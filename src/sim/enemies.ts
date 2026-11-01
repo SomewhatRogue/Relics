@@ -1,10 +1,10 @@
 /** Enemies' turns: the goblin butcher, goblin scrappers, and the two training dummies. */
 import { collide } from '../shared/arena';
-import { BUTCHER, FROST, KNOCK, SCRAPPER, SWING_DUMMY, type EnemyAttackSpec, type EnemySpec } from '../shared/tuning';
+import { BUTCHER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, type EnemyAttackSpec, type EnemySpec } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { slide } from './bodies';
 import { hitHero } from './combat';
-import { frozen, isDead, kill } from './damage';
+import { frozen, isDead, kill, snared } from './damage';
 import { shatter } from './elements';
 import type { Enemy, EnemyAttack, FightEvent, Hero } from './types';
 
@@ -16,7 +16,7 @@ export function newEnemy(id: number, kind: Enemy['kind'], x: number, y: number):
   return {
     id, kind, x, y, kvx: 0, kvy: 0, fx: 0, fy: 1, hp, maxHp: hp, radius: s ? s.radius : 0.4, weight: s ? s.weight : Infinity,
     act: s ? 'chase' : 'idle', actT: 0, actDur: 0, attack: null, cooldown: 1 + id * 0.4, hitstop: 0, hitAt: -9, moving: false, home: { x, y }, corpse: '',
-    burnUntil: 0, burnNext: 0, chillUntil: 0, frozenUntil: 0,
+    burnUntil: 0, burnNext: 0, chillUntil: 0, frozenUntil: 0, snareUntil: 0,
   };
 }
 
@@ -89,8 +89,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
       if (isDead(e)) return;
     }
   }
-  // Frozen solid: slides if thrown, does nothing else.
-  if (frozen(e, now)) return;
+  // Frozen solid, or a small goblin under a net: slides if thrown, does nothing else.
+  if (frozen(e, now) || snared(e, now)) return;
   if (e.act === 'stunned' || e.act === 'flinch') {
     if (e.actT >= e.actDur) Object.assign(e, { act: after(e), actT: 0, cooldown: e.act === 'stunned' ? 0.6 : 0.3 });
     return;
@@ -114,7 +114,7 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   const want = Math.atan2(uy, ux), have = Math.atan2(e.fy, e.fx);
   let diff = want - have;
   diff = Math.atan2(Math.sin(diff), Math.cos(diff));
-  const slow = e.chillUntil > now ? FROST.slow : 1;
+  const slow = (e.chillUntil > now ? FROST.slow : 1) * (e.snareUntil > now ? NET.slow : 1);
   const turn = Math.max(-spec.turn * slow * dt, Math.min(spec.turn * slow * dt, diff)), na = have + turn;
   e.fx = Math.cos(na);
   e.fy = Math.sin(na);

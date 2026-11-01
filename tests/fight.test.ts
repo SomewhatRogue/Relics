@@ -172,13 +172,13 @@ describe('weapons and heavies', () => {
     expect(h.weapon).toBe('greatsword');
     room.setIntent('me', intent({ weaponSeq: 2 }));
     room.step();
-    expect(h.weapon).toBe('sword');
+    expect(h.weapon).toBe('spear');
     room.setIntent('me', intent({ weaponSeq: 2, classSeq: 1 }));
     room.step();
-    expect(h.weapon).toBe('bow');
+    expect(h.weapon).toBe('longbow');
     room.setIntent('me', intent({ weaponSeq: 3, classSeq: 1 }));
     room.step();
-    expect(h.weapon).toBe('spear');
+    expect(h.weapon).toBe('shortbow');
   });
 
   it('the same blow throws a scrapper much further than the butcher', () => {
@@ -367,13 +367,13 @@ describe('kits block and dodge differently', () => {
 });
 
 describe('relic loadout', () => {
-  it('picks a relic by its slot, and ignores a slot past the rack', () => {
+  it('picks a relic by its slot, and ignores an empty slot', () => {
     const { room, h } = onTarget(1);
     expect(h.relics).toEqual(['javelin', 'hook', 'horn']);
     room.setIntent('me', intent({ relicPickSeq: 1, relicPick: 1 }));
     room.step();
     expect(h.relic).toBe('hook');
-    room.setIntent('me', intent({ relicPickSeq: 2, relicPick: 5 }));
+    room.setIntent('me', intent({ relicPickSeq: 2, relicPick: 3 }));
     room.step();
     expect(h.relic).toBe('hook');
   });

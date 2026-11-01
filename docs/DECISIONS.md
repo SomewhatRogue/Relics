@@ -2,6 +2,33 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-10-31 (late night): class kits by draw time, slower classes, class relics (Claude Opus 5.5)
+
+Kyle after trying slice 2d: no three-shot pattern on the bow; the long pullback is great; different
+bows with different draw times and damage; Mage spells the same way (a quick one, a long charge one);
+every class too mobile, only the Rogue should be; keep the mage's teleport but trade it off; no blast
+flask; the horn only as an ally buff for Warrior and Healer; Healer smites big, keeps the third-hit
+heal, targets allies to heal and buff; different relics per class.
+
+- **Ranged and spells are one shot per press** (`combo` of one) and a hold draws or casts; each kit
+  has its own `draw` time. Longbow 1.4 s to 55 that pierces the line (only at a full draw);
+  shortbow 0.55 s to 22, walk at 70% while drawing; crossbow fires on the press (`noCharge`), 34 that
+  hurls light goblins, 1.15 s reload. Wand 0.6 s, staff 1.6 s to a 65 orb that bursts 2.2 wide, rod
+  1 s to a piercing lance. Spells take the equipped relic's element; arrows and bolts don't.
+- **Mobility:** only the Rogue walks faster than base (1.15); everyone else 0.78 to 0.92, with shorter
+  rolls (1.9 to 2.4 tiles) and longer recharges (0.65 to 1 s). The blink keeps its 3.4 tiles but costs
+  40 stamina and recharges in 1.6 s.
+- **Healer:** third mace blow heals everyone within 3 tiles for 8; the hold (1.2 s) calls a holy smite
+  onto the goblin faced (up to 6 tiles; where you point on a laptop): 70, stuns 1.2 s.
+- **Relics by class** (`CLASS_RELICS`; racks and the L key are gone): Warrior javelin, hook, war
+  horn. Ranger hunter's net (snares small goblins flat, slows big ones), hook. Rogue shadowstep
+  (behind the goblin you face), hook. Mage lodestone (lobbed; drags goblins inward 1.8 s, then
+  bursts). Healer blessing (heals 20, then 1.3x damage dealt and 0.75x taken for 8 s; most hurt ally
+  on a phone, nearest to where you point on a laptop), war horn. Horn: allies within 6 refill
+  stamina, regenerate it twice as fast and block at half cost for 6 s.
+- **A squire** stands by the swing dummy taking hits, so the Healer has someone to heal and bless.
+- Gale horn (as a knockback) and blast flask removed.
+
 ## 2026-10-31 (night, last): classes, magic augments, new relics, the world atlas (Claude Opus 5.5)
 
 Kyle: weapon types for the other classes, more relic types and magic augments, a class button for the

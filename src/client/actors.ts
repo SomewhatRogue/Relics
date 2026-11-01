@@ -1,6 +1,6 @@
 /** Drawing a hero: the class's body, the weapon in hand, the dodge, charge and stun. */
 import { CHARGE, WEAPONS } from '../shared/tuning';
-import { currentSwing } from '../sim/hero';
+import { chargeFull, currentSwing } from '../sim/hero';
 import type { Hero } from '../sim/types';
 import { blit, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
 import { drawWeapon, pose } from './held';
@@ -8,7 +8,8 @@ import { EL_COL } from './palette';
 import { drawText } from './pixfont';
 import { HEROES, SPRITES } from './sprites';
 
-export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean): void {
+/** `t` is the room's time (blessings and rallies are kept in it). */
+export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean, t: number): void {
   const look = HEROES[WEAPONS[h.weapon].cls];
   if (h.act === 'down') {
     shadow(c, x, y, 6);
@@ -41,6 +42,11 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean): vo
   const bx = x + ox, by = y + oy;
   shadow(c, x, y, 6);
   if (me) ring(c, x, y, 7, '#4a90e0');
+  // Allies show their health at their feet, and their name.
+  else {
+    ring(c, x, y, 7, '#5ad07a', h.hp / 100, '#1a3a22');
+    drawText(c.glow, h.id.toUpperCase(), Math.round(x - h.id.length * 2), Math.round(y + 6), '#9ad8a8');
+  }
   if (h.act === 'roll' || h.act === 'zip') {
     const dx = h.act === 'roll' ? h.rollDx : h.fx, dy = h.act === 'roll' ? h.rollDy : h.fy;
     c.glow.globalAlpha = 0.25;
@@ -59,8 +65,9 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean): vo
       const a = Math.atan2(h.fy, h.fx) + Math.PI;
       if (h.relic === 'javelin') line(c.lit, bx - side * 2, by - 10, a, -4, 10, '#d8c48a');
       else if (h.relic === 'hook') line(c.lit, bx + side * 3, by - 9, a + 0.6, 0, 4, '#9aa3ad');
-      else if (h.relic === 'horn') line(c.lit, bx + side * 2, by - 12, Math.atan2(h.fy, h.fx), 0, 5, '#d8c48a', 2);
-      else (c.lit.fillStyle = '#7aa0a8'), c.lit.fillRect(Math.round(bx - side * 4), Math.round(by - 13), 2, 3);
+      else if (h.relic === 'horn') line(c.lit, bx + side * 2, by - 13, -Math.PI / 2 + side * 0.9, 0, 6, '#d8c48a', 2);
+      else if (h.relic === 'net') (c.lit.fillStyle = '#8a7a5a'), c.lit.fillRect(Math.round(bx - side * 5), Math.round(by - 13), 3, 3);
+      else if (h.relic === 'lodestone') (c.lit.fillStyle = '#3a3440'), c.lit.fillRect(Math.round(bx - side * 5), Math.round(by - 14), 3, 3);
       const el = h.augments[h.relic];
       if (el) (c.glow.fillStyle = EL_COL[el]), c.glow.fillRect(Math.round(bx - side * 3), Math.round(by - 12), 1, 1);
     }
@@ -71,7 +78,7 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean): vo
   if (!up) drawGear();
   if (fresh && h.weapon !== 'sword') smear(c.glow, bx, by - 8, Math.atan2(h.fy, h.fx) - 0.7, Math.atan2(h.fy, h.fx) + 0.7, 7, 9, '#cfe8ff');
   if (h.act === 'charge') {
-    const k = Math.min(1, (h.actT + CHARGE.start) / CHARGE.full);
+    const k = Math.min(1, (h.actT + CHARGE.start) / chargeFull(WEAPONS[h.weapon]));
     for (let i = 0; i < 4; i++) {
       const t = c.now * 4 + i * 1.57, r = 9 - 3 * k;
       c.glow.fillStyle = k >= 1 ? '#ffffff' : '#ffd860';
@@ -79,4 +86,22 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean): vo
     }
   }
   if (h.act === 'stun') stars(c, bx, by - 19);
+  aura(c, h, bx, by, t);
+}
+
+/** Blessed: gold motes rising. Rallied: a red pennant flicker overhead. */
+function aura(c: Ctx, h: Hero, x: number, y: number, t: number): void {
+  if (h.blessedUntil > t) {
+    for (let i = 0; i < 4; i++) {
+      const k = (c.now * 0.8 + i / 4) % 1;
+      c.glow.globalAlpha = 1 - k;
+      c.glow.fillStyle = i % 2 ? '#ffe9a8' : '#ffffff';
+      c.glow.fillRect(Math.round(x - 5 + i * 3), Math.round(y - 4 - k * 18), 1, 1);
+    }
+    c.glow.globalAlpha = 1;
+  }
+  if (h.rallyUntil > t) {
+    c.glow.fillStyle = Math.floor(c.now * 4) % 2 ? '#ff6a5a' : '#ffb0a0';
+    c.glow.fillRect(Math.round(x - 1), Math.round(y - 21), 3, 1);
+  }
 }

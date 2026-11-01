@@ -21,10 +21,13 @@
       (longbow, focus staff with blink, mace and censer that heals), gale horn and blast flask relics,
       racks of three, fire / frost / storm augments that play off each other. World atlas doc started:
       https://claude.ai/artifact/Q4B7cCpBANzFfvn3P6kffc
+- [x] Slice 2e: ranged and spell kits by draw time (longbow, shortbow, crossbow; wand, staff, rod),
+      slower classes but the Rogue, relics by class (net, shadowstep, lodestone, blessing, war horn),
+      the Healer's smite, a squire to heal
 
 ## Next (in order)
 
-1. Kyle plays slice 2d. Tune: class feel, augment strength, relic cooldowns, the phone's chips.
+1. Kyle plays slice 2e. Tune: draw times, class speeds, relic cooldowns, the phone's chips.
 2. Slice 3: four players in the room by link or code, the leader's browser hosts, drop-in mid-fight,
    rejoin by name, takeover from the last snapshot. Copy Come Bye's client relay and online tests.
 3. Slice 4: a real run (5 rooms and a boss, rescue room, down and revive, loot), bots for a bench.

@@ -189,11 +189,39 @@ export const sfx = {
   orb() {
     if (ready()) tone('sine', 300, 600, 0.3, 0.35), tone('triangle', 450, 900, 0.15, 0.35);
   },
-  flask() {
-    this.throw();
+  bolt() {
+    if (!ready()) return;
+    tone('square', 160, 70, 0.4, 0.1);
+    burst('bandpass', 1500, 600, 2, 0.6, 0.12);
   },
-  gust() {
-    if (ready()) burst('bandpass', 300, 900, 0.8, 0.8, 0.45), tone('sawtooth', 110, 90, 0.12, 0.4);
+  lance() {
+    if (ready()) tone('sawtooth', 400, 1600, 0.2, 0.2), burst('highpass', 2000, 5000, 1, 0.3, 0.15);
+  },
+  smite() {
+    if (!ready()) return;
+    for (const [f, d] of [[523, 0], [784, 0.03], [1046, 0.06]]) tone('sine', f, f, 0.2, 0.6, d);
+    tone('sine', 90, 35, 0.9, 0.4);
+    burst('lowpass', 3000, 200, 0.7, 0.8, 0.35);
+  },
+  net() {
+    if (ready()) burst('bandpass', 500, 1200, 1, 0.4, 0.25);
+  },
+  snared() {},
+  well() {
+    if (ready()) tone('sine', 60, 110, 0.6, 1.2), tone('triangle', 220, 330, 0.1, 1.2);
+  },
+  shadow() {
+    if (ready()) burst('lowpass', 2000, 300, 0.8, 0.4, 0.2), tone('sine', 300, 120, 0.2, 0.2);
+  },
+  rally() {
+    if (!ready()) return;
+    tone('sawtooth', 196, 196, 0.35, 0.9);
+    tone('sawtooth', 294, 294, 0.2, 0.9, 0.05);
+    tone('triangle', 392, 392, 0.15, 0.7, 0.1);
+  },
+  blessed() {
+    if (!ready()) return;
+    for (const [f, d] of [[880, 0], [1175, 0.08], [1760, 0.16]]) tone('sine', f, f, 0.12, 0.5, d);
   },
   burst() {
     if (!ready()) return;

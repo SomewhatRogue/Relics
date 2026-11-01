@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BURN, HERO, SHATTER, TICK, WEAPONS } from '../src/shared/tuning';
+import { BURN, SHATTER, TICK, WEAPONS } from '../src/shared/tuning';
 import { afflict, type World } from '../src/sim/elements';
 import { ArenaRoom } from '../src/sim/room';
 import { NO_INTENT, type Enemy, type FightEvent, type Intent } from '../src/sim/types';
@@ -29,103 +29,187 @@ function run(room: ArenaRoom, s: number): FightEvent[] {
 
 const world = (room: ArenaRoom, ev: FightEvent[] = []): World => ({ heroes: room.heroes, enemies: room.enemies, javelins: room.javelins, now: room.time, ev });
 
+const charged = (room: ArenaRoom, hold: number, aim: Partial<Intent> = { ay: -1 }) => {
+  room.setIntent('me', intent({ attackSeq: 1, attack: true, ...aim }));
+  run(room, hold);
+  room.setIntent('me', intent({ attackSeq: 1, attack: false, ...aim }));
+  return run(room, 0.7);
+};
+
 describe('class weapons', () => {
-  it('the bow shoots a goblin six tiles away', () => {
+  it('a longbow tap looses one arrow (no combo)', () => {
     const { room, h, t } = onTarget(3);
-    h.weapon = 'bow';
+    h.weapon = 'longbow';
     Object.assign(t, { x: 9, y: 3 });
-    room.setIntent('me', intent({ attackSeq: 1, ay: -1 }));
-    const ev = run(room, 0.8);
-    expect(ev.some((e) => e.k === 'shoot')).toBe(true);
+    let seq = 0, shots = 0;
+    for (let i = 0; i < ticks(1); i++) {
+      if (i % 4 === 0) room.setIntent('me', intent({ attackSeq: ++seq, ay: -1 }));
+      room.step();
+      shots += room.events.filter((e) => e.k === 'shoot').length;
+    }
+    expect(shots).toBeLessThanOrEqual(2);
     expect(t.hp).toBeLessThan(t.maxHp);
   });
 
-  it('a fully drawn arrow pierces two goblins in a line', () => {
-    const { room, h } = onTarget(3);
-    const [a, b] = [room.enemies[3], room.enemies[4]];
-    h.weapon = 'bow';
-    Object.assign(a, { x: 9, y: 6 });
-    Object.assign(b, { x: 9, y: 3.5, cooldown: 99, act: 'stunned', actDur: 99 });
-    Object.assign(h, { x: 9, y: 10 });
-    room.setIntent('me', intent({ attackSeq: 1, attack: true, ay: -1 }));
-    run(room, 1);
-    room.setIntent('me', intent({ attackSeq: 1, attack: false, ay: -1 }));
-    run(room, 0.6);
-    expect(a.hp).toBeLessThan(a.maxHp);
-    expect(b.hp).toBeLessThan(b.maxHp);
+  it('a full longbow draw pierces two goblins; a half draw does not', () => {
+    const line = (hold: number) => {
+      const { room, h } = onTarget(3);
+      const [a, b] = [room.enemies[3], room.enemies[4]];
+      h.weapon = 'longbow';
+      Object.assign(a, { x: 9, y: 6, hp: 200, maxHp: 200 });
+      Object.assign(b, { x: 9, y: 3.5, cooldown: 99, act: 'stunned', actDur: 99, hp: 200, maxHp: 200 });
+      Object.assign(h, { x: 9, y: 10 });
+      charged(room, hold);
+      return [a.hp < 200, b.hp < 200];
+    };
+    expect(line(1.5)).toEqual([true, true]);
+    expect(line(0.6)).toEqual([true, false]);
   });
 
-  it("the staff's charged orb bursts and throws a goblin back", () => {
+  it('draw times differ: the shortbow is full in half the time of the longbow', () => {
+    expect(WEAPONS.shortbow.draw!).toBeLessThan(WEAPONS.longbow.draw! / 2);
+    expect(WEAPONS.longbow.heavy.dmgFull).toBeGreaterThan(WEAPONS.shortbow.heavy.dmgFull * 2);
+  });
+
+  it('the crossbow looses on the press, then reloads', () => {
+    const { room, h } = onTarget(3);
+    h.weapon = 'crossbow';
+    room.setIntent('me', intent({ attackSeq: 1, attack: true, ay: -1 }));
+    const ev = run(room, 0.15);
+    expect(ev.some((e) => e.k === 'shoot' && e.kind === 'bolt')).toBe(true);
+    room.setIntent('me', intent({ attackSeq: 2, attack: false, ay: -1 }));
+    expect(run(room, 0.6).some((e) => e.k === 'shoot')).toBe(false);
+  });
+
+  it("the staff's long cast bursts and throws a goblin back", () => {
     const { room, h, t } = onTarget(3);
     h.weapon = 'staff';
     Object.assign(t, { x: 9, y: 6, hp: 500, maxHp: 500 });
-    room.setIntent('me', intent({ attackSeq: 1, attack: true, ay: -1 }));
-    run(room, 1);
-    room.setIntent('me', intent({ attackSeq: 1, attack: false, ay: -1 }));
-    const ev = run(room, 0.6);
+    const ev = charged(room, 1.7);
     expect(ev.some((e) => e.k === 'burst')).toBe(true);
     expect(t.y).toBeLessThan(5.5);
   });
 
-  it("the mace's third blow heals the healer, and the held blessing heals more", () => {
-    const { room, h } = onTarget(1);
+  it("the rod's lance runs through a line", () => {
+    const { room, h } = onTarget(3);
+    const [a, b] = [room.enemies[3], room.enemies[4]];
+    h.weapon = 'rod';
+    Object.assign(a, { x: 9, y: 6, hp: 200, maxHp: 200 });
+    Object.assign(b, { x: 9, y: 3.5, cooldown: 99, act: 'stunned', actDur: 99, hp: 200, maxHp: 200 });
+    charged(room, 1.1);
+    expect(a.hp).toBeLessThan(200);
+    expect(b.hp).toBeLessThan(200);
+  });
+
+  it("the mace's third blow heals; the held smite falls on the goblin and stuns it", () => {
+    const { room, h, t } = onTarget(3);
     h.weapon = 'mace';
     h.hp = 50;
+    Object.assign(t, { x: 9, y: 8, act: 'chase', hp: 500, maxHp: 500 });
     let seq = 0;
     for (let i = 0; i < ticks(1.6); i++) {
-      if (i % 9 === 0) room.setIntent('me', intent({ attackSeq: ++seq }));
+      if (i % 9 === 0) room.setIntent('me', intent({ attackSeq: ++seq, ay: -1 }));
       room.step();
     }
     expect(h.hp).toBe(50 + (WEAPONS.mace.combo[2].heal ?? 0));
     run(room, 0.6);
-    h.hp = 40;
-    room.setIntent('me', intent({ attackSeq: ++seq, attack: true }));
-    run(room, 1);
-    room.setIntent('me', intent({ attackSeq: seq, attack: false }));
-    run(room, 0.4);
-    expect(h.hp).toBe(Math.min(HERO.hp, 40 + (WEAPONS.mace.heavy.healFull ?? 0)));
+    Object.assign(t, { x: 9, y: 5, act: 'chase', hp: 500 });
+    Object.assign(h, { x: 9, y: 9.5 });
+    const ev = charged(room, 1.3);
+    expect(ev.some((e) => e.k === 'smite')).toBe(true);
+    expect(500 - t.hp).toBeGreaterThanOrEqual(WEAPONS.mace.heavy.dmgFull);
+    expect(t.act).toBe('stunned');
   });
 
-  it("the mage's blink jumps far in a blink", () => {
-    const { room, h } = onTarget(1);
-    h.weapon = 'staff';
-    Object.assign(h, { x: 6, y: 12 });
-    room.setIntent('me', intent({ rollSeq: 1, mx: 1 }));
-    const ev = run(room, 0.2);
-    expect(ev.some((e) => e.k === 'blink')).toBe(true);
-    expect(h.x - 6).toBeGreaterThan(3);
+  it('only the rogue is quick: every other class walks slower', () => {
+    for (const k of Object.keys(WEAPONS) as (keyof typeof WEAPONS)[]) if (k !== 'daggers') expect(WEAPONS[k].speed).toBeLessThan(1);
+    expect(WEAPONS.daggers.speed).toBeGreaterThan(1);
+    expect(WEAPONS.staff.dodge.cooldown).toBeGreaterThan(WEAPONS.daggers.dodge.cooldown * 4);
   });
 });
 
-describe('new relics', () => {
-  it('the gale horn throws a scrapper into the wall', () => {
+describe('class relics', () => {
+  /** Press the class button n times (Warrior, then Ranger, Rogue, Mage, Healer). */
+  const asClass = (room: ArenaRoom, n: number) => {
+    for (let i = 1; i <= n; i++) room.setIntent('me', intent({ classSeq: i })), room.step();
+  };
+
+  it('each class carries its own relics', () => {
+    const { room, h } = onTarget(1);
+    const seen: string[] = [];
+    for (let i = 1; i <= 5; i++) room.setIntent('me', intent({ classSeq: i })), room.step(), seen.push(h.relics.join(' '));
+    expect(seen).toEqual(['net hook', 'shadow hook', 'lodestone', 'blessing horn', 'javelin hook horn']);
+  });
+
+  it("the ranger's net snares a scrapper flat", () => {
     const { room, h, t } = onTarget(3);
-    Object.assign(t, { x: 9, y: 3 });
-    Object.assign(h, { x: 9, y: 5.5 });
+    asClass(room, 1);
+    Object.assign(t, { x: 9, y: 5, act: 'chase' });
+    room.setIntent('me', intent({ classSeq: 1, relicSeq: 1, ay: -1 }));
+    run(room, 0.6);
+    expect(t.snareUntil).toBeGreaterThan(room.time);
+    const x = t.x, y = t.y;
+    t.cooldown = 0;
+    run(room, 1);
+    expect(Math.hypot(t.x - x, t.y - y)).toBeLessThan(0.05);
+    expect(t.attack).toBeNull();
+  });
+
+  it("the rogue's shadowstep lands behind the goblin, facing its back", () => {
+    const { room, h, t } = onTarget(0);
+    asClass(room, 2);
+    Object.assign(t, { x: 9, y: 5, fx: 0, fy: 1 });
+    Object.assign(h, { x: 9, y: 9 });
+    room.setIntent('me', intent({ classSeq: 2, relicSeq: 1, ay: -1 }));
+    run(room, 0.2);
+    expect(h.y).toBeLessThan(t.y);
+    expect(h.fy).toBeGreaterThan(0.9);
+  });
+
+  it("the mage's lodestone drags goblins together, then bursts", () => {
+    const { room, h } = onTarget(3);
+    asClass(room, 3);
+    const [a, b] = [room.enemies[3], room.enemies[4]];
+    Object.assign(a, { x: 7, y: 5, act: 'stunned', actDur: 99, hp: 300, maxHp: 300 });
+    Object.assign(b, { x: 11, y: 5, cooldown: 99, act: 'stunned', actDur: 99, hp: 300, maxHp: 300 });
+    room.setIntent('me', intent({ classSeq: 3, relicSeq: 1, ax: 0, ay: -4 }));
+    const before = Math.abs(b.x - a.x);
+    const ev = run(room, 1.4);
+    expect(ev.some((e) => e.k === 'well')).toBe(true);
+    expect(Math.abs(b.x - a.x)).toBeLessThan(before - 1.5);
+    expect(run(room, 1.4).some((e) => e.k === 'burst')).toBe(true);
+  });
+
+  it("the healer's blessing heals and buffs the hurt squire, not herself", () => {
+    const room = new ArenaRoom(1, { squire: true });
+    const h = room.join('me');
+    const q = room.heroes.find((x) => x.id === 'squire')!;
+    for (let i = 1; i <= 4; i++) room.setIntent('me', intent({ classSeq: i })), room.step();
+    expect(h.relic).toBe('blessing');
+    Object.assign(h, { x: q.x - 3, y: q.y, hp: 90 });
+    q.hp = 40;
+    room.setIntent('me', intent({ classSeq: 4, relicSeq: 1 }));
+    const ev = run(room, 0.4);
+    expect(ev.some((e) => e.k === 'beam')).toBe(true);
+    expect(q.hp).toBeGreaterThanOrEqual(55);
+    expect(q.blessedUntil).toBeGreaterThan(room.time);
+    expect(h.blessedUntil).toBeLessThan(room.time);
+  });
+
+  it("the war horn rallies allies: stamina back, and blocking costs half", () => {
+    const room = new ArenaRoom(1, { squire: true });
+    const h = room.join('me');
+    const q = room.heroes.find((x) => x.id === 'squire')!;
+    Object.assign(h, { x: q.x - 3, y: q.y, stamina: 10 });
+    q.stamina = 5;
     room.setIntent('me', intent({ relicPickSeq: 1, relicPick: 2 }));
     room.step();
     expect(h.relic).toBe('horn');
-    room.setIntent('me', intent({ relicPickSeq: 1, relicPick: 2, relicSeq: 1, ay: -1 }));
-    const ev = run(room, 0.8);
-    expect(ev.some((e) => e.k === 'gust')).toBe(true);
-    expect(ev.some((e) => e.k === 'wallhit')).toBe(true);
-  });
-
-  it('the blast flask flies to where you aim and bursts there', () => {
-    const { room, h, t } = onTarget(3);
-    Object.assign(t, { x: 9, y: 5 });
-    room.setIntent('me', intent({ loadoutSeq: 1 }));
-    room.step();
-    expect(h.relics).toContain('flask');
-    room.setIntent('me', intent({ loadoutSeq: 1, relicPickSeq: 1, relicPick: 2 }));
-    room.step();
-    expect(h.relic).toBe('flask');
-    Object.assign(h, { x: 9, y: 9 });
-    room.setIntent('me', intent({ loadoutSeq: 1, relicPickSeq: 1, relicPick: 2, relicSeq: 1, ax: 0, ay: -4 }));
-    const ev = run(room, 1.2);
-    const burst = ev.find((e) => e.k === 'burst');
-    expect(burst && Math.abs(burst.y - 5)).toBeLessThan(0.3);
-    expect(t.hp).toBeLessThan(t.maxHp);
+    room.setIntent('me', intent({ relicPickSeq: 1, relicPick: 2, relicSeq: 1 }));
+    const ev = run(room, 0.5);
+    expect(ev.some((e) => e.k === 'rally')).toBe(true);
+    expect(q.stamina).toBeGreaterThan(90);
+    expect(q.rallyUntil).toBeGreaterThan(room.time);
   });
 
   it('cycles the equipped relic through its augments', () => {

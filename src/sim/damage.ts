@@ -9,10 +9,11 @@ export const isDead = (e: Enemy) => e.act === 'dead';
 export const isDummy = (e: Enemy) => e.kind === 'dummy' || e.kind === 'swingDummy';
 export const frozen = (e: Enemy, now: number) => e.frozenUntil > now;
 /** Held fast: can't flinch or act (stunned, pinned, on a javelin or hook, frozen). */
-export const held = (e: Enemy, now: number) => e.act === 'stunned' || e.act === 'pinned' || e.act === 'carried' || frozen(e, now);
+export const snared = (e: Enemy, now: number) => e.snareUntil > now && e.weight <= 1;
+export const held = (e: Enemy, now: number) => e.act === 'stunned' || e.act === 'pinned' || e.act === 'carried' || frozen(e, now) || snared(e, now);
 
 export function clearElements(e: Enemy): void {
-  e.burnUntil = e.chillUntil = e.frozenUntil = 0;
+  e.burnUntil = e.chillUntil = e.frozenUntil = e.snareUntil = 0;
 }
 
 export function kill(e: Enemy, ev: FightEvent[]): void {
@@ -34,7 +35,7 @@ export interface DamageOpts {
 /** Hurt an enemy; true if this killed it. Dummies never die (they refill). */
 export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: DamageOpts = {}): boolean {
   if (e.act === 'dead') return false;
-  if (o.mult && (e.act === 'stunned' || e.act === 'pinned' || frozen(e, now))) n = Math.round(n * GUARD.stunnedMult);
+  if (o.mult && (e.act === 'stunned' || e.act === 'pinned' || frozen(e, now) || snared(e, now))) n = Math.round(n * GUARD.stunnedMult);
   e.hp -= n;
   e.hitAt = now;
   ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy: !!o.heavy, on: 'enemy', tick: o.tick });

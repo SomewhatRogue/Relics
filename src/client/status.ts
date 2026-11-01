@@ -21,6 +21,15 @@ export function drawStatus(c: Ctx, e: Enemy, x: number, y: number, t: number): v
     g.globalAlpha = 1;
     return;
   }
+  if (e.snareUntil > t) {
+    // A net over it: a loose crosshatch, pegged at the corners.
+    const left = Math.round(x - w - 1), top = Math.round(y - tall * 0.8);
+    c.lit.fillStyle = '#8a7a5a';
+    for (let i = 0; i <= w * 2 + 2; i += 3) {
+      c.lit.fillRect(left + i, top, 1, Math.round(tall * 0.8));
+    }
+    for (let j = 0; j <= tall * 0.8; j += 3) c.lit.fillRect(left, top + j, w * 2 + 3, 1);
+  }
   if (e.burnUntil > t) {
     const cols = ['#fff1b0', '#ffd27a', '#ff9a3c', '#ff6a20'];
     for (let i = 0; i < 7; i++) {

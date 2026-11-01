@@ -12,7 +12,7 @@ interface Part { x: number; y: number; vx: number; vy: number; life: number; max
 interface Text { x: number; y: number; s: string; col: string; life: number }
 interface Ring { x: number; y: number; life: number; max: number; col: string; size?: number }
 /** A lightning arc between two points, in world pixels. */
-interface Arc { x: number; y: number; x2: number; y2: number; life: number }
+interface Arc { x: number; y: number; x2: number; y2: number; life: number; col?: string }
 interface Flash extends Light { life: number; max: number }
 
 export class Fx {
@@ -235,7 +235,7 @@ export class Fx {
     g.globalAlpha = 1;
     // Lightning: a jagged line, re-jagged every frame.
     for (const a of this.arcs) {
-      g.fillStyle = Math.random() < 0.5 ? '#ffffff' : '#fff27a';
+      g.fillStyle = Math.random() < 0.5 ? '#ffffff' : a.col ?? '#fff27a';
       const n = Math.max(2, Math.round(Math.hypot(a.x2 - a.x, a.y2 - a.y) / 3));
       for (let i = 0; i <= n; i++) {
         const k = i / n, j = i && i < n ? (Math.random() - 0.5) * 5 : 0;

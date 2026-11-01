@@ -53,31 +53,71 @@ export function drawHook(c: Ctx, k: Hook, hx: number, hy: number, x: number, y: 
 
 export type { Hero };
 
-/** Arrows, sparks, orbs and lobbed flasks. (x, y) is the bolt's spot on the floor in screen pixels. */
+/** Shots, smites and thrown relics. (x, y) is the bolt's spot on the floor in screen pixels. */
 export function drawBolt(c: Ctx, b: Bolt, x: number, y: number): void {
   const a = Math.atan2(b.dy, b.dx), back = a + Math.PI, col = EL_COL[b.el];
-  if (b.kind === 'arrow') {
+  if (b.kind === 'arrow' || b.kind === 'bolt') {
+    const bolt = b.kind === 'bolt', len = bolt ? 5 : 7;
     c.lit.globalAlpha = b.state === 'stuck' ? Math.min(1, b.life / 0.8) : 1;
     const ty = y - (b.state === 'stuck' ? 6 : 8);
     if (b.state === 'fly') (c.lit.fillStyle = 'rgba(8,6,12,0.5)'), c.lit.fillRect(Math.round(x), Math.round(y + 1), 1, 1);
-    line(c.lit, x, ty, back, b.state === 'stuck' ? 0 : 1, 7, '#8b6a3a');
-    line(c.lit, x, ty, back, 6, 7, '#e8e0c8');
+    line(c.lit, x, ty, back, b.state === 'stuck' ? 0 : 1, len, bolt ? '#5a3d22' : '#8b6a3a', bolt ? 2 : 1);
+    line(c.lit, x, ty, back, len - 1, len, bolt ? '#9aa3ad' : '#e8e0c8');
     if (b.state === 'fly') line(c.lit, x, ty, a, 0, 1, '#dfe6ec');
     c.lit.globalAlpha = 1;
     return;
   }
-  if (b.kind === 'flask') {
-    const k = b.t / b.flight, up = Math.sin(Math.PI * k) * 26, fy = y - 5 - up;
-    c.lit.fillStyle = 'rgba(8,6,12,0.55)';
-    c.lit.fillRect(Math.round(x - 1), Math.round(y), 3, 1);
-    const spin = Math.floor(c.now * 14) % 2;
-    c.lit.fillStyle = '#7aa0a8';
-    c.lit.fillRect(Math.round(x - 1), Math.round(fy - 1), spin ? 3 : 2, spin ? 2 : 3);
-    c.glow.fillStyle = b.el ? col : '#ffb44c';
-    c.glow.fillRect(Math.round(x), Math.round(fy), 1, 1);
+  if (b.kind === 'smite') {
+    // A ring of gold closing on the spot, then the light comes down.
+    const k = Math.min(1, b.t / b.flight), r = b.burst * 16 * (1.3 - 0.3 * k);
+    c.glow.fillStyle = '#ffe9a8';
+    c.glow.globalAlpha = 0.5 + 0.5 * k;
+    for (let i = 0; i < 40; i++) {
+      const t = (i / 40) * Math.PI * 2;
+      c.glow.fillRect(Math.round(x + Math.cos(t) * r), Math.round(y + Math.sin(t) * r * 0.6), 1, 1);
+    }
+    c.glow.globalAlpha = 0.25 * k;
+    c.glow.fillRect(Math.round(x - 2), Math.round(y - 60), 5, 60);
+    c.glow.globalAlpha = 1;
     return;
   }
-  const ty = y - 8, r = b.kind === 'orb' ? 2 + Math.round(Math.sin(c.now * 20)) * 0.5 : 1;
+  if (b.kind === 'lodestone') {
+    if (b.state === 'well') {
+      const r = 3.6 * 16;
+      c.glow.fillStyle = b.el ? col : '#b080ff';
+      for (let i = 0; i < 24; i++) {
+        const t = c.now * -3 + (i / 24) * Math.PI * 2, rr = r * (((c.now * 0.9 + i / 24) % 1) * 0.9 + 0.1);
+        c.glow.globalAlpha = 0.25 + 0.5 * (1 - rr / r);
+        c.glow.fillRect(Math.round(x + Math.cos(t) * rr), Math.round(y + Math.sin(t) * rr * 0.6), 1, 1);
+      }
+      c.glow.globalAlpha = 1;
+      c.lit.fillStyle = '#2a2630';
+      c.lit.fillRect(Math.round(x - 2), Math.round(y - 3), 5, 4);
+      c.glow.fillStyle = '#d8c0ff';
+      c.glow.fillRect(Math.round(x), Math.round(y - 2), 1, 1);
+      return;
+    }
+    const k = b.t / b.flight, up = Math.sin(Math.PI * k) * 24;
+    c.lit.fillStyle = 'rgba(8,6,12,0.55)';
+    c.lit.fillRect(Math.round(x - 1), Math.round(y), 3, 1);
+    c.lit.fillStyle = '#3a3440';
+    c.lit.fillRect(Math.round(x - 1), Math.round(y - 5 - up), 3, 3);
+    return;
+  }
+  if (b.kind === 'net') {
+    const spin = c.now * 18;
+    c.lit.fillStyle = '#8a7a5a';
+    for (let i = 0; i < 6; i++) c.lit.fillRect(Math.round(x + Math.cos(spin + i) * 2), Math.round(y - 8 + Math.sin(spin + i) * 2), 1, 1);
+    return;
+  }
+  const ty = y - 8;
+  if (b.kind === 'lance') {
+    c.glow.fillStyle = col;
+    line(c.glow, x, ty, back, 0, 12, col, 2);
+    line(c.glow, x, ty, back, 0, 12, '#ffffff');
+    return;
+  }
+  const r = b.kind === 'orb' ? 2 + Math.round(Math.sin(c.now * 20)) * 0.5 : 1;
   c.glow.fillStyle = col;
   for (let i = 1; i <= 4; i++) {
     c.glow.globalAlpha = 0.5 - i * 0.1;

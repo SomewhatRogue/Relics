@@ -104,7 +104,7 @@ export class Scene {
     const items: { y: number; draw: () => void }[] = [];
     for (const h of room.heroes) {
       const [x, y] = lerp('h:' + h.id, h.x, h.y);
-      items.push({ y, draw: () => drawHero(c, h, x - cx, y - cy, h.id === meId) });
+      items.push({ y, draw: () => drawHero(c, h, x - cx, y - cy, h.id === meId, room.time) });
     }
     for (const e of room.enemies) {
       const [x, y] = lerp('e:' + e.id, e.x, e.y);
@@ -112,7 +112,9 @@ export class Scene {
     }
     for (const b of room.bolts) {
       const x = OX + b.x * PX - cx, y = OY + b.y * PX - cy;
-      items.push({ y: OY + b.y * PX + (b.kind === 'flask' ? 30 : 0), draw: () => drawBolt(c, b, x, y) });
+      // Things on the floor draw under the bodies; things in the air over them.
+      const floor = b.kind === 'smite' || b.state === 'well';
+      items.push({ y: OY + b.y * PX + (floor ? -40 : b.kind === 'lodestone' ? 30 : 0), draw: () => drawBolt(c, b, x, y) });
     }
     for (const j of room.javelins) {
       const x = OX + j.x * PX - cx, y = OY + j.y * PX - cy;
@@ -159,7 +161,10 @@ export class Scene {
     for (const b of room.bolts) {
       if (b.kind === 'arrow') continue;
       const x = OX + b.x * PX - cx, y = OY + b.y * PX - cy - 8;
-      lights.push({ x, y, r: b.kind === 'orb' ? 50 : b.kind === 'flask' ? 16 : 30, i: 0.7, c: b.el || b.kind !== 'flask' ? EL_LIGHT[b.el] : [1, 0.7, 0.35] });
+      if (b.kind === 'net' || b.kind === 'bolt') continue;
+      if (b.kind === 'smite') lights.push({ x, y: y + 4, r: 40, i: 0.9 * Math.min(1, b.t / b.flight), c: [1, 0.9, 0.6] });
+      else if (b.kind === 'lodestone') lights.push({ x, y, r: b.state === 'well' ? 50 : 12, i: 0.5, c: b.el ? EL_LIGHT[b.el] : [0.7, 0.5, 1] });
+      else lights.push({ x, y, r: b.kind === 'orb' ? 50 : 30, i: 0.7, c: EL_LIGHT[b.el] });
     }
     for (const e of room.enemies) {
       if (e.act === 'dead') continue;
@@ -168,7 +173,7 @@ export class Scene {
       else if (e.frozenUntil > room.time) lights.push({ x: x - cx, y: y - cy - 8, r: 26, i: 0.4, c: [0.6, 0.85, 1] });
     }
     for (const h of room.heroes) {
-      if (h.weapon !== 'staff' && h.weapon !== 'mace') continue;
+      if (h.weapon !== 'staff' && h.weapon !== 'wand' && h.weapon !== 'rod' && h.weapon !== 'mace') continue;
       const [x, y] = lerp('h:' + h.id, h.x, h.y);
       lights.push({ x: x - cx, y: y - cy - 14, r: 22, i: 0.4, c: h.weapon === 'mace' ? [1, 0.75, 0.4] : EL_LIGHT[h.augments[h.relic]] });
     }

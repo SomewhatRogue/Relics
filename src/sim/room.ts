@@ -5,13 +5,13 @@
  */
 import { ARENA } from '../shared/arena';
 import { Rng } from '../shared/rng';
-import { FLASK, HEAL_RADIUS, HERO, TICK, type Swing } from '../shared/tuning';
+import { BLESSING, HEAL_RADIUS, HERO, LODESTONE, TICK, type Swing } from '../shared/tuning';
 import { separate } from './bodies';
-import { lob, shoot, stepBolt } from './bolts';
+import { lobLodestone, shoot, smite, stepBolt, throwNet } from './bolts';
 import { afflict, stepElements, type World } from './elements';
 import { newEnemy, stepEnemy } from './enemies';
-import { blowHorn } from './gale';
 import { newHero, stepHero, type HeroActs } from './hero';
+import { bless, rally, shadowstep } from './relics';
 import { fireHook, stepHook } from './hook';
 import { stepJavelin, throwJavelin } from './javelin';
 import { NO_INTENT, type Bolt, type Enemy, type FightEvent, type Hero, type Hook, type Intent, type Javelin } from './types';
@@ -32,14 +32,18 @@ export class ArenaRoom {
   private rng: Rng;
   private acc = 0;
 
-  constructor(seed = 1, opts: { scrappers?: boolean } = {}) {
+  /** `squire`: a training partner who stands by the swing dummy taking hits (someone to heal and bless). */
+  constructor(seed = 1, opts: { scrappers?: boolean; squire?: boolean } = {}) {
     this.rng = new Rng(seed);
     const s = ARENA.spawn;
     this.enemies.push(newEnemy(1, 'butcher', s.butcher.x, s.butcher.y));
     this.enemies.push(newEnemy(2, 'dummy', s.dummy.x, s.dummy.y));
     this.enemies.push(newEnemy(3, 'swingDummy', s.swingDummy.x, s.swingDummy.y));
     if (opts.scrappers !== false) s.scrappers.forEach((p, i) => this.enemies.push(newEnemy(4 + i, 'scrapper', p.x, p.y)));
+    this.squire = !!opts.squire;
   }
+
+  private squire: boolean;
 
   join(id: string): Hero {
     let h = this.heroes.find((x) => x.id === id);
@@ -47,6 +51,12 @@ export class ArenaRoom {
       const s = ARENA.spawn.hero;
       h = newHero(id, s.x + this.heroes.length * 0.9, s.y);
       this.heroes.push(h);
+      // The squire turns up with the first player (after them, so the room's first hero is a player).
+      if (this.squire && !this.heroes.some((x) => x.id === 'squire')) {
+        const w = ARENA.spawn.swingDummy, q = newHero('squire', w.x - 1.5, w.y + 1.5);
+        Object.assign(q, { fx: 0.7, fy: -0.7 });
+        this.heroes.push(q);
+      }
     }
     return h;
   }
@@ -94,28 +104,33 @@ export class ArenaRoom {
     const el = h.augments[h.relic];
     if (h.relic === 'hook') this.hooks.push(fireHook(h));
     else if (h.relic === 'javelin') this.javelins.push(throwJavelin(h));
-    else if (h.relic === 'horn') blowHorn(h, w, el);
-    else this.bolts.push(lob(h, this.lobDistance(h), el));
+    else if (h.relic === 'net') this.bolts.push(throwNet(h, el));
+    else if (h.relic === 'lodestone') this.bolts.push(lobLodestone(h, this.aimDistance(h, LODESTONE.range, LODESTONE.fallback), el));
+    else if (h.relic === 'shadow') shadowstep(h, this.enemies, w.ev);
+    else if (h.relic === 'horn') rally(h, this.heroes, this.enemies, w.now, w.ev);
+    else bless(h, this.heroes, this.intents.get(h.id), w.now, w.ev);
   }
 
-  /** How far to lob: to the mouse on a laptop, else to the goblin the hero faces, else a set distance. */
-  private lobDistance(h: Hero): number {
+  /** How far to throw or smite: to the mouse on a laptop, else to the goblin the hero faces, else a set distance. */
+  private aimDistance(h: Hero, range: number, fallback: number): number {
     const i = this.intents.get(h.id);
-    if (i && (i.ax || i.ay)) return Math.max(1.5, Math.min(FLASK.range, Math.hypot(i.ax, i.ay)));
-    let best = FLASK.fallback, bd = -1;
+    if (i && (i.ax || i.ay)) return Math.max(1.5, Math.min(range, Math.hypot(i.ax, i.ay)));
+    let best = fallback, bd = -1;
     for (const e of this.enemies) {
       if (e.act === 'dead') continue;
       const dx = e.x - h.x, dy = e.y - h.y, d = Math.hypot(dx, dy), dot = (dx * h.fx + dy * h.fy) / (d || 1);
-      if (d <= FLASK.range && dot > 0.95 && dot > bd) (bd = dot), (best = d);
+      if (d <= range && dot > 0.95 && dot > bd) (bd = dot), (best = d);
     }
     return best;
   }
 
-  /** A swing's moment of release: loose its shot (a staff casts with the equipped relic's augment), heal with it. */
+  /** A swing's moment of release: loose its shot (spells cast with the equipped relic's augment), smite, heal. */
   private loose(h: Hero, s: Swing, w: World): void {
-    if (s.shot) {
-      const el = s.shot === 'arrow' ? '' : h.augments[h.relic];
-      this.bolts.push(shoot(h, s, el));
+    const mult = h.blessedUntil > w.now ? BLESSING.dmgMult : 1;
+    if (s.shot === 'smite') this.bolts.push(smite(h, s, this.aimDistance(h, s.range, 3.5), mult));
+    else if (s.shot) {
+      const el = s.shot === 'arrow' || s.shot === 'bolt' ? '' : h.augments[h.relic];
+      this.bolts.push(shoot(h, s, el, mult));
       w.ev.push({ k: 'shoot', x: h.x, y: h.y, dx: h.fx, dy: h.fy, kind: s.shot, el });
     }
     if (!s.heal) return;

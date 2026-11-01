@@ -22,13 +22,11 @@ export interface Intent {
   relicPick: number;
   /** Cycle the equipped relic's augment (none, fire, frost, storm). */
   augmentSeq: number;
-  /** Take the next rack of relics (training room). */
-  loadoutSeq: number;
   /** Change class (the demo's class button). */
   classSeq: number;
 }
 
-export const NO_INTENT: Intent = { mx: 0, my: 0, ax: 0, ay: 0, attack: false, block: false, attackSeq: 0, blockSeq: 0, rollSeq: 0, weaponSeq: 0, relicSeq: 0, relicSwapSeq: 0, relicPickSeq: 0, relicPick: 0, augmentSeq: 0, loadoutSeq: 0, classSeq: 0 };
+export const NO_INTENT: Intent = { mx: 0, my: 0, ax: 0, ay: 0, attack: false, block: false, attackSeq: 0, blockSeq: 0, rollSeq: 0, weaponSeq: 0, relicSeq: 0, relicSwapSeq: 0, relicPickSeq: 0, relicPick: 0, augmentSeq: 0, classSeq: 0 };
 
 export type HeroAct = 'idle' | 'charge' | 'attack' | 'throw' | 'zip' | 'roll' | 'hurt' | 'stun' | 'down';
 
@@ -77,12 +75,14 @@ export interface Hero extends Body {
   relicQueuedAt: number;
   /** The augment fitted to each relic. */
   augments: Record<RelicId, Augment>;
-  /** Which training rack of relics (LOADOUTS) is carried. */
-  loadout: number;
+  /** Blessed by a healer until then: hits harder, takes less. */
+  blessedUntil: number;
+  /** Rallied by a war horn until then: stamina comes back faster, blocking costs less. */
+  rallyUntil: number;
   hitstop: number;
   /** Extra parry and dodge leniency for this player's ping (seconds). */
   lenience: number;
-  seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number; augment: number; loadout: number; cls: number };
+  seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number; augment: number; cls: number };
 }
 
 export type AttackKind = 'cleave' | 'slam' | 'swing' | 'stab';
@@ -139,6 +139,8 @@ export interface Enemy extends Body {
   burnNext: number;
   chillUntil: number;
   frozenUntil: number;
+  /** Caught in a hunter's net until then (small goblins can't move or act; big ones are slowed). */
+  snareUntil: number;
 }
 
 export type FightEvent =
@@ -150,10 +152,9 @@ export type FightEvent =
   | { k: 'relic'; x: number; y: number; name: string }
   | { k: 'shoot'; x: number; y: number; dx: number; dy: number; kind: Bolt['kind']; el: Augment }
   | { k: 'burst'; x: number; y: number; r: number; el: Augment }
-  | { k: 'gust'; x: number; y: number; dx: number; dy: number; el: Augment }
-  | { k: 'shock'; x: number; y: number; x2: number; y2: number }
+  | { k: 'shock' | 'beam'; x: number; y: number; x2: number; y2: number }
   | { k: 'heal'; x: number; y: number; n: number }
-  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless'; x: number; y: number };
+  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow'; x: number; y: number };
 
 /** A grappling hook: flying out, reeling an enemy in, pulling its owner along, or coming back. */
 export interface Hook {
@@ -190,11 +191,14 @@ export interface Javelin {
   el: Augment;
 }
 
-/** A shot or a lobbed flask: arrows, the mage's sparks and orbs, the blast flask. */
+/**
+ * A shot, a smite or a thrown relic: arrows and crossbow bolts, the mage's sparks, orbs and lances, a
+ * smite waiting to fall, the hunter's net, the lodestone (which lands and becomes a pulling well).
+ */
 export interface Bolt {
   id: number;
   owner: string;
-  kind: 'arrow' | 'spark' | 'orb' | 'flask';
+  kind: 'arrow' | 'bolt' | 'spark' | 'orb' | 'lance' | 'smite' | 'net' | 'lodestone';
   x: number;
   y: number;
   dx: number;
@@ -208,14 +212,16 @@ export interface Bolt {
   burst: number;
   el: Augment;
   hit: number[];
-  /** A flask flies from (sx, sy) to (tx, ty) over `flight` seconds, `t` so far. */
+  /** Stun on hit (a smite). */
+  stun: number;
+  /** Lobbed and dropped things go from (sx, sy) to (tx, ty) over `flight` seconds, `t` so far. */
   sx: number;
   sy: number;
   tx: number;
   ty: number;
   t: number;
   flight: number;
-  /** An arrow stays stuck in a wall or the floor a moment. */
-  state: 'fly' | 'stuck';
+  /** An arrow stays stuck in a wall or the floor a moment; a landed lodestone pulls ('well'). */
+  state: 'fly' | 'stuck' | 'well';
   life: number;
 }

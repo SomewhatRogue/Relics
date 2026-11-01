@@ -1,7 +1,7 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, parry, roll). */
-import { FLINCH, GUARD, HERO, HITSTOP, HURT_STAGGER, WEAPONS, type Swing } from '../shared/tuning';
+import { BLESSING, FLINCH, HORN, GUARD, HERO, HITSTOP, HURT_STAGGER, WEAPONS, type Swing } from '../shared/tuning';
 import { shove } from './bodies';
-import { frozen, isDummy, kill, stunOf } from './damage';
+import { frozen, isDummy, kill, snared, stunOf } from './damage';
 import { shatter } from './elements';
 import type { Enemy, EnemyAttack, FightEvent, Hero } from './types';
 
@@ -26,8 +26,8 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   const tx = h.x - e.x, ty = h.y - e.y, tl = Math.hypot(tx, ty) || 1;
   const rear = !isDummy(e) && (e.fx * tx + e.fy * ty) / tl < GUARD.rearCos;
   const rearMult = rear ? (WEAPONS[h.weapon].backstab ?? GUARD.rearMult) : 1;
-  const ice = frozen(e, now);
-  const mult = (h.counter ? GUARD.counterMult : e.act === 'stunned' || e.act === 'pinned' || ice ? GUARD.stunnedMult : 1) * rearMult;
+  const ice = frozen(e, now), blessed = h.blessedUntil > now ? BLESSING.dmgMult : 1;
+  const mult = (h.counter ? GUARD.counterMult : e.act === 'stunned' || e.act === 'pinned' || ice || snared(e, now) ? GUARD.stunnedMult : 1) * rearMult * blessed;
   const n = Math.round(s.dmg * mult);
   e.hp -= n;
   e.hitAt = now;
@@ -64,6 +64,8 @@ export function attackCovers(a: EnemyAttack, h: Hero): boolean {
 export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: FightEvent[]): void {
   if (h.act === 'down' || !attackCovers(a, h)) return;
   const w = WEAPONS[h.weapon];
+  // A blessed hero takes less from everything.
+  const taken = h.blessedUntil > now ? BLESSING.taken : 1;
   if (h.act === 'roll' && h.actT >= w.dodge.iFrom && h.actT <= w.dodge.iTo + h.lenience) {
     ev.push({ k: 'dodge', x: h.x, y: h.y });
     return;
@@ -86,9 +88,9 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     return;
   }
   if (canGuard && h.blocking) {
-    const chip = Math.round(a.dmg * w.chip);
+    const chip = Math.round(a.dmg * w.chip * taken);
     h.hp -= chip;
-    h.stamina -= a.dmg * GUARD.staminaPerDmg * w.guardCost;
+    h.stamina -= a.dmg * GUARD.staminaPerDmg * w.guardCost * (h.rallyUntil > now ? HORN.guard : 1);
     h.staminaAt = now;
     h.hitstop = Math.max(h.hitstop, HITSTOP.light);
     shove(h, sx / sl, sy / sl, a.knock * 0.4, HERO.weight);
@@ -98,11 +100,12 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     } else ev.push({ k: 'block', x: h.x, y: h.y });
     return downIfDead(h, ev);
   }
-  h.hp -= a.dmg;
+  const n = Math.round(a.dmg * taken);
+  h.hp -= n;
   Object.assign(h, { act: 'hurt', actT: 0, actDur: HURT_STAGGER + a.knock * 0.012 });
   h.hitstop = Math.max(h.hitstop, HITSTOP.heavy);
   shove(h, sx / sl, sy / sl, a.knock, HERO.weight);
-  ev.push({ k: 'hit', x: h.x, y: h.y, n: a.dmg, heavy: a.dmg >= 25, on: 'hero' });
+  ev.push({ k: 'hit', x: h.x, y: h.y, n, heavy: n >= 25, on: 'hero' });
   downIfDead(h, ev);
 }
 

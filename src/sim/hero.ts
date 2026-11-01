@@ -3,7 +3,7 @@
  * A tap of attack swings on release; holding past CHARGE.start charges a heavy instead.
  */
 import { collide } from '../shared/arena';
-import { AUGMENTS, CHARGE, CLASS_KITS, CLASS_ORDER, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, LOADOUTS, RELICS, WEAPONS, type Swing } from '../shared/tuning';
+import { AUGMENTS, CHARGE, HORN, CLASS_KITS, CLASS_ORDER, CLASS_RELICS, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon } from '../shared/tuning';
 import { slide } from './bodies';
 import { hitEnemy } from './combat';
 import type { Enemy, FightEvent, Hero, Intent } from './types';
@@ -13,9 +13,10 @@ export function newHero(id: string, x: number, y: number): Hero {
     id, x, y, kvx: 0, kvy: 0, fx: 0, fy: 1, moving: false, hp: HERO.hp, stamina: HERO.stamina, staminaAt: -9, weapon: 'sword',
     act: 'idle', actT: 0, actDur: 0, combo: 0, heavy: false, power: 0, counter: false, hitIds: [], blocking: false,
     parryOpenAt: -9, lastBlockPress: -9, rollDx: 0, rollDy: 1, lastRollAt: -9, counterUntil: -9,
-    attackQueuedAt: -9, rollQueuedAt: -9, relic: 'javelin', relics: [...LOADOUTS[0]], relicReady: { javelin: 0, hook: 0, horn: 0, flask: 0 }, relicQueuedAt: -9,
-    augments: { javelin: '', hook: '', horn: '', flask: '' }, loadout: 0, hitstop: 0, lenience: 0,
-    seen: { attack: 0, block: 0, roll: 0, weapon: 0, relic: 0, relicSwap: 0, relicPick: 0, augment: 0, loadout: 0, cls: 0 },
+    attackQueuedAt: -9, rollQueuedAt: -9, relic: 'javelin', relics: [...CLASS_RELICS.WARRIOR], relicQueuedAt: -9,
+    relicReady: { javelin: 0, hook: 0, horn: 0, net: 0, shadow: 0, lodestone: 0, blessing: 0 },
+    augments: { javelin: '', hook: '', horn: '', net: '', shadow: '', lodestone: '', blessing: '' }, blessedUntil: -9, rallyUntil: -9, hitstop: 0, lenience: 0,
+    seen: { attack: 0, block: 0, roll: 0, weapon: 0, relic: 0, relicSwap: 0, relicPick: 0, augment: 0, cls: 0 },
   };
 }
 
@@ -24,8 +25,8 @@ export function currentSwing(h: Hero): Swing {
   const w = WEAPONS[h.weapon];
   if (!h.heavy) return w.combo[h.combo];
   const k = h.power, hv = w.heavy;
-  const heal = hv.heal === undefined ? undefined : Math.round(hv.heal + ((hv.healFull ?? hv.heal) - hv.heal) * k);
-  return { ...hv, dmg: Math.round(hv.dmg + (hv.dmgFull - hv.dmg) * k), knock: hv.knock + (hv.knockFull - hv.knock) * k, heal };
+  // A drawn shot only pierces at a full draw.
+  return { ...hv, dmg: Math.round(hv.dmg + (hv.dmgFull - hv.dmg) * k), knock: hv.knock + (hv.knockFull - hv.knock) * k, pierce: hv.pierce && k >= 1 };
 }
 
 const swingTime = (s: Swing) => s.windup + s.active + s.recover;
@@ -78,14 +79,10 @@ function gear(h: Hero, inp: Intent, ev: FightEvent[]): void {
     h.augments[h.relic] = AUGMENTS[(AUGMENTS.indexOf(h.augments[h.relic]) + 1) % AUGMENTS.length];
     ev.push({ k: 'relic', x: h.x, y: h.y, name: relicLabel(h) });
   }
-  if (inp.loadoutSeq !== h.seen.loadout) {
-    h.seen.loadout = inp.loadoutSeq;
-    h.loadout = (h.loadout + 1) % LOADOUTS.length;
-    h.relics = [...LOADOUTS[h.loadout]];
-    if (!h.relics.includes(h.relic)) h.relic = h.relics[0];
-    ev.push({ k: 'relic', x: h.x, y: h.y, name: h.relics.map((r) => RELICS[r].short).join(' ') });
-  }
 }
+
+/** Seconds to a full draw or charge for this kit. */
+export const chargeFull = (w: Weapon) => w.draw ?? CHARGE.full;
 
 export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt: number, ev: FightEvent[], acts: HeroActs): void {
   gear(h, inp, ev);
@@ -115,6 +112,8 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     if (h.act === 'idle') {
       const cls = CLASS_ORDER[(CLASS_ORDER.indexOf(WEAPONS[h.weapon].cls) + 1) % CLASS_ORDER.length];
       h.weapon = CLASS_KITS[cls][0];
+      h.relics = [...CLASS_RELICS[cls]];
+      h.relic = h.relics[0];
       ev.push({ k: 'weapon', x: h.x, y: h.y, name: cls });
     }
   }
@@ -127,7 +126,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     }
   }
   if (h.hitstop > 0) return void (h.hitstop -= dt);
-  if (now - h.staminaAt > HERO.regenDelay) h.stamina = Math.min(HERO.stamina, h.stamina + HERO.staminaRegen * dt);
+  if (now - h.staminaAt > HERO.regenDelay) h.stamina = Math.min(HERO.stamina, h.stamina + HERO.staminaRegen * (h.rallyUntil > now ? HORN.regen : 1) * dt);
   h.actT += dt;
   h.moving = false;
   h.blocking = false;
@@ -158,7 +157,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     if (h.actT >= r.windup && h.actT - dt < r.windup) {
       acts.fire(h);
       h.relicReady[h.relic] = now + r.cooldown;
-      if (h.relic !== 'horn') ev.push({ k: h.relic === 'hook' ? 'hookfire' : 'throw', x: h.x, y: h.y, dx: h.fx, dy: h.fy });
+      if (h.relic === 'hook' || h.relic === 'javelin' || h.relic === 'net' || h.relic === 'lodestone') ev.push({ k: h.relic === 'hook' ? 'hookfire' : 'throw', x: h.x, y: h.y, dx: h.fx, dy: h.fy });
     }
     if (h.act === 'throw' && h.actT >= r.windup + r.recover) (h.act = 'idle'), (h.actT = 0);
     return;
@@ -168,9 +167,10 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     face(h, inp, enemies, false);
     walk(h, inp, w.chargeSpeed, dt);
     collide(h, HERO.radius);
-    if (h.actT >= CHARGE.full - CHARGE.start && h.actT - dt < CHARGE.full - CHARGE.start) ev.push({ k: 'charged', x: h.x, y: h.y });
+    const full = chargeFull(w) - CHARGE.start;
+    if (h.actT >= full && h.actT - dt < full) ev.push({ k: 'charged', x: h.x, y: h.y });
     if (!inp.attack) {
-      h.power = Math.min(1, (h.actT + CHARGE.start) / CHARGE.full);
+      h.power = Math.min(1, (h.actT + CHARGE.start) / chargeFull(w));
       startSwing(h, -1, inp, enemies, now, ev);
       ev.push({ k: 'heavy', x: h.x, y: h.y });
     }
@@ -200,12 +200,14 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   // Idle or walking.
   if (wantsRoll) return startRoll(h, inp, now, ev);
   if (now - h.relicQueuedAt < INPUT_BUFFER && now >= h.relicReady[h.relic]) {
-    face(h, inp, enemies, true, RELICS[h.relic].range);
+    // A blessing turns to nobody: the room picks the ally.
+    if (h.relic !== 'blessing' && h.relic !== 'horn') face(h, inp, enemies, true, RELICS[h.relic].range);
     Object.assign(h, { act: 'throw', actT: 0, relicQueuedAt: -9 });
     return;
   }
   if (now - h.attackQueuedAt < CHARGE.start + INPUT_BUFFER && h.attackQueuedAt > -9) {
-    if (!inp.attack) return startSwing(h, 0, inp, enemies, now, ev);
+    // The crossbow looses on the press; everything else waits to see if it's a tap or a hold.
+    if (!inp.attack || w.noCharge) return startSwing(h, 0, inp, enemies, now, ev);
     if (now - h.attackQueuedAt >= CHARGE.start) return startCharge(h);
   }
   h.blocking = inp.block && h.stamina > 0;
@@ -225,7 +227,7 @@ function startCharge(h: Hero): void {
 /** Start combo step `i`, or the heavy when i is -1. */
 function startSwing(h: Hero, i: number, inp: Intent, enemies: Enemy[], now: number, ev: FightEvent[]): void {
   // Bows and staffs look for a goblin as far as they shoot.
-  const shot = WEAPONS[h.weapon].combo[0];
+  const shot = i < 0 ? WEAPONS[h.weapon].heavy : WEAPONS[h.weapon].combo[0];
   face(h, inp, enemies, true, shot.shot ? shot.range * 0.9 : 3.2);
   h.act = 'attack';
   h.actT = 0;

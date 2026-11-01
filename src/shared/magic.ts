@@ -38,33 +38,46 @@ export const HOOK = {
   dmg: 5,
 };
 
-/** A horn from an old watchtower: a cone of wind that throws goblins by their weight (into walls, ideally). */
-export const HORN = { cooldown: 5, windup: 0.18, recover: 0.3, range: 4.5, arc: 80, dmg: 4, knock: 18, flinch: 0.5 };
+/** The Ranger's hunting net: thrown, it opens on the first goblin it reaches. Small ones are snared flat; big ones are slowed. */
+export const NET = { cooldown: 7, windup: 0.15, recover: 0.25, speed: 14, range: 8, radius: 1.3, snare: 2.6, slow: 0.35, dmg: 4 };
 
-/** The alchemist's blast flask: lobbed over heads, it bursts where it lands and throws everyone outward. */
-export const FLASK = { cooldown: 5, windup: 0.2, recover: 0.25, range: 7, fallback: 5, flight: 0.6, radius: 1.8, dmg: 16, knock: 12 };
+/** The Rogue's shadow relic: step out of the dark behind the goblin you face, ready to stab its back. */
+export const SHADOWSTEP = { cooldown: 6, windup: 0.06, recover: 0.12, range: 6 };
 
-/** `range` is how far the phone's auto-aim looks for a target. */
+/** The Mage's lodestone: lobbed, it lands and drags every goblin near it inward (light ones fast), then bursts. */
+export const LODESTONE = { cooldown: 8, windup: 0.2, recover: 0.3, range: 7, fallback: 4.5, flight: 0.5, radius: 3.6, pull: 34, time: 1.8, burst: 1.4, dmg: 12 };
+
+/** The Healer's blessing: aimed at an ally (the most hurt one near you on a phone). Heals, and for a while they hit harder and take less. */
+export const BLESSING = { cooldown: 9, windup: 0.2, recover: 0.2, range: 7, heal: 20, time: 8, dmgMult: 1.3, taken: 0.75 };
+
+/** The war horn (Warrior, Healer): every ally in earshot is rallied: stamina back at once, then twice as fast, and blocking costs half. Small goblins near you flinch. */
+export const HORN = { cooldown: 12, windup: 0.25, recover: 0.3, radius: 6, time: 6, regen: 2, guard: 0.5, scare: 2.5 };
+
+/** `range` is how far the phone's auto-aim looks; `cls` who may carry it. */
 export const RELICS = {
   javelin: { name: 'RELIC JAVELIN', short: 'JAVELIN', cooldown: JAVELIN.cooldown, windup: JAVELIN.windup, recover: JAVELIN.recover, range: JAVELIN.range * 0.8 },
   hook: { name: 'GRAPPLING HOOK', short: 'HOOK', cooldown: HOOK.cooldown, windup: HOOK.windup, recover: HOOK.recover, range: HOOK.range },
-  horn: { name: 'GALE HORN', short: 'HORN', cooldown: HORN.cooldown, windup: HORN.windup, recover: HORN.recover, range: HORN.range },
-  flask: { name: 'BLAST FLASK', short: 'FLASK', cooldown: FLASK.cooldown, windup: FLASK.windup, recover: FLASK.recover, range: FLASK.range },
+  net: { name: "HUNTER'S NET", short: 'NET', cooldown: NET.cooldown, windup: NET.windup, recover: NET.recover, range: NET.range },
+  shadow: { name: 'SHADOWSTEP', short: 'SHADOW', cooldown: SHADOWSTEP.cooldown, windup: SHADOWSTEP.windup, recover: SHADOWSTEP.recover, range: SHADOWSTEP.range },
+  lodestone: { name: 'LODESTONE', short: 'LODESTONE', cooldown: LODESTONE.cooldown, windup: LODESTONE.windup, recover: LODESTONE.recover, range: LODESTONE.range },
+  horn: { name: 'WAR HORN', short: 'HORN', cooldown: HORN.cooldown, windup: HORN.windup, recover: HORN.recover, range: HORN.radius },
+  blessing: { name: 'BLESSING', short: 'BLESS', cooldown: BLESSING.cooldown, windup: BLESSING.windup, recover: BLESSING.recover, range: BLESSING.range },
 };
 export type RelicId = keyof typeof RELICS;
-export const RELIC_ORDER: RelicId[] = ['javelin', 'hook', 'horn', 'flask'];
+export const RELIC_ORDER: RelicId[] = ['javelin', 'hook', 'horn', 'net', 'shadow', 'lodestone', 'blessing'];
 /** A hero carries at most this many relics into a run (chosen in town later). */
 export const RELIC_SLOTS = 3;
-/** The training room's racks: each a set of three to carry (the town's armoury picks freely later). */
-export const LOADOUTS: RelicId[][] = [
-  ['javelin', 'hook', 'horn'],
-  ['javelin', 'hook', 'flask'],
-  ['javelin', 'horn', 'flask'],
-  ['hook', 'horn', 'flask'],
-];
+/** Each class's relics (the town's relic-wright adds more later). */
+export const CLASS_RELICS: Record<'WARRIOR' | 'RANGER' | 'ROGUE' | 'MAGE' | 'HEALER', RelicId[]> = {
+  WARRIOR: ['javelin', 'hook', 'horn'],
+  RANGER: ['net', 'hook'],
+  ROGUE: ['shadow', 'hook'],
+  MAGE: ['lodestone'],
+  HEALER: ['blessing', 'horn'],
+};
 
 /**
- * Magic augments: an element fitted to a relic (the Mage's staff casts with its equipped relic's).
+ * Magic augments: an element fitted to a relic (the Mage's spells cast with the equipped relic's).
  * Each element alone: fire burns and spreads by touch; frost chills, and a second frost freezes
  * solid; storm arcs to nearby goblins and to javelins stuck in bodies. Together: fire meets frost
  * as a scalding steam burst; storm or a heavy blow shatters the frozen; storm on the burning flares.

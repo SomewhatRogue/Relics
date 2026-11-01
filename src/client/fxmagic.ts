@@ -22,14 +22,6 @@ export function magicFx(fx: Fx, ev: FightEvent, x: number, y: number): void {
       flash(fx, x, y - 6, r * 3, 1.2, ev.el ? EL_LIGHT[ev.el] : [1, 0.7, 0.35], 0.18);
       break;
     }
-    case 'gust':
-      for (let i = 0; i < 34; i++) {
-        const a = Math.atan2(ev.dy, ev.dx) + (Math.random() - 0.5) * 1.3, s = 120 + Math.random() * 120, life = 0.25 + Math.random() * 0.2;
-        const col = ev.el && i % 3 === 0 ? EL_COL[ev.el] : i % 2 ? '#dfe6ee' : '#9aa6b4';
-        fx.parts.push({ x: x + ev.dx * 8, y: y - 8 + ev.dy * 5, vx: Math.cos(a) * s, vy: Math.sin(a) * s * 0.7, life, max: life, col, glow: true, grav: 0, stick: false });
-      }
-      fx.shake = Math.max(fx.shake, 1.5);
-      break;
     case 'shock': {
       const [x2, y2] = toPx(ev.x2, ev.y2);
       fx.arcs.push({ x, y, x2, y2, life: 0.18 });
@@ -78,6 +70,50 @@ export function magicFx(fx: Fx, ev: FightEvent, x: number, y: number): void {
       fx.rings.push({ x, y: y - 2, life: 0.45, max: 0.45, col: '#ffe9a8', size: 44 });
       fx.burst(x, y - 8, 16, ['#ffe9a8', '#ffffff', '#ffd27a'], 50, true);
       flash(fx, x, y - 8, 70, 0.9, [1, 0.9, 0.6], 0.25);
+      break;
+    case 'beam': {
+      const [x2, y2] = toPx(ev.x2, ev.y2);
+      fx.arcs.push({ x, y, x2, y2, life: 0.3, col: '#ffe9a8' });
+      break;
+    }
+    case 'blessed':
+      fx.say(x, y - 36, 'BLESSED', '#ffe9a8');
+      fx.rings.push({ x, y: y - 8, life: 0.4, max: 0.4, col: '#ffe9a8', size: 16 });
+      flash(fx, x, y - 8, 50, 1, [1, 0.9, 0.6], 0.25);
+      break;
+    case 'rally':
+      fx.say(x, y - 36, 'RALLY', '#ff8a6a');
+      fx.rings.push({ x, y, life: 0.5, max: 0.5, col: '#ff8a6a', size: 90 });
+      fx.shake = Math.max(fx.shake, 2);
+      break;
+    case 'rallied':
+      fx.burst(x, y - 10, 8, ['#ffb0a0', '#ffffff'], 30, true);
+      break;
+    case 'smite':
+      fx.say(x, y - 40, 'SMITE', '#fff1b0');
+      for (let i = 0; i < 26; i++) {
+        const life = 0.2 + Math.random() * 0.25;
+        fx.parts.push({ x: x + (Math.random() - 0.5) * 6, y: y - Math.random() * 60, vx: 0, vy: 40, life, max: life, col: i % 2 ? '#ffffff' : '#ffe9a8', glow: true, grav: 0, stick: false });
+      }
+      fx.burst(x, y - 4, 22, ['#ffffff', '#ffe9a8', '#ffd27a'], 90, true);
+      fx.rings.push({ x, y, life: 0.35, max: 0.35, col: '#ffe9a8', size: 30 });
+      fx.crater(x, y, 6);
+      fx.shake = Math.max(fx.shake, 4);
+      flash(fx, x, y - 10, 100, 1.8, [1, 0.92, 0.65], 0.22);
+      break;
+    case 'net':
+      fx.burst(x, y - 6, 10, ['#8a7a5a', '#6a5a3a'], 50, false);
+      break;
+    case 'snared':
+      fx.say(x, y - 30, 'NETTED', '#d8c48a');
+      break;
+    case 'well':
+      fx.rings.push({ x, y, life: 0.4, max: 0.4, col: '#b080ff', size: 50 });
+      fx.shake = Math.max(fx.shake, 2);
+      break;
+    case 'shadow':
+      fx.burst(x, y - 8, 18, ['#3a3346', '#6a5a8a', '#c9a8ff'], 50, true);
+      fx.say(x, y - 30, 'BEHIND', '#d8a0ff');
       break;
     case 'heal':
       fx.say(x, y - 28, '+' + ev.n, '#7dff8a');

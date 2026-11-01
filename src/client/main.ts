@@ -10,7 +10,7 @@ import { setMuted, sfx } from './sfx';
 import './style.css';
 
 const params = new URLSearchParams(location.search);
-const room = new ArenaRoom(Number(params.get('seed')) || 1);
+const room = new ArenaRoom(Number(params.get('seed')) || 1, { squire: true });
 const ME = 'me';
 const me = room.join(ME);
 const scene = new Scene(document.getElementById('game') as HTMLCanvasElement);
@@ -22,7 +22,7 @@ const input = new Input(
 const $ = (s: string) => document.querySelector(s) as HTMLElement;
 
 function sound(ev: FightEvent): void {
-  if (ev.k === 'shoot') return sfx[ev.kind]();
+  if (ev.k === 'shoot') return (sfx as unknown as Record<string, (() => void) | undefined>)[ev.kind]?.();
   if (ev.k === 'hit' && ev.tick) return;
   if (ev.k === 'hit') return ev.on === 'enemy' ? (ev.backstab ? sfx.backstab() : sfx.hit(ev.heavy)) : sfx.hurt();
   if (ev.k === 'windup') return ev.kind === 'swing' || ev.kind === 'stab' ? undefined : sfx.growl(ev.kind === 'slam');
@@ -37,15 +37,19 @@ const KIT: Record<string, string> = {
   greatsword: 'TIGHT PARRY  HEAVY ROLL',
   spear: 'BACKSTEP  KEEPS FACING',
   daggers: 'LONG DASH  BACKSTAB 2.5X',
-  bow: 'HOLD TO DRAW  PIERCES',
-  staff: 'CASTS THE RELIC ELEMENT  BLINK',
-  mace: '3RD BLOW AND HOLD HEAL',
+  longbow: 'HOLD 1.4S: PIERCING SHOT',
+  shortbow: 'QUICK DRAW  WALK WHILE DRAWING',
+  crossbow: 'FIRES ON PRESS  LONG RELOAD',
+  wand: 'QUICK SPARKS  0.6S CAST',
+  staff: 'HOLD 1.6S: BURSTING ORB',
+  rod: 'HOLD 1S: PIERCING LANCE',
+  mace: '3RD BLOW HEALS  HOLD: SMITE',
 };
 
 let parries = 0;
 const tips = input.touch
-  ? ['CLASS changes class. AUGMENT puts an element on your relic', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'RELIC: pin a scrapper to the wall', 'Striped circles cannot be blocked: ROLL out', 'HOLD RELIC to pick another relic', 'TWIN DAGGERS: roll behind a goblin and BACKSTAB']
-  : ['C changes class. T puts an element on your relic. L another rack', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: pin a scrapper to the wall. 1 2 3 pick a relic', 'Striped circles cannot be blocked: SPACE to roll', 'Q swaps weapon within the class (sword or greatsword, bow or spear)', 'Daggers: roll behind a goblin and BACKSTAB'];
+  ? ['CLASS changes class. WEAPON swaps its kit', 'HEALER: hold RELIC for BLESS, it finds the most hurt ally', 'AUGMENT puts an element on your relic', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'RELIC: pin a scrapper to the wall', 'Striped circles cannot be blocked: ROLL out', 'HOLD RELIC to pick another relic', 'TWIN DAGGERS: roll behind a goblin and BACKSTAB']
+  : ['C changes class. Q swaps its kit. T puts an element on your relic', 'Healer: point at an ally and press E to BLESS them', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: pin a scrapper to the wall. 1 2 3 pick a relic', 'Striped circles cannot be blocked: SPACE to roll', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or rod', 'Daggers: roll behind a goblin and BACKSTAB'];
 let tipAt = -99, tipI = 0;
 
 function hud(now: number): void {

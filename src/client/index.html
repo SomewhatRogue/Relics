@@ -30,12 +30,16 @@
         <li><b>Block</b> hold right click (or BLOCK). Costs stamina; run out and your guard breaks.</li>
         <li><b>Parry</b> tap block when the red telegraph flashes <b>white</b>. No damage, the goblin is <b>stunned</b>, and your next hit is a <b>counter</b> for 2.5x.</li>
         <li><b>Dodge</b> Space (or ROLL). Untouchable mid-dodge. Striped circles can't be blocked: dodge out. Each kit dodges its own way.</li>
-        <li><b>Class</b> C (or CLASS) for the demo: Warrior (sword and shield, greatsword), Ranger (longbow, spear), Rogue (twin daggers), Mage (focus staff), Healer (mace and censer). Q (or WEAPON) swaps within the class.</li>
-        <li><b>Ranger</b> taps loose arrows; hold to draw a shot that pierces every goblin in a line and knocks them into walls. <b>Mage</b> taps sparks; hold for an orb that bursts; the staff casts with your equipped relic's element; dodge is a blink. <b>Healer</b> every third blow and the held blessing heal everyone near you.</li>
-        <li><b>Relic</b> E (or RELIC). The javelin pins small goblins to walls and sticks in big ones. The grappling hook yanks small goblins to you, or pulls you to walls, pillars and big ones. The gale horn blasts goblins away by their weight. The blast flask lobs over heads and bursts where it lands (where you point on a laptop). All recharge. L (or RELICS) takes another rack of three.</li>
+        <li><b>Class</b> C (or CLASS) for the demo; Q (or WEAPON) swaps the class's kit. Only the Rogue is quick on its feet; everyone else trades speed for something.</li>
+        <li><b>Warrior</b> sword and shield, greatsword or spear. Relics: javelin, grappling hook, war horn.</li>
+        <li><b>Ranger</b> one arrow per press, and the draw is everything: the longbow takes 1.4 s to a shot that pierces a whole line; the shortbow draws fast and lets you walk; the crossbow fires the moment you press, then a long reload. Relics: hunter's net (snares small goblins flat), grappling hook.</li>
+        <li><b>Rogue</b> twin daggers, 2.5x from behind, the long dash. Relics: shadowstep (straight behind the goblin you face), grappling hook.</li>
+        <li><b>Mage</b> spells by cast time: the wand flicks sparks, the staff gathers 1.6 s for an orb that bursts wide, the rod 1 s for a lance through a line. Spells take your relic's element. The blink is far but slow to come back. Relic: lodestone (lobbed; drags goblins together, then bursts).</li>
+        <li><b>Healer</b> every third mace blow heals everyone near; hold to call a holy smite down on the goblin you face (big, and it stuns). Relics: blessing (heals an ally and makes them hit harder and take less; points at the most hurt ally, or where you aim on a laptop) and the war horn.</li>
+        <li><b>War horn</b> every ally in earshot gets their stamina back, then twice as fast, and blocking costs half for 6 s.</li>
         <li><b>Augments</b> T (or AUGMENT) fits the equipped relic with fire, frost or storm. Fire burns and spreads by touch. Frost chills; frost again freezes solid, and a heavy blow or a wall shatters the ice. Storm arcs to nearby goblins and to any javelin stuck in one. Fire meets frost: steam stuns everything near. Storm on the burning: a flare throws them.</li>
-        <li><b>Kits</b>: <b>sword and shield</b> blocks best (wide guard, easiest parry, roll); <b>greatsword</b> hits hardest but parries need tight timing and its roll is heavy; <b>spear</b> keeps its distance with a backstep that keeps you facing; <b>twin daggers</b> are fast with a long dash and short recharge, poor at blocking.</li>
-        <li><b>Swap</b> Q for weapon (sword and shield, greatsword, spear, twin daggers). Relics: <b>hold RELIC</b> on a phone, slide onto one and let go; 1, 2, 3 or R on a laptop. You carry up to 3.</li>
+        <li><b>The squire</b> by the swing dummy keeps getting hit. Heal him, bless him, rally him.</li>
+        <li><b>Relic</b> E (or tap RELIC). On a phone, hold RELIC, slide onto another and let go to switch; 1, 2, 3 on a laptop. Each recharges.</li>
         <li><b>From behind</b> every blow does more. <b>Twin daggers</b> (the rogue's kit) do 2.5x from behind: roll past a goblin and stab its back. Goblins turn slowly; the purple arc marks their back.</li>
         <li><b>Move</b> WASD, or the stick on the left of the screen.</li>
       </ul>
@@ -49,7 +53,7 @@
       <button class="tb block">BLOCK</button>
       <button class="tb attack">ATTACK</button>
       <button class="tb relic">RELIC</button>
-      <div class="chips"><button class="chip swap-class">CLASS</button><button class="chip swap-weapon">WEAPON</button><button class="chip augment">AUGMENT</button><button class="chip rack">RELICS</button></div>
+      <div class="chips"><button class="chip swap-class">CLASS</button><button class="chip swap-weapon">WEAPON</button><button class="chip augment">AUGMENT</button></div>
     </div>
     <script type="module" src="./main.ts"></script>
   </body>

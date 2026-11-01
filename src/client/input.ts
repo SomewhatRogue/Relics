@@ -1,7 +1,7 @@
 /**
  * Turns keys, mouse and touch into an Intent. Laptop: WASD to move, mouse to aim, left click to
  * attack, hold right click to block (tap it to parry), Space to roll; J / K work too; C class, Q weapon,
- * E relic, 1 2 3 or R to pick one, T its augment, L another rack of relics. Phone (upright):
+ * E relic, 1 2 3 or R to pick one, T its augment. Phone (upright):
  * a floating stick on the left, Attack, Block and Roll under the right thumb.
  */
 import { NO_INTENT, type Intent } from '../sim/types';
@@ -32,7 +32,6 @@ export class Input {
       if (k === 'q') this.intent.weaponSeq++;
       if (k === 'r') this.intent.relicSwapSeq++;
       if (k === 't') this.intent.augmentSeq++;
-      if (k === 'l') this.intent.loadoutSeq++;
       if (k === 'c') this.intent.classSeq++;
       if (k === '1' || k === '2' || k === '3') (this.intent.relicPick = Number(k) - 1), this.intent.relicPickSeq++;
       if (k === 'k') (this.intent.blockSeq++), (this.blockHeld.key = true);
@@ -111,7 +110,6 @@ export class Input {
     btn('.swap-weapon', () => this.intent.weaponSeq++);
     btn('.swap-class', () => this.intent.classSeq++);
     btn('.augment', () => this.intent.augmentSeq++);
-    btn('.rack', () => this.intent.loadoutSeq++);
     btn('.roll', () => this.intent.rollSeq++);
     btn('.block', () => ((this.intent.blockSeq++), (this.blockHeld.touch = true)), () => (this.blockHeld.touch = false));
   }
