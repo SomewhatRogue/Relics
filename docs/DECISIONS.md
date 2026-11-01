@@ -638,3 +638,10 @@ world; elemental modifiers later, all as relics.
   in reach, so a parry faces the right way.
 - **Relay copied from Come Bye** with its keys renamed (`rl:`); its 16 tests pass here. Not wired to
   the client until slice 3.
+
+## 2026-11-01: talk, not lines (Claude Opus 5.5)
+Kyle: the writing read like Claude, too direct, every sentence a punchline. Read the books' excerpts and
+wrote prose-notes.md (long wandering sentences, hedging, detail before name, jokes last, short lines rare).
+Added .claude/agents/line-editor.md as a second pass after the lore keeper. In the wood, dialogue that
+can freeze the world waits for a tap (Kyle's ask); a card goes on with a tap anywhere, because the card
+covered the stick and the move card never let go on a phone. Captions now stay up a third of a second a word.

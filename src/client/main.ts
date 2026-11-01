@@ -212,7 +212,7 @@ function frame(t: number): void {
   if (game.mode === 'town' && !game.outside) void link.refresh();
   if (game.result && !panel.open) showResult(game, panel);
   // Out of the wood: Orla at the gate.
-  if (game.greeting === 'orla' && !panel.open) (game.greeting = null), panel.show('ORLA OF THE WATCH', `<p class="dim">${WOOD_ROAD}</p><p><b>Orla:</b> "Those are Hew's boots."</p><p>She looks at your feet a long while.</p><p><b>Orla:</b> "Ah. Church is up past the Lantern. Hollis after; he'll want you working."</p>`, [{ label: 'INTO WICKHOLD', primary: true, act: () => panel.hide() }], true);
+  if (game.greeting === 'orla' && !panel.open) (game.greeting = null), panel.show('ORLA OF THE WATCH', `<p class="dim">${WOOD_ROAD}</p><p><b>Orla:</b> "Those are Hew's boots."</p><p>She looks at your feet a long while.</p><p><b>Orla:</b> "Ah. Well. Church is up past the Lantern, and you'll want to see Hollis after, he'll have you working before your feet are dry."</p>`, [{ label: 'INTO WICKHOLD', primary: true, act: () => panel.hide() }], true);
   fx.update(dt);
   scene.focus = game.cutFocus();
   scene.render(game.room, ME, fx, t / 1000, dt);

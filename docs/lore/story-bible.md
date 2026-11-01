@@ -145,7 +145,7 @@ most Want among the heroes is the one the bells don't spare).
   his boots, taught them to fight, and was killed by the Stoker, a one-off butcher with a burner's rake.
   He left a hazel tally stick (eleven notches, names by the ones he knew) for Father Odric, who keeps the
   count of the dead. The hungry left that field half-picked and went north together (unexplained).
-  Wickhold owes Hew for four loads of charcoal. Orla of the watch knew him by his boots.
+  Wickhold owes Hew for four loads of charcoal. Orla of the watch knew him by his boots. The boots were resoled twice and let the wet in at the left heel; he gives them to the hero, who reaches Wickhold with that foot wet through. He had been round every one of the field's dead since first light before he found the hero alive. He carries cordwood up the hill to his hut. The Stoker counts the eleven Hew burned as its own meat lost ("Eleven you burn. Eleven of mine. So, this one I keep."); whether "this one" is the hero or Hew is left open on screen.
 - **After the wood:** the tally stick has eleven notches; Odric cuts the twelfth, for Hew, when it's handed
   over. Odric knew Hew and owed him a beer he never came in for. Hew calls the hero "stray". A Healer's
   censer goes cold on the field ("They do"); only the church relights it, and Isolde carries it there herself.

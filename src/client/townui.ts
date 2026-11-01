@@ -107,7 +107,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     const rerolls = worn.flatMap((it) => (it.mods ?? []).map((m, k) => ({ label: `${itemName(it)}: REROLL ${MODS[m.id].name} (${REROLL})`, disabled: pr.gold < REROLL, act: () => (g.rerollMod(it, k), again()) })));
     panel.show('IVO THE RELIC-WRIGHT', html + shelf(['frost']) + (rerolls.length ? p(`He'll turn one modifier on anything you wear into another, ${REROLL} gold.`) : ''), [...buttons, ...rerolls, ...potionButtons(g, ['frost'], again)]);
   } else if (id === 'hew') {
-    panel.show('HEW', say('Hew', g.wood && g.wood.stage >= 2 ? LINES.north : 'Later, stray. Breathe first.'));
+    panel.show('HEW', say('Hew', g.wood && g.wood.stage >= 2 ? LINES.north : LINES.later));
   } else if (id === 'church') {
     // Hungry gear is given up here, and only here. Odric doesn't ask what it is.
     const hungry = g.gearList().filter((it) => it.quality === 'hungry');

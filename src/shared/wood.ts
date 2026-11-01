@@ -98,32 +98,42 @@ export const STOKER_HELP: Foe[] = [{ kind: 'scrapper', x: 46, y: 9, awake: true 
 
 /** Hew's lines (lore keeper), and the Stoker's. */
 export const LINES = {
-  wake: "Breathing. That makes one of you. Soldier or thief, they took your boots. Have mine. Up, slow.",
-  attack: "They're at the boots. Always the boots first. Hit it, and keep hitting till it's quiet.",
-  dodge: "See that one crouch? It's coming through you, shield or no. Don't be there. Roll.",
-  block: "That's my kiln they're pissing on. Three's too many to roll from. Guard up. Let them knock.",
-  parry: 'This one breaks a guard like kindling. Meet the blow as it lands, not before. Turn it.',
-  hut: "Home. Kettle's older than you and better company. Hold on. I never leave that door open.",
-  round: 'Round the back, stray.',
-  last: 'Odric. Give him the count.',
-  stoker: 'Eleven you burn. One I keep.',
-  north: 'They went north, the lot of them. Left the field half-picked. Never seen them leave meat.',
-  up: ['Up. Spit out the dirt.', "Not yet, stray. I've enough to burn.", 'Breathe. Then do it right.'],
-  relic: 'Something hard sits under its breastbone, grown in like a knot in oak. You lever it out with Hew\'s poker: a javelin, haft and all, longer than the wound it came from, and warm.',
-  road: "The wood gives out at last. Walls ahead, and over them a glow that isn't the moon.",
+  attack: "There, see, they're at the boots again, it's always the boots first with them, I don't know why. And don't stop at one knock, mind. I watched a lad do that once, and it got up.",
+  dodge: "See that one, how it's crouching? When they get down low like that they're coming straight through you, shield or no shield, and there's no stopping them. Best not be standing there when it arrives, is all.",
+  block: "Well, there's three of them now, and that's too many to go rolling about between, so you stand your ground and let them knock. And that's my kiln they're pissing on, the little sods.",
+  parry: "Now, this big one breaks a guard like kindling. I turned over a few on that field who'd held theirs up and waited, shields split down the middle. You want to meet it, I'd say, not wait for it.",
+  hut: "That's home, kettle's older than you are. Hang on, I didn't leave that door open.",
+  round: "Wait here, stray, I'll go round the back.",
+  last: "Get the count to Odric, stray, Father Odric, he'll be wanting it.",
+  stoker: 'Eleven you burn. Eleven of mine. So, this one I keep.',
+  north: "They all went north and left the field half-picked. I've never known them leave meat.",
+  up: ['Up you get, and spit that dirt out.', "Not yet, stray, I've enough to burn as it is.", 'Have a breather, then go at it again, properly this time.'],
+  relic: "There's something hard under its breastbone, grown in like a knot in oak, and it takes Hew's poker and most of what you've got left to lever it out. It's a javelin, haft and all, longer than the wound it came out of, and warm.",
+  road: "The wood thins and then gives out, and there's a road, and at the end of it walls, with a glow over them that isn't the moon. Your left foot is wet through at the heel, just as Hew said it would be.",
   skill: "Now. Don't save any of it.",
-  /** Waking: he comes over slowly, checks you, hauls you up. */
-  waking: ['Breathing. That makes one of you.', "Anything broken? Move your toes. Good. Soldier or thief, they took your boots. Have mine.", 'Up, slow.'],
+  /** Waking: he comes over slowly, checks you, hauls you up (one box at a time, each waits for a tap). */
+  waking: [
+    "Oh, you're breathing. That's one, then, out of the whole field, and I've been round every one of them since first light. Give me a moment getting down, these knees pop like green wood in a kiln.",
+    "Anything broken? Move your toes for me. Good, all ten, I counted. Soldier or thief or whatever you are, and that's none of my business, they've had your boots off you all the same.",
+    "Have mine, go on. They've been resoled twice and they let the wet in at the left heel, I won't lie to you, but it's them or bare feet, and I've seen your feet.",
+    "Up you come, then, slowly, there you are. Lean on me as much as you like, I've carried cordwood heavier than you up that hill and it never once thanked me.",
+  ],
+  /** On the card that asks you to walk. */
+  walk: "Have a little walk about first, stray, get the blood back in your legs, and mind the carts, they're still burning.",
+  /** More looters on the field; you come round after falling to the Stoker; Hew in a panel before the hut. */
+  more: "There's more of them in the trees, stray, and they're coming this way.",
+  cometo: "You come round on the rise with a mouthful of ash, and it's still down there by the cordwood, waiting for you.",
+  later: "Ask me later, stray, once you've got your breath back. I'll still be talking, don't worry.",
   /** When you get it right (a short pause in the fight). */
-  praise: ["That's it.", 'Good. Like that.', "There. You've done this before.", "Hah. You'll keep, stray."],
-  /** The instruction under each lesson, plain, with the control shown beside it. */
+  praise: ["That's it, that's the way.", "Oh, that's good, do it like that.", "Done this before, haven't you?", "Hah, you'll keep, stray, I think."],
+  /** The game's own plain line under each lesson, with the control shown beside it. */
   how: {
-    move: 'Walk. Get the feel of your legs back.',
+    move: 'Make sure you can still move. Walk a few steps and get your legs back under you.',
     attack: 'Hit them. Tap for quick blows; hold for a heavy one.',
-    roll: "Red with a striped edge can't be blocked. When it's about to land, roll out of it.",
-    block: 'Hold your guard as the red fills. Blocking costs breath: the yellow bar.',
+    roll: "A red mark with a striped edge can't be blocked. Roll out of it just before it lands.",
+    block: 'Hold your guard while the red fills. Each block costs breath (the yellow bar).',
     parry: 'Tap your guard the moment the red flashes white. It staggers them, and your next blow lands hard.',
-    skill: 'Your skill. Spend it, then it needs a while to come back.',
+    skill: "Use your skill. Once it's spent, it takes a while to recharge.",
   },
   /** The freeze-frame prompts, the first times a lesson's blow comes. */
   now: { roll: 'NOW: ROLL OUT', block: 'NOW: GUARD UP', parry: 'NOW: TAP GUARD', attack: 'HIT IT' },

@@ -81,3 +81,10 @@ and burns out a goblin den on a job.
    quorum), down and revive, more objectives (escort, hold the ward), the Want and the church.
 4. Slice 6: classes for real (abilities, subclasses: Knight or Barbarian, Sharpshooter or Rogue).
    Slice 7: chapter 2, written from the group's choices. Slice 8: Blender art pilot.
+
+## 2026-11-01: writing that reads like talk (Claude Opus 5.5)
+- Read the published Blacktongue excerpts for how the prose moves; notes in docs/lore/prose-notes.md.
+- voice.md's sentence rules rewritten; a line-editor agent now follows the lore keeper on every line.
+- The prologue rewritten through both passes. Hew's waking is four tap-to-go-on boxes; any card goes on
+  with a tap anywhere (the phone stick couldn't reach under the card before).
+- Next: run the town's lines (townui, squareui, rumours, jobs, copy.ts) through the same two passes.
