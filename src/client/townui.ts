@@ -2,8 +2,10 @@
 import { FAMILIES, PATIENTS } from '../shared/interiors';
 import { PERKS, SHOP, xpFor, perkOffer } from '../shared/progress';
 import { CHAPTER_1, QUORUM, chapterGoals, councilOpen, marketOpen, rewardMult } from '../shared/story';
-import { housesFor, type SpotId } from '../shared/town';
-import { AUGMENTS, CLASS_KITS, CLASS_RELICS, ELEMENT_NAME, RELICS, TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
+import { TRAINERS, housesFor, type SpotId } from '../shared/town';
+import { ballot } from '../shared/worldsync';
+import { openSquare } from './squareui';
+import { AUGMENTS, CLASS_KITS, CLASS_ORDER, CLASS_RELICS, ELEMENT_NAME, RELICS, TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
 import type { Game } from './game';
 import type { Panel } from './panels';
 import { RUMOURS } from './rumours';
@@ -13,8 +15,9 @@ const p = (s: string) => `<p>${s}</p>`;
 const say = (who: string, s: string) => p(`<b>${who}:</b> "${s}"`);
 const itemLine = (i: Item) => `<b>${itemName(i)}</b>: ${i.traits.map((t) => `${TRAITS[t].name} (${TRAITS[t].text.toLowerCase()})`).join(', ')}`;
 
-export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0): void {
-  const pr = g.profile, w = g.world, again = () => openSpot(id, g, panel, arg);
+export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): void {
+  const pr = g.profile, w = g.world, again = () => openSpot(id, g, panel, arg, key);
+  if (openSquare(id, g, panel, arg, key)) return;
   if (id === 'board') {
     const jobs = g.jobs();
     const html = jobs.map((j, i) =>
@@ -32,16 +35,24 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0): void {
       return panel.show('REEVE HOLLIS', status + say('Reeve Hollis', `The council chose ${c.label.toLowerCase()}. We live with it now.`) + p(c.text) + p('Chapter 2 is written at the next review, from what the group did.'));
     }
     if (!councilOpen(w)) return panel.show('REEVE HOLLIS', status + say('Reeve Hollis', "Bring our people home and ring Barrowby's bell, and the council will sit. Until then there's nothing to decide but how to stay alive."));
-    panel.show('THE COUNCIL SITS', status + p(`<b>${d.question}</b>`) + d.choices.map((c) => p(`<b>${c.label}.</b> ${c.text}`)).join('') +
-      p(`A council needs ${QUORUM} heroes to decide (1 here). This is a demo, so you can decide alone.`),
-      d.choices.map((c) => ({ label: `DECIDE: ${c.label.toUpperCase()}`, primary: true, act: () => (g.decide(c.id, 1), again()) })));
+    const b = ballot(w), mine = w.ballots[d.id]?.[pr.id], need = g.link?.online ? QUORUM : 1;
+    panel.show('THE COUNCIL SITS', status + p(`<b>${d.question}</b>`) + d.choices.map((c) => p(`<b>${c.label}.</b> ${c.text} <span class="dim">(${b.counts[c.id] ?? 0} for)</span>`)).join('') +
+      p(need > 1 ? `The council decides when ${need} heroes have voted: ${b.voters} so far.${mine ? ' Your voice is in; you can change it until it decides.' : ''}` : 'Playing alone, off the shared world: your vote decides.'),
+      d.choices.map((c) => ({ label: `${mine === c.id ? 'VOTED: ' : 'VOTE: '}${c.label.toUpperCase()}`, primary: mine !== c.id, act: () => (g.vote(c.id), again()) })));
   } else if (id === 'trainer') {
+    // Each class has its own teacher, somewhere in town; only yours will train you.
+    const cls = CLASS_ORDER[arg] ?? 'WARRIOR', t = TRAINERS[cls], who = t.name.split(' ').slice(-1)[0];
+    const name = who.charAt(0) + who.slice(1).toLowerCase();
+    if (cls !== pr.cls) {
+      const yours = TRAINERS[pr.cls];
+      return panel.show(t.name, say(name, `You're no ${cls.toLowerCase()}. I can't teach you. ${yours.name.charAt(0) + yours.name.slice(1).toLowerCase()} trains your kind: try ${yours.where}.`));
+    }
     const next = xpFor(pr.level + 1), offer = perkOffer(pr);
-    const html = say('Master Cole', pr.picks > 0 ? 'You came back taller. Show me what you learned out there.' : 'Come back when the fields have taught you something.') +
+    const html = say(name, pr.picks > 0 ? 'You came back taller. Show me what you learned out there.' : 'Come back when the fields have taught you something.') +
       p(`Level ${pr.level}. Experience ${pr.xp}${pr.level < 10 ? ` of ${next} for the next` : ' (the chapter cap)'}.`) +
       p(pr.perks.length ? 'Yours: ' + pr.perks.map((k) => `<b>${PERKS[k].name}</b> (${PERKS[k].text.toLowerCase()})`).join(', ') : 'No perks yet.') +
-      (pr.picks > 0 ? p(`Choose ${pr.picks > 1 ? `one of ${pr.picks} picks` : 'one'}:`) + offer.map((k) => p(`<b>${PERKS[k].name}</b>: ${PERKS[k].text}`)).join('') : '');
-    panel.show('MASTER COLE, TRAINER', html, pr.picks > 0 ? offer.map((k) => ({ label: PERKS[k].name, primary: true, act: () => (g.pickPerk(k), again()) })) : []);
+      (pr.picks > 0 ? p(`Choose ${pr.picks > 1 ? `one of ${pr.picks} picks` : 'one'}:`) + offer.map((k) => p(`<b>${PERKS[k].name}</b>${PERKS[k].cls ? ' (only from me)' : ''}: ${PERKS[k].text}`)).join('') : '');
+    panel.show(`${t.name}, ${cls} TRAINER`, html, pr.picks > 0 ? offer.map((k) => ({ label: PERKS[k].name, primary: true, act: () => (g.pickPerk(k), again()) })) : []);
   } else if (id === 'smith' || id === 'market') {
     const forged = id === 'market';
     if (forged && !marketOpen(w)) return panel.show('MARKET ROW', p('The stalls stand empty. The traders are out in the refugee camp past the north gate, and only the council can bring them in.'));
@@ -89,6 +100,13 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0): void {
 
 const CHAT: Record<number, { name: string; line: string }> = {
   0: { name: 'OLD WENNA', line: 'I was born under that Lantern and I mean to die under it. Not soon, mind.' },
+  5: { name: 'GATE GUARD', line: 'Gate opens for a job and not before. Take one at the board in the square.' },
+  6: { name: 'SERGEANT DUNN', line: 'Two of us for the whole wall. Put some gold in the town works and I will have a proper watch.' },
+  7: { name: 'WATCHMAN HOB', line: 'Quiet tonight. Too quiet. I said that last night too.' },
+  8: { name: 'THE WATCH', line: 'New boots, new spear, same goblins. Glad of the work.' },
+  9: { name: 'OLD MERREN', line: 'The chapel has been barred since the siege. Whatever is in there, the town is not ready for it yet.' },
+  11: { name: 'A DRUNK', line: 'Moll cheats. Everybody knows Moll cheats. I keep playing. What does that make me?' },
+  12: { name: 'A CARD SHARP', line: 'Whisper only talks to his own kind. If you have to ask, you are not.' },
   1: { name: 'TAM', line: 'Is it true you can throw a goblin into another goblin? Show me. Show me!' },
   2: { name: 'MARTA', line: 'I pray for the ones still out there. Then I pray for you lot to hurry.' },
   3: { name: 'ALDER BRAM', line: 'Every choice the council makes costs someone. Make sure it costs the goblins more.' },
@@ -101,7 +119,7 @@ export function showResult(g: Game, panel: Panel): void {
   const r = g.result!;
   g.result = null;
   const lines = [`Gold: ${r.gold}`, `Experience: ${r.xp}`, r.won ? `People brought home: ${r.rescued}` : 'Driven back: half the gold, nobody saved.'];
-  if (r.levels) lines.push(`<b>Level up!</b> See Master Cole in the training hall.`);
+  if (r.levels) lines.push(`<b>Level up!</b> Find your trainer: ${TRAINERS[g.profile.cls].name}, at ${TRAINERS[g.profile.cls].where}.`);
   if (r.won && r.job.objective === 'story') lines.push(`<b>Barrowby's bell rings across the valley.</b> The council can sit once enough people are home.`);
   panel.show(r.won ? 'JOB DONE' : 'DRIVEN BACK', p(`<b>${r.job.title}</b>`) + lines.map(p).join(''), [{ label: 'BACK TO WICKHOLD', primary: true, act: () => panel.hide() }], true);
 }

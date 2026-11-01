@@ -44,6 +44,9 @@ and burns out a goblin den on a job.
       people to talk to (smith and relic-wright, priest, trainer and squire, healer, reeve, families),
       a town hall, cottages and barns to enter on jobs, wooden buildings that burn down, goblin dens
       and the burn-out job; Come Bye's newer relay and the online rules (`docs/ONLINE.md`)
+- [x] Slice 3e: CI (types, tests, build, a browser walk-through), the shared world server and the Roll
+      of the Brave, council votes counted across heroes, town works, a bigger living Wickhold with
+      patrols and locked places, a trainer per class with class perks, the Drowned Rat and its dice
 - [x] Slice 3d: live music for every kind of place (30 pieces) with a fight layer and boss music,
       kit-specific weapon sounds, goblin voices, building sounds; the Healer's blessed ground and ward
 - [x] Slice 3c: ledges and ramps (two levels), archers, falls, the high-ground shot, forks with a high
@@ -54,6 +57,8 @@ and burns out a goblin den on a job.
 ## Next (in order)
 
 1. Kyle plays slice 3. Tune: job length, goblin counts, gold and experience, the town's layout.
+1b. Kyle connects Redis (Upstash, free) to the Vercel project once it exists: the shared world and the
+   Roll go live; until then the game plays offline.
 2. Slice 4: four players by link or code (town and runs), the leader's browser hosts every room someone
    is in, drop-in mid-fight, rejoin by hero name, a RunSave every 2 s and takeover from it. Copy Come
    Bye's client relay, resume and online tests; follow `docs/ONLINE.md` and the Redis budget.

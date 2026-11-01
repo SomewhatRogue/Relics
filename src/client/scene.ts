@@ -2,7 +2,7 @@
  * One frame: camera, the flat (lit) layer in depth order, the glowing layer, then the lighting pass.
  * The scene is painted at a low resolution and scaled up by a whole number so pixels stay crisp.
  */
-import { ARENA, type GameMap } from '../shared/arena';
+import { ARENA, npcAt, type GameMap } from '../shared/arena';
 import { GRAB, GUARD, WEAPONS } from '../shared/tuning';
 import type { ArenaRoom } from '../sim/room';
 import { drawHero } from './actors';
@@ -161,8 +161,8 @@ export class Scene {
       items.push({ y: blockFoot(b), draw: () => drawBlock(c, b, bx - cx, by - cy, true) });
     }
     for (const n of map.npcs ?? []) {
-      const near = !!me && Math.hypot(me.x - n.x, me.y - n.y) <= SPOT_REACH;
-      items.push({ y: OY + n.y * PX, draw: () => drawNpc(c, n, OX + n.x * PX - cx, OY + n.y * PX - cy, near) });
+      const at = npcAt(n, room.time), near = !!me && Math.hypot(me.x - at.x, me.y - at.y) <= SPOT_REACH;
+      items.push({ y: OY + at.y * PX, draw: () => drawNpc(c, n, OX + at.x * PX - cx, OY + at.y * PX - cy, near, at.fx, !!n.path) });
     }
     for (const b of map.braziers) items.push({ y: OY + b.y * PX, draw: () => this.brazier(c, OX + b.x * PX - cx, OY + b.y * PX + 2 - cy, now) });
     if (map === ARENA) items.push({ y: OY + ARENA.cage.y * PX, draw: () => this.cage(c, OX + ARENA.cage.x * PX - cx, OY + ARENA.cage.y * PX - cy, now) });
@@ -217,6 +217,11 @@ export class Scene {
     }
     // Moonlight through a ceiling grate over the middle of the room.
     if (map.theme.moon) lights.push({ x: OX + (map.w / 2) * PX - cx, y: OY + (map.h / 2) * PX - cy, r: 125 * Math.max(1, map.w / 22), i: map.theme.moon, c: [0.55, 0.62, 0.9] });
+    for (const r of map.rounds) if (r.kind === 'post') {
+      const x = OX + r.x * PX - cx, y = OY + r.y * PX - cy - 24;
+      this.flame(glow, x, y + 2, now, 1);
+      lights.push({ x, y, r: 64, i: 0.8, c: [1, 0.72, 0.42] });
+    }
     for (const r of map.rounds) if (r.kind === 'lantern') lights.push({ x: OX + r.x * PX - cx, y: OY + r.y * PX - cy - 28, r: 150 + Math.sin(now * 3) * 4, i: 1.25, c: [1, 0.78, 0.45] });
     for (const b of map.blocks) {
       const [bx, by] = blockAt(b), mx = bx + (b.w * PX) / 2 - cx;

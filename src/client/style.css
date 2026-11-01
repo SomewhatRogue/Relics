@@ -97,7 +97,7 @@ body.touch #boss { bottom: auto; top: calc(160px + env(safe-area-inset-top)); }
 body.touch #prompt { bottom: calc(250px + env(safe-area-inset-bottom)); }
 .use { width: 84px; height: 84px; right: calc(18px + env(safe-area-inset-right)); bottom: calc(46px + env(safe-area-inset-bottom)); background: #5a3a14ee; border-color: #ffd27a; color: #fff1d0; font-size: 13px; z-index: 2; }
 .use[hidden] { display: none; }
-body[data-mode='town'] .tb.attack, body[data-mode='town'] .tb.block, body[data-mode='town'] .tb.roll, body[data-mode='town'] .tb.relic, body[data-mode='town'] .tb.grab { display: none; }
+body[data-mode='town'] .tb.attack, body[data-mode='town'] .tb.block, body[data-mode='town'] .tb.relic, body[data-mode='town'] .tb.grab { display: none; }
 body[data-mode='town'] #hud .gear:not(:first-of-type) { display: none; }
 #panel { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: #0d0b10cc; z-index: 6; padding: 16px; }
 #panel[hidden] { display: none; }
@@ -148,3 +148,20 @@ body.touch #hud { width: 138px; }
 body.touch #corner { gap: 4px; }
 body.touch #corner button { width: 30px; }
 body.touch #corner #heroes, body.touch #corner #tips { width: auto; padding: 0 5px; }
+
+/* Town works, the Roll of the Brave, dice. */
+#panel .work { border: 1px solid #3a3644; border-radius: 4px; padding: 7px 9px; margin-bottom: 7px; line-height: 1.5; }
+#panel .work .done { color: #9ad8a8; }
+#panel .meter { display: inline-block; width: 90px; height: 6px; background: #241f2c; border: 1px solid #0d0b10; vertical-align: middle; margin: 0 4px; }
+#panel .meter i { display: block; height: 100%; background: #d9b13a; }
+#panel .roll { margin-bottom: 8px; }
+#panel .roll ol { margin: 3px 0 0; padding-left: 22px; }
+#panel .roll li span { color: #8a8494; font-size: 10px; }
+#panel .roll li em { color: #ffd27a; font-style: normal; float: right; }
+#panel .roll li.me { color: #9fd0ff; }
+#panel .dim { color: #8a8494; }
+#panel .code { display: flex; align-items: center; gap: 8px; color: #c8b080; font-size: 11px; margin: 8px 0 4px; }
+#panel .code input { flex: 1; min-width: 0; height: 34px; padding: 0 8px; font: inherit; font-size: 16px; color: #fff1d0; background: #14121a; border: 1px solid #6a5a3a; border-radius: 4px; text-transform: uppercase; user-select: text; -webkit-user-select: text; }
+#panel .dice { display: flex; justify-content: space-around; text-align: center; margin: 4px 0 10px; color: #c8b080; }
+#panel .dice span { display: block; font-size: 40px; line-height: 1.1; color: #f0e0b0; font-family: system-ui, sans-serif; }
+body[data-mode='town'] .tb.roll { right: calc(116px + env(safe-area-inset-right)); bottom: calc(58px + env(safe-area-inset-bottom)); }

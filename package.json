@@ -7,7 +7,8 @@
     "build": "vite build",
     "check": "tsc --noEmit",
     "test": "vitest run",
-    "look": "node scripts/look.cjs"
+    "look": "node scripts/look.cjs",
+    "smoke": "node scripts/smoke.cjs"
   },
   "dependencies": {
     "redis": "^4.7.0",

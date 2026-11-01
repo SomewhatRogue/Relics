@@ -20,12 +20,15 @@ export interface Run {
   rescued: number;
   downs: number;
   failed: boolean;
+  /** Goblins killed and dens burned (for the Roll of the Brave and the town works). */
+  kills: number;
+  dens: number;
   /** The road the party took into each room after a fork (by room index). */
   roads: Record<number, RoadId>;
 }
 
 export const MAX_DOWNS = 3;
-export const newRun = (job: Job): Run => ({ job, index: 0, gold: 0, xp: 0, rescued: 0, downs: 0, failed: false, roads: {} });
+export const newRun = (job: Job): Run => ({ job, index: 0, gold: 0, xp: 0, rescued: 0, downs: 0, failed: false, roads: {}, kills: 0, dens: 0 });
 
 /** Build the room for the run's current index. */
 export function runRoom(run: Run): ArenaRoom {
@@ -49,7 +52,9 @@ export function tally(run: Run, room: ArenaRoom, events: FightEvent[], me: strin
     if (ev.k === 'death') {
       const e = room.enemies.find((x) => Math.abs(x.x - ev.x) < 0.01 && Math.abs(x.y - ev.y) < 0.01);
       const b = e?.name ? BOUNTY.boss : ev.kind === 'butcher' ? BOUNTY.butcher : ev.kind === 'scrapper' ? BOUNTY.scrapper : null;
-      if (b) (run.gold += b.gold), (run.xp += b.xp);
+      if (b) (run.gold += b.gold), (run.xp += b.xp), run.kills++;
+    } else if (ev.k === 'collapse') {
+      if (room.map.blocks.some((x) => x.kind === 'den' && x.x === ev.x && x.y === ev.y)) run.dens++;
     } else if (ev.k === 'freed') {
       run.rescued++;
       run.xp += BOUNTY.rescue;

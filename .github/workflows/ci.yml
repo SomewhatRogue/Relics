@@ -1,0 +1,26 @@
+# Every push and pull request: types, the rules and the relay (with a real Redis), a build, and a
+# browser walk through the start screen, the town and a job on a phone-sized and a laptop-sized page.
+name: ci
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Redis for the relay tests
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq redis-server
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+      - run: npm run build
+      - name: Browser for the walk-through
+        run: npx playwright install --with-deps chromium
+      - name: Walk through the game in a browser
+        run: npm run smoke

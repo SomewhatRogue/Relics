@@ -18,10 +18,10 @@ export function pose(h: Hero, now: number): Pose {
     longbow: fa + side * 1.2, shortbow: fa + side * 1.1, crossbow: fa + side * 0.9, wand: fa + side * 1.1, staff: -Math.PI / 2 + side * 0.25,
     rod: fa + side * 1, mace: fa + side * 1.2,
   };
-  const charge = Math.min(1, (h.actT + CHARGE.start) / chargeFull(WEAPONS[h.weapon]));
+  const charge = Math.min(1, (h.actT + CHARGE.start) / chargeFull(WEAPONS[h.weapon], h));
   if (h.act === 'charge') {
     // Held past the flash, the draw starts to shake (and the shot weakens).
-    const over = h.actT + CHARGE.start > chargeFull(WEAPONS[h.weapon]) + RELEASE.overdraw ? Math.sin(now * 70) * 0.09 : 0;
+    const over = h.actT + CHARGE.start > chargeFull(WEAPONS[h.weapon], h) + RELEASE.overdraw ? Math.sin(now * 70) * 0.09 : 0;
     if (ranged(h)) return { a: (h.weapon === 'staff' ? -Math.PI / 2 + side * 0.25 : fa) + over, ext: 0, reach: 0, pull: charge };
     // The healer lifts the mace to call down a smite.
     if (h.weapon === 'mace') return { a: -Math.PI / 2 + side * 0.2, ext: 0, reach: 0, pull: charge };
@@ -131,7 +131,7 @@ export function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): vo
     }
   }
   if (h.act === 'charge' && !ranged(h) && h.weapon !== 'mace') {
-    const k = Math.min(1, (h.actT + CHARGE.start) / chargeFull(WEAPONS[h.weapon])), len = h.weapon === 'greatsword' || h.weapon === 'spear' ? 17 : h.weapon === 'daggers' ? 7 : 12;
+    const k = Math.min(1, (h.actT + CHARGE.start) / chargeFull(WEAPONS[h.weapon], h)), len = h.weapon === 'greatsword' || h.weapon === 'spear' ? 17 : h.weapon === 'daggers' ? 7 : 12;
     c.glow.globalAlpha = 0.4 + 0.5 * k * (0.6 + 0.4 * Math.sin(c.now * 30));
     line(c.glow, ox, oy, p.a, len - 4 * k - 2, len, k >= 1 ? '#ffffff' : '#ffd860');
     c.glow.globalAlpha = 1;

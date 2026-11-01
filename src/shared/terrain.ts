@@ -4,10 +4,10 @@
  * and pit props in a mine). Ruin and the room's place in the run set how many goblins. The last room
  * holds the objective: cages, a named butcher, or the larder racks. Same seed, same room.
  */
-import type { Block, BlockKind, GameMap, Ledge, Road, Round, RoundKind, Theme } from './arena';
-import type { Job, PlaceKind } from './jobs';
-import { WOOD, type PropKind } from './props';
-import { Rng } from './rng';
+import type { Block, BlockKind, GameMap, Ledge, Road, Round, RoundKind, Theme } from './arena.js';
+import type { Job, PlaceKind } from './jobs.js';
+import { WOOD, type PropKind } from './props.js';
+import { Rng } from './rng.js';
 
 export interface Foe { kind: 'scrapper' | 'butcher'; x: number; y: number; hp?: number; name?: string; bow?: boolean; z?: number }
 /** Which way the party went at a fork. */

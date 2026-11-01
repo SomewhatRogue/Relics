@@ -5,12 +5,12 @@
  * Row); out on a job, a cottage or a barn the goblins have turned over, maybe with someone caged.
  * Walk out at the bottom to come back out of the door.
  */
-import type { Block, GameMap, Npc, Round, Theme } from './arena';
-import type { Job } from './jobs';
-import type { PropKind } from './props';
-import { Rng } from './rng';
-import type { WorldState } from './story';
-import type { Foe, RoomPlan } from './terrain';
+import type { Block, GameMap, Npc, Round, Theme } from './arena.js';
+import type { Job } from './jobs.js';
+import type { PropKind } from './props.js';
+import { Rng } from './rng.js';
+import type { WorldState } from './story.js';
+import type { Foe, RoomPlan } from './terrain.js';
 
 const HOME: Theme = { floor: 'planks', back: 'plaster', ambient: [0.24, 0.2, 0.22], moon: 0 };
 const STONE: Theme = { floor: 'flagstone', back: 'stone', ambient: [0.22, 0.2, 0.28], moon: 0 };
@@ -42,15 +42,26 @@ export const PATIENTS = ['AMOS', 'LETTY', 'CORIN'];
 export function townInterior(door: string, w: WorldState): GameMap {
   if (door === 'church') return room('THE CHURCH', 14, 9, STONE,
     [b('altar', 6, 0.5, 2, 1), b('pew', 1.5, 3.4, 4, 0.6), b('pew', 8.5, 3.4, 4, 0.6), b('pew', 1.5, 5.4, 4, 0.6), b('pew', 8.5, 5.4, 4, 0.6)],
-    [n('FATHER ODRIC', 7, 2.2, 'church', 'priest'), n('MARTA', 3.2, 4.6, 'chat', 'villager', 2)],
+    [n('FATHER ODRIC', 7, 2.2, 'church', 'priest'), n('MOTHER ISOLDE', 11.6, 2.4, 'trainer', 'healer', 4), n('MARTA', 3.2, 4.6, 'chat', 'villager', 2)],
     { torches: [{ x: 3, y: -1.6 }, { x: 7, y: -1.8 }, { x: 11, y: -1.6 }] });
   if (door === 'forge') return room('THE FORGE', 13, 8, { ...STONE, ambient: [0.28, 0.2, 0.2] },
     [b('anvil', 3.4, 2.7, 1.2, 0.6), b('bench', 8.5, 0.6, 3.5, 0.8), b('shelf', 5.5, 0.1, 2, 0.5), b('sacks', 11.2, 4.6, 1.2, 1)],
     [n('HALVARD THE SMITH', 4.1, 1.9, 'smith', 'smith'), n('IVO THE RELIC-WRIGHT', 10.2, 2.2, 'wright', 'wright')],
     { braziers: [{ x: 1.8, y: 1.4, r: 0.45 }] });
-  if (door === 'hall') return room('THE TRAINING HALL', 12, 8, HOME,
-    [b('shelf', 1, 0.2, 3, 0.5), b('shelf', 8, 0.2, 3, 0.5)],
-    [n('MASTER COLE', 4, 2.4, 'trainer', 'trainer'), n('SQUIRE PELL', 8.8, 3.2, 'yard', 'squire')]);
+  if (door === 'hall') return room('THE BARRACKS', 13, 8, STONE,
+    [b('rack', 1, 0.2, 3, 0.5), b('rack', 9, 0.2, 3, 0.5), b('bed', 0.8, 3.4, 1, 2), b('bed', 11.2, 3.4, 1, 2)],
+    [n('MASTER COLE', 4.5, 2.4, 'trainer', 'trainer', 0), n('SQUIRE PELL', 8.8, 3.2, 'yard', 'squire'), n('CORPORAL BRISK', 6.5, 5.4, 'chat', 'guard', 6)]);
+  if (door === 'tower') return room('THE TOWER', 10, 9, { ...STONE, ambient: [0.2, 0.18, 0.3] },
+    [b('shelf', 0.6, 0.2, 3, 0.5), b('shelf', 6.4, 0.2, 3, 0.5), b('bench', 3.6, 3.2, 2.8, 0.8)],
+    [n('MAGISTER VELL', 5, 2.2, 'trainer', 'wright', 3)], { braziers: [{ x: 1.4, y: 3.6, r: 0.35 }] });
+  if (door === 'lodge') return room("THE HUNTERS' LODGE", 11, 8, HOME,
+    [b('rack', 0.8, 0.2, 4, 0.5), b('bench', 6.5, 2.8, 2.5, 0.8), b('sacks', 9.2, 4.6, 1.2, 1)],
+    [n('HUNTRESS MAEVE', 4, 2.4, 'trainer', 'ranger', 1)], { braziers: [{ x: 9.6, y: 1.2, r: 0.35 }] });
+  if (door === 'tavern') return room('THE DROWNED RAT', 15, 9, { ...HOME, ambient: [0.26, 0.19, 0.16] },
+    [b('counter', 1, 1.4, 5, 0.8), b('shelf', 1, 0.1, 5, 0.5), b('bench', 8, 2.6, 2.4, 0.9), b('bench', 11.6, 5, 2.4, 0.9), b('bench', 6, 5.4, 2.4, 0.9)],
+    [n('BARKEEP HOLT', 3.5, 1.1, 'tavern', 'villager'), n('DICER MOLL', 9.2, 3.9, 'dice', 'rogue'), n('WHISPER', 13.6, 2, 'trainer', 'rogue', 2),
+      n('A DRUNK', 6.6, 6.7, 'chat', 'villager', 11), n('A CARD SHARP', 12.4, 6.3, 'chat', 'rogue', 12)],
+    { braziers: [{ x: 13.8, y: 0.9, r: 0.4 }] });
   if (door === 'infirmary') {
     const home = Math.min(PATIENTS.length, w.rescued);
     return room('THE INFIRMARY', 12, 8, HOME,

@@ -34,6 +34,12 @@ const LOOK: Record<Block['kind'], Look> = {
   bench: { tall: 8, roof: '#7a5a34', ridge: '#8b6a3a', wall: '#4a3420', windows: false, furniture: true },
   hearth: { tall: 12, roof: '#4a4652', ridge: '#57525e', wall: '#34313a', windows: false, furniture: true },
   sacks: { tall: 9, roof: '#9a8a5a', ridge: '#b0a06a', wall: '#7a6a48', windows: false, furniture: true },
+  tower: { tall: 64, roof: '#3a3050', ridge: '#4a3e66', wall: '#57525e', windows: true },
+  tavern: { tall: 26, roof: '#4a2a1e', ridge: '#6a3a26', wall: '#5e4a36', windows: true },
+  monument: { tall: 22, roof: '#6a6470', ridge: '#8a8494', wall: '#57525e', windows: false, furniture: true },
+  rubble: { tall: 10, roof: '#45414c', ridge: '#55505e', wall: '#34313a', windows: false },
+  cart: { tall: 9, roof: '#7a5a34', ridge: '#8b6a3a', wall: '#4a3420', windows: false, furniture: true },
+  rack: { tall: 16, roof: '#4a3420', ridge: '#4a3420', wall: '#5a3d22', windows: false, furniture: true },
 };
 
 /** 0 standing, 1 charred (under half its health), 2 burned down. */
@@ -64,7 +70,7 @@ function paint(b: Block, st: number): HTMLCanvasElement {
   // Roof over the footprint (raised by the wall's height), then the front wall below it.
   const roofH = d, wallY = roofH;
   rect(0, 0, w, roofH, l.roof);
-  if (b.kind === 'rockwall') for (let i = 0; i < w * 2; i++) rect((i * 37) % w, (i * 13) % roofH, 2, 1, i % 3 ? '#3a3640' : '#55505e');
+  if (b.kind === 'rockwall' || b.kind === 'rubble') for (let i = 0; i < w * 2; i++) rect((i * 37) % w, (i * 13) % roofH, 2, 1, i % 3 ? '#3a3640' : '#55505e');
   else if (b.kind === 'fence') for (let x = 1; x < w; x += 5) rect(x, 0, 2, roofH + l.tall, '#6b4a2b');
   else if (b.kind === 'den') for (let i = 0; i < w; i += 3) rect(i, 0, 2, roofH, i % 2 ? '#3a2e1c' : '#5e4a2e');
   else if (!l.furniture) {
@@ -82,6 +88,8 @@ function paint(b: Block, st: number): HTMLCanvasElement {
     const dw = b.kind === 'barn' ? 12 : b.kind === 'den' ? 8 : 6, dh = Math.min(l.tall - 3, b.kind === 'barn' ? 18 : 11);
     rect(Math.round(w / 2 - dw / 2), wallY + l.tall - dh, dw, dh, b.kind === 'den' ? '#0d0b10' : '#2a1e14');
     if (b.kind !== 'den') rect(Math.round(w / 2 - dw / 2), wallY + l.tall - dh, dw, 1, '#5a3d22');
+    // Barred: planks nailed across.
+    if (b.locked) for (const k of [0.35, 0.7]) rect(Math.round(w / 2 - dw / 2) - 2, Math.round(wallY + l.tall - dh * k), dw + 4, 2, '#7a5a34');
   }
   if (b.kind === 'church') {
     // The bell tower over the door.
@@ -113,6 +121,25 @@ function furnish(b: Block, rect: (x: number, y: number, w: number, h: number, c:
   if (b.kind === 'altar') rect(Math.round(w / 2) - 1, wallY + 2, 2, 7, '#d4a537'), rect(Math.round(w / 2) - 3, wallY + 4, 6, 2, '#d4a537');
   if (b.kind === 'sacks') for (let x = 1; x < w - 4; x += 6) rect(x, 2, 5, roofH - 3, '#b0a06a'), rect(x + 2, 1, 1, 2, '#6a5a3a');
   if (b.kind === 'anvil') rect(2, 2, w - 4, 2, '#a8a2b0');
+  if (b.kind === 'rubble') for (let i = 0; i < w * 3; i++) rect((i * 29) % w, wallY + ((i * 7) % l.tall), 3, 2, ['#45414c', '#2a2733', '#5a3d22'][i % 3]);
+  if (b.kind === 'monument') {
+    // The Roll of the Brave: names cut into stone, a gilt band.
+    rect(1, wallY + 2, w - 2, 1, '#d4a537');
+    for (let y = wallY + 5; y < wallY + l.tall - 2; y += 3) for (let x = 3; x < w - 3; x += 4) rect(x, y, 2 + ((x + y) % 2), 1, '#3a3640');
+  }
+  if (b.kind === 'cart') rect(1, wallY + l.tall - 4, 5, 5, '#3a2a1a'), rect(w - 6, wallY + l.tall - 4, 5, 5, '#3a2a1a'), rect(2, 1, w - 4, roofH - 2, '#9a8a5a');
+  if (b.kind === 'rack') for (let x = 1; x < w; x += 3) rect(x, 0, 1, roofH + l.tall - 2, '#9aa3ad');
+  if (b.kind === 'tower') {
+    // Battlements, and a lit slit high up.
+    for (let x = 0; x < w; x += 6) rect(x, 0, 3, 3, '#4a3e66');
+    rect(Math.round(w / 2) - 1, wallY + 8, 2, 8, '#14121a');
+  }
+  if (b.kind === 'tavern') {
+    // The hanging sign: a rat on a board.
+    rect(w - 10, wallY + 2, 8, 6, '#5a3d22');
+    rect(w - 8, wallY + 4, 4, 2, '#2a2630');
+    rect(w - 4, wallY + 5, 2, 1, '#2a2630');
+  }
   if (b.kind === 'pew' || b.kind === 'bench') rect(0, wallY + l.tall - 2, 2, 2, '#14121a'), rect(w - 2, wallY + l.tall - 2, 2, 2, '#14121a');
 }
 

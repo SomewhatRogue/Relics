@@ -4,7 +4,7 @@
  * (Javelin, hook, net and lodestone fly; see their own files.)
  */
 import { collide } from '../shared/arena';
-import { BLESSING, HERO, HORN, SHADOWSTEP, WARD } from '../shared/tuning';
+import { BLESSING, HERO, HORN, PERK, SHADOWSTEP, WARD } from '../shared/tuning';
 import { damage, held, isDead, isDummy } from './damage';
 import { afflict, type World } from './elements';
 import type { Enemy, FightEvent, Hero, Intent, Zone } from './types';
@@ -67,7 +67,7 @@ export function hallow(h: Hero, aim: Intent | undefined, now: number, el: Zone['
     (x = h.x + aim.ax * k), (y = h.y + aim.ay * k);
   }
   ev.push({ k: 'hallow', x, y });
-  return { x, y, r: BLESSING.radius, until: now + BLESSING.time, next: now, owner: h.id, el };
+  return { x, y, r: BLESSING.radius * (h.perks.includes('devotion') ? PERK.devotion : 1), until: now + BLESSING.time, next: now, owner: h.id, el };
 }
 
 /** Each blessed circle, every half second: allies in it mend and are blessed; goblins in it burn. Returns the ones still lit. */
@@ -93,7 +93,7 @@ export function stepZones(zones: Zone[], w: World): Zone[] {
 export function ward(h: Hero, heroes: Hero[], aim: Intent | undefined, now: number, ev: FightEvent[]): void {
   const t = allyFor(h, heroes, aim, WARD.range);
   t.wardUntil = now + WARD.time;
-  t.wardHp = WARD.hp;
+  t.wardHp = WARD.hp * (h.perks.includes('devotion') ? PERK.devotion : 1);
   if (t !== h) ev.push({ k: 'beam', x: h.x, y: h.y, x2: t.x, y2: t.y });
   ev.push({ k: 'ward', x: t.x, y: t.y });
 }

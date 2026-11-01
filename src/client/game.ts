@@ -4,13 +4,15 @@
  * to go in; taking a job starts a run (room after room until the job is done or you're driven back);
  * the results come home to the hero and the shared world, and the town changes with them.
  */
-import { doorAt, inArea, type Area, type Block } from '../shared/arena';
+import { doorAt, inArea, npcAt, type Area, type Block } from '../shared/arena';
 import { townInterior } from '../shared/interiors';
 import { board, type Job } from '../shared/jobs';
+import { workDone, WORK_ORDER, type WorkId } from '../shared/works';
+import { contribute, type Contribution } from '../shared/worldsync';
 import { BOUNTY, HERO_SLOTS, PERK, SHOP, gainXp, newProfile, type PerkId, type Profile } from '../shared/progress';
 import { Rng } from '../shared/rng';
-import { CHAPTER_1, decide, rewardMult } from '../shared/story';
-import { SPOT_REACH, townMap, townSpots, type SpotId } from '../shared/town';
+import { CHAPTER_1, QUORUM, rewardMult, type WorldState } from '../shared/story';
+import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
 import { CLASS_KITS, CLASS_RELICS, HERO, rollItem, type Augment, type HeroClass, type Item, type RelicId, type WeaponId } from '../shared/tuning';
 import { ArenaRoom } from '../sim/room';
 import { goal, interiorRoom, isFinal, newRun, runRoom, tally, type Run } from '../sim/run';
@@ -20,7 +22,7 @@ import { load, store, type Save } from './save';
 export type Mode = 'town' | 'yard' | 'run';
 export interface Result { won: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number }
 /** Something you can use where you stand: a spot, a person, or a door. */
-export interface Near { label: string; talk?: SpotId; arg?: number; door?: Block }
+export interface Near { label: string; talk?: SpotId; arg?: number; key?: string; door?: Block }
 
 export const ME = 'me';
 const NAMES: Record<string, string> = { cottage: 'THE COTTAGE', barn: 'THE BARN', home: 'THE HOUSE' };
@@ -39,6 +41,8 @@ export class Game {
   outside: { room: ArenaRoom; door: Block; hero: Hero } | null = null;
   /** A run room's buildings, once entered (their goblins stay dead). */
   private insides = new Map<Block, ArenaRoom>();
+  /** The line to the shared world (set by the page; none in tests). */
+  link: { online: boolean; send(c: Contribution): void } | null = null;
   /** Played before a hero is chosen (the title screen's backdrop, and the tests). */
   private scratch = newProfile();
 
@@ -105,7 +109,11 @@ export class Game {
   enterTown(at?: { x: number; y: number }): void {
     this.mode = 'town';
     this.outside = null;
-    this.place(new ArenaRoom(this.world.day, { map: townMap(this.world) }), at);
+    this.place(this.townRoom(), at);
+  }
+
+  private townRoom(): ArenaRoom {
+    return new ArenaRoom(this.world.day, { map: townMap(this.world), furniture: TOWN_PROPS });
   }
 
   enterYard(): void {
@@ -141,7 +149,7 @@ export class Game {
 
   /** Today's board, with the chapter's story mission on it until it's done. */
   jobs(): Job[] {
-    const list = board(this.world.day);
+    const list = board(this.world.day, workDone(this.world, 'sewers'));
     return this.world.storyDone.includes(CHAPTER_1.mission.id) ? list : [CHAPTER_1.mission, ...list];
   }
 
@@ -151,6 +159,8 @@ export class Game {
     this.insides.clear();
     this.run = newRun(job);
     this.place(runRoom(this.run));
+    // A coin in the well: you set out blessed.
+    if (this.profile.wish) (this.hero.blessedUntil = 20), (this.profile.wish = false), store(this.save);
   }
 
   /** Advance with this frame's intent; returns the events (for effects and sound). */
@@ -158,6 +168,8 @@ export class Game {
     const h = this.hero;
     // Your class and kit are your hero's: changed at the smith and the relic-wright, never mid-fight.
     intent = { ...intent, classSeq: h.seen.cls, weaponSeq: h.seen.weapon, augmentSeq: h.seen.augment };
+    // No fighting in town: no blows, guard, relics or grabs; rolls, dashes and blinks still work.
+    if (this.mode === 'town') intent = { ...intent, attack: false, block: false, attackSeq: h.seen.attack, blockSeq: h.seen.block, relicSeq: h.seen.relic, grabSeq: h.seen.grab };
     this.room.setIntent(ME, intent);
     // The room outside runs on while you're in (its kills still pay); then yours.
     const out = this.outside?.room, outEv = out?.advance(dt) ?? [];
@@ -209,25 +221,28 @@ export class Game {
     p.gold += gold;
     p.runs++;
     const levels = gainXp(p, xp);
-    w.rescued += rescued;
-    w.day++;
-    if (won && run.job.objective === 'story' && !w.storyDone.includes(run.job.id)) w.storyDone.push(run.job.id);
     this.result = { won, job: run.job, gold, xp, rescued, levels };
     this.run = null;
-    store(this.save);
-    this.enterTown({ x: 14.6, y: 15.2 });
+    this.give({
+      stats: { jobs: won ? 1 : 0, saved: rescued, kills: run.kills, dens: run.dens }, rescued, dens: run.dens, days: 1,
+      story: won && run.job.objective === 'story' ? run.job.id : undefined,
+    });
+    this.enterTown({ x: 24.1, y: 14.8 });
   }
 
   /** The nearest thing to use where the hero stands: a person, a door, a spot in the open. */
   near(): Near | null {
     const h = this.hero, map = this.room.map, all: (Near & { x: number; y: number })[] = [];
-    for (const n of map.npcs ?? []) all.push({ x: n.x, y: n.y, label: n.name, talk: n.talk as SpotId, arg: n.arg });
+    for (const n of map.npcs ?? []) {
+      const at = npcAt(n, this.room.time);
+      all.push({ x: at.x, y: at.y, label: n.name, talk: n.talk as SpotId, arg: n.arg });
+    }
     for (const b of map.blocks) {
       if (!b.door || b.ruined || (b.burning ?? -1) >= 0) continue;
-      const d = doorAt(b);
-      all.push({ x: d.x, y: d.y, label: 'ENTER ' + (b.label ?? NAMES[b.door.split(':')[0]] ?? 'THE BUILDING'), door: b });
+      const d = doorAt(b), name = b.label ?? NAMES[b.door.split(':')[0]] ?? 'THE BUILDING';
+      all.push(b.locked ? { x: d.x, y: d.y, label: name + ' (BARRED)', talk: 'locked', key: b.door } : { x: d.x, y: d.y, label: 'ENTER ' + name, door: b });
     }
-    if (this.mode === 'town' && !this.outside) for (const s of townSpots(this.world)) all.push({ x: s.x, y: s.y, label: s.label, talk: s.id });
+    if (this.mode === 'town' && !this.outside) for (const s of townSpots(this.world)) all.push({ x: s.x, y: s.y, label: s.label, talk: s.id, key: s.key });
     let best: Near | null = null, bd = SPOT_REACH;
     for (const n of all) {
       const d = Math.hypot(n.x - h.x, n.y - h.y) * (n.door ? 1.4 : 1);
@@ -267,12 +282,84 @@ export class Game {
     return true;
   }
 
+  /**
+   * What this hero does to the shared world: applied here at once (the council needs a quorum online;
+   * alone and offline, your vote decides), sent to the world server, and on the hero's own line.
+   */
+  give(c: Omit<Contribution, 'hero'>): void {
+    const p = this.profile, before = this.townKey();
+    const full: Contribution = { ...c, hero: { id: p.id, name: p.name, cls: p.cls } };
+    contribute(this.world, full, this.link?.online ? QUORUM : 1);
+    for (const [k, n] of Object.entries(c.stats ?? {})) p.stats[k as keyof typeof p.stats] += n ?? 0;
+    store(this.save);
+    this.link?.send(full);
+    if (this.townKey() !== before) this.rebuildTown();
+  }
+
+  /** The world as the server has it now (another player's gift, a vote, the next day). */
+  syncWorld(w: WorldState): void {
+    const before = this.townKey();
+    this.save.world = { ...this.world, ...w };
+    store(this.save);
+    if (this.townKey() !== before) this.rebuildTown();
+  }
+
+  /** What shapes the town: houses lit, the council's choices, the works finished. */
+  private townKey(): string {
+    const w = this.world;
+    return JSON.stringify([housesFor(w.rescued), w.flags, WORK_ORDER.map((k) => workDone(w, k))]);
+  }
+
+  /** The town rebuilt around you (outside, or the street you'll step back out into). */
+  private rebuildTown(): void {
+    if (this.mode !== 'town') return;
+    if (!this.outside) return this.place(this.townRoom(), { x: this.hero.x, y: this.hero.y });
+    const town = this.townRoom(), h = town.join(ME), door = this.outside.door.door;
+    this.equip(h);
+    town.heroes.splice(town.heroes.indexOf(h), 1);
+    this.outside = { room: town, door: town.map.blocks.find((b) => b.door === door) ?? this.outside.door, hero: h };
+  }
+
+  /** Gold to the Last Lantern. */
   donate(n: number): boolean {
     if (this.profile.gold < n) return false;
     this.profile.gold -= n;
-    this.world.lantern += n;
+    this.give({ lantern: n, stats: { given: n } });
+    return true;
+  }
+
+  /** Gold to a town work. */
+  fund(id: WorkId, n: number): boolean {
+    if (this.profile.gold < n || workDone(this.world, id)) return false;
+    this.profile.gold -= n;
+    this.give({ works: { [id]: n }, stats: { given: n } });
+    return true;
+  }
+
+  /** A coin in the well: the next job starts blessed. */
+  wish(): boolean {
+    const p = this.profile;
+    if (p.gold < SHOP.wish || p.wish) return false;
+    p.gold -= SHOP.wish;
+    p.wish = true;
     store(this.save);
     return true;
+  }
+
+  /**
+   * Knucklebones with Dicer Moll: two dice each, high roll takes the pot. Ties go to Moll, unless
+   * you're a Rogue (it takes one to know one). Returns the dice and whether you won.
+   */
+  dice(bet: number): { you: number[]; moll: number[]; won: boolean } | null {
+    const p = this.profile;
+    if (p.gold < bet || bet <= 0) return null;
+    const r = new Rng(p.id.length * 7919 + p.dice * 104729 + p.gold * 31 + p.runs);
+    p.dice++;
+    const roll = () => [1 + r.int(6), 1 + r.int(6)], you = roll(), moll = roll(), a = you[0] + you[1], b = moll[0] + moll[1];
+    const won = a > b || (a === b && p.cls === 'ROGUE');
+    p.gold += won ? bet : -bet;
+    store(this.save);
+    return { you, moll, won };
   }
 
   pickPerk(id: PerkId): void {
@@ -284,14 +371,8 @@ export class Game {
     store(this.save);
   }
 
-  /** The council decides (`voters` present); the town is rebuilt, and you step out of the hall into it. */
-  decide(choice: string, voters: number): void {
-    decide(this.world, choice, voters);
-    store(this.save);
-    if (!this.outside) return this.place(new ArenaRoom(this.world.day, { map: townMap(this.world) }), { x: this.hero.x, y: this.hero.y });
-    const town = new ArenaRoom(this.world.day, { map: townMap(this.world) }), h = town.join(ME);
-    this.equip(h);
-    town.heroes.splice(town.heroes.indexOf(h), 1);
-    this.outside = { room: town, door: town.map.blocks.find((b) => b.door === 'townhall')!, hero: h };
+  /** Your vote at the council (it decides once enough heroes have voted). */
+  vote(choice: string): void {
+    this.give({ vote: choice });
   }
 }

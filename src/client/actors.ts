@@ -78,7 +78,7 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean, t: 
   if (!up) drawGear();
   if (fresh && h.weapon !== 'sword') smear(c.glow, bx, by - 8, Math.atan2(h.fy, h.fx) - 0.7, Math.atan2(h.fy, h.fx) + 0.7, 7, 9, '#cfe8ff');
   if (h.act === 'charge') {
-    const k = Math.min(1, (h.actT + CHARGE.start) / chargeFull(WEAPONS[h.weapon]));
+    const k = Math.min(1, (h.actT + CHARGE.start) / chargeFull(WEAPONS[h.weapon], h));
     for (let i = 0; i < 4; i++) {
       const t = c.now * 4 + i * 1.57, r = 9 - 3 * k;
       c.glow.fillStyle = k >= 1 ? '#ffffff' : '#ffd860';

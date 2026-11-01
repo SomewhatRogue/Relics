@@ -17,11 +17,11 @@ export const HERO = {
   respawn: 3,
 };
 
-export * from './weapons';
-export * from './magic';
-export * from './loot';
-export * from './props';
-export * from './progress';
+export * from './weapons.js';
+export * from './magic.js';
+export * from './loot.js';
+export * from './props.js';
+export * from './progress.js';
 
 /** Holding attack past `start` begins charging; the heavy is strongest at `full`. */
 export const CHARGE = { start: 0.18, full: 0.9 };

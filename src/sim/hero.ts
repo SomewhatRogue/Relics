@@ -92,7 +92,7 @@ function gear(h: Hero, inp: Intent, ev: FightEvent[]): void {
 }
 
 /** Seconds to a full draw or charge for this kit. */
-export const chargeFull = (w: Weapon) => w.draw ?? CHARGE.full;
+export const chargeFull = (w: Weapon, h?: Hero) => (w.draw ?? CHARGE.full) * (h?.perks.includes('steadyhand') && w.heavy.shot === 'arrow' ? PERK.steadyhand : 1);
 
 export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt: number, ev: FightEvent[], acts: HeroActs): void {
   gear(h, inp, ev);
@@ -155,7 +155,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   }
   const w = WEAPONS[h.weapon];
   const dodge = w.dodge;
-  const wantsRoll = now - h.rollQueuedAt < INPUT_BUFFER && now - h.lastRollAt >= dodge.cooldown * (h.perks.includes('footwork') ? PERK.footwork : 1) && h.stamina >= 1;
+  const wantsRoll = now - h.rollQueuedAt < INPUT_BUFFER && now - h.lastRollAt >= dodge.cooldown * (h.perks.includes('footwork') ? PERK.footwork : 1) * (dodge.kind === 'blink' && h.perks.includes('focus') ? PERK.focus : 1) && h.stamina >= 1;
   if (h.act === 'roll') {
     const k = dodge.distance / dodge.time;
     h.x += h.rollDx * k * dt;
@@ -186,11 +186,11 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     face(h, inp, enemies, false);
     walk(h, inp, w.chargeSpeed, dt);
     collide(h, HERO.radius);
-    const full = chargeFull(w) - CHARGE.start;
+    const full = chargeFull(w, h) - CHARGE.start;
     if (h.actT >= full && h.actT - dt < full) ev.push({ k: 'charged', x: h.x, y: h.y });
     if (!inp.attack) {
       // A draw (a shot on the hold) wants a clean release: on the white flash is perfect; held too long, it shakes and weakens.
-      const held = h.actT + CHARGE.start, full = chargeFull(w), drawn = !!w.heavy.shot;
+      const held = h.actT + CHARGE.start, full = chargeFull(w, h), drawn = !!w.heavy.shot;
       h.power = Math.min(1, held / full);
       h.perfect = drawn && held >= full && held <= full + RELEASE.perfect;
       if (drawn && held > full + RELEASE.overdraw) h.power = RELEASE.overdrawn;

@@ -7,7 +7,7 @@ import type { ArenaRoom } from '../sim/room';
 import type { FightEvent, Hero } from '../sim/types';
 import type { Game } from './game';
 import type { Music } from './music';
-import type { Area } from './scores';
+import { SCORES, type Area } from './scores';
 import { sfx } from './sfx';
 import { butcher, goblin } from './voices';
 import { blockSound, chargedSound, hitSound, shotSound, swingSound, woodSounds } from './weaponsfx';
@@ -20,7 +20,12 @@ export class Soundscape {
   private crackleAt = 0;
   private wasInside: unknown = null;
 
-  constructor(private music: Music) {}
+  /** A tune asked of the bard (played while you're out in the square). */
+  private tune: { area: Area; name: string } | null = null;
+
+  constructor(private music: Music) {
+    addEventListener('relic:tune', (e) => (this.tune = (e as CustomEvent).detail));
+  }
 
   /** The hero nearest a spot (who swung, shot or blocked). */
   private heroAt(room: ArenaRoom, x: number, y: number): Hero | undefined {
@@ -99,8 +104,10 @@ export class Soundscape {
 
   private area(g: Game): [Area, number] {
     const w = g.world;
+    if (g.mode !== 'town') this.tune = null;
     if (g.mode === 'yard') return ['yard', w.day];
     if (g.mode === 'town') {
+      if (!g.outside && this.tune) return [this.tune.area, SCORES[this.tune.area].findIndex((sc) => sc.name === this.tune!.name)];
       if (!g.outside) return ['town', w.day];
       return [g.outside.door.door === 'church' ? 'church' : 'inside', w.day + (g.outside.door.door?.length ?? 0)];
     }

@@ -4,10 +4,12 @@
  * a time (the room that's running sets it), so collision never needs it passed around.
  */
 export type Circle = { x: number; y: number; r: number };
-export type RoundKind = 'pillar' | 'tree' | 'pine' | 'rock' | 'hay' | 'well' | 'lantern' | 'support' | 'stump';
+export type RoundKind = 'pillar' | 'tree' | 'pine' | 'rock' | 'hay' | 'well' | 'lantern' | 'support' | 'stump' | 'target' | 'stone' | 'post' | 'grate' | 'statue' | 'bush';
 export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall' | 'tent' | 'rockwall' | 'fence' | 'granary' | 'wall' | 'den'
   // Furniture, inside buildings.
-  | 'counter' | 'bed' | 'shelf' | 'anvil' | 'altar' | 'pew' | 'bench' | 'hearth' | 'sacks';
+  | 'counter' | 'bed' | 'shelf' | 'anvil' | 'altar' | 'pew' | 'bench' | 'hearth' | 'sacks'
+  // Wickhold's other buildings and things in the street.
+  | 'tower' | 'tavern' | 'monument' | 'rubble' | 'cart' | 'rack';
 export interface Round extends Circle { kind: RoundKind }
 export interface Block {
   x: number; y: number; w: number; h: number; kind: BlockKind; label?: string;
@@ -15,6 +17,8 @@ export interface Block {
   door?: string;
   /** Wooden buildings in a run can be smashed and burned: health, when it caught fire (-1 not), burned down. */
   hp?: number; maxHp?: number; burning?: number; ruined?: boolean;
+  /** A door that won't open yet (the story or the town works open it). */
+  locked?: boolean;
 }
 /**
  * Raised ground: a ledge, a rock shelf, a wall walk. Up on it you stand on level 1. From the ground
@@ -25,7 +29,32 @@ export interface Ledge { x: number; y: number; w: number; h: number; ramps: Area
 /** A way out of a run room, when there's more than one: the road it leads to. */
 export interface Road { area: Area; road: 'high' | 'low'; label: string }
 /** Someone to talk to: `talk` says what they offer (a town spot's panel), `look` how they're drawn. */
-export interface Npc { x: number; y: number; name: string; talk: string; look: string; arg?: number }
+export interface Npc {
+  x: number; y: number; name: string; talk: string; look: string; arg?: number;
+  /** A round they walk (a guard's patrol), at `speed` tiles a second; they don't block anyone. */
+  path?: [number, number][];
+  speed?: number;
+}
+
+/** Where someone is at time `t` (walking their round, or standing where they stand), and which way they face. */
+export function npcAt(n: Npc, t: number): { x: number; y: number; fx: number; fy: number } {
+  const p = n.path;
+  if (!p || p.length < 2) return { x: n.x, y: n.y, fx: 0, fy: 1 };
+  const seg = p.map((a, i) => {
+    const b = p[(i + 1) % p.length];
+    return { a, b, len: Math.hypot(b[0] - a[0], b[1] - a[1]) };
+  });
+  const total = seg.reduce((s, q) => s + q.len, 0);
+  let d = (t * (n.speed ?? 1.1)) % total;
+  for (const q of seg) {
+    if (d <= q.len) {
+      const k = d / (q.len || 1), fx = (q.b[0] - q.a[0]) / (q.len || 1), fy = (q.b[1] - q.a[1]) / (q.len || 1);
+      return { x: q.a[0] + (q.b[0] - q.a[0]) * k, y: q.a[1] + (q.b[1] - q.a[1]) * k, fx, fy };
+    }
+    d -= q.len;
+  }
+  return { x: p[0][0], y: p[0][1], fx: 0, fy: 1 };
+}
 export interface Area { x: number; y: number; w: number; h: number }
 
 /** How a map looks: floor, walls, light. */
@@ -125,7 +154,7 @@ export function collide(p: { x: number; y: number }, r: number): void {
   p.y = Math.max(r * 0.6, Math.min(m.h - r, p.y));
   for (const c of m.rounds) push(p, r, c);
   for (const c of m.braziers) push(p, r, c);
-  for (const n of m.npcs ?? []) push(p, r, { x: n.x, y: n.y, r: 0.32 });
+  for (const n of m.npcs ?? []) if (!n.path) push(p, r, { x: n.x, y: n.y, r: 0.32 });
   for (const b of m.blocks) {
     if (!b.ruined) box(p, r, b);
   }

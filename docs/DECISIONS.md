@@ -2,6 +2,59 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-01: automated tests, the shared world and the Roll of the Brave, a living Wickhold (Claude Opus 5.5)
+
+Kyle: automated tests running on this; small groups or individuals impact the world and see a
+leaderboard of quests done and people saved; a story individuals shape through action and voting
+that changes the world, the quests and the town around them; a town that feels alive (guards on
+patrol, more areas, some locked for now, more objects); a trainer for each class somewhere you have
+to find; gambling with the rogues at a tavern with a sewer nearby; more to do in the central area;
+no fighting in town but movement abilities still work.
+
+- **CI** (`.github/workflows/ci.yml`): every push and pull request runs the type check, every test
+  (the relay against a real `redis-server`), the build, and `npm run smoke`: real Chromium on a
+  phone-sized and a laptop-sized page makes a hero on the start screen, goes into the forge, takes a
+  job and wins its first room, failing on any page error.
+- **The shared world** (`api/world.ts`, `api/_world.ts`, `shared/worldsync.ts`, `client/worldlink.ts`).
+  Everything a hero does to the world is one contribution (a finished run, a gift, a vote), applied
+  in the browser at once and posted to `/api/world`, whose answer is the world you then see. One
+  world per code: WICKHOLD is everyone's; a group can play in a world of its own by typing a code at
+  the Roll of the Brave. Redis holds each world as one JSON value changed under WATCH (a clash
+  retries) plus a sorted set per stat: about a dozen commands per finished run, nothing per tick.
+  The server lets through only what a real run or gift could send (capped, never negative, names
+  cleaned). Offline (no server yet, or the claude.ai page, which can't reach it) the world is the
+  browser's and the Roll shows your own heroes. Shared code now imports with `.js` so the server can
+  run it under Node as is.
+- **The Roll of the Brave** (a stone in the square): jobs done, people saved, gold given, goblins
+  killed, dens burned, the top ten each. Heroes carry their own counts (`Profile.stats`) and an id.
+- **The council counts heroes.** Online it decides when four heroes have voted, by majority (a tie
+  goes to the choice voted first); you can change your vote until it decides. Alone and offline your
+  vote decides.
+- **Town works** (`shared/works.ts`), filled by everyone: Man the Walls (400 gold: two more guards on
+  patrol), Clear the Old Quarter (600 gold: the rubble in the east lane goes, the Old Quarter opens
+  with its barred chapel and Old Merren), Drive Them from Below (six dens burned on jobs, all told:
+  the sewer grate opens and sewer jobs go on the board).
+- **Wickhold, bigger and alive** (62 by 40): Lantern Square (the job board, the works board, the Roll,
+  the well, Rowan the bard, benches, a cart, lamp posts), the church and its graves, the town hall,
+  the forge, the mage's tower, the barred keep, the barracks, the hunters' lodge and its archery butts,
+  the infirmary, the Drowned Rat, Rescue Row, and the Old Quarter past the rubble. Guards walk rounds
+  (`Npc.path`, a pure function of time, so every player sees them in the same place); barrels and
+  crates in the streets. Barred doors (the keep, the chapel) and the rubble say what would open them.
+- **A trainer per class**, each somewhere of their own: Master Cole in the barracks (Warrior),
+  Huntress Maeve at the hunters' lodge (Ranger), Whisper at the back of the Drowned Rat (Rogue),
+  Magister Vell in the tower (Mage), Mother Isolde in the church (Healer). Only yours trains you; the
+  others tell you where yours is. Each teaches one perk of its class besides the shared ones: Ironhide
+  (blocking costs a quarter less), Steady Hand (bows draw a sixth faster), Shadowed (backstabs half as
+  hard again), Focus (the blink back a quarter sooner), Devotion (blessed ground wider, the ward
+  stronger).
+- **The Drowned Rat**: Barkeep Holt (rumours), Dicer Moll (knucklebones: two dice each, high roll takes
+  the pot, ties to the house unless you're a Rogue; seeded per hero), Whisper, a drunk, a card sharp.
+  The sewer grate is out the back.
+- **In the square**: the works board, the Roll, the well (5 gold: your next job starts blessed), the
+  bard (ask for any of the thirty pieces; it plays while you're in the square).
+- **No fighting in town**: blows, guard, relics and grabs are held still; rolls, dashes and blinks work
+  (the ROLL button shows in town on phones).
+
 ## 2026-11-01: music for every place, kits that sound like themselves, goblin voices, a Healer good alone (Claude Opus 5.5)
 
 Kyle: music specific to towns and each kind of area and terrain, a few versions of each; typical

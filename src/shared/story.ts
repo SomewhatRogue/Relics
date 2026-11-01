@@ -4,8 +4,8 @@
  * votes (a quorum of 4); the choice changes the town and the world for good, and the next chapter is
  * written at the weekly review from what the group did.
  */
-import type { Job } from './jobs';
-import { PLACES } from './jobs';
+import type { Job } from './jobs.js';
+import { PLACES } from './jobs.js';
 
 export interface Vote { decision: string; choice: string; voters: number; day: number }
 
@@ -21,9 +21,15 @@ export interface WorldState {
   votes: Vote[];
   /** Gold given to the Last Lantern at the church. */
   lantern: number;
+  /** Gold given to each town work (see works.ts). */
+  works: Record<string, number>;
+  /** Goblin dens burned out, all told. */
+  dens: number;
+  /** Council votes in progress: decision id -> hero id -> choice. */
+  ballots: Record<string, Record<string, string>>;
 }
 
-export const newWorld = (): WorldState => ({ chapter: 1, day: 1, rescued: 0, storyDone: [], flags: {}, votes: [], lantern: 0 });
+export const newWorld = (): WorldState => ({ chapter: 1, day: 1, rescued: 0, storyDone: [], flags: {}, votes: [], lantern: 0, works: {}, dens: 0, ballots: {} });
 
 export const QUORUM = 4;
 
@@ -61,6 +67,23 @@ export const councilOpen = (w: WorldState) => {
   const g = chapterGoals(w);
   return g.rescued >= g.rescuedGoal && g.story && !w.flags[CHAPTER_1.decision.id];
 };
+
+/**
+ * A hero's vote at the council. Once `quorum` heroes have voted the council decides by majority (a
+ * tie goes to the choice voted first). Returns the choice decided, if this vote decided it.
+ */
+export function vote(w: WorldState, hero: string, choice: string, quorum = QUORUM): string | null {
+  const d = CHAPTER_1.decision;
+  if (!councilOpen(w) || !d.choices.some((c) => c.id === choice)) return null;
+  const b = (w.ballots[d.id] ??= {});
+  b[hero] = choice;
+  const voters = Object.keys(b).length;
+  if (voters < quorum) return null;
+  const count = (c: string) => Object.values(b).filter((x) => x === c).length, order = Object.values(b);
+  const win = [...d.choices].map((c) => c.id).sort((x, y) => count(y) - count(x) || order.indexOf(x) - order.indexOf(y))[0];
+  decide(w, win, voters);
+  return win;
+}
 
 /** Record the council's choice and change the world for it. */
 export function decide(w: WorldState, choice: string, voters: number): void {

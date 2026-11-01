@@ -2,7 +2,7 @@
  * Things in the room that break and fly: barrels, an oil barrel, crates, a table, and the pieces
  * they break into. Anything can smash them; only a strong class can lift and throw them.
  */
-import type { HeroClass } from './weapons';
+import type { HeroClass } from './weapons.js';
 
 export type PropKind = 'barrel' | 'oil' | 'crate' | 'table' | 'plank' | 'stave' | 'cage' | 'larder';
 

@@ -3,8 +3,8 @@
  * execute something well (a parry, a dodge through a blow, a perfect release, a backstab, a throw
  * into a wall, a fully charged hit). No stat sheets: at most two traits, one weapon per kit.
  */
-import type { Rng } from './rng';
-import { CLASS_KITS, WEAPONS, type HeroClass, type WeaponId } from './weapons';
+import type { Rng } from './rng.js';
+import { CLASS_KITS, WEAPONS, type HeroClass, type WeaponId } from './weapons.js';
 
 export type TraitId = 'riposte' | 'tempo' | 'bulwark' | 'deadeye' | 'crushing' | 'brutal' | 'reaper' | 'ember' | 'rime' | 'storm';
 

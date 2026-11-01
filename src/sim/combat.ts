@@ -28,7 +28,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   // From behind: the hero stands where the enemy's facing points away (dummies have no back).
   const tx = h.x - e.x, ty = h.y - e.y, tl = Math.hypot(tx, ty) || 1;
   const rear = !isDummy(e) && (e.fx * tx + e.fy * ty) / tl < GUARD.rearCos;
-  const rearMult = rear ? (WEAPONS[h.weapon].backstab ?? GUARD.rearMult) : 1;
+  const rearMult = rear ? (WEAPONS[h.weapon].backstab ?? GUARD.rearMult) + (h.perks.includes('shadowed') ? PERK.shadowed : 0) : 1;
   const ice = frozen(e, now), blessed = h.blessedUntil > now ? BLESSING.dmgMult : 1;
   const heldFast = e.act === 'stunned' || e.act === 'pinned' || ice || snared(e, now);
   const counter = GUARD.counterMult * (has(h, 'riposte') ? TRAIT.riposte : 1), held = GUARD.stunnedMult * (has(h, 'brutal') ? TRAIT.brutal : 1);
@@ -124,7 +124,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   if (canGuard && h.blocking) {
     const chip = Math.round(a.dmg * w.chip * taken);
     h.hp -= chip;
-    h.stamina -= a.dmg * GUARD.staminaPerDmg * w.guardCost * (h.rallyUntil > now ? HORN.guard : 1);
+    h.stamina -= a.dmg * GUARD.staminaPerDmg * w.guardCost * (h.rallyUntil > now ? HORN.guard : 1) * (h.perks.includes('ironhide') ? PERK.ironhide : 1);
     h.staminaAt = now;
     h.hitstop = Math.max(h.hitstop, HITSTOP.light);
     shove(h, sx / sl, sy / sl, a.knock * 0.4, HERO.weight);

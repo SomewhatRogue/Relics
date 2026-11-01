@@ -44,3 +44,11 @@ for Relic, and the rules our code is built to now, before online play exists.
 Copy Come Bye's client side (`src/client/relay.ts`, `online.ts`, `local.ts`), `src/server/resume.ts`
 as the model for a `RunSave`, and its browser scenarios (`npm run test:online`) and stress run.
 Every fix gets a test that fails on the old code.
+
+## The shared world (built 2026-11-01)
+
+`/api/world` (plain HTTP, `api/world.ts`, store in `api/_world.ts`). GET `?g=CODE`: the world and its
+Roll of the Brave. POST `{g, c}`: a contribution (`shared/worldsync.ts`), cleaned and capped on the
+server. Redis per world: `rl:world:CODE` (the world as JSON, changed under WATCH), `rl:b:CODE:STAT`
+(sorted sets), `rl:n:CODE` (hero names). About a dozen commands per finished run and a few per look
+(the client looks at most every 30 s in town). No Redis: worlds live in the function's memory (dev).

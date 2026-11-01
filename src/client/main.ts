@@ -6,6 +6,8 @@ import { Game, ME } from './game';
 import { Panel } from './panels';
 import { openSpot, showResult } from './townui';
 import { Title } from './title';
+import { WorldLink } from './worldlink';
+import { setLink } from './squareui';
 import { grabbable } from '../sim/grab';
 import { liftable } from '../sim/props';
 import { relicLabel } from '../sim/hero';
@@ -30,6 +32,10 @@ const input = new Input(
 const $ = (s: string) => document.querySelector(s) as HTMLElement;
 const card = new LootCard((id) => input.take(id));
 const music = new Music();
+const link = new WorldLink((w) => game.syncWorld(w));
+game.link = link;
+setLink(link);
+void link.refresh(true);
 const sounds = new Soundscape(music);
 const title = new Title(game, () => undefined);
 // Test hook: ?hero=MAGE skips the start screen with a hero of that class.
@@ -41,7 +47,7 @@ const use = () => {
   const n = game.near();
   if (!n || panel.open || title.open) return;
   if (n.door) game.enter(n.door);
-  else if (n.talk) openSpot(n.talk, game, panel, n.arg);
+  else if (n.talk) openSpot(n.talk, game, panel, n.arg, n.key);
 };
 addEventListener('keydown', (e) => {
   if ((e.target as HTMLElement).closest('input')) return;
@@ -118,7 +124,7 @@ function hud(now: number): void {
     $('#banner').innerHTML = game.outside
       ? `<b>${room.map.name}</b> Walk out at the bottom<span>${pr.gold} GOLD  LEVEL ${pr.level}</span>`
       : game.mode === 'town'
-      ? `<b>WICKHOLD</b> DAY ${game.world.day}<span>${pr.gold} GOLD  LEVEL ${pr.level}${pr.picks ? '  (SEE THE TRAINER)' : ''}  ${game.world.rescued} HOME</span>`
+      ? `<b>WICKHOLD</b> DAY ${game.world.day}<span>${pr.gold} GOLD  LEVEL ${pr.level}${pr.picks ? '  (FIND YOUR TRAINER)' : ''}  ${game.world.rescued} HOME${link.online ? '  WORLD ' + link.group.toUpperCase() : ''}</span>`
       : `<b>TRAINING YARD</b> Walk out at the bottom to go back to town`;
   }
   const spot = game.near(), busy = panel.open || title.open;
@@ -149,6 +155,8 @@ function frame(t: number): void {
     if (ev.k === 'parry') parries++;
   }
   sounds.frame(game, t / 1000);
+  // Back in the open in town: see what the world has been up to (at most every 30 s).
+  if (game.mode === 'town' && !game.outside) void link.refresh();
   if (game.result && !panel.open) showResult(game, panel);
   fx.update(dt);
   scene.render(game.room, ME, fx, t / 1000, dt);
@@ -212,3 +220,5 @@ Object.defineProperty(w, '__room', { get: () => game.room });
 w.__game = game;
 w.__music = music;
 w.__title = title;
+w.__panel = panel;
+w.__openSpot = (id: string, arg = 0, key = '') => openSpot(id as never, game, panel, arg, key);

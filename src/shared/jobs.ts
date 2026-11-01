@@ -2,7 +2,7 @@
  * Jobs: a place plus an objective plus a twist, posted on Wickhold's job board. The board changes
  * each day (one finished run is a day for now). A chapter's story mission sits on it until it's done.
  */
-import { Rng } from './rng';
+import { Rng } from './rng.js';
 
 export type PlaceKind = 'village' | 'farm' | 'field' | 'forest' | 'mine';
 export interface Place { name: string; kind: PlaceKind; region: string; ruin: number }
@@ -45,11 +45,15 @@ function describe(o: Objective, p: Place, boss: string): { title: string; text: 
   return { title: `Burn the larder at ${p.name}`, text: `The goblins at ${p.name} keep a larder of stolen stores and worse. Smash every rack.` };
 }
 
-/** Today's three jobs. */
-export function board(day: number): Job[] {
+/** Under Wickhold itself: on the board once the town works have driven the goblins below to bay. */
+export const SEWERS: Place = { name: 'The Wickhold Sewers', kind: 'mine', region: 'Wickhold', ruin: 2 };
+
+/** Today's three jobs (one of them in the sewers, once they're open). */
+export function board(day: number, sewers = false): Job[] {
   const rng = new Rng(day * 977 + 31);
   const objectives: Objective[] = rng.shuffle(['rescue', 'hunt', 'larder', 'burn', 'rescue']);
   const places = rng.shuffle([...PLACES]);
+  if (sewers) places.splice(day % 3, 0, SEWERS);
   return [0, 1, 2].map((i) => {
     const place = places[i], objective = objectives[i], boss = rng.pick(BOSSES);
     const twist: Twist = rng.next() < 0.3 ? 'night' : 'none';
