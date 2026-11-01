@@ -2,6 +2,36 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-01: heights and forks (Claude Opus 5.5)
+
+Kyle: multiple heights and paths within missions that make heroes choose how to move together or
+attack threats.
+
+- **Two levels to start: the ground and up on a ledge** (`Ledge` in `shared/arena.ts`). A ledge is a
+  rock shelf (mines, forests) or a timber wall walk (villages, farms) along the back of a room. From
+  the ground its edge is a wall; from on top you can step off it (a drop: you land, no harm). A ramp
+  overlaps its edge: inside the ramp you take the level of where you stand, so stairs are just a place
+  the wall isn't. All of it is in `collide`, so heroes, goblins and the tests share one rule. Bodies
+  carry `z` (0 or 1); a prop has none and stays on the ground.
+- **What height changes:** a blade only reaches your own level (up top you're out of reach of the
+  ground, and they of you); grabs too. Arrows, bolts, spells, javelins, hooks and nets reach up and
+  down. Shots from up on a ledge hit 1.25x (`HEIGHT.shot`). A goblin knocked off a ledge fast (thrown,
+  hooked, blasted) takes the fall: 12 damage and a stun; one that steps off just lands.
+- **Archers** (`ARCHER`): a scrapper with a bow. It keeps its distance on the ground and holds its
+  perch up high, draws on you for a full second with a thin sightline telegraph, and looses: block it,
+  parry it (the archer is stunned where it stands), or roll. Goblins with blades go round by the ramp
+  to reach you up high; archers don't come down.
+- **Forks:** the middle room of a three-room job has two ways out instead of one: THE HIGH ROAD (the
+  next room has a ledge with three archers on it and two fewer goblins below) or THE LOW ROAD (one
+  more goblin below and someone caged to free, even in the last room). The run remembers the road
+  (`Run.roads`), so the same job can play two ways.
+- **The way on takes the whole party.** Every exit, and each road at a fork, opens only when every
+  player in the room stands in it (`Game.together`); solo that's you. Online this is how the party
+  chooses a road together: walk into it as a group. Splitting at a fork (the leader running both
+  rooms) is possible with the multi-room host, and saved for later.
+- Not yet: more than two levels, ledges out in the middle of a room (they draw against the back wall
+  for now), rooftops you climb by ladder, a lever up top that opens a gate below. Recorded in the atlas.
+
 ## 2026-11-01: heroes for life, every building enterable, buildings that burn, Come Bye's online lessons (Claude Opus 5.5)
 
 Kyle: pick your class at the start when you first load in, with its own level, and no changing it in

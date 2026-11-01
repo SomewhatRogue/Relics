@@ -20,7 +20,8 @@ export const inArc = (ox: number, oy: number, fx: number, fy: number, x: number,
 /** The hero's swing during its active frames: each enemy is hit at most once per swing. Returns the damage (0: missed). */
 export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEvent[]): number {
   if (e.act === 'dead' || h.hitIds.includes(e.id)) return 0;
-  if (!inArc(h.x, h.y, h.fx, h.fy, e.x, e.y, s.range, s.arc, e.radius)) return 0;
+  // A blade reaches only your own level (up on a ledge, you're out of reach of the ground).
+  if ((h.z ?? 0) !== (e.z ?? 0) || !inArc(h.x, h.y, h.fx, h.fy, e.x, e.y, s.range, s.arc, e.radius)) return 0;
   h.hitIds.push(e.id);
   e.lastBy = h.id;
   const heavy = h.counter || h.heavy || s.knock >= 7;

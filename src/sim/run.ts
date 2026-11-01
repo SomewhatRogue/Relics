@@ -6,7 +6,7 @@
 import { BOUNTY } from '../shared/progress';
 import type { Job } from '../shared/jobs';
 import { runInterior } from '../shared/interiors';
-import { planRoom } from '../shared/terrain';
+import { planRoom, type RoadId } from '../shared/terrain';
 import { isDead } from './damage';
 import { ArenaRoom } from './room';
 import type { FightEvent } from './types';
@@ -20,14 +20,16 @@ export interface Run {
   rescued: number;
   downs: number;
   failed: boolean;
+  /** The road the party took into each room after a fork (by room index). */
+  roads: Record<number, RoadId>;
 }
 
 export const MAX_DOWNS = 3;
-export const newRun = (job: Job): Run => ({ job, index: 0, gold: 0, xp: 0, rescued: 0, downs: 0, failed: false });
+export const newRun = (job: Job): Run => ({ job, index: 0, gold: 0, xp: 0, rescued: 0, downs: 0, failed: false, roads: {} });
 
 /** Build the room for the run's current index. */
 export function runRoom(run: Run): ArenaRoom {
-  const plan = planRoom(run.job, run.index);
+  const plan = planRoom(run.job, run.index, run.roads[run.index]);
   return new ArenaRoom(run.job.seed + run.index, { map: plan.map, foes: plan.foes, furniture: plan.props });
 }
 
@@ -62,7 +64,10 @@ export function tally(run: Run, room: ArenaRoom, events: FightEvent[], me: strin
 /** The room's goal, in words, and whether it's met. */
 export function goal(run: Run, room: ArenaRoom): { text: string; done: boolean } {
   const goblins = room.enemies.filter((e) => !isDead(e)).length;
-  if (!isFinal(run)) return { text: goblins ? `Clear the goblins (${goblins} left)` : 'The way ahead is open', done: goblins === 0 };
+  if (!isFinal(run)) {
+    const fork = !!room.map.roads;
+    return { text: goblins ? `Clear the goblins (${goblins} left)` : fork ? 'Pick a road, together. HIGH: archers up top, fewer below. LOW: more goblins, someone caged' : 'The way ahead is open', done: goblins === 0 };
+  }
   const o = run.job.objective;
   const cages = room.props.filter((p) => p.kind === 'cage' && !p.broken).length;
   if (o === 'rescue') return { text: cages ? `Break the cages (${cages} left)` : 'Everyone is free. Get them out', done: cages === 0 };

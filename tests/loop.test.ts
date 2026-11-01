@@ -88,7 +88,9 @@ describe('the loop', () => {
       for (const p of g.room.props) if (p.kind === 'cage') damageProp(p, 999, { heroes: g.room.heroes, enemies: g.room.enemies, javelins: [], props: g.room.props, now: g.room.time, ev: g.room.events });
       g.step(0.05, NO_INTENT);
       expect(g.room.exitOpen).toBe(true);
-      Object.assign(g.hero, { x: 9, y: 0.5 });
+      // At the fork, take the high road.
+      const way = g.room.map.roads?.[0].area ?? g.room.map.exit!;
+      Object.assign(g.hero, { x: way.x + way.w / 2, y: way.y + 0.5 });
       g.step(0.05, NO_INTENT);
     }
     expect(g.mode).toBe('town');

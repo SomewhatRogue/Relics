@@ -15,7 +15,7 @@ export function newHero(id: string, x: number, y: number): Hero {
     parryOpenAt: -9, lastBlockPress: -9, rollDx: 0, rollDy: 1, lastRollAt: -9, counterUntil: -9,
     attackQueuedAt: -9, rollQueuedAt: -9, relic: 'javelin', relics: [...CLASS_RELICS.WARRIOR], relicQueuedAt: -9,
     relicReady: { javelin: 0, hook: 0, horn: 0, net: 0, shadow: 0, lodestone: 0, blessing: 0 },
-    augments: { javelin: '', hook: '', horn: '', net: '', shadow: '', lodestone: '', blessing: '' }, blessedUntil: -9, rallyUntil: -9, arms: {}, perfect: false, tempoUntil: -9, carrying: 0, lifting: 0, grabQueuedAt: -9, hitstop: 0, lenience: 0,
+    augments: { javelin: '', hook: '', horn: '', net: '', shadow: '', lodestone: '', blessing: '' }, blessedUntil: -9, rallyUntil: -9, arms: {}, perfect: false, tempoUntil: -9, carrying: 0, lifting: 0, grabQueuedAt: -9, z: 0, hitstop: 0, lenience: 0,
     seen: { attack: 0, block: 0, roll: 0, weapon: 0, relic: 0, relicSwap: 0, relicPick: 0, augment: 0, cls: 0, take: 0, grab: 0 },
   };
 }

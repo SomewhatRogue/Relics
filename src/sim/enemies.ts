@@ -1,6 +1,6 @@
 /** Enemies' turns: the goblin butcher, goblin scrappers, and the two training dummies. */
-import { collide } from '../shared/arena';
-import { BUTCHER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, type EnemyAttackSpec, type EnemySpec } from '../shared/tuning';
+import { collide, currentMap, inArea } from '../shared/arena';
+import { ARCHER, BUTCHER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, type EnemyAttackSpec, type EnemySpec } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { slide } from './bodies';
 import { hitHero } from './combat';
@@ -17,7 +17,7 @@ export function newEnemy(id: number, kind: Enemy['kind'], x: number, y: number):
   return {
     id, kind, x, y, kvx: 0, kvy: 0, fx: 0, fy: 1, hp, maxHp: hp, radius: s ? s.radius : 0.4, weight: s ? s.weight : Infinity,
     act: s ? 'chase' : 'idle', actT: 0, actDur: 0, attack: null, cooldown: 1 + id * 0.4, hitstop: 0, hitAt: -9, moving: false, home: { x, y }, corpse: '',
-    burnUntil: 0, burnNext: 0, chillUntil: 0, frozenUntil: 0, snareUntil: 0, lastBy: '', death: '', respawns: true,
+    burnUntil: 0, burnNext: 0, chillUntil: 0, frozenUntil: 0, snareUntil: 0, lastBy: '', death: '', respawns: true, z: 0,
   };
 }
 
@@ -53,7 +53,8 @@ function runAttack(e: Enemy, heroes: Hero[], now: number, dt: number, ev: FightE
   if (!a.done && a.t >= a.windup) {
     a.done = true;
     ev.push({ k: 'impact', x: a.kind === 'slam' ? a.cx : e.x, y: a.kind === 'slam' ? a.cy : e.y, kind: a.kind });
-    for (const h of heroes) hitHero(e, a, h, now, ev);
+    // Blows land on your own level; arrows reach up and down.
+    for (const h of heroes) if (a.kind === 'shot' || (h.z ?? 0) === (e.z ?? 0)) hitHero(e, a, h, now, ev);
     if (e.attack === null) return true;
   }
   return a.t >= a.windup + a.active + a.recover;
@@ -112,8 +113,11 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     return;
   }
   if (!spec) return;
-  // Turn toward the target at this enemy's own pace; it only attacks once it faces you.
-  const ux = (t.x - e.x) / d, uy = (t.y - e.y) / d;
+  // On another level: a goblin with a blade goes round by the nearest ramp; an archer just shoots.
+  const level = (t.z ?? 0) === (e.z ?? 0), via = level || e.bow ? null : rampFor(e);
+  const gx = via ? via.x : t.x, gy = via ? via.y : t.y, gd = Math.hypot(gx - e.x, gy - e.y) || 1;
+  // Turn toward where it's going at this enemy's own pace; it only attacks once it faces you.
+  const ux = (gx - e.x) / gd, uy = (gy - e.y) / gd;
   const want = Math.atan2(uy, ux), have = Math.atan2(e.fy, e.fx);
   let diff = want - have;
   diff = Math.atan2(Math.sin(diff), Math.cos(diff));
@@ -122,23 +126,44 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   e.fx = Math.cos(na);
   e.fy = Math.sin(na);
   const facing = e.fx * ux + e.fy * uy;
-  if (d <= spec.reach && e.cooldown <= 0 && facing > 0.75) {
+  if (e.bow) {
+    if (d <= ARCHER.reach && e.cooldown <= 0 && facing > 0.9) return begin(e, 'shot', ARCHER.shot, t, ev);
+    // Keeps its distance on the ground; holds its perch up high.
+    const back = !e.z && d < ARCHER.keep, on = !e.z && d > ARCHER.reach;
+    if (back || on) walk(e, back ? -ux : ux, back ? -uy : uy, spec.speed * slow * (back ? 0.6 : Math.max(0.2, facing)), dt);
+    return;
+  }
+  if (level && d <= spec.reach && e.cooldown <= 0 && facing > 0.75) {
     if (e.kind === 'butcher') {
       const slam = rng.next() < BUTCHER.slamChance;
       begin(e, slam ? 'slam' : 'cleave', slam ? BUTCHER.slam : BUTCHER.cleave, t, ev);
     } else begin(e, 'stab', SCRAPPER.stab, t, ev);
     return;
   }
-  if (d > spec.reach * 0.8) {
+  if (via || d > spec.reach * 0.8) {
     // Scrappers sidle a little rather than queueing straight in.
-    const side = e.kind === 'scrapper' ? Math.sin(now * 1.3 + e.id * 2) * 0.5 : 0;
-    const mx = ux - uy * side, my = uy + ux * side, ml = Math.hypot(mx, my);
+    const side = e.kind === 'scrapper' && !via ? Math.sin(now * 1.3 + e.id * 2) * 0.5 : 0;
     // Walks where it faces: something turning round is slow to come after you.
-    const k = spec.speed * slow * Math.max(0.2, facing);
-    e.x += (mx / ml) * k * dt;
-    e.y += (my / ml) * k * dt;
-    e.moving = true;
-    collide(e, e.radius);
+    walk(e, ux - uy * side, uy + ux * side, spec.speed * slow * Math.max(0.2, facing), dt);
   }
+}
+
+function walk(e: Enemy, mx: number, my: number, k: number, dt: number): void {
+  const ml = Math.hypot(mx, my) || 1;
+  e.x += (mx / ml) * k * dt;
+  e.y += (my / ml) * k * dt;
+  e.moving = true;
+  collide(e, e.radius);
+}
+
+/** Where to head to change level: the middle of the nearest ramp (or straight on, once on it). */
+function rampFor(e: Enemy): { x: number; y: number } | null {
+  let best: { x: number; y: number } | null = null, bd = Infinity;
+  for (const l of currentMap().ledges ?? []) for (const r of l.ramps) {
+    if (inArea(r, e.x, e.y)) return null;
+    const c = { x: r.x + r.w / 2, y: r.y + r.h / 2 }, d = Math.hypot(c.x - e.x, c.y - e.y);
+    if (d < bd) (bd = d), (best = c);
+  }
+  return best;
 }
 

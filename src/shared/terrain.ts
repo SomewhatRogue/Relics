@@ -4,12 +4,14 @@
  * and pit props in a mine). Ruin and the room's place in the run set how many goblins. The last room
  * holds the objective: cages, a named butcher, or the larder racks. Same seed, same room.
  */
-import type { Block, BlockKind, GameMap, Round, RoundKind, Theme } from './arena';
+import type { Block, BlockKind, GameMap, Ledge, Road, Round, RoundKind, Theme } from './arena';
 import type { Job, PlaceKind } from './jobs';
 import { WOOD, type PropKind } from './props';
 import { Rng } from './rng';
 
-export interface Foe { kind: 'scrapper' | 'butcher'; x: number; y: number; hp?: number; name?: string }
+export interface Foe { kind: 'scrapper' | 'butcher'; x: number; y: number; hp?: number; name?: string; bow?: boolean; z?: number }
+/** Which way the party went at a fork. */
+export type RoadId = Road['road'];
 export interface RoomPlan { map: GameMap; foes: Foe[]; props: { kind: PropKind; x: number; y: number }[] }
 
 const W = 18, H = 16, SPAWN = { x: 9, y: 14 }, EXIT = { x: 8, y: 0, w: 2, h: 0.9 };
@@ -37,7 +39,14 @@ function wooden(b: Block): Block {
   return w ? { ...b, hp: w.hp, maxHp: w.hp, burning: -1, door: w.door } : b;
 }
 
-export function planRoom(job: Job, index: number): RoomPlan {
+/** A run's fork: the middle room of a three-room job has two ways out. */
+export const isFork = (job: Job, index: number) => job.rooms >= 3 && index === job.rooms - 2;
+export const ROADS: Record<RoadId, { label: string; text: string }> = {
+  high: { label: 'THE HIGH ROAD', text: 'archers on the heights, fewer below' },
+  low: { label: 'THE LOW ROAD', text: 'more goblins, someone caged' },
+};
+
+export function planRoom(job: Job, index: number, road?: RoadId): RoomPlan {
   const rng = new Rng(job.seed * 31 + index * 7 + 1), kind = job.place.kind, kit = KIT[kind], final = index === job.rooms - 1;
   const rounds: Round[] = [], blocks: Block[] = [], spots: { x: number; y: number; r: number }[] = [];
   const free = (x: number, y: number, r: number, skip?: object) =>
@@ -50,9 +59,25 @@ export function planRoom(job: Job, index: number): RoomPlan {
     }
     return null;
   };
+  // A fork's two ways out, kept clear.
+  const fork = isFork(job, index), obj = final ? job.objective : 'clear';
+  const roads: Road[] | undefined = fork ? (['high', 'low'] as RoadId[]).map((r, i) => ({ road: r, label: ROADS[r].label, area: { x: i ? 13 : 3, y: 0, w: 2, h: 0.9 } })) : undefined;
+  for (const r of roads ?? []) spots.push({ x: r.area.x + 1, y: 0.8, r: 1.4 });
+  // Raised ground: always on the high road, sometimes elsewhere; archers up on it.
+  const foes: Foe[] = [], ledges: Ledge[] = [];
+  if (!fork && obj !== 'burn' && (road === 'high' || (road !== 'low' && index >= 1 && rng.next() < 0.4))) {
+    const big = road === 'high', lw = big ? 7.5 : 6.5, lh = big ? 4.2 : 3.4, left = rng.next() < 0.5, lx = left ? 0 : W - lw;
+    const ramp = { x: left ? lx + lw - 1.8 : lx, y: lh - 1.3, w: 1.8, h: 2.8 };
+    ledges.push({ x: lx, y: 0, w: lw, h: lh, ramps: [ramp], kind: kind === 'mine' || kind === 'forest' ? 'rock' : 'wood' });
+    for (let x = lx + 1; x < lx + lw; x += 1.5) spots.push({ x, y: lh / 2, r: lh / 2 + 0.3 });
+    spots.push({ x: ramp.x + 0.9, y: ramp.y + ramp.h / 2, r: 1.5 });
+    for (let i = 0; i < (big ? 3 : 2); i++) foes.push({ kind: 'scrapper', bow: true, z: 1, x: lx + 1.3 + i * (lw - 2.6) / Math.max(1, big ? 2 : 1), y: 1.3 + (i % 2) * 0.8 });
+  }
   // The objective first (it must fit), then buildings and rock walls, round things, furniture.
   const props: RoomPlan['props'] = [];
-  const obj = final ? job.objective : 'clear';
+  const cagesAt = ledges.length ? [0, 1, 2].map(() => spot(0.6, 2, H / 2 + 1)).filter(Boolean) as { x: number; y: number }[] : [[3, 2.2], [15, 2.2], [9, 2.6]].map(([x, y]) => ({ x, y }));
+  // The low road: someone caged in every room.
+  if (road === 'low' && obj !== 'rescue' && obj !== 'story') { const c = spot(0.6, 2, H / 2 + 1); if (c) props.push({ kind: 'cage', ...c }); }
   if (obj === 'burn') for (let i = 0; i < 3; i++) {
     // The dens, each with an oil barrel by it (fire spreads wood to wood).
     const c = spot(1.6, 1.5, H - 4);
@@ -67,7 +92,7 @@ export function planRoom(job: Job, index: number): RoomPlan {
       }
     }
   }
-  if (obj === 'rescue' || obj === 'story') for (const [x, y] of [[3, 2.2], [15, 2.2], [9, 2.6]].slice(0, obj === 'story' ? 3 : 2)) props.push({ kind: 'cage', x, y }), spots.push({ x, y, r: 0.6 });
+  if (obj === 'rescue' || obj === 'story') for (const { x, y } of cagesAt.slice(0, obj === 'story' ? 3 : 2)) props.push({ kind: 'cage', x, y }), spots.push({ x, y, r: 0.6 });
   if (obj === 'larder') for (let i = 0; i < 3; i++) {
     const c = spot(0.5, 1.5, H / 2);
     if (c) props.push({ kind: 'larder', ...c });
@@ -88,8 +113,8 @@ export function planRoom(job: Job, index: number): RoomPlan {
   const fire = spot(0.35, 3, H / 2 + 1);
   const braziers = fire ? [{ ...fire, r: 0.35 }] : [];
   // Goblins, in the top half.
-  const ruin = job.place.ruin, foes: Foe[] = [];
-  const n = Math.min(6, 2 + ruin + index);
+  const ruin = job.place.ruin;
+  const n = Math.max(1, Math.min(7, 2 + ruin + index + (road === 'low' ? 1 : road === 'high' ? -2 : 0)));
   for (let i = 0; i < n; i++) {
     const c = spot(0.4, 1.5, H / 2);
     if (c) foes.push({ kind: 'scrapper', ...c });
@@ -100,7 +125,8 @@ export function planRoom(job: Job, index: number): RoomPlan {
   const theme: Theme = night ? { ...t, ambient: t.ambient.map((v) => v * 0.65) as Theme['ambient'], moon: t.moon * 0.5 } : t;
   const map: GameMap = {
     name: job.place.name.toUpperCase(), w: W, h: H, wallFace: 3, rounds, blocks, braziers,
-    torches: kit.torches ? [{ x: 4.5, y: -1.6 }, { x: 13.5, y: -1.6 }] : [], hero: { ...SPAWN }, exit: { ...EXIT }, theme,
+    torches: kit.torches ? [{ x: 4.5, y: -1.6 }, { x: 13.5, y: -1.6 }] : [], hero: { ...SPAWN }, exit: roads ? null : { ...EXIT }, theme,
+    ledges: ledges.length ? ledges : undefined, roads,
   };
   return { map, foes, props };
 }

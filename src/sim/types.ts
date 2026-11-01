@@ -43,6 +43,10 @@ export interface Body {
   kvy: number;
   /** Seconds left airborne (thrown): it barely slows until it lands. */
   air?: number;
+  /** Which level it stands on: 0 the ground, 1 up on a ledge (see shared/arena.ts). */
+  z?: number;
+  /** Set when it went off a ledge's edge (how fast it was moving); the room deals with the landing. */
+  dropped?: number;
 }
 
 export interface Hero extends Body {
@@ -106,7 +110,7 @@ export interface Hero extends Body {
   seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number; augment: number; cls: number; take: number; grab: number };
 }
 
-export type AttackKind = 'cleave' | 'slam' | 'swing' | 'stab';
+export type AttackKind = 'cleave' | 'slam' | 'swing' | 'stab' | 'shot';
 
 export interface EnemyAttack {
   kind: AttackKind;
@@ -168,6 +172,8 @@ export interface Enemy extends Body {
   death: DeathKind;
   /** Comes back after dying (the training room); run goblins stay dead. */
   respawns: boolean;
+  /** A scrapper with a bow (see ARCHER). */
+  bow?: boolean;
   /** A named goblin (a hunt's quarry, a story boss). */
   name?: string;
 }

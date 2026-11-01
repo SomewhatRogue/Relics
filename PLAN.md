@@ -2,10 +2,12 @@
 
 ## Current slice
 
-**Slice 3c: heights and paths** (Claude Opus 5.5, 2026-11-01). Ledges, ramps and rooftops in run
-rooms (goblin archers up high, height for the ranged, drops and falls), and forks in a run where the
-party picks the high road or the low road, together or split. *Done when* a job has a fork, and a
-room where a threat on a ledge has to be dealt with from the ledge or from range.
+**Slices 3b and 3c** (Claude Opus 5.5, 2026-11-01). Built; waiting on Kyle's play.
+*Done when* Kyle makes a hero on the start screen, goes into every building in Wickhold and talks to
+whoever is there, burns out a goblin den, and takes a job's high road and its low road.
+
+**Slice 3c: heights and forks.** Ledges and ramps in run rooms, goblin archers up high, height for
+the ranged, drops and falls; forks where the party picks the high road or the low road together.
 
 **Slice 3b: heroes, buildings, fire** (2026-11-01). Built; waiting on Kyle's play. *Done when* Kyle
 makes a hero on the start screen, goes into every building in Wickhold and talks to whoever is there,
@@ -42,6 +44,8 @@ and burns out a goblin den on a job.
       people to talk to (smith and relic-wright, priest, trainer and squire, healer, reeve, families),
       a town hall, cottages and barns to enter on jobs, wooden buildings that burn down, goblin dens
       and the burn-out job; Come Bye's newer relay and the online rules (`docs/ONLINE.md`)
+- [x] Slice 3c: ledges and ramps (two levels), archers, falls, the high-ground shot, forks with a high
+      road and a low road, exits that take the whole party
 - [x] Slice 2h: props (barrels, oil barrel, crates, a table, broken pieces) that break and push; the
       Warrior lifts, slams and throws them
 

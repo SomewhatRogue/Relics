@@ -10,7 +10,7 @@ import type { Enemy, FightEvent, Hero, Intent } from './types';
 
 /** Can this hero grab this goblin now? */
 export function grabbable(h: Hero, e: Enemy, now: number): boolean {
-  if (isDead(e) || e.weight > 1 || e.act === 'carried' || e.act === 'pinned') return false;
+  if (isDead(e) || e.weight > 1 || e.act === 'carried' || e.act === 'pinned' || (e.z ?? 0) !== (h.z ?? 0)) return false;
   const dx = e.x - h.x, dy = e.y - h.y, d = Math.hypot(dx, dy);
   if (d > GRAB.reach + e.radius) return false;
   const behind = (e.fx * -dx + e.fy * -dy) / (d || 1) < GUARD.rearCos;

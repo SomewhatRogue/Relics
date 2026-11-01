@@ -16,6 +16,14 @@ export interface Block {
   /** Wooden buildings in a run can be smashed and burned: health, when it caught fire (-1 not), burned down. */
   hp?: number; maxHp?: number; burning?: number; ruined?: boolean;
 }
+/**
+ * Raised ground: a ledge, a rock shelf, a wall walk. Up on it you stand on level 1. From the ground
+ * its edge is a wall; from on top you can step off it (a drop). Ramps (stairs, a slope) overlap its
+ * edge: inside a ramp you go freely between the levels.
+ */
+export interface Ledge { x: number; y: number; w: number; h: number; ramps: Area[]; kind?: 'rock' | 'wood' }
+/** A way out of a run room, when there's more than one: the road it leads to. */
+export interface Road { area: Area; road: 'high' | 'low'; label: string }
 /** Someone to talk to: `talk` says what they offer (a town spot's panel), `look` how they're drawn. */
 export interface Npc { x: number; y: number; name: string; talk: string; look: string; arg?: number }
 export interface Area { x: number; y: number; w: number; h: number }
@@ -46,7 +54,16 @@ export interface GameMap {
   theme: Theme;
   /** People standing about (towns and interiors). */
   npcs?: Npc[];
+  /** Raised ground. */
+  ledges?: Ledge[];
+  /** A fork: two ways out, each leading to its own next room (the party picks). */
+  roads?: Road[];
 }
+
+export const onLedge = (m: GameMap, x: number, y: number) => !!m.ledges?.some((l) => x > l.x && x < l.x + l.w && y > l.y && y < l.y + l.h);
+export const inRamp = (m: GameMap, x: number, y: number) => !!m.ledges?.some((l) => l.ramps.some((r) => inArea(r, x, y)));
+/** The level a point is at (for things placed there). */
+export const levelAt = (m: GameMap, x: number, y: number) => (onLedge(m, x, y) ? 1 : 0);
 
 /** A block's door: the spot in front of it you stand on to go in. */
 export const doorAt = (b: Block) => ({ x: b.x + b.w / 2, y: b.y + b.h + 0.45 });
@@ -110,21 +127,44 @@ export function collide(p: { x: number; y: number }, r: number): void {
   for (const c of m.braziers) push(p, r, c);
   for (const n of m.npcs ?? []) push(p, r, { x: n.x, y: n.y, r: 0.32 });
   for (const b of m.blocks) {
-    if (b.ruined) continue;
-    const nx = Math.max(b.x, Math.min(b.x + b.w, p.x)), ny = Math.max(b.y, Math.min(b.y + b.h, p.y));
-    const dx = p.x - nx, dy = p.y - ny, d = Math.hypot(dx, dy);
-    if (d >= r) continue;
-    if (d > 1e-6) {
-      p.x = nx + (dx / d) * r;
-      p.y = ny + (dy / d) * r;
-    } else {
-      // Inside: out by the nearest side.
-      const left = p.x - b.x, right = b.x + b.w - p.x, top = p.y - b.y, bottom = b.y + b.h - p.y, k = Math.min(left, right, top, bottom);
-      if (k === left) p.x = b.x - r;
-      else if (k === right) p.x = b.x + b.w + r;
-      else if (k === top) p.y = b.y - r;
-      else p.y = b.y + b.h + r;
-    }
+    if (!b.ruined) box(p, r, b);
+  }
+  if (m.ledges) levels(m, p as { x: number; y: number; z?: number; dropped?: number; kvx?: number; kvy?: number }, r);
+}
+
+/**
+ * Heights: on a ramp you take the level of where you stand; on the ground a ledge is a wall; walk off
+ * a ledge's edge and you drop to the ground. Things without a level (a point being tested, a prop) are
+ * on the ground.
+ */
+function levels(m: GameMap, p: { x: number; y: number; z?: number; dropped?: number; kvx?: number; kvy?: number }, r: number): void {
+  const up = onLedge(m, p.x, p.y);
+  if (inRamp(m, p.x, p.y)) {
+    if ('z' in p) p.z = up ? 1 : 0;
+    return;
+  }
+  if ((p.z ?? 0) >= 1) {
+    if (!up) (p.z = 0), (p.dropped = Math.hypot(p.kvx ?? 0, p.kvy ?? 0));
+    return;
+  }
+  for (const l of m.ledges!) box(p, r, l);
+}
+
+/** Push a circle out of a box. */
+function box(p: { x: number; y: number }, r: number, b: { x: number; y: number; w: number; h: number }): void {
+  const nx = Math.max(b.x, Math.min(b.x + b.w, p.x)), ny = Math.max(b.y, Math.min(b.y + b.h, p.y));
+  const dx = p.x - nx, dy = p.y - ny, d = Math.hypot(dx, dy);
+  if (d >= r) return;
+  if (d > 1e-6) {
+    p.x = nx + (dx / d) * r;
+    p.y = ny + (dy / d) * r;
+  } else {
+    // Inside: out by the nearest side.
+    const left = p.x - b.x, right = b.x + b.w - p.x, top = p.y - b.y, bottom = b.y + b.h - p.y, k = Math.min(left, right, top, bottom);
+    if (k === left) p.x = b.x - r;
+    else if (k === right) p.x = b.x + b.w + r;
+    else if (k === top) p.y = b.y - r;
+    else p.y = b.y + b.h + r;
   }
 }
 

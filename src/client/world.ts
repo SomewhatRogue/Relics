@@ -3,7 +3,7 @@
  * pixel (OX + 16x, OY + 16y). Buildings, trees and rocks are drawn with the actors (so you can walk
  * behind them); see blocks.ts.
  */
-import type { GameMap } from '../shared/arena';
+import type { GameMap, Ledge } from '../shared/arena';
 import { Rng } from '../shared/rng';
 
 export const PX = 16;
@@ -13,6 +13,8 @@ export const OY = 8 + 3 * PX;
 export const worldW = (m: GameMap) => m.w * PX + 16;
 export const worldH = (m: GameMap) => m.h * PX + OY + 8;
 export const toPx = (x: number, y: number): [number, number] => [OX + x * PX, OY + y * PX];
+/** How far up (pixels) level 1 is drawn: a ledge's top, and whoever stands on it. */
+export const LIFT = 12;
 
 type Rect = (x: number, y: number, w: number, h: number, col: string) => void;
 
@@ -62,6 +64,7 @@ export function paintMap(m: GameMap): HTMLCanvasElement {
   }
   g.fillStyle = 'rgba(0,0,0,0.35)';
   g.fillRect(OX, OY, fw, 4);
+  for (const l of m.ledges ?? []) ledge(l, rect, rng, pick);
   // Side and front walls.
   const side = m.theme.back === 'trees' ? '#141a12' : m.theme.back === 'palisade' || m.theme.back === 'plaster' ? '#2a2018' : '#2a2733';
   rect(0, 0, OX, H, side);
@@ -115,4 +118,29 @@ function back(m: GameMap, rect: Rect, rng: Rng, pick: (a: string[]) => string, W
     for (let i = 0; i < W * 2; i++) rect(rng.int(W), rng.int(OY), 2 + rng.int(4), 1 + rng.int(3), pick(['#2a2730', '#232029', '#302c36']));
   }
   rect(0, OY - 3, W, 3, '#16141b');
+}
+
+/** Raised ground: its top lifted, a face down to the floor, stairs or a slope where the ramp is. */
+function ledge(l: Ledge, rect: Rect, rng: Rng, pick: (a: string[]) => string): void {
+  const rock = l.kind !== 'wood', x = OX + l.x * PX, y = OY + l.y * PX - LIFT, w = l.w * PX, h = l.h * PX;
+  // The face first, a shadow at its foot, then the top over it.
+  rect(x, y + h, w, LIFT, rock ? '#2a2733' : '#3a2a1a');
+  for (let i = 0; i < w; i += rock ? 5 : 4) rect(x + i, y + h + (rock ? rng.int(LIFT) : 0), rock ? 3 : 1, rock ? 1 : LIFT, rock ? '#36323f' : '#2a1d12');
+  rect(x, y + h + LIFT, w, 3, 'rgba(0,0,0,0.4)');
+  if (rock) {
+    rect(x, y, w, h, '#4a4652');
+    for (let i = 0; i < (w * h) / 30; i++) rect(x + rng.int(w), y + rng.int(h), 2, 1, pick(['#403c48', '#57525e', '#45414c']));
+  } else for (let j = 0; j < h; j += 5) {
+    rect(x, y + j, w, 5, pick(['#6b4a2b', '#5e432a', '#734f2e']));
+    rect(x, y + j + 4, w, 1, '#3a2a1a');
+  }
+  rect(x, y + h - 1, w, 1, rock ? '#6a6470' : '#8b6a3a');
+  // Ramps: steps from the floor up to the top.
+  for (const r of l.ramps) {
+    const rx = OX + r.x * PX, top = OY + r.y * PX - LIFT, bot = OY + (r.y + r.h) * PX, n = 6;
+    rect(rx, top, r.w * PX, bot - top, rock ? '#3e3a46' : '#5a3d22');
+    for (let i = 0; i <= n; i++) rect(rx, Math.round(top + ((bot - top) * i) / n), r.w * PX, 1, rock ? '#57525e' : '#8b6a3a');
+    rect(rx, top, 1, bot - top, '#1d1b24');
+    rect(rx + r.w * PX - 1, top, 1, bot - top, '#1d1b24');
+  }
 }

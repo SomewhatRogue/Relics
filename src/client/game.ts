@@ -4,7 +4,7 @@
  * to go in; taking a job starts a run (room after room until the job is done or you're driven back);
  * the results come home to the hero and the shared world, and the town changes with them.
  */
-import { doorAt, inArea, type Block } from '../shared/arena';
+import { doorAt, inArea, type Area, type Block } from '../shared/arena';
 import { townInterior } from '../shared/interiors';
 import { board, type Job } from '../shared/jobs';
 import { BOUNTY, HERO_SLOTS, PERK, SHOP, gainXp, newProfile, type PerkId, type Profile } from '../shared/progress';
@@ -173,16 +173,27 @@ export class Game {
       tally(this.run, this.room, ev, ME);
       if (!this.outside) this.room.exitOpen = goal(this.run, this.room).done;
       if (this.run.failed) this.finish(false);
-      else if (!this.outside && this.room.exitOpen && inArea(this.room.map.exit, h.x, h.y)) {
-        if (isFinal(this.run)) this.finish(true);
-        else {
-          this.run.index++;
-          this.insides.clear();
-          this.place(runRoom(this.run), undefined, h);
+      else if (!this.outside && this.room.exitOpen) {
+        // The way on takes the whole party, standing in it together; at a fork, the road they stand in.
+        const road = this.room.map.roads?.find((r) => this.together(r.area));
+        if (road || this.together(this.room.map.exit)) {
+          if (isFinal(this.run)) this.finish(true);
+          else {
+            this.run.index++;
+            if (road) this.run.roads[this.run.index] = road.road;
+            this.insides.clear();
+            this.place(runRoom(this.run), undefined, h);
+          }
         }
       }
     }
     return ev;
+  }
+
+  /** Every player in the room (not the squire, not anyone down) stands in `a`. */
+  together(a: Area | null): boolean {
+    const ps = this.room.heroes.filter((x) => x.id !== 'squire' && x.act !== 'down');
+    return !!a && ps.length > 0 && ps.every((x) => inArea(a, x.x, x.y));
   }
 
   /** In front of a Wickhold building's door. */

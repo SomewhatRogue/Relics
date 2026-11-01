@@ -7,14 +7,14 @@ import { ARENA, useMap, type GameMap } from '../shared/arena';
 import type { Foe } from '../shared/terrain';
 import type { PropKind } from '../shared/props';
 import { Rng } from '../shared/rng';
-import { BLESSING, GUARD, HEAL_RADIUS, HERO, LODESTONE, TICK, TRAIT, WEAPONS, type Swing } from '../shared/tuning';
+import { BLESSING, GUARD, HEAL_RADIUS, HEIGHT, HERO, LODESTONE, TICK, TRAIT, WEAPONS, type Swing } from '../shared/tuning';
 import { separate } from './bodies';
 import { lobLodestone, shoot, smite, stepBolt, throwNet } from './bolts';
 import { afflict, stepElements, type World } from './elements';
 import { stepBuildings, sweepBlocks } from './buildings';
 import { newEnemy, stepEnemy } from './enemies';
 import { newHero, stepHero, type HeroActs } from './hero';
-import { isDead } from './damage';
+import { damage, isDead } from './damage';
 import { impacts } from './impacts';
 import { release, stepCarry, tryGrab } from './grab';
 import { dropProp, newProp, propImpacts, roomProps, stepLift, stepProps, sweepProps, tryLift } from './props';
@@ -65,7 +65,7 @@ export class ArenaRoom {
       opts.foes.forEach((f, i) => {
         const e = newEnemy(i + 1, f.kind, f.x, f.y);
         if (f.hp) e.hp = e.maxHp = f.hp;
-        Object.assign(e, { respawns: false, name: f.name });
+        Object.assign(e, { respawns: false, name: f.name, bow: f.bow, z: f.z ?? 0 });
         this.enemies.push(e);
       });
       this.props = (opts.furniture ?? []).map((p) => newProp(p.kind, p.x, p.y, false));
@@ -156,8 +156,22 @@ export class ArenaRoom {
     });
     stepElements(w);
     separate(this.heroes, this.enemies, this.props);
+    this.landings();
     for (const e of this.enemies) if (alive.has(e.id) && isDead(e)) dropFrom(e, this.heroes, this.drops, this.lootRng, this.events);
     this.drops = stepDrops(this.drops, TICK);
+  }
+
+  /** Off a ledge: a goblin knocked off (thrown, hooked, blasted) takes the fall; anyone who steps off just lands. */
+  private landings(): void {
+    for (const b of [...this.heroes, ...this.enemies]) {
+      if (b.dropped === undefined) continue;
+      const v = b.dropped;
+      b.dropped = undefined;
+      this.events.push({ k: 'land', x: b.x, y: b.y, dx: 0, dy: 1 });
+      if (!('kind' in b) || v < HEIGHT.fallSpeed || isDead(b)) continue;
+      if (!damage(b, HEIGHT.fallDmg, this.time, this.events, { how: 'fall', dx: b.kvx, dy: b.kvy }) && b.act !== 'carried')
+        Object.assign(b, { attack: null, act: 'stunned', actT: 0, actDur: HEIGHT.fallStun });
+    }
   }
 
   /** A melee blow landed: a forged weapon's element on a charged hit or counter; REAPER on a backstab or counter kill. */
@@ -203,6 +217,8 @@ export class ArenaRoom {
     // Blessed, a DEADEYE perfect release, a TEMPO hit after a dodge through a blow.
     let mult = (h.blessedUntil > w.now ? BLESSING.dmgMult : 1) * (h.heavy && h.perfect && has(h, 'deadeye') ? TRAIT.deadeye : 1);
     if (s.shot && h.tempoUntil > w.now) (mult *= TRAIT.tempo), (h.tempoUntil = -9);
+    // The high ground: shots from up on a ledge.
+    if (s.shot && (h.z ?? 0) > 0) mult *= HEIGHT.shot;
     // A forged weapon's element rides a full draw (and every crossbow bolt); spells otherwise take the relic's.
     const full = (h.heavy && h.power >= 1) || !!WEAPONS[h.weapon].noCharge, forged = full ? forgedElement(h) : '';
     if (s.shot === 'smite') this.bolts.push(smite(h, s, this.aimDistance(h, s.range, 3.5), mult, traitsOf(h)));

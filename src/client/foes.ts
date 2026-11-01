@@ -78,11 +78,23 @@ function scrapper(c: Ctx, e: Enemy, x: number, y: number, flash: number): void {
   if (e.act === 'stunned') (ox = Math.round(Math.sin(c.now * 5))), (oy = 1);
   shadow(c, x, y, 5);
   const bx = x + ox, by = y + oy, up = e.fy < -0.55, fa = Math.atan2(e.fy, e.fx);
-  const knife = () => line(c.lit, bx + Math.cos(fa) * reach, by - 6 + Math.sin(fa) * reach, fa, 0, 4, '#cfd6dc');
+  const knife = () => (e.bow ? bow(c, e, bx, by, fa) : line(c.lit, bx + Math.cos(fa) * reach, by - 6 + Math.sin(fa) * reach, fa, 0, 4, '#cfd6dc'));
   if (up) knife();
   blit(c, up ? SPRITES.scrapperUp : SPRITES.scrapper, bx, by, e.fx < -0.2, flash);
   if (!up) knife();
   if (e.act === 'stunned') stars(c, bx, by - 15, 3, 5);
+}
+
+/** An archer's short bow, the string pulled back through the wind-up, an arrow nocked. */
+function bow(c: Ctx, e: Enemy, x: number, y: number, fa: number): void {
+  const a = e.attack, pull = a && a.kind === 'shot' && a.t < a.windup ? Math.min(1, a.t / a.windup) : 0;
+  const px = Math.cos(fa), py = Math.sin(fa), cx = x + px * 4, cy = y - 6 + py * 4;
+  c.lit.fillStyle = '#6b4a2b';
+  for (let i = -3; i <= 3; i++) c.lit.fillRect(Math.round(cx - py * i + px * (1 - Math.abs(i) / 3) * 1.5), Math.round(cy + px * i + py * (1 - Math.abs(i) / 3) * 1.5), 1, 1);
+  const sx = cx - px * (pull * 3), sy = cy - py * (pull * 3);
+  c.lit.fillStyle = '#d8d0bc';
+  c.lit.fillRect(Math.round(sx), Math.round(sy), 1, 1);
+  if (pull) line(c.lit, sx, sy, fa, 0, 6, '#a08a6a');
 }
 
 export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number): void {
@@ -137,6 +149,16 @@ export function drawTelegraph(c: Ctx, a: EnemyAttack, cx: number, cy: number, pa
         g.globalAlpha = d < R * prog ? 0.5 * pulse : 0.16;
       }
       g.fillRect(Math.round(ox + x), Math.round(oy + y), 1, 1);
+    }
+  } else if (a.kind === 'shot') {
+    // An arrow's line: a thin dotted sightline that fills in from the archer as it draws.
+    const R = a.range * PX, ox = OX + a.ox * PX - cx, oy = OY + a.oy * PX - cy, wide = prog > 0.6 || now ? 1 : 0;
+    for (let d = 6; d <= R; d += 1) {
+      const on = d < R * prog, px = Math.round(ox + a.dx * d), py = Math.round(oy + a.dy * d);
+      if (!on && d % 3) continue;
+      g.fillStyle = now ? '#ffffff' : fill;
+      g.globalAlpha = on ? 0.85 * pulse : 0.35;
+      g.fillRect(px, py, 1 + wide, 1 + wide);
     }
   } else {
     const R = a.range * PX, ox = OX + a.ox * PX - cx, oy = OY + a.oy * PX - cy, cos = Math.cos(((a.arc / 2) * Math.PI) / 180);

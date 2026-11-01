@@ -15,7 +15,8 @@ import { drawLifted, drawProp } from './propsdraw';
 import type { Fx } from './fx';
 import { Lighting, type Light } from './light';
 import { SPRITES } from './sprites';
-import { OX, OY, PX, paintMap, worldH, worldW } from './world';
+import { LIFT, OX, OY, PX, paintMap, worldH, worldW } from './world';
+import { drawText, textWidth } from './pixfont';
 import { blockAt, blockFoot, drawBlock, drawRound } from './blocks';
 import { drawNpc } from './npcs';
 import { SPOT_REACH } from '../shared/town';
@@ -70,7 +71,7 @@ export class Scene {
     };
     const me = room.heroes.find((h) => h.id === meId);
     if (me) {
-      const [hx, hy] = lerp('h:' + me.id, me.x, me.y);
+      const [hx, hy0] = lerp('h:' + me.id, me.x, me.y), hy = hy0 - (me.z ?? 0) * LIFT;
       this.heroAt = [hx, hy];
       const portrait = this.vh > this.vw * 1.2;
       const tx = hx + me.fx * 10 - this.vw / 2, ty = hy - 8 + me.fy * 8 - this.vh / 2 + (portrait ? this.vh * 0.12 : 0);
@@ -109,8 +110,8 @@ export class Scene {
 
     const items: { y: number; draw: () => void }[] = [];
     for (const h of room.heroes) {
-      const [x, y] = lerp('h:' + h.id, h.x, h.y);
-      items.push({ y, draw: () => drawHero(c, h, x - cx, y - cy, h.id === meId, room.time) });
+      const [x, y] = lerp('h:' + h.id, h.x, h.y), up = (h.z ?? 0) * LIFT;
+      items.push({ y, draw: () => drawHero(c, h, x - cx, y - up - cy, h.id === meId, room.time) });
     }
     for (const e of room.enemies) {
       const carrier = room.heroes.find((h) => h.carrying === e.id);
@@ -120,8 +121,8 @@ export class Scene {
         items.push({ y: hy + 0.5, draw: () => (drawHeld(c, e, hx - cx, hy - cy, carrier.fx, carrier.fy, slam), drawStatus(c, e, hx - cx, hy - cy - 20, room.time)) });
         continue;
       }
-      const [x, y] = lerp('e:' + e.id, e.x, e.y);
-      items.push({ y, draw: () => (drawEnemy(c, e, x - cx, y - cy), drawStatus(c, e, x - cx, y - cy, room.time)) });
+      const [x, y] = lerp('e:' + e.id, e.x, e.y), up = (e.z ?? 0) * LIFT;
+      items.push({ y, draw: () => (drawEnemy(c, e, x - cx, y - up - cy), drawStatus(c, e, x - cx, y - up - cy, room.time)) });
     }
     for (const p of room.props) {
       if (p.broken) continue;
@@ -173,6 +174,15 @@ export class Scene {
       for (let i = 0; i < e.w * PX; i += 2) glow.fillRect(Math.round(ex + i), Math.round(ey + (e.y < 1 ? e.h * PX - 1 : 0)), 1, 1);
       for (let i = 0; i < 3; i++) glow.fillRect(Math.round(ex + (e.w * PX) / 2 - 1 + i - 1), Math.round(ey + (e.y < 1 ? 6 + i : e.h * PX - 6 - i)), 3 - Math.abs(i - 1) * 2 + 1, 1);
       glow.globalAlpha = 1;
+    }
+    // At a fork, both ways out glow, each with its name.
+    if (room.exitOpen) for (const r of map.roads ?? []) {
+      const e = r.area, ex = OX + e.x * PX - cx, ey = OY + e.y * PX - cy, k = 0.5 + 0.3 * Math.sin(now * 5 + e.x);
+      glow.globalAlpha = k;
+      glow.fillStyle = r.road === 'high' ? '#ffd27a' : '#9fe8ff';
+      for (let i = 0; i < e.w * PX; i += 2) glow.fillRect(Math.round(ex + i), Math.round(ey + e.h * PX - 1), 1, 1);
+      glow.globalAlpha = 1;
+      drawText(glow, r.label, Math.round(ex + (e.w * PX) / 2 - textWidth(r.label) / 2), Math.round(ey + e.h * PX + 3), r.road === 'high' ? '#ffd27a' : '#9fe8ff');
     }
     items.sort((p, q) => p.y - q.y);
     for (const it of items) it.draw();

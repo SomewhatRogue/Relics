@@ -102,6 +102,20 @@ export const SCRAPPER: EnemySpec & { stab: EnemyAttackSpec } = {
   stab: { windup: 0.55, active: 0.08, recover: 0.5, dmg: 8, knock: 3, range: 1.35, arc: 50, unblockable: false },
 };
 
+/**
+ * A scrapper with a bow: keeps its distance (up on a ledge if it can), draws on you for a second with
+ * a long thin telegraph, and looses. Blockable, parryable (it's stunned where it stands), rollable.
+ */
+export const ARCHER = {
+  reach: 7.5,
+  /** It backs off when you're this close (and it isn't up on a ledge). */
+  keep: 3.5,
+  shot: { windup: 1.0, active: 0.08, recover: 0.7, dmg: 10, knock: 3, range: 8, arc: 7, unblockable: false } as EnemyAttackSpec,
+};
+
+/** Heights: shots from up on a ledge hit harder; something knocked off a ledge this fast takes a fall. */
+export const HEIGHT = { shot: 1.25, fallSpeed: 3, fallDmg: 12, fallStun: 0.8 };
+
 export const SWING_DUMMY = {
   every: 2.6,
   reach: 2.2,
