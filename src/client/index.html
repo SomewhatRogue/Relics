@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#0d0b10" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>Relic</title>
+  </head>
+  <body>
+    <canvas id="game"></canvas>
+    <div id="hud">
+      <div class="who">WARRIOR</div>
+      <div class="bar hp"><i></i></div>
+      <div class="bar st"><i></i></div>
+    </div>
+    <div id="corner">
+      <button id="mute" aria-label="Sound on or off">SND</button>
+      <button id="help" aria-label="How to play">?</button>
+    </div>
+    <div id="tip"></div>
+    <div id="how" hidden>
+      <h2>The training room</h2>
+      <p>The goblin butcher winds up before every heavy blow. Its red shape on the floor fills, then it lands.</p>
+      <ul>
+        <li><b>Attack</b> click or tap. Keep pressing for a 3-hit combo.</li>
+        <li><b>Block</b> hold right click (or BLOCK). Costs stamina; run out and your guard breaks.</li>
+        <li><b>Parry</b> tap block just before the hit lands. No damage, the goblin staggers, and your next hit is a <b>counter</b> for 2.5x.</li>
+        <li><b>Roll</b> Space (or ROLL). Untouchable mid-roll. Striped circles can't be blocked: roll out.</li>
+        <li><b>Move</b> WASD, or the stick on the left of the screen.</li>
+      </ul>
+      <p>The dummy on the left takes hits. The one on the right swings back slowly: practise parries on it.</p>
+      <p class="dim">Tap to close</p>
+    </div>
+    <div id="touch" hidden>
+      <div class="stick-zone"></div>
+      <div class="stick"><div class="knob"></div></div>
+      <button class="tb roll">ROLL</button>
+      <button class="tb block">BLOCK</button>
+      <button class="tb attack">ATTACK</button>
+    </div>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
