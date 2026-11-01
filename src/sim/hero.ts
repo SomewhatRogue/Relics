@@ -3,7 +3,7 @@
  * A tap of attack swings on release; holding past CHARGE.start charges a heavy instead.
  */
 import { collide } from '../shared/arena';
-import { AUGMENTS, CHARGE, HORN, CLASS_KITS, CLASS_ORDER, CLASS_RELICS, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon } from '../shared/tuning';
+import { AUGMENTS, CHARGE, HORN, RELEASE, CLASS_KITS, CLASS_ORDER, CLASS_RELICS, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon } from '../shared/tuning';
 import { slide } from './bodies';
 import { hitEnemy } from './combat';
 import type { Enemy, FightEvent, Hero, Intent } from './types';
@@ -15,8 +15,8 @@ export function newHero(id: string, x: number, y: number): Hero {
     parryOpenAt: -9, lastBlockPress: -9, rollDx: 0, rollDy: 1, lastRollAt: -9, counterUntil: -9,
     attackQueuedAt: -9, rollQueuedAt: -9, relic: 'javelin', relics: [...CLASS_RELICS.WARRIOR], relicQueuedAt: -9,
     relicReady: { javelin: 0, hook: 0, horn: 0, net: 0, shadow: 0, lodestone: 0, blessing: 0 },
-    augments: { javelin: '', hook: '', horn: '', net: '', shadow: '', lodestone: '', blessing: '' }, blessedUntil: -9, rallyUntil: -9, hitstop: 0, lenience: 0,
-    seen: { attack: 0, block: 0, roll: 0, weapon: 0, relic: 0, relicSwap: 0, relicPick: 0, augment: 0, cls: 0 },
+    augments: { javelin: '', hook: '', horn: '', net: '', shadow: '', lodestone: '', blessing: '' }, blessedUntil: -9, rallyUntil: -9, arms: {}, perfect: false, tempoUntil: -9, hitstop: 0, lenience: 0,
+    seen: { attack: 0, block: 0, roll: 0, weapon: 0, relic: 0, relicSwap: 0, relicPick: 0, augment: 0, cls: 0, take: 0 },
   };
 }
 
@@ -68,6 +68,8 @@ function walk(h: Hero, inp: Intent, k: number, dt: number): void {
 export interface HeroActs {
   fire: (h: Hero) => void;
   loose: (h: Hero, s: Swing) => void;
+  /** A melee blow landed for `n` (forged elements, REAPER). */
+  struck: (h: Hero, e: Enemy, n: number) => void;
 }
 
 /** How a relic and its augment are named on screen: "JAVELIN FIRE". */
@@ -170,7 +172,12 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     const full = chargeFull(w) - CHARGE.start;
     if (h.actT >= full && h.actT - dt < full) ev.push({ k: 'charged', x: h.x, y: h.y });
     if (!inp.attack) {
-      h.power = Math.min(1, (h.actT + CHARGE.start) / chargeFull(w));
+      // A draw (a shot on the hold) wants a clean release: on the white flash is perfect; held too long, it shakes and weakens.
+      const held = h.actT + CHARGE.start, full = chargeFull(w), drawn = !!w.heavy.shot;
+      h.power = Math.min(1, held / full);
+      h.perfect = drawn && held >= full && held <= full + RELEASE.perfect;
+      if (drawn && held > full + RELEASE.overdraw) h.power = RELEASE.overdrawn;
+      if (h.perfect) ev.push({ k: 'perfect', x: h.x, y: h.y });
       startSwing(h, -1, inp, enemies, now, ev);
       ev.push({ k: 'heavy', x: h.x, y: h.y });
     }
@@ -185,7 +192,10 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
       collide(h, HERO.radius);
     } else if (h.actT < s.windup + s.active) {
       if (h.actT - dt < s.windup) acts.loose(h, s);
-      if (!s.shot) for (const e of enemies) hitEnemy(h, s, e, now, ev);
+      if (!s.shot) for (const e of enemies) {
+        const n = hitEnemy(h, s, e, now, ev);
+        if (n) acts.struck(h, e, n);
+      }
     } else {
       const queued = now - h.attackQueuedAt < INPUT_BUFFER && h.attackQueuedAt > now - h.actT;
       if (queued && !h.heavy && h.combo < w.combo.length - 1) {
@@ -232,6 +242,7 @@ function startSwing(h: Hero, i: number, inp: Intent, enemies: Enemy[], now: numb
   h.act = 'attack';
   h.actT = 0;
   h.heavy = i < 0;
+  if (!h.heavy) h.perfect = false;
   h.combo = Math.max(0, i);
   h.hitIds = [];
   h.attackQueuedAt = -9;

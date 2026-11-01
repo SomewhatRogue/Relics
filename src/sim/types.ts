@@ -1,5 +1,5 @@
 /** The fight's state. Plain data: the same shape is drawn locally and (later) sent to friends. */
-import type { Augment, RelicId, WeaponId } from '../shared/tuning';
+import type { Augment, Item, Quality, RelicId, TraitId, WeaponId } from '../shared/tuning';
 
 /** What a player's device sends: held state plus press counters, so a quick tap is never lost. */
 export interface Intent {
@@ -24,9 +24,12 @@ export interface Intent {
   augmentSeq: number;
   /** Change class (the demo's class button). */
   classSeq: number;
+  /** Take the loot drop with id `take` (counted by takeSeq). */
+  takeSeq: number;
+  take: number;
 }
 
-export const NO_INTENT: Intent = { mx: 0, my: 0, ax: 0, ay: 0, attack: false, block: false, attackSeq: 0, blockSeq: 0, rollSeq: 0, weaponSeq: 0, relicSeq: 0, relicSwapSeq: 0, relicPickSeq: 0, relicPick: 0, augmentSeq: 0, classSeq: 0 };
+export const NO_INTENT: Intent = { mx: 0, my: 0, ax: 0, ay: 0, attack: false, block: false, attackSeq: 0, blockSeq: 0, rollSeq: 0, weaponSeq: 0, relicSeq: 0, relicSwapSeq: 0, relicPickSeq: 0, relicPick: 0, augmentSeq: 0, classSeq: 0, takeSeq: 0, take: 0 };
 
 export type HeroAct = 'idle' | 'charge' | 'attack' | 'throw' | 'zip' | 'roll' | 'hurt' | 'stun' | 'down';
 
@@ -79,10 +82,16 @@ export interface Hero extends Body {
   blessedUntil: number;
   /** Rallied by a war horn until then: stamina comes back faster, blocking costs less. */
   rallyUntil: number;
+  /** The weapon found for each kit (a kit not listed is the plain one). */
+  arms: Partial<Record<WeaponId, Item>>;
+  /** The draw in flight was released on the white flash. */
+  perfect: boolean;
+  /** Dodged through a blow (TEMPO): the next hit before then lands double. */
+  tempoUntil: number;
   hitstop: number;
   /** Extra parry and dodge leniency for this player's ping (seconds). */
   lenience: number;
-  seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number; augment: number; cls: number };
+  seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number; augment: number; cls: number; take: number };
 }
 
 export type AttackKind = 'cleave' | 'slam' | 'swing' | 'stab';
@@ -141,6 +150,17 @@ export interface Enemy extends Body {
   frozenUntil: number;
   /** Caught in a hunter's net until then (small goblins can't move or act; big ones are slowed). */
   snareUntil: number;
+  /** The hero who last hit it (who threw it into the wall). */
+  lastBy: string;
+}
+
+/** A weapon lying where a goblin fell. */
+export interface Drop {
+  id: number;
+  x: number;
+  y: number;
+  item: Item;
+  life: number;
 }
 
 export type FightEvent =
@@ -149,12 +169,13 @@ export type FightEvent =
   | { k: 'windup' | 'impact'; x: number; y: number; kind: AttackKind }
   | { k: 'weapon'; x: number; y: number; name: string }
   | { k: 'throw' | 'pinned' | 'javwall' | 'javstick' | 'hookfire' | 'latch' | 'yank' | 'land'; x: number; y: number; dx: number; dy: number }
-  | { k: 'relic'; x: number; y: number; name: string }
+  | { k: 'relic' | 'loot'; x: number; y: number; name: string }
+  | { k: 'drop'; x: number; y: number; q: Quality }
   | { k: 'shoot'; x: number; y: number; dx: number; dy: number; kind: Bolt['kind']; el: Augment }
   | { k: 'burst'; x: number; y: number; r: number; el: Augment }
   | { k: 'shock' | 'beam'; x: number; y: number; x2: number; y2: number }
   | { k: 'heal'; x: number; y: number; n: number }
-  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow'; x: number; y: number };
+  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo'; x: number; y: number };
 
 /** A grappling hook: flying out, reeling an enemy in, pulling its owner along, or coming back. */
 export interface Hook {
@@ -214,6 +235,8 @@ export interface Bolt {
   hit: number[];
   /** Stun on hit (a smite). */
   stun: number;
+  /** The shooter's weapon traits (BRUTAL counts on a shot). */
+  traits: TraitId[];
   /** Lobbed and dropped things go from (sx, sy) to (tx, ty) over `flight` seconds, `t` so far. */
   sx: number;
   sy: number;

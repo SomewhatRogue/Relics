@@ -1,5 +1,5 @@
 /** Damage to an enemy from anything (blades, shots, blasts, burning), and what death resets. */
-import { BUTCHER, GUARD, SCRAPPER, SWING_DUMMY } from '../shared/tuning';
+import { BUTCHER, GUARD, SCRAPPER, SWING_DUMMY, TRAIT } from '../shared/tuning';
 import type { Enemy, FightEvent } from './types';
 
 export const stunOf = (e: Enemy) => (e.kind === 'butcher' ? BUTCHER.stun : e.kind === 'scrapper' ? SCRAPPER.stun : SWING_DUMMY.stun);
@@ -30,12 +30,14 @@ export interface DamageOpts {
   mult?: boolean;
   /** A burn tick: a small number, no blood. */
   tick?: boolean;
+  /** BRUTAL: the held-fast bonus is bigger. */
+  brutal?: boolean;
 }
 
 /** Hurt an enemy; true if this killed it. Dummies never die (they refill). */
 export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: DamageOpts = {}): boolean {
   if (e.act === 'dead') return false;
-  if (o.mult && (e.act === 'stunned' || e.act === 'pinned' || frozen(e, now) || snared(e, now))) n = Math.round(n * GUARD.stunnedMult);
+  if (o.mult && (e.act === 'stunned' || e.act === 'pinned' || frozen(e, now) || snared(e, now))) n = Math.round(n * GUARD.stunnedMult * (o.brutal ? TRAIT.brutal : 1));
   e.hp -= n;
   e.hitAt = now;
   ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy: !!o.heavy, on: 'enemy', tick: o.tick });

@@ -1,10 +1,11 @@
 /** Relic: slice 2, one room. The fight runs here in the browser (solo is a party of one). */
-import { HERO, RELICS, RELIC_SLOTS, WEAPONS } from '../shared/tuning';
+import { HERO, RELICS, RELIC_SLOTS, TRAITS, WEAPONS, itemName } from '../shared/tuning';
 import { relicLabel } from '../sim/hero';
 import { ArenaRoom } from '../sim/room';
 import type { FightEvent } from '../sim/types';
 import { Fx } from './fx';
 import { Input } from './input';
+import { LootCard } from './lootcard';
 import { Scene } from './scene';
 import { setMuted, sfx } from './sfx';
 import './style.css';
@@ -20,6 +21,8 @@ const input = new Input(
   () => me.relics.slice(0, RELIC_SLOTS).map((r) => ({ name: RELICS[r].short, el: me.augments[r], active: r === me.relic, ready: 1 - Math.max(0, me.relicReady[r] - room.time) / RELICS[r].cooldown })),
 );
 const $ = (s: string) => document.querySelector(s) as HTMLElement;
+const card = new LootCard((id) => input.take(id));
+addEventListener('keydown', (e) => e.key.toLowerCase() === 'f' && card.current >= 0 && input.take(card.current));
 
 function sound(ev: FightEvent): void {
   if (ev.k === 'shoot') return (sfx as unknown as Record<string, (() => void) | undefined>)[ev.kind]?.();
@@ -48,8 +51,8 @@ const KIT: Record<string, string> = {
 
 let parries = 0;
 const tips = input.touch
-  ? ['CLASS changes class. WEAPON swaps its kit', 'HEALER: hold RELIC for BLESS, it finds the most hurt ally', 'AUGMENT puts an element on your relic', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'RELIC: pin a scrapper to the wall', 'Striped circles cannot be blocked: ROLL out', 'HOLD RELIC to pick another relic', 'TWIN DAGGERS: roll behind a goblin and BACKSTAB']
-  : ['C changes class. Q swaps its kit. T puts an element on your relic', 'Healer: point at an ally and press E to BLESS them', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: pin a scrapper to the wall. 1 2 3 pick a relic', 'Striped circles cannot be blocked: SPACE to roll', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or rod', 'Daggers: roll behind a goblin and BACKSTAB'];
+  ? ['Goblins drop weapons. Stand on one and TAKE it', 'Traits reward skill: parries, dodges, perfect releases', 'CLASS changes class. WEAPON swaps its kit', 'HEALER: hold RELIC for BLESS, it finds the most hurt ally', 'AUGMENT puts an element on your relic', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'RELIC: pin a scrapper to the wall', 'Striped circles cannot be blocked: ROLL out', 'HOLD RELIC to pick another relic', 'TWIN DAGGERS: roll behind a goblin and BACKSTAB']
+  : ['Goblins drop weapons. Stand on one and press F to take it', 'Bows: release on the white flash. Held too long, the shot weakens', 'C changes class. Q swaps its kit. T puts an element on your relic', 'Healer: point at an ally and press E to BLESS them', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: pin a scrapper to the wall. 1 2 3 pick a relic', 'Striped circles cannot be blocked: SPACE to roll', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or rod', 'Daggers: roll behind a goblin and BACKSTAB'];
 let tipAt = -99, tipI = 0;
 
 function hud(now: number): void {
@@ -57,8 +60,10 @@ function hud(now: number): void {
   $('.st i').style.width = (100 * me.stamina) / HERO.stamina + '%';
   $('.st').classList.toggle('low', me.stamina < 25);
   $('.who').textContent = WEAPONS[me.weapon].cls;
-  $('.wpn').textContent = (input.touch ? '' : 'Q ') + WEAPONS[me.weapon].name;
-  $('.kit').textContent = KIT[me.weapon];
+  const item = me.arms[me.weapon];
+  $('.wpn').textContent = (input.touch ? '' : 'Q ') + (item ? itemName(item) : WEAPONS[me.weapon].name);
+  $('.kit').textContent = item ? item.traits.map((t) => TRAITS[t].name).join(' + ') + '  ' + KIT[me.weapon] : KIT[me.weapon];
+  card.update(room, me, !input.touch);
   $('.rlc').textContent = (input.touch ? '' : 'E ') + relicLabel(me);
   $('.rlc').dataset.el = me.augments[me.relic];
   if (input.touch) ($('.tb.relic').textContent = RELICS[me.relic].short), ($('.tb.relic').dataset.el = me.augments[me.relic]);

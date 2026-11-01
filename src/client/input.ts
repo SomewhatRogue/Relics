@@ -149,6 +149,12 @@ export class Input {
     el.addEventListener('touchcancel', end(false), { passive: false });
   }
 
+  /** Take a loot drop (the card's button, or F). */
+  take(id: number): void {
+    this.intent.take = id;
+    this.intent.takeSeq++;
+  }
+
   /** The current intent, read once a frame. */
   read(): Intent {
     const k = this.keys;

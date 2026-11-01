@@ -1,8 +1,9 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, parry, roll). */
-import { BLESSING, FLINCH, HORN, GUARD, HERO, HITSTOP, HURT_STAGGER, WEAPONS, type Swing } from '../shared/tuning';
+import { BLESSING, FLINCH, HORN, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, WEAPONS, type Swing } from '../shared/tuning';
 import { shove } from './bodies';
 import { frozen, isDummy, kill, snared, stunOf } from './damage';
 import { shatter } from './elements';
+import { has } from './traits';
 import type { Enemy, EnemyAttack, FightEvent, Hero } from './types';
 
 export { respawnOf, stunOf } from './damage';
@@ -16,18 +17,24 @@ export const inArc = (ox: number, oy: number, fx: number, fy: number, x: number,
   return Math.acos(Math.max(-1, Math.min(1, (dx * fx + dy * fy) / d))) <= ((arc / 2) * Math.PI) / 180 + widen;
 };
 
-/** The hero's swing during its active frames: each enemy is hit at most once per swing. */
-export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEvent[]): void {
-  if (e.act === 'dead' || h.hitIds.includes(e.id)) return;
-  if (!inArc(h.x, h.y, h.fx, h.fy, e.x, e.y, s.range, s.arc, e.radius)) return;
+/** The hero's swing during its active frames: each enemy is hit at most once per swing. Returns the damage (0: missed). */
+export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEvent[]): number {
+  if (e.act === 'dead' || h.hitIds.includes(e.id)) return 0;
+  if (!inArc(h.x, h.y, h.fx, h.fy, e.x, e.y, s.range, s.arc, e.radius)) return 0;
   h.hitIds.push(e.id);
+  e.lastBy = h.id;
   const heavy = h.counter || h.heavy || s.knock >= 7;
   // From behind: the hero stands where the enemy's facing points away (dummies have no back).
   const tx = h.x - e.x, ty = h.y - e.y, tl = Math.hypot(tx, ty) || 1;
   const rear = !isDummy(e) && (e.fx * tx + e.fy * ty) / tl < GUARD.rearCos;
   const rearMult = rear ? (WEAPONS[h.weapon].backstab ?? GUARD.rearMult) : 1;
   const ice = frozen(e, now), blessed = h.blessedUntil > now ? BLESSING.dmgMult : 1;
-  const mult = (h.counter ? GUARD.counterMult : e.act === 'stunned' || e.act === 'pinned' || ice || snared(e, now) ? GUARD.stunnedMult : 1) * rearMult * blessed;
+  const heldFast = e.act === 'stunned' || e.act === 'pinned' || ice || snared(e, now);
+  const counter = GUARD.counterMult * (has(h, 'riposte') ? TRAIT.riposte : 1), held = GUARD.stunnedMult * (has(h, 'brutal') ? TRAIT.brutal : 1);
+  // TEMPO: the first hit after dodging through a blow lands double.
+  const tempo = h.tempoUntil > now ? TRAIT.tempo : 1;
+  if (tempo > 1) h.tempoUntil = -9;
+  const mult = (h.counter ? counter : heldFast ? held : 1) * rearMult * blessed * tempo;
   const n = Math.round(s.dmg * mult);
   e.hp -= n;
   e.hitAt = now;
@@ -42,16 +49,17 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   if (isDummy(e)) {
     if (e.hp <= 0) e.hp = e.maxHp;
     if (ice && heavy) shatter(e, now, ev);
-    return;
+    return n;
   }
-  if (e.hp <= 0) return kill(e, ev);
+  if (e.hp <= 0) return kill(e, ev), n;
   // A heavy blow breaks the frozen.
-  if (ice && heavy) return shatter(e, now, ev);
+  if (ice && heavy) return shatter(e, now, ev), n;
   // Light goblins flinch out of their wind-up on any hit; the butcher only to a strong heavy.
   const big = h.heavy && h.power >= 0.7;
   if (e.act !== 'stunned' && e.act !== 'pinned' && e.act !== 'carried' && !ice && (e.kind === 'scrapper' || big)) {
     Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: big && e.kind === 'butcher' ? 0.6 : FLINCH });
   }
+  return n;
 }
 
 /** Is this hero inside the attack's shape? */
@@ -68,6 +76,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   const taken = h.blessedUntil > now ? BLESSING.taken : 1;
   if (h.act === 'roll' && h.actT >= w.dodge.iFrom && h.actT <= w.dodge.iTo + h.lenience) {
     ev.push({ k: 'dodge', x: h.x, y: h.y });
+    if (has(h, 'tempo')) (h.tempoUntil = now + TRAIT.tempoTime), ev.push({ k: 'tempo', x: h.x, y: h.y });
     return;
   }
   const tx = e.x - h.x, ty = e.y - h.y, tl = Math.hypot(tx, ty) || 1;
@@ -79,6 +88,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   if (canGuard && now - h.parryOpenAt <= w.parryWindow + h.lenience) {
     h.counterUntil = now + GUARD.counterWindow;
     h.parryOpenAt = -9;
+    if (has(h, 'bulwark')) h.stamina = HERO.stamina;
     h.hitstop = Math.max(h.hitstop, HITSTOP.parry);
     e.hitstop = HITSTOP.parry;
     Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: stunOf(e) });

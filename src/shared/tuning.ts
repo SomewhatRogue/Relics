@@ -19,6 +19,7 @@ export const HERO = {
 
 export * from './weapons';
 export * from './magic';
+export * from './loot';
 
 /** Holding attack past `start` begins charging; the heavy is strongest at `full`. */
 export const CHARGE = { start: 0.18, full: 0.9 };

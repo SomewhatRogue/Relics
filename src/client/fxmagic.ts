@@ -115,6 +115,22 @@ export function magicFx(fx: Fx, ev: FightEvent, x: number, y: number): void {
       fx.burst(x, y - 8, 18, ['#3a3346', '#6a5a8a', '#c9a8ff'], 50, true);
       fx.say(x, y - 30, 'BEHIND', '#d8a0ff');
       break;
+    case 'drop':
+      fx.say(x, y - 24, ev.q === 'forged' ? 'FORGED' : 'LOOT', ev.q === 'forged' ? '#ffd27a' : '#9fd0ff');
+      fx.burst(x, y - 6, 12, ev.q === 'forged' ? ['#ffd27a', '#ffffff'] : ['#9fd0ff', '#ffffff'], 50, true);
+      break;
+    case 'loot':
+      fx.say(x, y - 32, ev.name, '#ffd27a');
+      fx.rings.push({ x, y: y - 4, life: 0.3, max: 0.3, col: '#ffd27a', size: 14 });
+      break;
+    case 'perfect':
+      fx.say(x, y - 30, 'PERFECT', '#ffffff');
+      fx.rings.push({ x, y: y - 8, life: 0.25, max: 0.25, col: '#ffffff', size: 12 });
+      flash(fx, x, y - 8, 40, 1, [1, 1, 1], 0.1);
+      break;
+    case 'tempo':
+      fx.say(x, y - 34, 'TEMPO', '#7fe0c8');
+      break;
     case 'heal':
       fx.say(x, y - 28, '+' + ev.n, '#7dff8a');
       fx.burst(x, y - 8, 8, ['#7dff8a', '#ffffff'], 30, true);

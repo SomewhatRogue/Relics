@@ -9,7 +9,7 @@ import { drawHero } from './actors';
 import { blit, type Ctx } from './draw';
 import { drawEnemy, drawTelegraph } from './foes';
 import { EL_LIGHT } from './palette';
-import { drawBolt, drawHook, drawJavelin } from './relicsdraw';
+import { drawBolt, drawDrop, drawHook, drawJavelin } from './relicsdraw';
 import { drawStatus } from './status';
 import type { Fx } from './fx';
 import { Lighting, type Light } from './light';
@@ -110,6 +110,10 @@ export class Scene {
       const [x, y] = lerp('e:' + e.id, e.x, e.y);
       items.push({ y, draw: () => (drawEnemy(c, e, x - cx, y - cy), drawStatus(c, e, x - cx, y - cy, room.time)) });
     }
+    for (const d of room.drops) {
+      const x = OX + d.x * PX - cx, y = OY + d.y * PX - cy;
+      items.push({ y: OY + d.y * PX - 20, draw: () => drawDrop(c, d, x, y) });
+    }
     for (const b of room.bolts) {
       const x = OX + b.x * PX - cx, y = OY + b.y * PX - cy;
       // Things on the floor draw under the bodies; things in the air over them.
@@ -133,6 +137,10 @@ export class Scene {
     for (const it of items) it.draw();
 
     const lights: Light[] = [];
+    for (const d of room.drops) {
+      if (!d.item.traits.some((t) => t === 'ember' || t === 'rime' || t === 'storm')) continue;
+      lights.push({ x: OX + d.x * PX - cx, y: OY + d.y * PX - cy - 6, r: 22, i: 0.5, c: [1, 0.9, 0.6] });
+    }
     for (const t of ARENA.torches) {
       const x = OX + t.x * PX - cx, y = OY + t.y * PX - cy;
       this.flame(glow, x, y - 1, now, 1);

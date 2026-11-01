@@ -1,5 +1,5 @@
 /** Drawing relics and shots in the world: javelins, the hook on its chain, arrows, spells, flasks. */
-import type { Bolt, Hero, Hook, Javelin } from '../sim/types';
+import type { Bolt, Drop, Hero, Hook, Javelin } from '../sim/types';
 import { line, type Ctx } from './draw';
 import { EL_COL } from './palette';
 
@@ -127,4 +127,27 @@ export function drawBolt(c: Ctx, b: Bolt, x: number, y: number): void {
   c.glow.fillRect(Math.round(x - r), Math.round(ty - r), r * 2 + 1, r * 2 + 1);
   c.glow.fillStyle = '#ffffff';
   c.glow.fillRect(Math.round(x), Math.round(ty), 1, 1);
+}
+
+const KIT_COL: Record<string, string> = { sword: '#dfe6ec', greatsword: '#eef2f5', spear: '#8b6a3a', daggers: '#e6ecf0', longbow: '#8b6a3a', shortbow: '#6b4a2b', crossbow: '#5a3d22', wand: '#6b4a2b', staff: '#6b4a2b', rod: '#9aa3ad', mace: '#9aa3ad' };
+const FORGED: Record<string, string> = { ember: EL_COL.fire, rime: EL_COL.frost, storm: EL_COL.storm };
+
+/** A weapon lying on the floor, glinting in its quality's colour (a forged one sends up a thin shaft of light). */
+export function drawDrop(c: Ctx, d: Drop, x: number, y: number): void {
+  const fade = Math.min(1, d.life / 5), el = d.item.traits.find((t) => FORGED[t]), col = el ? FORGED[el] : '#9fd0ff';
+  c.lit.globalAlpha = c.glow.globalAlpha = fade;
+  const bob = Math.round(Math.sin(c.now * 3 + d.id) * 1);
+  c.glow.fillStyle = col;
+  for (let i = 0; i < 16; i++) {
+    const t = (i / 16) * Math.PI * 2;
+    if ((i + Math.floor(c.now * 8)) % 4) c.glow.fillRect(Math.round(x + Math.cos(t) * 6), Math.round(y + Math.sin(t) * 2.5), 1, 1);
+  }
+  if (el) {
+    c.glow.globalAlpha = fade * (0.25 + 0.1 * Math.sin(c.now * 5));
+    c.glow.fillRect(Math.round(x), Math.round(y - 28), 1, 26);
+    c.glow.globalAlpha = fade;
+  }
+  line(c.lit, x - 4, y - 3 + bob, -0.6, 0, 9, KIT_COL[d.item.kit] ?? '#dfe6ec', 2);
+  if (Math.floor(c.now * 2 + d.id) % 3 === 0) (c.glow.fillStyle = '#ffffff'), c.glow.fillRect(Math.round(x + 2), Math.round(y - 7 + bob), 1, 1);
+  c.lit.globalAlpha = c.glow.globalAlpha = 1;
 }

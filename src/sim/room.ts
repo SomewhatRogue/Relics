@@ -5,16 +5,19 @@
  */
 import { ARENA } from '../shared/arena';
 import { Rng } from '../shared/rng';
-import { BLESSING, HEAL_RADIUS, HERO, LODESTONE, TICK, type Swing } from '../shared/tuning';
+import { BLESSING, GUARD, HEAL_RADIUS, HERO, LODESTONE, TICK, TRAIT, WEAPONS, type Swing } from '../shared/tuning';
 import { separate } from './bodies';
 import { lobLodestone, shoot, smite, stepBolt, throwNet } from './bolts';
 import { afflict, stepElements, type World } from './elements';
 import { newEnemy, stepEnemy } from './enemies';
 import { newHero, stepHero, type HeroActs } from './hero';
+import { isDead } from './damage';
+import { dropFrom, stepDrops, takeLoot } from './loot';
 import { bless, rally, shadowstep } from './relics';
+import { forgedElement, has, traitsOf } from './traits';
 import { fireHook, stepHook } from './hook';
 import { stepJavelin, throwJavelin } from './javelin';
-import { NO_INTENT, type Bolt, type Enemy, type FightEvent, type Hero, type Hook, type Intent, type Javelin } from './types';
+import { NO_INTENT, type Bolt, type Drop, type Enemy, type FightEvent, type Hero, type Hook, type Intent, type Javelin } from './types';
 
 export class ArenaRoom {
   time = 0;
@@ -24,17 +27,21 @@ export class ArenaRoom {
   javelins: Javelin[] = [];
   hooks: Hook[] = [];
   bolts: Bolt[] = [];
+  drops: Drop[] = [];
   intents = new Map<string, Intent>();
   /** Events from the latest tick (drawn as hits, sparks and sounds). */
   events: FightEvent[] = [];
   /** Positions before the latest tick, keyed 'h:<id>' or 'e:<id>', for drawing between ticks. */
   prev = new Map<string, [number, number]>();
   private rng: Rng;
+  /** Loot rolls on their own stream, so a drop never shifts what the goblins do. */
+  private lootRng: Rng;
   private acc = 0;
 
   /** `squire`: a training partner who stands by the swing dummy taking hits (someone to heal and bless). */
   constructor(seed = 1, opts: { scrappers?: boolean; squire?: boolean } = {}) {
     this.rng = new Rng(seed);
+    this.lootRng = new Rng(seed * 7919 + 13);
     const s = ARENA.spawn;
     this.enemies.push(newEnemy(1, 'butcher', s.butcher.x, s.butcher.y));
     this.enemies.push(newEnemy(2, 'dummy', s.dummy.x, s.dummy.y));
@@ -90,7 +97,9 @@ export class ArenaRoom {
     this.tick++;
     const w: World = { heroes: this.heroes, enemies: this.enemies, javelins: this.javelins, now: this.time, ev: this.events };
     const hit = (e: Enemy, el: Hero['augments']['javelin'], n: number) => afflict(w, e, el, n);
-    const acts: HeroActs = { fire: (h) => this.fire(h, w), loose: (h, s) => this.loose(h, s, w) };
+    const acts: HeroActs = { fire: (h) => this.fire(h, w), loose: (h, s) => this.loose(h, s, w), struck: (h, e, n) => this.struck(h, e, n, w) };
+    const alive = new Set(this.enemies.filter((e) => !isDead(e)).map((e) => e.id));
+    for (const h of this.heroes) takeLoot(h, this.intents.get(h.id) ?? NO_INTENT, this.drops, this.events);
     for (const h of this.heroes) stepHero(h, this.intents.get(h.id) ?? NO_INTENT, this.enemies, this.time, TICK, this.events, acts);
     this.javelins = this.javelins.filter((j) => stepJavelin(j, this.enemies, this.time, TICK, this.events, hit));
     this.hooks = this.hooks.filter((k) => stepHook(k, this.heroes, this.enemies, this.time, TICK, this.events, hit));
@@ -98,6 +107,22 @@ export class ArenaRoom {
     for (const e of this.enemies) stepEnemy(e, this.heroes, this.rng, this.time, TICK, this.events);
     stepElements(w);
     separate(this.heroes, this.enemies);
+    for (const e of this.enemies) if (alive.has(e.id) && isDead(e)) dropFrom(e, this.heroes, this.drops, this.lootRng, this.events);
+    this.drops = stepDrops(this.drops, TICK);
+  }
+
+  /** A melee blow landed: a forged weapon's element on a charged hit or counter; REAPER on a backstab or counter kill. */
+  private struck(h: Hero, e: Enemy, n: number, w: World): void {
+    const charged = (h.heavy && h.power >= 0.7) || h.counter;
+    if (isDead(e)) {
+      const tx = h.x - e.x, ty = h.y - e.y, rear = (e.fx * tx + e.fy * ty) / (Math.hypot(tx, ty) || 1) < GUARD.rearCos;
+      if (has(h, 'reaper') && (h.counter || rear)) {
+        const heal = Math.min(HERO.hp - h.hp, TRAIT.reaper);
+        if (heal > 0) (h.hp += heal), w.ev.push({ k: 'heal', x: h.x, y: h.y, n: heal });
+      }
+      return;
+    }
+    if (charged) afflict(w, e, forgedElement(h), n);
   }
 
   private fire(h: Hero, w: World): void {
@@ -126,11 +151,15 @@ export class ArenaRoom {
 
   /** A swing's moment of release: loose its shot (spells cast with the equipped relic's augment), smite, heal. */
   private loose(h: Hero, s: Swing, w: World): void {
-    const mult = h.blessedUntil > w.now ? BLESSING.dmgMult : 1;
-    if (s.shot === 'smite') this.bolts.push(smite(h, s, this.aimDistance(h, s.range, 3.5), mult));
+    // Blessed, a DEADEYE perfect release, a TEMPO hit after a dodge through a blow.
+    let mult = (h.blessedUntil > w.now ? BLESSING.dmgMult : 1) * (h.heavy && h.perfect && has(h, 'deadeye') ? TRAIT.deadeye : 1);
+    if (s.shot && h.tempoUntil > w.now) (mult *= TRAIT.tempo), (h.tempoUntil = -9);
+    // A forged weapon's element rides a full draw (and every crossbow bolt); spells otherwise take the relic's.
+    const full = (h.heavy && h.power >= 1) || !!WEAPONS[h.weapon].noCharge, forged = full ? forgedElement(h) : '';
+    if (s.shot === 'smite') this.bolts.push(smite(h, s, this.aimDistance(h, s.range, 3.5), mult, traitsOf(h)));
     else if (s.shot) {
-      const el = s.shot === 'arrow' || s.shot === 'bolt' ? '' : h.augments[h.relic];
-      this.bolts.push(shoot(h, s, el, mult));
+      const el = s.shot === 'arrow' || s.shot === 'bolt' ? forged : forged || h.augments[h.relic];
+      this.bolts.push(shoot(h, s, el, mult, traitsOf(h)));
       w.ev.push({ k: 'shoot', x: h.x, y: h.y, dx: h.fx, dy: h.fy, kind: s.shot, el });
     }
     if (!s.heal) return;

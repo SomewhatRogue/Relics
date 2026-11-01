@@ -2,6 +2,27 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-10-31 (midnight): loot that rewards execution (Claude Opus 5.5)
+
+Kyle: weapons with modifiers so each fight drops loot and unlocks things as you progress, without
+drowning in stats and meta-gaming; and more skill-based execution throughout.
+
+- **A weapon is its kit plus at most two traits, in words.** Fine: one skill trait. Forged: a skill
+  trait plus an element (named for it: EMBERFORGED GREATSWORD). One weapon per kit, so no inventory:
+  stand on a drop, read the card, TAKE (F) swaps it in and leaves your old one on the floor.
+- **Every trait pays off only on execution** (`shared/loot.ts`): RIPOSTE (counters x1.4 on top),
+  TEMPO (dodge through a blow: next hit x2), BULWARK (a parry refills stamina), DEADEYE (a perfect
+  release x1.6), CRUSHING (goblins you throw into walls take x3 slam), BRUTAL (held-fast goblins take
+  x1.5 more), REAPER (a backstab or counter kill heals 10). Forged elements land only on charged
+  hits (70%+), counters, full draws and crossbow bolts, never on taps.
+- **Draws have a sweet spot for everyone:** release within 0.25 s of the white flash for a perfect
+  shot; hold more than 0.8 s past it and the bow shakes and the shot drops to 75% (no pierce).
+- **Drops:** scrappers 35% (20% forged), the butcher always (60% forged), rolled for the nearest
+  player's class on a separate seeded stream (`lootRng`), fading after 45 s.
+- **Progression stays sideways:** loot changes how a weapon plays, not a number that climbs. Vertical
+  power comes from town (new kits, relics and augments unlocked at the smith and relic-wright; levels
+  that open ability choices). No gear score.
+
 ## 2026-10-31 (late night): class kits by draw time, slower classes, class relics (Claude Opus 5.5)
 
 Kyle after trying slice 2d: no three-shot pattern on the bow; the long pullback is great; different

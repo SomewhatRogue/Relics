@@ -207,6 +207,20 @@ export const sfx = {
     if (ready()) burst('bandpass', 500, 1200, 1, 0.4, 0.25);
   },
   snared() {},
+  drop() {
+    if (ready()) for (const [f, d] of [[1320, 0], [1760, 0.06]]) tone('triangle', f, f, 0.12, 0.3, d);
+  },
+  loot() {
+    if (!ready()) return;
+    tone('triangle', 520, 520, 0.2, 0.12);
+    tone('triangle', 780, 780, 0.18, 0.2, 0.08);
+  },
+  perfect() {
+    if (ready()) tone('sine', 2093, 2093, 0.2, 0.25), tone('sine', 3136, 3136, 0.1, 0.2, 0.02);
+  },
+  tempo() {
+    if (ready()) tone('sine', 880, 1760, 0.15, 0.15);
+  },
   well() {
     if (ready()) tone('sine', 60, 110, 0.6, 1.2), tone('triangle', 220, 330, 0.1, 1.2);
   },

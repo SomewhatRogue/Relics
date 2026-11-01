@@ -1,5 +1,5 @@
 /** What a hero holds and how: each weapon's pose through rest, charge and swing, then drawn in hand. */
-import { CHARGE, WEAPONS } from '../shared/tuning';
+import { CHARGE, RELEASE, WEAPONS } from '../shared/tuning';
 import { chargeFull, currentSwing } from '../sim/hero';
 import type { Hero } from '../sim/types';
 import { ease, line, smear, type Ctx } from './draw';
@@ -20,7 +20,9 @@ export function pose(h: Hero, now: number): Pose {
   };
   const charge = Math.min(1, (h.actT + CHARGE.start) / chargeFull(WEAPONS[h.weapon]));
   if (h.act === 'charge') {
-    if (ranged(h)) return { a: h.weapon === 'staff' ? -Math.PI / 2 + side * 0.25 : fa, ext: 0, reach: 0, pull: charge };
+    // Held past the flash, the draw starts to shake (and the shot weakens).
+    const over = h.actT + CHARGE.start > chargeFull(WEAPONS[h.weapon]) + RELEASE.overdraw ? Math.sin(now * 70) * 0.09 : 0;
+    if (ranged(h)) return { a: (h.weapon === 'staff' ? -Math.PI / 2 + side * 0.25 : fa) + over, ext: 0, reach: 0, pull: charge };
     // The healer lifts the mace to call down a smite.
     if (h.weapon === 'mace') return { a: -Math.PI / 2 + side * 0.2, ext: 0, reach: 0, pull: charge };
     if (h.weapon === 'spear') return { a: fa, ext: -5 * charge, reach: 0, pull: 0 };

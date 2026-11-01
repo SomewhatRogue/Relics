@@ -64,3 +64,15 @@ body.touch #tip { top: calc(112px + env(safe-area-inset-top)); white-space: norm
 #wheel .slot { flex-direction: column; }
 #wheel .slot[data-el='fire'], #wheel .slot[data-el='frost'], #wheel .slot[data-el='storm'] { border-color: var(--el); }
 #wheel .slot[data-el='fire']::after, #wheel .slot[data-el='frost']::after, #wheel .slot[data-el='storm']::after { content: attr(data-el); text-transform: uppercase; color: var(--el); font-size: 9px; }
+
+#loot { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(24px + env(safe-area-inset-bottom)); width: min(320px, 70vw); padding: 8px 10px; background: #14121aee; border: 1px solid #6a7a98; border-radius: 6px; font-size: 11px; font-weight: 500; color: #c8c4d0; z-index: 3; --el: #9fd0ff; }
+body.touch #loot { bottom: auto; top: calc(160px + env(safe-area-inset-top)); }
+#loot .name { font-weight: 600; font-size: 12px; color: var(--el); margin-bottom: 4px; }
+#loot .trait { margin-bottom: 3px; }
+#loot .trait b { color: #ffd27a; }
+#loot .yours { color: #8a8494; margin-top: 4px; }
+#loot button { margin-top: 6px; width: 100%; height: 30px; background: #2c3a50; border: 1px solid #9fd0ff; border-radius: 4px; color: #e8f4ff; }
+#loot[data-el='fire'], #loot[data-el='frost'], #loot[data-el='storm'] { border-color: var(--el); }
+#loot[data-el='fire'] { --el: #ff9a3c; }
+#loot[data-el='frost'] { --el: #bfe8ff; }
+#loot[data-el='storm'] { --el: #fff27a; }
