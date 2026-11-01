@@ -20,6 +20,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 #wheel .slot.active { border-color: #9fe8ff; }
 #wheel .slot.hot { transform: scale(1.18); border-color: #ffffff; background: #2c5466; }
 #wheel .slot.empty { color: #5a5664; border-style: dashed; border-color: #3a3644; background: #14161caa; }
+.tb.relic2 { width: 58px; height: 58px; right: calc(27px + env(safe-area-inset-right)); bottom: calc(206px + env(safe-area-inset-bottom)); background: conic-gradient(#3a2a48 var(--cd, 100%), #14161ccc 0); border-color: #c9a8ff; color: #eadcff; font-size: 10px; letter-spacing: 0; padding: 0; }
+.relic2[hidden] { display: none; }
 .relic { width: 56px; height: 56px; right: calc(28px + env(safe-area-inset-right)); bottom: calc(142px + env(safe-area-inset-bottom)); background: conic-gradient(#1f3a48 var(--cd, 100%), #14161ccc 0); border-color: #9fe8ff; color: #d8f6ff; font-size: 10px; }
 
 #corner { position: fixed; right: calc(10px + env(safe-area-inset-right)); top: calc(8px + env(safe-area-inset-top)); display: flex; gap: 6px; }
@@ -97,7 +99,7 @@ body.touch #boss { bottom: auto; top: calc(160px + env(safe-area-inset-top)); }
 body.touch #prompt { bottom: calc(250px + env(safe-area-inset-bottom)); }
 .use { width: 84px; height: 84px; right: calc(18px + env(safe-area-inset-right)); bottom: calc(46px + env(safe-area-inset-bottom)); background: #5a3a14ee; border-color: #ffd27a; color: #fff1d0; font-size: 13px; z-index: 2; }
 .use[hidden] { display: none; }
-body[data-mode='town'] .tb.attack, body[data-mode='town'] .tb.block, body[data-mode='town'] .tb.relic, body[data-mode='town'] .tb.grab { display: none; }
+body[data-mode='town'] .tb.attack, body[data-mode='town'] .tb.block, body[data-mode='town'] .tb.relic, body[data-mode='town'] .tb.relic2, body[data-mode='town'] .tb.grab { display: none; }
 body[data-mode='town'] #hud .gear:not(:first-of-type) { display: none; }
 #panel { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: #0d0b10cc; z-index: 6; padding: 16px; }
 #panel[hidden] { display: none; }
@@ -165,3 +167,8 @@ body.touch #corner #heroes, body.touch #corner #tips { width: auto; padding: 0 5
 #panel .dice { display: flex; justify-content: space-around; text-align: center; margin: 4px 0 10px; color: #c8b080; }
 #panel .dice span { display: block; font-size: 40px; line-height: 1.1; color: #f0e0b0; font-family: system-ui, sans-serif; }
 body[data-mode='town'] .tb.roll { right: calc(116px + env(safe-area-inset-right)); bottom: calc(58px + env(safe-area-inset-bottom)); }
+
+#title .sheet { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; margin: 8px 0 6px; font-size: 11px; }
+#title .sheet dt { color: #c8b080; }
+#title .sheet dd { margin: 0; color: #d8d4de; }
+#panel .job.deep { border-color: #c9a8ff; background: #1e1a2a; }

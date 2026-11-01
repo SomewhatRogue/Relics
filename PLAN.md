@@ -2,6 +2,10 @@
 
 ## Current slice
 
+**Simpler classes, relics from deep dives** (Claude Opus 5.5, 2026-11-01). Built; waiting on Kyle's
+play. *Done when* each class plays with one skill and no relic, and a deep dive won gives a relic
+that shows up on the RELIC button.
+
 **Slices 3b and 3c** (Claude Opus 5.5, 2026-11-01). Built; waiting on Kyle's play.
 *Done when* Kyle makes a hero on the start screen, goes into every building in Wickhold and talks to
 whoever is there, burns out a goblin den, and takes a job's high road and its low road.

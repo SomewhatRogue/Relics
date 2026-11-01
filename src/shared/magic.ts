@@ -62,7 +62,10 @@ export const BLESSING = { cooldown: 12, windup: 0.25, recover: 0.25, range: 6, r
  */
 export const WARD = { cooldown: 14, windup: 0.2, recover: 0.2, range: 7, hp: 50, time: 5, reflect: 1.5, stun: 1.2 };
 
-/** The war horn (Warrior, Healer): every ally in earshot is rallied: stamina back at once, then twice as fast, and blocking costs half. Small goblins near you flinch. */
+/** The Healer's skill: blessed ground at your feet and a ward on whoever needs it most, at once. */
+export const SANCTUARY = { cooldown: 14, windup: 0.25, recover: 0.25 };
+
+/** The war cry (the Warrior's skill): every ally in earshot is rallied: stamina back at once, then twice as fast, and blocking costs half. Small goblins near you flinch. */
 export const HORN = { cooldown: 12, windup: 0.25, recover: 0.3, radius: 6, time: 6, regen: 2, guard: 0.5, scare: 2.5 };
 
 /** `range` is how far the phone's auto-aim looks; `cls` who may carry it. */
@@ -72,22 +75,30 @@ export const RELICS = {
   net: { name: "HUNTER'S NET", short: 'NET', cooldown: NET.cooldown, windup: NET.windup, recover: NET.recover, range: NET.range },
   shadow: { name: 'SHADOWSTEP', short: 'SHADOW', cooldown: SHADOWSTEP.cooldown, windup: SHADOWSTEP.windup, recover: SHADOWSTEP.recover, range: SHADOWSTEP.range },
   lodestone: { name: 'LODESTONE', short: 'LODESTONE', cooldown: LODESTONE.cooldown, windup: LODESTONE.windup, recover: LODESTONE.recover, range: LODESTONE.range },
-  horn: { name: 'WAR HORN', short: 'HORN', cooldown: HORN.cooldown, windup: HORN.windup, recover: HORN.recover, range: HORN.radius },
+  horn: { name: 'WAR CRY', short: 'WAR CRY', cooldown: HORN.cooldown, windup: HORN.windup, recover: HORN.recover, range: HORN.radius },
   blessing: { name: 'BLESSED GROUND', short: 'BLESS', cooldown: BLESSING.cooldown, windup: BLESSING.windup, recover: BLESSING.recover, range: BLESSING.range },
   ward: { name: 'WARD', short: 'WARD', cooldown: WARD.cooldown, windup: WARD.windup, recover: WARD.recover, range: WARD.range },
+  sanctuary: { name: 'SANCTUARY', short: 'SANCTUARY', cooldown: SANCTUARY.cooldown, windup: SANCTUARY.windup, recover: SANCTUARY.recover, range: WARD.range },
 };
 export type RelicId = keyof typeof RELICS;
-export const RELIC_ORDER: RelicId[] = ['javelin', 'hook', 'horn', 'net', 'shadow', 'lodestone', 'blessing', 'ward'];
-/** A hero carries at most this many relics into a run (chosen in town later). */
-export const RELIC_SLOTS = 3;
-/** Each class's relics (the town's relic-wright adds more later). */
-export const CLASS_RELICS: Record<'WARRIOR' | 'RANGER' | 'ROGUE' | 'MAGE' | 'HEALER', RelicId[]> = {
-  WARRIOR: ['javelin', 'hook', 'horn'],
-  RANGER: ['net', 'hook'],
-  ROGUE: ['shadow', 'hook'],
-  MAGE: ['lodestone'],
-  HEALER: ['blessing', 'ward', 'horn'],
+export const RELIC_ORDER: RelicId[] = ['javelin', 'hook', 'horn', 'net', 'shadow', 'lodestone', 'blessing', 'ward', 'sanctuary'];
+/** Two abilities at most: the class's own skill, and one found relic carried with it. */
+export const RELIC_SLOTS = 2;
+/** Each class's one skill, from the start (on the SKILL button). */
+export const CLASS_SKILL: Record<'WARRIOR' | 'RANGER' | 'ROGUE' | 'MAGE' | 'HEALER', RelicId> = {
+  WARRIOR: 'horn',
+  RANGER: 'net',
+  ROGUE: 'shadow',
+  MAGE: 'lodestone',
+  HEALER: 'sanctuary',
 };
+/**
+ * Relics are found, never given: pried out of the named butcher at the end of a deep dive, one you
+ * don't have yet each time. Any class can carry one (on the RELIC button).
+ */
+export const FOUND_RELICS: RelicId[] = ['javelin', 'hook'];
+/** A hero's abilities: their skill, then the relic they carry (if any). */
+export const abilitiesOf = (cls: keyof typeof CLASS_SKILL, carried?: RelicId | '') => [CLASS_SKILL[cls], ...(carried ? [carried] : [])];
 
 /**
  * Magic augments: an element fitted to a relic (the Mage's spells cast with the equipped relic's).

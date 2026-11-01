@@ -4,7 +4,8 @@
  */
 import { HERO_SLOTS } from '../shared/progress';
 import { CHAPTER_1 } from '../shared/story';
-import { CLASS_KITS, CLASS_ORDER, CLASS_RELICS, RELICS, WEAPONS, type HeroClass } from '../shared/tuning';
+import { CLASS_ORDER, type HeroClass } from '../shared/tuning';
+import { CLASSES, NO_RELICS } from '../shared/classes';
 import type { Game } from './game';
 import { HEROES } from './sprites';
 
@@ -56,12 +57,13 @@ export class Title {
   }
 
   private create(): void {
-    const c = this.pick;
+    const c = this.pick, s = CLASSES[c];
     this.el.innerHTML = `<div class="tcard"><h1>RELIC</h1><div class="sub">A NEW HERO</div>` +
       `<p class="lede">Choose a class. It is for life: to play another, make another hero.</p><div class="classes">` +
       CLASS_ORDER.map((k) => `<button data-cls="${k}" class="cls ${k === c ? 'on' : ''}">${face(k)}<b>${k}</b></button>`).join('') +
-      `</div><div class="about"><b>${c}</b> ${BLURB[c]}<br><span>Kits: ${CLASS_KITS[c].map((k) => WEAPONS[k].name.toLowerCase()).join(', ')}. ` +
-      `Relics: ${CLASS_RELICS[c].map((r) => RELICS[r].name.toLowerCase()).join(', ')}.</span></div>` +
+      `</div><div class="about"><b>${c}</b> ${BLURB[c]}<dl class="sheet">` +
+      ([['WEAPON', s.weapon], ['GUARD', s.guard], ['DODGE', s.dodge], ['SKILL', s.skill], ['ONLY THEM', s.edge], ['CAN\'T', s.cant]] as const).map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('') +
+      `</dl><span>${NO_RELICS}</span></div>` +
       `<label class="name">NAME <input maxlength="12" value="${NAMES[c]}" autocomplete="off" spellcheck="false"></label>` +
       `<button data-begin class="primary wide">BEGIN AS ${c}</button>${this.g.save.heroes.length ? '<button data-back class="ghost wide">BACK</button>' : ''}</div>`;
   }

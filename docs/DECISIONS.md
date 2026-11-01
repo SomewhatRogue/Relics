@@ -2,6 +2,28 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-01: simpler classes; relics only from deep dives (Claude Opus 5.5)
+
+Kyle: rewrite and simplify what each class has or doesn't; nobody starts with relics, they're found at
+the end of deeper dungeon dives.
+
+- **One sheet per class** (`src/shared/classes.ts`, shown on the start screen): weapon, guard, dodge,
+  one skill, what only that class does, what it can't do. That file is the source for the copy.
+- **One skill each, on the SKILL button (E):** Warrior War Cry, Ranger Hunter's Net, Rogue Shadowstep,
+  Mage Lodestone, Healer **Sanctuary** (the blessed ground and the ward in one cast: ground at your
+  feet or where you point, and a ward on whoever is most hurt). Two Healer buttons became one, which
+  keeps the Healer good alone without a menu.
+- **No relics to start.** The javelin and the grappling hook come out of the named butcher at the
+  bottom of a **deep dive**: one job on the board each day, five rooms, ruin 3, a hunt, 180 gold. The
+  first win gives the javelin, the next the hook; a new one is carried at once. Carry one at a time
+  (RELIC button, R); change which at Ivo the relic-wright. Lore fit: the bible already says relics are
+  pried out of butchers who ate slivers.
+- **The relic wheel is gone** (hold-and-slide, 1 2 3). Two buttons, two keys, nothing to pick
+  mid-fight.
+- **Elements** fit to the skill or to a found relic; a Mage's spells take the element of what's
+  readied. RELIC-WISE now speeds both.
+- Old saves: heroes keep their class and level; their relic list starts empty (nothing was "found").
+
 ## 2026-11-01: bigger rooms, goblins at rest, archers that run, loot that does what it says (Claude Opus 5.5)
 
 Kyle (after playing as a Mage): each area bigger before moving on; loot that didn't do what it said;

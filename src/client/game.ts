@@ -13,14 +13,14 @@ import { BOUNTY, HERO_SLOTS, PERK, SHOP, gainXp, newProfile, type PerkId, type P
 import { Rng } from '../shared/rng';
 import { CHAPTER_1, QUORUM, rewardMult, type WorldState } from '../shared/story';
 import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
-import { CLASS_KITS, CLASS_RELICS, HERO, rollItem, type Augment, type HeroClass, type Item, type RelicId, type WeaponId } from '../shared/tuning';
+import { CLASS_KITS, CLASS_SKILL, FOUND_RELICS, HERO, abilitiesOf, rollItem, type Augment, type HeroClass, type Item, type RelicId, type WeaponId } from '../shared/tuning';
 import { ArenaRoom } from '../sim/room';
 import { goal, interiorRoom, isFinal, newRun, runRoom, tally, type Run } from '../sim/run';
 import type { FightEvent, Hero, Intent } from '../sim/types';
 import { load, store, type Save } from './save';
 
 export type Mode = 'town' | 'yard' | 'run';
-export interface Result { won: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number }
+export interface Result { won: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number; relic?: RelicId }
 /** Something you can use where you stand: a spot, a person, or a door. */
 export interface Near { label: string; talk?: SpotId; arg?: number; key?: string; door?: Block }
 
@@ -91,7 +91,7 @@ export class Game {
     h.arms = { ...p.arms };
     h.perks = [...p.perks];
     h.maxHp = HERO.hp + (p.perks.includes('tough') ? PERK.tough : 0);
-    h.relics = [...CLASS_RELICS[p.cls]];
+    h.relics = abilitiesOf(p.cls, p.relic);
     h.relic = h.relics[0];
     for (const r of h.relics) h.augments[r] = p.augments[r] ?? '';
     h.hp = h.maxHp;
@@ -221,7 +221,10 @@ export class Game {
     p.gold += gold;
     p.runs++;
     const levels = gainXp(p, xp);
-    this.result = { won, job: run.job, gold, xp, rescued, levels };
+    // The bottom of a deep dive: a relic pried out of the butcher (one you don't have; the first is carried at once).
+    const relic = won && run.job.deep ? FOUND_RELICS.find((r) => !p.relics.includes(r)) : undefined;
+    if (relic) (p.relics.push(relic), p.relic ||= relic);
+    this.result = { won, job: run.job, gold, xp, rescued, levels, relic };
     this.run = null;
     this.give({
       stats: { jobs: won ? 1 : 0, saved: rescued, kills: run.kills, dens: run.dens }, rescued, dens: run.dens, days: 1,
@@ -263,6 +266,15 @@ export class Game {
     return item;
   }
 
+  /** Carry a relic you've found into your next job (at the relic-wright). */
+  carry(r: RelicId): void {
+    const p = this.profile;
+    if (!p.relics.includes(r)) return;
+    p.relic = r;
+    this.equip(this.hero, this.hero);
+    store(this.save);
+  }
+
   /** Take up another of your class's kits (at the smith). */
   setKit(k: WeaponId): void {
     const p = this.profile;
@@ -274,7 +286,7 @@ export class Game {
   /** The relic-wright fits an element to a relic (or takes it off, free). */
   fitAugment(r: RelicId, el: Augment): boolean {
     const p = this.profile, cost = el ? SHOP.augment : 0;
-    if (p.gold < cost || !CLASS_RELICS[p.cls].includes(r)) return false;
+    if (p.gold < cost || (r !== CLASS_SKILL[p.cls] && !p.relics.includes(r))) return false;
     p.gold -= cost;
     p.augments[r] = el;
     this.hero.augments[r] = el;

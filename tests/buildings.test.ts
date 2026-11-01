@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { collide, doorAt, useMap } from '../src/shared/arena';
 import { townInterior } from '../src/shared/interiors';
-import { PLACES, board, type Job } from '../src/shared/jobs';
+import { PLACES, board, deepDive, type Job } from '../src/shared/jobs';
 import { BLAZE } from '../src/shared/props';
 import { newWorld } from '../src/shared/story';
 import { planRoom } from '../src/shared/terrain';
@@ -52,11 +52,43 @@ describe('heroes', () => {
     const g = new Game();
     g.create('WARRIOR', 'b');
     g.profile.gold = 50;
-    expect(g.fitAugment('javelin', 'fire')).toBe(true);
-    expect(g.fitAugment('hook', 'frost')).toBe(false);
-    expect(g.hero.augments.javelin).toBe('fire');
+    expect(g.fitAugment('horn', 'fire')).toBe(true);
+    expect(g.fitAugment('javelin', 'frost')).toBe(false);
+    expect(g.hero.augments.horn).toBe('fire');
     g.enterYard();
-    expect(g.hero.augments.javelin).toBe('fire');
+    expect(g.hero.augments.horn).toBe('fire');
+  });
+});
+
+describe('relics come from deep dives', () => {
+  const win = (g: Game) => (g as unknown as { finish(won: boolean): void }).finish(true);
+
+  it('every board has one deep dive: five rooms, a named butcher at the bottom', () => {
+    const deep = board(3, false).filter((j) => j.deep);
+    expect(deep.length).toBe(1);
+    expect(deep[0].rooms).toBe(5);
+    expect(deep[0].boss).toBeTruthy();
+  });
+
+  it('a hero starts with no relic, wins one at the bottom of a deep dive, and carries what they found', () => {
+    const g = new Game();
+    g.create('MAGE', 'r');
+    expect(g.profile.relics).toEqual([]);
+    expect(g.hero.relics).toEqual(['lodestone']);
+    g.startJob(board(1, false)[0]);
+    win(g);
+    expect(g.profile.relics).toEqual([]);
+    g.startJob(deepDive(1));
+    win(g);
+    expect(g.result?.relic).toBe('javelin');
+    expect(g.hero.relics).toEqual(['lodestone', 'javelin']);
+    g.carry('hook');
+    expect(g.profile.relic).toBe('javelin');
+    g.startJob(deepDive(2));
+    win(g);
+    expect(g.result?.relic).toBe('hook');
+    g.carry('hook');
+    expect(g.hero.relics).toEqual(['lodestone', 'hook']);
   });
 });
 

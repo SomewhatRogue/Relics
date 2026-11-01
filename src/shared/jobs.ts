@@ -34,6 +34,8 @@ export interface Job {
   text: string;
   /** The named goblin to kill (hunts and the story mission). */
   boss?: string;
+  /** A deep dive: longer, worse, a named butcher at the bottom, and a relic pried out of it. */
+  deep?: boolean;
 }
 
 const BOSSES = ['MAWL', 'SKARN', 'OLD KNUCKLES', 'OLD SPOON', 'GUTCHAIN', 'MOTHER RUST'];
@@ -48,8 +50,22 @@ function describe(o: Objective, p: Place, boss: string): { title: string; text: 
 /** Under Wickhold itself: on the board once the town works have driven the goblins below to bay. */
 export const SEWERS: Place = { name: 'The Wickhold Sewers', kind: 'mine', region: 'Wickhold', ruin: 2 };
 
-/** Today's three jobs (one of them in the sewers, once they're open). */
+/** Today's jobs: three ordinary ones (one in the sewers, once they're open) and a deep dive. */
 export function board(day: number, sewers = false): Job[] {
+  return [...ordinary(day, sewers), deepDive(day)];
+}
+
+/** Five rooms into the worst of it, a named butcher at the bottom with a relic in its gut. */
+export function deepDive(day: number): Job {
+  const rng = new Rng(day * 613 + 7), place = rng.pick(PLACES.filter((p) => p.ruin >= 2)), boss = rng.pick(BOSSES);
+  return {
+    id: `d${day}-deep`, place: { ...place, ruin: 3 }, objective: 'hunt', twist: rng.next() < 0.5 ? 'night' : 'none', rooms: 5, boss, deep: true,
+    reward: 180, seed: day * 131 + 59, title: `Deep: ${boss} at ${place.name}`,
+    text: `Five rooms down through ${place.name}, the worst of it, and ${boss} at the bottom. The big ones carry relics in them. Cut it out of ${boss} and it's yours.`,
+  };
+}
+
+function ordinary(day: number, sewers: boolean): Job[] {
   const rng = new Rng(day * 977 + 31);
   const objectives: Objective[] = rng.shuffle(['rescue', 'hunt', 'larder', 'burn', 'rescue']);
   const places = rng.shuffle([...PLACES]);

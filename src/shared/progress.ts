@@ -13,7 +13,7 @@ export type PerkId = 'tough' | 'endurance' | 'relicsworn' | 'footwork' | 'guard'
 export const PERKS: Record<PerkId, { name: string; text: string; cls?: HeroClass }> = {
   tough: { name: 'TOUGH', text: '20 more health' },
   endurance: { name: 'ENDURANCE', text: 'Stamina comes back a third faster' },
-  relicsworn: { name: 'RELIC-WISE', text: 'Relics recharge a fifth faster' },
+  relicsworn: { name: 'RELIC-WISE', text: 'Your skill and relic recharge a fifth faster' },
   footwork: { name: 'FOOTWORK', text: 'Dodge again a fifth sooner' },
   guard: { name: 'GUARD', text: 'A slightly wider parry window' },
   secondwind: { name: 'SECOND WIND', text: 'Back on your feet sooner when downed' },
@@ -56,7 +56,10 @@ export interface Profile {
   picks: number;
   arms: Partial<Record<WeaponId, Item>>;
   weapon: WeaponId;
-  /** Elements the relic-wright has fitted to this hero's relics. */
+  /** Relics found at the end of deep dives, and the one carried into a job ('' none). */
+  relics: RelicId[];
+  relic: RelicId | '';
+  /** Elements the relic-wright has fitted to this hero's skill and relics. */
   augments: Partial<Record<RelicId, Augment>>;
   runs: number;
   stats: Stats;
@@ -67,7 +70,7 @@ export interface Profile {
 }
 
 export const newProfile = (cls: HeroClass = 'WARRIOR', name = 'HERO'): Profile =>
-  ({ id: heroId(), name, cls, gold: 0, xp: 0, level: 1, perks: [], picks: 0, arms: {}, weapon: CLASS_KITS[cls][0], augments: {}, runs: 0, stats: newStats(), wish: false, dice: 0 });
+  ({ id: heroId(), name, cls, gold: 0, xp: 0, level: 1, perks: [], picks: 0, arms: {}, weapon: CLASS_KITS[cls][0], relics: [], relic: '', augments: {}, runs: 0, stats: newStats(), wish: false, dice: 0 });
 
 function heroId(): string {
   const c = 'abcdefghijkmnpqrstuvwxyz23456789';

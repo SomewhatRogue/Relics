@@ -1,5 +1,5 @@
 /** Relic: Wickhold, the Training Yard and runs. The rooms run here in the browser (solo is a party of one). */
-import { CLASS_ORDER, RELICS, RELIC_SLOTS, TRAITS, WEAPONS, itemName, type HeroClass } from '../shared/tuning';
+import { CLASS_ORDER, RELICS, TRAITS, WEAPONS, itemName, type HeroClass } from '../shared/tuning';
 import { MAX_DOWNS, goal } from '../sim/run';
 import type { Intent } from '../sim/types';
 import { Game, ME } from './game';
@@ -25,10 +25,7 @@ const game = new Game();
 const scene = new Scene(document.getElementById('game') as HTMLCanvasElement);
 const fx = new Fx();
 const panel = new Panel();
-const input = new Input(
-  () => scene.heroScreen(),
-  () => game.hero.relics.slice(0, RELIC_SLOTS).map((r) => ({ name: RELICS[r].short, el: game.hero.augments[r], active: r === game.hero.relic, ready: 1 - Math.max(0, game.hero.relicReady[r] - game.room.time) / RELICS[r].cooldown })),
-);
+const input = new Input(() => scene.heroScreen());
 const $ = (s: string) => document.querySelector(s) as HTMLElement;
 const card = new LootCard((id) => input.take(id));
 const music = new Music();
@@ -78,11 +75,11 @@ const KIT: Record<string, string> = {
 
 let parries = 0;
 const townTips = input.touch
-  ? ['Walk to the JOB BOARD and tap USE to take a job', 'Walk up into a door to go in. Everyone inside has something to say', 'The FORGE: the smith changes your kit, the relic-wright fits elements', 'The TRAINING HALL: perks, and the squire takes you to the yard', 'The TOWN HALL: the reeve and the council decide the chapter']
-  : ['Walk to the JOB BOARD and press E to take a job', 'Walk up into a door to go in. Press E by anyone to talk', 'The FORGE: the smith changes your kit, the relic-wright fits elements', 'The TRAINING HALL: perks, and the squire takes you to the yard', 'The TOWN HALL: the reeve and the council decide the chapter'];
+  ? ['Walk to the JOB BOARD and tap USE to take a job', 'Walk up into a door to go in. Everyone inside has something to say', 'The FORGE: the smith changes your kit, the relic-wright fits elements and your relics', 'The TRAINING HALL: perks, and the squire takes you to the yard', 'The TOWN HALL: the reeve and the council decide the chapter']
+  : ['Walk to the JOB BOARD and press E to take a job', 'Walk up into a door to go in. Press E by anyone to talk', 'The FORGE: the smith changes your kit, the relic-wright fits elements and your relics', 'The TRAINING HALL: perks, and the squire takes you to the yard', 'The TOWN HALL: the reeve and the council decide the chapter'];
 const tips = input.touch
-  ? ['Stun or get behind a small goblin, then GRAB it', 'Warriors can GRAB barrels and tables and throw them', 'Break the oil barrel near goblins and they burn', 'Holding one: SLAM it, or THROW it at another', 'Goblins drop weapons. Stand on one and TAKE it', 'Traits reward skill: parries, dodges, perfect releases', 'Walk into a cottage or barn: goblins, and sometimes someone caged', 'HEALER: BLESS the ground you stand on; WARD the most hurt ally (or you)', 'Oil and fire burn wooden buildings down. Dens breed goblins', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'RELIC: pin a scrapper to the wall', 'Striped circles cannot be blocked: ROLL out', 'HOLD RELIC to pick another relic', 'TWIN DAGGERS: roll behind a goblin and BACKSTAB']
-  : ['G grabs a stunned goblin (or one you got behind). Click to slam, G to throw', 'Warriors: G lifts barrels and tables. Throw them, or slam them down', 'Break the oil barrel near goblins and they burn', 'Goblins drop weapons. Stand on one and press F to take it', 'Bows: release on the white flash. Held too long, the shot weakens', 'Walk up into a cottage door to go in. Fire burns buildings down', 'Healer: BLESS lights the ground where you point; WARD shields an ally and throws arrows back', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: pin a scrapper to the wall. 1 2 3 pick a relic', 'Striped circles cannot be blocked: SPACE to roll', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or rod', 'Daggers: roll behind a goblin and BACKSTAB'];
+  ? ['Stun or get behind a small goblin, then GRAB it', 'Warriors can GRAB barrels and tables and throw them', 'Break the oil barrel near goblins and they burn', 'Holding one: SLAM it, or THROW it at another', 'Goblins drop weapons. Stand on one and TAKE it', 'Traits reward skill: parries, dodges, perfect releases', 'Walk into a cottage or barn: goblins, and sometimes someone caged', 'HEALER: SANCTUARY blesses the ground and wards whoever is most hurt', 'Oil and fire burn wooden buildings down. Burn out the dens', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'SKILL: every class has one. Each recharges', 'Striped circles cannot be blocked: ROLL out', 'DEEP jobs end at a named butcher. Win one for a RELIC', 'TWIN DAGGERS: roll behind a goblin and BACKSTAB']
+  : ['G grabs a stunned goblin (or one you got behind). Click to slam, G to throw', 'Warriors: G lifts barrels and tables. Throw them, or slam them down', 'Break the oil barrel near goblins and they burn', 'Goblins drop weapons. Stand on one and press F to take it', 'Bows: release on the white flash. Held too long, the shot weakens', 'Walk up into a cottage door to go in. Fire burns buildings down', 'Healer: E for SANCTUARY. Blessed ground, and a ward that throws arrows back', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: your class skill. R: a relic, once you have won one on a DEEP job', 'Striped circles cannot be blocked: SPACE to roll', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or rod', 'Daggers: roll behind a goblin and BACKSTAB'];
 let tipAt = -99, tipI = 0;
 
 function hud(now: number): void {
@@ -104,13 +101,21 @@ function hud(now: number): void {
     $('.tb.grab').textContent = carrying ? 'THROW' : 'GRAB';
     $('.tb.attack').textContent = carrying ? 'SLAM' : 'ATTACK';
   }
-  $('.rlc').textContent = (input.touch ? '' : 'E ') + relicLabel(me);
-  $('.rlc').dataset.el = me.augments[me.relic];
-  if (input.touch) ($('.tb.relic').textContent = RELICS[me.relic].short), ($('.tb.relic').dataset.el = me.augments[me.relic]);
-  const wait = Math.max(0, me.relicReady[me.relic] - room.time);
-  $('.rcd').textContent = wait > 0 ? wait.toFixed(1) : 'READY';
-  $('.rcd').classList.toggle('wait', wait > 0);
-  if (input.touch) document.querySelector<HTMLElement>('.tb.relic')!.style.setProperty('--cd', 100 * (1 - wait / RELICS[me.relic].cooldown) + '%');
+  // The class skill (E, SKILL) and the relic carried, if any (R, RELIC), each with its cooldown.
+  const [skill, relic] = me.relics, left = (r: typeof skill) => Math.max(0, me.relicReady[r] - room.time);
+  const tag = (r: typeof skill) => relicLabel(me, r) + (left(r) > 0 ? ' ' + left(r).toFixed(1) : '');
+  $('.rlc').textContent = (input.touch ? '' : 'E ') + tag(skill);
+  $('.rlc').dataset.el = me.augments[skill];
+  $('.rcd').textContent = relic ? (input.touch ? '' : 'R ') + tag(relic) : '';
+  $('.rcd').classList.toggle('wait', !!relic && left(relic) > 0);
+  if (input.touch) {
+    const sb = $('.tb.relic'), rb = $('.tb.relic2');
+    sb.textContent = RELICS[skill].short;
+    sb.dataset.el = me.augments[skill];
+    sb.style.setProperty('--cd', 100 * (1 - left(skill) / RELICS[skill].cooldown) + '%');
+    rb.hidden = !relic;
+    if (relic) (rb.textContent = RELICS[relic].short), (rb.dataset.el = me.augments[relic]), rb.style.setProperty('--cd', 100 * (1 - left(relic) / RELICS[relic].cooldown) + '%');
+  }
   // The banner: where you are and what you're doing.
   const run = game.run;
   if (game.mode === 'run' && run) {

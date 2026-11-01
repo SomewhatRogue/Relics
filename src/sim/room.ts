@@ -200,6 +200,7 @@ export class ArenaRoom {
     else if (h.relic === 'shadow') shadowstep(h, this.enemies, w.ev);
     else if (h.relic === 'horn') rally(h, this.heroes, this.enemies, w.now, w.ev);
     else if (h.relic === 'ward') ward(h, this.heroes, this.intents.get(h.id), w.now, w.ev);
+    else if (h.relic === 'sanctuary') (this.zones.push(hallow(h, this.intents.get(h.id), w.now, el, w.ev)), ward(h, this.heroes, this.intents.get(h.id), w.now, w.ev));
     else this.zones.push(hallow(h, this.intents.get(h.id), w.now, el, w.ev));
   }
 

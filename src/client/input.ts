@@ -1,11 +1,10 @@
 /**
  * Turns keys, mouse and touch into an Intent. Laptop: WASD to move, mouse to aim, left click to
  * attack, hold right click to block (tap it to parry), Space to roll; J / K work too;
- * E relic, 1 2 3 or R to pick one, G grab (then click to slam, G to throw). Phone (upright):
+ * E the class skill, R the relic carried, G grab (then click to slam, G to throw). Phone (upright):
  * a floating stick on the left, Attack, Block and Roll under the right thumb.
  */
 import { NO_INTENT, type Intent } from '../sim/types';
-import { RelicWheel, type Slot } from './relicwheel';
 import { unlockAudio } from './sfx';
 
 export class Input {
@@ -19,7 +18,7 @@ export class Input {
   private stickEl!: HTMLElement;
   private knobEl!: HTMLElement;
 
-  constructor(private heroScreen: () => [number, number, number] | null, private relicSlots: () => Slot[]) {
+  constructor(private heroScreen: () => [number, number, number] | null) {
     const unlock = () => unlockAudio();
     for (const t of ['touchend', 'pointerup', 'click', 'keydown']) addEventListener(t, unlock, { passive: true });
     addEventListener('keydown', (e) => {
@@ -28,10 +27,9 @@ export class Input {
       this.keys.add(k);
       if (k === ' ') this.intent.rollSeq++, e.preventDefault();
       if (k === 'j') (this.intent.attackSeq++), (this.attackHeld.key = true);
-      if (k === 'e') this.intent.relicSeq++;
-      if (k === 'r') this.intent.relicSwapSeq++;
+      if (k === 'e') this.use(0);
+      if (k === 'r') this.use(1);
       if (k === 'g') this.intent.grabSeq++;
-      if (k === '1' || k === '2' || k === '3') (this.intent.relicPick = Number(k) - 1), this.intent.relicPickSeq++;
       if (k === 'k') (this.intent.blockSeq++), (this.blockHeld.key = true);
     });
     addEventListener('keyup', (e) => {
@@ -104,45 +102,18 @@ export class Input {
       el.addEventListener('touchcancel', release, { passive: false });
     };
     btn('.attack', () => ((this.intent.attackSeq++), (this.attackHeld.touch = true)), () => (this.attackHeld.touch = false));
-    this.relicButton(ui.querySelector('.relic') as HTMLElement);
+    btn('.relic', () => this.use(0));
+    btn('.relic2', () => this.use(1));
     btn('.grab', () => this.intent.grabSeq++);
     btn('.roll', () => this.intent.rollSeq++);
     btn('.block', () => ((this.intent.blockSeq++), (this.blockHeld.touch = true)), () => (this.blockHeld.touch = false));
   }
 
-  /** Tap to use the relic; hold to open the wheel, slide onto a relic and let go to equip it. */
-  private relicButton(el: HTMLElement): void {
-    const wheel = new RelicWheel(this.relicSlots);
-    let id = '', open = false, pick = -1, timer = 0;
-    el.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      el.classList.add('down');
-      id = String(e.changedTouches[0].identifier);
-      open = false;
-      pick = -1;
-      timer = window.setTimeout(() => {
-        open = true;
-        wheel.show(el);
-        navigator.vibrate?.(12);
-      }, 260);
-    }, { passive: false });
-    el.addEventListener('touchmove', (e) => {
-      if (!open) return;
-      e.preventDefault();
-      for (const t of Array.from(e.changedTouches)) if (String(t.identifier) === id) pick = wheel.hover(t.clientX, t.clientY);
-    }, { passive: false });
-    const end = (fire: boolean) => (e: TouchEvent) => {
-      e.preventDefault();
-      el.classList.remove('down');
-      clearTimeout(timer);
-      if (open) {
-        if (pick >= 0) (this.intent.relicPick = pick), this.intent.relicPickSeq++;
-        wheel.hide();
-      } else if (fire) this.intent.relicSeq++;
-      open = false;
-    };
-    el.addEventListener('touchend', end(true), { passive: false });
-    el.addEventListener('touchcancel', end(false), { passive: false });
+  /** Use an ability: 0 the class's skill, 1 the relic carried. */
+  use(slot: number): void {
+    this.intent.relicPick = slot;
+    this.intent.relicPickSeq++;
+    this.intent.relicSeq++;
   }
 
   /** Take a loot drop (the card's button, or F). */

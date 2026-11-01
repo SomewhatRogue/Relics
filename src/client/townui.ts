@@ -5,7 +5,7 @@ import { CHAPTER_1, QUORUM, chapterGoals, councilOpen, marketOpen, rewardMult } 
 import { TRAINERS, housesFor, type SpotId } from '../shared/town';
 import { ballot } from '../shared/worldsync';
 import { openSquare } from './squareui';
-import { AUGMENTS, CLASS_KITS, CLASS_ORDER, CLASS_RELICS, ELEMENT_NAME, RELICS, TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
+import { AUGMENTS, CLASS_KITS, CLASS_ORDER, CLASS_SKILL, ELEMENT_NAME, RELICS, TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
 import type { Game } from './game';
 import type { Panel } from './panels';
 import { RUMOURS } from './rumours';
@@ -21,7 +21,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
   if (id === 'board') {
     const jobs = g.jobs();
     const html = jobs.map((j, i) =>
-      `<div class="job ${j.objective === 'story' ? 'story' : ''}"><div class="t">${j.objective === 'story' ? 'STORY: ' : ''}${j.title}</div>` +
+      `<div class="job ${j.objective === 'story' ? 'story' : j.deep ? 'deep' : ''}"><div class="t">${j.objective === 'story' ? 'STORY: ' : ''}${j.title}</div>` +
       `<div class="m">${j.place.name}, ${j.place.region}. ${RUIN[j.place.ruin]}. ${j.rooms} rooms${j.twist === 'night' ? '. At night' : ''}. Pays ${Math.round(j.reward * rewardMult(w))} gold.</div>` +
       `<div class="d">${j.text}</div><button data-job="${i}">TAKE THE JOB</button></div>`).join('');
     panel.show(`JOB BOARD, DAY ${w.day}`, html);
@@ -67,14 +67,16 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       if (it) panel.show('BOUGHT', p(itemLine(it)) + p(forged ? 'Dessa counts your coin twice and smiles once.' : 'Your old one goes on Halvard\'s rack. He says thank you, by not saying anything.'), [{ label: 'MORE', act: again }]);
     } }, ...take]);
   } else if (id === 'wright') {
-    const rel = CLASS_RELICS[pr.cls];
-    const html = say('Ivo', 'Fire, frost or storm, set right into the relic. Hear it hum? It likes you. Don\'t let it like you too much. I can take it out again, for nothing; the putting in costs.') +
+    // Your skill, and any relic you've found: fit an element, or choose which relic to carry.
+    const rel = [CLASS_SKILL[pr.cls], ...pr.relics];
+    const html = say('Ivo', pr.relics.length ? 'Fire, frost or storm, set right into it. Hear it hum? It likes you. Don\'t let it like you too much.' : 'No relic yet? They come out of the big ones, at the bottom of the deep jobs. Bring me one. Meanwhile I can set an element into that trick of yours.') +
       p(`You have ${pr.gold} gold. An element costs ${SHOP.augment}; taking one out is free.`) +
-      rel.map((r) => p(`<b>${RELICS[r].name}</b>: ${pr.augments[r] ? ELEMENT_NAME[pr.augments[r] as keyof typeof ELEMENT_NAME] : 'plain'}`)).join('');
-    const buttons = rel.flatMap((r) => AUGMENTS.filter((a) => a !== (pr.augments[r] ?? '')).map((a) => ({
+      rel.map((r, i) => p(`<b>${RELICS[r].name}</b>${i ? (pr.relic === r ? ' (carried)' : ' (on the shelf)') : ' (your skill)'}: ${pr.augments[r] ? ELEMENT_NAME[pr.augments[r] as keyof typeof ELEMENT_NAME] : 'plain'}`)).join('');
+    const carry = pr.relics.filter((r) => r !== pr.relic).map((r) => ({ label: `CARRY THE ${RELICS[r].short}`, primary: true, act: () => (g.carry(r), again()) }));
+    const buttons = [...carry, ...rel.flatMap((r) => AUGMENTS.filter((a) => a !== (pr.augments[r] ?? '')).map((a) => ({
       label: a ? `${RELICS[r].short}: ${ELEMENT_NAME[a as keyof typeof ELEMENT_NAME]}` : `${RELICS[r].short}: PLAIN`,
       disabled: !!a && pr.gold < SHOP.augment, act: () => (g.fitAugment(r, a), again()),
-    })));
+    })))];
     panel.show('IVO THE RELIC-WRIGHT', html, buttons);
   } else if (id === 'church') {
     panel.show('FATHER ODRIC', say('Father Odric', 'Give what you can spare. Then a little of what you can\'t. That\'s the part it burns.') +
@@ -140,6 +142,7 @@ export function showResult(g: Game, panel: Panel): void {
   g.result = null;
   const lines = [`Gold: ${r.gold}`, `Experience: ${r.xp}`, r.won ? `People brought home: ${r.rescued}` : 'Driven back: half the gold, nobody saved.'];
   if (r.levels) lines.push(`You've grown. ${title(TRAINERS[g.profile.cls].name)} will want to see you, at ${TRAINERS[g.profile.cls].where}.`);
+  if (r.relic) lines.push(`<b>You cut a relic out of ${r.job.boss}: the ${RELICS[r.relic].name}.</b> It's on your RELIC button. Ivo at the forge can set an element into it.`);
   if (r.won && r.job.objective === 'story') lines.push(`<b>Barrowby's bell rings across the valley.</b> The council can sit once enough people are home.`);
   panel.show(r.won ? 'JOB DONE' : 'DRIVEN BACK', p(`<b>${r.job.title}</b>`) + lines.map(p).join(''), [{ label: 'BACK TO WICKHOLD', primary: true, act: () => panel.hide() }], true);
 }

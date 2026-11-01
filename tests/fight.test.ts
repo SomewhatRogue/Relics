@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { ArenaRoom } from '../src/sim/room';
 import { BUTCHER, CHARGE, GUARD, HERO, ROLL, TICK, WEAPONS } from '../src/shared/tuning';
-import { NO_INTENT, type Intent } from '../src/sim/types';
+import { NO_INTENT, type Hero, type Intent } from '../src/sim/types';
+import type { RelicId } from '../src/shared/magic';
+
+/** Hand a hero a found relic and ready it (nobody starts with one). */
+const arm = (h: Hero, r: RelicId) => ((h.relics = [h.relics[0], r]), (h.relic = r));
 
 const SWORD = WEAPONS.sword;
 
@@ -231,6 +235,7 @@ describe('relics', () => {
     const { room, h, t } = onTarget(3);
     Object.assign(t, { x: 9, y: 4 });
     Object.assign(h, { x: 9, y: 9 });
+    arm(h, 'javelin');
     room.setIntent('me', intent({ relicSeq: 1, ay: -1 }));
     let pinned = false;
     for (let i = 0; i < ticks(1.2); i++) {
@@ -247,6 +252,7 @@ describe('relics', () => {
     const { room, h, t } = onTarget(0);
     Object.assign(t, { x: 9, y: 5 });
     Object.assign(h, { x: 9, y: 9 });
+    arm(h, 'javelin');
     room.setIntent('me', intent({ relicSeq: 1, ay: -1 }));
     run(room, ticks(0.8));
     expect(room.javelins[0]?.state).toBe('body');
@@ -257,10 +263,8 @@ describe('relics', () => {
     const { room, h, t } = onTarget(3);
     Object.assign(t, { x: 9, y: 4 });
     Object.assign(h, { x: 9, y: 10 });
-    room.setIntent('me', intent({ relicSwapSeq: 1 }));
-    room.step();
-    expect(h.relic).toBe('hook');
-    room.setIntent('me', intent({ relicSwapSeq: 1, relicSeq: 1, ay: -1 }));
+    arm(h, 'hook');
+    room.setIntent('me', intent({ relicSeq: 1, ay: -1 }));
     run(room, ticks(1));
     expect(Math.hypot(t.x - h.x, t.y - h.y)).toBeLessThan(1.3);
     expect(t.act === 'stunned' || t.act === 'chase' || t.act === 'attack').toBe(true);
@@ -270,7 +274,8 @@ describe('relics', () => {
     const { room, h, t } = onTarget(0);
     Object.assign(t, { x: 9, y: 4 });
     Object.assign(h, { x: 9, y: 10 });
-    room.setIntent('me', intent({ relicSwapSeq: 1, relicSeq: 1, ay: -1 }));
+    arm(h, 'hook');
+    room.setIntent('me', intent({ relicSeq: 1, ay: -1 }));
     run(room, ticks(1.2));
     expect(Math.hypot(t.x - h.x, t.y - h.y)).toBeLessThan(1.4);
   });
@@ -281,6 +286,7 @@ describe('corpses and backstabs', () => {
     const { room, h, t } = onTarget(3);
     Object.assign(t, { x: 9, y: 4, hp: 5 });
     Object.assign(h, { x: 9, y: 9 });
+    arm(h, 'javelin');
     room.setIntent('me', intent({ relicSeq: 1, ay: -1 }));
     run(room, ticks(1.2));
     expect(t.act).toBe('dead');
@@ -367,14 +373,18 @@ describe('kits block and dodge differently', () => {
 });
 
 describe('relic loadout', () => {
-  it('picks a relic by its slot, and ignores an empty slot', () => {
+  it('starts with only the class skill; a found relic takes the second slot; an empty slot does nothing', () => {
     const { room, h } = onTarget(1);
-    expect(h.relics).toEqual(['javelin', 'hook', 'horn']);
+    expect(h.relics).toEqual(['horn']);
     room.setIntent('me', intent({ relicPickSeq: 1, relicPick: 1 }));
     room.step();
-    expect(h.relic).toBe('hook');
-    room.setIntent('me', intent({ relicPickSeq: 2, relicPick: 3 }));
+    expect(h.relic).toBe('horn');
+    h.relics = ['horn', 'hook'];
+    room.setIntent('me', intent({ relicPickSeq: 2, relicPick: 1 }));
     room.step();
     expect(h.relic).toBe('hook');
+    room.setIntent('me', intent({ relicPickSeq: 3, relicPick: 0 }));
+    room.step();
+    expect(h.relic).toBe('horn');
   });
 });

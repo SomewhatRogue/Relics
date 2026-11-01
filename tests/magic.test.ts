@@ -135,11 +135,11 @@ describe('class relics', () => {
     for (let i = 1; i <= n; i++) room.setIntent('me', intent({ classSeq: i })), room.step();
   };
 
-  it('each class carries its own relics', () => {
+  it('each class starts with its one skill and no relics', () => {
     const { room, h } = onTarget(1);
     const seen: string[] = [];
     for (let i = 1; i <= 5; i++) room.setIntent('me', intent({ classSeq: i })), room.step(), seen.push(h.relics.join(' '));
-    expect(seen).toEqual(['net hook', 'shadow hook', 'lodestone', 'blessing ward horn', 'javelin hook horn']);
+    expect(seen).toEqual(['net', 'shadow', 'lodestone', 'sanctuary', 'horn']);
   });
 
   it("the ranger's net snares a scrapper flat", () => {
@@ -181,12 +181,12 @@ describe('class relics', () => {
     expect(run(room, 1.4).some((e) => e.k === 'burst')).toBe(true);
   });
 
-  it("the healer's blessed ground mends and blesses allies in it, slowly, and burns goblins in it", () => {
+  it("the healer's sanctuary: blessed ground mends and blesses allies in it, slowly, and burns goblins in it", () => {
     const room = new ArenaRoom(1, { squire: true });
     const h = room.join('me');
     const q = room.heroes.find((x) => x.id === 'squire')!;
     for (let i = 1; i <= 4; i++) room.setIntent('me', intent({ classSeq: i })), room.step();
-    expect(h.relic).toBe('blessing');
+    expect(h.relic).toBe('sanctuary');
     Object.assign(h, { x: q.x - 1, y: q.y, hp: 60 });
     q.hp = 40;
     const g = room.enemies.find((e) => e.kind === 'scrapper')!;
@@ -206,10 +206,8 @@ describe('class relics', () => {
     const room = new ArenaRoom(1, { scrappers: false });
     const h = room.join('me');
     for (let i = 1; i <= 4; i++) room.setIntent('me', intent({ classSeq: i })), room.step();
-    room.setIntent('me', intent({ classSeq: 4, relicPick: 1, relicPickSeq: 1 }));
-    room.step();
-    expect(h.relic).toBe('ward');
-    room.setIntent('me', intent({ classSeq: 4, relicPick: 1, relicPickSeq: 1, relicSeq: 1 }));
+    expect(h.relic).toBe('sanctuary');
+    room.setIntent('me', intent({ classSeq: 4, relicSeq: 1 }));
     run(room, 0.5);
     expect(h.wardUntil).toBeGreaterThan(room.time);
     const a = room.enemies.find((e) => e.kind === 'butcher')!;
@@ -227,23 +225,21 @@ describe('class relics', () => {
     const q = room.heroes.find((x) => x.id === 'squire')!;
     Object.assign(h, { x: q.x - 3, y: q.y, stamina: 10 });
     q.stamina = 5;
-    room.setIntent('me', intent({ relicPickSeq: 1, relicPick: 2 }));
-    room.step();
     expect(h.relic).toBe('horn');
-    room.setIntent('me', intent({ relicPickSeq: 1, relicPick: 2, relicSeq: 1 }));
+    room.setIntent('me', intent({ relicSeq: 1 }));
     const ev = run(room, 0.5);
     expect(ev.some((e) => e.k === 'rally')).toBe(true);
     expect(q.stamina).toBeGreaterThan(90);
     expect(q.rallyUntil).toBeGreaterThan(room.time);
   });
 
-  it('cycles the equipped relic through its augments', () => {
+  it('cycles the readied skill through its elements', () => {
     const { room, h } = onTarget(1);
     const seen: string[] = [];
     for (let i = 1; i <= 4; i++) {
       room.setIntent('me', intent({ augmentSeq: i }));
       room.step();
-      seen.push(h.augments.javelin);
+      seen.push(h.augments.horn);
     }
     expect(seen).toEqual(['fire', 'frost', 'storm', '']);
   });
