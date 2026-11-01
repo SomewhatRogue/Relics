@@ -2,6 +2,26 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-01: the wood, slower and clearer (Claude Opus 5.5)
+
+Kyle, after playing: goblins didn't always come at you; Hew's words were hard to read under threat. He
+asked for a pause with praise when you do it right, the control shown for your device, slower and more
+readable blows (even a freeze on the flash), and an opening where you lie still while the screen fades in
+and Hew walks over, checks you and pulls you up.
+
+- **The opening** (`WAKE` in `sim/wood.ts`): you lie still (no input) as the screen fades up over 2.5 s;
+  Hew walks over slowly, says three lines, hauls you up at 11 s. Then a MOVE card; walking a few steps
+  starts the first lesson.
+- **Holds** (`WoodState.hold`, applied by `Game.holding`): the world stops for a lesson card (Hew's
+  line, the move, its control for this device, what it's for; GOT IT, Enter or any action key), for a
+  freeze-frame on the first two blows of each lesson just before they land ("NOW: ROLL OUT", "IT FLASHES
+  WHITE: NOW", the key; it waits for that move, which then goes through as the world restarts), and for
+  about a second of praise when you get it right (first three per lesson). On a phone the button to
+  press pulses.
+- **Pacing:** every goblin in the wood but the Stoker is drilled: wind-ups half again as long, and only
+  the nearest one comes at you (the rest hang back); the one coming is kept coming.
+- Laptops: a parry needs you facing the blow, so aim at the goblin with the mouse (phones turn you).
+
 ## 2026-11-01: the prologue, the wood in Greyhollow (Claude Opus 5.5)
 
 Kyle: a tutorial before town; woken and saved by an old man after a battle, taught attack, then dodge,

@@ -266,3 +266,27 @@ body[data-mode='wood']:not([data-taught~='relic']) .tb.relic2,
 body[data-mode='wood']:not([data-taught~='potion']) .tb.potion,
 body[data-mode='wood']:not([data-taught~='grab']) .tb.grab { display: none !important; }
 body[data-mode='wood'] .tb.use { display: none; }
+
+/* The wood's lessons: the card, the freeze-frame prompt, praise, the fade in, the button to press. */
+#lesson { position: fixed; inset: 0; z-index: 9; display: flex; align-items: center; justify-content: center; padding: 16px; pointer-events: none; }
+#lesson[hidden] { display: none; }
+#lesson.card { background: #0d0b1099; pointer-events: auto; }
+#lesson .card { width: min(440px, 100%); padding: 18px 20px; background: #14121af4; border: 1px solid #6a5a3a; border-radius: 8px; color: #e8e0d0; text-align: center; display: flex; flex-direction: column; gap: 10px; }
+#lesson .who { color: #ffb35a; font-size: 10px; letter-spacing: 0.25em; }
+#lesson .line { margin: 0; font-size: 15px; line-height: 1.5; }
+#lesson .move { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 4px; }
+#lesson .move span { color: #ffd27a; font-size: 18px; font-weight: 700; letter-spacing: 0.15em; }
+#lesson kbd { display: inline-block; padding: 6px 12px; border: 2px solid #e8e0d0; border-bottom-width: 4px; border-radius: 6px; background: #2a2733; color: #fff1d0; font: 700 14px/1 inherit; letter-spacing: 0.08em; }
+#lesson .how { margin: 0; color: #b8b2c4; font-size: 12px; line-height: 1.5; }
+#lesson .go-hint { margin: 0; color: #8a8494; font-size: 11px; }
+#lesson button { margin-top: 4px; min-height: 44px; background: #4a3414; border: 1px solid #ffd27a; border-radius: 6px; color: #fff1d0; font-size: 13px; letter-spacing: 0.12em; }
+#lesson.act { flex-direction: column; gap: 10px; background: radial-gradient(circle at 50% 50%, transparent 30%, #0d0b1088 80%); }
+#lesson.act .now { color: #fff; font-size: 26px; font-weight: 800; letter-spacing: 0.12em; text-shadow: 0 0 12px #ff6a3a, 0 2px 0 #000; animation: throb 0.45s ease-in-out infinite alternate; }
+#lesson.act kbd { font-size: 18px; padding: 8px 16px; }
+body.touch #lesson.act { justify-content: flex-start; padding-top: 30vh; }
+#caption.praise { font-size: 18px; border-color: #ffd27a; }
+#fade { position: fixed; inset: 0; z-index: 10; background: #000; pointer-events: none; opacity: 0; }
+body.waking .tb, body.waking .stick, body.waking #hud, body.waking #banner, body.waking #prompt { visibility: hidden; }
+.tb.hint { box-shadow: 0 0 0 4px #ffd27a, 0 0 24px #ffd27a; animation: pulse 0.5s ease-in-out infinite alternate; z-index: 11; }
+@keyframes throb { from { transform: scale(1); } to { transform: scale(1.08); } }
+body:not(.touch) #lesson.act { justify-content: flex-start; padding-top: 18vh; }

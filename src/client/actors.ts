@@ -14,7 +14,7 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean, t: 
   if (h.act === 'down') {
     shadow(c, x, y, 6);
     spin(c, look.down, x, y - 4, Math.PI / 2, 0.85);
-    drawText(c.glow, String(Math.ceil(h.actDur - h.actT)), Math.round(x - 1), Math.round(y - 18), '#ff6a5a');
+    if (!h.lying) drawText(c.glow, String(Math.ceil(h.actDur - h.actT)), Math.round(x - 1), Math.round(y - 18), '#ff6a5a');
     return;
   }
   const up = h.fy < -0.55 && Math.abs(h.fy) > Math.abs(h.fx) * 0.8;

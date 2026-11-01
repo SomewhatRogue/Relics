@@ -13,9 +13,9 @@ import { BOUNTY, HERO_SLOTS, PERK, SHOP, gainXp, newProfile, type PerkId, type P
 import { Rng } from '../shared/rng';
 import { CHAPTER_1, QUORUM, rewardMult, type WorldState } from '../shared/story';
 import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
-import { POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, FOUND_RELICS, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId } from '../shared/tuning';
+import { POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, FOUND_RELICS, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
 import { ArenaRoom } from '../sim/room';
-import { newWood, skipCut, stepWood, type WoodState } from '../sim/wood';
+import { newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
 import { LESSONS, woodMap } from '../shared/wood';
 import { PACK } from '../sim/pack';
 import { refreshHealth, statsOf } from '../sim/gearstats';
@@ -149,7 +149,7 @@ export class Game {
   /** The moves the wood has taught so far (everything outside it). */
   taught(): string[] {
     if (this.mode !== 'wood' || !this.wood) return ['attack', 'roll', 'block', 'relic', 'potion', 'grab'];
-    if (this.wood.cut >= 0) return [];
+    if (this.wood.cut >= 0 || this.wood.wake >= 0) return [];
     return this.wood.stage >= 5 ? ['attack', 'roll', 'block', 'relic', 'potion', 'grab'] : LESSONS[this.wood.stage].moves;
   }
   /** Make a hero (class for life); returns its slot, or -1 when all three are taken. */
@@ -257,6 +257,8 @@ export class Game {
   /** Advance with this frame's intent; returns the events (for effects and sound). */
   step(dt: number, intent: Intent): FightEvent[] {
     const h = this.hero;
+    // The wood holds the world still for a lesson's card, a freeze-frame, a word of praise.
+    if (this.mode === 'wood' && this.wood?.hold && this.holding(intent, dt)) return [];
     // Your class and kit are your hero's: changed at the smith and the relic-wright, never mid-fight.
     intent = { ...intent, classSeq: h.seen.cls, weaponSeq: h.seen.weapon, augmentSeq: h.seen.augment };
     // No fighting in town: no blows, guard, relics or grabs; rolls, dashes and blinks still work.
@@ -421,10 +423,37 @@ export class Game {
     store(this.save);
   }
 
+  /** While the wood holds: true to stay held. A card waits for a tap or a key (its press goes nowhere);
+   *  a freeze-frame waits for the very move it asks for, which then goes through as the world restarts. */
+  private holding(intent: Intent, dt: number): boolean {
+    const w = this.wood!, hold = w.hold!, h = this.hero;
+    hold.t += dt;
+    const pressed = intent.attackSeq !== h.seen.attack || intent.rollSeq !== h.seen.roll || intent.blockSeq !== h.seen.block || intent.relicSeq !== h.seen.relic;
+    let done = false;
+    if (hold.need === 'time') done = hold.t >= hold.until;
+    else if (hold.need === 'continue') done = this.continued || (hold.t > 0.6 && pressed);
+    else if (hold.need === 'move') done = hold.t > 0.6 && (Math.hypot(intent.mx, intent.my) > 0.3 || this.continued);
+    else if (hold.need === 'roll') done = intent.rollSeq !== h.seen.roll;
+    else if (hold.need === 'block') done = intent.blockSeq !== h.seen.block || intent.block;
+    else if (hold.need === 'attack') done = intent.attackSeq !== h.seen.attack;
+    this.continued = false;
+    if (!done) return true;
+    release(w);
+    // A card's key press only dismissed it.
+    if (hold.need === 'continue') Object.assign(h.seen, { attack: intent.attackSeq, roll: intent.rollSeq, block: intent.blockSeq, relic: intent.relicSeq });
+    return hold.need === 'continue';
+  }
+
+  /** The card's own button (or Enter): go on. */
+  continueHold(): void {
+    this.continued = true;
+  }
+  private continued = false;
+
   /** The wood's own rules after the room's: the lessons, the cutscene, the relic, the road. */
   private stepWoodFrame(h: Hero, ev: FightEvent[], dt: number): FightEvent[] {
     const w = this.wood!, cut = w.cut;
-    stepWood(w, this.room, ev, dt);
+    stepWood(w, this.room, ev, dt, WEAPONS[h.weapon].parryWindow + h.lenience);
     if (cut >= 0 && w.cut < 0 && !this.woodReplay) (this.profile.cutSeen = true), store(this.save);
     // Out of the Stoker: the javelin, on the RELIC button at once.
     if (w.relic && !h.found.includes('javelin')) {

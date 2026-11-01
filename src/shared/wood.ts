@@ -73,7 +73,7 @@ export function woodMap(): GameMap {
     name: 'GREYHOLLOW', w: WOOD.w, h: WOOD.h, wallFace: 3, rounds: treeLines(), blocks,
     braziers: [{ x: 5.2, y: 30.6, r: 0.5 }, { x: 16.2, y: 26.6, r: 0.5 }, { x: 32.5, y: 17.5, r: 0.5 }, { x: 52.5, y: 8.5, r: 0.4 }],
     torches: [], hero: { x: 8, y: 34 }, exit: null, theme: { ...THEMES.forest, moon: 0.45 },
-    npcs: [{ x: 10, y: 35, name: 'HEW', talk: 'hew', look: 'burner' }],
+    npcs: [{ x: 16, y: 30.5, name: 'HEW', talk: 'hew', look: 'burner' }],
   };
 }
 
@@ -112,4 +112,19 @@ export const LINES = {
   relic: 'Something hard sits under its breastbone, grown in like a knot in oak. You lever it out with Hew\'s poker: a javelin, haft and all, longer than the wound it came from, and warm.',
   road: "The wood gives out at last. Walls ahead, and over them a glow that isn't the moon.",
   skill: "Now. Don't save any of it.",
+  /** Waking: he comes over slowly, checks you, hauls you up. */
+  waking: ['Breathing. That makes one of you.', "Anything broken? Wiggle something. Good. Soldier or thief, they took your boots. Have mine.", 'Up, slow.'],
+  /** When you get it right (a short pause in the fight). */
+  praise: ["That's it.", 'Good. Like that.', "There. You've done this before.", 'Hah. Kindling.'],
+  /** The instruction under each lesson, plain, with the control shown beside it. */
+  how: {
+    move: 'Walk. Get the feel of your legs back.',
+    attack: 'Hit them. Tap for quick blows; hold for a heavy one.',
+    roll: "Red with a striped edge can't be blocked. When it's about to land, roll out of it.",
+    block: 'Hold your guard as the red fills. Blocking costs breath: the yellow bar.',
+    parry: 'Tap your guard the moment the red flashes white. It staggers them, and your next blow lands hard.',
+    skill: 'Your skill. It needs a while to come back.',
+  },
+  /** The freeze-frame prompts, the first times a lesson's blow comes. */
+  now: { roll: 'NOW: ROLL OUT', block: 'NOW: GUARD UP', parry: 'IT FLASHES WHITE: NOW', attack: 'HIT IT' },
 };

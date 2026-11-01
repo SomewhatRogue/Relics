@@ -8,11 +8,17 @@ const store = new Map<string, string>();
 (globalThis as unknown as { localStorage: unknown }).localStorage = { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => void store.set(k, v), removeItem: (k: string) => void store.delete(k) };
 beforeEach(() => store.clear());
 
-/** Walk the hero into lesson `i`'s area and let the wood notice. */
+/** Past the waking: on your feet, the move card dismissed. */
+function wake(g: Game): void {
+  Object.assign(g.wood!, { wake: -1, hold: null, from: null });
+  Object.assign(g.hero, { act: 'idle', actT: 0, lying: false });
+}
+/** Walk the hero into lesson `i`'s area, let the wood notice, and dismiss its card. */
 function enter(g: Game, i: number): void {
   const a = [[8, 33], [32, 36], [32, 18], [53, 20], [52, 10]][i];
   Object.assign(g.hero, { x: a[0], y: a[1] });
   g.step(0.05, NO_INTENT);
+  if (g.wood!.hold) g.wood!.hold = null;
 }
 /** Kill everything the lesson brought, counting `n` of its moves. */
 function clear(g: Game, n: number, k: FightEvent['k']): void {
@@ -23,14 +29,64 @@ function clear(g: Game, n: number, k: FightEvent['k']): void {
   // Feed the counted moves to the wood through a frame.
   const before = w.count;
   w.count = before + n;
+  w.praised = 99;
   g.step(0.05, NO_INTENT);
+  w.hold = null;
 }
 
 describe('the prologue wood', () => {
+  it('opens with you down and still; Hew walks over, talks, hauls you up; then a card to walk', () => {
+    const g = new Game();
+    g.create('ROGUE', 'stray');
+    expect(g.hero.act).toBe('down');
+    expect(g.taught()).toEqual([]);
+    const x = g.hero.x;
+    for (let i = 0; i < 60; i++) g.step(0.1, { ...NO_INTENT, mx: 1 });
+    expect(g.hero.x).toBeCloseTo(x);
+    for (let i = 0; i < 80 && g.wood!.wake >= 0; i++) g.step(0.1, NO_INTENT);
+    expect(g.hero.act).toBe('idle');
+    expect(g.wood!.hold?.need).toBe('move');
+    // The world waits for you to walk.
+    const t = g.room.time;
+    g.step(0.1, NO_INTENT);
+    g.step(0.5, NO_INTENT);
+    expect(g.room.time).toBe(t);
+    g.step(0.1, { ...NO_INTENT, mx: 1 });
+    expect(g.wood!.hold).toBeNull();
+  });
+
+  it('a lesson card holds the world until dismissed; the first blows freeze until you answer', () => {
+    const g = new Game();
+    g.create('WARRIOR', 'stray');
+    wake(g);
+    Object.assign(g.wood!, { stage: 1, entered: false });
+    Object.assign(g.hero, { x: 32, y: 36 });
+    g.step(0.05, NO_INTENT);
+    expect(g.wood!.hold?.kind).toBe('card');
+    const t = g.room.time;
+    g.step(0.7, NO_INTENT);
+    expect(g.room.time).toBe(t);
+    g.continueHold();
+    g.step(0.05, NO_INTENT);
+    expect(g.wood!.hold).toBeNull();
+    // A lunger comes and winds up: the world stops just before the stab, until you roll.
+    const l = g.room.enemies.find((e) => e.variant === 'lunger' && e.alert)!;
+    Object.assign(l, { x: g.hero.x + 2, y: g.hero.y, fx: -1, fy: 0, cooldown: 0 });
+    for (let i = 0; i < 80 && !g.wood!.hold; i++) g.step(0.05, NO_INTENT);
+    expect(g.wood!.hold?.need).toBe('roll');
+    g.step(0.3, NO_INTENT);
+    expect(g.wood!.hold?.need).toBe('roll');
+    const ev = g.step(0.05, { ...NO_INTENT, rollSeq: 1, mx: 0, my: 1 });
+    expect(g.wood!.hold).toBeNull();
+    expect(g.hero.act).toBe('roll');
+    expect(ev).toBeDefined();
+  });
+
   it('a new hero starts in the wood; only attack is taught at first; a gate stands across each way on', () => {
     const g = new Game();
     g.create('WARRIOR', 'stray');
     expect(g.mode).toBe('wood');
+    wake(g);
     expect(g.taught()).toEqual(['attack']);
     for (const gate of GATES) expect(g.room.map.blocks.some((b) => b.x === gate.block.x && b.y === gate.block.y)).toBe(true);
     // A roll press does nothing yet.
@@ -43,8 +99,7 @@ describe('the prologue wood', () => {
   it('each lesson opens its gate once done, and teaches the next move; Hew picks you up when you fall', () => {
     const g = new Game();
     g.create('RANGER', 'stray');
-    // (Hew gets you up before the first lesson starts.)
-    g.room.time = 6;
+    wake(g);
     enter(g, 0);
     clear(g, 0, 'hit');
     expect(g.wood!.more).toBe(true);
@@ -69,6 +124,7 @@ describe('the prologue wood', () => {
   it('the hut: the cutscene kills Hew; the Stoker gives up the javelin; the road leads to Wickhold with the tally stick', () => {
     const g = new Game();
     g.create('MAGE', 'stray');
+    wake(g);
     const w = () => g.wood!;
     Object.assign(w(), { stage: 4, entered: false });
     enter(g, 4);

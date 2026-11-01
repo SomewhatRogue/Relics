@@ -132,6 +132,8 @@ export interface Hero extends Body {
   ransomed: boolean;
   /** The Want, for the eyes (never shown as a number). */
   want: number;
+  /** Lying where you fell, before Hew gets you up (the wood's opening). */
+  lying?: boolean;
   /** A Healer's censer gone cold (the prologue, until Isolde relights it): no heals given. */
   cold: boolean;
   /** Relics this hero has won (one at a time is carried, in relics[1]). */
@@ -220,6 +222,8 @@ export interface Enemy extends Body {
   respawns: boolean;
   /** A scrapper with a bow (see ARCHER). */
   bow?: boolean;
+  /** Tutorial pacing in the wood: slower wind-ups (sim/wood.ts DRILL). */
+  drill?: boolean;
   /** A goblin built for one lesson in the prologue wood (shared/wood.ts VARIANTS). */
   variant?: 'looter' | 'lunger' | 'heavy' | 'stoker';
   /** False while it hasn't noticed anyone (see ALERT); undefined counts as awake. */

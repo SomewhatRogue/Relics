@@ -19,6 +19,7 @@ import { Fx } from './fx';
 import { Input } from './input';
 import { LootCard } from './lootcard';
 import { PackView } from './pack';
+import { LessonView } from './lesson';
 import { Scene } from './scene';
 import { setMusic, setMuted } from './sfx';
 import { Music } from './music';
@@ -32,6 +33,7 @@ const panel = new Panel();
 const input = new Input(() => scene.heroScreen());
 const $ = (s: string) => document.querySelector(s) as HTMLElement;
 const card = new LootCard((id) => input.take(id));
+const lesson = new LessonView(game, input.touch);
 const pack = new PackView((op, arg) => input.gear(op, arg), () => title.open);
 const music = new Music();
 const link = new WorldLink((w) => game.syncWorld(w));
@@ -60,6 +62,7 @@ addEventListener('keydown', (e) => {
   if ((e.target as HTMLElement).closest('input')) return;
   const k = e.key.toLowerCase();
   if (game.wood && game.wood.cut >= 0 && (k === 'escape' || k === ' ' || k === 'enter')) return game.skipCut();
+  if (game.wood?.hold && k === 'enter') return game.continueHold();
   if (k === 'f' && card.current >= 0) input.take(card.current);
   else if (k === 'f' && game.near()?.chest) use();
   else if ((k === 'e' || k === 'f') && game.mode === 'town') use();
@@ -109,6 +112,7 @@ function hud(now: number): void {
   $('.kit').textContent = item ? item.traits.map((t) => TRAITS[t].name).join(' + ') + '  ' + KIT[me.weapon] : KIT[me.weapon];
   card.update(room, me, !input.touch);
   pack.update(me);
+  lesson.update();
   $('#packbtn').classList.toggle('on', pack.open);
   if (input.touch) {
     // GRAB shows only when there's something to grab (or to throw); ATTACK becomes SLAM.
@@ -147,8 +151,12 @@ function hud(now: number): void {
   document.body.dataset.taught = game.taught().join(' ');
   const wood = game.wood;
   document.body.classList.toggle('cutscene', !!wood && wood.cut >= 0);
-  const cap = wood?.caption && wood.caption.until > room.time ? wood.caption : null;
-  $('#caption').hidden = !cap;
+  // Praise shows as a caption while the fight stops for it.
+  const praise = wood?.hold?.kind === 'praise' ? { who: wood.hold.who, text: wood.hold.text } : null;
+  const cap = praise ?? (wood?.caption && wood.caption.until > room.time ? wood.caption : null);
+  $('#caption').classList.toggle('praise', !!praise);
+  // (A lesson card or a freeze-frame says it all; the caption waits.)
+  $('#caption').hidden = !cap || (!!wood?.hold && wood.hold.kind !== 'praise');
   if (cap) $('#caption').innerHTML = (cap.who ? `<b>${cap.who}</b>` : '') + `<span>${cap.text}</span>`;
   $('#skipcut').hidden = !wood || wood.cut < 0 || !pr.cutSeen;
   if (game.mode === 'wood' && wood) {
