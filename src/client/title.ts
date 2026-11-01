@@ -13,7 +13,7 @@ const BLURB: Record<HeroClass, string> = {
   RANGER: 'The draw is everything: the longbow pierces a line, the crossbow fires on the press.',
   ROGUE: 'Twin daggers, two and a half times from behind. The only one quick on their feet.',
   MAGE: 'Quick sparks or long-charged blasts. Blinks far, but tires fast.',
-  HEALER: 'Every third blow heals, holy smites from above, blessings for allies.',
+  HEALER: 'Holy smites, blessed ground that mends allies and burns goblins, and a ward that throws arrows back. Good alone too.',
 };
 const NAMES: Record<HeroClass, string> = { WARRIOR: 'BRANNOCK', RANGER: 'WREN', ROGUE: 'SILK', MAGE: 'ASHE', HEALER: 'IVY' };
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);

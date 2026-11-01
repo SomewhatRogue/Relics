@@ -44,6 +44,8 @@ and burns out a goblin den on a job.
       people to talk to (smith and relic-wright, priest, trainer and squire, healer, reeve, families),
       a town hall, cottages and barns to enter on jobs, wooden buildings that burn down, goblin dens
       and the burn-out job; Come Bye's newer relay and the online rules (`docs/ONLINE.md`)
+- [x] Slice 3d: live music for every kind of place (30 pieces) with a fight layer and boss music,
+      kit-specific weapon sounds, goblin voices, building sounds; the Healer's blessed ground and ward
 - [x] Slice 3c: ledges and ramps (two levels), archers, falls, the high-ground shot, forks with a high
       road and a low road, exits that take the whole party
 - [x] Slice 2h: props (barrels, oil barrel, crates, a table, broken pieces) that break and push; the

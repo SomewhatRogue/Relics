@@ -47,8 +47,20 @@ export const SHADOWSTEP = { cooldown: 6, windup: 0.06, recover: 0.12, range: 6 }
 /** The Mage's lodestone: lobbed, it lands and drags every goblin near it inward (light ones fast), then bursts. */
 export const LODESTONE = { cooldown: 8, windup: 0.2, recover: 0.3, range: 7, fallback: 4.5, flight: 0.5, radius: 3.6, pull: 34, time: 1.8, burst: 1.4, dmg: 12 };
 
-/** The Healer's blessing: aimed at an ally (the most hurt one near you on a phone). Heals, and for a while they hit harder and take less. */
-export const BLESSING = { cooldown: 9, windup: 0.2, recover: 0.2, range: 7, heal: 20, time: 8, dmgMult: 1.3, taken: 0.75 };
+/**
+ * The Healer's blessed ground: a circle of light at the Healer's feet (or where they point, on a
+ * laptop). Allies in it mend slowly and are blessed (hit harder, take less) while they stand there;
+ * goblins in it burn with holy light. Every half second (`every`), for `time` seconds.
+ */
+export const BLESSING = { cooldown: 12, windup: 0.25, recover: 0.25, range: 6, radius: 2.4, time: 6, every: 0.5, heal: 3, hurt: 4, linger: 0.6, dmgMult: 1.3, taken: 0.75 };
+
+/**
+ * The Healer's ward: a shell of light on an ally (the most hurt one in reach, yourself included; where
+ * you point on a laptop). It takes the blows meant for them, up to `hp`, for `time`; arrows (and,
+ * later, goblin spells) bounce straight back at whoever loosed them for `reflect` times the damage,
+ * stunning them.
+ */
+export const WARD = { cooldown: 14, windup: 0.2, recover: 0.2, range: 7, hp: 50, time: 5, reflect: 1.5, stun: 1.2 };
 
 /** The war horn (Warrior, Healer): every ally in earshot is rallied: stamina back at once, then twice as fast, and blocking costs half. Small goblins near you flinch. */
 export const HORN = { cooldown: 12, windup: 0.25, recover: 0.3, radius: 6, time: 6, regen: 2, guard: 0.5, scare: 2.5 };
@@ -61,10 +73,11 @@ export const RELICS = {
   shadow: { name: 'SHADOWSTEP', short: 'SHADOW', cooldown: SHADOWSTEP.cooldown, windup: SHADOWSTEP.windup, recover: SHADOWSTEP.recover, range: SHADOWSTEP.range },
   lodestone: { name: 'LODESTONE', short: 'LODESTONE', cooldown: LODESTONE.cooldown, windup: LODESTONE.windup, recover: LODESTONE.recover, range: LODESTONE.range },
   horn: { name: 'WAR HORN', short: 'HORN', cooldown: HORN.cooldown, windup: HORN.windup, recover: HORN.recover, range: HORN.radius },
-  blessing: { name: 'BLESSING', short: 'BLESS', cooldown: BLESSING.cooldown, windup: BLESSING.windup, recover: BLESSING.recover, range: BLESSING.range },
+  blessing: { name: 'BLESSED GROUND', short: 'BLESS', cooldown: BLESSING.cooldown, windup: BLESSING.windup, recover: BLESSING.recover, range: BLESSING.range },
+  ward: { name: 'WARD', short: 'WARD', cooldown: WARD.cooldown, windup: WARD.windup, recover: WARD.recover, range: WARD.range },
 };
 export type RelicId = keyof typeof RELICS;
-export const RELIC_ORDER: RelicId[] = ['javelin', 'hook', 'horn', 'net', 'shadow', 'lodestone', 'blessing'];
+export const RELIC_ORDER: RelicId[] = ['javelin', 'hook', 'horn', 'net', 'shadow', 'lodestone', 'blessing', 'ward'];
 /** A hero carries at most this many relics into a run (chosen in town later). */
 export const RELIC_SLOTS = 3;
 /** Each class's relics (the town's relic-wright adds more later). */
@@ -73,7 +86,7 @@ export const CLASS_RELICS: Record<'WARRIOR' | 'RANGER' | 'ROGUE' | 'MAGE' | 'HEA
   RANGER: ['net', 'hook'],
   ROGUE: ['shadow', 'hook'],
   MAGE: ['lodestone'],
-  HEALER: ['blessing', 'horn'],
+  HEALER: ['blessing', 'ward', 'horn'],
 };
 
 /**

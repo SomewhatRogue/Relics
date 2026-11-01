@@ -1,12 +1,13 @@
 /**
- * The relics that act at once rather than flying: the Rogue's shadowstep, the Healer's blessing,
- * the war horn.
+ * The relics that act at once rather than flying: the Rogue's shadowstep, the Healer's blessed
+ * ground and ward, the war horn.
  * (Javelin, hook, net and lodestone fly; see their own files.)
  */
 import { collide } from '../shared/arena';
-import { BLESSING, HERO, HORN, SHADOWSTEP } from '../shared/tuning';
-import { held, isDead, isDummy } from './damage';
-import type { Enemy, FightEvent, Hero, Intent } from './types';
+import { BLESSING, HERO, HORN, SHADOWSTEP, WARD } from '../shared/tuning';
+import { damage, held, isDead, isDummy } from './damage';
+import { afflict, type World } from './elements';
+import type { Enemy, FightEvent, Hero, Intent, Zone } from './types';
 
 /** Step behind the goblin you face (or the nearest one in reach), facing its back. */
 export function shadowstep(h: Hero, enemies: Enemy[], ev: FightEvent[]): void {
@@ -37,12 +38,9 @@ export function shadowstep(h: Hero, enemies: Enemy[], ev: FightEvent[]): void {
   ev.push({ k: 'shadow', x: h.x, y: h.y });
 }
 
-/**
- * Bless an ally: the one nearest where you point (a laptop), else the most hurt one in reach
- * (others before yourself on a tie). Heals, and for a while they hit harder and take less.
- */
-export function bless(h: Hero, heroes: Hero[], aim: Intent | undefined, now: number, ev: FightEvent[]): void {
-  const near = heroes.filter((o) => o.act !== 'down' && Math.hypot(o.x - h.x, o.y - h.y) <= BLESSING.range);
+/** The ally a Healer means: nearest where they point (a laptop), else the most hurt in reach (others before yourself on a tie). */
+function allyFor(h: Hero, heroes: Hero[], aim: Intent | undefined, range: number): Hero {
+  const near = heroes.filter((o) => o.act !== 'down' && Math.hypot(o.x - h.x, o.y - h.y) <= range);
   let target = h;
   if (aim && (aim.ax || aim.ay)) {
     const px = h.x + aim.ax, py = h.y + aim.ay;
@@ -51,19 +49,53 @@ export function bless(h: Hero, heroes: Hero[], aim: Intent | undefined, now: num
       const d = Math.hypot(o.x - px, o.y - py);
       if (d < bd) (bd = d), (target = o);
     }
-  } else {
-    let low = Infinity;
-    for (const o of near) {
-      const share = o.hp / o.maxHp - (o === h ? 0 : 0.001);
-      if (share < low) (low = share), (target = o);
+    return target;
+  }
+  let low = Infinity;
+  for (const o of near) {
+    const share = o.hp / o.maxHp - (o === h ? 0 : 0.001);
+    if (share < low) (low = share), (target = o);
+  }
+  return target;
+}
+
+/** Bless the ground: at the Healer's feet, or where they point (within reach). */
+export function hallow(h: Hero, aim: Intent | undefined, now: number, el: Zone['el'], ev: FightEvent[]): Zone {
+  let x = h.x, y = h.y;
+  if (aim && (aim.ax || aim.ay)) {
+    const d = Math.hypot(aim.ax, aim.ay), k = Math.min(1, BLESSING.range / (d || 1));
+    (x = h.x + aim.ax * k), (y = h.y + aim.ay * k);
+  }
+  ev.push({ k: 'hallow', x, y });
+  return { x, y, r: BLESSING.radius, until: now + BLESSING.time, next: now, owner: h.id, el };
+}
+
+/** Each blessed circle, every half second: allies in it mend and are blessed; goblins in it burn. Returns the ones still lit. */
+export function stepZones(zones: Zone[], w: World): Zone[] {
+  for (const z of zones) {
+    if (w.now < z.next) continue;
+    z.next = w.now + BLESSING.every;
+    for (const o of w.heroes) {
+      if (o.act === 'down' || Math.hypot(o.x - z.x, o.y - z.y) > z.r) continue;
+      o.blessedUntil = Math.max(o.blessedUntil, w.now + BLESSING.linger);
+      const n = Math.min(o.maxHp - o.hp, BLESSING.heal);
+      if (n > 0) (o.hp += n), w.ev.push({ k: 'heal', x: o.x, y: o.y, n });
+    }
+    for (const e of w.enemies) {
+      if (isDead(e) || isDummy(e) || Math.hypot(e.x - z.x, e.y - z.y) > z.r + e.radius) continue;
+      if (!damage(e, BLESSING.hurt, w.now, w.ev, { tick: true, how: 'burn', src: 'smite' })) afflict(w, e, z.el, BLESSING.hurt);
     }
   }
-  const n = Math.min(target.maxHp - target.hp, BLESSING.heal);
-  target.hp += n;
-  target.blessedUntil = now + BLESSING.time;
-  if (target !== h) ev.push({ k: 'beam', x: h.x, y: h.y, x2: target.x, y2: target.y });
-  ev.push({ k: 'blessed', x: target.x, y: target.y });
-  if (n > 0) ev.push({ k: 'heal', x: target.x, y: target.y, n });
+  return zones.filter((z) => w.now < z.until);
+}
+
+/** Ward an ally (or yourself): a shell that takes the blows and throws arrows back. */
+export function ward(h: Hero, heroes: Hero[], aim: Intent | undefined, now: number, ev: FightEvent[]): void {
+  const t = allyFor(h, heroes, aim, WARD.range);
+  t.wardUntil = now + WARD.time;
+  t.wardHp = WARD.hp;
+  if (t !== h) ev.push({ k: 'beam', x: h.x, y: h.y, x2: t.x, y2: t.y });
+  ev.push({ k: 'ward', x: t.x, y: t.y });
 }
 
 /** Sound the war horn: every ally in earshot is rallied; small goblins close by flinch. */

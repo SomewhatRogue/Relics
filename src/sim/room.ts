@@ -19,11 +19,11 @@ import { impacts } from './impacts';
 import { release, stepCarry, tryGrab } from './grab';
 import { dropProp, newProp, propImpacts, roomProps, stepLift, stepProps, sweepProps, tryLift } from './props';
 import { dropFrom, stepDrops, takeLoot } from './loot';
-import { bless, rally, shadowstep } from './relics';
+import { hallow, rally, shadowstep, stepZones, ward } from './relics';
 import { forgedElement, has, traitsOf } from './traits';
 import { fireHook, stepHook } from './hook';
 import { stepJavelin, throwJavelin } from './javelin';
-import { NO_INTENT, type Bolt, type Drop, type Enemy, type Prop, type FightEvent, type Hero, type Hook, type Intent, type Javelin } from './types';
+import { NO_INTENT, type Zone, type Bolt, type Drop, type Enemy, type Prop, type FightEvent, type Hero, type Hook, type Intent, type Javelin } from './types';
 
 export class ArenaRoom {
   time = 0;
@@ -34,6 +34,8 @@ export class ArenaRoom {
   hooks: Hook[] = [];
   bolts: Bolt[] = [];
   drops: Drop[] = [];
+  /** Blessed ground. */
+  zones: Zone[] = [];
   props: Prop[] = roomProps();
   intents = new Map<string, Intent>();
   /** Events from the latest tick (drawn as hits, sparks and sounds). */
@@ -155,6 +157,7 @@ export class ArenaRoom {
       this.enemies.push(e);
     });
     stepElements(w);
+    this.zones = stepZones(this.zones, w);
     separate(this.heroes, this.enemies, this.props);
     this.landings();
     for (const e of this.enemies) if (alive.has(e.id) && isDead(e)) dropFrom(e, this.heroes, this.drops, this.lootRng, this.events);
@@ -196,7 +199,8 @@ export class ArenaRoom {
     else if (h.relic === 'lodestone') this.bolts.push(lobLodestone(h, this.aimDistance(h, LODESTONE.range, LODESTONE.fallback), el));
     else if (h.relic === 'shadow') shadowstep(h, this.enemies, w.ev);
     else if (h.relic === 'horn') rally(h, this.heroes, this.enemies, w.now, w.ev);
-    else bless(h, this.heroes, this.intents.get(h.id), w.now, w.ev);
+    else if (h.relic === 'ward') ward(h, this.heroes, this.intents.get(h.id), w.now, w.ev);
+    else this.zones.push(hallow(h, this.intents.get(h.id), w.now, el, w.ev));
   }
 
   /** How far to throw or smite: to the mouse on a laptop, else to the goblin the hero faces, else a set distance. */

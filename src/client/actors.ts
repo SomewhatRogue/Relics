@@ -1,5 +1,5 @@
 /** Drawing a hero: the class's body, the weapon in hand, the dodge, charge and stun. */
-import { CHARGE, WEAPONS } from '../shared/tuning';
+import { CHARGE, WARD, WEAPONS } from '../shared/tuning';
 import { chargeFull, currentSwing } from '../sim/hero';
 import type { Hero } from '../sim/types';
 import { blit, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
@@ -103,5 +103,19 @@ function aura(c: Ctx, h: Hero, x: number, y: number, t: number): void {
   if (h.rallyUntil > t) {
     c.glow.fillStyle = Math.floor(c.now * 4) % 2 ? '#ff6a5a' : '#ffb0a0';
     c.glow.fillRect(Math.round(x - 1), Math.round(y - 21), 3, 1);
+  }
+  if (h.wardUntil > t) {
+    // Warded: a shell of light, its dots thinning as it takes blows; it flickers before it fades.
+    const share = Math.max(0.25, h.wardHp / WARD.hp), fading = h.wardUntil - t < 1 && Math.floor(c.now * 12) % 2;
+    if (!fading) {
+      c.glow.fillStyle = '#bfe8ff';
+      const n = Math.round(28 * share);
+      for (let i = 0; i < n; i++) {
+        const a = (i / n) * Math.PI * 2 + c.now * 0.8;
+        c.glow.globalAlpha = 0.5 + 0.5 * Math.sin(a * 3 + c.now * 4);
+        c.glow.fillRect(Math.round(x + Math.cos(a) * 9), Math.round(y - 8 + Math.sin(a) * 11), 1, 1);
+      }
+      c.glow.globalAlpha = 1;
+    }
   }
 }

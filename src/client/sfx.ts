@@ -4,6 +4,9 @@
  */
 let ac: AudioContext | null = null;
 let master: GainNode | null = null;
+let music: GainNode | null = null;
+/** Two seconds of noise, made once; each sound plays a slice of it from somewhere random. */
+let noiseBuf: AudioBuffer | null = null;
 
 export function unlockAudio(): void {
   if (!ac) {
@@ -11,6 +14,9 @@ export function unlockAudio(): void {
     master = ac.createGain();
     master.gain.value = 0.5;
     master.connect(ac.destination);
+    music = ac.createGain();
+    music.gain.value = musicOn ? MUSIC_LEVEL : 0;
+    music.connect(master);
     const b = ac.createBuffer(1, 1, 22050), s = ac.createBufferSource();
     s.buffer = b;
     s.connect(ac.destination);
@@ -26,34 +32,55 @@ export function setMuted(m: boolean): void {
   if (master) master.gain.value = m ? 0 : 0.5;
 }
 
-function noise(dur: number): AudioBufferSourceNode {
-  const n = Math.floor(ac!.sampleRate * dur), b = ac!.createBuffer(1, n, ac!.sampleRate), d = b.getChannelData(0);
-  for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
-  const s = ac!.createBufferSource();
-  s.buffer = b;
+/** Music has its own switch (under the sound switch: SND silences both). */
+const MUSIC_LEVEL = 0.34;
+let musicOn = true;
+export function setMusic(on: boolean): void {
+  musicOn = on;
+  if (music && ac) music.gain.setTargetAtTime(on ? MUSIC_LEVEL : 0, ac.currentTime, 0.3);
+}
+/** The context and the music bus, once sound is unlocked (the music player builds on these). */
+export const audioOut = () => (ac && music && ac.state === 'running' ? { ac, music } : null);
+
+export function noise(dur: number, c: AudioContext = ac!): AudioBufferSourceNode {
+  if (!noiseBuf || noiseBuf.sampleRate !== c.sampleRate) {
+    const n = c.sampleRate * 2;
+    noiseBuf = c.createBuffer(1, n, c.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+  }
+  const s = c.createBufferSource();
+  s.buffer = noiseBuf;
+  s.loop = true;
+  s.loopStart = 0;
+  s.loopEnd = 2;
+  (s as unknown as { _off: number })._off = Math.random() * Math.max(0, 2 - dur);
   return s;
 }
+const startNoise = (s: AudioBufferSourceNode, t: number, dur: number) => (s.start(t, (s as unknown as { _off: number })._off), s.stop(t + dur + 0.05));
 
-function env(peak: number, at: number, dur: number): GainNode {
+export function env(peak: number, at: number, dur: number, out: AudioNode = master!): GainNode {
   const g = ac!.createGain();
   g.gain.setValueAtTime(0.0001, at);
   g.gain.exponentialRampToValueAtTime(peak, at + 0.005);
   g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
-  g.connect(master!);
+  g.connect(out);
   return g;
 }
 
-function burst(type: BiquadFilterType, f0: number, f1: number, q: number, peak: number, dur: number): void {
-  const t = ac!.currentTime, s = noise(dur), f = ac!.createBiquadFilter();
+/** Filtered noise swept from f0 to f1: whooshes, crunches, hisses. */
+export function burst(type: BiquadFilterType, f0: number, f1: number, q: number, peak: number, dur: number, delay = 0): void {
+  const t = ac!.currentTime + delay, s = noise(dur), f = ac!.createBiquadFilter();
   f.type = type;
   f.Q.value = q;
   f.frequency.setValueAtTime(f0, t);
   f.frequency.exponentialRampToValueAtTime(f1, t + dur);
   s.connect(f).connect(env(peak, t, dur));
-  s.start(t);
+  startNoise(s, t, dur);
 }
 
-function tone(type: OscillatorType, f0: number, f1: number, peak: number, dur: number, delay = 0): void {
+/** A pitch swept from f0 to f1. */
+export function tone(type: OscillatorType, f0: number, f1: number, peak: number, dur: number, delay = 0): void {
   const t = ac!.currentTime + delay, o = ac!.createOscillator();
   o.type = type;
   o.frequency.setValueAtTime(f0, t);
@@ -63,7 +90,9 @@ function tone(type: OscillatorType, f0: number, f1: number, peak: number, dur: n
   o.stop(t + dur + 0.05);
 }
 
-const ready = () => ac && ac.state === 'running' && master;
+export const ready = () => !!(ac && ac.state === 'running' && master);
+/** The context and the effects bus, once sound is unlocked (voices build on these). */
+export const sfxOut = () => (ready() ? { ac: ac!, out: master! } : null);
 
 export const sfx = {
   swing() {
@@ -311,6 +340,29 @@ export const sfx = {
   },
   heal() {
     if (ready()) tone('sine', 990, 1320, 0.1, 0.2);
+  },
+  hallow() {
+    if (!ready()) return;
+    for (const [f, d] of [[392, 0], [523, 0.1], [659, 0.2], [784, 0.3]]) tone('sine', f, f, 0.14, 1.2, d);
+    burst('lowpass', 400, 1800, 0.6, 0.2, 0.8);
+  },
+  ward() {
+    if (!ready()) return;
+    tone('sine', 660, 990, 0.15, 0.4);
+    tone('triangle', 1320, 1980, 0.08, 0.5, 0.05);
+  },
+  warded() {
+    if (ready()) tone('sine', 1760, 1500, 0.18, 0.25), burst('bandpass', 3000, 2000, 6, 0.2, 0.08);
+  },
+  reflect() {
+    if (!ready()) return;
+    tone('triangle', 900, 2400, 0.2, 0.15);
+    tone('sine', 1975, 1975, 0.12, 0.4, 0.05);
+  },
+  wardbreak() {
+    if (!ready()) return;
+    burst('highpass', 5000, 1800, 1, 0.5, 0.25);
+    for (let i = 0; i < 4; i++) tone('sine', 2000 - i * 250, 1200, 0.06, 0.15, i * 0.04);
   },
   blink() {
     if (ready()) tone('sine', 600, 2400, 0.15, 0.12), tone('sine', 2400, 900, 0.1, 0.12, 0.1);

@@ -2,6 +2,46 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-01: music for every place, kits that sound like themselves, goblin voices, a Healer good alone (Claude Opus 5.5)
+
+Kyle: music specific to towns and each kind of area and terrain, a few versions of each; typical
+sounds for all weapons, impacts, goblins. Then: the Healer gets an AOE bless that heals allies slowly
+and hurts enemies, and a ward that stops damage on self or others and reflects magic and projectiles,
+so the Healer is good even solo. Also: tips off unless switched on.
+
+- **Music, made live** (`client/music.ts`, `scores.ts`, `instruments.ts`; no files, nothing to
+  download). Ten kinds of place, three pieces each (30 in all): Wickhold, inside a house, the church,
+  the yard, villages, farms, fields, forests, mines, and a boss. Each piece is a mode, a chord
+  progression and its parts (a drone or organ bass, held strings or organ, a picked lute or harp
+  pattern, a flute, bell or horn tune that wanders a little differently every time, frame drums),
+  through a shared hall reverb (wetter in mines and the church). Moving between places crossfades;
+  the town's piece turns with the day, a run's with its seed and room. Under everything a fight layer
+  (low toms and a driving low ostinato) rises with how many goblins are coming for you and falls
+  away when they're dead; a named boss brings its own music once it's close or hurt. A note button
+  switches the music alone (remembered on the device); SND still silences everything.
+- **Every kit sounds like itself** (`client/weaponsfx.ts`). Swing and hit events now carry what made
+  them (`src`) and whether it landed on the butcher (`big`). Sword: a ringing slice; greatsword: a long
+  low whoosh and a cleave; spear: a thrust and a pierce; daggers: a quick double hiss and a stab; mace:
+  a whump and a bone crunch. Bows creak at full draw and twang on release (deeper on the longbow), the
+  crossbow thwacks and clicks, wand, staff and rod crackle, hum and zap. Blocks clang on a shield, ring
+  on a blade. Wood chops, buildings whoosh alight, crackle while they burn (louder the closer you are)
+  and fall in with a rumble; doors creak.
+- **Goblin voices** (`client/voices.ts`): a sawtooth through two vowel filters with a rasp. Scrappers
+  gibber and cackle as they come (now and then, more with more of them), yelp when cut, shriek when
+  they die, hiss before a stab; archers' bows creak as they draw; dens screech when one crawls out.
+  The butcher grunts, roars into its cleave and slam, and groans as it falls. Each goblin's pitch comes
+  from its id, so a crowd sounds like a crowd.
+- **The Healer** (relics now blessed ground, ward, war horn; `sim/relics.ts`, `BLESSING` and `WARD`).
+  Blessed ground: a 2.4-tile circle of light at your feet (or where you point on a laptop) for 6 s;
+  allies in it mend 3 every half second and are blessed (hit harder, take less) while they stand in
+  it; goblins in it take 4 every half second, and the relic's element if one is fitted. Ward: a shell
+  on the most hurt ally in reach, yourself included (or the one you point at), for 5 s: it soaks up to
+  50 damage of blows, and an archer's arrow bounces straight back for 1.5x its damage and stuns the
+  archer. Goblin spells will bounce the same way when there are goblin casters. Solo, the Healer
+  stands in her own light behind her own ward. (This settles the open solo-Healer question.)
+- Tips are off unless TIPS in the corner is on. On phones the HUD is narrower so the five corner
+  buttons fit beside it.
+
 ## 2026-11-01: heights and forks (Claude Opus 5.5)
 
 Kyle: multiple heights and paths within missions that make heroes choose how to move together or

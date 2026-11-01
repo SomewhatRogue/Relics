@@ -14,7 +14,9 @@ import { Fx } from './fx';
 import { Input } from './input';
 import { LootCard } from './lootcard';
 import { Scene } from './scene';
-import { setMuted, sfx } from './sfx';
+import { setMusic, setMuted } from './sfx';
+import { Music } from './music';
+import { Soundscape } from './soundscape';
 import './style.css';
 
 const game = new Game();
@@ -27,6 +29,8 @@ const input = new Input(
 );
 const $ = (s: string) => document.querySelector(s) as HTMLElement;
 const card = new LootCard((id) => input.take(id));
+const music = new Music();
+const sounds = new Soundscape(music);
 const title = new Title(game, () => undefined);
 // Test hook: ?hero=MAGE skips the start screen with a hero of that class.
 const quick = new URLSearchParams(location.search).get('hero') as HeroClass | null;
@@ -51,17 +55,6 @@ $('#heroes').addEventListener('click', () => {
 });
 $('.tb.use').addEventListener('touchstart', (e) => (e.preventDefault(), use()), { passive: false });
 
-function sound(ev: FightEvent): void {
-  if (ev.k === 'shoot') return (sfx as unknown as Record<string, (() => void) | undefined>)[ev.kind]?.();
-  if (ev.k === 'hit' && ev.tick) return;
-  if (ev.k === 'death') return sfx.death(ev.how);
-  if (ev.k === 'hit') return ev.on === 'enemy' ? (ev.backstab ? sfx.backstab() : sfx.hit(ev.heavy)) : sfx.hurt();
-  if (ev.k === 'windup') return ev.kind === 'swing' || ev.kind === 'stab' ? undefined : sfx.growl(ev.kind === 'slam');
-  if (ev.k === 'impact') return ev.kind === 'slam' ? sfx.boom() : undefined;
-  const f = (sfx as unknown as Record<string, (() => void) | undefined>)[ev.k];
-  f?.();
-}
-
 /** One line on how each kit guards and dodges. */
 const KIT: Record<string, string> = {
   sword: 'EASY PARRY  WIDE GUARD  ROLL',
@@ -82,8 +75,8 @@ const townTips = input.touch
   ? ['Walk to the JOB BOARD and tap USE to take a job', 'Walk up into a door to go in. Everyone inside has something to say', 'The FORGE: the smith changes your kit, the relic-wright fits elements', 'The TRAINING HALL: perks, and the squire takes you to the yard', 'The TOWN HALL: the reeve and the council decide the chapter']
   : ['Walk to the JOB BOARD and press E to take a job', 'Walk up into a door to go in. Press E by anyone to talk', 'The FORGE: the smith changes your kit, the relic-wright fits elements', 'The TRAINING HALL: perks, and the squire takes you to the yard', 'The TOWN HALL: the reeve and the council decide the chapter'];
 const tips = input.touch
-  ? ['Stun or get behind a small goblin, then GRAB it', 'Warriors can GRAB barrels and tables and throw them', 'Break the oil barrel near goblins and they burn', 'Holding one: SLAM it, or THROW it at another', 'Goblins drop weapons. Stand on one and TAKE it', 'Traits reward skill: parries, dodges, perfect releases', 'Walk into a cottage or barn: goblins, and sometimes someone caged', 'HEALER: hold RELIC for BLESS, it finds the most hurt ally', 'Oil and fire burn wooden buildings down. Dens breed goblins', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'RELIC: pin a scrapper to the wall', 'Striped circles cannot be blocked: ROLL out', 'HOLD RELIC to pick another relic', 'TWIN DAGGERS: roll behind a goblin and BACKSTAB']
-  : ['G grabs a stunned goblin (or one you got behind). Click to slam, G to throw', 'Warriors: G lifts barrels and tables. Throw them, or slam them down', 'Break the oil barrel near goblins and they burn', 'Goblins drop weapons. Stand on one and press F to take it', 'Bows: release on the white flash. Held too long, the shot weakens', 'Walk up into a cottage door to go in. Fire burns buildings down', 'Healer: point at an ally and press E to BLESS them', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: pin a scrapper to the wall. 1 2 3 pick a relic', 'Striped circles cannot be blocked: SPACE to roll', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or rod', 'Daggers: roll behind a goblin and BACKSTAB'];
+  ? ['Stun or get behind a small goblin, then GRAB it', 'Warriors can GRAB barrels and tables and throw them', 'Break the oil barrel near goblins and they burn', 'Holding one: SLAM it, or THROW it at another', 'Goblins drop weapons. Stand on one and TAKE it', 'Traits reward skill: parries, dodges, perfect releases', 'Walk into a cottage or barn: goblins, and sometimes someone caged', 'HEALER: BLESS the ground you stand on; WARD the most hurt ally (or you)', 'Oil and fire burn wooden buildings down. Dens breed goblins', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'RELIC: pin a scrapper to the wall', 'Striped circles cannot be blocked: ROLL out', 'HOLD RELIC to pick another relic', 'TWIN DAGGERS: roll behind a goblin and BACKSTAB']
+  : ['G grabs a stunned goblin (or one you got behind). Click to slam, G to throw', 'Warriors: G lifts barrels and tables. Throw them, or slam them down', 'Break the oil barrel near goblins and they burn', 'Goblins drop weapons. Stand on one and press F to take it', 'Bows: release on the white flash. Held too long, the shot weakens', 'Walk up into a cottage door to go in. Fire burns buildings down', 'Healer: BLESS lights the ground where you point; WARD shields an ally and throws arrows back', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: pin a scrapper to the wall. 1 2 3 pick a relic', 'Striped circles cannot be blocked: SPACE to roll', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or rod', 'Daggers: roll behind a goblin and BACKSTAB'];
 let tipAt = -99, tipI = 0;
 
 function hud(now: number): void {
@@ -152,9 +145,10 @@ function frame(t: number): void {
   else still = null;
   for (const ev of game.step(dt, still ?? live)) {
     fx.on(ev);
-    sound(ev);
+    sounds.event(ev, game.room, t / 1000);
     if (ev.k === 'parry') parries++;
   }
+  sounds.frame(game, t / 1000);
   if (game.result && !panel.open) showResult(game, panel);
   fx.update(dt);
   scene.render(game.room, ME, fx, t / 1000, dt);
@@ -169,6 +163,25 @@ $('#mute').addEventListener('click', () => {
   setMuted(muted);
   $('#mute').classList.toggle('off', muted);
 });
+// Music has its own switch, remembered on this device.
+let musicOn = true;
+try {
+  musicOn = localStorage.getItem('relic.music') !== '0';
+} catch {
+  /* no storage */
+}
+const musicSwitch = (on: boolean) => {
+  musicOn = on;
+  setMusic(on);
+  $('#music').classList.toggle('off', !on);
+  try {
+    localStorage.setItem('relic.music', on ? '1' : '0');
+  } catch {
+    /* this session only */
+  }
+};
+musicSwitch(musicOn);
+$('#music').addEventListener('click', () => musicSwitch(!musicOn));
 // Tips are off unless switched on; the choice is remembered on this device.
 const tipsOn = (on: boolean) => {
   document.body.classList.toggle('tips', on);
@@ -197,4 +210,5 @@ w.__GAME_STATE__ = () => ({ mode: game.mode, inside: game.outside ? game.room.ma
 w.render_game_to_text = () => `${game.mode} t=${game.room.time.toFixed(1)} hero ${game.hero.act} hp ${game.hero.hp} st ${Math.round(game.hero.stamina)} | ` + game.room.enemies.map((e) => `${e.kind} ${e.act} hp ${e.hp}${e.attack ? ' ' + e.attack.kind + ' ' + e.attack.t.toFixed(2) : ''}`).join(' | ');
 Object.defineProperty(w, '__room', { get: () => game.room });
 w.__game = game;
+w.__music = music;
 w.__title = title;

@@ -139,7 +139,7 @@ describe('class relics', () => {
     const { room, h } = onTarget(1);
     const seen: string[] = [];
     for (let i = 1; i <= 5; i++) room.setIntent('me', intent({ classSeq: i })), room.step(), seen.push(h.relics.join(' '));
-    expect(seen).toEqual(['net hook', 'shadow hook', 'lodestone', 'blessing horn', 'javelin hook horn']);
+    expect(seen).toEqual(['net hook', 'shadow hook', 'lodestone', 'blessing ward horn', 'javelin hook horn']);
   });
 
   it("the ranger's net snares a scrapper flat", () => {
@@ -181,20 +181,44 @@ describe('class relics', () => {
     expect(run(room, 1.4).some((e) => e.k === 'burst')).toBe(true);
   });
 
-  it("the healer's blessing heals and buffs the hurt squire, not herself", () => {
+  it("the healer's blessed ground mends and blesses allies in it, slowly, and burns goblins in it", () => {
     const room = new ArenaRoom(1, { squire: true });
     const h = room.join('me');
     const q = room.heroes.find((x) => x.id === 'squire')!;
     for (let i = 1; i <= 4; i++) room.setIntent('me', intent({ classSeq: i })), room.step();
     expect(h.relic).toBe('blessing');
-    Object.assign(h, { x: q.x - 3, y: q.y, hp: 90 });
+    Object.assign(h, { x: q.x - 1, y: q.y, hp: 60 });
     q.hp = 40;
+    const g = room.enemies.find((e) => e.kind === 'scrapper')!;
+    Object.assign(g, { x: h.x + 0.5, y: h.y - 1.2, cooldown: 99, act: 'stunned', actDur: 99 });
     room.setIntent('me', intent({ classSeq: 4, relicSeq: 1 }));
-    const ev = run(room, 0.4);
-    expect(ev.some((e) => e.k === 'beam')).toBe(true);
-    expect(q.hp).toBeGreaterThanOrEqual(55);
+    const ev = run(room, 1);
+    expect(ev.some((e) => e.k === 'hallow')).toBe(true);
+    expect(q.hp).toBeGreaterThan(40);
+    expect(q.hp).toBeLessThan(60);
     expect(q.blessedUntil).toBeGreaterThan(room.time);
-    expect(h.blessedUntil).toBeLessThan(room.time);
+    expect(g.hp).toBeLessThan(g.maxHp);
+    run(room, 6);
+    expect(room.zones.length).toBe(0);
+  });
+
+  it("the ward soaks blows meant for you, solo, and throws an archer's arrow back", () => {
+    const room = new ArenaRoom(1, { scrappers: false });
+    const h = room.join('me');
+    for (let i = 1; i <= 4; i++) room.setIntent('me', intent({ classSeq: i })), room.step();
+    room.setIntent('me', intent({ classSeq: 4, relicPick: 1, relicPickSeq: 1 }));
+    room.step();
+    expect(h.relic).toBe('ward');
+    room.setIntent('me', intent({ classSeq: 4, relicPick: 1, relicPickSeq: 1, relicSeq: 1 }));
+    run(room, 0.5);
+    expect(h.wardUntil).toBeGreaterThan(room.time);
+    const a = room.enemies.find((e) => e.kind === 'butcher')!;
+    Object.assign(a, { bow: true, kind: 'scrapper', x: h.x, y: h.y - 5, fx: 0, fy: 1, cooldown: 0, hp: 36, maxHp: 36 });
+    const hp = h.hp;
+    const ev = run(room, 2);
+    expect(ev.some((e) => e.k === 'reflect')).toBe(true);
+    expect(h.hp).toBe(hp);
+    expect(a.hp).toBeLessThan(36);
   });
 
   it("the war horn rallies allies: stamina back, and blocking costs half", () => {

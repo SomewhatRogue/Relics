@@ -175,6 +175,20 @@ export class Scene {
       for (let i = 0; i < 3; i++) glow.fillRect(Math.round(ex + (e.w * PX) / 2 - 1 + i - 1), Math.round(ey + (e.y < 1 ? 6 + i : e.h * PX - 6 - i)), 3 - Math.abs(i - 1) * 2 + 1, 1);
       glow.globalAlpha = 1;
     }
+    // Blessed ground: a ring of gold on the floor, light rising off it.
+    for (const z of room.zones) {
+      const zx = OX + z.x * PX - cx, zy = OY + z.y * PX - cy, R = z.r * PX, left = z.until - room.time, k = Math.min(1, left / 1.2);
+      glow.globalAlpha = 0.75 * k;
+      glow.fillStyle = '#ffd27a';
+      for (let a = 0; a < Math.PI * 2; a += 0.06) glow.fillRect(Math.round(zx + Math.cos(a + now * 0.3) * R), Math.round(zy + Math.sin(a + now * 0.3) * R * 0.55), 1, 1);
+      glow.fillStyle = '#fff1b0';
+      for (let i = 0; i < 14; i++) {
+        const p = (now * 0.6 + i / 14) % 1, a = i * 2.4;
+        glow.globalAlpha = (1 - p) * 0.8 * k;
+        glow.fillRect(Math.round(zx + Math.cos(a) * R * 0.8 * ((i % 5) / 5)), Math.round(zy + Math.sin(a) * R * 0.45 * ((i % 5) / 5) - p * 22), 1, 1);
+      }
+      glow.globalAlpha = 1;
+    }
     // At a fork, both ways out glow, each with its name.
     if (room.exitOpen) for (const r of map.roads ?? []) {
       const e = r.area, ex = OX + e.x * PX - cx, ey = OY + e.y * PX - cy, k = 0.5 + 0.3 * Math.sin(now * 5 + e.x);
@@ -212,6 +226,7 @@ export class Scene {
       if (b.maxHp || (b.kind !== 'house' && b.kind !== 'church' && b.kind !== 'hall' && b.kind !== 'forge')) continue;
       lights.push({ x: bx + (b.w * PX) / 2 - cx, y: by + b.h * PX - cy, r: 34, i: 0.45, c: b.kind === 'forge' ? [1, 0.5, 0.25] : [1, 0.8, 0.5] });
     }
+    for (const z of room.zones) lights.push({ x: OX + z.x * PX - cx, y: OY + z.y * PX - cy - 6, r: z.r * PX * 1.4, i: 0.8 * Math.min(1, (z.until - room.time) / 1.2), c: [1, 0.85, 0.5] });
     for (const h of room.heroes) {
       const [x, y] = lerp('h:' + h.id, h.x, h.y);
       // Underground (no moon), each hero carries a lantern.

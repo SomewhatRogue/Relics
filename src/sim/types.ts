@@ -88,6 +88,9 @@ export interface Hero extends Body {
   augments: Record<RelicId, Augment>;
   /** Blessed by a healer until then: hits harder, takes less. */
   blessedUntil: number;
+  /** A Healer's ward on this hero: until when, and how much more it can take. */
+  wardUntil: number;
+  wardHp: number;
   /** Rallied by a war horn until then: stamina comes back faster, blocking costs less. */
   rallyUntil: number;
   /** The weapon found for each kit (a kit not listed is the plain one). */
@@ -202,6 +205,17 @@ export interface Prop extends Body {
   spin: number;
 }
 
+/** Blessed ground: a circle that mends and blesses allies and burns goblins, ticking every half second. */
+export interface Zone {
+  x: number;
+  y: number;
+  r: number;
+  until: number;
+  next: number;
+  owner: string;
+  el: Augment;
+}
+
 /** A weapon lying where a goblin fell. */
 export interface Drop {
   id: number;
@@ -212,9 +226,11 @@ export interface Drop {
 }
 
 export type FightEvent =
-  | { k: 'hit'; x: number; y: number; n: number; heavy: boolean; on: 'enemy' | 'hero'; counter?: boolean; backstab?: boolean; tick?: boolean }
+  /** `src`: what landed it (a kit, or a shot's kind), for its sound; `big`: on the butcher. */
+  | { k: 'hit'; x: number; y: number; n: number; heavy: boolean; on: 'enemy' | 'hero'; counter?: boolean; backstab?: boolean; tick?: boolean; src?: string; big?: boolean }
+  | { k: 'swing'; x: number; y: number; src: string; heavy: boolean }
   | { k: 'death'; x: number; y: number; how: DeathKind; dx: number; dy: number; kind: EnemyKind }
-  | { k: 'block' | 'parry' | 'guardbreak' | 'dodge' | 'down' | 'roll' | 'swing' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number }
+  | { k: 'block' | 'parry' | 'guardbreak' | 'dodge' | 'down' | 'roll' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number }
   | { k: 'windup' | 'impact'; x: number; y: number; kind: AttackKind }
   | { k: 'weapon'; x: number; y: number; name: string }
   | { k: 'throw' | 'pinned' | 'javwall' | 'javstick' | 'hookfire' | 'latch' | 'yank' | 'land'; x: number; y: number; dx: number; dy: number }
@@ -224,7 +240,7 @@ export type FightEvent =
   | { k: 'burst'; x: number; y: number; r: number; el: Augment }
   | { k: 'shock' | 'beam'; x: number; y: number; x2: number; y2: number }
   | { k: 'heal'; x: number; y: number; n: number }
-  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle' | 'lift' | 'oilfire' | 'freed' | 'exitopen' | 'blaze' | 'chop' | 'denspawn'; x: number; y: number }
+  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle' | 'lift' | 'oilfire' | 'freed' | 'exitopen' | 'blaze' | 'chop' | 'denspawn' | 'hallow' | 'ward' | 'warded' | 'reflect' | 'wardbreak'; x: number; y: number }
   | { k: 'collapse'; x: number; y: number; w: number; h: number }
   | { k: 'propbreak'; x: number; y: number; kind: PropKind; dx: number; dy: number };
 

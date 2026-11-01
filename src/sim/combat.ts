@@ -1,7 +1,7 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, parry, roll). */
-import { BLESSING, FLINCH, HORN, OVERKILL, PERK, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, WEAPONS, type Swing } from '../shared/tuning';
+import { BLESSING, WARD, FLINCH, HORN, OVERKILL, PERK, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, WEAPONS, type Swing } from '../shared/tuning';
 import { shove } from './bodies';
-import { frozen, isDummy, kill, snared, stunOf } from './damage';
+import { damage, frozen, isDummy, kill, snared, stunOf } from './damage';
 import { shatter } from './elements';
 import { has } from './traits';
 import type { Enemy, EnemyAttack, FightEvent, Hero } from './types';
@@ -46,7 +46,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   const ring = s.arc >= 360, dl = Math.hypot(e.x - h.x, e.y - h.y) || 1;
   const kx = ring ? (e.x - h.x) / dl : h.fx, ky = ring ? (e.y - h.y) / dl : h.fy;
   if (e.act !== 'pinned' && e.act !== 'carried') shove(e, kx, ky, s.knock + (h.counter ? 5 : 0), e.weight);
-  ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy, on: 'enemy', counter: h.counter, backstab: rear && rearMult >= 2 });
+  ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy, on: 'enemy', counter: h.counter, backstab: rear && rearMult >= 2, src: h.weapon, big: e.kind === 'butcher' });
   if (isDummy(e)) {
     if (e.hp <= 0) e.hp = e.maxHp;
     if (ice && heavy) shatter(e, now, ev);
@@ -73,9 +73,28 @@ export function attackCovers(a: EnemyAttack, h: Hero): boolean {
   return inArc(a.ox, a.oy, a.dx, a.dy, h.x, h.y, a.range, a.arc, HERO.radius);
 }
 
+/**
+ * A ward takes it: an arrow goes straight back at the archer (hurt and stunned where it stands); a
+ * blow is soaked up until the ward breaks (the blow that breaks it is soaked too). Returns true when
+ * nothing reached the hero.
+ */
+function warded(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: FightEvent[]): boolean {
+  if (a.kind === 'shot') {
+    ev.push({ k: 'reflect', x: h.x, y: h.y });
+    ev.push({ k: 'beam', x: h.x, y: h.y, x2: e.x, y2: e.y });
+    if (!damage(e, Math.round(a.dmg * WARD.reflect), now, ev, { heavy: true, src: 'smite' })) Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: WARD.stun });
+    return true;
+  }
+  h.wardHp -= a.dmg;
+  ev.push({ k: 'warded', x: h.x, y: h.y });
+  if (h.wardHp <= 0) (h.wardUntil = -9), ev.push({ k: 'wardbreak', x: h.x, y: h.y });
+  return true;
+}
+
 /** An enemy's attack lands on a hero: rolled through, parried, blocked, or taken. */
 export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: FightEvent[]): void {
   if (h.act === 'down' || !attackCovers(a, h)) return;
+  if (h.wardUntil > now && warded(e, a, h, now, ev)) return;
   const w = WEAPONS[h.weapon];
   // A blessed hero takes less from everything.
   const taken = h.blessedUntil > now ? BLESSING.taken : 1;
@@ -120,7 +139,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   Object.assign(h, { act: 'hurt', actT: 0, actDur: HURT_STAGGER + a.knock * 0.012 });
   h.hitstop = Math.max(h.hitstop, HITSTOP.heavy);
   shove(h, sx / sl, sy / sl, a.knock, HERO.weight);
-  ev.push({ k: 'hit', x: h.x, y: h.y, n, heavy: n >= 25, on: 'hero' });
+  ev.push({ k: 'hit', x: h.x, y: h.y, n, heavy: n >= 25, on: 'hero', src: a.kind });
   downIfDead(h, ev);
 }
 
