@@ -274,7 +274,7 @@ no fighting in town but movement abilities still work.
   (blocking costs a quarter less), Steady Hand (bows draw a sixth faster), Shadowed (backstabs half as
   hard again), Focus (the blink back a quarter sooner), Devotion (blessed ground wider, the ward
   stronger).
-- **The Drowned Rat**: Barkeep Holt (rumours), Dicer Moll (knucklebones: two dice each, high roll takes
+- **The Drowned Rat**: Barkeep Gannet (rumours), Dicer Moll (knucklebones: two dice each, high roll takes
   the pot, ties to the house unless you're a Rogue; seeded per hero), Whisper, a drunk, a card sharp.
   The sewer grate is out the back.
 - **In the square**: the works board, the Roll, the well (5 gold: your next job starts blessed), the
