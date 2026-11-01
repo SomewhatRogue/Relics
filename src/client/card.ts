@@ -11,7 +11,7 @@ export const HOW: Record<WeaponId, string> = {
   sword: 'Three-hit combo, a wide guard and an easy parry. Rolls.',
   greatsword: 'Two slow, wide hits and a huge heavy. A tight parry.',
   spear: 'Four quick thrusts at long reach. Steps back to dodge.',
-  daggers: 'A fast four-hit combo, two and a half times from behind. A long dash.',
+  daggers: 'A fast four-hit combo, two and a half times the damage from behind. A long dash.',
   longbow: 'One arrow a press. A full 1.4 s draw pierces a line.',
   shortbow: 'A quick draw, and you can walk while drawing.',
   crossbow: 'Fires the moment you press. A long reload.',

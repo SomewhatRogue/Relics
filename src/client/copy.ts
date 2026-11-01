@@ -44,7 +44,7 @@ export const COAL = {
 /** Hungry gear at the church, and the town noticing the Want (lore keeper). */
 export const CHURCH = {
   hungry: 'If there\'s something you\'re carrying you\'d rather not, leave it on the step. I\'ll see to it.',
-  left: 'Good. Have you eaten today? You look thin.',
+  left: "Good. There's bread in the back, if you'll take it.",
   ransom: 'The coat won\'t let your hand open over the plate. Odric pretends not to see.',
   agne: 'You\'ve a look about you. Sleep with a candle tonight. Humour me.',
   ivo: "Oh. That's a hungry one. Don't sleep with it under your pillow.",
@@ -54,6 +54,6 @@ export const CHURCH = {
 export const SMITH = {
   greet: 'Good steel. Gold first.',
   bought: "In your pack. He's already oiling the next one.",
-  anvil: 'Steel and gold. Melt what you don\'t want; I\'ll make what you do better.',
+  anvil: 'Spares in the fire. Steel and gold for the rest.',
   hungry: 'Not that one. Not in my fire.',
 };

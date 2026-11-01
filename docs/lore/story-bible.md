@@ -137,3 +137,5 @@ most Want among the heroes is the one the bells don't spare).
 - **The Want, as built:** a hidden number per hero; grows with hungry gear worn and used, falls with
   gold given at the Lantern and hungry gear given up at the church (which feeds the Lantern). Its tell
   is the eyes. Turning into a named butcher is still Kyle's call.
+- **On screen, "hungry gear"** is the term for butcher-touched gear (red). It can only be given up at the
+  church, never melted, traded or dropped.

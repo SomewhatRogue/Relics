@@ -9,7 +9,7 @@ export const POTIONS: Record<PotionId, { name: string; short: string; text: stri
   bitter: { name: "SISTER'S BITTER", short: 'BITTER', text: '40 health over 2 seconds. Tastes like a boot. Works.', price: 20, thrown: false, col: '#c0392b' },
   brandy: { name: 'WALL BRANDY', short: 'BRANDY', text: 'Full breath, and it comes back half again as fast for 6 seconds.', price: 15, thrown: false, col: '#d4a537' },
   oil: { name: 'LAMP OIL', short: 'OIL', text: 'Thrown where you aim. It bursts into flame.', price: 20, thrown: true, col: '#ff9a3c' },
-  frost: { name: 'FROST FLASK', short: 'FROST', text: 'Thrown where you aim. It chills all it splashes; twice freezes.', price: 25, thrown: true, col: '#9fd0ff' },
+  frost: { name: 'FROST FLASK', short: 'FROST', text: 'Thrown where you aim. It chills what it splashes; a second splash freezes.', price: 25, thrown: true, col: '#9fd0ff' },
   smoke: { name: 'SMOKE', short: 'SMOKE', text: 'Thrown where you aim. Goblins lose anyone standing in it.', price: 25, thrown: true, col: '#9a94a8' },
 };
 
