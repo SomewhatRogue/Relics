@@ -276,8 +276,10 @@ export const HOOK = {
 };
 
 export const RELICS = {
-  javelin: { name: 'RELIC JAVELIN', cooldown: JAVELIN.cooldown, windup: JAVELIN.windup, recover: JAVELIN.recover },
-  hook: { name: 'GRAPPLING HOOK', cooldown: HOOK.cooldown, windup: HOOK.windup, recover: HOOK.recover },
+  javelin: { name: 'RELIC JAVELIN', short: 'JAVELIN', cooldown: JAVELIN.cooldown, windup: JAVELIN.windup, recover: JAVELIN.recover },
+  hook: { name: 'GRAPPLING HOOK', short: 'HOOK', cooldown: HOOK.cooldown, windup: HOOK.windup, recover: HOOK.recover },
 };
 export type RelicId = keyof typeof RELICS;
 export const RELIC_ORDER: RelicId[] = ['javelin', 'hook'];
+/** A hero carries at most this many relics into a run (chosen in town later). */
+export const RELIC_SLOTS = 3;

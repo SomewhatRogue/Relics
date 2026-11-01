@@ -17,9 +17,12 @@ export interface Intent {
   weaponSeq: number;
   relicSeq: number;
   relicSwapSeq: number;
+  /** Equip the relic in loadout slot `relicPick` (counted by relicPickSeq). */
+  relicPickSeq: number;
+  relicPick: number;
 }
 
-export const NO_INTENT: Intent = { mx: 0, my: 0, ax: 0, ay: 0, attack: false, block: false, attackSeq: 0, blockSeq: 0, rollSeq: 0, weaponSeq: 0, relicSeq: 0, relicSwapSeq: 0 };
+export const NO_INTENT: Intent = { mx: 0, my: 0, ax: 0, ay: 0, attack: false, block: false, attackSeq: 0, blockSeq: 0, rollSeq: 0, weaponSeq: 0, relicSeq: 0, relicSwapSeq: 0, relicPickSeq: 0, relicPick: 0 };
 
 export type HeroAct = 'idle' | 'charge' | 'attack' | 'throw' | 'zip' | 'roll' | 'hurt' | 'stun' | 'down';
 
@@ -61,13 +64,15 @@ export interface Hero extends Body {
   attackQueuedAt: number;
   rollQueuedAt: number;
   relic: RelicId;
+  /** The relics carried into this fight (at most RELIC_SLOTS). */
+  relics: RelicId[];
   /** When each relic is ready again. */
   relicReady: Record<RelicId, number>;
   relicQueuedAt: number;
   hitstop: number;
   /** Extra parry and dodge leniency for this player's ping (seconds). */
   lenience: number;
-  seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number };
+  seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number };
 }
 
 export type AttackKind = 'cleave' | 'slam' | 'swing' | 'stab';

@@ -17,6 +17,11 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .rcd.wait { color: #6a647a; }
 .chips { position: fixed; right: calc(10px + env(safe-area-inset-right)); top: calc(42px + env(safe-area-inset-top)); display: flex; gap: 6px; }
 .chip { position: static; height: 26px; padding: 0 8px; background: #1b1922cc; border: 1px solid #4f4a5c; border-radius: 4px; font-size: 10px; touch-action: none; }
+#wheel { position: fixed; inset: 0; background: #0d0b1066; z-index: 4; pointer-events: none; }
+#wheel .slot { position: fixed; width: 66px; height: 66px; margin: -33px 0 0 -33px; border-radius: 50%; border: 2px solid #4f6a78; background: conic-gradient(#1f3a48 var(--cd, 100%), #14161cee 0); color: #d8f6ff; font-size: 10px; display: flex; align-items: center; justify-content: center; }
+#wheel .slot.active { border-color: #9fe8ff; }
+#wheel .slot.hot { transform: scale(1.18); border-color: #ffffff; background: #2c5466; }
+#wheel .slot.empty { color: #5a5664; border-style: dashed; border-color: #3a3644; background: #14161caa; }
 .relic { width: 56px; height: 56px; right: calc(28px + env(safe-area-inset-right)); bottom: calc(142px + env(safe-area-inset-bottom)); background: conic-gradient(#1f3a48 var(--cd, 100%), #14161ccc 0); border-color: #9fe8ff; color: #d8f6ff; font-size: 10px; }
 
 #corner { position: fixed; right: calc(10px + env(safe-area-inset-right)); top: calc(8px + env(safe-area-inset-top)); display: flex; gap: 6px; }

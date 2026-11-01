@@ -2,6 +2,17 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-10-31 (night, latest): the relic wheel (Claude Opus 5.5)
+
+Kyle: switching relics on a phone was too slow; hold the relic button and quick-select, with only a
+few relics equippable.
+
+- Heroes carry a relic **loadout** of at most 3 (`RELIC_SLOTS`; chosen in town later). Tap RELIC to
+  use the equipped one; **hold** it (0.26 s) and the carried relics fan out up and to the left of the
+  thumb with their recharge shown; slide onto one and let go to equip it, let go elsewhere to cancel.
+  The button shows the equipped relic's name. The fight doesn't pause (it's shared online).
+- Laptop: 1, 2, 3 pick a slot directly; R still cycles; E uses. The top RELIC chip is gone.
+
 ## 2026-10-31 (night, later): kits guard and dodge differently (Claude Opus 5.5)
 
 Kyle: sword and shield should block easiest and best; greatsword and spear need more timing; classes

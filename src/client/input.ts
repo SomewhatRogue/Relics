@@ -4,6 +4,7 @@
  * a floating stick on the left, Attack, Block and Roll under the right thumb.
  */
 import { NO_INTENT, type Intent } from '../sim/types';
+import { RelicWheel, type Slot } from './relicwheel';
 import { unlockAudio } from './sfx';
 
 export class Input {
@@ -17,7 +18,7 @@ export class Input {
   private stickEl!: HTMLElement;
   private knobEl!: HTMLElement;
 
-  constructor(private heroScreen: () => [number, number] | null) {
+  constructor(private heroScreen: () => [number, number] | null, private relicSlots: () => Slot[]) {
     const unlock = () => unlockAudio();
     for (const t of ['touchend', 'pointerup', 'click', 'keydown']) addEventListener(t, unlock, { passive: true });
     addEventListener('keydown', (e) => {
@@ -29,6 +30,7 @@ export class Input {
       if (k === 'e') this.intent.relicSeq++;
       if (k === 'q') this.intent.weaponSeq++;
       if (k === 'r') this.intent.relicSwapSeq++;
+      if (k === '1' || k === '2' || k === '3') (this.intent.relicPick = Number(k) - 1), this.intent.relicPickSeq++;
       if (k === 'k') (this.intent.blockSeq++), (this.blockHeld.key = true);
     });
     addEventListener('keyup', (e) => {
@@ -101,11 +103,45 @@ export class Input {
       el.addEventListener('touchcancel', release, { passive: false });
     };
     btn('.attack', () => ((this.intent.attackSeq++), (this.attackHeld.touch = true)), () => (this.attackHeld.touch = false));
-    btn('.relic', () => this.intent.relicSeq++);
+    this.relicButton(ui.querySelector('.relic') as HTMLElement);
     btn('.swap-weapon', () => this.intent.weaponSeq++);
-    btn('.swap-relic', () => this.intent.relicSwapSeq++);
     btn('.roll', () => this.intent.rollSeq++);
     btn('.block', () => ((this.intent.blockSeq++), (this.blockHeld.touch = true)), () => (this.blockHeld.touch = false));
+  }
+
+  /** Tap to use the relic; hold to open the wheel, slide onto a relic and let go to equip it. */
+  private relicButton(el: HTMLElement): void {
+    const wheel = new RelicWheel(this.relicSlots);
+    let id = '', open = false, pick = -1, timer = 0;
+    el.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      el.classList.add('down');
+      id = String(e.changedTouches[0].identifier);
+      open = false;
+      pick = -1;
+      timer = window.setTimeout(() => {
+        open = true;
+        wheel.show(el);
+        navigator.vibrate?.(12);
+      }, 260);
+    }, { passive: false });
+    el.addEventListener('touchmove', (e) => {
+      if (!open) return;
+      e.preventDefault();
+      for (const t of Array.from(e.changedTouches)) if (String(t.identifier) === id) pick = wheel.hover(t.clientX, t.clientY);
+    }, { passive: false });
+    const end = (fire: boolean) => (e: TouchEvent) => {
+      e.preventDefault();
+      el.classList.remove('down');
+      clearTimeout(timer);
+      if (open) {
+        if (pick >= 0) (this.intent.relicPick = pick), this.intent.relicPickSeq++;
+        wheel.hide();
+      } else if (fire) this.intent.relicSeq++;
+      open = false;
+    };
+    el.addEventListener('touchend', end(true), { passive: false });
+    el.addEventListener('touchcancel', end(false), { passive: false });
   }
 
   /** The current intent, read once a frame. */

@@ -3,7 +3,7 @@
  * A tap of attack swings on release; holding past CHARGE.start charges a heavy instead.
  */
 import { collide } from '../shared/arena';
-import { CHARGE, GUARD, HERO, HOOK, INPUT_BUFFER, JAVELIN, RELICS, RELIC_ORDER, WEAPONS, WEAPON_ORDER, type Swing } from '../shared/tuning';
+import { CHARGE, GUARD, HERO, HOOK, INPUT_BUFFER, JAVELIN, RELICS, WEAPONS, WEAPON_ORDER, type Swing } from '../shared/tuning';
 import { slide } from './bodies';
 import { hitEnemy } from './combat';
 import type { Enemy, FightEvent, Hero, Intent } from './types';
@@ -13,8 +13,8 @@ export function newHero(id: string, x: number, y: number): Hero {
     id, x, y, kvx: 0, kvy: 0, fx: 0, fy: 1, moving: false, hp: HERO.hp, stamina: HERO.stamina, staminaAt: -9, weapon: 'sword',
     act: 'idle', actT: 0, actDur: 0, combo: 0, heavy: false, power: 0, counter: false, hitIds: [], blocking: false,
     parryOpenAt: -9, lastBlockPress: -9, rollDx: 0, rollDy: 1, lastRollAt: -9, counterUntil: -9,
-    attackQueuedAt: -9, rollQueuedAt: -9, relic: 'javelin', relicReady: { javelin: 0, hook: 0 }, relicQueuedAt: -9, hitstop: 0, lenience: 0,
-    seen: { attack: 0, block: 0, roll: 0, weapon: 0, relic: 0, relicSwap: 0 },
+    attackQueuedAt: -9, rollQueuedAt: -9, relic: 'javelin', relics: ['javelin', 'hook'], relicReady: { javelin: 0, hook: 0 }, relicQueuedAt: -9, hitstop: 0, lenience: 0,
+    seen: { attack: 0, block: 0, roll: 0, weapon: 0, relic: 0, relicSwap: 0, relicPick: 0 },
   };
 }
 
@@ -65,8 +65,16 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   if (inp.relicSeq !== h.seen.relic) (h.seen.relic = inp.relicSeq), (h.relicQueuedAt = now);
   if (inp.relicSwapSeq !== h.seen.relicSwap) {
     h.seen.relicSwap = inp.relicSwapSeq;
-    h.relic = RELIC_ORDER[(RELIC_ORDER.indexOf(h.relic) + 1) % RELIC_ORDER.length];
+    h.relic = h.relics[(h.relics.indexOf(h.relic) + 1) % h.relics.length];
     ev.push({ k: 'relic', x: h.x, y: h.y, name: RELICS[h.relic].name });
+  }
+  if (inp.relicPickSeq !== h.seen.relicPick) {
+    h.seen.relicPick = inp.relicPickSeq;
+    const r = h.relics[inp.relicPick];
+    if (r && r !== h.relic) {
+      h.relic = r;
+      ev.push({ k: 'relic', x: h.x, y: h.y, name: RELICS[r].name });
+    }
   }
   if (inp.attackSeq !== h.seen.attack) (h.seen.attack = inp.attackSeq), (h.attackQueuedAt = now);
   if (inp.rollSeq !== h.seen.roll) (h.seen.roll = inp.rollSeq), (h.rollQueuedAt = now);

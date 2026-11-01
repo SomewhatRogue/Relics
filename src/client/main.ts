@@ -1,5 +1,5 @@
 /** Relic: slice 2, one room. The fight runs here in the browser (solo is a party of one). */
-import { HERO, RELICS, WEAPONS } from '../shared/tuning';
+import { HERO, RELICS, RELIC_SLOTS, WEAPONS } from '../shared/tuning';
 import { ArenaRoom } from '../sim/room';
 import type { FightEvent } from '../sim/types';
 import { Fx } from './fx';
@@ -14,7 +14,10 @@ const ME = 'me';
 const me = room.join(ME);
 const scene = new Scene(document.getElementById('game') as HTMLCanvasElement);
 const fx = new Fx();
-const input = new Input(() => scene.heroScreen());
+const input = new Input(
+  () => scene.heroScreen(),
+  () => me.relics.slice(0, RELIC_SLOTS).map((r) => ({ name: RELICS[r].short, active: r === me.relic, ready: 1 - Math.max(0, me.relicReady[r] - room.time) / RELICS[r].cooldown })),
+);
 const $ = (s: string) => document.querySelector(s) as HTMLElement;
 
 function sound(ev: FightEvent): void {
@@ -35,8 +38,8 @@ const KIT: Record<string, string> = {
 
 let parries = 0;
 const tips = input.touch
-  ? ['Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'RELIC: pin a scrapper to the wall', 'Striped circles cannot be blocked: ROLL out', 'WEAPON and RELIC up top swap your kit', 'TWIN DAGGERS: roll behind a goblin and BACKSTAB']
-  : ['Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: pin a scrapper to the wall. R swaps relic', 'Striped circles cannot be blocked: SPACE to roll', 'Q swaps weapon: sword, greatsword, spear, daggers', 'Daggers: roll behind a goblin and BACKSTAB'];
+  ? ['Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'RELIC: pin a scrapper to the wall', 'Striped circles cannot be blocked: ROLL out', 'HOLD RELIC to pick another relic', 'TWIN DAGGERS: roll behind a goblin and BACKSTAB']
+  : ['Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: pin a scrapper to the wall. 1 2 3 pick a relic', 'Striped circles cannot be blocked: SPACE to roll', 'Q swaps weapon: sword, greatsword, spear, daggers', 'Daggers: roll behind a goblin and BACKSTAB'];
 let tipAt = -99, tipI = 0;
 
 function hud(now: number): void {
@@ -46,6 +49,7 @@ function hud(now: number): void {
   $('.wpn').textContent = (input.touch ? '' : 'Q ') + WEAPONS[me.weapon].name;
   $('.kit').textContent = KIT[me.weapon];
   $('.rlc').textContent = (input.touch ? '' : 'E ') + RELICS[me.relic].name;
+  if (input.touch) $('.tb.relic').textContent = RELICS[me.relic].short;
   const wait = Math.max(0, me.relicReady[me.relic] - room.time);
   $('.rcd').textContent = wait > 0 ? wait.toFixed(1) : 'READY';
   $('.rcd').classList.toggle('wait', wait > 0);

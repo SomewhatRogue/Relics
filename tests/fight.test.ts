@@ -359,3 +359,16 @@ describe('kits block and dodge differently', () => {
     expect(WEAPONS.daggers.dodge.cooldown).toBeLessThan(WEAPONS.greatsword.dodge.cooldown);
   });
 });
+
+describe('relic loadout', () => {
+  it('picks a relic by its slot, and ignores an empty slot', () => {
+    const { room, h } = onTarget(1);
+    expect(h.relics).toEqual(['javelin', 'hook']);
+    room.setIntent('me', intent({ relicPickSeq: 1, relicPick: 1 }));
+    room.step();
+    expect(h.relic).toBe('hook');
+    room.setIntent('me', intent({ relicPickSeq: 2, relicPick: 2 }));
+    room.step();
+    expect(h.relic).toBe('hook');
+  });
+});
