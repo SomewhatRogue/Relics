@@ -108,12 +108,20 @@ export const SCRAPPER: EnemySpec & { stab: EnemyAttackSpec } = {
  */
 export const ARCHER = {
   reach: 7.5,
-  /** It backs off when you're this close (and it isn't up on a ledge). */
-  keep: 3.5,
+  /** It runs from you when you're this close on its own level. */
+  keep: 4.5,
+  flee: 1.1,
   shot: { windup: 1.0, active: 0.08, recover: 0.7, dmg: 10, knock: 3, range: 8, arc: 7, unblockable: false } as EnemyAttackSpec,
 };
 
 /** Heights: shots from up on a ledge hit harder; something knocked off a ledge this fast takes a fall. */
+/**
+ * Goblins at rest: they mill about until they see you (this close, in front of them; half that from
+ * behind), hear a fight (a goblin hit or killed this close), or are hurt; then they shout, and every
+ * goblin within `shout` comes too.
+ */
+export const ALERT = { sight: 6.5, behind: 2.5, hear: 5, shout: 5.5, wander: 0.9, wanderSpeed: 0.8 };
+
 export const HEIGHT = { shot: 1.25, fallSpeed: 3, fallDmg: 12, fallStun: 0.8 };
 
 export const SWING_DUMMY = {

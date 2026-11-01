@@ -17,7 +17,7 @@ export function newProp(kind: PropKind, x: number, y: number, home = true): Prop
   const s = PROPS[kind];
   return {
     id: nextId++, kind, x, y, kvx: 0, kvy: 0, hp: s.hp, radius: s.radius, weight: s.weight, lifted: false, lastBy: '', hitAt: -9,
-    broken: false, respawnAt: -1, home: home ? { x, y } : null, fadeAt: Infinity, spin: 0,
+    broken: false, respawnAt: -1, home: home ? { x, y } : null, fadeAt: Infinity, spin: 0, z: 0,
   };
 }
 

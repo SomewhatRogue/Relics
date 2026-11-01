@@ -73,6 +73,10 @@ export class Soundscape {
     if (ev.k === 'impact') return ev.kind === 'slam' ? sfx.boom() : undefined;
     if (ev.k === 'chop' || ev.k === 'blaze' || ev.k === 'collapse') return woodSounds[ev.k]();
     if (ev.k === 'denspawn') return goblin.screech();
+    if (ev.k === 'spotted') {
+      const e = room.enemies.find((x) => Math.abs(x.x - ev.x) < 0.01 && Math.abs(x.y - ev.y) < 0.01);
+      return e?.kind === 'butcher' ? butcher.roar(false) : goblin.cackle(e?.id ?? 1);
+    }
     (sfx as unknown as AnyFx)[ev.k]?.();
   }
 

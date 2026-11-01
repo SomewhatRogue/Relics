@@ -155,6 +155,9 @@ export class Fx {
         this.say(x, y - 24, 'BLOCK', '#c8c4d0');
         this.shake = Math.max(this.shake, 1);
         break;
+      case 'spotted':
+        this.say(x, y - 22, '!', '#ff6a5a');
+        break;
       case 'parry':
         this.burst(x, y - 8, 18, ['#ffffff', '#cfe8ff', '#9fd0ff'], 90, true);
         this.rings.push({ x, y: y - 8, life: 0.3, max: 0.3, col: '#e8f4ff' });

@@ -1,6 +1,6 @@
 /** Enemies' turns: the goblin butcher, goblin scrappers, and the two training dummies. */
 import { collide, currentMap, inArea } from '../shared/arena';
-import { ARCHER, BUTCHER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, type EnemyAttackSpec, type EnemySpec } from '../shared/tuning';
+import { ALERT, ARCHER, BUTCHER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, type EnemyAttackSpec, type EnemySpec } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { slide } from './bodies';
 import { hitHero } from './combat';
@@ -62,7 +62,7 @@ function runAttack(e: Enemy, heroes: Hero[], now: number, dt: number, ev: FightE
 
 const after = (e: Enemy) => (e.kind === 'swingDummy' || e.kind === 'dummy' ? 'idle' : 'chase');
 
-export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: number, ev: FightEvent[]): void {
+export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: number, ev: FightEvent[], others: Enemy[] = []): void {
   if (e.hitstop > 0) return void (e.hitstop -= dt);
   e.actT += dt;
   e.moving = false;
@@ -105,6 +105,7 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     }
     return;
   }
+  if (e.alert === false && !notice(e, heroes, others, now, ev)) return wander(e, rng, now, dt);
   const t = nearest(e, heroes);
   if (!t || e.kind === 'dummy') return;
   const d = Math.hypot(t.x - e.x, t.y - e.y);
@@ -128,9 +129,13 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   const facing = e.fx * ux + e.fy * uy;
   if (e.bow) {
     if (d <= ARCHER.reach && e.cooldown <= 0 && facing > 0.9) return begin(e, 'shot', ARCHER.shot, t, ev);
-    // Keeps its distance on the ground; holds its perch up high.
-    const back = !e.z && d < ARCHER.keep, on = !e.z && d > ARCHER.reach;
-    if (back || on) walk(e, back ? -ux : ux, back ? -uy : uy, spec.speed * slow * (back ? 0.6 : Math.max(0.2, facing)), dt);
+    // Runs from you when you get close on its level (along its perch, up high); comes in if you're far on the ground.
+    const back = level && d < ARCHER.keep, on = !e.z && d > ARCHER.reach;
+    if (back) {
+      // Away, and a little to the side, so it doesn't back itself into a corner.
+      const side = Math.sin(now * 0.7 + e.id) > 0 ? 1 : -1;
+      walk(e, -ux - uy * side * 0.6, -uy + ux * side * 0.6, spec.speed * slow * ARCHER.flee, dt);
+    } else if (on) walk(e, ux, uy, spec.speed * slow * Math.max(0.2, facing), dt);
     return;
   }
   if (level && d <= spec.reach && e.cooldown <= 0 && facing > 0.75) {
@@ -146,6 +151,39 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     // Walks where it faces: something turning round is slow to come after you.
     walk(e, ux - uy * side, uy + ux * side, spec.speed * slow * Math.max(0.2, facing), dt);
   }
+}
+
+/**
+ * A goblin at rest looks about: a hero in front of it and near enough (or right behind it), or a fight
+ * close by, wakes it, and it shouts the others awake. Returns true when it's awake.
+ */
+function notice(e: Enemy, heroes: Hero[], others: Enemy[], now: number, ev: FightEvent[]): boolean {
+  let seen = false;
+  for (const h of heroes) {
+    if (h.act === 'down' || h.id === 'squire') continue;
+    const dx = h.x - e.x, dy = h.y - e.y, d = Math.hypot(dx, dy), ahead = (dx * e.fx + dy * e.fy) / (d || 1) > -0.2;
+    if (d < (ahead ? ALERT.sight : ALERT.behind)) seen = true;
+  }
+  for (const o of others) if (o !== e && o.alert && (isDead(o) || o.hitAt > now - 0.2) && Math.hypot(o.x - e.x, o.y - e.y) < ALERT.hear) seen = true;
+  if (!seen) return false;
+  for (const o of others) if (o.alert === false && Math.hypot(o.x - e.x, o.y - e.y) < ALERT.shout) o.alert = true;
+  e.alert = true;
+  e.cooldown = Math.max(e.cooldown, 0.6);
+  ev.push({ k: 'spotted', x: e.x, y: e.y });
+  return true;
+}
+
+/** At rest: a few steps here and there about where it was put, turning to look. */
+function wander(e: Enemy, rng: Rng, now: number, dt: number): void {
+  const k = Math.floor(now / 2.2 + e.id * 0.37);
+  if (Math.sin(k * 12.9898 + e.id * 78.233) > ALERT.wander - 1.4) {
+    const a = Math.sin(k * 3.7 + e.id) * Math.PI, hx = e.home.x - e.x, hy = e.home.y - e.y, far = Math.hypot(hx, hy) > 1.5;
+    const mx = far ? hx : Math.cos(a), my = far ? hy : Math.sin(a), ml = Math.hypot(mx, my) || 1;
+    e.fx = mx / ml;
+    e.fy = my / ml;
+    walk(e, mx, my, ALERT.wanderSpeed, dt);
+  }
+  void rng;
 }
 
 function walk(e: Enemy, mx: number, my: number, k: number, dt: number): void {

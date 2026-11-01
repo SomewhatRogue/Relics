@@ -43,6 +43,7 @@ export interface DamageOpts {
 
 /** Hurt an enemy; true if this killed it. Dummies never die (they refill). */
 export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: DamageOpts = {}): boolean {
+  e.alert = true;
   if (e.act === 'dead') return false;
   if (o.mult && (e.act === 'stunned' || e.act === 'pinned' || frozen(e, now) || snared(e, now))) n = Math.round(n * GUARD.stunnedMult * (o.brutal ? TRAIT.brutal : 1));
   e.hp -= n;

@@ -2,6 +2,30 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-01: bigger rooms, goblins at rest, archers that run, loot that does what it says (Claude Opus 5.5)
+
+Kyle (after playing as a Mage): each area bigger before moving on; loot that didn't do what it said;
+archers he couldn't hit that didn't run when he got close; starting rooms should be more small goblins
+that don't all rush you until startled, and bigger ones deeper in.
+
+- **Loot that does what it says.** The bug: a drop rolled for any kit of your class, and taking it
+  quietly swapped the kit in your hand (the wand for the staff) for that room only; next room you were
+  back on your own kit and the new weapon's trait sat on a kit you weren't using. Now drops and the
+  smith's wares are always for the weapon in hand, and taking one never changes your kit (the smith
+  does that). The loot card says so for anything else.
+- **Shots fly over ledges.** Ledges were walls to anything without a level, including arrows, spells
+  and javelins, so a shot from the ground at an archer up top stopped at the ledge's face. Only bodies
+  (heroes, goblins, props) are stopped by ledges now.
+- **Archers run** when you get close on their own level (up on the ledge too, along it), sidestepping
+  as they go so they don't back into a corner, and keep their distance at 4.5 tiles.
+- **Rooms are 28 by 24** (were 18 by 16), with more furniture to match. The camera follows.
+- **Goblins at rest** (`ALERT`): run goblins start in bands around their fires, milling about. One
+  notices you in front of it within 6.5 tiles (2.5 from behind), when a goblin near it is hit or
+  killed, or when it's hurt; it cackles, a "!" goes up, and its band (within 5.5) wakes with it. The
+  rest of the room keeps resting. Sneaking up from behind is now a real choice (and a Rogue's dream).
+- **Who's where:** the first room of a job is only small goblins (5 or more, more where it's worse);
+  butchers start in the second room where it's Occupied or worse, and the last room adds another.
+
 ## 2026-11-01: automated tests, the shared world and the Roll of the Brave, a living Wickhold (Claude Opus 5.5)
 
 Kyle: automated tests running on this; small groups or individuals impact the world and see a

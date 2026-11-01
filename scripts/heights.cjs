@@ -18,13 +18,13 @@ const url = process.argv[2] || 'http://localhost:4173/?hero=RANGER';
       // Win the first room and walk out: the fork.
       for (const e of g.room.enemies) Object.assign(e, { hp: 0, act: 'dead', respawns: false, death: 'burst' });
       g.room.exitOpen = true;
-      Object.assign(g.hero, { x: 9, y: 0.4 });
+      const ex = g.room.map.exit; Object.assign(g.hero, { x: ex.x + 1, y: 0.4 });
     });
     await page.waitForTimeout(400);
     await page.evaluate(() => {
       const g = window.__game;
       for (const e of g.room.enemies) Object.assign(e, { hp: 0, act: 'dead', respawns: false, death: 'burst' });
-      Object.assign(g.hero, { x: 9, y: 6 });
+      Object.assign(g.hero, { x: 14, y: 8 });
     });
     await page.waitForTimeout(600);
     await page.screenshot({ path: `shots/fork-${tag}.png` });

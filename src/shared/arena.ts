@@ -163,10 +163,12 @@ export function collide(p: { x: number; y: number }, r: number): void {
 
 /**
  * Heights: on a ramp you take the level of where you stand; on the ground a ledge is a wall; walk off
- * a ledge's edge and you drop to the ground. Things without a level (a point being tested, a prop) are
- * on the ground.
+ * a ledge's edge and you drop to the ground. Things without a level (shots in the air, a point being
+ * tested) aren't stopped by ledges at all.
  */
 function levels(m: GameMap, p: { x: number; y: number; z?: number; dropped?: number; kvx?: number; kvy?: number }, r: number): void {
+  // Things with no footing (a shot, a thrown javelin, a point being tested) pass over ledges.
+  if (!('z' in p)) return;
   const up = onLedge(m, p.x, p.y);
   if (inRamp(m, p.x, p.y)) {
     if ('z' in p) p.z = up ? 1 : 0;

@@ -1,8 +1,9 @@
 /**
- * Loot in the room: a goblin may drop a weapon (for the class of the nearest player); a hero of that
- * class standing on it can take it, and the weapon they had for that kit is left in its place.
+ * Loot in the room: a goblin may drop a weapon for the kit the nearest player has in hand; standing on
+ * it they can take it, and the weapon they had is left in its place. (Kits change only at the smith,
+ * so a drop is always for the weapon you're fighting with.)
  */
-import { CLASS_KITS, DROPS, WEAPONS, itemName, rollItem } from '../shared/tuning';
+import { DROPS, WEAPONS, itemName, rollItem } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import type { Drop, Enemy, FightEvent, Hero, Intent } from './types';
 
@@ -20,7 +21,7 @@ export function dropFrom(e: Enemy, heroes: Hero[], drops: Drop[], rng: Rng, ev: 
     if (h.id !== 'squire' && d < bd) (bd = d), (near = h);
   }
   if (!near) return;
-  const item = rollItem(rng, WEAPONS[near.weapon].cls, DROPS.forged[e.kind]);
+  const item = rollItem(rng, WEAPONS[near.weapon].cls, DROPS.forged[e.kind], near.weapon);
   drops.push({ id: nextId++, x: e.x, y: e.y, item, life: DROPS.life });
   ev.push({ k: 'drop', x: e.x, y: e.y, q: item.quality });
 }
@@ -31,11 +32,10 @@ export function takeLoot(h: Hero, inp: Intent, drops: Drop[], ev: FightEvent[]):
   h.seen.take = inp.takeSeq;
   const i = drops.findIndex((d) => d.id === inp.take);
   const d = drops[i];
-  if (!d || Math.hypot(d.x - h.x, d.y - h.y) > REACH || !CLASS_KITS[WEAPONS[h.weapon].cls].includes(d.item.kit)) return;
+  if (!d || Math.hypot(d.x - h.x, d.y - h.y) > REACH || d.item.kit !== h.weapon) return;
   drops.splice(i, 1);
   const old = h.arms[d.item.kit];
   h.arms[d.item.kit] = d.item;
-  if (h.act === 'idle') h.weapon = d.item.kit;
   if (old) drops.push({ id: nextId++, x: h.x, y: h.y + 0.3, item: old, life: DROPS.life });
   ev.push({ k: 'loot', x: h.x, y: h.y, name: itemName(d.item) });
 }

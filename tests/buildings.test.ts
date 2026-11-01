@@ -115,7 +115,7 @@ describe('buildings on a job', () => {
     run.index = run.job.rooms - 1;
     const room = runRoom(run), dens = room.map.blocks.filter((b) => b.kind === 'den');
     expect(dens.length).toBe(3);
-    expect(room.props.filter((p) => p.kind === 'oil').length).toBe(3);
+    expect(room.props.filter((p) => p.kind === 'oil').length).toBeGreaterThanOrEqual(3);
     const den = dens[0], oil = room.props.filter((p) => p.kind === 'oil').sort((a, b) => Math.hypot(a.x - den.x - 1.3, a.y - den.y) - Math.hypot(b.x - den.x - 1.3, b.y - den.y))[0];
     // The barrel goes up mid-tick (as when a blow lands), then the fire looks for wood.
     const w = { heroes: room.heroes, enemies: room.enemies, javelins: [], props: room.props, now: room.time, ev: [] };

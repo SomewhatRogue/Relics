@@ -67,7 +67,7 @@ export class ArenaRoom {
       opts.foes.forEach((f, i) => {
         const e = newEnemy(i + 1, f.kind, f.x, f.y);
         if (f.hp) e.hp = e.maxHp = f.hp;
-        Object.assign(e, { respawns: false, name: f.name, bow: f.bow, z: f.z ?? 0 });
+        Object.assign(e, { respawns: false, name: f.name, bow: f.bow, z: f.z ?? 0, alert: f.awake ?? false });
         this.enemies.push(e);
       });
       this.props = (opts.furniture ?? []).map((p) => newProp(p.kind, p.x, p.y, false));
@@ -147,7 +147,7 @@ export class ArenaRoom {
     this.javelins = this.javelins.filter((j) => stepJavelin(j, this.enemies, this.time, TICK, this.events, hit));
     this.hooks = this.hooks.filter((k) => stepHook(k, this.heroes, this.enemies, this.time, TICK, this.events, hit));
     this.bolts = this.bolts.filter((b) => stepBolt(b, w, TICK));
-    for (const e of this.enemies) stepEnemy(e, this.heroes, this.rng, this.time, TICK, this.events);
+    for (const e of this.enemies) stepEnemy(e, this.heroes, this.rng, this.time, TICK, this.events, this.enemies);
     impacts(this.enemies, this.time, this.events);
     propImpacts(w);
     this.props = w.props = stepProps(w, TICK);

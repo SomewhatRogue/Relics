@@ -36,13 +36,13 @@ export class LootCard {
     if (!best) return void ((this.current = -1), (this.el.hidden = true));
     if (best.id === this.current && !this.el.hidden) return;
     this.current = best.id;
-    const it = best.item, cls = WEAPONS[it.kit].cls, mine = CLASS_KITS[WEAPONS[me.weapon].cls].includes(it.kit);
+    const it = best.item, cls = WEAPONS[it.kit].cls, mine = it.kit === me.weapon;
     const el = it.traits.find((t) => t === 'ember' || t === 'rime' || t === 'storm') ?? '';
     this.el.dataset.el = el === 'ember' ? 'fire' : el === 'rime' ? 'frost' : el;
     this.el.innerHTML =
       `<div class="name">${itemName(it)}</div>` +
       it.traits.map((t) => `<div class="trait"><b>${TRAITS[t].name}</b> ${TRAITS[t].text}</div>`).join('') +
-      (mine ? `<div class="yours">Yours: ${describe(me.arms[it.kit])}</div><button>TAKE${keys ? ' (F)' : ''}</button>` : `<div class="yours">For a ${cls}</div>`);
+      (mine ? `<div class="yours">Yours: ${describe(me.arms[it.kit])}</div><button>TAKE${keys ? ' (F)' : ''}</button>` : `<div class="yours">For ${cls === WEAPONS[me.weapon].cls ? 'your other kit (the smith changes kits)' : 'a ' + cls}</div>`);
     this.el.hidden = false;
   }
 }

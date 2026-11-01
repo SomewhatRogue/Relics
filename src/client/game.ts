@@ -256,7 +256,7 @@ export class Game {
     const p = this.profile, cost = SHOP[quality];
     if (p.gold < cost) return null;
     p.gold -= cost;
-    const item = rollItem(new Rng(p.runs * 131 + p.gold * 7 + 5), p.cls, quality === 'forged' ? 1 : 0);
+    const item = rollItem(new Rng(p.runs * 131 + p.gold * 7 + 5), p.cls, quality === 'forged' ? 1 : 0, p.weapon);
     p.arms[item.kit] = item;
     this.hero.arms = { ...p.arms };
     store(this.save);
