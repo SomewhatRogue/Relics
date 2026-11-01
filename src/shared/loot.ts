@@ -3,8 +3,7 @@
  * execute something well (a parry, a dodge through a blow, a perfect release, a backstab, a throw
  * into a wall, a fully charged hit). No stat sheets: at most two traits, one weapon per kit.
  */
-import type { Rng } from './rng.js';
-import { CLASS_KITS, WEAPONS, type HeroClass, type WeaponId } from './weapons.js';
+import { WEAPONS, type WeaponId } from './weapons.js';
 
 export type TraitId = 'riposte' | 'tempo' | 'bulwark' | 'deadeye' | 'crushing' | 'brutal' | 'reaper' | 'ember' | 'rime' | 'storm';
 
@@ -38,26 +37,34 @@ export function traitsFor(kit: WeaponId): TraitId[] {
   return out;
 }
 
-export type Quality = 'fine' | 'forged';
+/** Gear tiers, white to red (gear.ts). */
+export type Tier = 'plain' | 'fine' | 'forged' | 'tolmouth' | 'hungry';
+export type Quality = Tier;
 export interface Item {
-  kit: WeaponId;
-  quality: Quality;
+  /** Weapon (the default, for old saves), armor or ring. */
+  slot?: 'weapon' | 'armor' | 'ring';
+  /** A weapon's type. */
+  kit?: WeaponId;
+  /** Armor's weight. */
+  armor?: 'light' | 'medium' | 'heavy';
+  quality: Tier;
   traits: TraitId[];
+  /** Modifiers on base stats (gear.ts). */
+  mods?: { id: 'damage' | 'quick' | 'reach' | 'draw' | 'parry' | 'guard' | 'knock' | 'health' | 'tough' | 'breath' | 'foot' | 'dodge' | 'focus' | 'mending'; v: number }[];
+  /** Halvard's upgrades, +0 to +5. */
+  level?: number;
+  /** A hungry piece's id (hungry.ts). */
+  hungry?: string;
 }
 
+const ARMOR_NAME = { light: 'LEATHERS', medium: 'MAIL SHIRT', heavy: 'PLATE' };
+/** "STORMFORGED SPEAR +2": an element if it has one, the base, its level. */
 export function itemName(i: Item): string {
   const el = i.traits.find((t) => ELEMENT_TRAITS.includes(t));
-  return (el ? TRAITS[el].name : 'FINE') + ' ' + WEAPONS[i.kit].name;
+  const base = i.slot === 'armor' ? ARMOR_NAME[i.armor ?? 'light'] : i.slot === 'ring' ? 'RING' : WEAPONS[i.kit ?? 'sword'].name;
+  return (el ? TRAITS[el].name + ' ' : '') + base + (i.level ? ' +' + i.level : '');
 }
 
 /** Drop chances by who died. */
 /** Drop chances by who died (weapons are rare now: gold, potions and chests take over in the loot system, docs/DECISIONS.md). */
 export const DROPS = { scrapper: 0.04, butcher: 0.4, forged: { scrapper: 0.2, butcher: 0.6 }, life: 45 };
-
-/** Roll a weapon for this class (for `kit`, the kit in hand, when given): a fine one has one skill trait; a forged one adds an element. */
-export function rollItem(rng: Rng, cls: HeroClass, forgedChance: number, kit: WeaponId = rng.pick(CLASS_KITS[cls])): Item {
-  const traits: TraitId[] = [rng.pick(traitsFor(kit))];
-  const forged = rng.next() < forgedChance;
-  if (forged) traits.push(rng.pick(ELEMENT_TRAITS));
-  return { kit, quality: forged ? 'forged' : 'fine', traits };
-}

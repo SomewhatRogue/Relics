@@ -113,8 +113,13 @@ export interface Hero extends Body {
   brandyUntil: number;
   /** In smoke: goblins can't see you (unless close) until then. */
   hiddenUntil: number;
-  /** Weapons carried, not in hand. */
+  /** Weapons, armor and rings carried, not worn. */
   bag: Item[];
+  /** Worn armor (none: as light) and up to two rings (shared/gear.ts). */
+  armor: Item | null;
+  rings: Item[];
+  /** Health before gear. */
+  baseHp: number;
   /** Relics this hero has won (one at a time is carried, in relics[1]). */
   found: RelicId[];
   /** The draw in flight was released on the white flash. */

@@ -2,6 +2,27 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-01: loot slices 2 and 4, tiers, modifiers, armor, rings, the item card (Claude Opus 5.5)
+
+- **Item** (`shared/loot.ts`) gains slot (weapon, armor, ring), tier (plain, fine, forged, tolmouth,
+  hungry), modifiers and a level. `shared/gear.ts` has the tiers, the 14 modifiers with their bands,
+  rolling by tier, tier odds by source, caps, armor weights and `gearStats`, the one sum the room and
+  the card both read (`sim/gearstats.ts` caches it per hero).
+- **Where modifiers act:** swing damage, wind-up and recovery, reach and knock (`currentSwing`); time to
+  full charge; parry window; chip and breath through a block; damage taken; walking speed; dodge
+  cooldown, distance and cost; skill and relic recharge; breath recovery; healing given; health.
+  BREATH speeds recovery only (maximum breath stays 100, which half the game assumes).
+- **Armor:** light (as before), medium (5% slower, 12% less taken), heavy (12% slower, 25% less taken,
+  a 25% shorter dodge costing 30% more breath, no stagger from small goblins). Warriors start in
+  plain plate, Healers in a mail shirt, the rest in leathers. Two rings; a third pushes out the older.
+- **Drops:** goblins drop by tier (small: white or green; butchers green up, sometimes armor or a ring;
+  named blue up). Weapons are any type of the nearest player's class. Halvard sells Fine weapons and
+  armor; Dessa Forged weapons and rings (her line no longer says Tolmouth).
+- **The card** (`client/card.ts`): tier chip, name, how a different weapon type fights, modifiers and
+  traits in words, then every number that would change against what you wear, better or worse. The
+  pack shows worn gear, spares with their comparisons, and AS YOU STAND, the hero sheet.
+- Old saves: weapons with a trait become Tolmouth; heroes get their class's plain armor.
+
 ## 2026-11-01: loot slice 1, gold and potions (Claude Opus 5.5)
 
 Kyle said continue on the loot plan. Defaults taken for the open questions (Kyle can overrule): the old

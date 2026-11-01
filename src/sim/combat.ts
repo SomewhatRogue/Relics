@@ -1,6 +1,7 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, parry, roll). */
 import { BLESSING, WARD, FLINCH, HORN, OVERKILL, PERK, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, WEAPONS, type Swing } from '../shared/tuning';
 import { shove } from './bodies';
+import { statsOf } from './gearstats';
 import { damage, frozen, isDummy, kill, snared, stunOf } from './damage';
 import { shatter } from './elements';
 import { has } from './traits';
@@ -97,7 +98,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   if (h.wardUntil > now && warded(e, a, h, now, ev)) return;
   const w = WEAPONS[h.weapon];
   // A blessed hero takes less from everything.
-  const taken = h.blessedUntil > now ? BLESSING.taken : 1;
+  const g = statsOf(h), taken = (h.blessedUntil > now ? BLESSING.taken : 1) * g.taken;
   if (h.act === 'roll' && h.actT >= w.dodge.iFrom && h.actT <= w.dodge.iTo + h.lenience) {
     ev.push({ k: 'dodge', x: h.x, y: h.y });
     if (has(h, 'tempo')) (h.tempoUntil = now + TRAIT.tempoTime), ev.push({ k: 'tempo', x: h.x, y: h.y });
@@ -109,7 +110,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   // The kit's guard covers an arc in front: a shield covers nearly everything ahead.
   const facing = (h.fx * tx + h.fy * ty) / tl > Math.cos(((w.guardArc / 2) * Math.PI) / 180);
   const canGuard = !a.unblockable && facing && (h.act === 'idle' || h.act === 'attack' || h.act === 'charge');
-  if (canGuard && now - h.parryOpenAt <= w.parryWindow + h.lenience + (h.perks.includes('guard') ? PERK.guard : 0)) {
+  if (canGuard && now - h.parryOpenAt <= w.parryWindow + g.parry + h.lenience + (h.perks.includes('guard') ? PERK.guard : 0)) {
     h.counterUntil = now + GUARD.counterWindow;
     h.parryOpenAt = -9;
     if (has(h, 'bulwark')) h.stamina = HERO.stamina;
@@ -122,9 +123,9 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     return;
   }
   if (canGuard && h.blocking) {
-    const chip = Math.round(a.dmg * w.chip * taken);
+    const chip = Math.round(a.dmg * w.chip * (1 - g.guard) * taken);
     h.hp -= chip;
-    h.stamina -= a.dmg * GUARD.staminaPerDmg * w.guardCost * (h.rallyUntil > now ? HORN.guard : 1) * (h.perks.includes('ironhide') ? PERK.ironhide : 1);
+    h.stamina -= a.dmg * GUARD.staminaPerDmg * w.guardCost * (1 - g.guard) * (h.rallyUntil > now ? HORN.guard : 1) * (h.perks.includes('ironhide') ? PERK.ironhide : 1);
     h.staminaAt = now;
     h.hitstop = Math.max(h.hitstop, HITSTOP.light);
     shove(h, sx / sl, sy / sl, a.knock * 0.4, HERO.weight);
@@ -136,7 +137,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   }
   const n = Math.round(a.dmg * taken);
   h.hp -= n;
-  Object.assign(h, { act: 'hurt', actT: 0, actDur: HURT_STAGGER + a.knock * 0.012 });
+  // Heavy armor: a small goblin's blow doesn't stagger you.
+  if (!(g.steady && e.kind === 'scrapper')) Object.assign(h, { act: 'hurt', actT: 0, actDur: HURT_STAGGER + a.knock * 0.012 });
   h.hitstop = Math.max(h.hitstop, HITSTOP.heavy);
   shove(h, sx / sl, sy / sl, a.knock, HERO.weight);
   ev.push({ k: 'hit', x: h.x, y: h.y, n, heavy: n >= 25, on: 'hero', src: a.kind });

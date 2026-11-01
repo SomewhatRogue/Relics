@@ -4,6 +4,7 @@
  */
 import type { Item } from './loot.js';
 import type { PotionId } from './potions.js';
+import { CLASS_ARMOR } from './gear.js';
 import { Rng } from './rng.js';
 import type { Augment, RelicId } from './magic.js';
 import { CLASS_KITS, type HeroClass, type WeaponId } from './weapons.js';
@@ -63,6 +64,9 @@ export interface Profile {
   glow: number;
   /** Potions on the belt (shared/potions.ts). */
   belt: PotionId[];
+  /** Worn armor and rings (shared/gear.ts). */
+  armor: Item | null;
+  rings: Item[];
   /** Relics found at the end of deep dives, and the one carried into a job ('' none). */
   relics: RelicId[];
   relic: RelicId | '';
@@ -77,7 +81,7 @@ export interface Profile {
 }
 
 export const newProfile = (cls: HeroClass = 'WARRIOR', name = 'HERO'): Profile =>
-  ({ id: heroId(), name, cls, gold: 0, xp: 0, level: 1, perks: [], picks: 0, arms: {}, weapon: CLASS_KITS[cls][0], bag: [], glow: 0, belt: ['bitter'], relics: [], relic: '', augments: {}, runs: 0, stats: newStats(), wish: false, dice: 0 });
+  ({ id: heroId(), name, cls, gold: 0, xp: 0, level: 1, perks: [], picks: 0, arms: {}, weapon: CLASS_KITS[cls][0], bag: [], glow: 0, belt: ['bitter'], armor: { slot: 'armor', armor: CLASS_ARMOR[cls], quality: 'plain', traits: [], mods: [], level: 0 }, rings: [], relics: [], relic: '', augments: {}, runs: 0, stats: newStats(), wish: false, dice: 0 });
 
 function heroId(): string {
   const c = 'abcdefghijkmnpqrstuvwxyz23456789';

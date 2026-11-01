@@ -6,6 +6,7 @@ import { collide } from '../shared/arena';
 import { POTION, AUGMENTS, CHARGE, GRAB, HORN, PERK, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon } from '../shared/tuning';
 import { slide } from './bodies';
 import { applyGear } from './pack';
+import { statsOf } from './gearstats';
 import { hitEnemy } from './combat';
 import type { Enemy, FightEvent, Hero, Intent } from './types';
 
@@ -16,18 +17,20 @@ export function newHero(id: string, x: number, y: number): Hero {
     parryOpenAt: -9, lastBlockPress: -9, rollDx: 0, rollDy: 1, lastRollAt: -9, counterUntil: -9,
     attackQueuedAt: -9, rollQueuedAt: -9, relic: 'horn', relics: abilitiesOf('WARRIOR'), relicQueuedAt: -9,
     relicReady: { javelin: 0, hook: 0, horn: 0, net: 0, shadow: 0, lodestone: 0, blessing: 0, ward: 0, sanctuary: 0 },
-    augments: { javelin: '', hook: '', horn: '', net: '', shadow: '', lodestone: '', blessing: '', ward: '', sanctuary: '' }, blessedUntil: -9, wardUntil: -9, wardHp: 0, rallyUntil: -9, arms: {}, bag: [], found: [], glow: 0, belt: [], potionReady: 0, mendLeft: 0, brandyUntil: -9, hiddenUntil: -9, perfect: false, tempoUntil: -9, carrying: 0, lifting: 0, grabQueuedAt: -9, z: 0, hitstop: 0, lenience: 0,
+    augments: { javelin: '', hook: '', horn: '', net: '', shadow: '', lodestone: '', blessing: '', ward: '', sanctuary: '' }, blessedUntil: -9, wardUntil: -9, wardHp: 0, rallyUntil: -9, arms: {}, bag: [], armor: null, rings: [], baseHp: HERO.hp, found: [], glow: 0, belt: [], potionReady: 0, mendLeft: 0, brandyUntil: -9, hiddenUntil: -9, perfect: false, tempoUntil: -9, carrying: 0, lifting: 0, grabQueuedAt: -9, z: 0, hitstop: 0, lenience: 0,
     seen: { attack: 0, block: 0, roll: 0, weapon: 0, relic: 0, relicSwap: 0, relicPick: 0, augment: 0, cls: 0, take: 0, grab: 0, gear: 0, potion: 0 },
   };
 }
 
 /** The swing in progress: a combo step, or the heavy scaled by its charge. */
 export function currentSwing(h: Hero): Swing {
-  const w = WEAPONS[h.weapon];
-  if (!h.heavy) return w.combo[h.combo];
+  const w = WEAPONS[h.weapon], g = statsOf(h);
   const k = h.power, hv = w.heavy;
   // A drawn shot only pierces at a full draw.
-  return { ...hv, dmg: Math.round(hv.dmg + (hv.dmgFull - hv.dmg) * k), knock: hv.knock + (hv.knockFull - hv.knock) * k, pierce: hv.pierce && k >= 1 };
+  const s = !h.heavy ? w.combo[h.combo] : { ...hv, dmg: Math.round(hv.dmg + (hv.dmgFull - hv.dmg) * k), knock: hv.knock + (hv.knockFull - hv.knock) * k, pierce: hv.pierce && k >= 1 };
+  // Modifiers: how well (shared/gear.ts).
+  if (!g.damage && !g.quick && !g.reach && !g.knock) return s;
+  return { ...s, dmg: Math.round(s.dmg * (1 + g.damage)), windup: s.windup * (1 - g.quick), recover: s.recover * (1 - g.quick), range: s.range * (1 + g.reach), knock: s.knock * (1 + g.knock) };
 }
 
 const swingTime = (s: Swing) => s.windup + s.active + s.recover;
@@ -59,7 +62,7 @@ function face(h: Hero, inp: Intent, enemies: Enemy[], snap: boolean, reach = 3.2
 function walk(h: Hero, inp: Intent, k: number, dt: number): void {
   const m = Math.min(1, Math.hypot(inp.mx, inp.my));
   if (m < 0.05) return;
-  const l = Math.hypot(inp.mx, inp.my), sp = HERO.speed * WEAPONS[h.weapon].speed * k * m;
+  const l = Math.hypot(inp.mx, inp.my), sp = HERO.speed * WEAPONS[h.weapon].speed * statsOf(h).speed * k * m;
   h.x += (inp.mx / l) * sp * dt;
   h.y += (inp.my / l) * sp * dt;
   h.moving = true;
@@ -95,7 +98,7 @@ function gear(h: Hero, inp: Intent, ev: FightEvent[]): void {
 }
 
 /** Seconds to a full draw or charge for this kit. */
-export const chargeFull = (w: Weapon, h?: Hero) => (w.draw ?? CHARGE.full) * (h?.perks.includes('steadyhand') && w.heavy.shot === 'arrow' ? PERK.steadyhand : 1);
+export const chargeFull = (w: Weapon, h?: Hero) => (w.draw ?? CHARGE.full) * (h?.perks.includes('steadyhand') && w.heavy.shot === 'arrow' ? PERK.steadyhand : 1) * (h ? 1 - statsOf(h).draw : 1);
 
 export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt: number, ev: FightEvent[], acts: HeroActs): void {
   gear(h, inp, ev);
@@ -142,7 +145,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     }
   }
   if (h.hitstop > 0) return void (h.hitstop -= dt);
-  if (now - h.staminaAt > HERO.regenDelay) h.stamina = Math.min(HERO.stamina, h.stamina + HERO.staminaRegen * (h.rallyUntil > now ? HORN.regen : 1) * (h.perks.includes('endurance') ? PERK.endurance : 1) * (h.brandyUntil > now ? POTION.brandyRegen : 1) * dt);
+  if (now - h.staminaAt > HERO.regenDelay) h.stamina = Math.min(HERO.stamina, h.stamina + HERO.staminaRegen * (h.rallyUntil > now ? HORN.regen : 1) * (h.perks.includes('endurance') ? PERK.endurance : 1) * (h.brandyUntil > now ? POTION.brandyRegen : 1) * (1 + statsOf(h).breath) * dt);
   h.actT += dt;
   h.moving = false;
   h.blocking = false;
@@ -158,9 +161,9 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   }
   const w = WEAPONS[h.weapon];
   const dodge = w.dodge;
-  const wantsRoll = now - h.rollQueuedAt < INPUT_BUFFER && now - h.lastRollAt >= dodge.cooldown * (h.perks.includes('footwork') ? PERK.footwork : 1) * (dodge.kind === 'blink' && h.perks.includes('focus') ? PERK.focus : 1) && h.stamina >= 1;
+  const wantsRoll = now - h.rollQueuedAt < INPUT_BUFFER && now - h.lastRollAt >= dodge.cooldown * (1 - statsOf(h).dodge) * (h.perks.includes('footwork') ? PERK.footwork : 1) * (dodge.kind === 'blink' && h.perks.includes('focus') ? PERK.focus : 1) && h.stamina >= 1;
   if (h.act === 'roll') {
-    const k = dodge.distance / dodge.time;
+    const k = (dodge.distance * statsOf(h).dodgeDist) / dodge.time;
     h.x += h.rollDx * k * dt;
     h.y += h.rollDy * k * dt;
     collide(h, HERO.radius);
@@ -178,7 +181,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     const r = RELICS[h.relic];
     if (h.actT >= r.windup && h.actT - dt < r.windup) {
       acts.fire(h);
-      h.relicReady[h.relic] = now + r.cooldown * (h.perks.includes('relicsworn') ? PERK.relicsworn : 1);
+      h.relicReady[h.relic] = now + r.cooldown * (1 - statsOf(h).focus) * (h.perks.includes('relicsworn') ? PERK.relicsworn : 1);
       if (h.relic === 'hook' || h.relic === 'javelin' || h.relic === 'net' || h.relic === 'lodestone') ev.push({ k: h.relic === 'hook' ? 'hookfire' : 'throw', x: h.x, y: h.y, dx: h.fx, dy: h.fy });
     }
     if (h.act === 'throw' && h.actT >= r.windup + r.recover) (h.act = 'idle'), (h.actT = 0);
@@ -290,6 +293,6 @@ function startRoll(h: Hero, inp: Intent, now: number, ev: FightEvent[]): void {
   h.kvx = h.kvy = 0;
   h.lastRollAt = now;
   h.rollQueuedAt = -9;
-  spend(h, WEAPONS[h.weapon].dodge.stamina, now);
+  spend(h, WEAPONS[h.weapon].dodge.stamina * statsOf(h).dodgeCost, now);
   ev.push({ k: kind === 'blink' ? 'blink' : 'roll', x: h.x, y: h.y });
 }

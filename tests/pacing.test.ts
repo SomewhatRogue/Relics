@@ -5,7 +5,7 @@ import { TICK } from '../src/shared/tuning';
 import { newEnemy } from '../src/sim/enemies';
 import { ArenaRoom } from '../src/sim/room';
 import { NO_INTENT } from '../src/sim/types';
-import { rollItem } from '../src/shared/loot';
+import { rollGear } from '../src/shared/gear';
 import { Rng } from '../src/shared/rng';
 
 const job = (kind: Job['place']['kind'], ruin = 1): Job => ({ ...board(1)[0], place: { ...PLACES.find((p) => p.kind === kind)!, ruin }, objective: 'hunt', boss: 'SKARN', seed: 21, rooms: 3 });
@@ -50,8 +50,9 @@ describe('pacing', () => {
     expect(Math.hypot(a.x - h.x, a.y - h.y)).toBeGreaterThan(3);
   });
 
-  it('a drop is always for the weapon in hand', () => {
+  it('a weapon rolled for a kind is that kind, and always for the class', () => {
     const rng = new Rng(4);
-    for (let i = 0; i < 20; i++) expect(rollItem(rng, 'MAGE', 0.5, 'wand').kit).toBe('wand');
+    for (let i = 0; i < 20; i++) expect(rollGear(rng, 'MAGE', 'fine', 'weapon', 'wand').kit).toBe('wand');
+    for (let i = 0; i < 20; i++) expect(['wand', 'staff', 'rod']).toContain(rollGear(rng, 'MAGE', 'forged').kit);
   });
 });

@@ -5,10 +5,11 @@ import { CHAPTER_1, QUORUM, chapterGoals, councilOpen, marketOpen, rewardMult } 
 import { TRAINERS, housesFor, type SpotId } from '../shared/town';
 import { ballot } from '../shared/worldsync';
 import { openSquare } from './squareui';
-import { POTION, POTIONS, type PotionId, AUGMENTS, CLASS_KITS, CLASS_ORDER, CLASS_SKILL, ELEMENT_NAME, RELICS, TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
+import { ARMOR, POTION, POTIONS, type PotionId, AUGMENTS, CLASS_KITS, CLASS_ORDER, CLASS_SKILL, ELEMENT_NAME, RELICS, TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
 import type { Game } from './game';
 import { PACK } from '../sim/pack';
 import { COAL, COPY, SMITH } from './copy';
+import { card, compare } from './card';
 import type { Panel } from './panels';
 import { RUMOURS } from './rumours';
 
@@ -58,13 +59,17 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
   } else if (id === 'smith' || id === 'market') {
     const forged = id === 'market';
     if (forged && !marketOpen(w)) return panel.show('MARKET ROW', p('Empty stalls and a cat. The traders are camped outside the north gate with the refugees, and the gate stays shut to them until the council says otherwise.'));
-    const cost = SHOP[forged ? 'forged' : 'fine'], kits = CLASS_KITS[pr.cls], full = pr.bag.length >= PACK;
-    const html = (forged ? say('Dessa', 'Tolmouth steel, from before Tolmouth was a larder. Each has a little weather in it. Fire, frost, storm. Price is the price.') : say('Halvard', SMITH.greet)) +
-      p(forged ? `Forged: a trait and an element, ${cost} gold.` : `Fine: one trait, ${cost} gold.`) + p(full ? COPY.packFull : `You have ${pr.gold} gold.`);
-    panel.show(forged ? 'DESSA THE TRADER' : 'HALVARD THE SMITH', html, kits.map((k) => ({ label: `${WEAPONS[k].name} (${cost})`, primary: true, disabled: full || pr.gold < cost, act: () => {
-      const it = g.buy(forged ? 'forged' : 'fine', k);
-      if (it) panel.show('BOUGHT', p(itemLine(it)) + p(forged ? 'Dessa counts your coin twice and smiles once.' : SMITH.bought), [{ label: 'MORE', act: again }]);
-    } })));
+    const cost = SHOP[forged ? 'forged' : 'fine'], kits = CLASS_KITS[pr.cls], full = pr.bag.length >= PACK, q = forged ? 'forged' : 'fine';
+    const html = (forged ? say('Dessa', 'Wickhold steel, with a little weather in it. Fire, frost, storm. Price is the price.') : say('Halvard', SMITH.greet)) +
+      p(forged ? `Forged (blue): two modifiers, or one and an element. ${cost} gold each.` : `Fine (green): one modifier. ${cost} gold each.`) + p(full ? COPY.packFull : `You have ${pr.gold} gold.`);
+    const sold = (label: string, buy: () => Item | null) => ({ label: `${label} (${cost})`, primary: true, disabled: full || pr.gold < cost, act: () => {
+      const it = buy();
+      if (it) panel.show('BOUGHT', `<div class="bought">${card(it, g.hero)}${compare(g.hero, it)}</div>` + p(forged ? 'Dessa counts your coin twice and smiles once.' : SMITH.bought), [{ label: 'MORE', act: again }]);
+    } });
+    panel.show(forged ? 'DESSA THE TRADER' : 'HALVARD THE SMITH', html, [
+      ...kits.map((k) => sold(WEAPONS[k].name, () => g.buy(q, k))),
+      ...(forged ? [sold('A RING', () => g.buy(q, pr.weapon, 'ring'))] : (['light', 'medium', 'heavy'] as const).map((a) => sold(ARMOR[a].name, () => g.buy(q, pr.weapon, 'armor', a)))),
+    ]);
   } else if (id === 'wright') {
     // Your skill, and any relic you've found: fit an element, or choose which relic to carry.
     const rel = [CLASS_SKILL[pr.cls], ...pr.relics];

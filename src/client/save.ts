@@ -5,7 +5,7 @@
  */
 import { HERO_SLOTS, newProfile, type Profile } from '../shared/progress';
 import { newWorld, type WorldState } from '../shared/story';
-import { WEAPONS } from '../shared/tuning';
+import { WEAPONS, upgradeOld } from '../shared/tuning';
 
 const KEY = 'relic.save.v2', OLD = 'relic.save.v1';
 export interface Save { heroes: Profile[]; current: number; world: WorldState }
@@ -16,11 +16,15 @@ const hero = (p: Partial<Profile>): Profile => {
   const out = { ...newProfile(cls, p.name), ...p, cls };
   // Before the pack, a hero kept one weapon per kind: the one in hand stays, the rest go in the pack.
   if (!p.belt) out.belt = [];
+  if (p.armor === undefined) out.armor = newProfile(cls).armor;
+  if (!p.rings) out.rings = [];
   if (!p.bag) {
     const arms = p.arms ?? {}, inHand = arms[out.weapon];
     out.bag = Object.entries(arms).filter(([k, it]) => k !== out.weapon && it).map(([, it]) => it!);
     out.arms = inHand ? { [out.weapon]: inHand } : {};
   }
+  out.arms = Object.fromEntries(Object.entries(out.arms).map(([k, it]) => [k, it && upgradeOld(it)]));
+  out.bag = (out.bag ?? []).map(upgradeOld);
   return out;
 };
 

@@ -3,25 +3,50 @@
  * intent (sim/types.ts gearOp) and the room applies them, so a friend's pack works the same online.
  * The world doesn't stop while you rummage.
  */
-import { CLASS_KITS, RELICS, WEAPONS, abilitiesOf, itemName } from '../shared/tuning';
+import { CLASS_KITS, RELICS, WEAPONS, abilitiesOf, itemName, slotOf, type Item } from '../shared/tuning';
+import { refreshHealth } from './gearstats';
 import type { FightEvent, Hero } from './types';
 
 /** Weapons a pack holds. */
 export const PACK = 8;
-export const GEAR = { equip: 1, drop: 2, carry: 3, front: 4, pour: 5 } as const;
+export const GEAR = { equip: 1, drop: 2, carry: 3, front: 4, pour: 5, off: 6 } as const;
+
+/** Put on armor (the old goes in the pack) or a ring (a third pushes out the older). */
+function wear(h: Hero, i: number, it: Item, ev: FightEvent[]): void {
+  h.bag.splice(i, 1);
+  if (slotOf(it) === 'armor') {
+    if (h.armor) h.bag.push(h.armor);
+    h.armor = it;
+  } else {
+    if (h.rings.length >= 2) h.bag.push(h.rings.shift()!);
+    h.rings.push(it);
+  }
+  refreshHealth(h);
+  ev.push({ k: 'weapon', x: h.x, y: h.y, name: itemName(it) });
+}
 
 export function applyGear(h: Hero, op: number, arg: number, ev: FightEvent[]): void {
   const cls = WEAPONS[h.weapon].cls;
   if (op === GEAR.equip) {
     const it = arg >= 0 ? h.bag[arg] : undefined;
-    if (arg >= 0 && (!it || WEAPONS[it.kit].cls !== cls)) return;
+    if (arg >= 0 && !it) return;
+    if (it && slotOf(it) !== 'weapon') return wear(h, arg, it, ev);
+    if (it && WEAPONS[it.kit!].cls !== cls) return;
     const old = h.arms[h.weapon];
     if (it) h.bag.splice(arg, 1);
     if (old) h.bag.push(old);
-    h.weapon = it ? it.kit : CLASS_KITS[cls][0];
-    h.arms = it ? { [it.kit]: it } : {};
+    h.weapon = it ? it.kit! : CLASS_KITS[cls][0];
+    h.arms = it ? { [it.kit!]: it } : {};
     Object.assign(h, { combo: 0, heavy: false, power: 0 });
+    refreshHealth(h);
     ev.push({ k: 'weapon', x: h.x, y: h.y, name: it ? itemName(it) : WEAPONS[h.weapon].name });
+  } else if (op === GEAR.off) {
+    // A ring off, into the pack (if there's room).
+    const r = h.rings[arg];
+    if (!r || h.bag.length >= PACK) return;
+    h.rings.splice(arg, 1);
+    h.bag.push(r);
+    refreshHealth(h);
   } else if (op === GEAR.drop) {
     if (h.bag[arg]) h.bag.splice(arg, 1);
   } else if (op === GEAR.front) {

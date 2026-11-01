@@ -56,7 +56,8 @@ describe('heroes', () => {
   it('an old save keeps the weapon in hand; its other weapons go in the pack', () => {
     const fine = { kit: 'greatsword', quality: 'fine', traits: ['brutal'] }, held = { kit: 'sword', quality: 'fine', traits: ['riposte'] };
     store.set('relic.save.v2', JSON.stringify({ heroes: [{ name: 'OLD', cls: 'WARRIOR', weapon: 'sword', arms: { sword: held, greatsword: fine } }], current: 0, world: newWorld() }));
-    expect(load().heroes[0]).toMatchObject({ weapon: 'sword', arms: { sword: held }, bag: [fine] });
+    expect(load().heroes[0]).toMatchObject({ weapon: 'sword', arms: { sword: { kit: 'sword', quality: 'tolmouth', traits: ['riposte'] } }, bag: [{ kit: 'greatsword', quality: 'tolmouth', traits: ['brutal'], mods: [] }] });
+    expect(load().heroes[0].armor).toMatchObject({ slot: 'armor', armor: 'heavy' });
   });
 
   it("carry an old save's hero across, class from its weapon", () => {

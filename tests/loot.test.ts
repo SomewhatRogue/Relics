@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CLASS_KITS, DROPS, KNOCK, RELEASE, TICK, WEAPONS, rollItem, type Item } from '../src/shared/tuning';
+import { CLASS_KITS, DROPS, KNOCK, RELEASE, TICK, WEAPONS, rollGear, rollTier, gearStats, TIERS, type Item } from '../src/shared/tuning';
 import { Rng } from '../src/shared/rng';
 import { ArenaRoom } from '../src/sim/room';
 import { NO_INTENT, type FightEvent, type Intent } from '../src/sim/types';
@@ -33,13 +33,32 @@ function tap(room: ArenaRoom, t: { hp: number }, seq = 1): number {
 }
 
 describe('loot', () => {
-  it('rolls a weapon for the class: one skill trait, plus an element when forged', () => {
+  it('rolls gear by tier: white has nothing, green one modifier, blue two (or one and an element), purple two and a trait', () => {
     const rng = new Rng(5);
-    for (let i = 0; i < 40; i++) {
-      const it = rollItem(rng, 'RANGER', 0.5);
+    for (const tier of ['plain', 'fine', 'forged', 'tolmouth'] as const) for (let i = 0; i < 20; i++) {
+      const it = rollGear(rng, 'RANGER', tier);
       expect(CLASS_KITS.RANGER).toContain(it.kit);
-      expect(it.traits.length).toBe(it.quality === 'forged' ? 2 : 1);
+      const n = (it.mods ?? []).length + it.traits.length;
+      expect(n).toBe(tier === 'plain' ? 0 : tier === 'fine' ? 1 : tier === 'forged' ? 2 : 3);
+      if (tier === 'tolmouth') expect(it.traits.length).toBe(1);
+      expect(new Set((it.mods ?? []).map((m) => m.id)).size).toBe((it.mods ?? []).length);
     }
+    expect(TIERS.tolmouth.col).toBeTruthy();
+    // Small goblins leave white or green; a named butcher blue or better.
+    for (let i = 0; i < 30; i++) expect(['plain', 'fine']).toContain(rollTier(rng, 'scrapper'));
+    for (let i = 0; i < 30; i++) expect(['forged', 'tolmouth', 'hungry']).toContain(rollTier(rng, 'named'));
+  });
+
+  it('modifiers move the numbers the fight uses, up to the caps; armor and levels count', () => {
+    const sword: Item = { slot: 'weapon', kit: 'sword', quality: 'forged', traits: [], mods: [{ id: 'damage', v: 0.1 }, { id: 'quick', v: 0.08 }], level: 0 };
+    const ring: Item = { slot: 'ring', quality: 'tolmouth', traits: [], mods: [{ id: 'damage', v: 0.45 }], level: 0 };
+    const plate: Item = { slot: 'armor', armor: 'heavy', quality: 'plain', traits: [], mods: [], level: 2 };
+    const g = gearStats(sword, plate, [ring]);
+    expect(g.damage).toBe(0.5);
+    expect(g.quick).toBeCloseTo(0.08);
+    expect(g.taken).toBeCloseTo(0.75 * (1 - 0.02));
+    expect(g.speed).toBeCloseTo(0.88);
+    expect(gearStats({ ...sword, level: 3 }, null).damage).toBeCloseTo(0.1 * 1.5 + 0.09);
   });
 
   it('a butcher sometimes drops a weapon, always for the nearest player\'s class; weapons are rare', () => {

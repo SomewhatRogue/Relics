@@ -13,9 +13,10 @@ import { BOUNTY, HERO_SLOTS, PERK, SHOP, gainXp, newProfile, type PerkId, type P
 import { Rng } from '../shared/rng';
 import { CHAPTER_1, QUORUM, rewardMult, type WorldState } from '../shared/story';
 import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
-import { POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, FOUND_RELICS, HERO, abilitiesOf, rollItem, type Augment, type HeroClass, type Item, type RelicId, type WeaponId } from '../shared/tuning';
+import { POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, FOUND_RELICS, HERO, abilitiesOf, rollGear, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId } from '../shared/tuning';
 import { ArenaRoom } from '../sim/room';
 import { PACK } from '../sim/pack';
+import { statsOf } from '../sim/gearstats';
 import { goal, interiorRoom, isFinal, newRun, runRoom, tally, type Run } from '../sim/run';
 import type { FightEvent, Hero, Intent } from '../sim/types';
 import { load, store, type Save } from './save';
@@ -95,7 +96,10 @@ export class Game {
     h.belt = [...p.belt];
     h.found = [...p.relics];
     h.perks = [...p.perks];
-    h.maxHp = HERO.hp + (p.perks.includes('tough') ? PERK.tough : 0);
+    h.armor = p.armor;
+    h.rings = [...p.rings];
+    h.baseHp = HERO.hp + (p.perks.includes('tough') ? PERK.tough : 0);
+    h.maxHp = h.baseHp + statsOf(h).health;
     h.relics = abilitiesOf(p.cls, p.relic);
     h.relic = h.relics[0];
     for (const r of h.relics) h.augments[r] = p.augments[r] ?? '';
@@ -259,12 +263,15 @@ export class Game {
     return best;
   }
 
-  /** Buy a weapon of kind `kit` for your class into the pack: fine at the smith, forged from the trader. Null: too poor, or the pack is full. */
-  buy(quality: 'fine' | 'forged', kit: WeaponId = this.profile.weapon): Item | null {
+  /**
+   * Buy into the pack: a weapon of kind `kit` (your class's), armor of `armor` weight, or a ring.
+   * Fine (green) at the smith, Forged (blue) from the trader. Null: too poor, or the pack is full.
+   */
+  buy(quality: 'fine' | 'forged', kit: WeaponId = this.profile.weapon, slot: 'weapon' | 'armor' | 'ring' = 'weapon', armor?: ArmorKind): Item | null {
     const p = this.profile, cost = SHOP[quality];
-    if (p.gold < cost || p.bag.length >= PACK || !CLASS_KITS[p.cls].includes(kit)) return null;
+    if (p.gold < cost || p.bag.length >= PACK || (slot === 'weapon' && !CLASS_KITS[p.cls].includes(kit))) return null;
     p.gold -= cost;
-    const item = rollItem(new Rng(p.runs * 131 + p.gold * 7 + 5), p.cls, quality === 'forged' ? 1 : 0, kit);
+    const item = rollGear(new Rng(p.runs * 131 + p.gold * 7 + 5), p.cls, quality, slot, kit, armor);
     p.bag.push(item);
     this.hero.bag = [...p.bag];
     store(this.save);
@@ -285,8 +292,8 @@ export class Game {
   /** The room changed what's in hand, in the pack, or carried: the hero's save follows. */
   private keepGear(h: Hero): void {
     const p = this.profile, relic = h.relics[1] ?? '';
-    if (h.weapon === p.weapon && h.bag.length === p.bag.length && h.arms[h.weapon] === p.arms[p.weapon] && relic === p.relic && h.glow === p.glow && h.belt.join() === p.belt.join() && h.bag.every((it, i) => it === p.bag[i])) return;
-    Object.assign(p, { weapon: h.weapon, arms: { ...h.arms }, bag: [...h.bag], relic, glow: h.glow, belt: [...h.belt] });
+    if (h.weapon === p.weapon && h.bag.length === p.bag.length && h.arms[h.weapon] === p.arms[p.weapon] && relic === p.relic && h.glow === p.glow && h.armor === p.armor && h.rings.join() === p.rings.join() && h.rings.every((r, i) => r === p.rings[i]) && h.rings.length === p.rings.length && h.belt.join() === p.belt.join() && h.bag.every((it, i) => it === p.bag[i])) return;
+    Object.assign(p, { weapon: h.weapon, arms: { ...h.arms }, bag: [...h.bag], relic, glow: h.glow, belt: [...h.belt], armor: h.armor, rings: [...h.rings] });
     store(this.save);
   }
 

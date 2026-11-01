@@ -3,7 +3,7 @@ import type { Bolt, Drop, Hero, Hook, Javelin } from '../sim/types';
 import type { Coal } from '../sim/lantern';
 import type { Pickup } from '../sim/pickups';
 import type { Smoke } from '../sim/flasks';
-import { POTIONS } from '../shared/tuning';
+import { POTIONS, TIERS, TIER_ORDER } from '../shared/tuning';
 import { line, type Ctx } from './draw';
 import { EL_COL } from './palette';
 
@@ -206,9 +206,9 @@ export function drawCoal(c: Ctx, m: Coal, x: number, y: number): void {
   c.glow.globalAlpha = 1;
 }
 
-/** A weapon lying on the floor, glinting in its quality's colour (a forged one sends up a thin shaft of light). */
+/** Gear lying on the floor: a ring of its tier's colour round it, a shaft of light from blue up, and the thing itself. */
 export function drawDrop(c: Ctx, d: Drop, x: number, y: number): void {
-  const fade = Math.min(1, d.life / 5), el = d.item.traits.find((t) => FORGED[t]), col = el ? FORGED[el] : '#9fd0ff';
+  const fade = Math.min(1, d.life / 5), col = TIERS[d.item.quality].col, step = TIER_ORDER.indexOf(d.item.quality), kind = d.item.slot ?? 'weapon';
   c.lit.globalAlpha = c.glow.globalAlpha = fade;
   const bob = Math.round(Math.sin(c.now * 3 + d.id) * 1);
   c.glow.fillStyle = col;
@@ -216,12 +216,14 @@ export function drawDrop(c: Ctx, d: Drop, x: number, y: number): void {
     const t = (i / 16) * Math.PI * 2;
     if ((i + Math.floor(c.now * 8)) % 4) c.glow.fillRect(Math.round(x + Math.cos(t) * 6), Math.round(y + Math.sin(t) * 2.5), 1, 1);
   }
-  if (el) {
-    c.glow.globalAlpha = fade * (0.25 + 0.1 * Math.sin(c.now * 5));
-    c.glow.fillRect(Math.round(x), Math.round(y - 28), 1, 26);
+  if (step >= 2) {
+    c.glow.globalAlpha = fade * (0.2 + 0.08 * step + 0.1 * Math.sin(c.now * (d.item.quality === 'hungry' ? 2 : 5)));
+    c.glow.fillRect(Math.round(x), Math.round(y - 20 - step * 4), 1, 18 + step * 4);
     c.glow.globalAlpha = fade;
   }
-  line(c.lit, x - 4, y - 3 + bob, -0.6, 0, 9, KIT_COL[d.item.kit] ?? '#dfe6ec', 2);
+  if (kind === 'weapon') line(c.lit, x - 4, y - 3 + bob, -0.6, 0, 9, KIT_COL[d.item.kit ?? 'sword'] ?? '#dfe6ec', 2);
+  else if (kind === 'armor') (c.lit.fillStyle = d.item.armor === 'heavy' ? '#9aa3ad' : d.item.armor === 'medium' ? '#7a828c' : '#6b4a2b'), c.lit.fillRect(Math.round(x - 3), Math.round(y - 6 + bob), 6, 5);
+  else (c.glow.fillStyle = col), c.glow.fillRect(Math.round(x - 1), Math.round(y - 5 + bob), 3, 1), c.glow.fillRect(Math.round(x - 1), Math.round(y - 3 + bob), 3, 1), c.glow.fillRect(Math.round(x - 2), Math.round(y - 4 + bob), 1, 1), c.glow.fillRect(Math.round(x + 2), Math.round(y - 4 + bob), 1, 1);
   if (Math.floor(c.now * 2 + d.id) % 3 === 0) (c.glow.fillStyle = '#ffffff'), c.glow.fillRect(Math.round(x + 2), Math.round(y - 7 + bob), 1, 1);
   c.lit.globalAlpha = c.glow.globalAlpha = 1;
 }

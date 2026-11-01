@@ -3,7 +3,7 @@
  * kind in their hand). Standing on it they can take it into their pack, if there's room; they equip
  * it from the pack.
  */
-import { DROPS, WEAPONS, itemName, rollItem } from '../shared/tuning';
+import { DROPS, WEAPONS, itemName, rollGear, rollTier } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { PACK } from './pack';
 import type { Drop, Enemy, FightEvent, Hero, Intent } from './types';
@@ -22,7 +22,10 @@ export function dropFrom(e: Enemy, heroes: Hero[], drops: Drop[], rng: Rng, ev: 
     if (h.id !== 'squire' && d < bd) (bd = d), (near = h);
   }
   if (!near) return;
-  const item = rollItem(rng, WEAPONS[near.weapon].cls, DROPS.forged[e.kind], rng.next() < 0.5 ? near.weapon : undefined);
+  // Tier by who fell; butchers sometimes leave armor or a ring instead of a weapon.
+  const tier = rollTier(rng, e.name ? 'named' : e.kind), cls = WEAPONS[near.weapon].cls;
+  const slot = e.kind === 'butcher' && rng.next() < 0.3 ? (rng.next() < 0.5 ? 'armor' : 'ring') : 'weapon';
+  const item = rollGear(rng, cls, tier, slot, slot === 'weapon' && rng.next() < 0.5 ? near.weapon : undefined);
   drops.push({ id: nextId++, x: e.x, y: e.y, item, life: DROPS.life });
   ev.push({ k: 'drop', x: e.x, y: e.y, q: item.quality });
 }
@@ -33,7 +36,7 @@ export function takeLoot(h: Hero, inp: Intent, drops: Drop[], ev: FightEvent[]):
   h.seen.take = inp.takeSeq;
   const i = drops.findIndex((d) => d.id === inp.take);
   const d = drops[i];
-  if (!d || Math.hypot(d.x - h.x, d.y - h.y) > REACH || WEAPONS[d.item.kit].cls !== WEAPONS[h.weapon].cls || h.bag.length >= PACK) return;
+  if (!d || Math.hypot(d.x - h.x, d.y - h.y) > REACH || (d.item.kit && WEAPONS[d.item.kit].cls !== WEAPONS[h.weapon].cls) || h.bag.length >= PACK) return;
   drops.splice(i, 1);
   h.bag.push(d.item);
   ev.push({ k: 'loot', x: h.x, y: h.y, name: itemName(d.item) });
