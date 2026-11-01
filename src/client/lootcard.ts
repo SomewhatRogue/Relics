@@ -1,9 +1,11 @@
 /**
  * The loot card: stand on a dropped weapon and it says what it is, in words: the traits and what
- * each one rewards, and what you'd leave behind. TAKE (or F) swaps it in.
+ * each one rewards. TAKE (or F) puts it in your pack; you equip it from there.
  */
-import { CLASS_KITS, TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
+import { TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
 import { REACH } from '../sim/loot';
+import { PACK } from '../sim/pack';
+import { COPY } from './copy';
 import type { ArenaRoom } from '../sim/room';
 import type { Hero } from '../sim/types';
 
@@ -12,6 +14,7 @@ const describe = (i: Item | undefined) => (i ? itemName(i) + ': ' + i.traits.map
 export class LootCard {
   /** The drop on show (-1: none). */
   current = -1;
+  private packed = 0;
   private el = document.createElement('div');
 
   constructor(take: (id: number) => void) {
@@ -34,15 +37,17 @@ export class LootCard {
       if (dist <= bd) (bd = dist), (best = d);
     }
     if (!best) return void ((this.current = -1), (this.el.hidden = true));
-    if (best.id === this.current && !this.el.hidden) return;
+    if (best.id === this.current && !this.el.hidden && me.bag.length === this.packed) return;
+    this.packed = me.bag.length;
     this.current = best.id;
-    const it = best.item, cls = WEAPONS[it.kit].cls, mine = it.kit === me.weapon;
+    const it = best.item, cls = WEAPONS[it.kit].cls, mine = cls === WEAPONS[me.weapon].cls;
     const el = it.traits.find((t) => t === 'ember' || t === 'rime' || t === 'storm') ?? '';
     this.el.dataset.el = el === 'ember' ? 'fire' : el === 'rime' ? 'frost' : el;
     this.el.innerHTML =
       `<div class="name">${itemName(it)}</div>` +
       it.traits.map((t) => `<div class="trait"><b>${TRAITS[t].name}</b> ${TRAITS[t].text}</div>`).join('') +
-      (mine ? `<div class="yours">Yours: ${describe(me.arms[it.kit])}</div><button>TAKE${keys ? ' (F)' : ''}</button>` : `<div class="yours">For ${cls === WEAPONS[me.weapon].cls ? 'your other kit (the smith changes kits)' : 'a ' + cls}</div>`);
+      (mine ? (me.bag.length >= PACK ? `<div class="yours">${COPY.full}</div>` : `<div class="yours">${COPY.takes} In hand: ${describe(me.arms[me.weapon])}</div><button>TAKE${keys ? ' (F)' : ''}</button>`)
+        : `<div class="yours">${COPY.otherClass.replace('{Class}', cls[0] + cls.slice(1).toLowerCase())}</div>`);
     this.el.hidden = false;
   }
 }

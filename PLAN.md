@@ -2,9 +2,12 @@
 
 ## Current slice
 
-**Simpler classes, relics from deep dives** (Claude Opus 5.5, 2026-11-01). Built; waiting on Kyle's
-play. *Done when* each class plays with one skill and no relic, and a deep dive won gives a relic
-that shows up on the RELIC button.
+**The pack and a shorter class pick** (Claude Opus 5.5, 2026-11-01). Built; waiting on Kyle's play.
+*Done when* Kyle picks a class from the short list, takes a dropped weapon into his pack mid-fight and
+equips it there, and carries a relic won on a deep job from the pack.
+
+**Simpler classes, relics from deep jobs** (2026-11-01). Built; waiting on Kyle's play. *Done when*
+each class plays with one skill and no relic, and a deep job won gives a relic on the RELIC button.
 
 **Slices 3b and 3c** (Claude Opus 5.5, 2026-11-01). Built; waiting on Kyle's play.
 *Done when* Kyle makes a hero on the start screen, goes into every building in Wickhold and talks to

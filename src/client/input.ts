@@ -116,6 +116,13 @@ export class Input {
     this.intent.relicSeq++;
   }
 
+  /** Change gear from the pack (see sim/pack.ts GEAR). */
+  gear(op: number, arg: number): void {
+    this.intent.gearOp = op;
+    this.intent.gearArg = arg;
+    this.intent.gearSeq++;
+  }
+
   /** Take a loot drop (the card's button, or F). */
   take(id: number): void {
     this.intent.take = id;

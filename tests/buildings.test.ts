@@ -35,10 +35,28 @@ describe('heroes', () => {
     g.step(0.1, { ...NO_INTENT, classSeq: 5, weaponSeq: 3, augmentSeq: 2 });
     expect(g.hero.weapon).toBe('longbow');
     expect(g.hero.augments.net).toBe('');
-    g.setKit('crossbow');
-    g.setKit('sword');
+    g.profile.gold = 200;
+    expect(g.buy('fine', 'sword')).toBeNull();
+    const bow = g.buy('fine', 'crossbow')!;
+    expect(g.hero.weapon).toBe('longbow');
+    expect(g.profile.bag).toEqual([bow]);
+    // Equipped from the pack (the room applies it), and the save follows.
+    g.step(0.1, { ...NO_INTENT, gearSeq: 1, gearOp: 1, gearArg: 0 });
     expect(g.hero.weapon).toBe('crossbow');
-    expect(load().heroes[0].weapon).toBe('crossbow');
+    expect(g.hero.arms.crossbow).toBe(bow);
+    expect(load().heroes[0]).toMatchObject({ weapon: 'crossbow', bag: [] });
+    // Back to the plain longbow: the crossbow goes back in the pack.
+    g.step(0.1, { ...NO_INTENT, gearSeq: 2, gearOp: 1, gearArg: -1 });
+    expect(g.hero.weapon).toBe('longbow');
+    expect(load().heroes[0].bag).toEqual([bow]);
+    g.step(0.1, { ...NO_INTENT, gearSeq: 3, gearOp: 2, gearArg: 0 });
+    expect(load().heroes[0].bag).toEqual([]);
+  });
+
+  it('an old save keeps the weapon in hand; its other weapons go in the pack', () => {
+    const fine = { kit: 'greatsword', quality: 'fine', traits: ['brutal'] }, held = { kit: 'sword', quality: 'fine', traits: ['riposte'] };
+    store.set('relic.save.v2', JSON.stringify({ heroes: [{ name: 'OLD', cls: 'WARRIOR', weapon: 'sword', arms: { sword: held, greatsword: fine } }], current: 0, world: newWorld() }));
+    expect(load().heroes[0]).toMatchObject({ weapon: 'sword', arms: { sword: held }, bag: [fine] });
   });
 
   it("carry an old save's hero across, class from its weapon", () => {
@@ -89,6 +107,12 @@ describe('relics come from deep dives', () => {
     expect(g.result?.relic).toBe('hook');
     g.carry('hook');
     expect(g.hero.relics).toEqual(['lodestone', 'hook']);
+    // From the pack: put it away, then carry the javelin again.
+    g.step(0.1, { ...NO_INTENT, gearSeq: 1, gearOp: 3, gearArg: -1 });
+    expect(g.profile.relic).toBe('');
+    g.step(0.1, { ...NO_INTENT, gearSeq: 2, gearOp: 3, gearArg: 0 });
+    expect(g.hero.relics).toEqual(['lodestone', 'javelin']);
+    expect(g.profile.relic).toBe('javelin');
   });
 });
 

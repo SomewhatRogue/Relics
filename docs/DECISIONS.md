@@ -2,6 +2,28 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-01: the pack, a shorter class pick, one weapon to start (Claude Opus 5.5)
+
+Kyle: start with a weapon type and don't say what the smith has; an inventory for each hero, open any
+time without pausing, to equip items and relics; too much text on the class pick (general info first,
+tap in for stats); copy through the lore keeper, simpler UI.
+
+- **The pack** (`src/sim/pack.ts`, `src/client/pack.ts`). Each hero has what's in hand, their skill,
+  the relic carried, the relics they've won, and up to 8 spare weapons. PACK in the top bar, or I
+  (Tab) on a laptop. The world doesn't pause. Changes go to the room as an intent (`gearSeq`,
+  `gearOp`, `gearArg`) so a friend's pack works the same online. A change pressed mid-swing waits
+  for free hands rather than being lost.
+- **One weapon to start.** Every class starts with its first weapon type. Other types of your class
+  come as loot (half of drops are the type in hand, half another of your class) or from Halvard, who
+  now sells each type into your pack. Taking a drop puts it in the pack; nothing swaps on its own. The
+  smith no longer changes kits. The plain starting weapon is always there to go back to.
+- **The class pick:** five rows (face, class, one line). Tap one: a one-line pitch, five ratings out
+  of five (POWER, GUARD, SPEED, RANGE, SUPPORT, hand-judged from tuning.ts and kept in
+  `shared/classes.ts`), weapon, skill, what it can't do, name, begin.
+- **Copy** rewritten with the lore keeper (`src/client/copy.ts` and `shared/classes.ts`): "deep job"
+  everywhere players see it, never "deep dive"; stamina is "breath"; goblins aren't careless or
+  brave, they're patient. Old saves: the weapon in hand stays, other weapons go in the pack.
+
 ## 2026-11-01: simpler classes; relics only from deep dives (Claude Opus 5.5)
 
 Kyle: rewrite and simplify what each class has or doesn't; nobody starts with relics, they're found at

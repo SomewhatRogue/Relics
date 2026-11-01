@@ -1,64 +1,68 @@
 /**
- * The five classes on one page: what each has and what it doesn't. Every class has a weapon, a guard,
- * a dodge and one skill of its own. Nobody starts with a relic: relics are pried out of the named
- * butcher at the end of a deep dive, and any class can carry one.
+ * The five classes, kept short: a line for the pick screen, then (tapped) a pitch, five ratings, the
+ * weapon, the one skill, and what it can't do. Nobody starts with a relic. Copy checked by the lore
+ * keeper (docs/lore/voice.md).
  */
 import type { HeroClass } from './weapons.js';
 
+export const STATS = ['POWER', 'GUARD', 'SPEED', 'RANGE', 'SUPPORT'] as const;
+export type Stat = (typeof STATS)[number];
+
 export interface ClassSheet {
-  /** The weapon you start with (the smith has the others). */
+  /** Under the class on the pick screen. */
+  line: string;
+  /** One sentence, in the world's voice. */
+  pitch: string;
+  /** Just the weapon type. */
   weapon: string;
-  guard: string;
-  dodge: string;
-  /** The class's one skill (the SKILL button). */
+  /** The class's one skill (the SKILL button), and what it does. */
   skill: string;
-  /** What only this class does. */
-  edge: string;
-  /** What it can't do. */
   cant: string;
+  /** Out of 5, against the other classes (judged from tuning.ts; keep honest when it changes). */
+  stats: Record<Stat, number>;
 }
 
 export const CLASSES: Record<HeroClass, ClassSheet> = {
   WARRIOR: {
-    weapon: 'Sword and shield. The smith has a greatsword and a spear.',
-    guard: 'The best guard: blocks almost anything in front, and parries come easy.',
-    dodge: 'A roll.',
-    skill: 'War Cry: allies near you get their wind back and block for half the cost; small goblins flinch.',
-    edge: 'Lifts barrels, tables and stunned goblins, and throws them.',
-    cant: 'No ranged attack. Slow on its feet.',
+    line: 'Sword and shield. Holds the line.',
+    pitch: "Somebody has to stand in the door. You're the one with the shield.",
+    weapon: 'Sword and shield',
+    skill: 'War Cry: nearby allies catch their breath and block at half cost. Small goblins flinch.',
+    cant: 'Nothing at range. Slow feet.',
+    stats: { POWER: 4, GUARD: 5, SPEED: 2, RANGE: 1, SUPPORT: 3 },
   },
   RANGER: {
-    weapon: 'Longbow. The smith has a shortbow and a crossbow.',
-    guard: 'A light guard.',
-    dodge: 'A quick step back.',
-    skill: "Hunter's Net: pins small goblins flat, slows big ones.",
-    edge: 'Hits hardest from range: release on the white flash.',
-    cant: "Weak up close. Can't lift.",
+    line: 'Longbow. Kills before they close.',
+    pitch: 'Forty paces is a long way to run with an arrow in you.',
+    weapon: 'Longbow',
+    skill: "Hunter's Net: pins a small goblin flat, slows a big one.",
+    cant: "Poor up close. Can't lift.",
+    stats: { POWER: 4, GUARD: 2, SPEED: 2, RANGE: 5, SUPPORT: 2 },
   },
   ROGUE: {
-    weapon: 'Twin daggers.',
-    guard: 'A poor guard: better to be elsewhere.',
-    dodge: 'A long dash, back again quickly.',
-    skill: 'Shadowstep: straight behind the goblin you face.',
-    edge: 'The fastest on its feet. Backstabs hit two and a half times as hard.',
+    line: 'Twin daggers. Fast, and from behind.',
+    pitch: 'Everything with teeth has a back. Go and stand there.',
+    weapon: 'Twin daggers',
+    skill: "Shadowstep: you're suddenly behind the goblin you face.",
     cant: "Can't take a beating. Can't lift.",
+    stats: { POWER: 3, GUARD: 1, SPEED: 5, RANGE: 1, SUPPORT: 1 },
   },
   MAGE: {
-    weapon: 'A spark wand. The smith has a staff and a rod.',
-    guard: 'A poor guard, and a costly one.',
-    dodge: 'A blink: far, but slow to come back.',
-    skill: 'Lodestone: drags goblins together, then bursts.',
-    edge: 'Spells by cast time: quick sparks, or held for a burst or a lance through a line.',
-    cant: "Runs out of breath fast. Can't lift.",
+    line: 'Spark wand. Quick sparks at range.',
+    pitch: 'The cleverest thing in the room, until something hits you.',
+    weapon: 'Spark wand',
+    skill: 'Lodestone: lob it; it drags goblins together, then bursts.',
+    cant: "Short of breath. Can't lift.",
+    stats: { POWER: 3, GUARD: 1, SPEED: 2, RANGE: 4, SUPPORT: 2 },
   },
   HEALER: {
-    weapon: 'Mace and censer.',
-    guard: 'A good guard.',
-    dodge: 'A roll.',
-    skill: 'Sanctuary: blessed ground that mends allies and burns goblins, and a ward on whoever needs it most.',
-    edge: 'Every third blow heals everyone near. Hold for a holy smite that stuns.',
+    line: 'Mace and censer. Keeps you standing.',
+    pitch: 'Stitch them shut, then go and hit whatever opened them.',
+    weapon: 'Mace and censer',
+    skill: "Sanctuary: blessed ground mends allies and burns goblins, and wards whoever's worst hurt.",
     cant: 'Slow, short reach.',
+    stats: { POWER: 2, GUARD: 4, SPEED: 2, RANGE: 2, SUPPORT: 5 },
   },
 };
 
-export const NO_RELICS = 'No relics to start. They come out of named butchers at the end of deep dives.';
+export const NO_RELICS = 'No relics to start. Pry them out of named butchers, at the bottom of deep jobs.';

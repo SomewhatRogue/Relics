@@ -13,7 +13,14 @@ export interface Save { heroes: Profile[]; current: number; world: WorldState }
 /** Fill in fields a saved hero predates. */
 const hero = (p: Partial<Profile>): Profile => {
   const cls = p.cls ?? (p.weapon ? WEAPONS[p.weapon].cls : 'WARRIOR');
-  return { ...newProfile(cls, p.name), ...p, cls };
+  const out = { ...newProfile(cls, p.name), ...p, cls };
+  // Before the pack, a hero kept one weapon per kind: the one in hand stays, the rest go in the pack.
+  if (!p.bag) {
+    const arms = p.arms ?? {}, inHand = arms[out.weapon];
+    out.bag = Object.entries(arms).filter(([k, it]) => k !== out.weapon && it).map(([, it]) => it!);
+    out.arms = inHand ? { [out.weapon]: inHand } : {};
+  }
+  return out;
 };
 
 export function load(): Save {

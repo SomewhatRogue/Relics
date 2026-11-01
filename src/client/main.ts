@@ -15,6 +15,7 @@ import type { FightEvent } from '../sim/types';
 import { Fx } from './fx';
 import { Input } from './input';
 import { LootCard } from './lootcard';
+import { PackView } from './pack';
 import { Scene } from './scene';
 import { setMusic, setMuted } from './sfx';
 import { Music } from './music';
@@ -28,6 +29,7 @@ const panel = new Panel();
 const input = new Input(() => scene.heroScreen());
 const $ = (s: string) => document.querySelector(s) as HTMLElement;
 const card = new LootCard((id) => input.take(id));
+const pack = new PackView((op, arg) => input.gear(op, arg), () => title.open);
 const music = new Music();
 const link = new WorldLink((w) => game.syncWorld(w));
 game.link = link;
@@ -54,8 +56,9 @@ addEventListener('keydown', (e) => {
   if (k === 'escape' && panel.open && !game.result) panel.hide();
 });
 $('#heroes').addEventListener('click', () => {
-  if (game.mode !== 'run' && !panel.open) title.show();
+  if (game.mode !== 'run' && !panel.open) pack.toggle(false), title.show();
 });
+$('#packbtn').addEventListener('click', () => pack.toggle());
 $('.tb.use').addEventListener('touchstart', (e) => (e.preventDefault(), use()), { passive: false });
 
 /** One line on how each kit guards and dodges. */
@@ -75,11 +78,11 @@ const KIT: Record<string, string> = {
 
 let parries = 0;
 const townTips = input.touch
-  ? ['Walk to the JOB BOARD and tap USE to take a job', 'Walk up into a door to go in. Everyone inside has something to say', 'The FORGE: the smith changes your kit, the relic-wright fits elements and your relics', 'The TRAINING HALL: perks, and the squire takes you to the yard', 'The TOWN HALL: the reeve and the council decide the chapter']
-  : ['Walk to the JOB BOARD and press E to take a job', 'Walk up into a door to go in. Press E by anyone to talk', 'The FORGE: the smith changes your kit, the relic-wright fits elements and your relics', 'The TRAINING HALL: perks, and the squire takes you to the yard', 'The TOWN HALL: the reeve and the council decide the chapter'];
+  ? ['Walk to the JOB BOARD and tap USE to take a job', 'Walk up into a door to go in. Everyone inside has something to say', 'The FORGE: Halvard sells weapons, Ivo fits elements', 'The TRAINING HALL: perks, and the squire takes you to the yard', 'The TOWN HALL: the reeve and the council decide the chapter']
+  : ['Walk to the JOB BOARD and press E to take a job', 'Walk up into a door to go in. Press E by anyone to talk', 'The FORGE: Halvard sells weapons, Ivo fits elements', 'The TRAINING HALL: perks, and the squire takes you to the yard', 'The TOWN HALL: the reeve and the council decide the chapter'];
 const tips = input.touch
-  ? ['Stun or get behind a small goblin, then GRAB it', 'Warriors can GRAB barrels and tables and throw them', 'Break the oil barrel near goblins and they burn', 'Holding one: SLAM it, or THROW it at another', 'Goblins drop weapons. Stand on one and TAKE it', 'Traits reward skill: parries, dodges, perfect releases', 'Walk into a cottage or barn: goblins, and sometimes someone caged', 'HEALER: SANCTUARY blesses the ground and wards whoever is most hurt', 'Oil and fire burn wooden buildings down. Burn out the dens', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'SKILL: every class has one. Each recharges', 'Striped circles cannot be blocked: ROLL out', 'DEEP jobs end at a named butcher. Win one for a RELIC', 'TWIN DAGGERS: roll behind a goblin and BACKSTAB']
-  : ['G grabs a stunned goblin (or one you got behind). Click to slam, G to throw', 'Warriors: G lifts barrels and tables. Throw them, or slam them down', 'Break the oil barrel near goblins and they burn', 'Goblins drop weapons. Stand on one and press F to take it', 'Bows: release on the white flash. Held too long, the shot weakens', 'Walk up into a cottage door to go in. Fire burns buildings down', 'Healer: E for SANCTUARY. Blessed ground, and a ward that throws arrows back', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: your class skill. R: a relic, once you have won one on a DEEP job', 'Striped circles cannot be blocked: SPACE to roll', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or rod', 'Daggers: roll behind a goblin and BACKSTAB'];
+  ? ['Stun or get behind a small goblin, then GRAB it', 'Warriors can GRAB barrels and tables and throw them', 'Break the oil barrel near goblins and they burn', 'Holding one: SLAM it, or THROW it at another', 'Goblins drop weapons. TAKE one, then EQUIP it from your PACK', 'Traits reward skill: parries, dodges, perfect releases', 'Walk into a cottage or barn: goblins, and sometimes someone caged', 'HEALER: SANCTUARY blesses the ground and wards whoever is most hurt', 'Oil and fire burn wooden buildings down. Burn out the dens', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'SKILL: every class has one. Each recharges', 'Striped circles cannot be blocked: ROLL out', 'DEEP jobs end at a named butcher. Win one for a RELIC', 'TWIN DAGGERS: roll behind a goblin and BACKSTAB']
+  : ['G grabs a stunned goblin (or one you got behind). Click to slam, G to throw', 'Warriors: G lifts barrels and tables. Throw them, or slam them down', 'Break the oil barrel near goblins and they burn', 'Goblins drop weapons. F takes one; I opens your pack to equip it', 'Bows: release on the white flash. Held too long, the shot weakens', 'Walk up into a cottage door to go in. Fire burns buildings down', 'Healer: E for SANCTUARY. Blessed ground, and a ward that throws arrows back', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: your class skill. R: a relic, once you have won one on a DEEP job', 'Striped circles cannot be blocked: SPACE to roll', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or rod', 'Daggers: roll behind a goblin and BACKSTAB'];
 let tipAt = -99, tipI = 0;
 
 function hud(now: number): void {
@@ -93,6 +96,8 @@ function hud(now: number): void {
   $('.wpn').textContent = item ? itemName(item) : WEAPONS[me.weapon].name;
   $('.kit').textContent = item ? item.traits.map((t) => TRAITS[t].name).join(' + ') + '  ' + KIT[me.weapon] : KIT[me.weapon];
   card.update(room, me, !input.touch);
+  pack.update(me);
+  $('#packbtn').classList.toggle('on', pack.open);
   if (input.touch) {
     // GRAB shows only when there's something to grab (or to throw); ATTACK becomes SLAM.
     const carrying = me.act === 'carry';

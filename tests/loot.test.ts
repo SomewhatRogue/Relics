@@ -52,19 +52,44 @@ describe('loot', () => {
     expect(ev).toBeDefined();
   });
 
-  it('taking a drop equips it and leaves the old one behind; another class cannot take it', () => {
+  it('taking a drop puts it in the pack (equipped from there); another class cannot take it; a full pack takes nothing', () => {
     const { room, h } = onTarget(1);
     h.arms.sword = arm(['tempo']);
-    room.drops.push({ id: 900, x: h.x, y: h.y, item: arm(['riposte', 'ember']), life: 30 });
+    const drop = arm(['riposte', 'ember'], 'greatsword');
+    room.drops.push({ id: 900, x: h.x, y: h.y, item: drop, life: 30 });
     room.drops.push({ id: 901, x: h.x, y: h.y, item: arm(['deadeye'], 'longbow'), life: 30 });
     room.setIntent('me', intent({ takeSeq: 1, take: 900 }));
     const ev = run(room, 0.1);
-    expect(h.arms.sword?.traits).toEqual(['riposte', 'ember']);
-    expect(room.drops.some((d) => d.item.traits[0] === 'tempo')).toBe(true);
+    expect(h.bag).toEqual([drop]);
+    expect(h.arms.sword?.traits).toEqual(['tempo']);
     expect(ev.some((e) => e.k === 'loot')).toBe(true);
     room.setIntent('me', intent({ takeSeq: 2, take: 901 }));
     run(room, 0.1);
-    expect(h.arms.longbow).toBeUndefined();
+    expect(h.bag.length).toBe(1);
+    room.setIntent('me', intent({ takeSeq: 2, take: 901, gearSeq: 1, gearOp: 1, gearArg: 0 }));
+    run(room, 0.1);
+    expect(h.weapon).toBe('greatsword');
+    expect(h.arms.greatsword).toBe(drop);
+    expect(h.bag.map((i) => i.traits)).toEqual([['tempo']]);
+    h.bag = Array.from({ length: 8 }, () => arm(['bulwark']));
+    room.drops.push({ id: 902, x: h.x, y: h.y, item: arm(['brutal']), life: 30 });
+    room.setIntent('me', intent({ takeSeq: 3, take: 902, gearSeq: 1, gearOp: 1, gearArg: 0 }));
+    run(room, 0.1);
+    expect(h.bag.length).toBe(8);
+    expect(room.drops.some((d) => d.id === 902)).toBe(true);
+  });
+
+  it('a pack change waits for free hands', () => {
+    const { room, h } = onTarget(1);
+    h.bag = [arm(['brutal'], 'spear')];
+    room.setIntent('me', intent({ attackSeq: 1 }));
+    run(room, 0.05);
+    expect(h.act).not.toBe('idle');
+    room.setIntent('me', intent({ attackSeq: 1, gearSeq: 1, gearOp: 1, gearArg: 0 }));
+    room.step();
+    expect(h.weapon).toBe('sword');
+    run(room, 1);
+    expect(h.weapon).toBe('spear');
   });
 });
 

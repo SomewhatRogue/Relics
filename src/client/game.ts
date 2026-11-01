@@ -15,6 +15,7 @@ import { CHAPTER_1, QUORUM, rewardMult, type WorldState } from '../shared/story'
 import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
 import { CLASS_KITS, CLASS_SKILL, FOUND_RELICS, HERO, abilitiesOf, rollItem, type Augment, type HeroClass, type Item, type RelicId, type WeaponId } from '../shared/tuning';
 import { ArenaRoom } from '../sim/room';
+import { PACK } from '../sim/pack';
 import { goal, interiorRoom, isFinal, newRun, runRoom, tally, type Run } from '../sim/run';
 import type { FightEvent, Hero, Intent } from '../sim/types';
 import { load, store, type Save } from './save';
@@ -89,6 +90,8 @@ export class Game {
     const p = this.profile;
     h.weapon = p.weapon;
     h.arms = { ...p.arms };
+    h.bag = [...p.bag];
+    h.found = [...p.relics];
     h.perks = [...p.perks];
     h.maxHp = HERO.hp + (p.perks.includes('tough') ? PERK.tough : 0);
     h.relics = abilitiesOf(p.cls, p.relic);
@@ -175,7 +178,7 @@ export class Game {
     const out = this.outside?.room, outEv = out?.advance(dt) ?? [];
     if (out && this.run) tally(this.run, out, outEv, ME);
     const ev = this.room.advance(dt);
-    for (const e of ev) if (e.k === 'loot') (this.profile.arms = { ...h.arms }), store(this.save);
+    this.keepGear(h);
     // Walk up into a door to go in; out the bottom of a room to come back out.
     const door = this.near()?.door;
     if (door && intent.my < -0.5 && Math.abs(h.x - doorAt(door).x) < 0.7) this.enter(door);
@@ -254,16 +257,24 @@ export class Game {
     return best;
   }
 
-  /** Buy a weapon for your class: fine at the smith, forged from the trader. Returns it (or null: too poor). */
-  buy(quality: 'fine' | 'forged'): Item | null {
+  /** Buy a weapon of kind `kit` for your class into the pack: fine at the smith, forged from the trader. Null: too poor, or the pack is full. */
+  buy(quality: 'fine' | 'forged', kit: WeaponId = this.profile.weapon): Item | null {
     const p = this.profile, cost = SHOP[quality];
-    if (p.gold < cost) return null;
+    if (p.gold < cost || p.bag.length >= PACK || !CLASS_KITS[p.cls].includes(kit)) return null;
     p.gold -= cost;
-    const item = rollItem(new Rng(p.runs * 131 + p.gold * 7 + 5), p.cls, quality === 'forged' ? 1 : 0, p.weapon);
-    p.arms[item.kit] = item;
-    this.hero.arms = { ...p.arms };
+    const item = rollItem(new Rng(p.runs * 131 + p.gold * 7 + 5), p.cls, quality === 'forged' ? 1 : 0, kit);
+    p.bag.push(item);
+    this.hero.bag = [...p.bag];
     store(this.save);
     return item;
+  }
+
+  /** The room changed what's in hand, in the pack, or carried: the hero's save follows. */
+  private keepGear(h: Hero): void {
+    const p = this.profile, relic = h.relics[1] ?? '';
+    if (h.weapon === p.weapon && h.bag.length === p.bag.length && h.arms[h.weapon] === p.arms[p.weapon] && relic === p.relic && h.bag.every((it, i) => it === p.bag[i])) return;
+    Object.assign(p, { weapon: h.weapon, arms: { ...h.arms }, bag: [...h.bag], relic });
+    store(this.save);
   }
 
   /** Carry a relic you've found into your next job (at the relic-wright). */
@@ -272,14 +283,6 @@ export class Game {
     if (!p.relics.includes(r)) return;
     p.relic = r;
     this.equip(this.hero, this.hero);
-    store(this.save);
-  }
-
-  /** Take up another of your class's kits (at the smith). */
-  setKit(k: WeaponId): void {
-    const p = this.profile;
-    if (!CLASS_KITS[p.cls].includes(k)) return;
-    p.weapon = this.hero.weapon = k;
     store(this.save);
   }
 

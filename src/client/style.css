@@ -168,7 +168,46 @@ body.touch #corner #heroes, body.touch #corner #tips { width: auto; padding: 0 5
 #panel .dice span { display: block; font-size: 40px; line-height: 1.1; color: #f0e0b0; font-family: system-ui, sans-serif; }
 body[data-mode='town'] .tb.roll { right: calc(116px + env(safe-area-inset-right)); bottom: calc(58px + env(safe-area-inset-bottom)); }
 
-#title .sheet { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; margin: 8px 0 6px; font-size: 11px; }
+#title .sheet { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin: 2px 0; font-size: 12px; line-height: 1.4; }
 #title .sheet dt { color: #c8b080; }
 #title .sheet dd { margin: 0; color: #d8d4de; }
 #panel .job.deep { border-color: #c9a8ff; background: #1e1a2a; }
+#title .cgrid { display: flex; flex-direction: column; gap: 6px; }
+#title .ccard { display: flex; align-items: center; gap: 12px; padding: 6px 12px; min-height: 60px; text-align: left; }
+#title .ccard span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+#title .ccard b { color: #ffd27a; font-size: 13px; letter-spacing: 0.08em; }
+#title .ccard i { font-style: normal; color: #b8b2c4; font-size: 11px; }
+#title .dhead { display: flex; align-items: center; gap: 14px; }
+#title .dhead .face { width: 54px; height: 72px; }
+#title .dhead h2 { margin: 0; color: #ffd27a; font-size: 22px; letter-spacing: 0.12em; }
+#title .dhead p { margin: 4px 0 0; line-height: 1.4; color: #e8e2d0; }
+#title .bars { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; align-items: center; padding: 10px 12px; background: #1b1922; border: 1px solid #3a3644; border-radius: 6px; font-size: 10px; color: #c8b080; letter-spacing: 0.08em; }
+#title .bars i { display: flex; gap: 4px; }
+#title .bars em { flex: 1; height: 8px; background: #2a2733; border-radius: 2px; }
+#title .bars em.on { background: #ffd27a; box-shadow: 0 0 6px #ff9a3c66; }
+#title .small { font-size: 11px; text-align: left; }
+#corner #packbtn { width: auto; padding: 0 10px; font-size: 10px; border-color: #c8b080; color: #ffe6b0; }
+#corner #packbtn.on { background: #4a3414; border-color: #ffd27a; }
+#pack { position: fixed; z-index: 6; right: calc(10px + env(safe-area-inset-right)); top: calc(44px + env(safe-area-inset-top)); width: min(320px, calc(100vw - 20px)); max-height: calc(100vh - 230px); overflow-y: auto; padding: 10px 12px 12px; background: #14121ae8; border: 1px solid #6a5a3a; border-radius: 6px; color: #d8d4de; font-size: 11px; font-weight: 500; touch-action: pan-y; }
+#pack[hidden] { display: none; }
+#pack .head { display: flex; align-items: center; gap: 8px; }
+#pack h2 { margin: 0; color: #ffd27a; font-size: 14px; letter-spacing: 0.2em; }
+#pack .head span { flex: 1; color: #8a8494; font-size: 10px; }
+#pack .x { width: 32px; height: 32px; padding: 0; background: transparent; border: 1px solid #4f4a5c; border-radius: 4px; color: #c8c4d0; font-size: 18px; }
+#pack h3 { margin: 10px 0 4px; color: #c8b080; font-size: 10px; letter-spacing: 0.15em; font-weight: 600; }
+#pack h3 i { font-style: normal; color: #8a8494; margin-left: 6px; }
+#pack .row { display: flex; align-items: center; gap: 6px; padding: 6px 8px; background: #1e1b26; border: 1px solid #34303f; border-radius: 4px; margin-bottom: 4px; }
+#pack .row > div { flex: 1; min-width: 0; }
+#pack .row b { color: #f0e0b0; font-size: 12px; }
+#pack .row em { font-style: normal; color: #9fd0ff; font-size: 10px; }
+#pack .tr { color: #a8a2b4; font-size: 10px; line-height: 1.35; }
+#pack .tr b { color: #9fd0ff; font-size: 10px; }
+#pack .row button { flex: none; min-height: 32px; padding: 0 10px; background: #2a2733; border: 1px solid #6a647a; border-radius: 4px; color: #e8e4ee; font-size: 10px; }
+#pack .row button.go { background: #4a3414; border-color: #ffd27a; color: #fff1d0; }
+#pack .row button.ghost { background: transparent; color: #9a94a8; }
+#pack .none { color: #8a8494; font-size: 11px; padding: 2px 0 4px; }
+body.touch #pack { max-height: calc(100vh - 330px - env(safe-area-inset-bottom)); }
+body.touch #pack { padding: 8px 10px 10px; }
+body.touch #pack h3 { margin: 6px 0 3px; }
+body.touch #pack .row { padding: 3px 8px; min-height: 36px; margin-bottom: 3px; }
+body.touch #pack .head span { font-size: 9px; }

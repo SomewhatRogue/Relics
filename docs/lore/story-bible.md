@@ -113,3 +113,9 @@ most Want among the heroes is the one the bells don't spare).
   eight Rescue Row families, the patients Amos, Letty and Corin. Whisper is "he".
 - **Town details.** Some nights there's a light in the keep's high window. Prayers are chalked over the
   chapel planks. The well is as old as the town and has tasted of copper since the siege.
+- **Words players see.** "Deep job" for the daily long job with a named butcher at the bottom (never
+  "deep dive"). Stamina is "breath". Heroes are a company; you "hire" another.
+- **Halvard** oils every blade on his rack, and the next one before you've paid for this one.
+- **Open question for Kyle:** a code comment (`src/client/held.ts`) has the Healer's censer swinging a
+  coal from the Last Lantern. Since the Lantern is a shard, that would put shard-light in every
+  Healer's hand outside the walls, where goblins can smell it. Keep it on purpose, or drop it.

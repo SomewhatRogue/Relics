@@ -54,8 +54,10 @@ export interface Profile {
   perks: PerkId[];
   /** Level ups not yet spent at the trainer. */
   picks: number;
+  /** The weapon in hand (`weapon`, plain if `arms` has nothing for it) and the pack. */
   arms: Partial<Record<WeaponId, Item>>;
   weapon: WeaponId;
+  bag: Item[];
   /** Relics found at the end of deep dives, and the one carried into a job ('' none). */
   relics: RelicId[];
   relic: RelicId | '';
@@ -70,7 +72,7 @@ export interface Profile {
 }
 
 export const newProfile = (cls: HeroClass = 'WARRIOR', name = 'HERO'): Profile =>
-  ({ id: heroId(), name, cls, gold: 0, xp: 0, level: 1, perks: [], picks: 0, arms: {}, weapon: CLASS_KITS[cls][0], relics: [], relic: '', augments: {}, runs: 0, stats: newStats(), wish: false, dice: 0 });
+  ({ id: heroId(), name, cls, gold: 0, xp: 0, level: 1, perks: [], picks: 0, arms: {}, weapon: CLASS_KITS[cls][0], bag: [], relics: [], relic: '', augments: {}, runs: 0, stats: newStats(), wish: false, dice: 0 });
 
 function heroId(): string {
   const c = 'abcdefghijkmnpqrstuvwxyz23456789';

@@ -29,9 +29,14 @@ export interface Intent {
   /** Take the loot drop with id `take` (counted by takeSeq). */
   takeSeq: number;
   take: number;
+  /** Change gear from the pack (counted by gearSeq): `gearOp` 1 equip pack item `gearArg` (-1: the plain
+   * weapon), 2 drop pack item `gearArg`, 3 carry found relic `gearArg` (-1: none). See sim/pack.ts. */
+  gearSeq: number;
+  gearOp: number;
+  gearArg: number;
 }
 
-export const NO_INTENT: Intent = { mx: 0, my: 0, ax: 0, ay: 0, attack: false, block: false, attackSeq: 0, blockSeq: 0, rollSeq: 0, weaponSeq: 0, relicSeq: 0, relicSwapSeq: 0, relicPickSeq: 0, relicPick: 0, augmentSeq: 0, classSeq: 0, grabSeq: 0, takeSeq: 0, take: 0 };
+export const NO_INTENT: Intent = { mx: 0, my: 0, ax: 0, ay: 0, attack: false, block: false, attackSeq: 0, blockSeq: 0, rollSeq: 0, weaponSeq: 0, relicSeq: 0, relicSwapSeq: 0, relicPickSeq: 0, relicPick: 0, augmentSeq: 0, classSeq: 0, grabSeq: 0, takeSeq: 0, take: 0, gearSeq: 0, gearOp: 0, gearArg: 0 };
 
 export type HeroAct = 'idle' | 'charge' | 'attack' | 'throw' | 'zip' | 'roll' | 'hurt' | 'stun' | 'down' | 'carry' | 'slam';
 
@@ -95,6 +100,10 @@ export interface Hero extends Body {
   rallyUntil: number;
   /** The weapon found for each kit (a kit not listed is the plain one). */
   arms: Partial<Record<WeaponId, Item>>;
+  /** Weapons carried, not in hand. */
+  bag: Item[];
+  /** Relics this hero has won (one at a time is carried, in relics[1]). */
+  found: RelicId[];
   /** The draw in flight was released on the white flash. */
   perfect: boolean;
   /** Dodged through a blow (TEMPO): the next hit before then lands double. */
@@ -110,7 +119,7 @@ export interface Hero extends Body {
   hitstop: number;
   /** Extra parry and dodge leniency for this player's ping (seconds). */
   lenience: number;
-  seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number; augment: number; cls: number; take: number; grab: number };
+  seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number; augment: number; cls: number; take: number; grab: number; gear: number };
 }
 
 export type AttackKind = 'cleave' | 'slam' | 'swing' | 'stab' | 'shot';
