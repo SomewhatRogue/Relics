@@ -169,6 +169,24 @@ $('#mute').addEventListener('click', () => {
   setMuted(muted);
   $('#mute').classList.toggle('off', muted);
 });
+// Tips are off unless switched on; the choice is remembered on this device.
+const tipsOn = (on: boolean) => {
+  document.body.classList.toggle('tips', on);
+  $('#tips').classList.toggle('off', !on);
+  try {
+    localStorage.setItem('relic.tips', on ? '1' : '0');
+  } catch {
+    /* no storage: this session only */
+  }
+};
+let tipsWanted = false;
+try {
+  tipsWanted = localStorage.getItem('relic.tips') === '1';
+} catch {
+  /* no storage */
+}
+tipsOn(tipsWanted);
+$('#tips').addEventListener('click', () => tipsOn(!document.body.classList.contains('tips')));
 $('#help').addEventListener('click', () => $('#how').toggleAttribute('hidden'));
 $('#how').addEventListener('click', () => $('#how').setAttribute('hidden', ''));
 if (input.touch) document.body.classList.add('touch');

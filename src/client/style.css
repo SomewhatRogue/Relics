@@ -30,6 +30,10 @@ body[data-mode='run'] #heroes { display: none; }
 
 #tip { position: fixed; left: 50%; transform: translateX(-50%); top: calc(54px + env(safe-area-inset-top)); padding: 5px 10px; background: #1b1922cc; border: 1px solid #4f4a5c; border-radius: 4px; font-size: 11px; color: #ffd27a; white-space: nowrap; pointer-events: none; transition: opacity 0.6s; }
 #tip.gone { opacity: 0; }
+/* Tips only when switched on (TIPS in the corner). */
+body:not(.tips) #tip { display: none; }
+#corner #tips { width: auto; padding: 0 8px; font-size: 10px; }
+#tips.off { color: #6a647a; }
 body.touch #tip { top: calc(76px + env(safe-area-inset-top)); }
 
 #how { position: fixed; inset: 0; display: flex; flex-direction: column; justify-content: center; padding: 24px max(24px, calc(50vw - 260px)); background: #0d0b10ee; font-weight: 500; font-size: 13px; z-index: 5; }
