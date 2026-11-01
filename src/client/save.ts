@@ -18,6 +18,7 @@ const hero = (p: Partial<Profile>): Profile => {
   if (!p.belt) out.belt = [];
   if (p.armor === undefined) out.armor = newProfile(cls).armor;
   if (!p.rings) out.rings = [];
+  out.steel ??= 0;
   if (!p.bag) {
     const arms = p.arms ?? {}, inHand = arms[out.weapon];
     out.bag = Object.entries(arms).filter(([k, it]) => k !== out.weapon && it).map(([, it]) => it!);

@@ -13,10 +13,10 @@ import { BOUNTY, HERO_SLOTS, PERK, SHOP, gainXp, newProfile, type PerkId, type P
 import { Rng } from '../shared/rng';
 import { CHAPTER_1, QUORUM, rewardMult, type WorldState } from '../shared/story';
 import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
-import { POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, FOUND_RELICS, HERO, abilitiesOf, rollGear, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId } from '../shared/tuning';
+import { POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, FOUND_RELICS, HERO, abilitiesOf, rollGear, nextLevel, reroll, REROLL, STEEL, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId } from '../shared/tuning';
 import { ArenaRoom } from '../sim/room';
 import { PACK } from '../sim/pack';
-import { statsOf } from '../sim/gearstats';
+import { refreshHealth, statsOf } from '../sim/gearstats';
 import { goal, interiorRoom, isFinal, newRun, runRoom, tally, type Run } from '../sim/run';
 import type { FightEvent, Hero, Intent } from '../sim/types';
 import { load, store, type Save } from './save';
@@ -287,6 +287,55 @@ export class Game {
     p.belt.push(id);
     this.hero.belt = [...p.belt];
     store(this.save);
+    return true;
+  }
+
+  /** Every piece this hero owns, worn or packed, for the forge. */
+  gearList(): Item[] {
+    const p = this.profile, held = p.arms[p.weapon];
+    return [...(held ? [held] : []), ...(p.armor ? [p.armor] : []), ...p.rings, ...p.bag];
+  }
+
+  /** Swap one piece for its changed copy, wherever it is (profile and hero alike). */
+  private replace(old: Item, next: Item): void {
+    const p = this.profile, h = this.hero, swap = (xs: Item[]) => xs.map((x) => (x === old ? next : x));
+    for (const o of [p, h] as { arms: Partial<Record<WeaponId, Item>>; armor: Item | null; rings: Item[]; bag: Item[] }[]) {
+      for (const k of Object.keys(o.arms) as WeaponId[]) if (o.arms[k] === old) o.arms[k] = next;
+      if (o.armor === old) o.armor = next;
+      o.rings = swap(o.rings);
+      o.bag = swap(o.bag);
+    }
+    refreshHealth(h);
+    store(this.save);
+  }
+
+  /** Halvard: one level up, for gold and steel. */
+  upgrade(it: Item): boolean {
+    const p = this.profile, cost = nextLevel(it);
+    if (!cost || p.gold < cost.gold || p.steel < cost.steel) return false;
+    p.gold -= cost.gold;
+    p.steel -= cost.steel;
+    this.replace(it, { ...it, level: (it.level ?? 0) + 1 });
+    return true;
+  }
+
+  /** Halvard: melt a packed piece down for steel (never a hungry one). */
+  melt(it: Item): boolean {
+    const p = this.profile, i = p.bag.indexOf(it);
+    if (i < 0 || it.quality === 'hungry') return false;
+    p.bag.splice(i, 1);
+    this.hero.bag = [...p.bag];
+    p.steel += STEEL[it.quality];
+    store(this.save);
+    return true;
+  }
+
+  /** Ivo: reroll modifier `k` on a green, blue or purple piece. */
+  rerollMod(it: Item, k: number): boolean {
+    const p = this.profile;
+    if (p.gold < REROLL || it.quality === 'plain' || it.quality === 'hungry' || !it.mods?.[k]) return false;
+    p.gold -= REROLL;
+    this.replace(it, reroll(new Rng(p.runs * 97 + p.gold * 13 + k), it, k, p.cls));
     return true;
   }
 

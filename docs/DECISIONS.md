@@ -2,6 +2,16 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-01: loot slice 5, upgrades (Claude Opus 5.5)
+
+- **Halvard's anvil** (THE ANVIL in his panel): melt packed gear for steel (white 1, green 3, blue 8,
+  purple 20; never hungry) and raise a piece a level for gold and steel (+1 30 and 2, +2 60 and 5, +3
+  120 and 10, +4 200 and 20, +5 320 and 35), capped by tier (white +2 to purple +5). A level grows its
+  modifiers by a sixth and adds 3% weapon damage, 1% less taken on armor, or 2 health on a ring.
+- **Ivo** rerolls one modifier on a worn green, blue or purple piece for 40 gold, into another the
+  slot can roll, at the same tier.
+- Upgrading replaces the piece wherever it is (profile and hero), so the stats cache stays true.
+
 ## 2026-11-01: loot slice 3, chests (Claude Opus 5.5)
 
 - **Chests** (`sim/chests.ts`, placed by `planRoom`): 40% of rooms have one, the last room always, and a

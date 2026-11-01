@@ -44,4 +44,6 @@ export const COAL = {
 export const SMITH = {
   greet: 'Good steel. Gold first.',
   bought: "In your pack. He's already oiling the next one.",
+  anvil: 'Steel and gold. Melt what you don\'t want; I\'ll make what you do better.',
+  hungry: 'Not that one. Not in my fire.',
 };

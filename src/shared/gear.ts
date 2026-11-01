@@ -61,6 +61,23 @@ export const LEVEL = { mods: 1 / 6, damage: 0.03, tough: 0.01, health: 2 };
 
 export const slotOf = (i: Item): Slot => i.slot ?? 'weapon';
 
+/** Halvard's levels: gold and steel for each next level (index = the level reached). Steel from melting by tier. */
+export const UPGRADE = [null, { gold: 30, steel: 2 }, { gold: 60, steel: 5 }, { gold: 120, steel: 10 }, { gold: 200, steel: 20 }, { gold: 320, steel: 35 }];
+export const STEEL: Record<Tier, number> = { plain: 1, fine: 3, forged: 8, tolmouth: 20, hungry: 0 };
+export const REROLL = 40;
+/** The next level's price, or null at the tier's cap (and never for hungry gear). */
+export const nextLevel = (i: Item) => ((i.level ?? 0) < TIERS[i.quality].cap ? UPGRADE[(i.level ?? 0) + 1] : null);
+
+/** Ivo's reroll: modifier `k` becomes a different one this slot can roll, at the same tier. */
+export function reroll(rng: Rng, i: Item, k: number, cls: HeroClass): Item {
+  const slot = slotOf(i), have = (i.mods ?? []).map((m) => m.id);
+  const pool = (Object.keys(MODS) as ModId[]).filter((id) => MODS[id].on.includes(slot) && !have.includes(id) && (id !== 'mending' || cls === 'HEALER'));
+  if (!pool.length || !i.mods?.[k]) return i;
+  const id = rng.pick(pool), mods = [...i.mods];
+  mods[k] = { id, v: value(rng, id, TIERS[i.quality].step) };
+  return { ...i, mods };
+}
+
 /** Roll a modifier's value in its band (a fifth either side of the middle), rounded to look tidy. */
 function value(rng: Rng, id: ModId, step: number): number {
   const v = MODS[id].mid[step] * (0.8 + rng.next() * 0.4);

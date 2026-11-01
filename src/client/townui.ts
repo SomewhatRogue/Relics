@@ -5,7 +5,7 @@ import { CHAPTER_1, QUORUM, chapterGoals, councilOpen, marketOpen, rewardMult } 
 import { TRAINERS, housesFor, type SpotId } from '../shared/town';
 import { ballot } from '../shared/worldsync';
 import { openSquare } from './squareui';
-import { ARMOR, POTION, POTIONS, type PotionId, AUGMENTS, CLASS_KITS, CLASS_ORDER, CLASS_SKILL, ELEMENT_NAME, RELICS, TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
+import { ARMOR, MODS, REROLL, STEEL, TIERS, nextLevel, POTION, POTIONS, type PotionId, AUGMENTS, CLASS_KITS, CLASS_ORDER, CLASS_SKILL, ELEMENT_NAME, RELICS, TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
 import type { Game } from './game';
 import { PACK } from '../sim/pack';
 import { COAL, COPY, SMITH } from './copy';
@@ -66,7 +66,21 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       const it = buy();
       if (it) panel.show('BOUGHT', `<div class="bought">${card(it, g.hero)}${compare(g.hero, it)}</div>` + p(forged ? 'Dessa counts your coin twice and smiles once.' : SMITH.bought), [{ label: 'MORE', act: again }]);
     } });
+    const anvil = () => {
+      const all = g.gearList(), hungry = all.filter((it) => it.quality === 'hungry');
+      panel.show('THE ANVIL', say('Halvard', SMITH.anvil) + p(`You have ${pr.gold} gold and ${pr.steel} steel.`) +
+        all.map((it) => p(`<b style="color:${TIERS[it.quality].col}">${itemName(it)}</b>${pr.bag.includes(it) ? ' (packed)' : ' (worn)'}`)).join('') +
+        (hungry.length ? say('Halvard', SMITH.hungry) : ''), [
+        ...all.flatMap((it) => {
+          const next = nextLevel(it);
+          return next ? [{ label: `${itemName(it)}: +${(it.level ?? 0) + 1} (${next.gold} GOLD, ${next.steel} STEEL)`, primary: true, disabled: pr.gold < next.gold || pr.steel < next.steel, act: () => (g.upgrade(it), anvil()) }] : [];
+        }),
+        ...pr.bag.filter((it) => it.quality !== 'hungry').map((it) => ({ label: `MELT ${itemName(it)} (+${STEEL[it.quality]} STEEL)`, act: () => (g.melt(it), anvil()) })),
+        { label: 'BACK', act: again },
+      ]);
+    };
     panel.show(forged ? 'DESSA THE TRADER' : 'HALVARD THE SMITH', html, [
+      ...(forged ? [] : [{ label: 'THE ANVIL: UPGRADE, MELT', act: anvil }]),
       ...kits.map((k) => sold(WEAPONS[k].name, () => g.buy(q, k))),
       ...(forged ? [sold('A RING', () => g.buy(q, pr.weapon, 'ring'))] : (['light', 'medium', 'heavy'] as const).map((a) => sold(ARMOR[a].name, () => g.buy(q, pr.weapon, 'armor', a)))),
     ]);
@@ -81,7 +95,10 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       label: a ? `${RELICS[r].short}: ${ELEMENT_NAME[a as keyof typeof ELEMENT_NAME]}` : `${RELICS[r].short}: PLAIN`,
       disabled: !!a && pr.gold < SHOP.augment, act: () => (g.fitAugment(r, a), again()),
     })))];
-    panel.show('IVO THE RELIC-WRIGHT', html + shelf(['frost']), [...buttons, ...potionButtons(g, ['frost'], again)]);
+    // Ivo also rerolls one modifier on a worn piece for gold.
+    const worn = g.gearList().filter((it) => !pr.bag.includes(it) && it.quality !== 'plain' && it.quality !== 'hungry');
+    const rerolls = worn.flatMap((it) => (it.mods ?? []).map((m, k) => ({ label: `${itemName(it)}: REROLL ${MODS[m.id].name} (${REROLL})`, disabled: pr.gold < REROLL, act: () => (g.rerollMod(it, k), again()) })));
+    panel.show('IVO THE RELIC-WRIGHT', html + shelf(['frost']) + (rerolls.length ? p(`He'll turn one modifier on anything you wear into another, ${REROLL} gold.`) : ''), [...buttons, ...rerolls, ...potionButtons(g, ['frost'], again)]);
   } else if (id === 'church') {
     panel.show('FATHER ODRIC', say('Father Odric', 'Give what you can spare. Then a little of what you can\'t. That\'s the part it burns.') + (pr.cls === 'HEALER' ? say('Father Odric', COAL.odric) : '') +
       p(`Given to the Lantern so far: ${w.lantern} gold.`) + p(`You have ${pr.gold} gold.`),

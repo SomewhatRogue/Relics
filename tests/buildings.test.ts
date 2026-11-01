@@ -79,6 +79,29 @@ describe('heroes', () => {
   });
 });
 
+describe('the forge', () => {
+  it('Halvard melts packed gear for steel and levels gear up to its tier cap; Ivo rerolls a modifier', () => {
+    const g = new Game();
+    g.create('WARRIOR', 'smith');
+    g.profile.gold = 2000;
+    const spear = g.buy('fine', 'spear')!, junk = g.buy('fine', 'greatsword')!;
+    expect(g.melt(junk)).toBe(true);
+    expect(g.profile.steel).toBe(3);
+    g.profile.steel = 100;
+    for (let i = 0; i < 5; i++) g.upgrade(g.profile.bag[0]);
+    expect(g.profile.bag[0].level).toBe(3);
+    expect(g.profile.bag[0].kit).toBe('spear');
+    // Wear a ring and reroll its modifier: a different one, same piece.
+    const ring = g.buy('forged', 'sword', 'ring')!;
+    g.step(0.1, { ...NO_INTENT, gearSeq: 1, gearOp: 1, gearArg: g.profile.bag.indexOf(ring) });
+    const worn = g.hero.rings[0], before = worn.mods![0].id;
+    expect(g.rerollMod(worn, 0)).toBe(true);
+    expect(g.hero.rings[0].mods![0].id).not.toBe(before);
+    expect(g.profile.rings[0]).toBe(g.hero.rings[0]);
+    expect(spear).toBeTruthy();
+  });
+});
+
 describe('relics come from deep dives', () => {
   const win = (g: Game) => (g as unknown as { finish(won: boolean): void }).finish(true);
 
