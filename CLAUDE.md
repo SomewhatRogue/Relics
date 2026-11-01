@@ -43,6 +43,9 @@ Kyle plays on his phone and laptop and reports; land the change rather than over
   may say goodbye, tokens in localStorage, joiners never claim a room.
 - **No external hosts at runtime.** Everything is bundled; online play talks only to `/api/room`.
 - **No em dashes** anywhere: docs, UI copy, comments (Kyle's standing preference).
+- **Every player-facing line goes through two passes**: the `lore-keeper` agent (is it true to the
+  world) and then the `line-editor` agent (does it read like talk, not lines; see
+  `docs/lore/prose-notes.md`). Don't write in a clipped, aphoristic, every-sentence-a-punchline way.
 
 ## The look (approved 2026-10-31)
 

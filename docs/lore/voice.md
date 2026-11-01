@@ -32,17 +32,33 @@ Banter in the town, dread in the dens, a joke after the scare, never a joke over
 
 ## Sentences
 
-- **Short and concrete.** Things, not feelings. "The well tastes of copper since the siege" beats
-  "the town has suffered much".
-- **Homely, physical comparisons**, ours not theirs: *drunk as a bishop's goat; cold as a
-  smith's wife's feet; brave as a dog that's never met a bear*. One per speech at most.
+How it moves on the page is in `prose-notes.md` (read it; it's from the books themselves). In short:
+
+- **People talk, they don't deliver lines.** A Wickhold voice is someone at a table telling you
+  something, not a character saying something quotable. It can wander a little, hedge, correct
+  itself, lose the thread and come back with *anyway*. That's allowed, and it's wanted.
+- **Long, then short.** Most sentences run on with commas and *and*, carrying the detail. A short
+  line comes at the end, only when something should land. Never three short punchy sentences in a
+  row; that's the tell of writing lines instead of talk.
+- **Concrete.** Things, not feelings. "The well tastes of copper since the siege" beats "the town
+  has suffered much".
+- **A detail first, then the name.** "The big one with the burnt ear, that's Dunn."
+- **Mention, don't explain.** People don't explain their own world to each other. When something
+  must be explained, it's a story about someone who got it wrong, not a rule.
+- **The joke goes last**, and it's about a body or a person. Homely comparisons, ours not theirs:
+  *drunk as a bishop's goat; cold as a smith's wife's feet*. One per speech at most.
+- **Fewer sayings.** A neat aphorism in a whole scene is character; one a line is a fortune cookie.
+  Same for fragments: fine for a terse speaker, a tic for everyone.
 - **People talk past each other.** A trainer answers the question you should have asked. A drunk
-  answers a different one. Nobody explains the world to you; they mention it, sideways, and move on.
+  answers a different one.
 - **Sad things are said plainly and then left alone.** "My boy went out the north gate in spring."
-  Full stop. No adjectives. The next line can be about the weather.
+  No adjectives. The next line can be about the weather.
+- **Speakers differ in length.** Hew and Gannet run on; Halvard and Cole barely speak. If everyone
+  is clipped, nobody is.
+- **The game's own voice stays plain.** What to press, what an item does, a cost: short, clear,
+  second person, and kept apart from what a character says. Characters never do the tutorial's job.
 - **No modern idiom** (*okay, guys, awesome, literally, vibe*), no fantasy throat-clearing (*verily,
-  thou, mayhap*), no epic voice (*the darkness rises; heroes of destiny*). People in Wickhold talk
-  like tired, clever farmers and soldiers.
+  thou, mayhap*), no epic voice. People in Wickhold talk like tired, clever farmers and soldiers.
 - **No em dashes.** Commas, full stops, colons. (Kyle's standing rule, for every line.)
 
 ## Goblins
@@ -109,10 +125,12 @@ Written by the town, nailed up by Hollis: short, practical, a little desperate, 
 
 ## Checklist (the lore keeper asks these of every line)
 
-1. Would a tired, clever person in a walled town actually say this?
+1. Would a tired, clever person in a walled town actually say this, out loud, in this many words?
 2. Is there one concrete thing in it (a smell, a price, a name, an object)?
 3. Is the joke earned, and is it off the grave?
 4. Is anything explained that should only be mentioned?
 5. Are goblins frightening, not silly?
 6. Is anything taken from the Blacktongue books (names, terms, scenes)? Any modern idiom? Any em dash?
-7. Does it agree with `story-bible.md` (and not give away what players shouldn't know yet)?
+7. Does it read like talk, not lines (`prose-notes.md` section 2)? Any run of short punchy sentences,
+   stacked sayings, tidy threes?
+8. Does it agree with `story-bible.md` (and not give away what players shouldn't know yet)?

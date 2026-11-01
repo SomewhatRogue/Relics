@@ -27,8 +27,9 @@ export class LessonView {
     this.el.hidden = true;
     this.fade.id = 'fade';
     document.body.append(this.el, this.fade);
+    // A tap or click anywhere on a card goes on (the card covers the screen, stick included).
     const go = (e: Event) => {
-      if (!(e.target as HTMLElement).closest('[data-go]')) return;
+      if (!this.el.classList.contains('card')) return;
       e.preventDefault();
       g.continueHold();
     };
@@ -50,11 +51,13 @@ export class LessonView {
     this.el.hidden = !show;
     if (!show) return;
     const h = hold!, k = KEY[h.move ?? 'attack'][this.touch ? 1 : 0];
-    this.el.className = h.kind;
+    this.el.className = h.kind === 'talk' ? 'card talk' : h.kind;
+    const hint = `<p class="go-hint">${this.touch ? 'TAP TO GO ON' : 'CLICK OR PRESS ENTER TO GO ON'}</p>`;
+    if (h.kind === 'talk') return void (this.el.innerHTML = `<div class="card"><b class="who">${h.who}</b><p class="line">${h.text}</p>${hint}</div>`);
     this.el.innerHTML = h.kind === 'act'
       ? `<div class="now">${h.text}</div><kbd>${k}</kbd>`
       : `<div class="card">${h.who ? `<b class="who">${h.who}</b>` : ''}<p class="line">${h.text}</p>` +
         `<div class="move"><span>${NAME[h.move ?? 'attack']}</span><kbd>${k}</kbd></div>${h.how ? `<p class="how">${h.how}</p>` : ''}` +
-        (h.need === 'move' ? `<p class="go-hint">${this.touch ? 'Use the stick to go on' : 'Walk to go on'}</p>` : `<button data-go>${this.touch ? 'GOT IT' : 'GOT IT (ENTER)'}</button>`) + '</div>';
+        hint + '</div>';
   }
 }

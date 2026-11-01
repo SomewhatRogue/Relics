@@ -43,7 +43,16 @@ describe('the prologue wood', () => {
     const x = g.hero.x;
     for (let i = 0; i < 60; i++) g.step(0.1, { ...NO_INTENT, mx: 1 });
     expect(g.hero.x).toBeCloseTo(x);
-    for (let i = 0; i < 80 && g.wood!.wake >= 0; i++) g.step(0.1, NO_INTENT);
+    // He talks; each line waits for a tap, and the world with it.
+    for (let i = 0; i < 80 && !g.wood!.hold; i++) g.step(0.1, NO_INTENT);
+    expect(g.wood!.hold?.kind).toBe('talk');
+    const held = g.room.time;
+    g.step(0.5, NO_INTENT);
+    expect(g.room.time).toBe(held);
+    for (let i = 0; i < 20 && g.wood!.wake >= 0; i++) {
+      if (g.wood!.hold?.kind === 'talk') g.continueHold();
+      g.step(0.1, NO_INTENT);
+    }
     expect(g.hero.act).toBe('idle');
     expect(g.wood!.hold?.need).toBe('move');
     // The world waits for you to walk.

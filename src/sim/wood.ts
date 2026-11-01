@@ -38,16 +38,20 @@ export interface WoodState {
   drilled: number;
   praised: number;
   drillAt: number;
+  /** How many of Hew's waking lines have been said, and when you were on your feet. */
+  said: number;
+  upAt: number;
   /** Where you stood up: walking a little away starts the first lesson. */
   from: { x: number; y: number } | null;
 }
 /** What the world is held for, and what lets it go on. */
 export type Move = 'move' | 'attack' | 'roll' | 'block' | 'parry' | 'skill';
-export interface Hold { kind: 'card' | 'act' | 'praise'; who: string; text: string; how?: string; move?: Move; need: 'continue' | 'move' | 'attack' | 'roll' | 'block' | 'time'; t: number; until: number }
+export interface Hold { kind: 'card' | 'act' | 'praise' | 'talk'; who: string; text: string; how?: string; move?: Move; need: 'continue' | 'move' | 'attack' | 'roll' | 'block' | 'time'; t: number; until: number }
 
 const HERO_ID = 'me', CUT = { stoker: 2, round: 2.4, draw: 3.6, drag: 4.4, last: 4.6, behind: 5.6, blow: 6.4, line: 7.6, end: 9.6 };
 const hew = (room: ArenaRoom) => room.map.npcs?.find((n) => n.talk === 'hew');
-const say = (w: WoodState, room: ArenaRoom, who: string, text: string, s = 5) => (w.caption = { who, text, until: room.time + s });
+/** A caption, up long enough to read (about a third of a second a word, never less than asked). */
+const say = (w: WoodState, room: ArenaRoom, who: string, text: string, s = 5) => (w.caption = { who, text, until: room.time + Math.max(s, 1.2 + text.split(' ').length * 0.32) });
 
 function spawn(room: ArenaRoom, f: Foe & { variant?: Enemy['variant'] }): Enemy {
   const e = newEnemy(Math.max(0, ...room.enemies.map((o) => o.id)) + 1, f.kind, f.x, f.y);
@@ -59,13 +63,13 @@ function spawn(room: ArenaRoom, f: Foe & { variant?: Enemy['variant'] }): Enemy 
   return e;
 }
 
-/** Waking, in seconds: the fade in, his slow walk over, his three lines, on your feet. */
-export const WAKE = { fade: 2.5, arrive: 4.6, line2: 7.4, up: 11, end: 12 };
+/** Waking, in seconds: the fade in, his slow walk over; then his lines wait for a tap; a breath on your feet. */
+export const WAKE = { fade: 2.5, arrive: 4.6, standing: 0.8 };
 /** Tutorial pacing: drilled goblins wind up this much slower; one at a time comes at you. */
 export const DRILL = { windup: 1.5, wheels: 2, praise: 3, praiseFor: 1.1 };
 
 export function newWood(room: ArenaRoom): WoodState {
-  const w: WoodState = { stage: 0, entered: false, count: 0, ids: [], more: false, cut: -1, caption: null, stoker: 0, helped: false, hewAlive: true, relic: false, done: false, wake: 0, hold: null, drilled: 0, praised: 0, drillAt: -1, from: null };
+  const w: WoodState = { stage: 0, entered: false, count: 0, ids: [], more: false, cut: -1, caption: null, stoker: 0, helped: false, hewAlive: true, relic: false, done: false, wake: 0, hold: null, drilled: 0, praised: 0, drillAt: -1, from: null, said: 0, upAt: -1 };
   const h = room.heroes.find((x) => x.id === HERO_ID);
   if (h) Object.assign(h, { act: 'down', actT: 0, actDur: 999, lying: true });
   return w;
@@ -73,18 +77,23 @@ export function newWood(room: ArenaRoom): WoodState {
 
 /** You lie still; the screen comes up; Hew walks over slowly, checks you, hauls you up. */
 function stepWake(w: WoodState, room: ArenaRoom, dt: number): void {
-  const t0 = w.wake, t = (w.wake += dt), at = (s: number) => t0 < s && t >= s, n = hew(room), h = room.heroes.find((x) => x.id === HERO_ID);
+  const t = (w.wake += dt), n = hew(room), h = room.heroes.find((x) => x.id === HERO_ID);
   if (n && h && t < WAKE.arrive) {
     const tx = h.x + 1.1, ty = h.y - 0.3, dx = tx - n.x, dy = ty - n.y, d = Math.hypot(dx, dy);
     if (d > 0.05) (n.x += (dx / d) * Math.min(d, 1.8 * dt)), (n.y += (dy / d) * Math.min(d, 1.8 * dt));
   }
-  if (at(WAKE.arrive)) say(w, room, 'HEW', LINES.waking[0], 2.8);
-  if (at(WAKE.line2)) say(w, room, 'HEW', LINES.waking[1], 3.6);
-  if (at(WAKE.up)) {
-    say(w, room, 'HEW', LINES.waking[2], 1.6);
-    if (h) Object.assign(h, { act: 'idle', actT: 0, actDur: 0, lying: false, hp: h.maxHp, fx: 1, fy: 0 });
+  if (t < WAKE.arrive) return;
+  // He talks, one line at a time, each waiting for a tap (the world held); the last as he hauls you up.
+  const lines = LINES.waking;
+  if (w.said < lines.length) {
+    if (w.said === lines.length - 1) {
+      if (h) Object.assign(h, { act: 'idle', actT: 0, actDur: 0, lying: false, hp: h.maxHp, fx: 1, fy: 0 });
+      w.upAt = t;
+    }
+    w.hold = talk('HEW', lines[w.said++]);
+    return;
   }
-  if (t >= WAKE.end) {
+  if (t >= w.upAt + WAKE.standing) {
     w.wake = -1;
     w.hold = card('HEW', LINES.how.move, 'move', 'move');
     if (h) w.from = { x: h.x, y: h.y };
@@ -92,6 +101,7 @@ function stepWake(w: WoodState, room: ArenaRoom, dt: number): void {
 }
 
 const card = (who: string, text: string, move: Move, need: Hold['need'], how?: string): Hold => ({ kind: 'card', who, text, how, move, need, t: 0, until: 0 });
+const talk = (who: string, text: string): Hold => ({ kind: 'talk', who, text, need: 'continue', t: 0, until: 0 });
 
 /** Release a hold (the game calls this when its condition is met). */
 export function release(w: WoodState): void {

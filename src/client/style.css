@@ -278,7 +278,11 @@ body[data-mode='wood'] .tb.use { display: none; }
 #lesson .move span { color: #ffd27a; font-size: 18px; font-weight: 700; letter-spacing: 0.15em; }
 #lesson kbd { display: inline-block; padding: 6px 12px; border: 2px solid #e8e0d0; border-bottom-width: 4px; border-radius: 6px; background: #2a2733; color: #fff1d0; font: 700 14px/1 inherit; letter-spacing: 0.08em; }
 #lesson .how { margin: 0; color: #b8b2c4; font-size: 12px; line-height: 1.5; }
-#lesson .go-hint { margin: 0; color: #8a8494; font-size: 11px; }
+#lesson .go-hint { margin: 4px 0 0; color: #ffd27a; font-size: 11px; letter-spacing: 0.15em; animation: throb 0.9s ease-in-out infinite alternate; }
+#lesson.card { cursor: pointer; }
+#lesson.talk { background: transparent; align-items: flex-start; padding-top: max(84px, 9vh); }
+#lesson.talk .line { font-size: 16px; text-align: left; }
+#lesson.talk .who { text-align: left; }
 #lesson button { margin-top: 4px; min-height: 44px; background: #4a3414; border: 1px solid #ffd27a; border-radius: 6px; color: #fff1d0; font-size: 13px; letter-spacing: 0.12em; }
 #lesson.act { flex-direction: column; gap: 10px; background: radial-gradient(circle at 50% 50%, transparent 30%, #0d0b1088 80%); }
 #lesson.act .now { color: #fff; font-size: 26px; font-weight: 800; letter-spacing: 0.12em; text-shadow: 0 0 12px #ff6a3a, 0 2px 0 #000; animation: throb 0.45s ease-in-out infinite alternate; }

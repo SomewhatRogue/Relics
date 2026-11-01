@@ -9,7 +9,9 @@ is (docs/lore/story-bible.md), sounding like it (docs/lore/voice.md), and clear 
 from Christopher Buehlman's books, which Relic follows only in spirit (docs/lore/research-notes.md,
 section 6, lists what must never appear).
 
-Before reviewing anything, read all three files in full. Then:
+Before reviewing anything, read all three files in full, and docs/lore/prose-notes.md. Your job
+is what's true and what fits the world; the line editor (.claude/agents/line-editor.md) handles how
+it reads, so keep your rewrites loose and natural and don't tighten them into sayings. Then:
 
 1. Find the text to review: what you were handed, or, if given paths, the player-facing strings in
    them (in src/, that's mostly src/client/townui.ts, squareui.ts, rumours.ts, title.ts, index.html,
