@@ -7,6 +7,7 @@ import { ballot } from '../shared/worldsync';
 import { openSquare } from './squareui';
 import { WANT, ARMOR, MODS, REROLL, STEEL, TIERS, nextLevel, POTION, POTIONS, type PotionId, AUGMENTS, CLASS_KITS, CLASS_ORDER, CLASS_SKILL, ELEMENT_NAME, RELICS, TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
 import type { Game } from './game';
+import { line } from './speech';
 import { PACK } from '../sim/pack';
 import { CHURCH, COAL, COPY, SMITH, TALLY } from './copy';
 import { LINES } from '../shared/wood';
@@ -16,7 +17,7 @@ import { RUMOURS } from './rumours';
 
 const RUIN = ['Held', 'Raided', 'Occupied', 'Razed', 'Blighted'];
 const p = (s: string) => `<p>${s}</p>`;
-const say = (who: string, s: string) => p(`<b>${who}:</b> "${s}"`);
+const say = (who: string, s: string) => p(`<b>${who}:</b> "${line(s, who)}"`);
 const itemLine = (i: Item) => `<b>${itemName(i)}</b>: ${i.traits.map((t) => `${TRAITS[t].name} (${TRAITS[t].text.toLowerCase()})`).join(', ')}`;
 
 export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): void {

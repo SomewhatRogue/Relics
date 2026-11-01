@@ -429,6 +429,13 @@ export class Game {
     const w = this.wood!, hold = w.hold!, h = this.hero;
     hold.t += dt;
     const pressed = intent.attackSeq !== h.seen.attack || intent.rollSeq !== h.seen.roll || intent.blockSeq !== h.seen.block || intent.relicSeq !== h.seen.relic;
+    // Still talking: a tap or a key finishes the line first.
+    if ((hold.need === 'continue' || hold.need === 'move') && (this.continued || pressed) && this.typing()) {
+      this.finishTyping();
+      this.continued = false;
+      Object.assign(h.seen, { attack: intent.attackSeq, roll: intent.rollSeq, block: intent.blockSeq, relic: intent.relicSeq });
+      return true;
+    }
     let done = false;
     if (hold.need === 'time') done = hold.t >= hold.until;
     else if (hold.need === 'continue') done = this.continued || (hold.t > 0.6 && pressed);
@@ -449,6 +456,9 @@ export class Game {
     this.continued = true;
   }
   private continued = false;
+  /** Set by the lesson view: is a line still typing, and finish it. */
+  typing: () => boolean = () => false;
+  finishTyping: () => void = () => {};
 
   /** The wood's own rules after the room's: the lessons, the cutscene, the relic, the road. */
   private stepWoodFrame(h: Hero, ev: FightEvent[], dt: number): FightEvent[] {

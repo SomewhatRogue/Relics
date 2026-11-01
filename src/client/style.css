@@ -294,3 +294,18 @@ body.waking .tb, body.waking .stick, body.waking #hud, body.waking #banner, body
 .tb.hint { box-shadow: 0 0 0 4px #ffd27a, 0 0 24px #ffd27a; animation: pulse 0.5s ease-in-out infinite alternate; z-index: 11; }
 @keyframes throb { from { transform: scale(1); } to { transform: scale(1.08); } }
 body:not(.touch) #lesson.act { justify-content: flex-start; padding-top: 18vh; }
+
+/* Spoken lines: typed in letter by letter; emphasis leans, sways, warms or trembles (speech.ts). */
+.speech .w { white-space: nowrap; }
+.speech .ch { visibility: hidden; display: inline-block; white-space: pre; }
+.speech .ch.in { visibility: visible; animation: pop 0.12s ease-out; }
+.speech .em { font-weight: 900; color: #ffd98a; text-shadow: 0 0 6px #ffb35a44; }
+.speech .good { color: #b8e46a; text-shadow: 0 0 8px #b8e46a66; }
+.speech .bad { color: #ff6b55; text-shadow: 0 0 8px #ff3a2a55; }
+.speech .sway .ch.in { animation: sway 1.6s ease-in-out infinite; animation-delay: calc(var(--i) * -0.11s); }
+.speech .bad .ch.in { animation: tremble 0.35s steps(2) infinite; animation-delay: calc(var(--i) * -0.07s); }
+.speech .sway.bad .ch.in, .speech .bad .sway .ch.in { animation: sway 1.6s ease-in-out infinite, tremble 0.35s steps(2) infinite; }
+@keyframes pop { from { transform: translateY(2px) scale(1.25); opacity: 0.3; } to { transform: none; opacity: 1; } }
+@keyframes sway { 0%, 100% { transform: translateY(0) rotate(0); } 25% { transform: translateY(-2px) rotate(-3deg); } 75% { transform: translateY(2px) rotate(3deg); } }
+@keyframes tremble { 0% { transform: translate(0, 0); } 50% { transform: translate(0.6px, -0.6px); } 100% { transform: translate(-0.6px, 0.4px); } }
+@media (prefers-reduced-motion: reduce) { .speech .ch.in { animation: none !important; } }

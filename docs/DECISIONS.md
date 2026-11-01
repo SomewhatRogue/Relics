@@ -645,3 +645,11 @@ wrote prose-notes.md (long wandering sentences, hedging, detail before name, jok
 Added .claude/agents/line-editor.md as a second pass after the lore keeper. In the wood, dialogue that
 can freeze the world waits for a tap (Kyle's ask); a card goes on with a tap anywhere, because the card
 covered the stick and the move card never let go on a phone. Captions now stay up a third of a second a word.
+
+## 2026-11-01: lines that speak (Claude Opus 5.5)
+Kyle asked for typing with little sounds and emphasis that moves and colours. speech.ts types every
+spoken line (wood dialogue, captions, town panels' quoted lines, Orla) a letter at a time with a per-speaker
+voice blip, and reads a small markup: *bold*, ~sway~, ^good^ (green-gold), _bad_ (red, trembling). A tap,
+click, Enter or action key finishes a line before it goes on. A panel redrawn in the same sitting doesn't
+retype. Found while testing: the first frame could step time backwards and skip Hew's waking; the loop now
+never steps below zero.

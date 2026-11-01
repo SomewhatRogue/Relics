@@ -405,3 +405,10 @@ export function chestSound(state: 'opening' | 'shut' | 'open', tier: string): vo
     for (let i = 0; i <= steps; i++) tone('triangle', 520 * Math.pow(1.26, i), 520 * Math.pow(1.26, i), 0.22, 0.25, 0.08 + i * 0.12);
   }
 }
+
+/** A voice blip for a typed letter: a tiny pitched tick, wobbling a little so it sounds like speech. */
+export function blip(hz: number, wave: OscillatorType): void {
+  if (!ac || ac.state !== 'running' || !master) return;
+  const f = hz * (0.92 + Math.random() * 0.16);
+  tone(wave, f, f * 0.94, wave === 'sine' ? 0.07 : 0.045, 0.045);
+}

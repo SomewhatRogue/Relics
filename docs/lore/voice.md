@@ -61,6 +61,14 @@ How it moves on the page is in `prose-notes.md` (read it; it's from the books th
   thou, mayhap*), no epic voice. People in Wickhold talk like tired, clever farmers and soldiers.
 - **No em dashes.** Commas, full stops, colons. (Kyle's standing rule, for every line.)
 
+## Emphasis (spoken lines)
+
+Spoken lines type in with a voice blip per speaker (`src/client/speech.ts`), and a few words can be marked:
+`*word*` bold, for the word a speaker leans on; `~word~` sways, for a lilt, wonder, mockery or a
+drawn-out word; `^word^` warm green-gold, for good things (alive, home, a kindness); `_word_` dull red
+and trembling, for bad things (the dead, burning, goblins' work). One or two marks in a line at most,
+and many lines none. Never mark the plain game voice. Sad lines stay plain. The line editor places them.
+
 ## Goblins
 
 - **Never comic grunts.** They're clever, practical, patient and cruel, and they work together. A

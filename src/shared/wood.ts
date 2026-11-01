@@ -98,34 +98,34 @@ export const STOKER_HELP: Foe[] = [{ kind: 'scrapper', x: 46, y: 9, awake: true 
 
 /** Hew's lines (lore keeper), and the Stoker's. */
 export const LINES = {
-  attack: "There, see, they're at the boots again, it's always the boots first with them, I don't know why. And don't stop at one knock, mind. I watched a lad do that once, and it got up.",
-  dodge: "See that one, how it's crouching? When they get down low like that they're coming straight through you, shield or no shield, and there's no stopping them. Best not be standing there when it arrives, is all.",
-  block: "Well, there's three of them now, and that's too many to go rolling about between, so you stand your ground and let them knock. And that's my kiln they're pissing on, the little sods.",
-  parry: "Now, this big one breaks a guard like kindling. I turned over a few on that field who'd held theirs up and waited, shields split down the middle. You want to meet it, I'd say, not wait for it.",
-  hut: "That's home, kettle's older than you are. Hang on, I didn't leave that door open.",
+  attack: "There, see, they're at the boots again, it's *always* the boots first with them, I don't know why. And don't stop at one knock, mind. I watched a lad do that once, and _it got up_.",
+  dodge: "See that one, how it's crouching? When they get down low like that they're coming *straight through you*, shield or no shield, and there's no stopping them. Best not be standing there when it arrives, is all.",
+  block: "Well, there's three of them now, and that's too many to go rolling about between, so you stand your ground and let them knock. And that's *my* kiln they're pissing on, the little sods.",
+  parry: "Now, this big one breaks a guard like kindling. I turned over a few on that field who'd held theirs up and waited, shields _split down the middle_. You want to *meet* it, I'd say, not wait for it.",
+  hut: "That's ^home^, kettle's older than you are. Hang on, I *didn't* leave that door open.",
   round: "Wait here, stray, I'll go round the back.",
   last: "Get the count to Odric, stray, Father Odric, he'll be wanting it.",
-  stoker: 'Eleven you burn. Eleven of mine. So, this one I keep.',
-  north: "They all went north and left the field half-picked. I've never known them leave meat.",
-  up: ['Up you get, and spit that dirt out.', "Not yet, stray, I've enough to burn as it is.", 'Have a breather, then go at it again, properly this time.'],
-  relic: "There's something hard under its breastbone, grown in like a knot in oak, and it takes Hew's poker and most of what you've got left to lever it out. It's a javelin, haft and all, longer than the wound it came out of, and warm.",
-  road: "The wood thins and then gives out, and there's a road, and at the end of it walls, with a glow over them that isn't the moon. Your left foot is wet through at the heel, just as Hew said it would be.",
-  skill: "Now. Don't save any of it.",
+  stoker: 'Eleven you burn. Eleven of mine. So, this one I _keep_.',
+  north: "They all went north and left the field half-picked. I've *never* known them leave meat.",
+  up: ['Up you get, and spit that dirt out.', "Not yet, stray, I've enough to burn as it is.", 'Have a breather, then go at it again, ~properly~ this time.'],
+  relic: "There's something hard under its breastbone, grown in like a knot in oak, and it takes Hew's poker and most of what you've got left to lever it out. It's a javelin, haft and all, longer than the wound it came out of, and ~warm~.",
+  road: "The wood thins and then gives out, and there's a road, and at the end of it walls, with a ~glow~ over them that isn't the moon. Your left foot is wet through at the heel, just as Hew said it would be.",
+  skill: "Now. Don't save *any* of it.",
   /** Waking: he comes over slowly, checks you, hauls you up (one box at a time, each waits for a tap). */
   waking: [
-    "Oh, you're breathing. That's one, then, out of the whole field, and I've been round every one of them since first light. Give me a moment getting down, these knees pop like green wood in a kiln.",
-    "Anything broken? Move your toes for me. Good, all ten, I counted. Soldier or thief or whatever you are, and that's none of my business, they've had your boots off you all the same.",
-    "Have mine, go on. They've been resoled twice and they let the wet in at the left heel, I won't lie to you, but it's them or bare feet, and I've seen your feet.",
-    "Up you come, then, slowly, there you are. Lean on me as much as you like, I've carried cordwood heavier than you up that hill and it never once thanked me.",
+    "Oh, you're ^breathing^. That's *one*, then, out of the whole field, and I've been round every one of them since first light. Give me a moment getting down, these knees pop like green wood in a kiln.",
+    "Anything broken? Move your toes for me. Good, *all ten*, I counted. Soldier or thief or whatever you are, and that's none of my business, they've had your boots off you all the same.",
+    "^Have mine^, go on. They've been resoled twice and they let the wet in at the left heel, I won't lie to you, but it's them or bare feet, and I've *seen* your feet.",
+    "Up you come, then, ~slowly~, there you are. Lean on me as much as you like, I've carried cordwood heavier than you up that hill and it never once thanked me.",
   ],
   /** On the card that asks you to walk. */
-  walk: "Have a little walk about first, stray, get the blood back in your legs, and mind the carts, they're still burning.",
+  walk: "Have a little walk about first, stray, get the blood back in your legs, and mind the carts, they're still _burning_.",
   /** More looters on the field; you come round after falling to the Stoker; Hew in a panel before the hut. */
-  more: "There's more of them in the trees, stray, and they're coming this way.",
-  cometo: "You come round on the rise with a mouthful of ash, and it's still down there by the cordwood, waiting for you.",
-  later: "Ask me later, stray, once you've got your breath back. I'll still be talking, don't worry.",
+  more: "There's _more of them_ in the trees, stray, and they're coming this way.",
+  cometo: "You come round on the rise with a mouthful of ash, and it's still down there by the cordwood, _waiting_ for you.",
+  later: "Ask me later, stray, once you've got your breath back. I'll ~still be talking~, don't worry.",
   /** When you get it right (a short pause in the fight). */
-  praise: ["That's it, that's the way.", "Oh, that's good, do it like that.", "Done this before, haven't you?", "Hah, you'll keep, stray, I think."],
+  praise: ["That's it, that's the way.", "Oh, that's good, do it like that.", "Done this before, ~haven't you~?", "Hah, you'll ^keep^, stray, I think."],
   /** The game's own plain line under each lesson, with the control shown beside it. */
   how: {
     move: 'Make sure you can still move. Walk a few steps and get your legs back under you.',

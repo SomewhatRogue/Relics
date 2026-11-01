@@ -1,4 +1,5 @@
 /** A panel over the game: a title, some words, and buttons (the job board, the trainer, results). */
+import { finish, forget, typeIn, typing } from './speech';
 export interface Button { label: string; act: () => void; primary?: boolean; disabled?: boolean }
 
 export class Panel {
@@ -11,6 +12,8 @@ export class Panel {
     document.body.appendChild(this.el);
     const press = (e: Event) => {
       const b = (e.target as HTMLElement).closest('button[data-i]') as HTMLButtonElement | null;
+      // A tap on the words while someone's talking finishes the line.
+      if (!b && typing(this.el)) return finish(this.el);
       if (!b || b.disabled) return;
       e.preventDefault();
       this.acts[Number(b.dataset.i)]?.();
@@ -31,9 +34,12 @@ export class Panel {
       `</div></div>`;
     this.el.hidden = false;
     this.open = true;
+    typeIn(this.el);
   }
 
   hide(): void {
+    finish(this.el);
+    forget();
     this.el.hidden = true;
     this.open = false;
   }

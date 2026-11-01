@@ -28,7 +28,9 @@ What you're listening for, in order:
    say instead, a memory or a story about someone who got it wrong.
 5. **Jokes in the wrong place.** The funny part goes at the end, and is about a body or a person.
 6. **Sad things dressed up.** Plain, no adjectives, then leave it.
-7. **Em dashes.** None, anywhere (Kyle's standing rule).
+7. **Emphasis marks** (voice.md, "Emphasis"): one or two per spoken line at most, often none; never on
+   the plain game voice; sad lines plain. Add or remove marks where they'd help.
+8. **Em dashes.** None, anywhere (Kyle's standing rule).
 
 Don't add lore. Don't add names, places or facts the original didn't have; if a rewrite needs one,
 say so and leave it for the lore keeper. Keep the meaning and any game information exactly.

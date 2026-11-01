@@ -7,6 +7,7 @@ import { SHOP, STAT_NAME, STAT_ORDER } from '../shared/progress';
 import { WORKS, WORK_ORDER, workDone, workProgress } from '../shared/works';
 import type { SpotId } from '../shared/town';
 import type { Game } from './game';
+import { line } from './speech';
 import type { Panel } from './panels';
 import { RUMOURS } from './rumours';
 import { SCORES, type Area } from './scores';
@@ -20,7 +21,7 @@ let link: WorldLink | null = null;
 export const setLink = (l: WorldLink) => (link = l);
 
 const p = (s: string) => `<p>${s}</p>`;
-const say = (who: string, s: string) => p(`<b>${who}:</b> "${s}"`);
+const say = (who: string, s: string) => p(`<b>${who}:</b> "${line(s, who)}"`);
 const bar = (n: number, of: number) => `<span class="meter"><i style="width:${Math.min(100, (100 * n) / of)}%"></i></span>`;
 const FACES = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);

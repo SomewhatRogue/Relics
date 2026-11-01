@@ -9,6 +9,8 @@ import { Title } from './title';
 import { woodGoal } from '../sim/wood';
 import { LINES } from '../shared/wood';
 const WOOD_ROAD = LINES.road;
+const ORLA = ["Those are *Hew's* boots.", "Ah. Well. Church is up past the Lantern, and you'll want to see Hollis after, he'll have you working before your feet are dry."];
+let shownCap = '';
 import { WorldLink } from './worldlink';
 import { setLink } from './squareui';
 import { grabbable } from '../sim/grab';
@@ -24,6 +26,7 @@ import { Scene } from './scene';
 import { setMusic, setMuted } from './sfx';
 import { Music } from './music';
 import { Soundscape } from './soundscape';
+import { line, speak } from './speech';
 import './style.css';
 
 const game = new Game();
@@ -62,7 +65,7 @@ addEventListener('keydown', (e) => {
   if ((e.target as HTMLElement).closest('input')) return;
   const k = e.key.toLowerCase();
   if (game.wood && game.wood.cut >= 0 && (k === 'escape' || k === ' ' || k === 'enter')) return game.skipCut();
-  if (game.wood?.hold && k === 'enter') return game.continueHold();
+  if (game.wood?.hold && k === 'enter') return lesson.go();
   if (k === 'f' && card.current >= 0) input.take(card.current);
   else if (k === 'f' && game.near()?.chest) use();
   else if ((k === 'e' || k === 'f') && game.mode === 'town') use();
@@ -157,7 +160,9 @@ function hud(now: number): void {
   $('#caption').classList.toggle('praise', !!praise);
   // (A lesson card or a freeze-frame says it all; the caption waits.)
   $('#caption').hidden = !cap || (!!wood?.hold && wood.hold.kind !== 'praise');
-  if (cap) $('#caption').innerHTML = (cap.who ? `<b>${cap.who}</b>` : '') + `<span>${cap.text}</span>`;
+  const capKey = cap ? cap.who + cap.text : '';
+  if (cap && capKey !== shownCap) $('#caption').innerHTML = (cap.who ? `<b>${cap.who}</b>` : '') + '<span></span>', speak($('#caption').querySelector('span')!, cap.text, cap.who);
+  shownCap = capKey;
   $('#skipcut').hidden = !wood || wood.cut < 0 || !pr.cutSeen;
   if (game.mode === 'wood' && wood) {
     const g = woodGoal(wood, input.touch);
@@ -196,7 +201,8 @@ function hud(now: number): void {
 let last = performance.now();
 let still: Intent | null = null;
 function frame(t: number): void {
-  const dt = Math.min(0.1, (t - last) / 1000);
+  // (The first frame can stamp a hair before the page clock: never step backwards.)
+  const dt = Math.max(0, Math.min(0.1, (t - last) / 1000));
   last = t;
   // With a panel up, the hero stands still (and no press is spent).
   const live = input.read();
@@ -212,7 +218,7 @@ function frame(t: number): void {
   if (game.mode === 'town' && !game.outside) void link.refresh();
   if (game.result && !panel.open) showResult(game, panel);
   // Out of the wood: Orla at the gate.
-  if (game.greeting === 'orla' && !panel.open) (game.greeting = null), panel.show('ORLA OF THE WATCH', `<p class="dim">${WOOD_ROAD}</p><p><b>Orla:</b> "Those are Hew's boots."</p><p>She looks at your feet a long while.</p><p><b>Orla:</b> "Ah. Well. Church is up past the Lantern, and you'll want to see Hollis after, he'll have you working before your feet are dry."</p>`, [{ label: 'INTO WICKHOLD', primary: true, act: () => panel.hide() }], true);
+  if (game.greeting === 'orla' && !panel.open) (game.greeting = null), panel.show('ORLA OF THE WATCH', `<p class="dim">${line(WOOD_ROAD)}</p><p><b>Orla:</b> "${line(ORLA[0], 'ORLA')}"</p><p>She looks at your feet a long while.</p><p><b>Orla:</b> "${line(ORLA[1], 'ORLA')}"</p>`, [{ label: 'INTO WICKHOLD', primary: true, act: () => panel.hide() }], true);
   fx.update(dt);
   scene.focus = game.cutFocus();
   scene.render(game.room, ME, fx, t / 1000, dt);

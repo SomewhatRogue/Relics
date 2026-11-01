@@ -77,7 +77,7 @@ export function newWood(room: ArenaRoom): WoodState {
 
 /** You lie still; the screen comes up; Hew walks over slowly, checks you, hauls you up. */
 function stepWake(w: WoodState, room: ArenaRoom, dt: number): void {
-  const t = (w.wake += dt), n = hew(room), h = room.heroes.find((x) => x.id === HERO_ID);
+  const t = (w.wake += Math.max(0, dt)), n = hew(room), h = room.heroes.find((x) => x.id === HERO_ID);
   if (n && h && t < WAKE.arrive) {
     const tx = h.x + 1.1, ty = h.y - 0.3, dx = tx - n.x, dy = ty - n.y, d = Math.hypot(dx, dy);
     if (d > 0.05) (n.x += (dx / d) * Math.min(d, 1.8 * dt)), (n.y += (dy / d) * Math.min(d, 1.8 * dt));

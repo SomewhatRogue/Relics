@@ -5,6 +5,7 @@
  */
 import type { Game } from './game';
 import type { Move } from '../sim/wood';
+import { finish, speak, typing } from './speech';
 
 const NAME: Record<Move, string> = { move: 'MOVE', attack: 'ATTACK', roll: 'DODGE', block: 'BLOCK', parry: 'PARRY', skill: 'SKILL' };
 const KEY: Record<Move, [string, string]> = {
@@ -31,10 +32,19 @@ export class LessonView {
     const go = (e: Event) => {
       if (!this.el.classList.contains('card')) return;
       e.preventDefault();
-      g.continueHold();
+      this.go();
     };
+    // A key that would go on while Hew is still talking finishes his line instead.
+    g.typing = () => typing(this.el);
+    g.finishTyping = () => finish(this.el);
     this.el.addEventListener('click', go);
     this.el.addEventListener('touchend', go, { passive: false });
+  }
+
+  /** Tap, click or Enter: finish the line if it's still typing, else go on. */
+  go(): void {
+    if (typing(this.el)) finish(this.el);
+    else this.g.continueHold();
   }
 
   update(): void {
@@ -53,11 +63,16 @@ export class LessonView {
     const h = hold!, k = KEY[h.move ?? 'attack'][this.touch ? 1 : 0];
     this.el.className = h.kind === 'talk' ? 'card talk' : h.kind;
     const hint = `<p class="go-hint">${this.touch ? 'TAP TO GO ON' : 'CLICK OR PRESS ENTER TO GO ON'}</p>`;
-    if (h.kind === 'talk') return void (this.el.innerHTML = `<div class="card"><b class="who">${h.who}</b><p class="line">${h.text}</p>${hint}</div>`);
+    if (h.kind === 'talk') {
+      this.el.innerHTML = `<div class="card"><b class="who">${h.who}</b><p class="line"></p>${hint}</div>`;
+      return speak(this.el.querySelector('.line')!, h.text, h.who);
+    }
     this.el.innerHTML = h.kind === 'act'
       ? `<div class="now">${h.text}</div><kbd>${k}</kbd>`
-      : `<div class="card">${h.who ? `<b class="who">${h.who}</b>` : ''}<p class="line">${h.text}</p>` +
+      : `<div class="card">${h.who ? `<b class="who">${h.who}</b>` : ''}<p class="line"></p>` +
         `<div class="move"><span>${NAME[h.move ?? 'attack']}</span><kbd>${k}</kbd></div>${h.how ? `<p class="how">${h.how}</p>` : ''}` +
         hint + '</div>';
+    const ln = this.el.querySelector<HTMLElement>('.line');
+    if (ln) speak(ln, h.text, h.who);
   }
 }
