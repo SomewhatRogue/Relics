@@ -76,3 +76,7 @@ body.touch #loot { bottom: auto; top: calc(160px + env(safe-area-inset-top)); }
 #loot[data-el='fire'] { --el: #ff9a3c; }
 #loot[data-el='frost'] { --el: #bfe8ff; }
 #loot[data-el='storm'] { --el: #fff27a; }
+
+.grab { width: 54px; height: 54px; right: calc(104px + env(safe-area-inset-right)); bottom: calc(184px + env(safe-area-inset-bottom)); background: #5a3a14dd; border-color: #ffd27a; color: #fff1d0; font-size: 10px; animation: pulse 0.8s ease-in-out infinite alternate; }
+.grab[hidden] { display: none; }
+@keyframes pulse { from { box-shadow: 0 0 0 #ffd27a00; } to { box-shadow: 0 0 12px #ffd27a; } }

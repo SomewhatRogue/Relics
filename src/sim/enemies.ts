@@ -17,7 +17,7 @@ export function newEnemy(id: number, kind: Enemy['kind'], x: number, y: number):
   return {
     id, kind, x, y, kvx: 0, kvy: 0, fx: 0, fy: 1, hp, maxHp: hp, radius: s ? s.radius : 0.4, weight: s ? s.weight : Infinity,
     act: s ? 'chase' : 'idle', actT: 0, actDur: 0, attack: null, cooldown: 1 + id * 0.4, hitstop: 0, hitAt: -9, moving: false, home: { x, y }, corpse: '',
-    burnUntil: 0, burnNext: 0, chillUntil: 0, frozenUntil: 0, snareUntil: 0, lastBy: '',
+    burnUntil: 0, burnNext: 0, chillUntil: 0, frozenUntil: 0, snareUntil: 0, lastBy: '', death: '',
   };
 }
 
@@ -73,7 +73,7 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     return;
   }
   if (e.act === 'dead') {
-    if (e.actT >= e.actDur) Object.assign(e, { act: 'chase', hp: e.maxHp, x: e.home.x, y: e.home.y, kvx: 0, kvy: 0, actT: 0, cooldown: 1.5, corpse: '' });
+    if (e.actT >= e.actDur) Object.assign(e, { act: 'chase', hp: e.maxHp, x: e.home.x, y: e.home.y, kvx: 0, kvy: 0, actT: 0, cooldown: 1.5, corpse: '', death: '' });
     return;
   }
   if (spec) {
@@ -86,7 +86,7 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
       e.hitAt = now;
       ev.push({ k: 'wallhit', x: e.x, y: e.y });
       ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy: n > KNOCK.wallDmg, on: 'enemy' });
-      if (e.hp <= 0) return kill(e, ev);
+      if (e.hp <= 0) return kill(e, ev, 'burst', e.kvx, e.kvy);
       // Thrown frozen into a wall: it breaks.
       if (ice) shatter(e, now, ev);
       if (isDead(e)) return;

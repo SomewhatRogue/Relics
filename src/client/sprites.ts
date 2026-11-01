@@ -117,6 +117,11 @@ const dummyBase: Part[] = [
   ['p', 4, 6, '#d8c08a'], ['p', 7, 9, '#d8c08a'], ['p', 5, 11, '#8a6a3a'], ['e', 6, 2.2, 2.4, 2.2, '#c8aa6a'], ['r', 0, 5, 12, 1, '#6b4a2b'],
 ];
 
+const scrapperBody: Part[] = [['r', 3, 9, 2, 4, '#3a4a1f'], ['r', 6, 9, 2, 4, '#3a4a1f'], ['r', 2, 6, 7, 4, '#4a3a2a'], ['r', 2, 9, 7, 1, '#2a2018']];
+const scrapperHead: Part[] = [['e', 5.5, 4, 3.4, 3, '#5b6b2a'], ['p', 0, 3, '#5b6b2a'], ['p', 1, 3, '#5b6b2a'], ['p', 10, 3, '#5b6b2a'], ['p', 9, 3, '#5b6b2a'], ['p', 4, 4, '#ff4a3a'], ['p', 6, 4, '#ff4a3a'], ['r', 4, 6, 3, 1, '#e8e0c8']];
+/** Everything burned to the same black, a few embers left. */
+const char = (parts: Part[]): Part[] => parts.map((p, i) => [...p.slice(0, -1), i % 5 ? '#1a1614' : '#2a2420'] as Part);
+
 export const HEROES = Object.fromEntries(Object.entries(LOOKS).map(([k, l]) => [k, heroPair(l)])) as Record<keyof typeof LOOKS, { down: Sprite; up: Sprite }>;
 
 export const SPRITES = {
@@ -126,6 +131,11 @@ export const SPRITES = {
   butcherUp: makeSprite(18, 22, [...butcherBase, ['r', 6, 8, 6, 2, '#4a5a22']]),
   scrapper: makeSprite(11, 13, [['r', 3, 9, 2, 4, '#3a4a1f'], ['r', 6, 9, 2, 4, '#3a4a1f'], ['r', 2, 6, 7, 4, '#4a3a2a'], ['r', 2, 9, 7, 1, '#2a2018'], ['e', 5.5, 4, 3.4, 3, '#5b6b2a'], ['p', 0, 3, '#5b6b2a'], ['p', 1, 3, '#5b6b2a'], ['p', 10, 3, '#5b6b2a'], ['p', 9, 3, '#5b6b2a'], ['p', 4, 4, '#ff4a3a'], ['p', 6, 4, '#ff4a3a'], ['r', 4, 6, 3, 1, '#e8e0c8']]),
   scrapperUp: makeSprite(11, 13, [['r', 3, 9, 2, 4, '#3a4a1f'], ['r', 6, 9, 2, 4, '#3a4a1f'], ['r', 2, 6, 7, 4, '#4a3a2a'], ['e', 5.5, 4, 3.4, 3, '#5b6b2a'], ['p', 0, 3, '#5b6b2a'], ['p', 10, 3, '#5b6b2a'], ['r', 3, 5, 5, 1, '#4a5a22']]),
+  // Bodies left behind: without a head (a red stump), or burned black.
+  scrapperHeadless: makeSprite(11, 13, [...scrapperBody, ['r', 4, 5, 3, 1, '#7a1d1d'], ['p', 5, 4, '#9a2a2a']]),
+  butcherHeadless: makeSprite(18, 22, [...butcherBase.slice(0, 9), ['r', 7, 8, 4, 2, '#7a1d1d'], ['p', 8, 7, '#9a2a2a']]),
+  scrapperBurnt: makeSprite(11, 13, char([...scrapperBody, ...scrapperHead.slice(0, 5)])),
+  butcherBurnt: makeSprite(18, 22, char(butcherBase)),
   dummy: makeSprite(12, 17, dummyBase),
   swingDummy: makeSprite(12, 17, [...dummyBase, ['r', 2, 9, 8, 1, '#a33a2a'], ['p', 5, 2, '#141218'], ['p', 7, 2, '#141218']]),
   shield: makeSprite(5, 7, [['r', 0, 0, 5, 7, '#7a5230'], ['r', 0, 0, 5, 1, '#9aa3ad'], ['r', 0, 6, 5, 1, '#9aa3ad'], ['p', 2, 3, '#cfd6dc']]),

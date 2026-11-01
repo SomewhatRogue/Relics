@@ -12,6 +12,7 @@ import { afflict, stepElements, type World } from './elements';
 import { newEnemy, stepEnemy } from './enemies';
 import { newHero, stepHero, type HeroActs } from './hero';
 import { isDead } from './damage';
+import { impacts } from './impacts';
 import { dropFrom, stepDrops, takeLoot } from './loot';
 import { bless, rally, shadowstep } from './relics';
 import { forgedElement, has, traitsOf } from './traits';
@@ -105,6 +106,7 @@ export class ArenaRoom {
     this.hooks = this.hooks.filter((k) => stepHook(k, this.heroes, this.enemies, this.time, TICK, this.events, hit));
     this.bolts = this.bolts.filter((b) => stepBolt(b, w, TICK));
     for (const e of this.enemies) stepEnemy(e, this.heroes, this.rng, this.time, TICK, this.events);
+    impacts(this.enemies, this.time, this.events);
     stepElements(w);
     separate(this.heroes, this.enemies);
     for (const e of this.enemies) if (alive.has(e.id) && isDead(e)) dropFrom(e, this.heroes, this.drops, this.lootRng, this.events);

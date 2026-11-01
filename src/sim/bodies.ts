@@ -26,7 +26,10 @@ export function slide(b: Body, r: number, dt: number): number {
     b.kvx = b.kvy = 0;
     return speed;
   }
-  const f = Math.max(0, 1 - KNOCK.friction * dt);
+  // Thrown bodies barely slow until they land.
+  const airborne = (b.air ?? 0) > 0;
+  if (airborne) b.air! -= dt;
+  const f = Math.max(0, 1 - (airborne ? 1.2 : KNOCK.friction) * dt);
   b.kvx *= f;
   b.kvy *= f;
   return 0;

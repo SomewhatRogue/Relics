@@ -173,11 +173,31 @@ export const sfx = {
   relic() {
     if (ready()) tone('sine', 880, 1320, 0.15, 0.25);
   },
-  death() {
+  death(how = 'fall') {
     if (!ready()) return;
     tone('sawtooth', 120, 35, 0.4, 0.7);
     burst('lowpass', 1200, 100, 0.7, 0.8, 0.5);
+    // A blade through the neck; a wet burst.
+    if (how === 'behead') burst('highpass', 4000, 1500, 1, 0.6, 0.1), burst('bandpass', 400, 150, 1, 0.7, 0.4);
+    if (how === 'burst') burst('lowpass', 600, 60, 0.6, 1, 0.5), tone('sine', 70, 30, 0.8, 0.3);
   },
+  grab() {
+    if (ready()) tone('sawtooth', 180, 120, 0.2, 0.15), burst('lowpass', 900, 300, 0.7, 0.3, 0.1);
+  },
+  hurl() {
+    if (ready()) burst('bandpass', 400, 1600, 1, 0.5, 0.3);
+  },
+  slam() {
+    if (!ready()) return;
+    tone('sine', 80, 30, 1, 0.4);
+    burst('lowpass', 1500, 80, 0.7, 1, 0.35);
+  },
+  bodyhit() {
+    if (!ready()) return;
+    tone('sine', 110, 45, 0.8, 0.2);
+    burst('bandpass', 900, 250, 1.5, 0.8, 0.18);
+  },
+  wriggle() {},
   arrow() {
     if (!ready()) return;
     tone('triangle', 220, 120, 0.3, 0.08);

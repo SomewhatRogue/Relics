@@ -131,6 +131,29 @@ export function magicFx(fx: Fx, ev: FightEvent, x: number, y: number): void {
     case 'tempo':
       fx.say(x, y - 34, 'TEMPO', '#7fe0c8');
       break;
+    case 'grab':
+      fx.say(x, y - 30, 'GRABBED', '#ffd27a');
+      break;
+    case 'hurl':
+      fx.burst(x, y - 10, 8, ['#6a647a', '#57525e'], 40, false);
+      break;
+    case 'slam':
+      fx.crater(x, y, 8);
+      fx.burst(x, y - 2, 18, ['#6a647a', '#4f4a5c', '#8a8494'], 80, false, 220, true);
+      fx.burst(x, y - 4, 14, ['#7a1d1d', '#5a1414', '#9a2a2a'], 60, false, 200, true);
+      fx.rings.push({ x, y, life: 0.3, max: 0.3, col: '#d8c8a8', size: 20 });
+      fx.say(x, y - 34, 'SLAM', '#ffe070');
+      fx.shake = Math.max(fx.shake, 6);
+      flash(fx, x, y - 4, 50, 0.7, [1, 0.7, 0.4], 0.12);
+      break;
+    case 'bodyhit':
+      fx.burst(x, y - 8, 12, ['#ffffff', '#ffd27a', '#7a1d1d'], 70, false, 160, true);
+      fx.say(x, y - 28, 'CRUNCH', '#ffd27a');
+      fx.shake = Math.max(fx.shake, 4);
+      break;
+    case 'wriggle':
+      fx.say(x, y - 26, 'SLIPPED FREE', '#c8c4d0');
+      break;
     case 'heal':
       fx.say(x, y - 28, '+' + ev.n, '#7dff8a');
       fx.burst(x, y - 8, 8, ['#7dff8a', '#ffffff'], 30, true);

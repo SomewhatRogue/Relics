@@ -48,7 +48,16 @@ export const HITSTOP = { light: 0.05, heavy: 0.11, parry: 0.18 };
 export const HURT_STAGGER = 0.25;
 
 /** Knockback slides decay by this share per second; a slide this fast into a wall slams. */
-export const KNOCK = { friction: 9, wallSpeed: 5, wallDmg: 6 };
+export const KNOCK = { friction: 9, wallSpeed: 5, wallDmg: 6, /** A body this fast that hits another hurts both. */ bodySpeed: 6, bodyDmg: 1.5, bodyMax: 25 };
+
+/**
+ * Grabbing a small goblin: only one you've stunned, netted, frozen, staggered or got behind. Carried
+ * overhead, it can be slammed into the ground (a kill pounds its head in) or thrown at its friends.
+ */
+export const GRAB = { reach: 1.3, carrySpeed: 0.6, hold: 3, throwSpeed: 16, /** Seconds a thrown goblin flies before it starts to skid. */ air: 0.35, slamWindup: 0.3, slamRecover: 0.3, slamDmg: 30, slamStun: 1.5 };
+
+/** A killing blow this much bigger than the life left bursts the body. */
+export const OVERKILL = 20;
 
 export interface EnemyAttackSpec {
   windup: number;

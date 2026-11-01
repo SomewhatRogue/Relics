@@ -3,11 +3,11 @@
  * The scene is painted at a low resolution and scaled up by a whole number so pixels stay crisp.
  */
 import { ARENA } from '../shared/arena';
-import { GUARD, WEAPONS } from '../shared/tuning';
+import { GRAB, GUARD, WEAPONS } from '../shared/tuning';
 import type { ArenaRoom } from '../sim/room';
 import { drawHero } from './actors';
 import { blit, type Ctx } from './draw';
-import { drawEnemy, drawTelegraph } from './foes';
+import { drawEnemy, drawHeld, drawTelegraph } from './foes';
 import { EL_LIGHT } from './palette';
 import { drawBolt, drawDrop, drawHook, drawJavelin } from './relicsdraw';
 import { drawStatus } from './status';
@@ -107,6 +107,13 @@ export class Scene {
       items.push({ y, draw: () => drawHero(c, h, x - cx, y - cy, h.id === meId, room.time) });
     }
     for (const e of room.enemies) {
+      const carrier = room.heroes.find((h) => h.carrying === e.id);
+      if (carrier) {
+        // Held overhead by a hero: drawn with them, just in front.
+        const [hx, hy] = lerp('h:' + carrier.id, carrier.x, carrier.y), slam = carrier.act === 'slam' ? Math.min(1, carrier.actT / GRAB.slamWindup) : 0;
+        items.push({ y: hy + 0.5, draw: () => (drawHeld(c, e, hx - cx, hy - cy, carrier.fx, carrier.fy, slam), drawStatus(c, e, hx - cx, hy - cy - 20, room.time)) });
+        continue;
+      }
       const [x, y] = lerp('e:' + e.id, e.x, e.y);
       items.push({ y, draw: () => (drawEnemy(c, e, x - cx, y - cy), drawStatus(c, e, x - cx, y - cy, room.time)) });
     }

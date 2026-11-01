@@ -76,7 +76,7 @@ function zap(w: World, e: Enemy, n: number, chain: boolean): void {
 export function shatter(e: Enemy, now: number, ev: FightEvent[]): void {
   e.frozenUntil = 0;
   ev.push({ k: 'shatter', x: e.x, y: e.y });
-  damage(e, SHATTER.dmg, now, ev, { heavy: true });
+  damage(e, SHATTER.dmg, now, ev, { heavy: true, how: 'shatter' });
 }
 
 /** Fire meets frost: both gone in a scalding cloud that stuns everything around. */
@@ -99,7 +99,7 @@ function flare(w: World, e: Enemy): void {
   for (const o of w.enemies) {
     const d = dist(o, e);
     if (o.act === 'dead' || d > FLARE.radius + o.radius) continue;
-    if (damage(o, FLARE.dmg, now, ev, { heavy: true, flinch: 0.4 })) continue;
+    if (damage(o, FLARE.dmg, now, ev, { heavy: true, flinch: 0.4, how: 'burst', dx: o.x - e.x, dy: o.y - e.y })) continue;
     if (o !== e && o.act !== 'pinned' && o.act !== 'carried') shove(o, (o.x - e.x) / (d || 1), (o.y - e.y) / (d || 1), FLARE.knock, o.weight);
   }
 }

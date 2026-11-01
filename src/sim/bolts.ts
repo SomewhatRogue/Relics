@@ -53,7 +53,7 @@ function blast(w: World, b: Bolt, x: number, y: number): void {
     if (isDead(e) || e.act === 'carried' || d > b.burst + e.radius) continue;
     const wasFrozen = frozen(e, w.now);
     e.lastBy = b.owner;
-    if (damage(e, b.dmg, w.now, w.ev, { heavy: true, flinch: 0.5, mult: true, brutal: b.traits.includes('brutal') })) continue;
+    if (damage(e, b.dmg, w.now, w.ev, { heavy: true, flinch: 0.5, mult: true, brutal: b.traits.includes('brutal'), how: 'burst', dx: e.x - x, dy: e.y - y })) continue;
     if (e.act !== 'pinned') shove(e, d > 0.05 ? (e.x - x) / d : b.dx, d > 0.05 ? (e.y - y) / d : b.dy, b.knock, e.weight);
     if (b.stun && e.act !== 'pinned') Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: b.stun });
     if (wasFrozen && b.knock >= 8) shatter(e, w.now, w.ev);
@@ -78,7 +78,7 @@ function openNet(w: World, b: Bolt): void {
 function strike(w: World, b: Bolt, e: Enemy): void {
   const wasFrozen = frozen(e, w.now);
   e.lastBy = b.owner;
-  if (damage(e, b.dmg, w.now, w.ev, { heavy: b.knock >= 8, flinch: FLINCH, mult: true, brutal: b.traits.includes('brutal') })) return;
+  if (damage(e, b.dmg, w.now, w.ev, { heavy: b.knock >= 8, flinch: FLINCH, mult: true, brutal: b.traits.includes('brutal'), dx: b.dx, dy: b.dy })) return;
   if (e.act !== 'pinned') shove(e, b.dx, b.dy, b.knock, e.weight);
   if (wasFrozen && b.knock >= 8) shatter(e, w.now, w.ev);
   else afflict(w, e, b.el, b.dmg);

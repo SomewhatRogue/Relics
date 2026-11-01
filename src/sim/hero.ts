@@ -3,8 +3,9 @@
  * A tap of attack swings on release; holding past CHARGE.start charges a heavy instead.
  */
 import { collide } from '../shared/arena';
-import { AUGMENTS, CHARGE, HORN, RELEASE, CLASS_KITS, CLASS_ORDER, CLASS_RELICS, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon } from '../shared/tuning';
+import { AUGMENTS, CHARGE, GRAB, HORN, RELEASE, CLASS_KITS, CLASS_ORDER, CLASS_RELICS, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon } from '../shared/tuning';
 import { slide } from './bodies';
+import { release, stepCarry, tryGrab } from './grab';
 import { hitEnemy } from './combat';
 import type { Enemy, FightEvent, Hero, Intent } from './types';
 
@@ -15,8 +16,8 @@ export function newHero(id: string, x: number, y: number): Hero {
     parryOpenAt: -9, lastBlockPress: -9, rollDx: 0, rollDy: 1, lastRollAt: -9, counterUntil: -9,
     attackQueuedAt: -9, rollQueuedAt: -9, relic: 'javelin', relics: [...CLASS_RELICS.WARRIOR], relicQueuedAt: -9,
     relicReady: { javelin: 0, hook: 0, horn: 0, net: 0, shadow: 0, lodestone: 0, blessing: 0 },
-    augments: { javelin: '', hook: '', horn: '', net: '', shadow: '', lodestone: '', blessing: '' }, blessedUntil: -9, rallyUntil: -9, arms: {}, perfect: false, tempoUntil: -9, hitstop: 0, lenience: 0,
-    seen: { attack: 0, block: 0, roll: 0, weapon: 0, relic: 0, relicSwap: 0, relicPick: 0, augment: 0, cls: 0, take: 0 },
+    augments: { javelin: '', hook: '', horn: '', net: '', shadow: '', lodestone: '', blessing: '' }, blessedUntil: -9, rallyUntil: -9, arms: {}, perfect: false, tempoUntil: -9, carrying: 0, grabQueuedAt: -9, hitstop: 0, lenience: 0,
+    seen: { attack: 0, block: 0, roll: 0, weapon: 0, relic: 0, relicSwap: 0, relicPick: 0, augment: 0, cls: 0, take: 0, grab: 0 },
   };
 }
 
@@ -103,6 +104,9 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     }
   }
   if (inp.attackSeq !== h.seen.attack) (h.seen.attack = inp.attackSeq), (h.attackQueuedAt = now);
+  if (inp.grabSeq !== h.seen.grab) (h.seen.grab = inp.grabSeq), (h.grabQueuedAt = now);
+  // Hit, stunned or downed while carrying: you drop it.
+  if (h.carrying && h.act !== 'carry' && h.act !== 'slam') release(h, enemies, ev);
   if (inp.rollSeq !== h.seen.roll) (h.seen.roll = inp.rollSeq), (h.rollQueuedAt = now);
   if (inp.blockSeq !== h.seen.block) {
     h.seen.block = inp.blockSeq;
@@ -154,6 +158,12 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     return;
   }
   if (h.act === 'zip') return;
+  if (h.act === 'carry' || h.act === 'slam') {
+    if (h.act === 'slam' && h.actT >= GRAB.slamWindup + GRAB.slamRecover) return void Object.assign(h, { act: 'idle', actT: 0 });
+    face(h, inp, enemies, false);
+    if (wantsRoll) return release(h, enemies, ev), startRoll(h, inp, now, ev);
+    return stepCarry(h, inp, enemies, now, dt, ev, (k) => walk(h, inp, k, dt));
+  }
   if (h.act === 'throw') {
     const r = RELICS[h.relic];
     if (h.actT >= r.windup && h.actT - dt < r.windup) {
@@ -209,6 +219,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   }
   // Idle or walking.
   if (wantsRoll) return startRoll(h, inp, now, ev);
+  if (now - h.grabQueuedAt < INPUT_BUFFER && tryGrab(h, enemies, now, ev)) return;
   if (now - h.relicQueuedAt < INPUT_BUFFER && now >= h.relicReady[h.relic]) {
     // A blessing turns to nobody: the room picks the ally.
     if (h.relic !== 'blessing' && h.relic !== 'horn') face(h, inp, enemies, true, RELICS[h.relic].range);

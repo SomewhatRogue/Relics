@@ -24,14 +24,16 @@ export interface Intent {
   augmentSeq: number;
   /** Change class (the demo's class button). */
   classSeq: number;
+  /** Grab a small goblin; while carrying, throw it. */
+  grabSeq: number;
   /** Take the loot drop with id `take` (counted by takeSeq). */
   takeSeq: number;
   take: number;
 }
 
-export const NO_INTENT: Intent = { mx: 0, my: 0, ax: 0, ay: 0, attack: false, block: false, attackSeq: 0, blockSeq: 0, rollSeq: 0, weaponSeq: 0, relicSeq: 0, relicSwapSeq: 0, relicPickSeq: 0, relicPick: 0, augmentSeq: 0, classSeq: 0, takeSeq: 0, take: 0 };
+export const NO_INTENT: Intent = { mx: 0, my: 0, ax: 0, ay: 0, attack: false, block: false, attackSeq: 0, blockSeq: 0, rollSeq: 0, weaponSeq: 0, relicSeq: 0, relicSwapSeq: 0, relicPickSeq: 0, relicPick: 0, augmentSeq: 0, classSeq: 0, grabSeq: 0, takeSeq: 0, take: 0 };
 
-export type HeroAct = 'idle' | 'charge' | 'attack' | 'throw' | 'zip' | 'roll' | 'hurt' | 'stun' | 'down';
+export type HeroAct = 'idle' | 'charge' | 'attack' | 'throw' | 'zip' | 'roll' | 'hurt' | 'stun' | 'down' | 'carry' | 'slam';
 
 /** Anything that can be pushed: a slide (knockback) decays each tick. */
 export interface Body {
@@ -39,6 +41,8 @@ export interface Body {
   y: number;
   kvx: number;
   kvy: number;
+  /** Seconds left airborne (thrown): it barely slows until it lands. */
+  air?: number;
 }
 
 export interface Hero extends Body {
@@ -88,10 +92,13 @@ export interface Hero extends Body {
   perfect: boolean;
   /** Dodged through a blow (TEMPO): the next hit before then lands double. */
   tempoUntil: number;
+  /** The goblin held overhead (0: none). */
+  carrying: number;
+  grabQueuedAt: number;
   hitstop: number;
   /** Extra parry and dodge leniency for this player's ping (seconds). */
   lenience: number;
-  seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number; augment: number; cls: number; take: number };
+  seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number; augment: number; cls: number; take: number; grab: number };
 }
 
 export type AttackKind = 'cleave' | 'slam' | 'swing' | 'stab';
@@ -152,7 +159,12 @@ export interface Enemy extends Body {
   snareUntil: number;
   /** The hero who last hit it (who threw it into the wall). */
   lastBy: string;
+  /** How it died, for the body left behind. */
+  death: DeathKind;
 }
+
+/** How a goblin died: fell, lost its head, burst apart, burned, or shattered. */
+export type DeathKind = '' | 'fall' | 'behead' | 'burst' | 'burn' | 'shatter';
 
 /** A weapon lying where a goblin fell. */
 export interface Drop {
@@ -165,7 +177,8 @@ export interface Drop {
 
 export type FightEvent =
   | { k: 'hit'; x: number; y: number; n: number; heavy: boolean; on: 'enemy' | 'hero'; counter?: boolean; backstab?: boolean; tick?: boolean }
-  | { k: 'block' | 'parry' | 'guardbreak' | 'dodge' | 'down' | 'death' | 'roll' | 'swing' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number }
+  | { k: 'death'; x: number; y: number; how: DeathKind; dx: number; dy: number; kind: EnemyKind }
+  | { k: 'block' | 'parry' | 'guardbreak' | 'dodge' | 'down' | 'roll' | 'swing' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number }
   | { k: 'windup' | 'impact'; x: number; y: number; kind: AttackKind }
   | { k: 'weapon'; x: number; y: number; name: string }
   | { k: 'throw' | 'pinned' | 'javwall' | 'javstick' | 'hookfire' | 'latch' | 'yank' | 'land'; x: number; y: number; dx: number; dy: number }
@@ -175,7 +188,7 @@ export type FightEvent =
   | { k: 'burst'; x: number; y: number; r: number; el: Augment }
   | { k: 'shock' | 'beam'; x: number; y: number; x2: number; y2: number }
   | { k: 'heal'; x: number; y: number; n: number }
-  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo'; x: number; y: number };
+  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle'; x: number; y: number };
 
 /** A grappling hook: flying out, reeling an enemy in, pulling its owner along, or coming back. */
 export interface Hook {

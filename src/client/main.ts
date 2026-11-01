@@ -1,5 +1,6 @@
 /** Relic: slice 2, one room. The fight runs here in the browser (solo is a party of one). */
 import { HERO, RELICS, RELIC_SLOTS, TRAITS, WEAPONS, itemName } from '../shared/tuning';
+import { grabbable } from '../sim/grab';
 import { relicLabel } from '../sim/hero';
 import { ArenaRoom } from '../sim/room';
 import type { FightEvent } from '../sim/types';
@@ -27,6 +28,7 @@ addEventListener('keydown', (e) => e.key.toLowerCase() === 'f' && card.current >
 function sound(ev: FightEvent): void {
   if (ev.k === 'shoot') return (sfx as unknown as Record<string, (() => void) | undefined>)[ev.kind]?.();
   if (ev.k === 'hit' && ev.tick) return;
+  if (ev.k === 'death') return sfx.death(ev.how);
   if (ev.k === 'hit') return ev.on === 'enemy' ? (ev.backstab ? sfx.backstab() : sfx.hit(ev.heavy)) : sfx.hurt();
   if (ev.k === 'windup') return ev.kind === 'swing' || ev.kind === 'stab' ? undefined : sfx.growl(ev.kind === 'slam');
   if (ev.k === 'impact') return ev.kind === 'slam' ? sfx.boom() : undefined;
@@ -51,8 +53,8 @@ const KIT: Record<string, string> = {
 
 let parries = 0;
 const tips = input.touch
-  ? ['Goblins drop weapons. Stand on one and TAKE it', 'Traits reward skill: parries, dodges, perfect releases', 'CLASS changes class. WEAPON swaps its kit', 'HEALER: hold RELIC for BLESS, it finds the most hurt ally', 'AUGMENT puts an element on your relic', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'RELIC: pin a scrapper to the wall', 'Striped circles cannot be blocked: ROLL out', 'HOLD RELIC to pick another relic', 'TWIN DAGGERS: roll behind a goblin and BACKSTAB']
-  : ['Goblins drop weapons. Stand on one and press F to take it', 'Bows: release on the white flash. Held too long, the shot weakens', 'C changes class. Q swaps its kit. T puts an element on your relic', 'Healer: point at an ally and press E to BLESS them', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: pin a scrapper to the wall. 1 2 3 pick a relic', 'Striped circles cannot be blocked: SPACE to roll', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or rod', 'Daggers: roll behind a goblin and BACKSTAB'];
+  ? ['Stun or get behind a small goblin, then GRAB it', 'Holding one: SLAM it, or THROW it at another', 'Goblins drop weapons. Stand on one and TAKE it', 'Traits reward skill: parries, dodges, perfect releases', 'CLASS changes class. WEAPON swaps its kit', 'HEALER: hold RELIC for BLESS, it finds the most hurt ally', 'AUGMENT puts an element on your relic', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'RELIC: pin a scrapper to the wall', 'Striped circles cannot be blocked: ROLL out', 'HOLD RELIC to pick another relic', 'TWIN DAGGERS: roll behind a goblin and BACKSTAB']
+  : ['G grabs a stunned goblin (or one you got behind). Click to slam, G to throw', 'Goblins drop weapons. Stand on one and press F to take it', 'Bows: release on the white flash. Held too long, the shot weakens', 'C changes class. Q swaps its kit. T puts an element on your relic', 'Healer: point at an ally and press E to BLESS them', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: pin a scrapper to the wall. 1 2 3 pick a relic', 'Striped circles cannot be blocked: SPACE to roll', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or rod', 'Daggers: roll behind a goblin and BACKSTAB'];
 let tipAt = -99, tipI = 0;
 
 function hud(now: number): void {
@@ -64,6 +66,14 @@ function hud(now: number): void {
   $('.wpn').textContent = (input.touch ? '' : 'Q ') + (item ? itemName(item) : WEAPONS[me.weapon].name);
   $('.kit').textContent = item ? item.traits.map((t) => TRAITS[t].name).join(' + ') + '  ' + KIT[me.weapon] : KIT[me.weapon];
   card.update(room, me, !input.touch);
+  if (input.touch) {
+    // GRAB shows only when there's something to grab (or to throw); ATTACK becomes SLAM.
+    const carrying = me.act === 'carry';
+    const can = carrying || (me.act === 'idle' && room.enemies.some((e) => grabbable(me, e, room.time)));
+    $('.tb.grab').hidden = !can;
+    $('.tb.grab').textContent = carrying ? 'THROW' : 'GRAB';
+    $('.tb.attack').textContent = carrying ? 'SLAM' : 'ATTACK';
+  }
   $('.rlc').textContent = (input.touch ? '' : 'E ') + relicLabel(me);
   $('.rlc').dataset.el = me.augments[me.relic];
   if (input.touch) ($('.tb.relic').textContent = RELICS[me.relic].short), ($('.tb.relic').dataset.el = me.augments[me.relic]);

@@ -2,6 +2,26 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-10-31 (after midnight): grab, slam, throw, and deaths by the blow (Claude Opus 5.5)
+
+Kyle: more dynamic hits and deaths: slam a goblin into the ground and pound its head off so it
+bursts, or chop it off; pick a unit up and throw it at another.
+
+- **Grab is earned** (`sim/grab.ts`): only a small goblin (weight 1 or less) you've stunned, netted,
+  frozen, staggered or got behind, within 1.3 tiles. G on a laptop; on a phone a GRAB button shows up
+  only when there's something to grab. Overhead you walk at 60%; ATTACK (now SLAM) drives it into the
+  ground (30, crater, stunned 1.5 s, a kill pounds its head in); GRAB again (THROW) hurls it 16 tiles a
+  second, airborne 0.35 s. It wriggles free after 3 s; being hit or rolling drops it.
+- **Bodies hit bodies** (`sim/impacts.ts`): anything driving into another goblin at 6 tiles a second
+  or more hurts both (1.5 per tile a second, up to 25) and passes momentum on by weight. Thrown,
+  blasted, smitten or greatsworded goblins bowl their friends over; the butcher barely moves. Frozen
+  ones shatter. Only a body actually closing on the other counts, so a pair never re-hits.
+- **Deaths by the killing blow** (`kill(e, ev, how)`): blades take the head (it flies, eyes still
+  lit, a fountain from the neck); maces, slams, blasts, smites, wall splats, body hits and any kill
+  20 or more past the life left burst the body into pieces; fire leaves a charred body; ice
+  shatters; thrusts and arrows drop them. Pieces fly with height and land as stains that stay.
+- Headless and charred bodies stay until the respawn; burst and shattered ones leave only the floor.
+
 ## 2026-10-31 (midnight): loot that rewards execution (Claude Opus 5.5)
 
 Kyle: weapons with modifiers so each fight drops loot and unlocks things as you progress, without

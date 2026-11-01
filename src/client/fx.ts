@@ -4,6 +4,7 @@
  */
 import type { FightEvent } from '../sim/types';
 import { magicFx } from './fxmagic';
+import { Gore } from './gore';
 import type { Light } from './light';
 import { drawText, textWidth } from './pixfont';
 import { toPx } from './world';
@@ -23,6 +24,7 @@ export class Fx {
   arcs: Arc[] = [];
   decals: { x: number; y: number; col: string }[] = [];
   shake = 0;
+  gore = new Gore(this);
 
   burst(x: number, y: number, n: number, cols: string[], speed: number, glow: boolean, grav = 0, stick = false): void {
     for (let i = 0; i < n; i++) {
@@ -61,7 +63,7 @@ export class Fx {
     }
   }
 
-  private decal(x: number, y: number, col: string): void {
+  decal(x: number, y: number, col: string): void {
     if (this.decals.length > 4000) this.decals.shift();
     this.decals.push({ x: Math.round(x), y: Math.round(y), col });
   }
@@ -171,9 +173,7 @@ export class Fx {
         this.burst(x, y, 6, ['#6a647a', '#57525e'], 25, false);
         break;
       case 'death':
-        this.burst(x, y - 10, 26, ['#7a1d1d', '#5a1414', '#9a2a2a', '#3a4a1f'], 80, false, 160, true);
-        this.say(x, y - 34, 'SLAIN', '#ffe070');
-        this.shake = 4;
+        this.gore.death(ev, x, y);
         break;
       case 'down':
         this.say(x, y - 26, 'DOWN', '#ff5a4a');
@@ -196,6 +196,7 @@ export class Fx {
     this.parts = this.parts.filter((p) => p.life > 0);
     for (const t of this.texts) (t.life -= dt), (t.y -= 18 * dt);
     this.texts = this.texts.filter((t) => t.life > 0);
+    this.gore.update(dt);
     for (const a of this.arcs) a.life -= dt;
     this.arcs = this.arcs.filter((a) => a.life > 0);
     for (const r of this.rings) r.life -= dt;
@@ -215,6 +216,7 @@ export class Fx {
 
   /** Sparks, rings and calls: drawn into the glowing layer. */
   drawGlow(g: CanvasRenderingContext2D, lit: CanvasRenderingContext2D, cx: number, cy: number): void {
+    this.gore.draw(lit, g, cx, cy);
     for (const p of this.parts) {
       const ctx = p.glow ? g : lit;
       ctx.globalAlpha = p.glow ? Math.min(1, (p.life / p.max) * 1.5) : 1;

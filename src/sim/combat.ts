@@ -1,5 +1,5 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, parry, roll). */
-import { BLESSING, FLINCH, HORN, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, WEAPONS, type Swing } from '../shared/tuning';
+import { BLESSING, FLINCH, HORN, OVERKILL, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, WEAPONS, type Swing } from '../shared/tuning';
 import { shove } from './bodies';
 import { frozen, isDummy, kill, snared, stunOf } from './damage';
 import { shatter } from './elements';
@@ -51,7 +51,11 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
     if (ice && heavy) shatter(e, now, ev);
     return n;
   }
-  if (e.hp <= 0) return kill(e, ev), n;
+  if (e.hp <= 0) {
+    // Blades take heads, maces and big overkills burst, thrusts just drop them.
+    const how = -e.hp >= OVERKILL || h.weapon === 'mace' ? 'burst' : s.thrust ? 'fall' : 'behead';
+    return kill(e, ev, how, h.fx, h.fy), n;
+  }
   // A heavy blow breaks the frozen.
   if (ice && heavy) return shatter(e, now, ev), n;
   // Light goblins flinch out of their wind-up on any hit; the butcher only to a strong heavy.

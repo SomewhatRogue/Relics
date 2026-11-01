@@ -63,6 +63,8 @@ function butcher(c: Ctx, e: Enemy, x: number, y: number, flash: number): void {
 }
 
 function scrapper(c: Ctx, e: Enemy, x: number, y: number, flash: number): void {
+  // Thrown: tumbling end over end through the air.
+  if (Math.hypot(e.kvx, e.kvy) > 6 && e.act !== 'carried') return spin(c, SPRITES.scrapper, x, y - 9, c.now * 22);
   if (e.act === 'carried' || e.act === 'pinned') {
     const wig = e.act === 'pinned' ? Math.sin(c.now * 14) * 0.25 : c.now * 14;
     spin(c, SPRITES.scrapper, x, y - 7, Math.atan2(e.fy, e.fx) + wig);
@@ -85,7 +87,10 @@ function scrapper(c: Ctx, e: Enemy, x: number, y: number, flash: number): void {
 
 export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number): void {
   if (e.act === 'dead') {
-    const s = e.kind === 'butcher' ? SPRITES.butcherDown : SPRITES.scrapper;
+    // Burst or shattered: nothing left but the stains. Otherwise the body, headless or burned.
+    if (e.death === 'burst' || e.death === 'shatter') return;
+    const big = e.kind === 'butcher';
+    const s = e.death === 'behead' ? (big ? SPRITES.butcherHeadless : SPRITES.scrapperHeadless) : e.death === 'burn' ? (big ? SPRITES.butcherBurnt : SPRITES.scrapperBurnt) : big ? SPRITES.butcherDown : SPRITES.scrapper;
     // A corpse on a javelin hangs where it was pinned until it fades, just before the respawn.
     if (e.corpse) return spin(c, s, x, y - 7, Math.atan2(e.fy, e.fx) + 0.2, Math.min(1, (e.actDur - e.actT) / 0.8));
     spin(c, s, x, y - 4, -Math.PI / 2, Math.max(0, 1 - e.actT / e.actDur));
@@ -147,4 +152,17 @@ export function drawTelegraph(c: Ctx, a: EnemyAttack, cx: number, cy: number, pa
     }
   }
   g.globalAlpha = 1;
+}
+
+/**
+ * A goblin held overhead (x, y: the carrier's feet), kicking. While slamming, it goes up and comes
+ * down in front over `k` (0..1) of the wind-up.
+ */
+export function drawHeld(c: Ctx, e: Enemy, x: number, y: number, fx: number, fy: number, slam: number): void {
+  const s = e.kind === 'butcher' ? SPRITES.butcherDown : SPRITES.scrapper;
+  if (slam > 0) {
+    const up = slam < 0.6 ? 24 + 8 * (slam / 0.6) : 32 * (1 - (slam - 0.6) / 0.4), ahead = slam < 0.6 ? 0 : 12 * ((slam - 0.6) / 0.4);
+    return spin(c, s, x + fx * ahead, y - up + fy * ahead * 0.5, Math.PI + (slam < 0.6 ? 0 : (slam - 0.6) * 4));
+  }
+  spin(c, s, x, y - 27, Math.PI / 2 + Math.sin(c.now * 18) * 0.3);
 }
