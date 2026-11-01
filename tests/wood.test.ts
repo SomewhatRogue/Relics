@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { GATES, LESSONS } from '../src/shared/wood';
+import { GATES, LESSONS, lessonsFor } from '../src/shared/wood';
 import { kill } from '../src/sim/damage';
 import { NO_INTENT, type FightEvent } from '../src/sim/types';
 import { Game } from '../src/client/game';
@@ -128,6 +128,32 @@ describe('the prologue wood', () => {
       expect(g.wood!.stage).toBe(i + 1);
     }
     expect(g.taught()).toContain('block');
+  });
+
+  it('each class has its own way through: guard and parry for the heavy kits, behind and full shots and the last second for the light', () => {
+    for (const c of ['ROGUE', 'RANGER', 'MAGE'] as const) {
+      const ls = lessonsFor(c);
+      expect(ls.slice(0, 4).every((l) => !l.moves.includes('block'))).toBe(true);
+      expect(ls[3].count).toBe('slip');
+    }
+    expect(lessonsFor('ROGUE')[2].count).toBe('backstab');
+    expect(lessonsFor('RANGER')[2].count).toBe('heavy');
+    expect(lessonsFor('WARRIOR')[2].count).toBe('block');
+    expect(lessonsFor('HEALER')[3].count).toBe('parry');
+    // The rogue's third lesson counts blows from behind, and nothing else.
+    const g = new Game();
+    g.create('ROGUE', 'stray');
+    wake(g);
+    Object.assign(g.wood!, { stage: 2, entered: false });
+    enter(g, 2);
+    expect(g.wood!.entered).toBe(true);
+    const step = (ev: FightEvent[]) => (g as unknown as { stepWoodFrame(h: unknown, ev: FightEvent[], dt: number): void }).stepWoodFrame(g.hero, ev, 0.05);
+    g.wood!.hold = null;
+    step([{ k: 'hit', x: 0, y: 0, n: 5, heavy: false, on: 'enemy' }]);
+    expect(g.wood!.count).toBe(0);
+    g.wood!.hold = null;
+    step([{ k: 'hit', x: 0, y: 0, n: 5, heavy: false, on: 'enemy', backstab: true }]);
+    expect(g.wood!.count).toBe(1);
   });
 
   it('the hut: the cutscene kills Hew; the Stoker gives up the javelin; the road leads to Wickhold with the tally stick', () => {

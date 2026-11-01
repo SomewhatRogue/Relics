@@ -15,8 +15,8 @@ import { CHAPTER_1, QUORUM, rewardMult, type WorldState } from '../shared/story'
 import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
 import { POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, FOUND_RELICS, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
 import { ArenaRoom } from '../sim/room';
-import { newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
-import { LESSONS, woodMap } from '../shared/wood';
+import { lessonOf, newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
+import { woodMap } from '../shared/wood';
 import { PACK } from '../sim/pack';
 import { refreshHealth, statsOf } from '../sim/gearstats';
 import { goal, interiorRoom, isFinal, newRun, runRoom, tally, type Run } from '../sim/run';
@@ -94,7 +94,7 @@ export class Game {
     // You come round with nothing but your class's weapon and its skill; a Healer's censer has gone cold.
     Object.assign(h, { relics: abilitiesOf(cls), found: [], cold: cls === 'HEALER', belt: [] });
     h.relic = h.relics[0];
-    this.wood = newWood(this.room);
+    this.wood = newWood(this.room, cls);
   }
 
   /** Straight to town, with what the wood would have given (a second hero's choice). */
@@ -150,7 +150,7 @@ export class Game {
   taught(): string[] {
     if (this.mode !== 'wood' || !this.wood) return ['attack', 'roll', 'block', 'relic', 'potion', 'grab'];
     if (this.wood.cut >= 0 || this.wood.wake >= 0) return [];
-    return this.wood.stage >= 5 ? ['attack', 'roll', 'block', 'relic', 'potion', 'grab'] : LESSONS[this.wood.stage].moves;
+    return this.wood.stage >= 5 ? ['attack', 'roll', 'block', 'relic', 'potion', 'grab'] : lessonOf(this.wood).moves;
   }
   /** Make a hero (class for life); returns its slot, or -1 when all three are taken. */
   create(cls: HeroClass, name: string): number {

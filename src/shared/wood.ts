@@ -6,6 +6,7 @@
  */
 import type { Area, Block, GameMap, Round } from './arena.js';
 import { THEMES, type Foe } from './terrain.js';
+import type { HeroClass } from './weapons.js';
 
 export const WOOD = { w: 64, h: 40 };
 type Rect = { x: number; y: number; w: number; h: number };
@@ -78,7 +79,12 @@ export function woodMap(): GameMap {
 }
 
 /** Each lesson: what it teaches, what you're allowed to press, what it counts, how many, the goblins it brings. */
-export interface Lesson { area: number; name: string; teach: string; moves: ('attack' | 'roll' | 'block' | 'relic' | 'potion' | 'grab')[]; count: 'kills' | 'dodge' | 'block' | 'parry' | 'none'; need: number; hew: [number, number]; foes: (Foe & { variant?: 'looter' | 'lunger' | 'heavy' | 'stoker' })[]; more?: Lesson['foes'] }
+/** What a lesson counts: kills, dodges, blocks, parries, last-second dodges (`slip`), blows from behind,
+ *  or full-charge hits (`heavy`). */
+export type Count = 'kills' | 'dodge' | 'block' | 'parry' | 'slip' | 'backstab' | 'heavy' | 'none';
+/** The move a lesson's card shows (its control comes from the device). */
+export type Teach = 'attack' | 'roll' | 'block' | 'parry' | 'slip' | 'backstab' | 'heavy' | 'skill';
+export interface Lesson { area: number; name: string; teach: string; card?: Teach; moves: ('attack' | 'roll' | 'block' | 'relic' | 'potion' | 'grab')[]; count: Count; need: number; hew: [number, number]; foes: (Foe & { variant?: 'looter' | 'lunger' | 'heavy' | 'stoker' })[]; more?: Lesson['foes'] }
 export const LESSONS: Lesson[] = [
   { area: 0, name: 'THE FIELD', teach: 'ATTACK', moves: ['attack'], count: 'kills', need: 0, hew: [5, 33],
     foes: [{ kind: 'scrapper', variant: 'looter', x: 8, y: 29 }, { kind: 'scrapper', variant: 'looter', x: 13, y: 31 }, { kind: 'scrapper', variant: 'looter', x: 16, y: 35 }],
@@ -92,6 +98,42 @@ export const LESSONS: Lesson[] = [
   { area: 4, name: "HEW'S HUT", teach: 'SKILL', moves: ['attack', 'roll', 'block', 'relic', 'potion', 'grab'], count: 'none', need: 0, hew: [52, 10],
     foes: [] },
 ];
+/**
+ * Each class's way through the wood. A Warrior or Healer is taught to hold a guard and to parry; the
+ * lighter kits (Rogue, Ranger, Mage) can't stand behind a block, so they learn what keeps them alive
+ * instead: getting behind (Rogue) or a full draw (Ranger, Mage), then the last-second dodge that
+ * staggers a big one the way a parry would. The goblins change to suit.
+ */
+const L = LESSONS, light = ['attack', 'roll'] as Lesson['moves'];
+const slip = (foes = L[3].foes): Lesson => ({ ...L[3], teach: 'LAST SECOND', card: 'slip', moves: light, count: 'slip', need: 2, foes });
+const scr = (x: number, y: number, v?: 'looter' | 'lunger' | 'heavy') => ({ kind: 'scrapper' as const, ...(v ? { variant: v } : {}), x, y, awake: true });
+const BY_CLASS: Record<HeroClass, Lesson[]> = {
+  WARRIOR: L,
+  HEALER: [L[0], L[1], { ...L[2], need: 4 }, L[3], L[4]],
+  ROGUE: [
+    { ...L[0], foes: [...L[0].foes, { kind: 'scrapper', variant: 'looter', x: 10, y: 37 }] },
+    { ...L[1], foes: [scr(31, 31, 'lunger'), scr(36, 35, 'lunger'), scr(38, 29, 'lunger')] },
+    { ...L[2], teach: 'BACKSTAB', card: 'backstab', moves: light, count: 'backstab', need: 3 },
+    slip(),
+    L[4],
+  ],
+  RANGER: [
+    { ...L[0], foes: [{ kind: 'scrapper', variant: 'looter', x: 12, y: 29 }, { kind: 'scrapper', variant: 'looter', x: 17, y: 32 }, { kind: 'scrapper', variant: 'looter', x: 18, y: 36 }] },
+    L[1],
+    { ...L[2], teach: 'FULL DRAW', card: 'heavy', moves: light, count: 'heavy', need: 3, foes: [scr(30, 12), scr(35, 12), scr(38, 15)] },
+    slip(),
+    L[4],
+  ],
+  MAGE: [
+    L[0],
+    { ...L[1], foes: [scr(31, 31, 'lunger'), scr(36, 35, 'lunger')] },
+    { ...L[2], teach: 'FULL CHARGE', card: 'heavy', moves: light, count: 'heavy', need: 3, foes: [scr(33, 14, 'looter'), scr(34, 15, 'looter'), scr(35, 14, 'looter'), scr(34, 13, 'looter')] },
+    slip(),
+    L[4],
+  ],
+};
+export const lessonsFor = (cls: HeroClass): Lesson[] => BY_CLASS[cls] ?? L;
+
 /** The Stoker, and the two that come out of the trees at half its health. */
 export const STOKER: Foe & { variant: 'stoker' } = { kind: 'butcher', variant: 'stoker', x: 59, y: 4.5, name: 'THE STOKER', awake: false };
 export const STOKER_HELP: Foe[] = [{ kind: 'scrapper', x: 46, y: 9, awake: true }, { kind: 'scrapper', x: 61, y: 10, awake: true }];
@@ -124,6 +166,21 @@ export const LINES = {
   more: "There's _more of them_ in the trees, stray, and they're coming this way.",
   cometo: "You come round on the rise with a mouthful of ash, and it's still down there by the cordwood, _waiting_ for you.",
   later: "Ask me later, stray, once you've got your breath back. I'll ~still be talking~, don't worry.",
+  /** What Hew makes of you, said after he's checked your toes: one line for each class. */
+  notice: {
+    WARRIOR: "That's a soldier's arm on you, I've been round enough of them this morning to know. With the column, were you? No, don't answer, you'll only have to think about it.",
+    HEALER: "And what's this, a censer? Gone _cold_ on you, and it'll want lighting again, though not off my kilns, I'd think, that'll be the Lantern's business. So you're church folk, then, or you robbed some.",
+    ROGUE: "Hold on, two knives, and neither worn where a soldier would wear one. I'll keep a hand on my *purse*, if it's all the same to you, not that there's much in it, Wickhold owes me for four loads. And you keep both of yours where I can see them.",
+    RANGER: "Bow's not broken, that's something, though the string's had a soaking, and those are ^hunter's hands^ if ever I saw any, which is good, I'd sooner you saw them coming from a long way off. And I'll be a good way behind you when you do.",
+    MAGE: "And that thing in your hand's still ~humming~, I can hear it from here, so mind you don't point it my way. I don't hold with it, sparks out of sticks and all that, but I'll not leave you lying here over it, I suppose.",
+  } as Record<HeroClass, string>,
+  /** Hew's words on the lessons a class does its own way (the rest use the lines above). */
+  teach: {
+    backstab: "Three of them, and you'll not stand toe to toe with three, not with those little things, so you get yourself round the *back* of one. I expect you know how, I expect you've had a fair bit of practice.",
+    heavy: "Three coming up past the kilns, and slow about it, so there's time to draw it all the way back, and you take it, mind. I've seen half a draw go into one of them, and all it did was make it *cross*.",
+    charge: "Four of them bunched round my kiln like they're warming their hands. If that thing does what I think it does, you'll let it build a good while first, I'd have thought. Don't tell me how, mind, I'd sooner not know.",
+    slip: "Now, this big one breaks a guard like kindling, and you've not got much guard to break, so you wait for it, wait, and be gone *just* as it comes down, and then it's yours while it gets over the surprise.",
+  },
   /** When you get it right (a short pause in the fight). */
   praise: ["That's it, that's the way.", "Oh, that's good, do it like that.", "Done this before, ~haven't you~?", "Hah, you'll ^keep^, stray, I think."],
   /** The game's own plain line under each lesson, with the control shown beside it. */
@@ -134,7 +191,10 @@ export const LINES = {
     block: 'Hold your guard while the red fills. Each block costs breath (the yellow bar).',
     parry: 'Tap your guard the moment the red flashes white. It staggers them, and your next blow lands hard.',
     skill: "Use your skill. Once it's spent, it takes a while to recharge.",
+    backstab: 'Hit a goblin from behind and the blow lands far harder.',
+    heavy: 'Hold attack until fully drawn or charged, then let go. A full shot hits much harder.',
+    slip: 'Roll just as a blow lands to pass through it. That staggers whoever struck, unless it was an archer.',
   },
   /** The freeze-frame prompts, the first times a lesson's blow comes. */
-  now: { roll: 'NOW: ROLL OUT', block: 'NOW: GUARD UP', parry: 'NOW: TAP GUARD', attack: 'HIT IT' },
+  now: { roll: 'NOW: ROLL OUT', block: 'NOW: GUARD UP', parry: 'NOW: TAP GUARD', slip: 'NOW: ROLL THROUGH', attack: 'HIT IT' },
 };

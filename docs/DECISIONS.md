@@ -653,3 +653,12 @@ voice blip, and reads a small markup: *bold*, ~sway~, ^good^ (green-gold), _bad_
 click, Enter or action key finishes a line before it goes on. A panel redrawn in the same sitting doesn't
 retype. Found while testing: the first frame could step time backwards and skip Hew's waking; the loop now
 never steps below zero.
+
+## 2026-11-01: daylight, dodges, and a wood for each class (Claude Opus 5.5)
+The wood is in daylight (Theme.day: no moon pool or hero lanterns). A roll out of a blow's reach during its
+wind-up now counts as a dodge (judged from where the roll started); a roll through it as it lands staggers
+a close attacker for 0.6 of a parry's stun (DODGE.stun; not archers) and shows LAST SECOND. The wood's
+lessons are per class (lessonsFor): Warrior and Healer keep block and parry; Rogue learns blows from behind,
+Ranger and Mage full draw or charge, and all three the last-second dodge in place of parry, with goblins to
+suit. Hew says one line about each class while he looks you over. The light classes can still hold a block
+in the game itself; the wood just doesn't teach it (Kyle to decide whether they should lose it).
