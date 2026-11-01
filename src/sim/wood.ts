@@ -108,7 +108,7 @@ function fallen(w: WoodState, room: ArenaRoom): void {
     room.enemies = room.enemies.filter((e) => e === s || !w.ids.includes(e.id) || e.kind === 'butcher');
     w.helped = false;
     Object.assign(h, { x: 52, y: 10 });
-    say(w, room, '', 'Again. It remembers you, too.', 3);
+    say(w, room, '', "You come round on the rise, mouth full of ash. It's still by the cordwood. Waiting.", 4);
     return;
   }
   if (n) (h.x = n.x + 0.8), (h.y = n.y);
@@ -170,7 +170,7 @@ export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: nu
   // Cleared them before the lesson took: they come again.
   if (!left.length && w.count < lesson.need) {
     w.ids = lesson.foes.map((f) => spawn(room, { ...f, awake: true }).id);
-    say(w, room, 'HEW', 'Again. Properly, this time.', 3);
+    say(w, room, 'HEW', 'More in the trees. My way this time.', 3);
     return;
   }
   if (!left.length && w.count >= lesson.need) {

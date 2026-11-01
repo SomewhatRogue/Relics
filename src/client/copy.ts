@@ -53,8 +53,8 @@ export const CHURCH = {
 
 /** After the wood (lore keeper to review): Odric takes Hew's count; Isolde relights a Healer's censer. */
 export const TALLY = {
-  odric: "Hew. He never did come in for the beer. Leave it with me. I'll chalk them up with the others, every name he had.",
-  isolde: "Went out on the field, did it? They do. It's lit now. Don't let it go out twice; I won't carry it again.",
+  odric: "Hew. He never did come in for the beer. Leave it with me. I'll chalk them up with the others, every name he had, and his.",
+  isolde: "Went out on the field, did it? They do. There. Lit. Let it die again and I'll light the next one off your arse.",
 };
 
 export const SMITH = {

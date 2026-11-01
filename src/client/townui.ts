@@ -114,7 +114,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     if (pr.tally) {
       pr.tally = false;
       g.keep();
-      return panel.show('FATHER ODRIC', p('You give him the hazel stick. He runs a thumb down the notches, twelve of them, and stops at the last, where nobody has scratched a name.') + say('Father Odric', TALLY.odric), [{ label: 'CLOSE', act: again }]);
+      return panel.show('FATHER ODRIC', p('You give him the hazel stick. He counts the notches with his thumb, eleven, then takes out a knife and cuts a twelfth.') + say('Father Odric', TALLY.odric), [{ label: 'CLOSE', act: again }]);
     }
     panel.show('FATHER ODRIC', say('Father Odric', 'Give what you can spare. Then a little of what you can\'t. That\'s the part it burns.') + (pr.cls === 'HEALER' ? say('Father Odric', COAL.odric) : '') +
       (hungry.length ? say('Father Odric', CHURCH.hungry) : '') + (pr.armor?.hungry === 'ransom' ? p(CHURCH.ransom) : '') +

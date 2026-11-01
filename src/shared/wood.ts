@@ -108,8 +108,8 @@ export const LINES = {
   last: 'Odric. Give him the count.',
   stoker: 'Eleven you burn. One I keep.',
   north: 'They went north, the lot of them. Left the field half-picked. Never seen them leave meat.',
-  up: ['Up. Again.', "Not yet, stray. I've enough to burn.", 'Breathe. Then do it right.'],
+  up: ['Up. Spit out the dirt.', "Not yet, stray. I've enough to burn.", 'Breathe. Then do it right.'],
   relic: 'Something hard sits under its breastbone, grown in like a knot in oak. You lever it out with Hew\'s poker: a javelin, haft and all, longer than the wound it came from, and warm.',
   road: "The wood gives out at last. Walls ahead, and over them a glow that isn't the moon.",
-  skill: 'Now. Everything you have.',
+  skill: "Now. Don't save any of it.",
 };
