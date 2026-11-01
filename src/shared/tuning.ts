@@ -50,6 +50,9 @@ export const GUARD = {
 
 
 export const HITSTOP = { light: 0.05, heavy: 0.11, parry: 0.18 };
+/** Dodging: rolled clear before it landed counts (no bonus); a roll through the blow as it lands (in the
+ *  roll's i-frames) staggers a close attacker for this share of a parry's stun. */
+export const DODGE = { stun: 0.6 };
 export const HURT_STAGGER = 0.25;
 
 /** Knockback slides decay by this share per second; a slide this fast into a wall slams. */

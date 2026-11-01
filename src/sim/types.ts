@@ -85,6 +85,9 @@ export interface Hero extends Body {
   rollDx: number;
   rollDy: number;
   lastRollAt: number;
+  /** Where the last roll started (a roll out of a blow's reach counts as dodging it). */
+  rollX: number;
+  rollY: number;
   counterUntil: number;
   attackQueuedAt: number;
   rollQueuedAt: number;
@@ -283,7 +286,7 @@ export type FightEvent =
   | { k: 'hit'; x: number; y: number; n: number; heavy: boolean; on: 'enemy' | 'hero'; counter?: boolean; backstab?: boolean; tick?: boolean; src?: string; big?: boolean }
   | { k: 'swing'; x: number; y: number; src: string; heavy: boolean }
   | { k: 'death'; x: number; y: number; how: DeathKind; dx: number; dy: number; kind: EnemyKind }
-  | { k: 'block' | 'parry' | 'guardbreak' | 'dodge' | 'down' | 'roll' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number }
+  | { k: 'block' | 'parry' | 'guardbreak' | 'dodge' | 'slip' | 'down' | 'roll' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number }
   | { k: 'windup' | 'impact'; x: number; y: number; kind: AttackKind }
   | { k: 'weapon'; x: number; y: number; name: string }
   | { k: 'throw' | 'pinned' | 'javwall' | 'javstick' | 'hookfire' | 'latch' | 'yank' | 'land'; x: number; y: number; dx: number; dy: number }

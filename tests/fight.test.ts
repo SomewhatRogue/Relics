@@ -127,6 +127,24 @@ describe('the slam', () => {
     run(room, ticks(0.3));
     expect(h.hp).toBe(HERO.hp);
   });
+
+  it('rolled through at the last moment staggers the butcher; rolled clear early is still a dodge', () => {
+    const late = setup('slam');
+    until(late.room, 0.1);
+    late.room.setIntent('me', intent({ rollSeq: 1, mx: 1 }));
+    const seen: string[] = [];
+    for (let i = 0; i < ticks(0.3); i++) (late.room.step(), seen.push(...late.room.events.map((e) => e.k)));
+    expect(seen).toContain('slip');
+    expect(late.b.act).toBe('stunned');
+
+    const early = setup('slam');
+    early.room.setIntent('me', intent({ rollSeq: 1, mx: 1 }));
+    const got: string[] = [];
+    for (let i = 0; i < ticks(BUTCHER.slam.windup) + 4; i++) (early.room.step(), got.push(...early.room.events.map((e) => e.k)));
+    expect(early.h.hp).toBe(HERO.hp);
+    expect(got).toContain('dodge');
+    expect(got).not.toContain('slip');
+  });
 });
 
 /** A hero next to a target enemy (index), everything else parked far away. */

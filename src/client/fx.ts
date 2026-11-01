@@ -172,6 +172,10 @@ export class Fx {
       case 'dodge':
         this.say(x, y - 24, 'DODGE', '#7fe0c8');
         break;
+      case 'slip':
+        this.say(x, y - 38, 'LAST SECOND', '#ffd27a');
+        this.shake = Math.max(this.shake, 2);
+        break;
       case 'roll':
         this.burst(x, y, 6, ['#6a647a', '#57525e'], 25, false);
         break;

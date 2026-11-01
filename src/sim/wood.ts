@@ -123,7 +123,7 @@ function drill(w: WoodState, e: Enemy | null, parryWindow: number): void {
   const a = e?.attack, kind = LESSONS[w.stage].count;
   if (!a || a.t >= a.windup || w.drilled >= DRILL.wheels || w.drillAt === e!.id * 1000 + Math.round(a.windup * 100) + Math.round(a.ox * 10)) return;
   const left = a.windup - a.t;
-  const ready = kind === 'dodge' ? a.unblockable && left <= 0.32 : kind === 'block' ? left <= 0.4 : kind === 'parry' ? !a.unblockable && left <= parryWindow * 0.6 : false;
+  const ready = kind === 'dodge' ? a.unblockable && left <= 0.16 : kind === 'block' ? left <= 0.4 : kind === 'parry' ? !a.unblockable && left <= parryWindow * 0.6 : false;
   if (!ready) return;
   w.drilled++;
   w.drillAt = e!.id * 1000 + Math.round(a.windup * 100) + Math.round(a.ox * 10);

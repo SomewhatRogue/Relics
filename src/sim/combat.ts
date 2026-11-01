@@ -1,5 +1,5 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, parry, roll). */
-import { BLESSING, WARD, FLINCH, HORN, OVERKILL, PERK, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing } from '../shared/tuning';
+import { BLESSING, DODGE, WARD, FLINCH, HORN, OVERKILL, PERK, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing } from '../shared/tuning';
 import { shove } from './bodies';
 import { statsOf } from './gearstats';
 import { HUNGRY_FX, wears } from './hungry';
@@ -96,13 +96,25 @@ function warded(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: FightEvent[]
 
 /** An enemy's attack lands on a hero: rolled through, parried, blocked, or taken. */
 export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: FightEvent[]): void {
-  if (h.act === 'down' || !attackCovers(a, h)) return;
+  if (h.act === 'down') return;
+  if (!attackCovers(a, h)) {
+    // Rolled out of it during the wind-up: a dodge all the same, just no bonus.
+    if (h.lastRollAt >= now - a.windup && attackCovers(a, { ...h, x: h.rollX, y: h.rollY })) ev.push({ k: 'dodge', x: h.x, y: h.y });
+    return;
+  }
   if (h.wardUntil > now && warded(e, a, h, now, ev)) return;
   const w = WEAPONS[h.weapon];
   // A blessed hero takes less from everything.
   const g = statsOf(h), taken = (h.blessedUntil > now ? BLESSING.taken : 1) * g.taken * (wears(h, 'apron') ? HUNGRY_FX.apron : 1);
   if (h.act === 'roll' && h.actT >= w.dodge.iFrom && h.actT <= w.dodge.iTo + h.lenience) {
     ev.push({ k: 'dodge', x: h.x, y: h.y });
+    // Through the blow at the last moment: the attacker staggers (a close one; not an archer).
+    if (a.kind !== 'shot' && e.act !== 'stunned') {
+      h.hitstop = Math.max(h.hitstop, HITSTOP.heavy);
+      e.hitstop = HITSTOP.heavy;
+      Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: stunOf(e) * DODGE.stun });
+      ev.push({ k: 'slip', x: h.x, y: h.y }, { k: 'stunned', x: e.x, y: e.y });
+    }
     if (has(h, 'tempo')) (h.tempoUntil = now + TRAIT.tempoTime), ev.push({ k: 'tempo', x: h.x, y: h.y });
     return;
   }

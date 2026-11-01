@@ -65,6 +65,8 @@ export interface Theme {
   ambient: [number, number, number];
   /** Moonlight strength over the middle (0: none). */
   moon: number;
+  /** Daylight: no moon pool, no lanterns, the ambient does it all. */
+  day?: boolean;
 }
 
 export interface GameMap {

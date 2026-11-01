@@ -242,7 +242,7 @@ export class Scene {
       lights.push({ x, y: y - 8, r: 78 + Math.sin(now * 11 + x) * 3, i: 0.95, c: [1, 0.6, 0.3] });
     }
     // Moonlight through a ceiling grate over the middle of the room.
-    if (map.theme.moon) lights.push({ x: OX + (map.w / 2) * PX - cx, y: OY + (map.h / 2) * PX - cy, r: 125 * Math.max(1, map.w / 22), i: map.theme.moon, c: [0.55, 0.62, 0.9] });
+    if (map.theme.moon && !map.theme.day) lights.push({ x: OX + (map.w / 2) * PX - cx, y: OY + (map.h / 2) * PX - cy, r: 125 * Math.max(1, map.w / 22), i: map.theme.moon, c: [0.55, 0.62, 0.9] });
     for (const r of map.rounds) if (r.kind === 'post') {
       const x = OX + r.x * PX - cx, y = OY + r.y * PX - cy - 24;
       this.flame(glow, x, y + 2, now, 1);
@@ -261,7 +261,7 @@ export class Scene {
     for (const h of room.heroes) {
       const [x, y] = lerp('h:' + h.id, h.x, h.y);
       // Underground (no moon), each hero carries a lantern.
-      lights.push({ x: x - cx, y: y - 10 - cy, r: map.theme.moon ? 44 : 90, i: map.theme.moon ? 0.35 : 0.7, c: [0.95, 0.8, 0.6] });
+      if (!map.theme.day) lights.push({ x: x - cx, y: y - 10 - cy, r: map.theme.moon ? 44 : 90, i: map.theme.moon ? 0.35 : 0.7, c: [0.95, 0.8, 0.6] });
       // A Healer's censer burns brighter the more coals it has taken.
       if (h.glow > 0 && WEAPONS[h.weapon].cls === 'HEALER') lights.push({ x: x - cx, y: y - 4 - cy, r: 20 + h.glow * 3 + Math.sin(now * 9) * 2, i: 0.25 + h.glow * 0.04, c: [1, 0.62, 0.3] });
     }

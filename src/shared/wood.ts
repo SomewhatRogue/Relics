@@ -72,7 +72,7 @@ export function woodMap(): GameMap {
   return {
     name: 'GREYHOLLOW', w: WOOD.w, h: WOOD.h, wallFace: 3, rounds: treeLines(), blocks,
     braziers: [{ x: 5.2, y: 30.6, r: 0.5 }, { x: 16.2, y: 26.6, r: 0.5 }, { x: 32.5, y: 17.5, r: 0.5 }, { x: 52.5, y: 8.5, r: 0.4 }],
-    torches: [], hero: { x: 8, y: 34 }, exit: null, theme: { ...THEMES.forest, moon: 0.45 },
+    torches: [], hero: { x: 8, y: 34 }, exit: null, theme: { ...THEMES.forest, ambient: [0.86, 0.84, 0.74], moon: 0, day: true },
     npcs: [{ x: 16, y: 30.5, name: 'HEW', talk: 'hew', look: 'burner' }],
   };
 }

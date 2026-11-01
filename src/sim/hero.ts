@@ -15,7 +15,7 @@ export function newHero(id: string, x: number, y: number): Hero {
   return {
     id, x, y, kvx: 0, kvy: 0, fx: 0, fy: 1, moving: false, hp: HERO.hp, maxHp: HERO.hp, perks: [], stamina: HERO.stamina, staminaAt: -9, weapon: 'sword',
     act: 'idle', actT: 0, actDur: 0, combo: 0, heavy: false, power: 0, counter: false, hitIds: [], blocking: false,
-    parryOpenAt: -9, lastBlockPress: -9, rollDx: 0, rollDy: 1, lastRollAt: -9, counterUntil: -9,
+    parryOpenAt: -9, lastBlockPress: -9, rollDx: 0, rollDy: 1, lastRollAt: -9, rollX: -99, rollY: -99, counterUntil: -9,
     attackQueuedAt: -9, rollQueuedAt: -9, relic: 'horn', relics: abilitiesOf('WARRIOR'), relicQueuedAt: -9,
     relicReady: { javelin: 0, hook: 0, horn: 0, net: 0, shadow: 0, lodestone: 0, blessing: 0, ward: 0, sanctuary: 0 },
     augments: { javelin: '', hook: '', horn: '', net: '', shadow: '', lodestone: '', blessing: '', ward: '', sanctuary: '' }, blessedUntil: -9, wardUntil: -9, wardHp: 0, rallyUntil: -9, arms: {}, bag: [], armor: null, rings: [], baseHp: HERO.hp, purse: 0, fed: 0, lastKill: 0, biteAt: 0, ransomed: false, want: 0, cold: false, found: [], glow: 0, belt: [], potionReady: 0, mendLeft: 0, brandyUntil: -9, hiddenUntil: -9, perfect: false, tempoUntil: -9, carrying: 0, lifting: 0, grabQueuedAt: -9, z: 0, hitstop: 0, lenience: 0,
@@ -296,6 +296,8 @@ function startRoll(h: Hero, inp: Intent, now: number, ev: FightEvent[]): void {
   h.actT = 0;
   h.kvx = h.kvy = 0;
   h.lastRollAt = now;
+  h.rollX = h.x;
+  h.rollY = h.y;
   h.rollQueuedAt = -9;
   spend(h, WEAPONS[h.weapon].dodge.stamina * statsOf(h).dodgeCost, now);
   ev.push({ k: kind === 'blink' ? 'blink' : 'roll', x: h.x, y: h.y });
