@@ -104,7 +104,7 @@ export class Soundscape {
     const [area, version] = this.area(g);
     this.music.set(area, version);
     const hunting = room.enemies.filter((e) => !isDead(e) && e.kind !== 'dummy' && e.kind !== 'swingDummy' && (e.act === 'chase' || e.act === 'attack') && Math.hypot(e.x - me.x, e.y - me.y) < 8).length;
-    this.music.setDanger(g.mode === 'run' ? Math.min(1, hunting / 3) : 0);
+    this.music.setDanger(g.mode === 'run' || g.mode === 'wood' ? Math.min(1, hunting / 3) : 0);
     this.music.tick();
   }
 
@@ -112,6 +112,10 @@ export class Soundscape {
     const w = g.world;
     if (g.mode !== 'town') this.tune = null;
     if (g.mode === 'yard') return ['yard', w.day];
+    if (g.mode === 'wood') {
+      const s = g.room.enemies.find((e) => e.name && !isDead(e));
+      return s && (g.wood?.cut ?? -1) < 0 ? ['boss', 7] : ['forest', 3];
+    }
     if (g.mode === 'town') {
       if (!g.outside && this.tune) return [this.tune.area, SCORES[this.tune.area].findIndex((sc) => sc.name === this.tune!.name)];
       if (!g.outside) return ['town', w.day];

@@ -243,3 +243,26 @@ body.touch #pack .head span { font-size: 9px; }
 .gift { color: #7fd07a; font-size: 10px; margin-top: 3px; }
 .cost { color: #ff6a5a; font-size: 10px; margin-top: 2px; }
 #pack .gift, #pack .cost { font-size: 10px; }
+
+/* The prologue wood: Hew's words, the cutscene's bars, only the buttons taught so far. */
+#caption { position: fixed; z-index: 5; left: 50%; transform: translateX(-50%); bottom: calc(150px + env(safe-area-inset-bottom)); width: min(520px, calc(100vw - 32px)); padding: 10px 14px; background: #0d0b10e8; border: 1px solid #5a4a3a; border-radius: 6px; color: #e8e0d0; font-size: 13px; line-height: 1.45; text-align: center; }
+#caption[hidden] { display: none; }
+#caption b { display: block; color: #ffb35a; font-size: 10px; letter-spacing: 0.2em; margin-bottom: 3px; }
+body.touch #caption { bottom: auto; top: calc(150px + env(safe-area-inset-top)); }
+#bars i { position: fixed; left: 0; right: 0; height: 0; background: #000; z-index: 4; transition: height 0.5s; }
+#bars i:first-child { top: 0; }
+#bars i:last-child { bottom: 0; }
+body.cutscene #bars i { height: 11vh; }
+body.cutscene .tb, body.cutscene .stick, body.cutscene #hud, body.cutscene #banner, body.cutscene #corner, body.cutscene #prompt { visibility: hidden; }
+body.cutscene #caption { z-index: 6; bottom: calc(13vh + 8px); top: auto; }
+#skipcut { position: fixed; z-index: 7; right: calc(14px + env(safe-area-inset-right)); bottom: calc(14px + env(safe-area-inset-bottom)); padding: 6px 14px; background: #1b1922cc; border: 1px solid #6a647a; border-radius: 4px; color: #d8d4de; font-size: 11px; letter-spacing: 0.15em; }
+#skipcut[hidden] { display: none; }
+body[data-mode='wood'] #packbtn, body[data-mode='wood'] #heroes, body[data-mode='wood'] #tips, body[data-mode='wood'] #tip { display: none; }
+body[data-mode='wood']:not([data-taught~='attack']) .tb.attack,
+body[data-mode='wood']:not([data-taught~='roll']) .tb.roll,
+body[data-mode='wood']:not([data-taught~='block']) .tb.block,
+body[data-mode='wood']:not([data-taught~='relic']) .tb.relic,
+body[data-mode='wood']:not([data-taught~='relic']) .tb.relic2,
+body[data-mode='wood']:not([data-taught~='potion']) .tb.potion,
+body[data-mode='wood']:not([data-taught~='grab']) .tb.grab { display: none !important; }
+body[data-mode='wood'] .tb.use { display: none; }

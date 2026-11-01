@@ -83,6 +83,7 @@ describe('the town', () => {
   it('no fighting in town, but a roll still rolls', () => {
     const g = new Game();
     g.create('ROGUE', 'silk');
+    g.skipWood();
     g.step(0.1, { ...NO_INTENT, attackSeq: 1, attack: true, relicSeq: 1 });
     expect(g.hero.act).not.toBe('attack');
     g.step(0.05, { ...NO_INTENT, rollSeq: 1, mx: 1 });
@@ -92,6 +93,7 @@ describe('the town', () => {
   it('town works fill from gold and change the town: the rubble goes, the Old Quarter opens', () => {
     const g = new Game();
     g.create('WARRIOR', 'b');
+    g.skipWood();
     g.profile.gold = 700;
     expect(g.room.map.blocks.some((b) => b.kind === 'rubble')).toBe(true);
     for (let i = 0; i < 6; i++) g.fund('oldquarter', 100);
@@ -104,6 +106,7 @@ describe('the town', () => {
   it('a run lands on the hero line and the world; sewer jobs open once six dens are burned', () => {
     const g = new Game();
     g.create('MAGE', 'ashe');
+    g.skipWood();
     expect(board(3, false).some((j) => j.place.region === 'Wickhold')).toBe(false);
     g.give({ stats: { dens: 6, jobs: 1 }, dens: 6, days: 1 });
     expect(g.profile.stats.dens).toBe(6);
@@ -113,6 +116,7 @@ describe('the town', () => {
   it('the dice move gold by the bet, one way or the other', () => {
     const g = new Game();
     g.create('ROGUE', 'silk');
+    g.skipWood();
     g.profile.gold = 100;
     for (let i = 0; i < 10; i++) {
       const before = g.profile.gold, r = g.dice(10)!;

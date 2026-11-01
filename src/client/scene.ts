@@ -38,6 +38,8 @@ export class Scene {
   private bg: HTMLCanvasElement | null = null;
   private painted: GameMap | null = null;
   private cam = { x: 0, y: 0, ready: false };
+  /** A cutscene's point of interest (tiles): the camera eases there instead of following the hero. */
+  focus: { x: number; y: number } | null = null;
   private heroAt: [number, number] | null = null;
 
   constructor(private out: HTMLCanvasElement) {
@@ -77,8 +79,9 @@ export class Scene {
       const [hx, hy0] = lerp('h:' + me.id, me.x, me.y), hy = hy0 - (me.z ?? 0) * LIFT;
       this.heroAt = [hx, hy];
       const portrait = this.vh > this.vw * 1.2;
-      const tx = hx + me.fx * 10 - this.vw / 2, ty = hy - 8 + me.fy * 8 - this.vh / 2 + (portrait ? this.vh * 0.12 : 0);
-      const k = this.cam.ready ? Math.min(1, dt * 7) : 1;
+      const f = this.focus;
+      const tx = f ? OX + f.x * PX - this.vw / 2 : hx + me.fx * 10 - this.vw / 2, ty = f ? OY + f.y * PX - 8 - this.vh / 2 : hy - 8 + me.fy * 8 - this.vh / 2 + (portrait ? this.vh * 0.12 : 0);
+      const k = this.cam.ready ? Math.min(1, dt * (f ? 2.5 : 7)) : 1;
       this.cam.x += (tx - this.cam.x) * k;
       this.cam.y += (ty - this.cam.y) * k;
       this.cam.ready = true;

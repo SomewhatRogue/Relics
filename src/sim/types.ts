@@ -132,6 +132,8 @@ export interface Hero extends Body {
   ransomed: boolean;
   /** The Want, for the eyes (never shown as a number). */
   want: number;
+  /** A Healer's censer gone cold (the prologue, until Isolde relights it): no heals given. */
+  cold: boolean;
   /** Relics this hero has won (one at a time is carried, in relics[1]). */
   found: RelicId[];
   /** The draw in flight was released on the white flash. */
@@ -152,7 +154,7 @@ export interface Hero extends Body {
   seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number; augment: number; cls: number; take: number; grab: number; gear: number; potion: number; open: number };
 }
 
-export type AttackKind = 'cleave' | 'slam' | 'swing' | 'stab' | 'shot';
+export type AttackKind = 'cleave' | 'slam' | 'swing' | 'stab' | 'shot' | 'draw';
 
 export interface EnemyAttack {
   kind: AttackKind;
@@ -175,6 +177,8 @@ export interface EnemyAttack {
   cy: number;
   radius: number;
   done: boolean;
+  /** Too heavy to block: a guard that meets it breaks (parry it instead). */
+  crush?: boolean;
 }
 
 export type EnemyKind = 'butcher' | 'scrapper' | 'dummy' | 'swingDummy';
@@ -216,6 +220,8 @@ export interface Enemy extends Body {
   respawns: boolean;
   /** A scrapper with a bow (see ARCHER). */
   bow?: boolean;
+  /** A goblin built for one lesson in the prologue wood (shared/wood.ts VARIANTS). */
+  variant?: 'looter' | 'lunger' | 'heavy' | 'stoker';
   /** False while it hasn't noticed anyone (see ALERT); undefined counts as awake. */
   alert?: boolean;
   /** A named goblin (a hunt's quarry, a story boss). */

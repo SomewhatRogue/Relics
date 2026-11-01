@@ -1,5 +1,5 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, parry, roll). */
-import { BLESSING, WARD, FLINCH, HORN, OVERKILL, PERK, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, WEAPONS, type Swing } from '../shared/tuning';
+import { BLESSING, WARD, FLINCH, HORN, OVERKILL, PERK, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing } from '../shared/tuning';
 import { shove } from './bodies';
 import { statsOf } from './gearstats';
 import { HUNGRY_FX, wears } from './hungry';
@@ -106,6 +106,15 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     if (has(h, 'tempo')) (h.tempoUntil = now + TRAIT.tempoTime), ev.push({ k: 'tempo', x: h.x, y: h.y });
     return;
   }
+  // The Stoker's draw: hooked along the line and hauled to its feet, stunned for a free sweep.
+  if (a.kind === 'draw') {
+    const l = Math.hypot(e.x - h.x, e.y - h.y) || 1, to = VARIANTS.stoker.pullTo;
+    Object.assign(h, { x: e.x - ((e.x - h.x) / l) * to, y: e.y - ((e.y - h.y) / l) * to, kvx: 0, kvy: 0, act: 'stun', actT: 0, actDur: VARIANTS.stoker.pullStun });
+    h.hp -= a.dmg;
+    e.cooldown = 0;
+    ev.push({ k: 'hit', x: h.x, y: h.y, n: a.dmg, heavy: true, on: 'hero', src: 'draw' });
+    return downIfDead(h, ev);
+  }
   const tx = e.x - h.x, ty = e.y - h.y, tl = Math.hypot(tx, ty) || 1;
   // Pushed away from where the blow came from (the slam's centre for a slam).
   const sx = a.kind === 'slam' ? h.x - a.cx : -tx, sy = a.kind === 'slam' ? h.y - a.cy : -ty, sl = Math.hypot(sx, sy) || 1;
@@ -125,6 +134,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     return;
   }
   if (canGuard && h.blocking) {
+    // Too heavy to block: the guard breaks (it should have been parried).
+    if (a.crush) h.stamina = 0;
     const chip = Math.round(a.dmg * w.chip * (1 - g.guard) * taken);
     h.hp -= chip;
     h.stamina -= a.dmg * GUARD.staminaPerDmg * w.guardCost * (1 - g.guard) * (h.rallyUntil > now ? HORN.guard : 1) * (h.perks.includes('ironhide') ? PERK.ironhide : 1);

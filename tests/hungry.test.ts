@@ -136,6 +136,7 @@ describe('hungry gear', () => {
   it('the Want grows with jobs in hungry gear and falls at the church', () => {
     const g = new Game();
     g.create('WARRIOR', 'greed');
+    g.skipWood();
     const it = piece('cleaver');
     g.profile.bag.push(it);
     g.hero.bag.push(it);

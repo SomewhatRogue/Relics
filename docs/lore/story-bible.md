@@ -139,3 +139,10 @@ most Want among the heroes is the one the bells don't spare).
   is the eyes. Turning into a named butcher is still Kyle's call.
 - **On screen, "hungry gear"** is the term for butcher-touched gear (red). It can only be given up at the
   church, never melted, traded or dropped.
+- **The prologue** (2026-11-01, Kyle approved by building it): every new hero wakes on the field where the
+  Greyhollow column died (undated: every hero plays it, whatever chapter the world is in). Hew, the last
+  charcoal burner in Greyhollow, burned the column's dead so the hungry went without; he gave the hero
+  his boots, taught them to fight, and was killed by the Stoker, a one-off butcher with a burner's rake.
+  He left a hazel tally stick (eleven notches, names by the ones he knew) for Father Odric, who keeps the
+  count of the dead. The hungry left that field half-picked and went north together (unexplained).
+  Wickhold owes Hew for four loads of charcoal. Orla of the watch knew him by his boots.

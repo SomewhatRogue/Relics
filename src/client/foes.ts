@@ -160,6 +160,15 @@ export function drawTelegraph(c: Ctx, a: EnemyAttack, cx: number, cy: number, pa
       g.globalAlpha = on ? 0.85 * pulse : 0.35;
       g.fillRect(px, py, 1 + wide, 1 + wide);
     }
+  } else if (a.kind === 'draw') {
+    // The Stoker's rake: a striped line (can't be blocked) that fills as it winds up. Get off it.
+    const R = a.range * PX, ox = OX + a.ox * PX - cx, oy = OY + a.oy * PX - cy, nx = -a.dy, ny = a.dx;
+    for (let d = 6; d <= R; d += 1) for (let w = -1; w <= 1; w++) {
+      const on = d < R * prog, px = Math.round(ox + a.dx * d + nx * w), py = Math.round(oy + a.dy * d + ny * w);
+      g.fillStyle = w ? (Math.floor(d / 3) % 2 ? '#ffd040' : '#2a1408') : fill;
+      g.globalAlpha = on ? 0.9 * pulse : 0.3;
+      g.fillRect(px, py, 1, 1);
+    }
   } else {
     const R = a.range * PX, ox = OX + a.ox * PX - cx, oy = OY + a.oy * PX - cy, cos = Math.cos(((a.arc / 2) * Math.PI) / 180);
     for (let y = -R; y <= R; y++) for (let x = -R; x <= R; x++) {
@@ -168,7 +177,7 @@ export function drawTelegraph(c: Ctx, a: EnemyAttack, cx: number, cy: number, pa
       const k = (x * a.dx + y * a.dy) / d;
       if (k < cos) continue;
       const edge = d > R - 1.2 || k < cos + 0.012;
-      g.fillStyle = edge && now ? '#ffffff' : edge ? '#e23a30' : fill;
+      g.fillStyle = edge && now ? '#ffffff' : edge && a.unblockable ? (Math.floor(d / 2) % 2 ? '#ffd040' : '#2a1408') : edge ? '#e23a30' : fill;
       g.globalAlpha = edge ? 0.95 : now ? 0.55 : d < R * prog ? 0.48 * pulse : 0.16;
       g.fillRect(Math.round(ox + x), Math.round(oy + y), 1, 1);
     }

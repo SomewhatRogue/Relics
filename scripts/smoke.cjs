@@ -31,6 +31,10 @@ const fail = (why) => {
       await page.click('[data-begin]');
       const p = await page.evaluate(() => window.__game.profile);
       if (p.cls !== 'RANGER') fail(`${tag}: hero not made (${p.cls})`);
+      // A new hero wakes in the prologue wood; skip on to town.
+      const wood = await page.evaluate(() => window.__game.mode);
+      if (wood !== 'wood') fail(`${tag}: no prologue (${wood})`);
+      await page.evaluate(() => window.__game.skipWood());
       // Into the forge, to the smith.
       const inside = await page.evaluate(() => {
         const g = window.__game, b = g.room.map.blocks.find((x) => x.door === 'forge');

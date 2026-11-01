@@ -20,6 +20,8 @@ const hero = (p: Partial<Profile>): Profile => {
   if (!p.rings) out.rings = [];
   out.steel ??= 0;
   out.want ??= 0;
+  // Heroes made before the prologue existed don't have to play it.
+  if (p.prologue === undefined) out.prologue = true;
   if (!p.bag) {
     const arms = p.arms ?? {}, inHand = arms[out.weapon];
     out.bag = Object.entries(arms).filter(([k, it]) => k !== out.weapon && it).map(([, it]) => it!);

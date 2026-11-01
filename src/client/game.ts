@@ -15,13 +15,15 @@ import { CHAPTER_1, QUORUM, rewardMult, type WorldState } from '../shared/story'
 import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
 import { POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, FOUND_RELICS, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId } from '../shared/tuning';
 import { ArenaRoom } from '../sim/room';
+import { newWood, skipCut, stepWood, type WoodState } from '../sim/wood';
+import { LESSONS, woodMap } from '../shared/wood';
 import { PACK } from '../sim/pack';
 import { refreshHealth, statsOf } from '../sim/gearstats';
 import { goal, interiorRoom, isFinal, newRun, runRoom, tally, type Run } from '../sim/run';
 import type { FightEvent, Hero, Intent } from '../sim/types';
 import { load, store, type Save } from './save';
 
-export type Mode = 'town' | 'yard' | 'run';
+export type Mode = 'town' | 'yard' | 'run' | 'wood';
 export interface Result { won: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number; relic?: RelicId }
 /** Something you can use where you stand: a spot, a person, or a door. */
 export interface Near { label: string; talk?: SpotId; arg?: number; key?: string; door?: Block; chest?: number }
@@ -34,6 +36,11 @@ export class Game {
   room!: ArenaRoom;
   run: Run | null = null;
   save: Save = load();
+  /** The prologue in progress (sim/wood.ts), and whether it's a replay. */
+  wood: WoodState | null = null;
+  private woodReplay = false;
+  /** Someone to greet a hero once (Orla, out of the wood). */
+  greeting: string | null = null;
   /** Set when a run ends; the UI shows it and clears it. */
   result: Result | null = null;
   /**
@@ -66,12 +73,84 @@ export class Game {
     return this.outside?.room ?? this.room;
   }
 
-  /** Play hero `i`; back in town. */
+  /** Play hero `i`: the prologue wood if they haven't been through it, else back in town. */
   choose(i: number): void {
     this.save.current = i;
     store(this.save);
     this.run = null;
-    this.enterTown();
+    if (this.profile.prologue) this.enterTown();
+    else this.startWood();
+  }
+
+  /** The prologue (shared/wood.ts): a replay gives nothing and changes nothing. */
+  startWood(replay = false): void {
+    this.mode = 'wood';
+    this.outside = null;
+    this.run = null;
+    this.woodReplay = replay;
+    const room = new ArenaRoom(7, { map: woodMap() });
+    this.place(room, room.map.hero);
+    const h = this.hero, cls = this.profile.cls;
+    // You come round with nothing but your class's weapon and its skill; a Healer's censer has gone cold.
+    Object.assign(h, { relics: abilitiesOf(cls), found: [], cold: cls === 'HEALER', belt: [] });
+    h.relic = h.relics[0];
+    this.wood = newWood(this.room);
+  }
+
+  /** Straight to town, with what the wood would have given (a second hero's choice). */
+  skipWood(): void {
+    this.giveWood();
+    this.enterTown(this.gateSpot());
+  }
+
+  /** What the wood leaves you: the javelin, Hew's tally stick, a cold censer for a Healer. */
+  private giveWood(): void {
+    const p = this.profile;
+    if (!this.woodReplay) {
+      Object.assign(p, { prologue: true, tally: true, cold: p.cls === 'HEALER' });
+      if (!p.relics.includes('javelin')) p.relics.unshift('javelin');
+      p.relic ||= 'javelin';
+    }
+    store(this.save);
+  }
+
+  private gateSpot(): { x: number; y: number } {
+    const g = townSpots(this.world).find((s) => s.id === 'gate');
+    return g ? { x: g.x, y: g.y + 1.6 } : { x: 28, y: 3 };
+  }
+
+  /** Out of the wood at the north gate: Orla knows the boots. */
+  private finishWood(): void {
+    this.giveWood();
+    this.wood = null;
+    this.greeting = this.woodReplay ? null : 'orla';
+    this.enterTown(this.gateSpot());
+  }
+
+  /** Where the camera looks during the cutscene: between you and what's happening. */
+  cutFocus(): { x: number; y: number } | null {
+    const w = this.wood;
+    if (!w || w.cut < 0) return null;
+    const s = this.room.enemies.find((e) => e.id === w.stoker), n = this.room.map.npcs?.find((x) => x.talk === 'hew'), t = s ?? n;
+    const h = this.hero;
+    return t ? { x: (h.x + t.x) / 2, y: (h.y + t.y) / 2 } : { x: h.x, y: h.y };
+  }
+
+  /** Save the hero now (after a change a panel made). */
+  keep(): void {
+    store(this.save);
+  }
+
+  /** Skip the cutscene (once you've seen it). */
+  skipCut(): void {
+    if (this.wood && this.wood.cut >= 0 && this.profile.cutSeen) skipCut(this.wood, this.room);
+  }
+
+  /** The moves the wood has taught so far (everything outside it). */
+  taught(): string[] {
+    if (this.mode !== 'wood' || !this.wood) return ['attack', 'roll', 'block', 'relic', 'potion', 'grab'];
+    if (this.wood.cut >= 0) return [];
+    return this.wood.stage >= 5 ? ['attack', 'roll', 'block', 'relic', 'potion', 'grab'] : LESSONS[this.wood.stage].moves;
   }
   /** Make a hero (class for life); returns its slot, or -1 when all three are taken. */
   create(cls: HeroClass, name: string): number {
@@ -95,6 +174,7 @@ export class Game {
     h.glow = p.glow;
     h.belt = [...p.belt];
     h.want = p.want;
+    h.cold = p.cold;
     h.purse = p.gold + (this.run?.gold ?? 0);
     h.found = [...p.relics];
     h.perks = [...p.perks];
@@ -181,11 +261,26 @@ export class Game {
     intent = { ...intent, classSeq: h.seen.cls, weaponSeq: h.seen.weapon, augmentSeq: h.seen.augment };
     // No fighting in town: no blows, guard, relics or grabs; rolls, dashes and blinks still work.
     if (this.mode === 'town') intent = { ...intent, attack: false, block: false, attackSeq: h.seen.attack, blockSeq: h.seen.block, relicSeq: h.seen.relic, grabSeq: h.seen.grab, potionSeq: h.seen.potion };
+    // The wood: only what Hew has taught you so far; nothing at all during the cutscene.
+    if (this.mode === 'wood') {
+      const t = this.taught(), cut = (this.wood?.cut ?? -1) >= 0;
+      intent = {
+        ...intent, gearSeq: h.seen.gear, openSeq: h.seen.open,
+        ...(cut ? { mx: 0, my: 0 } : {}),
+        ...(t.includes('attack') ? {} : { attack: false, attackSeq: h.seen.attack }),
+        ...(t.includes('roll') ? {} : { rollSeq: h.seen.roll }),
+        ...(t.includes('block') ? {} : { block: false, blockSeq: h.seen.block }),
+        ...(t.includes('relic') ? {} : { relicSeq: h.seen.relic, relicPickSeq: h.seen.relicPick }),
+        ...(t.includes('potion') ? {} : { potionSeq: h.seen.potion }),
+        ...(t.includes('grab') ? {} : { grabSeq: h.seen.grab }),
+      };
+    }
     this.room.setIntent(ME, intent);
     // The room outside runs on while you're in (its kills still pay); then yours.
     const out = this.outside?.room, outEv = out?.advance(dt) ?? [];
     if (out && this.run) tally(this.run, out, outEv, ME);
     const ev = this.room.advance(dt);
+    if (this.mode === 'wood' && this.wood) return this.stepWoodFrame(h, ev, dt);
     this.keepGear(h);
     for (const e of ev) if (e.k === 'spend' && e.id === ME) this.spend(e.n);
     // Walk up into a door to go in; out the bottom of a room to come back out.
@@ -324,6 +419,20 @@ export class Game {
     p.want = Math.max(0, p.want - WANT.giveUp);
     this.equip(this.hero, this.hero);
     store(this.save);
+  }
+
+  /** The wood's own rules after the room's: the lessons, the cutscene, the relic, the road. */
+  private stepWoodFrame(h: Hero, ev: FightEvent[], dt: number): FightEvent[] {
+    const w = this.wood!, cut = w.cut;
+    stepWood(w, this.room, ev, dt);
+    if (cut >= 0 && w.cut < 0 && !this.woodReplay) (this.profile.cutSeen = true), store(this.save);
+    // Out of the Stoker: the javelin, on the RELIC button at once.
+    if (w.relic && !h.found.includes('javelin')) {
+      h.found = ['javelin'];
+      h.relics = abilitiesOf(this.profile.cls, 'javelin');
+    }
+    if (w.done) this.finishWood();
+    return ev;
   }
 
   /** Every piece this hero owns, worn or packed, for the forge. */

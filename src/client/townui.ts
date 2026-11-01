@@ -8,7 +8,8 @@ import { openSquare } from './squareui';
 import { WANT, ARMOR, MODS, REROLL, STEEL, TIERS, nextLevel, POTION, POTIONS, type PotionId, AUGMENTS, CLASS_KITS, CLASS_ORDER, CLASS_SKILL, ELEMENT_NAME, RELICS, TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
 import type { Game } from './game';
 import { PACK } from '../sim/pack';
-import { CHURCH, COAL, COPY, SMITH } from './copy';
+import { CHURCH, COAL, COPY, SMITH, TALLY } from './copy';
+import { LINES } from '../shared/wood';
 import { card, compare } from './card';
 import type { Panel } from './panels';
 import { RUMOURS } from './rumours';
@@ -51,6 +52,12 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       return panel.show(t.name, say(name, ELSEWHERE[cls].replace('{who}', title(yours.name)).replace('{where}', yours.where)));
     }
     const next = xpFor(pr.level + 1), offer = perkOffer(pr);
+    if (pr.cls === 'HEALER' && pr.cold) {
+      pr.cold = false;
+      g.keep();
+      g.hero.cold = false;
+      return panel.show(`${t.name}, ${cls} TRAINER`, p('She takes your censer without asking, carries it to the Lantern, and brings it back lit.') + say(name, TALLY.isolde), [{ label: 'CLOSE', act: again }]);
+    }
     const html = say(name, pr.picks > 0 ? TEACH[pr.cls][0] : TEACH[pr.cls][1]) + (pr.cls === 'HEALER' && pr.glow > 0 ? say(name, COAL.isolde) : '') +
       p(`Level ${pr.level}. Experience ${pr.xp}${pr.level < 10 ? ` of ${next} for the next` : ' (the chapter cap)'}.`) +
       p(pr.perks.length ? 'Yours: ' + pr.perks.map((k) => `<b>${PERKS[k].name}</b> (${PERKS[k].text.toLowerCase()})`).join(', ') : 'No perks yet.') +
@@ -99,9 +106,16 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     const worn = g.gearList().filter((it) => !pr.bag.includes(it) && it.quality !== 'plain' && it.quality !== 'hungry');
     const rerolls = worn.flatMap((it) => (it.mods ?? []).map((m, k) => ({ label: `${itemName(it)}: REROLL ${MODS[m.id].name} (${REROLL})`, disabled: pr.gold < REROLL, act: () => (g.rerollMod(it, k), again()) })));
     panel.show('IVO THE RELIC-WRIGHT', html + shelf(['frost']) + (rerolls.length ? p(`He'll turn one modifier on anything you wear into another, ${REROLL} gold.`) : ''), [...buttons, ...rerolls, ...potionButtons(g, ['frost'], again)]);
+  } else if (id === 'hew') {
+    panel.show('HEW', say('Hew', g.wood && g.wood.stage >= 2 ? LINES.north : 'Later, stray. Breathe first.'));
   } else if (id === 'church') {
     // Hungry gear is given up here, and only here. Odric doesn't ask what it is.
     const hungry = g.gearList().filter((it) => it.quality === 'hungry');
+    if (pr.tally) {
+      pr.tally = false;
+      g.keep();
+      return panel.show('FATHER ODRIC', p('You give him the hazel stick. He runs a thumb down the notches, twelve of them, and stops at the last, where nobody has scratched a name.') + say('Father Odric', TALLY.odric), [{ label: 'CLOSE', act: again }]);
+    }
     panel.show('FATHER ODRIC', say('Father Odric', 'Give what you can spare. Then a little of what you can\'t. That\'s the part it burns.') + (pr.cls === 'HEALER' ? say('Father Odric', COAL.odric) : '') +
       (hungry.length ? say('Father Odric', CHURCH.hungry) : '') + (pr.armor?.hungry === 'ransom' ? p(CHURCH.ransom) : '') +
       p(`Given to the Lantern so far: ${w.lantern} gold.`) + p(`You have ${pr.gold} gold.`),

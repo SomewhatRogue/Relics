@@ -125,6 +125,25 @@ export const ARCHER = {
  */
 export const ALERT = { sight: 6.5, behind: 2.5, hear: 5, shout: 5.5, wander: 0.9, wanderSpeed: 0.8 };
 
+/**
+ * The prologue wood's goblins (shared/wood.ts), each built for one lesson: looters (slow, weak,
+ * picking the dead), lungers (a striped stab from further off: dodge it), the heavy (a blow that breaks
+ * a guard: parry it) and the Stoker (a one-off butcher: rake sweep, kiln drop, and the draw, a rake
+ * flung along a line and hauled back).
+ */
+export const VARIANTS = {
+  looter: { hp: 14, speed: 0.55, stab: { windup: 0.85, active: 0.08, recover: 0.7, dmg: 5, knock: 2, range: 1.3, arc: 50, unblockable: false } as EnemyAttackSpec },
+  lunger: { hp: 30, reach: 2.8, stab: { windup: 0.8, active: 0.1, recover: 0.8, dmg: 10, knock: 5, range: 3.0, arc: 24, unblockable: true } as EnemyAttackSpec },
+  heavy: { hp: 110, reach: 1.7, speed: 0.75, swing: { windup: 1.0, active: 0.1, recover: 0.9, dmg: 18, knock: 8, range: 1.9, arc: 100, unblockable: false } as EnemyAttackSpec },
+  stoker: {
+    hp: 520,
+    sweep: { windup: 1.0, active: 0.1, recover: 0.9, dmg: 26, knock: 8, range: 3.0, arc: 150, unblockable: false } as EnemyAttackSpec,
+    drop: { windup: 1.2, active: 0.12, recover: 1.0, dmg: 34, knock: 14, radius: 2.0, ahead: 1.0, unblockable: true } as EnemyAttackSpec,
+    draw: { windup: 1.0, active: 0.1, recover: 0.6, dmg: 6, knock: 0, range: 8, arc: 8, unblockable: true } as EnemyAttackSpec,
+    drawFrom: 3.2, drawEvery: 0.45, pullTo: 1.2, pullStun: 0.7,
+  },
+};
+
 export const HEIGHT = { shot: 1.25, fallSpeed: 3, fallDmg: 12, fallStun: 0.8 };
 
 export const SWING_DUMMY = {

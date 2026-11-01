@@ -15,6 +15,7 @@ export function wears(h: Hero | undefined, id: HungryId): boolean {
 
 /** Healing `n` from `by` to `to`, as their hungry gear allows. */
 export function heals(to: Hero, by: Hero | undefined, n: number): number {
+  if (by?.cold) return 0;
   if (wears(to, 'cleaver') && by !== to) return 0;
   if (wears(by, 'keeping')) return n * (by === to ? 2 : 0.5);
   return n;

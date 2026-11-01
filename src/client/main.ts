@@ -6,6 +6,9 @@ import { Game, ME } from './game';
 import { Panel } from './panels';
 import { openSpot, showResult } from './townui';
 import { Title } from './title';
+import { woodGoal } from '../sim/wood';
+import { LINES } from '../shared/wood';
+const WOOD_ROAD = LINES.road;
 import { WorldLink } from './worldlink';
 import { setLink } from './squareui';
 import { grabbable } from '../sim/grab';
@@ -39,7 +42,11 @@ const sounds = new Soundscape(music);
 const title = new Title(game, () => undefined);
 // Test hook: ?hero=MAGE skips the start screen with a hero of that class.
 const quick = new URLSearchParams(location.search).get('hero') as HeroClass | null;
-if (quick && CLASS_ORDER.includes(quick)) game.create(quick, quick) < 0 && game.choose(0);
+// ...and ?wood=1 starts it in the prologue wood instead of town.
+if (quick && CLASS_ORDER.includes(quick)) {
+  if (game.create(quick, quick) < 0) game.choose(0);
+  if (new URLSearchParams(location.search).get('wood') !== '1' && game.mode === 'wood') game.skipWood();
+}
 else title.show();
 /** Talk to whoever you stand by, use the spot, or go in at the door (E or F on a laptop, USE on a phone). */
 const use = () => {
@@ -52,6 +59,7 @@ const use = () => {
 addEventListener('keydown', (e) => {
   if ((e.target as HTMLElement).closest('input')) return;
   const k = e.key.toLowerCase();
+  if (game.wood && game.wood.cut >= 0 && (k === 'escape' || k === ' ' || k === 'enter')) return game.skipCut();
   if (k === 'f' && card.current >= 0) input.take(card.current);
   else if (k === 'f' && game.near()?.chest) use();
   else if ((k === 'e' || k === 'f') && game.mode === 'town') use();
@@ -61,6 +69,8 @@ $('#heroes').addEventListener('click', () => {
   if (game.mode !== 'run' && !panel.open) pack.toggle(false), title.show();
 });
 $('#packbtn').addEventListener('click', () => pack.toggle());
+$('#skipcut').addEventListener('click', () => game.skipCut());
+$('#skipcut').addEventListener('touchstart', (e) => (e.preventDefault(), game.skipCut()), { passive: false });
 $('.tb.use').addEventListener('touchstart', (e) => (e.preventDefault(), use()), { passive: false });
 
 /** One line on how each kit guards and dodges. */
@@ -133,7 +143,21 @@ function hud(now: number): void {
   }
   // The banner: where you are and what you're doing.
   const run = game.run;
-  if (game.mode === 'run' && run) {
+  // The wood: the lesson and its control, how far along; Hew's words; the bars in the cutscene.
+  document.body.dataset.taught = game.taught().join(' ');
+  const wood = game.wood;
+  document.body.classList.toggle('cutscene', !!wood && wood.cut >= 0);
+  const cap = wood?.caption && wood.caption.until > room.time ? wood.caption : null;
+  $('#caption').hidden = !cap;
+  if (cap) $('#caption').innerHTML = (cap.who ? `<b>${cap.who}</b>` : '') + `<span>${cap.text}</span>`;
+  $('#skipcut').hidden = !wood || wood.cut < 0 || !pr.cutSeen;
+  if (game.mode === 'wood' && wood) {
+    const g = woodGoal(wood, input.touch);
+    $('#banner').innerHTML = `<b>${g.title}</b> ${g.text}<span>GREYHOLLOW, THE DAY AFTER</span>`;
+    const boss = room.enemies.find((e) => e.name && e.act !== 'dead');
+    $('#boss').hidden = !boss || wood.cut >= 0;
+    if (boss) ($('#boss b').textContent = boss.name!), ($('#boss i').style.width = (100 * boss.hp) / boss.maxHp + '%');
+  } else if (game.mode === 'run' && run) {
     const g = goal(run, game.fightRoom);
     $('#banner').innerHTML = `<b>${run.job.place.name.toUpperCase()} ${run.index + 1}/${run.job.rooms}</b> ${g.text}<span>+${run.gold} GOLD  DOWNS ${run.downs}/${MAX_DOWNS}${run.rescued ? `  SAVED ${run.rescued}` : ''}</span>`;
     const boss = room.enemies.find((e) => e.name && e.act !== 'dead');
@@ -179,7 +203,10 @@ function frame(t: number): void {
   // Back in the open in town: see what the world has been up to (at most every 30 s).
   if (game.mode === 'town' && !game.outside) void link.refresh();
   if (game.result && !panel.open) showResult(game, panel);
+  // Out of the wood: Orla at the gate.
+  if (game.greeting === 'orla' && !panel.open) (game.greeting = null), panel.show('ORLA OF THE WATCH', `<p><b>Orla:</b> "Those are Hew's boots."</p><p>A beat.</p><p><b>Orla:</b> "Ah. Church is up past the Lantern. Hollis after; he'll want you working."</p><p class="dim">${WOOD_ROAD}</p>`, [{ label: 'INTO WICKHOLD', primary: true, act: () => panel.hide() }], true);
   fx.update(dt);
+  scene.focus = game.cutFocus();
   scene.render(game.room, ME, fx, t / 1000, dt);
   hud(t / 1000);
   requestAnimationFrame(frame);

@@ -30,6 +30,7 @@ describe('heroes', () => {
   it('are made once with a class for life; the fight never takes a class or kit change', () => {
     const g = new Game();
     g.create('RANGER', 'wren');
+    g.skipWood();
     expect(g.profile).toMatchObject({ name: 'WREN', cls: 'RANGER', weapon: 'longbow' });
     g.enterYard();
     g.step(0.1, { ...NO_INTENT, classSeq: 5, weaponSeq: 3, augmentSeq: 2 });
@@ -70,6 +71,7 @@ describe('heroes', () => {
   it('the relic-wright fits elements for gold', () => {
     const g = new Game();
     g.create('WARRIOR', 'b');
+    g.skipWood();
     g.profile.gold = 50;
     expect(g.fitAugment('horn', 'fire')).toBe(true);
     expect(g.fitAugment('javelin', 'frost')).toBe(false);
@@ -83,6 +85,7 @@ describe('the forge', () => {
   it('Halvard melts packed gear for steel and levels gear up to its tier cap; Ivo rerolls a modifier', () => {
     const g = new Game();
     g.create('WARRIOR', 'smith');
+    g.skipWood();
     g.profile.gold = 2000;
     const spear = g.buy('fine', 'spear')!, junk = g.buy('fine', 'greatsword')!;
     expect(g.melt(junk)).toBe(true);

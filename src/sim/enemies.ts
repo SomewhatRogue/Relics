@@ -3,7 +3,7 @@ import { lure, seenFrom } from './lantern';
 import { visible } from './flasks';
 import { HUNGRY_FX, wears } from './hungry';
 import { collide, currentMap, inArea } from '../shared/arena';
-import { ALERT, ARCHER, BUTCHER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, type EnemyAttackSpec, type EnemySpec } from '../shared/tuning';
+import { ALERT, ARCHER, BUTCHER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, type EnemyAttackSpec, type EnemySpec, VARIANTS } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { slide } from './bodies';
 import { hitHero } from './combat';
@@ -144,18 +144,29 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     } else if (on) walk(e, ux, uy, spec.speed * slow * Math.max(0.2, facing), dt);
     return;
   }
-  if (level && d <= spec.reach && e.cooldown <= 0 && facing > 0.75) {
+  // The wood's goblins: each fights the way its lesson needs.
+  const v = e.variant, reach = v === 'lunger' ? VARIANTS.lunger.reach : v === 'heavy' ? VARIANTS.heavy.reach : spec.reach;
+  if (v === 'stoker' && level && e.cooldown <= 0 && facing > 0.8 && d > VARIANTS.stoker.drawFrom && d < VARIANTS.stoker.draw.range! - 0.5 && rng.next() < VARIANTS.stoker.drawEvery) return begin(e, 'draw', VARIANTS.stoker.draw, t, ev);
+  if (level && d <= reach && e.cooldown <= 0 && facing > 0.75) {
+    if (v === 'looter') return begin(e, 'stab', VARIANTS.looter.stab, t, ev);
+    if (v === 'lunger') return begin(e, 'stab', VARIANTS.lunger.stab, t, ev);
+    if (v === 'heavy') return begin(e, 'cleave', VARIANTS.heavy.swing, t, ev), e.attack && (e.attack.crush = true), undefined;
+    if (v === 'stoker') {
+      const drop = rng.next() < 0.35;
+      return begin(e, drop ? 'slam' : 'cleave', drop ? VARIANTS.stoker.drop : VARIANTS.stoker.sweep, t, ev);
+    }
     if (e.kind === 'butcher') {
       const slam = rng.next() < BUTCHER.slamChance;
       begin(e, slam ? 'slam' : 'cleave', slam ? BUTCHER.slam : BUTCHER.cleave, t, ev);
     } else begin(e, 'stab', SCRAPPER.stab, t, ev);
     return;
   }
-  if (via || d > spec.reach * 0.8) {
+  if (via || d > reach * 0.8) {
     // Scrappers sidle a little rather than queueing straight in.
     const side = e.kind === 'scrapper' && !via ? Math.sin(now * 1.3 + e.id * 2) * 0.5 : 0;
     // Walks where it faces: something turning round is slow to come after you.
-    walk(e, ux - uy * side, uy + ux * side, spec.speed * slow * Math.max(0.2, facing), dt);
+    const pace = v === 'looter' ? VARIANTS.looter.speed : v === 'heavy' ? VARIANTS.heavy.speed : 1;
+    walk(e, ux - uy * side, uy + ux * side, spec.speed * slow * pace * Math.max(0.2, facing), dt);
   }
 }
 
@@ -170,7 +181,9 @@ function notice(e: Enemy, heroes: Hero[], others: Enemy[], now: number, ev: Figh
     const dx = h.x - e.x, dy = h.y - e.y, d = Math.hypot(dx, dy);
     if (!visible(h, d, now)) continue;
     const ahead = (dx * e.fx + dy * e.fy) / (d || 1) > -0.2;
-    if (d < (ahead ? ALERT.sight : ALERT.behind) + seenFrom(h)) seen = true;
+    // Looters picking the dead don't look up until something comes close.
+    const sight = e.variant === 'looter' ? 1.6 : ahead ? ALERT.sight : ALERT.behind;
+    if (d < sight + seenFrom(h)) seen = true;
   }
   for (const o of others) if (o !== e && o.alert && (isDead(o) || o.hitAt > now - 0.2) && Math.hypot(o.x - e.x, o.y - e.y) < ALERT.hear) seen = true;
   if (!seen) return false;

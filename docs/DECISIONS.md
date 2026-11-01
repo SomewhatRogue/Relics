@@ -2,6 +2,31 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-01: the prologue, the wood in Greyhollow (Claude Opus 5.5)
+
+Kyle: a tutorial before town; woken and saved by an old man after a battle, taught attack, then dodge,
+then block, then parry in different areas with different goblins; he's killed in a cutscene by a mini
+boss you then kill for your first relic. Plan: the Claude Doc "Relic: The Prologue"; story and lines
+from the lore keeper (Hew, the Greyhollow column, the Stoker, the tally stick).
+
+- **The wood** (`shared/wood.ts`): one hand-laid 64 by 40 map, five areas walled by trees, joined by
+  ways a fallen log closes until the lesson before it is done; then the road west to Wickhold.
+- **The running order** (`sim/wood.ts`, stepped after the room by the game): each area's goblins come
+  out when you walk in, its count (dodges, blocks, parries) and its goblins gate the way on, Hew walks
+  ahead and says his line, falls are picked up (Hew hauls you up; at the Stoker the fight restarts),
+  goblins killed before the lesson took come again.
+- **Locked moves:** the game passes only what's been taught (attack; then roll; then block; then
+  everything but the skill; the skill at the hut). Phone buttons appear as they're taught.
+- **New goblins** (`VARIANTS` in tuning.ts): looters (weak, slow, look up only when you're close),
+  lungers (a striped stab from three tiles), the heavy (a blow that breaks any guard: parry it) and
+  the Stoker (rake sweep, kiln drop, and the draw: a striped line; caught, you're hauled to its feet).
+- **The cutscene:** about ten seconds, bars, input off, the camera eased between you and it; Hew is
+  hooked, dragged, gives you the stick and dies behind the cordwood. Skippable once seen.
+- **Leaving:** the javelin (first relic; deep jobs now give the hook first), Hew's tally stick for Odric,
+  and for a Healer a cold censer (no heals given) until Mother Isolde relights it. Orla greets you at
+  the gate. Heroes made before today skip it; a second hero can BEGIN IN WICKHOLD; WOOD on the start
+  screen replays it with no rewards. Test links (`?hero=`) skip it unless `&wood=1`.
+
 ## 2026-11-01: loot slice 6, hungry gear and the Want (Claude Opus 5.5)
 
 - **Ten hungry pieces** (`shared/hungry.ts`, wired in `sim/hungry.ts`), names and costs from the lore

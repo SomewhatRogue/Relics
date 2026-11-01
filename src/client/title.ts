@@ -50,7 +50,7 @@ export class Title {
     this.el.innerHTML = `<div class="tcard"><h1>RELIC</h1><div class="sub">${CHAPTER_1.name.toUpperCase()}</div>` +
       `<p class="lede">${COPY.homeLede}</p><div class="slots">` +
       hs.map((h, i) => `<div class="slot">${face(h.cls)}<div class="who"><b>${esc(h.name)}</b><span>${h.cls} &middot; LEVEL ${h.level} &middot; ${h.gold} GOLD</span></div>` +
-        `<button data-play="${i}" class="primary">PLAY</button><button data-retire="${i}" class="ghost">${this.retiring === i ? 'SURE?' : 'RETIRE'}</button></div>`).join('') +
+        `<button data-play="${i}" class="primary">PLAY</button>${h.prologue ? `<button data-wood="${i}" class="ghost" title="Play the wood again">WOOD</button>` : ''}<button data-retire="${i}" class="ghost">${this.retiring === i ? 'SURE?' : 'RETIRE'}</button></div>`).join('') +
       `</div>${hs.length < HERO_SLOTS ? '<button data-new class="wide">NEW HERO</button>' : '<p class="dim">Three heroes is the most. Retire one to make another.</p>'}</div>`;
   }
 
@@ -66,7 +66,7 @@ export class Title {
       `<div class="bars">${STATS.map((k) => `<span>${k}</span><i>${'<em class="on"></em>'.repeat(s.stats[k])}${'<em></em>'.repeat(5 - s.stats[k])}</i>`).join('')}</div>` +
       `<dl class="sheet"><dt>WEAPON</dt><dd>${s.weapon}</dd><dt>SKILL</dt><dd>${s.skill}</dd><dt>CAN'T</dt><dd>${s.cant}</dd>${s.note ? `<dt>CENSER</dt><dd>${s.note}</dd>` : ''}</dl><p class="dim small">${NO_RELICS}</p>` +
       `<label class="name">NAME <input maxlength="12" value="${NAMES[c]}" autocomplete="off" spellcheck="false"></label>` +
-      `<button data-begin class="primary wide">BEGIN AS ${c}</button><button data-pick class="ghost wide">OTHER CLASSES</button></div>`;
+      `<button data-begin class="primary wide">BEGIN AS ${c}</button>${this.g.save.heroes.some((h) => h.prologue) ? '<button data-skipwood class="ghost wide">BEGIN IN WICKHOLD (SKIP THE WOOD)</button>' : ''}<button data-pick class="ghost wide">OTHER CLASSES</button></div>`;
   }
 
   private click(t: HTMLElement): void {
@@ -74,6 +74,12 @@ export class Title {
     if (!b) return;
     const d = b.dataset;
     if (d.play !== undefined) return this.g.choose(Number(d.play)), this.hide();
+    if (d.wood !== undefined) return this.g.choose(Number(d.wood)), this.g.startWood(true), this.hide();
+    if (d.skipwood !== undefined) {
+      const name = (this.el.querySelector('input') as HTMLInputElement).value;
+      if (this.g.create(this.pick, name) >= 0) this.g.skipWood(), this.hide();
+      return;
+    }
     if (d.retire !== undefined) {
       const i = Number(d.retire);
       if (this.retiring === i) (this.g.retire(i), (this.retiring = -1));

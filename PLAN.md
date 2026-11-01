@@ -2,6 +2,10 @@
 
 ## Current slice
 
+**The prologue wood** (built 2026-11-01; waiting on Kyle's play). *Done when* a new hero wakes on the
+field, learns attack, dodge, block and parry from Hew, watches him die, kills the Stoker for the
+javelin, and walks into Wickhold with the tally stick.
+
 **Loot and gear** (built 2026-11-01, all six slices; waiting on Kyle's play). *Done when* Kyle finds gold
 and potions on a job, opens a chest, compares and equips a better tier, upgrades at the anvil, and
 meets a hungry piece. Open: whether the Want turns a hero (story bible).

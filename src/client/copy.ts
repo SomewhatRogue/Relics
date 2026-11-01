@@ -51,6 +51,12 @@ export const CHURCH = {
   gannet: 'Gannet pours you a short one and doesn\'t meet your eye.',
 };
 
+/** After the wood (lore keeper to review): Odric takes Hew's count; Isolde relights a Healer's censer. */
+export const TALLY = {
+  odric: "Hew. He never did come in for the beer. Leave it with me. I'll chalk them up with the others, every name he had.",
+  isolde: "Went out on the field, did it? They do. It's lit now. Don't let it go out twice; I won't carry it again.",
+};
+
 export const SMITH = {
   greet: 'Good steel. Gold first.',
   bought: "In your pack. He's already oiling the next one.",
