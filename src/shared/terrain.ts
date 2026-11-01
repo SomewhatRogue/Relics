@@ -12,7 +12,7 @@ import { Rng } from './rng.js';
 export interface Foe { kind: 'scrapper' | 'butcher'; x: number; y: number; hp?: number; name?: string; bow?: boolean; z?: number; awake?: boolean }
 /** Which way the party went at a fork. */
 export type RoadId = Road['road'];
-export interface RoomPlan { map: GameMap; foes: Foe[]; props: { kind: PropKind; x: number; y: number }[] }
+export interface RoomPlan { map: GameMap; foes: Foe[]; props: { kind: PropKind; x: number; y: number }[]; chests: { x: number; y: number; chained?: boolean }[] }
 
 /** A run room: big enough to explore before the way on; you come in at the bottom, leave at the top. */
 export const ROOM = { w: 28, h: 24 };
@@ -130,6 +130,13 @@ export function planRoom(job: Job, index: number, road?: RoadId): RoomPlan {
   if (final && (obj === 'hunt' || obj === 'story')) foes.push({ kind: 'butcher', x: MID, y: 4.5, hp: obj === 'story' ? 560 : 420, name: job.boss });
   if (index >= 1 && ruin >= 2) foes.push({ kind: 'butcher', x: fires[0]?.x ?? MID, y: (fires[0]?.y ?? 6) - 1.2 });
   if (final && ruin >= 2 && obj !== 'hunt' && obj !== 'story') foes.push({ kind: 'butcher', x: fires[1]?.x ?? MID, y: (fires[1]?.y ?? 5) - 1.2 });
+  // Chests: sometimes one in a room, always one in the last; on a deep job, a chained one by the named butcher.
+  const chests: RoomPlan['chests'] = [];
+  if (final || rng.next() < 0.4) {
+    const c = spot(0.6, 2.5, H - 5);
+    if (c) chests.push(c);
+  }
+  if (final && job.deep) chests.push({ x: MID + 2.2, y: 3.2, chained: true });
   const night = job.twist === 'night', t = THEMES[kind];
   const theme: Theme = night ? { ...t, ambient: t.ambient.map((v) => v * 0.65) as Theme['ambient'], moon: t.moon * 0.5 } : t;
   const map: GameMap = {
@@ -137,5 +144,5 @@ export function planRoom(job: Job, index: number, road?: RoadId): RoomPlan {
     torches: kit.torches ? [{ x: 4.5, y: -1.6 }, { x: MID - 4, y: -1.6 }, { x: MID + 4, y: -1.6 }, { x: W - 4.5, y: -1.6 }] : [], hero: { ...SPAWN }, exit: roads ? null : { ...EXIT }, theme,
     ledges: ledges.length ? ledges : undefined, roads,
   };
-  return { map, foes, props };
+  return { map, foes, props, chests };
 }

@@ -94,5 +94,5 @@ export function runInterior(job: Job, roomIndex: number, blockIndex: number, doo
   const foes: Foe[] = rng.shuffle(spots).slice(0, Math.min(4, 1 + rng.int(2) + (ruin >= 2 ? 1 : 0) + (barn ? 1 : 0))).map(([x, y]) => ({ kind: 'scrapper', x, y }));
   if (barn && ruin >= 2 && rng.next() < 0.4) foes.push({ kind: 'butcher', x: W / 2, y: 2.4 });
   const map = room(barn ? 'THE BARN' : 'THE COTTAGE', W, H, night, blocks, [], { rounds, torches: [], braziers: [{ x: barn ? W / 2 : 9.5, y: barn ? 6.2 : 1.2, r: 0.35 }] });
-  return { map, foes, props };
+  return { map, foes, props, chests: [] };
 }

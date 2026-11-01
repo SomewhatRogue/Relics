@@ -36,7 +36,7 @@ export function takeLoot(h: Hero, inp: Intent, drops: Drop[], ev: FightEvent[]):
   h.seen.take = inp.takeSeq;
   const i = drops.findIndex((d) => d.id === inp.take);
   const d = drops[i];
-  if (!d || Math.hypot(d.x - h.x, d.y - h.y) > REACH || (d.item.kit && WEAPONS[d.item.kit].cls !== WEAPONS[h.weapon].cls) || h.bag.length >= PACK) return;
+  if (!d || (d.owner && d.owner !== h.id) || Math.hypot(d.x - h.x, d.y - h.y) > REACH || (d.item.kit && WEAPONS[d.item.kit].cls !== WEAPONS[h.weapon].cls) || h.bag.length >= PACK) return;
   drops.splice(i, 1);
   h.bag.push(d.item);
   ev.push({ k: 'loot', x: h.x, y: h.y, name: itemName(d.item) });

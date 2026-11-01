@@ -3,6 +3,7 @@ import type { Bolt, Drop, Hero, Hook, Javelin } from '../sim/types';
 import type { Coal } from '../sim/lantern';
 import type { Pickup } from '../sim/pickups';
 import type { Smoke } from '../sim/flasks';
+import type { Chest } from '../sim/chests';
 import { POTIONS, TIERS, TIER_ORDER } from '../shared/tuning';
 import { line, type Ctx } from './draw';
 import { EL_COL } from './palette';
@@ -204,6 +205,47 @@ export function drawCoal(c: Ctx, m: Coal, x: number, y: number): void {
     c.glow.fillRect(Math.round(x + Math.sin(t * 6 + i * 2) * 2), Math.round(y - 4 - t * 14), 1, 1);
   }
   c.glow.globalAlpha = 1;
+}
+
+/** A chest: wood and iron; rattling with light leaking from the seams while it opens; lid up after; chains on a chained one. */
+export function drawChest(c: Ctx, ch: Chest, x: number, y: number): void {
+  const opening = ch.state === 'opening', open = ch.state === 'open', col = TIERS[ch.tier].col;
+  const jx = opening ? Math.round(Math.sin(c.now * 40) * (ch.t > 0.6 ? 1 : 0.5)) : 0, bx = Math.round(x - 7 + jx), by = Math.round(y - 9);
+  c.lit.fillStyle = 'rgba(8,6,12,0.5)';
+  c.lit.fillRect(bx, by + 9, 14, 2);
+  c.lit.fillStyle = '#5a3d22';
+  c.lit.fillRect(bx, by + 3, 14, 7);
+  c.lit.fillStyle = '#3a2614';
+  c.lit.fillRect(bx, by + 6, 14, 1);
+  c.lit.fillStyle = '#7a828c';
+  c.lit.fillRect(bx + 1, by + 3, 1, 7);
+  c.lit.fillRect(bx + 12, by + 3, 1, 7);
+  if (open) {
+    c.lit.fillStyle = '#6b4a2b';
+    c.lit.fillRect(bx, by - 3, 14, 3);
+    c.glow.globalAlpha = 0.5;
+    c.glow.fillStyle = col;
+    c.glow.fillRect(bx + 2, by + 2, 10, 1);
+    c.glow.globalAlpha = 1;
+  } else {
+    c.lit.fillStyle = '#6b4a2b';
+    c.lit.fillRect(bx, by, 14, 3);
+    c.lit.fillStyle = '#d4a537';
+    c.lit.fillRect(bx + 6, by + 3, 2, 2);
+  }
+  if (opening) {
+    // Light leaking from the seam, brighter as the lid gives; hungry light pulses dark.
+    const k = ch.t / 1.2, pulse = ch.tier === 'hungry' ? 0.5 + 0.5 * Math.sin(c.now * 7) : 1;
+    c.glow.globalAlpha = (0.4 + 0.6 * k) * pulse;
+    c.glow.fillStyle = col;
+    c.glow.fillRect(bx, by + 3, 14, 1);
+    for (let i = 0; i < 3; i++) c.glow.fillRect(bx + 2 + i * 4 + jx, by + 2 - Math.round(((c.now * 20 + i * 7) % 6) * k), 1, 1);
+    c.glow.globalAlpha = 1;
+  }
+  if (ch.chained && ch.state === 'shut') {
+    c.lit.fillStyle = '#9aa3ad';
+    for (let i = 0; i < 7; i++) c.lit.fillRect(bx + i * 2, by + 1 + i, 1, 1), c.lit.fillRect(bx + 13 - i * 2, by + 1 + i, 1, 1);
+  }
 }
 
 /** Gear lying on the floor: a ring of its tier's colour round it, a shaft of light from blue up, and the thing itself. */

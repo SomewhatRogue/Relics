@@ -144,7 +144,8 @@ body[data-mode='town'] #hud .gear:not(:first-of-type) { display: none; }
 #title .about span { color: #9a94a8; font-size: 11px; }
 #title .name { display: flex; align-items: center; gap: 10px; color: #c8b080; font-size: 11px; }
 #title .name input { flex: 1; min-width: 0; height: 40px; padding: 0 10px; font: inherit; font-size: 16px; color: #fff1d0; background: #14121a; border: 1px solid #6a5a3a; border-radius: 4px; text-transform: uppercase; user-select: text; -webkit-user-select: text; }
-body[data-mode='run'] .tb.use { display: none; }
+body[data-mode='run'] .tb.use:not(.chest) { display: none; }
+body[data-mode='run'] .tb.use.chest { width: 64px; height: 64px; left: calc(24px + env(safe-area-inset-left)); right: auto; bottom: calc(290px + env(safe-area-inset-bottom)); }
 /* Phones: a narrower HUD so the corner buttons fit beside it. */
 body.touch #hud { width: 138px; }
 body.touch #corner { gap: 4px; }

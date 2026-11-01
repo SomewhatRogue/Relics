@@ -15,6 +15,7 @@ import { stepBuildings, sweepBlocks } from './buildings';
 import { newEnemy, stepEnemy } from './enemies';
 import { newHero, stepHero, type HeroActs } from './hero';
 import { damage, isDead } from './damage';
+import { newChest, startChest, stepChests, type Chest } from './chests';
 import { stepFlask, stepPotions, usePotion, type Smoke } from './flasks';
 import { dropPickups, stepPickups, type Pickup } from './pickups';
 import { dropCoal, healMult, stepCoals, type Coal } from './lantern';
@@ -45,6 +46,9 @@ export class ArenaRoom {
   pickups: Pickup[] = [];
   /** Smoke from thrown flasks. */
   smokes: Smoke[] = [];
+  /** Chests, and how far up the danger shifts what's in them (sim/chests.ts). */
+  chests: Chest[] = [];
+  danger = 0;
   props: Prop[] = roomProps();
   intents = new Map<string, Intent>();
   /** Events from the latest tick (drawn as hits, sparks and sounds). */
@@ -66,7 +70,9 @@ export class ArenaRoom {
    * The training room by default. A run room passes its `map`, `foes` and `props` (its goblins stay
    * dead and its furniture doesn't come back). `squire`: a training partner to heal and bless.
    */
-  constructor(seed = 1, opts: { scrappers?: boolean; squire?: boolean; props?: boolean; map?: GameMap; foes?: Foe[]; furniture?: { kind: PropKind; x: number; y: number }[] } = {}) {
+  constructor(seed = 1, opts: { scrappers?: boolean; squire?: boolean; props?: boolean; map?: GameMap; foes?: Foe[]; furniture?: { kind: PropKind; x: number; y: number }[]; chests?: { x: number; y: number; chained?: boolean }[]; danger?: number } = {}) {
+    this.chests = (opts.chests ?? []).map((c) => newChest(c.x, c.y, c.chained));
+    this.danger = opts.danger ?? 0;
     this.rng = new Rng(seed);
     this.lootRng = new Rng(seed * 7919 + 13);
     this.map = opts.map ?? ARENA;
@@ -161,6 +167,13 @@ export class ArenaRoom {
       if (flask) this.bolts.push(flask);
     }
     this.smokes = stepPotions(this.heroes, this.smokes, this.time, TICK);
+    for (const h of this.heroes) {
+      const inp = this.intents.get(h.id) ?? NO_INTENT, c = this.chests.find((x) => x.id === inp.open);
+      if (inp.openSeq === h.seen.open) continue;
+      h.seen.open = inp.openSeq;
+      if (c) startChest(c, h, this.heroes, this.enemies, this.lootRng, this.danger, this.events);
+    }
+    stepChests(this.chests, this.heroes, this.drops, this.pickups, this.lootRng, this.events, TICK);
     for (const h of this.heroes) stepHero(h, this.intents.get(h.id) ?? NO_INTENT, this.enemies, this.time, TICK, this.events, acts);
     this.javelins = this.javelins.filter((j) => stepJavelin(j, this.enemies, this.time, TICK, this.events, hit));
     this.hooks = this.hooks.filter((k) => stepHook(k, this.heroes, this.enemies, this.time, TICK, this.events, hit));

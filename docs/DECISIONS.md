@@ -2,6 +2,19 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-01: loot slice 3, chests (Claude Opus 5.5)
+
+- **Chests** (`sim/chests.ts`, placed by `planRoom`): 40% of rooms have one, the last room always, and a
+  deep job's last room adds a chained chest by the named butcher that opens only once it's dead.
+- **Opening:** USE beside it (F on a laptop; a small OPEN button on a phone, out of the way of the fight
+  buttons). It takes 1.2 s; walk off, get hurt or go down and it shuts again. Every player in the room
+  is rolled for at the start, so the seam light is the true colour of the opener's best piece. Hungry
+  light pulses, a heartbeat plays, and goblins within 6 tiles notice.
+- **What's inside:** one or two pieces per player (two in a chained chest, one tier up), weapons,
+  armor or rings by chest odds, shifted a tier up in places of ruin 3 and on deep jobs; sometimes gold
+  and a potion for anyone. Each player's pieces are theirs alone: only they see them, only they can
+  take them (`Drop.owner`).
+
 ## 2026-11-01: loot slices 2 and 4, tiers, modifiers, armor, rings, the item card (Claude Opus 5.5)
 
 - **Item** (`shared/loot.ts`) gains slot (weapon, armor, ring), tier (plain, fine, forged, tolmouth,

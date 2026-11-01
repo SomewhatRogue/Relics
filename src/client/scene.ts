@@ -3,13 +3,15 @@
  * The scene is painted at a low resolution and scaled up by a whole number so pixels stay crisp.
  */
 import { ARENA, npcAt, type GameMap } from '../shared/arena';
-import { GRAB, GUARD, POTION, WEAPONS } from '../shared/tuning';
+import { GRAB, GUARD, POTION, TIERS, WEAPONS } from '../shared/tuning';
 import type { ArenaRoom } from '../sim/room';
 import { drawHero } from './actors';
 import { blit, type Ctx } from './draw';
 import { drawEnemy, drawHeld, drawTelegraph } from './foes';
 import { EL_LIGHT } from './palette';
-import { drawFlask, drawPickup, drawSmoke } from './relicsdraw';
+import { drawChest, drawFlask, drawPickup, drawSmoke } from './relicsdraw';
+/** A '#rrggbb' as light colour 0..1. */
+const tint = (h: string): [number, number, number] => [parseInt(h.slice(1, 3), 16) / 255, parseInt(h.slice(3, 5), 16) / 255, parseInt(h.slice(5, 7), 16) / 255];
 import { drawBolt, drawDrop, drawCoal, drawHook, drawJavelin } from './relicsdraw';
 import { drawStatus } from './status';
 import { drawLifted, drawProp } from './propsdraw';
@@ -136,7 +138,12 @@ export class Scene {
       const x = OX + p.x * PX - cx, y = OY + p.y * PX - cy;
       items.push({ y: OY + p.y * PX, draw: () => drawProp(c, p, x, y, room.time) });
     }
+    for (const ch of room.chests) {
+      const x = OX + ch.x * PX - cx, y = OY + ch.y * PX - cy;
+      items.push({ y: OY + ch.y * PX, draw: () => drawChest(c, ch, x, y) });
+    }
     for (const d of room.drops) {
+      if (d.owner && d.owner !== meId) continue;
       const x = OX + d.x * PX - cx, y = OY + d.y * PX - cy;
       items.push({ y: OY + d.y * PX - 20, draw: () => drawDrop(c, d, x, y) });
     }
@@ -216,7 +223,9 @@ export class Scene {
 
     const lights: Light[] = [];
     for (const m of room.coals) lights.push({ x: OX + m.x * PX - cx, y: OY + m.y * PX - cy - 4, r: 26 + Math.sin(now * 7 + m.id) * 3, i: 0.6 * Math.min(1, m.life / 4), c: [1, 0.6, 0.28] });
+    for (const ch of room.chests) if (ch.state !== 'shut') lights.push({ x: OX + ch.x * PX - cx, y: OY + ch.y * PX - cy - 6, r: ch.state === 'opening' ? 16 + 30 * (ch.t / 1.2) : 26, i: ch.state === 'opening' ? 0.4 + 0.5 * (ch.t / 1.2) : 0.35, c: tint(TIERS[ch.tier].col) });
     for (const d of room.drops) {
+      if (d.owner && d.owner !== meId) continue;
       if (!d.item.traits.some((t) => t === 'ember' || t === 'rime' || t === 'storm')) continue;
       lights.push({ x: OX + d.x * PX - cx, y: OY + d.y * PX - cy - 6, r: 22, i: 0.5, c: [1, 0.9, 0.6] });
     }

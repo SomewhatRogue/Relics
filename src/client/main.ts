@@ -45,13 +45,15 @@ else title.show();
 const use = () => {
   const n = game.near();
   if (!n || panel.open || title.open) return;
-  if (n.door) game.enter(n.door);
+  if (n.chest) input.open(n.chest);
+  else if (n.door) game.enter(n.door);
   else if (n.talk) openSpot(n.talk, game, panel, n.arg, n.key);
 };
 addEventListener('keydown', (e) => {
   if ((e.target as HTMLElement).closest('input')) return;
   const k = e.key.toLowerCase();
   if (k === 'f' && card.current >= 0) input.take(card.current);
+  else if (k === 'f' && game.near()?.chest) use();
   else if ((k === 'e' || k === 'f') && game.mode === 'town') use();
   if (k === 'escape' && panel.open && !game.result) panel.hide();
 });
@@ -147,9 +149,10 @@ function hud(now: number): void {
   }
   const spot = game.near(), busy = panel.open || title.open;
   $('#prompt').hidden = !spot || busy;
-  if (spot) $('#prompt').textContent = (input.touch || game.mode === 'run' ? '' : 'E  ') + (spot.door || !spot.talk ? spot.label : 'TALK: ' + spot.label);
+  if (spot) $('#prompt').textContent = (input.touch ? '' : spot?.chest ? 'F  ' : game.mode === 'run' ? '' : 'E  ') + (spot.door || !spot.talk ? spot.label : 'TALK: ' + spot.label);
   $('.tb.use').hidden = !spot || busy;
-  if (spot) $('.tb.use').textContent = spot.door ? 'ENTER' : spot.talk && spot.talk !== 'board' && spot.talk !== 'market' && spot.talk !== 'gate' ? 'TALK' : 'USE';
+  $('.tb.use').classList.toggle('chest', !!spot?.chest);
+  if (spot) $('.tb.use').textContent = spot.chest ? 'OPEN' : spot.door ? 'ENTER' : spot.talk && spot.talk !== 'board' && spot.talk !== 'market' && spot.talk !== 'gate' ? 'TALK' : 'USE';
   const list = game.mode === 'town' ? townTips : tips;
   if (now - tipAt > 6) {
     tipAt = now;

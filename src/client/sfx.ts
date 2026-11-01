@@ -389,3 +389,19 @@ export const sfx = {
     if (ready()) tone('sine', 600, 2400, 0.15, 0.12), tone('sine', 2400, 900, 0.1, 0.12, 0.1);
   },
 };
+
+/** A chest: a creak as it starts; on opening, a rising note for each tier up (hungry: a heartbeat instead). */
+export function chestSound(state: 'opening' | 'shut' | 'open', tier: string): void {
+  if (!ready()) return;
+  if (state === 'opening') {
+    burst('bandpass', 300, 180, 3, 0.25, 0.5);
+    if (tier === 'hungry') for (let i = 0; i < 3; i++) tone('sine', 60, 45, 0.6, 0.12, i * 0.4), tone('sine', 55, 40, 0.4, 0.1, i * 0.4 + 0.15);
+    return;
+  }
+  if (state === 'open') {
+    const steps = ['plain', 'fine', 'forged', 'tolmouth', 'hungry'].indexOf(tier);
+    burst('lowpass', 1200, 300, 0.7, 0.3, 0.15);
+    if (tier === 'hungry') return tone('sawtooth', 110, 70, 0.3, 0.8);
+    for (let i = 0; i <= steps; i++) tone('triangle', 520 * Math.pow(1.26, i), 520 * Math.pow(1.26, i), 0.22, 0.25, 0.08 + i * 0.12);
+  }
+}

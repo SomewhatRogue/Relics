@@ -33,6 +33,7 @@ export class LootCard {
   update(room: ArenaRoom, me: Hero, keys: boolean): void {
     let best = null as (typeof room.drops)[number] | null, bd = REACH;
     for (const d of room.drops) {
+      if (d.owner && d.owner !== me.id) continue;
       const dist = Math.hypot(d.x - me.x, d.y - me.y);
       if (dist <= bd) (bd = dist), (best = d);
     }

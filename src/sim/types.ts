@@ -1,5 +1,5 @@
 /** The fight's state. Plain data: the same shape is drawn locally and (later) sent to friends. */
-import type { Augment, Item, PotionId, PropKind, Quality, RelicId, TraitId, WeaponId } from '../shared/tuning';
+import type { Augment, Item, PotionId, Tier, PropKind, Quality, RelicId, TraitId, WeaponId } from '../shared/tuning';
 
 /** What a player's device sends: held state plus press counters, so a quick tap is never lost. */
 export interface Intent {
@@ -36,9 +36,12 @@ export interface Intent {
   gearArg: number;
   /** Drink (or throw) the potion at the front of the belt. */
   potionSeq: number;
+  /** Open chest `open` (counted by openSeq). */
+  openSeq: number;
+  open: number;
 }
 
-export const NO_INTENT: Intent = { mx: 0, my: 0, ax: 0, ay: 0, attack: false, block: false, attackSeq: 0, blockSeq: 0, rollSeq: 0, weaponSeq: 0, relicSeq: 0, relicSwapSeq: 0, relicPickSeq: 0, relicPick: 0, augmentSeq: 0, classSeq: 0, grabSeq: 0, takeSeq: 0, take: 0, gearSeq: 0, gearOp: 0, gearArg: 0, potionSeq: 0 };
+export const NO_INTENT: Intent = { mx: 0, my: 0, ax: 0, ay: 0, attack: false, block: false, attackSeq: 0, blockSeq: 0, rollSeq: 0, weaponSeq: 0, relicSeq: 0, relicSwapSeq: 0, relicPickSeq: 0, relicPick: 0, augmentSeq: 0, classSeq: 0, grabSeq: 0, takeSeq: 0, take: 0, gearSeq: 0, gearOp: 0, gearArg: 0, potionSeq: 0, openSeq: 0, open: 0 };
 
 export type HeroAct = 'idle' | 'charge' | 'attack' | 'throw' | 'zip' | 'roll' | 'hurt' | 'stun' | 'down' | 'carry' | 'slam';
 
@@ -137,7 +140,7 @@ export interface Hero extends Body {
   hitstop: number;
   /** Extra parry and dodge leniency for this player's ping (seconds). */
   lenience: number;
-  seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number; augment: number; cls: number; take: number; grab: number; gear: number; potion: number };
+  seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number; augment: number; cls: number; take: number; grab: number; gear: number; potion: number; open: number };
 }
 
 export type AttackKind = 'cleave' | 'slam' | 'swing' | 'stab' | 'shot';
@@ -252,6 +255,8 @@ export interface Drop {
   y: number;
   item: Item;
   life: number;
+  /** A chest's roll: only this player sees it and can take it. */
+  owner?: string;
 }
 
 export type FightEvent =
@@ -268,6 +273,8 @@ export type FightEvent =
   | { k: 'gold'; id: string; x: number; y: number; n: number }
   | { k: 'potion' | 'drink'; x: number; y: number; kind: PotionId }
   | { k: 'smoke'; x: number; y: number }
+  | { k: 'chest'; x: number; y: number; tier: Tier; state: 'opening' | 'shut' | 'open' }
+  | { k: 'chained'; x: number; y: number }
   | { k: 'drop'; x: number; y: number; q: Quality }
   | { k: 'shoot'; x: number; y: number; dx: number; dy: number; kind: Bolt['kind']; el: Augment }
   | { k: 'burst'; x: number; y: number; r: number; el: Augment }

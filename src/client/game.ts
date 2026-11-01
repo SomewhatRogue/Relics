@@ -24,7 +24,7 @@ import { load, store, type Save } from './save';
 export type Mode = 'town' | 'yard' | 'run';
 export interface Result { won: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number; relic?: RelicId }
 /** Something you can use where you stand: a spot, a person, or a door. */
-export interface Near { label: string; talk?: SpotId; arg?: number; key?: string; door?: Block }
+export interface Near { label: string; talk?: SpotId; arg?: number; key?: string; door?: Block; chest?: number }
 
 export const ME = 'me';
 const NAMES: Record<string, string> = { cottage: 'THE COTTAGE', barn: 'THE BARN', home: 'THE HOUSE' };
@@ -255,6 +255,7 @@ export class Game {
       all.push(b.locked ? { x: d.x, y: d.y, label: name + ' (BARRED)', talk: 'locked', key: b.door } : { x: d.x, y: d.y, label: 'ENTER ' + name, door: b });
     }
     if (this.mode === 'town' && !this.outside) for (const s of townSpots(this.world)) all.push({ x: s.x, y: s.y, label: s.label, talk: s.id, key: s.key });
+    for (const c of this.room.chests) if (c.state === 'shut') all.push({ x: c.x, y: c.y, label: c.chained ? 'A CHAINED CHEST' : 'OPEN THE CHEST', chest: c.id });
     let best: Near | null = null, bd = SPOT_REACH;
     for (const n of all) {
       const d = Math.hypot(n.x - h.x, n.y - h.y) * (n.door ? 1.4 : 1);

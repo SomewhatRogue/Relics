@@ -125,6 +125,12 @@ export class Input {
     this.intent.gearSeq++;
   }
 
+  /** Open a chest (USE, or F beside it). */
+  open(id: number): void {
+    this.intent.open = id;
+    this.intent.openSeq++;
+  }
+
   /** Take a loot drop (the card's button, or F). */
   take(id: number): void {
     this.intent.take = id;

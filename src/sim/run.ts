@@ -33,7 +33,9 @@ export const newRun = (job: Job): Run => ({ job, index: 0, gold: 0, xp: 0, rescu
 /** Build the room for the run's current index. */
 export function runRoom(run: Run): ArenaRoom {
   const plan = planRoom(run.job, run.index, run.roads[run.index]);
-  return new ArenaRoom(run.job.seed + run.index, { map: plan.map, foes: plan.foes, furniture: plan.props });
+  // Worse places and deep jobs shift every chest roll a tier up.
+  const danger = (run.job.place.ruin >= 3 ? 1 : 0) + (run.job.deep ? 1 : 0);
+  return new ArenaRoom(run.job.seed + run.index, { map: plan.map, foes: plan.foes, furniture: plan.props, chests: plan.chests, danger });
 }
 
 /** Inside a cottage or barn in the current room (you can always walk back out). */

@@ -2,6 +2,7 @@
  * What you hear: each event's sound (by the kit that made it and what it landed on), goblins talking
  * as they come, fires crackling, doors, and the music for where you are and how bad it's getting.
  */
+import { chestSound } from './sfx';
 import { isDead } from '../sim/damage';
 import type { ArenaRoom } from '../sim/room';
 import type { FightEvent, Hero } from '../sim/types';
@@ -39,6 +40,7 @@ export class Soundscape {
 
   event(ev: FightEvent, room: ArenaRoom, now: number): void {
     if (ev.k === 'swing') return swingSound(ev.src, ev.heavy);
+    if (ev.k === 'chest') return chestSound(ev.state, ev.tier);
     if (ev.k === 'shoot') return shotSound(ev.kind, this.heroAt(room, ev.x, ev.y)?.weapon);
     if (ev.k === 'charged') return chargedSound(this.heroAt(room, ev.x, ev.y)?.weapon ?? '');
     if (ev.k === 'block') return blockSound(this.heroAt(room, ev.x, ev.y)?.weapon ?? '');
