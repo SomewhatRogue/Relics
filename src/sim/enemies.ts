@@ -1,5 +1,6 @@
 /** Enemies' turns: the goblin butcher, goblin scrappers, and the two training dummies. */
 import { lure, seenFrom } from './lantern';
+import { visible } from './flasks';
 import { collide, currentMap, inArea } from '../shared/arena';
 import { ALERT, ARCHER, BUTCHER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, type EnemyAttackSpec, type EnemySpec } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
@@ -22,11 +23,12 @@ export function newEnemy(id: number, kind: Enemy['kind'], x: number, y: number):
   };
 }
 
-function nearest(e: Enemy, heroes: Hero[]): Hero | null {
+function nearest(e: Enemy, heroes: Hero[], now: number): Hero | null {
   let best: Hero | null = null, bd = Infinity;
   for (const h of heroes) {
     if (h.act === 'down') continue;
-    const d = Math.hypot(h.x - e.x, h.y - e.y) - lure(h);
+    const raw = Math.hypot(h.x - e.x, h.y - e.y), d = raw - lure(h);
+    if (!visible(h, raw, now)) continue;
     if (d < bd) (bd = d), (best = h);
   }
   return best;
@@ -107,7 +109,7 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     return;
   }
   if (e.alert === false && !notice(e, heroes, others, now, ev)) return wander(e, rng, now, dt);
-  const t = nearest(e, heroes);
+  const t = nearest(e, heroes, now);
   if (!t || e.kind === 'dummy') return;
   const d = Math.hypot(t.x - e.x, t.y - e.y);
   if (e.kind === 'swingDummy') {
@@ -162,7 +164,9 @@ function notice(e: Enemy, heroes: Hero[], others: Enemy[], now: number, ev: Figh
   let seen = false;
   for (const h of heroes) {
     if (h.act === 'down' || h.id === 'squire') continue;
-    const dx = h.x - e.x, dy = h.y - e.y, d = Math.hypot(dx, dy), ahead = (dx * e.fx + dy * e.fy) / (d || 1) > -0.2;
+    const dx = h.x - e.x, dy = h.y - e.y, d = Math.hypot(dx, dy);
+    if (!visible(h, d, now)) continue;
+    const ahead = (dx * e.fx + dy * e.fy) / (d || 1) > -0.2;
     if (d < (ahead ? ALERT.sight : ALERT.behind) + seenFrom(h)) seen = true;
   }
   for (const o of others) if (o !== e && o.alert && (isDead(o) || o.hitAt > now - 0.2) && Math.hypot(o.x - e.x, o.y - e.y) < ALERT.hear) seen = true;

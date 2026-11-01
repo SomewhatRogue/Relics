@@ -15,6 +15,7 @@ const hero = (p: Partial<Profile>): Profile => {
   const cls = p.cls ?? (p.weapon ? WEAPONS[p.weapon].cls : 'WARRIOR');
   const out = { ...newProfile(cls, p.name), ...p, cls };
   // Before the pack, a hero kept one weapon per kind: the one in hand stays, the rest go in the pack.
+  if (!p.belt) out.belt = [];
   if (!p.bag) {
     const arms = p.arms ?? {}, inHand = arms[out.weapon];
     out.bag = Object.entries(arms).filter(([k, it]) => k !== out.weapon && it).map(([, it]) => it!);

@@ -13,7 +13,7 @@ import { BOUNTY, HERO_SLOTS, PERK, SHOP, gainXp, newProfile, type PerkId, type P
 import { Rng } from '../shared/rng';
 import { CHAPTER_1, QUORUM, rewardMult, type WorldState } from '../shared/story';
 import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
-import { CLASS_KITS, CLASS_SKILL, FOUND_RELICS, HERO, abilitiesOf, rollItem, type Augment, type HeroClass, type Item, type RelicId, type WeaponId } from '../shared/tuning';
+import { POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, FOUND_RELICS, HERO, abilitiesOf, rollItem, type Augment, type HeroClass, type Item, type RelicId, type WeaponId } from '../shared/tuning';
 import { ArenaRoom } from '../sim/room';
 import { PACK } from '../sim/pack';
 import { goal, interiorRoom, isFinal, newRun, runRoom, tally, type Run } from '../sim/run';
@@ -92,6 +92,7 @@ export class Game {
     h.arms = { ...p.arms };
     h.bag = [...p.bag];
     h.glow = p.glow;
+    h.belt = [...p.belt];
     h.found = [...p.relics];
     h.perks = [...p.perks];
     h.maxHp = HERO.hp + (p.perks.includes('tough') ? PERK.tough : 0);
@@ -173,7 +174,7 @@ export class Game {
     // Your class and kit are your hero's: changed at the smith and the relic-wright, never mid-fight.
     intent = { ...intent, classSeq: h.seen.cls, weaponSeq: h.seen.weapon, augmentSeq: h.seen.augment };
     // No fighting in town: no blows, guard, relics or grabs; rolls, dashes and blinks still work.
-    if (this.mode === 'town') intent = { ...intent, attack: false, block: false, attackSeq: h.seen.attack, blockSeq: h.seen.block, relicSeq: h.seen.relic, grabSeq: h.seen.grab };
+    if (this.mode === 'town') intent = { ...intent, attack: false, block: false, attackSeq: h.seen.attack, blockSeq: h.seen.block, relicSeq: h.seen.relic, grabSeq: h.seen.grab, potionSeq: h.seen.potion };
     this.room.setIntent(ME, intent);
     // The room outside runs on while you're in (its kills still pay); then yours.
     const out = this.outside?.room, outEv = out?.advance(dt) ?? [];
@@ -270,11 +271,22 @@ export class Game {
     return item;
   }
 
+  /** Buy a potion for the belt (Agne, Gannet, Moll, Ivo). False: too poor, or the belt is full. */
+  buyPotion(id: PotionId): boolean {
+    const p = this.profile, cost = POTIONS[id].price;
+    if (p.gold < cost || p.belt.length >= POTION.belt) return false;
+    p.gold -= cost;
+    p.belt.push(id);
+    this.hero.belt = [...p.belt];
+    store(this.save);
+    return true;
+  }
+
   /** The room changed what's in hand, in the pack, or carried: the hero's save follows. */
   private keepGear(h: Hero): void {
     const p = this.profile, relic = h.relics[1] ?? '';
-    if (h.weapon === p.weapon && h.bag.length === p.bag.length && h.arms[h.weapon] === p.arms[p.weapon] && relic === p.relic && h.glow === p.glow && h.bag.every((it, i) => it === p.bag[i])) return;
-    Object.assign(p, { weapon: h.weapon, arms: { ...h.arms }, bag: [...h.bag], relic, glow: h.glow });
+    if (h.weapon === p.weapon && h.bag.length === p.bag.length && h.arms[h.weapon] === p.arms[p.weapon] && relic === p.relic && h.glow === p.glow && h.belt.join() === p.belt.join() && h.bag.every((it, i) => it === p.bag[i])) return;
+    Object.assign(p, { weapon: h.weapon, arms: { ...h.arms }, bag: [...h.bag], relic, glow: h.glow, belt: [...h.belt] });
     store(this.save);
   }
 

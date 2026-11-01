@@ -3,12 +3,13 @@
  * The scene is painted at a low resolution and scaled up by a whole number so pixels stay crisp.
  */
 import { ARENA, npcAt, type GameMap } from '../shared/arena';
-import { GRAB, GUARD, WEAPONS } from '../shared/tuning';
+import { GRAB, GUARD, POTION, WEAPONS } from '../shared/tuning';
 import type { ArenaRoom } from '../sim/room';
 import { drawHero } from './actors';
 import { blit, type Ctx } from './draw';
 import { drawEnemy, drawHeld, drawTelegraph } from './foes';
 import { EL_LIGHT } from './palette';
+import { drawFlask, drawPickup, drawSmoke } from './relicsdraw';
 import { drawBolt, drawDrop, drawCoal, drawHook, drawJavelin } from './relicsdraw';
 import { drawStatus } from './status';
 import { drawLifted, drawProp } from './propsdraw';
@@ -139,6 +140,14 @@ export class Scene {
       const x = OX + d.x * PX - cx, y = OY + d.y * PX - cy;
       items.push({ y: OY + d.y * PX - 20, draw: () => drawDrop(c, d, x, y) });
     }
+    for (const p of room.pickups) {
+      const x = OX + p.x * PX - cx, y = OY + p.y * PX - cy;
+      items.push({ y: OY + p.y * PX - 20, draw: () => drawPickup(c, p, x, y) });
+    }
+    for (const s of room.smokes) {
+      const x = OX + s.x * PX - cx, y = OY + s.y * PX - cy;
+      items.push({ y: OY + s.y * PX + 30, draw: () => drawSmoke(c, s, x, y, POTION.smokeR * PX, room.time) });
+    }
     for (const m of room.coals) {
       const x = OX + m.x * PX - cx, y = OY + m.y * PX - cy;
       items.push({ y: OY + m.y * PX - 20, draw: () => drawCoal(c, m, x, y) });
@@ -147,7 +156,7 @@ export class Scene {
       const x = OX + b.x * PX - cx, y = OY + b.y * PX - cy;
       // Things on the floor draw under the bodies; things in the air over them.
       const floor = b.kind === 'smite' || b.state === 'well';
-      items.push({ y: OY + b.y * PX + (floor ? -40 : b.kind === 'lodestone' ? 30 : 0), draw: () => drawBolt(c, b, x, y) });
+      items.push({ y: OY + b.y * PX + (floor ? -40 : b.kind === 'lodestone' ? 30 : 0), draw: () => (b.kind === 'flask' ? drawFlask(c, b, x, y) : drawBolt(c, b, x, y)) });
     }
     for (const j of room.javelins) {
       const x = OX + j.x * PX - cx, y = OY + j.y * PX - cy;

@@ -96,6 +96,21 @@ export const sfxOut = () => (ready() ? { ac: ac!, out: master! } : null);
 
 export const sfx = {
   /** A Healer's censer takes a butcher's coal: a low warm swell, then a small bright note. */
+  gold() {
+    if (!ready()) return;
+    tone('square', 1900, 1900, 0.08, 0.05);
+    tone('square', 2500, 2500, 0.07, 0.07, 0.05);
+  },
+  potion() {
+    if (ready()) tone('sine', 600, 900, 0.15, 0.12);
+  },
+  drink() {
+    if (!ready()) return;
+    for (let i = 0; i < 3; i++) tone('sine', 300 + i * 40, 220, 0.18, 0.08, i * 0.1);
+  },
+  smoke() {
+    if (ready()) burst('lowpass', 900, 200, 0.6, 0.4, 0.5);
+  },
   coal() {
     if (!ready()) return;
     tone('sine', 220, 330, 0.35, 0.5);

@@ -2,7 +2,7 @@
  * The pack: what's in hand, the class skill, the relic carried, and the spares. Open any time (I, or
  * PACK); the world keeps going while it's open, and changes go to the room as an intent.
  */
-import { CLASS_KITS, ELEMENT_NAME, LANTERN, RELICS, TRAITS, WEAPONS, itemName, type Item, type RelicId } from '../shared/tuning';
+import { POTION, POTIONS, CLASS_KITS, ELEMENT_NAME, LANTERN, RELICS, TRAITS, WEAPONS, itemName, type Item, type RelicId } from '../shared/tuning';
 import { GEAR, PACK } from '../sim/pack';
 import type { Hero } from '../sim/types';
 import { COAL, COPY } from './copy';
@@ -47,7 +47,7 @@ export class PackView {
   /** Each frame: redraw only when what's shown has changed. */
   update(h: Hero): void {
     if (!this.open) return;
-    const key = JSON.stringify([h.weapon, h.arms[h.weapon], h.bag, h.relics, h.found, h.augments, h.glow]);
+    const key = JSON.stringify([h.weapon, h.arms[h.weapon], h.bag, h.relics, h.found, h.augments, h.glow, h.belt]);
     if (key === this.key) return;
     this.key = key;
     const [skill, carried] = h.relics, cls = WEAPONS[h.weapon].cls, plain = CLASS_KITS[cls][0], held = h.arms[h.weapon];
@@ -59,6 +59,8 @@ export class PackView {
       `<h3>${COPY.inHand}</h3><div class="row"><div><b>${held ? itemName(held) : WEAPONS[h.weapon].name}</b>${held ? traits(held) : `<div class="tr">${COPY.plain}</div>`}</div></div>` +
       `<h3>${COPY.skill}</h3><div class="row"><div><b>${RELICS[skill].name}</b>${el(skill, h)}</div></div>` +
       (cls === 'HEALER' ? `<h3>${COAL.name} <i>${h.glow} / ${LANTERN.max}</i></h3><div class="none">${COAL.line}</div>` : '') +
+      `<h3>${COPY.belt} <i>${h.belt.length} / ${POTION.belt}</i></h3>` +
+      (h.belt.length ? h.belt.map((p, i) => `<div class="row"><div><b>${POTIONS[p].name}</b><div class="tr">${POTIONS[p].text}</div></div>${i ? btn(COPY.next, GEAR.front, i, 'go') : ''}${btn(COPY.pour, GEAR.pour, i, 'ghost')}</div>`).join('') : `<div class="none">${COPY.beltEmpty}</div>`) +
       `<h3>${COPY.relic}</h3>` +
       (carried ? `<div class="row"><div><b>${RELICS[carried].name}</b>${el(carried, h)}</div>${btn(COPY.putAway, GEAR.carry, -1, 'ghost')}</div>` : `<div class="none">${h.found.length ? '' : COPY.relicEmpty}</div>`) + shelf +
       `<h3>${COPY.packed} <i>${h.bag.length} / ${PACK}</i></h3>` + (spares.length ? spares.join('') : `<div class="none">${COPY.packEmpty}</div>`) +

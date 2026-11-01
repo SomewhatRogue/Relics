@@ -30,6 +30,7 @@ export class Input {
       if (k === 'e') this.use(0);
       if (k === 'r') this.use(1);
       if (k === 'g') this.intent.grabSeq++;
+      if (k === 'q') this.intent.potionSeq++;
       if (k === 'k') (this.intent.blockSeq++), (this.blockHeld.key = true);
     });
     addEventListener('keyup', (e) => {
@@ -105,6 +106,7 @@ export class Input {
     btn('.relic', () => this.use(0));
     btn('.relic2', () => this.use(1));
     btn('.grab', () => this.intent.grabSeq++);
+    btn('.potion', () => this.intent.potionSeq++);
     btn('.roll', () => this.intent.rollSeq++);
     btn('.block', () => ((this.intent.blockSeq++), (this.blockHeld.touch = true)), () => (this.blockHeld.touch = false));
   }

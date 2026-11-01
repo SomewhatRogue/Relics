@@ -15,6 +15,8 @@ import { stepBuildings, sweepBlocks } from './buildings';
 import { newEnemy, stepEnemy } from './enemies';
 import { newHero, stepHero, type HeroActs } from './hero';
 import { damage, isDead } from './damage';
+import { stepFlask, stepPotions, usePotion, type Smoke } from './flasks';
+import { dropPickups, stepPickups, type Pickup } from './pickups';
 import { dropCoal, healMult, stepCoals, type Coal } from './lantern';
 import { impacts } from './impacts';
 import { release, stepCarry, tryGrab } from './grab';
@@ -39,6 +41,10 @@ export class ArenaRoom {
   coals: Coal[] = [];
   /** Blessed ground. */
   zones: Zone[] = [];
+  /** Gold and potions on the floor. */
+  pickups: Pickup[] = [];
+  /** Smoke from thrown flasks. */
+  smokes: Smoke[] = [];
   props: Prop[] = roomProps();
   intents = new Map<string, Intent>();
   /** Events from the latest tick (drawn as hits, sparks and sounds). */
@@ -146,10 +152,19 @@ export class ArenaRoom {
     };
     const alive = new Set(this.enemies.filter((e) => !isDead(e)).map((e) => e.id));
     for (const h of this.heroes) takeLoot(h, this.intents.get(h.id) ?? NO_INTENT, this.drops, this.events);
+    for (const h of this.heroes) {
+      const inp = this.intents.get(h.id) ?? NO_INTENT;
+      // A press during the cooldown waits for it (never lost).
+      if (inp.potionSeq === h.seen.potion || (this.time < h.potionReady && h.belt.length)) continue;
+      h.seen.potion = inp.potionSeq;
+      const flask = usePotion(h, this.time, w, inp.ax, inp.ay);
+      if (flask) this.bolts.push(flask);
+    }
+    this.smokes = stepPotions(this.heroes, this.smokes, this.time, TICK);
     for (const h of this.heroes) stepHero(h, this.intents.get(h.id) ?? NO_INTENT, this.enemies, this.time, TICK, this.events, acts);
     this.javelins = this.javelins.filter((j) => stepJavelin(j, this.enemies, this.time, TICK, this.events, hit));
     this.hooks = this.hooks.filter((k) => stepHook(k, this.heroes, this.enemies, this.time, TICK, this.events, hit));
-    this.bolts = this.bolts.filter((b) => stepBolt(b, w, TICK));
+    this.bolts = this.bolts.filter((b) => (b.kind === 'flask' ? stepFlask(b, w, TICK, this.smokes) : stepBolt(b, w, TICK)));
     for (const e of this.enemies) stepEnemy(e, this.heroes, this.rng, this.time, TICK, this.events, this.enemies);
     impacts(this.enemies, this.time, this.events);
     propImpacts(w);
@@ -164,7 +179,8 @@ export class ArenaRoom {
     separate(this.heroes, this.enemies, this.props);
     this.landings();
     for (const e of this.enemies) if (alive.has(e.id) && isDead(e)) dropFrom(e, this.heroes, this.drops, this.lootRng, this.events);
-    for (const e of this.enemies) if (alive.has(e.id) && isDead(e)) dropCoal(e, this.coals);
+    for (const e of this.enemies) if (alive.has(e.id) && isDead(e)) dropCoal(e, this.coals), dropPickups(e, this.pickups, this.lootRng);
+    this.pickups = stepPickups(this.pickups, this.heroes, this.events, TICK);
     this.drops = stepDrops(this.drops, TICK);
     this.coals = stepCoals(this.coals, this.heroes, this.events, TICK);
   }

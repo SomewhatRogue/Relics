@@ -1,6 +1,9 @@
 /** Drawing relics and shots in the world: javelins, the hook on its chain, arrows, spells, flasks. */
 import type { Bolt, Drop, Hero, Hook, Javelin } from '../sim/types';
 import type { Coal } from '../sim/lantern';
+import type { Pickup } from '../sim/pickups';
+import type { Smoke } from '../sim/flasks';
+import { POTIONS } from '../shared/tuning';
 import { line, type Ctx } from './draw';
 import { EL_COL } from './palette';
 
@@ -132,6 +135,59 @@ export function drawBolt(c: Ctx, b: Bolt, x: number, y: number): void {
 
 const KIT_COL: Record<string, string> = { sword: '#dfe6ec', greatsword: '#eef2f5', spear: '#8b6a3a', daggers: '#e6ecf0', longbow: '#8b6a3a', shortbow: '#6b4a2b', crossbow: '#5a3d22', wand: '#6b4a2b', staff: '#6b4a2b', rod: '#9aa3ad', mace: '#9aa3ad' };
 const FORGED: Record<string, string> = { ember: EL_COL.fire, rime: EL_COL.frost, storm: EL_COL.storm };
+
+/** Gold on the floor (a few coins, glinting) or a potion bottle in its colour. */
+export function drawPickup(c: Ctx, p: Pickup, x: number, y: number): void {
+  const fade = Math.min(1, p.life / 4);
+  c.lit.globalAlpha = c.glow.globalAlpha = fade;
+  if (p.gold) {
+    const n = Math.min(5, 1 + Math.floor(p.gold / 6));
+    for (let i = 0; i < n; i++) {
+      c.lit.fillStyle = i % 2 ? '#b08a3a' : '#d4a537';
+      c.lit.fillRect(Math.round(x - 4 + ((i * 3) % 8)), Math.round(y - 1 - (i % 3)), 3, 2);
+      c.glow.globalAlpha = 0.35 * fade;
+      c.glow.fillStyle = '#d4a537';
+      c.glow.fillRect(Math.round(x - 4 + ((i * 3) % 8)), Math.round(y - 1 - (i % 3)), 3, 1);
+      c.glow.globalAlpha = fade;
+    }
+    if (Math.floor(c.now * 2 + p.id) % 3 === 0) (c.glow.fillStyle = '#fff1d0'), c.glow.fillRect(Math.round(x), Math.round(y - 3), 1, 1);
+  } else if (p.potion) {
+    const col = POTIONS[p.potion].col, bob = Math.round(Math.sin(c.now * 3 + p.id));
+    c.lit.fillStyle = '#5a4a32';
+    c.lit.fillRect(Math.round(x), Math.round(y - 7 + bob), 1, 1);
+    c.lit.fillStyle = col;
+    c.lit.fillRect(Math.round(x - 1), Math.round(y - 6 + bob), 3, 4);
+    c.glow.fillStyle = col;
+    c.glow.fillRect(Math.round(x), Math.round(y - 5 + bob), 1, 1);
+  }
+  c.lit.globalAlpha = c.glow.globalAlpha = 1;
+}
+
+/** A thrown flask, turning over in its arc. */
+export function drawFlask(c: Ctx, b: Bolt, x: number, y: number): void {
+  const k = b.t / b.flight, up = Math.sin(Math.PI * k) * 20, col = POTIONS[b.potion ?? 'oil'].col;
+  c.lit.fillStyle = 'rgba(8,6,12,0.55)';
+  c.lit.fillRect(Math.round(x - 1), Math.round(y), 3, 1);
+  c.lit.fillStyle = col;
+  c.lit.fillRect(Math.round(x - 1), Math.round(y - 5 - up), 2, 3);
+  c.glow.fillStyle = col;
+  c.glow.fillRect(Math.round(x), Math.round(y - 5 - up), 1, 1);
+}
+
+/** Smoke: soft grey puffs, drifting and thinning as it goes. */
+export function drawSmoke(c: Ctx, s: Smoke, x: number, y: number, r: number, now: number): void {
+  const left = Math.min(1, (s.until - now) / 1.5);
+  for (let i = 0; i < 12; i++) {
+    const a = i * 2.4 + now * 0.35, d = r * (0.15 + ((i * 37) % 10) / 14), size = 4 + ((i * 7) % 4);
+    const px = Math.round(x + Math.cos(a) * d), py = Math.round(y + Math.sin(a) * d * 0.55 - 6 - ((now * 3 + i) % 4));
+    c.lit.globalAlpha = 0.35 * left;
+    c.lit.fillStyle = i % 2 ? '#c8c2d4' : '#a8a2b4';
+    c.lit.beginPath();
+    c.lit.arc(px, py, size, 0, Math.PI * 2);
+    c.lit.fill();
+  }
+  c.lit.globalAlpha = 1;
+}
 
 /** A butcher's coal on the floor: a coal that pulses and drifts sparks upward (a Healer can take it). */
 export function drawCoal(c: Ctx, m: Coal, x: number, y: number): void {

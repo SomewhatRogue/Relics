@@ -2,6 +2,23 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-01: loot slice 1, gold and potions (Claude Opus 5.5)
+
+Kyle said continue on the loot plan. Defaults taken for the open questions (Kyle can overrule): the old
+"no stat sheets" rule goes; any class wears any armor; the Want is built hidden and nobody turns yet;
+Dessa keeps her line until the Tolmouth tier lands; a lost job keeps half its gold.
+
+- **Gold on the floor** (`sim/pickups.ts`, `COINS` in `shared/potions.ts`): job goblins drop coins
+  (small 70%, 2 to 6; archers 3 to 8; butchers always 15 to 30; named 60 to 100). Walking over it
+  splits it evenly across the party, the picker keeping the odd coin. Gold no longer comes straight
+  from kills; experience still does. Training-yard goblins drop nothing.
+- **Potions** (`sim/flasks.ts`): a belt of three, Q or the POTION button uses the front one, a press in
+  the 0.8 s cooldown waits. Sister's Bitter (40 health over 2 s), Wall Brandy (full breath, faster
+  for 6 s), Lamp Oil (thrown, fire burst), Frost Flask (thrown, frost burst), Smoke (thrown; goblins
+  can't see anyone in it unless within 1.2 tiles). Flasks fly where you aim, or to the nearest goblin
+  in range on a phone. Goblins drop them (8% to 35%, named always); Agne sells Bitter, Gannet Brandy and
+  Oil, Moll Smoke, Ivo Frost. New heroes start with one Bitter. The pack reorders and pours out.
+
 ## 2026-11-01: weapons rarer now; the loot and gear plan (Claude Opus 5.5)
 
 Kyle: weapon drops too high; gold (shared in a party), potions, chests that open with a pause and a

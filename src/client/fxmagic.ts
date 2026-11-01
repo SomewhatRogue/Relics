@@ -1,5 +1,6 @@
 /** Effects for magic and the new relics: bursts, gusts, lightning, steam, ice, blessings. Cosmetic only. */
 import { COAL } from './copy';
+import { POTIONS } from '../shared/tuning';
 import type { FightEvent } from '../sim/types';
 import type { Fx } from './fx';
 import { EL_COL, EL_LIGHT } from './palette';
@@ -115,6 +116,18 @@ export function magicFx(fx: Fx, ev: FightEvent, x: number, y: number): void {
     case 'shadow':
       fx.burst(x, y - 8, 18, ['#3a3346', '#6a5a8a', '#c9a8ff'], 50, true);
       fx.say(x, y - 30, 'BEHIND', '#d8a0ff');
+      break;
+    case 'gold':
+      if (ev.id === 'me') fx.say(x, y - 26, `+${ev.n} GOLD`, '#ffd27a');
+      break;
+    case 'potion':
+      fx.say(x, y - 30, POTIONS[ev.kind].short, POTIONS[ev.kind].col);
+      break;
+    case 'drink':
+      fx.burst(x, y - 12, 8, [POTIONS[ev.kind].col, '#ffffff'], 30, true);
+      break;
+    case 'smoke':
+      fx.rings.push({ x, y: y - 4, life: 0.5, max: 0.5, col: '#9a94a8', size: 30 });
       break;
     case 'coal':
       fx.say(x, y - 30, COAL.pickup, '#ffb35a');

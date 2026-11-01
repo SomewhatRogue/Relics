@@ -8,7 +8,7 @@ import type { FightEvent, Hero } from './types';
 
 /** Weapons a pack holds. */
 export const PACK = 8;
-export const GEAR = { equip: 1, drop: 2, carry: 3 } as const;
+export const GEAR = { equip: 1, drop: 2, carry: 3, front: 4, pour: 5 } as const;
 
 export function applyGear(h: Hero, op: number, arg: number, ev: FightEvent[]): void {
   const cls = WEAPONS[h.weapon].cls;
@@ -24,6 +24,12 @@ export function applyGear(h: Hero, op: number, arg: number, ev: FightEvent[]): v
     ev.push({ k: 'weapon', x: h.x, y: h.y, name: it ? itemName(it) : WEAPONS[h.weapon].name });
   } else if (op === GEAR.drop) {
     if (h.bag[arg]) h.bag.splice(arg, 1);
+  } else if (op === GEAR.front) {
+    // A potion to the front of the belt (drunk next).
+    const [p] = h.belt.splice(arg, 1);
+    if (p) h.belt.unshift(p);
+  } else if (op === GEAR.pour) {
+    h.belt.splice(arg, 1);
   } else if (op === GEAR.carry) {
     const r = arg >= 0 ? h.found[arg] : undefined;
     if (arg >= 0 && !r) return;

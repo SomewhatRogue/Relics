@@ -99,7 +99,7 @@ body.touch #boss { bottom: auto; top: calc(160px + env(safe-area-inset-top)); }
 body.touch #prompt { bottom: calc(250px + env(safe-area-inset-bottom)); }
 .use { width: 84px; height: 84px; right: calc(18px + env(safe-area-inset-right)); bottom: calc(46px + env(safe-area-inset-bottom)); background: #5a3a14ee; border-color: #ffd27a; color: #fff1d0; font-size: 13px; z-index: 2; }
 .use[hidden] { display: none; }
-body[data-mode='town'] .tb.attack, body[data-mode='town'] .tb.block, body[data-mode='town'] .tb.relic, body[data-mode='town'] .tb.relic2, body[data-mode='town'] .tb.grab { display: none; }
+body[data-mode='town'] .tb.attack, body[data-mode='town'] .tb.block, body[data-mode='town'] .tb.relic, body[data-mode='town'] .tb.relic2, body[data-mode='town'] .tb.potion, body[data-mode='town'] .tb.grab { display: none; }
 body[data-mode='town'] #hud .gear:not(:first-of-type) { display: none; }
 #panel { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: #0d0b10cc; z-index: 6; padding: 16px; }
 #panel[hidden] { display: none; }
@@ -211,3 +211,7 @@ body.touch #pack { padding: 8px 10px 10px; }
 body.touch #pack h3 { margin: 6px 0 3px; }
 body.touch #pack .row { padding: 3px 8px; min-height: 36px; margin-bottom: 3px; }
 body.touch #pack .head span { font-size: 9px; }
+
+.tb.potion { width: 50px; height: 50px; left: calc(28px + env(safe-area-inset-left)); bottom: calc(222px + env(safe-area-inset-bottom)); background: #1b1922dd; color: #f0e0d0; font-size: 9px; }
+.tb.potion[hidden] { display: none; }
+#hud .belt { color: #e8b0a0; }

@@ -22,6 +22,7 @@ export * from './magic.js';
 export * from './loot.js';
 export * from './props.js';
 export * from './progress.js';
+export * from './potions.js';
 
 /** Holding attack past `start` begins charging; the heavy is strongest at `full`. */
 export const CHARGE = { start: 0.18, full: 0.9 };

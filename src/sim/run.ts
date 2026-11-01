@@ -52,7 +52,9 @@ export function tally(run: Run, room: ArenaRoom, events: FightEvent[], me: strin
     if (ev.k === 'death') {
       const e = room.enemies.find((x) => Math.abs(x.x - ev.x) < 0.01 && Math.abs(x.y - ev.y) < 0.01);
       const b = e?.name ? BOUNTY.boss : ev.kind === 'butcher' ? BOUNTY.butcher : ev.kind === 'scrapper' ? BOUNTY.scrapper : null;
-      if (b) (run.gold += b.gold), (run.xp += b.xp), run.kills++;
+      if (b) (run.xp += b.xp), run.kills++;
+    } else if (ev.k === 'gold') {
+      if (ev.id === me) run.gold += ev.n;
     } else if (ev.k === 'collapse') {
       if (room.map.blocks.some((x) => x.kind === 'den' && x.x === ev.x && x.y === ev.y)) run.dens++;
     } else if (ev.k === 'freed') {

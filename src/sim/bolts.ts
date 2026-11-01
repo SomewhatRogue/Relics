@@ -48,7 +48,7 @@ export function lobLodestone(h: Hero, dist: number, el: Augment): Bolt {
 }
 
 /** Everything within the bolt's burst of (x, y) is hit and thrown outward (and stunned, by a smite). */
-function blast(w: World, b: Bolt, x: number, y: number): void {
+export function blast(w: World, b: Bolt, x: number, y: number): void {
   w.ev.push(b.kind === 'smite' ? { k: 'smite', x, y } : { k: 'burst', x, y, r: b.burst, el: b.el });
   blastProps(x, y, b.burst, b.dmg, b.knock, w);
   blastBlocks(x, y, b.burst, b.dmg, b.el, w.now, w.ev);

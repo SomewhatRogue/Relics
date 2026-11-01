@@ -10,6 +10,8 @@ import type { Game } from './game';
 import type { Panel } from './panels';
 import { RUMOURS } from './rumours';
 import { SCORES, type Area } from './scores';
+import { POTIONS } from '../shared/tuning';
+import { potionButtons } from './townui';
 import { WorldLink } from './worldlink';
 
 let link: WorldLink | null = null;
@@ -74,12 +76,13 @@ export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key:
         say('Moll', r.won ? (r.you[0] + r.you[1] === r.moll[0] + r.moll[1] ? 'Tie goes to the house. Unless the house knows a fellow crook. Take it, take it.' : 'Well. The bones like you. They\'re fickle bones.') : r.you[0] + r.you[1] === r.moll[0] + r.moll[1] ? 'Tie goes to the house, love. Always has.' : 'Pay up, pet. Again?') + p(`You have ${pr.gold} gold.`),
         [10, 25, 50].map((n) => ({ label: `BET ${n}`, primary: n === bet, disabled: pr.gold < n, act: () => play(n) })));
     };
-    panel.show('DICER MOLL', say('Moll', 'Two bones each, high roll takes the pot, ties go to the house. Yes, I cheat. So would you, if you were any good.') + p(`You have ${pr.gold} gold.`),
-      [10, 25, 50].map((n) => ({ label: `BET ${n}`, disabled: pr.gold < n, act: () => play(n) })));
+    panel.show('DICER MOLL', say('Moll', 'Two bones each, high roll takes the pot, ties go to the house. Yes, I cheat. So would you, if you were any good.') + p(`<b>${POTIONS.smoke.name}</b>: ${POTIONS.smoke.text}`) + p(`You have ${pr.gold} gold.`),
+      [...[10, 25, 50].map((n) => ({ label: `BET ${n}`, disabled: pr.gold < n, act: () => play(n) })), ...potionButtons(g, ['smoke'], again)]);
     return true;
   }
   if (id === 'tavern') {
-    panel.show('BARKEEP GANNET', say('Gannet', RUMOURS[(w.day * 5 + pr.runs) % RUMOURS.length]) + p('The Drowned Rat: ale that tastes of the cellar, dice in the corner, and people who know things they shouldn\'t.'));
+    panel.show('BARKEEP GANNET', say('Gannet', RUMOURS[(w.day * 5 + pr.runs) % RUMOURS.length]) + p('The Drowned Rat: ale that tastes of the cellar, dice in the corner, and people who know things they shouldn\'t.') +
+      p(`<b>${POTIONS.brandy.name}</b>: ${POTIONS.brandy.text}`) + p(`<b>${POTIONS.oil.name}</b>: ${POTIONS.oil.text}`) + p(`You have ${pr.gold} gold.`), potionButtons(g, ['brandy', 'oil'], again));
     return true;
   }
   if (id === 'sewer') {

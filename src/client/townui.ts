@@ -5,7 +5,7 @@ import { CHAPTER_1, QUORUM, chapterGoals, councilOpen, marketOpen, rewardMult } 
 import { TRAINERS, housesFor, type SpotId } from '../shared/town';
 import { ballot } from '../shared/worldsync';
 import { openSquare } from './squareui';
-import { AUGMENTS, CLASS_KITS, CLASS_ORDER, CLASS_SKILL, ELEMENT_NAME, RELICS, TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
+import { POTION, POTIONS, type PotionId, AUGMENTS, CLASS_KITS, CLASS_ORDER, CLASS_SKILL, ELEMENT_NAME, RELICS, TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
 import type { Game } from './game';
 import { PACK } from '../sim/pack';
 import { COAL, COPY, SMITH } from './copy';
@@ -76,14 +76,14 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       label: a ? `${RELICS[r].short}: ${ELEMENT_NAME[a as keyof typeof ELEMENT_NAME]}` : `${RELICS[r].short}: PLAIN`,
       disabled: !!a && pr.gold < SHOP.augment, act: () => (g.fitAugment(r, a), again()),
     })))];
-    panel.show('IVO THE RELIC-WRIGHT', html, buttons);
+    panel.show('IVO THE RELIC-WRIGHT', html + shelf(['frost']), [...buttons, ...potionButtons(g, ['frost'], again)]);
   } else if (id === 'church') {
     panel.show('FATHER ODRIC', say('Father Odric', 'Give what you can spare. Then a little of what you can\'t. That\'s the part it burns.') + (pr.cls === 'HEALER' ? say('Father Odric', COAL.odric) : '') +
       p(`Given to the Lantern so far: ${w.lantern} gold.`) + p(`You have ${pr.gold} gold.`),
       [20, 100].map((n) => ({ label: `GIVE ${n}`, disabled: pr.gold < n, act: () => (g.donate(n), again()) })));
   } else if (id === 'infirmary') {
     panel.show('SISTER AGNE', say('Sister Agne', w.rescued ? `${w.rescued} through that gate so far. Some of them still won\'t sleep in the dark. I leave a candle.` : 'Empty beds. First time in my life I\'ve wanted them full. Bring someone home and I\'ll have work.') +
-      p(`Lit houses on Rescue Row: ${housesFor(w.rescued)}.`));
+      p(`Lit houses on Rescue Row: ${housesFor(w.rescued)}.`) + shelf(['bitter']) + p(`You have ${pr.gold} gold. Belt: ${pr.belt.length} of ${POTION.belt}.`), potionButtons(g, ['bitter'], again));
   } else if (id === 'yard') {
     panel.show('SQUIRE PELL', say('Squire Pell', "Yard's out back. Straw men, a butcher made of sacking on a chain, and me. Mostly me, getting hit. If you're the sort that heals, I'd take it kindly."), [{ label: 'TO THE YARD', primary: true, act: () => (panel.hide(), g.enterYard()) }]);
   } else if (id === 'granary') {
@@ -98,6 +98,11 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     panel.show('THE NORTH GATE', p('Oak and iron, and the hungry on the other side of it. The gate opens for a job, not before: the board is in the square.'));
   }
 }
+
+/** Potion buttons for a shop: each kind this one sells, at its price. */
+export const potionButtons = (g: Game, ids: PotionId[], again: () => void) =>
+  ids.map((id) => ({ label: `${POTIONS[id].short} (${POTIONS[id].price})`, disabled: g.profile.gold < POTIONS[id].price || g.profile.belt.length >= POTION.belt, act: () => (g.buyPotion(id), again()) }));
+const shelf = (ids: PotionId[]) => ids.map((id) => p(`<b>${POTIONS[id].name}</b>: ${POTIONS[id].text}`)).join('');
 
 const title = (s: string) => s.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 /** What each trainer says to a hero not of their class ({who}, {where}: that hero's own trainer). */
