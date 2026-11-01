@@ -74,6 +74,42 @@ describe('guarding against the butcher', () => {
     expect(h.counterUntil).toBeGreaterThan(room.time);
   });
 
+  it('each class guards its own way: a Ranger parries but never holds a block; a Mage does neither', () => {
+    const ranger = setup();
+    ranger.h.weapon = 'longbow';
+    until(ranger.room, 0.18);
+    ranger.room.setIntent('me', intent({ blockSeq: 1 }));
+    run(ranger.room, ticks(0.35));
+    expect(ranger.b.act).toBe('stunned');
+    const held = setup();
+    held.h.weapon = 'longbow';
+    held.room.setIntent('me', intent({ block: true, blockSeq: 1 }));
+    run(held.room, ticks(BUTCHER.cleave.windup) + 2);
+    expect(held.h.hp).toBe(HERO.hp - BUTCHER.cleave.dmg);
+    const mage = setup();
+    mage.h.weapon = 'wand';
+    until(mage.room, 0.18);
+    mage.room.setIntent('me', intent({ block: true, blockSeq: 1 }));
+    run(mage.room, ticks(0.35));
+    expect(mage.b.act).not.toBe('stunned');
+    expect(mage.h.hp).toBeLessThan(HERO.hp);
+  });
+
+  it("a Mage's blink leaves an image behind, and the butcher goes for it", () => {
+    const { room, h, b } = setup();
+    h.weapon = 'wand';
+    Object.assign(b, { attack: null, act: 'chase', cooldown: 5 });
+    room.setIntent('me', intent({ rollSeq: 1, mx: 1 }));
+    run(room, ticks(0.3));
+    expect(h.decoyUntil).toBeGreaterThan(room.time);
+    const at = { x: h.decoyX, y: h.decoyY };
+    // Walk further off; the butcher still turns toward where you were.
+    h.x += 3;
+    b.cooldown = 0;
+    run(room, ticks(0.2));
+    expect(Math.hypot(b.fx * 1 - (at.x - b.x) / Math.hypot(at.x - b.x, at.y - b.y), b.fy - (at.y - b.y) / Math.hypot(at.x - b.x, at.y - b.y))).toBeLessThan(0.3);
+  });
+
   it('a block pressed too early is only a block', () => {
     const { room, h } = setup();
     until(room, 0.6);

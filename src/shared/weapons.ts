@@ -136,8 +136,8 @@ export const WEAPONS: Record<KitId, Weapon> = {
       { windup: 0.1, active: 0.07, recover: 0.3, dmg: 14, range: 1.3, arc: 60, lunge: 0.6, knock: 3, thrust: true },
     ],
     heavy: { windup: 0.05, active: 0.1, recover: 0.35, dmg: 18, dmgFull: 34, range: 1.8, arc: 40, lunge: 1.6, knock: 3, knockFull: 5, thrust: true },
-    chip: 0.45, blockSpeed: 0.6, chargeSpeed: 0.7, backstab: 2.5, parryWindow: 0.2, guardArc: 100, guardCost: 1.8, speed: 1.15,
-    dodge: { kind: 'dash', distance: 3.6, time: 0.2, iFrom: 0, iTo: 0.2, stamina: 14, cooldown: 0.3 },
+    chip: 0.45, blockSpeed: 0.6, chargeSpeed: 0.7, backstab: 2.5, parryWindow: 0.2, guardArc: 100, guardCost: 1.8, speed: 1.22,
+    dodge: { kind: 'dash', distance: 4.3, time: 0.22, iFrom: 0, iTo: 0.22, stamina: 12, cooldown: 0.22 },
   },
   /** One arrow per press. The long draw is the point: 1.4 s to a shot that pierces a whole line. */
   longbow: {
@@ -177,7 +177,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     heavy: { windup: 0.06, active: 0.04, recover: 0.3, dmg: 10, dmgFull: 24, range: 9, arc: 0, lunge: 0, knock: 3, knockFull: 7, shot: 'spark', speed: 19, burst: 0.8 },
     draw: 0.6,
     chip: 0.5, blockSpeed: 0.4, chargeSpeed: 0.55, parryWindow: 0.2, guardArc: 100, guardCost: 2, speed: 0.86,
-    dodge: { kind: 'blink', distance: 3.4, time: 0.12, iFrom: 0, iTo: 0.12, stamina: 40, cooldown: 1.6 },
+    dodge: { kind: 'blink', distance: 3.8, time: 0.12, iFrom: 0, iTo: 0.12, stamina: 40, cooldown: 2.6 },
   },
   /** The Mage's long spell: 1.6 s of gathering for an orb that bursts wide and throws everything. */
   staff: {
@@ -187,7 +187,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     heavy: { windup: 0.12, active: 0.05, recover: 0.6, dmg: 20, dmgFull: 65, range: 9, arc: 0, lunge: 0, knock: 6, knockFull: 18, shot: 'orb', speed: 9, burst: 2.2 },
     draw: 1.6,
     chip: 0.5, blockSpeed: 0.35, chargeSpeed: 0.25, parryWindow: 0.2, guardArc: 100, guardCost: 2, speed: 0.8,
-    dodge: { kind: 'blink', distance: 3.4, time: 0.12, iFrom: 0, iTo: 0.12, stamina: 40, cooldown: 1.6 },
+    dodge: { kind: 'blink', distance: 3.8, time: 0.12, iFrom: 0, iTo: 0.12, stamina: 40, cooldown: 2.6 },
   },
   /** Between the two: a 1 s cast for a lance of force that runs through a line of goblins. */
   rod: {
@@ -197,7 +197,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     heavy: { windup: 0.08, active: 0.04, recover: 0.45, dmg: 16, dmgFull: 40, range: 12, arc: 0, lunge: 0, knock: 5, knockFull: 12, shot: 'lance', speed: 30, pierce: true },
     draw: 1,
     chip: 0.5, blockSpeed: 0.4, chargeSpeed: 0.35, parryWindow: 0.2, guardArc: 100, guardCost: 2, speed: 0.84,
-    dodge: { kind: 'blink', distance: 3.4, time: 0.12, iFrom: 0, iTo: 0.12, stamina: 40, cooldown: 1.6 },
+    dodge: { kind: 'blink', distance: 3.8, time: 0.12, iFrom: 0, iTo: 0.12, stamina: 40, cooldown: 2.6 },
   },
   /** The Healer: every third blow heals the party; held, a holy smite falls on the goblin you face. */
   mace: {
@@ -218,6 +218,11 @@ export type WeaponId = KitId;
 export const WEAPON_ORDER: WeaponId[] = ['sword', 'greatsword', 'spear', 'longbow', 'shortbow', 'crossbow', 'daggers', 'wand', 'staff', 'rod', 'mace'];
 /** The demo's class button cycles these; the weapon button swaps between a class's own kits. */
 export const CLASS_ORDER: HeroClass[] = ['WARRIOR', 'RANGER', 'ROGUE', 'MAGE', 'HEALER'];
+/** How each class guards: `full` holds a block and parries; `parry` can tap a parry but never holds a
+ *  block; `none` can do neither (a Mage blinks out instead, and leaves an image behind: DECOY). */
+export const CLASS_GUARD: Record<HeroClass, 'full' | 'parry' | 'none'> = { WARRIOR: 'full', HEALER: 'full', ROGUE: 'parry', RANGER: 'parry', MAGE: 'none' };
+/** The Mage's blink leaves an image of them where they stood: goblins near it go for it instead. */
+export const DECOY = { time: 2.5, lure: 5 };
 export const CLASS_KITS: Record<HeroClass, WeaponId[]> = {
   WARRIOR: ['sword', 'greatsword', 'spear'],
   RANGER: ['longbow', 'shortbow', 'crossbow'],

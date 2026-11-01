@@ -1,5 +1,5 @@
 /** Relic: Wickhold, the Training Yard and runs. The rooms run here in the browser (solo is a party of one). */
-import { POTIONS, CLASS_ORDER, RELICS, TRAITS, WEAPONS, itemName, type HeroClass } from '../shared/tuning';
+import { CLASS_GUARD, POTIONS, CLASS_ORDER, RELICS, TRAITS, WEAPONS, itemName, type HeroClass } from '../shared/tuning';
 import { MAX_DOWNS, goal } from '../sim/run';
 import type { Intent } from '../sim/types';
 import { Game, ME } from './game';
@@ -112,6 +112,9 @@ function hud(now: number): void {
   $('.who').textContent = `${pr.name}  ${pr.cls}  LV ${pr.level}`;
   const item = me.arms[me.weapon];
   $('.wpn').textContent = item ? itemName(item) : WEAPONS[me.weapon].name;
+  // The block button: a Mage has none; a Ranger or Rogue only taps it to parry.
+  const guard = CLASS_GUARD[WEAPONS[me.weapon].cls];
+  if (document.body.dataset.guard !== guard) (document.body.dataset.guard = guard), ($('.tb.block').textContent = guard === 'parry' ? 'PARRY' : 'BLOCK');
   $('.kit').textContent = item ? item.traits.map((t) => TRAITS[t].name).join(' + ') + '  ' + KIT[me.weapon] : KIT[me.weapon];
   card.update(room, me, !input.touch);
   pack.update(me);

@@ -3,7 +3,7 @@ import { lure, seenFrom } from './lantern';
 import { visible } from './flasks';
 import { HUNGRY_FX, wears } from './hungry';
 import { collide, currentMap, inArea } from '../shared/arena';
-import { ALERT, ARCHER, BUTCHER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, type EnemyAttackSpec, type EnemySpec, VARIANTS } from '../shared/tuning';
+import { DECOY, ALERT, ARCHER, BUTCHER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, type EnemyAttackSpec, type EnemySpec, VARIANTS } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { slide } from './bodies';
 import { hitHero } from './combat';
@@ -33,6 +33,11 @@ function nearest(e: Enemy, heroes: Hero[], now: number): Hero | null {
     const raw = Math.hypot(h.x - e.x, h.y - e.y), d = raw - lure(h) - apron;
     if (!visible(h, raw, now)) continue;
     if (d < bd) (bd = d), (best = h);
+    // A Mage's blink image draws them off while it lasts: they swing at where you were.
+    if (h.decoyUntil > now) {
+      const dd = Math.hypot(h.decoyX - e.x, h.decoyY - e.y) - DECOY.lure;
+      if (dd < bd) (bd = dd), (best = { ...h, x: h.decoyX, y: h.decoyY });
+    }
   }
   return best;
 }

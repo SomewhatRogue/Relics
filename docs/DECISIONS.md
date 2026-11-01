@@ -662,3 +662,11 @@ lessons are per class (lessonsFor): Warrior and Healer keep block and parry; Rog
 Ranger and Mage full draw or charge, and all three the last-second dodge in place of parry, with goblins to
 suit. Hew says one line about each class while he looks you over. The light classes can still hold a block
 in the game itself; the wood just doesn't teach it (Kyle to decide whether they should lose it).
+
+## 2026-11-01: each class guards its own way (Claude Opus 5.5)
+Kyle: Warrior and Healer hold a block and parry; Ranger and Rogue can parry with good timing but never hold
+a block; the Mage can neither, and blinks out instead (cooldown 1.6 to 2.6 s, a little further) leaving an
+image for 2.5 s that goblins near it go for (DECOY; nearest() hands them a stand-in at the image). The Rogue
+is quicker (speed 1.22; dash 4.3 tiles, 0.22 s cooldown, cheaper). CLASS_GUARD in weapons.ts; the class
+detail shows a GUARD line; on a phone the block button reads PARRY for Ranger and Rogue and is gone for the Mage.
+Later: a Rogue relic that slides behind the goblin instead of a straight dodge (Kyle's idea).

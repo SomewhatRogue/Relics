@@ -3,7 +3,7 @@
  * A tap of attack swings on release; holding past CHARGE.start charges a heavy instead.
  */
 import { collide } from '../shared/arena';
-import { POTION, AUGMENTS, CHARGE, GRAB, HORN, PERK, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon } from '../shared/tuning';
+import { CLASS_GUARD, DECOY, POTION, AUGMENTS, CHARGE, GRAB, HORN, PERK, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon } from '../shared/tuning';
 import { slide } from './bodies';
 import { applyGear } from './pack';
 import { statsOf } from './gearstats';
@@ -15,7 +15,7 @@ export function newHero(id: string, x: number, y: number): Hero {
   return {
     id, x, y, kvx: 0, kvy: 0, fx: 0, fy: 1, moving: false, hp: HERO.hp, maxHp: HERO.hp, perks: [], stamina: HERO.stamina, staminaAt: -9, weapon: 'sword',
     act: 'idle', actT: 0, actDur: 0, combo: 0, heavy: false, power: 0, counter: false, hitIds: [], blocking: false,
-    parryOpenAt: -9, lastBlockPress: -9, rollDx: 0, rollDy: 1, lastRollAt: -9, rollX: -99, rollY: -99, counterUntil: -9,
+    parryOpenAt: -9, lastBlockPress: -9, rollDx: 0, rollDy: 1, lastRollAt: -9, rollX: -99, rollY: -99, decoyX: 0, decoyY: 0, decoyUntil: -9, counterUntil: -9,
     attackQueuedAt: -9, rollQueuedAt: -9, relic: 'horn', relics: abilitiesOf('WARRIOR'), relicQueuedAt: -9,
     relicReady: { javelin: 0, hook: 0, horn: 0, net: 0, shadow: 0, lodestone: 0, blessing: 0, ward: 0, sanctuary: 0 },
     augments: { javelin: '', hook: '', horn: '', net: '', shadow: '', lodestone: '', blessing: '', ward: '', sanctuary: '' }, blessedUntil: -9, wardUntil: -9, wardHp: 0, rallyUntil: -9, arms: {}, bag: [], armor: null, rings: [], baseHp: HERO.hp, purse: 0, fed: 0, lastKill: 0, biteAt: 0, ransomed: false, want: 0, cold: false, found: [], glow: 0, belt: [], potionReady: 0, mendLeft: 0, brandyUntil: -9, hiddenUntil: -9, perfect: false, tempoUntil: -9, carrying: 0, lifting: 0, grabQueuedAt: -9, z: 0, hitstop: 0, lenience: 0,
@@ -125,7 +125,8 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   if (inp.rollSeq !== h.seen.roll) (h.seen.roll = inp.rollSeq), (h.rollQueuedAt = now);
   if (inp.blockSeq !== h.seen.block) {
     h.seen.block = inp.blockSeq;
-    if (now - h.lastBlockPress >= GUARD.parryRepress) h.parryOpenAt = now;
+    // A Mage has no guard at all; the rest can at least tap a parry.
+    if (CLASS_GUARD[WEAPONS[h.weapon].cls] !== 'none' && now - h.lastBlockPress >= GUARD.parryRepress) h.parryOpenAt = now;
     h.lastBlockPress = now;
   }
   if (inp.classSeq !== h.seen.cls) {
@@ -251,7 +252,8 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     if (!inp.attack || w.noCharge) return startSwing(h, 0, inp, enemies, now, ev);
     if (now - h.attackQueuedAt >= CHARGE.start) return startCharge(h);
   }
-  h.blocking = inp.block && h.stamina > 0;
+  // Only a Warrior's or Healer's kit holds a block.
+  h.blocking = inp.block && h.stamina > 0 && CLASS_GUARD[w.cls] === 'full';
   // Guarding with no aim (a phone) turns to the nearest threat, so a parry faces the right way.
   face(h, inp, enemies, h.blocking || now - h.lastBlockPress < 0.3);
   walk(h, inp, h.blocking ? w.blockSpeed : 1, dt);
@@ -298,6 +300,8 @@ function startRoll(h: Hero, inp: Intent, now: number, ev: FightEvent[]): void {
   h.lastRollAt = now;
   h.rollX = h.x;
   h.rollY = h.y;
+  // A blink leaves an image of you where you stood, and the goblins near it go for that.
+  if (kind === 'blink') Object.assign(h, { decoyX: h.x, decoyY: h.y, decoyUntil: now + DECOY.time });
   h.rollQueuedAt = -9;
   spend(h, WEAPONS[h.weapon].dodge.stamina * statsOf(h).dodgeCost, now);
   ev.push({ k: kind === 'blink' ? 'blink' : 'roll', x: h.x, y: h.y });

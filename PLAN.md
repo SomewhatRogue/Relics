@@ -88,3 +88,5 @@ and burns out a goblin den on a job.
 - The prologue rewritten through both passes. Hew's waking is four tap-to-go-on boxes; any card goes on
   with a tap anywhere (the phone stick couldn't reach under the card before).
 - Next: run the town's lines (townui, squareui, rumours, jobs, copy.ts) through the same two passes.
+- Idea (Kyle): a Rogue relic, "slide behind": the dodge goes round behind the goblin you face instead of straight.
+- Story: docs/lore/arcs-and-missions.md (also the Claude Doc "Relic: Story Arcs and Missions"); Kyle to pick a road.

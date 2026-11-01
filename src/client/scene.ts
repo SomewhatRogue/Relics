@@ -118,6 +118,16 @@ export class Scene {
     for (const h of room.heroes) {
       const [x, y] = lerp('h:' + h.id, h.x, h.y), up = (h.z ?? 0) * LIFT;
       items.push({ y, draw: () => drawHero(c, h, x - cx, y - up - cy, h.id === meId, room.time) });
+      // A Mage's blink image, flickering where they stood until it goes.
+      if (h.decoyUntil > room.time) {
+        const dx = OX + h.decoyX * PX, dy = OY + h.decoyY * PX, left = h.decoyUntil - room.time;
+        items.push({ y: dy, draw: () => {
+          const a = (0.35 + Math.sin(room.time * 18) * 0.12) * Math.min(1, left / 0.5);
+          c.lit.globalAlpha = c.glow.globalAlpha = a;
+          drawHero(c, { ...h, act: 'idle', actT: 0 }, dx - cx, dy - cy, false, room.time);
+          c.lit.globalAlpha = c.glow.globalAlpha = 1;
+        } });
+      }
     }
     for (const e of room.enemies) {
       const carrier = room.heroes.find((h) => h.carrying === e.id);

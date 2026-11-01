@@ -309,3 +309,6 @@ body:not(.touch) #lesson.act { justify-content: flex-start; padding-top: 18vh; }
 @keyframes sway { 0%, 100% { transform: translateY(0) rotate(0); } 25% { transform: translateY(-2px) rotate(-3deg); } 75% { transform: translateY(2px) rotate(3deg); } }
 @keyframes tremble { 0% { transform: translate(0, 0); } 50% { transform: translate(0.6px, -0.6px); } 100% { transform: translate(-0.6px, 0.4px); } }
 @media (prefers-reduced-motion: reduce) { .speech .ch.in { animation: none !important; } }
+
+/* A Mage has no guard: no block button. */
+body[data-guard="none"] .tb.block { display: none; }

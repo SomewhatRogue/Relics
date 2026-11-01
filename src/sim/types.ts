@@ -88,6 +88,10 @@ export interface Hero extends Body {
   /** Where the last roll started (a roll out of a blow's reach counts as dodging it). */
   rollX: number;
   rollY: number;
+  /** A Mage's blink image: where, and until when (goblins near it go for it). */
+  decoyX: number;
+  decoyY: number;
+  decoyUntil: number;
   counterUntil: number;
   attackQueuedAt: number;
   rollQueuedAt: number;
