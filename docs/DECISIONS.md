@@ -2,6 +2,24 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-10-31 (late): props to smash, lift and throw (Claude Opus 5.5)
+
+Kyle: pick up and throw barrels and tables (and broken pieces) if you're a big enough character,
+like the knight or a barbarian; the rogue and ranger can't.
+
+- **Props are bodies** (`shared/props.ts`, `sim/props.ts`): barrels (2.5), an oil barrel, crates (3)
+  and a table (4) stand in the training room. Blows, shots, blasts, wall slams and flying goblins
+  push and break them; they break into staves and planks (lighter pieces that fade after 25 s).
+  Big ones come back after 20 s in the training room. Shots stop on them.
+- **Only strong classes lift** (`STRONG`: the Warrior now; a Barbarian when the Warrior forks into
+  Knight or Barbarian). GRAB takes a goblin first if one is earned, else the nearest prop. Overhead
+  you walk at 70% (56% for a crate or table); ATTACK slams it down (28 to goblins within 1.3 tiles,
+  it breaks); GRAB throws it at 14 tiles a second. A thrown prop hits like its weight (0.8 per tile
+  a second times weight, up to 45) and breaks on any goblin it hits at speed.
+- **The oil barrel** bursts into flame when broken: everything within 1.8 tiles burns.
+- **Goblin grabs stay for every class** (they're earned by skill, not strength); lifting furniture is
+  the strong classes' extra.
+
 ## 2026-10-31 (after midnight): grab, slam, throw, and deaths by the blow (Claude Opus 5.5)
 
 Kyle: more dynamic hits and deaths: slam a goblin into the ground and pound its head off so it

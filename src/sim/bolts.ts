@@ -9,6 +9,7 @@ import { FLINCH, LODESTONE, NET, type Augment, type Swing, type TraitId } from '
 import { shove } from './bodies';
 import { damage, frozen, isDead } from './damage';
 import { afflict, shatter, type World } from './elements';
+import { blastProps, damageProp } from './props';
 import type { Bolt, Enemy, Hero } from './types';
 
 let nextId = 1;
@@ -48,6 +49,7 @@ export function lobLodestone(h: Hero, dist: number, el: Augment): Bolt {
 /** Everything within the bolt's burst of (x, y) is hit and thrown outward (and stunned, by a smite). */
 function blast(w: World, b: Bolt, x: number, y: number): void {
   w.ev.push(b.kind === 'smite' ? { k: 'smite', x, y } : { k: 'burst', x, y, r: b.burst, el: b.el });
+  blastProps(x, y, b.burst, b.dmg, b.knock, w);
   for (const e of w.enemies) {
     const d = Math.hypot(e.x - x, e.y - y);
     if (isDead(e) || e.act === 'carried' || d > b.burst + e.radius) continue;
@@ -112,6 +114,15 @@ export function stepBolt(b: Bolt, w: World, dt: number): boolean {
     b.y = p.y;
     b.travelled += d;
     if (Math.hypot(p.x - want.x, p.y - want.y) > 1e-4) return end(b, w, true);
+    // Barrels and tables stop shots (and take them).
+    const prop = w.props.find((q) => !q.broken && !q.lifted && Math.hypot(q.x - b.x, q.y - b.y) <= q.radius + 0.1);
+    if (prop) {
+      if (b.kind === 'net') return openNet(w, b), false;
+      if (b.burst) return blast(w, b, b.x, b.y), false;
+      shove(prop, b.dx, b.dy, b.knock, prop.weight);
+      damageProp(prop, b.dmg, w, b.dx, b.dy);
+      return end(b, w, true);
+    }
     for (const e of w.enemies) {
       if (isDead(e) || e.act === 'carried' || b.hit.includes(e.id)) continue;
       if (Math.hypot(e.x - b.x, e.y - b.y) > e.radius + (b.kind === 'orb' || b.kind === 'net' ? 0.3 : 0.14)) continue;

@@ -154,6 +154,26 @@ export function magicFx(fx: Fx, ev: FightEvent, x: number, y: number): void {
     case 'wriggle':
       fx.say(x, y - 26, 'SLIPPED FREE', '#c8c4d0');
       break;
+    case 'propbreak':
+      fx.gore.splinters(x, y - 6, ev.kind === 'table' || ev.kind === 'crate', ev.dx, ev.dy);
+      fx.burst(x, y - 6, 10, ['#6a647a', '#57525e'], 50, false);
+      fx.say(x, y - 26, ev.kind === 'plank' || ev.kind === 'stave' ? 'CRACK' : 'SMASH', '#d8c48a');
+      fx.shake = Math.max(fx.shake, ev.kind === 'table' ? 4 : 2);
+      break;
+    case 'oilfire':
+      fx.say(x, y - 34, 'OIL FIRE', '#ff9a3c');
+      fx.burst(x, y - 8, 40, ['#fff1b0', '#ffd27a', '#ff9a3c', '#ff6a20'], 120, true);
+      fx.rings.push({ x, y, life: 0.4, max: 0.4, col: '#ff9a3c', size: 34 });
+      for (let i = 0; i < 40; i++) {
+        const a = Math.random() * Math.PI * 2, r = Math.random() * 26;
+        fx.decal(x + Math.cos(a) * r, y + Math.sin(a) * r * 0.55, i % 2 ? '#1a1410' : '#2a2018');
+      }
+      fx.shake = Math.max(fx.shake, 5);
+      flash(fx, x, y - 8, 110, 1.8, [1, 0.6, 0.25], 0.35);
+      break;
+    case 'lift':
+      fx.burst(x, y - 4, 6, ['#6a647a', '#57525e'], 30, false);
+      break;
     case 'heal':
       fx.say(x, y - 28, '+' + ev.n, '#7dff8a');
       fx.burst(x, y - 8, 8, ['#7dff8a', '#ffffff'], 30, true);

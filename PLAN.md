@@ -28,10 +28,12 @@
       the loot card), perfect release and overdraw on every draw
 - [x] Slice 2g: grab, slam and throw small goblins (earned by stun, net, freeze, stagger or getting
       behind), body-to-body impacts, deaths by the blow (beheaded, burst, burned, shattered) with gore
+- [x] Slice 2h: props (barrels, oil barrel, crates, a table, broken pieces) that break and push; the
+      Warrior lifts, slams and throws them
 
 ## Next (in order)
 
-1. Kyle plays slice 2g. Tune: draw times, class speeds, relic cooldowns, the phone's chips.
+1. Kyle plays slice 2h. Tune: draw times, class speeds, relic cooldowns, the phone's chips.
 2. Slice 3: four players in the room by link or code, the leader's browser hosts, drop-in mid-fight,
    rejoin by name, takeover from the last snapshot. Copy Come Bye's client relay and online tests.
 3. Slice 4: a real run (5 rooms and a boss, rescue room, down and revive, loot), bots for a bench.

@@ -13,12 +13,14 @@ import { newEnemy, stepEnemy } from './enemies';
 import { newHero, stepHero, type HeroActs } from './hero';
 import { isDead } from './damage';
 import { impacts } from './impacts';
+import { release, stepCarry, tryGrab } from './grab';
+import { dropProp, propImpacts, roomProps, stepLift, stepProps, sweepProps, tryLift } from './props';
 import { dropFrom, stepDrops, takeLoot } from './loot';
 import { bless, rally, shadowstep } from './relics';
 import { forgedElement, has, traitsOf } from './traits';
 import { fireHook, stepHook } from './hook';
 import { stepJavelin, throwJavelin } from './javelin';
-import { NO_INTENT, type Bolt, type Drop, type Enemy, type FightEvent, type Hero, type Hook, type Intent, type Javelin } from './types';
+import { NO_INTENT, type Bolt, type Drop, type Enemy, type Prop, type FightEvent, type Hero, type Hook, type Intent, type Javelin } from './types';
 
 export class ArenaRoom {
   time = 0;
@@ -29,6 +31,7 @@ export class ArenaRoom {
   hooks: Hook[] = [];
   bolts: Bolt[] = [];
   drops: Drop[] = [];
+  props: Prop[] = roomProps();
   intents = new Map<string, Intent>();
   /** Events from the latest tick (drawn as hits, sparks and sounds). */
   events: FightEvent[] = [];
@@ -40,7 +43,7 @@ export class ArenaRoom {
   private acc = 0;
 
   /** `squire`: a training partner who stands by the swing dummy taking hits (someone to heal and bless). */
-  constructor(seed = 1, opts: { scrappers?: boolean; squire?: boolean } = {}) {
+  constructor(seed = 1, opts: { scrappers?: boolean; squire?: boolean; props?: boolean } = {}) {
     this.rng = new Rng(seed);
     this.lootRng = new Rng(seed * 7919 + 13);
     const s = ARENA.spawn;
@@ -49,6 +52,7 @@ export class ArenaRoom {
     this.enemies.push(newEnemy(3, 'swingDummy', s.swingDummy.x, s.swingDummy.y));
     if (opts.scrappers !== false) s.scrappers.forEach((p, i) => this.enemies.push(newEnemy(4 + i, 'scrapper', p.x, p.y)));
     this.squire = !!opts.squire;
+    if (opts.props === false) this.props = [];
   }
 
   private squire: boolean;
@@ -96,9 +100,17 @@ export class ArenaRoom {
     this.events = [];
     this.time += TICK;
     this.tick++;
-    const w: World = { heroes: this.heroes, enemies: this.enemies, javelins: this.javelins, now: this.time, ev: this.events };
+    const w: World = { heroes: this.heroes, enemies: this.enemies, javelins: this.javelins, props: this.props, now: this.time, ev: this.events };
     const hit = (e: Enemy, el: Hero['augments']['javelin'], n: number) => afflict(w, e, el, n);
-    const acts: HeroActs = { fire: (h) => this.fire(h, w), loose: (h, s) => this.loose(h, s, w), struck: (h, e, n) => this.struck(h, e, n, w) };
+    const acts: HeroActs = {
+      fire: (h) => this.fire(h, w),
+      loose: (h, s) => this.loose(h, s, w),
+      struck: (h, e, n) => this.struck(h, e, n, w),
+      sweep: (h, s) => sweepProps(h, s, w),
+      grab: (h) => tryGrab(h, this.enemies, this.time, this.events) || tryLift(h, this.props, this.events),
+      carry: (h, inp, walk) => (h.lifting ? stepLift(h, inp, w, TICK, walk) : stepCarry(h, inp, this.enemies, this.time, TICK, this.events, walk)),
+      drop: (h) => (release(h, this.enemies, this.events), dropProp(h, this.props)),
+    };
     const alive = new Set(this.enemies.filter((e) => !isDead(e)).map((e) => e.id));
     for (const h of this.heroes) takeLoot(h, this.intents.get(h.id) ?? NO_INTENT, this.drops, this.events);
     for (const h of this.heroes) stepHero(h, this.intents.get(h.id) ?? NO_INTENT, this.enemies, this.time, TICK, this.events, acts);
@@ -107,8 +119,10 @@ export class ArenaRoom {
     this.bolts = this.bolts.filter((b) => stepBolt(b, w, TICK));
     for (const e of this.enemies) stepEnemy(e, this.heroes, this.rng, this.time, TICK, this.events);
     impacts(this.enemies, this.time, this.events);
+    propImpacts(w);
+    this.props = w.props = stepProps(w, TICK);
     stepElements(w);
-    separate(this.heroes, this.enemies);
+    separate(this.heroes, this.enemies, this.props);
     for (const e of this.enemies) if (alive.has(e.id) && isDead(e)) dropFrom(e, this.heroes, this.drops, this.lootRng, this.events);
     this.drops = stepDrops(this.drops, TICK);
   }

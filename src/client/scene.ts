@@ -11,6 +11,7 @@ import { drawEnemy, drawHeld, drawTelegraph } from './foes';
 import { EL_LIGHT } from './palette';
 import { drawBolt, drawDrop, drawHook, drawJavelin } from './relicsdraw';
 import { drawStatus } from './status';
+import { drawLifted, drawProp } from './propsdraw';
 import type { Fx } from './fx';
 import { Lighting, type Light } from './light';
 import { SPRITES } from './sprites';
@@ -116,6 +117,17 @@ export class Scene {
       }
       const [x, y] = lerp('e:' + e.id, e.x, e.y);
       items.push({ y, draw: () => (drawEnemy(c, e, x - cx, y - cy), drawStatus(c, e, x - cx, y - cy, room.time)) });
+    }
+    for (const p of room.props) {
+      if (p.broken) continue;
+      const carrier = p.lifted ? room.heroes.find((h) => h.lifting === p.id) : undefined;
+      if (carrier) {
+        const [hx, hy] = lerp('h:' + carrier.id, carrier.x, carrier.y), slam = carrier.act === 'slam' ? Math.min(1, carrier.actT / GRAB.slamWindup) : 0;
+        items.push({ y: hy + 0.5, draw: () => drawLifted(c, p, hx - cx, hy - cy, carrier.fx, carrier.fy, slam) });
+        continue;
+      }
+      const x = OX + p.x * PX - cx, y = OY + p.y * PX - cy;
+      items.push({ y: OY + p.y * PX, draw: () => drawProp(c, p, x, y, room.time) });
     }
     for (const d of room.drops) {
       const x = OX + d.x * PX - cx, y = OY + d.y * PX - cy;

@@ -1,6 +1,7 @@
 /** Relic: slice 2, one room. The fight runs here in the browser (solo is a party of one). */
 import { HERO, RELICS, RELIC_SLOTS, TRAITS, WEAPONS, itemName } from '../shared/tuning';
 import { grabbable } from '../sim/grab';
+import { liftable } from '../sim/props';
 import { relicLabel } from '../sim/hero';
 import { ArenaRoom } from '../sim/room';
 import type { FightEvent } from '../sim/types';
@@ -53,8 +54,8 @@ const KIT: Record<string, string> = {
 
 let parries = 0;
 const tips = input.touch
-  ? ['Stun or get behind a small goblin, then GRAB it', 'Holding one: SLAM it, or THROW it at another', 'Goblins drop weapons. Stand on one and TAKE it', 'Traits reward skill: parries, dodges, perfect releases', 'CLASS changes class. WEAPON swaps its kit', 'HEALER: hold RELIC for BLESS, it finds the most hurt ally', 'AUGMENT puts an element on your relic', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'RELIC: pin a scrapper to the wall', 'Striped circles cannot be blocked: ROLL out', 'HOLD RELIC to pick another relic', 'TWIN DAGGERS: roll behind a goblin and BACKSTAB']
-  : ['G grabs a stunned goblin (or one you got behind). Click to slam, G to throw', 'Goblins drop weapons. Stand on one and press F to take it', 'Bows: release on the white flash. Held too long, the shot weakens', 'C changes class. Q swaps its kit. T puts an element on your relic', 'Healer: point at an ally and press E to BLESS them', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: pin a scrapper to the wall. 1 2 3 pick a relic', 'Striped circles cannot be blocked: SPACE to roll', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or rod', 'Daggers: roll behind a goblin and BACKSTAB'];
+  ? ['Stun or get behind a small goblin, then GRAB it', 'Warriors can GRAB barrels and tables and throw them', 'Break the oil barrel near goblins and they burn', 'Holding one: SLAM it, or THROW it at another', 'Goblins drop weapons. Stand on one and TAKE it', 'Traits reward skill: parries, dodges, perfect releases', 'CLASS changes class. WEAPON swaps its kit', 'HEALER: hold RELIC for BLESS, it finds the most hurt ally', 'AUGMENT puts an element on your relic', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'RELIC: pin a scrapper to the wall', 'Striped circles cannot be blocked: ROLL out', 'HOLD RELIC to pick another relic', 'TWIN DAGGERS: roll behind a goblin and BACKSTAB']
+  : ['G grabs a stunned goblin (or one you got behind). Click to slam, G to throw', 'Warriors: G lifts barrels and tables. Throw them, or slam them down', 'Break the oil barrel near goblins and they burn', 'Goblins drop weapons. Stand on one and press F to take it', 'Bows: release on the white flash. Held too long, the shot weakens', 'C changes class. Q swaps its kit. T puts an element on your relic', 'Healer: point at an ally and press E to BLESS them', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: pin a scrapper to the wall. 1 2 3 pick a relic', 'Striped circles cannot be blocked: SPACE to roll', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or rod', 'Daggers: roll behind a goblin and BACKSTAB'];
 let tipAt = -99, tipI = 0;
 
 function hud(now: number): void {
@@ -69,7 +70,7 @@ function hud(now: number): void {
   if (input.touch) {
     // GRAB shows only when there's something to grab (or to throw); ATTACK becomes SLAM.
     const carrying = me.act === 'carry';
-    const can = carrying || (me.act === 'idle' && room.enemies.some((e) => grabbable(me, e, room.time)));
+    const can = carrying || (me.act === 'idle' && (room.enemies.some((e) => grabbable(me, e, room.time)) || room.props.some((p) => liftable(me, p))));
     $('.tb.grab').hidden = !can;
     $('.tb.grab').textContent = carrying ? 'THROW' : 'GRAB';
     $('.tb.attack').textContent = carrying ? 'SLAM' : 'ATTACK';

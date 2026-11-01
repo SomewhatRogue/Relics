@@ -7,13 +7,14 @@
 import { BURN, FLARE, FROST, SHATTER, STEAM, STORM, type Augment } from '../shared/tuning';
 import { shove } from './bodies';
 import { clearElements, damage, frozen, isDummy } from './damage';
-import type { Enemy, FightEvent, Hero, Javelin } from './types';
+import type { Enemy, FightEvent, Hero, Javelin, Prop } from './types';
 
 /** Everything an element can reach, for one tick. */
 export interface World {
   heroes: Hero[];
   enemies: Enemy[];
   javelins: Javelin[];
+  props: Prop[];
   now: number;
   ev: FightEvent[];
 }

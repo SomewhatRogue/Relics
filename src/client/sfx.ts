@@ -198,6 +198,20 @@ export const sfx = {
     burst('bandpass', 900, 250, 1.5, 0.8, 0.18);
   },
   wriggle() {},
+  propbreak() {
+    if (!ready()) return;
+    burst('bandpass', 1800, 500, 2, 0.8, 0.2);
+    tone('triangle', 160, 80, 0.4, 0.15);
+    for (let i = 0; i < 4; i++) burst('highpass', 3000, 1500, 2, 0.2, 0.04);
+  },
+  oilfire() {
+    if (!ready()) return;
+    tone('sine', 70, 40, 0.9, 0.5);
+    burst('lowpass', 2000, 200, 0.6, 1, 0.9);
+  },
+  lift() {
+    if (ready()) tone('sawtooth', 140, 100, 0.2, 0.2);
+  },
   arrow() {
     if (!ready()) return;
     tone('triangle', 220, 120, 0.3, 0.08);

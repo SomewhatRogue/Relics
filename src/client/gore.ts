@@ -21,6 +21,12 @@ export class Gore {
     }
   }
 
+  /** Wood flying apart: a broken barrel, crate or table. */
+  splinters(x: number, y: number, big: boolean, dx: number, dy: number): void {
+    this.fling(x, y, 6, big ? 18 : 10, ['#8b6a3a', '#7a5230', '#5a3d22', '#4a4652'], big ? 80 : 60, 90, 2, dx, dy);
+    this.fling(x, y, 6, 10, ['#9a7a4a', '#6b4a2b'], 70, 120, 1, dx, dy);
+  }
+
   /** A goblin died (x, y in screen pixels). */
   death(ev: Extract<FightEvent, { k: 'death' }>, x: number, y: number): void {
     const fx = this.fx, big = ev.kind === 'butcher', neck = big ? 18 : 10, l = Math.hypot(ev.dx, ev.dy) || 1, dx = ev.dx / l, dy = ev.dy / l;

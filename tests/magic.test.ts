@@ -27,7 +27,7 @@ function run(room: ArenaRoom, s: number): FightEvent[] {
   return out;
 }
 
-const world = (room: ArenaRoom, ev: FightEvent[] = []): World => ({ heroes: room.heroes, enemies: room.enemies, javelins: room.javelins, now: room.time, ev });
+const world = (room: ArenaRoom, ev: FightEvent[] = []): World => ({ heroes: room.heroes, enemies: room.enemies, javelins: room.javelins, props: room.props, now: room.time, ev });
 
 const charged = (room: ArenaRoom, hold: number, aim: Partial<Intent> = { ay: -1 }) => {
   room.setIntent('me', intent({ attackSeq: 1, attack: true, ...aim }));

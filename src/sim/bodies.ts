@@ -1,7 +1,7 @@
 /** Bodies in the room: knockback slides, wall slams, and nobody standing inside anybody else. */
 import { collide } from '../shared/arena';
 import { HERO, KNOCK } from '../shared/tuning';
-import type { Body, Enemy, Hero } from './types';
+import type { Body, Enemy, Hero, Prop } from './types';
 
 /** Shove a body along (dx, dy) (a unit vector) by `impulse`, lightened or deadened by its weight. */
 export function shove(b: Body, dx: number, dy: number, impulse: number, weight: number): void {
@@ -36,13 +36,14 @@ export function slide(b: Body, r: number, dt: number): number {
 }
 
 /** Push overlapping bodies apart, the lighter one moving more. Rolling heroes pass through. */
-export function separate(heroes: Hero[], enemies: Enemy[]): void {
+export function separate(heroes: Hero[], enemies: Enemy[], props: Prop[] = []): void {
   const list: { b: Body; r: number; inv: number }[] = [];
   for (const h of heroes) if (h.act !== 'roll' && h.act !== 'down') list.push({ b: h, r: HERO.radius, inv: 1 / HERO.weight });
   for (const e of enemies) {
     if (e.act === 'dead' || e.act === 'carried') continue;
     list.push({ b: e, r: e.radius, inv: isFinite(e.weight) && e.act !== 'pinned' ? 1 / e.weight : 0 });
   }
+  for (const p of props) if (!p.broken && !p.lifted) list.push({ b: p, r: p.radius, inv: 1 / p.weight });
   for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) {
     const p = list[i], q = list[j], sum = p.inv + q.inv;
     if (!sum) continue;

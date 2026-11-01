@@ -1,5 +1,5 @@
 /** The fight's state. Plain data: the same shape is drawn locally and (later) sent to friends. */
-import type { Augment, Item, Quality, RelicId, TraitId, WeaponId } from '../shared/tuning';
+import type { Augment, Item, PropKind, Quality, RelicId, TraitId, WeaponId } from '../shared/tuning';
 
 /** What a player's device sends: held state plus press counters, so a quick tap is never lost. */
 export interface Intent {
@@ -94,6 +94,8 @@ export interface Hero extends Body {
   tempoUntil: number;
   /** The goblin held overhead (0: none). */
   carrying: number;
+  /** The prop held overhead (0: none). */
+  lifting: number;
   grabQueuedAt: number;
   hitstop: number;
   /** Extra parry and dodge leniency for this player's ping (seconds). */
@@ -166,6 +168,27 @@ export interface Enemy extends Body {
 /** How a goblin died: fell, lost its head, burst apart, burned, or shattered. */
 export type DeathKind = '' | 'fall' | 'behead' | 'burst' | 'burn' | 'shatter';
 
+/** A barrel, crate, table or broken piece: a body that can be smashed, pushed, lifted and thrown. */
+export interface Prop extends Body {
+  id: number;
+  kind: PropKind;
+  hp: number;
+  radius: number;
+  weight: number;
+  /** Held overhead by a hero. */
+  lifted: boolean;
+  lastBy: string;
+  hitAt: number;
+  /** Broken: gone until `respawnAt` (big props) or for good (pieces, at `respawnAt` -1). */
+  broken: boolean;
+  respawnAt: number;
+  /** Where it came back to; pieces have none and fade at `fadeAt`. */
+  home: { x: number; y: number } | null;
+  fadeAt: number;
+  /** Spin while flying, for drawing. */
+  spin: number;
+}
+
 /** A weapon lying where a goblin fell. */
 export interface Drop {
   id: number;
@@ -188,7 +211,8 @@ export type FightEvent =
   | { k: 'burst'; x: number; y: number; r: number; el: Augment }
   | { k: 'shock' | 'beam'; x: number; y: number; x2: number; y2: number }
   | { k: 'heal'; x: number; y: number; n: number }
-  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle'; x: number; y: number };
+  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle' | 'lift' | 'oilfire'; x: number; y: number }
+  | { k: 'propbreak'; x: number; y: number; kind: PropKind; dx: number; dy: number };
 
 /** A grappling hook: flying out, reeling an enemy in, pulling its owner along, or coming back. */
 export interface Hook {
