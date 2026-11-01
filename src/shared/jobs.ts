@@ -39,10 +39,10 @@ export interface Job {
 const BOSSES = ['MAWL THE FLAYER', 'SKARN', 'OLD KNUCKLES', 'THE TALLY MAN', 'GUTCHAIN', 'MOTHER RUST'];
 
 function describe(o: Objective, p: Place, boss: string): { title: string; text: string } {
-  if (o === 'rescue') return { title: `Rescue at ${p.name}`, text: `Goblins have caged survivors at ${p.name}. Break the cages and bring them home.` };
-  if (o === 'hunt') return { title: `Hunt ${boss}`, text: `A butcher called ${boss} holds ${p.name}. Kill it, and the place breathes again.` };
-  if (o === 'burn') return { title: `Burn out the dens at ${p.name}`, text: `Goblins have dug dens into ${p.name} and more crawl out of them every few breaths. Burn every den: oil lies about, and fire spreads wood to wood.` };
-  return { title: `Burn the larder at ${p.name}`, text: `The goblins at ${p.name} keep a larder of stolen stores and worse. Smash every rack.` };
+  if (o === 'rescue') return { title: `Rescue at ${p.name}`, text: `Folk alive in cages at ${p.name}, at last count. Last count was three days ago. Break the cages, bring them home, don't stop to count.` };
+  if (o === 'hunt') return { title: `Hunt ${boss}`, text: `${boss} has taken ${p.name} for a larder and the little ones for a family. Kill it and the rest scatter. Bring back something to prove it; we've been lied to before.` };
+  if (o === 'burn') return { title: `Burn out the dens at ${p.name}`, text: `The hungry have dug in at ${p.name}, and they breed in those holes like rats in a granary. Burn every den. There's oil lying about; they hoard it and never think. Wood burns into wood.` };
+  return { title: `Burn the larder at ${p.name}`, text: `They keep a larder at ${p.name}. Some of it is grain. Smash every rack, and don't look too long at the rest.` };
 }
 
 /** Under Wickhold itself: on the board once the town works have driven the goblins below to bay. */

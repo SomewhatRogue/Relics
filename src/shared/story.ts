@@ -43,15 +43,15 @@ export const CHAPTER_1 = {
   mission: {
     id: 'barrowby-bell', place: PLACES[0], objective: 'story', twist: 'night', rooms: 4, reward: 150, seed: 4242,
     title: "Barrowby's Bell",
-    text: "Barrowby's church bell used to call the valley home. The Gnawer nests in the church now, with the village's last families caged around it. Kill it, free them, and ring the bell.",
+    text: "Barrowby's bell used to call the whole valley in from the fields. It's the last bell for twenty miles that nobody melted down. The Gnawer sleeps under it now, with what's left of Barrowby penned round the font. Kill it. Free them. Then pull that rope with everything you've got, and listen to what the hungry do.",
     boss: 'THE GNAWER',
   } as Job,
   decision: {
     id: 'north-fields',
-    question: 'The north fields are safe again. What does Wickhold do with them?',
+    question: 'The north fields are ours again, for now. What does Wickhold do with them?',
     choices: [
-      { id: 'farm', label: 'Farm them', text: 'Food for the town. Every job pays a quarter more, and a granary goes up by the north gate.' },
-      { id: 'refugees', label: 'Take in the refugees', text: 'The camp outside the gate moves in: four more people on Rescue Row, and a trader opens a stall on Market Row.' },
+      { id: 'farm', label: 'Farm them', text: 'Plough them. Bread in winter and gold in the coffers: every job pays a quarter more, and a granary goes up by the north gate. The camp outside stays outside.' },
+      { id: 'refugees', label: 'Take in the refugees', text: 'Open the gate to the camp. Four more souls on Rescue Row, more mouths, and a trader who knows the roads opens a stall on Market Row.' },
     ],
   } as Decision,
 };

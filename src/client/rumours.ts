@@ -1,11 +1,13 @@
-/** What the people of Wickhold say: hints about places, jobs and the war, so the town is worth walking. */
+/** What Wickhold says over its ale and its washing: hints about places, jobs and the hungry. */
 export const RUMOURS = [
-  'The goblins at the Charcoal Camps dig dens into the hillside. Fire takes them, if you can get close.',
-  'A cottage with its door hanging open is a cottage with something inside. Look before you walk past.',
-  "Oil barrels. The goblins hoard them and never think what one spark does. Don't you forget it.",
-  'They say the Copperdeep goes down further than the miners ever dug. Something was waiting there.',
-  'Hangman\'s Wood is quiet at night. Too quiet. Take a friend.',
-  'The butchers keep the little ones in line. Drop the butcher and the rest lose their nerve.',
-  'Barrowby had a bell you could hear from here. When it rings again, we will know.',
-  'A barn burns faster than you think. Mind you are not inside it when it goes.',
+  'They dig into hillsides at the Charcoal Camps, the hungry do. Dens like badger setts. Fire gets them out. Oil gets the fire in.',
+  'A cottage with its door hanging open has something inside it. A cottage with its door shut has something inside it that shut the door.',
+  "The hungry hoard lamp oil and never think what one spark does. That's the one thing they're stupid about. Pray it lasts.",
+  'Miners at the Copperdeep say the shafts go down past where anyone ever dug. Something was down there first. The hungry just moved in.',
+  "Hangman's Wood is quiet at night. Too quiet, my da used to say, and then one night it wasn't, and he didn't come home. Take a friend.",
+  'Kill the big one with the cleaver and the little ones lose their nerve. Mostly. Some of them get braver. Those ones you want to kill quickly.',
+  "Barrowby had a bell you could hear from here on a still day. Ring it again and you'll see what the hungry think of bells.",
+  "A barn burns faster than you'd credit. Mind you're not in it. Mind the hungry inside it are.",
+  'They count, you know. Captives. Marks on the wall in fives. My cousin saw a wall in Fennick Ford with more marks than Fennick Ford had people.',
+  "Sneak up on them while they sit at their fires and you'll get three before they know it. Shout and you'll get the lot at once.",
 ];

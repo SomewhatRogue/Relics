@@ -59,7 +59,7 @@ export function townInterior(door: string, w: WorldState): GameMap {
     [n('HUNTRESS MAEVE', 4, 2.4, 'trainer', 'ranger', 1)], { braziers: [{ x: 9.6, y: 1.2, r: 0.35 }] });
   if (door === 'tavern') return room('THE DROWNED RAT', 15, 9, { ...HOME, ambient: [0.26, 0.19, 0.16] },
     [b('counter', 1, 1.4, 5, 0.8), b('shelf', 1, 0.1, 5, 0.5), b('bench', 8, 2.6, 2.4, 0.9), b('bench', 11.6, 5, 2.4, 0.9), b('bench', 6, 5.4, 2.4, 0.9)],
-    [n('BARKEEP HOLT', 3.5, 1.1, 'tavern', 'villager'), n('DICER MOLL', 9.2, 3.9, 'dice', 'rogue'), n('WHISPER', 13.6, 2, 'trainer', 'rogue', 2),
+    [n('BARKEEP GANNET', 3.5, 1.1, 'tavern', 'villager'), n('DICER MOLL', 9.2, 3.9, 'dice', 'rogue'), n('WHISPER', 13.6, 2, 'trainer', 'rogue', 2),
       n('A DRUNK', 6.6, 6.7, 'chat', 'villager', 11), n('A CARD SHARP', 12.4, 6.3, 'chat', 'rogue', 12)],
     { braziers: [{ x: 13.8, y: 0.9, r: 0.4 }] });
   if (door === 'infirmary') {

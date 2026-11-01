@@ -23,16 +23,16 @@ const FACES = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 
 const LOCKED: Record<string, string> = {
-  keep: "The lord's keep has been barred from inside since the siege. Nobody has opened it, and nobody has come out. (Chapter 2.)",
-  chapel: 'Planks nailed across the chapel door, and old prayers chalked over them. Something is kept in there, not out. (Chapter 2.)',
-  oldquarter: 'Rubble from the siege chokes the east lane. Beyond it, the Old Quarter. The town can clear it together: TOWN WORKS, in the square.',
+  keep: "Barred from the inside since the siege broke. Eleven years. Some nights there's a light in the high window. Nobody on the watch will say who's carrying it.",
+  chapel: 'Planks across the door, nailed from outside, and prayers chalked over the planks. Whatever the church put in there, it was keeping it in.',
+  oldquarter: 'Siege rubble chokes the east lane, roof beams and somebody\'s bed. The Old Quarter is past it. The town can clear it together, coin by coin: TOWN WORKS, in the square.',
 };
 
 /** Returns true if it handled the spot. */
 export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key: string): boolean {
   const pr = g.profile, w = g.world, again = () => openSquare(id, g, panel, _arg, key);
   if (id === 'works') {
-    const html = say('Reeve Hollis', 'What we build, we build together. Every coin is counted, and so is every den you burn.') +
+    const html = say('Reeve Hollis', 'Everything this town builds, it builds out of what people give. I write down every coin. I write down every den you burn, too. Somebody should.') +
       WORK_ORDER.map((k) => {
         const wk = WORKS[k], n = workProgress(w, k), done = workDone(w, k);
         return `<div class="work"><b>${wk.name}</b> ${bar(n, wk.need)} ${Math.min(n, wk.need)} of ${wk.need} ${wk.by === 'gold' ? 'gold' : 'dens burned'}<br>${done ? `<span class="done">Done. ${wk.done}</span>` : wk.text}</div>`;
@@ -61,7 +61,7 @@ export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key:
   }
   if (id === 'bard') {
     const areas: Area[] = ['town', 'inside', 'church', 'village', 'farm', 'field', 'forest', 'mine', 'boss'];
-    panel.show('ROWAN THE BARD', say('Rowan', 'A tune for a coin? No, keep your coin. Name it and I will play it, here in the square.') + p('Songs from everywhere the heroes have been:'),
+    panel.show('ROWAN THE BARD', say('Rowan', 'Keep your coin, you\'ll need it more than I will. Name a tune and I\'ll play it, and half of what I sing will even be true.') + p('Songs from everywhere the heroes have been:'),
       [...areas.flatMap((a) => SCORES[a].map((sc) => ({ label: sc.name.toUpperCase(), act: () => (dispatchEvent(new CustomEvent('relic:tune', { detail: { area: a, name: sc.name } })), panel.hide()) }))),
         { label: 'WHATEVER YOU LIKE', act: () => (dispatchEvent(new CustomEvent('relic:tune', { detail: null })), panel.hide()) }]);
     return true;
@@ -71,15 +71,15 @@ export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key:
       const r = g.dice(bet);
       if (!r) return again();
       panel.show('KNUCKLEBONES', `<div class="dice"><div><span>${FACES[r.you[0]]}${FACES[r.you[1]]}</span>YOU ${r.you[0] + r.you[1]}</div><div><span>${FACES[r.moll[0]]}${FACES[r.moll[1]]}</span>MOLL ${r.moll[0] + r.moll[1]}</div></div>` +
-        say('Moll', r.won ? (r.you[0] + r.you[1] === r.moll[0] + r.moll[1] ? 'A tie goes to the house. Unless the house knows you. Take it.' : 'Lucky. Again?') : r.you[0] + r.you[1] === r.moll[0] + r.moll[1] ? 'A tie goes to the house, love.' : 'Pay up.') + p(`You have ${pr.gold} gold.`),
+        say('Moll', r.won ? (r.you[0] + r.you[1] === r.moll[0] + r.moll[1] ? 'Tie goes to the house. Unless the house knows a fellow crook. Take it, take it.' : 'Well. The bones like you. They\'re fickle bones.') : r.you[0] + r.you[1] === r.moll[0] + r.moll[1] ? 'Tie goes to the house, love. Always has.' : 'Pay up, pet. Again?') + p(`You have ${pr.gold} gold.`),
         [10, 25, 50].map((n) => ({ label: `BET ${n}`, primary: n === bet, disabled: pr.gold < n, act: () => play(n) })));
     };
-    panel.show('DICER MOLL', say('Moll', 'Two bones each. High roll takes the pot. Ties go to the house.') + p(`You have ${pr.gold} gold.`),
+    panel.show('DICER MOLL', say('Moll', 'Two bones each, high roll takes the pot, ties go to the house. Yes, I cheat. So would you, if you were any good.') + p(`You have ${pr.gold} gold.`),
       [10, 25, 50].map((n) => ({ label: `BET ${n}`, disabled: pr.gold < n, act: () => play(n) })));
     return true;
   }
   if (id === 'tavern') {
-    panel.show('BARKEEP HOLT', say('Holt', RUMOURS[(w.day * 5 + pr.runs) % RUMOURS.length]) + p('The Drowned Rat: ale, dice in the corner, and the kind of people who know things.'));
+    panel.show('BARKEEP GANNET', say('Gannet', RUMOURS[(w.day * 5 + pr.runs) % RUMOURS.length]) + p('The Drowned Rat: ale that tastes of the cellar, dice in the corner, and people who know things they shouldn\'t.'));
     return true;
   }
   if (id === 'sewer') {

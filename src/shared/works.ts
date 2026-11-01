@@ -17,9 +17,9 @@ export interface Work {
 }
 
 export const WORKS: Record<WorkId, Work> = {
-  watch: { name: 'Man the Walls', by: 'gold', need: 400, text: 'Pay and arm more of the watch.', done: 'More guards walk the walls and the square, day and night.' },
-  oldquarter: { name: 'Clear the Old Quarter', by: 'gold', need: 600, text: 'Haul away the rubble from the siege and open the east lane.', done: 'The east lane is open. The Old Quarter and its chapel lie beyond.' },
-  sewers: { name: 'Drive Them from Below', by: 'dens', need: 6, text: 'Burn out goblin dens on jobs until the ones under the town lose their nerve.', done: 'The sewer grate by the Drowned Rat is open, and jobs below the town go on the board.' },
+  watch: { name: 'Man the Walls', by: 'gold', need: 400, text: 'Coin for spears, boots and wages. Two more on the walls means two more who see them coming.', done: 'Two more of the watch walk the walls and the square. In new boots.' },
+  oldquarter: { name: 'Clear the Old Quarter', by: 'gold', need: 600, text: 'Haul the siege rubble out of the east lane. Nobody has been past it in eleven years. Nobody much wants to.', done: 'The east lane is open. Beyond it, the Old Quarter, and the chapel Father Odric nailed shut.' },
+  sewers: { name: 'Drive Them from Below', by: 'dens', need: 6, text: 'Something scratches under the Drowned Rat at night. Burn out enough dens on jobs and the ones below lose their nerve.', done: 'The grate behind the Drowned Rat is open, and jobs under the town go on the board. Bring a lantern. Bring two.' },
 };
 export const WORK_ORDER = Object.keys(WORKS) as WorkId[];
 
