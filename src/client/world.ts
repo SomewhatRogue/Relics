@@ -23,6 +23,7 @@ const FLOORS: Record<GameMap['theme']['floor'], { tile: [number, number]; base: 
   dirt: { tile: [16, 16], base: ['#3a3024', '#3e3428', '#362c21', '#423628'], line: '#3a3024', fleck: ['#2a2219', '#4e4232'] },
   rock: { tile: [12, 10], base: ['#2e2c34', '#34313a', '#29272f', '#38353f'], line: '#18161c', fleck: ['#222027', '#45414c'] },
   wheat: { tile: [16, 16], base: ['#3e3424', '#433827'], line: '#3e3424', fleck: ['#2e2619'] },
+  planks: { tile: [24, 5], base: ['#5a3f28', '#5e432a', '#553b25', '#624630', '#583d27'], line: '#2a1d12', fleck: ['#4a321f', '#6b4e34'] },
 };
 
 export function paintMap(m: GameMap): HTMLCanvasElement {
@@ -62,7 +63,7 @@ export function paintMap(m: GameMap): HTMLCanvasElement {
   g.fillStyle = 'rgba(0,0,0,0.35)';
   g.fillRect(OX, OY, fw, 4);
   // Side and front walls.
-  const side = m.theme.back === 'trees' ? '#141a12' : m.theme.back === 'palisade' ? '#2a2018' : '#2a2733';
+  const side = m.theme.back === 'trees' ? '#141a12' : m.theme.back === 'palisade' || m.theme.back === 'plaster' ? '#2a2018' : '#2a2733';
   rect(0, 0, OX, H, side);
   rect(W - 8, 0, 8, H, side);
   rect(0, H - 8, W, 8, side);
@@ -101,6 +102,14 @@ function back(m: GameMap, rect: Rect, rng: Rng, pick: (a: string[]) => string, W
       for (let y = -r; y <= r; y++) for (let dx = -r; dx <= r; dx++) if (dx * dx + y * y <= r * r) rect(x + dx, cy + y, 1, 1, y < -r / 3 ? '#26361f' : '#1c2817');
       rect(x - 1, cy + r - 2, 3, OY - cy - r + 2, '#2a1f16');
     }
+  } else if (kind === 'plaster') {
+    // A room's back wall: plaster over a timber frame, a skirting board.
+    rect(0, 0, W, OY, '#16121a');
+    rect(0, top, W, faceH, '#6a5e52');
+    for (let i = 0; i < W * 3; i++) rect(rng.int(W), top + rng.int(faceH), 1, 1, pick(['#5e534a', '#74685a', '#665a4e']));
+    for (let x = 4; x < W; x += 28) rect(x, top, 4, faceH, '#3e2a1a');
+    rect(0, top, W, 3, '#3e2a1a');
+    rect(0, OY - 7, W, 4, '#3e2a1a');
   } else {
     rect(0, 0, W, OY, '#1a1820');
     for (let i = 0; i < W * 2; i++) rect(rng.int(W), rng.int(OY), 2 + rng.int(4), 1 + rng.int(3), pick(['#2a2730', '#232029', '#302c36']));

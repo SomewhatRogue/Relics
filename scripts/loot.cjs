@@ -1,6 +1,6 @@
 // Loot on screen: a forged drop by the hero on a phone (with the card), and taking it.
 const { chromium } = require('playwright');
-const url = process.argv[2] || 'http://localhost:4173/';
+const url = process.argv[2] || 'http://localhost:4173/?hero=WARRIOR';
 (async () => {
   const browser = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   const errors = [];

@@ -6,7 +6,7 @@
  */
 import type { Block, BlockKind, GameMap, Round, RoundKind, Theme } from './arena';
 import type { Job, PlaceKind } from './jobs';
-import type { PropKind } from './props';
+import { WOOD, type PropKind } from './props';
 import { Rng } from './rng';
 
 export interface Foe { kind: 'scrapper' | 'butcher'; x: number; y: number; hp?: number; name?: string }
@@ -31,12 +31,18 @@ const KIT: Record<PlaceKind, { blocks: [BlockKind, number, number, number][]; ro
   mine: { blocks: [['rockwall', 3.5, 1.2, 3]], rounds: [['support', 0.3, 4], ['rock', 0.5, 2]], props: [['crate', 2], ['oil', 2]], torches: true },
 };
 
+/** Wooden blocks get health (and a door if they have one); stone stays as it is. */
+function wooden(b: Block): Block {
+  const w = WOOD[b.kind];
+  return w ? { ...b, hp: w.hp, maxHp: w.hp, burning: -1, door: w.door } : b;
+}
+
 export function planRoom(job: Job, index: number): RoomPlan {
   const rng = new Rng(job.seed * 31 + index * 7 + 1), kind = job.place.kind, kit = KIT[kind], final = index === job.rooms - 1;
   const rounds: Round[] = [], blocks: Block[] = [], spots: { x: number; y: number; r: number }[] = [];
-  const free = (x: number, y: number, r: number) =>
+  const free = (x: number, y: number, r: number, skip?: object) =>
     Math.hypot(x - SPAWN.x, y - SPAWN.y) > r + 2.4 && Math.hypot(x - 9, y - 0.5) > r + 2.4 && Math.abs(x - 9) > r + 1.3 &&
-    spots.every((s) => Math.hypot(s.x - x, s.y - y) > s.r + r + 0.9);
+    spots.every((s) => s === skip || Math.hypot(s.x - x, s.y - y) > s.r + r + 0.9);
   const spot = (r: number, y0 = 2.2, y1 = H - 3): { x: number; y: number } | null => {
     for (let t = 0; t < 50; t++) {
       const x = rng.range(1.4 + r, W - 1.4 - r), y = rng.range(y0 + r, y1 - r);
@@ -47,6 +53,20 @@ export function planRoom(job: Job, index: number): RoomPlan {
   // The objective first (it must fit), then buildings and rock walls, round things, furniture.
   const props: RoomPlan['props'] = [];
   const obj = final ? job.objective : 'clear';
+  if (obj === 'burn') for (let i = 0; i < 3; i++) {
+    // The dens, each with an oil barrel by it (fire spreads wood to wood).
+    const c = spot(1.6, 1.5, H - 4);
+    if (!c) continue;
+    blocks.push(wooden({ x: c.x - 1.3, y: c.y - 0.8, w: 2.6, h: 1.6, kind: 'den' }));
+    const den = spots[spots.length - 1];
+    for (const [ox, oy] of [[2.1, 0.5], [-2.1, 0.5], [0, 1.6]]) {
+      const x = c.x + ox, y = c.y + oy;
+      if (x > 1 && x < W - 1 && y < H - 3 && free(x, y, 0.45, den)) {
+        props.push({ kind: 'oil', x, y }), spots.push({ x, y, r: 0.45 });
+        break;
+      }
+    }
+  }
   if (obj === 'rescue' || obj === 'story') for (const [x, y] of [[3, 2.2], [15, 2.2], [9, 2.6]].slice(0, obj === 'story' ? 3 : 2)) props.push({ kind: 'cage', x, y }), spots.push({ x, y, r: 0.6 });
   if (obj === 'larder') for (let i = 0; i < 3; i++) {
     const c = spot(0.5, 1.5, H / 2);
@@ -54,7 +74,7 @@ export function planRoom(job: Job, index: number): RoomPlan {
   }
   for (const [k, w, h, n] of kit.blocks) for (let i = 0; i < n; i++) {
     const r = Math.hypot(w, h) / 2, c = spot(r);
-    if (c) blocks.push({ x: c.x - w / 2, y: c.y - h / 2, w, h, kind: k });
+    if (c) blocks.push(wooden({ x: c.x - w / 2, y: c.y - h / 2, w, h, kind: k }));
   }
   for (const [k, r, n] of kit.rounds) for (let i = 0; i < n; i++) {
     const c = spot(r);

@@ -5,6 +5,7 @@
  */
 import { BOUNTY } from '../shared/progress';
 import type { Job } from '../shared/jobs';
+import { runInterior } from '../shared/interiors';
 import { planRoom } from '../shared/terrain';
 import { isDead } from './damage';
 import { ArenaRoom } from './room';
@@ -28,6 +29,14 @@ export const newRun = (job: Job): Run => ({ job, index: 0, gold: 0, xp: 0, rescu
 export function runRoom(run: Run): ArenaRoom {
   const plan = planRoom(run.job, run.index);
   return new ArenaRoom(run.job.seed + run.index, { map: plan.map, foes: plan.foes, furniture: plan.props });
+}
+
+/** Inside a cottage or barn in the current room (you can always walk back out). */
+export function interiorRoom(run: Run, blockIndex: number, door: string): ArenaRoom {
+  const plan = runInterior(run.job, run.index, blockIndex, door);
+  const room = new ArenaRoom(run.job.seed * 3 + run.index * 11 + blockIndex + 7, { map: plan.map, foes: plan.foes, furniture: plan.props });
+  room.exitOpen = true;
+  return room;
 }
 
 export const isFinal = (run: Run) => run.index === run.job.rooms - 1;
@@ -60,6 +69,10 @@ export function goal(run: Run, room: ArenaRoom): { text: string; done: boolean }
   if (o === 'larder') {
     const racks = room.props.filter((p) => p.kind === 'larder' && !p.broken).length;
     return { text: racks ? `Smash the larder (${racks} racks left)` : 'The larder is ruined. Get out', done: racks === 0 };
+  }
+  if (o === 'burn') {
+    const dens = room.map.blocks.filter((b) => b.kind === 'den' && !b.ruined).length;
+    return { text: dens ? `Burn out the dens (${dens} left)` : 'The dens are ash. Get out', done: dens === 0 };
   }
   const boss = room.enemies.find((e) => e.name);
   const bossDead = !boss || isDead(boss);

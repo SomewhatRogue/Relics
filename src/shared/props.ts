@@ -59,3 +59,32 @@ export const ROOM_PROPS: { kind: PropKind; x: number; y: number }[] = [
   { kind: 'crate', x: 12.4, y: 8.8 },
   { kind: 'table', x: 6, y: 8.8 },
 ];
+
+/**
+ * Wooden buildings out on a job: smashed by blows and blasts, set alight by oil, fire spells and
+ * burning goblins, and burned down to rubble you walk over. Town buildings have no health: they stand.
+ */
+export const WOOD: Partial<Record<import('./arena').BlockKind, { hp: number; door?: string }>> = {
+  house: { hp: 160, door: 'cottage' },
+  barn: { hp: 260, door: 'barn' },
+  den: { hp: 120 },
+  tent: { hp: 60 },
+  fence: { hp: 40 },
+};
+export const BLAZE = {
+  /** Health a burning building loses a second. */
+  dps: 24,
+  /** Burning this long, it lights wood this close. */
+  spreadAfter: 2.5,
+  spreadReach: 1.2,
+  /** Goblins this close to the flames catch; burning goblins this close set wood alight. */
+  reach: 0.6,
+  /** An oil barrel's fire lights wood this close. */
+  oilReach: 1.8,
+  /** Melee blows on a wall do this share of their damage (fire is the way). */
+  melee: 0.5,
+  blast: 0.6,
+  /** A goblin den sends out a scrapper this often while it stands (up to this many goblins about). */
+  denEvery: 9,
+  denCap: 6,
+};

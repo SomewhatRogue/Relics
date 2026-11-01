@@ -1,7 +1,7 @@
 /**
  * Turns keys, mouse and touch into an Intent. Laptop: WASD to move, mouse to aim, left click to
- * attack, hold right click to block (tap it to parry), Space to roll; J / K work too; C class, Q weapon,
- * E relic, 1 2 3 or R to pick one, T its augment, G grab (then click to slam, G to throw). Phone (upright):
+ * attack, hold right click to block (tap it to parry), Space to roll; J / K work too;
+ * E relic, 1 2 3 or R to pick one, G grab (then click to slam, G to throw). Phone (upright):
  * a floating stick on the left, Attack, Block and Roll under the right thumb.
  */
 import { NO_INTENT, type Intent } from '../sim/types';
@@ -23,16 +23,13 @@ export class Input {
     const unlock = () => unlockAudio();
     for (const t of ['touchend', 'pointerup', 'click', 'keydown']) addEventListener(t, unlock, { passive: true });
     addEventListener('keydown', (e) => {
-      if (e.repeat) return;
+      if (e.repeat || (e.target as HTMLElement).closest?.('input')) return;
       const k = e.key.toLowerCase();
       this.keys.add(k);
       if (k === ' ') this.intent.rollSeq++, e.preventDefault();
       if (k === 'j') (this.intent.attackSeq++), (this.attackHeld.key = true);
       if (k === 'e') this.intent.relicSeq++;
-      if (k === 'q') this.intent.weaponSeq++;
       if (k === 'r') this.intent.relicSwapSeq++;
-      if (k === 't') this.intent.augmentSeq++;
-      if (k === 'c') this.intent.classSeq++;
       if (k === 'g') this.intent.grabSeq++;
       if (k === '1' || k === '2' || k === '3') (this.intent.relicPick = Number(k) - 1), this.intent.relicPickSeq++;
       if (k === 'k') (this.intent.blockSeq++), (this.blockHeld.key = true);
@@ -108,10 +105,7 @@ export class Input {
     };
     btn('.attack', () => ((this.intent.attackSeq++), (this.attackHeld.touch = true)), () => (this.attackHeld.touch = false));
     this.relicButton(ui.querySelector('.relic') as HTMLElement);
-    btn('.swap-weapon', () => this.intent.weaponSeq++);
-    btn('.swap-class', () => this.intent.classSeq++);
     btn('.grab', () => this.intent.grabSeq++);
-    btn('.augment', () => this.intent.augmentSeq++);
     btn('.roll', () => this.intent.rollSeq++);
     btn('.block', () => ((this.intent.blockSeq++), (this.blockHeld.touch = true)), () => (this.blockHeld.touch = false));
   }

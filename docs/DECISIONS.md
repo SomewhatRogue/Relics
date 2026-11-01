@@ -2,6 +2,53 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-01: heroes for life, every building enterable, buildings that burn, Come Bye's online lessons (Claude Opus 5.5)
+
+Kyle: pick your class at the start when you first load in, with its own level, and no changing it in
+a game; every building enterable with things inside and people to talk to for upgrades; mission
+buildings that can be burned out and destroyed, visibly, or entered. Then: this will be online and
+offline; Come Bye's team wrote up joining and moving between servers; build towards it early without
+paying much.
+
+- **The start screen** (`client/title.ts`): your heroes, up to three, each with a name, a class for
+  life, its own level, gold, perks, kit and fitted elements; play one, make one, retire one (asks
+  twice). The world (town, chapter, votes) is shared by all of them. Saves are v2 (`relic.save.v2`:
+  heroes, current, world); a v1 save's hero comes across as HERO, its class from its weapon.
+- **No class, kit or element changes in play.** The CLASS, WEAPON and AUGMENT buttons and the C, Q, T
+  keys are gone, and `Game.step` holds those press counters still in every mode. Kits change at the
+  smith (within the class); the relic-wright fits fire, frost or storm to a relic for 45 gold (free to
+  take out), kept on the hero. HEROES in the corner opens the start screen (not mid-job).
+  `?hero=MAGE` skips the start screen for the scripts.
+- **Every Wickhold building has a door and people** (`shared/interiors.ts`, `client/npcs.ts`). Walk up
+  into the door (or ENTER on a phone); walk out the bottom to stand back at the door. The forge
+  (Halvard the smith, Ivo the relic-wright), the church (Father Odric, Marta), the training hall
+  (Master Cole, and Squire Pell who takes you to the yard), the infirmary (Sister Agne and up to three
+  patients), a new town hall where the council table was (Reeve Hollis and two councillors), the
+  granary (Farmer Jos) and every lit house on Rescue Row (a family of two, with rumours that hint at
+  places and tactics). Old Wenna and Tam stand in the square; Dessa the trader at the market once the
+  traders are in. A gold mark over anyone you can talk to, their name when you're close.
+- **Buildings on a job** (`sim/buildings.ts`, tuning `BLAZE` and `WOOD` in `shared/props.ts`).
+  Cottages and barns, fences and goblin dens are wood with health. Blows chip them (half damage),
+  blasts knock at them; oil fire, fire blasts and burning goblins set them alight; fire burns them
+  down in about six seconds, spreads to wood within a tile after 2.5 s, and catches goblins standing
+  close. Burned down, a building is ash and stubs you walk over (it stops colliding). Drawn charred
+  under half health, with flames, smoke and window glow while burning, embers after; a fire lights
+  the street. Town buildings have no health and never burn.
+- **Cottages and barns can be entered** on a job: turned over inside, one to four goblins, a cage
+  with someone in it on rescue jobs (a third of cottages and half of barns otherwise), a butcher in
+  some barns where it's bad. The inside stays as you left it for that room; a burning or burned
+  building can't be entered.
+- **A new job: Burn out the dens.** The last room holds three dens, each with an oil barrel by it;
+  a standing den sends out a scrapper every 9 s (up to six goblins about). The room is done when the
+  dens are ash.
+- **Online, from Come Bye's write-up** (`docs/ONLINE.md` here, the full one in Comearound): copied
+  their newer relay and its tests (publish through Redis only while another instance has players:
+  about 100 hours of play a month on the free plan instead of 3; dead hosts can't hold a room; a
+  Redis hiccup can't kill an instance). What it changes for us now: the room is plain data the leader
+  can save every 2 s; the room outside a building keeps running while you're in (the leader will run
+  every room someone is in, so a party can split); seats come back by hero name; the shared world is
+  written per run, never per tick.
+
 ## 2026-11-01: the town and the loop, terrain, the story mission and the council (Claude Opus 5.5)
 
 Kyle: get to work on the town and the gameplay loops; other terrain types and how maps and

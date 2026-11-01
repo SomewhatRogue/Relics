@@ -4,7 +4,8 @@
  */
 import type { Item } from './loot';
 import { Rng } from './rng';
-import type { WeaponId } from './weapons';
+import type { Augment, RelicId } from './magic';
+import { CLASS_KITS, type HeroClass, type WeaponId } from './weapons';
 
 export type PerkId = 'tough' | 'endurance' | 'relicsworn' | 'footwork' | 'guard' | 'secondwind';
 
@@ -30,6 +31,9 @@ export const levelFor = (xp: number) => {
 };
 
 export interface Profile {
+  /** The hero's name, and the class chosen when they were made (for life). */
+  name: string;
+  cls: HeroClass;
   gold: number;
   xp: number;
   level: number;
@@ -38,10 +42,16 @@ export interface Profile {
   picks: number;
   arms: Partial<Record<WeaponId, Item>>;
   weapon: WeaponId;
+  /** Elements the relic-wright has fitted to this hero's relics. */
+  augments: Partial<Record<RelicId, Augment>>;
   runs: number;
 }
 
-export const newProfile = (): Profile => ({ gold: 0, xp: 0, level: 1, perks: [], picks: 0, arms: {}, weapon: 'sword', runs: 0 });
+export const newProfile = (cls: HeroClass = 'WARRIOR', name = 'HERO'): Profile =>
+  ({ name, cls, gold: 0, xp: 0, level: 1, perks: [], picks: 0, arms: {}, weapon: CLASS_KITS[cls][0], augments: {}, runs: 0 });
+
+/** Up to three heroes per player; each keeps its own class, level and kit (the world is shared). */
+export const HERO_SLOTS = 3;
 
 /** Add experience; returns how many levels were gained (each is a pick at the trainer). */
 export function gainXp(p: Profile, n: number): number {
@@ -59,4 +69,4 @@ export function perkOffer(p: Profile): PerkId[] {
 
 /** Gold and experience for a kill. */
 export const BOUNTY = { scrapper: { gold: 4, xp: 10 }, butcher: { gold: 30, xp: 60 }, boss: { gold: 80, xp: 150 }, rescue: 25, objective: 50 };
-export const SHOP = { fine: 60, forged: 160 };
+export const SHOP = { fine: 60, forged: 160, augment: 45 };

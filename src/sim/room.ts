@@ -11,6 +11,7 @@ import { BLESSING, GUARD, HEAL_RADIUS, HERO, LODESTONE, TICK, TRAIT, WEAPONS, ty
 import { separate } from './bodies';
 import { lobLodestone, shoot, smite, stepBolt, throwNet } from './bolts';
 import { afflict, stepElements, type World } from './elements';
+import { stepBuildings, sweepBlocks } from './buildings';
 import { newEnemy, stepEnemy } from './enemies';
 import { newHero, stepHero, type HeroActs } from './hero';
 import { isDead } from './damage';
@@ -133,7 +134,7 @@ export class ArenaRoom {
       fire: (h) => this.fire(h, w),
       loose: (h, s) => this.loose(h, s, w),
       struck: (h, e, n) => this.struck(h, e, n, w),
-      sweep: (h, s) => sweepProps(h, s, w),
+      sweep: (h, s) => (sweepProps(h, s, w), sweepBlocks(h, s, this.events)),
       grab: (h) => tryGrab(h, this.enemies, this.time, this.events) || tryLift(h, this.props, this.events),
       carry: (h, inp, walk) => (h.lifting ? stepLift(h, inp, w, TICK, walk) : stepCarry(h, inp, this.enemies, this.time, TICK, this.events, walk)),
       drop: (h) => (release(h, this.enemies, this.events), dropProp(h, this.props)),
@@ -148,6 +149,11 @@ export class ArenaRoom {
     impacts(this.enemies, this.time, this.events);
     propImpacts(w);
     this.props = w.props = stepProps(w, TICK);
+    stepBuildings(w, TICK, (x, y) => {
+      const e = newEnemy(Math.max(0, ...this.enemies.map((o) => o.id)) + 1, 'scrapper', x, y);
+      e.respawns = false;
+      this.enemies.push(e);
+    });
     stepElements(w);
     separate(this.heroes, this.enemies, this.props);
     for (const e of this.enemies) if (alive.has(e.id) && isDead(e)) dropFrom(e, this.heroes, this.drops, this.lootRng, this.events);

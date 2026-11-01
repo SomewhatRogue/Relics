@@ -1,7 +1,7 @@
 // Grab, throw and deaths on a phone: grab a stunned scrapper, hold it overhead, throw it into the
 // other one; then a sword takes a head and a mace bursts a body.
 const { chromium } = require('playwright');
-const url = process.argv[2] || 'http://localhost:4173/';
+const url = process.argv[2] || 'http://localhost:4173/?hero=WARRIOR';
 (async () => {
   const browser = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   const errors = [];

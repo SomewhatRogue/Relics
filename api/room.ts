@@ -1,12 +1,16 @@
 /**
  * Vercel Function: the WebSocket every online player connects to (`/api/room`). Copied from Come Bye
- * (SomewhatRogue/Comearound), where it was proven on real phones. The relay logic is in _relay.ts;
- * rooms are shared across instances through Redis from the Vercel Marketplace (REDIS_URL, or
- * Upstash's KV_URL). Without Redis it still runs, but only players who land on the same instance meet.
+ * (SomewhatRogue/Comearound, docs/ONLINE.md), where it was proven on real phones. The relay logic is
+ * in _relay.ts; rooms are shared across instances through Redis from the Vercel Marketplace
+ * (REDIS_URL, or Upstash's KV_URL). Without Redis it still runs, but only players who happen to
+ * land on the same instance can meet, so the game warns that online play isn't set up.
  */
 import http from 'node:http';
 import { WebSocketServer } from 'ws';
 import { Relay, memoryBackend, redisBackend } from './_relay.js';
+
+// Last line of defence: one failed promise must never take the instance (and its players) down.
+process.on('unhandledRejection', (e) => console.log(JSON.stringify({ relay: 1, ev: 'unhandled', msg: String((e as Error)?.message ?? e) })));
 
 const server = http.createServer((_req, res) => {
   res.writeHead(426, { 'Content-Type': 'text/plain' });
@@ -15,7 +19,11 @@ const server = http.createServer((_req, res) => {
 const wss = new WebSocketServer({ server, maxPayload: 64 * 1024 });
 
 let relay: Promise<Relay> | null = null;
-/** REDIS_URL or KV_URL as the Marketplace sets them, or any variable holding a redis:// URL. */
+/**
+ * The Redis connection URL: REDIS_URL or KV_URL as the Marketplace sets them, or any other variable
+ * holding a redis:// or rediss:// URL (connecting storage with a custom prefix renames them, e.g.
+ * STORAGE_URL).
+ */
 function redisUrl(): string | undefined {
   const named = process.env.REDIS_URL ?? process.env.KV_URL;
   if (named) return named;

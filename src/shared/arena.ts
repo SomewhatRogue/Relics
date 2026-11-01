@@ -5,16 +5,26 @@
  */
 export type Circle = { x: number; y: number; r: number };
 export type RoundKind = 'pillar' | 'tree' | 'pine' | 'rock' | 'hay' | 'well' | 'lantern' | 'support' | 'stump';
-export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall' | 'tent' | 'rockwall' | 'fence' | 'granary' | 'wall';
+export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall' | 'tent' | 'rockwall' | 'fence' | 'granary' | 'wall' | 'den'
+  // Furniture, inside buildings.
+  | 'counter' | 'bed' | 'shelf' | 'anvil' | 'altar' | 'pew' | 'bench' | 'hearth' | 'sacks';
 export interface Round extends Circle { kind: RoundKind }
-export interface Block { x: number; y: number; w: number; h: number; kind: BlockKind; label?: string }
+export interface Block {
+  x: number; y: number; w: number; h: number; kind: BlockKind; label?: string;
+  /** Walk up into the door (bottom middle) to go in: the interior's id. */
+  door?: string;
+  /** Wooden buildings in a run can be smashed and burned: health, when it caught fire (-1 not), burned down. */
+  hp?: number; maxHp?: number; burning?: number; ruined?: boolean;
+}
+/** Someone to talk to: `talk` says what they offer (a town spot's panel), `look` how they're drawn. */
+export interface Npc { x: number; y: number; name: string; talk: string; look: string; arg?: number }
 export interface Area { x: number; y: number; w: number; h: number }
 
 /** How a map looks: floor, walls, light. */
 export interface Theme {
-  floor: 'flagstone' | 'cobble' | 'grass' | 'dirt' | 'rock' | 'wheat';
-  /** The back wall's face: stone, a palisade, a treeline, or a rock face. */
-  back: 'stone' | 'palisade' | 'trees' | 'rockface';
+  floor: 'flagstone' | 'cobble' | 'grass' | 'dirt' | 'rock' | 'wheat' | 'planks';
+  /** The back wall's face: stone, a palisade, a treeline, a rock face, or a room's plastered wall. */
+  back: 'stone' | 'palisade' | 'trees' | 'rockface' | 'plaster';
   ambient: [number, number, number];
   /** Moonlight strength over the middle (0: none). */
   moon: number;
@@ -34,7 +44,14 @@ export interface GameMap {
   /** Walk into this to leave (opens when the room says so). */
   exit: Area | null;
   theme: Theme;
+  /** People standing about (towns and interiors). */
+  npcs?: Npc[];
 }
+
+/** A block's door: the spot in front of it you stand on to go in. */
+export const doorAt = (b: Block) => ({ x: b.x + b.w / 2, y: b.y + b.h + 0.45 });
+/** A block that still stands in the way (burned-down ones are rubble you walk over). */
+export const solid = (b: Block) => !b.ruined;
 
 /** The training room (the Training Yard in town). */
 export const ARENA = {
@@ -91,7 +108,9 @@ export function collide(p: { x: number; y: number }, r: number): void {
   p.y = Math.max(r * 0.6, Math.min(m.h - r, p.y));
   for (const c of m.rounds) push(p, r, c);
   for (const c of m.braziers) push(p, r, c);
+  for (const n of m.npcs ?? []) push(p, r, { x: n.x, y: n.y, r: 0.32 });
   for (const b of m.blocks) {
+    if (b.ruined) continue;
     const nx = Math.max(b.x, Math.min(b.x + b.w, p.x)), ny = Math.max(b.y, Math.min(b.y + b.h, p.y));
     const dx = p.x - nx, dy = p.y - ny, d = Math.hypot(dx, dy);
     if (d >= r) continue;

@@ -17,7 +17,7 @@ export const PLACES: Place[] = [
   { name: 'The Copperdeep Shafts', kind: 'mine', region: 'Copperdeep', ruin: 2 },
 ];
 
-export type Objective = 'rescue' | 'hunt' | 'larder' | 'story';
+export type Objective = 'rescue' | 'hunt' | 'larder' | 'burn' | 'story';
 export type Twist = 'none' | 'night';
 
 export interface Job {
@@ -41,13 +41,14 @@ const BOSSES = ['MAWL THE FLAYER', 'SKARN', 'OLD KNUCKLES', 'THE TALLY MAN', 'GU
 function describe(o: Objective, p: Place, boss: string): { title: string; text: string } {
   if (o === 'rescue') return { title: `Rescue at ${p.name}`, text: `Goblins have caged survivors at ${p.name}. Break the cages and bring them home.` };
   if (o === 'hunt') return { title: `Hunt ${boss}`, text: `A butcher called ${boss} holds ${p.name}. Kill it, and the place breathes again.` };
+  if (o === 'burn') return { title: `Burn out the dens at ${p.name}`, text: `Goblins have dug dens into ${p.name} and more crawl out of them every few breaths. Burn every den: oil lies about, and fire spreads wood to wood.` };
   return { title: `Burn the larder at ${p.name}`, text: `The goblins at ${p.name} keep a larder of stolen stores and worse. Smash every rack.` };
 }
 
 /** Today's three jobs. */
 export function board(day: number): Job[] {
   const rng = new Rng(day * 977 + 31);
-  const objectives: Objective[] = rng.shuffle(['rescue', 'hunt', 'larder', 'rescue']);
+  const objectives: Objective[] = rng.shuffle(['rescue', 'hunt', 'larder', 'burn', 'rescue']);
   const places = rng.shuffle([...PLACES]);
   return [0, 1, 2].map((i) => {
     const place = places[i], objective = objectives[i], boss = rng.pick(BOSSES);

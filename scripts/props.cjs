@@ -1,6 +1,6 @@
 // Props on a phone: the room's furniture, a Warrior lifting a barrel and throwing it into two scrappers, the oil barrel going up.
 const { chromium } = require('playwright');
-const url = process.argv[2] || 'http://localhost:4173/';
+const url = process.argv[2] || 'http://localhost:4173/?hero=WARRIOR';
 (async () => {
   const browser = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   const errors = [];

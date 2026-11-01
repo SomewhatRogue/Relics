@@ -18,6 +18,7 @@
       <div class="gear"><span class="rlc"></span><b class="rcd"></b></div>
     </div>
     <div id="corner">
+      <button id="heroes" aria-label="Your heroes">HEROES</button>
       <button id="mute" aria-label="Sound on or off">SND</button>
       <button id="help" aria-label="How to play">?</button>
     </div>
@@ -27,7 +28,7 @@
     <div id="prompt" hidden></div>
     <div id="how" hidden>
       <h2>Relic</h2>
-      <p>You start in <b>Wickhold</b>, the last walled town. Walk to the <b>job board</b> in Lantern Square to take a job: three rooms (four for the story mission) in a village, a farm, the fields, a forest or a mine. Clear each room to open the way out at the top; the last room holds the job (free the caged, kill the named butcher, smash the larder). Three downs and you're driven back. Gold, experience and the people you save come home: level up at the <b>trainer</b>, buy weapons at the <b>smith</b>, give to the Lantern at the <b>church</b>. When the chapter's goals are met the <b>council table</b> decides what the town does next, and the town changes. Progress saves in this browser.</p>
+      <p>You start in <b>Wickhold</b>, the last walled town. Walk to the <b>job board</b> in Lantern Square to take a job: three rooms (four for the story mission) in a village, a farm, the fields, a forest or a mine. Clear each room to open the way out at the top; the last room holds the job (free the caged, kill the named butcher, smash the larder). Three downs and you're driven back. Gold, experience and the people you save come home: walk up into any door to go in and talk to whoever is there: the <b>trainer</b> (perks) and his squire (the yard) in the training hall, the <b>smith</b> and the <b>relic-wright</b> at the forge, the priest at the <b>church</b>, the families on Rescue Row. Out on a job, cottages and barns can be entered, and wooden buildings smashed or burned down. When the chapter's goals are met the council in the <b>town hall</b> decides what the town does next, and the town changes. Progress saves in this browser.</p>
       <h2>The fight</h2>
       <p>The goblin butcher winds up before every heavy blow. Its red shape on the floor fills, then it lands.</p>
       <ul>
@@ -35,14 +36,14 @@
         <li><b>Block</b> hold right click (or BLOCK). Costs stamina; run out and your guard breaks.</li>
         <li><b>Parry</b> tap block when the red telegraph flashes <b>white</b>. No damage, the goblin is <b>stunned</b>, and your next hit is a <b>counter</b> for 2.5x.</li>
         <li><b>Dodge</b> Space (or ROLL). Untouchable mid-dodge. Striped circles can't be blocked: dodge out. Each kit dodges its own way.</li>
-        <li><b>Class</b> C (or CLASS) for the demo; Q (or WEAPON) swaps the class's kit. Only the Rogue is quick on its feet; everyone else trades speed for something.</li>
+        <li><b>Your hero</b> is made once, on the start screen: the class is for life (make another hero, up to three, to play another). Only the Rogue is quick on its feet; everyone else trades speed for something. The smith at the forge changes your kit within your class; the relic-wright fits elements.</li>
         <li><b>Warrior</b> sword and shield, greatsword or spear. Relics: javelin, grappling hook, war horn.</li>
         <li><b>Ranger</b> one arrow per press, and the draw is everything: the longbow takes 1.4 s to a shot that pierces a whole line; the shortbow draws fast and lets you walk; the crossbow fires the moment you press, then a long reload. Relics: hunter's net (snares small goblins flat), grappling hook.</li>
         <li><b>Rogue</b> twin daggers, 2.5x from behind, the long dash. Relics: shadowstep (straight behind the goblin you face), grappling hook.</li>
         <li><b>Mage</b> spells by cast time: the wand flicks sparks, the staff gathers 1.6 s for an orb that bursts wide, the rod 1 s for a lance through a line. Spells take your relic's element. The blink is far but slow to come back. Relic: lodestone (lobbed; drags goblins together, then bursts).</li>
         <li><b>Healer</b> every third mace blow heals everyone near; hold to call a holy smite down on the goblin you face (big, and it stuns). Relics: blessing (heals an ally and makes them hit harder and take less; points at the most hurt ally, or where you aim on a laptop) and the war horn.</li>
         <li><b>War horn</b> every ally in earshot gets their stamina back, then twice as fast, and blocking costs half for 6 s.</li>
-        <li><b>Augments</b> T (or AUGMENT) fits the equipped relic with fire, frost or storm. Fire burns and spreads by touch. Frost chills; frost again freezes solid, and a heavy blow or a wall shatters the ice. Storm arcs to nearby goblins and to any javelin stuck in one. Fire meets frost: steam stuns everything near. Storm on the burning: a flare throws them.</li>
+        <li><b>Augments</b> the relic-wright at the forge fits a relic with fire, frost or storm. Fire burns and spreads by touch. Frost chills; frost again freezes solid, and a heavy blow or a wall shatters the ice. Storm arcs to nearby goblins and to any javelin stuck in one. Fire meets frost: steam stuns everything near. Storm on the burning: a flare throws them.</li>
         <li><b>The squire</b> by the swing dummy keeps getting hit. Heal him, bless him, rally him.</li>
         <li><b>Grab</b> G (or GRAB, which shows up when you can): lift a small goblin you've stunned, netted, frozen, staggered or got behind. Then attack to slam it into the ground, or grab again to throw it at another goblin. It wriggles free after 3 s. A Warrior can also lift barrels, crates, the table and their broken pieces: throw them (big ones break on what they hit) or slam them down. Anyone can smash them; the oil barrel bursts into flame.</li>
         <li><b>Relic</b> E (or tap RELIC). On a phone, hold RELIC, slide onto another and let go to switch; 1, 2, 3 on a laptop. Each recharges.</li>
@@ -61,7 +62,6 @@
       <button class="tb relic">RELIC</button>
       <button class="tb grab" hidden>GRAB</button>
       <button class="tb use" hidden>USE</button>
-      <div class="chips"><button class="chip swap-class">CLASS</button><button class="chip swap-weapon">WEAPON</button><button class="chip augment">AUGMENT</button></div>
     </div>
     <script type="module" src="./main.ts"></script>
   </body>

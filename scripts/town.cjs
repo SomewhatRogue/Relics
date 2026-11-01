@@ -12,6 +12,8 @@ const url = process.argv[2] || 'http://localhost:4173/';
     page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
     await page.goto(url);
     await page.waitForFunction(() => window.__game);
+    // Past the start screen with a hero.
+    await page.evaluate(() => { window.__game.create('WARRIOR', 'BRANNOCK'); document.getElementById('title').hidden = true; window.__title.open = false; });
     return { ctx, page };
   };
   {
