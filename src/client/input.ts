@@ -12,6 +12,7 @@ export class Input {
   private keys = new Set<string>();
   private mouse: [number, number] | null = null;
   private blockHeld = { mouse: false, key: false, touch: false };
+  private attackHeld = { mouse: false, key: false, touch: false };
   private stick = { id: '', ox: 0, oy: 0, x: 0, y: 0 };
   private stickEl!: HTMLElement;
   private knobEl!: HTMLElement;
@@ -24,26 +25,34 @@ export class Input {
       const k = e.key.toLowerCase();
       this.keys.add(k);
       if (k === ' ') this.intent.rollSeq++, e.preventDefault();
-      if (k === 'j') this.intent.attackSeq++;
+      if (k === 'j') (this.intent.attackSeq++), (this.attackHeld.key = true);
+      if (k === 'e') this.intent.relicSeq++;
+      if (k === 'q') this.intent.weaponSeq++;
+      if (k === 'r') this.intent.relicSwapSeq++;
       if (k === 'k') (this.intent.blockSeq++), (this.blockHeld.key = true);
     });
     addEventListener('keyup', (e) => {
       const k = e.key.toLowerCase();
       this.keys.delete(k);
       if (k === 'k') this.blockHeld.key = false;
+      if (k === 'j') this.attackHeld.key = false;
     });
     addEventListener('blur', () => {
       this.keys.clear();
       this.blockHeld = { mouse: false, key: false, touch: false };
+      this.attackHeld = { mouse: false, key: false, touch: false };
     });
     addEventListener('mousemove', (e) => (this.mouse = [e.clientX, e.clientY]));
     addEventListener('mousedown', (e) => {
       if ((e.target as HTMLElement).closest('button')) return;
       this.mouse = [e.clientX, e.clientY];
-      if (e.button === 0) this.intent.attackSeq++;
+      if (e.button === 0) (this.intent.attackSeq++), (this.attackHeld.mouse = true);
       if (e.button === 2) (this.intent.blockSeq++), (this.blockHeld.mouse = true);
     });
-    addEventListener('mouseup', (e) => e.button === 2 && (this.blockHeld.mouse = false));
+    addEventListener('mouseup', (e) => {
+      if (e.button === 2) this.blockHeld.mouse = false;
+      if (e.button === 0) this.attackHeld.mouse = false;
+    });
     addEventListener('contextmenu', (e) => e.preventDefault());
     if (this.touch) this.buildTouch();
   }
@@ -91,7 +100,10 @@ export class Input {
       el.addEventListener('touchend', release, { passive: false });
       el.addEventListener('touchcancel', release, { passive: false });
     };
-    btn('.attack', () => this.intent.attackSeq++);
+    btn('.attack', () => ((this.intent.attackSeq++), (this.attackHeld.touch = true)), () => (this.attackHeld.touch = false));
+    btn('.relic', () => this.intent.relicSeq++);
+    btn('.swap-weapon', () => this.intent.weaponSeq++);
+    btn('.swap-relic', () => this.intent.relicSwapSeq++);
     btn('.roll', () => this.intent.rollSeq++);
     btn('.block', () => ((this.intent.blockSeq++), (this.blockHeld.touch = true)), () => (this.blockHeld.touch = false));
   }
@@ -107,6 +119,7 @@ export class Input {
     i.mx = Math.abs(mx) < 0.12 ? 0 : mx;
     i.my = Math.abs(my) < 0.12 ? 0 : my;
     i.block = this.blockHeld.mouse || this.blockHeld.key || this.blockHeld.touch;
+    i.attack = this.attackHeld.mouse || this.attackHeld.key || this.attackHeld.touch;
     i.ax = i.ay = 0;
     const hs = this.heroScreen();
     if (!this.touch && this.mouse && hs) (i.ax = this.mouse[0] - hs[0]), (i.ay = this.mouse[1] - hs[1]);

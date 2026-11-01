@@ -31,9 +31,100 @@ export class Fx {
     this.texts.push({ x, y, s, col, life: 0.8 });
   }
 
+  /** A jagged crack in the stone, left for good (javelins, slams into walls). */
+  crack(x: number, y: number, len: number): void {
+    for (let b = 0; b < 3; b++) {
+      let cx = x, cy = y, a = Math.random() * Math.PI * 2;
+      for (let i = 0; i < len; i++) {
+        a += (Math.random() - 0.5) * 1.2;
+        cx += Math.cos(a);
+        cy += Math.sin(a) * 0.8;
+        this.decal(cx, cy, i < 2 ? '#0e0c12' : '#1a1720');
+      }
+    }
+  }
+
+  /** A crater: a dark bowl ringed with cracks (the butcher's slam). */
+  crater(x: number, y: number, r: number): void {
+    for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+      const d = Math.hypot(dx, dy * 1.4);
+      if (d < r * 0.55) this.decal(x + dx, y + dy, Math.random() < 0.5 ? '#1d1a24' : '#24212c');
+      else if (d < r * 0.7 && Math.random() < 0.6) this.decal(x + dx, y + dy, '#5a5468');
+    }
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2 + Math.random() * 0.4;
+      this.crack(x + Math.cos(a) * r * 0.6, y + Math.sin(a) * r * 0.45, 5 + Math.floor(Math.random() * 6));
+    }
+  }
+
+  private decal(x: number, y: number, col: string): void {
+    if (this.decals.length > 4000) this.decals.shift();
+    this.decals.push({ x: Math.round(x), y: Math.round(y), col });
+  }
+
+  private debris(x: number, y: number, n: number): void {
+    this.burst(x, y, n, ['#6a647a', '#4f4a5c', '#8a8494'], 70, false, 220, true);
+  }
+
   on(ev: FightEvent): void {
     const [x, y] = toPx(ev.x, ev.y);
     switch (ev.k) {
+      case 'impact':
+        if (ev.kind === 'slam') {
+          this.crater(x, y, 13);
+          this.debris(x, y - 2, 22);
+          this.rings.push({ x, y, life: 0.35, max: 0.35, col: '#d8c8a8' });
+          this.shake = Math.max(this.shake, 6);
+          this.flashes.push({ x, y: y - 4, r: 60, i: 0.6, c: [1, 0.6, 0.35], life: 0.12, max: 0.12 });
+        } else if (ev.kind === 'cleave') this.shake = Math.max(this.shake, 1.5);
+        break;
+      case 'stunned':
+        this.say(x, y - 34, 'STUNNED', '#ffe070');
+        break;
+      case 'wallhit':
+        this.crack(x, y - 6, 7);
+        this.debris(x, y - 6, 8);
+        this.shake = Math.max(this.shake, 2);
+        break;
+      case 'charged':
+        this.rings.push({ x, y: y - 8, life: 0.25, max: 0.25, col: '#ffe9a8' });
+        this.flashes.push({ x, y: y - 8, r: 40, i: 0.8, c: [1, 0.9, 0.5], life: 0.15, max: 0.15 });
+        break;
+      case 'heavy':
+        this.shake = Math.max(this.shake, 1.5);
+        this.burst(x, y, 8, ['#6a647a', '#57525e'], 40, false);
+        break;
+      case 'weapon':
+      case 'relic':
+        this.say(x, y - 30, ev.name, '#e8e4ee');
+        break;
+      case 'pinned':
+        this.say(x, y - 30, 'PINNED', '#9fe8ff');
+        this.crack(x, y - 8, 9);
+        this.debris(x, y - 8, 14);
+        this.shake = Math.max(this.shake, 4);
+        this.flashes.push({ x, y: y - 8, r: 50, i: 1, c: [0.6, 0.9, 1], life: 0.15, max: 0.15 });
+        break;
+      case 'javwall':
+        this.crack(x, y - 8, 6);
+        this.debris(x, y - 8, 10);
+        this.burst(x, y - 8, 6, ['#ffffff', '#9fe8ff'], 60, true);
+        this.shake = Math.max(this.shake, 2);
+        break;
+      case 'javstick':
+        this.burst(x, y - 10, 8, ['#7a1d1d', '#5a1414'], 50, false, 160, true);
+        this.shake = Math.max(this.shake, 2);
+        break;
+      case 'latch':
+        this.burst(x, y - 8, 6, ['#ffffff', '#9fe8ff'], 50, true);
+        break;
+      case 'yank':
+        this.say(x, y - 24, 'YANK', '#9fe8ff');
+        break;
+      case 'land':
+        this.burst(x, y, 8, ['#6a647a', '#57525e'], 35, false);
+        this.shake = Math.max(this.shake, 1.5);
+        break;
       case 'hit':
         this.burst(x, y - 8, ev.heavy ? 12 : 7, ['#ffffff', '#fff1b0', '#ffd27a'], ev.heavy ? 70 : 50, true);
         this.burst(x, y - 6, ev.heavy ? 10 : 5, ['#7a1d1d', '#5a1414', '#9a2a2a'], 45, false, 160, true);

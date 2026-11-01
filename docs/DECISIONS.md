@@ -2,6 +2,36 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-10-31 (late): parry that lands, weapons, heavies, knockback, relics (Claude Opus 5.5)
+
+Kyle after his first play: parrying was hard to pull off and should stun; wants animation with the
+telegraphs; collision with enemies and knockback by type; combos per weapon and hold for a heavy; a
+rechargeable javelin relic that pins small enemies to walls; grappling hooks; physics impacts on the
+world; elemental modifiers later, all as relics.
+
+- **Parry:** window 0.18 s to 0.30 s before the hit; the telegraph turns white for exactly that
+  window (the cue is the judged window); a parry **stuns** (butcher 2.2 s, scrapper 1.8 s) with
+  "STUNNED", stars and a slump; stunned or pinned enemies take 1.5x; counter window 1.1 to 1.6 s.
+- **Weapons** (`WEAPONS` in tuning, Q or the WEAPON chip): sword and shield (3 slashes, best block),
+  greatsword (2 wide slow sweeps, big knockback, weak block), spear (4 quick thrusts, long reach).
+- **Hold to charge:** a tap swings on release; holding past 0.18 s charges (slower walk, gold glow,
+  white ring at full charge at 0.9 s); release for the weapon's heavy, damage and knockback scaling
+  with charge. A strong heavy (70%+) flinches the butcher out of his wind-up.
+- **Bodies and knockback** (`sim/bodies.ts`): nobody walks through anybody (lighter one gives way;
+  rolls pass through); every blow pushes by its knock divided by weight (scrapper 0.6, hero 1,
+  butcher 3.5, dummies immovable); a fast slide into a wall or pillar is a wall slam for 6 and a crack.
+- **Goblin scrappers** (two): small, quick stab with a short telegraph, flinch on any hit.
+- **Animation with every telegraph:** the butcher hauls the cleaver back, trembles, chops with a smear;
+  for the slam he leaps, hangs, comes down squashed with a crater, debris and a shockwave. Scrappers pull
+  the knife back and lunge. Swing dummy winds its club up.
+- **Relics** (E or RELIC, R or the RELIC chip to swap; each recharges): the **relic javelin** carries
+  anything weight 1 or lighter to the first wall or pillar and **pins** it there (2.6 s, +12), sticks
+  into heavier bodies, stays in the world 9 s; the **grappling hook** yanks light enemies to you
+  (arriving stunned) or pulls you to walls, pillars and heavy enemies. Phones auto-aim relics at the
+  nearest goblin in the relic's range.
+- **Marks on the world:** slam craters, wall cracks and blood stay on the floor and walls.
+- **Next for relics (Kyle):** elemental modifiers that play off one another; keep relics data-driven.
+
 ## 2026-10-31: slices 1 and 2, the training room (Claude Opus 5.5)
 
 - **Kyle's calls carried in from the kickoff doc:** Relic; three-quarter view; click or tap to

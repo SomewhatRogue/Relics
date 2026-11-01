@@ -1,5 +1,5 @@
 /** Relic: slice 2, one room. The fight runs here in the browser (solo is a party of one). */
-import { HERO } from '../shared/tuning';
+import { HERO, RELICS, WEAPONS } from '../shared/tuning';
 import { ArenaRoom } from '../sim/room';
 import type { FightEvent } from '../sim/types';
 import { Fx } from './fx';
@@ -19,21 +19,28 @@ const $ = (s: string) => document.querySelector(s) as HTMLElement;
 
 function sound(ev: FightEvent): void {
   if (ev.k === 'hit') return ev.on === 'enemy' ? sfx.hit(ev.heavy) : sfx.hurt();
-  if (ev.k === 'windup') return ev.kind === 'swing' ? undefined : sfx.growl(ev.kind === 'slam');
+  if (ev.k === 'windup') return ev.kind === 'swing' || ev.kind === 'stab' ? undefined : sfx.growl(ev.kind === 'slam');
+  if (ev.k === 'impact') return ev.kind === 'slam' ? sfx.boom() : undefined;
   const f = (sfx as unknown as Record<string, (() => void) | undefined>)[ev.k];
   f?.();
 }
 
 let parries = 0;
 const tips = input.touch
-  ? ['Tap BLOCK just as the red fills to PARRY', 'Hold BLOCK to guard; it costs stamina', 'Striped circles cannot be blocked: ROLL out', 'After a parry, hit back for a COUNTER']
-  : ['Tap right click just as the red fills to PARRY', 'Hold right click to guard; it costs stamina', 'Striped circles cannot be blocked: SPACE to roll', 'After a parry, hit back for a COUNTER'];
+  ? ['Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'RELIC: pin a scrapper to the wall', 'Striped circles cannot be blocked: ROLL out', 'WEAPON and RELIC up top swap your kit']
+  : ['Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: pin a scrapper to the wall. R swaps relic', 'Striped circles cannot be blocked: SPACE to roll', 'Q swaps weapon: sword, greatsword, spear'];
 let tipAt = -99, tipI = 0;
 
 function hud(now: number): void {
   $('.hp i').style.width = (100 * me.hp) / HERO.hp + '%';
   $('.st i').style.width = (100 * me.stamina) / HERO.stamina + '%';
   $('.st').classList.toggle('low', me.stamina < 25);
+  $('.wpn').textContent = (input.touch ? '' : 'Q ') + WEAPONS[me.weapon].name;
+  $('.rlc').textContent = (input.touch ? '' : 'E ') + RELICS[me.relic].name;
+  const wait = Math.max(0, me.relicReady[me.relic] - room.time);
+  $('.rcd').textContent = wait > 0 ? wait.toFixed(1) : 'READY';
+  $('.rcd').classList.toggle('wait', wait > 0);
+  if (input.touch) document.querySelector<HTMLElement>('.tb.relic')!.style.setProperty('--cd', 100 * (1 - wait / RELICS[me.relic].cooldown) + '%');
   if (now - tipAt > 6) {
     tipAt = now;
     $('#tip').textContent = tips[tipI++ % tips.length];

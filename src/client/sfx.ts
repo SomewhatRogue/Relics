@@ -106,6 +106,67 @@ export const sfx = {
   dodge() {
     if (ready()) tone('sine', 900, 1500, 0.15, 0.12);
   },
+  boom() {
+    if (!ready()) return;
+    tone('sine', 70, 30, 1, 0.5);
+    burst('lowpass', 900, 80, 0.7, 1, 0.45);
+  },
+  stunned() {
+    if (!ready()) return;
+    for (const [f, d] of [[1760, 0], [2093, 0.08], [2637, 0.16]]) tone('sine', f, f, 0.12, 0.25, d);
+  },
+  wallhit() {
+    if (!ready()) return;
+    burst('bandpass', 700, 300, 2, 0.8, 0.18);
+    tone('sine', 120, 50, 0.5, 0.15);
+  },
+  charged() {
+    if (ready()) tone('triangle', 1320, 1760, 0.2, 0.2);
+  },
+  heavy() {
+    if (!ready()) return;
+    burst('bandpass', 400, 1600, 1, 0.55, 0.22);
+  },
+  throw() {
+    if (ready()) burst('bandpass', 600, 2400, 1.5, 0.45, 0.25);
+  },
+  pinned() {
+    if (!ready()) return;
+    tone('square', 220, 70, 0.3, 0.12);
+    burst('bandpass', 900, 300, 2, 0.9, 0.25);
+    tone('sine', 1500, 1400, 0.12, 0.4, 0.02);
+  },
+  javwall() {
+    if (!ready()) return;
+    burst('bandpass', 1100, 400, 2, 0.7, 0.18);
+    tone('sine', 1500, 1400, 0.1, 0.35);
+  },
+  javstick() {
+    if (!ready()) return;
+    tone('sine', 140, 60, 0.6, 0.15);
+    burst('lowpass', 1200, 200, 0.7, 0.5, 0.12);
+  },
+  hookfire() {
+    if (!ready()) return;
+    burst('highpass', 2500, 4000, 1, 0.25, 0.2);
+    for (let i = 0; i < 5; i++) tone('square', 2400 + i * 90, 2300, 0.03, 0.03, i * 0.035);
+  },
+  latch() {
+    if (ready()) tone('square', 1800, 1200, 0.15, 0.08);
+  },
+  yank() {
+    if (!ready()) return;
+    for (let i = 0; i < 6; i++) tone('square', 2000 - i * 120, 1800, 0.03, 0.03, i * 0.03);
+  },
+  land() {
+    if (ready()) burst('lowpass', 800, 150, 0.7, 0.4, 0.12);
+  },
+  weapon() {
+    if (ready()) tone('triangle', 520, 380, 0.25, 0.12), tone('triangle', 700, 500, 0.15, 0.1, 0.06);
+  },
+  relic() {
+    if (ready()) tone('sine', 880, 1320, 0.15, 0.25);
+  },
   death() {
     if (!ready()) return;
     tone('sawtooth', 120, 35, 0.4, 0.7);

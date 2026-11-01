@@ -4,7 +4,10 @@
  */
 import { ARENA } from '../shared/arena';
 import type { ArenaRoom } from '../sim/room';
-import { blit, drawEnemy, drawHero, drawTelegraph, type Ctx } from './actors';
+import { drawHero } from './actors';
+import { blit, type Ctx } from './draw';
+import { drawEnemy, drawTelegraph } from './foes';
+import { drawHook, drawJavelin } from './relicsdraw';
 import type { Fx } from './fx';
 import { Lighting, type Light } from './light';
 import { SPRITES } from './sprites';
@@ -92,6 +95,16 @@ export class Scene {
       const [x, y] = lerp('e:' + e.id, e.x, e.y);
       items.push({ y, draw: () => drawEnemy(c, e, x - cx, y - cy) });
     }
+    for (const j of room.javelins) {
+      const x = OX + j.x * PX - cx, y = OY + j.y * PX - cy;
+      items.push({ y: OY + j.y * PX + (j.state === 'wall' && j.dy < 0 ? -40 : 0), draw: () => drawJavelin(c, j, x, y) });
+    }
+    for (const k of room.hooks) {
+      const o = room.heroes.find((h) => h.id === k.owner);
+      if (!o) continue;
+      const [ox, oy] = lerp('h:' + o.id, o.x, o.y);
+      items.push({ y: OY + k.y * PX + 1, draw: () => drawHook(c, k, ox - cx, oy - cy, OX + k.x * PX - cx, OY + k.y * PX - cy) });
+    }
     for (const p of ARENA.pillars) items.push({ y: OY + p.y * PX, draw: () => blit(c, SPRITES.pillar, OX + p.x * PX - cx, OY + p.y * PX + 5 - cy) });
     for (const b of ARENA.braziers) items.push({ y: OY + b.y * PX, draw: () => this.brazier(c, OX + b.x * PX - cx, OY + b.y * PX + 2 - cy, now) });
     items.push({ y: OY + ARENA.cage.y * PX, draw: () => this.cage(c, OX + ARENA.cage.x * PX - cx, OY + ARENA.cage.y * PX - cy, now) });
@@ -119,6 +132,10 @@ export class Scene {
       if (!at || at.t >= at.windup) continue;
       const k = at.t / at.windup, ax = at.kind === 'slam' ? at.cx : at.ox + at.dx * at.range * 0.5, ay = at.kind === 'slam' ? at.cy : at.oy + at.dy * at.range * 0.5;
       lights.push({ x: OX + ax * PX - cx, y: OY + ay * PX - cy, r: 40, i: 0.35 * k, c: [1, 0.25, 0.15] });
+    }
+    for (const j of room.javelins) {
+      const x = OX + j.x * PX - cx, y = OY + j.y * PX - cy - 8;
+      lights.push({ x, y, r: j.state === 'fly' ? 34 : 14, i: j.state === 'fly' ? 0.6 : 0.3 * Math.min(1, j.life), c: [0.55, 0.85, 1] });
     }
     fx.drawGlow(glow, lit, cx, cy);
     lights.push(...fx.lights(cx, cy));

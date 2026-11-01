@@ -19,7 +19,16 @@ export const ARENA = {
     { x: 1.4, y: 14.6, r: 0.35 },
     { x: 16.6, y: 14.6, r: 0.35 },
   ],
-  spawn: { hero: { x: 9, y: 12 }, butcher: { x: 9, y: 5 }, dummy: { x: 3.5, y: 11 }, swingDummy: { x: 14.5, y: 11 } },
+  spawn: {
+    hero: { x: 9, y: 12 },
+    butcher: { x: 9, y: 5 },
+    dummy: { x: 3.5, y: 11 },
+    swingDummy: { x: 14.5, y: 11 },
+    scrappers: [
+      { x: 2.2, y: 2.4 },
+      { x: 13.2, y: 2.4 },
+    ],
+  },
   cage: { x: 15.5, y: 0.9 },
 };
 

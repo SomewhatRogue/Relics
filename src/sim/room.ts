@@ -6,27 +6,35 @@
 import { ARENA } from '../shared/arena';
 import { Rng } from '../shared/rng';
 import { TICK } from '../shared/tuning';
+import { separate } from './bodies';
 import { newEnemy, stepEnemy } from './enemies';
 import { newHero, stepHero } from './hero';
-import { NO_INTENT, type Enemy, type FightEvent, type Hero, type Intent } from './types';
+import { fireHook, stepHook } from './hook';
+import { stepJavelin, throwJavelin } from './javelin';
+import { NO_INTENT, type Enemy, type FightEvent, type Hero, type Hook, type Intent, type Javelin } from './types';
 
 export class ArenaRoom {
   time = 0;
   tick = 0;
   heroes: Hero[] = [];
   enemies: Enemy[] = [];
+  javelins: Javelin[] = [];
+  hooks: Hook[] = [];
   intents = new Map<string, Intent>();
   /** Events from the latest tick (drawn as hits, sparks and sounds). */
   events: FightEvent[] = [];
+  /** Positions before the latest tick, keyed 'h:<id>' or 'e:<id>', for drawing between ticks. */
+  prev = new Map<string, [number, number]>();
   private rng: Rng;
   private acc = 0;
 
-  constructor(seed = 1) {
+  constructor(seed = 1, opts: { scrappers?: boolean } = {}) {
     this.rng = new Rng(seed);
     const s = ARENA.spawn;
     this.enemies.push(newEnemy(1, 'butcher', s.butcher.x, s.butcher.y));
     this.enemies.push(newEnemy(2, 'dummy', s.dummy.x, s.dummy.y));
     this.enemies.push(newEnemy(3, 'swingDummy', s.swingDummy.x, s.swingDummy.y));
+    if (opts.scrappers !== false) s.scrappers.forEach((p, i) => this.enemies.push(newEnemy(4 + i, 'scrapper', p.x, p.y)));
   }
 
   join(id: string): Hero {
@@ -60,16 +68,17 @@ export class ArenaRoom {
     return this.acc / TICK;
   }
 
-  /** Positions before the latest tick, keyed 'h:<id>' or 'e:<id>', for drawing between ticks. */
-  prev = new Map<string, [number, number]>();
-
   step(): void {
     for (const h of this.heroes) this.prev.set('h:' + h.id, [h.x, h.y]);
     for (const e of this.enemies) this.prev.set('e:' + e.id, [e.x, e.y]);
     this.events = [];
     this.time += TICK;
     this.tick++;
-    for (const h of this.heroes) stepHero(h, this.intents.get(h.id) ?? NO_INTENT, this.enemies, this.time, TICK, this.events);
+    const fire = (h: Hero) => (h.relic === 'hook' ? this.hooks.push(fireHook(h)) : this.javelins.push(throwJavelin(h)));
+    for (const h of this.heroes) stepHero(h, this.intents.get(h.id) ?? NO_INTENT, this.enemies, this.time, TICK, this.events, fire);
+    this.javelins = this.javelins.filter((j) => stepJavelin(j, this.enemies, this.time, TICK, this.events));
+    this.hooks = this.hooks.filter((k) => stepHook(k, this.heroes, this.enemies, this.time, TICK, this.events));
     for (const e of this.enemies) stepEnemy(e, this.heroes, this.rng, this.time, TICK, this.events);
+    separate(this.heroes, this.enemies);
   }
 }

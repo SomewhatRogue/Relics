@@ -1,39 +1,48 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, parry, roll). */
-import { BUTCHER, COMBO, GUARD, HERO, HITSTOP, HURT_STAGGER, ROLL, SWING_DUMMY } from '../shared/tuning';
+import { BUTCHER, FLINCH, GUARD, HERO, HITSTOP, HURT_STAGGER, ROLL, SCRAPPER, SWING_DUMMY, WEAPONS, type Swing } from '../shared/tuning';
+import { shove } from './bodies';
 import type { Enemy, EnemyAttack, FightEvent, Hero } from './types';
 
 const inArc = (ox: number, oy: number, fx: number, fy: number, x: number, y: number, range: number, arc: number, r: number) => {
   const dx = x - ox, dy = y - oy, d = Math.hypot(dx, dy);
   if (d - r > range) return false;
   if (d < r + 0.2) return true;
-  return (dx * fx + dy * fy) / d >= Math.cos(((arc / 2) * Math.PI) / 180);
+  // The target's own size widens the arc a little, so a thrust can graze a big body.
+  const widen = Math.atan2(r, d);
+  return Math.acos(Math.max(-1, Math.min(1, (dx * fx + dy * fy) / d))) <= ((arc / 2) * Math.PI) / 180 + widen;
 };
 
+export const stunOf = (e: Enemy) => (e.kind === 'butcher' ? BUTCHER.stun : e.kind === 'scrapper' ? SCRAPPER.stun : SWING_DUMMY.stun);
+export const respawnOf = (e: Enemy) => (e.kind === 'scrapper' ? SCRAPPER.respawn : BUTCHER.respawn);
+
 /** The hero's swing during its active frames: each enemy is hit at most once per swing. */
-export function hitEnemy(h: Hero, e: Enemy, now: number, ev: FightEvent[]): void {
+export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEvent[]): void {
   if (e.act === 'dead' || h.hitIds.includes(e.id)) return;
-  const s = COMBO[h.combo];
   if (!inArc(h.x, h.y, h.fx, h.fy, e.x, e.y, s.range, s.arc, e.radius)) return;
   h.hitIds.push(e.id);
-  const heavy = h.counter || h.combo === COMBO.length - 1;
-  const n = Math.round(s.dmg * (h.counter ? GUARD.counterMult : 1));
+  const heavy = h.counter || h.heavy || s.knock >= 7;
+  const mult = h.counter ? GUARD.counterMult : e.act === 'stunned' || e.act === 'pinned' ? GUARD.stunnedMult : 1;
+  const n = Math.round(s.dmg * mult);
   e.hp -= n;
   e.hitAt = now;
   const stop = h.counter ? HITSTOP.parry : heavy ? HITSTOP.heavy : HITSTOP.light;
   h.hitstop = Math.max(h.hitstop, stop);
   e.hitstop = Math.max(e.hitstop, stop);
+  if (e.act !== 'pinned' && e.act !== 'carried') shove(e, h.fx, h.fy, s.knock + (h.counter ? 5 : 0), e.weight);
   ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy, on: 'enemy', counter: h.counter });
   if (e.kind === 'dummy' || e.kind === 'swingDummy') {
     if (e.hp <= 0) e.hp = e.maxHp;
     return;
   }
   if (e.hp <= 0) {
-    e.hp = 0;
-    e.act = 'dead';
-    e.actT = 0;
-    e.actDur = BUTCHER.respawn;
-    e.attack = null;
+    Object.assign(e, { hp: 0, act: 'dead', actT: 0, actDur: respawnOf(e), attack: null });
     ev.push({ k: 'death', x: e.x, y: e.y });
+    return;
+  }
+  // Light goblins flinch out of their wind-up on any hit; the butcher only to a strong heavy.
+  const big = h.heavy && h.power >= 0.7;
+  if (e.act !== 'stunned' && e.act !== 'pinned' && e.act !== 'carried' && (e.kind === 'scrapper' || big)) {
+    Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: big && e.kind === 'butcher' ? 0.6 : FLINCH });
   }
 }
 
@@ -51,56 +60,44 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     return;
   }
   const tx = e.x - h.x, ty = e.y - h.y, tl = Math.hypot(tx, ty) || 1;
-  const facing = (h.fx * tx + h.fy * ty) / tl > 0.15;
-  const canGuard = !a.unblockable && facing && (h.act === 'idle' || h.act === 'attack');
+  // Pushed away from where the blow came from (the slam's centre for a slam).
+  const sx = a.kind === 'slam' ? h.x - a.cx : -tx, sy = a.kind === 'slam' ? h.y - a.cy : -ty, sl = Math.hypot(sx, sy) || 1;
+  const facing = (h.fx * tx + h.fy * ty) / tl > 0.1;
+  const canGuard = !a.unblockable && facing && (h.act === 'idle' || h.act === 'attack' || h.act === 'charge');
   if (canGuard && now - h.parryOpenAt <= GUARD.parryWindow + h.lenience) {
     h.counterUntil = now + GUARD.counterWindow;
     h.parryOpenAt = -9;
     h.hitstop = Math.max(h.hitstop, HITSTOP.parry);
     e.hitstop = HITSTOP.parry;
-    e.attack = null;
-    e.act = 'stagger';
-    e.actT = 0;
-    e.actDur = e.kind === 'butcher' ? BUTCHER.parryStagger : SWING_DUMMY.parryStagger;
+    Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: stunOf(e) });
+    shove(e, tx / tl, ty / tl, 4, e.weight);
     ev.push({ k: 'parry', x: (h.x + e.x) / 2, y: (h.y + e.y) / 2 });
+    ev.push({ k: 'stunned', x: e.x, y: e.y });
     return;
   }
   if (canGuard && h.blocking) {
-    const chip = Math.round(a.dmg * GUARD.chip);
+    const chip = Math.round(a.dmg * WEAPONS[h.weapon].chip);
     h.hp -= chip;
     h.stamina -= a.dmg * GUARD.staminaPerDmg;
     h.staminaAt = now;
     h.hitstop = Math.max(h.hitstop, HITSTOP.light);
-    push(h, tx / tl, ty / tl, 0.25);
+    shove(h, sx / sl, sy / sl, a.knock * 0.4, HERO.weight);
     if (h.stamina <= 0) {
-      h.stamina = 0;
-      h.act = 'stun';
-      h.actT = 0;
-      h.actDur = GUARD.guardBreakStun;
+      Object.assign(h, { stamina: 0, act: 'stun', actT: 0, actDur: GUARD.guardBreakStun });
       ev.push({ k: 'guardbreak', x: h.x, y: h.y });
     } else ev.push({ k: 'block', x: h.x, y: h.y });
     return downIfDead(h, ev);
   }
   h.hp -= a.dmg;
-  h.act = 'hurt';
-  h.actT = 0;
-  h.actDur = HURT_STAGGER;
+  Object.assign(h, { act: 'hurt', actT: 0, actDur: HURT_STAGGER + a.knock * 0.012 });
   h.hitstop = Math.max(h.hitstop, HITSTOP.heavy);
-  push(h, tx / tl, ty / tl, 0.6);
+  shove(h, sx / sl, sy / sl, a.knock, HERO.weight);
   ev.push({ k: 'hit', x: h.x, y: h.y, n: a.dmg, heavy: a.dmg >= 25, on: 'hero' });
   downIfDead(h, ev);
 }
 
-function push(h: Hero, towardX: number, towardY: number, d: number): void {
-  h.x -= towardX * d;
-  h.y -= towardY * d;
-}
-
 function downIfDead(h: Hero, ev: FightEvent[]): void {
   if (h.hp > 0) return;
-  h.hp = 0;
-  h.act = 'down';
-  h.actT = 0;
-  h.actDur = HERO.respawn;
+  Object.assign(h, { hp: 0, act: 'down', actT: 0, actDur: HERO.respawn, kvx: 0, kvy: 0 });
   ev.push({ k: 'down', x: h.x, y: h.y });
 }
