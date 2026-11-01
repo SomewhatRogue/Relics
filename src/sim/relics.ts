@@ -3,6 +3,7 @@
  * ground and ward, the war horn.
  * (Javelin, hook, net and lodestone fly; see their own files.)
  */
+import { healMult } from './lantern';
 import { collide } from '../shared/arena';
 import { BLESSING, HERO, HORN, PERK, SHADOWSTEP, WARD } from '../shared/tuning';
 import { damage, held, isDead, isDummy } from './damage';
@@ -78,7 +79,7 @@ export function stepZones(zones: Zone[], w: World): Zone[] {
     for (const o of w.heroes) {
       if (o.act === 'down' || Math.hypot(o.x - z.x, o.y - z.y) > z.r) continue;
       o.blessedUntil = Math.max(o.blessedUntil, w.now + BLESSING.linger);
-      const n = Math.min(o.maxHp - o.hp, BLESSING.heal);
+      const n = Math.min(o.maxHp - o.hp, Math.round(BLESSING.heal * healMult(w.heroes.find((x) => x.id === z.owner))));
       if (n > 0) (o.hp += n), w.ev.push({ k: 'heal', x: o.x, y: o.y, n });
     }
     for (const e of w.enemies) {

@@ -1,4 +1,5 @@
 /** Enemies' turns: the goblin butcher, goblin scrappers, and the two training dummies. */
+import { lure, seenFrom } from './lantern';
 import { collide, currentMap, inArea } from '../shared/arena';
 import { ALERT, ARCHER, BUTCHER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, type EnemyAttackSpec, type EnemySpec } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
@@ -25,7 +26,7 @@ function nearest(e: Enemy, heroes: Hero[]): Hero | null {
   let best: Hero | null = null, bd = Infinity;
   for (const h of heroes) {
     if (h.act === 'down') continue;
-    const d = Math.hypot(h.x - e.x, h.y - e.y);
+    const d = Math.hypot(h.x - e.x, h.y - e.y) - lure(h);
     if (d < bd) (bd = d), (best = h);
   }
   return best;
@@ -162,7 +163,7 @@ function notice(e: Enemy, heroes: Hero[], others: Enemy[], now: number, ev: Figh
   for (const h of heroes) {
     if (h.act === 'down' || h.id === 'squire') continue;
     const dx = h.x - e.x, dy = h.y - e.y, d = Math.hypot(dx, dy), ahead = (dx * e.fx + dy * e.fy) / (d || 1) > -0.2;
-    if (d < (ahead ? ALERT.sight : ALERT.behind)) seen = true;
+    if (d < (ahead ? ALERT.sight : ALERT.behind) + seenFrom(h)) seen = true;
   }
   for (const o of others) if (o !== e && o.alert && (isDead(o) || o.hitAt > now - 0.2) && Math.hypot(o.x - e.x, o.y - e.y) < ALERT.hear) seen = true;
   if (!seen) return false;

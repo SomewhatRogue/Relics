@@ -91,6 +91,7 @@ export class Game {
     h.weapon = p.weapon;
     h.arms = { ...p.arms };
     h.bag = [...p.bag];
+    h.glow = p.glow;
     h.found = [...p.relics];
     h.perks = [...p.perks];
     h.maxHp = HERO.hp + (p.perks.includes('tough') ? PERK.tough : 0);
@@ -272,8 +273,8 @@ export class Game {
   /** The room changed what's in hand, in the pack, or carried: the hero's save follows. */
   private keepGear(h: Hero): void {
     const p = this.profile, relic = h.relics[1] ?? '';
-    if (h.weapon === p.weapon && h.bag.length === p.bag.length && h.arms[h.weapon] === p.arms[p.weapon] && relic === p.relic && h.bag.every((it, i) => it === p.bag[i])) return;
-    Object.assign(p, { weapon: h.weapon, arms: { ...h.arms }, bag: [...h.bag], relic });
+    if (h.weapon === p.weapon && h.bag.length === p.bag.length && h.arms[h.weapon] === p.arms[p.weapon] && relic === p.relic && h.glow === p.glow && h.bag.every((it, i) => it === p.bag[i])) return;
+    Object.assign(p, { weapon: h.weapon, arms: { ...h.arms }, bag: [...h.bag], relic, glow: h.glow });
     store(this.save);
   }
 

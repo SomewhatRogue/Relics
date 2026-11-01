@@ -1,5 +1,6 @@
 /** Drawing relics and shots in the world: javelins, the hook on its chain, arrows, spells, flasks. */
 import type { Bolt, Drop, Hero, Hook, Javelin } from '../sim/types';
+import type { Coal } from '../sim/lantern';
 import { line, type Ctx } from './draw';
 import { EL_COL } from './palette';
 
@@ -131,6 +132,23 @@ export function drawBolt(c: Ctx, b: Bolt, x: number, y: number): void {
 
 const KIT_COL: Record<string, string> = { sword: '#dfe6ec', greatsword: '#eef2f5', spear: '#8b6a3a', daggers: '#e6ecf0', longbow: '#8b6a3a', shortbow: '#6b4a2b', crossbow: '#5a3d22', wand: '#6b4a2b', staff: '#6b4a2b', rod: '#9aa3ad', mace: '#9aa3ad' };
 const FORGED: Record<string, string> = { ember: EL_COL.fire, rime: EL_COL.frost, storm: EL_COL.storm };
+
+/** A butcher's coal on the floor: a coal that pulses and drifts sparks upward (a Healer can take it). */
+export function drawCoal(c: Ctx, m: Coal, x: number, y: number): void {
+  const fade = Math.min(1, m.life / 4), pulse = Math.floor(c.now * 6 + m.id) % 2;
+  c.glow.globalAlpha = fade;
+  c.glow.fillStyle = pulse ? '#ffd27a' : '#ff9a3c';
+  c.glow.fillRect(Math.round(x - 1), Math.round(y - 3), 3, 2);
+  c.glow.fillStyle = '#ffffff';
+  c.glow.fillRect(Math.round(x), Math.round(y - 3), 1, 1);
+  for (let i = 0; i < 3; i++) {
+    const t = (c.now * 0.8 + i / 3 + m.id * 0.17) % 1;
+    c.glow.globalAlpha = fade * (1 - t);
+    c.glow.fillStyle = '#ffb35a';
+    c.glow.fillRect(Math.round(x + Math.sin(t * 6 + i * 2) * 2), Math.round(y - 4 - t * 14), 1, 1);
+  }
+  c.glow.globalAlpha = 1;
+}
 
 /** A weapon lying on the floor, glinting in its quality's colour (a forged one sends up a thin shaft of light). */
 export function drawDrop(c: Ctx, d: Drop, x: number, y: number): void {

@@ -1,4 +1,5 @@
 /** Effects for magic and the new relics: bursts, gusts, lightning, steam, ice, blessings. Cosmetic only. */
+import { COAL } from './copy';
 import type { FightEvent } from '../sim/types';
 import type { Fx } from './fx';
 import { EL_COL, EL_LIGHT } from './palette';
@@ -114,6 +115,11 @@ export function magicFx(fx: Fx, ev: FightEvent, x: number, y: number): void {
     case 'shadow':
       fx.burst(x, y - 8, 18, ['#3a3346', '#6a5a8a', '#c9a8ff'], 50, true);
       fx.say(x, y - 30, 'BEHIND', '#d8a0ff');
+      break;
+    case 'coal':
+      fx.say(x, y - 30, COAL.pickup, '#ffb35a');
+      fx.burst(x, y - 10, 14, ['#ffd27a', '#ff9a3c', '#ffffff'], 40, true);
+      fx.rings.push({ x, y: y - 6, life: 0.5, max: 0.5, col: '#ffb35a', size: 18 });
       break;
     case 'drop':
       fx.say(x, y - 24, ev.q === 'forged' ? 'FORGED' : 'LOOT', ev.q === 'forged' ? '#ffd27a' : '#9fd0ff');

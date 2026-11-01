@@ -15,6 +15,7 @@ import { stepBuildings, sweepBlocks } from './buildings';
 import { newEnemy, stepEnemy } from './enemies';
 import { newHero, stepHero, type HeroActs } from './hero';
 import { damage, isDead } from './damage';
+import { dropCoal, healMult, stepCoals, type Coal } from './lantern';
 import { impacts } from './impacts';
 import { release, stepCarry, tryGrab } from './grab';
 import { dropProp, newProp, propImpacts, roomProps, stepLift, stepProps, sweepProps, tryLift } from './props';
@@ -34,6 +35,8 @@ export class ArenaRoom {
   hooks: Hook[] = [];
   bolts: Bolt[] = [];
   drops: Drop[] = [];
+  /** Slivers left by dead butchers, for a Healer's censer. */
+  coals: Coal[] = [];
   /** Blessed ground. */
   zones: Zone[] = [];
   props: Prop[] = roomProps();
@@ -161,7 +164,9 @@ export class ArenaRoom {
     separate(this.heroes, this.enemies, this.props);
     this.landings();
     for (const e of this.enemies) if (alive.has(e.id) && isDead(e)) dropFrom(e, this.heroes, this.drops, this.lootRng, this.events);
+    for (const e of this.enemies) if (alive.has(e.id) && isDead(e)) dropCoal(e, this.coals);
     this.drops = stepDrops(this.drops, TICK);
+    this.coals = stepCoals(this.coals, this.heroes, this.events, TICK);
   }
 
   /** Off a ledge: a goblin knocked off (thrown, hooked, blasted) takes the fall; anyone who steps off just lands. */
@@ -236,7 +241,7 @@ export class ArenaRoom {
     w.ev.push({ k: 'bless', x: h.x, y: h.y });
     for (const o of this.heroes) {
       if (o.act === 'down' || Math.hypot(o.x - h.x, o.y - h.y) > HEAL_RADIUS) continue;
-      const n = Math.min(o.maxHp - o.hp, s.heal);
+      const n = Math.min(o.maxHp - o.hp, Math.round(s.heal * healMult(h)));
       if (n <= 0) continue;
       o.hp += n;
       w.ev.push({ k: 'heal', x: o.x, y: o.y, n });

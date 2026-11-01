@@ -64,7 +64,7 @@ export class Title {
     const c = this.pick, s = CLASSES[c];
     this.el.innerHTML = `<div class="tcard"><div class="dhead">${face(c)}<div><h2>${c}</h2><p>${s.pitch}</p></div></div>` +
       `<div class="bars">${STATS.map((k) => `<span>${k}</span><i>${'<em class="on"></em>'.repeat(s.stats[k])}${'<em></em>'.repeat(5 - s.stats[k])}</i>`).join('')}</div>` +
-      `<dl class="sheet"><dt>WEAPON</dt><dd>${s.weapon}</dd><dt>SKILL</dt><dd>${s.skill}</dd><dt>CAN'T</dt><dd>${s.cant}</dd></dl><p class="dim small">${NO_RELICS}</p>` +
+      `<dl class="sheet"><dt>WEAPON</dt><dd>${s.weapon}</dd><dt>SKILL</dt><dd>${s.skill}</dd><dt>CAN'T</dt><dd>${s.cant}</dd>${s.note ? `<dt>CENSER</dt><dd>${s.note}</dd>` : ''}</dl><p class="dim small">${NO_RELICS}</p>` +
       `<label class="name">NAME <input maxlength="12" value="${NAMES[c]}" autocomplete="off" spellcheck="false"></label>` +
       `<button data-begin class="primary wide">BEGIN AS ${c}</button><button data-pick class="ghost wide">OTHER CLASSES</button></div>`;
   }

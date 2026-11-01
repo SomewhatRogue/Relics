@@ -95,6 +95,12 @@ export const ready = () => !!(ac && ac.state === 'running' && master);
 export const sfxOut = () => (ready() ? { ac: ac!, out: master! } : null);
 
 export const sfx = {
+  /** A Healer's censer takes a butcher's coal: a low warm swell, then a small bright note. */
+  coal() {
+    if (!ready()) return;
+    tone('sine', 220, 330, 0.35, 0.5);
+    tone('triangle', 880, 990, 0.18, 0.35, 0.12);
+  },
   swing() {
     if (ready()) burst('bandpass', 900, 2600, 1.2, 0.35, 0.14);
   },

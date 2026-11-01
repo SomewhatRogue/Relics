@@ -52,6 +52,9 @@ export const LODESTONE = { cooldown: 8, windup: 0.2, recover: 0.3, range: 7, fal
  * laptop). Allies in it mend slowly and are blessed (hit harder, take less) while they stand there;
  * goblins in it burn with holy light. Every half second (`every`), for `time` seconds.
  */
+/** The Healer's coal (sim/lantern.ts): per coal, heals x(1 + heal), goblins judge you `lure` tiles nearer and notice you `notice` further off. */
+export const LANTERN = { heal: 0.08, lure: 0.35, notice: 0.25, max: 12, reach: 1.1, life: 25 };
+
 export const BLESSING = { cooldown: 12, windup: 0.25, recover: 0.25, range: 6, radius: 2.4, time: 6, every: 0.5, heal: 3, hurt: 4, linger: 0.6, dmgMult: 1.3, taken: 0.75 };
 
 /**

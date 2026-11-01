@@ -18,6 +18,8 @@ export interface ClassSheet {
   /** The class's one skill (the SKILL button), and what it does. */
   skill: string;
   cant: string;
+  /** Anything else only this class has (one line). */
+  note?: string;
   /** Out of 5, against the other classes (judged from tuning.ts; keep honest when it changes). */
   stats: Record<Stat, number>;
 }
@@ -61,6 +63,7 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     weapon: 'Mace and censer',
     skill: "Sanctuary: blessed ground mends allies and burns goblins, and wards whoever's worst hurt.",
     cant: 'Slow, short reach.',
+    note: 'Feed the censer what butchers leave. It heals hotter, and draws teeth.',
     stats: { POWER: 2, GUARD: 4, SPEED: 2, RANGE: 2, SUPPORT: 5 },
   },
 };

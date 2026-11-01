@@ -9,7 +9,7 @@ import { drawHero } from './actors';
 import { blit, type Ctx } from './draw';
 import { drawEnemy, drawHeld, drawTelegraph } from './foes';
 import { EL_LIGHT } from './palette';
-import { drawBolt, drawDrop, drawHook, drawJavelin } from './relicsdraw';
+import { drawBolt, drawDrop, drawCoal, drawHook, drawJavelin } from './relicsdraw';
 import { drawStatus } from './status';
 import { drawLifted, drawProp } from './propsdraw';
 import type { Fx } from './fx';
@@ -139,6 +139,10 @@ export class Scene {
       const x = OX + d.x * PX - cx, y = OY + d.y * PX - cy;
       items.push({ y: OY + d.y * PX - 20, draw: () => drawDrop(c, d, x, y) });
     }
+    for (const m of room.coals) {
+      const x = OX + m.x * PX - cx, y = OY + m.y * PX - cy;
+      items.push({ y: OY + m.y * PX - 20, draw: () => drawCoal(c, m, x, y) });
+    }
     for (const b of room.bolts) {
       const x = OX + b.x * PX - cx, y = OY + b.y * PX - cy;
       // Things on the floor draw under the bodies; things in the air over them.
@@ -202,6 +206,7 @@ export class Scene {
     for (const it of items) it.draw();
 
     const lights: Light[] = [];
+    for (const m of room.coals) lights.push({ x: OX + m.x * PX - cx, y: OY + m.y * PX - cy - 4, r: 26 + Math.sin(now * 7 + m.id) * 3, i: 0.6 * Math.min(1, m.life / 4), c: [1, 0.6, 0.28] });
     for (const d of room.drops) {
       if (!d.item.traits.some((t) => t === 'ember' || t === 'rime' || t === 'storm')) continue;
       lights.push({ x: OX + d.x * PX - cx, y: OY + d.y * PX - cy - 6, r: 22, i: 0.5, c: [1, 0.9, 0.6] });
@@ -236,6 +241,8 @@ export class Scene {
       const [x, y] = lerp('h:' + h.id, h.x, h.y);
       // Underground (no moon), each hero carries a lantern.
       lights.push({ x: x - cx, y: y - 10 - cy, r: map.theme.moon ? 44 : 90, i: map.theme.moon ? 0.35 : 0.7, c: [0.95, 0.8, 0.6] });
+      // A Healer's censer burns brighter the more coals it has taken.
+      if (h.glow > 0 && WEAPONS[h.weapon].cls === 'HEALER') lights.push({ x: x - cx, y: y - 4 - cy, r: 20 + h.glow * 3 + Math.sin(now * 9) * 2, i: 0.25 + h.glow * 0.04, c: [1, 0.62, 0.3] });
     }
     for (const e of room.enemies) {
       const at = e.attack;

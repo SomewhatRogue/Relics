@@ -2,6 +2,24 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-01: the Healer's coals (Claude Opus 5.5)
+
+Kyle kept the censer's Lantern coal: "the more they collect the more they heal allies but the more
+goblins might seek them out in battle."
+
+- **Coals** (`src/sim/lantern.ts`, `LANTERN` in `shared/magic.ts`): every butcher that dies leaves a
+  live coal on the floor for 25 s. A Healer who walks over it feeds the censer, up to 12, kept for
+  life (saved on the hero). Nobody else can take one.
+- **Each coal:** every heal the Healer gives (Sanctuary's ground, every third mace blow) is 8%
+  stronger, nearly double at 12. Goblins judge the Healer 0.35 tiles nearer when picking whom to go
+  for (4.2 at 12, so a full censer pulls them past a nearer friend) and notice them 0.25 tiles
+  further off.
+- **Seen and heard:** the coal on the floor pulses and sheds sparks; the censer's light grows with
+  each one; "CENSER FED" and a warm two-note chime on pickup; COALS n / 12 in the pack; a line on
+  the Healer's class page; Isolde and Odric each have a line for a Healer.
+- **Words from the lore keeper:** "coal", not "ember" (EMBERFORGED is a fire trait already). Code
+  says coal too.
+
 ## 2026-11-01: the pack, a shorter class pick, one weapon to start (Claude Opus 5.5)
 
 Kyle: start with a weapon type and don't say what the smith has; an inventory for each hero, open any

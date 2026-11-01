@@ -116,6 +116,16 @@ most Want among the heroes is the one the bells don't spare).
 - **Words players see.** "Deep job" for the daily long job with a named butcher at the bottom (never
   "deep dive"). Stamina is "breath". Heroes are a company; you "hire" another.
 - **Halvard** oils every blade on his rack, and the next one before you've paid for this one.
-- **Open question for Kyle:** a code comment (`src/client/held.ts`) has the Healer's censer swinging a
-  coal from the Last Lantern. Since the Lantern is a shard, that would put shard-light in every
-  Healer's hand outside the walls, where goblins can smell it. Keep it on purpose, or drop it.
+- **The censer coal** (Kyle, 2026-11-01: kept). Every Healer's coal is lit from the Last Lantern when
+  the church takes them on: the Lantern's light, not a piece of the shard, so the Lantern loses nothing.
+  A dead butcher leaves a crumb of the sliver it ate (apart from any relic pried out of it); out of a
+  body and unfed it goes dark in moments. Fed to the coal, its hunger burns into light the Healer
+  spends on other people. Healing is giving, so it doesn't grow the Want in the Healer. But the coal
+  keeps a little of every crumb: to the hungry it smells more like the Lantern each time, and they
+  can't tell kept from given. A full censer is the nearest thing to the Lantern outside the walls.
+- **On screen:** "coals" and "the censer", never shard, sliver, crown or the Want, and never why the
+  hungry come for a Healer, only that they do. Isolde suspects ("I don't ask the coal its business");
+  Odric knows and changes the subject.
+- **Open question for Kyle (chapter 5):** do censer coals count toward the Want when the bells "don't
+  spare" the one with the most? Recorded answer for now: no, because they're spent on others. Darker
+  option: they count for a Healer who carries a full censer and rarely heals.

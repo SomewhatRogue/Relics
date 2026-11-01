@@ -115,7 +115,7 @@ export function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): vo
     line(g, ox, oy, p.a, 0, 8, '#5a3d22');
     line(g, ox, oy, p.a, 8, 11, '#9aa3ad', 3);
     line(g, ox + Math.cos(p.a) * 9.5, oy + Math.sin(p.a) * 9.5, p.a + Math.PI / 2, -2.5, 2.5, '#cfd6dc');
-    // The censer in the off hand, a coal from the Last Lantern swinging in it.
+    // The censer in the off hand, a coal lit from the Last Lantern swinging in it.
     const cx = px - side * 9, cy = py + 3 + Math.round(Math.sin(c.now * 3)), sway = Math.sin(c.now * 3) * 2;
     line(g, px - side * 8, py - 1, Math.PI / 2 + sway * 0.1, 0, 3, '#6a6470');
     g.fillStyle = '#b08a3a';

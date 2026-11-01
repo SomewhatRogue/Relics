@@ -8,7 +8,7 @@ import { openSquare } from './squareui';
 import { AUGMENTS, CLASS_KITS, CLASS_ORDER, CLASS_SKILL, ELEMENT_NAME, RELICS, TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
 import type { Game } from './game';
 import { PACK } from '../sim/pack';
-import { COPY, SMITH } from './copy';
+import { COAL, COPY, SMITH } from './copy';
 import type { Panel } from './panels';
 import { RUMOURS } from './rumours';
 
@@ -50,7 +50,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       return panel.show(t.name, say(name, ELSEWHERE[cls].replace('{who}', title(yours.name)).replace('{where}', yours.where)));
     }
     const next = xpFor(pr.level + 1), offer = perkOffer(pr);
-    const html = say(name, pr.picks > 0 ? TEACH[pr.cls][0] : TEACH[pr.cls][1]) +
+    const html = say(name, pr.picks > 0 ? TEACH[pr.cls][0] : TEACH[pr.cls][1]) + (pr.cls === 'HEALER' && pr.glow > 0 ? say(name, COAL.isolde) : '') +
       p(`Level ${pr.level}. Experience ${pr.xp}${pr.level < 10 ? ` of ${next} for the next` : ' (the chapter cap)'}.`) +
       p(pr.perks.length ? 'Yours: ' + pr.perks.map((k) => `<b>${PERKS[k].name}</b> (${PERKS[k].text.toLowerCase()})`).join(', ') : 'No perks yet.') +
       (pr.picks > 0 ? p(`Choose ${pr.picks > 1 ? `one of ${pr.picks} picks` : 'one'}:`) + offer.map((k) => p(`<b>${PERKS[k].name}</b>${PERKS[k].cls ? ' (only from me)' : ''}: ${PERKS[k].text}`)).join('') : '');
@@ -78,7 +78,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     })))];
     panel.show('IVO THE RELIC-WRIGHT', html, buttons);
   } else if (id === 'church') {
-    panel.show('FATHER ODRIC', say('Father Odric', 'Give what you can spare. Then a little of what you can\'t. That\'s the part it burns.') +
+    panel.show('FATHER ODRIC', say('Father Odric', 'Give what you can spare. Then a little of what you can\'t. That\'s the part it burns.') + (pr.cls === 'HEALER' ? say('Father Odric', COAL.odric) : '') +
       p(`Given to the Lantern so far: ${w.lantern} gold.`) + p(`You have ${pr.gold} gold.`),
       [20, 100].map((n) => ({ label: `GIVE ${n}`, disabled: pr.gold < n, act: () => (g.donate(n), again()) })));
   } else if (id === 'infirmary') {

@@ -100,6 +100,8 @@ export interface Hero extends Body {
   rallyUntil: number;
   /** The weapon found for each kit (a kit not listed is the plain one). */
   arms: Partial<Record<WeaponId, Item>>;
+  /** Coals fed to a Healer's censer (sim/lantern.ts). */
+  glow: number;
   /** Weapons carried, not in hand. */
   bag: Item[];
   /** Relics this hero has won (one at a time is carried, in relics[1]). */
@@ -246,6 +248,7 @@ export type FightEvent =
   | { k: 'weapon'; x: number; y: number; name: string }
   | { k: 'throw' | 'pinned' | 'javwall' | 'javstick' | 'hookfire' | 'latch' | 'yank' | 'land'; x: number; y: number; dx: number; dy: number }
   | { k: 'relic' | 'loot'; x: number; y: number; name: string }
+  | { k: 'coal'; x: number; y: number; n: number }
   | { k: 'drop'; x: number; y: number; q: Quality }
   | { k: 'shoot'; x: number; y: number; dx: number; dy: number; kind: Bolt['kind']; el: Augment }
   | { k: 'burst'; x: number; y: number; r: number; el: Augment }
