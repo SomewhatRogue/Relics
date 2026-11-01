@@ -3,7 +3,7 @@
  * and what it would change against what you wear now, in the numbers the room uses. Green better, red
  * worse. Used by the loot card, chests and the pack.
  */
-import { MODS, MOD_TEXT, TIERS, TRAITS, WEAPONS, CHARGE, gearStats, itemName, slotOf, type Item, type WeaponId } from '../shared/tuning';
+import { HUNGRY, type HungryId, MODS, MOD_TEXT, TIERS, TRAITS, WEAPONS, CHARGE, gearStats, itemName, slotOf, type Item, type WeaponId } from '../shared/tuning';
 import type { Hero } from '../sim/types';
 
 /** How each weapon type fights, in a line. */
@@ -75,7 +75,8 @@ export function card(it: Item, h?: Hero): string {
   const mods = (it.mods ?? []).map((m) => `<div class="tr"><b>${MODS[m.id].name} ${m.v > 0 ? '+' : ''}${MODS[m.id].unit === '%' ? Math.round(m.v * 100) + '%' : MODS[m.id].unit === 's' ? m.v + ' s' : m.v}</b> ${MOD_TEXT[m.id]}</div>`);
   const traits = it.traits.map((k) => `<div class="tr"><b>${TRAITS[k].name}</b> ${TRAITS[k].text}</div>`);
   return `<div class="card-head" style="--t:${t.col}"><span class="chip">${t.name}</span><b>${itemName(it)}</b></div>` +
-    (how ? `<div class="how">${how}</div>` : '') + [...mods, ...traits].join('') + (mods.length + traits.length ? '' : `<div class="tr">Plain. No modifiers.</div>`);
+    (how ? `<div class="how">${how}</div>` : '') + [...mods, ...traits].join('') +
+    (it.hungry ? `<div class="gift">${HUNGRY[it.hungry as HungryId].gift}</div><div class="cost">${HUNGRY[it.hungry as HungryId].cost}</div>` : '') + (mods.length + traits.length || it.hungry ? '' : `<div class="tr">Plain. No modifiers.</div>`);
 }
 
 /** The hero sheet: every number, as worn. */

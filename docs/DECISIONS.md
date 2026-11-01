@@ -2,6 +2,23 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-01: loot slice 6, hungry gear and the Want (Claude Opus 5.5)
+
+- **Ten hungry pieces** (`shared/hungry.ts`, wired in `sim/hungry.ts`), names and costs from the lore
+  keeper: Skarn's Cleaver, the Larder Pike, Spendthrift, Mother Rust's Needles, the Jealous Rod, the
+  Keeping Mace, the Butcher's Apron, the Ransom Coat, Someone's Wedding Ring, the Tooth Ring. Each has
+  three very large modifiers, a gift and a cost, both shown on the card (green and red). Named butchers
+  favour their own piece (Skarn, Mother Rust); no other source drops those two.
+- **Where they come from:** 5% of a named butcher's drops and 3% of chest rolls (before danger shifts).
+- **Rules:** can't be dropped, melted, traded or upgraded; Someone's Wedding Ring can't come off; all of
+  it can only be left on the church step (Odric: "Leave it on the step. I'll see to it.").
+- **Gold in a fight:** heroes carry a purse (home gold plus the job's) so Spendthrift and the Ransom
+  Coat can spend it; spending takes from the job's gold first.
+- **The Want** (`Profile.want`, hidden): +5 per hungry piece worn at a job's end (+15 for the Wedding
+  Ring), +0.2 a kill made in hungry gear; -0.1 per gold given at the Lantern, -30 per piece given up.
+  It shows sideways: from 15 the hero's eyes glint red in the dark, brighter as it grows; from 30 Agne
+  remarks and Gannet pours short. Nobody turns yet; the threshold and turning are for Kyle to decide.
+
 ## 2026-11-01: loot slice 5, upgrades (Claude Opus 5.5)
 
 - **Halvard's anvil** (THE ANVIL in his panel): melt packed gear for steel (white 1, green 3, blue 8,

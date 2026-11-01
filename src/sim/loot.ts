@@ -3,7 +3,7 @@
  * kind in their hand). Standing on it they can take it into their pack, if there's room; they equip
  * it from the pack.
  */
-import { DROPS, WEAPONS, itemName, rollGear, rollTier } from '../shared/tuning';
+import { DROPS, WEAPONS, itemName, rollAny, rollTier } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { PACK } from './pack';
 import type { Drop, Enemy, FightEvent, Hero, Intent } from './types';
@@ -25,7 +25,7 @@ export function dropFrom(e: Enemy, heroes: Hero[], drops: Drop[], rng: Rng, ev: 
   // Tier by who fell; butchers sometimes leave armor or a ring instead of a weapon.
   const tier = rollTier(rng, e.name ? 'named' : e.kind), cls = WEAPONS[near.weapon].cls;
   const slot = e.kind === 'butcher' && rng.next() < 0.3 ? (rng.next() < 0.5 ? 'armor' : 'ring') : 'weapon';
-  const item = rollGear(rng, cls, tier, slot, slot === 'weapon' && rng.next() < 0.5 ? near.weapon : undefined);
+  const item = rollAny(rng, cls, tier, slot, slot === 'weapon' && rng.next() < 0.5 ? near.weapon : undefined, e.name);
   drops.push({ id: nextId++, x: e.x, y: e.y, item, life: DROPS.life });
   ev.push({ k: 'drop', x: e.x, y: e.y, q: item.quality });
 }

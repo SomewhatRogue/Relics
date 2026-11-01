@@ -1,5 +1,5 @@
 /** Drawing a hero: the class's body, the weapon in hand, the dodge, charge and stun. */
-import { CHARGE, WARD, WEAPONS } from '../shared/tuning';
+import { CHARGE, WARD, WEAPONS, WANT } from '../shared/tuning';
 import { chargeFull, currentSwing } from '../sim/hero';
 import type { Hero } from '../sim/types';
 import { blit, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
@@ -75,6 +75,14 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean, t: 
   if (up) drawGear();
   const flash = h.act === 'hurt' && h.actT < 0.1 ? 0.85 : h.act === 'stun' ? 0.3 : 0;
   blit(c, up ? look.up : look.down, bx, by, flip, flash);
+  // The Want shows in the eyes first: a glint in the dark, like theirs.
+  if (!up && h.want >= WANT.eyes) {
+    c.glow.globalAlpha = Math.min(1, h.want / 80) * (0.55 + 0.45 * Math.sin(c.now * 2));
+    c.glow.fillStyle = '#ff4a3a';
+    c.glow.fillRect(Math.round(bx - 2), Math.round(by - 13), 1, 1);
+    c.glow.fillRect(Math.round(bx + 1), Math.round(by - 13), 1, 1);
+    c.glow.globalAlpha = 1;
+  }
   if (!up) drawGear();
   if (fresh && h.weapon !== 'sword') smear(c.glow, bx, by - 8, Math.atan2(h.fy, h.fx) - 0.7, Math.atan2(h.fy, h.fx) + 0.7, 7, 9, '#cfe8ff');
   if (h.act === 'charge') {

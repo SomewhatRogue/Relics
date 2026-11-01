@@ -15,6 +15,7 @@ import { stepBuildings, sweepBlocks } from './buildings';
 import { newEnemy, stepEnemy } from './enemies';
 import { newHero, stepHero, type HeroActs } from './hero';
 import { damage, isDead } from './damage';
+import { HUNGRY_FX, heals, onKill, stepHungry, wears } from './hungry';
 import { newChest, startChest, stepChests, type Chest } from './chests';
 import { stepFlask, stepPotions, usePotion, type Smoke } from './flasks';
 import { dropPickups, stepPickups, type Pickup } from './pickups';
@@ -192,7 +193,13 @@ export class ArenaRoom {
     separate(this.heroes, this.enemies, this.props);
     this.landings();
     for (const e of this.enemies) if (alive.has(e.id) && isDead(e)) dropFrom(e, this.heroes, this.drops, this.lootRng, this.events);
-    for (const e of this.enemies) if (alive.has(e.id) && isDead(e)) dropCoal(e, this.coals), dropPickups(e, this.pickups, this.lootRng);
+    for (const e of this.enemies) if (alive.has(e.id) && isDead(e)) {
+      dropCoal(e, this.coals);
+      dropPickups(e, this.pickups, this.lootRng);
+      const by = this.heroes.find((x) => x.id === e.lastBy);
+      if (by) onKill(by, this.time, this.events);
+    }
+    stepHungry(this.heroes, this.enemies, this.time, this.events);
     this.pickups = stepPickups(this.pickups, this.heroes, this.events, TICK);
     this.drops = stepDrops(this.drops, TICK);
     this.coals = stepCoals(this.coals, this.heroes, this.events, TICK);
@@ -213,6 +220,11 @@ export class ArenaRoom {
 
   /** A melee blow landed: a forged weapon's element on a charged hit or counter; REAPER on a backstab or counter kill. */
   private struck(h: Hero, e: Enemy, n: number, w: World): void {
+    // Skarn's Cleaver: every hit heals a fifth of what it dealt.
+    if (wears(h, 'cleaver') && h.hp < h.maxHp) {
+      const back = Math.min(h.maxHp - h.hp, Math.round(n * HUNGRY_FX.leech));
+      if (back > 0) (h.hp += back), w.ev.push({ k: 'heal', x: h.x, y: h.y, n: back });
+    }
     const charged = (h.heavy && h.power >= 0.7) || h.counter;
     if (isDead(e)) {
       const tx = h.x - e.x, ty = h.y - e.y, rear = (e.fx * tx + e.fy * ty) / (Math.hypot(tx, ty) || 1) < GUARD.rearCos;
@@ -253,6 +265,7 @@ export class ArenaRoom {
 
   /** A swing's moment of release: loose its shot (spells cast with the equipped relic's augment), smite, heal. */
   private loose(h: Hero, s: Swing, w: World): void {
+    s = { ...s };
     // Blessed, a DEADEYE perfect release, a TEMPO hit after a dodge through a blow.
     let mult = (h.blessedUntil > w.now ? BLESSING.dmgMult : 1) * (h.heavy && h.perfect && has(h, 'deadeye') ? TRAIT.deadeye : 1);
     if (s.shot && h.tempoUntil > w.now) (mult *= TRAIT.tempo), (h.tempoUntil = -9);
@@ -260,17 +273,26 @@ export class ArenaRoom {
     if (s.shot && (h.z ?? 0) > 0) mult *= HEIGHT.shot;
     // A forged weapon's element rides a full draw (and every crossbow bolt); spells otherwise take the relic's.
     const full = (h.heavy && h.power >= 1) || !!WEAPONS[h.weapon].noCharge, forged = full ? forgedElement(h) : '';
+    // Spendthrift: a gold an arrow, and a full draw lands double and pierces.
+    if (s.shot === 'arrow' && wears(h, 'spendthrift')) {
+      h.purse--;
+      w.ev.push({ k: 'spend', id: h.id, x: h.x, y: h.y, n: 1 });
+      if (full) (mult *= 2), (s = { ...s, pierce: true });
+    }
+    const bolts = this.bolts.length;
     if (s.shot === 'smite') this.bolts.push(smite(h, s, this.aimDistance(h, s.range, 3.5), mult, traitsOf(h)));
     else if (s.shot) {
       const el = s.shot === 'arrow' || s.shot === 'bolt' ? forged : forged || h.augments[h.relic];
       this.bolts.push(shoot(h, s, el, mult, traitsOf(h)));
       w.ev.push({ k: 'shoot', x: h.x, y: h.y, dx: h.fx, dy: h.fy, kind: s.shot, el });
     }
+    // The Jealous Rod: a charged spell jumps to every goblin near what it hits.
+    if (full && wears(h, 'jealous')) for (const b of this.bolts.slice(bolts)) b.chain = true;
     if (!s.heal) return;
     w.ev.push({ k: 'bless', x: h.x, y: h.y });
     for (const o of this.heroes) {
       if (o.act === 'down' || Math.hypot(o.x - h.x, o.y - h.y) > HEAL_RADIUS) continue;
-      const n = Math.min(o.maxHp - o.hp, Math.round(s.heal * healMult(h)));
+      const n = Math.min(o.maxHp - o.hp, Math.round(heals(o, h, s.heal * healMult(h))));
       if (n <= 0) continue;
       o.hp += n;
       w.ev.push({ k: 'heal', x: o.x, y: o.y, n });

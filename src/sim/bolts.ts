@@ -4,6 +4,7 @@
  * spot, then falls. The hunter's net opens on the first goblin it reaches. The lodestone is lobbed,
  * lands, drags goblins inward for a while, then bursts.
  */
+import { HUNGRY_FX } from './hungry';
 import { collide } from '../shared/arena';
 import { FLINCH, LODESTONE, NET, type Augment, type Swing, type TraitId } from '../shared/tuning';
 import { shove } from './bodies';
@@ -86,6 +87,11 @@ function strike(w: World, b: Bolt, e: Enemy): void {
   if (e.act !== 'pinned') shove(e, b.dx, b.dy, b.knock, e.weight);
   if (wasFrozen && b.knock >= 8) shatter(e, w.now, w.ev);
   else afflict(w, e, b.el, b.dmg);
+  if (b.chain) for (const o of w.enemies) {
+    if (o === e || isDead(o) || Math.hypot(o.x - e.x, o.y - e.y) > HUNGRY_FX.chain) continue;
+    o.lastBy = b.owner;
+    damage(o, Math.round(b.dmg * HUNGRY_FX.chainDmg), w.now, w.ev, { src: b.kind });
+  }
 }
 
 /** Advance one bolt a tick; false when it is gone. */

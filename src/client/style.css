@@ -239,3 +239,7 @@ body.touch #pack .head span { font-size: 9px; }
 #pack .cmp b, #pack .card-head b { font-size: 11px; }
 #pack .card-head b { color: var(--t); }
 .bought .cmp { margin-top: 6px; }
+
+.gift { color: #7fd07a; font-size: 10px; margin-top: 3px; }
+.cost { color: #ff6a5a; font-size: 10px; margin-top: 2px; }
+#pack .gift, #pack .cost { font-size: 10px; }

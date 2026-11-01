@@ -1,6 +1,7 @@
 /** Enemies' turns: the goblin butcher, goblin scrappers, and the two training dummies. */
 import { lure, seenFrom } from './lantern';
 import { visible } from './flasks';
+import { HUNGRY_FX, wears } from './hungry';
 import { collide, currentMap, inArea } from '../shared/arena';
 import { ALERT, ARCHER, BUTCHER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, type EnemyAttackSpec, type EnemySpec } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
@@ -27,7 +28,9 @@ function nearest(e: Enemy, heroes: Hero[], now: number): Hero | null {
   let best: Hero | null = null, bd = Infinity;
   for (const h of heroes) {
     if (h.act === 'down') continue;
-    const raw = Math.hypot(h.x - e.x, h.y - e.y), d = raw - lure(h);
+    // The Butcher's Apron: they come for you first; a named butcher looks at no one else.
+    const apron = wears(h, 'apron') ? (e.name ? 999 : HUNGRY_FX.lure) : 0;
+    const raw = Math.hypot(h.x - e.x, h.y - e.y), d = raw - lure(h) - apron;
     if (!visible(h, raw, now)) continue;
     if (d < bd) (bd = d), (best = h);
   }

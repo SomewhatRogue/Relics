@@ -129,3 +129,11 @@ most Want among the heroes is the one the bells don't spare).
 - **Open question for Kyle (chapter 5):** do censer coals count toward the Want when the bells "don't
   spare" the one with the most? Recorded answer for now: no, because they're spent on others. Darker
   option: they count for a Healer who carries a full censer and rarely heals.
+- **Loot words** (lore keeper, 2026-11-01): tiers Plain, Fine, Forged, Tolmouth (pre-war steel from a
+  town that's now a larder; nobody makes it now), Hungry (the town's word for goblins). Hungry gear is
+  plain steel that sat in a butcher's fist beside a sliver until the hunger took: the same stuff as a
+  relic, a different kind of thing. "Steel", not scrap, is what melting gives (scrappers are goblins).
+  Sister's Bitter (Agne makes it), Wall Brandy (the watch drinks it), Lamp Oil (the hungry hoard it).
+- **The Want, as built:** a hidden number per hero; grows with hungry gear worn and used, falls with
+  gold given at the Lantern and hungry gear given up at the church (which feeds the Lantern). Its tell
+  is the eyes. Turning into a named butcher is still Kyle's call.

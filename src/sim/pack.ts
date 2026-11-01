@@ -18,7 +18,12 @@ function wear(h: Hero, i: number, it: Item, ev: FightEvent[]): void {
     if (h.armor) h.bag.push(h.armor);
     h.armor = it;
   } else {
-    if (h.rings.length >= 2) h.bag.push(h.rings.shift()!);
+    // A third ring pushes out the older, never Someone's Wedding Ring (only the church takes that off).
+    if (h.rings.length >= 2) {
+      const k = h.rings[0].hungry === 'wedding' ? 1 : 0;
+      if (h.rings[k].hungry === 'wedding') return void h.bag.splice(i, 0, it);
+      h.bag.push(h.rings.splice(k, 1)[0]);
+    }
     h.rings.push(it);
   }
   refreshHealth(h);
@@ -43,12 +48,13 @@ export function applyGear(h: Hero, op: number, arg: number, ev: FightEvent[]): v
   } else if (op === GEAR.off) {
     // A ring off, into the pack (if there's room).
     const r = h.rings[arg];
-    if (!r || h.bag.length >= PACK) return;
+    if (!r || h.bag.length >= PACK || r.hungry === 'wedding') return;
     h.rings.splice(arg, 1);
     h.bag.push(r);
     refreshHealth(h);
   } else if (op === GEAR.drop) {
-    if (h.bag[arg]) h.bag.splice(arg, 1);
+    // Hungry gear can't be dropped: only given up at the church.
+    if (h.bag[arg] && h.bag[arg].quality !== 'hungry') h.bag.splice(arg, 1);
   } else if (op === GEAR.front) {
     // A potion to the front of the belt (drunk next).
     const [p] = h.belt.splice(arg, 1);

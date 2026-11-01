@@ -123,6 +123,15 @@ export interface Hero extends Body {
   rings: Item[];
   /** Health before gear. */
   baseHp: number;
+  /** Gold this hero can spend in a fight (Spendthrift, the Ransom Coat): theirs plus the job's so far. */
+  purse: number;
+  /** Hungry gear's counters (sim/hungry.ts): kills fed to the Larder Pike, the last kill, the next bite, the coat used. */
+  fed: number;
+  lastKill: number;
+  biteAt: number;
+  ransomed: boolean;
+  /** The Want, for the eyes (never shown as a number). */
+  want: number;
   /** Relics this hero has won (one at a time is carried, in relics[1]). */
   found: RelicId[];
   /** The draw in flight was released on the white flash. */
@@ -275,6 +284,8 @@ export type FightEvent =
   | { k: 'smoke'; x: number; y: number }
   | { k: 'chest'; x: number; y: number; tier: Tier; state: 'opening' | 'shut' | 'open' }
   | { k: 'chained'; x: number; y: number }
+  | { k: 'spend'; id: string; x: number; y: number; n: number }
+  | { k: 'ransom' | 'tooth'; x: number; y: number }
   | { k: 'drop'; x: number; y: number; q: Quality }
   | { k: 'shoot'; x: number; y: number; dx: number; dy: number; kind: Bolt['kind']; el: Augment }
   | { k: 'burst'; x: number; y: number; r: number; el: Augment }
@@ -329,6 +340,8 @@ export interface Bolt {
   kind: 'arrow' | 'bolt' | 'spark' | 'orb' | 'lance' | 'smite' | 'net' | 'lodestone' | 'flask';
   /** A thrown flask's potion. */
   potion?: PotionId;
+  /** The Jealous Rod: this shot jumps to every goblin near what it hits. */
+  chain?: boolean;
   x: number;
   y: number;
   dx: number;

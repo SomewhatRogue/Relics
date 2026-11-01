@@ -13,7 +13,7 @@ import { BOUNTY, HERO_SLOTS, PERK, SHOP, gainXp, newProfile, type PerkId, type P
 import { Rng } from '../shared/rng';
 import { CHAPTER_1, QUORUM, rewardMult, type WorldState } from '../shared/story';
 import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
-import { POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, FOUND_RELICS, HERO, abilitiesOf, rollGear, nextLevel, reroll, REROLL, STEEL, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId } from '../shared/tuning';
+import { POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, FOUND_RELICS, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId } from '../shared/tuning';
 import { ArenaRoom } from '../sim/room';
 import { PACK } from '../sim/pack';
 import { refreshHealth, statsOf } from '../sim/gearstats';
@@ -94,6 +94,8 @@ export class Game {
     h.bag = [...p.bag];
     h.glow = p.glow;
     h.belt = [...p.belt];
+    h.want = p.want;
+    h.purse = p.gold + (this.run?.gold ?? 0);
     h.found = [...p.relics];
     h.perks = [...p.perks];
     h.armor = p.armor;
@@ -104,7 +106,7 @@ export class Game {
     h.relic = h.relics[0];
     for (const r of h.relics) h.augments[r] = p.augments[r] ?? '';
     h.hp = h.maxHp;
-    if (keep) Object.assign(h, { hp: Math.max(1, keep.hp), relic: keep.relic });
+    if (keep) Object.assign(h, { hp: Math.max(1, keep.hp), relic: keep.relic, fed: keep.fed, lastKill: 0 });
   }
 
   private place(room: ArenaRoom, at?: { x: number; y: number }, keep?: Hero): void {
@@ -185,6 +187,7 @@ export class Game {
     if (out && this.run) tally(this.run, out, outEv, ME);
     const ev = this.room.advance(dt);
     this.keepGear(h);
+    for (const e of ev) if (e.k === 'spend' && e.id === ME) this.spend(e.n);
     // Walk up into a door to go in; out the bottom of a room to come back out.
     const door = this.near()?.door;
     if (door && intent.my < -0.5 && Math.abs(h.x - doorAt(door).x) < 0.7) this.enter(door);
@@ -225,7 +228,13 @@ export class Game {
 
   private finish(won: boolean): void {
     const run = this.run!, p = this.profile, w = this.world;
-    const gold = won ? run.gold + Math.round(run.job.reward * rewardMult(w)) : Math.round(run.gold / 2);
+    // Driven back in the Ransom Coat: all of it, not half.
+    const ransom = !won && p.armor?.hungry === 'ransom';
+    const gold = won ? run.gold + Math.round(run.job.reward * rewardMult(w)) : ransom ? 0 : Math.round(run.gold / 2);
+    if (ransom) p.gold = 0;
+    // The Want grows with every job finished in hungry gear, and with what it killed.
+    const hungry = this.hungryWorn();
+    p.want += hungry.reduce((s, it) => s + HUNGRY[it.hungry as HungryId].want, 0) + (hungry.length ? run.kills * WANT.perKill : 0);
     const xp = run.xp + (won ? BOUNTY.objective : 0), rescued = won ? run.rescued : 0;
     p.gold += gold;
     p.runs++;
@@ -288,6 +297,33 @@ export class Game {
     this.hero.belt = [...p.belt];
     store(this.save);
     return true;
+  }
+
+  /** Hungry gear spends gold in a fight: the job's first, then the purse at home. */
+  private spend(n: number): void {
+    const run = this.run, p = this.profile, fromRun = Math.min(n, run?.gold ?? 0);
+    if (run) run.gold -= fromRun;
+    p.gold = Math.max(0, p.gold - (n - fromRun));
+    store(this.save);
+  }
+
+  /** The hungry pieces this hero wears. */
+  hungryWorn(): Item[] {
+    const p = this.profile, held = p.arms[p.weapon];
+    return [held, p.armor, ...p.rings].filter((x): x is Item => !!x && x.quality === 'hungry');
+  }
+
+  /** At the church: give a hungry piece up, wherever it is. The Want falls hard. */
+  giveUp(it: Item): void {
+    const p = this.profile;
+    if (it.quality !== 'hungry') return;
+    for (const k of Object.keys(p.arms) as WeaponId[]) if (p.arms[k] === it) (delete p.arms[k]), (p.weapon = CLASS_KITS[p.cls][0]);
+    if (p.armor === it) p.armor = null;
+    p.rings = p.rings.filter((r) => r !== it);
+    p.bag = p.bag.filter((r) => r !== it);
+    p.want = Math.max(0, p.want - WANT.giveUp);
+    this.equip(this.hero, this.hero);
+    store(this.save);
   }
 
   /** Every piece this hero owns, worn or packed, for the forge. */
@@ -407,8 +443,10 @@ export class Game {
 
   /** Gold to the Last Lantern. */
   donate(n: number): boolean {
-    if (this.profile.gold < n) return false;
+    // The Ransom Coat won't let you give.
+    if (this.profile.gold < n || this.profile.armor?.hungry === 'ransom') return false;
     this.profile.gold -= n;
+    this.profile.want = Math.max(0, this.profile.want - n * WANT.perGold);
     this.give({ lantern: n, stats: { given: n } });
     return true;
   }

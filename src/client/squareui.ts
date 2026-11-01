@@ -12,6 +12,7 @@ import { RUMOURS } from './rumours';
 import { SCORES, type Area } from './scores';
 import { POTIONS } from '../shared/tuning';
 import { potionButtons } from './townui';
+import { CHURCH } from './copy';
 import { WorldLink } from './worldlink';
 
 let link: WorldLink | null = null;
@@ -81,7 +82,7 @@ export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key:
     return true;
   }
   if (id === 'tavern') {
-    panel.show('BARKEEP GANNET', say('Gannet', RUMOURS[(w.day * 5 + pr.runs) % RUMOURS.length]) + p('The Drowned Rat: ale that tastes of the cellar, dice in the corner, and people who know things they shouldn\'t.') +
+    panel.show('BARKEEP GANNET', say('Gannet', RUMOURS[(w.day * 5 + pr.runs) % RUMOURS.length]) + p('The Drowned Rat: ale that tastes of the cellar, dice in the corner, and people who know things they shouldn\'t.') + (pr.want >= 30 ? p(CHURCH.gannet) : '') +
       p(`<b>${POTIONS.brandy.name}</b>: ${POTIONS.brandy.text}`) + p(`<b>${POTIONS.oil.name}</b>: ${POTIONS.oil.text}`) + p(`You have ${pr.gold} gold.`), potionButtons(g, ['brandy', 'oil'], again));
     return true;
   }

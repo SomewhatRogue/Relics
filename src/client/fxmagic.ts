@@ -133,6 +133,16 @@ export function magicFx(fx: Fx, ev: FightEvent, x: number, y: number): void {
         fx.say(x, y - 34, TIERS[ev.tier].name, TIERS[ev.tier].col);
       }
       break;
+    case 'spend':
+      if (ev.n >= 5) fx.say(x, y - 30, `-${ev.n} GOLD`, '#ff9a6a');
+      break;
+    case 'ransom':
+      fx.say(x, y - 40, 'RANSOMED', '#ff4a3a');
+      fx.burst(x, y - 10, 16, ['#d4a537', '#ff4a3a'], 60, true);
+      break;
+    case 'tooth':
+      fx.say(x, y - 34, 'THE TOOTH TAKES IT', '#ff4a3a');
+      break;
     case 'chained':
       fx.say(x, y - 30, 'CHAINED', '#9aa3ad');
       break;

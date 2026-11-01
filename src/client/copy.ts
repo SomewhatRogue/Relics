@@ -41,6 +41,16 @@ export const COAL = {
   odric: 'Lit from the Lantern, like every one before it. Feed it what you find out there. Have you eaten today? You look thin.',
 };
 
+/** Hungry gear at the church, and the town noticing the Want (lore keeper). */
+export const CHURCH = {
+  hungry: 'If there\'s something you\'re carrying you\'d rather not, leave it on the step. I\'ll see to it.',
+  left: 'Good. Have you eaten today? You look thin.',
+  ransom: 'The coat won\'t let your hand open over the plate. Odric pretends not to see.',
+  agne: 'You\'ve a look about you. Sleep with a candle tonight. Humour me.',
+  ivo: "Oh. That's a hungry one. Don't sleep with it under your pillow.",
+  gannet: 'Gannet pours you a short one and doesn\'t meet your eye.',
+};
+
 export const SMITH = {
   greet: 'Good steel. Gold first.',
   bought: "In your pack. He's already oiling the next one.",

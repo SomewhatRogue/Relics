@@ -4,6 +4,7 @@
  * into a wall, a fully charged hit). No stat sheets: at most two traits, one weapon per kit.
  */
 import { WEAPONS, type WeaponId } from './weapons.js';
+import { HUNGRY, type HungryId } from './hungry.js';
 
 export type TraitId = 'riposte' | 'tempo' | 'bulwark' | 'deadeye' | 'crushing' | 'brutal' | 'reaper' | 'ember' | 'rime' | 'storm';
 
@@ -61,6 +62,7 @@ const ARMOR_NAME = { light: 'LEATHERS', medium: 'MAIL SHIRT', heavy: 'PLATE' };
 /** "STORMFORGED SPEAR +2": an element if it has one, the base, its level. */
 export function itemName(i: Item): string {
   const el = i.traits.find((t) => ELEMENT_TRAITS.includes(t));
+  if (i.hungry) return HUNGRY[i.hungry as HungryId].name;
   const base = i.slot === 'armor' ? ARMOR_NAME[i.armor ?? 'light'] : i.slot === 'ring' ? 'RING' : WEAPONS[i.kit ?? 'sword'].name;
   return (el ? TRAITS[el].name + ' ' : '') + base + (i.level ? ' +' + i.level : '');
 }

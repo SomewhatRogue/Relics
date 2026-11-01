@@ -7,6 +7,7 @@ import { POTION, AUGMENTS, CHARGE, GRAB, HORN, PERK, RELEASE, CLASS_KITS, CLASS_
 import { slide } from './bodies';
 import { applyGear } from './pack';
 import { statsOf } from './gearstats';
+import { fedMult, jealousBlocks, jealousCooldown, needlesBreath, wears } from './hungry';
 import { hitEnemy } from './combat';
 import type { Enemy, FightEvent, Hero, Intent } from './types';
 
@@ -17,7 +18,7 @@ export function newHero(id: string, x: number, y: number): Hero {
     parryOpenAt: -9, lastBlockPress: -9, rollDx: 0, rollDy: 1, lastRollAt: -9, counterUntil: -9,
     attackQueuedAt: -9, rollQueuedAt: -9, relic: 'horn', relics: abilitiesOf('WARRIOR'), relicQueuedAt: -9,
     relicReady: { javelin: 0, hook: 0, horn: 0, net: 0, shadow: 0, lodestone: 0, blessing: 0, ward: 0, sanctuary: 0 },
-    augments: { javelin: '', hook: '', horn: '', net: '', shadow: '', lodestone: '', blessing: '', ward: '', sanctuary: '' }, blessedUntil: -9, wardUntil: -9, wardHp: 0, rallyUntil: -9, arms: {}, bag: [], armor: null, rings: [], baseHp: HERO.hp, found: [], glow: 0, belt: [], potionReady: 0, mendLeft: 0, brandyUntil: -9, hiddenUntil: -9, perfect: false, tempoUntil: -9, carrying: 0, lifting: 0, grabQueuedAt: -9, z: 0, hitstop: 0, lenience: 0,
+    augments: { javelin: '', hook: '', horn: '', net: '', shadow: '', lodestone: '', blessing: '', ward: '', sanctuary: '' }, blessedUntil: -9, wardUntil: -9, wardHp: 0, rallyUntil: -9, arms: {}, bag: [], armor: null, rings: [], baseHp: HERO.hp, purse: 0, fed: 0, lastKill: 0, biteAt: 0, ransomed: false, want: 0, found: [], glow: 0, belt: [], potionReady: 0, mendLeft: 0, brandyUntil: -9, hiddenUntil: -9, perfect: false, tempoUntil: -9, carrying: 0, lifting: 0, grabQueuedAt: -9, z: 0, hitstop: 0, lenience: 0,
     seen: { attack: 0, block: 0, roll: 0, weapon: 0, relic: 0, relicSwap: 0, relicPick: 0, augment: 0, cls: 0, take: 0, grab: 0, gear: 0, potion: 0, open: 0 },
   };
 }
@@ -29,8 +30,9 @@ export function currentSwing(h: Hero): Swing {
   // A drawn shot only pierces at a full draw.
   const s = !h.heavy ? w.combo[h.combo] : { ...hv, dmg: Math.round(hv.dmg + (hv.dmgFull - hv.dmg) * k), knock: hv.knock + (hv.knockFull - hv.knock) * k, pierce: hv.pierce && k >= 1 };
   // Modifiers: how well (shared/gear.ts).
-  if (!g.damage && !g.quick && !g.reach && !g.knock) return s;
-  return { ...s, dmg: Math.round(s.dmg * (1 + g.damage)), windup: s.windup * (1 - g.quick), recover: s.recover * (1 - g.quick), range: s.range * (1 + g.reach), knock: s.knock * (1 + g.knock) };
+  if (!g.damage && !g.quick && !g.reach && !g.knock && fedMult(h) === 1) return s;
+  const fed = fedMult(h);
+  return { ...s, dmg: Math.round(s.dmg * (1 + g.damage) * fed), windup: s.windup * (1 - g.quick), recover: s.recover * (1 - g.quick), range: s.range * (1 + g.reach), knock: s.knock * (1 + g.knock) };
 }
 
 const swingTime = (s: Swing) => s.windup + s.active + s.recover;
@@ -145,7 +147,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     }
   }
   if (h.hitstop > 0) return void (h.hitstop -= dt);
-  if (now - h.staminaAt > HERO.regenDelay) h.stamina = Math.min(HERO.stamina, h.stamina + HERO.staminaRegen * (h.rallyUntil > now ? HORN.regen : 1) * (h.perks.includes('endurance') ? PERK.endurance : 1) * (h.brandyUntil > now ? POTION.brandyRegen : 1) * (1 + statsOf(h).breath) * dt);
+  if (now - h.staminaAt > HERO.regenDelay) h.stamina = Math.min(HERO.stamina, h.stamina + HERO.staminaRegen * (h.rallyUntil > now ? HORN.regen : 1) * (h.perks.includes('endurance') ? PERK.endurance : 1) * (h.brandyUntil > now ? POTION.brandyRegen : 1) * (1 + statsOf(h).breath) * needlesBreath(h, enemies) * dt);
   h.actT += dt;
   h.moving = false;
   h.blocking = false;
@@ -181,7 +183,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     const r = RELICS[h.relic];
     if (h.actT >= r.windup && h.actT - dt < r.windup) {
       acts.fire(h);
-      h.relicReady[h.relic] = now + r.cooldown * (1 - statsOf(h).focus) * (h.perks.includes('relicsworn') ? PERK.relicsworn : 1);
+      h.relicReady[h.relic] = now + r.cooldown * jealousCooldown(h) * (1 - statsOf(h).focus) * (h.perks.includes('relicsworn') ? PERK.relicsworn : 1);
       if (h.relic === 'hook' || h.relic === 'javelin' || h.relic === 'net' || h.relic === 'lodestone') ev.push({ k: h.relic === 'hook' ? 'hookfire' : 'throw', x: h.x, y: h.y, dx: h.fx, dy: h.fy });
     }
     if (h.act === 'throw' && h.actT >= r.windup + r.recover) (h.act = 'idle'), (h.actT = 0);
@@ -236,12 +238,14 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   // Idle or walking.
   if (wantsRoll) return startRoll(h, inp, now, ev);
   if (now - h.grabQueuedAt < INPUT_BUFFER && acts.grab(h)) return;
-  if (now - h.relicQueuedAt < INPUT_BUFFER && now >= h.relicReady[h.relic]) {
+  if (now - h.relicQueuedAt < INPUT_BUFFER && now >= h.relicReady[h.relic] && !jealousBlocks(h)) {
     // A blessing turns to nobody: the room picks the ally.
     if (h.relic !== 'blessing' && h.relic !== 'horn') face(h, inp, enemies, true, RELICS[h.relic].range);
     Object.assign(h, { act: 'throw', actT: 0, relicQueuedAt: -9 });
     return;
   }
+  // Spendthrift won't draw with an empty purse.
+  if (wears(h, 'spendthrift') && h.purse <= 0) h.attackQueuedAt = -9;
   if (now - h.attackQueuedAt < CHARGE.start + INPUT_BUFFER && h.attackQueuedAt > -9) {
     // The crossbow looses on the press; everything else waits to see if it's a tap or a hold.
     if (!inp.attack || w.noCharge) return startSwing(h, 0, inp, enemies, now, ev);

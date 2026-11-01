@@ -6,6 +6,7 @@
 import { COINS, POTION, POTION_DROPS, POTION_ORDER, type PotionId } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import type { Enemy, FightEvent, Hero } from './types';
+import { HUNGRY_FX, wears } from './hungry';
 
 export interface Pickup { id: number; x: number; y: number; life: number; gold?: number; potion?: PotionId }
 let nextId = 1;
@@ -32,10 +33,14 @@ export function stepPickups(pickups: Pickup[], heroes: Hero[], ev: FightEvent[],
   return pickups.filter((p) => {
     const h = players(heroes).find((o) => o.act !== 'down' && Math.hypot(o.x - p.x, o.y - p.y) < COINS.reach && (!p.potion || o.belt.length < POTION.belt));
     if (h && p.gold) {
-      const party = players(heroes), share = Math.floor(p.gold / party.length);
+      // The Tooth Ring takes the party's gold near its wearer, and they see it go.
+      const tooth = players(heroes).find((o) => wears(o, 'tooth') && Math.hypot(o.x - p.x, o.y - p.y) < HUNGRY_FX.near);
+      const party = tooth ? [tooth] : players(heroes), share = Math.floor(p.gold / party.length);
+      if (tooth && players(heroes).length > 1) ev.push({ k: 'tooth', x: tooth.x, y: tooth.y });
       for (const o of party) {
-        const n = share + (o === h ? p.gold - share * party.length : 0);
-        if (n > 0) ev.push({ k: 'gold', id: o.id, x: o.x, y: o.y, n });
+        // Someone's Wedding Ring: every coin counts twice.
+        const n = (share + (o === (tooth ?? h) ? p.gold - share * party.length : 0)) * (wears(o, 'wedding') ? 2 : 1);
+        if (n > 0) (o.purse += n), ev.push({ k: 'gold', id: o.id, x: o.x, y: o.y, n });
       }
       return false;
     }

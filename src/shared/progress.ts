@@ -64,6 +64,8 @@ export interface Profile {
   glow: number;
   /** Potions on the belt (shared/potions.ts). */
   belt: PotionId[];
+  /** The Want: hidden, never shown as a number (shared/hungry.ts, docs/lore/story-bible.md). */
+  want: number;
   /** Steel from melting gear down (Halvard's upgrades). */
   steel: number;
   /** Worn armor and rings (shared/gear.ts). */
@@ -83,7 +85,7 @@ export interface Profile {
 }
 
 export const newProfile = (cls: HeroClass = 'WARRIOR', name = 'HERO'): Profile =>
-  ({ id: heroId(), name, cls, gold: 0, xp: 0, level: 1, perks: [], picks: 0, arms: {}, weapon: CLASS_KITS[cls][0], bag: [], glow: 0, belt: ['bitter'], armor: { slot: 'armor', armor: CLASS_ARMOR[cls], quality: 'plain', traits: [], mods: [], level: 0 }, rings: [], steel: 0, relics: [], relic: '', augments: {}, runs: 0, stats: newStats(), wish: false, dice: 0 });
+  ({ id: heroId(), name, cls, gold: 0, xp: 0, level: 1, perks: [], picks: 0, arms: {}, weapon: CLASS_KITS[cls][0], bag: [], glow: 0, belt: ['bitter'], armor: { slot: 'armor', armor: CLASS_ARMOR[cls], quality: 'plain', traits: [], mods: [], level: 0 }, rings: [], steel: 0, want: 0, relics: [], relic: '', augments: {}, runs: 0, stats: newStats(), wish: false, dice: 0 });
 
 function heroId(): string {
   const c = 'abcdefghijkmnpqrstuvwxyz23456789';

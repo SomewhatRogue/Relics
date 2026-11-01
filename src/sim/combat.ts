@@ -2,6 +2,7 @@
 import { BLESSING, WARD, FLINCH, HORN, OVERKILL, PERK, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, WEAPONS, type Swing } from '../shared/tuning';
 import { shove } from './bodies';
 import { statsOf } from './gearstats';
+import { HUNGRY_FX, wears } from './hungry';
 import { damage, frozen, isDummy, kill, snared, stunOf } from './damage';
 import { shatter } from './elements';
 import { has } from './traits';
@@ -37,7 +38,8 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   const tempo = h.tempoUntil > now ? TRAIT.tempo : 1;
   if (tempo > 1) h.tempoUntil = -9;
   const mult = (h.counter ? counter : heldFast ? held : 1) * rearMult * blessed * tempo;
-  const n = Math.round(s.dmg * mult);
+  // Mother Rust's Needles: a backstab kills anything short of a butcher.
+  const n = rear && e.kind === 'scrapper' && wears(h, 'needles') ? Math.max(e.hp, Math.round(s.dmg * mult)) : Math.round(s.dmg * mult);
   e.hp -= n;
   e.hitAt = now;
   const stop = h.counter ? HITSTOP.parry : heavy ? HITSTOP.heavy : HITSTOP.light;
@@ -98,7 +100,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   if (h.wardUntil > now && warded(e, a, h, now, ev)) return;
   const w = WEAPONS[h.weapon];
   // A blessed hero takes less from everything.
-  const g = statsOf(h), taken = (h.blessedUntil > now ? BLESSING.taken : 1) * g.taken;
+  const g = statsOf(h), taken = (h.blessedUntil > now ? BLESSING.taken : 1) * g.taken * (wears(h, 'apron') ? HUNGRY_FX.apron : 1);
   if (h.act === 'roll' && h.actT >= w.dodge.iFrom && h.actT <= w.dodge.iTo + h.lenience) {
     ev.push({ k: 'dodge', x: h.x, y: h.y });
     if (has(h, 'tempo')) (h.tempoUntil = now + TRAIT.tempoTime), ev.push({ k: 'tempo', x: h.x, y: h.y });
@@ -147,6 +149,12 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
 
 function downIfDead(h: Hero, ev: FightEvent[]): void {
   if (h.hp > 0) return;
+  // The Ransom Coat: once a room, a killing blow takes 50 gold instead.
+  if (wears(h, 'ransom') && !h.ransomed && h.purse >= HUNGRY_FX.ransom) {
+    Object.assign(h, { hp: 1, ransomed: true, purse: h.purse - HUNGRY_FX.ransom });
+    ev.push({ k: 'spend', id: h.id, x: h.x, y: h.y, n: HUNGRY_FX.ransom }, { k: 'ransom', x: h.x, y: h.y });
+    return;
+  }
   Object.assign(h, { hp: 0, act: 'down', actT: 0, actDur: HERO.respawn * (h.perks.includes('secondwind') ? PERK.secondwind : 1), kvx: 0, kvy: 0 });
   ev.push({ k: 'down', x: h.x, y: h.y });
 }

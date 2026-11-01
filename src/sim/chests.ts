@@ -4,7 +4,7 @@
  * seams; hungry light is wrong, and goblins near look up. Every player in the room gets their own roll,
  * seen only by them. A chained chest (deep jobs) opens only once the named butcher is dead.
  */
-import { COINS, POTION_ORDER, TIER_ORDER, WEAPONS, rollGear, rollTier, type Item, type Tier } from '../shared/tuning';
+import { COINS, POTION_ORDER, TIER_ORDER, WEAPONS, rollAny, rollTier, type Item, type Tier } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { isDead } from './damage';
 import type { Drop, Enemy, FightEvent, Hero } from './types';
@@ -26,7 +26,7 @@ export function startChest(c: Chest, h: Hero, heroes: Hero[], enemies: Enemy[], 
     const n = rng.next() < 0.4 || c.chained ? 2 : 1, cls = WEAPONS[p.weapon].cls;
     c.rolls[p.id] = Array.from({ length: n }, () => {
       const slot = rng.next() < 0.55 ? 'weapon' : rng.next() < 0.5 ? 'armor' : 'ring';
-      return rollGear(rng, cls, rollTier(rng, 'chest', shift + (c.chained ? 1 : 0)), slot);
+      return rollAny(rng, cls, rollTier(rng, 'chest', shift + (c.chained ? 1 : 0)), slot);
     });
   }
   c.tier = c.rolls[h.id].reduce<Tier>((best, it) => (TIER_ORDER.indexOf(it.quality) > TIER_ORDER.indexOf(best) ? it.quality : best), 'plain');

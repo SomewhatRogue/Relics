@@ -5,10 +5,10 @@ import { CHAPTER_1, QUORUM, chapterGoals, councilOpen, marketOpen, rewardMult } 
 import { TRAINERS, housesFor, type SpotId } from '../shared/town';
 import { ballot } from '../shared/worldsync';
 import { openSquare } from './squareui';
-import { ARMOR, MODS, REROLL, STEEL, TIERS, nextLevel, POTION, POTIONS, type PotionId, AUGMENTS, CLASS_KITS, CLASS_ORDER, CLASS_SKILL, ELEMENT_NAME, RELICS, TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
+import { WANT, ARMOR, MODS, REROLL, STEEL, TIERS, nextLevel, POTION, POTIONS, type PotionId, AUGMENTS, CLASS_KITS, CLASS_ORDER, CLASS_SKILL, ELEMENT_NAME, RELICS, TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
 import type { Game } from './game';
 import { PACK } from '../sim/pack';
-import { COAL, COPY, SMITH } from './copy';
+import { CHURCH, COAL, COPY, SMITH } from './copy';
 import { card, compare } from './card';
 import type { Panel } from './panels';
 import { RUMOURS } from './rumours';
@@ -87,7 +87,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
   } else if (id === 'wright') {
     // Your skill, and any relic you've found: fit an element, or choose which relic to carry.
     const rel = [CLASS_SKILL[pr.cls], ...pr.relics];
-    const html = say('Ivo', pr.relics.length ? 'Fire, frost or storm, set right into it. Hear it hum? It likes you. Don\'t let it like you too much.' : 'No relic yet? They come out of the big ones, at the bottom of the deep jobs. Bring me one. Meanwhile I can set an element into that trick of yours.') +
+    const html = (g.gearList().some((it) => it.quality === 'hungry') ? say('Ivo', CHURCH.ivo) : '') + say('Ivo', pr.relics.length ? 'Fire, frost or storm, set right into it. Hear it hum? It likes you. Don\'t let it like you too much.' : 'No relic yet? They come out of the big ones, at the bottom of the deep jobs. Bring me one. Meanwhile I can set an element into that trick of yours.') +
       p(`You have ${pr.gold} gold. An element costs ${SHOP.augment}; taking one out is free.`) +
       rel.map((r, i) => p(`<b>${RELICS[r].name}</b>${i ? (pr.relic === r ? ' (carried)' : ' (on the shelf)') : ' (your skill)'}: ${pr.augments[r] ? ELEMENT_NAME[pr.augments[r] as keyof typeof ELEMENT_NAME] : 'plain'}`)).join('');
     const carry = pr.relics.filter((r) => r !== pr.relic).map((r) => ({ label: `CARRY THE ${RELICS[r].short}`, primary: true, act: () => (g.carry(r), again()) }));
@@ -100,12 +100,16 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     const rerolls = worn.flatMap((it) => (it.mods ?? []).map((m, k) => ({ label: `${itemName(it)}: REROLL ${MODS[m.id].name} (${REROLL})`, disabled: pr.gold < REROLL, act: () => (g.rerollMod(it, k), again()) })));
     panel.show('IVO THE RELIC-WRIGHT', html + shelf(['frost']) + (rerolls.length ? p(`He'll turn one modifier on anything you wear into another, ${REROLL} gold.`) : ''), [...buttons, ...rerolls, ...potionButtons(g, ['frost'], again)]);
   } else if (id === 'church') {
+    // Hungry gear is given up here, and only here. Odric doesn't ask what it is.
+    const hungry = g.gearList().filter((it) => it.quality === 'hungry');
     panel.show('FATHER ODRIC', say('Father Odric', 'Give what you can spare. Then a little of what you can\'t. That\'s the part it burns.') + (pr.cls === 'HEALER' ? say('Father Odric', COAL.odric) : '') +
+      (hungry.length ? say('Father Odric', CHURCH.hungry) : '') + (pr.armor?.hungry === 'ransom' ? p(CHURCH.ransom) : '') +
       p(`Given to the Lantern so far: ${w.lantern} gold.`) + p(`You have ${pr.gold} gold.`),
-      [20, 100].map((n) => ({ label: `GIVE ${n}`, disabled: pr.gold < n, act: () => (g.donate(n), again()) })));
+      [...[20, 100].map((n) => ({ label: `GIVE ${n}`, disabled: pr.gold < n || pr.armor?.hungry === 'ransom', act: () => (g.donate(n), again()) })),
+        ...hungry.map((it) => ({ label: `LEAVE ${itemName(it)} ON THE STEP`, act: () => (g.giveUp(it), panel.show('FATHER ODRIC', say('Father Odric', CHURCH.left), [{ label: 'CLOSE', act: () => panel.hide() }], true)) }))]);
   } else if (id === 'infirmary') {
     panel.show('SISTER AGNE', say('Sister Agne', w.rescued ? `${w.rescued} through that gate so far. Some of them still won\'t sleep in the dark. I leave a candle.` : 'Empty beds. First time in my life I\'ve wanted them full. Bring someone home and I\'ll have work.') +
-      p(`Lit houses on Rescue Row: ${housesFor(w.rescued)}.`) + shelf(['bitter']) + p(`You have ${pr.gold} gold. Belt: ${pr.belt.length} of ${POTION.belt}.`), potionButtons(g, ['bitter'], again));
+      p(`Lit houses on Rescue Row: ${housesFor(w.rescued)}.`) + (pr.want >= WANT.noticed ? say('Sister Agne', CHURCH.agne) : '') + shelf(['bitter']) + p(`You have ${pr.gold} gold. Belt: ${pr.belt.length} of ${POTION.belt}.`), potionButtons(g, ['bitter'], again));
   } else if (id === 'yard') {
     panel.show('SQUIRE PELL', say('Squire Pell', "Yard's out back. Straw men, a butcher made of sacking on a chain, and me. Mostly me, getting hit. If you're the sort that heals, I'd take it kindly."), [{ label: 'TO THE YARD', primary: true, act: () => (panel.hide(), g.enterYard()) }]);
   } else if (id === 'granary') {
