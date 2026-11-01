@@ -2,6 +2,24 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-01: weapons rarer now; the loot and gear plan (Claude Opus 5.5)
+
+Kyle: weapon drops too high; gold (shared in a party), potions, chests that open with a pause and a
+colour by tier; white to purple tiers with modifiers on base stats; armor and rings; upgrades; a way
+to see how gear changes attacks and stats; top-tier gear with real drawbacks, "since it's greed".
+
+- **Landed now:** a small goblin drops a weapon 4% of the time (was 35%), a butcher 40% (was always).
+- **The plan** is the Claude Doc "Relic: Loot and Gear" (https://claude.ai/artifact/BSET3vmRQ6Dn2BJqr3dVdW):
+  tiers Plain (white), Fine (green), Forged (blue), Tolmouth (purple), Hungry (goblin-eye red); weapon
+  type = how you attack, modifiers = how well; 13 modifiers with bands by tier; light, medium and heavy
+  armor; two rings; a three-potion belt; chests held open 1.2 s with tier light leaking out; Halvard
+  levels with gold and steel; ten hungry items with gifts and drawbacks; the Want as a hidden number.
+- **Names from the lore keeper:** Tolmouth (pre-war steel nobody makes now), Hungry (the town's word for
+  goblins), steel (not "scrap", which clashes with scrappers), Sister's Bitter, Wall Brandy, Lamp Oil.
+- **Overrules** the loot code's old "no stat sheets, at most two traits" rule once Kyle agrees (open
+  question in the doc). Build order in the doc: gold and potions, weapon tiers and the item card, chests,
+  armor and rings, upgrades, hungry gear and the Want.
+
 ## 2026-11-01: the Healer's coals (Claude Opus 5.5)
 
 Kyle kept the censer's Lantern coal: "the more they collect the more they heal allies but the more

@@ -51,7 +51,8 @@ export function itemName(i: Item): string {
 }
 
 /** Drop chances by who died. */
-export const DROPS = { scrapper: 0.35, butcher: 1, forged: { scrapper: 0.2, butcher: 0.6 }, life: 45 };
+/** Drop chances by who died (weapons are rare now: gold, potions and chests take over in the loot system, docs/DECISIONS.md). */
+export const DROPS = { scrapper: 0.04, butcher: 0.4, forged: { scrapper: 0.2, butcher: 0.6 }, life: 45 };
 
 /** Roll a weapon for this class (for `kit`, the kit in hand, when given): a fine one has one skill trait; a forged one adds an element. */
 export function rollItem(rng: Rng, cls: HeroClass, forgedChance: number, kit: WeaponId = rng.pick(CLASS_KITS[cls])): Item {

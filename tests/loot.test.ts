@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CLASS_KITS, KNOCK, RELEASE, TICK, WEAPONS, rollItem, type Item } from '../src/shared/tuning';
+import { CLASS_KITS, DROPS, KNOCK, RELEASE, TICK, WEAPONS, rollItem, type Item } from '../src/shared/tuning';
 import { Rng } from '../src/shared/rng';
 import { ArenaRoom } from '../src/sim/room';
 import { NO_INTENT, type FightEvent, type Intent } from '../src/sim/types';
@@ -42,14 +42,18 @@ describe('loot', () => {
     }
   });
 
-  it('the butcher always drops a weapon for the nearest player', () => {
+  it('a butcher sometimes drops a weapon, always for the nearest player\'s class; weapons are rare', () => {
+    const was = DROPS.butcher;
+    DROPS.butcher = 1;
     const { room, t } = onTarget(0);
     t.hp = 1;
-    const ev = (tap(room, t), room.events);
+    tap(room, t);
     run(room, 0.2);
+    DROPS.butcher = was;
     expect(room.drops.length).toBe(1);
     expect(CLASS_KITS.WARRIOR).toContain(room.drops[0].item.kit);
-    expect(ev).toBeDefined();
+    expect(DROPS.scrapper).toBeLessThan(0.1);
+    expect(DROPS.butcher).toBeLessThan(0.5);
   });
 
   it('taking a drop puts it in the pack (equipped from there); another class cannot take it; a full pack takes nothing', () => {

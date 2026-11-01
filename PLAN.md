@@ -2,6 +2,9 @@
 
 ## Current slice
 
+**Loot and gear** (planned 2026-11-01, waiting on Kyle's answers to the open questions in the doc
+"Relic: Loot and Gear"). Weapon drop rates already cut. Next to build: gold and potions.
+
 **The pack and a shorter class pick** (Claude Opus 5.5, 2026-11-01). Built; waiting on Kyle's play.
 *Done when* Kyle picks a class from the short list, takes a dropped weapon into his pack mid-fight and
 equips it there, and carries a relic won on a deep job from the pack.
