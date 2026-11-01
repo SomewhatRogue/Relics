@@ -4,6 +4,8 @@
  */
 export interface Slot {
   name: string;
+  /** The augment fitted ('' none), for the slot's colour. */
+  el: string;
   /** 0 just used .. 1 ready. */
   ready: number;
   active: boolean;
@@ -41,6 +43,7 @@ export class RelicWheel {
       s.textContent = slot ? slot.name : 'EMPTY';
       s.classList.toggle('empty', !slot);
       s.classList.toggle('active', !!slot?.active);
+      s.dataset.el = slot?.el ?? '';
       s.classList.remove('hot');
       s.style.setProperty('--cd', 100 * (slot?.ready ?? 1) + '%');
     });

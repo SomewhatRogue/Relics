@@ -1,5 +1,5 @@
 /** The fight's state. Plain data: the same shape is drawn locally and (later) sent to friends. */
-import type { RelicId, WeaponId } from '../shared/tuning';
+import type { Augment, RelicId, WeaponId } from '../shared/tuning';
 
 /** What a player's device sends: held state plus press counters, so a quick tap is never lost. */
 export interface Intent {
@@ -20,9 +20,15 @@ export interface Intent {
   /** Equip the relic in loadout slot `relicPick` (counted by relicPickSeq). */
   relicPickSeq: number;
   relicPick: number;
+  /** Cycle the equipped relic's augment (none, fire, frost, storm). */
+  augmentSeq: number;
+  /** Take the next rack of relics (training room). */
+  loadoutSeq: number;
+  /** Change class (the demo's class button). */
+  classSeq: number;
 }
 
-export const NO_INTENT: Intent = { mx: 0, my: 0, ax: 0, ay: 0, attack: false, block: false, attackSeq: 0, blockSeq: 0, rollSeq: 0, weaponSeq: 0, relicSeq: 0, relicSwapSeq: 0, relicPickSeq: 0, relicPick: 0 };
+export const NO_INTENT: Intent = { mx: 0, my: 0, ax: 0, ay: 0, attack: false, block: false, attackSeq: 0, blockSeq: 0, rollSeq: 0, weaponSeq: 0, relicSeq: 0, relicSwapSeq: 0, relicPickSeq: 0, relicPick: 0, augmentSeq: 0, loadoutSeq: 0, classSeq: 0 };
 
 export type HeroAct = 'idle' | 'charge' | 'attack' | 'throw' | 'zip' | 'roll' | 'hurt' | 'stun' | 'down';
 
@@ -69,10 +75,14 @@ export interface Hero extends Body {
   /** When each relic is ready again. */
   relicReady: Record<RelicId, number>;
   relicQueuedAt: number;
+  /** The augment fitted to each relic. */
+  augments: Record<RelicId, Augment>;
+  /** Which training rack of relics (LOADOUTS) is carried. */
+  loadout: number;
   hitstop: number;
   /** Extra parry and dodge leniency for this player's ping (seconds). */
   lenience: number;
-  seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number };
+  seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number; augment: number; loadout: number; cls: number };
 }
 
 export type AttackKind = 'cleave' | 'slam' | 'swing' | 'stab';
@@ -124,15 +134,26 @@ export interface Enemy extends Body {
   home: { x: number; y: number };
   /** A corpse carried on a javelin, or pinned to a wall by one. */
   corpse: '' | 'carried' | 'pinned';
+  /** Elements: burning until, next burn tick, chilled until, frozen solid until (room time). */
+  burnUntil: number;
+  burnNext: number;
+  chillUntil: number;
+  frozenUntil: number;
 }
 
 export type FightEvent =
-  | { k: 'hit'; x: number; y: number; n: number; heavy: boolean; on: 'enemy' | 'hero'; counter?: boolean; backstab?: boolean }
+  | { k: 'hit'; x: number; y: number; n: number; heavy: boolean; on: 'enemy' | 'hero'; counter?: boolean; backstab?: boolean; tick?: boolean }
   | { k: 'block' | 'parry' | 'guardbreak' | 'dodge' | 'down' | 'death' | 'roll' | 'swing' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number }
   | { k: 'windup' | 'impact'; x: number; y: number; kind: AttackKind }
   | { k: 'weapon'; x: number; y: number; name: string }
   | { k: 'throw' | 'pinned' | 'javwall' | 'javstick' | 'hookfire' | 'latch' | 'yank' | 'land'; x: number; y: number; dx: number; dy: number }
-  | { k: 'relic'; x: number; y: number; name: string };
+  | { k: 'relic'; x: number; y: number; name: string }
+  | { k: 'shoot'; x: number; y: number; dx: number; dy: number; kind: Bolt['kind']; el: Augment }
+  | { k: 'burst'; x: number; y: number; r: number; el: Augment }
+  | { k: 'gust'; x: number; y: number; dx: number; dy: number; el: Augment }
+  | { k: 'shock'; x: number; y: number; x2: number; y2: number }
+  | { k: 'heal'; x: number; y: number; n: number }
+  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless'; x: number; y: number };
 
 /** A grappling hook: flying out, reeling an enemy in, pulling its owner along, or coming back. */
 export interface Hook {
@@ -146,6 +167,7 @@ export interface Hook {
   travelled: number;
   /** Enemy hooked (0 for a wall). */
   enemy: number;
+  el: Augment;
 }
 
 /** A thrown relic javelin: flying (maybe carrying a goblin), or stuck in a wall, the floor or a body. */
@@ -164,5 +186,36 @@ export interface Javelin {
   ox: number;
   oy: number;
   hit: number[];
+  life: number;
+  el: Augment;
+}
+
+/** A shot or a lobbed flask: arrows, the mage's sparks and orbs, the blast flask. */
+export interface Bolt {
+  id: number;
+  owner: string;
+  kind: 'arrow' | 'spark' | 'orb' | 'flask';
+  x: number;
+  y: number;
+  dx: number;
+  dy: number;
+  speed: number;
+  range: number;
+  travelled: number;
+  dmg: number;
+  knock: number;
+  pierce: boolean;
+  burst: number;
+  el: Augment;
+  hit: number[];
+  /** A flask flies from (sx, sy) to (tx, ty) over `flight` seconds, `t` so far. */
+  sx: number;
+  sy: number;
+  tx: number;
+  ty: number;
+  t: number;
+  flight: number;
+  /** An arrow stays stuck in a wall or the floor a moment. */
+  state: 'fly' | 'stuck';
   life: number;
 }

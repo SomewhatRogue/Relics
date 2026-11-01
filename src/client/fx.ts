@@ -3,13 +3,16 @@
  * rings, screen shake and short flashes of light. Cosmetic, so Math.random is fine here.
  */
 import type { FightEvent } from '../sim/types';
+import { magicFx } from './fxmagic';
 import type { Light } from './light';
 import { drawText, textWidth } from './pixfont';
 import { toPx } from './world';
 
 interface Part { x: number; y: number; vx: number; vy: number; life: number; max: number; col: string; glow: boolean; grav: number; stick: boolean }
 interface Text { x: number; y: number; s: string; col: string; life: number }
-interface Ring { x: number; y: number; life: number; max: number; col: string }
+interface Ring { x: number; y: number; life: number; max: number; col: string; size?: number }
+/** A lightning arc between two points, in world pixels. */
+interface Arc { x: number; y: number; x2: number; y2: number; life: number }
 interface Flash extends Light { life: number; max: number }
 
 export class Fx {
@@ -17,17 +20,18 @@ export class Fx {
   texts: Text[] = [];
   rings: Ring[] = [];
   flashes: Flash[] = [];
+  arcs: Arc[] = [];
   decals: { x: number; y: number; col: string }[] = [];
   shake = 0;
 
-  private burst(x: number, y: number, n: number, cols: string[], speed: number, glow: boolean, grav = 0, stick = false): void {
+  burst(x: number, y: number, n: number, cols: string[], speed: number, glow: boolean, grav = 0, stick = false): void {
     for (let i = 0; i < n; i++) {
       const a = Math.random() * Math.PI * 2, s = speed * (0.4 + Math.random() * 0.8), life = 0.25 + Math.random() * 0.35;
       this.parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - (grav ? speed * 0.6 : 0), life, max: life, col: cols[i % cols.length], glow, grav, stick });
     }
   }
 
-  private say(x: number, y: number, s: string, col: string): void {
+  say(x: number, y: number, s: string, col: string): void {
     this.texts.push({ x, y, s, col, life: 0.8 });
   }
 
@@ -126,6 +130,11 @@ export class Fx {
         this.shake = Math.max(this.shake, 1.5);
         break;
       case 'hit':
+        if (ev.tick) {
+          this.burst(x, y - 10, 3, ['#ffd27a', '#ff9a3c'], 30, true);
+          this.say(x, y - 20, String(ev.n), '#ff9a3c');
+          break;
+        }
         this.burst(x, y - 8, ev.heavy ? 12 : 7, ['#ffffff', '#fff1b0', '#ffd27a'], ev.heavy ? 70 : 50, true);
         this.burst(x, y - 6, ev.heavy ? 10 : 5, ['#7a1d1d', '#5a1414', '#9a2a2a'], 45, false, 160, true);
         this.say(x, y - 22, String(ev.n), ev.on === 'hero' ? '#ff6a5a' : ev.counter ? '#ffa040' : ev.heavy ? '#ffe070' : '#ffffff');
@@ -169,6 +178,8 @@ export class Fx {
       case 'down':
         this.say(x, y - 26, 'DOWN', '#ff5a4a');
         break;
+      default:
+        magicFx(this, ev, x, y);
     }
   }
 
@@ -185,6 +196,8 @@ export class Fx {
     this.parts = this.parts.filter((p) => p.life > 0);
     for (const t of this.texts) (t.life -= dt), (t.y -= 18 * dt);
     this.texts = this.texts.filter((t) => t.life > 0);
+    for (const a of this.arcs) a.life -= dt;
+    this.arcs = this.arcs.filter((a) => a.life > 0);
     for (const r of this.rings) r.life -= dt;
     this.rings = this.rings.filter((r) => r.life > 0);
     for (const f of this.flashes) f.life -= dt;
@@ -211,7 +224,7 @@ export class Fx {
     g.globalAlpha = 1;
     lit.globalAlpha = 1;
     for (const r of this.rings) {
-      const k = 1 - r.life / r.max, rad = 4 + k * 22;
+      const k = 1 - r.life / r.max, rad = 4 + k * (r.size ?? 22);
       g.globalAlpha = 1 - k;
       g.fillStyle = r.col;
       for (let a = 0; a < 48; a++) {
@@ -220,6 +233,15 @@ export class Fx {
       }
     }
     g.globalAlpha = 1;
+    // Lightning: a jagged line, re-jagged every frame.
+    for (const a of this.arcs) {
+      g.fillStyle = Math.random() < 0.5 ? '#ffffff' : '#fff27a';
+      const n = Math.max(2, Math.round(Math.hypot(a.x2 - a.x, a.y2 - a.y) / 3));
+      for (let i = 0; i <= n; i++) {
+        const k = i / n, j = i && i < n ? (Math.random() - 0.5) * 5 : 0;
+        g.fillRect(Math.round(a.x + (a.x2 - a.x) * k - cx + j), Math.round(a.y + (a.y2 - a.y) * k - cy - 10 + j), 1, 1);
+      }
+    }
     for (const t of this.texts) {
       g.globalAlpha = Math.min(1, t.life * 3);
       drawText(g, t.s, Math.round(t.x - cx - textWidth(t.s) / 2), Math.round(t.y - cy), t.col);

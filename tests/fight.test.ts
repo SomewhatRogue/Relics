@@ -172,6 +172,12 @@ describe('weapons and heavies', () => {
     expect(h.weapon).toBe('greatsword');
     room.setIntent('me', intent({ weaponSeq: 2 }));
     room.step();
+    expect(h.weapon).toBe('sword');
+    room.setIntent('me', intent({ weaponSeq: 2, classSeq: 1 }));
+    room.step();
+    expect(h.weapon).toBe('bow');
+    room.setIntent('me', intent({ weaponSeq: 3, classSeq: 1 }));
+    room.step();
     expect(h.weapon).toBe('spear');
   });
 
@@ -361,13 +367,13 @@ describe('kits block and dodge differently', () => {
 });
 
 describe('relic loadout', () => {
-  it('picks a relic by its slot, and ignores an empty slot', () => {
+  it('picks a relic by its slot, and ignores a slot past the rack', () => {
     const { room, h } = onTarget(1);
-    expect(h.relics).toEqual(['javelin', 'hook']);
+    expect(h.relics).toEqual(['javelin', 'hook', 'horn']);
     room.setIntent('me', intent({ relicPickSeq: 1, relicPick: 1 }));
     room.step();
     expect(h.relic).toBe('hook');
-    room.setIntent('me', intent({ relicPickSeq: 2, relicPick: 2 }));
+    room.setIntent('me', intent({ relicPickSeq: 2, relicPick: 5 }));
     room.step();
     expect(h.relic).toBe('hook');
   });

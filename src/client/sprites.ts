@@ -86,6 +86,27 @@ const warriorBase: Part[] = [
   ['r', 2, 6, 8, 6, '#2f5d9b'], ['r', 5, 6, 2, 6, '#d4a537'], ['r', 2, 10, 8, 1, '#5a3d22'],
   ['r', 1, 6, 2, 3, '#9aa3ad'], ['r', 9, 6, 2, 3, '#9aa3ad'],
 ];
+/** One hero sprite per class: the same body, its own colours, hood and crest. */
+interface Look { body: string; trim: string; arms: string; head: string; face: Part[]; top: Part[]; cape: string }
+const LOOKS: Record<'WARRIOR' | 'RANGER' | 'ROGUE' | 'MAGE' | 'HEALER', Look> = {
+  WARRIOR: { body: '#2f5d9b', trim: '#d4a537', arms: '#9aa3ad', head: '#9aa3ad', face: [['r', 4, 3, 5, 1, '#141218']], top: [['r', 5, 0, 2, 1, '#c0392b']], cape: '#7a1d1d' },
+  RANGER: { body: '#3f6b3a', trim: '#8b6a3a', arms: '#5a4a32', head: '#3f5a32', face: [['r', 5, 3, 3, 2, '#c79c78']], top: [['p', 7, 0, '#9ab85a']], cape: '#2f4a28' },
+  ROGUE: { body: '#3a3346', trim: '#5a3d22', arms: '#2a2630', head: '#2a2630', face: [['r', 4, 3, 5, 2, '#141218'], ['p', 5, 3, '#c9a8ff'], ['p', 7, 3, '#c9a8ff']], top: [], cape: '#24202c' },
+  MAGE: { body: '#4a2f6e', trim: '#8a6ac8', arms: '#4a2f6e', head: '#4a2f6e', face: [['r', 4, 3, 5, 2, '#141218'], ['p', 5, 4, '#c9a8ff'], ['p', 7, 4, '#c9a8ff']], top: [['r', 6, 0, 1, 1, '#4a2f6e'], ['p', 7, 0, '#4a2f6e']], cape: '#3a2458' },
+  HEALER: { body: '#d8d0bc', trim: '#d4a537', arms: '#b8ae98', head: '#d8d0bc', face: [['r', 5, 3, 3, 2, '#c79c78']], top: [['r', 5, 0, 2, 1, '#d4a537']], cape: '#b8ae98' },
+};
+
+function heroPair(l: Look): { down: Sprite; up: Sprite } {
+  const base: Part[] = [
+    ['r', 3, 11, 2, 5, '#3a3f4a'], ['r', 7, 11, 2, 5, '#3a3f4a'], ['r', 3, 15, 2, 1, '#2a2420'], ['r', 7, 15, 2, 1, '#2a2420'],
+    ['r', 2, 6, 8, 6, l.body], ['r', 5, 6, 2, 6, l.trim], ['r', 2, 10, 8, 1, '#5a3d22'], ['r', 1, 6, 2, 3, l.arms], ['r', 9, 6, 2, 3, l.arms],
+  ];
+  return {
+    down: makeSprite(12, 16, [...base, ['e', 6, 3.5, 3.6, 3.6, l.head], ...l.face, ...l.top]),
+    up: makeSprite(12, 16, [...base, ['r', 3, 6, 6, 7, l.cape], ['e', 6, 3.5, 3.6, 3.6, l.head], ...l.top]),
+  };
+}
+
 const butcherBase: Part[] = [
   ['r', 5, 17, 3, 5, '#3a4a1f'], ['r', 10, 17, 3, 5, '#3a4a1f'], ['e', 9, 13, 7.5, 6.5, '#5b6b2a'],
   ['r', 5, 10, 8, 9, '#8a7a66'], ['p', 7, 13, '#6b1a1a'], ['p', 8, 14, '#6b1a1a'], ['p', 10, 12, '#6b1a1a'], ['p', 9, 16, '#7a1d1d'], ['p', 6, 17, '#6b1a1a'],
@@ -95,6 +116,8 @@ const dummyBase: Part[] = [
   ['r', 5, 9, 2, 8, '#6b4a2b'], ['r', 3, 16, 6, 1, '#4a3420'], ['e', 6, 7, 4, 4.5, '#b89a5a'], ['r', 2, 7, 8, 1, '#8a6a3a'],
   ['p', 4, 6, '#d8c08a'], ['p', 7, 9, '#d8c08a'], ['p', 5, 11, '#8a6a3a'], ['e', 6, 2.2, 2.4, 2.2, '#c8aa6a'], ['r', 0, 5, 12, 1, '#6b4a2b'],
 ];
+
+export const HEROES = Object.fromEntries(Object.entries(LOOKS).map(([k, l]) => [k, heroPair(l)])) as Record<keyof typeof LOOKS, { down: Sprite; up: Sprite }>;
 
 export const SPRITES = {
   warriorDown: makeSprite(12, 16, [...warriorBase, ['e', 6, 3.5, 3.6, 3.6, '#9aa3ad'], ['r', 4, 3, 5, 1, '#141218'], ['r', 5, 0, 2, 1, '#c0392b']]),

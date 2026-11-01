@@ -2,6 +2,33 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-10-31 (night, last): classes, magic augments, new relics, the world atlas (Claude Opus 5.5)
+
+Kyle: weapon types for the other classes, more relic types and magic augments, a class button for the
+demo, and start mapping the town, quests, scenarios and locations (fields, farms, towns, cities,
+mines, forests; some places more wrecked than others).
+
+- **Classes for the demo:** C or CLASS cycles Warrior (sword and shield, greatsword), Ranger (longbow,
+  spear), Rogue (twin daggers), Mage (focus staff), Healer (mace and censer). Q or WEAPON swaps within
+  the class (`CLASS_KITS`). Each class has its own sprite colours and hood.
+- **Longbow:** taps loose arrows (stop in the first body, stick in walls); a held draw pierces every
+  goblin in a line and knocks them into walls. **Focus staff:** sparks, a burst on the third, a held
+  orb that bursts and throws; it casts with the equipped relic's augment (the focus relic from the
+  kickoff); its dodge is a blink. **Mace and censer:** every third blow heals heroes within 3 tiles
+  for 6, the held blessing hits all round and heals 10 to 30. Shots live in `sim/bolts.ts`.
+- **New relics:** the gale horn (a cone that throws goblins by weight) and the blast flask (lobbed to
+  where you point, or the goblin you face on a phone; bursts and throws everyone outward). A hero
+  carries a rack of three (`LOADOUTS`); L or RELICS takes the next rack until the town's armoury exists.
+- **Magic augments** (T or AUGMENT, on the equipped relic; `sim/elements.ts`): fire burns 4 every
+  0.5 s for 3 s and spreads by touch; frost chills (half speed and turn), a second frost freezes
+  solid for 2.2 s; storm arcs to the 2 nearest goblins within 3.2 tiles and to any goblin with a
+  javelin stuck in it within 6 (lightning rods). Together: fire and frost make steam (cancels both,
+  10 damage, stuns everything near); storm, a heavy blow, a heavy shot or a wall slam shatters the
+  frozen (30); storm on the burning flares (12 and a throw). Bows shoot plain arrows for now.
+- **World atlas** (Docs artifact, link in PLAN): Wickhold as the proposed town name, its districts and
+  gates, five regions, ruin levels 0 to 4, eleven kinds of place, twelve objectives, ten twists.
+  Proposals for Kyle to cut or change.
+
 ## 2026-10-31 (night, latest): the relic wheel (Claude Opus 5.5)
 
 Kyle: switching relics on a phone was too slow; hold the relic button and quick-select, with only a

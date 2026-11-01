@@ -52,3 +52,15 @@ body.touch .stick.on { opacity: 1; }
 .attack { width: 84px; height: 84px; right: calc(18px + env(safe-area-inset-right)); bottom: calc(46px + env(safe-area-inset-bottom)); background: #712b13dd; border-color: #f0997b; color: #faece7; font-size: 12px; }
 .block { width: 60px; height: 60px; right: calc(116px + env(safe-area-inset-right)); bottom: calc(24px + env(safe-area-inset-bottom)); background: #2f3a52dd; border-color: #85b7eb; }
 .roll { width: 60px; height: 60px; right: calc(100px + env(safe-area-inset-right)); bottom: calc(108px + env(safe-area-inset-bottom)); background: #34303cdd; border-color: #b4b2a9; }
+
+.chips { display: grid; grid-template-columns: repeat(2, auto); gap: 5px; }
+.chip { min-width: 74px; }
+body.touch #tip { top: calc(112px + env(safe-area-inset-top)); white-space: normal; width: max-content; max-width: 92vw; text-align: center; }
+[data-el='fire'] { --el: #ff9a3c; }
+[data-el='frost'] { --el: #bfe8ff; }
+[data-el='storm'] { --el: #fff27a; }
+.rlc[data-el='fire'], .rlc[data-el='frost'], .rlc[data-el='storm'] { color: var(--el); }
+.relic[data-el='fire'], .relic[data-el='frost'], .relic[data-el='storm'] { border-color: var(--el); box-shadow: 0 0 10px var(--el); }
+#wheel .slot { flex-direction: column; }
+#wheel .slot[data-el='fire'], #wheel .slot[data-el='frost'], #wheel .slot[data-el='storm'] { border-color: var(--el); }
+#wheel .slot[data-el='fire']::after, #wheel .slot[data-el='frost']::after, #wheel .slot[data-el='storm']::after { content: attr(data-el); text-transform: uppercase; color: var(--el); font-size: 9px; }

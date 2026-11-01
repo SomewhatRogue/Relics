@@ -1,6 +1,7 @@
-/** Drawing relics in the world: javelins in flight or stuck fast, and the hook on its chain. */
-import type { Hero, Hook, Javelin } from '../sim/types';
+/** Drawing relics and shots in the world: javelins, the hook on its chain, arrows, spells, flasks. */
+import type { Bolt, Hero, Hook, Javelin } from '../sim/types';
 import { line, type Ctx } from './draw';
+import { EL_COL } from './palette';
 
 const runes = (c: Ctx, x: number, y: number, a: number, from: number, to: number) => {
   c.glow.globalAlpha = 0.6 + 0.4 * Math.sin(c.now * 6);
@@ -51,3 +52,39 @@ export function drawHook(c: Ctx, k: Hook, hx: number, hy: number, x: number, y: 
 }
 
 export type { Hero };
+
+/** Arrows, sparks, orbs and lobbed flasks. (x, y) is the bolt's spot on the floor in screen pixels. */
+export function drawBolt(c: Ctx, b: Bolt, x: number, y: number): void {
+  const a = Math.atan2(b.dy, b.dx), back = a + Math.PI, col = EL_COL[b.el];
+  if (b.kind === 'arrow') {
+    c.lit.globalAlpha = b.state === 'stuck' ? Math.min(1, b.life / 0.8) : 1;
+    const ty = y - (b.state === 'stuck' ? 6 : 8);
+    if (b.state === 'fly') (c.lit.fillStyle = 'rgba(8,6,12,0.5)'), c.lit.fillRect(Math.round(x), Math.round(y + 1), 1, 1);
+    line(c.lit, x, ty, back, b.state === 'stuck' ? 0 : 1, 7, '#8b6a3a');
+    line(c.lit, x, ty, back, 6, 7, '#e8e0c8');
+    if (b.state === 'fly') line(c.lit, x, ty, a, 0, 1, '#dfe6ec');
+    c.lit.globalAlpha = 1;
+    return;
+  }
+  if (b.kind === 'flask') {
+    const k = b.t / b.flight, up = Math.sin(Math.PI * k) * 26, fy = y - 5 - up;
+    c.lit.fillStyle = 'rgba(8,6,12,0.55)';
+    c.lit.fillRect(Math.round(x - 1), Math.round(y), 3, 1);
+    const spin = Math.floor(c.now * 14) % 2;
+    c.lit.fillStyle = '#7aa0a8';
+    c.lit.fillRect(Math.round(x - 1), Math.round(fy - 1), spin ? 3 : 2, spin ? 2 : 3);
+    c.glow.fillStyle = b.el ? col : '#ffb44c';
+    c.glow.fillRect(Math.round(x), Math.round(fy), 1, 1);
+    return;
+  }
+  const ty = y - 8, r = b.kind === 'orb' ? 2 + Math.round(Math.sin(c.now * 20)) * 0.5 : 1;
+  c.glow.fillStyle = col;
+  for (let i = 1; i <= 4; i++) {
+    c.glow.globalAlpha = 0.5 - i * 0.1;
+    c.glow.fillRect(Math.round(x + Math.cos(back) * i * 3), Math.round(ty + Math.sin(back) * i * 3), 1, 1);
+  }
+  c.glow.globalAlpha = 1;
+  c.glow.fillRect(Math.round(x - r), Math.round(ty - r), r * 2 + 1, r * 2 + 1);
+  c.glow.fillStyle = '#ffffff';
+  c.glow.fillRect(Math.round(x), Math.round(ty), 1, 1);
+}

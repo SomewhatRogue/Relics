@@ -178,4 +178,65 @@ export const sfx = {
     tone('sawtooth', 120, 35, 0.4, 0.7);
     burst('lowpass', 1200, 100, 0.7, 0.8, 0.5);
   },
+  arrow() {
+    if (!ready()) return;
+    tone('triangle', 220, 120, 0.3, 0.08);
+    burst('highpass', 2500, 5000, 1, 0.25, 0.12);
+  },
+  spark() {
+    if (ready()) tone('sine', 1200, 600, 0.18, 0.15), burst('bandpass', 3000, 1500, 2, 0.2, 0.1);
+  },
+  orb() {
+    if (ready()) tone('sine', 300, 600, 0.3, 0.35), tone('triangle', 450, 900, 0.15, 0.35);
+  },
+  flask() {
+    this.throw();
+  },
+  gust() {
+    if (ready()) burst('bandpass', 300, 900, 0.8, 0.8, 0.45), tone('sawtooth', 110, 90, 0.12, 0.4);
+  },
+  burst() {
+    if (!ready()) return;
+    tone('sine', 90, 35, 0.9, 0.4);
+    burst('lowpass', 2400, 120, 0.7, 0.9, 0.4);
+  },
+  ignite() {
+    if (ready()) burst('bandpass', 800, 2400, 0.8, 0.45, 0.35);
+  },
+  chill() {
+    if (ready()) tone('sine', 2400, 1800, 0.1, 0.25), burst('highpass', 4000, 6000, 1, 0.15, 0.2);
+  },
+  freeze() {
+    if (!ready()) return;
+    for (const [f, d] of [[2093, 0], [2637, 0.05], [3136, 0.1]]) tone('triangle', f, f * 0.97, 0.12, 0.3, d);
+    burst('highpass', 3000, 5000, 1, 0.3, 0.25);
+  },
+  shatter() {
+    if (!ready()) return;
+    burst('highpass', 6000, 2000, 1, 0.9, 0.3);
+    for (let i = 0; i < 6; i++) tone('triangle', 2600 + i * 300, 2000, 0.06, 0.12, i * 0.03);
+  },
+  steam() {
+    if (ready()) burst('highpass', 1500, 4000, 0.5, 0.7, 0.7);
+  },
+  flare() {
+    if (!ready()) return;
+    tone('sine', 120, 40, 0.8, 0.35);
+    burst('bandpass', 600, 2400, 0.8, 0.9, 0.35);
+  },
+  shock() {
+    if (!ready()) return;
+    for (let i = 0; i < 4; i++) tone('square', 1800 - i * 300, 900, 0.08, 0.05, i * 0.02);
+    burst('highpass', 3000, 6000, 1, 0.3, 0.1);
+  },
+  bless() {
+    if (!ready()) return;
+    for (const [f, d] of [[660, 0], [880, 0.07], [1320, 0.14]]) tone('sine', f, f, 0.15, 0.5, d);
+  },
+  heal() {
+    if (ready()) tone('sine', 990, 1320, 0.1, 0.2);
+  },
+  blink() {
+    if (ready()) tone('sine', 600, 2400, 0.15, 0.12), tone('sine', 2400, 900, 0.1, 0.12, 0.1);
+  },
 };

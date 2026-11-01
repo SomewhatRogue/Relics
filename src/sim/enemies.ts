@@ -1,9 +1,11 @@
 /** Enemies' turns: the goblin butcher, goblin scrappers, and the two training dummies. */
 import { collide } from '../shared/arena';
-import { BUTCHER, KNOCK, SCRAPPER, SWING_DUMMY, type EnemyAttackSpec, type EnemySpec } from '../shared/tuning';
+import { BUTCHER, FROST, KNOCK, SCRAPPER, SWING_DUMMY, type EnemyAttackSpec, type EnemySpec } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { slide } from './bodies';
 import { hitHero } from './combat';
+import { frozen, isDead, kill } from './damage';
+import { shatter } from './elements';
 import type { Enemy, EnemyAttack, FightEvent, Hero } from './types';
 
 const SPECS: Partial<Record<Enemy['kind'], EnemySpec>> = { butcher: BUTCHER, scrapper: SCRAPPER };
@@ -14,6 +16,7 @@ export function newEnemy(id: number, kind: Enemy['kind'], x: number, y: number):
   return {
     id, kind, x, y, kvx: 0, kvy: 0, fx: 0, fy: 1, hp, maxHp: hp, radius: s ? s.radius : 0.4, weight: s ? s.weight : Infinity,
     act: s ? 'chase' : 'idle', actT: 0, actDur: 0, attack: null, cooldown: 1 + id * 0.4, hitstop: 0, hitAt: -9, moving: false, home: { x, y }, corpse: '',
+    burnUntil: 0, burnNext: 0, chillUntil: 0, frozenUntil: 0,
   };
 }
 
@@ -75,17 +78,19 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   if (spec) {
     const hit = slide(e, e.radius, dt);
     if (hit) {
+      const ice = frozen(e, now);
       e.hp -= KNOCK.wallDmg;
       e.hitAt = now;
       ev.push({ k: 'wallhit', x: e.x, y: e.y });
       ev.push({ k: 'hit', x: e.x, y: e.y, n: KNOCK.wallDmg, heavy: false, on: 'enemy' });
-      if (e.hp <= 0) {
-        Object.assign(e, { hp: 0, act: 'dead', actT: 0, actDur: spec.respawn, attack: null });
-        ev.push({ k: 'death', x: e.x, y: e.y });
-        return;
-      }
+      if (e.hp <= 0) return kill(e, ev);
+      // Thrown frozen into a wall: it breaks.
+      if (ice) shatter(e, now, ev);
+      if (isDead(e)) return;
     }
   }
+  // Frozen solid: slides if thrown, does nothing else.
+  if (frozen(e, now)) return;
   if (e.act === 'stunned' || e.act === 'flinch') {
     if (e.actT >= e.actDur) Object.assign(e, { act: after(e), actT: 0, cooldown: e.act === 'stunned' ? 0.6 : 0.3 });
     return;
@@ -109,7 +114,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   const want = Math.atan2(uy, ux), have = Math.atan2(e.fy, e.fx);
   let diff = want - have;
   diff = Math.atan2(Math.sin(diff), Math.cos(diff));
-  const turn = Math.max(-spec.turn * dt, Math.min(spec.turn * dt, diff)), na = have + turn;
+  const slow = e.chillUntil > now ? FROST.slow : 1;
+  const turn = Math.max(-spec.turn * slow * dt, Math.min(spec.turn * slow * dt, diff)), na = have + turn;
   e.fx = Math.cos(na);
   e.fy = Math.sin(na);
   const facing = e.fx * ux + e.fy * uy;
@@ -125,7 +131,7 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     const side = e.kind === 'scrapper' ? Math.sin(now * 1.3 + e.id * 2) * 0.5 : 0;
     const mx = ux - uy * side, my = uy + ux * side, ml = Math.hypot(mx, my);
     // Walks where it faces: something turning round is slow to come after you.
-    const k = spec.speed * Math.max(0.2, facing);
+    const k = spec.speed * slow * Math.max(0.2, facing);
     e.x += (mx / ml) * k * dt;
     e.y += (my / ml) * k * dt;
     e.moving = true;

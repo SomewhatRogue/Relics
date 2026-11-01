@@ -4,27 +4,25 @@
  * A miss sticks in the wall, or drops to the floor at the end of its range. Stuck javelins stay a while.
  */
 import { collide } from '../shared/arena';
-import { GUARD, JAVELIN, KNOCK } from '../shared/tuning';
+import { GUARD, JAVELIN, KNOCK, type Augment } from '../shared/tuning';
 import { shove } from './bodies';
-import { respawnOf } from './combat';
+import { isDead, kill } from './damage';
 import type { Enemy, FightEvent, Hero, Javelin } from './types';
+
+/** Lands the javelin's augment on what it hits. */
+export type Afflict = (e: Enemy, el: Augment, n: number) => void;
 
 let nextId = 1;
 
 export function throwJavelin(h: Hero): Javelin {
   return {
     id: nextId++, owner: h.id, x: h.x + h.fx * 0.5, y: h.y + h.fy * 0.5, dx: h.fx, dy: h.fy,
-    state: 'fly', travelled: 0, enemy: 0, ox: 0, oy: 0, hit: [], life: JAVELIN.stuckLife,
+    state: 'fly', travelled: 0, enemy: 0, ox: 0, oy: 0, hit: [], life: JAVELIN.stuckLife, el: h.augments.javelin,
   };
 }
 
-function kill(e: Enemy, ev: FightEvent[]): void {
-  Object.assign(e, { hp: 0, act: 'dead', actT: 0, actDur: respawnOf(e), attack: null, kvx: 0, kvy: 0 });
-  ev.push({ k: 'death', x: e.x, y: e.y });
-}
-
 /** Advance one javelin a tick; false when it is gone. */
-export function stepJavelin(j: Javelin, enemies: Enemy[], now: number, dt: number, ev: FightEvent[]): boolean {
+export function stepJavelin(j: Javelin, enemies: Enemy[], now: number, dt: number, ev: FightEvent[], afflict: Afflict = () => {}): boolean {
   const byId = (id: number) => enemies.find((e) => e.id === id);
   if (j.state !== 'fly') {
     j.life -= dt;
@@ -61,7 +59,7 @@ export function stepJavelin(j: Javelin, enemies: Enemy[], now: number, dt: numbe
         ev.push({ k: 'pinned', x: j.x, y: j.y, dx: j.dx, dy: j.dy });
         ev.push({ k: 'hit', x: carried.x, y: carried.y, n: JAVELIN.pinDmg, heavy: true, on: 'enemy' });
         if (carried.hp <= 0) kill(carried, ev), (carried.corpse = 'pinned');
-        else Object.assign(carried, { act: 'pinned', actT: 0, actDur: JAVELIN.pinTime, kvx: 0, kvy: 0 });
+        else Object.assign(carried, { act: 'pinned', actT: 0, actDur: JAVELIN.pinTime, kvx: 0, kvy: 0 }), afflict(carried, j.el, JAVELIN.pinDmg);
       } else ev.push({ k: 'javwall', x: j.x, y: j.y, dx: j.dx, dy: j.dy });
       return true;
     }
@@ -85,6 +83,8 @@ export function stepJavelin(j: Javelin, enemies: Enemy[], now: number, dt: numbe
         if (e.weight <= JAVELIN.pinWeight) break;
         continue;
       }
+      afflict(e, j.el, n);
+      if (isDead(e)) continue;
       if (e.weight <= JAVELIN.pinWeight) {
         j.enemy = e.id;
         Object.assign(e, { act: 'carried', attack: null, actT: 0, kvx: 0, kvy: 0 });

@@ -1,9 +1,13 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, parry, roll). */
-import { BUTCHER, FLINCH, GUARD, HERO, HITSTOP, HURT_STAGGER, SCRAPPER, SWING_DUMMY, WEAPONS, type Swing } from '../shared/tuning';
+import { FLINCH, GUARD, HERO, HITSTOP, HURT_STAGGER, WEAPONS, type Swing } from '../shared/tuning';
 import { shove } from './bodies';
+import { frozen, isDummy, kill, stunOf } from './damage';
+import { shatter } from './elements';
 import type { Enemy, EnemyAttack, FightEvent, Hero } from './types';
 
-const inArc = (ox: number, oy: number, fx: number, fy: number, x: number, y: number, range: number, arc: number, r: number) => {
+export { respawnOf, stunOf } from './damage';
+
+export const inArc = (ox: number, oy: number, fx: number, fy: number, x: number, y: number, range: number, arc: number, r: number) => {
   const dx = x - ox, dy = y - oy, d = Math.hypot(dx, dy);
   if (d - r > range) return false;
   if (d < r + 0.2) return true;
@@ -11,9 +15,6 @@ const inArc = (ox: number, oy: number, fx: number, fy: number, x: number, y: num
   const widen = Math.atan2(r, d);
   return Math.acos(Math.max(-1, Math.min(1, (dx * fx + dy * fy) / d))) <= ((arc / 2) * Math.PI) / 180 + widen;
 };
-
-export const stunOf = (e: Enemy) => (e.kind === 'butcher' ? BUTCHER.stun : e.kind === 'scrapper' ? SCRAPPER.stun : SWING_DUMMY.stun);
-export const respawnOf = (e: Enemy) => (e.kind === 'scrapper' ? SCRAPPER.respawn : BUTCHER.respawn);
 
 /** The hero's swing during its active frames: each enemy is hit at most once per swing. */
 export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEvent[]): void {
@@ -23,29 +24,32 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   const heavy = h.counter || h.heavy || s.knock >= 7;
   // From behind: the hero stands where the enemy's facing points away (dummies have no back).
   const tx = h.x - e.x, ty = h.y - e.y, tl = Math.hypot(tx, ty) || 1;
-  const rear = e.kind !== 'dummy' && e.kind !== 'swingDummy' && (e.fx * tx + e.fy * ty) / tl < GUARD.rearCos;
+  const rear = !isDummy(e) && (e.fx * tx + e.fy * ty) / tl < GUARD.rearCos;
   const rearMult = rear ? (WEAPONS[h.weapon].backstab ?? GUARD.rearMult) : 1;
-  const mult = (h.counter ? GUARD.counterMult : e.act === 'stunned' || e.act === 'pinned' ? GUARD.stunnedMult : 1) * rearMult;
+  const ice = frozen(e, now);
+  const mult = (h.counter ? GUARD.counterMult : e.act === 'stunned' || e.act === 'pinned' || ice ? GUARD.stunnedMult : 1) * rearMult;
   const n = Math.round(s.dmg * mult);
   e.hp -= n;
   e.hitAt = now;
   const stop = h.counter ? HITSTOP.parry : heavy ? HITSTOP.heavy : HITSTOP.light;
   h.hitstop = Math.max(h.hitstop, stop);
   e.hitstop = Math.max(e.hitstop, stop);
-  if (e.act !== 'pinned' && e.act !== 'carried') shove(e, h.fx, h.fy, s.knock + (h.counter ? 5 : 0), e.weight);
+  // A blow sweeping all round (the healer's blessing) throws outward; anything else, along the swing.
+  const ring = s.arc >= 360, dl = Math.hypot(e.x - h.x, e.y - h.y) || 1;
+  const kx = ring ? (e.x - h.x) / dl : h.fx, ky = ring ? (e.y - h.y) / dl : h.fy;
+  if (e.act !== 'pinned' && e.act !== 'carried') shove(e, kx, ky, s.knock + (h.counter ? 5 : 0), e.weight);
   ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy, on: 'enemy', counter: h.counter, backstab: rear && rearMult >= 2 });
-  if (e.kind === 'dummy' || e.kind === 'swingDummy') {
+  if (isDummy(e)) {
     if (e.hp <= 0) e.hp = e.maxHp;
+    if (ice && heavy) shatter(e, now, ev);
     return;
   }
-  if (e.hp <= 0) {
-    Object.assign(e, { hp: 0, act: 'dead', actT: 0, actDur: respawnOf(e), attack: null });
-    ev.push({ k: 'death', x: e.x, y: e.y });
-    return;
-  }
+  if (e.hp <= 0) return kill(e, ev);
+  // A heavy blow breaks the frozen.
+  if (ice && heavy) return shatter(e, now, ev);
   // Light goblins flinch out of their wind-up on any hit; the butcher only to a strong heavy.
   const big = h.heavy && h.power >= 0.7;
-  if (e.act !== 'stunned' && e.act !== 'pinned' && e.act !== 'carried' && (e.kind === 'scrapper' || big)) {
+  if (e.act !== 'stunned' && e.act !== 'pinned' && e.act !== 'carried' && !ice && (e.kind === 'scrapper' || big)) {
     Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: big && e.kind === 'butcher' ? 0.6 : FLINCH });
   }
 }

@@ -5,12 +5,14 @@
  */
 import { collide } from '../shared/arena';
 import { HERO, HOOK } from '../shared/tuning';
+import { isDead } from './damage';
+import type { Afflict } from './javelin';
 import type { Enemy, FightEvent, Hero, Hook } from './types';
 
 let nextId = 1;
 
 export function fireHook(h: Hero): Hook {
-  return { id: nextId++, owner: h.id, x: h.x + h.fx * 0.4, y: h.y + h.fy * 0.4, dx: h.fx, dy: h.fy, state: 'fly', travelled: 0, enemy: 0 };
+  return { id: nextId++, owner: h.id, x: h.x + h.fx * 0.4, y: h.y + h.fy * 0.4, dx: h.fx, dy: h.fy, state: 'fly', travelled: 0, enemy: 0, el: h.augments.hook };
 }
 
 function release(h: Hero | undefined): void {
@@ -18,7 +20,7 @@ function release(h: Hero | undefined): void {
 }
 
 /** Advance one hook a tick; false when it is done. */
-export function stepHook(k: Hook, heroes: Hero[], enemies: Enemy[], now: number, dt: number, ev: FightEvent[]): boolean {
+export function stepHook(k: Hook, heroes: Hero[], enemies: Enemy[], now: number, dt: number, ev: FightEvent[], afflict: Afflict = () => {}): boolean {
   const h = heroes.find((x) => x.id === k.owner);
   if (!h || h.act === 'down' || h.act === 'hurt' || h.act === 'stun') {
     release(h);
@@ -47,6 +49,8 @@ export function stepHook(k: Hook, heroes: Hero[], enemies: Enemy[], now: number,
         t.hp -= t.kind === 'dummy' || t.kind === 'swingDummy' ? 0 : HOOK.dmg;
         t.hitAt = now;
         ev.push({ k: 'latch', x: k.x, y: k.y, dx: k.dx, dy: k.dy });
+        afflict(t, k.el, HOOK.dmg);
+        if (isDead(t)) return false;
         if (t.weight <= HOOK.yankWeight && t.act !== 'pinned') {
           k.state = 'yank';
           Object.assign(t, { act: 'carried', attack: null, kvx: 0, kvy: 0 });

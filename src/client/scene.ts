@@ -8,7 +8,9 @@ import type { ArenaRoom } from '../sim/room';
 import { drawHero } from './actors';
 import { blit, type Ctx } from './draw';
 import { drawEnemy, drawTelegraph } from './foes';
-import { drawHook, drawJavelin } from './relicsdraw';
+import { EL_LIGHT } from './palette';
+import { drawBolt, drawHook, drawJavelin } from './relicsdraw';
+import { drawStatus } from './status';
 import type { Fx } from './fx';
 import { Lighting, type Light } from './light';
 import { SPRITES } from './sprites';
@@ -48,11 +50,11 @@ export class Scene {
     for (const g of [this.lit, this.glow]) g.imageSmoothingEnabled = false;
   }
 
-  /** My hero's position on screen in CSS pixels (for aiming with the mouse). */
-  heroScreen(): [number, number] | null {
+  /** My hero's position on screen in CSS pixels, and CSS pixels per tile (for aiming with the mouse). */
+  heroScreen(): [number, number, number] | null {
     if (!this.heroAt) return null;
     const k = this.scale / this.dpr;
-    return [(this.heroAt[0] - this.cam.x) * k, (this.heroAt[1] - 8 - this.cam.y) * k];
+    return [(this.heroAt[0] - this.cam.x) * k, (this.heroAt[1] - 8 - this.cam.y) * k, PX * k];
   }
 
   render(room: ArenaRoom, meId: string, fx: Fx, now: number, dt: number): void {
@@ -106,7 +108,11 @@ export class Scene {
     }
     for (const e of room.enemies) {
       const [x, y] = lerp('e:' + e.id, e.x, e.y);
-      items.push({ y, draw: () => drawEnemy(c, e, x - cx, y - cy) });
+      items.push({ y, draw: () => (drawEnemy(c, e, x - cx, y - cy), drawStatus(c, e, x - cx, y - cy, room.time)) });
+    }
+    for (const b of room.bolts) {
+      const x = OX + b.x * PX - cx, y = OY + b.y * PX - cy;
+      items.push({ y: OY + b.y * PX + (b.kind === 'flask' ? 30 : 0), draw: () => drawBolt(c, b, x, y) });
     }
     for (const j of room.javelins) {
       const x = OX + j.x * PX - cx, y = OY + j.y * PX - cy;
@@ -149,6 +155,22 @@ export class Scene {
     for (const j of room.javelins) {
       const x = OX + j.x * PX - cx, y = OY + j.y * PX - cy - 8;
       lights.push({ x, y, r: j.state === 'fly' ? 34 : 14, i: j.state === 'fly' ? 0.6 : 0.3 * Math.min(1, j.life), c: [0.55, 0.85, 1] });
+    }
+    for (const b of room.bolts) {
+      if (b.kind === 'arrow') continue;
+      const x = OX + b.x * PX - cx, y = OY + b.y * PX - cy - 8;
+      lights.push({ x, y, r: b.kind === 'orb' ? 50 : b.kind === 'flask' ? 16 : 30, i: 0.7, c: b.el || b.kind !== 'flask' ? EL_LIGHT[b.el] : [1, 0.7, 0.35] });
+    }
+    for (const e of room.enemies) {
+      if (e.act === 'dead') continue;
+      const [x, y] = lerp('e:' + e.id, e.x, e.y);
+      if (e.burnUntil > room.time) lights.push({ x: x - cx, y: y - cy - 10, r: 44 + Math.sin(now * 17 + e.id) * 4, i: 0.75, c: [1, 0.55, 0.25] });
+      else if (e.frozenUntil > room.time) lights.push({ x: x - cx, y: y - cy - 8, r: 26, i: 0.4, c: [0.6, 0.85, 1] });
+    }
+    for (const h of room.heroes) {
+      if (h.weapon !== 'staff' && h.weapon !== 'mace') continue;
+      const [x, y] = lerp('h:' + h.id, h.x, h.y);
+      lights.push({ x: x - cx, y: y - cy - 14, r: 22, i: 0.4, c: h.weapon === 'mace' ? [1, 0.75, 0.4] : EL_LIGHT[h.augments[h.relic]] });
     }
     fx.drawGlow(glow, lit, cx, cy);
     lights.push(...fx.lights(cx, cy));
