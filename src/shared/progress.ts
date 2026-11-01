@@ -13,7 +13,7 @@ export type PerkId = 'tough' | 'endurance' | 'relicsworn' | 'footwork' | 'guard'
 export const PERKS: Record<PerkId, { name: string; text: string; cls?: HeroClass }> = {
   tough: { name: 'TOUGH', text: '20 more health' },
   endurance: { name: 'ENDURANCE', text: 'Stamina comes back a third faster' },
-  relicsworn: { name: 'RELIC SWORN', text: 'Relics recharge a fifth faster' },
+  relicsworn: { name: 'RELIC-WISE', text: 'Relics recharge a fifth faster' },
   footwork: { name: 'FOOTWORK', text: 'Dodge again a fifth sooner' },
   guard: { name: 'GUARD', text: 'A slightly wider parry window' },
   secondwind: { name: 'SECOND WIND', text: 'Back on your feet sooner when downed' },

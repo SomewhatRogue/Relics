@@ -106,7 +106,7 @@ export function townMap(w: WorldState): GameMap {
     n('SERGEANT DUNN', 21, 11.6, 'chat', 'guard', 6, [[21, 11.6], [34.4, 11.6], [34.4, 26.6], [21, 26.6]], 1),
     n('WATCHMAN HOB', 4, 10.8, 'chat', 'guard', 7, [[4, 10.8], [51, 10.8]], 1.2),
   ];
-  if (watch) npcs.push(n('WATCHMAN PIKE', 11, 27.6, 'chat', 'guard', 8, [[11, 27.6], [51, 27.6]], 1.1), n('WATCHMAN ORLA', 41.2, 22, 'chat', 'guard', 8, [[41.2, 22], [52, 22], [52, 12], [41.2, 12]], 1));
+  if (watch) npcs.push(n('WATCHMAN PIKE', 11, 27.6, 'chat', 'guard', 8, [[11, 27.6], [51, 27.6]], 1.1), n('ORLA OF THE WATCH', 41.2, 22, 'chat', 'guard', 14, [[41.2, 22], [52, 22], [52, 12], [41.2, 12]], 1));
   if (marketIn(w)) npcs.push(n('DESSA THE TRADER', 38.5, 13.9, 'market', 'trader'));
   if (quarter) npcs.push(n('OLD MERREN', 57, 18, 'chat', 'elder', 9));
   return {

@@ -32,7 +32,7 @@ export const FAMILIES = [
   { name: 'THE FENNS', adult: 'OLD FENN', child: 'ROSIE' },
   { name: 'THE TULLOCKS', adult: 'BRAN TULLOCK', child: 'NELL' },
   { name: 'THE MARLOWES', adult: 'EDA MARLOWE', child: 'KIT' },
-  { name: 'THE HOBBS', adult: 'GARRET HOBB', child: 'MAY' },
+  { name: 'THE THATCHERS', adult: 'GARRET THATCHER', child: 'MAY' },
   { name: 'THE WYLDES', adult: 'SORREL WYLDE', child: 'FINCH' },
   { name: 'THE CARTERS', adult: 'HUGH CARTER', child: 'BESS' },
 ];
@@ -50,7 +50,7 @@ export function townInterior(door: string, w: WorldState): GameMap {
     { braziers: [{ x: 1.8, y: 1.4, r: 0.45 }] });
   if (door === 'hall') return room('THE BARRACKS', 13, 8, STONE,
     [b('rack', 1, 0.2, 3, 0.5), b('rack', 9, 0.2, 3, 0.5), b('bed', 0.8, 3.4, 1, 2), b('bed', 11.2, 3.4, 1, 2)],
-    [n('MASTER COLE', 4.5, 2.4, 'trainer', 'trainer', 0), n('SQUIRE PELL', 8.8, 3.2, 'yard', 'squire'), n('CORPORAL BRISK', 6.5, 5.4, 'chat', 'guard', 6)]);
+    [n('MASTER COLE', 4.5, 2.4, 'trainer', 'trainer', 0), n('SQUIRE PELL', 8.8, 3.2, 'yard', 'squire'), n('CORPORAL BRISK', 6.5, 5.4, 'chat', 'guard', 13)]);
   if (door === 'tower') return room('THE TOWER', 10, 9, { ...STONE, ambient: [0.2, 0.18, 0.3] },
     [b('shelf', 0.6, 0.2, 3, 0.5), b('shelf', 6.4, 0.2, 3, 0.5), b('bench', 3.6, 3.2, 2.8, 0.8)],
     [n('MAGISTER VELL', 5, 2.2, 'trainer', 'wright', 3)], { braziers: [{ x: 1.4, y: 3.6, r: 0.35 }] });

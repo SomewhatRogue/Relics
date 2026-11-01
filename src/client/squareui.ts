@@ -54,14 +54,14 @@ export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key:
     return true;
   }
   if (id === 'well') {
-    panel.show('THE WELL', p('Old as the town. They say a coin dropped in comes back as luck.') +
-      p(pr.wish ? 'Your coin is in. You will set out on your next job blessed.' : `A coin (${SHOP.wish} gold): your next job starts blessed.`),
+    panel.show('THE WELL', p('Old as the town, and the water\'s tasted of copper since the siege. People drop a coin in for luck. Father Odric says that\'s a coin kept, not given, and drops one in anyway.') +
+      p(pr.wish ? 'Your coin is in. Your next job starts lucky.' : `A coin (${SHOP.wish} gold): your next job starts lucky.`),
       pr.wish ? [] : [{ label: `DROP A COIN (${SHOP.wish})`, primary: true, disabled: pr.gold < SHOP.wish, act: () => (g.wish(), again()) }]);
     return true;
   }
   if (id === 'bard') {
     const areas: Area[] = ['town', 'inside', 'church', 'village', 'farm', 'field', 'forest', 'mine', 'boss'];
-    panel.show('ROWAN THE BARD', say('Rowan', 'Keep your coin, you\'ll need it more than I will. Name a tune and I\'ll play it, and half of what I sing will even be true.') + p('Songs from everywhere the heroes have been:'),
+    panel.show('ROWAN THE BARD', say('Rowan', 'A copper a song, and from a hero I\'ll take it on credit. Name a tune. Half of what I sing is even true.') + p('Songs from everywhere the heroes have been:'),
       [...areas.flatMap((a) => SCORES[a].map((sc) => ({ label: sc.name.toUpperCase(), act: () => (dispatchEvent(new CustomEvent('relic:tune', { detail: { area: a, name: sc.name } })), panel.hide()) }))),
         { label: 'WHATEVER YOU LIKE', act: () => (dispatchEvent(new CustomEvent('relic:tune', { detail: null })), panel.hide()) }]);
     return true;
@@ -85,7 +85,7 @@ export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key:
   if (id === 'sewer') {
     panel.show('THE SEWER GRATE', workDone(w, 'sewers')
       ? p('The grate is open. Jobs below the town are on the board in the square: The Wickhold Sewers.')
-      : p(`Rusted shut. Something scratches below, and the smell is goblin. The town works will open it once enough dens are burned out on jobs (${Math.min(w.dens, WORKS.sewers.need)} of ${WORKS.sewers.need}).`));
+      : p(`Rusted shut. Something scratches below, and the air that comes up smells of wet fur and old pennies. The town works will open it once enough dens are burned out on jobs (${Math.min(w.dens, WORKS.sewers.need)} of ${WORKS.sewers.need}).`));
     return true;
   }
   if (id === 'locked') {

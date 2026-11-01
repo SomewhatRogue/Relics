@@ -32,7 +32,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     const status = p(`<b>${CHAPTER_1.name}</b>`) + p(`People brought home: ${goals.rescued} of ${goals.rescuedGoal}. Story mission, ${CHAPTER_1.mission.title}: ${goals.story ? 'done' : 'not yet'}.`);
     if (done) {
       const c = d.choices.find((x) => x.id === done)!;
-      return panel.show('REEVE HOLLIS', status + say('Reeve Hollis', `${c.label}. That's what the council said, so that's what we do. Some of them will never forgive the rest. That's councils.`) + p(c.text) + p('Chapter 2 is written at the next review, from what the group did.'));
+      return panel.show('REEVE HOLLIS', status + say('Reeve Hollis', `${c.label}. That's what the council said, so that's what we do. Some of them will never forgive the rest. That's councils.`) + p(c.text) + p('What comes next is still being written. Hollis will nail it up when it is.'));
     }
     if (!councilOpen(w)) return panel.show('REEVE HOLLIS', status + say('Reeve Hollis', "Bring six of ours home and ring Barrowby's bell, and I'll call the council. Until then the only thing to decide is who's on the wall tonight, and that's always me."));
     const b = ballot(w), mine = w.ballots[d.id]?.[pr.id], need = g.link?.online ? QUORUM : 1;
@@ -45,7 +45,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     const name = who.charAt(0) + who.slice(1).toLowerCase();
     if (cls !== pr.cls) {
       const yours = TRAINERS[pr.cls];
-      return panel.show(t.name, say(name, `You're no ${cls.toLowerCase()}, and I've no time to make you one. ${yours.name.charAt(0) + yours.name.slice(1).toLowerCase()} has the teaching of your sort: ${yours.where}.`));
+      return panel.show(t.name, say(name, ELSEWHERE[cls].replace('{who}', title(yours.name)).replace('{where}', yours.where)));
     }
     const next = xpFor(pr.level + 1), offer = perkOffer(pr);
     const html = say(name, pr.picks > 0 ? TEACH[pr.cls][0] : TEACH[pr.cls][1]) +
@@ -57,14 +57,14 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     const forged = id === 'market';
     if (forged && !marketOpen(w)) return panel.show('MARKET ROW', p('Empty stalls and a cat. The traders are camped outside the north gate with the refugees, and the gate stays shut to them until the council says otherwise.'));
     const cost = SHOP[forged ? 'forged' : 'fine'], mine = Object.values(pr.arms).filter(Boolean) as Item[], kits = CLASS_KITS[pr.cls];
-    const html = (forged ? say('Dessa', 'Tolmouth steel, from before Tolmouth was a larder. Each has a little weather in it. Fire, frost, storm. Price is the price.') : say('Halvard', kits.length > 1 ? `${kits.length} ways to kill, for your sort. Pick one. I'll oil the rest.` : 'One weapon. Use it well. I can make it better.')) +
+    const html = (forged ? say('Dessa', 'Tolmouth steel, from before Tolmouth was a larder. Each has a little weather in it. Fire, frost, storm. Price is the price.') : say('Halvard', kits.length > 1 ? 'Pick your steel. I\'ll oil the rest.' : 'One weapon. Good steel. I can make it better.')) +
       p(`You have ${pr.gold} gold. In hand: <b>${WEAPONS[pr.weapon].name}</b>.`) +
       p(forged ? `A forged weapon for your class: ${cost} gold. One skill trait and an element.` : `A fine weapon for your class: ${cost} gold. One skill trait.`) +
       (mine.length ? p('Carried: ' + mine.map(itemLine).join('<br>')) : '');
     const take = forged ? [] : kits.filter((k) => k !== pr.weapon).map((k) => ({ label: `TAKE UP THE ${WEAPONS[k].name}`, act: () => (g.setKit(k), again()) }));
     panel.show(forged ? 'DESSA THE TRADER' : 'HALVARD THE SMITH', html, [{ label: `BUY (${cost})`, primary: true, disabled: pr.gold < cost, act: () => {
       const it = g.buy(forged ? 'forged' : 'fine');
-      if (it) panel.show('BOUGHT', p(itemLine(it)) + p('Your old one goes on Halvard\'s rack. He says thank you, by not saying anything.'), [{ label: 'MORE', act: again }]);
+      if (it) panel.show('BOUGHT', p(itemLine(it)) + p(forged ? 'Dessa counts your coin twice and smiles once.' : 'Your old one goes on Halvard\'s rack. He says thank you, by not saying anything.'), [{ label: 'MORE', act: again }]);
     } }, ...take]);
   } else if (id === 'wright') {
     const rel = CLASS_RELICS[pr.cls];
@@ -78,18 +78,18 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     panel.show('IVO THE RELIC-WRIGHT', html, buttons);
   } else if (id === 'church') {
     panel.show('FATHER ODRIC', say('Father Odric', 'Give what you can spare. Then a little of what you can\'t. That\'s the part it burns.') +
-      p(`Given so far: ${w.lantern} gold. Later, you will give up loot here too, and take holy vows.`) + p(`You have ${pr.gold} gold.`),
+      p(`Given to the Lantern so far: ${w.lantern} gold.`) + p(`You have ${pr.gold} gold.`),
       [20, 100].map((n) => ({ label: `GIVE ${n}`, disabled: pr.gold < n, act: () => (g.donate(n), again()) })));
   } else if (id === 'infirmary') {
-    panel.show('SISTER AGNE', say('Sister Agne', w.rescued ? `${w.rescued} through that gate so far. Some of them still won\'t sleep in the dark. I leave a candle.` : 'Empty beds. I\'d rather they were full of the living than empty, and I never thought I\'d say that. Bring someone home and I will have work.') +
+    panel.show('SISTER AGNE', say('Sister Agne', w.rescued ? `${w.rescued} through that gate so far. Some of them still won\'t sleep in the dark. I leave a candle.` : 'Empty beds. First time in my life I\'ve wanted them full. Bring someone home and I\'ll have work.') +
       p(`Lit houses on Rescue Row: ${housesFor(w.rescued)}.`));
   } else if (id === 'yard') {
-    panel.show('SQUIRE PELL', say('Squire Pell', "Yard's out back. Straw men, a butcher on a chain, and me. Mostly me, getting hit. If you're the sort that heals, I'd take it kindly."), [{ label: 'TO THE YARD', primary: true, act: () => (panel.hide(), g.enterYard()) }]);
+    panel.show('SQUIRE PELL', say('Squire Pell', "Yard's out back. Straw men, a butcher made of sacking on a chain, and me. Mostly me, getting hit. If you're the sort that heals, I'd take it kindly."), [{ label: 'TO THE YARD', primary: true, act: () => (panel.hide(), g.enterYard()) }]);
   } else if (id === 'granary') {
     panel.show('FARMER JOS', say('Farmer Jos', 'Every sack in here is a week nobody starves. Barley doesn\'t care who won the war. That\'s the best thing about barley.'));
   } else if (id === 'home') {
     const f = FAMILIES[arg % FAMILIES.length];
-    panel.show(f.name, say(f.adult.split(' ')[0], RUMOURS[(arg * 3 + w.day) % RUMOURS.length]) + say(f.child, CHILD[arg % CHILD.length]));
+    panel.show(f.name, say(title(f.adult), RUMOURS[(arg * 3 + w.day) % RUMOURS.length]) + say(f.child, CHILD[arg % CHILD.length]));
   } else if (id === 'chat') {
     const who = CHAT[arg] ?? { name: PATIENTS[arg - 10] ?? 'A STRANGER', line: SURVIVOR[(arg + w.day) % SURVIVOR.length] };
     panel.show(who.name, say(who.name.split(' ').slice(-1)[0], who.line) + (arg === 0 ? say('Wenna', RUMOURS[w.day % RUMOURS.length]) : ''));
@@ -98,26 +98,37 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
   }
 }
 
+const title = (s: string) => s.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+/** What each trainer says to a hero not of their class ({who}, {where}: that hero's own trainer). */
+const ELSEWHERE: Record<string, string> = {
+  WARRIOR: 'Not mine. {who}, {where}.',
+  RANGER: "You're not one of mine, and I've a dog with better manners waiting. {who} has your sort: {where}.",
+  ROGUE: 'Lovely to see you. Wrong shop. {who} takes your sort, {where}. That one was free.',
+  MAGE: "No, no, you're not, you can't be. {who}. {where}. Go. Mind the door.",
+  HEALER: "You're not mine to stitch, more's the pity. {who}, {where}. Off you go.",
+};
 /** What each class's trainer says when you've grown, and when you haven't. */
 const TEACH: Record<string, [string, string]> = {
   WARRIOR: ['Again. Better. Pick one.', 'Again.'],
   RANGER: ['You came back with all your fingers. Good. Now learn something with them.', 'You breathe like a bull in a barley field. Out on the draw, not in. Come back when you\'ve shot something that shot back.'],
   ROGUE: ['Look at you, still alive. That\'s worth a lesson. A cheap one.', 'I don\'t teach. I let you watch me, and you pay for the seat. Come back with more to pay.'],
   MAGE: ['Yes, yes, sit. No, not there. There. You\'ve grown, the relic says so. Pick, quickly, before I lose my nerve.', 'Don\'t touch that. Or that. Come back when the relic\'s heard more of you.'],
-  HEALER: ['You\'re still breathing and so is half the company. Good. Choose.', 'Hold still, you great calf. There. Now go and get somebody else\'s blood on you, and come back when you\'ve learned something from it.'],
+  HEALER: ['Burn me, you\'re still breathing, and so is half the company. Choose.', 'Hold still, you great calf. There. Now go and get somebody else\'s blood on you, and come back when you\'ve learned something from it.'],
 };
 
 const CHAT: Record<number, { name: string; line: string }> = {
   0: { name: 'OLD WENNA', line: "Seventy-one winters. Saw the walls go up, saw the last bell go into the pot for arrowheads. I'll see the hungry off this valley too, or I'll haunt the lot of you." },
-  1: { name: 'TAM', line: "Is it true you can throw a goblin at another goblin? Did it burst? Mam says don't ask about the bursting. Did it, though?" },
+  1: { name: 'TAM', line: "Is it true you can throw a greenie at another greenie? Did it burst? Mam says don't ask about the bursting. Did it, though?" },
   2: { name: 'MARTA', line: 'I pray for the ones still out there. Then I pray you lot walk faster.' },
   3: { name: 'ALDER BRAM', line: 'Every choice this council makes, somebody pays for. My job is to make sure it is somebody with teeth.' },
   4: { name: 'GOODWIFE SELL', line: 'Farm or refugees. I have heard both argued till the candles gave out, and the candles were the only ones talking sense.' },
-  5: { name: 'GATE GUARD', line: 'Gate opens for a job, and shuts behind you whether you are through or not. Board is in the square.' },
+  5: { name: 'GATE GUARD', line: 'Gate opens for a job, and shuts behind you whether you\'re through or not. Board is in the square.' },
   6: { name: 'SERGEANT DUNN', line: 'Two of us for a whole wall, and boots that let the rain in. Put coin in the town works and I will find you a proper watch. And boots.' },
   7: { name: 'WATCHMAN HOB', line: 'Quiet tonight. I said that last night and a tallyman took the Fosters\' goat off the wall. So, not quiet.' },
-  8: { name: 'THE WATCH', line: 'New spear, new boots, same teeth out there. Still. Good boots.' },
+  8: { name: 'WATCHMAN PIKE', line: 'New spear, new boots, same teeth out there. Still. Good boots.' },
   9: { name: 'OLD MERREN', line: 'Father Odric nailed that chapel shut with his own hands, the night the siege broke. I asked him why. He said, so it stays where it is.' },
+  13: { name: 'CORPORAL BRISK', line: "Cole says I'll make sergeant when Dunn dies. Dunn says he's not dying till he gets new boots. So that's me, corporal for life." },
+  14: { name: 'ORLA OF THE WATCH', line: "Third night on the east wall. Something out there whistles when I whistle. I've stopped whistling." },
   11: { name: 'A DRUNK', line: 'Moll cheats. Everyone knows Moll cheats. I keep playing her. What does that make me? Don\'t answer that. Buy me one.' },
   12: { name: 'A CARD SHARP', line: 'Whisper talks to his own kind. If you have to ask which kind, you are not it.' },
 };
@@ -128,7 +139,7 @@ export function showResult(g: Game, panel: Panel): void {
   const r = g.result!;
   g.result = null;
   const lines = [`Gold: ${r.gold}`, `Experience: ${r.xp}`, r.won ? `People brought home: ${r.rescued}` : 'Driven back: half the gold, nobody saved.'];
-  if (r.levels) lines.push(`<b>Level up!</b> Find your trainer: ${TRAINERS[g.profile.cls].name}, at ${TRAINERS[g.profile.cls].where}.`);
+  if (r.levels) lines.push(`You've grown. ${title(TRAINERS[g.profile.cls].name)} will want to see you, at ${TRAINERS[g.profile.cls].where}.`);
   if (r.won && r.job.objective === 'story') lines.push(`<b>Barrowby's bell rings across the valley.</b> The council can sit once enough people are home.`);
   panel.show(r.won ? 'JOB DONE' : 'DRIVEN BACK', p(`<b>${r.job.title}</b>`) + lines.map(p).join(''), [{ label: 'BACK TO WICKHOLD', primary: true, act: () => panel.hide() }], true);
 }

@@ -129,7 +129,7 @@ export function magicFx(fx: Fx, ev: FightEvent, x: number, y: number): void {
       flash(fx, x, y - 8, 40, 1, [1, 1, 1], 0.1);
       break;
     case 'tempo':
-      fx.say(x, y - 34, 'TEMPO', '#7fe0c8');
+      fx.say(x, y - 34, 'SIDESTEP', '#7fe0c8');
       break;
     case 'grab':
       fx.say(x, y - 30, 'GRABBED', '#ffd27a');

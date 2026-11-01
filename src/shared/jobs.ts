@@ -36,12 +36,12 @@ export interface Job {
   boss?: string;
 }
 
-const BOSSES = ['MAWL THE FLAYER', 'SKARN', 'OLD KNUCKLES', 'THE TALLY MAN', 'GUTCHAIN', 'MOTHER RUST'];
+const BOSSES = ['MAWL', 'SKARN', 'OLD KNUCKLES', 'OLD SPOON', 'GUTCHAIN', 'MOTHER RUST'];
 
 function describe(o: Objective, p: Place, boss: string): { title: string; text: string } {
   if (o === 'rescue') return { title: `Rescue at ${p.name}`, text: `Folk alive in cages at ${p.name}, at last count. Last count was three days ago. Break the cages, bring them home, don't stop to count.` };
-  if (o === 'hunt') return { title: `Hunt ${boss}`, text: `${boss} has taken ${p.name} for a larder and the little ones for a family. Kill it and the rest scatter. Bring back something to prove it; we've been lied to before.` };
-  if (o === 'burn') return { title: `Burn out the dens at ${p.name}`, text: `The hungry have dug in at ${p.name}, and they breed in those holes like rats in a granary. Burn every den. There's oil lying about; they hoard it and never think. Wood burns into wood.` };
+  if (o === 'hunt') return { title: `Hunt ${boss}`, text: `${boss} has made a larder of ${p.name}, and a dozen little ones eat from it. Kill it and the rest lose their nerve. Bring back something to prove it; we\'ve been lied to before.` };
+  if (o === 'burn') return { title: `Burn out the dens at ${p.name}`, text: `The hungry have dug in at ${p.name}. Every hole you leave, they come back to. Burn every den. They hoard lamp oil; use theirs.` };
   return { title: `Burn the larder at ${p.name}`, text: `They keep a larder at ${p.name}. Some of it is grain. Smash every rack, and don't look too long at the rest.` };
 }
 

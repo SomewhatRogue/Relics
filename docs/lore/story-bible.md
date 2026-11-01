@@ -91,3 +91,25 @@ most Want among the heroes is the one the bells don't spare).
 - The church is not wrong, but it is not honest either.
 - Wickhold is decent people being petty, brave, frightened and kind on the same afternoon.
 - Gold is never just gold. Every coin is either kept or given, and the world notices which.
+
+## Recorded lore (from the lore keeper's first review)
+
+- **Timeline.** The war began thirty years ago. Wickhold's siege lasted three winters and broke eleven
+  years ago. Old Wenna (seventy-one) saw the walls go up.
+- **Where new goblins come from.** Not breeding. Captives kept in the pens and fed on what the butchers
+  leave turn, slowly, over a season: the Want takes them from the inside. The pens are for that as
+  much as for the larder, which is why every rescue matters twice.
+- **Habits.** The hungry hoard lamp oil, the way they hoard everything: more than they can use. It's
+  greed, not stupidity, and it burns.
+- **The valley.** Barrowfields (Barrowby, Tollan's Farm, Lowfurrow Fields), Greyhollow (the Charcoal
+  Camps, Hangman's Wood), Copperdeep (the Copperdeep Shafts: they took the ones who could dig, which
+  seeds chapter 2's tunnels), Fenmere (Fennick Ford, the tally wall that seeds chapter 4). Tolmouth was a
+  town and is now a larder; Dessa's steel came from there. "Something was down there first" at the
+  Copperdeep: an old shard, deep, that the goblins found rather than brought. Keep it for later.
+- **Named butchers on the board:** the Gnawer (Barrowby), Mawl, Skarn, Old Knuckles, Old Spoon,
+  Gutchain, Mother Rust. The Tally Man is chapter 4's and never appears on the board before then.
+- **People.** Corporal Brisk and Squire Pell (barracks), Farmer Jos, Old Merren (the Old Quarter),
+  Alder Bram ("Alder" is a council seat) and Goodwife Sell, Dessa, Pike and Orla of the watch, the
+  eight Rescue Row families, the patients Amos, Letty and Corin. Whisper is "he".
+- **Town details.** Some nights there's a light in the keep's high window. Prayers are chalked over the
+  chapel planks. The well is as old as the town and has tasted of copper since the siege.
