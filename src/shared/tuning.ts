@@ -45,9 +45,11 @@ export interface Weapon {
   blockSpeed: number;
   /** Move speed while charging a heavy. */
   chargeSpeed: number;
+  /** Damage multiplier for blows from behind (GUARD.rearMult if not set). */
+  backstab?: number;
 }
 
-export const WEAPONS: Record<'sword' | 'greatsword' | 'spear', Weapon> = {
+export const WEAPONS: Record<'sword' | 'greatsword' | 'spear' | 'daggers', Weapon> = {
   sword: {
     name: 'SWORD AND SHIELD',
     combo: [
@@ -84,9 +86,24 @@ export const WEAPONS: Record<'sword' | 'greatsword' | 'spear', Weapon> = {
     blockSpeed: 0.45,
     chargeSpeed: 0.35,
   },
+  /** The rogue's kit (a Ranger upgrade, Kyle's idea): weak from the front, brutal from behind. */
+  daggers: {
+    name: 'TWIN DAGGERS',
+    combo: [
+      { windup: 0.05, active: 0.06, recover: 0.12, dmg: 7, range: 1.15, arc: 100, lunge: 0.3, knock: 1 },
+      { windup: 0.05, active: 0.06, recover: 0.12, dmg: 7, range: 1.15, arc: 100, lunge: 0.3, knock: 1 },
+      { windup: 0.05, active: 0.06, recover: 0.12, dmg: 8, range: 1.15, arc: 100, lunge: 0.3, knock: 1 },
+      { windup: 0.1, active: 0.07, recover: 0.3, dmg: 14, range: 1.3, arc: 60, lunge: 0.6, knock: 3, thrust: true },
+    ],
+    heavy: { windup: 0.05, active: 0.1, recover: 0.35, dmg: 18, dmgFull: 34, range: 1.8, arc: 40, lunge: 1.6, knock: 3, knockFull: 5, thrust: true },
+    chip: 0.45,
+    blockSpeed: 0.6,
+    chargeSpeed: 0.7,
+    backstab: 2.5,
+  },
 };
 export type WeaponId = keyof typeof WEAPONS;
-export const WEAPON_ORDER: WeaponId[] = ['sword', 'greatsword', 'spear'];
+export const WEAPON_ORDER: WeaponId[] = ['sword', 'greatsword', 'spear', 'daggers'];
 
 /** Holding attack past `start` begins charging; the heavy is strongest at `full`. */
 export const CHARGE = { start: 0.18, full: 0.9 };
@@ -106,6 +123,10 @@ export const GUARD = {
   counterMult: 2.5,
   /** Hits on a stunned enemy (other than the counter) do this much more. */
   stunnedMult: 1.5,
+  /** Any blow from behind does this much more (daggers do more, see WEAPONS). No extra knockback. */
+  rearMult: 1.25,
+  /** Behind means the attacker stands where the target's facing points away (dot below this). */
+  rearCos: -0.35,
 };
 
 export const ROLL = { distance: 3, time: 0.32, iFrom: 0.04, iTo: 0.26, stamina: 22, cooldown: 0.5 };
@@ -141,17 +162,19 @@ export interface EnemySpec {
   pauseBetween: number;
   /** Ordinary hits interrupt its wind-up (light enemies); heavy ones need a charged hit. */
   flinches: boolean;
+  /** How fast it turns to face you (radians a second): slow turners can be got behind. */
+  turn: number;
 }
 
 export const BUTCHER: EnemySpec & { cleave: EnemyAttackSpec; slam: EnemyAttackSpec; slamChance: number } = {
-  hp: 260, radius: 0.62, weight: 3.5, speed: 2.1, reach: 2.2, respawn: 4, stun: 2.2, pauseBetween: 0.5, flinches: false,
+  hp: 260, radius: 0.62, weight: 3.5, speed: 2.1, reach: 2.2, respawn: 4, stun: 2.2, pauseBetween: 0.5, flinches: false, turn: 2.4,
   cleave: { windup: 1.0, active: 0.1, recover: 0.9, dmg: 30, knock: 8, range: 2.6, arc: 70, unblockable: false },
   slam: { windup: 1.3, active: 0.12, recover: 1.1, dmg: 40, knock: 14, radius: 1.7, ahead: 1.2, unblockable: true },
   slamChance: 0.3,
 };
 
 export const SCRAPPER: EnemySpec & { stab: EnemyAttackSpec } = {
-  hp: 36, radius: 0.34, weight: 0.6, speed: 3.1, reach: 1.25, respawn: 5, stun: 1.8, pauseBetween: 0.9, flinches: true,
+  hp: 36, radius: 0.34, weight: 0.6, speed: 3.1, reach: 1.25, respawn: 5, stun: 1.8, pauseBetween: 0.9, flinches: true, turn: 7,
   stab: { windup: 0.55, active: 0.08, recover: 0.5, dmg: 8, knock: 3, range: 1.35, arc: 50, unblockable: false },
 };
 

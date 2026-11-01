@@ -2,6 +2,21 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-10-31 (night): corpses ride the javelin, backstabs (Claude Opus 5.5)
+
+Kyle: the javelin should carry the body back even when the throw kills; some classes (a rogue,
+maybe a Ranger upgrade) should do more from behind, so they want to roll behind an enemy and attack.
+
+- **Corpses ride the javelin:** a light enemy killed by the throw (or by the pin) is carried to the
+  wall and hangs there (`Enemy.corpse`), fading just before it respawns.
+- **Backstabs:** any blow from behind does 1.25x (`GUARD.rearMult`); behind means standing where the
+  target's facing points away (dot below -0.35). No extra knockback (Kyle's Old Gods flanking rule).
+- **Twin daggers** (the rogue's kit, fourth weapon on Q for now): fast 4-hit combo, weak block, 2.5x
+  from behind. With daggers in hand each goblin's back shows as a purple arc, bright when you're in it.
+- **Enemies turn at their own pace** (butcher 2.4 rad/s, scrapper 7) and only attack once they face
+  you, so rolling past the butcher (rolls pass through) leaves his back open for a moment.
+- **Design:** Ranger's subclass fork becomes Sharpshooter or Rogue (backstabs), per Kyle.
+
 ## 2026-10-31 (late): parry that lands, weapons, heavies, knockback, relics (Claude Opus 5.5)
 
 Kyle after his first play: parrying was hard to pull off and should stun; wants animation with the

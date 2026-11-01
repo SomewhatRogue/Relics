@@ -86,6 +86,8 @@ function scrapper(c: Ctx, e: Enemy, x: number, y: number, flash: number): void {
 export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number): void {
   if (e.act === 'dead') {
     const s = e.kind === 'butcher' ? SPRITES.butcherDown : SPRITES.scrapper;
+    // A corpse on a javelin hangs where it was pinned until it fades, just before the respawn.
+    if (e.corpse) return spin(c, s, x, y - 7, Math.atan2(e.fy, e.fx) + 0.2, Math.min(1, (e.actDur - e.actT) / 0.8));
     spin(c, s, x, y - 4, -Math.PI / 2, Math.max(0, 1 - e.actT / e.actDur));
     return;
   }

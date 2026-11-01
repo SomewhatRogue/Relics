@@ -18,7 +18,7 @@ const input = new Input(() => scene.heroScreen());
 const $ = (s: string) => document.querySelector(s) as HTMLElement;
 
 function sound(ev: FightEvent): void {
-  if (ev.k === 'hit') return ev.on === 'enemy' ? sfx.hit(ev.heavy) : sfx.hurt();
+  if (ev.k === 'hit') return ev.on === 'enemy' ? (ev.backstab ? sfx.backstab() : sfx.hit(ev.heavy)) : sfx.hurt();
   if (ev.k === 'windup') return ev.kind === 'swing' || ev.kind === 'stab' ? undefined : sfx.growl(ev.kind === 'slam');
   if (ev.k === 'impact') return ev.kind === 'slam' ? sfx.boom() : undefined;
   const f = (sfx as unknown as Record<string, (() => void) | undefined>)[ev.k];
@@ -27,8 +27,8 @@ function sound(ev: FightEvent): void {
 
 let parries = 0;
 const tips = input.touch
-  ? ['Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'RELIC: pin a scrapper to the wall', 'Striped circles cannot be blocked: ROLL out', 'WEAPON and RELIC up top swap your kit']
-  : ['Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: pin a scrapper to the wall. R swaps relic', 'Striped circles cannot be blocked: SPACE to roll', 'Q swaps weapon: sword, greatsword, spear'];
+  ? ['Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'RELIC: pin a scrapper to the wall', 'Striped circles cannot be blocked: ROLL out', 'WEAPON and RELIC up top swap your kit', 'TWIN DAGGERS: roll behind a goblin and BACKSTAB']
+  : ['Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: pin a scrapper to the wall. R swaps relic', 'Striped circles cannot be blocked: SPACE to roll', 'Q swaps weapon: sword, greatsword, spear, daggers', 'Daggers: roll behind a goblin and BACKSTAB'];
 let tipAt = -99, tipI = 0;
 
 function hud(now: number): void {

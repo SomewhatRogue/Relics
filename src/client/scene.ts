@@ -3,6 +3,7 @@
  * The scene is painted at a low resolution and scaled up by a whole number so pixels stay crisp.
  */
 import { ARENA } from '../shared/arena';
+import { GUARD } from '../shared/tuning';
 import type { ArenaRoom } from '../sim/room';
 import { drawHero } from './actors';
 import { blit, type Ctx } from './draw';
@@ -85,6 +86,17 @@ export class Scene {
     fx.drawDecals(lit, cx, cy);
     glow.clearRect(0, 0, this.vw, this.vh);
     for (const e of room.enemies) if (e.attack && e.act === 'attack') drawTelegraph(c, e.attack, cx, cy);
+    // With daggers in hand, show each goblin's back: the place a backstab lands.
+    if (me?.weapon === 'daggers') for (const e of room.enemies) {
+      if (e.act === 'dead' || e.kind === 'dummy' || e.kind === 'swingDummy') continue;
+      const [ex, ey] = lerp('e:' + e.id, e.x, e.y), tx = me.x - e.x, ty = me.y - e.y, tl = Math.hypot(tx, ty) || 1;
+      if (tl > 6) continue;
+      const behind = (e.fx * tx + e.fy * ty) / tl < GUARD.rearCos, back = Math.atan2(-e.fy, -e.fx), r = e.radius * PX + 5;
+      glow.fillStyle = '#b080ff';
+      glow.globalAlpha = behind ? 0.95 : 0.35;
+      for (let a = -1.1; a <= 1.1; a += 0.08) glow.fillRect(Math.round(ex - cx + Math.cos(back + a) * r), Math.round(ey - cy + Math.sin(back + a) * r * 0.5), 1, 1);
+      glow.globalAlpha = 1;
+    }
 
     const items: { y: number; draw: () => void }[] = [];
     for (const h of room.heroes) {

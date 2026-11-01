@@ -43,19 +43,24 @@ export function stepJavelin(j: Javelin, enemies: Enemy[], now: number, dt: numbe
     j.x = p.x;
     j.y = p.y;
     j.travelled += d;
-    const carried = j.enemy ? byId(j.enemy) : undefined;
+    let carried = j.enemy ? byId(j.enemy) : undefined;
+    // A carried goblin that has respawned elsewhere is no longer on the javelin.
+    if (carried && carried.act !== 'carried' && carried.corpse !== 'carried') (carried = undefined), (j.enemy = 0);
     if (carried) {
       carried.x = j.x - j.dx * carried.radius * 0.6;
       carried.y = j.y - j.dy * carried.radius * 0.6;
     }
     if (blocked) {
       j.state = 'wall';
-      if (carried) {
+      if (carried && carried.act === 'dead') {
+        carried.corpse = 'pinned';
+        ev.push({ k: 'pinned', x: j.x, y: j.y, dx: j.dx, dy: j.dy });
+      } else if (carried) {
         carried.hp -= JAVELIN.pinDmg;
         carried.hitAt = now;
         ev.push({ k: 'pinned', x: j.x, y: j.y, dx: j.dx, dy: j.dy });
         ev.push({ k: 'hit', x: carried.x, y: carried.y, n: JAVELIN.pinDmg, heavy: true, on: 'enemy' });
-        if (carried.hp <= 0) kill(carried, ev);
+        if (carried.hp <= 0) kill(carried, ev), (carried.corpse = 'pinned');
         else Object.assign(carried, { act: 'pinned', actT: 0, actDur: JAVELIN.pinTime, kvx: 0, kvy: 0 });
       } else ev.push({ k: 'javwall', x: j.x, y: j.y, dx: j.dx, dy: j.dy });
       return true;
@@ -75,6 +80,9 @@ export function stepJavelin(j: Javelin, enemies: Enemy[], now: number, dt: numbe
         if (e.hp <= 0) e.hp = e.maxHp;
       } else if (e.hp <= 0) {
         kill(e, ev);
+        // A light body rides the javelin to the wall even when the throw killed it.
+        if (e.weight <= JAVELIN.pinWeight) (j.enemy = e.id), (e.corpse = 'carried'), (e.actDur += 1);
+        if (e.weight <= JAVELIN.pinWeight) break;
         continue;
       }
       if (e.weight <= JAVELIN.pinWeight) {
@@ -94,10 +102,9 @@ export function stepJavelin(j: Javelin, enemies: Enemy[], now: number, dt: numbe
   }
   if (j.travelled >= JAVELIN.range) {
     const carried = j.enemy ? byId(j.enemy) : undefined;
-    if (carried) {
-      Object.assign(carried, { act: 'flinch', actT: 0, actDur: 0.6, kvx: j.dx * KNOCK.wallSpeed * 0.8, kvy: j.dy * KNOCK.wallSpeed * 0.8 });
-      j.enemy = 0;
-    }
+    if (carried && carried.act === 'dead') carried.corpse = '';
+    else if (carried) Object.assign(carried, { act: 'flinch', actT: 0, actDur: 0.6, kvx: j.dx * KNOCK.wallSpeed * 0.8, kvy: j.dy * KNOCK.wallSpeed * 0.8 });
+    j.enemy = 0;
     j.state = 'floor';
   }
   return true;

@@ -21,7 +21,11 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   if (!inArc(h.x, h.y, h.fx, h.fy, e.x, e.y, s.range, s.arc, e.radius)) return;
   h.hitIds.push(e.id);
   const heavy = h.counter || h.heavy || s.knock >= 7;
-  const mult = h.counter ? GUARD.counterMult : e.act === 'stunned' || e.act === 'pinned' ? GUARD.stunnedMult : 1;
+  // From behind: the hero stands where the enemy's facing points away (dummies have no back).
+  const tx = h.x - e.x, ty = h.y - e.y, tl = Math.hypot(tx, ty) || 1;
+  const rear = e.kind !== 'dummy' && e.kind !== 'swingDummy' && (e.fx * tx + e.fy * ty) / tl < GUARD.rearCos;
+  const rearMult = rear ? (WEAPONS[h.weapon].backstab ?? GUARD.rearMult) : 1;
+  const mult = (h.counter ? GUARD.counterMult : e.act === 'stunned' || e.act === 'pinned' ? GUARD.stunnedMult : 1) * rearMult;
   const n = Math.round(s.dmg * mult);
   e.hp -= n;
   e.hitAt = now;
@@ -29,7 +33,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   h.hitstop = Math.max(h.hitstop, stop);
   e.hitstop = Math.max(e.hitstop, stop);
   if (e.act !== 'pinned' && e.act !== 'carried') shove(e, h.fx, h.fy, s.knock + (h.counter ? 5 : 0), e.weight);
-  ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy, on: 'enemy', counter: h.counter });
+  ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy, on: 'enemy', counter: h.counter, backstab: rear && rearMult >= 2 });
   if (e.kind === 'dummy' || e.kind === 'swingDummy') {
     if (e.hp <= 0) e.hp = e.maxHp;
     return;

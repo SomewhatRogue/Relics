@@ -130,6 +130,12 @@ export class Fx {
         this.burst(x, y - 6, ev.heavy ? 10 : 5, ['#7a1d1d', '#5a1414', '#9a2a2a'], 45, false, 160, true);
         this.say(x, y - 22, String(ev.n), ev.on === 'hero' ? '#ff6a5a' : ev.counter ? '#ffa040' : ev.heavy ? '#ffe070' : '#ffffff');
         if (ev.counter) this.say(x, y - 30, 'COUNTER', '#ffa040');
+        if (ev.backstab) {
+          this.say(x, y - (ev.counter ? 38 : 30), 'BACKSTAB', '#d8a0ff');
+          this.burst(x, y - 8, 14, ['#7a1d1d', '#9a2a2a', '#5a1414'], 70, false, 180, true);
+          this.burst(x, y - 8, 8, ['#d8a0ff', '#ffffff'], 60, true);
+          this.flashes.push({ x, y: y - 8, r: 40, i: 0.8, c: [0.8, 0.6, 1], life: 0.12, max: 0.12 });
+        }
         this.shake = Math.max(this.shake, ev.on === 'hero' ? 3 : ev.heavy ? 2 : 1);
         this.flashes.push({ x, y: y - 8, r: 34, i: 0.7, c: [1, 0.8, 0.5], life: 0.08, max: 0.08 });
         break;

@@ -117,10 +117,12 @@ export interface Enemy extends Body {
   hitAt: number;
   moving: boolean;
   home: { x: number; y: number };
+  /** A corpse carried on a javelin, or pinned to a wall by one. */
+  corpse: '' | 'carried' | 'pinned';
 }
 
 export type FightEvent =
-  | { k: 'hit'; x: number; y: number; n: number; heavy: boolean; on: 'enemy' | 'hero'; counter?: boolean }
+  | { k: 'hit'; x: number; y: number; n: number; heavy: boolean; on: 'enemy' | 'hero'; counter?: boolean; backstab?: boolean }
   | { k: 'block' | 'parry' | 'guardbreak' | 'dodge' | 'down' | 'death' | 'roll' | 'swing' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number }
   | { k: 'windup' | 'impact'; x: number; y: number; kind: AttackKind }
   | { k: 'weapon'; x: number; y: number; name: string }

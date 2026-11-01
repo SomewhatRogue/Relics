@@ -106,6 +106,12 @@ export const sfx = {
   dodge() {
     if (ready()) tone('sine', 900, 1500, 0.15, 0.12);
   },
+  backstab() {
+    if (!ready()) return;
+    burst('highpass', 3000, 1200, 1, 0.5, 0.08);
+    tone('sine', 180, 50, 0.8, 0.2);
+    burst('lowpass', 1800, 200, 0.7, 0.6, 0.15);
+  },
   boom() {
     if (!ready()) return;
     tone('sine', 70, 30, 1, 0.5);

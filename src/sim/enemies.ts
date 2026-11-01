@@ -13,7 +13,7 @@ export function newEnemy(id: number, kind: Enemy['kind'], x: number, y: number):
   const hp = s ? s.hp : 999;
   return {
     id, kind, x, y, kvx: 0, kvy: 0, fx: 0, fy: 1, hp, maxHp: hp, radius: s ? s.radius : 0.4, weight: s ? s.weight : Infinity,
-    act: s ? 'chase' : 'idle', actT: 0, actDur: 0, attack: null, cooldown: 1 + id * 0.4, hitstop: 0, hitAt: -9, moving: false, home: { x, y },
+    act: s ? 'chase' : 'idle', actT: 0, actDur: 0, attack: null, cooldown: 1 + id * 0.4, hitstop: 0, hitAt: -9, moving: false, home: { x, y }, corpse: '',
   };
 }
 
@@ -69,7 +69,7 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     return;
   }
   if (e.act === 'dead') {
-    if (e.actT >= e.actDur) Object.assign(e, { act: 'chase', hp: e.maxHp, x: e.home.x, y: e.home.y, kvx: 0, kvy: 0, actT: 0, cooldown: 1.5 });
+    if (e.actT >= e.actDur) Object.assign(e, { act: 'chase', hp: e.maxHp, x: e.home.x, y: e.home.y, kvx: 0, kvy: 0, actT: 0, cooldown: 1.5, corpse: '' });
     return;
   }
   if (spec) {
@@ -104,7 +104,16 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     return;
   }
   if (!spec) return;
-  if (d <= spec.reach && e.cooldown <= 0) {
+  // Turn toward the target at this enemy's own pace; it only attacks once it faces you.
+  const ux = (t.x - e.x) / d, uy = (t.y - e.y) / d;
+  const want = Math.atan2(uy, ux), have = Math.atan2(e.fy, e.fx);
+  let diff = want - have;
+  diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+  const turn = Math.max(-spec.turn * dt, Math.min(spec.turn * dt, diff)), na = have + turn;
+  e.fx = Math.cos(na);
+  e.fy = Math.sin(na);
+  const facing = e.fx * ux + e.fy * uy;
+  if (d <= spec.reach && e.cooldown <= 0 && facing > 0.75) {
     if (e.kind === 'butcher') {
       const slam = rng.next() < BUTCHER.slamChance;
       begin(e, slam ? 'slam' : 'cleave', slam ? BUTCHER.slam : BUTCHER.cleave, t, ev);
@@ -114,12 +123,11 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   if (d > spec.reach * 0.8) {
     // Scrappers sidle a little rather than queueing straight in.
     const side = e.kind === 'scrapper' ? Math.sin(now * 1.3 + e.id * 2) * 0.5 : 0;
-    const ux = (t.x - e.x) / d, uy = (t.y - e.y) / d;
     const mx = ux - uy * side, my = uy + ux * side, ml = Math.hypot(mx, my);
-    e.fx = ux;
-    e.fy = uy;
-    e.x += (mx / ml) * spec.speed * dt;
-    e.y += (my / ml) * spec.speed * dt;
+    // Walks where it faces: something turning round is slow to come after you.
+    const k = spec.speed * Math.max(0.2, facing);
+    e.x += (mx / ml) * k * dt;
+    e.y += (my / ml) * k * dt;
     e.moving = true;
     collide(e, e.radius);
   }

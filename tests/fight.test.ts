@@ -269,3 +269,43 @@ describe('relics', () => {
     expect(Math.hypot(t.x - h.x, t.y - h.y)).toBeLessThan(1.4);
   });
 });
+
+describe('corpses and backstabs', () => {
+  it('a javelin that kills a scrapper still carries the body to the wall', () => {
+    const { room, h, t } = onTarget(3);
+    Object.assign(t, { x: 9, y: 4, hp: 5 });
+    Object.assign(h, { x: 9, y: 9 });
+    room.setIntent('me', intent({ relicSeq: 1, ay: -1 }));
+    run(room, ticks(1.2));
+    expect(t.act).toBe('dead');
+    expect(t.corpse).toBe('pinned');
+    expect(t.y).toBeLessThan(1);
+  });
+
+  it('a blow from behind does more, and twin daggers far more', () => {
+    const hitFrom = (weapon: 'sword' | 'daggers', behind: boolean) => {
+      const { room, h, t } = onTarget(0);
+      Object.assign(t, { fx: 0, fy: behind ? -1 : 1, cooldown: 99 });
+      h.weapon = weapon;
+      room.setIntent('me', intent({ attackSeq: 1, ay: -1 }));
+      run(room, 3);
+      t.fx = 0;
+      t.fy = behind ? -1 : 1;
+      run(room, ticks(0.4));
+      return t.maxHp - t.hp;
+    };
+    expect(hitFrom('sword', true)).toBe(Math.round(WEAPONS.sword.combo[0].dmg * GUARD.rearMult));
+    expect(hitFrom('daggers', true)).toBe(Math.round(WEAPONS.daggers.combo[0].dmg * WEAPONS.daggers.backstab!));
+    expect(hitFrom('daggers', false)).toBe(WEAPONS.daggers.combo[0].dmg);
+  });
+
+  it('the butcher turns slowly, so a roll past him leaves his back open', () => {
+    const { room, h, t } = onTarget(0);
+    Object.assign(t, { x: 9, y: 7, fx: 0, fy: 1, cooldown: 99 });
+    Object.assign(h, { x: 9, y: 8.2 });
+    room.setIntent('me', intent({ rollSeq: 1, my: -1 }));
+    run(room, ticks(ROLL.time) + 1);
+    const tx = h.x - t.x, ty = h.y - t.y, tl = Math.hypot(tx, ty);
+    expect((t.fx * tx + t.fy * ty) / tl).toBeLessThan(GUARD.rearCos);
+  });
+});

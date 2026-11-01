@@ -12,7 +12,7 @@ interface Pose { a: number; ext: number; from?: number; thrust?: boolean; reach:
 /** Where the weapon points now (and what it has swept through, for the smear). */
 function pose(h: Hero, now: number): Pose {
   const fa = Math.atan2(h.fy, h.fx), side = h.fx >= -0.2 ? 1 : -1;
-  const rest: Record<Hero['weapon'], number> = { sword: fa + side * 1.1, greatsword: -Math.PI / 2 - side * 0.7, spear: -Math.PI / 2 + side * 0.3 };
+  const rest: Record<Hero['weapon'], number> = { sword: fa + side * 1.1, greatsword: -Math.PI / 2 - side * 0.7, spear: -Math.PI / 2 + side * 0.3, daggers: fa + side * 1.4 };
   if (h.act === 'charge') {
     const p = Math.min(1, (h.actT + CHARGE.start) / CHARGE.full);
     if (h.weapon === 'spear') return { a: fa, ext: -5 * p, reach: 0 };
@@ -45,12 +45,19 @@ function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): void {
     line(g, ox + Math.cos(p.a) * 2.5, oy + Math.sin(p.a) * 2.5, p.a + Math.PI / 2, -2, 2, '#d4a537');
     line(g, ox, oy, p.a, 3, 17, '#b9c1c8', 2);
     line(g, ox, oy, p.a, 4, 17, '#eef2f5');
-  } else {
+  } else if (h.weapon === 'spear') {
     line(g, ox, oy, p.a, -7, 13, '#8b6a3a');
     line(g, ox, oy, p.a, 13, 17, '#dfe6ec', 2);
+  } else {
+    // Twin daggers: one in each hand, the off hand trailing the swing.
+    const side = h.fx >= -0.2 ? 1 : -1, lx = ox - side * 6, ly = oy + 1, la = p.a - side * 0.6;
+    for (const [x0, y0, a] of [[ox, oy, p.a], [lx, ly, la]] as const) {
+      line(g, x0, y0, a, 0, 2, '#2a2420');
+      line(g, x0, y0, a, 2, 7, '#e6ecf0');
+    }
   }
   if (h.act === 'charge') {
-    const k = Math.min(1, (h.actT + CHARGE.start) / CHARGE.full), len = h.weapon === 'greatsword' ? 17 : h.weapon === 'spear' ? 17 : 12;
+    const k = Math.min(1, (h.actT + CHARGE.start) / CHARGE.full), len = h.weapon === 'greatsword' || h.weapon === 'spear' ? 17 : h.weapon === 'daggers' ? 7 : 12;
     c.glow.globalAlpha = 0.4 + 0.5 * k * (0.6 + 0.4 * Math.sin(c.now * 30));
     line(c.glow, ox, oy, p.a, len - 4 * k - 2, len, k >= 1 ? '#ffffff' : '#ffd860');
     c.glow.globalAlpha = 1;
