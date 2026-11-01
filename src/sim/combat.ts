@@ -1,5 +1,5 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, parry, roll). */
-import { BLESSING, FLINCH, HORN, OVERKILL, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, WEAPONS, type Swing } from '../shared/tuning';
+import { BLESSING, FLINCH, HORN, OVERKILL, PERK, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, WEAPONS, type Swing } from '../shared/tuning';
 import { shove } from './bodies';
 import { frozen, isDummy, kill, snared, stunOf } from './damage';
 import { shatter } from './elements';
@@ -89,7 +89,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   // The kit's guard covers an arc in front: a shield covers nearly everything ahead.
   const facing = (h.fx * tx + h.fy * ty) / tl > Math.cos(((w.guardArc / 2) * Math.PI) / 180);
   const canGuard = !a.unblockable && facing && (h.act === 'idle' || h.act === 'attack' || h.act === 'charge');
-  if (canGuard && now - h.parryOpenAt <= w.parryWindow + h.lenience) {
+  if (canGuard && now - h.parryOpenAt <= w.parryWindow + h.lenience + (h.perks.includes('guard') ? PERK.guard : 0)) {
     h.counterUntil = now + GUARD.counterWindow;
     h.parryOpenAt = -9;
     if (has(h, 'bulwark')) h.stamina = HERO.stamina;
@@ -125,6 +125,6 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
 
 function downIfDead(h: Hero, ev: FightEvent[]): void {
   if (h.hp > 0) return;
-  Object.assign(h, { hp: 0, act: 'down', actT: 0, actDur: HERO.respawn, kvx: 0, kvy: 0 });
+  Object.assign(h, { hp: 0, act: 'down', actT: 0, actDur: HERO.respawn * (h.perks.includes('secondwind') ? PERK.secondwind : 1), kvx: 0, kvy: 0 });
   ev.push({ k: 'down', x: h.x, y: h.y });
 }

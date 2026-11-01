@@ -54,11 +54,11 @@ export function bless(h: Hero, heroes: Hero[], aim: Intent | undefined, now: num
   } else {
     let low = Infinity;
     for (const o of near) {
-      const share = o.hp / HERO.hp - (o === h ? 0 : 0.001);
+      const share = o.hp / o.maxHp - (o === h ? 0 : 0.001);
       if (share < low) (low = share), (target = o);
     }
   }
-  const n = Math.min(HERO.hp - target.hp, BLESSING.heal);
+  const n = Math.min(target.maxHp - target.hp, BLESSING.heal);
   target.hp += n;
   target.blessedUntil = now + BLESSING.time;
   if (target !== h) ev.push({ k: 'beam', x: h.x, y: h.y, x2: target.x, y2: target.y });

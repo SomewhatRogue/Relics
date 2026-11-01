@@ -11,6 +11,9 @@ const url = process.argv[2] || 'http://localhost:4173/';
     page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
     await page.goto(url);
     await page.waitForFunction(() => typeof window.render_game_to_text === 'function');
+    await page.screenshot({ path: `shots/${name}-town.png` });
+    // The fight lives in the Training Yard now (the game starts in town).
+    await page.evaluate(() => window.__game.enterYard());
     // Walk the hero up toward the butcher and swing.
     await page.evaluate(() => { const r = window.__room; r.heroes[0].y = 7.8; r.heroes[0].x = 9.3; });
     await page.waitForTimeout(1200);

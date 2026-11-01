@@ -4,7 +4,7 @@
  */
 import type { HeroClass } from './weapons';
 
-export type PropKind = 'barrel' | 'oil' | 'crate' | 'table' | 'plank' | 'stave';
+export type PropKind = 'barrel' | 'oil' | 'crate' | 'table' | 'plank' | 'stave' | 'cage' | 'larder';
 
 export interface PropSpec {
   radius: number;
@@ -21,6 +21,10 @@ export const PROPS: Record<PropKind, PropSpec> = {
   table: { radius: 0.55, weight: 4, hp: 45, pieces: { kind: 'plank', n: 3 } },
   plank: { radius: 0.24, weight: 0.8, hp: 10, pieces: null },
   stave: { radius: 0.2, weight: 0.6, hp: 8, pieces: null },
+  /** A goblin cage with someone in it: break it and they go free. Too heavy to lift. */
+  cage: { radius: 0.55, weight: 99, hp: 40, pieces: { kind: 'plank', n: 2 } },
+  /** The goblins' larder: a rack of stolen stores and worse. Smash it. */
+  larder: { radius: 0.45, weight: 99, hp: 25, pieces: null },
 };
 
 /** Classes big enough to lift and throw them (a Barbarian joins when the Warrior forks). */

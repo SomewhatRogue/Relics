@@ -2,7 +2,7 @@
  * One frame: camera, the flat (lit) layer in depth order, the glowing layer, then the lighting pass.
  * The scene is painted at a low resolution and scaled up by a whole number so pixels stay crisp.
  */
-import { ARENA } from '../shared/arena';
+import { ARENA, type GameMap } from '../shared/arena';
 import { GRAB, GUARD, WEAPONS } from '../shared/tuning';
 import type { ArenaRoom } from '../sim/room';
 import { drawHero } from './actors';
@@ -15,9 +15,9 @@ import { drawLifted, drawProp } from './propsdraw';
 import type { Fx } from './fx';
 import { Lighting, type Light } from './light';
 import { SPRITES } from './sprites';
-import { OX, OY, PX, WORLD_H, WORLD_W, paintRoom } from './world';
+import { OX, OY, PX, paintMap, worldH, worldW } from './world';
+import { blockAt, blockFoot, drawBlock, drawRound } from './blocks';
 
-const AMBIENT: [number, number, number] = [0.2, 0.19, 0.27];
 
 export class Scene {
   vw = 0;
@@ -29,7 +29,8 @@ export class Scene {
   private lit = this.base.getContext('2d')!;
   private glow = this.glowC.getContext('2d')!;
   private lighting: Lighting;
-  private bg = paintRoom();
+  private bg: HTMLCanvasElement | null = null;
+  private painted: GameMap | null = null;
   private cam = { x: 0, y: 0, ready: false };
   private heroAt: [number, number] | null = null;
 
@@ -76,16 +77,18 @@ export class Scene {
       this.cam.y += (ty - this.cam.y) * k;
       this.cam.ready = true;
     }
+    const map = room.map;
+    if (this.painted !== map) (this.bg = paintMap(map)), (this.painted = map), (this.cam.ready = false);
     const clamp = (v: number, size: number, world: number) => (size >= world ? (world - size) / 2 : Math.max(0, Math.min(world - size, v)));
-    this.cam.x = clamp(this.cam.x, this.vw, WORLD_W);
-    this.cam.y = clamp(this.cam.y, this.vh, WORLD_H);
+    this.cam.x = clamp(this.cam.x, this.vw, worldW(map));
+    this.cam.y = clamp(this.cam.y, this.vh, worldH(map));
     const sh = fx.shake;
     const cx = Math.round(this.cam.x + (Math.random() - 0.5) * sh), cy = Math.round(this.cam.y + (Math.random() - 0.5) * sh);
 
     const lit = this.lit, glow = this.glow, c: Ctx = { lit, glow, now };
     lit.fillStyle = '#0d0b10';
     lit.fillRect(0, 0, this.vw, this.vh);
-    lit.drawImage(this.bg, -cx, -cy);
+    lit.drawImage(this.bg!, -cx, -cy);
     fx.drawDecals(lit, cx, cy);
     glow.clearRect(0, 0, this.vw, this.vh);
     const pw = me ? WEAPONS[me.weapon].parryWindow + me.lenience : 0.3;
@@ -149,9 +152,22 @@ export class Scene {
       const [ox, oy] = lerp('h:' + o.id, o.x, o.y);
       items.push({ y: OY + k.y * PX + 1, draw: () => drawHook(c, k, ox - cx, oy - cy, OX + k.x * PX - cx, OY + k.y * PX - cy) });
     }
-    for (const p of ARENA.pillars) items.push({ y: OY + p.y * PX, draw: () => blit(c, SPRITES.pillar, OX + p.x * PX - cx, OY + p.y * PX + 5 - cy) });
-    for (const b of ARENA.braziers) items.push({ y: OY + b.y * PX, draw: () => this.brazier(c, OX + b.x * PX - cx, OY + b.y * PX + 2 - cy, now) });
-    items.push({ y: OY + ARENA.cage.y * PX, draw: () => this.cage(c, OX + ARENA.cage.x * PX - cx, OY + ARENA.cage.y * PX - cy, now) });
+    for (const r of map.rounds) items.push({ y: OY + r.y * PX, draw: () => drawRound(c, r, OX + r.x * PX - cx, OY + r.y * PX - cy) });
+    for (const b of map.blocks) {
+      const [bx, by] = blockAt(b);
+      items.push({ y: blockFoot(b), draw: () => drawBlock(c, b, bx - cx, by - cy, true) });
+    }
+    for (const b of map.braziers) items.push({ y: OY + b.y * PX, draw: () => this.brazier(c, OX + b.x * PX - cx, OY + b.y * PX + 2 - cy, now) });
+    if (map === ARENA) items.push({ y: OY + ARENA.cage.y * PX, draw: () => this.cage(c, OX + ARENA.cage.x * PX - cx, OY + ARENA.cage.y * PX - cy, now) });
+    // The way out, glowing once it's open.
+    if (room.exitOpen && map.exit) {
+      const e = map.exit, ex = OX + e.x * PX - cx, ey = OY + e.y * PX - cy, k = 0.5 + 0.3 * Math.sin(now * 5);
+      glow.globalAlpha = k;
+      glow.fillStyle = '#9fe8ff';
+      for (let i = 0; i < e.w * PX; i += 2) glow.fillRect(Math.round(ex + i), Math.round(ey + (e.y < 1 ? e.h * PX - 1 : 0)), 1, 1);
+      for (let i = 0; i < 3; i++) glow.fillRect(Math.round(ex + (e.w * PX) / 2 - 1 + i - 1), Math.round(ey + (e.y < 1 ? 6 + i : e.h * PX - 6 - i)), 3 - Math.abs(i - 1) * 2 + 1, 1);
+      glow.globalAlpha = 1;
+    }
     items.sort((p, q) => p.y - q.y);
     for (const it of items) it.draw();
 
@@ -160,20 +176,27 @@ export class Scene {
       if (!d.item.traits.some((t) => t === 'ember' || t === 'rime' || t === 'storm')) continue;
       lights.push({ x: OX + d.x * PX - cx, y: OY + d.y * PX - cy - 6, r: 22, i: 0.5, c: [1, 0.9, 0.6] });
     }
-    for (const t of ARENA.torches) {
+    for (const t of map.torches) {
       const x = OX + t.x * PX - cx, y = OY + t.y * PX - cy;
       this.flame(glow, x, y - 1, now, 1);
       lights.push({ x, y: y - 3, r: 118 + Math.sin(now * 13 + x) * 4 + Math.sin(now * 7.3) * 3, i: 1.15, c: [1, 0.66, 0.36] });
     }
-    for (const b of ARENA.braziers) {
+    for (const b of map.braziers) {
       const x = OX + b.x * PX - cx, y = OY + b.y * PX - cy;
       lights.push({ x, y: y - 8, r: 78 + Math.sin(now * 11 + x) * 3, i: 0.95, c: [1, 0.6, 0.3] });
     }
     // Moonlight through a ceiling grate over the middle of the room.
-    lights.push({ x: OX + (ARENA.w / 2) * PX - cx, y: OY + 8.5 * PX - cy, r: 125, i: 0.42, c: [0.55, 0.62, 0.9] });
+    if (map.theme.moon) lights.push({ x: OX + (map.w / 2) * PX - cx, y: OY + (map.h / 2) * PX - cy, r: 125 * Math.max(1, map.w / 22), i: map.theme.moon, c: [0.55, 0.62, 0.9] });
+    for (const r of map.rounds) if (r.kind === 'lantern') lights.push({ x: OX + r.x * PX - cx, y: OY + r.y * PX - cy - 28, r: 150 + Math.sin(now * 3) * 4, i: 1.25, c: [1, 0.78, 0.45] });
+    for (const b of map.blocks) {
+      if (b.kind !== 'house' && b.kind !== 'church' && b.kind !== 'hall' && b.kind !== 'forge') continue;
+      const [bx, by] = blockAt(b);
+      lights.push({ x: bx + (b.w * PX) / 2 - cx, y: by + b.h * PX - cy, r: 34, i: 0.45, c: b.kind === 'forge' ? [1, 0.5, 0.25] : [1, 0.8, 0.5] });
+    }
     for (const h of room.heroes) {
       const [x, y] = lerp('h:' + h.id, h.x, h.y);
-      lights.push({ x: x - cx, y: y - 10 - cy, r: 44, i: 0.35, c: [0.9, 0.86, 0.78] });
+      // Underground (no moon), each hero carries a lantern.
+      lights.push({ x: x - cx, y: y - 10 - cy, r: map.theme.moon ? 44 : 90, i: map.theme.moon ? 0.35 : 0.7, c: [0.95, 0.8, 0.6] });
     }
     for (const e of room.enemies) {
       const at = e.attack;
@@ -206,7 +229,9 @@ export class Scene {
     }
     fx.drawGlow(glow, lit, cx, cy);
     lights.push(...fx.lights(cx, cy));
-    this.lighting.render(this.base, this.glowC, lights, AMBIENT);
+    // Only lights that reach the screen (a town has more than the pass can take at once).
+    const seen = lights.filter((l) => l.x + l.r > 0 && l.x - l.r < this.vw && l.y + l.r > 0 && l.y - l.r < this.vh);
+    this.lighting.render(this.base, this.glowC, seen, map.theme.ambient);
   }
 
   private flame(g: CanvasRenderingContext2D, x: number, y: number, now: number, size: number): void {

@@ -1,9 +1,13 @@
-/** Relic: slice 2, one room. The fight runs here in the browser (solo is a party of one). */
-import { HERO, RELICS, RELIC_SLOTS, TRAITS, WEAPONS, itemName } from '../shared/tuning';
+/** Relic: Wickhold, the Training Yard and runs. The rooms run here in the browser (solo is a party of one). */
+import { RELICS, RELIC_SLOTS, TRAITS, WEAPONS, itemName } from '../shared/tuning';
+import { MAX_DOWNS, goal } from '../sim/run';
+import type { Intent } from '../sim/types';
+import { Game, ME } from './game';
+import { Panel } from './panels';
+import { openSpot, showResult } from './townui';
 import { grabbable } from '../sim/grab';
 import { liftable } from '../sim/props';
 import { relicLabel } from '../sim/hero';
-import { ArenaRoom } from '../sim/room';
 import type { FightEvent } from '../sim/types';
 import { Fx } from './fx';
 import { Input } from './input';
@@ -12,19 +16,28 @@ import { Scene } from './scene';
 import { setMuted, sfx } from './sfx';
 import './style.css';
 
-const params = new URLSearchParams(location.search);
-const room = new ArenaRoom(Number(params.get('seed')) || 1, { squire: true });
-const ME = 'me';
-const me = room.join(ME);
+const game = new Game();
 const scene = new Scene(document.getElementById('game') as HTMLCanvasElement);
 const fx = new Fx();
+const panel = new Panel();
 const input = new Input(
   () => scene.heroScreen(),
-  () => me.relics.slice(0, RELIC_SLOTS).map((r) => ({ name: RELICS[r].short, el: me.augments[r], active: r === me.relic, ready: 1 - Math.max(0, me.relicReady[r] - room.time) / RELICS[r].cooldown })),
+  () => game.hero.relics.slice(0, RELIC_SLOTS).map((r) => ({ name: RELICS[r].short, el: game.hero.augments[r], active: r === game.hero.relic, ready: 1 - Math.max(0, game.hero.relicReady[r] - game.room.time) / RELICS[r].cooldown })),
 );
 const $ = (s: string) => document.querySelector(s) as HTMLElement;
 const card = new LootCard((id) => input.take(id));
-addEventListener('keydown', (e) => e.key.toLowerCase() === 'f' && card.current >= 0 && input.take(card.current));
+/** Use the town spot you stand at (E or F on a laptop, USE on a phone). */
+const use = () => {
+  const s = game.nearSpot();
+  if (s && !panel.open) openSpot(s.id, game, panel);
+};
+addEventListener('keydown', (e) => {
+  const k = e.key.toLowerCase();
+  if (k === 'f' && card.current >= 0) input.take(card.current);
+  if ((k === 'e' || k === 'f') && game.mode === 'town') use();
+  if (k === 'escape' && panel.open && !game.result) panel.hide();
+});
+$('.tb.use').addEventListener('touchstart', (e) => (e.preventDefault(), use()), { passive: false });
 
 function sound(ev: FightEvent): void {
   if (ev.k === 'shoot') return (sfx as unknown as Record<string, (() => void) | undefined>)[ev.kind]?.();
@@ -53,14 +66,19 @@ const KIT: Record<string, string> = {
 };
 
 let parries = 0;
+const townTips = input.touch
+  ? ['Walk to the JOB BOARD and tap USE to take a job', 'Level up at the TRAINER: pick a perk', 'The SMITH sells weapons. The TRAINING YARD is to the west', 'The COUNCIL TABLE decides the chapter']
+  : ['Walk to the JOB BOARD and press E to take a job', 'Level up at the TRAINER: pick a perk', 'The SMITH sells weapons. The TRAINING YARD is to the west', 'The COUNCIL TABLE decides the chapter'];
 const tips = input.touch
   ? ['Stun or get behind a small goblin, then GRAB it', 'Warriors can GRAB barrels and tables and throw them', 'Break the oil barrel near goblins and they burn', 'Holding one: SLAM it, or THROW it at another', 'Goblins drop weapons. Stand on one and TAKE it', 'Traits reward skill: parries, dodges, perfect releases', 'CLASS changes class. WEAPON swaps its kit', 'HEALER: hold RELIC for BLESS, it finds the most hurt ally', 'AUGMENT puts an element on your relic', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'RELIC: pin a scrapper to the wall', 'Striped circles cannot be blocked: ROLL out', 'HOLD RELIC to pick another relic', 'TWIN DAGGERS: roll behind a goblin and BACKSTAB']
   : ['G grabs a stunned goblin (or one you got behind). Click to slam, G to throw', 'Warriors: G lifts barrels and tables. Throw them, or slam them down', 'Break the oil barrel near goblins and they burn', 'Goblins drop weapons. Stand on one and press F to take it', 'Bows: release on the white flash. Held too long, the shot weakens', 'C changes class. Q swaps its kit. T puts an element on your relic', 'Healer: point at an ally and press E to BLESS them', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: pin a scrapper to the wall. 1 2 3 pick a relic', 'Striped circles cannot be blocked: SPACE to roll', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or rod', 'Daggers: roll behind a goblin and BACKSTAB'];
 let tipAt = -99, tipI = 0;
 
 function hud(now: number): void {
-  $('.hp i').style.width = (100 * me.hp) / HERO.hp + '%';
-  $('.st i').style.width = (100 * me.stamina) / HERO.stamina + '%';
+  const me = game.hero, room = game.room, pr = game.profile;
+  document.body.dataset.mode = game.mode;
+  $('.hp i').style.width = (100 * me.hp) / me.maxHp + '%';
+  $('.st i').style.width = me.stamina + '%';
   $('.st').classList.toggle('low', me.stamina < 25);
   $('.who').textContent = WEAPONS[me.weapon].cls;
   const item = me.arms[me.weapon];
@@ -82,25 +100,50 @@ function hud(now: number): void {
   $('.rcd').textContent = wait > 0 ? wait.toFixed(1) : 'READY';
   $('.rcd').classList.toggle('wait', wait > 0);
   if (input.touch) document.querySelector<HTMLElement>('.tb.relic')!.style.setProperty('--cd', 100 * (1 - wait / RELICS[me.relic].cooldown) + '%');
+  // The banner: where you are and what you're doing.
+  const run = game.run;
+  if (game.mode === 'run' && run) {
+    const g = goal(run, room);
+    $('#banner').innerHTML = `<b>${run.job.place.name.toUpperCase()} ${run.index + 1}/${run.job.rooms}</b> ${g.text}<span>+${run.gold} GOLD  DOWNS ${run.downs}/${MAX_DOWNS}${run.rescued ? `  SAVED ${run.rescued}` : ''}</span>`;
+    const boss = room.enemies.find((e) => e.name && e.act !== 'dead');
+    $('#boss').hidden = !boss;
+    if (boss) ($('#boss b').textContent = boss.name!), ($('#boss i').style.width = (100 * boss.hp) / boss.maxHp + '%');
+  } else {
+    $('#boss').hidden = true;
+    $('#banner').innerHTML = game.mode === 'town'
+      ? `<b>WICKHOLD</b> DAY ${game.world.day}<span>${pr.gold} GOLD  LEVEL ${pr.level}${pr.picks ? '  (SEE THE TRAINER)' : ''}  ${game.world.rescued} HOME</span>`
+      : `<b>TRAINING YARD</b> Walk out at the bottom to go back to town`;
+  }
+  const spot = game.nearSpot();
+  $('#prompt').hidden = !spot || panel.open;
+  if (spot) $('#prompt').textContent = (input.touch ? '' : 'E  ') + spot.label;
+  $('.tb.use').hidden = !spot || panel.open;
+  if (spot) $('.tb.use').textContent = 'USE';
+  const list = game.mode === 'town' ? townTips : tips;
   if (now - tipAt > 6) {
     tipAt = now;
-    $('#tip').textContent = tips[tipI++ % tips.length];
+    $('#tip').textContent = list[tipI++ % list.length];
   }
-  $('#tip').classList.toggle('gone', parries >= 3);
+  $('#tip').classList.toggle('gone', game.mode === 'run' || (game.mode === 'yard' && parries >= 3));
 }
 
 let last = performance.now();
+let still: Intent | null = null;
 function frame(t: number): void {
   const dt = Math.min(0.1, (t - last) / 1000);
   last = t;
-  room.setIntent(ME, input.read());
-  for (const ev of room.advance(dt)) {
+  // With a panel up, the hero stands still (and no press is spent).
+  const live = input.read();
+  if (panel.open) still ??= { ...live, mx: 0, my: 0, attack: false, block: false };
+  else still = null;
+  for (const ev of game.step(dt, still ?? live)) {
     fx.on(ev);
     sound(ev);
     if (ev.k === 'parry') parries++;
   }
+  if (game.result && !panel.open) showResult(game, panel);
   fx.update(dt);
-  scene.render(room, ME, fx, t / 1000, dt);
+  scene.render(game.room, ME, fx, t / 1000, dt);
   hud(t / 1000);
   requestAnimationFrame(frame);
 }
@@ -118,6 +161,7 @@ if (input.touch) document.body.classList.add('touch');
 
 // Test hooks: read the fight as data, never as pixels.
 const w = window as unknown as Record<string, unknown>;
-w.__GAME_STATE__ = () => ({ time: room.time, hero: { ...me }, enemies: room.enemies.map((e) => ({ ...e })), parries });
-w.render_game_to_text = () => `t=${room.time.toFixed(1)} hero ${me.act} hp ${me.hp} st ${Math.round(me.stamina)} | ` + room.enemies.map((e) => `${e.kind} ${e.act} hp ${e.hp}${e.attack ? ' ' + e.attack.kind + ' ' + e.attack.t.toFixed(2) : ''}`).join(' | ');
-w.__room = room;
+w.__GAME_STATE__ = () => ({ mode: game.mode, time: game.room.time, hero: { ...game.hero }, enemies: game.room.enemies.map((e) => ({ ...e })), parries, run: game.run, profile: game.profile, world: game.world });
+w.render_game_to_text = () => `${game.mode} t=${game.room.time.toFixed(1)} hero ${game.hero.act} hp ${game.hero.hp} st ${Math.round(game.hero.stamina)} | ` + game.room.enemies.map((e) => `${e.kind} ${e.act} hp ${e.hp}${e.attack ? ' ' + e.attack.kind + ' ' + e.attack.t.toFixed(2) : ''}`).join(' | ');
+Object.defineProperty(w, '__room', { get: () => game.room });
+w.__game = game;

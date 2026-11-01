@@ -92,6 +92,9 @@ export interface Hero extends Body {
   perfect: boolean;
   /** Dodged through a blow (TEMPO): the next hit before then lands double. */
   tempoUntil: number;
+  maxHp: number;
+  /** Perks chosen at the trainer (see shared/progress). */
+  perks: string[];
   /** The goblin held overhead (0: none). */
   carrying: number;
   /** The prop held overhead (0: none). */
@@ -163,6 +166,10 @@ export interface Enemy extends Body {
   lastBy: string;
   /** How it died, for the body left behind. */
   death: DeathKind;
+  /** Comes back after dying (the training room); run goblins stay dead. */
+  respawns: boolean;
+  /** A named goblin (a hunt's quarry, a story boss). */
+  name?: string;
 }
 
 /** How a goblin died: fell, lost its head, burst apart, burned, or shattered. */
@@ -211,7 +218,7 @@ export type FightEvent =
   | { k: 'burst'; x: number; y: number; r: number; el: Augment }
   | { k: 'shock' | 'beam'; x: number; y: number; x2: number; y2: number }
   | { k: 'heal'; x: number; y: number; n: number }
-  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle' | 'lift' | 'oilfire'; x: number; y: number }
+  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle' | 'lift' | 'oilfire' | 'freed' | 'exitopen'; x: number; y: number }
   | { k: 'propbreak'; x: number; y: number; kind: PropKind; dx: number; dy: number };
 
 /** A grappling hook: flying out, reeling an enemy in, pulling its owner along, or coming back. */

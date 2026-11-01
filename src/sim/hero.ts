@@ -3,14 +3,14 @@
  * A tap of attack swings on release; holding past CHARGE.start charges a heavy instead.
  */
 import { collide } from '../shared/arena';
-import { AUGMENTS, CHARGE, GRAB, HORN, RELEASE, CLASS_KITS, CLASS_ORDER, CLASS_RELICS, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon } from '../shared/tuning';
+import { AUGMENTS, CHARGE, GRAB, HORN, PERK, RELEASE, CLASS_KITS, CLASS_ORDER, CLASS_RELICS, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon } from '../shared/tuning';
 import { slide } from './bodies';
 import { hitEnemy } from './combat';
 import type { Enemy, FightEvent, Hero, Intent } from './types';
 
 export function newHero(id: string, x: number, y: number): Hero {
   return {
-    id, x, y, kvx: 0, kvy: 0, fx: 0, fy: 1, moving: false, hp: HERO.hp, stamina: HERO.stamina, staminaAt: -9, weapon: 'sword',
+    id, x, y, kvx: 0, kvy: 0, fx: 0, fy: 1, moving: false, hp: HERO.hp, maxHp: HERO.hp, perks: [], stamina: HERO.stamina, staminaAt: -9, weapon: 'sword',
     act: 'idle', actT: 0, actDur: 0, combo: 0, heavy: false, power: 0, counter: false, hitIds: [], blocking: false,
     parryOpenAt: -9, lastBlockPress: -9, rollDx: 0, rollDy: 1, lastRollAt: -9, counterUntil: -9,
     attackQueuedAt: -9, rollQueuedAt: -9, relic: 'javelin', relics: [...CLASS_RELICS.WARRIOR], relicQueuedAt: -9,
@@ -139,14 +139,14 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     }
   }
   if (h.hitstop > 0) return void (h.hitstop -= dt);
-  if (now - h.staminaAt > HERO.regenDelay) h.stamina = Math.min(HERO.stamina, h.stamina + HERO.staminaRegen * (h.rallyUntil > now ? HORN.regen : 1) * dt);
+  if (now - h.staminaAt > HERO.regenDelay) h.stamina = Math.min(HERO.stamina, h.stamina + HERO.staminaRegen * (h.rallyUntil > now ? HORN.regen : 1) * (h.perks.includes('endurance') ? PERK.endurance : 1) * dt);
   h.actT += dt;
   h.moving = false;
   h.blocking = false;
   if (h.act !== 'roll' && h.act !== 'down' && h.act !== 'zip' && slide(h, HERO.radius, dt)) ev.push({ k: 'wallhit', x: h.x, y: h.y });
 
   if (h.act === 'down') {
-    if (h.actT >= h.actDur) Object.assign(h, { act: 'idle', hp: HERO.hp, stamina: HERO.stamina, actT: 0 });
+    if (h.actT >= h.actDur) Object.assign(h, { act: 'idle', hp: h.maxHp, stamina: HERO.stamina, actT: 0 });
     return;
   }
   if (h.act === 'hurt' || h.act === 'stun') {
@@ -155,7 +155,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   }
   const w = WEAPONS[h.weapon];
   const dodge = w.dodge;
-  const wantsRoll = now - h.rollQueuedAt < INPUT_BUFFER && now - h.lastRollAt >= dodge.cooldown && h.stamina >= 1;
+  const wantsRoll = now - h.rollQueuedAt < INPUT_BUFFER && now - h.lastRollAt >= dodge.cooldown * (h.perks.includes('footwork') ? PERK.footwork : 1) && h.stamina >= 1;
   if (h.act === 'roll') {
     const k = dodge.distance / dodge.time;
     h.x += h.rollDx * k * dt;
@@ -175,7 +175,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     const r = RELICS[h.relic];
     if (h.actT >= r.windup && h.actT - dt < r.windup) {
       acts.fire(h);
-      h.relicReady[h.relic] = now + r.cooldown;
+      h.relicReady[h.relic] = now + r.cooldown * (h.perks.includes('relicsworn') ? PERK.relicsworn : 1);
       if (h.relic === 'hook' || h.relic === 'javelin' || h.relic === 'net' || h.relic === 'lodestone') ev.push({ k: h.relic === 'hook' ? 'hookfire' : 'throw', x: h.x, y: h.y, dx: h.fx, dy: h.fy });
     }
     if (h.act === 'throw' && h.actT >= r.windup + r.recover) (h.act = 'idle'), (h.actT = 0);

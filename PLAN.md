@@ -2,8 +2,9 @@
 
 ## Current slice
 
-**Slice 2: one hero, one room** (Claude Opus 5.5, 2026-10-31). Built; waiting on Kyle's thumbs.
-*Done when* parrying and rolling feel good to Kyle on his phone.
+**Slice 3: the town and the loop** (Claude Opus 5.5, 2026-11-01). Built; waiting on Kyle's play.
+*Done when* Kyle can take a job, finish it, level up, buy a weapon, and decide chapter 1 solo.
+
 
 ## Done
 
@@ -28,14 +29,18 @@
       the loot card), perfect release and overdraw on every draw
 - [x] Slice 2g: grab, slam and throw small goblins (earned by stun, net, freeze, stagger or getting
       behind), body-to-body impacts, deaths by the blow (beheaded, burst, burned, shattered) with gore
+- [x] Slice 3: Wickhold (walkable, spots, panels), the job board, seeded run rooms for five terrains,
+      rescue / hunt / larder jobs, gold, experience, levels and perks, the smith and trader, the
+      church, Rescue Row filling up, chapter 1's story mission and the council vote, saves
 - [x] Slice 2h: props (barrels, oil barrel, crates, a table, broken pieces) that break and push; the
       Warrior lifts, slams and throws them
 
 ## Next (in order)
 
-1. Kyle plays slice 2h. Tune: draw times, class speeds, relic cooldowns, the phone's chips.
-2. Slice 3: four players in the room by link or code, the leader's browser hosts, drop-in mid-fight,
+1. Kyle plays slice 3. Tune: job length, goblin counts, gold and experience, the town's layout.
+2. Slice 4: four players by link or code (town and runs), the leader's browser hosts, drop-in mid-fight,
    rejoin by name, takeover from the last snapshot. Copy Come Bye's client relay and online tests.
-3. Slice 4: a real run (5 rooms and a boss, rescue room, down and revive, loot), bots for a bench.
-4. Slice 5: classes for real (abilities, subclasses, levels). Slice 6: Wickhold, the town (see the
-   world atlas), and saves. Slice 7: chapter 1 jobs (place + objective + twist). Slice 8: Blender art pilot.
+3. Slice 5: the shared world on the server (api/world.ts: town state, chapter, votes with a real
+   quorum), down and revive, more objectives (escort, hold the ward), the Want and the church.
+4. Slice 6: classes for real (abilities, subclasses: Knight or Barbarian, Sharpshooter or Rogue).
+   Slice 7: chapter 2, written from the group's choices. Slice 8: Blender art pilot.

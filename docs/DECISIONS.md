@@ -2,6 +2,42 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-01: the town and the loop, terrain, the story mission and the council (Claude Opus 5.5)
+
+Kyle: get to work on the town and the gameplay loops; other terrain types and how maps and
+scenarios are made; bigger story missions and decisions the group votes on that change the world
+and the town.
+
+- **The game starts in Wickhold** (`shared/town.ts`), built from the shared world's state: Lantern
+  Square (the Last Lantern, the job board, the council table), the Church, the Forge, the Training
+  Yard, Market Row, the Infirmary, Rescue Row (a lit house per two people brought home), the north
+  gate. Walk up to a spot and USE it (E or F on a laptop; a USE button on a phone, where the combat
+  buttons hide in town). The training room is now the Training Yard; walk out the bottom to leave.
+- **Maps are data** (`shared/arena.ts`): size, blocks (buildings, rock walls, fences: footprints you
+  walk behind), round things (pillars, trees, pines, rocks, hay, wells, supports, the Lantern),
+  braziers, torches, the way out, and a theme (floor, back wall, ambient light, moonlight). One map
+  is in use at a time (the room sets it), so collision never needs it passed around.
+- **Run rooms are laid out from the job's seed** (`shared/terrain.ts`): village (cottages, a well),
+  farm (barn, fences, hay), fields (standing wheat, hay), forest (trees, pines), mine (rock walls,
+  pit props, oil, dark: heroes carry a lantern). Objective first, then buildings, round things,
+  furniture, a goblin campfire, goblins in the top half; spawn, exit and the middle lane stay clear.
+  Ruin and the room's place set the goblin count; a butcher joins at ruin 2.
+- **Jobs** (`shared/jobs.ts`): three a day from seven places across four regions. Objectives:
+  rescue (break the cages), hunt (a named butcher), larder (smash the racks). Twist: night. Three
+  rooms; clear each to open the way out at the top; the last holds the job. Run goblins stay dead.
+  Three downs and you're driven back with half the gold and nobody saved.
+- **Progress** (`shared/progress.ts`, saved in this browser for now): gold and experience from kills
+  (scrapper 4 and 10, butcher 30 and 60, a named one 80 and 150), 25 experience per person freed, 50
+  and the job's pay for finishing. Levels at 100, 300, 600... (cap 10 in chapter 1); each level is a
+  pick of one of two perks at the trainer (tough, endurance, relic sworn, footwork, guard, second
+  wind). The smith sells a fine weapon (60), the trader a forged one (160, once the market opens).
+  Gold given at the church feeds the Lantern (the Want comes later).
+- **Chapter 1** (`shared/story.ts`): bring 6 people home and finish the story mission, Barrowby's
+  Bell (four rooms at night, the Gnawer in the church, three cages). Then the council table opens:
+  farm the north fields (jobs pay 25% more, a granary goes up) or take in the refugees (four more on
+  Rescue Row, the trader opens). A council needs 4; in this solo demo you can decide alone. The vote
+  is recorded with its voters and day; chapter 2 is written at the review.
+
 ## 2026-10-31 (late): props to smash, lift and throw (Claude Opus 5.5)
 
 Kyle: pick up and throw barrels and tables (and broken pieces) if you're a big enough character,

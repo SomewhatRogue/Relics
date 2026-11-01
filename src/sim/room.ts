@@ -3,7 +3,9 @@
  * sockets or screens. Solo, it runs in this browser; online, it runs in the party leader's browser
  * (the Come Bye host model) and friends send it Intents.
  */
-import { ARENA } from '../shared/arena';
+import { ARENA, useMap, type GameMap } from '../shared/arena';
+import type { Foe } from '../shared/terrain';
+import type { PropKind } from '../shared/props';
 import { Rng } from '../shared/rng';
 import { BLESSING, GUARD, HEAL_RADIUS, HERO, LODESTONE, TICK, TRAIT, WEAPONS, type Swing } from '../shared/tuning';
 import { separate } from './bodies';
@@ -14,7 +16,7 @@ import { newHero, stepHero, type HeroActs } from './hero';
 import { isDead } from './damage';
 import { impacts } from './impacts';
 import { release, stepCarry, tryGrab } from './grab';
-import { dropProp, propImpacts, roomProps, stepLift, stepProps, sweepProps, tryLift } from './props';
+import { dropProp, newProp, propImpacts, roomProps, stepLift, stepProps, sweepProps, tryLift } from './props';
 import { dropFrom, stepDrops, takeLoot } from './loot';
 import { bless, rally, shadowstep } from './relics';
 import { forgedElement, has, traitsOf } from './traits';
@@ -42,25 +44,49 @@ export class ArenaRoom {
   private lootRng: Rng;
   private acc = 0;
 
-  /** `squire`: a training partner who stands by the swing dummy taking hits (someone to heal and bless). */
-  constructor(seed = 1, opts: { scrappers?: boolean; squire?: boolean; props?: boolean } = {}) {
+  /** The map this room is played on. */
+  map: GameMap;
+  /** The way out is open (a run room once its goal is met; the training yard always). */
+  exitOpen = false;
+  private squire: boolean;
+
+  /**
+   * The training room by default. A run room passes its `map`, `foes` and `props` (its goblins stay
+   * dead and its furniture doesn't come back). `squire`: a training partner to heal and bless.
+   */
+  constructor(seed = 1, opts: { scrappers?: boolean; squire?: boolean; props?: boolean; map?: GameMap; foes?: Foe[]; furniture?: { kind: PropKind; x: number; y: number }[] } = {}) {
     this.rng = new Rng(seed);
     this.lootRng = new Rng(seed * 7919 + 13);
+    this.map = opts.map ?? ARENA;
+    useMap(this.map);
+    this.squire = !!opts.squire;
+    if (opts.foes) {
+      opts.foes.forEach((f, i) => {
+        const e = newEnemy(i + 1, f.kind, f.x, f.y);
+        if (f.hp) e.hp = e.maxHp = f.hp;
+        Object.assign(e, { respawns: false, name: f.name });
+        this.enemies.push(e);
+      });
+      this.props = (opts.furniture ?? []).map((p) => newProp(p.kind, p.x, p.y, false));
+      return;
+    }
+    if (opts.map) {
+      this.props = (opts.furniture ?? []).map((p) => newProp(p.kind, p.x, p.y, false));
+      return;
+    }
     const s = ARENA.spawn;
     this.enemies.push(newEnemy(1, 'butcher', s.butcher.x, s.butcher.y));
     this.enemies.push(newEnemy(2, 'dummy', s.dummy.x, s.dummy.y));
     this.enemies.push(newEnemy(3, 'swingDummy', s.swingDummy.x, s.swingDummy.y));
     if (opts.scrappers !== false) s.scrappers.forEach((p, i) => this.enemies.push(newEnemy(4 + i, 'scrapper', p.x, p.y)));
-    this.squire = !!opts.squire;
     if (opts.props === false) this.props = [];
+    this.exitOpen = true;
   }
-
-  private squire: boolean;
 
   join(id: string): Hero {
     let h = this.heroes.find((x) => x.id === id);
     if (!h) {
-      const s = ARENA.spawn.hero;
+      const s = this.map.hero;
       h = newHero(id, s.x + this.heroes.length * 0.9, s.y);
       this.heroes.push(h);
       // The squire turns up with the first player (after them, so the room's first hero is a player).
@@ -95,6 +121,7 @@ export class ArenaRoom {
   }
 
   step(): void {
+    useMap(this.map);
     for (const h of this.heroes) this.prev.set('h:' + h.id, [h.x, h.y]);
     for (const e of this.enemies) this.prev.set('e:' + e.id, [e.x, e.y]);
     this.events = [];
@@ -133,7 +160,7 @@ export class ArenaRoom {
     if (isDead(e)) {
       const tx = h.x - e.x, ty = h.y - e.y, rear = (e.fx * tx + e.fy * ty) / (Math.hypot(tx, ty) || 1) < GUARD.rearCos;
       if (has(h, 'reaper') && (h.counter || rear)) {
-        const heal = Math.min(HERO.hp - h.hp, TRAIT.reaper);
+        const heal = Math.min(h.maxHp - h.hp, TRAIT.reaper);
         if (heal > 0) (h.hp += heal), w.ev.push({ k: 'heal', x: h.x, y: h.y, n: heal });
       }
       return;
@@ -182,7 +209,7 @@ export class ArenaRoom {
     w.ev.push({ k: 'bless', x: h.x, y: h.y });
     for (const o of this.heroes) {
       if (o.act === 'down' || Math.hypot(o.x - h.x, o.y - h.y) > HEAL_RADIUS) continue;
-      const n = Math.min(HERO.hp - o.hp, s.heal);
+      const n = Math.min(o.maxHp - o.hp, s.heal);
       if (n <= 0) continue;
       o.hp += n;
       w.ev.push({ k: 'heal', x: o.x, y: o.y, n });

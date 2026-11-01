@@ -1,80 +1,109 @@
-/** The room's still parts, painted once: back wall, floor, side walls. Tile (x, y) is pixel (OX + 16x, OY + 16y). */
-import { ARENA } from '../shared/arena';
+/**
+ * A map's still parts, painted once: the floor, the back wall's face, the side walls. Tile (x, y) is
+ * pixel (OX + 16x, OY + 16y). Buildings, trees and rocks are drawn with the actors (so you can walk
+ * behind them); see blocks.ts.
+ */
+import type { GameMap } from '../shared/arena';
 import { Rng } from '../shared/rng';
 
 export const PX = 16;
 export const OX = 8;
-export const OY = 8 + ARENA.wallFace * PX;
-export const WORLD_W = ARENA.w * PX + 16;
-export const WORLD_H = ARENA.h * PX + OY + 8;
+/** Every map has a 3-tile back wall face. */
+export const OY = 8 + 3 * PX;
+export const worldW = (m: GameMap) => m.w * PX + 16;
+export const worldH = (m: GameMap) => m.h * PX + OY + 8;
 export const toPx = (x: number, y: number): [number, number] => [OX + x * PX, OY + y * PX];
 
-export function paintRoom(): HTMLCanvasElement {
-  const c = document.createElement('canvas');
-  c.width = WORLD_W;
-  c.height = WORLD_H;
-  const g = c.getContext('2d')!;
-  const rng = new Rng(7);
+type Rect = (x: number, y: number, w: number, h: number, col: string) => void;
+
+const FLOORS: Record<GameMap['theme']['floor'], { tile: [number, number]; base: string[]; line: string; fleck: string[] }> = {
+  flagstone: { tile: [16, 12], base: ['#3f3b4a', '#45404f', '#3a3644', '#4a4555', '#423d4d'], line: '#1d1b24', fleck: ['#36323f', '#524c5e'] },
+  cobble: { tile: [8, 6], base: ['#4a4450', '#524b56', '#45404a', '#575060', '#4d4652'], line: '#24212a', fleck: ['#3a3640', '#5e5866'] },
+  grass: { tile: [16, 16], base: ['#26331f', '#2b3923', '#233021', '#2e3d25'], line: '#26331f', fleck: ['#3a4c2c', '#1d2818', '#46582f'] },
+  dirt: { tile: [16, 16], base: ['#3a3024', '#3e3428', '#362c21', '#423628'], line: '#3a3024', fleck: ['#2a2219', '#4e4232'] },
+  rock: { tile: [12, 10], base: ['#2e2c34', '#34313a', '#29272f', '#38353f'], line: '#18161c', fleck: ['#222027', '#45414c'] },
+  wheat: { tile: [16, 16], base: ['#3e3424', '#433827'], line: '#3e3424', fleck: ['#2e2619'] },
+};
+
+export function paintMap(m: GameMap): HTMLCanvasElement {
+  const W = worldW(m), H = worldH(m), c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const g = c.getContext('2d')!, rng = new Rng(m.w * 31 + m.h * 7 + m.name.length);
   const pick = (a: string[]) => a[rng.int(a.length)];
-  const rect = (x: number, y: number, w: number, h: number, col: string) => {
-    g.fillStyle = col;
-    g.fillRect(x, y, w, h);
-  };
-  rect(0, 0, WORLD_W, WORLD_H, '#14121a');
-  // Back wall: a cap, then the face in brick courses.
-  rect(0, 0, WORLD_W, 8, '#2a2733');
-  rect(0, 0, WORLD_W, 2, '#4f4a5c');
-  const faceTop = 8, faceH = OY - 8;
-  rect(0, faceTop, WORLD_W, faceH, '#1f1c26');
-  for (let r = 0; r * 5 < faceH - 3; r++) {
-    const off = (r % 2) * 4;
-    for (let x = -8 + off; x < WORLD_W; x += 8) rect(x + 1, faceTop + r * 5, 7, 4, pick(['#3b3746', '#433e50', '#36323f', '#3e3a4a']));
-  }
-  rect(0, OY - 3, WORLD_W, 3, '#16141b');
-  // Chains and scrawl on the wall.
-  for (const cx of [60, 196]) for (let y = faceTop + 2; y < faceTop + 26; y += 2) rect(cx + (y % 4 ? 1 : 0), y, 1, 1, '#6a6470');
-  for (let i = 0; i < 9; i++) rect(118 + i * 2 + rng.int(2), faceTop + 14 + rng.int(6), 1, 2 + rng.int(3), '#5a1414');
-  // Floor flagstones.
-  for (let r = 0; r * 12 < ARENA.h * PX; r++) {
-    const off = (r % 2) * 8;
-    for (let x = OX - 16 + off; x < OX + ARENA.w * PX; x += 16) {
-      const y0 = OY + r * 12, base = pick(['#3f3b4a', '#45404f', '#3a3644', '#4a4555', '#423d4d']);
-      rect(x, y0, 16, 12, '#1d1b24');
-      rect(x + 1, y0 + 1, 15, 11, base);
-      for (let k = 0; k < 5; k++) rect(x + 1 + rng.int(15), y0 + 1 + rng.int(11), 1, 1, rng.next() < 0.5 ? '#36323f' : '#524c5e');
+  const rect: Rect = (x, y, w, h, col) => ((g.fillStyle = col), g.fillRect(x, y, w, h));
+  rect(0, 0, W, H, '#14121a');
+  back(m, rect, rng, pick, W);
+  // Floor.
+  const f = FLOORS[m.theme.floor], [tw, th] = f.tile, fw = m.w * PX, fh = m.h * PX;
+  for (let r = 0; r * th < fh; r++) {
+    const off = (r % 2) * (tw / 2);
+    for (let x = OX - tw + off; x < OX + fw; x += tw) {
+      const y0 = OY + r * th;
+      rect(x, y0, tw, th, f.line);
+      rect(x + (f.line === f.base[0] ? 0 : 1), y0 + (f.line === f.base[0] ? 0 : 1), tw - 1, th - 1, pick(f.base));
+      for (let k = 0; k < (tw * th) / 40; k++) rect(x + 1 + rng.int(tw - 1), y0 + 1 + rng.int(th - 1), 1, 1, pick(f.fleck));
     }
   }
-  for (let i = 0; i < 10; i++) {
-    let x = OX + rng.int(ARENA.w * PX), y = OY + rng.int(ARENA.h * PX - 8);
-    for (let k = 0; k < 6; k++) rect((x += rng.int(2)), y++, 1, 1, '#24212c');
-  }
-  // Old stains and bones.
-  const stain = (cx: number, cy: number, r: number) => {
-    for (let y = -r; y <= r; y++) for (let x = -r; x <= r; x++) {
-      const d = Math.hypot(x, y) + rng.next() * 2;
-      if (d < r) rect(cx + x, cy + y, 1, 1, d < r * 0.55 ? '#43141a' : '#33101a');
+  if (m.theme.floor === 'wheat') {
+    // Rows of standing wheat, trampled in places.
+    for (let y = OY + 6; y < OY + fh; y += 7) for (let x = OX + rng.int(4); x < OX + fw; x += 3) {
+      if (rng.next() < 0.25) continue;
+      const h = 3 + rng.int(4);
+      rect(x, y - h, 1, h, rng.next() < 0.5 ? '#8a7a3a' : '#a08c44');
+      if (rng.next() < 0.5) rect(x, y - h - 1, 1, 1, '#c8b060');
     }
-  };
-  stain(OX + 40, OY + 220, 6);
-  stain(OX + 250, OY + 60, 5);
-  rect(OX + 44, OY + 214, 3, 1, '#d9d2c0');
-  rect(OX + 46, OY + 215, 1, 1, '#b8b0a0');
-  rect(OX + 30, OY + 228, 2, 2, '#d9d2c0');
-  // Floor darkens under the back wall.
+  }
+  if (m.theme.floor === 'grass') for (let i = 0; i < m.w * m.h * 0.8; i++) {
+    const x = OX + rng.int(fw), y = OY + rng.int(fh);
+    rect(x, y, 1, 2, '#3a4c2c');
+    rect(x + 1, y + 1, 1, 1, '#46582f');
+  }
   g.fillStyle = 'rgba(0,0,0,0.35)';
-  g.fillRect(OX, OY, ARENA.w * PX, 4);
+  g.fillRect(OX, OY, fw, 4);
   // Side and front walls.
-  rect(0, 0, OX, WORLD_H, '#2a2733');
-  rect(OX - 1, OY, 1, ARENA.h * PX, '#3b3746');
-  rect(WORLD_W - 8, 0, 8, WORLD_H, '#2a2733');
-  rect(WORLD_W - 8, OY, 1, ARENA.h * PX, '#3b3746');
-  rect(0, WORLD_H - 8, WORLD_W, 8, '#2a2733');
-  rect(0, WORLD_H - 8, WORLD_W, 1, '#4f4a5c');
-  // Torch brackets.
-  for (const t of ARENA.torches) {
+  const side = m.theme.back === 'trees' ? '#141a12' : m.theme.back === 'palisade' ? '#2a2018' : '#2a2733';
+  rect(0, 0, OX, H, side);
+  rect(W - 8, 0, 8, H, side);
+  rect(0, H - 8, W, 8, side);
+  rect(0, H - 8, W, 1, '#4f4a5c');
+  for (const t of m.torches) {
     const [x, y] = toPx(t.x, t.y);
     rect(x - 1, y, 3, 8, '#3a2a1a');
     rect(x - 2, y + 7, 5, 1, '#3a2a1a');
   }
   return c;
+}
+
+/** The back wall's face: stone courses, a log palisade, a treeline, or bare rock. */
+function back(m: GameMap, rect: Rect, rng: Rng, pick: (a: string[]) => string, W: number): void {
+  const top = 8, faceH = OY - 8, kind = m.theme.back;
+  if (kind === 'stone') {
+    rect(0, 0, W, 8, '#2a2733');
+    rect(0, 0, W, 2, '#4f4a5c');
+    rect(0, top, W, faceH, '#1f1c26');
+    for (let r = 0; r * 5 < faceH - 3; r++) {
+      const off = (r % 2) * 4;
+      for (let x = -8 + off; x < W; x += 8) rect(x + 1, top + r * 5, 7, 4, pick(['#3b3746', '#433e50', '#36323f', '#3e3a4a']));
+    }
+  } else if (kind === 'palisade') {
+    rect(0, 0, W, OY, '#120f14');
+    for (let x = 0; x < W; x += 6) {
+      const h = faceH + 2 + rng.int(4);
+      rect(x, OY - h, 5, h, pick(['#4a3424', '#523a28', '#44301f']));
+      rect(x + 1, OY - h - 2, 3, 2, '#3a2a1c');
+      rect(x + 4, OY - h, 1, h, '#2e2016');
+    }
+  } else if (kind === 'trees') {
+    rect(0, 0, W, OY, '#0c100b');
+    for (let x = -10; x < W + 10; x += 9) {
+      const r = 8 + rng.int(6), cy = 10 + rng.int(12);
+      for (let y = -r; y <= r; y++) for (let dx = -r; dx <= r; dx++) if (dx * dx + y * y <= r * r) rect(x + dx, cy + y, 1, 1, y < -r / 3 ? '#26361f' : '#1c2817');
+      rect(x - 1, cy + r - 2, 3, OY - cy - r + 2, '#2a1f16');
+    }
+  } else {
+    rect(0, 0, W, OY, '#1a1820');
+    for (let i = 0; i < W * 2; i++) rect(rng.int(W), rng.int(OY), 2 + rng.int(4), 1 + rng.int(3), pick(['#2a2730', '#232029', '#302c36']));
+  }
+  rect(0, OY - 3, W, 3, '#16141b');
 }

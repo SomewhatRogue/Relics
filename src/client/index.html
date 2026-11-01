@@ -21,9 +21,14 @@
       <button id="mute" aria-label="Sound on or off">SND</button>
       <button id="help" aria-label="How to play">?</button>
     </div>
+    <div id="banner"></div>
+    <div id="boss" hidden><b></b><div class="bar"><i></i></div></div>
     <div id="tip"></div>
+    <div id="prompt" hidden></div>
     <div id="how" hidden>
-      <h2>The training room</h2>
+      <h2>Relic</h2>
+      <p>You start in <b>Wickhold</b>, the last walled town. Walk to the <b>job board</b> in Lantern Square to take a job: three rooms (four for the story mission) in a village, a farm, the fields, a forest or a mine. Clear each room to open the way out at the top; the last room holds the job (free the caged, kill the named butcher, smash the larder). Three downs and you're driven back. Gold, experience and the people you save come home: level up at the <b>trainer</b>, buy weapons at the <b>smith</b>, give to the Lantern at the <b>church</b>. When the chapter's goals are met the <b>council table</b> decides what the town does next, and the town changes. Progress saves in this browser.</p>
+      <h2>The fight</h2>
       <p>The goblin butcher winds up before every heavy blow. Its red shape on the floor fills, then it lands.</p>
       <ul>
         <li><b>Attack</b> click or tap. Keep pressing for the weapon's combo. <b>Hold</b> to charge a heavy blow; release to swing.</li>
@@ -55,6 +60,7 @@
       <button class="tb attack">ATTACK</button>
       <button class="tb relic">RELIC</button>
       <button class="tb grab" hidden>GRAB</button>
+      <button class="tb use" hidden>USE</button>
       <div class="chips"><button class="chip swap-class">CLASS</button><button class="chip swap-weapon">WEAPON</button><button class="chip augment">AUGMENT</button></div>
     </div>
     <script type="module" src="./main.ts"></script>

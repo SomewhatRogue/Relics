@@ -37,6 +37,7 @@ function breakProp(p: Prop, w: PropWorld, dx: number, dy: number): void {
   const spec = PROPS[p.kind];
   Object.assign(p, { broken: true, lifted: false, kvx: 0, kvy: 0, respawnAt: p.home ? w.now + PROP.respawn : -1 });
   w.ev.push({ k: 'propbreak', x: p.x, y: p.y, kind: p.kind, dx, dy });
+  if (p.kind === 'cage') w.ev.push({ k: 'freed', x: p.x, y: p.y });
   if (spec.pieces) for (let i = 0; i < spec.pieces.n; i++) {
     const a = (i / spec.pieces.n) * Math.PI * 2 + 0.6, q = newProp(spec.pieces.kind, p.x + Math.cos(a) * 0.3, p.y + Math.sin(a) * 0.3, false);
     Object.assign(q, { kvx: Math.cos(a) * 5 + dx * 4, kvy: Math.sin(a) * 5 + dy * 4, fadeAt: w.now + PROP.pieceLife, lastBy: p.lastBy });
@@ -131,7 +132,7 @@ export function propImpacts(w: PropWorld): void {
 
 /** Can this hero lift this prop? Only strong classes, within reach. */
 export const liftable = (h: Hero, p: Prop) =>
-  STRONG.includes(WEAPONS[h.weapon].cls) && !p.broken && !p.lifted && Math.hypot(p.x - h.x, p.y - h.y) <= GRAB.reach + p.radius;
+  STRONG.includes(WEAPONS[h.weapon].cls) && p.weight < 10 && !p.broken && !p.lifted && Math.hypot(p.x - h.x, p.y - h.y) <= GRAB.reach + p.radius;
 
 export function tryLift(h: Hero, props: Prop[], ev: FightEvent[]): boolean {
   let best: Prop | null = null, bd = Infinity;
