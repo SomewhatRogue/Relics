@@ -113,9 +113,9 @@ export const LINES = {
   road: "The wood gives out at last. Walls ahead, and over them a glow that isn't the moon.",
   skill: "Now. Don't save any of it.",
   /** Waking: he comes over slowly, checks you, hauls you up. */
-  waking: ['Breathing. That makes one of you.', "Anything broken? Wiggle something. Good. Soldier or thief, they took your boots. Have mine.", 'Up, slow.'],
+  waking: ['Breathing. That makes one of you.', "Anything broken? Move your toes. Good. Soldier or thief, they took your boots. Have mine.", 'Up, slow.'],
   /** When you get it right (a short pause in the fight). */
-  praise: ["That's it.", 'Good. Like that.', "There. You've done this before.", 'Hah. Kindling.'],
+  praise: ["That's it.", 'Good. Like that.', "There. You've done this before.", "Hah. You'll keep, stray."],
   /** The instruction under each lesson, plain, with the control shown beside it. */
   how: {
     move: 'Walk. Get the feel of your legs back.',
@@ -123,8 +123,8 @@ export const LINES = {
     roll: "Red with a striped edge can't be blocked. When it's about to land, roll out of it.",
     block: 'Hold your guard as the red fills. Blocking costs breath: the yellow bar.',
     parry: 'Tap your guard the moment the red flashes white. It staggers them, and your next blow lands hard.',
-    skill: 'Your skill. It needs a while to come back.',
+    skill: 'Your skill. Spend it, then it needs a while to come back.',
   },
   /** The freeze-frame prompts, the first times a lesson's blow comes. */
-  now: { roll: 'NOW: ROLL OUT', block: 'NOW: GUARD UP', parry: 'IT FLASHES WHITE: NOW', attack: 'HIT IT' },
+  now: { roll: 'NOW: ROLL OUT', block: 'NOW: GUARD UP', parry: 'NOW: TAP GUARD', attack: 'HIT IT' },
 };
