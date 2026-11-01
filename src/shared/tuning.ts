@@ -36,6 +36,28 @@ export interface Heavy extends Swing {
   knockFull: number;
 }
 
+/**
+ * A dodge. 'roll' goes where you push (or where you face); 'backstep' always hops away from where you
+ * face and keeps you facing; 'dash' is a fast, long, low run. Untouchable between iFrom and iTo.
+ */
+export interface Dodge {
+  kind: 'roll' | 'backstep' | 'dash';
+  distance: number;
+  time: number;
+  iFrom: number;
+  iTo: number;
+  stamina: number;
+  /** Can't dodge again until this long after the last one started. */
+  cooldown: number;
+}
+
+/** The sword and shield's roll: the baseline every other dodge is measured against. */
+export const ROLL: Dodge = { kind: 'roll', distance: 3, time: 0.32, iFrom: 0.04, iTo: 0.26, stamina: 22, cooldown: 0.5 };
+
+/**
+ * A weapon kit. Until classes exist each weapon stands in for one, so it carries how its holder
+ * blocks, parries, moves and dodges; these move to the class once there are classes.
+ */
 export interface Weapon {
   name: string;
   combo: Swing[];
@@ -47,6 +69,15 @@ export interface Weapon {
   chargeSpeed: number;
   /** Damage multiplier for blows from behind (GUARD.rearMult if not set). */
   backstab?: number;
+  /** A tap of block this close before a hit lands is a parry. */
+  parryWindow: number;
+  /** Blows within this arc (degrees, centred on where you face) can be blocked or parried. */
+  guardArc: number;
+  /** Stamina per point of damage blocked, times GUARD.staminaPerDmg. */
+  guardCost: number;
+  /** Walk speed, times HERO.speed. */
+  speed: number;
+  dodge: Dodge;
 }
 
 export const WEAPONS: Record<'sword' | 'greatsword' | 'spear' | 'daggers', Weapon> = {
@@ -61,6 +92,11 @@ export const WEAPONS: Record<'sword' | 'greatsword' | 'spear' | 'daggers', Weapo
     chip: 0.12,
     blockSpeed: 0.5,
     chargeSpeed: 0.4,
+    parryWindow: 0.36,
+    guardArc: 170,
+    guardCost: 1,
+    speed: 1,
+    dodge: ROLL,
   },
   greatsword: {
     name: 'GREATSWORD',
@@ -72,6 +108,11 @@ export const WEAPONS: Record<'sword' | 'greatsword' | 'spear' | 'daggers', Weapo
     chip: 0.3,
     blockSpeed: 0.35,
     chargeSpeed: 0.25,
+    parryWindow: 0.2,
+    guardArc: 110,
+    guardCost: 1.5,
+    speed: 0.85,
+    dodge: { kind: 'roll', distance: 2.3, time: 0.4, iFrom: 0.06, iTo: 0.28, stamina: 30, cooldown: 0.8 },
   },
   spear: {
     name: 'SPEAR',
@@ -85,6 +126,11 @@ export const WEAPONS: Record<'sword' | 'greatsword' | 'spear' | 'daggers', Weapo
     chip: 0.22,
     blockSpeed: 0.45,
     chargeSpeed: 0.35,
+    parryWindow: 0.24,
+    guardArc: 120,
+    guardCost: 1.3,
+    speed: 0.95,
+    dodge: { kind: 'backstep', distance: 2.4, time: 0.24, iFrom: 0.02, iTo: 0.18, stamina: 16, cooldown: 0.45 },
   },
   /** The rogue's kit (a Ranger upgrade, Kyle's idea): weak from the front, brutal from behind. */
   daggers: {
@@ -100,6 +146,11 @@ export const WEAPONS: Record<'sword' | 'greatsword' | 'spear' | 'daggers', Weapo
     blockSpeed: 0.6,
     chargeSpeed: 0.7,
     backstab: 2.5,
+    parryWindow: 0.2,
+    guardArc: 100,
+    guardCost: 1.8,
+    speed: 1.15,
+    dodge: { kind: 'dash', distance: 3.6, time: 0.2, iFrom: 0, iTo: 0.2, stamina: 14, cooldown: 0.3 },
   },
 };
 export type WeaponId = keyof typeof WEAPONS;
@@ -113,8 +164,6 @@ export const INPUT_BUFFER = 0.25;
 export const GUARD = {
   /** Stamina spent per point of damage blocked. */
   staminaPerDmg: 1.4,
-  /** A tap of block this close before a hit lands is a parry. Online, the guest's ping widens it. */
-  parryWindow: 0.3,
   /** A re-press this soon after the last one doesn't reopen the window (no mashing). */
   parryRepress: 0.25,
   guardBreakStun: 0.9,
@@ -129,7 +178,6 @@ export const GUARD = {
   rearCos: -0.35,
 };
 
-export const ROLL = { distance: 3, time: 0.32, iFrom: 0.04, iTo: 0.26, stamina: 22, cooldown: 0.5 };
 
 export const HITSTOP = { light: 0.05, heavy: 0.11, parry: 0.18 };
 export const HURT_STAGGER = 0.25;

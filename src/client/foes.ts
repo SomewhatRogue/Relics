@@ -111,12 +111,12 @@ export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number): void {
 
 /**
  * The telegraph on the floor: a red shape that fills before the attack lands. While a parry
- * would land (the last GUARD.parryWindow of the wind-up), its edge and fill flash white.
+ * would land (the last `parryWindow` of the wind-up, from the player's kit), its edge and fill flash white.
  */
-export function drawTelegraph(c: Ctx, a: EnemyAttack, cx: number, cy: number): void {
+export function drawTelegraph(c: Ctx, a: EnemyAttack, cx: number, cy: number, parryWindow: number): void {
   if (a.t >= a.windup + a.active) return;
   const prog = Math.min(1, a.t / a.windup), g = c.glow;
-  const now = !a.unblockable && a.windup - a.t <= GUARD.parryWindow && a.t < a.windup;
+  const now = !a.unblockable && a.windup - a.t <= parryWindow && a.t < a.windup;
   const pulse = 0.85 + 0.15 * Math.sin(c.now * 20);
   const fill = now ? '#ffe8e0' : a.kind === 'slam' ? '#e8501f' : '#e23a30';
   if (a.kind === 'slam') {

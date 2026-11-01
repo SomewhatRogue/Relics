@@ -1,5 +1,5 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, parry, roll). */
-import { BUTCHER, FLINCH, GUARD, HERO, HITSTOP, HURT_STAGGER, ROLL, SCRAPPER, SWING_DUMMY, WEAPONS, type Swing } from '../shared/tuning';
+import { BUTCHER, FLINCH, GUARD, HERO, HITSTOP, HURT_STAGGER, SCRAPPER, SWING_DUMMY, WEAPONS, type Swing } from '../shared/tuning';
 import { shove } from './bodies';
 import type { Enemy, EnemyAttack, FightEvent, Hero } from './types';
 
@@ -59,16 +59,18 @@ export function attackCovers(a: EnemyAttack, h: Hero): boolean {
 /** An enemy's attack lands on a hero: rolled through, parried, blocked, or taken. */
 export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: FightEvent[]): void {
   if (h.act === 'down' || !attackCovers(a, h)) return;
-  if (h.act === 'roll' && h.actT >= ROLL.iFrom && h.actT <= ROLL.iTo + h.lenience) {
+  const w = WEAPONS[h.weapon];
+  if (h.act === 'roll' && h.actT >= w.dodge.iFrom && h.actT <= w.dodge.iTo + h.lenience) {
     ev.push({ k: 'dodge', x: h.x, y: h.y });
     return;
   }
   const tx = e.x - h.x, ty = e.y - h.y, tl = Math.hypot(tx, ty) || 1;
   // Pushed away from where the blow came from (the slam's centre for a slam).
   const sx = a.kind === 'slam' ? h.x - a.cx : -tx, sy = a.kind === 'slam' ? h.y - a.cy : -ty, sl = Math.hypot(sx, sy) || 1;
-  const facing = (h.fx * tx + h.fy * ty) / tl > 0.1;
+  // The kit's guard covers an arc in front: a shield covers nearly everything ahead.
+  const facing = (h.fx * tx + h.fy * ty) / tl > Math.cos(((w.guardArc / 2) * Math.PI) / 180);
   const canGuard = !a.unblockable && facing && (h.act === 'idle' || h.act === 'attack' || h.act === 'charge');
-  if (canGuard && now - h.parryOpenAt <= GUARD.parryWindow + h.lenience) {
+  if (canGuard && now - h.parryOpenAt <= w.parryWindow + h.lenience) {
     h.counterUntil = now + GUARD.counterWindow;
     h.parryOpenAt = -9;
     h.hitstop = Math.max(h.hitstop, HITSTOP.parry);
@@ -80,9 +82,9 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     return;
   }
   if (canGuard && h.blocking) {
-    const chip = Math.round(a.dmg * WEAPONS[h.weapon].chip);
+    const chip = Math.round(a.dmg * w.chip);
     h.hp -= chip;
-    h.stamina -= a.dmg * GUARD.staminaPerDmg;
+    h.stamina -= a.dmg * GUARD.staminaPerDmg * w.guardCost;
     h.staminaAt = now;
     h.hitstop = Math.max(h.hitstop, HITSTOP.light);
     shove(h, sx / sl, sy / sl, a.knock * 0.4, HERO.weight);

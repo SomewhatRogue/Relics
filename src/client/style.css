@@ -13,6 +13,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .st.low i { background: #7a6a30; }
 .gear { display: flex; justify-content: space-between; align-items: center; gap: 8px; white-space: nowrap; font-size: 10px; color: #b5b0c0; margin-top: 3px; text-shadow: 0 1px 0 #000; }
 .rcd { font-weight: 600; color: #9fe8ff; }
+.kit { color: #8a8494; margin-top: 1px; }
 .rcd.wait { color: #6a647a; }
 .chips { position: fixed; right: calc(10px + env(safe-area-inset-right)); top: calc(42px + env(safe-area-inset-top)); display: flex; gap: 6px; }
 .chip { position: static; height: 26px; padding: 0 8px; background: #1b1922cc; border: 1px solid #4f4a5c; border-radius: 4px; font-size: 10px; touch-action: none; }

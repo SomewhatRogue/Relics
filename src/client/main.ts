@@ -25,6 +25,14 @@ function sound(ev: FightEvent): void {
   f?.();
 }
 
+/** One line on how each kit guards and dodges. */
+const KIT: Record<string, string> = {
+  sword: 'EASY PARRY  WIDE GUARD  ROLL',
+  greatsword: 'TIGHT PARRY  HEAVY ROLL',
+  spear: 'BACKSTEP  KEEPS FACING',
+  daggers: 'LONG DASH  BACKSTAB 2.5X',
+};
+
 let parries = 0;
 const tips = input.touch
   ? ['Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'RELIC: pin a scrapper to the wall', 'Striped circles cannot be blocked: ROLL out', 'WEAPON and RELIC up top swap your kit', 'TWIN DAGGERS: roll behind a goblin and BACKSTAB']
@@ -36,6 +44,7 @@ function hud(now: number): void {
   $('.st i').style.width = (100 * me.stamina) / HERO.stamina + '%';
   $('.st').classList.toggle('low', me.stamina < 25);
   $('.wpn').textContent = (input.touch ? '' : 'Q ') + WEAPONS[me.weapon].name;
+  $('.kit').textContent = KIT[me.weapon];
   $('.rlc').textContent = (input.touch ? '' : 'E ') + RELICS[me.relic].name;
   const wait = Math.max(0, me.relicReady[me.relic] - room.time);
   $('.rcd').textContent = wait > 0 ? wait.toFixed(1) : 'READY';

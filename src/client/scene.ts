@@ -3,7 +3,7 @@
  * The scene is painted at a low resolution and scaled up by a whole number so pixels stay crisp.
  */
 import { ARENA } from '../shared/arena';
-import { GUARD } from '../shared/tuning';
+import { GUARD, WEAPONS } from '../shared/tuning';
 import type { ArenaRoom } from '../sim/room';
 import { drawHero } from './actors';
 import { blit, type Ctx } from './draw';
@@ -85,7 +85,8 @@ export class Scene {
     lit.drawImage(this.bg, -cx, -cy);
     fx.drawDecals(lit, cx, cy);
     glow.clearRect(0, 0, this.vw, this.vh);
-    for (const e of room.enemies) if (e.attack && e.act === 'attack') drawTelegraph(c, e.attack, cx, cy);
+    const pw = me ? WEAPONS[me.weapon].parryWindow + me.lenience : 0.3;
+    for (const e of room.enemies) if (e.attack && e.act === 'attack') drawTelegraph(c, e.attack, cx, cy, pw);
     // With daggers in hand, show each goblin's back: the place a backstab lands.
     if (me?.weapon === 'daggers') for (const e of room.enemies) {
       if (e.act === 'dead' || e.kind === 'dummy' || e.kind === 'swingDummy') continue;

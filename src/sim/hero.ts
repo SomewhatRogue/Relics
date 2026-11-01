@@ -3,7 +3,7 @@
  * A tap of attack swings on release; holding past CHARGE.start charges a heavy instead.
  */
 import { collide } from '../shared/arena';
-import { CHARGE, GUARD, HERO, HOOK, INPUT_BUFFER, JAVELIN, RELICS, RELIC_ORDER, ROLL, WEAPONS, WEAPON_ORDER, type Swing } from '../shared/tuning';
+import { CHARGE, GUARD, HERO, HOOK, INPUT_BUFFER, JAVELIN, RELICS, RELIC_ORDER, WEAPONS, WEAPON_ORDER, type Swing } from '../shared/tuning';
 import { slide } from './bodies';
 import { hitEnemy } from './combat';
 import type { Enemy, FightEvent, Hero, Intent } from './types';
@@ -55,7 +55,7 @@ function face(h: Hero, inp: Intent, enemies: Enemy[], snap: boolean, reach = 3.2
 function walk(h: Hero, inp: Intent, k: number, dt: number): void {
   const m = Math.min(1, Math.hypot(inp.mx, inp.my));
   if (m < 0.05) return;
-  const l = Math.hypot(inp.mx, inp.my), sp = HERO.speed * k * m;
+  const l = Math.hypot(inp.mx, inp.my), sp = HERO.speed * WEAPONS[h.weapon].speed * k * m;
   h.x += (inp.mx / l) * sp * dt;
   h.y += (inp.my / l) * sp * dt;
   h.moving = true;
@@ -98,13 +98,14 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     return;
   }
   const w = WEAPONS[h.weapon];
-  const wantsRoll = now - h.rollQueuedAt < INPUT_BUFFER && now - h.lastRollAt >= ROLL.cooldown && h.stamina >= 1;
+  const dodge = w.dodge;
+  const wantsRoll = now - h.rollQueuedAt < INPUT_BUFFER && now - h.lastRollAt >= dodge.cooldown && h.stamina >= 1;
   if (h.act === 'roll') {
-    const k = ROLL.distance / ROLL.time;
+    const k = dodge.distance / dodge.time;
     h.x += h.rollDx * k * dt;
     h.y += h.rollDy * k * dt;
     collide(h, HERO.radius);
-    if (h.actT >= ROLL.time) (h.act = 'idle'), (h.actT = 0);
+    if (h.actT >= dodge.time) (h.act = 'idle'), (h.actT = 0);
     return;
   }
   if (h.act === 'zip') return;
@@ -191,18 +192,20 @@ function startSwing(h: Hero, i: number, inp: Intent, enemies: Enemy[], now: numb
 }
 
 function startRoll(h: Hero, inp: Intent, now: number, ev: FightEvent[]): void {
+  const kind = WEAPONS[h.weapon].dodge.kind;
   let x = inp.mx, y = inp.my;
+  // A backstep always hops away from where you face, and you keep facing the threat.
+  if (kind === 'backstep') (x = -h.fx), (y = -h.fy);
   if (Math.hypot(x, y) < 0.1) (x = h.fx), (y = h.fy);
   const l = Math.hypot(x, y);
   h.rollDx = x / l;
   h.rollDy = y / l;
-  h.fx = h.rollDx;
-  h.fy = h.rollDy;
+  if (kind !== 'backstep') (h.fx = h.rollDx), (h.fy = h.rollDy);
   h.act = 'roll';
   h.actT = 0;
   h.kvx = h.kvy = 0;
   h.lastRollAt = now;
   h.rollQueuedAt = -9;
-  spend(h, ROLL.stamina, now);
+  spend(h, WEAPONS[h.weapon].dodge.stamina, now);
   ev.push({ k: 'roll', x: h.x, y: h.y });
 }

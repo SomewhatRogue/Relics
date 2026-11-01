@@ -1,5 +1,5 @@
 /** Drawing the Warrior: body, the weapon in hand (sword and shield, greatsword, spear), charge and swing. */
-import { CHARGE, GUARD } from '../shared/tuning';
+import { CHARGE, WEAPONS } from '../shared/tuning';
 import { currentSwing } from '../sim/hero';
 import type { Hero } from '../sim/types';
 import { blit, ease, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
@@ -88,19 +88,23 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean): vo
   if (h.act === 'charge') (ox = -Math.round(h.fx)), (oy = 1);
   if (h.act === 'hurt') ox = Math.round(Math.sin(c.now * 90) * 1.2);
   if (h.act === 'zip') (ox = Math.round(h.fx * 2)), (oy = Math.round(h.fy * 2) - 1);
-  if (h.act === 'roll') squash = 0.62;
+  const dk = WEAPONS[h.weapon].dodge;
+  if (h.act === 'roll' && dk.kind === 'roll') squash = 0.62;
+  if (h.act === 'roll' && dk.kind === 'backstep') oy -= Math.round(4 * Math.sin((Math.PI * h.actT) / dk.time));
+  if (h.act === 'roll' && dk.kind === 'dash') (ox = Math.round(h.rollDx * 2)), (oy += 1);
   const bx = x + ox, by = y + oy;
   shadow(c, x, y, 6);
   if (me) ring(c, x, y, 7, '#4a90e0');
   if (h.act === 'roll' || h.act === 'zip') {
     const dx = h.act === 'roll' ? h.rollDx : h.fx, dy = h.act === 'roll' ? h.rollDy : h.fy;
     c.glow.globalAlpha = 0.25;
-    for (let k = 1; k <= 3; k++) c.glow.drawImage(SPRITES.warriorDown.white, Math.round(bx - 7 - dx * 5 * k), Math.round(by - (h.act === 'roll' ? 10 : 17) - dy * 5 * k), 14, h.act === 'roll' ? 11 : 18);
+    const tumble = h.act === 'roll' && dk.kind === 'roll', n = h.act === 'roll' && dk.kind === 'dash' ? 5 : 3;
+    for (let k = 1; k <= n; k++) c.glow.drawImage(SPRITES.warriorDown.white, Math.round(bx - 7 - dx * 5 * k), Math.round(by - (tumble ? 10 : 17) - dy * 5 * k), 14, tumble ? 11 : 18);
     c.glow.globalAlpha = 1;
-    if (h.act === 'roll') return blit(c, SPRITES.warriorDown, bx, by, flip, 0, squash);
+    if (tumble) return blit(c, SPRITES.warriorDown, bx, by, flip, 0, squash);
   }
   const side = h.fx >= -0.2 ? 1 : -1, px = bx + side * 3, py = by - 8, p = pose(h, c.now);
-  const fresh = c.now - h.parryOpenAt < GUARD.parryWindow;
+  const fresh = c.now - h.parryOpenAt < WEAPONS[h.weapon].parryWindow;
   const shieldAt: [number, number] = h.blocking || fresh ? [bx + h.fx * 6, by - 7 + h.fy * 4] : [bx - side * 4, by - 6];
   const drawGear = () => {
     if (h.weapon === 'sword') blit(c, SPRITES.shield, shieldAt[0], shieldAt[1] + 4, false, fresh ? 0.85 : 0);

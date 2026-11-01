@@ -2,6 +2,23 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-10-31 (night, later): kits guard and dodge differently (Claude Opus 5.5)
+
+Kyle: sword and shield should block easiest and best; greatsword and spear need more timing; classes
+should differ in speed, dodge recharge, dodge range and direction. Until classes exist, each weapon
+kit carries these (`Weapon` in tuning) and they move to the class later.
+
+| Kit | Parry window | Guard arc | Block cost | Speed | Dodge |
+| --- | --- | --- | --- | --- | --- |
+| Sword and shield | 0.36 s | 170 deg | 1x | 1.0 | roll 3 tiles, 0.5 s recharge |
+| Greatsword | 0.20 s | 110 deg | 1.5x | 0.85 | heavy roll 2.3 tiles, 0.8 s |
+| Spear | 0.24 s | 120 deg | 1.3x | 0.95 | backstep 2.4 tiles away from facing, keeps facing, 0.45 s |
+| Twin daggers | 0.20 s | 100 deg | 1.8x | 1.15 | dash 3.6 tiles, 0.3 s |
+
+- The telegraph's white parry cue uses the player's own kit window, so it always tells the truth.
+- Class mapping to carry over later: Warrior (sword and shield or greatsword), Ranger (spear-like
+  backstep, then Rogue's dash), Mage (a blink), Healer (to decide).
+
 ## 2026-10-31 (night): corpses ride the javelin, backstabs (Claude Opus 5.5)
 
 Kyle: the javelin should carry the body back even when the throw kills; some classes (a rogue,

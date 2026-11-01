@@ -309,3 +309,53 @@ describe('corpses and backstabs', () => {
     expect((t.fx * tx + t.fy * ty) / tl).toBeLessThan(GUARD.rearCos);
   });
 });
+
+describe('kits block and dodge differently', () => {
+  it('a parry 0.3 s early works with sword and shield but only blocks with a greatsword', () => {
+    const parryWith = (weapon: 'sword' | 'greatsword') => {
+      const { room, h, b } = setup();
+      h.weapon = weapon;
+      until(room, 0.3);
+      room.setIntent('me', intent({ blockSeq: 1, block: true }));
+      run(room, ticks(0.4));
+      return b.act === 'stunned';
+    };
+    expect(parryWith('sword')).toBe(true);
+    expect(parryWith('greatsword')).toBe(false);
+  });
+
+  it("a shield guards a blow from the side that a greatsword's guard misses", () => {
+    const blockFromSide = (weapon: 'sword' | 'greatsword') => {
+      const { room, h } = setup();
+      h.weapon = weapon;
+      room.setIntent('me', intent({ block: true, blockSeq: 1, ax: 1, ay: -0.5 }));
+      run(room, ticks(BUTCHER.cleave.windup) + 2);
+      return HERO.hp - h.hp;
+    };
+    expect(blockFromSide('sword')).toBeLessThan(BUTCHER.cleave.dmg);
+    expect(blockFromSide('greatsword')).toBe(BUTCHER.cleave.dmg);
+  });
+
+  it('the spear backsteps away from where you face and keeps facing', () => {
+    const { room, h } = onTarget(1);
+    h.weapon = 'spear';
+    Object.assign(h, { x: 9, y: 9, fx: 0, fy: -1 });
+    room.setIntent('me', intent({ rollSeq: 1, mx: 1 }));
+    run(room, ticks(WEAPONS.spear.dodge.time) + 1);
+    expect(h.y).toBeGreaterThan(9 + WEAPONS.spear.dodge.distance * 0.8);
+    expect(h.fy).toBeLessThan(-0.9);
+  });
+
+  it('the dagger dash goes further than the greatsword roll and recharges sooner', () => {
+    const dodge = (weapon: 'daggers' | 'greatsword') => {
+      const { room, h } = onTarget(1);
+      h.weapon = weapon;
+      Object.assign(h, { x: 14, y: 9 });
+      room.setIntent('me', intent({ rollSeq: 1, mx: -1 }));
+      run(room, ticks(0.45));
+      return 14 - h.x;
+    };
+    expect(dodge('daggers')).toBeGreaterThan(dodge('greatsword') + 1);
+    expect(WEAPONS.daggers.dodge.cooldown).toBeLessThan(WEAPONS.greatsword.dodge.cooldown);
+  });
+});
