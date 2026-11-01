@@ -146,3 +146,6 @@ most Want among the heroes is the one the bells don't spare).
   He left a hazel tally stick (eleven notches, names by the ones he knew) for Father Odric, who keeps the
   count of the dead. The hungry left that field half-picked and went north together (unexplained).
   Wickhold owes Hew for four loads of charcoal. Orla of the watch knew him by his boots.
+- **After the wood:** the tally stick has eleven notches; Odric cuts the twelfth, for Hew, when it's handed
+  over. Odric knew Hew and owed him a beer he never came in for. Hew calls the hero "stray". A Healer's
+  censer goes cold on the field ("They do"); only the church relights it, and Isolde carries it there herself.
