@@ -1149,3 +1149,8 @@ puddles, weeds, missing cobbles, arrows) stay on top; the earth, path, mud and s
 - New tallies, counted per player in a run and kept on the shared Roll online: butchers killed, gold
   earned, friends picked up; and on the unlucky side times knocked down, picked up by friends, friends
   floored. Old heroes start the new tallies at nothing.
+
+## 2026-11-01: back to 1x sprites (Kyle; Opus 5.5)
+- The 2x jointed figures were reverted (Kyle: "doughy and soft", and the idle bob jumped about; the 1x
+  look was grittier). The work stays on branch `juice` (97ffc72) for reference. The anticipation and
+  payoff pass from before the 2x step stays in.
