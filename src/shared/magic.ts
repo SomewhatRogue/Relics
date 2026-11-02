@@ -29,8 +29,11 @@ export const HOOK = {
   recover: 0.15,
   speed: 20,
   range: 8,
-  /** Enemies this light or lighter are yanked; anything heavier pulls you instead. */
+  /** Enemies this light or lighter are yanked to you; anything heavier (or a wall) pulls you to it instead.
+   *  Only a Warrior or a Healer is heavy enough to haul big things in (`heavyYank`): the rest pull small
+   *  goblins and otherwise go flying to whatever they hooked, which makes the hook a second dodge. */
   yankWeight: 1,
+  heavyYank: 4,
   yankSpeed: 15,
   zipSpeed: 15,
   /** A yanked enemy arrives reeling for this long. */

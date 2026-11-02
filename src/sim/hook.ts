@@ -4,7 +4,7 @@
  * pulls the owner across instead. A miss reels the hook back.
  */
 import { collide } from '../shared/arena';
-import { HERO, HOOK } from '../shared/tuning';
+import { CLASS_GUARD, HERO, HOOK, WEAPONS } from '../shared/tuning';
 import { isDead } from './damage';
 import type { Afflict } from './javelin';
 import type { Enemy, FightEvent, Hero, Hook } from './types';
@@ -51,7 +51,8 @@ export function stepHook(k: Hook, heroes: Hero[], enemies: Enemy[], now: number,
         ev.push({ k: 'latch', x: k.x, y: k.y, dx: k.dx, dy: k.dy });
         afflict(t, k.el, HOOK.dmg);
         if (isDead(t)) return false;
-        if (t.weight <= HOOK.yankWeight && t.act !== 'pinned') {
+        const heavy = CLASS_GUARD[WEAPONS[h.weapon].cls] === 'full';
+        if (t.weight <= (heavy ? HOOK.heavyYank : HOOK.yankWeight) && t.act !== 'pinned') {
           k.state = 'yank';
           Object.assign(t, { act: 'carried', attack: null, kvx: 0, kvy: 0 });
           ev.push({ k: 'yank', x: t.x, y: t.y, dx: -k.dx, dy: -k.dy });
@@ -79,7 +80,9 @@ export function stepHook(k: Hook, heroes: Hero[], enemies: Enemy[], now: number,
       e.x = h.x - (dx / d) * stop;
       e.y = h.y - (dy / d) * stop;
       collide(e, e.radius);
-      Object.assign(e, { act: 'stunned', actT: 0, actDur: HOOK.yankStun });
+      // Small ones arrive reeling; a butcher hauled in just arrives, angry.
+      if (e.kind === 'butcher') Object.assign(e, { act: 'chase', cooldown: Math.max(e.cooldown, 0.4) });
+      else Object.assign(e, { act: 'stunned', actT: 0, actDur: HOOK.yankStun });
       ev.push({ k: 'land', x: e.x, y: e.y, dx: dx / d, dy: dy / d });
       return false;
     }

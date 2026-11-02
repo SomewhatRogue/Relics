@@ -156,7 +156,7 @@ describe('the prologue wood', () => {
     expect(g.wood!.count).toBe(1);
   });
 
-  it('the hut: the cutscene kills Hew; the Stoker gives up the javelin; the road leads to Wickhold with the tally stick', () => {
+  it('the hut: the cutscene kills Hew; the Stoker gives up the grappling hook; the road leads to Wickhold with the tally stick', () => {
     const g = new Game();
     g.create('MAGE', 'stray');
     wake(g);
@@ -173,7 +173,7 @@ describe('the prologue wood', () => {
     kill(s, [], 'burst', 0, 1);
     g.step(0.05, NO_INTENT);
     expect(w().relic).toBe(true);
-    expect(g.hero.relics).toEqual(['lodestone', 'javelin']);
+    expect(g.hero.relics).toEqual(['lodestone', 'hook']);
     // The find stops everything until you've seen it.
     expect(w().hold?.kind).toBe('relic');
     g.continueHold();
@@ -182,16 +182,16 @@ describe('the prologue wood', () => {
     Object.assign(g.hero, { x: 1.6, y: 4 });
     g.step(0.05, NO_INTENT);
     expect(g.mode).toBe('town');
-    expect(g.profile).toMatchObject({ prologue: true, tally: true, relic: 'javelin' });
+    expect(g.profile).toMatchObject({ prologue: true, tally: true, relic: 'hook' });
     expect(g.greeting).toBe('orla');
   });
 
-  it('a second hero can skip the wood and still gets the javelin; a Healer comes out with a cold censer', () => {
+  it('a second hero can skip the wood and still gets the hook; a Healer comes out with a cold censer', () => {
     const g = new Game();
     g.create('HEALER', 'ivy');
     g.skipWood();
     expect(g.mode).toBe('town');
-    expect(g.profile).toMatchObject({ prologue: true, cold: true, relic: 'javelin' });
+    expect(g.profile).toMatchObject({ prologue: true, cold: true, relic: 'hook' });
     expect(g.hero.cold).toBe(true);
   });
 });

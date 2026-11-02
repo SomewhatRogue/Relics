@@ -52,7 +52,7 @@ export class Scene {
     addEventListener('resize', () => this.resize());
   }
 
-  /** The javelin held over your head, turning slowly in a ring of light. */
+  /** The relic (the hook) held over your head in a turning ring of light. */
   private heldUp(c: Ctx, x: number, y: number, t: number): void {
     const top = Math.round(y - 34), g = c.glow;
     g.globalAlpha = 0.55;
@@ -62,11 +62,11 @@ export class Scene {
       for (let r = r0; r < r1; r++) g.fillRect(Math.round(x + Math.cos(a) * r), Math.round(top + Math.sin(a) * r * 0.8), 1, 1);
     }
     g.globalAlpha = 1;
-    c.lit.fillStyle = '#7a5230';
-    c.lit.fillRect(Math.round(x - 9), top, 16, 2);
-    g.fillStyle = '#e8f0ff';
-    g.fillRect(Math.round(x + 7), top - 1, 3, 4);
-    g.fillRect(Math.round(x + 10), top, 2, 2);
+    // The hook up top, its chain hanging down to your hand.
+    const X = Math.round(x), px = (dx: number, dy: number, col: string) => ((g.fillStyle = col), g.fillRect(X + dx, top + dy, 1, 1));
+    for (let k = 0; k < 6; k++) px(k % 2 ? 0 : -1, 4 + k * 2, '#8a8f9a'), px(k % 2 ? -1 : 0, 5 + k * 2, '#5a5e68');
+    for (const [dx, dy] of [[0, 3], [0, 2], [0, 1], [0, 0], [1, -1], [2, -1], [3, 0], [3, 1], [3, 2], [2, 3], [-1, 0], [-2, 1]]) px(dx, dy, '#e8f0ff');
+    px(3, 3, '#ffffff');
   }
 
   /** A gold arrow at your feet, pointing the way on, pulsing out and back. */

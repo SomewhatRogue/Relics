@@ -40,6 +40,9 @@ export interface Npc {
   lift?: number;
   walking?: boolean;
   pose?: 'headless' | 'body' | 'corpse';
+  /** Stopped to talk to you (on their round): since when, and how long they've stood about in all. */
+  heldAt?: number;
+  lag?: number;
 }
 
 /** Where someone is at time `t` (walking their round, or standing where they stand), and which way they face. */
@@ -51,7 +54,9 @@ export function npcAt(n: Npc, t: number): { x: number; y: number; fx: number; fy
     return { a, b, len: Math.hypot(b[0] - a[0], b[1] - a[1]) };
   });
   const total = seg.reduce((s, q) => s + q.len, 0);
-  let d = (t * (n.speed ?? 1.1)) % total;
+  // Stopped to talk: they stand where they were, and pick their round up again from there.
+  const tt = (n.heldAt ?? t) - (n.lag ?? 0);
+  let d = (tt * (n.speed ?? 1.1)) % total;
   for (const q of seg) {
     if (d <= q.len) {
       const k = d / (q.len || 1), fx = (q.b[0] - q.a[0]) / (q.len || 1), fy = (q.b[1] - q.a[1]) / (q.len || 1);

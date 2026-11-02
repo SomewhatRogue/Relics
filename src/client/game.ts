@@ -4,7 +4,7 @@
  * to go in; taking a job starts a run (room after room until the job is done or you're driven back);
  * the results come home to the hero and the shared world, and the town changes with them.
  */
-import { doorAt, inArea, npcAt, type Area, type Block } from '../shared/arena';
+import { doorAt, inArea, npcAt, type Area, type Block, type Npc } from '../shared/arena';
 import { townInterior } from '../shared/interiors';
 import { board, type Job } from '../shared/jobs';
 import { workDone, WORK_ORDER, type WorkId } from '../shared/works';
@@ -26,7 +26,7 @@ import { load, store, type Save } from './save';
 export type Mode = 'town' | 'yard' | 'run' | 'wood';
 export interface Result { won: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number; relic?: RelicId }
 /** Something you can use where you stand: a spot, a person, or a door. */
-export interface Near { label: string; talk?: SpotId; arg?: number; key?: string; door?: Block; chest?: number }
+export interface Near { label: string; talk?: SpotId; arg?: number; key?: string; door?: Block; chest?: number; npc?: Npc }
 
 export const ME = 'me';
 const NAMES: Record<string, string> = { cottage: 'THE COTTAGE', barn: 'THE BARN', home: 'THE HOUSE' };
@@ -104,13 +104,13 @@ export class Game {
     this.enterTown(this.gateSpot());
   }
 
-  /** What the wood leaves you: the javelin, Hew's tally stick, a cold censer for a Healer. */
+  /** What the wood leaves you: the grappling hook, Hew's tally stick, a cold censer for a Healer. */
   private giveWood(): void {
     const p = this.profile;
     if (!this.woodReplay) {
       Object.assign(p, { prologue: true, tally: true, cold: p.cls === 'HEALER' });
-      if (!p.relics.includes('javelin')) p.relics.unshift('javelin');
-      p.relic ||= 'javelin';
+      if (!p.relics.includes('hook')) p.relics.unshift('hook');
+      p.relic ||= 'hook';
     }
     store(this.save);
   }
@@ -357,7 +357,7 @@ export class Game {
     for (const n of map.npcs ?? []) {
       if (n.pose) continue;
       const at = npcAt(n, this.room.time);
-      all.push({ x: at.x, y: at.y, label: n.name, talk: n.talk as SpotId, arg: n.arg });
+      all.push({ x: at.x, y: at.y, label: n.name, talk: n.talk as SpotId, arg: n.arg, npc: n });
     }
     for (const b of map.blocks) {
       if (!b.door || b.ruined || (b.burning ?? -1) >= 0) continue;
@@ -470,9 +470,9 @@ export class Game {
     stepWood(w, this.room, ev, dt, WEAPONS[h.weapon].parryWindow + h.lenience);
     if (cut >= 0 && w.cut < 0 && !this.woodReplay) (this.profile.cutSeen = true), store(this.save);
     // Out of the Stoker: the javelin, on the RELIC button at once.
-    if (w.relic && !h.found.includes('javelin')) {
-      h.found = ['javelin'];
-      h.relics = abilitiesOf(this.profile.cls, 'javelin');
+    if (w.relic && !h.found.includes('hook')) {
+      h.found = ['hook'];
+      h.relics = abilitiesOf(this.profile.cls, 'hook');
     }
     if (w.done) this.finishWood();
     return ev;

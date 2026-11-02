@@ -702,3 +702,10 @@ goblins among them (GOBLIN_DEAD, cut down, in two, beheaded), and the field's lo
 The three wagons burn for show (Block.smoulder) and are drawn as wagons (plank bed, hoops, spoked wheels,
 charred). Fire is redrawn everywhere: tapering tongues white to red, licks tearing loose, embers, a thick
 rolling smoke column.
+
+## 2026-11-01: the hook is the first relic; in town only the one you talk to stops (Claude Opus 5.5)
+Kyle: the Stoker hauls you in with a hook, so its relic is the grappling hook, not the javelin (the javelin is
+the next found). The hook pulls by weight: a small goblin comes to you; anything heavier, or a wall, pulls you
+to it (a second dodge for the light classes); a Warrior or Healer can haul in up to a butcher (HOOK.heavyYank),
+which arrives angry rather than reeling. The town no longer pauses for a panel (the town is shared online);
+instead whoever you're talking to stops their round (Npc.heldAt/lag) and picks it up after.

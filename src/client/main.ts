@@ -1,6 +1,7 @@
 /** Relic: Wickhold, the Training Yard and runs. The rooms run here in the browser (solo is a party of one). */
 import { CLASS_GUARD, POTIONS, CLASS_ORDER, RELICS, TRAITS, WEAPONS, itemName, type HeroClass } from '../shared/tuning';
 import { MAX_DOWNS, goal } from '../sim/run';
+import type { Npc } from '../shared/arena';
 import type { Intent } from '../sim/types';
 import { Game, ME } from './game';
 import { Panel } from './panels';
@@ -59,8 +60,12 @@ const use = () => {
   if (!n || panel.open || title.open) return;
   if (n.chest) input.open(n.chest);
   else if (n.door) game.enter(n.door);
-  else if (n.talk) openSpot(n.talk, game, panel, n.arg, n.key);
+  else if (n.talk) {
+    if (n.npc?.path) (talking = n.npc), (n.npc.heldAt = game.room.time);
+    openSpot(n.talk, game, panel, n.arg, n.key);
+  }
 };
+let talking: Npc | null = null;
 addEventListener('keydown', (e) => {
   if ((e.target as HTMLElement).closest('input')) return;
   const k = e.key.toLowerCase();
@@ -212,9 +217,9 @@ function frame(t: number): void {
   const live = input.read();
   if (panel.open || title.open) still ??= { ...live, mx: 0, my: 0, attack: false, block: false };
   else still = null;
-  // In town, someone talking to you stops the world till you're done (the jobs never stop for anyone).
-  const paused = panel.open && game.mode === 'town';
-  if (!paused) for (const ev of game.step(dt, still ?? live)) {
+  // Whoever you're talking to stops their round till you're done (the world doesn't: it's shared).
+  if (talking && !panel.open) (talking.lag = (talking.lag ?? 0) + game.room.time - (talking.heldAt ?? game.room.time)), (talking.heldAt = undefined), (talking = null);
+  for (const ev of game.step(dt, still ?? live)) {
     fx.on(ev);
     sounds.event(ev, game.room, t / 1000);
     if (ev.k === 'parry') parries++;
