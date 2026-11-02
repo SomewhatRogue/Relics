@@ -371,3 +371,34 @@ body[data-guard="none"] .tb.block { display: none; }
 #title .rform button { flex: none; }
 #title .about p { margin: 0 0 6px; }
 #title .about p:last-child { margin: 0; }
+
+/* The Roll of the Brave: a card per tally, a podium for the top three. */
+#panel .rcards { display: flex; flex-direction: column; gap: 10px; margin: 6px 0 10px; }
+#panel .rcard { background: #1e1b24; border: 1px solid #3a3644; border-radius: 6px; padding: 8px 10px 6px; }
+#panel .rcard h4 { margin: 0 0 6px; color: #ffd27a; font-size: 12px; letter-spacing: 0.1em; text-align: center; }
+#panel .rcard.shame { background: #22171a; border-color: #4a2a2e; }
+#panel .rcard.shame h4 { color: #e07a6a; }
+#panel .podium { display: flex; align-items: flex-end; justify-content: center; gap: 6px; }
+#panel .step { display: flex; flex-direction: column; align-items: center; width: 31%; min-width: 0; }
+#panel .step .rface { width: 26px; image-rendering: pixelated; }
+#panel .step b { font-size: 11px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #e8e2d0; }
+#panel .step em { font-style: normal; color: #ffd27a; font-size: 13px; }
+#panel .step > span { display: block; width: 100%; margin-top: 3px; text-align: center; font-weight: bold; color: #15131a; border-radius: 3px 3px 0 0; }
+#panel .step.s1 > span { background: #d9b13a; height: 30px; line-height: 30px; }
+#panel .step.s2 > span { background: #a8a2b4; height: 20px; line-height: 20px; }
+#panel .step.s3 > span { background: #a0683a; height: 13px; line-height: 13px; font-size: 10px; }
+#panel .shame .step.s1 > span { background: #c84a3a; }
+#panel .step.me b { color: #7ac8ff; }
+#panel .step i { color: #5a5664; font-style: normal; }
+#panel .rcard ol { list-style: none; margin: 6px 0 0; padding: 0; font-size: 11px; }
+#panel .rcard li { display: flex; gap: 6px; padding: 2px 0; border-top: 1px solid #2a2630; }
+#panel .rcard li span { color: #8a8494; width: 16px; }
+#panel .rcard li small { color: #8a8494; }
+#panel .rcard li em { margin-left: auto; color: #ffd27a; font-style: normal; }
+#panel .rcard li.me { color: #7ac8ff; }
+#panel .rcard .you { margin: 6px 0 0; font-size: 11px; color: #7ac8ff; text-align: right; }
+#panel .rcard .you em { font-style: normal; color: #ffd27a; }
+#panel .rtabs { display: flex; gap: 6px; margin: 0 0 8px; }
+#panel .rtabs button { flex: 1; padding: 8px 0; background: #1c1a22; border: 1px solid #3a3644; color: #b8b2c4; border-radius: 6px; letter-spacing: 0.08em; }
+#panel .rtabs button.on { background: #2a2418; border-color: #ffd27a; color: #ffd27a; }
+#panel .rtabs button[data-side="unlucky"].on { background: #2a1a1c; border-color: #e07a6a; color: #e07a6a; }

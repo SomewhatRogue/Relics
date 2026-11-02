@@ -28,7 +28,7 @@ export function allyHit(by: string, h: Hero, dmg: number, ev: FightEvent[], dx =
   ev.push({ k: 'hit', x: h.x, y: h.y, n, heavy: false, on: 'hero', src: 'friendly' });
   if (h.hp > 0) return;
   Object.assign(h, { hp: 0, act: 'down', actT: 0, actDur: HERO.respawn, kvx: 0, kvy: 0 });
-  ev.push({ k: 'down', x: h.x, y: h.y });
+  ev.push({ k: 'down', x: h.x, y: h.y, id: h.id, by });
   const g = (h.grudges ??= {});
   if ((g[by] = (g[by] ?? 0) + 1) === PARTY.grudge) ev.push({ k: 'grudge', x: h.x, y: h.y, id: h.id, by });
 }
@@ -71,7 +71,7 @@ export function stepParty(heroes: Hero[], dt: number, ev: FightEvent[]): void {
     h.pickT = (h.pickT ?? 0) + dt;
     if (h.pickT < PARTY.pickUp) continue;
     Object.assign(h, { act: 'idle', actT: 0, actDur: 0, hp: Math.round(h.maxHp * PARTY.upHp), bleeding: false, pickT: 0 });
-    ev.push({ k: 'pickedup', x: h.x, y: h.y });
+    ev.push({ k: 'pickedup', x: h.x, y: h.y, id: h.id, by: by.id });
   }
 }
 

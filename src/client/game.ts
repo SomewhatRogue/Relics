@@ -530,7 +530,7 @@ export class Game {
     this.result = { won, job: run.job, gold, xp, rescued, levels, relic, treasure: kept, sold };
     this.run = null;
     this.give({
-      stats: { jobs: won ? 1 : 0, saved: rescued, kills: run.kills, dens: run.dens }, rescued, dens: run.dens, days: 1,
+      stats: { jobs: won ? 1 : 0, saved: rescued, kills: run.kills, dens: run.dens, butchers: run.butchers ?? 0, gold, raised: run.raised ?? 0, falls: run.falls ?? 0, carried: run.carried ?? 0, teamkills: run.teamkills ?? 0 }, rescued, dens: run.dens, days: 1,
       story: won && run.job.objective === 'story' ? run.job.id : undefined,
       deed: won && !followed ? { title: run.job.title, place: run.job.place.name, party } : undefined,
     });

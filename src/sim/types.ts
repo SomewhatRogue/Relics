@@ -332,11 +332,13 @@ export interface Drop {
 export type FightEvent =
   /** A teammate downed you once too often this job. */
   | { k: 'grudge'; x: number; y: number; id: string; by: string }
+  /** A hero down (`by`: the teammate whose blow did it), or picked up (`by`: who picked them up). */
+  | { k: 'down' | 'pickedup'; x: number; y: number; id?: string; by?: string }
   /** `src`: what landed it (a kit, or a shot's kind), for its sound; `big`: on the butcher. */
   | { k: 'hit'; x: number; y: number; n: number; heavy: boolean; on: 'enemy' | 'hero'; counter?: boolean; crit?: boolean; ambush?: boolean; boarded?: boolean; backstab?: boolean; tick?: boolean; src?: string; big?: boolean }
   | { k: 'swing'; x: number; y: number; src: string; heavy: boolean }
   | { k: 'death'; x: number; y: number; how: DeathKind; dx: number; dy: number; kind: EnemyKind }
-  | { k: 'block' | 'parry' | 'guardbreak' | 'winded' | 'breath' | 'bash' | 'dodge' | 'slip' | 'down' | 'out' | 'pickedup' | 'roll' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number }
+  | { k: 'block' | 'parry' | 'guardbreak' | 'winded' | 'breath' | 'bash' | 'dodge' | 'slip' | 'out' | 'roll' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number }
   | { k: 'windup' | 'impact'; x: number; y: number; kind: AttackKind }
   /** The prologue's cutscene: the ground shaking, the bite, a body landing, the Stoker's bellow. */
   | { k: 'rumble' | 'bite' | 'thud' | 'bellow' | 'fanfare'; x: number; y: number }

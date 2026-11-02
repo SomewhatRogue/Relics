@@ -379,3 +379,4 @@ w.__panel = panel;
 w.__openSpot = (id: string, arg = 0, key = '') => openSpot(id as never, game, panel, arg, key);
 // Look sheets for screenshots: every hero, the Warrior's options, and a dark copy with only the glow lit.
 w.__looks = () => Object.fromEntries(Object.keys(LOOKS).map((k) => [k, [0, 1, 2].map((i) => heroLook(k as HeroClass, i).down.c.toDataURL())]));
+w.__openSpot = (id: string) => openSpot(id as Parameters<typeof openSpot>[0], game, panel);

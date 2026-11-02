@@ -40,10 +40,12 @@ export const levelFor = (xp: number) => {
 };
 
 /** What a hero has done, for the Roll of the Brave (the leaderboard). */
-export interface Stats { jobs: number; saved: number; kills: number; given: number; dens: number }
-export const STAT_ORDER: (keyof Stats)[] = ['jobs', 'saved', 'given', 'kills', 'dens'];
-export const STAT_NAME: Record<keyof Stats, string> = { jobs: 'JOBS DONE', saved: 'PEOPLE SAVED', given: 'GOLD GIVEN', kills: 'GOBLINS KILLED', dens: 'DENS BURNED' };
-export const newStats = (): Stats => ({ jobs: 0, saved: 0, kills: 0, given: 0, dens: 0 });
+export interface Stats { jobs: number; saved: number; kills: number; given: number; dens: number; butchers: number; gold: number; raised: number; falls: number; carried: number; teamkills: number }
+/** The Roll of the Brave: honours first, then the tallies nobody wants to top. */
+export const STAT_ORDER: (keyof Stats)[] = ['jobs', 'saved', 'butchers', 'kills', 'gold', 'given', 'dens', 'raised', 'falls', 'carried', 'teamkills'];
+export const SHAME: (keyof Stats)[] = ['falls', 'carried', 'teamkills'];
+export const STAT_NAME: Record<keyof Stats, string> = { jobs: 'JOBS DONE', saved: 'BROUGHT HOME', butchers: 'BUTCHERS KILLED', kills: 'GOBLINS KILLED', gold: 'GOLD EARNED', given: 'GOLD GIVEN', dens: 'DENS BURNED', raised: 'FRIENDS PICKED UP', falls: 'TIMES KNOCKED DOWN', carried: 'PICKED UP BY FRIENDS', teamkills: 'FRIENDS FLOORED' };
+export const newStats = (): Stats => ({ jobs: 0, saved: 0, kills: 0, given: 0, dens: 0, butchers: 0, gold: 0, raised: 0, falls: 0, carried: 0, teamkills: 0 });
 
 export interface Profile {
   /** Who this hero is on the Roll of the Brave (made once, never shown). */

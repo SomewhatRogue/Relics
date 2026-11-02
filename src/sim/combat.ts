@@ -211,5 +211,5 @@ function downIfDead(h: Hero, ev: FightEvent[]): void {
     return;
   }
   Object.assign(h, { hp: 0, act: 'down', actT: 0, actDur: HERO.respawn * (h.perks.includes('secondwind') ? PERK.secondwind : 1), kvx: 0, kvy: 0 });
-  ev.push({ k: 'down', x: h.x, y: h.y });
+  ev.push({ k: 'down', x: h.x, y: h.y, id: h.id });
 }

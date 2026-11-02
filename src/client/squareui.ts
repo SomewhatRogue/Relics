@@ -8,6 +8,7 @@ import { CLASS_NAME } from '../shared/classes';
 import type { HeroClass } from '../shared/tuning';
 import { WORKS, workDone } from '../shared/works';
 import { openWorks } from './worksui';
+import { rollHtml } from './rollui';
 import { townSays } from '../shared/townsays';
 import type { SpotId } from '../shared/town';
 import type { Game } from './game';
@@ -37,19 +38,24 @@ const LOCKED: Record<string, string> = {
 };
 
 /** Returns true if it handled the spot. */
+/** Which side of the Roll is showing. */
+let rollSide: 'brave' | 'unlucky' = 'brave';
+
 export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key: string): boolean {
   const pr = g.profile, w = g.world, again = () => openSquare(id, g, panel, _arg, key);
   if (id === 'works') return openWorks(g, panel), true;
   if (id === 'roll') {
     const board = link?.online && link.board ? link.board : WorldLink.localBoard(g.save.heroes);
-    const where = link?.online ? `World: <b>${link.group.toUpperCase()}</b>${link.group === 'wickhold' ? ' (everyone)' : ' (your group)'}.` : 'Off the shared world: this shows your own heroes. Online, every hero in your world is here.';
-    const html = p(where) + STAT_ORDER.map((k) => `<div class="roll"><b>${STAT_NAME[k]}</b>${board[k].length ? `<ol>${board[k].map((r) => `<li${r.id === pr.id ? ' class="me"' : ''}>${esc(r.name)} <span>${CLASS_NAME[r.cls as HeroClass] ?? r.cls}</span> <em>${r.n}</em></li>`).join('')}</ol>` : '<div class="dim">Nobody yet.</div>'}</div>`).join('') +
-      (link ? `<label class="code">WORLD CODE <input id="wcode" maxlength="24" value="${esc(link.group)}" autocomplete="off" spellcheck="false"></label><p class="dim">Give your group a code of your own to build a town together, apart from everyone else. WICKHOLD is the world everyone shares.</p>` : '');
-    panel.show('THE ROLL OF THE BRAVE', html, link ? [{ label: 'PLAY IN THIS WORLD', act: () => {
+    const where = link?.online ? `World: <b>${link.group.toUpperCase()}</b>.` : 'Your own heroes only, until you play online.';
+    const tabs = `<div class="rtabs">${(['brave', 'unlucky'] as const).map((s) => `<button data-side="${s}" class="${s === rollSide ? 'on' : ''}">${s === 'brave' ? 'THE BRAVE' : 'THE UNLUCKY'}</button>`).join('')}</div>`;
+    const html = tabs + p(where) + rollHtml(board, pr, rollSide) +
+      (link ? `<label class="code">WORLD CODE <input id="wcode" maxlength="24" value="${esc(link.group)}" autocomplete="off" spellcheck="false"></label><p class="dim">A code of your own makes a town apart. WICKHOLD is everyone.</p>` : '');
+    panel.show('THE ROLL OF THE BRAVE', html, [...(link ? [{ label: 'PLAY IN THIS WORLD', act: () => {
       const v = (document.getElementById('wcode') as HTMLInputElement | null)?.value ?? '';
       link!.join(v);
       setTimeout(again, 600);
-    } }] : []);
+    } }] : [])]);
+    for (const b of document.querySelectorAll<HTMLButtonElement>('#panel .rtabs button')) b.onclick = () => ((rollSide = b.dataset.side as typeof rollSide), again());
     return true;
   }
   if (id === 'well') {

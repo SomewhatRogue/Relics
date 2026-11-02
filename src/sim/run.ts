@@ -24,6 +24,12 @@ export interface Run {
   /** Goblins killed and dens burned (for the Roll of the Brave and the town works). */
   kills: number;
   dens: number;
+  /** For the Roll: butchers felled, and this player's own falls, rescues, friends raised and friends felled. */
+  butchers?: number;
+  falls?: number;
+  carried?: number;
+  raised?: number;
+  teamkills?: number;
   /** The road the party took into each room after a fork (by room index). */
   roads: Record<number, RoadId>;
   /** Players in the party when each room is built (it scales the goblins; the ones left, if some went home). */
@@ -60,6 +66,7 @@ export function tally(run: Run, room: ArenaRoom, events: FightEvent[], me: strin
       const e = room.enemies.find((x) => Math.abs(x.x - ev.x) < 0.01 && Math.abs(x.y - ev.y) < 0.01);
       const b = e?.name ? BOUNTY.boss : ev.kind === 'butcher' ? BOUNTY.butcher : ev.kind === 'scrapper' ? BOUNTY.scrapper : null;
       if (b) (run.xp += b.xp), run.kills++;
+      if (b && b !== BOUNTY.scrapper) run.butchers = (run.butchers ?? 0) + 1;
     } else if (ev.k === 'gold') {
       // One pot for the party: whoever picks it up, everyone is paid the lot at the end.
       if (ev.id === me || players(room.heroes).some((h) => h.id === ev.id)) run.gold += ev.n;
@@ -68,7 +75,13 @@ export function tally(run: Run, room: ArenaRoom, events: FightEvent[], me: strin
     } else if (ev.k === 'freed') {
       run.rescued++;
       run.xp += BOUNTY.rescue;
-    } else if (ev.k === 'down' && players(room.heroes).length < 2) {
+    } else if (ev.k === 'pickedup') {
+      if (ev.id === me) run.carried = (run.carried ?? 0) + 1;
+      if (ev.by === me) run.raised = (run.raised ?? 0) + 1;
+    }
+    if (ev.k === 'down' && ev.id === me) run.falls = (run.falls ?? 0) + 1;
+    if (ev.k === 'down' && ev.by === me) run.teamkills = (run.teamkills ?? 0) + 1;
+    if (ev.k === 'down' && players(room.heroes).length < 2) {
       // Alone, three downs and it's lost; in a party, it's lost when everyone is out.
       const h = room.heroes.find((x) => x.id === me);
       if (h && Math.abs(h.x - ev.x) < 0.01 && Math.abs(h.y - ev.y) < 0.01) run.downs++;

@@ -6,7 +6,7 @@
  * Without Redis it keeps worlds in memory (tests, local dev).
  */
 import { CLASS_ORDER } from '../src/shared/weapons.js';
-import { STAT_ORDER, type Stats } from '../src/shared/progress.js';
+import { STAT_ORDER, newStats, type Stats } from '../src/shared/progress.js';
 import { CHAPTER_1, newWorld, type WorldState } from '../src/shared/story.js';
 import { BOARD_SIZE, contribute, type Board, type Contribution } from '../src/shared/worldsync.js';
 import { WORK_ORDER } from '../src/shared/works.js';
@@ -30,7 +30,7 @@ export function clean(raw: unknown): Contribution | null {
   if (!cls) return null;
   const name = String(h.name ?? 'HERO').toUpperCase().replace(/[^A-Z0-9 ]/g, '').slice(0, 12) || 'HERO';
   const s = (c.stats ?? {}) as Record<string, unknown>, w = (c.works ?? {}) as Record<string, unknown>;
-  const cap: Stats = { jobs: 1, saved: 16, kills: 300, given: 5000, dens: 8 };
+  const cap: Stats = { jobs: 1, saved: 16, kills: 300, given: 5000, dens: 8, butchers: 12, gold: 3000, raised: 30, falls: 30, carried: 30, teamkills: 30 };
   const out: Contribution = { hero: { id: h.id, name, cls }, stats: {}, works: {} };
   for (const k of STAT_ORDER) if (s[k] !== undefined) out.stats![k] = num(s[k], cap[k]);
   for (const k of WORK_ORDER) if (w[k] !== undefined) out.works![k] = num(w[k], 5000);
@@ -68,9 +68,9 @@ export function memoryWorldStore(): WorldStore {
       worlds.set(g, w);
       const m = stats.get(g) ?? new Map();
       stats.set(g, m);
-      const line = m.get(c.hero.id) ?? { name: c.hero.name, cls: c.hero.cls, s: { jobs: 0, saved: 0, kills: 0, given: 0, dens: 0 } };
+      const line = m.get(c.hero.id) ?? { name: c.hero.name, cls: c.hero.cls, s: newStats() };
       line.name = c.hero.name;
-      for (const k of STAT_ORDER) line.s[k] += c.stats?.[k] ?? 0;
+      for (const k of STAT_ORDER) line.s[k] = (line.s[k] ?? 0) + (c.stats?.[k] ?? 0);
       m.set(c.hero.id, line);
       return view(g);
     },

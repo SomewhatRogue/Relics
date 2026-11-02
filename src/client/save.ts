@@ -3,7 +3,7 @@
  * own class (for life), level, gold and kit; the world (the town, the chapter, the council) is shared
  * by all of them. (The shared world moves to the server, api/world.ts, when the group plays online.)
  */
-import { HERO_SLOTS, newProfile, type Profile } from '../shared/progress';
+import { HERO_SLOTS, newProfile, newStats, type Profile } from '../shared/progress';
 import { newWorld, type WorldState } from '../shared/story';
 import { WEAPONS, upgradeOld } from '../shared/tuning';
 
@@ -20,6 +20,8 @@ const hero = (p: Partial<Profile>): Profile => {
   if (p.armor === undefined) out.armor = newProfile(cls).armor;
   if (!p.rings) out.rings = [];
   out.steel ??= 0;
+  // Heroes from before the longer Roll start the new tallies at nothing.
+  out.stats = { ...newStats(), ...(p.stats ?? {}) };
   out.want ??= 0;
   // Heroes made before the prologue existed don't have to play it.
   if (p.prologue === undefined) out.prologue = true;

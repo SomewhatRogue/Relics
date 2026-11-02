@@ -1103,3 +1103,10 @@ per 4x4 pixels and coloured per 2x2, written straight into the floor's pixels on
 sweeps its earth and relays three more cobble islands; clearing the lanes sweeps bands of lane mud,
 widens the cobble spines and takes the cart-turn mud fans. The small marks (flagstones, ruts, drains,
 puddles, weeds, missing cobbles, arrows) stay on top; the earth, path, mud and straw marks are gone.
+
+## 2026-11-01: the Roll as a leaderboard (Kyle; Opus 5.5)
+- Two sides, THE BRAVE and THE UNLUCKY, each a card per tally with a podium of the top three (their
+  faces), places four to ten below, and your own count if you're not on it (`src/client/rollui.ts`).
+- New tallies, counted per player in a run and kept on the shared Roll online: butchers killed, gold
+  earned, friends picked up; and on the unlucky side times knocked down, picked up by friends, friends
+  floored. Old heroes start the new tallies at nothing.
