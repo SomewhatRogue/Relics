@@ -29,7 +29,7 @@ import { RelaySocket, type RelayMsg } from './relay';
 import { Decoder, Encoder, stateOf, type Patch } from './snap';
 import { keepJob } from './session';
 
-const AWAY = 5, BYE_WAIT = 2.5, SEND_EVERY = 0.05, FULL_EVERY = 4, GRACE = 60, LOST = 20, KEEP = 2, SAVE_EVERY = 2, TAKE = 9, TAKE_NEXT = 5;
+const AWAY = 5, REJOIN = 5, BYE_WAIT = 2.5, SEND_EVERY = 0.05, FULL_EVERY = 4, GRACE = 60, LOST = 20, KEEP = 2, SAVE_EVERY = 2, TAKE = 9, TAKE_NEXT = 5;
 /**
  * Your own hero, on a friend's screen, moves the moment you press. The leader's word on where you
  * are is a trip there and back old, so the walking you've done here since then is added on top of
@@ -267,12 +267,17 @@ export class CoopGuest {
     // No room yet, or no hero of mine in it (away over a minute, a locked phone): keep saying hello
     // (the leader may still be getting there, or let my hero go and will bring it back).
     if ((!this.room || this.missing) && now - this.helloAt > 2) this.hello();
+    // The leader quiet a while, though my own socket answers: connect afresh (the relay says again who
+    // leads, maybe from another instance) before anyone thinks of taking the job on. (Seen live: a
+    // friend whose socket got there before the leader's claim heard nothing, ever, on the one he had.)
+    if (this.quiet(now) > REJOIN && now - this.rejoinAt > REJOIN) (this.rejoinAt = now), this.sock.reconnect();
     if (this.room) (this.room as unknown as { acc: number }).acc = TICK * Math.min(1, (now - this.lastAt) / this.gap);
     this.predict(intent, now - (this.frameAt < 0 ? now : this.frameAt));
     this.frameAt = now;
   }
 
   private frameAt = -1;
+  private rejoinAt = -99;
   private ack = -1;
   private trip = PREDICT.trip;
   /** My walking here, frame by frame, for the last second. */

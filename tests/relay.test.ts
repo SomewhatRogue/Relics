@@ -4,46 +4,11 @@
  * Redis server (started here if `redis-server` is installed). Each player is a real WebSocket.
  */
 import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
-import http from 'node:http';
-import type { AddressInfo } from 'node:net';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import WebSocket, { WebSocketServer } from 'ws';
-import { Relay, memoryBackend, redisBackend, type Backend } from '../api/_relay';
+import { memoryBackend, redisBackend, type Backend } from '../api/_relay';
+import { ANSWER_MS } from '../api/_presence';
+import { code, instance, player, wait } from './relaykit';
 
-type Msg = { t: string; role?: string; host?: string; id?: string; from?: string; d?: unknown };
-const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-async function instance(backend: Backend, staleMs = 600): Promise<{ port: number; close: () => void }> {
-  const relay = new Relay(backend, { staleMs });
-  const server = http.createServer();
-  const wss = new WebSocketServer({ server });
-  wss.on('connection', (ws, req) => void relay.attach(ws, new URL(req.url ?? '/', 'http://x')));
-  await new Promise<void>((r) => server.listen(0, '127.0.0.1', r));
-  return { port: (server.address() as AddressInfo).port, close: () => (wss.clients.forEach((c) => c.terminate()), server.close()) };
-}
-
-/** A player's socket. Like the game, it says something as soon as it's told it hosts (unless `silent`: a crashed page). */
-function player(port: number, room: string, id: string, want: 'host' | 'take' | 'join' | 'peer', silent = false) {
-  const ws = new WebSocket(`ws://127.0.0.1:${port}/api/room?room=${room}&id=${id}&want=${want}`);
-  const msgs: Msg[] = [];
-  ws.on('message', (d) => {
-    const m = JSON.parse(String(d)) as Msg;
-    msgs.push(m);
-    if (!silent && m.t === 'role' && m.role === 'host') ws.send('{"ping":1}');
-  });
-  const until = async (pred: (m: Msg) => boolean, ms = 4000): Promise<Msg> => {
-    const end = Date.now() + ms;
-    for (;;) {
-      const m = msgs.find(pred);
-      if (m) return m;
-      if (Date.now() > end) throw new Error(`${id} never got it; had ${JSON.stringify(msgs)}`);
-      await wait(15);
-    }
-  };
-  return { ws, msgs, until, send: (to: string, d: unknown) => ws.send(JSON.stringify({ to, d })), close: () => ws.close() };
-}
-
-const code = () => `R${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
 const backends: { name: string; make: () => Promise<Backend>; skip?: boolean }[] = [];
 
 // Two instances, one shared in-memory backend.
@@ -263,6 +228,8 @@ describe('the relay spares Redis', () => {
     await ava.until((m) => m.role === 'guest');
     ava.send('kyle-0101', { t: 'hello' });
     await host.until((m) => m.t === 'msg' && m.from === 'ava-00101');
+    // (A room just opened sends everything while any other instance there answers.)
+    await wait(ANSWER_MS + 100);
     // Three seconds of play on one instance: 15 snapshots a second and inputs.
     pa.v = 0;
     for (let i = 0; i < 45; i++) {

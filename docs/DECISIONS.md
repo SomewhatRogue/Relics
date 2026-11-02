@@ -2,6 +2,45 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-02: the friend who froze when a Florida friend led (Claude Opus 5.5)
+
+Kyle played with two friends in Florida. When he led, every job worked; when a Florida friend led,
+Kyle loaded in and froze (LEAVE still worked), his hero stood still on the leader's screen, and the
+other two played on. Twice. The relay logs and the meter lines say why:
+
+- **Two instances had the same name.** The relay named each instance with `Math.random()`, and
+  Vercel starts instances from a snapshot whose Math.random runs the same numbers: the meter line
+  (one per instance every 5 minutes) for "evqgzyea" came at 20:45:03 and again at 20:45:49, two
+  instances with one name (n0eunt05 too). The "sfo1"/"iad1" in the logs is where a request came in,
+  not a separate machine. Kyle's socket landed on one "evqgzyea", the leader's and the other
+  friend's on the other; each took the other's messages for its own echo and dropped them. Kyle
+  never heard "hosted" or a single patch; the leader never heard Kyle (the still hero was his town
+  figure, brought along when the job started). When Kyle led, the instances happened to differ.
+  Joining before the leader's claim wasn't the cause: the stress scenario passes that way once the
+  names differ.
+- **Fix:** each instance is named by Redis `INCR rl:inst` (a crypto suffix on top; crypto and the
+  clock if Redis is down), and a connection's nonce is the instance's name and a count, so nothing
+  hangs on Math.random (`api/_relay.ts`).
+- **The count that kept messages home is gone as a judge.** Publishing only while another instance
+  listened leaned on PUBLISH's count; a count that left someone out would keep messages from a friend
+  who only listens (only a probe every 2 s got through). Now instances say so themselves
+  (`api/_presence.ts`): `here` on a room's channel when one gets its first player there (sending
+  everything for half a second meanwhile), an answer to any newcomer, `here` again after 15 s of
+  saying nothing else, and `away` when its last player goes. Messages go out while another instance
+  was heard in the last 40 s. A count above one can still open a room, never close it. On one
+  instance that's one `here` per room every 15 s, fewer commands than the old probe every 2 s.
+- **Also:** the relay listens to a socket from its first moment (what a player said while it was
+  still being set up was dropped); a room's set is only taken down if it's still that room's set;
+  a friend who hasn't heard the leader in 5 s reconnects (`coop.ts`, REJOIN), so a socket stuck on a
+  deaf instance gets another go before anyone takes the job on. Backends moved to `api/_backends.ts`.
+- **Tests:** `tests/relaybus.test.ts` (instances with the same Math.random, a friend in before the
+  claim; a count that leaves out the other instance; a lone room publishes nothing). Both fail on
+  the old relay. Stress scenario 14 (`scripts/stress/order.cjs`): a friend's socket there before the
+  leader's claim, on the other instance, a third player with the leader. `scripts/online-server.ts`
+  now makes its two relays with the same seeded Math.random, as Vercel does, and takes `inst` and
+  `hold` on a socket's URL (pick the instance, hold the connection back); scenario 14 froze exactly
+  as Kyle did (`info nohost`, never `hosted`) before the fix.
+
 ## 2026-11-02: the party stress test, and what it broke (Kyle; Claude Opus 5.5)
 
 Kyle played online with a friend and things came apart when he died: the relay logs show his page

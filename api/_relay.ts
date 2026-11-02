@@ -17,21 +17,10 @@
  * From the player: {to: '*' | id, d}
  */
 
-export interface Store {
-  get(key: string): Promise<string | null>;
-  /** SET key val NX EX ttl; returns the value now held. */
-  setNx(key: string, val: string, ttl: number): Promise<string | null>;
-  set(key: string, val: string, ttl: number): Promise<void>;
-  expire(key: string, ttl: number): Promise<void>;
-  del(key: string): Promise<void>;
-}
-export interface Bus {
-  /** Resolves with how many instances heard it (Redis PUBLISH's reply; this one included), or -1 if unknown. */
-  publish(channel: string, msg: string): Promise<number>;
-  subscribe(channel: string, fn: (msg: string) => void): Promise<void>;
-  unsubscribe(channel: string): Promise<void>;
-}
-export interface Backend { store: Store; bus: Bus; shared: boolean }
+import { randomUUID } from 'node:crypto';
+import type { Backend } from './_backends.js';
+import { HERE_MS, Presence } from './_presence.js';
+export { memoryBackend, redisBackend, type Backend, type Bus, type Store } from './_backends.js';
 
 /** The bits of a WebSocket the relay uses (the `ws` package's WebSocket fits). */
 export interface Sock {
@@ -52,17 +41,12 @@ export const STALE_MS = 8000;
 const ROOM = /^[A-Z0-9]{3,12}$/;
 const ID = /^[\w-]{6,64}$/;
 const MAX_MSG = 64_000;
-/**
- * While no other instance has players in a room, its messages stay on this instance; one still goes
- * out this often, so a newcomer elsewhere is found (they announce themselves at once anyway).
- */
-export const PROBE_MS = 2000;
-/** Anyone elsewhere talks at least every 3 s; heard within this long, they're still there. */
-const REMOTE_MS = 10_000;
 
 type Conn = { sock: Sock; id: string; room: string; host: boolean; touchedAt: number; nonce: string; alive: boolean };
 /** `cn`: the sender's connection, so a player can tell a stale goodbye (an old connection) from a real one. */
-type Envelope = { k: 'msg'; from: string; to: string; d: unknown; o: string; cn: string } | { k: 'hosted' | 'left'; id: string; o: string; cn?: string };
+type Envelope = { k: 'msg'; from: string; to: string; d: unknown; o: string; cn: string } | { k: 'hosted' | 'left'; id: string; o: string; cn?: string }
+  /** Between instances only (_presence.ts): this instance has players in the room, or no longer. */
+  | { k: 'here' | 'away'; o: string };
 
 const hostKey = (room: string) => `rl:host:${room}`;
 const seenKey = (room: string) => `rl:seen:${room}`;
@@ -79,16 +63,17 @@ const chan = (room: string) => `rl:room:${room}`;
 
 export class Relay {
   private rooms = new Map<string, Set<Conn>>();
+  /** Which rooms have players on other instances too, so their messages need the bus. */
+  private presence = new Presence();
   /**
-   * Rooms nobody else is listening to, and when that was found. Redis's free plan is a few hundred
-   * thousand commands a month, and publishing every message (the host's 15 snapshots a second, every
-   * input) spent that in a few hours of play. Players usually share one instance, so most messages
-   * never need Redis at all.
+   * This instance's name on the bus (its own echoes are skipped by it). Counted out by the store, not
+   * drawn from Math.random: Vercel starts instances from one snapshot, so their Math.random runs alike,
+   * and two instances both named "evqgzyea" each took the other's messages for its own echo and
+   * dropped them (seen live: a friend on one froze, the leader on the other never heard him).
    */
-  private alone = new Map<string, number>();
-  /** When each room last heard from another instance: while that's recent, everything goes out. */
-  private elsewhere = new Map<string, number>();
-  readonly origin = Math.random().toString(36).slice(2, 10);
+  origin = '';
+  private ready: Promise<void>;
+  private seq = 0;
 
   private staleMs: number;
   /** Redis's meter: messages published and kept local since the last log line. */
@@ -96,6 +81,16 @@ export class Relay {
 
   constructor(private b: Backend, opts: { staleMs?: number } = {}) {
     this.staleMs = opts.staleMs ?? STALE_MS;
+    this.ready = this.b.store.incr('rl:inst').then(
+      (n) => void (this.origin = n.toString(36) + randomUUID().slice(0, 4)),
+      () => void (this.origin = randomUUID().slice(0, 6) + process.hrtime.bigint().toString(36).slice(-4)),
+    );
+    // Each room this instance has players in says 'here' when it has said nothing else for a while.
+    const beat = setInterval(() => {
+      const now = Date.now();
+      for (const room of this.presence.due(now)) safe(this.send(room, { k: 'here', o: this.origin }), 'here');
+    }, Math.min(1000, HERE_MS / 4));
+    (beat as { unref?: () => void }).unref?.();
     const meter = setInterval(() => {
       if (this.sent.pub || this.sent.kept) log({ ev: 'meter', inst: this.origin, rooms: this.rooms.size, ...this.sent });
       this.sent = { pub: 0, kept: 0 };
@@ -109,19 +104,16 @@ export class Relay {
     const id = url.searchParams.get('id') ?? '';
     const want = url.searchParams.get('want') ?? 'join';
     if (!ROOM.test(room) || !ID.test(id)) return sock.close(4000);
-    const c: Conn = { sock, id, room, host: false, touchedAt: 0, nonce: Math.random().toString(36).slice(2, 10), alive: true };
-    await this.b.store.set(connKey(room, id), c.nonce, 3600);
-    log({ ev: 'join', room, id: id.slice(0, 8), want, inst: this.origin });
-    let set = this.rooms.get(room);
-    if (!set) {
-      this.rooms.set(room, (set = new Set()));
-      await this.b.bus.subscribe(chan(room), (raw) => this.fromBus(room, raw));
-    }
-    set.add(c);
-    sock.on('message', (data) => safe(this.fromPlayer(c, String(data)), 'message'));
+    const c: Conn = { sock, id, room, host: false, touchedAt: 0, nonce: '', alive: true };
+    // Listening from the first moment: what the player says (or a goodbye) while this is still being
+    // set up waits for it, rather than being lost.
+    let live = false, closed = false;
+    const early: string[] = [];
+    sock.on('message', (data) => (live ? safe(this.fromPlayer(c, String(data)), 'message') : early.push(String(data))));
     sock.on('close', () => {
       clearInterval(beat);
-      safe(this.gone(c), 'gone');
+      closed = true;
+      if (live) safe(this.gone(c), 'gone');
     });
     // A phone can vanish without closing its socket: ping it, and drop it if it stops answering.
     sock.on('pong', () => (c.alive = true));
@@ -132,8 +124,27 @@ export class Relay {
         sock.ping?.();
       } catch { /* closing */ }
     }, 15000);
-    this.tell(c, { t: 'info', shared: this.b.shared });
-    await this.decide(c, want);
+    try {
+      await this.ready;
+      c.nonce = `${this.origin}.${++this.seq}`;
+      await this.b.store.set(connKey(room, id), c.nonce, 3600);
+      log({ ev: 'join', room, id: id.slice(0, 8), want, inst: this.origin });
+      let set = this.rooms.get(room);
+      if (!set) {
+        this.rooms.set(room, (set = new Set()));
+        this.presence.joined(room, Date.now());
+        await this.b.bus.subscribe(chan(room), (raw) => this.fromBus(room, raw));
+        // Any other instance with players here answers, and from then on this room's messages reach them.
+        safe(this.send(room, { k: 'here', o: this.origin }), 'here');
+      }
+      set.add(c);
+      this.tell(c, { t: 'info', shared: this.b.shared });
+      await this.decide(c, want);
+    } finally {
+      live = true;
+      if (closed) safe(this.gone(c), 'gone');
+    }
+    for (const raw of early.splice(0)) safe(this.fromPlayer(c, raw), 'message');
   }
 
   private tell(c: Conn, m: unknown): void {
@@ -210,20 +221,16 @@ export class Relay {
     await this.send(c.room, { k: 'msg', from: c.id, to, d: m.d, o: this.origin, cn: c.nonce });
   }
 
-  /** Deliver to this instance's sockets, then tell the other instances. */
+  /** Deliver to this instance's sockets, then tell the other instances (if any are in the room). */
   private async send(room: string, env: Envelope): Promise<void> {
     this.deliver(room, env);
-    // Joins and leaves always go out; messages only when another instance is listening (or to look).
     const now = Date.now();
-    const at = this.alone.get(room);
-    const quiet = now - (this.elsewhere.get(room) ?? 0) > REMOTE_MS;
-    if (env.k === 'msg' && quiet && at !== undefined && now - at < PROBE_MS) return void this.sent.kept++;
+    // Hosts, leaves and the instances' own word always go out; messages only when someone elsewhere is here.
+    if (env.k === 'msg' && !this.presence.shared(room, now)) return void this.sent.kept++;
     this.sent.pub++;
+    this.presence.sent(room, now, -1);
     const heard = await this.b.bus.publish(chan(room), JSON.stringify(env));
-    // Only this instance heard it: nobody else is here. (0 or unknown can't be right, since this
-    // instance is subscribed itself: keep publishing.)
-    if (heard === 1) this.alone.set(room, now);
-    else this.alone.delete(room);
+    this.presence.sent(room, now, heard);
   }
 
   private fromBus(room: string, raw: string): void {
@@ -234,9 +241,10 @@ export class Relay {
       return;
     }
     if (env.o === this.origin) return;
-    // Someone on another instance: from now on this room's messages go out to them.
-    this.alone.delete(room);
-    this.elsewhere.set(room, Date.now());
+    if (env.k === 'away') return this.presence.away(room, env.o);
+    // Someone on another instance: from now on this room's messages go out to them. A newcomer is
+    // answered at once, so it knows to send its own players' messages out too.
+    if (this.presence.heard(room, env.o, Date.now()) && env.k !== 'left') safe(this.send(room, { k: 'here', o: this.origin }), 'here');
     this.deliver(room, env);
   }
 
@@ -244,7 +252,7 @@ export class Relay {
     for (const c of this.rooms.get(room) ?? []) {
       if (env.k === 'msg') {
         if (c.id !== env.from && (env.to === '*' || env.to === c.id)) this.tell(c, { t: 'msg', from: env.from, d: env.d, cn: env.cn });
-      } else if (c.id !== env.id) {
+      } else if ((env.k === 'hosted' || env.k === 'left') && c.id !== env.id) {
         this.tell(c, { t: env.k, id: env.id, cn: env.cn });
         // Someone else hosts now: a host here that was replaced (it was away too long) steps down.
         if (env.k === 'hosted' && c.host) {
@@ -269,83 +277,13 @@ export class Relay {
       if (c.host && (await this.b.store.get(hostKey(c.room))) === c.id) await this.b.store.del(seenKey(c.room));
       await this.send(c.room, { k: 'left', id: c.id, o: this.origin, cn: c.nonce });
     }
-    if (set && !set.size) {
+    // (Only if it's still this room's set: one emptied and replaced while this waited isn't.)
+    if (set && !set.size && this.rooms.get(c.room) === set) {
       this.rooms.delete(c.room);
-      this.alone.delete(c.room);
-      this.elsewhere.delete(c.room);
+      this.presence.left(c.room);
       await this.b.bus.unsubscribe(chan(c.room));
+      // The others needn't send this instance anything more.
+      await this.b.bus.publish(chan(c.room), JSON.stringify({ k: 'away', o: this.origin }));
     }
   }
-}
-
-/** One process, no Redis: rooms only work for players on this same instance (local dev, tests). */
-export function memoryBackend(shared?: { kv: Map<string, { v: string; exp: number }>; subs: Map<string, Set<(m: string) => void>> }): Backend {
-  const kv = shared?.kv ?? new Map<string, { v: string; exp: number }>();
-  const subs = shared?.subs ?? new Map<string, Set<(m: string) => void>>();
-  const mine = new Map<string, (m: string) => void>();
-  const live = (k: string) => {
-    const e = kv.get(k);
-    if (e && e.exp < Date.now()) kv.delete(k);
-    return kv.get(k)?.v ?? null;
-  };
-  return {
-    shared: !!shared,
-    store: {
-      get: async (k) => live(k),
-      setNx: async (k, v, ttl) => (live(k) ?? (kv.set(k, { v, exp: Date.now() + ttl * 1000 }), v)),
-      set: async (k, v, ttl) => void kv.set(k, { v, exp: Date.now() + ttl * 1000 }),
-      expire: async (k, ttl) => {
-        const e = kv.get(k);
-        if (e) e.exp = Date.now() + ttl * 1000;
-      },
-      del: async (k) => void kv.delete(k),
-    },
-    bus: {
-      publish: async (ch, m) => {
-        const fns = [...(subs.get(ch) ?? [])];
-        fns.forEach((f) => f(m));
-        return fns.length;
-      },
-      subscribe: async (ch, fn) => {
-        mine.set(ch, fn);
-        (subs.get(ch) ?? subs.set(ch, new Set()).get(ch)!).add(fn);
-      },
-      unsubscribe: async (ch) => {
-        const fn = mine.get(ch);
-        if (fn) subs.get(ch)?.delete(fn);
-        mine.delete(ch);
-      },
-    },
-  };
-}
-
-/** Redis from the Vercel Marketplace (REDIS_URL): one connection for commands, one for pub/sub. */
-export async function redisBackend(url: string): Promise<Backend> {
-  const { createClient } = await import('redis');
-  const cmd = createClient({ url });
-  const sub = cmd.duplicate();
-  cmd.on('error', () => {});
-  sub.on('error', () => {});
-  await Promise.all([cmd.connect(), sub.connect()]);
-  return {
-    shared: true,
-    store: {
-      get: (k) => cmd.get(k),
-      setNx: async (k, v, ttl) => {
-        await cmd.set(k, v, { NX: true, EX: ttl });
-        return cmd.get(k);
-      },
-      set: async (k, v, ttl) => void (await cmd.set(k, v, { EX: ttl })),
-      expire: async (k, ttl) => void (await cmd.expire(k, ttl)),
-      del: async (k) => void (await cmd.del(k)),
-    },
-    bus: {
-      publish: async (ch, m) => {
-        const n = await cmd.publish(ch, m);
-        return typeof n === 'number' ? n : -1;
-      },
-      subscribe: (ch, fn) => sub.subscribe(ch, fn),
-      unsubscribe: (ch) => sub.unsubscribe(ch),
-    },
-  };
 }

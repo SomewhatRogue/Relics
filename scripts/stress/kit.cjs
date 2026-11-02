@@ -29,6 +29,8 @@ const PHONE_OS = () => {
   window.requestAnimationFrame = (fn) => raf(later(fn));
   const WS = window.WebSocket;
   window.WebSocket = class extends WS {
+    // (`__route`, set by a scenario: rewrites a relay URL, to pick its instance or hold it back.)
+    constructor(url, p) { super(window.__route ? window.__route(String(url)) : url, p); }
     set onmessage(f) { super.onmessage = f && later(f); }
     set onclose(f) { super.onclose = f && later(f); }
     set onopen(f) { super.onopen = f && later(f); }

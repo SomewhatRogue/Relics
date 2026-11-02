@@ -85,6 +85,19 @@ This is only safe when the protocol tolerates a message lost while the room was 
 - the newcomer **speaks first** (its hello goes out because its instance hears the host's traffic,
   or because the probe found it), so the room opens before the reply is sent.
 
+**Two traps Relic hit (Nov 2 2026), and what it does instead** (`api/_presence.ts`):
+- **Don't name an instance with `Math.random`.** Vercel started several instances whose
+  Math.random ran the same numbers, so two were both "evqgzyea"; each took the other's messages for
+  its own echo and dropped them, and a friend on one never heard the leader on the other. Name it
+  with Redis `INCR` (a number no other instance gets), a crypto suffix on top.
+- **Don't let a count of 1 shut a room.** A count that leaves out a listener elsewhere would keep
+  messages home from a friend who only listens. Instead each instance says `here` on the room's
+  channel when it gets its first player there (sending everything for half a second while others
+  answer), answers any newcomer's `here` at once, says `here` again after 15 s of saying nothing
+  else, and `away` when its last player goes. Messages go out while another instance was heard in
+  the last 40 s. A count above one may still open a room; it never closes one. Cost on one
+  instance: one `here` per room every 15 s (240 an hour), against a probe every 2 s before.
+
 Test it both ways (see `tests/relay.test.ts`, "the relay spares Redis"): a few seconds of play on
 one instance must publish only a handful of times, and a friend joining on a second instance must
 still get the hello through, a direct reply, and every following message.

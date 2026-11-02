@@ -8,11 +8,11 @@ const path = require('path');
 const { chromium } = require('playwright');
 const { kit, wait } = require('./stress/kit.cjs');
 const ROOT = path.join(__dirname, '..'), PORT = 8792;
-const SCENES = { ...require('./stress/leave.cjs'), ...require('./stress/drop.cjs'), ...require('./stress/falls.cjs') };
+const SCENES = { ...require('./stress/leave.cjs'), ...require('./stress/drop.cjs'), ...require('./stress/falls.cjs'), ...require('./stress/order.cjs') };
 const NAMES = {
   1: 'friend leaves', 2: 'leader leaves', 3: 'leader of three leaves', 4: "leader's page hidden 30 s", '4f': "leader's page frozen",
   5: "leader's tab closed", 6: 'friend reloads', '6b': "friend's phone locked over a minute", 7: 'leader reloads', 8: 'friend down, leader helps', 9: 'friend down alone, then out',
-  10: 'leader out, friend goes on', 11: 'everyone out', 12: 'HELP UP on the phone', 13: 'solo leave',
+  10: 'leader out, friend goes on', 11: 'everyone out', 12: 'HELP UP on the phone', 13: 'solo leave', 14: 'friend in before the leader',
 };
 
 (async () => {
