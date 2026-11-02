@@ -155,3 +155,8 @@ most Want among the heroes is the one the bells don't spare).
   their heel from the north gate on. An ordinary dog, no shard and no magic. On screen it never dies: it bolts when a
   butcher swings close and comes back when it's ready. Nothing ever jokes about a dead dog. No name on screen yet.
   Dogs are not a goblin weakness; bells stay the town's one hope.
+
+- **Elements** (recorded 2026-11-01): fire, frost and storm are the world's only three, shared by a Mage's spells and
+  the relic-wright's fittings. A Mage's Elemental Channel is its own craft, worked through its focus (the wand, staff
+  or rod): not shard-stuff, and it doesn't feed the Want. The relic-wright's fittings are for skills and relics; a
+  Mage's spells take their element from the Channel. Open (Kyle's call): Magister Vell as the one who taught it.
