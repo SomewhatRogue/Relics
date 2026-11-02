@@ -4,6 +4,9 @@
   "outputDirectory": "dist",
   "installCommand": "npm ci",
   "framework": null,
+  "regions": [
+    "sfo1"
+  ],
   "functions": {
     "api/room.ts": {
       "maxDuration": 300
