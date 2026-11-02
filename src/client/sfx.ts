@@ -186,6 +186,14 @@ export const sfx = {
     burst('bandpass', 900, 400, 3, 0.25, 0.1);
     tone('triangle', 220, 180, 0.08, 0.06, 0.05);
   },
+  /** A goblin at the dead: a wet tear and a chew (quieter the further off). */
+  gnaw(near = 1) {
+    if (!ready()) return;
+    const v = 0.15 + 0.5 * near;
+    burst('bandpass', 1300, 500, 3, 0.5 * v, 0.14);
+    burst('lowpass', 700, 200, 1, 0.4 * v, 0.1, 0.18);
+    burst('lowpass', 600, 180, 1, 0.35 * v, 0.08, 0.34);
+  },
   rumble() {
     if (!ready()) return;
     burst('lowpass', 220, 60, 0.8, 0.7, 1.4);

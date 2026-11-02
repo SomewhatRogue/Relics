@@ -86,7 +86,13 @@ export class ArenaRoom {
       opts.foes.forEach((f, i) => {
         const e = newEnemy(i + 1, f.kind, f.x, f.y);
         if (f.hp) e.hp = e.maxHp = f.hp;
-        Object.assign(e, { respawns: false, name: f.name, bow: f.bow, z: f.z ?? 0, alert: f.awake ?? false });
+        Object.assign(e, { respawns: false, name: f.name, bow: f.bow, z: f.z ?? 0, alert: f.awake ?? false, feeding: f.feeding });
+        // At the dead: facing the body it's eating.
+        const body = f.feeding ? (this.map.npcs ?? []).filter((n) => n.pose === 'corpse').sort((a, b) => Math.hypot(a.x - e.x, a.y - e.y) - Math.hypot(b.x - e.x, b.y - e.y))[0] : undefined;
+        if (body) {
+          const l = Math.hypot(body.x - e.x, body.y - e.y) || 1;
+          (e.fx = (body.x - e.x) / l), (e.fy = (body.y - e.y) / l);
+        }
         this.enemies.push(e);
       });
       this.props = (opts.furniture ?? []).map((p) => newProp(p.kind, p.x, p.y, false));

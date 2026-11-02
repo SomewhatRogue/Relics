@@ -147,7 +147,11 @@ export const lessonsFor = (cls: HeroClass): Lesson[] => BY_CLASS[cls] ?? L;
 
 /** The Stoker, and the two that come out of the trees at half its health. */
 export const STOKER: Foe & { variant: 'stoker' } = { kind: 'butcher', variant: 'stoker', x: 59, y: 4.5, name: 'THE STOKER', awake: false };
-export const STOKER_HELP: Foe[] = [{ kind: 'scrapper', x: 46, y: 9, awake: true }, { kind: 'scrapper', x: 61, y: 10, awake: true }];
+/** The Stoker bellows for help twice: at two thirds of its health, and at one third (a bigger wave). */
+export const STOKER_CALLS: { at: number; foes: (Foe & { variant?: 'looter' | 'lunger' | 'heavy' })[] }[] = [
+  { at: 2 / 3, foes: [{ kind: 'scrapper', x: 46, y: 9, awake: true }, { kind: 'scrapper', x: 61, y: 10, awake: true }] },
+  { at: 1 / 3, foes: [{ kind: 'scrapper', x: 45, y: 4, awake: true }, { kind: 'scrapper', variant: 'lunger', x: 61, y: 2, awake: true }, { kind: 'scrapper', x: 55, y: 11, awake: true }] },
+];
 
 /** Hew's lines (lore keeper), and the Stoker's. */
 export const LINES = {
@@ -161,7 +165,7 @@ export const LINES = {
   stoker: 'Eleven you burn. Eleven of mine. So, this one I _keep_.',
   north: "They all went north and left the field half-picked. I've *never* known them leave meat.",
   up: ['Up you get, and spit that dirt out.', "Not yet, stray, I've enough to burn as it is.", 'Have a breather, then go at it again, ~properly~ this time.'],
-  relic: "There's something hard under its breastbone, grown in like a knot in oak, and it takes Hew's poker and most of what you've got left to lever it out. It's a hook on a length of black chain, the one it hauled at you with, and the chain's still ~warm~.",
+  relic: "There's something hard under its breastbone, grown in like a knot in oak, and it takes Hew's poker and most of what you've got left to lever it out. It's a javelin, haft and all, longer than the wound it came out of, and ~warm~.",
   road: "The wood thins and then gives out, and there's a road, and at the end of it walls, with a ~glow~ over them that isn't the moon. Your left foot is wet through at the heel, just as Hew said it would be.",
   skill: "Now. Don't save *any* of it.",
   /** Waking: he comes over slowly, checks you, hauls you up (one box at a time, each waits for a tap). */
@@ -203,7 +207,7 @@ export const LINES = {
     block: 'Hold your guard while the red fills. Each block costs breath (the yellow bar).',
     parry: 'Tap your guard the moment the red flashes white. It staggers them, and your next blow lands hard.',
     skill: "Use your skill. Once it's spent, it takes a while to recharge.",
-    relic: 'Throw it with your relic button. A small goblin is dragged to you; anything heavier, or a wall, drags you to it, which gets you out of trouble fast. A Warrior or a Healer is heavy enough to haul in even the big ones.',
+    relic: 'Throw it with your relic button. A small goblin is carried off and pinned to the nearest wall. It comes back to your hand after a few seconds.',
     grab: 'Hit a small goblin so it reels, or get behind it, then grab it. Grab again to throw it, and whatever it hits gets hurt. Out on jobs, crates and barrels throw too.',
     backstab: 'Hit a goblin from behind and the blow lands far harder.',
     heavy: 'Hold attack until fully drawn or charged, then let go. A full shot hits much harder.',

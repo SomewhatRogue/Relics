@@ -717,3 +717,10 @@ to draw the bow (all three bows, the crossbow included, now draw on a hold). Its
 goblin, slows a butcher). A hound runs at its heel (sim/ranger.ts): now and then it goes for what you've
 been hitting (or the nearest small goblin), bites a few times and comes back; nothing can hurt it, but a
 butcher winding up near it sends it off for 14 s. No hound in the wood. The class pick shows a HOUND line.
+
+## 2026-11-01: the javelin again; the Stoker calls twice; goblins at the dead on jobs (Claude Opus 5.5)
+Kyle: back to the javelin as the Stoker's relic (the hook is the next found; its weight rule stays). The
+Stoker bellows for help twice, at two thirds and one third of its health (STOKER_CALLS; the second wave is
+bigger, with a lunger). Out on jobs, most rooms (60%) have a heap of the dead (one or two bodies, dressed for
+the place) with one to three goblins at it, feeding: facing the body, leaning in, tearing a piece back, red
+flicking off, wet chewing you can hear within 8 tiles. They see you at half the usual distance while they eat.

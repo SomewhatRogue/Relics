@@ -137,10 +137,18 @@ export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number): void {
   if ((e.kind === 'butcher' || e.kind === 'scrapper') && hurt) ring(c, x, y, e.kind === 'butcher' ? 11 : 6, '#e24b4a', e.hp / e.maxHp);
   if (e.kind === 'butcher') return butcher(c, e, x, y, flash);
   if (e.kind === 'scrapper' && e.feeding) {
-    // Crouched at the dead: head down, tearing, a fleck now and then.
-    const dip = Math.floor(c.now * 2.5 + e.id) % 3 ? 2 : 1;
-    if (Math.floor(c.now * 5 + e.id * 3) % 7 === 0) (c.lit.fillStyle = '#8a1212'), c.lit.fillRect(Math.round(x + 4), Math.round(y - 6), 1, 1);
-    return scrapper(c, e, x, y + dip, flash);
+    // Crouched at the dead: it leans in, worries at it, tears a piece back and chews; red flicks off.
+    const cyc = (c.now * 1.3 + e.id * 0.37) % 1, f = e.fx >= 0 ? 1 : -1;
+    const lean = cyc < 0.45 ? 2 + (Math.floor(c.now * 14) % 2) : cyc < 0.6 ? 0 : 1, shove = cyc < 0.45 ? f : cyc < 0.6 ? -f : 0;
+    scrapper(c, e, x + shove, y + lean, flash);
+    if (cyc >= 0.45 && cyc < 0.75) {
+      const k = (cyc - 0.45) / 0.3;
+      c.lit.fillStyle = '#9a1414';
+      for (let i = 0; i < 3; i++) c.lit.fillRect(Math.round(x + f * (3 + i * 2 * k)), Math.round(y - 7 - 6 * k + i * k * 3 + 8 * k * k), 1, 1);
+      c.lit.fillStyle = '#6a2a1a';
+      c.lit.fillRect(Math.round(x + f * 4), Math.round(y - 8), 2, 1);
+    }
+    return;
   }
   if (e.kind === 'scrapper') return scrapper(c, e, x, y, flash);
   const a = e.attack;

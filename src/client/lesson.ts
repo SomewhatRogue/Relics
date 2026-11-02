@@ -71,7 +71,7 @@ export class LessonView {
     if (h.kind === 'relic') {
       // The relic: found, named, what it does, and its button.
       this.el.className = 'card found-relic';
-      this.el.innerHTML = `<div class="card"><div class="found">FOUND</div><div class="relic-name">GRAPPLING HOOK</div><p class="line"></p>` +
+      this.el.innerHTML = `<div class="card"><div class="found">FOUND</div><div class="relic-name">RELIC JAVELIN</div><p class="line"></p>` +
         `<div class="move"><span>RELIC</span><kbd>${this.touch ? 'RELIC' : 'R'}</kbd></div><p class="how">${h.how ?? ''}</p>${hint}</div>`;
       return speak(this.el.querySelector('.line')!, h.text, '');
     }

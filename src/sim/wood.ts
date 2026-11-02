@@ -4,7 +4,7 @@
  * pick you up when you fall, run the cutscene at the hut, then the Stoker, the relic and the road.
  * Plain data, stepped after the room each frame by whoever runs the room.
  */
-import { AREAS, FEEDING, GATES, GOBLIN_DEAD, LINES, ROAD_OUT, STOKER, STOKER_HELP, areaAt, lessonsFor, type Lesson, type Teach } from '../shared/wood';
+import { AREAS, FEEDING, GATES, GOBLIN_DEAD, LINES, ROAD_OUT, STOKER, STOKER_CALLS, areaAt, lessonsFor, type Lesson, type Teach } from '../shared/wood';
 import type { HeroClass } from '../shared/weapons';
 import { inArea } from '../shared/arena';
 import type { Foe } from '../shared/terrain';
@@ -26,7 +26,8 @@ export interface WoodState {
   cut: number;
   caption: Caption | null;
   stoker: number;
-  helped: boolean;
+  /** How many times the Stoker has bellowed for help. */
+  helped: number;
   hewAlive: boolean;
   /** The relic is out of the Stoker (the game gives it); then walk the road. */
   relic: boolean;
@@ -72,7 +73,7 @@ export const WAKE = { fade: 2.5, arrive: 4.6, standing: 0.8 };
 export const DRILL = { windup: 1.5, wheels: 2, praise: 3, praiseFor: 1.1 };
 
 export function newWood(room: ArenaRoom, cls: HeroClass = 'WARRIOR'): WoodState {
-  const w: WoodState = { stage: 0, entered: false, count: 0, ids: [], more: false, cut: -1, caption: null, stoker: 0, helped: false, hewAlive: true, relic: false, done: false, wake: 0, hold: null, drilled: 0, praised: 0, drillAt: -1, from: null, said: 0, upAt: -1, cls };
+  const w: WoodState = { stage: 0, entered: false, count: 0, ids: [], more: false, cut: -1, caption: null, stoker: 0, helped: 0, hewAlive: true, relic: false, done: false, wake: 0, hold: null, drilled: 0, praised: 0, drillAt: -1, from: null, said: 0, upAt: -1, cls };
   const h = room.heroes.find((x) => x.id === HERO_ID);
   if (h) Object.assign(h, { act: 'down', actT: 0, actDur: 999, lying: true });
   // The field as you come round: goblins dead among the column's dead, and the looters already at them.
@@ -238,7 +239,7 @@ function fallen(w: WoodState, room: ArenaRoom): void {
     const s = room.enemies.find((e) => e.id === w.stoker)!;
     Object.assign(s, { hp: s.maxHp, x: STOKER.x, y: STOKER.y, attack: null, act: 'chase', cooldown: 2 });
     room.enemies = room.enemies.filter((e) => e === s || !w.ids.includes(e.id) || e.kind === 'butcher');
-    w.helped = false;
+    w.helped = 0;
     Object.assign(h, { x: 52, y: 10 });
     say(w, room, '', LINES.cometo, 4);
     return;
@@ -301,7 +302,13 @@ export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: nu
   // The Stoker: two more come at half its health; the relic comes out of it.
   if (w.stage === 4) {
     const s = room.enemies.find((e) => e.id === w.stoker);
-    if (s && !w.helped && s.hp < s.maxHp / 2) (w.helped = true), w.ids.push(...STOKER_HELP.map((f) => spawn(room, f).id));
+    // It bellows into the trees for help: at two thirds of its health, then at one third.
+    const call = STOKER_CALLS[w.helped];
+    if (s && call && s.hp < s.maxHp * call.at) {
+      w.helped++;
+      ev.push({ k: 'bellow', x: s.x, y: s.y });
+      w.ids.push(...call.foes.map((f) => spawn(room, f).id));
+    }
     if (s && isDead(s) && !w.relic) {
       w.relic = true;
       // Everything stops: you hold it up, the light comes, and the card says what it is.

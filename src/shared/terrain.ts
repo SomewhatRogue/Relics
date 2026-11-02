@@ -4,12 +4,12 @@
  * and pit props in a mine). Ruin and the room's place in the run set how many goblins. The last room
  * holds the objective: cages, a named butcher, or the larder racks. Same seed, same room.
  */
-import type { Block, BlockKind, GameMap, Ledge, Road, Round, RoundKind, Theme } from './arena.js';
+import type { Block, BlockKind, GameMap, Ledge, Npc, Road, Round, RoundKind, Theme } from './arena.js';
 import type { Job, PlaceKind } from './jobs.js';
 import { WOOD, type PropKind } from './props.js';
 import { Rng } from './rng.js';
 
-export interface Foe { kind: 'scrapper' | 'butcher'; x: number; y: number; hp?: number; name?: string; bow?: boolean; z?: number; awake?: boolean }
+export interface Foe { kind: 'scrapper' | 'butcher'; x: number; y: number; hp?: number; name?: string; bow?: boolean; z?: number; awake?: boolean; feeding?: boolean }
 /** Which way the party went at a fork. */
 export type RoadId = Road['road'];
 export interface RoomPlan { map: GameMap; foes: Foe[]; props: { kind: PropKind; x: number; y: number }[]; chests: { x: number; y: number; chained?: boolean }[] }
@@ -127,6 +127,21 @@ export function planRoom(job: Job, index: number, road?: RoadId): RoomPlan {
     c ??= spot(0.4, 1.5, H - 6);
     if (c) foes.push({ kind: 'scrapper', ...c });
   }
+  // Often: a heap of the dead and goblins at it, too busy eating to look up till you're close.
+  const dead: Npc[] = [];
+  if (rng.next() < 0.6) {
+    const c = spot(1.1, 3, H - 6);
+    if (c) {
+      const look = ({ village: 'villager', farm: 'farmer', field: 'farmer', forest: 'soldier', mine: 'villager' } as Record<string, string>)[kind] ?? 'villager';
+      dead.push({ x: c.x, y: c.y, name: '', talk: 'dead', look, pose: 'corpse' });
+      if (rng.next() < 0.6) dead.push({ x: c.x + 0.6, y: c.y - 0.35, name: '', talk: 'dead', look: look === 'farmer' ? 'villager' : 'soldier2', pose: 'corpse' });
+      const k = 1 + Math.floor(rng.next() * 3);
+      for (let i = 0; i < k; i++) {
+        const a = (i / k) * Math.PI * 2 + rng.range(-0.4, 0.4);
+        foes.push({ kind: 'scrapper', x: c.x + Math.cos(a) * 0.9, y: c.y + Math.sin(a) * 0.55, feeding: true });
+      }
+    }
+  }
   if (final && (obj === 'hunt' || obj === 'story')) foes.push({ kind: 'butcher', x: MID, y: 4.5, hp: obj === 'story' ? 560 : 420, name: job.boss });
   if (index >= 1 && ruin >= 2) foes.push({ kind: 'butcher', x: fires[0]?.x ?? MID, y: (fires[0]?.y ?? 6) - 1.2 });
   if (final && ruin >= 2 && obj !== 'hunt' && obj !== 'story') foes.push({ kind: 'butcher', x: fires[1]?.x ?? MID, y: (fires[1]?.y ?? 5) - 1.2 });
@@ -142,7 +157,7 @@ export function planRoom(job: Job, index: number, road?: RoadId): RoomPlan {
   const map: GameMap = {
     name: job.place.name.toUpperCase(), w: W, h: H, wallFace: 3, rounds, blocks, braziers,
     torches: kit.torches ? [{ x: 4.5, y: -1.6 }, { x: MID - 4, y: -1.6 }, { x: MID + 4, y: -1.6 }, { x: W - 4.5, y: -1.6 }] : [], hero: { ...SPAWN }, exit: roads ? null : { ...EXIT }, theme,
-    ledges: ledges.length ? ledges : undefined, roads,
+    ledges: ledges.length ? ledges : undefined, roads, npcs: dead.length ? dead : undefined,
   };
   return { map, foes, props, chests };
 }

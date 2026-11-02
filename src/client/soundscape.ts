@@ -18,6 +18,7 @@ type AnyFx = Record<string, ((...a: unknown[]) => void) | undefined>;
 export class Soundscape {
   private yelpAt = 0;
   private chatterAt = 3;
+  private gnawAt = 0;
   private crackleAt = 0;
   private wasInside: unknown = null;
 
@@ -90,8 +91,11 @@ export class Soundscape {
       if (g.outside || this.wasInside) woodSounds.door();
       this.wasInside = g.outside;
     }
+    // Goblins at the dead, close by: wet chewing, tearing.
+    const eating = room.enemies.find((e) => !isDead(e) && e.feeding && e.alert === false && Math.hypot(e.x - me.x, e.y - me.y) < 8);
+    if (eating && now > this.gnawAt) (sfx.gnaw(1 - Math.hypot(eating.x - me.x, eating.y - me.y) / 8), (this.gnawAt = now + 0.9 + Math.random() * 1.1));
     // Goblins coming for you talk among themselves now and then.
-    const coming = room.enemies.filter((e) => !isDead(e) && e.kind === 'scrapper' && (e.act === 'chase' || e.act === 'attack') && Math.hypot(e.x - me.x, e.y - me.y) < 9);
+    const coming = room.enemies.filter((e) => !isDead(e) && e.alert !== false && e.kind === 'scrapper' && (e.act === 'chase' || e.act === 'attack') && Math.hypot(e.x - me.x, e.y - me.y) < 9);
     if (coming.length && now > this.chatterAt) {
       const e = coming[Math.floor(Math.random() * coming.length)];
       Math.random() < 0.25 ? goblin.cackle(e.id) : goblin.chatter(e.id);

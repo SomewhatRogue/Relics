@@ -105,13 +105,13 @@ export class Game {
     this.enterTown(this.gateSpot());
   }
 
-  /** What the wood leaves you: the grappling hook, Hew's tally stick, a cold censer for a Healer. */
+  /** What the wood leaves you: the javelin, Hew's tally stick, a cold censer for a Healer. */
   private giveWood(): void {
     const p = this.profile;
     if (!this.woodReplay) {
       Object.assign(p, { prologue: true, tally: true, cold: p.cls === 'HEALER' });
-      if (!p.relics.includes('hook')) p.relics.unshift('hook');
-      p.relic ||= 'hook';
+      if (!p.relics.includes('javelin')) p.relics.unshift('javelin');
+      p.relic ||= 'javelin';
     }
     store(this.save);
   }
@@ -471,9 +471,9 @@ export class Game {
     stepWood(w, this.room, ev, dt, WEAPONS[h.weapon].parryWindow + h.lenience);
     if (cut >= 0 && w.cut < 0 && !this.woodReplay) (this.profile.cutSeen = true), store(this.save);
     // Out of the Stoker: the javelin, on the RELIC button at once.
-    if (w.relic && !h.found.includes('hook')) {
-      h.found = ['hook'];
-      h.relics = abilitiesOf(this.profile.cls, 'hook');
+    if (w.relic && !h.found.includes('javelin')) {
+      h.found = ['javelin'];
+      h.relics = abilitiesOf(this.profile.cls, 'javelin');
     }
     if (w.done) this.finishWood();
     return ev;

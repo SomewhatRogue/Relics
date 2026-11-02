@@ -233,4 +233,16 @@ describe('buildings on a job', () => {
     for (let i = 0; i < 60; i++) room.setIntent('me', { ...NO_INTENT, attackSeq: (seq += i % 12 === 0 ? 1 : 0) }), room.step();
     expect(barn.hp!).toBeLessThan(barn.maxHp!);
   });
+
+  it('rooms often have a heap of the dead with goblins at it, feeding, facing the body', () => {
+    let heaps = 0;
+    for (let seed = 1; seed < 20; seed++) {
+      const plan = planRoom({ ...job('village', 'rescue'), seed }, 1);
+      const feeders = plan.foes.filter((f) => f.feeding);
+      if (!feeders.length) continue;
+      heaps++;
+      expect(plan.map.npcs?.some((n) => n.pose === 'corpse')).toBe(true);
+    }
+    expect(heaps).toBeGreaterThan(4);
+  });
 });

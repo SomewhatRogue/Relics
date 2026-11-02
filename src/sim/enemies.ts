@@ -236,7 +236,7 @@ function notice(e: Enemy, heroes: Hero[], others: Enemy[], now: number, ev: Figh
     if (!visible(h, d, now)) continue;
     const ahead = (dx * e.fx + dy * e.fy) / (d || 1) > -0.2;
     // Looters picking the dead don't look up until something comes close.
-    const sight = e.variant === 'looter' ? 1.6 : ahead ? ALERT.sight : ALERT.behind;
+    const sight = e.variant === 'looter' ? 1.6 : e.feeding ? ALERT.sight * 0.5 : ahead ? ALERT.sight : ALERT.behind;
     if (d < sight + seenFrom(h)) seen = true;
   }
   for (const o of others) if (o !== e && o.alert && (isDead(o) || o.hitAt > now - 0.2) && Math.hypot(o.x - e.x, o.y - e.y) < ALERT.hear) seen = true;
