@@ -61,7 +61,8 @@ export function tally(run: Run, room: ArenaRoom, events: FightEvent[], me: strin
       const b = e?.name ? BOUNTY.boss : ev.kind === 'butcher' ? BOUNTY.butcher : ev.kind === 'scrapper' ? BOUNTY.scrapper : null;
       if (b) (run.xp += b.xp), run.kills++;
     } else if (ev.k === 'gold') {
-      if (ev.id === me) run.gold += ev.n;
+      // One pot for the party: whoever picks it up, everyone is paid the lot at the end.
+      if (ev.id === me || players(room.heroes).some((h) => h.id === ev.id)) run.gold += ev.n;
     } else if (ev.k === 'collapse') {
       if (room.map.blocks.some((x) => x.kind === 'den' && x.x === ev.x && x.y === ev.y)) run.dens++;
     } else if (ev.k === 'freed') {

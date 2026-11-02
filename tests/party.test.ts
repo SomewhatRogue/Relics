@@ -95,3 +95,16 @@ describe('scaling', () => {
     expect(room.enemies[0].maxHp).toBe(Math.round(hp * (1 + PARTY.boss * 2)));
   });
 });
+
+describe('the treasure at the end', () => {
+  it("is each player's own, the same every time for the same player and job, and never empty", async () => {
+    const { treasure } = await import('../src/shared/treasure');
+    const { board } = await import('../src/shared/jobs');
+    const job = board(4)[1];
+    const a = treasure(job, 'WARRIOR', 'hkyle0000001', 3), b = treasure(job, 'WARRIOR', 'hkyle0000001', 3), c = treasure(job, 'RANGER', 'hsam00000001', 3);
+    expect(a.length).toBeGreaterThan(0);
+    expect(a).toEqual(b);
+    expect(JSON.stringify(a)).not.toEqual(JSON.stringify(c));
+    for (const i of c) if (i.kit) expect(['longbow', 'shortbow', 'crossbow']).toContain(i.kit);
+  });
+});

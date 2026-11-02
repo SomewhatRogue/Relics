@@ -22,11 +22,14 @@ import { refreshHealth, statsOf } from '../sim/gearstats';
 import { goal, interiorRoom, isFinal, newRun, runRoom, tally, type Run } from '../sim/run';
 import type { FightEvent, Hero, Intent } from '../sim/types';
 import { load, store, type Save } from './save';
+import { treasure } from '../shared/treasure';
+/** What a piece of treasure that won't fit in the pack fetches. */
+const TREASURE_SOLD = 20;
 import { CoopHost, type CoopGuest, type Friend } from './coop';
 import type { Parties } from './parties';
 
 export type Mode = 'town' | 'yard' | 'run' | 'wood';
-export interface Result { won: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number; relic?: RelicId }
+export interface Result { won: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number; relic?: RelicId; treasure: Item[]; sold: Item[] }
 /** Something you can use where you stand: a spot, a person, or a door. */
 export interface Near { label: string; talk?: SpotId; arg?: number; key?: string; door?: Block; chest?: number; npc?: Npc }
 
@@ -412,7 +415,7 @@ export class Game {
   private stepRemote(): FightEvent[] {
     const g = this.remote!, now = performance.now() / 1000;
     // Their room once it has me in it (until then, the town stands still behind the wait).
-    if (g.room?.heroes.some((x) => x.id === ME)) (this.room = g.room), (this.run = g.run ?? this.run);
+    if (g.room?.heroes.some((x) => x.id === ME)) (this.room = g.room), (this.run = g.run ?? this.run), this.keepRemoteGear(this.hero);
     const ev = g.take();
     const end = g.ended ?? (g.lost(now) ? { won: false, run: g.run ?? newRun(g.job) } : null);
     if (end) {
@@ -456,7 +459,11 @@ export class Game {
     // The bottom of a deep dive: a relic pried out of the butcher (one you don't have; the first is carried at once).
     const relic = won && run.job.deep ? FOUND_RELICS.find((r) => !p.relics.includes(r)) : undefined;
     if (relic) (p.relics.push(relic), p.relic ||= relic);
-    this.result = { won, job: run.job, gold, xp, rescued, levels, relic };
+    // The treasure at the end: yours alone. What won't fit in the pack is sold on the spot.
+    const found = won ? treasure(run.job, p.cls, p.id, p.runs) : [], kept = found.slice(0, Math.max(0, PACK - p.bag.length)), sold = found.slice(kept.length);
+    p.bag.push(...kept);
+    p.gold += sold.length * TREASURE_SOLD;
+    this.result = { won, job: run.job, gold, xp, rescued, levels, relic, treasure: kept, sold };
     this.run = null;
     this.give({
       stats: { jobs: won ? 1 : 0, saved: rescued, kills: run.kills, dens: run.dens }, rescued, dens: run.dens, days: 1,
@@ -642,6 +649,14 @@ export class Game {
   }
 
   /** The room changed what's in hand, in the pack, or carried: the hero's save follows. */
+  /** Following a friend's job: what my hero picks up, drinks or puts on there is mine to keep. */
+  private keepRemoteGear(h: Hero): void {
+    const p = this.profile, now = { bag: h.bag ?? p.bag, arms: h.arms ?? p.arms, armor: h.armor ?? p.armor, rings: h.rings ?? p.rings, belt: h.belt ?? p.belt, glow: h.glow ?? p.glow };
+    if (JSON.stringify(now) === JSON.stringify({ bag: p.bag, arms: p.arms, armor: p.armor, rings: p.rings, belt: p.belt, glow: p.glow })) return;
+    Object.assign(p, JSON.parse(JSON.stringify(now)));
+    store(this.save);
+  }
+
   private keepGear(h: Hero): void {
     const p = this.profile, relic = h.relics[1] ?? '';
     // The Mage's channelled element goes with it from room to room.

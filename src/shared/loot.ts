@@ -69,4 +69,11 @@ export function itemName(i: Item): string {
 
 /** Drop chances by who died. */
 /** Drop chances by who died (weapons are rare now: gold, potions and chests take over in the loot system, docs/DECISIONS.md). */
-export const DROPS = { scrapper: 0.04, butcher: 0.4, forged: { scrapper: 0.2, butcher: 0.6 }, life: 45 };
+export const DROPS = { scrapper: 0.02, butcher: 0.15, forged: { scrapper: 0.2, butcher: 0.6 }, life: 45 };
+
+/**
+ * The treasure at the end of a job won: each player's own (rolled for their class, by their own
+ * browser, so nobody fights over it). One piece always, a chance of a second, a better one for
+ * worse places and deep jobs. Most gear comes from here; goblins on the way rarely drop any.
+ */
+export const TREASURE = { second: 0.35, slots: [['weapon', 0.6], ['armor', 0.2], ['ring', 0.2]] as const };

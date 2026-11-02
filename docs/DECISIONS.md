@@ -797,3 +797,14 @@ which moves the page to the media channel.
 - Labels checked by the lore keeper (plain board words: GATHER A PARTY, SET OUT, TAKE IT DOWN).
 - `npm run test:online` now also runs scripts/party-online.cjs: gather, join, set out, same goblins,
   walking seen, a hurt goblin hurt for both, every room in order, the end paying the friend.
+
+## 2026-11-01: loot and gold (Kyle; Opus 5.5)
+
+- Gear rarely drops on the way now (a small goblin 2%, a butcher 15%); chests stay as they were.
+- The treasure at the end of a job won is each player's own (shared/treasure.ts): one piece always,
+  35% a second, better for worse places and deep jobs, rolled for that player's class by their own
+  browser. What won't fit in the pack sells for 20 gold. Shown on the results panel.
+- Gold drops often (85% of small goblins) and goes in one pot for the party: whoever picks it up,
+  everyone is paid the whole pot at the end, and spends their own in town.
+- A friend's pickups, potions drunk and gear changes in the leader's job come home with them (the
+  pack now travels in the snapshots).

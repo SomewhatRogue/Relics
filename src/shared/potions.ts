@@ -21,8 +21,8 @@ export const POTION = { belt: 3, cooldown: 0.8, heal: 40, healTime: 2, brandyTim
  * butchers always, a lot), potions by chance. Gold is split across the party when anyone picks it up.
  */
 export const COINS = {
-  scrapper: { chance: 0.7, min: 2, max: 6 },
-  archer: { chance: 0.7, min: 3, max: 8 },
+  scrapper: { chance: 0.85, min: 2, max: 6 },
+  archer: { chance: 0.85, min: 3, max: 8 },
   butcher: { chance: 1, min: 15, max: 30 },
   named: { chance: 1, min: 60, max: 100 },
   life: 30,
