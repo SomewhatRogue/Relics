@@ -36,9 +36,15 @@ export interface Block {
   look?: number;
   /** Paint only: a town building still showing the breach (scorched, shutters boarded, roof holed). */
   worn?: boolean;
+  /**
+   * A job's house (shared/houses.ts): what's become of it, and whether it's one of the big ones. A
+   * blocked one has no door (fallen in across it); a burning one smoulders (drawn on fire, never spreading).
+   */
+  fate?: 'standing' | 'wrecked' | 'blocked' | 'burning';
+  big?: boolean;
 }
 /** Paint only, on the floor: never collided against or decided on. */
-export type MarkKind = 'blood' | 'drag' | 'scorch' | 'trample' | 'planks' | 'beds' | 'flowers' | 'mound' | 'fallenpost' | 'green'
+export type MarkKind = 'blood' | 'drag' | 'debris' | 'scorch' | 'trample' | 'planks' | 'beds' | 'flowers' | 'mound' | 'fallenpost' | 'green'
   // The ground itself (shared/ground.ts): flagstones, packed earth, mud, wheel ruts, a trodden path,
   // missing cobbles, puddles, straw, weeds, a drain, spent arrows.
   | 'flags' | 'earth' | 'mud' | 'ruts' | 'path' | 'holes' | 'puddle' | 'straw' | 'weeds' | 'gutter' | 'arrows';
@@ -143,10 +149,24 @@ export interface GameMap {
   soil?: Soil[];
   /** Paint only: marks on the floor (blood, scorch, dug beds, flowers). */
   marks?: Mark[];
+  /** Paint only: what the goblins left in a house (shared/grim.ts). */
+  grim?: Grim[];
+  /** A house on fire inside (shared/blaze.ts): where it burns and when, the beams that come down, when it falls in. */
+  blaze?: Blaze;
   /** Paint only: a stretch of the back wall that came down (tiles), and how far it's mended (0 to 3). */
   breach?: { x: number; w: number; stage: number };
 }
 export interface Water { x: number; y: number; w: number; h: number; deep?: boolean }
+/**
+ * Paint only, what the goblins did: a body torn apart (`torn`), the pieces strewn about one they're at
+ * (`strewn`), one tied up on the back wall and opened (`pinned`, x along the wall), one hung from a
+ * rafter hook (`hung`), a cook-pot on their fire (`pot`), a heap of bones and clothes (`bones`), what's
+ * left of the last one by a cage (`remains`), bloody hands on the back wall (`smear`), a count scratched
+ * there in fives (`tally`), a body dragged from (x, y) to (x2, y2) (`trail`). `k` varies the look.
+ */
+export interface Grim { kind: 'torn' | 'strewn' | 'pinned' | 'hung' | 'pot' | 'bones' | 'remains' | 'smear' | 'tally' | 'trail'; x: number; y: number; x2?: number; y2?: number; k: number }
+/** Fire in a house: patches that catch at `at` seconds (and burn on), beams that come down at `at`, the roof falling in at `fall`. */
+export interface Blaze { patches: (Area & { at: number })[]; beams: { x: number; y: number; at: number }[]; fall: number }
 /** How fast anyone moves knee-deep in a ford or a bog. */
 export const WADE = 0.55;
 /** How fast you can move where you stand (slowed in shallow water). */

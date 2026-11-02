@@ -14,7 +14,7 @@ const known = new WeakMap<Block, House | null>();
 /** A job's house, if this block is one (town buildings are drawn as they are). */
 export function houseOf(b: Block): House | null {
   let h = known.get(b);
-  if (h === undefined) known.set(b, (h = b.look !== undefined && b.door && (b.kind === 'house' || b.kind === 'barn') ? house(b.look, b.door) : null));
+  if (h === undefined) known.set(b, (h = b.look !== undefined && (b.kind === 'house' || b.kind === 'barn') ? house(b.look, b.kind === 'barn' ? 'barn' : 'cottage') : null));
   return h;
 }
 

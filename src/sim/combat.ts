@@ -203,7 +203,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   downIfDead(h, ev);
 }
 
-function downIfDead(h: Hero, ev: FightEvent[]): void {
+/** Down at no health (the Ransom Coat may buy you off once a room). */
+export function downIfDead(h: Hero, ev: FightEvent[]): void {
   if (h.hp > 0) return;
   // The Ransom Coat: once a room, a killing blow takes 50 gold instead.
   if (wears(h, 'ransom') && !h.ransomed && h.purse >= HUNGRY_FX.ransom) {

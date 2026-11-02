@@ -6,7 +6,7 @@
  * holds the objective: cages, a named butcher, or the larder racks. Same seed, same room.
  */
 import type { Block, BlockKind, GameMap, Ledge, Npc, Road, Round, RoundKind, Theme, Water } from './arena.js';
-import { houseSeed } from './houses.js';
+import { settle } from './houses.js';
 import type { Job, PlaceKind } from './jobs.js';
 import { WOOD, type PropKind } from './props.js';
 import { Rng } from './rng.js';
@@ -193,14 +193,15 @@ export function planRoom(job: Job, index: number, road?: RoadId): RoomPlan {
     if (c) chests.push(c);
   }
   if (final && job.deep) chests.push({ x: MID + 2.2, y: 3.2, chained: true });
-  // Each house's look outside comes from the same seed as its inside.
-  blocks.forEach((b, i) => b.door && (b.look = houseSeed(job, index, i)));
+  // Each house's look and fate outside come from the same seed as its inside.
+  const spill = settle(job, index, blocks);
   const night = job.twist === 'night', t = THEMES[kind];
   const theme: Theme = night ? { ...t, ambient: t.ambient.map((v) => v * 0.65) as Theme['ambient'], moon: t.moon * 0.5 } : t;
   const map: GameMap = {
     name: job.place.name.toUpperCase(), w: W, h: H, wallFace: 3, rounds, blocks, braziers,
     torches: kit.torches ? [{ x: 4.5, y: -1.6 }, { x: MID - 4, y: -1.6 }, { x: MID + 4, y: -1.6 }, { x: W - 4.5, y: -1.6 }] : [], hero: { ...SPAWN }, exit: roads ? null : { ...EXIT }, theme,
     ledges: ledges.length ? ledges : undefined, roads, npcs: dead.length ? dead : undefined, water: water.length ? water : undefined,
+    marks: spill.length ? spill : undefined,
   };
   return { map, foes, props, chests };
 }

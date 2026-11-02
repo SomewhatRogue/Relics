@@ -2,6 +2,14 @@
 
 ## Current slice
 
+**What the goblins do; houses wrecked and burning** (Claude Opus 5.5, 2026-11-01; Kyle: "some houses
+bigger, more fucked up things going on", "more destroyed, or on fire, or you can't get into them
+safely"). Built; waiting on Kyle's play. *Done when* on a long or deep job Kyle walks into a longhouse,
+a manor or a tithe barn; finds a house where the goblins have been at the dead (torn apart, one tied to
+the wall and opened, one on a hook, the pot on their fire) next to a quiet one; sees a street with a
+house half fallen in, one he can't get into, and one burning; goes into the burning one past the fire
+and the falling beams, frees whoever's caged and gets out before the roof comes in.
+
 **The back of the pack** (Claude Opus 5.5, 2026-11-01). Built; waiting on Kyle's play. *Done when* Kyle
 meets a hexer (steps out of its striped circle, or cuts it down mid-spell) and a drummer (sees the pack
 pick up near it, and kill it first) on a job, and a party of three finds the extra goblins a little

@@ -1,48 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { collide, inArea, useMap, type GameMap } from '../src/shared/arena';
+import { inArea } from '../src/shared/arena';
+import { walkable } from './walk';
 import { house, houseSeed } from '../src/shared/houses';
 import { runInterior } from '../src/shared/interiors';
 import { PLACES, board, type Job } from '../src/shared/jobs';
-import { PROPS } from '../src/shared/props';
 import { planRoom, type RoomPlan } from '../src/shared/terrain';
-import { HERO } from '../src/shared/tuning';
 
 const job = (seed: number, kind: Job['place']['kind'] = 'farm', objective: Job['objective'] = 'hunt', ruin = 1): Job =>
   ({ ...board(1)[0], rooms: 3, place: { ...PLACES.find((p) => p.kind === kind)!, ruin }, objective, seed });
 const layout = (p: RoomPlan) => JSON.stringify({ w: p.map.w, h: p.map.h, f: p.map.theme.floor, b: p.map.blocks, r: p.map.rounds, p: p.props });
-
-/**
- * Where a hero can walk from the door: a flood over a fine grid, a cell open if the map's own collision
- * leaves a hero standing there untouched and no heavy furniture (a table, a barrel, a cage) is in the way.
- */
-function walkable(plan: RoomPlan) {
-  const m: GameMap = plan.map, r = HERO.radius, step = 0.2;
-  useMap(m);
-  const heavy = plan.props.filter((q) => q.kind !== 'plank' && q.kind !== 'stave');
-  const open = (x: number, y: number) => {
-    const q = { x, y };
-    collide(q, r);
-    return Math.hypot(q.x - x, q.y - y) < 1e-6 && heavy.every((h) => Math.hypot(h.x - x, h.y - y) >= PROPS[h.kind].radius + r);
-  };
-  const cols = Math.floor(m.w / step), rows = Math.floor(m.h / step), seen = new Set<number>(), cell = (i: number, j: number) => ({ x: (i + 0.5) * step, y: (j + 0.5) * step });
-  let all = 0;
-  for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) if (open(cell(i, j).x, cell(i, j).y)) all++;
-  const start = [Math.floor(m.hero.x / step), Math.floor(m.hero.y / step)], todo = [start];
-  seen.add(start[0] * 1000 + start[1]);
-  while (todo.length) {
-    const [i, j] = todo.pop()!;
-    for (const [a, c] of [[i + 1, j], [i - 1, j], [i, j + 1], [i, j - 1]]) {
-      if (a < 0 || c < 0 || a >= cols || c >= rows || seen.has(a * 1000 + c)) continue;
-      const at = cell(a, c);
-      if (open(at.x, at.y)) seen.add(a * 1000 + c), todo.push([a, c]);
-    }
-  }
-  const reach = (x: number, y: number, d: number) => [...seen].some((k) => {
-    const at = cell(Math.floor(k / 1000), k % 1000);
-    return Math.hypot(at.x - x, at.y - y) <= d;
-  });
-  return { all, reached: seen.size, reach, open };
-}
 
 describe('houses on a job', () => {
   it('differ from seed to seed, inside and out, and the same seed makes the same house', () => {
@@ -72,8 +38,9 @@ describe('houses on a job', () => {
         expect(b.look).toBe(houseSeed(j, 1, i));
         expect([b.w, b.h]).toEqual([3.5, 2]);
         const inside = runInterior(j, 1, i, b.door!), home = house(b.look!, b.door!);
-        // A lit house outside has its fire going inside.
-        expect(inside.map.torches.length > 0).toBe(home.lit && !!inside.map.blocks.some((q) => q.kind === 'hearth'));
+        // A lit house outside has its fire going inside (unless the whole house is burning).
+        expect(inside.map.torches.length > 0).toBe(home.lit && b.fate !== 'burning' && !!inside.map.blocks.some((q) => q.kind === 'hearth'));
+        expect(!!inside.map.blaze).toBe(b.fate === 'burning');
       }
     }
   });

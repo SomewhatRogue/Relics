@@ -6,6 +6,7 @@
  */
 import type { Block, Round } from '../shared/arena';
 import { drawLit, houseOf, paintHouse } from './cottage';
+import { paintFate } from './wreck';
 import { blit, type Ctx } from './draw';
 import { furnish, mouth, type Look } from './furnish';
 import { drawText, textWidth } from './pixfont';
@@ -81,6 +82,7 @@ function paint(b: Block, st: number): HTMLCanvasElement {
   if (home) paintHouse(rect, b, home, w, roofH, l.tall);
   else furnished(g, b, rect, w, roofH, wallY, l);
   door(b, rect, w, wallY, l);
+  if (home) paintFate(g, rect, b, w, roofH, l.tall);
   if (b.kind === 'church') {
     // The bell tower over the door.
     rect(Math.round(w / 2 - 5), 0, 10, 6, '#4e4e60');
@@ -158,7 +160,7 @@ export function drawBlock(c: Ctx, b: Block, x: number, y: number, lit: boolean):
   if ((b.burning ?? -1) >= 0 || b.smoulder) return flames(c, b, x, top, w, Math.round(b.h * PX), l.tall);
   if (b.kind === 'hearth' && b.look === 2) embers(c, x, top, w, Math.round(b.h * PX), l.tall);
   const home = houseOf(b);
-  if (home) return void (home.lit && b.kind === 'house' && drawLit(c, home, x, top, w, Math.round(b.h * PX), l.tall));
+  if (home) return void (home.lit && b.kind === 'house' && b.fate !== 'blocked' && drawLit(c, home, x, top, w, Math.round(b.h * PX), l.tall));
   if (!l.windows || !lit || b.maxHp) return;
   // Lit windows either side of the door: someone lives here.
   const wy = Math.round(y + b.h * PX - l.tall + 5);

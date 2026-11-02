@@ -44,6 +44,16 @@ const PAINT: Partial<Record<Mark['kind'], Painter>> = {
       if (rng.next() < 0.6) rect(x + w - 3 + rng.int(2), y + j, 2, 1, BLOOD[rng.int(BLOOD.length)]);
     }
   },
+  debris(rect, rng, x, y, w, h) {
+    // What came down off a house: broken boards and beams, stones, clumps of thatch, plaster dust.
+    blob(rect, rng, x, y, w, h, ['#2a2420', '#302824', '#26201c'], 0.5);
+    for (let i = 0; i < w / 3; i++) rect(x + rng.int(w), y + rng.int(h), 2 + rng.int(2), 2, ['#45414c', '#3a3036', '#55505e'][rng.int(3)]);
+    for (let i = 0; i < w / 6; i++) {
+      const bx = x + rng.int(w - 8), by = y + rng.int(h), len = 6 + rng.int(8), up = rng.next() < 0.5 ? 0 : 1;
+      for (let k = 0; k < len; k++) rect(bx + k, by - (up ? Math.floor(k / 3) : 0), 1, 2, k % 5 ? '#4a3420' : '#2a1e14');
+    }
+    for (let i = 0; i < w / 5; i++) rect(x + rng.int(w), y + rng.int(h), 3, 1, ['#6b5a3a', '#8a7448', '#7a6a58'][rng.int(3)]);
+  },
   scorch(rect, rng, x, y, w, h) {
     blob(rect, rng, x, y, w, h, ['#201c1e', '#2a2426', '#1a1618', '#34282a'], 0.7);
     for (let i = 0; i < w / 3; i++) rect(x + rng.int(w), y + rng.int(h), 1, 1, '#4a3a2a');

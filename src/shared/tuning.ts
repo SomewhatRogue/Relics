@@ -194,3 +194,12 @@ export const SWING_DUMMY = {
 
 /** How long a light enemy flinches when hit. */
 export const FLINCH = 0.3;
+
+/**
+ * A house on fire inside (shared/blaze.ts, sim/blaze.ts). A patch smokes `warn` seconds before it
+ * catches, then burns anyone standing in it `dps`; a beam's circle shows `beamWarn` before it lands
+ * (`beamR`, `beamDmg`), and it burns where it fell for `beamBurn`. The roof gives `fallWarn` seconds of
+ * falling dust before it comes in at the plan's `fall`: everyone inside is thrown out the door hurt
+ * (never below 1 health), and anyone still caged is lost.
+ */
+export const HOUSEFIRE = { warn: 3, dps: 14, beamWarn: 1.6, beamR: 0.95, beamDmg: 22, beamBurn: 5, fallWarn: 10, fallDmg: 18, fallMin: 52, fallMax: 64 };

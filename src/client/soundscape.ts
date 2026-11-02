@@ -81,6 +81,8 @@ export class Soundscape {
     }
     if (ev.k === 'impact') return ev.kind === 'slam' ? sfx.boom() : ev.kind === 'hex' ? goblin.hexBurst() : undefined;
     if (ev.k === 'chop' || ev.k === 'blaze' || ev.k === 'collapse') return woodSounds[ev.k]();
+    if (ev.k === 'rafter') return woodSounds.collapse();
+    if (ev.k === 'housefall') return woodSounds.collapse(), sfx.boom();
     if (ev.k === 'denspawn') return goblin.screech();
     if (ev.k === 'bellow') return butcher.roar(true), butcher.roar(true), sfx.boom();
     if (ev.k === 'spotted') {
@@ -117,7 +119,9 @@ export class Soundscape {
     }
     // A building on fire crackles, louder the closer you are.
     let near = 0;
-    for (const b of room.map.blocks) if ((b.burning ?? -1) >= 0 && !b.ruined) near = Math.max(near, 1 - Math.hypot(b.x + b.w / 2 - me.x, b.y + b.h / 2 - me.y) / 12);
+    for (const b of room.map.blocks) if (((b.burning ?? -1) >= 0 || b.fate === 'burning') && !b.ruined) near = Math.max(near, 1 - Math.hypot(b.x + b.w / 2 - me.x, b.y + b.h / 2 - me.y) / 12);
+    // Inside a house on fire, the whole room crackles.
+    if (room.map.blaze && !room.blaze?.fallen) near = Math.max(near, 0.7);
     if (near > 0 && now > this.crackleAt) (woodSounds.crackle(near), (this.crackleAt = now + 0.25 + Math.random() * 0.35));
     // The music: where you are, how bad it is.
     const [area, version] = this.area(g);

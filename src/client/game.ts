@@ -321,6 +321,8 @@ export class Game {
     if (this.mode === 'run') this.followers.through(this.room, o.room, inner, d.x, d.y + 0.6);
     // The freed you're leading come out too: home (the room may have goblins waiting).
     if (this.mode === 'run') walkOut(this.room.survivors, this.room.heroes, o.room.survivors, d.x, d.y + 1.1);
+    // A house on fire that fell in behind you is ash in the street (sim/blaze.ts).
+    if (this.room.blaze?.fallen) Object.assign(o.door, { ruined: true, smoulder: false });
     this.outside = null;
     this.room = o.room;
     this.room.heroes.push(h);

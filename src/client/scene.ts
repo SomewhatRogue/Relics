@@ -26,6 +26,8 @@ import { SPRITES } from './sprites';
 import { LIFT, OX, OY, PX, paintMap, worldH, worldW } from './world';
 import { drawText, textWidth } from './pixfont';
 import { blockAt, blockFoot, drawBlock, drawRound } from './blocks';
+import { blazeLights, drawBlaze, drawBlazeAbove } from './blazedraw';
+import { drawHung, drawPot } from './grimdraw';
 import { drawNpc } from './npcs';
 import { drawCaged, drawSurvivor } from './captives';
 import { SPOT_REACH } from '../shared/town';
@@ -143,6 +145,8 @@ export class Scene {
     glow.clearRect(0, 0, this.vw, this.vh);
     const pw = me ? WEAPONS[me.weapon].parryWindow + me.lenience : 0.3;
     for (const e of room.enemies) if (e.attack && e.act === 'attack') drawTelegraph(c, e.attack, cx, cy, pw);
+    // A house on fire: where it burns, where it's about to, where a beam is coming down (blazedraw.ts).
+    drawBlaze(c, room, cx, cy);
     // A drummer's reach and its beat on the floor, and the goblins it has roused (client/backline.ts).
     drawDrums(c, room.enemies, (e) => {
       const [x, y] = lerp('e:' + e.id, e.x, e.y);
@@ -266,6 +270,12 @@ export class Scene {
       items.push({ y: OY + at.y * PX, draw: () => drawNpc(c, n, OX + at.x * PX - cx, OY + at.y * PX - cy, near && !n.mute, at.fx, !!n.path, at.x) });
     }
     for (const b of map.braziers) items.push({ y: OY + b.y * PX, draw: () => this.brazier(c, OX + b.x * PX - cx, OY + b.y * PX + 2 - cy, now) });
+    // What the goblins left that moves: one hung from a hook, the pot on their fire (grimdraw.ts).
+    for (const q of map.grim ?? []) {
+      const x = OX + q.x * PX - cx, y = OY + q.y * PX - cy;
+      if (q.kind === 'hung') items.push({ y: OY + q.y * PX, draw: () => drawHung(c, q, x, y) });
+      if (q.kind === 'pot') items.push({ y: OY + q.y * PX + 0.5, draw: () => drawPot(c, q, x, y + 2) });
+    }
     if (map === ARENA) items.push({ y: OY + ARENA.cage.y * PX, draw: () => this.cage(c, OX + ARENA.cage.x * PX - cx, OY + ARENA.cage.y * PX - cy, now) });
     // The way out, glowing once it's open.
     if (room.exitOpen && map.exit) {
@@ -302,8 +312,10 @@ export class Scene {
     }
     items.sort((p, q) => p.y - q.y);
     for (const it of items) it.draw();
+    drawBlazeAbove(c, room, cx, cy);
 
     const lights: Light[] = [];
+    blazeLights(room, cx, cy, now, lights);
     for (const m of room.coals) lights.push({ x: OX + m.x * PX - cx, y: OY + m.y * PX - cy - 4, r: 26 + Math.sin(now * 7 + m.id) * 3, i: 0.6 * Math.min(1, m.life / 4), c: [1, 0.6, 0.28] });
     for (const ch of room.chests) if (ch.state !== 'shut') lights.push({ x: OX + ch.x * PX - cx, y: OY + ch.y * PX - cy - 6, r: ch.state === 'opening' ? 16 + 30 * (ch.t / 1.2) : 26, i: ch.state === 'opening' ? 0.4 + 0.5 * (ch.t / 1.2) : 0.35, c: tint(TIERS[ch.tier].col) });
     for (const d of room.drops) {

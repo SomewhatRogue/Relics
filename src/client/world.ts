@@ -7,6 +7,7 @@ import type { GameMap, Ledge } from '../shared/arena';
 import { Rng } from '../shared/rng';
 import { paintBreach } from './breach';
 import { paintMarks } from './marks';
+import { paintGrim } from './grimpaint';
 import { paintSoil } from './soil';
 
 export const PX = 16;
@@ -85,6 +86,7 @@ export function paintMap(m: GameMap): HTMLCanvasElement {
   }
   paintSoil(m, g);
   paintMarks(m, rect);
+  paintGrim(m, rect);
   g.fillStyle = 'rgba(0,0,0,0.35)';
   g.fillRect(OX, OY, fw, 4);
   for (const l of m.ledges ?? []) ledge(l, rect, rng, pick);
