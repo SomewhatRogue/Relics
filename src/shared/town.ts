@@ -12,7 +12,7 @@
 import type { Block, GameMap, Npc, Round } from './arena.js';
 import type { PropKind } from './props.js';
 import type { WorldState } from './story.js';
-import { townGround } from './ground.js';
+import { townGround, townSoil } from './ground.js';
 import { mending, WORN } from './mend.js';
 import { siege } from './siege.js';
 import { workDone } from './works.js';
@@ -116,7 +116,7 @@ export function townMap(w: WorldState): GameMap {
   for (const b of blocks) if (worn && b.label && WORN.includes(b.label)) b.worn = true;
   blocks.push(...m.blocks, ...sg.blocks), rounds.push(...m.rounds, ...sg.rounds), npcs.push(...m.npcs, ...sg.npcs);
   return {
-    name: 'WICKHOLD', w: W, h: H, wallFace: 3, rounds, blocks, npcs, marks: [...townGround(w), ...m.marks], breach: m.breach,
+    name: 'WICKHOLD', w: W, h: H, wallFace: 3, rounds, blocks, npcs, soil: townSoil(w), marks: [...townGround(w), ...m.marks], breach: m.breach,
     braziers: [{ x: 25, y: 15, r: 0.35 }, { x: 31, y: 15, r: 0.35 }, { x: 28, y: 21.6, r: 0.35 }, ...sg.braziers],
     torches: [6, 14, 22, 34, 40, 46, 58].map((x) => ({ x, y: -1.6 })),
     hero: { x: 28, y: 20 }, exit: null,

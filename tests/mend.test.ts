@@ -161,12 +161,20 @@ describe('the ground and the life in it', () => {
   const count = (w: WorldState, k: string) => townMap(w).marks!.filter((m) => m.kind === k).length;
 
   it('the square is not one sheet of cobbles, mended or not, and mending heals the mess', () => {
-    for (const w of [newWorld(), withWorks(...all)]) for (const k of ['flags', 'earth', 'ruts', 'path', 'puddle', 'straw', 'weeds', 'gutter', 'holes', 'mud']) expect(kinds(w).has(k as never), k).toBe(true);
+    const mats = (w: WorldState) => townMap(w).soil!.map((x) => x.mat), soilOf = (w: WorldState, k: string) => mats(w).filter((x) => x === k).length;
+    for (const w of [newWorld(), withWorks(...all)]) {
+      for (const k of ['flags', 'ruts', 'puddle', 'weeds', 'gutter', 'holes']) expect(kinds(w).has(k as never), k).toBe(true);
+      for (const k of ['cobble', 'earth', 'mud', 'wet', 'straw', 'ash']) expect(mats(w), k).toContain(k);
+    }
+    // Earth and mud everywhere first; cobble only in islands and strips over it.
+    expect(townMap(newWorld()).soil![0]).toMatchObject({ mat: 'mud', w: 64, h: 42 });
+    expect(soilOf(withWorks('wash'), 'cobble')).toBeGreaterThan(soilOf(newWorld(), 'cobble'));
+    expect(soilOf(withWorks('wash', 'lanes'), 'swept')).toBeGreaterThan(0);
+    expect(soilOf(withWorks('lanes'), 'mud')).toBeLessThan(soilOf(newWorld(), 'mud'));
     expect(count(withWorks('wash', 'lanes'), 'holes')).toBeLessThan(count(newWorld(), 'holes'));
-    expect(count(withWorks('lanes'), 'mud')).toBeLessThan(count(newWorld(), 'mud'));
     expect(kinds(newWorld()).has('arrows')).toBe(true);
     expect(kinds(withWorks('lanes')).has('arrows')).toBe(false);
-    expect(JSON.stringify(townMap(newWorld()).marks)).toBe(JSON.stringify(townMap(newWorld()).marks));
+    expect(JSON.stringify(townMap(newWorld()).soil)).toBe(JSON.stringify(townMap(newWorld()).soil));
   });
 
   it('under siege: a gallows, the gravedigger at his work, the burned-out round a brazier, hurdles at the gate', () => {

@@ -1088,3 +1088,18 @@ it seem more alive and under siege. Less is more for new lines.
 - New NPC fields (paint only): `Npc.work` (what they're busy at) and `Npc.mute` (background people: no
   mark, nobody to talk to). Two block kinds (`gallows`, `hurdle`), two round kinds (`dog`, `smoke`).
   Nothing blocks a door, a spot or a patrol; the reach test covers it.
+
+## 2026-11-01: the ground is mostly earth and mud now (Kyle; Opus 5.5)
+
+The square still read as one cobble grid with a flagstone patch. The ground is now made of materials
+in big soft-edged shapes (`GameMap.soil`, `shared/ground.ts` `townSoil`, painted by `client/soil.ts`):
+mud everywhere first, packed earth over the square, the gate yard, the market and the lane mouths; the
+cobbles survive in islands and strips over that (round the Lantern and the well, along the building
+fronts, the old road down from the gate, a spine down each lane); then wear over all of it (a track
+worn corner to corner across the square, mud fans where carts turn, wet round the well, straw under
+the stalls, ash round the braziers). Edges are broken by seeded value noise; the material is decided
+per 4x4 pixels and coloured per 2x2, written straight into the floor's pixels once per map (about
+50 ms). Each material has its own colour family, dark for the stepped lighting. Washing the square
+sweeps its earth and relays three more cobble islands; clearing the lanes sweeps bands of lane mud,
+widens the cobble spines and takes the cart-turn mud fans. The small marks (flagstones, ruts, drains,
+puddles, weeds, missing cobbles, arrows) stay on top; the earth, path, mud and straw marks are gone.

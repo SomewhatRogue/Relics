@@ -7,6 +7,7 @@ import type { GameMap, Ledge } from '../shared/arena';
 import { Rng } from '../shared/rng';
 import { paintBreach } from './breach';
 import { paintMarks } from './marks';
+import { paintSoil } from './soil';
 
 export const PX = 16;
 export const OX = 8;
@@ -82,6 +83,7 @@ export function paintMap(m: GameMap): HTMLCanvasElement {
     }
     rect(x0, y0, w, 1, wt.deep ? '#2a4a5a' : '#7a9a9a');
   }
+  paintSoil(m, g);
   paintMarks(m, rect);
   g.fillStyle = 'rgba(0,0,0,0.35)';
   g.fillRect(OX, OY, fw, 4);

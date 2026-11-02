@@ -42,6 +42,13 @@ export type MarkKind = 'blood' | 'drag' | 'scorch' | 'trample' | 'planks' | 'bed
   // The ground itself (shared/ground.ts): flagstones, packed earth, mud, wheel ruts, a trodden path,
   // missing cobbles, puddles, straw, weeds, a drain, spent arrows.
   | 'flags' | 'earth' | 'mud' | 'ruts' | 'path' | 'holes' | 'puddle' | 'straw' | 'weeds' | 'gutter' | 'arrows';
+/**
+ * What the ground is made of, in big soft-edged shapes painted over the floor (later ones win; where
+ * the winner is `cobble`, the floor's own cobbles show). A box, an ellipse in the box (`round`), or a
+ * line from (x, y) to (x + w, y + h) `line` tiles either side. Paint only.
+ */
+export type SoilMat = 'cobble' | 'earth' | 'mud' | 'swept' | 'straw' | 'ash' | 'wet';
+export interface Soil { mat: SoilMat; x: number; y: number; w: number; h: number; round?: boolean; line?: number }
 /** A floor mark's area (tiles). A `path` runs as a line from (x, y) to (x + w, y + h). */
 export interface Mark { kind: MarkKind; x: number; y: number; w: number; h: number }
 /**
@@ -132,6 +139,8 @@ export interface GameMap {
   water?: Water[];
   /** Where goblins lie asleep (drawn curled up; they lie as still as ones at the dead till they wake). */
   sleepers?: { x: number; y: number }[];
+  /** Paint only: what the ground is made of (shapes, in order), before the marks. */
+  soil?: Soil[];
   /** Paint only: marks on the floor (blood, scorch, dug beds, flowers). */
   marks?: Mark[];
   /** Paint only: a stretch of the back wall that came down (tiles), and how far it's mended (0 to 3). */
