@@ -76,7 +76,7 @@ const input = new Input(() => scene.heroScreen());
 const $ = (s: string) => document.querySelector(s) as HTMLElement;
 const card = new LootCard((id) => input.take(id));
 const lesson = new LessonView(game, input.touch);
-const pack = new PackView((op, arg) => input.gear(op, arg), () => title.open, { open: () => openTree(game, panel), picks: () => game.profile.picks });
+const pack = new PackView((op, arg) => input.gear(op, arg), () => title.open, { open: () => openTree(game, panel), picks: () => game.profile.picks, town: () => game.mode === 'town' });
 const music = new Music();
 const link = new WorldLink((w) => game.syncWorld(w));
 game.link = link;
@@ -110,6 +110,7 @@ void recovery.start((s) => title.open && (game.adopt(s), title.show(), true));
 const use = () => {
   const n = game.near();
   if (!n || panel.open || title.open) return;
+  pack.toggle(false);
   if (n.chest) input.open(n.chest);
   else if (n.door) game.enter(n.door);
   else if (n.talk) {
@@ -166,8 +167,8 @@ const KIT: Record<string, string> = {
 
 let parries = 0;
 const townTips = input.touch
-  ? ['Walk to the JOB BOARD and tap USE to take a job', 'Walk up into a door to go in. Everyone inside has something to say', 'The FORGE: Halvard sells weapons, Ivo fits elements', 'The TRAINING HALL: perks, and the squire takes you to the yard', 'The TOWN HALL: the reeve and the council decide the chapter']
-  : ['Walk to the JOB BOARD and press E to take a job', 'Walk up into a door to go in. Press E by anyone to talk', 'The FORGE: Halvard sells weapons, Ivo fits elements', 'The TRAINING HALL: perks, and the squire takes you to the yard', 'The TOWN HALL: the reeve and the council decide the chapter'];
+  ? ['Walk to the JOB BOARD and tap USE to take a job', 'Walk up into a door to go in. Everyone inside has something to say', 'The FORGE: Halvard upgrades your gear or melts it down for steel, and Ivo sees to your relics', 'The TRAINING HALL: perks, and the squire takes you to the yard', 'The TOWN HALL: the reeve and the council decide the chapter']
+  : ['Walk to the JOB BOARD and press E to take a job', 'Walk up into a door to go in. Press E by anyone to talk', 'The FORGE: Halvard upgrades your gear or melts it down for steel, and Ivo sees to your relics', 'The TRAINING HALL: perks, and the squire takes you to the yard', 'The TOWN HALL: the reeve and the council decide the chapter'];
 const tips = input.touch
   ? ['Stun or get behind a small goblin, then GRAB it', 'Warriors can GRAB barrels and tables and throw them', 'Break the oil barrel near goblins and they burn', 'Holding one: SLAM it, or THROW it at another', 'POTION drinks or throws the front of your belt', 'Traits reward skill: parries, dodges, perfect releases', 'Walk into a cottage or barn: goblins, and sometimes someone caged', 'HEALER: SANCTUARY blesses the ground and wards whoever is most hurt', 'Oil and fire burn wooden buildings down. Burn out the dens', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'SKILL: every class has one. Each recharges', 'Striped circles cannot be blocked: dodge out, or walk out', 'DEEP jobs end at a named butcher. Win one for a RELIC', 'TWIN DAGGERS: dash behind a goblin and BACKSTAB', 'Push the stick part way to creep. Resting goblins see you late: hit first for an AMBUSH']
   : ['G grabs a stunned goblin (or one you got behind). Click to slam, G to throw', 'Warriors: G lifts barrels and tables. Throw them, or slam them down', 'Break the oil barrel near goblins and they burn', 'Q drinks or throws the potion at the front of your belt. Hold Q to bring the next one to the front', 'Bows: release on the white flash. Held too long, the shot weakens', 'Walk up into a cottage door to go in. Fire burns buildings down', 'Cleric: E for SANCTUARY. Blessed ground, and a ward that throws arrows back', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: your class skill. R: a relic, once you have won one on a DEEP job', 'Striped circles cannot be blocked: SPACE to dodge, or walk out', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or rod', 'Daggers: dash behind a goblin and BACKSTAB', 'Hold Shift to creep. Resting goblins see you late: hit first for an AMBUSH'];
@@ -314,8 +315,10 @@ function tick(t: number): void {
   last = t;
   // With a panel up, the hero stands still (and no press is spent).
   const live = input.read();
-  if (panel.open || title.open || chat.typing) still ??= { ...live, mx: 0, my: 0, attack: false, block: false };
+  if (panel.open || title.open || chat.typing || pack.open) still ??= { ...live, mx: 0, my: 0, attack: false, block: false };
   else still = null;
+  // With the pack open the hero stands still too, but what you change in it still goes to the room.
+  if (still && pack.open && !panel.open) still = { ...still, gearOp: live.gearOp, gearArg: live.gearArg, gearSeq: live.gearSeq };
   // Whoever you're talking to stops their round till you're done (the world doesn't: it's shared).
   if (talking && !panel.open) (talking.lag = (talking.lag ?? 0) + game.room.time - (talking.heldAt ?? game.room.time)), (talking.heldAt = undefined), (talking = null);
   // Back after a reload in the middle of a job with friends: straight back in (once, once a hero's chosen).
@@ -451,6 +454,7 @@ w.__music = music;
 w.__renderMusic = (...a: Parameters<typeof import('./musicrender').renderMusic>) => import('./musicrender').then((m) => m.renderMusic(...a));
 w.__title = title;
 w.__panel = panel;
+w.__pack = pack;
 w.__openTree = (take = false) => openTree(game, panel, { take });
 w.__openSpot = (id: string, arg = 0, key = '') => openSpot(id as never, game, panel, arg, key);
 // Look sheets for screenshots: every hero, the Warrior's options, and a dark copy with only the glow lit.

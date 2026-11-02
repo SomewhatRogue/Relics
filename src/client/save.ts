@@ -6,6 +6,7 @@
 import { HERO_SLOTS, fitPerks, newProfile, newStats, type Profile } from '../shared/progress';
 import { newWorld, type WorldState } from '../shared/story';
 import { WEAPONS, upgradeOld } from '../shared/tuning';
+import { fitStores } from '../shared/bags';
 
 const KEY = 'relic.save.v2', OLD = 'relic.save.v1';
 /** `savedAt`: when it was last kept here (it only goes forward), to tell which copy is newer (recovery.ts). */
@@ -32,6 +33,8 @@ const hero = (p: Partial<Profile>): Profile => {
   }
   out.arms = Object.fromEntries(Object.entries(out.arms).map(([k, it]) => [k, it && upgradeOld(it)]));
   out.bag = (out.bag ?? []).map(upgradeOld);
+  // The pack, the vault and the buyback (shared/bags.ts): older heroes keep every piece.
+  fitStores(out);
   // Knacks onto the tree: one the class can't use comes back as a pick (shared/chains.ts).
   out.perks = [...(out.perks ?? [])];
   fitPerks(out);

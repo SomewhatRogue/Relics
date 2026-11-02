@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { Game } from '../src/client/game';
-import { moveOf } from '../src/client/pack';
+import { moveOf } from '../src/client/packmoves';
 import { GEAR, applyGear } from '../src/sim/pack';
 import { rollGear } from '../src/shared/gear';
 import { Rng } from '../src/shared/rng';

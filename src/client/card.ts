@@ -28,11 +28,11 @@ const ARMOR_HOW = { light: 'Light: full speed and a full dodge, full damage take
 /** The same for a class with no dodge (a Warrior, a Healer): nothing about a dodge it hasn't got. */
 const ARMOR_FEET = { ...ARMOR_HOW, light: 'Light: full speed, full damage taken.', heavy: 'Heavy: 12% slower, 25% less damage, and small goblins can\'t stagger you.' };
 /** Rows a class has no use for: a parry it can't make, a block it can't hold, a dodge it hasn't got, heals it doesn't give. */
-const shown = (r: Row, cls: HeroClass) =>
+export const shown = (r: Row, cls: HeroClass) =>
   !(r.label === 'PARRY WINDOW' && CLASS_GUARD[cls] === 'none') && !(r.label === 'THROUGH A BLOCK' && CLASS_GUARD[cls] !== 'full') &&
   !(r.label === 'DODGE EVERY' && !CLASS_DODGES[cls]) && !(r.label === 'HEALING GIVEN' && cls !== 'HEALER');
 
-interface Row { label: string; v: number; unit: '' | 's' | '%'; low?: boolean }
+export interface Row { label: string; v: number; unit: '' | 's' | '%'; low?: boolean }
 interface Worn { weapon: WeaponId; item?: Item; armor: Item | null; rings: Item[]; baseHp: number }
 
 /** The numbers that matter, for what's worn. */
@@ -56,11 +56,11 @@ export function sheet(w: Worn): Row[] {
   ];
 }
 
-const fmt = (r: Row, v = r.v) => (r.unit === 's' ? v.toFixed(2) + ' s' : r.unit === '%' ? Math.round(v * 100) + '%' : String(Math.round(v * 10) / 10));
-const worn = (h: Hero): Worn => ({ weapon: h.weapon, item: h.arms[h.weapon], armor: h.armor, rings: h.rings, baseHp: h.baseHp });
+export const fmt = (r: Row, v = r.v) => (r.unit === 's' ? v.toFixed(2) + ' s' : r.unit === '%' ? Math.round(v * 100) + '%' : String(Math.round(v * 10) / 10));
+export const worn = (h: Hero): Worn => ({ weapon: h.weapon, item: h.arms[h.weapon], armor: h.armor, rings: h.rings, baseHp: h.baseHp });
 
 /** What you'd wear with `it` on instead (a third ring pushes out the older). */
-function wearing(h: Hero, it: Item): Worn {
+export function wearing(h: Hero, it: Item): Worn {
   const w = worn(h), s = slotOf(it);
   if (s === 'weapon') return { ...w, weapon: it.kit!, item: it };
   if (s === 'armor') return { ...w, armor: it };

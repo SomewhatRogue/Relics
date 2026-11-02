@@ -140,6 +140,8 @@ export interface Hero extends Body {
   hiddenUntil: number;
   /** Weapons, armor and rings carried, not worn. */
   bag: Item[];
+  /** How many the pack holds (bought bigger in town, shared/bags.ts). */
+  bagSize: number;
   /** Worn armor (none: as light) and up to two rings (shared/gear.ts). */
   armor: Item | null;
   rings: Item[];

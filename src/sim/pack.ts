@@ -5,10 +5,13 @@
  */
 import { CLASS_KITS, RELICS, WEAPONS, abilitiesOf, itemName, slotOf, type Item } from '../shared/tuning';
 import { refreshHealth } from './gearstats';
+import { BAG } from '../shared/bags';
 import type { FightEvent, Hero, Intent } from './types';
 
-/** Weapons a pack holds. */
-export const PACK = 8;
+/** What a new pack holds (it's bought bigger in town: shared/bags.ts). */
+export const PACK = BAG.start;
+/** No room left in this hero's pack. */
+export const full = (h: Hero) => h.bag.length >= (h.bagSize || BAG.start);
 export const GEAR = { equip: 1, drop: 2, carry: 3, front: 4, pour: 5, off: 6, unarm: 7 } as const;
 
 /** Put on armor (the old goes in the pack) or a ring (a third pushes out the older). */
@@ -34,7 +37,7 @@ export function applyGear(h: Hero, op: number, arg: number, ev: FightEvent[]): v
   const cls = WEAPONS[h.weapon].cls;
   if (op === GEAR.equip) {
     const it = arg >= 0 ? h.bag[arg] : undefined;
-    if (arg >= 0 && !it) return;
+    if ((arg >= 0 && !it) || (arg < 0 && h.arms[h.weapon] && full(h))) return;
     if (it && slotOf(it) !== 'weapon') return wear(h, arg, it, ev);
     if (it && WEAPONS[it.kit!].cls !== cls) return;
     const old = h.arms[h.weapon];
@@ -48,13 +51,13 @@ export function applyGear(h: Hero, op: number, arg: number, ev: FightEvent[]): v
   } else if (op === GEAR.off) {
     // A ring off, into the pack (if there's room).
     const r = h.rings[arg];
-    if (!r || h.bag.length >= PACK || r.hungry === 'wedding') return;
+    if (!r || full(h) || r.hungry === 'wedding') return;
     h.rings.splice(arg, 1);
     h.bag.push(r);
     refreshHealth(h);
   } else if (op === GEAR.unarm) {
     // Armor off, into the pack (if there's room).
-    if (!h.armor || h.bag.length >= PACK) return;
+    if (!h.armor || full(h)) return;
     h.bag.push(h.armor);
     h.armor = null;
     refreshHealth(h);

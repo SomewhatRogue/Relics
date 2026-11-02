@@ -4,7 +4,7 @@
  * windows lit odd colours, coloured smoke from its flue; shields and a banner on the barracks; logs,
  * antlers and pelts at the hunters' lodge; the church's empty belfry and a round window; casks and a
  * lamp at the Drowned Rat; the forge's chimney stack, smoking; notices at the town hall; herbs drying
- * at the infirmary. Live bits (lit slits, smoke) are drawn each frame by `liveOutside`.
+ * at the infirmary; the counting house open to the sky at one end. Live bits (lit slits, smoke) are drawn each frame by `liveOutside`.
  */
 import type { Block } from '../shared/arena';
 import type { Ctx } from './draw';
@@ -84,6 +84,22 @@ export function dressOutside(g: CanvasRenderingContext2D, b: Block, rect: Rect, 
       rect(8, wallY + 2, 6, 12, '#5a1818'), rect(10, wallY + 6, 2, 3, '#d4a537');
       rect(mid - 6, bot - 2, 12, 2, '#6a6470');
       return;
+    case 'bank': {
+      // The counting house: one end of the roof fallen in (the dark inside, bare rafters, a ragged edge),
+      // the wall-top broken under it, a window boarded over, a crack down the front.
+      const hx = Math.round(w * 0.58), hw = Math.round(w * 0.36);
+      rect(hx, 2, hw, roofH - 3, '#0d0b10');
+      // Rubble on the floor inside, two rafters still up, one fallen across.
+      for (let i = 0; i < hw; i += 2) rect(hx + i, roofH - 4 - ((i * 7) % 4), 2, 3 + ((i * 7) % 4), i % 4 ? '#2a2630' : '#3a3640');
+      for (const x of [hx + Math.round(hw * 0.3), hx + Math.round(hw * 0.7)]) rect(x, 1, 2, roofH - 2, '#4a3420');
+      for (let i = 0; i < hw - 2; i++) rect(hx + 1 + i, 3 + Math.round((i * (roofH - 8)) / hw), 2, 1, '#5a3d22');
+      for (let y = 2; y < roofH - 1; y += 2) rect(hx - 1 - (y % 4 ? 0 : 1), y, 2, 2, '#57525e'), rect(hx + hw - 1 + (y % 4 ? 0 : 1), y, 2, 2, '#57525e');
+      for (let x = hx; x < hx + hw; x += 3) rect(x, wallY - 1 - (x % 2), 3, 2 + (x % 2), '#4e4a56');
+      const wy = wallY + 6;
+      rect(6, wy, 10, 8, '#14121a'), rect(5, wy + 1, 12, 2, '#6b4a2b'), rect(5, wy + 5, 12, 2, '#5a3d22');
+      for (let i = 0; i < tall - 10; i++) rect(hx + hw - 8 + (i % 5 < 2 ? 1 : 0) + Math.floor(i / 6), wallY + 6 + i, 1, 1, '#14121a');
+      return;
+    }
     case 'infirmary':
       // Herbs drying under the eaves, a lamp by the door.
       rect(4, wallY + 1, w - 8, 1, '#8a7a5a');

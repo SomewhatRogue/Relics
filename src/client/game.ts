@@ -19,7 +19,7 @@ import { ARRIVE_SAFE, PARTY, type DrillId, POTION, POTIONS, type PotionId, CLASS
 import { ArenaRoom } from '../sim/room';
 import { lessonOf, newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
 import { woodMap, WOOD_PROPS } from '../shared/wood';
-import { PACK } from '../sim/pack';
+import { bagFull, bagSize } from '../shared/bags';
 import { walkOut } from '../sim/survivors';
 import { refreshHealth, statsOf } from '../sim/gearstats';
 import { houseCaptives, sum } from '../sim/goal';
@@ -212,6 +212,7 @@ export class Game {
     h.weapon = p.weapon;
     h.arms = { ...p.arms };
     h.bag = [...p.bag];
+    h.bagSize = bagSize(p);
     h.glow = p.glow;
     h.belt = [...p.belt];
     h.want = p.want;
@@ -608,7 +609,7 @@ export class Game {
     const relic = won && run.job.deep ? FOUND_RELICS.find((r) => !p.relics.includes(r)) : undefined;
     if (relic) (p.relics.push(relic), p.relic ||= relic);
     // The treasure at the end: yours alone. What won't fit in the pack is sold on the spot.
-    const found = won ? treasure(run.job, p.cls, p.id, p.runs, crowd) : [], kept = found.slice(0, Math.max(0, PACK - p.bag.length)), sold = found.slice(kept.length);
+    const found = won ? treasure(run.job, p.cls, p.id, p.runs, crowd) : [], kept = found.slice(0, Math.max(0, bagSize(p) - p.bag.length)), sold = found.slice(kept.length);
     p.bag.push(...kept);
     p.gold += sold.length * TREASURE_SOLD;
     this.result = { won, job: run.job, gold, xp, rescued, levels, relic, treasure: kept, sold, lost: run.lost ?? 0 };
@@ -650,7 +651,7 @@ export class Game {
    */
   buy(quality: 'fine' | 'forged', kit: WeaponId = this.profile.weapon, slot: 'weapon' | 'armor' | 'ring' = 'weapon', armor?: ArmorKind): Item | null {
     const p = this.profile, cost = SHOP[quality];
-    if (p.gold < cost || p.bag.length >= PACK || (slot === 'weapon' && !CLASS_KITS[p.cls].includes(kit))) return null;
+    if (p.gold < cost || bagFull(p) || (slot === 'weapon' && !CLASS_KITS[p.cls].includes(kit))) return null;
     p.gold -= cost;
     const item = rollGear(new Rng(p.runs * 131 + p.gold * 7 + 5), p.cls, quality, slot, kit, armor);
     p.bag.push(item);

@@ -5,7 +5,8 @@
 import { TIERS, WEAPONS } from '../shared/tuning';
 import { card, compare } from './card';
 import { REACH } from '../sim/loot';
-import { PACK } from '../sim/pack';
+import { full } from '../sim/pack';
+import { PACKW } from './storewords';
 import { COPY } from './copy';
 import type { ArenaRoom } from '../sim/room';
 import type { Hero } from '../sim/types';
@@ -44,7 +45,7 @@ export class LootCard {
     const it = best.item, cls = it.kit ? WEAPONS[it.kit].cls : WEAPONS[me.weapon].cls, mine = cls === WEAPONS[me.weapon].cls;
     this.el.style.setProperty('--el', TIERS[it.quality].col);
     this.el.innerHTML = card(it, me) +
-      (mine ? (me.bag.length >= PACK ? `<div class="yours">${COPY.full}</div>` : compare(me, it) + `<div class="yours">${COPY.takes}</div><button>TAKE${keys ? ' (F)' : ''}</button>`)
+      (mine ? (full(me) ? `<div class="yours">${PACKW.fullJob}</div>` : compare(me, it) + `<div class="yours">${COPY.takes}</div><button>TAKE${keys ? ' (F)' : ''}</button>`)
         : `<div class="yours">${COPY.otherClass.replace('{Class}', cls[0] + cls.slice(1).toLowerCase())}</div>`);
     this.el.hidden = false;
   }

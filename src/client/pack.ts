@@ -1,56 +1,48 @@
 /**
- * The pack (I, Tab, or PACK): what you wear in slots along the top (hand, armor, two rings, the relic
- * carried), the pack below, the relics on the shelf and the belt. Drag a piece onto its slot to wear it,
- * into the pack to take it off, or onto DROP; tap one to see its card and buttons. The world keeps going
- * while it's open, and every change goes to the room as an intent (sim/pack.ts).
+ * The pack (I, Tab, or PACK): your hero with what's on each part of them (HAND, BODY, two RINGs, the
+ * RELIC carried, the BELT, and the class SKILL shown but not changed here), and beside it the pack, a
+ * square a piece. Tap a piece (or point at it, with a mouse) for its card next to what you wear in that
+ * slot now, every number with the change. Drag a piece onto its slot to wear it, or into the pack to
+ * take it off. The world keeps going while it's open and your hero stands still; every change goes to
+ * the room as an intent (sim/pack.ts).
  */
-import { CLASS_KITS, ELEMENT_NAME, LANTERN, POTION, POTIONS, RELICS, TIERS, WEAPONS, itemName, slotOf, type Item, type RelicId } from '../shared/tuning';
-import { GEAR, PACK } from '../sim/pack';
+import { ELEMENT_NAME, LANTERN, POTION, POTIONS, RELICS, WEAPONS, type RelicId } from '../shared/tuning';
+import { GEAR, full } from '../sim/pack';
 import type { Hero } from '../sim/types';
 import { COAL, COPY } from './copy';
-import { card, compare, heroSheet } from './card';
+import { heroSheet } from './card';
+import { cell, grid, plainKit, sideBySide } from './cells';
+import { itemIcon, potionIcon, relicIcon, skillIcon } from './itemicons';
 import { drag } from './packdrag';
+import { heroLook } from './sprites';
+import { PACKW } from './storewords';
+import { fits, moveOf } from './packmoves';
+export { moveOf };
+import './pack.css';
 
-/** Where a piece is: in the pack (`bag:i`), in hand, worn (`armor`, `ring:k`), the relic carried, a relic on the shelf (`found:i`), or on the belt (`belt:i`). */
+/** Where a piece is: in the pack (`bag:i`), in hand, worn (`armor`, `ring:k`), the relic carried, the skill, or on the belt (`belt:i`). */
 export type Spot = string;
 const el = (r: RelicId, h: Hero) => (h.augments[r] ? ' ' + ELEMENT_NAME[h.augments[r] as keyof typeof ELEMENT_NAME] : '');
 const btn = (label: string, op: number, arg: number, cls = '') => `<button data-op="${op}" data-arg="${arg}" class="${cls}">${label}</button>`;
-
-/** What dropping `src` on `dst` does, as a gear change (or nothing). */
-export function moveOf(h: Hero, src: Spot, dst: Spot): [number, number] | null {
-  const [s, si] = src.split(':'), [d] = dst.split(':'), i = Number(si), room = h.bag.length < PACK;
-  if (s === 'bag') {
-    const it = h.bag[i];
-    if (!it) return null;
-    const slot = slotOf(it);
-    if (d === 'hand' && slot === 'weapon' && WEAPONS[it.kit!].cls === WEAPONS[h.weapon].cls) return [GEAR.equip, i];
-    if ((d === 'armor' && slot === 'armor') || (d === 'ring' && slot === 'ring')) return [GEAR.equip, i];
-    if (d === 'drop' && it.quality !== 'hungry') return [GEAR.drop, i];
-    return null;
-  }
-  if (d === 'bag' && room) {
-    if (s === 'hand' && h.arms[h.weapon]) return [GEAR.equip, -1];
-    if (s === 'armor' && h.armor) return [GEAR.unarm, 0];
-    if (s === 'ring' && h.rings[i] && h.rings[i].hungry !== 'wedding') return [GEAR.off, i];
-  }
-  if (s === 'found' && d === 'relic') return [GEAR.carry, i];
-  if (s === 'relic' && d === 'shelf' && h.relics[1]) return [GEAR.carry, -1];
-  if (s === 'belt' && d === 'belt' && i > 0) return [GEAR.front, i];
-  if (s === 'belt' && d === 'drop') return [GEAR.pour, i];
-  return null;
-}
+const figs = new Map<string, string>();
+/** The hero's own sprite, facing you, as a picture. */
+const figure = (cls: Parameters<typeof heroLook>[0], look: number) => figs.get(cls + look) ?? (figs.set(cls + look, heroLook(cls, look).down.c.toDataURL()), figs.get(cls + look)!);
 
 export class PackView {
   private el = document.createElement('div');
   open = false;
-  private key = '';
+  private keys = ['', '', ''];
   private sel: Spot | null = null;
+  private hover: Spot | null = null;
   private h: Hero | null = null;
+  private parts: HTMLElement[];
 
-  /** `tree`: open the knacks tree (treeui.ts), and how many level-up picks wait. */
-  constructor(private gear: (op: number, arg: number) => void, private blocked: () => boolean, private tree: { open: () => void; picks: () => number }) {
+  /** `tree`: open the knacks tree (treeui.ts), how many level-up picks wait, and whether you're in town. */
+  constructor(private gear: (op: number, arg: number) => void, private blocked: () => boolean, private tree: { open: () => void; picks: () => number; town?: () => boolean }) {
     this.el.id = 'pack';
     this.el.hidden = true;
+    this.el.innerHTML = '<div class="head"></div><div class="top"></div><div class="detail"></div><div class="foot"></div>';
+    this.parts = Array.from(this.el.children) as HTMLElement[];
     document.body.appendChild(this.el);
     const press = (e: Event) => {
       const b = (e.target as HTMLElement).closest('button') as HTMLButtonElement | null;
@@ -59,17 +51,23 @@ export class PackView {
       if (b.dataset.close !== undefined) return this.toggle(false);
       if (b.dataset.tree !== undefined) return this.toggle(false), this.tree.open();
       this.gear(Number(b.dataset.op), Number(b.dataset.arg));
-      this.sel = null;
+      this.pick(null);
     };
     this.el.addEventListener('click', press);
     this.el.addEventListener('touchend', press, { passive: false });
     drag(this.el, {
-      can: (src, dst) => !!this.h && !!moveOf(this.h, src, dst),
+      can: (src, dst) => !!this.h && !!moveOf(this.h, src, dst, this.town()),
       drop: (src, dst) => {
-        const m = this.h && moveOf(this.h, src, dst);
-        if (m) this.gear(m[0], m[1]), (this.sel = null), (this.key = '');
+        const m = this.h && moveOf(this.h, src, dst, this.town());
+        if (m) this.gear(m[0], m[1]), this.pick(null);
       },
-      tap: (src) => ((this.sel = this.sel === src ? null : src), (this.key = '')),
+      tap: (src) => this.pick(this.sel === src ? null : src),
+    });
+    // With a mouse, pointing at a piece shows its card (a tap still chooses it).
+    this.el.addEventListener('pointerover', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      const t = (e.target as HTMLElement).closest('[data-src]') as HTMLElement | null;
+      if (t && t.dataset.src !== this.hover) (this.hover = t.dataset.src!), (this.keys[1] = '');
     });
     addEventListener('keydown', (e) => {
       if (e.repeat || (e.target as HTMLElement).closest?.('input')) return;
@@ -79,73 +77,84 @@ export class PackView {
     });
   }
 
+  private town = () => !!this.tree.town?.();
+
   toggle(on = !this.open): void {
     if (on && this.blocked()) return;
     this.open = on;
     this.el.hidden = !on;
-    this.key = '';
-    this.sel = null;
+    this.keys = ['', '', ''];
+    this.sel = this.hover = null;
   }
 
-  /** One square: a piece (its tier's colour, its name) or an empty place to put one. */
-  private tile(src: Spot | null, dst: Spot | null, it: { name: string; tier?: keyof typeof TIERS; sub?: string } | null, empty = ''): string {
-    const sel = src && src === this.sel ? ' sel' : '';
-    const col = it?.tier ? TIERS[it.tier].col : '#4f4a5c';
-    return `<div class="tile${it ? '' : ' empty'}${sel}" style="--t:${col}"${src && it ? ` data-src="${src}"` : ''}${dst ? ` data-dst="${dst}"` : ''}>` +
-      (it ? `<b>${it.name}</b>${it.sub ? `<i>${it.sub}</i>` : ''}` : `<i>${empty}</i>`) + '</div>';
+  /** Choose a piece to look at (or none). */
+  pick(src: Spot | null): void {
+    this.sel = src;
+    this.keys = ['', '', ''];
   }
 
-  private piece = (it: Item) => ({ name: itemName(it), tier: it.quality, sub: it.quality === 'plain' ? '' : TIERS[it.quality].name });
+  /** Your hero, with a square on each part that wears something. */
+  private doll(h: Hero): string {
+    const [, carried] = h.relics, held = h.arms[h.weapon], sel = this.sel, look = figure(WEAPONS[h.weapon].cls, h.look ?? 0);
+    const slot = (name: string, inner: string) => `<div class="slot ${name}">${inner}</div>`;
+    const hand = cell(held ?? null, 'hand', { dst: 'hand', sel, label: held ? PACKW.hand : WEAPONS[h.weapon].name, icon: held ? undefined : itemIcon({ kit: h.weapon, quality: 'plain', traits: [] }), col: held ? undefined : '#e8e4ee' });
+    const belt = Array.from({ length: POTION.belt }, (_, i) => cell(null, h.belt[i] ? 'belt:' + i : null, { dst: i === 0 ? 'belt' : undefined, sel, icon: h.belt[i] ? potionIcon(h.belt[i]) : undefined, col: h.belt[i] ? POTIONS[h.belt[i]].col : undefined, tag: i === 0 && h.belt[i] ? '1ST' : undefined })).join('');
+    return '<div class="doll">' +
+      slot('s-relic', cell(null, carried ? 'relic' : null, { dst: 'relic', sel, label: PACKW.relic, icon: carried ? relicIcon() : undefined, col: carried ? '#ffd27a' : undefined })) +
+      slot('s-skill', cell(null, 'skill', { sel, label: PACKW.skill, icon: skillIcon(), col: '#5a8ac8', dim: true })) +
+      slot('s-hand', hand) +
+      slot('s-body', cell(h.armor, h.armor ? 'armor' : null, { dst: 'armor', sel, label: PACKW.body })) +
+      [0, 1].map((k) => slot('s-ring' + k, cell(h.rings[k] ?? null, h.rings[k] ? 'ring:' + k : null, { dst: 'ring', sel, label: PACKW.ring }))).join('') +
+      `<div class="fig"><img src="${look}" alt=""></div>` +
+      `<div class="slot s-belt"><i>${PACKW.belt}</i><div class="beltrow">${belt}</div></div></div>`;
+  }
 
-  /** The card and buttons for what's tapped. */
+  /** The card and buttons for what's chosen (or pointed at). */
   private detail(h: Hero): string {
-    const [s, si] = (this.sel ?? '').split(':'), i = Number(si), plain = CLASS_KITS[WEAPONS[h.weapon].cls][0];
-    const row = (inner: string, buttons: string) => `<div class="detail">${inner}<div class="btns">${buttons}</div></div>`;
+    const at = this.sel ?? this.hover, [s, si] = (at ?? '').split(':'), i = Number(si), town = this.town();
+    const under = (buttons = '', note = '') => (note ? `<div class="note">${note}</div>` : '') + (buttons ? `<div class="btns">${buttons}</div>` : '');
+    const row = (inner: string, buttons = '', note = '') => inner + under(buttons, note);
     if (s === 'bag' && h.bag[i]) {
-      const it = h.bag[i], fits = !it.kit || WEAPONS[it.kit].cls === WEAPONS[h.weapon].cls;
-      return row(card(it, h) + compare(h, it), (fits ? btn(COPY.equip, GEAR.equip, i, 'go') : '') + (it.quality === 'hungry' ? '' : btn(COPY.drop, GEAR.drop, i, 'ghost')));
+      const it = h.bag[i], hungry = it.quality === 'hungry';
+      return sideBySide(h, it, false, under((fits(h, it.kit) ? btn(PACKW.wear, GEAR.equip, i, 'go') : '') + (!town && !hungry ? btn(COPY.drop, GEAR.drop, i, 'ghost') : ''), hungry ? PACKW.hungry : town ? PACKW.inTown : ''));
     }
     if (s === 'hand') {
-      // Every other kit of your class you carry, a tap away.
-      const swaps = h.bag.map((it, k) => (slotOf(it) === 'weapon' && WEAPONS[it.kit!].cls === WEAPONS[h.weapon].cls ? btn(`${COPY.swapTo} ${itemName(it)}`, GEAR.equip, k, 'go') : '')).join('');
-      return row(h.arms[h.weapon] ? card(h.arms[h.weapon]!) : `<b>${WEAPONS[h.weapon].name}</b><div class="tr">${COPY.plain}</div>`, swaps + (h.arms[h.weapon] || h.weapon !== plain ? btn(COPY.intoPack, GEAR.equip, -1, 'ghost') : ''));
+      const held = h.arms[h.weapon];
+      return row(held ? sideBySide(h, held, true) : `<b>${WEAPONS[h.weapon].name}</b><div class="tr">${COPY.plain}</div>`, held || h.weapon !== plainKit(h) ? btn(COPY.intoPack, GEAR.equip, -1, 'ghost') : '');
     }
-    if (s === 'armor' && h.armor) return row(card(h.armor, h), btn(COPY.takeOff, GEAR.unarm, 0, 'ghost'));
-    if (s === 'ring' && h.rings[i]) return row(card(h.rings[i]), h.rings[i].hungry === 'wedding' ? '' : btn(COPY.takeOff, GEAR.off, i, 'ghost'));
-    if (s === 'relic' && h.relics[1]) return row(`<b>${RELICS[h.relics[1]].name}</b>${el(h.relics[1], h)}`, btn(COPY.putAway, GEAR.carry, -1, 'ghost'));
-    if (s === 'found' && h.found[i]) return row(`<b>${RELICS[h.found[i]].name}</b>${el(h.found[i], h)}`, btn(COPY.carry, GEAR.carry, i, 'go'));
+    if (s === 'armor' && h.armor) return row(sideBySide(h, h.armor, true), btn(COPY.takeOff, GEAR.unarm, 0, 'ghost'));
+    if (s === 'ring' && h.rings[i]) return row(sideBySide(h, h.rings[i], true), h.rings[i].hungry === 'wedding' ? '' : btn(COPY.takeOff, GEAR.off, i, 'ghost'));
+    if (s === 'relic' && h.relics[1]) {
+      const others = h.found.map((r, k) => (r === h.relics[1] ? '' : btn(`${COPY.carry} ${RELICS[r].short}`, GEAR.carry, k, 'go'))).join('');
+      return row(`<b>${RELICS[h.relics[1]].name}</b>${el(h.relics[1], h)}`, others + btn(COPY.putAway, GEAR.carry, -1, 'ghost'));
+    }
+    if (s === 'skill') return row(`<b>${RELICS[h.relics[0]].name}</b>${el(h.relics[0], h)}`, '', PACKW.skillLine);
     if (s === 'belt' && h.belt[i]) return row(`<b>${POTIONS[h.belt[i]].name}</b><div class="tr">${POTIONS[h.belt[i]].text}</div>`, (i ? btn(COPY.next, GEAR.front, i, 'go') : '') + btn(COPY.pour, GEAR.pour, i, 'ghost'));
-    return `<div class="none">${COPY.dragHint}</div>`;
+    // Nothing chosen: relics found but not carried can still be picked up here.
+    const shelf = h.found.filter((r) => r !== h.relics[1]).map((r) => btn(`${COPY.carry} ${RELICS[r].short}`, GEAR.carry, h.found.indexOf(r), 'go')).join('');
+    return row(`<div class="none">${matchMedia('(hover: hover)').matches ? PACKW.hover : PACKW.hint}</div>`, shelf);
   }
 
-  /** Each frame: redraw only when what's shown has changed (and never mid-drag). */
+  /** Each frame: redraw only the parts whose contents have changed (and never mid-drag). */
   update(h: Hero): void {
     this.h = h;
     if (!this.open || this.el.querySelector('.dragging')) return;
-    const key = JSON.stringify([h.weapon, h.arms[h.weapon], h.bag, h.relics, h.found, h.augments, h.glow, h.belt, h.armor, h.rings, this.sel, this.tree.picks()]);
-    if (key === this.key) return;
-    this.key = key;
-    const [skill, carried] = h.relics, held = h.arms[h.weapon];
-    const hand = held ? this.piece(held) : { name: WEAPONS[h.weapon].name, tier: 'plain' as const };
-    const worn = [
-      this.tile('hand', 'hand', hand),
-      this.tile('armor', 'armor', h.armor ? this.piece(h.armor) : null, 'ARMOR'),
-      ...[0, 1].map((k) => this.tile('ring:' + k, 'ring', h.rings[k] ? this.piece(h.rings[k]) : null, 'RING')),
-      this.tile('relic', 'relic', carried ? { name: RELICS[carried].name, tier: 'tolmouth', sub: 'RELIC' } : null, 'RELIC'),
-    ].join('');
-    const bag = Array.from({ length: PACK }, (_, i) => this.tile(h.bag[i] ? 'bag:' + i : null, 'bag', h.bag[i] ? this.piece(h.bag[i]) : null)).join('') +
-      `<div class="tile drop" data-dst="drop"><i>${COPY.drop}</i></div>`;
-    const shelf = h.found.map((r, i) => (r === carried ? '' : this.tile('found:' + i, 'shelf', { name: RELICS[r].name, tier: 'tolmouth', sub: 'RELIC' }))).join('');
-    const belt = Array.from({ length: POTION.belt }, (_, i) => this.tile(h.belt[i] ? 'belt:' + i : null, i === 0 ? 'belt' : null, h.belt[i] ? { name: POTIONS[h.belt[i]].name, sub: i ? '' : COPY.drunkNext } : null)).join('');
-    this.el.innerHTML =
-      `<div class="head"><h2>${COPY.pack}</h2><span>${COPY.stillGoing}</span><button data-tree class="kn">${COPY.knacks}${this.tree.picks() ? ' <i>!</i>' : ''}</button><button data-close class="x" aria-label="Close">&times;</button></div>` +
-      `<h3>${COPY.worn}</h3><div class="slots">${worn}</div>` +
-      `<h3>${COPY.packed} <i>${h.bag.length} / ${PACK}</i></h3><div class="grid" data-dst="bag">${bag}</div>` +
-      `<h3>${COPY.relic}</h3><div class="grid shelf" data-dst="shelf">${shelf || `<div class="none">${h.found.length ? '' : COPY.relicEmpty}</div>`}</div>` +
-      `<h3>${COPY.belt} <i>${h.belt.length} / ${POTION.belt}</i></h3><div class="slots">${belt}</div>` +
-      this.detail(h) +
-      `<h3>${COPY.skill}</h3><div class="none"><b>${RELICS[skill].name}</b>${el(skill, h)}</div>` +
-      (WEAPONS[h.weapon].cls === 'HEALER' ? `<h3>${COAL.name} <i>${h.glow} / ${LANTERN.max}</i></h3><div class="none">${COAL.line}</div>` : '') +
-      `<h3>${COPY.stats}</h3>` + heroSheet(h);
+    const town = this.town(), gear = JSON.stringify([h.weapon, h.arms[h.weapon], h.bag, h.bagSize, h.relics, h.found, h.augments, h.belt, h.armor, h.rings, town]);
+    const keys = [gear + this.sel + this.tree.picks(), gear + this.sel + this.hover, JSON.stringify([h.glow, h.weapon, h.armor, h.rings, h.arms[h.weapon]])];
+    const [head, top, detail, foot] = this.parts;
+    if (keys[0] !== this.keys[0]) {
+      const size = h.bagSize || 8, isFull = full(h);
+      head.innerHTML = `<h2>${COPY.pack}</h2><span>${town ? '' : COPY.stillGoing}</span><button data-tree class="kn">${COPY.knacks}${this.tree.picks() ? ' <i>!</i>' : ''}</button><button data-close class="x" aria-label="Close">&times;</button>`;
+      top.innerHTML = this.doll(h) + `<div class="bag"><h3>${PACKW.bag} <i class="${isFull ? 'full' : ''}">${h.bag.length} / ${size}</i></h3>` + grid(h.bag, size, 'bag', this.sel, 'bag') +
+        (town ? '' : `<div class="tile drop" data-dst="drop"><i>${COPY.drop}</i></div>`) + (isFull && !town ? `<div class="note warn">${PACKW.fullJob}</div>` : '') + '</div>';
+    }
+    if (keys[1] !== this.keys[1]) detail.innerHTML = this.detail(h);
+    if (keys[2] !== this.keys[2]) {
+      const open = (foot.querySelector('details') as HTMLDetailsElement | null)?.open ?? false;
+      foot.innerHTML = (WEAPONS[h.weapon].cls === 'HEALER' ? `<h3>${COAL.name} <i>${h.glow} / ${LANTERN.max}</i></h3><div class="none">${COAL.line}</div>` : '') +
+        `<details${open ? ' open' : ''}><summary>${COPY.stats}</summary>${heroSheet(h)}</details>`;
+    }
+    this.keys = keys;
   }
 }
+

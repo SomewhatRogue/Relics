@@ -219,3 +219,11 @@ most Want among the heroes is the one the bells don't spare).
 - Cleric is the on-screen name for the Healer class (Kyle's call). Older notes here that say Healer mean the Cleric.
 - Element jobs (Kyle's call, 2026-11-02): fire for swarms, frost for the big and the quick, storm for packs and shields (lightning goes round a board). The Stoker lives by the kiln: fire hardly touches it and cold is what hurts. Butchers, named ones too, take more from frost and less from fire. Spiders and their nests burn easily. The brute being cold-blooded stays off screen.
 - Dens on burn jobs are low, windowless huts the hungry put up themselves, not taken houses (recorded 2026-11-02). The longhouse, hall house and great barn stay the big houses.
+
+## The Counting House, the pawn stall and the forge (recorded 2026-11-02; Kyle's call, lore keeper)
+- The Counting House stands west of the square, north of the infirmary. The town's tolls were counted there before the war; it was never the Wicks', so it isn't a second hoard. Half the roof came in the siege's last winter (bare rafters, a window boarded, a crack down the front) and nobody has had the timber since. The vault under the floor held. Keeper Edda writes down everything that goes in or out. The vault holds gear, never coin, never hungry gear. No line ever ties Edda to the Wicks.
+- Tobin the pawnbroker keeps the second stall on Market Row, there whether the market's open or not. A townsman, not a refugee trader. He buys anything but hungry gear and sells it back at what he paid till you're home from your next job; after that it's his. His bigger packs are old packs stitched together: no new leather comes in.
+- Halvard upgrades gear and melts it for steel; he doesn't buy gear. All steel in Wickhold is remelted.
+- Ivo isn't setting elements for now (from 2026-11-02); what's set stays set. The reason stays off screen till Kyle decides.
+- Storing, selling and buying back are trade, like trainers' fees: they never touch the Want.
+- Open for Kyle: Dessa's steel (Tolmouth per the bible, "Wickhold steel" in her line), and who sets the elements in her stock while Ivo is shut.
