@@ -428,3 +428,5 @@ body[data-guard="none"] .tb.block { display: none; }
 .tb.grab.raise { border-color: #ffd27a; color: #ffd27a; box-shadow: 0 0 10px rgba(255, 210, 122, 0.45); }
 /* LEAVE: on a job only, where HEROES would be. */
 body:not([data-mode='run']) #leave { display: none; }
+/* On a job the tips are off the screen, so their button gives LEAVE the room. */
+body[data-mode='run'] #tips { display: none; }

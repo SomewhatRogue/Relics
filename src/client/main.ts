@@ -10,6 +10,7 @@ import { CoopGuest } from './coop';
 import { session, touchSession } from './session';
 import { MAX_DOWNS } from '../sim/run';
 import { WayWatch, wayTarget } from './wayfind';
+import { targets } from '../sim/targets';
 import type { Npc } from '../shared/arena';
 import { knows, type Intent } from '../sim/types';
 import { Game, ME } from './game';
@@ -341,6 +342,7 @@ function tick(t: number): void {
   fx.update(dt);
   scene.focus = game.cutFocus();
   scene.fanfare = game.wood?.hold?.kind === 'relic';
+  scene.marks = game.mode === 'run' ? targets(game.run, game.room, game.houses()) : [];
   scene.pointTo = game.wood && game.wood.stage === 5 && !game.wood.hold ? { x: ROAD_OUT.x + 1, y: ROAD_OUT.y + ROAD_OUT.h / 2 } : wayTarget(game);
   // The way on just opened: say which way, over you.
   const opened = ways.check(game);

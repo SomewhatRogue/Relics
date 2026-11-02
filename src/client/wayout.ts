@@ -3,7 +3,7 @@
  * (posts and a lintel, a dark passage), a doorstep where a house's door is. Drawn each frame: shut, stakes
  * across the gap; open, light in it, a torch either side and gold chevrons on the floor running into it
  * (out of a house, down through the door). Also the small marks at the screen's edge for anyone you've
- * freed who's fallen behind out of sight. Drawing only.
+ * freed who's fallen behind out of sight, and the point those (and the quest marks) share. Drawing only.
  */
 import type { Area, GameMap } from '../shared/arena';
 import type { Survivor } from '../sim/types';
@@ -95,23 +95,35 @@ function flame(g: CanvasRenderingContext2D, x: number, y: number, now: number): 
   px(0, -2 - (f === 0 ? 1 : 0), '#ffb44c'), px(f === 1 ? 1 : -1, -3, '#ff7a28'), px(f === 2 ? -1 : 1, -1, '#ffd27a');
 }
 
+/** The view and what the HUD covers at its top and bottom (screen pixels), for marks at the edge. */
+export interface View { vw: number; vh: number; top: number; bottom: number }
+
+/**
+ * Where a mark for something at (sx, sy) on screen sits, held inside the view clear of the HUD, and the
+ * way toward it; null when it's in sight. Draws the little point toward it, `bob` pixels along.
+ */
+export function edgeMark(g: CanvasRenderingContext2D, sx: number, sy: number, v: View, bob: number, col: string): { x: number; y: number; ux: number; uy: number } | null {
+  const m = 8;
+  if (sx >= 0 && sx <= v.vw && sy >= v.top && sy <= v.vh - v.bottom) return null;
+  const ex = Math.max(m, Math.min(v.vw - m, sx)), ey = Math.max(v.top + m, Math.min(v.vh - v.bottom - m, sy));
+  const dx = sx - ex, dy = sy - ey, d = Math.hypot(dx, dy) || 1, ux = dx / d, uy = dy / d, x = ex - ux * bob, y = ey - uy * bob;
+  g.fillStyle = col;
+  for (let k = 1; k <= 3; k++) for (let w = -(3 - k); w <= 3 - k; w++) g.fillRect(Math.round(ex + ux * (5 + k) - uy * w), Math.round(ey + uy * (5 + k) + ux * w), 1, 1);
+  return { x, y, ux, uy };
+}
+
 /**
  * Someone you've freed (not yet home) out of sight: a small pale mark at the edge of the screen, toward
- * them, bobbing, so you know who you've left behind. `vw`, `vh` the view; `top`, `bottom` what the HUD
- * covers.
+ * them, bobbing, so you know who you've left behind.
  */
-export function behindMarks(c: Ctx, list: Survivor[], cx: number, cy: number, vw: number, vh: number, topCover: number, bottomCover: number, now: number): void {
-  const g = c.glow, m = 8;
+export function behindMarks(c: Ctx, list: Survivor[], cx: number, cy: number, v: View, now: number): void {
+  const g = c.glow;
   for (const s of list) {
     if (s.dead || s.gone || s.home >= 0) continue;
-    const sx = OX + s.x * PX - cx, sy = OY + s.y * PX - cy - 8;
-    if (sx >= 0 && sx <= vw && sy >= topCover && sy <= vh - bottomCover) continue;
-    const ex = Math.max(m, Math.min(vw - m, sx)), ey = Math.max(topCover + m, Math.min(vh - bottomCover - m, sy));
-    const dx = sx - ex, dy = sy - ey, d = Math.hypot(dx, dy) || 1, ux = dx / d, uy = dy / d, bob = Math.sin(now * 6 + s.id) * 1.5;
-    g.fillStyle = '#c8f0c0';
-    // A head and shoulders, and a point toward them.
-    g.fillRect(Math.round(ex - 1 - ux * bob), Math.round(ey - 3 - uy * bob), 3, 3);
-    g.fillRect(Math.round(ex - 2 - ux * bob), Math.round(ey + 1 - uy * bob), 5, 2);
-    for (let k = 1; k <= 3; k++) for (let w = -(3 - k); w <= 3 - k; w++) g.fillRect(Math.round(ex + ux * (5 + k) - uy * w), Math.round(ey + uy * (5 + k) + ux * w), 1, 1);
+    const at = edgeMark(g, OX + s.x * PX - cx, OY + s.y * PX - cy - 8, v, Math.sin(now * 6 + s.id) * 1.5, '#c8f0c0');
+    if (!at) continue;
+    // A head and shoulders.
+    g.fillRect(Math.round(at.x - 1), Math.round(at.y - 3), 3, 3);
+    g.fillRect(Math.round(at.x - 2), Math.round(at.y + 1), 5, 2);
   }
 }

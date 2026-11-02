@@ -1,7 +1,7 @@
 /**
  * The caged and the freed, drawn so you know them: someone in a cage waves and calls out when you're
- * near (a glowing mark over the cage says it's someone to save); once it breaks they stand up where it
- * was, say their thanks, and follow (the room moves them: sim/survivors.ts, the same on every screen).
+ * near (the gold quest mark over it, questmarks.ts, says it's someone to save); once it breaks they
+ * stand up where it was, say their thanks, and follow (the room moves them: sim/survivors.ts, the same on every screen).
  * Hurt, they flash; burning, they smoulder; killed, they fall and stay down; home, they walk off and fade.
  * Drawing only.
  */
@@ -17,12 +17,8 @@ export const THANKS = ['Lantern keep you.', 'Thank you. Thank you.', "I can walk
 /** What one of them cries out when the party hurts them (lore keeper and line editor). */
 export const CRY = 'Ah!';
 
-/** Over a cage: the mark, and their call when you're close. */
+/** At a cage: an arm waving through the bars, and their call when you're close. */
 export function drawCaged(c: Ctx, x: number, y: number, now: number, near: boolean, k: number): void {
-  const bob = Math.round(Math.sin(now * 5 + k) * 1.5);
-  c.glow.fillStyle = '#ffe070';
-  c.glow.fillRect(Math.round(x), Math.round(y - 26 + bob), 2, 5);
-  c.glow.fillRect(Math.round(x), Math.round(y - 19 + bob), 2, 2);
   // An arm out through the bars, waving.
   c.lit.fillStyle = '#c79c78';
   c.lit.fillRect(Math.round(x + 7), Math.round(y - 8 - (Math.floor(now * 4 + k) % 2)), 3, 1);
