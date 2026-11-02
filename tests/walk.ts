@@ -31,10 +31,13 @@ export function walkable(plan: RoomPlan, avoid: { x: number; y: number; w: numbe
       if (open(at.x, at.y)) seen.add(a * 1000 + c), todo.push([a, c]);
     }
   }
-  const reach = (x: number, y: number, d: number) => [...seen].some((k) => {
-    const at = cell(Math.floor(k / 1000), k % 1000);
-    return Math.hypot(at.x - x, at.y - y) <= d;
-  });
+  const reach = (x: number, y: number, d: number) => {
+    for (let i = Math.floor((x - d) / step); i <= Math.ceil((x + d) / step); i++) for (let j = Math.floor((y - d) / step); j <= Math.ceil((y + d) / step); j++) {
+      const at = cell(i, j);
+      if (seen.has(i * 1000 + j) && Math.hypot(at.x - x, at.y - y) <= d) return true;
+    }
+    return false;
+  };
   return { all, reached: seen.size, reach, open };
 }
 

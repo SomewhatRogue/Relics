@@ -2,6 +2,12 @@
 
 ## Current slice
 
+**Places with a plan** (Claude Opus 5.5, 2026-11-01; Kyle: "maps that feel more like actual areas").
+Built; waiting on Kyle's play. *Done when* Kyle walks Barrowby's lane past cottages and their yards to
+the green with the fields beyond the hedges, the Charcoal Camps' shacks along the muddy path, Fennick
+Ford's stone street and walled garden, Hesketh Hall's grounds, and finds each place looks like itself
+every time he goes back.
+
 **What the goblins do; houses wrecked and burning** (Claude Opus 5.5, 2026-11-01; Kyle: "some houses
 bigger, more fucked up things going on", "more destroyed, or on fire, or you can't get into them
 safely"). Built; waiting on Kyle's play. *Done when* on a long or deep job Kyle walks into a longhouse,

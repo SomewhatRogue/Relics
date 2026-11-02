@@ -94,7 +94,9 @@ export class Scene {
   resize(): void {
     this.dpr = Math.min(devicePixelRatio || 1, 3);
     const W = innerWidth * this.dpr, H = innerHeight * this.dpr;
-    this.scale = Math.max(1, Math.round(Math.sqrt((W * H) / 82000)));
+    // A whole-room view for screenshots and checking a layout (set window.__zoom, then resize).
+    const zoom = (globalThis as { __zoom?: number }).__zoom;
+    this.scale = zoom ?? Math.max(1, Math.round(Math.sqrt((W * H) / 82000)));
     this.vw = Math.ceil(W / this.scale);
     this.vh = Math.ceil(H / this.scale);
     for (const c of [this.out, this.base, this.glowC]) (c.width = this.vw), (c.height = this.vh);

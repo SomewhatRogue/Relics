@@ -84,6 +84,7 @@ export const WOOD: Partial<Record<import('./arena').BlockKind, { hp: number; doo
   barn: { hp: 260, door: 'barn' },
   den: { hp: 120 },
   tent: { hp: 60 },
+  shack: { hp: 80 },
   fence: { hp: 40 },
 };
 export const BLAZE = {

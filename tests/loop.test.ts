@@ -21,7 +21,8 @@ describe('terrain', () => {
         const a = planRoom(job(k), i), b = planRoom(job(k), i);
         expect(JSON.stringify(a)).toBe(JSON.stringify(b));
         useMap(a.map);
-        for (const at of [a.map.hero, { x: 9, y: 0.6 }]) {
+        const out = a.map.exit ?? a.map.roads![0].area;
+        for (const at of [a.map.hero, { x: out.x + out.w / 2, y: out.y + out.h + 0.3 }]) {
           const p = { ...at };
           collide(p, 0.32);
           expect(Math.hypot(p.x - at.x, p.y - at.y)).toBeLessThan(0.05);

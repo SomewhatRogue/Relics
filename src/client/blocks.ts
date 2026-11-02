@@ -7,6 +7,7 @@
 import type { Block, Round } from '../shared/arena';
 import { drawLit, houseOf, paintHouse } from './cottage';
 import { paintFate } from './wreck';
+import { drawSite, paintShack } from './sitedraw';
 import { blit, type Ctx } from './draw';
 import { furnish, mouth, type Look } from './furnish';
 import { drawText, textWidth } from './pixfont';
@@ -49,6 +50,7 @@ const LOOK: Record<Block['kind'], Look> = {
   gallows: { tall: 34, roof: '#5a3d22', ridge: '#5a3d22', wall: '#2e2016', windows: false, furniture: true },
   hurdle: { tall: 12, roof: '#3a2818', ridge: '#3a2818', wall: '#5a4a30', windows: false, furniture: true },
   pen: { tall: 9, roof: '#8a7448', ridge: '#6b4a2b', wall: '#5a3d22', windows: false, furniture: true },
+  shack: { tall: 12, roof: '#8a7a5a', ridge: '#6a5a48', wall: '#4a3420', windows: false },
 };
 
 /** 0 standing, 1 charred (under half its health), 2 burned down. */
@@ -80,6 +82,7 @@ function paint(b: Block, st: number): HTMLCanvasElement {
   // Roof over the footprint (raised by the wall's height), then the front wall below it.
   const roofH = d, wallY = roofH, home = houseOf(b);
   if (home) paintHouse(rect, b, home, w, roofH, l.tall);
+  else if (b.kind === 'shack') paintShack(rect, b, w, roofH, l.tall);
   else furnished(g, b, rect, w, roofH, wallY, l);
   door(b, rect, w, wallY, l);
   if (home) paintFate(g, rect, b, w, roofH, l.tall);
@@ -235,7 +238,8 @@ export const blockAt = (b: Block): [number, number] => [OX + b.x * PX, OY + b.y 
 export function drawRound(c: Ctx, r: Round, x: number, y: number): void {
   if (r.kind === 'pillar') return blit(c, SPRITES.pillar, x, y + 5);
   if (r.kind === 'crows' || r.kind === 'moths' || r.kind === 'dog' || r.kind === 'smoke') return void drawLife(c, r, x, y);
-  blit(c, SPRITES[r.kind], x, y + Math.round(r.r * 6));
+  if (drawSite(c, r, x, y)) return;
+  blit(c, SPRITES[r.kind as keyof typeof SPRITES], x, y + Math.round(r.r * 6));
   if (r.kind === 'lantern') {
     // The Last Lantern: a flame that never goes out.
     const f = Math.floor(c.now * 9) % 3;
