@@ -15,12 +15,12 @@ export type PerkId = 'tough' | 'endurance' | 'relicsworn' | 'footwork' | 'guard'
 /** Every class's trainer teaches the shared perks and one of the class's own (`cls`). */
 export const PERKS: Record<PerkId, { name: string; text: string; cls?: HeroClass }> = {
   tough: { name: 'TOUGH', text: '20 more health' },
-  endurance: { name: 'ENDURANCE', text: 'Stamina comes back a third faster' },
+  endurance: { name: 'ENDURANCE', text: 'Your breath comes back a third faster' },
   relicsworn: { name: 'RELIC-WISE', text: 'Your skill and relic recharge a fifth faster' },
   footwork: { name: 'FOOTWORK', text: 'Dodge again a fifth sooner' },
   guard: { name: 'GUARD', text: 'A slightly wider parry window' },
   secondwind: { name: 'SECOND WIND', text: 'Back on your feet sooner when downed' },
-  ironhide: { name: 'IRONHIDE', text: 'Blocking costs a quarter less stamina', cls: 'WARRIOR' },
+  ironhide: { name: 'IRONHIDE', text: 'Blocking costs a quarter less breath', cls: 'WARRIOR' },
   steadyhand: { name: 'STEADY HAND', text: 'Bows draw a sixth faster', cls: 'RANGER' },
   shadowed: { name: 'SHADOWED', text: 'Backstabs hit half as hard again', cls: 'ROGUE' },
   focus: { name: 'FOCUS', text: 'The blink comes back a quarter sooner', cls: 'MAGE' },

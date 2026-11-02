@@ -33,7 +33,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   const ice = frozen(e, now), blessed = h.blessedUntil > now ? BLESSING.dmgMult : 1;
   const heldFast = e.act === 'stunned' || e.act === 'pinned' || ice || snared(e, now);
   // A Rogue's knives are weak head on (unless it's held fast): keep moving and get behind.
-  const rearMult = rear ? (WEAPONS[h.weapon].backstab ?? GUARD.rearMult) + (h.perks.includes('shadowed') ? PERK.shadowed : 0) + (WEAPONS[h.weapon].cls === 'ROGUE' ? technique(h.drills, 'ROGUE') : 0) : heldFast ? 1 : (WEAPONS[h.weapon].front ?? 1);
+  const rearMult = rear ? ((WEAPONS[h.weapon].backstab ?? GUARD.rearMult) + (h.perks.includes('shadowed') ? PERK.shadowed : 0)) * (1 + (WEAPONS[h.weapon].cls === 'ROGUE' ? technique(h.drills, 'ROGUE') : 0)) : heldFast ? 1 : (WEAPONS[h.weapon].front ?? 1);
   const counter = GUARD.counterMult * (has(h, 'riposte') ? TRAIT.riposte : 1), held = GUARD.stunnedMult * (has(h, 'brutal') ? TRAIT.brutal : 1);
   // TEMPO: the first hit after dodging through a blow lands double.
   const tempo = h.tempoUntil > now ? TRAIT.tempo : 1;

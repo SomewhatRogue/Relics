@@ -106,6 +106,12 @@ most Want among the heroes is the one the bells don't spare).
   seeds chapter 2's tunnels), Fenmere (Fennick Ford, the tally wall that seeds chapter 4). Tolmouth was a
   town and is now a larder; Dessa's steel came from there. "Something was down there first" at the
   Copperdeep: an old shard, deep, that the goblins found rather than brought. Keep it for later.
+- **Trainers' fees** (recorded 2026-11-01): drills are bought from your own class's trainer, and
+  paying for them is trade, not keeping or giving: it never touches the Want. Mother Isolde's fees buy
+  linen and Sister's Bitter for the infirmary, never the Lantern box. Magister Vell sells the QUICK
+  CHANNEL drill; whether he taught the Channel itself stays open. Players see "breath", never
+  "stamina" or "wind". A job's length in real minutes is the game's own voice on the board only;
+  characters and postings never measure a job in minutes.
 - **The valley, added** (recorded 2026-11-01, for the river, marsh and ruins jobs): Barrowfields: the
   Sheepwash (the shallow stretch where the valley washed its sheep, deep either side), Ketterby (a hamlet
   by Barrowby, burned in the war's first year, never rebuilt). Greyhollow: Sallow Carr (a willow wood

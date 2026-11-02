@@ -13,21 +13,21 @@ export const DRILL_ORDER: DrillId[] = ['power', 'health', 'speed', 'crit', 'wind
 export const DRILLS: Record<DrillId, { name: string; text: string; per: number; max: number; price: number }> = {
   power: { name: 'POWER', text: 'Every blow and spell lands harder', per: 0.05, max: 5, price: 40 },
   health: { name: 'HEALTH', text: 'More health', per: 8, max: 5, price: 40 },
-  speed: { name: 'SPEED', text: 'Quicker on your feet', per: 0.03, max: 5, price: 50 },
-  crit: { name: 'CRITICAL', text: 'A chance for a blow to land half again as hard', per: 0.04, max: 5, price: 60 },
-  wind: { name: 'WIND', text: 'Stamina comes back faster', per: 0.08, max: 5, price: 35 },
-  skill: { name: 'SKILL', text: 'Your class skill is back sooner', per: 0.08, max: 3, price: 80 },
+  speed: { name: 'SPEED', text: 'Faster on your feet', per: 0.03, max: 5, price: 50 },
+  crit: { name: 'CRITICAL', text: 'A chance for any hit to land half again as hard', per: 0.04, max: 5, price: 60 },
+  wind: { name: 'BREATH', text: 'Your breath comes back faster', per: 0.08, max: 5, price: 35 },
+  skill: { name: 'SKILL', text: 'Your class skill comes back sooner', per: 0.08, max: 3, price: 80 },
   technique: { name: 'TECHNIQUE', text: '', per: 0, max: 3, price: 90 },
 };
 /** What a crit does to a blow. */
 export const CRIT = 1.5;
 /** Each class's technique, rank by rank. */
 export const TECHNIQUE: Record<HeroClass, { name: string; text: string; per: number }> = {
-  WARRIOR: { name: 'SLAM', text: 'A goblin you slam down takes a quarter more', per: 0.25 },
-  HEALER: { name: 'MENDING HANDS', text: 'Your heals mend a sixth more', per: 0.16 },
-  ROGUE: { name: 'KNIFEWORK', text: 'Backstabs cut a quarter deeper', per: 0.25 },
-  RANGER: { name: 'TRAPPER', text: 'Your snares hold a fifth longer', per: 0.2 },
-  MAGE: { name: 'QUICK CHANNEL', text: 'The channel takes a sixth less time', per: 0.16 },
+  WARRIOR: { name: 'SLAM', text: 'Your slams hit a quarter harder each rank', per: 0.25 },
+  HEALER: { name: "SURGEON'S HANDS", text: 'Your heals mend a sixth more each rank', per: 0.16 },
+  ROGUE: { name: 'KNIFEWORK', text: 'Your backstabs cut a quarter deeper each rank', per: 0.25 },
+  RANGER: { name: 'TRAPPER', text: 'Your snares hold a fifth longer each rank', per: 0.2 },
+  MAGE: { name: 'QUICK CHANNEL', text: 'Your channel takes a sixth less time each rank', per: 0.16 },
 };
 
 export type Drills = Partial<Record<DrillId, number>>;

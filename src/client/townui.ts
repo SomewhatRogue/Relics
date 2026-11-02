@@ -47,7 +47,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     const doneHtml = deeds.length ? '<h3>DONE LATELY</h3>' + deeds.map((d) => `<div class="m">Day ${Number(d.day) || 1}: ${esc(d.title)}, by ${d.party.map(esc).join(', ')}.</div>`).join('') : '';
     const html = partyHtml + doneHtml + (partyHtml || doneHtml ? '<h3>JOBS</h3>' : '') + jobs.map((j, i) =>
       `<div class="job ${j.objective === 'story' ? 'story' : j.deep ? 'deep' : ''}"><div class="t">${j.objective === 'story' ? 'STORY: ' : ''}${j.title}</div>` +
-      `<div class="m">${j.place.name}, ${j.place.region}. ${RUIN[j.place.ruin]}. ${SIZES[j.size ?? 'medium'].label}: ${j.rooms} rooms, ${SIZES[j.size ?? 'medium'].minutes}${j.twist === 'night' ? '. At night' : ''}. Pays ${Math.round(j.reward * rewardMult(w))} gold and treasure (${treasureWord(j)}).</div>` +
+      `<div class="m">${j.place.name}, ${j.place.region}. ${RUIN[j.place.ruin]}. ${SIZES[j.size ?? 'medium'].label}: ${j.rooms} rooms, ${SIZES[j.size ?? 'medium'].minutes}${j.twist === 'night' ? '. At night' : ''}. Pays ${Math.round(j.reward * rewardMult(w))} gold and ${treasureWord(j)}.</div>` +
       `<div class="d">${j.text}</div><button data-job="${i}">${pt ? 'GO ALONE' : 'TAKE THE JOB'}</button>${pt ? ` <button data-gather="${i}">GATHER A PARTY</button>` : ''}</div>`).join('');
     panel.show(`JOB BOARD, DAY ${w.day}`, html);
     const on = (sel: string, f: (b: HTMLButtonElement) => void) => document.querySelectorAll<HTMLButtonElement>(`#panel ${sel}`).forEach((b) => b.addEventListener('click', () => f(b)));
@@ -91,7 +91,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     const tech = TECHNIQUE[pr.cls], drillName = (d: DrillId) => (d === 'technique' ? tech.name : DRILLS[d].name);
     const drills = '<h3>DRILLS</h3>' + p(`You have ${pr.gold} gold.`) + DRILL_ORDER.map((d) => {
       const r = pr.drills?.[d] ?? 0, cap = drillCap(d, pr.level);
-      return p(`<b>${drillName(d)}</b> ${r} of ${DRILLS[d].max}: ${d === 'technique' ? tech.text : DRILLS[d].text}.${r >= cap && r < DRILLS[d].max ? ` <span class="dim">More at level ${cap * 2}.</span>` : ''}`);
+      return p(`<b>${drillName(d)}</b> ${r} of ${DRILLS[d].max}: ${d === 'technique' ? tech.text : DRILLS[d].text}.${r >= cap && r < DRILLS[d].max ? ` <span class="dim">More ranks at level ${cap * 2}.</span>` : ''}`);
     }).join('');
     const drillButtons = DRILL_ORDER.filter((d) => (pr.drills?.[d] ?? 0) < drillCap(d, pr.level)).map((d) => {
       const r = pr.drills?.[d] ?? 0, price = drillPrice(d, r);
