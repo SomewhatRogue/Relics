@@ -149,3 +149,9 @@ most Want among the heroes is the one the bells don't spare).
 - **After the wood:** the tally stick has eleven notches; Odric cuts the twelfth, for Hew, when it's handed
   over. Odric knew Hew and owed him a beer he never came in for. Hew calls the hero "stray". A Healer's
   censer goes cold on the field ("They do"); only the church relights it, and Isolde carries it there herself.
+
+- **The Ranger's hound** (recorded 2026-11-01): a rough grey wolfhound from Huntress Maeve's lodge, given to every
+  Ranger the company hires. It isn't with them in the Greyhollow wood (Maeve's dogs don't go that far east); it's at
+  their heel from the north gate on. An ordinary dog, no shard and no magic. On screen it never dies: it bolts when a
+  butcher swings close and comes back when it's ready. Nothing ever jokes about a dead dog. No name on screen yet.
+  Dogs are not a goblin weakness; bells stay the town's one hope.

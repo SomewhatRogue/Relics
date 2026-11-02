@@ -91,7 +91,7 @@ const KIT: Record<string, string> = {
   spear: 'BACKSTEP  KEEPS FACING',
   daggers: 'LONG DASH  BACKSTAB 2.5X',
   longbow: 'TAP: SHORT SWORD  HOLD 1.4S: PIERCING SHOT',
-  shortbow: 'TAP: SHORT SWORD  HOLD: QUICK DRAW, WALK',
+  shortbow: 'TAP: SHORT SWORD  HOLD: QUICK SHOT ON THE MOVE',
   crossbow: 'TAP: SHORT SWORD  HOLD: BOLT, LONG RELOAD',
   wand: 'QUICK SPARKS  0.6S CAST',
   staff: 'HOLD 1.6S: BURSTING ORB',
