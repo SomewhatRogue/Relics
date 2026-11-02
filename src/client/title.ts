@@ -1,13 +1,15 @@
 /**
  * The start screen: your heroes (up to three), each with its class for life, its level and gold; play
  * one, make a new one, or retire one. Making a hero: five classes with a line each; tap one for its
- * pitch, ratings, weapon and skill; name them and begin.
+ * pitch, ratings, weapon and skill; name them and begin. RECOVERY CODE opens recoveryui.ts.
  */
 import { HERO_SLOTS } from '../shared/progress';
 import { CHAPTER_1 } from '../shared/story';
 import { CLASS_ORDER, type HeroClass } from '../shared/tuning';
 import { CLASSES, NO_RELICS, STATS } from '../shared/classes';
-import { COPY } from './copy';
+import { COPY, RECOVER } from './copy';
+import { RECOVERY, type Recovery } from './recovery';
+import { RecoveryPanel } from './recoveryui';
 import type { Game } from './game';
 import { HEROES } from './sprites';
 
@@ -22,21 +24,41 @@ export class Title {
   /** On the class grid, or looking at one class. */
   private detail = false;
   private retiring = -1;
+  /** The recovery code panel (none in the one-file build), and whether it's the one showing. */
+  private panel: RecoveryPanel | null = null;
+  private inPanel = false;
 
-  constructor(private g: Game, private done: () => void) {
+  constructor(private g: Game, private done: () => void, recovery?: Recovery) {
     this.el.id = 'title';
     this.el.hidden = true;
     document.body.appendChild(this.el);
     this.el.addEventListener('click', (e) => this.click(e.target as HTMLElement));
+    if (recovery && RECOVERY) {
+      const p = (this.panel = new RecoveryPanel(recovery, g, () => this.inPanel && this.open && (this.el.innerHTML = p.html()), () => this.front()));
+      this.el.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (this.inPanel) void p.submit((this.el.querySelector('form input') as HTMLInputElement).value);
+      });
+    }
   }
 
   show(): void {
     this.open = true;
     this.el.hidden = false;
     this.retiring = -1;
+    this.front();
+  }
+
+  /** Your heroes, or the class pick when there are none. */
+  private front(): void {
+    this.inPanel = false;
     this.detail = false;
     if (this.g.save.heroes.length) this.home();
     else this.create();
+  }
+
+  private recoverButton(): string {
+    return this.panel ? `<button data-recover class="ghost wide">${RECOVER.button}</button>` : '';
   }
 
   private hide(): void {
@@ -51,14 +73,14 @@ export class Title {
       `<p class="lede">${COPY.homeLede}</p><div class="slots">` +
       hs.map((h, i) => `<div class="slot">${face(h.cls)}<div class="who"><b>${esc(h.name)}</b><span>${h.cls} &middot; LEVEL ${h.level} &middot; ${h.gold} GOLD</span></div>` +
         `<button data-play="${i}" class="primary">PLAY</button>${h.prologue ? `<button data-wood="${i}" class="ghost" title="Play the wood again">WOOD</button>` : ''}<button data-retire="${i}" class="ghost">${this.retiring === i ? 'SURE?' : 'RETIRE'}</button></div>`).join('') +
-      `</div>${hs.length < HERO_SLOTS ? '<button data-new class="wide">NEW HERO</button>' : '<p class="dim">Three heroes is the most. Retire one to make another.</p>'}</div>`;
+      `</div>${hs.length < HERO_SLOTS ? '<button data-new class="wide">NEW HERO</button>' : '<p class="dim">Three heroes is the most. Retire one to make another.</p>'}${this.recoverButton()}</div>`;
   }
 
   private create(): void {
     const back = this.g.save.heroes.length ? '<button data-back class="ghost wide">BACK</button>' : '';
     if (!this.detail) {
       this.el.innerHTML = `<div class="tcard"><h1>RELIC</h1><div class="sub">A NEW HERO</div><p class="lede">${COPY.pickLede}</p><div class="cgrid">` +
-        CLASS_ORDER.map((k) => `<button data-cls="${k}" class="ccard">${face(k)}<span><b>${k}</b><i>${CLASSES[k].line}</i></span></button>`).join('') + `</div>${back}</div>`;
+        CLASS_ORDER.map((k) => `<button data-cls="${k}" class="ccard">${face(k)}<span><b>${k}</b><i>${CLASSES[k].line}</i></span></button>`).join('') + `</div>${back}${this.recoverButton()}</div>`;
       return;
     }
     const c = this.pick, s = CLASSES[c];
@@ -73,6 +95,8 @@ export class Title {
     const b = t.closest('button');
     if (!b) return;
     const d = b.dataset;
+    if (this.inPanel) return this.panel?.click(d);
+    if (d.recover !== undefined && this.panel) return (this.inPanel = true), this.panel.open(), void (this.el.innerHTML = this.panel.html());
     if (d.play !== undefined) return this.g.choose(Number(d.play)), this.hide();
     if (d.wood !== undefined) return this.g.choose(Number(d.wood)), this.g.startWood(true), this.hide();
     if (d.skipwood !== undefined) {

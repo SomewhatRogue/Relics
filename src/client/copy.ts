@@ -66,3 +66,30 @@ export const SMITH = {
   anvil: 'Spares in the fire. Steel and gold for the rest.',
   hungry: 'Not that one. Not in my fire.',
 };
+
+/** The recovery code panel on the start screen (recoveryui.ts). {n} is a count of heroes (from counts), {names} their names. */
+export const RECOVER = {
+  button: 'RECOVERY CODE',
+  title: 'RECOVERY CODE',
+  making: 'Making your code...',
+  writeDown: 'Write this down. It brings your heroes to another phone or computer.',
+  noHeroes: 'Once you have a hero, you can get a code here that brings your heroes to another phone or computer.',
+  unreachable: "We couldn't reach the server just now. Try again in a little while.",
+  tryAgain: 'TRY AGAIN',
+  useTitle: 'USE A CODE',
+  useLede: 'Have a code from another phone or computer? Type it in to bring those heroes here.',
+  example: 'KILN FERN 47',
+  use: 'USE THIS CODE',
+  looking: 'Looking for it...',
+  bad: "That doesn't look like a code. A code is two words and a number.",
+  none: "There's nothing kept under that code. Check the words and the number.",
+  empty: 'That code has no heroes in it.',
+  mine: "That's this device's own code already.",
+  found: 'This code has {n}: {names}.',
+  replaces: 'They will take the place of the {n} on this device.',
+  bring: 'BRING THEM HERE',
+  cancel: 'CANCEL',
+  back: 'BACK',
+  /** How many heroes, by count (a device holds three at most). */
+  counts: ['no heroes', 'one hero', 'two heroes', 'three heroes'],
+};

@@ -186,6 +186,14 @@ export class Game {
     this.choose(this.save.heroes.length - 1);
     return this.save.current;
   }
+  /** Heroes brought from another device (a recovery code): they replace these, kept as saved there. */
+  adopt(s: Save): void {
+    this.save = { ...s, current: -1 };
+    store(this.save, s.savedAt);
+    this.run = null;
+    this.wood = null;
+    this.enterTown();
+  }
   retire(i: number): void {
     this.save.heroes.splice(i, 1);
     this.save.current = -1;

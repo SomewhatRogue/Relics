@@ -354,3 +354,10 @@ body[data-guard="none"] .tb.block { display: none; }
 
 .tb.dim { opacity: 0.4; }
 .tb[hidden] { display: none !important; }
+#title .rcode { margin: 4px 0 0; padding: 12px 10px; text-align: center; font-size: 24px; letter-spacing: 0.14em; color: #ffd27a; background: #1b1922; border: 1px solid #6a5a3a; border-radius: 6px; user-select: text; -webkit-user-select: text; text-shadow: 0 0 10px #ff9a3c55; }
+#title .rsep { margin-top: 10px; }
+#title .rform { display: flex; gap: 8px; }
+#title .rform .name { flex: 1; min-width: 0; }
+#title .rform button { flex: none; }
+#title .about p { margin: 0 0 6px; }
+#title .about p:last-child { margin: 0; }
