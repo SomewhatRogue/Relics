@@ -126,7 +126,7 @@ function kit(browser, port, report) {
       if (r === rooms - 1) return ev(lead, () => (window.__game.endForTest(true), true));
       // (Only the players still at their screens walk there: anyone else's hero stays where it is.)
       await ev(lead, (ids) => { const g = window.__game, x = g.room.map.exit ?? g.room.map.roads[0].area; for (const h of g.room.heroes) if (h.act !== 'down' && ids.includes(h.id)) Object.assign(h, { x: x.x + x.w / 2, y: x.y + 0.4 }); }, ['me', ...rest.map((p) => p.id)]);
-      if (!(await until(lead, (key) => window.__game.roomKey > key, key))) return false;
+      if (!(await until(lead, (key) => window.__game.roomKey > key, key))) return console.error('STUCK', JSON.stringify(await ev(lead, () => { const g = window.__game; return { r: g.run.index, open: g.room.exitOpen, goal: g.goalText(), exit: g.room.map.exit, heroes: g.room.heroes.map((h) => [h.id, h.x.toFixed(1), h.y.toFixed(1), h.act]), foes: g.room.enemies.filter((e) => e.hp > 0).length }; }))), false;
       for (const p of rest) if (!(await until(p, (i) => window.__game.run?.index === i, r + 1))) return false;
     }
     return true;

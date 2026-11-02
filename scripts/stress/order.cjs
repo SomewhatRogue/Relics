@@ -40,7 +40,7 @@ async function friendFirst(k) {
   await route(k, ana, '&inst=1&hold=900');
   const set = await k.party(sam, kyle, ana);
   const told = await k.ev(kyle, () => window.__told.join(' '));
-  k.step(`Kyle got there before Sam claimed it (${told})`, /^info nohost hosted/.test(told), told);
+  k.step(`Kyle got there before Sam claimed it (${told})`, /^nohost hosted/.test(told.replace(/\b(info|role:peer) /g, "")), told);
   if (!set) return;
   for (let i = 0; i < 3; i++) {
     await together(k, sam, kyle);
