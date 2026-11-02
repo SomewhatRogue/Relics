@@ -426,3 +426,5 @@ body[data-guard="none"] .tb.block { display: none; }
 #banner.faint { opacity: 0.3; }
 /* GRAB as RAISE, by a friend who's down. */
 .tb.grab.raise { border-color: #ffd27a; color: #ffd27a; box-shadow: 0 0 10px rgba(255, 210, 122, 0.45); }
+/* LEAVE: on a job only, where HEROES would be. */
+body:not([data-mode='run']) #leave { display: none; }

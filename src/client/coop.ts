@@ -27,7 +27,7 @@ import { NO_INTENT, type FightEvent, type Intent } from '../sim/types';
 import { RelaySocket, type RelayMsg } from './relay';
 import { Decoder, Encoder, stateOf, type Patch } from './snap';
 
-const SEND_EVERY = 0.05, FULL_EVERY = 4, GRACE = 60, LOST = 20, KEEP = 2, SAVE_EVERY = 2, TAKE = 9, TAKE_NEXT = 5;
+const BYE_WAIT = 2.5, SEND_EVERY = 0.05, FULL_EVERY = 4, GRACE = 60, LOST = 20, KEEP = 2, SAVE_EVERY = 2, TAKE = 9, TAKE_NEXT = 5;
 /**
  * Your own hero, on a friend's screen, moves the moment you press. The leader's word on where you
  * are is a trip there and back old, so the walking you've done here since then is added on top of
@@ -79,6 +79,8 @@ export class CoopHost {
     const f = this.friends.get(m.from), d = m.d as { t?: string; profile?: Profile; i?: Intent } | null;
     if (!f || !d) return;
     f.heard = this.now;
+    // A friend headed home: out of the fight now, not in a minute.
+    if (d.t === 'bye') return void (f.gone || ((f.gone = true), this.game.dropFriend(m.from)));
     if (d.t === 'hello' && d.profile && typeof d.profile === 'object') {
       const first = !f.profile || f.gone;
       Object.assign(f, { profile: d.profile, fresh: true, gone: false });
@@ -108,6 +110,18 @@ export class CoopHost {
     this.evs = [];
     this.sentAt = now;
     if (full) (this.fullAt = now), (this.sentKey = g.roomKey), this.friends.forEach((f) => (f.fresh = false));
+  }
+
+  /** Leaving the job to the friends still in it: the whole job as it stands, then goodbye. */
+  handOver(): void {
+    this.sock.send('*', { save: JSON.stringify({ run: this.game.run, room: saveRoom(this.game.room), members: this.members, key: this.game.roomKey }) });
+    this.sock.send('*', { bye: 1 });
+    this.close();
+  }
+
+  /** Anyone still with me (not gone). */
+  get company(): boolean {
+    return [...this.friends.values()].some((f) => !f.gone);
   }
 
   /** The job is over: tell everyone how it went (their game pays them from the run). */
@@ -165,7 +179,10 @@ export class CoopGuest {
     if (m.t === 'hosted' && m.id !== this.myId) return this.follow(m.id), this.hello();
     if (m.t !== 'msg' || m.from !== this.lead) return;
     this.heardLead = this.now;
-    const d = m.d as { s?: string; end?: { won: boolean; run: Run }; save?: string };
+    const d = m.d as { s?: string; end?: { won: boolean; run: Run }; save?: string; bye?: number };
+    // The leader's headed home and left the job to us: as good as gone, so whoever's first takes it
+    // on in a moment (once their goodbye has freed the room).
+    if (d.bye) return void (this.heardLead = this.now - TAKE + BYE_WAIT);
     // (The end's run swaps ids like a patch does, so my own tallies are under `me`.)
     if (d.end) return void (this.ended = JSON.parse(JSON.stringify(d.end).split('"me"').join('"@lead"').split(`"${this.myId}"`).join('"me"')));
     if (typeof d.save === 'string') return void (this.save = d.save);
@@ -293,6 +310,13 @@ export class CoopGuest {
     const e = this.events;
     this.events = [];
     return e;
+  }
+
+  /** Headed home: tell the leader (so my hero leaves the fight now), then go. */
+  leave(): void {
+    this.sock.send(this.lead, { t: 'bye' });
+    const s = this.sock;
+    setTimeout(() => s.close(), 1500);
   }
 
   close(): void {

@@ -448,6 +448,24 @@ export class Game {
     return ev;
   }
 
+  /**
+   * Leave the job now, for town. Alone, it's lost (driven back: half the gold). Following a friend,
+   * they carry on without you. Leading one, your friends take it on from here and carry on.
+   */
+  leaveJob(): void {
+    if (this.mode !== 'run' || !this.run || this.result) return;
+    const g = this.remote;
+    if (g) {
+      g.leave();
+      this.remote = null;
+      this.run = g.run ?? this.run;
+      return this.finish(false, true);
+    }
+    const c = this.coop;
+    if (c?.company) (c.handOver(), (this.coop = null));
+    this.finish(false);
+  }
+
   /** Test hook: end the run now (won or lost), as if its last room were done. */
   endForTest(won: boolean): void {
     if (this.run) this.finish(won);

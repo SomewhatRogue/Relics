@@ -117,6 +117,15 @@ $('#heroes').addEventListener('click', () => {
   if (game.mode !== 'run' && !panel.open) pack.toggle(false), title.show();
 });
 $('#packbtn').addEventListener('click', () => pack.toggle());
+// Leave the job early, for town (game.leaveJob says what that means alone, following or leading).
+$('#leave').addEventListener('click', () => {
+  if (game.mode !== 'run' || panel.open) return;
+  const party = !!(game.remote || game.coop?.company);
+  panel.show('BACK TO WICKHOLD?', `<p>${party ? LEAVE_PARTY : LEAVE_SOLO}</p>`, [
+    { label: 'LEAVE', act: () => (panel.hide(), game.leaveJob()) },
+    { label: 'STAY', primary: true, act: () => panel.hide() },
+  ]);
+});
 $('#skipcut').addEventListener('click', () => game.skipCut());
 $('#skipcut').addEventListener('touchstart', (e) => (e.preventDefault(), game.skipCut()), { passive: false });
 $('.tb.use').addEventListener('touchstart', (e) => (e.preventDefault(), use()), { passive: false });
@@ -273,6 +282,10 @@ function hud(now: number): void {
   }
   $('#tip').classList.toggle('gone', game.mode === 'run' || (game.mode === 'yard' && parries >= 3));
 }
+
+/** The LEAVE button's question, alone and in a party. */
+const LEAVE_SOLO = "The job's lost if you go, and you keep half the gold you've picked up.";
+const LEAVE_PARTY = "Your party carries on without you, and you keep half the gold you've picked up.";
 
 /** On the banner once you're out of a job (your party carries on without you). */
 const OUT_TEXT = "You're out till the job's done. Your party carries on";
