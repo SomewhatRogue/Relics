@@ -217,3 +217,4 @@ most Want among the heroes is the one the bells don't spare).
 - The cellars under the Peat Cuts and Hesketh Hall hold larders.
 - Vell's tower floor: a chalked circle cut into three by three lines, one part each for fire, frost and storm, with Vell's own sums chalked round the rim, rubbed out and redone. Never a star.
 - Cleric is the on-screen name for the Healer class (Kyle's call). Older notes here that say Healer mean the Cleric.
+- Element jobs (Kyle's call, 2026-11-02): fire for swarms, frost for the big and the quick, storm for packs and shields (lightning goes round a board). The Stoker lives by the kiln: fire hardly touches it and cold is what hurts. Butchers, named ones too, take more from frost and less from fire. Spiders and their nests burn easily. The brute being cold-blooded stays off screen.
