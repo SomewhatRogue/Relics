@@ -1462,3 +1462,19 @@ and fall to others. His call: give each element a job.
   lance); relic augments go through the same table.
 - `tests/elements.test.ts`: the switch and its cooldown, the primed spell, every table entry through
   `damage()`, the brute resisting a blade, the pop limit, storm round a shield, fire jumping a gap.
+
+## Going down in a party, and a leader out of sight (2026-11-02, Claude Opus 5.5)
+Kyle and a friend's first online job: Kyle died, the Cleric's smite didn't help (it doesn't heal;
+every third mace blow does), the friend didn't know how to get him up, then the friend froze.
+- Getting someone up is a button now: GRAB by a friend who's down (HELP UP on a phone, G on a
+  laptop) kneels you there 2.5 s (a Cleric twice as quick). A hit, a swing or walking off stops it.
+  Standing over them alone no longer does it.
+- Nobody comes in 20 s: you get yourself up, once a job (`Hero.selfUp`, carried room to room).
+  Raised by a friend, it isn't spent. The next time nobody comes, you're out till the job ends and
+  the rest carry on (everyone out: the job is lost). The banner's heart in a party is that get-up.
+- The freeze: the relay log shows the friend's game trying to take the job over at 2:15 in, refused
+  because the leader's page still pinged. The leader's page had stopped drawing (out of sight), and
+  the room only ran on drawn frames. Now a leader's room runs on a timer when the page is hidden,
+  catching up in 0.1 s steps; and a refused takeover goes back to following the leader instead of
+  running a copy of the job alone.
+- Laptop grab key is G: the lesson and Hew's card said F.

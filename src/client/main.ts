@@ -27,6 +27,7 @@ import { setLink } from './squareui';
 import { raidNews } from './raidnews';
 import { WORK_ORDER } from '../shared/works';
 import { grabbable } from '../sim/grab';
+import { raisable } from '../sim/party';
 import { liftable } from '../sim/props';
 import { relicLabel } from '../sim/hero';
 import { castElement } from '../sim/channel';
@@ -180,9 +181,12 @@ function hud(now: number): void {
     $('.tb.roll').textContent = ({ roll: 'ROLL', backstep: 'JUMP', dash: 'DASH', blink: 'BLINK' } as Record<string, string>)[WEAPONS[me.weapon].dodge.kind] ?? 'ROLL';
     // A Warrior or Healer has no dodge, so no button for one.
     $('.tb.roll').hidden = !CLASS_DODGES[WEAPONS[me.weapon].cls];
-    $('.tb.grab').hidden = !can && !lifter;
-    $('.tb.grab').classList.toggle('dim', !can);
-    $('.tb.grab').textContent = carrying ? 'THROW' : 'GRAB';
+    // By a friend who's down, GRAB helps them up.
+    const raise = me.act === 'idle' && raisable(me, room.heroes);
+    $('.tb.grab').hidden = !can && !lifter && !raise;
+    $('.tb.grab').classList.toggle('dim', !can && !raise);
+    $('.tb.grab').classList.toggle('raise', raise);
+    $('.tb.grab').textContent = raise ? 'HELP UP' : carrying ? 'THROW' : 'GRAB';
     $('.tb.attack').textContent = carrying ? 'SLAM' : 'ATTACK';
   }
   // The class skill (E, SKILL) and the relic carried, if any (R, RELIC), each with its cooldown.
@@ -238,10 +242,10 @@ function hud(now: number): void {
     $('#boss').hidden = !boss || wood.cut >= 0;
     if (boss) ($('#boss b').textContent = boss.name!), ($('#boss i').style.width = (100 * boss.hp) / boss.maxHp + '%');
   } else if (game.mode === 'run' && run) {
-    const g = { text: game.goalText() };
-    // Alone, the times you can still get up (a heart each); in a party, your friends pick you up instead.
+    const g = { text: me.out ? OUT_TEXT : game.goalText() };
+    // Alone, the times you can still get up (a heart each); in a party, your one get-up of the job.
     const solo = room.heroes.filter((x) => x.id !== 'squire').length < 2, ups = MAX_DOWNS - run.downs;
-    const hearts = solo ? `  <i class="ups">${'\u2665'.repeat(Math.max(0, ups))}${'\u2661'.repeat(Math.min(MAX_DOWNS, run.downs))}</i>` : '';
+    const hearts = `  <i class="ups">${solo ? '\u2665'.repeat(Math.max(0, ups)) + '\u2661'.repeat(Math.min(MAX_DOWNS, run.downs)) : me.selfUp ? '\u2661' : '\u2665'}</i>`;
     $('#banner').innerHTML = `<b>${run.job.place.name.toUpperCase()} ${run.index + 1}/${run.job.rooms}</b> ${g.text}<span>+${run.gold} GOLD${hearts}${run.rescued ? `  SAVED ${run.rescued}` : ''}</span>`;
     const boss = room.enemies.find((e) => e.name && e.act !== 'dead');
     $('#boss').hidden = !boss;
@@ -257,6 +261,8 @@ function hud(now: number): void {
   const spot = game.near(), busy = panel.open || title.open;
   $('#prompt').hidden = !spot || busy;
   if (spot) $('#prompt').textContent = (input.touch ? '' : spot?.chest ? 'F  ' : game.mode === 'run' ? '' : 'E  ') + (spot.door || !spot.talk ? spot.label : 'TALK: ' + spot.label);
+  // A friend down at your feet: the key that gets them up.
+  if (!spot && !busy && !input.touch && game.mode === 'run' && game.hero.act === 'idle' && raisable(game.hero, game.room.heroes)) ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  HELP UP');
   $('.tb.use').hidden = !spot || busy;
   $('.tb.use').classList.toggle('chest', !!spot?.chest);
   if (spot) $('.tb.use').textContent = spot.chest ? 'OPEN' : spot.door ? 'ENTER' : spot.talk && spot.talk !== 'board' && spot.talk !== 'market' && spot.talk !== 'gate' ? 'TALK' : 'USE';
@@ -268,10 +274,13 @@ function hud(now: number): void {
   $('#tip').classList.toggle('gone', game.mode === 'run' || (game.mode === 'yard' && parries >= 3));
 }
 
+/** On the banner once you're out of a job (your party carries on without you). */
+const OUT_TEXT = "You're out till the job's done. Your party carries on";
+
 let last = performance.now();
 let still: Intent | null = null;
 let resumed = false, touchedAt = 0;
-function frame(t: number): void {
+function tick(t: number): void {
   // (The first frame can stamp a hair before the page clock: never step backwards.)
   const dt = Math.max(0, Math.min(0.1, (t - last) / 1000));
   last = t;
@@ -329,11 +338,27 @@ function frame(t: number): void {
   // Online: everyone else in Wickhold, while you're there.
   const inTown = game.mode === 'town', h = game.hero;
   online()?.step(inTown && h ? { n: game.profile.name, w: h.weapon, l: h.look ?? 0, at: game.room.map.name, p: [h.x, h.y, h.fx, h.fy, h.moving ? 1 : 0] } : null, t / 1000, dt);
+  // (Off screen, leading a job in the background: nothing to draw.)
+  if (document.hidden) return;
   scene.render(game.room, ME, fx, t / 1000, dt, inTown ? (townfolk?.here(game.room.map.name) ?? []) : []);
   hud(t / 1000);
+}
+
+function frame(t: number): void {
+  if (!document.hidden) tick(t);
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
+
+// Leading a job with this page out of sight (another tab, another app): the browser stops drawing
+// frames, but your friends' room still has to run, so it runs here on a timer, catching up in
+// tenth-of-a-second steps however late the browser lets the timer fire.
+setInterval(() => {
+  if (!document.hidden || !game.coop) return;
+  const now = performance.now();
+  for (let n = 0; now - last > 120 && n < 40; n++) tick(last + 100);
+  tick(now);
+}, 100);
 
 let muted = false;
 $('#mute').addEventListener('click', () => {

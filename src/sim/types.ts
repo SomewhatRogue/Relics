@@ -180,6 +180,9 @@ export interface Hero extends Body {
   bleeding?: boolean;
   out?: boolean;
   pickT?: number;
+  /** The teammate kneeling to get this hero up, and whether they've spent their own get-up this job. */
+  raiser?: string;
+  selfUp?: boolean;
   /** Teammates this swing has already cut (friendly fire), and who has downed this hero how often. */
   hitAllies?: string[];
   grudges?: Record<string, number>;
@@ -381,7 +384,7 @@ export type FightEvent =
   /** A teammate downed you once too often this job. */
   | { k: 'grudge'; x: number; y: number; id: string; by: string }
   /** A hero down (`by`: the teammate whose blow did it), or picked up (`by`: who picked them up). */
-  | { k: 'down' | 'pickedup'; x: number; y: number; id?: string; by?: string }
+  | { k: 'down' | 'pickedup' | 'raising' | 'gotup'; x: number; y: number; id?: string; by?: string }
   /** `src`: what landed it (a kit, or a shot's kind), for its sound; `big`: on the butcher. */
   | { k: 'hit'; x: number; y: number; n: number; heavy: boolean; on: 'enemy' | 'hero'; counter?: boolean; crit?: boolean; ambush?: boolean; boarded?: boolean; backstab?: boolean; tick?: boolean; src?: string; big?: boolean }
   | { k: 'swing'; x: number; y: number; src: string; heavy: boolean }

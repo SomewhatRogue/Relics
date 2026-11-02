@@ -70,7 +70,11 @@ export class CoopHost {
     this.sock.onMessage = (m) => this.heard(m);
   }
 
+  /** Taking a job on, and the relay says its leader is still there after all: follow them again. */
+  onRefused: (lead: string) => void = () => {};
+
   private heard(m: RelayMsg): void {
+    if (m.t === 'role' && m.role === 'guest' && m.host && m.host !== this.myId) return this.onRefused(m.host);
     if (m.t !== 'msg') return;
     const f = this.friends.get(m.from), d = m.d as { t?: string; profile?: Profile; i?: Intent } | null;
     if (!f || !d) return;

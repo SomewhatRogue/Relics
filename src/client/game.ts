@@ -28,7 +28,7 @@ import { load, store, type Save } from './save';
 import { treasure } from '../shared/treasure';
 /** What a piece of treasure that won't fit in the pack fetches. */
 const TREASURE_SOLD = 20;
-import { CoopHost, loadRoom, type CoopGuest, type Friend } from './coop';
+import { CoopGuest, CoopHost, loadRoom, type Friend } from './coop';
 import { forgetSession, keepSession } from './session';
 import { dayPhase, townLight } from '../shared/daylight';
 import { Followers } from './followers';
@@ -228,6 +228,9 @@ export class Game {
     for (const r of h.relics) h.augments[r] = p.augments[r] ?? '';
     h.hp = h.maxHp;
     if (keep) Object.assign(h, { hp: Math.max(1, keep.hp), relic: keep.relic, fed: keep.fed, lastKill: 0 });
+    // Down or out carries on into the next room with you, and so does your one get-up, spent or not.
+    if (keep) h.selfUp = keep.selfUp;
+    if (keep?.act === 'down' && keep.bleeding) Object.assign(h, { act: 'down', hp: 0, bleeding: true, out: keep.out, actDur: Infinity });
   }
 
   private place(room: ArenaRoom, at?: { x: number; y: number }, keep?: Hero): void {
@@ -492,6 +495,13 @@ export class Game {
     const members = o.members.map(([id, name]) => [id === 'me' ? g.myId : id, name] as [string, string]);
     this.coop = new CoopHost(g.code, g.myId, this.profile.name, this, members, 'take');
     keepSession({ code: g.code, lead: '', job: o.run.job, hero: this.profile.id });
+    // The leader was only slow (the relay still has them): back to following them, not a job of my own.
+    this.coop.onRefused = (lead) => {
+      const job = o.run.job;
+      this.coop?.close();
+      this.coop = null;
+      this.startRemote(new CoopGuest(g.code, g.myId, lead, () => this.profile, job));
+    };
   }
 
   private stepRemote(): FightEvent[] {

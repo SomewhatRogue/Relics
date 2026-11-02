@@ -40,7 +40,7 @@ describe('friendly fire', () => {
 });
 
 describe('going down in a party', () => {
-  it('you bleed instead of getting up; a teammate standing over you picks you up', () => {
+  it('you lie there instead of getting up; a teammate who presses GRAB by you raises you', () => {
     const { room, a, b } = two();
     b.hp = 1;
     allyHit(a.id, b, 10, []);
@@ -49,24 +49,52 @@ describe('going down in a party', () => {
     for (let i = 0; i < ticks(HERO.respawn + 1); i++) room.step();
     expect(b.act).toBe('down');
     expect(b.bleeding).toBe(true);
-    // Kyle stands over Sam long enough.
+    // Standing over Sam isn't enough on its own.
     Object.assign(a, { x: b.x + 0.5, y: b.y });
+    for (let i = 0; i < ticks(PARTY.pickUp + 0.2); i++) room.step();
+    expect(b.act).toBe('down');
+    // Kyle presses GRAB by Sam and kneels there long enough.
+    room.setIntent(a.id, { ...NO_INTENT, grabSeq: 1 });
     for (let i = 0; i < ticks(PARTY.pickUp + 0.2); i++) room.step();
     expect(b.act).not.toBe('down');
     expect(b.hp).toBe(Math.round(b.maxHp * PARTY.upHp));
+    // Raised by a friend: Sam's own get-up is still to come.
+    expect(b.selfUp).toBeFalsy();
   });
-  it("nobody comes: you're out, and when everyone's out the job is lost", () => {
+  it('a hit on the one kneeling stops the raise', () => {
+    const { room, a, b } = two();
+    b.hp = 1;
+    allyHit(a.id, b, 10, []);
+    room.step();
+    Object.assign(a, { x: b.x + 0.5, y: b.y });
+    room.setIntent(a.id, { ...NO_INTENT, grabSeq: 1 });
+    for (let i = 0; i < ticks(PARTY.pickUp / 2); i++) room.step();
+    expect(b.pickT).toBeGreaterThan(0);
+    Object.assign(a, { act: 'hurt', actT: 0, actDur: 0.3 });
+    room.step();
+    expect(b.pickT).toBe(0);
+    expect(b.raiser).toBeUndefined();
+  });
+  it("nobody comes: you get yourself up once a job; the next time you're out, and when everyone's out the job is lost", () => {
     const { room, a, b } = two();
     Object.assign(a, { x: 2, y: 2 });
     b.hp = 1;
     allyHit(a.id, b, 10, []);
     for (let i = 0; i < ticks(PARTY.bleed + 0.5); i++) room.step();
+    expect(b.act).not.toBe('down');
+    expect(b.selfUp).toBe(true);
+    expect(b.out).toBeFalsy();
+    b.hp = 1;
+    allyHit(a.id, b, 10, []);
+    for (let i = 0; i < ticks(PARTY.bleed + 0.5); i++) room.step();
     expect(b.out).toBe(true);
     expect(allOut(room.heroes)).toBe(false);
-    // The last one standing goes down too: nobody left to pick anyone up.
-    a.hp = 1;
-    allyHit(b.id, a, 10, []);
-    for (let i = 0; i < ticks(PARTY.bleed + 0.5); i++) room.step();
+    // The last one standing goes down twice too: nobody left to pick anyone up.
+    for (let k = 0; k < 2; k++) {
+      a.hp = 1;
+      allyHit(b.id, a, 10, []);
+      for (let i = 0; i < ticks(PARTY.bleed + 0.5); i++) room.step();
+    }
     expect(allOut(room.heroes)).toBe(true);
   });
   it('the last one left (the rest gone home) gets up the old way', () => {

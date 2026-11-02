@@ -1,14 +1,16 @@
 /**
  * A party in a fight: what changes once there's more than one player (the squire doesn't count).
  *
- * - Going down, you bleed: lie there up to PARTY.bleed seconds while a teammate stands over you for
- *   PARTY.pickUp seconds to get you up (a hit on them starts it over). Nobody comes, and you're out
- *   until the job ends. Alone (or the last one left), it's the old way: up again in a moment.
+ * - Going down, you lie there PARTY.bleed seconds. A teammate who presses GRAB by you kneels and gets
+ *   you up in PARTY.pickUp seconds (a Cleric twice as quick); a hit, a swing or walking off stops it.
+ *   Nobody comes: the first time in a job you get yourself up; the next, you're out until it ends.
+ *   Raised by a friend, your own get-up isn't spent. Alone (or the last one left), it's the old way:
+ *   up again in a moment.
  * - Friendly fire: your own side's blows, shots and blasts land on you at PARTY.friendly.
  * - Down a teammate PARTY.grudge times in one job and they hold a grudge.
  * - More players, more goblins (scaleFoes) and tougher named ones.
  */
-import { HERO, HURT_STAGGER, PARTY } from '../shared/tuning';
+import { HERO, HURT_STAGGER, PARTY, WEAPONS } from '../shared/tuning';
 import { Rng } from '../shared/rng';
 import { toughen } from '../shared/roster';
 import { waveFor } from './spiders';
@@ -46,35 +48,56 @@ export function sweepAllies(h: Hero, s: Swing, heroes: Hero[], ev: FightEvent[])
   }
 }
 
-/** Bleeding, picking up, and going out, once a tick. */
+/** GRAB by a teammate who's down (and not out): start getting them up. False if nobody's there. */
+export function startRaise(h: Hero, heroes: Hero[], ev: FightEvent[]): boolean {
+  if (h.id === 'squire') return false;
+  const o = players(heroes).find((x) => x !== h && x.act === 'down' && x.bleeding && !x.out && (x.z ?? 0) === (h.z ?? 0) && Math.hypot(x.x - h.x, x.y - h.y) <= PARTY.reach);
+  if (!o) return false;
+  if (o.raiser !== h.id) Object.assign(o, { raiser: h.id, pickT: 0 });
+  h.grabQueuedAt = -9;
+  ev.push({ k: 'raising', x: o.x, y: o.y, id: o.id, by: h.id });
+  return true;
+}
+
+/** A teammate down by `h`, close enough to get up (for the RAISE button). */
+export const raisable = (h: Hero, heroes: Hero[]) =>
+  players(heroes).some((x) => x !== h && x.act === 'down' && x.bleeding && !x.out && Math.hypot(x.x - h.x, x.y - h.y) <= PARTY.reach);
+
+const up = (h: Hero) => Object.assign(h, { act: 'idle', actT: 0, actDur: 0, hp: Math.round(h.maxHp * PARTY.upHp), bleeding: false, pickT: 0, raiser: undefined });
+
+/** Lying there, being got up, getting up, and going out, once a tick. */
 export function stepParty(heroes: Hero[], dt: number, ev: FightEvent[]): void {
   const ps = players(heroes);
   if (ps.length < 2) {
     // Alone again (the rest gone home): the old way, up in a moment.
-    for (const h of ps) if (h.bleeding && !h.out) Object.assign(h, { bleeding: false, actDur: HERO.respawn, actT: 0 });
+    for (const h of ps) if (h.bleeding && !h.out) Object.assign(h, { bleeding: false, actDur: HERO.respawn, actT: 0, raiser: undefined });
     return;
   }
   for (const h of ps) {
     if (h.act !== 'down') {
-      h.pickT = 0;
+      if (h.pickT || h.raiser) Object.assign(h, { pickT: 0, raiser: undefined });
       continue;
     }
-    if (!h.bleeding) Object.assign(h, { bleeding: true, actDur: Infinity, pickT: 0 });
+    if (!h.bleeding) Object.assign(h, { bleeding: true, actDur: Infinity, pickT: 0, raiser: undefined });
     if (h.out) continue;
-    if (h.actT >= PARTY.bleed) {
-      h.out = true;
-      ev.push({ k: 'out', x: h.x, y: h.y });
+    // A friend kneeling by you: only while they stay close and aren't doing anything else.
+    const by = h.raiser ? ps.find((o) => o.id === h.raiser) : undefined;
+    if (by && by.act === 'idle' && !by.moving && Math.hypot(by.x - h.x, by.y - h.y) <= PARTY.reach) {
+      h.pickT = (h.pickT ?? 0) + dt * (WEAPONS[by.weapon].cls === 'HEALER' ? 2 : 1);
+      if (h.pickT >= PARTY.pickUp) (up(h), ev.push({ k: 'pickedup', x: h.x, y: h.y, id: h.id, by: by.id }));
       continue;
     }
-    const by = ps.find((o) => o !== h && o.act !== 'down' && Math.hypot(o.x - h.x, o.y - h.y) <= PARTY.reach);
-    if (!by || by.act === 'hurt' || by.act === 'stun') {
-      h.pickT = 0;
+    if (h.raiser) Object.assign(h, { raiser: undefined, pickT: 0 });
+    if (h.actT < PARTY.bleed) continue;
+    // Nobody came: your one get-up of the job, or you're out.
+    if (!h.selfUp) {
+      h.selfUp = true;
+      up(h);
+      ev.push({ k: 'gotup', x: h.x, y: h.y, id: h.id });
       continue;
     }
-    h.pickT = (h.pickT ?? 0) + dt;
-    if (h.pickT < PARTY.pickUp) continue;
-    Object.assign(h, { act: 'idle', actT: 0, actDur: 0, hp: Math.round(h.maxHp * PARTY.upHp), bleeding: false, pickT: 0 });
-    ev.push({ k: 'pickedup', x: h.x, y: h.y, id: h.id, by: by.id });
+    h.out = true;
+    ev.push({ k: 'out', x: h.x, y: h.y });
   }
 }
 

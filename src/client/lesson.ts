@@ -18,7 +18,7 @@ const KEY: Record<Move, [string, string]> = {
   parry: ['RIGHT CLICK', 'BLOCK'],
   skill: ['E', 'SKILL'],
   relic: ['R', 'RELIC'],
-  grab: ['F', 'GRAB'],
+  grab: ['G', 'GRAB'],
   backstab: ['LEFT CLICK, FROM BEHIND', 'ATTACK, FROM BEHIND'],
   heavy: ['HOLD LEFT CLICK', 'HOLD ATTACK'],
   slip: ['SPACE, AS IT LANDS', 'ROLL, AS IT LANDS'],

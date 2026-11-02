@@ -25,7 +25,7 @@ import { impacts } from './impacts';
 import { release, stepCarry, tryGrab } from './grab';
 import { startBash, stepBash } from './bash';
 import { dropProp, newProp, propImpacts, roomProps, stepLift, stepProps, sweepProps, tryLift } from './props';
-import { stepParty, sweepAllies } from './party';
+import { startRaise, stepParty, sweepAllies } from './party';
 import { stepSurvivors } from './survivors';
 import { ambush } from './ambush';
 import { stepBlaze, type BlazeState } from './blaze';
@@ -187,7 +187,7 @@ export class ArenaRoom {
       loose: (h, s) => this.loose(h, s, w),
       struck: (h, e, n) => this.struck(h, e, n, w),
       sweep: (h, s) => (sweepProps(h, s, w), sweepBlocks(h, s, this.events), sweepAllies(h, s, this.heroes, this.events), sweepSurvivors(h, s, w)),
-      grab: (h) => tryGrab(h, this.enemies, this.time, this.events) || tryLift(h, this.props, this.events),
+      grab: (h) => startRaise(h, this.heroes, this.events) || tryGrab(h, this.enemies, this.time, this.events) || tryLift(h, this.props, this.events),
       carry: (h, inp, walk) => (h.lifting ? stepLift(h, inp, w, TICK, walk) : stepCarry(h, inp, this.enemies, this.time, TICK, this.events, walk)),
       drop: (h) => (release(h, this.enemies, this.events), dropProp(h, this.props)),
       bash: (h) => stepBash(h, this.enemies, w, TICK),

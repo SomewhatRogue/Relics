@@ -248,6 +248,12 @@ export class Fx {
       case 'down':
         this.say(x, y - 26, 'DOWN', '#ff5a4a');
         break;
+      case 'out':
+        this.say(x, y - 26, 'OUT', '#a04a4a', 2);
+        break;
+      case 'gotup':
+        this.say(x, y - 26, 'UP', '#ffd27a');
+        break;
       case 'survivorhit':
         // Someone you freed, hurt by the party: blood, the number, and a cry (not for every burn).
         this.burst(x, y - 6, ev.tick ? 3 : 8, ['#7a1d1d', '#5a1414', '#9a2a2a'], 45, false, 160, true);

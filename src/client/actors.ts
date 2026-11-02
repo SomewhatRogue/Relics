@@ -37,8 +37,9 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'b
     spin(c, look.down, x, y - 4, Math.PI / 2, 0.85);
     // Alone: up in a moment. In a party: the seconds left to be picked up, and how far along it is.
     if (h.out || h.lying) return;
+    // In a party: gold while your own get-up is still to come, red once it's spent (then it's out).
     const left = h.bleeding ? PARTY.bleed - h.actT : h.actDur - h.actT;
-    drawText(c.glow, String(Math.max(0, Math.ceil(left))), Math.round(x - 1), Math.round(y - 18), '#ff6a5a');
+    drawText(c.glow, String(Math.max(0, Math.ceil(left))), Math.round(x - 1), Math.round(y - 18), h.bleeding && !h.selfUp ? '#ffd27a' : '#ff6a5a');
     if (h.pickT) ring(c, x, y, 8, '#f0e0b0', h.pickT / PARTY.pickUp, '#3a3428');
     return;
   }
