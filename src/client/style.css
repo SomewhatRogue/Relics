@@ -353,3 +353,4 @@ body[data-guard="none"] .tb.block { display: none; }
 #pack .detail button.ghost { background: transparent; color: #9a94a8; }
 
 .tb.dim { opacity: 0.4; }
+.tb[hidden] { display: none !important; }
