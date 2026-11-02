@@ -4,6 +4,7 @@
  */
 import { chestSound } from './sfx';
 import { isDead } from '../sim/damage';
+import { asleep } from './foes';
 import type { ArenaRoom } from '../sim/room';
 import type { FightEvent, Hero } from '../sim/types';
 import type { Game } from './game';
@@ -92,7 +93,7 @@ export class Soundscape {
       this.wasInside = g.outside;
     }
     // Goblins at the dead, close by: wet chewing, tearing.
-    const eating = room.enemies.find((e) => !isDead(e) && e.feeding && e.alert === false && Math.hypot(e.x - me.x, e.y - me.y) < 8);
+    const eating = room.enemies.find((e) => !isDead(e) && e.feeding && e.alert === false && !asleep(room.map, e) && Math.hypot(e.x - me.x, e.y - me.y) < 8);
     if (eating && now > this.gnawAt) (sfx.gnaw(1 - Math.hypot(eating.x - me.x, eating.y - me.y) / 8), (this.gnawAt = now + 0.9 + Math.random() * 1.1));
     // Goblins coming for you talk among themselves now and then.
     const coming = room.enemies.filter((e) => !isDead(e) && e.alert !== false && e.kind === 'scrapper' && (e.act === 'chase' || e.act === 'attack') && Math.hypot(e.x - me.x, e.y - me.y) < 9);

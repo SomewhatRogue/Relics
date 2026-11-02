@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { collide, doorAt, useMap } from '../src/shared/arena';
-import { townInterior } from '../src/shared/interiors';
+import { runInterior, townInterior } from '../src/shared/interiors';
 import { PLACES, board, deepDive, type Job } from '../src/shared/jobs';
 import { BLAZE } from '../src/shared/props';
 import { newWorld } from '../src/shared/story';
@@ -179,10 +179,11 @@ describe('buildings on a job', () => {
   it('a cottage can be entered; its goblins stay dead, and the room outside keeps your place', () => {
     const g = new Game();
     g.startJob(job('village', 'rescue'));
-    const house = g.room.map.blocks.find((b) => b.door === 'cottage')!;
+    // Houses differ: some stand empty, so go into one with goblins in it.
+    const blocks = g.room.map.blocks, house = blocks.find((b, i) => b.door === 'cottage' && runInterior(g.run!.job, 0, i, 'cottage').foes.length)!;
     expect(house).toBeTruthy();
     g.enter(house);
-    expect(g.room.map.name).toBe('THE COTTAGE');
+    expect(['THE COTTAGE', "THE WEAVER'S COTTAGE", 'THE SMITHY', 'THE STOREHOUSE']).toContain(g.room.map.name);
     expect(g.room.enemies.length).toBeGreaterThan(0);
     for (const e of g.room.enemies) kill(e, g.room.events);
     g.step(0.05, NO_INTENT);

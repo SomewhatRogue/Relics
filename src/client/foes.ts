@@ -2,6 +2,7 @@
  * Drawing goblins and dummies, with wind-ups that match their telegraphs: the butcher hauls his
  * cleaver back and chops, or leaps and comes down on the slam; scrappers pull the knife back and stab.
  */
+import type { GameMap } from '../shared/arena';
 import { GUARD } from '../shared/tuning';
 import type { Enemy, EnemyAttack } from '../sim/types';
 import { blit, ease, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
@@ -116,7 +117,20 @@ function halves(c: Ctx, s: Sprite, x: number, y: number, alpha: number): void {
   g.fillRect(Math.round(x - 3), Math.round(y - 4), 3, 2);
 }
 
-export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number): void {
+/** A goblin lying asleep where the map says goblins sleep (it lies still till it wakes, like one at the dead). */
+export const asleep = (m: GameMap, e: Enemy) => !!e.feeding && e.alert === false && !!m.sleepers?.some((s) => Math.hypot(s.x - e.x, s.y - e.y) < 0.6);
+
+/** Curled on its side, breathing slow; now and then a breath of steam goes up off it in the cold. */
+function sleeping(c: Ctx, e: Enemy, x: number, y: number, flash: number): void {
+  const side = e.id % 2 ? 1 : -1, breathe = Math.floor(c.now * 0.8 + e.id) % 2;
+  shadow(c, x, y, 7);
+  spin(c, SPRITES.scrapper, x, y - 3 - breathe * 0.5, (side * Math.PI) / 2);
+  if (flash) (c.lit.fillStyle = '#ffffff'), c.lit.fillRect(Math.round(x - 5), Math.round(y - 7), 11, 7);
+  const p = (c.now * 0.35 + e.id * 0.31) % 1;
+  if (p < 0.6) (c.lit.globalAlpha = 0.5 * (1 - p / 0.6)), (c.lit.fillStyle = '#8a8494'), c.lit.fillRect(Math.round(x + side * 5 + p * 3), Math.round(y - 8 - p * 8), 2, 1), (c.lit.globalAlpha = 1);
+}
+
+export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number, dozing = false): void {
   if (e.act === 'dead') {
     // Burst or shattered: nothing left but the stains. Otherwise the body, headless or burned.
     if (e.death === 'burst' || e.death === 'shatter') return;
@@ -136,6 +150,7 @@ export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number): void {
   const hurt = e.hp < e.maxHp && (c.now - e.hitAt < 3 || e.hp < e.maxHp * 0.5);
   if ((e.kind === 'butcher' || e.kind === 'scrapper') && hurt) ring(c, x, y, e.kind === 'butcher' ? 11 : 6, '#e24b4a', e.hp / e.maxHp);
   if (e.kind === 'butcher') return butcher(c, e, x, y, flash);
+  if (e.kind === 'scrapper' && dozing) return sleeping(c, e, x, y, flash);
   if (e.kind === 'scrapper' && e.feeding) {
     // Crouched at the dead: it leans in, worries at it, tears a piece back and chews; red flicks off.
     const cyc = (c.now * 1.3 + e.id * 0.37) % 1, f = e.fx >= 0 ? 1 : -1;

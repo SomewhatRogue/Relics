@@ -5,12 +5,13 @@
  * on a job char as they're hurt, burn with flames and smoke, and fall in to rubble.
  */
 import type { Block, Round } from '../shared/arena';
+import { drawLit, houseOf, paintHouse } from './cottage';
 import { blit, type Ctx } from './draw';
+import { furnish, mouth, type Look } from './furnish';
 import { drawText, textWidth } from './pixfont';
 import { SPRITES } from './sprites';
 import { OX, OY, PX } from './world';
 
-interface Look { tall: number; roof: string; ridge: string; wall: string; windows: boolean; furniture?: boolean }
 /** Wall height (pixels), roof and wall colours, by kind. */
 const LOOK: Record<Block['kind'], Look> = {
   house: { tall: 20, roof: '#5a2e22', ridge: '#7a3e2a', wall: '#6a5a48', windows: true },
@@ -40,12 +41,16 @@ const LOOK: Record<Block['kind'], Look> = {
   rubble: { tall: 10, roof: '#45414c', ridge: '#55505e', wall: '#34313a', windows: false },
   cart: { tall: 9, roof: '#7a5a34', ridge: '#8b6a3a', wall: '#4a3420', windows: false, furniture: true },
   rack: { tall: 16, roof: '#4a3420', ridge: '#4a3420', wall: '#5a3d22', windows: false, furniture: true },
+  partition: { tall: 22, roof: '#3e2a1a', ridge: '#5a3d22', wall: '#6a5e52', windows: false, furniture: true },
+  loom: { tall: 18, roof: '#5a3d22', ridge: '#7a5a34', wall: '#3a2a1a', windows: false, furniture: true },
+  pen: { tall: 9, roof: '#8a7448', ridge: '#6b4a2b', wall: '#5a3d22', windows: false, furniture: true },
 };
 
 /** 0 standing, 1 charred (under half its health), 2 burned down. */
 const state = (b: Block) => (b.ruined ? 2 : b.maxHp && (b.hp ?? 0) < b.maxHp * 0.5 ? 1 : 0);
 const cache = new WeakMap<Block, { s: number; c: HTMLCanvasElement }>();
 const RUBBLE = 7;
+type Rect = (x: number, y: number, w: number, h: number, c: string) => void;
 
 function paint(b: Block, st: number): HTMLCanvasElement {
   const l = LOOK[b.kind], w = Math.round(b.w * PX), d = Math.round(b.h * PX), c = document.createElement('canvas');
@@ -68,29 +73,10 @@ function paint(b: Block, st: number): HTMLCanvasElement {
   c.width = w;
   c.height = d + l.tall;
   // Roof over the footprint (raised by the wall's height), then the front wall below it.
-  const roofH = d, wallY = roofH;
-  rect(0, 0, w, roofH, l.roof);
-  if (b.kind === 'rockwall' || b.kind === 'rubble') for (let i = 0; i < w * 2; i++) rect((i * 37) % w, (i * 13) % roofH, 2, 1, i % 3 ? '#3a3640' : '#55505e');
-  else if (b.kind === 'fence') for (let x = 1; x < w; x += 5) rect(x, 0, 2, roofH + l.tall, '#6b4a2b');
-  else if (b.kind === 'den') for (let i = 0; i < w; i += 3) rect(i, 0, 2, roofH, i % 2 ? '#3a2e1c' : '#5e4a2e');
-  else if (!l.furniture) {
-    for (let y = 2; y < roofH; y += 3) rect(0, y, w, 1, l.ridge);
-    rect(0, 0, w, 1, l.ridge);
-  } else rect(0, 0, w, 1, l.ridge);
-  if (b.kind !== 'fence') {
-    rect(0, wallY, w, l.tall, l.wall);
-    rect(0, wallY, w, 1, '#14121a');
-    if (!l.furniture) for (let y = wallY + 4; y < wallY + l.tall; y += 4) rect(0, y, w, 1, 'rgba(0,0,0,0.18)');
-  }
-  furnish(b, rect, w, roofH, wallY, l);
-  // A door in the middle of the front wall.
-  if (b.door || b.kind === 'den' || b.kind === 'granary') {
-    const dw = b.kind === 'barn' ? 12 : b.kind === 'den' ? 8 : 6, dh = Math.min(l.tall - 3, b.kind === 'barn' ? 18 : 11);
-    rect(Math.round(w / 2 - dw / 2), wallY + l.tall - dh, dw, dh, b.kind === 'den' ? '#0d0b10' : '#2a1e14');
-    if (b.kind !== 'den') rect(Math.round(w / 2 - dw / 2), wallY + l.tall - dh, dw, 1, '#5a3d22');
-    // Barred: planks nailed across.
-    if (b.locked) for (const k of [0.35, 0.7]) rect(Math.round(w / 2 - dw / 2) - 2, Math.round(wallY + l.tall - dh * k), dw + 4, 2, '#7a5a34');
-  }
+  const roofH = d, wallY = roofH, home = houseOf(b);
+  if (home) paintHouse(rect, b, home, w, roofH, l.tall);
+  else furnished(g, b, rect, w, roofH, wallY, l);
+  door(b, rect, w, wallY, l);
   if (b.kind === 'church') {
     // The bell tower over the door.
     rect(Math.round(w / 2 - 5), 0, 10, 6, '#4e4e60');
@@ -111,49 +97,32 @@ function paint(b: Block, st: number): HTMLCanvasElement {
   return c;
 }
 
-/** The details that make a bed a bed. */
-function furnish(b: Block, rect: (x: number, y: number, w: number, h: number, c: string) => void, w: number, roofH: number, wallY: number, l: Look): void {
-  if (b.kind === 'bed') rect(1, 1, w - 2, 5, '#d8d0bc'), rect(0, 7, w, roofH - 7, '#5a4a7a');
-  if (b.kind === 'shelf') for (let y = wallY + 3; y < wallY + l.tall; y += 6) {
-    rect(0, y, w, 1, '#3a2a1a');
-    for (let x = 2; x < w - 2; x += 4) rect(x, y - 3, 2, 3, ['#7a2a2a', '#3a5a6a', '#8a7a3a', '#5a6a3a'][(x + y) % 4]);
+/** Any block but a job's house: its roof, its front wall, then what makes it what it is. */
+function furnished(g: CanvasRenderingContext2D, b: Block, rect: Rect, w: number, roofH: number, wallY: number, l: Look): void {
+  rect(0, 0, w, roofH, l.roof);
+  if (b.kind === 'rockwall' || b.kind === 'rubble') for (let i = 0; i < w * 2; i++) rect((i * 37) % w, (i * 13) % roofH, 2, 1, i % 3 ? '#3a3640' : '#55505e');
+  else if (b.kind === 'fence') for (let x = 1; x < w; x += 5) rect(x, 0, 2, roofH + l.tall, '#6b4a2b');
+  else if (b.kind === 'den') for (let i = 0; i < w; i += 3) rect(i, 0, 2, roofH, i % 2 ? '#3a2e1c' : '#5e4a2e');
+  else if (!l.furniture) {
+    for (let y = 2; y < roofH; y += 3) rect(0, y, w, 1, l.ridge);
+    rect(0, 0, w, 1, l.ridge);
+  } else rect(0, 0, w, 1, l.ridge);
+  if (b.kind !== 'fence') {
+    rect(0, wallY, w, l.tall, l.wall);
+    rect(0, wallY, w, 1, '#14121a');
+    if (!l.furniture) for (let y = wallY + 4; y < wallY + l.tall; y += 4) rect(0, y, w, 1, 'rgba(0,0,0,0.18)');
   }
-  if (b.kind === 'altar') rect(Math.round(w / 2) - 1, wallY + 2, 2, 7, '#d4a537'), rect(Math.round(w / 2) - 3, wallY + 4, 6, 2, '#d4a537');
-  if (b.kind === 'sacks') for (let x = 1; x < w - 4; x += 6) rect(x, 2, 5, roofH - 3, '#b0a06a'), rect(x + 2, 1, 1, 2, '#6a5a3a');
-  if (b.kind === 'anvil') rect(2, 2, w - 4, 2, '#a8a2b0');
-  if (b.kind === 'rubble') for (let i = 0; i < w * 3; i++) rect((i * 29) % w, wallY + ((i * 7) % l.tall), 3, 2, ['#45414c', '#2a2733', '#5a3d22'][i % 3]);
-  if (b.kind === 'monument') {
-    // The Roll of the Brave: names cut into stone, a gilt band.
-    rect(1, wallY + 2, w - 2, 1, '#d4a537');
-    for (let y = wallY + 5; y < wallY + l.tall - 2; y += 3) for (let x = 3; x < w - 3; x += 4) rect(x, y, 2 + ((x + y) % 2), 1, '#3a3640');
-  }
-  if (b.kind === 'cart') {
-    // A wagon: plank bed, the bare hoops of its cover, two spoked wheels (charred if it's burning).
-    const burnt = !!b.smoulder, wood = burnt ? '#2a1e16' : '#7a5a34', dark = burnt ? '#14100c' : '#4a3420';
-    rect(0, 0, w, roofH, burnt ? '#1e1814' : '#6a4a2a');
-    for (let x = 0; x < w; x += 3) rect(x, 0, 1, roofH, dark);
-    for (let x = 3; x < w - 2; x += Math.max(4, Math.round(w / 4))) rect(x, 0, 1, roofH + 3, burnt ? '#3a2e24' : '#9a8a5a');
-    rect(0, wallY, w, l.tall, wood);
-    for (let y = wallY + 2; y < wallY + l.tall; y += 3) rect(0, y, w, 1, dark);
-    for (const cx of [4, w - 5]) {
-      rect(cx - 3, wallY + l.tall - 6, 7, 7, '#1a1410');
-      rect(cx - 2, wallY + l.tall - 5, 5, 5, burnt ? '#2a2018' : '#5a3d22');
-      rect(cx, wallY + l.tall - 6, 1, 7, '#1a1410'), rect(cx - 3, wallY + l.tall - 3, 7, 1, '#1a1410');
-    }
-  }
-  if (b.kind === 'rack') for (let x = 1; x < w; x += 3) rect(x, 0, 1, roofH + l.tall - 2, '#9aa3ad');
-  if (b.kind === 'tower') {
-    // Battlements, and a lit slit high up.
-    for (let x = 0; x < w; x += 6) rect(x, 0, 3, 3, '#4a3e66');
-    rect(Math.round(w / 2) - 1, wallY + 8, 2, 8, '#14121a');
-  }
-  if (b.kind === 'tavern') {
-    // The hanging sign: a rat on a board.
-    rect(w - 10, wallY + 2, 8, 6, '#5a3d22');
-    rect(w - 8, wallY + 4, 4, 2, '#2a2630');
-    rect(w - 4, wallY + 5, 2, 1, '#2a2630');
-  }
-  if (b.kind === 'pew' || b.kind === 'bench') rect(0, wallY + l.tall - 2, 2, 2, '#14121a'), rect(w - 2, wallY + l.tall - 2, 2, 2, '#14121a');
+  furnish(g, b, rect, w, roofH, wallY, l);
+}
+
+/** A door in the middle of the front wall. */
+function door(b: Block, rect: Rect, w: number, wallY: number, l: Look): void {
+  if (!b.door && b.kind !== 'den' && b.kind !== 'granary') return;
+  const dw = b.kind === 'barn' ? 12 : b.kind === 'den' ? 8 : 6, dh = Math.min(l.tall - 3, b.kind === 'barn' ? 18 : 11);
+  rect(Math.round(w / 2 - dw / 2), wallY + l.tall - dh, dw, dh, b.kind === 'den' ? '#0d0b10' : '#2a1e14');
+  if (b.kind !== 'den') rect(Math.round(w / 2 - dw / 2), wallY + l.tall - dh, dw, 1, '#5a3d22');
+  // Barred: planks nailed across.
+  if (b.locked) for (const k of [0.35, 0.7]) rect(Math.round(w / 2 - dw / 2) - 2, Math.round(wallY + l.tall - dh * k), dw + 4, 2, '#7a5a34');
 }
 
 /** (x, y) is the block's top-left on screen (the footprint's corner). */
@@ -182,12 +151,28 @@ export function drawBlock(c: Ctx, b: Block, x: number, y: number, lit: boolean):
     c.glow.fillRect(Math.round(x + w / 2 + 1), foot - 7, 1, 1);
   }
   if ((b.burning ?? -1) >= 0 || b.smoulder) return flames(c, b, x, top, w, Math.round(b.h * PX), l.tall);
+  if (b.kind === 'hearth' && b.look === 2) embers(c, x, top, w, Math.round(b.h * PX), l.tall);
+  const home = houseOf(b);
+  if (home) return void (home.lit && b.kind === 'house' && drawLit(c, home, x, top, w, Math.round(b.h * PX), l.tall));
   if (!l.windows || !lit || b.maxHp) return;
   // Lit windows either side of the door: someone lives here.
   const wy = Math.round(y + b.h * PX - l.tall + 5);
   c.glow.fillStyle = '#ffd27a';
   for (const wx of [Math.round(w * 0.22), Math.round(w * 0.72)]) c.glow.fillRect(Math.round(x + wx), wy, 3, 3);
   if (b.kind === 'forge') (c.glow.fillStyle = Math.floor(c.now * 8) % 2 ? '#ff9a3c' : '#ff6a20'), c.glow.fillRect(Math.round(x + w / 2 - 2), Math.round(y + b.h * PX - 5), 4, 3);
+}
+
+/** A lit hearth: the mouth glowing, coals winking along its floor (the flame is the room's torch). */
+function embers(c: Ctx, x: number, top: number, w: number, roofH: number, tall: number): void {
+  const m = mouth(w, roofH, tall), g = c.glow, t = c.now;
+  g.globalAlpha = 0.35 + 0.1 * Math.sin(t * 9);
+  g.fillStyle = '#ff6a20';
+  g.fillRect(Math.round(x + m.x + 1), Math.round(top + m.y + m.h - 5), m.w - 2, 4);
+  g.globalAlpha = 1;
+  for (let i = 1; i < m.w - 1; i += 2) {
+    g.fillStyle = Math.floor(t * 6 + i * 1.3) % 3 ? '#ff9a3c' : '#fff1b0';
+    g.fillRect(Math.round(x + m.x + i), Math.round(top + m.y + m.h - 2 - (i % 3 === 0 ? 1 : 0)), 1, 1);
+  }
 }
 
 /** A building (or a wagon) on fire: tongues of flame with white-hot roots licking up off the roof, bits

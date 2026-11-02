@@ -9,7 +9,8 @@ import { drawHero } from './actors';
 import { drawHound, drawSnare } from './hound';
 import type { Hero } from '../sim/types';
 import { blit, type Ctx } from './draw';
-import { drawEnemy, drawHeld, drawTelegraph } from './foes';
+import { asleep, drawEnemy, drawHeld, drawTelegraph } from './foes';
+import { houseOf } from './cottage';
 import { EL_LIGHT } from './palette';
 import { drawChest, drawFlask, drawPickup, drawSmoke } from './relicsdraw';
 /** A '#rrggbb' as light colour 0..1. */
@@ -181,7 +182,7 @@ export class Scene {
         continue;
       }
       const [x, y] = lerp('e:' + e.id, e.x, e.y), up = (e.z ?? 0) * LIFT;
-      items.push({ y, draw: () => (drawEnemy(c, e, x - cx, y - up - cy), drawStatus(c, e, x - cx, y - up - cy, room.time)) });
+      items.push({ y, draw: () => (drawEnemy(c, e, x - cx, y - up - cy, asleep(map, e)), drawStatus(c, e, x - cx, y - up - cy, room.time)) });
     }
     for (const p of room.props) {
       if (p.broken) continue;
@@ -308,7 +309,9 @@ export class Scene {
       // A building on fire lights the whole street; its ashes smoulder.
       if (((b.burning ?? -1) >= 0 || b.smoulder) && !b.ruined) lights.push({ x: mx, y: by + (b.h * PX) / 2 - cy - 10, r: 70 + b.w * 10 + Math.sin(now * 13 + bx) * 6, i: 1.2, c: [1, 0.55, 0.25] });
       if (b.ruined) lights.push({ x: mx, y: by + (b.h * PX) / 2 - cy, r: 22 + b.w * 3, i: 0.35, c: [1, 0.35, 0.15] });
-      if (b.maxHp || (b.kind !== 'house' && b.kind !== 'church' && b.kind !== 'hall' && b.kind !== 'forge')) continue;
+      // A job's cottage with its fire going shows a little light at the windows.
+      const home = houseOf(b), fire = !!home?.lit && b.kind === 'house' && !b.ruined && (b.burning ?? -1) < 0;
+      if (!fire && (b.maxHp || (b.kind !== 'house' && b.kind !== 'church' && b.kind !== 'hall' && b.kind !== 'forge'))) continue;
       lights.push({ x: bx + (b.w * PX) / 2 - cx, y: by + b.h * PX - cy, r: 34, i: 0.45, c: b.kind === 'forge' ? [1, 0.5, 0.25] : [1, 0.8, 0.5] });
     }
     for (const z of room.zones) lights.push({ x: OX + z.x * PX - cx, y: OY + z.y * PX - cy - 6, r: z.r * PX * 1.4, i: 0.8 * Math.min(1, (z.until - room.time) / 1.2), c: [1, 0.85, 0.5] });

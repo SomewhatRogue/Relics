@@ -867,3 +867,19 @@ which moves the page to the media channel.
 - An untaught skill has no button and its press is spent; the relic button carries the javelin.
 - In the wood and the yard the hound joins in a third as often, never goes for a goblin that's
   swinging at you, and never knocks one off its stride: those blows are yours to meet.
+
+## 2026-11-01: every house its own (Kyle's playtest note; Opus 5.5)
+
+- One seed per house (job, room, house) picks its sort, its outside and its fire: the street block
+  carries it as `look`, the inside uses the same one, so a lit window outside means a lit hearth in.
+- Cottages: one room (hearth, beds, table), a back room behind a wall, a weaver's (looms), a smithy
+  (forge, anvil, racked tools), a storehouse (sacks, crates, barrels, oil), or either of the first two
+  looted (furniture smashed, the table in pieces, often a body). Barns: stalls with hay, or an open
+  threshing floor with bales and a cart. Size, floor (planks, dirt, flagstone) and sides vary; any
+  layout may be mirrored.
+- Who's in: nobody (about a fifth), one or two asleep (still and half-sighted, like goblins at the
+  dead, drawn curled up), some at a body, or a band; a butcher in a barn only at ruin 2 and up, one
+  time in five. Light: the hearth lit or cold, moonlight through a stove-in roof, the goblins' fire,
+  a lantern post in a barn. Collision sizes outside are unchanged.
+- A hiding survivor is a cage tucked in the back (the only rescue the room knows); a free one who
+  talks would need new lines and a run-side talk handler.

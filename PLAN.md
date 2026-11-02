@@ -2,6 +2,12 @@
 
 ## Current slice
 
+**Every house its own** (Claude Opus 5.5, 2026-11-01; Kyle's note: "every house is mostly the same").
+Built; waiting on Kyle's play. *Done when* the cottages and barns on a village or farm job look
+different from the street (thatch or shingle, roof colour, lean-to, a roof stove in, a lit window and
+chimney smoke) and inside (one room, a back room, a weaver's, a smithy, a store, a looted house, two
+barns), with some empty, some with goblins asleep, some at a body, and the door always clear.
+
 **The prologue wood** (built 2026-11-01; waiting on Kyle's play). *Done when* a new hero wakes on the
 field, learns attack, dodge, block and parry from Hew, watches him die, kills the Stoker for the
 javelin, and walks into Wickhold with the tally stick.
