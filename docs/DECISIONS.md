@@ -781,3 +781,5 @@ which moves the page to the media channel.
 - Online is on only in the Vercel build (`VITE_ONLINE=1`) or with `?relay=`; the one-file artifact
   build stays offline. `npm run test:online` runs three real browsers against a local two-instance
   relay (`scripts/online-server.ts`).
+- relic-lake.vercel.app is public (Kyle, 2026-11-01): Vercel Authentication now guards preview
+  deployments only, so anyone with the link plays without a login.
