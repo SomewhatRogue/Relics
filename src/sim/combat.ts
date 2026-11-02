@@ -83,7 +83,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
 
 /** Is this hero inside the attack's shape? */
 export function attackCovers(a: EnemyAttack, h: Hero): boolean {
-  if (a.kind === 'slam' || a.kind === 'charge') return Math.hypot(h.x - a.cx, h.y - a.cy) <= a.radius + HERO.radius;
+  if (a.kind === 'slam' || a.kind === 'hex' || a.kind === 'charge') return Math.hypot(h.x - a.cx, h.y - a.cy) <= a.radius + HERO.radius;
   return inArc(a.ox, a.oy, a.dx, a.dy, h.x, h.y, a.range, a.arc, HERO.radius);
 }
 
@@ -105,9 +105,9 @@ function warded(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: FightEvent[]
   return true;
 }
 
-/** Out from under the blow at the last moment: the attacker staggers (a close one; not an archer). */
+/** Out from under the blow at the last moment: the attacker staggers (a close one; not an archer or a hexer). */
 function slipped(e: Enemy, a: EnemyAttack, h: Hero, ev: FightEvent[]): void {
-  if (a.kind === 'shot' || e.act === 'stunned') return;
+  if (a.kind === 'shot' || a.kind === 'hex' || e.act === 'stunned') return;
   h.hitstop = Math.max(h.hitstop, HITSTOP.heavy);
   e.hitstop = HITSTOP.heavy;
   Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: stunOf(e) * DODGE.stun });
@@ -162,7 +162,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   }
   const tx = e.x - h.x, ty = e.y - h.y, tl = Math.hypot(tx, ty) || 1;
   // Pushed away from where the blow came from (the slam's centre for a slam).
-  const sx = a.kind === 'slam' ? h.x - a.cx : -tx, sy = a.kind === 'slam' ? h.y - a.cy : -ty, sl = Math.hypot(sx, sy) || 1;
+  const round = a.kind === 'slam' || a.kind === 'hex';
+  const sx = round ? h.x - a.cx : -tx, sy = round ? h.y - a.cy : -ty, sl = Math.hypot(sx, sy) || 1;
   // The kit's guard covers an arc in front: a shield covers nearly everything ahead.
   const facing = (h.fx * tx + h.fy * ty) / tl > Math.cos(((w.guardArc / 2) * Math.PI) / 180);
   const canGuard = !a.unblockable && facing && (h.act === 'idle' || h.act === 'attack' || h.act === 'charge');

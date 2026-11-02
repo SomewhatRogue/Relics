@@ -2,6 +2,42 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-01: the back of the pack: hexers and drummers, and a tougher mix for a bigger party (Kyle; Opus 5.5)
+
+Kyle: enemies harder with more people, and variety (small ones, spears, big ones, ranged, casters,
+buffers). Two new small goblins, each with one counter; numbers in `shared/backline.ts`.
+
+- **The hexer** (`sim/backline.ts`): staff with a skull fetish, bone horns. Keeps 4 to 7 tiles off
+  (runs when you close, comes in when you're far) and calls the ground up under you: a red circle with
+  a striped edge (nothing blocks it) put down where you stood, 1.15 tiles across the radius, that
+  bursts after 1.25 s for 16. The circle is the one judged (`attackCovers`), and it stays put. Counter:
+  step out or roll; any blow on the hexer breaks the spell (it flinches like any small goblin); 20
+  health. Goblins standing in the burst take 0.8 of it. A roll through it doesn't stagger the hexer
+  (it's far off). The fetish glows green and lights the hexer through the wind-up; the staff rises.
+- **The drummer**: a drum slung at the hip, a bone stick. Hangs about two tiles behind its pack and,
+  while it stands and beats, every other goblin on its level within 4.5 tiles is roused: wind-ups at
+  0.8 of the time, 1.2 times the pace, 1.2 times the damage (locked into the attack when the wind-up
+  starts, so the telegraph never lies). It runs from anyone within 3.5 tiles and the drum stops while
+  it runs; it pokes with the stick if cornered; 24 health. Dead, stunned, frozen or netted, the drum
+  stops on the next tick (`rouse`, once a tick before anyone moves). You see a faint ring at its reach,
+  a ripple out to it on every beat (0.5 s) and a pulse under every roused goblin; you hear the beat,
+  louder the closer you are. Counter: kill it first, or rush it so it runs.
+- **In jobs** (`shared/roster.ts`, on its own seeded stream so room layouts are unchanged): each small
+  goblin with a blade rolls 2% + 4% a room in + 1.5% a point of ruin (+2.5% long job, +2.5% deep) to
+  be one. At most 1 in a first room, 2 in the next two, 3 after; always two blades left, and a drummer
+  only with three to drum for. Over 200 days of boards: a first room has one about one time in six on
+  an easy short job, about half the time on the worst long ones; nearly every fourth or fifth room of
+  a long job has one, often two or three. The wood is untouched.
+- **A bigger party** (`toughen`, from `scaleFoes`): the count scaling stays. A pair gets no more
+  hexers or drummers than the room had (copies of them come plain). Three or more: each plain extra
+  goblin has 15% a player past two to come tougher (lunger 3, shield 2, brute 2, hexer 1, drummer 1 by
+  weight), with at most one more of the back of the pack than the room had. Run rooms and door
+  ambushes are seeded, so a party sees the same goblins.
+- **Cost**: the circle telegraphs (slam too) are now drawn in row runs instead of pixel by pixel. A
+  yard fight with two hexers and a drummer runs about half a millisecond a frame over the same fight
+  with plain goblins on the phone profile (4.0 to 4.6 against 3.6 to 4.0 ms, noisy).
+- No new player-facing lines; the kinds are never named on screen.
+
 ## 2026-11-01: the sprites posed in parts, and a charge that reads through the weapon (Claude Opus 5.5)
 
 Kyle on the 2x figures: doughy and soft, and the idle bob jumped. He picked the middle way: the same 1x

@@ -198,7 +198,7 @@ export interface Hero extends Body {
   seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number; augment: number; cls: number; take: number; grab: number; gear: number; potion: number; open: number };
 }
 
-export type AttackKind = 'cleave' | 'slam' | 'swing' | 'stab' | 'shot' | 'draw' | 'charge';
+export type AttackKind = 'cleave' | 'slam' | 'swing' | 'stab' | 'shot' | 'draw' | 'charge' | 'hex';
 
 export interface EnemyAttack {
   kind: AttackKind;
@@ -220,7 +220,7 @@ export interface EnemyAttack {
   oy: number;
   range: number;
   arc: number;
-  /** Slam: a circle at (cx, cy). */
+  /** Slam or hex: a circle at (cx, cy). */
   cx: number;
   cy: number;
   radius: number;
@@ -273,7 +273,11 @@ export interface Enemy extends Body {
   /** Tutorial pacing in the wood: slower wind-ups (sim/wood.ts DRILL). */
   drill?: boolean;
   /** A goblin built for one lesson in the prologue wood (shared/wood.ts VARIANTS). */
-  variant?: 'looter' | 'lunger' | 'heavy' | 'stoker' | 'shield';
+  variant?: 'looter' | 'lunger' | 'heavy' | 'stoker' | 'shield' | 'hexer' | 'drummer';
+  /** A drummer standing and beating its drum this tick (shared/backline.ts DRUMMER). */
+  drumming?: boolean;
+  /** Within reach of a drumming drummer this tick: faster wind-ups and feet, harder blows. */
+  roused?: boolean;
   /** Crouched at the dead, eating: stays put and doesn't look up until something comes close. */
   feeding?: boolean;
   /** False while it hasn't noticed anyone (see ALERT); undefined counts as awake. */

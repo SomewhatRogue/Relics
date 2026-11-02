@@ -5,6 +5,7 @@
 import type { GameMap } from '../shared/arena';
 import { GUARD } from '../shared/tuning';
 import type { Enemy, EnemyAttack } from '../sim/types';
+import { drawKit } from './backline';
 import { blit, blitBody, ease, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
 import { armOffset, drawFigure, layout } from './figure';
 import { BUTCHER_CUT, SCRAPPER_CUT, jointed } from './joints';
@@ -76,7 +77,7 @@ function scrapper(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
   const body = jointed(up ? SPRITES.scrapperUp : SPRITES.scrapper, SCRAPPER_CUT);
   layout(body, bx, by, e.fx < -0.2, pz);
   const [ax, ay] = armOffset(ARM), kx = bx + ax, ky = by + ay;
-  const knife = () => (e.bow ? bow(c, e, kx, ky, fa) : line(c.lit, kx + Math.cos(fa) * reach, ky - 6 + Math.sin(fa) * reach, fa, 0, 4, '#cfd6dc'));
+  const knife = () => (e.bow ? bow(c, e, kx, ky, fa) : e.variant === 'hexer' || e.variant === 'drummer' ? drawKit(c, e, bx, by, ax, ay, t) : line(c.lit, kx + Math.cos(fa) * reach, ky - 6 + Math.sin(fa) * reach, fa, 0, 4, '#cfd6dc'));
   if (up) knife();
   drawFigure(c, body, bx, by, pz);
   if (!up) knife();
@@ -191,19 +192,30 @@ export function drawTelegraph(c: Ctx, a: EnemyAttack, cx: number, cy: number, pa
   const now = !a.unblockable && a.windup - a.t <= parryWindow && a.t < a.windup;
   const pulse = 0.85 + 0.15 * Math.sin(c.now * 20);
   const fill = now ? '#ffe8e0' : a.kind === 'slam' ? '#e8501f' : '#e23a30';
-  if (a.kind === 'slam') {
-    const R = a.radius * PX, ox = OX + a.cx * PX - cx, oy = OY + a.cy * PX - cy;
-    for (let y = -R; y <= R; y++) for (let x = -R; x <= R; x++) {
-      const d = Math.hypot(x, y);
-      if (d > R) continue;
-      if (d > R - 1.2) {
-        g.fillStyle = Math.floor((Math.atan2(y, x) + Math.PI) * 6) % 2 ? '#ffd040' : '#2a1408';
-        g.globalAlpha = 0.95;
-      } else {
-        g.fillStyle = fill;
-        g.globalAlpha = d < R * prog ? 0.5 * pulse : 0.16;
+  if (a.kind === 'slam' || a.kind === 'hex') {
+    const R = a.radius * PX, ox = Math.round(OX + a.cx * PX - cx), oy = Math.round(OY + a.cy * PX - cy), Ri = R - 1.2, Rp = R * prog;
+    // Row by row: the filled middle and the faint rest as runs, the striped edge pixel by pixel.
+    for (let y = -Math.floor(R); y <= R; y++) {
+      const xo = Math.floor(Math.sqrt(R * R - y * y)), xi = Ri * Ri >= y * y ? Math.floor(Math.sqrt(Ri * Ri - y * y)) : -1;
+      const xp = Math.min(xi, Rp * Rp > y * y ? Math.ceil(Math.sqrt(Rp * Rp - y * y)) - 1 : -1);
+      g.fillStyle = fill;
+      if (xp >= 0) (g.globalAlpha = 0.5 * pulse), g.fillRect(ox - xp, oy + y, xp * 2 + 1, 1);
+      g.globalAlpha = 0.16;
+      if (xi > xp) g.fillRect(ox - xi, oy + y, xi - xp, 1), g.fillRect(ox + xp + 1, oy + y, xi - xp, 1);
+      g.globalAlpha = 0.95;
+      for (let x = xi + 1; x <= xo; x++) for (let sx = -x; sx <= x; sx += 2 * x || 1) {
+        g.fillStyle = Math.floor((Math.atan2(y, sx) + Math.PI) * 6) % 2 ? '#ffd040' : '#2a1408';
+        g.fillRect(ox + sx, oy + y, 1, 1);
       }
-      g.fillRect(Math.round(ox + x), Math.round(oy + y), 1, 1);
+    }
+    // A hex: the hexer's sign turning slowly in the red, sickly green.
+    if (a.kind === 'hex') {
+      g.fillStyle = '#9be040';
+      g.globalAlpha = 0.5 + 0.4 * prog;
+      for (let i = 0; i < 18; i++) {
+        const t = (i / 18) * Math.PI * 2 + c.now * 0.8, r = R * (i % 2 ? 0.55 : 0.4);
+        g.fillRect(Math.round(ox + Math.cos(t) * r), Math.round(oy + Math.sin(t) * r), 1, 1);
+      }
     }
   } else if (a.kind === 'shot') {
     // An arrow's line: a thin dotted sightline that fills in from the archer as it draws.

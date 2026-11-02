@@ -9,6 +9,8 @@
  * - More players, more goblins (scaleFoes) and tougher named ones.
  */
 import { HERO, HURT_STAGGER, PARTY } from '../shared/tuning';
+import { Rng } from '../shared/rng';
+import { toughen } from '../shared/roster';
 import type { Foe } from '../shared/terrain';
 import { inArc } from './combat';
 import type { Swing } from '../shared/tuning';
@@ -78,15 +80,19 @@ export function stepParty(heroes: Hero[], dt: number, ev: FightEvent[]): void {
 /** Everyone in the party is out: the job is lost. */
 export const allOut = (heroes: Hero[]) => inParty(heroes) && players(heroes).every((h) => h.out);
 
-/** More goblins for more players: the room's own, then more of them, a step off each. Named ones once. */
-export function scaleFoes(foes: Foe[], party: number): Foe[] {
+/**
+ * More goblins for more players: the room's own, then more of them, a step off each. Named ones once.
+ * In a party of three or more, some of the extras come tougher (shared/roster.ts), rolled from `seed`.
+ */
+export function scaleFoes(foes: Foe[], party: number, seed = 1): Foe[] {
   if (party <= 1) return foes;
-  const common = foes.filter((f) => !f.name), more = Math.round(common.length * PARTY.foes * (party - 1)), out = [...foes];
+  const common = foes.filter((f) => !f.name), more = Math.round(common.length * PARTY.foes * (party - 1)), extra: Foe[] = [];
   for (let i = 0; i < more; i++) {
     const f = common[i % common.length], a = i * 2.4;
-    out.push({ ...f, x: f.x + Math.cos(a) * 0.7, y: f.y + Math.sin(a) * 0.7 });
+    extra.push({ ...f, x: f.x + Math.cos(a) * 0.7, y: f.y + Math.sin(a) * 0.7 });
   }
-  return out;
+  toughen(foes, extra, party, new Rng(seed));
+  return [...foes, ...extra];
 }
 
 /** Named goblins (bosses) tougher for a bigger party. */

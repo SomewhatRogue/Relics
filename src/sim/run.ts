@@ -48,7 +48,7 @@ export function runRoom(run: Run): ArenaRoom {
   const plan = planRoom(run.job, run.index, run.roads[run.index]), n = run.party ?? 1;
   // Worse places and deep jobs shift every chest roll a tier up.
   const danger = (run.job.place.ruin >= 3 ? 1 : 0) + (run.job.deep ? 1 : 0);
-  const room = new ArenaRoom(run.job.seed + run.index, { map: plan.map, foes: scaleFoes(plan.foes, n), furniture: plan.props, chests: plan.chests, danger });
+  const room = new ArenaRoom(run.job.seed + run.index, { map: plan.map, foes: scaleFoes(plan.foes, n, run.job.seed * 17 + run.index * 5 + 2), furniture: plan.props, chests: plan.chests, danger });
   scaleBosses(room.enemies, n);
   return room;
 }
