@@ -2,6 +2,36 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-01: recovery codes (Claude Opus 5.5)
+
+Kyle: friends he sends the link to (no accounts, no login) should be able to get their heroes back on
+another device with a short code they can remember.
+
+- **The code** (`shared/recovery.ts`): two words and a number, KILN FERN 47. The first word from 128
+  made things and places, the second from 128 things that grow, live or blow through the valley; the
+  number 10 to 99 (about 1.5 million codes). Every word is two letters or more from every other (a test
+  holds it), so a one-letter slip is read as the word meant and is never someone else's code. Typed in
+  any case, with spaces, dashes or nothing between.
+- **The keeper** (`api/save.ts`, `api/_save.ts`): one Redis hash per code, `relic:save:<code>` (save,
+  token, time), one Lua command per make, pull or push, a year's keeping refreshed on each. Making
+  takes an unused code (only if it doesn't exist) and gives back a random token; pushing needs the
+  token, and is refused (409) if another device pushed since the copy this one last saw, so a page left
+  open elsewhere can't write over newer play. Pulling gives the token too, so the new device can push.
+  Over 256 KB is refused. A code gone missing (a year unused, or the store emptied) is made again by
+  the next device that pushes it. No rate limit yet.
+- **This browser** (`client/recovery.ts`): the code, token, last-seen server time and an unsent flag in
+  localStorage. Every `store()` now stamps `savedAt` (it only goes forward) and tells recovery, which
+  pushes 20 s after the last change (at most 2 minutes after the first) and at once on pagehide or
+  hidden (keepalive). On start it pulls: if another device pushed since, that copy replaces this one,
+  but only while the start screen is up; if both changed, the newer `savedAt` wins.
+- **The way in** (`client/recoveryui.ts`): RECOVERY CODE on the start screen (heroes and class pick).
+  It shows your code (made the first time, once you have a hero) and USE A CODE, which says how many
+  heroes the code holds, by name, and asks before they replace this device's. Lines in `copy.ts`
+  (RECOVER), waiting on the lore keeper and line editor.
+- **Where it's on:** everywhere but the one-file build, which has no server: `vite.solo.config.ts`
+  defines `VITE_SOLO` and the panel compiles out. Not tied to `VITE_ONLINE`, so recovery doesn't depend
+  on co-op being switched on.
+
 ## 2026-11-01: the wood, slower and clearer (Claude Opus 5.5)
 
 Kyle, after playing: goblins didn't always come at you; Hew's words were hard to read under threat. He

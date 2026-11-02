@@ -15,6 +15,7 @@ import { Game, ME } from './game';
 import { Panel } from './panels';
 import { openSpot, showResult } from './townui';
 import { Title } from './title';
+import { Recovery } from './recovery';
 import { woodGoal } from '../sim/wood';
 import { LINES, ROAD_OUT } from '../shared/wood';
 const WOOD_ROAD = LINES.road;
@@ -71,7 +72,8 @@ game.link = link;
 setLink(link);
 void link.refresh(true);
 const sounds = new Soundscape(music);
-const title = new Title(game, () => undefined);
+const recovery = new Recovery(() => game.save);
+const title = new Title(game, () => undefined, recovery);
 // Test hook: ?hero=MAGE skips the start screen with a hero of that class.
 const quick = new URLSearchParams(location.search).get('hero') as HeroClass | null;
 // ...and ?wood=1 starts it in the prologue wood instead of town.
@@ -80,6 +82,8 @@ if (quick && CLASS_ORDER.includes(quick)) {
   if (new URLSearchParams(location.search).get('wood') !== '1' && game.mode === 'wood') game.skipWood();
 }
 else title.show();
+// A recovery code here: if another device sent these heroes on since, take that copy (only before play).
+void recovery.start((s) => title.open && (game.adopt(s), title.show(), true));
 /** Talk to whoever you stand by, use the spot, or go in at the door (E or F on a laptop, USE on a phone). */
 const use = () => {
   const n = game.near();

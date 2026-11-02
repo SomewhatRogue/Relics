@@ -8,7 +8,8 @@ import { newWorld, type WorldState } from '../shared/story';
 import { WEAPONS, upgradeOld } from '../shared/tuning';
 
 const KEY = 'relic.save.v2', OLD = 'relic.save.v1';
-export interface Save { heroes: Profile[]; current: number; world: WorldState }
+/** `savedAt`: when it was last kept here (it only goes forward), to tell which copy is newer (recovery.ts). */
+export interface Save { heroes: Profile[]; current: number; world: WorldState; savedAt?: number }
 
 /** Fill in fields a saved hero predates. */
 const hero = (p: Partial<Profile>): Profile => {
@@ -32,13 +33,17 @@ const hero = (p: Partial<Profile>): Profile => {
   return out;
 };
 
+/** A save as kept (here, or on the server under a recovery code), with older heroes filled in. */
+export function fromJson(s: Partial<Save> | null): Save | null {
+  if (!s || !Array.isArray(s.heroes) || !s.world) return null;
+  const heroes = s.heroes.slice(0, HERO_SLOTS).map(hero);
+  return { heroes, current: Math.min(s.current ?? -1, heroes.length - 1), world: { ...newWorld(), ...s.world }, savedAt: Number(s.savedAt) || 0 };
+}
+
 export function load(): Save {
   try {
-    const s = JSON.parse(localStorage.getItem(KEY) ?? 'null');
-    if (s && Array.isArray(s.heroes) && s.world) {
-      const heroes = s.heroes.slice(0, HERO_SLOTS).map(hero);
-      return { heroes, current: Math.min(s.current ?? -1, heroes.length - 1), world: { ...newWorld(), ...s.world } };
-    }
+    const s = fromJson(JSON.parse(localStorage.getItem(KEY) ?? 'null'));
+    if (s) return s;
     // The first save kept one hero, unnamed: they come across as HERO, their class from their weapon.
     const v1 = JSON.parse(localStorage.getItem(OLD) ?? 'null');
     if (v1 && v1.profile && v1.world) return { heroes: [hero(v1.profile)], current: -1, world: { ...newWorld(), ...v1.world } };
@@ -48,12 +53,19 @@ export function load(): Save {
   return { heroes: [], current: -1, world: newWorld() };
 }
 
-export function store(s: Save): void {
+let listener: (() => void) | null = null;
+/** Told after every store (recovery.ts sends the save on to the server a little later). */
+export const onStore = (f: () => void) => void (listener = f);
+
+/** Keep it; `at` keeps a copy's own time (one brought from the server), else it moves forward. */
+export function store(s: Save, at?: number): void {
+  s.savedAt = at ?? Math.max(Date.now(), (s.savedAt ?? 0) + 1);
   try {
     localStorage.setItem(KEY, JSON.stringify(s));
   } catch {
     /* private window: progress lasts this session only */
   }
+  listener?.();
 }
 
 export function wipe(): void {

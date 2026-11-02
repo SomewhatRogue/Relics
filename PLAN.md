@@ -2,6 +2,10 @@
 
 ## Current slice
 
+**Recovery codes** (Claude Opus 5.5, 2026-11-01). Built; waiting on Kyle's play. *Done when* a friend
+opens RECOVERY CODE on the start screen, writes down their code, and brings their heroes to another
+phone or computer with USE A CODE. Open: the panel's lines through the lore keeper and line editor.
+
 **Every house its own** (Claude Opus 5.5, 2026-11-01; Kyle's note: "every house is mostly the same").
 Built; waiting on Kyle's play. *Done when* the cottages and barns on a village or farm job look
 different from the street (thatch or shingle, roof colour, lean-to, a roof stove in, a lit window and
