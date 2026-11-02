@@ -5,6 +5,7 @@
  */
 import type { GameMap, Mark } from '../shared/arena';
 import { Rng } from '../shared/rng';
+import { GROUND, type Painter } from './groundpaint';
 import { OX, OY, PX } from './world';
 
 type Rect = (x: number, y: number, w: number, h: number, col: string) => void;
@@ -15,8 +16,8 @@ const FLOWERS = ['#d8a43a', '#e0c050', '#b04a3a', '#c8c0d8', '#d87a3a', '#9a5aa8
 export function paintMarks(m: GameMap, rect: Rect): void {
   for (const k of m.marks ?? []) {
     const rng = new Rng(Math.round(k.x * 131 + k.y * 71 + k.w * 13)), x = Math.round(OX + k.x * PX), y = Math.round(OY + k.y * PX);
-    const w = Math.max(2, Math.round(k.w * PX)), h = Math.max(2, Math.round(k.h * PX));
-    PAINT[k.kind](rect, rng, x, y, w, h, k);
+    const w = k.kind === 'path' ? k.w * PX : Math.max(2, Math.round(k.w * PX)), h = k.kind === 'path' ? k.h * PX : Math.max(2, Math.round(k.h * PX));
+    (PAINT[k.kind] ?? GROUND[k.kind])?.(rect, rng, x, y, w, h, k);
   }
 }
 
@@ -29,7 +30,7 @@ function blob(rect: Rect, rng: Rng, x: number, y: number, w: number, h: number, 
   }
 }
 
-const PAINT: Record<Mark['kind'], (rect: Rect, rng: Rng, x: number, y: number, w: number, h: number, k: Mark) => void> = {
+const PAINT: Partial<Record<Mark['kind'], Painter>> = {
   blood(rect, rng, x, y, w, h) {
     blob(rect, rng, x, y, w, h, BLOOD);
     // Spatter round the pool, and a darker heart where it's thickest.
@@ -83,7 +84,7 @@ const PAINT: Record<Mark['kind'], (rect: Rect, rng: Rng, x: number, y: number, w
     for (let j = 2; j < h; j += 3) for (let i = 1; i < w - 1; i++) if (rng.next() < 0.8) rect(x + i, y + j, 1, 1, '#4e3a26');
   },
   flowers(rect, rng, x, y, w, h, k) {
-    PAINT.beds(rect, rng, x, y, w, h, k);
+    PAINT.beds!(rect, rng, x, y, w, h, k);
     // Leaves first, then a flower on about half the plants, a colour to a patch.
     for (let j = 1; j < h - 1; j += 3) for (let i = 2; i < w - 2; i += 3) {
       rect(x + i - 1, y + j + 1, 3, 2, rng.next() < 0.5 ? '#2e4a24' : '#3a5a2a');

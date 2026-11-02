@@ -1024,3 +1024,29 @@ better with time, and world events where the town is attacked and bloodied again
   moths round the lamp after dark.
 - Not done: barks when walking past a newly finished work (there's no bubble system yet); a raid you
   fight in town.
+
+## 2026-11-01: Wickhold's ground, and a town alive under siege (Kyle; Opus 5.5)
+
+Kyle: the square is too uniform, all cobbles; add gallows and a gravedigger shifting the bodies; make
+it seem more alive and under siege. Less is more for new lines.
+
+- **The ground** (`shared/ground.ts`, painted by `client/groundpaint.ts` as more floor marks): old
+  flagstones worn into the cobbles round the Lantern and the well; packed earth where carts turn inside
+  the gate, by the square's cart, the tavern and the west lane; wheel ruts down the gate road and along
+  the lanes; paths worn corner to corner (square to tavern, to barracks, to the forge, to Rescue Row); a
+  drain down to the sewer grate and along the north lane; puddles; straw by the stalls and the tavern;
+  weeds along the walls and edges. Fixed data, each mark painted from its own seed: the same on every
+  screen. Washing the square takes its broken cobbles; clearing the lanes takes the churned mud, the
+  lane holes and the spent arrows under the breach. The rest stays when fully mended.
+- **Under siege** (`shared/siege.ts`, drawn in `client/siegedraw.ts`): a gallows at the square's east
+  edge with an empty noose and a crow on the beam (empty, not a hanged goblin: the bible has Wickhold
+  taking nobody and the horror in absences; the lore keeper can change it). Gravedigger Cobb walks
+  Odric's cart to the churchyard with the dead over his shoulder, digs a while, goes back; once the
+  square is washed he only tends the graves. The Tulls, burned out of the north lane, round a new
+  brazier inside the gate till the shutters and roofs are mended (not refugees: those wait outside the
+  gate for the council). Goodwife Mab drawing water at the well; Recruit Wat at the whetstone by the
+  barracks. Wicker hurdles either side of the gate road till the timber wall is up. Smoke past the north
+  wall; a dog nosing along the south lane.
+- New NPC fields (paint only): `Npc.work` (what they're busy at) and `Npc.mute` (background people: no
+  mark, nobody to talk to). Two block kinds (`gallows`, `hurdle`), two round kinds (`dog`, `smoke`).
+  Nothing blocks a door, a spot or a patrol; the reach test covers it.

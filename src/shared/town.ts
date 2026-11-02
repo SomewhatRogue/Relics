@@ -12,7 +12,9 @@
 import type { Block, GameMap, Npc, Round } from './arena.js';
 import type { PropKind } from './props.js';
 import type { WorldState } from './story.js';
+import { townGround } from './ground.js';
 import { mending, WORN } from './mend.js';
+import { siege } from './siege.js';
 import { workDone } from './works.js';
 
 /** What talking to someone (or using a spot) opens. */
@@ -110,12 +112,12 @@ export function townMap(w: WorldState): GameMap {
   if (watch) npcs.push(n('WATCHMAN PIKE', 11, 27.6, 'chat', 'guard', 8, [[11, 27.6], [51, 27.6]], 1.1), n('ORLA OF THE WATCH', 41.2, 22, 'chat', 'guard', 14, [[41.2, 22], [52, 22], [52, 12], [41.2, 12]], 1));
   if (marketIn(w)) npcs.push(n('DESSA THE TRADER', 38.5, 13.9, 'market', 'trader'));
   if (quarter) npcs.push(n('OLD MERREN', 57, 18, 'chat', 'elder', 9));
-  const m = mending(w), worn = !workDone(w, 'shutters');
+  const m = mending(w), sg = siege(w), worn = !workDone(w, 'shutters');
   for (const b of blocks) if (worn && b.label && WORN.includes(b.label)) b.worn = true;
-  blocks.push(...m.blocks), rounds.push(...m.rounds), npcs.push(...m.npcs);
+  blocks.push(...m.blocks, ...sg.blocks), rounds.push(...m.rounds, ...sg.rounds), npcs.push(...m.npcs, ...sg.npcs);
   return {
-    name: 'WICKHOLD', w: W, h: H, wallFace: 3, rounds, blocks, npcs, marks: m.marks, breach: m.breach,
-    braziers: [{ x: 25, y: 15, r: 0.35 }, { x: 31, y: 15, r: 0.35 }, { x: 28, y: 21.6, r: 0.35 }],
+    name: 'WICKHOLD', w: W, h: H, wallFace: 3, rounds, blocks, npcs, marks: [...townGround(w), ...m.marks], breach: m.breach,
+    braziers: [{ x: 25, y: 15, r: 0.35 }, { x: 31, y: 15, r: 0.35 }, { x: 28, y: 21.6, r: 0.35 }, ...sg.braziers],
     torches: [6, 14, 22, 34, 40, 46, 58].map((x) => ({ x, y: -1.6 })),
     hero: { x: 28, y: 20 }, exit: null,
     theme: { floor: 'cobble', back: 'stone', ambient: [0.27, 0.25, 0.33], moon: 0.5 },
