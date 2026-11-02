@@ -64,8 +64,6 @@ export function scrapperPose(e: Enemy, t: number, now: number): BodyPose {
     p.ox = -Math.round(e.fx * 2 * q);
     p.oy = -Math.round(e.fy * 2 * q);
     if (lunger && k > 0.75) p.ox += Math.floor(now * 40) % 2;
-    // The brute lifts its club.
-    if (e.variant === 'heavy') p.raise = F.windup.raise * q;
     (p.phase = 'windup'), (p.k = k);
   } else if (a && a.t < a.windup + a.active + 0.08) {
     lunge(p, e, 1, lunger ? 5 : 3, F.release.lean, F.release.stretch * (lunger ? 1.6 : 1), !e.bow);
@@ -107,7 +105,6 @@ export function butcherPose(e: Enemy, t: number, now: number): BodyPose {
       p.crouch = k < C.coilAt ? -C.tall * up : C.coil * easeOut((k - C.coilAt) / (1 - C.coilAt));
       p.ox = -Math.round(e.fx * 2 * up) + (k > 0.8 ? Math.round(Math.sin(now * 70)) : 0);
       p.oy = -Math.round(1 + e.fy * 2 * up);
-      p.raise = C.raise * up;
       (p.phase = 'windup'), (p.k = k);
     } else if (a.t < end) lunge(p, e, 1, 3, C.lean, F.release.stretch, true), (p.phase = e.hitstop > 0 ? 'contact' : 'release');
     else {
@@ -122,8 +119,6 @@ export function butcherPose(e: Enemy, t: number, now: number): BodyPose {
       const r = (k - S.crouchShare) / S.riseShare;
       p.crouch = k < S.crouchShare ? S.crouch * easeOut(k / S.crouchShare) : -S.stretch * clamp01(1 - (r - 1) / 0.4) * easeOut(r);
       p.lift = k < S.crouchShare ? 0 : Math.round(S.rise * easeOut(r));
-      // The cleaver goes up over his head as he crouches, and stays there.
-      p.raise = S.raise * easeOut(k / S.crouchShare);
       (p.phase = 'windup'), (p.k = k);
     } else if (a.t < a.windup + a.active + 0.1) (p.crouch = S.flat), (p.phase = 'land');
     else {

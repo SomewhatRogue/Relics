@@ -13,7 +13,7 @@ export const MOTION = {
     /** End of a quick wind-up: the top pulled back from the blow and a dip. `full`: a wind-up this long gets all of it. */
     windup: { lean: 2, crouch: 0.08, full: 0.2 },
     /** Held for a heavy, at full charge: leaning back, crouched low, a pixel back on the heels. */
-    charge: { lean: 2, crouch: 0.16, back: 1, raise: 2 },
+    charge: { lean: 2, crouch: 0.16, back: 1 },
     /** The blow going out: a step toward it, stretched along it, the top leaning in. */
     release: { shift: 2, stretch: 0.1, lean: 1 },
     releaseHeavy: { shift: 4, stretch: 0.22, lean: 3 },
@@ -32,7 +32,7 @@ export const MOTION = {
   },
   foe: {
     /** A wind-up: pulled back and coiled. `full`: a wind-up this long gets the whole pose. */
-    windup: { lean: 2, crouch: 0.1, full: 0.8, raise: 2 },
+    windup: { lean: 2, crouch: 0.1, full: 0.8 },
     /** The lunger coils far lower before its long spring, and shivers at the end of it. */
     windupLunger: { lean: 3, crouch: 0.2 },
     /** The blow going out: stretched along it, leaning in. */
@@ -48,9 +48,9 @@ export const MOTION = {
   },
   butcher: {
     /** Cleave: rising tall as the cleaver goes back, then a coil just before the chop. */
-    cleave: { tall: 0.07, coil: 0.07, coilAt: 0.75, lean: 3, raise: 3 },
+    cleave: { tall: 0.07, coil: 0.07, coilAt: 0.75, lean: 3 },
     /** Slam: a crouch before the leap, stretched in the air, flattened on landing, then rising. */
-    slam: { crouch: 0.18, crouchShare: 0.15, rise: 9, riseShare: 0.55, stretch: 0.12, flat: 0.3, recover: 0.35, raise: 6 },
+    slam: { crouch: 0.18, crouchShare: 0.15, rise: 9, riseShare: 0.55, stretch: 0.12, flat: 0.3, recover: 0.35 },
     /** The Stoker's run: coiled low and pawing, then thrown forward along the lane. */
     charge: { crouch: 0.15, lean: 3, stretch: 0.16 },
   },
@@ -66,8 +66,7 @@ export type Phase = 'rest' | 'windup' | 'charge' | 'release' | 'contact' | 'reco
  * A body's pose this frame. `k` is how far through its phase (0..1). `lean` shifts the top of the body
  * sideways in pixels; `crouch` lowers it (negative rises tall); `stretch` lengthens it along (dx, dy);
  * `ox, oy` shift the whole body (a lunge, a recoil); `lift` raises it off the ground (a leap, a hop);
- * `raise` lifts the weapon arm (pixels); `flash` washes it in `tint`; `ghost` is an afterimage left
- * at (gx, gy) from the body.
+ * `flash` washes it in `tint`; `ghost` is an afterimage left at (gx, gy) from the body.
  */
 export interface BodyPose {
   phase: Phase;
@@ -80,7 +79,6 @@ export interface BodyPose {
   ox: number;
   oy: number;
   lift: number;
-  raise: number;
   flash: number;
   tint: string;
   ghost: number;
@@ -93,7 +91,7 @@ export const WHITE = '#ffffff', HURT_RED = '#ff3a2a';
 /** Back to standing still (pose objects are reused every frame, so nothing is allocated). */
 export function rest(p: BodyPose): BodyPose {
   p.phase = 'rest';
-  p.k = p.lean = p.crouch = p.stretch = p.ox = p.oy = p.lift = p.raise = p.flash = p.ghost = p.gx = p.gy = 0;
+  p.k = p.lean = p.crouch = p.stretch = p.ox = p.oy = p.lift = p.flash = p.ghost = p.gx = p.gy = 0;
   p.dx = 1;
   p.dy = 0;
   p.tint = WHITE;

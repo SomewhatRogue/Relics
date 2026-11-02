@@ -5,24 +5,17 @@
 import type { GameMap } from '../shared/arena';
 import { GUARD } from '../shared/tuning';
 import type { Enemy, EnemyAttack } from '../sim/types';
-import { PEN, blitBody, ease, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
-import { drawFigure, handAt, layout } from './figure';
-import { BUTCHER_FIG, GOBLIN_FIGS, goblinKind } from './hd/index';
+import { blit, blitBody, ease, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
 import { butcherPose, foeHit, scrapperPose, tumble } from './foepose';
 import { rest, newPose } from './motion';
 import { drawText } from './pixfont';
 import { SPRITES, type Sprite } from './sprites';
-
-const HAND: [number, number] = [0, 0];
 import { OX, OY, PX } from './world';
 
 function cleaver(c: Ctx, x: number, y: number, a: number): void {
-  // Drawn as fine as the hand that holds it.
-  PEN.k = 2;
-  line(c.lit, x, y, a, 0, 4, '#4a3a2a', 2);
-  line(c.lit, x, y, a, 4, 11, '#9a968c', 6);
-  line(c.lit, x + Math.cos(a + Math.PI / 2) * 1.5, y + Math.sin(a + Math.PI / 2) * 1.5, a, 5, 11, '#e0dcd0', 2);
-  PEN.k = 1;
+  line(c.lit, x, y, a, 0, 4, '#4a3a2a');
+  line(c.lit, x, y, a, 4, 11, '#9a968c', 3);
+  line(c.lit, x + Math.cos(a + Math.PI / 2) * 1.5, y + Math.sin(a + Math.PI / 2) * 1.5, a, 5, 11, '#e0dcd0');
 }
 
 function butcher(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
@@ -31,7 +24,7 @@ function butcher(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
   const pz = butcherPose(e, t, c.now);
   let arm = fa + side * 1.25;
   let trail: [number, number] | null = null;
-  const walk = pz.phase === 'rest' && e.moving ? (Math.floor(c.now * 5) % 2 ? 1 : -1) : 0, bob = walk > 0 ? 1 : 0;
+  if (pz.phase === 'rest' && e.moving) pz.oy = Math.floor(c.now * 5) % 2 ? -1 : 0;
   if (a && a.kind === 'cleave') {
     const half = ((a.arc / 2) * Math.PI) / 180, back = fa - side * (half + 1.5), end = fa + side * half;
     if (a.t < a.windup) arm = arm + (back - arm) * ease(a.t / (a.windup * 0.8));
@@ -46,11 +39,10 @@ function butcher(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
   } else if (a && a.kind === 'charge') arm = a.t < a.windup ? fa - side * 1.9 : fa + side * 0.3;
   if (e.act === 'stunned') (pz.ox += Math.round(Math.sin(c.now * 4) * 1.5)), (pz.oy += 2), (arm = Math.PI / 2 + side * 0.4);
   shadow(c, x, y, Math.max(5, 10 - pz.lift / 2));
-  const bx = x + pz.ox, by = y + pz.oy - pz.lift, up = e.fy < -0.55, body = up ? BUTCHER_FIG.up : BUTCHER_FIG.down;
-  layout(body, bx, by, e.fx < -0.2, pz, walk, bob);
-  const [hx, hy] = handAt(body, HAND);
+  const bx = x + pz.ox, by = y + pz.oy - pz.lift, up = e.fy < -0.55;
+  const hx = bx + side * 7 + Math.round(pz.lean / 2), hy = by - Math.round(13 * (1 - pz.crouch));
   if (up) cleaver(c, hx, hy, arm);
-  drawFigure(c, body, bx, by, pz);
+  blitBody(c, up ? SPRITES.butcherUp : SPRITES.butcherDown, bx, by, e.fx < -0.2, pz);
   if (!up) cleaver(c, hx, hy, arm);
   if (trail) smear(c.glow, hx, hy, trail[0], trail[1], 8, 15, e.hitstop > 0 ? '#ffffff' : '#ffb0a0');
   if (e.act === 'stunned') stars(c, bx, by - 25, 5, 8);
@@ -68,24 +60,15 @@ function scrapper(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
     return;
   }
   const pz = scrapperPose(e, t, c.now);
-  const walk = pz.phase === 'rest' && e.moving ? (Math.floor(c.now * 9) % 2 ? 1 : -1) : 0, bob = walk > 0 ? 1 : 0;
+  if (pz.phase === 'rest' && e.moving) pz.oy = Math.floor(c.now * 9) % 2 ? -1 : 0;
   if (e.act === 'stunned') (pz.ox += Math.round(Math.sin(c.now * 5))), (pz.oy += 1);
-  // The knife held in close through the wind-up, out at the stab.
-  const reach = pz.phase === 'windup' ? -1 : pz.phase === 'release' || pz.phase === 'contact' ? 4 : 0;
+  const reach = pz.phase === 'windup' ? 1 : pz.phase === 'release' || pz.phase === 'contact' ? 7 : 3;
   shadow(c, x, y, 5);
   const bx = x + pz.ox, by = y + pz.oy, up = e.fy < -0.55, fa = Math.atan2(e.fy, e.fx);
-  const f = GOBLIN_FIGS[goblinKind(e.variant, e.bow)], body = up ? f.up : f.down;
-  layout(body, bx, by, e.fx < -0.2, pz, walk, bob);
-  const [kx, ky] = handAt(body, HAND);
-  const knife = () => {
-    if (e.bow) return bow(c, e, kx, ky + 6, fa);
-    PEN.k = 2;
-    line(c.lit, kx + Math.cos(fa) * reach, ky + Math.sin(fa) * reach, fa, 0, 4, '#cfd6dc');
-    line(c.lit, kx + Math.cos(fa) * reach, ky + Math.sin(fa) * reach, fa, -1, 0, '#4a3a2a', 2);
-    PEN.k = 1;
-  };
+  const kx = bx + Math.round(pz.lean / 2), ky = by + Math.round(6 * pz.crouch);
+  const knife = () => (e.bow ? bow(c, e, kx, ky, fa) : line(c.lit, kx + Math.cos(fa) * reach, ky - 6 + Math.sin(fa) * reach, fa, 0, 4, '#cfd6dc'));
   if (up) knife();
-  drawFigure(c, body, bx, by, pz);
+  blitBody(c, up ? SPRITES.scrapperUp : SPRITES.scrapper, bx, by, e.fx < -0.2, pz);
   if (!up) knife();
   if (e.act === 'stunned') stars(c, bx, by - 15, 3, 5);
 }
@@ -104,19 +87,18 @@ function bow(c: Ctx, e: Enemy, x: number, y: number, fa: number): void {
 
 /** A body cut in two at the waist, lying in its two pieces. */
 function halves(c: Ctx, s: Sprite, x: number, y: number, alpha: number): void {
-  // Canvas pixels in the sprite (`k` to a scene pixel), scene pixels on the floor.
-  const g = c.lit, k = s.k ?? 1, w = s.w / k, H = Math.round(s.h / 2 / k) * k, half = H / k;
+  const g = c.lit, half = Math.round(s.h / 2);
   g.save();
   g.globalAlpha = alpha;
   g.translate(Math.round(x), Math.round(y - 4));
   g.rotate(-Math.PI / 2);
-  g.drawImage(s.c, 0, H, s.w, s.h - H, -Math.round(w / 2), 0, w, s.h / k - half);
+  g.drawImage(s.c, 0, half, s.w, s.h - half, -Math.round(s.w / 2), 0, s.w, s.h - half);
   g.restore();
   g.save();
   g.globalAlpha = alpha;
   g.translate(Math.round(x - half - 4), Math.round(y - 2));
   g.rotate(-Math.PI / 2 - 0.35);
-  g.drawImage(s.c, 0, 0, s.w, H, -Math.round(w / 2), -half, w, half);
+  g.drawImage(s.c, 0, 0, s.w, half, -Math.round(s.w / 2), -half, s.w, half);
   g.restore();
   g.fillStyle = '#7a1010';
   g.fillRect(Math.round(x - 3), Math.round(y - 4), 3, 2);

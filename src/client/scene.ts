@@ -31,8 +31,6 @@ import { SPOT_REACH } from '../shared/town';
 import { dusk } from './streetlife';
 
 
-/** Canvas pixels per scene pixel: the bodies are drawn at twice the detail (hd/), so the scene is painted at 2x. */
-export const HD = 2;
 /** The view's jolt this frame (heropose.ts), reused. */
 const KICK: [number, number] = [0, 0];
 
@@ -96,12 +94,10 @@ export class Scene {
     this.scale = Math.max(1, Math.round(Math.sqrt((W * H) / 82000)));
     this.vw = Math.ceil(W / this.scale);
     this.vh = Math.ceil(H / this.scale);
-    // Painted at HD canvas pixels per scene pixel (bodies are drawn at twice the detail); everything
-    // else draws in scene pixels through the transform, so it looks as it always has.
-    for (const c of [this.out, this.base, this.glowC]) (c.width = this.vw * HD), (c.height = this.vh * HD);
+    for (const c of [this.out, this.base, this.glowC]) (c.width = this.vw), (c.height = this.vh);
     this.out.style.width = (this.vw * this.scale) / this.dpr + 'px';
     this.out.style.height = (this.vh * this.scale) / this.dpr + 'px';
-    for (const g of [this.lit, this.glow]) g.setTransform(HD, 0, 0, HD, 0, 0), (g.imageSmoothingEnabled = false);
+    for (const g of [this.lit, this.glow]) g.imageSmoothingEnabled = false;
   }
 
   /** My hero's position on screen in CSS pixels, and CSS pixels per tile (for aiming with the mouse). */
@@ -377,7 +373,7 @@ export class Scene {
     lights.push(...fx.lights(cx, cy));
     // Only lights that reach the screen (a town has more than the pass can take at once).
     const seen = lights.filter((l) => l.x + l.r > 0 && l.x - l.r < this.vw && l.y + l.r > 0 && l.y - l.r < this.vh);
-    this.lighting.render(this.base, this.glowC, seen, map.theme.ambient, HD);
+    this.lighting.render(this.base, this.glowC, seen, map.theme.ambient);
   }
 
   private flame(g: CanvasRenderingContext2D, x: number, y: number, now: number, size: number): void {

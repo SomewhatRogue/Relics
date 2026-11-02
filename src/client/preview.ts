@@ -22,8 +22,7 @@ export class Preview {
   private seq = { attack: 0, roll: 0, block: 0 };
 
   constructor(private cls: HeroClass, look = 0) {
-    // Twice the pixels, like the scene: the bodies are drawn at twice the detail.
-    for (const c of [this.el, this.lit, this.glow]) (c.width = W * 2), (c.height = H * 2);
+    for (const c of [this.el, this.lit, this.glow]) (c.width = W), (c.height = H);
     this.el.className = 'preview';
     this.room = new ArenaRoom(1, { scrappers: false, props: false });
     this.room.enemies = [];
@@ -83,8 +82,7 @@ export class Preview {
 
   private draw(now: number): void {
     const lit = this.lit.getContext('2d')!, glow = this.glow.getContext('2d')!, out = this.el.getContext('2d')!;
-    for (const g of [lit, glow, out]) g.setTransform(1, 0, 0, 1, 0, 0), g.clearRect(0, 0, W * 2, H * 2), (g.imageSmoothingEnabled = false);
-    for (const g of [lit, glow]) g.setTransform(2, 0, 0, 2, 0, 0);
+    for (const g of [lit, glow, out]) (g.clearRect(0, 0, W, H), (g.imageSmoothingEnabled = false));
     const c: Ctx = { lit, glow, now }, h = this.room.heroes[0];
     drawHero(c, h, Math.round(W / 2 + (h.x - 9) * 6), Math.round(H - 9 + (h.y - 9) * 6), 'bare', this.room.time);
     out.drawImage(this.lit, 0, 0);
