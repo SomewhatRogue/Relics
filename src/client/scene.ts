@@ -33,6 +33,8 @@ import { drawNpc } from './npcs';
 import { drawCaged, drawSurvivor } from './captives';
 import { behindMarks, drawWays } from './wayout';
 import { drawQuestMarks, onScreen } from './questmarks';
+import { drawDoorMarks } from './doormarks';
+import type { DoorMark } from './jobrooms';
 import type { Target } from '../sim/targets';
 import { SPOT_REACH } from '../shared/town';
 import { dusk } from './streetlife';
@@ -64,6 +66,8 @@ export class Scene {
   pointTo: { x: number; y: number } | null = null;
   /** On a job, what the room's goal is about (sim/targets.ts): a gold mark over each (questmarks.ts). */
   marks: Target[] = [];
+  /** Out in the street on a job: who's gone into which house (doormarks.ts). */
+  doors: DoorMark[] = [];
   private heroAt: [number, number] | null = null;
 
   constructor(private out: HTMLCanvasElement) {
@@ -321,6 +325,7 @@ export class Scene {
     behindMarks(c, room.survivors ?? [], cx, cy, view, now);
     // What the goal is about: a gold mark over each, or a point at the edge toward the nearest.
     const markLights = drawQuestMarks(c, this.marks, (t) => (t.id !== undefined ? lerp('e:' + t.id, t.x, t.y) : onScreen(t)), cx, cy, view, me ?? null, now);
+    if (!room.indoors) markLights.push(...drawDoorMarks(c, this.doors, cx, cy));
     drawBlazeAbove(c, room, cx, cy);
 
     const lights: Light[] = [...wayLights, ...markLights];

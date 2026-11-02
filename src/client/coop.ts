@@ -3,9 +3,11 @@
  * browser draws it and sends their input. No codes: the party room comes from the board (parties.ts).
  *
  * - CoopHost (the leader): friends say hello with their hero (their profile); the game puts them in
- *   the room and feeds it their Intents. About 12 times a second the room goes out as a patch of
- *   what changed (snap.ts), a full one every few seconds and for anyone new, with the tick's events
- *   for their effects and sounds. A friend silent a minute is gone (a phone that lost signal has
+ *   the room and feeds it their Intents. Each player is in whichever room they walked into (the street
+ *   or a house off it: jobrooms.ts), and each friend is sent only theirs: about 12 times a second a
+ *   patch of what changed (snap.ts), a full one every few seconds, for anyone new and for anyone who's
+ *   just gone through a door, with that room's events for their effects and sounds. The street's
+ *   patch says who's indoors, over which door. A friend silent a minute is gone (a phone that lost signal has
  *   that long to come back to the same hero).
  * - CoopGuest (a friend): keeps a copy of the leader's room from the patches and draws it; sends
  *   its Intent when it changes (and every 2 s). Its own hero is `me` in its copy, so the rest of the
@@ -28,6 +30,7 @@ import { NO_INTENT, type FightEvent, type Intent } from '../sim/types';
 import { RelaySocket, type RelayMsg } from './relay';
 import { Decoder, Encoder, stateOf, type Patch } from './snap';
 import { keepJob } from './session';
+import type { DoorMark } from './jobrooms';
 
 const AWAY = 5, REJOIN = 5, BYE_WAIT = 2.5, SEND_EVERY = 0.05, FULL_EVERY = 4, GRACE = 60, LOST = 20, KEEP = 2, SAVE_EVERY = 2, TAKE = 9, TAKE_NEXT = 5;
 /**
@@ -42,25 +45,38 @@ const PREDICT = { ease: 12, snap: 1.5, trip: 0.15 };
 export interface Friend { name: string; profile: Profile | null; intent: Intent; heard: number; fresh: boolean; gone: boolean; /** Their clock on the newest input used (handed back, so they can time the trip). */ at?: number }
 /** What the leader's game tells the host to send, and is told by it. */
 export interface HostGame {
+  /** The leader's own room. */
   room: ArenaRoom;
   run: Run | null;
-  /** Which room this is (changes when the party moves on or goes indoors). */
+  /** Counts up as rooms change (a takeover starts past the old leader's). */
   roomKey: number;
   goalText(): string;
-  /** The caged and freed in this room's houses, by door (for the way-pointer on friends' screens). */
+  /** The caged and freed in the street's houses, by door (for the way-pointer on friends' screens). */
   houses(): { x: number; y: number; caged: number; waiting: number }[];
   addFriend(id: string, f: Friend): void;
   dropFriend(id: string): void;
+  /** The room a player's hero is in. */
+  roomOf(id: string): ArenaRoom | undefined;
+  /** A room's own number (friends rebuild their copy when theirs changes). */
+  keyOf(room: ArenaRoom): number;
+  /** Each room's events from the latest step. */
+  stepped: Map<ArenaRoom, FightEvent[]>;
+  /** Who's indoors, over which door of the street. */
+  doorMarks(): DoorMark[];
+  /** The street and its houses, to hand the job on. */
+  jobSave(): { room: Record<string, unknown>; houses: unknown };
 }
 
 export class CoopHost {
   readonly friends = new Map<string, Friend>();
   private sock: RelaySocket;
-  private enc = new Encoder();
-  private evs: FightEvent[] = [];
+  /** Each room being sent: its own encoder (patches are against what was last sent of it) and last full. */
+  private sending = new Map<ArenaRoom, { enc: Encoder; fullAt: number }>();
+  /** Events since the last send, by room. */
+  private evs = new Map<ArenaRoom, FightEvent[]>();
+  /** The room each friend was last sent whole (a different one now: they get the whole of it). */
+  private sentKey = new Map<string, number>();
   private sentAt = -9;
-  private fullAt = -99;
-  private sentKey = -1;
   private now = 0;
 
   private savedAt = -99;
@@ -90,11 +106,16 @@ export class CoopHost {
     } else if (d.t === 'in' && d.i && typeof d.i === 'object') (f.intent = { ...NO_INTENT, ...d.i }), (f.at = typeof (d as { at?: unknown }).at === 'number' ? (d as { at: number }).at : f.at);
   }
 
-  /** Each frame, after the room has run: collect its events; send a patch when it's time. */
-  frame(now: number, ev: FightEvent[]): void {
+  /** Each frame, after the rooms have run: collect their events; send each friend their room when it's time. */
+  frame(now: number): void {
     this.now = now;
-    this.evs.push(...ev);
-    if (this.evs.length > 200) this.evs.splice(0, this.evs.length - 200);
+    for (const [r, ev] of this.game.stepped) {
+      const l = this.evs.get(r) ?? [];
+      l.push(...ev);
+      if (l.length > 200) l.splice(0, l.length - 200);
+      this.evs.set(r, l);
+    }
+    this.game.stepped = new Map();
     for (const [id, f] of this.friends) if (!f.gone && now - f.heard > GRACE) (f.gone = true), this.game.dropFriend(id);
     // The whole job, now and then, for a friend to take on if this browser goes.
     if (now - this.savedAt > SAVE_EVERY && this.company) {
@@ -105,16 +126,29 @@ export class CoopHost {
       keepJob(save);
     }
     if (now - this.sentAt < SEND_EVERY) return;
-    const g = this.game, room = g.room, full = now - this.fullAt > FULL_EVERY || g.roomKey !== this.sentKey || [...this.friends.values()].some((f) => f.fresh);
-    const p = this.enc.encode(stateOf(room), full);
+    const g = this.game, groups = new Map<ArenaRoom, string[]>();
+    // Each friend's own room (one not in any yet, the leader's: they're brought to it).
+    for (const [id, f] of this.friends) if (!f.gone) groups.set(g.roomOf(id) ?? g.room, [...(groups.get(g.roomOf(id) ?? g.room) ?? []), id]);
     const names: Record<string, string> = { me: this.myName };
     const acks: Record<string, number> = {};
     for (const [id, f] of this.friends) (names[id] = f.name), f.at !== undefined && (acks[id] = f.at);
-    const body = { p, f: full ? 1 : 0, k: g.roomKey, map: full ? { ...room.map, blocks: [] } : undefined, t: room.time, x: room.exitOpen ? 1 : 0, in: room.indoors ? 1 : 0, hc: g.houses(), run: g.run, goal: g.goalText(), ev: this.evs, names, acks };
-    this.sock.send('*', { s: JSON.stringify(body) });
-    this.evs = [];
+    const hc = g.houses(), dm = g.doorMarks(), goal = g.goalText();
+    for (const [room, ids] of groups) {
+      const k = g.keyOf(room), st = this.sending.get(room) ?? { enc: new Encoder(), fullAt: -99 };
+      this.sending.set(room, st);
+      const full = now - st.fullAt > FULL_EVERY || ids.some((id) => this.friends.get(id)!.fresh || this.sentKey.get(id) !== k);
+      const p = st.enc.encode(stateOf(room), full), out = !room.indoors;
+      const body = { p, f: full ? 1 : 0, k, map: full ? { ...room.map, blocks: [] } : undefined, t: room.time, x: room.exitOpen ? 1 : 0, in: room.indoors ? 1 : 0, hc: out ? hc : [], dm: out ? dm : [], run: g.run, goal, ev: this.evs.get(room) ?? [], names, acks };
+      const s = JSON.stringify(body);
+      // Everyone in the one room: one message for them all; else each their own.
+      if (groups.size === 1) this.sock.send('*', { s });
+      else for (const id of ids) this.sock.send(id, { s });
+      if (full) (st.fullAt = now), ids.forEach((id) => (this.sentKey.set(id, k), (this.friends.get(id)!.fresh = false)));
+    }
+    // A room nobody's in any more starts afresh if anyone goes back.
+    for (const r of [...this.sending.keys()]) if (!groups.has(r)) this.sending.delete(r);
+    this.evs.clear();
     this.sentAt = now;
-    if (full) (this.fullAt = now), (this.sentKey = g.roomKey), this.friends.forEach((f) => (f.fresh = false));
   }
 
   /** Leaving the job to the friends still in it: the whole job as it stands, then goodbye. */
@@ -126,7 +160,7 @@ export class CoopHost {
 
   /** The whole job as it stands. */
   private saved(): string {
-    return JSON.stringify({ run: this.game.run, room: saveRoom(this.game.room), members: this.members, key: this.game.roomKey });
+    return JSON.stringify({ run: this.game.run, ...this.game.jobSave(), members: this.members, key: this.game.roomKey });
   }
 
   /** A friend gone, or not heard from in AWAY seconds (a closed tab, a locked phone): the party won't wait for them. */
@@ -158,6 +192,8 @@ export class CoopGuest {
   goal = '';
   /** The leader's count of the caged and freed in this room's houses. */
   houses: { x: number; y: number; caged: number; waiting: number }[] = [];
+  /** Out in the street: who's indoors, over which door. */
+  doorMarks: DoorMark[] = [];
   ended: { won: boolean; run: Run } | null = null;
   private sock: RelaySocket;
   private dec = new Decoder();
@@ -209,14 +245,14 @@ export class CoopGuest {
     if (typeof d.save === 'string') return void (this.save = d.save);
     if (typeof d.s !== 'string') return;
     // The leader's own hero is `me` in their room; in mine, I am. (Ids are quoted whole, so only ids change.)
-    let body: { p: Patch; f: number; k: number; map?: ArenaRoom['map']; t: number; x: number; in?: number; hc?: CoopGuest['houses']; run: Run | null; goal: string; ev: FightEvent[]; names: Record<string, string>; acks?: Record<string, number> };
+    let body: { p: Patch; f: number; k: number; map?: ArenaRoom['map']; t: number; x: number; in?: number; hc?: CoopGuest['houses']; dm?: DoorMark[]; run: Run | null; goal: string; ev: FightEvent[]; names: Record<string, string>; acks?: Record<string, number> };
     try {
       body = JSON.parse(d.s.split('"me"').join('"@lead"').split(`"${this.myId}"`).join('"me"'));
     } catch {
       return;
     }
     // (Only a whole room to start from: a new leader's changes mean nothing without it.)
-    if (!body.f && (!this.room || this.key < 0)) return;
+    if (!body.f && (!this.room || this.key < 0 || body.k !== this.key)) return;
     if (body.f && (body.k !== this.key || !this.room) && body.map) {
       this.room = new ArenaRoom(1, { map: body.map });
       this.key = body.k;
@@ -248,6 +284,7 @@ export class CoopGuest {
     room.exitOpen = !!body.x;
     room.indoors = !!body.in;
     this.houses = body.hc ?? [];
+    this.doorMarks = body.dm ?? [];
     this.run = body.run;
     this.goal = body.goal;
     // The trip there and back, from the newest input of mine the leader has used.

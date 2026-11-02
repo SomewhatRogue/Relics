@@ -19,25 +19,26 @@ import { ArenaRoom } from '../sim/room';
 import { lessonOf, newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
 import { woodMap, WOOD_PROPS } from '../shared/wood';
 import { PACK } from '../sim/pack';
-import { walkOut } from '../sim/survivors';
 import { refreshHealth, statsOf } from '../sim/gearstats';
 import { houseCaptives, sum } from '../sim/goal';
-import { goal, interiorRoom, isFinal, mine, newRun, runRoom, tally, type Run } from '../sim/run';
+import { goal, isFinal, mine, newRun, runRoom, tally, type Run } from '../sim/run';
 import { NO_INTENT, knows, type FightEvent, type Hero, type Intent, type Learned } from '../sim/types';
+import { players } from '../sim/party';
 import { load, store, type Save } from './save';
 import { treasure } from '../shared/treasure';
 /** What a piece of treasure that won't fit in the pack fetches. */
 const TREASURE_SOLD = 20;
 import { rebase } from '../sim/rebase';
-import { CoopGuest, CoopHost, loadRoom, type Friend } from './coop';
+import { CoopGuest, CoopHost, loadRoom, saveRoom, type Friend } from './coop';
 import { forgetSession, keepSession, keptJob, type Session } from './session';
 import { dayPhase, townLight } from '../shared/daylight';
 import { Followers } from './followers';
+import { JobRooms, doorPushed, type DoorMark, type SavedHouses } from './jobrooms';
 import type { Parties } from './parties';
 
 export type Mode = 'town' | 'yard' | 'run' | 'wood';
 /** A whole job, to lead it from (coop.ts sends it every 2 s): `me` is whoever leads. */
-interface JobSave { run: Run; room: Record<string, unknown>; members: [string, string][]; key?: number }
+interface JobSave { run: Run; room: Record<string, unknown>; houses?: SavedHouses; members: [string, string][]; key?: number }
 export interface Result { won: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number; relic?: RelicId; treasure: Item[]; sold: Item[]; lost?: number }
 /** Something you can use where you stand: a spot, a person, or a door. */
 export interface Near { label: string; talk?: SpotId; arg?: number; key?: string; door?: Block; chest?: number; npc?: Npc }
@@ -59,11 +60,9 @@ export class Game {
   result: Result | null = null;
   /**
    * Inside a building: the room outside (it keeps running: fires burn, dens breed), the door you came
-   * in by, and your hero there, kept aside. Online, the party leader runs every room someone is in.
+   * in by, and your hero there (in town, kept aside). Online, the party leader runs every room someone is in.
    */
   outside: { room: ArenaRoom; door: Block; hero: Hero } | null = null;
-  /** A run room's buildings, once entered (their goblins stay dead). */
-  private insides = new Map<Block, ArenaRoom>();
   /** The line to the shared world (set by the page; none in tests). */
   link: { online: boolean; send(c: Contribution): void } | null = null;
   /** Played before a hero is chosen (the title screen's backdrop, and the tests). */
@@ -79,6 +78,12 @@ export class Game {
   private townTheme: Theme | null = null;
   /** Goblins following you through a door (followers.ts). */
   private followers = new Followers();
+  /** On a job: the street and its houses, each player in whichever they walked into (jobrooms.ts). */
+  readonly rooms = new JobRooms(this.followers);
+  /** Each room's events from the latest step (the leader sends each friend their own room's). */
+  stepped = new Map<ArenaRoom, FightEvent[]>();
+  /** Each room's own number, for friends to know when theirs is a different one. */
+  private keys = new WeakMap<ArenaRoom, number>();
   /** The last input given (a new room's hero takes its presses as already seen). */
   private lastIntent: Intent = NO_INTENT;
   /** Friends whose press counters have been matched to their hero's (so no old press fires). */
@@ -115,6 +120,7 @@ export class Game {
   startWood(replay = false): void {
     this.mode = 'wood';
     this.outside = null;
+    this.rooms.reset(null);
     this.run = null;
     this.woodReplay = replay;
     const room = new ArenaRoom(7, { map: woodMap(), furniture: WOOD_PROPS });
@@ -247,11 +253,10 @@ export class Game {
     // roll doesn't fire again on the doorstep), and it starts standing still.
     syncSeen(h, this.lastIntent);
     Object.assign(h, { act: h.act === 'down' ? 'down' : 'idle', actT: 0, kvx: 0, kvy: 0, rollQueuedAt: -9, attackQueuedAt: -9, relicQueuedAt: -9, grabQueuedAt: -9 });
-    // Leading a party: your friends come with you, each with the health they had.
+    // Leading a party: your friends come with you (from the street or a house), each with the health they had.
     for (const [id, f] of this.coop?.friends ?? []) {
-      const old = from?.heroes.find((x) => x.id === id);
-      if (old && from !== room) from.heroes.splice(from.heroes.indexOf(old), 1);
-      if (!f.gone) this.bring(id, f, old, from?.time ?? room.time);
+      const [was, old] = this.pluck(id, room, from);
+      if (!f.gone) this.bring(id, f, old, was?.time ?? room.time);
     }
     // First time in this room on a job: a moment's grace for everyone, so nobody's cut down in the doorway.
     if (fresh) for (const x of room.heroes) if (x.id !== 'squire') x.safeT = ARRIVE_SAFE;
@@ -270,16 +275,25 @@ export class Game {
     this.room.prev.set('h:' + id, [h.x, h.y]);
   }
 
+  /** Take a player's hero out of whichever room has it (not `into`): `from`, or the job's street or a house. */
+  private pluck(id: string, into: ArenaRoom, from?: ArenaRoom): [ArenaRoom | undefined, Hero | undefined] {
+    for (const r of new Set([from, ...this.rooms.all()])) {
+      const i = r && r !== into ? r.heroes.findIndex((x) => x.id === id) : -1;
+      if (r && i >= 0) return [r, r.heroes.splice(i, 1)[0]];
+    }
+    return [undefined, undefined];
+  }
+
   /** A friend arrives in the job (or back after losing their signal: their hero is still here). */
   addFriend(id: string, f: Friend): void {
-    if (this.mode !== 'run' || this.room.heroes.some((x) => x.id === id)) return;
+    if (this.mode !== 'run' || this.room.heroes.some((x) => x.id === id) || this.rooms.roomOf(id)) return;
     this.synced.delete(id);
     this.bring(id, f);
   }
 
   /** A friend gone a minute: their hero leaves the fight. */
   dropFriend(id: string): void {
-    for (const r of [this.room, this.outside?.room]) {
+    for (const r of new Set([this.room, this.outside?.room, ...this.rooms.all()])) {
       const i = r ? r.heroes.findIndex((x) => x.id === id) : -1;
       if (r && i >= 0) r.heroes.splice(i, 1);
     }
@@ -294,13 +308,37 @@ export class Game {
   /** The caged and the freed in this room's houses, by door (sim/goal.ts). */
   houses(): ReturnType<typeof houseCaptives> {
     if (this.remote) return this.remote.houses;
-    return this.run && this.mode === 'run' ? houseCaptives(this.run, this.fightRoom, this.insides) : [];
+    return this.run && this.mode === 'run' ? houseCaptives(this.run, this.fightRoom, this.rooms.houses) : [];
+  }
+
+  /** Over each house door in the street, who's gone in (for whoever's out there to see). */
+  doorMarks(): DoorMark[] {
+    if (this.remote) return this.remote.doorMarks;
+    return this.mode === 'run' ? this.rooms.marks((h) => (h.id === ME ? this.profile.name : this.coop?.friends.get(h.id)?.name ?? h.tag ?? '')) : [];
+  }
+
+  /** The room this player's hero is in on the job (the leader's own, off one). */
+  roomOf(id: string): ArenaRoom | undefined {
+    return this.mode === 'run' ? this.rooms.roomOf(id) : this.room.heroes.some((h) => h.id === id) ? this.room : undefined;
+  }
+
+  /** A room's own number (a new one each time a room is first asked about). */
+  keyOf(room: ArenaRoom): number {
+    let k = this.keys.get(room);
+    if (k === undefined) this.keys.set(room, (k = ++this.roomKey));
+    return k;
+  }
+
+  /** The whole job to hand on: the street, and every house anyone's been in (with whoever's in them). */
+  jobSave(): { room: Record<string, unknown>; houses: SavedHouses } {
+    return { room: saveRoom(this.rooms.street ?? this.fightRoom), houses: this.rooms.save() };
   }
 
   /** Back to Wickhold, at `at` (in front of a door) or the square. */
   enterTown(at?: { x: number; y: number }): void {
     this.mode = 'town';
     this.outside = null;
+    this.rooms.reset(null);
     this.place(this.townRoom(), at);
   }
 
@@ -310,38 +348,48 @@ export class Game {
 
   enterYard(): void {
     this.outside = null;
+    this.rooms.reset(null);
     this.mode = 'yard';
     this.place(new ArenaRoom(this.world.day, { squire: true }));
     this.hero.calmHound = true;
   }
 
-  /** Go in through a door: a Wickhold building, or a cottage or barn on a job. */
+  /**
+   * Go in through a door: a Wickhold building, or a cottage or barn on a job. On a job only you go in
+   * (your friends go in and out on their own: jobrooms.ts); following a friend's job, their game decides.
+   */
   enter(b: Block): void {
-    if (!b.door || b.ruined || (b.burning ?? -1) >= 0) return;
-    const out = this.room, h = this.hero;
-    let inside = this.insides.get(b);
-    const fresh = !inside;
-    if (!inside) {
-      if (this.mode === 'run' && this.run) inside = interiorRoom(this.run, out.map.blocks.indexOf(b), b.door);
-      else (inside = new ArenaRoom(this.world.day, { map: townInterior(b.door, this.world) })), (inside.exitOpen = true);
-      if (this.mode === 'run') this.insides.set(b, inside);
-    }
+    if (this.remote || !b.door || b.ruined || (b.burning ?? -1) >= 0) return;
+    if (this.mode === 'run') return this.goIn(ME, b);
+    const out = this.room, h = this.hero, inside = new ArenaRoom(this.world.day, { map: townInterior(b.door, this.world) });
+    inside.exitOpen = true;
     out.heroes.splice(out.heroes.indexOf(h), 1);
     this.outside = { room: out, door: b, hero: h };
-    // On a job, the goblins after you come in after you.
-    if (this.mode === 'run') this.followers.through(out, inside, h, inside.map.hero.x, inside.map.hero.y);
-    this.place(inside, inside.map.hero, h, fresh && this.mode === 'run');
+    this.place(inside, inside.map.hero, h, false);
+  }
+
+  /** On a job: player `id` goes in at door `b` (alone; the small goblins after them follow). */
+  private goIn(id: string, b: Block): void {
+    const street = this.rooms.street, h = street?.heroes.find((x) => x.id === id), inside = h && this.run ? this.rooms.goIn(this.run, h, b) : null;
+    if (!inside || id !== ME) return;
+    this.outside = { room: street!, door: b, hero: h! };
+    this.room = inside;
+    this.roomKey++;
+  }
+
+  /** On a job: player `id` walks out of the house they're in, into the street. */
+  private comeOut(id: string): void {
+    const h = this.rooms.roomOf(id)?.heroes.find((x) => x.id === id), street = h ? this.rooms.comeOut(h) : null;
+    if (!street || id !== ME) return;
+    this.outside = null;
+    this.room = street;
+    this.roomKey++;
   }
 
   /** Back out of the door you came in by. */
   leave(): void {
-    const o = this.outside!, inner = this.hero, d = doorAt(o.door), h = o.hero, insideAt = this.room.time;
-    // ...and out after you.
-    if (this.mode === 'run') this.followers.through(this.room, o.room, inner, d.x, d.y + 0.6);
-    // The freed you're leading come out too: home (the room may have goblins waiting).
-    if (this.mode === 'run') walkOut(this.room.survivors, this.room.heroes, o.room.survivors, d.x, d.y + 1.1);
-    // A house on fire that fell in behind you is ash in the street (sim/blaze.ts).
-    if (this.room.blaze?.fallen) Object.assign(o.door, { ruined: true, smoulder: false });
+    if (this.mode === 'run') return this.comeOut(ME);
+    const o = this.outside!, inner = this.hero, d = doorAt(o.door), h = o.hero;
     this.outside = null;
     this.room = o.room;
     this.room.heroes.push(h);
@@ -349,19 +397,6 @@ export class Game {
     syncSeen(h, this.lastIntent);
     this.room.prev.set('h:' + ME, [h.x, h.y]);
     this.roomKey++;
-    // Your friends come back out with you.
-    for (const [id, f] of this.coop?.friends ?? []) {
-      const old = o.room.heroes.find((x) => x.id === id) ? undefined : this.insideHero(id);
-      if (old && !f.gone) this.bring(id, f, old, insideAt);
-    }
-  }
-
-  private insideHero(id: string): Hero | undefined {
-    for (const r of this.insides.values()) {
-      const i = r.heroes.findIndex((x) => x.id === id);
-      if (i >= 0) return r.heroes.splice(i, 1)[0];
-    }
-    return undefined;
   }
 
   /** Today's board, with the chapter's story mission on it until it's done. */
@@ -374,10 +409,11 @@ export class Game {
     this.followers.clear();
     this.mode = 'run';
     this.outside = null;
-    this.insides.clear();
+    this.rooms.reset(null);
     this.run = newRun(job);
     this.run.party = party;
     this.place(runRoom(this.run));
+    this.rooms.reset(this.room);
     // A coin in the well: you set out blessed.
     if (this.profile.wish) (this.hero.blessedUntil = 20), (this.profile.wish = false), store(this.save);
   }
@@ -409,18 +445,27 @@ export class Game {
     }
     this.room.setIntent(ME, intent);
     this.lastIntent = intent;
-    // Leading a party: each friend's latest input (their old presses matched first, so none fires).
+    // Leading a party: each friend's latest input, in whichever room they're in (their old presses matched first, so none fires).
     for (const [id, f] of this.coop?.friends ?? []) {
-      const fh = this.room.heroes.find((x) => x.id === id);
+      const r = this.roomOf(id) ?? this.room, fh = r.heroes.find((x) => x.id === id);
       if (!fh) continue;
       if (!this.synced.has(id) && f.intent !== null) (this.synced.add(id), syncSeen(fh, f.intent));
-      this.room.setIntent(id, { ...f.intent, classSeq: fh.seen.cls, weaponSeq: fh.seen.weapon, augmentSeq: fh.seen.augment });
+      r.setIntent(id, { ...f.intent, classSeq: fh.seen.cls, weaponSeq: fh.seen.weapon, augmentSeq: fh.seen.augment });
     }
-    // The room outside runs on while you're in (its kills still pay); then yours.
-    const out = this.outside?.room, outEv = out?.advance(dt) ?? [];
-    if (out && this.run) tally(this.run, out, outEv, ME);
-    const ev = this.room.advance(dt);
-    this.followers.step(this.room);
+    // The other rooms run on beside yours (the street while you're in, any house a friend's in; their kills still pay); then yours.
+    const here = this.room, stepped = new Map<ArenaRoom, FightEvent[]>();
+    for (const r of this.mode === 'run' ? this.rooms.live() : this.outside ? [this.outside.room] : []) {
+      if (r === here) continue;
+      const e = r.advance(dt);
+      stepped.set(r, e);
+      if (this.run) tally(this.run, r, e, ME);
+      this.followers.step(r);
+    }
+    const ev = here.advance(dt);
+    stepped.set(here, ev);
+    this.stepped = stepped;
+    this.followers.step(here);
+    if (this.mode === 'run' && this.run) tally(this.run, here, ev, ME);
     // Wickhold keeps the shared day: the light turns with the clock, the same on every screen.
     if (this.mode === 'town' && !this.outside) this.room.map.theme = townLight(this.townTheme ??= this.room.map.theme, dayPhase(Date.now()));
     if (this.mode === 'wood' && this.wood) return this.stepWoodFrame(h, ev, dt);
@@ -431,9 +476,11 @@ export class Game {
     if (door && intent.my < -0.5 && Math.abs(h.x - doorAt(door).x) < 0.7) this.enter(door);
     else if (this.outside && inArea(this.room.map.exit, h.x, h.y)) this.leave();
     else if (this.mode === 'yard' && inArea(this.room.map.exit, h.x, h.y)) this.enterTown(this.doorOf('hall'));
+    // Your friends go in and out on their own.
+    if (this.mode === 'run') this.friendDoors();
     if (this.mode === 'run' && this.run) {
-      tally(this.run, this.room, ev, ME);
-      if (!this.outside) this.room.exitOpen = goal(this.run, this.room, sum(this.houses())).done;
+      const street = this.fightRoom;
+      street.exitOpen = goal(this.run, street, sum(this.houses())).done;
       if (this.run.failed) this.finish(false);
       else if (!this.outside && this.room.exitOpen) {
         // The way on takes the whole party, standing in it together; at a fork, the road they stand in.
@@ -443,15 +490,35 @@ export class Game {
           else {
             this.run.index++;
             if (road) this.run.roads[this.run.index] = road.road;
-            this.insides.clear();
             // The goblins ahead are counted for whoever's still with you.
             this.run.party = 1 + [...(this.coop?.friends.values() ?? [])].filter((f) => f.profile && !f.gone).length;
             this.place(runRoom(this.run), undefined, h);
+            this.rooms.reset(this.room);
           }
         }
       }
     }
     return ev;
+  }
+
+  /**
+   * Leading a job: each friend walks up into a door to go in, and out the bottom of a house to come
+   * out, the same as you do, wherever you are.
+   */
+  private friendDoors(): void {
+    const moves: [string, Block | null][] = [];
+    for (const r of this.rooms.all()) for (const fh of players(r.heroes)) {
+      if (fh.id === ME) continue;
+      const i = this.coop?.friends.get(fh.id)?.intent ?? NO_INTENT;
+      if (fh.act === 'down' || fh.out || this.coop?.away(fh.id)) continue;
+      if (r !== this.rooms.street) {
+        if (inArea(r.map.exit, fh.x, fh.y)) moves.push([fh.id, null]);
+        continue;
+      }
+      const b = doorPushed(r.map, fh, i);
+      if (b) moves.push([fh.id, b]);
+    }
+    for (const [id, b] of moves) b ? this.goIn(id, b) : this.comeOut(id);
   }
 
   /**
@@ -519,7 +586,7 @@ export class Game {
   startRemote(g: CoopGuest): void {
     this.mode = 'run';
     this.outside = null;
-    this.insides.clear();
+    this.rooms.reset(null);
     this.remote = g;
     // Until the leader's room arrives: the job as it was posted.
     this.run = newRun(g.job);
@@ -541,11 +608,15 @@ export class Game {
   private leadFrom(code: string, o: JobSave, want: 'host' | 'take'): void {
     this.remote = null;
     this.mode = 'run';
-    this.outside = null;
-    this.insides.clear();
     this.followers.clear();
     this.run = o.run;
-    this.room = loadRoom(o.room);
+    // The street and every house anyone's been in, as they were; you're wherever your hero was.
+    const street = loadRoom(o.room);
+    this.rooms.load(street, o.houses);
+    if (!this.rooms.roomOf(ME)) Object.assign(street.join(ME), street.map.hero), this.equip(street.heroes.find((x) => x.id === ME)!);
+    this.room = this.rooms.roomOf(ME)!;
+    const door = this.rooms.doorOf(this.room);
+    this.outside = door ? { room: street, door, hero: this.hero } : null;
     this.roomKey = Math.max(this.roomKey, o.key ?? 0) + 2;
     this.synced.clear();
     this.coop = new CoopHost(code, this.profile.id, this.profile.name, this, o.members, want);
@@ -569,8 +640,12 @@ export class Game {
     return ev;
   }
 
-  /** Every player in the room (not the squire, not anyone down, not a friend who's gone quiet) stands in `a`. */
+  /**
+   * Every player in the room (not the squire, not anyone down, not a friend who's gone quiet) stands in
+   * `a`, and nobody who could walk is still indoors (they come out to go on with you).
+   */
   together(a: Area | null): boolean {
+    if (this.mode === 'run' && this.rooms.indoors().some((x) => x.act !== 'down' && !this.coop?.away(x.id))) return false;
     const ps = this.room.heroes.filter((x) => x.id !== 'squire' && x.act !== 'down' && !this.coop?.away(x.id));
     return !!a && ps.length > 0 && ps.every((x) => inArea(a, x.x, x.y));
   }

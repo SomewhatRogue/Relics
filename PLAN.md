@@ -2,6 +2,13 @@
 
 ## Current slice
 
+**Going indoors on your own** (Claude Opus 5.5, 2026-11-02; Kyle: "when you go into a house it drags
+EVERYONE into it"). Built; waiting on Kyle's play. *Done when* on a job with friends Kyle goes into a
+cottage and nobody else is pulled in; a friend outside sees KYLE over that door; a friend goes into
+another house on their own and Kyle sees their name there; small goblins still follow you in and big
+ones don't; someone freed comes out with whoever brings them (maybe into an ambush); and the way on
+waits until everyone has come out.
+
 **Places with a plan** (Claude Opus 5.5, 2026-11-01; Kyle: "maps that feel more like actual areas").
 Built; waiting on Kyle's play. *Done when* Kyle walks Barrowby's lane past cottages and their yards to
 the green with the fields beyond the hedges, the Charcoal Camps' shacks along the muddy path, Fennick
