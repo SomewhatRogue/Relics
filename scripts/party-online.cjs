@@ -36,6 +36,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     step('they see each other in town', await until(sam, () => window.__town().here.some((h) => h.name === 'KYLE')));
     // Kyle gathers a party for the first job on the board.
     await kyle.page.evaluate(() => window.__openSpot('board'));
+    await kyle.page.click('#panel [data-open="1"]');
     await kyle.page.click('#panel [data-gather="1"]');
     await sam.page.evaluate(() => window.__openSpot('board'));
     step("Sam's board shows Kyle's party", await until(sam, () => !!document.querySelector('#panel [data-joinparty]')));
@@ -110,6 +111,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
       return page;
     };
     await kyle.page.evaluate(() => window.__openSpot('board'));
+    await kyle.page.click('#panel [data-open="2"]');
     await kyle.page.click('#panel [data-gather="2"]');
     await sam.page.evaluate(() => window.__openSpot('board'));
     await until(sam, () => !!document.querySelector('#panel [data-joinparty]'));
