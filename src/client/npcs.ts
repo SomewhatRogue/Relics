@@ -33,6 +33,8 @@ const LOOKS: Record<string, Look> = {
   bard: { body: '#2f6a5a', trim: '#d8c48a', skin: SKIN, hair: [['r', 3, 0, 7, 2, '#7a2a6a'], ['p', 9, 0, '#d8d0bc']] },
   ranger: { body: '#3f6b3a', trim: '#8b6a3a', skin: DARK, hair: [['r', 3, 0, 6, 3, '#3f5a32']] },
   rogue: { body: '#3a3346', trim: '#5a3d22', skin: SKIN, hair: [['r', 3, 0, 6, 3, '#2a2630'], ['r', 4, 5, 4, 1, '#141218']] },
+  // Magister Vell: a deep blue robe, silver trim, a tall hat gone soft at the point.
+  mage: { body: '#2a2a5a', trim: '#b8b4c8', skin: SKIN, hair: [['r', 2, 1, 8, 1, '#1e1e44'], ['r', 3, -1, 6, 2, '#2a2a5a'], ['r', 4, -3, 4, 2, '#2a2a5a'], ['r', 5, -5, 3, 2, '#2a2a5a'], ['p', 8, -5, '#2a2a5a'], ['r', 4, 5, 4, 3, '#d8d4de']] },
   // The gravedigger: earth-coloured smock, a cap pulled down.
   digger: { body: '#3e3628', trim: '#2a2018', skin: DARK, hair: [['r', 3, 0, 6, 2, '#2e2a24'], ['r', 2, 2, 8, 1, '#2e2a24']] },
   survivor: { body: '#7a6a58', trim: '#5a4a3a', skin: SKIN, hair: [['r', 4, 1, 4, 1, '#3a2a1a'], ['r', 3, 2, 6, 1, '#e8e0c8']] },
@@ -46,7 +48,9 @@ function person(l: Look): Sprite {
   ];
   if (l.apron) parts.push(['r', 3, 8, 6, 5, l.apron]);
   parts.push(['e', 6, 3.5, 3.4, 3.4, l.skin], ['p', 5, 4, '#141218'], ['p', 7, 4, '#141218'], ...l.hair);
-  return makeSprite(12, 16, parts);
+  // A tall hat reaches above the head: grow the sprite upward to fit it.
+  const lift = Math.max(0, ...parts.map((q) => -(q[2] as number)));
+  return makeSprite(12, 16 + lift, parts.map((q) => q.map((v, i) => (i === 2 ? (v as number) + lift : v)) as Part));
 }
 
 const SPRITES: Record<string, Sprite> = {};

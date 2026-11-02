@@ -36,6 +36,7 @@ import { SPOT_REACH } from '../shared/town';
 import { dusk } from './streetlife';
 import { drawMist, setSun, torchIn } from './daytime';
 import { drawPuddles } from './spiders';
+import { witchColour } from './hallsdraw';
 
 
 /** The view's jolt this frame (heropose.ts), reused. */
@@ -342,6 +343,11 @@ export class Scene {
       lights.push({ x, y, r: 64, i: 0.8 * tk, c: [1, 0.72, 0.42] });
     }
     // Perrin's garden after dark: a soft pool of lamplight over the benches and the beds.
+    // Inside the halls: candlelight, and the tower's coloured fire.
+    for (const r of map.rounds) {
+      if (r.kind === 'candles') lights.push({ x: OX + r.x * PX - cx, y: OY + r.y * PX - cy - 18, r: 46 + Math.sin(now * 11 + r.x) * 2, i: 0.7, c: [1, 0.78, 0.48] });
+      if (r.kind === 'witchfire') lights.push({ x: OX + r.x * PX - cx, y: OY + r.y * PX - cy - 10, r: 90 + Math.sin(now * 5) * 4, i: 1.1, c: witchColour(now) });
+    }
     for (const r of map.rounds) if (r.kind === 'moths' && !map.theme.day) lights.push({ x: OX + r.x * PX - cx - 36, y: OY + r.y * PX - cy - 34, r: 84, i: 0.4 * dusk(), c: [1, 0.84, 0.58] });
     for (const r of map.rounds) if (r.kind === 'lantern') lights.push({ x: OX + r.x * PX - cx, y: OY + r.y * PX - cy - 28, r: 150 + Math.sin(now * 3) * 4, i: 1.25, c: [1, 0.78, 0.45] });
     for (const b of map.blocks) {

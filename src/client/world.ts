@@ -6,6 +6,7 @@
 import type { GameMap, Ledge } from '../shared/arena';
 import { Rng } from '../shared/rng';
 import { paintBreach } from './breach';
+import { paintHangs } from './hangs';
 import { paintMarks } from './marks';
 import { paintGrim } from './grimpaint';
 import { paintSoil } from './soil';
@@ -44,6 +45,7 @@ export function paintMap(m: GameMap): HTMLCanvasElement {
   rect(0, 0, W, H, '#14121a');
   back(m, rect, rng, pick, W);
   paintBreach(m, rect);
+  paintHangs(m, rect);
   // Floor.
   const f = FLOORS[m.theme.floor], [tw, th] = f.tile, fw = m.w * PX, fh = m.h * PX;
   for (let r = 0; r * th < fh; r++) {

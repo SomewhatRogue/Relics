@@ -1410,3 +1410,28 @@ Kyle: "trained abilities to be level locked and cost more", and the screen was "
   Tap a row for NOW and NEXT, every rank with its level and price, and one buy button.
 - The greeting is one line at most: the grown line when picks wait, or Isolde's coal line.
 
+
+## 2026-11-01: each hall its own place, inside and out (Kyle; Opus 5.5)
+
+Kyle: the wizard tower doesn't look very wizard-towery outside or inside; personalise each hall.
+
+- **Inside** (`shared/townhalls.ts`; `interiors.ts` hands the town's halls to it): the tower has
+  bookcases, a star chart, a stair curling up, a desk of books and jars, a chalked circle and a brazier
+  of coloured fire, and Magister Vell has a tall hat; the barracks racks, shields and a banner, bunks,
+  a map table and a dummy on strewn rushes; the lodge bows, antlers and pelts on the wall, a skinning
+  bench, a bear hide, the hounds' bowls; the church candles, a runner up the aisle, coloured windows and
+  Mother Isolde's cot; the Drowned Rat casks, the dice table, Whisper's curtained booth, its sign and
+  notices, sawdust; the forge bellows, a quench tub, tools and horseshoes, soot; the town hall the
+  council desk with its ledgers, the valley map, notices, a rug; the infirmary herbs drying, a basin, a
+  candle stand. NPCs stand where they stood (the trainer panels are untouched).
+- **New pieces:** twelve furniture kinds (`client/hallsdraw.ts`), two live rounds (`candles`,
+  `witchfire`, lit by the scene: candlelight, and fire that drifts violet, green and blue), seven floor
+  marks (`client/hallfloor.ts`), and `GameMap.hangs`, things on the back wall (`client/hangs.ts`).
+- **Outside** (`client/exterior.ts`, by door, on labelled town buildings): the tower round and shaded,
+  a crooked slate cone with a vane, slit windows lit odd colours and coloured smoke from its flue; the
+  barracks shields and a banner; the lodge logs, antlers, pelts, a bow; the church a round window and an
+  empty belfry (the bell went for arrowheads in the siege); the Drowned Rat casks and a lamp; the forge a
+  chimney stack that smokes and sparks, horseshoes, a quench barrel; the town hall notices, its banner,
+  worn steps; the infirmary herbs under the eaves and a lamp.
+- `tests/halls.test.ts` floods each hall from the door and checks everyone and the way out can be
+  reached, and that each is the same every time with its own pieces.
