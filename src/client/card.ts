@@ -24,7 +24,7 @@ export const HOW: Record<WeaponId, string> = {
   censer: 'Two cuts, then the censer burns goblins and heals everyone near. The best Cleric guard. Hold to whirl it.',
   flail: 'Slow, wide sweeps that come over a shield. The second heals. Hold to bring down a smite close in.',
 };
-const ARMOR_HOW = { light: 'Light: full speed and a full dodge. Takes full damage.', medium: 'Medium: 5% slower, 12% less damage taken.', heavy: 'Heavy: 12% slower, a shorter dodge that costs more breath, 25% less damage, and small goblins can\'t stagger you.' };
+const ARMOR_HOW = { light: 'Light: full speed and a full dodge. Takes full damage.', medium: 'Medium: 5% slower, 12% less damage taken.', heavy: 'Heavy: 12% slower, a shorter dodge that costs more breath, 25% less damage taken, and small goblins can\'t stagger you.' };
 /** The same for a class with no dodge (a Warrior, a Healer): nothing about a dodge it hasn't got. */
 const ARMOR_FEET = { ...ARMOR_HOW, light: 'Light: full speed. Takes full damage.', heavy: 'Heavy: 12% slower, 25% less damage, and small goblins can\'t stagger you.' };
 /** Rows a class has no use for: a parry it can't make, a block it can't hold, a dodge it hasn't got, heals it doesn't give. */

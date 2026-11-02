@@ -37,7 +37,7 @@ export function openTree(g: Game, panel: Panel, o: TreeOpts = {}): void {
     return `<div class="kn-chain"><div class="kn-h"><b>${CHAINS[c].name}</b><i>${have} / ${steps.length}</i></div><div class="kn-row">${nodes}</div></div>`;
   }).join('');
   const waiting = p.picks > 1 ? `${p.picks} PICKS WAITING` : 'A PICK WAITING';
-  const note = !offer.length ? 'Each level up offers the next step on two chains.' : o.take ? `${waiting}: take one of the two in green.` : `${waiting}. Take it at your trainer.`;
+  const note = !offer.length ? 'Each level up offers the next step on two chains.' : o.take ? `${waiting}: take one of the two in green.` : `${waiting}. Take ${p.picks > 1 ? 'them' : 'it'} at your trainer.`;
   const pk = picked as { id: PerkId; state: State } | null;
   const detail = pk ? `<div class="kn-detail s-${pk.state}"><div><b>${PERKS[pk.id].name}</b><em>${TAG[pk.state]}</em></div><span>${perkText(pk.id, p.cls)}</span></div>` : '';
   const buttons: Button[] = [];

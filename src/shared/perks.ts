@@ -36,7 +36,7 @@ export const PERKS: Record<PerkId, { name: string; text: string; gain: string; f
   heft: { name: 'HEFT', text: 'Your hits throw goblins a quarter further', gain: 'knock +25%', fx: { knock: 0.25 } },
   heavy: { name: 'HEAVY HANDS', text: 'Your hits land a little harder', gain: '+6% damage', fx: { damage: 0.06 } },
   keen: { name: 'KEEN', text: 'A better chance of a hit landing half again as hard', gain: '+5% crit', fx: { crit: 0.05 } },
-  steadyhand: { name: 'STEADY HAND', text: 'Bows draw a sixth faster', gain: 'draw 15% faster', fx: { draw: 0.15 } },
+  steadyhand: { name: 'STEADY HAND', text: 'Your bow draws a little faster', gain: 'draw 15% faster', fx: { draw: 0.15 } },
   longshot: { name: 'LONG SHOT', text: 'Your shots carry a tenth further', gain: '+10% range', fx: { reach: 0.1 } },
   shadowed: { name: 'SHADOWED', text: 'Backstabs hit half as hard again', gain: 'backstab +50%', fx: { rear: 0.5 } },
   quick: { name: 'QUICK HANDS', text: 'Your blows come a little faster', gain: '+6% quicker', fx: { quick: 0.06 } },
