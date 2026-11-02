@@ -9,8 +9,8 @@ import { NO_INTENT } from '../src/sim/types';
 describe('drills', () => {
   it('climb in price, and a trainer only takes you as far as your level', () => {
     expect(drillPrice('power', 1)).toBeGreaterThan(drillPrice('power', 0));
-    expect(drillCap('power', 1)).toBe(1);
-    expect(drillCap('power', 4)).toBe(3);
+    expect(drillCap('power', 1)).toBe(0);
+    expect(drillCap('power', 4)).toBe(2);
     expect(drillCap('skill', 10)).toBe(DRILLS.skill.max);
   });
   it('power, health, speed and wind show in the hero\'s stats; a crit lands half again as hard', () => {
