@@ -75,8 +75,14 @@ export const WARD = { cooldown: 14, windup: 0.2, recover: 0.2, range: 7, hp: 50,
 export const CHANNEL = { cooldown: 8, windup: 0.08, recover: 0.1, time: 2, order: ['fire', 'frost', 'storm'] as const };
 export const SANCTUARY = { cooldown: 20, windup: 0.25, recover: 0.25 };
 
-/** The war cry (the Warrior's skill): every ally in earshot is rallied: stamina back at once, then twice as fast, and blocking costs half. Small goblins near you flinch. */
-export const HORN = { cooldown: 20, windup: 0.25, recover: 0.3, radius: 6, time: 6, regen: 2, guard: 0.5, scare: 2.5 };
+/** The war cry (one of the Warrior's two skills): every goblin in earshot, awake or not, comes for you
+ *  and nobody else for `time` seconds; small ones right beside you flinch. */
+export const HORN = { cooldown: 18, windup: 0.25, recover: 0.3, radius: 9, time: 5, scare: 2.5 };
+
+/** The shield charge (the Warrior's other skill): a run shield-first along where you face, `distance` in
+ *  `time`. Small goblins in the way are knocked flat and reeling (grab them), big ones stagger; crates and
+ *  barrels burst; a wall stops it. */
+export const BASH = { cooldown: 10, windup: 0.12, recover: 0.2, distance: 5, time: 0.4, reach: 0.25, dmg: 14, knock: 10, stun: 1.2, stagger: 0.45, propDmg: 40 };
 
 /** `range` is how far the phone's auto-aim looks; `cls` who may carry it. */
 export const RELICS = {
@@ -87,17 +93,18 @@ export const RELICS = {
   channel: { name: 'ELEMENTAL CHANNEL', short: 'CHANNEL', cooldown: CHANNEL.cooldown, windup: CHANNEL.windup, recover: CHANNEL.recover, range: 0 },
   lodestone: { name: 'LODESTONE', short: 'LODESTONE', cooldown: LODESTONE.cooldown, windup: LODESTONE.windup, recover: LODESTONE.recover, range: LODESTONE.range },
   horn: { name: 'WAR CRY', short: 'WAR CRY', cooldown: HORN.cooldown, windup: HORN.windup, recover: HORN.recover, range: HORN.radius },
+  bash: { name: 'SHIELD CHARGE', short: 'CHARGE', cooldown: BASH.cooldown, windup: BASH.windup, recover: BASH.recover, range: BASH.distance },
   blessing: { name: 'BLESSED GROUND', short: 'BLESS', cooldown: BLESSING.cooldown, windup: BLESSING.windup, recover: BLESSING.recover, range: BLESSING.range },
   ward: { name: 'WARD', short: 'WARD', cooldown: WARD.cooldown, windup: WARD.windup, recover: WARD.recover, range: WARD.range },
   sanctuary: { name: 'SANCTUARY', short: 'SANCTUARY', cooldown: SANCTUARY.cooldown, windup: SANCTUARY.windup, recover: SANCTUARY.recover, range: WARD.range },
 };
 export type RelicId = keyof typeof RELICS;
-export const RELIC_ORDER: RelicId[] = ['javelin', 'hook', 'horn', 'net', 'shadow', 'lodestone', 'blessing', 'ward', 'sanctuary'];
+export const RELIC_ORDER: RelicId[] = ['javelin', 'hook', 'bash', 'horn', 'net', 'shadow', 'lodestone', 'blessing', 'ward', 'sanctuary'];
 /** Two abilities at most: the class's own skill, and one found relic carried with it. */
 export const RELIC_SLOTS = 2;
-/** Each class's one skill, from the start (on the SKILL button). */
+/** Each class's skill (on the SKILL button): the first of its choices, until the hero picks another. */
 export const CLASS_SKILL: Record<'WARRIOR' | 'RANGER' | 'ROGUE' | 'MAGE' | 'HEALER', RelicId> = {
-  WARRIOR: 'horn',
+  WARRIOR: 'bash',
   RANGER: 'net',
   ROGUE: 'shadow',
   MAGE: 'channel',
@@ -109,7 +116,9 @@ export const CLASS_SKILL: Record<'WARRIOR' | 'RANGER' | 'ROGUE' | 'MAGE' | 'HEAL
  */
 export const FOUND_RELICS: RelicId[] = ['javelin', 'hook'];
 /** A hero's abilities: their skill, then the relic they carry (if any). */
-export const abilitiesOf = (cls: keyof typeof CLASS_SKILL, carried?: RelicId | '') => [CLASS_SKILL[cls], ...(carried ? [carried] : [])];
+export const abilitiesOf = (cls: keyof typeof CLASS_SKILL, carried?: RelicId | '', skill?: RelicId) => [skill && SKILL_CHOICES[cls].includes(skill) ? skill : CLASS_SKILL[cls], ...(carried ? [carried] : [])];
+/** The skills a class's trainer teaches together; a hero carries one at a time and changes it at the trainer. */
+export const SKILL_CHOICES: Record<keyof typeof CLASS_SKILL, RelicId[]> = { WARRIOR: ['bash', 'horn'], RANGER: ['net'], ROGUE: ['shadow'], MAGE: ['channel'], HEALER: ['sanctuary'] };
 
 /**
  * Magic augments: an element fitted to a relic (the Mage's spells cast with the equipped relic's).

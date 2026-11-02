@@ -73,11 +73,11 @@ describe('heroes', () => {
     g.create('WARRIOR', 'b');
     g.skipWood();
     g.profile.gold = 50;
-    expect(g.fitAugment('horn', 'fire')).toBe(true);
+    expect(g.fitAugment('bash', 'fire')).toBe(true);
     expect(g.fitAugment('javelin', 'frost')).toBe(false);
-    expect(g.hero.augments.horn).toBe('fire');
+    expect(g.hero.augments.bash).toBe('fire');
     g.enterYard();
-    expect(g.hero.augments.horn).toBe('fire');
+    expect(g.hero.augments.bash).toBe('fire');
   });
 });
 

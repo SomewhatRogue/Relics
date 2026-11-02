@@ -70,7 +70,7 @@ export function applyGear(h: Hero, op: number, arg: number, ev: FightEvent[]): v
   } else if (op === GEAR.carry) {
     const r = arg >= 0 ? h.found[arg] : undefined;
     if (arg >= 0 && !r) return;
-    h.relics = abilitiesOf(cls, r);
+    h.relics = abilitiesOf(cls, r, h.relics[0]);
     if (!h.relics.includes(h.relic)) h.relic = h.relics[0];
     ev.push({ k: 'relic', x: h.x, y: h.y, name: r ? RELICS[r].name : RELICS[h.relics[0]].name });
   }

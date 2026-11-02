@@ -112,7 +112,7 @@ most Want among the heroes is the one the bells don't spare).
 - **Class skills** (recorded 2026-11-01, Kyle's call): a hero comes out of the Greyhollow wood with
   their weapon, their own way out of a blow and the Relic Javelin, and knows no class skill; nothing in the wood
   uses one, and no line says they've forgotten or lost it. Each class's own trainer teaches its skill
-  from level 2 for 60 gold: Master Cole the War Cry, Huntress Maeve the Hunter's Net, Whisper
+  from level 2 for 60 gold: Master Cole the Shield Charge and the War Cry (both at once; the hero carries one, and changes it at his yard), Huntress Maeve the Hunter's Net, Whisper
   Shadowstep, Magister Vell the Elemental Channel (Vell taught the Channel: settled), Mother Isolde
   Sanctuary. From level 3, for 80 gold, Maeve teaches the snare on the jump and Vell the image on the
   blink (the Mage's own craft through the focus, not shard-stuff; the goblins go for it a couple of

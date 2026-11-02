@@ -3,7 +3,7 @@ import { lure, seenFrom } from './lantern';
 import { visible } from './flasks';
 import { HUNGRY_FX, wears } from './hungry';
 import { collide, currentMap, inArea, wadeAt } from '../shared/arena';
-import { FRIENDLY, DECOY, ALERT, ARCHER, BUTCHER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, type EnemyAttackSpec, type EnemySpec, VARIANTS, STEALTH, CLASS_DODGES, WEAPONS } from '../shared/tuning';
+import { FRIENDLY, DECOY, ALERT, ARCHER, BUTCHER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, type EnemyAttackSpec, type EnemySpec, VARIANTS, STEALTH, CLASS_DODGES, WEAPONS, HORN } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { shove, slide } from './bodies';
 import { attackCovers, hitHero } from './combat';
@@ -25,6 +25,9 @@ export function newEnemy(id: number, kind: Enemy['kind'], x: number, y: number):
 }
 
 function nearest(e: Enemy, heroes: Hero[], now: number): Hero | null {
+  // A war cry it heard: it comes for whoever gave it, and nobody else, until it wears off.
+  const cried = heroes.find((h) => h.rallyUntil > now && h.act !== 'down' && Math.hypot(h.x - e.x, h.y - e.y) <= HORN.radius * 1.5);
+  if (cried) return cried;
   let best: Hero | null = null, bd = Infinity;
   for (const h of heroes) {
     if (h.act === 'down') continue;

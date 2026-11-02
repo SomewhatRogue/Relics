@@ -917,3 +917,20 @@ which moves the page to the media channel.
   Healer kit could come later.
 - Hew screams as the Stoker takes him ("No! No, no, n"), cut off at the bite.
 - The pixel font now has punctuation, a heart, and draws lowercase as capitals, so captives' words show.
+
+## 2026-11-01: the Warrior's two skills, blocks cost breath, an easier grab (Kyle; Opus 5.5)
+
+- The War Cry no longer helps allies block (they might not block). It now draws every goblin in
+  earshot to the Warrior, and nobody else, for 5 s; it wakes the ones at rest. Small goblins right
+  beside them flinch.
+- New: Shield Charge. A 5-tile run shield first along where you face; small goblins in the way are
+  knocked aside and left reeling (so they can be grabbed), big ones stagger, crates and barrels burst,
+  a wall stops it (`src/sim/bash.ts`, `BASH` in magic.ts).
+- A class can have a choice of skills (`SKILL_CHOICES`): the trainer teaches them together and the hero
+  carries one, swapping for free at the trainer (`Profile.skill`). Only the Warrior has two for now.
+- A held block costs no health at all, only breath, and a lot of it (2.4 per point of damage; a butcher's
+  cleave takes most of a full bar). Weapon `chip` values are unused now.
+- Grabbing: a small goblin that is busy (feeding, swinging at someone else, or at the end of a swing)
+  can be grabbed as well as one reeling or one you're behind. The wood's field has crates and a barrel
+  off the burning carts, and the Warrior's grab lesson teaches throwing those first.
+- Hew no longer says "skittles" (it read as the sweets, not the old pin game).

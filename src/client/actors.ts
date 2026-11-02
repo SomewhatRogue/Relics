@@ -53,8 +53,8 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean, t: 
     const name = (h.tag ?? h.id).toUpperCase();
     drawText(c.glow, name, Math.round(x - name.length * 2), Math.round(y + 6), '#9ad8a8');
   }
-  if (h.act === 'roll' || h.act === 'zip') {
-    const dx = h.act === 'roll' ? h.rollDx : h.fx, dy = h.act === 'roll' ? h.rollDy : h.fy;
+  if (h.act === 'roll' || h.act === 'zip' || h.act === 'bash') {
+    const dx = h.act === 'zip' ? h.fx : h.rollDx, dy = h.act === 'zip' ? h.fy : h.rollDy;
     c.glow.globalAlpha = 0.25;
     const tumble = h.act === 'roll' && dk.kind === 'roll', n = h.act === 'roll' && dk.kind === 'dash' ? 5 : 3;
     for (let k = 1; k <= n; k++) c.glow.drawImage(look.down.white, Math.round(bx - 7 - dx * 5 * k), Math.round(by - (tumble ? 10 : 17) - dy * 5 * k), 14, tumble ? 11 : 18);

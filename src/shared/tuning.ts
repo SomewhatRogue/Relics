@@ -33,8 +33,8 @@ export const CHARGE = { start: 0.18, full: 0.9 };
 export const INPUT_BUFFER = 0.25;
 
 export const GUARD = {
-  /** Stamina spent per point of damage blocked. */
-  staminaPerDmg: 1.4,
+  /** Stamina spent per point of damage blocked (a block costs no health: Kyle, 2026-11-01). */
+  staminaPerDmg: 2.4,
   /** A re-press this soon after the last one doesn't reopen the window (no mashing). */
   parryRepress: 0.25,
   guardBreakStun: 0.9,

@@ -5,7 +5,7 @@ import { CHAPTER_1, QUORUM, chapterGoals, councilOpen, marketOpen, rewardMult } 
 import { TRAINERS, housesFor, type SpotId } from '../shared/town';
 import { ballot } from '../shared/worldsync';
 import { openSquare } from './squareui';
-import { LEAVES, TEACHES, DRILLS, DRILL_ORDER, TECHNIQUE, drillCap, drillPrice, type DrillId, WANT, ARMOR, MODS, REROLL, STEEL, TIERS, nextLevel, POTION, POTIONS, type PotionId, AUGMENTS, CLASS_KITS, CLASS_ORDER, CLASS_SKILL, ELEMENT_NAME, RELICS, TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
+import { LEAVES, TEACHES, DRILLS, DRILL_ORDER, TECHNIQUE, drillCap, drillPrice, type DrillId, WANT, ARMOR, MODS, REROLL, STEEL, TIERS, nextLevel, POTION, POTIONS, type PotionId, AUGMENTS, CLASS_KITS, CLASS_ORDER, CLASS_SKILL, SKILL_CHOICES, ELEMENT_NAME, RELICS, TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
 import { device, type Game } from './game';
 import { line } from './speech';
 import { PACK } from '../sim/pack';
@@ -92,7 +92,8 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     const ready = (d: DrillId) => !needs(d) || knowsIt(needs(d)!);
     const detail = (title: string, text: string, buy?: { label: string; ok: boolean; act: () => void }) =>
       panel.show(head, p(`<b>${title}</b>`) + p(text) + p(`You have ${pr.gold} gold.`), [...(buy ? [{ label: buy.label, primary: true, disabled: !buy.ok, act: () => (buy.act(), again()) }] : []), { label: 'BACK', act: again }]);
-    const teach: ['skill' | 'leave', string, string][] = [['skill', RELICS[skillId].name, CLASSES[pr.cls].skill], ...(leave ? [['leave', leave.name, leave.text + '.'] as ['leave', string, string]] : [])];
+    const choices = SKILL_CHOICES[pr.cls], skillName = choices.map((r) => RELICS[r].name).join(' AND ');
+    const teach: ['skill' | 'leave', string, string][] = [['skill', skillName, CLASSES[pr.cls].skill], ...(leave ? [['leave', leave.name, leave.text + '.'] as ['leave', string, string]] : [])];
     const html = (pr.picks > 0 ? say(name, TEACH[pr.cls][0]) : '') + (pr.cls === 'HEALER' && pr.glow > 0 ? say(name, COAL.isolde) : '') +
       p(`Level ${pr.level}. Experience ${pr.xp}${pr.level < 10 ? ` of ${next}` : ' (the chapter cap)'}. ${pr.gold} gold.`) +
       (pr.perks.length ? p('Yours: ' + pr.perks.map((k) => `<b>${PERKS[k].name}</b>`).join(', ')) : '') +
@@ -107,7 +108,10 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       const text = (d === 'technique' ? tech.text : DRILLS[d].text) + '.' + (!ready(d) ? " More ranks once you've learned it." : r >= DRILLS[d].max ? ' No more ranks.' : r >= cap ? ` More ranks at level ${cap * 2}.` : ` Rank ${r + 1} costs ${price} gold.`);
       return { label: `${drillName(d)} ${r}/${DRILLS[d].max}`, act: () => detail(`${drillName(d)}, rank ${r} of ${DRILLS[d].max}`, text, open ? { label: `RANK ${r + 1} (${price} GOLD)`, ok: pr.gold >= price, act: () => g.buyDrill(d) } : undefined) };
     });
-    panel.show(head, html, [...picks, ...lessonButtons, ...drillButtons]);
+    // A class with a choice of skills: carry one, change it here for nothing.
+    const carried = pr.skill && choices.includes(pr.skill) ? pr.skill : skillId;
+    const carryButtons = choices.length > 1 && knowsIt('skill') ? choices.map((r) => ({ label: r === carried ? `CARRYING ${RELICS[r].name}` : `CARRY ${RELICS[r].name}`, primary: false, disabled: r === carried, act: () => (g.chooseSkill(r), again()) })) : [];
+    panel.show(head, html, [...picks, ...carryButtons, ...lessonButtons, ...drillButtons]);
   } else if (id === 'smith' || id === 'market') {
     const forged = id === 'market';
     if (forged && !marketOpen(w)) return panel.show('MARKET ROW', p('Empty stalls and a cat. The traders are camped outside the north gate with the refugees, and the gate stays shut to them until the council says otherwise.'));
@@ -138,7 +142,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     ]);
   } else if (id === 'wright') {
     // Your skill, and any relic you've found: fit an element, or choose which relic to carry.
-    const rel = [CLASS_SKILL[pr.cls], ...pr.relics];
+    const rel = [...SKILL_CHOICES[pr.cls], ...pr.relics];
     const html = (g.gearList().some((it) => it.quality === 'hungry') ? say('Ivo', CHURCH.ivo) : '') + say('Ivo', pr.relics.length ? 'Fire, frost or storm, set right into it. Hear it hum? It likes you. Don\'t let it like you too much.' : 'No relic yet? They come out of the big ones, at the bottom of the deep jobs. Bring me one. Meanwhile I can set an element into that trick of yours.') +
       p(`You have ${pr.gold} gold. An element costs ${SHOP.augment}; taking one out is free.`) +
       rel.map((r, i) => p(`<b>${RELICS[r].name}</b>${i ? (pr.relic === r ? ' (carried)' : ' (on the shelf)') : ' (your skill)'}: ${pr.augments[r] ? ELEMENT_NAME[pr.augments[r] as keyof typeof ELEMENT_NAME] : 'plain'}`)).join('');

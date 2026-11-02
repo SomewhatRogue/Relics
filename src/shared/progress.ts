@@ -84,6 +84,8 @@ export interface Profile {
   /** Relics found at the end of deep dives, and the one carried into a job ('' none). */
   relics: RelicId[];
   relic: RelicId | '';
+  /** The class skill carried, when the class has a choice of them (the first, until picked). */
+  skill?: RelicId;
   /** Elements the relic-wright has fitted to this hero's skill and relics. */
   augments: Partial<Record<RelicId, Augment>>;
   runs: number;

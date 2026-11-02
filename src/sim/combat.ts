@@ -181,9 +181,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   if (canGuard && h.blocking) {
     // Too heavy to block: the guard breaks (it should have been parried).
     if (a.crush) h.stamina = 0;
-    const chip = Math.round(a.dmg * w.chip * (1 - g.guard) * taken);
-    h.hp -= chip;
-    h.stamina -= a.dmg * GUARD.staminaPerDmg * w.guardCost * (1 - g.guard) * (h.rallyUntil > now ? HORN.guard : 1) * (h.perks.includes('ironhide') ? PERK.ironhide : 1);
+    // A held block takes nothing off your health; it costs breath instead, and plenty of it.
+    h.stamina -= a.dmg * GUARD.staminaPerDmg * w.guardCost * (1 - g.guard) * (h.perks.includes('ironhide') ? PERK.ironhide : 1);
     h.staminaAt = now;
     h.hitstop = Math.max(h.hitstop, HITSTOP.light);
     shove(h, sx / sl, sy / sl, a.knock * 0.4, HERO.weight);
@@ -191,7 +190,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
       Object.assign(h, { stamina: 0, act: 'stun', actT: 0, actDur: GUARD.guardBreakStun });
       ev.push({ k: 'guardbreak', x: h.x, y: h.y });
     } else ev.push({ k: 'block', x: h.x, y: h.y });
-    return downIfDead(h, ev);
+    return;
   }
   const n = Math.round(a.dmg * taken);
   h.hp -= n;

@@ -1,6 +1,6 @@
 /**
  * Grab, slam, throw. Only a small goblin you've earned can be grabbed: stunned, netted, frozen,
- * staggered, or one you've got behind. Overhead, ATTACK slams it into the ground (a kill pounds its
+ * staggered, busy (feeding, swinging at someone else, or just after a swing), or one you've got behind. Overhead, ATTACK slams it into the ground (a kill pounds its
  * head in); GRAB again throws it, and it hits whatever it flies into. It wriggles free in time.
  */
 import { collide } from '../shared/arena';
@@ -14,7 +14,9 @@ export function grabbable(h: Hero, e: Enemy, now: number): boolean {
   const dx = e.x - h.x, dy = e.y - h.y, d = Math.hypot(dx, dy);
   if (d > GRAB.reach + e.radius) return false;
   const behind = (e.fx * -dx + e.fy * -dy) / (d || 1) < GUARD.rearCos;
-  return e.act === 'stunned' || e.act === 'flinch' || frozen(e, now) || snared(e, now) || behind;
+  // Busy: feeding, swinging at someone else, or caught at the end of a swing that missed.
+  const a = e.attack, busy = e.feeding || (!!a && (a.aimed !== h.id || a.t > a.windup + a.active));
+  return e.act === 'stunned' || e.act === 'flinch' || frozen(e, now) || snared(e, now) || behind || busy;
 }
 
 /** Lift the nearest grabbable goblin overhead; false if there is none. */

@@ -13,10 +13,10 @@ import { BOUNTY, HERO_SLOTS, PERK, SHOP, gainXp, newProfile, type PerkId, type P
 import { Rng } from '../shared/rng';
 import { CHAPTER_1, QUORUM, rewardMult, type WorldState } from '../shared/story';
 import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
-import { LEAVES, TEACHES, drillCap, drillPrice, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, FOUND_RELICS, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
+import { LEAVES, TEACHES, drillCap, drillPrice, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, FOUND_RELICS, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
 import { ArenaRoom } from '../sim/room';
 import { lessonOf, newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
-import { woodMap } from '../shared/wood';
+import { woodMap, WOOD_PROPS } from '../shared/wood';
 import { PACK } from '../sim/pack';
 import { refreshHealth, statsOf } from '../sim/gearstats';
 import { goal, interiorRoom, isFinal, newRun, runRoom, tally, type Run } from '../sim/run';
@@ -111,7 +111,7 @@ export class Game {
     this.outside = null;
     this.run = null;
     this.woodReplay = replay;
-    const room = new ArenaRoom(7, { map: woodMap() });
+    const room = new ArenaRoom(7, { map: woodMap(), furniture: WOOD_PROPS });
     this.place(room, room.map.hero);
     const h = this.hero, cls = this.profile.cls;
     // You come round with nothing but your class's weapon (your skill is your trainer's to teach); a
@@ -209,7 +209,7 @@ export class Game {
     h.rings = [...p.rings];
     h.baseHp = HERO.hp + (p.perks.includes('tough') ? PERK.tough : 0);
     h.maxHp = h.baseHp + statsOf(h).health;
-    h.relics = abilitiesOf(p.cls, p.relic);
+    h.relics = abilitiesOf(p.cls, p.relic, p.skill);
     h.learned = p.learned;
     // Your skill in hand, or (not yet taught it) the relic you carry.
     h.relic = knows(h, 'skill') ? h.relics[0] : (h.relics[1] ?? h.relics[0]);
@@ -649,7 +649,7 @@ export class Game {
     // Out of the Stoker: the javelin, on the RELIC button at once.
     if (w.relic && !h.found.includes('javelin')) {
       h.found = ['javelin'];
-      h.relics = abilitiesOf(this.profile.cls, 'javelin');
+      h.relics = abilitiesOf(this.profile.cls, 'javelin', this.profile.skill);
       if (!knows(h, 'skill')) h.relic = 'javelin';
     }
     if (w.done) this.finishWood();
@@ -735,7 +735,7 @@ export class Game {
   /** The relic-wright fits an element to a relic (or takes it off, free). */
   fitAugment(r: RelicId, el: Augment): boolean {
     const p = this.profile, cost = el ? SHOP.augment : 0;
-    if (p.gold < cost || (r !== CLASS_SKILL[p.cls] && !p.relics.includes(r))) return false;
+    if (p.gold < cost || (!SKILL_CHOICES[p.cls].includes(r) && !p.relics.includes(r))) return false;
     p.gold -= cost;
     p.augments[r] = el;
     this.hero.augments[r] = el;
@@ -844,6 +844,18 @@ export class Game {
     const h = this.hero;
     h.learned = p.learned;
     if (what === 'skill') h.relic = h.relics[0];
+    store(this.save);
+  }
+
+  /** Carry another of your class's skills (once taught; free, at the trainer). */
+  chooseSkill(r: RelicId): void {
+    const p = this.profile, h = this.hero;
+    if (!SKILL_CHOICES[p.cls].includes(r) || !knows(h, 'skill')) return;
+    const was = h.relics[0];
+    p.skill = r;
+    h.relics = abilitiesOf(p.cls, h.relics[1], r);
+    if (h.relic === was) h.relic = r;
+    h.augments[r] = p.augments[r] ?? '';
     store(this.save);
   }
 

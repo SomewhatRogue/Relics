@@ -58,6 +58,11 @@ function treeLines(): Round[] {
   return out;
 }
 
+/** What came off the burning carts on the field: something for a Warrior to pick up and throw. */
+export const WOOD_PROPS: { kind: 'crate' | 'barrel'; x: number; y: number }[] = [
+  { kind: 'crate', x: 7.2, y: 33.6 }, { kind: 'barrel', x: 17.9, y: 29.6 }, { kind: 'crate', x: 14.4, y: 34.3 },
+];
+
 export function woodMap(): GameMap {
   const blocks: Block[] = [
     // The field: wagons burning where the column broke.
@@ -201,7 +206,7 @@ export const LINES = {
     backstab: "Three of them, and you'll not stand toe to toe with three, not with those little things, so you get yourself round the *back* of one. I expect you know how, I expect you've had a fair bit of practice.",
     heavy: "Three coming up past the kilns, and slow about it, so there's time to draw it all the way back, and you take it, mind. I've seen half a draw go into one of them, and all it did was make it *cross*.",
     charge: "Four of them bunched round my kiln like they're warming their hands. If that thing does what I think it does, you'll let it build a good while first, I'd have thought. Don't tell me how, mind, I'd sooner not know.",
-    grab: "Two more out of the trees, and fresh ones. Now, you're the size for it, I'd say. I once saw a big lad from the camps knock one silly, pick it up by the scruff and sling it at its mate, and the pair of them went over like *skittles*. They hate that, I've noticed.",
+    grab: "Two more out of the trees, and fresh ones. Now, you're the size for it, I'd say. There's crates come off those carts, so pick one up and *throw* it at them. Or get round the back of one while it's busy with something else, and pick _it_ up instead, they hate that, I've noticed.",
     slip: "Now, this big one breaks a guard like kindling, and you've not got much guard to break, so you wait for it, wait, and be gone *just* as it comes down, and then it's yours while it gets over the surprise.",
   },
   /** When you get it right (a short pause in the fight). */
@@ -215,7 +220,7 @@ export const LINES = {
     block: 'Hold your guard while the red fills. Each block costs breath (the yellow bar).',
     parry: 'Tap your guard the moment the red flashes white. It staggers them, and your next blow lands hard.',
     relic: 'Throw it with your relic button. A small goblin is carried off and pinned to the nearest wall. It comes back to your hand after a few seconds.',
-    grab: 'Hit a small goblin so it reels, or get behind it, then grab it. Grab again to throw it, and whatever it hits gets hurt. Out on jobs, crates and barrels throw too.',
+    grab: 'Grab a crate or a barrel and grab again to throw it. A small goblin can be grabbed too, from behind, or while it reels, or while it is busy swinging at someone else. Whatever you throw hurts whatever it hits.',
     backstab: 'Hit a goblin from behind and the blow lands far harder.',
     heavy: 'Hold attack until fully drawn or charged, then let go. A full shot hits much harder.',
     slip: "You can't hold a block. Roll just as a blow lands to pass through it. That staggers whoever struck, unless it was an arrow.",

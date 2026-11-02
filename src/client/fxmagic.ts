@@ -84,8 +84,12 @@ export function magicFx(fx: Fx, ev: FightEvent, x: number, y: number): void {
       flash(fx, x, y - 8, 50, 1, [1, 0.9, 0.6], 0.25);
       break;
     case 'rally':
-      fx.say(x, y - 36, 'RALLY', '#ff8a6a');
-      fx.rings.push({ x, y, life: 0.5, max: 0.5, col: '#ff8a6a', size: 90 });
+      fx.say(x, y - 36, 'WAR CRY', '#ff8a6a');
+      fx.rings.push({ x, y, life: 0.6, max: 0.6, col: '#ff8a6a', size: 140 });
+      fx.shake = Math.max(fx.shake, 3);
+      break;
+    case 'bash':
+      fx.burst(x, y, 10, ['#8a8496', '#c8c4d0'], 40, false);
       fx.shake = Math.max(fx.shake, 2);
       break;
     case 'rallied':

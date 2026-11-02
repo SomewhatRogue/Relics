@@ -32,7 +32,7 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     line: 'Sword and shield. Holds the line.',
     pitch: "Somebody has to stand in the door. You're the one with the shield.",
     weapon: 'Sword and shield',
-    skill: 'War Cry: nearby allies catch their breath and block at half cost. Small goblins flinch. Your trainer teaches it from level 2.',
+    skill: 'Shield Charge or War Cry, one carried at a time. Shield Charge: run shield first through whatever is in front of you, knocking small goblins flat and bursting crates. War Cry: every goblin in earshot comes for you and nobody else. Your trainer teaches both from level 2, and you change which you carry there.',
     cant: 'Nothing at range. Slow feet.',
     guard: "Can hold a block and parry, and the shield covers nearly everything in front. Can't roll: walk out of anything striped.",
     stats: { POWER: 4, GUARD: 5, SPEED: 2, RANGE: 1, SUPPORT: 3 },

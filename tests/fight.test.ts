@@ -75,12 +75,12 @@ describe('guarding against the butcher', () => {
     expect(h.y - y0).toBeGreaterThan(0.3);
   });
 
-  it('a block takes only chip damage and costs stamina', () => {
+  it('a block costs no health, and a good deal of stamina', () => {
     const { room, h } = setup();
     room.setIntent('me', intent({ block: true, blockSeq: 1 }));
     run(room, ticks(BUTCHER.cleave.windup) + 2);
-    expect(h.hp).toBe(HERO.hp - Math.round(BUTCHER.cleave.dmg * SWORD.chip));
-    expect(h.stamina).toBeLessThan(HERO.stamina);
+    expect(h.hp).toBe(HERO.hp);
+    expect(h.stamina).toBeLessThan(HERO.stamina * 0.5);
   });
 
   it('a tap of block in the window is a parry: no damage, butcher stunned, counter ready', () => {
@@ -135,7 +135,7 @@ describe('guarding against the butcher', () => {
     until(room, 0.6);
     room.setIntent('me', intent({ block: true, blockSeq: 1 }));
     run(room, ticks(0.8));
-    expect(h.hp).toBe(HERO.hp - Math.round(BUTCHER.cleave.dmg * SWORD.chip));
+    expect(h.hp).toBe(HERO.hp);
   });
 
   it('mashing block does not keep the parry window open', () => {
@@ -481,17 +481,17 @@ describe('kits block and dodge differently', () => {
 describe('relic loadout', () => {
   it('starts with only the class skill; a found relic takes the second slot; an empty slot does nothing', () => {
     const { room, h } = onTarget(1);
-    expect(h.relics).toEqual(['horn']);
+    expect(h.relics).toEqual(['bash']);
     room.setIntent('me', intent({ relicPickSeq: 1, relicPick: 1 }));
     room.step();
-    expect(h.relic).toBe('horn');
-    h.relics = ['horn', 'hook'];
+    expect(h.relic).toBe('bash');
+    h.relics = ['bash', 'hook'];
     room.setIntent('me', intent({ relicPickSeq: 2, relicPick: 1 }));
     room.step();
     expect(h.relic).toBe('hook');
     room.setIntent('me', intent({ relicPickSeq: 3, relicPick: 0 }));
     room.step();
-    expect(h.relic).toBe('horn');
+    expect(h.relic).toBe('bash');
   });
 });
 

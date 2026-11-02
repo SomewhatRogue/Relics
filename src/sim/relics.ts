@@ -100,17 +100,15 @@ export function ward(h: Hero, heroes: Hero[], aim: Intent | undefined, now: numb
   ev.push({ k: 'ward', x: t.x, y: t.y });
 }
 
-/** Sound the war horn: every ally in earshot is rallied; small goblins close by flinch. */
-export function rally(h: Hero, heroes: Hero[], enemies: Enemy[], now: number, ev: FightEvent[]): void {
+/** The war cry: every goblin in earshot wakes and comes for this hero, and nobody else, for a while;
+ *  small ones right beside them flinch. */
+export function rally(h: Hero, enemies: Enemy[], now: number, ev: FightEvent[]): void {
   ev.push({ k: 'rally', x: h.x, y: h.y });
-  for (const o of heroes) {
-    if (o.act === 'down' || Math.hypot(o.x - h.x, o.y - h.y) > HORN.radius) continue;
-    o.stamina = HERO.stamina;
-    o.rallyUntil = now + HORN.time;
-    ev.push({ k: 'rallied', x: o.x, y: o.y });
-  }
+  h.rallyUntil = now + HORN.time;
   for (const e of enemies) {
-    if (isDead(e) || e.weight > 1 || held(e, now) || Math.hypot(e.x - h.x, e.y - h.y) > HORN.scare) continue;
-    Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: 0.5 });
+    const d = Math.hypot(e.x - h.x, e.y - h.y);
+    if (isDead(e) || d > HORN.radius) continue;
+    Object.assign(e, { alert: true, feeding: false });
+    if (e.weight <= 1 && !held(e, now) && d <= HORN.scare) Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: 0.5 });
   }
 }

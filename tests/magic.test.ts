@@ -133,7 +133,7 @@ describe('class relics', () => {
     const { room, h } = onTarget(1);
     const seen: string[] = [];
     for (let i = 1; i <= 5; i++) room.setIntent('me', intent({ classSeq: i })), room.step(), seen.push(h.relics.join(' '));
-    expect(seen).toEqual(['net', 'shadow', 'channel', 'sanctuary', 'horn']);
+    expect(seen).toEqual(['net', 'shadow', 'channel', 'sanctuary', 'bash']);
   });
 
   it("the ranger's net snares a scrapper flat", () => {
@@ -220,18 +220,36 @@ describe('class relics', () => {
     expect(a.hp).toBeLessThan(36);
   });
 
-  it("the war horn rallies allies: stamina back, and blocking costs half", () => {
+  it('the war cry draws every goblin in earshot to the one who gave it', () => {
     const room = new ArenaRoom(1, { squire: true });
     const h = room.join('me');
     const q = room.heroes.find((x) => x.id === 'squire')!;
-    Object.assign(h, { x: q.x - 3, y: q.y, stamina: 10 });
-    q.stamina = 5;
-    expect(h.relic).toBe('horn');
+    Object.assign(h, { x: q.x - 4, y: q.y, relics: ['horn'], relic: 'horn' });
     room.setIntent('me', intent({ relicSeq: 1 }));
     const ev = run(room, 0.5);
     expect(ev.some((e) => e.k === 'rally')).toBe(true);
-    expect(q.stamina).toBeGreaterThan(90);
-    expect(q.rallyUntil).toBeGreaterThan(room.time);
+    expect(h.rallyUntil).toBeGreaterThan(room.time);
+    // The butcher, nearer the squire, turns to the Warrior.
+    const b = room.enemies.find((e) => e.kind === 'butcher')!;
+    Object.assign(b, { x: q.x + 1, y: q.y, attack: null, cooldown: 0, alert: true });
+    run(room, 1.2);
+    expect(b.attack?.aimed ?? 'me').toBe('me');
+    expect(Math.hypot(b.x - h.x, b.y - h.y)).toBeLessThan(Math.hypot(q.x + 1 - h.x, q.y - h.y));
+  });
+
+  it('the shield charge runs through small goblins, leaving them reeling, and bursts a crate', () => {
+    const room = new ArenaRoom(1, { scrappers: true });
+    const h = room.join('me');
+    Object.assign(h, { x: 6, y: 9, fx: 1, fy: 0, relics: ['bash'], relic: 'bash' });
+    const s = room.enemies.find((e) => e.kind === 'scrapper')!;
+    for (const e of room.enemies) if (e !== s) Object.assign(e, { x: 1, y: 15, cooldown: 99 });
+    Object.assign(s, { x: 8.5, y: 9, cooldown: 99, alert: true });
+    room.setIntent('me', intent({ relicSeq: 1 }));
+    const ev = run(room, 0.7);
+    expect(ev.some((e) => e.k === 'bash')).toBe(true);
+    expect(h.x).toBeGreaterThan(9.5);
+    expect(s.hp).toBeLessThan(s.maxHp);
+    expect(['stunned', 'dead']).toContain(s.act);
   });
 
   it('cycles the readied skill through its elements', () => {
@@ -240,7 +258,7 @@ describe('class relics', () => {
     for (let i = 1; i <= 4; i++) {
       room.setIntent('me', intent({ augmentSeq: i }));
       room.step();
-      seen.push(h.augments.horn);
+      seen.push(h.augments.bash);
     }
     expect(seen).toEqual(['fire', 'frost', 'storm', '']);
   });

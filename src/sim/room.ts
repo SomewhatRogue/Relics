@@ -22,6 +22,7 @@ import { dropPickups, stepPickups, type Pickup } from './pickups';
 import { dropCoal, healMult, stepCoals, type Coal } from './lantern';
 import { impacts } from './impacts';
 import { release, stepCarry, tryGrab } from './grab';
+import { startBash, stepBash } from './bash';
 import { dropProp, newProp, propImpacts, roomProps, stepLift, stepProps, sweepProps, tryLift } from './props';
 import { stepParty, sweepAllies } from './party';
 import { dropFrom, stepDrops, takeLoot } from './loot';
@@ -167,6 +168,7 @@ export class ArenaRoom {
       grab: (h) => tryGrab(h, this.enemies, this.time, this.events) || tryLift(h, this.props, this.events),
       carry: (h, inp, walk) => (h.lifting ? stepLift(h, inp, w, TICK, walk) : stepCarry(h, inp, this.enemies, this.time, TICK, this.events, walk)),
       drop: (h) => (release(h, this.enemies, this.events), dropProp(h, this.props)),
+      bash: (h) => stepBash(h, this.enemies, w, TICK),
     };
     const alive = new Set(this.enemies.filter((e) => !isDead(e)).map((e) => e.id));
     for (const h of this.heroes) takeLoot(h, this.intents.get(h.id) ?? NO_INTENT, this.drops, this.events);
@@ -280,7 +282,8 @@ export class ArenaRoom {
     else if (h.relic === 'lodestone') this.bolts.push(lobLodestone(h, this.aimDistance(h, LODESTONE.range, LODESTONE.fallback), el));
     else if (h.relic === 'shadow') shadowstep(h, this.enemies, w.ev);
     else if (h.relic === 'channel') Object.assign(h, { act: 'channel', actT: 0, actDur: CHANNEL.time * (1 - technique(h.drills, 'MAGE')) }), w.ev.push({ k: 'channel', x: h.x, y: h.y, el: h.augments.channel || 'fire' });
-    else if (h.relic === 'horn') rally(h, this.heroes, this.enemies, w.now, w.ev);
+    else if (h.relic === 'horn') rally(h, this.enemies, w.now, w.ev);
+    else if (h.relic === 'bash') startBash(h, w.ev);
     else if (h.relic === 'ward') ward(h, this.heroes, this.intents.get(h.id), w.now, w.ev);
     else if (h.relic === 'sanctuary') (this.zones.push(hallow(h, this.intents.get(h.id), w.now, el, w.ev)), ward(h, this.heroes, this.intents.get(h.id), w.now, w.ev));
     else this.zones.push(hallow(h, this.intents.get(h.id), w.now, el, w.ev));
