@@ -433,3 +433,5 @@ body[data-guard="none"] .tb.block { display: none; }
 body:not([data-mode='run']) #leave { display: none; }
 /* On a job the tips are off the screen, so their button gives LEAVE the room. */
 body[data-mode='run'] #tips { display: none; }
+/* A long weapon line wraps short of the corner buttons instead of running under them. */
+#hud .gear.kit { white-space: normal; width: min(230px, 58vw); display: block; line-height: 1.35; }
