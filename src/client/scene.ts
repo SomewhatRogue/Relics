@@ -10,6 +10,7 @@ import { drawHound, drawSnare } from './hound';
 import type { Hero } from '../sim/types';
 import { blit, type Ctx } from './draw';
 import { asleep, drawEnemy, drawHeld, drawTelegraph } from './foes';
+import { drawDrums } from './backline';
 import { camKick } from './heropose';
 import { houseOf } from './cottage';
 import { EL_LIGHT } from './palette';
@@ -142,6 +143,11 @@ export class Scene {
     glow.clearRect(0, 0, this.vw, this.vh);
     const pw = me ? WEAPONS[me.weapon].parryWindow + me.lenience : 0.3;
     for (const e of room.enemies) if (e.attack && e.act === 'attack') drawTelegraph(c, e.attack, cx, cy, pw);
+    // A drummer's reach and its beat on the floor, and the goblins it has roused (client/backline.ts).
+    drawDrums(c, room.enemies, (e) => {
+      const [x, y] = lerp('e:' + e.id, e.x, e.y);
+      return [x - cx, y - (e.z ?? 0) * LIFT - cy];
+    }, room.time);
     // With daggers in hand, show each goblin's back: the place a backstab lands.
     if (me?.weapon === 'daggers') for (const e of room.enemies) {
       if (e.act === 'dead' || e.kind === 'dummy' || e.kind === 'swingDummy') continue;
@@ -345,8 +351,10 @@ export class Scene {
     for (const e of room.enemies) {
       const at = e.attack;
       if (!at || at.t >= at.windup) continue;
-      const k = at.t / at.windup, ax = at.kind === 'slam' ? at.cx : at.ox + at.dx * at.range * 0.5, ay = at.kind === 'slam' ? at.cy : at.oy + at.dy * at.range * 0.5;
+      const k = at.t / at.windup, round = at.kind === 'slam' || at.kind === 'hex', ax = round ? at.cx : at.ox + at.dx * at.range * 0.5, ay = round ? at.cy : at.oy + at.dy * at.range * 0.5;
       lights.push({ x: OX + ax * PX - cx, y: OY + ay * PX - cy, r: 40, i: 0.35 * k, c: [1, 0.25, 0.15] });
+      // A hexer's fetish lights it up green as the spell comes.
+      if (at.kind === 'hex') lights.push({ x: OX + e.x * PX - cx, y: OY + e.y * PX - cy - 16, r: 18 + 22 * k, i: 0.3 + 0.5 * k, c: [0.55, 1, 0.3] });
     }
     for (const j of room.javelins) {
       const x = OX + j.x * PX - cx, y = OY + j.y * PX - cy - 8;

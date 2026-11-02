@@ -29,6 +29,8 @@ export * from './potions.js';
 export * from './gear.js';
 export * from './hungry.js';
 export * from './drills.js';
+export * from './backline.js';
+import { DRUMMER, HEXER } from './backline.js';
 
 /** Holding attack past `start` begins charging; the heavy is strongest at `full`. */
 export const CHARGE = { start: 0.18, full: 0.9 };
@@ -164,6 +166,9 @@ export const VARIANTS = {
   lunger: { hp: 30, reach: 2.8, stab: { windup: 0.8, active: 0.1, recover: 0.8, dmg: 10, knock: 5, range: 3.0, arc: 24, unblockable: true } as EnemyAttackSpec },
   /** Run goblins with a board: blows and shots from the front do `front` of themselves (from behind, or a heavy blow, all of it). */
   shield: { hp: 44, front: 0.25 },
+  /** The back of the pack (shared/backline.ts): a caster and a drummer. */
+  hexer: HEXER,
+  drummer: DRUMMER,
   heavy: { hp: 110, reach: 1.7, speed: 0.75, swing: { windup: 1.0, active: 0.1, recover: 0.9, dmg: 18, knock: 8, range: 1.9, arc: 100, unblockable: false } as EnemyAttackSpec },
   stoker: {
     hp: 520,

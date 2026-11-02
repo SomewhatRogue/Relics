@@ -22,7 +22,7 @@ export function ambush(enemies: Enemy[], heroes: Hero[], rng: Rng, x: number, y:
     if (rng.next() < AMBUSH.variant) f.variant = rng.next() < 0.5 ? 'lunger' : 'shield';
     base.push(f);
   }
-  const foes = scaleFoes(base, players(heroes).length).slice(0, AMBUSH.most);
+  const party = players(heroes).length, foes = scaleFoes(base, party, party >= 3 ? rng.int(1e6) + 1 : 1).slice(0, AMBUSH.most);
   let id = Math.max(0, ...enemies.map((e) => e.id)) + 1;
   for (const f of foes) {
     const e = newEnemy(id++, f.kind, f.x, f.y);

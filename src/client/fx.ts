@@ -83,6 +83,14 @@ export class Fx {
           this.rings.push({ x, y, life: 0.35, max: 0.35, col: '#d8c8a8' });
           this.shake = Math.max(this.shake, 6);
           this.flashes.push({ x, y: y - 4, r: 60, i: 0.6, c: [1, 0.6, 0.35], life: 0.12, max: 0.12 });
+        } else if (ev.kind === 'hex') {
+          // The ground under a hex goes up: clods, green fire, a scorch left behind.
+          this.crater(x, y, 9);
+          this.debris(x, y - 2, 10);
+          this.burst(x, y - 3, 22, ['#9be040', '#d8ff90', '#5a8a20'], 75, true);
+          this.rings.push({ x, y, life: 0.3, max: 0.3, col: '#9be040' });
+          this.shake = Math.max(this.shake, 3);
+          this.flashes.push({ x, y: y - 4, r: 50, i: 0.6, c: [0.55, 1, 0.3], life: 0.14, max: 0.14 });
         } else if (ev.kind === 'cleave') this.shake = Math.max(this.shake, 1.5);
         else if (ev.kind === 'charge') (this.shake = Math.max(this.shake, 4)), this.debris(x, y - 2, 10);
         break;

@@ -11,6 +11,7 @@ import type { Game } from './game';
 import type { Music } from './music';
 import { SCORES, type Area } from './scores';
 import { sfx } from './sfx';
+import { DRUMMER } from '../shared/tuning';
 import { butcher, goblin } from './voices';
 import { blockSound, chargedSound, hitSound, shotSound, swingSound, woodSounds } from './weaponsfx';
 
@@ -21,6 +22,7 @@ export class Soundscape {
   private chatterAt = 3;
   private gnawAt = 0;
   private crackleAt = 0;
+  private beatAt = 0;
   private wasInside: unknown = null;
 
   /** A tune asked of the bard (played while you're out in the square). */
@@ -73,10 +75,11 @@ export class Soundscape {
     if (ev.k === 'windup') {
       if (ev.kind === 'stab') return goblin.hiss();
       if (ev.kind === 'shot') return goblin.draw();
+      if (ev.kind === 'hex') return goblin.chant(Math.round(ev.x * 7 + ev.y * 3));
       if (ev.kind === 'cleave' || ev.kind === 'slam' || ev.kind === 'charge') return butcher.roar(ev.kind !== 'cleave');
       return;
     }
-    if (ev.k === 'impact') return ev.kind === 'slam' ? sfx.boom() : undefined;
+    if (ev.k === 'impact') return ev.kind === 'slam' ? sfx.boom() : ev.kind === 'hex' ? goblin.hexBurst() : undefined;
     if (ev.k === 'chop' || ev.k === 'blaze' || ev.k === 'collapse') return woodSounds[ev.k]();
     if (ev.k === 'denspawn') return goblin.screech();
     if (ev.k === 'bellow') return butcher.roar(true), butcher.roar(true), sfx.boom();
@@ -97,6 +100,14 @@ export class Soundscape {
     // Goblins at the dead, close by: wet chewing, tearing.
     const eating = room.enemies.find((e) => !isDead(e) && e.feeding && e.alert === false && !asleep(room.map, e) && Math.hypot(e.x - me.x, e.y - me.y) < 8);
     if (eating && now > this.gnawAt) (sfx.gnaw(1 - Math.hypot(eating.x - me.x, eating.y - me.y) / 8), (this.gnawAt = now + 0.9 + Math.random() * 1.1));
+    // A drummer beating, louder the closer you are, in time with its ripple (room time).
+    const beat = Math.floor(room.time / DRUMMER.beat);
+    if (beat !== this.beatAt) {
+      this.beatAt = beat;
+      let near = 0;
+      for (const e of room.enemies) if (e.drumming && !isDead(e)) near = Math.max(near, 1 - Math.hypot(e.x - me.x, e.y - me.y) / 14);
+      goblin.drum(near, beat % 2 === 1);
+    }
     // Goblins coming for you talk among themselves now and then.
     const coming = room.enemies.filter((e) => !isDead(e) && e.alert !== false && e.kind === 'scrapper' && (e.act === 'chase' || e.act === 'attack') && Math.hypot(e.x - me.x, e.y - me.y) < 9);
     if (coming.length && now > this.chatterAt) {

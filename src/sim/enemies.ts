@@ -3,8 +3,9 @@ import { lure, seenFrom } from './lantern';
 import { visible } from './flasks';
 import { HUNGRY_FX, wears } from './hungry';
 import { collide, currentMap, inArea, wadeAt } from '../shared/arena';
-import { FRIENDLY, DECOY, ALERT, ARCHER, BUTCHER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, type EnemyAttackSpec, type EnemySpec, VARIANTS, STEALTH, CLASS_DODGES, WEAPONS, HORN } from '../shared/tuning';
+import { FRIENDLY, DECOY, ALERT, ARCHER, BUTCHER, DRUMMER, HEXER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, type EnemyAttackSpec, type EnemySpec, VARIANTS, STEALTH, CLASS_DODGES, WEAPONS, HORN } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
+import { hexFriendly, isBackline, stepBackline } from './backline';
 import { shove, slide } from './bodies';
 import { attackCovers, hitHero } from './combat';
 import { damage, frozen, isDead, kill, snared } from './damage';
@@ -45,7 +46,7 @@ function nearest(e: Enemy, heroes: Hero[], now: number): Hero | null {
   return best;
 }
 
-function begin(e: Enemy, kind: EnemyAttack['kind'], s: EnemyAttackSpec, target: Hero, ev: FightEvent[]): void {
+export function begin(e: Enemy, kind: EnemyAttack['kind'], s: EnemyAttackSpec, target: Hero, ev: FightEvent[]): void {
   const dx = target.x - e.x, dy = target.y - e.y, l = Math.hypot(dx, dy) || 1;
   e.fx = dx / l;
   e.fy = dy / l;
@@ -57,6 +58,8 @@ function begin(e: Enemy, kind: EnemyAttack['kind'], s: EnemyAttackSpec, target: 
   };
   // The wood's drilled goblins wind up slower, so there's time to read the blow.
   if (e.drill) e.attack.windup *= 1.5;
+  // Roused by a drum: quicker to the blow, and it lands harder (locked here, so the telegraph holds).
+  if (e.roused) (e.attack.windup *= DRUMMER.rouse.windup), (e.attack.dmg = Math.round(e.attack.dmg * DRUMMER.rouse.dmg));
   e.act = 'attack';
   e.actT = 0;
   ev.push({ k: 'windup', x: e.x, y: e.y, kind });
@@ -71,14 +74,16 @@ function runAttack(e: Enemy, heroes: Hero[], now: number, dt: number, ev: FightE
   if (a.kind === 'charge') return runCharge(e, a, heroes, now, ev, others);
   if (!a.done && a.t >= a.windup) {
     a.done = true;
-    ev.push({ k: 'impact', x: a.kind === 'slam' ? a.cx : e.x, y: a.kind === 'slam' ? a.cy : e.y, kind: a.kind });
+    const round = a.kind === 'slam' || a.kind === 'hex';
+    ev.push({ k: 'impact', x: round ? a.cx : e.x, y: round ? a.cy : e.y, kind: a.kind });
     // Blows land on your own level; arrows reach up and down.
     const before = heroes.map((h) => h.hp);
     for (const h of heroes) if (a.kind === 'shot' || (h.z ?? 0) === (e.z ?? 0)) hitHero(e, a, h, now, ev);
     if (e.attack === null) return true;
     // Their own get in the way: a missed arrow takes the first goblin in its line; a butcher's blow
     // lands on any small goblin under it.
-    friendly(e, a, others, heroes.some((h, i) => h.hp < before[i]), now, ev);
+    if (a.kind === 'hex') hexFriendly(e, a, others, now, ev);
+    else friendly(e, a, others, heroes.some((h, i) => h.hp < before[i]), now, ev);
   }
   return a.t >= a.windup + a.active + a.recover;
 }
@@ -167,7 +172,7 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   }
   if (e.act === 'attack') {
     if (runAttack(e, heroes, now, dt, ev, others) && e.act === 'attack') {
-      Object.assign(e, { attack: null, act: after(e), actT: 0, cooldown: spec ? spec.pauseBetween : SWING_DUMMY.every });
+      Object.assign(e, { attack: null, act: after(e), actT: 0, cooldown: e.variant === 'hexer' ? HEXER.pause : spec ? spec.pauseBetween : SWING_DUMMY.every });
     }
     return;
   }
@@ -192,7 +197,7 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   const want = Math.atan2(uy, ux), have = Math.atan2(e.fy, e.fx);
   let diff = want - have;
   diff = Math.atan2(Math.sin(diff), Math.cos(diff));
-  const slow = (e.chillUntil > now ? FROST.slow : 1) * (e.snareUntil > now ? NET.slow : 1);
+  const slow = (e.chillUntil > now ? FROST.slow : 1) * (e.snareUntil > now ? NET.slow : 1) * (e.roused ? DRUMMER.rouse.pace : 1);
   const turn = Math.max(-spec.turn * slow * dt, Math.min(spec.turn * slow * dt, diff)), na = have + turn;
   e.fx = Math.cos(na);
   e.fy = Math.sin(na);
@@ -208,6 +213,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     } else if (on) walk(e, ux, uy, spec.speed * slow * Math.max(0.2, facing), dt);
     return;
   }
+  // The back of the pack (sim/backline.ts): a hexer or a drummer keeps its distance.
+  if (isBackline(e)) return stepBackline(e, t, d, !!via || !level, ux, uy, facing, spec.speed * slow, others, now, dt, ev);
   // The wood's goblins: each fights the way its lesson needs.
   const v = e.variant, reach = v === 'lunger' ? VARIANTS.lunger.reach : v === 'heavy' ? VARIANTS.heavy.reach : spec.reach;
   const netted = e.snareUntil > now;
@@ -273,7 +280,7 @@ function wander(e: Enemy, rng: Rng, now: number, dt: number): void {
   void rng;
 }
 
-function walk(e: Enemy, mx: number, my: number, k: number, dt: number): void {
+export function walk(e: Enemy, mx: number, my: number, k: number, dt: number): void {
   const ml = Math.hypot(mx, my) || 1, wade = wadeAt(e.x, e.y);
   e.x += (mx / ml) * k * wade * dt;
   e.y += (my / ml) * k * wade * dt;

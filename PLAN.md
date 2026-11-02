@@ -2,6 +2,12 @@
 
 ## Current slice
 
+**The back of the pack** (Claude Opus 5.5, 2026-11-01). Built; waiting on Kyle's play. *Done when* Kyle
+meets a hexer (steps out of its striped circle, or cuts it down mid-spell) and a drummer (sees the pack
+pick up near it, and kill it first) on a job, and a party of three finds the extra goblins a little
+tougher. Open: a second spell for the hexer (a slow bolt), a horn-blower or other buffers, and their
+own sprites in the Blender pass.
+
 **Recovery codes** (Claude Opus 5.5, 2026-11-01). Built; waiting on Kyle's play. *Done when* a friend
 opens RECOVERY CODE on the start screen, writes down their code, and brings their heroes to another
 phone or computer with USE A CODE. Open: the panel's lines through the lore keeper and line editor.

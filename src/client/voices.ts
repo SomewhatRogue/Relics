@@ -86,6 +86,22 @@ export const goblin = {
   draw() {
     if (ready()) burst('bandpass', 300, 700, 9, 0.28, 0.6), burst('bandpass', 500, 900, 9, 0.12, 0.4, 0.3);
   },
+  /** A hexer calling the ground up: a low drone, the same few syllables over and over. */
+  chant(id: number) {
+    if (!ok()) return;
+    const p = pitchOf(id), t = ctx!.currentTime;
+    for (let i = 0; i < 4; i++) syllable(t + i * 0.26, 0.24, 150 * p, 120 * p, i % 2 ? 400 : 700, i % 2 ? 2200 : 1200, 0.16, 0.6);
+  },
+  /** The ground going up under a hex: a wet crack and a hiss of something burning green. */
+  hexBurst() {
+    if (ready()) burst('lowpass', 1200, 120, 0.8, 0.7, 0.35), burst('highpass', 2400, 5200, 1, 0.18, 0.4, 0.05);
+  },
+  /** One beat of a drummer's drum, quieter the further off (`v` 0 to 1); the off-beat a little higher. */
+  drum(v: number, off: boolean) {
+    if (!ready() || v <= 0) return;
+    burst('lowpass', off ? 260 : 180, 50, 1.2, 0.55 * v, 0.22);
+    burst('bandpass', off ? 900 : 700, 300, 3, 0.15 * v, 0.06);
+  },
   /** Out of a den: a screech. */
   screech() {
     if (ok()) syllable(ctx!.currentTime, 0.3, 900, 500, 900, 2600, 0.25, 0.8);

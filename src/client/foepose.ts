@@ -5,6 +5,7 @@
  * staggering, the stunned swaying. Pose data only (motion.ts); foes.ts draws it.
  */
 import type { Enemy } from '../sim/types';
+import { DRUMMER } from '../shared/tuning';
 import { MOTION, WHITE, clamp01, easeOut, newPose, pushDir, rest, struck, type BodyPose } from './motion';
 
 const P = newPose(), D: [number, number] = [0, 0], F = MOTION.foe, B = MOTION.butcher;
@@ -51,12 +52,27 @@ function reel(p: BodyPose, e: Enemy, now: number): void {
   }
 }
 
-/** A small goblin: knife pulled back and coiled (the lunger low and shivering), then the stab. */
+/**
+ * A small goblin: knife pulled back and coiled (the lunger low and shivering), then the stab. A hexer
+ * stands tall with its staff raised through the spell and brings it down as the ground goes; a
+ * drummer's stick comes down on every beat.
+ */
 export function scrapperPose(e: Enemy, t: number, now: number): BodyPose {
   const p = rest(P), a = e.attack, lunger = e.variant === 'lunger';
   p.dx = e.fx;
   p.dy = e.fy;
-  if (a && a.t < a.windup) {
+  if (a && a.kind === 'hex' && a.t < a.windup + a.active + 0.08) {
+    const k = Math.min(1, a.t / a.windup), up = a.t < a.windup;
+    p.raise = up ? Math.round(1 + 3 * easeOut(k)) : 0;
+    p.lean = up ? Math.round(e.fx * -1 * easeOut(k)) : Math.round(e.fx * 2);
+    p.crouch = up ? -0.08 * easeOut(k) : 0.12;
+    if (up && k > 0.7) p.ox = Math.floor(now * 30) % 2;
+    (p.phase = up ? 'windup' : 'release'), (p.k = k);
+  } else if (e.drumming && !a) {
+    const k = (t % DRUMMER.beat) / DRUMMER.beat;
+    p.raise = k < 0.2 ? 0 : 2;
+    p.oy = k < 0.12 ? 1 : 0;
+  } else if (a && a.t < a.windup) {
     const W = lunger ? F.windupLunger : F.windup, k = a.t / a.windup;
     const amp = Math.min(1.3, Math.max(0.5, a.windup / F.windup.full)), q = easeOut(k) * amp;
     p.lean = -Math.round(e.fx * W.lean * q);
