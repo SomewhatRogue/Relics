@@ -1,11 +1,13 @@
 /**
  * Turns keys, mouse and touch into an Intent. Laptop: WASD to move, mouse to aim, left click to
  * attack, hold right click to block (tap it to parry), Space to roll; J / K work too;
- * E the class skill, R the relic carried, G grab (then click to slam, G to throw). Phone (upright):
+ * E the class skill, R the relic carried, G grab (then click to slam, G to throw), Q a potion (held:
+ * turn the belt instead). Phone (upright):
  * a floating stick on the left, Attack, Block and Roll under the right thumb.
  */
 import { NO_INTENT, type Intent } from '../sim/types';
 import { unlockAudio } from './sfx';
+import { PotionPress } from './potionpress';
 
 export class Input {
   intent: Intent = { ...NO_INTENT };
@@ -17,6 +19,7 @@ export class Input {
   private stick = { id: '', ox: 0, oy: 0, x: 0, y: 0 };
   private stickEl!: HTMLElement;
   private knobEl!: HTMLElement;
+  private potion = new PotionPress(() => this.intent.potionSeq++, () => (this.intent.beltSeq = (this.intent.beltSeq ?? 0) + 1));
 
   constructor(private heroScreen: () => [number, number, number] | null) {
     const unlock = () => unlockAudio();
@@ -30,7 +33,7 @@ export class Input {
       if (k === 'e') this.use(0);
       if (k === 'r') this.use(1);
       if (k === 'g') this.intent.grabSeq++;
-      if (k === 'q') this.intent.potionSeq++;
+      if (k === 'q') this.potion.down();
       if (k === 'k') (this.intent.blockSeq++), (this.blockHeld.key = true);
     });
     addEventListener('keyup', (e) => {
@@ -38,9 +41,11 @@ export class Input {
       this.keys.delete(k);
       if (k === 'k') this.blockHeld.key = false;
       if (k === 'j') this.attackHeld.key = false;
+      if (k === 'q') this.potion.up();
     });
     addEventListener('blur', () => {
       this.keys.clear();
+      this.potion.cancel();
       this.blockHeld = { mouse: false, key: false, touch: false };
       this.attackHeld = { mouse: false, key: false, touch: false };
     });
@@ -106,7 +111,11 @@ export class Input {
     btn('.relic', () => this.use(0));
     btn('.relic2', () => this.use(1));
     btn('.grab', () => this.intent.grabSeq++);
-    btn('.potion', () => this.intent.potionSeq++);
+    // A tap drinks; a long press turns the belt (potionpress.ts). A cancelled touch drinks nothing.
+    const pb = ui.querySelector('.potion') as HTMLElement;
+    pb.addEventListener('touchstart', (e) => (e.preventDefault(), pb.classList.add('down'), this.potion.down()), { passive: false });
+    pb.addEventListener('touchend', (e) => (e.preventDefault(), pb.classList.remove('down'), this.potion.up()), { passive: false });
+    pb.addEventListener('touchcancel', () => (pb.classList.remove('down'), this.potion.cancel()));
     btn('.roll', () => this.intent.rollSeq++);
     btn('.block', () => ((this.intent.blockSeq++), (this.blockHeld.touch = true)), () => (this.blockHeld.touch = false));
   }

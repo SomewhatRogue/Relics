@@ -5,6 +5,7 @@ import type { Hero } from '../sim/types';
 import { ease, line, smear, type Ctx } from './draw';
 import { EL_COL } from './palette';
 import { PX } from './world';
+import { bladeLength, censer, drawKit, kitPose } from './heldkits';
 
 export interface Pose { a: number; ext: number; from?: number; thrust?: boolean; reach: number; pull: number }
 
@@ -14,12 +15,14 @@ const ranged = (h: Hero) => !!WEAPONS[h.weapon].combo[0].shot || WEAPONS[h.weapo
 /** Where the weapon points now (and what it has swept through, for the smear). */
 export function pose(h: Hero, now: number): Pose {
   const fa = Math.atan2(h.fy, h.fx), side = h.fx >= -0.2 ? 1 : -1;
-  const rest: Record<Hero['weapon'], number> = {
+  const rest: Partial<Record<Hero['weapon'], number>> = {
     sword: fa + side * 1.1, greatsword: -Math.PI / 2 - side * 0.7, spear: -Math.PI / 2 + side * 0.3, daggers: fa + side * 1.4,
     longbow: fa + side * 1.2, shortbow: fa + side * 1.1, crossbow: fa + side * 0.9, wand: fa + side * 1.1, staff: -Math.PI / 2 + side * 0.25,
     rod: fa + side * 1, mace: fa + side * 1.2,
   };
   const charge = Math.min(1, (h.actT + CHARGE.start) / chargeFull(WEAPONS[h.weapon], h));
+  const kit = kitPose(h, now, fa, side, charge);
+  if (kit) return kit;
   if (h.act === 'charge') {
     // Held past the flash, the draw starts to shake (and the shot weakens).
     const over = h.actT + CHARGE.start > chargeFull(WEAPONS[h.weapon], h) + RELEASE.overdraw ? Math.sin(now * 70) * 0.09 : 0;
@@ -48,8 +51,8 @@ export function pose(h: Hero, now: number): Pose {
     if (t < s.windup + s.active) return { a: start + (end - start) * ((t - s.windup) / s.active), ext: 0, from: start, reach: s.range * PX, pull: 0 };
     return { a: end, ext: 0, from: t < s.windup + s.active + 0.07 ? start : undefined, reach: s.range * PX, pull: 0 };
   }
-  if (h.blocking) return { a: h.weapon === 'sword' ? rest.sword : fa + side * (h.weapon === 'greatsword' ? Math.PI / 2 : 1.3), ext: 0, reach: 0, pull: 0 };
-  return { a: rest[h.weapon], ext: 0, reach: 0, pull: 0 };
+  if (h.blocking) return { a: h.weapon === 'sword' ? rest.sword! : fa + side * (h.weapon === 'greatsword' ? Math.PI / 2 : 1.3), ext: 0, reach: 0, pull: 0 };
+  return { a: rest[h.weapon] ?? fa, ext: 0, reach: 0, pull: 0 };
 }
 
 /** A bow (`r` is half its length), its belly toward the target; the string pulls back with an arrow on it. */
@@ -106,7 +109,9 @@ function tip(c: Ctx, h: Hero, tx: number, ty: number, el: string): void {
 export function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): void {
   const g = c.lit, ox = px + Math.cos(p.a) * p.ext, oy = py + Math.sin(p.a) * p.ext;
   const side = h.fx >= -0.2 ? 1 : -1, el = EL_COL[h.augments[h.relic]];
-  if (h.weapon === 'sword') {
+  if (drawKit(c, h, px, py, ox, oy, p)) {
+    // (The Rogue's and Cleric's other kits: heldkits.ts.)
+  } else if (h.weapon === 'sword') {
     line(g, ox, oy, p.a, 2, 12, '#dfe6ec');
     line(g, ox, oy, p.a, 0, 2, '#d4a537');
     // The edge flashes as the blow goes out.
@@ -158,12 +163,7 @@ export function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): vo
     line(g, ox, oy, p.a, 8, 11, '#9aa3ad', 3);
     line(g, ox + Math.cos(p.a) * 9.5, oy + Math.sin(p.a) * 9.5, p.a + Math.PI / 2, -2.5, 2.5, '#cfd6dc');
     // The censer in the off hand, a coal lit from the Last Lantern swinging in it.
-    const cx = px - side * 9, cy = py + 3 + Math.round(Math.sin(c.now * 3)), sway = Math.sin(c.now * 3) * 2;
-    line(g, px - side * 8, py - 1, Math.PI / 2 + sway * 0.1, 0, 3, '#6a6470');
-    g.fillStyle = '#b08a3a';
-    g.fillRect(Math.round(cx + sway - 1), Math.round(cy), 3, 2);
-    c.glow.fillStyle = Math.floor(c.now * 6) % 2 ? '#ffd27a' : '#ff9a3c';
-    c.glow.fillRect(Math.round(cx + sway), Math.round(cy - 1), 1, 1);
+    censer(c, px, py, side);
   } else {
     // Twin daggers: one in each hand, the off hand trailing the swing.
     const lx = ox - side * 6, ly = oy + 1, la = p.a - side * 0.6;
@@ -172,8 +172,8 @@ export function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): vo
       line(g, x0, y0, a, 2, 7, '#e6ecf0');
     }
   }
-  if (h.act === 'charge' && !ranged(h) && h.weapon !== 'mace') {
-    const k = Math.min(1, (h.actT + CHARGE.start) / chargeFull(WEAPONS[h.weapon], h)), len = h.weapon === 'greatsword' || h.weapon === 'spear' ? 17 : h.weapon === 'daggers' ? 7 : 12;
+  if (h.act === 'charge' && !ranged(h) && bladeLength(h.weapon)) {
+    const k = Math.min(1, (h.actT + CHARGE.start) / chargeFull(WEAPONS[h.weapon], h)), len = bladeLength(h.weapon);
     c.glow.globalAlpha = 0.4 + 0.5 * k * (0.6 + 0.4 * Math.sin(c.now * 30));
     line(c.glow, ox, oy, p.a, len - 4 * k - 2, len, k >= 1 ? '#ffffff' : '#ffd860');
     c.glow.globalAlpha = 1;

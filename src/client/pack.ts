@@ -103,7 +103,11 @@ export class PackView {
       const it = h.bag[i], fits = !it.kit || WEAPONS[it.kit].cls === WEAPONS[h.weapon].cls;
       return row(card(it, h) + compare(h, it), (fits ? btn(COPY.equip, GEAR.equip, i, 'go') : '') + (it.quality === 'hungry' ? '' : btn(COPY.drop, GEAR.drop, i, 'ghost')));
     }
-    if (s === 'hand') return row(h.arms[h.weapon] ? card(h.arms[h.weapon]!) : `<b>${WEAPONS[h.weapon].name}</b><div class="tr">${COPY.plain}</div>`, h.arms[h.weapon] || h.weapon !== plain ? btn(COPY.intoPack, GEAR.equip, -1, 'ghost') : '');
+    if (s === 'hand') {
+      // Every other kit of your class you carry, a tap away.
+      const swaps = h.bag.map((it, k) => (slotOf(it) === 'weapon' && WEAPONS[it.kit!].cls === WEAPONS[h.weapon].cls ? btn(`${COPY.swapTo} ${itemName(it)}`, GEAR.equip, k, 'go') : '')).join('');
+      return row(h.arms[h.weapon] ? card(h.arms[h.weapon]!) : `<b>${WEAPONS[h.weapon].name}</b><div class="tr">${COPY.plain}</div>`, swaps + (h.arms[h.weapon] || h.weapon !== plain ? btn(COPY.intoPack, GEAR.equip, -1, 'ghost') : ''));
+    }
     if (s === 'armor' && h.armor) return row(card(h.armor), btn(COPY.takeOff, GEAR.unarm, 0, 'ghost'));
     if (s === 'ring' && h.rings[i]) return row(card(h.rings[i]), h.rings[i].hungry === 'wedding' ? '' : btn(COPY.takeOff, GEAR.off, i, 'ghost'));
     if (s === 'relic' && h.relics[1]) return row(`<b>${RELICS[h.relics[1]].name}</b>${el(h.relics[1], h)}`, btn(COPY.putAway, GEAR.carry, -1, 'ghost'));

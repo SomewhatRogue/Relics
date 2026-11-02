@@ -1,3 +1,5 @@
+import { MORE_KITS, type MoreKitId } from './kits.js';
+
 /**
  * Weapon kits. Until classes exist each weapon stands in for one (it carries its class's guard,
  * speed and dodge). The rules read these and the client draws from the same values.
@@ -24,8 +26,14 @@ export interface Swing {
   burst?: number;
   /** Heals every standing hero within HEAL_RADIUS of the swinger. */
   heal?: number;
-  /** Stuns what it hits this long (a smite). */
+  /** Stuns what it hits this long (a smite; a hand crossbow's bolt dazes small goblins only). */
   stun?: number;
+  /** A melee blow strikes at most this many goblins, nearest first (a rapier's lunge runs through two). */
+  hits?: number;
+  /** Sets what it strikes burning (the censer's coals). */
+  burn?: boolean;
+  /** A smite falls this long after the release (0.35 s if not set). */
+  delay?: number;
 }
 
 export interface Heavy extends Swing {
@@ -101,10 +109,14 @@ export interface Weapon {
   draw?: number;
   /** No charging: a press looses at once (the crossbow, then a long reload). */
   noCharge?: boolean;
+  /** Goblins it kills burst (a mace, a flail). */
+  blunt?: boolean;
+  /** Its blows come over a shield-bearer's board (a flail). */
+  overShield?: boolean;
   dodge: Dodge;
 }
 
-type KitId = 'sword' | 'greatsword' | 'spear' | 'daggers' | 'longbow' | 'shortbow' | 'crossbow' | 'wand' | 'staff' | 'rod' | 'mace';
+type KitId = 'sword' | 'greatsword' | 'spear' | 'daggers' | 'longbow' | 'shortbow' | 'crossbow' | 'wand' | 'staff' | 'rod' | 'mace' | MoreKitId;
 
 export const WEAPONS: Record<KitId, Weapon> = {
   sword: {
@@ -230,12 +242,14 @@ export const WEAPONS: Record<KitId, Weapon> = {
     ],
     heavy: { windup: 0.15, active: 0.05, recover: 0.55, dmg: 24, dmgFull: 70, range: 6, arc: 0, lunge: 0, knock: 4, knockFull: 10, shot: 'smite', burst: 1.3, stun: 1.2 },
     draw: 1.2,
-    chip: 0.18, blockSpeed: 0.45, chargeSpeed: 0.35, parryWindow: 0.3, guardArc: 150, guardCost: 1.1, speed: 0.84,
+    chip: 0.18, blockSpeed: 0.45, chargeSpeed: 0.35, parryWindow: 0.3, guardArc: 150, guardCost: 1.1, speed: 0.84, blunt: true,
     dodge: { kind: 'roll', distance: 2, time: 0.36, iFrom: 0.05, iTo: 0.28, stamina: 28, cooldown: 1.3 },
   },
+  // The Rogue's and Cleric's other kits (kits.ts).
+  ...MORE_KITS,
 };
 export type WeaponId = KitId;
-export const WEAPON_ORDER: WeaponId[] = ['sword', 'greatsword', 'spear', 'longbow', 'shortbow', 'crossbow', 'daggers', 'wand', 'staff', 'rod', 'mace'];
+export const WEAPON_ORDER: WeaponId[] = ['sword', 'greatsword', 'spear', 'longbow', 'shortbow', 'crossbow', 'daggers', 'rapier', 'handbow', 'wand', 'staff', 'rod', 'mace', 'censer', 'flail'];
 /** The demo's class button cycles these; the weapon button swaps between a class's own kits. */
 export const CLASS_ORDER: HeroClass[] = ['WARRIOR', 'RANGER', 'ROGUE', 'MAGE', 'HEALER'];
 /** How each class guards: `full` holds a block and parries; `parry` can tap a parry but never holds a
@@ -253,9 +267,9 @@ export const DECOY = { time: 2.5, lure: 5 };
 export const CLASS_KITS: Record<HeroClass, WeaponId[]> = {
   WARRIOR: ['sword', 'greatsword', 'spear'],
   RANGER: ['longbow', 'shortbow', 'crossbow'],
-  ROGUE: ['daggers'],
+  ROGUE: ['daggers', 'rapier', 'handbow'],
   MAGE: ['wand', 'staff', 'rod'],
-  HEALER: ['mace'],
+  HEALER: ['mace', 'censer', 'flail'],
 };
 /** A healing blow reaches every hero this close to the healer. */
 export const HEAL_RADIUS = 3;

@@ -12,6 +12,8 @@ export const COPY = {
   plain: 'Plain. No traits.',
   stillGoing: 'Nothing waits while you rummage.',
   equip: 'EQUIP',
+  /** On the hand's card: one button for each weapon of your class in the pack. */
+  swapTo: 'SWAP TO',
   drop: 'DROP',
   carry: 'CARRY',
   putAway: 'PUT AWAY',

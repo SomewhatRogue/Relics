@@ -382,7 +382,7 @@ export class Game {
         ...(t.includes('roll') ? {} : { rollSeq: h.seen.roll }),
         ...(t.includes('block') ? {} : { block: false, blockSeq: h.seen.block }),
         ...(t.includes('relic') ? {} : { relicSeq: h.seen.relic, relicPickSeq: h.seen.relicPick }),
-        ...(t.includes('potion') ? {} : { potionSeq: h.seen.potion }),
+        ...(t.includes('potion') ? {} : { potionSeq: h.seen.potion, beltSeq: h.seen.belt }),
         ...(t.includes('grab') ? {} : { grabSeq: h.seen.grab }),
       };
     }
@@ -917,7 +917,7 @@ export class Game {
 
 /** A friend's hero takes their press counters as already seen (so nothing pressed in town fires). */
 function syncSeen(h: Hero, i: Intent): void {
-  Object.assign(h.seen, { attack: i.attackSeq, block: i.blockSeq, roll: i.rollSeq, weapon: i.weaponSeq, relic: i.relicSeq, relicSwap: i.relicSwapSeq, relicPick: i.relicPickSeq, augment: i.augmentSeq, cls: i.classSeq, take: i.takeSeq, grab: i.grabSeq, gear: i.gearSeq, potion: i.potionSeq, open: i.openSeq });
+  Object.assign(h.seen, { attack: i.attackSeq, block: i.blockSeq, roll: i.rollSeq, weapon: i.weaponSeq, relic: i.relicSeq, relicSwap: i.relicSwapSeq, relicPick: i.relicPickSeq, augment: i.augmentSeq, cls: i.classSeq, take: i.takeSeq, grab: i.grabSeq, gear: i.gearSeq, potion: i.potionSeq, belt: i.beltSeq ?? 0, open: i.openSeq });
 }
 
 /** This browser, as one voter (all its heroes share it): made once, kept. */

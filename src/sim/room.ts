@@ -14,7 +14,7 @@ import { afflict, stepElements, type World } from './elements';
 import { stepBuildings, sweepBlocks } from './buildings';
 import { rouse } from './backline';
 import { newEnemy, stepEnemy } from './enemies';
-import { newHero, stepHero, type HeroActs } from './hero';
+import { currentSwing, newHero, stepHero, type HeroActs } from './hero';
 import { damage, isDead } from './damage';
 import { HUNGRY_FX, heals, onKill, stepHungry, wears } from './hungry';
 import { newChest, startChest, stepChests, type Chest } from './chests';
@@ -271,6 +271,8 @@ export class ArenaRoom {
       return;
     }
     if (charged) afflict(w, e, forgedElement(h), n);
+    // The censer's coals set alight what they strike.
+    if (currentSwing(h).burn) afflict(w, e, 'fire', n);
   }
 
   /** A Mage's spell, shaped by its element: fire a firebolt or a burning fireball; frost three icicles
@@ -336,7 +338,7 @@ export class ArenaRoom {
       if (full) (mult *= 2), (s = { ...s, pierce: true });
     }
     const bolts = this.bolts.length;
-    if (s.shot === 'smite') this.bolts.push(smite(h, s, this.aimDistance(h, s.range, 3.5), mult, traitsOf(h)));
+    if (s.shot === 'smite') this.bolts.push(smite(h, s, Math.min(s.range, this.aimDistance(h, s.range, 3.5)), mult, traitsOf(h), s.delay));
     else if (s.shot) {
       // A Mage's spells take the element it last channelled (fire to start with).
       const mage = WEAPONS[h.weapon].cls === 'MAGE', mel = (h.augments.channel || 'fire') as Augment;

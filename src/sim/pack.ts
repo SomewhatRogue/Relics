@@ -5,7 +5,7 @@
  */
 import { CLASS_KITS, RELICS, WEAPONS, abilitiesOf, itemName, slotOf, type Item } from '../shared/tuning';
 import { refreshHealth } from './gearstats';
-import type { FightEvent, Hero } from './types';
+import type { FightEvent, Hero, Intent } from './types';
 
 /** Weapons a pack holds. */
 export const PACK = 8;
@@ -73,5 +73,20 @@ export function applyGear(h: Hero, op: number, arg: number, ev: FightEvent[]): v
     h.relics = abilitiesOf(cls, r, h.relics[0]);
     if (!h.relics.includes(h.relic)) h.relic = h.relics[0];
     ev.push({ k: 'relic', x: h.x, y: h.y, name: r ? RELICS[r].name : RELICS[h.relics[0]].name });
+  }
+}
+
+/**
+ * Turn the belt once a press (counted, so two quick long presses turn it twice, and a guest's work the
+ * same as yours): the potion at the front goes to the back until a different kind is at the front.
+ * Nothing is drunk; the one now at the front says its name. Any time, mid-fight too.
+ */
+export function turnBelt(h: Hero, inp: Intent, ev: FightEvent[]): void {
+  const seq = inp.beltSeq ?? h.seen.belt ?? 0, n = Math.min(3, seq - (h.seen.belt ?? 0));
+  h.seen.belt = seq;
+  for (let k = 0; k < n && h.belt.length; k++) {
+    const was = h.belt[0];
+    for (let i = 0; i < h.belt.length - 1 && h.belt[0] === was; i++) h.belt.push(h.belt.shift()!);
+    ev.push({ k: 'potion', x: h.x, y: h.y, kind: h.belt[0] });
   }
 }

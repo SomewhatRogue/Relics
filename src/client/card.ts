@@ -19,6 +19,10 @@ export const HOW: Record<WeaponId, string> = {
   staff: 'Hold 1.6 s for an orb that bursts wide.',
   rod: 'Hold 1 s for a lance through a line.',
   mace: 'Every third blow heals everyone near. Hold for a smite that stuns.',
+  rapier: 'Quick thrusts at long reach, fairer head on than daggers. Hold to lunge through two.',
+  handbow: 'A knife for two stabs and a slash. Hold for a quick bolt that dazes a small goblin.',
+  censer: 'Two cuts, then the censer: it burns them and heals everyone near. The best Cleric guard. Hold to whirl it.',
+  flail: 'Slow, wide sweeps that come over a shield. The second heals. Hold to bring down a smite close in.',
 };
 const ARMOR_HOW = { light: 'Light: full speed and a full dodge. Takes full damage.', medium: 'Medium: 5% slower, 12% less damage taken.', heavy: 'Heavy: 12% slower, a shorter dodge that costs more breath, 25% less damage, and small goblins can\'t stagger you.' };
 

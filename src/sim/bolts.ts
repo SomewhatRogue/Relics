@@ -26,7 +26,7 @@ const base = (h: Hero, kind: Bolt['kind'], el: Augment): Bolt => ({
 
 /** Loose the swing's shot along the hero's facing; `mult` is the hero's damage (blessing, perfect release, tempo). */
 export function shoot(h: Hero, s: Swing, el: Augment, mult = 1, traits: TraitId[] = []): Bolt {
-  return { ...base(h, s.shot!, el), traits, speed: s.speed ?? 20, range: s.range, dmg: Math.round(s.dmg * mult), knock: s.knock, pierce: !!s.pierce, burst: s.burst ?? 0 };
+  return { ...base(h, s.shot!, el), traits, speed: s.speed ?? 20, range: s.range, dmg: Math.round(s.dmg * mult), knock: s.knock, pierce: !!s.pierce, burst: s.burst ?? 0, stun: s.stun ?? 0 };
 }
 
 /** A spot `dist` tiles ahead of the hero, kept inside the room. */
@@ -95,6 +95,8 @@ function strike(w: World, b: Bolt, e: Enemy): void {
   const boarded = e.variant === 'shield' && e.alert !== false && e.fx * -b.dx + e.fy * -b.dy > 0.3 && b.knock < 8;
   if (damage(e, Math.round(b.dmg * (crit ? CRIT : 1) * (boarded ? VARIANTS.shield.front : 1)), w.now, w.ev, { heavy: b.knock >= 8 || crit, flinch: FLINCH, mult: true, brutal: b.traits.includes('brutal'), dx: b.dx, dy: b.dy, src: b.kind })) return;
   if (e.act !== 'pinned') shove(e, b.dx, b.dy, b.knock, e.weight);
+  // A hand crossbow's bolt dazes a small goblin where it stands (not a butcher).
+  if (b.stun && e.kind !== 'butcher' && e.act !== 'pinned') Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: b.stun });
   if (wasFrozen && b.knock >= 8) shatter(e, w.now, w.ev);
   else (afflict(w, e, b.el, b.dmg), b.freeze && afflict(w, e, b.el, b.dmg));
   if (b.chain) for (const o of w.enemies) {
