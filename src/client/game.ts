@@ -29,12 +29,14 @@ import { treasure } from '../shared/treasure';
 /** What a piece of treasure that won't fit in the pack fetches. */
 const TREASURE_SOLD = 20;
 import { CoopGuest, CoopHost, loadRoom, type Friend } from './coop';
-import { forgetSession, keepSession } from './session';
+import { forgetSession, keepSession, keptJob, type Session } from './session';
 import { dayPhase, townLight } from '../shared/daylight';
 import { Followers } from './followers';
 import type { Parties } from './parties';
 
 export type Mode = 'town' | 'yard' | 'run' | 'wood';
+/** A whole job, to lead it from (coop.ts sends it every 2 s): `me` is whoever leads. */
+interface JobSave { run: Run; room: Record<string, unknown>; members: [string, string][]; key?: number }
 export interface Result { won: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number; relic?: RelicId; treasure: Item[]; sold: Item[]; lost?: number }
 /** Something you can use where you stand: a spot, a person, or a door. */
 export interface Near { label: string; talk?: SpotId; arg?: number; key?: string; door?: Block; chest?: number; npc?: Npc }
@@ -485,6 +487,28 @@ export class Game {
     this.coop = new CoopHost(go.room, this.profile.id, this.profile.name, this, go.members);
     this.startJob(go.job, go.members.length);
     keepSession({ code: go.room, lead: '', job: go.job, hero: this.profile.id });
+    this.stepDown(go.job);
+  }
+
+  /**
+   * Leading, and the relay says a friend leads now (this page was frozen or away long enough for them
+   * to take the job on): follow them, in the job as they have it, rather than run a second one.
+   */
+  private stepDown(job: Job): void {
+    const c = this.coop!;
+    c.onRefused = (lead) => {
+      if (this.coop !== c) return;
+      c.close();
+      this.coop = null;
+      this.startRemote(new CoopGuest(c.room, this.profile.id, lead, () => this.profile, job));
+    };
+  }
+
+  /** Back after a reload in a job with friends: lead it again from the job as this page left it, or follow. */
+  resume(s: Session): void {
+    const kept = s.lead ? null : keptJob();
+    if (kept) return this.leadFrom(s.code, JSON.parse(kept), 'host');
+    this.startRemote(new CoopGuest(s.code, this.profile.id, s.lead, () => this.profile, s.job));
   }
 
   /** Follow a friend's job (they lead): their room is drawn here as it comes. */
@@ -501,25 +525,28 @@ export class Game {
   /** The leader's gone: take their job on from the last whole job they sent, and lead it. */
   private takeOver(g: CoopGuest): void {
     // Their `me` is them again; mine is me.
-    const o = JSON.parse(g.save!.split('"me"').join(`"${g.lead}"`).split(`"${g.myId}"`).join('"me"')) as { run: Run; room: Record<string, unknown>; members: [string, string][] };
+    const o = JSON.parse(g.save!.split('"me"').join(`"${g.lead}"`).split(`"${g.myId}"`).join('"me"')) as JobSave;
     g.close();
+    this.leadFrom(g.code, { ...o, members: o.members.map(([id, name]) => [id === 'me' ? g.myId : id, name]) }, 'take');
+    // They went home (LEAVE): their hero goes with them, not left standing in the way.
+    const f = g.left ? this.coop?.friends.get(g.lead) : undefined;
+    if (f) (f.gone = true), this.dropFriend(g.lead);
+  }
+
+  /** Run the party's job here from a whole-job save, and lead it (if the relay agrees: else follow). */
+  private leadFrom(code: string, o: JobSave, want: 'host' | 'take'): void {
     this.remote = null;
+    this.mode = 'run';
     this.outside = null;
     this.insides.clear();
+    this.followers.clear();
     this.run = o.run;
     this.room = loadRoom(o.room);
-    this.roomKey += 2;
+    this.roomKey = Math.max(this.roomKey, o.key ?? 0) + 2;
     this.synced.clear();
-    const members = o.members.map(([id, name]) => [id === 'me' ? g.myId : id, name] as [string, string]);
-    this.coop = new CoopHost(g.code, g.myId, this.profile.name, this, members, 'take');
-    keepSession({ code: g.code, lead: '', job: o.run.job, hero: this.profile.id });
-    // The leader was only slow (the relay still has them): back to following them, not a job of my own.
-    this.coop.onRefused = (lead) => {
-      const job = o.run.job;
-      this.coop?.close();
-      this.coop = null;
-      this.startRemote(new CoopGuest(g.code, g.myId, lead, () => this.profile, job));
-    };
+    this.coop = new CoopHost(code, this.profile.id, this.profile.name, this, o.members, want);
+    keepSession({ code, lead: '', job: o.run.job, hero: this.profile.id });
+    this.stepDown(o.run.job);
   }
 
   private stepRemote(): FightEvent[] {
@@ -538,9 +565,9 @@ export class Game {
     return ev;
   }
 
-  /** Every player in the room (not the squire, not anyone down) stands in `a`. */
+  /** Every player in the room (not the squire, not anyone down, not a friend who's gone quiet) stands in `a`. */
   together(a: Area | null): boolean {
-    const ps = this.room.heroes.filter((x) => x.id !== 'squire' && x.act !== 'down');
+    const ps = this.room.heroes.filter((x) => x.id !== 'squire' && x.act !== 'down' && !this.coop?.away(x.id));
     return !!a && ps.length > 0 && ps.every((x) => inArea(a, x.x, x.y));
   }
 

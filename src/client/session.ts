@@ -6,7 +6,7 @@
 import type { Job } from '../shared/jobs';
 
 export interface Session { code: string; lead: string; job: Job; hero: string; at: number }
-const KEY = 'relic-coop', FRESH = 15 * 60_000;
+const KEY = 'relic-coop', JOB = 'relic-coop-job', FRESH = 15 * 60_000;
 
 export function keepSession(s: Omit<Session, 'at'>): void {
   try {
@@ -17,7 +17,26 @@ export function keepSession(s: Omit<Session, 'at'>): void {
 export function forgetSession(): void {
   try {
     localStorage.removeItem(KEY);
+    localStorage.removeItem(JOB);
   } catch { /* nothing kept */ }
+}
+
+/**
+ * Leading: the whole job as it stands (the same save that goes to the party every 2 s), so a reload
+ * of the leader's page can pick the job up where it was and lead it again.
+ */
+export function keepJob(save: string): void {
+  try {
+    localStorage.setItem(JOB, save);
+  } catch { /* too big or no storage: a friend takes it on instead */ }
+}
+
+export function keptJob(): string | null {
+  try {
+    return localStorage.getItem(JOB);
+  } catch {
+    return null;
+  }
 }
 
 /** Still in a job with friends, as this hero? */

@@ -307,7 +307,7 @@ function tick(t: number): void {
   if (ONLINE && !resumed && !title.open) {
     resumed = true;
     const s = session(game.profile.id);
-    if (s && game.mode === 'town') game.startRemote(new CoopGuest(s.code, game.profile.id, s.lead, () => game.profile, s.job));
+    if (s && game.mode === 'town') game.resume(s);
   }
   if ((game.coop || game.remote) && t - touchedAt > 20000) (touchedAt = t), touchSession();
   // Following a friend's job: my input goes to them.

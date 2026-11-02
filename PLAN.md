@@ -153,6 +153,9 @@ and burns out a goblin den on a job.
    Since: a friend's own hero walks at once (prediction), 20 updates a second, loot and the gold
    pot come home with everyone, a reload puts you straight back in, and the leader dropping hands
    the job to the friend first in line (the leader, back, follows them).
+   2026-11-02: LEAVE, party falls, and `npm run test:stress` (leaving, joining, rejoining, dying and
+   coming back, 15 scenarios in real browsers); a reloaded leader leads again from its own save, a
+   thawed one follows whoever took over (docs/DECISIONS.md).
    Not yet: the party can't split into buildings (everyone goes in with the leader); a job handed
    on from inside a building restarts that building's room only; the leader's mid-fight effects
    (sounds, sparks) for a friend come with the patches, so a lost patch loses its sparks.

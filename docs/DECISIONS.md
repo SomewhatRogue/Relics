@@ -2,6 +2,47 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-02: the party stress test, and what it broke (Kyle; Claude Opus 5.5)
+
+Kyle played online with a friend and things came apart when he died: the relay logs show his page
+stopped (hidden while he lay there), the friend asked to take the job on, the relay refused because
+his page still pinged, and they ended up in two different jobs. `npm run test:stress`
+(`scripts/stress-online.cjs`, helpers in `scripts/stress/`) now plays it out in real browsers against
+the local relay (two instances, 120 ms of lag), fresh players each time: a friend leaving, the leader
+leaving (with one friend and with two), the leader's page hidden 30 s, suspended outright, closed and
+reloaded, a friend reloading and a friend gone over a minute, every way of falling in a party, and
+leaving alone. A hidden page runs its timers once a second (as Chrome does); a suspended one runs
+nothing till it thaws (timers, frames and the socket's news held, then all at once). It prints a JSON
+report and fails on any failed step or page error. What it found, and the fixes:
+
+- **A frozen leader came back to a second job.** A phone that suspends the leader's page outright: the
+  friend takes the job on (right), but the leader's page, thawed, kept running its own copy. The relay
+  had told it someone else hosts; only a page that had itself taken a job on listened. Now every
+  leader does (`Game.stepDown`): told a friend leads, it closes its room and follows them.
+- **A leader's reload left the friend stuck.** The reloaded page came back as a follower of nobody
+  (its session says "I lead"), while the relay, seeing the same player, gave it the room; the friend's
+  takeover was refused, it followed a leader running nothing, and the job was lost 35 s later. Now
+  the leader keeps the whole-job save in the browser too (`session.ts keepJob`, every 2 s with the
+  one sent to friends), and a reload leads again from it (`Game.resume`, `leadFrom`); if a friend
+  already took over, the relay says so and it follows them.
+- **Following a new leader read their changes without their room.** With three, the friend second in
+  line could hear the new leader's patches before hearing they lead, then apply changes to an empty
+  copy (one goblin of nineteen, then a crash). A follower now waits for a whole room after changing
+  leader, and a new leader gets their own time before anyone thinks them gone too.
+- **A leader who left stood in the way.** Taking a job on from a leader who pressed LEAVE kept their
+  hero standing where it was for a minute, and the way on takes the whole party. Now their hero goes
+  (`CoopGuest.left`). And a friend not heard from in 5 s (a closed tab, a locked phone) no longer
+  holds up the way on (`CoopHost.away`); their hero still comes along to the next room, in case
+  they're back.
+- **A friend away over a minute came back to nothing.** The leader lets their hero go after a minute;
+  back, the friend's page had no hero to draw and stopped with an error every frame. Now it keeps
+  drawing its hero where it was and says hello every 2 s till the leader brings it back.
+
+Fine as they were: a friend's LEAVE, the hidden leader's room running on (nobody takes over), the
+closed tab taken on, a friend's reload, getting each other up (G, and HELP UP on a phone), getting
+yourself up once, out, the way on without the down and out, everyone out, and LEAVE alone (half the
+gold). No new player-facing words.
+
 ## 2026-11-01: three kits for every class, and the belt turns on a long press (Kyle; Opus 5.5)
 
 Kyle: other weapon types for all the classes (fun without needing many upgrades), and a long press on

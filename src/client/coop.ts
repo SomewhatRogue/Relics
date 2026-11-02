@@ -12,7 +12,8 @@
  *   game can't tell. The leader quiet 20 s, and the job ends for it as a loss.
  * - Handing on: every 2 s the leader also sends the whole job (the run and the room, saveRoom).
  *   The leader quiet 9 s, the friend first in line (by id) takes the room over from that and leads
- *   (Game.takeOver); the others hear who leads now and follow them. The old leader, back, joins in.
+ *   (Game.takeOver); the others hear who leads now and follow them. The old leader, back, follows
+ *   them; a leader whose page only reloaded leads again from the job as it kept it (Game.resume).
  */
 import type { Job } from '../shared/jobs';
 import type { Profile } from '../shared/progress';
@@ -26,8 +27,9 @@ import type { Run } from '../sim/run';
 import { NO_INTENT, type FightEvent, type Intent } from '../sim/types';
 import { RelaySocket, type RelayMsg } from './relay';
 import { Decoder, Encoder, stateOf, type Patch } from './snap';
+import { keepJob } from './session';
 
-const BYE_WAIT = 2.5, SEND_EVERY = 0.05, FULL_EVERY = 4, GRACE = 60, LOST = 20, KEEP = 2, SAVE_EVERY = 2, TAKE = 9, TAKE_NEXT = 5;
+const AWAY = 5, BYE_WAIT = 2.5, SEND_EVERY = 0.05, FULL_EVERY = 4, GRACE = 60, LOST = 20, KEEP = 2, SAVE_EVERY = 2, TAKE = 9, TAKE_NEXT = 5;
 /**
  * Your own hero, on a friend's screen, moves the moment you press. The leader's word on where you
  * are is a trip there and back old, so the walking you've done here since then is added on top of
@@ -95,9 +97,12 @@ export class CoopHost {
     if (this.evs.length > 200) this.evs.splice(0, this.evs.length - 200);
     for (const [id, f] of this.friends) if (!f.gone && now - f.heard > GRACE) (f.gone = true), this.game.dropFriend(id);
     // The whole job, now and then, for a friend to take on if this browser goes.
-    if (now - this.savedAt > SAVE_EVERY && [...this.friends.values()].some((f) => !f.gone)) {
+    if (now - this.savedAt > SAVE_EVERY && this.company) {
       this.savedAt = now;
-      this.sock.send('*', { save: JSON.stringify({ run: this.game.run, room: saveRoom(this.game.room), members: this.members, key: this.game.roomKey }) });
+      const save = this.saved();
+      this.sock.send('*', { save });
+      // (Kept here too, for this page to lead again after a reload.)
+      keepJob(save);
     }
     if (now - this.sentAt < SEND_EVERY) return;
     const g = this.game, room = g.room, full = now - this.fullAt > FULL_EVERY || g.roomKey !== this.sentKey || [...this.friends.values()].some((f) => f.fresh);
@@ -114,9 +119,20 @@ export class CoopHost {
 
   /** Leaving the job to the friends still in it: the whole job as it stands, then goodbye. */
   handOver(): void {
-    this.sock.send('*', { save: JSON.stringify({ run: this.game.run, room: saveRoom(this.game.room), members: this.members, key: this.game.roomKey }) });
+    this.sock.send('*', { save: this.saved() });
     this.sock.send('*', { bye: 1 });
     this.close();
+  }
+
+  /** The whole job as it stands. */
+  private saved(): string {
+    return JSON.stringify({ run: this.game.run, room: saveRoom(this.game.room), members: this.members, key: this.game.roomKey });
+  }
+
+  /** A friend gone, or not heard from in AWAY seconds (a closed tab, a locked phone): the party won't wait for them. */
+  away(id: string): boolean {
+    const f = this.friends.get(id);
+    return !!f && (f.gone || this.now - f.heard > AWAY);
   }
 
   /** Anyone still with me (not gone). */
@@ -160,6 +176,11 @@ export class CoopGuest {
 
   /** The newest whole job from the leader (to take it on), and when the leader was last heard. */
   save: string | null = null;
+  /** My hero as the leader last had it, and whether their room has let it go. */
+  private mine: Hero | null = null;
+  private missing = false;
+  /** The leader said goodbye (went home): whoever takes it on lets their hero go. */
+  left = false;
   private heardLead = -1;
 
   constructor(readonly code: string, readonly myId: string, public lead: string, private profile: () => Profile, readonly job: Job) {
@@ -182,7 +203,7 @@ export class CoopGuest {
     const d = m.d as { s?: string; end?: { won: boolean; run: Run }; save?: string; bye?: number };
     // The leader's headed home and left the job to us: as good as gone, so whoever's first takes it
     // on in a moment (once their goodbye has freed the room).
-    if (d.bye) return void (this.heardLead = this.now - TAKE + BYE_WAIT);
+    if (d.bye) return void ((this.left = true), (this.heardLead = this.now - TAKE + BYE_WAIT));
     // (The end's run swaps ids like a patch does, so my own tallies are under `me`.)
     if (d.end) return void (this.ended = JSON.parse(JSON.stringify(d.end).split('"me"').join('"@lead"').split(`"${this.myId}"`).join('"me"')));
     if (typeof d.save === 'string') return void (this.save = d.save);
@@ -194,7 +215,8 @@ export class CoopGuest {
     } catch {
       return;
     }
-    if (!body.f && !this.room) return;
+    // (Only a whole room to start from: a new leader's changes mean nothing without it.)
+    if (!body.f && (!this.room || this.key < 0)) return;
     if (body.f && (body.k !== this.key || !this.room) && body.map) {
       this.room = new ArenaRoom(1, { map: body.map });
       this.key = body.k;
@@ -214,6 +236,12 @@ export class CoopGuest {
     const r = room as unknown as Record<string, unknown>;
     for (const [c, list] of Object.entries(s)) if (c === 'blocks') room.map.blocks = list as typeof room.map.blocks;
     else r[c] = list;
+    // My hero let go (I was away over a minute): it stays drawn where it was, and I say hello till
+    // the leader brings it back (this copy is only drawn; the fight is the leader's).
+    const mineNow = room.heroes.find((h) => h.id === 'me');
+    this.missing = !mineNow && !!this.mine;
+    if (mineNow) this.mine = mineNow;
+    else if (this.mine) room.heroes.push(this.mine);
     // (The names came through the same swap: the leader's under '@lead', mine under 'me'.)
     for (const h of room.heroes) h.tag = body.names[h.id] ?? h.tag;
     room.time = body.t;
@@ -236,8 +264,9 @@ export class CoopGuest {
     const s = JSON.stringify(intent);
     // Every 0.5 s even unchanged, so the trip there and back stays timed.
     if (s !== this.said || now - this.saidAt > Math.min(KEEP, 0.5)) (this.sock.send(this.lead, { t: 'in', i: intent, at: now }), (this.said = s), (this.saidAt = now));
-    // No room yet: keep saying hello (the leader may still be getting there).
-    if (!this.room && now - this.helloAt > 2) this.hello();
+    // No room yet, or no hero of mine in it (away over a minute, a locked phone): keep saying hello
+    // (the leader may still be getting there, or let my hero go and will bring it back).
+    if ((!this.room || this.missing) && now - this.helloAt > 2) this.hello();
     if (this.room) (this.room as unknown as { acc: number }).acc = TICK * Math.min(1, (now - this.lastAt) / this.gap);
     this.predict(intent, now - (this.frameAt < 0 ? now : this.frameAt));
     this.frameAt = now;
@@ -282,6 +311,10 @@ export class CoopGuest {
     this.dec = new Decoder();
     this.key = -1;
     this.pred = this.server = null;
+    // A new leader: give them their own time before anyone thinks them gone too.
+    this.heardLead = this.now;
+    this.left = false;
+    this.mine = null;
   }
 
   /** How long the leader has been quiet. */
