@@ -30,6 +30,9 @@ async function hidden(k) {
   k.step('back in sight: Kyle leads, Sam follows', (await k.role(kyle)) === 'lead' && (await k.role(sam)) === 'follow:' + kyle.id);
   const [a, b] = [await k.ev(kyle, () => window.__game.room.time), await k.ev(sam, () => window.__game.room.time)];
   k.step('both on the same moment of the fight', Math.abs(a - b) < 1, [a, b]);
+  // Half a minute with nobody at the keys: the goblins may well have put both of them down by now
+  // (the board's first job is harder some days). On their feet again, so the way on can take them.
+  await k.ev(kyle, () => { for (const h of window.__game.room.heroes) if (h.act === 'down') Object.assign(h, { act: 'idle', actT: 0, actDur: 0, hp: h.maxHp, bleeding: false, out: false }); });
   k.step('and they finish it together', (await k.finish(kyle, [sam])) && (await k.until(sam, () => window.__game.mode === 'town', null, 10000)));
 }
 
