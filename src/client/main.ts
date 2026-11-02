@@ -225,6 +225,8 @@ function hud(now: number): void {
   if (cap && capKey !== shownCap) $('#caption').innerHTML = (cap.who ? `<b>${cap.who}</b>` : '') + '<span></span>', speak($('#caption').querySelector('span')!, cap.text, cap.who);
   shownCap = capKey;
   $('#skipcut').hidden = !wood || wood.cut < 0 || !pr.cutSeen;
+  // On a job, near the top of a room (where the way on is), the banner fades so it doesn't hide the exit.
+  $('#banner').classList.toggle('faint', game.mode === 'run' && game.hero.y < 7);
   if (game.mode === 'wood' && wood) {
     const g = woodGoal(wood, input.touch);
     $('#banner').innerHTML = `<b>${g.title}</b> ${g.text}<span>GREYHOLLOW, THE DAY AFTER</span>`;

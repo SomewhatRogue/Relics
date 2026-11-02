@@ -1334,3 +1334,9 @@ and he couldn't tell when or where he could leave.
   64 s the roof falls in after 10 s of falling dust: everyone inside is thrown out the door hurt (never
   below 1 health), the freed with them, and anyone still caged is lost (`run.lost`). Fire never touches
   the doorway or the way from the door to the cage. The house is rubble in the street once it falls.
+
+## 2026-11-01: small fixes (Opus 5.5)
+- Knock-downs, pick-ups and friends floored are counted per player in a run, so a friend following a
+  job gets their own tallies, not the leader's.
+- The results say how many were lost to a fire.
+- On a job, the banner fades when you're near the top of a room so it doesn't hide the way on.

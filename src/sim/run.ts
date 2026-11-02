@@ -27,10 +27,10 @@ export interface Run {
   dens: number;
   /** For the Roll: butchers felled, and this player's own falls, rescues, friends raised and friends felled. */
   butchers?: number;
-  falls?: number;
-  carried?: number;
-  raised?: number;
-  teamkills?: number;
+  falls?: Record<string, number>;
+  carried?: Record<string, number>;
+  raised?: Record<string, number>;
+  teamkills?: Record<string, number>;
   /** Blows landed on the freed, and freed people killed, by hero id (each player's own, so a friend's game reads theirs). */
   rescueHits?: Record<string, number>;
   rescueKills?: Record<string, number>;
@@ -64,6 +64,10 @@ export function interiorRoom(run: Run, blockIndex: number, door: string): ArenaR
   return room;
 }
 
+const bump = (m: Record<string, number>, id: string) => (m[id] = (m[id] ?? 0) + 1);
+/** One player's count from a per-player tally (an old saved run kept a single number). */
+export const mine = (t: Record<string, number> | number | undefined, id: string) => (typeof t === 'number' ? t : t?.[id] ?? 0);
+
 export const isFinal = (run: Run) => run.index === run.job.rooms - 1;
 
 /** Count what a tick's events earned. `me` is the player whose downs count. */
@@ -90,11 +94,12 @@ export function tally(run: Run, room: ArenaRoom, events: FightEvent[], me: strin
     } else if (ev.k === 'cagelost') {
       run.lost = (run.lost ?? 0) + 1;
     } else if (ev.k === 'pickedup') {
-      if (ev.id === me) run.carried = (run.carried ?? 0) + 1;
-      if (ev.by === me) run.raised = (run.raised ?? 0) + 1;
+      if (ev.id) bump(run.carried ??= {}, ev.id);
+      if (ev.by) bump(run.raised ??= {}, ev.by);
     }
-    if (ev.k === 'down' && ev.id === me) run.falls = (run.falls ?? 0) + 1;
-    if (ev.k === 'down' && ev.by === me) run.teamkills = (run.teamkills ?? 0) + 1;
+    // Each player's own (so a friend following the job reads theirs, not the leader's).
+    if (ev.k === 'down' && ev.id) bump(run.falls ??= {}, ev.id);
+    if (ev.k === 'down' && ev.by) bump(run.teamkills ??= {}, ev.by);
     if (ev.k === 'down' && players(room.heroes).length < 2) {
       // Alone, three downs and it's lost; in a party, it's lost when everyone is out.
       const h = room.heroes.find((x) => x.id === me);

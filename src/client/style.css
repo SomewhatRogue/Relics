@@ -418,3 +418,4 @@ body[data-guard="none"] .tb.block { display: none; }
 #panel .job .jmore { padding: 0 6px 8px; }
 #panel .job .need { color: #e07a6a; margin: 6px 0; }
 #panel .job.open { border-color: #ffd27a; }
+#banner.faint { opacity: 0.3; }

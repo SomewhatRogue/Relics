@@ -21,7 +21,7 @@ import { PACK } from '../sim/pack';
 import { walkOut } from '../sim/survivors';
 import { refreshHealth, statsOf } from '../sim/gearstats';
 import { houseCaptives, sum } from '../sim/goal';
-import { goal, interiorRoom, isFinal, newRun, runRoom, tally, type Run } from '../sim/run';
+import { goal, interiorRoom, isFinal, mine, newRun, runRoom, tally, type Run } from '../sim/run';
 import { NO_INTENT, knows, type FightEvent, type Hero, type Intent, type Learned } from '../sim/types';
 import { load, store, type Save } from './save';
 import { treasure } from '../shared/treasure';
@@ -34,7 +34,7 @@ import { Followers } from './followers';
 import type { Parties } from './parties';
 
 export type Mode = 'town' | 'yard' | 'run' | 'wood';
-export interface Result { won: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number; relic?: RelicId; treasure: Item[]; sold: Item[] }
+export interface Result { won: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number; relic?: RelicId; treasure: Item[]; sold: Item[]; lost?: number }
 /** Something you can use where you stand: a spot, a person, or a door. */
 export interface Near { label: string; talk?: SpotId; arg?: number; key?: string; door?: Block; chest?: number; npc?: Npc }
 
@@ -550,10 +550,10 @@ export class Game {
     const found = won ? treasure(run.job, p.cls, p.id, p.runs, crowd) : [], kept = found.slice(0, Math.max(0, PACK - p.bag.length)), sold = found.slice(kept.length);
     p.bag.push(...kept);
     p.gold += sold.length * TREASURE_SOLD;
-    this.result = { won, job: run.job, gold, xp, rescued, levels, relic, treasure: kept, sold };
+    this.result = { won, job: run.job, gold, xp, rescued, levels, relic, treasure: kept, sold, lost: run.lost ?? 0 };
     this.run = null;
     this.give({
-      stats: { jobs: won ? 1 : 0, saved: rescued, kills: run.kills, dens: run.dens, butchers: run.butchers ?? 0, gold, raised: run.raised ?? 0, falls: run.falls ?? 0, carried: run.carried ?? 0, teamkills: run.teamkills ?? 0, rescueHits: run.rescueHits?.[ME] ?? 0, rescueKills: run.rescueKills?.[ME] ?? 0 }, rescued, dens: run.dens, days: 1,
+      stats: { jobs: won ? 1 : 0, saved: rescued, kills: run.kills, dens: run.dens, butchers: run.butchers ?? 0, gold, raised: mine(run.raised, ME), falls: mine(run.falls, ME), carried: mine(run.carried, ME), teamkills: mine(run.teamkills, ME), rescueHits: run.rescueHits?.[ME] ?? 0, rescueKills: run.rescueKills?.[ME] ?? 0 }, rescued, dens: run.dens, days: 1,
       story: won && run.job.objective === 'story' ? run.job.id : undefined,
       deed: won && !followed ? { title: run.job.title, place: run.job.place.name, party } : undefined,
     });

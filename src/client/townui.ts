@@ -265,7 +265,7 @@ const SURVIVOR = ['They kept us in the dark so long I forgot what my hands looke
 export function showResult(g: Game, panel: Panel): void {
   const r = g.result!;
   g.result = null;
-  const lines = [`Gold: ${r.gold}`, `Experience: ${r.xp}`, r.won ? `People brought home: ${r.rescued}` : 'Driven back: half the gold, nobody saved.'];
+  const lines = [`Gold: ${r.gold}`, `Experience: ${r.xp}`, r.won ? `People brought home: ${r.rescued}` : 'Driven back: half the gold, nobody saved.', ...(r.lost ? [`Lost to the fire: ${r.lost}`] : [])];
   if (r.levels) lines.push(`You've grown. ${title(TRAINERS[g.profile.cls].name)} will want to see you, at ${TRAINERS[g.profile.cls].where}.`);
   if (r.treasure.length) lines.push(`<b>Treasure in your pack:</b> ${r.treasure.map((i) => `<b>${itemName(i)}</b>`).join(' and ')}.`);
   for (const i of r.sold) lines.push(`No room in your pack for the ${itemName(i)}, so it went for 20 gold.`);
