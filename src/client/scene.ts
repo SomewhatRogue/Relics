@@ -32,6 +32,8 @@ import { drawHung, drawPot } from './grimdraw';
 import { drawNpc } from './npcs';
 import { drawCaged, drawSurvivor } from './captives';
 import { behindMarks, drawWays } from './wayout';
+import { drawQuestMarks, onScreen } from './questmarks';
+import type { Target } from '../sim/targets';
 import { SPOT_REACH } from '../shared/town';
 import { dusk } from './streetlife';
 import { drawMist, setSun, torchIn } from './daytime';
@@ -60,6 +62,8 @@ export class Scene {
   /** The relic held up over your head (the wood's find), and where the arrow by your feet points. */
   fanfare = false;
   pointTo: { x: number; y: number } | null = null;
+  /** On a job, what the room's goal is about (sim/targets.ts): a gold mark over each (questmarks.ts). */
+  marks: Target[] = [];
   private heroAt: [number, number] | null = null;
 
   constructor(private out: HTMLCanvasElement) {
@@ -313,11 +317,13 @@ export class Scene {
     items.sort((p, q) => p.y - q.y);
     for (const it of items) it.draw();
     // Anyone you've freed who's fallen behind out of sight: a mark at the edge, toward them (clear of the HUD).
-    const tall = this.vh > this.vw * 1.2;
-    behindMarks(c, room.survivors ?? [], cx, cy, this.vw, this.vh, tall ? this.vh * 0.2 : 20, tall ? this.vh * 0.3 : 20, now);
+    const tall = this.vh > this.vw * 1.2, view = { vw: this.vw, vh: this.vh, top: tall ? this.vh * 0.2 : 20, bottom: tall ? this.vh * 0.3 : 20 };
+    behindMarks(c, room.survivors ?? [], cx, cy, view, now);
+    // What the goal is about: a gold mark over each, or a point at the edge toward the nearest.
+    const markLights = drawQuestMarks(c, this.marks, (t) => (t.id !== undefined ? lerp('e:' + t.id, t.x, t.y) : onScreen(t)), cx, cy, view, me ?? null, now);
     drawBlazeAbove(c, room, cx, cy);
 
-    const lights: Light[] = [...wayLights];
+    const lights: Light[] = [...wayLights, ...markLights];
     blazeLights(room, cx, cy, now, lights);
     for (const m of room.coals) lights.push({ x: OX + m.x * PX - cx, y: OY + m.y * PX - cy - 4, r: 26 + Math.sin(now * 7 + m.id) * 3, i: 0.6 * Math.min(1, m.life / 4), c: [1, 0.6, 0.28] });
     for (const ch of room.chests) if (ch.state !== 'shut') lights.push({ x: OX + ch.x * PX - cx, y: OY + ch.y * PX - cy - 6, r: ch.state === 'opening' ? 16 + 30 * (ch.t / 1.2) : 26, i: ch.state === 'opening' ? 0.4 + 0.5 * (ch.t / 1.2) : 0.35, c: tint(TIERS[ch.tier].col) });

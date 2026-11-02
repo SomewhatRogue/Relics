@@ -13,6 +13,7 @@ import { isDead } from './damage';
 import { isSpiderKind } from '../shared/spiders';
 import type { ArenaRoom } from './room';
 import type { Run } from './run';
+import { bossOf, densLeft, racksLeft } from './targets';
 
 export interface Captives { caged: number; waiting: number }
 
@@ -62,6 +63,10 @@ export function houseCaptives(run: Run, room: ArenaRoom, insides: Map<Block, Are
 /** Add up a list of counts. */
 export const sum = (list: Captives[]): Captives => list.reduce((a, c) => ({ caged: a.caged + c.caged, waiting: a.waiting + c.waiting }), { caged: 0, waiting: 0 });
 
+/** What a larder and the dens are, said on the banner (lore keeper and line editor). */
+export const LARDER_IS = 'their food store';
+export const DENS_ARE = 'their huts';
+
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export function goal(run: Run, room: ArenaRoom, houses: Captives = { caged: 0, waiting: 0 }): { text: string; done: boolean } {
@@ -80,15 +85,16 @@ export function goal(run: Run, room: ArenaRoom, houses: Captives = { caged: 0, w
   }
   const freed = !need.caged && !need.waiting;
   if (o === 'rescue') return { text: freed ? also(`Everyone's out. ${way(true)}`) : people, done: freed };
+  // Each says what it is (a gold mark is over each one: sim/targets.ts).
   if (o === 'larder') {
-    const racks = room.props.filter((p) => p.kind === 'larder' && !p.broken).length;
-    return { text: also(racks ? `Smash the larder (${racks} racks left)` : `The larder is ruined. ${way(true)}`), done: racks === 0 };
+    const racks = racksLeft(room).length;
+    return { text: also(racks ? `Smash ${LARDER_IS}, the larder (${racks} racks left)` : `The larder is ruined. ${way(true)}`), done: racks === 0 };
   }
   if (o === 'burn') {
-    const dens = room.map.blocks.filter((b) => b.kind === 'den' && !b.ruined).length;
-    return { text: also(dens ? `Burn out the dens (${dens} left)` : `The dens are ash. ${way(true)}`), done: dens === 0 };
+    const dens = densLeft(room.map).length;
+    return { text: also(dens ? `Burn out ${DENS_ARE}, the dens (${dens} left)` : `The dens are ash. ${way(true)}`), done: dens === 0 };
   }
-  const boss = room.enemies.find((e) => e.name);
+  const boss = bossOf(room);
   const bossDead = !boss || isDead(boss);
   if (o === 'hunt') return { text: also(bossDead ? `${run.job.boss} is dead. ${way(true)}` : `Kill ${run.job.boss}`), done: bossDead };
   // The story mission: the boss, every cage out here, and everyone freed brought out.

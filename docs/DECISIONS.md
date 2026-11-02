@@ -2,6 +2,29 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-02: quest marks, so you can see what the job is (Kyle; Claude Opus 5.5)
+
+Kyle, after playing with friends: on a mission it wasn't clear what the objective was, or which things
+were objectives; smashing a larder was fun but nobody knew what a larder was. Now every thing the
+room's goal is about has a small gold diamond bobbing over it, on the glow layer so it reads in the dark,
+with a little gold light under it.
+
+- **One list.** `src/sim/targets.ts` `targets(run, room, houses)` is the room's objective things right
+  now: cages out here; the door of any house with someone caged or freed inside; where the freed are
+  brought out (the way in, or a house's door from inside); a middle room's spider nests; and in the
+  last room, by the job, the larder's racks, the dens, or the named butcher (hunts, the story, a deep
+  dive). Chests and plain goblins never. The goal text counts racks, dens and the boss with the same
+  helpers (`racksLeft`, `densLeft`, `bossOf`), so a mark never points at something that doesn't count.
+- **The mark** (`src/client/questmarks.ts`): gold like the way on (`#ffd860`, dark edge), never the red
+  of a telegraph; it goes the moment its thing is done. When none is on screen at all, a gold point
+  at the screen's edge toward the nearest, sharing `edgeMark` with the marks for the freed left
+  behind (`wayout.ts`). The cage's old yellow "!" is gone: the quest mark replaces it.
+- **The banner says what it is**, in a few plain words: "Smash their food store, the larder (3 racks
+  left)", "Burn out their huts, the dens (3 left)". New player-facing words: `LARDER_IS` and `DENS_ARE`
+  in `sim/goal.ts`, waiting on the lore keeper and line editor.
+- **Friends see the same marks.** A friend's game builds the list from what the leader already sends
+  (the room, the run, the houses by door); nothing new on the wire.
+
 ## 2026-11-02: the party stress test, and what it broke (Kyle; Claude Opus 5.5)
 
 Kyle played online with a friend and things came apart when he died: the relay logs show his page
