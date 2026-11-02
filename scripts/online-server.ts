@@ -30,6 +30,12 @@ const http = createServer((req, res) => {
 new WebSocketServer({ server: http }).on('connection', (ws, req) => {
   if (!(req.url ?? '').startsWith('/api/room')) return ws.close();
   const i = turn++ % 2;
+  // LAG_MS: every message to a player arrives this much later (the whole trip there and back, as on a phone).
+  const lag = Number(process.env.LAG_MS) || 0;
+  if (lag) {
+    const send = ws.send.bind(ws);
+    ws.send = ((d: string) => void setTimeout(() => ws.readyState === 1 && send(d), lag)) as typeof ws.send;
+  }
   void relays.then((r) => r[i].attach(ws, new URL(req.url ?? '/', 'http://localhost')));
 });
 http.listen(PORT, () => console.log(`Relic online dev server on http://localhost:${PORT}`));

@@ -27,6 +27,7 @@ export class Parties {
   constructor(private town: Townfolk, private me: () => { id: string; name: string }) {
     town.offer = () => this.mine ?? undefined;
     town.onWord = (from, d) => this.word(from, d);
+    town.onOffers = () => this.onChange();
   }
 
   /** Every party in town: mine first. */

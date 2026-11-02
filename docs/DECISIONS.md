@@ -808,3 +808,13 @@ which moves the page to the media channel.
   everyone is paid the whole pot at the end, and spends their own in town.
 - A friend's pickups, potions drunk and gear changes in the leader's job come home with them (the
   pack now travels in the snapshots).
+
+## 2026-11-01: less lag for friends (Opus 5.5)
+
+- The leader sends 20 patches a second (was 12).
+- A friend's own hero walks the moment they press. Each input carries the friend's clock and the
+  leader hands back the newest one it has used, which times the trip there and back; the friend's
+  hero is drawn at the leader's position plus the walking done here since then, eased in, snapped
+  if more than 1.5 tiles off. Rolls, swings, hits and knockbacks stay the leader's alone.
+- scripts/party-online.cjs now runs with 150 ms of lag on every message (LAG_MS on the local
+  server): the friend's hero moves within 0.11 s of the press, and never jerks back while walking.

@@ -12,7 +12,8 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 (async () => {
   const report = { ok: false, steps: [], errors: [] };
   if (!process.env.NOBUILD) execSync('npx vite build', { cwd: ROOT, env: { ...process.env, VITE_ONLINE: '1' }, stdio: 'ignore' });
-  const srv = spawn(path.join(ROOT, 'node_modules/.bin/tsx'), ['scripts/online-server.ts'], { cwd: ROOT, env: { ...process.env, PORT: String(PORT) }, stdio: 'ignore' });
+  // A phone's worth of lag on every message (LAG_MS, default 150): the test proves play still feels right.
+  const srv = spawn(path.join(ROOT, 'node_modules/.bin/tsx'), ['scripts/online-server.ts'], { cwd: ROOT, env: { LAG_MS: '150', ...process.env, PORT: String(PORT) }, stdio: 'ignore' });
   for (let i = 0; i < 100; i++) {
     if (await new Promise((r) => http.get(`http://127.0.0.1:${PORT}/`, (res) => (res.resume(), r(true))).on('error', () => r(false)))) break;
     await wait(200);
@@ -49,11 +50,24 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     step('names right on both screens', await until(sam, () => window.__game.room.heroes.find((h) => h.id === '@lead')?.tag === 'KYLE') && await until(kyle, () => window.__game.room.heroes.some((h) => h.tag === 'SAM')));
     const sameGoblins = await Promise.all([kyle, sam].map((p) => p.page.evaluate(() => window.__game.room.enemies.map((e) => e.id).join(','))));
     step(`same goblins on both screens (${sameGoblins[0].split(',').length})`, sameGoblins[0] && sameGoblins[0] === sameGoblins[1]);
+    // Sam's own hero answers the stick at once, lag or no lag.
+    const x0 = await sam.page.evaluate(() => window.__game.hero.x);
+    await sam.page.keyboard.down('a');
+    await wait(110);
+    const x1 = await sam.page.evaluate(() => window.__game.hero.x);
+    await sam.page.keyboard.up('a');
+    await wait(900);
+    step(`Sam's hero moves the moment he presses, with 150 ms of lag (${x0.toFixed(2)} to ${x1.toFixed(2)} in 0.11 s)`, x1 < x0 - 0.2);
     // Sam walks up the room: Kyle should see Sam's hero move.
     const before = await kyle.page.evaluate(() => window.__game.room.heroes.find((h) => h.id !== 'me').y);
+    // While he walks, his hero on his own screen should go steadily up, never jerk back.
+    await sam.page.evaluate(() => { window.__ys = []; window.__yt = setInterval(() => window.__ys.push(window.__game.hero.y), 30); });
     await sam.page.keyboard.down('w');
     await wait(1200);
     await sam.page.keyboard.up('w');
+    const ys = await sam.page.evaluate(() => (clearInterval(window.__yt), window.__ys));
+    const back = ys.slice(1).reduce((n, y, i) => n + (y > ys[i] + 0.04 ? 1 : 0), 0);
+    step(`Sam's walk is smooth on his screen (${back} jerks back in ${ys.length} looks: ${ys.slice(1).map((y, i) => (y - ys[i]).toFixed(2)).join(" ")})`, back === 0);
     await wait(600);
     const after = await kyle.page.evaluate(() => window.__game.room.heroes.find((h) => h.id !== 'me').y);
     const samSees = await sam.page.evaluate(() => window.__game.hero.y);

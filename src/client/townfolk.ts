@@ -34,6 +34,8 @@ export class Townfolk {
   /** What a player says that isn't about where they stand (parties: parties.ts), and what goes out with you (your party). */
   onWord: (from: string, d: Record<string, unknown>) => void = () => {};
   offer: () => unknown = () => undefined;
+  /** Someone's party went up, changed or came down (the board redraws). */
+  onOffers: () => void = () => {};
 
   constructor(readonly id: string) {}
 
@@ -51,6 +53,7 @@ export class Townfolk {
     for (const [id, f] of this.folk) {
       if (now - f.heard > GONE) {
         this.folk.delete(id);
+        if (f.pt) this.onOffers();
         continue;
       }
       // Walk each toward where they last said they were: smooth between their few words a second.
@@ -96,7 +99,7 @@ export class Townfolk {
 
   private heard(m: RelayMsg): void {
     if (m.t === 'role' && m.role === 'peer') return this.tell('*', 'hi');
-    if (m.t === 'left') return void this.folk.delete(m.id);
+    if (m.t === 'left') return void (this.folk.get(m.id)?.pt && this.onOffers(), this.folk.delete(m.id));
     if (m.t !== 'msg') return;
     const d = m.d as Partial<Said> | null;
     if (d && typeof d === 'object' && d.k !== 'me' && d.k !== 'hi') return this.onWord(m.from, d as Record<string, unknown>);
@@ -105,7 +108,9 @@ export class Townfolk {
     const [x, y, fx, fy, moving] = d.p;
     let f = this.folk.get(m.from);
     if (!f) this.folk.set(m.from, (f = { hero: newHero('o:' + m.from, x, y), to: [x, y], at: '', heard: 0 }));
+    const had = JSON.stringify(f.pt ?? null), has = JSON.stringify(d.pt ?? null);
     Object.assign(f, { to: [x, y], at: String(d.at ?? '').slice(0, 40), heard: this.now, pt: d.pt });
+    if (had !== has) this.onOffers();
     Object.assign(f.hero, { weapon, fx, fy, moving: !!moving, tag: String(d.n ?? '').toUpperCase().replace(NAME, '').slice(0, 14) || 'STRANGER' });
     // Someone new: tell them where you are, just them.
     if (d.k === 'hi') this.tell(m.from, 'me');
