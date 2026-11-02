@@ -74,6 +74,8 @@ and burns out a goblin den on a job.
       patrols and locked places, a trainer per class with class perks, the Drowned Rat and its dice
 - [x] Slice 3d: live music for every kind of place (30 pieces) with a fight layer and boss music,
       kit-specific weapon sounds, goblin voices, building sounds; the Healer's blessed ground and ward
+      (2026-11-01: the music rewritten for recorded instruments, VSCO 2 CE, VCSL and a CC BY choir;
+      see DECISIONS)
 - [x] Slice 3c: ledges and ramps (two levels), archers, falls, the high-ground shot, forks with a high
       road and a low road, exits that take the whole party
 - [x] Slice 2h: props (barrels, oil barrel, crates, a table, broken pieces) that break and push; the

@@ -374,6 +374,8 @@ Object.defineProperty(w, '__room', { get: () => game.room });
 w.__game = game;
 w.__works = WORK_ORDER;
 w.__music = music;
+// Listening: a stretch of any piece rendered offline (scripts/listen.cjs). Loaded only when asked.
+w.__renderMusic = (...a: Parameters<typeof import('./musicrender').renderMusic>) => import('./musicrender').then((m) => m.renderMusic(...a));
 w.__title = title;
 w.__panel = panel;
 w.__openSpot = (id: string, arg = 0, key = '') => openSpot(id as never, game, panel, arg, key);
