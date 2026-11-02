@@ -1,13 +1,14 @@
 /**
- * The music's instruments, synthesized: a lute, a harp, a wooden flute, a low drone, a soft string
- * pad, a church organ, a bell, a war horn, and frame drums and toms. Each plays one note at time `t`
- * into `out`. Kept simple and warm; the reverb in music.ts does the rest.
+ * The synthesized instruments: a lute, a harp, a wooden flute, a low drone, a soft string pad, a
+ * church organ, a bell, a war horn, and frame drums and toms. The music plays on these until the
+ * recorded instruments (sampler.ts) have loaded, or if they never do. Each plays one note at time `t`
+ * into `out`.
  */
-export type Play = (c: AudioContext, out: AudioNode, t: number, midi: number, dur: number, vel: number) => void;
+export type Play = (c: BaseAudioContext, out: AudioNode, t: number, midi: number, dur: number, vel: number) => void;
 
 export const mtof = (m: number) => 440 * 2 ** ((m - 69) / 12);
 
-function amp(c: AudioContext, out: AudioNode, t: number, attack: number, peak: number, hold: number, release: number): GainNode {
+function amp(c: BaseAudioContext, out: AudioNode, t: number, attack: number, peak: number, hold: number, release: number): GainNode {
   const g = c.createGain();
   g.gain.setValueAtTime(0.0001, t);
   g.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak), t + attack);
@@ -16,7 +17,7 @@ function amp(c: AudioContext, out: AudioNode, t: number, attack: number, peak: n
   g.connect(out);
   return g;
 }
-function osc(c: AudioContext, type: OscillatorType, f: number, t: number, end: number, detune = 0): OscillatorNode {
+function osc(c: BaseAudioContext, type: OscillatorType, f: number, t: number, end: number, detune = 0): OscillatorNode {
   const o = c.createOscillator();
   o.type = type;
   o.frequency.value = f;
@@ -25,7 +26,7 @@ function osc(c: AudioContext, type: OscillatorType, f: number, t: number, end: n
   o.stop(end + 0.05);
   return o;
 }
-function lp(c: AudioContext, f: number, q = 0.7, to?: AudioNode): BiquadFilterNode {
+function lp(c: BaseAudioContext, f: number, q = 0.7, to?: AudioNode): BiquadFilterNode {
   const b = c.createBiquadFilter();
   b.type = 'lowpass';
   b.frequency.value = f;

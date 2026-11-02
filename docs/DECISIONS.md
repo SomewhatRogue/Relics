@@ -2,6 +2,46 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-01: the music, played on recorded instruments (Opus 5.5)
+
+Kyle: "the music can be more high def and interesting ... almost biblical or epic, with more gentle
+themes for dark woods or town." He chose real recorded instruments, a small bundled set, free licence,
+and new pieces for each place.
+
+- **The instruments** (`public/music/`, 86 mono MP3s, 2.2 MB, credits in `public/music/CREDITS.txt`):
+  VSCO 2 Community Edition (CC0) for the string sections soft and strong, solo double bass, pizzicato,
+  short bowed cellos, horn, tuba, harp, flute, timpani, bass drum, glockenspiel and gong; the
+  Versilian Community Sample Library (CC0) for the pipe organ, tubular bells and frame drums; and the
+  FluidR3 soundfont's Choir Aahs and Voice Oohs (Frank Wen, CC BY 3.0, via midi-js-soundfonts) for
+  the choir, the one set that asks for credit. A few notes per instrument (every 5 to 7 semitones,
+  pitch-shifted between); held sounds loop. `scripts/make-samples.py` remakes them all from the three
+  libraries: trimmed, levelled to one loudness, swells evened out, loops crossfaded where the wave
+  matches, a tail past each loop so a browser's MP3 delay can't click; `src/client/samplemap.ts` is
+  its output. MP3 because every browser decodes it (Safari and Playwright's Chromium included).
+- **Playing them** (`sampler.ts`, `orchestra.ts`): fetched from our own site once sound is unlocked,
+  four at a time, the most used first; nearest note, playbackRate, attack and release. An instrument
+  plays recorded only when all its notes have loaded; until then (or if any fail) the old synthesized
+  instrument stands in, so the music never goes silent. Strings switch to the strong recording at
+  velocity 0.75 and up.
+- **The pieces** (`score.ts`, `scores-home.ts`, `scores-wild.ts`, `scores-boss.ts`, played by
+  `track.ts`): all 30 rewritten, keeping their names (the bard lists them). Each has a written
+  8-bar theme over chords that mostly hold two bars, and parts with roles (bass, chord voiced to move
+  smoothly, a picked pattern, the theme, an answer or a made-up line, drums, bells). A form of
+  sections (opening, theme, theme in other voices, answer, quiet) loops with seeded chance: sections
+  swap, long notes get a turn, timing breathes. Town warm (harp, strings, flute), houses small (harp,
+  pizzicato, flute), church organ and voices, yard horn and frame drum, villages and farms sad, fields
+  and woods a low string drone and one lonely voice, mines tuba, voices and dripping glockenspiel;
+  bosses choir, horn and tuba, timpani and driving cellos.
+- **The fight layer** is timpani on the strong beats, a bass drum on the one and cellos driving
+  eighths on the chord; it comes in lower (0.35) over pieces that have their own timpani. The boss
+  sting is a bass drum, timpani, gong, low horn and tuba. A gentle compressor (with its makeup gain
+  taken back off) keeps a boss from clipping; overall loudness matches the old music, a boss about
+  4 dB above town.
+- **The one-file build** carries the recordings inside the page (`samplesrc.solo.ts` swapped in by
+  `vite.solo.config.ts`; the page is 3.3 MB of the 16 MB cap), so it sounds the same with no server.
+- **Listening**: `node scripts/listen.cjs <dir>` renders a few pieces offline in Chromium to MP3 and
+  prints their loudness (`window.__renderMusic`, loaded only when called).
+
 ## 2026-11-01: recovery codes (Claude Opus 5.5)
 
 Kyle: friends he sends the link to (no accounts, no login) should be able to get their heroes back on

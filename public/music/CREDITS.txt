@@ -1,0 +1,20 @@
+Relic: the recorded instruments in this folder
+
+Every file here was cut from the free libraries below by scripts/make-samples.py (mono, trimmed,
+levelled, looped, MP3). The music itself is written in src/client/scores*.ts and played live.
+
+1. VS Chamber Orchestra 2: Community Edition (VSCO 2 CE), by Versilian Studios.
+   Recorded by Sam Gossner and Simon Dalzell; sample cutting by Elan Hickler (Soundemote).
+   Licence: CC0 1.0 Universal (public domain dedication). https://github.com/sgossner/VSCO-2-CE
+   Used for: strings-p, strings-f (cello and violin sections, solo contrabass), pizz, spic, horn,
+   tuba, harp, flute, timp, bassdrum, glock, gong.
+
+2. Versilian Community Sample Library (VCSL), by Versilian Studios and contributors.
+   Licence: CC0 1.0 Universal. https://github.com/sgossner/VCSL
+   Used for: organ (pipe organ sampled by Simon Dalzell of Ivy Audio; credit to him and to Versilian
+   Studios is encouraged), chimes (tubular bells), frame (frame drums).
+
+3. FluidR3_GM soundfont by Frank Wen, as rendered to notes by Benjamin Gleitzman's
+   midi-js-soundfonts. Licence: Creative Commons Attribution 3.0 (CC BY 3.0).
+   https://github.com/gleitz/midi-js-soundfonts  https://creativecommons.org/licenses/by/3.0/
+   Used for: choir (Choir Aahs), oohs (Voice Oohs). Changes: mono, trimmed, looped, re-encoded.
