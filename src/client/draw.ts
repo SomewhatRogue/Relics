@@ -3,39 +3,97 @@
  * is drawn unlit on top. Each sprite erases the glow under itself, so a telegraph never shows
  * through whoever is standing on it.
  */
+import { scaleOf, type BodyPose } from './motion';
 import type { Sprite } from './sprites';
 
 export interface Ctx {
   lit: CanvasRenderingContext2D;
   glow: CanvasRenderingContext2D;
   now: number;
+  /** The room's own time (hits, parries and dodges are stamped in it); `now` is the wall clock. */
+  t?: number;
 }
 
 /** Draw a sprite with its feet at (x, y): lit pixels, then knock out and relight its glow. */
 export function blit(c: Ctx, s: Sprite, x: number, y: number, flip = false, flash = 0, squash = 1): void {
-  const h = Math.round(s.h * squash), left = Math.round(x - s.w / 2), top = Math.round(y - h);
+  blitPose(c, s, x, y, flip, 1, squash, 0, flash);
+}
+
+const tints = new WeakMap<Sprite, Map<string, HTMLCanvasElement>>();
+/** The sprite's silhouette in one colour (made once, kept). */
+function tinted(s: Sprite, col: string): HTMLCanvasElement {
+  let m = tints.get(s);
+  if (!m) tints.set(s, (m = new Map()));
+  let t = m.get(col);
+  if (!t) {
+    t = document.createElement('canvas');
+    (t.width = s.w), (t.height = s.h);
+    const g = t.getContext('2d')!;
+    g.drawImage(s.white, 0, 0);
+    g.globalCompositeOperation = 'source-in';
+    g.fillStyle = col;
+    g.fillRect(0, 0, s.w, s.h);
+    m.set(col, t);
+  }
+  return t;
+}
+
+/**
+ * A sprite in a pose: `sx`, `sy` stretch it (feet stay put), `lean` shifts its top third that many
+ * pixels sideways (its middle half as many), and `flash` washes it in `tint`. Whole pixels throughout.
+ */
+export function blitPose(c: Ctx, s: Sprite, x: number, y: number, flip: boolean, sx: number, sy: number, lean: number, flash: number, tint = '#ffffff'): void {
+  const w = Math.max(1, Math.round(s.w * sx)), h = Math.max(1, Math.round(s.h * sy));
+  const left = Math.round(x - w / 2), top = Math.round(y - h), bands = lean ? 3 : 1;
+  const off = (i: number) => (bands === 1 ? 0 : Math.round((lean * (2 - i)) / 2));
   const put = (g: CanvasRenderingContext2D, img: HTMLCanvasElement) => {
-    g.save();
-    if (flip) {
-      g.translate(left + s.w, top);
-      g.scale(-1, 1);
-      g.drawImage(img, 0, 0, s.w, h);
-    } else g.drawImage(img, left, top, s.w, h);
-    g.restore();
+    for (let i = 0; i < bands; i++) {
+      const r0 = Math.round((s.h * i) / bands), r1 = Math.round((s.h * (i + 1)) / bands);
+      const d0 = top + Math.round((r0 * h) / s.h), d1 = top + Math.round((r1 * h) / s.h);
+      if (r1 <= r0 || d1 <= d0) continue;
+      const dx = left + off(i);
+      if (!flip) g.drawImage(img, 0, r0, s.w, r1 - r0, dx, d0, w, d1 - d0);
+      else {
+        g.save();
+        g.translate(dx + w, d0);
+        g.scale(-1, 1);
+        g.drawImage(img, 0, r0, s.w, r1 - r0, 0, 0, w, d1 - d0);
+        g.restore();
+      }
+    }
   };
   put(c.lit, s.c);
   c.glow.globalCompositeOperation = 'destination-out';
   put(c.glow, s.white);
   c.glow.globalCompositeOperation = 'source-over';
-  if (squash === 1) for (const [gx, gy, col] of s.glow) {
+  for (const [gx, gy, col] of s.glow) {
+    const band = bands === 1 ? 0 : Math.min(2, Math.floor((gy * 3) / s.h)), px = Math.floor((gx * w) / s.w);
     c.glow.fillStyle = col;
-    c.glow.fillRect(flip ? left + s.w - 1 - gx : left + gx, top + gy, 1, 1);
+    c.glow.fillRect((flip ? left + w - 1 - px : left + px) + off(band), top + Math.floor((gy * h) / s.h), 1, 1);
   }
   if (flash > 0) {
-    c.glow.globalAlpha = flash;
-    put(c.glow, s.white);
+    c.glow.globalAlpha = Math.min(1, flash);
+    put(c.glow, tint === '#ffffff' ? s.white : tinted(s, tint));
     c.glow.globalAlpha = 1;
   }
+}
+
+/** A pale afterimage of a body (a lunge's smear frame), on the glow layer; draw it before the body. */
+export function ghost(c: Ctx, s: Sprite, x: number, y: number, flip: boolean, alpha: number, sx = 1, sy = 1): void {
+  if (alpha <= 0) return;
+  const w = Math.round(s.w * sx), h = Math.round(s.h * sy), left = Math.round(x - w / 2), top = Math.round(y - h);
+  c.glow.globalAlpha = alpha;
+  if (!flip) c.glow.drawImage(s.white, left, top, w, h);
+  else (c.glow.save(), c.glow.translate(left + w, top), c.glow.scale(-1, 1), c.glow.drawImage(s.white, 0, 0, w, h), c.glow.restore());
+  c.glow.globalAlpha = 1;
+}
+
+const SC: [number, number] = [1, 1];
+/** A sprite drawn in a body pose (motion.ts), its feet at (x, y): the afterimage first, then the body. */
+export function blitBody(c: Ctx, s: Sprite, x: number, y: number, flip: boolean, p: BodyPose): void {
+  scaleOf(p, SC);
+  if (p.ghost > 0) ghost(c, s, x + p.gx, y + p.gy, flip, p.ghost, SC[0], SC[1]);
+  blitPose(c, s, x, y, flip, SC[0], SC[1], p.lean, p.flash, p.tint);
 }
 
 /** A sprite turned by `a` radians about its middle (thrown, pinned, lying down). */

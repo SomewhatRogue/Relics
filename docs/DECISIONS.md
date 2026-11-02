@@ -2,6 +2,40 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-01: anticipation and payoff in the bodies (Claude Opus 5.5)
+
+Kyle loved the world effects on big blows (the charged magic burst, the butcher's slam) and asked for
+the same in the bodies: poses before a blow, a payoff when it lands, better reactions to hits. Drawing
+only; the room is untouched and every pose is read from state it already has (act, actT, the swing's
+windup/active/recover, the charge, hitstop, the knockback slide, hitAt).
+
+- **Pose data, not pictures** (`client/motion.ts`): every number in one table, by phase (windup,
+  charge, release, contact, recover, hit, stagger, land, stun, tumble). A pose is lean (the top of the
+  body, in pixels), crouch (negative rises tall), stretch along a direction, a whole-body shift, a
+  lift off the ground, a flash and its tint, and an afterimage. Today one sprite is bent by it
+  (`draw.ts` `blitPose`: whole-pixel stretch with the feet fixed, the top third shifted by the lean and
+  the middle by half); the jointed 2x sprites coming next can read the same pose per part.
+- **Heroes** (`client/heropose.ts`): pulled back and dipped in a wind-up (a quick one gets its share);
+  crouching deeper and leaning back as a heavy charges, a shiver at full; the release snaps out (a
+  step in, stretched along the blow, an afterimage where the body was) and holds through the hitstop,
+  where the swing's trail turns white across the whole arc the room judges; shots kick back instead
+  (the staff's orb hardest). Hit: white through the hitstop, then a fading red, snapped along the
+  push. Heavy armor that doesn't stagger still flashes and flinches (a drop in health says it landed).
+  A squash on landing a roll, jump, dash or slam.
+- **Goblins and the butcher** (`client/foepose.ts`): wind-ups rear back and coil, scaled to how long
+  they are; the lunger coils low and shivers; the butcher rises tall hauling the cleaver back then
+  coils before the chop, crouches before his leap, stretches in the air, lands flattened and rises
+  again; the Stoker coils and paws before his run. Hit: a white flash and a snap back along the push;
+  small goblins hit hard go head over heels once with a hop; the butcher staggers back on his heels;
+  the stunned sway.
+- **The view** jolts along a blow that hits you and nudges along your heavy as it connects
+  (`camKick`, added to the shake in `scene.ts`).
+- **Dust** (`client/dust.ts`): puffs at the feet when a roll ends, a heavy steps out of its charge, a
+  body turns sharply at speed, a slide from a blow stops, the butcher pushes off, the Stoker sets off.
+- **A fix found on the way:** goblins' hit flash, their health ring after a hit, the dummies' wobble
+  and the parry glint compared the wall clock to room time, so they almost never showed. Drawing now
+  has the room's time (`Ctx.t`) for anything the room stamped.
+
 ## 2026-11-01: recovery codes (Claude Opus 5.5)
 
 Kyle: friends he sends the link to (no accounts, no login) should be able to get their heroes back on
