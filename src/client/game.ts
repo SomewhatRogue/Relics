@@ -13,14 +13,14 @@ import { BOUNTY, HERO_SLOTS, PERK, SHOP, gainXp, newProfile, type PerkId, type P
 import { Rng } from '../shared/rng';
 import { CHAPTER_1, QUORUM, rewardMult, type WorldState } from '../shared/story';
 import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
-import { drillCap, drillPrice, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, FOUND_RELICS, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
+import { LEAVES, TEACHES, drillCap, drillPrice, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, FOUND_RELICS, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
 import { ArenaRoom } from '../sim/room';
 import { lessonOf, newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
 import { woodMap } from '../shared/wood';
 import { PACK } from '../sim/pack';
 import { refreshHealth, statsOf } from '../sim/gearstats';
 import { goal, interiorRoom, isFinal, newRun, runRoom, tally, type Run } from '../sim/run';
-import type { FightEvent, Hero, Intent } from '../sim/types';
+import { knows, type FightEvent, type Hero, type Intent, type Learned } from '../sim/types';
 import { load, store, type Save } from './save';
 import { treasure } from '../shared/treasure';
 /** What a piece of treasure that won't fit in the pack fetches. */
@@ -106,9 +106,9 @@ export class Game {
     const room = new ArenaRoom(7, { map: woodMap() });
     this.place(room, room.map.hero);
     const h = this.hero, cls = this.profile.cls;
-    // You come round with nothing but your class's weapon and its skill; a Healer's censer has gone cold.
-    // (A Ranger's hound is: it lay by them all night.)
-    Object.assign(h, { relics: abilitiesOf(cls), found: [], cold: cls === 'HEALER', belt: [] });
+    // You come round with nothing but your class's weapon (your skill is your trainer's to teach); a
+    // Healer's censer has gone cold. (A Ranger's hound is with them: it lay by them all night.)
+    Object.assign(h, { relics: abilitiesOf(cls), found: [], cold: cls === 'HEALER', belt: [], learned: this.profile.learned ?? [], calmHound: true });
     h.relic = h.relics[0];
     this.wood = newWood(this.room, cls);
   }
@@ -202,7 +202,9 @@ export class Game {
     h.baseHp = HERO.hp + (p.perks.includes('tough') ? PERK.tough : 0);
     h.maxHp = h.baseHp + statsOf(h).health;
     h.relics = abilitiesOf(p.cls, p.relic);
-    h.relic = h.relics[0];
+    h.learned = p.learned;
+    // Your skill in hand, or (not yet taught it) the relic you carry.
+    h.relic = knows(h, 'skill') ? h.relics[0] : (h.relics[1] ?? h.relics[0]);
     for (const r of h.relics) h.augments[r] = p.augments[r] ?? '';
     h.hp = h.maxHp;
     if (keep) Object.assign(h, { hp: Math.max(1, keep.hp), relic: keep.relic, fed: keep.fed, lastKill: 0 });
@@ -270,6 +272,7 @@ export class Game {
     this.outside = null;
     this.mode = 'yard';
     this.place(new ArenaRoom(this.world.day, { squire: true }));
+    this.hero.calmHound = true;
   }
 
   /** Go in through a door: a Wickhold building, or a cottage or barn on a job. */
@@ -625,6 +628,7 @@ export class Game {
     if (w.relic && !h.found.includes('javelin')) {
       h.found = ['javelin'];
       h.relics = abilitiesOf(this.profile.cls, 'javelin');
+      if (!knows(h, 'skill')) h.relic = 'javelin';
     }
     if (w.done) this.finishWood();
     return ev;
@@ -809,6 +813,18 @@ export class Game {
   }
 
   /** Your vote at the council (it decides once enough heroes have voted). */
+  /** Pay your trainer to teach you your class skill, or your dodge's leave-behind (once your level allows). */
+  learn(what: Learned): void {
+    const p = this.profile, t = TEACHES[what];
+    if (!p.learned || p.learned.includes(what) || p.level < t.level || p.gold < t.price || (what === 'leave' && !LEAVES[p.cls])) return;
+    p.gold -= t.price;
+    p.learned = [...p.learned, what];
+    const h = this.hero;
+    h.learned = p.learned;
+    if (what === 'skill') h.relic = h.relics[0];
+    store(this.save);
+  }
+
   /** Pay the trainer for the next rank of a drill (if you can afford it and your level allows). */
   buyDrill(id: DrillId): void {
     const p = this.profile, r = p.drills?.[id] ?? 0, price = drillPrice(id, r);

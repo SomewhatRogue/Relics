@@ -857,3 +857,13 @@ which moves the page to the media channel.
   Warrior SLAM, Healer MENDING HANDS, Rogue KNIFEWORK, Ranger TRAPPER, Mage QUICK CHANNEL.
 - Price = base x (rank+1)^1.6; a trainer goes one rank further every two levels. Perks on levelling
   stay free picks. Crits roll on the hero's own seeded dice, so the room's dice never shift.
+
+## 2026-11-01: taught at the trainer; a calmer hound in training (Kyle; Opus 5.5)
+
+- A new hero comes out of the wood with their weapon and a plain dodge only (no class skill in the
+  wood: Kyle's call; the Stoker's goal no longer mentions it). Their trainer teaches the class skill
+  from level 2 (60 gold), and from level 3 (80 gold) a Ranger's snare on the jump and a Mage's image
+  on the blink. Heroes made before this (no `learned` list) keep everything they had.
+- An untaught skill has no button and its press is spent; the relic button carries the javelin.
+- In the wood and the yard the hound joins in a third as often, never goes for a goblin that's
+  swinging at you, and never knocks one off its stride: those blows are yours to meet.

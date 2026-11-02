@@ -350,7 +350,7 @@ export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: nu
 /** What to show over the field: the lesson, the control, how far along. */
 export function woodGoal(w: WoodState, touch: boolean): { title: string; text: string } {
   if (w.stage === 5) return { title: 'THE ROAD', text: 'Follow the arrow west, to Wickhold' };
-  if (w.stage === 4 && w.entered && w.cut < 0) return { title: 'KILL THE STOKER', text: `Roll out of anything striped. Your skill: ${touch ? 'tap SKILL' : 'E'}` };
+  if (w.stage === 4 && w.entered && w.cut < 0) return { title: 'KILL THE STOKER', text: 'Roll out of anything striped' };
   const l = lessonOf(w), key: Record<string, string> = touch
     ? { GRAB: 'HIT IT, TAP GRAB, AGAIN TO THROW', ATTACK: 'TAP ATTACK', DODGE: 'TAP ROLL', BLOCK: 'HOLD BLOCK', PARRY: 'TAP BLOCK ON THE WHITE FLASH', SKILL: 'TAP SKILL', BACKSTAB: 'GET BEHIND, TAP ATTACK', 'FULL DRAW': 'HOLD ATTACK, LET GO', 'FULL CHARGE': 'HOLD ATTACK, LET GO', 'LAST SECOND': 'TAP ROLL AS IT LANDS' }
     : { GRAB: 'HIT IT, F, F AGAIN TO THROW', ATTACK: 'CLICK', DODGE: 'SPACE', BLOCK: 'HOLD RIGHT CLICK', PARRY: 'TAP RIGHT CLICK ON THE WHITE FLASH', SKILL: 'E', BACKSTAB: 'GET BEHIND, CLICK', 'FULL DRAW': 'HOLD LEFT CLICK, LET GO', 'FULL CHARGE': 'HOLD LEFT CLICK, LET GO', 'LAST SECOND': 'SPACE AS IT LANDS' };

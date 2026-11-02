@@ -7,7 +7,7 @@ import { CoopGuest } from './coop';
 import { session, touchSession } from './session';
 import { MAX_DOWNS, goal } from '../sim/run';
 import type { Npc } from '../shared/arena';
-import type { Intent } from '../sim/types';
+import { knows, type Intent } from '../sim/types';
 import { Game, ME } from './game';
 import { Panel } from './panels';
 import { openSpot, showResult } from './townui';
@@ -160,12 +160,15 @@ function hud(now: number): void {
   // The class skill (E, SKILL) and the relic carried, if any (R, RELIC), each with its cooldown.
   const [skill, relic] = me.relics, left = (r: typeof skill) => Math.max(0, me.relicReady[r] - room.time);
   const tag = (r: typeof skill) => relicLabel(me, r) + (left(r) > 0 ? ' ' + left(r).toFixed(1) : '');
-  $('.rlc').textContent = (input.touch ? '' : 'E ') + tag(skill);
+  // (A skill your trainer hasn't taught you yet has no button.)
+  const known = knows(me, 'skill');
+  $('.rlc').textContent = known ? (input.touch ? '' : 'E ') + tag(skill) : '';
   $('.rlc').dataset.el = me.augments[skill];
   $('.rcd').textContent = relic ? (input.touch ? '' : 'R ') + tag(relic) : '';
   $('.rcd').classList.toggle('wait', !!relic && left(relic) > 0);
   if (input.touch) {
     const sb = $('.tb.relic'), rb = $('.tb.relic2');
+    sb.hidden = !known;
     sb.textContent = RELICS[skill].short;
     sb.dataset.el = me.augments[skill];
     sb.style.setProperty('--cd', 100 * (1 - left(skill) / RELICS[skill].cooldown) + '%');

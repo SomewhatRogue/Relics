@@ -10,11 +10,11 @@
  */
 import { HOUND, SNARE, WEAPONS, technique } from '../shared/tuning';
 import { damage, isDead } from './damage';
-import type { Enemy, FightEvent, Hero, Hound, Snare } from './types';
+import { knows, type Enemy, type FightEvent, type Hero, type Hound, type Snare } from './types';
 
 /** Jumped back as a Ranger: leave a snare where you stood (if one's ready). */
 export function laySnare(h: Hero, snares: Snare[], now: number, ev: FightEvent[]): void {
-  if (WEAPONS[h.weapon].cls !== 'RANGER' || now < h.snareReady) return;
+  if (WEAPONS[h.weapon].cls !== 'RANGER' || now < h.snareReady || !knows(h, 'leave')) return;
   h.snareReady = now + SNARE.cooldown;
   const mine = snares.filter((s) => s.owner === h.id);
   if (mine.length >= SNARE.max) snares.splice(snares.indexOf(mine[0]), 1);
@@ -69,13 +69,15 @@ export function stepHound(h: Hero, enemies: Enemy[], now: number, dt: number, ev
     to(h.x - h.fx * 1.1 - h.fy * side * 0.8, h.y - h.fy * 1.1 + h.fx * side * 0.8 + 0.2, HOUND.speed, 0.3);
     if (now < d.next) return;
     // Now and then: what you've been hitting, or the nearest small goblin near you.
-    const awake = enemies.filter((e) => !isDead(e) && e.alert !== false && e.kind === 'scrapper' && Math.hypot(e.x - h.x, e.y - h.y) < HOUND.reach);
+    // Training: never one that's swinging at you (that's yours to dodge or parry).
+    const awake = enemies.filter((e) => !isDead(e) && e.alert !== false && e.kind === 'scrapper' && Math.hypot(e.x - h.x, e.y - h.y) < HOUND.reach && !(h.calmHound && e.attack));
     const pick = awake.find((e) => e.lastBy === h.id && e.hitAt > now - 2) ?? awake.sort((a, b) => Math.hypot(a.x - h.x, a.y - h.y) - Math.hypot(b.x - h.x, b.y - h.y))[0];
     if (!pick) return void (d.next = now + 1);
     Object.assign(d, { state: 'run', target: pick.id, t: 0, bites: 0 });
     return void ev.push({ k: 'bark', x: d.x, y: d.y });
   }
-  if (!prey || d.t > 6) return void Object.assign(d, { state: 'heel', target: 0, next: now + HOUND.every + (h.id.length % 3) });
+  const every = HOUND.every * (h.calmHound ? 3 : 1);
+  if (!prey || d.t > 6) return void Object.assign(d, { state: 'heel', target: 0, next: now + every + (h.id.length % 3) });
   if (d.state === 'run') {
     if (to(prey.x, prey.y, HOUND.speed * 1.3, 0.6) <= 0.65) Object.assign(d, { state: 'bite', t: HOUND.biteEvery });
     return;
@@ -86,6 +88,7 @@ export function stepHound(h: Hero, enemies: Enemy[], now: number, dt: number, ev
   d.t = 0;
   d.target = prey.id;
   damage(prey, HOUND.bite, now, ev, { src: 'hound', how: 'opened' });
-  if (prey.kind === 'scrapper' && !isDead(prey)) Object.assign(prey, { attack: null, act: 'flinch', actT: 0, actDur: 0.35 });
-  if (++d.bites >= HOUND.bites || isDead(prey)) Object.assign(d, { state: 'heel', target: 0, next: now + HOUND.every + (h.id.length % 3) });
+  // It knocks a small one off its stride (not while you're training: you're meant to meet that blow).
+  if (prey.kind === 'scrapper' && !isDead(prey) && !h.calmHound) Object.assign(prey, { attack: null, act: 'flinch', actT: 0, actDur: 0.35 });
+  if (++d.bites >= HOUND.bites || isDead(prey)) Object.assign(d, { state: 'heel', target: 0, next: now + every + (h.id.length % 3) });
 }

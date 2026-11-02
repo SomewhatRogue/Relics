@@ -38,3 +38,14 @@ export const drillPrice = (id: DrillId, rank: number) => Math.round((DRILLS[id].
 /** A drill's total, at its rank. */
 export const drilled = (d: Drills | undefined, id: DrillId) => (d?.[id] ?? 0) * DRILLS[id].per;
 export const technique = (d: Drills | undefined, cls: HeroClass) => (d?.technique ?? 0) * TECHNIQUE[cls].per;
+
+/**
+ * What your trainer teaches, once you've the level and the gold: your class skill (a new hero comes
+ * out of the wood with only a dodge and their weapon), and later what a Ranger's or Mage's dodge
+ * leaves behind (a snare where they jumped from, an image where they blinked from).
+ */
+export const TEACHES = { skill: { level: 2, price: 60 }, leave: { level: 3, price: 80 } } as const;
+export const LEAVES: Partial<Record<HeroClass, { name: string; text: string }>> = {
+  RANGER: { name: 'SNARE ON THE JUMP', text: 'Jumping back leaves a snare where you stood' },
+  MAGE: { name: 'AN IMAGE ON THE BLINK', text: 'Blinking leaves an image of you behind, and the goblins go for it' },
+};

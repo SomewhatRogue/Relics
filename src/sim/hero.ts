@@ -9,7 +9,7 @@ import { applyGear } from './pack';
 import { statsOf } from './gearstats';
 import { fedMult, jealousBlocks, jealousCooldown, needlesBreath, wears } from './hungry';
 import { hitEnemy } from './combat';
-import type { Enemy, FightEvent, Hero, Intent } from './types';
+import { knows, type Enemy, type FightEvent, type Hero, type Intent } from './types';
 
 export function newHero(id: string, x: number, y: number): Hero {
   return {
@@ -107,13 +107,14 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   if (inp.relicSeq !== h.seen.relic) (h.seen.relic = inp.relicSeq), (h.relicQueuedAt = now);
   if (inp.relicSwapSeq !== h.seen.relicSwap) {
     h.seen.relicSwap = inp.relicSwapSeq;
-    h.relic = h.relics[(h.relics.indexOf(h.relic) + 1) % h.relics.length];
+    const usable = h.relics.filter((r, i) => i > 0 || knows(h, 'skill'));
+    if (usable.length) h.relic = usable[(usable.indexOf(h.relic) + 1) % usable.length];
     ev.push({ k: 'relic', x: h.x, y: h.y, name: RELICS[h.relic].name });
   }
   if (inp.relicPickSeq !== h.seen.relicPick) {
     h.seen.relicPick = inp.relicPickSeq;
     const r = h.relics[inp.relicPick];
-    if (r && r !== h.relic) {
+    if (r && r !== h.relic && (r !== h.relics[0] || knows(h, 'skill'))) {
       h.relic = r;
       ev.push({ k: 'relic', x: h.x, y: h.y, name: RELICS[r].name });
     }
@@ -252,6 +253,8 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   // Idle or walking.
   if (wantsRoll) return startRoll(h, inp, now, ev);
   if (now - h.grabQueuedAt < INPUT_BUFFER && acts.grab(h)) return;
+  // The class skill, not yet taught, does nothing (the press is spent).
+  if (now - h.relicQueuedAt < INPUT_BUFFER && h.relic === h.relics[0] && !knows(h, 'skill')) h.relicQueuedAt = -9;
   if (now - h.relicQueuedAt < INPUT_BUFFER && now >= h.relicReady[h.relic] && !jealousBlocks(h)) {
     // A blessing turns to nobody: the room picks the ally.
     if (h.relic !== 'blessing' && h.relic !== 'horn') face(h, inp, enemies, true, RELICS[h.relic].range);
@@ -318,7 +321,7 @@ function startRoll(h: Hero, inp: Intent, now: number, ev: FightEvent[]): void {
   h.rollX = h.x;
   h.rollY = h.y;
   // A blink leaves an image of you where you stood, and the goblins near it go for that.
-  if (kind === 'blink') Object.assign(h, { decoyX: h.x, decoyY: h.y, decoyUntil: now + DECOY.time });
+  if (kind === 'blink' && knows(h, 'leave')) Object.assign(h, { decoyX: h.x, decoyY: h.y, decoyUntil: now + DECOY.time });
   h.rollQueuedAt = -9;
   spend(h, WEAPONS[h.weapon].dodge.stamina * DODGE.cost * statsOf(h).dodgeCost, now);
   ev.push({ k: kind === 'blink' ? 'blink' : 'roll', x: h.x, y: h.y });

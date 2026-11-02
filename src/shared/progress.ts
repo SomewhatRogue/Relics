@@ -57,6 +57,8 @@ export interface Profile {
   perks: PerkId[];
   /** Drills paid for at the trainer (drills.ts). */
   drills?: Drills;
+  /** What the trainer has taught: the class skill, the dodge's leave-behind. Undefined on old heroes (they know it all). */
+  learned?: ('skill' | 'leave')[];
   /** Level ups not yet spent at the trainer. */
   picks: number;
   /** The weapon in hand (`weapon`, plain if `arms` has nothing for it) and the pack. */
@@ -93,7 +95,7 @@ export interface Profile {
 }
 
 export const newProfile = (cls: HeroClass = 'WARRIOR', name = 'HERO'): Profile =>
-  ({ id: heroId(), name, cls, gold: 0, xp: 0, level: 1, perks: [], picks: 0, arms: {}, weapon: CLASS_KITS[cls][0], bag: [], glow: 0, belt: ['bitter'], armor: { slot: 'armor', armor: CLASS_ARMOR[cls], quality: 'plain', traits: [], mods: [], level: 0 }, rings: [], steel: 0, want: 0, prologue: false, tally: false, cold: false, cutSeen: false, relics: [], relic: '', augments: {}, runs: 0, stats: newStats(), wish: false, dice: 0 });
+  ({ id: heroId(), name, cls, gold: 0, xp: 0, level: 1, perks: [], learned: [], picks: 0, arms: {}, weapon: CLASS_KITS[cls][0], bag: [], glow: 0, belt: ['bitter'], armor: { slot: 'armor', armor: CLASS_ARMOR[cls], quality: 'plain', traits: [], mods: [], level: 0 }, rings: [], steel: 0, want: 0, prologue: false, tally: false, cold: false, cutSeen: false, relics: [], relic: '', augments: {}, runs: 0, stats: newStats(), wish: false, dice: 0 });
 
 function heroId(): string {
   const c = 'abcdefghijkmnpqrstuvwxyz23456789';

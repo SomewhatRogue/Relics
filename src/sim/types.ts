@@ -43,6 +43,10 @@ export interface Intent {
 
 export const NO_INTENT: Intent = { mx: 0, my: 0, ax: 0, ay: 0, attack: false, block: false, attackSeq: 0, blockSeq: 0, rollSeq: 0, weaponSeq: 0, relicSeq: 0, relicSwapSeq: 0, relicPickSeq: 0, relicPick: 0, augmentSeq: 0, classSeq: 0, grabSeq: 0, takeSeq: 0, take: 0, gearSeq: 0, gearOp: 0, gearArg: 0, potionSeq: 0, openSeq: 0, open: 0 };
 
+/** What a trainer teaches: the class skill, and the leave-behind on a dodge. */
+export type Learned = 'skill' | 'leave';
+export const knows = (h: { learned?: Learned[] }, l: Learned) => !h.learned || h.learned.includes(l);
+
 export type HeroAct = 'idle' | 'charge' | 'attack' | 'throw' | 'zip' | 'roll' | 'hurt' | 'stun' | 'down' | 'carry' | 'slam' | 'channel';
 
 /** Anything that can be pushed: a slide (knockback) decays each tick. */
@@ -147,6 +151,13 @@ export interface Hero extends Body {
   want: number;
   /** Lying where you fell, before Hew gets you up (the wood's opening). */
   lying?: boolean;
+  /**
+   * What a trainer has taught this hero: their class skill, and the dodge's leave-behind (a Ranger's
+   * snare, a Mage's image). Undefined: an old hero, who knows it all already.
+   */
+  learned?: Learned[];
+  /** Training (the wood, the yard): the hound joins in rarely and never breaks up a blow at you. */
+  calmHound?: boolean;
   /** Drills paid for at the trainer (shared/drills.ts), and a crit's own dice (seeded by the hero). */
   drills?: import('../shared/drills').Drills;
   critSeed?: number;
