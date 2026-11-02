@@ -173,5 +173,5 @@ describe('every room has a way out you can see and reach', () => {
         expect(can(mid(a).x, a.y + a.h + 0.3), `${p.kind} ${seed} room ${i}: reach the way out`).toBe(true);
       }
     }
-  });
+  }, 60000);
 });

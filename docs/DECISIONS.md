@@ -1358,3 +1358,37 @@ and he couldn't tell when or where he could leave.
   or the clear line up the middle.
 - The ground comes from soil shapes (grass, ploughed furrows, standing grain, earth, mud, gravel)
   over each place's floor. Enemy rolls, themes' light and torches are untouched.
+
+## 2026-11-01: jobs at any hour, and spiders (Kyle; Opus 5.5)
+Kyle: maps don't always have to be night, and other enemy types, like spiders that come in waves and poison.
+- **A job's hour** (`shared/timeofday.ts`): dawn, day, dusk or night, rolled from the job's own seed on its
+  own stream (the rest of the board is unchanged). Night is still the twist with its extra pay; a quarter
+  of the rest are dawn, a quarter dusk, the rest day. The room is lit through the same pass as the town:
+  the place's own tint mixed toward the hour's sky as far as the place lets the sky in (a forest less, a
+  mine not at all), `torch` scales torches, braziers, posts and lanterns (day 0.35), dusk stretches every
+  shadow east, dawn lays mist bands over the ground. The board shows the hour as one word on each line
+  (". At night" left the detail). Old saved jobs read as night if they were night jobs, else day.
+- **Darkness and stealth**: nothing judged depended on the dark before. Now a resting goblin's sight is
+  0.8 of itself at night, 0.9 at dawn and dusk; a censer's glow gives a Healer away half as far by day.
+- **Spiders** (`shared/spiders.ts` numbers, `shared/nests.ts` where, `sim/spiders.ts`, `sim/poison.ts`,
+  `sim/puddles.ts`): in forests, marshes, mines and ruins only (never villages, farms, fields, rivers or
+  under Wickhold), 25% a room plus 12% a room in, 5% a point of ruin, 15% on a deep job. A room with them
+  gets a nest (two from the third room, or on a deep job) with two spiders on it, and two fewer plain
+  goblins a nest. A nest wakes when a hero comes within 8.5 tiles (or it's hit), hatches 3 spiders 1.2 s
+  later and every 8 s after while fewer than 7 of its own live; it counts toward clearing the room ("Clear
+  the room (N left)" while spiders are about). A spider: 14 health, fast, zigzags in, circles while it
+  gathers itself, pounces 2.4 tiles along a shown lane (blockable, parryable) for 5 and a stack of poison.
+  The brood mother (from the third room, the second on a deep job, 40% plus 30% deep): 240 health, slow;
+  a bite (14) up close and, from 2.8 to 7 tiles, a lobbed glob at where you stand: a striped circle that
+  lands exactly there for 10 and leaves a poison puddle 5 s. She hangs back in spitting range.
+- **Poison**: up to 3 stacks, 2 a stack a second, never the last point of health; a stack wears off 5 s
+  after the last bite, then one every 1.5 s. A Bitter cures it; a Healer's heal takes a stack off. Green
+  cast and drips on the hero, the health bar goes green. Synced to friends on the hero and puddles as a
+  collection.
+- **Weaknesses** (`WEAK` in shared/spiders.ts, read by `damage()` and melee): spider fire 2.5, storm 1.2;
+  brood fire 1.8, blades 0.9; nest fire 3, blades 0.6, frost 0.5, storm 0.8. WEAK pops over a hit on one.
+  Fire spreads between spiders half a tile further than between goblins, and a burn tick kills a spider.
+  Spiders give xp (3; nest 20; brood 60) but no gold or loot and don't count as goblins killed.
+- In a party, nests aren't copied (their waves grow by one a player past the first, and their cap with
+  them); the brood mother isn't copied and gets tougher like a named one.
+

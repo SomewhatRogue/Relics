@@ -9,6 +9,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .bar { height: 6px; background: #241f2c; border: 1px solid #0d0b10; margin-bottom: 3px; }
 .bar i { display: block; height: 100%; width: 100%; transition: width 0.12s; }
 .hp i { background: #c8402f; }
+.hp.poisoned i { background: #6a9a2a; box-shadow: inset 0 -2px 0 #3a6a1a; }
 .st i { background: #d9b13a; }
 .st.low i { background: #7a6a30; }
 .st.winded i { background: #c84a3a; animation: winded 0.5s steps(2) infinite; }
@@ -411,6 +412,10 @@ body[data-guard="none"] .tb.block { display: none; }
 #panel .job .jhead .k-story { color: #ffe9a8; }
 #panel .job .jhead .where { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #panel .job .jhead .len { color: #8a8494; font-size: 10px; }
+#panel .job .jhead .when { font-size: 10px; color: #e8d8a8; }
+#panel .job .jhead .t-dawn { color: #a8c0d8; }
+#panel .job .jhead .t-dusk { color: #e0a070; }
+#panel .job .jhead .t-night { color: #8a90d0; }
 #panel .job .jhead em { font-style: normal; color: #ffd27a; min-width: 38px; text-align: right; }
 #panel .pips { display: inline-flex; gap: 2px; }
 #panel .pips i { width: 5px; height: 8px; background: #3a3644; }

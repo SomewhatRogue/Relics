@@ -2,7 +2,7 @@
 import type { Enemy } from '../sim/types';
 import type { Ctx } from './draw';
 
-const TALL: Record<Enemy['kind'], number> = { butcher: 24, scrapper: 14, dummy: 18, swingDummy: 18 };
+const TALL: Record<Enemy['kind'], number> = { butcher: 24, scrapper: 14, dummy: 18, swingDummy: 18, spider: 6, brood: 14, nest: 12 };
 
 /** `t` is the room's time (the statuses are kept in it); (x, y) the feet on screen. */
 export function drawStatus(c: Ctx, e: Enemy, x: number, y: number, t: number): void {

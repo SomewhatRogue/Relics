@@ -13,8 +13,11 @@ import { layOut, placeSeed, siteWater } from './sites.js';
 import { siteClear, wooden, type Site } from './sitekit.js';
 import { Rng } from './rng.js';
 import { rollBackline } from './roster.js';
+import { rollSpiders } from './nests.js';
+import { lightFor, timeOf } from './timeofday.js';
 
-export interface Foe { kind: 'scrapper' | 'butcher'; x: number; y: number; hp?: number; name?: string; bow?: boolean; z?: number; awake?: boolean; feeding?: boolean; variant?: 'looter' | 'lunger' | 'heavy' | 'stoker' | 'shield' | 'hexer' | 'drummer' }
+/** `wave`: a nest's spiders a wave (more in a party; shared/nests.ts). */
+export interface Foe { kind: 'scrapper' | 'butcher' | 'spider' | 'brood' | 'nest'; wave?: number; x: number; y: number; hp?: number; name?: string; bow?: boolean; z?: number; awake?: boolean; feeding?: boolean; variant?: 'looter' | 'lunger' | 'heavy' | 'stoker' | 'shield' | 'hexer' | 'drummer' }
 /** Which way the party went at a fork. */
 export type RoadId = Road['road'];
 export interface RoomPlan { map: GameMap; foes: Foe[]; props: { kind: PropKind; x: number; y: number }[]; chests: { x: number; y: number; chained?: boolean }[] }
@@ -177,10 +180,12 @@ export function planRoom(job: Job, index: number, road?: RoadId): RoomPlan {
     if (c) chests.push(c);
   }
   if (final && job.deep) chests.push({ x: MID + 2.2, y: 3.2, chained: true });
+  // In the wilder places, sometimes spiders: nests that hatch waves, and deep in, a brood mother (shared/nests.ts).
+  rollSpiders(foes, job, index, spot, H, W);
   // Each house's look and fate outside come from the same seed as its inside.
   const spill = settle(job, index, blocks);
-  const night = job.twist === 'night', t = THEMES[kind];
-  const theme: Theme = night ? { ...t, ambient: t.ambient.map((v) => v * 0.65) as Theme['ambient'], moon: t.moon * 0.5 } : t;
+  // Lit for the job's hour (shared/timeofday.ts): broad day, a misty dawn, a long dusk, or night.
+  const theme: Theme = lightFor(THEMES[kind], kind, timeOf(job));
   const map: GameMap = {
     name: job.place.name.toUpperCase(), w: W, h: H, wallFace: 3, rounds, blocks, braziers,
     torches: kit.torches ? [{ x: 4.5, y: -1.6 }, { x: MID - 4, y: -1.6 }, { x: MID + 4, y: -1.6 }, { x: W - 4.5, y: -1.6 }] : [], hero: { ...SPAWN }, exit: roads ? null : { ...EXIT }, theme,

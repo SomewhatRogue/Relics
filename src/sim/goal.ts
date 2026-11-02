@@ -10,6 +10,7 @@
 import { doorAt, type Area, type Block, type GameMap } from '../shared/arena';
 import { runInterior } from '../shared/interiors';
 import { isDead } from './damage';
+import { isSpiderKind } from '../shared/spiders';
 import type { ArenaRoom } from './room';
 import type { Run } from './run';
 
@@ -73,7 +74,9 @@ export function goal(run: Run, room: ArenaRoom, houses: Captives = { caged: 0, w
   const way = (home: boolean) => `${home ? 'Way home' : 'Way on'}: ${wayDir(room.map)}`;
   if (!isFinal(run)) {
     const fork = !!room.map.roads;
-    return { text: also(goblins ? `Clear the goblins (${goblins} left)` : fork ? 'Pick a road, together. HIGH: archers up top, fewer below. LOW: more goblins, someone caged' : way(false)), done: goblins === 0 };
+    // With spiders about (nests and all) it's the room to clear, not just the goblins.
+    const what = room.enemies.some((e) => !isDead(e) && isSpiderKind(e.kind)) ? 'the room' : 'the goblins';
+    return { text: also(goblins ? `Clear ${what} (${goblins} left)` : fork ? 'Pick a road, together. HIGH: archers up top, fewer below. LOW: more goblins, someone caged' : way(false)), done: goblins === 0 };
   }
   const freed = !need.caged && !need.waiting;
   if (o === 'rescue') return { text: freed ? also(`Everyone's out. ${way(true)}`) : people, done: freed };

@@ -36,7 +36,10 @@ import { forgedElement, has, traitsOf } from './traits';
 import { fireHook, stepHook } from './hook';
 import { stepJavelin, throwJavelin } from './javelin';
 import { laySnare, stepHound, stepSnare } from './ranger';
-import { NO_INTENT, type Zone, type Bolt, type Drop, type Enemy, type Prop, type FightEvent, type Hero, type Hook, type Intent, type Javelin, type Snare, type Survivor } from './types';
+import { stepNests } from './spiders';
+import { cure, stepPoison } from './poison';
+import { stepPuddles } from './puddles';
+import { NO_INTENT, type Puddle, type Zone, type Bolt, type Drop, type Enemy, type Prop, type FightEvent, type Hero, type Hook, type Intent, type Javelin, type Snare, type Survivor } from './types';
 
 export class ArenaRoom {
   time = 0;
@@ -57,6 +60,8 @@ export class ArenaRoom {
   pickups: Pickup[] = [];
   /** Smoke from thrown flasks. */
   smokes: Smoke[] = [];
+  /** Poison where the brood mother's globs landed (sim/puddles.ts). */
+  puddles: Puddle[] = [];
   /** Chests, and how far up the danger shifts what's in them (sim/chests.ts). */
   chests: Chest[] = [];
   danger = 0;
@@ -104,6 +109,7 @@ export class ArenaRoom {
         if (f.hp) e.hp = e.maxHp = f.hp;
         if (f.variant) (e.variant = f.variant), (e.hp = e.maxHp = VARIANTS[f.variant].hp);
         Object.assign(e, { respawns: false, name: f.name, bow: f.bow, z: f.z ?? 0, alert: f.awake ?? false, feeding: f.feeding });
+        if (f.wave) e.wave = f.wave;
         // At the dead: facing the body it's eating.
         const body = f.feeding ? (this.map.npcs ?? []).filter((n) => n.pose === 'corpse').sort((a, b) => Math.hypot(a.x - e.x, a.y - e.y) - Math.hypot(b.x - e.x, b.y - e.y))[0] : undefined;
         if (body) {
@@ -219,11 +225,11 @@ export class ArenaRoom {
     impacts(this.enemies, this.time, this.events);
     propImpacts(w);
     this.props = w.props = stepProps(w, TICK);
-    stepBuildings(w, TICK, (x, y) => {
-      const e = newEnemy(Math.max(0, ...this.enemies.map((o) => o.id)) + 1, 'scrapper', x, y);
-      e.respawns = false;
-      this.enemies.push(e);
-    });
+    stepBuildings(w, TICK, (x, y) => void this.spawn('scrapper', x, y));
+    // Nests hatch their waves; the brood mother's globs leave puddles; poison ticks (sim/spiders.ts, puddles.ts, poison.ts).
+    stepNests(this.enemies, this.heroes, this.time, this.events, (x, y) => this.spawn('spider', x, y));
+    this.puddles = stepPuddles(this.puddles, this.heroes, this.time, TICK, this.events);
+    stepPoison(this.heroes, this.time, this.events);
     stepElements(w);
     // The freed: home out in the open at the way in; brought out of a house, maybe goblins waiting.
     const door = stepSurvivors(w, TICK, this.indoors ? null : this.map.hero);
@@ -243,6 +249,14 @@ export class ArenaRoom {
     this.drops = stepDrops(this.drops, TICK);
     this.coals = stepCoals(this.coals, this.heroes, this.events, TICK);
     if (this.map.blaze) stepBlaze(this, TICK);
+  }
+
+  /** Something new in the room (a den's goblin, a nest's spider), awake and for good. */
+  private spawn(kind: 'scrapper' | 'spider', x: number, y: number): Enemy {
+    const e = newEnemy(Math.max(0, ...this.enemies.map((o) => o.id)) + 1, kind, x, y);
+    e.respawns = false;
+    this.enemies.push(e);
+    return e;
   }
 
   /** Off a ledge: a goblin knocked off (thrown, hooked, blasted) takes the fall; anyone who steps off just lands. */
@@ -357,6 +371,8 @@ export class ArenaRoom {
     w.ev.push({ k: 'bless', x: h.x, y: h.y });
     for (const o of this.heroes) {
       if (o.act === 'down' || Math.hypot(o.x - h.x, o.y - h.y) > HEAL_RADIUS) continue;
+      // A heal draws a stack of poison too.
+      cure(o, false, this.events);
       const n = Math.min(o.maxHp - o.hp, Math.round(heals(o, h, s.heal * healMult(h) * (1 + technique(h.drills, 'HEALER')))));
       if (n <= 0) continue;
       o.hp += n;

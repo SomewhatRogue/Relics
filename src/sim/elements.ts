@@ -4,7 +4,7 @@
  * fire meets frost as a steam burst, storm or a heavy blow shatters the frozen, storm on the
  * burning flares outward.
  */
-import { BURN, FLARE, FROST, SHATTER, STEAM, STORM, type Augment } from '../shared/tuning';
+import { BURN, FLARE, FROST, SHATTER, SPIDER, STEAM, STORM, type Augment } from '../shared/tuning';
 import { shove } from './bodies';
 import { clearElements, damage, frozen, isDummy } from './damage';
 import type { Enemy, FightEvent, Hero, Javelin, Prop, Survivor } from './types';
@@ -71,7 +71,7 @@ function zap(w: World, e: Enemy, n: number, chain: boolean): void {
   for (const o of [...near, ...rods]) {
     ev.push({ k: 'shock', x: e.x, y: e.y, x2: o.x, y2: o.y });
     const hit = rods.includes(o) ? STORM.rodDmg : Math.max(STORM.min, Math.round(n * STORM.share));
-    if (!damage(o, hit, now, ev, { flinch: STORM.flinch })) zap(w, o, 0, false);
+    if (!damage(o, hit, now, ev, { flinch: STORM.flinch, el: 'storm' })) zap(w, o, 0, false);
   }
 }
 
@@ -79,7 +79,7 @@ function zap(w: World, e: Enemy, n: number, chain: boolean): void {
 export function shatter(e: Enemy, now: number, ev: FightEvent[]): void {
   e.frozenUntil = 0;
   ev.push({ k: 'shatter', x: e.x, y: e.y });
-  damage(e, SHATTER.dmg, now, ev, { heavy: true, how: 'shatter' });
+  damage(e, SHATTER.dmg, now, ev, { heavy: true, how: 'shatter', el: 'frost' });
 }
 
 /** Fire meets frost: both gone in a scalding cloud that stuns everything around. */
@@ -102,7 +102,7 @@ function flare(w: World, e: Enemy): void {
   for (const o of w.enemies) {
     const d = dist(o, e);
     if (o.act === 'dead' || d > FLARE.radius + o.radius) continue;
-    if (damage(o, FLARE.dmg, now, ev, { heavy: true, flinch: 0.4, how: 'burst', dx: o.x - e.x, dy: o.y - e.y })) continue;
+    if (damage(o, FLARE.dmg, now, ev, { heavy: true, flinch: 0.4, how: 'burst', dx: o.x - e.x, dy: o.y - e.y, el: 'fire' })) continue;
     if (o !== e && o.act !== 'pinned' && o.act !== 'carried') shove(o, (o.x - e.x) / (d || 1), (o.y - e.y) / (d || 1), FLARE.knock, o.weight);
   }
 }
@@ -114,11 +114,12 @@ export function stepElements(w: World): void {
     if (e.act === 'dead' || !burning(e, now)) continue;
     if (now >= e.burnNext) {
       e.burnNext = now + BURN.every;
-      if (damage(e, BURN.dmg, now, ev, { tick: true })) continue;
+      if (damage(e, BURN.dmg, now, ev, { tick: true, el: 'fire' })) continue;
     }
     for (const o of w.enemies) {
       if (o === e || o.act === 'dead' || burning(o, now) || frozen(o, now)) continue;
-      if (dist(o, e) <= o.radius + e.radius + BURN.spread) ignite(o, now, ev);
+      // Spiders packed together go up like tinder.
+      if (dist(o, e) <= o.radius + e.radius + BURN.spread + (o.kind === 'spider' ? SPIDER.spread : 0)) ignite(o, now, ev);
     }
   }
 }

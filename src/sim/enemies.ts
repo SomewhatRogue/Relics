@@ -3,7 +3,7 @@ import { lure, seenFrom } from './lantern';
 import { visible } from './flasks';
 import { HUNGRY_FX, wears } from './hungry';
 import { collide, currentMap, inArea, wadeAt } from '../shared/arena';
-import { FRIENDLY, DECOY, ALERT, ARCHER, BUTCHER, DRUMMER, HEXER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, type EnemyAttackSpec, type EnemySpec, VARIANTS, STEALTH, CLASS_DODGES, WEAPONS, HORN } from '../shared/tuning';
+import { FRIENDLY, DECOY, ALERT, ARCHER, BUTCHER, BROOD, NEST, SPIDER, DRUMMER, HEXER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, type EnemyAttackSpec, type EnemySpec, VARIANTS, STEALTH, CLASS_DODGES, WEAPONS, HORN } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { hexFriendly, isBackline, stepBackline } from './backline';
 import { shove, slide } from './bodies';
@@ -11,18 +11,25 @@ import { attackCovers, hitHero } from './combat';
 import { damage, frozen, isDead, kill, snared } from './damage';
 import { shatter } from './elements';
 import { has } from './traits';
+import { hunt } from './spiders';
+import { glowIn, sightIn } from '../shared/timeofday';
 import type { Enemy, EnemyAttack, FightEvent, Hero } from './types';
 
-const SPECS: Partial<Record<Enemy['kind'], EnemySpec>> = { butcher: BUTCHER, scrapper: SCRAPPER };
+const SPECS: Partial<Record<Enemy['kind'], EnemySpec>> = { butcher: BUTCHER, scrapper: SCRAPPER, spider: SPIDER, brood: BROOD };
 
 export function newEnemy(id: number, kind: Enemy['kind'], x: number, y: number): Enemy {
   const s = SPECS[kind];
-  const hp = s ? s.hp : 999;
-  return {
+  const hp = s ? s.hp : kind === 'nest' ? NEST.hp : 999;
+  const e: Enemy = {
     id, kind, x, y, kvx: 0, kvy: 0, fx: 0, fy: 1, hp, maxHp: hp, radius: s ? s.radius : 0.4, weight: s ? s.weight : Infinity,
     act: s ? 'chase' : 'idle', actT: 0, actDur: 0, attack: null, cooldown: 1 + id * 0.4, hitstop: 0, hitAt: -9, moving: false, home: { x, y }, corpse: '',
     burnUntil: 0, burnNext: 0, chillUntil: 0, frozenUntil: 0, snareUntil: 0, lastBy: '', death: '', respawns: true, z: 0,
   };
+  // A nest: rooted, asleep till a hero comes near (sim/spiders.ts).
+  if (kind === 'nest') Object.assign(e, { radius: NEST.radius, nextWave: -1 });
+  // Spiders come in late and in numbers: their first move isn't held back by how many came before.
+  if (kind === 'spider' || kind === 'brood') e.cooldown = 1 + (id % 4) * 0.3;
+  return e;
 }
 
 function nearest(e: Enemy, heroes: Hero[], now: number): Hero | null {
@@ -71,10 +78,10 @@ function runAttack(e: Enemy, heroes: Hero[], now: number, dt: number, ev: FightE
   a.t += dt;
   // Netted: no running at you and no throwing the hook. Whatever it was winding up for is lost.
   if ((a.kind === 'charge' || a.kind === 'draw') && e.snareUntil > now) return ev.push({ k: 'snared', x: e.x, y: e.y }), true;
-  if (a.kind === 'charge') return runCharge(e, a, heroes, now, ev, others);
+  if (a.kind === 'charge' || a.kind === 'pounce') return runCharge(e, a, heroes, now, ev, others);
   if (!a.done && a.t >= a.windup) {
     a.done = true;
-    const round = a.kind === 'slam' || a.kind === 'hex';
+    const round = a.kind === 'slam' || a.kind === 'hex' || a.kind === 'spit';
     ev.push({ k: 'impact', x: round ? a.cx : e.x, y: round ? a.cy : e.y, kind: a.kind });
     // Blows land on your own level; arrows reach up and down.
     const before = heroes.map((h) => h.hp);
@@ -91,7 +98,7 @@ function runAttack(e: Enemy, heroes: Hero[], now: number, dt: number, ev: FightE
 /** The charge: it runs the line it showed you, through anyone on it (once each), and stops at the end. */
 function runCharge(e: Enemy, a: EnemyAttack, heroes: Hero[], now: number, ev: FightEvent[], others: Enemy[]): boolean {
   const going = a.t >= a.windup && a.t < a.windup + a.active, speed = a.range / a.active;
-  if (going && !a.done) (a.done = true), ev.push({ k: 'impact', x: e.x, y: e.y, kind: 'charge' });
+  if (going && !a.done) (a.done = true), ev.push({ k: 'impact', x: e.x, y: e.y, kind: a.kind });
   e.kvx = going ? a.dx * speed : 0;
   e.kvy = going ? a.dy * speed : 0;
   e.moving = going;
@@ -100,7 +107,7 @@ function runCharge(e: Enemy, a: EnemyAttack, heroes: Hero[], now: number, ev: Fi
     a.cy = e.y + a.dy * 0.4;
     for (const h of heroes) if (!(a.hit ??= []).includes(h.id) && (h.z ?? 0) === (e.z ?? 0) && attackCovers(a, h)) (a.hit.push(h.id), hitHero(e, a, h, now, ev));
     // Its own in the way go flying.
-    for (const o of others) if (o !== e && o.kind === 'scrapper' && !isDead(o) && !a.hit!.includes('g' + o.id) && attackCovers(a, o as unknown as Hero)) a.hit!.push('g' + o.id), damage(o, Math.round(a.dmg * FRIENDLY.blow), now, ev, { heavy: true, how: 'burst' }), shove(o, a.dx, a.dy, a.knock, o.weight);
+    if (a.kind === 'charge') for (const o of others) if (o !== e && o.kind === 'scrapper' && !isDead(o) && !a.hit!.includes('g' + o.id) && attackCovers(a, o as unknown as Hero)) a.hit!.push('g' + o.id), damage(o, Math.round(a.dmg * FRIENDLY.blow), now, ev, { heavy: true, how: 'burst' }), shove(o, a.dx, a.dy, a.knock, o.weight);
     if (e.attack === null) return true;
   }
   // Ran its line and missed the one it was meant for: if that's a hero with no dodge, they stepped out.
@@ -142,9 +149,13 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     if (e.respawns && e.actT >= e.actDur) Object.assign(e, { act: 'chase', hp: e.maxHp, x: e.home.x, y: e.home.y, kvx: 0, kvy: 0, actT: 0, cooldown: 1.5, corpse: '', death: '' });
     return;
   }
+  // A nest never moves; its waves are the room's (sim/spiders.ts stepNests).
+  if (e.kind === 'nest') return;
   if (spec) {
     const hit = slide(e, e.radius, dt);
-    if (hit) {
+    // A spider's pounce into a wall just stops it.
+    if (hit && e.attack?.kind === 'pounce') e.kvx = e.kvy = 0;
+    else if (hit) {
       const ice = frozen(e, now), by = heroes.find((h) => h.id === e.lastBy);
       // CRUSHING: whoever threw it there makes the wall hurt more.
       const n = KNOCK.wallDmg * (by && has(by, 'crushing') ? TRAIT.crushing : 1);
@@ -213,6 +224,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     } else if (on) walk(e, ux, uy, spec.speed * slow * Math.max(0.2, facing), dt);
     return;
   }
+  // Spiders (sim/spiders.ts): skitter, circle and pounce; the brood mother bites and spits.
+  if (e.kind === 'spider' || e.kind === 'brood') return hunt(e, t, d, ux, uy, facing, spec.speed * slow, level && !via, rng, now, dt, ev);
   // The back of the pack (sim/backline.ts): a hexer or a drummer keeps its distance.
   if (isBackline(e)) return stepBackline(e, t, d, !!via || !level, ux, uy, facing, spec.speed * slow, others, now, dt, ev);
   // The wood's goblins: each fights the way its lesson needs.
@@ -249,14 +262,17 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
  */
 function notice(e: Enemy, heroes: Hero[], others: Enemy[], now: number, ev: FightEvent[]): boolean {
   let seen = false;
+  const theme = currentMap().theme;
   for (const h of heroes) {
     if (h.act === 'down' || h.id === 'squire') continue;
     const dx = h.x - e.x, dy = h.y - e.y, d = Math.hypot(dx, dy);
     if (!visible(h, d, now)) continue;
     const ahead = (dx * e.fx + dy * e.fy) / (d || 1) > -0.2;
     // Looters picking the dead don't look up until something comes close.
-    const sight = e.variant === 'looter' ? 1.6 : e.feeding ? ALERT.sight * 0.5 : ahead ? ALERT.sight : ALERT.behind;
-    if (d < sight * (h.sneaking && h.act !== 'roll' ? STEALTH.sneak : 1) + seenFrom(h)) seen = true;
+    // Darker hours, less far (shared/timeofday.ts); a censer's glow carries less by day.
+    const far = (e.kind === 'spider' ? SPIDER.sight : ALERT.sight) * sightIn(theme);
+    const sight = e.variant === 'looter' ? 1.6 : e.feeding ? far * 0.5 : ahead ? far : ALERT.behind;
+    if (d < sight * (h.sneaking && h.act !== 'roll' ? STEALTH.sneak : 1) + seenFrom(h) * glowIn(theme)) seen = true;
   }
   for (const o of others) if (o !== e && o.alert && (isDead(o) || o.hitAt > now - 0.2) && Math.hypot(o.x - e.x, o.y - e.y) < ALERT.hear) seen = true;
   if (!seen) return false;

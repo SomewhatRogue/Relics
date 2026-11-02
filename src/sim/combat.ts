@@ -1,9 +1,10 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, parry, roll). */
-import { BLESSING, DODGE, WARD, FLINCH, HORN, OVERKILL, PERK, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing, CLASS_DODGES, CRIT, STEALTH, technique } from '../shared/tuning';
+import { BLESSING, DODGE, WARD, FLINCH, HORN, OVERKILL, PERK, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing, CLASS_DODGES, CRIT, STEALTH, technique, weakness } from '../shared/tuning';
 import { shove } from './bodies';
 import { statsOf } from './gearstats';
 import { HUNGRY_FX, wears } from './hungry';
-import { damage, frozen, isDummy, kill, snared, stunOf } from './damage';
+import { damage, frozen, isDummy, kill, small, snared, stunOf } from './damage';
+import { poison } from './poison';
 import { shatter } from './elements';
 import { has } from './traits';
 import type { Enemy, EnemyAttack, FightEvent, Hero } from './types';
@@ -41,7 +42,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   const crit = rollCrit(h), ambush = e.alert === false && !isDummy(e);
   // A shield-bearer takes a blow from the front on its board (unless it's heavy, held fast, or caught unaware).
   const boarded = e.variant === 'shield' && !rear && !heavy && !heldFast && !ambush && !WEAPONS[h.weapon].overShield;
-  const mult = (h.counter ? counter : heldFast ? held : 1) * rearMult * blessed * tempo * (crit ? CRIT : 1) * (ambush ? STEALTH.ambush : 1) * (boarded ? VARIANTS.shield.front : 1);
+  const mult = weakness(e.kind) * (h.counter ? counter : heldFast ? held : 1) * rearMult * blessed * tempo * (crit ? CRIT : 1) * (ambush ? STEALTH.ambush : 1) * (boarded ? VARIANTS.shield.front : 1);
   // Mother Rust's Needles: a backstab kills anything short of a butcher.
   const n = rear && e.kind === 'scrapper' && wears(h, 'needles') ? Math.max(e.hp, Math.round(s.dmg * mult)) : Math.round(s.dmg * mult);
   e.hp -= n;
@@ -75,7 +76,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   // Nothing stops a charge once it's coming.
   // (A Rogue's head-on blow doesn't knock anything off balance: only from behind.)
   const shakes = !(WEAPONS[h.weapon].front && !rear);
-  if (shakes && e.act !== 'stunned' && e.act !== 'pinned' && e.act !== 'carried' && !ice && e.attack?.kind !== 'charge' && (e.kind === 'scrapper' || big)) {
+  if (shakes && e.act !== 'stunned' && e.act !== 'pinned' && e.act !== 'carried' && !ice && e.attack?.kind !== 'charge' && (small(e) || big)) {
     Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: big && e.kind === 'butcher' ? 0.6 : FLINCH });
   }
   return n;
@@ -83,7 +84,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
 
 /** Is this hero inside the attack's shape? */
 export function attackCovers(a: EnemyAttack, h: Hero): boolean {
-  if (a.kind === 'slam' || a.kind === 'hex' || a.kind === 'charge') return Math.hypot(h.x - a.cx, h.y - a.cy) <= a.radius + HERO.radius;
+  if (a.kind === 'slam' || a.kind === 'hex' || a.kind === 'charge' || a.kind === 'pounce' || a.kind === 'spit') return Math.hypot(h.x - a.cx, h.y - a.cy) <= a.radius + HERO.radius;
   return inArc(a.ox, a.oy, a.dx, a.dy, h.x, h.y, a.range, a.arc, HERO.radius);
 }
 
@@ -107,7 +108,7 @@ function warded(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: FightEvent[]
 
 /** Out from under the blow at the last moment: the attacker staggers (a close one; not an archer or a hexer). */
 function slipped(e: Enemy, a: EnemyAttack, h: Hero, ev: FightEvent[]): void {
-  if (a.kind === 'shot' || a.kind === 'hex' || e.act === 'stunned') return;
+  if (a.kind === 'shot' || a.kind === 'hex' || a.kind === 'spit' || e.act === 'stunned') return;
   h.hitstop = Math.max(h.hitstop, HITSTOP.heavy);
   e.hitstop = HITSTOP.heavy;
   Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: stunOf(e) * DODGE.stun });
@@ -162,7 +163,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   }
   const tx = e.x - h.x, ty = e.y - h.y, tl = Math.hypot(tx, ty) || 1;
   // Pushed away from where the blow came from (the slam's centre for a slam).
-  const round = a.kind === 'slam' || a.kind === 'hex';
+  const round = a.kind === 'slam' || a.kind === 'hex' || a.kind === 'spit';
   const sx = round ? h.x - a.cx : -tx, sy = round ? h.y - a.cy : -ty, sl = Math.hypot(sx, sy) || 1;
   // The kit's guard covers an arc in front: a shield covers nearly everything ahead.
   const facing = (h.fx * tx + h.fy * ty) / tl > Math.cos(((w.guardArc / 2) * Math.PI) / 180);
@@ -200,6 +201,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   h.hitstop = Math.max(h.hitstop, HITSTOP.heavy);
   shove(h, sx / sl, sy / sl, a.knock, HERO.weight);
   ev.push({ k: 'hit', x: h.x, y: h.y, n, heavy: n >= 25, on: 'hero', src: a.kind });
+  // A spider's bite (or the brood mother's bite or glob) poisons.
+  if (e.kind === 'spider' || e.kind === 'brood') poison(h, now, ev);
   downIfDead(h, ev);
 }
 

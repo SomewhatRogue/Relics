@@ -5,6 +5,7 @@
  * three downs and the run fails.
  */
 import { BOUNTY } from '../shared/progress';
+import { isSpiderKind } from '../shared/spiders';
 import type { Job } from '../shared/jobs';
 import { runInterior } from '../shared/interiors';
 import { planRoom, type RoadId } from '../shared/terrain';
@@ -75,9 +76,10 @@ export function tally(run: Run, room: ArenaRoom, events: FightEvent[], me: strin
   for (const ev of events) {
     if (ev.k === 'death') {
       const e = room.enemies.find((x) => Math.abs(x.x - ev.x) < 0.01 && Math.abs(x.y - ev.y) < 0.01);
-      const b = e?.name ? BOUNTY.boss : ev.kind === 'butcher' ? BOUNTY.butcher : ev.kind === 'scrapper' ? BOUNTY.scrapper : null;
-      if (b) (run.xp += b.xp), run.kills++;
-      if (b && b !== BOUNTY.scrapper) run.butchers = (run.butchers ?? 0) + 1;
+      const b = e?.name ? BOUNTY.boss : ev.kind === 'butcher' ? BOUNTY.butcher : ev.kind === 'scrapper' ? BOUNTY.scrapper : BOUNTY[ev.kind as 'spider'] ?? null;
+      // Spiders pay xp but aren't goblins killed (the Roll and the town works count goblins).
+      if (b) (run.xp += b.xp), (run.kills += isSpiderKind(ev.kind) ? 0 : 1);
+      if (b && (b === BOUNTY.butcher || b === BOUNTY.boss)) run.butchers = (run.butchers ?? 0) + 1;
     } else if (ev.k === 'gold') {
       // One pot for the party: whoever picks it up, everyone is paid the lot at the end.
       if (ev.id === me || players(room.heroes).some((h) => h.id === ev.id)) run.gold += ev.n;
