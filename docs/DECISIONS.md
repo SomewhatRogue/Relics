@@ -742,3 +742,11 @@ that freezes solid. Storm: every spell jumps to the next goblin. A rod's lance k
 the line, no burst). The HUD kit line shows the element. Kyle heard no sound on his phone: iPhones play web audio
 on the ringer channel, so the silent switch mutes it; the first tap now loops a silent clip on a media element,
 which moves the page to the media channel.
+
+## 2026-11-01: hosting plan (Opus 5.5)
+
+- `api/room.ts` maxDuration is 300 s, not 800: Vercel Hobby refuses a deploy that asks for more
+  than 300, and sockets swap every 4 minutes anyway, so 300 works on Hobby and Pro alike.
+- Start on Vercel Hobby plus Upstash Redis on pay as you go with a monthly budget cap (rate limited
+  at the cap, never billed past it). Move to Vercel Pro ($20 a month, $20 of usage included) only
+  when real players arrive; Hobby is non-commercial and pauses when over its limits.
