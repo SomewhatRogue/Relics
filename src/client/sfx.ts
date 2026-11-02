@@ -464,6 +464,14 @@ export const sfx = {
     burst('highpass', 5000, 1800, 1, 0.5, 0.25);
     for (let i = 0; i < 4; i++) tone('sine', 2000 - i * 250, 1200, 0.06, 0.15, i * 0.04);
   },
+  /** Knucklebones: the bones knocking about in the cup, or one landing on the table (v: how hard). */
+  dice(kind: 'shake' | 'land', v = 1) {
+    if (!ready()) return;
+    if (kind === 'shake') return burst('bandpass', 1500 + Math.random() * 800, 900, 6, 0.16, 0.035);
+    burst('bandpass', 2600, 1500, 5, 0.4 * v, 0.045);
+    tone('triangle', 1250, 900, 0.1 * v, 0.035);
+    burst('lowpass', 500, 120, 0.7, 0.25 * v, 0.07);
+  },
   blink() {
     if (ready()) tone('sine', 600, 2400, 0.15, 0.12), tone('sine', 2400, 900, 0.1, 0.12, 0.1);
   },

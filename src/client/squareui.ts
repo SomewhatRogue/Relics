@@ -15,6 +15,7 @@ import { POTIONS } from '../shared/tuning';
 import { potionButtons } from './townui';
 import { CHURCH } from './copy';
 import { WorldLink } from './worldlink';
+import { throwDice } from './diceanim';
 
 let link: WorldLink | null = null;
 /** The page hands over its line to the world server. */
@@ -24,7 +25,6 @@ const p = (s: string) => `<p>${s}</p>`;
 // The quote marks type in with the words, so the end of the line never shows before it's said.
 const say = (who: string, s: string) => p(`<b>${who}:</b> ${line(`"${s}"`, who)}`);
 const bar = (n: number, of: number) => `<span class="meter"><i style="width:${Math.min(100, (100 * n) / of)}%"></i></span>`;
-const FACES = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 
 const LOCKED: Record<string, string> = {
@@ -75,9 +75,9 @@ export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key:
     const play = (bet: number) => {
       const r = g.dice(bet);
       if (!r) return again();
-      panel.show('KNUCKLEBONES', `<div class="dice"><div><span>${FACES[r.you[0]]}${FACES[r.you[1]]}</span>YOU ${r.you[0] + r.you[1]}</div><div><span>${FACES[r.moll[0]]}${FACES[r.moll[1]]}</span>MOLL ${r.moll[0] + r.moll[1]}</div></div>` +
+      throwDice(panel, 'KNUCKLEBONES', r.you, r.moll, (img) => panel.show('KNUCKLEBONES', img +
         say('Moll', r.won ? (r.you[0] + r.you[1] === r.moll[0] + r.moll[1] ? 'Tie goes to the house. Unless the house knows a fellow crook. Take it, take it.' : 'Well. The bones like you. They\'re fickle bones.') : r.you[0] + r.you[1] === r.moll[0] + r.moll[1] ? 'Tie goes to the house, love. Always has.' : 'Pay up, pet. Again?') + p(`You have ${pr.gold} gold.`),
-        [10, 25, 50].map((n) => ({ label: `BET ${n}`, primary: n === bet, disabled: pr.gold < n, act: () => play(n) })));
+        [10, 25, 50].map((n) => ({ label: `BET ${n}`, primary: n === bet, disabled: pr.gold < n, act: () => play(n) }))));
     };
     panel.show('DICER MOLL', say('Moll', 'Two bones each, high roll takes the pot, ties go to the house. Yes, I cheat. So would you, if you were any good.') + p(`<b>${POTIONS.smoke.name}</b>: ${POTIONS.smoke.text}`) + p(`You have ${pr.gold} gold.`),
       [...[10, 25, 50].map((n) => ({ label: `BET ${n}`, disabled: pr.gold < n, act: () => play(n) })), ...potionButtons(g, ['smoke'], again)]);
