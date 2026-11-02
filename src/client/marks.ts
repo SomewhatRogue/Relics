@@ -6,6 +6,7 @@
 import type { GameMap, Mark } from '../shared/arena';
 import { Rng } from '../shared/rng';
 import { GROUND, type Painter } from './groundpaint';
+import { HALL_FLOOR } from './hallfloor';
 import { OX, OY, PX } from './world';
 
 type Rect = (x: number, y: number, w: number, h: number, col: string) => void;
@@ -17,7 +18,7 @@ export function paintMarks(m: GameMap, rect: Rect): void {
   for (const k of m.marks ?? []) {
     const rng = new Rng(Math.round(k.x * 131 + k.y * 71 + k.w * 13)), x = Math.round(OX + k.x * PX), y = Math.round(OY + k.y * PX);
     const w = k.kind === 'path' ? k.w * PX : Math.max(2, Math.round(k.w * PX)), h = k.kind === 'path' ? k.h * PX : Math.max(2, Math.round(k.h * PX));
-    (PAINT[k.kind] ?? GROUND[k.kind])?.(rect, rng, x, y, w, h, k);
+    (PAINT[k.kind] ?? GROUND[k.kind] ?? HALL_FLOOR[k.kind])?.(rect, rng, x, y, w, h, k);
   }
 }
 

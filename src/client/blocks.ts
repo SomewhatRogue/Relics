@@ -12,6 +12,8 @@ import { furnish, mouth, type Look } from './furnish';
 import { drawText, textWidth } from './pixfont';
 import { SPRITES } from './sprites';
 import { drawLife } from './streetlife';
+import { dressOutside, liveOutside } from './exterior';
+import { drawHallRound } from './hallsdraw';
 import { wear, windowsLit } from './wear';
 import { OX, OY, PX } from './world';
 
@@ -48,6 +50,18 @@ const LOOK: Record<Block['kind'], Look> = {
   loom: { tall: 18, roof: '#5a3d22', ridge: '#7a5a34', wall: '#3a2a1a', windows: false, furniture: true },
   gallows: { tall: 34, roof: '#5a3d22', ridge: '#5a3d22', wall: '#2e2016', windows: false, furniture: true },
   hurdle: { tall: 12, roof: '#3a2818', ridge: '#3a2818', wall: '#5a4a30', windows: false, furniture: true },
+  books: { tall: 26, roof: '#3a2818', ridge: '#3a2818', wall: '#2a1d12', windows: false, furniture: true },
+  stair: { tall: 30, roof: '#2e2a34', ridge: '#2e2a34', wall: '#2e2a34', windows: false, furniture: true },
+  dummy: { tall: 18, roof: '#5a3d22', ridge: '#5a3d22', wall: '#4a3420', windows: false, furniture: true },
+  maptable: { tall: 9, roof: '#5a3d22', ridge: '#7a5a34', wall: '#3a2818', windows: false, furniture: true },
+  dicetable: { tall: 8, roof: '#4a3420', ridge: '#5a3d22', wall: '#3a2818', windows: false, furniture: true },
+  skinbench: { tall: 9, roof: '#5a3d22', ridge: '#7a5a34', wall: '#3a2818', windows: false, furniture: true },
+  desk: { tall: 9, roof: '#5a3d22', ridge: '#7a5a34', wall: '#3a2818', windows: false, furniture: true },
+  tub: { tall: 7, roof: '#4a3420', ridge: '#4a3420', wall: '#5a3d22', windows: false, furniture: true },
+  bellows: { tall: 6, roof: '#4a3424', ridge: '#4a3424', wall: '#5e4230', windows: false, furniture: true },
+  booth: { tall: 26, roof: '#2a1d12', ridge: '#2a1d12', wall: '#14100c', windows: false, furniture: true },
+  bunk: { tall: 14, roof: '#3a2a1a', ridge: '#3a2a1a', wall: '#3a2a1a', windows: false, furniture: true },
+  casks: { tall: 14, roof: '#3a2818', ridge: '#3a2818', wall: '#2a1d12', windows: false, furniture: true },
   pen: { tall: 9, roof: '#8a7448', ridge: '#6b4a2b', wall: '#5a3d22', windows: false, furniture: true },
 };
 
@@ -81,12 +95,13 @@ function paint(b: Block, st: number): HTMLCanvasElement {
   const roofH = d, wallY = roofH, home = houseOf(b);
   if (home) paintHouse(rect, b, home, w, roofH, l.tall);
   else furnished(g, b, rect, w, roofH, wallY, l);
+  if (b.label && b.door) dressOutside(g, b, rect, w, roofH, wallY, l.tall);
   door(b, rect, w, wallY, l);
   if (home) paintFate(g, rect, b, w, roofH, l.tall);
   if (b.kind === 'church') {
-    // The bell tower over the door.
+    // The bell tower over the door, empty: the bell went for arrowheads in the siege.
     rect(Math.round(w / 2 - 5), 0, 10, 6, '#4e4e60');
-    rect(Math.round(w / 2 - 1), 1, 2, 4, '#b08a3a');
+    rect(Math.round(w / 2 - 2), 1, 4, 4, '#14121a');
   }
   if (b.kind === 'stall') for (let x = 0; x < w; x += 6) rect(x, 0, 3, roofH, '#d8c48a');
   if (b.label) {
@@ -161,7 +176,8 @@ export function drawBlock(c: Ctx, b: Block, x: number, y: number, lit: boolean):
   if (b.kind === 'hearth' && b.look === 2) embers(c, x, top, w, Math.round(b.h * PX), l.tall);
   const home = houseOf(b);
   if (home) return void (home.lit && b.kind === 'house' && b.fate !== 'blocked' && drawLit(c, home, x, top, w, Math.round(b.h * PX), l.tall));
-  if (!l.windows || !lit || b.maxHp) return;
+  if (b.label && b.door) liveOutside(c, b, x, top, w, Math.round(b.h * PX), l.tall);
+  if (!l.windows || !lit || b.maxHp || b.door === 'tower') return;
   // Lit windows either side of the door: someone lives here.
   const wy = Math.round(y + b.h * PX - l.tall + 5);
   c.glow.fillStyle = '#ffd27a';
@@ -235,6 +251,7 @@ export const blockAt = (b: Block): [number, number] => [OX + b.x * PX, OY + b.y 
 export function drawRound(c: Ctx, r: Round, x: number, y: number): void {
   if (r.kind === 'pillar') return blit(c, SPRITES.pillar, x, y + 5);
   if (r.kind === 'crows' || r.kind === 'moths' || r.kind === 'dog' || r.kind === 'smoke') return void drawLife(c, r, x, y);
+  if (r.kind === 'candles' || r.kind === 'witchfire') return void drawHallRound(c, r, x, y);
   blit(c, SPRITES[r.kind], x, y + Math.round(r.r * 6));
   if (r.kind === 'lantern') {
     // The Last Lantern: a flame that never goes out.

@@ -8,7 +8,9 @@ export type RoundKind = 'pillar' | 'tree' | 'pine' | 'rock' | 'hay' | 'well' | '
   // Paint only, a speck to bump: crows at the blood, moths round a garden lamp.
   | 'crows' | 'moths'
   // Paint only: a dog nosing about, smoke rising past the wall.
-  | 'dog' | 'smoke';
+  | 'dog' | 'smoke'
+  // Inside the halls: a stand of candles, a brazier of coloured fire (the mage's tower).
+  | 'candles' | 'witchfire';
 export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall' | 'tent' | 'rockwall' | 'fence' | 'granary' | 'wall' | 'den'
   // Furniture, inside buildings.
   | 'counter' | 'bed' | 'shelf' | 'anvil' | 'altar' | 'pew' | 'bench' | 'hearth' | 'sacks'
@@ -17,7 +19,9 @@ export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall'
   // Wickhold's other buildings and things in the street.
   | 'tower' | 'tavern' | 'monument' | 'rubble' | 'cart' | 'rack'
   // Under siege: the gallows on the square, wicker hurdles barricading the gate.
-  | 'gallows' | 'hurdle';
+  | 'gallows' | 'hurdle'
+  // Inside the halls, each its own (client/hallsdraw.ts).
+  | 'books' | 'stair' | 'dummy' | 'maptable' | 'dicetable' | 'skinbench' | 'desk' | 'tub' | 'bellows' | 'booth' | 'bunk' | 'casks';
 export interface Round extends Circle { kind: RoundKind }
 export interface Block {
   x: number; y: number; w: number; h: number; kind: BlockKind; label?: string;
@@ -47,12 +51,16 @@ export interface Block {
 export type MarkKind = 'blood' | 'drag' | 'debris' | 'scorch' | 'trample' | 'planks' | 'beds' | 'flowers' | 'mound' | 'fallenpost' | 'green'
   // The ground itself (shared/ground.ts): flagstones, packed earth, mud, wheel ruts, a trodden path,
   // missing cobbles, puddles, straw, weeds, a drain, spent arrows.
-  | 'flags' | 'earth' | 'mud' | 'ruts' | 'path' | 'holes' | 'puddle' | 'straw' | 'weeds' | 'gutter' | 'arrows';
+  | 'flags' | 'earth' | 'mud' | 'ruts' | 'path' | 'holes' | 'puddle' | 'straw' | 'weeds' | 'gutter' | 'arrows'
+  // Inside the halls: a chalked circle, a rug, strewn rushes, sawdust, a pelt, soot, the hounds' bowls.
+  | 'chalk' | 'rug' | 'rushes' | 'sawdust' | 'pelt' | 'soot' | 'bowls';
 /**
  * What the ground is made of, in big soft-edged shapes painted over the floor (later ones win; where
  * the winner is `cobble`, the floor's own cobbles show). A box, an ellipse in the box (`round`), or a
  * line from (x, y) to (x + w, y + h) `line` tiles either side. Paint only.
  */
+/** What hangs on a hall's back wall. */
+export type HangKind = 'stars' | 'shields' | 'banner' | 'map' | 'antlers' | 'pelts' | 'bows' | 'window' | 'tools' | 'herbs' | 'notices' | 'sign' | 'shelves';
 export type SoilMat = 'cobble' | 'earth' | 'mud' | 'swept' | 'straw' | 'ash' | 'wet';
 export interface Soil { mat: SoilMat; x: number; y: number; w: number; h: number; round?: boolean; line?: number }
 /** A floor mark's area (tiles). A `path` runs as a line from (x, y) to (x + w, y + h). */
@@ -147,6 +155,8 @@ export interface GameMap {
   sleepers?: { x: number; y: number }[];
   /** Paint only: what the ground is made of (shapes, in order), before the marks. */
   soil?: Soil[];
+  /** Paint only: things hung on the back wall's face, from tile x for w tiles (client/hangs.ts). */
+  hangs?: { kind: HangKind; x: number; w: number }[];
   /** Paint only: marks on the floor (blood, scorch, dug beds, flowers). */
   marks?: Mark[];
   /** Paint only: what the goblins left in a house (shared/grim.ts). */
