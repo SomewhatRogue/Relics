@@ -167,6 +167,7 @@ body.touch #corner #heroes, body.touch #corner #tips { width: auto; padding: 0 5
 #panel .code { display: flex; align-items: center; gap: 8px; color: #c8b080; font-size: 11px; margin: 8px 0 4px; }
 #panel .code input { flex: 1; min-width: 0; height: 34px; padding: 0 8px; font: inherit; font-size: 16px; color: #fff1d0; background: #14121a; border: 1px solid #6a5a3a; border-radius: 4px; text-transform: uppercase; user-select: text; -webkit-user-select: text; }
 #panel .dice { display: flex; justify-content: space-around; text-align: center; margin: 4px 0 10px; color: #c8b080; }
+body.dicing #banner span { visibility: hidden; }
 #panel .dice span { display: block; font-size: 40px; line-height: 1.1; color: #f0e0b0; font-family: system-ui, sans-serif; }
 body[data-mode='town'] .tb.roll { right: calc(116px + env(safe-area-inset-right)); bottom: calc(58px + env(safe-area-inset-bottom)); }
 
