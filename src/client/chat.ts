@@ -17,7 +17,7 @@ import { ChatLog, type Entry } from './chatlog';
 import { ChatBox } from './chatbox';
 import { Bubbles } from './bubbles';
 import { Mutes } from './chatmute';
-import { Pace, cleanText, type Channel } from '../shared/chatrules';
+import { Pace, STRUCK_STUN, cleanText, type Channel } from '../shared/chatrules';
 import './chat.css';
 
 /** How near a NEAR line carries in town, in tiles. */
@@ -85,6 +85,7 @@ export class Chat {
     if (!line) return;
     this.add({ from: this.game.profile.id, name: line.name, ch, text: line.text, mine: true });
     if (ch !== 'world') this.bubbles.say('me', line.text, now, () => at(this.game.hero));
+    if (line.struck) this.strike(this.game.profile.id, line.name);
   }
 
   private heard(l: Incoming): void {
@@ -100,6 +101,23 @@ export class Chat {
     }
     this.add({ from: l.from, name: l.name, ch: l.ch, text: l.text });
     this.box.ping();
+    if (l.struck) this.strike(l.from, l.name);
+  }
+
+  /** Where the lightning lands (world tiles): the effect is drawn there, wherever the speaker is. */
+  onStrike: (x: number, y: number) => void = () => {};
+
+  /**
+   * Swore in chat: struck by lightning and stunned. In town your own hero is yours to stun; on a job
+   * the leader's room stuns whoever it was (it decides), and everyone draws the bolt on them.
+   */
+  private strike(id: string, name: string): void {
+    const g = this.game, mine = id === g.profile.id;
+    const h = this.where === 'party' ? (mine ? g.hero : this.partyHero(id, name)) : mine ? g.hero : this.town?.where(id)?.hero;
+    if (!h) return;
+    this.onStrike(h.x, h.y);
+    const stun = mine ? this.where === 'town' || !g.remote : !!g.coop && this.where === 'party';
+    if (stun && 'act' in h) Object.assign(h, { act: 'stun', actT: 0, actDur: STRUCK_STUN, kvx: 0, kvy: 0 });
   }
 
   /** In the same place in town as me, and within `range` tiles. */

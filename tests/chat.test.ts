@@ -9,8 +9,8 @@ describe('word filter', () => {
     for (const w of ['nigger', 'N1GGA', 'f@ggot', 'k.i.k.e', 'cuuunt', 'retarded', 'tr4nny']) expect(isBad(w), w).toBe(true);
     expect(starWords('you f4ggot.')).toBe('you *******');
   });
-  it("leaves Wickhold's own swearing and ordinary words alone", () => {
-    for (const w of ['arse', 'shite', 'bollocks', 'piss', 'Niger', 'chink', 'spice', 'scunthorpe', 'cunning', 'figure', 'fagin', 'spicy']) expect(isBad(w), w).toBe(false);
+  it('leaves ordinary words alone (swearing is starred now: see below)', () => {
+    for (const w of ['Niger', 'arsenal', 'passing', 'scrap', 'dickens', 'chink', 'spice', 'scunthorpe', 'cunning', 'figure', 'fagin', 'spicy']) expect(isBad(w), w).toBe(false);
     expect(starWords('Burn me, that hurt.')).toBe('Burn me, that hurt.');
   });
 });
@@ -73,5 +73,21 @@ describe('the wire', () => {
     expect(heard({ k: 'chat', c: 'l', n: 'A', t: 'y'.repeat(2000) })).toBeNull();
     expect(heard({ k: 'chat', c: 'l', n: 'A', t: 'z'.repeat(300) })!.text.length).toBe(MAX_CHAT);
     expect(heard({ k: 'chat', c: 'w', n: 'A', t: 'you kike' })!.text).toBe('you ****');
+  });
+});
+
+describe('swearing brings the lightning', () => {
+  it('stars the word and marks the line struck; ordinary words are left alone', async () => {
+    const { swore } = await import('../src/shared/chatfilter');
+    const { wire, heard } = await import('../src/shared/chatrules');
+    expect(swore('what the fuck')).toBe(true);
+    expect(swore('sh1t')).toBe(true);
+    expect(swore('the arsenal at the passing class')).toBe(false);
+    const w = wire('world', 'KYLE', 'oh shit');
+    expect(w?.z).toBe(1);
+    const l = heard(w);
+    expect(l?.struck).toBe(true);
+    expect(l?.text).toBe('oh ****');
+    expect(heard(wire('world', 'KYLE', 'over here'))?.struck).toBeUndefined();
   });
 });

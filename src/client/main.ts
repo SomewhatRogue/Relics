@@ -87,6 +87,15 @@ const recovery = new Recovery(() => game.save);
 const title = new Title(game, () => undefined, recovery);
 /** Chat (online): world and near in town, the party on a job. */
 const chat = new Chat(game, scene, input.touch, () => panel.open || title.open);
+// Swore in chat: lightning out of the sky onto them (chat.ts stuns them).
+chat.onStrike = (x, y) => {
+  for (const dx of [-0.15, 0.1]) {
+    const ev = { k: 'shock' as const, x: x + dx, y: y - 7, x2: x, y2: y };
+    fx.on(ev);
+    sounds.event(ev, game.room, performance.now() / 1000);
+  }
+  fx.shake = Math.max(fx.shake, 4);
+};
 // Test hook: ?hero=MAGE skips the start screen with a hero of that class.
 const quick = new URLSearchParams(location.search).get('hero') as HeroClass | null;
 // ...and ?wood=1 starts it in the prologue wood instead of town.

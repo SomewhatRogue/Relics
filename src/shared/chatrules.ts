@@ -4,7 +4,7 @@
  * and everyone else drops what breaks it), slurs starred (chatfilter.ts), and names as the town
  * spells them. What goes over the relay is tiny: `{k:'chat', c, n, t}` or, for a quick line, `q`.
  */
-import { starWords } from './chatfilter';
+import { starWords, swore } from './chatfilter';
 import { QUICK } from './chatlines';
 
 export const MAX_CHAT = 120;
@@ -14,9 +14,13 @@ const CODE: Record<Channel, string> = { world: 'w', local: 'l', party: 'p' };
 const FROM_CODE: Record<string, Channel> = { w: 'world', l: 'local', p: 'party' };
 
 /** One line on the wire. */
-export interface ChatWire { k: 'chat'; c: string; n: string; t?: string; q?: number }
+/** `z`: the sender swore (the line comes starred), and is struck by lightning for it. */
+export interface ChatWire { k: 'chat'; c: string; n: string; t?: string; q?: number; z?: 1 }
 /** One line as heard. */
-export interface ChatLine { ch: Channel; name: string; text: string; quick?: number }
+export interface ChatLine { ch: Channel; name: string; text: string; quick?: number; struck?: boolean }
+
+/** Seconds a hero who swore in chat stands stunned under the lightning. */
+export const STRUCK_STUN = 5;
 
 /** Control characters, zero-width and direction marks: nothing a player means to type. */
 const HIDDEN = /[\u0000-\u001f\u007f-\u009f​-‏‪-‮⁠-⁩﻿]/g;
@@ -41,7 +45,7 @@ export function escapeHtml(s: string): string {
 export function wire(ch: Channel, name: string, said: string | number): ChatWire | null {
   if (typeof said === 'number') return Number.isInteger(said) && QUICK[said] ? { k: 'chat', c: CODE[ch], n: cleanName(name), q: said } : null;
   const t = cleanText(said);
-  return t ? { k: 'chat', c: CODE[ch], n: cleanName(name), t } : null;
+  return t ? { k: 'chat', c: CODE[ch], n: cleanName(name), t, ...(swore(said) ? { z: 1 as const } : {}) } : null;
 }
 
 /** A line heard: checked and cleaned again (never trust the sender's page), or null. */
@@ -54,7 +58,7 @@ export function heard(d: unknown): ChatLine | null {
   if (typeof w.q === 'number') return Number.isInteger(w.q) && QUICK[w.q] ? { ch, name, text: QUICK[w.q], quick: w.q } : null;
   if (typeof w.t !== 'string' || w.t.length > MAX_CHAT * 4) return null;
   const text = cleanText(w.t);
-  return text ? { ch, name, text } : null;
+  return text ? { ch, name, text, ...(w.z === 1 ? { struck: true } : {}) } : null;
 }
 
 /**
