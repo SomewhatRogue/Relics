@@ -181,3 +181,12 @@ describe('the board and the council, shared', () => {
     expect(c?.deed?.party).toEqual(['KYLE', 'SAMSCRIPT', 'A', 'B']);
   });
 });
+
+describe('party rewards', () => {
+  it('a party of two or more finds one more piece of treasure', async () => {
+    const { treasure } = await import('../src/shared/treasure');
+    const { board } = await import('../src/shared/jobs');
+    const job = board(5, false).find((j) => j.rooms < 5)!;
+    expect(treasure(job, 'WARRIOR', 'habcdef', 3, 2).length).toBe(treasure(job, 'WARRIOR', 'habcdef', 3, 1).length + 1);
+  });
+});

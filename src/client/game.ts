@@ -13,7 +13,7 @@ import { BOUNTY, HERO_SLOTS, PERK, SHOP, gainXp, newProfile, type PerkId, type P
 import { Rng } from '../shared/rng';
 import { CHAPTER_1, QUORUM, rewardMult, type WorldState } from '../shared/story';
 import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
-import { LEAVES, TEACHES, drillCap, drillPrice, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, FOUND_RELICS, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, sellValue, giveValue, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
+import { PARTY, LEAVES, TEACHES, drillCap, drillPrice, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, FOUND_RELICS, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, sellValue, giveValue, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
 import { ArenaRoom } from '../sim/room';
 import { lessonOf, newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
 import { woodMap, WOOD_PROPS } from '../shared/wood';
@@ -514,12 +514,14 @@ export class Game {
     this.coop = null;
     // Driven back in the Ransom Coat: all of it, not half.
     const ransom = !won && p.armor?.hungry === 'ransom';
-    const gold = won ? run.gold + Math.round(run.job.reward * rewardMult(w)) : ransom ? 0 : Math.round(run.gold / 2);
+    // A bigger party: more pay and objective xp, and a better treasure (more goblins already paid more along the way).
+    const crowd = Math.max(1, run.party ?? 1), bonus = 1 + PARTY.reward * (crowd - 1);
+    const gold = won ? run.gold + Math.round(run.job.reward * rewardMult(w) * bonus) : ransom ? 0 : Math.round(run.gold / 2);
     if (ransom) p.gold = 0;
     // The Want grows with every job finished in hungry gear, and with what it killed.
     const hungry = this.hungryWorn();
     p.want += hungry.reduce((s, it) => s + HUNGRY[it.hungry as HungryId].want, 0) + (hungry.length ? run.kills * WANT.perKill : 0);
-    const xp = run.xp + (won ? BOUNTY.objective : 0), rescued = won ? run.rescued : 0;
+    const xp = run.xp + (won ? Math.round(BOUNTY.objective * bonus) : 0), rescued = won ? run.rescued : 0;
     p.gold += gold;
     p.runs++;
     const levels = gainXp(p, xp);
@@ -527,7 +529,7 @@ export class Game {
     const relic = won && run.job.deep ? FOUND_RELICS.find((r) => !p.relics.includes(r)) : undefined;
     if (relic) (p.relics.push(relic), p.relic ||= relic);
     // The treasure at the end: yours alone. What won't fit in the pack is sold on the spot.
-    const found = won ? treasure(run.job, p.cls, p.id, p.runs) : [], kept = found.slice(0, Math.max(0, PACK - p.bag.length)), sold = found.slice(kept.length);
+    const found = won ? treasure(run.job, p.cls, p.id, p.runs, crowd) : [], kept = found.slice(0, Math.max(0, PACK - p.bag.length)), sold = found.slice(kept.length);
     p.bag.push(...kept);
     p.gold += sold.length * TREASURE_SOLD;
     this.result = { won, job: run.job, gold, xp, rescued, levels, relic, treasure: kept, sold };

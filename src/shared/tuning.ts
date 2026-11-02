@@ -70,7 +70,8 @@ export const DODGE = { stun: 0.6, cost: 1.5 };
  * share of the room's) and `boss` more health on a named one. `grudge`: team kills by the same
  * player in one job before you hold it against them.
  */
-export const PARTY = { bleed: 20, pickUp: 3, reach: 1.2, upHp: 0.4, friendly: 0.5, foes: 0.6, boss: 0.4, grudge: 3 };
+/** `reward`: each extra player adds this share to a won job's pay and objective xp (more goblins already mean more kill gold and xp). */
+export const PARTY = { bleed: 20, pickUp: 3, reach: 1.2, upHp: 0.4, friendly: 0.5, foes: 0.6, boss: 0.4, grudge: 3, reward: 0.25 };
 export const HURT_STAGGER = 0.25;
 
 /** Knockback slides decay by this share per second; a slide this fast into a wall slams. */

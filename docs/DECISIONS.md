@@ -1209,3 +1209,8 @@ puddles, weeds, missing cobbles, arrows) stay on top; the earth, path, mud and s
 ## 2026-11-01: the Mage casts (Kyle; Opus 5.5)
 - The Mage's tap spell is a cast: about half a second rooted in place (wind-up 0.3 to 0.36 s across the
   three kits). Burning hits harder to make up for it: 7 every half second for 3 s (was 4).
+
+## 2026-11-01: bigger parties, better rewards (Kyle; Opus 5.5)
+- Each extra player adds a quarter to a won job's pay and its objective xp (`PARTY.reward`); kill gold
+  and xp already grow with the extra goblins. Two or more players each find one more piece of
+  treasure; three or more roll it a cut above.
