@@ -119,8 +119,9 @@ export class Soundscape {
     if (g.mode !== 'town') this.tune = null;
     if (g.mode === 'yard') return ['yard', w.day];
     if (g.mode === 'wood') {
+      // The Stoker's own music from the moment it comes up out of the ground (The Butcher Comes).
       const s = g.room.enemies.find((e) => e.name && !isDead(e));
-      return s && (g.wood?.cut ?? -1) < 0 ? ['boss', 7] : ['forest', 3];
+      return s ? ['boss', 0] : ['forest', 3];
     }
     if (g.mode === 'town') {
       if (!g.outside && this.tune) return [this.tune.area, SCORES[this.tune.area].findIndex((sc) => sc.name === this.tune!.name)];

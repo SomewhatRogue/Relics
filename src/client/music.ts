@@ -31,10 +31,10 @@ class Track {
   private rand: () => number;
   private last = 9;
 
-  constructor(private c: AudioContext, readonly score: Score, readonly key: string, bus: AudioNode, reverb: AudioNode, private fight: AudioNode) {
+  constructor(private c: AudioContext, readonly score: Score, readonly key: string, bus: AudioNode, reverb: AudioNode, private fight: AudioNode, fade = FADE) {
     this.out = c.createGain();
     this.out.gain.setValueAtTime(0.0001, c.currentTime);
-    this.out.gain.exponentialRampToValueAtTime(1, c.currentTime + FADE);
+    this.out.gain.exponentialRampToValueAtTime(1, c.currentTime + fade);
     this.out.connect(bus);
     const send = c.createGain();
     send.gain.value = score.wet;
@@ -43,12 +43,12 @@ class Track {
     this.rand = rng(score.seed + Math.floor(Math.random() * 1000));
   }
 
-  fadeOut(): void {
+  fadeOut(fade = FADE): void {
     const t = this.c.currentTime;
     this.out.gain.cancelScheduledValues(t);
     this.out.gain.setValueAtTime(Math.max(0.0001, this.out.gain.value), t);
-    this.out.gain.exponentialRampToValueAtTime(0.0001, t + FADE);
-    setTimeout(() => this.out.disconnect(), (FADE + 2) * 1000);
+    this.out.gain.exponentialRampToValueAtTime(0.0001, t + fade);
+    setTimeout(() => this.out.disconnect(), (fade + 2) * 1000);
   }
 
   /** Write bars until `until`. */
@@ -131,8 +131,14 @@ export class Music {
     const c = a.ac;
     if (!this.bus) this.build(c, a.music);
     if (this.track?.key !== this.wantKey) {
-      this.track?.fadeOut();
-      this.track = new Track(c, this.want, this.wantKey, this.bus!, this.reverb!, this.fight!);
+      // Into a boss fight: quick, with a hit on the drum and a low horn, so the change can't be missed.
+      const boss = this.wantKey.startsWith('boss:') && !!this.track && !this.track.key.startsWith('boss:');
+      if (boss) {
+        INSTRUMENTS.drum(c, this.bus!, c.currentTime + 0.02, 36, 0.6, 1);
+        INSTRUMENTS.horn(c, this.bus!, c.currentTime + 0.05, 38, 2.4, 1);
+      }
+      this.track?.fadeOut(boss ? 0.5 : FADE);
+      this.track = new Track(c, this.want, this.wantKey, this.bus!, this.reverb!, this.fight!, boss ? 0.3 : FADE);
     }
     this.fight!.gain.setTargetAtTime(0.0001 + this.danger * 0.8, c.currentTime, 0.8);
     this.track.fill(c.currentTime + AHEAD);
