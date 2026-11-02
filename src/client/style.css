@@ -86,7 +86,9 @@ body.touch #loot { bottom: auto; top: calc(160px + env(safe-area-inset-top)); }
 .grab[hidden] { display: none; }
 @keyframes pulse { from { box-shadow: 0 0 0 #ffd27a00; } to { box-shadow: 0 0 12px #ffd27a; } }
 
-#banner { position: fixed; left: 50%; transform: translateX(-50%); top: calc(8px + env(safe-area-inset-top)); max-width: 46vw; text-align: center; font-size: 11px; color: #e8e4ee; text-shadow: 0 1px 0 #000; pointer-events: none; }
+#banner { position: fixed; left: 50%; transform: translateX(-50%); top: calc(8px + env(safe-area-inset-top)); max-width: 46vw; text-align: center; font-size: 11px; color: #e8e4ee; text-shadow: 0 1px 0 #000; pointer-events: none; background: rgba(12, 10, 18, 0.72); border: 1px solid #3a3644; border-radius: 4px; padding: 4px 8px; }
+#banner:empty { display: none; }
+#banner .ups { color: #ff6a7a; letter-spacing: 1px; }
 #banner b { color: #ffd27a; margin-right: 6px; }
 #banner span { display: block; color: #9fd0ff; font-size: 10px; margin-top: 2px; }
 body.touch #banner { left: auto; right: calc(10px + env(safe-area-inset-right)); transform: none; top: calc(112px + env(safe-area-inset-top)); max-width: 62vw; text-align: right; }
@@ -344,3 +346,5 @@ body[data-guard="none"] .tb.block { display: none; }
 #pack .detail button { flex: 1; min-height: 34px; background: #2a2733; border: 1px solid #6a647a; border-radius: 4px; color: #e8e4ee; font-size: 10px; }
 #pack .detail button.go { background: #4a3414; border-color: #ffd27a; color: #fff1d0; }
 #pack .detail button.ghost { background: transparent; color: #9a94a8; }
+
+.tb.dim { opacity: 0.4; }

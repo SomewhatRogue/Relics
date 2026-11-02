@@ -4,6 +4,7 @@
  * pick you up when you fall, run the cutscene at the hut, then the Stoker, the relic and the road.
  * Plain data, stepped after the room each frame by whoever runs the room.
  */
+import { attackCovers } from './combat';
 import { AREAS, FEEDING, GATES, GOBLIN_DEAD, LINES, ROAD_OUT, STOKER, STOKER_CALLS, areaAt, lessonsFor, type Lesson, type Teach } from '../shared/wood';
 import type { HeroClass } from '../shared/weapons';
 import { inArea } from '../shared/arena';
@@ -11,7 +12,7 @@ import type { Foe } from '../shared/terrain';
 import { isDead } from './damage';
 import { newEnemy } from './enemies';
 import type { ArenaRoom } from './room';
-import type { Enemy, FightEvent } from './types';
+import type { Enemy, FightEvent, Hero } from './types';
 
 export interface Caption { who: string; text: string; until: number }
 export interface WoodState {
@@ -40,6 +41,8 @@ export interface WoodState {
   drilled: number;
   praised: number;
   drillAt: number;
+  /** Hew's said there's more coming this lesson (he doesn't say it every wave). */
+  moreSaid?: boolean;
   /** How many of Hew's waking lines have been said, and when you were on your feet. */
   said: number;
   upAt: number;
@@ -72,7 +75,7 @@ export const WAKE = { fade: 2.5, arrive: 5.2, standing: 0.8 };
 /** Hew's way in at the waking: out of the trees west of you, round under the cart, slow and low. */
 const SNEAK = { round: [4.2, 36.4] as [number, number], speed: 1.45 };
 /** Tutorial pacing: drilled goblins wind up this much slower; one at a time comes at you. */
-export const DRILL = { windup: 1.5, wheels: 2, praise: 3, praiseFor: 1.1 };
+export const DRILL = { windup: 1.5, wheels: 2, praise: 1, praiseFor: 1.1 };
 
 export function newWood(room: ArenaRoom, cls: HeroClass = 'WARRIOR'): WoodState {
   const w: WoodState = { stage: 0, entered: false, count: 0, ids: [], more: false, cut: -1, caption: null, stoker: 0, helped: 0, hewAlive: true, relic: false, done: false, wake: 0, hold: null, drilled: 0, praised: 0, drillAt: -1, from: null, said: 0, upAt: -1, cls };
@@ -143,9 +146,11 @@ function oneAtATime(w: WoodState, room: ArenaRoom, hx: number, hy: number): Enem
 }
 
 /** The first blows of a lesson stop just before they land: the moment to answer, and what to press. */
-function drill(w: WoodState, e: Enemy | null, parryWindow: number): void {
+function drill(w: WoodState, e: Enemy | null, parryWindow: number, h: Hero): void {
   const a = e?.attack, kind = lessonOf(w).count;
   if (!a || a.t >= a.windup || w.drilled >= DRILL.wheels || w.drillAt === e!.id * 1000 + Math.round(a.windup * 100) + Math.round(a.ox * 10)) return;
+  // Already answered it (rolling, or moved out of where it'll land): no need to stop the world.
+  if (h.act === 'roll' || !attackCovers(a, h)) return;
   const left = a.windup - a.t;
   const ready = kind === 'dodge' ? a.unblockable && left <= 0.16 : kind === 'block' ? left <= 0.4 : kind === 'parry' ? !a.unblockable && left <= parryWindow * 0.6 : kind === 'slip' ? a.kind !== 'shot' && left <= 0.08 : false;
   if (!ready) return;
@@ -277,7 +282,7 @@ export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: nu
   // goblins come out. (The first lesson waits until you've walked a few steps on your own.)
   const walked = !w.from || Math.hypot(h.x - w.from.x, h.y - w.from.y) > 2.5;
   if (!w.entered && areaAt(h.x, h.y) === lesson.area && (w.stage > 0 || walked)) {
-    Object.assign(w, { entered: true, count: 0, drilled: 0, praised: 0 });
+    Object.assign(w, { entered: true, count: 0, drilled: 0, praised: 0, moreSaid: false });
     if (w.stage === 4) {
       w.cut = 0;
       say(w, room, 'HEW', LINES.hut, 2);
@@ -298,12 +303,12 @@ export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: nu
   let good = false;
   for (const e of ev) if (counts(kind, e)) (w.count += kind === 'kills' ? 0 : 1), (good = true);
   // Done it right: the fight stops a moment for a word from Hew.
+  // Done it right: a word from Hew in passing (once a lesson; the fight doesn't stop for it).
   if (good && w.praised < DRILL.praise && w.hewAlive) {
     w.praised++;
-    w.hold = { kind: 'praise', who: 'HEW', text: LINES.praise[(w.stage + w.praised) % LINES.praise.length], need: 'time', t: 0, until: DRILL.praiseFor };
-    return;
+    say(w, room, 'HEW', LINES.praise[w.stage % LINES.praise.length], 1.8);
   }
-  drill(w, oneAtATime(w, room, h.x, h.y), parryWindow);
+  drill(w, oneAtATime(w, room, h.x, h.y), parryWindow, h);
   if (w.hold) return;
   const left = room.enemies.filter((e) => w.ids.includes(e.id) && !isDead(e));
   // The Stoker: two more come at half its health; the relic comes out of it.
@@ -337,7 +342,7 @@ export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: nu
   // Cleared them before the lesson took: they come again.
   if (!left.length && w.count < lesson.need) {
     w.ids = lesson.foes.map((f) => spawn(room, { ...f, awake: true }).id);
-    say(w, room, 'HEW', LINES.more, 3);
+    if (!w.moreSaid) (w.moreSaid = true), say(w, room, 'HEW', LINES.more, 3);
     return;
   }
   if (!left.length && w.count >= lesson.need) {

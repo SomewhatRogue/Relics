@@ -2,6 +2,7 @@
 import { CLASS_GUARD, POTIONS, CLASS_ORDER, RELICS, TRAITS, WEAPONS, itemName, type HeroClass } from '../shared/tuning';
 import { ONLINE } from './relay';
 import { Townfolk } from './townfolk';
+import { toPx } from './world';
 import { Parties } from './parties';
 import { CoopGuest } from './coop';
 import { session, touchSession } from './session';
@@ -153,7 +154,12 @@ function hud(now: number): void {
     // GRAB shows only when there's something to grab (or to throw); ATTACK becomes SLAM.
     const carrying = me.act === 'carry';
     const can = carrying || (me.act === 'idle' && (room.enemies.some((e) => grabbable(me, e, room.time)) || room.props.some((p) => liftable(me, p))));
-    $('.tb.grab').hidden = !can;
+    // A Warrior always has GRAB (dimmed till there's something to take hold of); others only when there is.
+    const lifter = WEAPONS[me.weapon].cls === 'WARRIOR';
+    // The dodge button says what your dodge is.
+    $('.tb.roll').textContent = ({ roll: 'ROLL', backstep: 'JUMP', dash: 'DASH', blink: 'BLINK' } as Record<string, string>)[WEAPONS[me.weapon].dodge.kind] ?? 'ROLL';
+    $('.tb.grab').hidden = !can && !lifter;
+    $('.tb.grab').classList.toggle('dim', !can);
     $('.tb.grab').textContent = carrying ? 'THROW' : 'GRAB';
     $('.tb.attack').textContent = carrying ? 'SLAM' : 'ATTACK';
   }
@@ -207,7 +213,10 @@ function hud(now: number): void {
     if (boss) ($('#boss b').textContent = boss.name!), ($('#boss i').style.width = (100 * boss.hp) / boss.maxHp + '%');
   } else if (game.mode === 'run' && run) {
     const g = goal(run, game.fightRoom);
-    $('#banner').innerHTML = `<b>${run.job.place.name.toUpperCase()} ${run.index + 1}/${run.job.rooms}</b> ${g.text}<span>+${run.gold} GOLD  DOWNS ${run.downs}/${MAX_DOWNS}${run.rescued ? `  SAVED ${run.rescued}` : ''}</span>`;
+    // Alone, the times you can still get up (a heart each); in a party, your friends pick you up instead.
+    const solo = room.heroes.filter((x) => x.id !== 'squire').length < 2, ups = MAX_DOWNS - run.downs;
+    const hearts = solo ? `  <i class="ups">${'\u2665'.repeat(Math.max(0, ups))}${'\u2661'.repeat(Math.min(MAX_DOWNS, run.downs))}</i>` : '';
+    $('#banner').innerHTML = `<b>${run.job.place.name.toUpperCase()} ${run.index + 1}/${run.job.rooms}</b> ${g.text}<span>+${run.gold} GOLD${hearts}${run.rescued ? `  SAVED ${run.rescued}` : ''}</span>`;
     const boss = room.enemies.find((e) => e.name && e.act !== 'dead');
     $('#boss').hidden = !boss;
     if (boss) ($('#boss b').textContent = boss.name!), ($('#boss i').style.width = (100 * boss.hp) / boss.maxHp + '%');
@@ -260,6 +269,13 @@ function frame(t: number): void {
   game.coop?.frame(t / 1000, evs);
   for (const ev of evs) {
     fx.on(ev);
+    if (ev.k === 'freed') scene.captives.free(game.room, ev.x, ev.y, game.room.time);
+    // Down alone on a job: how many more times you'll get up.
+    if (ev.k === 'down' && game.mode === 'run' && game.run && game.room.heroes.filter((x) => x.id !== 'squire').length < 2 && Math.abs(ev.x - game.hero.x) < 0.01) {
+      const left = MAX_DOWNS - game.run.downs;
+      const [sx, sy] = toPx(ev.x, ev.y);
+      fx.say(sx, sy - 34, left > 0 ? `${'\u2665'.repeat(left)} LEFT` : 'DRIVEN BACK', '#ff6a7a');
+    }
     sounds.event(ev, game.room, t / 1000);
     if (ev.k === 'parry') parries++;
   }

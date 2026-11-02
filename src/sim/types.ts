@@ -156,6 +156,8 @@ export interface Hero extends Body {
    * snare, a Mage's image). Undefined: an old hero, who knows it all already.
    */
   learned?: Learned[];
+  /** Walking slowly or standing still: goblins at rest see you from less far (STEALTH). */
+  sneaking?: boolean;
   /** Training (the wood, the yard): the hound joins in rarely and never breaks up a blow at you. */
   calmHound?: boolean;
   /** Drills paid for at the trainer (shared/drills.ts), and a crit's own dice (seeded by the hero). */
@@ -263,7 +265,7 @@ export interface Enemy extends Body {
   /** Tutorial pacing in the wood: slower wind-ups (sim/wood.ts DRILL). */
   drill?: boolean;
   /** A goblin built for one lesson in the prologue wood (shared/wood.ts VARIANTS). */
-  variant?: 'looter' | 'lunger' | 'heavy' | 'stoker';
+  variant?: 'looter' | 'lunger' | 'heavy' | 'stoker' | 'shield';
   /** Crouched at the dead, eating: stays put and doesn't look up until something comes close. */
   feeding?: boolean;
   /** False while it hasn't noticed anyone (see ALERT); undefined counts as awake. */
@@ -323,7 +325,7 @@ export type FightEvent =
   /** A teammate downed you once too often this job. */
   | { k: 'grudge'; x: number; y: number; id: string; by: string }
   /** `src`: what landed it (a kit, or a shot's kind), for its sound; `big`: on the butcher. */
-  | { k: 'hit'; x: number; y: number; n: number; heavy: boolean; on: 'enemy' | 'hero'; counter?: boolean; crit?: boolean; backstab?: boolean; tick?: boolean; src?: string; big?: boolean }
+  | { k: 'hit'; x: number; y: number; n: number; heavy: boolean; on: 'enemy' | 'hero'; counter?: boolean; crit?: boolean; ambush?: boolean; boarded?: boolean; backstab?: boolean; tick?: boolean; src?: string; big?: boolean }
   | { k: 'swing'; x: number; y: number; src: string; heavy: boolean }
   | { k: 'death'; x: number; y: number; how: DeathKind; dx: number; dy: number; kind: EnemyKind }
   | { k: 'block' | 'parry' | 'guardbreak' | 'dodge' | 'slip' | 'down' | 'out' | 'pickedup' | 'roll' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number }

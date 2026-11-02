@@ -20,13 +20,14 @@ import { woodMap } from '../shared/wood';
 import { PACK } from '../sim/pack';
 import { refreshHealth, statsOf } from '../sim/gearstats';
 import { goal, interiorRoom, isFinal, newRun, runRoom, tally, type Run } from '../sim/run';
-import { knows, type FightEvent, type Hero, type Intent, type Learned } from '../sim/types';
+import { NO_INTENT, knows, type FightEvent, type Hero, type Intent, type Learned } from '../sim/types';
 import { load, store, type Save } from './save';
 import { treasure } from '../shared/treasure';
 /** What a piece of treasure that won't fit in the pack fetches. */
 const TREASURE_SOLD = 20;
 import { CoopHost, loadRoom, type CoopGuest, type Friend } from './coop';
 import { forgetSession, keepSession } from './session';
+import { Followers } from './followers';
 import type { Parties } from './parties';
 
 export type Mode = 'town' | 'yard' | 'run' | 'wood';
@@ -67,6 +68,10 @@ export class Game {
   parties: Parties | null = null;
   /** Counts up each time the room changes (friends rebuild their copy when it does). */
   roomKey = 0;
+  /** Goblins following you through a door (followers.ts). */
+  private followers = new Followers();
+  /** The last input given (a new room's hero takes its presses as already seen). */
+  private lastIntent: Intent = NO_INTENT;
   /** Friends whose press counters have been matched to their hero's (so no old press fires). */
   private synced = new Set<string>();
 
@@ -217,6 +222,10 @@ export class Game {
     const h = room.join(ME);
     if (at) (h.x = at.x), (h.y = at.y);
     this.equip(h, keep);
+    // A fresh hero in the new room: every press made so far counts as seen (so the last swing or
+    // roll doesn't fire again on the doorstep), and it starts standing still.
+    syncSeen(h, this.lastIntent);
+    Object.assign(h, { act: h.act === 'down' ? 'down' : 'idle', actT: 0, kvx: 0, kvy: 0, rollQueuedAt: -9, attackQueuedAt: -9, relicQueuedAt: -9, grabQueuedAt: -9 });
     // Leading a party: your friends come with you, each with the health they had.
     for (const [id, f] of this.coop?.friends ?? []) {
       const old = from?.heroes.find((x) => x.id === id);
@@ -287,16 +296,21 @@ export class Game {
     }
     out.heroes.splice(out.heroes.indexOf(h), 1);
     this.outside = { room: out, door: b, hero: h };
+    // On a job, the goblins after you come in after you.
+    if (this.mode === 'run') this.followers.through(out, inside, h, inside.map.hero.x, inside.map.hero.y);
     this.place(inside, inside.map.hero, h);
   }
 
   /** Back out of the door you came in by. */
   leave(): void {
     const o = this.outside!, inner = this.hero, d = doorAt(o.door), h = o.hero;
+    // ...and out after you.
+    if (this.mode === 'run') this.followers.through(this.room, o.room, inner, d.x, d.y + 0.6);
     this.outside = null;
     this.room = o.room;
     this.room.heroes.push(h);
-    Object.assign(h, { x: d.x, y: d.y + 0.5, fx: 0, fy: 1, hp: Math.max(1, inner.hp), relic: inner.relic, act: 'idle', actT: 0 });
+    Object.assign(h, { x: d.x, y: d.y + 0.5, fx: 0, fy: 1, hp: Math.max(1, inner.hp), relic: inner.relic, act: 'idle', actT: 0, kvx: 0, kvy: 0, rollQueuedAt: -9, attackQueuedAt: -9, relicQueuedAt: -9, grabQueuedAt: -9 });
+    syncSeen(h, this.lastIntent);
     this.room.prev.set('h:' + ME, [h.x, h.y]);
     this.roomKey++;
     // Your friends come back out with you.
@@ -321,6 +335,7 @@ export class Game {
   }
 
   startJob(job: Job, party = 1): void {
+    this.followers.clear();
     this.mode = 'run';
     this.outside = null;
     this.insides.clear();
@@ -357,6 +372,7 @@ export class Game {
       };
     }
     this.room.setIntent(ME, intent);
+    this.lastIntent = intent;
     // Leading a party: each friend's latest input (their old presses matched first, so none fires).
     for (const [id, f] of this.coop?.friends ?? []) {
       const fh = this.room.heroes.find((x) => x.id === id);
@@ -368,6 +384,7 @@ export class Game {
     const out = this.outside?.room, outEv = out?.advance(dt) ?? [];
     if (out && this.run) tally(this.run, out, outEv, ME);
     const ev = this.room.advance(dt);
+    this.followers.step(this.room);
     if (this.mode === 'wood' && this.wood) return this.stepWoodFrame(h, ev, dt);
     this.keepGear(h);
     for (const e of ev) if (e.k === 'spend' && e.id === ME) this.spend(e.n);

@@ -76,7 +76,7 @@ export function stepHound(h: Hero, enemies: Enemy[], now: number, dt: number, ev
     Object.assign(d, { state: 'run', target: pick.id, t: 0, bites: 0 });
     return void ev.push({ k: 'bark', x: d.x, y: d.y });
   }
-  const every = HOUND.every * (h.calmHound ? 3 : 1);
+  const every = HOUND.every * (h.calmHound ? 1.5 : 1);
   if (!prey || d.t > 6) return void Object.assign(d, { state: 'heel', target: 0, next: now + every + (h.id.length % 3) });
   if (d.state === 'run') {
     if (to(prey.x, prey.y, HOUND.speed * 1.3, 0.6) <= 0.65) Object.assign(d, { state: 'bite', t: HOUND.biteEvery });

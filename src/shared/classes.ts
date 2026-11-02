@@ -54,7 +54,7 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     weapon: 'Twin daggers',
     skill: "Shadowstep: you're suddenly behind the goblin you face. Your trainer teaches it from level 2.",
     cant: "Can't take a beating. Can't lift.",
-    guard: "Can't hold a block. Can parry, if the timing's right. Quickest on their feet, dodging further and far more often than anyone.",
+    guard: "Can't block or parry. Dodges instead: quickest on their feet, further and far more often than anyone.",
     stats: { POWER: 3, GUARD: 1, SPEED: 5, RANGE: 1, SUPPORT: 1 },
   },
   MAGE: {

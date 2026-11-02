@@ -3,7 +3,7 @@ import { lure, seenFrom } from './lantern';
 import { visible } from './flasks';
 import { HUNGRY_FX, wears } from './hungry';
 import { collide, currentMap, inArea, wadeAt } from '../shared/arena';
-import { FRIENDLY, DECOY, ALERT, ARCHER, BUTCHER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, type EnemyAttackSpec, type EnemySpec, VARIANTS } from '../shared/tuning';
+import { FRIENDLY, DECOY, ALERT, ARCHER, BUTCHER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, type EnemyAttackSpec, type EnemySpec, VARIANTS, STEALTH } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { shove, slide } from './bodies';
 import { attackCovers, hitHero } from './combat';
@@ -240,7 +240,7 @@ function notice(e: Enemy, heroes: Hero[], others: Enemy[], now: number, ev: Figh
     const ahead = (dx * e.fx + dy * e.fy) / (d || 1) > -0.2;
     // Looters picking the dead don't look up until something comes close.
     const sight = e.variant === 'looter' ? 1.6 : e.feeding ? ALERT.sight * 0.5 : ahead ? ALERT.sight : ALERT.behind;
-    if (d < sight + seenFrom(h)) seen = true;
+    if (d < sight * (h.sneaking && h.act !== 'roll' ? STEALTH.sneak : 1) + seenFrom(h)) seen = true;
   }
   for (const o of others) if (o !== e && o.alert && (isDead(o) || o.hitAt > now - 0.2) && Math.hypot(o.x - e.x, o.y - e.y) < ALERT.hear) seen = true;
   if (!seen) return false;

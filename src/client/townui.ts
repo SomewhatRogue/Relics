@@ -15,6 +15,7 @@ import { card, compare } from './card';
 import type { Panel } from './panels';
 import { RUMOURS } from './rumours';
 import { PARTY_MAX } from './parties';
+import { CLASSES } from '../shared/classes';
 import { SIZES } from '../shared/jobs';
 import { treasureWord } from '../shared/treasure';
 
@@ -83,29 +84,30 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       g.hero.cold = false;
       return panel.show(`${t.name}, ${cls} TRAINER`, p('She takes your censer without asking, carries it to the Lantern, and brings it back lit.') + say(name, TALLY.isolde), [{ label: 'CLOSE', act: again }]);
     }
-    const html = say(name, pr.picks > 0 ? TEACH[pr.cls][0] : TEACH[pr.cls][1]) + (pr.cls === 'HEALER' && pr.glow > 0 ? say(name, COAL.isolde) : '') +
-      p(`Level ${pr.level}. Experience ${pr.xp}${pr.level < 10 ? ` of ${next} for the next` : ' (the chapter cap)'}.`) +
-      p(pr.perks.length ? 'Yours: ' + pr.perks.map((k) => `<b>${PERKS[k].name}</b> (${PERKS[k].text.toLowerCase()})`).join(', ') : 'No perks yet.') +
-      (pr.picks > 0 ? p(`Choose ${pr.picks > 1 ? `one of ${pr.picks} picks` : 'one'}:`) + offer.map((k) => p(`<b>${PERKS[k].name}</b>${PERKS[k].cls ? ' (only from me)' : ''}: ${PERKS[k].text}`)).join('') : '');
-    // What your trainer teaches: your class skill (level 2), and what your dodge leaves behind (level 3).
-    const skillId = CLASS_SKILL[pr.cls], leave = LEAVES[pr.cls], knowsIt = (l: 'skill' | 'leave') => !pr.learned || pr.learned.includes(l);
-    const teach: [('skill' | 'leave'), string, string][] = [['skill', RELICS[skillId].name, 'your class skill'], ...(leave ? [['leave', leave.name, leave.text.charAt(0).toLowerCase() + leave.text.slice(1)] as ['leave', string, string]] : [])];
-    const lessons = '<h3>LESSONS</h3>' + teach.map(([l, n, what]) => p(`<b>${n}</b>: ${what}. ${knowsIt(l) ? 'Learned.' : pr.level < TEACHES[l].level ? `At level ${TEACHES[l].level}.` : `${TEACHES[l].price} gold.`}`)).join('');
-    const lessonButtons = teach.filter(([l]) => !knowsIt(l) && pr.level >= TEACHES[l].level).map(([l, n]) => ({ label: `LEARN ${n} (${TEACHES[l].price} GOLD)`, primary: true, disabled: pr.gold < TEACHES[l].price, act: () => (g.learn(l), again()) }));
-    // Drills: gold for practice, rank by rank, as far as your level allows.
-    const tech = TECHNIQUE[pr.cls], drillName = (d: DrillId) => (d === 'technique' ? tech.name : DRILLS[d].name);
-    // A drill for something not yet learned (your skill; a Mage's channel; a Ranger's snares) waits for it.
+    // Short by default: where you stand, and a button for each thing; tap one to hear about it.
+    const head = `${t.name}, ${cls} TRAINER`, tech = TECHNIQUE[pr.cls], skillId = CLASS_SKILL[pr.cls], leave = LEAVES[pr.cls];
+    const knowsIt = (l: 'skill' | 'leave') => !pr.learned || pr.learned.includes(l);
+    const drillName = (d: DrillId) => (d === 'technique' ? tech.name : DRILLS[d].name);
     const needs = (d: DrillId) => (d === 'skill' || (d === 'technique' && pr.cls === 'MAGE') ? 'skill' : d === 'technique' && pr.cls === 'RANGER' ? 'leave' : null);
     const ready = (d: DrillId) => !needs(d) || knowsIt(needs(d)!);
-    const drills = '<h3>DRILLS</h3>' + p(`You have ${pr.gold} gold.`) + DRILL_ORDER.map((d) => {
-      const r = pr.drills?.[d] ?? 0, cap = drillCap(d, pr.level);
-      return p(`<b>${drillName(d)}</b> ${r} of ${DRILLS[d].max}: ${d === 'technique' ? tech.text : DRILLS[d].text}.${!ready(d) ? ` <span class="dim">Once you've learned it.</span>` : r >= cap && r < DRILLS[d].max ? ` <span class="dim">More ranks at level ${cap * 2}.</span>` : ''}`);
-    }).join('');
-    const drillButtons = DRILL_ORDER.filter((d) => ready(d) && (pr.drills?.[d] ?? 0) < drillCap(d, pr.level)).map((d) => {
-      const r = pr.drills?.[d] ?? 0, price = drillPrice(d, r);
-      return { label: `${drillName(d)} ${r + 1} (${price} GOLD)`, disabled: pr.gold < price, act: () => (g.buyDrill(d), again()) };
+    const detail = (title: string, text: string, buy?: { label: string; ok: boolean; act: () => void }) =>
+      panel.show(head, p(`<b>${title}</b>`) + p(text) + p(`You have ${pr.gold} gold.`), [...(buy ? [{ label: buy.label, primary: true, disabled: !buy.ok, act: () => (buy.act(), again()) }] : []), { label: 'BACK', act: again }]);
+    const teach: ['skill' | 'leave', string, string][] = [['skill', RELICS[skillId].name, CLASSES[pr.cls].skill], ...(leave ? [['leave', leave.name, leave.text + '.'] as ['leave', string, string]] : [])];
+    const html = (pr.picks > 0 ? say(name, TEACH[pr.cls][0]) : '') + (pr.cls === 'HEALER' && pr.glow > 0 ? say(name, COAL.isolde) : '') +
+      p(`Level ${pr.level}. Experience ${pr.xp}${pr.level < 10 ? ` of ${next}` : ' (the chapter cap)'}. ${pr.gold} gold.`) +
+      (pr.perks.length ? p('Yours: ' + pr.perks.map((k) => `<b>${PERKS[k].name}</b>`).join(', ')) : '') +
+      (pr.picks > 0 ? p(`<b>Choose ${pr.picks > 1 ? `from ${pr.picks} picks` : 'one'}.</b>`) : '');
+    const picks = pr.picks > 0 ? offer.map((k) => ({ label: `PICK: ${PERKS[k].name}`, primary: true, act: () => detail(PERKS[k].name, PERKS[k].text + '.' + (PERKS[k].cls ? ' Only from your own trainer.' : ''), { label: `TAKE ${PERKS[k].name}`, ok: true, act: () => g.pickPerk(k) }) })) : [];
+    const lessonButtons = teach.map(([l, n, what]) => {
+      const lv = TEACHES[l].level, price = TEACHES[l].price, have = knowsIt(l);
+      return { label: have ? `${n}: LEARNED` : pr.level < lv ? `${n}: LEVEL ${lv}` : `LEARN ${n} (${price})`, primary: !have && pr.level >= lv, act: () => detail(n, what + (have ? ' Learned.' : pr.level < lv ? ` From level ${lv}.` : ` ${price} gold.`), have || pr.level < lv ? undefined : { label: `LEARN IT (${price} GOLD)`, ok: pr.gold >= price, act: () => g.learn(l) }) };
     });
-    panel.show(`${t.name}, ${cls} TRAINER`, html + lessons + drills, [...lessonButtons, ...(pr.picks > 0 ? offer.map((k) => ({ label: PERKS[k].name, primary: true, act: () => (g.pickPerk(k), again()) })) : []), ...drillButtons]);
+    const drillButtons = DRILL_ORDER.map((d) => {
+      const r = pr.drills?.[d] ?? 0, cap = drillCap(d, pr.level), price = drillPrice(d, r), open = ready(d) && r < cap;
+      const text = (d === 'technique' ? tech.text : DRILLS[d].text) + '.' + (!ready(d) ? " Once you've learned it." : r >= DRILLS[d].max ? ' As far as it goes.' : r >= cap ? ` More ranks at level ${cap * 2}.` : ` Rank ${r + 1} costs ${price} gold.`);
+      return { label: `${drillName(d)} ${r}/${DRILLS[d].max}`, act: () => detail(`${drillName(d)}, rank ${r} of ${DRILLS[d].max}`, text, open ? { label: `RANK ${r + 1} (${price} GOLD)`, ok: pr.gold >= price, act: () => g.buyDrill(d) } : undefined) };
+    });
+    panel.show(head, html, [...picks, ...lessonButtons, ...drillButtons]);
   } else if (id === 'smith' || id === 'market') {
     const forged = id === 'market';
     if (forged && !marketOpen(w)) return panel.show('MARKET ROW', p('Empty stalls and a cat. The traders are camped outside the north gate with the refugees, and the gate stays shut to them until the council says otherwise.'));

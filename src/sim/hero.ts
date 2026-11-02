@@ -3,7 +3,7 @@
  * A tap of attack swings on release; holding past CHARGE.start charges a heavy instead.
  */
 import { collide, wadeAt } from '../shared/arena';
-import { CHANNEL, DODGE, CLASS_GUARD, DECOY, POTION, AUGMENTS, CHARGE, GRAB, HORN, PERK, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon, drilled } from '../shared/tuning';
+import { CHANNEL, DODGE, CLASS_GUARD, DECOY, POTION, AUGMENTS, CHARGE, GRAB, HORN, PERK, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon, drilled, STEALTH } from '../shared/tuning';
 import { slide } from './bodies';
 import { applyGear } from './pack';
 import { statsOf } from './gearstats';
@@ -63,6 +63,8 @@ function face(h: Hero, inp: Intent, enemies: Enemy[], snap: boolean, reach = 3.2
 
 function walk(h: Hero, inp: Intent, k: number, dt: number): void {
   const m = Math.min(1, Math.hypot(inp.mx, inp.my));
+  // Creeping: harder to see (STEALTH). (Standing in plain sight isn't.)
+  h.sneaking = m >= 0.05 && m < STEALTH.slow;
   if (m < 0.05) return;
   const l = Math.hypot(inp.mx, inp.my), sp = HERO.speed * WEAPONS[h.weapon].speed * statsOf(h).speed * k * m * wadeAt(h.x, h.y);
   h.x += (inp.mx / l) * sp * dt;

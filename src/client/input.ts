@@ -144,6 +144,8 @@ export class Input {
     let my = (k.has('s') || k.has('arrowdown') ? 1 : 0) - (k.has('w') || k.has('arrowup') ? 1 : 0);
     if (this.stick.id) (mx = this.stick.x), (my = this.stick.y);
     else if (mx && my) (mx *= Math.SQRT1_2), (my *= Math.SQRT1_2);
+    // Shift: creep (half pace, and goblins at rest see you from less far).
+    if (!this.stick.id && k.has('shift')) (mx *= 0.45), (my *= 0.45);
     const i = this.intent;
     i.mx = Math.abs(mx) < 0.12 ? 0 : mx;
     i.my = Math.abs(my) < 0.12 ? 0 : my;

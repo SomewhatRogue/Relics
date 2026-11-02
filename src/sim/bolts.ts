@@ -6,7 +6,7 @@
  */
 import { HUNGRY_FX } from './hungry';
 import { collide } from '../shared/arena';
-import { CRIT, FLINCH, HERO, LODESTONE, NET, type Augment, type Swing, type TraitId } from '../shared/tuning';
+import { CRIT, FLINCH, HERO, LODESTONE, NET, VARIANTS, type Augment, type Swing, type TraitId } from '../shared/tuning';
 import { shove } from './bodies';
 import { damage, frozen, isDead } from './damage';
 import { afflict, shatter, type World } from './elements';
@@ -89,7 +89,9 @@ function strike(w: World, b: Bolt, e: Enemy): void {
   const wasFrozen = frozen(e, w.now);
   e.lastBy = b.owner;
   const by = w.heroes.find((h) => h.id === b.owner), crit = !!by && rollCrit(by);
-  if (damage(e, Math.round(b.dmg * (crit ? CRIT : 1)), w.now, w.ev, { heavy: b.knock >= 8 || crit, flinch: FLINCH, mult: true, brutal: b.traits.includes('brutal'), dx: b.dx, dy: b.dy, src: b.kind })) return;
+  // A shot into a shield-bearer's board (it's facing the shot) does little.
+  const boarded = e.variant === 'shield' && e.alert !== false && e.fx * -b.dx + e.fy * -b.dy > 0.3 && b.knock < 8;
+  if (damage(e, Math.round(b.dmg * (crit ? CRIT : 1) * (boarded ? VARIANTS.shield.front : 1)), w.now, w.ev, { heavy: b.knock >= 8 || crit, flinch: FLINCH, mult: true, brutal: b.traits.includes('brutal'), dx: b.dx, dy: b.dy, src: b.kind })) return;
   if (e.act !== 'pinned') shove(e, b.dx, b.dy, b.knock, e.weight);
   if (wasFrozen && b.knock >= 8) shatter(e, w.now, w.ev);
   else (afflict(w, e, b.el, b.dmg), b.freeze && afflict(w, e, b.el, b.dmg));

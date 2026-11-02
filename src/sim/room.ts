@@ -7,7 +7,7 @@ import { ARENA, useMap, type GameMap } from '../shared/arena';
 import type { Foe } from '../shared/terrain';
 import type { PropKind } from '../shared/props';
 import { Rng } from '../shared/rng';
-import { BLESSING, CHANNEL, GUARD, HEAL_RADIUS, HEIGHT, HERO, LODESTONE, TICK, TRAIT, WEAPONS, type Augment, type Swing, technique } from '../shared/tuning';
+import { BLESSING, CHANNEL, GUARD, HEAL_RADIUS, HEIGHT, HERO, LODESTONE, TICK, TRAIT, WEAPONS, type Augment, type Swing, technique, VARIANTS } from '../shared/tuning';
 import { separate } from './bodies';
 import { lobLodestone, shoot, smite, stepBolt, throwNet } from './bolts';
 import { afflict, stepElements, type World } from './elements';
@@ -87,6 +87,7 @@ export class ArenaRoom {
       opts.foes.forEach((f, i) => {
         const e = newEnemy(i + 1, f.kind, f.x, f.y);
         if (f.hp) e.hp = e.maxHp = f.hp;
+        if (f.variant) (e.variant = f.variant), (e.hp = e.maxHp = VARIANTS[f.variant].hp);
         Object.assign(e, { respawns: false, name: f.name, bow: f.bow, z: f.z ?? 0, alert: f.awake ?? false, feeding: f.feeding });
         // At the dead: facing the body it's eating.
         const body = f.feeding ? (this.map.npcs ?? []).filter((n) => n.pose === 'corpse').sort((a, b) => Math.hypot(a.x - e.x, a.y - e.y) - Math.hypot(b.x - e.x, b.y - e.y))[0] : undefined;

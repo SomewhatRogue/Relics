@@ -10,7 +10,7 @@ import type { Job, PlaceKind } from './jobs.js';
 import { WOOD, type PropKind } from './props.js';
 import { Rng } from './rng.js';
 
-export interface Foe { kind: 'scrapper' | 'butcher'; x: number; y: number; hp?: number; name?: string; bow?: boolean; z?: number; awake?: boolean; feeding?: boolean }
+export interface Foe { kind: 'scrapper' | 'butcher'; x: number; y: number; hp?: number; name?: string; bow?: boolean; z?: number; awake?: boolean; feeding?: boolean; variant?: 'looter' | 'lunger' | 'heavy' | 'stoker' | 'shield' }
 /** Which way the party went at a fork. */
 export type RoadId = Road['road'];
 export interface RoomPlan { map: GameMap; foes: Foe[]; props: { kind: PropKind; x: number; y: number }[]; chests: { x: number; y: number; chained?: boolean }[] }
@@ -169,6 +169,15 @@ export function planRoom(job: Job, index: number, road?: RoadId): RoomPlan {
         foes.push({ kind: 'scrapper', x: c.x + Math.cos(a) * 0.9, y: c.y + Math.sin(a) * 0.55, feeding: true });
       }
     }
+  }
+  // Not every small goblin is the same: spear-lungers (roll out of the line), brutes (big, slow blows
+  // to parry or dodge) and shield-bearers (hit them from behind, or hard). More of them deeper in.
+  for (const f of foes) {
+    if (f.kind !== 'scrapper' || f.bow || f.feeding || f.name) continue;
+    const r = rng.next(), deep = index * 0.05 + ruin * 0.04;
+    if (r < 0.14 + deep) f.variant = 'lunger';
+    else if (r < 0.26 + deep * 2 && ruin >= 1) f.variant = 'shield';
+    else if (r < 0.33 + deep * 2.5 && index >= 1) f.variant = 'heavy';
   }
   if (final && (obj === 'hunt' || obj === 'story')) foes.push({ kind: 'butcher', x: MID, y: 4.5, hp: obj === 'story' ? 560 : 420, name: job.boss });
   if (index >= 1 && ruin >= 2) foes.push({ kind: 'butcher', x: fires[0]?.x ?? MID, y: (fires[0]?.y ?? 6) - 1.2 });

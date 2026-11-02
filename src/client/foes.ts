@@ -150,7 +150,7 @@ export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number): void {
     }
     return;
   }
-  if (e.kind === 'scrapper') return scrapper(c, e, x, y, flash);
+  if (e.kind === 'scrapper') return scrapper(c, e, x, y, flash), kit(c, e, x, y);
   const a = e.attack;
   shadow(c, x, y, 5);
   const wob = c.now - e.hitAt < 0.3 ? Math.round(Math.sin(c.now * 60)) : 0;
@@ -244,4 +244,19 @@ export function drawHeld(c: Ctx, e: Enemy, x: number, y: number, fx: number, fy:
     return spin(c, s, x + fx * ahead, y - up + fy * ahead * 0.5, Math.PI + (slam < 0.6 ? 0 : (slam - 0.6) * 4));
   }
   spin(c, s, x, y - 27, Math.PI / 2 + Math.sin(c.now * 18) * 0.3);
+}
+
+/** What marks a run goblin's kind: a board on its arm, a long spear, a brute's club. */
+function kit(c: Ctx, e: Enemy, x: number, y: number): void {
+  const f = e.fx >= 0 ? 1 : -1, g = c.lit;
+  if (e.variant === 'shield') {
+    // A door-plank shield, held toward whatever it faces.
+    g.fillStyle = '#5a3f28';
+    g.fillRect(Math.round(x + f * 4 - (f < 0 ? 3 : 0)), Math.round(y - 11), 3, 8);
+    g.fillStyle = '#7a5a38';
+    g.fillRect(Math.round(x + f * 4 - (f < 0 ? 3 : 0)), Math.round(y - 11), 3, 1);
+    g.fillStyle = '#8a8a90';
+    g.fillRect(Math.round(x + f * 5 - (f < 0 ? 3 : 0)), Math.round(y - 8), 1, 1);
+  } else if (e.variant === 'lunger') line(g, x + f * 2, y - 8, Math.atan2(e.fy, e.fx), 0, 12, '#6b4a2b', 1), line(g, x + f * 2, y - 8, Math.atan2(e.fy, e.fx), 11, 14, '#cfd6dc', 1);
+  else if (e.variant === 'heavy') (g.fillStyle = '#3a2a1a'), g.fillRect(Math.round(x + f * 5), Math.round(y - 14), 2, 10), (g.fillStyle = '#4a3a2a'), g.fillRect(Math.round(x + f * 4), Math.round(y - 16), 4, 3);
 }

@@ -142,6 +142,12 @@ export const ARCHER = {
  * goblin within `shout` comes too.
  */
 export const ALERT = { sight: 6.5, behind: 2.5, hear: 5, shout: 5.5, wander: 0.9, wanderSpeed: 0.8 };
+/**
+ * Creeping up: walk slowly (the stick part way over; Shift on a keyboard), and goblins
+ * at rest see you at `sneak` of the distance. The first blow on one that hasn't seen you is an AMBUSH:
+ * `ambush` times as hard, and it reels for `reel` seconds.
+ */
+export const STEALTH = { slow: 0.55, sneak: 0.45, ambush: 2.2, reel: 1.2 };
 
 /**
  * The prologue wood's goblins (shared/wood.ts), each built for one lesson: looters (slow, weak,
@@ -152,6 +158,8 @@ export const ALERT = { sight: 6.5, behind: 2.5, hear: 5, shout: 5.5, wander: 0.9
 export const VARIANTS = {
   looter: { hp: 14, speed: 0.55, stab: { windup: 0.85, active: 0.08, recover: 0.7, dmg: 5, knock: 2, range: 1.3, arc: 50, unblockable: false } as EnemyAttackSpec },
   lunger: { hp: 30, reach: 2.8, stab: { windup: 0.8, active: 0.1, recover: 0.8, dmg: 10, knock: 5, range: 3.0, arc: 24, unblockable: true } as EnemyAttackSpec },
+  /** Run goblins with a board: blows and shots from the front do `front` of themselves (from behind, or a heavy blow, all of it). */
+  shield: { hp: 44, front: 0.25 },
   heavy: { hp: 110, reach: 1.7, speed: 0.75, swing: { windup: 1.0, active: 0.1, recover: 0.9, dmg: 18, knock: 8, range: 1.9, arc: 100, unblockable: false } as EnemyAttackSpec },
   stoker: {
     hp: 520,
