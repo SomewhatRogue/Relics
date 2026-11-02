@@ -69,11 +69,12 @@ export const BLESSING = { cooldown: 12, windup: 0.25, recover: 0.25, range: 6, r
 export const WARD = { cooldown: 14, windup: 0.2, recover: 0.2, range: 7, hp: 50, time: 5, reflect: 1.5, stun: 1.2 };
 
 /** The Healer's skill: blessed ground at your feet and a ward on whoever needs it most, at once. */
-/** The Mage's Elemental Channel: stands still `time` seconds, then its spells turn to the next element
- *  (fire, frost, storm, round again). Fire: a firebolt, and a fireball that bursts and sets them burning.
- *  Frost: three icicles, and a burst that freezes solid. Storm: sparks and lances that jump to the next goblin. */
-export const CHANNEL = { cooldown: 8, windup: 0.08, recover: 0.1, time: 2, order: ['fire', 'frost', 'storm'] as const };
 export const SANCTUARY = { cooldown: 20, windup: 0.25, recover: 0.25 };
+
+/** The Mage's Elemental Channel: a tap turns its spells to the next element at once (fire, frost,
+ *  storm, round again), back in `cooldown` seconds. The first spell after a turn is primed: `primed`
+ *  times as hard. Each element has a job (BURN, FROST, STORM below; who is weak to what: weakness.ts). */
+export const CHANNEL = { cooldown: 1, windup: 0.06, recover: 0.12, primed: 1.5, order: ['fire', 'frost', 'storm'] as const };
 
 /** The war cry (one of the Warrior's two skills): every goblin in earshot, awake or not, comes for you
  *  and nobody else for `time` seconds; small ones right beside you flinch. */
@@ -131,9 +132,15 @@ export type Augment = Element | '';
 export const AUGMENTS: Augment[] = ['', 'fire', 'frost', 'storm'];
 export const ELEMENT_NAME: Record<Element, string> = { fire: 'FIRE', frost: 'FROST', storm: 'STORM' };
 
-export const BURN = { time: 3, every: 0.5, dmg: 7, /** Touching distance (beyond both bodies) that spreads it. */ spread: 0.3 };
-export const FROST = { chill: 3, /** Chilled goblins move and turn this much slower. */ slow: 0.5, freeze: 2.2 };
-export const STORM = { reach: 3.2, chains: 2, share: 0.6, min: 6, flinch: 0.25, /** A javelin stuck in a body is a lightning rod. */ rodReach: 6, rodDmg: 10 };
+/** Fire's job, swarms: it burns on, and jumps to anything within `spread` (beyond both bodies). */
+export const BURN = { time: 3, every: 0.5, dmg: 7, spread: 0.7 };
+/** Frost's job, control: chilled goblins move and turn at `slow` and wind up at `windup` of their pace;
+ *  a second frost freezes them solid for `freeze` (a heavy blow then shatters them: SHATTER). */
+export const FROST = { chill: 3, slow: 0.5, windup: 0.6, freeze: 2.2 };
+/** Storm's job, packs: it jumps to `chains` more within `reach` for `share` of the blow, and goes round
+ *  a shield's board; a Mage's storm spell lands only `single` of itself on the first goblin.
+ *  A javelin stuck in a body is a lightning rod. */
+export const STORM = { reach: 3.8, chains: 3, share: 0.7, min: 6, single: 0.8, flinch: 0.25, rodReach: 6, rodDmg: 10 };
 export const STEAM = { radius: 1.8, dmg: 10, stun: 0.9 };
 export const SHATTER = { dmg: 30 };
 export const FLARE = { radius: 1.6, dmg: 12, knock: 12 };

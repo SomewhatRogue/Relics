@@ -1,5 +1,5 @@
 /** The fight's state. Plain data: the same shape is drawn locally and (later) sent to friends. */
-import type { Augment, Item, PotionId, Tier, PropKind, Quality, RelicId, TraitId, WeaponId } from '../shared/tuning';
+import type { Augment, Item, PotionId, Tier, PropKind, Quality, RelicId, TraitId, WeaponId, Hurt } from '../shared/tuning';
 
 /** What a player's device sends: held state plus press counters, so a quick tap is never lost. */
 export interface Intent {
@@ -50,7 +50,7 @@ export const NO_INTENT: Intent = { mx: 0, my: 0, ax: 0, ay: 0, attack: false, bl
 export type Learned = 'skill' | 'leave';
 export const knows = (h: { learned?: Learned[] }, l: Learned) => !h.learned || h.learned.includes(l);
 
-export type HeroAct = 'idle' | 'charge' | 'attack' | 'throw' | 'zip' | 'bash' | 'roll' | 'hurt' | 'stun' | 'down' | 'carry' | 'slam' | 'channel';
+export type HeroAct = 'idle' | 'charge' | 'attack' | 'throw' | 'zip' | 'bash' | 'roll' | 'hurt' | 'stun' | 'down' | 'carry' | 'slam';
 
 /** Anything that can be pushed: a slide (knockback) decays each tick. */
 export interface Body {
@@ -191,6 +191,8 @@ export interface Hero extends Body {
   perfect: boolean;
   /** Dodged through a blow (TEMPO): the next hit before then lands double. */
   tempoUntil: number;
+  /** A Mage just turned element: its next spell is primed (CHANNEL.primed). */
+  primed?: boolean;
   maxHp: number;
   /** Perks chosen at the trainer (see shared/progress). */
   perks: string[];
@@ -282,6 +284,8 @@ export interface Enemy extends Body {
   drill?: boolean;
   /** A goblin built for one lesson in the prologue wood (shared/wood.ts VARIANTS). */
   variant?: 'looter' | 'lunger' | 'heavy' | 'stoker' | 'shield' | 'hexer' | 'drummer';
+  /** When it last showed WEAK or RESIST (sim/damage.ts sayWeak). */
+  popAt?: number;
   /** A drummer standing and beating its drum this tick (shared/backline.ts DRUMMER). */
   drumming?: boolean;
   /** Within reach of a drumming drummer this tick: faster wind-ups and feet, harder blows. */
@@ -390,8 +394,8 @@ export type FightEvent =
   | { k: 'noblock' | 'noguard'; x: number; y: number; dodge?: string }
   /** The Ranger's snare laid; the hound barking or yelping off. */
   | { k: 'snareset' | 'bark' | 'yelp'; x: number; y: number }
-  /** The Mage channelling, and done: its spells now `el`. */
-  | { k: 'channel' | 'channeled'; x: number; y: number; el: string }
+  /** The Mage's channel: its spells now `el`, the first one primed. */
+  | { k: 'channeled'; x: number; y: number; el: string }
   | { k: 'weapon'; x: number; y: number; name: string }
   | { k: 'throw' | 'pinned' | 'javwall' | 'javstick' | 'hookfire' | 'latch' | 'yank' | 'land'; x: number; y: number; dx: number; dy: number }
   | { k: 'relic' | 'loot'; x: number; y: number; name: string }
@@ -404,7 +408,7 @@ export type FightEvent =
   | { k: 'spend'; id: string; x: number; y: number; n: number }
   | { k: 'ransom' | 'tooth'; x: number; y: number }
   | { k: 'drop'; x: number; y: number; q: Quality }
-  | { k: 'shoot'; x: number; y: number; dx: number; dy: number; kind: Bolt['kind']; el: Augment }
+  | { k: 'shoot'; x: number; y: number; dx: number; dy: number; kind: Bolt['kind']; el: Augment; primed?: boolean }
   | { k: 'burst'; x: number; y: number; r: number; el: Augment }
   | { k: 'shock' | 'beam'; x: number; y: number; x2: number; y2: number }
   | { k: 'heal'; x: number; y: number; n: number }
@@ -412,8 +416,10 @@ export type FightEvent =
   | { k: 'collapse'; x: number; y: number; w: number; h: number }
   /** A house on fire (sim/blaze.ts): a beam down, the roof in, someone caged lost with it. */
   | { k: 'rafter' | 'housefall' | 'cagelost'; x: number; y: number }
-  /** Spiders: a hit on a weakness, a wave hatching, a hero poisoned or cured, a glob landing. */
-  | { k: 'weak' | 'hatch' | 'poisoned' | 'cured' | 'splat'; x: number; y: number }
+  /** Spiders: a wave hatching, a hero poisoned or cured, a glob landing. */
+  | { k: 'hatch' | 'poisoned' | 'cured' | 'splat'; x: number; y: number }
+  /** A blow on a weakness or a resistance (shared/weakness.ts), and what it was made of. */
+  | { k: 'weak' | 'resist'; x: number; y: number; el: Hurt }
   /** A freed survivor hurt by the party (`by` the hero, '' nobody's; `tick` a burn), or killed. */
   | { k: 'survivorhit'; x: number; y: number; id: number; n: number; by: string; tick?: boolean }
   | { k: 'survivordeath'; x: number; y: number; id: number; by: string }

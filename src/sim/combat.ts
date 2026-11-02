@@ -1,9 +1,9 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, parry, roll). */
-import { BLESSING, DODGE, WARD, FLINCH, HORN, OVERKILL, PERK, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing, CLASS_DODGES, CRIT, STEALTH, technique, weakness } from '../shared/tuning';
+import { BLESSING, DODGE, WARD, FLINCH, HORN, OVERKILL, PERK, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing, CLASS_DODGES, CRIT, STEALTH, technique, weakOn } from '../shared/tuning';
 import { shove } from './bodies';
 import { statsOf } from './gearstats';
 import { HUNGRY_FX, wears } from './hungry';
-import { damage, frozen, isDummy, kill, small, snared, stunOf } from './damage';
+import { damage, frozen, isDummy, kill, sayWeak, small, snared, stunOf } from './damage';
 import { poison } from './poison';
 import { shatter } from './elements';
 import { has } from './traits';
@@ -42,7 +42,9 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   const crit = rollCrit(h), ambush = e.alert === false && !isDummy(e);
   // A shield-bearer takes a blow from the front on its board (unless it's heavy, held fast, or caught unaware).
   const boarded = e.variant === 'shield' && !rear && !heavy && !heldFast && !ambush && !WEAPONS[h.weapon].overShield;
-  const mult = weakness(e.kind) * (h.counter ? counter : heldFast ? held : 1) * rearMult * blessed * tempo * (crit ? CRIT : 1) * (ambush ? STEALTH.ambush : 1) * (boarded ? VARIANTS.shield.front : 1);
+  const weak = weakOn(e);
+  sayWeak(e, weak, now, ev, 'physical');
+  const mult = weak * (h.counter ? counter : heldFast ? held : 1) * rearMult * blessed * tempo * (crit ? CRIT : 1) * (ambush ? STEALTH.ambush : 1) * (boarded ? VARIANTS.shield.front : 1);
   // Mother Rust's Needles: a backstab kills anything short of a butcher.
   const n = rear && e.kind === 'scrapper' && wears(h, 'needles') ? Math.max(e.hp, Math.round(s.dmg * mult)) : Math.round(s.dmg * mult);
   e.hp -= n;

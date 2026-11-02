@@ -1,5 +1,5 @@
 /**
- * Spiders' effects: WEAK where a blow lands on a weakness, a nest splitting as a wave comes out, a
+ * Spiders' effects: a nest splitting as a wave comes out, a
  * hero poisoned (a puff of green) or cured, a glob landing, and a spider bursting into dark ichor
  * instead of blood. Cosmetic, so Math.random is fine.
  */
@@ -11,10 +11,6 @@ const ICHOR = ['#1e2a12', '#2a3a16', '#3a4a1e'], VENOM = ['#9be040', '#6ab82a', 
 /** True if it was a spider's event (and has been drawn). */
 export function spiderFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
   switch (ev.k) {
-    case 'weak':
-      fx.say(x, y - 30, 'WEAK', '#ffb040');
-      fx.burst(x, y - 8, 6, ['#ffb040', '#fff1b0'], 55, true);
-      return true;
     case 'hatch':
       fx.burst(x, y - 6, 14, ['#c8bfa8', '#e0d8c0', '#8a8494'], 60, false, 140, true);
       fx.burst(x, y - 8, 8, VENOM, 40, true);

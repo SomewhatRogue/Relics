@@ -121,7 +121,7 @@ most Want among the heroes is the one the bells don't spare).
 - **Trainers' fees** (recorded 2026-11-01): drills are bought from your own class's trainer, and
   paying for them is trade, not keeping or giving: it never touches the Want. Mother Isolde's fees buy
   linen and Sister's Bitter for the infirmary, never the Lantern box. Magister Vell teaches the Elemental
-  Channel and sells the QUICK CHANNEL drill. Players see "breath", never
+  Channel and sells the FIRST SPELL drill (was QUICK CHANNEL until the Channel became a quick switch, 2026-11-02). Players see "breath", never
   "stamina" or "wind". A job's length in real minutes is the game's own voice on the board only;
   characters and postings never measure a job in minutes.
 - **The valley, added** (recorded 2026-11-01, for the river, marsh and ruins jobs): Barrowfields: the

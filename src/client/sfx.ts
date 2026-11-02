@@ -216,11 +216,6 @@ export const sfx = {
     burst('lowpass', 600, 180, 1, 0.35 * v, 0.08, 0.34);
   },
   /** The Mage gathering itself, and the element turning. */
-  channel() {
-    if (!ready()) return;
-    tone('sine', 180, 520, 0.12, 2);
-    tone('triangle', 90, 260, 0.08, 2);
-  },
   channeled() {
     if (!ready()) return;
     for (const [f, d] of [[880, 0], [1320, 0.06], [1760, 0.12]]) tone('sine', f, f, 0.14, 0.4, d);

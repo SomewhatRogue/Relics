@@ -1435,3 +1435,30 @@ Kyle: the wizard tower doesn't look very wizard-towery outside or inside; person
   worn steps; the infirmary herbs under the eaves and a lamp.
 - `tests/halls.test.ts` floods each hall from the door and checks everyone and the way out can be
   reached, and that each is the same every time with its own pieces.
+
+## 2026-11-01: the quick channel, and each element a job (Kyle; Opus 5.5)
+
+Kyle: the channel isn't much fun, and there's no reason to switch element unless goblins resist some
+and fall to others. His call: give each element a job.
+
+- **The channel is a quick switch** (`CHANNEL` in `shared/magic.ts`, `sim/channel.ts`): a tap turns
+  the spells to the next element at once (fire, frost, storm), a short flourish, back in 1 s. No
+  standing still. The reward for committing: the first spell after a turn is **primed**, x1.5 (more
+  with the Mage's technique, now **FIRST SPELL**, +20% a rank, was QUICK CHANNEL). The skill button
+  reads the element now (FIRE, FROST, STORM) in its colour, and the Mage's casting light and tip glow
+  take that colour; a primed Mage has motes circling and a brighter light until the spell goes.
+- **Each element's job**: fire burns and jumps further between goblins (`BURN.spread` 0.3 to 0.7),
+  for crowds and spiders; frost slows feet and now wind-ups too (`FROST.windup` 0.6, locked in the
+  attack's own clock so the telegraph fills at the judged pace), then freezes for a shatter, for the
+  big and the quick; storm chains further and to more (3 within 3.8, 0.7 a jump) and goes round a
+  shield's board, but a Mage's storm spell lands 0.8 on the first goblin.
+- **One table for every foe** (`shared/weakness.ts`, read by `damage()` and the melee path): rows by
+  variant, bow, named butcher (boss) or kind. Looters, drummers and spiders burn; lungers, butchers,
+  bosses and the Stoker take frost hard (the Stoker shrugs fire, 0.6); brutes resist blades and frost
+  a little; hexers and shield goblins fall to storm. Numbers 0.6 to 1.8 (the spiders' older 2.5 and
+  the nest's 3 left as they were). **WEAK** pops in the colour of what landed it, **RESIST** small and
+  grey, at most one per foe each half second (`WEAK_POP`), never on a burn's tick.
+- Steam, shatter and flare unchanged; the three kits keep their shapes (wand sparks, staff orb, rod
+  lance); relic augments go through the same table.
+- `tests/elements.test.ts`: the switch and its cooldown, the primed spell, every table entry through
+  `damage()`, the brute resisting a blade, the pop limit, storm round a shield, fire jumping a gap.

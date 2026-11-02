@@ -161,14 +161,13 @@ describe('class relics', () => {
     expect(h.fy).toBeGreaterThan(0.9);
   });
 
-  it("the mage channels two seconds and its spells turn from fire to frost: three icicles a tap", () => {
+  it("the mage's channel turns its spells from fire to frost at once (no standing): three icicles a tap", () => {
     const { room, h } = onTarget(3);
     asClass(room, 3);
     room.setIntent('me', intent({ classSeq: 3, relicSeq: 1, ay: -1 }));
-    run(room, 1);
-    expect(h.act).toBe('channel');
-    const ev = run(room, 1.3);
+    const ev = run(room, 0.15);
     expect(ev.find((e) => e.k === 'channeled')).toMatchObject({ el: 'frost' });
+    expect(h.primed).toBe(true);
     for (const e of room.enemies) Object.assign(e, { x: 1, y: 15, cooldown: 99 });
     expect(h.augments.channel).toBe('frost');
     room.setIntent('me', intent({ classSeq: 3, relicSeq: 1, attackSeq: 1, ay: -1 }));

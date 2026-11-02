@@ -1,5 +1,5 @@
 /** Damage to an enemy from anything (blades, shots, blasts, burning), and what death resets. */
-import { BROOD, BUTCHER, GUARD, OVERKILL, SCRAPPER, SPIDER, SWING_DUMMY, TRAIT, weakness, type Hurt } from '../shared/tuning';
+import { BROOD, BUTCHER, GUARD, OVERKILL, SCRAPPER, SPIDER, SWING_DUMMY, TRAIT, WEAK_POP, weakOn, type Hurt } from '../shared/tuning';
 import type { DeathKind, Enemy, FightEvent } from './types';
 
 const SPEC = { butcher: BUTCHER, scrapper: SCRAPPER, spider: SPIDER, brood: BROOD } as Record<string, { stun: number; respawn: number } | undefined>;
@@ -42,18 +42,25 @@ export interface DamageOpts {
   how?: DeathKind;
   dx?: number;
   dy?: number;
-  /** What it's made of, for a kind's weaknesses (shared/spiders.ts WEAK); a plain blow when left out. */
+  /** What it's made of, for a kind's weaknesses (shared/weakness.ts); a plain blow when left out. */
   el?: Hurt | '';
+}
+
+/** WEAK or RESIST over a foe (`m` the table's multiplier), at most one every WEAK_POP seconds. */
+export function sayWeak(e: Enemy, m: number, now: number, ev: FightEvent[], el: Hurt): void {
+  if (m === 1 || now - (e.popAt ?? -9) < WEAK_POP) return;
+  e.popAt = now;
+  ev.push({ k: m > 1 ? 'weak' : 'resist', x: e.x, y: e.y, el });
 }
 
 /** Hurt an enemy; true if this killed it. Dummies never die (they refill). */
 export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: DamageOpts = {}): boolean {
   e.alert = true;
   if (e.act === 'dead') return false;
-  // A weakness (fire on a spider) lands harder and says so; a burn's tick says nothing.
-  const weak = weakness(e.kind, o.el || 'physical');
+  // A weakness (fire on a spider) lands harder and says so, a resistance softer; a burn's tick says nothing.
+  const weak = weakOn(e, o.el || 'physical');
   if (weak !== 1) n = Math.max(1, Math.round(n * weak));
-  if (weak > 1 && !o.tick) ev.push({ k: 'weak', x: e.x, y: e.y });
+  if (!o.tick) sayWeak(e, weak, now, ev, o.el || 'physical');
   if (o.mult && (e.act === 'stunned' || e.act === 'pinned' || frozen(e, now) || snared(e, now))) n = Math.round(n * GUARD.stunnedMult * (o.brutal ? TRAIT.brutal : 1));
   e.hp -= n;
   e.hitAt = now;

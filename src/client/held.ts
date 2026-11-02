@@ -3,7 +3,7 @@ import { CHARGE, RELEASE, WEAPONS } from '../shared/tuning';
 import { chargeFull, currentSwing } from '../sim/hero';
 import type { Hero } from '../sim/types';
 import { ease, line, smear, type Ctx } from './draw';
-import { EL_COL } from './palette';
+import { EL_COL, heldEl } from './palette';
 import { PX } from './world';
 import { bladeLength, censer, drawKit, kitPose } from './heldkits';
 
@@ -108,7 +108,7 @@ function tip(c: Ctx, h: Hero, tx: number, ty: number, el: string): void {
 
 export function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): void {
   const g = c.lit, ox = px + Math.cos(p.a) * p.ext, oy = py + Math.sin(p.a) * p.ext;
-  const side = h.fx >= -0.2 ? 1 : -1, el = EL_COL[h.augments[h.relic]];
+  const side = h.fx >= -0.2 ? 1 : -1, el = EL_COL[heldEl(h)];
   if (drawKit(c, h, px, py, ox, oy, p)) {
     // (The Rogue's and Cleric's other kits: heldkits.ts.)
   } else if (h.weapon === 'sword') {

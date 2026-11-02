@@ -14,7 +14,7 @@ import { asleep, drawEnemy, drawHeld, drawTelegraph } from './foes';
 import { drawDrums } from './backline';
 import { camKick } from './heropose';
 import { houseOf } from './cottage';
-import { EL_LIGHT } from './palette';
+import { EL_LIGHT, heldEl } from './palette';
 import { drawChest, drawFlask, drawPickup, drawSmoke } from './relicsdraw';
 /** A '#rrggbb' as light colour 0..1. */
 const tint = (h: string): [number, number, number] => [parseInt(h.slice(1, 3), 16) / 255, parseInt(h.slice(3, 5), 16) / 255, parseInt(h.slice(5, 7), 16) / 255];
@@ -397,7 +397,8 @@ export class Scene {
     for (const h of room.heroes) {
       if (!lightsHolder(h.weapon)) continue;
       const [x, y] = lerp('h:' + h.id, h.x, h.y);
-      lights.push({ x: x - cx, y: y - cy - 14, r: 22, i: 0.4, c: WEAPONS[h.weapon].cls === 'HEALER' ? [1, 0.75, 0.4] : EL_LIGHT[h.augments[h.relic]] });
+      // A primed Mage (just channelled) burns brighter till the spell goes.
+      lights.push({ x: x - cx, y: y - cy - 14, r: h.primed ? 30 : 22, i: h.primed ? 0.55 : 0.4, c: WEAPONS[h.weapon].cls === 'HEALER' ? [1, 0.75, 0.4] : EL_LIGHT[heldEl(h)] });
     }
     drawMist(glow, map.theme, this.vw, this.vh, cx, cy, now);
     fx.drawGlow(glow, lit, cx, cy);

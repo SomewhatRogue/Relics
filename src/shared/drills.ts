@@ -34,7 +34,7 @@ export const TECHNIQUE: Record<HeroClass, { name: string; text: string; gain: st
   HEALER: { name: "SURGEON'S HANDS", text: 'Your heals mend a sixth more each rank', gain: '+#% healing', per: 0.16 },
   ROGUE: { name: 'KNIFEWORK', text: 'Your backstabs cut a quarter deeper each rank', gain: '+#% backstab damage', per: 0.25 },
   RANGER: { name: 'TRAPPER', text: 'Your snares hold a fifth longer each rank', gain: 'snares hold #% longer', per: 0.2 },
-  MAGE: { name: 'QUICK CHANNEL', text: 'Your channel takes a sixth less time each rank', gain: 'channel #% quicker', per: 0.16 },
+  MAGE: { name: 'FIRST SPELL', text: 'The first spell after you change element lands a fifth harder each rank', gain: '+#% first spell', per: 0.2 },
 };
 
 export type Drills = Partial<Record<DrillId, number>>;

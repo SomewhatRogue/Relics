@@ -1,6 +1,7 @@
 /** Drawing a hero: the class's body, the weapon in hand, the dodge, charge and stun. */
 import { CHARGE, WARD, WEAPONS, WANT } from '../shared/tuning';
 import { chargeFull } from '../sim/hero';
+import { castElement } from '../sim/channel';
 import type { Hero } from '../sim/types';
 import { blit, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
 import { armOffset, drawFigure, layout } from './figure';
@@ -126,14 +127,12 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'b
     }
   }
   if (h.act === 'stun') stars(c, bx, by - 19);
-  // Channelling: motes of the element to come spiralling in, faster and tighter as it finishes.
-  if (h.act === 'channel') {
-    const k = Math.min(1, h.actT / Math.max(0.01, h.actDur)), cur = h.augments.channel || 'fire';
-    const next = cur === 'fire' ? 'frost' : cur === 'frost' ? 'storm' : 'fire';
-    c.glow.fillStyle = EL_COL[next];
-    for (let i = 0; i < 8; i++) {
-      const a = c.now * (3 + 6 * k) + (i / 8) * Math.PI * 2, r = 14 - 9 * k;
-      c.glow.fillRect(Math.round(bx + Math.cos(a) * r), Math.round(by - 9 + Math.sin(a) * r * 0.55), 1 + (i % 2), 1);
+  // Primed (just channelled): motes of the element circling slowly until the next spell goes.
+  if (h.primed && WEAPONS[h.weapon].cls === 'MAGE') {
+    c.glow.fillStyle = EL_COL[castElement(h)];
+    for (let i = 0; i < 4; i++) {
+      const a = c.now * 3 + (i / 4) * Math.PI * 2;
+      c.glow.fillRect(Math.round(bx + Math.cos(a) * 8), Math.round(by - 9 + Math.sin(a) * 4), 1, 1);
     }
   }
   aura(c, h, bx, by, t);
