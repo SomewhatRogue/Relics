@@ -68,7 +68,7 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     pitch: 'The cleverest thing in the room, until something hits you.',
     weapon: 'Spark wand',
     skill: `Elemental Channel: tap it and your spells turn to the next element (fire, frost, storm, and round again). The first spell after a change hits harder. Your trainer teaches it from level ${SKILL_AT}.`,
-    note: "Fire: a firebolt (tap) or a fireball (hold). It burns and spreads, so it's best on a crowd. Frost: three icicles (tap) or a wide burst (hold). It slows them, and a second hit freezes them solid, so it's best on the big ones. Storm: every spell jumps to the next goblin and goes round a shield. Some goblins take more from one element and less from another, and spiders burn: watch for WEAK and RESIST.",
+    note: "Fire: a firebolt (tap) or a fireball (hold). It burns and spreads, so it's best on a crowd. Frost: three icicles (tap) or a wide burst (hold). It slows goblins, and a second hit freezes them solid, so it's best on the big ones. Storm: every spell jumps to the next goblin and goes round a shield. Some goblins take more from one element and less from another, and spiders burn, so watch for WEAK and RESIST.",
     noteLabel: 'SPELLS',
     cant: "Short of breath. Can't lift.",
     guard: `Can't block or parry. Blinks out of reach instead, and the blink is slow to come back. From level ${LEAVE_AT} your trainer can teach the blink to leave an image behind, which draws goblins off for a couple of seconds.`,
