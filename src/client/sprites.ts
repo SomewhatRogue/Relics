@@ -12,7 +12,11 @@ export interface Sprite {
   h: number;
   /** Pixels that glow (eyes, embers): drawn unlit. */
   glow: [number, number, string][];
+  /** Canvas pixels per scene pixel (2 for the bodies drawn at twice the detail; 1 if missing). */
+  k?: number;
 }
+
+import { HD_SPRITES, HERO_FIGS, type Facing } from './hd/index';
 
 export const OUTLINE = '#0d0b10';
 const GLOW = new Set(['#ff4a3a', '#7dff8a', '#ffd27a', '#c9a8ff', '#ffe9a8', '#bfe0ff', '#ff8a3a']);
@@ -207,9 +211,13 @@ function robe(body: string, sleeve: string, brim: string, band: string, eyes: st
   };
 }
 
-const LOOK_SPRITES = Object.fromEntries(Object.entries(LOOKS).map(([k, ls]) => [k, ls.map((l) => heroPair(l))])) as Record<keyof typeof LOOKS, { down: Sprite; up: Sprite }[]>;
-/** A class's look `i` (0 to 2; anything else is the first). */
+// In play: the same looks drawn at twice the detail (hd/), posable part by part. The small ones above
+// stay as the reference for each design.
+const LOOK_SPRITES = Object.fromEntries(Object.entries(HERO_FIGS).map(([k, fs]) => [k, fs.map((f) => ({ down: f.down.whole, up: f.up.whole }))])) as Record<keyof typeof LOOKS, { down: Sprite; up: Sprite }[]>;
+/** A class's look `i` (0 to 2; anything else is the first): its whole sprites. */
 export const heroLook = (cls: keyof typeof LOOKS, i = 0) => LOOK_SPRITES[cls][i] ?? LOOK_SPRITES[cls][0];
+/** A class's look `i` as posable bodies, facing you and walking away. */
+export const heroFigure = (cls: keyof typeof LOOKS, i = 0): Facing => HERO_FIGS[cls][i] ?? HERO_FIGS[cls][0];
 
 
 const butcherBase: Part[] = [
@@ -232,15 +240,15 @@ export const HEROES = Object.fromEntries(Object.keys(LOOKS).map((k) => [k, heroL
 export const SPRITES = {
   warriorDown: makeSprite(12, 16, [...warriorBase, ['e', 6, 3.5, 3.6, 3.6, '#9aa3ad'], ['r', 4, 3, 5, 1, '#141218'], ['r', 5, 0, 2, 1, '#c0392b']]),
   warriorUp: makeSprite(12, 16, [...warriorBase, ['r', 3, 6, 6, 7, '#7a1d1d'], ['e', 6, 3.5, 3.6, 3.6, '#9aa3ad'], ['r', 5, 0, 2, 2, '#c0392b']]),
-  butcherDown: makeSprite(18, 22, [...butcherBase, ['p', 7, 5, '#ff4a3a'], ['p', 11, 5, '#ff4a3a'], ['p', 7, 8, '#e8e0c8'], ['p', 11, 8, '#e8e0c8'], ['r', 8, 7, 3, 1, '#2a1a14']]),
-  butcherUp: makeSprite(18, 22, [...butcherBase, ['r', 6, 8, 6, 2, '#4a5a22']]),
-  scrapper: makeSprite(11, 13, [['r', 3, 9, 2, 4, '#3a4a1f'], ['r', 6, 9, 2, 4, '#3a4a1f'], ['r', 2, 6, 7, 4, '#4a3a2a'], ['r', 2, 9, 7, 1, '#2a2018'], ['e', 5.5, 4, 3.4, 3, '#5b6b2a'], ['p', 0, 3, '#5b6b2a'], ['p', 1, 3, '#5b6b2a'], ['p', 10, 3, '#5b6b2a'], ['p', 9, 3, '#5b6b2a'], ['p', 4, 4, '#ff4a3a'], ['p', 6, 4, '#ff4a3a'], ['r', 4, 6, 3, 1, '#e8e0c8']]),
-  scrapperUp: makeSprite(11, 13, [['r', 3, 9, 2, 4, '#3a4a1f'], ['r', 6, 9, 2, 4, '#3a4a1f'], ['r', 2, 6, 7, 4, '#4a3a2a'], ['e', 5.5, 4, 3.4, 3, '#5b6b2a'], ['p', 0, 3, '#5b6b2a'], ['p', 10, 3, '#5b6b2a'], ['r', 3, 5, 5, 1, '#4a5a22']]),
+  butcherDown: HD_SPRITES.butcherDown,
+  butcherUp: HD_SPRITES.butcherUp,
+  scrapper: HD_SPRITES.scrapper,
+  scrapperUp: HD_SPRITES.scrapperUp,
   // Bodies left behind: without a head (a red stump), or burned black.
-  scrapperHeadless: makeSprite(11, 13, [...scrapperBody, ['r', 4, 5, 3, 1, '#7a1d1d'], ['p', 5, 4, '#9a2a2a']]),
-  butcherHeadless: makeSprite(18, 22, [...butcherBase.slice(0, 9), ['r', 7, 8, 4, 2, '#7a1d1d'], ['p', 8, 7, '#9a2a2a']]),
-  scrapperBurnt: makeSprite(11, 13, char([...scrapperBody, ...scrapperHead.slice(0, 5)])),
-  butcherBurnt: makeSprite(18, 22, char(butcherBase)),
+  scrapperHeadless: HD_SPRITES.scrapperHeadless,
+  butcherHeadless: HD_SPRITES.butcherHeadless,
+  scrapperBurnt: HD_SPRITES.scrapperBurnt,
+  butcherBurnt: HD_SPRITES.butcherBurnt,
   barrel: makeSprite(10, 12, [['r', 1, 1, 8, 11, '#7a5230'], ['r', 0, 3, 10, 6, '#7a5230'], ['r', 0, 3, 10, 1, '#4a4652'], ['r', 0, 8, 10, 1, '#4a4652'], ['r', 2, 0, 6, 2, '#9a7a4a'], ['r', 4, 2, 1, 9, '#5a3d22']]),
   oil: makeSprite(10, 12, [['r', 1, 1, 8, 11, '#3a2a20'], ['r', 0, 3, 10, 6, '#3a2a20'], ['r', 0, 5, 10, 2, '#8a2a1a'], ['r', 2, 0, 6, 2, '#4a3a2a'], ['p', 5, 1, '#ffd27a'], ['p', 3, 9, '#1a1410']]),
   crate: makeSprite(12, 11, [['r', 0, 0, 12, 11, '#8a6a3a'], ['r', 0, 0, 12, 1, '#5a3d22'], ['r', 0, 10, 12, 1, '#5a3d22'], ['r', 0, 0, 1, 11, '#5a3d22'], ['r', 11, 0, 1, 11, '#5a3d22'], ['p', 3, 3, '#5a3d22'], ['p', 4, 4, '#5a3d22'], ['p', 5, 5, '#5a3d22'], ['p', 6, 5, '#5a3d22'], ['p', 7, 6, '#5a3d22'], ['p', 8, 7, '#5a3d22'], ['p', 8, 3, '#5a3d22'], ['p', 7, 4, '#5a3d22'], ['p', 4, 6, '#5a3d22'], ['p', 3, 7, '#5a3d22']]),
@@ -259,7 +267,7 @@ export const SPRITES = {
   stump: makeSprite(9, 6, [['r', 1, 1, 7, 5, '#4a3420'], ['r', 1, 0, 7, 2, '#8a6a3a'], ['p', 4, 1, '#6b4a2b']]),
   dummy: makeSprite(12, 17, dummyBase),
   swingDummy: makeSprite(12, 17, [...dummyBase, ['r', 2, 9, 8, 1, '#a33a2a'], ['p', 5, 2, '#141218'], ['p', 7, 2, '#141218']]),
-  shield: makeSprite(5, 7, [['r', 0, 0, 5, 7, '#7a5230'], ['r', 0, 0, 5, 1, '#9aa3ad'], ['r', 0, 6, 5, 1, '#9aa3ad'], ['p', 2, 3, '#cfd6dc']]),
+  shield: HD_SPRITES.shield,
   pillar: makeSprite(14, 36, [['r', 2, 4, 10, 28, '#4f4a5c'], ['r', 2, 12, 10, 1, '#3b3746'], ['r', 2, 21, 10, 1, '#3b3746'], ['r', 6, 4, 1, 8, '#3b3746'], ['r', 4, 13, 1, 8, '#3b3746'], ['r', 8, 22, 1, 10, '#3b3746'], ['r', 0, 0, 14, 4, '#5d576b'], ['r', 0, 32, 14, 4, '#3b3746']]),
   brazier: makeSprite(10, 9, [['r', 4, 4, 2, 5, '#2a2630'], ['r', 1, 8, 8, 1, '#2a2630'], ['r', 0, 1, 10, 4, '#3a3640'], ['r', 1, 0, 8, 1, '#57525e'], ['r', 2, 1, 6, 1, '#7a2a10']]),
   target: makeSprite(12, 16, [['r', 5, 9, 2, 7, '#4a3420'], ['e', 6, 5.5, 5.5, 5.5, '#d8c48a'], ['e', 6, 5.5, 3.8, 3.8, '#a33a2a'], ['e', 6, 5.5, 2, 2, '#d8c48a'], ['p', 6, 5, '#7a1d1d']]),

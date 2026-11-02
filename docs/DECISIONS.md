@@ -2,6 +2,40 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-01: heroes and goblins at twice the detail, posed part by part (Claude Opus 5.5)
+
+Kyle approved the 2x sample (black iron Warrior, violet Mage) and asked for every hero and goblin redrawn
+that way, in jointed parts, posed by the anticipation and payoff pass.
+
+- **Drawn from character grids** (`client/hd/`): five hero bodies (plate, hood, wide hat, robe under a
+  pointed hat, robe under a hood) in `bodies.ts`, each facing you and walking away; the fifteen looks
+  in `looks.ts` are a body, a palette and a few details laid over it, matching the designs in
+  `sprites.ts` `LOOKS`. Goblins (plain, the brute's pot helm, the lunger's red band, the looter's sack,
+  the archer's hood), the butcher, the dead (headless, burned) and the sword's shield in `goblins.ts`.
+  Half rows are mirrored; the back view is the front with characters swapped and rows laid over. No
+  assets: everything is built once at load (`hd/index.ts`).
+- **Parts with no seams** (`hd/grid.ts`): shading and the outline are worked out on the whole body, then
+  every pixel goes to a part (cape, off arm, left leg, right leg, torso, head, weapon arm), by
+  character then region. A body at rest is exactly its whole sprite (a test holds it), and parts can
+  move a pixel or two apart. `pixels()` is pure, so tests and tools run it in Node.
+- **Posed by the motion pass** (`client/figure.ts`): the head leans the most and the torso half as
+  much, the legs fold under a crouch and stretch when the body rises, the weapon arm reaches along the
+  blow and lifts (`raise`, new: the butcher's cleaver goes up over his head for the slam), steps lift
+  one foot then the other, and the body breathes by half a pixel. Weapons are drawn at the weapon hand,
+  on half pixels (`PEN.k`), so they move with the arm and are as fine as the bodies.
+- **Same size on screen and in the room**: heroes are 24 by 32 canvas pixels (12 by 16 scene pixels, as
+  before; the Mage's hat makes 36), goblins 22 by 26, the butcher 36 by 44. Collision radii untouched.
+- **Painting at 2x** (`scene.ts` `HD`): the scene's canvases are twice the scene's pixels each way,
+  with a 2x transform, so everything else draws exactly as before; sprites carry `k` (canvas pixels
+  per scene pixel) and the drawing helpers land them on half pixels. The pick-screen preview does the
+  same. Title faces and the town look use the new whole sprites.
+- **Lighting in two passes** (`light.ts`): at 2x the per-pixel light loop cost four times as much.
+  The light on each scene pixel is now summed once into a scene-sized texture and the canvas pass
+  reads it; bands and dither stay on scene pixels, so the look is unchanged. In software rendering
+  (the test browser) this took the 2x build from about a third of main's frame rate to about 70%.
+- Where the scale is odd (a 1280 by 800 laptop at 2x is 7), the canvas is shown at 3.5 screen pixels
+  to its pixel, so some half pixels are a screen pixel wider than others; crisp, slightly uneven.
+
 ## 2026-11-01: anticipation and payoff in the bodies (Claude Opus 5.5)
 
 Kyle loved the world effects on big blows (the charged magic burst, the butcher's slam) and asked for
