@@ -2,6 +2,46 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-02: the pack as a paper doll, the vault, Tobin's stall, the forge reworked (Claude Opus 5.5)
+
+Kyle: "redesign how you can access your pack", "spend money to make your pack bigger in town", "clear
+what items are on what body part", "easily see and compare items, sort of Castle of the Winds or
+Diablo", "a somewhat ruined bank in town", "the forge is for upgrading existing weapons or melting
+things down", augments "unavailable or blocked out", "a generic merchant who you can sell things to
+and buy things back from for a limited time".
+
+- **The PACK** (`client/pack.ts`, `cells.ts`, `itemicons.ts`): your hero's sprite with a square on
+  each part: RELIC and SKILL over HAND and BODY, two RINGs, the three-potion BELT under; the pack
+  beside it, one piece a square, its tier's colour on the border, a small pixel picture for what it
+  is (blade, bow, staff, mail, ring) drawn in code. Tap a piece (or point at it with a mouse) and its
+  card sits beside the card of what you wear in that slot, then every number the room uses, now and
+  with it, and the change in green or red. WEAR / DROP (on a job; in town nothing drops, the card
+  says where to sell or store it). The SKILL square is shown, not changed. Dragging still works.
+  With the pack open the hero stands still (the world doesn't); gear changes still go through as
+  intents. Relics found but not carried: CARRY buttons on the RELIC square's card.
+- **Pack size** (`shared/bags.ts`): 8 to start, then 12, 16, 20, 24 for 100, 250, 500, 900 gold,
+  sold by Tobin. The room checks the hero's own `bagSize`: a full pack can't take loot or a piece
+  taken off, and the loot card says "Your pack is full. Drop something to make room." Treasure at a
+  job's end that won't fit still sells for 20 as before.
+- **The vault** (Keeper Edda, the counting house, west of the square above the infirmary): roof
+  fallen in at one end since the siege, the vault under the floor. 16 shelves, then 24, 32, 40 for
+  150, 400, 800 gold. Per hero, in the save (and so in the recovery code's copy). Hungry gear can't
+  go in (it can't be dropped either).
+- **Tobin the pawnbroker** (the far stall on Market Row, always there; Dessa's stall still waits on the
+  council): buys any packed piece for `sellValue` (hungry gear never), and holds it for you to buy
+  back at what he paid until you come home from your next job (`runs` moves on), the newest eight.
+  Halvard no longer buys gear.
+- **The forge**: Halvard's anvil is a panel of your worn and packed gear; tap one for UPGRADE (the
+  existing `UPGRADE` gold and steel, tier caps) or MELT DOWN (packed only, `STEEL` by tier). His rack
+  of Fine gear stays behind a button. Hungry gear: neither. Ivo isn't setting elements for now (one
+  greyed button a relic, a line from him); what's already set keeps working; carrying a relic,
+  rerolls and frost flasks stay.
+- **Old saves** (`fitStores` in `client/save.ts`): an 8-cell pack (what it always held), an empty
+  vault, nothing pawned. More than 8 pieces would size the pack up to fit, as far as 24, and the rest
+  goes in the vault, however full. Nothing is deleted.
+- New words are all in `client/storewords.ts` for the lore keeper and line editor; Edda, Tobin and the
+  counting house are new and want lore review.
+
 ## 2026-11-02: the friend who froze when a Florida friend led (Claude Opus 5.5)
 
 Kyle played with two friends in Florida. When he led, every job worked; when a Florida friend led,

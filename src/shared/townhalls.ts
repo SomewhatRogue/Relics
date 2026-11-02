@@ -4,7 +4,8 @@
  * dummy), the hunters' lodge (bows, antlers, pelts, a skinning bench, the hounds' bowls), the church
  * (candles, a runner up the aisle, a surgeon's cot), the Drowned Rat (the bar, casks, the dice table,
  * Whisper's curtained booth), the forge (bellows, quench tub, soot), the town hall (the council table,
- * the valley map, notices) and the infirmary (herbs drying, a basin). Paint-only touches are marks on
+ * the valley map, notices), the counting house (open to the sky at one end, a counter, the vault
+ * stair behind it) and the infirmary (herbs drying, a basin). Paint-only touches are marks on
  * the floor and hangs on the back wall; furniture is solid. Same layout every time.
  */
 import type { Block, GameMap, Mark, Npc, Round, Theme } from './arena.js';
@@ -54,6 +55,10 @@ export function hall(door: string): GameMap | null {
     [b('anvil', 3.4, 2.7, 1.2, 0.6), b('bench', 8.5, 0.6, 3.5, 0.8), b('sacks', 11.2, 4.6, 1.2, 1), b('bellows', 0.2, 1.1, 0.9, 0.6), b('tub', 1, 4.6, 1.3, 0.8)],
     [n('HALVARD THE SMITH', 4.1, 1.9, 'smith', 'smith'), n('IVO THE RELIC-WRIGHT', 10.2, 2.2, 'wright', 'wright')],
     { braziers: [{ x: 1.8, y: 1.4, r: 0.45 }], marks: [mk('soot', 0.3, 0.6, 5, 4.4)], hangs: [hang('tools', 4.6, 3)] });
+  if (door === 'bank') return room('THE COUNTING HOUSE', 11, 8, { ...STONE, ambient: [0.26, 0.25, 0.32], moon: 0.4 },
+    [b('counter', 3, 1.4, 5, 0.8), b('shelf', 0.6, 0.1, 2.2, 0.5), b('rubble', 8.2, 0.4, 2.4, 1.4), b('rubble', 0.4, 5.6, 1.4, 0.9), b('sacks', 9.4, 5, 1.2, 1)],
+    [n('KEEPER EDDA', 5.5, 1.1, 'bank', 'villager')],
+    { marks: [mk('rushes', 2.6, 3, 6, 3)], hangs: [hang('notices', 4.8, 1.4)], braziers: [{ x: 2, y: 3.2, r: 0.35 }] });
   if (door === 'townhall') return room('THE TOWN HALL', 12, 8, HOME,
     [b('desk', 3, 2.4, 6, 1), b('shelf', 1, 0.2, 2, 0.5), b('shelf', 9, 0.2, 2, 0.5)],
     [n('REEVE HOLLIS', 6, 1.7, 'council', 'reeve'), n('ALDER BRAM', 2.2, 3, 'chat', 'elder', 3), n('GOODWIFE SELL', 9.8, 3, 'chat', 'villager', 4)],

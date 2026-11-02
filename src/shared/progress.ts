@@ -4,6 +4,7 @@
  */
 import type { Drills } from './drills.js';
 import type { Item } from './loot.js';
+import type { Pawn } from './bags.js';
 import type { PotionId } from './potions.js';
 import { CLASS_ARMOR } from './gear.js';
 import type { Augment, RelicId } from './magic.js';
@@ -58,6 +59,11 @@ export interface Profile {
   arms: Partial<Record<WeaponId, Item>>;
   weapon: WeaponId;
   bag: Item[];
+  /** Pack cells bought, the vault under the counting house and its shelves, Tobin's buyback (shared/bags.ts). */
+  bagSize?: number;
+  stash?: Item[];
+  stashSize?: number;
+  buyback?: Pawn[];
   /** Coals fed to a Healer's censer (sim/lantern.ts). */
   glow: number;
   /** Potions on the belt (shared/potions.ts). */

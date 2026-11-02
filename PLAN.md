@@ -2,6 +2,14 @@
 
 ## Current slice
 
+**The pack, the vault, Tobin's stall, the forge** (Claude Opus 5.5, 2026-11-02; Kyle: "Castle of the
+Winds or Diablo style", "a somewhat ruined bank", "a generic merchant"). Built; waiting on Kyle's play.
+*Done when* Kyle opens PACK on a job and sees what's on each part of his hero, taps a piece and reads it
+beside what he wears with the numbers, can't pick up loot with a full pack, buys a bigger pack from
+Tobin on Market Row, sells him something and buys it back, stores a piece in the vault at the counting
+house, upgrades and melts at Halvard's anvil, and finds Ivo's elements greyed out. Open: Edda, Tobin, the
+counting house and every line in `client/storewords.ts` through the lore keeper and line editor.
+
 **Slower growth, the knacks tree, class-true offers** (Claude Opus 5.5, 2026-11-02; Kyle: "purple
 loot too fast as well as leveling up too fast", "its own sort of area you can see grow", "the Rogue can
 only dodge"). Built; waiting on Kyle's play. *Done when* a new hero is about level 5 after nine or ten

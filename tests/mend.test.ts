@@ -64,7 +64,7 @@ describe('Wickhold, broken and mended', () => {
     expect(lanes(newWorld())).toBeGreaterThan(3);
     expect(lanes(withWorks('lanes'))).toBe(0);
     expect(posts(withWorks('lanterns'))).toBeGreaterThan(posts(newWorld()) + 5);
-    expect(townMap(withWorks('shutters')).blocks.some((b) => b.worn)).toBe(false);
+    expect(townMap(withWorks('shutters')).blocks.some((b) => b.worn && b.door !== 'bank')).toBe(false); // The counting house stays roofless (shared/town.ts).
     expect(base.marks!.some((k) => k.kind === 'beds' || k.kind === 'flowers')).toBe(false);
     expect(townMap(withWorks('dig')).marks!.filter((k) => k.kind === 'beds').length).toBe(3);
     expect(townMap(withWorks('dig', 'plant')).marks!.filter((k) => k.kind === 'flowers').length).toBe(3);

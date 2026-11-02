@@ -4,7 +4,7 @@
  * Lantern Square in the middle (the Last Lantern, the job board, the town works, the Roll of the
  * Brave, the well, a bard). Round it: the church and its graves (north-west), the town hall and the
  * forge (north), the mage's tower and the barred keep (north-east), the barracks (west), the hunters'
- * lodge and its archery butts (east), the infirmary (south-west), the Drowned Rat tavern with a sewer
+ * lodge and its archery butts (east), the counting house with its vault (west, roof fallen in), the infirmary (south-west), the Drowned Rat tavern with a sewer
  * grate behind it (south), Rescue Row (south-east). Past the rubble in the east lane, the Old Quarter.
  * Guards walk their rounds. What the world has done changes it: houses on Rescue Row, a granary or
  * a trader, more of the watch, the east lane cleared, and the town mended after the breach (mend.ts).
@@ -19,7 +19,7 @@ import { workDone } from './works.js';
 
 /** What talking to someone (or using a spot) opens. */
 export type SpotId = 'board' | 'council' | 'church' | 'smith' | 'wright' | 'trainer' | 'market' | 'infirmary' | 'granary' | 'home' | 'chat'
-  | 'yard' | 'gate' | 'hew' | 'works' | 'roll' | 'well' | 'bard' | 'dice' | 'tavern' | 'sewer' | 'locked';
+  | 'yard' | 'gate' | 'hew' | 'works' | 'roll' | 'well' | 'bard' | 'dice' | 'tavern' | 'sewer' | 'locked' | 'bank' | 'merchant';
 export interface Spot { id: SpotId; x: number; y: number; label: string; key?: string }
 
 export const SPOTS: Spot[] = [
@@ -73,7 +73,9 @@ export function townMap(w: WorldState): GameMap {
     { x: 10.2, y: 13.6, w: 0.5, h: 2.2, kind: 'rack' },
     { x: 45, y: 13, w: 6, h: 3.5, kind: 'house', label: "HUNTERS' LODGE", door: 'lodge' },
     { x: 37, y: 11.5, w: 3, h: 2, kind: 'stall', label: marketIn(w) ? 'TRADER' : 'EMPTY' },
-    { x: 37, y: 15.5, w: 3, h: 2, kind: 'stall' },
+    { x: 37, y: 15.5, w: 3, h: 2, kind: 'stall', label: 'PAWN' },
+    // The counting house: the roof came in during the siege and was never put back; the vault under it held (Keeper Edda).
+    { x: 2.4, y: 22.4, w: 6, h: 3.2, kind: 'hall', label: 'COUNTING HOUSE', door: 'bank', worn: true },
     { x: 22.9, y: 12.6, w: 2.4, h: 0.6, kind: 'stall', label: 'JOBS' },
     { x: 30.7, y: 12.6, w: 2.6, h: 0.6, kind: 'stall', label: 'WORKS' },
     { x: 27, y: 23.5, w: 2, h: 1, kind: 'monument' },
@@ -111,6 +113,8 @@ export function townMap(w: WorldState): GameMap {
   ];
   if (watch) npcs.push(n('WATCHMAN PIKE', 11, 27.6, 'chat', 'guard', 8, [[11, 27.6], [51, 27.6]], 1.1), n('ORLA OF THE WATCH', 41.2, 22, 'chat', 'guard', 14, [[41.2, 22], [52, 22], [52, 12], [41.2, 12]], 1));
   if (marketIn(w)) npcs.push(n('DESSA THE TRADER', 38.5, 13.9, 'market', 'trader'));
+  // Tobin buys anything at the far stall, and sells it back for a while (client/stores.ts).
+  npcs.push(n('TOBIN THE PAWNBROKER', 38.5, 18.1, 'merchant', 'villager'));
   if (quarter) npcs.push(n('OLD MERREN', 57, 18, 'chat', 'elder', 9));
   const m = mending(w), sg = siege(w), worn = !workDone(w, 'shutters');
   for (const b of blocks) if (worn && b.label && WORN.includes(b.label)) b.worn = true;
