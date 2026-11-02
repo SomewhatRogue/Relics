@@ -149,6 +149,13 @@ export interface Hero extends Body {
   lying?: boolean;
   /** The name shown under someone else's hero (another player in town); their id otherwise. */
   tag?: string;
+  /** In a party: down and waiting to be picked up (`pickT` so far), or out until the job ends. */
+  bleeding?: boolean;
+  out?: boolean;
+  pickT?: number;
+  /** Teammates this swing has already cut (friendly fire), and who has downed this hero how often. */
+  hitAllies?: string[];
+  grudges?: Record<string, number>;
   /** A Healer's censer gone cold (the prologue, until Isolde relights it): no heals given. */
   cold: boolean;
   /** Relics this hero has won (one at a time is carried, in relics[1]). */
@@ -299,11 +306,13 @@ export interface Drop {
 }
 
 export type FightEvent =
+  /** A teammate downed you once too often this job. */
+  | { k: 'grudge'; x: number; y: number; id: string; by: string }
   /** `src`: what landed it (a kit, or a shot's kind), for its sound; `big`: on the butcher. */
   | { k: 'hit'; x: number; y: number; n: number; heavy: boolean; on: 'enemy' | 'hero'; counter?: boolean; backstab?: boolean; tick?: boolean; src?: string; big?: boolean }
   | { k: 'swing'; x: number; y: number; src: string; heavy: boolean }
   | { k: 'death'; x: number; y: number; how: DeathKind; dx: number; dy: number; kind: EnemyKind }
-  | { k: 'block' | 'parry' | 'guardbreak' | 'dodge' | 'slip' | 'down' | 'roll' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number }
+  | { k: 'block' | 'parry' | 'guardbreak' | 'dodge' | 'slip' | 'down' | 'out' | 'pickedup' | 'roll' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number }
   | { k: 'windup' | 'impact'; x: number; y: number; kind: AttackKind }
   /** The prologue's cutscene: the ground shaking, the bite, a body landing, the Stoker's bellow. */
   | { k: 'rumble' | 'bite' | 'thud' | 'bellow' | 'fanfare'; x: number; y: number }
@@ -395,6 +404,8 @@ export interface Bolt {
   burst: number;
   el: Augment;
   hit: number[];
+  /** Teammates it has already passed through (friendly fire). */
+  hitHeroes?: string[];
   /** Stun on hit (a smite). */
   stun: number;
   /** The shooter's weapon traits (BRUTAL counts on a shot). */

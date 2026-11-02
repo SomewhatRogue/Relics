@@ -6,10 +6,11 @@
  */
 import { HUNGRY_FX } from './hungry';
 import { collide } from '../shared/arena';
-import { FLINCH, LODESTONE, NET, type Augment, type Swing, type TraitId } from '../shared/tuning';
+import { FLINCH, HERO, LODESTONE, NET, type Augment, type Swing, type TraitId } from '../shared/tuning';
 import { shove } from './bodies';
 import { damage, frozen, isDead } from './damage';
 import { afflict, shatter, type World } from './elements';
+import { allyHit, players } from './party';
 import { blastProps, damageProp } from './props';
 import { blastBlocks } from './buildings';
 import type { Bolt, Enemy, Hero } from './types';
@@ -64,6 +65,9 @@ export function blast(w: World, b: Bolt, x: number, y: number): void {
     if (wasFrozen && b.knock >= 8) shatter(e, w.now, w.ev);
     else (afflict(w, e, b.el, b.dmg), b.freeze && afflict(w, e, b.el, b.dmg));
   }
+  // Your own side caught in it (a holy smite spares them).
+  if (b.kind !== 'smite' && players(w.heroes).length > 1)
+    for (const h of w.heroes) if (Math.hypot(h.x - x, h.y - y) <= b.burst + HERO.radius) allyHit(b.owner, h, b.dmg, w.ev, h.x - x, h.y - y);
 }
 
 /** The net opens: small goblins in it are snared flat, big ones slowed. */
@@ -138,6 +142,14 @@ export function stepBolt(b: Bolt, w: World, dt: number): boolean {
       if (b.burst) return blast(w, b, b.x, b.y), false;
       b.hit.push(e.id);
       strike(w, b, e);
+      if (!b.pierce) return false;
+    }
+    // A teammate in the way takes it (not the one who loosed it, and not a net).
+    const ally = b.kind === 'net' || players(w.heroes).length < 2 ? undefined : w.heroes.find((h) => h.id !== b.owner && h.id !== 'squire' && h.act !== 'down' && h.act !== 'roll' && !b.hitHeroes?.includes(h.id) && Math.hypot(h.x - b.x, h.y - b.y) <= HERO.radius + 0.1);
+    if (ally) {
+      if (b.burst) return blast(w, b, b.x, b.y), false;
+      (b.hitHeroes ??= []).push(ally.id);
+      allyHit(b.owner, ally, b.dmg, w.ev, b.dx, b.dy);
       if (!b.pierce) return false;
     }
     if (b.travelled >= b.range) return end(b, w, false);

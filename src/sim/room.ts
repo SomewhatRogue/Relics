@@ -23,6 +23,7 @@ import { dropCoal, healMult, stepCoals, type Coal } from './lantern';
 import { impacts } from './impacts';
 import { release, stepCarry, tryGrab } from './grab';
 import { dropProp, newProp, propImpacts, roomProps, stepLift, stepProps, sweepProps, tryLift } from './props';
+import { stepParty, sweepAllies } from './party';
 import { dropFrom, stepDrops, takeLoot } from './loot';
 import { hallow, rally, shadowstep, stepZones, ward } from './relics';
 import { forgedElement, has, traitsOf } from './traits';
@@ -161,7 +162,7 @@ export class ArenaRoom {
       fire: (h) => this.fire(h, w),
       loose: (h, s) => this.loose(h, s, w),
       struck: (h, e, n) => this.struck(h, e, n, w),
-      sweep: (h, s) => (sweepProps(h, s, w), sweepBlocks(h, s, this.events)),
+      sweep: (h, s) => (sweepProps(h, s, w), sweepBlocks(h, s, this.events), sweepAllies(h, s, this.heroes, this.events)),
       grab: (h) => tryGrab(h, this.enemies, this.time, this.events) || tryLift(h, this.props, this.events),
       carry: (h, inp, walk) => (h.lifting ? stepLift(h, inp, w, TICK, walk) : stepCarry(h, inp, this.enemies, this.time, TICK, this.events, walk)),
       drop: (h) => (release(h, this.enemies, this.events), dropProp(h, this.props)),
@@ -185,6 +186,8 @@ export class ArenaRoom {
     }
     stepChests(this.chests, this.heroes, this.drops, this.pickups, this.lootRng, this.events, TICK);
     for (const h of this.heroes) stepHero(h, this.intents.get(h.id) ?? NO_INTENT, this.enemies, this.time, TICK, this.events, acts);
+    // A party: bleeding, picking each other up, going out.
+    stepParty(this.heroes, TICK, this.events);
     // A Ranger who has just jumped back leaves a snare where they stood.
     for (const h of this.heroes) if (h.act === 'roll' && h.actT === 0) laySnare(h, this.snares, this.time, this.events);
     this.snares = this.snares.filter((s) => stepSnare(s, this.enemies, this.time, this.events));

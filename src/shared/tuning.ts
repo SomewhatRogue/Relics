@@ -58,6 +58,15 @@ export const FRIENDLY = { shot: 1.5, blow: 0.8 };
  *  stamina is multiplied by this for now (Kyle: dear at first, so there's something to grow into; perks,
  *  gear and levels bring it down). */
 export const DODGE = { stun: 0.6, cost: 1.5 };
+/**
+ * A party (more than one player in a fight). `bleed`: seconds down before you're out for the job;
+ * `pickUp`: seconds a teammate stands over you to get you up (a hit on them starts it over), from
+ * within `reach` tiles, and you come up with `upHp` of your health. `friendly`: what your own side's
+ * blows, shots and blasts do to you. Each player past the first brings `foes` more goblins (as a
+ * share of the room's) and `boss` more health on a named one. `grudge`: team kills by the same
+ * player in one job before you hold it against them.
+ */
+export const PARTY = { bleed: 20, pickUp: 3, reach: 1.2, upHp: 0.4, friendly: 0.5, foes: 0.6, boss: 0.4, grudge: 3 };
 export const HURT_STAGGER = 0.25;
 
 /** Knockback slides decay by this share per second; a slide this fast into a wall slams. */

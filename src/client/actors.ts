@@ -6,6 +6,7 @@ import { blit, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
 import { drawWeapon, pose } from './held';
 import { EL_COL } from './palette';
 import { drawText } from './pixfont';
+import { PARTY } from '../shared/tuning';
 import { HEROES, SPRITES } from './sprites';
 
 /** `t` is the room's time (blessings and rallies are kept in it). */
@@ -14,7 +15,11 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean, t: 
   if (h.act === 'down') {
     shadow(c, x, y, 6);
     spin(c, look.down, x, y - 4, Math.PI / 2, 0.85);
-    if (!h.lying) drawText(c.glow, String(Math.ceil(h.actDur - h.actT)), Math.round(x - 1), Math.round(y - 18), '#ff6a5a');
+    // Alone: up in a moment. In a party: the seconds left to be picked up, and how far along it is.
+    if (h.out || h.lying) return;
+    const left = h.bleeding ? PARTY.bleed - h.actT : h.actDur - h.actT;
+    drawText(c.glow, String(Math.max(0, Math.ceil(left))), Math.round(x - 1), Math.round(y - 18), '#ff6a5a');
+    if (h.pickT) ring(c, x, y, 8, '#f0e0b0', h.pickT / PARTY.pickUp, '#3a3428');
     return;
   }
   const up = h.fy < -0.55 && Math.abs(h.fy) > Math.abs(h.fx) * 0.8;

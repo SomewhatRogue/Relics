@@ -293,6 +293,7 @@ function startSwing(h: Hero, i: number, inp: Intent, enemies: Enemy[], now: numb
   if (!h.heavy) h.perfect = false;
   h.combo = Math.max(0, i);
   h.hitIds = [];
+  h.hitAllies = [];
   h.attackQueuedAt = -9;
   h.counter = now < h.counterUntil;
   if (h.counter) h.counterUntil = -9;
