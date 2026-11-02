@@ -21,7 +21,7 @@ export function blit(c: Ctx, s: Sprite, x: number, y: number, flip = false, flas
 
 const tints = new WeakMap<Sprite, Map<string, HTMLCanvasElement>>();
 /** The sprite's silhouette in one colour (made once, kept). */
-function tinted(s: Sprite, col: string): HTMLCanvasElement {
+export function tinted(s: Sprite, col: string): HTMLCanvasElement {
   let m = tints.get(s);
   if (!m) tints.set(s, (m = new Map()));
   let t = m.get(col);
@@ -40,16 +40,19 @@ function tinted(s: Sprite, col: string): HTMLCanvasElement {
 
 /**
  * A sprite in a pose: `sx`, `sy` stretch it (feet stay put), `lean` shifts its top third that many
- * pixels sideways (its middle half as many), and `flash` washes it in `tint`. Whole pixels throughout.
+ * pixels sideways (its middle half as many), and `flash` washes it in `tint`. Whole pixels throughout:
+ * a sprite drawn at twice the detail (`s.k` 2) lands on half pixels of the scene, which the scene's
+ * canvas has (scene.ts paints at HD).
  */
 export function blitPose(c: Ctx, s: Sprite, x: number, y: number, flip: boolean, sx: number, sy: number, lean: number, flash: number, tint = '#ffffff'): void {
-  const w = Math.max(1, Math.round(s.w * sx)), h = Math.max(1, Math.round(s.h * sy));
-  const left = Math.round(x - w / 2), top = Math.round(y - h), bands = lean ? 3 : 1;
-  const off = (i: number) => (bands === 1 ? 0 : Math.round((lean * (2 - i)) / 2));
+  const k = s.k ?? 1, q = (v: number) => Math.round(v * k) / k;
+  const w = Math.max(1 / k, q((s.w / k) * sx)), h = Math.max(1 / k, q((s.h / k) * sy));
+  const left = k === 1 ? Math.round(x - w / 2) : q(Math.round(x) - w / 2), top = k === 1 ? Math.round(y - h) : q(Math.round(y) - h), bands = lean ? 3 : 1;
+  const off = (i: number) => (bands === 1 ? 0 : q((lean * (2 - i)) / 2));
   const put = (g: CanvasRenderingContext2D, img: HTMLCanvasElement) => {
     for (let i = 0; i < bands; i++) {
       const r0 = Math.round((s.h * i) / bands), r1 = Math.round((s.h * (i + 1)) / bands);
-      const d0 = top + Math.round((r0 * h) / s.h), d1 = top + Math.round((r1 * h) / s.h);
+      const d0 = top + q((r0 * h) / s.h), d1 = top + q((r1 * h) / s.h);
       if (r1 <= r0 || d1 <= d0) continue;
       const dx = left + off(i);
       if (!flip) g.drawImage(img, 0, r0, s.w, r1 - r0, dx, d0, w, d1 - d0);
@@ -67,9 +70,9 @@ export function blitPose(c: Ctx, s: Sprite, x: number, y: number, flip: boolean,
   put(c.glow, s.white);
   c.glow.globalCompositeOperation = 'source-over';
   for (const [gx, gy, col] of s.glow) {
-    const band = bands === 1 ? 0 : Math.min(2, Math.floor((gy * 3) / s.h)), px = Math.floor((gx * w) / s.w);
+    const band = bands === 1 ? 0 : Math.min(2, Math.floor((gy * 3) / s.h)), px = Math.floor((gx * w * k) / s.w) / k;
     c.glow.fillStyle = col;
-    c.glow.fillRect((flip ? left + w - 1 - px : left + px) + off(band), top + Math.floor((gy * h) / s.h), 1, 1);
+    c.glow.fillRect((flip ? left + w - 1 / k - px : left + px) + off(band), top + Math.floor((gy * h * k) / s.h) / k, 1 / k, 1 / k);
   }
   if (flash > 0) {
     c.glow.globalAlpha = Math.min(1, flash);
@@ -81,7 +84,8 @@ export function blitPose(c: Ctx, s: Sprite, x: number, y: number, flip: boolean,
 /** A pale afterimage of a body (a lunge's smear frame), on the glow layer; draw it before the body. */
 export function ghost(c: Ctx, s: Sprite, x: number, y: number, flip: boolean, alpha: number, sx = 1, sy = 1): void {
   if (alpha <= 0) return;
-  const w = Math.round(s.w * sx), h = Math.round(s.h * sy), left = Math.round(x - w / 2), top = Math.round(y - h);
+  const k = s.k ?? 1, q = (v: number) => Math.round(v * k) / k;
+  const w = q((s.w / k) * sx), h = q((s.h / k) * sy), left = q(Math.round(x) - w / 2), top = q(Math.round(y) - h);
   c.glow.globalAlpha = alpha;
   if (!flip) c.glow.drawImage(s.white, left, top, w, h);
   else (c.glow.save(), c.glow.translate(left + w, top), c.glow.scale(-1, 1), c.glow.drawImage(s.white, 0, 0, w, h), c.glow.restore());
@@ -102,7 +106,8 @@ export function spin(c: Ctx, s: Sprite, x: number, y: number, a: number, alpha =
   c.lit.globalAlpha = alpha;
   c.lit.translate(Math.round(x), Math.round(y));
   c.lit.rotate(a);
-  c.lit.drawImage(s.c, -Math.round(s.w / 2), -Math.round(s.h / 2));
+  const k = s.k ?? 1, w = s.w / k, h = s.h / k;
+  c.lit.drawImage(s.c, -Math.round((w / 2) * k) / k, -Math.round((h / 2) * k) / k, w, h);
   c.lit.restore();
 }
 
@@ -125,13 +130,19 @@ export function ring(c: Ctx, x: number, y: number, rx: number, col: string, shar
   }
 }
 
-/** A straight run of pixels from r0 to r1 along angle a, `w` pixels thick. */
+/**
+ * How fine lines are drawn: 1 on the scene's pixels; 2 on half pixels, to match the bodies drawn at
+ * twice the detail (weapons in hand are drawn fine; set it back to 1 after).
+ */
+export const PEN = { k: 1 };
+
+/** A straight run of pixels from r0 to r1 along angle a, `w` pixels thick (pixels of the PEN). */
 export function line(g: CanvasRenderingContext2D, x0: number, y0: number, a: number, r0: number, r1: number, col: string, w = 1): void {
   g.fillStyle = col;
-  const nx = -Math.sin(a), ny = Math.cos(a);
-  for (let r = r0; r <= r1; r += 0.5) for (let k = 0; k < w; k++) {
-    const o = k - (w - 1) / 2;
-    g.fillRect(Math.round(x0 + Math.cos(a) * r + nx * o), Math.round(y0 + Math.sin(a) * r + ny * o), 1, 1);
+  const nx = -Math.sin(a), ny = Math.cos(a), K = PEN.k, d = 1 / K;
+  for (let r = r0; r <= r1; r += 0.5 * d) for (let k = 0; k < w; k++) {
+    const o = (k - (w - 1) / 2) * d;
+    g.fillRect(Math.round((x0 + Math.cos(a) * r + nx * o) * K) / K, Math.round((y0 + Math.sin(a) * r + ny * o) * K) / K, d, d);
   }
 }
 

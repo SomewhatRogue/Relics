@@ -76,6 +76,7 @@ function heroAct(p: BodyPose, h: Hero, t: number, now: number, w: (typeof WEAPON
   if (h.act === 'charge') {
     const k = clamp01((h.actT + CHARGE.start) / chargeFull(w, h));
     coil(p, h, k, M.charge.lean, M.charge.crouch * (shot ? 0.5 : 1), M.charge.back);
+    if (!shot) p.raise = M.charge.raise * k;
     // A blade held at full: the body shivers with it.
     if (k >= 1 && !shot) p.ox += Math.floor(now * 30) % 2;
     return (p.phase = 'charge'), (p.k = k), p;
