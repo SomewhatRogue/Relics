@@ -34,6 +34,10 @@ export interface Npc {
   /** A round they walk (a guard's patrol), at `speed` tiles a second; they don't block anyone. */
   path?: [number, number][];
   speed?: number;
+  /** Cutscene puppetry: lifted off the ground (pixels), walking, or dead (`headless` standing, `body` on the ground). */
+  lift?: number;
+  walking?: boolean;
+  pose?: 'headless' | 'body';
 }
 
 /** Where someone is at time `t` (walking their round, or standing where they stand), and which way they face. */

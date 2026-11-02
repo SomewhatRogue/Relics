@@ -670,3 +670,15 @@ image for 2.5 s that goblins near it go for (DECOY; nearest() hands them a stand
 is quicker (speed 1.22; dash 4.3 tiles, 0.22 s cooldown, cheaper). CLASS_GUARD in weapons.ts; the class
 detail shows a GUARD line; on a phone the block button reads PARRY for Ranger and Rogue and is gone for the Mage.
 Later: a Rogue relic that slides behind the goblin instead of a straight dodge (Kyle's idea).
+
+## 2026-11-01: Hew's death staged, the Stoker's charge, the relic found, kills that vary (Claude Opus 5.5)
+Kyle: the old ending was weird (Hew teleported, the Stoker spun). The cut is now beat by beat (CUT in
+sim/wood.ts): Hew walks round the hut, the ground rumbles, the Stoker rises behind the cordwood, runs him
+down, lifts him (Npc.lift), bites (headless pose, blood, shake), throws the body onto its cordwood pile (kept,
+not wasted, so "this one I keep" still reads two ways), turns and bellows (big shake, roar). The Stoker gains a
+charge: a broad striped lane, unblockable, and no blow flinches it; it stuns itself on a wall or tree. Killing it
+stops everything for a relic card (FOUND / RELIC JAVELIN) with the javelin held up in a ring of light and a
+rising run of notes; then a gold arrow points to the road. Blade kills now vary: cut down (most light blows),
+cut in two at the waist (most heavy blows), and only now and then the head. The Rogue's knives do half head on
+(front: 0.5) unless the goblin is held fast. Ranger and Rogue holding block get "CAN'T BLOCK: TAP TO PARRY";
+a Mage pressing it gets "NO GUARD: ROLL"; the HUD kit line says so too. In town, a panel stops the world.

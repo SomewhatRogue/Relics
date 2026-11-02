@@ -6,6 +6,7 @@ import { ARENA, npcAt, type GameMap } from '../shared/arena';
 import { GRAB, GUARD, POTION, TIERS, WEAPONS } from '../shared/tuning';
 import type { ArenaRoom } from '../sim/room';
 import { drawHero } from './actors';
+import type { Hero } from '../sim/types';
 import { blit, type Ctx } from './draw';
 import { drawEnemy, drawHeld, drawTelegraph } from './foes';
 import { EL_LIGHT } from './palette';
@@ -40,12 +41,40 @@ export class Scene {
   private cam = { x: 0, y: 0, ready: false };
   /** A cutscene's point of interest (tiles): the camera eases there instead of following the hero. */
   focus: { x: number; y: number } | null = null;
+  /** The relic held up over your head (the wood's find), and where the arrow by your feet points. */
+  fanfare = false;
+  pointTo: { x: number; y: number } | null = null;
   private heroAt: [number, number] | null = null;
 
   constructor(private out: HTMLCanvasElement) {
     this.lighting = new Lighting(out);
     this.resize();
     addEventListener('resize', () => this.resize());
+  }
+
+  /** The javelin held over your head, turning slowly in a ring of light. */
+  private heldUp(c: Ctx, x: number, y: number, t: number): void {
+    const top = Math.round(y - 34), g = c.glow;
+    g.globalAlpha = 0.55;
+    g.fillStyle = '#ffe9a8';
+    for (let i = 0; i < 10; i++) {
+      const a = t * 0.8 + (i / 10) * Math.PI * 2, r0 = 8, r1 = 18 + (i % 2) * 6;
+      for (let r = r0; r < r1; r++) g.fillRect(Math.round(x + Math.cos(a) * r), Math.round(top + Math.sin(a) * r * 0.8), 1, 1);
+    }
+    g.globalAlpha = 1;
+    c.lit.fillStyle = '#7a5230';
+    c.lit.fillRect(Math.round(x - 9), top, 16, 2);
+    g.fillStyle = '#e8f0ff';
+    g.fillRect(Math.round(x + 7), top - 1, 3, 4);
+    g.fillRect(Math.round(x + 10), top, 2, 2);
+  }
+
+  /** A gold arrow at your feet, pointing the way on, pulsing out and back. */
+  private arrow(c: Ctx, h: Hero, x: number, y: number, t: number): void {
+    const p = this.pointTo!, dx = p.x - h.x, dy = p.y - h.y, l = Math.hypot(dx, dy) || 1, ux = dx / l, uy = dy / l;
+    const d = 14 + Math.sin(t * 5) * 3, bx = x + ux * d, by = y - 6 + uy * d * 0.8, g = c.glow;
+    g.fillStyle = '#ffd27a';
+    for (let k = 0; k < 6; k++) for (let s = -k; s <= k; s++) g.fillRect(Math.round(bx + ux * (6 - k) - uy * s * 0.9), Math.round(by + uy * (6 - k) * 0.8 + ux * s * 0.9), 1, 1);
   }
 
   resize(): void {
@@ -118,6 +147,8 @@ export class Scene {
     for (const h of room.heroes) {
       const [x, y] = lerp('h:' + h.id, h.x, h.y), up = (h.z ?? 0) * LIFT;
       items.push({ y, draw: () => drawHero(c, h, x - cx, y - up - cy, h.id === meId, room.time) });
+      if (h.id === meId && this.fanfare) items.push({ y: y + 0.5, draw: () => this.heldUp(c, x - cx, y - up - cy, room.time) });
+      if (h.id === meId && this.pointTo) items.push({ y: y + 0.5, draw: () => this.arrow(c, h, x - cx, y - up - cy, room.time) });
       // A Mage's blink image, flickering where they stood until it goes.
       if (h.decoyUntil > room.time) {
         const dx = OX + h.decoyX * PX, dy = OY + h.decoyY * PX, left = h.decoyUntil - room.time;

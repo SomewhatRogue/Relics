@@ -144,6 +144,10 @@ export const VARIANTS = {
     drop: { windup: 1.2, active: 0.12, recover: 1.0, dmg: 34, knock: 14, radius: 2.0, ahead: 1.0, unblockable: true } as EnemyAttackSpec,
     draw: { windup: 1.0, active: 0.1, recover: 0.6, dmg: 6, knock: 0, range: 8, arc: 8, unblockable: true } as EnemyAttackSpec,
     drawFrom: 3.2, drawEvery: 0.45, pullTo: 1.2, pullStun: 0.7,
+    /** The charge: a long striped run straight at you. It can't be blocked, and no blow stops it once it's
+     *  coming; get out of its line. Run into a wall or a tree and it stuns itself. */
+    charge: { windup: 1.15, active: 0.55, recover: 1.0, dmg: 30, knock: 14, range: 8, arc: 0, radius: 0.95, unblockable: true } as EnemyAttackSpec,
+    chargeFrom: 3.5, chargeChance: 0.3, chargeStun: 1.8,
   },
 };
 

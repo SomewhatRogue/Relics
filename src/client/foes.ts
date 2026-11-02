@@ -6,7 +6,7 @@ import { GUARD } from '../shared/tuning';
 import type { Enemy, EnemyAttack } from '../sim/types';
 import { blit, ease, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
 import { drawText } from './pixfont';
-import { SPRITES } from './sprites';
+import { SPRITES, type Sprite } from './sprites';
 import { OX, OY, PX } from './world';
 
 function cleaver(c: Ctx, x: number, y: number, a: number): void {
@@ -97,6 +97,25 @@ function bow(c: Ctx, e: Enemy, x: number, y: number, fa: number): void {
   if (pull) line(c.lit, sx, sy, fa, 0, 6, '#a08a6a');
 }
 
+/** A body cut in two at the waist, lying in its two pieces. */
+function halves(c: Ctx, s: Sprite, x: number, y: number, alpha: number): void {
+  const g = c.lit, half = Math.round(s.h / 2);
+  g.save();
+  g.globalAlpha = alpha;
+  g.translate(Math.round(x), Math.round(y - 4));
+  g.rotate(-Math.PI / 2);
+  g.drawImage(s.c, 0, half, s.w, s.h - half, -Math.round(s.w / 2), 0, s.w, s.h - half);
+  g.restore();
+  g.save();
+  g.globalAlpha = alpha;
+  g.translate(Math.round(x - half - 4), Math.round(y - 2));
+  g.rotate(-Math.PI / 2 - 0.35);
+  g.drawImage(s.c, 0, 0, s.w, half, -Math.round(s.w / 2), -half, s.w, half);
+  g.restore();
+  g.fillStyle = '#7a1010';
+  g.fillRect(Math.round(x - 3), Math.round(y - 4), 3, 2);
+}
+
 export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number): void {
   if (e.act === 'dead') {
     // Burst or shattered: nothing left but the stains. Otherwise the body, headless or burned.
@@ -105,7 +124,12 @@ export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number): void {
     const s = e.death === 'behead' ? (big ? SPRITES.butcherHeadless : SPRITES.scrapperHeadless) : e.death === 'burn' ? (big ? SPRITES.butcherBurnt : SPRITES.scrapperBurnt) : big ? SPRITES.butcherDown : SPRITES.scrapper;
     // A corpse on a javelin hangs where it was pinned until it fades, just before the respawn.
     if (e.corpse) return spin(c, s, x, y - 7, Math.atan2(e.fy, e.fx) + 0.2, Math.min(1, (e.actDur - e.actT) / 0.8));
-    spin(c, s, x, y - 4, -Math.PI / 2, Math.max(0, 1 - e.actT / e.actDur));
+    const fade = Math.max(0, 1 - e.actT / e.actDur);
+    // In two: the legs where it stood, the top half a little way off where it went over.
+    if (e.death === 'halve') return halves(c, s, x, y, fade);
+    spin(c, s, x, y - 4, -Math.PI / 2, fade);
+    // Cut down: the slash across the chest.
+    if (e.death === 'opened') (c.lit.globalAlpha = fade), line(c.lit, x - 2, y - 7, -0.5, 0, big ? 9 : 6, '#8a1010', 1), (c.lit.globalAlpha = 1);
     return;
   }
   const flash = c.now - e.hitAt < 0.09 ? 0.9 : 0;
@@ -159,6 +183,16 @@ export function drawTelegraph(c: Ctx, a: EnemyAttack, cx: number, cy: number, pa
       g.fillStyle = now ? '#ffffff' : fill;
       g.globalAlpha = on ? 0.85 * pulse : 0.35;
       g.fillRect(px, py, 1 + wide, 1 + wide);
+    }
+  } else if (a.kind === 'charge') {
+    // The Stoker's charge: a broad striped lane the length of its run, filling as it winds up. Get out of it.
+    const R = a.range * PX, ox = OX + a.ox * PX - cx, oy = OY + a.oy * PX - cy, nx = -a.dy, ny = a.dx, W = Math.round(a.radius * PX);
+    for (let d = 4; d <= R; d += 1) for (let w = -W; w <= W; w++) {
+      const edge = Math.abs(w) >= W - 1, on = d < R * prog;
+      if (!edge && (d + w) % 2) continue;
+      g.fillStyle = edge ? (Math.floor(d / 3) % 2 ? '#ffd040' : '#2a1408') : fill;
+      g.globalAlpha = (on ? 0.85 : 0.25) * (edge ? 1 : 0.6) * pulse;
+      g.fillRect(Math.round(ox + a.dx * d + nx * w), Math.round(oy + a.dy * d + ny * w), 1, 1);
     }
   } else if (a.kind === 'draw') {
     // The Stoker's rake: a striped line (can't be blocked) that fills as it winds up. Get off it.

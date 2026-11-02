@@ -17,7 +17,8 @@ import { RUMOURS } from './rumours';
 
 const RUIN = ['Held', 'Raided', 'Occupied', 'Razed', 'Blighted'];
 const p = (s: string) => `<p>${s}</p>`;
-const say = (who: string, s: string) => p(`<b>${who}:</b> "${line(s, who)}"`);
+// The quote marks type in with the words, so the end of the line never shows before it's said.
+const say = (who: string, s: string) => p(`<b>${who}:</b> ${line(`"${s}"`, who)}`);
 const itemLine = (i: Item) => `<b>${itemName(i)}</b>: ${i.traits.map((t) => `${TRAITS[t].name} (${TRAITS[t].text.toLowerCase()})`).join(', ')}`;
 
 export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): void {

@@ -312,3 +312,10 @@ body:not(.touch) #lesson.act { justify-content: flex-start; padding-top: 18vh; }
 
 /* A Mage has no guard: no block button. */
 body[data-guard="none"] .tb.block { display: none; }
+
+/* The relic found: a gold card, a slow shine. */
+#lesson.found-relic { background: radial-gradient(circle at 50% 40%, #ffd27a33, #0d0b10cc 70%); }
+#lesson.found-relic .card { border: 2px solid #ffd27a; box-shadow: 0 0 40px #ffd27a66, inset 0 0 24px #ffd27a22; animation: rise 0.5s ease-out; }
+#lesson.found-relic .found { color: #ffd27a; font-size: 12px; letter-spacing: 0.4em; }
+#lesson.found-relic .relic-name { color: #fff6e0; font-size: 24px; font-weight: 800; letter-spacing: 0.12em; text-shadow: 0 0 14px #ffb35a; }
+@keyframes rise { from { transform: translateY(20px) scale(0.92); opacity: 0; } to { transform: none; opacity: 1; } }

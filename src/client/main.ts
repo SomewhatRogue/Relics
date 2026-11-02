@@ -7,7 +7,7 @@ import { Panel } from './panels';
 import { openSpot, showResult } from './townui';
 import { Title } from './title';
 import { woodGoal } from '../sim/wood';
-import { LINES } from '../shared/wood';
+import { LINES, ROAD_OUT } from '../shared/wood';
 const WOOD_ROAD = LINES.road;
 const ORLA = ["Those are *Hew's* boots.", "Ah. Well. Church is up past the Lantern, and you'll want to see Hollis after, he'll have you working before your feet are dry."];
 let shownCap = '';
@@ -115,7 +115,8 @@ function hud(now: number): void {
   // The block button: a Mage has none; a Ranger or Rogue only taps it to parry.
   const guard = CLASS_GUARD[WEAPONS[me.weapon].cls];
   if (document.body.dataset.guard !== guard) (document.body.dataset.guard = guard), ($('.tb.block').textContent = guard === 'parry' ? 'PARRY' : 'BLOCK');
-  $('.kit').textContent = item ? item.traits.map((t) => TRAITS[t].name).join(' + ') + '  ' + KIT[me.weapon] : KIT[me.weapon];
+  const kit = KIT[me.weapon] + (guard === 'none' ? '  NO GUARD' : guard === 'parry' ? '  PARRY, NO BLOCK' : '');
+  $('.kit').textContent = item ? item.traits.map((t) => TRAITS[t].name).join(' + ') + '  ' + kit : kit;
   card.update(room, me, !input.touch);
   pack.update(me);
   lesson.update();
@@ -211,7 +212,9 @@ function frame(t: number): void {
   const live = input.read();
   if (panel.open || title.open) still ??= { ...live, mx: 0, my: 0, attack: false, block: false };
   else still = null;
-  for (const ev of game.step(dt, still ?? live)) {
+  // In town, someone talking to you stops the world till you're done (the jobs never stop for anyone).
+  const paused = panel.open && game.mode === 'town';
+  if (!paused) for (const ev of game.step(dt, still ?? live)) {
     fx.on(ev);
     sounds.event(ev, game.room, t / 1000);
     if (ev.k === 'parry') parries++;
@@ -221,9 +224,11 @@ function frame(t: number): void {
   if (game.mode === 'town' && !game.outside) void link.refresh();
   if (game.result && !panel.open) showResult(game, panel);
   // Out of the wood: Orla at the gate.
-  if (game.greeting === 'orla' && !panel.open) (game.greeting = null), panel.show('ORLA OF THE WATCH', `<p class="dim">${line(WOOD_ROAD)}</p><p><b>Orla:</b> "${line(ORLA[0], 'ORLA')}"</p><p>She looks at your feet a long while.</p><p><b>Orla:</b> "${line(ORLA[1], 'ORLA')}"</p>`, [{ label: 'INTO WICKHOLD', primary: true, act: () => panel.hide() }], true);
+  if (game.greeting === 'orla' && !panel.open) (game.greeting = null), panel.show('ORLA OF THE WATCH', `<p class="dim">${line(WOOD_ROAD)}</p><p><b>Orla:</b> ${line(`"${ORLA[0]}"`, 'ORLA')}</p><p>She looks at your feet a long while.</p><p><b>Orla:</b> ${line(`"${ORLA[1]}"`, 'ORLA')}</p>`, [{ label: 'INTO WICKHOLD', primary: true, act: () => panel.hide() }], true);
   fx.update(dt);
   scene.focus = game.cutFocus();
+  scene.fanfare = game.wood?.hold?.kind === 'relic';
+  scene.pointTo = game.wood && game.wood.stage === 5 && !game.wood.hold ? { x: ROAD_OUT.x + 1, y: ROAD_OUT.y + ROAD_OUT.h / 2 } : null;
   scene.render(game.room, ME, fx, t / 1000, dt);
   hud(t / 1000);
   requestAnimationFrame(frame);

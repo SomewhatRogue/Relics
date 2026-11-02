@@ -38,6 +38,20 @@ export class Gore {
       }
       fx.say(x, y - neck - 22, 'BEHEADED', '#ff6a5a');
       fx.shake = Math.max(fx.shake, 4);
+    } else if (ev.how === 'halve') {
+      // In two at the waist: the top half goes over, and the cut empties itself onto the floor.
+      const waist = neck * 0.5;
+      for (let i = 0; i < 40; i++) this.gibs.push({ x: x + (Math.random() - 0.5) * 4, y, z: waist, vx: (Math.random() - 0.5) * 50 + dx * 30, vy: (Math.random() - 0.5) * 20, vz: 20 + Math.random() * 70, col: BLOOD[i % 3], size: i % 5 ? 1 : 2, head: false, big: false, bounced: true });
+      this.fling(x, y, waist, 6, ['#6a7a3a', '#4a5a2a'], 50, 60, 1, dx, dy);
+      for (let i = 0; i < 26; i++) fx.decal(x + dx * i * 0.5 + (Math.random() - 0.5) * 6, y + dy * i * 0.3 + (Math.random() - 0.5) * 3, BLOOD[i % 3]);
+      fx.say(x, y - neck - 22, 'CUT IN TWO', '#ff6a5a');
+      fx.shake = Math.max(fx.shake, 5);
+    } else if (ev.how === 'opened') {
+      // Cut down: a slash across the chest, a spray along the swing, and down.
+      for (let i = 0; i < 22; i++) this.gibs.push({ x, y, z: neck * 0.7, vx: dx * (40 + Math.random() * 60) + (Math.random() - 0.5) * 20, vy: dy * 30 + (Math.random() - 0.5) * 14, vz: 30 + Math.random() * 50, col: BLOOD[i % 3], size: 1, head: false, big: false, bounced: true });
+      fx.burst(x, y - neck * 0.7, 10, BLOOD, 70, false, 180, true);
+      fx.say(x, y - neck - 22, 'CUT DOWN', '#ff6a5a');
+      fx.shake = Math.max(fx.shake, 3);
     } else if (ev.how === 'burst') {
       this.fling(x, y, neck * 0.6, big ? 22 : 14, [...SKIN, ...BLOOD], big ? 90 : 75, 110, 2, dx, dy);
       this.fling(x, y, neck * 0.6, 5, [BONE], 70, 120, 1, dx, dy);

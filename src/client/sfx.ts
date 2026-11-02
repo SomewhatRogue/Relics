@@ -162,6 +162,31 @@ export const sfx = {
     tone('sine', 180, 50, 0.8, 0.2);
     burst('lowpass', 1800, 200, 0.7, 0.6, 0.15);
   },
+  /** The cutscene: the ground going under the cordwood, the bite, a body landing. */
+  /** A relic found: a rising run of notes, then a held, shimmering chord. */
+  fanfare() {
+    if (!ready()) return;
+    const run = [392, 494, 587, 740, 880];
+    run.forEach((f, i) => tone('triangle', f, f, 0.22, 0.16, i * 0.11));
+    for (const f of [587, 740, 880, 1175]) tone('triangle', f, f * 1.002, 0.14, 1.6, run.length * 0.11);
+    for (let i = 0; i < 8; i++) tone('sine', 2349, 2349, 0.04, 0.12, run.length * 0.11 + i * 0.12);
+  },
+  rumble() {
+    if (!ready()) return;
+    burst('lowpass', 220, 60, 0.8, 0.7, 1.4);
+    tone('sine', 48, 36, 0.6, 1.4);
+  },
+  bite() {
+    if (!ready()) return;
+    burst('bandpass', 1800, 500, 2, 0.9, 0.12);
+    burst('lowpass', 900, 150, 0.8, 0.8, 0.3, 0.04);
+    tone('square', 140, 60, 0.25, 0.12, 0.02);
+  },
+  thud() {
+    if (!ready()) return;
+    tone('sine', 90, 40, 0.8, 0.3);
+    burst('lowpass', 500, 90, 0.7, 0.6, 0.25);
+  },
   boom() {
     if (!ready()) return;
     tone('sine', 70, 30, 1, 0.5);
@@ -228,7 +253,7 @@ export const sfx = {
     tone('sawtooth', 120, 35, 0.4, 0.7);
     burst('lowpass', 1200, 100, 0.7, 0.8, 0.5);
     // A blade through the neck; a wet burst.
-    if (how === 'behead') burst('highpass', 4000, 1500, 1, 0.6, 0.1), burst('bandpass', 400, 150, 1, 0.7, 0.4);
+    if (how === 'behead' || how === 'halve' || how === 'opened') burst('highpass', 4000, 1500, 1, 0.6, 0.1), burst('bandpass', 400, 150, 1, how === 'opened' ? 0.5 : 0.7, 0.4);
     if (how === 'burst') burst('lowpass', 600, 60, 0.6, 1, 0.5), tone('sine', 70, 30, 0.8, 0.3);
   },
   grab() {

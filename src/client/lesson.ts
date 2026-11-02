@@ -66,6 +66,13 @@ export class LessonView {
     const h = hold!, k = KEY[h.move ?? 'attack'][this.touch ? 1 : 0];
     this.el.className = h.kind === 'talk' ? 'card talk' : h.kind;
     const hint = `<p class="go-hint">${this.touch ? 'TAP TO GO ON' : 'CLICK OR PRESS ENTER TO GO ON'}</p>`;
+    if (h.kind === 'relic') {
+      // The relic: found, named, what it does, and its button.
+      this.el.className = 'card found-relic';
+      this.el.innerHTML = `<div class="card"><div class="found">FOUND</div><div class="relic-name">RELIC JAVELIN</div><p class="line"></p>` +
+        `<div class="move"><span>RELIC</span><kbd>${this.touch ? 'RELIC' : 'R'}</kbd></div><p class="how">${h.how ?? ''}</p>${hint}</div>`;
+      return speak(this.el.querySelector('.line')!, h.text, '');
+    }
     if (h.kind === 'talk') {
       this.el.innerHTML = `<div class="card"><b class="who">${h.who}</b><p class="line"></p>${hint}</div>`;
       return speak(this.el.querySelector('.line')!, h.text, h.who);

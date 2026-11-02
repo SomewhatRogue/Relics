@@ -51,10 +51,32 @@ SPRITES.child = makeSprite(9, 11, [
 ]);
 
 /** Someone standing about, breathing; a gold mark overhead says you can talk to them, their name when you're close. */
+/** Hew after the bite: still held up without his head, or thrown down on his side. */
+function drawDead(c: Ctx, s: Sprite, x: number, y: number, n: Npc): void {
+  const neck = 7, both = [c.lit, c.glow];
+  for (const g of both) {
+    g.save();
+    g.translate(Math.round(x), Math.round(y - (n.lift ?? 0)));
+    if (n.pose === 'body') g.rotate(-Math.PI / 2), g.translate(0, 3);
+    g.beginPath();
+    g.rect(-20, -s.h + neck, 40, s.h);
+    g.clip();
+  }
+  blit(c, s, 0, 0, false);
+  for (const g of both) g.restore();
+  // Where the head was.
+  c.lit.fillStyle = '#7a1010';
+  if (n.pose === 'body') c.lit.fillRect(Math.round(x - s.h + neck - 2), Math.round(y - 3), 3, 3), c.lit.fillRect(Math.round(x - s.h + neck - 6), Math.round(y - 1), 6, 2);
+  else c.lit.fillRect(Math.round(x - 2), Math.round(y - (n.lift ?? 0) - s.h + neck - 1), 4, 2);
+}
+
 export function drawNpc(c: Ctx, n: Npc, x: number, y: number, near: boolean, fx = 0, walking = false): void {
-  const s = SPRITES[n.look] ?? SPRITES.villager, bob = Math.floor(c.now * (walking ? 7 : 1.5) + n.x) % 2 ? -1 : 0;
+  const s = SPRITES[n.look] ?? SPRITES.villager;
+  walking ||= !!n.walking;
+  const bob = n.pose ? 0 : Math.floor(c.now * (walking ? 7 : 1.5) + n.x) % 2 ? -1 : 0;
   shadow(c, x, y, 5);
-  blit(c, s, x, y + bob, walking ? fx < 0 : Math.floor(c.now * 0.25 + n.y) % 2 === 0);
+  if (n.pose) return drawDead(c, s, x, y, n);
+  blit(c, s, x, y - (n.lift ?? 0) + bob, walking ? fx < 0 : Math.floor(c.now * 0.25 + n.y) % 2 === 0);
   // A guard carries a spear upright.
   if (n.look === 'guard') (c.lit.fillStyle = '#6b4a2b'), c.lit.fillRect(Math.round(x + (fx < 0 && walking ? -6 : 5)), Math.round(y - 22 + bob), 1, 20), (c.lit.fillStyle = '#cfd6dc'), c.lit.fillRect(Math.round(x + (fx < 0 && walking ? -6 : 5)), Math.round(y - 24 + bob), 1, 3);
   const top = Math.round(y - s.h - 4 + (Math.floor(c.now * 3) % 2));

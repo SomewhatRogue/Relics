@@ -77,7 +77,7 @@ describe('grab, slam, throw', () => {
 });
 
 describe('deaths', () => {
-  it('a blade takes the head; a mace bursts it', () => {
+  it('a blade cuts them down, in two, or takes the head; a mace bursts it', () => {
     const die = (weapon: 'sword' | 'mace') => {
       const { room, h, t } = setup();
       h.weapon = weapon;
@@ -85,7 +85,7 @@ describe('deaths', () => {
       room.setIntent('me', intent({ attackSeq: 1, ay: -1 }));
       return run(room, 0.4).find((e) => e.k === 'death');
     };
-    expect(die('sword')).toMatchObject({ how: 'behead' });
+    expect(['behead', 'halve', 'opened']).toContain(die('sword')!.how);
     expect(die('mace')).toMatchObject({ how: 'burst' });
   });
 

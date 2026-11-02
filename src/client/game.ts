@@ -131,9 +131,11 @@ export class Game {
   cutFocus(): { x: number; y: number } | null {
     const w = this.wood;
     if (!w || w.cut < 0) return null;
-    const s = this.room.enemies.find((e) => e.id === w.stoker), n = this.room.map.npcs?.find((x) => x.talk === 'hew'), t = s ?? n;
-    const h = this.hero;
-    return t ? { x: (h.x + t.x) / 2, y: (h.y + t.y) / 2 } : { x: h.x, y: h.y };
+    // The camera stays on Hew, then on Hew and the thing that has him.
+    const s = this.room.enemies.find((e) => e.id === w.stoker), n = this.room.map.npcs?.find((x) => x.talk === 'hew');
+    if (s && n) return { x: (s.x + n.x) / 2, y: (s.y + n.y) / 2 - 0.4 };
+    const t = s ?? n ?? this.hero;
+    return { x: t.x, y: t.y - 0.4 };
   }
 
   /** Save the hero now (after a change a panel made). */
@@ -352,6 +354,7 @@ export class Game {
   near(): Near | null {
     const h = this.hero, map = this.room.map, all: (Near & { x: number; y: number })[] = [];
     for (const n of map.npcs ?? []) {
+      if (n.pose) continue;
       const at = npcAt(n, this.room.time);
       all.push({ x: at.x, y: at.y, label: n.name, talk: n.talk as SpotId, arg: n.arg });
     }

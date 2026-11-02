@@ -49,9 +49,9 @@ export interface WoodState {
 }
 /** What the world is held for, and what lets it go on. */
 export type Move = 'move' | Teach;
-export interface Hold { kind: 'card' | 'act' | 'praise' | 'talk'; who: string; text: string; how?: string; move?: Move; need: 'continue' | 'move' | 'attack' | 'roll' | 'block' | 'time'; t: number; until: number }
+export interface Hold { kind: 'card' | 'act' | 'praise' | 'talk' | 'relic'; who: string; text: string; how?: string; move?: Move; need: 'continue' | 'move' | 'attack' | 'roll' | 'block' | 'time'; t: number; until: number }
 
-const HERO_ID = 'me', CUT = { stoker: 2, round: 2.4, draw: 3.6, drag: 4.4, last: 4.6, behind: 5.6, blow: 6.4, line: 7.6, end: 9.6 };
+const HERO_ID = 'me';
 const hew = (room: ArenaRoom) => room.map.npcs?.find((n) => n.talk === 'hew');
 /** A caption, up long enough to read (about a third of a second a word, never less than asked). */
 const say = (w: WoodState, room: ArenaRoom, who: string, text: string, s = 5) => (w.caption = { who, text, until: room.time + Math.max(s, 1.2 + text.split(' ').length * 0.32) });
@@ -153,37 +153,73 @@ function openGate(room: ArenaRoom, i: number): void {
   room.map.blocks = room.map.blocks.filter((b) => b.x !== g.x || b.y !== g.y || b.kind !== g.kind);
 }
 
+/** Hew's death, beat by beat (seconds): he walks round the hut; the ground shakes; the Stoker rises
+ *  behind the cordwood, looks, and runs him down; lifts him off his feet; bites; throws the body; and
+ *  bellows at you. Hew and the Stoker are puppeted here (the Stoker's own mind is held still). */
+export const CUT = { walk: 0.4, rumble: 2.6, rise: 3.4, run: 4.3, grab: 5.0, last: 5.3, bite: 7.9, toss: 8.5, land: 9.2, bellow: 9.8, line: 10.4, end: 12.8 };
+const BACK = { x: 55.5, y: 7.4 };
+
 function stepCut(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: number): void {
   const t0 = w.cut, t = (w.cut += dt), at = (s: number) => t0 < s && t >= s, n = hew(room);
-  if (at(CUT.stoker)) {
-    const e = spawn(room, STOKER);
-    w.stoker = e.id;
-    e.fx = -1;
-    e.fy = 0;
-    ev.push({ k: 'spotted', x: e.x, y: e.y });
+  const ease = (k: number) => k * k * (3 - 2 * k), span = (a: number, b: number) => Math.max(0, Math.min(1, (t - a) / (b - a)));
+  let s = room.enemies.find((e) => e.id === w.stoker);
+  // (If he's somehow behind, he's at his door when it starts.)
+  if (n && t0 === 0 && Math.hypot(n.x - 52, n.y - 10) > 4) (n.x = 52), (n.y = 10);
+  // He goes round the side of the hut to the cordwood, at an old man's pace.
+  if (at(CUT.walk)) say(w, room, 'HEW', LINES.round, 2.2);
+  if (n && t < CUT.rise) {
+    const dx = BACK.x - n.x, dy = BACK.y - n.y, d = Math.hypot(dx, dy);
+    n.walking = d > 0.05;
+    if (d > 0.05) (n.x += (dx / d) * Math.min(d, 1.6 * dt)), (n.y += (dy / d) * Math.min(d, 1.6 * dt));
   }
-  if (at(CUT.round) && n) (n.x = 55), (n.y = 8.5), say(w, room, 'HEW', LINES.round, 2);
-  const s = room.enemies.find((e) => e.id === w.stoker);
-  if (at(CUT.draw) && s) ev.push({ k: 'windup', x: s.x, y: s.y, kind: 'draw' });
-  // Hooked and dragged across the yard to it.
-  if (n && t >= CUT.drag && t < CUT.behind) {
-    const k = (t - CUT.drag) / (CUT.behind - CUT.drag);
-    n.x = 55 + (58.4 - 55) * k;
-    n.y = 8.5 + (5.6 - 8.5) * k;
+  if (at(CUT.rumble)) ev.push({ k: 'rumble', x: STOKER.x, y: STOKER.y });
+  if (at(CUT.rise)) {
+    s = spawn(room, STOKER);
+    w.stoker = s.id;
+    Object.assign(s, { fx: -1, fy: 0.6 });
+    if (n) n.walking = false;
+    ev.push({ k: 'spotted', x: s.x, y: s.y });
   }
-  if (at(CUT.last)) say(w, room, 'HEW', LINES.last, 2.4);
-  if (at(CUT.blow) && n) {
-    ev.push({ k: 'impact', x: n.x, y: n.y, kind: 'slam' });
-    room.map.npcs = room.map.npcs?.filter((x) => x !== n);
+  if (s) s.hitstop = 1;
+  // It looks at him a breath, then runs him down.
+  if (s && n && t >= CUT.run && t < CUT.grab) {
+    const k = ease(span(CUT.run, CUT.grab)), tx = n.x + 0.9, ty = n.y - 0.4;
+    s.x = STOKER.x + (tx - STOKER.x) * k;
+    s.y = STOKER.y + (ty - STOKER.y) * k;
+    s.moving = true;
+    const l = Math.hypot(n.x - s.x, n.y - s.y) || 1;
+    (s.fx = (n.x - s.x) / l), (s.fy = (n.y - s.y) / l);
+  }
+  if (at(CUT.grab) && s) (s.moving = false), ev.push({ k: 'impact', x: s.x, y: s.y, kind: 'cleave' });
+  // Off his feet, held up at its mouth; he gets his last words out.
+  if (n && t >= CUT.grab && t < CUT.toss) n.lift = 22 * ease(span(CUT.grab, CUT.grab + 0.5)) + (t > CUT.grab + 0.5 && t < CUT.bite ? Math.sin(t * 30) * 0.8 : 0);
+  if (at(CUT.last)) say(w, room, 'HEW', LINES.last, 2);
+  if (at(CUT.bite) && n) {
+    n.pose = 'headless';
+    ev.push({ k: 'bite', x: n.x, y: n.y });
     w.hewAlive = false;
   }
-  if (at(CUT.line)) say(w, room, 'THE STOKER', LINES.stoker, 3);
+  // Thrown up onto its own cordwood pile, like a log: kept, not wasted.
+  if (n && t >= CUT.toss && t < CUT.land) {
+    const k = span(CUT.toss, CUT.land), from = { x: (s?.x ?? 56) - 0.9, y: (s?.y ?? 7) + 0.4 }, to = { x: 59.3, y: 6.7 };
+    n.x = from.x + (to.x - from.x) * k;
+    n.y = from.y + (to.y - from.y) * k;
+    n.lift = 22 * (1 - k) + 40 * Math.sin(Math.PI * k) + 6 * k;
+  }
+  if (at(CUT.land) && n) (n.lift = 6), (n.pose = 'body'), ev.push({ k: 'thud', x: n.x, y: n.y });
+  // Then it turns on you, and bellows.
+  if (s && t >= CUT.land) {
+    const h = room.heroes.find((x) => x.id === HERO_ID), l = h ? Math.hypot(h.x - s.x, h.y - s.y) || 1 : 1;
+    if (h) (s.fx = (h.x - s.x) / l), (s.fy = (h.y - s.y) / l);
+  }
+  if (at(CUT.bellow) && s) ev.push({ k: 'bellow', x: s.x, y: s.y });
+  if (at(CUT.line)) say(w, room, 'THE STOKER', LINES.stoker, 2.2);
   if (t >= CUT.end) {
-    if (n) room.map.npcs = room.map.npcs?.filter((x) => x !== n);
+    if (n) Object.assign(n, { pose: 'body', lift: 6, walking: false, name: '', talk: 'hewdead' }, n.pose === 'body' ? {} : { x: 59.3, y: 6.7 });
     w.hewAlive = false;
     const e = room.enemies.find((x) => x.id === w.stoker) ?? spawn(room, STOKER);
     w.stoker = e.id;
-    Object.assign(e, { alert: true, cooldown: 1.2 });
+    Object.assign(e, { alert: true, cooldown: 1.2, hitstop: 0, moving: false });
     w.cut = -1;
   }
 }
@@ -236,7 +272,8 @@ export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: nu
     w.ids = lesson.foes.map((f) => spawn(room, f).id);
     const move: Teach = lesson.card ?? (['attack', 'roll', 'block', 'parry'] as const)[w.stage];
     const said = move === 'backstab' ? LINES.teach.backstab : move === 'slip' ? LINES.teach.slip : move === 'heavy' ? (w.cls === 'MAGE' ? LINES.teach.charge : LINES.teach.heavy) : [LINES.attack, LINES.dodge, LINES.block, LINES.parry][w.stage];
-    w.hold = card('HEW', said, move, 'continue', LINES.how[move as keyof typeof LINES.how]);
+    const light = lessonsFor(w.cls)[3].count === 'slip';
+    w.hold = card('HEW', said, move, 'continue', move === 'roll' && light ? LINES.how.rollLight : LINES.how[move as keyof typeof LINES.how]);
     return;
   }
   if (!w.entered) return;
@@ -258,7 +295,9 @@ export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: nu
     if (s && !w.helped && s.hp < s.maxHp / 2) (w.helped = true), w.ids.push(...STOKER_HELP.map((f) => spawn(room, f).id));
     if (s && isDead(s) && !w.relic) {
       w.relic = true;
-      say(w, room, '', LINES.relic, 8);
+      // Everything stops: you hold it up, the light comes, and the card says what it is.
+      w.hold = { kind: 'relic', who: '', text: LINES.relic, how: LINES.how.relic, move: 'skill', need: 'continue', t: 0, until: 0 };
+      ev.push({ k: 'fanfare', x: h.x, y: h.y });
       openGate(room, 4);
       Object.assign(w, { stage: 5, entered: true });
     }
@@ -285,7 +324,8 @@ export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: nu
 
 /** What to show over the field: the lesson, the control, how far along. */
 export function woodGoal(w: WoodState, touch: boolean): { title: string; text: string } {
-  if (w.stage === 5) return { title: 'THE ROAD', text: 'West, to Wickhold' };
+  if (w.stage === 5) return { title: 'THE ROAD', text: 'Follow the arrow west, to Wickhold' };
+  if (w.stage === 4 && w.entered && w.cut < 0) return { title: 'KILL THE STOKER', text: `Roll out of anything striped. Your skill: ${touch ? 'tap SKILL' : 'E'}` };
   const l = lessonOf(w), key: Record<string, string> = touch
     ? { ATTACK: 'TAP ATTACK', DODGE: 'TAP ROLL', BLOCK: 'HOLD BLOCK', PARRY: 'TAP BLOCK ON THE WHITE FLASH', SKILL: 'TAP SKILL', BACKSTAB: 'GET BEHIND, TAP ATTACK', 'FULL DRAW': 'HOLD ATTACK, LET GO', 'FULL CHARGE': 'HOLD ATTACK, LET GO', 'LAST SECOND': 'TAP ROLL AS IT LANDS' }
     : { ATTACK: 'CLICK', DODGE: 'SPACE', BLOCK: 'HOLD RIGHT CLICK', PARRY: 'TAP RIGHT CLICK ON THE WHITE FLASH', SKILL: 'E', BACKSTAB: 'GET BEHIND, CLICK', 'FULL DRAW': 'HOLD LEFT CLICK, LET GO', 'FULL CHARGE': 'HOLD LEFT CLICK, LET GO', 'LAST SECOND': 'SPACE AS IT LANDS' };

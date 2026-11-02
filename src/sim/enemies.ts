@@ -6,7 +6,7 @@ import { collide, currentMap, inArea } from '../shared/arena';
 import { DECOY, ALERT, ARCHER, BUTCHER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, type EnemyAttackSpec, type EnemySpec, VARIANTS } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { slide } from './bodies';
-import { hitHero } from './combat';
+import { attackCovers, hitHero } from './combat';
 import { frozen, isDead, kill, snared } from './damage';
 import { shatter } from './elements';
 import { has } from './traits';
@@ -63,11 +63,28 @@ function begin(e: Enemy, kind: EnemyAttack['kind'], s: EnemyAttackSpec, target: 
 function runAttack(e: Enemy, heroes: Hero[], now: number, dt: number, ev: FightEvent[]): boolean {
   const a = e.attack!;
   a.t += dt;
+  if (a.kind === 'charge') return runCharge(e, a, heroes, now, ev);
   if (!a.done && a.t >= a.windup) {
     a.done = true;
     ev.push({ k: 'impact', x: a.kind === 'slam' ? a.cx : e.x, y: a.kind === 'slam' ? a.cy : e.y, kind: a.kind });
     // Blows land on your own level; arrows reach up and down.
     for (const h of heroes) if (a.kind === 'shot' || (h.z ?? 0) === (e.z ?? 0)) hitHero(e, a, h, now, ev);
+    if (e.attack === null) return true;
+  }
+  return a.t >= a.windup + a.active + a.recover;
+}
+
+/** The charge: it runs the line it showed you, through anyone on it (once each), and stops at the end. */
+function runCharge(e: Enemy, a: EnemyAttack, heroes: Hero[], now: number, ev: FightEvent[]): boolean {
+  const going = a.t >= a.windup && a.t < a.windup + a.active, speed = a.range / a.active;
+  if (going && !a.done) (a.done = true), ev.push({ k: 'impact', x: e.x, y: e.y, kind: 'charge' });
+  e.kvx = going ? a.dx * speed : 0;
+  e.kvy = going ? a.dy * speed : 0;
+  e.moving = going;
+  if (going) {
+    a.cx = e.x + a.dx * 0.4;
+    a.cy = e.y + a.dy * 0.4;
+    for (const h of heroes) if (!(a.hit ??= []).includes(h.id) && (h.z ?? 0) === (e.z ?? 0) && attackCovers(a, h)) (a.hit.push(h.id), hitHero(e, a, h, now, ev));
     if (e.attack === null) return true;
   }
   return a.t >= a.windup + a.active + a.recover;
@@ -101,6 +118,12 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
       ev.push({ k: 'wallhit', x: e.x, y: e.y });
       ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy: n > KNOCK.wallDmg, on: 'enemy' });
       if (e.hp <= 0) return kill(e, ev, 'burst', e.kvx, e.kvy);
+      // Charged into a wall or a tree: it stuns itself.
+      if (e.attack?.kind === 'charge' && e.attack.t >= e.attack.windup) {
+        Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: VARIANTS.stoker.chargeStun, kvx: 0, kvy: 0 });
+        ev.push({ k: 'stunned', x: e.x, y: e.y });
+        return;
+      }
       // Thrown frozen into a wall: it breaks.
       if (ice) shatter(e, now, ev);
       if (isDead(e)) return;
@@ -153,6 +176,7 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   }
   // The wood's goblins: each fights the way its lesson needs.
   const v = e.variant, reach = v === 'lunger' ? VARIANTS.lunger.reach : v === 'heavy' ? VARIANTS.heavy.reach : spec.reach;
+  if (v === 'stoker' && level && e.cooldown <= 0 && facing > 0.85 && d > VARIANTS.stoker.chargeFrom && d < VARIANTS.stoker.charge.range! - 1 && rng.next() < VARIANTS.stoker.chargeChance) return begin(e, 'charge', VARIANTS.stoker.charge, t, ev);
   if (v === 'stoker' && level && e.cooldown <= 0 && facing > 0.8 && d > VARIANTS.stoker.drawFrom && d < VARIANTS.stoker.draw.range! - 0.5 && rng.next() < VARIANTS.stoker.drawEvery) return begin(e, 'draw', VARIANTS.stoker.draw, t, ev);
   if (level && d <= reach && e.cooldown <= 0 && facing > 0.75) {
     if (v === 'looter') return begin(e, 'stab', VARIANTS.looter.stab, t, ev);

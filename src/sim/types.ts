@@ -92,6 +92,8 @@ export interface Hero extends Body {
   decoyX: number;
   decoyY: number;
   decoyUntil: number;
+  /** The block press we last told this hero their class can't hold a block on (told once a press). */
+  toldAt: number;
   counterUntil: number;
   attackQueuedAt: number;
   rollQueuedAt: number;
@@ -163,7 +165,7 @@ export interface Hero extends Body {
   seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number; augment: number; cls: number; take: number; grab: number; gear: number; potion: number; open: number };
 }
 
-export type AttackKind = 'cleave' | 'slam' | 'swing' | 'stab' | 'shot' | 'draw';
+export type AttackKind = 'cleave' | 'slam' | 'swing' | 'stab' | 'shot' | 'draw' | 'charge';
 
 export interface EnemyAttack {
   kind: AttackKind;
@@ -186,6 +188,8 @@ export interface EnemyAttack {
   cy: number;
   radius: number;
   done: boolean;
+  /** A charge: who it has already run through. */
+  hit?: string[];
   /** Too heavy to block: a guard that meets it breaks (parry it instead). */
   crush?: boolean;
 }
@@ -240,7 +244,8 @@ export interface Enemy extends Body {
 }
 
 /** How a goblin died: fell, lost its head, burst apart, burned, or shattered. */
-export type DeathKind = '' | 'fall' | 'behead' | 'burst' | 'burn' | 'shatter';
+/** `halve`: cut in two at the waist; `opened`: cut down with a slash across the chest. */
+export type DeathKind = '' | 'fall' | 'behead' | 'halve' | 'opened' | 'burst' | 'burn' | 'shatter';
 
 /** A barrel, crate, table or broken piece: a body that can be smashed, pushed, lifted and thrown. */
 export interface Prop extends Body {
@@ -292,6 +297,10 @@ export type FightEvent =
   | { k: 'death'; x: number; y: number; how: DeathKind; dx: number; dy: number; kind: EnemyKind }
   | { k: 'block' | 'parry' | 'guardbreak' | 'dodge' | 'slip' | 'down' | 'roll' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number }
   | { k: 'windup' | 'impact'; x: number; y: number; kind: AttackKind }
+  /** The prologue's cutscene: the ground shaking, the bite, a body landing, the Stoker's bellow. */
+  | { k: 'rumble' | 'bite' | 'thud' | 'bellow' | 'fanfare'; x: number; y: number }
+  /** A Ranger or Rogue holding block (it does nothing), or a Mage pressing it at all. */
+  | { k: 'noblock' | 'noguard'; x: number; y: number }
   | { k: 'weapon'; x: number; y: number; name: string }
   | { k: 'throw' | 'pinned' | 'javwall' | 'javstick' | 'hookfire' | 'latch' | 'yank' | 'land'; x: number; y: number; dx: number; dy: number }
   | { k: 'relic' | 'loot'; x: number; y: number; name: string }

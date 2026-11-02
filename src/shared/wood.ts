@@ -191,9 +191,12 @@ export const LINES = {
     block: 'Hold your guard while the red fills. Each block costs breath (the yellow bar).',
     parry: 'Tap your guard the moment the red flashes white. It staggers them, and your next blow lands hard.',
     skill: "Use your skill. Once it's spent, it takes a while to recharge.",
+    relic: 'Throw it with your relic button. A small goblin is carried off and pinned to the nearest wall. It comes back to your hand after a few seconds.',
     backstab: 'Hit a goblin from behind and the blow lands far harder.',
     heavy: 'Hold attack until fully drawn or charged, then let go. A full shot hits much harder.',
-    slip: 'Roll just as a blow lands to pass through it. That staggers whoever struck, unless it was an archer.',
+    slip: "You can't hold a block. Roll just as a blow lands to pass through it. That staggers whoever struck, unless it was an arrow.",
+    /** The dodge lesson's line for a class that can't hold a block. */
+    rollLight: "You can't hold a block, so roll out of any red before it lands. Nobody can block red with a striped edge.",
   },
   /** The freeze-frame prompts, the first times a lesson's blow comes. */
   now: { roll: 'NOW: ROLL OUT', block: 'NOW: GUARD UP', parry: 'NOW: TAP GUARD', slip: 'NOW: ROLL THROUGH', attack: 'HIT IT' },

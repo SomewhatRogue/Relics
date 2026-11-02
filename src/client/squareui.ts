@@ -21,7 +21,8 @@ let link: WorldLink | null = null;
 export const setLink = (l: WorldLink) => (link = l);
 
 const p = (s: string) => `<p>${s}</p>`;
-const say = (who: string, s: string) => p(`<b>${who}:</b> "${line(s, who)}"`);
+// The quote marks type in with the words, so the end of the line never shows before it's said.
+const say = (who: string, s: string) => p(`<b>${who}:</b> ${line(`"${s}"`, who)}`);
 const bar = (n: number, of: number) => `<span class="meter"><i style="width:${Math.min(100, (100 * n) / of)}%"></i></span>`;
 const FACES = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);

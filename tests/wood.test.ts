@@ -165,7 +165,7 @@ describe('the prologue wood', () => {
     enter(g, 4);
     expect(w().cut).toBeGreaterThanOrEqual(0);
     expect(g.taught()).toEqual([]);
-    for (let i = 0; i < 220 && w().cut >= 0; i++) g.step(0.05, NO_INTENT);
+    for (let i = 0; i < 400 && w().cut >= 0; i++) g.step(0.05, NO_INTENT);
     expect(w().hewAlive).toBe(false);
     expect(g.room.map.npcs?.some((n) => n.talk === 'hew')).toBe(false);
     const s = g.room.enemies.find((e) => e.name === 'THE STOKER')!;
@@ -174,6 +174,11 @@ describe('the prologue wood', () => {
     g.step(0.05, NO_INTENT);
     expect(w().relic).toBe(true);
     expect(g.hero.relics).toEqual(['lodestone', 'javelin']);
+    // The find stops everything until you've seen it.
+    expect(w().hold?.kind).toBe('relic');
+    g.continueHold();
+    g.step(0.05, NO_INTENT);
+    expect(w().hold).toBeNull();
     Object.assign(g.hero, { x: 1.6, y: 4 });
     g.step(0.05, NO_INTENT);
     expect(g.mode).toBe('town');

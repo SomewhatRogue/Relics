@@ -83,9 +83,42 @@ export class Fx {
           this.shake = Math.max(this.shake, 6);
           this.flashes.push({ x, y: y - 4, r: 60, i: 0.6, c: [1, 0.6, 0.35], life: 0.12, max: 0.12 });
         } else if (ev.kind === 'cleave') this.shake = Math.max(this.shake, 1.5);
+        else if (ev.kind === 'charge') (this.shake = Math.max(this.shake, 4)), this.debris(x, y - 2, 10);
         break;
       case 'stunned':
         this.say(x, y - 34, 'STUNNED', '#ffe070');
+        break;
+      // The prologue's cutscene: the ground going, the bite, the body landing, the bellow.
+      case 'noblock':
+        this.say(x, y - 30, "CAN'T BLOCK: TAP TO PARRY", '#c8c4d0');
+        break;
+      case 'noguard':
+        this.say(x, y - 30, 'NO GUARD: ROLL', '#c8c4d0');
+        break;
+      case 'fanfare':
+        this.flashes.push({ x, y: y - 24, r: 140, i: 1.1, c: [1, 0.85, 0.5], life: 1.2, max: 1.2 });
+        for (let i = 0; i < 3; i++) this.rings.push({ x, y: y - 24, life: 0.6 + i * 0.3, max: 0.6 + i * 0.3, col: '#ffe9a8' });
+        this.burst(x, y - 26, 30, ['#fff6d0', '#ffd27a', '#ffb35a'], 70, true);
+        break;
+      case 'rumble':
+        this.shake = Math.max(this.shake, 3);
+        this.debris(x, y - 10, 14);
+        break;
+      case 'bite':
+        this.burst(x, y - 40, 46, ['#9a0f0f', '#c41a1a', '#6a0808', '#e03a2a'], 110, false, 260, true);
+        this.burst(x, y - 40, 14, ['#ff4a3a'], 60, true);
+        this.flashes.push({ x, y: y - 40, r: 70, i: 0.9, c: [1, 0.2, 0.15], life: 0.25, max: 0.25 });
+        this.shake = Math.max(this.shake, 7);
+        break;
+      case 'thud':
+        this.debris(x, y - 2, 12);
+        for (let i = 0; i < 18; i++) this.decal(x - 8 + Math.random() * 16, y - 2 + Math.random() * 5, i % 2 ? '#6a0a0a' : '#8a1212');
+        this.shake = Math.max(this.shake, 3);
+        break;
+      case 'bellow':
+        this.shake = Math.max(this.shake, 14);
+        for (let i = 0; i < 3; i++) this.rings.push({ x, y: y - 20, life: 0.5 + i * 0.25, max: 0.5 + i * 0.25, col: '#ff8a5a' });
+        this.flashes.push({ x, y: y - 20, r: 120, i: 0.7, c: [1, 0.4, 0.2], life: 0.5, max: 0.5 });
         break;
       case 'wallhit':
         this.crack(x, y - 6, 7);

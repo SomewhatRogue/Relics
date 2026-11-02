@@ -348,7 +348,7 @@ describe('corpses and backstabs', () => {
     expect(t.y).toBeLessThan(1);
   });
 
-  it('a blow from behind does more, and twin daggers far more', () => {
+  it('a blow from behind does more, and twin daggers far more; head on, the daggers do half', () => {
     const hitFrom = (weapon: 'sword' | 'daggers', behind: boolean) => {
       const { room, h, t } = onTarget(0);
       Object.assign(t, { fx: 0, fy: behind ? -1 : 1, cooldown: 99 });
@@ -362,7 +362,7 @@ describe('corpses and backstabs', () => {
     };
     expect(hitFrom('sword', true)).toBe(Math.round(WEAPONS.sword.combo[0].dmg * GUARD.rearMult));
     expect(hitFrom('daggers', true)).toBe(Math.round(WEAPONS.daggers.combo[0].dmg * WEAPONS.daggers.backstab!));
-    expect(hitFrom('daggers', false)).toBe(WEAPONS.daggers.combo[0].dmg);
+    expect(hitFrom('daggers', false)).toBe(Math.round(WEAPONS.daggers.combo[0].dmg * WEAPONS.daggers.front!));
   });
 
   it('the butcher turns slowly, so a roll past him leaves his back open', () => {

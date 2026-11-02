@@ -30,9 +30,10 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   // From behind: the hero stands where the enemy's facing points away (dummies have no back).
   const tx = h.x - e.x, ty = h.y - e.y, tl = Math.hypot(tx, ty) || 1;
   const rear = !isDummy(e) && (e.fx * tx + e.fy * ty) / tl < GUARD.rearCos;
-  const rearMult = rear ? (WEAPONS[h.weapon].backstab ?? GUARD.rearMult) + (h.perks.includes('shadowed') ? PERK.shadowed : 0) : 1;
   const ice = frozen(e, now), blessed = h.blessedUntil > now ? BLESSING.dmgMult : 1;
   const heldFast = e.act === 'stunned' || e.act === 'pinned' || ice || snared(e, now);
+  // A Rogue's knives are weak head on (unless it's held fast): keep moving and get behind.
+  const rearMult = rear ? (WEAPONS[h.weapon].backstab ?? GUARD.rearMult) + (h.perks.includes('shadowed') ? PERK.shadowed : 0) : heldFast ? 1 : (WEAPONS[h.weapon].front ?? 1);
   const counter = GUARD.counterMult * (has(h, 'riposte') ? TRAIT.riposte : 1), held = GUARD.stunnedMult * (has(h, 'brutal') ? TRAIT.brutal : 1);
   // TEMPO: the first hit after dodging through a blow lands double.
   const tempo = h.tempoUntil > now ? TRAIT.tempo : 1;
@@ -56,15 +57,19 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
     return n;
   }
   if (e.hp <= 0) {
-    // Blades take heads, maces and big overkills burst, thrusts just drop them.
-    const how = -e.hp >= OVERKILL || h.weapon === 'mace' ? 'burst' : s.thrust ? 'fall' : 'behead';
+    // Maces and big overkills burst, thrusts drop them; a blade cuts them down, in two at the waist, or
+    // (now and then) takes the head. Heavy blows cut in two more often. Which one is fixed by the moment.
+    const roll = (e.id * 7 + Math.floor(now * 30)) % 8;
+    const cut = heavy ? (roll < 4 ? 'halve' : roll < 6 ? 'behead' : 'opened') : roll < 4 ? 'opened' : roll < 6 ? 'halve' : 'behead';
+    const how = -e.hp >= OVERKILL || h.weapon === 'mace' ? 'burst' : s.thrust ? 'fall' : cut;
     return kill(e, ev, how, h.fx, h.fy), n;
   }
   // A heavy blow breaks the frozen.
   if (ice && heavy) return shatter(e, now, ev), n;
   // Light goblins flinch out of their wind-up on any hit; the butcher only to a strong heavy.
   const big = h.heavy && h.power >= 0.7;
-  if (e.act !== 'stunned' && e.act !== 'pinned' && e.act !== 'carried' && !ice && (e.kind === 'scrapper' || big)) {
+  // Nothing stops a charge once it's coming.
+  if (e.act !== 'stunned' && e.act !== 'pinned' && e.act !== 'carried' && !ice && e.attack?.kind !== 'charge' && (e.kind === 'scrapper' || big)) {
     Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: big && e.kind === 'butcher' ? 0.6 : FLINCH });
   }
   return n;
@@ -72,7 +77,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
 
 /** Is this hero inside the attack's shape? */
 export function attackCovers(a: EnemyAttack, h: Hero): boolean {
-  if (a.kind === 'slam') return Math.hypot(h.x - a.cx, h.y - a.cy) <= a.radius + HERO.radius;
+  if (a.kind === 'slam' || a.kind === 'charge') return Math.hypot(h.x - a.cx, h.y - a.cy) <= a.radius + HERO.radius;
   return inArc(a.ox, a.oy, a.dx, a.dy, h.x, h.y, a.range, a.arc, HERO.radius);
 }
 
