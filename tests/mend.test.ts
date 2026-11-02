@@ -155,3 +155,42 @@ describe('what the town says', () => {
     expect(text).not.toMatch(/\u2014|\u2013/);
   });
 });
+
+describe('the ground and the life in it', () => {
+  const kinds = (w: WorldState) => new Set(townMap(w).marks!.map((k) => k.kind));
+  const count = (w: WorldState, k: string) => townMap(w).marks!.filter((m) => m.kind === k).length;
+
+  it('the square is not one sheet of cobbles, mended or not, and mending heals the mess', () => {
+    for (const w of [newWorld(), withWorks(...all)]) for (const k of ['flags', 'earth', 'ruts', 'path', 'puddle', 'straw', 'weeds', 'gutter', 'holes', 'mud']) expect(kinds(w).has(k as never), k).toBe(true);
+    expect(count(withWorks('wash', 'lanes'), 'holes')).toBeLessThan(count(newWorld(), 'holes'));
+    expect(count(withWorks('lanes'), 'mud')).toBeLessThan(count(newWorld(), 'mud'));
+    expect(kinds(newWorld()).has('arrows')).toBe(true);
+    expect(kinds(withWorks('lanes')).has('arrows')).toBe(false);
+    expect(JSON.stringify(townMap(newWorld()).marks)).toBe(JSON.stringify(townMap(newWorld()).marks));
+  });
+
+  it('under siege: a gallows, the gravedigger at his work, the burned-out round a brazier, hurdles at the gate', () => {
+    const m = townMap(newWorld()), cobb = m.npcs!.find((n) => n.name === 'GRAVEDIGGER COBB')!;
+    expect(m.blocks.some((b) => b.kind === 'gallows')).toBe(true);
+    expect(cobb.work).toBe('bury');
+    expect(cobb.path!.length).toBeGreaterThan(2);
+    expect(townMap(withWorks('wash')).npcs!.find((n) => n.name === 'GRAVEDIGGER COBB')!.work).toBe('dig');
+    expect(m.npcs!.some((n) => n.name === 'GOODMAN TULL')).toBe(true);
+    expect(townMap(withWorks('shutters')).npcs!.some((n) => n.name === 'GOODMAN TULL')).toBe(false);
+    expect(m.blocks.filter((b) => b.kind === 'hurdle').length).toBe(2);
+    expect(townMap(withWorks('stakes', 'timber')).blocks.some((b) => b.kind === 'hurdle')).toBe(false);
+    expect(m.rounds.some((r) => r.kind === 'dog') && m.rounds.some((r) => r.kind === 'smoke')).toBe(true);
+  });
+
+  it('nobody talks to the ones huddled in the background', () => {
+    const g = new Game();
+    g.create('WARRIOR', 'b');
+    g.skipWood();
+    const mute = g.room.map.npcs!.filter((n) => n.mute);
+    expect(mute.length).toBeGreaterThan(0);
+    for (const n of mute) {
+      Object.assign(g.hero, { x: n.x, y: n.y + 0.4 });
+      expect(g.near()?.npc?.mute).not.toBe(true);
+    }
+  });
+});

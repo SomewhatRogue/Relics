@@ -45,6 +45,8 @@ const LOOK: Record<Block['kind'], Look> = {
   rack: { tall: 16, roof: '#4a3420', ridge: '#4a3420', wall: '#5a3d22', windows: false, furniture: true },
   partition: { tall: 22, roof: '#3e2a1a', ridge: '#5a3d22', wall: '#6a5e52', windows: false, furniture: true },
   loom: { tall: 18, roof: '#5a3d22', ridge: '#7a5a34', wall: '#3a2a1a', windows: false, furniture: true },
+  gallows: { tall: 34, roof: '#5a3d22', ridge: '#5a3d22', wall: '#2e2016', windows: false, furniture: true },
+  hurdle: { tall: 12, roof: '#3a2818', ridge: '#3a2818', wall: '#5a4a30', windows: false, furniture: true },
   pen: { tall: 9, roof: '#8a7448', ridge: '#6b4a2b', wall: '#5a3d22', windows: false, furniture: true },
 };
 
@@ -230,7 +232,7 @@ export const blockAt = (b: Block): [number, number] => [OX + b.x * PX, OY + b.y 
 /** A round thing at its foot (x, y on screen). */
 export function drawRound(c: Ctx, r: Round, x: number, y: number): void {
   if (r.kind === 'pillar') return blit(c, SPRITES.pillar, x, y + 5);
-  if (r.kind === 'crows' || r.kind === 'moths') return void drawLife(c, r, x, y);
+  if (r.kind === 'crows' || r.kind === 'moths' || r.kind === 'dog' || r.kind === 'smoke') return void drawLife(c, r, x, y);
   blit(c, SPRITES[r.kind], x, y + Math.round(r.r * 6));
   if (r.kind === 'lantern') {
     // The Last Lantern: a flame that never goes out.

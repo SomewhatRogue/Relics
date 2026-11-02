@@ -3,11 +3,13 @@
  * stall's straw, a hearth's mouth), and the same furniture smashed when a house has been turned over.
  */
 import type { Block } from '../shared/arena';
+import { siegeBlock } from './siegedraw';
 
 export interface Look { tall: number; roof: string; ridge: string; wall: string; windows: boolean; furniture?: boolean }
 type Rect = (x: number, y: number, w: number, h: number, c: string) => void;
 
 export function furnish(g: CanvasRenderingContext2D, b: Block, rect: Rect, w: number, roofH: number, wallY: number, l: Look): void {
+  if (b.kind === 'gallows' || b.kind === 'hurdle') return siegeBlock(g, b, rect, w, roofH, l.tall);
   const smashed = b.look === 1;
   if (b.kind === 'bed') rect(1, 1, w - 2, 5, '#d8d0bc'), rect(0, 7, w, roofH - 7, smashed ? '#3e3456' : '#5a4a7a');
   if (b.kind === 'shelf') for (let y = wallY + 3; y < wallY + l.tall; y += 6) {

@@ -6,6 +6,7 @@ import type { Npc } from '../shared/arena';
 import { blit, shadow, type Ctx } from './draw';
 import { drawText, textWidth } from './pixfont';
 import { makeSprite, type Sprite } from './sprites';
+import { drawWork } from './siegedraw';
 
 type Part = Parameters<typeof makeSprite>[2][number];
 interface Look { body: string; trim: string; skin: string; hair: Part[]; apron?: string }
@@ -32,6 +33,8 @@ const LOOKS: Record<string, Look> = {
   bard: { body: '#2f6a5a', trim: '#d8c48a', skin: SKIN, hair: [['r', 3, 0, 7, 2, '#7a2a6a'], ['p', 9, 0, '#d8d0bc']] },
   ranger: { body: '#3f6b3a', trim: '#8b6a3a', skin: DARK, hair: [['r', 3, 0, 6, 3, '#3f5a32']] },
   rogue: { body: '#3a3346', trim: '#5a3d22', skin: SKIN, hair: [['r', 3, 0, 6, 3, '#2a2630'], ['r', 4, 5, 4, 1, '#141218']] },
+  // The gravedigger: earth-coloured smock, a cap pulled down.
+  digger: { body: '#3e3628', trim: '#2a2018', skin: DARK, hair: [['r', 3, 0, 6, 2, '#2e2a24'], ['r', 2, 2, 8, 1, '#2e2a24']] },
   survivor: { body: '#7a6a58', trim: '#5a4a3a', skin: SKIN, hair: [['r', 4, 1, 4, 1, '#3a2a1a'], ['r', 3, 2, 6, 1, '#e8e0c8']] },
 };
 
@@ -87,15 +90,19 @@ function drawDead(c: Ctx, s: Sprite, x: number, y: number, n: Npc): void {
   else c.lit.fillRect(Math.round(x - 2), Math.round(y - (n.lift ?? 0) - s.h + neck - 1), 4, 2);
 }
 
-export function drawNpc(c: Ctx, n: Npc, x: number, y: number, near: boolean, fx = 0, walking = false): void {
+export function drawNpc(c: Ctx, n: Npc, x: number, y: number, near: boolean, fx = 0, walking = false, tx = n.x): void {
   const s = SPRITES[n.look] ?? SPRITES.villager;
   walking ||= !!n.walking;
+  // The gravedigger stops walking while he digs.
+  if ((n.work === 'bury' || n.work === 'dig') && tx < 5) walking = false;
   const bob = n.pose ? 0 : Math.floor(c.now * (walking ? (n.sneak ? 4 : 7) : 1.5) + n.x) % 2 ? -1 : 0;
   shadow(c, x, y, 5);
   if (n.pose === 'corpse') return drawCorpse(c, s, x, y, n);
   if (n.pose) return drawDead(c, s, x, y, n);
   blit(c, s, x, y - (n.lift ?? 0) + bob, walking ? fx < 0 : Math.floor(c.now * 0.25 + n.y) % 2 === 0, 0, n.sneak ? 0.78 : 1);
   // A guard carries a spear upright.
+  if (n.work) drawWork(c, n, x, y + bob, tx, fx);
+  if (n.mute) return;
   if (n.look === 'guard') (c.lit.fillStyle = '#6b4a2b'), c.lit.fillRect(Math.round(x + (fx < 0 && walking ? -6 : 5)), Math.round(y - 22 + bob), 1, 20), (c.lit.fillStyle = '#cfd6dc'), c.lit.fillRect(Math.round(x + (fx < 0 && walking ? -6 : 5)), Math.round(y - 24 + bob), 1, 3);
   const top = Math.round(y - s.h - 4 + (Math.floor(c.now * 3) % 2));
   c.glow.fillStyle = near ? '#fff1b0' : '#d4a537';

@@ -145,5 +145,9 @@ and burns out a goblin den on a job.
 - DONE: raids (`shared/raids.ts`): now and then the hungry come over the wall between visits and pull
   down the newest mending (never stone, never the first three works); Dunn tells you, the board
   remembers, it has to be paid for again.
+- DONE: ground with some variety (flagstones, earth, ruts, worn paths, puddles, straw, weeds, a drain;
+  `shared/ground.ts`) and a town alive under siege (`shared/siege.ts`): a gallows, the gravedigger
+  carrying the dead to the churchyard, a burned-out family round a brazier, water drawn at the well, a
+  recruit at the whetstone, hurdles at the gate, smoke past the wall, a dog.
 - Next: barks as you walk past something newly mended; a raid you're in town for (a fight at the
   breach); other world events (a flood, a fire in the lane). The town remembers what it lost.

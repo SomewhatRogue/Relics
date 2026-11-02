@@ -6,14 +6,18 @@
 export type Circle = { x: number; y: number; r: number };
 export type RoundKind = 'pillar' | 'tree' | 'pine' | 'rock' | 'hay' | 'well' | 'lantern' | 'support' | 'stump' | 'target' | 'stone' | 'post' | 'grate' | 'statue' | 'bush' | 'reed' | 'deadtree'
   // Paint only, a speck to bump: crows at the blood, moths round a garden lamp.
-  | 'crows' | 'moths';
+  | 'crows' | 'moths'
+  // Paint only: a dog nosing about, smoke rising past the wall.
+  | 'dog' | 'smoke';
 export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall' | 'tent' | 'rockwall' | 'fence' | 'granary' | 'wall' | 'den'
   // Furniture, inside buildings.
   | 'counter' | 'bed' | 'shelf' | 'anvil' | 'altar' | 'pew' | 'bench' | 'hearth' | 'sacks'
   // A cottage's inner wall, a weaver's loom, a stall in a barn.
   | 'partition' | 'loom' | 'pen'
   // Wickhold's other buildings and things in the street.
-  | 'tower' | 'tavern' | 'monument' | 'rubble' | 'cart' | 'rack';
+  | 'tower' | 'tavern' | 'monument' | 'rubble' | 'cart' | 'rack'
+  // Under siege: the gallows on the square, wicker hurdles barricading the gate.
+  | 'gallows' | 'hurdle';
 export interface Round extends Circle { kind: RoundKind }
 export interface Block {
   x: number; y: number; w: number; h: number; kind: BlockKind; label?: string;
@@ -34,7 +38,11 @@ export interface Block {
   worn?: boolean;
 }
 /** Paint only, on the floor: never collided against or decided on. */
-export type MarkKind = 'blood' | 'drag' | 'scorch' | 'trample' | 'planks' | 'beds' | 'flowers' | 'mound' | 'fallenpost' | 'green';
+export type MarkKind = 'blood' | 'drag' | 'scorch' | 'trample' | 'planks' | 'beds' | 'flowers' | 'mound' | 'fallenpost' | 'green'
+  // The ground itself (shared/ground.ts): flagstones, packed earth, mud, wheel ruts, a trodden path,
+  // missing cobbles, puddles, straw, weeds, a drain, spent arrows.
+  | 'flags' | 'earth' | 'mud' | 'ruts' | 'path' | 'holes' | 'puddle' | 'straw' | 'weeds' | 'gutter' | 'arrows';
+/** A floor mark's area (tiles). A `path` runs as a line from (x, y) to (x + w, y + h). */
 export interface Mark { kind: MarkKind; x: number; y: number; w: number; h: number }
 /**
  * Raised ground: a ledge, a rock shelf, a wall walk. Up on it you stand on level 1. From the ground
@@ -55,6 +63,10 @@ export interface Npc {
   walking?: boolean;
   /** Keeping low: crouched and creeping (Hew coming in past the goblins at the dead). */
   sneak?: boolean;
+  /** Paint only, what they're busy at: carrying the dead and digging, at the whetstone, at the well. */
+  work?: 'bury' | 'dig' | 'whet' | 'well';
+  /** Somebody in the background: no mark over them, nobody to talk to. */
+  mute?: boolean;
   pose?: 'headless' | 'body' | 'corpse';
   /** Stopped to talk to you (on their round): since when, and how long they've stood about in all. */
   heldAt?: number;

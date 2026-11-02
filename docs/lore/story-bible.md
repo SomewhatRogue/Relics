@@ -202,3 +202,5 @@ most Want among the heroes is the one the bells don't spare).
 - Widow Perrin keeps the physic garden west of the well, her mother's before her (sage, feverfew, roses). A dead apple tree she won't cut; why stays unsaid.
 - The Fosters live in the lanes (the dresser). Gannet's tavern sign is crooked and he likes it. Hob's mother is alive.
 - Nothing comes into Wickhold from outside: seed, glass and oil are dear because nobody brings any in.
+- Cobb is the church's gravedigger; he takes the breach dead off Odric's cart. The Tulls lived against the north wall and were burned out (nobody died); stone from their house went into the mending. Mab draws water at the well. Wat is a recruit at the barracks under Master Cole, with Corporal Brisk and Squire Pell.
+- An empty gallows at the square's edge, a crow on the beam; nobody on screen says who it was last used for. The crow is just a crow.

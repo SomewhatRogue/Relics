@@ -541,7 +541,7 @@ export class Game {
   near(): Near | null {
     const h = this.hero, map = this.room.map, all: (Near & { x: number; y: number })[] = [];
     for (const n of map.npcs ?? []) {
-      if (n.pose) continue;
+      if (n.pose || n.mute) continue;
       const at = npcAt(n, this.room.time);
       all.push({ x: at.x, y: at.y, label: n.name, talk: n.talk as SpotId, arg: n.arg, npc: n });
     }
