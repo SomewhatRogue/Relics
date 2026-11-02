@@ -6,11 +6,12 @@
  */
 import { HUNGRY_FX } from './hungry';
 import { collide } from '../shared/arena';
-import { FLINCH, HERO, LODESTONE, NET, type Augment, type Swing, type TraitId } from '../shared/tuning';
+import { CRIT, FLINCH, HERO, LODESTONE, NET, type Augment, type Swing, type TraitId } from '../shared/tuning';
 import { shove } from './bodies';
 import { damage, frozen, isDead } from './damage';
 import { afflict, shatter, type World } from './elements';
 import { allyHit, players } from './party';
+import { rollCrit } from './combat';
 import { blastProps, damageProp } from './props';
 import { blastBlocks } from './buildings';
 import type { Bolt, Enemy, Hero } from './types';
@@ -87,7 +88,8 @@ function openNet(w: World, b: Bolt): void {
 function strike(w: World, b: Bolt, e: Enemy): void {
   const wasFrozen = frozen(e, w.now);
   e.lastBy = b.owner;
-  if (damage(e, b.dmg, w.now, w.ev, { heavy: b.knock >= 8, flinch: FLINCH, mult: true, brutal: b.traits.includes('brutal'), dx: b.dx, dy: b.dy, src: b.kind })) return;
+  const by = w.heroes.find((h) => h.id === b.owner), crit = !!by && rollCrit(by);
+  if (damage(e, Math.round(b.dmg * (crit ? CRIT : 1)), w.now, w.ev, { heavy: b.knock >= 8 || crit, flinch: FLINCH, mult: true, brutal: b.traits.includes('brutal'), dx: b.dx, dy: b.dy, src: b.kind })) return;
   if (e.act !== 'pinned') shove(e, b.dx, b.dy, b.knock, e.weight);
   if (wasFrozen && b.knock >= 8) shatter(e, w.now, w.ev);
   else (afflict(w, e, b.el, b.dmg), b.freeze && afflict(w, e, b.el, b.dmg));

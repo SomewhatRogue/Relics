@@ -147,6 +147,9 @@ export interface Hero extends Body {
   want: number;
   /** Lying where you fell, before Hew gets you up (the wood's opening). */
   lying?: boolean;
+  /** Drills paid for at the trainer (shared/drills.ts), and a crit's own dice (seeded by the hero). */
+  drills?: import('../shared/drills').Drills;
+  critSeed?: number;
   /** The name shown under someone else's hero (another player in town); their id otherwise. */
   tag?: string;
   /** In a party: down and waiting to be picked up (`pickT` so far), or out until the job ends. */
@@ -309,7 +312,7 @@ export type FightEvent =
   /** A teammate downed you once too often this job. */
   | { k: 'grudge'; x: number; y: number; id: string; by: string }
   /** `src`: what landed it (a kit, or a shot's kind), for its sound; `big`: on the butcher. */
-  | { k: 'hit'; x: number; y: number; n: number; heavy: boolean; on: 'enemy' | 'hero'; counter?: boolean; backstab?: boolean; tick?: boolean; src?: string; big?: boolean }
+  | { k: 'hit'; x: number; y: number; n: number; heavy: boolean; on: 'enemy' | 'hero'; counter?: boolean; crit?: boolean; backstab?: boolean; tick?: boolean; src?: string; big?: boolean }
   | { k: 'swing'; x: number; y: number; src: string; heavy: boolean }
   | { k: 'death'; x: number; y: number; how: DeathKind; dx: number; dy: number; kind: EnemyKind }
   | { k: 'block' | 'parry' | 'guardbreak' | 'dodge' | 'slip' | 'down' | 'out' | 'pickedup' | 'roll' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number }
@@ -423,6 +426,6 @@ export interface Bolt {
 }
 
 /** A Ranger's snare on the ground. */
-export interface Snare { owner: string; x: number; y: number; until: number }
+export interface Snare { owner: string; x: number; y: number; until: number; /** How long it holds what steps in (a Ranger's TRAPPER drill lengthens it). */ hold?: number }
 /** A Ranger's hound: at heel, running something down, worrying it, or scared off till `back`. */
 export interface Hound { x: number; y: number; fx: number; fy: number; state: 'heel' | 'run' | 'bite' | 'fled'; target: number; t: number; next: number; back: number; bites: number; moving: boolean; /** Lying down (across you while you're out). */ down?: boolean }

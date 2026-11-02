@@ -4,7 +4,7 @@
  * head in); GRAB again throws it, and it hits whatever it flies into. It wriggles free in time.
  */
 import { collide } from '../shared/arena';
-import { GRAB, GUARD, HERO } from '../shared/tuning';
+import { GRAB, GUARD, HERO, technique } from '../shared/tuning';
 import { damage, frozen, isDead, snared } from './damage';
 import type { Enemy, FightEvent, Hero, Intent } from './types';
 
@@ -59,7 +59,7 @@ export function stepCarry(h: Hero, inp: Intent, enemies: Enemy[], now: number, d
       e.act = 'flinch';
       h.carrying = 0;
       ev.push({ k: 'slam', x: e.x, y: e.y });
-      if (!damage(e, GRAB.slamDmg, now, ev, { heavy: true, how: 'burst', dx: 0, dy: 1 })) Object.assign(e, { act: 'stunned', actT: 0, actDur: GRAB.slamStun });
+      if (!damage(e, Math.round(GRAB.slamDmg * (1 + technique(h.drills, 'WARRIOR'))), now, ev, { heavy: true, how: 'burst', dx: 0, dy: 1 })) Object.assign(e, { act: 'stunned', actT: 0, actDur: GRAB.slamStun });
     }
     return;
   }

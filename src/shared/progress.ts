@@ -2,6 +2,7 @@
  * A hero's progress between runs: gold, experience and levels, perks chosen at the trainer, and the
  * weapons found. Levels open choices (one of two perks), never a stat that quietly climbs.
  */
+import type { Drills } from './drills.js';
 import type { Item } from './loot.js';
 import type { PotionId } from './potions.js';
 import { CLASS_ARMOR } from './gear.js';
@@ -54,6 +55,8 @@ export interface Profile {
   xp: number;
   level: number;
   perks: PerkId[];
+  /** Drills paid for at the trainer (drills.ts). */
+  drills?: Drills;
   /** Level ups not yet spent at the trainer. */
   picks: number;
   /** The weapon in hand (`weapon`, plain if `arms` has nothing for it) and the pack. */

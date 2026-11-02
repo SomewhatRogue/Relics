@@ -5,7 +5,7 @@ import { CHAPTER_1, QUORUM, chapterGoals, councilOpen, marketOpen, rewardMult } 
 import { TRAINERS, housesFor, type SpotId } from '../shared/town';
 import { ballot } from '../shared/worldsync';
 import { openSquare } from './squareui';
-import { WANT, ARMOR, MODS, REROLL, STEEL, TIERS, nextLevel, POTION, POTIONS, type PotionId, AUGMENTS, CLASS_KITS, CLASS_ORDER, CLASS_SKILL, ELEMENT_NAME, RELICS, TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
+import { DRILLS, DRILL_ORDER, TECHNIQUE, drillCap, drillPrice, type DrillId, WANT, ARMOR, MODS, REROLL, STEEL, TIERS, nextLevel, POTION, POTIONS, type PotionId, AUGMENTS, CLASS_KITS, CLASS_ORDER, CLASS_SKILL, ELEMENT_NAME, RELICS, TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
 import { device, type Game } from './game';
 import { line } from './speech';
 import { PACK } from '../sim/pack';
@@ -87,7 +87,17 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       p(`Level ${pr.level}. Experience ${pr.xp}${pr.level < 10 ? ` of ${next} for the next` : ' (the chapter cap)'}.`) +
       p(pr.perks.length ? 'Yours: ' + pr.perks.map((k) => `<b>${PERKS[k].name}</b> (${PERKS[k].text.toLowerCase()})`).join(', ') : 'No perks yet.') +
       (pr.picks > 0 ? p(`Choose ${pr.picks > 1 ? `one of ${pr.picks} picks` : 'one'}:`) + offer.map((k) => p(`<b>${PERKS[k].name}</b>${PERKS[k].cls ? ' (only from me)' : ''}: ${PERKS[k].text}`)).join('') : '');
-    panel.show(`${t.name}, ${cls} TRAINER`, html, pr.picks > 0 ? offer.map((k) => ({ label: PERKS[k].name, primary: true, act: () => (g.pickPerk(k), again()) })) : []);
+    // Drills: gold for practice, rank by rank, as far as your level allows.
+    const tech = TECHNIQUE[pr.cls], drillName = (d: DrillId) => (d === 'technique' ? tech.name : DRILLS[d].name);
+    const drills = '<h3>DRILLS</h3>' + p(`You have ${pr.gold} gold.`) + DRILL_ORDER.map((d) => {
+      const r = pr.drills?.[d] ?? 0, cap = drillCap(d, pr.level);
+      return p(`<b>${drillName(d)}</b> ${r} of ${DRILLS[d].max}: ${d === 'technique' ? tech.text : DRILLS[d].text}.${r >= cap && r < DRILLS[d].max ? ` <span class="dim">More at level ${cap * 2}.</span>` : ''}`);
+    }).join('');
+    const drillButtons = DRILL_ORDER.filter((d) => (pr.drills?.[d] ?? 0) < drillCap(d, pr.level)).map((d) => {
+      const r = pr.drills?.[d] ?? 0, price = drillPrice(d, r);
+      return { label: `${drillName(d)} ${r + 1} (${price} GOLD)`, disabled: pr.gold < price, act: () => (g.buyDrill(d), again()) };
+    });
+    panel.show(`${t.name}, ${cls} TRAINER`, html + drills, [...(pr.picks > 0 ? offer.map((k) => ({ label: PERKS[k].name, primary: true, act: () => (g.pickPerk(k), again()) })) : []), ...drillButtons]);
   } else if (id === 'smith' || id === 'market') {
     const forged = id === 'market';
     if (forged && !marketOpen(w)) return panel.show('MARKET ROW', p('Empty stalls and a cat. The traders are camped outside the north gate with the refugees, and the gate stays shut to them until the council says otherwise.'));

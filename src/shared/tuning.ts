@@ -25,6 +25,7 @@ export * from './progress.js';
 export * from './potions.js';
 export * from './gear.js';
 export * from './hungry.js';
+export * from './drills.js';
 
 /** Holding attack past `start` begins charging; the heavy is strongest at `full`. */
 export const CHARGE = { start: 0.18, full: 0.9 };

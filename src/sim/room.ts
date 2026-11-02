@@ -7,7 +7,7 @@ import { ARENA, useMap, type GameMap } from '../shared/arena';
 import type { Foe } from '../shared/terrain';
 import type { PropKind } from '../shared/props';
 import { Rng } from '../shared/rng';
-import { BLESSING, CHANNEL, GUARD, HEAL_RADIUS, HEIGHT, HERO, LODESTONE, TICK, TRAIT, WEAPONS, type Augment, type Swing } from '../shared/tuning';
+import { BLESSING, CHANNEL, GUARD, HEAL_RADIUS, HEIGHT, HERO, LODESTONE, TICK, TRAIT, WEAPONS, type Augment, type Swing, technique } from '../shared/tuning';
 import { separate } from './bodies';
 import { lobLodestone, shoot, smite, stepBolt, throwNet } from './bolts';
 import { afflict, stepElements, type World } from './elements';
@@ -278,7 +278,7 @@ export class ArenaRoom {
     else if (h.relic === 'net') this.bolts.push(throwNet(h, el));
     else if (h.relic === 'lodestone') this.bolts.push(lobLodestone(h, this.aimDistance(h, LODESTONE.range, LODESTONE.fallback), el));
     else if (h.relic === 'shadow') shadowstep(h, this.enemies, w.ev);
-    else if (h.relic === 'channel') Object.assign(h, { act: 'channel', actT: 0, actDur: CHANNEL.time }), w.ev.push({ k: 'channel', x: h.x, y: h.y, el: h.augments.channel || 'fire' });
+    else if (h.relic === 'channel') Object.assign(h, { act: 'channel', actT: 0, actDur: CHANNEL.time * (1 - technique(h.drills, 'MAGE')) }), w.ev.push({ k: 'channel', x: h.x, y: h.y, el: h.augments.channel || 'fire' });
     else if (h.relic === 'horn') rally(h, this.heroes, this.enemies, w.now, w.ev);
     else if (h.relic === 'ward') ward(h, this.heroes, this.intents.get(h.id), w.now, w.ev);
     else if (h.relic === 'sanctuary') (this.zones.push(hallow(h, this.intents.get(h.id), w.now, el, w.ev)), ward(h, this.heroes, this.intents.get(h.id), w.now, w.ev));
@@ -330,7 +330,7 @@ export class ArenaRoom {
     w.ev.push({ k: 'bless', x: h.x, y: h.y });
     for (const o of this.heroes) {
       if (o.act === 'down' || Math.hypot(o.x - h.x, o.y - h.y) > HEAL_RADIUS) continue;
-      const n = Math.min(o.maxHp - o.hp, Math.round(heals(o, h, s.heal * healMult(h))));
+      const n = Math.min(o.maxHp - o.hp, Math.round(heals(o, h, s.heal * healMult(h) * (1 + technique(h.drills, 'HEALER')))));
       if (n <= 0) continue;
       o.hp += n;
       w.ev.push({ k: 'heal', x: o.x, y: o.y, n });

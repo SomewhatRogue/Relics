@@ -8,7 +8,7 @@
  * the nearest small goblin), runs it down and worries it, then comes back. It can't be killed; a
  * butcher winding up near it scares it off for a while, and it comes back when it's ready.
  */
-import { HOUND, SNARE, WEAPONS } from '../shared/tuning';
+import { HOUND, SNARE, WEAPONS, technique } from '../shared/tuning';
 import { damage, isDead } from './damage';
 import type { Enemy, FightEvent, Hero, Hound, Snare } from './types';
 
@@ -18,7 +18,7 @@ export function laySnare(h: Hero, snares: Snare[], now: number, ev: FightEvent[]
   h.snareReady = now + SNARE.cooldown;
   const mine = snares.filter((s) => s.owner === h.id);
   if (mine.length >= SNARE.max) snares.splice(snares.indexOf(mine[0]), 1);
-  snares.push({ owner: h.id, x: h.rollX, y: h.rollY, until: now + SNARE.life });
+  snares.push({ owner: h.id, x: h.rollX, y: h.rollY, until: now + SNARE.life, hold: SNARE.hold * (1 + technique(h.drills, 'RANGER')) });
   ev.push({ k: 'snareset', x: h.rollX, y: h.rollY });
 }
 
@@ -27,8 +27,9 @@ export function stepSnare(s: Snare, enemies: Enemy[], now: number, ev: FightEven
   if (now > s.until) return false;
   const e = enemies.find((o) => !isDead(o) && o.kind !== 'dummy' && o.kind !== 'swingDummy' && (o.z ?? 0) === 0 && Math.hypot(o.x - s.x, o.y - s.y) < SNARE.radius + o.radius);
   if (!e) return true;
-  e.snareUntil = now + SNARE.hold;
-  if (e.weight <= 1) Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: SNARE.hold });
+  const hold = s.hold ?? SNARE.hold;
+  e.snareUntil = now + hold;
+  if (e.weight <= 1) Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: hold });
   ev.push({ k: 'snared', x: e.x, y: e.y });
   return false;
 }

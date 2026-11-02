@@ -1,5 +1,5 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, parry, roll). */
-import { BLESSING, DODGE, WARD, FLINCH, HORN, OVERKILL, PERK, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing } from '../shared/tuning';
+import { BLESSING, DODGE, WARD, FLINCH, HORN, OVERKILL, PERK, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing, CRIT, technique } from '../shared/tuning';
 import { shove } from './bodies';
 import { statsOf } from './gearstats';
 import { HUNGRY_FX, wears } from './hungry';
@@ -33,12 +33,13 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   const ice = frozen(e, now), blessed = h.blessedUntil > now ? BLESSING.dmgMult : 1;
   const heldFast = e.act === 'stunned' || e.act === 'pinned' || ice || snared(e, now);
   // A Rogue's knives are weak head on (unless it's held fast): keep moving and get behind.
-  const rearMult = rear ? (WEAPONS[h.weapon].backstab ?? GUARD.rearMult) + (h.perks.includes('shadowed') ? PERK.shadowed : 0) : heldFast ? 1 : (WEAPONS[h.weapon].front ?? 1);
+  const rearMult = rear ? (WEAPONS[h.weapon].backstab ?? GUARD.rearMult) + (h.perks.includes('shadowed') ? PERK.shadowed : 0) + (WEAPONS[h.weapon].cls === 'ROGUE' ? technique(h.drills, 'ROGUE') : 0) : heldFast ? 1 : (WEAPONS[h.weapon].front ?? 1);
   const counter = GUARD.counterMult * (has(h, 'riposte') ? TRAIT.riposte : 1), held = GUARD.stunnedMult * (has(h, 'brutal') ? TRAIT.brutal : 1);
   // TEMPO: the first hit after dodging through a blow lands double.
   const tempo = h.tempoUntil > now ? TRAIT.tempo : 1;
   if (tempo > 1) h.tempoUntil = -9;
-  const mult = (h.counter ? counter : heldFast ? held : 1) * rearMult * blessed * tempo;
+  const crit = rollCrit(h);
+  const mult = (h.counter ? counter : heldFast ? held : 1) * rearMult * blessed * tempo * (crit ? CRIT : 1);
   // Mother Rust's Needles: a backstab kills anything short of a butcher.
   const n = rear && e.kind === 'scrapper' && wears(h, 'needles') ? Math.max(e.hp, Math.round(s.dmg * mult)) : Math.round(s.dmg * mult);
   e.hp -= n;
@@ -50,7 +51,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   const ring = s.arc >= 360, dl = Math.hypot(e.x - h.x, e.y - h.y) || 1;
   const kx = ring ? (e.x - h.x) / dl : h.fx, ky = ring ? (e.y - h.y) / dl : h.fy;
   if (e.act !== 'pinned' && e.act !== 'carried') shove(e, kx, ky, s.knock + (h.counter ? 5 : 0), e.weight);
-  ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy, on: 'enemy', counter: h.counter, backstab: rear && rearMult >= 2, src: WEAPONS[h.weapon].cls === 'RANGER' ? 'sword' : h.weapon, big: e.kind === 'butcher' });
+  ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy, on: 'enemy', counter: h.counter, crit, backstab: rear && rearMult >= 2, src: WEAPONS[h.weapon].cls === 'RANGER' ? 'sword' : h.weapon, big: e.kind === 'butcher' });
   if (isDummy(e)) {
     if (e.hp <= 0) e.hp = e.maxHp;
     if (ice && heavy) shatter(e, now, ev);
@@ -108,6 +109,19 @@ function slipped(e: Enemy, a: EnemyAttack, h: Hero, ev: FightEvent[]): void {
   e.hitstop = HITSTOP.heavy;
   Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: stunOf(e) * DODGE.stun });
   ev.push({ k: 'slip', x: h.x, y: h.y }, { k: 'stunned', x: e.x, y: e.y });
+}
+
+/**
+ * A crit, by the hero's own dice (seeded from their name, stepped each roll: the room's dice never
+ * shift, and the same fight plays the same way).
+ */
+export function rollCrit(h: Hero): boolean {
+  const chance = statsOf(h).crit;
+  if (chance <= 0) return false;
+  let x = h.critSeed ?? [...h.id].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+  x = (Math.imul(x, 1103515245) + 12345) >>> 0;
+  h.critSeed = x;
+  return x / 4294967296 < chance;
 }
 
 /** An enemy's attack lands on a hero: rolled through, parried, blocked, or taken. */

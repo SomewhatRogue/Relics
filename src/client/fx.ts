@@ -184,6 +184,7 @@ export class Fx {
         this.burst(x, y - 6, ev.heavy ? 10 : 5, ['#7a1d1d', '#5a1414', '#9a2a2a'], 45, false, 160, true);
         this.say(x, y - 22, String(ev.n), ev.on === 'hero' ? '#ff6a5a' : ev.counter ? '#ffa040' : ev.heavy ? '#ffe070' : '#ffffff');
         if (ev.counter) this.say(x, y - 30, 'COUNTER', '#ffa040');
+        if (ev.crit && !ev.counter && !ev.backstab) (this.say(x, y - 30, 'CRIT', '#ffe070'), this.burst(x, y - 8, 8, ['#ffe070', '#ffffff'], 65, true));
         if (ev.backstab) {
           this.say(x, y - (ev.counter ? 38 : 30), 'BACKSTAB', '#d8a0ff');
           this.burst(x, y - 8, 14, ['#7a1d1d', '#9a2a2a', '#5a1414'], 70, false, 180, true);
