@@ -332,7 +332,7 @@ function tick(t: number): void {
   game.remote?.frame(t / 1000, still ?? live);
   const evs = game.step(dt, still ?? live);
   // Leading one: the room goes out to the party.
-  game.coop?.frame(t / 1000, evs);
+  game.coop?.frame(t / 1000);
   for (const ev of evs) {
     fx.on(ev);
     // Down alone on a job: how many more times you'll get up.
@@ -360,6 +360,7 @@ function tick(t: number): void {
   scene.focus = game.cutFocus();
   scene.fanfare = game.wood?.hold?.kind === 'relic';
   scene.marks = game.mode === 'run' ? targets(game.run, game.room, game.houses()) : [];
+  scene.doors = game.mode === 'run' ? game.doorMarks() : [];
   scene.pointTo = game.wood && game.wood.stage === 5 && !game.wood.hold ? { x: ROAD_OUT.x + 1, y: ROAD_OUT.y + ROAD_OUT.h / 2 } : wayTarget(game);
   // The way on just opened: say which way, over you.
   const opened = ways.check(game);
@@ -457,5 +458,7 @@ w.__panel = panel;
 w.__pack = pack;
 w.__openTree = (take = false) => openTree(game, panel, { take });
 w.__openSpot = (id: string, arg = 0, key = '') => openSpot(id as never, game, panel, arg, key);
+// A job on a village street (houses to go into), for the party tests to set out on.
+w.__villageJob = (seed = 7) => import('../shared/jobs').then((m) => ({ ...m.board(1)[0], place: m.PLACES.find((p) => p.kind === 'village')!, objective: 'hunt', boss: 'SKARN', rooms: 3, seed, deep: false }));
 // Look sheets for screenshots: every hero, the Warrior's options, and a dark copy with only the glow lit.
 w.__looks = () => Object.fromEntries(Object.keys(LOOKS).map((k) => [k, [0, 1, 2].map((i) => heroLook(k as HeroClass, i).down.c.toDataURL())]));

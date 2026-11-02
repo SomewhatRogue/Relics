@@ -88,6 +88,55 @@ and buy things back from for a limited time".
 - New words are all in `client/storewords.ts` for the lore keeper and line editor; Edda, Tobin and the
   counting house are new and want lore review.
 
+## 2026-11-02: going indoors on your own (Kyle; Claude Opus 5.5)
+
+Kyle, after a job with friends: going into a house dragged everyone in with you. Now each player is
+in whichever room they walked into, the street or a house off it, and goes in and out on their own.
+
+- **Who's where** (`src/client/jobrooms.ts`): on a job the leader's game keeps the street (the job's
+  room) and every house anyone's been in. Each hero lives in exactly one of them and is carried
+  through a door as it is (health, potions, cooldowns, its clock moved on by `rebase`); a goblin or
+  crate held overhead is put down first. The leader's own going in and out is the same move, so the
+  old kept-aside outside hero is gone on a job (town buildings still work the old way).
+- **Every occupied room runs.** Each tick the leader's game runs the street (always: fires burn,
+  dens breed) and every house with a player in it, then its own. Kills in any of them pay. Friends'
+  intents go to the room they're in. Friendly fire, HELP UP and the arrival grace need no change:
+  each room only has the heroes in it. The grace on a fresh house goes to whoever goes in first.
+- **Friends' doors are the leader's to decide**, the way all of the fight is: a friend walking up
+  into a door goes in, out the bottom of a house comes out (`Game.friendDoors`, `doorPushed` uses
+  the leader's own reach). Phones walk up into doors on a job, as the leader does (there's no ENTER
+  button out on a job), so no new intent was needed.
+- **Followers:** the goblins after whoever went through follow them, as before. "Big ones can't"
+  is now a rule, not luck: only plain goblins (not brutes) and spiders fit through a door
+  (`followers.ts small`). Before, an unnamed butcher close behind you could have come in.
+- **Ambush:** it was never about the whole party; it comes when someone freed is brought out of a
+  door (sim/survivors.ts, the room's door Rng). It still does, per door and per player: whoever
+  walks out brings the freed within reach of them, and the street's next tick may bring goblins.
+- **The way on** (`together`) waits for everyone: a player indoors on their feet (not gone quiet,
+  not down) holds the party. A friend down in a house is carried along, as one down in the street is.
+- **Bandwidth** (`coop.ts`): friends are grouped by the room they're in; each room has its own
+  encoder and its own "last whole copy", and each group is sent only its room (to `*` when everyone's
+  in one room, else to each id). A friend going through a door has a different room number
+  (`Game.keyOf`) and gets the whole of the new one. Events are kept per room.
+- **Over the door:** the street's patch carries `dm`, who's in each house (name and class). Anyone
+  outside sees each name just above that door in the class's colour, under the quest mark's diamond
+  (`doormarks.ts`), the leader too (drawn from `Game.doorMarks`). Indoors, nothing extra.
+- **Handing the job on:** the whole-job save is now the street plus every house anyone has been in
+  (`houses: [blockIndex, saveRoom][]`), not the leader's current room (which, if the leader was
+  indoors, used to hand on the house as if it were the street). A friend who takes over stays where
+  their hero was, indoors or out; the old leader's hero is let go from whichever room it's in. I
+  chose every visited house rather than only occupied ones so dead goblins stay dead after a
+  takeover; houses are small.
+- **Tests:** `tests/split.test.ts` (7). Stress scenarios 15 to 21 (`scripts/stress/split.cjs`): a
+  friend in alone (the leader sees the name over that door, the goblins in there hurt the friend on
+  both screens), the leader in alone (the friend keeps walking about outside), leader and friend in
+  two houses with a third outside seeing both names, a small goblin follows and a butcher doesn't, a
+  friend frees someone and brings them out (counted on both screens), the leader leaves while a
+  friend is indoors (the friend takes over, still inside, walks out and finishes), and the way on
+  waits for the friend indoors. They set out on a village street through a test hook
+  (`window.__villageJob`). The stress, town-online and party-online scripts take a port from
+  `STRESS_PORT` / `ONLINE_PORT` so parallel worktrees don't collide.
+
 ## 2026-11-02: the friend who froze when a Florida friend led (Claude Opus 5.5)
 
 Kyle played with two friends in Florida. When he led, every job worked; when a Florida friend led,

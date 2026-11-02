@@ -7,7 +7,7 @@ const { execSync, spawn } = require('child_process');
 const http = require('http');
 const path = require('path');
 const { chromium } = require('playwright');
-const ROOT = path.join(__dirname, '..'), PORT = 8791;
+const ROOT = path.join(__dirname, '..'), PORT = Number(process.env.ONLINE_PORT) || 8791;
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 (async () => {
   const report = { ok: false, steps: [], errors: [] };
