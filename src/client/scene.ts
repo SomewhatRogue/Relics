@@ -4,6 +4,7 @@
  */
 import { ARENA, npcAt, type GameMap } from '../shared/arena';
 import { GRAB, GUARD, POTION, TIERS, WEAPONS } from '../shared/tuning';
+import { lightsHolder } from './heldkits';
 import type { ArenaRoom } from '../sim/room';
 import { drawHero } from './actors';
 import { drawHound, drawSnare } from './hound';
@@ -149,8 +150,8 @@ export class Scene {
       const [x, y] = lerp('e:' + e.id, e.x, e.y);
       return [x - cx, y - (e.z ?? 0) * LIFT - cy];
     }, room.time);
-    // With daggers in hand, show each goblin's back: the place a backstab lands.
-    if (me?.weapon === 'daggers') for (const e of room.enemies) {
+    // A Rogue's kit in hand: show each goblin's back, the place a backstab lands.
+    if (me && WEAPONS[me.weapon].cls === 'ROGUE') for (const e of room.enemies) {
       if (e.act === 'dead' || e.kind === 'dummy' || e.kind === 'swingDummy') continue;
       const [ex, ey] = lerp('e:' + e.id, e.x, e.y), tx = me.x - e.x, ty = me.y - e.y, tl = Math.hypot(tx, ty) || 1;
       if (tl > 6) continue;
@@ -368,9 +369,9 @@ export class Scene {
       else if (e.frozenUntil > room.time) lights.push({ x: x - cx, y: y - cy - 8, r: 26, i: 0.4, c: [0.6, 0.85, 1] });
     }
     for (const h of room.heroes) {
-      if (h.weapon !== 'staff' && h.weapon !== 'wand' && h.weapon !== 'rod' && h.weapon !== 'mace') continue;
+      if (!lightsHolder(h.weapon)) continue;
       const [x, y] = lerp('h:' + h.id, h.x, h.y);
-      lights.push({ x: x - cx, y: y - cy - 14, r: 22, i: 0.4, c: h.weapon === 'mace' ? [1, 0.75, 0.4] : EL_LIGHT[h.augments[h.relic]] });
+      lights.push({ x: x - cx, y: y - cy - 14, r: 22, i: 0.4, c: WEAPONS[h.weapon].cls === 'HEALER' ? [1, 0.75, 0.4] : EL_LIGHT[h.augments[h.relic]] });
     }
     fx.drawGlow(glow, lit, cx, cy);
     lights.push(...fx.lights(cx, cy));

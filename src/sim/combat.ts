@@ -40,7 +40,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   if (tempo > 1) h.tempoUntil = -9;
   const crit = rollCrit(h), ambush = e.alert === false && !isDummy(e);
   // A shield-bearer takes a blow from the front on its board (unless it's heavy, held fast, or caught unaware).
-  const boarded = e.variant === 'shield' && !rear && !heavy && !heldFast && !ambush;
+  const boarded = e.variant === 'shield' && !rear && !heavy && !heldFast && !ambush && !WEAPONS[h.weapon].overShield;
   const mult = (h.counter ? counter : heldFast ? held : 1) * rearMult * blessed * tempo * (crit ? CRIT : 1) * (ambush ? STEALTH.ambush : 1) * (boarded ? VARIANTS.shield.front : 1);
   // Mother Rust's Needles: a backstab kills anything short of a butcher.
   const n = rear && e.kind === 'scrapper' && wears(h, 'needles') ? Math.max(e.hp, Math.round(s.dmg * mult)) : Math.round(s.dmg * mult);
@@ -61,11 +61,11 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
     return n;
   }
   if (e.hp <= 0) {
-    // Maces and big overkills burst, thrusts drop them; a blade cuts them down, in two at the waist, or
+    // Maces, flails and big overkills burst, thrusts drop them; a blade cuts them down, in two at the waist, or
     // (now and then) takes the head. Heavy blows cut in two more often. Which one is fixed by the moment.
     const roll = (e.id * 7 + Math.floor(now * 30)) % 8;
     const cut = heavy ? (roll < 4 ? 'halve' : roll < 6 ? 'behead' : 'opened') : roll < 4 ? 'opened' : roll < 6 ? 'halve' : 'behead';
-    const how = -e.hp >= OVERKILL || h.weapon === 'mace' ? 'burst' : s.thrust ? 'fall' : cut;
+    const how = -e.hp >= OVERKILL || WEAPONS[h.weapon].blunt ? 'burst' : s.thrust ? 'fall' : cut;
     return kill(e, ev, how, h.fx, h.fy), n;
   }
   // A heavy blow breaks the frozen.

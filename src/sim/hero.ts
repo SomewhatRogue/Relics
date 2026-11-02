@@ -5,7 +5,7 @@
 import { collide, wadeAt } from '../shared/arena';
 import { CHANNEL, DODGE, CLASS_DODGES, CLASS_GUARD, DECOY, POTION, AUGMENTS, CHARGE, GRAB, HORN, PERK, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon, drilled, STEALTH } from '../shared/tuning';
 import { slide } from './bodies';
-import { applyGear } from './pack';
+import { applyGear, turnBelt } from './pack';
 import { statsOf } from './gearstats';
 import { fedMult, jealousBlocks, jealousCooldown, needlesBreath, wears } from './hungry';
 import { hitEnemy } from './combat';
@@ -19,7 +19,7 @@ export function newHero(id: string, x: number, y: number): Hero {
     attackQueuedAt: -9, rollQueuedAt: -9, relic: 'bash', relics: abilitiesOf('WARRIOR'), relicQueuedAt: -9,
     relicReady: { javelin: 0, hook: 0, horn: 0, bash: 0, net: 0, shadow: 0, channel: 0, lodestone: 0, blessing: 0, ward: 0, sanctuary: 0 },
     augments: { javelin: '', hook: '', horn: '', bash: '', net: '', shadow: '', channel: '', lodestone: '', blessing: '', ward: '', sanctuary: '' }, blessedUntil: -9, wardUntil: -9, wardHp: 0, rallyUntil: -9, arms: {}, bag: [], armor: null, rings: [], baseHp: HERO.hp, purse: 0, fed: 0, lastKill: 0, biteAt: 0, ransomed: false, want: 0, cold: false, found: [], glow: 0, belt: [], potionReady: 0, mendLeft: 0, brandyUntil: -9, hiddenUntil: -9, perfect: false, tempoUntil: -9, carrying: 0, lifting: 0, grabQueuedAt: -9, z: 0, hitstop: 0, lenience: 0,
-    seen: { attack: 0, block: 0, roll: 0, weapon: 0, relic: 0, relicSwap: 0, relicPick: 0, augment: 0, cls: 0, take: 0, grab: 0, gear: 0, potion: 0, open: 0 },
+    seen: { attack: 0, block: 0, roll: 0, weapon: 0, relic: 0, relicSwap: 0, relicPick: 0, augment: 0, cls: 0, take: 0, grab: 0, gear: 0, potion: 0, belt: 0, open: 0 },
   };
 }
 
@@ -95,6 +95,7 @@ export interface HeroActs {
 export const relicLabel = (h: Hero, r = h.relic) => RELICS[r].short + (h.augments[r] ? ' ' + ELEMENT_NAME[h.augments[r] as keyof typeof ELEMENT_NAME] : '');
 
 function gear(h: Hero, inp: Intent, ev: FightEvent[]): void {
+  turnBelt(h, inp, ev);
   // A change from the pack waits until your hands are free (never lost, never mid-swing).
   if (inp.gearSeq !== h.seen.gear && (h.act === 'idle' || inp.gearOp === 2 || inp.gearOp >= 4)) (h.seen.gear = inp.gearSeq), applyGear(h, inp.gearOp, inp.gearArg, ev);
   if (inp.augmentSeq !== h.seen.augment) {
@@ -238,10 +239,10 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     } else if (h.actT < s.windup + s.active) {
       if (h.actT - dt < s.windup) acts.loose(h, s);
       if (!s.shot) {
-        // A Rogue's knives find one goblin a blow (the nearest in reach); everything else cuts through all.
-        const one = !!w.single, near = one ? [...enemies].sort((a, b) => Math.hypot(a.x - h.x, a.y - h.y) - Math.hypot(b.x - h.x, b.y - h.y)) : enemies;
+        // A Rogue's knives find one goblin a blow (the nearest in reach), a rapier's lunge two; everything else cuts through all.
+        const most = s.hits ?? (w.single ? 1 : 0), near = most ? [...enemies].sort((a, b) => Math.hypot(a.x - h.x, a.y - h.y) - Math.hypot(b.x - h.x, b.y - h.y)) : enemies;
         for (const e of near) {
-          if (one && h.hitIds.some((id) => id > 0)) break;
+          if (most && h.hitIds.filter((id) => id > 0).length >= most) break;
           const n = hitEnemy(h, s, e, now, ev);
           if (n) acts.struck(h, e, n);
         }

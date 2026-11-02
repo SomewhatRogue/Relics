@@ -27,8 +27,8 @@ export const TRAIT = { riposte: 1.4, tempo: 2, tempoTime: 1.5, deadeye: 1.6, cru
 export const RELEASE = { perfect: 0.25, overdraw: 0.8, overdrawn: 0.75 };
 
 export const ELEMENT_TRAITS: TraitId[] = ['ember', 'rime', 'storm'];
-const DRAWN: WeaponId[] = ['longbow', 'shortbow', 'wand', 'staff', 'rod', 'mace'];
-const MELEE: WeaponId[] = ['sword', 'greatsword', 'spear', 'daggers', 'mace'];
+const DRAWN: WeaponId[] = ['longbow', 'shortbow', 'wand', 'staff', 'rod', 'mace', 'handbow', 'flail'];
+const MELEE: WeaponId[] = ['sword', 'greatsword', 'spear', 'daggers', 'mace', 'rapier', 'handbow', 'censer', 'flail'];
 
 /** The skill traits a kit can roll (the ones that make sense for how it fights). */
 export function traitsFor(kit: WeaponId): TraitId[] {

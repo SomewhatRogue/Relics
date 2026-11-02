@@ -2,6 +2,39 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-01: three kits for every class, and the belt turns on a long press (Kyle; Opus 5.5)
+
+Kyle: other weapon types for all the classes (fun without needing many upgrades), and a long press on
+the potion button to switch between them. The Rogue and the Cleric had one kit each; now three, with
+the class rules kept (a Rogue dashes and never blocks; a Cleric guards, never dodges, heals on a blow,
+and carries the censer's coal whatever is in hand). Numbers in `shared/kits.ts`.
+
+- **Rapier** (Rogue): three thrusts at 1.85 to 2 tiles (9, 9, 13), each finding one goblin; 0.8 head
+  on and 1.8 from behind (daggers 0.5 and 2.5), so it's the honest one. Held (0.7 s): a 2.6 tile
+  lunge, 16 to 36, through at most two in a line (`Swing.hits`). Dash a little shorter (3.8).
+- **Hand crossbow** (Rogue): a knife (two stabs and a slash, 8, 8, 12; 0.55 head on, 2.2 behind). Held
+  (0.45 s, walk at 0.8 while aiming): a light bolt, 12 to 22, that dazes a small goblin 0.6 s (never a
+  butcher), so the knife goes in at full. Keeps the long dash.
+- **Sword and censer** (Cleric): two cuts (11, 11), then the censer comes round in a 170 degree arc,
+  heals the party 8 and sets goblins burning (`Swing.burn`). The best Cleric guard (12% through, 0.34 s
+  parry, 165 degrees). Held (1.1 s): the censer whirled all round, 16 to 36, burning, healing 8 again.
+- **Flail** (Cleric): two slow sweeps (200 and 220 degrees, 16 and 20) that come over a shield-bearer's
+  board (`overShield`); the second heals 9. Held (1 s): brought down overhead and a smite cracks out
+  up to 1.7 tiles ahead, 1.7 wide, 26 to 60, stuns a second. Kills burst, like the mace (`blunt`).
+- **Getting them**: as before. `CLASS_KITS` feeds treasure and drops (`rollGear`), Halvard's and
+  Dessa's stalls list every kit of your class, traits fit (`traitsFor`). The first kit stays the
+  plain one in hand. To switch: the pack, as before, and tapping the hand now shows SWAP TO for each
+  kit of your class you carry.
+- **The belt turns** (`client/potionpress.ts`, `sim/pack.ts turnBelt`): a tap of the potion button
+  (or Q) drinks as before, now on release; held 0.4 s it turns the belt instead (the next kind comes to
+  the front, its name pops up, nothing drunk) and keeps turning every 0.45 s while held. Laptop: hold Q.
+  It goes to the room as its own press counter (`Intent.beltSeq`, optional so an older guest still
+  reads), so two turns in one tick both count and a guest's work the same.
+- **Drawn** in `client/heldkits.ts`: a thin rapier with a gilt hilt; the knife in hand and the hand
+  crossbow at the off hand, up to the eye on a hold; the sword with the censer at the off hand, the
+  censer on its chain throwing coals when it's swung or whirled; the flail's head hanging at rest,
+  spinning overhead with light gathering on a hold. Each has its own swing and hit sounds.
+
 ## 2026-11-01: the back of the pack: hexers and drummers, and a tougher mix for a bigger party (Kyle; Opus 5.5)
 
 Kyle: enemies harder with more people, and variety (small ones, spears, big ones, ranged, casters,

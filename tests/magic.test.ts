@@ -117,7 +117,7 @@ describe('class weapons', () => {
   });
 
   it('only the rogue is quick: every other class walks slower', () => {
-    for (const k of Object.keys(WEAPONS) as (keyof typeof WEAPONS)[]) if (k !== 'daggers') expect(WEAPONS[k].speed).toBeLessThan(1);
+    for (const k of Object.keys(WEAPONS) as (keyof typeof WEAPONS)[]) if (WEAPONS[k].cls !== 'ROGUE') expect(WEAPONS[k].speed).toBeLessThan(1);
     expect(WEAPONS.daggers.speed).toBeGreaterThan(1);
     expect(WEAPONS.staff.dodge.cooldown).toBeGreaterThan(WEAPONS.daggers.dodge.cooldown * 4);
   });
