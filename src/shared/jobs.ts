@@ -37,6 +37,12 @@ export const SIZES: Record<Size, { rooms: number; label: string; minutes: string
 /** Gold a job pays: by room, by how bad the place is, more at night, more for a longer one. */
 export const payFor = (rooms: number, ruin: number, night: boolean, size: Size) => Math.round((18 + ruin * 9 + (night ? 6 : 0)) * rooms * SIZES[size].pay);
 export type Twist = 'none' | 'night';
+/** A story mission is for a party: at least this many heroes when the world is shared online. */
+export const STORY_PARTY = 3;
+/** The short name of a job's kind, for the board's list. */
+export const KIND: Record<Objective, string> = { rescue: 'RESCUE', hunt: 'HUNT', larder: 'LARDER', burn: 'DENS', story: 'STORY' };
+/** How hard a job is, 1 to 5: the place's ruin, its length, night, and a deep dive. */
+export const danger = (j: Job) => Math.max(1, Math.min(5, Math.round(1 + j.place.ruin * 0.6 + (j.size === 'long' ? 1 : j.size === 'short' ? 0 : 0.5) + (j.twist === 'night' ? 0.5 : 0) + (j.deep ? 1 : 0) + (j.objective === 'story' ? 1 : 0))));
 
 export interface Job {
   id: string;

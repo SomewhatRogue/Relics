@@ -6,7 +6,7 @@
  */
 import { doorAt, inArea, npcAt, type Area, type Block, type Npc, type Theme } from '../shared/arena';
 import { townInterior } from '../shared/interiors';
-import { board, type Job } from '../shared/jobs';
+import { board, STORY_PARTY, type Job } from '../shared/jobs';
 import { WORKS, workDone, workOpen, workProgress, WORK_ORDER, type WorkId } from '../shared/works';
 import { contribute, type Contribution } from '../shared/worldsync';
 import { BOUNTY, HERO_SLOTS, PERK, SHOP, gainXp, newProfile, type PerkId, type Profile } from '../shared/progress';
@@ -448,7 +448,14 @@ export class Game {
   }
 
   /** Leading a party: set out, and this browser runs the job for everyone in it. */
+  /** Can this job be set out on with this many? (A story mission needs a party, online.) */
+  canTake(job: Job, party: number): boolean {
+    return job.objective !== 'story' || !this.link?.online || party >= STORY_PARTY;
+  }
+
   setOut(): void {
+    const mine = this.parties?.list().find((q) => q.mine);
+    if (mine && !this.canTake(mine.job, mine.members.length)) return;
     const go = this.parties?.setOut();
     if (!go) return;
     this.coop = new CoopHost(go.room, this.profile.id, this.profile.name, this, go.members);

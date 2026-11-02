@@ -1272,3 +1272,9 @@ and he couldn't tell when or where he could leave.
   someone freed out in the open, then the way on. Someone freed and left out of sight gets a pale mark
   at the screen's edge. Every kind of place has its way out at the top middle (forks: two at the top);
   a test floods each from the way in and checks nothing stands in front of it.
+
+## 2026-11-01: the job board, and story missions need a party (Kyle; Opus 5.5)
+- The board lists each job on one line: its kind, the place, its length, how hard (five pips:
+  ruin, length, night, deep, story) and the pay. Tap one for the rest and the buttons.
+- Online, a story mission needs a party of three (`STORY_PARTY`): no GO ALONE, and the party can't set
+  out short-handed. Off the shared world (and in the one-file build) it can still be taken alone.

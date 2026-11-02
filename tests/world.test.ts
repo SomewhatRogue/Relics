@@ -190,3 +190,16 @@ describe('party rewards', () => {
     expect(treasure(job, 'WARRIOR', 'habcdef', 3, 2).length).toBe(treasure(job, 'WARRIOR', 'habcdef', 3, 1).length + 1);
   });
 });
+
+describe('story missions', () => {
+  it('need a party of three when the world is shared, and can be taken alone off it', async () => {
+    const { CHAPTER_1 } = await import('../src/shared/story');
+    const g = new Game();
+    g.create('WARRIOR', 'b');
+    const job = CHAPTER_1.mission as unknown as Parameters<typeof g.canTake>[0];
+    expect(g.canTake(job, 1)).toBe(true);
+    g.link = { online: true, send: () => undefined };
+    expect(g.canTake(job, 2)).toBe(false);
+    expect(g.canTake(job, 3)).toBe(true);
+  });
+});

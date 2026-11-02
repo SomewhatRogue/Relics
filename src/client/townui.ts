@@ -16,7 +16,10 @@ import type { Panel } from './panels';
 import { RUMOURS } from './rumours';
 import { PARTY_MAX } from './parties';
 import { CLASSES, CLASS_NAME } from '../shared/classes';
-import { SIZES } from '../shared/jobs';
+import { KIND, SIZES, STORY_PARTY, danger } from '../shared/jobs';
+
+/** The job open on the board (by id), if any. */
+let boardOpen = '';
 import { treasureWord } from '../shared/treasure';
 import { SPEAKER, townSays } from '../shared/townsays';
 import { lossText } from '../shared/raids';
@@ -43,7 +46,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     const partyHtml = parties.length ? '<h3>PARTIES</h3>' + parties.map((q, i) =>
       `<div class="job party"><div class="t">${q.mine ? 'YOUR PARTY' : `${esc(q.members[0][1])}'S PARTY`}: ${esc(q.job.title)}</div>` +
       `<div class="m">${esc(q.job.place.name)}. ${q.members.map((m) => esc(m[1])).join(', ')} (${q.members.length} of ${PARTY_MAX})</div>` +
-      (q.mine ? `<button data-setout>SET OUT</button> <button data-quit class="ghost">TAKE IT DOWN</button>`
+      (q.mine ? `${g.canTake(q.job, q.members.length) ? '<button data-setout>SET OUT</button>' : `<div class="d">NEEDS ${STORY_PARTY} TO SET OUT</div>`} <button data-quit class="ghost">TAKE IT DOWN</button>`
         : q.in ? `<div class="d">WAITING ON ${esc(q.members[0][1])}</div><button data-quit class="ghost">LEAVE</button>`
         : q.asked ? `<div class="d">ASKED TO JOIN</div><button data-quit class="ghost">NEVER MIND</button>`
         : q.members.length < PARTY_MAX ? `<button data-joinparty="${i}">JOIN</button>` : '<div class="d">FULL</div>') + '</div>').join('') : '';
@@ -52,13 +55,21 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     // The town hit, while the raid is still the newest thing on the board.
     const raidHtml = raid && !deeds.some((d) => d.day > raid.day) ? `<div class="m">${esc(MEND_UI.board(raid.day, lossText(raid)))}</div>` : '';
     const doneHtml = deeds.length || raidHtml ? '<h3>DONE LATELY</h3>' + raidHtml + deeds.map((d) => `<div class="m">Day ${Number(d.day) || 1}: ${esc(d.title)}, by ${d.party.map(esc).join(', ')}.</div>`).join('') : '';
-    const html = partyHtml + doneHtml + (partyHtml || doneHtml ? '<h3>JOBS</h3>' : '') + jobs.map((j, i) =>
-      `<div class="job ${j.objective === 'story' ? 'story' : j.deep ? 'deep' : ''}"><div class="t">${j.objective === 'story' ? 'STORY: ' : ''}${j.title}</div>` +
-      `<div class="m">${j.place.name}, ${j.place.region}. ${RUIN[j.place.ruin]}. ${SIZES[j.size ?? 'medium'].label}: ${j.rooms} rooms, ${SIZES[j.size ?? 'medium'].minutes}${j.twist === 'night' ? '. At night' : ''}. Pays ${Math.round(j.reward * rewardMult(w))} gold and ${treasureWord(j)}.</div>` +
-      `<div class="d">${j.text}</div><button data-job="${i}">${pt ? 'GO ALONE' : 'TAKE THE JOB'}</button>${pt ? ` <button data-gather="${i}">GATHER A PARTY</button>` : ''}</div>`).join('');
+    // The list: what kind of job, how long, how hard, what it pays. Tap one for the rest.
+    const pips = (n: number) => '<span class="pips">' + '<i class="on"></i>'.repeat(n) + '<i></i>'.repeat(5 - n) + '</span>';
+    const html = partyHtml + doneHtml + (partyHtml || doneHtml ? '<h3>JOBS</h3>' : '') + jobs.map((j, i) => {
+      const open = boardOpen === j.id, size = SIZES[j.size ?? 'medium'], pay = Math.round(j.reward * rewardMult(w)), story = j.objective === 'story';
+      const alone = g.canTake(j, 1), head = `<button class="jhead" data-open="${i}"><b class="kind k-${j.objective}">${KIND[j.objective]}</b><span class="where">${esc(j.place.name)}</span><span class="len">${size.label}</span>${pips(danger(j))}<em>${pay}g</em></button>`;
+      const more = open ? `<div class="jmore"><div class="t">${story ? 'STORY: ' : ''}${j.title}</div>` +
+        `<div class="m">${j.place.region}. ${RUIN[j.place.ruin]}. ${j.rooms} rooms, ${size.minutes}${j.twist === 'night' ? '. At night' : ''}. Pays ${pay} gold and ${treasureWord(j)}.</div>` +
+        `<div class="d">${j.text}</div>` + (story && !alone ? `<div class="need">Needs a party of ${STORY_PARTY}.</div>` : '') +
+        (alone ? `<button data-job="${i}">${pt ? 'GO ALONE' : 'TAKE THE JOB'}</button>` : '') + (pt ? ` <button data-gather="${i}">GATHER A PARTY</button>` : '') + '</div>' : '';
+      return `<div class="job ${story ? 'story' : j.deep ? 'deep' : ''}${open ? ' open' : ''}">${head}${more}</div>`;
+    }).join('');
     panel.show(`JOB BOARD, DAY ${w.day}`, html);
     const on = (sel: string, f: (b: HTMLButtonElement) => void) => document.querySelectorAll<HTMLButtonElement>(`#panel ${sel}`).forEach((b) => b.addEventListener('click', () => f(b)));
-    on('[data-job]', (b) => (panel.hide(), pt?.quit(), g.startJob(jobs[Number(b.dataset.job)])));
+    on('[data-open]', (b) => ((boardOpen = boardOpen === jobs[Number(b.dataset.open)].id ? '' : jobs[Number(b.dataset.open)].id), openSpot('board', g, panel)));
+    on('[data-job]', (b) => g.canTake(jobs[Number(b.dataset.job)], 1) && (panel.hide(), pt?.quit(), g.startJob(jobs[Number(b.dataset.job)])));
     on('[data-gather]', (b) => pt?.gather(jobs[Number(b.dataset.gather)]));
     on('[data-joinparty]', (b) => pt?.join(parties[Number(b.dataset.joinparty)].lead));
     on('[data-quit]', () => pt?.quit());

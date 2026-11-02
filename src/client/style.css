@@ -402,3 +402,19 @@ body[data-guard="none"] .tb.block { display: none; }
 #panel .rtabs button { flex: 1; padding: 8px 0; background: #1c1a22; border: 1px solid #3a3644; color: #b8b2c4; border-radius: 6px; letter-spacing: 0.08em; }
 #panel .rtabs button.on { background: #2a2418; border-color: #ffd27a; color: #ffd27a; }
 #panel .rtabs button[data-side="unlucky"].on { background: #2a1a1c; border-color: #e07a6a; color: #e07a6a; }
+
+/* The job board: a line a job; tap one for the rest. */
+#panel .job .jhead { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 6px; background: none; border: 0; color: #e8e2d0; text-align: left; font-size: 12px; }
+#panel .job .jhead .kind { min-width: 52px; font-size: 11px; letter-spacing: 0.06em; color: #ffd27a; }
+#panel .job .jhead .k-rescue { color: #9ad8a8; }
+#panel .job .jhead .k-hunt { color: #e07a6a; }
+#panel .job .jhead .k-story { color: #ffe9a8; }
+#panel .job .jhead .where { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#panel .job .jhead .len { color: #8a8494; font-size: 10px; }
+#panel .job .jhead em { font-style: normal; color: #ffd27a; min-width: 38px; text-align: right; }
+#panel .pips { display: inline-flex; gap: 2px; }
+#panel .pips i { width: 5px; height: 8px; background: #3a3644; }
+#panel .pips i.on { background: #c84a3a; }
+#panel .job .jmore { padding: 0 6px 8px; }
+#panel .job .need { color: #e07a6a; margin: 6px 0; }
+#panel .job.open { border-color: #ffd27a; }
