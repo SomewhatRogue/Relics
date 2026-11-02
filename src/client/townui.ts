@@ -62,7 +62,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       const alone = g.canTake(j, 1), head = `<button class="jhead" data-open="${i}"><b class="kind k-${j.objective}">${KIND[j.objective]}</b><span class="where">${esc(j.place.name)}</span><span class="len">${size.label}</span>${pips(danger(j))}<em>${pay}g</em></button>`;
       const more = open ? `<div class="jmore"><div class="t">${story ? 'STORY: ' : ''}${j.title}</div>` +
         `<div class="m">${j.place.region}. ${RUIN[j.place.ruin]}. ${j.rooms} rooms, ${size.minutes}${j.twist === 'night' ? '. At night' : ''}. Pays ${pay} gold and ${treasureWord(j)}.</div>` +
-        `<div class="d">${j.text}</div>` + (story && !alone ? `<div class="need">Needs a party of ${STORY_PARTY}.</div>` : '') +
+        `<div class="d">${j.text}</div>` + (story && !alone ? `<div class="need">Needs ${STORY_PARTY} to set out.</div>` : '') +
         (alone ? `<button data-job="${i}">${pt ? 'GO ALONE' : 'TAKE THE JOB'}</button>` : '') + (pt ? ` <button data-gather="${i}">GATHER A PARTY</button>` : '') + '</div>' : '';
       return `<div class="job ${story ? 'story' : j.deep ? 'deep' : ''}${open ? ' open' : ''}">${head}${more}</div>`;
     }).join('');
