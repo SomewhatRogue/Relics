@@ -4,7 +4,9 @@
  * its ranks as pips, what the next rank adds, and its price, the level it waits on, or MAX; tap it
  * for the whole ladder and one buy button. The rows come from shared/trainrows.ts.
  */
-import { LEVEL_CAP, PERKS, perkOffer, xpFor } from '../shared/progress';
+import { perkOffer, perkText, PERKS } from '../shared/progress';
+import { xpHead } from './xphead';
+import { openTree } from './treeui';
 import { RELICS, SKILL_CHOICES, CLASS_SKILL, type RelicId } from '../shared/magic';
 import { trainerRows, type Pip, type TrainRow } from '../shared/trainrows';
 import { knowsLesson } from '../shared/training';
@@ -16,13 +18,7 @@ import './trainer.css';
 
 const pips = (ps: Pip[]) => `<span class="tr-pips">${ps.map((x) => `<i class="${x}"></i>`).join('')}</span>`;
 
-/** Level, a bar to the next, and gold. */
-function head(g: Game): string {
-  const p = g.profile, top = p.level >= LEVEL_CAP, from = xpFor(p.level), to = xpFor(p.level + 1);
-  const fill = top ? 100 : Math.max(0, Math.min(100, Math.round(((p.xp - from) / (to - from)) * 100)));
-  return `<div class="tr-head"><div class="tr-top"><b>LEVEL ${p.level}</b><em>${p.gold} GOLD</em></div>` +
-    `<div class="tr-bar"><i style="width:${fill}%"></i></div><div class="tr-xp">${top ? 'FULL' : `${p.xp} / ${to} XP`}</div></div>`;
-}
+const head = (g: Game) => xpHead(g.profile);
 
 const row = (r: TrainRow) =>
   `<button class="tr-row s-${r.state}" data-row="${r.id}"><span class="tr-n">${r.name}${pips(r.pips)}</span>` +
@@ -38,17 +34,20 @@ export function openTrainer(g: Game, panel: Panel, title: string, who: string, g
   // Level-up picks: tap one to take it.
   const offer = p.picks > 0 ? perkOffer(p) : [];
   const picks = offer.length ? `<h3 class="tr-h">${p.picks > 1 ? `${p.picks} PICKS WAITING` : 'A PICK WAITING'}</h3>` +
-    offer.map((k) => `<button class="tr-pick" data-pick="${k}"><b>${PERKS[k].name}</b><span>${PERKS[k].text}</span><em>TAKE</em></button>`).join('') : '';
+    offer.map((k) => `<button class="tr-pick" data-pick="${k}"><b>${PERKS[k].name}</b><span>${perkText(k, p.cls)}</span><em>TAKE</em></button>`).join('') : '';
   // A class with a choice of skills carries one; change it here for nothing.
   const choices = SKILL_CHOICES[p.cls], carried = p.skill && choices.includes(p.skill) ? p.skill : CLASS_SKILL[p.cls];
   const carry = choices.length > 1 && knowsLesson(p, 'skill') ? `<div class="tr-carry"><span>CARRY</span>` +
     choices.map((r) => `<button data-carry="${r}" class="${r === carried ? 'on' : ''}">${RELICS[r].name}</button>`).join('') + '</div>' : '';
-  const perks = p.perks.length ? `<h3 class="tr-h">KNACKS</h3><div class="tr-chips">${p.perks.map((k) => `<span>${PERKS[k].name}</span>`).join('')}</div>` : '';
-  const html = head(g) + (greet ? `<p><b>${who}:</b> ${line(`"${greet}"`, who)}</p>` : '') + picks +
-    `<h3 class="tr-h">SKILLS</h3>${lessons.map(row).join('')}${carry}<h3 class="tr-h">TRAINING</h3>${drills.map(row).join('')}` + perks;
+  // Every knack and where each chain goes: the tree (treeui.ts), picks taken there too.
+  const perks = `<h3 class="tr-h">KNACKS</h3><button class="tr-row tr-tree" data-tree><span class="tr-n">SEE THE TREE</span>` +
+    `<span class="tr-g">${p.perks.length ? p.perks.map((k) => PERKS[k].name).join(', ') : 'none yet'}</span><em class="tr-t">&rsaquo;</em></button>`;
+  const html = head(g) + (greet ? `<p><b>${who}:</b> ${line(`"${greet}"`, who)}</p>` : '') + picks + (picks ? perks : '') +
+    `<h3 class="tr-h">SKILLS</h3>${lessons.map(row).join('')}${carry}<h3 class="tr-h">TRAINING</h3>${drills.map(row).join('')}` + (picks ? '' : perks);
   panel.show(title, html);
   const on = (sel: string, f: (b: HTMLElement) => void) => document.querySelectorAll<HTMLElement>(`#panel ${sel}`).forEach((b) => b.addEventListener('click', () => f(b)));
   on('[data-pick]', (b) => (g.pickPerk(b.dataset.pick as never), again()));
+  on('[data-tree]', () => openTree(g, panel, { take: true, back: again }));
   on('[data-carry]', (b) => (g.chooseSkill(b.dataset.carry as RelicId), again()));
   on('[data-row]', (b) => openRow(g, panel, title, b.dataset.row!, again));
 }

@@ -1,0 +1,37 @@
+/* The knacks tree (treeui.ts): a row of three steps per chain, square-cut like the rest of the UI. */
+#panel .kn-note { margin: 2px 0 8px; color: #b8b2c4; font-size: 11px; }
+#panel .kn-tree { display: flex; flex-direction: column; gap: 9px; }
+#panel .kn-h { display: flex; align-items: baseline; justify-content: space-between; margin: 0 0 4px; }
+#panel .kn-h b { color: #c8b080; font-size: 10px; letter-spacing: 0.15em; font-weight: 600; }
+#panel .kn-h i { color: #6a6474; font-size: 10px; font-style: normal; }
+#panel .kn-row { display: grid; grid-template-columns: 1fr 7px 1fr 7px 1fr; align-items: center; }
+#panel .kn-node { display: flex; flex-direction: column; justify-content: center; gap: 3px; min-width: 0; min-height: 54px; padding: 5px 4px; text-align: center; border-radius: 0; border: 2px solid #3a3644; background: #17151d; box-shadow: inset 0 -3px 0 #0d0b10; color: #8a8494; }
+#panel .kn-node b { display: block; color: inherit; font-size: 10px; letter-spacing: 0.04em; line-height: 1.15; overflow-wrap: anywhere; }
+#panel .kn-node span { font-size: 9px; line-height: 1.2; color: inherit; opacity: 0.85; }
+#panel .kn-link { display: block; height: 2px; background: #3a3644; }
+#panel .kn-link.on { background: #ffd27a; box-shadow: 0 0 4px #ffd27a88; }
+#panel .kn-node.s-have { border-color: #ffd27a; background: #3a2c14; box-shadow: inset 0 -3px 0 #22180a, 0 0 8px #ffb84a44; color: #fff1d0; }
+#panel .kn-node.s-have span { color: #ffd27a; opacity: 1; }
+#panel .kn-node.s-offer { border-color: #9ad8a8; background: #18291e; color: #e0f8e6; animation: kn-glow 1.4s steps(4) infinite; }
+#panel .kn-node.s-offer span { color: #9ad8a8; opacity: 1; }
+#panel .kn-node.s-next { border-color: #6a7a98; background: #1c2230; color: #d8e4f4; }
+#panel .kn-node.s-next span { color: #9fd0ff; opacity: 1; }
+#panel .kn-node.s-later { border-style: dashed; opacity: 0.5; }
+#panel .kn-node.sel { outline: 2px solid #f0e0b0; outline-offset: 1px; }
+#panel .kn-detail { margin: 10px 0 0; padding: 7px 9px; border: 2px solid #3a3644; background: #211e29; }
+#panel .kn-detail div { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 3px; }
+#panel .kn-detail b { font-size: 12px; letter-spacing: 0.04em; }
+#panel .kn-detail em { font-style: normal; font-size: 10px; letter-spacing: 0.1em; color: #8a8494; }
+#panel .kn-detail span { font-size: 11px; color: #c8c4d0; }
+#panel .kn-detail.s-have { border-color: #6a5a3a; }
+#panel .kn-detail.s-have em { color: #ffd27a; }
+#panel .kn-detail.s-offer { border-color: #9ad8a8; }
+#panel .kn-detail.s-offer em { color: #9ad8a8; }
+#panel .kn-detail.s-next em { color: #9fd0ff; }
+#panel .tr-tree .tr-g { color: #c8c4d0; }
+@keyframes kn-glow { 0%, 100% { box-shadow: inset 0 -3px 0 #0d1a10, 0 0 0 #9ad8a800; } 50% { box-shadow: inset 0 -3px 0 #0d1a10, 0 0 10px #9ad8a8aa; } }
+@media (min-width: 700px) {
+  #panel .kn-node { min-height: 62px; }
+  #panel .kn-node b { font-size: 11px; }
+  #panel .kn-node span { font-size: 10px; }
+}

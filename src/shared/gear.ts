@@ -6,7 +6,7 @@
  */
 import type { Rng } from './rng.js';
 import { ELEMENT_TRAITS, traitsFor, type Item, type Tier } from './loot.js';
-import { CLASS_KITS, type HeroClass, type WeaponId } from './weapons.js';
+import { CLASS_DODGES, CLASS_GUARD, CLASS_KITS, type HeroClass, type WeaponId } from './weapons.js';
 
 export const TIERS: Record<Tier, { name: string; col: string; mods: number; step: number; cap: number }> = {
   plain: { name: 'PLAIN', col: '#e8e4ee', mods: 0, step: 0, cap: 2 },
@@ -45,6 +45,17 @@ export const MOD_TEXT: Record<ModId, string> = {
   tough: 'less damage taken', breath: 'breath comes back faster', foot: 'faster on your feet', dodge: 'dodge again sooner',
   focus: 'skill and relic recharge sooner', mending: 'every heal you give',
 };
+/**
+ * Whether a modifier can roll for a class: nothing it can't use (Kyle, 2026-11-02). PARRY needs a parry,
+ * GUARD a held block, DODGE a dodge button, MENDING a Healer.
+ */
+export function modFits(id: ModId, cls: HeroClass): boolean {
+  if (id === 'parry') return CLASS_GUARD[cls] !== 'none';
+  if (id === 'guard') return CLASS_GUARD[cls] === 'full';
+  if (id === 'dodge') return CLASS_DODGES[cls];
+  if (id === 'mending') return cls === 'HEALER';
+  return true;
+}
 /** Most a full set can stack, so gear never breaks the fight. */
 export const CAPS: Partial<Record<ModId, number>> = { damage: 0.5, quick: 0.3, tough: 0.3, draw: 0.5, guard: 0.6, foot: 0.25, dodge: 0.4, focus: 0.4, breath: 0.6, reach: 0.4 };
 
@@ -77,7 +88,7 @@ export const nextLevel = (i: Item) => ((i.level ?? 0) < TIERS[i.quality].cap ? U
 /** Ivo's reroll: modifier `k` becomes a different one this slot can roll, at the same tier. */
 export function reroll(rng: Rng, i: Item, k: number, cls: HeroClass): Item {
   const slot = slotOf(i), have = (i.mods ?? []).map((m) => m.id);
-  const pool = (Object.keys(MODS) as ModId[]).filter((id) => MODS[id].on.includes(slot) && !have.includes(id) && (id !== 'mending' || cls === 'HEALER'));
+  const pool = (Object.keys(MODS) as ModId[]).filter((id) => MODS[id].on.includes(slot) && !have.includes(id) && modFits(id, cls));
   if (!pool.length || !i.mods?.[k]) return i;
   const id = rng.pick(pool), mods = [...i.mods];
   mods[k] = { id, v: value(rng, id, TIERS[i.quality].step) };
@@ -95,7 +106,7 @@ export function rollGear(rng: Rng, cls: HeroClass, tier: Tier, slot: Slot = 'wea
   const t = tier === 'hungry' ? 'tolmouth' : tier, n = TIERS[t].mods, out: Item = { slot, quality: t, traits: [], mods: [], level: 0 };
   if (slot === 'weapon') out.kit = kit ?? rng.pick(CLASS_KITS[cls]);
   if (slot === 'armor') out.armor = armor ?? rng.pick(['light', 'medium', 'heavy'] as ArmorKind[]);
-  const pool = (Object.keys(MODS) as ModId[]).filter((id) => MODS[id].on.includes(slot) && (id !== 'mending' || cls === 'HEALER'));
+  const pool = (Object.keys(MODS) as ModId[]).filter((id) => MODS[id].on.includes(slot) && modFits(id, cls));
   // Forged: half the time one modifier and an element instead of two.
   const element = slot === 'weapon' && t === 'forged' && rng.next() < 0.5;
   for (let i = 0; i < n - (element ? 1 : 0) && pool.length; i++) {
@@ -107,17 +118,23 @@ export function rollGear(rng: Rng, cls: HeroClass, tier: Tier, slot: Slot = 'wea
   return out;
 }
 
-/** Odds of each tier by where it came from (danger shifts every roll one tier up). */
+/**
+ * Odds of each tier by where it came from. Tolmouth (purple) is a real find: a few in the first several
+ * hours, mostly from long and deep jobs (Kyle, 2026-11-02: "purple loot too fast").
+ */
 const ODDS: Record<'scrapper' | 'butcher' | 'named' | 'chest', [Tier, number][]> = {
-  scrapper: [['plain', 0.6], ['fine', 0.4]],
-  butcher: [['fine', 0.55], ['forged', 0.3], ['tolmouth', 0.15]],
-  named: [['forged', 0.65], ['tolmouth', 0.3], ['hungry', 0.05]],
-  chest: [['plain', 0.4], ['fine', 0.3], ['forged', 0.18], ['tolmouth', 0.09], ['hungry', 0.03]],
+  scrapper: [['plain', 0.7], ['fine', 0.3]],
+  butcher: [['plain', 0.2], ['fine', 0.55], ['forged', 0.23], ['tolmouth', 0.02]],
+  named: [['fine', 0.35], ['forged', 0.53], ['tolmouth', 0.1], ['hungry', 0.02]],
+  chest: [['plain', 0.45], ['fine', 0.37], ['forged', 0.15], ['tolmouth', 0.02], ['hungry', 0.01]],
 };
+/** Danger lifts a roll a tier a step, but only as far as Forged: Tolmouth and Hungry are found, never lifted into. */
+export const LIFT_TO: Tier = 'forged';
 export function rollTier(rng: Rng, from: keyof typeof ODDS, shift = 0): Tier {
   let r = rng.next(), t: Tier = ODDS[from][ODDS[from].length - 1][0];
   for (const [tier, p] of ODDS[from]) if ((r -= p) < 0) { t = tier; break; }
-  return t === 'hungry' ? t : TIER_ORDER[Math.min(3, TIER_ORDER.indexOf(t) + shift)];
+  const i = TIER_ORDER.indexOf(t), top = TIER_ORDER.indexOf(LIFT_TO);
+  return i >= top ? t : TIER_ORDER[Math.min(top, i + shift)];
 }
 
 /** Old saves: a weapon with a trait and no modifiers becomes Tolmouth, keeping what it had. */

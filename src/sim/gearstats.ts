@@ -1,5 +1,5 @@
 /** What a hero's worn gear adds up to (shared/gear.ts), read wherever the fight uses a number. */
-import { drilled, gearStats, type GearStats } from '../shared/tuning';
+import { drilled, gearStats, perkFx, type Fx, type GearStats } from '../shared/tuning';
 import type { Hero } from './types';
 
 const cache = new WeakMap<Hero, { key: unknown[]; s: GearStats & { crit: number } }>();
@@ -7,10 +7,11 @@ const cache = new WeakMap<Hero, { key: unknown[]; s: GearStats & { crit: number 
 /** Gear and drills together: power, health, speed and wind from the trainer on top of what's worn. */
 export function statsOf(h: Hero): GearStats & { crit: number } {
   const w = h.arms?.[h.weapon], rings = h.rings ?? [], c = cache.get(h), d = h.drills;
-  if (c && c.key[0] === w && c.key[1] === h.armor && c.key[2] === rings[0] && c.key[3] === rings[1] && c.key[4] === d) return c.s;
+  if (c && c.key[0] === w && c.key[1] === h.armor && c.key[2] === rings[0] && c.key[3] === rings[1] && c.key[4] === d && c.key[5] === (h.perks ?? []).join()) return c.s;
   const g = gearStats(w, h.armor, rings);
   const s = { ...g, damage: g.damage + drilled(d, 'power'), health: g.health + drilled(d, 'health'), speed: g.speed * (1 + drilled(d, 'speed')), breath: g.breath + drilled(d, 'wind'), crit: drilled(d, 'crit') };
-  cache.set(h, { key: [w, h.armor, rings[0], rings[1], d], s });
+  withKnacks(s, perkFx(h.perks));
+  cache.set(h, { key: [w, h.armor, rings[0], rings[1], d, (h.perks ?? []).join()], s });
   return s;
 }
 
@@ -20,3 +21,13 @@ export function refreshHealth(h: Hero): void {
   h.maxHp = max;
   h.hp = Math.max(1, Math.min(max, max - lost));
 }
+
+/** Knacks on top (shared/perks.ts): gear-named ones add as gear does; health stays in the hero's own (baseHp). */
+function withKnacks(s: GearStats & { crit: number }, f: Fx): void {
+  for (const k of ['damage', 'quick', 'reach', 'draw', 'parry', 'knock', 'breath', 'dodge', 'focus', 'mending', 'crit'] as const) s[k] += f[k] ?? 0;
+  s.speed *= 1 + (f.foot ?? 0);
+  s.taken *= 1 - (f.tough ?? 0);
+}
+
+/** A hero's knacks, for the few that aren't gear numbers (down, block, rear, bless, counter, winded). */
+export const knack = (h: Hero, k: keyof Fx) => perkFx(h.perks)[k] ?? 0;

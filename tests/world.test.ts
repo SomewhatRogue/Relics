@@ -144,10 +144,10 @@ describe('the town', () => {
     }
   });
 
-  it("each class's trainer offers its own perk, and it works", () => {
+  it("a Ranger's knacks come from its own chains, and the bow one works", () => {
     const p = newProfile('RANGER');
     p.picks = 1;
-    expect(perkOffer(p)[0]).toBe('steadyhand');
+    expect(perkOffer(p)).toHaveLength(2);
     const h = { perks: ['steadyhand'] } as never;
     expect(chargeFull(WEAPONS.longbow, h)).toBeLessThan(chargeFull(WEAPONS.longbow));
   });

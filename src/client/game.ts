@@ -9,7 +9,8 @@ import { townInterior } from '../shared/interiors';
 import { board, STORY_PARTY, type Job } from '../shared/jobs';
 import { WORKS, workDone, workOpen, workProgress, WORK_ORDER, type WorkId } from '../shared/works';
 import { contribute, type Contribution } from '../shared/worldsync';
-import { BOUNTY, HERO_SLOTS, PERK, SHOP, gainXp, newProfile, type PerkId, type Profile } from '../shared/progress';
+import { HERO_SLOTS, SHOP, gainXp, newProfile, perkFx, perkOffer, type PerkId, type Profile } from '../shared/progress';
+import { jobXp } from '../shared/pace';
 import { Rng } from '../shared/rng';
 import { CHAPTER_1, QUORUM, rewardMult, type WorldState } from '../shared/story';
 import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
@@ -221,7 +222,7 @@ export class Game {
     h.drills = p.drills;
     h.armor = p.armor;
     h.rings = [...p.rings];
-    h.baseHp = HERO.hp + (p.perks.includes('tough') ? PERK.tough : 0);
+    h.baseHp = HERO.hp + (perkFx(p.perks).health ?? 0);
     h.maxHp = h.baseHp + statsOf(h).health;
     h.relics = abilitiesOf(p.cls, p.relic, p.skill);
     h.learned = p.learned;
@@ -592,14 +593,14 @@ export class Game {
     this.coop = null;
     // Driven back in the Ransom Coat: all of it, not half.
     const ransom = !won && p.armor?.hungry === 'ransom';
-    // A bigger party: more pay and objective xp, and a better treasure (more goblins already paid more along the way).
+    // A bigger party: more pay and a better treasure; experience shared out so it's a little more, not a multiple (shared/pace.ts).
     const crowd = Math.max(1, run.party ?? 1), bonus = 1 + PARTY.reward * (crowd - 1);
     const gold = won ? run.gold + Math.round(run.job.reward * rewardMult(w) * bonus) : ransom ? 0 : Math.round(run.gold / 2);
     if (ransom) p.gold = 0;
     // The Want grows with every job finished in hungry gear, and with what it killed.
     const hungry = this.hungryWorn();
     p.want += hungry.reduce((s, it) => s + HUNGRY[it.hungry as HungryId].want, 0) + (hungry.length ? run.kills * WANT.perKill : 0);
-    const xp = run.xp + (won ? Math.round(BOUNTY.objective * bonus) : 0), rescued = won ? run.rescued : 0;
+    const xp = jobXp(run.xp, won, crowd), rescued = won ? run.rescued : 0;
     p.gold += gold;
     p.runs++;
     const levels = gainXp(p, xp);
@@ -943,7 +944,8 @@ export class Game {
 
   pickPerk(id: PerkId): void {
     const p = this.profile;
-    if (p.picks <= 0 || p.perks.includes(id)) return;
+    // Only one of the two the tree offers now (shared/chains.ts).
+    if (p.picks <= 0 || !perkOffer(p).includes(id)) return;
     p.perks.push(id);
     p.picks--;
     this.equip(this.hero, this.hero);
