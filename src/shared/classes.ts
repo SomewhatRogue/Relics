@@ -74,7 +74,7 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     weapon: 'Mace and censer',
     skill: "Sanctuary: blessed ground mends allies and burns goblins, and wards whoever's worst hurt. Your trainer teaches it from level 2.",
     cant: 'Slow, short reach.',
-    guard: "Can hold a block and parry, though a mace and censer give a little more than a shield does. Can't roll: walk out of anything striped.",
+    guard: "Can hold a block and parry, though a mace and censer let a little more through than a shield. Can't roll: walk out of anything striped.",
     note: 'Feed the censer what butchers leave. It heals hotter, and draws teeth.',
     noteLabel: 'CENSER',
     stats: { POWER: 2, GUARD: 4, SPEED: 2, RANGE: 2, SUPPORT: 5 },

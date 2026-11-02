@@ -1,4 +1,4 @@
-/** A 3x5 pixel font for numbers and short calls ("PARRY"), drawn crisp at any zoom. */
+/** A 3x5 pixel font for numbers, short calls ("PARRY") and a few words of speech (in capitals), drawn crisp at any zoom. */
 const G: Record<string, string> = {
   '0': '111101101101111', '1': '010110010010111', '2': '111001111100111', '3': '111001111001111', '4': '101101111001001',
   '5': '111100111001111', '6': '111100111101111', '7': '111001001010010', '8': '111101111101111', '9': '111101111001111',
@@ -7,6 +7,8 @@ const G: Record<string, string> = {
   M: '101111111101101', F: '111100110100100', X: '101101010101101', K: '101101110101101', L: '100100100100111', N: '110101101101101', O: '010101101101010',
   P: '110101110100100', R: '110101110101101', S: '011100010001110', T: '111010010010010', U: '101101101101111',
   W: '101101111111101', Y: '101101010010010', Q: '010101101110011', Z: '111001010100111', '+': '000010111010000', '!': '010010010000010', ' ': '000000000000000',
+  '.': '000000000000010', ',': '000000000010100', "'": '010010000000000', ':': '000010000010000', '?': '111001011000010',
+  '-': '000000111000000', '/': '001001010100100', '♥': '101111111010000',
 };
 
 export function textWidth(s: string): number {
@@ -18,7 +20,7 @@ export function drawText(g: CanvasRenderingContext2D, s: string, x: number, y: n
   const px = (ox: number, oy: number, c: string) => {
     g.fillStyle = c;
     for (let i = 0; i < s.length; i++) {
-      const p = G[s[i]] ?? G[' '];
+      const p = G[s[i]] ?? G[s[i].toUpperCase()] ?? G[' '];
       for (let k = 0; k < 15; k++) if (p[k] === '1') g.fillRect(x + ox + i * 4 + (k % 3), y + oy + Math.floor(k / 3), 1, 1);
     }
   };

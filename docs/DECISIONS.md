@@ -904,3 +904,16 @@ which moves the page to the media channel.
   a lantern post in a barn. Collision sizes outside are unchanged.
 - A hiding survivor is a cage tucked in the back (the only rescue the room knows); a free one who
   talks would need new lines and a run-side talk handler.
+
+## 2026-11-01: no dodge for Warriors and Healers (Kyle; Opus 5.5)
+
+- Warriors and Healers can't dodge at all; there's no button for it on a phone. They block, and walk
+  out of anything striped. Pressing dodge does nothing (`CLASS_DODGES` in `weapons.ts`).
+- Walking out of a striped blow aimed at you counts as a dodge (`EnemyAttack.aimed`; a charge that runs
+  its line and misses its mark counts too), so traits and the wood can count it.
+- The wood's second lesson for them is STEP OUT: the freeze comes earlier (0.45 s) and the stick
+  answers it. Rogue, Ranger and Mage keep the dodge lesson, with their own button's name in prompts.
+- The Healer's block stays a little weaker than the shield (mace guard cost 1.1). A sword-and-censer
+  Healer kit could come later.
+- Hew screams as the Stoker takes him ("No! No, no, n"), cut off at the bite.
+- The pixel font now has punctuation, a heart, and draws lowercase as capitals, so captives' words show.

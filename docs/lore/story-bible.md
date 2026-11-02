@@ -106,8 +106,11 @@ most Want among the heroes is the one the bells don't spare).
   seeds chapter 2's tunnels), Fenmere (Fennick Ford, the tally wall that seeds chapter 4). Tolmouth was a
   town and is now a larder; Dessa's steel came from there. "Something was down there first" at the
   Copperdeep: an old shard, deep, that the goblins found rather than brought. Keep it for later.
+- **No dodge for Warriors and Healers** (recorded 2026-11-01, Kyle's call): they block, and walk out of
+  anything with a striped edge; the wood teaches them to STEP OUT. Every other class dodges its own way:
+  the Rogue dashes, the Ranger jumps, the Mage blinks.
 - **Class skills** (recorded 2026-11-01, Kyle's call): a hero comes out of the Greyhollow wood with
-  their weapon, a plain dodge and the Relic Javelin, and knows no class skill; nothing in the wood
+  their weapon, their own way out of a blow and the Relic Javelin, and knows no class skill; nothing in the wood
   uses one, and no line says they've forgotten or lost it. Each class's own trainer teaches its skill
   from level 2 for 60 gold: Master Cole the War Cry, Huntress Maeve the Hunter's Net, Whisper
   Shadowstep, Magister Vell the Elemental Channel (Vell taught the Channel: settled), Mother Isolde

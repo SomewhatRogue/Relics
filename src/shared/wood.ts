@@ -211,7 +211,7 @@ export const LINES = {
     move: 'Make sure you can still move. Walk a few steps and get your legs back under you.',
     attack: 'Hit them. Tap for quick blows; hold for a heavy one.',
     roll: "A red mark with a striped edge can't be blocked. Roll out of it just before it lands.",
-    step: "A red mark with a striped edge can't be blocked, and you've no roll. Walk out of it before it lands.",
+    step: "A red mark with a striped edge can't be blocked, and you can't roll. Walk out of it before it lands.",
     block: 'Hold your guard while the red fills. Each block costs breath (the yellow bar).',
     parry: 'Tap your guard the moment the red flashes white. It staggers them, and your next blow lands hard.',
     relic: 'Throw it with your relic button. A small goblin is carried off and pinned to the nearest wall. It comes back to your hand after a few seconds.',
