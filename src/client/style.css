@@ -311,7 +311,11 @@ body:not(.touch) #lesson.act { justify-content: flex-start; padding-top: 18vh; }
 @keyframes pop { from { transform: translateY(2px) scale(1.25); opacity: 0.3; } to { transform: none; opacity: 1; } }
 @keyframes sway { 0%, 100% { transform: translateY(0) rotate(0); } 25% { transform: translateY(-2px) rotate(-3deg); } 75% { transform: translateY(2px) rotate(3deg); } }
 @keyframes tremble { 0% { transform: translate(0, 0); } 50% { transform: translate(0.6px, -0.6px); } 100% { transform: translate(-0.6px, 0.4px); } }
-@media (prefers-reduced-motion: reduce) { .speech .ch.in { animation: none !important; } }
+/* Words waiting their turn in a panel, and their arrival (speech.ts). */
+.unread { visibility: hidden; }
+.unveil { animation: unveil 0.25s ease-out; }
+@keyframes unveil { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .speech .ch.in, .unveil { animation: none !important; } }
 
 /* A Mage has no guard: no block button. */
 body[data-guard="none"] .tb.block { display: none; }

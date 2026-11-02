@@ -2,9 +2,10 @@
  * Spoken lines come alive: they type in a letter at a time with a little voice blip per speaker, and a
  * light markup lets a word lean, sway, or colour with feeling (docs/lore/voice.md, "Emphasis"):
  *   *word* bold   ~word~ sways   ^word^ warm, a good thing   _word_ dull red and trembling, a bad thing
- * A tap, click or Enter while a line is typing finishes it; the next one goes on.
+ * A panel reveals in reading order (reveal.ts): a tap finishes the line being typed, another shows the rest.
  */
 import { blip } from './sfx';
+import { GAP, plan, Reveal, type Beat, type Unit } from './reveal';
 
 const MARK: Record<string, string> = { '*': 'em', '~': 'sway', '^': 'good', _: 'bad' };
 /** Letters a second, and the pauses after punctuation (seconds). */
@@ -72,68 +73,100 @@ export function markup(s: string): string {
 /** The words without the markup (for anything that isn't typed). */
 export const plain = (s: string) => s.replace(/[*~^_]/g, '');
 
-interface Run { el: HTMLElement; chars: HTMLElement[]; at: number; wait: number; voice: [number, OscillatorType] | null; done: () => void }
-const runs: Run[] = [];
-let last = 0, ticking = false;
+/** Every reveal under way, each in its own root (a panel's words, a lesson card, the caption). */
+interface Seq { root: HTMLElement; rev: Reveal }
+let seqs: Seq[] = [], last = 0, ticking = false;
+const still = matchMedia('(prefers-reduced-motion: reduce)');
 
 function tick(now: number): void {
   const dt = Math.min(0.1, (now - last) / 1000);
   last = now;
-  const r = runs[0];
-  if (r) {
-    r.wait -= dt;
-    while (r.wait <= 0 && r.at < r.chars.length) {
-      const ch = r.chars[r.at++];
-      ch.classList.add('in');
-      const t = ch.textContent ?? '';
-      r.wait += 1 / SPEED + (PAUSE[t] ?? 0);
-      if (r.voice && /[a-z0-9]/i.test(t) && r.at % 2) blip(r.voice[0], r.voice[1]);
-    }
-    if (r.at >= r.chars.length) (runs.shift(), r.done());
-  }
-  ticking = runs.length > 0;
+  // A root redrawn or taken away is dropped; only the newest talker blips.
+  seqs = seqs.filter((q) => q.root.isConnected && q.rev.pending);
+  seqs.forEach((q, i) => q.rev.step(dt, i === seqs.length - 1));
+  seqs = seqs.filter((q) => q.rev.pending);
+  ticking = seqs.length > 0;
   if (ticking) requestAnimationFrame(tick);
+}
+
+function run(root: HTMLElement, beats: Beat[], done: () => void = () => {}): void {
+  seqs = seqs.filter((q) => q.root !== root);
+  const rev = new Reveal(beats, done);
+  if (still.matches) return rev.finish();
+  if (!rev.pending) return;
+  seqs.push({ root, rev });
+  if (!ticking) (ticking = true), (last = performance.now()), requestAnimationFrame(tick);
+}
+
+/** Lay out a line's letters in `el`, all hidden; the beat that types them. */
+function letters(el: HTMLElement, text: string, who: string): Beat {
+  el.innerHTML = markup(text);
+  el.classList.add('speech');
+  const chars = Array.from(el.querySelectorAll<HTMLElement>('.ch')), voice = voiceOf(who);
+  const waits = chars.map((c) => 1 / SPEED + (PAUSE[c.textContent ?? ''] ?? 0));
+  const letter = (i: number, loud: boolean) => {
+    const c = chars[i], t = c.textContent ?? '';
+    c.classList.add('in');
+    if (loud && voice && /[a-z0-9]/i.test(t) && i % 2 === 0) blip(voice[0], voice[1]);
+  };
+  return { show: () => {}, waits, letter, after: GAP };
 }
 
 /** Type a line into `el` as `who` speaks it (no one: narration, typed quietly). */
 export function speak(el: HTMLElement, text: string, who = '', done: () => void = () => {}): void {
-  el.innerHTML = markup(text);
-  el.classList.add('speech');
-  const chars = Array.from(el.querySelectorAll<HTMLElement>('.ch'));
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return (chars.forEach((c) => c.classList.add('in')), done());
-  runs.push({ el, chars, at: 0, wait: 0, voice: voiceOf(who), done });
-  if (!ticking) (ticking = true), (last = performance.now()), requestAnimationFrame(tick);
+  run(el, [letters(el, text, who)], done);
 }
 
-/** Is anything still typing (inside `within`, if given)? */
-export const typing = (within?: HTMLElement) => runs.some((r) => !within || within.contains(r.el));
+const within = (q: Seq, el?: HTMLElement) => q.root.isConnected && (!el || el.contains(q.root));
+/** Is anything still typing or waiting to show (inside `el`, if given)? */
+export const typing = (el?: HTMLElement) => seqs.some((q) => within(q, el) && q.rev.pending);
+/** Show and type everything still to come (inside `el`, if given). */
+export function finish(el?: HTMLElement): void {
+  for (const q of seqs.filter((q) => within(q, el))) q.rev.finish();
+  seqs = seqs.filter((q) => !within(q, el));
+}
+/** A tap: finish the line being typed; a second tap shows the rest (inside `el`, if given). */
+export function skip(el?: HTMLElement): void {
+  for (const q of seqs.filter((q) => within(q, el))) q.rev.skip();
+}
 
-/** Finish every line still typing (inside `within`, if given). */
-export function finish(within?: HTMLElement): void {
-  for (const r of [...runs]) {
-    if (within && !within.contains(r.el)) continue;
-    r.chars.forEach((c) => c.classList.add('in'));
-    runs.splice(runs.indexOf(r), 1);
-    r.done();
+/** The things in `root` in reading order: each spoken line, and each plain thing around them. A bare
+ *  stretch of words beside a line is wrapped so it can wait its turn. */
+function units(node: Element, out: Unit<HTMLElement>[] = []): Unit<HTMLElement>[] {
+  for (const c of Array.from(node.childNodes)) {
+    if (c.nodeType === Node.TEXT_NODE && c.textContent?.trim()) {
+      const s = document.createElement('span');
+      c.replaceWith(s);
+      s.append(c);
+      out.push({ item: s, parent: node, letters: s.textContent!.length });
+    } else if (c instanceof HTMLElement) {
+      if (c.dataset.say !== undefined) out.push({ item: c, parent: node, line: { fresh: !said.has((c.dataset.who ?? '') + c.dataset.say) }, letters: c.dataset.say.length });
+      else if (c.querySelector('[data-say]')) units(c, out);
+      else out.push({ item: c, parent: node, letters: c.textContent?.length ?? 0 });
+    }
   }
+  return out;
 }
 
-/** Type every unwritten `[data-say]` line in `root`, one after another; a line already typed in this
- *  sitting (the panel redrawn after a purchase, say) shows at once. `forget` starts a new sitting. */
+/** Reveal `root` in reading order: each unwritten `[data-say]` line types in turn, and whatever comes
+ *  after a line waits for it. A line already typed in this sitting (the panel redrawn after a
+ *  purchase, say) shows at once. `forget` starts a new sitting. */
 const said = new Set<string>();
 export function typeIn(root: HTMLElement): void {
+  const p = plan(units(root)), typed = new Map<HTMLElement, Beat>();
   for (const el of Array.from(root.querySelectorAll<HTMLElement>('[data-say]'))) {
-    const text = el.dataset.say!, who = el.dataset.who ?? '';
+    const text = el.dataset.say!, who = el.dataset.who ?? '', b = letters(el, text, who);
     delete el.dataset.say;
-    if (said.has(who + text)) {
-      el.innerHTML = markup(text);
-      el.classList.add('speech');
-      el.querySelectorAll('.ch').forEach((c) => c.classList.add('in'));
-      continue;
-    }
+    if (said.has(who + text)) b.waits.forEach((_, i) => b.letter(i, false));
+    else typed.set(el, b);
     said.add(who + text);
-    speak(el, text, who);
   }
+  p.hide.forEach((el) => el.classList.add('unread'));
+  const show = (els: HTMLElement[]) => () => els.forEach((el) => (el.classList.remove('unread'), el.classList.add('unveil')));
+  run(root, p.beats.map((b) => {
+    const t = b.type ? typed.get(b.type)! : null;
+    return { show: show(b.show), waits: t?.waits ?? [], letter: t?.letter ?? (() => {}), after: b.after };
+  }));
 }
 export const forget = () => said.clear();
 
