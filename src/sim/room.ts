@@ -28,7 +28,8 @@ import { hallow, rally, shadowstep, stepZones, ward } from './relics';
 import { forgedElement, has, traitsOf } from './traits';
 import { fireHook, stepHook } from './hook';
 import { stepJavelin, throwJavelin } from './javelin';
-import { NO_INTENT, type Zone, type Bolt, type Drop, type Enemy, type Prop, type FightEvent, type Hero, type Hook, type Intent, type Javelin } from './types';
+import { laySnare, stepHound, stepSnare } from './ranger';
+import { NO_INTENT, type Zone, type Bolt, type Drop, type Enemy, type Prop, type FightEvent, type Hero, type Hook, type Intent, type Javelin, type Snare } from './types';
 
 export class ArenaRoom {
   time = 0;
@@ -36,6 +37,8 @@ export class ArenaRoom {
   heroes: Hero[] = [];
   enemies: Enemy[] = [];
   javelins: Javelin[] = [];
+  /** Rangers' snares on the ground. */
+  snares: Snare[] = [];
   hooks: Hook[] = [];
   bolts: Bolt[] = [];
   drops: Drop[] = [];
@@ -176,10 +179,14 @@ export class ArenaRoom {
     }
     stepChests(this.chests, this.heroes, this.drops, this.pickups, this.lootRng, this.events, TICK);
     for (const h of this.heroes) stepHero(h, this.intents.get(h.id) ?? NO_INTENT, this.enemies, this.time, TICK, this.events, acts);
+    // A Ranger who has just jumped back leaves a snare where they stood.
+    for (const h of this.heroes) if (h.act === 'roll' && h.actT === 0) laySnare(h, this.snares, this.time, this.events);
+    this.snares = this.snares.filter((s) => stepSnare(s, this.enemies, this.time, this.events));
     this.javelins = this.javelins.filter((j) => stepJavelin(j, this.enemies, this.time, TICK, this.events, hit));
     this.hooks = this.hooks.filter((k) => stepHook(k, this.heroes, this.enemies, this.time, TICK, this.events, hit));
     this.bolts = this.bolts.filter((b) => (b.kind === 'flask' ? stepFlask(b, w, TICK, this.smokes) : stepBolt(b, w, TICK)));
     for (const e of this.enemies) stepEnemy(e, this.heroes, this.rng, this.time, TICK, this.events, this.enemies);
+    for (const h of this.heroes) stepHound(h, this.enemies, this.time, TICK, this.events);
     impacts(this.enemies, this.time, this.events);
     propImpacts(w);
     this.props = w.props = stepProps(w, TICK);

@@ -20,8 +20,9 @@ export interface ClassSheet {
   cant: string;
   /** How it guards (blocks, parries, or neither) and dodges: plain, so nobody picks blind. */
   guard: string;
-  /** Anything else only this class has (one line). */
+  /** Anything else only this class has (one line), under its own heading. */
   note?: string;
+  noteLabel?: string;
   /** Out of 5, against the other classes (judged from tuning.ts; keep honest when it changes). */
   stats: Record<Stat, number>;
 }
@@ -37,12 +38,14 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     stats: { POWER: 4, GUARD: 5, SPEED: 2, RANGE: 1, SUPPORT: 3 },
   },
   RANGER: {
-    line: 'Longbow. Kills before they close.',
+    line: 'Blade and bow, and a hound.',
     pitch: 'Forty paces is a long way to run with an arrow in you.',
-    weapon: 'Longbow',
+    weapon: 'A short sword (tap) and a longbow (hold to draw)',
     skill: "Hunter's Net: pins a small goblin flat, slows a big one.",
     cant: "Poor up close. Can't lift.",
-    guard: "Can't hold a block. Can parry, if the timing's right.",
+    guard: "Can't hold a block. Can parry, if the timing's right. Jumps back instead of rolling, and leaves a snare where they stood.",
+    note: "Runs at your heel and now and then goes for whatever you're hitting. Nothing kills it, but something big will send it off for a while.",
+    noteLabel: 'HOUND',
     stats: { POWER: 4, GUARD: 1, SPEED: 2, RANGE: 5, SUPPORT: 2 },
   },
   ROGUE: {
@@ -71,6 +74,7 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     cant: 'Slow, short reach.',
     guard: 'Can hold a block and parry.',
     note: 'Feed the censer what butchers leave. It heals hotter, and draws teeth.',
+    noteLabel: 'CENSER',
     stats: { POWER: 2, GUARD: 4, SPEED: 2, RANGE: 2, SUPPORT: 5 },
   },
 };

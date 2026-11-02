@@ -50,6 +50,19 @@ export interface Dodge {
 }
 
 /** The sword and shield's roll: the baseline every other dodge is measured against. */
+/** The Ranger: a short sword on a tap (two quick cuts), the bow on a hold. */
+export const RANGER_BLADE: Swing[] = [
+  { windup: 0.08, active: 0.1, recover: 0.22, dmg: 8, range: 1.45, arc: 110, lunge: 0.35, knock: 3 },
+  { windup: 0.08, active: 0.1, recover: 0.32, dmg: 10, range: 1.55, arc: 120, lunge: 0.45, knock: 4 },
+];
+/** The Ranger's dodge: a jump back, still facing (and it leaves a snare where you stood: SNARE). */
+export const RANGER_JUMP: Dodge = { kind: 'backstep', distance: 2.6, time: 0.26, iFrom: 0.02, iTo: 0.2, stamina: 22, cooldown: 0.7 };
+/** The snare a Ranger leaves when they jump back: a goblin that steps in is held (a butcher slowed). */
+export const SNARE = { cooldown: 7, radius: 0.65, hold: 2.4, life: 20, max: 2 };
+/** The Ranger's hound: how fast it runs, how far from you it'll go after something, how often it joins in
+ *  (seconds at heel between), its bite and how many before it comes back; a butcher winding up this close
+ *  scares it off for `away` seconds. It can't be hurt. */
+export const HOUND = { speed: 6, reach: 7, every: 6, bite: 7, biteEvery: 0.55, bites: 3, scare: 2.6, away: 14 };
 export const ROLL: Dodge = { kind: 'roll', distance: 2.4, time: 0.32, iFrom: 0.04, iTo: 0.26, stamina: 26, cooldown: 0.7 };
 
 /**
@@ -145,31 +158,31 @@ export const WEAPONS: Record<KitId, Weapon> = {
   longbow: {
     name: 'LONGBOW',
     cls: 'RANGER',
-    combo: [{ windup: 0.24, active: 0.05, recover: 0.36, dmg: 10, range: 11, arc: 0, lunge: 0, knock: 2, shot: 'arrow', speed: 24 }],
+    combo: RANGER_BLADE,
     heavy: { windup: 0.04, active: 0.05, recover: 0.45, dmg: 18, dmgFull: 55, range: 15, arc: 0, lunge: -0.3, knock: 4, knockFull: 15, shot: 'arrow', speed: 34, pierce: true },
     draw: 1.4,
     chip: 0.4, blockSpeed: 0.4, chargeSpeed: 0.3, parryWindow: 0.22, guardArc: 100, guardCost: 1.6, speed: 0.85,
-    dodge: { kind: 'roll', distance: 2.2, time: 0.34, iFrom: 0.04, iTo: 0.26, stamina: 26, cooldown: 0.8 },
+    dodge: RANGER_JUMP,
   },
   /** Quick draws, light arrows, and you can walk while drawing: the kiting bow. */
   shortbow: {
     name: 'SHORTBOW',
     cls: 'RANGER',
-    combo: [{ windup: 0.1, active: 0.04, recover: 0.16, dmg: 7, range: 8, arc: 0, lunge: 0, knock: 1, shot: 'arrow', speed: 22 }],
+    combo: RANGER_BLADE,
     heavy: { windup: 0.03, active: 0.04, recover: 0.22, dmg: 10, dmgFull: 22, range: 9, arc: 0, lunge: 0, knock: 2, knockFull: 6, shot: 'arrow', speed: 26 },
     draw: 0.55,
     chip: 0.45, blockSpeed: 0.45, chargeSpeed: 0.7, parryWindow: 0.22, guardArc: 100, guardCost: 1.7, speed: 0.92,
-    dodge: { kind: 'backstep', distance: 2.2, time: 0.24, iFrom: 0.02, iTo: 0.18, stamina: 22, cooldown: 0.65 },
+    dodge: RANGER_JUMP,
   },
-  /** Loosed the moment you press: one heavy bolt that hurls small goblins into walls, then a long reload. */
+  /** Drawn like the bows now (hold): one heavy bolt that hurls small goblins into walls, then a long reload. */
   crossbow: {
     name: 'CROSSBOW',
     cls: 'RANGER',
-    combo: [{ windup: 0.06, active: 0.04, recover: 1.15, dmg: 34, range: 13, arc: 0, lunge: -0.2, knock: 12, shot: 'bolt', speed: 36 }],
+    combo: RANGER_BLADE,
     heavy: { windup: 0.06, active: 0.04, recover: 1.15, dmg: 34, dmgFull: 34, range: 13, arc: 0, lunge: -0.2, knock: 12, knockFull: 12, shot: 'bolt', speed: 36 },
-    noCharge: true,
+    draw: 0.8,
     chip: 0.35, blockSpeed: 0.4, chargeSpeed: 0.4, parryWindow: 0.22, guardArc: 110, guardCost: 1.5, speed: 0.82,
-    dodge: { kind: 'roll', distance: 2, time: 0.36, iFrom: 0.05, iTo: 0.27, stamina: 28, cooldown: 0.9 },
+    dodge: RANGER_JUMP,
   },
   /** The Mage's quick spell: a flick of sparks, or a short 0.6 s cast for a bigger one. */
   wand: {

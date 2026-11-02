@@ -37,18 +37,16 @@ const charged = (room: ArenaRoom, hold: number, aim: Partial<Intent> = { ay: -1 
 };
 
 describe('class weapons', () => {
-  it('a longbow tap looses one arrow (no combo)', () => {
-    const { room, h, t } = onTarget(3);
+  it("a Ranger's tap is the short sword (no arrow); a hold draws the bow", () => {
+    const { room, h } = onTarget(3);
     h.weapon = 'longbow';
-    Object.assign(t, { x: 9, y: 3 });
-    let seq = 0, shots = 0;
-    for (let i = 0; i < ticks(1); i++) {
-      if (i % 4 === 0) room.setIntent('me', intent({ attackSeq: ++seq, ay: -1 }));
-      room.step();
-      shots += room.events.filter((e) => e.k === 'shoot').length;
-    }
-    expect(shots).toBeLessThanOrEqual(2);
-    expect(t.hp).toBeLessThan(t.maxHp);
+    room.setIntent('me', intent({ attackSeq: 1, ay: -1 }));
+    const tap = run(room, 0.6);
+    expect(tap.some((e) => e.k === 'shoot')).toBe(false);
+    expect(tap.some((e) => e.k === 'swing' && e.src === 'sword')).toBe(true);
+    const bow = onTarget(3);
+    bow.h.weapon = 'longbow';
+    expect(charged(bow.room, 1.5).some((e) => e.k === 'shoot')).toBe(true);
   });
 
   it('a full longbow draw pierces two goblins; a half draw does not', () => {
@@ -71,14 +69,10 @@ describe('class weapons', () => {
     expect(WEAPONS.longbow.heavy.dmgFull).toBeGreaterThan(WEAPONS.shortbow.heavy.dmgFull * 2);
   });
 
-  it('the crossbow looses on the press, then reloads', () => {
+  it('the crossbow is drawn on a hold like the bows, and looses a bolt', () => {
     const { room, h } = onTarget(3);
     h.weapon = 'crossbow';
-    room.setIntent('me', intent({ attackSeq: 1, attack: true, ay: -1 }));
-    const ev = run(room, 0.15);
-    expect(ev.some((e) => e.k === 'shoot' && e.kind === 'bolt')).toBe(true);
-    room.setIntent('me', intent({ attackSeq: 2, attack: false, ay: -1 }));
-    expect(run(room, 0.6).some((e) => e.k === 'shoot')).toBe(false);
+    expect(charged(room, 1).some((e) => e.k === 'shoot' && e.kind === 'bolt')).toBe(true);
   });
 
   it("the staff's long cast bursts and throws a goblin back", () => {

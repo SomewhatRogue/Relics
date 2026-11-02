@@ -8,7 +8,8 @@ import { PX } from './world';
 
 export interface Pose { a: number; ext: number; from?: number; thrust?: boolean; reach: number; pull: number }
 
-const ranged = (h: Hero) => !!WEAPONS[h.weapon].combo[0].shot;
+// (A Ranger draws the bow on a hold, though their tap is the short sword.)
+const ranged = (h: Hero) => !!WEAPONS[h.weapon].combo[0].shot || WEAPONS[h.weapon].cls === 'RANGER';
 
 /** Where the weapon points now (and what it has swept through, for the smear). */
 export function pose(h: Hero, now: number): Pose {
@@ -84,6 +85,11 @@ export function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): vo
   } else if (h.weapon === 'spear') {
     line(g, ox, oy, p.a, -7, 13, '#8b6a3a');
     line(g, ox, oy, p.a, 13, 17, '#dfe6ec', 2);
+  } else if (WEAPONS[h.weapon].cls === 'RANGER' && h.act === 'attack' && !currentSwing(h).shot) {
+    // The Ranger's short sword, out for a quick cut.
+    line(g, ox, oy, p.a, 2, 9, '#dfe6ec');
+    line(g, ox, oy, p.a, 0, 2, '#8b6a3a');
+    line(g, ox + Math.cos(p.a) * 2, oy + Math.sin(p.a) * 2, p.a + Math.PI / 2, -1, 1, '#9aa3ad');
   } else if (h.weapon === 'longbow') bow(c, ox, oy, p.a, p.pull, 7);
   else if (h.weapon === 'shortbow') bow(c, ox, oy, p.a, p.pull, 4);
   else if (h.weapon === 'crossbow') {

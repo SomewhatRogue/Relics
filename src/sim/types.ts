@@ -92,6 +92,10 @@ export interface Hero extends Body {
   decoyX: number;
   decoyY: number;
   decoyUntil: number;
+  /** A Ranger's: when the next snare is ready, and the hound (none in the wood). */
+  snareReady: number;
+  hound: Hound | null;
+  noHound?: boolean;
   /** The block press we last told this hero their class can't hold a block on (told once a press). */
   toldAt: number;
   counterUntil: number;
@@ -303,6 +307,8 @@ export type FightEvent =
   | { k: 'rumble' | 'bite' | 'thud' | 'bellow' | 'fanfare'; x: number; y: number }
   /** A Ranger or Rogue holding block (it does nothing), or a Mage pressing it at all. */
   | { k: 'noblock' | 'noguard'; x: number; y: number }
+  /** The Ranger's snare laid; the hound barking or yelping off. */
+  | { k: 'snareset' | 'bark' | 'yelp'; x: number; y: number }
   | { k: 'weapon'; x: number; y: number; name: string }
   | { k: 'throw' | 'pinned' | 'javwall' | 'javstick' | 'hookfire' | 'latch' | 'yank' | 'land'; x: number; y: number; dx: number; dy: number }
   | { k: 'relic' | 'loot'; x: number; y: number; name: string }
@@ -398,3 +404,8 @@ export interface Bolt {
   state: 'fly' | 'stuck' | 'well';
   life: number;
 }
+
+/** A Ranger's snare on the ground. */
+export interface Snare { owner: string; x: number; y: number; until: number }
+/** A Ranger's hound: at heel, running something down, worrying it, or scared off till `back`. */
+export interface Hound { x: number; y: number; fx: number; fy: number; state: 'heel' | 'run' | 'bite' | 'fled'; target: number; t: number; next: number; back: number; bites: number; moving: boolean }

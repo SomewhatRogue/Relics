@@ -6,6 +6,7 @@ import { ARENA, npcAt, type GameMap } from '../shared/arena';
 import { GRAB, GUARD, POTION, TIERS, WEAPONS } from '../shared/tuning';
 import type { ArenaRoom } from '../sim/room';
 import { drawHero } from './actors';
+import { drawHound, drawSnare } from './hound';
 import type { Hero } from '../sim/types';
 import { blit, type Ctx } from './draw';
 import { drawEnemy, drawHeld, drawTelegraph } from './foes';
@@ -147,6 +148,11 @@ export class Scene {
     for (const h of room.heroes) {
       const [x, y] = lerp('h:' + h.id, h.x, h.y), up = (h.z ?? 0) * LIFT;
       items.push({ y, draw: () => drawHero(c, h, x - cx, y - up - cy, h.id === meId, room.time) });
+      // A Ranger's hound, wherever it is.
+      if (h.hound) {
+        const d = h.hound, [dx, dy] = lerp('d:' + h.id, d.x, d.y);
+        items.push({ y: dy, draw: () => drawHound(c, d, dx - cx, dy - cy) });
+      }
       if (h.id === meId && this.fanfare) items.push({ y: y + 0.5, draw: () => this.heldUp(c, x - cx, y - up - cy, room.time) });
       if (h.id === meId && this.pointTo) items.push({ y: y + 0.5, draw: () => this.arrow(c, h, x - cx, y - up - cy, room.time) });
       // A Mage's blink image, flickering where they stood until it goes.
@@ -240,6 +246,7 @@ export class Scene {
       glow.globalAlpha = 1;
     }
     // Blessed ground: a ring of gold on the floor, light rising off it.
+    for (const s of room.snares) drawSnare(c, s, OX + s.x * PX - cx, OY + s.y * PX - cy);
     for (const z of room.zones) {
       const zx = OX + z.x * PX - cx, zy = OY + z.y * PX - cy, R = z.r * PX, left = z.until - room.time, k = Math.min(1, left / 1.2);
       glow.globalAlpha = 0.75 * k;

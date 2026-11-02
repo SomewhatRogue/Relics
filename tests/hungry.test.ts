@@ -77,12 +77,11 @@ describe('hungry gear', () => {
     const { room, h } = onTarget();
     wear(h, 'spendthrift');
     h.purse = 1;
-    room.setIntent('me', intent({ attackSeq: 1, ay: -1 }));
-    const ev = run(room, 0.8);
-    expect(ev.some((e) => e.k === 'spend')).toBe(true);
+    // (A Ranger's arrows are drawn on a hold.)
+    const draw = (seq: number) => (room.setIntent('me', intent({ attackSeq: seq, attack: true, ay: -1 })), run(room, 1.6), room.setIntent('me', intent({ attackSeq: seq, attack: false, ay: -1 })), run(room, 0.8));
+    expect(draw(1).some((e) => e.k === 'spend')).toBe(true);
     expect(h.purse).toBe(0);
-    room.setIntent('me', intent({ attackSeq: 2, ay: -1 }));
-    expect(run(room, 0.8).some((e) => e.k === 'shoot')).toBe(false);
+    expect(draw(2).some((e) => e.k === 'shoot')).toBe(false);
   });
 
   it("Mother Rust's Needles kill a small goblin from behind", () => {

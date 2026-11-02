@@ -89,6 +89,9 @@ export class Fx {
         this.say(x, y - 34, 'STUNNED', '#ffe070');
         break;
       // The prologue's cutscene: the ground going, the bite, the body landing, the bellow.
+      case 'snareset':
+        this.burst(x, y - 1, 6, ['#8a6a3a', '#5a3d22'], 25, false, 120, true);
+        break;
       case 'noblock':
         this.say(x, y - 30, "CAN'T BLOCK: TAP TO PARRY", '#c8c4d0');
         break;

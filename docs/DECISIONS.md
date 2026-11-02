@@ -709,3 +709,11 @@ the next found). The hook pulls by weight: a small goblin comes to you; anything
 to it (a second dodge for the light classes); a Warrior or Healer can haul in up to a butcher (HOOK.heavyYank),
 which arrives angry rather than reeling. The town no longer pauses for a panel (the town is shared online);
 instead whoever you're talking to stops their round (Npc.heldAt/lag) and picks it up after.
+
+## 2026-11-01: the Ranger gets its own (Claude Opus 5.5)
+Kyle picked the hound and snares. The Ranger taps for a short sword (RANGER_BLADE, two quick cuts) and holds
+to draw the bow (all three bows, the crossbow included, now draw on a hold). Its dodge is a jump back
+(RANGER_JUMP) that leaves a snare where it stood (SNARE: one every 7 s, two down at most, holds a small
+goblin, slows a butcher). A hound runs at its heel (sim/ranger.ts): now and then it goes for what you've
+been hitting (or the nearest small goblin), bites a few times and comes back; nothing can hurt it, but a
+butcher winding up near it sends it off for 14 s. No hound in the wood. The class pick shows a HOUND line.

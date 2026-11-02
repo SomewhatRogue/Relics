@@ -171,6 +171,21 @@ export const sfx = {
     for (const f of [587, 740, 880, 1175]) tone('triangle', f, f * 1.002, 0.14, 1.6, run.length * 0.11);
     for (let i = 0; i < 8; i++) tone('sine', 2349, 2349, 0.04, 0.12, run.length * 0.11 + i * 0.12);
   },
+  /** The Ranger's hound giving tongue, or yelping off; a snare pegged down. */
+  bark() {
+    if (!ready()) return;
+    for (const d of [0, 0.16]) tone('sawtooth', 520, 300, 0.12, 0.09, d), burst('bandpass', 1400, 700, 2, 0.25, 0.08, d);
+  },
+  yelp() {
+    if (!ready()) return;
+    tone('sawtooth', 1100, 500, 0.12, 0.25);
+    tone('sine', 900, 400, 0.08, 0.3, 0.05);
+  },
+  snareset() {
+    if (!ready()) return;
+    burst('bandpass', 900, 400, 3, 0.25, 0.1);
+    tone('triangle', 220, 180, 0.08, 0.06, 0.05);
+  },
   rumble() {
     if (!ready()) return;
     burst('lowpass', 220, 60, 0.8, 0.7, 1.4);
