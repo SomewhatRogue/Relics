@@ -147,6 +147,8 @@ export interface Hero extends Body {
   want: number;
   /** Lying where you fell, before Hew gets you up (the wood's opening). */
   lying?: boolean;
+  /** The name shown under someone else's hero (another player in town); their id otherwise. */
+  tag?: string;
   /** A Healer's censer gone cold (the prologue, until Isolde relights it): no heals given. */
   cold: boolean;
   /** Relics this hero has won (one at a time is carried, in relics[1]). */

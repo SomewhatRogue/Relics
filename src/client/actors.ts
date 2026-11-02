@@ -45,7 +45,8 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean, t: 
   // Allies show their health at their feet, and their name.
   else {
     ring(c, x, y, 7, '#5ad07a', h.hp / 100, '#1a3a22');
-    drawText(c.glow, h.id.toUpperCase(), Math.round(x - h.id.length * 2), Math.round(y + 6), '#9ad8a8');
+    const name = (h.tag ?? h.id).toUpperCase();
+    drawText(c.glow, name, Math.round(x - name.length * 2), Math.round(y + 6), '#9ad8a8');
   }
   if (h.act === 'roll' || h.act === 'zip') {
     const dx = h.act === 'roll' ? h.rollDx : h.fx, dy = h.act === 'roll' ? h.rollDy : h.fy;

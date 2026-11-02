@@ -23,7 +23,7 @@ async function instance(backend: Backend, staleMs = 600): Promise<{ port: number
 }
 
 /** A player's socket. Like the game, it says something as soon as it's told it hosts (unless `silent`: a crashed page). */
-function player(port: number, room: string, id: string, want: 'host' | 'take' | 'join', silent = false) {
+function player(port: number, room: string, id: string, want: 'host' | 'take' | 'join' | 'peer', silent = false) {
   const ws = new WebSocket(`ws://127.0.0.1:${port}/api/room?room=${room}&id=${id}&want=${want}`);
   const msgs: Msg[] = [];
   ws.on('message', (d) => {
@@ -90,6 +90,22 @@ for (const be of backends) {
       expect(ava.msgs.some((m) => (m.d as { ev?: string } | undefined)?.ev === 'just-for-sam')).toBe(false);
       expect(host.msgs.some((m) => m.t === 'msg' && m.from === 'kyle-0001')).toBe(false);
       [host, sam, ava].forEach((p) => p.close());
+    });
+
+    it('a peer room (the town): nobody hosts, everyone hears everyone across instances, and a leaver is announced', async () => {
+      const room = code();
+      const kyle = player(A.port, room, 'kyle-0001', 'peer');
+      const sam = player(B.port, room, 'sam-00001', 'peer');
+      for (const p of [kyle, sam]) expect(await p.until((m) => m.t === 'role')).toMatchObject({ role: 'peer' });
+      await wait(100);
+      kyle.send('*', { k: 'me', x: 1 });
+      await sam.until((m) => m.t === 'msg' && m.from === 'kyle-0001');
+      sam.send('*', { k: 'me', x: 2 });
+      await kyle.until((m) => m.t === 'msg' && m.from === 'sam-00001');
+      expect([...kyle.msgs, ...sam.msgs].some((m) => m.t === 'nohost' || m.t === 'hosted')).toBe(false);
+      sam.close();
+      await kyle.until((m) => m.t === 'left' && m.id === 'sam-00001');
+      kyle.close();
     });
 
     it("a friend who opens the code before the host is told there's no host yet, then hears when one arrives", async () => {

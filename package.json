@@ -8,7 +8,8 @@
     "check": "tsc --noEmit",
     "test": "vitest run",
     "look": "node scripts/look.cjs",
-    "smoke": "node scripts/smoke.cjs"
+    "smoke": "node scripts/smoke.cjs",
+    "test:online": "node scripts/town-online.cjs"
   },
   "dependencies": {
     "redis": "^4.7.0",

@@ -7,10 +7,12 @@
  * The game itself runs in the host's browser (the GameRoom); the relay only routes messages:
  * friends' input to the host, the host's snapshots and events to friends.
  *
- * Player URL: /api/room?room=CODE&id=PLAYER&want=host|take|join
+ * Player URL: /api/room?room=CODE&id=PLAYER&want=host|take|join|peer
  *   host: made this room (or hosted it on this device); take: was playing in it and its host left;
  *   join: opened someone's code. Only host/take may claim the room; join waits for a host.
- * To the player: {t:'role', role:'host'} | {t:'role', role:'guest', host} | {t:'nohost'} |
+ *   peer: a room with no host at all, where everyone just tells everyone (the shared town: each
+ *   browser runs Wickhold itself, and only says where its own hero is).
+ * To the player: {t:'role', role:'host'} | {t:'role', role:'guest', host} | {t:'role', role:'peer'} | {t:'nohost'} |
  *   {t:'hosted', id} | {t:'left', id} | {t:'msg', from, d} | {t:'info', shared}
  * From the player: {to: '*' | id, d}
  */
@@ -141,6 +143,8 @@ export class Relay {
   /** Host, guest, or wait for a host. */
   private async decide(c: Conn, want: string): Promise<void> {
     const { room, id } = c;
+    // Nobody hosts a peer room: no claim, no Redis, nothing to take over when someone goes.
+    if (want === 'peer') return this.tell(c, { t: 'role', role: 'peer' });
     let holder = await this.b.store.get(hostKey(room));
     const had = holder === id;
     if (want === 'host' || want === 'take') {

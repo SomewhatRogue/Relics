@@ -1,5 +1,7 @@
 /** Relic: Wickhold, the Training Yard and runs. The rooms run here in the browser (solo is a party of one). */
 import { CLASS_GUARD, POTIONS, CLASS_ORDER, RELICS, TRAITS, WEAPONS, itemName, type HeroClass } from '../shared/tuning';
+import { ONLINE } from './relay';
+import { Townfolk } from './townfolk';
 import { MAX_DOWNS, goal } from '../sim/run';
 import type { Npc } from '../shared/arena';
 import type { Intent } from '../sim/types';
@@ -31,6 +33,14 @@ import { line, speak } from './speech';
 import './style.css';
 
 const game = new Game();
+/** Online (the Vercel site): the others in town. Made once there's a hero, keyed by the hero's id. */
+let townfolk: Townfolk | null = null;
+function online(): Townfolk | null {
+  if (!ONLINE || !game.profile.id) return null;
+  // Another hero picked: the old one leaves town.
+  if (townfolk && townfolk.id !== game.profile.id) townfolk.leave(), (townfolk = null);
+  return (townfolk ??= new Townfolk(game.profile.id));
+}
 const scene = new Scene(document.getElementById('game') as HTMLCanvasElement);
 const fx = new Fx();
 const panel = new Panel();
@@ -234,7 +244,10 @@ function frame(t: number): void {
   scene.focus = game.cutFocus();
   scene.fanfare = game.wood?.hold?.kind === 'relic';
   scene.pointTo = game.wood && game.wood.stage === 5 && !game.wood.hold ? { x: ROAD_OUT.x + 1, y: ROAD_OUT.y + ROAD_OUT.h / 2 } : null;
-  scene.render(game.room, ME, fx, t / 1000, dt);
+  // Online: everyone else in Wickhold, while you're there.
+  const inTown = game.mode === 'town', h = game.hero;
+  online()?.step(inTown && h ? { n: game.profile.name, w: h.weapon, at: game.room.map.name, p: [h.x, h.y, h.fx, h.fy, h.moving ? 1 : 0] } : null, t / 1000, dt);
+  scene.render(game.room, ME, fx, t / 1000, dt, inTown ? (townfolk?.here(game.room.map.name) ?? []) : []);
   hud(t / 1000);
   requestAnimationFrame(frame);
 }
@@ -289,6 +302,7 @@ if (input.touch) document.body.classList.add('touch');
 
 // Test hooks: read the fight as data, never as pixels.
 const w = window as unknown as Record<string, unknown>;
+w.__town = () => ({ count: townfolk?.count ?? 0, here: townfolk?.here(game.room.map.name).map((h) => ({ name: h.tag, x: h.x, y: h.y })) ?? [] });
 w.__GAME_STATE__ = () => ({ mode: game.mode, wood: game.wood ? { wake: game.wood.wake, said: game.wood.said, stage: game.wood.stage, hold: game.wood.hold } : null, inside: game.outside ? game.room.map.name : null, title: title.open, time: game.room.time, hero: { ...game.hero }, enemies: game.room.enemies.map((e) => ({ ...e })), parries, run: game.run, profile: game.profile, world: game.world });
 w.render_game_to_text = () => `${game.mode} t=${game.room.time.toFixed(1)} hero ${game.hero.act} hp ${game.hero.hp} st ${Math.round(game.hero.stamina)} | ` + game.room.enemies.map((e) => `${e.kind} ${e.act} hp ${e.hp}${e.attack ? ' ' + e.attack.kind + ' ' + e.attack.t.toFixed(2) : ''}`).join(' | ');
 Object.defineProperty(w, '__room', { get: () => game.room });

@@ -768,3 +768,16 @@ which moves the page to the media channel.
   which allows one database per account). Relic's keys all start `rl:`, so the two never collide;
   they do share the 500K commands a month. Moving to pay as you go (budget capped) is the step when
   either game gets regular players.
+
+## 2026-11-01: the shared town (Opus 5.5)
+
+- Online shape (Kyle): no join codes. Wickhold is one shared hub; parties form at the board; a job
+  is a shared instance run by the party leader's browser; world quests need 3+ in town.
+- The town has no host. Each browser runs Wickhold (its people walk on the clock), and each player
+  only says where their own hero is, through a peer room on the relay (`want=peer`, room
+  WICKHOLD1). Nobody leaving can break the town. `src/client/townfolk.ts`; `src/client/relay.ts`
+  is Come Bye's reconnecting socket (heartbeat, visibility check, 4-minute swap).
+- At most 4 messages a second while moving, one every 3 s standing; silent 12 s means gone.
+- Online is on only in the Vercel build (`VITE_ONLINE=1`) or with `?relay=`; the one-file artifact
+  build stays offline. `npm run test:online` runs three real browsers against a local two-instance
+  relay (`scripts/online-server.ts`).

@@ -98,7 +98,8 @@ export class Scene {
     return [(this.heroAt[0] - this.cam.x) * k, (this.heroAt[1] - 8 - this.cam.y) * k, PX * k];
   }
 
-  render(room: ArenaRoom, meId: string, fx: Fx, now: number, dt: number): void {
+  /** `others`: other players' heroes in this place (the shared town); drawn only, never in the room. */
+  render(room: ArenaRoom, meId: string, fx: Fx, now: number, dt: number, others: Hero[] = []): void {
     const a = room.alpha;
     const lerp = (key: string, x: number, y: number): [number, number] => {
       const p = room.prev.get(key);
@@ -146,6 +147,10 @@ export class Scene {
     }
 
     const items: { y: number; draw: () => void }[] = [];
+    for (const h of others) {
+      const x = OX + h.x * PX, y = OY + h.y * PX;
+      items.push({ y, draw: () => drawHero(c, h, x - cx, y - cy, false, room.time) });
+    }
     for (const h of room.heroes) {
       const [x, y] = lerp('h:' + h.id, h.x, h.y), up = (h.z ?? 0) * LIFT;
       items.push({ y, draw: () => drawHero(c, h, x - cx, y - up - cy, h.id === meId, room.time) });
