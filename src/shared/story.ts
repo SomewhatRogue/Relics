@@ -29,6 +29,10 @@ export interface WorldState {
   ballots: Record<string, Record<string, string>>;
   /** Jobs done lately, for the board, newest first (worldsync DEEDS). */
   deeds?: { day: number; title: string; place: string; party: string[] }[];
+  /** Works finished lately (newest first), for what people talk about (shared/townsays.ts). */
+  mended?: { id: string; day: number }[];
+  /** Raids on the town (newest first), and what each pulled down (shared/raids.ts). */
+  raids?: { day: number; lost: import('./works.js').WorkId[] }[];
 }
 
 export const newWorld = (): WorldState => ({ chapter: 1, day: 1, rescued: 0, storyDone: [], flags: {}, votes: [], lantern: 0, works: {}, dens: 0, ballots: {} });

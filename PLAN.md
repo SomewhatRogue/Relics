@@ -136,10 +136,14 @@ and burns out a goblin den on a job.
 ## Wickhold as a place to live (Kyle, 2026-11-01)
 - DONE: a shared day and night in town (`shared/daylight.ts`): every screen the same hour, a full
   day every 40 minutes.
-- Next: a garden to sit in (a patch behind the church or by the well: benches, beds, the light at
-  dusk), and spending together to make the town better, seen and unseen: "vote with your money".
-  The works system already pools gold (`shared/works.ts`); add works you can see: clearing the
-  rubble out of the square, a flower bed, lanterns along the lane, the garden itself, repairs that
-  stay repaired. Each shows on the town map once paid for, for everyone.
-- Bigger world events can undo it: a raid that burns the lane, a flood, a move. The town remembers
-  what it lost.
+- DONE: Wickhold starts broken after the breach (blood, the dead on a cart, crows, wrecked lanes,
+  scorched and boarded buildings, lamp posts down, a wall of hurdles and stakes) and mends with gold,
+  for everyone (`shared/mend.ts`): Wash the Square, Clear the Lanes, Mend the Shutters and Roofs,
+  Lanterns along the Lanes, Perrin's garden in three stages (dig, plant, benches and a lamp: a garden
+  to sit in at dusk), the north wall in three (stakes, timber with a walk, stone). Townsfolk talk
+  about what was mended lately and how the town stands (`shared/townsays.ts`).
+- DONE: raids (`shared/raids.ts`): now and then the hungry come over the wall between visits and pull
+  down the newest mending (never stone, never the first three works); Dunn tells you, the board
+  remembers, it has to be paid for again.
+- Next: barks as you walk past something newly mended; a raid you're in town for (a fight at the
+  breach); other world events (a flood, a fire in the lane). The town remembers what it lost.

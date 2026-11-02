@@ -7,11 +7,12 @@
  * lodge and its archery butts (east), the infirmary (south-west), the Drowned Rat tavern with a sewer
  * grate behind it (south), Rescue Row (south-east). Past the rubble in the east lane, the Old Quarter.
  * Guards walk their rounds. What the world has done changes it: houses on Rescue Row, a granary or
- * a trader, more of the watch, the east lane cleared.
+ * a trader, more of the watch, the east lane cleared, and the town mended after the breach (mend.ts).
  */
 import type { Block, GameMap, Npc, Round } from './arena.js';
 import type { PropKind } from './props.js';
 import type { WorldState } from './story.js';
+import { mending, WORN } from './mend.js';
 import { workDone } from './works.js';
 
 /** What talking to someone (or using a spot) opens. */
@@ -94,7 +95,7 @@ export function townMap(w: WorldState): GameMap {
     ...[[43, 20], [46, 20.6], [49, 20]].map(([x, y]) => r('target', x, y, 0.35)),
     ...[[19.6, 12.2], [36.3, 12.2], [20, 26.5], [36, 26.5], [12, 27], [44, 27], [8, 20], [50, 25]].map(([x, y]) => r('post', x, y, 0.15)),
     ...[[60, 5], [1.5, 37], [10, 38], [59.5, 37], [27, 38.5], [41, 8.5], [1.5, 24]].map(([x, y]) => r('tree', x, y, 0.6)),
-    ...[[12.5, 7], [13.5, 22], [41, 24], [19, 37], [55.5, 9], [60.5, 21]].map(([x, y]) => r('bush', x, y, 0.35)),
+    ...[[12.5, 7], [41, 24], [19, 37], [55.5, 9], [60.5, 21]].map(([x, y]) => r('bush', x, y, 0.35)),
     r('grate', 23.5, 36, 0.05), r('statue', 58.5, 19.5, 0.5),
   ];
   const n = (name: string, x: number, y: number, talk: string, look: string, arg?: number, path?: [number, number][], speed?: number): Npc => ({ name, x, y, talk, look, arg, path, speed });
@@ -109,8 +110,11 @@ export function townMap(w: WorldState): GameMap {
   if (watch) npcs.push(n('WATCHMAN PIKE', 11, 27.6, 'chat', 'guard', 8, [[11, 27.6], [51, 27.6]], 1.1), n('ORLA OF THE WATCH', 41.2, 22, 'chat', 'guard', 14, [[41.2, 22], [52, 22], [52, 12], [41.2, 12]], 1));
   if (marketIn(w)) npcs.push(n('DESSA THE TRADER', 38.5, 13.9, 'market', 'trader'));
   if (quarter) npcs.push(n('OLD MERREN', 57, 18, 'chat', 'elder', 9));
+  const m = mending(w), worn = !workDone(w, 'shutters');
+  for (const b of blocks) if (worn && b.label && WORN.includes(b.label)) b.worn = true;
+  blocks.push(...m.blocks), rounds.push(...m.rounds), npcs.push(...m.npcs);
   return {
-    name: 'WICKHOLD', w: W, h: H, wallFace: 3, rounds, blocks, npcs,
+    name: 'WICKHOLD', w: W, h: H, wallFace: 3, rounds, blocks, npcs, marks: m.marks, breach: m.breach,
     braziers: [{ x: 25, y: 15, r: 0.35 }, { x: 31, y: 15, r: 0.35 }, { x: 28, y: 21.6, r: 0.35 }],
     torches: [6, 14, 22, 34, 40, 46, 58].map((x) => ({ x, y: -1.6 })),
     hero: { x: 28, y: 20 }, exit: null,

@@ -5,6 +5,8 @@
  */
 import type { GameMap, Ledge } from '../shared/arena';
 import { Rng } from '../shared/rng';
+import { paintBreach } from './breach';
+import { paintMarks } from './marks';
 
 export const PX = 16;
 export const OX = 8;
@@ -38,6 +40,7 @@ export function paintMap(m: GameMap): HTMLCanvasElement {
   const rect: Rect = (x, y, w, h, col) => ((g.fillStyle = col), g.fillRect(x, y, w, h));
   rect(0, 0, W, H, '#14121a');
   back(m, rect, rng, pick, W);
+  paintBreach(m, rect);
   // Floor.
   const f = FLOORS[m.theme.floor], [tw, th] = f.tile, fw = m.w * PX, fh = m.h * PX;
   for (let r = 0; r * th < fh; r++) {
@@ -79,6 +82,7 @@ export function paintMap(m: GameMap): HTMLCanvasElement {
     }
     rect(x0, y0, w, 1, wt.deep ? '#2a4a5a' : '#7a9a9a');
   }
+  paintMarks(m, rect);
   g.fillStyle = 'rgba(0,0,0,0.35)';
   g.fillRect(OX, OY, fw, 4);
   for (const l of m.ledges ?? []) ledge(l, rect, rng, pick);

@@ -5,6 +5,7 @@ import { board } from '../src/shared/jobs';
 import { newProfile, perkOffer } from '../src/shared/progress';
 import { CHAPTER_1, newWorld } from '../src/shared/story';
 import { SPOTS, townMap } from '../src/shared/town';
+import { WORKS } from '../src/shared/works';
 import { WEAPONS, giveValue, rollGear, sellValue } from '../src/shared/tuning';
 import { Rng } from '../src/shared/rng';
 import { chargeFull } from '../src/sim/hero';
@@ -64,7 +65,8 @@ describe('the world server', () => {
 
 describe('the town', () => {
   it('every spot and everyone standing still can be reached; the patrols walk clear streets', () => {
-    for (const w of [newWorld(), { ...ready(), works: { watch: 400, oldquarter: 600 }, flags: { 'north-fields': 'refugees' } }]) {
+    const mended = Object.fromEntries(Object.keys(WORKS).map((k) => [k, 9999]));
+    for (const w of [newWorld(), { ...ready(), works: { watch: 400, oldquarter: 600 }, flags: { 'north-fields': 'refugees' } }, { ...ready(), rescued: 16, works: mended, flags: { 'north-fields': 'farm' } }]) {
       const m = townMap(w);
       useMap(m);
       for (const s of SPOTS) {
@@ -96,10 +98,11 @@ describe('the town', () => {
     g.create('WARRIOR', 'b');
     g.skipWood();
     g.profile.gold = 700;
-    expect(g.room.map.blocks.some((b) => b.kind === 'rubble')).toBe(true);
+    const eastRubble = () => g.room.map.blocks.some((b) => b.kind === 'rubble' && b.x > 50);
+    expect(eastRubble()).toBe(true);
     for (let i = 0; i < 6; i++) g.fund('oldquarter', 100);
     expect(g.profile.stats.given).toBe(600);
-    expect(g.room.map.blocks.some((b) => b.kind === 'rubble')).toBe(false);
+    expect(eastRubble()).toBe(false);
     expect(g.room.map.npcs!.some((n) => n.name === 'OLD MERREN')).toBe(true);
     expect(g.fund('oldquarter', 100)).toBe(false);
   });

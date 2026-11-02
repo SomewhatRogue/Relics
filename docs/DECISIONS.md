@@ -976,3 +976,51 @@ which moves the page to the media channel.
   hooded. Three Warrior looks are drawn for Kyle to choose from (`WARRIOR_LOOKS`: knight, sellsword,
   blackiron). Kyle: three looks for every class, chosen on the pick screen (`LOOKS`, `Profile.look`, `Hero.look`; sent to the town so friends see it).
 - Halvard buys packed gear (never hungry); gear given to a town work counts for half again.
+## 2026-11-01: Wickhold starts broken, mends with gold, and gets raided (Kyle; Opus 5.5)
+
+Kyle: start the town broken down and bloody, with an unfinished garden, so there's something to put
+money towards and watch it clean up; NPCs comment as it gets nicer. Then: bad walls (sticks) that get
+better with time, and world events where the town is attacked and bloodied again.
+
+- **The breach.** Wickhold's north wall came down in a recent assault; the stretch either side of the
+  gate (tiles 17 to 39) is hurdles, stakes and a cart bed lashed up with rope (`GameMap.breach`,
+  painted in `client/breach.ts`). The rest of the wall is the old stone Wenna saw go up, so it is still
+  "the last walled town". Blood on the square and at the gate, a drag trail, the dead on a cart by the
+  church with crows, burnt carts and rubble in the lanes, scorch, lamp posts down, buildings scorched
+  with boarded windows and holed roofs, and Perrin's trampled physic garden with a dead tree.
+- **What's broken is data** (`shared/mend.ts`, from the world's works, so the same on every screen):
+  paint-only floor marks (`GameMap.marks`, `client/marks.ts`), a `worn` flag on buildings
+  (`client/wear.ts`), a laden cart (`look: 3`), and two paint-only round kinds (`crows`, `moths`,
+  `client/streetlife.ts`). Wrecks sit clear of doors and patrols (the town reach test covers a fully
+  mended town too).
+- **New works, all gold, all seen:** Wash the Square 60 (blood, crows and the dead cart go, fresh graves
+  by the church), Clear the Lanes 150, Mend the Shutters and Roofs 200, Lanterns along the Lanes 120
+  (eight lit posts), the garden in three stages (Clear and Dig 80, Plant the Beds 120, Benches and a
+  Lamp 160), the wall in three (Stakes for the Breach 150, A Timber Wall and a Walk 350, Stone for the
+  North Wall 800). Stages are separate ids with `after`; a stage opens only when the one before is done.
+  Gifts never overshoot what a work still needs. The first three works are unchanged.
+- **The TOWN WORKS panel** (`client/worksui.ts`): Hollis, your gold, a dim line of what's done, then one
+  button per open work with its progress (mending first; only the next stage of a line). Tap for what it
+  is, GIVE 25 / GIVE n, and for the defence works (`arms`: the watch and the three wall stages) GIVE GEAR,
+  the gear flow from main moved there.
+- **Raids** (`shared/raids.ts`): from day 10, never within 6 days of the last, a 15% chance a day, and
+  only once the town has two mended things to lose. A raid always brings the blood back (if the square
+  was washed) and pulls down one more (two once five are standing): only the top stage of a line (the
+  garden loses its newest stage, the wall drops back one), never the watch, the Old Quarter, the sewers,
+  and never stone. Recorded in `world.raids` (newest four).
+- **Who decides a raid:** it's rolled in `contribute` as days pass, seeded by the day, so it's the same
+  everywhere. For a shared world only the world server rolls it (the browser passes `raids = false` while
+  online, and takes the server's world back); off the server, the browser rolls it for its own world.
+  Days pass per finished run, as gold does, so a busy world is raided more and mends faster in
+  proportion. No server change was needed.
+- **The town talks** (`shared/townsays.ts`, lines in `shared/mendlines.ts`): a fresh raid (3 days), then
+  a work finished in the last 4 days (`world.mended`, kept in `contribute`), then on two days in three how
+  the town stands (broken, mending, mended with the garden in flower), or after any raid, Wenna and Dunn
+  remembering it. Old Wenna, Tam, the gate guard, Dunn, Hob, Pike, Orla, Rowan, and Widow Perrin (new, in
+  the garden; her line follows its stage, and of an evening once there are benches). The first time you
+  see a raided town Dunn tells you (`client/raidnews.ts`, once per raid per device), and the job board's
+  DONE LATELY says when it was hit.
+- **The garden at dusk:** once the benches are in, a soft lamplit pool over the benches and beds and
+  moths round the lamp after dark.
+- Not done: barks when walking past a newly finished work (there's no bubble system yet); a raid you
+  fight in town.

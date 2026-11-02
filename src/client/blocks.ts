@@ -10,6 +10,8 @@ import { blit, type Ctx } from './draw';
 import { furnish, mouth, type Look } from './furnish';
 import { drawText, textWidth } from './pixfont';
 import { SPRITES } from './sprites';
+import { drawLife } from './streetlife';
+import { wear, windowsLit } from './wear';
 import { OX, OY, PX } from './world';
 
 /** Wall height (pixels), roof and wall colours, by kind. */
@@ -87,6 +89,7 @@ function paint(b: Block, st: number): HTMLCanvasElement {
     const tw = textWidth(b.label), ty = b.kind === 'stall' ? wallY + 3 : wallY + 2;
     if (tw < w - 2) drawText(g, b.label, Math.round(w / 2 - tw / 2), ty, b.kind === 'stall' ? '#f0e0b0' : '#d8c48a');
   }
+  if (b.worn) wear(g, rect, b, w, roofH, wallY, l.tall);
   if (st === 1) {
     // Scorched: blackened, the roof holed.
     g.globalCompositeOperation = 'source-atop';
@@ -158,7 +161,7 @@ export function drawBlock(c: Ctx, b: Block, x: number, y: number, lit: boolean):
   // Lit windows either side of the door: someone lives here.
   const wy = Math.round(y + b.h * PX - l.tall + 5);
   c.glow.fillStyle = '#ffd27a';
-  for (const wx of [Math.round(w * 0.22), Math.round(w * 0.72)]) c.glow.fillRect(Math.round(x + wx), wy, 3, 3);
+  for (const wx of windowsLit(b).map((k) => Math.round(w * k))) c.glow.fillRect(Math.round(x + wx), wy, 3, 3);
   if (b.kind === 'forge') (c.glow.fillStyle = Math.floor(c.now * 8) % 2 ? '#ff9a3c' : '#ff6a20'), c.glow.fillRect(Math.round(x + w / 2 - 2), Math.round(y + b.h * PX - 5), 4, 3);
 }
 
@@ -227,6 +230,7 @@ export const blockAt = (b: Block): [number, number] => [OX + b.x * PX, OY + b.y 
 /** A round thing at its foot (x, y on screen). */
 export function drawRound(c: Ctx, r: Round, x: number, y: number): void {
   if (r.kind === 'pillar') return blit(c, SPRITES.pillar, x, y + 5);
+  if (r.kind === 'crows' || r.kind === 'moths') return void drawLife(c, r, x, y);
   blit(c, SPRITES[r.kind], x, y + Math.round(r.r * 6));
   if (r.kind === 'lantern') {
     // The Last Lantern: a flame that never goes out.

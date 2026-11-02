@@ -7,7 +7,7 @@
 import { doorAt, inArea, npcAt, type Area, type Block, type Npc, type Theme } from '../shared/arena';
 import { townInterior } from '../shared/interiors';
 import { board, type Job } from '../shared/jobs';
-import { workDone, WORK_ORDER, type WorkId } from '../shared/works';
+import { WORKS, workDone, workOpen, workProgress, WORK_ORDER, type WorkId } from '../shared/works';
 import { contribute, type Contribution } from '../shared/worldsync';
 import { BOUNTY, HERO_SLOTS, PERK, SHOP, gainXp, newProfile, type PerkId, type Profile } from '../shared/progress';
 import { Rng } from '../shared/rng';
@@ -719,7 +719,7 @@ export class Game {
   /** Give a packed piece to a town work: it counts for more than it would sell for. */
   giveGear(it: Item, id: WorkId): boolean {
     const p = this.profile, i = p.bag.indexOf(it), n = giveValue(it);
-    if (i < 0 || n <= 0 || workDone(this.world, id)) return false;
+    if (i < 0 || n <= 0 || !workOpen(this.world, id)) return false;
     p.bag.splice(i, 1);
     this.hero.bag = [...p.bag];
     this.give({ works: { [id]: n }, stats: { given: n } });
@@ -780,7 +780,8 @@ export class Game {
   give(c: Omit<Contribution, 'hero'>): void {
     const p = this.profile, before = this.townKey();
     const full: Contribution = { ...c, hero: { id: p.id, name: p.name, cls: p.cls } };
-    contribute(this.world, full, this.link?.online ? QUORUM : 1);
+    // Online the world server rolls the nights for raids (everyone sees the same one); off it, this browser does.
+    contribute(this.world, full, this.link?.online ? QUORUM : 1, !this.link?.online);
     for (const [k, n] of Object.entries(c.stats ?? {})) p.stats[k as keyof typeof p.stats] += n ?? 0;
     store(this.save);
     this.link?.send(full);
@@ -823,7 +824,9 @@ export class Game {
 
   /** Gold to a town work. */
   fund(id: WorkId, n: number): boolean {
-    if (this.profile.gold < n || workDone(this.world, id)) return false;
+    // Never more than it still needs; never to a stage whose turn hasn't come.
+    n = Math.min(n, WORKS[id].need - workProgress(this.world, id));
+    if (n <= 0 || this.profile.gold < n || !workOpen(this.world, id)) return false;
     this.profile.gold -= n;
     this.give({ works: { [id]: n }, stats: { given: n } });
     return true;

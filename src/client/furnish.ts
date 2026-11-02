@@ -109,4 +109,9 @@ function cart(b: Block, rect: Rect, w: number, roofH: number, wallY: number, l: 
     rect(cx - 2, wallY + l.tall - 5, 5, 5, burnt ? '#2a2018' : '#5a3d22');
     rect(cx, wallY + l.tall - 6, 1, 7, '#1a1410'), rect(cx - 3, wallY + l.tall - 3, 7, 1, '#1a1410');
   }
+  // Laden with the dead, waiting on a burying: long shapes under grey sacking, a boot showing.
+  if (b.look === 3) {
+    for (let y = 1; y < roofH - 2; y += 4) rect(1, y, w - 2, 3, y % 8 ? '#6a6670' : '#5a5660'), rect(1, y + 3, w - 2, 1, '#3a3640');
+    rect(w - 3, 2, 2, 2, '#2a1e14');
+  }
 }

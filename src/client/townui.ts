@@ -18,6 +18,10 @@ import { PARTY_MAX } from './parties';
 import { CLASSES, CLASS_NAME } from '../shared/classes';
 import { SIZES } from '../shared/jobs';
 import { treasureWord } from '../shared/treasure';
+import { SPEAKER, townSays } from '../shared/townsays';
+import { lossText } from '../shared/raids';
+import { MEND_UI, PERRIN } from '../shared/mendlines';
+import { dusk } from './streetlife';
 
 /** Words from another player's browser, made safe to show. */
 const esc = (v: unknown) => String(v ?? '').replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -44,8 +48,10 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
         : q.asked ? `<div class="d">ASKED TO JOIN</div><button data-quit class="ghost">NEVER MIND</button>`
         : q.members.length < PARTY_MAX ? `<button data-joinparty="${i}">JOIN</button>` : '<div class="d">FULL</div>') + '</div>').join('') : '';
     // Jobs done lately, by whoever did them (the shared world's, online).
-    const deeds = (w.deeds ?? []).slice(0, 5);
-    const doneHtml = deeds.length ? '<h3>DONE LATELY</h3>' + deeds.map((d) => `<div class="m">Day ${Number(d.day) || 1}: ${esc(d.title)}, by ${d.party.map(esc).join(', ')}.</div>`).join('') : '';
+    const deeds = (w.deeds ?? []).slice(0, 5), raid = w.raids?.[0];
+    // The town hit, while the raid is still the newest thing on the board.
+    const raidHtml = raid && !deeds.some((d) => d.day > raid.day) ? `<div class="m">${esc(MEND_UI.board(raid.day, lossText(raid)))}</div>` : '';
+    const doneHtml = deeds.length || raidHtml ? '<h3>DONE LATELY</h3>' + raidHtml + deeds.map((d) => `<div class="m">Day ${Number(d.day) || 1}: ${esc(d.title)}, by ${d.party.map(esc).join(', ')}.</div>`).join('') : '';
     const html = partyHtml + doneHtml + (partyHtml || doneHtml ? '<h3>JOBS</h3>' : '') + jobs.map((j, i) =>
       `<div class="job ${j.objective === 'story' ? 'story' : j.deep ? 'deep' : ''}"><div class="t">${j.objective === 'story' ? 'STORY: ' : ''}${j.title}</div>` +
       `<div class="m">${j.place.name}, ${j.place.region}. ${RUIN[j.place.ruin]}. ${SIZES[j.size ?? 'medium'].label}: ${j.rooms} rooms, ${SIZES[j.size ?? 'medium'].minutes}${j.twist === 'night' ? '. At night' : ''}. Pays ${Math.round(j.reward * rewardMult(w))} gold and ${treasureWord(j)}.</div>` +
@@ -190,7 +196,9 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     panel.show(f.name, say(title(f.adult), RUMOURS[(arg * 3 + w.day) % RUMOURS.length]) + say(f.child, CHILD[arg % CHILD.length]));
   } else if (id === 'chat') {
     const who = CHAT[arg] ?? { name: PATIENTS[arg - 10] ?? 'A STRANGER', line: SURVIVOR[(arg + w.day) % SURVIVOR.length] };
-    panel.show(who.name, say(who.name.split(' ').slice(-1)[0], who.line) + (arg === 0 ? say('Wenna', RUMOURS[w.day % RUMOURS.length]) : ''));
+    // How the town's coming on (or what the hungry pulled down) comes first, when they've a mind to.
+    const said = SPEAKER[arg] ? townSays(w, SPEAKER[arg], dusk() > 0.5) : null;
+    panel.show(who.name, say(who.name.split(' ').slice(-1)[0], said ?? who.line) + (arg === 0 ? say('Wenna', RUMOURS[w.day % RUMOURS.length]) : ''));
   } else {
     panel.show('THE NORTH GATE', p('Oak and iron, and the hungry on the other side of it. The gate opens for a job, not before: the board is in the square.'));
   }
@@ -231,6 +239,7 @@ const CHAT: Record<number, { name: string; line: string }> = {
   8: { name: 'WATCHMAN PIKE', line: 'New spear, new boots, same teeth out there. Still. Good boots.' },
   9: { name: 'OLD MERREN', line: 'Father Odric nailed that chapel shut with his own hands, the night the siege broke. I asked him why. He said, so it stays where it is.' },
   13: { name: 'CORPORAL BRISK', line: "Cole says I'll make sergeant when Dunn dies. Dunn says he's not dying till he gets new boots. So that's me, corporal for life." },
+  15: { name: PERRIN.name, line: PERRIN.stages[0] },
   14: { name: 'ORLA OF THE WATCH', line: "Third night on the east wall. Something out there whistles when I whistle. I've stopped whistling." },
   11: { name: 'A DRUNK', line: 'Moll cheats. Everyone knows Moll cheats. I keep playing her. What does that make me? Don\'t answer that. Buy me one.' },
   12: { name: 'A CARD SHARP', line: 'Whisper talks to his own kind. If you have to ask which kind, you are not it.' },
