@@ -760,3 +760,5 @@ which moves the page to the media channel.
 - A dodge that clears the blow (a Ranger's jump back, or any roll out of range) staggers the attacker
   when it started within the dodge's i-frame span of the blow landing, same as rolling through.
 - Netted, the Stoker can't start a charge or a hook throw, and loses one it was winding up.
+- Vercel project `relic` created on the SomwhatRogue team, linked to SomewhatRogue/Relics; every push
+  to main deploys.
