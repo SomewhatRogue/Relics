@@ -506,3 +506,24 @@ describe('netted', () => {
     }
   });
 });
+
+describe('winded', () => {
+  it('run out of breath and there is no dodge or block until the bar is full again', () => {
+    const { room, h } = onTarget(1);
+    h.stamina = 1;
+    room.setIntent('me', intent({ rollSeq: 1, mx: 1 }));
+    run(room, ticks(0.5));
+    expect(h.winded).toBe(true);
+    // Nothing comes back for a second.
+    const s = h.stamina;
+    run(room, ticks(0.3));
+    expect(h.stamina).toBe(s);
+    room.setIntent('me', intent({ rollSeq: 2, mx: 1, block: true, blockSeq: 1 }));
+    run(room, ticks(1.2));
+    expect(h.act).not.toBe('roll');
+    expect(h.blocking).toBe(false);
+    run(room, ticks(4));
+    expect(h.stamina).toBe(HERO.stamina);
+    expect(h.winded).toBe(false);
+  });
+});

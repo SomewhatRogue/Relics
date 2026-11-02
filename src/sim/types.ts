@@ -72,6 +72,8 @@ export interface Hero extends Body {
   hp: number;
   stamina: number;
   staminaAt: number;
+  /** Out of breath: no dodge, block or parry until stamina is full again. */
+  winded?: boolean;
   weapon: WeaponId;
   act: HeroAct;
   actT: number;
@@ -334,7 +336,7 @@ export type FightEvent =
   | { k: 'hit'; x: number; y: number; n: number; heavy: boolean; on: 'enemy' | 'hero'; counter?: boolean; crit?: boolean; ambush?: boolean; boarded?: boolean; backstab?: boolean; tick?: boolean; src?: string; big?: boolean }
   | { k: 'swing'; x: number; y: number; src: string; heavy: boolean }
   | { k: 'death'; x: number; y: number; how: DeathKind; dx: number; dy: number; kind: EnemyKind }
-  | { k: 'block' | 'parry' | 'guardbreak' | 'bash' | 'dodge' | 'slip' | 'down' | 'out' | 'pickedup' | 'roll' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number }
+  | { k: 'block' | 'parry' | 'guardbreak' | 'winded' | 'breath' | 'bash' | 'dodge' | 'slip' | 'down' | 'out' | 'pickedup' | 'roll' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number }
   | { k: 'windup' | 'impact'; x: number; y: number; kind: AttackKind }
   /** The prologue's cutscene: the ground shaking, the bite, a body landing, the Stoker's bellow. */
   | { k: 'rumble' | 'bite' | 'thud' | 'bellow' | 'fanfare'; x: number; y: number }

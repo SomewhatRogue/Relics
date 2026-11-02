@@ -1,5 +1,5 @@
 /** Relic: Wickhold, the Training Yard and runs. The rooms run here in the browser (solo is a party of one). */
-import { CLASS_GUARD, CLASS_DODGES, POTIONS, CLASS_ORDER, RELICS, TRAITS, WEAPONS, itemName, type HeroClass } from '../shared/tuning';
+import { HERO, CLASS_GUARD, CLASS_DODGES, POTIONS, CLASS_ORDER, RELICS, TRAITS, WEAPONS, itemName, type HeroClass } from '../shared/tuning';
 import { CLASS_NAME } from '../shared/classes';
 import { LOOKS, heroLook } from './sprites';
 import { ONLINE } from './relay';
@@ -146,6 +146,9 @@ function hud(now: number): void {
   $('.hp i').style.width = (100 * me.hp) / me.maxHp + '%';
   $('.st i').style.width = me.stamina + '%';
   $('.st').classList.toggle('low', me.stamina < 25);
+  // Winded: the bar flashes, fast while nothing's coming back, slower as it refills.
+  $('.st').classList.toggle('winded', !!me.winded);
+  $('.st').classList.toggle('empty', !!me.winded && room.time - me.staminaAt < HERO.windedDelay);
   $('.who').textContent = `${pr.name}  ${CLASS_NAME[pr.cls]}  LV ${pr.level}`;
   const item = me.arms[me.weapon];
   $('.wpn').textContent = item ? itemName(item) : WEAPONS[me.weapon].name;

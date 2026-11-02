@@ -40,6 +40,7 @@ const swingTime = (s: Swing) => s.windup + s.active + s.recover;
 export function spend(h: Hero, n: number, now: number): void {
   h.stamina = Math.max(0, h.stamina - n);
   h.staminaAt = now;
+  if (h.stamina <= 0) h.winded = true;
 }
 
 /** Point the hero: aim if given, else toward the nearest enemy in reach (snap), else where they move. */
@@ -132,7 +133,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     h.seen.block = inp.blockSeq;
     // A Mage has no guard at all; the rest can at least tap a parry.
     const guard = CLASS_GUARD[WEAPONS[h.weapon].cls];
-    if (guard !== 'none' && now - h.lastBlockPress >= GUARD.parryRepress) h.parryOpenAt = now;
+    if (guard !== 'none' && !h.winded && now - h.lastBlockPress >= GUARD.parryRepress) h.parryOpenAt = now;
     if (guard === 'none' && now - h.toldAt > 2) (h.toldAt = now), ev.push({ k: 'noguard', x: h.x, y: h.y, dodge: WEAPONS[h.weapon].dodge.kind });
     h.lastBlockPress = now;
   }
@@ -155,7 +156,9 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     }
   }
   if (h.hitstop > 0) return void (h.hitstop -= dt);
-  if (now - h.staminaAt > HERO.regenDelay) h.stamina = Math.min(HERO.stamina, h.stamina + HERO.staminaRegen * (h.perks.includes('endurance') ? PERK.endurance : 1) * (h.brandyUntil > now ? POTION.brandyRegen : 1) * (1 + statsOf(h).breath) * needlesBreath(h, enemies) * dt);
+  if (h.stamina <= 0 && !h.winded) (h.winded = true), ev.push({ k: 'winded', x: h.x, y: h.y });
+  if (now - h.staminaAt > (h.winded ? HERO.windedDelay : HERO.regenDelay)) h.stamina = Math.min(HERO.stamina, h.stamina + HERO.staminaRegen * (h.perks.includes('endurance') ? PERK.endurance : 1) * (h.brandyUntil > now ? POTION.brandyRegen : 1) * (1 + statsOf(h).breath) * needlesBreath(h, enemies) * dt);
+  if (h.winded && h.stamina >= HERO.stamina) (h.winded = false), ev.push({ k: 'breath', x: h.x, y: h.y });
   h.actT += dt;
   h.moving = false;
   h.blocking = false;
@@ -179,7 +182,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   }
   const w = WEAPONS[h.weapon];
   const dodge = w.dodge;
-  const wantsRoll = CLASS_DODGES[w.cls] && now - h.rollQueuedAt < INPUT_BUFFER && now - h.lastRollAt >= dodge.cooldown * (1 - statsOf(h).dodge) * (h.perks.includes('footwork') ? PERK.footwork : 1) * (dodge.kind === 'blink' && h.perks.includes('focus') ? PERK.focus : 1) && h.stamina >= 1;
+  const wantsRoll = CLASS_DODGES[w.cls] && now - h.rollQueuedAt < INPUT_BUFFER && now - h.lastRollAt >= dodge.cooldown * (1 - statsOf(h).dodge) * (h.perks.includes('footwork') ? PERK.footwork : 1) * (dodge.kind === 'blink' && h.perks.includes('focus') ? PERK.focus : 1) && h.stamina >= 1 && !h.winded;
   if (h.act === 'roll') {
     const k = (dodge.distance * statsOf(h).dodgeDist) / dodge.time;
     h.x += h.rollDx * k * dt;
@@ -274,7 +277,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     if (now - h.attackQueuedAt >= CHARGE.start) return startCharge(h);
   }
   // Only a Warrior's or Healer's kit holds a block.
-  h.blocking = inp.block && h.stamina > 0 && CLASS_GUARD[w.cls] === 'full';
+  h.blocking = inp.block && h.stamina > 0 && !h.winded && CLASS_GUARD[w.cls] === 'full';
   // Holding block as a Ranger or Rogue does nothing: say so, once a press.
   if (inp.block && CLASS_GUARD[w.cls] === 'parry' && now - h.lastBlockPress > 0.35 && h.toldAt < h.lastBlockPress) (h.toldAt = now), ev.push({ k: 'noblock', x: h.x, y: h.y });
   // Guarding with no aim (a phone) turns to the nearest threat, so a parry faces the right way.

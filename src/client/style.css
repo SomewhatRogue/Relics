@@ -11,6 +11,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .hp i { background: #c8402f; }
 .st i { background: #d9b13a; }
 .st.low i { background: #7a6a30; }
+.st.winded i { background: #c84a3a; animation: winded 0.5s steps(2) infinite; }
+.st.empty { animation: winded 0.18s steps(2) infinite; }
+@keyframes winded { 50% { opacity: 0.35; } }
 .gear { display: flex; justify-content: space-between; align-items: center; gap: 8px; white-space: nowrap; font-size: 10px; color: #b5b0c0; margin-top: 3px; text-shadow: 0 1px 0 #000; }
 .rcd { font-weight: 600; color: #9fe8ff; }
 .kit { color: #8a8494; margin-top: 1px; }

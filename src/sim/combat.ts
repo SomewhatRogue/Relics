@@ -187,7 +187,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     h.hitstop = Math.max(h.hitstop, HITSTOP.light);
     shove(h, sx / sl, sy / sl, a.knock * 0.4, HERO.weight);
     if (h.stamina <= 0) {
-      Object.assign(h, { stamina: 0, act: 'stun', actT: 0, actDur: GUARD.guardBreakStun });
+      Object.assign(h, { stamina: 0, winded: true, act: 'stun', actT: 0, actDur: GUARD.guardBreakStun });
       ev.push({ k: 'guardbreak', x: h.x, y: h.y });
     } else ev.push({ k: 'block', x: h.x, y: h.y });
     return;

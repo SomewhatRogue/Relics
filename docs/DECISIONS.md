@@ -1024,3 +1024,8 @@ better with time, and world events where the town is attacked and bloodied again
   moths round the lamp after dark.
 - Not done: barks when walking past a newly finished work (there's no bubble system yet); a raid you
   fight in town.
+
+## 2026-11-01: winded (Kyle; Opus 5.5)
+- Run stamina all the way out (a dodge, a block, a guard break) and you're winded: the bar flashes red,
+  nothing comes back for a second (`HERO.windedDelay`), and there's no dodge, blink, block or parry until
+  the bar is full again.

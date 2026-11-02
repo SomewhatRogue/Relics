@@ -222,6 +222,9 @@ export class Fx {
         this.say(x, y - 38, 'LAST SECOND', '#ffd27a');
         this.shake = Math.max(this.shake, 2);
         break;
+      case 'winded':
+        this.say(x, y - 30, 'WINDED', '#c84a3a');
+        break;
       case 'roll':
         this.burst(x, y, 6, ['#6a647a', '#57525e'], 25, false);
         break;

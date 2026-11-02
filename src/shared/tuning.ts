@@ -13,6 +13,9 @@ export const HERO = {
   stamina: 100,
   staminaRegen: 34,
   regenDelay: 0.6,
+  /** Run your breath all the way out and you're winded: nothing comes back for this long, and you can't
+   *  dodge, block or parry again until the bar is full (Kyle, 2026-11-01). */
+  windedDelay: 1,
   /** Downed heroes stand back up after this (no revive yet). */
   respawn: 3,
 };
