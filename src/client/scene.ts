@@ -119,6 +119,12 @@ export class Scene {
     return [(this.heroAt[0] - this.cam.x) * k, (this.heroAt[1] - 8 - this.cam.y) * k, PX * k];
   }
 
+  /** A spot in the room (tiles) on screen, in CSS pixels (speech bubbles over heads: bubbles.ts). */
+  tileScreen(x: number, y: number): [number, number] {
+    const k = this.scale / this.dpr;
+    return [(OX + x * PX - this.cam.x) * k, (OY + y * PX - this.cam.y) * k];
+  }
+
   /** `others`: other players' heroes in this place (the shared town); drawn only, never in the room. */
   render(room: ArenaRoom, meId: string, fx: Fx, now: number, dt: number, others: Hero[] = []): void {
     const a = room.alpha;

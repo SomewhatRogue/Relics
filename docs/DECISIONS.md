@@ -2,6 +2,52 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-02: chat, world and near in town, the party on a job (Kyle; Claude Opus 5.5)
+
+Kyle: "in-game chat, local and world (world logs down below for when you're in the world area, local
+is just near you), but it needs to work on mobile and desktop."
+
+- **Where it's heard.** WORLD: everyone in Wickhold, in the log. NEAR: only those within 8 tiles in
+  the same place (`NEAR` in `client/chat.ts`), as a bubble over the speaker and in the log tagged
+  NEAR. On a job with friends: the party, bubbles and log, tagged PARTY. Alone on a job, in the wood
+  or the yard, and offline (the one-file build): no chat, and no CHAT button.
+- **Carried on what's open.** Town lines ride the town's peer room (WICKHOLD1, `townfolk.ts`; its
+  `onWord` is wrapped, so parties still get their words). Every listener decides for itself whether a
+  NEAR line is close enough, from where the town says the speaker stands. The party talks in a peer
+  room of its own, the job's room code plus CH (`partyRoom`, `client/chatnet.ts`), so coop.ts and the
+  job's socket are untouched. Payloads are `{k:'chat', c, n, t}` or a quick line as its number `q`;
+  well under the relay's 64 KB MAX_MSG. The relay is unchanged.
+- **Safety** (`shared/chatrules.ts`, `shared/chatfilter.ts`): 120 characters of plain text, control,
+  zero-width and direction characters stripped; one line per 1.5 s and five per 15 s, held by the
+  sender (it says "Slow down a moment.") and dropped by listeners past a slightly looser pace (lines
+  bunch in transit); a short filter that stars slurs and the very worst words in their common
+  spellings, and leaves Wickhold's own swearing alone (voice.md); MUTE by tapping a name in the log,
+  per device, by player id (`relic.mute`). Everything heard is cleaned again on arrival and only ever
+  set as textContent.
+- **Laptop.** Enter opens a box at the bottom left over the log; Enter says it, Esc shuts, Tab
+  switches WORLD and NEAR, 1 to 8 in an empty box say a quick line. The log shows its last six lines,
+  fading after 14 s, and all of it while the box is open. CHAT in the corner does the same.
+- **Phone.** CHAT sits just under the corner row. In town it opens a panel at the top: the box first
+  (so the keyboard doesn't cover it), the quick lines, then the log. Shut, the town shows the last two
+  lines faint under the banner; tap them to open the panel. On a job it opens a strip of the eight
+  quick lines and TYPE, at the top, away from the thumbs. A dot on CHAT says something new was said.
+- The hero stands still while the box or panel is open (`chat.typing` joins the `still` intent in
+  main.ts); the world goes on. The quick strip doesn't stop you.
+- **Bubbles** (`client/bubbles.ts`) are page elements just after the canvas, so the HUD, banner and
+  buttons stay over them, and each one moves aside or under the speaker's feet rather than sit under
+  the banner, the HUD or a button.
+- LEAVE in the corner now sizes to its word (it spilled into SND on phones and laptops).
+- Tests: `tests/chat.test.ts` (filter, pace, cleaning, escaping, the wire). `scripts/chat-online.cjs`
+  (two browsers, port 8795): world line heard; typing w, a, s, d never moves the hero; NEAR not heard
+  from 14 tiles and heard as a bubble from 2.5; the phone's panel sends; mute holds; on a job the
+  phone's quick line and the laptop's number key and typed line reach the other, as bubbles.
+- New words, for the lore keeper and line editor: CHAT, WORLD, NEAR, PARTY, SAY, TYPE, X; "Say
+  something"; "Slow down a moment."; "... is muted on this device. Tap the name to hear them again.";
+  "... can be heard again."; quick lines Help me up! Follow me. Wait. Ready. Thanks. Over here!
+  Going in. Behind you!
+- Not yet: a typed line isn't spoken aloud or blipped; no chat history across reloads; the filter
+  doesn't catch letters spaced out with spaces.
+
 ## 2026-11-02: the friend who froze when a Florida friend led (Claude Opus 5.5)
 
 Kyle played with two friends in Florida. When he led, every job worked; when a Florida friend led,

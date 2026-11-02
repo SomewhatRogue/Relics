@@ -168,6 +168,8 @@ and burns out a goblin den on a job.
    on from inside a building restarts that building's room only; the leader's mid-fight effects
    (sounds, sparks) for a friend come with the patches, so a lost patch loses its sparks.
 3. DONE 2026-11-01: results on the board (DONE LATELY: the job and who did it).
+   DONE 2026-11-02: chat. WORLD and NEAR in town, the party on a job; bubbles over heads; a phone
+   panel and quick lines; mute and a slur filter (docs/DECISIONS.md, `scripts/chat-online.cjs`).
 4. World quests: open only with 3+ in town; hard.
 5. Town votes. DONE 2026-11-01: one voice per device (all its heroes share it). Without sign-in a
    second browser is still a second voice. Real one-per-

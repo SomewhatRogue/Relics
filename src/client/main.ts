@@ -45,6 +45,7 @@ import { setMusic, setMuted } from './sfx';
 import { Music } from './music';
 import { Soundscape } from './soundscape';
 import { line, speak } from './speech';
+import { Chat } from './chat';
 import './style.css';
 
 const game = new Game();
@@ -62,6 +63,7 @@ function online(): Townfolk | null {
       panel.hide();
       game.startRemote(new CoopGuest(room, game.profile.id, lead, () => game.profile, job));
     };
+    chat.attach(townfolk);
   }
   return townfolk;
 }
@@ -83,6 +85,8 @@ void link.refresh(true);
 const sounds = new Soundscape(music);
 const recovery = new Recovery(() => game.save);
 const title = new Title(game, () => undefined, recovery);
+/** Chat (online): world and near in town, the party on a job. */
+const chat = new Chat(game, scene, input.touch, () => panel.open || title.open);
 // Test hook: ?hero=MAGE skips the start screen with a hero of that class.
 const quick = new URLSearchParams(location.search).get('hero') as HeroClass | null;
 // ...and ?wood=1 starts it in the prologue wood instead of town.
@@ -301,7 +305,7 @@ function tick(t: number): void {
   last = t;
   // With a panel up, the hero stands still (and no press is spent).
   const live = input.read();
-  if (panel.open || title.open) still ??= { ...live, mx: 0, my: 0, attack: false, block: false };
+  if (panel.open || title.open || chat.typing) still ??= { ...live, mx: 0, my: 0, attack: false, block: false };
   else still = null;
   // Whoever you're talking to stops their round till you're done (the world doesn't: it's shared).
   if (talking && !panel.open) (talking.lag = (talking.lag ?? 0) + game.room.time - (talking.heldAt ?? game.room.time)), (talking.heldAt = undefined), (talking = null);
@@ -358,6 +362,7 @@ function tick(t: number): void {
   if (document.hidden) return;
   scene.render(game.room, ME, fx, t / 1000, dt, inTown ? (townfolk?.here(game.room.map.name) ?? []) : []);
   hud(t / 1000);
+  chat.frame();
 }
 
 function frame(t: number): void {
@@ -430,6 +435,7 @@ w.__GAME_STATE__ = () => ({ mode: game.mode, wood: game.wood ? { wake: game.wood
 w.render_game_to_text = () => `${game.mode} t=${game.room.time.toFixed(1)} hero ${game.hero.act} hp ${game.hero.hp} st ${Math.round(game.hero.stamina)} | ` + game.room.enemies.map((e) => `${e.kind} ${e.act} hp ${e.hp}${e.attack ? ' ' + e.attack.kind + ' ' + e.attack.t.toFixed(2) : ''}`).join(' | ');
 Object.defineProperty(w, '__room', { get: () => game.room });
 w.__game = game;
+w.__chat = chat.hooks();
 w.__works = WORK_ORDER;
 w.__music = music;
 // Listening: a stretch of any piece rendered offline (scripts/listen.cjs). Loaded only when asked.

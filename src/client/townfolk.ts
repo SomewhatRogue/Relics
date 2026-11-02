@@ -71,6 +71,12 @@ export class Townfolk {
     return [...this.folk.values()].filter((f) => f.at === at).map((f) => f.hero);
   }
 
+  /** One player by id: their hero and the place they're in (chat: who's near enough to hear). */
+  where(id: string): { hero: Hero; at: string } | null {
+    const f = this.folk.get(id);
+    return f ? { hero: f.hero, at: f.at } : null;
+  }
+
   /** Everyone else, by id: their name and what they offer (a party). */
   others(): { id: string; name: string; pt: unknown }[] {
     return [...this.folk].map(([id, f]) => ({ id, name: f.hero.tag ?? '', pt: f.pt }));
