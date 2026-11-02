@@ -11,7 +11,7 @@ export const PACKW = {
   hover: 'Point at a piece to see it beside what you wear. Click to choose it.',
   inTown: 'In town: sell it to Tobin on Market Row, or put it in the vault at the counting house.',
   hungry: 'Hungry gear stays with you. Only the church will take it.',
-  skillLine: 'Your class skill. Your trainer sees to it, not the pack.',
+  skillLine: 'Your class skill. Your trainer changes it, not the pack.',
   fullJob: 'Your pack is full. Drop something to make room.',
   notYours: 'Not for your class.',
 };
@@ -44,7 +44,7 @@ export const PAWN = {
   buy: (gold: number) => `BUY BACK (${gold} GOLD)`,
   rule: 'Anything you sell him, you can buy back for what he paid until you come home from your next job.',
   none: 'Nothing of yours on his table.',
-  packs: "Bigger packs I do as well. Two old ones stitched into one, mostly. Don't ask whose.",
+  packs: "Bigger packs I do as well, two old ones stitched into one, mostly, since there's no new leather coming and I'm not cutting up my own.",
   more: (size: number, gold: number) => `A BIGGER PACK: ${size} (${gold} GOLD)`,
   biggest: 'Your pack is as big as they come.',
   emptyRow: 'Empty stalls and a cat, and Tobin at the far one. The traders are camped outside the north gate with the refugees, and the gate stays shut to them until the council says otherwise.',
@@ -59,7 +59,7 @@ export const FORGE = {
   melt: (steel: number) => `MELT DOWN (+${steel} STEEL)`,
   meltWorn: 'Take it off first to melt it.',
   rack: "HALVARD'S RACK",
-  ivo: "I'm not setting elements for a while, not till I've sorted the bench out. What's set in yours already stays set.",
+  ivo: "No elements for a while, I'm sorry, not till I've put the bench right. Whatever's set in yours stays set, it's happy where it is.",
   shut: 'Setting elements: not for now.',
   element: 'AN ELEMENT (NOT FOR NOW)',
 };
