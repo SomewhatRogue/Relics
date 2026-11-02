@@ -98,3 +98,18 @@ and burns out a goblin den on a job.
   for everyone.
 - World quests need at least three people, and they're HARD: people can and will go down. No permadeath.
 - Failing a job has a consequence for the town (smaller missions too, scaled to the job).
+- World quests end with their result told to the whole town (a crier, and the board), and when the
+  outcome leaves a choice for the town, everyone is told there's a vote and where (the town hall or
+  the board), with a deadline. Kyle wants one vote per person, not per character.
+
+### Built and next
+1. DONE 2026-11-01: the shared town. Everyone online sees everyone in Wickhold (`townfolk.ts`).
+2. Parties at the board: post a party for a job, others tap Join, the leader sets out and the
+   others are pulled into the leader's instance (Come Bye's host model, no codes).
+3. Results on the board: a finished job written for everyone, with who was in it.
+4. World quests: open only with 3+ in town; someone going down (open question for Kyle: out until
+   the job ends, or a teammate can pick them up?).
+5. Town votes. Without sign-in the game knows devices, not people: a vote kept per device token (all
+   of a device's heroes share it) stops character-hopping but not a second browser. Real one-per-
+   person needs a sign-in (Google, Apple or an email link). Start per device; add sign-in if it's
+   ever gamed.
