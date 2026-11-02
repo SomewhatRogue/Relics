@@ -29,6 +29,7 @@ import { WORK_ORDER } from '../shared/works';
 import { grabbable } from '../sim/grab';
 import { liftable } from '../sim/props';
 import { relicLabel } from '../sim/hero';
+import { castElement } from '../sim/channel';
 import type { FightEvent } from '../sim/types';
 import { Fx } from './fx';
 import { watchDust } from './dust';
@@ -190,14 +191,16 @@ function hud(now: number): void {
   // (A skill your trainer hasn't taught you yet has no button.)
   const known = knows(me, 'skill');
   $('.rlc').textContent = known ? (input.touch ? '' : 'E ') + tag(skill) : '';
-  $('.rlc').dataset.el = me.augments[skill];
+  // (The Mage's channel shows the element its spells are in now, in that colour.)
+  const skillEl = skill === 'channel' ? castElement(me) : me.augments[skill];
+  $('.rlc').dataset.el = skillEl;
   $('.rcd').textContent = relic ? (input.touch ? '' : 'R ') + tag(relic) : '';
   $('.rcd').classList.toggle('wait', !!relic && left(relic) > 0);
   if (input.touch) {
     const sb = $('.tb.relic'), rb = $('.tb.relic2');
     sb.hidden = !known;
-    sb.textContent = RELICS[skill].short;
-    sb.dataset.el = me.augments[skill];
+    sb.textContent = skill === 'channel' ? relicLabel(me, skill) : RELICS[skill].short;
+    sb.dataset.el = skillEl;
     sb.style.setProperty('--cd', 100 * (1 - left(skill) / RELICS[skill].cooldown) + '%');
     rb.hidden = !relic;
     if (relic) (rb.textContent = RELICS[relic].short), (rb.dataset.el = me.augments[relic]), rb.style.setProperty('--cd', 100 * (1 - left(relic) / RELICS[relic].cooldown) + '%');

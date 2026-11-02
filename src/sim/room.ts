@@ -7,7 +7,7 @@ import { ARENA, useMap, type GameMap } from '../shared/arena';
 import type { Foe } from '../shared/terrain';
 import type { PropKind } from '../shared/props';
 import { Rng } from '../shared/rng';
-import { BLESSING, CHANNEL, GUARD, HEAL_RADIUS, HEIGHT, HERO, LODESTONE, TICK, TRAIT, WEAPONS, type Augment, type Swing, technique, VARIANTS } from '../shared/tuning';
+import { BLESSING, GUARD, HEAL_RADIUS, HEIGHT, HERO, LODESTONE, TICK, TRAIT, WEAPONS, type Swing, technique, VARIANTS } from '../shared/tuning';
 import { separate } from './bodies';
 import { lobLodestone, shoot, smite, stepBolt, throwNet } from './bolts';
 import { afflict, stepElements, type World } from './elements';
@@ -32,6 +32,7 @@ import { stepBlaze, type BlazeState } from './blaze';
 import { sweepSurvivors } from './survivorhits';
 import { dropFrom, stepDrops, takeLoot } from './loot';
 import { hallow, rally, shadowstep, stepZones, ward } from './relics';
+import { castElement, castSpell, spendPrimed, turnElement } from './channel';
 import { forgedElement, has, traitsOf } from './traits';
 import { fireHook, stepHook } from './hook';
 import { stepJavelin, throwJavelin } from './javelin';
@@ -293,24 +294,6 @@ export class ArenaRoom {
     if (currentSwing(h).burn) afflict(w, e, 'fire', n);
   }
 
-  /** A Mage's spell, shaped by its element: fire a firebolt or a burning fireball; frost three icicles
-   *  or a burst that freezes; storm a spark or lance that jumps to the next goblin. */
-  private spell(h: Hero, s: Swing, el: Augment, mult: number): void {
-    const traits = traitsOf(h);
-    if (el === 'frost' && !h.heavy) {
-      for (const a of [-0.2, 0, 0.2]) {
-        const c = Math.cos(a), n = Math.sin(a), aim = { ...h, fx: h.fx * c - h.fy * n, fy: h.fx * n + h.fy * c };
-        this.bolts.push(shoot(aim, { ...s, shot: 'lance', burst: 0, dmg: Math.round(s.dmg * 0.55), speed: (s.speed ?? 20) * 1.2 }, el, mult, traits));
-      }
-      return;
-    }
-    // (A rod's lance keeps running through its line: its element rides it, no burst.)
-    const b = shoot(h, h.heavy && el !== 'storm' && !s.pierce ? { ...s, burst: Math.max(s.burst ?? 0, el === 'frost' ? 2.2 : 1.8) } : s, el, mult, traits);
-    if (h.heavy && el === 'frost') b.freeze = true;
-    if (el === 'storm') b.chain = true;
-    this.bolts.push(b);
-  }
-
   private fire(h: Hero, w: World): void {
     const el = h.augments[h.relic];
     if (h.relic === 'hook') this.hooks.push(fireHook(h));
@@ -318,7 +301,7 @@ export class ArenaRoom {
     else if (h.relic === 'net') this.bolts.push(throwNet(h, el));
     else if (h.relic === 'lodestone') this.bolts.push(lobLodestone(h, this.aimDistance(h, LODESTONE.range, LODESTONE.fallback), el));
     else if (h.relic === 'shadow') shadowstep(h, this.enemies, w.ev);
-    else if (h.relic === 'channel') Object.assign(h, { act: 'channel', actT: 0, actDur: CHANNEL.time * (1 - technique(h.drills, 'MAGE')) }), w.ev.push({ k: 'channel', x: h.x, y: h.y, el: h.augments.channel || 'fire' });
+    else if (h.relic === 'channel') turnElement(h, w.ev);
     else if (h.relic === 'horn') rally(h, this.enemies, w.now, w.ev);
     else if (h.relic === 'bash') startBash(h, w.ev);
     else if (h.relic === 'ward') ward(h, this.heroes, this.intents.get(h.id), w.now, w.ev);
@@ -358,12 +341,12 @@ export class ArenaRoom {
     const bolts = this.bolts.length;
     if (s.shot === 'smite') this.bolts.push(smite(h, s, Math.min(s.range, this.aimDistance(h, s.range, 3.5)), mult, traitsOf(h), s.delay));
     else if (s.shot) {
-      // A Mage's spells take the element it last channelled (fire to start with).
-      const mage = WEAPONS[h.weapon].cls === 'MAGE', mel = (h.augments.channel || 'fire') as Augment;
-      const el = s.shot === 'arrow' || s.shot === 'bolt' || s.shot === 'knife' ? forged : forged || (mage ? mel : h.augments[h.relic]);
-      if (mage) this.spell(h, s, el, mult);
+      // A Mage's spells take the element it last channelled (fire to start with); the first after a turn is primed.
+      const mage = WEAPONS[h.weapon].cls === 'MAGE', primed = mage && !!h.primed;
+      const el = s.shot === 'arrow' || s.shot === 'bolt' || s.shot === 'knife' ? forged : forged || (mage ? castElement(h) : h.augments[h.relic]);
+      if (mage) this.bolts.push(...castSpell(h, s, el, mult * spendPrimed(h), traitsOf(h)));
       else this.bolts.push(shoot(h, s, el, mult, traitsOf(h)));
-      w.ev.push({ k: 'shoot', x: h.x, y: h.y, dx: h.fx, dy: h.fy, kind: s.shot, el });
+      w.ev.push({ k: 'shoot', x: h.x, y: h.y, dx: h.fx, dy: h.fy, kind: s.shot, el, ...(primed ? { primed } : {}) });
     }
     // The Jealous Rod: a charged spell jumps to every goblin near what it hits.
     if (full && wears(h, 'jealous')) for (const b of this.bolts.slice(bolts)) b.chain = true;

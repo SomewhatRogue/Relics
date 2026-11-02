@@ -1,11 +1,10 @@
 /**
  * Spiders: the numbers. Small fast ones that come in waves out of a nest until it's destroyed, each
  * weak alone, with a short telegraphed pounce whose bite poisons; now and then, deep in, a big slow
- * brood mother that bites and spits a glob that leaves a poison puddle. All of them burn easily (WEAK).
+ * brood mother that bites and spits a glob that leaves a poison puddle. All of them burn easily (WEAK: shared/weakness.ts).
  * Poison is a status on heroes, judged by the room (sim/poison.ts). Where they turn up: shared/nests.ts.
  */
 import type { EnemyAttackSpec, EnemySpec } from './tuning.js';
-import type { Element } from './magic.js';
 
 /** A small spider. `pounce`: a short leap along a line it shows you (blockable, parryable). */
 export const SPIDER: EnemySpec & { pounce: EnemyAttackSpec; sight: number; skitter: number; zig: number; spread: number } = {
@@ -49,19 +48,6 @@ export const POISON = { every: 1, dmg: 2, most: 3, time: 5, fade: 1.5 };
 
 /** A poison puddle where a glob lands: `life` seconds, a stack every `every` seconds on whoever stands in it. */
 export const PUDDLE = { life: 5, every: 0.8, radius: 1.1 };
-
-/** What a blow is made of, for weaknesses. */
-export type Hurt = Element | 'physical';
-/**
- * Damage multipliers by kind and what landed it (a kind not listed takes everything as it comes). Over
- * 1 is a weakness and shows WEAK where it lands. Spiders burn; their nests burn best of all.
- */
-export const WEAK: Record<string, Partial<Record<Hurt, number>>> = {
-  spider: { fire: 2.5, storm: 1.2 },
-  brood: { fire: 1.8, physical: 0.9 },
-  nest: { fire: 3, frost: 0.5, storm: 0.8, physical: 0.6 },
-};
-export const weakness = (kind: string, by: Hurt | '' = 'physical') => WEAK[kind]?.[by || 'physical'] ?? 1;
 
 /** The spider kinds (not goblins: no loot, no coals, the hound leaves them be). */
 export const SPIDER_KINDS = ['spider', 'brood', 'nest'] as const;

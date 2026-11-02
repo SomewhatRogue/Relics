@@ -53,7 +53,7 @@ export class Soundscape {
     if (ev.k === 'block') return blockSound(this.heroAt(room, ev.x, ev.y)?.weapon ?? '');
     // Someone you freed, hurt by the party, cries out (a burn's tick doesn't).
     if (ev.k === 'survivorhit') return ev.tick ? undefined : sfx.hurt();
-    if (ev.k === 'hatch' || ev.k === 'splat' || ev.k === 'weak') return spiderSounds[ev.k]();
+    if (ev.k === 'hatch' || ev.k === 'splat' || ev.k === 'weak' || ev.k === 'resist') return spiderSounds[ev.k]();
     if (ev.k === 'hit') {
       if (ev.tick) return;
       if (ev.on === 'hero' && (ev.src === 'pounce' || ev.src === 'bite' || ev.src === 'spit')) return spiderSounds.wetbite(), sfx.hurt();

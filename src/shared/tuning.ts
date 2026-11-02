@@ -31,6 +31,7 @@ export * from './hungry.js';
 export * from './drills.js';
 export * from './backline.js';
 export * from './spiders.js';
+export * from './weakness.js';
 import { DRUMMER, HEXER } from './backline.js';
 
 /** Holding attack past `start` begins charging; the heavy is strongest at `full`. */

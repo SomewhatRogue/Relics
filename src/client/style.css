@@ -69,7 +69,7 @@ body.touch #tip { top: calc(112px + env(safe-area-inset-top)); white-space: norm
 [data-el='frost'] { --el: #bfe8ff; }
 [data-el='storm'] { --el: #fff27a; }
 .rlc[data-el='fire'], .rlc[data-el='frost'], .rlc[data-el='storm'] { color: var(--el); }
-.relic[data-el='fire'], .relic[data-el='frost'], .relic[data-el='storm'] { border-color: var(--el); box-shadow: 0 0 10px var(--el); }
+.relic[data-el='fire'], .relic[data-el='frost'], .relic[data-el='storm'] { border-color: var(--el); box-shadow: 0 0 10px var(--el); color: var(--el); }
 #wheel .slot { flex-direction: column; }
 #wheel .slot[data-el='fire'], #wheel .slot[data-el='frost'], #wheel .slot[data-el='storm'] { border-color: var(--el); }
 #wheel .slot[data-el='fire']::after, #wheel .slot[data-el='frost']::after, #wheel .slot[data-el='storm']::after { content: attr(data-el); text-transform: uppercase; color: var(--el); font-size: 9px; }

@@ -3,7 +3,7 @@
  * A tap of attack swings on release; holding past CHARGE.start charges a heavy instead.
  */
 import { collide, wadeAt } from '../shared/arena';
-import { CHANNEL, DODGE, CLASS_DODGES, CLASS_GUARD, DECOY, POTION, AUGMENTS, CHARGE, GRAB, HORN, PERK, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon, drilled, STEALTH } from '../shared/tuning';
+import { DODGE, CLASS_DODGES, CLASS_GUARD, DECOY, POTION, AUGMENTS, CHARGE, GRAB, HORN, PERK, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon, drilled, STEALTH } from '../shared/tuning';
 import { slide } from './bodies';
 import { applyGear, turnBelt } from './pack';
 import { statsOf } from './gearstats';
@@ -92,7 +92,8 @@ export interface HeroActs {
 }
 
 /** How a relic and its augment are named on screen: "JAVELIN FIRE". */
-export const relicLabel = (h: Hero, r = h.relic) => RELICS[r].short + (h.augments[r] ? ' ' + ELEMENT_NAME[h.augments[r] as keyof typeof ELEMENT_NAME] : '');
+/** A relic's name and its element; the Mage's channel shows just the element its spells are in now. */
+export const relicLabel = (h: Hero, r = h.relic) => r === 'channel' ? ELEMENT_NAME[(h.augments.channel || 'fire') as keyof typeof ELEMENT_NAME] : RELICS[r].short + (h.augments[r] ? ' ' + ELEMENT_NAME[h.augments[r] as keyof typeof ELEMENT_NAME] : '');
 
 function gear(h: Hero, inp: Intent, ev: FightEvent[]): void {
   turnBelt(h, inp, ev);
@@ -172,14 +173,6 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   if (h.act === 'hurt' || h.act === 'stun') {
     if (h.actT >= h.actDur) (h.act = 'idle'), (h.actT = 0);
     return;
-  }
-  // The Mage's channel: stood still, and at the end its spells turn to the next element.
-  if (h.act === 'channel') {
-    if (h.actT < h.actDur) return;
-    const order = CHANNEL.order, next = order[(order.indexOf((h.augments.channel || 'fire') as (typeof order)[number]) + 1) % order.length];
-    h.augments.channel = next;
-    Object.assign(h, { act: 'idle', actT: 0 });
-    return void ev.push({ k: 'channeled', x: h.x, y: h.y, el: next });
   }
   const w = WEAPONS[h.weapon];
   const dodge = w.dodge;

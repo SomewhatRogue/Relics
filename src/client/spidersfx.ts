@@ -1,7 +1,7 @@
 /**
  * What spiders sound like: a dry skitter of legs (louder the closer), a hiss as one gathers itself to
  * pounce, a wet bite, sacs tearing when a wave hatches, the brood mother's gurgling spit and the glob's
- * splat, a bright tick on a weakness. Built from the shared noise and tone hooks (sfx.ts).
+ * splat, a bright tick on a weakness (a dull one on a resistance). Built from the shared noise and tone hooks (sfx.ts).
  */
 import { burst, ready, tone } from './sfx';
 
@@ -40,5 +40,9 @@ export const spiderSounds = {
   weak() {
     if (!ready()) return;
     tone('square', 990, 1480, 0.05, 0.08);
+  },
+  resist() {
+    if (!ready()) return;
+    tone('triangle', 220, 160, 0.05, 0.07);
   },
 };

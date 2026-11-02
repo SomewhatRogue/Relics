@@ -12,7 +12,9 @@ const flash = (fx: Fx, x: number, y: number, r: number, i: number, c: [number, n
 export function magicFx(fx: Fx, ev: FightEvent, x: number, y: number): void {
   switch (ev.k) {
     case 'shoot':
-      if (ev.kind !== 'arrow') fx.burst(x + ev.dx * 10, y - 10 + ev.dy * 6, 5, [EL_COL[ev.el], '#ffffff'], 40, true);
+      if (ev.kind !== 'arrow') fx.burst(x + ev.dx * 10, y - 10 + ev.dy * 6, ev.primed ? 14 : 5, [EL_COL[ev.el], '#ffffff'], ev.primed ? 70 : 40, true);
+      // A primed spell (the first after a channel) goes with a ring and a flash.
+      if (ev.primed) fx.rings.push({ x: x + ev.dx * 10, y: y - 10 + ev.dy * 6, life: 0.25, max: 0.25, col: EL_COL[ev.el], size: 14 }), flash(fx, x, y - 10, 60, 1, EL_LIGHT[ev.el]);
       break;
     case 'burst': {
       const col = ev.el ? EL_COL[ev.el] : '#ffb44c', r = ev.r * 16;

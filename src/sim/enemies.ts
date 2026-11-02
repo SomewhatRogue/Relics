@@ -75,7 +75,8 @@ export function begin(e: Enemy, kind: EnemyAttack['kind'], s: EnemyAttackSpec, t
 /** Run an attack in progress; true when it has finished (or was parried away). */
 function runAttack(e: Enemy, heroes: Hero[], now: number, dt: number, ev: FightEvent[], others: Enemy[] = []): boolean {
   const a = e.attack!;
-  a.t += dt;
+  // Chilled: the wind-up drags (the telegraph fills at the same slowed pace, so what you see holds).
+  a.t += a.t < a.windup && e.chillUntil > now ? dt * FROST.windup : dt;
   // Netted: no running at you and no throwing the hook. Whatever it was winding up for is lost.
   if ((a.kind === 'charge' || a.kind === 'draw') && e.snareUntil > now) return ev.push({ k: 'snared', x: e.x, y: e.y }), true;
   if (a.kind === 'charge' || a.kind === 'pounce') return runCharge(e, a, heroes, now, ev, others);
