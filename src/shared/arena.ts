@@ -4,7 +4,9 @@
  * a time (the room that's running sets it), so collision never needs it passed around.
  */
 export type Circle = { x: number; y: number; r: number };
-export type RoundKind = 'pillar' | 'tree' | 'pine' | 'rock' | 'hay' | 'well' | 'lantern' | 'support' | 'stump' | 'target' | 'stone' | 'post' | 'grate' | 'statue' | 'bush' | 'reed' | 'deadtree';
+export type RoundKind = 'pillar' | 'tree' | 'pine' | 'rock' | 'hay' | 'well' | 'lantern' | 'support' | 'stump' | 'target' | 'stone' | 'post' | 'grate' | 'statue' | 'bush' | 'reed' | 'deadtree'
+  // Paint only, a speck to bump: crows at the blood, moths round a garden lamp.
+  | 'crows' | 'moths';
 export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall' | 'tent' | 'rockwall' | 'fence' | 'granary' | 'wall' | 'den'
   // Furniture, inside buildings.
   | 'counter' | 'bed' | 'shelf' | 'anvil' | 'altar' | 'pew' | 'bench' | 'hearth' | 'sacks'
@@ -28,7 +30,12 @@ export interface Block {
    * inside both come from (shared/houses.ts). Furniture: 1 smashed, 2 a fire lit in it (a hearth).
    */
   look?: number;
+  /** Paint only: a town building still showing the breach (scorched, shutters boarded, roof holed). */
+  worn?: boolean;
 }
+/** Paint only, on the floor: never collided against or decided on. */
+export type MarkKind = 'blood' | 'drag' | 'scorch' | 'trample' | 'planks' | 'beds' | 'flowers' | 'mound' | 'fallenpost' | 'green';
+export interface Mark { kind: MarkKind; x: number; y: number; w: number; h: number }
 /**
  * Raised ground: a ledge, a rock shelf, a wall walk. Up on it you stand on level 1. From the ground
  * its edge is a wall; from on top you can step off it (a drop). Ramps (stairs, a slope) overlap its
@@ -113,6 +120,10 @@ export interface GameMap {
   water?: Water[];
   /** Where goblins lie asleep (drawn curled up; they lie as still as ones at the dead till they wake). */
   sleepers?: { x: number; y: number }[];
+  /** Paint only: marks on the floor (blood, scorch, dug beds, flowers). */
+  marks?: Mark[];
+  /** Paint only: a stretch of the back wall that came down (tiles), and how far it's mended (0 to 3). */
+  breach?: { x: number; w: number; stage: number };
 }
 export interface Water { x: number; y: number; w: number; h: number; deep?: boolean }
 /** How fast anyone moves knee-deep in a ford or a bog. */

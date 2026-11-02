@@ -4,8 +4,9 @@
  * the sewer grate. Barred doors and rubble say what would open them.
  */
 import { SHOP, STAT_NAME, STAT_ORDER } from '../shared/progress';
-import { WORKS, WORK_ORDER, workDone, workProgress, type WorkId } from '../shared/works';
-import { giveValue, itemName } from '../shared/tuning';
+import { WORKS, workDone } from '../shared/works';
+import { openWorks } from './worksui';
+import { townSays } from '../shared/townsays';
 import type { SpotId } from '../shared/town';
 import type { Game } from './game';
 import { line } from './speech';
@@ -25,7 +26,6 @@ export const setLink = (l: WorldLink) => (link = l);
 const p = (s: string) => `<p>${s}</p>`;
 // The quote marks type in with the words, so the end of the line never shows before it's said.
 const say = (who: string, s: string) => p(`<b>${who}:</b> ${line(`"${s}"`, who)}`);
-const bar = (n: number, of: number) => `<span class="meter"><i style="width:${Math.min(100, (100 * n) / of)}%"></i></span>`;
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 
 const LOCKED: Record<string, string> = {
@@ -37,25 +37,7 @@ const LOCKED: Record<string, string> = {
 /** Returns true if it handled the spot. */
 export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key: string): boolean {
   const pr = g.profile, w = g.world, again = () => openSquare(id, g, panel, _arg, key);
-  if (id === 'works') {
-    const html = say('Reeve Hollis', 'Everything this town builds, it builds out of what people give. I write down every coin. I write down every den you burn, too. Somebody should.') +
-      WORK_ORDER.map((k) => {
-        const wk = WORKS[k], n = workProgress(w, k), done = workDone(w, k);
-        return `<div class="work"><b>${wk.name}</b> ${bar(n, wk.need)} ${Math.min(n, wk.need)} of ${wk.need} ${wk.by === 'gold' ? 'gold' : 'dens burned'}<br>${done ? `<span class="done">Done. ${wk.done}</span>` : wk.text}</div>`;
-      }).join('') + p(`You have ${pr.gold} gold.`);
-    const open = WORK_ORDER.filter((k) => WORKS[k].by === 'gold' && !workDone(w, k));
-    // Gear for the works: pick the work, then the piece; it counts for more than Halvard would pay.
-    const gearFor = (k: WorkId) => {
-      const can = pr.bag.filter((it) => giveValue(it) > 0);
-      panel.show('GIVE GEAR', p(`<b>${WORKS[k].name}</b>`) + p(can.length ? 'Hollis writes down what it would fetch, and a bit over.' : 'Nothing in your pack the works can use.'), [
-        ...can.map((it) => ({ label: `GIVE ${itemName(it)} (${giveValue(it)})`, act: () => (g.giveGear(it, k), workDone(g.world, k) ? again() : gearFor(k)) })),
-        { label: 'BACK', act: again },
-      ]);
-    };
-    const gearButtons = pr.bag.some((it) => giveValue(it) > 0) ? open.map((k) => ({ label: `${WORKS[k].name.split(' ').slice(-1)[0].toUpperCase()}: GIVE GEAR`, act: () => gearFor(k) })) : [];
-    panel.show('TOWN WORKS', html, [...open.flatMap((k) => [25, 100].map((n) => ({ label: `${WORKS[k].name.split(' ').slice(-1)[0].toUpperCase()}: GIVE ${n}`, disabled: pr.gold < n, act: () => (g.fund(k, n), again()) }))), ...gearButtons]);
-    return true;
-  }
+  if (id === 'works') return openWorks(g, panel), true;
   if (id === 'roll') {
     const board = link?.online && link.board ? link.board : WorldLink.localBoard(g.save.heroes);
     const where = link?.online ? `World: <b>${link.group.toUpperCase()}</b>${link.group === 'wickhold' ? ' (everyone)' : ' (your group)'}.` : 'Off the shared world: this shows your own heroes. Online, every hero in your world is here.';
@@ -76,7 +58,7 @@ export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key:
   }
   if (id === 'bard') {
     const areas: Area[] = ['town', 'inside', 'church', 'village', 'farm', 'field', 'forest', 'mine', 'boss'];
-    panel.show('ROWAN THE BARD', say('Rowan', 'A copper a song, and from a hero I\'ll take it on credit. Name a tune. Half of what I sing is even true.') + p('Songs from everywhere the heroes have been:'),
+    panel.show('ROWAN THE BARD', say('Rowan', townSays(w, 'rowan') ?? 'A copper a song, and from a hero I\'ll take it on credit. Name a tune. Half of what I sing is even true.') + p('Songs from everywhere the heroes have been:'),
       [...areas.flatMap((a) => SCORES[a].map((sc) => ({ label: sc.name.toUpperCase(), act: () => (dispatchEvent(new CustomEvent('relic:tune', { detail: { area: a, name: sc.name } })), panel.hide()) }))),
         { label: 'WHATEVER YOU LIKE', act: () => (dispatchEvent(new CustomEvent('relic:tune', { detail: null })), panel.hide()) }]);
     return true;

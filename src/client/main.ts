@@ -20,6 +20,8 @@ const ORLA = ["Those are *Hew's* boots.", "Ah. Well. Church is up past the Lante
 let shownCap = '';
 import { WorldLink } from './worldlink';
 import { setLink } from './squareui';
+import { raidNews } from './raidnews';
+import { WORK_ORDER } from '../shared/works';
 import { grabbable } from '../sim/grab';
 import { liftable } from '../sim/props';
 import { relicLabel } from '../sim/hero';
@@ -287,6 +289,11 @@ function frame(t: number): void {
   if (game.result && !panel.open) showResult(game, panel);
   // Out of the wood: Orla at the gate.
   if (game.greeting === 'orla' && !panel.open) (game.greeting = null), panel.show('ORLA OF THE WATCH', `<p class="dim">${line(WOOD_ROAD)}</p><p><b>Orla:</b> ${line(`"${ORLA[0]}"`, 'ORLA')}</p><p>She looks at your feet a long while.</p><p><b>Orla:</b> ${line(`"${ORLA[1]}"`, 'ORLA')}</p>`, [{ label: 'INTO WICKHOLD', primary: true, act: () => panel.hide() }], true);
+  // Back to a town the hungry raided while you were away: Dunn tells you, the first time you see it.
+  else if (game.mode === 'town' && !game.outside && !panel.open && !title.open && !game.result) {
+    const news = raidNews(game.world);
+    if (news) panel.show(news.title, news.html, [{ label: 'CLOSE', primary: true, act: () => panel.hide() }], true);
+  }
   fx.update(dt);
   scene.focus = game.cutFocus();
   scene.fanfare = game.wood?.hold?.kind === 'relic';
@@ -354,6 +361,7 @@ w.__GAME_STATE__ = () => ({ mode: game.mode, wood: game.wood ? { wake: game.wood
 w.render_game_to_text = () => `${game.mode} t=${game.room.time.toFixed(1)} hero ${game.hero.act} hp ${game.hero.hp} st ${Math.round(game.hero.stamina)} | ` + game.room.enemies.map((e) => `${e.kind} ${e.act} hp ${e.hp}${e.attack ? ' ' + e.attack.kind + ' ' + e.attack.t.toFixed(2) : ''}`).join(' | ');
 Object.defineProperty(w, '__room', { get: () => game.room });
 w.__game = game;
+w.__works = WORK_ORDER;
 w.__music = music;
 w.__title = title;
 w.__panel = panel;
