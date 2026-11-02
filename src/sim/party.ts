@@ -11,6 +11,7 @@
 import { HERO, HURT_STAGGER, PARTY } from '../shared/tuning';
 import { Rng } from '../shared/rng';
 import { toughen } from '../shared/roster';
+import { waveFor } from './spiders';
 import type { Foe } from '../shared/terrain';
 import { inArc } from './combat';
 import type { Swing } from '../shared/tuning';
@@ -86,7 +87,9 @@ export const allOut = (heroes: Hero[]) => inParty(heroes) && players(heroes).eve
  */
 export function scaleFoes(foes: Foe[], party: number, seed = 1): Foe[] {
   if (party <= 1) return foes;
-  const common = foes.filter((f) => !f.name), more = Math.round(common.length * PARTY.foes * (party - 1)), extra: Foe[] = [];
+  // Nests aren't copied: their waves grow instead. One brood mother is enough (she gets tougher, scaleBosses).
+  for (const f of foes) if (f.kind === 'nest') f.wave = waveFor(party);
+  const common = foes.filter((f) => !f.name && f.kind !== 'nest' && f.kind !== 'brood'), more = Math.round(common.length * PARTY.foes * (party - 1)), extra: Foe[] = [];
   for (let i = 0; i < more; i++) {
     const f = common[i % common.length], a = i * 2.4;
     extra.push({ ...f, x: f.x + Math.cos(a) * 0.7, y: f.y + Math.sin(a) * 0.7 });
@@ -95,8 +98,8 @@ export function scaleFoes(foes: Foe[], party: number, seed = 1): Foe[] {
   return [...foes, ...extra];
 }
 
-/** Named goblins (bosses) tougher for a bigger party. */
+/** Named goblins (bosses) and brood mothers tougher for a bigger party. */
 export function scaleBosses(enemies: Enemy[], party: number): void {
   if (party <= 1) return;
-  for (const e of enemies) if (e.name) e.hp = e.maxHp = Math.round(e.maxHp * (1 + PARTY.boss * (party - 1)));
+  for (const e of enemies) if (e.name || e.kind === 'brood') e.hp = e.maxHp = Math.round(e.maxHp * (1 + PARTY.boss * (party - 1)));
 }

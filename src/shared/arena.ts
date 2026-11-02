@@ -113,6 +113,14 @@ export interface Theme {
   moon: number;
   /** Daylight: no moon pool, no lanterns, the ambient does it all. */
   day?: boolean;
+  /** A job's hour (shared/timeofday.ts), and what it does: how much fires and lanterns count, dawn's
+   *  mist, the low sun's shadows (+ east, - west), how far a resting goblin sees, and a censer's glow. */
+  time?: import('./timeofday.js').Time;
+  torch?: number;
+  mist?: number;
+  sun?: number;
+  sight?: number;
+  glow?: number;
 }
 
 export interface GameMap {

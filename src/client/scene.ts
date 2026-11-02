@@ -32,6 +32,8 @@ import { drawCaged, drawSurvivor } from './captives';
 import { behindMarks, drawWays } from './wayout';
 import { SPOT_REACH } from '../shared/town';
 import { dusk } from './streetlife';
+import { drawMist, setSun, torchIn } from './daytime';
+import { drawPuddles } from './spiders';
 
 
 /** The view's jolt this frame (heropose.ts), reused. */
@@ -143,6 +145,10 @@ export class Scene {
     lit.drawImage(this.bg!, -cx, -cy);
     fx.drawDecals(lit, cx, cy);
     glow.clearRect(0, 0, this.vw, this.vh);
+    // The job's hour: the low sun's shadows; the brood mother's poison on the floor.
+    setSun(map.theme);
+    const tk = torchIn(map.theme);
+    if (room.puddles?.length) drawPuddles(c, room.puddles, cx, cy, room.time, now);
     const pw = me ? WEAPONS[me.weapon].parryWindow + me.lenience : 0.3;
     for (const e of room.enemies) if (e.attack && e.act === 'attack') drawTelegraph(c, e.attack, cx, cy, pw);
     // A drummer's reach and its beat on the floor, and the goblins it has roused (client/backline.ts).
@@ -308,18 +314,18 @@ export class Scene {
     for (const t of map.torches) {
       const x = OX + t.x * PX - cx, y = OY + t.y * PX - cy;
       this.flame(glow, x, y - 1, now, 1);
-      lights.push({ x, y: y - 3, r: 118 + Math.sin(now * 13 + x) * 4 + Math.sin(now * 7.3) * 3, i: 1.15, c: [1, 0.66, 0.36] });
+      lights.push({ x, y: y - 3, r: 118 + Math.sin(now * 13 + x) * 4 + Math.sin(now * 7.3) * 3, i: 1.15 * tk, c: [1, 0.66, 0.36] });
     }
     for (const b of map.braziers) {
       const x = OX + b.x * PX - cx, y = OY + b.y * PX - cy;
-      lights.push({ x, y: y - 8, r: 78 + Math.sin(now * 11 + x) * 3, i: 0.95, c: [1, 0.6, 0.3] });
+      lights.push({ x, y: y - 8, r: 78 + Math.sin(now * 11 + x) * 3, i: 0.95 * tk, c: [1, 0.6, 0.3] });
     }
     // Moonlight through a ceiling grate over the middle of the room.
     if (map.theme.moon && !map.theme.day) lights.push({ x: OX + (map.w / 2) * PX - cx, y: OY + (map.h / 2) * PX - cy, r: 125 * Math.max(1, map.w / 22), i: map.theme.moon, c: [0.55, 0.62, 0.9] });
     for (const r of map.rounds) if (r.kind === 'post') {
       const x = OX + r.x * PX - cx, y = OY + r.y * PX - cy - 24;
       this.flame(glow, x, y + 2, now, 1);
-      lights.push({ x, y, r: 64, i: 0.8, c: [1, 0.72, 0.42] });
+      lights.push({ x, y, r: 64, i: 0.8 * tk, c: [1, 0.72, 0.42] });
     }
     // Perrin's garden after dark: a soft pool of lamplight over the benches and the beds.
     for (const r of map.rounds) if (r.kind === 'moths' && !map.theme.day) lights.push({ x: OX + r.x * PX - cx - 36, y: OY + r.y * PX - cy - 34, r: 84, i: 0.4 * dusk(), c: [1, 0.84, 0.58] });
@@ -338,7 +344,7 @@ export class Scene {
     for (const h of room.heroes) {
       const [x, y] = lerp('h:' + h.id, h.x, h.y);
       // Underground (no moon), each hero carries a lantern.
-      if (!map.theme.day) lights.push({ x: x - cx, y: y - 10 - cy, r: map.theme.moon ? 44 : 90, i: map.theme.moon ? 0.35 : 0.7, c: [0.95, 0.8, 0.6] });
+      if (!map.theme.day) lights.push({ x: x - cx, y: y - 10 - cy, r: map.theme.moon ? 44 : 90, i: (map.theme.moon ? 0.35 : 0.7) * tk, c: [0.95, 0.8, 0.6] });
       // A Healer's censer burns brighter the more coals it has taken.
       if (h.glow > 0 && WEAPONS[h.weapon].cls === 'HEALER') lights.push({ x: x - cx, y: y - 4 - cy, r: 20 + h.glow * 3 + Math.sin(now * 9) * 2, i: 0.25 + h.glow * 0.04, c: [1, 0.62, 0.3] });
     }
@@ -373,6 +379,7 @@ export class Scene {
       const [x, y] = lerp('h:' + h.id, h.x, h.y);
       lights.push({ x: x - cx, y: y - cy - 14, r: 22, i: 0.4, c: WEAPONS[h.weapon].cls === 'HEALER' ? [1, 0.75, 0.4] : EL_LIGHT[h.augments[h.relic]] });
     }
+    drawMist(glow, map.theme, this.vw, this.vh, cx, cy, now);
     fx.drawGlow(glow, lit, cx, cy);
     lights.push(...fx.lights(cx, cy));
     // Only lights that reach the screen (a town has more than the pass can take at once).

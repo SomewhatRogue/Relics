@@ -86,6 +86,9 @@ and burns out a goblin den on a job.
       road and a low road, exits that take the whole party
 - [x] Slice 2h: props (barrels, oil barrel, crates, a table, broken pieces) that break and push; the
       Warrior lifts, slams and throws them
+- [x] Jobs at dawn, by day, at dusk or at night (lit to match; the board says which), and spiders in the
+      wilder places: nests that hatch waves, poison, the brood mother's glob, fire as their weakness
+      (2026-11-01, Opus 5.5; lore placement waiting on the lore keeper)
 
 ## Next (in order)
 

@@ -13,6 +13,9 @@ import { butcherPose, foeHit, scrapperPose, tumble } from './foepose';
 import { rest, newPose } from './motion';
 import { drawText } from './pixfont';
 import { SPRITES, type Sprite } from './sprites';
+import { drawPounce, drawSpiderKind, drawSpitSign } from './spiders';
+import { SPIDER_SPRITES } from './spidersprites';
+import { isSpiderKind } from '../shared/spiders';
 
 const ARM: [number, number] = [0, 0];
 import { OX, OY, PX } from './world';
@@ -131,6 +134,7 @@ function sleeping(c: Ctx, e: Enemy, x: number, y: number, flash: number): void {
 const DUMMY = newPose();
 
 export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number, dozing = false): void {
+  if (isSpiderKind(e.kind)) return drawSpiderKind(c, e, x, y, c.t ?? c.now);
   if (e.act === 'dead') {
     // Burst or shattered: nothing left but the stains. Otherwise the body, headless or burned.
     if (e.death === 'burst' || e.death === 'shatter') return;
@@ -192,7 +196,8 @@ export function drawTelegraph(c: Ctx, a: EnemyAttack, cx: number, cy: number, pa
   const now = !a.unblockable && a.windup - a.t <= parryWindow && a.t < a.windup;
   const pulse = 0.85 + 0.15 * Math.sin(c.now * 20);
   const fill = now ? '#ffe8e0' : a.kind === 'slam' ? '#e8501f' : '#e23a30';
-  if (a.kind === 'slam' || a.kind === 'hex') {
+  if (a.kind === 'pounce') return drawPounce(c, a, cx, cy, now, pulse);
+  if (a.kind === 'slam' || a.kind === 'hex' || a.kind === 'spit') {
     const R = a.radius * PX, ox = Math.round(OX + a.cx * PX - cx), oy = Math.round(OY + a.cy * PX - cy), Ri = R - 1.2, Rp = R * prog;
     // Row by row: the filled middle and the faint rest as runs, the striped edge pixel by pixel.
     for (let y = -Math.floor(R); y <= R; y++) {
@@ -208,6 +213,7 @@ export function drawTelegraph(c: Ctx, a: EnemyAttack, cx: number, cy: number, pa
         g.fillRect(ox + sx, oy + y, 1, 1);
       }
     }
+    if (a.kind === 'spit') drawSpitSign(c, a, cx, cy);
     // A hex: the hexer's sign turning slowly in the red, sickly green.
     if (a.kind === 'hex') {
       g.fillStyle = '#9be040';
@@ -267,7 +273,7 @@ export function drawTelegraph(c: Ctx, a: EnemyAttack, cx: number, cy: number, pa
  * down in front over `k` (0..1) of the wind-up.
  */
 export function drawHeld(c: Ctx, e: Enemy, x: number, y: number, fx: number, fy: number, slam: number): void {
-  const s = e.kind === 'butcher' ? SPRITES.butcherDown : SPRITES.scrapper;
+  const s = e.kind === 'butcher' ? SPRITES.butcherDown : e.kind === 'spider' ? SPIDER_SPRITES.spiderA : SPRITES.scrapper;
   if (slam > 0) {
     const up = slam < 0.6 ? 24 + 8 * (slam / 0.6) : 32 * (1 - (slam - 0.6) / 0.4), ahead = slam < 0.6 ? 0 : 12 * ((slam - 0.6) / 0.4);
     return spin(c, s, x + fx * ahead, y - up + fy * ahead * 0.5, Math.PI + (slam < 0.6 ? 0 : (slam - 0.6) * 4));

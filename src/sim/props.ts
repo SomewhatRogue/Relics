@@ -52,7 +52,7 @@ function breakProp(p: Prop, w: PropWorld, dx: number, dy: number): void {
     blastSurvivors(w, p.x, p.y, PROP.oilRadius, 6, p.lastBy, 'fire');
     for (const e of w.enemies) {
       if (isDead(e) || Math.hypot(e.x - p.x, e.y - p.y) > PROP.oilRadius + e.radius) continue;
-      if (!damage(e, 6, w.now, w.ev, { how: 'burn' })) afflict(w, e, 'fire', 6);
+      if (!damage(e, 6, w.now, w.ev, { how: 'burn', el: 'fire' })) afflict(w, e, 'fire', 6);
     }
   }
 }

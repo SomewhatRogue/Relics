@@ -1,9 +1,12 @@
 /** Damage to an enemy from anything (blades, shots, blasts, burning), and what death resets. */
-import { BUTCHER, GUARD, OVERKILL, SCRAPPER, SWING_DUMMY, TRAIT } from '../shared/tuning';
+import { BROOD, BUTCHER, GUARD, OVERKILL, SCRAPPER, SPIDER, SWING_DUMMY, TRAIT, weakness, type Hurt } from '../shared/tuning';
 import type { DeathKind, Enemy, FightEvent } from './types';
 
-export const stunOf = (e: Enemy) => (e.kind === 'butcher' ? BUTCHER.stun : e.kind === 'scrapper' ? SCRAPPER.stun : SWING_DUMMY.stun);
-export const respawnOf = (e: Enemy) => (e.kind === 'scrapper' ? SCRAPPER.respawn : BUTCHER.respawn);
+const SPEC = { butcher: BUTCHER, scrapper: SCRAPPER, spider: SPIDER, brood: BROOD } as Record<string, { stun: number; respawn: number } | undefined>;
+export const stunOf = (e: Enemy) => SPEC[e.kind]?.stun ?? SWING_DUMMY.stun;
+export const respawnOf = (e: Enemy) => SPEC[e.kind]?.respawn ?? BUTCHER.respawn;
+/** Small enough that any blow knocks it out of its wind-up. */
+export const small = (e: Enemy) => e.kind === 'scrapper' || e.kind === 'spider';
 /** A function, so a check after something that may have killed it isn't narrowed away. */
 export const isDead = (e: Enemy) => e.act === 'dead';
 export const isDummy = (e: Enemy) => e.kind === 'dummy' || e.kind === 'swingDummy';
@@ -39,12 +42,18 @@ export interface DamageOpts {
   how?: DeathKind;
   dx?: number;
   dy?: number;
+  /** What it's made of, for a kind's weaknesses (shared/spiders.ts WEAK); a plain blow when left out. */
+  el?: Hurt | '';
 }
 
 /** Hurt an enemy; true if this killed it. Dummies never die (they refill). */
 export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: DamageOpts = {}): boolean {
   e.alert = true;
   if (e.act === 'dead') return false;
+  // A weakness (fire on a spider) lands harder and says so; a burn's tick says nothing.
+  const weak = weakness(e.kind, o.el || 'physical');
+  if (weak !== 1) n = Math.max(1, Math.round(n * weak));
+  if (weak > 1 && !o.tick) ev.push({ k: 'weak', x: e.x, y: e.y });
   if (o.mult && (e.act === 'stunned' || e.act === 'pinned' || frozen(e, now) || snared(e, now))) n = Math.round(n * GUARD.stunnedMult * (o.brutal ? TRAIT.brutal : 1));
   e.hp -= n;
   e.hitAt = now;
@@ -57,6 +66,6 @@ export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: Da
     const how = o.tick ? 'burn' : -e.hp >= OVERKILL ? 'burst' : o.how ?? 'fall';
     return kill(e, ev, how, o.dx ?? 0, o.dy ?? 0), true;
   }
-  if (o.flinch && e.kind === 'scrapper' && !held(e, now)) Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: o.flinch });
+  if (o.flinch && small(e) && !held(e, now)) Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: o.flinch });
   return false;
 }

@@ -13,6 +13,8 @@ import { SCORES, type Area } from './scores';
 import { sfx } from './sfx';
 import { DRUMMER } from '../shared/tuning';
 import { butcher, goblin } from './voices';
+import { spiderSounds } from './spidersfx';
+import { isSpiderKind } from '../shared/spiders';
 import { blockSound, chargedSound, hitSound, shotSound, swingSound, woodSounds } from './weaponsfx';
 
 type AnyFx = Record<string, ((...a: unknown[]) => void) | undefined>;
@@ -23,6 +25,7 @@ export class Soundscape {
   private gnawAt = 0;
   private crackleAt = 0;
   private beatAt = 0;
+  private skitterAt = 0;
   private wasInside: unknown = null;
 
   /** A tune asked of the bard (played while you're out in the square). */
@@ -50,8 +53,10 @@ export class Soundscape {
     if (ev.k === 'block') return blockSound(this.heroAt(room, ev.x, ev.y)?.weapon ?? '');
     // Someone you freed, hurt by the party, cries out (a burn's tick doesn't).
     if (ev.k === 'survivorhit') return ev.tick ? undefined : sfx.hurt();
+    if (ev.k === 'hatch' || ev.k === 'splat' || ev.k === 'weak') return spiderSounds[ev.k]();
     if (ev.k === 'hit') {
       if (ev.tick) return;
+      if (ev.on === 'hero' && (ev.src === 'pounce' || ev.src === 'bite' || ev.src === 'spit')) return spiderSounds.wetbite(), sfx.hurt();
       if (ev.on === 'hero') return sfx.hurt();
       if (ev.backstab) sfx.backstab();
       else hitSound(ev.src, ev.heavy, !!ev.big);
@@ -73,6 +78,8 @@ export class Soundscape {
       return;
     }
     if (ev.k === 'windup') {
+      if (ev.kind === 'pounce' || ev.kind === 'bite') return spiderSounds.hiss();
+      if (ev.kind === 'spit') return spiderSounds.spit();
       if (ev.kind === 'stab') return goblin.hiss();
       if (ev.kind === 'shot') return goblin.draw();
       if (ev.kind === 'hex') return goblin.chant(Math.round(ev.x * 7 + ev.y * 3));
@@ -85,6 +92,7 @@ export class Soundscape {
     if (ev.k === 'bellow') return butcher.roar(true), butcher.roar(true), sfx.boom();
     if (ev.k === 'spotted') {
       const e = room.enemies.find((x) => Math.abs(x.x - ev.x) < 0.01 && Math.abs(x.y - ev.y) < 0.01);
+      if (e && isSpiderKind(e.kind)) return spiderSounds.hiss();
       return e?.kind === 'butcher' ? butcher.roar(false) : goblin.cackle(e?.id ?? 1);
     }
     (sfx as unknown as AnyFx)[ev.k]?.();
@@ -108,6 +116,10 @@ export class Soundscape {
       for (const e of room.enemies) if (e.drumming && !isDead(e)) near = Math.max(near, 1 - Math.hypot(e.x - me.x, e.y - me.y) / 14);
       goblin.drum(near, beat % 2 === 1);
     }
+    // Spiders on the move close by: the dry patter of their legs.
+    let legs = 0;
+    for (const e of room.enemies) if (e.kind === 'spider' && e.moving && !isDead(e)) legs = Math.max(legs, 1 - Math.hypot(e.x - me.x, e.y - me.y) / 9);
+    if (legs > 0 && now > this.skitterAt) (spiderSounds.skitter(legs), (this.skitterAt = now + 0.22 + Math.random() * 0.3));
     // Goblins coming for you talk among themselves now and then.
     const coming = room.enemies.filter((e) => !isDead(e) && e.alert !== false && e.kind === 'scrapper' && (e.act === 'chase' || e.act === 'attack') && Math.hypot(e.x - me.x, e.y - me.y) < 9);
     if (coming.length && now > this.chatterAt) {

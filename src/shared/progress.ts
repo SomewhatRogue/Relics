@@ -133,5 +133,6 @@ export function perkOffer(p: Profile): PerkId[] {
 }
 
 /** Gold and experience for a kill. */
-export const BOUNTY = { scrapper: { gold: 4, xp: 10 }, butcher: { gold: 30, xp: 60 }, boss: { gold: 80, xp: 150 }, rescue: 25, objective: 50 };
+/** `spider`, `brood`, `nest`: xp for spiders (they carry no gold). */
+export const BOUNTY = { scrapper: { gold: 4, xp: 10 }, butcher: { gold: 30, xp: 60 }, boss: { gold: 80, xp: 150 }, spider: { gold: 0, xp: 3 }, brood: { gold: 0, xp: 60 }, nest: { gold: 0, xp: 20 }, rescue: 25, objective: 50 };
 export const SHOP = { fine: 60, forged: 160, augment: 45, wish: 5 };

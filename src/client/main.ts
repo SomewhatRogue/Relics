@@ -151,6 +151,7 @@ function hud(now: number): void {
   const me = game.hero, room = game.room, pr = game.profile;
   document.body.dataset.mode = game.mode;
   $('.hp i').style.width = (100 * me.hp) / me.maxHp + '%';
+  $('.hp').classList.toggle('poisoned', !!me.poison);
   $('.st i').style.width = me.stamina + '%';
   $('.st').classList.toggle('low', me.stamina < 25);
   // Winded: the bar flashes, fast while nothing's coming back, slower as it refills.

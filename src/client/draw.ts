@@ -106,12 +106,16 @@ export function spin(c: Ctx, s: Sprite, x: number, y: number, a: number, alpha =
   c.lit.restore();
 }
 
+/** The low sun this frame (client/daytime.ts): shadows stretch east at dusk (+), west at dawn (-). */
+export const SUN = { k: 0 };
+
 export function shadow(c: Ctx, x: number, y: number, rx: number): void {
-  c.lit.fillStyle = 'rgba(8,6,12,0.55)';
+  const k = SUN.k, sx = x + rx * 0.8 * k, w0 = rx * (1 + Math.abs(k) * 0.9);
+  c.lit.fillStyle = k ? 'rgba(8,6,12,0.45)' : 'rgba(8,6,12,0.55)';
   const ry = Math.max(1, Math.round(rx / 3));
   for (let dy = -ry; dy <= ry; dy++) {
-    const w = Math.round(rx * Math.sqrt(Math.max(0, 1 - (dy * dy) / (ry * ry + 0.01))));
-    c.lit.fillRect(Math.round(x - w), Math.round(y + dy), w * 2 + 1, 1);
+    const w = Math.round(w0 * Math.sqrt(Math.max(0, 1 - (dy * dy) / (ry * ry + 0.01))));
+    c.lit.fillRect(Math.round(sx - w), Math.round(y + dy), w * 2 + 1, 1);
   }
 }
 

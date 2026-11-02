@@ -13,6 +13,18 @@ import { PARTY } from '../shared/tuning';
 import { LOOKS, SPRITES, heroLook } from './sprites';
 
 const ARM: [number, number] = [0, 0];
+const POISON_TINT = '#5ad02a';
+
+/** Green drops running off a poisoned hero, one more a stack. */
+function drip(c: Ctx, x: number, y: number, n: number): void {
+  c.glow.fillStyle = '#8ae040';
+  for (let i = 0; i < n + 1; i++) {
+    const k = (c.now * 0.9 + i * 0.41) % 1;
+    c.glow.globalAlpha = 0.9 * (1 - k);
+    c.glow.fillRect(Math.round(x - 4 + ((i * 5) % 9)), Math.round(y - 12 + i * 2 + k * 9), 1, k > 0.5 ? 2 : 1);
+  }
+  c.glow.globalAlpha = 1;
+}
 /** How a class's look is cut into parts: hats make it taller; a robe hides the legs but for the feet. */
 const cutOf = (cls: keyof typeof LOOKS, look = 0) => heroCut((LOOKS[cls][look] ?? LOOKS[cls][0]).tall ?? 0, cls === 'MAGE' || (cls === 'HEALER' && look === 1));
 
@@ -89,7 +101,10 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'b
     }
   };
   if (up) drawGear();
+  // Poisoned: a green cast over the body, pulsing, stronger with each stack (unless a hit's flash is on it).
+  if (h.poison && !pz.flash) (pz.flash = 0.16 + 0.07 * h.poison + 0.06 * Math.sin(c.now * 5)), (pz.tint = POISON_TINT);
   drawFigure(c, body, bx, by, pz);
+  if (h.poison) drip(c, bx, by, h.poison);
   // The Want shows in the eyes first: a glint in the dark, like theirs.
   if (!up && h.want >= WANT.eyes) {
     c.glow.globalAlpha = Math.min(1, h.want / 80) * (0.55 + 0.45 * Math.sin(c.now * 2));

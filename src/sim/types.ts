@@ -152,6 +152,10 @@ export interface Hero extends Body {
   lastKill: number;
   biteAt: number;
   ransomed: boolean;
+  /** Poison (sim/poison.ts): stacks, when the next stack wears off, and the next tick. */
+  poison?: number;
+  poisonUntil?: number;
+  poisonNext?: number;
   /** The Want, for the eyes (never shown as a number). */
   want: number;
   /** Lying where you fell, before Hew gets you up (the wood's opening). */
@@ -201,7 +205,8 @@ export interface Hero extends Body {
   seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number; augment: number; cls: number; take: number; grab: number; gear: number; potion: number; belt?: number; open: number };
 }
 
-export type AttackKind = 'cleave' | 'slam' | 'swing' | 'stab' | 'shot' | 'draw' | 'charge' | 'hex';
+/** `pounce`: a spider's leap along its line; `bite`: the brood mother's; `spit`: her lobbed glob (a circle). */
+export type AttackKind = 'cleave' | 'slam' | 'swing' | 'stab' | 'shot' | 'draw' | 'charge' | 'hex' | 'pounce' | 'bite' | 'spit';
 
 export interface EnemyAttack {
   kind: AttackKind;
@@ -234,7 +239,7 @@ export interface EnemyAttack {
   crush?: boolean;
 }
 
-export type EnemyKind = 'butcher' | 'scrapper' | 'dummy' | 'swingDummy';
+export type EnemyKind = 'butcher' | 'scrapper' | 'dummy' | 'swingDummy' | 'spider' | 'brood' | 'nest';
 export type EnemyAct = 'idle' | 'chase' | 'attack' | 'stunned' | 'flinch' | 'carried' | 'pinned' | 'dead';
 
 export interface Enemy extends Body {
@@ -287,6 +292,10 @@ export interface Enemy extends Body {
   alert?: boolean;
   /** A named goblin (a hunt's quarry, a story boss). */
   name?: string;
+  /** A nest: spiders a wave, and when the next one hatches (-1 asleep). A spider: the nest it came from. */
+  wave?: number;
+  nextWave?: number;
+  nest?: number;
 }
 
 /** How a goblin died: fell, lost its head, burst apart, burned, or shattered. */
@@ -401,6 +410,8 @@ export type FightEvent =
   | { k: 'heal'; x: number; y: number; n: number }
   | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle' | 'lift' | 'oilfire' | 'freed' | 'exitopen' | 'blaze' | 'chop' | 'denspawn' | 'hallow' | 'ward' | 'warded' | 'reflect' | 'wardbreak' | 'spotted'; x: number; y: number }
   | { k: 'collapse'; x: number; y: number; w: number; h: number }
+  /** Spiders: a hit on a weakness, a wave hatching, a hero poisoned or cured, a glob landing. */
+  | { k: 'weak' | 'hatch' | 'poisoned' | 'cured' | 'splat'; x: number; y: number }
   /** A freed survivor hurt by the party (`by` the hero, '' nobody's; `tick` a burn), or killed. */
   | { k: 'survivorhit'; x: number; y: number; id: number; n: number; by: string; tick?: boolean }
   | { k: 'survivordeath'; x: number; y: number; id: number; by: string }
@@ -487,6 +498,9 @@ export interface Bolt {
   state: 'fly' | 'stuck' | 'well';
   life: number;
 }
+
+/** A poison puddle where the brood mother's glob landed (sim/puddles.ts). */
+export interface Puddle { id: number; x: number; y: number; r: number; until: number }
 
 /** A Ranger's snare on the ground. */
 export interface Snare { owner: string; x: number; y: number; until: number; /** How long it holds what steps in (a Ranger's TRAPPER drill lengthens it). */ hold?: number }

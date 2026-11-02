@@ -11,7 +11,8 @@ import type { Enemy, FightEvent } from './types';
 export function impacts(enemies: Enemy[], now: number, ev: FightEvent[]): void {
   for (const a of enemies) {
     const speed = Math.hypot(a.kvx, a.kvy);
-    if (speed < KNOCK.bodySpeed || isDead(a) || a.act === 'carried') continue;
+    // (A spider's pounce is its own legs, not a blow: it doesn't bowl anything over.)
+    if (speed < KNOCK.bodySpeed || isDead(a) || a.act === 'carried' || a.attack?.kind === 'pounce') continue;
     for (const b of enemies) {
       const d = Math.hypot(b.x - a.x, b.y - a.y);
       if (b === a || isDead(b) || b.act === 'carried' || d > a.radius + b.radius + 0.05) continue;

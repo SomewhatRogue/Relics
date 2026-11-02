@@ -2,6 +2,7 @@
  * Potions in the fight: drinking (Bitter heals over time, Brandy brings breath back) and thrown flasks
  * (oil bursts into flame, frost chills, smoke hides whoever stands in it from goblins).
  */
+import { cure } from './poison';
 import { POTION, POTIONS } from '../shared/tuning';
 import { blast } from './bolts';
 import type { World } from './elements';
@@ -19,7 +20,8 @@ export function usePotion(h: Hero, now: number, w: World, ax: number, ay: number
   h.belt.shift();
   h.potionReady = now + POTION.cooldown;
   w.ev.push({ k: 'drink', x: h.x, y: h.y, kind: p });
-  if (p === 'bitter') return (h.mendLeft = POTION.heal), null;
+  // A Bitter mends, and cures poison outright.
+  if (p === 'bitter') return (h.mendLeft = POTION.heal), cure(h, true, w.ev), null;
   if (p === 'brandy') return (h.stamina = 100), (h.brandyUntil = now + POTION.brandyTime), null;
   let d = Math.hypot(ax, ay);
   if (!d) {

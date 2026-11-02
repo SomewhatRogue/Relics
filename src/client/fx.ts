@@ -9,6 +9,7 @@ import type { Light } from './light';
 import { drawText, textWidth } from './pixfont';
 import { toPx } from './world';
 import { CRY } from './captives';
+import { spiderFx } from './fxspiders';
 
 interface Part { x: number; y: number; vx: number; vy: number; life: number; max: number; col: string; glow: boolean; grav: number; stick: boolean }
 interface Text { x: number; y: number; s: string; col: string; life: number; rise?: number }
@@ -76,6 +77,7 @@ export class Fx {
 
   on(ev: FightEvent): void {
     const [x, y] = toPx(ev.x, ev.y);
+    if (spiderFx(this, ev, x, y)) return;
     switch (ev.k) {
       case 'impact':
         if (ev.kind === 'slam') {
@@ -186,8 +188,9 @@ export class Fx {
         break;
       case 'hit':
         if (ev.tick) {
-          this.burst(x, y - 10, 3, ['#ffd27a', '#ff9a3c'], 30, true);
-          this.say(x, y - 20, String(ev.n), '#ff9a3c');
+          const venom = ev.src === 'poison';
+          this.burst(x, y - 10, 3, venom ? ['#9be040', '#6ab82a'] : ['#ffd27a', '#ff9a3c'], 30, true);
+          this.say(x, y - 20, String(ev.n), venom ? '#9be040' : '#ff9a3c');
           break;
         }
         this.burst(x, y - 8, ev.heavy ? 12 : 7, ['#ffffff', '#fff1b0', '#ffd27a'], ev.heavy ? 70 : 50, true);

@@ -62,7 +62,7 @@ export function blast(w: World, b: Bolt, x: number, y: number): void {
     if (isDead(e) || e.act === 'carried' || d > b.burst + e.radius) continue;
     const wasFrozen = frozen(e, w.now);
     e.lastBy = b.owner;
-    if (damage(e, b.dmg, w.now, w.ev, { heavy: true, flinch: 0.5, mult: true, brutal: b.traits.includes('brutal'), how: 'burst', dx: e.x - x, dy: e.y - y, src: b.kind })) continue;
+    if (damage(e, b.dmg, w.now, w.ev, { heavy: true, flinch: 0.5, mult: true, brutal: b.traits.includes('brutal'), how: 'burst', dx: e.x - x, dy: e.y - y, src: b.kind, el: b.el })) continue;
     if (e.act !== 'pinned') shove(e, d > 0.05 ? (e.x - x) / d : b.dx, d > 0.05 ? (e.y - y) / d : b.dy, b.knock, e.weight);
     if (b.stun && e.act !== 'pinned') Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: b.stun });
     if (wasFrozen && b.knock >= 8) shatter(e, w.now, w.ev);
@@ -78,7 +78,7 @@ function openNet(w: World, b: Bolt): void {
   w.ev.push({ k: 'net', x: b.x, y: b.y });
   for (const e of w.enemies) {
     if (isDead(e) || e.act === 'carried' || Math.hypot(e.x - b.x, e.y - b.y) > b.burst + e.radius) continue;
-    if (damage(e, b.dmg, w.now, w.ev, { src: b.kind })) continue;
+    if (damage(e, b.dmg, w.now, w.ev, { src: b.kind, el: b.el })) continue;
     e.snareUntil = w.now + NET.snare;
     e.kvx = e.kvy = 0;
     if (e.act === 'attack' && e.weight <= 1) Object.assign(e, { attack: null, act: 'chase', actT: 0 });
@@ -93,7 +93,7 @@ function strike(w: World, b: Bolt, e: Enemy): void {
   const by = w.heroes.find((h) => h.id === b.owner), crit = !!by && rollCrit(by);
   // A shot into a shield-bearer's board (it's facing the shot) does little.
   const boarded = e.variant === 'shield' && e.alert !== false && e.fx * -b.dx + e.fy * -b.dy > 0.3 && b.knock < 8;
-  if (damage(e, Math.round(b.dmg * (crit ? CRIT : 1) * (boarded ? VARIANTS.shield.front : 1)), w.now, w.ev, { heavy: b.knock >= 8 || crit, flinch: FLINCH, mult: true, brutal: b.traits.includes('brutal'), dx: b.dx, dy: b.dy, src: b.kind })) return;
+  if (damage(e, Math.round(b.dmg * (crit ? CRIT : 1) * (boarded ? VARIANTS.shield.front : 1)), w.now, w.ev, { heavy: b.knock >= 8 || crit, flinch: FLINCH, mult: true, brutal: b.traits.includes('brutal'), dx: b.dx, dy: b.dy, src: b.kind, el: b.el })) return;
   if (e.act !== 'pinned') shove(e, b.dx, b.dy, b.knock, e.weight);
   // A hand crossbow's bolt dazes a small goblin where it stands (not a butcher).
   if (b.stun && e.kind !== 'butcher' && e.act !== 'pinned') Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: b.stun });
@@ -102,7 +102,7 @@ function strike(w: World, b: Bolt, e: Enemy): void {
   if (b.chain) for (const o of w.enemies) {
     if (o === e || isDead(o) || Math.hypot(o.x - e.x, o.y - e.y) > HUNGRY_FX.chain) continue;
     o.lastBy = b.owner;
-    damage(o, Math.round(b.dmg * HUNGRY_FX.chainDmg), w.now, w.ev, { src: b.kind });
+    damage(o, Math.round(b.dmg * HUNGRY_FX.chainDmg), w.now, w.ev, { src: b.kind, el: b.el });
   }
 }
 

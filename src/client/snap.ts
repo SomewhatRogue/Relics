@@ -8,7 +8,7 @@
  */
 import type { ArenaRoom } from '../sim/room';
 
-export const COLLS = ['heroes', 'enemies', 'javelins', 'snares', 'hooks', 'bolts', 'drops', 'coals', 'zones', 'pickups', 'smokes', 'chests', 'props', 'survivors', 'blocks'] as const;
+export const COLLS = ['heroes', 'enemies', 'javelins', 'snares', 'hooks', 'bolts', 'drops', 'coals', 'zones', 'pickups', 'smokes', 'chests', 'props', 'survivors', 'puddles', 'blocks'] as const;
 type Coll = (typeof COLLS)[number];
 type Ent = Record<string, unknown>;
 /** Per collection: the order of keys (only when it changed), and each changed entity's changed fields. */
