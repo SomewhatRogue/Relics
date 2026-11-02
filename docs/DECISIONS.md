@@ -682,3 +682,13 @@ rising run of notes; then a gold arrow points to the road. Blade kills now vary:
 cut in two at the waist (most heavy blows), and only now and then the head. The Rogue's knives do half head on
 (front: 0.5) unless the goblin is held fast. Ranger and Rogue holding block get "CAN'T BLOCK: TAP TO PARRY";
 a Mage pressing it gets "NO GUARD: ROLL"; the HUD kit line says so too. In town, a panel stops the world.
+
+## 2026-11-01: the pack by dragging; goblins in each other's way; the Warrior's throw (Claude Opus 5.5)
+The pack (I, Tab, PACK) is now slots: WORN (hand, armor, two rings, relic), SPARES (8 and a DROP square),
+the relic shelf and the belt. Drag a piece onto its slot to wear it, into the pack to take it off (armor
+too: GEAR.unarm), onto DROP to drop it (or pour a potion); tap one for its card and buttons. Pointer events,
+so mouse and finger both (packdrag.ts); the rules live in moveOf (tested). Goblins now hurt their own: an
+arrow that misses you takes the first goblin in its line (x1.5), and a butcher's sweep, slam or charge
+catches small goblins under it (FRIENDLY). The Warrior's field in the wood adds a grab-and-throw beat with
+the second pair of looters. Found while testing: a hero who skipped the wood got a black screen in town
+(the wood's fade stayed up); fixed, and the fade only ever shows in the wood.

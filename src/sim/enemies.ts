@@ -3,11 +3,11 @@ import { lure, seenFrom } from './lantern';
 import { visible } from './flasks';
 import { HUNGRY_FX, wears } from './hungry';
 import { collide, currentMap, inArea } from '../shared/arena';
-import { DECOY, ALERT, ARCHER, BUTCHER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, type EnemyAttackSpec, type EnemySpec, VARIANTS } from '../shared/tuning';
+import { FRIENDLY, DECOY, ALERT, ARCHER, BUTCHER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, type EnemyAttackSpec, type EnemySpec, VARIANTS } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
-import { slide } from './bodies';
+import { shove, slide } from './bodies';
 import { attackCovers, hitHero } from './combat';
-import { frozen, isDead, kill, snared } from './damage';
+import { damage, frozen, isDead, kill, snared } from './damage';
 import { shatter } from './elements';
 import { has } from './traits';
 import type { Enemy, EnemyAttack, FightEvent, Hero } from './types';
@@ -60,22 +60,26 @@ function begin(e: Enemy, kind: EnemyAttack['kind'], s: EnemyAttackSpec, target: 
 }
 
 /** Run an attack in progress; true when it has finished (or was parried away). */
-function runAttack(e: Enemy, heroes: Hero[], now: number, dt: number, ev: FightEvent[]): boolean {
+function runAttack(e: Enemy, heroes: Hero[], now: number, dt: number, ev: FightEvent[], others: Enemy[] = []): boolean {
   const a = e.attack!;
   a.t += dt;
-  if (a.kind === 'charge') return runCharge(e, a, heroes, now, ev);
+  if (a.kind === 'charge') return runCharge(e, a, heroes, now, ev, others);
   if (!a.done && a.t >= a.windup) {
     a.done = true;
     ev.push({ k: 'impact', x: a.kind === 'slam' ? a.cx : e.x, y: a.kind === 'slam' ? a.cy : e.y, kind: a.kind });
     // Blows land on your own level; arrows reach up and down.
+    const before = heroes.map((h) => h.hp);
     for (const h of heroes) if (a.kind === 'shot' || (h.z ?? 0) === (e.z ?? 0)) hitHero(e, a, h, now, ev);
     if (e.attack === null) return true;
+    // Their own get in the way: a missed arrow takes the first goblin in its line; a butcher's blow
+    // lands on any small goblin under it.
+    friendly(e, a, others, heroes.some((h, i) => h.hp < before[i]), now, ev);
   }
   return a.t >= a.windup + a.active + a.recover;
 }
 
 /** The charge: it runs the line it showed you, through anyone on it (once each), and stops at the end. */
-function runCharge(e: Enemy, a: EnemyAttack, heroes: Hero[], now: number, ev: FightEvent[]): boolean {
+function runCharge(e: Enemy, a: EnemyAttack, heroes: Hero[], now: number, ev: FightEvent[], others: Enemy[]): boolean {
   const going = a.t >= a.windup && a.t < a.windup + a.active, speed = a.range / a.active;
   if (going && !a.done) (a.done = true), ev.push({ k: 'impact', x: e.x, y: e.y, kind: 'charge' });
   e.kvx = going ? a.dx * speed : 0;
@@ -85,9 +89,24 @@ function runCharge(e: Enemy, a: EnemyAttack, heroes: Hero[], now: number, ev: Fi
     a.cx = e.x + a.dx * 0.4;
     a.cy = e.y + a.dy * 0.4;
     for (const h of heroes) if (!(a.hit ??= []).includes(h.id) && (h.z ?? 0) === (e.z ?? 0) && attackCovers(a, h)) (a.hit.push(h.id), hitHero(e, a, h, now, ev));
+    // Its own in the way go flying.
+    for (const o of others) if (o !== e && o.kind === 'scrapper' && !isDead(o) && !a.hit!.includes('g' + o.id) && attackCovers(a, o as unknown as Hero)) a.hit!.push('g' + o.id), damage(o, Math.round(a.dmg * FRIENDLY.blow), now, ev, { heavy: true, how: 'burst' }), shove(o, a.dx, a.dy, a.knock, o.weight);
     if (e.attack === null) return true;
   }
   return a.t >= a.windup + a.active + a.recover;
+}
+
+/** Goblins hit by their own: an arrow that missed you, or a butcher's sweep, slam or charge. */
+function friendly(e: Enemy, a: EnemyAttack, others: Enemy[], landed: boolean, now: number, ev: FightEvent[]): void {
+  const near = others.filter((o) => o !== e && !isDead(o) && o.kind === 'scrapper' && (o.z ?? 0) === (e.z ?? 0));
+  if (a.kind === 'shot') {
+    if (landed) return;
+    const inLine = near.filter((o) => attackCovers(a, o as unknown as Hero)).sort((p, q) => Math.hypot(p.x - e.x, p.y - e.y) - Math.hypot(q.x - e.x, q.y - e.y));
+    if (inLine[0]) damage(inLine[0], Math.round(a.dmg * FRIENDLY.shot), now, ev, { src: 'arrow', how: 'fall' });
+    return;
+  }
+  if (e.kind !== 'butcher') return;
+  for (const o of near) if (attackCovers(a, o as unknown as Hero)) damage(o, Math.round(a.dmg * FRIENDLY.blow), now, ev, { heavy: true, how: 'burst' }), shove(o, o.x - e.x, o.y - e.y, a.knock, o.weight);
 }
 
 const after = (e: Enemy) => (e.kind === 'swingDummy' || e.kind === 'dummy' ? 'idle' : 'chase');
@@ -136,7 +155,7 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     return;
   }
   if (e.act === 'attack') {
-    if (runAttack(e, heroes, now, dt, ev) && e.act === 'attack') {
+    if (runAttack(e, heroes, now, dt, ev, others) && e.act === 'attack') {
       Object.assign(e, { attack: null, act: after(e), actT: 0, cooldown: spec ? spec.pauseBetween : SWING_DUMMY.every });
     }
     return;

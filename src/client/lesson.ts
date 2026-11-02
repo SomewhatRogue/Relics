@@ -7,7 +7,7 @@ import type { Game } from './game';
 import type { Move } from '../sim/wood';
 import { finish, speak, typing } from './speech';
 
-const NAME: Record<Move, string> = { move: 'MOVE', attack: 'ATTACK', roll: 'DODGE', block: 'BLOCK', parry: 'PARRY', skill: 'SKILL', backstab: 'BACKSTAB', heavy: 'FULL SHOT', slip: 'LAST SECOND' };
+const NAME: Record<Move, string> = { move: 'MOVE', attack: 'ATTACK', roll: 'DODGE', block: 'BLOCK', parry: 'PARRY', skill: 'SKILL', grab: 'GRAB AND THROW', backstab: 'BACKSTAB', heavy: 'FULL SHOT', slip: 'LAST SECOND' };
 const KEY: Record<Move, [string, string]> = {
   move: ['W A S D', 'THE STICK, LEFT'],
   attack: ['LEFT CLICK', 'ATTACK'],
@@ -15,11 +15,12 @@ const KEY: Record<Move, [string, string]> = {
   block: ['HOLD RIGHT CLICK', 'HOLD BLOCK'],
   parry: ['RIGHT CLICK', 'BLOCK'],
   skill: ['E', 'SKILL'],
+  grab: ['F', 'GRAB'],
   backstab: ['LEFT CLICK, FROM BEHIND', 'ATTACK, FROM BEHIND'],
   heavy: ['HOLD LEFT CLICK', 'HOLD ATTACK'],
   slip: ['SPACE, AS IT LANDS', 'ROLL, AS IT LANDS'],
 };
-const BUTTON: Partial<Record<Move, string>> = { attack: '.tb.attack', roll: '.tb.roll', block: '.tb.block', parry: '.tb.block', skill: '.tb.relic', backstab: '.tb.attack', heavy: '.tb.attack', slip: '.tb.roll' };
+const BUTTON: Partial<Record<Move, string>> = { attack: '.tb.attack', roll: '.tb.roll', block: '.tb.block', parry: '.tb.block', skill: '.tb.relic', grab: '.tb.grab', backstab: '.tb.attack', heavy: '.tb.attack', slip: '.tb.roll' };
 
 export class LessonView {
   private el = document.createElement('div');
@@ -51,7 +52,8 @@ export class LessonView {
   }
 
   update(): void {
-    const w = this.g.wood, hold = w?.hold ?? null;
+    // (Only in the wood: a hero who skipped it may still carry a wood that never woke.)
+    const w = this.g.mode === 'wood' ? this.g.wood : null, hold = w?.hold ?? null;
     // The fade in, while you lie there.
     this.fade.style.opacity = w && w.wake >= 0 && w.wake < 2.5 ? String(1 - w.wake / 2.5) : '0';
     document.body.classList.toggle('waking', !!w && w.wake >= 0);

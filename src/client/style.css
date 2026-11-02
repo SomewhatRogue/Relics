@@ -319,3 +319,27 @@ body[data-guard="none"] .tb.block { display: none; }
 #lesson.found-relic .found { color: #ffd27a; font-size: 12px; letter-spacing: 0.4em; }
 #lesson.found-relic .relic-name { color: #fff6e0; font-size: 24px; font-weight: 800; letter-spacing: 0.12em; text-shadow: 0 0 14px #ffb35a; }
 @keyframes rise { from { transform: translateY(20px) scale(0.92); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* The pack as slots: drag a piece where it goes (packdrag.ts). */
+#pack { width: min(380px, calc(100vw - 20px)); }
+#pack .slots, #pack .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+#pack .grid { min-height: 30px; padding: 4px; border: 1px dashed #34303f; border-radius: 5px; }
+#pack .grid.can { border-color: #ffd27a; }
+#pack .tile { position: relative; aspect-ratio: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px; padding: 3px; background: #1e1b26; border: 2px solid var(--t); border-radius: 5px; text-align: center; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+#pack .tile b { color: #f0e0b0; font-size: 8px; line-height: 1.15; letter-spacing: 0.03em; word-break: break-word; }
+#pack .tile i { font-style: normal; color: var(--t); font-size: 7px; letter-spacing: 0.1em; }
+#pack .tile.empty { border-style: dashed; border-color: #3a3546; background: transparent; cursor: default; }
+#pack .tile.empty i { color: #5a5466; }
+#pack .tile.drop { border: 2px dashed #7a3a32; background: #2a1414; cursor: default; }
+#pack .tile.drop i { color: #ff8a7a; }
+#pack .tile.sel { box-shadow: 0 0 0 2px #fff1d0, 0 0 12px var(--t); }
+#pack .tile.can { box-shadow: 0 0 0 2px #ffd27a; }
+#pack .tile.over, #pack .grid.over { box-shadow: 0 0 0 3px #fff1d0, 0 0 16px #ffd27a; background: #3a2c14; }
+#pack .tile.dragging { opacity: 0.35; }
+.tile.ghost { position: fixed; z-index: 50; width: 58px; height: 58px; margin: -29px 0 0 -29px; pointer-events: none; opacity: 0.92; transform: scale(1.12) rotate(-4deg); box-shadow: 0 6px 18px #000a; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #1e1b26; border: 2px solid var(--t); border-radius: 5px; text-align: center; color: #f0e0b0; font-size: 8px; }
+.tile.ghost i { font-style: normal; color: var(--t); font-size: 7px; }
+#pack .detail { margin-top: 8px; padding: 8px; background: #1e1b26; border: 1px solid #34303f; border-radius: 4px; }
+#pack .detail .btns { display: flex; gap: 6px; margin-top: 6px; }
+#pack .detail button { flex: 1; min-height: 34px; background: #2a2733; border: 1px solid #6a647a; border-radius: 4px; color: #e8e4ee; font-size: 10px; }
+#pack .detail button.go { background: #4a3414; border-color: #ffd27a; color: #fff1d0; }
+#pack .detail button.ghost { background: transparent; color: #9a94a8; }

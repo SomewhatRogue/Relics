@@ -108,7 +108,7 @@ function stepWake(w: WoodState, room: ArenaRoom, dt: number): void {
 export const lessonOf = (w: WoodState): Lesson => lessonsFor(w.cls)[Math.min(w.stage, 4)];
 /** Does this event count for the lesson? */
 const counts = (kind: Lesson['count'], e: FightEvent): boolean =>
-  kind === 'kills' ? e.k === 'death' : kind === 'backstab' ? e.k === 'hit' && e.on === 'enemy' && !!e.backstab : kind === 'heavy' ? e.k === 'hit' && e.on === 'enemy' && e.heavy : e.k === kind;
+  kind === 'kills' ? e.k === 'death' : kind === 'grab' ? e.k === 'hurl' : kind === 'backstab' ? e.k === 'hit' && e.on === 'enemy' && !!e.backstab : kind === 'heavy' ? e.k === 'hit' && e.on === 'enemy' && e.heavy : e.k === kind;
 
 const card = (who: string, text: string, move: Move, need: Hold['need'], how?: string): Hold => ({ kind: 'card', who, text, how, move, need, t: 0, until: 0 });
 const talk = (who: string, text: string): Hold => ({ kind: 'talk', who, text, need: 'continue', t: 0, until: 0 });
@@ -307,6 +307,8 @@ export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: nu
   if (w.stage === 0 && !left.length && !w.more && lesson.more) {
     w.more = true;
     w.ids.push(...lesson.more.map((f) => spawn(room, f).id));
+    // A Warrior: the next two are for throwing.
+    if (lesson.count === 'grab') w.hold = card('HEW', LINES.teach.grab, 'grab', 'continue', LINES.how.grab);
     return;
   }
   // Cleared them before the lesson took: they come again.
@@ -327,11 +329,13 @@ export function woodGoal(w: WoodState, touch: boolean): { title: string; text: s
   if (w.stage === 5) return { title: 'THE ROAD', text: 'Follow the arrow west, to Wickhold' };
   if (w.stage === 4 && w.entered && w.cut < 0) return { title: 'KILL THE STOKER', text: `Roll out of anything striped. Your skill: ${touch ? 'tap SKILL' : 'E'}` };
   const l = lessonOf(w), key: Record<string, string> = touch
-    ? { ATTACK: 'TAP ATTACK', DODGE: 'TAP ROLL', BLOCK: 'HOLD BLOCK', PARRY: 'TAP BLOCK ON THE WHITE FLASH', SKILL: 'TAP SKILL', BACKSTAB: 'GET BEHIND, TAP ATTACK', 'FULL DRAW': 'HOLD ATTACK, LET GO', 'FULL CHARGE': 'HOLD ATTACK, LET GO', 'LAST SECOND': 'TAP ROLL AS IT LANDS' }
-    : { ATTACK: 'CLICK', DODGE: 'SPACE', BLOCK: 'HOLD RIGHT CLICK', PARRY: 'TAP RIGHT CLICK ON THE WHITE FLASH', SKILL: 'E', BACKSTAB: 'GET BEHIND, CLICK', 'FULL DRAW': 'HOLD LEFT CLICK, LET GO', 'FULL CHARGE': 'HOLD LEFT CLICK, LET GO', 'LAST SECOND': 'SPACE AS IT LANDS' };
+    ? { GRAB: 'HIT IT, TAP GRAB, AGAIN TO THROW', ATTACK: 'TAP ATTACK', DODGE: 'TAP ROLL', BLOCK: 'HOLD BLOCK', PARRY: 'TAP BLOCK ON THE WHITE FLASH', SKILL: 'TAP SKILL', BACKSTAB: 'GET BEHIND, TAP ATTACK', 'FULL DRAW': 'HOLD ATTACK, LET GO', 'FULL CHARGE': 'HOLD ATTACK, LET GO', 'LAST SECOND': 'TAP ROLL AS IT LANDS' }
+    : { GRAB: 'HIT IT, F, F AGAIN TO THROW', ATTACK: 'CLICK', DODGE: 'SPACE', BLOCK: 'HOLD RIGHT CLICK', PARRY: 'TAP RIGHT CLICK ON THE WHITE FLASH', SKILL: 'E', BACKSTAB: 'GET BEHIND, CLICK', 'FULL DRAW': 'HOLD LEFT CLICK, LET GO', 'FULL CHARGE': 'HOLD LEFT CLICK, LET GO', 'LAST SECOND': 'SPACE AS IT LANDS' };
   if (w.wake >= 0) return { title: '', text: '' };
   if (!w.entered) return { title: l.name, text: w.stage ? 'Follow Hew' : 'Walk' };
-  const what = { kills: '', dodge: 'DODGES', block: 'BLOCKS', parry: 'PARRIES', slip: 'LAST-SECOND DODGES', backstab: 'FROM BEHIND', heavy: 'FULL SHOTS', none: '' }[l.count];
+  const what = { kills: '', dodge: 'DODGES', block: 'BLOCKS', parry: 'PARRIES', slip: 'LAST-SECOND DODGES', backstab: 'FROM BEHIND', heavy: 'FULL SHOTS', grab: 'THROWN', none: '' }[l.count];
+  // A Warrior's field: hit them first; the throwing comes with the second pair.
+  if (l.count === 'grab') return w.more ? { title: `GRAB: ${key.GRAB}`, text: `${what} ${Math.min(w.count, l.need)} / ${l.need}` } : { title: `ATTACK: ${key.ATTACK}`, text: 'Clear them' };
   return { title: `${l.teach}: ${key[l.teach]}`, text: what ? `${what} ${Math.min(w.count, l.need)} / ${l.need}` : w.stage === 4 ? 'Kill it' : 'Clear them' };
 }
 export { AREAS };

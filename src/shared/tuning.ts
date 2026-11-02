@@ -50,6 +50,9 @@ export const GUARD = {
 
 
 export const HITSTOP = { light: 0.05, heavy: 0.11, parry: 0.18 };
+/** Goblins hit by their own: an arrow that missed you lands on the first goblin in its line (this times
+ *  its damage); a butcher's sweep, slam or charge catches small goblins under it. */
+export const FRIENDLY = { shot: 1.5, blow: 0.8 };
 /** Dodging: rolled clear before it landed counts (no bonus); a roll through the blow as it lands (in the
  *  roll's i-frames) staggers a close attacker for this share of a parry's stun. */
 export const DODGE = { stun: 0.6 };

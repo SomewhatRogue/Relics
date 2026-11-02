@@ -81,9 +81,9 @@ export function woodMap(): GameMap {
 /** Each lesson: what it teaches, what you're allowed to press, what it counts, how many, the goblins it brings. */
 /** What a lesson counts: kills, dodges, blocks, parries, last-second dodges (`slip`), blows from behind,
  *  or full-charge hits (`heavy`). */
-export type Count = 'kills' | 'dodge' | 'block' | 'parry' | 'slip' | 'backstab' | 'heavy' | 'none';
+export type Count = 'kills' | 'dodge' | 'block' | 'parry' | 'slip' | 'backstab' | 'heavy' | 'grab' | 'none';
 /** The move a lesson's card shows (its control comes from the device). */
-export type Teach = 'attack' | 'roll' | 'block' | 'parry' | 'slip' | 'backstab' | 'heavy' | 'skill';
+export type Teach = 'attack' | 'roll' | 'block' | 'parry' | 'slip' | 'backstab' | 'heavy' | 'grab' | 'skill';
 export interface Lesson { area: number; name: string; teach: string; card?: Teach; moves: ('attack' | 'roll' | 'block' | 'relic' | 'potion' | 'grab')[]; count: Count; need: number; hew: [number, number]; foes: (Foe & { variant?: 'looter' | 'lunger' | 'heavy' | 'stoker' })[]; more?: Lesson['foes'] }
 export const LESSONS: Lesson[] = [
   { area: 0, name: 'THE FIELD', teach: 'ATTACK', moves: ['attack'], count: 'kills', need: 0, hew: [5, 33],
@@ -108,7 +108,8 @@ const L = LESSONS, light = ['attack', 'roll'] as Lesson['moves'];
 const slip = (foes = L[3].foes): Lesson => ({ ...L[3], teach: 'LAST SECOND', card: 'slip', moves: light, count: 'slip', need: 2, foes });
 const scr = (x: number, y: number, v?: 'looter' | 'lunger' | 'heavy') => ({ kind: 'scrapper' as const, ...(v ? { variant: v } : {}), x, y, awake: true });
 const BY_CLASS: Record<HeroClass, Lesson[]> = {
-  WARRIOR: L,
+  // Only the Warrior lifts: after the first three, the next two are for grabbing and throwing.
+  WARRIOR: [{ ...L[0], count: 'grab', need: 1, moves: ['attack', 'grab'] }, L[1], { ...L[2], moves: [...L[2].moves, 'grab'] }, { ...L[3], moves: [...L[3].moves, 'grab'] }, L[4]],
   HEALER: [L[0], L[1], { ...L[2], need: 4 }, L[3], L[4]],
   ROGUE: [
     { ...L[0], foes: [...L[0].foes, { kind: 'scrapper', variant: 'looter', x: 10, y: 37 }] },
@@ -179,6 +180,7 @@ export const LINES = {
     backstab: "Three of them, and you'll not stand toe to toe with three, not with those little things, so you get yourself round the *back* of one. I expect you know how, I expect you've had a fair bit of practice.",
     heavy: "Three coming up past the kilns, and slow about it, so there's time to draw it all the way back, and you take it, mind. I've seen half a draw go into one of them, and all it did was make it *cross*.",
     charge: "Four of them bunched round my kiln like they're warming their hands. If that thing does what I think it does, you'll let it build a good while first, I'd have thought. Don't tell me how, mind, I'd sooner not know.",
+    grab: "Two more out of the trees, and fresh ones. Now, you're the size for it, I'd say. I once saw a big lad from the camps knock one silly, pick it up by the scruff and sling it at its mate, and the pair of them went over like *skittles*. They hate that, I've noticed.",
     slip: "Now, this big one breaks a guard like kindling, and you've not got much guard to break, so you wait for it, wait, and be gone *just* as it comes down, and then it's yours while it gets over the surprise.",
   },
   /** When you get it right (a short pause in the fight). */
@@ -192,6 +194,7 @@ export const LINES = {
     parry: 'Tap your guard the moment the red flashes white. It staggers them, and your next blow lands hard.',
     skill: "Use your skill. Once it's spent, it takes a while to recharge.",
     relic: 'Throw it with your relic button. A small goblin is carried off and pinned to the nearest wall. It comes back to your hand after a few seconds.',
+    grab: 'Hit a small goblin so it reels, or get behind it, then grab it. Grab again to throw it, and whatever it hits gets hurt. Out on jobs, crates and barrels throw too.',
     backstab: 'Hit a goblin from behind and the blow lands far harder.',
     heavy: 'Hold attack until fully drawn or charged, then let go. A full shot hits much harder.',
     slip: "You can't hold a block. Roll just as a blow lands to pass through it. That staggers whoever struck, unless it was an arrow.",

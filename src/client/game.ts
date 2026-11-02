@@ -99,6 +99,7 @@ export class Game {
 
   /** Straight to town, with what the wood would have given (a second hero's choice). */
   skipWood(): void {
+    this.wood = null;
     this.giveWood();
     this.enterTown(this.gateSpot());
   }
@@ -152,7 +153,7 @@ export class Game {
   taught(): string[] {
     if (this.mode !== 'wood' || !this.wood) return ['attack', 'roll', 'block', 'relic', 'potion', 'grab'];
     if (this.wood.cut >= 0 || this.wood.wake >= 0) return [];
-    return this.wood.stage >= 5 ? ['attack', 'roll', 'block', 'relic', 'potion', 'grab'] : lessonOf(this.wood).moves;
+    return this.wood.stage >= 5 ? ['attack', 'roll', 'block', 'relic', 'potion', 'grab'] : lessonOf(this.wood).moves.filter((m) => m !== 'grab' || this.wood!.stage > 0 || this.wood!.more);
   }
   /** Make a hero (class for life); returns its slot, or -1 when all three are taken. */
   create(cls: HeroClass, name: string): number {

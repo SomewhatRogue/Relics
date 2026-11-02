@@ -9,7 +9,7 @@ import type { FightEvent, Hero } from './types';
 
 /** Weapons a pack holds. */
 export const PACK = 8;
-export const GEAR = { equip: 1, drop: 2, carry: 3, front: 4, pour: 5, off: 6 } as const;
+export const GEAR = { equip: 1, drop: 2, carry: 3, front: 4, pour: 5, off: 6, unarm: 7 } as const;
 
 /** Put on armor (the old goes in the pack) or a ring (a third pushes out the older). */
 function wear(h: Hero, i: number, it: Item, ev: FightEvent[]): void {
@@ -51,6 +51,12 @@ export function applyGear(h: Hero, op: number, arg: number, ev: FightEvent[]): v
     if (!r || h.bag.length >= PACK || r.hungry === 'wedding') return;
     h.rings.splice(arg, 1);
     h.bag.push(r);
+    refreshHealth(h);
+  } else if (op === GEAR.unarm) {
+    // Armor off, into the pack (if there's room).
+    if (!h.armor || h.bag.length >= PACK) return;
+    h.bag.push(h.armor);
+    h.armor = null;
     refreshHealth(h);
   } else if (op === GEAR.drop) {
     // Hungry gear can't be dropped: only given up at the church.
