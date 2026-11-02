@@ -28,6 +28,7 @@ import { load, store, type Save } from './save';
 import { treasure } from '../shared/treasure';
 /** What a piece of treasure that won't fit in the pack fetches. */
 const TREASURE_SOLD = 20;
+import { rebase } from '../sim/rebase';
 import { CoopGuest, CoopHost, loadRoom, type Friend } from './coop';
 import { forgetSession, keepSession, keptJob, type Session } from './session';
 import { dayPhase, townLight } from '../shared/daylight';
@@ -250,16 +251,16 @@ export class Game {
     for (const [id, f] of this.coop?.friends ?? []) {
       const old = from?.heroes.find((x) => x.id === id);
       if (old && from !== room) from.heroes.splice(from.heroes.indexOf(old), 1);
-      if (!f.gone) this.bring(id, f, old);
+      if (!f.gone) this.bring(id, f, old, from?.time ?? room.time);
     }
   }
 
   /** A friend's hero, next to yours in this room (dressed from their own profile). */
-  private bring(id: string, f: Friend, keep?: Hero): void {
+  private bring(id: string, f: Friend, keep?: Hero, was = this.room.time): void {
     const me = this.hero;
     let h: Hero;
     // Their own hero, carried over as it is (health, potions, cooldowns); a new one dressed from their profile.
-    if (keep) this.room.heroes.push((h = keep));
+    if (keep) this.room.heroes.push((h = keep)), rebase(h, was, this.room.time);
     else if (f.profile) (h = this.room.join(id)), this.equip(h, undefined, f.profile);
     else return;
     const n = this.room.heroes.indexOf(h);
@@ -331,7 +332,7 @@ export class Game {
 
   /** Back out of the door you came in by. */
   leave(): void {
-    const o = this.outside!, inner = this.hero, d = doorAt(o.door), h = o.hero;
+    const o = this.outside!, inner = this.hero, d = doorAt(o.door), h = o.hero, insideAt = this.room.time;
     // ...and out after you.
     if (this.mode === 'run') this.followers.through(this.room, o.room, inner, d.x, d.y + 0.6);
     // The freed you're leading come out too: home (the room may have goblins waiting).
@@ -348,7 +349,7 @@ export class Game {
     // Your friends come back out with you.
     for (const [id, f] of this.coop?.friends ?? []) {
       const old = o.room.heroes.find((x) => x.id === id) ? undefined : this.insideHero(id);
-      if (old && !f.gone) this.bring(id, f, old);
+      if (old && !f.gone) this.bring(id, f, old, insideAt);
     }
   }
 
