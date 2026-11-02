@@ -8,7 +8,8 @@
  * Relic's online play is off unless the page was built for the Vercel site (VITE_ONLINE) or is
  * pointed at a relay (`?relay=ws://...`): the one-file build played from an artifact has no server.
  */
-export const ONLINE = !!(import.meta.env.VITE_ONLINE || new URLSearchParams(location.search).get('relay'));
+const params = () => new URLSearchParams(typeof location === 'undefined' ? '' : location.search);
+export const ONLINE = !!(import.meta.env?.VITE_ONLINE || params().get('relay'));
 
 export type RelayMsg =
   | { t: 'role'; role: 'host' | 'guest' | 'peer'; host?: string }
@@ -24,7 +25,7 @@ export type RelayMsg =
  * before: the new one opens first, the old one closes once the new one is talking.
  * `?rotate=ms` overrides it (tests).
  */
-const ROTATE_MS = Number(new URLSearchParams(location.search).get('rotate')) || 4 * 60_000;
+const ROTATE_MS = Number(params().get('rotate')) || 4 * 60_000;
 
 export class RelaySocket {
   onMessage: (m: RelayMsg) => void = () => {};

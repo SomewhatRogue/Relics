@@ -22,6 +22,8 @@ import { refreshHealth, statsOf } from '../sim/gearstats';
 import { goal, interiorRoom, isFinal, newRun, runRoom, tally, type Run } from '../sim/run';
 import type { FightEvent, Hero, Intent } from '../sim/types';
 import { load, store, type Save } from './save';
+import { CoopHost, type CoopGuest, type Friend } from './coop';
+import type { Parties } from './parties';
 
 export type Mode = 'town' | 'yard' | 'run' | 'wood';
 export interface Result { won: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number; relic?: RelicId }
@@ -54,6 +56,15 @@ export class Game {
   link: { online: boolean; send(c: Contribution): void } | null = null;
   /** Played before a hero is chosen (the title screen's backdrop, and the tests). */
   private scratch = newProfile();
+  /** Online with friends: leading (this browser runs the job: coop.ts) or following a leader's. */
+  coop: CoopHost | null = null;
+  remote: CoopGuest | null = null;
+  /** Parties at the board (online only). */
+  parties: Parties | null = null;
+  /** Counts up each time the room changes (friends rebuild their copy when it does). */
+  roomKey = 0;
+  /** Friends whose press counters have been matched to their hero's (so no old press fires). */
+  private synced = new Set<string>();
 
   constructor() {
     this.enterTown();
@@ -170,8 +181,7 @@ export class Game {
   }
 
   /** Dress the hero from the profile; `keep` carries health and the relic in hand between run rooms. */
-  private equip(h: Hero, keep?: Hero): void {
-    const p = this.profile;
+  private equip(h: Hero, keep?: Hero, p: Profile = this.profile): void {
     h.weapon = p.weapon;
     h.arms = { ...p.arms };
     h.bag = [...p.bag];
@@ -194,10 +204,45 @@ export class Game {
   }
 
   private place(room: ArenaRoom, at?: { x: number; y: number }, keep?: Hero): void {
+    const from = this.room;
     this.room = room;
+    this.roomKey++;
     const h = room.join(ME);
     if (at) (h.x = at.x), (h.y = at.y);
     this.equip(h, keep);
+    // Leading a party: your friends come with you, each with the health they had.
+    for (const [id, f] of this.coop?.friends ?? []) {
+      const old = from?.heroes.find((x) => x.id === id);
+      if (old && from !== room) from.heroes.splice(from.heroes.indexOf(old), 1);
+      if (f.profile && !f.gone) this.bring(id, f, old);
+    }
+  }
+
+  /** A friend's hero, next to yours in this room (dressed from their own profile). */
+  private bring(id: string, f: Friend, keep?: Hero): void {
+    const me = this.hero, h = this.room.join(id), n = this.room.heroes.indexOf(h);
+    this.equip(h, keep, f.profile!);
+    Object.assign(h, { x: me.x + (n % 2 ? 0.8 : -0.8), y: me.y + 0.3 * n, fx: me.fx, fy: me.fy, act: 'idle', actT: 0, tag: f.name });
+    this.room.prev.set('h:' + id, [h.x, h.y]);
+  }
+
+  /** A friend arrives in the job (or back after losing their signal: their hero is still here). */
+  addFriend(id: string, f: Friend): void {
+    if (this.mode !== 'run' || this.room.heroes.some((x) => x.id === id)) return;
+    this.synced.delete(id);
+    this.bring(id, f);
+  }
+
+  /** A friend gone a minute: their hero leaves the fight. */
+  dropFriend(id: string): void {
+    for (const r of [this.room, this.outside?.room]) {
+      const i = r ? r.heroes.findIndex((x) => x.id === id) : -1;
+      if (r && i >= 0) r.heroes.splice(i, 1);
+    }
+  }
+
+  goalText(): string {
+    return this.run ? goal(this.run, this.fightRoom).text : '';
   }
 
   /** Back to Wickhold, at `at` (in front of a door) or the square. */
@@ -240,6 +285,20 @@ export class Game {
     this.room.heroes.push(h);
     Object.assign(h, { x: d.x, y: d.y + 0.5, fx: 0, fy: 1, hp: Math.max(1, inner.hp), relic: inner.relic, act: 'idle', actT: 0 });
     this.room.prev.set('h:' + ME, [h.x, h.y]);
+    this.roomKey++;
+    // Your friends come back out with you.
+    for (const [id, f] of this.coop?.friends ?? []) {
+      const old = o.room.heroes.find((x) => x.id === id) ? undefined : this.insideHero(id);
+      if (old && f.profile && !f.gone) this.bring(id, f, old);
+    }
+  }
+
+  private insideHero(id: string): Hero | undefined {
+    for (const r of this.insides.values()) {
+      const i = r.heroes.findIndex((x) => x.id === id);
+      if (i >= 0) return r.heroes.splice(i, 1)[0];
+    }
+    return undefined;
   }
 
   /** Today's board, with the chapter's story mission on it until it's done. */
@@ -248,11 +307,12 @@ export class Game {
     return this.world.storyDone.includes(CHAPTER_1.mission.id) ? list : [CHAPTER_1.mission, ...list];
   }
 
-  startJob(job: Job): void {
+  startJob(job: Job, party = 1): void {
     this.mode = 'run';
     this.outside = null;
     this.insides.clear();
     this.run = newRun(job);
+    this.run.party = party;
     this.place(runRoom(this.run));
     // A coin in the well: you set out blessed.
     if (this.profile.wish) (this.hero.blessedUntil = 20), (this.profile.wish = false), store(this.save);
@@ -260,6 +320,8 @@ export class Game {
 
   /** Advance with this frame's intent; returns the events (for effects and sound). */
   step(dt: number, intent: Intent): FightEvent[] {
+    // Following a friend's job: their room is drawn here; nothing runs in this browser.
+    if (this.remote) return this.stepRemote();
     const h = this.hero;
     // The wood holds the world still for a lesson's card, a freeze-frame, a word of praise.
     if (this.mode === 'wood' && this.wood?.hold && this.holding(intent, dt)) return [];
@@ -282,6 +344,13 @@ export class Game {
       };
     }
     this.room.setIntent(ME, intent);
+    // Leading a party: each friend's latest input (their old presses matched first, so none fires).
+    for (const [id, f] of this.coop?.friends ?? []) {
+      const fh = this.room.heroes.find((x) => x.id === id);
+      if (!fh) continue;
+      if (!this.synced.has(id) && f.intent !== null) (this.synced.add(id), syncSeen(fh, f.intent));
+      this.room.setIntent(id, { ...f.intent, classSeq: fh.seen.cls, weaponSeq: fh.seen.weapon, augmentSeq: fh.seen.augment });
+    }
     // The room outside runs on while you're in (its kills still pay); then yours.
     const out = this.outside?.room, outEv = out?.advance(dt) ?? [];
     if (out && this.run) tally(this.run, out, outEv, ME);
@@ -307,10 +376,50 @@ export class Game {
             this.run.index++;
             if (road) this.run.roads[this.run.index] = road.road;
             this.insides.clear();
+            // The goblins ahead are counted for whoever's still with you.
+            this.run.party = 1 + [...(this.coop?.friends.values() ?? [])].filter((f) => f.profile && !f.gone).length;
             this.place(runRoom(this.run), undefined, h);
           }
         }
       }
+    }
+    return ev;
+  }
+
+  /** Test hook: end the run now (won or lost), as if its last room were done. */
+  endForTest(won: boolean): void {
+    if (this.run) this.finish(won);
+  }
+
+  /** Leading a party: set out, and this browser runs the job for everyone in it. */
+  setOut(): void {
+    const go = this.parties?.setOut();
+    if (!go) return;
+    this.coop = new CoopHost(go.room, this.profile.id, this.profile.name, this, go.members);
+    this.startJob(go.job, go.members.length);
+  }
+
+  /** Follow a friend's job (they lead): their room is drawn here as it comes. */
+  startRemote(g: CoopGuest): void {
+    this.mode = 'run';
+    this.outside = null;
+    this.insides.clear();
+    this.remote = g;
+    // Until the leader's room arrives: the job as it was posted.
+    this.run = newRun(g.job);
+  }
+
+  private stepRemote(): FightEvent[] {
+    const g = this.remote!, now = performance.now() / 1000;
+    // Their room once it has me in it (until then, the town stands still behind the wait).
+    if (g.room?.heroes.some((x) => x.id === ME)) (this.room = g.room), (this.run = g.run ?? this.run);
+    const ev = g.take();
+    const end = g.ended ?? (g.lost(now) ? { won: false, run: g.run ?? newRun(g.job) } : null);
+    if (end) {
+      g.close();
+      this.remote = null;
+      this.run = end.run;
+      this.finish(end.won);
     }
     return ev;
   }
@@ -329,6 +438,10 @@ export class Game {
 
   private finish(won: boolean): void {
     const run = this.run!, p = this.profile, w = this.world;
+    // Leading: everyone's told how it went (each friend's game pays them from the run).
+    this.coop?.end(won, run);
+    this.coop?.close();
+    this.coop = null;
     // Driven back in the Ransom Coat: all of it, not half.
     const ransom = !won && p.armor?.hungry === 'ransom';
     const gold = won ? run.gold + Math.round(run.job.reward * rewardMult(w)) : ransom ? 0 : Math.round(run.gold / 2);
@@ -653,4 +766,9 @@ export class Game {
   vote(choice: string): void {
     this.give({ vote: choice });
   }
+}
+
+/** A friend's hero takes their press counters as already seen (so nothing pressed in town fires). */
+function syncSeen(h: Hero, i: Intent): void {
+  Object.assign(h.seen, { attack: i.attackSeq, block: i.blockSeq, roll: i.rollSeq, weapon: i.weaponSeq, relic: i.relicSeq, relicSwap: i.relicSwapSeq, relicPick: i.relicPickSeq, augment: i.augmentSeq, cls: i.classSeq, take: i.takeSeq, grab: i.grabSeq, gear: i.gearSeq, potion: i.potionSeq, open: i.openSeq });
 }

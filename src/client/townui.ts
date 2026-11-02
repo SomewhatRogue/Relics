@@ -14,6 +14,10 @@ import { LINES } from '../shared/wood';
 import { card, compare } from './card';
 import type { Panel } from './panels';
 import { RUMOURS } from './rumours';
+import { PARTY_MAX } from './parties';
+
+/** Words from another player's browser, made safe to show. */
+const esc = (v: unknown) => String(v ?? '').replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
 const RUIN = ['Held', 'Raided', 'Occupied', 'Razed', 'Blighted'];
 const p = (s: string) => `<p>${s}</p>`;
@@ -25,14 +29,28 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
   const pr = g.profile, w = g.world, again = () => openSpot(id, g, panel, arg, key);
   if (openSquare(id, g, panel, arg, key)) return;
   if (id === 'board') {
-    const jobs = g.jobs();
-    const html = jobs.map((j, i) =>
+    const jobs = g.jobs(), pt = g.parties;
+    // Online: the parties gathering, and the board's jobs taken alone or with a party.
+    if (pt) pt.onChange = () => panel.open && document.querySelector('#panel h2')?.textContent?.startsWith('JOB BOARD') && openSpot('board', g, panel);
+    const parties = pt?.list() ?? [];
+    const partyHtml = parties.length ? '<h3>PARTIES</h3>' + parties.map((q, i) =>
+      `<div class="job party"><div class="t">${q.mine ? 'YOUR PARTY' : `${esc(q.members[0][1])}'S PARTY`}: ${esc(q.job.title)}</div>` +
+      `<div class="m">${esc(q.job.place.name)}. ${q.members.map((m) => esc(m[1])).join(', ')} (${q.members.length} of ${PARTY_MAX})</div>` +
+      (q.mine ? `<button data-setout>SET OUT</button> <button data-quit class="ghost">TAKE IT DOWN</button>`
+        : q.in ? `<div class="d">WAITING ON ${esc(q.members[0][1])}</div><button data-quit class="ghost">LEAVE</button>`
+        : q.asked ? `<div class="d">ASKED TO JOIN</div><button data-quit class="ghost">NEVER MIND</button>`
+        : q.members.length < PARTY_MAX ? `<button data-joinparty="${i}">JOIN</button>` : '<div class="d">FULL</div>') + '</div>').join('') + '<h3>JOBS</h3>' : '';
+    const html = partyHtml + jobs.map((j, i) =>
       `<div class="job ${j.objective === 'story' ? 'story' : j.deep ? 'deep' : ''}"><div class="t">${j.objective === 'story' ? 'STORY: ' : ''}${j.title}</div>` +
       `<div class="m">${j.place.name}, ${j.place.region}. ${RUIN[j.place.ruin]}. ${j.rooms} rooms${j.twist === 'night' ? '. At night' : ''}. Pays ${Math.round(j.reward * rewardMult(w))} gold.</div>` +
-      `<div class="d">${j.text}</div><button data-job="${i}">TAKE THE JOB</button></div>`).join('');
+      `<div class="d">${j.text}</div><button data-job="${i}">${pt ? 'GO ALONE' : 'TAKE THE JOB'}</button>${pt ? ` <button data-gather="${i}">GATHER A PARTY</button>` : ''}</div>`).join('');
     panel.show(`JOB BOARD, DAY ${w.day}`, html);
-    document.querySelectorAll<HTMLButtonElement>('#panel [data-job]').forEach((b) =>
-      b.addEventListener('click', () => (panel.hide(), g.startJob(jobs[Number(b.dataset.job)]))));
+    const on = (sel: string, f: (b: HTMLButtonElement) => void) => document.querySelectorAll<HTMLButtonElement>(`#panel ${sel}`).forEach((b) => b.addEventListener('click', () => f(b)));
+    on('[data-job]', (b) => (panel.hide(), pt?.quit(), g.startJob(jobs[Number(b.dataset.job)])));
+    on('[data-gather]', (b) => pt?.gather(jobs[Number(b.dataset.gather)]));
+    on('[data-joinparty]', (b) => pt?.join(parties[Number(b.dataset.joinparty)].lead));
+    on('[data-quit]', () => pt?.quit());
+    on('[data-setout]', () => (panel.hide(), g.setOut()));
   } else if (id === 'council') {
     const goals = chapterGoals(w), d = CHAPTER_1.decision, done = w.flags[d.id];
     const status = p(`<b>${CHAPTER_1.name}</b>`) + p(`People brought home: ${goals.rescued} of ${goals.rescuedGoal}. Story mission, ${CHAPTER_1.mission.title}: ${goals.story ? 'done' : 'not yet'}.`);

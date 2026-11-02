@@ -783,3 +783,17 @@ which moves the page to the media channel.
   relay (`scripts/online-server.ts`).
 - relic-lake.vercel.app is public (Kyle, 2026-11-01): Vercel Authentication now guards preview
   deployments only, so anyone with the link plays without a login.
+
+## 2026-11-01: parties and the shared run (Opus 5.5)
+
+- Parties form over the town's peer room: the one gathering says so with where they stand (`pt`:
+  the job and who's in), joiners ask by direct word, SET OUT tells each member the run's room code
+  and the job. The job travels with it (each player's world, and so board, can differ).
+- The leader's browser runs the job; friends' heroes are dressed from the profile they send.
+  Patches of what changed (`snap.ts`) about 12 a second, a full one every 4 s, on a room change and
+  for anyone new; average well under 4 KB. Friends swap ids in the text (leader `me` to `@lead`,
+  theirs to `me`) so the rest of the game runs unchanged on their copy.
+- The run's gold is shared: every pickup counts for the party, and everyone is paid the run.
+- Labels checked by the lore keeper (plain board words: GATHER A PARTY, SET OUT, TAKE IT DOWN).
+- `npm run test:online` now also runs scripts/party-online.cjs: gather, join, set out, same goblins,
+  walking seen, a hurt goblin hurt for both, every room in order, the end paying the friend.

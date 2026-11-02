@@ -17,9 +17,9 @@ export const TOWN_ROOM = 'WICKHOLD1';
 const SEND_EVERY = 0.25, KEEP = 3, GONE = 12;
 
 /** One player about themselves: name, weapon, the place they're in, and x, y, facing, moving. */
-export interface Me { n: string; w: string; at: string; p: [number, number, number, number, number] }
+export interface Me { n: string; w: string; at: string; p: [number, number, number, number, number]; pt?: unknown }
 type Said = Me & { k: 'me' | 'hi' };
-interface Folk { hero: Hero; to: [number, number]; at: string; heard: number }
+interface Folk { hero: Hero; to: [number, number]; at: string; heard: number; pt?: unknown }
 
 const NAME = /[^A-Z0-9 '-]/g;
 const r2 = (v: number) => Math.round(v * 100) / 100;
@@ -31,6 +31,9 @@ export class Townfolk {
   private said = '';
   private me: Me | null = null;
   private now = 0;
+  /** What a player says that isn't about where they stand (parties: parties.ts), and what goes out with you (your party). */
+  onWord: (from: string, d: Record<string, unknown>) => void = () => {};
+  offer: () => unknown = () => undefined;
 
   constructor(readonly id: string) {}
 
@@ -38,7 +41,7 @@ export class Townfolk {
   step(me: Me | null, now: number, dt: number): void {
     this.now = now;
     if (!me) return this.leave();
-    this.me = { ...me, p: [r2(me.p[0]), r2(me.p[1]), r2(me.p[2]), r2(me.p[3]), me.p[4]] };
+    this.me = { ...me, p: [r2(me.p[0]), r2(me.p[1]), r2(me.p[2]), r2(me.p[3]), me.p[4]], pt: this.offer() };
     if (!this.sock) {
       this.sock = new RelaySocket(TOWN_ROOM, this.id, 'peer');
       this.sock.onMessage = (m) => this.heard(m);
@@ -65,6 +68,21 @@ export class Townfolk {
     return [...this.folk.values()].filter((f) => f.at === at).map((f) => f.hero);
   }
 
+  /** Everyone else, by id: their name and what they offer (a party). */
+  others(): { id: string; name: string; pt: unknown }[] {
+    return [...this.folk].map(([id, f]) => ({ id, name: f.hero.tag ?? '', pt: f.pt }));
+  }
+
+  /** A word to one player (or everyone). */
+  say(to: string, d: Record<string, unknown>): void {
+    if (this.sock?.open_) this.sock.send(to, d);
+  }
+
+  /** Send where you are now, not at the next beat (your party changed). */
+  soon(): void {
+    this.sentAt = -99;
+  }
+
   /** How many others are in Wickhold right now. */
   get count(): number {
     return this.folk.size;
@@ -81,12 +99,13 @@ export class Townfolk {
     if (m.t === 'left') return void this.folk.delete(m.id);
     if (m.t !== 'msg') return;
     const d = m.d as Partial<Said> | null;
+    if (d && typeof d === 'object' && d.k !== 'me' && d.k !== 'hi') return this.onWord(m.from, d as Record<string, unknown>);
     if (!d || (d.k !== 'me' && d.k !== 'hi') || !Array.isArray(d.p) || d.p.length !== 5 || !d.p.every((v) => typeof v === 'number' && isFinite(v))) return;
     const weapon = (typeof d.w === 'string' && d.w in WEAPONS ? d.w : 'sword') as WeaponId;
     const [x, y, fx, fy, moving] = d.p;
     let f = this.folk.get(m.from);
     if (!f) this.folk.set(m.from, (f = { hero: newHero('o:' + m.from, x, y), to: [x, y], at: '', heard: 0 }));
-    Object.assign(f, { to: [x, y], at: String(d.at ?? '').slice(0, 40), heard: this.now });
+    Object.assign(f, { to: [x, y], at: String(d.at ?? '').slice(0, 40), heard: this.now, pt: d.pt });
     Object.assign(f.hero, { weapon, fx, fy, moving: !!moving, tag: String(d.n ?? '').toUpperCase().replace(NAME, '').slice(0, 14) || 'STRANGER' });
     // Someone new: tell them where you are, just them.
     if (d.k === 'hi') this.tell(m.from, 'me');

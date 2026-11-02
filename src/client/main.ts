@@ -2,6 +2,8 @@
 import { CLASS_GUARD, POTIONS, CLASS_ORDER, RELICS, TRAITS, WEAPONS, itemName, type HeroClass } from '../shared/tuning';
 import { ONLINE } from './relay';
 import { Townfolk } from './townfolk';
+import { Parties } from './parties';
+import { CoopGuest } from './coop';
 import { MAX_DOWNS, goal } from '../sim/run';
 import type { Npc } from '../shared/arena';
 import type { Intent } from '../sim/types';
@@ -39,8 +41,18 @@ function online(): Townfolk | null {
   if (!ONLINE || !game.profile.id) return null;
   // Another hero picked: the old one leaves town.
   if (townfolk && townfolk.id !== game.profile.id) townfolk.leave(), (townfolk = null);
-  return (townfolk ??= new Townfolk(game.profile.id));
+  if (!townfolk) {
+    townfolk = new Townfolk(game.profile.id);
+    const parties = (game.parties = new Parties(townfolk, () => ({ id: game.profile.id, name: game.profile.name })));
+    // Called to a friend's job: off you go with them.
+    parties.onGo = (room, job, lead) => {
+      panel.hide();
+      game.startRemote(new CoopGuest(room, game.profile.id, lead, () => game.profile, job));
+    };
+  }
+  return townfolk;
 }
+
 const scene = new Scene(document.getElementById('game') as HTMLCanvasElement);
 const fx = new Fx();
 const panel = new Panel();
@@ -229,7 +241,12 @@ function frame(t: number): void {
   else still = null;
   // Whoever you're talking to stops their round till you're done (the world doesn't: it's shared).
   if (talking && !panel.open) (talking.lag = (talking.lag ?? 0) + game.room.time - (talking.heldAt ?? game.room.time)), (talking.heldAt = undefined), (talking = null);
-  for (const ev of game.step(dt, still ?? live)) {
+  // Following a friend's job: my input goes to them.
+  game.remote?.frame(t / 1000, still ?? live);
+  const evs = game.step(dt, still ?? live);
+  // Leading one: the room goes out to the party.
+  game.coop?.frame(t / 1000, evs);
+  for (const ev of evs) {
     fx.on(ev);
     sounds.event(ev, game.room, t / 1000);
     if (ev.k === 'parry') parries++;

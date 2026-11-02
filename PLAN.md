@@ -104,11 +104,19 @@ and burns out a goblin den on a job.
 
 ### Built and next
 1. DONE 2026-11-01: the shared town. Everyone online sees everyone in Wickhold (`townfolk.ts`).
-2. Parties at the board: post a party for a job, others tap Join, the leader sets out and the
-   others are pulled into the leader's instance (Come Bye's host model, no codes).
+2. DONE 2026-11-01: parties at the board and the shared run. GATHER A PARTY on a job, others JOIN,
+   the leader SETS OUT and everyone is pulled into the leader's job (coop.ts, parties.ts). Kyle's
+   rules: goblins scale with the party (count, and bosses' health), friendly fire at half, down in
+   a party you bleed 20 s for a teammate to pick you up (3 s standing over you) or you're out for
+   the job; everyone out and it's lost; the last one left plays it out alone; three team kills of
+   the same player make a grudge (counted, shown nowhere yet).
+   Not yet: the leader dropping hands the job to a friend (today the friends lose it after 20 s);
+   a friend who reloads their page can't get back in (a dropped connection can: the hero waits a
+   minute); a friend's own hero moves only when the leader's room says so (no prediction yet);
+   loot a friend picks up doesn't come home with them; the party can't split into buildings
+   (everyone goes in with the leader).
 3. Results on the board: a finished job written for everyone, with who was in it.
-4. World quests: open only with 3+ in town; someone going down (open question for Kyle: out until
-   the job ends, or a teammate can pick them up?).
+4. World quests: open only with 3+ in town; hard.
 5. Town votes. Without sign-in the game knows devices, not people: a vote kept per device token (all
    of a device's heroes share it) stops character-hopping but not a second browser. Real one-per-
    person needs a sign-in (Google, Apple or an email link). Start per device; add sign-in if it's
