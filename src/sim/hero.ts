@@ -143,7 +143,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
       h.weapon = CLASS_KITS[cls][0];
       h.relics = abilitiesOf(cls, h.relics[1]);
       h.relic = h.relics[0];
-      ev.push({ k: 'weapon', x: h.x, y: h.y, name: cls });
+      ev.push({ k: 'weapon', x: h.x, y: h.y, name: cls === 'HEALER' ? 'CLERIC' : cls });
     }
   }
   if (inp.weaponSeq !== h.seen.weapon) {

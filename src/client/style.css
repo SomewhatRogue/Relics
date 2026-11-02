@@ -182,6 +182,9 @@ body[data-mode='town'] .tb.roll { right: calc(116px + env(safe-area-inset-right)
 #title .ccard span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 #title .ccard b { color: #ffd27a; font-size: 13px; letter-spacing: 0.08em; }
 #title .ccard i { font-style: normal; color: #b8b2c4; font-size: 11px; }
+#title .cname { margin: 0; text-align: center; color: #ffd27a; font-size: 22px; letter-spacing: 0.14em; }
+#title .stage { display: flex; justify-content: center; margin: 4px 0 10px; }
+#title .preview { width: 224px; height: 160px; max-width: 100%; image-rendering: pixelated; background: radial-gradient(ellipse at 50% 80%, #2a2632 0%, #15131a 70%); border-radius: 6px; }
 #title .dhead { display: flex; align-items: center; gap: 14px; }
 #title .dhead .face { width: 54px; height: 72px; }
 #title .dhead h2 { margin: 0; color: #ffd27a; font-size: 22px; letter-spacing: 0.12em; }

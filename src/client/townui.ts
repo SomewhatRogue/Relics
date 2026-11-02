@@ -15,7 +15,7 @@ import { card, compare } from './card';
 import type { Panel } from './panels';
 import { RUMOURS } from './rumours';
 import { PARTY_MAX } from './parties';
-import { CLASSES } from '../shared/classes';
+import { CLASSES, CLASS_NAME } from '../shared/classes';
 import { SIZES } from '../shared/jobs';
 import { treasureWord } from '../shared/treasure';
 
@@ -82,10 +82,10 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       pr.cold = false;
       g.keep();
       g.hero.cold = false;
-      return panel.show(`${t.name}, ${cls} TRAINER`, p('She takes your censer without asking, carries it to the Lantern, and brings it back lit.') + say(name, TALLY.isolde), [{ label: 'CLOSE', act: again }]);
+      return panel.show(`${t.name}, ${CLASS_NAME[cls]} TRAINER`, p('She takes your censer without asking, carries it to the Lantern, and brings it back lit.') + say(name, TALLY.isolde), [{ label: 'CLOSE', act: again }]);
     }
     // Short by default: where you stand, and a button for each thing; tap one to hear about it.
-    const head = `${t.name}, ${cls} TRAINER`, tech = TECHNIQUE[pr.cls], skillId = CLASS_SKILL[pr.cls], leave = LEAVES[pr.cls];
+    const head = `${t.name}, ${CLASS_NAME[cls]} TRAINER`, tech = TECHNIQUE[pr.cls], skillId = CLASS_SKILL[pr.cls], leave = LEAVES[pr.cls];
     const knowsIt = (l: 'skill' | 'leave') => !pr.learned || pr.learned.includes(l);
     const drillName = (d: DrillId) => (d === 'technique' ? tech.name : DRILLS[d].name);
     const needs = (d: DrillId) => (d === 'skill' || (d === 'technique' && pr.cls === 'MAGE') ? 'skill' : d === 'technique' && pr.cls === 'RANGER' ? 'leave' : null);
@@ -138,13 +138,13 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     // Selling what's packed (never a hungry piece).
     const selling = () => {
       const can = pr.bag.filter((it) => sellValue(it) > 0);
-      panel.show('SELL TO HALVARD', say('Halvard', SMITH.sell) + p(can.length ? `You have ${pr.gold} gold.` : 'Nothing in your pack he wants.'), [
+      panel.show('SELL TO HALVARD', say('Halvard', SMITH.sell) + p(can.length ? `You have ${pr.gold} gold.` : "Nothing in your pack he'll buy."), [
         ...can.map((it) => ({ label: `SELL ${itemName(it)} (+${sellValue(it)} GOLD)`, act: () => (g.sell(it), selling()) })),
         { label: 'BACK', act: again },
       ]);
     };
     panel.show(forged ? 'DESSA THE TRADER' : 'HALVARD THE SMITH', html, [
-      ...(forged ? [] : [{ label: 'THE ANVIL: UPGRADE, MELT', act: anvil }, { label: 'SELL WHAT YOU CARRY', act: selling }]),
+      ...(forged ? [] : [{ label: 'THE ANVIL: UPGRADE, MELT', act: anvil }, { label: 'SELL FROM YOUR PACK', act: selling }]),
       ...kits.map((k) => sold(WEAPONS[k].name, () => g.buy(q, k))),
       ...(forged ? [sold('A RING', () => g.buy(q, pr.weapon, 'ring'))] : (['light', 'medium', 'heavy'] as const).map((a) => sold(ARMOR[a].name, () => g.buy(q, pr.weapon, 'armor', a)))),
     ]);

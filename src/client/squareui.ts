@@ -4,6 +4,8 @@
  * the sewer grate. Barred doors and rubble say what would open them.
  */
 import { SHOP, STAT_NAME, STAT_ORDER } from '../shared/progress';
+import { CLASS_NAME } from '../shared/classes';
+import type { HeroClass } from '../shared/tuning';
 import { WORKS, WORK_ORDER, workDone, workProgress, type WorkId } from '../shared/works';
 import { giveValue, itemName } from '../shared/tuning';
 import type { SpotId } from '../shared/town';
@@ -47,8 +49,8 @@ export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key:
     // Gear for the works: pick the work, then the piece; it counts for more than Halvard would pay.
     const gearFor = (k: WorkId) => {
       const can = pr.bag.filter((it) => giveValue(it) > 0);
-      panel.show('GIVE GEAR', p(`<b>${WORKS[k].name}</b>`) + p(can.length ? 'Hollis writes down what it would fetch, and a bit over.' : 'Nothing in your pack the works can use.'), [
-        ...can.map((it) => ({ label: `GIVE ${itemName(it)} (${giveValue(it)})`, act: () => (g.giveGear(it, k), workDone(g.world, k) ? again() : gearFor(k)) })),
+      panel.show('GIVE GEAR', p(`<b>${WORKS[k].name}</b>`) + p(can.length ? 'Hollis writes it down at what Halvard would give for it, and half again.' : 'Nothing in your pack the works can use.'), [
+        ...can.map((it) => ({ label: `GIVE ${itemName(it)} (WORTH ${giveValue(it)})`, act: () => (g.giveGear(it, k), workDone(g.world, k) ? again() : gearFor(k)) })),
         { label: 'BACK', act: again },
       ]);
     };
@@ -59,7 +61,7 @@ export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key:
   if (id === 'roll') {
     const board = link?.online && link.board ? link.board : WorldLink.localBoard(g.save.heroes);
     const where = link?.online ? `World: <b>${link.group.toUpperCase()}</b>${link.group === 'wickhold' ? ' (everyone)' : ' (your group)'}.` : 'Off the shared world: this shows your own heroes. Online, every hero in your world is here.';
-    const html = p(where) + STAT_ORDER.map((k) => `<div class="roll"><b>${STAT_NAME[k]}</b>${board[k].length ? `<ol>${board[k].map((r) => `<li${r.id === pr.id ? ' class="me"' : ''}>${esc(r.name)} <span>${r.cls}</span> <em>${r.n}</em></li>`).join('')}</ol>` : '<div class="dim">Nobody yet.</div>'}</div>`).join('') +
+    const html = p(where) + STAT_ORDER.map((k) => `<div class="roll"><b>${STAT_NAME[k]}</b>${board[k].length ? `<ol>${board[k].map((r) => `<li${r.id === pr.id ? ' class="me"' : ''}>${esc(r.name)} <span>${CLASS_NAME[r.cls as HeroClass] ?? r.cls}</span> <em>${r.n}</em></li>`).join('')}</ol>` : '<div class="dim">Nobody yet.</div>'}</div>`).join('') +
       (link ? `<label class="code">WORLD CODE <input id="wcode" maxlength="24" value="${esc(link.group)}" autocomplete="off" spellcheck="false"></label><p class="dim">Give your group a code of your own to build a town together, apart from everyone else. WICKHOLD is the world everyone shares.</p>` : '');
     panel.show('THE ROLL OF THE BRAVE', html, link ? [{ label: 'PLAY IN THIS WORLD', act: () => {
       const v = (document.getElementById('wcode') as HTMLInputElement | null)?.value ?? '';

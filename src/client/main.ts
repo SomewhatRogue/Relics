@@ -1,5 +1,7 @@
 /** Relic: Wickhold, the Training Yard and runs. The rooms run here in the browser (solo is a party of one). */
 import { CLASS_GUARD, CLASS_DODGES, POTIONS, CLASS_ORDER, RELICS, TRAITS, WEAPONS, itemName, type HeroClass } from '../shared/tuning';
+import { CLASS_NAME } from '../shared/classes';
+import { HEROES, WARRIOR_LOOKS, heroPair } from './sprites';
 import { ONLINE } from './relay';
 import { Townfolk } from './townfolk';
 import { toPx } from './world';
@@ -129,7 +131,7 @@ const townTips = input.touch
   : ['Walk to the JOB BOARD and press E to take a job', 'Walk up into a door to go in. Press E by anyone to talk', 'The FORGE: Halvard sells weapons, Ivo fits elements', 'The TRAINING HALL: perks, and the squire takes you to the yard', 'The TOWN HALL: the reeve and the council decide the chapter'];
 const tips = input.touch
   ? ['Stun or get behind a small goblin, then GRAB it', 'Warriors can GRAB barrels and tables and throw them', 'Break the oil barrel near goblins and they burn', 'Holding one: SLAM it, or THROW it at another', 'POTION drinks or throws the front of your belt', 'Traits reward skill: parries, dodges, perfect releases', 'Walk into a cottage or barn: goblins, and sometimes someone caged', 'HEALER: SANCTUARY blesses the ground and wards whoever is most hurt', 'Oil and fire burn wooden buildings down. Burn out the dens', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'SKILL: every class has one. Each recharges', 'Striped circles cannot be blocked: dodge out, or walk out', 'DEEP jobs end at a named butcher. Win one for a RELIC', 'TWIN DAGGERS: dash behind a goblin and BACKSTAB', 'Push the stick part way to creep. Resting goblins see you late: hit first for an AMBUSH']
-  : ['G grabs a stunned goblin (or one you got behind). Click to slam, G to throw', 'Warriors: G lifts barrels and tables. Throw them, or slam them down', 'Break the oil barrel near goblins and they burn', 'Q drinks or throws the potion at the front of your belt', 'Bows: release on the white flash. Held too long, the shot weakens', 'Walk up into a cottage door to go in. Fire burns buildings down', 'Healer: E for SANCTUARY. Blessed ground, and a ward that throws arrows back', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: your class skill. R: a relic, once you have won one on a DEEP job', 'Striped circles cannot be blocked: SPACE to dodge, or walk out', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or rod', 'Daggers: dash behind a goblin and BACKSTAB', 'Hold Shift to creep. Resting goblins see you late: hit first for an AMBUSH'];
+  : ['G grabs a stunned goblin (or one you got behind). Click to slam, G to throw', 'Warriors: G lifts barrels and tables. Throw them, or slam them down', 'Break the oil barrel near goblins and they burn', 'Q drinks or throws the potion at the front of your belt', 'Bows: release on the white flash. Held too long, the shot weakens', 'Walk up into a cottage door to go in. Fire burns buildings down', 'Cleric: E for SANCTUARY. Blessed ground, and a ward that throws arrows back', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: your class skill. R: a relic, once you have won one on a DEEP job', 'Striped circles cannot be blocked: SPACE to dodge, or walk out', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or rod', 'Daggers: dash behind a goblin and BACKSTAB', 'Hold Shift to creep. Resting goblins see you late: hit first for an AMBUSH'];
 let tipAt = -99, tipI = 0;
 
 function hud(now: number): void {
@@ -138,7 +140,7 @@ function hud(now: number): void {
   $('.hp i').style.width = (100 * me.hp) / me.maxHp + '%';
   $('.st i').style.width = me.stamina + '%';
   $('.st').classList.toggle('low', me.stamina < 25);
-  $('.who').textContent = `${pr.name}  ${pr.cls}  LV ${pr.level}`;
+  $('.who').textContent = `${pr.name}  ${CLASS_NAME[pr.cls]}  LV ${pr.level}`;
   const item = me.arms[me.weapon];
   $('.wpn').textContent = item ? itemName(item) : WEAPONS[me.weapon].name;
   // The block button: a Mage has none; a Ranger or Rogue only taps it to parry.
@@ -358,3 +360,5 @@ w.__music = music;
 w.__title = title;
 w.__panel = panel;
 w.__openSpot = (id: string, arg = 0, key = '') => openSpot(id as never, game, panel, arg, key);
+// Look sheets for screenshots: every hero, the Warrior's options, and a dark copy with only the glow lit.
+w.__looks = () => ({ heroes: Object.fromEntries(Object.entries(HEROES).map(([k, v]) => [k, v.down.c.toDataURL()])), warrior: Object.fromEntries(Object.entries(WARRIOR_LOOKS).map(([k, v]) => [k, heroPair(v).down.c.toDataURL()])) });

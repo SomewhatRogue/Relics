@@ -934,3 +934,15 @@ which moves the page to the media channel.
   can be grabbed as well as one reeling or one you're behind. The wood's field has crates and a barrel
   off the burning carts, and the Warrior's grab lesson teaches throwing those first.
 - Hew no longer says "skittles" (it read as the sweets, not the old pin game).
+
+## 2026-11-01: the pick screen, the Cleric, new looks (Kyle; Opus 5.5)
+
+- The pick screen says only RELIC, A NEW CHAPTER, "Choose your destiny." and the five classes by name
+  and look. Tapping one shows it fighting (a live loop: blows, a heavy, a dodge or a guard,
+  `src/client/preview.ts`), its ratings, a name and BEGIN. No weapon or skill text: Kyle, "less is more".
+- The Healer is called the Cleric on screen (`CLASS_NAME`); the id stays HEALER.
+- Every class has eyes that glow in the dark. The Mage has a tall pointed hat, a robe, sleeves and a
+  beard; the Cleric wears a mail coif and a white tabard with the Lantern on it in gold; the Ranger is
+  hooded. Three Warrior looks are drawn for Kyle to choose from (`WARRIOR_LOOKS`: knight, sellsword,
+  blackiron); the knight stays in play until he picks.
+- Halvard buys packed gear (never hungry); gear given to a town work counts for half again.

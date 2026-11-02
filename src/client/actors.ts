@@ -10,7 +10,7 @@ import { PARTY } from '../shared/tuning';
 import { HEROES, SPRITES } from './sprites';
 
 /** `t` is the room's time (blessings and rallies are kept in it). */
-export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean, t: number): void {
+export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t: number): void {
   const look = HEROES[WEAPONS[h.weapon].cls];
   if (h.act === 'down') {
     shadow(c, x, y, 6);
@@ -46,9 +46,9 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean, t: 
   if (h.act === 'roll' && dk.kind === 'dash') (ox = Math.round(h.rollDx * 2)), (oy += 1);
   const bx = x + ox, by = y + oy;
   shadow(c, x, y, 6);
-  if (me) ring(c, x, y, 7, '#4a90e0');
-  // Allies show their health at their feet, and their name.
-  else {
+  if (me === true) ring(c, x, y, 7, '#4a90e0');
+  // Allies show their health at their feet, and their name (nothing at all on the pick screen).
+  else if (me === false) {
     ring(c, x, y, 7, '#5ad07a', h.hp / 100, '#1a3a22');
     const name = (h.tag ?? h.id).toUpperCase();
     drawText(c.glow, name, Math.round(x - name.length * 2), Math.round(y + 6), '#9ad8a8');

@@ -15,7 +15,7 @@ export interface Sprite {
 }
 
 export const OUTLINE = '#0d0b10';
-const GLOW = new Set(['#ff4a3a', '#7dff8a', '#ffd27a', '#c9a8ff']);
+const GLOW = new Set(['#ff4a3a', '#7dff8a', '#ffd27a', '#c9a8ff', '#ffe9a8', '#bfe0ff', '#ff8a3a']);
 const hex = (h: string) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
 
 export function makeSprite(w: number, h: number, parts: Part[]): Sprite {
@@ -86,25 +86,67 @@ const warriorBase: Part[] = [
   ['r', 2, 6, 8, 6, '#2f5d9b'], ['r', 5, 6, 2, 6, '#d4a537'], ['r', 2, 10, 8, 1, '#5a3d22'],
   ['r', 1, 6, 2, 3, '#9aa3ad'], ['r', 9, 6, 2, 3, '#9aa3ad'],
 ];
-/** One hero sprite per class: the same body, its own colours, hood and crest. */
-interface Look { body: string; trim: string; arms: string; head: string; face: Part[]; top: Part[]; cape: string }
-const LOOKS: Record<'WARRIOR' | 'RANGER' | 'ROGUE' | 'MAGE' | 'HEALER', Look> = {
-  WARRIOR: { body: '#2f5d9b', trim: '#d4a537', arms: '#9aa3ad', head: '#9aa3ad', face: [['r', 4, 3, 5, 1, '#141218']], top: [['r', 5, 0, 2, 1, '#c0392b']], cape: '#7a1d1d' },
-  RANGER: { body: '#3f6b3a', trim: '#8b6a3a', arms: '#5a4a32', head: '#3f5a32', face: [['r', 5, 3, 3, 2, '#c79c78']], top: [['p', 7, 0, '#9ab85a']], cape: '#2f4a28' },
-  ROGUE: { body: '#3a3346', trim: '#5a3d22', arms: '#2a2630', head: '#2a2630', face: [['r', 4, 3, 5, 2, '#141218'], ['p', 5, 3, '#c9a8ff'], ['p', 7, 3, '#c9a8ff']], top: [], cape: '#24202c' },
-  MAGE: { body: '#4a2f6e', trim: '#8a6ac8', arms: '#4a2f6e', head: '#4a2f6e', face: [['r', 4, 3, 5, 2, '#141218'], ['p', 5, 4, '#c9a8ff'], ['p', 7, 4, '#c9a8ff']], top: [['r', 6, 0, 1, 1, '#4a2f6e'], ['p', 7, 0, '#4a2f6e']], cape: '#3a2458' },
-  HEALER: { body: '#d8d0bc', trim: '#d4a537', arms: '#b8ae98', head: '#d8d0bc', face: [['r', 5, 3, 3, 2, '#c79c78']], top: [['r', 5, 0, 2, 1, '#d4a537']], cape: '#b8ae98' },
+/** One hero sprite per class, facing you (`down`) and walking away (`up`). Eyes glow in the dark. */
+type Pair = { down: Part[]; up: Part[]; tall?: number };
+const shift = (parts: Part[], dy: number): Part[] => parts.map((p) => (p[0] === 'p' ? ['p', p[1], p[2] + dy, p[3]] : [p[0], p[1], p[2] + dy, p[3], p[4], p[5]]) as Part);
+const legs = (col = '#3a3f4a', boot = '#2a2420'): Part[] => [['r', 3, 11, 2, 5, col], ['r', 7, 11, 2, 5, col], ['r', 3, 15, 2, 1, boot], ['r', 7, 15, 2, 1, boot]];
+
+/** The Warrior's looks (Kyle to choose; the first is the one in play). */
+export const WARRIOR_LOOKS: Record<'knight' | 'sellsword' | 'blackiron', Pair> = {
+  knight: {
+    down: [...legs(), ['r', 2, 6, 8, 6, '#2f5d9b'], ['r', 5, 6, 2, 6, '#d4a537'], ['r', 2, 10, 8, 1, '#5a3d22'], ['r', 1, 6, 2, 3, '#9aa3ad'], ['r', 9, 6, 2, 3, '#9aa3ad'],
+      ['e', 6, 3.5, 3.6, 3.6, '#9aa3ad'], ['r', 4, 3, 5, 1, '#141218'], ['p', 5, 3, '#bfe0ff'], ['p', 7, 3, '#bfe0ff'], ['r', 5, 0, 2, 1, '#c0392b']],
+    up: [...legs(), ['r', 2, 6, 8, 6, '#2f5d9b'], ['r', 1, 6, 2, 3, '#9aa3ad'], ['r', 9, 6, 2, 3, '#9aa3ad'], ['r', 3, 6, 6, 7, '#7a1d1d'], ['e', 6, 3.5, 3.6, 3.6, '#9aa3ad'], ['r', 5, 0, 2, 1, '#c0392b']],
+  },
+  // Dented steel, old leather, a rag of red: someone who's been paid to stand there a long time.
+  sellsword: {
+    down: [...legs('#4a3a2e', '#241c16'), ['r', 2, 6, 8, 6, '#5a4030'], ['r', 2, 6, 8, 2, '#6a6e74'], ['r', 2, 10, 8, 1, '#2a1e16'], ['p', 3, 8, '#7a1d1d'], ['p', 4, 9, '#5a1414'], ['r', 1, 6, 2, 4, '#6a6e74'], ['r', 9, 6, 2, 4, '#6a6e74'],
+      ['e', 6, 3.5, 3.6, 3.6, '#7a7f86'], ['r', 3, 3, 6, 2, '#141218'], ['p', 5, 3, '#bfe0ff'], ['p', 7, 3, '#bfe0ff'], ['p', 8, 1, '#5a5e64'], ['r', 9, 9, 2, 1, '#7a1d1d']],
+    up: [...legs('#4a3a2e', '#241c16'), ['r', 2, 6, 8, 6, '#5a4030'], ['r', 1, 6, 2, 4, '#6a6e74'], ['r', 9, 6, 2, 4, '#6a6e74'], ['r', 3, 6, 6, 6, '#3a2a22'], ['p', 4, 12, '#3a2a22'], ['p', 7, 12, '#3a2a22'], ['e', 6, 3.5, 3.6, 3.6, '#7a7f86'], ['p', 4, 1, '#5a5e64']],
+  },
+  // Blackened plate, the brass gone dull, a red-hot stare through the slit, and somebody else's blood.
+  blackiron: {
+    down: [...legs('#2a2a30', '#1a1a1e'), ['r', 2, 6, 8, 6, '#2a2a30'], ['r', 5, 6, 2, 6, '#8a6a3a'], ['r', 2, 10, 8, 1, '#3a2a1a'], ['r', 1, 5, 3, 3, '#3a3a42'], ['r', 8, 5, 3, 3, '#3a3a42'],
+      ['e', 6, 3.5, 3.6, 3.6, '#3a3a42'], ['r', 4, 3, 5, 1, '#0d0b10'], ['p', 5, 3, '#ff8a3a'], ['p', 7, 3, '#ff8a3a'], ['p', 3, 8, '#6b1a1a'], ['p', 8, 9, '#6b1a1a'], ['p', 7, 7, '#7a1d1d'], ['r', 6, 0, 1, 1, '#3a3a42']],
+    up: [...legs('#2a2a30', '#1a1a1e'), ['r', 2, 6, 8, 6, '#2a2a30'], ['r', 1, 5, 3, 3, '#3a3a42'], ['r', 8, 5, 3, 3, '#3a3a42'], ['r', 3, 6, 6, 7, '#4a1414'], ['e', 6, 3.5, 3.6, 3.6, '#3a3a42'], ['p', 5, 10, '#2a0a0a']],
+  },
 };
 
-function heroPair(l: Look): { down: Sprite; up: Sprite } {
-  const base: Part[] = [
-    ['r', 3, 11, 2, 5, '#3a3f4a'], ['r', 7, 11, 2, 5, '#3a3f4a'], ['r', 3, 15, 2, 1, '#2a2420'], ['r', 7, 15, 2, 1, '#2a2420'],
-    ['r', 2, 6, 8, 6, l.body], ['r', 5, 6, 2, 6, l.trim], ['r', 2, 10, 8, 1, '#5a3d22'], ['r', 1, 6, 2, 3, l.arms], ['r', 9, 6, 2, 3, l.arms],
-  ];
-  return {
-    down: makeSprite(12, 16, [...base, ['e', 6, 3.5, 3.6, 3.6, l.head], ...l.face, ...l.top]),
-    up: makeSprite(12, 16, [...base, ['r', 3, 6, 6, 7, l.cape], ['e', 6, 3.5, 3.6, 3.6, l.head], ...l.top]),
-  };
+const PAIRS: Record<'WARRIOR' | 'RANGER' | 'ROGUE' | 'MAGE' | 'HEALER', Pair> = {
+  WARRIOR: WARRIOR_LOOKS.knight,
+  // Hooded, a scarf over the mouth, a quiver strap; a hunter's eyes in the shadow of the hood.
+  RANGER: {
+    down: [...legs('#3a3a2a'), ['r', 2, 6, 8, 6, '#3f6b3a'], ['p', 8, 6, '#5a3d22'], ['p', 7, 7, '#5a3d22'], ['p', 6, 8, '#5a3d22'], ['p', 5, 9, '#5a3d22'], ['p', 4, 10, '#5a3d22'], ['r', 2, 10, 8, 1, '#5a3d22'], ['r', 1, 6, 2, 3, '#5a4a32'], ['r', 9, 6, 2, 3, '#5a4a32'],
+      ['e', 6, 3.5, 3.6, 3.6, '#3f5a32'], ['p', 6, 0, '#3f5a32'], ['r', 4, 3, 5, 2, '#141218'], ['p', 5, 3, '#ffd27a'], ['p', 7, 3, '#ffd27a'], ['r', 4, 5, 5, 1, '#5a4a32']],
+    up: [...legs('#3a3a2a'), ['r', 2, 6, 8, 6, '#3f6b3a'], ['r', 1, 6, 2, 3, '#5a4a32'], ['r', 9, 6, 2, 3, '#5a4a32'], ['r', 3, 6, 6, 7, '#2f4a28'], ['r', 8, 4, 2, 5, '#6b4a2b'], ['p', 8, 3, '#d8c48a'], ['p', 9, 3, '#d8c48a'], ['e', 6, 3.5, 3.6, 3.6, '#3f5a32'], ['p', 6, 0, '#3f5a32']],
+  },
+  ROGUE: {
+    down: [...legs(), ['r', 2, 6, 8, 6, '#3a3346'], ['r', 5, 6, 2, 6, '#5a3d22'], ['r', 2, 10, 8, 1, '#5a3d22'], ['r', 1, 6, 2, 3, '#2a2630'], ['r', 9, 6, 2, 3, '#2a2630'],
+      ['e', 6, 3.5, 3.6, 3.6, '#2a2630'], ['r', 4, 3, 5, 2, '#141218'], ['p', 5, 3, '#c9a8ff'], ['p', 7, 3, '#c9a8ff']],
+    up: [...legs(), ['r', 2, 6, 8, 6, '#3a3346'], ['r', 1, 6, 2, 3, '#2a2630'], ['r', 9, 6, 2, 3, '#2a2630'], ['r', 3, 6, 6, 7, '#24202c'], ['e', 6, 3.5, 3.6, 3.6, '#2a2630']],
+  },
+  // A tall pointed hat with a star stitched on, a long robe and wide sleeves, a grey beard, eyes lit violet.
+  MAGE: {
+    tall: 5,
+    down: [['r', 3, 14, 2, 2, '#2a2420'], ['r', 7, 14, 2, 2, '#2a2420'], ['r', 2, 6, 8, 9, '#3e2760'], ['r', 1, 13, 10, 2, '#3e2760'], ['r', 5, 6, 2, 9, '#b89a4a'], ['r', 2, 10, 8, 1, '#2a1a3a'],
+      ['r', 0, 6, 3, 4, '#4a2f6e'], ['r', 9, 6, 3, 4, '#4a2f6e'], ['p', 0, 9, '#c79c78'], ['p', 11, 9, '#c79c78'],
+      ['e', 6, 3.5, 3.4, 3.2, '#141218'], ['p', 5, 3, '#c9a8ff'], ['p', 7, 3, '#c9a8ff'], ['t', 6, 4, 4, 4, '#a8a2b4'],
+      ['r', 1, 1, 10, 1, '#2e1c48'], ['t', 6, -5, 7, 6, '#3e2760'], ['p', 7, -5, '#3e2760'], ['p', 8, -5, '#3e2760'], ['r', 3, 0, 6, 1, '#b89a4a'], ['p', 5, -2, '#ffd27a']],
+    up: [['r', 3, 14, 2, 2, '#2a2420'], ['r', 7, 14, 2, 2, '#2a2420'], ['r', 2, 6, 8, 9, '#3e2760'], ['r', 1, 13, 10, 2, '#3a2458'], ['r', 0, 6, 3, 4, '#4a2f6e'], ['r', 9, 6, 3, 4, '#4a2f6e'],
+      ['e', 6, 3.5, 3.4, 3.2, '#a8a2b4'], ['r', 1, 1, 10, 1, '#2e1c48'], ['t', 6, -5, 7, 6, '#3e2760'], ['p', 7, -5, '#3e2760'], ['p', 8, -5, '#3e2760'], ['r', 3, 0, 6, 1, '#b89a4a']],
+  },
+  // The Cleric: a mail coif and mail sleeves, a white tabard to the knee with the Lantern on it in gold.
+  HEALER: {
+    down: [...legs('#4a4e56'), ['r', 2, 6, 8, 6, '#6a7078'], ['r', 1, 6, 2, 4, '#7a8088'], ['r', 9, 6, 2, 4, '#7a8088'], ['r', 2, 10, 8, 1, '#5a3d22'],
+      ['r', 3, 6, 6, 8, '#e0d8c4'], ['r', 3, 10, 6, 1, '#8a6a3a'], ['p', 5, 7, '#ffd27a'], ['p', 6, 7, '#ffd27a'], ['r', 5, 8, 2, 1, '#d4a537'],
+      ['e', 6, 3.5, 3.6, 3.6, '#8a9098'], ['r', 4, 3, 5, 2, '#141218'], ['p', 5, 3, '#ffe9a8'], ['p', 7, 3, '#ffe9a8'], ['r', 4, 1, 4, 1, '#d4a537']],
+    up: [...legs('#4a4e56'), ['r', 2, 6, 8, 6, '#6a7078'], ['r', 1, 6, 2, 4, '#7a8088'], ['r', 9, 6, 2, 4, '#7a8088'], ['r', 3, 6, 6, 8, '#cfc6b0'], ['e', 6, 3.5, 3.6, 3.6, '#8a9098'], ['r', 4, 1, 4, 1, '#d4a537']],
+  },
+};
+
+export function heroPair(l: Pair): { down: Sprite; up: Sprite } {
+  const t = l.tall ?? 0;
+  return { down: makeSprite(12, 16 + t, shift(l.down, t)), up: makeSprite(12, 16 + t, shift(l.up, t)) };
 }
 
 const butcherBase: Part[] = [
@@ -122,7 +164,7 @@ const scrapperHead: Part[] = [['e', 5.5, 4, 3.4, 3, '#5b6b2a'], ['p', 0, 3, '#5b
 /** Everything burned to the same black, a few embers left. */
 const char = (parts: Part[]): Part[] => parts.map((p, i) => [...p.slice(0, -1), i % 5 ? '#1a1614' : '#2a2420'] as Part);
 
-export const HEROES = Object.fromEntries(Object.entries(LOOKS).map(([k, l]) => [k, heroPair(l)])) as Record<keyof typeof LOOKS, { down: Sprite; up: Sprite }>;
+export const HEROES = Object.fromEntries(Object.entries(PAIRS).map(([k, l]) => [k, heroPair(l)])) as Record<keyof typeof PAIRS, { down: Sprite; up: Sprite }>;
 
 export const SPRITES = {
   warriorDown: makeSprite(12, 16, [...warriorBase, ['e', 6, 3.5, 3.6, 3.6, '#9aa3ad'], ['r', 4, 3, 5, 1, '#141218'], ['r', 5, 0, 2, 1, '#c0392b']]),

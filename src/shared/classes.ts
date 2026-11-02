@@ -5,6 +5,9 @@
  */
 import type { HeroClass } from './weapons.js';
 
+/** What a class is called on screen (the Healer is a Cleric; the id stays HEALER). */
+export const CLASS_NAME: Record<HeroClass, string> = { WARRIOR: 'WARRIOR', RANGER: 'RANGER', ROGUE: 'ROGUE', MAGE: 'MAGE', HEALER: 'CLERIC' };
+
 export const STATS = ['POWER', 'GUARD', 'SPEED', 'RANGE', 'SUPPORT'] as const;
 export type Stat = (typeof STATS)[number];
 

@@ -1,7 +1,6 @@
 /** Short UI copy for the start screen, the pack, the loot card and the smith (lore keeper checked). */
 export const COPY = {
   homeLede: 'Wickhold still has its walls. Pick a hero, or hire another.',
-  pickLede: "Pick a class. It's for life.",
   pack: 'PACK',
   inHand: 'IN HAND',
   skill: 'SKILL',
@@ -37,7 +36,7 @@ export const COAL = {
   name: 'COALS',
   line: 'Heals burn hotter. The hungry find you first, from further off.',
   pickup: 'CENSER FED',
-  help: 'A dead butcher leaves a live coal for a little while. A Healer who walks over it feeds the censer: stronger heals, for good, and the hungry hunt that Healer first.',
+  help: 'A dead butcher leaves a live coal for a little while. A Cleric who walks over it feeds the censer: stronger heals, for good, and the hungry hunt that Cleric first.',
   note: 'Feed the censer what butchers leave. It heals hotter, and draws teeth.',
   /** Said to a Healer whose censer has been fed (she suspects; he knows). */
   isolde: "It takes to them, doesn't it? Burns sweeter after. I don't ask the coal its business, and I'd thank you not to. Keep your back to a wall.",
@@ -65,5 +64,5 @@ export const SMITH = {
   bought: "In your pack. He's already oiling the next one.",
   anvil: 'Spares in the fire. Steel and gold for the rest.',
   hungry: 'Not that one. Not in my fire.',
-  sell: "I'll take what you're not using. Don't expect what you'd pay me for it.",
+  sell: 'Leave it on the bench. I buy cheaper than I sell.',
 };
