@@ -1,10 +1,11 @@
 /**
  * Run rooms, laid out from the job's seed: each place kind has its own floor, walls, light, cover and
  * furniture (cottages and a well in a village, a barn and hay on a farm, trees in a forest, rock walls
- * and pit props in a mine). Ruin and the room's place in the run set how many goblins. The last room
+ * and pit props in a mine, a river with its fords, bog pools in a marsh, broken walls in ruins). Ruin
+ * and the room's place in the run set how many goblins. The last room
  * holds the objective: cages, a named butcher, or the larder racks. Same seed, same room.
  */
-import type { Block, BlockKind, GameMap, Ledge, Npc, Road, Round, RoundKind, Theme } from './arena.js';
+import type { Block, BlockKind, GameMap, Ledge, Npc, Road, Round, RoundKind, Theme, Water } from './arena.js';
 import type { Job, PlaceKind } from './jobs.js';
 import { WOOD, type PropKind } from './props.js';
 import { Rng } from './rng.js';
@@ -24,6 +25,9 @@ export const THEMES: Record<PlaceKind, Theme> = {
   field: { floor: 'wheat', back: 'trees', ambient: [0.26, 0.25, 0.33], moon: 0.7 },
   forest: { floor: 'grass', back: 'trees', ambient: [0.17, 0.19, 0.23], moon: 0.35 },
   mine: { floor: 'rock', back: 'rockface', ambient: [0.14, 0.13, 0.18], moon: 0 },
+  river: { floor: 'grass', back: 'trees', ambient: [0.2, 0.22, 0.28], moon: 0.6 },
+  marsh: { floor: 'mud', back: 'trees', ambient: [0.18, 0.2, 0.22], moon: 0.45 },
+  ruins: { floor: 'flagstone', back: 'stone', ambient: [0.2, 0.19, 0.26], moon: 0.5 },
 };
 
 /** What each kind of place is furnished with. */
@@ -33,7 +37,30 @@ const KIT: Record<PlaceKind, { blocks: [BlockKind, number, number, number][]; ro
   field: { blocks: [['fence', 3.5, 0.35, 3]], rounds: [['hay', 0.6, 6], ['stump', 0.3, 3], ['tree', 0.6, 2]], props: [['crate', 2], ['barrel', 2]], torches: false },
   forest: { blocks: [], rounds: [['tree', 0.6, 9], ['pine', 0.5, 8], ['stump', 0.3, 3], ['bush', 0.35, 5], ['rock', 0.5, 2]], props: [['crate', 2], ['oil', 1]], torches: false },
   mine: { blocks: [['rockwall', 3.5, 1.2, 6]], rounds: [['support', 0.3, 7], ['rock', 0.5, 4]], props: [['crate', 3], ['oil', 3]], torches: true },
+  river: { blocks: [], rounds: [['reed', 0.3, 10], ['tree', 0.6, 4], ['rock', 0.5, 3], ['bush', 0.35, 3]], props: [['crate', 2], ['barrel', 1]], torches: false },
+  marsh: { blocks: [], rounds: [['reed', 0.3, 12], ['deadtree', 0.45, 6], ['stump', 0.3, 3]], props: [['crate', 1], ['oil', 1]], torches: false },
+  ruins: { blocks: [['rubble', 2.6, 1.4, 4], ['wall', 3.5, 0.7, 4]], rounds: [['pillar', 0.45, 6], ['statue', 0.5, 2], ['stone', 0.35, 4]], props: [['crate', 2], ['barrel', 2], ['oil', 1]], torches: true },
 };
+
+/**
+ * The water in a room. A river runs across the middle with two fords to wade; a marsh has bog pools
+ * all about, a couple too deep to cross. Kept clear of the way in and out.
+ */
+function waters(kind: PlaceKind, rng: Rng, reserve: (x: number, y: number, r: number) => void): Water[] {
+  const out: Water[] = [];
+  if (kind === 'river') {
+    const y = rng.range(H * 0.38, H * 0.52), h = 2.6, a = rng.range(3, MID - 4), b = rng.range(MID + 1, W - 6), fw = 3.2;
+    out.push({ x: 0, y, w: a, h, deep: true }, { x: a, y, w: fw, h }, { x: a + fw, y, w: b - a - fw, h, deep: true }, { x: b, y, w: fw, h }, { x: b + fw, y, w: W - b - fw, h, deep: true });
+    for (let x = 0.8; x < W; x += 1.6) reserve(x, y + h / 2, 1.5);
+  } else if (kind === 'marsh') {
+    for (let i = 0; i < 6; i++) {
+      const w = rng.range(2.2, 4), h = rng.range(1.4, 2.4), x = rng.range(1, W - 1 - w), y = rng.range(5, H - 5 - h), deep = i < 2 && w < 3.2;
+      if (Math.abs(x + w / 2 - MID) < w / 2 + 1.6 && deep) continue;
+      out.push({ x, y, w, h, deep }), reserve(x + w / 2, y + h / 2, Math.max(w, h) / 2 + 0.2);
+    }
+  }
+  return out;
+}
 
 /** Wooden blocks get health (and a door if they have one); stone stays as it is. */
 function wooden(b: Block): Block {
@@ -65,6 +92,7 @@ export function planRoom(job: Job, index: number, road?: RoadId): RoomPlan {
   const fork = isFork(job, index), obj = final ? job.objective : 'clear';
   const roads: Road[] | undefined = fork ? (['high', 'low'] as RoadId[]).map((r, i) => ({ road: r, label: ROADS[r].label, area: { x: i ? W - 5 : 3, y: 0, w: 2, h: 0.9 } })) : undefined;
   for (const r of roads ?? []) spots.push({ x: r.area.x + 1, y: 0.8, r: 1.4 });
+  const water = waters(kind, rng, (x, y, r) => spots.push({ x, y, r }));
   // Raised ground: always on the high road, sometimes elsewhere; archers up on it.
   const foes: Foe[] = [], ledges: Ledge[] = [];
   if (!fork && obj !== 'burn' && (road === 'high' || (road !== 'low' && index >= 1 && rng.next() < 0.4))) {
@@ -157,7 +185,7 @@ export function planRoom(job: Job, index: number, road?: RoadId): RoomPlan {
   const map: GameMap = {
     name: job.place.name.toUpperCase(), w: W, h: H, wallFace: 3, rounds, blocks, braziers,
     torches: kit.torches ? [{ x: 4.5, y: -1.6 }, { x: MID - 4, y: -1.6 }, { x: MID + 4, y: -1.6 }, { x: W - 4.5, y: -1.6 }] : [], hero: { ...SPAWN }, exit: roads ? null : { ...EXIT }, theme,
-    ledges: ledges.length ? ledges : undefined, roads, npcs: dead.length ? dead : undefined,
+    ledges: ledges.length ? ledges : undefined, roads, npcs: dead.length ? dead : undefined, water: water.length ? water : undefined,
   };
   return { map, foes, props, chests };
 }

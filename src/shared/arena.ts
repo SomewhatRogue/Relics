@@ -4,7 +4,7 @@
  * a time (the room that's running sets it), so collision never needs it passed around.
  */
 export type Circle = { x: number; y: number; r: number };
-export type RoundKind = 'pillar' | 'tree' | 'pine' | 'rock' | 'hay' | 'well' | 'lantern' | 'support' | 'stump' | 'target' | 'stone' | 'post' | 'grate' | 'statue' | 'bush';
+export type RoundKind = 'pillar' | 'tree' | 'pine' | 'rock' | 'hay' | 'well' | 'lantern' | 'support' | 'stump' | 'target' | 'stone' | 'post' | 'grate' | 'statue' | 'bush' | 'reed' | 'deadtree';
 export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall' | 'tent' | 'rockwall' | 'fence' | 'granary' | 'wall' | 'den'
   // Furniture, inside buildings.
   | 'counter' | 'bed' | 'shelf' | 'anvil' | 'altar' | 'pew' | 'bench' | 'hearth' | 'sacks'
@@ -72,7 +72,7 @@ export interface Area { x: number; y: number; w: number; h: number }
 
 /** How a map looks: floor, walls, light. */
 export interface Theme {
-  floor: 'flagstone' | 'cobble' | 'grass' | 'dirt' | 'rock' | 'wheat' | 'planks';
+  floor: 'flagstone' | 'cobble' | 'grass' | 'dirt' | 'rock' | 'wheat' | 'planks' | 'mud';
   /** The back wall's face: stone, a palisade, a treeline, a rock face, or a room's plastered wall. */
   back: 'stone' | 'palisade' | 'trees' | 'rockface' | 'plaster';
   ambient: [number, number, number];
@@ -102,7 +102,14 @@ export interface GameMap {
   ledges?: Ledge[];
   /** A fork: two ways out, each leading to its own next room (the party picks). */
   roads?: Road[];
+  /** Water: deep (nobody wades it; shots fly over) or shallow (everyone in it slows to WADE). */
+  water?: Water[];
 }
+export interface Water { x: number; y: number; w: number; h: number; deep?: boolean }
+/** How fast anyone moves knee-deep in a ford or a bog. */
+export const WADE = 0.55;
+/** How fast you can move where you stand (slowed in shallow water). */
+export const wadeAt = (x: number, y: number) => (MAP.water?.some((w) => !w.deep && inArea(w, x, y)) ? WADE : 1);
 
 export const onLedge = (m: GameMap, x: number, y: number) => !!m.ledges?.some((l) => x > l.x && x < l.x + l.w && y > l.y && y < l.y + l.h);
 export const inRamp = (m: GameMap, x: number, y: number) => !!m.ledges?.some((l) => l.ramps.some((r) => inArea(r, x, y)));
@@ -174,6 +181,8 @@ export function collide(p: { x: number; y: number }, r: number): void {
     if (!b.ruined) box(p, r, b);
   }
   if (m.ledges) levels(m, p as { x: number; y: number; z?: number; dropped?: number; kvx?: number; kvy?: number }, r);
+  // Deep water stops bodies (things with a footing), never a shot over it.
+  if (m.water && 'z' in p) for (const w of m.water) if (w.deep) box(p, r, w);
 }
 
 /**

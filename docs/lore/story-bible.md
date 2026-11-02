@@ -106,6 +106,13 @@ most Want among the heroes is the one the bells don't spare).
   seeds chapter 2's tunnels), Fenmere (Fennick Ford, the tally wall that seeds chapter 4). Tolmouth was a
   town and is now a larder; Dessa's steel came from there. "Something was down there first" at the
   Copperdeep: an old shard, deep, that the goblins found rather than brought. Keep it for later.
+- **The valley, added** (recorded 2026-11-01, for the river, marsh and ruins jobs): Barrowfields: the
+  Sheepwash (the shallow stretch where the valley washed its sheep, deep either side), Ketterby (a hamlet
+  by Barrowby, burned in the war's first year, never rebuilt). Greyhollow: Sallow Carr (a willow wood
+  gone to bog when nobody kept the ditches). Copperdeep: Brokenbridge (the ore road's crossing, bridge
+  down; who broke it is open). Fenmere: the Peat Cuts (old diggings gone to water), Hesketh Hall (a
+  family's house on the one dry rise in the fen, razed; no Heskeths left). Hesketh Hall is not a second
+  Wick: no heirloom, no barred lord, the statues are just statues.
 - **Named butchers on the board:** the Gnawer (Barrowby), Mawl, Skarn, Old Knuckles, Old Spoon,
   Gutchain, Mother Rust. The Tally Man is chapter 4's and never appears on the board before then.
 - **People.** Corporal Brisk and Squire Pell (barracks), Farmer Jos, Old Merren (the Old Quarter),

@@ -836,3 +836,15 @@ which moves the page to the media channel.
 - Council votes are cast by the device (`relic-device` in this browser), not the hero, so one
   person's heroes share one voice (Kyle's worry). A second browser is still a second voice; real
   one-per-person needs sign-in, later if it's ever gamed.
+
+## 2026-11-01: places and lengths (Kyle; Opus 5.5)
+
+- Three new kinds of place: river (deep water across the room, two fords to wade, stepping stones
+  drawn), marsh (bog pools, two too deep to cross; reeds, drowned trees, mud), ruins (broken walls,
+  rubble, pillars, statues). Six new places named by the lore keeper (the Sheepwash, Brokenbridge,
+  the Peat Cuts, Sallow Carr, Ketterby, Hesketh Hall). Shallow water slows everyone to 55%; deep
+  water stops bodies, never shots.
+- Four ordinary jobs a day, each a different kind of place: short (2 rooms, about 5 minutes), two
+  medium (3), long (5, about 15), plus the deep dive. Pay = (18 + 9 per ruin, +6 at night) per room,
+  x1 / 1.15 / 1.35 by length. Treasure: a piece; a piece, maybe two; two pieces a cut above.
+- River and marsh borrow the wood's music, ruins the village's, till they have their own.

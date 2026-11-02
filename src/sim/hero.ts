@@ -2,7 +2,7 @@
  * A hero's turn each tick: presses, movement, the weapon's combo, the charged heavy, the roll.
  * A tap of attack swings on release; holding past CHARGE.start charges a heavy instead.
  */
-import { collide } from '../shared/arena';
+import { collide, wadeAt } from '../shared/arena';
 import { CHANNEL, DODGE, CLASS_GUARD, DECOY, POTION, AUGMENTS, CHARGE, GRAB, HORN, PERK, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon } from '../shared/tuning';
 import { slide } from './bodies';
 import { applyGear } from './pack';
@@ -64,7 +64,7 @@ function face(h: Hero, inp: Intent, enemies: Enemy[], snap: boolean, reach = 3.2
 function walk(h: Hero, inp: Intent, k: number, dt: number): void {
   const m = Math.min(1, Math.hypot(inp.mx, inp.my));
   if (m < 0.05) return;
-  const l = Math.hypot(inp.mx, inp.my), sp = HERO.speed * WEAPONS[h.weapon].speed * statsOf(h).speed * k * m;
+  const l = Math.hypot(inp.mx, inp.my), sp = HERO.speed * WEAPONS[h.weapon].speed * statsOf(h).speed * k * m * wadeAt(h.x, h.y);
   h.x += (inp.mx / l) * sp * dt;
   h.y += (inp.my / l) * sp * dt;
   h.moving = true;

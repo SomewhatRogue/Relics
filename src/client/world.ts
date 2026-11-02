@@ -25,6 +25,7 @@ const FLOORS: Record<GameMap['theme']['floor'], { tile: [number, number]; base: 
   dirt: { tile: [16, 16], base: ['#3a3024', '#3e3428', '#362c21', '#423628'], line: '#3a3024', fleck: ['#2a2219', '#4e4232'] },
   rock: { tile: [12, 10], base: ['#2e2c34', '#34313a', '#29272f', '#38353f'], line: '#18161c', fleck: ['#222027', '#45414c'] },
   wheat: { tile: [16, 16], base: ['#3e3424', '#433827'], line: '#3e3424', fleck: ['#2e2619'] },
+  mud: { tile: [16, 16], base: ['#2c2a20', '#302d22', '#28261d', '#333024'], line: '#2c2a20', fleck: ['#3a3a26', '#22201a', '#3e4228'] },
   planks: { tile: [24, 5], base: ['#5a3f28', '#5e432a', '#553b25', '#624630', '#583d27'], line: '#2a1d12', fleck: ['#4a321f', '#6b4e34'] },
 };
 
@@ -61,6 +62,22 @@ export function paintMap(m: GameMap): HTMLCanvasElement {
     const x = OX + rng.int(fw), y = OY + rng.int(fh);
     rect(x, y, 1, 2, '#3a4c2c');
     rect(x + 1, y + 1, 1, 1, '#46582f');
+  }
+  // Water: deep runs dark with slow ripples; shallow shows the stones under it.
+  for (const wt of m.water ?? []) {
+    const [x0, y0] = toPx(wt.x, wt.y), w = wt.w * PX, h = wt.h * PX;
+    rect(x0 - 1, y0 - 1, w + 2, h + 2, wt.deep ? '#1a2a22' : '#3a3a2a');
+    rect(x0, y0, w, h, wt.deep ? '#122036' : '#3e5a62');
+    if (wt.deep) for (let i = 0; i < (w * h) / 60; i++) rect(x0 + rng.int(w - 3), y0 + rng.int(h), 3, 1, rng.next() < 0.5 ? '#1a2c46' : '#22405c');
+    else {
+      // A ford: sandy bottom through clear water, and stepping stones to show the way over.
+      for (let i = 0; i < (w * h) / 14; i++) rect(x0 + rng.int(w - 2), y0 + rng.int(h), 2, 1, rng.next() < 0.5 ? '#6a6a52' : '#4e6a6a');
+      for (let y = y0 + 4; y < y0 + h - 3; y += 7) {
+        const x = x0 + 3 + rng.int(Math.max(1, w - 10));
+        rect(x, y, 5, 3, '#8a8474'), rect(x + 1, y, 3, 1, '#a8a290'), rect(x, y + 3, 5, 1, '#2e3e44');
+      }
+    }
+    rect(x0, y0, w, 1, wt.deep ? '#2a4a5a' : '#7a9a9a');
   }
   g.fillStyle = 'rgba(0,0,0,0.35)';
   g.fillRect(OX, OY, fw, 4);

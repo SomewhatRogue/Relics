@@ -11,7 +11,7 @@ import { damageProp } from '../src/sim/props';
 import { kill } from '../src/sim/damage';
 
 const job = (kind: Job['place']['kind'], objective: Job['objective'] = 'rescue'): Job => ({
-  ...board(1)[0], place: PLACES.find((p) => p.kind === kind)!, objective, boss: 'SKARN', seed: 99,
+  ...board(1)[0], rooms: 3, place: PLACES.find((p) => p.kind === kind)!, objective, boss: 'SKARN', seed: 99,
 });
 
 describe('terrain', () => {

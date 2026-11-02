@@ -4,7 +4,7 @@
  */
 import { Rng } from './rng.js';
 
-export type PlaceKind = 'village' | 'farm' | 'field' | 'forest' | 'mine';
+export type PlaceKind = 'village' | 'farm' | 'field' | 'forest' | 'mine' | 'river' | 'marsh' | 'ruins';
 export interface Place { name: string; kind: PlaceKind; region: string; ruin: number }
 
 export const PLACES: Place[] = [
@@ -15,9 +15,27 @@ export const PLACES: Place[] = [
   { name: 'The Charcoal Camps', kind: 'forest', region: 'Greyhollow', ruin: 2 },
   { name: "Hangman's Wood", kind: 'forest', region: 'Greyhollow', ruin: 2 },
   { name: 'The Copperdeep Shafts', kind: 'mine', region: 'Copperdeep', ruin: 2 },
+  { name: 'The Sheepwash', kind: 'river', region: 'Barrowfields', ruin: 1 },
+  { name: 'Brokenbridge', kind: 'river', region: 'Copperdeep', ruin: 2 },
+  { name: 'The Peat Cuts', kind: 'marsh', region: 'Fenmere', ruin: 2 },
+  { name: 'Sallow Carr', kind: 'marsh', region: 'Greyhollow', ruin: 2 },
+  { name: 'Ketterby', kind: 'ruins', region: 'Barrowfields', ruin: 1 },
+  { name: 'Hesketh Hall', kind: 'ruins', region: 'Fenmere', ruin: 3 },
 ];
 
 export type Objective = 'rescue' | 'hunt' | 'larder' | 'burn' | 'story';
+/**
+ * How long a job is: a short one is about five minutes, a long one about fifteen. Longer pays
+ * better, all told and per room, and its treasure is better (treasure.ts).
+ */
+export type Size = 'short' | 'medium' | 'long';
+export const SIZES: Record<Size, { rooms: number; label: string; minutes: string; pay: number }> = {
+  short: { rooms: 2, label: 'SHORT', minutes: 'about 5 minutes', pay: 1 },
+  medium: { rooms: 3, label: 'MEDIUM', minutes: 'about 10 minutes', pay: 1.15 },
+  long: { rooms: 5, label: 'LONG', minutes: 'about 15 minutes', pay: 1.35 },
+};
+/** Gold a job pays: by room, by how bad the place is, more at night, more for a longer one. */
+export const payFor = (rooms: number, ruin: number, night: boolean, size: Size) => Math.round((18 + ruin * 9 + (night ? 6 : 0)) * rooms * SIZES[size].pay);
 export type Twist = 'none' | 'night';
 
 export interface Job {
@@ -36,6 +54,8 @@ export interface Job {
   boss?: string;
   /** A deep dive: longer, worse, a named butcher at the bottom, and a relic pried out of it. */
   deep?: boolean;
+  /** How long (old jobs without one are medium). */
+  size?: Size;
 }
 
 const BOSSES = ['MAWL', 'SKARN', 'OLD KNUCKLES', 'OLD SPOON', 'GUTCHAIN', 'MOTHER RUST'];
@@ -59,23 +79,26 @@ export function board(day: number, sewers = false): Job[] {
 export function deepDive(day: number): Job {
   const rng = new Rng(day * 613 + 7), place = rng.pick(PLACES.filter((p) => p.ruin >= 2)), boss = rng.pick(BOSSES);
   return {
-    id: `d${day}-deep`, place: { ...place, ruin: 3 }, objective: 'hunt', twist: rng.next() < 0.5 ? 'night' : 'none', rooms: 5, boss, deep: true,
-    reward: 180, seed: day * 131 + 59, title: `Deep: ${boss} at ${place.name}`,
+    id: `d${day}-deep`, place: { ...place, ruin: 3 }, objective: 'hunt', twist: rng.next() < 0.5 ? 'night' : 'none', rooms: 5, boss, deep: true, size: 'long',
+    reward: payFor(5, 3, false, 'long') + 40, seed: day * 131 + 59, title: `Deep: ${boss} at ${place.name}`,
     text: `Five rooms down through ${place.name}, the worst of it, and ${boss} at the bottom. The big ones carry relics in them. Cut it out of ${boss} and it's yours.`,
   };
 }
 
+/** Four a day: a short one, two medium, a long one, each somewhere different (a kind of place apiece where it can). */
 function ordinary(day: number, sewers: boolean): Job[] {
   const rng = new Rng(day * 977 + 31);
-  const objectives: Objective[] = rng.shuffle(['rescue', 'hunt', 'larder', 'burn', 'rescue']);
-  const places = rng.shuffle([...PLACES]);
+  const objectives: Objective[] = rng.shuffle(['rescue', 'hunt', 'larder', 'burn', 'rescue', 'hunt']);
+  const places: Place[] = [];
+  for (const p of rng.shuffle([...PLACES])) if (!places.some((q) => q.kind === p.kind)) places.push(p);
   if (sewers) places.splice(day % 3, 0, SEWERS);
-  return [0, 1, 2].map((i) => {
-    const place = places[i], objective = objectives[i], boss = rng.pick(BOSSES);
-    const twist: Twist = rng.next() < 0.3 ? 'night' : 'none';
+  const sizes: Size[] = ['short', 'medium', 'medium', 'long'];
+  return sizes.map((size, i) => {
+    const place = places[i % places.length], objective = objectives[i], boss = rng.pick(BOSSES);
+    const twist: Twist = rng.next() < 0.3 ? 'night' : 'none', rooms = SIZES[size].rooms;
     return {
-      id: `d${day}-${i}`, place, objective, twist, rooms: 3, boss: objective === 'hunt' ? boss : undefined,
-      reward: 40 + place.ruin * 20 + (twist === 'night' ? 15 : 0), seed: day * 101 + i * 7 + 1, ...describe(objective, place, boss),
+      id: `d${day}-${i}`, place, objective, twist, rooms, size, boss: objective === 'hunt' ? boss : undefined,
+      reward: payFor(rooms, place.ruin, twist === 'night', size), seed: day * 101 + i * 7 + 1, ...describe(objective, place, boss),
     };
   });
 }

@@ -2,7 +2,7 @@
 import { lure, seenFrom } from './lantern';
 import { visible } from './flasks';
 import { HUNGRY_FX, wears } from './hungry';
-import { collide, currentMap, inArea } from '../shared/arena';
+import { collide, currentMap, inArea, wadeAt } from '../shared/arena';
 import { FRIENDLY, DECOY, ALERT, ARCHER, BUTCHER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, type EnemyAttackSpec, type EnemySpec, VARIANTS } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { shove, slide } from './bodies';
@@ -265,9 +265,9 @@ function wander(e: Enemy, rng: Rng, now: number, dt: number): void {
 }
 
 function walk(e: Enemy, mx: number, my: number, k: number, dt: number): void {
-  const ml = Math.hypot(mx, my) || 1;
-  e.x += (mx / ml) * k * dt;
-  e.y += (my / ml) * k * dt;
+  const ml = Math.hypot(mx, my) || 1, wade = wadeAt(e.x, e.y);
+  e.x += (mx / ml) * k * wade * dt;
+  e.y += (my / ml) * k * wade * dt;
   e.moving = true;
   collide(e, e.radius);
 }

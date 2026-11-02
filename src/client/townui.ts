@@ -15,6 +15,8 @@ import { card, compare } from './card';
 import type { Panel } from './panels';
 import { RUMOURS } from './rumours';
 import { PARTY_MAX } from './parties';
+import { SIZES } from '../shared/jobs';
+import { treasureWord } from '../shared/treasure';
 
 /** Words from another player's browser, made safe to show. */
 const esc = (v: unknown) => String(v ?? '').replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -45,7 +47,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     const doneHtml = deeds.length ? '<h3>DONE LATELY</h3>' + deeds.map((d) => `<div class="m">Day ${Number(d.day) || 1}: ${esc(d.title)}, by ${d.party.map(esc).join(', ')}.</div>`).join('') : '';
     const html = partyHtml + doneHtml + (partyHtml || doneHtml ? '<h3>JOBS</h3>' : '') + jobs.map((j, i) =>
       `<div class="job ${j.objective === 'story' ? 'story' : j.deep ? 'deep' : ''}"><div class="t">${j.objective === 'story' ? 'STORY: ' : ''}${j.title}</div>` +
-      `<div class="m">${j.place.name}, ${j.place.region}. ${RUIN[j.place.ruin]}. ${j.rooms} rooms${j.twist === 'night' ? '. At night' : ''}. Pays ${Math.round(j.reward * rewardMult(w))} gold.</div>` +
+      `<div class="m">${j.place.name}, ${j.place.region}. ${RUIN[j.place.ruin]}. ${SIZES[j.size ?? 'medium'].label}: ${j.rooms} rooms, ${SIZES[j.size ?? 'medium'].minutes}${j.twist === 'night' ? '. At night' : ''}. Pays ${Math.round(j.reward * rewardMult(w))} gold and treasure (${treasureWord(j)}).</div>` +
       `<div class="d">${j.text}</div><button data-job="${i}">${pt ? 'GO ALONE' : 'TAKE THE JOB'}</button>${pt ? ` <button data-gather="${i}">GATHER A PARTY</button>` : ''}</div>`).join('');
     panel.show(`JOB BOARD, DAY ${w.day}`, html);
     const on = (sel: string, f: (b: HTMLButtonElement) => void) => document.querySelectorAll<HTMLButtonElement>(`#panel ${sel}`).forEach((b) => b.addEventListener('click', () => f(b)));

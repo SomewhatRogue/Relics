@@ -129,6 +129,8 @@ export class Soundscape {
     const run = g.run!, boss = g.fightRoom.enemies.find((e) => e.name && !isDead(e));
     // The boss's music once it's close or the fight with it has begun.
     if (boss && !g.outside && (boss.hp < boss.maxHp || Math.hypot(boss.x - g.hero.x, boss.y - g.hero.y) < 6)) return ['boss', run.job.seed];
-    return [run.job.place.kind, run.job.seed + run.index];
+    // New kinds of place borrow a tune till they have their own: the river and marsh the wood's, ruins the village's.
+    const k = run.job.place.kind, area = (k === 'river' || k === 'marsh' ? 'forest' : k === 'ruins' ? 'village' : k) as Area;
+    return [area, run.job.seed + run.index];
   }
 }
