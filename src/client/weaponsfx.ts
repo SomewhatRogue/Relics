@@ -33,7 +33,7 @@ export function hitSound(src: string | undefined, heavy: boolean, big: boolean):
   if (big) burst('bandpass', 600, 300, 3, 0.25, 0.12), tone('square', 330, 300, 0.05, 0.12);
   if (k === 'mace') return burst('lowpass', 1400, 200, 0.8, 0.8, 0.14), burst('bandpass', 2600, 1200, 4, 0.3, 0.05), tone('triangle', 900, 880, 0.08, 0.3);
   if (k === 'greatsword') return burst('lowpass', 2600, 200, 0.7, 0.85, 0.18), burst('bandpass', 400, 120, 1, 0.5, 0.25);
-  if (k === 'spear' || src === 'arrow' || src === 'bolt') return burst('bandpass', 1800, 500, 2, 0.55, 0.07), tone('sine', 260, 90, 0.35, 0.08);
+  if (k === 'spear' || src === 'arrow' || src === 'bolt' || src === 'knife') return burst('bandpass', 1800, 500, 2, 0.55, 0.07), tone('sine', 260, 90, 0.35, 0.08);
   if (k === 'daggers') return burst('highpass', 3000, 1500, 1.2, 0.4, 0.06), burst('bandpass', 700, 250, 1.5, 0.35, 0.12, 0.02);
   if (src === 'spark') return burst('highpass', 3500, 6000, 1, 0.3, 0.08), tone('square', 1500, 700, 0.06, 0.08);
   if (src === 'orb') return tone('sine', 220, 70, 0.5, 0.3), burst('lowpass', 3000, 300, 0.7, 0.6, 0.3);

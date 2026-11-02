@@ -61,6 +61,15 @@ export type { Hero };
 /** Shots, smites and thrown relics. (x, y) is the bolt's spot on the floor in screen pixels. */
 export function drawBolt(c: Ctx, b: Bolt, x: number, y: number): void {
   const a = Math.atan2(b.dy, b.dx), back = a + Math.PI, col = EL_COL[b.el];
+  if (b.kind === 'knife') {
+    // A thrown dagger: it tumbles in flight, and sticks point first where it lands.
+    const spin = b.state === 'fly' ? b.t * 40 : a, ty = y - (b.state === 'stuck' ? 5 : 8);
+    c.lit.globalAlpha = b.state === 'stuck' ? Math.min(1, b.life / 0.8) : 1;
+    line(c.lit, x, ty, spin, 0, 3, '#cfd6dc');
+    line(c.lit, x, ty, spin + Math.PI, 0, 2, '#3a2a1a', 1);
+    c.lit.globalAlpha = 1;
+    return;
+  }
   if (b.kind === 'arrow' || b.kind === 'bolt') {
     const bolt = b.kind === 'bolt', len = bolt ? 5 : 7;
     c.lit.globalAlpha = b.state === 'stuck' ? Math.min(1, b.life / 0.8) : 1;

@@ -189,7 +189,7 @@ function pull(b: Bolt, w: World, dt: number): boolean {
 function end(b: Bolt, w: World, wall: boolean): boolean {
   if (b.kind === 'net') return openNet(w, b), false;
   if (b.burst) return blast(w, b, b.x, b.y), false;
-  if (b.kind !== 'arrow' && b.kind !== 'bolt') return false;
+  if (b.kind !== 'arrow' && b.kind !== 'bolt' && b.kind !== 'knife') return false;
   b.state = 'stuck';
   b.life = wall ? 2.5 : 1.5;
   return true;

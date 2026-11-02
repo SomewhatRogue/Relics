@@ -527,3 +527,17 @@ describe('winded', () => {
     expect(h.winded).toBe(false);
   });
 });
+
+describe('the thrown dagger', () => {
+  it("a Rogue's held attack throws a dagger that flies and sticks", () => {
+    const { room, h, t } = onTarget(1);
+    h.weapon = 'daggers';
+    Object.assign(t, { x: 2, y: 2 });
+    room.setIntent('me', intent({ attack: true, attackSeq: 1, ax: 0, ay: 1 }));
+    run(room, ticks(1));
+    room.setIntent('me', intent({ attack: false, attackSeq: 1 }));
+    let seen = false;
+    for (let i = 0; i < ticks(0.4); i++) (room.step(), (seen ||= room.bolts.some((b) => b.kind === 'knife')));
+    expect(seen).toBe(true);
+  });
+});

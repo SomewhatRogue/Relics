@@ -15,7 +15,7 @@ export interface Swing {
   thrust?: boolean;
   /** A ranged swing looses a shot at its first active frame instead of striking an arc. A smite falls
    * from above on a spot `range` tiles away at most (the goblin you face, or where you point). */
-  shot?: 'arrow' | 'bolt' | 'spark' | 'orb' | 'lance' | 'smite';
+  shot?: 'arrow' | 'bolt' | 'knife' | 'spark' | 'orb' | 'lance' | 'smite';
   /** Shot speed, tiles a second (the shot flies `range` tiles). */
   speed?: number;
   /** The shot passes through every body it hits. */
@@ -153,7 +153,8 @@ export const WEAPONS: Record<KitId, Weapon> = {
       { windup: 0.05, active: 0.06, recover: 0.12, dmg: 8, range: 1.15, arc: 100, lunge: 0.3, knock: 1 },
       { windup: 0.1, active: 0.07, recover: 0.3, dmg: 14, range: 1.3, arc: 60, lunge: 0.6, knock: 3, thrust: true },
     ],
-    heavy: { windup: 0.05, active: 0.1, recover: 0.35, dmg: 18, dmgFull: 34, range: 1.8, arc: 40, lunge: 1.6, knock: 3, knockFull: 5, thrust: true },
+    // Held: a dagger thrown (Kyle), harder the longer it's held; it sticks where it lands.
+    heavy: { windup: 0.05, active: 0.04, recover: 0.3, dmg: 14, dmgFull: 30, range: 8, arc: 0, lunge: -0.15, knock: 2, knockFull: 5, shot: 'knife', speed: 24 },
     chip: 0.45, blockSpeed: 0.6, chargeSpeed: 0.7, backstab: 2.5, front: 0.5, single: true, parryWindow: 0.2, guardArc: 100, guardCost: 1.8, speed: 1.12,
     dodge: { kind: 'dash', distance: 4.3, time: 0.22, iFrom: 0, iTo: 0.22, stamina: 30, cooldown: 0.35 },
   },

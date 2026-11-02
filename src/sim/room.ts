@@ -337,7 +337,7 @@ export class ArenaRoom {
     else if (s.shot) {
       // A Mage's spells take the element it last channelled (fire to start with).
       const mage = WEAPONS[h.weapon].cls === 'MAGE', mel = (h.augments.channel || 'fire') as Augment;
-      const el = s.shot === 'arrow' || s.shot === 'bolt' ? forged : forged || (mage ? mel : h.augments[h.relic]);
+      const el = s.shot === 'arrow' || s.shot === 'bolt' || s.shot === 'knife' ? forged : forged || (mage ? mel : h.augments[h.relic]);
       if (mage) this.spell(h, s, el, mult);
       else this.bolts.push(shoot(h, s, el, mult, traitsOf(h)));
       w.ev.push({ k: 'shoot', x: h.x, y: h.y, dx: h.fx, dy: h.fy, kind: s.shot, el });

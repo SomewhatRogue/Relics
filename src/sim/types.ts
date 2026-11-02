@@ -443,7 +443,7 @@ export interface Javelin {
 export interface Bolt {
   id: number;
   owner: string;
-  kind: 'arrow' | 'bolt' | 'spark' | 'orb' | 'lance' | 'smite' | 'net' | 'lodestone' | 'flask';
+  kind: 'arrow' | 'bolt' | 'knife' | 'spark' | 'orb' | 'lance' | 'smite' | 'net' | 'lodestone' | 'flask';
   /** A Mage's frost burst: freezes solid at once (frost twice). */
   freeze?: boolean;
   /** A thrown flask's potion. */

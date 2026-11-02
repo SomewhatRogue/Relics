@@ -1173,3 +1173,7 @@ puddles, weeds, missing cobbles, arrows) stay on top; the earth, path, mud and s
 - The Roll: RESCUES STRUCK (blows landed on the freed) and RESCUES KILLED take the place of PICKED UP
   BY FRIENDS on the unlucky side (`carried` is still counted, off the board). Counted per hero id in the
   run so a friend's game reads its own; the job's end now swaps ids for a guest the way patches do.
+
+## 2026-11-01: the Rogue throws a dagger (Kyle; Opus 5.5)
+- The daggers' held attack is a thrown dagger instead of the power thrust: 14 damage, 30 at full,
+  8 tiles, tumbling in flight and sticking where it lands (`shot: 'knife'`).

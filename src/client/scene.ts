@@ -353,7 +353,7 @@ export class Scene {
       lights.push({ x, y, r: j.state === 'fly' ? 34 : 14, i: j.state === 'fly' ? 0.6 : 0.3 * Math.min(1, j.life), c: [0.55, 0.85, 1] });
     }
     for (const b of room.bolts) {
-      if (b.kind === 'arrow') continue;
+      if (b.kind === 'arrow' || b.kind === 'knife') continue;
       const x = OX + b.x * PX - cx, y = OY + b.y * PX - cy - 8;
       if (b.kind === 'net' || b.kind === 'bolt') continue;
       if (b.kind === 'smite') lights.push({ x, y: y + 4, r: 40, i: 0.9 * Math.min(1, b.t / b.flight), c: [1, 0.9, 0.6] });
