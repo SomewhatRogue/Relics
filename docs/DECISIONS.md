@@ -848,3 +848,12 @@ which moves the page to the media channel.
   medium (3), long (5, about 15), plus the deep dive. Pay = (18 + 9 per ruin, +6 at night) per room,
   x1 / 1.15 / 1.35 by length. Treasure: a piece; a piece, maybe two; two pieces a cut above.
 - River and marsh borrow the wood's music, ruins the village's, till they have their own.
+
+## 2026-11-01: drills at the trainer (Kyle; Opus 5.5)
+
+- Your own class's trainer sells drills for gold: POWER (+5% damage a rank), HEALTH (+8), SPEED
+  (+3%), CRITICAL (+4% chance a rank for a blow or shot to land 1.5x; shows CRIT), WIND (+8% stamina
+  back), SKILL (class skill back 8% sooner a rank, 3 ranks) and the class TECHNIQUE (3 ranks):
+  Warrior SLAM, Healer MENDING HANDS, Rogue KNIFEWORK, Ranger TRAPPER, Mage QUICK CHANNEL.
+- Price = base x (rank+1)^1.6; a trainer goes one rank further every two levels. Perks on levelling
+  stay free picks. Crits roll on the hero's own seeded dice, so the room's dice never shift.
