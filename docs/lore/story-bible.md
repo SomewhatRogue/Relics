@@ -193,3 +193,12 @@ most Want among the heroes is the one the bells don't spare).
   the relic-wright's fittings. A Mage's Elemental Channel is its own craft, worked through its focus (the wand, staff
   or rod): not shard-stuff, and it doesn't feed the Want. The relic-wright's fittings are for skills and relics; a
   Mage's spells take their element from the Channel. Settled 2026-11-01: Magister Vell teaches it.
+
+## The breach and the mending (recorded 2026-11-01, Kyle's call; lore keeper)
+- A recent assault, never dated on screen, brought down the north wall on either side of the north gate. The gate held; the hungry came over the wall. The rest is the old stone Wenna saw go up, so Wickhold is still the last walled town. The siege (three winters, broke eleven years ago) is older and separate.
+- The dead of the breach were carried on Odric's cart and buried by the church. Odric said the words over each, by name where he knew it.
+- Raids: the hungry come over the north wall at night, take nobody, and pull down what the town has mended. Stone holds. Nobody on screen says why (never the Lantern by name).
+- The hungry whistle going over a wall, and something past the wall whistles back at the watch, so the watch doesn't whistle on duty. Relic's own.
+- Widow Perrin keeps the physic garden west of the well, her mother's before her (sage, feverfew, roses). A dead apple tree she won't cut; why stays unsaid.
+- The Fosters live in the lanes (the dresser). Gannet's tavern sign is crooked and he likes it. Hob's mother is alive.
+- Nothing comes into Wickhold from outside: seed, glass and oil are dear because nobody brings any in.
