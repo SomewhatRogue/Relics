@@ -8,6 +8,8 @@ export type RoundKind = 'pillar' | 'tree' | 'pine' | 'rock' | 'hay' | 'well' | '
 export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall' | 'tent' | 'rockwall' | 'fence' | 'granary' | 'wall' | 'den'
   // Furniture, inside buildings.
   | 'counter' | 'bed' | 'shelf' | 'anvil' | 'altar' | 'pew' | 'bench' | 'hearth' | 'sacks'
+  // A cottage's inner wall, a weaver's loom, a stall in a barn.
+  | 'partition' | 'loom' | 'pen'
   // Wickhold's other buildings and things in the street.
   | 'tower' | 'tavern' | 'monument' | 'rubble' | 'cart' | 'rack';
 export interface Round extends Circle { kind: RoundKind }
@@ -21,6 +23,11 @@ export interface Block {
   smoulder?: boolean;
   /** A door that won't open yet (the story or the town works open it). */
   locked?: boolean;
+  /**
+   * Paint only, never collided against or decided on. A house on a job: the seed its outside and its
+   * inside both come from (shared/houses.ts). Furniture: 1 smashed, 2 a fire lit in it (a hearth).
+   */
+  look?: number;
 }
 /**
  * Raised ground: a ledge, a rock shelf, a wall walk. Up on it you stand on level 1. From the ground
@@ -104,6 +111,8 @@ export interface GameMap {
   roads?: Road[];
   /** Water: deep (nobody wades it; shots fly over) or shallow (everyone in it slows to WADE). */
   water?: Water[];
+  /** Where goblins lie asleep (drawn curled up; they lie as still as ones at the dead till they wake). */
+  sleepers?: { x: number; y: number }[];
 }
 export interface Water { x: number; y: number; w: number; h: number; deep?: boolean }
 /** How fast anyone moves knee-deep in a ford or a bog. */

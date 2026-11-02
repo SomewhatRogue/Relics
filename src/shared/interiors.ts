@@ -2,15 +2,11 @@
  * Inside the buildings. Every door leads to a small room with its own floor and furniture: in
  * Wickhold, people to talk to (the smith and the relic-wright at the forge, the priest, the trainer
  * and his squire, the healer and those she mends, the reeve, a family in every lit house on Rescue
- * Row); out on a job, a cottage or a barn the goblins have turned over, maybe with someone caged.
+ * Row); out on a job, a cottage or a barn, each different from the next (inside.ts).
  * Walk out at the bottom to come back out of the door.
  */
-import type { Block, GameMap, Npc, Round, Theme } from './arena.js';
-import type { Job } from './jobs.js';
-import type { PropKind } from './props.js';
-import { Rng } from './rng.js';
+import type { Block, GameMap, Npc, Theme } from './arena.js';
 import type { WorldState } from './story.js';
-import type { Foe, RoomPlan } from './terrain.js';
 
 const HOME: Theme = { floor: 'planks', back: 'plaster', ambient: [0.24, 0.2, 0.22], moon: 0 };
 const STONE: Theme = { floor: 'flagstone', back: 'stone', ambient: [0.22, 0.2, 0.28], moon: 0 };
@@ -81,18 +77,5 @@ export function townInterior(door: string, w: WorldState): GameMap {
     [n(f.adult, 4.2, 1.6, 'home', 'villager', i), n(f.child, 7.4, 3.2, 'home', 'child', i)], { braziers: [{ x: 8.2, y: 1, r: 0.35 }] });
 }
 
-/** A cottage or barn on a job: turned over, goblins inside, maybe someone caged. Same seed, same room. */
-export function runInterior(job: Job, roomIndex: number, blockIndex: number, door: string): RoomPlan {
-  const rng = new Rng(job.seed * 53 + roomIndex * 17 + blockIndex * 5 + 3), ruin = job.place.ruin, barn = door === 'barn';
-  const night: Theme = { ...HOME, floor: barn ? 'dirt' : 'planks', ambient: [0.17, 0.15, 0.19] };
-  const W = barn ? 14 : 11, H = barn ? 9 : 8;
-  const blocks = barn ? [b('sacks', 0.8, 0.6, 2, 1)] : [b('bed', 0.8, 0.6, 1.2, 2), b('shelf', 4, 0.2, 2.5, 0.5)];
-  const rounds: Round[] = barn ? [{ x: 3, y: 4.5, r: 0.6, kind: 'hay' }, { x: 11, y: 5, r: 0.6, kind: 'hay' }, { x: 5, y: 2, r: 0.3, kind: 'support' }, { x: 9, y: 2, r: 0.3, kind: 'support' }] : [];
-  const props: { kind: PropKind; x: number; y: number }[] = [{ kind: 'table', x: W / 2 + rng.range(-1, 1), y: 3.6 }, { kind: rng.next() < 0.5 ? 'barrel' : 'crate', x: W - 1.5, y: H - 2.5 }];
-  if (job.objective === 'rescue' || rng.next() < (barn ? 0.5 : 0.35)) props.push({ kind: 'cage', x: W - 2.2, y: 1.6 });
-  const spots = [[2.5, 3], [W - 3.5, 3.2], [W / 2, 1.8], [3, 5], [W - 3, 5.2]];
-  const foes: Foe[] = rng.shuffle(spots).slice(0, Math.min(4, 1 + rng.int(2) + (ruin >= 2 ? 1 : 0) + (barn ? 1 : 0))).map(([x, y]) => ({ kind: 'scrapper', x, y }));
-  if (barn && ruin >= 2 && rng.next() < 0.4) foes.push({ kind: 'butcher', x: W / 2, y: 2.4 });
-  const map = room(barn ? 'THE BARN' : 'THE COTTAGE', W, H, night, blocks, [], { rounds, torches: [], braziers: [{ x: barn ? W / 2 : 9.5, y: barn ? 6.2 : 1.2, r: 0.35 }] });
-  return { map, foes, props, chests: [] };
-}
+/** A cottage or barn on a job (each its own: see inside.ts). */
+export { runInterior } from './inside.js';

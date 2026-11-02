@@ -6,6 +6,7 @@
  * holds the objective: cages, a named butcher, or the larder racks. Same seed, same room.
  */
 import type { Block, BlockKind, GameMap, Ledge, Npc, Road, Round, RoundKind, Theme, Water } from './arena.js';
+import { houseSeed } from './houses.js';
 import type { Job, PlaceKind } from './jobs.js';
 import { WOOD, type PropKind } from './props.js';
 import { Rng } from './rng.js';
@@ -189,6 +190,8 @@ export function planRoom(job: Job, index: number, road?: RoadId): RoomPlan {
     if (c) chests.push(c);
   }
   if (final && job.deep) chests.push({ x: MID + 2.2, y: 3.2, chained: true });
+  // Each house's look outside comes from the same seed as its inside.
+  blocks.forEach((b, i) => b.door && (b.look = houseSeed(job, index, i)));
   const night = job.twist === 'night', t = THEMES[kind];
   const theme: Theme = night ? { ...t, ambient: t.ambient.map((v) => v * 0.65) as Theme['ambient'], moon: t.moon * 0.5 } : t;
   const map: GameMap = {
