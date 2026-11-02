@@ -21,7 +21,7 @@ function head(g: Game): string {
   const p = g.profile, top = p.level >= LEVEL_CAP, from = xpFor(p.level), to = xpFor(p.level + 1);
   const fill = top ? 100 : Math.max(0, Math.min(100, Math.round(((p.xp - from) / (to - from)) * 100)));
   return `<div class="tr-head"><div class="tr-top"><b>LEVEL ${p.level}</b><em>${p.gold} GOLD</em></div>` +
-    `<div class="tr-bar"><i style="width:${fill}%"></i></div><div class="tr-xp">${top ? 'MAX' : `${p.xp} / ${to} XP`}</div></div>`;
+    `<div class="tr-bar"><i style="width:${fill}%"></i></div><div class="tr-xp">${top ? 'FULL' : `${p.xp} / ${to} XP`}</div></div>`;
 }
 
 const row = (r: TrainRow) =>
@@ -43,7 +43,7 @@ export function openTrainer(g: Game, panel: Panel, title: string, who: string, g
   const choices = SKILL_CHOICES[p.cls], carried = p.skill && choices.includes(p.skill) ? p.skill : CLASS_SKILL[p.cls];
   const carry = choices.length > 1 && knowsLesson(p, 'skill') ? `<div class="tr-carry"><span>CARRY</span>` +
     choices.map((r) => `<button data-carry="${r}" class="${r === carried ? 'on' : ''}">${RELICS[r].name}</button>`).join('') + '</div>' : '';
-  const perks = p.perks.length ? `<h3 class="tr-h">PERKS</h3><div class="tr-chips">${p.perks.map((k) => `<span>${PERKS[k].name}</span>`).join('')}</div>` : '';
+  const perks = p.perks.length ? `<h3 class="tr-h">KNACKS</h3><div class="tr-chips">${p.perks.map((k) => `<span>${PERKS[k].name}</span>`).join('')}</div>` : '';
   const html = head(g) + (greet ? `<p><b>${who}:</b> ${line(`"${greet}"`, who)}</p>` : '') + picks +
     `<h3 class="tr-h">SKILLS</h3>${lessons.map(row).join('')}${carry}<h3 class="tr-h">TRAINING</h3>${drills.map(row).join('')}` + perks;
   panel.show(title, html);

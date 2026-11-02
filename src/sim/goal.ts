@@ -75,7 +75,7 @@ export function goal(run: Run, room: ArenaRoom, houses: Captives = { caged: 0, w
   if (!isFinal(run)) {
     const fork = !!room.map.roads;
     // With spiders about (nests and all) it's the room to clear, not just the goblins.
-    const what = room.enemies.some((e) => !isDead(e) && isSpiderKind(e.kind)) ? 'the room' : 'the goblins';
+    const what = room.enemies.some((e) => !isDead(e) && isSpiderKind(e.kind)) ? 'them out' : 'the goblins';
     return { text: also(goblins ? `Clear ${what} (${goblins} left)` : fork ? 'Pick a road, together. HIGH: archers up top, fewer below. LOW: more goblins, someone caged' : way(false)), done: goblins === 0 };
   }
   const freed = !need.caged && !need.waiting;

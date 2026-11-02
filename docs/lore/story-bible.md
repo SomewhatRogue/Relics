@@ -211,3 +211,9 @@ most Want among the heroes is the one the bells don't spare).
 - The hungry eat raw where they kill and cook what they carry home; the den cookpot is for people. Larders hang their stock by the ankles from rafter hooks. Captives are caged beside what's left of the last one, never explained on screen.
 - Den interiors are a deliberate exception to "Show, don't gore" (Kyle: "goblins are brutal, we need to showcase it"). The limit: no children's remains, ever (show the shoe, never the child).
 - Why a larder burns: their hoarded lamp oil catches. A captive left in a burning house is lost; no line ever jokes about it.
+
+## Spiders, the halls and names (recorded 2026-11-01; Kyle's call, lore keeper)
+- Spiders: brood mothers grew fat in the Copperdeep shafts on what the hungry left there; nothing stranger than that. They come in waves and their bite poisons. Webs hung with what they caught follow the den limit (no children's remains, ever).
+- The cellars under the Peat Cuts and Hesketh Hall hold larders.
+- Vell's tower floor: a chalked circle cut into three by three lines, one part each for fire, frost and storm, with Vell's own sums chalked round the rim, rubbed out and redone. Never a star.
+- Cleric is the on-screen name for the Healer class (Kyle's call). Older notes here that say Healer mean the Cleric.

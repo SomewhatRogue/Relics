@@ -66,7 +66,7 @@ export const LEAVES: Partial<Record<HeroClass, { name: string; short: string; te
 /** A few words for each class skill, on the trainer's list. */
 export const SKILL_GAIN: Record<HeroClass, string> = {
   WARRIOR: 'learn both, carry one',
-  RANGER: 'pins a goblin down',
+  RANGER: 'pins a goblin down, slows a big one',
   ROGUE: 'step behind a goblin',
   MAGE: 'fire, frost, storm',
   HEALER: 'ground that mends',
