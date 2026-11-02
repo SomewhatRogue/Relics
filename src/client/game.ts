@@ -13,7 +13,7 @@ import { BOUNTY, HERO_SLOTS, PERK, SHOP, gainXp, newProfile, type PerkId, type P
 import { Rng } from '../shared/rng';
 import { CHAPTER_1, QUORUM, rewardMult, type WorldState } from '../shared/story';
 import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
-import { LEAVES, TEACHES, drillCap, drillPrice, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, FOUND_RELICS, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
+import { LEAVES, TEACHES, drillCap, drillPrice, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, FOUND_RELICS, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, sellValue, giveValue, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
 import { ArenaRoom } from '../sim/room';
 import { lessonOf, newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
 import { woodMap, WOOD_PROPS } from '../shared/wood';
@@ -693,6 +693,27 @@ export class Game {
     this.hero.bag = [...p.bag];
     p.steel += STEEL[it.quality];
     store(this.save);
+    return true;
+  }
+
+  /** Halvard: sell a packed piece for gold (never a hungry one). */
+  sell(it: Item): boolean {
+    const p = this.profile, i = p.bag.indexOf(it), n = sellValue(it);
+    if (i < 0 || n <= 0) return false;
+    p.bag.splice(i, 1);
+    this.hero.bag = [...p.bag];
+    p.gold += n;
+    store(this.save);
+    return true;
+  }
+
+  /** Give a packed piece to a town work: it counts for more than it would sell for. */
+  giveGear(it: Item, id: WorkId): boolean {
+    const p = this.profile, i = p.bag.indexOf(it), n = giveValue(it);
+    if (i < 0 || n <= 0 || workDone(this.world, id)) return false;
+    p.bag.splice(i, 1);
+    this.hero.bag = [...p.bag];
+    this.give({ works: { [id]: n }, stats: { given: n } });
     return true;
   }
 

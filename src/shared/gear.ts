@@ -65,6 +65,12 @@ export const slotOf = (i: Item): Slot => i.slot ?? 'weapon';
 export const UPGRADE = [null, { gold: 30, steel: 2 }, { gold: 60, steel: 5 }, { gold: 120, steel: 10 }, { gold: 200, steel: 20 }, { gold: 320, steel: 35 }];
 export const STEEL: Record<Tier, number> = { plain: 1, fine: 3, forged: 8, tolmouth: 20, hungry: 0 };
 export const REROLL = 40;
+/** What Halvard pays for a packed piece (never a hungry one), plus a little for each level on it. Given
+ *  to the town works instead, a piece counts for `GIVE_MULT` times that toward the work. */
+export const SELL: Record<Tier, number> = { plain: 4, fine: 12, forged: 35, tolmouth: 90, hungry: 0 };
+export const GIVE_MULT = 1.5;
+export const sellValue = (i: Item) => (i.quality === 'hungry' ? 0 : SELL[i.quality] + (i.level ?? 0) * 8);
+export const giveValue = (i: Item) => Math.round(sellValue(i) * GIVE_MULT);
 /** The next level's price, or null at the tier's cap (and never for hungry gear). */
 export const nextLevel = (i: Item) => ((i.level ?? 0) < TIERS[i.quality].cap ? UPGRADE[(i.level ?? 0) + 1] : null);
 

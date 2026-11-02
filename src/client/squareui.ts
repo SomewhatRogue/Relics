@@ -4,7 +4,8 @@
  * the sewer grate. Barred doors and rubble say what would open them.
  */
 import { SHOP, STAT_NAME, STAT_ORDER } from '../shared/progress';
-import { WORKS, WORK_ORDER, workDone, workProgress } from '../shared/works';
+import { WORKS, WORK_ORDER, workDone, workProgress, type WorkId } from '../shared/works';
+import { giveValue, itemName } from '../shared/tuning';
 import type { SpotId } from '../shared/town';
 import type { Game } from './game';
 import { line } from './speech';
@@ -43,7 +44,16 @@ export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key:
         return `<div class="work"><b>${wk.name}</b> ${bar(n, wk.need)} ${Math.min(n, wk.need)} of ${wk.need} ${wk.by === 'gold' ? 'gold' : 'dens burned'}<br>${done ? `<span class="done">Done. ${wk.done}</span>` : wk.text}</div>`;
       }).join('') + p(`You have ${pr.gold} gold.`);
     const open = WORK_ORDER.filter((k) => WORKS[k].by === 'gold' && !workDone(w, k));
-    panel.show('TOWN WORKS', html, open.flatMap((k) => [25, 100].map((n) => ({ label: `${WORKS[k].name.split(' ').slice(-1)[0].toUpperCase()}: GIVE ${n}`, disabled: pr.gold < n, act: () => (g.fund(k, n), again()) }))));
+    // Gear for the works: pick the work, then the piece; it counts for more than Halvard would pay.
+    const gearFor = (k: WorkId) => {
+      const can = pr.bag.filter((it) => giveValue(it) > 0);
+      panel.show('GIVE GEAR', p(`<b>${WORKS[k].name}</b>`) + p(can.length ? 'Hollis writes down what it would fetch, and a bit over.' : 'Nothing in your pack the works can use.'), [
+        ...can.map((it) => ({ label: `GIVE ${itemName(it)} (${giveValue(it)})`, act: () => (g.giveGear(it, k), workDone(g.world, k) ? again() : gearFor(k)) })),
+        { label: 'BACK', act: again },
+      ]);
+    };
+    const gearButtons = pr.bag.some((it) => giveValue(it) > 0) ? open.map((k) => ({ label: `${WORKS[k].name.split(' ').slice(-1)[0].toUpperCase()}: GIVE GEAR`, act: () => gearFor(k) })) : [];
+    panel.show('TOWN WORKS', html, [...open.flatMap((k) => [25, 100].map((n) => ({ label: `${WORKS[k].name.split(' ').slice(-1)[0].toUpperCase()}: GIVE ${n}`, disabled: pr.gold < n, act: () => (g.fund(k, n), again()) }))), ...gearButtons]);
     return true;
   }
   if (id === 'roll') {

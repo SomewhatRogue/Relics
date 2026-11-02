@@ -65,4 +65,5 @@ export const SMITH = {
   bought: "In your pack. He's already oiling the next one.",
   anvil: 'Spares in the fire. Steel and gold for the rest.',
   hungry: 'Not that one. Not in my fire.',
+  sell: "I'll take what you're not using. Don't expect what you'd pay me for it.",
 };

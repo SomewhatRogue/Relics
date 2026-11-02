@@ -5,7 +5,7 @@ import { CHAPTER_1, QUORUM, chapterGoals, councilOpen, marketOpen, rewardMult } 
 import { TRAINERS, housesFor, type SpotId } from '../shared/town';
 import { ballot } from '../shared/worldsync';
 import { openSquare } from './squareui';
-import { LEAVES, TEACHES, DRILLS, DRILL_ORDER, TECHNIQUE, drillCap, drillPrice, type DrillId, WANT, ARMOR, MODS, REROLL, STEEL, TIERS, nextLevel, POTION, POTIONS, type PotionId, AUGMENTS, CLASS_KITS, CLASS_ORDER, CLASS_SKILL, SKILL_CHOICES, ELEMENT_NAME, RELICS, TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
+import { LEAVES, TEACHES, DRILLS, DRILL_ORDER, TECHNIQUE, drillCap, drillPrice, type DrillId, WANT, ARMOR, MODS, REROLL, STEEL, sellValue, TIERS, nextLevel, POTION, POTIONS, type PotionId, AUGMENTS, CLASS_KITS, CLASS_ORDER, CLASS_SKILL, SKILL_CHOICES, ELEMENT_NAME, RELICS, TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
 import { device, type Game } from './game';
 import { line } from './speech';
 import { PACK } from '../sim/pack';
@@ -135,8 +135,16 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
         { label: 'BACK', act: again },
       ]);
     };
+    // Selling what's packed (never a hungry piece).
+    const selling = () => {
+      const can = pr.bag.filter((it) => sellValue(it) > 0);
+      panel.show('SELL TO HALVARD', say('Halvard', SMITH.sell) + p(can.length ? `You have ${pr.gold} gold.` : 'Nothing in your pack he wants.'), [
+        ...can.map((it) => ({ label: `SELL ${itemName(it)} (+${sellValue(it)} GOLD)`, act: () => (g.sell(it), selling()) })),
+        { label: 'BACK', act: again },
+      ]);
+    };
     panel.show(forged ? 'DESSA THE TRADER' : 'HALVARD THE SMITH', html, [
-      ...(forged ? [] : [{ label: 'THE ANVIL: UPGRADE, MELT', act: anvil }]),
+      ...(forged ? [] : [{ label: 'THE ANVIL: UPGRADE, MELT', act: anvil }, { label: 'SELL WHAT YOU CARRY', act: selling }]),
       ...kits.map((k) => sold(WEAPONS[k].name, () => g.buy(q, k))),
       ...(forged ? [sold('A RING', () => g.buy(q, pr.weapon, 'ring'))] : (['light', 'medium', 'heavy'] as const).map((a) => sold(ARMOR[a].name, () => g.buy(q, pr.weapon, 'armor', a)))),
     ]);

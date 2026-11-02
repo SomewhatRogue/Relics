@@ -5,7 +5,8 @@ import { board } from '../src/shared/jobs';
 import { newProfile, perkOffer } from '../src/shared/progress';
 import { CHAPTER_1, newWorld } from '../src/shared/story';
 import { SPOTS, townMap } from '../src/shared/town';
-import { WEAPONS } from '../src/shared/tuning';
+import { WEAPONS, giveValue, rollGear, sellValue } from '../src/shared/tuning';
+import { Rng } from '../src/shared/rng';
 import { chargeFull } from '../src/sim/hero';
 import { NO_INTENT } from '../src/sim/types';
 import { Game } from '../src/client/game';
@@ -101,6 +102,22 @@ describe('the town', () => {
     expect(g.room.map.blocks.some((b) => b.kind === 'rubble')).toBe(false);
     expect(g.room.map.npcs!.some((n) => n.name === 'OLD MERREN')).toBe(true);
     expect(g.fund('oldquarter', 100)).toBe(false);
+  });
+
+  it('gear sells to the smith for gold, or goes to a town work for a bit more', () => {
+    const g = new Game();
+    g.create('WARRIOR', 'b');
+    g.skipWood();
+    const a = rollGear(new Rng(3), 'WARRIOR', 'forged'), b = rollGear(new Rng(4), 'WARRIOR', 'fine');
+    g.profile.bag.push(a, b);
+    const gold = g.profile.gold;
+    expect(g.sell(a)).toBe(true);
+    expect(g.profile.gold).toBe(gold + sellValue(a));
+    expect(g.profile.bag.includes(a)).toBe(false);
+    expect(g.giveGear(b, 'watch')).toBe(true);
+    expect(g.world.works.watch).toBe(giveValue(b));
+    expect(giveValue(b)).toBeGreaterThan(sellValue(b));
+    expect(g.sell(b)).toBe(false);
   });
 
   it('a run lands on the hero line and the world; sewer jobs open once six dens are burned', () => {
