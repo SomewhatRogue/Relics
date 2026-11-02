@@ -34,6 +34,8 @@ export interface Run {
   /** Blows landed on the freed, and freed people killed, by hero id (each player's own, so a friend's game reads theirs). */
   rescueHits?: Record<string, number>;
   rescueKills?: Record<string, number>;
+  /** People left caged in a house that burned and fell in (lost, never brought home). */
+  lost?: number;
   /** The road the party took into each room after a fork (by room index). */
   roads: Record<number, RoadId>;
   /** Players in the party when each room is built (it scales the goblins; the ones left, if some went home). */
@@ -85,6 +87,8 @@ export function tally(run: Run, room: ArenaRoom, events: FightEvent[], me: strin
       if (ev.by && !ev.tick) (run.rescueHits ??= {})[ev.by] = (run.rescueHits[ev.by] ?? 0) + 1;
     } else if (ev.k === 'survivordeath') {
       if (ev.by) (run.rescueKills ??= {})[ev.by] = (run.rescueKills[ev.by] ?? 0) + 1;
+    } else if (ev.k === 'cagelost') {
+      run.lost = (run.lost ?? 0) + 1;
     } else if (ev.k === 'pickedup') {
       if (ev.id === me) run.carried = (run.carried ?? 0) + 1;
       if (ev.by === me) run.raised = (run.raised ?? 0) + 1;

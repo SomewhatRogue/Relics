@@ -28,6 +28,7 @@ import { dropProp, newProp, propImpacts, roomProps, stepLift, stepProps, sweepPr
 import { stepParty, sweepAllies } from './party';
 import { stepSurvivors } from './survivors';
 import { ambush } from './ambush';
+import { stepBlaze, type BlazeState } from './blaze';
 import { sweepSurvivors } from './survivorhits';
 import { dropFrom, stepDrops, takeLoot } from './loot';
 import { hallow, rally, shadowstep, stepZones, ward } from './relics';
@@ -64,6 +65,8 @@ export class ArenaRoom {
   survivors: Survivor[] = [];
   /** Inside a cottage or barn (the freed are home only once out of its door). */
   indoors = false;
+  /** A house on fire inside: who's burning, the beams down, whether the roof has come in (sim/blaze.ts). */
+  blaze?: BlazeState;
   intents = new Map<string, Intent>();
   /** Events from the latest tick (drawn as hits, sparks and sounds). */
   events: FightEvent[] = [];
@@ -239,6 +242,7 @@ export class ArenaRoom {
     this.pickups = stepPickups(this.pickups, this.heroes, this.events, TICK);
     this.drops = stepDrops(this.drops, TICK);
     this.coals = stepCoals(this.coals, this.heroes, this.events, TICK);
+    if (this.map.blaze) stepBlaze(this, TICK);
   }
 
   /** Off a ledge: a goblin knocked off (thrown, hooked, blasted) takes the fall; anyone who steps off just lands. */

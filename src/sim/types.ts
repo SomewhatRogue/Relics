@@ -401,6 +401,8 @@ export type FightEvent =
   | { k: 'heal'; x: number; y: number; n: number }
   | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle' | 'lift' | 'oilfire' | 'freed' | 'exitopen' | 'blaze' | 'chop' | 'denspawn' | 'hallow' | 'ward' | 'warded' | 'reflect' | 'wardbreak' | 'spotted'; x: number; y: number }
   | { k: 'collapse'; x: number; y: number; w: number; h: number }
+  /** A house on fire (sim/blaze.ts): a beam down, the roof in, someone caged lost with it. */
+  | { k: 'rafter' | 'housefall' | 'cagelost'; x: number; y: number }
   /** A freed survivor hurt by the party (`by` the hero, '' nobody's; `tick` a burn), or killed. */
   | { k: 'survivorhit'; x: number; y: number; id: number; n: number; by: string; tick?: boolean }
   | { k: 'survivordeath'; x: number; y: number; id: number; by: string }

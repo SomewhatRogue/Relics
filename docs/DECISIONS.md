@@ -1311,3 +1311,26 @@ and he couldn't tell when or where he could leave.
   ruin, length, night, deep, story) and the pay. Tap one for the rest and the buttons.
 - Online, a story mission needs a party of three (`STORY_PARTY`): no GO ALONE, and the party can't set
   out short-handed. Off the shared world (and in the one-file build) it can still be taken alone.
+## 2026-11-01: what the goblins do; wrecked, blocked and burning houses (Kyle; Opus 5.5)
+
+- Big houses on long and deep jobs (now and then deeper into a medium one): a longhouse (two or three
+  rooms off its hall, each through a doorway), a manor (a hall with a long table and a back wing walled
+  off it: a bedroom and a store), a tithe barn (posts, grain bays, bales, a cart). The door and the
+  way out stay at the bottom middle.
+- What the goblins left, paint only, laid out from the house's seed (shared/grim.ts): bodies torn apart
+  with pieces strewn, a body dragged across the floor, one tied up on the back wall and opened, one hung
+  by the ankles from a rafter hook, a cook-pot on their fire with a hand or a foot in it, a heap of bones
+  and clothes, what's left of the last one by a cage, bloody handprints, a count scratched in fives
+  (the rumour about captives' marks). More of it the worse the place and the deeper the job; about a
+  third of houses at ruin 1 (still some at the worst) stay quiet. Goblins still at the dead are the
+  existing feeding goblins over a corpse.
+- Fates on the street, more of them the worse the place: wrecked (a gable end down, the roof caved, beams
+  and rubble spilled; inside, rubble heaps and the sky through the roof), blocked (fallen in across the
+  door: no door, no prompt), burning (smouldering outside, never spreading). A caged person is only
+  ever inside a house you can enter.
+- Inside a burning house (HOUSEFIRE in tuning.ts, judged in sim/blaze.ts, drawn from the same plan):
+  patches smoke for 3 s then burn whoever stands in them (14 a second, 4 at a time); beams come down
+  every 5 to 7 s on a striped circle (1.6 s warning, 22 damage, a roll gets you out); between 52 and
+  64 s the roof falls in after 10 s of falling dust: everyone inside is thrown out the door hurt (never
+  below 1 health), the freed with them, and anyone still caged is lost (`run.lost`). Fire never touches
+  the doorway or the way from the door to the cage. The house is rubble in the street once it falls.
