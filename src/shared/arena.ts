@@ -39,6 +39,8 @@ export interface Npc {
   /** Cutscene puppetry: lifted off the ground (pixels), walking, or dead (`headless` standing, `body` on the ground). */
   lift?: number;
   walking?: boolean;
+  /** Keeping low: crouched and creeping (Hew coming in past the goblins at the dead). */
+  sneak?: boolean;
   pose?: 'headless' | 'body' | 'corpse';
   /** Stopped to talk to you (on their round): since when, and how long they've stood about in all. */
   heldAt?: number;

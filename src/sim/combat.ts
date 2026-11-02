@@ -101,12 +101,25 @@ function warded(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: FightEvent[]
   return true;
 }
 
+/** Out from under the blow at the last moment: the attacker staggers (a close one; not an archer). */
+function slipped(e: Enemy, a: EnemyAttack, h: Hero, ev: FightEvent[]): void {
+  if (a.kind === 'shot' || e.act === 'stunned') return;
+  h.hitstop = Math.max(h.hitstop, HITSTOP.heavy);
+  e.hitstop = HITSTOP.heavy;
+  Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: stunOf(e) * DODGE.stun });
+  ev.push({ k: 'slip', x: h.x, y: h.y }, { k: 'stunned', x: e.x, y: e.y });
+}
+
 /** An enemy's attack lands on a hero: rolled through, parried, blocked, or taken. */
 export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: FightEvent[]): void {
   if (h.act === 'down') return;
   if (!attackCovers(a, h)) {
-    // Rolled out of it during the wind-up: a dodge all the same, just no bonus.
-    if (h.lastRollAt >= now - a.windup && attackCovers(a, { ...h, x: h.rollX, y: h.rollY })) ev.push({ k: 'dodge', x: h.x, y: h.y });
+    // Rolled (or jumped) out of it during the wind-up: a dodge all the same. Left to the last moment,
+    // so the blow lands where you were a breath ago, it staggers the attacker just as rolling through does.
+    if (h.lastRollAt >= now - a.windup && attackCovers(a, { ...h, x: h.rollX, y: h.rollY })) {
+      ev.push({ k: 'dodge', x: h.x, y: h.y });
+      if (now - h.lastRollAt <= WEAPONS[h.weapon].dodge.iTo + h.lenience) slipped(e, a, h, ev);
+    }
     return;
   }
   if (h.wardUntil > now && warded(e, a, h, now, ev)) return;
@@ -115,13 +128,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   const g = statsOf(h), taken = (h.blessedUntil > now ? BLESSING.taken : 1) * g.taken * (wears(h, 'apron') ? HUNGRY_FX.apron : 1);
   if (h.act === 'roll' && h.actT >= w.dodge.iFrom && h.actT <= w.dodge.iTo + h.lenience) {
     ev.push({ k: 'dodge', x: h.x, y: h.y });
-    // Through the blow at the last moment: the attacker staggers (a close one; not an archer).
-    if (a.kind !== 'shot' && e.act !== 'stunned') {
-      h.hitstop = Math.max(h.hitstop, HITSTOP.heavy);
-      e.hitstop = HITSTOP.heavy;
-      Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: stunOf(e) * DODGE.stun });
-      ev.push({ k: 'slip', x: h.x, y: h.y }, { k: 'stunned', x: e.x, y: e.y });
-    }
+    slipped(e, a, h, ev);
     if (has(h, 'tempo')) (h.tempoUntil = now + TRAIT.tempoTime), ev.push({ k: 'tempo', x: h.x, y: h.y });
     return;
   }

@@ -90,11 +90,11 @@ function drawDead(c: Ctx, s: Sprite, x: number, y: number, n: Npc): void {
 export function drawNpc(c: Ctx, n: Npc, x: number, y: number, near: boolean, fx = 0, walking = false): void {
   const s = SPRITES[n.look] ?? SPRITES.villager;
   walking ||= !!n.walking;
-  const bob = n.pose ? 0 : Math.floor(c.now * (walking ? 7 : 1.5) + n.x) % 2 ? -1 : 0;
+  const bob = n.pose ? 0 : Math.floor(c.now * (walking ? (n.sneak ? 4 : 7) : 1.5) + n.x) % 2 ? -1 : 0;
   shadow(c, x, y, 5);
   if (n.pose === 'corpse') return drawCorpse(c, s, x, y, n);
   if (n.pose) return drawDead(c, s, x, y, n);
-  blit(c, s, x, y - (n.lift ?? 0) + bob, walking ? fx < 0 : Math.floor(c.now * 0.25 + n.y) % 2 === 0);
+  blit(c, s, x, y - (n.lift ?? 0) + bob, walking ? fx < 0 : Math.floor(c.now * 0.25 + n.y) % 2 === 0, 0, n.sneak ? 0.78 : 1);
   // A guard carries a spear upright.
   if (n.look === 'guard') (c.lit.fillStyle = '#6b4a2b'), c.lit.fillRect(Math.round(x + (fx < 0 && walking ? -6 : 5)), Math.round(y - 22 + bob), 1, 20), (c.lit.fillStyle = '#cfd6dc'), c.lit.fillRect(Math.round(x + (fx < 0 && walking ? -6 : 5)), Math.round(y - 24 + bob), 1, 3);
   const top = Math.round(y - s.h - 4 + (Math.floor(c.now * 3) % 2));

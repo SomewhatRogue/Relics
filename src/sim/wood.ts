@@ -68,7 +68,9 @@ function spawn(room: ArenaRoom, f: Foe & { variant?: Enemy['variant'] }): Enemy 
 }
 
 /** Waking, in seconds: the fade in, his slow walk over; then his lines wait for a tap; a breath on your feet. */
-export const WAKE = { fade: 2.5, arrive: 4.6, standing: 0.8 };
+export const WAKE = { fade: 2.5, arrive: 5.2, standing: 0.8 };
+/** Hew's way in at the waking: out of the trees west of you, round under the cart, slow and low. */
+const SNEAK = { round: [4.2, 36.4] as [number, number], speed: 1.45 };
 /** Tutorial pacing: drilled goblins wind up this much slower; one at a time comes at you. */
 export const DRILL = { windup: 1.5, wheels: 2, praise: 3, praiseFor: 1.1 };
 
@@ -85,12 +87,16 @@ export function newWood(room: ArenaRoom, cls: HeroClass = 'WARRIOR'): WoodState 
   return w;
 }
 
-/** You lie still; the screen comes up; Hew walks over slowly, checks you, hauls you up. */
+/** You lie still; the screen comes up; Hew creeps out of the trees, keeping low and wide of the goblins
+ *  at the dead, checks you over crouched beside you, and stands only to haul you up. */
 function stepWake(w: WoodState, room: ArenaRoom, dt: number): void {
   const t = (w.wake += Math.max(0, dt)), n = hew(room), h = room.heroes.find((x) => x.id === HERO_ID);
-  if (n && h && t < WAKE.arrive) {
-    const tx = h.x + 1.1, ty = h.y - 0.3, dx = tx - n.x, dy = ty - n.y, d = Math.hypot(dx, dy);
-    if (d > 0.05) (n.x += (dx / d) * Math.min(d, 1.8 * dt)), (n.y += (dy / d) * Math.min(d, 1.8 * dt));
+  if (n && h && w.said < 4) {
+    n.sneak = true;
+    // Round the back of the field, out of the looters' sight, then in at your side.
+    const [tx, ty] = n.x < SNEAK.round[0] - 0.2 ? SNEAK.round : [h.x - 1.0, h.y + 0.3], dx = tx - n.x, dy = ty - n.y, d = Math.hypot(dx, dy);
+    n.walking = d > 0.05;
+    if (d > 0.05) (n.x += (dx / d) * Math.min(d, SNEAK.speed * dt)), (n.y += (dy / d) * Math.min(d, SNEAK.speed * dt));
   }
   if (t < WAKE.arrive) return;
   // He talks, one line at a time, each waiting for a tap (the world held); the last as he hauls you up.
@@ -98,7 +104,8 @@ function stepWake(w: WoodState, room: ArenaRoom, dt: number): void {
   const lines = [LINES.waking[0], LINES.waking[1], LINES.notice[w.cls], LINES.waking[2], LINES.waking[3]];
   if (w.said < lines.length) {
     if (w.said === lines.length - 1) {
-      if (h) Object.assign(h, { act: 'idle', actT: 0, actDur: 0, lying: false, hp: h.maxHp, fx: 1, fy: 0 });
+      if (h) Object.assign(h, { act: 'idle', actT: 0, actDur: 0, lying: false, hp: h.maxHp, fx: -1, fy: 0 });
+      if (n) Object.assign(n, { sneak: false, walking: false });
       w.upAt = t;
     }
     w.hold = talk('HEW', lines[w.said++]);

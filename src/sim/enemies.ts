@@ -63,6 +63,8 @@ function begin(e: Enemy, kind: EnemyAttack['kind'], s: EnemyAttackSpec, target: 
 function runAttack(e: Enemy, heroes: Hero[], now: number, dt: number, ev: FightEvent[], others: Enemy[] = []): boolean {
   const a = e.attack!;
   a.t += dt;
+  // Netted: no running at you and no throwing the hook. Whatever it was winding up for is lost.
+  if ((a.kind === 'charge' || a.kind === 'draw') && e.snareUntil > now) return ev.push({ k: 'snared', x: e.x, y: e.y }), true;
   if (a.kind === 'charge') return runCharge(e, a, heroes, now, ev, others);
   if (!a.done && a.t >= a.windup) {
     a.done = true;
@@ -199,8 +201,9 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   }
   // The wood's goblins: each fights the way its lesson needs.
   const v = e.variant, reach = v === 'lunger' ? VARIANTS.lunger.reach : v === 'heavy' ? VARIANTS.heavy.reach : spec.reach;
-  if (v === 'stoker' && level && e.cooldown <= 0 && facing > 0.85 && d > VARIANTS.stoker.chargeFrom && d < VARIANTS.stoker.charge.range! - 1 && rng.next() < VARIANTS.stoker.chargeChance) return begin(e, 'charge', VARIANTS.stoker.charge, t, ev);
-  if (v === 'stoker' && level && e.cooldown <= 0 && facing > 0.8 && d > VARIANTS.stoker.drawFrom && d < VARIANTS.stoker.draw.range! - 0.5 && rng.next() < VARIANTS.stoker.drawEvery) return begin(e, 'draw', VARIANTS.stoker.draw, t, ev);
+  const netted = e.snareUntil > now;
+  if (v === 'stoker' && !netted && level && e.cooldown <= 0 && facing > 0.85 && d > VARIANTS.stoker.chargeFrom && d < VARIANTS.stoker.charge.range! - 1 && rng.next() < VARIANTS.stoker.chargeChance) return begin(e, 'charge', VARIANTS.stoker.charge, t, ev);
+  if (v === 'stoker' && !netted && level && e.cooldown <= 0 && facing > 0.8 && d > VARIANTS.stoker.drawFrom && d < VARIANTS.stoker.draw.range! - 0.5 && rng.next() < VARIANTS.stoker.drawEvery) return begin(e, 'draw', VARIANTS.stoker.draw, t, ev);
   if (level && d <= reach && e.cooldown <= 0 && facing > 0.75) {
     if (v === 'looter') return begin(e, 'stab', VARIANTS.looter.stab, t, ev);
     if (v === 'lunger') return begin(e, 'stab', VARIANTS.lunger.stab, t, ev);

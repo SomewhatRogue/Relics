@@ -181,6 +181,18 @@ describe('the slam', () => {
     expect(got).toContain('dodge');
     expect(got).not.toContain('slip');
   });
+
+  it("a Ranger's jump back, late, clears the blow and staggers the butcher all the same", () => {
+    const { room, h, b } = setup('cleave');
+    h.weapon = 'longbow';
+    until(room, 0.15);
+    room.setIntent('me', intent({ rollSeq: 1 }));
+    const seen: string[] = [];
+    for (let i = 0; i < ticks(0.4); i++) (room.step(), seen.push(...room.events.map((e) => e.k)));
+    expect(h.hp).toBe(HERO.hp);
+    expect(seen).toContain('slip');
+    expect(b.act).toBe('stunned');
+  });
 });
 
 /** A hero next to a target enemy (index), everything else parked far away. */
@@ -460,5 +472,17 @@ describe('relic loadout', () => {
     room.setIntent('me', intent({ relicPickSeq: 3, relicPick: 0 }));
     room.step();
     expect(h.relic).toBe('horn');
+  });
+});
+
+describe('netted', () => {
+  it("a netted Stoker can't run at you or throw its hook: the wind-up is lost", () => {
+    for (const kind of ['charge', 'draw'] as const) {
+      const { room, b } = setup('cleave');
+      Object.assign(b.attack!, { kind, t: 0 });
+      b.snareUntil = 99;
+      room.step();
+      expect(b.attack).toBeNull();
+    }
   });
 });

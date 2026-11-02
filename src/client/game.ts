@@ -93,7 +93,7 @@ export class Game {
     const h = this.hero, cls = this.profile.cls;
     // You come round with nothing but your class's weapon and its skill; a Healer's censer has gone cold.
     // (A Ranger's hound isn't with them in the wood.)
-    Object.assign(h, { relics: abilitiesOf(cls), found: [], cold: cls === 'HEALER', belt: [], noHound: true });
+    Object.assign(h, { relics: abilitiesOf(cls), found: [], cold: cls === 'HEALER', belt: [] });
     h.relic = h.relics[0];
     this.wood = newWood(this.room, cls);
   }

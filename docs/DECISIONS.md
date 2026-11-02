@@ -750,3 +750,13 @@ which moves the page to the media channel.
 - Start on Vercel Hobby plus Upstash Redis on pay as you go with a monthly budget cap (rate limited
   at the cap, never billed past it). Move to Vercel Pro ($20 a month, $20 of usage included) only
   when real players arrive; Hobby is non-commercial and pauses when over its limits.
+
+## 2026-11-01: Ranger playtest fixes (Opus 5.5)
+
+- The hound is with a Ranger from the waking in Greyhollow on (Kyle's call; overrides the bible's
+  "joins at the north gate").
+- Hew creeps in at the waking: out of the trees west of you, round behind the feeding looters,
+  crouched (drawn squashed, slower bob) until he hauls you up. Hew's start moved to the west edge.
+- A dodge that clears the blow (a Ranger's jump back, or any roll out of range) staggers the attacker
+  when it started within the dodge's i-frame span of the blow landing, same as rolling through.
+- Netted, the Stoker can't start a charge or a hook throw, and loses one it was winding up.
