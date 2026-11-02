@@ -6,7 +6,7 @@
  */
 import { attackCovers } from './combat';
 import { AREAS, FEEDING, GATES, GOBLIN_DEAD, LINES, ROAD_OUT, STOKER, STOKER_CALLS, areaAt, lessonsFor, type Lesson, type Teach } from '../shared/wood';
-import type { HeroClass } from '../shared/weapons';
+import { dodgeName, type HeroClass } from '../shared/weapons';
 import { inArea } from '../shared/arena';
 import type { Foe } from '../shared/terrain';
 import { isDead } from './damage';
@@ -152,12 +152,13 @@ function drill(w: WoodState, e: Enemy | null, parryWindow: number, h: Hero): voi
   // Already answered it (rolling, or moved out of where it'll land): no need to stop the world.
   if (h.act === 'roll' || !attackCovers(a, h)) return;
   const left = a.windup - a.t;
-  const ready = kind === 'dodge' ? a.unblockable && left <= 0.16 : kind === 'block' ? left <= 0.4 : kind === 'parry' ? !a.unblockable && left <= parryWindow * 0.6 : kind === 'slip' ? a.kind !== 'shot' && left <= 0.08 : false;
+  const walk = lessonOf(w).card === 'step';
+  const ready = kind === 'dodge' ? a.unblockable && left <= (walk ? 0.45 : 0.16) : kind === 'block' ? left <= 0.4 : kind === 'parry' ? !a.unblockable && left <= parryWindow * 0.6 : kind === 'slip' ? a.kind !== 'shot' && left <= 0.08 : false;
   if (!ready) return;
   w.drilled++;
   w.drillAt = e!.id * 1000 + Math.round(a.windup * 100) + Math.round(a.ox * 10);
-  const move: Move = kind === 'dodge' ? 'roll' : kind === 'block' ? 'block' : kind === 'slip' ? 'slip' : 'parry';
-  w.hold = { kind: 'act', who: '', text: LINES.now[move as 'roll' | 'block' | 'parry' | 'slip'], move, need: move === 'roll' || move === 'slip' ? 'roll' : 'block', t: 0, until: 0 };
+  const move: Move = kind === 'dodge' ? (walk ? 'step' : 'roll') : kind === 'block' ? 'block' : kind === 'slip' ? 'slip' : 'parry';
+  w.hold = { kind: 'act', who: '', text: LINES.now[move as 'step' | 'roll' | 'block' | 'parry' | 'slip'], move, need: move === 'step' ? 'move' : move === 'roll' || move === 'slip' ? 'roll' : 'block', t: 0, until: 0 };
 }
 
 /** Skip the cutscene (the game offers it once it has been seen). */
@@ -213,6 +214,9 @@ function stepCut(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: number): v
   // Off his feet, held up at its mouth; he gets his last words out.
   if (n && t >= CUT.grab && t < CUT.toss) n.lift = 22 * ease(span(CUT.grab, CUT.grab + 0.5)) + (t > CUT.grab + 0.5 && t < CUT.bite ? Math.sin(t * 30) * 0.8 : 0);
   if (at(CUT.last)) say(w, room, 'HEW', LINES.last, 2);
+  // Its jaws come down: his words stop, and he screams, and then nothing.
+  if (at(CUT.bite - 0.55)) w.caption = { who: 'HEW', text: LINES.scream, until: room.time + 0.55 };
+  if (at(CUT.bite)) w.caption = null;
   if (at(CUT.bite) && n) {
     n.pose = 'headless';
     ev.push({ k: 'bite', x: n.x, y: n.y });
@@ -355,12 +359,12 @@ export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: nu
 /** What to show over the field: the lesson, the control, how far along. */
 export function woodGoal(w: WoodState, touch: boolean): { title: string; text: string } {
   if (w.stage === 5) return { title: 'THE ROAD', text: 'Follow the arrow west, to Wickhold' };
-  if (w.stage === 4 && w.entered && w.cut < 0) return { title: 'KILL THE STOKER', text: 'Roll out of anything striped' };
+  if (w.stage === 4 && w.entered && w.cut < 0) return { title: 'KILL THE STOKER', text: lessonsFor(w.cls)[1].card === 'step' ? 'Get out of anything striped' : 'Dodge out of anything striped' };
   // On the way to the hut, and while Hew's there: no skill to teach a hero who has none yet.
   if (w.stage === 4) return { title: "HEW'S HUT", text: w.entered ? 'Wait for Hew' : 'Follow Hew' };
   const l = lessonOf(w), key: Record<string, string> = touch
-    ? { GRAB: 'HIT IT, TAP GRAB, AGAIN TO THROW', ATTACK: 'TAP ATTACK', DODGE: 'TAP ROLL', BLOCK: 'HOLD BLOCK', PARRY: 'TAP BLOCK ON THE WHITE FLASH', SKILL: 'TAP SKILL', BACKSTAB: 'GET BEHIND, TAP ATTACK', 'FULL DRAW': 'HOLD ATTACK, LET GO', 'FULL CHARGE': 'HOLD ATTACK, LET GO', 'LAST SECOND': 'TAP ROLL AS IT LANDS' }
-    : { GRAB: 'HIT IT, F, F AGAIN TO THROW', ATTACK: 'CLICK', DODGE: 'SPACE', BLOCK: 'HOLD RIGHT CLICK', PARRY: 'TAP RIGHT CLICK ON THE WHITE FLASH', SKILL: 'E', BACKSTAB: 'GET BEHIND, CLICK', 'FULL DRAW': 'HOLD LEFT CLICK, LET GO', 'FULL CHARGE': 'HOLD LEFT CLICK, LET GO', 'LAST SECOND': 'SPACE AS IT LANDS' };
+    ? { 'STEP OUT': 'WALK OUT OF THE STRIPES', GRAB: 'HIT IT, TAP GRAB, AGAIN TO THROW', ATTACK: 'TAP ATTACK', DODGE: 'TAP ' + dodgeName(w.cls), BLOCK: 'HOLD BLOCK', PARRY: 'TAP BLOCK ON THE WHITE FLASH', SKILL: 'TAP SKILL', BACKSTAB: 'GET BEHIND, TAP ATTACK', 'FULL DRAW': 'HOLD ATTACK, LET GO', 'FULL CHARGE': 'HOLD ATTACK, LET GO', 'LAST SECOND': 'TAP ' + dodgeName(w.cls) + ' AS IT LANDS' }
+    : { 'STEP OUT': 'WALK OUT OF THE STRIPES', GRAB: 'HIT IT, F, F AGAIN TO THROW', ATTACK: 'CLICK', DODGE: 'SPACE', BLOCK: 'HOLD RIGHT CLICK', PARRY: 'TAP RIGHT CLICK ON THE WHITE FLASH', SKILL: 'E', BACKSTAB: 'GET BEHIND, CLICK', 'FULL DRAW': 'HOLD LEFT CLICK, LET GO', 'FULL CHARGE': 'HOLD LEFT CLICK, LET GO', 'LAST SECOND': 'SPACE AS IT LANDS' };
   if (w.wake >= 0) return { title: '', text: '' };
   if (!w.entered) return { title: l.name, text: w.stage ? 'Follow Hew' : 'Walk' };
   const what = { kills: '', dodge: 'DODGES', block: 'BLOCKS', parry: 'PARRIES', slip: 'LAST-SECOND DODGES', backstab: 'FROM BEHIND', heavy: 'FULL SHOTS', grab: 'THROWN', none: '' }[l.count];

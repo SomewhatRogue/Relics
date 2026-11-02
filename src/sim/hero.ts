@@ -3,7 +3,7 @@
  * A tap of attack swings on release; holding past CHARGE.start charges a heavy instead.
  */
 import { collide, wadeAt } from '../shared/arena';
-import { CHANNEL, DODGE, CLASS_GUARD, DECOY, POTION, AUGMENTS, CHARGE, GRAB, HORN, PERK, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon, drilled, STEALTH } from '../shared/tuning';
+import { CHANNEL, DODGE, CLASS_DODGES, CLASS_GUARD, DECOY, POTION, AUGMENTS, CHARGE, GRAB, HORN, PERK, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon, drilled, STEALTH } from '../shared/tuning';
 import { slide } from './bodies';
 import { applyGear } from './pack';
 import { statsOf } from './gearstats';
@@ -131,7 +131,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     // A Mage has no guard at all; the rest can at least tap a parry.
     const guard = CLASS_GUARD[WEAPONS[h.weapon].cls];
     if (guard !== 'none' && now - h.lastBlockPress >= GUARD.parryRepress) h.parryOpenAt = now;
-    if (guard === 'none' && now - h.toldAt > 2) (h.toldAt = now), ev.push({ k: 'noguard', x: h.x, y: h.y });
+    if (guard === 'none' && now - h.toldAt > 2) (h.toldAt = now), ev.push({ k: 'noguard', x: h.x, y: h.y, dodge: WEAPONS[h.weapon].dodge.kind });
     h.lastBlockPress = now;
   }
   if (inp.classSeq !== h.seen.cls) {
@@ -177,7 +177,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   }
   const w = WEAPONS[h.weapon];
   const dodge = w.dodge;
-  const wantsRoll = now - h.rollQueuedAt < INPUT_BUFFER && now - h.lastRollAt >= dodge.cooldown * (1 - statsOf(h).dodge) * (h.perks.includes('footwork') ? PERK.footwork : 1) * (dodge.kind === 'blink' && h.perks.includes('focus') ? PERK.focus : 1) && h.stamina >= 1;
+  const wantsRoll = CLASS_DODGES[w.cls] && now - h.rollQueuedAt < INPUT_BUFFER && now - h.lastRollAt >= dodge.cooldown * (1 - statsOf(h).dodge) * (h.perks.includes('footwork') ? PERK.footwork : 1) * (dodge.kind === 'blink' && h.perks.includes('focus') ? PERK.focus : 1) && h.stamina >= 1;
   if (h.act === 'roll') {
     const k = (dodge.distance * statsOf(h).dodgeDist) / dodge.time;
     h.x += h.rollDx * k * dt;

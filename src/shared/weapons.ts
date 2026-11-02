@@ -238,6 +238,13 @@ export const WEAPON_ORDER: WeaponId[] = ['sword', 'greatsword', 'spear', 'longbo
 export const CLASS_ORDER: HeroClass[] = ['WARRIOR', 'RANGER', 'ROGUE', 'MAGE', 'HEALER'];
 /** How each class guards: `full` holds a block and parries; `parry` can tap a parry but never holds a
  *  block; `none` can do neither (a Mage blinks out instead, and leaves an image behind: DECOY). */
+/**
+ * Who can dodge. The Warrior and Healer stand behind a guard instead (no dodge button at all): a striped,
+ * unblockable blow they step out of on their feet. The light classes dodge and can't hold a guard.
+ */
+/** What a class's dodge button says on a phone. */
+export const dodgeName = (cls: HeroClass): string => ({ ROGUE: 'DASH', RANGER: 'JUMP', MAGE: 'BLINK' } as Partial<Record<HeroClass, string>>)[cls] ?? 'ROLL';
+export const CLASS_DODGES: Record<HeroClass, boolean> = { WARRIOR: false, HEALER: false, ROGUE: true, RANGER: true, MAGE: true };
 export const CLASS_GUARD: Record<HeroClass, 'full' | 'parry' | 'none'> = { WARRIOR: 'full', HEALER: 'full', ROGUE: 'none', RANGER: 'parry', MAGE: 'none' };
 /** The Mage's blink leaves an image of them where they stood: goblins near it go for it instead. */
 export const DECOY = { time: 2.5, lure: 5 };

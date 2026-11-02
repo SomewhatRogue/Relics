@@ -1,5 +1,5 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, parry, roll). */
-import { BLESSING, DODGE, WARD, FLINCH, HORN, OVERKILL, PERK, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing, CRIT, STEALTH, technique } from '../shared/tuning';
+import { BLESSING, DODGE, WARD, FLINCH, HORN, OVERKILL, PERK, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing, CLASS_DODGES, CRIT, STEALTH, technique } from '../shared/tuning';
 import { shove } from './bodies';
 import { statsOf } from './gearstats';
 import { HUNGRY_FX, wears } from './hungry';
@@ -137,6 +137,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
       ev.push({ k: 'dodge', x: h.x, y: h.y });
       if (now - h.lastRollAt <= WEAPONS[h.weapon].dodge.iTo + h.lenience) slipped(e, a, h, ev);
     }
+    // No dodge (a Warrior, a Healer): walked out of a striped blow meant for you. That's the dodge.
+    else if (!CLASS_DODGES[WEAPONS[h.weapon].cls] && a.unblockable && a.aimed === h.id) ev.push({ k: 'dodge', x: h.x, y: h.y });
     return;
   }
   if (h.wardUntil > now && warded(e, a, h, now, ev)) return;

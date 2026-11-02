@@ -103,7 +103,7 @@ export class Fx {
         this.say(x, y - 30, "CAN'T BLOCK: TAP TO PARRY", '#c8c4d0');
         break;
       case 'noguard':
-        this.say(x, y - 30, 'NO GUARD: ROLL', '#c8c4d0');
+        this.say(x, y - 30, 'NO GUARD: ' + ({ roll: 'ROLL', backstep: 'JUMP', dash: 'DASH', blink: 'BLINK' } as Record<string, string>)[(ev as { dodge?: string }).dodge ?? 'roll'], '#c8c4d0');
         break;
       case 'fanfare':
         this.flashes.push({ x, y: y - 24, r: 140, i: 1.1, c: [1, 0.85, 0.5], life: 1.2, max: 1.2 });

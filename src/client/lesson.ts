@@ -5,11 +5,13 @@
  */
 import type { Game } from './game';
 import type { Move } from '../sim/wood';
+import { dodgeName } from '../shared/weapons';
 import { finish, speak, typing } from './speech';
 
-const NAME: Record<Move, string> = { move: 'MOVE', attack: 'ATTACK', roll: 'DODGE', block: 'BLOCK', parry: 'PARRY', skill: 'SKILL', relic: 'RELIC', grab: 'GRAB AND THROW', backstab: 'BACKSTAB', heavy: 'FULL SHOT', slip: 'LAST SECOND' };
+const NAME: Record<Move, string> = { move: 'MOVE', step: 'STEP OUT', attack: 'ATTACK', roll: 'DODGE', block: 'BLOCK', parry: 'PARRY', skill: 'SKILL', relic: 'RELIC', grab: 'GRAB AND THROW', backstab: 'BACKSTAB', heavy: 'FULL SHOT', slip: 'LAST SECOND' };
 const KEY: Record<Move, [string, string]> = {
   move: ['W A S D', 'THE STICK, LEFT'],
+  step: ['W A S D', 'THE STICK, LEFT'],
   attack: ['LEFT CLICK', 'ATTACK'],
   roll: ['SPACE', 'ROLL'],
   block: ['HOLD RIGHT CLICK', 'HOLD BLOCK'],
@@ -66,7 +68,7 @@ export class LessonView {
     this.key = key;
     this.el.hidden = !show;
     if (!show) return;
-    const h = hold!, k = KEY[h.move ?? 'attack'][this.touch ? 1 : 0];
+    const h = hold!, k = KEY[h.move ?? 'attack'][this.touch ? 1 : 0].replace('ROLL', this.touch && w ? dodgeName(w.cls) : 'ROLL');
     this.el.className = h.kind === 'talk' ? 'card talk' : h.kind;
     const hint = `<p class="go-hint">${this.touch ? 'TAP TO GO ON' : 'CLICK OR PRESS ENTER TO GO ON'}</p>`;
     if (h.kind === 'relic') {

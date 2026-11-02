@@ -9,8 +9,8 @@ import { blit, type Ctx } from './draw';
 import { drawText, textWidth } from './pixfont';
 
 /** What the caged call out (lore keeper and line editor), and what the freed say. */
-export const BEG = ['Please! Over here!', 'Get us out of this!', "They'll be back. Please!"];
-export const THANKS = ['Bless you.', 'Thank you. Thank you.', "I can walk. I'll keep up."];
+export const BEG = ['Please! Over here!', "Don't leave us in here!", "They'll be back. Please!"];
+export const THANKS = ['Lantern keep you.', 'Thank you. Thank you.', "I can walk. I'll keep up."];
 
 interface Freed { x: number; y: number; at: number; line: string }
 

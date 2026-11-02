@@ -78,17 +78,37 @@ describe('the prologue wood', () => {
     g.continueHold();
     g.step(0.05, NO_INTENT);
     expect(g.wood!.hold).toBeNull();
-    // A lunger comes and winds up: the world stops just before the stab, until you roll.
+    // A lunger comes and winds up: the world stops before the stab, until you move (a Warrior has no
+    // roll, so it walks out of the stripes).
+    const l = g.room.enemies.find((e) => e.variant === 'lunger' && e.alert)!;
+    Object.assign(l, { x: g.hero.x + 2, y: g.hero.y, fx: -1, fy: 0, cooldown: 0 });
+    for (let i = 0; i < 80 && !g.wood!.hold; i++) g.step(0.05, NO_INTENT);
+    expect(g.wood!.hold?.need).toBe('move');
+    g.step(0.3, NO_INTENT);
+    expect(g.wood!.hold?.need).toBe('move');
+    g.step(0.15, { ...NO_INTENT, mx: 0, my: 1 });
+    expect(g.wood!.hold).toBeNull();
+    // Walk on out of the line, and it's counted as a dodge.
+    for (let i = 0; i < 30; i++) g.step(0.05, { ...NO_INTENT, mx: 0, my: 1 });
+    expect(g.wood!.count).toBeGreaterThanOrEqual(1);
+  });
+
+  it('a Rogue on the same path is stopped until it dodges', () => {
+    const g = new Game();
+    g.create('ROGUE', 'stray');
+    wake(g);
+    Object.assign(g.wood!, { stage: 1, entered: false });
+    Object.assign(g.hero, { x: 32, y: 36 });
+    g.step(0.05, NO_INTENT);
+    g.continueHold();
+    g.step(0.05, NO_INTENT);
     const l = g.room.enemies.find((e) => e.variant === 'lunger' && e.alert)!;
     Object.assign(l, { x: g.hero.x + 2, y: g.hero.y, fx: -1, fy: 0, cooldown: 0 });
     for (let i = 0; i < 80 && !g.wood!.hold; i++) g.step(0.05, NO_INTENT);
     expect(g.wood!.hold?.need).toBe('roll');
-    g.step(0.3, NO_INTENT);
-    expect(g.wood!.hold?.need).toBe('roll');
-    const ev = g.step(0.05, { ...NO_INTENT, rollSeq: 1, mx: 0, my: 1 });
+    g.step(0.05, { ...NO_INTENT, rollSeq: 1, mx: 0, my: 1 });
     expect(g.wood!.hold).toBeNull();
     expect(g.hero.act).toBe('roll');
-    expect(ev).toBeDefined();
   });
 
   it('a new hero starts in the wood; only attack is taught at first; a gate stands across each way on', () => {

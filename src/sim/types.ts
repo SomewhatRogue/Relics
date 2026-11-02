@@ -198,6 +198,10 @@ export type AttackKind = 'cleave' | 'slam' | 'swing' | 'stab' | 'shot' | 'draw' 
 
 export interface EnemyAttack {
   kind: AttackKind;
+  /** Who it was swung at (a striped blow stepped out of counts as a dodge for them). */
+  aimed?: string;
+  /** (A charge) its run is over: a hero with no dodge who wasn't on its line has stepped out. */
+  missed?: boolean;
   t: number;
   windup: number;
   active: number;
@@ -333,7 +337,7 @@ export type FightEvent =
   /** The prologue's cutscene: the ground shaking, the bite, a body landing, the Stoker's bellow. */
   | { k: 'rumble' | 'bite' | 'thud' | 'bellow' | 'fanfare'; x: number; y: number }
   /** A Ranger or Rogue holding block (it does nothing), or a Mage pressing it at all. */
-  | { k: 'noblock' | 'noguard'; x: number; y: number }
+  | { k: 'noblock' | 'noguard'; x: number; y: number; dodge?: string }
   /** The Ranger's snare laid; the hound barking or yelping off. */
   | { k: 'snareset' | 'bark' | 'yelp'; x: number; y: number }
   /** The Mage channelling, and done: its spells now `el`. */

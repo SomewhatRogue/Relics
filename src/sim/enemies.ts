@@ -3,7 +3,7 @@ import { lure, seenFrom } from './lantern';
 import { visible } from './flasks';
 import { HUNGRY_FX, wears } from './hungry';
 import { collide, currentMap, inArea, wadeAt } from '../shared/arena';
-import { FRIENDLY, DECOY, ALERT, ARCHER, BUTCHER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, type EnemyAttackSpec, type EnemySpec, VARIANTS, STEALTH } from '../shared/tuning';
+import { FRIENDLY, DECOY, ALERT, ARCHER, BUTCHER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, type EnemyAttackSpec, type EnemySpec, VARIANTS, STEALTH, CLASS_DODGES, WEAPONS } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { shove, slide } from './bodies';
 import { attackCovers, hitHero } from './combat';
@@ -48,7 +48,7 @@ function begin(e: Enemy, kind: EnemyAttack['kind'], s: EnemyAttackSpec, target: 
   e.fy = dy / l;
   const ahead = s.ahead ?? 0;
   e.attack = {
-    kind, t: 0, windup: s.windup, active: s.active, recover: s.recover, dmg: s.dmg, knock: s.knock, unblockable: s.unblockable,
+    kind, aimed: target.id, t: 0, windup: s.windup, active: s.active, recover: s.recover, dmg: s.dmg, knock: s.knock, unblockable: s.unblockable,
     dx: e.fx, dy: e.fy, ox: e.x, oy: e.y, range: s.range ?? 0, arc: s.arc ?? 0,
     cx: e.x + e.fx * ahead, cy: e.y + e.fy * ahead, radius: s.radius ?? 0, done: false,
   };
@@ -94,6 +94,12 @@ function runCharge(e: Enemy, a: EnemyAttack, heroes: Hero[], now: number, ev: Fi
     // Its own in the way go flying.
     for (const o of others) if (o !== e && o.kind === 'scrapper' && !isDead(o) && !a.hit!.includes('g' + o.id) && attackCovers(a, o as unknown as Hero)) a.hit!.push('g' + o.id), damage(o, Math.round(a.dmg * FRIENDLY.blow), now, ev, { heavy: true, how: 'burst' }), shove(o, a.dx, a.dy, a.knock, o.weight);
     if (e.attack === null) return true;
+  }
+  // Ran its line and missed the one it was meant for: if that's a hero with no dodge, they stepped out.
+  if (a.t >= a.windup + a.active && !a.missed) {
+    a.missed = true;
+    const h = heroes.find((x) => x.id === a.aimed);
+    if (h && !(a.hit ?? []).includes(h.id) && h.act !== 'down' && !CLASS_DODGES[WEAPONS[h.weapon].cls]) ev.push({ k: 'dodge', x: h.x, y: h.y });
   }
   return a.t >= a.windup + a.active + a.recover;
 }

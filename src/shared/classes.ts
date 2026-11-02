@@ -34,7 +34,7 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     weapon: 'Sword and shield',
     skill: 'War Cry: nearby allies catch their breath and block at half cost. Small goblins flinch. Your trainer teaches it from level 2.',
     cant: 'Nothing at range. Slow feet.',
-    guard: 'Can hold a block and parry. The shield covers nearly everything in front.',
+    guard: "Can hold a block and parry, and the shield covers nearly everything in front. Can't roll: walk out of anything striped.",
     stats: { POWER: 4, GUARD: 5, SPEED: 2, RANGE: 1, SUPPORT: 3 },
   },
   RANGER: {
@@ -54,7 +54,7 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     weapon: 'Twin daggers',
     skill: "Shadowstep: you're suddenly behind the goblin you face. Your trainer teaches it from level 2.",
     cant: "Can't take a beating. Can't lift.",
-    guard: "Can't block or parry. Dodges instead: quickest on their feet, further and far more often than anyone.",
+    guard: "Can't block or parry. Dashes out of reach instead, further than anyone and far more often.",
     stats: { POWER: 3, GUARD: 1, SPEED: 5, RANGE: 1, SUPPORT: 1 },
   },
   MAGE: {
@@ -74,7 +74,7 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     weapon: 'Mace and censer',
     skill: "Sanctuary: blessed ground mends allies and burns goblins, and wards whoever's worst hurt. Your trainer teaches it from level 2.",
     cant: 'Slow, short reach.',
-    guard: 'Can hold a block and parry.',
+    guard: "Can hold a block and parry, though a mace and censer give a little more than a shield does. Can't roll: walk out of anything striped.",
     note: 'Feed the censer what butchers leave. It heals hotter, and draws teeth.',
     noteLabel: 'CENSER',
     stats: { POWER: 2, GUARD: 4, SPEED: 2, RANGE: 2, SUPPORT: 5 },

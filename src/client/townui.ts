@@ -96,15 +96,15 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     const html = (pr.picks > 0 ? say(name, TEACH[pr.cls][0]) : '') + (pr.cls === 'HEALER' && pr.glow > 0 ? say(name, COAL.isolde) : '') +
       p(`Level ${pr.level}. Experience ${pr.xp}${pr.level < 10 ? ` of ${next}` : ' (the chapter cap)'}. ${pr.gold} gold.`) +
       (pr.perks.length ? p('Yours: ' + pr.perks.map((k) => `<b>${PERKS[k].name}</b>`).join(', ')) : '') +
-      (pr.picks > 0 ? p(`<b>Choose ${pr.picks > 1 ? `from ${pr.picks} picks` : 'one'}.</b>`) : '');
+      (pr.picks > 0 ? p(`<b>${pr.picks > 1 ? `${pr.picks} picks to spend. Choose one.` : 'Choose one.'}</b>`) : '');
     const picks = pr.picks > 0 ? offer.map((k) => ({ label: `PICK: ${PERKS[k].name}`, primary: true, act: () => detail(PERKS[k].name, PERKS[k].text + '.' + (PERKS[k].cls ? ' Only from your own trainer.' : ''), { label: `TAKE ${PERKS[k].name}`, ok: true, act: () => g.pickPerk(k) }) })) : [];
     const lessonButtons = teach.map(([l, n, what]) => {
       const lv = TEACHES[l].level, price = TEACHES[l].price, have = knowsIt(l);
-      return { label: have ? `${n}: LEARNED` : pr.level < lv ? `${n}: LEVEL ${lv}` : `LEARN ${n} (${price})`, primary: !have && pr.level >= lv, act: () => detail(n, what + (have ? ' Learned.' : pr.level < lv ? ` From level ${lv}.` : ` ${price} gold.`), have || pr.level < lv ? undefined : { label: `LEARN IT (${price} GOLD)`, ok: pr.gold >= price, act: () => g.learn(l) }) };
+      return { label: have ? `${n}: LEARNED` : pr.level < lv ? `${n}: RANK ${lv}` : `LEARN ${n} (${price})`, primary: !have && pr.level >= lv, act: () => detail(n, what + (have ? ' Learned.' : pr.level < lv ? ` From level ${lv}.` : ` ${price} gold.`), have || pr.level < lv ? undefined : { label: `LEARN IT (${price} GOLD)`, ok: pr.gold >= price, act: () => g.learn(l) }) };
     });
     const drillButtons = DRILL_ORDER.map((d) => {
       const r = pr.drills?.[d] ?? 0, cap = drillCap(d, pr.level), price = drillPrice(d, r), open = ready(d) && r < cap;
-      const text = (d === 'technique' ? tech.text : DRILLS[d].text) + '.' + (!ready(d) ? " Once you've learned it." : r >= DRILLS[d].max ? ' As far as it goes.' : r >= cap ? ` More ranks at level ${cap * 2}.` : ` Rank ${r + 1} costs ${price} gold.`);
+      const text = (d === 'technique' ? tech.text : DRILLS[d].text) + '.' + (!ready(d) ? " More ranks once you've learned it." : r >= DRILLS[d].max ? ' No more ranks.' : r >= cap ? ` More ranks at level ${cap * 2}.` : ` Rank ${r + 1} costs ${price} gold.`);
       return { label: `${drillName(d)} ${r}/${DRILLS[d].max}`, act: () => detail(`${drillName(d)}, rank ${r} of ${DRILLS[d].max}`, text, open ? { label: `RANK ${r + 1} (${price} GOLD)`, ok: pr.gold >= price, act: () => g.buyDrill(d) } : undefined) };
     });
     panel.show(head, html, [...picks, ...lessonButtons, ...drillButtons]);

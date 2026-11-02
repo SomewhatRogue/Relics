@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ArenaRoom } from '../src/sim/room';
-import { BUTCHER, CHARGE, GUARD, HERO, ROLL, TICK, WEAPONS } from '../src/shared/tuning';
+import { BUTCHER, CHARGE, CLASS_DODGES, GUARD, HERO, ROLL, TICK, WEAPONS } from '../src/shared/tuning';
 import { NO_INTENT, type Hero, type Intent } from '../src/sim/types';
 import type { RelicId } from '../src/shared/magic';
 
@@ -8,6 +8,26 @@ import type { RelicId } from '../src/shared/magic';
 const arm = (h: Hero, r: RelicId) => ((h.relics = [h.relics[0], r]), (h.relic = r));
 
 const SWORD = WEAPONS.sword;
+
+// A Warrior has no dodge in play; these tests lend the sword one so the roll itself stays tested.
+beforeEach(() => void (CLASS_DODGES.WARRIOR = true));
+afterEach(() => void (CLASS_DODGES.WARRIOR = false));
+
+describe('no dodge', () => {
+  it('a Warrior or a Healer presses dodge and nothing happens', () => {
+    CLASS_DODGES.WARRIOR = false;
+    for (const weapon of ['sword', 'mace'] as const) {
+      const room = new ArenaRoom(1);
+      const h = room.join('me');
+      h.weapon = weapon;
+      const y0 = h.y;
+      room.setIntent('me', intent({ rollSeq: 1, my: -1 }));
+      room.step();
+      expect(h.act).not.toBe('roll');
+      expect(Math.abs(h.y - y0)).toBeLessThan(0.5);
+    }
+  });
+});
 
 /** A room with one hero standing just in front of the butcher, the dummies far away. */
 function setup(kind: 'cleave' | 'slam' = 'cleave') {

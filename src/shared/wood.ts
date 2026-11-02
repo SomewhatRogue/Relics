@@ -93,7 +93,7 @@ export const FEEDING: [number, number][] = [[7.8, 29.7], [13.0, 32.0], [15.9, 35
  *  or full-charge hits (`heavy`). */
 export type Count = 'kills' | 'dodge' | 'block' | 'parry' | 'slip' | 'backstab' | 'heavy' | 'grab' | 'none';
 /** The move a lesson's card shows (its control comes from the device). */
-export type Teach = 'attack' | 'roll' | 'block' | 'parry' | 'slip' | 'backstab' | 'heavy' | 'grab' | 'skill' | 'relic';
+export type Teach = 'attack' | 'roll' | 'step' | 'block' | 'parry' | 'slip' | 'backstab' | 'heavy' | 'grab' | 'skill' | 'relic';
 export interface Lesson { area: number; name: string; teach: string; card?: Teach; moves: ('attack' | 'roll' | 'block' | 'relic' | 'potion' | 'grab')[]; count: Count; need: number; hew: [number, number]; foes: (Foe & { variant?: 'looter' | 'lunger' | 'heavy' | 'stoker' })[]; more?: Lesson['foes'] }
 export const LESSONS: Lesson[] = [
   { area: 0, name: 'THE FIELD', teach: 'ATTACK', moves: ['attack'], count: 'kills', need: 0, hew: [5, 33],
@@ -117,10 +117,13 @@ export const LESSONS: Lesson[] = [
 const L = LESSONS, light = ['attack', 'roll'] as Lesson['moves'];
 const slip = (foes = L[3].foes): Lesson => ({ ...L[3], teach: 'LAST SECOND', card: 'slip', moves: light, count: 'slip', need: 2, foes });
 const scr = (x: number, y: number, v?: 'looter' | 'lunger' | 'heavy') => ({ kind: 'scrapper' as const, ...(v ? { variant: v } : {}), x, y, awake: true });
+// A Warrior or Healer has no dodge at all: what they learn on the path is to walk out of the stripes.
+const heavy = (l: Lesson, more: Lesson['moves'] = []): Lesson => ({ ...l, moves: [...l.moves.filter((m) => m !== 'roll'), ...more] });
+const step: Lesson = { ...L[1], teach: 'STEP OUT', card: 'step', moves: ['attack'], foes: [scr(31, 31, 'lunger'), scr(37, 35, 'lunger')] };
 const BY_CLASS: Record<HeroClass, Lesson[]> = {
   // Only the Warrior lifts: after the first three, the next two are for grabbing and throwing.
-  WARRIOR: [{ ...L[0], count: 'grab', need: 1, moves: ['attack', 'grab'] }, L[1], { ...L[2], moves: [...L[2].moves, 'grab'] }, { ...L[3], moves: [...L[3].moves, 'grab'] }, L[4]],
-  HEALER: [L[0], L[1], { ...L[2], need: 4 }, L[3], L[4]],
+  WARRIOR: [{ ...L[0], count: 'grab', need: 1, moves: ['attack', 'grab'] }, step, heavy(L[2], ['grab']), heavy(L[3], ['grab']), heavy(L[4])],
+  HEALER: [L[0], step, { ...heavy(L[2]), need: 4 }, heavy(L[3]), heavy(L[4])],
   ROGUE: [
     { ...L[0], foes: [...L[0].foes, { kind: 'scrapper', variant: 'looter', x: 10, y: 37 }] },
     { ...L[1], foes: [scr(31, 31, 'lunger'), scr(36, 35, 'lunger'), scr(38, 29, 'lunger')] },
@@ -162,6 +165,8 @@ export const LINES = {
   hut: "That's ^home^, kettle's older than you are. Hang on, I *didn't* leave that door open.",
   round: "Wait here, stray, I'll go round the back.",
   last: "Get the count to Odric, stray, Father Odric, he'll be wanting it.",
+  /** Cut off by the bite. */
+  scream: 'No! No, no, n',
   stoker: 'Eleven you burn. Eleven of mine. So, this one I _keep_.',
   north: "They all went north and left the field half-picked. I've *never* known them leave meat.",
   up: ['Up you get, and spit that dirt out.', "Not yet, stray, I've enough to burn as it is.", 'Have a breather, then go at it again, ~properly~ this time.'],
@@ -206,6 +211,7 @@ export const LINES = {
     move: 'Make sure you can still move. Walk a few steps and get your legs back under you.',
     attack: 'Hit them. Tap for quick blows; hold for a heavy one.',
     roll: "A red mark with a striped edge can't be blocked. Roll out of it just before it lands.",
+    step: "A red mark with a striped edge can't be blocked, and you've no roll. Walk out of it before it lands.",
     block: 'Hold your guard while the red fills. Each block costs breath (the yellow bar).',
     parry: 'Tap your guard the moment the red flashes white. It staggers them, and your next blow lands hard.',
     relic: 'Throw it with your relic button. A small goblin is carried off and pinned to the nearest wall. It comes back to your hand after a few seconds.',
@@ -217,5 +223,5 @@ export const LINES = {
     rollLight: "You can't hold a block, so roll out of any red before it lands. Nobody can block red with a striped edge.",
   },
   /** The freeze-frame prompts, the first times a lesson's blow comes. */
-  now: { roll: 'NOW: ROLL OUT', block: 'NOW: GUARD UP', parry: 'NOW: TAP GUARD', slip: 'NOW: ROLL THROUGH', attack: 'HIT IT' },
+  now: { step: 'NOW: STEP OUT', roll: 'NOW: ROLL OUT', block: 'NOW: GUARD UP', parry: 'NOW: TAP GUARD', slip: 'NOW: ROLL THROUGH', attack: 'HIT IT' },
 };

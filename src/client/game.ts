@@ -620,7 +620,7 @@ export class Game {
     let done = false;
     if (hold.need === 'time') done = hold.t >= hold.until;
     else if (hold.need === 'continue') done = this.continued || (hold.t > 0.6 && pressed);
-    else if (hold.need === 'move') done = hold.t > 0.6 && (Math.hypot(intent.mx, intent.my) > 0.3 || this.continued);
+    else if (hold.need === 'move') done = hold.t > (hold.kind === 'act' ? 0.1 : 0.6) && (Math.hypot(intent.mx, intent.my) > 0.3 || this.continued);
     else if (hold.need === 'roll') done = intent.rollSeq !== h.seen.roll;
     else if (hold.need === 'block') done = intent.blockSeq !== h.seen.block || intent.block;
     else if (hold.need === 'attack') done = intent.attackSeq !== h.seen.attack;
