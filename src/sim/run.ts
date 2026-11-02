@@ -1,7 +1,8 @@
 /**
  * A run: a job's rooms one after another. Each room's goal (clear the goblins; in the last room, the
  * job's objective) opens the way out; walking out starts the next room or ends the run. Kills pay
- * gold and experience, freed survivors come home with you, three downs and the run fails.
+ * gold and experience, the freed count once they're brought out (and not if the party kills them first),
+ * three downs and the run fails.
  */
 import { BOUNTY } from '../shared/progress';
 import type { Job } from '../shared/jobs';
@@ -30,6 +31,9 @@ export interface Run {
   carried?: number;
   raised?: number;
   teamkills?: number;
+  /** Blows landed on the freed, and freed people killed, by hero id (each player's own, so a friend's game reads theirs). */
+  rescueHits?: Record<string, number>;
+  rescueKills?: Record<string, number>;
   /** The road the party took into each room after a fork (by room index). */
   roads: Record<number, RoadId>;
   /** Players in the party when each room is built (it scales the goblins; the ones left, if some went home). */
@@ -54,6 +58,7 @@ export function interiorRoom(run: Run, blockIndex: number, door: string): ArenaR
   const plan = runInterior(run.job, run.index, blockIndex, door);
   const room = new ArenaRoom(run.job.seed * 3 + run.index * 11 + blockIndex + 7, { map: plan.map, foes: plan.foes, furniture: plan.props });
   room.exitOpen = true;
+  room.indoors = true;
   return room;
 }
 
@@ -72,9 +77,14 @@ export function tally(run: Run, room: ArenaRoom, events: FightEvent[], me: strin
       if (ev.id === me || players(room.heroes).some((h) => h.id === ev.id)) run.gold += ev.n;
     } else if (ev.k === 'collapse') {
       if (room.map.blocks.some((x) => x.kind === 'den' && x.x === ev.x && x.y === ev.y)) run.dens++;
-    } else if (ev.k === 'freed') {
+    } else if (ev.k === 'survivorhome') {
+      // Freed is not saved: they count once they're brought out (sim/survivors.ts).
       run.rescued++;
       run.xp += BOUNTY.rescue;
+    } else if (ev.k === 'survivorhit') {
+      if (ev.by && !ev.tick) (run.rescueHits ??= {})[ev.by] = (run.rescueHits[ev.by] ?? 0) + 1;
+    } else if (ev.k === 'survivordeath') {
+      if (ev.by) (run.rescueKills ??= {})[ev.by] = (run.rescueKills[ev.by] ?? 0) + 1;
     } else if (ev.k === 'pickedup') {
       if (ev.id === me) run.carried = (run.carried ?? 0) + 1;
       if (ev.by === me) run.raised = (run.raised ?? 0) + 1;
@@ -99,7 +109,9 @@ export function goal(run: Run, room: ArenaRoom): { text: string; done: boolean }
   }
   const o = run.job.objective;
   const cages = room.props.filter((p) => p.kind === 'cage' && !p.broken).length;
-  if (o === 'rescue') return { text: cages ? `Break the cages (${cages} left)` : 'Everyone is free. Get them out', done: cages === 0 };
+  // The freed still to be walked back to the way in.
+  const waiting = room.survivors.filter((s) => !s.dead && s.home < 0).length;
+  if (o === 'rescue') return { text: cages ? `Break the cages (${cages} left)` : 'Everyone is free. Get them out', done: cages === 0 && !waiting };
   if (o === 'larder') {
     const racks = room.props.filter((p) => p.kind === 'larder' && !p.broken).length;
     return { text: racks ? `Smash the larder (${racks} racks left)` : 'The larder is ruined. Get out', done: racks === 0 };
@@ -113,5 +125,5 @@ export function goal(run: Run, room: ArenaRoom): { text: string; done: boolean }
   if (o === 'hunt') return { text: bossDead ? `${run.job.boss} is dead. Get out` : `Kill ${run.job.boss}`, done: bossDead };
   // The story mission: the boss and every cage.
   if (!bossDead) return { text: `Kill ${run.job.boss}${cages ? `, free the caged (${cages})` : ''}`, done: false };
-  return { text: cages ? `Free the caged (${cages} left)` : 'Ring the bell: get out', done: cages === 0 };
+  return { text: cages ? `Free the caged (${cages} left)` : waiting ? 'Everyone is free. Get them out' : 'Ring the bell: get out', done: cages === 0 && !waiting };
 }

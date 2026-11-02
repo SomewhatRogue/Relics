@@ -26,7 +26,7 @@ import { LIFT, OX, OY, PX, paintMap, worldH, worldW } from './world';
 import { drawText, textWidth } from './pixfont';
 import { blockAt, blockFoot, drawBlock, drawRound } from './blocks';
 import { drawNpc } from './npcs';
-import { Captives } from './captives';
+import { drawCaged, drawSurvivor } from './captives';
 import { SPOT_REACH } from '../shared/town';
 import { dusk } from './streetlife';
 
@@ -51,8 +51,6 @@ export class Scene {
   focus: { x: number; y: number } | null = null;
   /** The relic held up over your head (the wood's find), and where the arrow by your feet points. */
   fanfare = false;
-  /** The caged and the freed (captives.ts). */
-  readonly captives = new Captives();
   pointTo: { x: number; y: number } | null = null;
   private heroAt: [number, number] | null = null;
 
@@ -206,11 +204,15 @@ export class Scene {
       // Someone caged: a mark over them, and their call when you're close.
       if (p.kind === 'cage' && !p.broken) {
         const near = !!me && Math.hypot(me.x - p.x, me.y - p.y) < 7;
-        items.push({ y: OY + p.y * PX + 0.2, draw: () => this.captives.caged(c, x, y, room.time, near, p.id) });
+        items.push({ y: OY + p.y * PX + 0.2, draw: () => drawCaged(c, x, y, room.time, near, p.id) });
       }
     }
-    // The freed, stood where their cages were.
-    this.captives.each(room, (fx, fy, draw) => items.push({ y: OY + fy * PX, draw: () => draw(c, OX + fx * PX - cx, OY + fy * PX - cy, room.time) }));
+    // The freed, where the room has them (the dead lie under everyone; the gone are gone).
+    for (const s of room.survivors ?? []) {
+      if (s.gone) continue;
+      const [x, y] = lerp('s:' + s.id, s.x, s.y);
+      items.push({ y: s.dead ? y - 20 : y, draw: () => drawSurvivor(c, s, x - cx, y - cy, room.time) });
+    }
     for (const ch of room.chests) {
       const x = OX + ch.x * PX - cx, y = OY + ch.y * PX - cy;
       items.push({ y: OY + ch.y * PX, draw: () => drawChest(c, ch, x, y) });

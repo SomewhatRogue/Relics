@@ -46,6 +46,8 @@ export class Soundscape {
     if (ev.k === 'shoot') return shotSound(ev.kind, this.heroAt(room, ev.x, ev.y)?.weapon);
     if (ev.k === 'charged') return chargedSound(this.heroAt(room, ev.x, ev.y)?.weapon ?? '');
     if (ev.k === 'block') return blockSound(this.heroAt(room, ev.x, ev.y)?.weapon ?? '');
+    // Someone you freed, hurt by the party, cries out (a burn's tick doesn't).
+    if (ev.k === 'survivorhit') return ev.tick ? undefined : sfx.hurt();
     if (ev.k === 'hit') {
       if (ev.tick) return;
       if (ev.on === 'hero') return sfx.hurt();

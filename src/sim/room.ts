@@ -25,13 +25,16 @@ import { release, stepCarry, tryGrab } from './grab';
 import { startBash, stepBash } from './bash';
 import { dropProp, newProp, propImpacts, roomProps, stepLift, stepProps, sweepProps, tryLift } from './props';
 import { stepParty, sweepAllies } from './party';
+import { stepSurvivors } from './survivors';
+import { ambush } from './ambush';
+import { sweepSurvivors } from './survivorhits';
 import { dropFrom, stepDrops, takeLoot } from './loot';
 import { hallow, rally, shadowstep, stepZones, ward } from './relics';
 import { forgedElement, has, traitsOf } from './traits';
 import { fireHook, stepHook } from './hook';
 import { stepJavelin, throwJavelin } from './javelin';
 import { laySnare, stepHound, stepSnare } from './ranger';
-import { NO_INTENT, type Zone, type Bolt, type Drop, type Enemy, type Prop, type FightEvent, type Hero, type Hook, type Intent, type Javelin, type Snare } from './types';
+import { NO_INTENT, type Zone, type Bolt, type Drop, type Enemy, type Prop, type FightEvent, type Hero, type Hook, type Intent, type Javelin, type Snare, type Survivor } from './types';
 
 export class ArenaRoom {
   time = 0;
@@ -56,6 +59,10 @@ export class ArenaRoom {
   chests: Chest[] = [];
   danger = 0;
   props: Prop[] = roomProps();
+  /** Whoever was freed from a cage (sim/survivors.ts), the dead where they fell. */
+  survivors: Survivor[] = [];
+  /** Inside a cottage or barn (the freed are home only once out of its door). */
+  indoors = false;
   intents = new Map<string, Intent>();
   /** Events from the latest tick (drawn as hits, sparks and sounds). */
   events: FightEvent[] = [];
@@ -64,6 +71,8 @@ export class ArenaRoom {
   private rng: Rng;
   /** Loot rolls on their own stream, so a drop never shifts what the goblins do. */
   private lootRng: Rng;
+  /** Ambushes by the door (sim/ambush.ts) on their own stream too. */
+  private doorRng: Rng;
   private acc = 0;
 
   /** The map this room is played on. */
@@ -81,6 +90,7 @@ export class ArenaRoom {
     this.danger = opts.danger ?? 0;
     this.rng = new Rng(seed);
     this.lootRng = new Rng(seed * 7919 + 13);
+    this.doorRng = new Rng(seed * 104729 + 31);
     this.map = opts.map ?? ARENA;
     useMap(this.map);
     this.squire = !!opts.squire;
@@ -155,16 +165,17 @@ export class ArenaRoom {
     useMap(this.map);
     for (const h of this.heroes) this.prev.set('h:' + h.id, [h.x, h.y]);
     for (const e of this.enemies) this.prev.set('e:' + e.id, [e.x, e.y]);
+    for (const s of this.survivors) this.prev.set('s:' + s.id, [s.x, s.y]);
     this.events = [];
     this.time += TICK;
     this.tick++;
-    const w: World = { heroes: this.heroes, enemies: this.enemies, javelins: this.javelins, props: this.props, now: this.time, ev: this.events };
+    const w: World = { heroes: this.heroes, enemies: this.enemies, javelins: this.javelins, props: this.props, survivors: this.survivors, now: this.time, ev: this.events };
     const hit = (e: Enemy, el: Hero['augments']['javelin'], n: number) => afflict(w, e, el, n);
     const acts: HeroActs = {
       fire: (h) => this.fire(h, w),
       loose: (h, s) => this.loose(h, s, w),
       struck: (h, e, n) => this.struck(h, e, n, w),
-      sweep: (h, s) => (sweepProps(h, s, w), sweepBlocks(h, s, this.events), sweepAllies(h, s, this.heroes, this.events)),
+      sweep: (h, s) => (sweepProps(h, s, w), sweepBlocks(h, s, this.events), sweepAllies(h, s, this.heroes, this.events), sweepSurvivors(h, s, w)),
       grab: (h) => tryGrab(h, this.enemies, this.time, this.events) || tryLift(h, this.props, this.events),
       carry: (h, inp, walk) => (h.lifting ? stepLift(h, inp, w, TICK, walk) : stepCarry(h, inp, this.enemies, this.time, TICK, this.events, walk)),
       drop: (h) => (release(h, this.enemies, this.events), dropProp(h, this.props)),
@@ -208,6 +219,9 @@ export class ArenaRoom {
       this.enemies.push(e);
     });
     stepElements(w);
+    // The freed: home out in the open at the way in; brought out of a house, maybe goblins waiting.
+    const door = stepSurvivors(w, TICK, this.indoors ? null : this.map.hero);
+    if (door) ambush(this.enemies, this.heroes, this.doorRng, door.x, door.y, this.events);
     this.zones = stepZones(this.zones, w);
     separate(this.heroes, this.enemies, this.props);
     this.landings();

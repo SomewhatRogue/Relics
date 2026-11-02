@@ -9,6 +9,7 @@ import { shove } from './bodies';
 import { damage, held, isDead } from './damage';
 import type { World } from './elements';
 import { damageProp } from './props';
+import { bashSurvivors } from './survivorhits';
 import type { Enemy, FightEvent, Hero } from './types';
 
 const hitBy = new WeakMap<Hero, Set<number>>();
@@ -46,6 +47,7 @@ export function stepBash(h: Hero, w: Enemy[], world: World, dt: number): void {
     if (p.lifted || p.broken || Math.hypot(p.x - h.x, p.y - h.y) > HERO.radius + p.radius + BASH.reach) continue;
     damageProp(p, BASH.propDmg, world, h.rollDx, h.rollDy);
   }
+  bashSurvivors(h, world, hit);
   // Ran into a wall, or ran its length.
   const blocked = moved < v * dt * 0.3;
   if (blocked) world.ev.push({ k: 'wallhit', x: h.x, y: h.y });

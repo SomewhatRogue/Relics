@@ -14,6 +14,7 @@ import { allyHit, players } from './party';
 import { rollCrit } from './combat';
 import { blastProps, damageProp } from './props';
 import { blastBlocks } from './buildings';
+import { blastSurvivors, shotSurvivor, survivorIn } from './survivorhits';
 import type { Bolt, Enemy, Hero } from './types';
 
 let nextId = 1;
@@ -55,6 +56,7 @@ export function blast(w: World, b: Bolt, x: number, y: number): void {
   w.ev.push(b.kind === 'smite' ? { k: 'smite', x, y } : { k: 'burst', x, y, r: b.burst, el: b.el });
   blastProps(x, y, b.burst, b.dmg, b.knock, w);
   blastBlocks(x, y, b.burst, b.dmg, b.el, w.now, w.ev);
+  if (b.kind !== 'smite') blastSurvivors(w, x, y, b.burst, b.dmg, b.owner, b.el);
   for (const e of w.enemies) {
     const d = Math.hypot(e.x - x, e.y - y);
     if (isDead(e) || e.act === 'carried' || d > b.burst + e.radius) continue;
@@ -154,6 +156,13 @@ export function stepBolt(b: Bolt, w: World, dt: number): boolean {
       if (b.burst) return blast(w, b, b.x, b.y), false;
       (b.hitHeroes ??= []).push(ally.id);
       allyHit(b.owner, ally, b.dmg, w.ev, b.dx, b.dy);
+      if (!b.pierce) return false;
+    }
+    // Someone freed in the way takes it too (solo as well: they're no fighters).
+    const sv = b.kind === 'net' ? undefined : survivorIn(w, b);
+    if (sv) {
+      if (b.burst) return blast(w, b, b.x, b.y), false;
+      shotSurvivor(w, b, sv);
       if (!b.pierce) return false;
     }
     if (b.travelled >= b.range) return end(b, w, false);

@@ -49,6 +49,21 @@ export const PROP = {
   oilRadius: 1.8,
 };
 
+/**
+ * Whoever was in a cage, once it breaks (sim/survivors.ts). Not fighters: a couple of blows kill them.
+ * They stand a moment, then follow the nearest player at a slow walk, keeping a gap and out of the way;
+ * nobody within `notice` and they wait where they are. They're home once brought out of the house they
+ * were caged in, or (caged out in the open) within `homeReach` of where the party came into the room;
+ * then they walk off toward it and are gone within `walkOff` seconds.
+ */
+export const SURVIVOR = { hp: 24, radius: 0.26, speed: 2.3, gap: 1.3, notice: 9, standUp: 1.4, room: 0.15, knock: 3, bumpEvery: 0.35, homeReach: 2.5, walkOff: 8 };
+
+/**
+ * Stepping out of a house with someone you've freed: a third of the time a few goblins are waiting by
+ * the door (2 or 3, more for a bigger party, never more than `most`), some of them the tougher sorts.
+ */
+export const AMBUSH = { chance: 1 / 3, min: 2, extra: 1, most: 5, near: 2.4, far: 3.4, variant: 0.3 };
+
 /** Where the training room's furniture stands. */
 export const ROOM_PROPS: { kind: PropKind; x: number; y: number }[] = [
   { kind: 'barrel', x: 1.3, y: 6.2 },

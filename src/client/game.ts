@@ -18,6 +18,7 @@ import { ArenaRoom } from '../sim/room';
 import { lessonOf, newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
 import { woodMap, WOOD_PROPS } from '../shared/wood';
 import { PACK } from '../sim/pack';
+import { walkOut } from '../sim/survivors';
 import { refreshHealth, statsOf } from '../sim/gearstats';
 import { goal, interiorRoom, isFinal, newRun, runRoom, tally, type Run } from '../sim/run';
 import { NO_INTENT, knows, type FightEvent, type Hero, type Intent, type Learned } from '../sim/types';
@@ -318,6 +319,8 @@ export class Game {
     const o = this.outside!, inner = this.hero, d = doorAt(o.door), h = o.hero;
     // ...and out after you.
     if (this.mode === 'run') this.followers.through(this.room, o.room, inner, d.x, d.y + 0.6);
+    // The freed you're leading come out too: home (the room may have goblins waiting).
+    if (this.mode === 'run') walkOut(this.room.survivors, this.room.heroes, o.room.survivors, d.x, d.y + 1.1);
     this.outside = null;
     this.room = o.room;
     this.room.heroes.push(h);
@@ -530,7 +533,7 @@ export class Game {
     this.result = { won, job: run.job, gold, xp, rescued, levels, relic, treasure: kept, sold };
     this.run = null;
     this.give({
-      stats: { jobs: won ? 1 : 0, saved: rescued, kills: run.kills, dens: run.dens, butchers: run.butchers ?? 0, gold, raised: run.raised ?? 0, falls: run.falls ?? 0, carried: run.carried ?? 0, teamkills: run.teamkills ?? 0 }, rescued, dens: run.dens, days: 1,
+      stats: { jobs: won ? 1 : 0, saved: rescued, kills: run.kills, dens: run.dens, butchers: run.butchers ?? 0, gold, raised: run.raised ?? 0, falls: run.falls ?? 0, carried: run.carried ?? 0, teamkills: run.teamkills ?? 0, rescueHits: run.rescueHits?.[ME] ?? 0, rescueKills: run.rescueKills?.[ME] ?? 0 }, rescued, dens: run.dens, days: 1,
       story: won && run.job.objective === 'story' ? run.job.id : undefined,
       deed: won && !followed ? { title: run.job.title, place: run.job.place.name, party } : undefined,
     });

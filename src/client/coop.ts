@@ -158,7 +158,8 @@ export class CoopGuest {
     if (m.t !== 'msg' || m.from !== this.lead) return;
     this.heardLead = this.now;
     const d = m.d as { s?: string; end?: { won: boolean; run: Run }; save?: string };
-    if (d.end) return void (this.ended = d.end);
+    // (The end's run swaps ids like a patch does, so my own tallies are under `me`.)
+    if (d.end) return void (this.ended = JSON.parse(JSON.stringify(d.end).split('"me"').join('"@lead"').split(`"${this.myId}"`).join('"me"')));
     if (typeof d.save === 'string') return void (this.save = d.save);
     if (typeof d.s !== 'string') return;
     // The leader's own hero is `me` in their room; in mine, I am. (Ids are quoted whole, so only ids change.)
@@ -177,6 +178,7 @@ export class CoopGuest {
     const room = this.room!;
     for (const h of room.heroes) room.prev.set('h:' + h.id, [h.x, h.y]);
     for (const e of room.enemies) room.prev.set('e:' + e.id, [e.x, e.y]);
+    for (const s of room.survivors) room.prev.set('s:' + s.id, [s.x, s.y]);
     // Where the leader has me, when this patch says (my hero's own x, y get my walk between patches).
     const mine = body.p.heroes?.u.find(([k]) => k === 'me')?.[1] as { x?: number; y?: number } | undefined;
     const s = this.dec.apply(body.p, !!body.f) as unknown as Record<string, unknown[]>;

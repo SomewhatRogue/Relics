@@ -1154,3 +1154,22 @@ puddles, weeds, missing cobbles, arrows) stay on top; the earth, path, mud and s
 - The 2x jointed figures were reverted (Kyle: "doughy and soft", and the idle bob jumped about; the 1x
   look was grittier). The work stays on branch `juice` (97ffc72) for reference. The anticipation and
   payoff pass from before the 2x step stays in.
+## 2026-11-01: the freed can be hurt, and are only saved once you get them out (Kyle; Opus 5.5)
+- Breaking a cage puts its person in the room as a body (`sim/survivors.ts`, tuning `SURVIVOR` in
+  `shared/props.ts`): 24 health, they stand a moment, then follow the nearest player at a slow walk a
+  gap behind, step out of a hero's way (heroes never push past them), and wait where they are with
+  nobody near. Goblins ignore them for now. They're in the room's state, so guests see the same people.
+- Everything of the party's that can hurt a friend hurts them, at full weight and solo too
+  (`sim/survivorhits.ts`): swings, arrows and spells, blasts, a slammed barrel, the oil going up, a
+  javelin, goblins and props flung into them, the shield charge, and fire caught from burning goblins
+  and buildings. A holy smite, the net and the hound spare them. The blow that breaks the cage doesn't
+  land on whoever's inside. Killed, they fall and stay where they fell.
+- Freed is not saved (Kyle: bring them out, don't babysit the whole job): they count as brought home
+  (`survivorhome`) once walked out of the house they were caged in, or, caged out in the open, back to
+  where the party came into the room. Then they walk off and are gone. A rescue job's goal now waits on
+  them. Stepping out of a house with someone, a third of the time 2 or 3 goblins (more for a bigger
+  party, at most 5, some lungers or shields) are waiting by the door (`sim/ambush.ts`, the room's own
+  seeded stream).
+- The Roll: RESCUES STRUCK (blows landed on the freed) and RESCUES KILLED take the place of PICKED UP
+  BY FRIENDS on the unlucky side (`carried` is still counted, off the board). Counted per hero id in the
+  run so a friend's game reads its own; the job's end now swaps ids for a guest the way patches do.
