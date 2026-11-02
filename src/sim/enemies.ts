@@ -160,6 +160,10 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     }
     return;
   }
+  if (e.alert === false && e.feeding) {
+    if (!notice(e, heroes, others, now, ev)) return;
+    e.feeding = false;
+  }
   if (e.alert === false && !notice(e, heroes, others, now, ev)) return wander(e, rng, now, dt);
   const t = nearest(e, heroes, now);
   if (!t || e.kind === 'dummy') return;

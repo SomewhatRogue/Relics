@@ -17,6 +17,8 @@ export interface Block {
   door?: string;
   /** Wooden buildings in a run can be smashed and burned: health, when it caught fire (-1 not), burned down. */
   hp?: number; maxHp?: number; burning?: number; ruined?: boolean;
+  /** Burning for show, never spreading or burning down (the wagons on the battlefield). */
+  smoulder?: boolean;
   /** A door that won't open yet (the story or the town works open it). */
   locked?: boolean;
 }
@@ -37,7 +39,7 @@ export interface Npc {
   /** Cutscene puppetry: lifted off the ground (pixels), walking, or dead (`headless` standing, `body` on the ground). */
   lift?: number;
   walking?: boolean;
-  pose?: 'headless' | 'body';
+  pose?: 'headless' | 'body' | 'corpse';
 }
 
 /** Where someone is at time `t` (walking their round, or standing where they stand), and which way they face. */
@@ -160,7 +162,7 @@ export function collide(p: { x: number; y: number }, r: number): void {
   p.y = Math.max(r * 0.6, Math.min(m.h - r, p.y));
   for (const c of m.rounds) push(p, r, c);
   for (const c of m.braziers) push(p, r, c);
-  for (const n of m.npcs ?? []) if (!n.path) push(p, r, { x: n.x, y: n.y, r: 0.32 });
+  for (const n of m.npcs ?? []) if (!n.path && !n.pose) push(p, r, { x: n.x, y: n.y, r: 0.32 });
   for (const b of m.blocks) {
     if (!b.ruined) box(p, r, b);
   }

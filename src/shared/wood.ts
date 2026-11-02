@@ -61,7 +61,7 @@ function treeLines(): Round[] {
 export function woodMap(): GameMap {
   const blocks: Block[] = [
     // The field: wagons burning where the column broke.
-    { x: 4, y: 31, w: 2.4, h: 1.2, kind: 'cart' }, { x: 15, y: 27, w: 2.4, h: 1.2, kind: 'cart' }, { x: 11, y: 36, w: 2.4, h: 1.2, kind: 'cart' },
+    { x: 4, y: 31, w: 2.4, h: 1.2, kind: 'cart', smoulder: true }, { x: 15, y: 27, w: 2.4, h: 1.2, kind: 'cart', smoulder: true }, { x: 11, y: 36, w: 2.4, h: 1.2, kind: 'cart', smoulder: true },
     // Hew's clearing: his kilns and his woodpile.
     { x: 26, y: 13, w: 2.4, h: 2, kind: 'hearth', label: 'KILN' }, { x: 36, y: 13, w: 2.4, h: 2, kind: 'hearth', label: 'KILN' }, { x: 31, y: 20, w: 3, h: 1, kind: 'sacks' },
     // The stream: stones in the water.
@@ -74,9 +74,19 @@ export function woodMap(): GameMap {
     name: 'GREYHOLLOW', w: WOOD.w, h: WOOD.h, wallFace: 3, rounds: treeLines(), blocks,
     braziers: [{ x: 5.2, y: 30.6, r: 0.5 }, { x: 16.2, y: 26.6, r: 0.5 }, { x: 32.5, y: 17.5, r: 0.5 }, { x: 52.5, y: 8.5, r: 0.4 }],
     torches: [], hero: { x: 8, y: 34 }, exit: null, theme: { ...THEMES.forest, ambient: [0.86, 0.84, 0.74], moon: 0, day: true },
-    npcs: [{ x: 16, y: 30.5, name: 'HEW', talk: 'hew', look: 'burner' }],
+    npcs: [{ x: 16, y: 30.5, name: 'HEW', talk: 'hew', look: 'burner' }, ...FIELD_DEAD.map(([x, y], i) => ({ x, y, name: '', talk: 'dead', look: i % 3 ? 'soldier' : 'soldier2', pose: 'corpse' as const }))],
   };
 }
+
+/** The battlefield the day after: the column's dead in heaps where the looters are at them, and more
+ *  lying where they fell; dead goblins among them; the wagons still burning. */
+export const FIELD_DEAD: [number, number][] = [
+  [8.4, 29.6], [9.0, 29.1], [8.7, 30.3], [13.6, 31.7], [14.3, 31.3], [16.3, 35.8], [16.9, 35.2], [15.9, 36.3], [10.6, 37.4], [11.2, 37.0],
+  [5.2, 35.6], [3.2, 27.5], [18.4, 30.6], [6.4, 38.0], [12.2, 27.2], [19.5, 34.2], [2.8, 33.6], [27.5, 30.2], [34.0, 33.5],
+];
+export const GOBLIN_DEAD: [number, number, 'behead' | 'halve' | 'opened'][] = [[6.6, 32.8, 'halve'], [11.8, 33.5, 'opened'], [17.6, 29.2, 'behead'], [9.4, 26.6, 'opened'], [14.6, 37.8, 'halve']];
+/** Where the field's looters are crouched at the dead when you come round. */
+export const FEEDING: [number, number][] = [[7.8, 29.7], [13.0, 32.0], [15.9, 35.0], [10.1, 37.6], [17.6, 35.6]];
 
 /** Each lesson: what it teaches, what you're allowed to press, what it counts, how many, the goblins it brings. */
 /** What a lesson counts: kills, dodges, blocks, parries, last-second dodges (`slip`), blows from behind,

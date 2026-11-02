@@ -4,7 +4,7 @@
  * pick you up when you fall, run the cutscene at the hut, then the Stoker, the relic and the road.
  * Plain data, stepped after the room each frame by whoever runs the room.
  */
-import { AREAS, GATES, LINES, ROAD_OUT, STOKER, STOKER_HELP, areaAt, lessonsFor, type Lesson, type Teach } from '../shared/wood';
+import { AREAS, FEEDING, GATES, GOBLIN_DEAD, LINES, ROAD_OUT, STOKER, STOKER_HELP, areaAt, lessonsFor, type Lesson, type Teach } from '../shared/wood';
 import type { HeroClass } from '../shared/weapons';
 import { inArea } from '../shared/arena';
 import type { Foe } from '../shared/terrain';
@@ -75,6 +75,12 @@ export function newWood(room: ArenaRoom, cls: HeroClass = 'WARRIOR'): WoodState 
   const w: WoodState = { stage: 0, entered: false, count: 0, ids: [], more: false, cut: -1, caption: null, stoker: 0, helped: false, hewAlive: true, relic: false, done: false, wake: 0, hold: null, drilled: 0, praised: 0, drillAt: -1, from: null, said: 0, upAt: -1, cls };
   const h = room.heroes.find((x) => x.id === HERO_ID);
   if (h) Object.assign(h, { act: 'down', actT: 0, actDur: 999, lying: true });
+  // The field as you come round: goblins dead among the column's dead, and the looters already at them.
+  for (const [x, y, how] of GOBLIN_DEAD) Object.assign(spawn(room, { kind: 'scrapper', x, y }), { act: 'dead', hp: 0, death: how, actT: 0, actDur: 1e9, alert: false, drill: false });
+  w.ids = lessonsFor(cls)[0].foes.map((f, i) => {
+    const [x, y] = FEEDING[i % FEEDING.length], e = spawn(room, { ...f, x, y, awake: false });
+    return Object.assign(e, { feeding: true, fx: 1, fy: 0.3 }).id;
+  });
   return w;
 }
 
@@ -269,7 +275,10 @@ export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: nu
       say(w, room, 'HEW', LINES.hut, 2);
       return;
     }
-    w.ids = lesson.foes.map((f) => spawn(room, f).id);
+    // (The field's looters are already there, at the dead: they look up now.)
+    if (w.stage === 0 && w.ids.length) {
+      for (const e of room.enemies) if (w.ids.includes(e.id)) Object.assign(e, { feeding: false, alert: true });
+    } else w.ids = lesson.foes.map((f) => spawn(room, f).id);
     const move: Teach = lesson.card ?? (['attack', 'roll', 'block', 'parry'] as const)[w.stage];
     const said = move === 'backstab' ? LINES.teach.backstab : move === 'slip' ? LINES.teach.slip : move === 'heavy' ? (w.cls === 'MAGE' ? LINES.teach.charge : LINES.teach.heavy) : [LINES.attack, LINES.dodge, LINES.block, LINES.parry][w.stage];
     const light = lessonsFor(w.cls)[3].count === 'slip';

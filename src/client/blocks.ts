@@ -127,7 +127,20 @@ function furnish(b: Block, rect: (x: number, y: number, w: number, h: number, c:
     rect(1, wallY + 2, w - 2, 1, '#d4a537');
     for (let y = wallY + 5; y < wallY + l.tall - 2; y += 3) for (let x = 3; x < w - 3; x += 4) rect(x, y, 2 + ((x + y) % 2), 1, '#3a3640');
   }
-  if (b.kind === 'cart') rect(1, wallY + l.tall - 4, 5, 5, '#3a2a1a'), rect(w - 6, wallY + l.tall - 4, 5, 5, '#3a2a1a'), rect(2, 1, w - 4, roofH - 2, '#9a8a5a');
+  if (b.kind === 'cart') {
+    // A wagon: plank bed, the bare hoops of its cover, two spoked wheels (charred if it's burning).
+    const burnt = !!b.smoulder, wood = burnt ? '#2a1e16' : '#7a5a34', dark = burnt ? '#14100c' : '#4a3420';
+    rect(0, 0, w, roofH, burnt ? '#1e1814' : '#6a4a2a');
+    for (let x = 0; x < w; x += 3) rect(x, 0, 1, roofH, dark);
+    for (let x = 3; x < w - 2; x += Math.max(4, Math.round(w / 4))) rect(x, 0, 1, roofH + 3, burnt ? '#3a2e24' : '#9a8a5a');
+    rect(0, wallY, w, l.tall, wood);
+    for (let y = wallY + 2; y < wallY + l.tall; y += 3) rect(0, y, w, 1, dark);
+    for (const cx of [4, w - 5]) {
+      rect(cx - 3, wallY + l.tall - 6, 7, 7, '#1a1410');
+      rect(cx - 2, wallY + l.tall - 5, 5, 5, burnt ? '#2a2018' : '#5a3d22');
+      rect(cx, wallY + l.tall - 6, 1, 7, '#1a1410'), rect(cx - 3, wallY + l.tall - 3, 7, 1, '#1a1410');
+    }
+  }
   if (b.kind === 'rack') for (let x = 1; x < w; x += 3) rect(x, 0, 1, roofH + l.tall - 2, '#9aa3ad');
   if (b.kind === 'tower') {
     // Battlements, and a lit slit high up.
@@ -168,7 +181,7 @@ export function drawBlock(c: Ctx, b: Block, x: number, y: number, lit: boolean):
     c.glow.fillRect(Math.round(x + w / 2 - 2), foot - 7, 1, 1);
     c.glow.fillRect(Math.round(x + w / 2 + 1), foot - 7, 1, 1);
   }
-  if ((b.burning ?? -1) >= 0) return flames(c, b, x, top, w, Math.round(b.h * PX), l.tall);
+  if ((b.burning ?? -1) >= 0 || b.smoulder) return flames(c, b, x, top, w, Math.round(b.h * PX), l.tall);
   if (!l.windows || !lit || b.maxHp) return;
   // Lit windows either side of the door: someone lives here.
   const wy = Math.round(y + b.h * PX - l.tall + 5);
@@ -177,28 +190,50 @@ export function drawBlock(c: Ctx, b: Block, x: number, y: number, lit: boolean):
   if (b.kind === 'forge') (c.glow.fillStyle = Math.floor(c.now * 8) % 2 ? '#ff9a3c' : '#ff6a20'), c.glow.fillRect(Math.round(x + w / 2 - 2), Math.round(y + b.h * PX - 5), 4, 3);
 }
 
-/** A building on fire: flames over the roof (more as it burns down), smoke rising, the windows aglow. */
+/** A building (or a wagon) on fire: tongues of flame with white-hot roots licking up off the roof, bits
+ *  tearing loose and rising, embers drifting, and a thick column of smoke rolling off downwind. */
 function flames(c: Ctx, b: Block, x: number, top: number, w: number, roofH: number, tall: number): void {
-  const share = 1 - (b.hp ?? 0) / (b.maxHp || 1), n = Math.max(2, Math.round((w / 7) * (0.4 + 0.6 * share)));
-  for (let i = 0; i < n; i++) {
-    const fx = Math.round(x + ((i + 0.5) * w) / n + Math.sin(i * 2.3) * 3), fy = Math.round(top + roofH * (0.3 + 0.6 * ((i * 7) % 5) / 5));
-    const h = 4 + Math.round(3 * (1 + Math.sin(c.now * 11 + i * 1.9)) + share * 4);
-    for (let k = 0; k < h; k++) {
-      c.glow.fillStyle = k < 2 ? '#fff1b0' : k < h / 2 ? '#ffb44c' : k < h - 1 ? '#ff7a28' : '#a83a10';
-      const wob = Math.round(Math.sin(c.now * 9 + i + k * 0.7) * (k / 4));
-      c.glow.fillRect(fx + wob - (k < h / 2 ? 1 : 0), fy - k, k < h / 2 ? 3 : 1, 1);
-    }
-  }
-  // Smoke drifting up and off.
-  for (let j = 0; j < 5; j++) {
-    const p = (c.now * 0.35 + j * 0.2 + b.x * 0.13) % 1, r = 2 + p * 6;
-    c.lit.globalAlpha = (1 - p) * 0.55;
-    c.lit.fillStyle = '#3a363c';
-    c.lit.fillRect(Math.round(x + w / 2 + Math.sin(p * 6 + j) * 6 + p * 14 - r), Math.round(top - p * 46 - r), Math.round(r * 2), Math.round(r * 1.6));
+  const share = b.smoulder ? 0.8 : 1 - (b.hp ?? 0) / (b.maxHp || 1), t = c.now, g = c.glow;
+  const n = Math.max(3, Math.round((w / 5) * (0.5 + 0.5 * share))), base = top + Math.round(roofH * 0.7);
+  // Smoke first (behind): big soft billows, dark at the root and greying as they climb.
+  for (let j = 0; j < 9; j++) {
+    const p = (t * 0.22 + j / 9 + b.x * 0.13) % 1, r = 3 + p * 9;
+    c.lit.globalAlpha = (1 - p) * 0.6;
+    c.lit.fillStyle = p < 0.3 ? '#1e1a1c' : p < 0.6 ? '#3a3438' : '#5a5458';
+    const sx = x + w / 2 + Math.sin(p * 5 + j * 1.7) * 5 + p * 22, sy = top - 6 - p * 60;
+    c.lit.beginPath();
+    c.lit.ellipse(Math.round(sx), Math.round(sy), r, r * 0.8, 0, 0, Math.PI * 2);
+    c.lit.fill();
   }
   c.lit.globalAlpha = 1;
-  c.glow.fillStyle = Math.floor(c.now * 12) % 2 ? '#ff9a3c' : '#ff6a20';
-  for (const wx of [Math.round(w * 0.22), Math.round(w * 0.72)]) c.glow.fillRect(Math.round(x + wx), top + roofH + Math.round(tall / 3), 3, 3);
+  // Tongues: each a tapering column, white then yellow then orange then red at the tip, flickering.
+  const COL = ['#fffbe8', '#fff1b0', '#ffd27a', '#ffb44c', '#ff8a30', '#ff6a20', '#d8441a', '#9a2a10'];
+  for (let i = 0; i < n; i++) {
+    const fx = x + ((i + 0.5) * w) / n + Math.sin(i * 2.3) * 2, seed = i * 1.93 + b.x;
+    const h = Math.round(6 + 5 * share + 4 * (0.5 + 0.5 * Math.sin(t * 9 + seed * 3)) + 3 * (0.5 + 0.5 * Math.sin(t * 23 + seed)));
+    const half = 2 + Math.round(share * 1.5);
+    for (let k = 0; k < h; k++) {
+      const f = k / h, wide = Math.max(0, Math.round(half * (1 - f * f))), sway = Math.sin(t * 7 + seed + k * 0.45) * f * 2.5;
+      for (let dx = -wide; dx <= wide; dx++) {
+        const edge = Math.abs(dx) / (wide + 0.5);
+        g.fillStyle = COL[Math.min(COL.length - 1, Math.floor((f * 0.75 + edge * 0.45) * COL.length))];
+        g.fillRect(Math.round(fx + dx + sway), base - k, 1, 1);
+      }
+    }
+    // A lick tearing loose and rising.
+    const lp = (t * 1.6 + seed * 0.37) % 1;
+    if (lp < 0.6) (g.fillStyle = lp < 0.3 ? '#ffd27a' : '#ff7a28'), g.fillRect(Math.round(fx + Math.sin(t * 5 + seed) * 2), Math.round(base - h - 2 - lp * 10), 1, lp < 0.3 ? 2 : 1);
+  }
+  // Embers drifting up and off.
+  for (let e = 0; e < 10; e++) {
+    const p = (t * 0.5 + e * 0.137 + b.y * 0.21) % 1;
+    g.fillStyle = p < 0.5 ? '#ffd27a' : '#ff6a20';
+    g.fillRect(Math.round(x + ((e * 37) % Math.max(1, w)) + Math.sin(t * 3 + e) * 3 + p * 10), Math.round(base - 6 - p * 50), 1, 1);
+  }
+  // The windows (a building) glow and flicker.
+  if (b.smoulder) return;
+  g.fillStyle = Math.floor(t * 12) % 2 ? '#ff9a3c' : '#ff6a20';
+  for (const wx of [Math.round(w * 0.22), Math.round(w * 0.72)]) g.fillRect(Math.round(x + wx), top + roofH + Math.round(tall / 3), 3, 3);
 }
 
 export const blockFoot = (b: Block) => OY + (b.y + b.h) * PX;

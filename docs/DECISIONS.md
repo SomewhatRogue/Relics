@@ -692,3 +692,13 @@ arrow that misses you takes the first goblin in its line (x1.5), and a butcher's
 catches small goblins under it (FRIENDLY). The Warrior's field in the wood adds a grab-and-throw beat with
 the second pair of looters. Found while testing: a hero who skipped the wood got a black screen in town
 (the wood's fade stayed up); fixed, and the fade only ever shows in the wood.
+
+## 2026-11-01: the field the day after; fire (Claude Opus 5.5)
+Kyle: more evidence of a battle when you wake, the looters already eating rather than appearing, and fire
+that looks like fire. The field now has the column's dead lying where they fell and in heaps (FIELD_DEAD,
+drawn as corpses: on their backs or sides, blood under them, now and then an arrow still in them), dead
+goblins among them (GOBLIN_DEAD, cut down, in two, beheaded), and the field's looters crouched at the heaps
+(Enemy.feeding: they stay put, head down, and don't look up until you come close or the lesson starts).
+The three wagons burn for show (Block.smoulder) and are drawn as wagons (plank bed, hoops, spoked wheels,
+charred). Fire is redrawn everywhere: tapering tongues white to red, licks tearing loose, embers, a thick
+rolling smoke column.

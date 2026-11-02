@@ -293,7 +293,7 @@ export class Scene {
     for (const b of map.blocks) {
       const [bx, by] = blockAt(b), mx = bx + (b.w * PX) / 2 - cx;
       // A building on fire lights the whole street; its ashes smoulder.
-      if ((b.burning ?? -1) >= 0 && !b.ruined) lights.push({ x: mx, y: by + (b.h * PX) / 2 - cy - 10, r: 70 + b.w * 10 + Math.sin(now * 13 + bx) * 6, i: 1.2, c: [1, 0.55, 0.25] });
+      if (((b.burning ?? -1) >= 0 || b.smoulder) && !b.ruined) lights.push({ x: mx, y: by + (b.h * PX) / 2 - cy - 10, r: 70 + b.w * 10 + Math.sin(now * 13 + bx) * 6, i: 1.2, c: [1, 0.55, 0.25] });
       if (b.ruined) lights.push({ x: mx, y: by + (b.h * PX) / 2 - cy, r: 22 + b.w * 3, i: 0.35, c: [1, 0.35, 0.15] });
       if (b.maxHp || (b.kind !== 'house' && b.kind !== 'church' && b.kind !== 'hall' && b.kind !== 'forge')) continue;
       lights.push({ x: bx + (b.w * PX) / 2 - cx, y: by + b.h * PX - cy, r: 34, i: 0.45, c: b.kind === 'forge' ? [1, 0.5, 0.25] : [1, 0.8, 0.5] });

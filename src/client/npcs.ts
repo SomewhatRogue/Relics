@@ -25,6 +25,9 @@ const LOOKS: Record<string, Look> = {
   // Hew: soot to the elbows, a white beard, a leather apron.
   burner: { body: '#2a2622', trim: '#4a3a2a', skin: DARK, apron: '#5a3d22', hair: [['r', 4, 1, 4, 1, '#e8e4ee'], ['r', 4, 5, 4, 2, '#e8e4ee'], ['r', 3, 0, 6, 1, '#3a3020']] },
   elder: { body: '#4a4652', trim: '#6a6470', skin: SKIN, hair: [['r', 4, 1, 4, 1, '#d8d4de'], ['r', 4, 5, 4, 2, '#d8d4de']] },
+  // The column's dead on the Greyhollow field: mail and a steel cap, or a leather jerkin.
+  soldier: { body: '#4a5262', trim: '#8a8f9a', skin: SKIN, hair: [['r', 3, 0, 6, 3, '#7a808c']] },
+  soldier2: { body: '#5a4632', trim: '#3a2a1a', skin: SKIN, hair: [['r', 4, 1, 4, 1, '#5a3d22']] },
   guard: { body: '#7a1d1d', trim: '#d4a537', skin: SKIN, hair: [['r', 3, 0, 6, 3, '#9aa3ad'], ['r', 4, 3, 4, 1, '#6a6470']] },
   bard: { body: '#2f6a5a', trim: '#d8c48a', skin: SKIN, hair: [['r', 3, 0, 7, 2, '#7a2a6a'], ['p', 9, 0, '#d8d0bc']] },
   ranger: { body: '#3f6b3a', trim: '#8b6a3a', skin: DARK, hair: [['r', 3, 0, 6, 3, '#3f5a32']] },
@@ -51,6 +54,20 @@ SPRITES.child = makeSprite(9, 11, [
 ]);
 
 /** Someone standing about, breathing; a gold mark overhead says you can talk to them, their name when you're close. */
+/** One of the column's dead: on their back or side, in what they bled. */
+function drawCorpse(c: Ctx, s: Sprite, x: number, y: number, n: Npc): void {
+  const k = Math.round(n.x * 7 + n.y * 3), side = k % 2 ? 1 : -1, g = c.lit;
+  g.fillStyle = '#5a0c0c';
+  for (let i = 0; i < 14; i++) g.fillRect(Math.round(x - 7 + ((k * (i + 3)) % 13)), Math.round(y - 3 + ((k + i * 5) % 5)), 2, 1);
+  g.fillStyle = '#7a1010';
+  g.fillRect(Math.round(x - 3), Math.round(y - 1), 5, 2);
+  for (const t of [c.lit, c.glow]) t.save(), t.translate(Math.round(x), Math.round(y - 3)), t.rotate((side * Math.PI) / 2 + (k % 5) * 0.06);
+  blit(c, s, 0, s.h / 2, false);
+  for (const t of [c.lit, c.glow]) t.restore();
+  // Now and then an arrow still in them.
+  if (k % 3 === 0) (g.fillStyle = '#6b4a2b'), g.fillRect(Math.round(x + 1), Math.round(y - 9), 1, 6), (g.fillStyle = '#d8d0bc'), g.fillRect(Math.round(x), Math.round(y - 10), 3, 1);
+}
+
 /** Hew after the bite: still held up without his head, or thrown down on his side. */
 function drawDead(c: Ctx, s: Sprite, x: number, y: number, n: Npc): void {
   const neck = 7, both = [c.lit, c.glow];
@@ -75,6 +92,7 @@ export function drawNpc(c: Ctx, n: Npc, x: number, y: number, near: boolean, fx 
   walking ||= !!n.walking;
   const bob = n.pose ? 0 : Math.floor(c.now * (walking ? 7 : 1.5) + n.x) % 2 ? -1 : 0;
   shadow(c, x, y, 5);
+  if (n.pose === 'corpse') return drawCorpse(c, s, x, y, n);
   if (n.pose) return drawDead(c, s, x, y, n);
   blit(c, s, x, y - (n.lift ?? 0) + bob, walking ? fx < 0 : Math.floor(c.now * 0.25 + n.y) % 2 === 0);
   // A guard carries a spear upright.

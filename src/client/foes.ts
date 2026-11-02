@@ -136,6 +136,12 @@ export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number): void {
   const hurt = e.hp < e.maxHp && (c.now - e.hitAt < 3 || e.hp < e.maxHp * 0.5);
   if ((e.kind === 'butcher' || e.kind === 'scrapper') && hurt) ring(c, x, y, e.kind === 'butcher' ? 11 : 6, '#e24b4a', e.hp / e.maxHp);
   if (e.kind === 'butcher') return butcher(c, e, x, y, flash);
+  if (e.kind === 'scrapper' && e.feeding) {
+    // Crouched at the dead: head down, tearing, a fleck now and then.
+    const dip = Math.floor(c.now * 2.5 + e.id) % 3 ? 2 : 1;
+    if (Math.floor(c.now * 5 + e.id * 3) % 7 === 0) (c.lit.fillStyle = '#8a1212'), c.lit.fillRect(Math.round(x + 4), Math.round(y - 6), 1, 1);
+    return scrapper(c, e, x, y + dip, flash);
+  }
   if (e.kind === 'scrapper') return scrapper(c, e, x, y, flash);
   const a = e.attack;
   shadow(c, x, y, 5);

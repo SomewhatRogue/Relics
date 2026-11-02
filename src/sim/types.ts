@@ -237,6 +237,8 @@ export interface Enemy extends Body {
   drill?: boolean;
   /** A goblin built for one lesson in the prologue wood (shared/wood.ts VARIANTS). */
   variant?: 'looter' | 'lunger' | 'heavy' | 'stoker';
+  /** Crouched at the dead, eating: stays put and doesn't look up until something comes close. */
+  feeding?: boolean;
   /** False while it hasn't noticed anyone (see ALERT); undefined counts as awake. */
   alert?: boolean;
   /** A named goblin (a hunt's quarry, a story boss). */
