@@ -36,14 +36,17 @@ export const chimneyOf = (h: House, w: number) => (h.leanTo > 0 ? Math.round(w *
 
 /** Paint the roof and front wall of a job's cottage or barn (the door and scorching come after). */
 export function paintHouse(rect: Rect, b: Block, h: House, w: number, roofH: number, tall: number): void {
+  // A better-off street's: stone under slate, no lean-to, shutters on the windows.
+  if (b.style === 'stone') h = { ...h, thatch: false, roof: 1, leanTo: 0 };
   const lw = leanW(h, w), lx = h.leanTo < 0 ? 0 : w - lw, mx = h.leanTo < 0 ? lw : 0, mw = w - lw, barn = b.kind === 'barn';
   roof(rect, h, mx, 0, mw, roofH);
-  const wall = barn ? '#5a3d22' : WALLS[(h.roof + (h.thatch ? 1 : 0)) % 3];
+  const wall = barn ? '#5a3d22' : b.style === 'stone' ? WALLS[2] : WALLS[(h.roof + (h.thatch ? 1 : 0)) % 3];
   rect(mx, roofH, mw, tall, wall), rect(mx, roofH, mw, 1, '#14121a');
   if (barn) for (let x = mx + 2; x < mx + mw; x += 4) rect(x, roofH + 1, 1, tall - 1, '#4a3420');
   else if (wall === WALLS[2]) for (let y = roofH + 3; y < roofH + tall; y += 4) for (let x = mx + ((y >> 2) % 2) * 3; x < mx + mw; x += 6) rect(x, y, 5, 1, '#45414c');
   else for (const x of [mx, mx + mw - 2, mx + Math.round(mw * 0.35)]) rect(x, roofH + 1, 2, tall - 1, '#3e2a1a');
   if (!barn) for (const x of windowsOf(h, w)) rect(x - 1, roofH + tall - 16, 5, 5, '#3e2a1a'), rect(x, roofH + tall - 15, 3, 3, '#14100c');
+  if (b.style === 'stone') for (const x of windowsOf(h, w)) rect(x - 2, roofH + tall - 15, 1, 3, '#4a3424'), rect(x + 3, roofH + tall - 15, 1, 3, '#4a3424'), rect(x - 1, roofH + 1, 5, 1, '#6a6470');
   if (lw) {
     // The lean-to: lower, rough boards, a plank roof.
     const drop = 7;

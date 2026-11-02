@@ -7,6 +7,9 @@ export type Circle = { x: number; y: number; r: number };
 export type RoundKind = 'pillar' | 'tree' | 'pine' | 'rock' | 'hay' | 'well' | 'lantern' | 'support' | 'stump' | 'target' | 'stone' | 'post' | 'grate' | 'statue' | 'bush' | 'reed' | 'deadtree'
   // Paint only, a speck to bump: crows at the blood, moths round a garden lamp.
   | 'crows' | 'moths'
+  // A place's things (shared/sites.ts): a wayside shrine, a fountain, a market cross, a washing line, a scarecrow,
+  // a cookfire's ring of stones, a charcoal clamp, a stack of cut peat.
+  | 'shrine' | 'fountain' | 'cross' | 'washline' | 'scarecrow' | 'cookfire' | 'clamp' | 'peat'
   // Paint only: a dog nosing about, smoke rising past the wall.
   | 'dog' | 'smoke';
 export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall' | 'tent' | 'rockwall' | 'fence' | 'granary' | 'wall' | 'den'
@@ -17,7 +20,9 @@ export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall'
   // Wickhold's other buildings and things in the street.
   | 'tower' | 'tavern' | 'monument' | 'rubble' | 'cart' | 'rack'
   // Under siege: the gallows on the square, wicker hurdles barricading the gate.
-  | 'gallows' | 'hurdle';
+  | 'gallows' | 'hurdle'
+  // A shack of scrap boards and sailcloth (a shanty, a camp).
+  | 'shack';
 export interface Round extends Circle { kind: RoundKind }
 export interface Block {
   x: number; y: number; w: number; h: number; kind: BlockKind; label?: string;
@@ -42,6 +47,8 @@ export interface Block {
    */
   fate?: 'standing' | 'wrecked' | 'blocked' | 'burning';
   big?: boolean;
+  /** Paint only: a house of stone with a slate roof (a better-off street). */
+  style?: 'stone';
 }
 /** Paint only, on the floor: never collided against or decided on. */
 export type MarkKind = 'blood' | 'drag' | 'debris' | 'scorch' | 'trample' | 'planks' | 'beds' | 'flowers' | 'mound' | 'fallenpost' | 'green'
@@ -53,7 +60,9 @@ export type MarkKind = 'blood' | 'drag' | 'debris' | 'scorch' | 'trample' | 'pla
  * the winner is `cobble`, the floor's own cobbles show). A box, an ellipse in the box (`round`), or a
  * line from (x, y) to (x + w, y + h) `line` tiles either side. Paint only.
  */
-export type SoilMat = 'cobble' | 'earth' | 'mud' | 'swept' | 'straw' | 'ash' | 'wet';
+export type SoilMat = 'cobble' | 'earth' | 'mud' | 'swept' | 'straw' | 'ash' | 'wet'
+  // Out on a job: grass over another floor, a ploughed field in rows, grain standing.
+  | 'grass' | 'furrow' | 'crop';
 export interface Soil { mat: SoilMat; x: number; y: number; w: number; h: number; round?: boolean; line?: number }
 /** A floor mark's area (tiles). A `path` runs as a line from (x, y) to (x + w, y + h). */
 export interface Mark { kind: MarkKind; x: number; y: number; w: number; h: number }

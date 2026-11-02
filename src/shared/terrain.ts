@@ -1,14 +1,16 @@
 /**
- * Run rooms, laid out from the job's seed: each place kind has its own floor, walls, light, cover and
- * furniture (cottages and a well in a village, a barn and hay on a farm, trees in a forest, rock walls
- * and pit props in a mine, a river with its fords, bog pools in a marsh, broken walls in ruins). Ruin
- * and the room's place in the run set how many goblins. The last room
- * holds the objective: cages, a named butcher, or the larder racks. Same seed, same room.
+ * Run rooms. Each place is laid out to its own plan (shared/sites.ts: a village round its green, a
+ * shanty, a better-off street, a manor's grounds, a wood, a mine...), the same every time you go there;
+ * the job's seed puts the objective, the goblins and the chests into it. Ruin and the room's place in
+ * the run set how many goblins. The last room holds the objective: cages, a named butcher, or the
+ * larder racks. Same seed, same room.
  */
 import type { Block, BlockKind, GameMap, Ledge, Npc, Road, Round, RoundKind, Theme, Water } from './arena.js';
 import { settle } from './houses.js';
 import type { Job, PlaceKind } from './jobs.js';
-import { WOOD, type PropKind } from './props.js';
+import type { PropKind } from './props.js';
+import { layOut, placeSeed, siteWater } from './sites.js';
+import { siteClear, wooden, type Site } from './sitekit.js';
 import { Rng } from './rng.js';
 import { rollBackline } from './roster.js';
 
@@ -32,16 +34,10 @@ export const THEMES: Record<PlaceKind, Theme> = {
   ruins: { floor: 'flagstone', back: 'stone', ambient: [0.2, 0.19, 0.26], moon: 0.5 },
 };
 
-/** What each kind of place is furnished with. */
-const KIT: Record<PlaceKind, { blocks: [BlockKind, number, number, number][]; rounds: [RoundKind, number, number][]; props: [PropKind, number][]; torches: boolean }> = {
-  village: { blocks: [['house', 3.5, 2, 5]], rounds: [['well', 0.5, 1], ['stump', 0.3, 3], ['bush', 0.35, 4]], props: [['barrel', 5], ['crate', 3], ['oil', 1]], torches: true },
-  farm: { blocks: [['barn', 5, 3, 2], ['fence', 3.5, 0.35, 4], ['house', 3.5, 2, 1]], rounds: [['hay', 0.6, 6], ['bush', 0.35, 2]], props: [['barrel', 3], ['crate', 3], ['table', 1], ['oil', 1]], torches: true },
-  field: { blocks: [['fence', 3.5, 0.35, 3]], rounds: [['hay', 0.6, 6], ['stump', 0.3, 3], ['tree', 0.6, 2]], props: [['crate', 2], ['barrel', 2]], torches: false },
-  forest: { blocks: [], rounds: [['tree', 0.6, 9], ['pine', 0.5, 8], ['stump', 0.3, 3], ['bush', 0.35, 5], ['rock', 0.5, 2]], props: [['crate', 2], ['oil', 1]], torches: false },
-  mine: { blocks: [['rockwall', 3.5, 1.2, 6]], rounds: [['support', 0.3, 7], ['rock', 0.5, 4]], props: [['crate', 3], ['oil', 3]], torches: true },
-  river: { blocks: [], rounds: [['reed', 0.3, 10], ['tree', 0.6, 4], ['rock', 0.5, 3], ['bush', 0.35, 3]], props: [['crate', 2], ['barrel', 1]], torches: false },
-  marsh: { blocks: [], rounds: [['reed', 0.3, 12], ['deadtree', 0.45, 6], ['stump', 0.3, 3]], props: [['crate', 1], ['oil', 1]], torches: false },
-  ruins: { blocks: [['rubble', 2.6, 1.4, 4], ['wall', 3.5, 0.7, 4]], rounds: [['pillar', 0.45, 6], ['statue', 0.5, 2], ['stone', 0.35, 4]], props: [['crate', 2], ['barrel', 2], ['oil', 1]], torches: true },
+/** Which places have torches on their back wall. */
+const KIT: Record<PlaceKind, { torches: boolean }> = {
+  village: { torches: true }, farm: { torches: true }, field: { torches: false }, forest: { torches: false },
+  mine: { torches: true }, river: { torches: false }, marsh: { torches: false }, ruins: { torches: true },
 };
 
 /**
@@ -64,12 +60,6 @@ function waters(kind: PlaceKind, rng: Rng, reserve: (x: number, y: number, r: nu
   return out;
 }
 
-/** Wooden blocks get health (and a door if they have one); stone stays as it is. */
-function wooden(b: Block): Block {
-  const w = WOOD[b.kind];
-  return w ? { ...b, hp: w.hp, maxHp: w.hp, burning: -1, door: w.door } : b;
-}
-
 /** A run's fork: the middle room of a three-room job has two ways out. */
 export const isFork = (job: Job, index: number) => job.rooms >= 3 && index === job.rooms - 2;
 export const ROADS: Record<RoadId, { label: string; text: string }> = {
@@ -80,9 +70,10 @@ export const ROADS: Record<RoadId, { label: string; text: string }> = {
 export function planRoom(job: Job, index: number, road?: RoadId): RoomPlan {
   const rng = new Rng(job.seed * 31 + index * 7 + 1), kind = job.place.kind, kit = KIT[kind], final = index === job.rooms - 1;
   const rounds: Round[] = [], blocks: Block[] = [], spots: { x: number; y: number; r: number }[] = [];
+  let site: Site | null = null;
   const free = (x: number, y: number, r: number, skip?: object) =>
     Math.hypot(x - SPAWN.x, y - SPAWN.y) > r + 2.4 && Math.hypot(x - MID, y - 0.5) > r + 2.4 && Math.abs(x - MID) > r + 1.3 &&
-    spots.every((s) => s === skip || Math.hypot(s.x - x, s.y - y) > s.r + r + 0.9);
+    spots.every((s) => s === skip || Math.hypot(s.x - x, s.y - y) > s.r + r + 0.9) && (!site || siteClear(site, x, y, r));
   const spot = (r: number, y0 = 2.2, y1 = H - 3): { x: number; y: number } | null => {
     for (let t = 0; t < 50; t++) {
       const x = rng.range(1.4 + r, W - 1.4 - r), y = rng.range(y0 + r, y1 - r);
@@ -94,7 +85,9 @@ export function planRoom(job: Job, index: number, road?: RoadId): RoomPlan {
   const fork = isFork(job, index), obj = final ? job.objective : 'clear';
   const roads: Road[] | undefined = fork ? (['high', 'low'] as RoadId[]).map((r, i) => ({ road: r, label: ROADS[r].label, area: { x: i ? W - 5 : 3, y: 0, w: 2, h: 0.9 } })) : undefined;
   for (const r of roads ?? []) spots.push({ x: r.area.x + 1, y: 0.8, r: 1.4 });
-  const water = waters(kind, rng, (x, y, r) => spots.push({ x, y, r }));
+  const own = siteWater(job, index, W, H);
+  for (const w of own ?? []) spots.push({ x: w.x + w.w / 2, y: w.y + w.h / 2, r: Math.max(w.w, w.h) / 2 + 0.2 });
+  const water = own ?? waters(kind, new Rng(placeSeed(job.place, index) + 2), (x, y, r) => spots.push({ x, y, r }));
   // Raised ground: always on the high road, sometimes elsewhere; archers up on it.
   const foes: Foe[] = [], ledges: Ledge[] = [];
   if (!fork && obj !== 'burn' && (road === 'high' || (road !== 'low' && index >= 1 && rng.next() < 0.4))) {
@@ -129,18 +122,9 @@ export function planRoom(job: Job, index: number, road?: RoadId): RoomPlan {
     const c = spot(0.5, 1.5, H / 2);
     if (c) props.push({ kind: 'larder', ...c });
   }
-  for (const [k, w, h, n] of kit.blocks) for (let i = 0; i < n; i++) {
-    const r = Math.hypot(w, h) / 2, c = spot(r);
-    if (c) blocks.push(wooden({ x: c.x - w / 2, y: c.y - h / 2, w, h, kind: k }));
-  }
-  for (const [k, r, n] of kit.rounds) for (let i = 0; i < n; i++) {
-    const c = spot(r);
-    if (c) rounds.push({ ...c, r, kind: k });
-  }
-  for (const [k, n] of kit.props) for (let i = 0; i < n; i++) {
-    const c = spot(0.5);
-    if (c) props.push({ kind: k, ...c });
-  }
+  // The place itself, to its plan, round the ways in and out, the raised ground, the water and the job's spots.
+  site = layOut(job, index, { w: W, h: H, fork, water }, roads ? roads.map((r) => r.area) : [EXIT], ledges.flatMap((l) => [l, ...l.ramps]), [...spots], SPAWN);
+  blocks.push(...site.blocks), rounds.push(...site.rounds), props.push(...site.props);
   // Goblins at their fires: a band or two by each, at rest until they see you. The first room is all
   // small ones; butchers come deeper in.
   const fires = [spot(0.35, 3, H - 7), spot(0.35, 3, H / 2)].filter(Boolean) as { x: number; y: number }[];
@@ -203,5 +187,7 @@ export function planRoom(job: Job, index: number, road?: RoadId): RoomPlan {
     ledges: ledges.length ? ledges : undefined, roads, npcs: dead.length ? dead : undefined, water: water.length ? water : undefined,
     marks: spill.length ? spill : undefined,
   };
+  // The place's own ground, floor and back wall.
+  Object.assign(map, { theme: { ...map.theme, floor: site.floor, back: site.back ?? map.theme.back }, soil: site.soil, marks: [...site.marks, ...spill] });
   return { map, foes, props, chests };
 }

@@ -1340,3 +1340,21 @@ and he couldn't tell when or where he could leave.
   job gets their own tallies, not the leader's.
 - The results say how many were lost to a fire.
 - On a job, the banner fades when you're near the top of a room so it doesn't hide the way on.
+## 2026-11-01: places with a plan (Kyle; Opus 5.5)
+
+- Every place on the board is one of twelve sorts (shared/sites.ts): Barrowby a village round its
+  green (cottages facing the lane, yards and fences, kitchen gardens, the well and a shrine, strip
+  fields and hedges at the edges); Tollan's Farm a farmstead; Lowfurrow Fields fields cut by tracks and
+  hedgerows; Fennick Ford a better-off street (stone terraces, gutters, a walled garden, a courtyard,
+  a fountain or market cross, stalls, a gatehouse); the Charcoal Camps and Brokenbridge shanties
+  (shacks and tents along a twisting muddy path, cookfires, washing lines, a latrine ditch; charcoal
+  clamps in the wood, the broken bridge by the river); Hesketh Hall a manor's grounds; Ketterby a
+  village gone to ruin; Hangman's Wood a wood with its clearing and gallows; the Copperdeep Shafts a
+  gallery; the Sheepwash a riverbank with sheep pens; the Peat Cuts water in rows; Sallow Carr a
+  willow carr. A place not on the list gets its kind's sort.
+- A place's plan is seeded by its name and the room, not the job, so it looks the same every visit;
+  the job's seed still places the objective, goblins and chests. The objective is placed first and the
+  plan drops whatever would land on it, the way in or out, the forks' roads, raised ground or water,
+  or the clear line up the middle.
+- The ground comes from soil shapes (grass, ploughed furrows, standing grain, earth, mud, gravel)
+  over each place's floor. Enemy rolls, themes' light and torches are untouched.

@@ -41,6 +41,9 @@ const FAMILY: Record<Exclude<Soil['mat'], 'cobble'>, string[]> = {
   wet: ['#1e2226', '#23282d', '#282e34', '#2e353c'],
   straw: ['#4a3e26', '#55472a', '#62532f', '#3e3420'],
   ash: ['#232224', '#29282b', '#302e31', '#1c1b1d'],
+  grass: ['#233021', '#26331f', '#2b3923', '#2e3d25'],
+  furrow: ['#2a221a', '#30271d', '#362c21', '#3c3125'],
+  crop: ['#4a3e24', '#544628', '#5e4f2c', '#433822'],
 };
 
 /** A shape's box, grown by as far as the noise can push an edge (tiles). */
@@ -70,6 +73,10 @@ function colourAt(mat: Exclude<Soil['mat'], 'cobble'>, x: number, y: number, px:
   if (mat === 'earth' || mat === 'swept') return r < 0.025 ? '#57525e' : r < 0.035 ? '#2e2820' : col;
   if (mat === 'mud') return r < 0.03 ? '#3a4044' : r < 0.06 ? '#1c1813' : col;
   if (mat === 'wet') return r < 0.05 ? '#4a5866' : col;
+  // Grass in tufts; a field ploughed in rows (dark in the furrow, lighter on the ridge); grain in ears.
+  if (mat === 'grass') return r < 0.12 ? ['#3a4c2c', '#46582f', '#1d2818'][Math.floor(r * 30) % 3] : col;
+  if (mat === 'furrow') return px % 8 < 4 ? fam[0] : r < 0.06 ? '#4e4232' : fam[2 + (py % 4 < 2 ? 1 : 0)];
+  if (mat === 'crop') return r < 0.35 ? ['#8a7a3a', '#a08c44', '#6b5a2e', '#b8a050'][Math.floor(r * 40) % 4] : col;
   if (mat === 'straw') return r < 0.3 ? ['#8a7a3a', '#a08c44', '#6b5a2e'][Math.floor(r * 10) % 3] : col;
   return r < 0.04 ? '#6a5a4a' : col;
 }
