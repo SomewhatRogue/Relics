@@ -448,7 +448,7 @@ export class Game {
       g.close();
       this.remote = null;
       this.run = end.run;
-      this.finish(end.won);
+      this.finish(end.won, true);
     }
     return ev;
   }
@@ -465,8 +465,10 @@ export class Game {
     return b && { x: doorAt(b).x, y: doorAt(b).y + 0.5 };
   }
 
-  private finish(won: boolean): void {
+  /** The run's over. `followed`: it was a friend's job (they write it on the board, not you). */
+  private finish(won: boolean, followed = false): void {
     const run = this.run!, p = this.profile, w = this.world;
+    const party = this.coop ? this.coop.members.map(([id, name]) => (id === p.id ? p.name : name)) : [p.name];
     // Leading: everyone's told how it went (each friend's game pays them from the run).
     this.coop?.end(won, run);
     forgetSession();
@@ -495,6 +497,7 @@ export class Game {
     this.give({
       stats: { jobs: won ? 1 : 0, saved: rescued, kills: run.kills, dens: run.dens }, rescued, dens: run.dens, days: 1,
       story: won && run.job.objective === 'story' ? run.job.id : undefined,
+      deed: won && !followed ? { title: run.job.title, place: run.job.place.name, party } : undefined,
     });
     this.enterTown({ x: 24.1, y: 14.8 });
   }
@@ -806,11 +809,22 @@ export class Game {
 
   /** Your vote at the council (it decides once enough heroes have voted). */
   vote(choice: string): void {
-    this.give({ vote: choice });
+    this.give({ vote: choice, voter: device() });
   }
 }
 
 /** A friend's hero takes their press counters as already seen (so nothing pressed in town fires). */
 function syncSeen(h: Hero, i: Intent): void {
   Object.assign(h.seen, { attack: i.attackSeq, block: i.blockSeq, roll: i.rollSeq, weapon: i.weaponSeq, relic: i.relicSeq, relicSwap: i.relicSwapSeq, relicPick: i.relicPickSeq, augment: i.augmentSeq, cls: i.classSeq, take: i.takeSeq, grab: i.grabSeq, gear: i.gearSeq, potion: i.potionSeq, open: i.openSeq });
+}
+
+/** This browser, as one voter (all its heroes share it): made once, kept. */
+export function device(): string {
+  try {
+    let d = localStorage.getItem('relic-device');
+    if (!d) localStorage.setItem('relic-device', (d = 'd' + Math.random().toString(36).slice(2, 14)));
+    return d;
+  } catch {
+    return 'dnostorage';
+  }
 }

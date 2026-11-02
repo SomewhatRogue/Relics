@@ -828,3 +828,11 @@ which moves the page to the media channel.
 - A job with friends is kept in this browser (`session.ts`, 15 minutes fresh): a reload goes
   straight back in as a friend, and the old leader coming back follows whoever leads now.
 - Known: module id counters (bolts, drops) restart on the new leader, so an id can repeat once.
+
+## 2026-11-01: the board remembers, one voice per device (Opus 5.5)
+
+- A job won is written to the shared world as a deed (title, place, the party's names) by the
+  browser that ran it; the board shows the last five under DONE LATELY. The world server cleans it.
+- Council votes are cast by the device (`relic-device` in this browser), not the hero, so one
+  person's heroes share one voice (Kyle's worry). A second browser is still a second voice; real
+  one-per-person needs sign-in, later if it's ever gamed.

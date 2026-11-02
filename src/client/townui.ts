@@ -6,7 +6,7 @@ import { TRAINERS, housesFor, type SpotId } from '../shared/town';
 import { ballot } from '../shared/worldsync';
 import { openSquare } from './squareui';
 import { WANT, ARMOR, MODS, REROLL, STEEL, TIERS, nextLevel, POTION, POTIONS, type PotionId, AUGMENTS, CLASS_KITS, CLASS_ORDER, CLASS_SKILL, ELEMENT_NAME, RELICS, TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
-import type { Game } from './game';
+import { device, type Game } from './game';
 import { line } from './speech';
 import { PACK } from '../sim/pack';
 import { CHURCH, COAL, COPY, SMITH, TALLY } from './copy';
@@ -39,8 +39,11 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       (q.mine ? `<button data-setout>SET OUT</button> <button data-quit class="ghost">TAKE IT DOWN</button>`
         : q.in ? `<div class="d">WAITING ON ${esc(q.members[0][1])}</div><button data-quit class="ghost">LEAVE</button>`
         : q.asked ? `<div class="d">ASKED TO JOIN</div><button data-quit class="ghost">NEVER MIND</button>`
-        : q.members.length < PARTY_MAX ? `<button data-joinparty="${i}">JOIN</button>` : '<div class="d">FULL</div>') + '</div>').join('') + '<h3>JOBS</h3>' : '';
-    const html = partyHtml + jobs.map((j, i) =>
+        : q.members.length < PARTY_MAX ? `<button data-joinparty="${i}">JOIN</button>` : '<div class="d">FULL</div>') + '</div>').join('') : '';
+    // Jobs done lately, by whoever did them (the shared world's, online).
+    const deeds = (w.deeds ?? []).slice(0, 5);
+    const doneHtml = deeds.length ? '<h3>DONE LATELY</h3>' + deeds.map((d) => `<div class="m">Day ${Number(d.day) || 1}: ${esc(d.title)}, by ${d.party.map(esc).join(', ')}.</div>`).join('') : '';
+    const html = partyHtml + doneHtml + (partyHtml || doneHtml ? '<h3>JOBS</h3>' : '') + jobs.map((j, i) =>
       `<div class="job ${j.objective === 'story' ? 'story' : j.deep ? 'deep' : ''}"><div class="t">${j.objective === 'story' ? 'STORY: ' : ''}${j.title}</div>` +
       `<div class="m">${j.place.name}, ${j.place.region}. ${RUIN[j.place.ruin]}. ${j.rooms} rooms${j.twist === 'night' ? '. At night' : ''}. Pays ${Math.round(j.reward * rewardMult(w))} gold.</div>` +
       `<div class="d">${j.text}</div><button data-job="${i}">${pt ? 'GO ALONE' : 'TAKE THE JOB'}</button>${pt ? ` <button data-gather="${i}">GATHER A PARTY</button>` : ''}</div>`).join('');
@@ -59,7 +62,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       return panel.show('REEVE HOLLIS', status + say('Reeve Hollis', `${c.label}. That's what the council said, so that's what we do. Some of them will never forgive the rest. That's councils.`) + p(c.text) + p('What comes next is still being written. Hollis will nail it up when it is.'));
     }
     if (!councilOpen(w)) return panel.show('REEVE HOLLIS', status + say('Reeve Hollis', "Bring six of ours home and ring Barrowby's bell, and I'll call the council. Until then the only thing to decide is who's on the wall tonight, and that's always me."));
-    const b = ballot(w), mine = w.ballots[d.id]?.[pr.id], need = g.link?.online ? QUORUM : 1;
+    const b = ballot(w), mine = w.ballots[d.id]?.[device()] ?? w.ballots[d.id]?.[pr.id], need = g.link?.online ? QUORUM : 1;
     panel.show('THE COUNCIL SITS', status + p(`<b>${d.question}</b>`) + d.choices.map((c) => p(`<b>${c.label}.</b> ${c.text} <span class="dim">(${b.counts[c.id] ?? 0} for)</span>`)).join('') +
       p(need > 1 ? `The council decides when ${need} heroes have voted: ${b.voters} so far.${mine ? ' Your voice is in; you can change it until it decides.' : ''}` : 'Playing alone, off the shared world: your vote decides.'),
       d.choices.map((c) => ({ label: `${mine === c.id ? 'VOTED: ' : 'VOTE: '}${c.label.toUpperCase()}`, primary: mine !== c.id, act: () => (g.vote(c.id), again()) })));

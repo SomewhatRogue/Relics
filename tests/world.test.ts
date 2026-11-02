@@ -132,3 +132,32 @@ describe('the town', () => {
     expect(chargeFull(WEAPONS.longbow, h)).toBeLessThan(chargeFull(WEAPONS.longbow));
   });
 });
+
+describe('the board and the council, shared', () => {
+  it('a job done goes on the board for everyone, newest first, kept to a few', async () => {
+    const { contribute, DEEDS } = await import('../src/shared/worldsync');
+    const { newWorld } = await import('../src/shared/story');
+    const w = newWorld();
+    const hero = { id: 'hkyle00001', name: 'KYLE', cls: 'WARRIOR' as const };
+    for (let i = 0; i < DEEDS + 3; i++) contribute(w, { hero, deed: { title: `Job ${i}`, place: 'Barrowby', party: ['KYLE', 'SAM'] } });
+    expect(w.deeds).toHaveLength(DEEDS);
+    expect(w.deeds![0]).toMatchObject({ title: `Job ${DEEDS + 2}`, party: ['KYLE', 'SAM'] });
+  });
+  it("one device is one voice: a second hero on it changes that voice, it doesn't add one", async () => {
+    const { contribute } = await import('../src/shared/worldsync');
+    const { newWorld, CHAPTER_1 } = await import('../src/shared/story');
+    const w = newWorld();
+    Object.assign(w, { rescued: 99, storyDone: [CHAPTER_1.mission.id] });
+    const [a, b] = CHAPTER_1.decision.choices.map((c) => c.id);
+    contribute(w, { hero: { id: 'hone000001', name: 'ONE', cls: 'MAGE' }, vote: a, voter: 'dphone0001' }, 9);
+    contribute(w, { hero: { id: 'htwo000002', name: 'TWO', cls: 'ROGUE' }, vote: b, voter: 'dphone0001' }, 9);
+    expect(Object.keys(w.ballots[CHAPTER_1.decision.id])).toEqual(['dphone0001']);
+  });
+  it('the world server cleans a deed and a voter from the wire', async () => {
+    const { clean } = await import('../api/_world');
+    const c = clean({ hero: { id: 'hkyle00001', name: 'Kyle', cls: 'WARRIOR' }, voter: 'dphone0001', deed: { title: "Rescue <b>at</b> Hangman's Wood", place: "Hangman's Wood", party: ['kyle', 'sam<script>', 'a', 'b', 'c'] } });
+    expect(c?.voter).toBe('dphone0001');
+    expect(c?.deed?.title).not.toContain('<');
+    expect(c?.deed?.party).toEqual(['KYLE', 'SAMSCRIPT', 'A', 'B']);
+  });
+});

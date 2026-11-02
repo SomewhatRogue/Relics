@@ -40,6 +40,10 @@ export function clean(raw: unknown): Contribution | null {
   out.days = num(c.days, 1);
   if (c.story === CHAPTER_1.mission.id) out.story = c.story;
   if (CHAPTER_1.decision.choices.some((x) => x.id === c.vote)) out.vote = c.vote as string;
+  if (typeof c.voter === 'string' && /^[\w-]{6,40}$/.test(c.voter)) out.voter = c.voter;
+  const d = c.deed as Record<string, unknown> | undefined, words = (v: unknown, n: number) => String(v ?? '').replace(/[^A-Za-z0-9 ',.-]/g, '').slice(0, n);
+  if (d && typeof d === 'object' && Array.isArray(d.party))
+    out.deed = { title: words(d.title, 60), place: words(d.place, 40), party: d.party.slice(0, 4).map((x) => String(x).toUpperCase().replace(/[^A-Z0-9 ]/g, '').slice(0, 12)).filter(Boolean) };
   return out;
 }
 

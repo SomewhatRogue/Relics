@@ -25,8 +25,10 @@ export interface WorldState {
   works: Record<string, number>;
   /** Goblin dens burned out, all told. */
   dens: number;
-  /** Council votes in progress: decision id -> hero id -> choice. */
+  /** Council votes in progress: decision id -> voter (a device; a hero id in old worlds) -> choice. */
   ballots: Record<string, Record<string, string>>;
+  /** Jobs done lately, for the board, newest first (worldsync DEEDS). */
+  deeds?: { day: number; title: string; place: string; party: string[] }[];
 }
 
 export const newWorld = (): WorldState => ({ chapter: 1, day: 1, rescued: 0, storyDone: [], flags: {}, votes: [], lantern: 0, works: {}, dens: 0, ballots: {} });

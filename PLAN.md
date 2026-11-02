@@ -116,9 +116,9 @@ and burns out a goblin den on a job.
    Not yet: the party can't split into buildings (everyone goes in with the leader); a job handed
    on from inside a building restarts that building's room only; the leader's mid-fight effects
    (sounds, sparks) for a friend come with the patches, so a lost patch loses its sparks.
-3. Results on the board: a finished job written for everyone, with who was in it.
+3. DONE 2026-11-01: results on the board (DONE LATELY: the job and who did it).
 4. World quests: open only with 3+ in town; hard.
-5. Town votes. Without sign-in the game knows devices, not people: a vote kept per device token (all
-   of a device's heroes share it) stops character-hopping but not a second browser. Real one-per-
+5. Town votes. DONE 2026-11-01: one voice per device (all its heroes share it). Without sign-in a
+   second browser is still a second voice. Real one-per-
    person needs a sign-in (Google, Apple or an email link). Start per device; add sign-in if it's
    ever gamed.

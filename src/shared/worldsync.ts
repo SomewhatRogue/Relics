@@ -9,6 +9,8 @@ import { CHAPTER_1, QUORUM, vote, type WorldState } from './story.js';
 import type { WorkId } from './works.js';
 
 export interface HeroTag { id: string; name: string; cls: HeroClass }
+/** How many jobs done the board keeps (newest first). */
+export const DEEDS = 8;
 
 export interface Contribution {
   hero: HeroTag;
@@ -22,8 +24,11 @@ export interface Contribution {
   works?: Partial<Record<WorkId, number>>;
   /** A story mission done. */
   story?: string;
-  /** A council vote. */
+  /** A council vote, and who casts it: the device, not the hero, so one person's heroes share one voice. */
   vote?: string;
+  voter?: string;
+  /** A job done, for the board: what, where, and the party that did it. */
+  deed?: { title: string; place: string; party: string[] };
   /** Days that pass (a finished run). */
   days?: number;
 }
@@ -36,7 +41,8 @@ export function contribute(w: WorldState, c: Contribution, quorum = QUORUM): voi
   w.day += c.days ?? 0;
   for (const [k, n] of Object.entries(c.works ?? {})) w.works[k] = (w.works[k] ?? 0) + (n ?? 0);
   if (c.story && !w.storyDone.includes(c.story)) w.storyDone.push(c.story);
-  if (c.vote) vote(w, c.hero.id, c.vote, quorum);
+  if (c.vote) vote(w, c.voter ?? c.hero.id, c.vote, quorum);
+  if (c.deed) (w.deeds ??= []).unshift({ ...c.deed, day: w.day }), (w.deeds.length = Math.min(w.deeds.length, DEEDS));
 }
 
 /** The Roll of the Brave: per stat, the top heroes. */
