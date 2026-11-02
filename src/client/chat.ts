@@ -115,7 +115,7 @@ export class Chat {
   }
 
   private mute(id: string, name: string): void {
-    if (this.mutes.toggle(id)) this.log.drop(id), this.note(id, name, 'is muted on this device. Tap the name to hear them again.');
+    if (this.mutes.toggle(id)) this.log.drop(id), this.note(id, name, 'is muted on this device. Tap or click the name to hear them again.');
     else this.note(id, name, 'can be heard again.');
   }
 
