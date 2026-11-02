@@ -84,8 +84,11 @@ export interface Weapon {
   chargeSpeed: number;
   /** Damage multiplier for blows from behind (GUARD.rearMult if not set). */
   backstab?: number;
-  /** Damage on a blow that isn't from behind (the Rogue's knives are weak head on). */
+  /** Damage on a blow that isn't from behind (the Rogue's knives are weak head on); such a blow doesn't
+   *  knock anything off balance either. */
   front?: number;
+  /** Each blow finds one goblin (the nearest in reach), never a crowd. */
+  single?: boolean;
   /** A tap of block this close before a hit lands is a parry. */
   parryWindow: number;
   /** Blows within this arc (degrees, centred on where you face) can be blocked or parried. */
@@ -151,8 +154,8 @@ export const WEAPONS: Record<KitId, Weapon> = {
       { windup: 0.1, active: 0.07, recover: 0.3, dmg: 14, range: 1.3, arc: 60, lunge: 0.6, knock: 3, thrust: true },
     ],
     heavy: { windup: 0.05, active: 0.1, recover: 0.35, dmg: 18, dmgFull: 34, range: 1.8, arc: 40, lunge: 1.6, knock: 3, knockFull: 5, thrust: true },
-    chip: 0.45, blockSpeed: 0.6, chargeSpeed: 0.7, backstab: 2.5, front: 0.5, parryWindow: 0.2, guardArc: 100, guardCost: 1.8, speed: 1.22,
-    dodge: { kind: 'dash', distance: 4.3, time: 0.22, iFrom: 0, iTo: 0.22, stamina: 12, cooldown: 0.22 },
+    chip: 0.45, blockSpeed: 0.6, chargeSpeed: 0.7, backstab: 2.5, front: 0.5, single: true, parryWindow: 0.2, guardArc: 100, guardCost: 1.8, speed: 1.22,
+    dodge: { kind: 'dash', distance: 4.3, time: 0.22, iFrom: 0, iTo: 0.22, stamina: 18, cooldown: 0.22 },
   },
   /** One arrow per press. The long draw is the point: 1.4 s to a shot that pierces a whole line. */
   longbow: {

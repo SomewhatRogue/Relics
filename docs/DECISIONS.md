@@ -724,3 +724,11 @@ Stoker bellows for help twice, at two thirds and one third of its health (STOKER
 bigger, with a lunger). Out on jobs, most rooms (60%) have a heap of the dead (one or two bodies, dressed for
 the place) with one to three goblins at it, feeding: facing the body, leaning in, tearing a piece back, red
 flicking off, wet chewing you can hear within 8 tiles. They see you at half the usual distance while they eat.
+
+## 2026-11-01: a Rogue earns it; dodges cost more; skills on 20 s (Claude Opus 5.5)
+Kyle: the Rogue's knives find one goblin a blow (the nearest in reach: Weapon.single), and a head-on blow
+doesn't knock anything off balance (only from behind). Every dodge costs half again its stamina for now
+(DODGE.cost 1.5; the Rogue's dash 18 before that), so there's something to grow into: perks, gear and levels
+will bring it down. Class skills (War Cry, Hunter's Net, Shadowstep, Lodestone, Sanctuary) are on 20 s
+cooldowns while heroes are low level; shorter cooldowns and new abilities come with levels later. Relics
+(javelin 6 s, hook 4 s) unchanged for now.

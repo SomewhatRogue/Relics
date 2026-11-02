@@ -42,13 +42,13 @@ export const HOOK = {
 };
 
 /** The Ranger's hunting net: thrown, it opens on the first goblin it reaches. Small ones are snared flat; big ones are slowed. */
-export const NET = { cooldown: 7, windup: 0.15, recover: 0.25, speed: 14, range: 8, radius: 1.3, snare: 2.6, slow: 0.35, dmg: 4 };
+export const NET = { cooldown: 20, windup: 0.15, recover: 0.25, speed: 14, range: 8, radius: 1.3, snare: 2.6, slow: 0.35, dmg: 4 };
 
 /** The Rogue's shadow relic: step out of the dark behind the goblin you face, ready to stab its back. */
-export const SHADOWSTEP = { cooldown: 6, windup: 0.06, recover: 0.12, range: 6 };
+export const SHADOWSTEP = { cooldown: 20, windup: 0.06, recover: 0.12, range: 6 };
 
 /** The Mage's lodestone: lobbed, it lands and drags every goblin near it inward (light ones fast), then bursts. */
-export const LODESTONE = { cooldown: 8, windup: 0.2, recover: 0.3, range: 7, fallback: 4.5, flight: 0.5, radius: 3.6, pull: 34, time: 1.8, burst: 1.4, dmg: 12 };
+export const LODESTONE = { cooldown: 20, windup: 0.2, recover: 0.3, range: 7, fallback: 4.5, flight: 0.5, radius: 3.6, pull: 34, time: 1.8, burst: 1.4, dmg: 12 };
 
 /**
  * The Healer's blessed ground: a circle of light at the Healer's feet (or where they point, on a
@@ -69,10 +69,10 @@ export const BLESSING = { cooldown: 12, windup: 0.25, recover: 0.25, range: 6, r
 export const WARD = { cooldown: 14, windup: 0.2, recover: 0.2, range: 7, hp: 50, time: 5, reflect: 1.5, stun: 1.2 };
 
 /** The Healer's skill: blessed ground at your feet and a ward on whoever needs it most, at once. */
-export const SANCTUARY = { cooldown: 14, windup: 0.25, recover: 0.25 };
+export const SANCTUARY = { cooldown: 20, windup: 0.25, recover: 0.25 };
 
 /** The war cry (the Warrior's skill): every ally in earshot is rallied: stamina back at once, then twice as fast, and blocking costs half. Small goblins near you flinch. */
-export const HORN = { cooldown: 12, windup: 0.25, recover: 0.3, radius: 6, time: 6, regen: 2, guard: 0.5, scare: 2.5 };
+export const HORN = { cooldown: 20, windup: 0.25, recover: 0.3, radius: 6, time: 6, regen: 2, guard: 0.5, scare: 2.5 };
 
 /** `range` is how far the phone's auto-aim looks; `cls` who may carry it. */
 export const RELICS = {

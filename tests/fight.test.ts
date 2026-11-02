@@ -348,6 +348,26 @@ describe('corpses and backstabs', () => {
     expect(t.y).toBeLessThan(1);
   });
 
+  it("a Rogue's blow finds one goblin, and only knocks it off balance from behind", () => {
+    const { room, h, t } = onTarget(3);
+    const other = room.enemies[4];
+    Object.assign(other, { x: t.x + 0.5, y: t.y, cooldown: 99, fx: 0, fy: 1 });
+    Object.assign(t, { fx: 0, fy: 1, cooldown: 99, hp: 300, maxHp: 300 });
+    Object.assign(other, { hp: 300, maxHp: 300 });
+    h.weapon = 'daggers';
+    room.setIntent('me', intent({ attackSeq: 1, ay: -1 }));
+    run(room, ticks(0.25));
+    expect([t, other].filter((e) => e.hp < e.maxHp).length).toBe(1);
+    expect(t.act === 'flinch' || other.act === 'flinch').toBe(false);
+    // From behind, it reels.
+    const back = onTarget(3);
+    Object.assign(back.t, { fx: 0, fy: -1, cooldown: 99, hp: 300, maxHp: 300 });
+    back.h.weapon = 'daggers';
+    back.room.setIntent('me', intent({ attackSeq: 1, ay: -1 }));
+    run(back.room, ticks(0.25));
+    expect(back.t.act).toBe('flinch');
+  });
+
   it('a blow from behind does more, and twin daggers far more; head on, the daggers do half', () => {
     const hitFrom = (weapon: 'sword' | 'daggers', behind: boolean) => {
       const { room, h, t } = onTarget(0);

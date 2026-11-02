@@ -3,7 +3,7 @@
  * A tap of attack swings on release; holding past CHARGE.start charges a heavy instead.
  */
 import { collide } from '../shared/arena';
-import { CLASS_GUARD, DECOY, POTION, AUGMENTS, CHARGE, GRAB, HORN, PERK, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon } from '../shared/tuning';
+import { DODGE, CLASS_GUARD, DECOY, POTION, AUGMENTS, CHARGE, GRAB, HORN, PERK, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon } from '../shared/tuning';
 import { slide } from './bodies';
 import { applyGear } from './pack';
 import { statsOf } from './gearstats';
@@ -221,7 +221,10 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     } else if (h.actT < s.windup + s.active) {
       if (h.actT - dt < s.windup) acts.loose(h, s);
       if (!s.shot) {
-        for (const e of enemies) {
+        // A Rogue's knives find one goblin a blow (the nearest in reach); everything else cuts through all.
+        const one = !!w.single, near = one ? [...enemies].sort((a, b) => Math.hypot(a.x - h.x, a.y - h.y) - Math.hypot(b.x - h.x, b.y - h.y)) : enemies;
+        for (const e of near) {
+          if (one && h.hitIds.some((id) => id > 0)) break;
           const n = hitEnemy(h, s, e, now, ev);
           if (n) acts.struck(h, e, n);
         }
@@ -308,6 +311,6 @@ function startRoll(h: Hero, inp: Intent, now: number, ev: FightEvent[]): void {
   // A blink leaves an image of you where you stood, and the goblins near it go for that.
   if (kind === 'blink') Object.assign(h, { decoyX: h.x, decoyY: h.y, decoyUntil: now + DECOY.time });
   h.rollQueuedAt = -9;
-  spend(h, WEAPONS[h.weapon].dodge.stamina * statsOf(h).dodgeCost, now);
+  spend(h, WEAPONS[h.weapon].dodge.stamina * DODGE.cost * statsOf(h).dodgeCost, now);
   ev.push({ k: kind === 'blink' ? 'blink' : 'roll', x: h.x, y: h.y });
 }

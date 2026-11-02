@@ -69,7 +69,9 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   // Light goblins flinch out of their wind-up on any hit; the butcher only to a strong heavy.
   const big = h.heavy && h.power >= 0.7;
   // Nothing stops a charge once it's coming.
-  if (e.act !== 'stunned' && e.act !== 'pinned' && e.act !== 'carried' && !ice && e.attack?.kind !== 'charge' && (e.kind === 'scrapper' || big)) {
+  // (A Rogue's head-on blow doesn't knock anything off balance: only from behind.)
+  const shakes = !(WEAPONS[h.weapon].front && !rear);
+  if (shakes && e.act !== 'stunned' && e.act !== 'pinned' && e.act !== 'carried' && !ice && e.attack?.kind !== 'charge' && (e.kind === 'scrapper' || big)) {
     Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: big && e.kind === 'butcher' ? 0.6 : FLINCH });
   }
   return n;
