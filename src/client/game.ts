@@ -4,7 +4,7 @@
  * to go in; taking a job starts a run (room after room until the job is done or you're driven back);
  * the results come home to the hero and the shared world, and the town changes with them.
  */
-import { doorAt, inArea, npcAt, type Area, type Block, type Npc } from '../shared/arena';
+import { doorAt, inArea, npcAt, type Area, type Block, type Npc, type Theme } from '../shared/arena';
 import { townInterior } from '../shared/interiors';
 import { board, type Job } from '../shared/jobs';
 import { workDone, WORK_ORDER, type WorkId } from '../shared/works';
@@ -27,6 +27,7 @@ import { treasure } from '../shared/treasure';
 const TREASURE_SOLD = 20;
 import { CoopHost, loadRoom, type CoopGuest, type Friend } from './coop';
 import { forgetSession, keepSession } from './session';
+import { dayPhase, townLight } from '../shared/daylight';
 import { Followers } from './followers';
 import type { Parties } from './parties';
 
@@ -68,6 +69,8 @@ export class Game {
   parties: Parties | null = null;
   /** Counts up each time the room changes (friends rebuild their copy when it does). */
   roomKey = 0;
+  /** The town's own light, before the day turns it (daylight.ts). */
+  private townTheme: Theme | null = null;
   /** Goblins following you through a door (followers.ts). */
   private followers = new Followers();
   /** The last input given (a new room's hero takes its presses as already seen). */
@@ -385,6 +388,8 @@ export class Game {
     if (out && this.run) tally(this.run, out, outEv, ME);
     const ev = this.room.advance(dt);
     this.followers.step(this.room);
+    // Wickhold keeps the shared day: the light turns with the clock, the same on every screen.
+    if (this.mode === 'town' && !this.outside) this.room.map.theme = townLight(this.townTheme ??= this.room.map.theme, dayPhase(Date.now()));
     if (this.mode === 'wood' && this.wood) return this.stepWoodFrame(h, ev, dt);
     this.keepGear(h);
     for (const e of ev) if (e.k === 'spend' && e.id === ME) this.spend(e.n);

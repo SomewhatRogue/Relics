@@ -867,3 +867,25 @@ which moves the page to the media channel.
 - An untaught skill has no button and its press is spent; the relic button carries the javelin.
 - In the wood and the yard the hound joins in a third as often, never goes for a goblin that's
   swinging at you, and never knocks one off its stride: those blows are yours to meet.
+
+## 2026-11-01: playtest batch (Kyle's notes; Opus 5.5)
+
+- Doors: the hero on the far side takes every press so far as seen, and stands still (no repeat of
+  the last swing or roll). Goblins after you (awake, within 7 tiles, not named, four at most) come
+  through the door a second later, in and out (`followers.ts`).
+- The caged call out when you're near (a gold mark over the cage) and, freed, stand where it was and
+  thank you (`captives.ts`; drawing only).
+- The run banner has a readable backing and shows get-ups as hearts; going down alone says how many.
+- The trainer is short: where you stand and a button for each thing; tap one for what it does.
+- Sneaking: walk slowly (part-way stick, or Shift) and goblins at rest see you from 45% as far. The
+  first blow on one that hasn't seen you is an AMBUSH: 2.2x, and it reels 1.2 s.
+- Jobs mix in spear-lungers, brutes and shield-bearers (a plank shield: a quarter from the front
+  unless heavy, held fast or unaware), more of them deeper and in worse places.
+- Rogue: no parry, dodge only; dash costs more breath (30, x1.5) on a 0.35 s cooldown; feet 1.12.
+  Everyone else dodges less often (roll 1.1 s, jump 1.0, heavy 1.4, Healer 1.3). The Mage's taps are
+  slower and a little harder. The dodge button says ROLL, JUMP, DASH or BLINK.
+- The hound joins in every 3.5 s (5 in training) and, in training, never on a goblin swinging at you.
+- Hew: one word of praise a lesson, in passing (the fight doesn't stop), and "more of them" once.
+  The dodge freeze-frame doesn't happen if you're already rolling or out of where the blow lands.
+- Merged from helpers: panels reveal in reading order (`reveal.ts`), and the dice are thrown on a
+  little pixel table (`diceanim.ts`).

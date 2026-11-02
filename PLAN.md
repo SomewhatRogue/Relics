@@ -122,3 +122,14 @@ and burns out a goblin den on a job.
    second browser is still a second voice. Real one-per-
    person needs a sign-in (Google, Apple or an email link). Start per device; add sign-in if it's
    ever gamed.
+
+## Wickhold as a place to live (Kyle, 2026-11-01)
+- DONE: a shared day and night in town (`shared/daylight.ts`): every screen the same hour, a full
+  day every 40 minutes.
+- Next: a garden to sit in (a patch behind the church or by the well: benches, beds, the light at
+  dusk), and spending together to make the town better, seen and unseen: "vote with your money".
+  The works system already pools gold (`shared/works.ts`); add works you can see: clearing the
+  rubble out of the square, a flower bed, lanterns along the lane, the garden itself, repairs that
+  stay repaired. Each shows on the town map once paid for, for everyone.
+- Bigger world events can undo it: a raid that burns the lane, a flood, a move. The town remembers
+  what it lost.
