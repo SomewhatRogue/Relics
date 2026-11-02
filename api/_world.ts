@@ -30,7 +30,7 @@ export function clean(raw: unknown): Contribution | null {
   if (!cls) return null;
   const name = String(h.name ?? 'HERO').toUpperCase().replace(/[^A-Z0-9 ]/g, '').slice(0, 12) || 'HERO';
   const s = (c.stats ?? {}) as Record<string, unknown>, w = (c.works ?? {}) as Record<string, unknown>;
-  const cap: Stats = { jobs: 1, saved: 16, kills: 300, given: 5000, dens: 8, butchers: 12, gold: 3000, raised: 30, falls: 30, carried: 30, teamkills: 30 };
+  const cap: Stats = { jobs: 1, saved: 16, kills: 300, given: 5000, dens: 8, butchers: 12, gold: 3000, raised: 30, falls: 30, carried: 30, teamkills: 30, rescueHits: 60, rescueKills: 16 };
   const out: Contribution = { hero: { id: h.id, name, cls }, stats: {}, works: {} };
   for (const k of STAT_ORDER) if (s[k] !== undefined) out.stats![k] = num(s[k], cap[k]);
   for (const k of WORK_ORDER) if (w[k] !== undefined) out.works![k] = num(w[k], 5000);

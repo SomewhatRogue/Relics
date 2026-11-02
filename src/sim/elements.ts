@@ -7,7 +7,7 @@
 import { BURN, FLARE, FROST, SHATTER, STEAM, STORM, type Augment } from '../shared/tuning';
 import { shove } from './bodies';
 import { clearElements, damage, frozen, isDummy } from './damage';
-import type { Enemy, FightEvent, Hero, Javelin, Prop } from './types';
+import type { Enemy, FightEvent, Hero, Javelin, Prop, Survivor } from './types';
 
 /** Everything an element can reach, for one tick. */
 export interface World {
@@ -15,6 +15,8 @@ export interface World {
   enemies: Enemy[];
   javelins: Javelin[];
   props: Prop[];
+  /** The freed (sim/survivors.ts); a world without them leaves them out. */
+  survivors?: Survivor[];
   now: number;
   ev: FightEvent[];
 }

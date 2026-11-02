@@ -283,7 +283,6 @@ function frame(t: number): void {
   game.coop?.frame(t / 1000, evs);
   for (const ev of evs) {
     fx.on(ev);
-    if (ev.k === 'freed') scene.captives.free(game.room, ev.x, ev.y, game.room.time);
     // Down alone on a job: how many more times you'll get up.
     if (ev.k === 'down' && game.mode === 'run' && game.run && game.room.heroes.filter((x) => x.id !== 'squire').length < 2 && Math.abs(ev.x - game.hero.x) < 0.01) {
       const left = MAX_DOWNS - game.run.downs;

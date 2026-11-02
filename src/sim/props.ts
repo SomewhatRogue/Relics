@@ -9,6 +9,8 @@ import { shove, slide } from './bodies';
 import { inArc } from './combat';
 import { damage, isDead } from './damage';
 import { afflict, type World } from './elements';
+import { freeSurvivor } from './survivors';
+import { blastSurvivors } from './survivorhits';
 import type { Enemy, FightEvent, Hero, Intent, Prop } from './types';
 
 let nextId = 1;
@@ -37,7 +39,7 @@ function breakProp(p: Prop, w: PropWorld, dx: number, dy: number): void {
   const spec = PROPS[p.kind];
   Object.assign(p, { broken: true, lifted: false, kvx: 0, kvy: 0, respawnAt: p.home ? w.now + PROP.respawn : -1 });
   w.ev.push({ k: 'propbreak', x: p.x, y: p.y, kind: p.kind, dx, dy });
-  if (p.kind === 'cage') w.ev.push({ k: 'freed', x: p.x, y: p.y });
+  if (p.kind === 'cage') w.ev.push({ k: 'freed', x: p.x, y: p.y }), w.survivors && freeSurvivor(w.survivors, p.x, p.y, w.now);
   if (spec.pieces) for (let i = 0; i < spec.pieces.n; i++) {
     const a = (i / spec.pieces.n) * Math.PI * 2 + 0.6, q = newProp(spec.pieces.kind, p.x + Math.cos(a) * 0.3, p.y + Math.sin(a) * 0.3, false);
     Object.assign(q, { kvx: Math.cos(a) * 5 + dx * 4, kvy: Math.sin(a) * 5 + dy * 4, fadeAt: w.now + PROP.pieceLife, lastBy: p.lastBy });
@@ -47,6 +49,7 @@ function breakProp(p: Prop, w: PropWorld, dx: number, dy: number): void {
   if (p.kind === 'oil') {
     // The oil goes up: everything near is set burning.
     w.ev.push({ k: 'oilfire', x: p.x, y: p.y });
+    blastSurvivors(w, p.x, p.y, PROP.oilRadius, 6, p.lastBy, 'fire');
     for (const e of w.enemies) {
       if (isDead(e) || Math.hypot(e.x - p.x, e.y - p.y) > PROP.oilRadius + e.radius) continue;
       if (!damage(e, 6, w.now, w.ev, { how: 'burn' })) afflict(w, e, 'fire', 6);
@@ -174,6 +177,7 @@ export function stepLift(h: Hero, inp: Intent, w: PropWorld, dt: number, walk: (
       e.lastBy = h.id;
       if (!damage(e, PROP.slamDmg, w.now, w.ev, { heavy: true, flinch: 0.8, mult: true, how: 'burst', dx: h.fx, dy: h.fy })) shove(e, (e.x - p.x) / (d || 1), (e.y - p.y) / (d || 1), 8, e.weight);
     }
+    blastSurvivors(w, p.x, p.y, PROP.slamRadius, PROP.slamDmg, h.id, '');
     damageProp(p, p.hp, w, h.fx, h.fy);
     return;
   }

@@ -8,6 +8,7 @@ import { Gore } from './gore';
 import type { Light } from './light';
 import { drawText, textWidth } from './pixfont';
 import { toPx } from './world';
+import { CRY } from './captives';
 
 interface Part { x: number; y: number; vx: number; vy: number; life: number; max: number; col: string; glow: boolean; grav: number; stick: boolean }
 interface Text { x: number; y: number; s: string; col: string; life: number }
@@ -233,6 +234,15 @@ export class Fx {
         break;
       case 'down':
         this.say(x, y - 26, 'DOWN', '#ff5a4a');
+        break;
+      case 'survivorhit':
+        // Someone you freed, hurt by the party: blood, the number, and a cry (not for every burn).
+        this.burst(x, y - 6, ev.tick ? 3 : 8, ['#7a1d1d', '#5a1414', '#9a2a2a'], 45, false, 160, true);
+        this.say(x, y - 18, String(ev.n), '#ff6a5a');
+        if (!ev.tick) (this.say(x, y - 26, CRY, '#f0e0b0'), (this.shake = Math.max(this.shake, 1.5)));
+        break;
+      case 'survivordeath':
+        this.burst(x, y - 6, 16, ['#7a1d1d', '#5a1414', '#9a2a2a'], 70, false, 180, true);
         break;
       default:
         magicFx(this, ev, x, y);

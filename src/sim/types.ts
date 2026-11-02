@@ -286,6 +286,34 @@ export interface Enemy extends Body {
 /** `halve`: cut in two at the waist; `opened`: cut down with a slash across the chest. */
 export type DeathKind = '' | 'fall' | 'behead' | 'halve' | 'opened' | 'burst' | 'burn' | 'shatter';
 
+/**
+ * Someone freed from a cage (sim/survivors.ts): fragile, following the nearest player till they're
+ * brought home, and hurt by anything of the party's that reaches them. A dead one stays where they fell.
+ */
+export interface Survivor extends Body {
+  id: number;
+  hp: number;
+  maxHp: number;
+  /** When the cage broke (they stand and give thanks a moment before they follow). */
+  at: number;
+  /** Last hurt (the flash), and who last hurt them. */
+  hitAt: number;
+  by: string;
+  dead: boolean;
+  deadAt: number;
+  /** Burning, ticking, set alight by whom. */
+  burnUntil: number;
+  burnNext: number;
+  burnBy: string;
+  /** Facing left or right, and walking this tick (for drawing). */
+  fx: number;
+  moving: boolean;
+  /** When they were brought home (-1 not yet); just brought out of a house (announced next tick); walked off. */
+  home: number;
+  out: boolean;
+  gone: boolean;
+}
+
 /** A barrel, crate, table or broken piece: a body that can be smashed, pushed, lifted and thrown. */
 export interface Prop extends Body {
   id: number;
@@ -366,6 +394,11 @@ export type FightEvent =
   | { k: 'heal'; x: number; y: number; n: number }
   | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle' | 'lift' | 'oilfire' | 'freed' | 'exitopen' | 'blaze' | 'chop' | 'denspawn' | 'hallow' | 'ward' | 'warded' | 'reflect' | 'wardbreak' | 'spotted'; x: number; y: number }
   | { k: 'collapse'; x: number; y: number; w: number; h: number }
+  /** A freed survivor hurt by the party (`by` the hero, '' nobody's; `tick` a burn), or killed. */
+  | { k: 'survivorhit'; x: number; y: number; id: number; n: number; by: string; tick?: boolean }
+  | { k: 'survivordeath'; x: number; y: number; id: number; by: string }
+  /** A survivor brought home: out of their house, or back to where the party came in. */
+  | { k: 'survivorhome'; x: number; y: number; id: number }
   | { k: 'propbreak'; x: number; y: number; kind: PropKind; dx: number; dy: number };
 
 /** A grappling hook: flying out, reeling an enemy in, pulling its owner along, or coming back. */
