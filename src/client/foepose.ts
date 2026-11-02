@@ -24,13 +24,13 @@ export function foeHit(p: BodyPose, e: Enemy, t: number, heavy = 1): BodyPose {
   return p;
 }
 
-/** Thrown at the blow along its facing, `f` (0..1) of the way, with an afterimage while it's fresh. */
-function lunge(p: BodyPose, e: Enemy, f: number, shift: number, lean: number, stretch: number, ghost: boolean): void {
+/** Thrown at the blow along its facing, `f` (0..1) of the way, the weapon arm `reach` pixels out, with an afterimage while it's fresh. */
+function lunge(p: BodyPose, e: Enemy, f: number, shift: number, lean: number, reach: number, ghost: boolean): void {
   const side = e.fx >= -0.2 ? 1 : -1;
   p.ox = Math.round(e.fx * shift * f);
   p.oy = Math.round(e.fy * shift * f);
   p.lean = Math.round(side * lean * f);
-  p.stretch = stretch * f;
+  p.reach = reach * f;
   if (ghost) (p.ghost = 0.3 * f), (p.gx = -p.ox), (p.gy = -p.oy);
 }
 
@@ -64,9 +64,11 @@ export function scrapperPose(e: Enemy, t: number, now: number): BodyPose {
     p.ox = -Math.round(e.fx * 2 * q);
     p.oy = -Math.round(e.fy * 2 * q);
     if (lunger && k > 0.75) p.ox += Math.floor(now * 40) % 2;
+    // The brute lifts its club.
+    if (e.variant === 'heavy') p.raise = Math.round(F.windup.raise * 2 * q);
     (p.phase = 'windup'), (p.k = k);
   } else if (a && a.t < a.windup + a.active + 0.08) {
-    lunge(p, e, 1, lunger ? 5 : 3, F.release.lean, F.release.stretch * (lunger ? 1.6 : 1), !e.bow);
+    lunge(p, e, 1, lunger ? 5 : 3, F.release.lean, F.release.reach * (lunger ? 1.5 : 1), !e.bow);
     (p.phase = e.hitstop > 0 ? 'contact' : 'release'), (p.k = (a.t - a.windup) / a.active);
   } else if (a) {
     const r = (a.t - a.windup - a.active - 0.08) / F.recover.time;
@@ -105,8 +107,10 @@ export function butcherPose(e: Enemy, t: number, now: number): BodyPose {
       p.crouch = k < C.coilAt ? -C.tall * up : C.coil * easeOut((k - C.coilAt) / (1 - C.coilAt));
       p.ox = -Math.round(e.fx * 2 * up) + (k > 0.8 ? Math.round(Math.sin(now * 70)) : 0);
       p.oy = -Math.round(1 + e.fy * 2 * up);
+      // The cleaver goes up as it comes back.
+      p.raise = Math.round(C.raise * up);
       (p.phase = 'windup'), (p.k = k);
-    } else if (a.t < end) lunge(p, e, 1, 3, C.lean, F.release.stretch, true), (p.phase = e.hitstop > 0 ? 'contact' : 'release');
+    } else if (a.t < end) lunge(p, e, 1, 3, C.lean, F.release.reach, true), (p.phase = e.hitstop > 0 ? 'contact' : 'release');
     else {
       const r = (a.t - end) / F.recover.time;
       lunge(p, e, 1 - easeOut(r), 3, C.lean, 0, false);
@@ -119,6 +123,8 @@ export function butcherPose(e: Enemy, t: number, now: number): BodyPose {
       const r = (k - S.crouchShare) / S.riseShare;
       p.crouch = k < S.crouchShare ? S.crouch * easeOut(k / S.crouchShare) : -S.stretch * clamp01(1 - (r - 1) / 0.4) * easeOut(r);
       p.lift = k < S.crouchShare ? 0 : Math.round(S.rise * easeOut(r));
+      // The cleaver over his head from the crouch on, held there through the leap.
+      p.raise = Math.round(S.raise * easeOut(k / S.crouchShare));
       (p.phase = 'windup'), (p.k = k);
     } else if (a.t < a.windup + a.active + 0.1) (p.crouch = S.flat), (p.phase = 'land');
     else {
@@ -133,7 +139,7 @@ export function butcherPose(e: Enemy, t: number, now: number): BodyPose {
       p.lean = -Math.round(side * C.lean * k);
       p.ox = Math.floor(now * 12) % 2;
       (p.phase = 'windup'), (p.k = a.t / a.windup);
-    } else if (a.t < a.windup + a.active) lunge(p, e, 1, 2, C.lean, C.stretch, true), (p.phase = 'release');
+    } else if (a.t < a.windup + a.active) lunge(p, e, 1, 2, C.lean, C.reach, true), (p.phase = 'release');
   }
   reel(p, e, now);
   return foeHit(p, e, t, 2);

@@ -2,13 +2,19 @@
 import { CHARGE, WARD, WEAPONS, WANT } from '../shared/tuning';
 import { chargeFull } from '../sim/hero';
 import type { Hero } from '../sim/types';
-import { blit, blitBody, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
+import { blit, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
+import { armOffset, drawFigure, layout } from './figure';
+import { heroCut, jointed } from './joints';
 import { heroPose } from './heropose';
 import { drawWeapon, pose } from './held';
 import { EL_COL } from './palette';
 import { drawText } from './pixfont';
 import { PARTY } from '../shared/tuning';
-import { SPRITES, heroLook } from './sprites';
+import { LOOKS, SPRITES, heroLook } from './sprites';
+
+const ARM: [number, number] = [0, 0];
+/** How a class's look is cut into parts: hats make it taller; a robe hides the legs but for the feet. */
+const cutOf = (cls: keyof typeof LOOKS, look = 0) => heroCut((LOOKS[cls][look] ?? LOOKS[cls][0]).tall ?? 0, cls === 'MAGE' || (cls === 'HEALER' && look === 1));
 
 /** `t` is the room's time (blessings and rallies are kept in it). */
 export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t: number): void {
@@ -25,10 +31,10 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'b
   }
   const up = h.fy < -0.55 && Math.abs(h.fy) > Math.abs(h.fx) * 0.8;
   const flip = h.fx < -0.2;
-  // The body's pose (heropose.ts): wound up, thrown at the blow, struck, landing; at rest it bobs.
+  // The body's pose (heropose.ts), drawn part by part; walking it bobs a pixel, standing it keeps still.
   const pz = heroPose(h, t, c.now);
   let ox = pz.ox, oy = pz.oy, squash = 1;
-  if (pz.phase === 'rest') oy = h.moving ? (Math.floor(c.now * 8) % 2 ? -1 : 0) : Math.floor(c.now * 2) % 2 ? -1 : 0;
+  if (pz.phase === 'rest' && h.moving) oy = Math.floor(c.now * 8) % 2 ? -1 : 0;
   if (h.act === 'zip') (ox = Math.round(h.fx * 2)), (oy = Math.round(h.fy * 2) - 1);
   const dk = WEAPONS[h.weapon].dodge;
   // The mage's blink: gone, a scatter of violet light where they are.
@@ -60,13 +66,16 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'b
     c.glow.globalAlpha = 1;
     if (tumble) return blit(c, look.down, bx, by, flip, 0, squash);
   }
-  // The hands ride the middle of the body: half its lean, lower as it crouches.
-  const mid = Math.round(pz.lean / 2), low = Math.round(8 * pz.crouch);
-  const side = h.fx >= -0.2 ? 1 : -1, px = bx + side * 3 + mid, py = by - 8 + low, p = pose(h, c.now);
+  // The body in parts (figure.ts); the weapon is in the weapon hand, wherever that arm has gone.
+  const cls = WEAPONS[h.weapon].cls, body = jointed(up ? look.up : look.down, cutOf(cls, h.look));
+  const L = layout(body, bx, by, flip, pz), [ax, ay] = armOffset(ARM), mid = Math.round(L.lean / 2), low = L.drop;
+  const side = h.fx >= -0.2 ? 1 : -1, px = bx + side * 3 + ax, py = by - 8 + ay, p = pose(h, c.now);
+  // The sword and shield's release: the shield flashes as the blow goes out (the blade too, held.ts).
+  const snap = h.weapon === 'sword' && (pz.phase === 'release' || pz.phase === 'contact');
   const fresh = t - h.parryOpenAt < WEAPONS[h.weapon].parryWindow;
   const shieldAt: [number, number] = h.blocking || fresh ? [bx + mid + h.fx * 6, by - 7 + low + h.fy * 4] : [bx + mid - side * 4, by - 6 + low];
   const drawGear = () => {
-    if (h.weapon === 'sword') blit(c, SPRITES.shield, shieldAt[0], shieldAt[1] + 4, false, fresh ? 0.85 : 0);
+    if (h.weapon === 'sword') blit(c, SPRITES.shield, shieldAt[0], shieldAt[1] + 4, false, fresh || snap ? 0.85 : 0);
     drawWeapon(c, h, px, py, p);
     if (h.act === 'throw' && h.actT < 0.2) {
       const a = Math.atan2(h.fy, h.fx) + Math.PI;
@@ -80,24 +89,25 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'b
     }
   };
   if (up) drawGear();
-  blitBody(c, up ? look.up : look.down, bx, by, flip, pz);
+  drawFigure(c, body, bx, by, pz);
   // The Want shows in the eyes first: a glint in the dark, like theirs.
   if (!up && h.want >= WANT.eyes) {
     c.glow.globalAlpha = Math.min(1, h.want / 80) * (0.55 + 0.45 * Math.sin(c.now * 2));
     c.glow.fillStyle = '#ff4a3a';
-    const ex = Math.round(bx + pz.lean), ey = Math.round(by - 13 + 13 * pz.crouch);
+    const ex = Math.round(bx + L.lean), ey = Math.round(by - 13 + L.drop);
     c.glow.fillRect(ex - 2, ey, 1, 1);
     c.glow.fillRect(ex + 1, ey, 1, 1);
     c.glow.globalAlpha = 1;
   }
   if (!up) drawGear();
   if (fresh && h.weapon !== 'sword') smear(c.glow, bx, by - 8, Math.atan2(h.fy, h.fx) - 0.7, Math.atan2(h.fy, h.fx) + 0.7, 7, 9, '#cfe8ff');
-  if (h.act === 'charge') {
+  // A blade's charge gathers at the hand (a caster's draws into the tip instead, held.ts).
+  if (h.act === 'charge' && cls !== 'MAGE') {
     const k = Math.min(1, (h.actT + CHARGE.start) / chargeFull(WEAPONS[h.weapon], h));
     for (let i = 0; i < 4; i++) {
-      const t = c.now * 4 + i * 1.57, r = 9 - 3 * k;
+      const t = c.now * 4 + i * 1.57, r = 6 - 3 * k;
       c.glow.fillStyle = k >= 1 ? '#ffffff' : '#ffd860';
-      c.glow.fillRect(Math.round(bx + Math.cos(t) * r), Math.round(by - 8 + Math.sin(t) * r * 0.5), 1, 1);
+      c.glow.fillRect(Math.round(px + Math.cos(t) * r), Math.round(py + Math.sin(t) * r * 0.5), 1, 1);
     }
   }
   if (h.act === 'stun') stars(c, bx, by - 19);

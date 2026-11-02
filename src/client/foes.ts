@@ -6,10 +6,14 @@ import type { GameMap } from '../shared/arena';
 import { GUARD } from '../shared/tuning';
 import type { Enemy, EnemyAttack } from '../sim/types';
 import { blit, blitBody, ease, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
+import { armOffset, drawFigure, layout } from './figure';
+import { BUTCHER_CUT, SCRAPPER_CUT, jointed } from './joints';
 import { butcherPose, foeHit, scrapperPose, tumble } from './foepose';
 import { rest, newPose } from './motion';
 import { drawText } from './pixfont';
 import { SPRITES, type Sprite } from './sprites';
+
+const ARM: [number, number] = [0, 0];
 import { OX, OY, PX } from './world';
 
 function cleaver(c: Ctx, x: number, y: number, a: number): void {
@@ -40,9 +44,12 @@ function butcher(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
   if (e.act === 'stunned') (pz.ox += Math.round(Math.sin(c.now * 4) * 1.5)), (pz.oy += 2), (arm = Math.PI / 2 + side * 0.4);
   shadow(c, x, y, Math.max(5, 10 - pz.lift / 2));
   const bx = x + pz.ox, by = y + pz.oy - pz.lift, up = e.fy < -0.55;
-  const hx = bx + side * 7 + Math.round(pz.lean / 2), hy = by - Math.round(13 * (1 - pz.crouch));
+  // In parts (figure.ts): the cleaver goes where the arm goes (over his head for the cleave and slam).
+  const body = jointed(up ? SPRITES.butcherUp : SPRITES.butcherDown, BUTCHER_CUT);
+  layout(body, bx, by, e.fx < -0.2, pz);
+  const [ax, ay] = armOffset(ARM), hx = bx + side * 7 + ax, hy = by - 13 + ay;
   if (up) cleaver(c, hx, hy, arm);
-  blitBody(c, up ? SPRITES.butcherUp : SPRITES.butcherDown, bx, by, e.fx < -0.2, pz);
+  drawFigure(c, body, bx, by, pz);
   if (!up) cleaver(c, hx, hy, arm);
   if (trail) smear(c.glow, hx, hy, trail[0], trail[1], 8, 15, e.hitstop > 0 ? '#ffffff' : '#ffb0a0');
   if (e.act === 'stunned') stars(c, bx, by - 25, 5, 8);
@@ -65,10 +72,13 @@ function scrapper(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
   const reach = pz.phase === 'windup' ? 1 : pz.phase === 'release' || pz.phase === 'contact' ? 7 : 3;
   shadow(c, x, y, 5);
   const bx = x + pz.ox, by = y + pz.oy, up = e.fy < -0.55, fa = Math.atan2(e.fy, e.fx);
-  const kx = bx + Math.round(pz.lean / 2), ky = by + Math.round(6 * pz.crouch);
+  // In parts (figure.ts): the knife (or bow) is in the hand, wherever the arm has gone.
+  const body = jointed(up ? SPRITES.scrapperUp : SPRITES.scrapper, SCRAPPER_CUT);
+  layout(body, bx, by, e.fx < -0.2, pz);
+  const [ax, ay] = armOffset(ARM), kx = bx + ax, ky = by + ay;
   const knife = () => (e.bow ? bow(c, e, kx, ky, fa) : line(c.lit, kx + Math.cos(fa) * reach, ky - 6 + Math.sin(fa) * reach, fa, 0, 4, '#cfd6dc'));
   if (up) knife();
-  blitBody(c, up ? SPRITES.scrapperUp : SPRITES.scrapper, bx, by, e.fx < -0.2, pz);
+  drawFigure(c, body, bx, by, pz);
   if (!up) knife();
   if (e.act === 'stunned') stars(c, bx, by - 15, 3, 5);
 }

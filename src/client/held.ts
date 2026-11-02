@@ -27,6 +27,8 @@ export function pose(h: Hero, now: number): Pose {
     // The healer lifts the mace to call down a smite.
     if (h.weapon === 'mace') return { a: -Math.PI / 2 + side * 0.2, ext: 0, reach: 0, pull: charge };
     if (h.weapon === 'spear') return { a: fa, ext: -5 * charge, reach: 0, pull: 0 };
+    // The Rogue draws a dagger back over the shoulder to throw it.
+    if (h.weapon === 'daggers') return { a: -Math.PI / 2 - side * (0.5 + 0.9 * charge), ext: 0, reach: 0, pull: charge };
     return { a: fa - side * (1.5 + 0.7 * charge) + Math.sin(now * 40) * 0.03 * charge, ext: 0, reach: 0, pull: 0 };
   }
   if (h.act === 'attack') {
@@ -71,12 +73,44 @@ function bow(c: Ctx, x: number, y: number, a: number, pull: number, r = 6): void
   }
 }
 
+/**
+ * A caster's tip: while the spell gathers, light draws in to it from around (faster and brighter as it
+ * fills, white at full); as it goes, a flash at the tip.
+ */
+function tip(c: Ctx, h: Hero, tx: number, ty: number, el: string): void {
+  // A held spell, or a tapped one being cast (it takes a moment, rooted in place).
+  const cast = h.act === 'attack' && !h.heavy && h.actT < currentSwing(h).windup;
+  if (h.act === 'charge' || cast) {
+    const k = cast ? Math.min(0.99, h.actT / currentSwing(h).windup) : Math.min(1, (h.actT + CHARGE.start) / chargeFull(WEAPONS[h.weapon], h));
+    for (let i = 0; i < 6; i++) {
+      const f = (c.now * (1.2 + k) + i / 6) % 1, a = i * 1.05 + c.now * 0.7, r = 2 + 9 * (1 - f);
+      c.glow.globalAlpha = 0.3 + 0.7 * f;
+      c.glow.fillStyle = k >= 1 || i % 3 === 0 ? '#ffffff' : el;
+      c.glow.fillRect(Math.round(tx + Math.cos(a) * r), Math.round(ty + Math.sin(a) * r * 0.7), 1, 1);
+    }
+    c.glow.globalAlpha = 1;
+    if (k >= 1) (c.glow.fillStyle = '#ffffff'), c.glow.fillRect(Math.round(tx) - 1, Math.round(ty), 3, 1), c.glow.fillRect(Math.round(tx), Math.round(ty) - 1, 1, 3);
+  } else if (h.act === 'attack' && currentSwing(h).shot) {
+    const s = currentSwing(h), age = h.actT - s.windup;
+    if (age < 0 || age > 0.1) return;
+    // The flash as it goes: a bright cross, bigger for a held spell.
+    const r = h.heavy ? 3 : 2;
+    c.glow.fillStyle = '#ffffff';
+    c.glow.fillRect(Math.round(tx) - r, Math.round(ty), r * 2 + 1, 1);
+    c.glow.fillRect(Math.round(tx), Math.round(ty) - r, 1, r * 2 + 1);
+    c.glow.fillStyle = el;
+    c.glow.fillRect(Math.round(tx) - 1, Math.round(ty) - 1, 3, 3);
+  }
+}
+
 export function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): void {
   const g = c.lit, ox = px + Math.cos(p.a) * p.ext, oy = py + Math.sin(p.a) * p.ext;
   const side = h.fx >= -0.2 ? 1 : -1, el = EL_COL[h.augments[h.relic]];
   if (h.weapon === 'sword') {
     line(g, ox, oy, p.a, 2, 12, '#dfe6ec');
     line(g, ox, oy, p.a, 0, 2, '#d4a537');
+    // The edge flashes as the blow goes out.
+    if (h.act === 'attack' && h.actT >= currentSwing(h).windup && h.actT < currentSwing(h).windup + 0.08) line(c.glow, ox, oy, p.a, 4, 12, '#ffffff');
   } else if (h.weapon === 'greatsword') {
     line(g, ox, oy, p.a, -2, 2, '#5a3d22');
     line(g, ox + Math.cos(p.a) * 2.5, oy + Math.sin(p.a) * 2.5, p.a + Math.PI / 2, -2, 2, '#d4a537');
@@ -103,6 +137,7 @@ export function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): vo
     const tl = h.weapon === 'wand' ? 7 : 10, tx = ox + Math.cos(p.a) * tl, ty = oy + Math.sin(p.a) * tl, r = Math.round(p.pull * 2);
     c.glow.fillStyle = el;
     c.glow.fillRect(Math.round(tx - r / 2), Math.round(ty - r / 2), r + 1, r + 1);
+    tip(c, h, tx, ty, el);
   } else if (h.weapon === 'staff') {
     line(g, ox, oy, p.a, -6, 12, '#6b4a2b');
     const tx = ox + Math.cos(p.a) * 13, ty = oy + Math.sin(p.a) * 13, r = 1 + Math.round(p.pull * 3);
@@ -112,6 +147,7 @@ export function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): vo
     c.glow.globalAlpha = 1;
     c.glow.fillStyle = '#ffffff';
     c.glow.fillRect(Math.round(tx), Math.round(ty), 1, 1);
+    tip(c, h, tx, ty, el);
   } else if (h.weapon === 'mace') {
     if (p.pull > 0) {
       c.glow.globalAlpha = 0.3 + 0.6 * p.pull;

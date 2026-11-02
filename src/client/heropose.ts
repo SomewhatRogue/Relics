@@ -1,7 +1,9 @@
 /**
  * A hero's body through each act, from what the room already says (act, actT, the swing, the charge,
- * hitstop, the slide): coiled in the wind-up, thrown at the blow, frozen on contact, snapped back
- * when hit, squashed on landing. Pose data only (motion.ts); actors.ts draws it.
+ * hitstop, the slide). Kyle: a charge reads through the weapon, not the body, and the face never
+ * moves with it: the weapon arm draws back and up while the charge fills, snaps through on release
+ * while the body is knocked back a pixel or two; snapped back when hit, a little lower on landing.
+ * Pose data only (motion.ts); actors.ts draws it.
  */
 import { CHARGE, GRAB, RELICS, WEAPONS } from '../shared/tuning';
 import { chargeFull, currentSwing } from '../sim/hero';
@@ -31,30 +33,21 @@ function flashHit(p: BodyPose, age: number): void {
   else if (age < M.hit.red) (p.flash = 0.8 * (1 - (age - M.hit.white) / (M.hit.red - M.hit.white))), (p.tint = HURT_RED);
 }
 
-/** Pulled back from the facing and crouched, `k` of the way (a wind-up, a charge). */
-function coil(p: BodyPose, h: Hero, k: number, lean: number, crouch: number, back = 0): void {
-  p.lean = -Math.round(h.fx * lean * k);
-  p.crouch = crouch * k;
-  p.ox = -Math.round(h.fx * back * k);
-  p.oy = -Math.round(h.fy * back * k);
+/** The weapon arm drawn back from the facing and lifted (pixels); the body and head stay where they are. */
+function draw(p: BodyPose, back: number, up: number): void {
+  p.reach = -back;
+  p.raise = up;
 }
 
-/** The blow going out, `e` (0..1) of the way: a step in (or a kick back for a shot), stretched along it. */
+/** The blow or shot going out, `e` (0..1) of the way: the arm snaps through, the body knocked back by it. */
 function release(p: BodyPose, h: Hero, e: number): void {
   const s = currentSwing(h), big = h.heavy || h.counter || s.knock >= 7;
-  if (s.shot) {
-    const amt = h.heavy ? M.recoil.heavy * Math.max(0.4, h.power) : M.recoil.shift;
-    p.ox = -Math.round(h.fx * amt * e);
-    p.oy = -Math.round(h.fy * amt * 0.6 * e);
-    p.lean = -Math.round(h.fx * amt * 0.7 * e);
-    p.crouch = M.recoil.crouch * e;
-    return;
-  }
-  const R = big ? M.releaseHeavy : M.release, power = h.heavy ? 0.5 + 0.5 * h.power : 1;
-  p.ox = Math.round(h.fx * R.shift * power * e);
-  p.oy = Math.round(h.fy * R.shift * power * 0.7 * e);
-  p.lean = Math.round(h.fx * R.lean * e);
-  p.stretch = R.stretch * (s.thrust ? 1.4 : 1) * e;
+  // A thrown dagger goes out like a blow (the arm snaps forward); a bow or a spell kicks the hands back.
+  const shot = !!s.shot && s.shot !== 'knife', R = shot ? M.shot : big ? M.releaseHeavy : M.release;
+  const kick = shot ? (h.heavy ? M.shot.heavy * Math.max(0.5, h.power) : M.shot.recoil) : R.recoil;
+  p.ox = -Math.round(h.fx * kick * e);
+  p.oy = -Math.round(h.fy * kick * 0.6 * e);
+  p.reach = R.reach * (s.thrust ? 1.5 : 1) * e;
 }
 
 /** The pose this frame; `t` is room time, `now` the wall clock (for shivers). Reused: read it at once. */
@@ -75,42 +68,40 @@ export function heroPose(h: Hero, t: number, now: number): BodyPose {
 function heroAct(p: BodyPose, h: Hero, t: number, now: number, w: (typeof WEAPONS)[keyof typeof WEAPONS], shot: boolean): BodyPose {
   if (h.act === 'charge') {
     const k = clamp01((h.actT + CHARGE.start) / chargeFull(w, h));
-    coil(p, h, k, M.charge.lean, M.charge.crouch * (shot ? 0.5 : 1), M.charge.back);
-    // A blade held at full: the body shivers with it.
-    if (k >= 1 && !shot) p.ox += Math.floor(now * 30) % 2;
+    draw(p, M.charge.draw * k, M.charge.raise * k);
+    // A blade held at full shivers in the hand (the arm, not the body).
+    if (k >= 1 && !shot) p.raise += Math.floor(now * 30) % 2;
     return (p.phase = 'charge'), (p.k = k), p;
   }
   if (h.act === 'attack') {
     const s = currentSwing(h), T = h.actT;
     if (T < s.windup) {
       const k = T / s.windup;
-      if (h.heavy) coil(p, h, h.power, M.charge.lean, M.charge.crouch * (shot ? 0.5 : 1), M.charge.back);
-      else coil(p, h, easeOut(k) * Math.min(1, s.windup / M.windup.full), M.windup.lean, M.windup.crouch);
+      const q = h.heavy ? h.power : easeOut(k) * Math.min(1, s.windup / M.windup.full);
+      if (h.heavy) draw(p, M.charge.draw * q, M.charge.raise * q);
+      // A spell cast from the tap: the casting arm comes up, the light gathers at the tip (held.ts).
+      else if (s.shot && s.shot !== 'knife') draw(p, 0, M.charge.raise * q);
+      else draw(p, M.windup.draw * q, M.windup.raise * q);
       return (p.phase = 'windup'), (p.k = k), p;
     }
     if (T < s.windup + s.active) {
       const k = (T - s.windup) / s.active;
       // The blow snaps out (it lands on the first active tick), and holds full through the hitstop.
       release(p, h, h.hitstop > 0 ? 1 : easeOut(0.5 + k * 2));
-      if (!s.shot) {
-        p.ghost = M.ghost.alpha * clamp01(1 - (T - s.windup) / M.ghost.time);
-        (p.gx = -p.ox), (p.gy = -p.oy);
-      }
       // Frozen on the blow while the hitstop holds.
       return (p.phase = h.hitstop > 0 ? 'contact' : 'release'), (p.k = k), p;
     }
     const r = (T - s.windup - s.active) / M.recover.time;
     if (r < 1) {
       release(p, h, 1 - easeOut(r));
-      if (r < 0.4) p.crouch += M.recover.crouch;
       return (p.phase = 'recover'), (p.k = r), p;
     }
     return p;
   }
   if (h.act === 'throw') {
     const r = RELICS[h.relic], k = h.actT / r.windup;
-    if (k < 1) coil(p, h, easeOut(k), M.windup.lean, M.windup.crouch);
-    else (p.lean = Math.round(h.fx * M.release.lean)), (p.stretch = M.release.stretch * clamp01(1 - (h.actT - r.windup) / M.recover.time));
+    if (k < 1) draw(p, M.windup.draw * easeOut(k), M.windup.raise * easeOut(k));
+    else p.reach = M.release.reach * clamp01(1 - (h.actT - r.windup) / M.recover.time);
     return (p.phase = k < 1 ? 'windup' : 'release'), (p.k = clamp01(k)), p;
   }
   if (h.act === 'slam') {

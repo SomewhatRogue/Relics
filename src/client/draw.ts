@@ -21,7 +21,7 @@ export function blit(c: Ctx, s: Sprite, x: number, y: number, flip = false, flas
 
 const tints = new WeakMap<Sprite, Map<string, HTMLCanvasElement>>();
 /** The sprite's silhouette in one colour (made once, kept). */
-function tinted(s: Sprite, col: string): HTMLCanvasElement {
+export function tinted(s: Sprite, col: string): HTMLCanvasElement {
   let m = tints.get(s);
   if (!m) tints.set(s, (m = new Map()));
   let t = m.get(col);

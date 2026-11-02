@@ -2,6 +2,34 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-01: the sprites posed in parts, and a charge that reads through the weapon (Claude Opus 5.5)
+
+Kyle on the 2x figures: doughy and soft, and the idle bob jumped. He picked the middle way: the same 1x
+sprites, posed part by part. And on holding attack: it stretched the character instead of focusing on
+the weapon; a charge should draw in, a release knock back a little, and neither touch the face.
+
+- **Cut, not redrawn** (`client/joints.ts`): each sprite's own canvas (same pixels, same one-pixel
+  outline and shading) is split by region into the off arm, the legs (left and right), the body, the
+  head and the weapon arm. Every pixel goes to one part, so a body at rest is exactly today's sprite
+  (a test holds it); a body with nothing moved is still drawn whole, in one call.
+- **Posed a whole pixel at a time** (`client/figure.ts`): lean moves the head and the body half as
+  much; a crouch lowers the body onto the legs (rising, the legs grow a pixel at most); the weapon arm
+  reaches along the blow (`reach`) and lifts (`raise`); the whole shifts for a lunge or a recoil;
+  afterimages and flashes as before, flashes part by part. Weapons are drawn at the weapon hand.
+- **Heroes, charge and release** (`client/heropose.ts`, `held.ts`): no lean, crouch or stretch while
+  winding up or charging, so the head never moves. The weapon arm draws back and the weapon comes up;
+  a blade at full shivers in the hand; the charge's motes gather at the hand. Casters: light draws in
+  to the wand, staff or rod tip, faster and whiter as it fills, and the tapped spell's half-second cast
+  raises the casting arm the same way. Release: the arm snaps through and the body is knocked back one
+  or two pixels against the blow or shot; the sword's edge and the shield flash; casters flash at the
+  tip. The Rogue's thrown dagger is drawn back over the shoulder and the arm snaps forward on the throw.
+- **Goblins and the butcher** (`client/foepose.ts`): lunges reach with the arm instead of stretching;
+  the butcher's cleaver goes up as it comes back for the cleave and over his head for the slam; the
+  brute lifts its club.
+- **No idle breathing.** Standing still is still; walking keeps its one-pixel bob.
+- **Cost**: within noise of main (yard fight, three runs each: phone 5.1 against 4.9 ms a frame,
+  laptop 4.2 against 4.2; town about the same).
+
 ## 2026-11-01: anticipation and payoff in the bodies (Claude Opus 5.5)
 
 Kyle loved the world effects on big blows (the charged magic burst, the butcher's slam) and asked for
