@@ -90,3 +90,11 @@ and burns out a goblin den on a job.
 - Next: run the town's lines (townui, squareui, rumours, jobs, copy.ts) through the same two passes.
 - Idea (Kyle): a Rogue relic, "slide behind": the dodge goes round behind the goblin you face instead of straight.
 - Story: docs/lore/arcs-and-missions.md (also the Claude Doc "Relic: Story Arcs and Missions"); Kyle to pick a road.
+
+## Online co-op (slice 4): Kyle's shape, 2026-11-01
+- You join Wickhold (the hub) only after your own prologue. Everyone logged in to the same world is there, seen
+  walking about in real time.
+- A group forms at the job board and goes out on a job together; when it succeeds, it's written to the board
+  for everyone.
+- World quests need at least three people, and they're HARD: people can and will go down. No permadeath.
+- Failing a job has a consequence for the town (smaller missions too, scaled to the job).

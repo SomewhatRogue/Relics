@@ -531,6 +531,8 @@ export class Game {
   /** The room changed what's in hand, in the pack, or carried: the hero's save follows. */
   private keepGear(h: Hero): void {
     const p = this.profile, relic = h.relics[1] ?? '';
+    // The Mage's channelled element goes with it from room to room.
+    if ((h.augments.channel ?? '') !== (p.augments.channel ?? '')) (p.augments.channel = h.augments.channel), store(this.save);
     if (h.weapon === p.weapon && h.bag.length === p.bag.length && h.arms[h.weapon] === p.arms[p.weapon] && relic === p.relic && h.glow === p.glow && h.armor === p.armor && h.rings.join() === p.rings.join() && h.rings.every((r, i) => r === p.rings[i]) && h.rings.length === p.rings.length && h.belt.join() === p.belt.join() && h.bag.every((it, i) => it === p.bag[i])) return;
     Object.assign(p, { weapon: h.weapon, arms: { ...h.arms }, bag: [...h.bag], relic, glow: h.glow, belt: [...h.belt], armor: h.armor, rings: [...h.rings] });
     store(this.save);

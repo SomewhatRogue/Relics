@@ -94,6 +94,16 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean, t: 
     }
   }
   if (h.act === 'stun') stars(c, bx, by - 19);
+  // Channelling: motes of the element to come spiralling in, faster and tighter as it finishes.
+  if (h.act === 'channel') {
+    const k = Math.min(1, h.actT / Math.max(0.01, h.actDur)), cur = h.augments.channel || 'fire';
+    const next = cur === 'fire' ? 'frost' : cur === 'frost' ? 'storm' : 'fire';
+    c.glow.fillStyle = EL_COL[next];
+    for (let i = 0; i < 8; i++) {
+      const a = c.now * (3 + 6 * k) + (i / 8) * Math.PI * 2, r = 14 - 9 * k;
+      c.glow.fillRect(Math.round(bx + Math.cos(a) * r), Math.round(by - 9 + Math.sin(a) * r * 0.55), 1 + (i % 2), 1);
+    }
+  }
   aura(c, h, bx, by, t);
 }
 

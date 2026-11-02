@@ -133,7 +133,7 @@ describe('class relics', () => {
     const { room, h } = onTarget(1);
     const seen: string[] = [];
     for (let i = 1; i <= 5; i++) room.setIntent('me', intent({ classSeq: i })), room.step(), seen.push(h.relics.join(' '));
-    expect(seen).toEqual(['net', 'shadow', 'lodestone', 'sanctuary', 'horn']);
+    expect(seen).toEqual(['net', 'shadow', 'channel', 'sanctuary', 'horn']);
   });
 
   it("the ranger's net snares a scrapper flat", () => {
@@ -161,18 +161,25 @@ describe('class relics', () => {
     expect(h.fy).toBeGreaterThan(0.9);
   });
 
-  it("the mage's lodestone drags goblins together, then bursts", () => {
+  it("the mage channels two seconds and its spells turn from fire to frost: three icicles a tap", () => {
     const { room, h } = onTarget(3);
     asClass(room, 3);
-    const [a, b] = [room.enemies[3], room.enemies[4]];
-    Object.assign(a, { x: 7, y: 5, act: 'stunned', actDur: 99, hp: 300, maxHp: 300 });
-    Object.assign(b, { x: 11, y: 5, cooldown: 99, act: 'stunned', actDur: 99, hp: 300, maxHp: 300 });
-    room.setIntent('me', intent({ classSeq: 3, relicSeq: 1, ax: 0, ay: -4 }));
-    const before = Math.abs(b.x - a.x);
-    const ev = run(room, 1.4);
-    expect(ev.some((e) => e.k === 'well')).toBe(true);
-    expect(Math.abs(b.x - a.x)).toBeLessThan(before - 1.5);
-    expect(run(room, 1.4).some((e) => e.k === 'burst')).toBe(true);
+    room.setIntent('me', intent({ classSeq: 3, relicSeq: 1, ay: -1 }));
+    run(room, 1);
+    expect(h.act).toBe('channel');
+    const ev = run(room, 1.3);
+    expect(ev.find((e) => e.k === 'channeled')).toMatchObject({ el: 'frost' });
+    for (const e of room.enemies) Object.assign(e, { x: 1, y: 15, cooldown: 99 });
+    expect(h.augments.channel).toBe('frost');
+    room.setIntent('me', intent({ classSeq: 3, relicSeq: 1, attackSeq: 1, ay: -1 }));
+    let icicles = 0, shots = 0;
+    for (let i = 0; i < ticks(0.4); i++) {
+      room.step();
+      shots += room.events.filter((e) => e.k === 'shoot').length;
+      icicles = Math.max(icicles, room.bolts.filter((b) => b.el === 'frost').length);
+    }
+    expect(shots).toBe(1);
+    expect(icicles).toBe(3);
   });
 
   it("the healer's sanctuary: blessed ground mends and blesses allies in it, slowly, and burns goblins in it", () => {

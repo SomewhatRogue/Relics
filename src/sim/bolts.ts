@@ -62,7 +62,7 @@ export function blast(w: World, b: Bolt, x: number, y: number): void {
     if (e.act !== 'pinned') shove(e, d > 0.05 ? (e.x - x) / d : b.dx, d > 0.05 ? (e.y - y) / d : b.dy, b.knock, e.weight);
     if (b.stun && e.act !== 'pinned') Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: b.stun });
     if (wasFrozen && b.knock >= 8) shatter(e, w.now, w.ev);
-    else afflict(w, e, b.el, b.dmg);
+    else (afflict(w, e, b.el, b.dmg), b.freeze && afflict(w, e, b.el, b.dmg));
   }
 }
 
@@ -76,7 +76,7 @@ function openNet(w: World, b: Bolt): void {
     e.kvx = e.kvy = 0;
     if (e.act === 'attack' && e.weight <= 1) Object.assign(e, { attack: null, act: 'chase', actT: 0 });
     w.ev.push({ k: 'snared', x: e.x, y: e.y });
-    afflict(w, e, b.el, b.dmg);
+    (afflict(w, e, b.el, b.dmg), b.freeze && afflict(w, e, b.el, b.dmg));
   }
 }
 
@@ -86,7 +86,7 @@ function strike(w: World, b: Bolt, e: Enemy): void {
   if (damage(e, b.dmg, w.now, w.ev, { heavy: b.knock >= 8, flinch: FLINCH, mult: true, brutal: b.traits.includes('brutal'), dx: b.dx, dy: b.dy, src: b.kind })) return;
   if (e.act !== 'pinned') shove(e, b.dx, b.dy, b.knock, e.weight);
   if (wasFrozen && b.knock >= 8) shatter(e, w.now, w.ev);
-  else afflict(w, e, b.el, b.dmg);
+  else (afflict(w, e, b.el, b.dmg), b.freeze && afflict(w, e, b.el, b.dmg));
   if (b.chain) for (const o of w.enemies) {
     if (o === e || isDead(o) || Math.hypot(o.x - e.x, o.y - e.y) > HUNGRY_FX.chain) continue;
     o.lastBy = b.owner;

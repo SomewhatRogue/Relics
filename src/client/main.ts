@@ -120,7 +120,7 @@ function hud(now: number): void {
   // The block button: a Mage has none; a Ranger or Rogue only taps it to parry.
   const guard = CLASS_GUARD[WEAPONS[me.weapon].cls];
   if (document.body.dataset.guard !== guard) (document.body.dataset.guard = guard), ($('.tb.block').textContent = guard === 'parry' ? 'PARRY' : 'BLOCK');
-  const kit = KIT[me.weapon] + (guard === 'none' ? '  NO GUARD' : guard === 'parry' ? '  PARRY, NO BLOCK' : '');
+  const kit = KIT[me.weapon] + (guard === 'none' ? '  NO GUARD' : guard === 'parry' ? '  PARRY, NO BLOCK' : '') + (WEAPONS[me.weapon].cls === 'MAGE' ? '  ' + (me.augments.channel || 'fire').toUpperCase() : '');
   $('.kit').textContent = item ? item.traits.map((t) => TRAITS[t].name).join(' + ') + '  ' + kit : kit;
   card.update(room, me, !input.touch);
   pack.update(me);

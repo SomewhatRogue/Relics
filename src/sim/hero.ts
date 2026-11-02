@@ -3,7 +3,7 @@
  * A tap of attack swings on release; holding past CHARGE.start charges a heavy instead.
  */
 import { collide } from '../shared/arena';
-import { DODGE, CLASS_GUARD, DECOY, POTION, AUGMENTS, CHARGE, GRAB, HORN, PERK, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon } from '../shared/tuning';
+import { CHANNEL, DODGE, CLASS_GUARD, DECOY, POTION, AUGMENTS, CHARGE, GRAB, HORN, PERK, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon } from '../shared/tuning';
 import { slide } from './bodies';
 import { applyGear } from './pack';
 import { statsOf } from './gearstats';
@@ -17,8 +17,8 @@ export function newHero(id: string, x: number, y: number): Hero {
     act: 'idle', actT: 0, actDur: 0, combo: 0, heavy: false, power: 0, counter: false, hitIds: [], blocking: false,
     parryOpenAt: -9, lastBlockPress: -9, rollDx: 0, rollDy: 1, lastRollAt: -9, rollX: -99, rollY: -99, decoyX: 0, decoyY: 0, decoyUntil: -9, toldAt: -9, snareReady: 0, hound: null, counterUntil: -9,
     attackQueuedAt: -9, rollQueuedAt: -9, relic: 'horn', relics: abilitiesOf('WARRIOR'), relicQueuedAt: -9,
-    relicReady: { javelin: 0, hook: 0, horn: 0, net: 0, shadow: 0, lodestone: 0, blessing: 0, ward: 0, sanctuary: 0 },
-    augments: { javelin: '', hook: '', horn: '', net: '', shadow: '', lodestone: '', blessing: '', ward: '', sanctuary: '' }, blessedUntil: -9, wardUntil: -9, wardHp: 0, rallyUntil: -9, arms: {}, bag: [], armor: null, rings: [], baseHp: HERO.hp, purse: 0, fed: 0, lastKill: 0, biteAt: 0, ransomed: false, want: 0, cold: false, found: [], glow: 0, belt: [], potionReady: 0, mendLeft: 0, brandyUntil: -9, hiddenUntil: -9, perfect: false, tempoUntil: -9, carrying: 0, lifting: 0, grabQueuedAt: -9, z: 0, hitstop: 0, lenience: 0,
+    relicReady: { javelin: 0, hook: 0, horn: 0, net: 0, shadow: 0, channel: 0, lodestone: 0, blessing: 0, ward: 0, sanctuary: 0 },
+    augments: { javelin: '', hook: '', horn: '', net: '', shadow: '', channel: '', lodestone: '', blessing: '', ward: '', sanctuary: '' }, blessedUntil: -9, wardUntil: -9, wardHp: 0, rallyUntil: -9, arms: {}, bag: [], armor: null, rings: [], baseHp: HERO.hp, purse: 0, fed: 0, lastKill: 0, biteAt: 0, ransomed: false, want: 0, cold: false, found: [], glow: 0, belt: [], potionReady: 0, mendLeft: 0, brandyUntil: -9, hiddenUntil: -9, perfect: false, tempoUntil: -9, carrying: 0, lifting: 0, grabQueuedAt: -9, z: 0, hitstop: 0, lenience: 0,
     seen: { attack: 0, block: 0, roll: 0, weapon: 0, relic: 0, relicSwap: 0, relicPick: 0, augment: 0, cls: 0, take: 0, grab: 0, gear: 0, potion: 0, open: 0 },
   };
 }
@@ -163,6 +163,14 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   if (h.act === 'hurt' || h.act === 'stun') {
     if (h.actT >= h.actDur) (h.act = 'idle'), (h.actT = 0);
     return;
+  }
+  // The Mage's channel: stood still, and at the end its spells turn to the next element.
+  if (h.act === 'channel') {
+    if (h.actT < h.actDur) return;
+    const order = CHANNEL.order, next = order[(order.indexOf((h.augments.channel || 'fire') as (typeof order)[number]) + 1) % order.length];
+    h.augments.channel = next;
+    Object.assign(h, { act: 'idle', actT: 0 });
+    return void ev.push({ k: 'channeled', x: h.x, y: h.y, el: next });
   }
   const w = WEAPONS[h.weapon];
   const dodge = w.dodge;

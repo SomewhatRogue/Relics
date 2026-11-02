@@ -4,7 +4,7 @@
  * pins it to the first wall or pillar it reaches; it sticks into anything heavier.
  */
 export const JAVELIN = {
-  cooldown: 6,
+  cooldown: 10,
   windup: 0.2,
   recover: 0.28,
   speed: 16,
@@ -24,7 +24,7 @@ export const JAVELIN = {
  * a heavy one, a wall or a pillar pulls you to it.
  */
 export const HOOK = {
-  cooldown: 4,
+  cooldown: 10,
   windup: 0.12,
   recover: 0.15,
   speed: 20,
@@ -69,6 +69,10 @@ export const BLESSING = { cooldown: 12, windup: 0.25, recover: 0.25, range: 6, r
 export const WARD = { cooldown: 14, windup: 0.2, recover: 0.2, range: 7, hp: 50, time: 5, reflect: 1.5, stun: 1.2 };
 
 /** The Healer's skill: blessed ground at your feet and a ward on whoever needs it most, at once. */
+/** The Mage's Elemental Channel: stands still `time` seconds, then its spells turn to the next element
+ *  (fire, frost, storm, round again). Fire: a firebolt, and a fireball that bursts and sets them burning.
+ *  Frost: three icicles, and a burst that freezes solid. Storm: sparks and lances that jump to the next goblin. */
+export const CHANNEL = { cooldown: 8, windup: 0.08, recover: 0.1, time: 2, order: ['fire', 'frost', 'storm'] as const };
 export const SANCTUARY = { cooldown: 20, windup: 0.25, recover: 0.25 };
 
 /** The war cry (the Warrior's skill): every ally in earshot is rallied: stamina back at once, then twice as fast, and blocking costs half. Small goblins near you flinch. */
@@ -80,6 +84,7 @@ export const RELICS = {
   hook: { name: 'GRAPPLING HOOK', short: 'HOOK', cooldown: HOOK.cooldown, windup: HOOK.windup, recover: HOOK.recover, range: HOOK.range },
   net: { name: "HUNTER'S NET", short: 'NET', cooldown: NET.cooldown, windup: NET.windup, recover: NET.recover, range: NET.range },
   shadow: { name: 'SHADOWSTEP', short: 'SHADOW', cooldown: SHADOWSTEP.cooldown, windup: SHADOWSTEP.windup, recover: SHADOWSTEP.recover, range: SHADOWSTEP.range },
+  channel: { name: 'ELEMENTAL CHANNEL', short: 'CHANNEL', cooldown: CHANNEL.cooldown, windup: CHANNEL.windup, recover: CHANNEL.recover, range: 0 },
   lodestone: { name: 'LODESTONE', short: 'LODESTONE', cooldown: LODESTONE.cooldown, windup: LODESTONE.windup, recover: LODESTONE.recover, range: LODESTONE.range },
   horn: { name: 'WAR CRY', short: 'WAR CRY', cooldown: HORN.cooldown, windup: HORN.windup, recover: HORN.recover, range: HORN.radius },
   blessing: { name: 'BLESSED GROUND', short: 'BLESS', cooldown: BLESSING.cooldown, windup: BLESSING.windup, recover: BLESSING.recover, range: BLESSING.range },
@@ -95,7 +100,7 @@ export const CLASS_SKILL: Record<'WARRIOR' | 'RANGER' | 'ROGUE' | 'MAGE' | 'HEAL
   WARRIOR: 'horn',
   RANGER: 'net',
   ROGUE: 'shadow',
-  MAGE: 'lodestone',
+  MAGE: 'channel',
   HEALER: 'sanctuary',
 };
 /**

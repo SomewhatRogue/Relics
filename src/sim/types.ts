@@ -43,7 +43,7 @@ export interface Intent {
 
 export const NO_INTENT: Intent = { mx: 0, my: 0, ax: 0, ay: 0, attack: false, block: false, attackSeq: 0, blockSeq: 0, rollSeq: 0, weaponSeq: 0, relicSeq: 0, relicSwapSeq: 0, relicPickSeq: 0, relicPick: 0, augmentSeq: 0, classSeq: 0, grabSeq: 0, takeSeq: 0, take: 0, gearSeq: 0, gearOp: 0, gearArg: 0, potionSeq: 0, openSeq: 0, open: 0 };
 
-export type HeroAct = 'idle' | 'charge' | 'attack' | 'throw' | 'zip' | 'roll' | 'hurt' | 'stun' | 'down' | 'carry' | 'slam';
+export type HeroAct = 'idle' | 'charge' | 'attack' | 'throw' | 'zip' | 'roll' | 'hurt' | 'stun' | 'down' | 'carry' | 'slam' | 'channel';
 
 /** Anything that can be pushed: a slide (knockback) decays each tick. */
 export interface Body {
@@ -309,6 +309,8 @@ export type FightEvent =
   | { k: 'noblock' | 'noguard'; x: number; y: number }
   /** The Ranger's snare laid; the hound barking or yelping off. */
   | { k: 'snareset' | 'bark' | 'yelp'; x: number; y: number }
+  /** The Mage channelling, and done: its spells now `el`. */
+  | { k: 'channel' | 'channeled'; x: number; y: number; el: string }
   | { k: 'weapon'; x: number; y: number; name: string }
   | { k: 'throw' | 'pinned' | 'javwall' | 'javstick' | 'hookfire' | 'latch' | 'yank' | 'land'; x: number; y: number; dx: number; dy: number }
   | { k: 'relic' | 'loot'; x: number; y: number; name: string }
@@ -372,6 +374,8 @@ export interface Bolt {
   id: number;
   owner: string;
   kind: 'arrow' | 'bolt' | 'spark' | 'orb' | 'lance' | 'smite' | 'net' | 'lodestone' | 'flask';
+  /** A Mage's frost burst: freezes solid at once (frost twice). */
+  freeze?: boolean;
   /** A thrown flask's potion. */
   potion?: PotionId;
   /** The Jealous Rod: this shot jumps to every goblin near what it hits. */

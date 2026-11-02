@@ -89,6 +89,13 @@ export class Fx {
         this.say(x, y - 34, 'STUNNED', '#ffe070');
         break;
       // The prologue's cutscene: the ground going, the bite, the body landing, the bellow.
+      case 'channeled': {
+        const col = ev.el === 'fire' ? '#ff8a3c' : ev.el === 'frost' ? '#9fe0ff' : '#e8e07a';
+        this.burst(x, y - 9, 26, [col, '#ffffff'], 80, true);
+        this.rings.push({ x, y: y - 9, life: 0.4, max: 0.4, col });
+        this.say(x, y - 30, ev.el.toUpperCase(), col);
+        break;
+      }
       case 'snareset':
         this.burst(x, y - 1, 6, ['#8a6a3a', '#5a3d22'], 25, false, 120, true);
         break;

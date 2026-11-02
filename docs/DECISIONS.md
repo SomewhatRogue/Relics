@@ -732,3 +732,13 @@ doesn't knock anything off balance (only from behind). Every dodge costs half ag
 will bring it down. Class skills (War Cry, Hunter's Net, Shadowstep, Lodestone, Sanctuary) are on 20 s
 cooldowns while heroes are low level; shorter cooldowns and new abilities come with levels later. Relics
 (javelin 6 s, hook 4 s) unchanged for now.
+
+## 2026-11-01: relics on 10 s; the Mage channels; sound on a silenced iPhone (Claude Opus 5.5)
+Relics recharge in 10 s (javelin, hook). The Mage's class skill is Elemental Channel (CHANNEL; Lodestone stays a
+relic): it stands still 2 s (anything that hurts it breaks the channel), then its spells turn to the next element,
+fire, frost, storm, round again, kept from room to room (profile.augments.channel). Fire: the tap is a firebolt,
+the hold a fireball that bursts and sets them burning. Frost: the tap is three icicles in a fan, the hold a burst
+that freezes solid. Storm: every spell jumps to the next goblin. A rod's lance keeps piercing (its element rides
+the line, no burst). The HUD kit line shows the element. Kyle heard no sound on his phone: iPhones play web audio
+on the ringer channel, so the silent switch mutes it; the first tap now loops a silent clip on a media element,
+which moves the page to the media channel.

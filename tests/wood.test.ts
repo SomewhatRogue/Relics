@@ -173,7 +173,7 @@ describe('the prologue wood', () => {
     kill(s, [], 'burst', 0, 1);
     g.step(0.05, NO_INTENT);
     expect(w().relic).toBe(true);
-    expect(g.hero.relics).toEqual(['lodestone', 'javelin']);
+    expect(g.hero.relics).toEqual(['channel', 'javelin']);
     // The find stops everything until you've seen it.
     expect(w().hold?.kind).toBe('relic');
     g.continueHold();

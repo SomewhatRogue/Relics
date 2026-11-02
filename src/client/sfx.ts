@@ -26,6 +26,27 @@ export function unlockAudio(): void {
     } catch { /* not supported */ }
   }
   if (ac.state !== 'running') void ac.resume();
+  // iPhones play web audio through the ringer's channel, so the silent switch mutes the whole game.
+  // A tiny silent clip looping on a media element moves the page to the media channel (as a video
+  // would), and the game is heard with the switch on silent.
+  if (!quiet) {
+    quiet = document.createElement('audio');
+    quiet.setAttribute('playsinline', '');
+    quiet.loop = true;
+    quiet.src = silentWav();
+  }
+  if (quiet.paused) void quiet.play().catch(() => {});
+}
+let quiet: HTMLAudioElement | null = null;
+
+/** Half a second of silence as a WAV, made here (nothing to download). */
+function silentWav(): string {
+  const rate = 8000, n = rate / 2, buf = new ArrayBuffer(44 + n), v = new DataView(buf);
+  const str = (o: number, t: string) => [...t].forEach((ch, i) => v.setUint8(o + i, ch.charCodeAt(0)));
+  str(0, 'RIFF'), v.setUint32(4, 36 + n, true), str(8, 'WAVE'), str(12, 'fmt '), v.setUint32(16, 16, true), v.setUint16(20, 1, true), v.setUint16(22, 1, true);
+  v.setUint32(24, rate, true), v.setUint32(28, rate, true), v.setUint16(32, 1, true), v.setUint16(34, 8, true), str(36, 'data'), v.setUint32(40, n, true);
+  for (let i = 0; i < n; i++) v.setUint8(44 + i, 128);
+  return URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
 }
 
 export function setMuted(m: boolean): void {
@@ -193,6 +214,16 @@ export const sfx = {
     burst('bandpass', 1300, 500, 3, 0.5 * v, 0.14);
     burst('lowpass', 700, 200, 1, 0.4 * v, 0.1, 0.18);
     burst('lowpass', 600, 180, 1, 0.35 * v, 0.08, 0.34);
+  },
+  /** The Mage gathering itself, and the element turning. */
+  channel() {
+    if (!ready()) return;
+    tone('sine', 180, 520, 0.12, 2);
+    tone('triangle', 90, 260, 0.08, 2);
+  },
+  channeled() {
+    if (!ready()) return;
+    for (const [f, d] of [[880, 0], [1320, 0.06], [1760, 0.12]]) tone('sine', f, f, 0.14, 0.4, d);
   },
   rumble() {
     if (!ready()) return;
