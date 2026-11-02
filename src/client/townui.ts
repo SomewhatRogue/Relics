@@ -240,7 +240,7 @@ const CHAT: Record<number, { name: string; line: string }> = {
   9: { name: 'OLD MERREN', line: 'Father Odric nailed that chapel shut with his own hands, the night the siege broke. I asked him why. He said, so it stays where it is.' },
   13: { name: 'CORPORAL BRISK', line: "Cole says I'll make sergeant when Dunn dies. Dunn says he's not dying till he gets new boots. So that's me, corporal for life." },
   15: { name: PERRIN.name, line: PERRIN.stages[0] },
-  16: { name: 'GRAVEDIGGER COBB', line: "I dig and Odric says the words. Between us we've never been short of work." },
+  16: { name: 'GRAVEDIGGER COBB', line: "I dig and Odric says the words, by name where he knows one." },
   17: { name: 'GOODMAN TULL', line: 'Our house stood against the north wall. Some of it is the north wall now.' },
   18: { name: 'GOODWIFE MAB', line: "It tastes of copper, but it's wet and it's ours." },
   19: { name: 'RECRUIT WAT', line: "Master Cole says a dull blade's a gift to the other fellow. I'm not giving them anything." },
