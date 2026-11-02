@@ -1250,3 +1250,25 @@ puddles, weeds, missing cobbles, arrows) stay on top; the earth, path, mud and s
 - Each extra player adds a quarter to a won job's pay and its objective xp (`PARTY.reward`); kill gold
   and xp already grow with the extra goblins. Two or more players each find one more piece of
   treasure; three or more roll it a cut above.
+
+## 2026-11-01: finding your way on a job (Kyle; Opus 5.5)
+Kyle: he didn't know how many were left to rescue, the people he freed didn't follow him out of houses,
+and he couldn't tell when or where he could leave.
+- **The freed came out in the wrong place.** Walking out of a house moved them to the street, but they
+  were pushed against the house's map (the map in use at that moment), so they turned up across the
+  street, counted as home at once and walked off without being seen. They now come out by the door
+  behind you (the street's own tick settles them), with SAVED over them, then walk off toward the way in.
+  Tested through the real door, alone and with a friend leading them.
+- **The goal counts people** (`sim/goal.ts`, moved out of run.ts): "2 to free, 1 to bring out", plus
+  "3 more in the houses" for anyone caged indoors (extra, never needed: on a rescue, every house has
+  someone; that would be seven in a village). Anyone freed, indoors or out, has to be brought out
+  before a rescue's way home opens. A friend's screen shows the leader's words and count.
+- **The way out is plain** (`client/wayout.ts`): a gap painted in the back wall where the way on is;
+  stakes across it while it's shut; once open, light in it, a torch either side and gold chevrons
+  running into it; a sill, light and chevrons at a house's door. The goal names it ("Way on: north",
+  "The larder is ruined. Way home: north"), "WAY ON: NORTH" / "WAY HOME: NORTH" / "PICK A ROAD" rises
+  over you the moment it opens, and the wood's gold arrow at your feet points the way on a job
+  (`client/wayfind.ts`): the cage, out of the door once someone's freed, back to the way in with
+  someone freed out in the open, then the way on. Someone freed and left out of sight gets a pale mark
+  at the screen's edge. Every kind of place has its way out at the top middle (forks: two at the top);
+  a test floods each from the way in and checks nothing stands in front of it.

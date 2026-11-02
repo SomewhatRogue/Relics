@@ -11,7 +11,7 @@ import { toPx } from './world';
 import { CRY } from './captives';
 
 interface Part { x: number; y: number; vx: number; vy: number; life: number; max: number; col: string; glow: boolean; grav: number; stick: boolean }
-interface Text { x: number; y: number; s: string; col: string; life: number }
+interface Text { x: number; y: number; s: string; col: string; life: number; rise?: number }
 interface Ring { x: number; y: number; life: number; max: number; col: string; size?: number }
 /** A lightning arc between two points, in world pixels. */
 interface Arc { x: number; y: number; x2: number; y2: number; life: number; col?: string }
@@ -34,8 +34,9 @@ export class Fx {
     }
   }
 
-  say(x: number, y: number, s: string, col: string): void {
-    this.texts.push({ x, y, s, col, life: 0.8 });
+  /** Words that rise and fade over (x, y); `life` seconds (rising slower the longer they stay). */
+  say(x: number, y: number, s: string, col: string, life = 0.8): void {
+    this.texts.push({ x, y, s, col, life, rise: 18 * Math.min(1, 0.8 / life) });
   }
 
   /** A jagged crack in the stone, left for good (javelins, slams into walls). */
@@ -249,6 +250,9 @@ export class Fx {
         this.say(x, y - 18, String(ev.n), '#ff6a5a');
         if (!ev.tick) (this.say(x, y - 26, CRY, '#f0e0b0'), (this.shake = Math.max(this.shake, 1.5)));
         break;
+      case 'survivorhome':
+        this.say(x, y - 26, 'SAVED', '#9affc0', 1.6);
+        break;
       case 'survivordeath':
         this.burst(x, y - 6, 16, ['#7a1d1d', '#5a1414', '#9a2a2a'], 70, false, 180, true);
         break;
@@ -268,7 +272,7 @@ export class Fx {
       if (p.life <= 0 && p.stick && this.decals.length < 600) this.decals.push({ x: Math.round(p.x), y: Math.round(p.y), col: p.col });
     }
     this.parts = this.parts.filter((p) => p.life > 0);
-    for (const t of this.texts) (t.life -= dt), (t.y -= 18 * dt);
+    for (const t of this.texts) (t.life -= dt), (t.y -= (t.rise ?? 18) * dt);
     this.texts = this.texts.filter((t) => t.life > 0);
     this.gore.update(dt);
     for (const a of this.arcs) a.life -= dt;

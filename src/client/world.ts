@@ -8,6 +8,7 @@ import { Rng } from '../shared/rng';
 import { paintBreach } from './breach';
 import { paintMarks } from './marks';
 import { paintSoil } from './soil';
+import { paintGaps } from './wayout';
 
 export const PX = 16;
 export const OX = 8;
@@ -94,6 +95,8 @@ export function paintMap(m: GameMap): HTMLCanvasElement {
   rect(W - 8, 0, 8, H, side);
   rect(0, H - 8, W, 8, side);
   rect(0, H - 8, W, 1, '#4f4a5c');
+  // The ways out: a gap in the back wall, a house's doorway in the front (wayout.ts).
+  paintGaps(m, rect);
   for (const t of m.torches) {
     const [x, y] = toPx(t.x, t.y);
     rect(x - 1, y, 3, 8, '#3a2a1a');

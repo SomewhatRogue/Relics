@@ -45,6 +45,8 @@ export interface HostGame {
   /** Which room this is (changes when the party moves on or goes indoors). */
   roomKey: number;
   goalText(): string;
+  /** The caged and freed in this room's houses, by door (for the way-pointer on friends' screens). */
+  houses(): { x: number; y: number; caged: number; waiting: number }[];
   addFriend(id: string, f: Friend): void;
   dropFriend(id: string): void;
 }
@@ -97,7 +99,7 @@ export class CoopHost {
     const names: Record<string, string> = { me: this.myName };
     const acks: Record<string, number> = {};
     for (const [id, f] of this.friends) (names[id] = f.name), f.at !== undefined && (acks[id] = f.at);
-    const body = { p, f: full ? 1 : 0, k: g.roomKey, map: full ? { ...room.map, blocks: [] } : undefined, t: room.time, x: room.exitOpen ? 1 : 0, run: g.run, goal: g.goalText(), ev: this.evs, names, acks };
+    const body = { p, f: full ? 1 : 0, k: g.roomKey, map: full ? { ...room.map, blocks: [] } : undefined, t: room.time, x: room.exitOpen ? 1 : 0, in: room.indoors ? 1 : 0, hc: g.houses(), run: g.run, goal: g.goalText(), ev: this.evs, names, acks };
     this.sock.send('*', { s: JSON.stringify(body) });
     this.evs = [];
     this.sentAt = now;
@@ -120,6 +122,8 @@ export class CoopGuest {
   room: ArenaRoom | null = null;
   run: Run | null = null;
   goal = '';
+  /** The leader's count of the caged and freed in this room's houses. */
+  houses: { x: number; y: number; caged: number; waiting: number }[] = [];
   ended: { won: boolean; run: Run } | null = null;
   private sock: RelaySocket;
   private dec = new Decoder();
@@ -163,7 +167,7 @@ export class CoopGuest {
     if (typeof d.save === 'string') return void (this.save = d.save);
     if (typeof d.s !== 'string') return;
     // The leader's own hero is `me` in their room; in mine, I am. (Ids are quoted whole, so only ids change.)
-    let body: { p: Patch; f: number; k: number; map?: ArenaRoom['map']; t: number; x: number; run: Run | null; goal: string; ev: FightEvent[]; names: Record<string, string>; acks?: Record<string, number> };
+    let body: { p: Patch; f: number; k: number; map?: ArenaRoom['map']; t: number; x: number; in?: number; hc?: CoopGuest['houses']; run: Run | null; goal: string; ev: FightEvent[]; names: Record<string, string>; acks?: Record<string, number> };
     try {
       body = JSON.parse(d.s.split('"me"').join('"@lead"').split(`"${this.myId}"`).join('"me"'));
     } catch {
@@ -193,6 +197,8 @@ export class CoopGuest {
     for (const h of room.heroes) h.tag = body.names[h.id] ?? h.tag;
     room.time = body.t;
     room.exitOpen = !!body.x;
+    room.indoors = !!body.in;
+    this.houses = body.hc ?? [];
     this.run = body.run;
     this.goal = body.goal;
     // The trip there and back, from the newest input of mine the leader has used.

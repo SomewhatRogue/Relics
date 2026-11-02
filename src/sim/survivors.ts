@@ -141,8 +141,8 @@ export function walkOut(from: Survivor[], heroes: Hero[], to: Survivor[], x: num
   const going = from.filter((s) => !s.dead && s.home < 0 && !!nearest(s, heroes));
   going.forEach((s, i) => {
     from.splice(from.indexOf(s), 1);
+    // (No collide here: the map in use is still the house's. The street's own tick settles them.)
     Object.assign(s, { id: to.length + 1, x: x + ((i % 3) - 1) * 0.6, y: y + Math.floor(i / 3) * 0.5, z: 0, kvx: 0, kvy: 0, out: true, burnUntil: 0, moving: false });
-    collide(s, SURVIVOR.radius);
     to.push(s);
   });
 }

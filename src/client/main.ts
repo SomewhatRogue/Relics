@@ -8,7 +8,8 @@ import { toPx } from './world';
 import { Parties } from './parties';
 import { CoopGuest } from './coop';
 import { session, touchSession } from './session';
-import { MAX_DOWNS, goal } from '../sim/run';
+import { MAX_DOWNS } from '../sim/run';
+import { WayWatch, wayTarget } from './wayfind';
 import type { Npc } from '../shared/arena';
 import { knows, type Intent } from '../sim/types';
 import { Game, ME } from './game';
@@ -63,6 +64,7 @@ function online(): Townfolk | null {
 
 const scene = new Scene(document.getElementById('game') as HTMLCanvasElement);
 const fx = new Fx();
+const ways = new WayWatch();
 const panel = new Panel();
 const input = new Input(() => scene.heroScreen());
 const $ = (s: string) => document.querySelector(s) as HTMLElement;
@@ -226,7 +228,7 @@ function hud(now: number): void {
     $('#boss').hidden = !boss || wood.cut >= 0;
     if (boss) ($('#boss b').textContent = boss.name!), ($('#boss i').style.width = (100 * boss.hp) / boss.maxHp + '%');
   } else if (game.mode === 'run' && run) {
-    const g = goal(run, game.fightRoom);
+    const g = { text: game.goalText() };
     // Alone, the times you can still get up (a heart each); in a party, your friends pick you up instead.
     const solo = room.heroes.filter((x) => x.id !== 'squire').length < 2, ups = MAX_DOWNS - run.downs;
     const hearts = solo ? `  <i class="ups">${'\u2665'.repeat(Math.max(0, ups))}${'\u2661'.repeat(Math.min(MAX_DOWNS, run.downs))}</i>` : '';
@@ -307,7 +309,13 @@ function frame(t: number): void {
   fx.update(dt);
   scene.focus = game.cutFocus();
   scene.fanfare = game.wood?.hold?.kind === 'relic';
-  scene.pointTo = game.wood && game.wood.stage === 5 && !game.wood.hold ? { x: ROAD_OUT.x + 1, y: ROAD_OUT.y + ROAD_OUT.h / 2 } : null;
+  scene.pointTo = game.wood && game.wood.stage === 5 && !game.wood.hold ? { x: ROAD_OUT.x + 1, y: ROAD_OUT.y + ROAD_OUT.h / 2 } : wayTarget(game);
+  // The way on just opened: say which way, over you.
+  const opened = ways.check(game);
+  if (opened && game.hero) {
+    const [sx, sy] = toPx(game.hero.x, game.hero.y);
+    fx.say(sx, sy - 40, opened, '#ffd27a', 2.6);
+  }
   // Online: everyone else in Wickhold, while you're there.
   const inTown = game.mode === 'town', h = game.hero;
   online()?.step(inTown && h ? { n: game.profile.name, w: h.weapon, l: h.look ?? 0, at: game.room.map.name, p: [h.x, h.y, h.fx, h.fy, h.moving ? 1 : 0] } : null, t / 1000, dt);

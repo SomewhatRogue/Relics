@@ -28,6 +28,7 @@ import { drawText, textWidth } from './pixfont';
 import { blockAt, blockFoot, drawBlock, drawRound } from './blocks';
 import { drawNpc } from './npcs';
 import { drawCaged, drawSurvivor } from './captives';
+import { behindMarks, drawWays } from './wayout';
 import { SPOT_REACH } from '../shared/town';
 import { dusk } from './streetlife';
 
@@ -267,15 +268,8 @@ export class Scene {
     }
     for (const b of map.braziers) items.push({ y: OY + b.y * PX, draw: () => this.brazier(c, OX + b.x * PX - cx, OY + b.y * PX + 2 - cy, now) });
     if (map === ARENA) items.push({ y: OY + ARENA.cage.y * PX, draw: () => this.cage(c, OX + ARENA.cage.x * PX - cx, OY + ARENA.cage.y * PX - cy, now) });
-    // The way out, glowing once it's open.
-    if (room.exitOpen && map.exit) {
-      const e = map.exit, ex = OX + e.x * PX - cx, ey = OY + e.y * PX - cy, k = 0.5 + 0.3 * Math.sin(now * 5);
-      glow.globalAlpha = k;
-      glow.fillStyle = '#9fe8ff';
-      for (let i = 0; i < e.w * PX; i += 2) glow.fillRect(Math.round(ex + i), Math.round(ey + (e.y < 1 ? e.h * PX - 1 : 0)), 1, 1);
-      for (let i = 0; i < 3; i++) glow.fillRect(Math.round(ex + (e.w * PX) / 2 - 1 + i - 1), Math.round(ey + (e.y < 1 ? 6 + i : e.h * PX - 6 - i)), 3 - Math.abs(i - 1) * 2 + 1, 1);
-      glow.globalAlpha = 1;
-    }
+    // The way out: stakes across the gap while it's shut; lit, torches and chevrons once it's open (wayout.ts).
+    const wayLights = drawWays(c, map, room.exitOpen, cx, cy, now);
     // Blessed ground: a ring of gold on the floor, light rising off it.
     for (const s of room.snares) drawSnare(c, s, OX + s.x * PX - cx, OY + s.y * PX - cy);
     for (const z of room.zones) {
@@ -293,17 +287,16 @@ export class Scene {
     }
     // At a fork, both ways out glow, each with its name.
     if (room.exitOpen) for (const r of map.roads ?? []) {
-      const e = r.area, ex = OX + e.x * PX - cx, ey = OY + e.y * PX - cy, k = 0.5 + 0.3 * Math.sin(now * 5 + e.x);
-      glow.globalAlpha = k;
-      glow.fillStyle = r.road === 'high' ? '#ffd27a' : '#9fe8ff';
-      for (let i = 0; i < e.w * PX; i += 2) glow.fillRect(Math.round(ex + i), Math.round(ey + e.h * PX - 1), 1, 1);
-      glow.globalAlpha = 1;
-      drawText(glow, r.label, Math.round(ex + (e.w * PX) / 2 - textWidth(r.label) / 2), Math.round(ey + e.h * PX + 3), r.road === 'high' ? '#ffd27a' : '#9fe8ff');
+      const e = r.area, ex = OX + e.x * PX - cx, ey = OY + e.y * PX - cy;
+      drawText(glow, r.label, Math.round(ex + (e.w * PX) / 2 - textWidth(r.label) / 2), Math.round(ey + e.h * PX + 34), r.road === 'high' ? '#ffd27a' : '#9fe8ff');
     }
     items.sort((p, q) => p.y - q.y);
     for (const it of items) it.draw();
+    // Anyone you've freed who's fallen behind out of sight: a mark at the edge, toward them (clear of the HUD).
+    const tall = this.vh > this.vw * 1.2;
+    behindMarks(c, room.survivors ?? [], cx, cy, this.vw, this.vh, tall ? this.vh * 0.2 : 20, tall ? this.vh * 0.3 : 20, now);
 
-    const lights: Light[] = [];
+    const lights: Light[] = [...wayLights];
     for (const m of room.coals) lights.push({ x: OX + m.x * PX - cx, y: OY + m.y * PX - cy - 4, r: 26 + Math.sin(now * 7 + m.id) * 3, i: 0.6 * Math.min(1, m.life / 4), c: [1, 0.6, 0.28] });
     for (const ch of room.chests) if (ch.state !== 'shut') lights.push({ x: OX + ch.x * PX - cx, y: OY + ch.y * PX - cy - 6, r: ch.state === 'opening' ? 16 + 30 * (ch.t / 1.2) : 26, i: ch.state === 'opening' ? 0.4 + 0.5 * (ch.t / 1.2) : 0.35, c: tint(TIERS[ch.tier].col) });
     for (const d of room.drops) {

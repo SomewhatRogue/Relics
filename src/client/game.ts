@@ -20,6 +20,7 @@ import { woodMap, WOOD_PROPS } from '../shared/wood';
 import { PACK } from '../sim/pack';
 import { walkOut } from '../sim/survivors';
 import { refreshHealth, statsOf } from '../sim/gearstats';
+import { houseCaptives, sum } from '../sim/goal';
 import { goal, interiorRoom, isFinal, newRun, runRoom, tally, type Run } from '../sim/run';
 import { NO_INTENT, knows, type FightEvent, type Hero, type Intent, type Learned } from '../sim/types';
 import { load, store, type Save } from './save';
@@ -276,7 +277,15 @@ export class Game {
   }
 
   goalText(): string {
-    return this.run ? goal(this.run, this.fightRoom).text : '';
+    // Following a friend's job: their game's words (it knows their houses).
+    if (this.remote) return this.remote.goal;
+    return this.run ? goal(this.run, this.fightRoom, sum(this.houses())).text : '';
+  }
+
+  /** The caged and the freed in this room's houses, by door (sim/goal.ts). */
+  houses(): ReturnType<typeof houseCaptives> {
+    if (this.remote) return this.remote.houses;
+    return this.run && this.mode === 'run' ? houseCaptives(this.run, this.fightRoom, this.insides) : [];
   }
 
   /** Back to Wickhold, at `at` (in front of a door) or the square. */
@@ -412,7 +421,7 @@ export class Game {
     else if (this.mode === 'yard' && inArea(this.room.map.exit, h.x, h.y)) this.enterTown(this.doorOf('hall'));
     if (this.mode === 'run' && this.run) {
       tally(this.run, this.room, ev, ME);
-      if (!this.outside) this.room.exitOpen = goal(this.run, this.room).done;
+      if (!this.outside) this.room.exitOpen = goal(this.run, this.room, sum(this.houses())).done;
       if (this.run.failed) this.finish(false);
       else if (!this.outside && this.room.exitOpen) {
         // The way on takes the whole party, standing in it together; at a fork, the road they stand in.

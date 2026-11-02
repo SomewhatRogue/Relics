@@ -100,30 +100,5 @@ export function tally(run: Run, room: ArenaRoom, events: FightEvent[], me: strin
   if (run.downs >= MAX_DOWNS || allOut(room.heroes)) run.failed = true;
 }
 
-/** The room's goal, in words, and whether it's met. */
-export function goal(run: Run, room: ArenaRoom): { text: string; done: boolean } {
-  const goblins = room.enemies.filter((e) => !isDead(e)).length;
-  if (!isFinal(run)) {
-    const fork = !!room.map.roads;
-    return { text: goblins ? `Clear the goblins (${goblins} left)` : fork ? 'Pick a road, together. HIGH: archers up top, fewer below. LOW: more goblins, someone caged' : 'The way ahead is open', done: goblins === 0 };
-  }
-  const o = run.job.objective;
-  const cages = room.props.filter((p) => p.kind === 'cage' && !p.broken).length;
-  // The freed still to be walked back to the way in.
-  const waiting = room.survivors.filter((s) => !s.dead && s.home < 0).length;
-  if (o === 'rescue') return { text: cages ? `Break the cages (${cages} left)` : 'Everyone is free. Get them out', done: cages === 0 && !waiting };
-  if (o === 'larder') {
-    const racks = room.props.filter((p) => p.kind === 'larder' && !p.broken).length;
-    return { text: racks ? `Smash the larder (${racks} racks left)` : 'The larder is ruined. Get out', done: racks === 0 };
-  }
-  if (o === 'burn') {
-    const dens = room.map.blocks.filter((b) => b.kind === 'den' && !b.ruined).length;
-    return { text: dens ? `Burn out the dens (${dens} left)` : 'The dens are ash. Get out', done: dens === 0 };
-  }
-  const boss = room.enemies.find((e) => e.name);
-  const bossDead = !boss || isDead(boss);
-  if (o === 'hunt') return { text: bossDead ? `${run.job.boss} is dead. Get out` : `Kill ${run.job.boss}`, done: bossDead };
-  // The story mission: the boss and every cage.
-  if (!bossDead) return { text: `Kill ${run.job.boss}${cages ? `, free the caged (${cages})` : ''}`, done: false };
-  return { text: cages ? `Free the caged (${cages} left)` : waiting ? 'Everyone is free. Get them out' : 'Ring the bell: get out', done: cages === 0 && !waiting };
-}
+/** The room's goal (sim/goal.ts). */
+export { goal, wayDir, type Captives } from './goal';
