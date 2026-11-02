@@ -21,13 +21,14 @@ export class Preview {
   private raf = 0;
   private seq = { attack: 0, roll: 0, block: 0 };
 
-  constructor(private cls: HeroClass) {
+  constructor(private cls: HeroClass, look = 0) {
     for (const c of [this.el, this.lit, this.glow]) (c.width = W), (c.height = H);
     this.el.className = 'preview';
     this.room = new ArenaRoom(1, { scrappers: false, props: false });
     this.room.enemies = [];
     const h = this.room.join('me');
     h.weapon = CLASS_KITS[cls][0];
+    h.look = look;
     this.home();
   }
 

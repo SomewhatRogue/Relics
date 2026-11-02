@@ -86,6 +86,8 @@ export interface Profile {
   relic: RelicId | '';
   /** The class skill carried, when the class has a choice of them (the first, until picked). */
   skill?: RelicId;
+  /** Which of its class's three looks (chosen when made). */
+  look?: number;
   /** Elements the relic-wright has fitted to this hero's skill and relics. */
   augments: Partial<Record<RelicId, Augment>>;
   runs: number;

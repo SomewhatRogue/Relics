@@ -116,7 +116,7 @@ export class Game {
     const h = this.hero, cls = this.profile.cls;
     // You come round with nothing but your class's weapon (your skill is your trainer's to teach); a
     // Healer's censer has gone cold. (A Ranger's hound is with them: it lay by them all night.)
-    Object.assign(h, { relics: abilitiesOf(cls), found: [], cold: cls === 'HEALER', belt: [], learned: this.profile.learned ?? [], calmHound: true });
+    Object.assign(h, { relics: abilitiesOf(cls), found: [], cold: cls === 'HEALER', belt: [], learned: this.profile.learned ?? [], calmHound: true, look: this.profile.look ?? 0 });
     h.relic = h.relics[0];
     this.wood = newWood(this.room, cls);
   }
@@ -180,9 +180,9 @@ export class Game {
     return this.wood.stage >= 5 ? ['attack', 'roll', 'block', 'relic', 'potion', 'grab'] : lessonOf(this.wood).moves.filter((m) => m !== 'grab' || this.wood!.stage > 0 || this.wood!.more);
   }
   /** Make a hero (class for life); returns its slot, or -1 when all three are taken. */
-  create(cls: HeroClass, name: string): number {
+  create(cls: HeroClass, name: string, look = 0): number {
     if (this.save.heroes.length >= HERO_SLOTS) return -1;
-    this.save.heroes.push(newProfile(cls, name.trim().toUpperCase().slice(0, 12) || 'HERO'));
+    this.save.heroes.push({ ...newProfile(cls, name.trim().toUpperCase().slice(0, 12) || 'HERO'), look });
     this.choose(this.save.heroes.length - 1);
     return this.save.current;
   }
@@ -219,6 +219,7 @@ export class Game {
     h.maxHp = h.baseHp + statsOf(h).health;
     h.relics = abilitiesOf(p.cls, p.relic, p.skill);
     h.learned = p.learned;
+    h.look = p.look ?? 0;
     // Your skill in hand, or (not yet taught it) the relic you carry.
     h.relic = knows(h, 'skill') ? h.relics[0] : (h.relics[1] ?? h.relics[0]);
     for (const r of h.relics) h.augments[r] = p.augments[r] ?? '';

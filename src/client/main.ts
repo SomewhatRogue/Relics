@@ -1,7 +1,7 @@
 /** Relic: Wickhold, the Training Yard and runs. The rooms run here in the browser (solo is a party of one). */
 import { CLASS_GUARD, CLASS_DODGES, POTIONS, CLASS_ORDER, RELICS, TRAITS, WEAPONS, itemName, type HeroClass } from '../shared/tuning';
 import { CLASS_NAME } from '../shared/classes';
-import { HEROES, WARRIOR_LOOKS, heroPair } from './sprites';
+import { LOOKS, heroLook } from './sprites';
 import { ONLINE } from './relay';
 import { Townfolk } from './townfolk';
 import { toPx } from './world';
@@ -299,7 +299,7 @@ function frame(t: number): void {
   scene.pointTo = game.wood && game.wood.stage === 5 && !game.wood.hold ? { x: ROAD_OUT.x + 1, y: ROAD_OUT.y + ROAD_OUT.h / 2 } : null;
   // Online: everyone else in Wickhold, while you're there.
   const inTown = game.mode === 'town', h = game.hero;
-  online()?.step(inTown && h ? { n: game.profile.name, w: h.weapon, at: game.room.map.name, p: [h.x, h.y, h.fx, h.fy, h.moving ? 1 : 0] } : null, t / 1000, dt);
+  online()?.step(inTown && h ? { n: game.profile.name, w: h.weapon, l: h.look ?? 0, at: game.room.map.name, p: [h.x, h.y, h.fx, h.fy, h.moving ? 1 : 0] } : null, t / 1000, dt);
   scene.render(game.room, ME, fx, t / 1000, dt, inTown ? (townfolk?.here(game.room.map.name) ?? []) : []);
   hud(t / 1000);
   requestAnimationFrame(frame);
@@ -365,4 +365,4 @@ w.__title = title;
 w.__panel = panel;
 w.__openSpot = (id: string, arg = 0, key = '') => openSpot(id as never, game, panel, arg, key);
 // Look sheets for screenshots: every hero, the Warrior's options, and a dark copy with only the glow lit.
-w.__looks = () => ({ heroes: Object.fromEntries(Object.entries(HEROES).map(([k, v]) => [k, v.down.c.toDataURL()])), warrior: Object.fromEntries(Object.entries(WARRIOR_LOOKS).map(([k, v]) => [k, heroPair(v).down.c.toDataURL()])) });
+w.__looks = () => Object.fromEntries(Object.keys(LOOKS).map((k) => [k, [0, 1, 2].map((i) => heroLook(k as HeroClass, i).down.c.toDataURL())]));

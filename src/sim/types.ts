@@ -165,6 +165,8 @@ export interface Hero extends Body {
   critSeed?: number;
   /** The name shown under someone else's hero (another player in town); their id otherwise. */
   tag?: string;
+  /** Which of its class's three looks it wears (drawing only). */
+  look?: number;
   /** In a party: down and waiting to be picked up (`pickT` so far), or out until the job ends. */
   bleeding?: boolean;
   out?: boolean;

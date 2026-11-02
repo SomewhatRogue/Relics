@@ -12,11 +12,11 @@ import { COPY, RECOVER } from './copy';
 import { RECOVERY, type Recovery } from './recovery';
 import { RecoveryPanel } from './recoveryui';
 import type { Game } from './game';
-import { HEROES } from './sprites';
+import { heroLook } from './sprites';
 
 const NAMES: Record<HeroClass, string> = { WARRIOR: 'BRANNOCK', RANGER: 'WREN', ROGUE: 'SILK', MAGE: 'ASHE', HEALER: 'IVY' };
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
-const face = (cls: HeroClass) => `<img class="face" alt="" src="${HEROES[cls].down.c.toDataURL()}">`;
+const face = (cls: HeroClass, look = 0) => `<img class="face" alt="" src="${heroLook(cls, look).down.c.toDataURL()}">`;
 
 export class Title {
   private el = document.createElement('div');
@@ -26,6 +26,8 @@ export class Title {
   private detail = false;
   private retiring = -1;
   private preview: Preview | null = null;
+  /** Which of the class's three looks is chosen. */
+  private look = 0;
   /** The recovery code panel (none in the one-file build), and whether it's the one showing. */
   private panel: RecoveryPanel | null = null;
   private inPanel = false;
@@ -75,7 +77,7 @@ export class Title {
     const hs = this.g.save.heroes;
     this.el.innerHTML = `<div class="tcard"><h1>RELIC</h1><div class="sub">${CHAPTER_1.name.toUpperCase()}</div>` +
       `<p class="lede">${COPY.homeLede}</p><div class="slots">` +
-      hs.map((h, i) => `<div class="slot">${face(h.cls)}<div class="who"><b>${esc(h.name)}</b><span>${CLASS_NAME[h.cls]} &middot; LEVEL ${h.level} &middot; ${h.gold} GOLD</span></div>` +
+      hs.map((h, i) => `<div class="slot">${face(h.cls, h.look)}<div class="who"><b>${esc(h.name)}</b><span>${CLASS_NAME[h.cls]} &middot; LEVEL ${h.level} &middot; ${h.gold} GOLD</span></div>` +
         `<button data-play="${i}" class="primary">PLAY</button>${h.prologue ? `<button data-wood="${i}" class="ghost" title="Play the wood again">WOOD</button>` : ''}<button data-retire="${i}" class="ghost">${this.retiring === i ? 'SURE?' : 'RETIRE'}</button></div>`).join('') +
       `</div>${hs.length < HERO_SLOTS ? '<button data-new class="wide">NEW HERO</button>' : '<p class="dim">Three heroes is the most. Retire one to make another.</p>'}${this.recoverButton()}</div>`;
   }
@@ -91,12 +93,21 @@ export class Title {
     }
     const c = this.pick, s = CLASSES[c];
     this.el.innerHTML = `<div class="tcard"><h2 class="cname">${CLASS_NAME[c]}</h2><div class="stage"></div>` +
+      `<div class="looks">${[0, 1, 2].map((i) => `<button data-look="${i}" class="${i === this.look ? 'on' : ''}">${face(c, i)}</button>`).join('')}</div>` +
       `<div class="bars">${STATS.map((k) => `<span>${k}</span><i>${'<em class="on"></em>'.repeat(s.stats[k])}${'<em></em>'.repeat(5 - s.stats[k])}</i>`).join('')}</div>` +
       `<label class="name">NAME <input maxlength="12" value="${NAMES[c]}" autocomplete="off" spellcheck="false"></label>` +
       `<button data-begin class="primary wide">BEGIN</button>${this.g.save.heroes.some((h) => h.prologue) ? '<button data-skipwood class="ghost wide">SKIP THE WOOD</button>' : ''}<button data-pick class="ghost wide">BACK</button></div>`;
-    this.preview = new Preview(c);
+    this.preview = new Preview(c, this.look);
     this.el.querySelector('.stage')!.appendChild(this.preview.el);
     this.preview.start();
+  }
+
+  /** Redraw without losing a name the player has typed. */
+  private keepName(redraw: () => void): void {
+    const typed = (this.el.querySelector('input') as HTMLInputElement | null)?.value;
+    redraw();
+    const box = this.el.querySelector('input') as HTMLInputElement | null;
+    if (box && typed !== undefined) box.value = typed;
   }
 
   private click(t: HTMLElement): void {
@@ -109,7 +120,7 @@ export class Title {
     if (d.wood !== undefined) return this.g.choose(Number(d.wood)), this.g.startWood(true), this.hide();
     if (d.skipwood !== undefined) {
       const name = (this.el.querySelector('input') as HTMLInputElement).value;
-      if (this.g.create(this.pick, name) >= 0) this.g.skipWood(), this.hide();
+      if (this.g.create(this.pick, name, this.look) >= 0) this.g.skipWood(), this.hide();
       return;
     }
     if (d.retire !== undefined) {
@@ -120,11 +131,12 @@ export class Title {
     }
     if (d.new !== undefined) return (this.detail = false), this.create();
     if (d.back !== undefined) return this.home();
-    if (d.cls) return (this.pick = d.cls as HeroClass), (this.detail = true), this.create();
+    if (d.cls) return (this.pick = d.cls as HeroClass), (this.look = 0), (this.detail = true), this.create();
+    if (d.look !== undefined) return (this.look = Number(d.look)), this.keepName(() => this.create());
     if (d.pick !== undefined) return (this.detail = false), this.create();
     if (d.begin !== undefined) {
       const name = (this.el.querySelector('input') as HTMLInputElement).value;
-      if (this.g.create(this.pick, name) >= 0) this.hide();
+      if (this.g.create(this.pick, name, this.look) >= 0) this.hide();
     }
   }
 }

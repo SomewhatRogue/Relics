@@ -183,6 +183,10 @@ body[data-mode='town'] .tb.roll { right: calc(116px + env(safe-area-inset-right)
 #title .ccard b { color: #ffd27a; font-size: 13px; letter-spacing: 0.08em; }
 #title .ccard i { font-style: normal; color: #b8b2c4; font-size: 11px; }
 #title .cname { margin: 0; text-align: center; color: #ffd27a; font-size: 22px; letter-spacing: 0.14em; }
+#title .looks { display: flex; justify-content: center; gap: 10px; margin: -2px 0 10px; }
+#title .looks button { padding: 4px 10px; border: 1px solid #3a3644; background: #1c1a22; border-radius: 6px; }
+#title .looks button.on { border-color: #ffd27a; background: #2a2418; }
+#title .looks .face { width: 30px; height: auto; image-rendering: pixelated; display: block; }
 #title .stage { display: flex; justify-content: center; margin: 4px 0 10px; }
 #title .preview { width: 224px; height: 160px; max-width: 100%; image-rendering: pixelated; background: radial-gradient(ellipse at 50% 80%, #2a2632 0%, #15131a 70%); border-radius: 6px; }
 #title .dhead { display: flex; align-items: center; gap: 14px; }

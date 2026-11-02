@@ -974,5 +974,5 @@ which moves the page to the media channel.
 - Every class has eyes that glow in the dark. The Mage has a tall pointed hat, a robe, sleeves and a
   beard; the Cleric wears a mail coif and a white tabard with the Lantern on it in gold; the Ranger is
   hooded. Three Warrior looks are drawn for Kyle to choose from (`WARRIOR_LOOKS`: knight, sellsword,
-  blackiron); the knight stays in play until he picks.
+  blackiron). Kyle: three looks for every class, chosen on the pick screen (`LOOKS`, `Profile.look`, `Hero.look`; sent to the town so friends see it).
 - Halvard buys packed gear (never hungry); gear given to a town work counts for half again.

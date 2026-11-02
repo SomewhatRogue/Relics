@@ -7,11 +7,11 @@ import { drawWeapon, pose } from './held';
 import { EL_COL } from './palette';
 import { drawText } from './pixfont';
 import { PARTY } from '../shared/tuning';
-import { HEROES, SPRITES } from './sprites';
+import { SPRITES, heroLook } from './sprites';
 
 /** `t` is the room's time (blessings and rallies are kept in it). */
 export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t: number): void {
-  const look = HEROES[WEAPONS[h.weapon].cls];
+  const look = heroLook(WEAPONS[h.weapon].cls, h.look);
   if (h.act === 'down') {
     shadow(c, x, y, 6);
     spin(c, look.down, x, y - 4, Math.PI / 2, 0.85);

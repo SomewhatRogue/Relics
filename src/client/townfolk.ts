@@ -17,7 +17,7 @@ export const TOWN_ROOM = 'WICKHOLD1';
 const SEND_EVERY = 0.25, KEEP = 3, GONE = 12;
 
 /** One player about themselves: name, weapon, the place they're in, and x, y, facing, moving. */
-export interface Me { n: string; w: string; at: string; p: [number, number, number, number, number]; pt?: unknown }
+export interface Me { n: string; w: string; l?: number; at: string; p: [number, number, number, number, number]; pt?: unknown }
 type Said = Me & { k: 'me' | 'hi' };
 interface Folk { hero: Hero; to: [number, number]; at: string; heard: number; pt?: unknown }
 
@@ -111,7 +111,7 @@ export class Townfolk {
     const had = JSON.stringify(f.pt ?? null), has = JSON.stringify(d.pt ?? null);
     Object.assign(f, { to: [x, y], at: String(d.at ?? '').slice(0, 40), heard: this.now, pt: d.pt });
     if (had !== has) this.onOffers();
-    Object.assign(f.hero, { weapon, fx, fy, moving: !!moving, tag: String(d.n ?? '').toUpperCase().replace(NAME, '').slice(0, 14) || 'STRANGER' });
+    Object.assign(f.hero, { weapon, look: typeof d.l === 'number' ? Math.max(0, Math.min(2, Math.floor(d.l))) : 0, fx, fy, moving: !!moving, tag: String(d.n ?? '').toUpperCase().replace(NAME, '').slice(0, 14) || 'STRANGER' });
     // Someone new: tell them where you are, just them.
     if (d.k === 'hi') this.tell(m.from, 'me');
   }
