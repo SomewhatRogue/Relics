@@ -131,7 +131,7 @@ export type Augment = Element | '';
 export const AUGMENTS: Augment[] = ['', 'fire', 'frost', 'storm'];
 export const ELEMENT_NAME: Record<Element, string> = { fire: 'FIRE', frost: 'FROST', storm: 'STORM' };
 
-export const BURN = { time: 3, every: 0.5, dmg: 4, /** Touching distance (beyond both bodies) that spreads it. */ spread: 0.3 };
+export const BURN = { time: 3, every: 0.5, dmg: 7, /** Touching distance (beyond both bodies) that spreads it. */ spread: 0.3 };
 export const FROST = { chill: 3, /** Chilled goblins move and turn this much slower. */ slow: 0.5, freeze: 2.2 };
 export const STORM = { reach: 3.2, chains: 2, share: 0.6, min: 6, flinch: 0.25, /** A javelin stuck in a body is a lightning rod. */ rodReach: 6, rodDmg: 10 };
 export const STEAM = { radius: 1.8, dmg: 10, stun: 0.9 };

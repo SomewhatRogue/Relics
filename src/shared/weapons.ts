@@ -192,7 +192,8 @@ export const WEAPONS: Record<KitId, Weapon> = {
   wand: {
     name: 'SPARK WAND',
     cls: 'MAGE',
-    combo: [{ windup: 0.12, active: 0.04, recover: 0.4, dmg: 8, range: 8, arc: 0, lunge: 0, knock: 2, shot: 'spark', speed: 17 }],
+    // A cast: rooted to the spot for about half a second (Kyle).
+    combo: [{ windup: 0.3, active: 0.04, recover: 0.2, dmg: 8, range: 8, arc: 0, lunge: 0, knock: 2, shot: 'spark', speed: 17 }],
     heavy: { windup: 0.06, active: 0.04, recover: 0.3, dmg: 10, dmgFull: 24, range: 9, arc: 0, lunge: 0, knock: 3, knockFull: 7, shot: 'spark', speed: 19, burst: 0.8 },
     draw: 0.6,
     chip: 0.5, blockSpeed: 0.4, chargeSpeed: 0.55, parryWindow: 0.2, guardArc: 100, guardCost: 2, speed: 0.86,
@@ -202,7 +203,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
   staff: {
     name: 'FOCUS STAFF',
     cls: 'MAGE',
-    combo: [{ windup: 0.2, active: 0.05, recover: 0.5, dmg: 10, range: 8, arc: 0, lunge: 0, knock: 3, shot: 'spark', speed: 14 }],
+    combo: [{ windup: 0.36, active: 0.05, recover: 0.3, dmg: 10, range: 8, arc: 0, lunge: 0, knock: 3, shot: 'spark', speed: 14 }],
     heavy: { windup: 0.12, active: 0.05, recover: 0.6, dmg: 20, dmgFull: 65, range: 9, arc: 0, lunge: 0, knock: 6, knockFull: 18, shot: 'orb', speed: 9, burst: 2.2 },
     draw: 1.6,
     chip: 0.5, blockSpeed: 0.35, chargeSpeed: 0.25, parryWindow: 0.2, guardArc: 100, guardCost: 2, speed: 0.8,
@@ -212,7 +213,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
   rod: {
     name: 'LANCE ROD',
     cls: 'MAGE',
-    combo: [{ windup: 0.14, active: 0.04, recover: 0.42, dmg: 9, range: 8, arc: 0, lunge: 0, knock: 2, shot: 'spark', speed: 16 }],
+    combo: [{ windup: 0.32, active: 0.04, recover: 0.24, dmg: 9, range: 8, arc: 0, lunge: 0, knock: 2, shot: 'spark', speed: 16 }],
     heavy: { windup: 0.08, active: 0.04, recover: 0.45, dmg: 16, dmgFull: 40, range: 12, arc: 0, lunge: 0, knock: 5, knockFull: 12, shot: 'lance', speed: 30, pierce: true },
     draw: 1,
     chip: 0.5, blockSpeed: 0.4, chargeSpeed: 0.35, parryWindow: 0.2, guardArc: 100, guardCost: 2, speed: 0.84,

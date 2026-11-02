@@ -1177,3 +1177,7 @@ puddles, weeds, missing cobbles, arrows) stay on top; the earth, path, mud and s
 ## 2026-11-01: the Rogue throws a dagger (Kyle; Opus 5.5)
 - The daggers' held attack is a thrown dagger instead of the power thrust: 14 damage, 30 at full,
   8 tiles, tumbling in flight and sticking where it lands (`shot: 'knife'`).
+
+## 2026-11-01: the Mage casts (Kyle; Opus 5.5)
+- The Mage's tap spell is a cast: about half a second rooted in place (wind-up 0.3 to 0.36 s across the
+  three kits). Burning hits harder to make up for it: 7 every half second for 3 s (was 4).
