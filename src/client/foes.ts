@@ -5,7 +5,9 @@
 import type { GameMap } from '../shared/arena';
 import { GUARD } from '../shared/tuning';
 import type { Enemy, EnemyAttack } from '../sim/types';
-import { blit, ease, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
+import { blit, blitBody, ease, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
+import { butcherPose, foeHit, scrapperPose, tumble } from './foepose';
+import { rest, newPose } from './motion';
 import { drawText } from './pixfont';
 import { SPRITES, type Sprite } from './sprites';
 import { OX, OY, PX } from './world';
@@ -16,72 +18,57 @@ function cleaver(c: Ctx, x: number, y: number, a: number): void {
   line(c.lit, x + Math.cos(a + Math.PI / 2) * 1.5, y + Math.sin(a + Math.PI / 2) * 1.5, a, 5, 11, '#e0dcd0');
 }
 
-function butcher(c: Ctx, e: Enemy, x: number, y: number, flash: number): void {
+function butcher(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
   const fa = Math.atan2(e.fy, e.fx), side = e.fx >= -0.2 ? 1 : -1, a = e.attack;
-  let ox = 0, oy = 0, squash = 1, arm = fa + side * 1.25, rise = 0;
+  // The body (foepose.ts); the cleaver's swing is drawn here, from the same clock.
+  const pz = butcherPose(e, t, c.now);
+  let arm = fa + side * 1.25;
   let trail: [number, number] | null = null;
-  if (e.moving) oy = Math.floor(c.now * 5) % 2 ? -1 : 0;
+  if (pz.phase === 'rest' && e.moving) pz.oy = Math.floor(c.now * 5) % 2 ? -1 : 0;
   if (a && a.kind === 'cleave') {
     const half = ((a.arc / 2) * Math.PI) / 180, back = fa - side * (half + 1.5), end = fa + side * half;
-    if (a.t < a.windup) {
-      const p = ease(a.t / (a.windup * 0.8));
-      arm = arm + (back - arm) * p;
-      ox = -Math.round(e.fx * 2 * p);
-      oy = -Math.round(1 + e.fy * 2 * p);
-      if (a.t > a.windup * 0.8) ox += Math.round(Math.sin(c.now * 70));
-    } else if (a.t < a.windup + a.active + 0.06) {
-      const k = Math.min(1, (a.t - a.windup) / a.active);
-      arm = back + (end - back) * k;
+    if (a.t < a.windup) arm = arm + (back - arm) * ease(a.t / (a.windup * 0.8));
+    else if (a.t < a.windup + a.active + 0.06) {
+      arm = back + (end - back) * Math.min(1, (a.t - a.windup) / a.active);
       trail = [back, arm];
-      ox = Math.round(e.fx * 3);
-      oy = Math.round(e.fy * 3);
-    } else {
-      arm = end;
-      oy = 1;
-      ox = Math.round(e.fx * 2);
-    }
+    } else arm = end;
   } else if (a && a.kind === 'slam') {
-    if (a.t < a.windup) {
-      const p = a.t / a.windup;
-      rise = Math.round(9 * ease(Math.min(1, p / 0.7)));
-      arm = -Math.PI / 2 + Math.sin(c.now * 18) * 0.15 * (p > 0.7 ? 1 : 0);
-    } else if (a.t < a.windup + a.active + 0.1) {
-      squash = 0.84;
-      arm = fa + side * 0.4;
-    } else (arm = fa + side * 0.6), (oy = 1);
-  }
-  if (e.act === 'stunned') (ox = Math.round(Math.sin(c.now * 4) * 1.5)), (oy = 2), (arm = Math.PI / 2 + side * 0.4);
-  if (e.act === 'flinch') (ox = -Math.round(e.fx * 2)), (oy = -Math.round(e.fy * 2));
-  shadow(c, x, y, Math.max(5, 10 - rise / 2));
-  const bx = x + ox, by = y + oy - rise, up = e.fy < -0.55;
-  const hx = bx + side * 7, hy = by - 13 * squash;
+    if (a.t < a.windup) arm = -Math.PI / 2 + Math.sin(c.now * 18) * 0.15 * (a.t / a.windup > 0.7 ? 1 : 0);
+    else if (a.t < a.windup + a.active + 0.1) arm = fa + side * 0.4;
+    else arm = fa + side * 0.6;
+  } else if (a && a.kind === 'charge') arm = a.t < a.windup ? fa - side * 1.9 : fa + side * 0.3;
+  if (e.act === 'stunned') (pz.ox += Math.round(Math.sin(c.now * 4) * 1.5)), (pz.oy += 2), (arm = Math.PI / 2 + side * 0.4);
+  shadow(c, x, y, Math.max(5, 10 - pz.lift / 2));
+  const bx = x + pz.ox, by = y + pz.oy - pz.lift, up = e.fy < -0.55;
+  const hx = bx + side * 7 + Math.round(pz.lean / 2), hy = by - Math.round(13 * (1 - pz.crouch));
   if (up) cleaver(c, hx, hy, arm);
-  blit(c, up ? SPRITES.butcherUp : SPRITES.butcherDown, bx, by, e.fx < -0.2, flash, squash);
+  blitBody(c, up ? SPRITES.butcherUp : SPRITES.butcherDown, bx, by, e.fx < -0.2, pz);
   if (!up) cleaver(c, hx, hy, arm);
-  if (trail) smear(c.glow, hx, hy, trail[0], trail[1], 8, 15, '#ffb0a0');
+  if (trail) smear(c.glow, hx, hy, trail[0], trail[1], 8, 15, e.hitstop > 0 ? '#ffffff' : '#ffb0a0');
   if (e.act === 'stunned') stars(c, bx, by - 25, 5, 8);
   if (a && a.unblockable && a.t < a.windup) drawText(c.glow, '!', Math.round(bx - 1), Math.round(by - 33 - (Math.floor(c.now * 6) % 2)), '#ffd040');
 }
 
-function scrapper(c: Ctx, e: Enemy, x: number, y: number, flash: number): void {
-  // Thrown: tumbling end over end through the air.
+function scrapper(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
+  // Hit hard: head over heels once, with a hop. Thrown: tumbling end over end through the air.
+  const tb = e.act === 'carried' || e.act === 'pinned' ? null : tumble(e, t);
+  if (tb) return shadow(c, x, y, 4), spin(c, SPRITES.scrapper, x, y - 7 - tb.hop, tb.a);
   if (Math.hypot(e.kvx, e.kvy) > 6 && e.act !== 'carried') return spin(c, SPRITES.scrapper, x, y - 9, c.now * 22);
   if (e.act === 'carried' || e.act === 'pinned') {
     const wig = e.act === 'pinned' ? Math.sin(c.now * 14) * 0.25 : c.now * 14;
     spin(c, SPRITES.scrapper, x, y - 7, Math.atan2(e.fy, e.fx) + wig);
     return;
   }
-  const a = e.attack;
-  let ox = 0, oy = e.moving ? (Math.floor(c.now * 9) % 2 ? -1 : 0) : 0, reach = 3;
-  if (a && a.t < a.windup) (ox = -Math.round(e.fx * 2)), (oy -= Math.round(e.fy * 2)), (reach = 1);
-  else if (a && a.t < a.windup + a.active + 0.08) (ox = Math.round(e.fx * 3)), (oy += Math.round(e.fy * 3)), (reach = 7);
-  if (e.act === 'flinch') (ox = -Math.round(e.fx * 2)), (oy = -1);
-  if (e.act === 'stunned') (ox = Math.round(Math.sin(c.now * 5))), (oy = 1);
+  const pz = scrapperPose(e, t, c.now);
+  if (pz.phase === 'rest' && e.moving) pz.oy = Math.floor(c.now * 9) % 2 ? -1 : 0;
+  if (e.act === 'stunned') (pz.ox += Math.round(Math.sin(c.now * 5))), (pz.oy += 1);
+  const reach = pz.phase === 'windup' ? 1 : pz.phase === 'release' || pz.phase === 'contact' ? 7 : 3;
   shadow(c, x, y, 5);
-  const bx = x + ox, by = y + oy, up = e.fy < -0.55, fa = Math.atan2(e.fy, e.fx);
-  const knife = () => (e.bow ? bow(c, e, bx, by, fa) : line(c.lit, bx + Math.cos(fa) * reach, by - 6 + Math.sin(fa) * reach, fa, 0, 4, '#cfd6dc'));
+  const bx = x + pz.ox, by = y + pz.oy, up = e.fy < -0.55, fa = Math.atan2(e.fy, e.fx);
+  const kx = bx + Math.round(pz.lean / 2), ky = by + Math.round(6 * pz.crouch);
+  const knife = () => (e.bow ? bow(c, e, kx, ky, fa) : line(c.lit, kx + Math.cos(fa) * reach, ky - 6 + Math.sin(fa) * reach, fa, 0, 4, '#cfd6dc'));
   if (up) knife();
-  blit(c, up ? SPRITES.scrapperUp : SPRITES.scrapper, bx, by, e.fx < -0.2, flash);
+  blitBody(c, up ? SPRITES.scrapperUp : SPRITES.scrapper, bx, by, e.fx < -0.2, pz);
   if (!up) knife();
   if (e.act === 'stunned') stars(c, bx, by - 15, 3, 5);
 }
@@ -130,6 +117,8 @@ function sleeping(c: Ctx, e: Enemy, x: number, y: number, flash: number): void {
   if (p < 0.6) (c.lit.globalAlpha = 0.5 * (1 - p / 0.6)), (c.lit.fillStyle = '#8a8494'), c.lit.fillRect(Math.round(x + side * 5 + p * 3), Math.round(y - 8 - p * 8), 2, 1), (c.lit.globalAlpha = 1);
 }
 
+const DUMMY = newPose();
+
 export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number, dozing = false): void {
   if (e.act === 'dead') {
     // Burst or shattered: nothing left but the stains. Otherwise the body, headless or burned.
@@ -146,16 +135,17 @@ export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number, dozing = false
     if (e.death === 'opened') (c.lit.globalAlpha = fade), line(c.lit, x - 2, y - 7, -0.5, 0, big ? 9 : 6, '#8a1010', 1), (c.lit.globalAlpha = 1);
     return;
   }
-  const flash = c.now - e.hitAt < 0.09 ? 0.9 : 0;
-  const hurt = e.hp < e.maxHp && (c.now - e.hitAt < 3 || e.hp < e.maxHp * 0.5);
+  // Hits are stamped in room time (`c.t`), not the wall clock.
+  const t = c.t ?? c.now, flash = t - e.hitAt < 0.09 ? 0.9 : 0;
+  const hurt = e.hp < e.maxHp && (t - e.hitAt < 3 || e.hp < e.maxHp * 0.5);
   if ((e.kind === 'butcher' || e.kind === 'scrapper') && hurt) ring(c, x, y, e.kind === 'butcher' ? 11 : 6, '#e24b4a', e.hp / e.maxHp);
-  if (e.kind === 'butcher') return butcher(c, e, x, y, flash);
+  if (e.kind === 'butcher') return butcher(c, e, x, y, t);
   if (e.kind === 'scrapper' && dozing) return sleeping(c, e, x, y, flash);
   if (e.kind === 'scrapper' && e.feeding) {
     // Crouched at the dead: it leans in, worries at it, tears a piece back and chews; red flicks off.
     const cyc = (c.now * 1.3 + e.id * 0.37) % 1, f = e.fx >= 0 ? 1 : -1;
     const lean = cyc < 0.45 ? 2 + (Math.floor(c.now * 14) % 2) : cyc < 0.6 ? 0 : 1, shove = cyc < 0.45 ? f : cyc < 0.6 ? -f : 0;
-    scrapper(c, e, x + shove, y + lean, flash);
+    scrapper(c, e, x + shove, y + lean, t);
     if (cyc >= 0.45 && cyc < 0.75) {
       const k = (cyc - 0.45) / 0.3;
       c.lit.fillStyle = '#9a1414';
@@ -165,11 +155,13 @@ export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number, dozing = false
     }
     return;
   }
-  if (e.kind === 'scrapper') return scrapper(c, e, x, y, flash), kit(c, e, x, y);
+  if (e.kind === 'scrapper') return scrapper(c, e, x, y, t), kit(c, e, x, y);
   const a = e.attack;
   shadow(c, x, y, 5);
-  const wob = c.now - e.hitAt < 0.3 ? Math.round(Math.sin(c.now * 60)) : 0;
-  blit(c, e.kind === 'dummy' ? SPRITES.dummy : SPRITES.swingDummy, x + wob, y, false, flash);
+  // A dummy rocks and flattens a little under a blow; it doesn't go anywhere.
+  const pz = foeHit(rest(DUMMY), e, t), wob = t - e.hitAt < 0.3 ? Math.round(Math.sin(c.now * 60)) : 0;
+  pz.ox = pz.oy = 0;
+  blitBody(c, e.kind === 'dummy' ? SPRITES.dummy : SPRITES.swingDummy, x + wob, y, false, pz);
   if (e.kind === 'swingDummy') {
     let ang = Math.atan2(e.fy, e.fx);
     if (a) ang += a.t < a.windup ? -1.4 * ease(a.t / a.windup) : -1.4 + 2.8 * Math.min(1, (a.t - a.windup) / a.active);

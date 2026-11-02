@@ -10,6 +10,7 @@ import { drawHound, drawSnare } from './hound';
 import type { Hero } from '../sim/types';
 import { blit, type Ctx } from './draw';
 import { asleep, drawEnemy, drawHeld, drawTelegraph } from './foes';
+import { camKick } from './heropose';
 import { houseOf } from './cottage';
 import { EL_LIGHT } from './palette';
 import { drawChest, drawFlask, drawPickup, drawSmoke } from './relicsdraw';
@@ -29,6 +30,9 @@ import { Captives } from './captives';
 import { SPOT_REACH } from '../shared/town';
 import { dusk } from './streetlife';
 
+
+/** The view's jolt this frame (heropose.ts), reused. */
+const KICK: [number, number] = [0, 0];
 
 export class Scene {
   vw = 0;
@@ -129,9 +133,10 @@ export class Scene {
     this.cam.x = clamp(this.cam.x, this.vw, worldW(map));
     this.cam.y = clamp(this.cam.y, this.vh, worldH(map));
     const sh = fx.shake;
-    const cx = Math.round(this.cam.x + (Math.random() - 0.5) * sh), cy = Math.round(this.cam.y + (Math.random() - 0.5) * sh);
+    const [kx, ky] = camKick(me, room.time, KICK);
+    const cx = Math.round(this.cam.x + (Math.random() - 0.5) * sh) + kx, cy = Math.round(this.cam.y + (Math.random() - 0.5) * sh) + ky;
 
-    const lit = this.lit, glow = this.glow, c: Ctx = { lit, glow, now };
+    const lit = this.lit, glow = this.glow, c: Ctx = { lit, glow, now, t: room.time };
     lit.fillStyle = '#0d0b10';
     lit.fillRect(0, 0, this.vw, this.vh);
     lit.drawImage(this.bg!, -cx, -cy);

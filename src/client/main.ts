@@ -30,6 +30,7 @@ import { liftable } from '../sim/props';
 import { relicLabel } from '../sim/hero';
 import type { FightEvent } from '../sim/types';
 import { Fx } from './fx';
+import { watchDust } from './dust';
 import { Input } from './input';
 import { LootCard } from './lootcard';
 import { PackView } from './pack';
@@ -293,6 +294,7 @@ function frame(t: number): void {
     if (ev.k === 'parry') parries++;
   }
   sounds.frame(game, t / 1000);
+  watchDust(game.room, fx);
   // Back in the open in town: see what the world has been up to (at most every 30 s).
   if (game.mode === 'town' && !game.outside) void link.refresh();
   if (game.result && !panel.open) showResult(game, panel);

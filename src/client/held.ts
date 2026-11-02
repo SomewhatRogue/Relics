@@ -143,11 +143,16 @@ export function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): vo
     c.glow.globalAlpha = 1;
   }
   if (p.from !== undefined) {
-    const col = h.counter ? '#ffa040' : h.heavy ? '#ffe9a8' : '#ffffff';
+    // Frozen on contact (the hitstop): the trail burns white and fuller, the impact frame.
+    const hold = h.hitstop > 0, col = hold ? '#ffffff' : h.counter ? '#ffa040' : h.heavy ? '#ffe9a8' : '#ffffff';
     if (p.thrust) {
-      c.glow.globalAlpha = 0.7;
-      line(c.glow, px, py, p.a, 10, p.reach, col);
+      c.glow.globalAlpha = hold ? 1 : 0.7;
+      line(c.glow, px, py, p.a, 10, p.reach, col, hold ? 2 : 1);
       c.glow.globalAlpha = 1;
+    } else if (hold) {
+      // The room judges the whole arc as the blow lands: the contact frame shows all of it.
+      const fa = Math.atan2(h.fy, h.fx);
+      smear(c.glow, px, py, p.from, 2 * fa - p.from, p.reach * 0.55, p.reach, col);
     } else smear(c.glow, px, py, p.from, p.a, p.reach * 0.5, p.reach * 0.95, col);
   }
 }

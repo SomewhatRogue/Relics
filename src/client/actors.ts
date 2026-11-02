@@ -1,8 +1,9 @@
 /** Drawing a hero: the class's body, the weapon in hand, the dodge, charge and stun. */
 import { CHARGE, WARD, WEAPONS, WANT } from '../shared/tuning';
-import { chargeFull, currentSwing } from '../sim/hero';
+import { chargeFull } from '../sim/hero';
 import type { Hero } from '../sim/types';
-import { blit, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
+import { blit, blitBody, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
+import { heroPose } from './heropose';
 import { drawWeapon, pose } from './held';
 import { EL_COL } from './palette';
 import { drawText } from './pixfont';
@@ -24,12 +25,10 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'b
   }
   const up = h.fy < -0.55 && Math.abs(h.fy) > Math.abs(h.fx) * 0.8;
   const flip = h.fx < -0.2;
-  let ox = 0, oy = 0, squash = 1;
-  if (h.moving) oy = Math.floor(c.now * 8) % 2 ? -1 : 0;
-  else oy = Math.floor(c.now * 2) % 2 ? -1 : 0;
-  if (h.act === 'attack' && h.actT >= currentSwing(h).windup) (ox = Math.round(h.fx * 1.5)), (oy = Math.round(h.fy * 1.5));
-  if (h.act === 'charge') (ox = -Math.round(h.fx)), (oy = 1);
-  if (h.act === 'hurt') ox = Math.round(Math.sin(c.now * 90) * 1.2);
+  // The body's pose (heropose.ts): wound up, thrown at the blow, struck, landing; at rest it bobs.
+  const pz = heroPose(h, t, c.now);
+  let ox = pz.ox, oy = pz.oy, squash = 1;
+  if (pz.phase === 'rest') oy = h.moving ? (Math.floor(c.now * 8) % 2 ? -1 : 0) : Math.floor(c.now * 2) % 2 ? -1 : 0;
   if (h.act === 'zip') (ox = Math.round(h.fx * 2)), (oy = Math.round(h.fy * 2) - 1);
   const dk = WEAPONS[h.weapon].dodge;
   // The mage's blink: gone, a scatter of violet light where they are.
@@ -61,9 +60,11 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'b
     c.glow.globalAlpha = 1;
     if (tumble) return blit(c, look.down, bx, by, flip, 0, squash);
   }
-  const side = h.fx >= -0.2 ? 1 : -1, px = bx + side * 3, py = by - 8, p = pose(h, c.now);
-  const fresh = c.now - h.parryOpenAt < WEAPONS[h.weapon].parryWindow;
-  const shieldAt: [number, number] = h.blocking || fresh ? [bx + h.fx * 6, by - 7 + h.fy * 4] : [bx - side * 4, by - 6];
+  // The hands ride the middle of the body: half its lean, lower as it crouches.
+  const mid = Math.round(pz.lean / 2), low = Math.round(8 * pz.crouch);
+  const side = h.fx >= -0.2 ? 1 : -1, px = bx + side * 3 + mid, py = by - 8 + low, p = pose(h, c.now);
+  const fresh = t - h.parryOpenAt < WEAPONS[h.weapon].parryWindow;
+  const shieldAt: [number, number] = h.blocking || fresh ? [bx + mid + h.fx * 6, by - 7 + low + h.fy * 4] : [bx + mid - side * 4, by - 6 + low];
   const drawGear = () => {
     if (h.weapon === 'sword') blit(c, SPRITES.shield, shieldAt[0], shieldAt[1] + 4, false, fresh ? 0.85 : 0);
     drawWeapon(c, h, px, py, p);
@@ -79,14 +80,14 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'b
     }
   };
   if (up) drawGear();
-  const flash = h.act === 'hurt' && h.actT < 0.1 ? 0.85 : h.act === 'stun' ? 0.3 : 0;
-  blit(c, up ? look.up : look.down, bx, by, flip, flash);
+  blitBody(c, up ? look.up : look.down, bx, by, flip, pz);
   // The Want shows in the eyes first: a glint in the dark, like theirs.
   if (!up && h.want >= WANT.eyes) {
     c.glow.globalAlpha = Math.min(1, h.want / 80) * (0.55 + 0.45 * Math.sin(c.now * 2));
     c.glow.fillStyle = '#ff4a3a';
-    c.glow.fillRect(Math.round(bx - 2), Math.round(by - 13), 1, 1);
-    c.glow.fillRect(Math.round(bx + 1), Math.round(by - 13), 1, 1);
+    const ex = Math.round(bx + pz.lean), ey = Math.round(by - 13 + 13 * pz.crouch);
+    c.glow.fillRect(ex - 2, ey, 1, 1);
+    c.glow.fillRect(ex + 1, ey, 1, 1);
     c.glow.globalAlpha = 1;
   }
   if (!up) drawGear();
