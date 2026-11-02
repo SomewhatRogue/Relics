@@ -4,6 +4,7 @@ import { ONLINE } from './relay';
 import { Townfolk } from './townfolk';
 import { Parties } from './parties';
 import { CoopGuest } from './coop';
+import { session, touchSession } from './session';
 import { MAX_DOWNS, goal } from '../sim/run';
 import type { Npc } from '../shared/arena';
 import type { Intent } from '../sim/types';
@@ -231,6 +232,7 @@ function hud(now: number): void {
 
 let last = performance.now();
 let still: Intent | null = null;
+let resumed = false, touchedAt = 0;
 function frame(t: number): void {
   // (The first frame can stamp a hair before the page clock: never step backwards.)
   const dt = Math.max(0, Math.min(0.1, (t - last) / 1000));
@@ -241,6 +243,13 @@ function frame(t: number): void {
   else still = null;
   // Whoever you're talking to stops their round till you're done (the world doesn't: it's shared).
   if (talking && !panel.open) (talking.lag = (talking.lag ?? 0) + game.room.time - (talking.heldAt ?? game.room.time)), (talking.heldAt = undefined), (talking = null);
+  // Back after a reload in the middle of a job with friends: straight back in (once, once a hero's chosen).
+  if (ONLINE && !resumed && !title.open) {
+    resumed = true;
+    const s = session(game.profile.id);
+    if (s && game.mode === 'town') game.startRemote(new CoopGuest(s.code, game.profile.id, s.lead, () => game.profile, s.job));
+  }
+  if ((game.coop || game.remote) && t - touchedAt > 20000) (touchedAt = t), touchSession();
   // Following a friend's job: my input goes to them.
   game.remote?.frame(t / 1000, still ?? live);
   const evs = game.step(dt, still ?? live);

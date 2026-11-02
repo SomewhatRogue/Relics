@@ -10,10 +10,14 @@
  * - CoopGuest (a friend): keeps a copy of the leader's room from the patches and draws it; sends
  *   its Intent when it changes (and every 2 s). Its own hero is `me` in its copy, so the rest of the
  *   game can't tell. The leader quiet 20 s, and the job ends for it as a loss.
+ * - Handing on: every 2 s the leader also sends the whole job (the run and the room, saveRoom).
+ *   The leader quiet 9 s, the friend first in line (by id) takes the room over from that and leads
+ *   (Game.takeOver); the others hear who leads now and follow them. The old leader, back, joins in.
  */
 import type { Job } from '../shared/jobs';
 import type { Profile } from '../shared/progress';
 import { HERO, TICK, WEAPONS } from '../shared/tuning';
+import { Rng } from '../shared/rng';
 import { collide, useMap } from '../shared/arena';
 import { statsOf } from '../sim/gearstats';
 import type { Hero } from '../sim/types';
@@ -23,7 +27,7 @@ import { NO_INTENT, type FightEvent, type Intent } from '../sim/types';
 import { RelaySocket, type RelayMsg } from './relay';
 import { Decoder, Encoder, stateOf, type Patch } from './snap';
 
-const SEND_EVERY = 0.05, FULL_EVERY = 4, GRACE = 60, LOST = 20, KEEP = 2;
+const SEND_EVERY = 0.05, FULL_EVERY = 4, GRACE = 60, LOST = 20, KEEP = 2, SAVE_EVERY = 2, TAKE = 9, TAKE_NEXT = 5;
 /**
  * Your own hero, on a friend's screen, moves the moment you press. The leader's word on where you
  * are is a trip there and back old, so the walking you've done here since then is added on top of
@@ -55,9 +59,12 @@ export class CoopHost {
   private sentKey = -1;
   private now = 0;
 
-  constructor(readonly room: string, private myId: string, private myName: string, private game: HostGame, members: [string, string][]) {
-    for (const [id, name] of members) if (id !== myId) this.friends.set(id, { name, profile: null, intent: NO_INTENT, heard: 0, fresh: true, gone: false });
-    this.sock = new RelaySocket(room, myId, 'host');
+  private savedAt = -99;
+
+  constructor(readonly room: string, private myId: string, private myName: string, private game: HostGame, readonly members: [string, string][], want: 'host' | 'take' = 'host') {
+    const now = performance.now() / 1000;
+    for (const [id, name] of members) if (id !== myId) this.friends.set(id, { name, profile: null, intent: NO_INTENT, heard: now, fresh: true, gone: false });
+    this.sock = new RelaySocket(room, myId, want);
     this.sock.onMessage = (m) => this.heard(m);
   }
 
@@ -78,7 +85,12 @@ export class CoopHost {
     this.now = now;
     this.evs.push(...ev);
     if (this.evs.length > 200) this.evs.splice(0, this.evs.length - 200);
-    for (const [id, f] of this.friends) if (f.profile && !f.gone && now - f.heard > GRACE) (f.gone = true), this.game.dropFriend(id);
+    for (const [id, f] of this.friends) if (!f.gone && now - f.heard > GRACE) (f.gone = true), this.game.dropFriend(id);
+    // The whole job, now and then, for a friend to take on if this browser goes.
+    if (now - this.savedAt > SAVE_EVERY && [...this.friends.values()].some((f) => !f.gone)) {
+      this.savedAt = now;
+      this.sock.send('*', { save: JSON.stringify({ run: this.game.run, room: saveRoom(this.game.room), members: this.members, key: this.game.roomKey }) });
+    }
     if (now - this.sentAt < SEND_EVERY) return;
     const g = this.game, room = g.room, full = now - this.fullAt > FULL_EVERY || g.roomKey !== this.sentKey || [...this.friends.values()].some((f) => f.fresh);
     const p = this.enc.encode(stateOf(room), full);
@@ -124,7 +136,11 @@ export class CoopGuest {
   private pred: { x: number; y: number } | null = null;
   private server: { x: number; y: number } | null = null;
 
-  constructor(readonly code: string, private myId: string, readonly lead: string, private profile: () => Profile, readonly job: Job) {
+  /** The newest whole job from the leader (to take it on), and when the leader was last heard. */
+  save: string | null = null;
+  private heardLead = -1;
+
+  constructor(readonly code: string, readonly myId: string, public lead: string, private profile: () => Profile, readonly job: Job) {
     this.sock = new RelaySocket(code, myId, 'join');
     this.sock.onMessage = (m) => this.heard(m);
   }
@@ -135,10 +151,15 @@ export class CoopGuest {
   }
 
   private heard(m: RelayMsg): void {
-    if (m.t === 'role' && m.role === 'guest') return this.hello();
+    // Whoever hosts is who I follow (a page coming back after a reload may not know yet).
+    if (m.t === 'role' && m.role === 'guest') return void (m.host && m.host !== this.lead && this.follow(m.host)), this.hello();
+    // Someone else leads now (a friend took the job on): follow them.
+    if (m.t === 'hosted' && m.id !== this.myId) return this.follow(m.id), this.hello();
     if (m.t !== 'msg' || m.from !== this.lead) return;
-    const d = m.d as { s?: string; end?: { won: boolean; run: Run } };
+    this.heardLead = this.now;
+    const d = m.d as { s?: string; end?: { won: boolean; run: Run }; save?: string };
     if (d.end) return void (this.ended = d.end);
+    if (typeof d.save === 'string') return void (this.save = d.save);
     if (typeof d.s !== 'string') return;
     // The leader's own hero is `me` in their room; in mine, I am. (Ids are quoted whole, so only ids change.)
     let body: { p: Patch; f: number; k: number; map?: ArenaRoom['map']; t: number; x: number; run: Run | null; goal: string; ev: FightEvent[]; names: Record<string, string>; acks?: Record<string, number> };
@@ -227,10 +248,32 @@ export class CoopGuest {
     room.prev.set('h:me', [p.x, p.y]);
   }
 
+  private follow(id: string): void {
+    this.lead = id;
+    this.dec = new Decoder();
+    this.key = -1;
+    this.pred = this.server = null;
+  }
+
+  /** How long the leader has been quiet. */
+  quiet(now: number): number {
+    if (this.firstAt < 0) this.firstAt = now;
+    return now - (this.heardLead > 0 ? this.heardLead : this.firstAt);
+  }
+
+  /**
+   * Time to take the job on: the leader quiet TAKE seconds, I've a save, and I'm first in line among
+   * the friends still in it (by id; the next one waits TAKE_NEXT longer, in case the first is gone too).
+   */
+  shouldTake(now: number): boolean {
+    if (!this.save || !this.room) return false;
+    const line = [this.myId, ...this.room.heroes.map((h) => h.id).filter((id) => id !== 'me' && id !== '@lead' && id !== 'squire')].sort();
+    return this.quiet(now) > TAKE + line.indexOf(this.myId) * TAKE_NEXT;
+  }
+
   /** The leader has gone quiet too long (or never came): the job is lost. */
   lost(now: number): boolean {
-    if (this.firstAt < 0) this.firstAt = now;
-    return now - (this.lastAt || this.firstAt) > LOST;
+    return this.quiet(now) > LOST + TAKE_NEXT * 3;
   }
 
   /** The leader's events since last asked (effects and sounds). */
@@ -243,4 +286,20 @@ export class CoopGuest {
   close(): void {
     this.sock.close();
   }
+}
+
+/** The whole room as plain data, to hand the job on (its maps of positions and inputs start fresh). */
+export function saveRoom(room: ArenaRoom): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(room).filter(([k]) => k !== 'prev' && k !== 'intents' && k !== 'events'));
+}
+
+/** A room back from saveRoom: the same goblins, props, chests and dice where they were. */
+export function loadRoom(o: Record<string, unknown>): ArenaRoom {
+  const room = new ArenaRoom(1, { map: o.map as ArenaRoom['map'] }), r = room as unknown as Record<string, unknown>;
+  for (const [k, v] of Object.entries(o)) {
+    if (k === 'map') continue;
+    if (r[k] instanceof Rng) Object.assign(r[k] as object, v);
+    else r[k] = v;
+  }
+  return room;
 }

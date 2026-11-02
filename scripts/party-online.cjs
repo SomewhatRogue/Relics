@@ -99,6 +99,38 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     }
     step('the job ends for Sam too, and pays him', await until(sam, (g0) => window.__game.mode === 'town' && window.__game.profile.gold > g0, samGold, 10000));
     step('Kyle is home', await until(kyle, () => window.__game.mode === 'town'));
+    // A second job: Sam reloads mid-job and gets back in; then Kyle's page dies, Sam takes the job
+    // on and leads it, Kyle comes back and follows Sam, and Sam ends it with both paid.
+    const reopen = async (p) => {
+      const page = await p.ctx.newPage();
+      page.on('pageerror', (e) => report.errors.push(`${p.name}: ${e}`));
+      await page.goto(`http://127.0.0.1:${PORT}/`);
+      await page.waitForFunction(() => window.__game);
+      await page.evaluate(() => { document.getElementById('title').hidden = true; window.__title.open = false; });
+      return page;
+    };
+    await kyle.page.evaluate(() => window.__openSpot('board'));
+    await kyle.page.click('#panel [data-gather="2"]');
+    await sam.page.evaluate(() => window.__openSpot('board'));
+    await until(sam, () => !!document.querySelector('#panel [data-joinparty]'));
+    await sam.page.click('#panel [data-joinparty]');
+    await until(kyle, () => document.querySelector('#panel .job.party .m')?.textContent.includes('SAM'));
+    await kyle.page.click('#panel [data-setout]');
+    step('second job: Sam is in it', await until(sam, () => window.__game.mode === 'run' && window.__game.room.heroes.some((h) => h.id === '@lead'), null, 12000));
+    await sam.page.close();
+    sam.page = await reopen(sam);
+    step('Sam reloads and is straight back in', await until(sam, () => window.__game.mode === 'run' && window.__game.room.heroes.some((h) => h.id === 'me') && window.__game.room.heroes.some((h) => h.id === '@lead'), null, 15000));
+    const goblins = await kyle.page.evaluate(() => window.__game.room.enemies.filter((e) => e.hp > 0).map((e) => e.id).join(','));
+    await wait(2500); // (a whole-job save goes out every 2 s)
+    await kyle.page.close();
+    step('Kyle gone: Sam takes the job on and leads it', await until(sam, () => !!window.__game.coop && window.__game.mode === 'run' && !window.__game.remote, null, 20000));
+    const samGoblins = await sam.page.evaluate(() => window.__game.room.enemies.filter((e) => e.hp > 0).map((e) => e.id).join(','));
+    step(`the same goblins left in it (${goblins.split(',').length})`, samGoblins === goblins || samGoblins.split(',').length <= goblins.split(',').length);
+    kyle.page = await reopen(kyle);
+    step("Kyle comes back and follows Sam's lead", await until(kyle, () => window.__game.mode === 'run' && !!window.__game.remote && window.__game.room.heroes.some((h) => h.id === '@lead' && h.tag === 'SAM'), null, 20000));
+    const kyleGold = await kyle.page.evaluate(() => window.__game.profile.gold);
+    await sam.page.evaluate(() => window.__game.endForTest(true));
+    step('Sam ends it and Kyle is paid too', await until(kyle, (g0) => window.__game.mode === 'town' && window.__game.profile.gold > g0, kyleGold, 10000));
     report.ok = report.steps.every((s) => s.ok) && !report.errors.length;
   } catch (e) {
     report.errors.push(String(e));

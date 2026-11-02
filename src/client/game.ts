@@ -25,7 +25,8 @@ import { load, store, type Save } from './save';
 import { treasure } from '../shared/treasure';
 /** What a piece of treasure that won't fit in the pack fetches. */
 const TREASURE_SOLD = 20;
-import { CoopHost, type CoopGuest, type Friend } from './coop';
+import { CoopHost, loadRoom, type CoopGuest, type Friend } from './coop';
+import { forgetSession, keepSession } from './session';
 import type { Parties } from './parties';
 
 export type Mode = 'town' | 'yard' | 'run' | 'wood';
@@ -217,15 +218,20 @@ export class Game {
     for (const [id, f] of this.coop?.friends ?? []) {
       const old = from?.heroes.find((x) => x.id === id);
       if (old && from !== room) from.heroes.splice(from.heroes.indexOf(old), 1);
-      if (f.profile && !f.gone) this.bring(id, f, old);
+      if (!f.gone) this.bring(id, f, old);
     }
   }
 
   /** A friend's hero, next to yours in this room (dressed from their own profile). */
   private bring(id: string, f: Friend, keep?: Hero): void {
-    const me = this.hero, h = this.room.join(id), n = this.room.heroes.indexOf(h);
-    this.equip(h, keep, f.profile!);
-    Object.assign(h, { x: me.x + (n % 2 ? 0.8 : -0.8), y: me.y + 0.3 * n, fx: me.fx, fy: me.fy, act: 'idle', actT: 0, tag: f.name });
+    const me = this.hero;
+    let h: Hero;
+    // Their own hero, carried over as it is (health, potions, cooldowns); a new one dressed from their profile.
+    if (keep) this.room.heroes.push((h = keep));
+    else if (f.profile) (h = this.room.join(id)), this.equip(h, undefined, f.profile);
+    else return;
+    const n = this.room.heroes.indexOf(h);
+    Object.assign(h, { x: me.x + (n % 2 ? 0.8 : -0.8), y: me.y + 0.3 * n, fx: me.fx, fy: me.fy, kvx: 0, kvy: 0, act: h.act === 'down' ? 'down' : 'idle', actT: h.act === 'down' ? h.actT : 0, tag: f.name });
     this.room.prev.set('h:' + id, [h.x, h.y]);
   }
 
@@ -292,7 +298,7 @@ export class Game {
     // Your friends come back out with you.
     for (const [id, f] of this.coop?.friends ?? []) {
       const old = o.room.heroes.find((x) => x.id === id) ? undefined : this.insideHero(id);
-      if (old && f.profile && !f.gone) this.bring(id, f, old);
+      if (old && !f.gone) this.bring(id, f, old);
     }
   }
 
@@ -400,6 +406,7 @@ export class Game {
     if (!go) return;
     this.coop = new CoopHost(go.room, this.profile.id, this.profile.name, this, go.members);
     this.startJob(go.job, go.members.length);
+    keepSession({ code: go.room, lead: '', job: go.job, hero: this.profile.id });
   }
 
   /** Follow a friend's job (they lead): their room is drawn here as it comes. */
@@ -410,6 +417,24 @@ export class Game {
     this.remote = g;
     // Until the leader's room arrives: the job as it was posted.
     this.run = newRun(g.job);
+    keepSession({ code: g.code, lead: g.lead, job: g.job, hero: this.profile.id });
+  }
+
+  /** The leader's gone: take their job on from the last whole job they sent, and lead it. */
+  private takeOver(g: CoopGuest): void {
+    // Their `me` is them again; mine is me.
+    const o = JSON.parse(g.save!.split('"me"').join(`"${g.lead}"`).split(`"${g.myId}"`).join('"me"')) as { run: Run; room: Record<string, unknown>; members: [string, string][] };
+    g.close();
+    this.remote = null;
+    this.outside = null;
+    this.insides.clear();
+    this.run = o.run;
+    this.room = loadRoom(o.room);
+    this.roomKey += 2;
+    this.synced.clear();
+    const members = o.members.map(([id, name]) => [id === 'me' ? g.myId : id, name] as [string, string]);
+    this.coop = new CoopHost(g.code, g.myId, this.profile.name, this, members, 'take');
+    keepSession({ code: g.code, lead: '', job: o.run.job, hero: this.profile.id });
   }
 
   private stepRemote(): FightEvent[] {
@@ -417,6 +442,7 @@ export class Game {
     // Their room once it has me in it (until then, the town stands still behind the wait).
     if (g.room?.heroes.some((x) => x.id === ME)) (this.room = g.room), (this.run = g.run ?? this.run), this.keepRemoteGear(this.hero);
     const ev = g.take();
+    if (g.shouldTake(now)) return this.takeOver(g), ev;
     const end = g.ended ?? (g.lost(now) ? { won: false, run: g.run ?? newRun(g.job) } : null);
     if (end) {
       g.close();
@@ -443,6 +469,7 @@ export class Game {
     const run = this.run!, p = this.profile, w = this.world;
     // Leading: everyone's told how it went (each friend's game pays them from the run).
     this.coop?.end(won, run);
+    forgetSession();
     this.coop?.close();
     this.coop = null;
     // Driven back in the Ransom Coat: all of it, not half.

@@ -110,11 +110,12 @@ and burns out a goblin den on a job.
    a party you bleed 20 s for a teammate to pick you up (3 s standing over you) or you're out for
    the job; everyone out and it's lost; the last one left plays it out alone; three team kills of
    the same player make a grudge (counted, shown nowhere yet).
-   Not yet: the leader dropping hands the job to a friend (today the friends lose it after 20 s);
-   a friend who reloads their page can't get back in (a dropped connection can: the hero waits a
-   minute); a friend's own hero moves only when the leader's room says so (no prediction yet);
-   loot a friend picks up doesn't come home with them; the party can't split into buildings
-   (everyone goes in with the leader).
+   Since: a friend's own hero walks at once (prediction), 20 updates a second, loot and the gold
+   pot come home with everyone, a reload puts you straight back in, and the leader dropping hands
+   the job to the friend first in line (the leader, back, follows them).
+   Not yet: the party can't split into buildings (everyone goes in with the leader); a job handed
+   on from inside a building restarts that building's room only; the leader's mid-fight effects
+   (sounds, sparks) for a friend come with the patches, so a lost patch loses its sparks.
 3. Results on the board: a finished job written for everyone, with who was in it.
 4. World quests: open only with 3+ in town; hard.
 5. Town votes. Without sign-in the game knows devices, not people: a vote kept per device token (all

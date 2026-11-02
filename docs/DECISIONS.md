@@ -818,3 +818,13 @@ which moves the page to the media channel.
   if more than 1.5 tiles off. Rolls, swings, hits and knockbacks stay the leader's alone.
 - scripts/party-online.cjs now runs with 150 ms of lag on every message (LAG_MS on the local
   server): the friend's hero moves within 0.11 s of the press, and never jerks back while walking.
+
+## 2026-11-01: handing the job on, and coming back (Opus 5.5)
+
+- Every 2 s the leader sends the whole job (`saveRoom`: the run and every field of the room, its
+  dice included). Leader quiet 9 s: the friend first in line by id takes the room over with
+  `want=take` (the next waits 5 s more, in case the first is gone too) and leads; the others hear
+  `hosted` and follow. Friends' heroes now move between rooms as they are, not re-dressed.
+- A job with friends is kept in this browser (`session.ts`, 15 minutes fresh): a reload goes
+  straight back in as a friend, and the old leader coming back follows whoever leads now.
+- Known: module id counters (bolts, drops) restart on the new leader, so an id can repeat once.
