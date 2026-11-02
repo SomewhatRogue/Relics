@@ -21,7 +21,7 @@ const job = (seed: number, o: Partial<Job> & { ruin?: number; kind?: Job['place'
   const { ruin = 2, kind = 'farm', ...rest } = o;
   return { ...board(1)[0], rooms: 3, objective: 'hunt', size: 'medium', ...rest, place: { ...PLACES.find((p) => p.kind === kind)!, ruin }, seed };
 };
-const BIG = ['THE LONGHOUSE', 'THE MANOR', 'THE TITHE BARN'];
+const BIG = ['THE LONGHOUSE', 'THE HALL HOUSE', 'THE GREAT BARN'];
 
 /** A run room's houses with their fates, and the job they came from. */
 function streets(n: number, o: Parameters<typeof job>[1]) {
