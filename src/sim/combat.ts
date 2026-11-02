@@ -132,6 +132,8 @@ export function rollCrit(h: Hero): boolean {
 
 /** An enemy's attack lands on a hero: rolled through, parried, blocked, or taken. */
 export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: FightEvent[]): void {
+  // Just come into the room: nothing lands yet.
+  if (h.safeT) return;
   if (h.act === 'down') return;
   if (!attackCovers(a, h)) {
     // Rolled (or jumped) out of it during the wind-up: a dodge all the same. Left to the last moment,

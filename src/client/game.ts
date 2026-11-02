@@ -14,7 +14,7 @@ import { Rng } from '../shared/rng';
 import { CHAPTER_1, QUORUM, rewardMult, type WorldState } from '../shared/story';
 import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
 import { buyDrill, learnLesson } from '../shared/training';
-import { PARTY, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, FOUND_RELICS, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, sellValue, giveValue, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
+import { ARRIVE_SAFE, PARTY, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, FOUND_RELICS, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, sellValue, giveValue, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
 import { ArenaRoom } from '../sim/room';
 import { lessonOf, newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
 import { woodMap, WOOD_PROPS } from '../shared/wood';
@@ -236,7 +236,7 @@ export class Game {
     if (keep?.act === 'down' && keep.bleeding) Object.assign(h, { act: 'down', hp: 0, bleeding: true, out: keep.out, actDur: Infinity });
   }
 
-  private place(room: ArenaRoom, at?: { x: number; y: number }, keep?: Hero): void {
+  private place(room: ArenaRoom, at?: { x: number; y: number }, keep?: Hero, fresh = this.mode === 'run'): void {
     const from = this.room;
     this.room = room;
     this.roomKey++;
@@ -253,6 +253,8 @@ export class Game {
       if (old && from !== room) from.heroes.splice(from.heroes.indexOf(old), 1);
       if (!f.gone) this.bring(id, f, old, from?.time ?? room.time);
     }
+    // First time in this room on a job: a moment's grace for everyone, so nobody's cut down in the doorway.
+    if (fresh) for (const x of room.heroes) if (x.id !== 'squire') x.safeT = ARRIVE_SAFE;
   }
 
   /** A friend's hero, next to yours in this room (dressed from their own profile). */
@@ -261,7 +263,7 @@ export class Game {
     let h: Hero;
     // Their own hero, carried over as it is (health, potions, cooldowns); a new one dressed from their profile.
     if (keep) this.room.heroes.push((h = keep)), rebase(h, was, this.room.time);
-    else if (f.profile) (h = this.room.join(id)), this.equip(h, undefined, f.profile);
+    else if (f.profile) (h = this.room.join(id)), this.equip(h, undefined, f.profile), this.mode === 'run' && (h.safeT = ARRIVE_SAFE);
     else return;
     const n = this.room.heroes.indexOf(h);
     Object.assign(h, { x: me.x + (n % 2 ? 0.8 : -0.8), y: me.y + 0.3 * n, fx: me.fx, fy: me.fy, kvx: 0, kvy: 0, act: h.act === 'down' ? 'down' : 'idle', actT: h.act === 'down' ? h.actT : 0, tag: f.name });
@@ -318,6 +320,7 @@ export class Game {
     if (!b.door || b.ruined || (b.burning ?? -1) >= 0) return;
     const out = this.room, h = this.hero;
     let inside = this.insides.get(b);
+    const fresh = !inside;
     if (!inside) {
       if (this.mode === 'run' && this.run) inside = interiorRoom(this.run, out.map.blocks.indexOf(b), b.door);
       else (inside = new ArenaRoom(this.world.day, { map: townInterior(b.door, this.world) })), (inside.exitOpen = true);
@@ -327,7 +330,7 @@ export class Game {
     this.outside = { room: out, door: b, hero: h };
     // On a job, the goblins after you come in after you.
     if (this.mode === 'run') this.followers.through(out, inside, h, inside.map.hero.x, inside.map.hero.y);
-    this.place(inside, inside.map.hero, h);
+    this.place(inside, inside.map.hero, h, fresh && this.mode === 'run');
   }
 
   /** Back out of the door you came in by. */

@@ -43,6 +43,8 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'b
     if (h.pickT) ring(c, x, y, 8, '#f0e0b0', h.pickT / PARTY.pickUp, '#3a3428');
     return;
   }
+  // Just come into the room: flickering, so everyone can see nothing lands on you yet.
+  if (h.safeT && Math.floor(c.now * 14) % 3 === 0) return;
   const up = h.fy < -0.55 && Math.abs(h.fy) > Math.abs(h.fx) * 0.8;
   const flip = h.fx < -0.2;
   // The body's pose (heropose.ts), drawn part by part; walking it bobs a pixel, standing it keeps still.

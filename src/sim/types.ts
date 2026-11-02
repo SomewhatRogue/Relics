@@ -182,6 +182,8 @@ export interface Hero extends Body {
   pickT?: number;
   /** The teammate kneeling to get this hero up, and whether they've spent their own get-up this job. */
   raiser?: string;
+  /** Seconds left of the grace on coming into a new room: nothing hurts this hero till it's gone. */
+  safeT?: number;
   selfUp?: boolean;
   /** Teammates this swing has already cut (friendly fire), and who has downed this hero how often. */
   hitAllies?: string[];

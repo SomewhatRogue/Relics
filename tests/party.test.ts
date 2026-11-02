@@ -97,6 +97,16 @@ describe('going down in a party', () => {
     }
     expect(allOut(room.heroes)).toBe(true);
   });
+  it("just come into the room: a friend's blow does nothing yet", () => {
+    const { a, b } = two();
+    b.safeT = 3;
+    const hp = b.hp;
+    allyHit(a.id, b, 30, []);
+    expect(b.hp).toBe(hp);
+    b.safeT = 0;
+    allyHit(a.id, b, 30, []);
+    expect(b.hp).toBeLessThan(hp);
+  });
   it('the last one left (the rest gone home) gets up the old way', () => {
     const { room, a, b } = two();
     b.hp = 1;

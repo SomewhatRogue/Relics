@@ -75,6 +75,9 @@ export const DODGE = { stun: 0.6, cost: 1.5 };
  * player in one job before you hold it against them.
  */
 /** `reward`: each extra player adds this share to a won job's pay and objective xp (more goblins already mean more kill gold and xp). */
+/** Seconds nothing can hurt a hero who has just come into a new room on a job (no friendly fire in the doorway). */
+export const ARRIVE_SAFE = 3;
+
 export const PARTY = { bleed: 20, pickUp: 2.5, reach: 1.4, upHp: 0.4, friendly: 0.5, foes: 0.6, boss: 0.4, grudge: 3, reward: 0.25 };
 export const HURT_STAGGER = 0.25;
 

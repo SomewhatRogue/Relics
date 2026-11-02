@@ -24,7 +24,7 @@ const inParty = (heroes: Hero[]) => players(heroes).length > 1;
 
 /** A teammate's blow, shot or blast lands on `h` (never on yourself, never on someone down). */
 export function allyHit(by: string, h: Hero, dmg: number, ev: FightEvent[], dx = 0, dy = 0): void {
-  if (h.id === by || h.id === 'squire' || h.act === 'down' || h.act === 'roll') return;
+  if (h.id === by || h.id === 'squire' || h.act === 'down' || h.act === 'roll' || h.safeT) return;
   const n = Math.max(1, Math.round(dmg * PARTY.friendly));
   h.hp -= n;
   Object.assign(h, { act: 'hurt', actT: 0, actDur: HURT_STAGGER });

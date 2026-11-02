@@ -210,6 +210,7 @@ export class ArenaRoom {
       if (c) startChest(c, h, this.heroes, this.enemies, this.lootRng, this.danger, this.events);
     }
     stepChests(this.chests, this.heroes, this.drops, this.pickups, this.lootRng, this.events, TICK);
+    for (const h of this.heroes) if (h.safeT) h.safeT = Math.max(0, h.safeT - TICK);
     for (const h of this.heroes) stepHero(h, this.intents.get(h.id) ?? NO_INTENT, this.enemies, this.time, TICK, this.events, acts);
     // A party: bleeding, picking each other up, going out.
     stepParty(this.heroes, TICK, this.events);

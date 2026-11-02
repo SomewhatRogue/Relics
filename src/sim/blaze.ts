@@ -24,6 +24,7 @@ export interface Burning {
 }
 
 const scorch = (h: Hero, n: number, ev: FightEvent[], src: string) => {
+  if (h.safeT) return;
   h.hp -= n;
   ev.push({ k: 'hit', x: h.x, y: h.y, n, heavy: n >= 20, on: 'hero', src });
   downIfDead(h, ev);
