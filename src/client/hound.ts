@@ -8,6 +8,12 @@ export function drawHound(c: Ctx, d: Hound, x: number, y: number): void {
   const g = c.lit, f = d.fx >= 0 ? 1 : -1, step = d.moving ? Math.floor(c.now * 12) % 2 : 0, X = Math.round(x), Y = Math.round(y);
   const px = (dx: number, dy: number, w: number, h: number, col: string) => ((g.fillStyle = col), g.fillRect(X + (f > 0 ? dx : -dx - w + 1), Y + dy, w, h));
   shadow(c, x, y, 5);
+  // Lying flat: legs tucked, chin on its paws, eyes open.
+  if (d.down) {
+    px(-5, -4, 10, 4, '#6a5e52'), px(-5, -4, 10, 1, '#4a4038'), px(-8, -2, 3, 1, '#5a4e44');
+    px(4, -5, 4, 3, '#6a5e52'), px(7, -3, 2, 1, '#4a4038'), px(4, -6, 1, 1, '#3a3028'), px(6, -4, 1, 1, '#141218');
+    return;
+  }
   // Legs, body (darker along the back), tail up, head and ears forward.
   px(-4, -3, 1, 3 - step, '#3a3028'), px(-2, -3, 1, 2 + step, '#3a3028'), px(2, -3, 1, 3 - step, '#3a3028'), px(4, -3, 1, 2 + step, '#3a3028');
   px(-5, -7, 10, 4, '#6a5e52');

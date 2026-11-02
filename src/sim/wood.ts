@@ -91,7 +91,7 @@ export function newWood(room: ArenaRoom, cls: HeroClass = 'WARRIOR'): WoodState 
  *  at the dead, checks you over crouched beside you, and stands only to haul you up. */
 function stepWake(w: WoodState, room: ArenaRoom, dt: number): void {
   const t = (w.wake += Math.max(0, dt)), n = hew(room), h = room.heroes.find((x) => x.id === HERO_ID);
-  if (n && h && w.said < 4) {
+  if (n && h && w.said < 3 + ([] as string[]).concat(LINES.notice[w.cls]).length) {
     n.sneak = true;
     // Round the back of the field, out of the looters' sight, then in at your side.
     const [tx, ty] = n.x < SNEAK.round[0] - 0.2 ? SNEAK.round : [h.x - 1.0, h.y + 0.3], dx = tx - n.x, dy = ty - n.y, d = Math.hypot(dx, dy);
@@ -101,7 +101,7 @@ function stepWake(w: WoodState, room: ArenaRoom, dt: number): void {
   if (t < WAKE.arrive) return;
   // He talks, one line at a time, each waiting for a tap (the world held); the last as he hauls you up.
   // His checking-over, then what he makes of you, then the boots and up.
-  const lines = [LINES.waking[0], LINES.waking[1], LINES.notice[w.cls], LINES.waking[2], LINES.waking[3]];
+  const lines = [LINES.waking[0], LINES.waking[1], ...([] as string[]).concat(LINES.notice[w.cls]), LINES.waking[2], LINES.waking[3]];
   if (w.said < lines.length) {
     if (w.said === lines.length - 1) {
       if (h) Object.assign(h, { act: 'idle', actT: 0, actDur: 0, lying: false, hp: h.maxHp, fx: -1, fy: 0 });

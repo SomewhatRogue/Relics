@@ -35,10 +35,13 @@ export function stepSnare(s: Snare, enemies: Enemy[], now: number, ev: FightEven
 
 const newHound = (h: Hero): Hound => ({ x: h.x - h.fx, y: h.y - h.fy + 0.6, fx: h.fx, fy: h.fy, state: 'heel', target: 0, t: 0, next: 4, back: 0, bites: 0, moving: false });
 
-/** The hound, a tick at a time (only with a Ranger, and not in the wood). */
+/** The hound, a tick at a time (only with a Ranger). */
 export function stepHound(h: Hero, enemies: Enemy[], now: number, dt: number, ev: FightEvent[]): void {
   if (WEAPONS[h.weapon].cls !== 'RANGER' || h.noHound) return void (h.hound = null);
   const d = (h.hound ??= newHound(h));
+  // You're out cold: it lies across your legs and doesn't stir.
+  if (h.lying) return void Object.assign(d, { x: h.x + 0.55, y: h.y + 0.12, fx: -1, fy: 0, state: 'heel', moving: false, down: true, next: now + 3 });
+  d.down = false;
   d.t += dt;
   const to = (x: number, y: number, speed: number, stop: number) => {
     const dx = x - d.x, dy = y - d.y, l = Math.hypot(dx, dy);

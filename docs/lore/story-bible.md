@@ -150,11 +150,19 @@ most Want among the heroes is the one the bells don't spare).
   over. Odric knew Hew and owed him a beer he never came in for. Hew calls the hero "stray". A Healer's
   censer goes cold on the field ("They do"); only the church relights it, and Isolde carries it there herself.
 
-- **The Ranger's hound** (recorded 2026-11-01): a rough grey wolfhound from Huntress Maeve's lodge, given to every
-  Ranger the company hires. It isn't with them in the Greyhollow wood (Maeve's dogs don't go that far east); it's at
-  their heel from the north gate on. An ordinary dog, no shard and no magic. On screen it never dies: it bolts when a
-  butcher swings close and comes back when it's ready. Nothing ever jokes about a dead dog. No name on screen yet.
-  Dogs are not a goblin weakness; bells stay the town's one hope.
+- **The Ranger's hound** (recorded 2026-11-01; changed by Kyle 2026-11-01): a rough grey wolfhound bred at
+  Huntress Maeve's lodge and sold out of it as a pup, and the Ranger's own dog before the column ever set out. It was
+  on the Greyhollow column with them. When the column broke it lay across their legs all night while they were out,
+  and made no sound with the hungry feeding on the dead a few yards off. The hungry left it alone because they were
+  busy at the dead, not because they fear dogs. It is at the Ranger's heel from the waking on, through the wood and
+  against the Stoker. At the lodge, Maeve knows her own breeding on sight and has opinions about how it's been fed.
+  An ordinary dog, no shard and no magic. On screen it never dies: it bolts when a butcher swings close, the Stoker
+  included, and comes back when it's ready. Nothing ever jokes about a dead dog. No name on screen yet, and no he or
+  she yet. Dogs are not a goblin weakness; bells stay the town's one hope.
+
+- **Hew at the waking** (recorded 2026-11-01): he comes in low out of the trees west of the hero and round the
+  back of the goblins feeding on the dead, keeping to the far side of the field from them, and stays crouched until
+  he hauls the hero up. The feeders came back to the field after his round at first light.
 
 - **Elements** (recorded 2026-11-01): fire, frost and storm are the world's only three, shared by a Mage's spells and
   the relic-wright's fittings. A Mage's Elemental Channel is its own craft, worked through its focus (the wand, staff

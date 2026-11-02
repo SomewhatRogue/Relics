@@ -181,14 +181,17 @@ export const LINES = {
   more: "There's _more of them_ in the trees, stray, and they're coming this way.",
   cometo: "You come round on the rise with a mouthful of ash, and it's still down there by the cordwood, _waiting_ for you.",
   later: "Ask me later, stray, once you've got your breath back. I'll ~still be talking~, don't worry.",
-  /** What Hew makes of you, said after he's checked your toes: one line for each class. */
+  /** What Hew makes of you, said after he's checked your toes: a line (or two boxes) for each class. */
   notice: {
     WARRIOR: "That's a soldier's arm on you, I've been round enough of them this morning to know. With the column, were you? No, don't answer, you'll only have to think about it.",
     HEALER: "And what's this, a censer? Gone _cold_ on you, and it'll want lighting again, though not off my kilns, I'd think, that'll be the Lantern's business. So you're church folk, then, or you robbed some.",
     ROGUE: "Hold on, two knives, and neither worn where a soldier would wear one. I'll keep a hand on my *purse*, if it's all the same to you, not that there's much in it, Wickhold owes me for four loads. And you keep both of yours where I can see them.",
-    RANGER: "Bow's not broken, that's something, though the string's had a soaking, and those are ^hunter's hands^ if ever I saw any, which is good, I'd sooner you saw them coming from a long way off. And I'll be a good way behind you when you do.",
+    RANGER: [
+      "Bow's not broken, that's something, though the string's had a soaking. And this great grey lump's yours, I take it? The grass is dry under it, so it's been lying across your legs all night, and never a peep out of it with them at it over there.",
+      "Those are ^hunter's hands^ if ever I saw any, which is as well, I'd sooner you saw that lot coming a long way off. And I'll be a good way behind you when you do.",
+    ],
     MAGE: "And that thing in your hand's still ~humming~, I can hear it from here, so mind you don't point it my way. I don't hold with it, sparks out of sticks and all that, but I'll not leave you lying here over it, I suppose.",
-  } as Record<HeroClass, string>,
+  } as Record<HeroClass, string | string[]>,
   /** Hew's words on the lessons a class does its own way (the rest use the lines above). */
   teach: {
     backstab: "Three of them, and you'll not stand toe to toe with three, not with those little things, so you get yourself round the *back* of one. I expect you know how, I expect you've had a fair bit of practice.",

@@ -92,7 +92,7 @@ export interface Hero extends Body {
   decoyX: number;
   decoyY: number;
   decoyUntil: number;
-  /** A Ranger's: when the next snare is ready, and the hound (none in the wood). */
+  /** A Ranger's: when the next snare is ready, and the hound (`noHound` keeps it away). */
   snareReady: number;
   hound: Hound | null;
   noHound?: boolean;
@@ -412,4 +412,4 @@ export interface Bolt {
 /** A Ranger's snare on the ground. */
 export interface Snare { owner: string; x: number; y: number; until: number }
 /** A Ranger's hound: at heel, running something down, worrying it, or scared off till `back`. */
-export interface Hound { x: number; y: number; fx: number; fy: number; state: 'heel' | 'run' | 'bite' | 'fled'; target: number; t: number; next: number; back: number; bites: number; moving: boolean }
+export interface Hound { x: number; y: number; fx: number; fy: number; state: 'heel' | 'run' | 'bite' | 'fled'; target: number; t: number; next: number; back: number; bites: number; moving: boolean; /** Lying down (across you while you're out). */ down?: boolean }
