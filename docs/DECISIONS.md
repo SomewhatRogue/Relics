@@ -1519,3 +1519,50 @@ every third mace blow does), the friend didn't know how to get him up, then the 
   catching up in 0.1 s steps; and a refused takeover goes back to following the leader instead of
   running a copy of the job alone.
 - Laptop grab key is G: the lesson and Hew's card said F.
+
+## 2026-11-02: slower levels and loot, the knacks tree, class-true offers (Kyle; Claude Opus 5.5)
+
+Kyle, after playing with friends: purple loot and levels came too fast; he liked picking one of two
+on a level up and wants to see it grow as its own place; a Rogue was offered "on block" and "on parry".
+
+- **Measured first** (a seeded sim of a typical hero's first jobs through the real room plans, bounty,
+  drop, chest and treasure code; 40 seeds). Before: solo level 3 after one job, 5 after three, 10 after
+  eight; about 24 Tolmouth (purple) pieces in 15 jobs, the first around job 2. A party of three reached
+  level 10 in five jobs with 38 purple.
+- **Levels** (`shared/progress.ts`): `xpFor` is now 250, 780, 1590, 2680, 4050... (12330 for 10), and
+  kill, rescue and objective xp roughly halved. Solo: level 2 after one job, 3 after about four (the
+  trainer's skill), 5 after about ten (the leave-behind), 6 at 15, about 9 at 30. Trainer ranks at
+  2/4/6/8/10 land every few jobs. Saved heroes keep their level.
+- **Parties** (`shared/pace.ts`, `jobXp`): a party fights more goblins and every kill paid everyone in
+  full. Now the room's xp is shared for the party's size, plus 15% a player past the first: a party of
+  three earns about 1.15 to 1.25 times a solo job. Gold is unchanged.
+- **Loot** (`shared/gear.ts`): new odds; danger lifts a roll only as far as Forged (`LIFT_TO`), so
+  Tolmouth and Hungry are found, never lifted into. Purple is 2% from chests and butchers, 10% from a
+  named butcher (the treasure of long and deep jobs). Solo: about 2 purple in 15 jobs, 4 in 30, the
+  first around job 6 or 7; a party of three about 3 in 15. Blue (Forged) is what deep jobs now pour out.
+- **The tree** (`shared/perks.ts`, `shared/chains.ts`): four chains of three steps a class, BODY and
+  BREATH shared, then its guard or its feet, then its trade. Warrior: GUARD, WEIGHT. Healer: GUARD,
+  MERCY. Ranger: FEET (jump, parry, speed), BOW. Rogue: FEET, KNIFE. Mage: BLINK, SPELLS. A level up
+  offers the next step of two different chains; 12 steps and 9 picks to level 10, so not everything.
+  Every knack is a number the fight already reads: gear-named ones fold into `statsOf` with gear and
+  drills; `knack(h, k)` for down, block, rear, bless, counter and winded.
+- **Old heroes**: the old perk ids are steps on the chains, so they stay lit. One the class can't use
+  (a Rogue's GUARD, a Warrior's FOOTWORK) comes back as a pick (`fitPerks`, run on load).
+- **The screen** (`client/treeui.ts`, `tree.css`): KNACKS, the level bar, then a row per chain: taken
+  steps gold and linked, the two on offer green and glowing, each chain's next step blue, later steps
+  dim and dashed. Tap a step for its words. Opened from the pack (KNACKS, with a ! while a pick waits),
+  from a job's end when you've grown (SEE KNACKS), and from the trainer, still the one place a pick is
+  taken (my call: the trainer's lines and "find your trainer" stay true; one flag, `take`, to change).
+- **Class-true offers** (Kyle: "the Rogue can only dodge"). Filtered, not swapped, for gear: PARRY
+  needs a parry, GUARD a held block, DODGE a dodge button (`modFits`, used by rolls, rerolls and hungry
+  pieces); RIPOSTE and BULWARK need a parry and SIDESTEP a dodge (`traitsFor`); REAPER reads "A backstab
+  that kills heals you" for a class with no parry. Swapped for knacks: FOOTWORK says the class's own
+  dodge (Dash, Jump, Blink), and the chains only hold what the class does. The item card and hero sheet
+  hide PARRY WINDOW, THROUGH A BLOCK and DODGE EVERY for a class without them; the sword and spear lines
+  and the armor lines no longer promise a Warrior a roll. Relics and augments had nothing to fix.
+- `tests/knacks.test.ts` walks every class through 40 pick paths to the end of the tree, checking each
+  offer is two chains' next steps and nothing the class can't do, and rolls gear, rerolls, hungry
+  pieces and treasure for every class, and reads the trainer's rows for every class.
+- New words (for the lore keeper and line editor): KNACKS button and title; SEE KNACKS, SEE THE TREE;
+  chain names; the new knacks SCARRED, LONG WIND, COUNTERSTROKE, FLEET, SLIPPERY, HEFT, HEAVY HANDS,
+  KEEN, LONG SHOT, QUICK HANDS, DEEP CHARGE, POTENT, MENDER with their lines; the tree's notes.

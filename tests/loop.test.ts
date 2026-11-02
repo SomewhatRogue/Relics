@@ -40,11 +40,11 @@ describe('terrain', () => {
 });
 
 describe('progress and the world', () => {
-  it('levels at 100, 300, 600 experience', () => {
-    expect([xpFor(2), xpFor(3), xpFor(4)]).toEqual([100, 300, 600]);
-    expect(levelFor(299)).toBe(2);
+  it('levels at 250, 780, 1590 experience', () => {
+    expect([xpFor(2), xpFor(3), xpFor(4)]).toEqual([250, 780, 1590]);
+    expect(levelFor(779)).toBe(2);
     const p = newProfile();
-    expect(gainXp(p, 320)).toBe(2);
+    expect(gainXp(p, 800)).toBe(2);
     expect(p.picks).toBe(2);
   });
 

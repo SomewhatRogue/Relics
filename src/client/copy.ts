@@ -2,6 +2,7 @@
 export const COPY = {
   homeLede: 'Wickhold still has its walls. Pick a hero, or hire another.',
   pack: 'PACK',
+  knacks: 'KNACKS',
   inHand: 'IN HAND',
   skill: 'SKILL',
   relic: 'RELIC',

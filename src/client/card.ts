@@ -3,14 +3,14 @@
  * and what it would change against what you wear now, in the numbers the room uses. Green better, red
  * worse. Used by the loot card, chests and the pack.
  */
-import { HUNGRY, type HungryId, MODS, MOD_TEXT, TIERS, TRAITS, WEAPONS, CHARGE, gearStats, itemName, slotOf, type Item, type WeaponId } from '../shared/tuning';
+import { CLASS_DODGES, CLASS_GUARD, HUNGRY, type HungryId, MODS, MOD_TEXT, TIERS, TRAITS, WEAPONS, CHARGE, gearStats, itemName, slotOf, traitText, type HeroClass, type Item, type WeaponId } from '../shared/tuning';
 import type { Hero } from '../sim/types';
 
 /** How each weapon type fights, in a line. */
 export const HOW: Record<WeaponId, string> = {
-  sword: 'Three-hit combo, a wide guard and an easy parry. Rolls.',
+  sword: 'Three-hit combo, a wide guard and an easy parry.',
   greatsword: 'Two slow, wide hits and a huge heavy. A tight parry.',
-  spear: 'Four quick thrusts at long reach. Steps back to dodge.',
+  spear: 'Four quick thrusts at long reach.',
   daggers: 'A fast four-hit combo, two and a half times the damage from behind. A long dash.',
   longbow: 'One arrow a press. A full 1.4 s draw pierces a line.',
   shortbow: 'A quick draw, and you can walk while drawing.',
@@ -25,6 +25,12 @@ export const HOW: Record<WeaponId, string> = {
   flail: 'Slow, wide sweeps that come over a shield. The second heals. Hold to bring down a smite close in.',
 };
 const ARMOR_HOW = { light: 'Light: full speed and a full dodge. Takes full damage.', medium: 'Medium: 5% slower, 12% less damage taken.', heavy: 'Heavy: 12% slower, a shorter dodge that costs more breath, 25% less damage, and small goblins can\'t stagger you.' };
+/** The same for a class with no dodge (a Warrior, a Healer): nothing about a dodge it hasn't got. */
+const ARMOR_FEET = { ...ARMOR_HOW, light: 'Light: full speed. Takes full damage.', heavy: 'Heavy: 12% slower, 25% less damage, and small goblins can\'t stagger you.' };
+/** Rows a class has no use for: a parry it can't make, a block it can't hold, a dodge it hasn't got, heals it doesn't give. */
+const shown = (r: Row, cls: HeroClass) =>
+  !(r.label === 'PARRY WINDOW' && CLASS_GUARD[cls] === 'none') && !(r.label === 'THROUGH A BLOCK' && CLASS_GUARD[cls] !== 'full') &&
+  !(r.label === 'DODGE EVERY' && !CLASS_DODGES[cls]) && !(r.label === 'HEALING GIVEN' && cls !== 'HEALER');
 
 interface Row { label: string; v: number; unit: '' | 's' | '%'; low?: boolean }
 interface Worn { weapon: WeaponId; item?: Item; armor: Item | null; rings: Item[]; baseHp: number }
@@ -64,7 +70,7 @@ function wearing(h: Hero, it: Item): Worn {
 /** The rows that change, old to new, green better, red worse. */
 export function compare(h: Hero, it: Item): string {
   const a = sheet(worn(h)), b = sheet(wearing(h, it));
-  const rows = a.map((r, i) => ({ r, n: b[i] })).filter(({ r, n }) => Math.abs(n.v - r.v) > 1e-3);
+  const cls = WEAPONS[h.weapon].cls, rows = a.map((r, i) => ({ r, n: b[i] })).filter(({ r, n }) => shown(r, cls) && Math.abs(n.v - r.v) > 1e-3);
   if (!rows.length) return '<div class="cmp none">No change to what you wear now.</div>';
   return '<div class="cmp">' + rows.map(({ r, n }) => {
     const up = n.v > r.v, good = r.low ? !up : up;
@@ -74,14 +80,14 @@ export function compare(h: Hero, it: Item): string {
 
 /** The card: tier, name, how it fights, what's on it. */
 export function card(it: Item, h?: Hero): string {
-  const t = TIERS[it.quality], s = slotOf(it);
-  const how = s === 'weapon' ? (h && it.kit !== h.weapon ? HOW[it.kit!] : '') : s === 'armor' ? ARMOR_HOW[it.armor ?? 'light'] : '';
+  const t = TIERS[it.quality], s = slotOf(it), cls = h ? WEAPONS[h.weapon].cls : it.kit ? WEAPONS[it.kit].cls : undefined;
+  const how = s === 'weapon' ? (h && it.kit !== h.weapon ? HOW[it.kit!] : '') : s === 'armor' ? (cls && !CLASS_DODGES[cls] ? ARMOR_FEET : ARMOR_HOW)[it.armor ?? 'light'] : '';
   const mods = (it.mods ?? []).map((m) => `<div class="tr"><b>${MODS[m.id].name} ${m.v > 0 ? '+' : ''}${MODS[m.id].unit === '%' ? Math.round(m.v * 100) + '%' : MODS[m.id].unit === 's' ? m.v + ' s' : m.v}</b> ${MOD_TEXT[m.id]}</div>`);
-  const traits = it.traits.map((k) => `<div class="tr"><b>${TRAITS[k].name}</b> ${TRAITS[k].text}</div>`);
+  const traits = it.traits.map((k) => `<div class="tr"><b>${TRAITS[k].name}</b> ${traitText(k, cls)}</div>`);
   return `<div class="card-head" style="--t:${t.col}"><span class="chip">${t.name}</span><b>${itemName(it)}</b></div>` +
     (how ? `<div class="how">${how}</div>` : '') + [...mods, ...traits].join('') +
     (it.hungry ? `<div class="gift">${HUNGRY[it.hungry as HungryId].gift}</div><div class="cost">${HUNGRY[it.hungry as HungryId].cost}</div>` : '') + (mods.length + traits.length || it.hungry ? '' : `<div class="tr">Plain. No modifiers.</div>`);
 }
 
 /** The hero sheet: every number, as worn. */
-export const heroSheet = (h: Hero) => '<div class="cmp sheet">' + sheet(worn(h)).filter((r) => r.label !== 'HEALING GIVEN' || WEAPONS[h.weapon].cls === 'HEALER').map((r) => `<div><span>${r.label}</span><b>${fmt(r)}</b></div>`).join('') + '</div>';
+export const heroSheet = (h: Hero) => '<div class="cmp sheet">' + sheet(worn(h)).filter((r) => shown(r, WEAPONS[h.weapon].cls)).map((r) => `<div><span>${r.label}</span><b>${fmt(r)}</b></div>`).join('') + '</div>';

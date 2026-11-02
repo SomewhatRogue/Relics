@@ -5,7 +5,7 @@
  * The gifts and costs are wired into the fight in sim/hungry.ts.
  */
 import type { Rng } from './rng.js';
-import { MODS, TIERS, rollGear, type ModId } from './gear.js';
+import { MODS, TIERS, modFits, rollGear, type ModId } from './gear.js';
 import type { Item } from './loot.js';
 import type { HeroClass, WeaponId } from './weapons.js';
 
@@ -33,7 +33,7 @@ export function rollHungry(rng: Rng, cls: HeroClass, from?: string): Item {
   const fits = HUNGRY_ORDER.filter((id) => (!HUNGRY[id].cls || HUNGRY[id].cls === cls) && (!HUNGRY[id].from || HUNGRY[id].from === from));
   const own = fits.find((id) => HUNGRY[id].from && HUNGRY[id].from === from);
   const id = own && rng.next() < 0.6 ? own : rng.pick(fits), d = HUNGRY[id];
-  const pool = (Object.keys(MODS) as ModId[]).filter((m) => MODS[m].on.includes(d.slot) && (m !== 'mending' || cls === 'HEALER'));
+  const pool = (Object.keys(MODS) as ModId[]).filter((m) => MODS[m].on.includes(d.slot) && modFits(m, cls));
   const mods: Item['mods'] = [];
   for (let i = 0; i < TIERS.hungry.mods && pool.length; i++) {
     const m = pool.splice(Math.floor(rng.next() * pool.length), 1)[0];

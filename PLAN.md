@@ -2,6 +2,14 @@
 
 ## Current slice
 
+**Slower growth, the knacks tree, class-true offers** (Claude Opus 5.5, 2026-11-02; Kyle: "purple
+loot too fast as well as leveling up too fast", "its own sort of area you can see grow", "the Rogue can
+only dodge"). Built; waiting on Kyle's play. *Done when* a new hero is about level 5 after nine or ten
+jobs, finds their first purple piece some jobs in rather than on the first, opens KNACKS from the pack
+and sees four chains with where each goes, takes one of the two green steps at the trainer, and a
+Rogue or Mage is never offered a parry or a block, nor a Warrior or Healer a dodge. Open: the new words
+through the lore keeper and line editor; gold pace untouched (drill prices assumed the old levels).
+
 **Places with a plan** (Claude Opus 5.5, 2026-11-01; Kyle: "maps that feel more like actual areas").
 Built; waiting on Kyle's play. *Done when* Kyle walks Barrowby's lane past cottages and their yards to
 the green with the fields beyond the hedges, the Charcoal Camps' shacks along the muddy path, Fennick

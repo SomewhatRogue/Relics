@@ -209,6 +209,8 @@ body[data-mode='town'] .tb.roll { right: calc(116px + env(safe-area-inset-right)
 #pack .head { display: flex; align-items: center; gap: 8px; }
 #pack h2 { margin: 0; color: #ffd27a; font-size: 14px; letter-spacing: 0.2em; }
 #pack .head span { flex: 1; color: #8a8494; font-size: 10px; }
+#pack .kn { height: 32px; padding: 0 9px; background: #2e2516; border: 1px solid #ffd27a; border-radius: 4px; color: #ffd27a; font-size: 10px; letter-spacing: 0.1em; }
+#pack .kn i { font-style: normal; color: #9ad8a8; }
 #pack .x { width: 32px; height: 32px; padding: 0; background: transparent; border: 1px solid #4f4a5c; border-radius: 4px; color: #c8c4d0; font-size: 18px; }
 #pack h3 { margin: 10px 0 4px; color: #c8b080; font-size: 10px; letter-spacing: 0.15em; font-weight: 600; }
 #pack h3 i { font-style: normal; color: #8a8494; margin-left: 6px; }

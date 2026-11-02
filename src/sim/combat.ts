@@ -1,7 +1,7 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, parry, roll). */
-import { BLESSING, DODGE, WARD, FLINCH, HORN, OVERKILL, PERK, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing, CLASS_DODGES, CRIT, STEALTH, technique, weakOn } from '../shared/tuning';
+import { BLESSING, DODGE, WARD, FLINCH, HORN, OVERKILL, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing, CLASS_DODGES, CRIT, STEALTH, technique, weakOn } from '../shared/tuning';
 import { shove } from './bodies';
-import { statsOf } from './gearstats';
+import { knack, statsOf } from './gearstats';
 import { HUNGRY_FX, wears } from './hungry';
 import { damage, frozen, isDummy, kill, sayWeak, small, snared, stunOf } from './damage';
 import { poison } from './poison';
@@ -34,8 +34,8 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   const ice = frozen(e, now), blessed = h.blessedUntil > now ? BLESSING.dmgMult : 1;
   const heldFast = e.act === 'stunned' || e.act === 'pinned' || ice || snared(e, now);
   // A Rogue's knives are weak head on (unless it's held fast): keep moving and get behind.
-  const rearMult = rear ? ((WEAPONS[h.weapon].backstab ?? GUARD.rearMult) + (h.perks.includes('shadowed') ? PERK.shadowed : 0)) * (1 + (WEAPONS[h.weapon].cls === 'ROGUE' ? technique(h.drills, 'ROGUE') : 0)) : heldFast ? 1 : (WEAPONS[h.weapon].front ?? 1);
-  const counter = GUARD.counterMult * (has(h, 'riposte') ? TRAIT.riposte : 1), held = GUARD.stunnedMult * (has(h, 'brutal') ? TRAIT.brutal : 1);
+  const rearMult = rear ? ((WEAPONS[h.weapon].backstab ?? GUARD.rearMult) + knack(h, 'rear')) * (1 + (WEAPONS[h.weapon].cls === 'ROGUE' ? technique(h.drills, 'ROGUE') : 0)) : heldFast ? 1 : (WEAPONS[h.weapon].front ?? 1);
+  const counter = GUARD.counterMult * (has(h, 'riposte') ? TRAIT.riposte : 1) * (1 + knack(h, 'counter')), held = GUARD.stunnedMult * (has(h, 'brutal') ? TRAIT.brutal : 1);
   // TEMPO: the first hit after dodging through a blow lands double.
   const tempo = h.tempoUntil > now ? TRAIT.tempo : 1;
   if (tempo > 1) h.tempoUntil = -9;
@@ -170,7 +170,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   // The kit's guard covers an arc in front: a shield covers nearly everything ahead.
   const facing = (h.fx * tx + h.fy * ty) / tl > Math.cos(((w.guardArc / 2) * Math.PI) / 180);
   const canGuard = !a.unblockable && facing && (h.act === 'idle' || h.act === 'attack' || h.act === 'charge');
-  if (canGuard && now - h.parryOpenAt <= w.parryWindow + g.parry + h.lenience + (h.perks.includes('guard') ? PERK.guard : 0)) {
+  if (canGuard && now - h.parryOpenAt <= w.parryWindow + g.parry + h.lenience) {
     h.counterUntil = now + GUARD.counterWindow;
     h.parryOpenAt = -9;
     if (has(h, 'bulwark')) h.stamina = HERO.stamina;
@@ -186,7 +186,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     // Too heavy to block: the guard breaks (it should have been parried).
     if (a.crush) h.stamina = 0;
     // A held block takes nothing off your health; it costs breath instead, and plenty of it.
-    h.stamina -= a.dmg * GUARD.staminaPerDmg * w.guardCost * (1 - g.guard) * (h.perks.includes('ironhide') ? PERK.ironhide : 1);
+    h.stamina -= a.dmg * GUARD.staminaPerDmg * w.guardCost * (1 - g.guard) * (1 - knack(h, 'block'));
     h.staminaAt = now;
     h.hitstop = Math.max(h.hitstop, HITSTOP.light);
     shove(h, sx / sl, sy / sl, a.knock * 0.4, HERO.weight);
@@ -217,6 +217,6 @@ export function downIfDead(h: Hero, ev: FightEvent[]): void {
     ev.push({ k: 'spend', id: h.id, x: h.x, y: h.y, n: HUNGRY_FX.ransom }, { k: 'ransom', x: h.x, y: h.y });
     return;
   }
-  Object.assign(h, { hp: 0, act: 'down', actT: 0, actDur: HERO.respawn * (h.perks.includes('secondwind') ? PERK.secondwind : 1), kvx: 0, kvy: 0 });
+  Object.assign(h, { hp: 0, act: 'down', actT: 0, actDur: HERO.respawn * (1 - knack(h, 'down')), kvx: 0, kvy: 0 });
   ev.push({ k: 'down', x: h.x, y: h.y, id: h.id });
 }

@@ -3,7 +3,7 @@
  * own class (for life), level, gold and kit; the world (the town, the chapter, the council) is shared
  * by all of them. (The shared world moves to the server, api/world.ts, when the group plays online.)
  */
-import { HERO_SLOTS, newProfile, newStats, type Profile } from '../shared/progress';
+import { HERO_SLOTS, fitPerks, newProfile, newStats, type Profile } from '../shared/progress';
 import { newWorld, type WorldState } from '../shared/story';
 import { WEAPONS, upgradeOld } from '../shared/tuning';
 
@@ -32,6 +32,9 @@ const hero = (p: Partial<Profile>): Profile => {
   }
   out.arms = Object.fromEntries(Object.entries(out.arms).map(([k, it]) => [k, it && upgradeOld(it)]));
   out.bag = (out.bag ?? []).map(upgradeOld);
+  // Knacks onto the tree: one the class can't use comes back as a pick (shared/chains.ts).
+  out.perks = [...(out.perks ?? [])];
+  fitPerks(out);
   return out;
 };
 

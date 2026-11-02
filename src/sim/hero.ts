@@ -3,10 +3,10 @@
  * A tap of attack swings on release; holding past CHARGE.start charges a heavy instead.
  */
 import { collide, wadeAt } from '../shared/arena';
-import { DODGE, CLASS_DODGES, CLASS_GUARD, DECOY, POTION, AUGMENTS, CHARGE, GRAB, HORN, PERK, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon, drilled, STEALTH } from '../shared/tuning';
+import { DODGE, CLASS_DODGES, CLASS_GUARD, DECOY, POTION, AUGMENTS, CHARGE, GRAB, HORN, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon, drilled, STEALTH } from '../shared/tuning';
 import { slide } from './bodies';
 import { applyGear, turnBelt } from './pack';
-import { statsOf } from './gearstats';
+import { knack, statsOf } from './gearstats';
 import { fedMult, jealousBlocks, jealousCooldown, needlesBreath, wears } from './hungry';
 import { hitEnemy } from './combat';
 import { knows, type Enemy, type FightEvent, type Hero, type Intent } from './types';
@@ -107,7 +107,7 @@ function gear(h: Hero, inp: Intent, ev: FightEvent[]): void {
 }
 
 /** Seconds to a full draw or charge for this kit. */
-export const chargeFull = (w: Weapon, h?: Hero) => (w.draw ?? CHARGE.full) * (h?.perks.includes('steadyhand') && w.heavy.shot === 'arrow' ? PERK.steadyhand : 1) * (h ? 1 - statsOf(h).draw : 1);
+export const chargeFull = (w: Weapon, h?: Hero) => (w.draw ?? CHARGE.full) * (h ? 1 - statsOf(h).draw : 1);
 
 export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt: number, ev: FightEvent[], acts: HeroActs): void {
   gear(h, inp, ev);
@@ -159,7 +159,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   }
   if (h.hitstop > 0) return void (h.hitstop -= dt);
   if (h.stamina <= 0 && !h.winded) (h.winded = true), ev.push({ k: 'winded', x: h.x, y: h.y });
-  if (now - h.staminaAt > (h.winded ? HERO.windedDelay : HERO.regenDelay)) h.stamina = Math.min(HERO.stamina, h.stamina + HERO.staminaRegen * (h.perks.includes('endurance') ? PERK.endurance : 1) * (h.brandyUntil > now ? POTION.brandyRegen : 1) * (1 + statsOf(h).breath) * needlesBreath(h, enemies) * dt);
+  if (now - h.staminaAt > (h.winded ? HERO.windedDelay * (1 - knack(h, 'winded')) : HERO.regenDelay)) h.stamina = Math.min(HERO.stamina, h.stamina + HERO.staminaRegen * (h.brandyUntil > now ? POTION.brandyRegen : 1) * (1 + statsOf(h).breath) * needlesBreath(h, enemies) * dt);
   if (h.winded && h.stamina >= HERO.stamina) (h.winded = false), ev.push({ k: 'breath', x: h.x, y: h.y });
   h.actT += dt;
   h.moving = false;
@@ -176,7 +176,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   }
   const w = WEAPONS[h.weapon];
   const dodge = w.dodge;
-  const wantsRoll = CLASS_DODGES[w.cls] && now - h.rollQueuedAt < INPUT_BUFFER && now - h.lastRollAt >= dodge.cooldown * (1 - statsOf(h).dodge) * (h.perks.includes('footwork') ? PERK.footwork : 1) * (dodge.kind === 'blink' && h.perks.includes('focus') ? PERK.focus : 1) && h.stamina >= 1 && !h.winded;
+  const wantsRoll = CLASS_DODGES[w.cls] && now - h.rollQueuedAt < INPUT_BUFFER && now - h.lastRollAt >= dodge.cooldown * (1 - statsOf(h).dodge) && h.stamina >= 1 && !h.winded;
   if (h.act === 'roll') {
     const k = (dodge.distance * statsOf(h).dodgeDist) / dodge.time;
     h.x += h.rollDx * k * dt;
@@ -197,7 +197,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     const r = RELICS[h.relic];
     if (h.actT >= r.windup && h.actT - dt < r.windup) {
       acts.fire(h);
-      h.relicReady[h.relic] = now + r.cooldown * jealousCooldown(h) * (1 - statsOf(h).focus) * (h.perks.includes('relicsworn') ? PERK.relicsworn : 1) * (h.relic === h.relics[0] ? 1 - drilled(h.drills, 'skill') : 1);
+      h.relicReady[h.relic] = now + r.cooldown * jealousCooldown(h) * (1 - statsOf(h).focus) * (h.relic === h.relics[0] ? 1 - drilled(h.drills, 'skill') : 1);
       if (h.relic === 'hook' || h.relic === 'javelin' || h.relic === 'net' || h.relic === 'lodestone') ev.push({ k: h.relic === 'hook' ? 'hookfire' : 'throw', x: h.x, y: h.y, dx: h.fx, dy: h.fy });
     }
     if (h.act === 'throw' && h.actT >= r.windup + r.recover) (h.act = 'idle'), (h.actT = 0);

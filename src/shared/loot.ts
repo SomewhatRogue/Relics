@@ -3,7 +3,7 @@
  * execute something well (a parry, a dodge through a blow, a perfect release, a backstab, a throw
  * into a wall, a fully charged hit). No stat sheets: at most two traits, one weapon per kit.
  */
-import { WEAPONS, type WeaponId } from './weapons.js';
+import { CLASS_DODGES, CLASS_GUARD, WEAPONS, type HeroClass, type WeaponId } from './weapons.js';
 import { HUNGRY, type HungryId } from './hungry.js';
 
 export type TraitId = 'riposte' | 'tempo' | 'bulwark' | 'deadeye' | 'crushing' | 'brutal' | 'reaper' | 'ember' | 'rime' | 'storm';
@@ -30,13 +30,22 @@ export const ELEMENT_TRAITS: TraitId[] = ['ember', 'rime', 'storm'];
 const DRAWN: WeaponId[] = ['longbow', 'shortbow', 'wand', 'staff', 'rod', 'mace', 'handbow', 'flail'];
 const MELEE: WeaponId[] = ['sword', 'greatsword', 'spear', 'daggers', 'mace', 'rapier', 'handbow', 'censer', 'flail'];
 
-/** The skill traits a kit can roll (the ones that make sense for how it fights). */
+/**
+ * The skill traits a kit can roll: the ones that make sense for how it fights, and only what its class
+ * can do (Kyle, 2026-11-02): RIPOSTE and BULWARK need a parry, SIDESTEP a dodge.
+ */
 export function traitsFor(kit: WeaponId): TraitId[] {
-  const out: TraitId[] = ['tempo', 'bulwark', 'crushing', 'brutal'];
-  if (MELEE.includes(kit)) out.push('riposte', 'reaper');
+  const cls = WEAPONS[kit].cls, out: TraitId[] = ['crushing', 'brutal'];
+  if (CLASS_DODGES[cls]) out.push('tempo');
+  if (CLASS_GUARD[cls] !== 'none') out.push('bulwark');
+  if (MELEE.includes(kit)) out.push('reaper');
+  if (MELEE.includes(kit) && CLASS_GUARD[cls] !== 'none') out.push('riposte');
   if (DRAWN.includes(kit)) out.push('deadeye');
   return out;
 }
+
+/** A trait's words for a class: REAPER without a parry is a backstab's alone. */
+export const traitText = (t: TraitId, cls?: HeroClass) => (t === 'reaper' && cls && CLASS_GUARD[cls] === 'none' ? 'A backstab that kills heals you' : TRAITS[t].text);
 
 /** Gear tiers, white to red (gear.ts). */
 export type Tier = 'plain' | 'fine' | 'forged' | 'tolmouth' | 'hungry';

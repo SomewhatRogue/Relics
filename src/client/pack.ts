@@ -47,7 +47,8 @@ export class PackView {
   private sel: Spot | null = null;
   private h: Hero | null = null;
 
-  constructor(private gear: (op: number, arg: number) => void, private blocked: () => boolean) {
+  /** `tree`: open the knacks tree (treeui.ts), and how many level-up picks wait. */
+  constructor(private gear: (op: number, arg: number) => void, private blocked: () => boolean, private tree: { open: () => void; picks: () => number }) {
     this.el.id = 'pack';
     this.el.hidden = true;
     document.body.appendChild(this.el);
@@ -56,6 +57,7 @@ export class PackView {
       if (!b) return;
       e.preventDefault();
       if (b.dataset.close !== undefined) return this.toggle(false);
+      if (b.dataset.tree !== undefined) return this.toggle(false), this.tree.open();
       this.gear(Number(b.dataset.op), Number(b.dataset.arg));
       this.sel = null;
     };
@@ -108,7 +110,7 @@ export class PackView {
       const swaps = h.bag.map((it, k) => (slotOf(it) === 'weapon' && WEAPONS[it.kit!].cls === WEAPONS[h.weapon].cls ? btn(`${COPY.swapTo} ${itemName(it)}`, GEAR.equip, k, 'go') : '')).join('');
       return row(h.arms[h.weapon] ? card(h.arms[h.weapon]!) : `<b>${WEAPONS[h.weapon].name}</b><div class="tr">${COPY.plain}</div>`, swaps + (h.arms[h.weapon] || h.weapon !== plain ? btn(COPY.intoPack, GEAR.equip, -1, 'ghost') : ''));
     }
-    if (s === 'armor' && h.armor) return row(card(h.armor), btn(COPY.takeOff, GEAR.unarm, 0, 'ghost'));
+    if (s === 'armor' && h.armor) return row(card(h.armor, h), btn(COPY.takeOff, GEAR.unarm, 0, 'ghost'));
     if (s === 'ring' && h.rings[i]) return row(card(h.rings[i]), h.rings[i].hungry === 'wedding' ? '' : btn(COPY.takeOff, GEAR.off, i, 'ghost'));
     if (s === 'relic' && h.relics[1]) return row(`<b>${RELICS[h.relics[1]].name}</b>${el(h.relics[1], h)}`, btn(COPY.putAway, GEAR.carry, -1, 'ghost'));
     if (s === 'found' && h.found[i]) return row(`<b>${RELICS[h.found[i]].name}</b>${el(h.found[i], h)}`, btn(COPY.carry, GEAR.carry, i, 'go'));
@@ -120,7 +122,7 @@ export class PackView {
   update(h: Hero): void {
     this.h = h;
     if (!this.open || this.el.querySelector('.dragging')) return;
-    const key = JSON.stringify([h.weapon, h.arms[h.weapon], h.bag, h.relics, h.found, h.augments, h.glow, h.belt, h.armor, h.rings, this.sel]);
+    const key = JSON.stringify([h.weapon, h.arms[h.weapon], h.bag, h.relics, h.found, h.augments, h.glow, h.belt, h.armor, h.rings, this.sel, this.tree.picks()]);
     if (key === this.key) return;
     this.key = key;
     const [skill, carried] = h.relics, held = h.arms[h.weapon];
@@ -136,7 +138,7 @@ export class PackView {
     const shelf = h.found.map((r, i) => (r === carried ? '' : this.tile('found:' + i, 'shelf', { name: RELICS[r].name, tier: 'tolmouth', sub: 'RELIC' }))).join('');
     const belt = Array.from({ length: POTION.belt }, (_, i) => this.tile(h.belt[i] ? 'belt:' + i : null, i === 0 ? 'belt' : null, h.belt[i] ? { name: POTIONS[h.belt[i]].name, sub: i ? '' : COPY.drunkNext } : null)).join('');
     this.el.innerHTML =
-      `<div class="head"><h2>${COPY.pack}</h2><span>${COPY.stillGoing}</span><button data-close class="x" aria-label="Close">&times;</button></div>` +
+      `<div class="head"><h2>${COPY.pack}</h2><span>${COPY.stillGoing}</span><button data-tree class="kn">${COPY.knacks}${this.tree.picks() ? ' <i>!</i>' : ''}</button><button data-close class="x" aria-label="Close">&times;</button></div>` +
       `<h3>${COPY.worn}</h3><div class="slots">${worn}</div>` +
       `<h3>${COPY.packed} <i>${h.bag.length} / ${PACK}</i></h3><div class="grid" data-dst="bag">${bag}</div>` +
       `<h3>${COPY.relic}</h3><div class="grid shelf" data-dst="shelf">${shelf || `<div class="none">${h.found.length ? '' : COPY.relicEmpty}</div>`}</div>` +

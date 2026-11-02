@@ -27,6 +27,7 @@ import { SPEAKER, townSays } from '../shared/townsays';
 import { lossText } from '../shared/raids';
 import { MEND_UI, PERRIN } from '../shared/mendlines';
 import { dusk } from './streetlife';
+import { openTree } from './treeui';
 
 /** Words from another player's browser, made safe to show. */
 const esc = (v: unknown) => String(v ?? '').replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -247,5 +248,8 @@ export function showResult(g: Game, panel: Panel): void {
   for (const i of r.sold) lines.push(`No room in your pack for the ${itemName(i)}, so it went for 20 gold.`);
   if (r.relic) lines.push(`<b>You cut a relic out of ${r.job.boss}: the ${RELICS[r.relic].name}.</b> It's on your RELIC button. Ivo at the forge can set an element into it.`);
   if (r.won && r.job.objective === 'story') lines.push(`<b>Barrowby's bell rings across the valley.</b> The council can sit once enough people are home.`);
-  panel.show(r.won ? 'JOB DONE' : 'DRIVEN BACK', p(`<b>${r.job.title}</b>`) + lines.map(p).join(''), [{ label: 'BACK TO WICKHOLD', primary: true, act: () => panel.hide() }], true);
+  const html = p(`<b>${r.job.title}</b>`) + lines.map(p).join(''), done = { label: 'BACK TO WICKHOLD', primary: true, act: () => panel.hide() };
+  // Grown: a look at the tree, and what the next pick could be.
+  const again = () => panel.show(r.won ? 'JOB DONE' : 'DRIVEN BACK', html, [...(r.levels ? [{ label: 'SEE KNACKS', act: () => openTree(g, panel, { back: again }) }] : []), done], true);
+  again();
 }
