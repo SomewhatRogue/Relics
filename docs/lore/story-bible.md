@@ -205,3 +205,9 @@ most Want among the heroes is the one the bells don't spare).
 - Cobb is the church's gravedigger; he takes the breach dead off Odric's cart. The Tulls lived against the north wall and were burned out (nobody died); stone from their house went into the mending. Mab draws water at the well. Wat is a recruit at the barracks under Master Cole, with Corporal Brisk and Squire Pell.
 - An empty gallows at the square's edge, a crow on the beam; nobody on screen says who it was last used for. The crow is just a crow.
 - Rapiers and hand crossbows are pre-war pieces or Halvard's work from melted steel; none is ever said to have come from outside (recorded 2026-11-01).
+
+## Dens and big houses (recorded 2026-11-01; Kyle's call, lore keeper)
+- Big valley houses: the longhouse, the hall house and the great barn. Several can stand in one place; none has a named lord.
+- The hungry eat raw where they kill and cook what they carry home; the den cookpot is for people. Larders hang their stock by the ankles from rafter hooks. Captives are caged beside what's left of the last one, never explained on screen.
+- Den interiors are a deliberate exception to "Show, don't gore" (Kyle: "goblins are brutal, we need to showcase it"). The limit: no children's remains, ever (show the shoe, never the child).
+- Why a larder burns: their hoarded lamp oil catches. A captive left in a burning house is lost; no line ever jokes about it.

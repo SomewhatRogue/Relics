@@ -56,7 +56,7 @@ export function manor(rng: Rng): Layout {
   blocks.push(b('counter', w - 1.3, wy + 1.4, 0.8, 2.2), b('sacks', wx + 0.8, h - 2.2, 1.6, 1));
   const props = [{ kind: 'table' as const, x: tx + 1.5, y: 4.65 }, { kind: 'table' as const, x: tx + 4.5, y: 4.65 }, { kind: 'crate' as const, x: 1, y: h - 2 }];
   return {
-    name: 'THE MANOR', w, h, floor: rng.next() < 0.5 ? 'flagstone' : 'planks', blocks, rounds: [], props, hearth,
+    name: 'THE HALL HOUSE', w, h, floor: rng.next() < 0.5 ? 'flagstone' : 'planks', blocks, rounds: [], props, hearth,
     stand: [p(wx / 2, 2.4), p(2.4, 7.5), p(wx - 2, 7.8), p(wx + 3.2, 7.8), p(w / 2 - 2, 9.4)],
     sleep: [p(wx + 2.1, 3.3), p(hx + 1.3, 1.9)], hide: p(w - 1, 3.2), body: p(tx + 3, 7.3),
   };
@@ -69,7 +69,7 @@ export function tithebarn(rng: Rng): Layout {
   blocks.push(b('sacks', 0.3, 4.5, 1, 2), b('sacks', w - 1.3, 4.5, 1, 2), b('cart', w - 4.6, h - 3.4, 2.8, 1.2));
   for (const y of [3.6, 7.4]) for (let x = 3.6; x < w - 2; x += 4.4) rounds.push({ x, y, r: 0.32, kind: 'support' });
   const l: Layout = {
-    name: 'THE TITHE BARN', w, h, floor: 'dirt', blocks, rounds, props: [],
+    name: 'THE GREAT BARN', w, h, floor: 'dirt', blocks, rounds, props: [],
     stand: [p(2.6, 5.4), p(w - 3, 5.6), p(w / 2, 2.6), p(5, 9.4), p(w - 6, 9.2)],
     sleep: [], hide: p(w - 1.5, 2.6), body: p(w / 2 - 3, 5.6), lamp: p(w / 2 + 2.2, 5.5),
   };
