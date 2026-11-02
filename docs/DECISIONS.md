@@ -764,3 +764,7 @@ which moves the page to the media channel.
   matching west region so each publish is a short hop.
 - Vercel project `relic` created on the SomwhatRogue team, linked to SomewhatRogue/Relics; every push
   to main deploys.
+- Relic shares Come Bye's Upstash database for now (upstash-kv-amethyst-compass, sfo1, Free plan,
+  which allows one database per account). Relic's keys all start `rl:`, so the two never collide;
+  they do share the 500K commands a month. Moving to pay as you go (budget capped) is the step when
+  either game gets regular players.
