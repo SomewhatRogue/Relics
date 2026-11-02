@@ -101,7 +101,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     const picks = pr.picks > 0 ? offer.map((k) => ({ label: `PICK: ${PERKS[k].name}`, primary: true, act: () => detail(PERKS[k].name, PERKS[k].text + '.' + (PERKS[k].cls ? ' Only from your own trainer.' : ''), { label: `TAKE ${PERKS[k].name}`, ok: true, act: () => g.pickPerk(k) }) })) : [];
     const lessonButtons = teach.map(([l, n, what]) => {
       const lv = TEACHES[l].level, price = TEACHES[l].price, have = knowsIt(l);
-      return { label: have ? `${n}: LEARNED` : pr.level < lv ? `${n}: RANK ${lv}` : `LEARN ${n} (${price})`, primary: !have && pr.level >= lv, act: () => detail(n, what + (have ? ' Learned.' : pr.level < lv ? ` From level ${lv}.` : ` ${price} gold.`), have || pr.level < lv ? undefined : { label: `LEARN IT (${price} GOLD)`, ok: pr.gold >= price, act: () => g.learn(l) }) };
+      return { label: have ? `${n}: LEARNED` : pr.level < lv ? `${n}: RANK ${lv}` : `LEARN ${n} (${price})`, primary: !have && pr.level >= lv, act: () => detail(n, what + (have ? ' Learned.' : pr.level < lv ? ` From level ${lv}.` : ` ${price} gold.`), have || pr.level < lv ? undefined : { label: `${l === 'skill' && choices.length > 1 ? 'LEARN BOTH' : 'LEARN IT'} (${price} GOLD)`, ok: pr.gold >= price, act: () => g.learn(l) }) };
     });
     const drillButtons = DRILL_ORDER.map((d) => {
       const r = pr.drills?.[d] ?? 0, cap = drillCap(d, pr.level), price = drillPrice(d, r), open = ready(d) && r < cap;

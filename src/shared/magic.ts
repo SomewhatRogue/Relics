@@ -93,7 +93,7 @@ export const RELICS = {
   channel: { name: 'ELEMENTAL CHANNEL', short: 'CHANNEL', cooldown: CHANNEL.cooldown, windup: CHANNEL.windup, recover: CHANNEL.recover, range: 0 },
   lodestone: { name: 'LODESTONE', short: 'LODESTONE', cooldown: LODESTONE.cooldown, windup: LODESTONE.windup, recover: LODESTONE.recover, range: LODESTONE.range },
   horn: { name: 'WAR CRY', short: 'WAR CRY', cooldown: HORN.cooldown, windup: HORN.windup, recover: HORN.recover, range: HORN.radius },
-  bash: { name: 'SHIELD CHARGE', short: 'CHARGE', cooldown: BASH.cooldown, windup: BASH.windup, recover: BASH.recover, range: BASH.distance },
+  bash: { name: 'SHIELD CHARGE', short: 'SHIELD', cooldown: BASH.cooldown, windup: BASH.windup, recover: BASH.recover, range: BASH.distance },
   blessing: { name: 'BLESSED GROUND', short: 'BLESS', cooldown: BLESSING.cooldown, windup: BLESSING.windup, recover: BLESSING.recover, range: BLESSING.range },
   ward: { name: 'WARD', short: 'WARD', cooldown: WARD.cooldown, windup: WARD.windup, recover: WARD.recover, range: WARD.range },
   sanctuary: { name: 'SANCTUARY', short: 'SANCTUARY', cooldown: SANCTUARY.cooldown, windup: SANCTUARY.windup, recover: SANCTUARY.recover, range: WARD.range },
