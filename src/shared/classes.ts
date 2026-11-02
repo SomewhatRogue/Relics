@@ -43,7 +43,7 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     weapon: 'Short sword (tap) and longbow (hold to draw)',
     skill: "Hunter's Net: pins a small goblin flat, slows a big one. Your trainer teaches it from level 2.",
     cant: "Light up close. Can't lift.",
-    guard: "Can't hold a block. Can parry, if the timing's right. Jumps back instead of rolling. From level 3 the trainer can teach them to leave a snare where they stood.",
+    guard: "Can't hold a block. Can parry, if the timing's right. Jumps back instead of rolling, and from level 3 your trainer can teach the jump to leave a snare behind.",
     note: "Runs at your heel and now and then goes for whatever you're hitting. It can't be killed, but a butcher swinging close by will scare it off for a while.",
     noteLabel: 'HOUND',
     stats: { POWER: 4, GUARD: 1, SPEED: 2, RANGE: 5, SUPPORT: 2 },
@@ -65,7 +65,7 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     note: 'Fire: a firebolt (tap) or a fireball that sets goblins burning (hold). Frost: three icicles (tap) or a burst that freezes them solid (hold). Storm: every spell, tap or hold, jumps to the next goblin.',
     noteLabel: 'SPELLS',
     cant: "Short of breath. Can't lift.",
-    guard: "Can't block or parry. Blinks out of reach instead, and the blink is slow to come back. From level 3 the trainer can teach them to leave an image behind that draws goblins off for a couple of seconds.",
+    guard: "Can't block or parry. Blinks out of reach instead, and the blink is slow to come back. From level 3 your trainer can teach the blink to leave an image behind, which draws goblins off for a couple of seconds.",
     stats: { POWER: 3, GUARD: 0, SPEED: 2, RANGE: 4, SUPPORT: 2 },
   },
   HEALER: {

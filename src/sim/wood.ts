@@ -319,7 +319,7 @@ export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: nu
     if (s && isDead(s) && !w.relic) {
       w.relic = true;
       // Everything stops: you hold it up, the light comes, and the card says what it is.
-      w.hold = { kind: 'relic', who: '', text: LINES.relic, how: LINES.how.relic, move: 'skill', need: 'continue', t: 0, until: 0 };
+      w.hold = { kind: 'relic', who: '', text: LINES.relic, how: LINES.how.relic, move: 'relic', need: 'continue', t: 0, until: 0 };
       ev.push({ k: 'fanfare', x: h.x, y: h.y });
       openGate(room, 4);
       Object.assign(w, { stage: 5, entered: true });
@@ -351,6 +351,8 @@ export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: nu
 export function woodGoal(w: WoodState, touch: boolean): { title: string; text: string } {
   if (w.stage === 5) return { title: 'THE ROAD', text: 'Follow the arrow west, to Wickhold' };
   if (w.stage === 4 && w.entered && w.cut < 0) return { title: 'KILL THE STOKER', text: 'Roll out of anything striped' };
+  // On the way to the hut, and while Hew's there: no skill to teach a hero who has none yet.
+  if (w.stage === 4) return { title: "HEW'S HUT", text: w.entered ? 'Wait for Hew' : 'Follow Hew' };
   const l = lessonOf(w), key: Record<string, string> = touch
     ? { GRAB: 'HIT IT, TAP GRAB, AGAIN TO THROW', ATTACK: 'TAP ATTACK', DODGE: 'TAP ROLL', BLOCK: 'HOLD BLOCK', PARRY: 'TAP BLOCK ON THE WHITE FLASH', SKILL: 'TAP SKILL', BACKSTAB: 'GET BEHIND, TAP ATTACK', 'FULL DRAW': 'HOLD ATTACK, LET GO', 'FULL CHARGE': 'HOLD ATTACK, LET GO', 'LAST SECOND': 'TAP ROLL AS IT LANDS' }
     : { GRAB: 'HIT IT, F, F AGAIN TO THROW', ATTACK: 'CLICK', DODGE: 'SPACE', BLOCK: 'HOLD RIGHT CLICK', PARRY: 'TAP RIGHT CLICK ON THE WHITE FLASH', SKILL: 'E', BACKSTAB: 'GET BEHIND, CLICK', 'FULL DRAW': 'HOLD LEFT CLICK, LET GO', 'FULL CHARGE': 'HOLD LEFT CLICK, LET GO', 'LAST SECOND': 'SPACE AS IT LANDS' };

@@ -93,7 +93,7 @@ export const FEEDING: [number, number][] = [[7.8, 29.7], [13.0, 32.0], [15.9, 35
  *  or full-charge hits (`heavy`). */
 export type Count = 'kills' | 'dodge' | 'block' | 'parry' | 'slip' | 'backstab' | 'heavy' | 'grab' | 'none';
 /** The move a lesson's card shows (its control comes from the device). */
-export type Teach = 'attack' | 'roll' | 'block' | 'parry' | 'slip' | 'backstab' | 'heavy' | 'grab' | 'skill';
+export type Teach = 'attack' | 'roll' | 'block' | 'parry' | 'slip' | 'backstab' | 'heavy' | 'grab' | 'skill' | 'relic';
 export interface Lesson { area: number; name: string; teach: string; card?: Teach; moves: ('attack' | 'roll' | 'block' | 'relic' | 'potion' | 'grab')[]; count: Count; need: number; hew: [number, number]; foes: (Foe & { variant?: 'looter' | 'lunger' | 'heavy' | 'stoker' })[]; more?: Lesson['foes'] }
 export const LESSONS: Lesson[] = [
   { area: 0, name: 'THE FIELD', teach: 'ATTACK', moves: ['attack'], count: 'kills', need: 0, hew: [5, 33],
@@ -167,7 +167,6 @@ export const LINES = {
   up: ['Up you get, and spit that dirt out.', "Not yet, stray, I've enough to burn as it is.", 'Have a breather, then go at it again, ~properly~ this time.'],
   relic: "There's something hard under its breastbone, grown in like a knot in oak, and it takes Hew's poker and most of what you've got left to lever it out. It's a javelin, haft and all, longer than the wound it came out of, and ~warm~.",
   road: "The wood thins and then gives out, and there's a road, and at the end of it walls, with a ~glow~ over them that isn't the moon. Your left foot is wet through at the heel, just as Hew said it would be.",
-  skill: "Now. Don't save *any* of it.",
   /** Waking: he comes over slowly, checks you, hauls you up (one box at a time, each waits for a tap). */
   waking: [
     "Oh, you're ^breathing^. That's *one*, then, out of the whole field, and I've been round every one of them since first light. Give me a moment getting down, these knees pop like green wood in a kiln.",
@@ -209,7 +208,6 @@ export const LINES = {
     roll: "A red mark with a striped edge can't be blocked. Roll out of it just before it lands.",
     block: 'Hold your guard while the red fills. Each block costs breath (the yellow bar).',
     parry: 'Tap your guard the moment the red flashes white. It staggers them, and your next blow lands hard.',
-    skill: "Use your skill. Once it's spent, it takes a while to recharge.",
     relic: 'Throw it with your relic button. A small goblin is carried off and pinned to the nearest wall. It comes back to your hand after a few seconds.',
     grab: 'Hit a small goblin so it reels, or get behind it, then grab it. Grab again to throw it, and whatever it hits gets hurt. Out on jobs, crates and barrels throw too.',
     backstab: 'Hit a goblin from behind and the blow lands far harder.',

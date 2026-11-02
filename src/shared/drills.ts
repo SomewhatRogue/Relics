@@ -47,5 +47,5 @@ export const technique = (d: Drills | undefined, cls: HeroClass) => (d?.techniqu
 export const TEACHES = { skill: { level: 2, price: 60 }, leave: { level: 3, price: 80 } } as const;
 export const LEAVES: Partial<Record<HeroClass, { name: string; text: string }>> = {
   RANGER: { name: 'SNARE ON THE JUMP', text: 'Jumping back leaves a snare where you stood' },
-  MAGE: { name: 'AN IMAGE ON THE BLINK', text: 'Blinking leaves an image of you behind, and the goblins go for it' },
+  MAGE: { name: 'IMAGE ON THE BLINK', text: 'Blinking leaves an image of you behind, and the goblins go for it' },
 };

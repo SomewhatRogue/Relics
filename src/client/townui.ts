@@ -90,15 +90,18 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     // What your trainer teaches: your class skill (level 2), and what your dodge leaves behind (level 3).
     const skillId = CLASS_SKILL[pr.cls], leave = LEAVES[pr.cls], knowsIt = (l: 'skill' | 'leave') => !pr.learned || pr.learned.includes(l);
     const teach: [('skill' | 'leave'), string, string][] = [['skill', RELICS[skillId].name, 'your class skill'], ...(leave ? [['leave', leave.name, leave.text.charAt(0).toLowerCase() + leave.text.slice(1)] as ['leave', string, string]] : [])];
-    const lessons = '<h3>TECHNIQUES</h3>' + teach.map(([l, n, what]) => p(`<b>${n}</b>: ${what}. ${knowsIt(l) ? 'Learned.' : pr.level < TEACHES[l].level ? `At level ${TEACHES[l].level}.` : `${TEACHES[l].price} gold.`}`)).join('');
+    const lessons = '<h3>LESSONS</h3>' + teach.map(([l, n, what]) => p(`<b>${n}</b>: ${what}. ${knowsIt(l) ? 'Learned.' : pr.level < TEACHES[l].level ? `At level ${TEACHES[l].level}.` : `${TEACHES[l].price} gold.`}`)).join('');
     const lessonButtons = teach.filter(([l]) => !knowsIt(l) && pr.level >= TEACHES[l].level).map(([l, n]) => ({ label: `LEARN ${n} (${TEACHES[l].price} GOLD)`, primary: true, disabled: pr.gold < TEACHES[l].price, act: () => (g.learn(l), again()) }));
     // Drills: gold for practice, rank by rank, as far as your level allows.
     const tech = TECHNIQUE[pr.cls], drillName = (d: DrillId) => (d === 'technique' ? tech.name : DRILLS[d].name);
+    // A drill for something not yet learned (your skill; a Mage's channel; a Ranger's snares) waits for it.
+    const needs = (d: DrillId) => (d === 'skill' || (d === 'technique' && pr.cls === 'MAGE') ? 'skill' : d === 'technique' && pr.cls === 'RANGER' ? 'leave' : null);
+    const ready = (d: DrillId) => !needs(d) || knowsIt(needs(d)!);
     const drills = '<h3>DRILLS</h3>' + p(`You have ${pr.gold} gold.`) + DRILL_ORDER.map((d) => {
       const r = pr.drills?.[d] ?? 0, cap = drillCap(d, pr.level);
-      return p(`<b>${drillName(d)}</b> ${r} of ${DRILLS[d].max}: ${d === 'technique' ? tech.text : DRILLS[d].text}.${r >= cap && r < DRILLS[d].max ? ` <span class="dim">More ranks at level ${cap * 2}.</span>` : ''}`);
+      return p(`<b>${drillName(d)}</b> ${r} of ${DRILLS[d].max}: ${d === 'technique' ? tech.text : DRILLS[d].text}.${!ready(d) ? ` <span class="dim">Once you've learned it.</span>` : r >= cap && r < DRILLS[d].max ? ` <span class="dim">More ranks at level ${cap * 2}.</span>` : ''}`);
     }).join('');
-    const drillButtons = DRILL_ORDER.filter((d) => (pr.drills?.[d] ?? 0) < drillCap(d, pr.level)).map((d) => {
+    const drillButtons = DRILL_ORDER.filter((d) => ready(d) && (pr.drills?.[d] ?? 0) < drillCap(d, pr.level)).map((d) => {
       const r = pr.drills?.[d] ?? 0, price = drillPrice(d, r);
       return { label: `${drillName(d)} ${r + 1} (${price} GOLD)`, disabled: pr.gold < price, act: () => (g.buyDrill(d), again()) };
     });

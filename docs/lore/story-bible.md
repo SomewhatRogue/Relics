@@ -106,10 +106,19 @@ most Want among the heroes is the one the bells don't spare).
   seeds chapter 2's tunnels), Fenmere (Fennick Ford, the tally wall that seeds chapter 4). Tolmouth was a
   town and is now a larder; Dessa's steel came from there. "Something was down there first" at the
   Copperdeep: an old shard, deep, that the goblins found rather than brought. Keep it for later.
+- **Class skills** (recorded 2026-11-01, Kyle's call): a hero comes out of the Greyhollow wood with
+  their weapon, a plain dodge and the Relic Javelin, and knows no class skill; nothing in the wood
+  uses one, and no line says they've forgotten or lost it. Each class's own trainer teaches its skill
+  from level 2 for 60 gold: Master Cole the War Cry, Huntress Maeve the Hunter's Net, Whisper
+  Shadowstep, Magister Vell the Elemental Channel (Vell taught the Channel: settled), Mother Isolde
+  Sanctuary. From level 3, for 80 gold, Maeve teaches the snare on the jump and Vell the image on the
+  blink (the Mage's own craft through the focus, not shard-stuff; the goblins go for it a couple of
+  seconds and no longer). Paying is trade and never touches the Want. Until Vell teaches the Channel a
+  Mage's spells are fire. Old heroes keep what they had; no in-world explanation is ever written.
 - **Trainers' fees** (recorded 2026-11-01): drills are bought from your own class's trainer, and
   paying for them is trade, not keeping or giving: it never touches the Want. Mother Isolde's fees buy
-  linen and Sister's Bitter for the infirmary, never the Lantern box. Magister Vell sells the QUICK
-  CHANNEL drill; whether he taught the Channel itself stays open. Players see "breath", never
+  linen and Sister's Bitter for the infirmary, never the Lantern box. Magister Vell teaches the Elemental
+  Channel and sells the QUICK CHANNEL drill. Players see "breath", never
   "stamina" or "wind". A job's length in real minutes is the game's own voice on the board only;
   characters and postings never measure a job in minutes.
 - **The valley, added** (recorded 2026-11-01, for the river, marsh and ruins jobs): Barrowfields: the
@@ -180,4 +189,4 @@ most Want among the heroes is the one the bells don't spare).
 - **Elements** (recorded 2026-11-01): fire, frost and storm are the world's only three, shared by a Mage's spells and
   the relic-wright's fittings. A Mage's Elemental Channel is its own craft, worked through its focus (the wand, staff
   or rod): not shard-stuff, and it doesn't feed the Want. The relic-wright's fittings are for skills and relics; a
-  Mage's spells take their element from the Channel. Open (Kyle's call): Magister Vell as the one who taught it.
+  Mage's spells take their element from the Channel. Settled 2026-11-01: Magister Vell teaches it.
