@@ -13,7 +13,8 @@ import { BOUNTY, HERO_SLOTS, PERK, SHOP, gainXp, newProfile, type PerkId, type P
 import { Rng } from '../shared/rng';
 import { CHAPTER_1, QUORUM, rewardMult, type WorldState } from '../shared/story';
 import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
-import { PARTY, LEAVES, TEACHES, drillCap, drillPrice, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, FOUND_RELICS, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, sellValue, giveValue, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
+import { buyDrill, learnLesson } from '../shared/training';
+import { PARTY, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, FOUND_RELICS, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, sellValue, giveValue, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
 import { ArenaRoom } from '../sim/room';
 import { lessonOf, newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
 import { woodMap, WOOD_PROPS } from '../shared/wood';
@@ -893,10 +894,8 @@ export class Game {
   /** Your vote at the council (it decides once enough heroes have voted). */
   /** Pay your trainer to teach you your class skill, or your dodge's leave-behind (once your level allows). */
   learn(what: Learned): void {
-    const p = this.profile, t = TEACHES[what];
-    if (!p.learned || p.learned.includes(what) || p.level < t.level || p.gold < t.price || (what === 'leave' && !LEAVES[p.cls])) return;
-    p.gold -= t.price;
-    p.learned = [...p.learned, what];
+    const p = this.profile;
+    if (!learnLesson(p, what)) return;
     const h = this.hero;
     h.learned = p.learned;
     if (what === 'skill') h.relic = h.relics[0];
@@ -917,11 +916,8 @@ export class Game {
 
   /** Pay the trainer for the next rank of a drill (if you can afford it and your level allows). */
   buyDrill(id: DrillId): void {
-    const p = this.profile, r = p.drills?.[id] ?? 0, price = drillPrice(id, r);
-    if (r >= drillCap(id, p.level) || p.gold < price) return;
-    p.gold -= price;
-    // A new object, so everything that keeps the old numbers sees the change.
-    p.drills = { ...p.drills, [id]: r + 1 };
+    const p = this.profile;
+    if (!buyDrill(p, id)) return;
     const h = this.hero;
     h.drills = p.drills;
     refreshHealth(h);

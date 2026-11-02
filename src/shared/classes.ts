@@ -4,6 +4,9 @@
  * keeper (docs/lore/voice.md).
  */
 import type { HeroClass } from './weapons.js';
+import { TEACHES } from './drills.js';
+
+const SKILL_AT = TEACHES.skill.level, LEAVE_AT = TEACHES.leave.level;
 
 /** What a class is called on screen (the Healer is a Cleric; the id stays HEALER). */
 export const CLASS_NAME: Record<HeroClass, string> = { WARRIOR: 'WARRIOR', RANGER: 'RANGER', ROGUE: 'ROGUE', MAGE: 'MAGE', HEALER: 'CLERIC' };
@@ -35,7 +38,7 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     line: 'Sword and shield. Holds the line.',
     pitch: "Somebody has to stand in the door. You're the one with the shield.",
     weapon: 'Sword and shield',
-    skill: 'Shield Charge or War Cry, one carried at a time. Shield Charge: run shield first the way you face, knocking small goblins flat, staggering big ones and bursting crates, until a wall stops you. War Cry: every goblin in earshot comes for you and nobody else. Your trainer teaches both from level 2, and you can change which you carry there for nothing.',
+    skill: `Shield Charge or War Cry, one carried at a time. Shield Charge: run shield first the way you face, knocking small goblins flat, staggering big ones and bursting crates, until a wall stops you. War Cry: every goblin in earshot comes for you and nobody else. Your trainer teaches both from level ${SKILL_AT}, and you can change which you carry there for nothing.`,
     cant: 'Nothing at range. Slow feet.',
     guard: "Can hold a block and parry, and the shield covers nearly everything in front. Can't roll: walk out of anything striped.",
     stats: { POWER: 4, GUARD: 5, SPEED: 2, RANGE: 1, SUPPORT: 3 },
@@ -44,9 +47,9 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     line: 'Blade and bow, and a hound.',
     pitch: 'Forty paces is a long way to run with an arrow in you.',
     weapon: 'Short sword (tap) and longbow (hold to draw)',
-    skill: "Hunter's Net: pins a small goblin flat, slows a big one. Your trainer teaches it from level 2.",
+    skill: `Hunter's Net: pins a small goblin flat, slows a big one. Your trainer teaches it from level ${SKILL_AT}.`,
     cant: "Light up close. Can't lift.",
-    guard: "Can't hold a block. Can parry, if the timing's right. Jumps back instead of rolling, and from level 3 your trainer can teach the jump to leave a snare behind.",
+    guard: `Can't hold a block. Can parry, if the timing's right. Jumps back instead of rolling, and from level ${LEAVE_AT} your trainer can teach the jump to leave a snare behind.`,
     note: "Runs at your heel and now and then goes for whatever you're hitting. It can't be killed, but a butcher swinging close by will scare it off for a while.",
     noteLabel: 'HOUND',
     stats: { POWER: 4, GUARD: 1, SPEED: 2, RANGE: 5, SUPPORT: 2 },
@@ -55,7 +58,7 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     line: 'Twin daggers. Fast, and from behind.',
     pitch: 'Everything with teeth has a back. Go and stand there.',
     weapon: 'Twin daggers',
-    skill: "Shadowstep: you're suddenly behind the goblin you face. Your trainer teaches it from level 2.",
+    skill: `Shadowstep: you're suddenly behind the goblin you face. Your trainer teaches it from level ${SKILL_AT}.`,
     cant: "Can't take a beating. Can't lift.",
     guard: "Can't block or parry. Dashes out of reach instead, further than anyone and far more often.",
     stats: { POWER: 3, GUARD: 1, SPEED: 5, RANGE: 1, SUPPORT: 1 },
@@ -64,18 +67,18 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     line: 'Spark wand. Quick sparks at range.',
     pitch: 'The cleverest thing in the room, until something hits you.',
     weapon: 'Spark wand',
-    skill: 'Elemental Channel: stand still for two seconds and your spells turn to the next element: fire, then frost, then storm, then fire again. Your trainer teaches it from level 2.',
+    skill: `Elemental Channel: stand still for two seconds and your spells turn to the next element: fire, then frost, then storm, then fire again. Your trainer teaches it from level ${SKILL_AT}.`,
     note: 'Fire: a firebolt (tap) or a fireball that sets goblins burning (hold). Frost: three icicles (tap) or a burst that freezes them solid (hold). Storm: every spell, tap or hold, jumps to the next goblin.',
     noteLabel: 'SPELLS',
     cant: "Short of breath. Can't lift.",
-    guard: "Can't block or parry. Blinks out of reach instead, and the blink is slow to come back. From level 3 your trainer can teach the blink to leave an image behind, which draws goblins off for a couple of seconds.",
+    guard: `Can't block or parry. Blinks out of reach instead, and the blink is slow to come back. From level ${LEAVE_AT} your trainer can teach the blink to leave an image behind, which draws goblins off for a couple of seconds.`,
     stats: { POWER: 3, GUARD: 0, SPEED: 2, RANGE: 4, SUPPORT: 2 },
   },
   HEALER: {
     line: 'Mace and censer. Keeps you standing.',
     pitch: 'Stitch them shut, then go and hit whatever opened them.',
     weapon: 'Mace and censer',
-    skill: "Sanctuary: blessed ground mends allies and burns goblins, and wards whoever's worst hurt. Your trainer teaches it from level 2.",
+    skill: `Sanctuary: blessed ground mends allies and burns goblins, and wards whoever's worst hurt. Your trainer teaches it from level ${SKILL_AT}.`,
     cant: 'Slow, short reach.',
     guard: "Can hold a block and parry, though a mace and censer let a little more through than a shield. Can't roll: walk out of anything striped.",
     note: 'Feed the censer what butchers leave. It heals hotter, and draws teeth.',

@@ -1,11 +1,12 @@
 /** What each person in Wickhold says and offers, the spots in the open, and the end-of-run results. */
 import { FAMILIES, PATIENTS } from '../shared/interiors';
-import { PERKS, SHOP, xpFor, perkOffer } from '../shared/progress';
+import { SHOP } from '../shared/progress';
+import { openTrainer } from './trainerui';
 import { CHAPTER_1, QUORUM, chapterGoals, councilOpen, marketOpen, rewardMult } from '../shared/story';
 import { TRAINERS, housesFor, type SpotId } from '../shared/town';
 import { ballot } from '../shared/worldsync';
 import { openSquare } from './squareui';
-import { LEAVES, TEACHES, DRILLS, DRILL_ORDER, TECHNIQUE, drillCap, drillPrice, type DrillId, WANT, ARMOR, MODS, REROLL, STEEL, sellValue, TIERS, nextLevel, POTION, POTIONS, type PotionId, AUGMENTS, CLASS_KITS, CLASS_ORDER, CLASS_SKILL, SKILL_CHOICES, ELEMENT_NAME, RELICS, TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
+import { WANT, ARMOR, MODS, REROLL, STEEL, sellValue, TIERS, nextLevel, POTION, POTIONS, type PotionId, AUGMENTS, CLASS_KITS, CLASS_ORDER, SKILL_CHOICES, ELEMENT_NAME, RELICS, TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
 import { device, type Game } from './game';
 import { line } from './speech';
 import { PACK } from '../sim/pack';
@@ -15,7 +16,7 @@ import { card, compare } from './card';
 import type { Panel } from './panels';
 import { RUMOURS } from './rumours';
 import { PARTY_MAX } from './parties';
-import { CLASSES, CLASS_NAME } from '../shared/classes';
+import { CLASS_NAME } from '../shared/classes';
 import { KIND, SIZES, STORY_PARTY, danger } from '../shared/jobs';
 
 /** The job open on the board (by id), if any. */
@@ -94,41 +95,15 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       const yours = TRAINERS[pr.cls];
       return panel.show(t.name, say(name, ELSEWHERE[cls].replace('{who}', title(yours.name)).replace('{where}', yours.where)));
     }
-    const next = xpFor(pr.level + 1), offer = perkOffer(pr);
     if (pr.cls === 'HEALER' && pr.cold) {
       pr.cold = false;
       g.keep();
       g.hero.cold = false;
       return panel.show(`${t.name}, ${CLASS_NAME[cls]} TRAINER`, p('She takes your censer without asking, carries it to the Lantern, and brings it back lit.') + say(name, TALLY.isolde), [{ label: 'CLOSE', act: again }]);
     }
-    // Short by default: where you stand, and a button for each thing; tap one to hear about it.
-    const head = `${t.name}, ${CLASS_NAME[cls]} TRAINER`, tech = TECHNIQUE[pr.cls], skillId = CLASS_SKILL[pr.cls], leave = LEAVES[pr.cls];
-    const knowsIt = (l: 'skill' | 'leave') => !pr.learned || pr.learned.includes(l);
-    const drillName = (d: DrillId) => (d === 'technique' ? tech.name : DRILLS[d].name);
-    const needs = (d: DrillId) => (d === 'skill' || (d === 'technique' && pr.cls === 'MAGE') ? 'skill' : d === 'technique' && pr.cls === 'RANGER' ? 'leave' : null);
-    const ready = (d: DrillId) => !needs(d) || knowsIt(needs(d)!);
-    const detail = (title: string, text: string, buy?: { label: string; ok: boolean; act: () => void }) =>
-      panel.show(head, p(`<b>${title}</b>`) + p(text) + p(`You have ${pr.gold} gold.`), [...(buy ? [{ label: buy.label, primary: true, disabled: !buy.ok, act: () => (buy.act(), again()) }] : []), { label: 'BACK', act: again }]);
-    const choices = SKILL_CHOICES[pr.cls], skillName = choices.map((r) => RELICS[r].name).join(' AND ');
-    const teach: ['skill' | 'leave', string, string][] = [['skill', skillName, CLASSES[pr.cls].skill], ...(leave ? [['leave', leave.name, leave.text + '.'] as ['leave', string, string]] : [])];
-    const html = (pr.picks > 0 ? say(name, TEACH[pr.cls][0]) : '') + (pr.cls === 'HEALER' && pr.glow > 0 ? say(name, COAL.isolde) : '') +
-      p(`Level ${pr.level}. Experience ${pr.xp}${pr.level < 10 ? ` of ${next}` : ' (the chapter cap)'}. ${pr.gold} gold.`) +
-      (pr.perks.length ? p('Yours: ' + pr.perks.map((k) => `<b>${PERKS[k].name}</b>`).join(', ')) : '') +
-      (pr.picks > 0 ? p(`<b>${pr.picks > 1 ? `${pr.picks} picks to spend. Choose one.` : 'Choose one.'}</b>`) : '');
-    const picks = pr.picks > 0 ? offer.map((k) => ({ label: `PICK: ${PERKS[k].name}`, primary: true, act: () => detail(PERKS[k].name, PERKS[k].text + '.' + (PERKS[k].cls ? ' Only from your own trainer.' : ''), { label: `TAKE ${PERKS[k].name}`, ok: true, act: () => g.pickPerk(k) }) })) : [];
-    const lessonButtons = teach.map(([l, n, what]) => {
-      const lv = TEACHES[l].level, price = TEACHES[l].price, have = knowsIt(l);
-      return { label: have ? `${n}: LEARNED` : pr.level < lv ? `${n}: RANK ${lv}` : `LEARN ${n} (${price})`, primary: !have && pr.level >= lv, act: () => detail(n, what + (have ? ' Learned.' : pr.level < lv ? ` From level ${lv}.` : ` ${price} gold.`), have || pr.level < lv ? undefined : { label: `${l === 'skill' && choices.length > 1 ? 'LEARN BOTH' : 'LEARN IT'} (${price} GOLD)`, ok: pr.gold >= price, act: () => g.learn(l) }) };
-    });
-    const drillButtons = DRILL_ORDER.map((d) => {
-      const r = pr.drills?.[d] ?? 0, cap = drillCap(d, pr.level), price = drillPrice(d, r), open = ready(d) && r < cap;
-      const text = (d === 'technique' ? tech.text : DRILLS[d].text) + '.' + (!ready(d) ? " More ranks once you've learned it." : r >= DRILLS[d].max ? ' No more ranks.' : r >= cap ? ` More ranks at level ${cap * 2}.` : ` Rank ${r + 1} costs ${price} gold.`);
-      return { label: `${drillName(d)} ${r}/${DRILLS[d].max}`, act: () => detail(`${drillName(d)}, rank ${r} of ${DRILLS[d].max}`, text, open ? { label: `RANK ${r + 1} (${price} GOLD)`, ok: pr.gold >= price, act: () => g.buyDrill(d) } : undefined) };
-    });
-    // A class with a choice of skills: carry one, change it here for nothing.
-    const carried = pr.skill && choices.includes(pr.skill) ? pr.skill : skillId;
-    const carryButtons = choices.length > 1 && knowsIt('skill') ? choices.map((r) => ({ label: r === carried ? `CARRYING ${RELICS[r].name}` : `CARRY ${RELICS[r].name}`, primary: false, disabled: r === carried, act: () => (g.chooseSkill(r), again()) })) : [];
-    panel.show(head, html, [...picks, ...carryButtons, ...lessonButtons, ...drillButtons]);
+    // One spoken line at most: grown since you were last here, or (a Cleric) coals for the censer.
+    const greet = pr.picks > 0 ? TEACH[pr.cls][0] : pr.cls === 'HEALER' && pr.glow > 0 ? COAL.isolde : '';
+    openTrainer(g, panel, `${t.name}, ${CLASS_NAME[cls]} TRAINER`, name, greet);
   } else if (id === 'smith' || id === 'market') {
     const forged = id === 'market';
     if (forged && !marketOpen(w)) return panel.show('MARKET ROW', p('Empty stalls and a cat. The traders are camped outside the north gate with the refugees, and the gate stays shut to them until the council says otherwise.'));

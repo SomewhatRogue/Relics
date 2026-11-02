@@ -1340,3 +1340,22 @@ and he couldn't tell when or where he could leave.
   job gets their own tallies, not the leader's.
 - The results say how many were lost to a fire.
 - On a job, the banner fades when you're near the top of a room so it doesn't hide the way on.
+
+## 2026-11-01: trainer ranks level locked and dearer; a trainer screen you can read (Kyle; Opus 5.5)
+
+Kyle: "trained abilities to be level locked and cost more", and the screen was "a pain to understand".
+- Every rank has a level (drills.ts `levels`): power, health, speed, critical and breath at 2, 4, 6,
+  8, 10; skill at 4, 7, 10; technique at 5, 8, 10. Prices doubled on the same curve (power 80, 245,
+  465, 735, 1050). The whole set is about 17,800 gold, a long road past the chapter's level cap.
+- The class skill lesson moves to level 3 for 150 gold; a Ranger's snare and a Mage's image to level 5
+  for 250. Class sheets read the levels from drills.ts so they can't drift.
+- The rules live in shared/training.ts (`drillState`, `buyDrill`, `learnLesson`); the game only calls
+  them, so a buy refuses below the level, without the gold, or before the lesson it needs. Ranks a hero
+  already has above the new levels are kept; they buy on once their level catches up.
+- The screen (client/trainerui.ts, rows from shared/trainrows.ts): level, an experience bar and gold
+  on top; picks waiting first (tap to take); then SKILLS (the lessons, and the Warrior's CARRY choice)
+  and TRAINING, one row each with pips (filled, open, hatched for a level not reached), what the next
+  rank adds, and a price, LEVEL n, NEEDS SKILL or MAX. Buyable rows are gold-edged; locked ones dim.
+  Tap a row for NOW and NEXT, every rank with its level and price, and one buy button.
+- The greeting is one line at most: the grown line when picks wait, or Isolde's coal line.
+
