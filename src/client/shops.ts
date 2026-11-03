@@ -53,8 +53,13 @@ function trader(g: Game, panel: Panel): void {
   show(panel, PLACES.trader, says('Dessa', 'Wickhold steel, with a little weather in it. Fire, frost, storm. Price is the price.'), goods, SHOPW.gold(pr.gold), again);
 }
 
+/** Ivo won't talk for now; his bench below waits for when he will. */
+const IVO_BUSY = true;
+
 /** Ivo's bench: frost flasks and a modifier turned, the relics you own (he hears how bright each is), and no elements for now. */
 function wright(g: Game, panel: Panel): void {
+  // Busy for now (Kyle, 2026-11-03): one line, no panel of goods. Relics are carried from the pack.
+  if (IVO_BUSY) return panel.show(PLACES.wright.keeper, p(FORGE.busy));
   const pr = g.profile, again = () => wright(g, panel), skills = SKILL_CHOICES[pr.cls];
   const held = pr.relics.find((r) => r.id === pr.relic), fill = held ? relicFill(held) : -1;
   // He hears the one you carry: dark, fading, or singing.
