@@ -43,6 +43,7 @@ import { dusk } from './streetlife';
 import { drawMist, setSun, torchIn } from './daytime';
 import { drawPuddles } from './spiders';
 import { drawSkills, skillLights } from './skillsdraw';
+import { drawFound } from './foundsdraw';
 import { witchColour } from './hallsdraw';
 import { brazierOn, drawBrazier, drawLamps } from './lampsdraw';
 import { lampAt } from '../shared/lamps';
@@ -276,6 +277,8 @@ export class Scene {
       items.push({ y: OY + m.y * PX - 20, draw: () => drawCoal(c, m, x, y) });
     }
     for (const b of room.bolts) {
+      // (A gall bomb is drawn with the found relics, foundsdraw.ts.)
+      if (b.kind === 'bomb') continue;
       const x = OX + b.x * PX - cx, y = OY + b.y * PX - cy;
       // Things on the floor draw under the bodies; things in the air over them.
       const floor = b.kind === 'smite' || b.state === 'well';
@@ -328,6 +331,7 @@ export class Scene {
     }
     // The skills taught after the first: rings wound up, a volley, a fire ring, a tether, a chain (skillsdraw.ts).
     drawSkills(c, room, cx, cy);
+    drawFound(c, room, cx, cy);
     // At a fork, both ways out glow, each with its name.
     if (room.exitOpen) for (const r of map.roads ?? []) {
       const e = r.area, ex = OX + e.x * PX - cx, ey = OY + e.y * PX - cy;
@@ -402,7 +406,7 @@ export class Scene {
       const x = OX + b.x * PX - cx, y = OY + b.y * PX - cy - 8;
       if (b.kind === 'net' || b.kind === 'bolt') continue;
       if (b.kind === 'smite') lights.push({ x, y: y + 4, r: 40, i: 0.9 * Math.min(1, b.t / b.flight), c: [1, 0.9, 0.6] });
-      else if (b.kind === 'lodestone') lights.push({ x, y, r: b.state === 'well' ? 50 : 12, i: 0.5, c: b.el ? EL_LIGHT[b.el] : [0.7, 0.5, 1] });
+      else if (b.kind === 'lodestone') lights.push({ x, y, r: b.state === 'well' ? 50 : 12, i: 0.5, c: b.el ? EL_LIGHT[b.el] : [1, 0.85, 0.55] });
       else lights.push({ x, y, r: b.kind === 'orb' ? 50 : 30, i: 0.7, c: EL_LIGHT[b.el] });
     }
     for (const e of room.enemies) {

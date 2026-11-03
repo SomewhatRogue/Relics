@@ -57,7 +57,7 @@ export function drawSkills(c: Ctx, room: ArenaRoom, cx: number, cy: number): voi
         g.fillRect(ax, ay - 6 - Math.floor(Math.random() * 10), 1, 4);
       }
       g.globalAlpha = 1;
-    } else {
+    } else if (z.kind === 'fire') {
       // Burning on: a flickering ring and embers rising off it.
       for (let a = 0; a < Math.PI * 2; a += 1 / R) {
         const f = Math.random();

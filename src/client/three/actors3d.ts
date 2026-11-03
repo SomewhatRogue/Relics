@@ -20,6 +20,7 @@ import { makeTele, shapeTele } from './teleg3d';
 import { makeChest, makeCoal, makeDrop, makePickup, makeProp, poseChest, type ChestFig } from './props3d';
 import { boltLook, makeBolt, makeExit, makeJavelin, makeRing, makeSmoke, placeBolt, placeJavelin } from './shots3d';
 import { TIERS } from '../../shared/gear';
+import { relicCol } from '../relicicons';
 import type { Figure } from './rig';
 import { BOXFIGS } from './look';
 
@@ -90,7 +91,7 @@ export class Actors {
       o.position.set(d.x, Math.sin(now * 3 + d.id) * 0.05, d.y);
       o.rotation.y = now * 0.8 + d.id;
     }
-    for (const p of room.pickups) this.things.get('k' + p.id, '', () => ({ root: makePickup(!!p.gold, p.potion) })).root.position.set(p.x, 0, p.y);
+    for (const p of room.pickups) this.things.get('k' + p.id, '', () => ({ root: makePickup(!!p.gold, p.potion, p.relic && relicCol(p.relic)) })).root.position.set(p.x, 0, p.y);
     for (const c of room.coals) this.things.get('o' + c.id, '', () => ({ root: makeCoal() })).root.position.set(c.x, Math.sin(now * 6 + c.id) * 0.02, c.y);
     for (const b of room.bolts) placeBolt(this.things.get('b' + b.id, boltLook(b), () => ({ root: makeBolt(b) })).root, b, 0);
     for (const j of room.javelins) placeJavelin(this.things.get('j' + j.id, '', () => ({ root: makeJavelin() })).root, j, 0);

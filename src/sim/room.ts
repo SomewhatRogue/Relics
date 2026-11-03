@@ -19,7 +19,7 @@ import { damage, isDead } from './damage';
 import { HUNGRY_FX, heals, onKill, stepHungry, wears } from './hungry';
 import { newChest, startChest, stepChests, type Chest } from './chests';
 import { stepFlask, stepPotions, usePotion, type Smoke } from './flasks';
-import { dropPickups, stepPickups, type Pickup } from './pickups';
+import { dropPickups, dropRelic, stepPickups, type Pickup } from './pickups';
 import { dropCoal, healMult, stepCoals, type Coal } from './lantern';
 import { impacts } from './impacts';
 import { release, stepCarry, tryGrab } from './grab';
@@ -90,6 +90,8 @@ export class ArenaRoom {
   private lootRng: Rng;
   /** Ambushes by the door (sim/ambush.ts) on their own stream too. */
   private doorRng: Rng;
+  /** Relics off named butchers on their own stream too. */
+  private relicRng: Rng;
   private acc = 0;
 
   /** The map this room is played on. */
@@ -108,6 +110,7 @@ export class ArenaRoom {
     this.rng = new Rng(seed);
     this.lootRng = new Rng(seed * 7919 + 13);
     this.doorRng = new Rng(seed * 104729 + 31);
+    this.relicRng = new Rng(seed * 31337 + 7);
     this.map = opts.map ?? ARENA;
     useMap(this.map);
     this.squire = !!opts.squire;
@@ -255,6 +258,7 @@ export class ArenaRoom {
     for (const e of this.enemies) if (alive.has(e.id) && isDead(e)) {
       dropCoal(e, this.coals);
       dropPickups(e, this.pickups, this.lootRng);
+      dropRelic(e, this.pickups, this.relicRng);
       const by = this.heroes.find((x) => x.id === e.lastBy);
       if (by) onKill(by, this.time, this.events);
     }

@@ -54,7 +54,7 @@ export function roomLights(room: ArenaRoom, fx: Fx, lerp: Lerp, out: L3[]): void
   for (const b of room.bolts) {
     if (b.kind === 'arrow' || b.kind === 'knife' || b.kind === 'net' || b.kind === 'bolt' || b.kind === 'flask') continue;
     if (b.kind === 'smite') add(b.x, 0.8, b.y, R(40), 0.9 * Math.min(1, b.t / b.flight), [1, 0.9, 0.6]);
-    else if (b.kind === 'lodestone') add(b.x, 0.8, b.y, b.state === 'well' ? R(50) : R(12), 0.5, b.el ? EL_LIGHT[b.el] : [0.7, 0.5, 1]);
+    else if (b.kind === 'lodestone') add(b.x, 0.8, b.y, b.state === 'well' ? R(50) : R(12), 0.5, b.el ? EL_LIGHT[b.el] : [1, 0.85, 0.55]);
     else add(b.x, 0.7, b.y, b.kind === 'orb' ? R(50) : R(30), 0.7, EL_LIGHT[b.el]);
   }
   skillLights3(room, out);

@@ -73,4 +73,6 @@ export const SKILL_SOUNDS: Partial<Record<FightEvent['k'], string>> = {
   lanternlight: 'smite', tetherzap: 'spark', chainpull: 'hookfire', houndpin: 'pinned',
   // Not a skill, but the same borrowing: a nest catching (sim/torch.ts).
   torched: 'oilfire',
+  // The found relics (fxrelics.ts).
+  bell: 'smite', knuckle: 'boom', sentry: 'throw', hookprop: 'hookfire', relicfound: 'fanfare',
 };

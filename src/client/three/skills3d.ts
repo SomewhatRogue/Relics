@@ -68,7 +68,7 @@ export function drawSkills3(g: CanvasRenderingContext2D, room: ArenaRoom, P: Pro
         line(g, P(ax, hi + 0.5, az), P(ax, hi, az), '#f4ecd0');
       }
       g.globalAlpha = 1;
-    } else {
+    } else if (zn.kind === 'fire') {
       // Burning on: a flickering ring of flame with embers lifting off it.
       const n = Math.max(12, Math.round(Math.PI * 2 * zn.r * ppu));
       for (let i = 0; i < n; i++) {

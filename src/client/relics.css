@@ -22,8 +22,7 @@
 .tb.relic2::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: 7px; height: 3px; background: linear-gradient(90deg, var(--chgc, #ffd27a) var(--chg, 0%), #0d0b10 0); border-radius: 1px; }
 .tb.relic2.dark { border-color: #5a5664; color: #6a6872; }
 .rcd .rchgl { display: inline-block; width: 26px; height: 4px; margin-left: 4px; vertical-align: middle; background: linear-gradient(90deg, var(--chgc, #ffd27a) var(--chg, 0%), #0d0b10 0); border: 1px solid #3a3644; }
-.litbadge { position: fixed; z-index: 3; left: calc(10px + env(safe-area-inset-left)); top: calc(62px + env(safe-area-inset-top)); font-size: 9px; letter-spacing: 0.15em; color: #fff1b0; background: #3a2e14cc; border: 1px solid #ffd27a; border-radius: 3px; padding: 2px 5px; pointer-events: none; text-shadow: 0 0 4px #ffd27a; }
+.litbadge { display: inline-block; margin-top: 4px; font-size: 9px; letter-spacing: 0.15em; color: #fff1b0; background: #3a2e14cc; border: 1px solid #ffd27a; border-radius: 3px; padding: 1px 5px; text-shadow: 0 0 4px #ffd27a; box-shadow: 0 0 6px #ffd27a66; }
 .litbadge[hidden] { display: none; }
-body[data-mode='town'] .litbadge { display: none; }
 canvas.forge, img.forge { display: block; margin: 0 auto 8px; image-rendering: pixelated; touch-action: none; }
 .forgeskip { text-align: center; color: #6a647a; font-size: 9px; letter-spacing: 0.15em; }

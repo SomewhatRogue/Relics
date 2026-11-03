@@ -116,7 +116,7 @@ export function magicFx(fx: Fx, ev: FightEvent, x: number, y: number): void {
       fx.say(x, y - 30, 'NETTED', '#d8c48a');
       break;
     case 'well':
-      fx.rings.push({ x, y, life: 0.4, max: 0.4, col: '#b080ff', size: 50 });
+      fx.rings.push({ x, y, life: 0.4, max: 0.4, col: '#ffd27a', size: 50 });
       fx.shake = Math.max(fx.shake, 2);
       break;
     case 'shadow':
