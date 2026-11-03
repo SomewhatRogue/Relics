@@ -44,6 +44,8 @@ import { startTorch, stepTorch } from './torch';
 import { cure, stepPoison } from './poison';
 import { stepPuddles } from './puddles';
 import { brandyDmg } from './brandy';
+import { litMult } from './charge';
+import { fireFound, stepSentries } from './foundrelics';
 import { grow } from './grow';
 import { NO_INTENT, type Puddle, type Zone, type Bolt, type Drop, type Enemy, type Prop, type FightEvent, type Hero, type Hook, type Intent, type Javelin, type Snare, type Survivor } from './types';
 
@@ -224,7 +226,7 @@ export class ArenaRoom {
     for (const h of this.heroes) if (h.act === 'roll' && h.actT === 0) laySnare(h, this.snares, this.time, this.events);
     this.snares = this.snares.filter((s) => stepSnare(s, this.enemies, this.time, this.events));
     this.javelins = this.javelins.filter((j) => stepJavelin(j, this.enemies, this.time, TICK, this.events, hit));
-    this.hooks = this.hooks.filter((k) => stepHook(k, this.heroes, this.enemies, this.time, TICK, this.events, hit));
+    this.hooks = this.hooks.filter((k) => stepHook(k, this.heroes, this.enemies, this.time, TICK, this.events, hit, w));
     this.bolts = this.bolts.filter((b) => (b.kind === 'flask' ? stepFlask(b, w, TICK, this.smokes) : stepBolt(b, w, TICK)));
     // Who hears a drum this tick (sim/backline.ts), before anyone moves.
     rouse(this.enemies, this.time);
@@ -245,6 +247,7 @@ export class ArenaRoom {
     const door = stepSurvivors(w, TICK, this.indoors ? null : this.map.hero);
     if (door) ambush(this.enemies, this.heroes, this.doorRng, door.x, door.y, this.events);
     stepSkills(this, w, TICK);
+    stepSentries(this.zones, this.bolts, w);
     this.zones = stepZones(this.zones, w);
     separate(this.heroes, this.enemies, this.props);
     this.landings();
@@ -308,11 +311,11 @@ export class ArenaRoom {
 
   private fire(h: Hero, w: World): void {
     const el = h.augments[h.relic];
-    if (fireSkill(h, this, w, h.blessedUntil > w.now ? BLESSING.dmgMult : 1)) return;
+    if (fireSkill(h, this, w, h.blessedUntil > w.now ? BLESSING.dmgMult : 1) || fireFound(h, this, w)) return;
     if (h.relic === 'hook') this.hooks.push(fireHook(h));
     else if (h.relic === 'javelin') this.javelins.push(throwJavelin(h));
     else if (h.relic === 'net') this.bolts.push(throwNet(h, el));
-    else if (h.relic === 'lodestone') this.bolts.push(lobLodestone(h, this.aimDistance(h, LODESTONE.range, LODESTONE.fallback), el));
+    else if (h.relic === 'lodestone') this.bolts.push({ ...lobLodestone(h, this.aimDistance(h, LODESTONE.range, LODESTONE.fallback), el), relic: true });
     else if (h.relic === 'shadow') shadowstep(h, this.enemies, w.ev);
     else if (h.relic === 'channel') turnElement(h, w.ev);
     else if (h.relic === 'horn') rally(h, this.enemies, w.now, w.ev);
@@ -339,7 +342,7 @@ export class ArenaRoom {
   private loose(h: Hero, s: Swing, w: World): void {
     s = { ...s };
     // Blessed, a DEADEYE perfect release, a TEMPO hit after a dodge through a blow.
-    let mult = (h.blessedUntil > w.now ? BLESSING.dmgMult : 1) * (h.heavy && h.perfect ? perfectMult(h) * (has(h, 'deadeye') ? TRAIT.deadeye : 1) : 1) * brandyDmg(h, w.now);
+    let mult = (h.blessedUntil > w.now ? BLESSING.dmgMult : 1) * (h.heavy && h.perfect ? perfectMult(h) * (has(h, 'deadeye') ? TRAIT.deadeye : 1) : 1) * brandyDmg(h, w.now) * litMult(h);
     if (s.shot && h.tempoUntil > w.now) (mult *= TRAIT.tempo), (h.tempoUntil = -9);
     // The high ground: shots from up on a ledge.
     if (s.shot && (h.z ?? 0) > 0) mult *= HEIGHT.shot;

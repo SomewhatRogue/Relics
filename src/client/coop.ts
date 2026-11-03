@@ -44,7 +44,7 @@ const AWAY = 5, REJOIN = 5, BYE_WAIT = 2.5, SEND_EVERY = 0.05, FULL_EVERY = 4, G
  */
 const PREDICT = { ease: 12, snap: 1.5, trip: 0.15 };
 /** A hero's fields that are their kit (client/keepkit.ts). */
-const KIT = ['weapon', 'arms', 'bag', 'armor', 'rings', 'belt', 'glow', 'relics', 'augments'];
+const KIT = ['weapon', 'arms', 'bag', 'armor', 'rings', 'belt', 'glow', 'relics', 'augments', 'found', 'relicItem'];
 /** A friend in the leader's room. */
 export interface Friend { name: string; profile: Profile | null; intent: Intent; heard: number; fresh: boolean; gone: boolean; /** Their clock on the newest input used (handed back, so they can time the trip). */ at?: number }
 /** What the leader's game tells the host to send, and is told by it. */

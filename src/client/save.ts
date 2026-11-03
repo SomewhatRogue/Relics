@@ -7,6 +7,7 @@ import { HERO_SLOTS, fitPerks, newProfile, newStats, type Profile } from '../sha
 import { newWorld, type WorldState } from '../shared/story';
 import { WEAPONS, upgradeOld } from '../shared/tuning';
 import { fitStores } from '../shared/bags';
+import { fitRelics } from '../shared/relicitems';
 
 const KEY = 'relic.save.v2', OLD = 'relic.save.v1';
 /** `savedAt`: when it was last kept here (it only goes forward), to tell which copy is newer (recovery.ts). */
@@ -24,6 +25,8 @@ const hero = (p: Partial<Profile>): Profile => {
   // Heroes from before the longer Roll start the new tallies at nothing.
   out.stats = { ...newStats(), ...(p.stats ?? {}) };
   out.want ??= 0;
+  // Relics before they had charge: each kind owned becomes a full plain relic (shared/relicitems.ts).
+  Object.assign(out, fitRelics(p as never, out.xp * 31 + out.runs + 7));
   // Heroes made before the prologue existed don't have to play it.
   if (p.prologue === undefined) out.prologue = true;
   if (!p.bag) {

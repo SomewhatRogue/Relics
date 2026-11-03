@@ -17,6 +17,7 @@ import { blastProps, damageProp } from './props';
 import { blastBlocks } from './buildings';
 import { blastSurvivors, shotSurvivor, survivorIn } from './survivorhits';
 import type { Bolt, Enemy, Hero } from './types';
+import { hobble, spare } from './foundrelics';
 
 let nextId = 1;
 
@@ -57,7 +58,8 @@ export function blast(w: World, b: Bolt, x: number, y: number): void {
   w.ev.push(b.kind === 'smite' ? { k: 'smite', x, y } : { k: 'burst', x, y, r: b.burst, el: b.el });
   blastProps(x, y, b.burst, b.dmg, b.knock, w);
   blastBlocks(x, y, b.burst, b.dmg, b.el, w.now, w.ev);
-  if (b.kind !== 'smite') blastSurvivors(w, x, y, b.burst, b.dmg, b.owner, b.el);
+  // A relic's blast spares the freed and every friend (they're told so).
+  if (b.kind !== 'smite' && !b.relic) blastSurvivors(w, x, y, b.burst, b.dmg, b.owner, b.el);
   for (const e of w.enemies) {
     const d = Math.hypot(e.x - x, e.y - y);
     if (isDead(e) || e.act === 'carried' || d > b.burst + e.radius) continue;
@@ -65,11 +67,12 @@ export function blast(w: World, b: Bolt, x: number, y: number): void {
     e.lastBy = b.owner;
     if (damage(e, b.dmg, w.now, w.ev, { heavy: true, flinch: 0.5, mult: true, brutal: b.traits.includes('brutal'), how: 'burst', dx: e.x - x, dy: e.y - y, src: b.kind, el: b.el })) continue;
     if (e.act !== 'pinned') shove(e, d > 0.05 ? (e.x - x) / d : b.dx, d > 0.05 ? (e.y - y) / d : b.dy, b.knock, e.weight);
-    if (b.stun && e.act !== 'pinned') Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: b.stun });
+    if (b.stun && e.act !== 'pinned' && !(b.relic && e.weight > 1)) Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: b.stun });
     if (wasFrozen && b.knock >= 8) shatter(e, w.now, w.ev);
     else (afflict(w, e, b.el, b.dmg), b.freeze && afflict(w, e, b.el, b.dmg));
   }
   // Your own side caught in it (a holy smite spares them).
+  if (b.relic) return spare(w, null, (h) => Math.hypot(h.x - x, h.y - y) <= b.burst + HERO.radius);
   if (b.kind !== 'smite' && players(w.heroes).length > 1)
     for (const h of w.heroes) if (Math.hypot(h.x - x, h.y - y) <= b.burst + HERO.radius) allyHit(b.owner, h, b.dmg, w.ev, h.x - x, h.y - y);
 }
@@ -99,6 +102,7 @@ function strike(w: World, b: Bolt, e: Enemy): void {
   const rear = back && by ? backstabOf(by) : 1;
   if (damage(e, Math.round(b.dmg * rear * (crit ? CRIT : 1) * (boarded ? VARIANTS.shield.front : 1)), w.now, w.ev, { heavy: b.knock >= 8 || crit, flinch: FLINCH, mult: true, brutal: b.traits.includes('brutal'), dx: b.dx, dy: b.dy, src: b.kind, el: b.el, backstab: back })) return;
   if (e.act !== 'pinned') shove(e, b.dx, b.dy, b.knock, e.weight);
+  if (b.hobble) hobble(e, w);
   // A hand crossbow's bolt dazes a small goblin where it stands (not a butcher).
   if (b.stun && e.kind !== 'butcher' && e.act !== 'pinned') Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: b.stun });
   if (wasFrozen && b.knock >= 8) shatter(e, w.now, w.ev);
@@ -119,12 +123,13 @@ export function stepBolt(b: Bolt, w: World, dt: number): boolean {
     blast(w, b, b.x, b.y);
     return false;
   }
-  if (b.kind === 'lodestone') {
+  if (b.kind === 'lodestone' || b.kind === 'bomb') {
     b.t += dt;
     const k = Math.min(1, b.t / b.flight);
     b.x = b.sx + (b.tx - b.sx) * k;
     b.y = b.sy + (b.ty - b.sy) * k;
     if (k < 1) return true;
+    if (b.kind === 'bomb') return blast(w, b, b.x, b.y), false;
     b.state = 'well';
     b.life = LODESTONE.time;
     w.ev.push({ k: 'well', x: b.x, y: b.y });
@@ -157,7 +162,7 @@ export function stepBolt(b: Bolt, w: World, dt: number): boolean {
       if (!b.pierce) return false;
     }
     // A teammate in the way takes it (not the one who loosed it, and not a net).
-    const ally = b.kind === 'net' || players(w.heroes).length < 2 ? undefined : w.heroes.find((h) => h.id !== b.owner && h.id !== 'squire' && h.act !== 'down' && h.act !== 'roll' && !b.hitHeroes?.includes(h.id) && Math.hypot(h.x - b.x, h.y - b.y) <= HERO.radius + 0.1);
+    const ally = b.kind === 'net' || b.relic || players(w.heroes).length < 2 ? undefined : w.heroes.find((h) => h.id !== b.owner && h.id !== 'squire' && h.act !== 'down' && h.act !== 'roll' && !b.hitHeroes?.includes(h.id) && Math.hypot(h.x - b.x, h.y - b.y) <= HERO.radius + 0.1);
     if (ally) {
       if (b.burst) return blast(w, b, b.x, b.y), false;
       (b.hitHeroes ??= []).push(ally.id);
@@ -165,7 +170,7 @@ export function stepBolt(b: Bolt, w: World, dt: number): boolean {
       if (!b.pierce) return false;
     }
     // Someone freed in the way takes it too (solo as well: they're no fighters).
-    const sv = b.kind === 'net' ? undefined : survivorIn(w, b);
+    const sv = b.kind === 'net' || b.relic ? undefined : survivorIn(w, b);
     if (sv) {
       if (b.burst) return blast(w, b, b.x, b.y), false;
       shotSurvivor(w, b, sv);

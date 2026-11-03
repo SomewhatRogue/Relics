@@ -28,6 +28,8 @@ import { NO_INTENT, knows, type FightEvent, type Hero, type Intent, type Learned
 import { players } from '../sim/party';
 import { load, store, type Save } from './save';
 import { treasure } from '../shared/treasure';
+import { makeRelic, type RelicItem } from '../shared/relicitems';
+import { deepRelic } from '../shared/church';
 /** What a piece of treasure that won't fit in the pack fetches. */
 const TREASURE_SOLD = 20;
 import { rebase } from '../sim/rebase';
@@ -51,7 +53,7 @@ interface JobSave { run: Run; room: Record<string, unknown>; houses?: SavedHouse
  * gold); or gone early from a party, by LEAVE or cut off from it (the gold picked up while with them).
  */
 export type How = 'won' | 'beaten' | 'left' | 'dropped';
-export interface Result { won: boolean; how: How; half: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number; relic?: RelicId; treasure: Item[]; sold: Item[]; lost?: number }
+export interface Result { won: boolean; how: How; half: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number; relic?: RelicItem; treasure: Item[]; sold: Item[]; lost?: number; /** Jobs of the church's light left, if it went on this one. */ lit?: number }
 /** A leader back after a reload waits this long (the room held) for a friend to answer before the job's given up. */
 const HOLD = 10;
 /** Something you can use where you stand: a spot, a person, or a door. */
@@ -172,8 +174,8 @@ export class Game {
     const p = this.profile;
     if (!this.woodReplay) {
       Object.assign(p, { prologue: true, tally: true, cold: p.cls === 'HEALER' });
-      if (!p.relics.includes('javelin')) p.relics.unshift('javelin');
-      p.relic ||= 'javelin';
+      if (!p.relics.some((r) => r.kind === 'javelin')) p.relics.unshift(makeRelic(new Rng(p.xp * 31 + p.runs + 7), 'javelin'));
+      p.relic ||= p.relics.find((r) => r.kind === 'javelin')!.id;
     }
     store(this.save);
   }
@@ -250,19 +252,25 @@ export class Game {
     h.want = p.want;
     h.cold = p.cold;
     h.purse = p.gold + (this.run?.gold ?? 0);
-    h.found = [...p.relics];
+    // Copies: the room spends charge on its own, and keepkit.ts brings it home.
+    h.found = p.relics.map((r) => ({ ...r }));
+    const carried = p.relics.find((r) => r.id === p.relic);
+    h.relicItem = carried?.id ?? '';
+    h.lit = (p.lit ?? 0) > 0;
     h.perks = [...p.perks];
     h.drills = p.drills;
     h.armor = p.armor;
     h.rings = [...p.rings];
     h.baseHp = HERO.hp + (perkFx(p.perks).health ?? 0);
     h.maxHp = h.baseHp + statsOf(h).health;
-    h.relics = abilitiesOf(p.cls, p.relic, p.skill);
+    h.relics = abilitiesOf(p.cls, carried?.kind, p.skill);
     h.learned = p.learned;
     h.look = p.look ?? 0;
     // Your skill in hand, or (not yet taught it) the relic you carry.
     h.relic = knows(h, 'skill') ? h.relics[0] : (h.relics[1] ?? h.relics[0]);
     for (const r of h.relics) h.augments[r] = p.augments[r] ?? '';
+    // A found relic's element is its own (shared/relicitems.ts).
+    if (carried) h.augments[carried.kind] = carried.el;
     h.hp = h.maxHp;
     if (keep) Object.assign(h, { hp: Math.max(1, keep.hp), relic: keep.relic, fed: keep.fed, lastKill: 0 });
     // Down or out carries on into the next room with you, and so does your one get-up, spent or not.
@@ -803,14 +811,17 @@ export class Game {
     // Grown on the way home (the job's pay): lit up back in Wickhold.
     if (levels > this.grown) this.levelSeq += levels - this.grown;
     this.grown = 0;
-    // The bottom of a deep dive: a relic pried out of the butcher (one you don't have; the first is carried at once).
-    const relic = won && run.job.deep ? FOUND_RELICS.find((r) => !p.relics.includes(r)) : undefined;
-    if (relic) (p.relics.push(relic), p.relic ||= relic);
+    // The bottom of a deep dive: a relic pried out of the butcher (a kind you don't have, else any; the first is carried at once).
+    const relic = won && run.job.deep ? deepRelic(p.relics, FOUND_RELICS, run.job.seed * 977 + p.runs * 31 + p.xp) : undefined;
+    if (relic) (p.relics.push(relic), (p.relic ||= relic.id));
+    // The church's light: one job less (any job, won or not).
+    const lit = p.lit ?? 0;
+    if (lit > 0) p.lit = lit - 1;
     // The treasure at the end: yours alone. What won't fit in the pack is sold on the spot.
     const found = won ? treasure(run.job, p.cls, p.id, p.runs, crowd) : [], kept = found.slice(0, Math.max(0, bagSize(p) - p.bag.length)), sold = found.slice(kept.length);
     p.bag.push(...kept);
     p.gold += sold.length * TREASURE_SOLD;
-    this.result = { won, how, half, job: run.job, gold, xp, rescued, levels, relic, treasure: kept, sold, lost: run.lost ?? 0 };
+    this.result = { won, how, half, job: run.job, gold, xp, rescued, levels, relic, treasure: kept, sold, lost: run.lost ?? 0, lit: lit > 0 ? p.lit : undefined };
     this.run = null;
     // Paid: marked so in the same store as the pay (the give below), then the tallies let go.
     if (key) p.paid = [...(p.paid ?? []), key].slice(-12);
@@ -943,8 +954,10 @@ export class Game {
     stepWood(w, this.room, ev, dt, WEAPONS[h.weapon].parryWindow + h.lenience);
     if (cut >= 0 && w.cut < 0 && !this.woodReplay) (this.profile.cutSeen = true), store(this.save);
     // Out of the Stoker: the javelin, on the RELIC button at once.
-    if (w.relic && !h.found.includes('javelin')) {
-      h.found = ['javelin'];
+    if (w.relic && !h.found.some((r) => r.kind === 'javelin')) {
+      const jav = makeRelic(new Rng(7), 'javelin');
+      h.found = [jav];
+      h.relicItem = jav.id;
       h.relics = abilitiesOf(this.profile.cls, 'javelin', this.profile.skill);
       if (!knows(h, 'skill')) h.relic = 'javelin';
     }
@@ -1033,11 +1046,16 @@ export class Game {
     if (keepKit(this.profile, h, false)) store(this.save);
   }
 
-  /** Carry a relic you've found into your next job (at the relic-wright). */
-  carry(r: RelicId): void {
+  /** Carry a relic you own into your next job (by its id; '' none). */
+  carry(id: string): void {
     const p = this.profile;
-    if (!p.relics.includes(r)) return;
-    p.relic = r;
+    if (id && !p.relics.some((r) => r.id === id)) return;
+    p.relic = id;
+    this.relicsChanged();
+  }
+
+  /** The church changed this hero's relics or light (relicchurch.ts): dress the hero again and keep it. */
+  relicsChanged(): void {
     this.equip(this.hero, this.hero);
     store(this.save);
   }
@@ -1045,7 +1063,8 @@ export class Game {
   /** The relic-wright fits an element to a relic (or takes it off, free). */
   fitAugment(r: RelicId, el: Augment): boolean {
     const p = this.profile, cost = el ? SHOP.augment : 0;
-    if (p.gold < cost || (!SKILL_CHOICES[p.cls].includes(r) && !p.relics.includes(r))) return false;
+    // Found relics come with their element or none (shared/relicitems.ts): only the class skills take one.
+    if (p.gold < cost || !SKILL_CHOICES[p.cls].includes(r)) return false;
     p.gold -= cost;
     p.augments[r] = el;
     this.hero.augments[r] = el;
