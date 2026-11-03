@@ -40,6 +40,7 @@ import { laySnare, stepHound, stepSnare } from './ranger';
 import { stepNests } from './spiders';
 import { cure, stepPoison } from './poison';
 import { stepPuddles } from './puddles';
+import { brandyDmg } from './brandy';
 import { NO_INTENT, type Puddle, type Zone, type Bolt, type Drop, type Enemy, type Prop, type FightEvent, type Hero, type Hook, type Intent, type Javelin, type Snare, type Survivor } from './types';
 
 export class ArenaRoom {
@@ -327,7 +328,7 @@ export class ArenaRoom {
   private loose(h: Hero, s: Swing, w: World): void {
     s = { ...s };
     // Blessed, a DEADEYE perfect release, a TEMPO hit after a dodge through a blow.
-    let mult = (h.blessedUntil > w.now ? BLESSING.dmgMult : 1) * (h.heavy && h.perfect && has(h, 'deadeye') ? TRAIT.deadeye : 1);
+    let mult = (h.blessedUntil > w.now ? BLESSING.dmgMult : 1) * (h.heavy && h.perfect && has(h, 'deadeye') ? TRAIT.deadeye : 1) * brandyDmg(h, w.now);
     if (s.shot && h.tempoUntil > w.now) (mult *= TRAIT.tempo), (h.tempoUntil = -9);
     // The high ground: shots from up on a ledge.
     if (s.shot && (h.z ?? 0) > 0) mult *= HEIGHT.shot;

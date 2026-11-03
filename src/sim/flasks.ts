@@ -1,5 +1,5 @@
 /**
- * Potions in the fight: drinking (Bitter heals over time, Brandy brings breath back) and thrown flasks
+ * Potions in the fight: drinking (Bitter heals over time, Brandy hits harder but slows you) and thrown flasks
  * (oil bursts into flame, frost chills, smoke hides whoever stands in it from goblins).
  */
 import { cure } from './poison';
@@ -22,7 +22,8 @@ export function usePotion(h: Hero, now: number, w: World, ax: number, ay: number
   w.ev.push({ k: 'drink', x: h.x, y: h.y, kind: p });
   // A Bitter mends, and cures poison outright.
   if (p === 'bitter') return (h.mendLeft = POTION.heal), cure(h, true, w.ev), null;
-  if (p === 'brandy') return (h.stamina = 100), (h.brandyUntil = now + POTION.brandyTime), null;
+  // Wall Brandy: harder blows, slower feet, half the breath (sim/brandy.ts), for a while.
+  if (p === 'brandy') return (h.brandyUntil = now + POTION.brandyTime), null;
   let d = Math.hypot(ax, ay);
   if (!d) {
     const near = w.enemies.filter((e) => e.hp > 0 && e.act !== 'dead' && Math.hypot(e.x - h.x, e.y - h.y) < POTION.range).sort((a, b) => Math.hypot(a.x - h.x, a.y - h.y) - Math.hypot(b.x - h.x, b.y - h.y))[0];
