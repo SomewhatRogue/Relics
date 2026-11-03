@@ -33,11 +33,20 @@ export const BROOD: EnemySpec & { bite: EnemyAttackSpec; spit: EnemyAttackSpec; 
 
 /**
  * A nest (a mound of web and egg sacs). Wakes when a hero comes within `wake` (or it's hit); `first`
- * seconds later the first wave hatches, then one every `every` seconds, `wave` spiders (and `party`
- * more for each player past the first), while fewer than `cap` of its own are alive. The sacs swell
- * for `swell` seconds before a wave. Destroying it stops the waves; fire is the quick way.
+ * seconds later the first wave hatches, then one every `every` seconds (`fewer` less for each player
+ * past the first, never under `least`), `wave` spiders (and `party` more for each player past the
+ * first), while fewer than `cap` of its own are alive. Once a wave is all dead, the next waits at least
+ * `rest` seconds more: the window to reach it. The sacs swell for `swell` seconds before a wave.
+ *
+ * Burning it out (sim/torch.ts): stand within `reach` of it and press GRAB, and `light` seconds still
+ * there sets it alight (a hit, a swing or a step away stops it). Alight, it hatches nothing, sets the
+ * spiders on it burning, and is ash `burn` seconds later. From range it takes its `hp` (fire 3x).
+ * Kyle, 2026-11-03: it came back too fast to kill, and was too tough for a Rogue.
  */
-export const NEST = { hp: 80, radius: 0.65, wake: 8.5, first: 1.2, every: 8, wave: 3, party: 1, cap: 7, swell: 1 };
+export const NEST = { hp: 55, radius: 0.65, wake: 8.5, first: 2, every: 12, fewer: 1, least: 9, rest: 5, wave: 3, party: 1, cap: 6, swell: 1, reach: 1.6, light: 1.2, burn: 3.5 };
+
+/** Seconds between a nest's waves with `party` players. */
+export const nestGap = (party: number) => Math.max(NEST.least, NEST.every - NEST.fewer * Math.max(0, party - 1));
 
 /**
  * Poison on a hero: each bite adds a stack (at most `most`). Every `every` seconds it does `dmg` a

@@ -112,7 +112,8 @@ export function stepElements(w: World): void {
   const { now, ev } = w;
   for (const e of w.enemies) {
     if (e.act === 'dead' || !burning(e, now)) continue;
-    if (now >= e.burnNext) {
+    // A nest set alight burns down on its own clock (sim/torch.ts), not by the tick.
+    if (now >= e.burnNext && !e.ashAt) {
       e.burnNext = now + BURN.every;
       if (damage(e, BURN.dmg, now, ev, { tick: true, el: 'fire' })) continue;
     }

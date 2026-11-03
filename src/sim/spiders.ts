@@ -5,7 +5,7 @@
  * stand (a striped circle on the floor: the glob lands there and leaves a puddle). Nests wake when a
  * hero comes near, then hatch a wave every few seconds until they're destroyed.
  */
-import { BROOD, NEST, SPIDER } from '../shared/tuning';
+import { BROOD, NEST, SPIDER, nestGap } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { shove } from './bodies';
 import { isDead } from './damage';
@@ -45,21 +45,26 @@ export const waveFor = (party: number) => NEST.wave + Math.round(NEST.party * Ma
 
 /**
  * Nests: asleep until a hero comes within NEST.wake (or it's hit), then a wave NEST.first seconds later
- * and every NEST.every after, while fewer than its cap of its own spiders are alive. `spawn` adds a
- * spider to the room and hands it back.
+ * and one every nestGap(party) after, while fewer than its cap of its own spiders are alive. When the
+ * last of a wave dies, the next waits NEST.rest more at least. A nest alight (sim/torch.ts) hatches
+ * nothing. `spawn` adds a spider to the room and hands it back.
  */
 export function stepNests(enemies: Enemy[], heroes: Hero[], now: number, ev: FightEvent[], spawn: (x: number, y: number) => Enemy): void {
+  const party = heroes.filter((h) => h.id !== 'squire').length;
   for (const n of enemies) {
-    if (n.kind !== 'nest' || isDead(n)) continue;
+    if (n.kind !== 'nest' || isDead(n) || n.ashAt) continue;
     if ((n.nextWave ?? -1) < 0) {
       const near = heroes.some((h) => h.act !== 'down' && h.id !== 'squire' && Math.hypot(h.x - n.x, h.y - n.y) <= NEST.wake);
       if (near || n.alert) (n.alert = true), (n.nextWave = now + NEST.first);
       continue;
     }
+    const mine = enemies.filter((e) => e.nest === n.id && !isDead(e)).length;
+    // The wave it sent is all dead: a breather before the next.
+    if (!mine && n.had) n.nextWave = Math.max(n.nextWave!, now + NEST.rest);
+    n.had = mine;
     if (now < n.nextWave!) continue;
-    n.nextWave = now + NEST.every;
-    const wave = n.wave ?? NEST.wave, cap = NEST.cap + (wave - NEST.wave) * 2;
-    const mine = enemies.filter((e) => e.nest === n.id && !isDead(e)).length, k = Math.min(wave, cap - mine);
+    n.nextWave = now + nestGap(party);
+    const wave = n.wave ?? NEST.wave, cap = NEST.cap + (wave - NEST.wave) * 2, k = Math.min(wave, cap - mine);
     if (k <= 0) continue;
     ev.push({ k: 'hatch', x: n.x, y: n.y });
     for (let i = 0; i < k; i++) {
@@ -68,5 +73,6 @@ export function stepNests(enemies: Enemy[], heroes: Hero[], now: number, ev: Fig
       Object.assign(s, { nest: n.id, alert: true, cooldown: 0.6 + i * 0.15, fx: Math.cos(a), fy: Math.sin(a) });
       shove(s, Math.cos(a), Math.sin(a), 1.4, s.weight);
     }
+    n.had = mine + k;
   }
 }

@@ -32,11 +32,12 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   const heavy = h.counter || h.heavy || s.knock >= 7;
   // From behind: the hero stands where the enemy's facing points away (dummies have no back).
   const tx = h.x - e.x, ty = h.y - e.y, tl = Math.hypot(tx, ty) || 1;
-  const rear = !isDummy(e) && (e.fx * tx + e.fy * ty) / tl < rearCos(h);
+  // A nest is a mound of web: no back to stab and no front to glance off (Kyle: too hard for a Rogue).
+  const mound = e.kind === 'nest', rear = !isDummy(e) && !mound && (e.fx * tx + e.fy * ty) / tl < rearCos(h);
   const ice = frozen(e, now), blessed = h.blessedUntil > now ? BLESSING.dmgMult : 1;
   const heldFast = e.act === 'stunned' || e.act === 'pinned' || ice || snared(e, now);
   // A Rogue's knives are weak head on (unless it's held fast): keep moving and get behind.
-  const rearMult = rear ? (WEAPONS[h.weapon].backstab ?? GUARD.rearMult) * (1 + knack(h, 'rear')) * (1 + (WEAPONS[h.weapon].cls === 'ROGUE' ? technique(h.drills, 'ROGUE') : 0)) : heldFast ? 1 : (WEAPONS[h.weapon].front ?? 1);
+  const rearMult = rear ? (WEAPONS[h.weapon].backstab ?? GUARD.rearMult) * (1 + knack(h, 'rear')) * (1 + (WEAPONS[h.weapon].cls === 'ROGUE' ? technique(h.drills, 'ROGUE') : 0)) : heldFast || mound ? 1 : (WEAPONS[h.weapon].front ?? 1);
   const counter = GUARD.counterMult * (has(h, 'riposte') ? TRAIT.riposte : 1) * (1 + knack(h, 'counter')), held = GUARD.stunnedMult * (has(h, 'brutal') ? TRAIT.brutal : 1);
   // TEMPO: the first hit after dodging through a blow lands double.
   const tempo = h.tempoUntil > now ? TRAIT.tempo : 1;

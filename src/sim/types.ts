@@ -193,6 +193,8 @@ export interface Hero extends Body {
   pickT?: number;
   /** The teammate kneeling to get this hero up, and whether they've spent their own get-up this job. */
   raiser?: string;
+  /** Crouched at a nest, setting it alight (1) or not (0): sim/torch.ts sets it, the pose reads it. */
+  stoop?: number;
   /** Seconds left of the grace on coming into a new room: nothing hurts this hero till it's gone. */
   safeT?: number;
   selfUp?: boolean;
@@ -318,6 +320,13 @@ export interface Enemy extends Body {
   wave?: number;
   nextWave?: number;
   nest?: number;
+  /** A nest: how many of its spiders were alive last tick (a wave all dead gives a breather). */
+  had?: number;
+  /** A nest being set alight: by whom ('' nobody) and how far along (sim/torch.ts). */
+  lighter?: string;
+  lightT?: number;
+  /** A nest alight: the room time it's ash (0 not alight). */
+  ashAt?: number;
 }
 
 /** How a goblin died: fell, lost its head, burst apart, burned, or shattered. */
@@ -404,6 +413,8 @@ export type FightEvent =
   | { k: 'grudge'; x: number; y: number; id: string; by: string }
   /** A hero down (`by`: the teammate whose blow did it), or picked up (`by`: who picked them up). */
   | { k: 'down' | 'pickedup' | 'raising' | 'gotup'; x: number; y: number; id?: string; by?: string }
+  /** A nest: someone crouching to set it alight; it catches. */
+  | { k: 'kindling' | 'torched'; x: number; y: number; by: string }
   /** `src`: what landed it (a kit, or a shot's kind), for its sound; `big`: on the butcher. */
   | { k: 'hit'; x: number; y: number; n: number; heavy: boolean; on: 'enemy' | 'hero'; counter?: boolean; crit?: boolean; ambush?: boolean; boarded?: boolean; backstab?: boolean; tick?: boolean; src?: string; big?: boolean }
   | { k: 'swing'; x: number; y: number; src: string; heavy: boolean }

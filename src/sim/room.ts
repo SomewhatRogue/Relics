@@ -40,6 +40,7 @@ import { stepJavelin, throwJavelin } from './javelin';
 import { laySnare, stepHound, stepSnare } from './ranger';
 import { burstMult, healOf, healReach, perfectMult, smiteStun } from './knacks';
 import { stepNests } from './spiders';
+import { startTorch, stepTorch } from './torch';
 import { cure, stepPoison } from './poison';
 import { stepPuddles } from './puddles';
 import { brandyDmg } from './brandy';
@@ -191,7 +192,7 @@ export class ArenaRoom {
       loose: (h, s) => this.loose(h, s, w),
       struck: (h, e, n) => this.struck(h, e, n, w),
       sweep: (h, s) => (sweepProps(h, s, w), sweepBlocks(h, s, this.events), sweepAllies(h, s, this.heroes, this.events), sweepSurvivors(h, s, w)),
-      grab: (h) => startRaise(h, this.heroes, this.events) || tryGrab(h, this.enemies, this.time, this.events) || tryLift(h, this.props, this.events),
+      grab: (h) => startRaise(h, this.heroes, this.events) || startTorch(h, this.enemies, this.events) || tryGrab(h, this.enemies, this.time, this.events) || tryLift(h, this.props, this.events),
       carry: (h, inp, walk) => (h.lifting ? stepLift(h, inp, w, TICK, walk) : stepCarry(h, inp, this.enemies, this.time, TICK, this.events, walk)),
       drop: (h) => (release(h, this.enemies, this.events), dropProp(h, this.props)),
       bash: (h) => stepBash(h, this.enemies, w, TICK),
@@ -234,6 +235,8 @@ export class ArenaRoom {
     this.props = w.props = stepProps(w, TICK);
     stepBuildings(w, TICK, (x, y) => void this.spawn('scrapper', x, y));
     // Nests hatch their waves; the brood mother's globs leave puddles; poison ticks (sim/spiders.ts, puddles.ts, poison.ts).
+    // A nest set alight up close burns out (sim/torch.ts), and hatches nothing while it burns.
+    stepTorch(this.enemies, this.heroes, this.time, TICK, this.events);
     stepNests(this.enemies, this.heroes, this.time, this.events, (x, y) => this.spawn('spider', x, y));
     this.puddles = stepPuddles(this.puddles, this.heroes, this.time, TICK, this.events);
     stepPoison(this.heroes, this.time, this.events);

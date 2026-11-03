@@ -28,7 +28,7 @@ export function newEnemy(id: number, kind: Enemy['kind'], x: number, y: number):
     burnUntil: 0, burnNext: 0, chillUntil: 0, frozenUntil: 0, snareUntil: 0, lastBy: '', death: '', respawns: true, z: 0,
   };
   // A nest: rooted, asleep till a hero comes near (sim/spiders.ts).
-  if (kind === 'nest') Object.assign(e, { radius: NEST.radius, nextWave: -1 });
+  if (kind === 'nest') Object.assign(e, { radius: NEST.radius, nextWave: -1, had: 0, lighter: '', lightT: 0, ashAt: 0 });
   // Spiders come in late and in numbers: their first move isn't held back by how many came before.
   if (kind === 'spider' || kind === 'brood') e.cooldown = 1 + (id % 4) * 0.3;
   return e;
