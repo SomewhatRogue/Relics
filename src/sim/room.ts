@@ -41,6 +41,8 @@ import { laySnare, stepHound, stepSnare } from './ranger';
 import { burstMult, healOf, healReach, perfectMult, smiteStun } from './knacks';
 import { stepNests } from './spiders';
 import { startTorch, stepTorch } from './torch';
+import { startKindle, stepKindle } from './kindle';
+import { stepHouseFires, type HouseFire, type Indoors } from './houseburn';
 import { cure, stepPoison } from './poison';
 import { stepPuddles } from './puddles';
 import { brandyDmg } from './brandy';
@@ -78,6 +80,9 @@ export class ArenaRoom {
   indoors = false;
   /** A house on fire inside: who's burning, the beams down, whether the roof has come in (sim/blaze.ts). */
   blaze?: BlazeState;
+  /** Houses on a job set alight from outside (sim/houseburn.ts), and what the leader's game knows is inside them. */
+  houseFires: HouseFire[] = [];
+  houseIn?: Indoors;
   intents = new Map<string, Intent>();
   /** Events from the latest tick (drawn as hits, sparks and sounds). */
   events: FightEvent[] = [];
@@ -88,6 +93,8 @@ export class ArenaRoom {
   private lootRng: Rng;
   /** Ambushes by the door (sim/ambush.ts) on their own stream too. */
   private doorRng: Rng;
+  /** Whether a house catches, and when its goblins come out (sim/catching.ts, houseburn.ts), on a stream of their own. */
+  private fireRng: Rng;
   private acc = 0;
 
   /** The map this room is played on. */
@@ -106,6 +113,7 @@ export class ArenaRoom {
     this.rng = new Rng(seed);
     this.lootRng = new Rng(seed * 7919 + 13);
     this.doorRng = new Rng(seed * 104729 + 31);
+    this.fireRng = new Rng(seed * 7351 + 17);
     this.map = opts.map ?? ARENA;
     useMap(this.map);
     this.squire = !!opts.squire;
@@ -185,18 +193,20 @@ export class ArenaRoom {
     this.events = [];
     this.time += TICK;
     this.tick++;
-    const w: World = { heroes: this.heroes, enemies: this.enemies, javelins: this.javelins, props: this.props, survivors: this.survivors, now: this.time, ev: this.events };
+    const w: World = { heroes: this.heroes, enemies: this.enemies, javelins: this.javelins, props: this.props, survivors: this.survivors, now: this.time, ev: this.events, rng: this.fireRng };
     const hit = (e: Enemy, el: Hero['augments']['javelin'], n: number) => afflict(w, e, el, n);
     const acts: HeroActs = {
       fire: (h) => this.fire(h, w),
       loose: (h, s) => this.loose(h, s, w),
       struck: (h, e, n) => this.struck(h, e, n, w),
       sweep: (h, s) => (sweepProps(h, s, w), sweepBlocks(h, s, this.events), sweepAllies(h, s, this.heroes, this.events), sweepSurvivors(h, s, w)),
-      grab: (h) => startRaise(h, this.heroes, this.events) || startTorch(h, this.enemies, this.events) || tryGrab(h, this.enemies, this.time, this.events) || tryLift(h, this.props, this.events),
+      grab: (h) => startRaise(h, this.heroes, this.events) || startTorch(h, this.enemies, this.events) || startKindle(h, this.map, this.events) || tryGrab(h, this.enemies, this.time, this.events) || tryLift(h, this.props, this.events),
       carry: (h, inp, walk) => (h.lifting ? stepLift(h, inp, w, TICK, walk) : stepCarry(h, inp, this.enemies, this.time, TICK, this.events, walk)),
       drop: (h) => (release(h, this.enemies, this.events), dropProp(h, this.props)),
       bash: (h) => stepBash(h, this.enemies, w, TICK),
     };
+    // Houses alight: their goblins driven out into the street before anyone moves (and their loot falls here).
+    stepHouseFires(this, this.fireRng);
     const alive = new Set(this.enemies.filter((e) => !isDead(e)).map((e) => e.id));
     for (const h of this.heroes) takeLoot(h, this.intents.get(h.id) ?? NO_INTENT, this.drops, this.events);
     for (const h of this.heroes) grow(h, this.intents.get(h.id) ?? NO_INTENT, this.events);
@@ -237,6 +247,7 @@ export class ArenaRoom {
     // Nests hatch their waves; the brood mother's globs leave puddles; poison ticks (sim/spiders.ts, puddles.ts, poison.ts).
     // A nest set alight up close burns out (sim/torch.ts), and hatches nothing while it burns.
     stepTorch(this.enemies, this.heroes, this.time, TICK, this.events);
+    stepKindle(this.map, this.heroes, this.time, TICK, this.events);
     stepNests(this.enemies, this.heroes, this.time, this.events, (x, y) => this.spawn('spider', x, y));
     this.puddles = stepPuddles(this.puddles, this.heroes, this.time, TICK, this.events);
     stepPoison(this.heroes, this.time, this.events);

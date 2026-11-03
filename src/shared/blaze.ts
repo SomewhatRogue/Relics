@@ -7,7 +7,7 @@
 import type { Area, Blaze } from './arena.js';
 import { freeSpot, type Layout, type P } from './housekit.js';
 import type { Rng } from './rng.js';
-import { HOUSEFIRE } from './tuning.js';
+import { HOUSEBURN, HOUSEFIRE } from './tuning.js';
 
 /** A fallen beam's footprint, lying across where it landed. */
 export const beamArea = (x: number, y: number): Area => ({ x: x - 0.9, y: y - 0.25, w: 1.8, h: 0.5 });
@@ -78,4 +78,18 @@ export function planBlaze(l: Layout, rng: Rng, cage?: P): Blaze {
     if (s) beams.push({ ...s, at: t });
   }
   return { patches, beams, fall };
+}
+
+/**
+ * A house set alight from outside while someone's in it (sim/houseburn.ts): the same sort of plan,
+ * squeezed into the time it has (catching from `start`, the roof in at `fall`), and the smoke that
+ * starts to hurt after a grace.
+ */
+export function blazeFrom(l: Layout, rng: Rng, start: number, fall: number, cage?: P): Blaze {
+  const p = planBlaze(l, rng, cage), k = (fall - start - HOUSEBURN.catch) / p.fall, lit = start + HOUSEBURN.catch;
+  return {
+    patches: p.patches.map((q, i) => ({ ...q, at: i < 2 ? lit : lit + q.at * k })),
+    beams: p.beams.map((m) => ({ ...m, at: lit + m.at * k })).filter((m) => m.at > lit + HOUSEFIRE.beamWarn && m.at < fall - 1),
+    fall, smoke: start + HOUSEBURN.grace,
+  };
 }

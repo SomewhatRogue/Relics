@@ -6,11 +6,11 @@
  */
 import { burningAt, inBox } from '../shared/blaze';
 import type { Blaze } from '../shared/arena';
-import { HOUSEFIRE } from '../shared/tuning';
+import { HOUSEBURN, HOUSEFIRE } from '../shared/tuning';
 import { downIfDead } from './combat';
 import type { FightEvent, Hero, Prop, Survivor } from './types';
 
-export interface BlazeState { burnt: Record<string, number>; beams: number; fallen: boolean }
+export interface BlazeState { burnt: Record<string, number>; beams: number; fallen: boolean; smoked?: Record<string, number> }
 
 /** What a burning house needs of its room. */
 export interface Burning {
@@ -40,6 +40,11 @@ export function stepBlaze(r: Burning, dt: number): void {
     const on = fire.some((a) => inBox(a, h.x, h.y + 0.1));
     st.burnt[h.id] = on ? (st.burnt[h.id] ?? 0) + HOUSEFIRE.dps * dt : 0;
     if (st.burnt[h.id] >= 4) (st.burnt[h.id] -= 4), scorch(h, 4, ev, 'fire');
+    // Set alight from outside with someone in: after a grace, the smoke gets to them (sim/houseburn.ts).
+    if (b.smoke === undefined || t < b.smoke) continue;
+    const sm = (st.smoked ??= {});
+    sm[h.id] = (sm[h.id] ?? 0) + HOUSEBURN.heroSmoke * dt;
+    if (sm[h.id] >= 3) (sm[h.id] -= 3), scorch(h, 3, ev, 'smoke'), ev.push({ k: 'choke', x: h.x, y: h.y });
   }
   // Beams down on their time, on whoever's under them.
   while (st.beams < b.beams.length && t >= b.beams[st.beams].at) {

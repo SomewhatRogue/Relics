@@ -421,7 +421,7 @@ export class CoopGuest {
 
 /** The whole room as plain data, to hand the job on (its maps of positions and inputs start fresh). */
 export function saveRoom(room: ArenaRoom): Record<string, unknown> {
-  return Object.fromEntries(Object.entries(room).filter(([k]) => k !== 'prev' && k !== 'intents' && k !== 'events'));
+  return Object.fromEntries(Object.entries(room).filter(([k]) => k !== 'prev' && k !== 'intents' && k !== 'events' && k !== 'houseIn'));
 }
 
 /** A room back from saveRoom: the same goblins, props, chests and dice where they were. */

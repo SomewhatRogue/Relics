@@ -6,27 +6,16 @@
  * its map), so the rules collide against what's still standing.
  */
 import { currentMap, doorAt, type Block } from '../shared/arena';
+import { burnable } from '../shared/kindling';
 import { BLAZE } from '../shared/props';
-import type { Augment, Swing } from '../shared/tuning';
+import { CATCH, type Augment, type Swing } from '../shared/tuning';
+import { burstCatch, burning, ignite, nearest, wood } from './catching';
 import { inArc } from './combat';
 import { isDead } from './damage';
 import { afflict, type World } from './elements';
 import type { FightEvent, Hero } from './types';
 
-export const wood = (b: Block) => b.hp !== undefined && !b.ruined;
-export const burning = (b: Block) => (b.burning ?? -1) >= 0 && !b.ruined;
-
-/** The nearest point of a block to (x, y), and how far it is. */
-function nearest(b: Block, x: number, y: number): [number, number, number] {
-  const nx = Math.max(b.x, Math.min(b.x + b.w, x)), ny = Math.max(b.y, Math.min(b.y + b.h, y));
-  return [nx, ny, Math.hypot(x - nx, y - ny)];
-}
-
-function ignite(b: Block, now: number, ev: FightEvent[]): void {
-  if (!wood(b) || burning(b)) return;
-  b.burning = now;
-  ev.push({ k: 'blaze', x: b.x + b.w / 2, y: b.y + b.h / 2 });
-}
+export { burning, wood } from './catching';
 
 function hurt(b: Block, n: number, ev: FightEvent[]): void {
   if (!wood(b)) return;
@@ -48,12 +37,12 @@ export function sweepBlocks(h: Hero, s: Swing, ev: FightEvent[]): void {
   });
 }
 
-/** A blast at (x, y) knocks at the walls in reach; a fire blast sets them alight. */
-export function blastBlocks(x: number, y: number, r: number, dmg: number, el: Augment, now: number, ev: FightEvent[]): void {
+/** A blast at (x, y) knocks at the walls in reach; a fire blast may set them alight (`oil`: a Lamp Oil flask). */
+export function blastBlocks(w: World, x: number, y: number, r: number, dmg: number, el: Augment, oil = false): void {
   for (const b of currentMap().blocks) {
-    if (!wood(b) || nearest(b, x, y)[2] > r) continue;
-    if (el === 'fire') ignite(b, now, ev);
-    hurt(b, dmg * BLAZE.blast, ev);
+    if (!wood(b)) continue;
+    if (el === 'fire') burstCatch(b, x, y, r, oil, w);
+    if (nearest(b, x, y)[2] <= r && !(burnable(b) && burning(b))) hurt(b, dmg * BLAZE.blast, w.ev);
   }
 }
 
@@ -63,21 +52,22 @@ export function stepBuildings(w: World, dt: number, spawn: (x: number, y: number
   if (!blocks.some(wood)) return;
   for (const e of w.ev) {
     if (e.k !== 'oilfire') continue;
-    for (const b of blocks) if (nearest(b, e.x, e.y)[2] <= BLAZE.oilReach) ignite(b, w.now, w.ev);
+    for (const b of blocks) if (nearest(b, e.x, e.y)[2] <= BLAZE.oilReach) ignite(b, w, CATCH.barrel);
   }
   for (const e of w.enemies) {
     if (isDead(e) || e.burnUntil <= w.now) continue;
-    for (const b of blocks) if (nearest(b, e.x, e.y)[2] <= e.radius + BLAZE.reach) ignite(b, w.now, w.ev);
+    for (const b of blocks) if (nearest(b, e.x, e.y)[2] <= e.radius + BLAZE.reach) ignite(b, w, CATCH.rub * dt);
   }
   for (const b of blocks) {
     if (!burning(b)) continue;
-    hurt(b, BLAZE.dps * dt, w.ev);
+    // A house alight burns on its own clock (sim/houseburn.ts); other wood burns down as it goes.
+    if (!burnable(b)) hurt(b, BLAZE.dps * dt, w.ev);
     for (const e of w.enemies) if (!isDead(e) && e.burnUntil <= w.now && nearest(b, e.x, e.y)[2] <= e.radius + BLAZE.reach) afflict(w, e, 'fire', 4);
     if (w.now - b.burning! < BLAZE.spreadAfter) continue;
     for (const o of blocks) {
       if (o === b || !wood(o)) continue;
       const [nx, ny] = nearest(o, b.x + b.w / 2, b.y + b.h / 2), [, , d] = nearest(b, nx, ny);
-      if (d <= BLAZE.spreadReach) ignite(o, w.now, w.ev);
+      if (d <= BLAZE.spreadReach) ignite(o, w, burnable(o) ? CATCH.spread * dt : 1);
     }
   }
   // Dens breed goblins while they stand.

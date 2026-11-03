@@ -5,6 +5,7 @@
  */
 import { FIRE_RING, VOLLEY, type Augment } from '../shared/tuning';
 import { shove } from './bodies';
+import { ringCatch } from './catching';
 import { damage, held, isDead, isDummy } from './damage';
 import { afflict, type World } from './elements';
 import type { Enemy, Hero, Zone } from './types';
@@ -21,6 +22,7 @@ export function volley(h: Hero, at: { x: number; y: number }, now: number, el: A
 /** Fire bursts out around the Mage, then burns on where it stood. */
 export function fireRing(h: Hero, w: World): Zone {
   w.ev.push({ k: 'firering', x: h.x, y: h.y });
+  ringCatch(h.x, h.y, FIRE_RING.radius, w);
   const z: Zone = { kind: 'fire', x: h.x, y: h.y, r: FIRE_RING.radius, at: w.now, next: w.now + FIRE_RING.every, until: w.now + FIRE_RING.linger, owner: h.id, el: 'fire' };
   for (const e of w.enemies) {
     if (!inside(e, z) || (e.z ?? 0) !== (h.z ?? 0)) continue;

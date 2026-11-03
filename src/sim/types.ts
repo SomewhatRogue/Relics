@@ -415,6 +415,10 @@ export type FightEvent =
   | { k: 'down' | 'pickedup' | 'raising' | 'gotup'; x: number; y: number; id?: string; by?: string }
   /** A nest: someone crouching to set it alight; it catches. */
   | { k: 'kindling' | 'torched'; x: number; y: number; by: string }
+  /** A house: someone crouching at its kindling spot; it's alight (sim/kindle.ts). */
+  | { k: 'housekindle' | 'houselit'; x: number; y: number; by: string }
+  /** A house alight (sim/houseburn.ts): a goblin driven out of its door; a chest inside burned, its charred leavings at the door; the smoke getting to someone inside. */
+  | { k: 'flushed' | 'charred' | 'choke'; x: number; y: number }
   /** `src`: what landed it (a kit, or a shot's kind), for its sound; `big`: on the butcher. */
   | { k: 'hit'; x: number; y: number; n: number; heavy: boolean; on: 'enemy' | 'hero'; counter?: boolean; crit?: boolean; ambush?: boolean; boarded?: boolean; backstab?: boolean; tick?: boolean; src?: string; big?: boolean }
   | { k: 'swing'; x: number; y: number; src: string; heavy: boolean }

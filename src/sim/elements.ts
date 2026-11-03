@@ -7,6 +7,7 @@
 import { BURN, FLARE, FROST, SHATTER, SPIDER, STEAM, STORM, type Augment } from '../shared/tuning';
 import { shove } from './bodies';
 import { clearElements, damage, frozen, isDummy } from './damage';
+import type { Rng } from '../shared/rng';
 import type { Enemy, FightEvent, Hero, Javelin, Prop, Survivor } from './types';
 
 /** Everything an element can reach, for one tick. */
@@ -19,6 +20,8 @@ export interface World {
   survivors?: Survivor[];
   now: number;
   ev: FightEvent[];
+  /** The room's fire stream: whether a house catches (sim/catching.ts). */
+  rng?: Rng;
 }
 
 const dist = (a: { x: number; y: number }, b: { x: number; y: number }) => Math.hypot(a.x - b.x, a.y - b.y);

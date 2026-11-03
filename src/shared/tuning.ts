@@ -209,3 +209,29 @@ export const FLINCH = 0.3;
  * (never below 1 health), and anyone still caged is lost.
  */
 export const HOUSEFIRE = { warn: 3, dps: 14, beamWarn: 1.6, beamR: 0.95, beamDmg: 22, beamBurn: 5, fallWarn: 10, fallDmg: 18, fallMin: 52, fallMax: 64 };
+
+/**
+ * Setting a house on a job alight (Kyle, 2026-11-03: shared/kindling.ts, sim/kindle.ts, sim/houseburn.ts).
+ * Each small house has one kindling spot by a side wall: it glints within `glint` tiles; within `reach`
+ * GRAB crouches `light` seconds (`lightBig` for a longhouse, manor or tithe barn) and it's alight. It
+ * `catch`es (smoke, small flames) then burns `burn` more seconds (`burnBarn`, `burnBig`) and the roof
+ * comes in: a burnt shell. Goblins inside choke `smoke` a second until they're out: the awake ones from
+ * `wakeOut` seconds, one every `wakeGap`; the sleeping ones somewhere in the `sleepOut` window, later
+ * in a bigger house; out burning for `outBurn` seconds. Players inside get `grace` seconds, then the
+ * smoke takes `heroSmoke` a second. A chest inside leaves a charred drop at the door: `charGold` gold
+ * and, `charItem` of the time, one plain piece.
+ */
+export const HOUSEBURN = {
+  glint: 2.5, reach: 1.05, light: 1.5, lightBig: 2.4, catch: 3, burn: 24, burnBarn: 30, burnBig: 40,
+  smoke: 2.5, wakeOut: 1.6, wakeGap: 0.9, sleepOut: [4, 14] as [number, number], sleepOutBig: [4, 22] as [number, number], outBurn: 1,
+  grace: 4, heroSmoke: 5, charGold: [6, 14] as [number, number], charItem: 0.5, cryReach: 1.6,
+};
+/**
+ * How likely fire is to set a house alight by accident (rolled once on the room's fire stream, so it's
+ * the same on every screen). A Lamp Oil flask bursting against it (or at its kindling spot) nearly
+ * always; a fire spell or a fire relic's burst against the wall most of the time; the edge of a fire
+ * burst or a spark that hits the wall now and then; a Fire Ring reaching it sometimes. A burning goblin
+ * rubbing on it, and a neighbour's fire, take their chance a second. Other wood (dens, sheds, fences) still
+ * catches every time.
+ */
+export const CATCH = { oil: 0.9, barrel: 0.9, blast: 0.75, edge: 0.12, spark: 0.12, ring: 0.3, rub: 0.04, spread: 0.02, wall: 0.4, spot: 0.9 };

@@ -53,6 +53,11 @@ export interface Block {
   big?: boolean;
   /** Paint only: a house of stone with a slate roof (a better-off street). */
   style?: 'stone';
+  /** Someone crouched at its kindling spot setting it alight (sim/kindle.ts): who, and how long so far. */
+  lighter?: string;
+  lightT?: number;
+  /** Someone caged inside (the leader's game says so, from the house's plan or its room): a muffled cry at the kindling spot. */
+  cry?: boolean;
 }
 /** Paint only, on the floor: never collided against or decided on. */
 export type MarkKind = 'blood' | 'drag' | 'debris' | 'scorch' | 'trample' | 'planks' | 'beds' | 'flowers' | 'mound' | 'fallenpost' | 'green'
@@ -198,7 +203,8 @@ export interface Water { x: number; y: number; w: number; h: number; deep?: bool
  */
 export interface Grim { kind: 'torn' | 'strewn' | 'pinned' | 'hung' | 'pot' | 'bones' | 'remains' | 'smear' | 'tally' | 'trail'; x: number; y: number; x2?: number; y2?: number; k: number }
 /** Fire in a house: patches that catch at `at` seconds (and burn on), beams that come down at `at`, the roof falling in at `fall`. */
-export interface Blaze { patches: (Area & { at: number })[]; beams: { x: number; y: number; at: number }[]; fall: number }
+/** `smoke`: from then on the smoke hurts everyone inside (a house set alight from outside with someone in it). */
+export interface Blaze { patches: (Area & { at: number })[]; beams: { x: number; y: number; at: number }[]; fall: number; smoke?: number }
 /** How fast anyone moves knee-deep in a ford or a bog. */
 export const WADE = 0.55;
 /** How fast you can move where you stand (slowed in shallow water). */
