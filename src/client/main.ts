@@ -41,6 +41,8 @@ import { PackView } from './pack';
 import { openTree } from './treeui';
 import { LessonView } from './lesson';
 import { Scene } from './scene';
+import { Views } from './three/views';
+import { options } from './options';
 import { setMusic, setMuted } from './sfx';
 import { Music } from './music';
 import { Soundscape } from './soundscape';
@@ -69,10 +71,12 @@ function online(): Townfolk | null {
 }
 
 const scene = new Scene(document.getElementById('game') as HTMLCanvasElement);
+/** The pixel scene, or the 3D view on a job when the VIEW switch says so (three/views.ts). */
+const views = new Views(scene);
 const fx = new Fx();
 const ways = new WayWatch();
 const panel = new Panel();
-const input = new Input(() => scene.heroScreen());
+const input = new Input(() => views.heroScreen());
 const $ = (s: string) => document.querySelector(s) as HTMLElement;
 const card = new LootCard((id) => input.take(id));
 const lesson = new LessonView(game, input.touch);
@@ -86,7 +90,7 @@ const sounds = new Soundscape(music);
 const recovery = new Recovery(() => game.save);
 const title = new Title(game, () => undefined, recovery);
 /** Chat (online): world and near in town, the party on a job. */
-const chat = new Chat(game, scene, input.touch, () => panel.open || title.open);
+const chat = new Chat(game, views, input.touch, () => panel.open || title.open);
 // Swore in chat: lightning out of the sky onto them (chat.ts stuns them).
 chat.onStrike = (x, y) => {
   for (const dx of [-0.15, 0.1]) {
@@ -373,7 +377,7 @@ function tick(t: number): void {
   online()?.step(inTown && h ? { n: game.profile.name, w: h.weapon, l: h.look ?? 0, at: game.room.map.name, p: [h.x, h.y, h.fx, h.fy, h.moving ? 1 : 0] } : null, t / 1000, dt);
   // (Off screen, leading a job in the background: nothing to draw.)
   if (document.hidden) return;
-  scene.render(game.room, ME, fx, t / 1000, dt, inTown ? (townfolk?.here(game.room.map.name) ?? []) : []);
+  views.render(game.room, ME, fx, t / 1000, dt, inTown ? (townfolk?.here(game.room.map.name) ?? []) : [], game.mode === 'run');
   hud(t / 1000);
   chat.frame();
 }
@@ -437,8 +441,7 @@ try {
 }
 tipsOn(tipsWanted);
 $('#tips').addEventListener('click', () => tipsOn(!document.body.classList.contains('tips')));
-$('#help').addEventListener('click', () => $('#how').toggleAttribute('hidden'));
-$('#how').addEventListener('click', () => $('#how').setAttribute('hidden', ''));
+options();
 if (input.touch) document.body.classList.add('touch');
 
 // Test hooks: read the fight as data, never as pixels.
@@ -448,6 +451,7 @@ w.__GAME_STATE__ = () => ({ mode: game.mode, wood: game.wood ? { wake: game.wood
 w.render_game_to_text = () => `${game.mode} t=${game.room.time.toFixed(1)} hero ${game.hero.act} hp ${game.hero.hp} st ${Math.round(game.hero.stamina)} | ` + game.room.enemies.map((e) => `${e.kind} ${e.act} hp ${e.hp}${e.attack ? ' ' + e.attack.kind + ' ' + e.attack.t.toFixed(2) : ''}`).join(' | ');
 Object.defineProperty(w, '__room', { get: () => game.room });
 w.__game = game;
+w.__views = views;
 w.__chat = chat.hooks();
 w.__works = WORK_ORDER;
 w.__music = music;

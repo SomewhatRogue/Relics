@@ -19,7 +19,7 @@ import { wear, windowsLit } from './wear';
 import { OX, OY, PX } from './world';
 
 /** Wall height (pixels), roof and wall colours, by kind. */
-const LOOK: Record<Block['kind'], Look> = {
+export const LOOK: Record<Block['kind'], Look> = {
   house: { tall: 20, roof: '#5a2e22', ridge: '#7a3e2a', wall: '#6a5a48', windows: true },
   barn: { tall: 28, roof: '#6a2a1a', ridge: '#8a3a22', wall: '#5a3d22', windows: false },
   hall: { tall: 24, roof: '#4a3a2a', ridge: '#5e4a34', wall: '#5e5248', windows: true },

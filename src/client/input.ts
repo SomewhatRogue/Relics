@@ -21,7 +21,7 @@ export class Input {
   private knobEl!: HTMLElement;
   private potion = new PotionPress(() => this.intent.potionSeq++, () => (this.intent.beltSeq = (this.intent.beltSeq ?? 0) + 1));
 
-  constructor(private heroScreen: () => [number, number, number] | null) {
+  constructor(private heroScreen: () => [number, number, number, number?] | null) {
     const unlock = () => unlockAudio();
     for (const t of ['touchend', 'pointerup', 'click', 'keydown']) addEventListener(t, unlock, { passive: true });
     addEventListener('keydown', (e) => {
@@ -162,8 +162,9 @@ export class Input {
     i.attack = this.attackHeld.mouse || this.attackHeld.key || this.attackHeld.touch;
     i.ax = i.ay = 0;
     const hs = this.heroScreen();
-    // Aim in tiles: the direction to the mouse, and how far (a lobbed flask lands there).
-    if (!this.touch && this.mouse && hs) (i.ax = (this.mouse[0] - hs[0]) / hs[2]), (i.ay = (this.mouse[1] - hs[1]) / hs[2]);
+    // Aim in tiles: the direction to the mouse, and how far (a lobbed flask lands there). The 3D view's
+    // floor is foreshortened, so it gives its own pixels per tile down the screen.
+    if (!this.touch && this.mouse && hs) (i.ax = (this.mouse[0] - hs[0]) / hs[2]), (i.ay = (this.mouse[1] - hs[1]) / (hs[3] ?? hs[2]));
     return { ...i };
   }
 }
