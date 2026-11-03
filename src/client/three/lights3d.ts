@@ -34,10 +34,10 @@ export class Lights {
   /** The room's light: its ambient, and moonlight (or the sun by day) slanting in, centred on (cx, cz). */
   setSky(t: Theme, cx: number, cz: number): void {
     const [r, g, b] = t.ambient;
-    this.amb.color.setRGB(r * 1.5, g * 1.5, b * 1.5);
+    this.amb.color.setRGB(r * 1.35, g * 1.35, b * 1.35);
     this.amb.intensity = Math.PI;
     if (t.day) this.sky.color.setRGB(1, 0.93, 0.8), (this.sky.intensity = 0.9 * Math.PI);
-    else this.sky.color.setRGB(0.55, 0.62, 0.9), (this.sky.intensity = (t.moon ?? 0) * 1.6 * Math.PI);
+    else this.sky.color.setRGB(0.55, 0.62, 0.9), (this.sky.intensity = Math.max(0.3, (t.moon ?? 0) * 1.6) * Math.PI);
     this.sky.position.set(cx - 8, 22, cz + 10);
     this.sky.target.position.set(cx, 0, cz);
   }

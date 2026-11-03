@@ -34,5 +34,17 @@ export const CHAR = toonize(new THREE.MeshLambertMaterial({ color: 0x1a1614, fla
 /** Frozen solid. */
 export const ICE = toonize(new THREE.MeshLambertMaterial({ color: 0xa8d8f0, flatShading: true }));
 
+/**
+ * A hero seen through what stands in front of them: a dithered violet silhouette, drawn only where
+ * something nearer already covers them (view3d.ts draws the heroes again with this).
+ */
+export const XRAY = new THREE.ShaderMaterial({
+  vertexShader: 'void main(){ gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+  fragmentShader: 'void main(){ if (mod(floor(gl_FragCoord.x) + floor(gl_FragCoord.y), 2.0) > 0.5) discard; gl_FragColor = vec4(0.62, 0.56, 0.86, 0.55); }',
+  depthFunc: THREE.GreaterDepth,
+  depthWrite: false,
+  blending: THREE.NoBlending,
+});
+
 /** A '#rrggbb' string as a number. */
 export const hex = (s: string) => parseInt(s.slice(1, 7), 16);

@@ -1,6 +1,6 @@
 /**
  * The room's buildings and other blocks, each built once and rebuilt only when its state changes
- * (hurt to charred, set alight, burned down). A roof lifts off while you're behind its building, so
+ * (hurt to charred, set alight, burned down). A roof lifts off (the walls dropping low) while you're behind its building, so
  * you're never lost behind a cottage.
  */
 import * as THREE from 'three';
@@ -34,7 +34,10 @@ export class Buildings {
         this.built.set(blk, e);
       }
       const roof = e.b.roof;
-      if (roof && me) roof.visible = !(me[0] > blk.x - 0.5 && me[0] < blk.x + blk.w + 0.5 && me[1] > blk.y - e.b.top * 1.2 && me[1] < blk.y + 0.4);
+      // Behind it: the roof comes off and the walls drop low, like a doll's house opened.
+      const cut = !!roof && !!me && me[0] > blk.x - 0.5 && me[0] < blk.x + blk.w + 0.5 && me[1] > blk.y - e.b.top * 1.2 && me[1] < blk.y + 0.4;
+      if (roof) roof.visible = !cut;
+      e.b.group.scale.y = cut ? 0.3 : 1;
       fires.push(...e.b.fires);
     }
   }

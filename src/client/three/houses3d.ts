@@ -77,7 +77,7 @@ export function buildBlock(b: Block): Built {
     if (!stone) W.b((x0 + x1) / 2, H * 0.55, z1 - 0.06, b.w - 0.1, 0.08, 0.06, beam);
     // The floor inside, dark, so a doorway shows the dark within.
     W.b((x0 + x1) / 2, 0, (z0 + z1) / 2, b.w - 0.3, 0.02, b.h - 0.3, 0x0c0a0a);
-    W.b((x0 + x1) / 2, H - 0.12, (z0 + z1) / 2, b.w - 0.3, 0.06, b.h - 0.3, 0x0c0a0a);
+    R.b((x0 + x1) / 2, H - 0.12, (z0 + z1) / 2, b.w - 0.3, 0.06, b.h - 0.3, 0x0c0a0a);
     if (door !== null) {
       // The way in: a frame proud of the wall, a lintel, a step, and the door swung in (or shut and barred).
       for (const s of [-1, 1]) W.b(door + s * (dw + 0.04), 0, z1 + 0.02, 0.1, dh + 0.06, t + 0.08, beam);

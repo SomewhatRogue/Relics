@@ -9,7 +9,8 @@ import type { ArenaRoom } from '../../sim/room';
 import type { GameMap } from '../../shared/arena';
 import type { Fx } from '../fx';
 import { paintMap } from '../world';
-import { Actors, type Lerp } from './actors3d';
+import { Actors, XRAY_LAYER, type Lerp } from './actors3d';
+import { XRAY } from './mats';
 import { Buildings } from './buildings3d';
 import { Cam, FAR, NEAR, PITCH } from './camera3d';
 import { Fires } from './fire3d';
@@ -136,6 +137,17 @@ export class View3D {
     this.gl.setRenderTarget(this.rt);
     this.gl.render(this.scene, this.view.cam);
     const calls = (this.calls = this.gl.info.render.calls), tris = this.gl.info.render.triangles;
+    // Again, just the heroes, as a silhouette where something nearer hides them.
+    const cam = this.view.cam;
+    cam.layers.set(XRAY_LAYER);
+    this.scene.overrideMaterial = XRAY;
+    this.gl.autoClear = false;
+    this.gl.shadowMap.autoUpdate = false;
+    this.gl.render(this.scene, cam);
+    this.gl.shadowMap.autoUpdate = true;
+    this.gl.autoClear = true;
+    this.scene.overrideMaterial = null;
+    cam.layers.set(0);
     this.post.uniforms.tCol.value = this.rt!.texture;
     this.post.uniforms.tDep.value = this.rt!.depthTexture;
     this.gl.setRenderTarget(null);

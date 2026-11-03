@@ -16,6 +16,9 @@ export interface RoofOpts {
   angle?: number;
 }
 
+/** Every other row a shade darker, so the rows read. */
+const dim = (c: number) => (((c >> 16) & 255) * 0.8) << 16 | (((c >> 8) & 255) * 0.8) << 8 | ((c & 255) * 0.8);
+
 /** A gable roof over x0..x1, z0..z1 from eave height h. Returns the ridge's height. */
 export function gable(B: Boxes, x0: number, x1: number, z0: number, z1: number, h: number, o: RoofOpts, r: Seed): number {
   const a = o.angle ?? 0.62, ov = 0.22, zc = (z0 + z1) / 2, hd = (z1 - z0) / 2 + ov;
@@ -30,7 +33,7 @@ export function gable(B: Boxes, x0: number, x1: number, z0: number, z1: number, 
         x += L;
         if (xb - xa < 0.05 || (o.holes && r.next() < o.holes && i > 0 && i < n - 1)) continue;
         const y = ridgeY - s * Math.sin(a) + th * 0.5 + 0.04, z = zc + side * s * Math.cos(a);
-        B.c((xa + xb) / 2, y, z, xb - xa + (o.thatch ? 0.05 : -0.03), th, rowL + 0.06, jit(o.col, o.thatch ? 0.1 : 0.14, r), 0, side * a);
+        B.c((xa + xb) / 2, y, z, xb - xa + (o.thatch ? 0.05 : -0.03), th, rowL + 0.06, jit(i % 2 ? o.col : dim(o.col), o.thatch ? 0.1 : 0.14, r), 0, side * a);
       }
     }
   }

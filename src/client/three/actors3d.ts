@@ -22,6 +22,13 @@ import { boltLook, makeBolt, makeExit, makeJavelin, makeRing, makeSmoke, placeBo
 import { TIERS } from '../../shared/gear';
 import type { Figure } from './rig';
 
+/** Heroes are drawn a second time on layer 1, as a silhouette wherever a wall or a roof hides them. */
+export const XRAY_LAYER = 1;
+function xray<T extends Figure>(f: T): T {
+  f.root.traverse((o) => !o.userData.keep && o.layers.enable(XRAY_LAYER));
+  return f;
+}
+
 export type Lerp = (key: string, x: number, y: number) => [number, number];
 
 export class Actors {
@@ -107,7 +114,7 @@ export class Actors {
   }
 
   private hero(h: Hero, lerp: Lerp, now: number, up: number): void {
-    const [x, y] = lerp('h:' + h.id, h.x, h.y), f = this.heroes.get('h' + h.id, heroKey(h), () => makeHero(clsOf(h.weapon), h.look ?? 0, h.weapon));
+    const [x, y] = lerp('h:' + h.id, h.x, h.y), f = this.heroes.get('h' + h.id, heroKey(h), () => xray(makeHero(clsOf(h.weapon), h.look ?? 0, h.weapon)));
     poseHero(f, h, now, this.stride('h' + h.id, x, y));
     f.root.position.set(x, f.root.position.y + up, y);
     if (h.hound) {
