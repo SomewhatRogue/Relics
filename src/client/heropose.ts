@@ -66,6 +66,8 @@ export function heroPose(h: Hero, t: number, now: number): BodyPose {
 }
 
 function heroAct(p: BodyPose, h: Hero, t: number, now: number, w: (typeof WEAPONS)[keyof typeof WEAPONS], shot: boolean): BodyPose {
+  // Crouched at a nest, setting it alight (sim/torch.ts): down low, the hand out to it.
+  if (h.stoop && h.act === 'idle') return (p.crouch = 0.35), (p.reach = 2), (p.phase = 'rest'), p;
   if (h.act === 'charge') {
     const k = clamp01((h.actT + CHARGE.start) / chargeFull(w, h));
     draw(p, M.charge.draw * k, M.charge.raise * k);

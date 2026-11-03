@@ -168,7 +168,7 @@ export class View3D {
     this.buildings.update(map, this.heroAt, fires);
     for (const e of room.enemies) if (e.act !== 'dead' && e.burnUntil > room.time) {
       const [x, y] = lerp('e:' + e.id, e.x, e.y);
-      fires.push([x, 0.5, y, e.kind === 'butcher' ? 1.3 : 0.8]);
+      fires.push([x, 0.5, y, e.kind === 'butcher' || e.ashAt ? 1.3 : 0.8]);
     }
     roomLights(room, fx, lerp, ls);
     this.grim.update(now, fires, ls);

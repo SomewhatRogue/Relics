@@ -6,10 +6,11 @@
  */
 import { NEST } from '../shared/tuning';
 import type { Enemy, EnemyAttack, Puddle } from '../sim/types';
-import { blit, ring, shadow, spin, stars, type Ctx } from './draw';
+import { blit, blitPose, ring, shadow, spin, stars, type Ctx } from './draw';
 import { drawFigure, layout } from './figure';
 import { scrapperPose } from './foepose';
 import { jointed } from './joints';
+import { burnt, drawAsh, drawBlaze, drawLighting } from './nestfire';
 import { BROOD_CUT, SPIDER_CUT, SPIDER_SPRITES as S } from './spidersprites';
 import { OX, OY, PX } from './world';
 
@@ -36,11 +37,19 @@ export function drawSpiderKind(c: Ctx, e: Enemy, x: number, y: number, t: number
 }
 
 function nest(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
-  if (e.act === 'dead') return blit(c, S.nestTorn, x, y + 2);
+  if (e.act === 'dead') return e.death === 'burn' ? drawAsh(c, e, x, y) : blit(c, S.nestTorn, x, y + 2);
+  // Burned out up close (nestfire.ts): it sinks as it burns, and hatches nothing.
+  if (e.ashAt) {
+    const k = burnt(e, t);
+    if (k > 0.55) drawAsh(c, { ...e, actT: 0 }, x, y);
+    blitPose(c, S.nest, x, y + 1, false, 1 - k * 0.15, 1 - k * 0.7, 0, 0.35 + k * 0.5, '#1a1210');
+    return drawBlaze(c, e, x, y, t);
+  }
   const left = (e.nextWave ?? -1) - t, swell = e.nextWave! > 0 && left < NEST.swell ? 1 - left / NEST.swell : 0;
   const hit = t - e.hitAt < 0.09 ? 0.8 : 0, shake = swell > 0.5 ? Math.round(Math.sin(c.now * 50)) : 0;
   blit(c, S.nest, x + shake, y + 1, false, hit);
   if (e.hp < e.maxHp) ring(c, x, y, 12, '#e24b4a', e.hp / e.maxHp);
+  drawLighting(c, e, x, y);
   // The sacs: a sickly glow in them as a wave comes, brighter till they split.
   if (!swell) return;
   const g = c.glow;

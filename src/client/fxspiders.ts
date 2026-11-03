@@ -1,5 +1,5 @@
 /**
- * Spiders' effects: a nest splitting as a wave comes out, a
+ * Spiders' effects: a nest splitting as a wave comes out, or catching when it's set alight; a
  * hero poisoned (a puff of green) or cured, a glob landing, and a spider bursting into dark ichor
  * instead of blood. Cosmetic, so Math.random is fine.
  */
@@ -15,6 +15,12 @@ export function spiderFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean 
       fx.burst(x, y - 6, 14, ['#c8bfa8', '#e0d8c0', '#8a8494'], 60, false, 140, true);
       fx.burst(x, y - 8, 8, VENOM, 40, true);
       fx.shake = Math.max(fx.shake, 1);
+      return true;
+    case 'torched':
+      fx.say(x, y - 30, 'ALIGHT', '#ffb040', 1.2);
+      fx.burst(x, y - 8, 22, ['#fff1b0', '#ffd27a', '#ff9a3c', '#ff6a20'], 70, true);
+      fx.flashes.push({ x, y: y - 8, r: 70, i: 0.9, c: [1, 0.6, 0.25], life: 0.35, max: 0.35 });
+      fx.shake = Math.max(fx.shake, 1.5);
       return true;
     case 'poisoned':
       fx.burst(x, y - 10, 6, VENOM, 30, true);

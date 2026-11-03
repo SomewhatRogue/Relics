@@ -407,7 +407,8 @@ export class Scene {
     for (const e of room.enemies) {
       if (e.act === 'dead') continue;
       const [x, y] = lerp('e:' + e.id, e.x, e.y);
-      if (e.burnUntil > room.time) lights.push({ x: x - cx, y: y - cy - 10, r: 44 + Math.sin(now * 17 + e.id) * 4, i: 0.75, c: [1, 0.55, 0.25] });
+      // A nest burned out up close throws a bigger, warmer light (sim/torch.ts).
+      if (e.burnUntil > room.time) lights.push({ x: x - cx, y: y - cy - 10, r: (e.ashAt ? 70 : 44) + Math.sin(now * 17 + e.id) * 4, i: e.ashAt ? 0.95 : 0.75, c: [1, 0.55, 0.25] });
       else if (e.frozenUntil > room.time) lights.push({ x: x - cx, y: y - cy - 8, r: 26, i: 0.4, c: [0.6, 0.85, 1] });
     }
     for (const h of room.heroes) {

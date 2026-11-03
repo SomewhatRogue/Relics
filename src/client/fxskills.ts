@@ -71,4 +71,6 @@ export function skillFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
 export const SKILL_SOUNDS: Partial<Record<FightEvent['k'], string>> = {
   stamp: 'boom', volleyshot: 'throw', arrowfall: 'arrow', vanish: 'smoke', knives: 'throw', firering: 'oilfire',
   lanternlight: 'smite', tetherzap: 'spark', chainpull: 'hookfire', houndpin: 'pinned',
+  // Not a skill, but the same borrowing: a nest catching (sim/torch.ts).
+  torched: 'oilfire',
 };

@@ -29,6 +29,7 @@ import { raidNews } from './raidnews';
 import { WORK_ORDER } from '../shared/works';
 import { grabbable } from '../sim/grab';
 import { raisable } from '../sim/party';
+import { torchable } from '../sim/torch';
 import { liftable } from '../sim/props';
 import { relicLabel } from '../sim/hero';
 import { castElement } from '../sim/channel';
@@ -211,10 +212,12 @@ function hud(now: number): void {
     $('.tb.roll').hidden = !CLASS_DODGES[WEAPONS[me.weapon].cls];
     // By a friend who's down, GRAB helps them up.
     const raise = me.act === 'idle' && raisable(me, room.heroes);
-    $('.tb.grab').hidden = !can && !lifter && !raise;
-    $('.tb.grab').classList.toggle('dim', !can && !raise);
-    $('.tb.grab').classList.toggle('raise', raise);
-    $('.tb.grab').textContent = raise ? 'HELP UP' : carrying ? 'THROW' : 'GRAB';
+    // By a nest, GRAB sets it alight (sim/torch.ts).
+    const burn = !raise && !!torchable(me, room.enemies);
+    $('.tb.grab').hidden = !can && !lifter && !raise && !burn;
+    $('.tb.grab').classList.toggle('dim', !can && !raise && !burn);
+    $('.tb.grab').classList.toggle('raise', raise || burn);
+    $('.tb.grab').textContent = raise ? 'HELP UP' : burn ? 'BURN' : carrying ? 'THROW' : 'GRAB';
     $('.tb.attack').textContent = carrying ? 'SLAM' : 'ATTACK';
   }
   // The class skill (E, SKILL) and the relic carried, if any (R, RELIC), each with its cooldown.
@@ -291,6 +294,7 @@ function hud(now: number): void {
   if (spot) $('#prompt').textContent = (input.touch ? '' : spot?.chest ? 'F  ' : game.mode === 'run' ? '' : 'E  ') + (spot.door || !spot.talk ? spot.label : 'TALK: ' + spot.label);
   // A friend down at your feet: the key that gets them up.
   if (!spot && !busy && !input.touch && game.mode === 'run' && game.hero.act === 'idle' && raisable(game.hero, game.room.heroes)) ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  HELP UP');
+  else if (!spot && !busy && !input.touch && game.mode === 'run' && torchable(game.hero, game.room.enemies)) ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  BURN');
   $('.tb.use').hidden = !spot || busy;
   $('.tb.use').classList.toggle('chest', !!spot?.chest);
   if (spot) $('.tb.use').textContent = spot.chest ? 'OPEN' : spot.door ? 'ENTER' : spot.talk && spot.talk !== 'board' && spot.talk !== 'market' && spot.talk !== 'gate' ? 'TALK' : 'USE';

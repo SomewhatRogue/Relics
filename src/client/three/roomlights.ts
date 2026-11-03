@@ -44,7 +44,7 @@ export function roomLights(room: ArenaRoom, fx: Fx, lerp: Lerp, out: L3[]): void
     }
     if (e.act === 'dead') continue;
     const [x, y] = lerp('e:' + e.id, e.x, e.y);
-    if (e.burnUntil > room.time) add(x, 1, y, R(44), 0.75, [1, 0.55, 0.25], 17);
+    if (e.burnUntil > room.time) add(x, 1, y, R(e.ashAt ? 70 : 44), e.ashAt ? 0.95 : 0.75, [1, 0.55, 0.25], 17);
     else if (e.frozenUntil > room.time) add(x, 1, y, R(26), 0.4, [0.6, 0.85, 1]);
   }
   for (const j of room.javelins) add(j.x, 0.9, j.y, j.state === 'fly' ? R(34) : R(14), j.state === 'fly' ? 0.6 : 0.3 * Math.min(1, j.life), [0.55, 0.85, 1]);
