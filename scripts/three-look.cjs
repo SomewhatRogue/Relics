@@ -60,13 +60,13 @@ const SCENES = {
     await page.waitForTimeout(1200);
   },
   async 'rogue-handbow'(page) {
-    await page.evaluate(() => { window.__game.hero.weapon = 'handbow'; });
-    await at(page, 31, 21, 1, 0.3);
+    await clock(page, NOON);
+    await page.evaluate(() => { const g = window.__game; g.profile.weapon = 'handbow'; g.profile.arms = {}; g.hero.weapon = 'handbow'; g.hero.arms = {}; setInterval(() => Object.assign(g.hero, { x: 31, y: 22.5, fx: -0.35, fy: 0.94 }), 16); });
     await page.waitForTimeout(800);
   },
   async 'rogue-daggers'(page) {
-    await page.evaluate(() => { window.__game.hero.weapon = 'daggers'; });
-    await at(page, 31, 21, 1, 0.3);
+    await clock(page, NOON);
+    await page.evaluate(() => { const g = window.__game; g.profile.weapon = 'daggers'; g.profile.arms = {}; g.hero.weapon = 'daggers'; g.hero.arms = {}; setInterval(() => Object.assign(g.hero, { x: 31, y: 22.5, fx: -0.35, fy: 0.94 }), 16); });
     await page.waitForTimeout(800);
   },
   async halls(page) { await clock(page, MIDNIGHT); await at(page, 40, 10, 0, -1); await page.waitForTimeout(900); },

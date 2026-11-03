@@ -23,8 +23,8 @@ function censer(off: THREE.Group): THREE.Mesh {
 
 /** A small crossbow along the hand: stock forward, the prod across, a bolt on it. */
 function handbow(g: THREE.Group, s: number): void {
-  part(g, 0.06 * s, 0.07 * s, 0.42 * s, wood, 0, -0.04, 0.16 * s);
-  part(g, 0.5 * s, 0.04 * s, 0.05 * s, M(0x9aa3ad), 0, -0.02, 0.3 * s);
+  part(g, 0.07 * s, 0.08 * s, 0.44 * s, M(0x8b6a3a), 0, -0.04, 0.16 * s);
+  part(g, 0.56 * s, 0.05 * s, 0.06 * s, M(0xcfd6dc), 0, -0.02, 0.32 * s);
   part(g, 0.48 * s, 0.01, 0.01, string, 0, -0.02, 0.22 * s);
   part(g, 0.025, 0.025, 0.3 * s, M(0xcfd6dc), 0, 0.02, 0.24 * s);
 }
