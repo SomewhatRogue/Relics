@@ -16,15 +16,14 @@ let going = false;
 
 const esc = (v: unknown) => String(v ?? '').replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
-/** The leader sets out (the HUD card or the board): nobody more can join while the beat runs. */
+/** The leader sets out (the HUD card or the board): the party's told at once, and comes down, so nobody more joins. */
 export function setOutNow(g: Game, panel: Panel): void {
   const pt = g.parties, job = pt?.myJob, cur = pt?.current();
   if (!pt || !job || !cur || going || pt.hold || !g.canTake(job, cur.members.length)) return;
-  pt.hold = true;
-  beat(panel, PW.beatLead(job.place.name), () => {
-    g.setOut();
-    if (pt.leading) pt.hold = false;
-  });
+  // Everyone's told now, so the whole party's beat runs together and they arrive about as the leader does.
+  const go = pt.setOut();
+  if (!go) return;
+  beat(panel, PW.beatLead(job.place.name), () => g.setOut(go));
 }
 
 /** Pulled into the leader's job: the beat, then `go`. */

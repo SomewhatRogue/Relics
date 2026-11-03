@@ -113,12 +113,17 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isM
     await post(kyle, 2);
     await joinFromBoard(sam);
     step('Sam joins from the board', await has(kyle, 'SAM'));
+    await kyle.page.click('#partycard .pc-line');
+    step('a laptop card shuts to one line on a click', await until(kyle, () => !!document.querySelector('#partycard.shut')));
+    await shot(kyle, 'laptop-card-shut.png');
+    await kyle.page.click('#partycard .pc-line');
     await reload(sam);
     step('Sam reloads and is still in the party', await has(sam, 'SAM') && await has(kyle, 'SAM'));
     await wait(1500);
     step("Kyle wasn't told Sam left", !(await kyle.page.evaluate(() => [...document.querySelectorAll('.ptoast')].some((x) => x.textContent.includes('SAM left')))));
     await card(sam, '[data-quit]');
     step('Sam leaves; Kyle gets "SAM left"', await toast(kyle, 'SAM left'));
+    await shot(kyle, 'laptop-left-toast.png');
     step("Kyle's card is back to 1/4", await until(kyle, () => document.querySelector('#partycard .slots')?.textContent === '1/4'));
 
     // 3. The leader reloads: the party's still up, Sam still in it; then the leader cancels.
