@@ -301,7 +301,9 @@ export class Scene {
       const k = kindling(b, map);
       if (!k) continue;
       const kx = OX + k.x * PX - cx, ky = OY + k.y * PX - cy, d = me && !b.ruined && (b.burning ?? -1) < 0 ? Math.hypot(me.x - k.x, me.y - k.y) : 99;
-      items.push({ y: OY + k.y * PX, draw: () => (drawWoodpile(c, k, kx, ky, b), drawGlint(c, kx, ky, d, b.look ?? 0), drawKindling(c, b, kx, ky)) });
+      items.push({ y: OY + k.y * PX, draw: () => drawWoodpile(c, k, kx, ky, b) });
+      // (The glint and the ring after the house, so its sprite never wipes them.)
+      items.push({ y: blockFoot(b) + 0.1, draw: () => (drawGlint(c, kx, ky, d, b.look ?? 0), drawKindling(c, b, kx, ky)) });
     }
     for (const n of map.npcs ?? []) {
       const at = npcAt(n, room.time), near = !!me && Math.hypot(me.x - at.x, me.y - at.y) <= SPOT_REACH;

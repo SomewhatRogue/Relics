@@ -42,7 +42,7 @@ export class Buildings {
       if (roof) roof.visible = !cut;
       e.b.group.scale.y = cut ? 0.3 : 1;
       // A house set alight from outside: its flames grow as it burns down (sim/houseburn.ts).
-      const grow = houseAlight(blk) ? 0.45 + 0.75 * (1 - (blk.hp ?? 0) / (blk.maxHp || 1)) : 1;
+      const grow = houseAlight(blk) ? 0.7 + 0.6 * (1 - (blk.hp ?? 0) / (blk.maxHp || 1)) : 1;
       for (const f of e.b.fires) fires.push(grow === 1 ? f : [f[0], f[1], f[2], f[3] * grow]);
       setLampMeshes(map.theme, blk.x, blk.y, e.b.lamps);
     });

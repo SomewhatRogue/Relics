@@ -13,8 +13,8 @@ import type { Ctx } from '../draw';
 import { pose } from '../held';
 import { drawHook } from '../relicsdraw';
 import { drawStatus } from '../status';
-import { kindling } from '../../shared/kindling';
-import { drawGlint, drawKindling } from '../kindledraw';
+import { houseAlight, kindling } from '../../shared/kindling';
+import { drawGlint, drawHouseSmoke, drawKindling } from '../kindledraw';
 import { drawLife } from '../streetlife';
 import { edgeMark, type View } from '../wayout';
 import { PX } from '../world';
@@ -37,6 +37,10 @@ export function drawExtras(g: CanvasRenderingContext2D, x: Extra): void {
   // A house's kindling: the glint while you're near, the ring while someone lights it (kindledraw.ts).
   const meH = room.heroes.find((h) => h.id === x.meId);
   for (const b of room.map.blocks) {
+    if (houseAlight(b)) {
+      const [hx, hy] = P(b.x + b.w / 2, 2.3, b.y + b.h / 2);
+      drawHouseSmoke(c, hx, hy, 1 - (b.hp ?? 0) / (b.maxHp || 1), b.x);
+    }
     const k = kindling(b, room.map);
     if (!k) continue;
     const [sx, sy] = P(k.x, 0, k.y), d = meH && !b.ruined && (b.burning ?? -1) < 0 ? Math.hypot(meH.x - k.x, meH.y - k.y) : 99;

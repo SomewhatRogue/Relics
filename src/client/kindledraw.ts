@@ -14,7 +14,7 @@ const BARK = ['#4a3420', '#5c4128', '#6b4c2e'], END = '#b08a58', RING = '#7a5a34
 
 /** The pile at its foot (x, y on screen): log ends in a little pyramid, an oil stain under it. */
 export function drawWoodpile(c: Ctx, k: Kindling, x: number, y: number, b: Block): void {
-  const l = c.lit, gone = !!b.ruined || (b.burning ?? -1) >= 0, sx = Math.round(x - 5 + k.side * 1);
+  const l = c.lit, gone = !!b.ruined || (b.burning ?? -1) >= 0, sx = Math.round(x - 6 + k.side * 3);
   l.fillStyle = OIL;
   l.globalAlpha = 0.55;
   l.fillRect(sx - 2, Math.round(y) - 1, 14, 3);
@@ -24,27 +24,31 @@ export function drawWoodpile(c: Ctx, k: Kindling, x: number, y: number, b: Block
     l.fillRect(sx, Math.round(y) - 2, 10, 2);
     return;
   }
-  for (let row = 0; row < 3; row++) for (let i = 0; i < 3 - row; i++) {
-    const lx = sx + i * 3 + row * 1.5, ly = Math.round(y - 3 - row * 3);
+  for (let row = 0; row < 3; row++) for (let i = 0; i < 4 - row; i++) {
+    const lx = Math.round(sx - 2 + i * 4 + row * 2), ly = Math.round(y - 3 - row * 3);
     l.fillStyle = gone ? '#1e1612' : BARK[(i + row) % 3];
-    l.fillRect(Math.round(lx), ly - 1, 3, 3);
+    l.fillRect(lx, ly - 1, 4, 3);
     l.fillStyle = gone ? '#3a1a10' : END;
-    l.fillRect(Math.round(lx) + 1, ly, 1, 1);
-    if (!gone && (i + row) % 2) (l.fillStyle = RING), l.fillRect(Math.round(lx), ly - 1, 1, 1);
+    l.fillRect(lx + 1, ly, 2, 1);
+    if (!gone) (l.fillStyle = RING), l.fillRect(lx + ((i + row) % 2 ? 0 : 3), ly - 1, 1, 1);
   }
 }
 
 /** A soft spark off the pile now and then, while `d` (tiles from you) is inside the glint's reach. */
 export function drawGlint(c: Ctx, x: number, y: number, d: number, seed: number): void {
   if (d > HOUSEBURN.glint) return;
-  const g = c.glow, near = 1 - d / HOUSEBURN.glint, p = (c.now * 0.7 + seed * 0.37) % 1;
-  // A slow pulse, and a brief star at its height.
-  const a = Math.max(0, Math.sin(p * Math.PI)) * (0.35 + 0.65 * near), sx = Math.round(x + 1), sy = Math.round(y - 10);
-  g.globalAlpha = a;
-  g.fillStyle = '#fff1b0';
+  const g = c.glow, near = 1 - d / HOUSEBURN.glint, p = (c.now * 0.7 + seed * 0.37) % 1, pulse = Math.max(0, Math.sin(p * Math.PI));
+  const sx = Math.round(x + 1 + Math.round(Math.sin(seed) * 3)), sy = Math.round(y - 11);
+  // A warm haze round it, then a star that opens and closes.
+  g.globalAlpha = (0.15 + 0.25 * pulse) * (0.5 + 0.5 * near);
+  g.fillStyle = '#ffb040';
+  g.fillRect(sx - 2, sy - 1, 5, 3);
+  g.fillRect(sx - 1, sy - 2, 3, 5);
+  g.globalAlpha = (0.55 + 0.45 * pulse) * (0.6 + 0.4 * near);
+  g.fillStyle = '#ffffff';
   g.fillRect(sx, sy, 1, 1);
-  g.fillStyle = '#ffd27a';
-  const arm = p > 0.35 && p < 0.65 ? 2 : 1;
+  g.fillStyle = '#ffe9a8';
+  const arm = 1 + Math.round(pulse * 2);
   for (let i = 1; i <= arm; i++) g.fillRect(sx - i, sy, 1, 1), g.fillRect(sx + i, sy, 1, 1), g.fillRect(sx, sy - i, 1, 1), g.fillRect(sx, sy + i, 1, 1);
   g.globalAlpha = 1;
 }
@@ -61,4 +65,18 @@ export function drawKindling(c: Ctx, b: Block, x: number, y: number): void {
     g.fillRect(Math.round(x + Math.cos(a) * r), Math.round(y - 4 - ((c.now * 9 + i) % (3 + k * 5))), 1, 1);
   }
   g.globalAlpha = 1;
+}
+
+/** Smoke rolling up off a house alight, thicker as it goes (the 2.5D view's; the flat view's is in blocks.ts). */
+export function drawHouseSmoke(c: Ctx, x: number, y: number, share: number, seed: number): void {
+  const l = c.lit, t = c.now;
+  for (let j = 0; j < 10; j++) {
+    const p = (t * 0.2 + j / 10 + seed * 0.13) % 1, r = (3 + p * 10) * (0.6 + 0.6 * share);
+    l.globalAlpha = (1 - p) * (0.35 + 0.35 * share);
+    l.fillStyle = p < 0.3 ? '#1e1a1c' : p < 0.6 ? '#3a3438' : '#5a5458';
+    l.beginPath();
+    l.ellipse(Math.round(x + Math.sin(p * 5 + j * 1.7) * 5 + p * 24), Math.round(y - p * 70), r, r * 0.8, 0, 0, Math.PI * 2);
+    l.fill();
+  }
+  l.globalAlpha = 1;
 }

@@ -30,9 +30,9 @@ export function kindling(b: Block, m: Room): Kindling | null {
   if (!b.door || (b.kind !== 'house' && b.kind !== 'barn') || b.look === undefined || !b.maxHp || b.fate === 'burning' || b.fate === 'blocked') return null;
   const had = cache.get(b);
   if (had !== undefined) return had;
-  const rng = new Rng(b.look * 37 + 11), first: -1 | 1 = rng.next() < 0.5 ? -1 : 1, up = rng.range(0.42, 0.7);
+  const rng = new Rng(b.look * 37 + 11), first: -1 | 1 = rng.next() < 0.5 ? -1 : 1, up = rng.range(0.72, 0.9);
   let out: Kindling | null = null;
-  for (const side of [first, -first as -1 | 1]) for (const k of [up, 0.55, 0.3]) {
+  for (const side of [first, -first as -1 | 1]) for (const k of [up, 0.6, 0.4]) {
     const x = side < 0 ? b.x - 0.32 : b.x + b.w + 0.32, y = b.y + b.h * k;
     // Room to stand beside it: clear of every other wall, inside the room.
     const sx = x + side * 0.45;
