@@ -76,7 +76,8 @@ export function hallow(h: Hero, aim: Intent | undefined, now: number, el: Zone['
 /** Each blessed circle, every half second: allies in it mend and are blessed; goblins in it burn. Returns the ones still lit. */
 export function stepZones(zones: Zone[], w: World): Zone[] {
   for (const z of zones) {
-    if (w.now < z.next) continue;
+    // A skill's area (a volley, a fire ring) is stepped in areas.ts.
+    if (z.kind || w.now < z.next) continue;
     z.next = w.now + BLESSING.every;
     for (const o of w.heroes) {
       if (o.act === 'down' || Math.hypot(o.x - z.x, o.y - z.y) > z.r) continue;

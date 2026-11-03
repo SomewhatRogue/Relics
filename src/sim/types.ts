@@ -64,6 +64,8 @@ export interface Body {
   z?: number;
   /** Set when it went off a ledge's edge (how fast it was moving); the room deals with the landing. */
   dropped?: number;
+  /** Hauled toward (x, y) by a Cleric's censer chain until there or `until` (sim/chain.ts). */
+  tow?: { x: number; y: number; until: number };
 }
 
 export interface Hero extends Body {
@@ -138,6 +140,10 @@ export interface Hero extends Body {
   brandyUntil: number;
   /** In smoke: goblins can't see you (unless close) until then. */
   hiddenUntil: number;
+  /** A Rogue's vanish: no goblin sees them, even close, until then (or till they strike). */
+  vanishUntil?: number;
+  /** A Mage's storm tether: the goblin it holds, until when, and its next strike (sim/tether.ts). */
+  tether?: { id: number; until: number; next: number };
   /** Weapons, armor and rings carried, not worn. */
   bag: Item[];
   /** How many the pack holds (bought bigger in town, shared/bags.ts). */
@@ -371,6 +377,10 @@ export interface Zone {
   next: number;
   owner: string;
   el: Augment;
+  /** Not blessed ground but a skill's area (sim/areas.ts): a Ranger's volley (falling from `at`), a
+   *  Mage's fire ring burning on. */
+  kind?: 'volley' | 'fire';
+  at?: number;
 }
 
 /** A weapon lying where a goblin fell. */
@@ -421,6 +431,10 @@ export type FightEvent =
   | { k: 'heal'; x: number; y: number; n: number }
   | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle' | 'lift' | 'oilfire' | 'freed' | 'exitopen' | 'blaze' | 'chop' | 'denspawn' | 'hallow' | 'ward' | 'warded' | 'reflect' | 'wardbreak' | 'spotted'; x: number; y: number }
   | { k: 'collapse'; x: number; y: number; w: number; h: number }
+  /** The skills taught after the first (sim/skills.ts): a stamp, arrows falling, a vanish, knives, a fire
+   *  ring, a tether strike (to x2, y2), a chain (to x2, y2), the lantern light, a hound sent or pinning. */
+  | { k: 'stamp' | 'volleyshot' | 'arrowfall' | 'vanish' | 'knives' | 'firering' | 'lanternlight' | 'sic' | 'houndpin'; x: number; y: number }
+  | { k: 'tetherzap' | 'chainpull'; x: number; y: number; x2: number; y2: number }
   /** A house on fire (sim/blaze.ts): a beam down, the roof in, someone caged lost with it. */
   | { k: 'rafter' | 'housefall' | 'cagelost'; x: number; y: number }
   /** Spiders: a wave hatching, a hero poisoned or cured, a glob landing. */
@@ -520,4 +534,4 @@ export interface Puddle { id: number; x: number; y: number; r: number; until: nu
 /** A Ranger's snare on the ground. */
 export interface Snare { owner: string; x: number; y: number; until: number; /** How long it holds what steps in (a Ranger's TRAPPER drill lengthens it). */ hold?: number }
 /** A Ranger's hound: at heel, running something down, worrying it, or scared off till `back`. */
-export interface Hound { x: number; y: number; fx: number; fy: number; state: 'heel' | 'run' | 'bite' | 'fled'; target: number; t: number; next: number; back: number; bites: number; moving: boolean; /** Lying down (across you while you're out). */ down?: boolean }
+export interface Hound { x: number; y: number; fx: number; fy: number; state: 'heel' | 'run' | 'bite' | 'fled'; target: number; t: number; next: number; back: number; bites: number; moving: boolean; /** Lying down (across you while you're out). */ down?: boolean; /** Sent in by SEND THE HOUND: pins what it reaches. */ pin?: boolean }

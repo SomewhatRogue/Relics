@@ -6,8 +6,9 @@ import { CHANNEL, STORM, technique, type Augment, type Element, type Swing, type
 import { shoot } from './bolts';
 import type { Bolt, FightEvent, Hero } from './types';
 
-/** The element a Mage's spells are cast in now (fire to start with). */
-export const castElement = (h: Hero): Element => (h.augments.channel || 'fire') as Element;
+/** The element a Mage's spells are cast in now: fire to start with, and fire again while they carry
+ *  another skill than the Channel (the fire ring, the storm tether). */
+export const castElement = (h: Hero): Element => (h.relics.includes('channel') ? h.augments.channel || 'fire' : 'fire') as Element;
 
 /** The channel: the next element at once, and the first spell after it primed. */
 export function turnElement(h: Hero, ev: FightEvent[]): void {

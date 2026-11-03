@@ -14,6 +14,7 @@ import { has } from './traits';
 import { hunt } from './spiders';
 import { glowIn, sightIn } from '../shared/timeofday';
 import type { Enemy, EnemyAttack, FightEvent, Hero } from './types';
+import { vanished } from './rogue';
 
 const SPECS: Partial<Record<Enemy['kind'], EnemySpec>> = { butcher: BUTCHER, scrapper: SCRAPPER, spider: SPIDER, brood: BROOD };
 
@@ -42,7 +43,7 @@ function nearest(e: Enemy, heroes: Hero[], now: number): Hero | null {
     // The Butcher's Apron: they come for you first; a named butcher looks at no one else.
     const apron = wears(h, 'apron') ? (e.name ? 999 : HUNGRY_FX.lure) : 0;
     const raw = Math.hypot(h.x - e.x, h.y - e.y), d = raw - lure(h) - apron;
-    if (!visible(h, raw, now)) continue;
+    if (!visible(h, raw, now) || vanished(h, now)) continue;
     if (d < bd) (bd = d), (best = h);
     // A Mage's blink image draws them off while it lasts: they swing at where you were.
     if (h.decoyUntil > now) {
@@ -267,7 +268,7 @@ function notice(e: Enemy, heroes: Hero[], others: Enemy[], now: number, ev: Figh
   for (const h of heroes) {
     if (h.act === 'down' || h.id === 'squire') continue;
     const dx = h.x - e.x, dy = h.y - e.y, d = Math.hypot(dx, dy);
-    if (!visible(h, d, now)) continue;
+    if (!visible(h, d, now) || vanished(h, now)) continue;
     const ahead = (dx * e.fx + dy * e.fy) / (d || 1) > -0.2;
     // Looters picking the dead don't look up until something comes close.
     // Darker hours, less far (shared/timeofday.ts); a censer's glow carries less by day.
