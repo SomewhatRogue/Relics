@@ -16,7 +16,7 @@ import { CHAPTER_1, QUORUM, rewardMult, type WorldState } from '../shared/story'
 import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
 import { buyDrill, learnLesson } from '../shared/training';
 import { knowsSkill, learnSkill } from '../shared/skillteach';
-import { ARRIVE_SAFE, PARTY, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, FOUND_RELICS, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, sellValue, giveValue, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
+import { ARRIVE_SAFE, HOUSEBURN, PARTY, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, FOUND_RELICS, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, sellValue, giveValue, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
 import { ArenaRoom } from '../sim/room';
 import { lessonOf, newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
 import { woodMap, WOOD_PROPS } from '../shared/wood';
@@ -800,7 +800,9 @@ export class Game {
     const ransom = half && p.armor?.hungry === 'ransom';
     // A bigger party: more pay and a better treasure; experience shared out so it's a little more, not a multiple (shared/pace.ts).
     const crowd = Math.max(1, run.party ?? 1), bonus = 1 + PARTY.reward * (crowd - 1);
-    const gold = won ? run.gold + Math.round(run.job.reward * rewardMult(w) * bonus) : ransom ? 0 : half ? Math.round(run.gold / 2) : run.gold;
+    // Each one lost to a fire takes a share off the job's pay (shared/tuning.ts HOUSEBURN).
+    const spared = 1 - Math.min(HOUSEBURN.lostMost, (run.lost ?? 0) * HOUSEBURN.lostCut);
+    const gold = won ? run.gold + Math.round(run.job.reward * rewardMult(w) * bonus * spared) : ransom ? 0 : half ? Math.round(run.gold / 2) : run.gold;
     if (ransom) p.gold = 0;
     // The Want grows with every job finished in hungry gear, and with what it killed.
     const hungry = this.hungryWorn();

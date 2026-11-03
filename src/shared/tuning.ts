@@ -219,12 +219,13 @@ export const HOUSEFIRE = { warn: 3, dps: 14, beamWarn: 1.6, beamR: 0.95, beamDmg
  * `wakeOut` seconds, one every `wakeGap`; the sleeping ones somewhere in the `sleepOut` window, later
  * in a bigger house; out burning for `outBurn` seconds. Players inside get `grace` seconds, then the
  * smoke takes `heroSmoke` a second. A chest inside leaves a charred drop at the door: `charGold` gold
- * and, `charItem` of the time, one plain piece.
+ * and, `charItem` of the time, one plain piece. Each caged person lost to it takes `lostCut` off the job's
+ * pay (at most `lostMost`).
  */
 export const HOUSEBURN = {
   glint: 2.5, reach: 1.05, light: 1.5, lightBig: 2.4, catch: 3, burn: 24, burnBarn: 30, burnBig: 40,
   smoke: 2.5, wakeOut: 1.6, wakeGap: 0.9, sleepOut: [4, 14] as [number, number], sleepOutBig: [4, 22] as [number, number], outBurn: 1,
-  grace: 4, heroSmoke: 5, charGold: [6, 14] as [number, number], charItem: 0.5, cryReach: 1.6,
+  grace: 4, heroSmoke: 5, charGold: [6, 14] as [number, number], charItem: 0.5, cryReach: 1.6, lostCut: 0.15, lostMost: 0.6,
 };
 /**
  * How likely fire is to set a house alight by accident (rolled once on the room's fire stream, so it's

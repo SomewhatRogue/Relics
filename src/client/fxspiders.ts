@@ -21,6 +21,21 @@ export function spiderFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean 
       fx.flashes.push({ x, y: y - 8, r: 70, i: 0.9, c: [1, 0.6, 0.25], life: 0.35, max: 0.35 });
       fx.shake = Math.max(fx.shake, 1.5);
       return true;
+    // A house: its kindling catching; a goblin driven out of the door in a puff of smoke; a chest's charred leavings; someone inside choking.
+    case 'houselit':
+      fx.burst(x, y - 6, 18, ['#fff1b0', '#ffd27a', '#ff9a3c', '#ff6a20'], 60, true);
+      fx.flashes.push({ x, y: y - 6, r: 60, i: 0.8, c: [1, 0.6, 0.25], life: 0.3, max: 0.3 });
+      return true;
+    case 'flushed':
+      fx.burst(x, y - 10, 14, ['#3a3438', '#5a5458', '#2a2428'], 50, false, 60, true);
+      fx.burst(x, y - 8, 6, ['#ffd27a', '#ff6a20'], 40, true);
+      return true;
+    case 'charred':
+      fx.burst(x, y - 4, 10, ['#1a1410', '#3a2a20', '#ff6a20'], 40, false, 120, true);
+      return true;
+    case 'choke':
+      fx.burst(x, y - 16, 4, ['#5a5458', '#3a3438'], 20, false, 40, true);
+      return true;
     case 'poisoned':
       fx.burst(x, y - 10, 6, VENOM, 30, true);
       return true;

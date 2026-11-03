@@ -31,6 +31,7 @@ import { grabbable } from '../sim/grab';
 import { raisable } from '../sim/party';
 import { torchable } from '../sim/torch';
 import { kindleable } from '../sim/kindle';
+import { kindleCue } from './kindlecue';
 import { liftable } from '../sim/props';
 import { relicLabel } from '../sim/hero';
 import { castElement } from '../sim/channel';
@@ -201,6 +202,8 @@ function hud(now: number): void {
   lesson.update();
   $('#packbtn').classList.toggle('on', pack.open);
   knackCues(game, panel.open, $('#packbtn'), (x, y, s) => fx.say(toPx(x, y)[0], toPx(x, y)[1] + 14, s, '#ffd27a', 3.2));
+  // At a house's kindling with someone caged inside: a muffled cry, and the words over the pile (kindlecue.ts).
+  if (game.mode === 'run') kindleCue(room.map, me, (x, y, s) => fx.say(toPx(x, y)[0], toPx(x, y)[1] - 18, s, '#e8dcc8', 2.6));
   if (input.touch) {
     // GRAB shows only when there's something to grab (or to throw); ATTACK becomes SLAM.
     const carrying = me.act === 'carry';

@@ -92,6 +92,8 @@ export class Soundscape {
     if (ev.k === 'rafter') return woodSounds.collapse();
     if (ev.k === 'housefall') return woodSounds.collapse(), sfx.boom();
     if (ev.k === 'denspawn') return goblin.screech();
+    if (ev.k === 'flushed') return goblin.screech();
+    if (ev.k === 'charred') return woodSounds.chop();
     if (ev.k === 'bellow') return butcher.roar(true), butcher.roar(true), sfx.boom();
     if (ev.k === 'spotted') {
       const e = room.enemies.find((x) => Math.abs(x.x - ev.x) < 0.01 && Math.abs(x.y - ev.y) < 0.01);
