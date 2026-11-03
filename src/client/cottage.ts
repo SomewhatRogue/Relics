@@ -89,10 +89,11 @@ function hole(rect: Rect, b: Block, mx: number, mw: number, roofH: number): void
   for (let i = hx + 2; i < hx + hw; i += 5) rect(i, hy - 1, 2, hh + 2, '#3a2a1a');
 }
 
-/** Live on the glow: a lit house's windows and the smoke off its chimney. */
-export function drawLit(c: Ctx, h: House, x: number, top: number, w: number, roofH: number, tall: number): void {
+/** Live on the glow: a lit house's windows (after dark) and the smoke off its chimney. */
+export function drawLit(c: Ctx, h: House, x: number, top: number, w: number, roofH: number, tall: number, lamps = true): void {
   c.glow.fillStyle = '#ffd27a';
-  for (const wx of windowsOf(h, w)) c.glow.fillRect(Math.round(x + wx), Math.round(top + roofH + tall - 15), 3, 3);
+  // The windows show the fire only once it's dark enough to light the lamps (shared/lamps.ts).
+  if (lamps) for (const wx of windowsOf(h, w)) c.glow.fillRect(Math.round(x + wx), Math.round(top + roofH + tall - 15), 3, 3);
   const cx = x + chimneyOf(h, w) + 3;
   for (let j = 0; j < 5; j++) {
     const p = (c.now * 0.18 + j / 5 + x * 0.01) % 1;

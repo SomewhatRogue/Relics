@@ -8,6 +8,7 @@
 import * as THREE from 'three';
 import { doorAt, type Block } from '../../shared/arena';
 import { Boxes, Seed, jit } from './boxes';
+import { asLamp } from './lamps3d';
 import { G } from './mats';
 
 /** The roof's span (x) left open: the counting house's fallen-in end. */
@@ -34,7 +35,10 @@ export function dressHall(W: Boxes, b: Block, H: number, group: THREE.Group, r: 
     const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), G(col, a));
     m.position.set(x, y, z);
     group.add(m);
+    return m;
   };
+  // A door lamp: lit with the town's other lamps, dark glass by day (lamps3d.ts).
+  const lamp = (x: number, y: number, z: number) => asLamp(glow(x, y, z, 0.14, 0.2, 0.14, 0xffc070, 0.3), G(0x2a2420, 1));
   switch (b.door) {
     case 'tower': {
       // Slit windows lit violet, pale blue and the witchfire's green.
@@ -77,7 +81,7 @@ export function dressHall(W: Boxes, b: Block, H: number, group: THREE.Group, r: 
       // Casks by the door, a lamp on its bracket.
       for (const x of [mid - 1.1, mid - 0.7]) W.b(x, 0, f + 0.2, 0.32, 0.44, 0.32, jit(0x6b4a2b, 0.08, r)), W.b(x, 0.14, f + 0.2, 0.34, 0.05, 0.34, 0x2a2630);
       W.b(mid + 0.5, H * 0.75, f + 0.1, 0.3, 0.04, 0.2, 0x2a2630);
-      glow(mid + 0.6, H * 0.62, f + 0.18, 0.14, 0.2, 0.14, 0xffc070, 0.3);
+      lamp(mid + 0.6, H * 0.62, f + 0.18);
       return;
     case 'forge':
       // A stone chimney stack up through the roof, horseshoes over the door, the quench barrel.
@@ -108,7 +112,7 @@ export function dressHall(W: Boxes, b: Block, H: number, group: THREE.Group, r: 
       // Herbs drying under the eaves, a lamp by the door.
       W.b((x0 + x1) / 2, H * 0.92, f + 0.05, b.w - 0.5, 0.03, 0.03, 0x8a7a5a);
       for (let x = x0 + 0.4, i = 0; x < x1 - 0.4; x += 0.38, i++) if (Math.abs(x - mid) > 0.5) W.b(x, H * 0.66, f + 0.05, 0.16, 0.34, 0.08, i % 2 ? 0x4a6a3a : 0x6a5a3a);
-      glow(mid + 0.6, H * 0.55, f + 0.1, 0.14, 0.2, 0.14, 0xffc070, 0.3);
+      lamp(mid + 0.6, H * 0.55, f + 0.1);
       return;
   }
 }

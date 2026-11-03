@@ -2,7 +2,7 @@
  * The room's still parts in 3D: the floor (the 2D floor painting itself, laid flat, so floors, soil,
  * marks and water match the pixel view, with blood added as it's spilled), the back wall with its
  * painted face and real thickness and the gap of the way out, low side walls, ledges, the round things,
- * torches and braziers. Static boxes are merged into one mesh.
+ * torches and braziers (their flames and light by the hour: lamps3d.ts). Static boxes are merged into one mesh.
  */
 import * as THREE from 'three';
 import type { GameMap } from '../../shared/arena';
@@ -10,6 +10,7 @@ import { torchIn } from '../daytime';
 import type { Fx } from '../fx';
 import { OX, OY, PX } from '../world';
 import { Boxes, Seed, jit } from './boxes';
+import type { Lamp3 } from './lamps3d';
 import type { L3 } from './lights3d';
 import { VCOL } from './mats';
 import { toonize } from './post';
@@ -19,7 +20,7 @@ import { addRound, type Spot } from './rounds3d';
 export const WALL_H = 2.4;
 export const LEDGE_H = 0.75;
 
-export interface Ground { group: THREE.Group; fires: Spot[]; lights: L3[]; decals(fx: Fx): void; dispose(): void }
+export interface Ground { group: THREE.Group; fires: Spot[]; lights: L3[]; lamps: Lamp3[]; decals(fx: Fx): void; dispose(): void }
 
 const BODY: Record<GameMap['theme']['back'], number> = { stone: 0x2a2733, palisade: 0x2e2016, trees: 0x10160e, rockface: 0x26242c, plaster: 0x2a2018 };
 
@@ -31,7 +32,7 @@ function texture(c: HTMLCanvasElement): THREE.CanvasTexture {
 }
 
 export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
-  const group = new THREE.Group(), B = new Boxes(), r = new Seed(m.w * 7 + m.h), fires: Spot[] = [], lights: L3[] = [];
+  const group = new THREE.Group(), B = new Boxes(), r = new Seed(m.w * 7 + m.h), fires: Spot[] = [], lights: L3[] = [], lamps: Lamp3[] = [];
   const tk = torchIn(m.theme), body = BODY[m.theme.back];
   // The floor: the 2D painting's floor, a copy we can bleed on.
   const fc = document.createElement('canvas');
@@ -87,22 +88,28 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
     B.b(l.x + l.w / 2, 0, l.y + l.h / 2, l.w, LEDGE_H, l.h, l.kind === 'wood' ? 0x5a3d22 : 0x3a3640);
     for (const rp of l.ramps) B.b(rp.x + rp.w / 2, 0, rp.y + rp.h / 2, rp.w, LEDGE_H * 0.45, rp.h, 0x46424e);
   }
-  for (const o of m.rounds) addRound(B, o, fires, r);
+  // The tended lamps (torches, braziers, lamp posts) give flames and light only while lit (lamps3d.ts).
+  for (const o of m.rounds) {
+    const n = fires.length;
+    addRound(B, o, fires, r);
+    if (o.kind === 'post') lamps.push({ x: o.x, y: o.y, fires: fires.splice(n), light: { x: o.x, y: 1.6, z: o.y, r: 4.5, i: 0.8 * tk, c: [1, 0.72, 0.42], f: 9 } });
+  }
   for (const t of m.torches) {
     const onWall = t.y < 0.8, y = onWall ? 1.55 : 1.3, z = onWall ? 0.16 : t.y;
     if (onWall) B.b(t.x, y - 0.3, 0.06, 0.08, 0.32, 0.14, 0x3a2a1a);
     else B.b(t.x, 0, z, 0.1, y, 0.1, 0x3a2a1a);
-    fires.push([t.x, y, z, 0.7]);
-    lights.push({ x: t.x, y: y + 0.4, z: z + 0.5, r: 8, i: 1.1 * tk, c: [1, 0.66, 0.36], f: 13 });
+    B.b(t.x, y - 0.02, onWall ? 0.06 : z, 0.11, 0.08, onWall ? 0.16 : 0.11, 0x1a1410);
+    lamps.push({ x: t.x, y: t.y, fires: [[t.x, y, z, 0.7]], light: { x: t.x, y: y + 0.4, z: z + 0.5, r: 8, i: 1.1 * tk, c: [1, 0.66, 0.36], f: 13 } });
   }
   for (const b of m.braziers) {
     B.b(b.x, 0, b.y, 0.12, 0.6, 0.12, 0x2a2630);
     B.b(b.x, 0.55, b.y, 0.55, 0.18, 0.55, 0x3a3640);
-    fires.push([b.x - 0.1, 0.72, b.y, 1], [b.x + 0.12, 0.72, b.y + 0.05, 0.9]);
-    lights.push({ x: b.x, y: 1.4, z: b.y, r: 6, i: 0.95 * tk, c: [1, 0.6, 0.3], f: 11 });
+    // Ash in the bowl (the flames stand over it while it's lit).
+    B.b(b.x, 0.73, b.y, 0.42, 0.02, 0.42, 0x5a5660);
+    lamps.push({ x: b.x, y: b.y, wild: b.wild, fires: [[b.x - 0.1, 0.72, b.y, 1], [b.x + 0.12, 0.72, b.y + 0.05, 0.9]], light: { x: b.x, y: 1.4, z: b.y, r: 6, i: 0.95 * tk, c: [1, 0.6, 0.3], f: 11 } });
   }
   for (const o of m.rounds) {
-    if (o.kind === 'post' || o.kind === 'cookfire') lights.push({ x: o.x, y: 1.6, z: o.y, r: 4.5, i: 0.8 * tk, c: [1, 0.72, 0.42], f: 9 });
+    if (o.kind === 'cookfire') lights.push({ x: o.x, y: 1.6, z: o.y, r: 4.5, i: 0.8 * tk, c: [1, 0.72, 0.42], f: 9 });
     if (o.kind === 'lantern') lights.push({ x: o.x, y: 2.4, z: o.y, r: 9, i: 1.2, c: [1, 0.78, 0.45], f: 3 });
     if (o.kind === 'candles') lights.push({ x: o.x, y: 1.2, z: o.y, r: 3.5, i: 0.7, c: [1, 0.78, 0.48], f: 11 });
   }
@@ -126,5 +133,5 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
     const mm = o as THREE.Mesh;
     if (mm.isMesh && mm.geometry !== statics?.geometry) mm.geometry.dispose();
   });
-  return { group, fires, lights, decals, dispose: () => (dispose(), statics?.geometry.dispose(), floorTex.dispose(), floorMat.dispose(), wallMat.map?.dispose(), wallMat.dispose()) };
+  return { group, fires, lights, lamps, decals, dispose: () => (dispose(), statics?.geometry.dispose(), floorTex.dispose(), floorMat.dispose(), wallMat.map?.dispose(), wallMat.dispose()) };
 }

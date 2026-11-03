@@ -25,5 +25,5 @@ const mix = (a: number[], b: number[], k: number) => a.map((v, i) => v + (b[i] -
 export function townLight(base: Theme, phase: number): Theme {
   const d = daylight(phase), edge = 1 - Math.abs(d - 0.5) * 2;
   const ambient = mix(mix(NIGHT, NOON, d), DUSK, Math.max(0, edge) * 0.35);
-  return { ...base, ambient, moon: base.moon * (1 - d), day: d > 0.65 };
+  return { ...base, ambient, moon: base.moon * (1 - d), day: d > 0.65, dayAt: phase };
 }

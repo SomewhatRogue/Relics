@@ -10,7 +10,7 @@ import type { Block, Circle, Npc, Round } from './arena.js';
 import type { WorldState } from './story.js';
 import { workDone } from './works.js';
 
-export interface Siege { blocks: Block[]; rounds: Round[]; npcs: Npc[]; braziers: Circle[] }
+export interface Siege { blocks: Block[]; rounds: Round[]; npcs: Npc[]; braziers: (Circle & { wild?: boolean })[] }
 
 /** Who's who, by `arg` (their lines are in client/townui.ts CHAT). */
 export const FOLK = { digger: 16, tull: 17, mab: 18, wat: 19 } as const;
@@ -19,7 +19,7 @@ export function siege(w: WorldState): Siege {
   const washed = workDone(w, 'wash');
   const blocks: Block[] = [{ x: 36.5, y: 24.5, w: 1.6, h: 0.7, kind: 'gallows' }];
   const rounds: Round[] = [{ kind: 'smoke', x: 45, y: 0.2, r: 0.01 }, { kind: 'dog', x: 31, y: 29.6, r: 0.01 }];
-  const braziers: Circle[] = [];
+  const braziers: Siege['braziers'] = [];
   const npcs: Npc[] = [
     // The gravedigger: the dead over his shoulder from the cart to the churchyard, a while digging,
     // back for the next. Once the square's washed and the cart's gone, he tends the graves.
@@ -31,7 +31,7 @@ export function siege(w: WorldState): Siege {
   // Burned out of the north lane when the wall came down, round a brazier inside the gate till the
   // houses are mended.
   if (!workDone(w, 'shutters')) {
-    braziers.push({ x: 23.4, y: 8.7, r: 0.35 });
+    braziers.push({ x: 23.4, y: 8.7, r: 0.35, wild: true });
     npcs.push({ name: 'GOODMAN TULL', x: 24.2, y: 8.5, talk: 'chat', look: 'villager', arg: FOLK.tull },
       { name: 'TULL\'S WIFE', x: 22.6, y: 8.4, talk: 'chat', look: 'survivor', mute: true }, { name: 'A TULL', x: 23.4, y: 9.45, talk: 'chat', look: 'child', mute: true });
   }

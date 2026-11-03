@@ -178,14 +178,15 @@ export function drawBlock(c: Ctx, b: Block, x: number, y: number, lit: boolean):
   if ((b.burning ?? -1) >= 0 || b.smoulder) return flames(c, b, x, top, w, Math.round(b.h * PX), l.tall);
   if (b.kind === 'hearth' && b.look === 2) embers(c, x, top, w, Math.round(b.h * PX), l.tall);
   const home = houseOf(b);
-  if (home) return void (home.lit && b.kind === 'house' && b.fate !== 'blocked' && drawLit(c, home, x, top, w, Math.round(b.h * PX), l.tall));
+  if (home) return void (home.lit && b.kind === 'house' && b.fate !== 'blocked' && drawLit(c, home, x, top, w, Math.round(b.h * PX), l.tall, lit));
   if (b.label && b.door) liveOutside(c, b, x, top, w, Math.round(b.h * PX), l.tall);
+  // The forge's fire is worked all day; lamplit windows only while the lamps are (`lit`, shared/lamps.ts).
+  if (b.kind === 'forge' && !b.maxHp) (c.glow.fillStyle = Math.floor(c.now * 8) % 2 ? '#ff9a3c' : '#ff6a20'), c.glow.fillRect(Math.round(x + w / 2 - 2), Math.round(y + b.h * PX - 5), 4, 3);
   if (!l.windows || !lit || b.maxHp || b.door === 'tower') return;
   // Lit windows either side of the door: someone lives here.
   const wy = Math.round(y + b.h * PX - l.tall + 5);
   c.glow.fillStyle = '#ffd27a';
   for (const wx of windowsLit(b).map((k) => Math.round(w * k))) c.glow.fillRect(Math.round(x + wx), wy, 3, 3);
-  if (b.kind === 'forge') (c.glow.fillStyle = Math.floor(c.now * 8) % 2 ? '#ff9a3c' : '#ff6a20'), c.glow.fillRect(Math.round(x + w / 2 - 2), Math.round(y + b.h * PX - 5), 4, 3);
 }
 
 /** A lit hearth: the mouth glowing, coals winking along its floor (the flame is the room's torch). */

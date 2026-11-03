@@ -14,6 +14,7 @@ import { G, VCOL, hex } from './mats';
 import { gable } from './roofs3d';
 import { cone, dressHall, roofGap } from './halls3d';
 import { flatBlock } from './walls3d';
+import { asLamp, lampMeshes } from './lamps3d';
 
 /** Eave height (tiles) by kind. */
 const TALL: Partial<Record<Block['kind'], number>> = { house: 1.45, barn: 1.9, hall: 1.6, church: 2.4, forge: 1.8, tavern: 1.7, granary: 1.9, tower: 3.6, shack: 0.95, den: 0.7 };
@@ -27,6 +28,8 @@ export interface Built {
   fires: [number, number, number, number][];
   /** Its footprint and how high it stands (for lifting the roof when you're behind it). */
   top: number;
+  /** Lamp meshes (lit windows, a door lamp), lit or dark by the hour (lamps3d.ts). */
+  lamps: THREE.Mesh[];
 }
 
 /** 0 standing, 1 charred, 2 burned down; and whether it's alight. */
@@ -39,7 +42,7 @@ const shade = (c: number, k: number) => {
 
 export function buildBlock(b: Block): Built {
   const group = new THREE.Group(), fires: Built['fires'] = [];
-  if (!ROOFED.has(b.kind)) return { group: flatBlock(b, group, fires), roof: null, fires, top: 1 };
+  if (!ROOFED.has(b.kind)) return { group: flatBlock(b, group, fires), roof: null, fires, top: 1, lamps: [] };
   const st = blockState(b), ruined = st >= 4, alight = st % 2 === 1, charred = st >= 2 || alight;
   const r = new Seed(Math.round(b.x * 31 + b.y * 17 + 7)), L = LOOK[b.kind], home = houseOf(b);
   const k = charred ? 0.45 : 1, wallC = shade(hex(L.wall), k), beam = shade(0x3a2a1e, k);
@@ -103,6 +106,7 @@ export function buildBlock(b: Block): Built {
       W.b(wx, H * 0.42, z1 + 0.01, 0.46, 0.06, 0.06, beam);
       W.b(wx, H * 0.42 + 0.36, z1 + 0.01, 0.46, 0.06, 0.06, beam);
       const pane = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.3, 0.04), lit ? G(0xffc070, 0.35) : G(0x0a0808, 1));
+      if (lit) asLamp(pane, G(0x0a0808, 1));
       pane.position.set(wx, H * 0.42 + 0.21, z1 + 0.005);
       group.add(pane);
     }
@@ -122,5 +126,5 @@ export function buildBlock(b: Block): Built {
   const wm = W.mesh(VCOL), roof = R.mesh(VCOL);
   if (wm) group.add(wm);
   if (roof) group.add(roof);
-  return { group, roof, fires, top: H + 1 };
+  return { group, roof, fires, top: H + 1, lamps: lampMeshes(group) };
 }
