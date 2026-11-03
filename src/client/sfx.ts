@@ -192,6 +192,12 @@ export const sfx = {
     for (const f of [587, 740, 880, 1175]) tone('triangle', f, f * 1.002, 0.14, 1.6, run.length * 0.11);
     for (let i = 0; i < 8; i++) tone('sine', 2349, 2349, 0.04, 0.12, run.length * 0.11 + i * 0.12);
   },
+  /** A level grown: a quick run up and one bright note held over it. */
+  levelup() {
+    if (!ready()) return;
+    [523, 659, 784, 1047].forEach((f, i) => tone('triangle', f, f, 0.18, 0.2, i * 0.08));
+    tone('sine', 1568, 1568, 0.06, 0.6, 0.32);
+  },
   /** The Ranger's hound giving tongue, or yelping off; a snare pegged down. */
   bark() {
     if (!ready()) return;

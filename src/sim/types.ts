@@ -1,5 +1,5 @@
 /** The fight's state. Plain data: the same shape is drawn locally and (later) sent to friends. */
-import type { Augment, Item, PotionId, Tier, PropKind, Quality, RelicId, TraitId, WeaponId, Hurt } from '../shared/tuning';
+import type { Augment, Item, PotionId, Tier, PropKind, Quality, RelicId, TraitId, WeaponId, Hurt, HeroClass } from '../shared/tuning';
 
 /** What a player's device sends: held state plus press counters, so a quick tap is never lost. */
 export interface Intent {
@@ -42,6 +42,9 @@ export interface Intent {
   /** Open chest `open` (counted by openSeq). */
   openSeq: number;
   open: number;
+  /** Grown a level (counted): the room fills your health and lights you up in your class's colour
+   *  (sim/grow.ts). Optional so an older guest's intent still reads. */
+  levelSeq?: number;
 }
 
 export const NO_INTENT: Intent = { mx: 0, my: 0, ax: 0, ay: 0, attack: false, block: false, attackSeq: 0, blockSeq: 0, rollSeq: 0, weaponSeq: 0, relicSeq: 0, relicSwapSeq: 0, relicPickSeq: 0, relicPick: 0, augmentSeq: 0, classSeq: 0, grabSeq: 0, takeSeq: 0, take: 0, gearSeq: 0, gearOp: 0, gearArg: 0, potionSeq: 0, beltSeq: 0, openSeq: 0, open: 0 };
@@ -211,7 +214,7 @@ export interface Hero extends Body {
   hitstop: number;
   /** Extra parry and dodge leniency for this player's ping (seconds). */
   lenience: number;
-  seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number; augment: number; cls: number; take: number; grab: number; gear: number; potion: number; belt?: number; open: number };
+  seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number; augment: number; cls: number; take: number; grab: number; gear: number; potion: number; belt?: number; open: number; level?: number };
 }
 
 /** `pounce`: a spider's leap along its line; `bite`: the brood mother's; `spit`: her lobbed glob (a circle). */
@@ -432,7 +435,9 @@ export type FightEvent =
   | { k: 'survivordeath'; x: number; y: number; id: number; by: string }
   /** A survivor brought home: out of their house, or back to where the party came in. */
   | { k: 'survivorhome'; x: number; y: number; id: number }
-  | { k: 'propbreak'; x: number; y: number; kind: PropKind; dx: number; dy: number };
+  | { k: 'propbreak'; x: number; y: number; kind: PropKind; dx: number; dy: number }
+  /** A hero grew a level: full health, and a flash in the class's colour (sim/grow.ts). */
+  | { k: 'levelup'; x: number; y: number; id: string; cls: HeroClass };
 
 /** A grappling hook: flying out, reeling an enemy in, pulling its owner along, or coming back. */
 export interface Hook {

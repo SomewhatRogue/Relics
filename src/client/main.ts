@@ -329,7 +329,7 @@ function tick(t: number): void {
   }
   if ((game.coop || game.remote) && t - touchedAt > 20000) (touchedAt = t), touchSession();
   // Following a friend's job: my input goes to them.
-  game.remote?.frame(t / 1000, still ?? live);
+  game.remote?.frame(t / 1000, game.own(still ?? live));
   const evs = game.step(dt, still ?? live);
   // Leading one: the room goes out to the party.
   game.coop?.frame(t / 1000);

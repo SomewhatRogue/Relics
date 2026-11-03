@@ -41,6 +41,7 @@ import { stepNests } from './spiders';
 import { cure, stepPoison } from './poison';
 import { stepPuddles } from './puddles';
 import { brandyDmg } from './brandy';
+import { grow } from './grow';
 import { NO_INTENT, type Puddle, type Zone, type Bolt, type Drop, type Enemy, type Prop, type FightEvent, type Hero, type Hook, type Intent, type Javelin, type Snare, type Survivor } from './types';
 
 export class ArenaRoom {
@@ -195,6 +196,7 @@ export class ArenaRoom {
     };
     const alive = new Set(this.enemies.filter((e) => !isDead(e)).map((e) => e.id));
     for (const h of this.heroes) takeLoot(h, this.intents.get(h.id) ?? NO_INTENT, this.drops, this.events);
+    for (const h of this.heroes) grow(h, this.intents.get(h.id) ?? NO_INTENT, this.events);
     for (const h of this.heroes) {
       const inp = this.intents.get(h.id) ?? NO_INTENT;
       // A press during the cooldown waits for it (never lost).

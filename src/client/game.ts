@@ -10,7 +10,7 @@ import { board, STORY_PARTY, type Job } from '../shared/jobs';
 import { WORKS, workDone, workOpen, workProgress, WORK_ORDER, type WorkId } from '../shared/works';
 import { contribute, type Contribution } from '../shared/worldsync';
 import { HERO_SLOTS, SHOP, gainXp, newProfile, perkFx, perkOffer, type PerkId, type Profile } from '../shared/progress';
-import { jobXp } from '../shared/pace';
+import { dueLevels, jobXp } from '../shared/pace';
 import { Rng } from '../shared/rng';
 import { CHAPTER_1, QUORUM, rewardMult, type WorldState } from '../shared/story';
 import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
@@ -89,6 +89,9 @@ export class Game {
   private lastIntent: Intent = NO_INTENT;
   /** Friends whose press counters have been matched to their hero's (so no old press fires). */
   private synced = new Set<string>();
+  /** Levels grown, counted out to the room (sim/grow.ts); and how many of this job's are lit already. */
+  levelSeq = 0;
+  private grown = 0;
 
   constructor() {
     this.enterTown();
@@ -424,6 +427,7 @@ export class Game {
   step(dt: number, intent: Intent): FightEvent[] {
     // Following a friend's job: their room is drawn here; nothing runs in this browser.
     if (this.remote) return this.stepRemote();
+    intent = this.own(intent);
     const h = this.hero;
     // The wood holds the world still for a lesson's card, a freeze-frame, a word of praise.
     if (this.mode === 'wood' && this.wood?.hold && this.holding(intent, dt)) return [];
@@ -468,6 +472,7 @@ export class Game {
     this.stepped = stepped;
     this.followers.step(here);
     if (this.mode === 'run' && this.run) tally(this.run, here, ev, ME);
+    this.growing();
     // Wickhold keeps the shared day: the light turns with the clock, the same on every screen.
     if (this.mode === 'town' && !this.outside) this.room.map.theme = townLight(this.townTheme ??= this.room.map.theme, dayPhase(Date.now()));
     if (this.mode === 'wood' && this.wood) return this.stepWoodFrame(h, ev, dt);
@@ -631,6 +636,7 @@ export class Game {
     // Their room once it has me in it (until then, the town stands still behind the wait).
     if (g.room?.heroes.some((x) => x.id === ME)) (this.room = g.room), (this.run = g.run ?? this.run), this.keepRemoteGear(this.hero);
     const ev = g.take();
+    this.growing();
     if (g.shouldTake(now)) return this.takeOver(g), ev;
     const end = g.ended ?? (g.lost(now) ? { won: false, run: g.run ?? newRun(g.job) } : null);
     if (end) {
@@ -680,6 +686,9 @@ export class Game {
     p.gold += gold;
     p.runs++;
     const levels = gainXp(p, xp);
+    // Grown on the way home (the job's pay): lit up back in Wickhold.
+    if (levels > this.grown) this.levelSeq += levels - this.grown;
+    this.grown = 0;
     // The bottom of a deep dive: a relic pried out of the butcher (one you don't have; the first is carried at once).
     const relic = won && run.job.deep ? FOUND_RELICS.find((r) => !p.relics.includes(r)) : undefined;
     if (relic) (p.relics.push(relic), p.relic ||= relic);
@@ -1061,6 +1070,18 @@ export class Game {
     store(this.save);
   }
 
+  /** My input as it goes to the room: with the levels I've grown counted in. */
+  own(i: Intent): Intent {
+    return { ...i, levelSeq: this.levelSeq };
+  }
+
+  /** On a job: a level surely earned (kills and rescues so far) is lit now, in the room, for everyone to see. */
+  private growing(): void {
+    if (!this.run || this.mode !== 'run') return;
+    const due = dueLevels(this.profile, this.run.xp, Math.max(1, this.run.party ?? 1));
+    if (due > this.grown) (this.levelSeq += due - this.grown), (this.grown = due);
+  }
+
   vote(choice: string): void {
     this.give({ vote: choice, voter: device() });
   }
@@ -1068,7 +1089,7 @@ export class Game {
 
 /** A friend's hero takes their press counters as already seen (so nothing pressed in town fires). */
 function syncSeen(h: Hero, i: Intent): void {
-  Object.assign(h.seen, { attack: i.attackSeq, block: i.blockSeq, roll: i.rollSeq, weapon: i.weaponSeq, relic: i.relicSeq, relicSwap: i.relicSwapSeq, relicPick: i.relicPickSeq, augment: i.augmentSeq, cls: i.classSeq, take: i.takeSeq, grab: i.grabSeq, gear: i.gearSeq, potion: i.potionSeq, belt: i.beltSeq ?? 0, open: i.openSeq });
+  Object.assign(h.seen, { attack: i.attackSeq, block: i.blockSeq, roll: i.rollSeq, weapon: i.weaponSeq, relic: i.relicSeq, relicSwap: i.relicSwapSeq, relicPick: i.relicPickSeq, augment: i.augmentSeq, cls: i.classSeq, take: i.takeSeq, grab: i.grabSeq, gear: i.gearSeq, potion: i.potionSeq, belt: i.beltSeq ?? 0, open: i.openSeq, level: i.levelSeq ?? 0 });
 }
 
 /** This browser, as one voter (all its heroes share it): made once, kept. */
