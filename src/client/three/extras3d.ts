@@ -37,7 +37,7 @@ export function drawExtras(g: CanvasRenderingContext2D, x: Extra): void {
   // A house's kindling: the glint while you're near, the ring while someone lights it (kindledraw.ts).
   const meH = room.heroes.find((h) => h.id === x.meId);
   for (const b of room.map.blocks) {
-    const k = kindling(b, room.map.blocks, room.map.w, room.map.h);
+    const k = kindling(b, room.map);
     if (!k) continue;
     const [sx, sy] = P(k.x, 0, k.y), d = meH && !b.ruined && (b.burning ?? -1) < 0 ? Math.hypot(meH.x - k.x, meH.y - k.y) : 99;
     drawGlint(c, sx, sy - 4, d, b.look ?? 0);

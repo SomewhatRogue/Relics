@@ -32,7 +32,7 @@ export function ignite(b: Block, w: Pick<World, 'now' | 'ev' | 'rng'>, chance = 
 
 /** How far (x, y) is from a house's kindling spot (Infinity: it has none). */
 function fromSpot(b: Block, x: number, y: number): number {
-  const m = currentMap(), k = kindling(b, m.blocks, m.w, m.h);
+  const m = currentMap(), k = kindling(b, m);
   return k ? Math.hypot(k.x - x, k.y - y) : Infinity;
 }
 

@@ -20,11 +20,11 @@ export function kindleCue(map: GameMap, me: Hero | undefined, say: (x: number, y
   let at = -1;
   if (me) map.blocks.forEach((b, i) => {
     if (at >= 0 || !b.cry || b.ruined) return;
-    const k = kindling(b, map.blocks, map.w, map.h);
+    const k = kindling(b, map);
     if (k && Math.hypot(me.x - k.x, me.y - k.y) <= HOUSEBURN.cryReach) at = i;
   });
   if (at >= 0 && at !== heard) {
-    const b = map.blocks[at], k = kindling(b, map.blocks, map.w, map.h)!;
+    const b = map.blocks[at], k = kindling(b, map)!;
     say(k.x, k.y, CRY_CUE);
     muffledCry();
   }

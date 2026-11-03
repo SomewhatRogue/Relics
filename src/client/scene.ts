@@ -298,7 +298,7 @@ export class Scene {
       const [bx, by] = blockAt(b);
       items.push({ y: blockFoot(b), draw: () => drawBlock(c, b, bx - cx, by - cy, lampAt(map.theme, b.x, b.y) > 0.5) });
       // A house's kindling: its woodpile, glinting while you're near, the ring while someone lights it (kindledraw.ts).
-      const k = kindling(b, map.blocks, map.w, map.h);
+      const k = kindling(b, map);
       if (!k) continue;
       const kx = OX + k.x * PX - cx, ky = OY + k.y * PX - cy, d = me && !b.ruined && (b.burning ?? -1) < 0 ? Math.hypot(me.x - k.x, me.y - k.y) : 99;
       items.push({ y: OY + k.y * PX, draw: () => (drawWoodpile(c, k, kx, ky, b), drawGlint(c, kx, ky, d, b.look ?? 0), drawKindling(c, b, kx, ky)) });
@@ -377,7 +377,7 @@ export class Scene {
       if (((b.burning ?? -1) >= 0 || b.smoulder) && !b.ruined) lights.push({ x: mx, y: by + (b.h * PX) / 2 - cy - 10, r: 70 + b.w * 10 + Math.sin(now * 13 + bx) * 6, i: 1.2, c: [1, 0.55, 0.25] });
       if (b.ruined) lights.push({ x: mx, y: by + (b.h * PX) / 2 - cy, r: 22 + b.w * 3, i: 0.35, c: [1, 0.35, 0.15] });
       // Someone lighting its kindling: a small warm glow growing at the pile.
-      const kk = b.lighter && b.lightT ? kindling(b, map.blocks, map.w, map.h) : null;
+      const kk = b.lighter && b.lightT ? kindling(b, map) : null;
       if (kk) lights.push({ x: OX + kk.x * PX - cx, y: OY + kk.y * PX - cy - 4, r: 30 + (b.lightT ?? 0) * 14, i: 0.5 + (b.lightT ?? 0) * 0.25, c: [1, 0.6, 0.3] });
       // A job's cottage with its fire going shows a little light at the windows.
       const home = houseOf(b), fire = !!home?.lit && b.kind === 'house' && !b.ruined && (b.burning ?? -1) < 0;

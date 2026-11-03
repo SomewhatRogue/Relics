@@ -98,7 +98,7 @@ export class Game {
   /** On a job: the street and its houses, each player in whichever they walked into (jobrooms.ts). */
   readonly rooms = new JobRooms(this.followers);
   /** What's inside the job's houses, for a house set alight (houseindoors.ts). */
-  private indoors = (this.rooms.inside = new HouseIndoors(this.rooms, () => (this.mode === 'run' ? this.run : null), (r) => this.coop?.fresh(r)));
+  private indoors = (this.rooms.inside = new HouseIndoors(this.rooms, () => (this.mode === 'run' ? this.run : null), (r) => this.coop?.fresh?.(r)));
   /** Each room's events from the latest step (the leader sends each friend their own room's). */
   stepped = new Map<ArenaRoom, FightEvent[]>();
   /** Each room's own number, for friends to know when theirs is a different one. */

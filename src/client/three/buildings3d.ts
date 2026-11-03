@@ -32,7 +32,7 @@ export class Buildings {
       let e = this.built.get(i);
       if (!e || e.key !== key) {
         if (e) this.drop(e.b);
-        e = { b: buildBlock(blk, kindling(blk, map.blocks, map.w, map.h)), key };
+        e = { b: buildBlock(blk, kindling(blk, map)), key };
         this.group.add(e.b.group);
         this.built.set(i, e);
       }

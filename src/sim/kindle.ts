@@ -5,16 +5,16 @@
  * again from nothing, like a nest: sim/torch.ts). Then the house is alight (`burning`), and the house
  * fire takes it from there (sim/houseburn.ts). The state is on the block, so a friend's screen has it.
  */
-import type { Block } from '../shared/arena';
+import type { Block, Round } from '../shared/arena';
 import { burnable, fireTimes, kindling } from '../shared/kindling';
 import { HOUSEBURN } from '../shared/tuning';
 import type { FightEvent, Hero } from './types';
 
-interface Street { blocks: Block[]; w: number; h: number }
+interface Street { blocks: Block[]; rounds?: Round[]; w: number; h: number }
 
 const unlit = (b: Block) => burnable(b) && (b.burning ?? -1) < 0 && !b.ruined;
 const near = (h: Hero, b: Block, m: Street) => {
-  const k = kindling(b, m.blocks, m.w, m.h);
+  const k = kindling(b, m);
   return !!k && (h.z ?? 0) === 0 && Math.hypot(h.x - k.x, h.y - k.y) <= HOUSEBURN.reach;
 };
 
@@ -30,7 +30,7 @@ export function startKindle(h: Hero, m: Street, ev: FightEvent[]): boolean {
   // Someone else already at it: the press is spent, theirs goes on.
   if (b.lighter && b.lighter !== h.id) return true;
   if (b.lighter !== h.id) Object.assign(b, { lighter: h.id, lightT: 0 });
-  const k = kindling(b, m.blocks, m.w, m.h)!;
+  const k = kindling(b, m)!;
   ev.push({ k: 'housekindle', x: k.x, y: k.y, by: h.id });
   return true;
 }
@@ -50,7 +50,7 @@ export function stepKindle(m: Street, heroes: Hero[], now: number, dt: number, e
     if (b.lightT < fireTimes(b).light) continue;
     h.stoop = 0;
     Object.assign(b, { lighter: '', lightT: 0, burning: now });
-    const k = kindling(b, m.blocks, m.w, m.h)!;
+    const k = kindling(b, m)!;
     ev.push({ k: 'houselit', x: k.x, y: k.y, by: h.id }, { k: 'blaze', x: b.x + b.w / 2, y: b.y + b.h / 2 });
   }
 }
