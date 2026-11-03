@@ -6,6 +6,8 @@ import { NEST, TICK, nestGap } from '../src/shared/tuning';
 import { ArenaRoom } from '../src/sim/room';
 import { kill } from '../src/sim/damage';
 import { torchable } from '../src/sim/torch';
+import { hitEnemy } from '../src/sim/combat';
+import { WEAPONS } from '../src/shared/tuning';
 import { NO_INTENT, type FightEvent, type Hero } from '../src/sim/types';
 
 const job = (): Job => ({ ...board(3)[1], rooms: 3, place: { name: 'Test', kind: 'forest', region: 'Greyhollow', ruin: 2 }, objective: 'hunt', seed: 77 });
@@ -121,5 +123,17 @@ describe('a nest\'s waves', () => {
     run(room, 0.4, keep(h));
     expect(spiders(room)).toHaveLength(NEST.wave);
     expect(n.act).not.toBe('dead');
+  });
+});
+
+describe('a nest under a Rogue\'s knives', () => {
+  it('has no front to halve a stab and no back to stab: blades land plain (x0.6)', () => {
+    const room = arena([{ kind: 'nest', x: 14, y: 10, wave: NEST.wave }], 14, 11), h = room.heroes[0], n = nestOf(room);
+    Object.assign(h, { weapon: 'daggers', fx: 0, fy: -1, crit: 0 });
+    Object.assign(n, { alert: true, fx: 0, fy: 1 });
+    const s = WEAPONS.daggers.combo[0], ev: FightEvent[] = [];
+    const dealt = hitEnemy(h, s, n, room.time, ev);
+    expect(dealt).toBe(Math.round(s.dmg * 0.6));
+    expect(ev.some((e) => e.k === 'hit' && e.backstab)).toBe(false);
   });
 });

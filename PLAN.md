@@ -2,6 +2,15 @@
 
 ## Current slice
 
+**Nests you can reach and burn out** (Claude Opus 5.5, 2026-11-03; Kyle: spiders "respawn too quickly
+so it's hard to kill their nest", too much HP for a Rogue, "if you run up to it you can light it on
+fire and it burns out"). Built; waiting on Kyle's play. *Done when* a nest's waves come every 12 s solo
+(9 to 11 in a party) with a 5 s breather after a wave dies; any class standing at a nest sees BURN on
+the button (G BURN on a laptop), crouches 1.2 s inside a filling gold ring (a hit, swing, dodge or step
+off puts it out), and the nest goes up for 3.5 s, its spiders catching and no wave coming, then lies as
+ash and counts; a Rogue's daggers take 55 HP off a nest without the head-on halving; and it reads the
+same in FLAT and 2.5D and for a guest online. Open: BURN through the lore keeper and line editor.
+
 **The lamps keep the hour** (Claude Opus 5.5, 2026-11-03; Kyle: "turn off fires at night except for
 the wild burning ones", read as: tended fires out by day, wild ones always). Built; waiting on Kyle's
 play. *Done when* by day in Wickhold the braziers are ash, the torches and lamp posts out and the

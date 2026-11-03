@@ -2,6 +2,43 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-03: nests come back slower, and burn out up close (Kyle; Claude Opus 5.5)
+
+Kyle: "I love them but they respawn too quickly so it's hard to kill their nest. Nests should have less
+HP too; it's hard for a Rogue. Or maybe it has the same HP from range, but if you run up to it you can
+light it on fire and it burns out." Done both ways: the waves give you a window, and in that window any
+class can run in and torch it. Numbers in `shared/spiders.ts` (NEST), rule in `sim/torch.ts`.
+
+- **Waves** (`sim/spiders.ts`). Before: first wave 1.2 s after it wakes, then every 8 s, cap 7 alive.
+  After: first wave 2 s after it wakes, then every 12 s solo, 1 s quicker for each player past the
+  first, never under 9 s (`nestGap`); cap 6 alive (still +2 for each extra spider a wave in a party).
+  New: when the last spider of its waves dies, the next waits at least 5 s more (`NEST.rest`), so
+  killing a wave buys a real run at the nest. Wave size unchanged: 3, +1 a player past the first. The
+  gap counts the players in the room now, so it follows someone leaving.
+- **Burn it out** (`sim/torch.ts`). GRAB within 1.6 tiles of a nest's middle (it comes after HELP UP,
+  before grabbing a goblin or lifting a prop): you crouch, and after 1.2 s of standing still and idle it
+  catches. A hit (you stagger), a swing, a dodge, a step or going down stops it and the next try starts
+  from nothing, the same rule as getting a friend up. One lighter at a time; a second press while a
+  friend is at it does nothing. Alight it burns 3.5 s, its health running down to nothing, then dies as
+  'burn' (ash), credited to whoever lit it, and counts like any nest for the room's goal. While alight
+  it hatches nothing (a wave swelling in it never comes), nothing puts it out, and its fire spreads to
+  spiders on it by the room's ordinary touch rule (the nest's burn tick is off: it burns on its own
+  clock). From range nothing changed: fire still 3x, and a fire hit still burns it fast.
+- **HP and blades.** 80 to 55. Blades kept at 0.6. The real trouble for a Rogue was the daggers' head-on
+  halving (`front: 0.5`) on top of 0.6: 2 a stab. A nest is a mound of web with no front or back, so
+  blades now land on it plain (no halving, no backstab; `sim/combat.ts`). Daggers: 4, 4, 5, 8 a chain,
+  about 3 chains to kill it, where it was about 8.
+- **Drawn from the same state, both views** (`client/nestfire.ts`, called from `client/spiders.ts`, which
+  2.5D's cards draw too): a gold ring filling round the nest while it's lit (like the ring for helping
+  a friend up), sparks at its foot and a small warm glow; alight, tongues of fire over a mound that chars
+  and sinks, a bigger warmer light (70 not 44; 2.5D adds its fire too); after, a grey heap of ash with
+  embers going out over 6 s. The lighter crouches (`hero.stoop`, set by the room). The hatch is the
+  'oilfire' whoosh with a flash; no new pop (the spiders' own BURNING says enough).
+- **Online.** GRAB is the existing grab press, decided by the room; the nest's `lighter`, `lightT`,
+  `ashAt` and the hero's `stoop` are plain fields in the patches, so a guest sees all of it.
+- **Words**: BURN (the button), G  BURN (the laptop prompt). For the lore keeper and line editor.
+- Tests: `tests/torch.test.ts`. Screenshots: `node scripts/nests.cjs [url] [outdir]`.
+
 ## 2026-11-03: the lamps keep the hour; 2.5D's night back to FLAT's (Kyle; Claude Opus 5.5)
 
 Kyle: "Town looks a little too bright now, but maybe it's daytime. If there is day and night, we should
