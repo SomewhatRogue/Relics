@@ -2,6 +2,51 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-02: 2.5D as bright as FLAT, closer in on phones, trees that aren't voxels (Kyle; Claude Opus 5.5)
+
+Kyle and his friends played both views: "We like the 2.5D, but flat has cleaner, brighter colours. It's
+too dark in 2.5D." Then Kyle in the wood on his phone: "It looked like Minecraft from super far back."
+
+- **Measured, not eyed.** `scripts/bright-look.cjs` holds the room still and shoots FLAT then 2.5D at
+  the same moment (Wickhold night and day, a job street at night, a den, the butcher's telegraph, and
+  the wood: waking, Hew's first card, a drill freeze-frame, the cutscene, the Stoker), phone and laptop;
+  `scripts/bright-stats.py` gives mean luma and saturation of the play area and of a box round the hero.
+  Before: the square at night and the dens 14 to 30% darker than FLAT, saturation 0.27 against 0.46 in a den, the hero
+  about 60% of FLAT's brightness at night (88 against 150 in the square).
+- **What made it dark.** The 3D ambient was 1.35 times the theme's where FLAT's pass uses 1.55 with a
+  floor (light.ts: nothing goes below 0.19); upright faces (walls, every figure) took the moon or a
+  torch only by the cosine of a light slanting down, so people stood darker than the floor they were on;
+  indoors (no moon) a blue moonlight was still forced on at 0.35, greying the warm rooms; outlines were
+  near black (22% of the colour) on 1-pixel figures. Banding was not the cause: it already bands the
+  light's level, not each channel.
+- **What changed** (`three/lights3d.ts`, `three/post.ts`). The theme's ambient at FLAT's 1.55, split
+  into a fill (75%) and a key from the sky in the ambient's own colour (45%), so a lit floor lands on
+  its flat colour and faces still model; the moon adds its blue-silver to the key at night only (none
+  indoors); wrapped light (a face turned away still takes 40%), so figures read like FLAT's sprites; the
+  same light floor as FLAT; point lights a little stronger (2.6) so torch and brazier pools match FLAT's
+  falloff; outlines a darker shade of the thing's own colour (42%, saturation kept) instead of black.
+- **After** (luma, flat / old / new): square at night 63 / 50 / 65, a den 33 / 23 / 30 (saturation
+  0.46 / 0.27 / 0.39), a job street 29 / 30 / 37, the square by day 92 / 106 / 98. The hero at night
+  120 (was 88), never darker than in FLAT on a job. Night is still night: the square is blue-silver
+  away from the braziers, the pools warm.
+- **Closer in on phones.** The 2.5D view showed 85% of FLAT's width, but tilted it took in 38 rows to
+  FLAT's 26 on an upright phone, so everything looked far off. Now it shows as much floor (tiles across
+  times down) as FLAT does, and on an upright screen 80% of it (`ZOOM` in view3d.ts): about 8.4 tiles
+  across and 31 deep on a phone, 17.5 by 19 on a laptop. The angle stays 36 degrees (the job rooms that
+  looked right).
+- **Trees** (`three/rounds3d.ts`, `three/boxes.ts`): a pine is three six-sided cones and a leafy tree
+  three rounded lumps, in FLAT's own greens (sprites.ts), not stacked boxes; a wood's wall of trees is
+  lumps too. Burning wagons burn on top of their bed (the flames were inside the box) and have side
+  boards; the cordwood is a stack of logs between posts, not a brown box.
+- **The trainer skills in 2.5D** (`three/skills3d.ts`): the rings a Shield Stamp, Fire Ring or Censer
+  Light fill while winding up, the Volley's marked spot and its arrows falling, the fire ring burning,
+  the Storm Tether's lightning and the Censer Chain's links, from the same room data skillsdraw.ts
+  uses, with their light. (Vanish smoke, the knives and the hound were already drawn.)
+- **BRIGHT - / +** under QUALITY while 2.5D is on: a gamma in the post pass, -2 to +3, remembered
+  (`?b=` wins). For dim phone screens.
+- Headless (software GL) frame times are the same as before within noise; triangle counts unchanged
+  (the cones and lumps are no more faces than the boxes they replace).
+
 ## 2026-11-02: the 2.5D view everywhere, a quality switch, the hand crossbow (Kyle; Claude Opus 5.5)
 
 Kyle played 2.5D on jobs ("It seemed to run really well") and asked: "No 2.5D in the main hub area?",
