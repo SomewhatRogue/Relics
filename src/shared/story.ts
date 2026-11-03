@@ -1,11 +1,12 @@
 /**
  * The shared world's story: one chapter at a time. A chapter has goals (people brought home, its
  * story mission); when they're met, the council table in Lantern Square opens a decision. The group
- * votes (a quorum of 4); the choice changes the town and the world for good, and the next chapter is
+ * votes all week, everyone on the server (councilweek.ts: it closes at the end of Sunday, Pacific); the choice changes the town and the world for good, and the next chapter is
  * written at the weekly review from what the group did.
  */
 import type { Job } from './jobs.js';
 import { PLACES } from './jobs.js';
+import { COUNCIL, closeFor, weekEnd } from './councilweek.js';
 
 export interface Vote { decision: string; choice: string; voters: number; day: number }
 
@@ -29,6 +30,9 @@ export interface WorldState {
   ballots: Record<string, Record<string, string>>;
   /** Who each voter is, by the hero who last voted from there (the town hall's boards). */
   voters?: Record<string, string>;
+  /** When the open council closes (ms, real time), set when it opens; and whether it's already sat on for a tie. */
+  councilCloses?: number;
+  councilTied?: boolean;
   /** Jobs done lately, for the board, newest first (worldsync DEEDS). */
   deeds?: { day: number; title: string; place: string; party: string[] }[];
   /** Works finished lately (newest first), for what people talk about (shared/townsays.ts). */
@@ -38,8 +42,6 @@ export interface WorldState {
 }
 
 export const newWorld = (): WorldState => ({ chapter: 1, day: 1, rescued: 0, storyDone: [], flags: {}, votes: [], lantern: 0, works: {}, dens: 0, ballots: {} });
-
-export const QUORUM = 4;
 
 /** `short`: the name on its board in the town hall (fits 12 letters). */
 export interface Choice { id: string; label: string; short: string; text: string }
@@ -78,20 +80,42 @@ export const councilOpen = (w: WorldState) => {
 };
 
 /**
- * A hero's vote at the council. Once `quorum` heroes have voted the council decides by majority (a
- * tie goes to the choice voted first). Returns the choice decided, if this vote decided it.
+ * The council, looked at `now` (real ms): run whenever the world is read or written, so nothing needs
+ * a timer. Once open it gets its close (closeFor); at the close the most votes win and land then. A tie
+ * sits one day longer; tied again, the reeve breaks it for the side voted for first. Nobody voted at
+ * all: it sits another week. Returns the choice if it was decided just now.
  */
-export function vote(w: WorldState, hero: string, choice: string, quorum = QUORUM): string | null {
+export function settle(w: WorldState, now: number): string | null {
   const d = CHAPTER_1.decision;
-  if (!councilOpen(w) || !d.choices.some((c) => c.id === choice)) return null;
-  const b = (w.ballots[d.id] ??= {});
-  b[hero] = choice;
-  const voters = Object.keys(b).length;
-  if (voters < quorum) return null;
-  const count = (c: string) => Object.values(b).filter((x) => x === c).length, order = Object.values(b);
-  const win = [...d.choices].map((c) => c.id).sort((x, y) => count(y) - count(x) || order.indexOf(x) - order.indexOf(y))[0];
-  decide(w, win, voters);
-  return win;
+  if (!councilOpen(w)) return null;
+  w.councilCloses ??= closeFor(now);
+  while (now >= w.councilCloses) {
+    const order = Object.values(w.ballots[d.id] ?? {});
+    if (!order.length) {
+      w.councilCloses = weekEnd(w.councilCloses);
+      continue;
+    }
+    const count = (c: string) => order.filter((x) => x === c).length;
+    const ranked = d.choices.map((c) => c.id).sort((x, y) => count(y) - count(x) || first(order, x) - first(order, y));
+    if (count(ranked[0]) === count(ranked[1]) && !w.councilTied) {
+      w.councilTied = true;
+      w.councilCloses += COUNCIL.tieExtra;
+      continue;
+    }
+    decide(w, ranked[0], order.length);
+    return ranked[0];
+  }
+  return null;
+}
+const first = (order: string[], c: string) => (order.includes(c) ? order.indexOf(c) : order.length);
+
+/** A voice at the council (a device: all its heroes share it), changeable until the close. False: closed, or no such choice. */
+export function vote(w: WorldState, voter: string, choice: string, now: number): boolean {
+  const d = CHAPTER_1.decision;
+  settle(w, now);
+  if (!councilOpen(w) || !d.choices.some((c) => c.id === choice)) return false;
+  (w.ballots[d.id] ??= {})[voter] = choice;
+  return true;
 }
 
 /** Record the council's choice and change the world for it. */

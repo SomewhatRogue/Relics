@@ -5,7 +5,7 @@
  */
 import type { HeroClass } from './weapons.js';
 import type { Stats } from './progress.js';
-import { CHAPTER_1, QUORUM, councilOpen, vote, type WorldState } from './story.js';
+import { CHAPTER_1, settle, vote, type WorldState } from './story.js';
 import { nights } from './raids.js';
 import { WORK_ORDER, workDone, type WorkId } from './works.js';
 
@@ -38,11 +38,11 @@ export interface Contribution {
 }
 
 /**
- * Apply a contribution to a world. `quorum` is the council's (1 when you play alone, offline).
+ * Apply a contribution to a world at real time `now` (the council's week runs on it: story.ts settle).
  * `raids`: roll the nights that pass for raids (the world server does for a shared world; a browser
  * only for its own, off the server, so a shared world's raid is the server's alone).
  */
-export function contribute(w: WorldState, c: Contribution, quorum = QUORUM, raids = true): void {
+export function contribute(w: WorldState, c: Contribution, now = Date.now(), raids = true): void {
   const was = WORK_ORDER.filter((k) => workDone(w, k)), day = w.day;
   w.rescued += c.rescued ?? 0;
   w.dens += c.dens ?? 0;
@@ -52,8 +52,9 @@ export function contribute(w: WorldState, c: Contribution, quorum = QUORUM, raid
   for (const k of WORK_ORDER) if (!was.includes(k) && workDone(w, k)) (w.mended ??= []).unshift({ id: k, day: w.day }), (w.mended.length = Math.min(w.mended.length, MENDED_KEPT));
   if (raids) nights(w, day);
   if (c.story && !w.storyDone.includes(c.story)) w.storyDone.push(c.story);
-  if (c.vote && councilOpen(w)) (w.voters ??= {})[c.voter ?? c.hero.id] = c.hero.name;
-  if (c.vote) vote(w, c.voter ?? c.hero.id, c.vote, quorum);
+  if (c.vote && vote(w, c.voter ?? c.hero.id, c.vote, now)) (w.voters ??= {})[c.voter ?? c.hero.id] = c.hero.name;
+  // The council may have just opened (its close is set) or closed (decided): checked after every change.
+  settle(w, now);
   if (c.deed) (w.deeds ??= []).unshift({ ...c.deed, day: w.day }), (w.deeds.length = Math.min(w.deeds.length, DEEDS));
 }
 

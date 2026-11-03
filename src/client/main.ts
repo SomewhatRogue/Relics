@@ -248,7 +248,8 @@ function hud(now: number): void {
   $('.rcd').innerHTML = relic ? (input.touch ? '' : 'R ') + (it && isDark(it) ? RELICS[relic].short + ' ' + RELICW.dark : tag(relic)) + (it ? `<i class="rchgl" style="--chg:${chg};--chgc:${chgc}"></i>` : '') : '';
   $('.rcd').classList.toggle('wait', !!relic && (left(relic) > 0 || (!!it && isDark(it))));
   $('.litbadge').hidden = !me.lit;
-  setVotes(game.world, !!game.link?.online);
+  game.settleCouncil();
+  setVotes(game.world);
   if (input.touch) {
     const sb = $('.tb.relic'), rb = $('.tb.relic2');
     sb.hidden = !known;

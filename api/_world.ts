@@ -7,7 +7,7 @@
  */
 import { CLASS_ORDER } from '../src/shared/weapons.js';
 import { STAT_ORDER, newStats, type Stats } from '../src/shared/progress.js';
-import { CHAPTER_1, newWorld, type WorldState } from '../src/shared/story.js';
+import { CHAPTER_1, newWorld, settle, type WorldState } from '../src/shared/story.js';
 import { BOARD_SIZE, contribute, type Board, type Contribution } from '../src/shared/worldsync.js';
 import { WORK_ORDER } from '../src/shared/works.js';
 
@@ -49,7 +49,8 @@ export function clean(raw: unknown): Contribution | null {
 
 const emptyBoard = (): Board => Object.fromEntries(STAT_ORDER.map((k) => [k, []])) as unknown as Board;
 
-export function memoryWorldStore(): WorldStore {
+/** In memory (tests, local dev). `clock`: real time, unless a test moves it. */
+export function memoryWorldStore(clock = () => Date.now()): WorldStore {
   const worlds = new Map<string, WorldState>(), stats = new Map<string, Map<string, { name: string; cls: Contribution['hero']['cls']; s: Stats }>>();
   const board = (g: string): Board => {
     const b = emptyBoard(), m = stats.get(g);
@@ -57,14 +58,19 @@ export function memoryWorldStore(): WorldStore {
       b[k] = [...m.entries()].filter(([, v]) => v.s[k] > 0).map(([id, v]) => ({ id, name: v.name, cls: v.cls, n: v.s[k] })).sort((a, z) => z.n - a.n).slice(0, BOARD_SIZE);
     return b;
   };
-  const view = (g: string) => ({ world: structuredClone(worlds.get(g) ?? newWorld()), board: board(g) });
+  // Read lazily settled: a council past its close is decided by whoever looks first (story.ts settle).
+  const view = (g: string) => {
+    const w = worlds.get(g) ?? newWorld();
+    settle(w, clock());
+    return { world: structuredClone(w), board: board(g) };
+  };
   return {
     async load(g) {
       return view(g);
     },
     async apply(g, c) {
       const w = worlds.get(g) ?? newWorld();
-      contribute(w, c);
+      contribute(w, c, clock());
       worlds.set(g, w);
       const m = stats.get(g) ?? new Map();
       stats.set(g, m);
@@ -94,7 +100,10 @@ export async function redisWorldStore(url: string): Promise<WorldStore> {
   return {
     async load(g) {
       const [raw, b] = await Promise.all([r.get(wk(g)), board(g)]);
-      return { world: read(raw), board: b };
+      // Settled as it's read (not written back: the same ballots give the same result; the next write keeps it).
+      const w = read(raw);
+      settle(w, Date.now());
+      return { world: w, board: b };
     },
     async apply(g, c) {
       let world = newWorld();

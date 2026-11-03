@@ -12,7 +12,7 @@ import { contribute, type Contribution } from '../shared/worldsync';
 import { HERO_SLOTS, SHOP, gainXp, newProfile, perkFx, perkOffer, resetPerks, takePerk, type PerkId, type Profile } from '../shared/progress';
 import { dueLevels, jobXp } from '../shared/pace';
 import { Rng } from '../shared/rng';
-import { CHAPTER_1, QUORUM, rewardMult, type WorldState } from '../shared/story';
+import { CHAPTER_1, rewardMult, settle, type WorldState } from '../shared/story';
 import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
 import { buyDrill, learnLesson } from '../shared/training';
 import { knowsSkill, learnSkill } from '../shared/skillteach';
@@ -1085,17 +1085,25 @@ export class Game {
   }
 
   /**
-   * What this hero does to the shared world: applied here at once (the council needs a quorum online;
-   * alone and offline, your vote decides), sent to the world server, and on the hero's own line.
+   * What this hero does to the shared world: applied here at once, sent to the world server, and on
+   * the hero's own line. (The council's week closes the same way online or off: story.ts settle.)
    */
   give(c: Omit<Contribution, 'hero'>): void {
     const p = this.profile, before = this.townKey();
     const full: Contribution = { ...c, hero: { id: p.id, name: p.name, cls: p.cls } };
     // Online the world server rolls the nights for raids (everyone sees the same one); off it, this browser does.
-    contribute(this.world, full, this.link?.online ? QUORUM : 1, !this.link?.online);
+    contribute(this.world, full, Date.now(), !this.link?.online);
     for (const [k, n] of Object.entries(c.stats ?? {})) p.stats[k as keyof typeof p.stats] += n ?? 0;
     store(this.save);
     this.link?.send(full);
+    if (this.townKey() !== before) this.rebuildTown();
+  }
+
+  /** The council's week, looked at now (each frame): past its close, it's decided here too, online or off. */
+  settleCouncil(): void {
+    const before = this.townKey();
+    if (!settle(this.world, Date.now())) return;
+    store(this.save);
     if (this.townKey() !== before) this.rebuildTown();
   }
 

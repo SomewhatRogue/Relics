@@ -6,8 +6,9 @@
 
 /** On the boards (the 3x5 pixel font: capitals, short). */
 export const BOARDW = {
-  closes: (quorum: number, left: number) => `CLOSES AT ${quorum} VOTES: ${left} TO GO`,
-  alone: 'PLAYING ALONE: YOUR VOTE DECIDES',
+  /** When it closes, by how many nights off (0 tonight, 1 tomorrow) and the weekday of that night. */
+  closes: (nights: number, day: string) => `VOTING CLOSES ${nights <= 0 ? 'TONIGHT' : nights === 1 ? 'TOMORROW NIGHT' : day + ' NIGHT'}`,
+  votes: (n: number) => `${n} ${n === 1 ? 'VOTE' : 'VOTES'}`,
   notYet: 'THE COUNCIL HAS NOT SAT YET',
   chose: (short: string) => `THE COUNCIL CHOSE: ${short}`,
   nobody: 'NOBODY YET',
@@ -30,6 +31,13 @@ export const ADVOCATES: Record<number, { choice: string; title: string; who: str
       "And there's a trader out there, Dessa, who knows every road in this valley and which ones still have a bridge. Bram will tell you about the barley, and he's right about the barley, he's always right about the barley. Ask his wife.",
     ],
   },
+};
+
+/** The reeve's panel: when it closes, and that you can change your mind until then. */
+export const COUNCILW = {
+  closes: (nights: number, day: string) => `Everyone in Wickhold has a voice, all week. Voting closes at midnight ${nights <= 0 ? 'tonight' : nights === 1 ? 'tomorrow night' : `on ${day.charAt(0) + day.slice(1).toLowerCase()} night`}, and whichever side has the most voices then wins.`,
+  tied: 'It was a tie, so the council sits one more night. If it\'s still a tie, Hollis breaks it himself.',
+  yours: 'Your voice is in. You can change it until voting closes.',
 };
 
 /** Under the advocate's words: where the vote is actually cast. */

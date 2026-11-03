@@ -1,7 +1,9 @@
 /** What each person in Wickhold says and offers, the spots in the open, and the end-of-run results. */
 import { FAMILIES, PATIENTS } from '../shared/interiors';
 import { openTrainer } from './trainerui';
-import { CHAPTER_1, QUORUM, chapterGoals, councilOpen, rewardMult } from '../shared/story';
+import { CHAPTER_1, chapterGoals, councilOpen, rewardMult } from '../shared/story';
+import { COUNCILW } from './councilwords';
+import { closeNight } from './voteboards';
 import { TRAINERS, type SpotId } from '../shared/town';
 import { ballot } from '../shared/worldsync';
 import { openSquare } from './squareui';
@@ -83,9 +85,9 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       return panel.show('REEVE HOLLIS', status + say('Reeve Hollis', `${c.label}. That's what the council said, so that's what we do. Some of them will never forgive the rest. That's councils.`) + p(c.text) + p('What comes next is still being written. Hollis will nail it up when it is.'));
     }
     if (!councilOpen(w)) return panel.show('REEVE HOLLIS', status + say('Reeve Hollis', "Bring six of ours home and ring Barrowby's bell, and I'll call the council. Until then the only thing to decide is who's on the wall tonight, and that's always me."));
-    const b = ballot(w), mine = w.ballots[d.id]?.[device()] ?? w.ballots[d.id]?.[pr.id], need = g.link?.online ? QUORUM : 1;
+    const b = ballot(w), mine = w.ballots[d.id]?.[device()] ?? w.ballots[d.id]?.[pr.id];
     panel.show('THE COUNCIL SITS', status + p(`<b>${d.question}</b>`) + d.choices.map((c) => p(`<b>${c.label}.</b> ${c.text} <span class="dim">(${b.counts[c.id] ?? 0} for)</span>`)).join('') +
-      p(need > 1 ? `The council decides when ${need} heroes have voted: ${b.voters} so far.${mine ? ' Your voice is in; you can change it until it decides.' : ''}` : 'Playing alone, off the shared world: your vote decides.'),
+      p(COUNCILW.closes(...closeNight(w.councilCloses ?? Date.now()))) + (w.councilTied ? p(COUNCILW.tied) : '') + (mine ? p(COUNCILW.yours) : ''),
       d.choices.map((c) => ({ label: `${mine === c.id ? 'VOTED: ' : 'VOTE: '}${c.label.toUpperCase()}`, primary: mine !== c.id, act: () => (g.vote(c.id), again()) })));
   } else if (id === 'advocate') {
     // Under each vote board, someone arguing for it while the council's undecided; after, the usual talk.

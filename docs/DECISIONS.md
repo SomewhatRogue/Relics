@@ -2523,3 +2523,23 @@ strong based on physics and buff or debuff ... clear that it doesn't have friend
   His old bench stays in `shops.ts` behind `IVO_BUSY`; the town tip no longer sends you to him for relics.
 - New words for the lore keeper and line editor: listed in the report for this change (relicwords,
   storewords FORGE.busy, councilwords).
+
+## 2026-11-03: the council sits a week (Kyle; Claude Opus 5.5)
+
+- Kyle: "it shouldn't be playing alone; the server is anyone who comes into the server, and it happens
+  that WEEK." The 4-vote quorum is gone. A council vote is open to everyone on the server all week and
+  closes at midnight at the end of Sunday, Pacific (`shared/councilweek.ts`: America/Los_Angeles through
+  Intl, so daylight saving is followed). A council opening with under a day left sits the next week too.
+- At the close the most votes win and the effects land then. **Tie:** the council sits one more night
+  (24 hours, once); tied again, Reeve Hollis breaks it for the side that was voted for first. **No votes
+  at all:** it sits another week, and again, until somebody votes (nothing the council can decide is
+  decided for it).
+- **Changing your vote:** yes, until the close. Still one voice per device (all its heroes share it);
+  the boards name it by the hero who last voted from it.
+- **Lazy, no cron:** `settle(w, now)` (story.ts) runs whenever the world is read or written: in
+  `contribute` (after each change), in both world stores' `load` (Redis settles what it read without
+  writing it back; the same ballots give the same result, and the next write keeps it), and in the
+  browser each frame (`Game.settleCouncil`), which is how a world off the server closes too. Votes after
+  the close are refused. `memoryWorldStore` takes a clock for tests.
+- The boards' top line: VOTING CLOSES TONIGHT / TOMORROW NIGHT / SUNDAY NIGHT (by the Pacific
+  calendar), then THE COUNCIL CHOSE: X. Each board: its count (n VOTES) and up to three names.

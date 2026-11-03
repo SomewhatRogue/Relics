@@ -50,16 +50,14 @@ describe('the world server', () => {
     expect((await s.load('our-band')).world.rescued).toBe(0);
   });
 
-  it('the council decides when four heroes have voted, by majority', async () => {
-    const s = memoryWorldStore();
+  it('the council stays open all week whoever votes, and closes at the week end (tests/council.test.ts)', async () => {
+    let now = Date.UTC(2026, 10, 4, 20);
+    const s = memoryWorldStore(() => now);
     for (let i = 1; i <= 6; i++) await s.apply('g', { hero: hero(i), rescued: 1, story: i === 1 ? CHAPTER_1.mission.id : undefined });
-    await s.apply('g', { hero: hero(1), vote: 'farm' });
-    await s.apply('g', { hero: hero(2), vote: 'refugees' });
-    let v = await s.apply('g', { hero: hero(3), vote: 'refugees' });
-    expect(v.world.flags['north-fields']).toBeUndefined();
-    v = await s.apply('g', { hero: hero(4), vote: 'farm' });
-    // Two each: the tie goes to the choice voted first.
-    expect(v.world.flags['north-fields']).toBe('farm');
+    for (let i = 1; i <= 5; i++) await s.apply('g', { hero: hero(i), vote: i < 4 ? 'refugees' : 'farm', voter: 'd' + i });
+    expect((await s.load('g')).world.flags['north-fields']).toBeUndefined();
+    now = Date.UTC(2026, 10, 9, 8);
+    expect((await s.load('g')).world.flags['north-fields']).toBe('refugees');
   });
 });
 
@@ -169,8 +167,8 @@ describe('the board and the council, shared', () => {
     const w = newWorld();
     Object.assign(w, { rescued: 99, storyDone: [CHAPTER_1.mission.id] });
     const [a, b] = CHAPTER_1.decision.choices.map((c) => c.id);
-    contribute(w, { hero: { id: 'hone000001', name: 'ONE', cls: 'MAGE' }, vote: a, voter: 'dphone0001' }, 9);
-    contribute(w, { hero: { id: 'htwo000002', name: 'TWO', cls: 'ROGUE' }, vote: b, voter: 'dphone0001' }, 9);
+    contribute(w, { hero: { id: 'hone000001', name: 'ONE', cls: 'MAGE' }, vote: a, voter: 'dphone0001' });
+    contribute(w, { hero: { id: 'htwo000002', name: 'TWO', cls: 'ROGUE' }, vote: b, voter: 'dphone0001' });
     expect(Object.keys(w.ballots[CHAPTER_1.decision.id])).toEqual(['dphone0001']);
     // The town hall's boards name the voice by the hero who last cast it, under what it's for now.
     const { ballot } = await import('../src/shared/worldsync');

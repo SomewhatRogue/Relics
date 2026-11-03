@@ -117,7 +117,7 @@ describe('raids', () => {
     expect(wa.raids).toEqual(wb.raids);
     expect(wa.works).toEqual(wb.works);
     const off = withWorks(...all);
-    for (let i = 0; i < 60; i++) contribute(off, { hero, days: 1 }, 1, false);
+    for (let i = 0; i < 60; i++) contribute(off, { hero, days: 1 }, Date.now(), false);
     expect(off.raids).toBeUndefined();
   });
 });
