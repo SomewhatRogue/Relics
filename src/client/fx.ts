@@ -11,6 +11,7 @@ import { toPx } from './world';
 import { CRY } from './captives';
 import { spiderFx } from './fxspiders';
 import { weakFx } from './fxweak';
+import { skillFx } from './fxskills';
 
 interface Part { x: number; y: number; vx: number; vy: number; life: number; max: number; col: string; glow: boolean; grav: number; stick: boolean }
 interface Text { x: number; y: number; s: string; col: string; life: number; rise?: number }
@@ -78,7 +79,7 @@ export class Fx {
 
   on(ev: FightEvent): void {
     const [x, y] = toPx(ev.x, ev.y);
-    if (spiderFx(this, ev, x, y) || weakFx(this, ev, x, y)) return;
+    if (spiderFx(this, ev, x, y) || weakFx(this, ev, x, y) || skillFx(this, ev, x, y)) return;
     switch (ev.k) {
       case 'impact':
         if (ev.kind === 'slam') {

@@ -40,6 +40,7 @@ import { SPOT_REACH } from '../shared/town';
 import { dusk } from './streetlife';
 import { drawMist, setSun, torchIn } from './daytime';
 import { drawPuddles } from './spiders';
+import { drawSkills, skillLights } from './skillsdraw';
 import { witchColour } from './hallsdraw';
 
 
@@ -307,6 +308,7 @@ export class Scene {
     // Blessed ground: a ring of gold on the floor, light rising off it.
     for (const s of room.snares) drawSnare(c, s, OX + s.x * PX - cx, OY + s.y * PX - cy);
     for (const z of room.zones) {
+      if (z.kind) continue;
       const zx = OX + z.x * PX - cx, zy = OY + z.y * PX - cy, R = z.r * PX, left = z.until - room.time, k = Math.min(1, left / 1.2);
       glow.globalAlpha = 0.75 * k;
       glow.fillStyle = '#ffd27a';
@@ -319,6 +321,8 @@ export class Scene {
       }
       glow.globalAlpha = 1;
     }
+    // The skills taught after the first: rings wound up, a volley, a fire ring, a tether, a chain (skillsdraw.ts).
+    drawSkills(c, room, cx, cy);
     // At a fork, both ways out glow, each with its name.
     if (room.exitOpen) for (const r of map.roads ?? []) {
       const e = r.area, ex = OX + e.x * PX - cx, ey = OY + e.y * PX - cy;
@@ -377,7 +381,8 @@ export class Scene {
       if (!fire && (b.maxHp || (b.kind !== 'house' && b.kind !== 'church' && b.kind !== 'hall' && b.kind !== 'forge'))) continue;
       lights.push({ x: bx + (b.w * PX) / 2 - cx, y: by + b.h * PX - cy, r: 34, i: 0.45, c: b.kind === 'forge' ? [1, 0.5, 0.25] : [1, 0.8, 0.5] });
     }
-    for (const z of room.zones) lights.push({ x: OX + z.x * PX - cx, y: OY + z.y * PX - cy - 6, r: z.r * PX * 1.4, i: 0.8 * Math.min(1, (z.until - room.time) / 1.2), c: [1, 0.85, 0.5] });
+    lights.push(...skillLights(room, cx, cy, now));
+    for (const z of room.zones) if (!z.kind) lights.push({ x: OX + z.x * PX - cx, y: OY + z.y * PX - cy - 6, r: z.r * PX * 1.4, i: 0.8 * Math.min(1, (z.until - room.time) / 1.2), c: [1, 0.85, 0.5] });
     for (const h of room.heroes) {
       const [x, y] = lerp('h:' + h.id, h.x, h.y);
       // Underground (no moon), each hero carries a lantern.

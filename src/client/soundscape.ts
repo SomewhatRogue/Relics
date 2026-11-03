@@ -11,6 +11,7 @@ import type { Game } from './game';
 import type { Music } from './music';
 import { SCORES, type Area } from './scores';
 import { sfx } from './sfx';
+import { SKILL_SOUNDS } from './fxskills';
 import { DRUMMER } from '../shared/tuning';
 import { butcher, goblin } from './voices';
 import { spiderSounds } from './spidersfx';
@@ -97,7 +98,7 @@ export class Soundscape {
       if (e && isSpiderKind(e.kind)) return spiderSounds.hiss();
       return e?.kind === 'butcher' ? butcher.roar(false) : goblin.cackle(e?.id ?? 1);
     }
-    (sfx as unknown as AnyFx)[ev.k]?.();
+    (sfx as unknown as AnyFx)[SKILL_SOUNDS[ev.k] ?? ev.k]?.();
   }
 
   /** Every frame: doors, goblin chatter, fire, and the music. */
