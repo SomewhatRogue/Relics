@@ -2,6 +2,48 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-02: what you pick up on a job is yours, whatever happens to your page (Kyle; Claude Opus 5.5)
+
+Kyle: "What if someone drops and rejoins multiplayer but picked up gold or an item? I want to make sure
+they have it when they reload." Then: "Shouldn't be my device, should be whoever started the job."
+
+- **The leader keeps what the job owes.** The room decides, so whoever runs the job (CoopHost, and
+  whoever takes it on) writes each member's share to the server (`api/owed.ts`, `api/_owed.ts`: one
+  Redis hash per hero, `relic:owed:<heroId>`, a field per job's room code, a week's keeping). Written
+  when the pot changed, at most every 4 s, for everyone still with the job (heard in the last 5 s);
+  someone gone keeps the share they had when they went. At the end, everyone still with it is written
+  the outcome too (`end: won | beaten`), so a page that was hidden at the end is paid as won.
+- **Claimed once, on load** (`Game.settle`, from main.ts once a hero is in town and has no job to get
+  back into, or when a job turns out to be gone). The pay goes into the save in the same store as the
+  job's mark in `profile.paid` (the last 12 jobs), then the server's record is dropped. A record for a
+  job already paid is only dropped. So a reload mid-payout, a late write from the leader or a lost
+  drop can never pay twice.
+- **Each device's own tally** (`client/jobbank.ts`) is only a fallback: paid when the server can't be
+  reached, or for a job alone (never on the server). Never both: whichever pays marks the job paid.
+- **What each pays.** Won: the pot, the job's pay, the treasure. Driven back (beaten): half the pot.
+  Alone, leaving or being cut off loses the job: half, as driven back (so closing the tab never beats
+  LEAVE). With a party, going early, by LEAVE or cut off (a crash, a closed tab, the leader gone and
+  nobody to take it on), keeps the pot as it was while you were with them, in full, and the experience
+  earned, but not the job's pay. LEAVE with a party was half before; it's now the same as a drop. The
+  Ransom Coat only bites when it's half. New title for going early: HOME EARLY.
+- **A leader back after a reload** leads again from the job as it kept it, but the room waits up to 10 s
+  for a friend to answer; nobody does (they finished it, or left), and the job is given up and settled
+  from the record, rather than the old leader replaying a stale job alone.
+- **Kit is saved the moment the room changes it** (`client/keepkit.ts`), for a friend now too: a weapon
+  swapped from the pack, the relic carried, the Mage's element (a friend's weapon swap was lost on
+  reload before). **And never rolled back:** a room restored from a whole-job save (a reload, a
+  takeover) is dressed from each player's own save (their profile is the newer word on their kit; a
+  friend's on their first hello), and a piece already in someone's save isn't left on the floor too.
+  The pack's size rule on pickup is the room's (`sim/loot.ts`), unchanged.
+- **Stress** (`scripts/stress/keep.cjs`): 22 a friend picks up and reloads, paid what the leader is;
+  23 a friend closes the tab, the job ends, he comes back: the ring, the pot as it was, the experience,
+  paid once (his device tally wiped first, so it's the leader's record); 24 the leader crashes, a friend
+  finishes, the old leader comes back: the ring and his share (device tally wiped too); 25 a friend
+  swaps weapon and reloads: still holding it. Scenarios 1, 2, 3 and 20 now expect HOME EARLY.
+- **Unsure:** no accounts, as for the world: anyone knowing a hero id could write it gold (capped at 5000
+  a job). A friend coming back to a job that ended still waits the 35 s a lost leader takes before
+  being paid. A record the leader never got to write (it crashed in its first seconds) pays nothing.
+
 ## 2026-11-02: the 2.5D view everywhere, a quality switch, the hand crossbow (Kyle; Claude Opus 5.5)
 
 Kyle played 2.5D on jobs ("It seemed to run really well") and asked: "No 2.5D in the main hub area?",
