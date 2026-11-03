@@ -2252,3 +2252,55 @@ Beyond that, I want training to be its own expandable / collapsible area."
   "Later it teaches..." sentence; callouts STAMP, GONE, FIRE RING, PINNED; headers TECHNIQUE, RANKS;
   CARRYING, CARRY, LEARN, READY, NEXT AT LEVEL, TAUGHT AT LEVEL n FOR n GOLD; the carry note.
 
+
+## 2026-11-03: setting a house alight (Kyle; Claude Opus 5.5)
+
+Kyle: "Instead of going into a building that's a small house, you can firebomb or light the house on
+fire. It goes up over time, smokes, and flushes out or kills things inside ... Con: maybe there are
+prisoners in there. You cannot enter a flaming house." Then: "Not right at the door; maybe a spot to
+the side that glints a little as you get close, but always the same spot ... Also a Mage can
+accidentally burn it down, ditto anyone who throws fire oil."
+
+- **The kindling spot** (`shared/kindling.ts`): every house on a job you could walk into (cottage or
+  barn, standing or half fallen in) has one woodpile stacked against a side wall near its front corner,
+  side and height from the house's own seed, kept clear of other walls and bushes with room to stand.
+  Never at the door. Big houses (longhouse, manor, tithe barn) get one too and are slower: 2.4 s to
+  light, 40 s to burn. Dens keep their rules (no spot; fire burns them out as before). Houses already
+  burning or fallen in across their door have none.
+- **Lighting it** (`sim/kindle.ts`, like a nest: `sim/torch.ts`): within 1.05 tiles GRAB reads BURN (laptop
+  G BURN); crouch 1.5 s (a hit, a swing, a dodge or a step puts it out, starting again from nothing).
+  State on the block (`lighter`, `lightT`), so a friend's screen has it; the press goes through the grab
+  intent, the room decides.
+- **By accident** (`sim/catching.ts`, numbers `CATCH` in tuning.ts, rolled on the room's own fire
+  stream): a Lamp Oil flask bursting against a house 90% (at its kindling 90%), the oil barrel 90%; a fire
+  spell or fire relic's burst against the wall (within 0.4) 75%, the edge of a burst 12%; a spark or fire
+  arrow striking the wall 12%; a Fire Ring reaching it 30%; a burning goblin rubbing on it 4% a second; a
+  burning neighbour within reach 2% a second. Dens, sheds and fences still catch every time.
+- **Burning** (`sim/houseburn.ts`, `HOUSEBURN` in tuning.ts): catches 3 s, burns 24 more (a barn 30, a big
+  house 40), the roof comes in: a burnt shell (ruined). Its health falls on that clock, so the flames
+  grow (flat and 2.5D; smoke in both). Nobody goes in once it's alight. What's inside comes from the
+  leader's game (`client/houseindoors.ts`): a house someone's been in from its room, one nobody has from
+  its plan. Goblins choke 2.5 a second until they're out: the awake from 1.6 s, one every 0.9 s; the
+  sleeping somewhere in 4 to 14 s (4 to 22 in a big house), so the longer it burns the more die; each
+  comes out of the door on fire for 1 s, hurt, alert, into the street (its loot falls there). One the
+  smoke has all but killed comes out at 1 health and drops on the doorstep (my call: a body in the
+  doorway reads better than a silent count, and its kill and loot land where you can take them).
+- **The caged** are lost as the roof comes in: `cagelost`, counted on the run as before, never a failed
+  job; each takes 15% off the job's pay (at most 60%), and the result already says "Lost to the fire".
+- **Chests in houses** (new, my call: the brief assumed a chest inside could burn, and houses had none):
+  20% of cottages, 15% of barns, 6% of looted ones, 40% of big houses have one, on a stream of its own so
+  nothing else about the house moved. Burned, it leaves 6 to 14 gold and, half the time, one plain piece
+  at the door (`charred`).
+- **The warning**: the gold diamond on known captive houses is unchanged; at the kindling of any house
+  with someone still caged (`cry` on the block, set by the leader from the plan or the room), a muffled
+  cry through the wall and SOMEONE'S INSIDE over the pile, once each time you come up. Accidental fire can
+  still take them.
+- **A friend inside** (per-player houses): when a house with a room catches, that room burns too (its own
+  plan squeezed into the time left: `blazeFrom` in shared/blaze.ts), the smoke hurting 5 a second after a
+  4 s grace (it can down you), fire patches and beams as in a burning house; as the roof comes in,
+  everyone still in is thrown out into the street (`outOfTheFire` in game.ts). A guest's room is sent
+  whole again so the fire shows on their screen (`coop.fresh`).
+- New words for the lore keeper and line editor: BURN (button), G BURN (laptop), SOMEONE'S INSIDE
+  (`client/kindlecue.ts`). Fx words reused: BURNING.
+- Tests: `tests/houseburn.test.ts`; stress scenario 26 (a friend inside when the leader lights the
+  house); screenshots `scripts/houseburn.cjs`.

@@ -2,6 +2,18 @@
 
 ## Current slice
 
+**Setting a house alight** (Claude Opus 5.5, 2026-11-03; Kyle: "you can firebomb or light the house on
+fire ... flushes out or kills things inside", "a spot to the side that glints a little as you get close,
+but always the same spot", "a Mage can accidentally burn it down, ditto anyone who throws fire oil").
+Built; waiting on Kyle's play. *Done when* every small house on a job has a woodpile by a side wall that
+glints as Kyle comes within a few steps; at it BURN (G BURN) crouches 1.5 s and the house catches, smokes,
+burns for half a minute and falls in to a shell nobody can enter; goblins inside come out of the door on
+fire and hurt, the late ones dying on the doorstep; at a house with someone caged a muffled cry and
+SOMEONE'S INSIDE warn him off, and if it burns anyway they're lost on the result and the pay; a Lamp Oil
+flask on a house nearly always lights it and a Mage's fireballs now and then; and a friend inside when
+it catches gets a few seconds before the smoke and is out in the street as it falls. Open: the words
+through the lore keeper and line editor; the chance numbers once Kyle has played with a Mage.
+
 **Nests you can reach and burn out** (Claude Opus 5.5, 2026-11-03; Kyle: spiders "respawn too quickly
 so it's hard to kill their nest", too much HP for a Rogue, "if you run up to it you can light it on
 fire and it burns out"). Built; waiting on Kyle's play. *Done when* a nest's waves come every 12 s solo
