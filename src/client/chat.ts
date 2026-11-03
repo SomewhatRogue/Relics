@@ -37,7 +37,7 @@ export class Chat {
   private ch: Channel = 'world';
   private where: Where = 'off';
 
-  constructor(private game: Game, private scene: Scene, touch: boolean, busy: () => boolean) {
+  constructor(private game: Game, private scene: Pick<Scene, 'tileScreen'>, touch: boolean, busy: () => boolean) {
     this.box = new ChatBox(this.log, touch);
     this.box.canOpen = () => this.where !== 'off' && !busy();
     this.box.onSay = (s) => this.say(s);

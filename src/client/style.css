@@ -435,3 +435,9 @@ body:not([data-mode='run']) #leave { display: none; }
 body[data-mode='run'] #tips { display: none; }
 /* A long weapon line wraps short of the corner buttons instead of running under them. */
 #hud .gear.kit { white-space: normal; width: min(230px, 58vw); display: block; line-height: 1.35; }
+
+/* The VIEW switch at the top of the ? panel (three/switch.ts). */
+#viewswitch { position: absolute; top: calc(10px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 10px; background: #14121af2; border: 1px solid #4f4a5c; border-radius: 6px; z-index: 1; }
+#viewswitch button { height: 32px; padding: 0 14px; background: #1b1922; border: 1px solid #c8b080; border-radius: 4px; color: #ffe6b0; font-size: 11px; letter-spacing: 0.12em; }
+#viewswitch button.on { background: #4a3414; border-color: #ffd27a; }
+#viewswitch span { color: #8a8494; font-size: 10px; }
