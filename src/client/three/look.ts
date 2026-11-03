@@ -1,5 +1,5 @@
 /**
- * Which view draws a job: the pixel scene (FLAT, the default) or the low-res 3D one (2.5D). Set by
+ * Which view draws a job: the pixel scene (FLAT) or the low-res 3D one (2.5D, the default). Set by
  * ?look=3d (or 2.5d) in the address, or by the VIEW switch (remembered on this device). Also the
  * 3D quality (?q=low|mid|high, or the QUALITY switch, remembered; high on every device unless
  * someone picks less) and the frame-time readout (?perf=1).
@@ -16,15 +16,21 @@ const url = new URLSearchParams(location.search);
  */
 export const BOXFIGS = url.get('figs') === '3d';
 
-/** The view to start in: the address wins, then what this device last chose. */
+/**
+ * The view to start in: the address wins, then what this device last chose, then 2.5D (Kyle,
+ * 2026-11-03). Test browsers (navigator.webdriver) still start flat unless the address asks, so the
+ * scripts keep their speed and their pictures.
+ */
 export function startLook(): Look {
   const u = url.get('look');
   if (u === '3d' || u === '2.5d') return '3d';
   if (u === 'pixel' || u === 'flat' || u === '2d') return 'pixel';
+  const fallback: Look = navigator.webdriver ? 'pixel' : '3d';
   try {
-    return localStorage.getItem(KEY) === '3d' ? '3d' : 'pixel';
+    const s = localStorage.getItem(KEY);
+    return s === '3d' || s === 'pixel' ? s : fallback;
   } catch {
-    return 'pixel';
+    return fallback;
   }
 }
 
