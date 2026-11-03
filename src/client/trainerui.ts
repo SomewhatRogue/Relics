@@ -30,8 +30,8 @@ const row = (r: TrainRow) =>
 /** A skill: what it does; carried, known (tap to carry), or the level and price it's taught at. */
 function skillRow(r: TrainRow, carried: RelicId, known: boolean): string {
   const on = known && r.skill === carried;
-  const tag = on ? 'CARRYING' : known ? 'CARRY' : r.tag;
-  const when = known ? '' : `<small class="tr-lv">LEVEL ${r.level} &middot; ${r.price} GOLD</small>`;
+  const tag = on ? 'CARRYING' : known ? 'CARRY' : r.state === 'buy' ? 'LEARN' : r.tag;
+  const when = known ? '' : `<small class="tr-lv">TAUGHT AT LEVEL ${r.level} FOR ${r.price} GOLD</small>`;
   return `<button class="tr-skill s-${known ? 'known' : r.state}${on ? ' carried' : ''}" ${known ? `data-carry="${r.skill}"` : `data-row="${r.key}"`}>` +
     `<span class="tr-n">${r.name}</span><em class="tr-t">${tag}</em><span class="tr-d">${r.text}</span>${when}</button>`;
 }
@@ -55,7 +55,7 @@ export function openTrainer(g: Game, panel: Panel, title: string, who: string, g
   const choices = SKILL_CHOICES[p.cls], known = choices.filter((r) => knowsSkill(p, r));
   const carried = p.skill && known.includes(p.skill) ? p.skill : known[0] ?? CLASS_SKILL[p.cls];
   const sNext = nextLevel(skills);
-  const skillSum = [known.length ? `CARRYING ${RELICS[carried].short}` : '', `${known.length} OF ${choices.length}`, sNext ? `NEXT AT LEVEL ${sNext}` : ''].filter(Boolean).join(' &middot; ');
+  const skillSum = [known.length ? `CARRYING ${RELICS[carried].name}` : '', `${known.length} OF ${choices.length}`, sNext ? `NEXT AT LEVEL ${sNext}` : ''].filter(Boolean).join(' &middot; ');
   const skillBody = skills.map((r) => skillRow(r, carried, !!r.skill && knowsSkill(p, r.skill))).join('') +
     (known.length > 1 ? '<p class="tr-note">Tap a skill you know to carry it. One at a time, changed here for nothing.</p>' : '');
   // The class's own craft, and the base stats.
