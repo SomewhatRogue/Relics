@@ -2,6 +2,18 @@
 
 ## Current slice
 
+**The 2.5D view on jobs, options under a gear** (Claude Opus 5.5, 2026-11-02; Kyle: wants the look
+test's low-res 3D, "a button someone can get to from options", the ? panel "WAY too much info").
+Step 1 built; waiting on Kyle's play. *Done when* Kyle taps the gear on his phone and his laptop, picks
+VIEW: 2.5D mid-fight and the job carries on in low-res 3D (houses with doors, burning houses, goblins
+with glowing eyes, the butcher's red that fills and flashes white, a striped edge on what can't be
+blocked, friends' names over their heads, the gold marks and the arrow to the way on), flips back to
+FLAT and nothing else changed; it's remembered next time; and it feels smooth on his phone (or ?q=low
+does). Not yet in 2.5D: town and the wood; a Mage's blink image; the grappling hook's line; drummers'
+reach rings; swing trails; NPCs and the goblins' grim leavings (hung bodies, the pot); the hungry
+gear's marks and status icons over goblins; marks at the edge for the freed who fall behind; the
+relic held up in the wood; mist; Blender art.
+
 **The pack, the vault, Tobin's stall, the forge** (Claude Opus 5.5, 2026-11-02; Kyle: "Castle of the
 Winds or Diablo style", "a somewhat ruined bank", "a generic merchant"). Built; waiting on Kyle's play.
 *Done when* Kyle opens PACK on a job and sees what's on each part of his hero, taps a piece and reads it

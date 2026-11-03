@@ -2,6 +2,53 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-02: the 2.5D view (low-res 3D) on jobs, and options under a gear (Kyle; Claude Opus 5.5)
+
+Kyle saw the 2.5D look test (low-res 3D that reads as pixel art) and wants that style. Step 1: a second
+renderer for the same room, opt-in, on jobs only. Then: "can we have a button someone can get to from
+options to toggle between?", the ? panel had "WAY too much info", and he calls the views FLAT and 2.5D.
+
+- **Same room, second drawer.** `client/three/` (about 30 small files) draws the `ArenaRoom` the pixel
+  scene draws, nothing else: no sim change, no relay or coop change. Telegraphs are shaped from the
+  enemy's `attack` (circle, sector by `arc`, lane, an arrow's line), so the red you see is the one
+  judged; the white edge is the same parry window the 2D scene uses (`parryWindow + lenience`).
+  Positions ease between ticks with `room.prev` and `alpha`, as scene.ts does. Online guests draw the
+  room they're sent; buildings are keyed by their place in the list, since a guest's blocks are new
+  objects on every update.
+- **The look** (copied from the look test, three.js r128 there, 0.160.0 bundled here, never a CDN):
+  painted at a low resolution and scaled by a whole number with CSS `pixelated`; Lambert light banded
+  into five steps with a 4x4 Bayer dither (the 2D pass's bands) and point lights falling off as the 2D
+  pass's do (`post.ts` patches three's attenuation); a post pass outlines silhouettes one pixel dark from
+  depth and lets glowing things (alpha below 1) bleed; 36 degree orthographic three-quarter camera
+  following the hero, snapped to the pixel grid. Colours are hex as painted (colour management off).
+- **What's reused rather than redrawn.** The floor and the back wall's face are the 2D painting itself
+  (`paintMap`), laid on the ground and the wall, so floors, soil, marks, water and the way out match;
+  blood decals are painted into that floor as they're spilled. The effects are Fx's own (sparks,
+  rings, lightning, gore, words), each re-projected from where the room put it onto a low-res overlay
+  canvas with the 3x5 pixel font, so every event the 2D view shows has a 3D place without new code.
+- **Seeing your hero.** Heroes draw last, on their own layer: first as a dithered pale silhouette
+  where something nearer hides them, then as themselves, so only hidden parts stay a silhouette. Behind
+  a building its roof comes off and its walls drop low.
+- **Lazy and live.** three.js and the view are a separate chunk loaded the first time 2.5D is wanted
+  (the flat game's bundle grows about 2 KB). Switching is live mid-fight: only which canvas shows
+  changes. `?look=3d` (or `2.5d`) starts in 2.5D; the switch is remembered in localStorage. Town and the
+  wood stay flat for now, even with 2.5D on.
+- **Quality knob** (`three/look.ts`): `?q=low|mid|high`, mid on touch devices, high otherwise. Pixel
+  count (40k, 62k, 90k), point lights at once (4, 8, 12, a fixed pool so shaders never rebuild), the
+  moon's shadow map (none, 1024, 2048). `?perf=1` shows draw ms, frame ms, size, draw calls.
+- **Measured headless (software GL, SwiftShader; real GPUs will be far quicker).** Phone 390x844@3:
+  flat 31 ms a frame; 2.5D low 36, mid 106, high 131. Laptop 1280x800@2: flat 17; 2.5D low 37, mid 87,
+  high 132. The JavaScript side of a 2.5D frame is 3 to 5 ms; the rest is SwiftShader rasterising
+  (shadows and lights dominate). The look test ran at 4.2 ms on Kyle's laptop; phones unknown, so the
+  phone default is mid and low is there if it stutters.
+- **Options under a gear.** The ? button and its long help panel are gone (removed cleanly; nothing
+  read them). A pixel gear (inline SVG) in the corner row opens a small box: VIEW: FLAT / 2.5D, HEROES,
+  SOUND, MUSIC, TIPS (moved out of the corner row, same ids and handlers). A tap outside closes it.
+  Mouse aim in 2.5D divides the vertical by the floor's foreshortening (`heroScreen` gives a fourth
+  number; the flat scene's is unchanged).
+- New words (for the lore keeper and line editor): VIEW: FLAT, VIEW: 2.5D, "2.5D shows on jobs for
+  now", SOUND, MUSIC.
+
 ## 2026-11-02: chat, world and near in town, the party on a job (Kyle; Claude Opus 5.5)
 
 Kyle: "in-game chat, local and world (world logs down below for when you're in the world area, local
