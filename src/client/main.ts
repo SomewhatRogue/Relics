@@ -3,6 +3,7 @@ import { carriedItem } from '../sim/charge';
 import { isDark, relicFill } from '../shared/relicitems';
 import { fillCol } from './reliccard';
 import { RELICW } from './relicwords';
+import { hookLitBadge } from './litbadge';
 import { HERO, CLASS_GUARD, CLASS_DODGES, POTIONS, CLASS_ORDER, RELICS, TRAITS, WEAPONS, itemName, type HeroClass } from '../shared/tuning';
 import { CLASS_NAME } from '../shared/classes';
 import { LOOKS, heroLook } from './sprites';
@@ -60,6 +61,7 @@ import { Chat } from './chat';
 import './style.css';
 
 const game = new Game();
+hookLitBadge(() => game.profile.lit ?? 0);
 /** Online (the Vercel site): the others in town. Made once there's a hero, keyed by the hero's id. */
 let townfolk: Townfolk | null = null;
 function online(): Townfolk | null {

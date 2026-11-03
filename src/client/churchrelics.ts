@@ -1,8 +1,9 @@
 /**
  * The church step's relic panel (shared/church.ts decides; this shows it): each relic you own as a
- * card with RECHARGE (plain ones, for gold) and LEAVE IT (worth the church's light for your next jobs);
- * then TWO FOR ONE: tap two, see the odds, leave them, and watch what comes back (forgeanim.ts). The
- * roll is made and kept before the light starts, so nothing on screen can change it.
+ * card with RECHARGE (plain ones, for gold) and GIVE IT UP (gone for good, worth the church's light for
+ * your next jobs; a second tap says so and confirms); then TWO FOR ONE: tap two, see the odds, give
+ * them up (confirmed the same way), and watch what comes back (forgeanim.ts). The roll is made and
+ * kept before the light starts, so nothing on screen can change it.
  */
 import { LIT, canRecharge, forge, forgeOdds, leaveRelic, litFor, recharge, rechargeCost } from '../shared/church';
 import { relicName, type RelicItem } from '../shared/relicitems';
@@ -20,16 +21,21 @@ const b = (op: string, id: string, label: string, opts: { go?: boolean; off?: bo
 
 /** The two picked for TWO FOR ONE (by id), kept while the panel is open. */
 let picked: string[] = [];
+/** Asked once already: the relic id about to be given up, or 'two' for the pair. */
+let sure = '';
 
 export function openStep(g: Game, panel: Panel, back: () => void, said = ''): void {
-  const pr = g.profile, again = (s = '') => openStep(g, panel, back, s);
+  const pr = g.profile, again = (s = '') => ((sure = ''), openStep(g, panel, back, s));
   picked = picked.filter((id) => pr.relics.some((r) => r.id === id));
   const lit = pr.lit ?? 0;
-  const head = (said.startsWith('~') ? p(said.slice(1)) : said ? say('Father Odric', said) : say('Father Odric', RELICW.churchIntro)) + (lit ? p(`<b>${RELICW.litLeft(lit)}</b>`) : '') + p(`You have ${pr.gold} gold.`);
+  const head = (said.startsWith('~') ? p(said.slice(1)) : said ? say('Father Odric', said) : say('Father Odric', RELICW.churchIntro)) + (lit ? p(`<b>${RELICW.litLeft(lit)}</b>`) : '') + p(`You have ${pr.gold} gold.`) + p(RELICW.stepHow);
   const rows = pr.relics.map((r) => {
     const cost = rechargeCost(r), n = litFor(r);
     const re = r.el ? '' : b('recharge', r.id, canRecharge(r) ? RELICW.recharge(cost) : RELICW.full, { off: !canRecharge(r) || pr.gold < cost });
-    const leave = b('leave', r.id, n ? RELICW.leave(Math.min(n, LIT.max - lit)) : RELICW.leaveDark);
+    const get = n ? Math.min(n, LIT.max - lit) : 0;
+    const leave = sure === r.id
+      ? `</div><p class="rwarn">${RELICW.leaveWarn(get)}</p><div class="rbtns">` + b('leave', r.id, RELICW.leaveSure, { go: true }) + b('keep', r.id, RELICW.keep)
+      : b('ask', r.id, n ? RELICW.leave(get) : RELICW.leaveDark);
     return relicCard(r, { tag: r.id === pr.relic ? RELICW.carrying : '' }) + `<div class="rbtns">${re}${leave}</div>`;
   }).join('');
   const two = pr.relics.length >= 2 ? twoForOne(pr.relics) : '';
@@ -38,6 +44,8 @@ export function openStep(g: Game, panel: Panel, back: () => void, said = ''): vo
   for (const el of root?.querySelectorAll<HTMLButtonElement>('[data-rop]') ?? []) el.onclick = (e) => {
     e.stopPropagation();
     const id = el.dataset.rid!, op = el.dataset.rop;
+    if (op === 'ask' || op === 'twoask') return (sure = op === 'ask' ? id : 'two'), openStep(g, panel, back, said);
+    if (op === 'keep') return again(said);
     if (op === 'recharge') return recharge(pr, id) ? (g.relicsChanged(), again('~' + RELICW.recharged)) : undefined;
     if (op === 'leave') {
       const r = pr.relics.find((x) => x.id === id), was = pr.lit ?? 0;
@@ -50,6 +58,7 @@ export function openStep(g: Game, panel: Panel, back: () => void, said = ''): vo
       const [a, c] = picked.map((x) => pr.relics.find((r) => r.id === x)!) as [RelicItem, RelicItem];
       const got = forge(pr, a.id, c.id);
       picked = [];
+      sure = '';
       if (!got) return again();
       g.relicsChanged();
       forgeAnim(panel, a, c, got, () => gotOne(g, panel, back, got));
@@ -69,7 +78,9 @@ function twoForOne(relics: RelicItem[]): string {
   const odds = pair.length === 2 ? `<p class="rodds">${RELICW.odds(forgeOdds(pair[0], pair[1]).elemental)}</p>` : '';
   return `<div class="rsec">${RELICW.twoTitle}</div>` + p(RELICW.twoLine) + p(RELICW.picked(pair.length)) +
     relics.map((r) => relicCard(r, { pick: r.id, on: picked.includes(r.id), brief: true })).join('') + odds +
-    `<div class="rbtns" style="margin-left:0">${b('give', '', RELICW.give, { go: true, off: pair.length < 2 })}</div>`;
+    (sure === 'two' && pair.length === 2
+      ? `<p class="rwarn">${RELICW.giveWarn}</p><div class="rbtns" style="margin-left:0">${b('give', '', RELICW.giveSure, { go: true })}${b('keep', '', RELICW.keep)}</div>`
+      : `<div class="rbtns" style="margin-left:0">${b('twoask', '', RELICW.give, { off: pair.length < 2 })}</div>`);
 }
 
 /** What came back, with CARRY IT. */
