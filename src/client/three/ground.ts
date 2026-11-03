@@ -92,25 +92,26 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   for (const o of m.rounds) {
     const n = fires.length;
     addRound(B, o, fires, r);
-    if (o.kind === 'post') lamps.push({ x: o.x, y: o.y, fires: fires.splice(n), light: { x: o.x, y: 1.6, z: o.y, r: 4.5, i: 0.8 * tk, c: [1, 0.72, 0.42], f: 9 } });
+    if (o.kind === 'post') lamps.push({ x: o.x, y: o.y, fires: fires.splice(n), light: { x: o.x, y: 1.6, z: o.y, r: 4.5, i: 0.8, c: [1, 0.72, 0.42], f: 9 } });
   }
   for (const t of m.torches) {
     const onWall = t.y < 0.8, y = onWall ? 1.55 : 1.3, z = onWall ? 0.16 : t.y;
     if (onWall) B.b(t.x, y - 0.3, 0.06, 0.08, 0.32, 0.14, 0x3a2a1a);
     else B.b(t.x, 0, z, 0.1, y, 0.1, 0x3a2a1a);
     B.b(t.x, y - 0.02, onWall ? 0.06 : z, 0.11, 0.08, onWall ? 0.16 : 0.11, 0x1a1410);
-    lamps.push({ x: t.x, y: t.y, fires: [[t.x, y, z, 0.7]], light: { x: t.x, y: y + 0.4, z: z + 0.5, r: 8, i: 1.1 * tk, c: [1, 0.66, 0.36], f: 13 } });
+    lamps.push({ x: t.x, y: t.y, fires: [[t.x, y, z, 0.7]], light: { x: t.x, y: y + 0.4, z: z + 0.5, r: 8, i: 1.1, c: [1, 0.66, 0.36], f: 13 } });
   }
   for (const b of m.braziers) {
     B.b(b.x, 0, b.y, 0.12, 0.6, 0.12, 0x2a2630);
     B.b(b.x, 0.55, b.y, 0.55, 0.18, 0.55, 0x3a3640);
     // Ash in the bowl (the flames stand over it while it's lit).
     B.b(b.x, 0.73, b.y, 0.42, 0.02, 0.42, 0x5a5660);
-    lamps.push({ x: b.x, y: b.y, wild: b.wild, fires: [[b.x - 0.1, 0.72, b.y, 1], [b.x + 0.12, 0.72, b.y + 0.05, 0.9]], light: { x: b.x, y: 1.4, z: b.y, r: 6, i: 0.95 * tk, c: [1, 0.6, 0.3], f: 11 } });
+    lamps.push({ x: b.x, y: b.y, always: b.wild, fires: [[b.x - 0.1, 0.72, b.y, 1], [b.x + 0.12, 0.72, b.y + 0.05, 0.9]], light: { x: b.x, y: 1.4, z: b.y, r: 6, i: 0.95, c: [1, 0.6, 0.3], f: 11 } });
   }
   for (const o of m.rounds) {
     if (o.kind === 'cookfire') lights.push({ x: o.x, y: 1.6, z: o.y, r: 4.5, i: 0.8 * tk, c: [1, 0.72, 0.42], f: 9 });
-    if (o.kind === 'lantern') lights.push({ x: o.x, y: 2.4, z: o.y, r: 9, i: 1.2, c: [1, 0.78, 0.45], f: 3 });
+    // The Last Lantern never goes out (but its light, like any fire's, fades under the sun: lamps3d.ts).
+    if (o.kind === 'lantern') lamps.push({ x: o.x, y: o.y, always: true, fires: [], light: { x: o.x, y: 2.4, z: o.y, r: 9, i: 1.2, c: [1, 0.78, 0.45], f: 3 } });
     if (o.kind === 'candles') lights.push({ x: o.x, y: 1.2, z: o.y, r: 3.5, i: 0.7, c: [1, 0.78, 0.48], f: 11 });
   }
   const statics = B.mesh(VCOL);

@@ -1,24 +1,28 @@
 /**
  * The tended lamps in 2.5D, by the same rule as the flat view (shared/lamps.ts): wall torches, braziers
  * and lamp posts give their flames and light only while lit; a hall's door lamp and a cottage's lit
- * windows glow only then, and are dark glass by day. A camp's brazier (`wild`) burns whatever the hour.
+ * windows glow only then, and are dark glass by day. A camp's brazier (`wild`) and the Last Lantern
+ * burn whatever the hour.
  */
 import type * as THREE from 'three';
 import type { Theme } from '../../shared/arena';
 import { lampAt } from '../../shared/lamps';
+import { torchIn } from '../daytime';
 import type { L3 } from './lights3d';
 import type { Spot } from './rounds3d';
 
-/** A lamp standing in the room (x, y in tiles): its flames and its light, as they are when lit. */
-export interface Lamp3 { x: number; y: number; fires: Spot[]; light: L3; wild?: boolean }
+/** A lamp standing in the room (x, y in tiles): its flames and its light, as they are when lit.
+ *  `always`: a camp's fire or the Last Lantern, burning whatever the hour. */
+export interface Lamp3 { x: number; y: number; fires: Spot[]; light: L3; always?: boolean }
 
-/** This frame's lit lamps into the frame's fires and lights. */
+/** This frame's lit lamps into the frame's fires and lights (their light as much as the hour lets a fire count). */
 export function lampsNow(theme: Theme, lamps: Lamp3[], fires: Spot[], lights: L3[]): void {
+  const tk = torchIn(theme);
   for (const l of lamps) {
-    const on = l.wild ? 1 : lampAt(theme, l.x, l.y);
+    const on = l.always ? 1 : lampAt(theme, l.x, l.y);
     if (on <= 0) continue;
     if (on > 0.5) fires.push(...l.fires);
-    lights.push({ ...l.light, i: l.light.i * on });
+    lights.push({ ...l.light, i: l.light.i * on * tk });
   }
 }
 
