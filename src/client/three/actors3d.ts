@@ -3,6 +3,8 @@
  * hounds, telegraphs, props, chests, drops, shots, javelins, rings on the floor and the way out.
  * Positions are eased between the room's ticks the way the 2D scene eases them (room.prev, alpha).
  */
+import { exitMats } from '../exitmark';
+import { makeExitMat } from './exitmat3d';
 import * as THREE from 'three';
 import type { ArenaRoom } from '../../sim/room';
 import type { Hero } from '../../sim/types';
@@ -106,6 +108,8 @@ export class Actors {
     (room.puddles ?? []).forEach((p) => this.things.get('u' + p.id, String(p.r), () => ({ root: makeRing(p.r, 0x5a8a20, true, p.r) })).root.position.set(p.x, 0.025, p.y));
     const ex = room.map.exit;
     if (ex && ex.y < 1) this.things.get('exit', String(room.exitOpen), () => ({ root: makeExit(ex.w, room.exitOpen) })).root.position.set(ex.x, 0, ex.y - 0.4);
+    // The lit threshold with its arrow out, in front of every way out (../exitmark.ts).
+    if (room.exitOpen) exitMats(room.map).forEach((t, i) => this.things.get('exitmat' + i, `${t.w}:${t.d}:${t.out}`, () => ({ root: makeExitMat(t) })).root.position.set(t.x, 0, t.y));
     for (const p of [this.heroes, this.foes, this.folk, this.hounds, this.teles, this.things, this.chests]) p.end();
   }
 

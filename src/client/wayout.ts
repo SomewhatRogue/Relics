@@ -1,8 +1,8 @@
 /**
  * The way out of a room, so you can't miss it. Painted once: a gap in the back wall where the way on is
  * (posts and a lintel, a dark passage), a doorstep where a house's door is. Drawn each frame: shut, stakes
- * across the gap; open, light in it, a torch either side and gold chevrons on the floor running into it
- * (out of a house, down through the door). Also the small marks at the screen's edge for anyone you've
+ * across the gap; open, light in it, a torch either side and a lit threshold on the floor with an arrow
+ * out (exitmark.ts). Also the small marks at the screen's edge for anyone you've
  * freed who's fallen behind out of sight, and the point those (and the quest marks) share. Drawing only.
  */
 import type { Area, GameMap } from '../shared/arena';
@@ -11,6 +11,7 @@ import type { Survivor } from '../sim/types';
 import type { Ctx } from './draw';
 import type { Light } from './light';
 import { OX, OY, PX } from './world';
+import { drawExitMats } from './exitmark';
 
 type Rect = (x: number, y: number, w: number, h: number, col: string) => void;
 
@@ -66,30 +67,19 @@ export function drawWays(c: Ctx, m: GameMap, open: boolean, cx: number, cy: numb
         if (on > 0) lights.push({ x: tx + 1, y: y0, r: 80 + Math.sin(now * 11 + tx) * 4, i: 1.1 * on, c: [1, 0.7, 0.4] });
       }
       lights.push({ x: mid, y: y0 - 6, r: 60, i: 0.7, c: [1, 0.9, 0.7] });
-      chevrons(g, mid, y0 + 14, -1, now);
     } else {
-      // Out of a house: light on the sill and chevrons down through the door.
+      // Out of a house: light on the sill.
       const y1 = OY + (a.y + a.h) * PX - cy;
       g.globalAlpha = 0.3;
       g.fillStyle = '#ffe2a0';
       g.fillRect(Math.round(x0 + 2), Math.round(y1 - 3), w - 4, 3);
       g.globalAlpha = 1;
       lights.push({ x: mid, y: y1 - 4, r: 46, i: 0.6, c: [1, 0.9, 0.7] });
-      chevrons(g, mid, y1 - 30, 1, now);
     }
   }
+  // The lit threshold with its arrow out, on the floor in front of each way out (exitmark.ts).
+  if (open) drawExitMats(g, m, cx, cy, now);
   return lights;
-}
-
-/** Three gold chevrons from (x, y) running `dir` (-1 up the screen, 1 down), each brightening in turn. */
-function chevrons(g: CanvasRenderingContext2D, x: number, y: number, dir: number, now: number): void {
-  g.fillStyle = '#ffd27a';
-  for (let k = 0; k < 3; k++) {
-    const p = (now * 1.6 + k / 3) % 1, cy = y - dir * k * 9;
-    g.globalAlpha = 0.25 + 0.65 * (1 - p);
-    for (let s = -4; s <= 4; s++) g.fillRect(Math.round(x + s), Math.round(cy + dir * (4 - Math.abs(s))), 1, 2);
-  }
-  g.globalAlpha = 1;
 }
 
 function flame(g: CanvasRenderingContext2D, x: number, y: number, now: number): void {
