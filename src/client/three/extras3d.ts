@@ -13,6 +13,7 @@ import type { Ctx } from '../draw';
 import { pose } from '../held';
 import { drawHook } from '../relicsdraw';
 import { drawStatus } from '../status';
+import { drawLife } from '../streetlife';
 import { edgeMark, type View } from '../wayout';
 import { PX } from '../world';
 import type { Lerp } from './actors3d';
@@ -24,6 +25,12 @@ export interface Extra { room: ArenaRoom; meId: string; lerp: Lerp; P: Proj; now
 
 export function drawExtras(g: CanvasRenderingContext2D, x: Extra): void {
   const { room, lerp, P, now } = x, c: Ctx = { lit: g, glow: g, now, t: room.time }, up = (z?: number) => (z ?? 0) * 0.75;
+  // Wickhold's small life, as the flat view paints it: crows at the blood, a dog nosing about, moths
+  // round a garden lamp, smoke rising past the wall.
+  for (const r of room.map.rounds) if (r.kind === 'crows' || r.kind === 'dog' || r.kind === 'moths' || r.kind === 'smoke') {
+    const [sx, sy] = P(r.x, 0, r.y);
+    if (sx > -60 && sy > -140 && sx < x.W + 60 && sy < x.H + 60) drawLife(c, r, sx, sy);
+  }
   // A drummer's reach on the floor, its beat going out, and the goblins it has roused.
   const beat = (room.time % DRUMMER.beat) / DRUMMER.beat;
   for (const e of room.enemies) {
