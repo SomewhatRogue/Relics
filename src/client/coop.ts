@@ -280,7 +280,8 @@ export class CoopGuest {
       this.room = new ArenaRoom(1, { map: body.map });
       this.key = body.k;
       this.pred = this.server = null;
-    }
+    } else if (body.f && body.map && this.room) this.room.map.blaze = body.map.blaze;
+    // (The same room whole again: a house set alight from outside with me in it now burns: houseindoors.ts.)
     const room = this.room!;
     for (const h of room.heroes) room.prev.set('h:' + h.id, [h.x, h.y]);
     for (const e of room.enemies) room.prev.set('e:' + e.id, [e.x, e.y]);

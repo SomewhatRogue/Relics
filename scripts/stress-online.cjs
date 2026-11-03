@@ -8,14 +8,14 @@ const path = require('path');
 const { chromium } = require('playwright');
 const { kit, wait } = require('./stress/kit.cjs');
 const ROOT = path.join(__dirname, '..'), PORT = Number(process.env.STRESS_PORT) || 8792;
-const SCENES = { ...require('./stress/leave.cjs'), ...require('./stress/drop.cjs'), ...require('./stress/falls.cjs'), ...require('./stress/order.cjs'), ...require('./stress/split.cjs'), ...require('./stress/keep.cjs') };
+const SCENES = { ...require('./stress/leave.cjs'), ...require('./stress/drop.cjs'), ...require('./stress/falls.cjs'), ...require('./stress/order.cjs'), ...require('./stress/split.cjs'), ...require('./stress/keep.cjs'), ...require('./stress/burn.cjs') };
 const NAMES = {
   1: 'friend leaves', 2: 'leader leaves', 3: 'leader of three leaves', 4: "leader's page hidden 30 s", '4f': "leader's page frozen",
   5: "leader's tab closed", 6: 'friend reloads', '6b': "friend's phone locked over a minute", 7: 'leader reloads', 8: 'friend down, leader helps', 9: 'friend down alone, then out',
   10: 'leader out, friend goes on', 11: 'everyone out', 12: 'HELP UP on the phone', 13: 'solo leave', 14: 'friend in before the leader',
   15: 'friend goes into a house alone', 16: 'leader goes in alone', 17: 'two houses at once', 18: 'small goblins follow, big ones not', 19: 'friend brings a captive out',
   20: 'leader leaves while a friend is indoors', 21: 'the way on waits for a friend indoors',
-  22: 'friend picks up, reloads, finishes', 23: 'friend picks up, closes the tab, comes back after', 24: 'leader picks up, crashes, friend finishes', 25: 'friend swaps weapon, reloads',
+  22: 'friend picks up, reloads, finishes', 23: 'friend picks up, closes the tab, comes back after', 24: 'leader picks up, crashes, friend finishes', 25: 'friend swaps weapon, reloads', 26: 'a friend inside when the leader lights the house',
 };
 
 (async () => {
