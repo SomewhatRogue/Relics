@@ -31,15 +31,32 @@ export function kindleCue(map: GameMap, me: Hero | undefined, say: (x: number, y
   heard = at;
 }
 
-/** A voice through a wall: two falling syllables, the high end gone, quiet. */
-function muffledCry(): void {
+/** Shouted from inside a burning house with someone caged in it (for the lore keeper and line editor). */
+export const BURN_CRIES = ['HELP! IN HERE!', "IT'S BURNING!", "I'M BURNING!", 'PLEASE, THE DOOR!', 'GET ME OUT!'];
+const lastCry = new Map<number, number>();
+
+/** Each frame: from each house alight with someone still caged inside, a shout every couple of seconds. */
+export function burningCries(map: GameMap, now: number, say: (x: number, y: number, s: string) => void): void {
+  map.blocks.forEach((b, i) => {
+    if (!b.cry || b.ruined || (b.burning ?? -1) < 0) return lastCry.delete(i), undefined;
+    const at = lastCry.get(i);
+    if (at !== undefined && now - at < 2.2) return;
+    lastCry.set(i, now);
+    const n = Math.floor(now / 2.2) + i;
+    say(b.x + b.w / 2 + ((n % 3) - 1) * 0.8, b.y + b.h * 0.3, BURN_CRIES[n % BURN_CRIES.length]);
+    muffledCry(1900, 0.9);
+  });
+}
+
+/** A voice through a wall: two falling syllables, the high end gone, quiet (or a scream: `open` lets the high end through). */
+function muffledCry(open = 520, loud = 0.5): void {
   const o = sfxOut();
   if (!o) return;
   const c = o.ac, t = c.currentTime, lp = c.createBiquadFilter(), g = c.createGain();
   lp.type = 'lowpass';
-  lp.frequency.value = 520;
+  lp.frequency.value = open;
   lp.Q.value = 0.7;
-  g.gain.value = 0.5;
+  g.gain.value = loud;
   lp.connect(g).connect(o.out);
   for (const [at, dur, f0, f1] of [[0, 0.32, 300, 250], [0.42, 0.55, 330, 210]]) {
     const osc = c.createOscillator(), env = c.createGain(), vf = c.createBiquadFilter();
