@@ -9,7 +9,7 @@ export const PACKW = {
   wear: 'WEAR',
   hint: 'Tap a piece to see it beside what you wear.',
   hover: 'Point at a piece to see it beside what you wear. Click to choose it.',
-  inTown: 'In town: sell it to Tobin on Market Row, or put it in the vault at the counting house.',
+  inTown: 'In town: sell it to Tobin on Market Row, or put it in the vault at the Counting House.',
   hungry: 'Hungry gear stays with you. Only the church will take it.',
   skillLine: 'Your class skill. Your trainer changes it, not the pack.',
   fullJob: 'Your pack is full. Drop something to make room.',
@@ -20,7 +20,7 @@ export const PACKW = {
 export const BANK = {
   name: 'THE COUNTING HOUSE',
   keeper: 'KEEPER EDDA',
-  greet: "The roof came in the last winter of the siege and nobody's had the timber for it since, but the vault's under the floor and the vault's *fine*. Put in what you like and take out what you like, and I write it all down.",
+  greet: "The roof came in the last winter of the siege and nobody's had the timber for it since, but the vault's under the floor and the vault's *sound*. Put in what you like and take out what you like, and I write it all down.",
   hungry: "Not that one. I don't care what it's worth, it doesn't go down there.",
   grown: "That's another shelf down there for you. Mind your head on the stair, everybody cracks it the first time.",
   vault: 'VAULT',
@@ -55,7 +55,7 @@ export const FORGE = {
   top: 'As good as he can make it.',
   melt: (steel: number) => `MELT DOWN (+${steel} STEEL)`,
   meltWorn: 'Take it off first to melt it.',
-  ivo: "No elements for a while, I'm sorry, not till I've put the bench right. Whatever's set in yours stays set, it's happy where it is.",
+  ivo: "No elements for a while, I'm sorry, and please don't ask me why. Whatever's set in yours stays set, it's happy where it is.",
   shut: 'Ivo is not setting elements for now.',
   element: 'AN ELEMENT (NOT FOR NOW)',
 };
