@@ -2,6 +2,54 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-02: 2.5D figures are FLAT's pixel figures standing in the 3D world (Kyle; Claude Opus 5.5)
+
+Kyle: "In 2.5D the mage looks blocky, so does the big orc. Also when the spearmen are attacking they
+sort of project and then hold too long at the end instead of more of a stab ... I really like how the
+terrain and land look in 2.5D but the enemies I'm not loving." Decided: the HD-2D way. Keep the 3D
+world, draw the characters as the game's own sprites. On the first shot Kyle said "Yes. Love. Do it."
+
+- **One source for how a figure looks.** Every figure in 2.5D is drawn by the flat view's own code
+  (`drawHero`, `drawEnemy`, `drawHeld`, `drawStatus`, `drawHound`, `drawSurvivor`, `drawNpc`), so each
+  class and look, held kit, pose, wind-up and payoff, hit flash, frozen and burning, death, and the
+  goblins' glowing eyes match FLAT exactly and can't drift. Who gets a card is `three/cards3d.ts`.
+- **How** (`three/figs3d.ts`). Each frame every figure in sight is drawn into its own 96x96 cell of one
+  atlas (a `lit` canvas and a `glow` canvas, ten cells a row, more rows as needed) and shown on a card
+  at its feet. The card is folded at the feet: upright above them, lying on the floor below them (a
+  blade swung toward you, a ring at the feet, a name under someone stays on the ground, never sunk into
+  it). It is sized so one sprite pixel is one pixel of the low-res view (a whole multiple when the view
+  is coarser) and snapped to whole pixels, sampled nearest, so it stays crisp under the post pass. At
+  HIGH a figure stands as tall against the floor as in FLAT (the view's pixels per tile times cos 36
+  degrees is about 17 against FLAT's 16).
+- **Lit by the world** (`three/figmat.ts`). The lit layer is a Lambert surface (the same banded light
+  and dither as everything else) with a normal facing the camera and a little up, so torches, braziers,
+  the moon and spells light it, and the moon's shadow falls on it. The glow layer goes on top unlit and
+  blooms (eyes, sparks, flashes, words). Part-covered pixels keep to an ordered dither, never a blend;
+  a faint one (a lunge's afterimage) is drawn dimmer. A soft dithered pool on the floor is the shadow
+  (FLAT's own shadow is skipped on a card: `draw.ts` `BARE`).
+- **Depth and outlines.** Cards sort and hide against walls, roofs and trees by depth like anything
+  else; heroes still show as the violet silhouette behind walls, now cut to the sprite's shape. Cards
+  are kept out of the outline pass (alpha just under 1): the sprites carry FLAT's one-pixel outline, so
+  no double outline.
+- **What the cards now carry** (and the overlay no longer draws twice): a goblin's health ring and
+  what's on it, the butcher's "!", a downed hero's count, an NPC's mark and name when you're near, a
+  swing's smear. Friends' names stay over their heads (the overlay, lower to match the figures).
+- **The spearman.** FLAT's lunger already stabs quickly (out for 0.18 s, back over 0.25 s, then
+  standing), but its spear was drawn from the feet and never moved, so the lunge read as a body sliding
+  with a stick. Now the lunger's spear and the brute's club are in the weapon hand and go with the pose
+  (`foes.ts` `kit`): the spear drives out on the stab and comes back with the recover. The lunger no
+  longer carries a knife as well. Drawing only; the sim's timings are unchanged.
+- **Kept.** The box figures (`heroes3d.ts`, `goblins3d.ts`, `foepose3d.ts`, `folk3d.ts`, `npcs3d.ts`
+  and the rest) are untouched behind `?figs=3d`, for when Blender models replace the sprites. Props,
+  buildings, chests, bolts, telegraphs and effects stay 3D; the yard's cage still holds a box figure.
+- **Cost.** Drawing the cells is under 1 ms for ten figures and about 2.5 ms for the wood's thirteen
+  (software GL in headless Chrome, so slower than a phone). Draw calls about halve (82 to 36 in the
+  square). Alternating runs of box figures and cards in the square, headless, showed no measurable
+  difference in frame time (medians about 48 against 41 ms draw); the 390 ms frame in the first shot
+  was load from a parallel run, not the cards. Both atlas textures go up every frame something was drawn
+  (960 by 192 pixels each for up to twenty figures).
+
+
 ## 2026-11-02: 2.5D as bright as FLAT, closer in on phones, trees that aren't voxels (Kyle; Claude Opus 5.5)
 
 Kyle and his friends played both views: "We like the 2.5D, but flat has cleaner, brighter colours. It's

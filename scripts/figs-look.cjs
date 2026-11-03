@@ -80,6 +80,15 @@ const SCENES = {
     await page.evaluate(() => Object.assign(window.__game.hero, { x: 31, y: 21, fx: 0, fy: 1 }));
     await page.waitForTimeout(1200);
   },
+  async behind(page) {
+    await clock(page, MIDNIGHT);
+    await page.waitForTimeout(300);
+    await page.evaluate(() => {
+      const r = window.__hold(), me = r.heroes[0], b = r.map.blocks.filter((b) => b.kind === 'house' && b.y > 6).sort((p, q) => Math.hypot(p.x - 31, p.y - 21) - Math.hypot(q.x - 31, q.y - 21))[0];
+      Object.assign(me, { x: b.x + b.w / 2, y: b.y + 0.6, fx: 0, fy: 1, act: 'idle', moving: false });
+    });
+    await page.waitForTimeout(700);
+  },
   async stoker(page) {
     await page.evaluate(() => window.__game.mode !== 'wood' && window.__game.startWood());
     await page.waitForTimeout(500);
