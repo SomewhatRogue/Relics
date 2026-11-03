@@ -25,18 +25,33 @@ const SCENES = {
     await page.waitForTimeout(1000);
   },
   async den(page) {
-    await page.evaluate(() => {
-      const g = window.__game, j = g.jobs()[1];
-      g.startJob({ ...j, place: { name: 'Barrowby', kind: 'village', region: 'Barrowfields', ruin: 2 }, objective: 'larder', boss: 'SKARN', rooms: 1, seed: 7 });
+    await clock(page, MIDNIGHT);
+    // A job's houses one by one until one has someone hung in it (and the pot if it can).
+    const found = await page.evaluate(async () => {
+      const g = window.__game, wait = (ms) => new Promise((r) => setTimeout(r, ms));
+      for (const seed of [7, 11, 13, 17, 19, 23, 29, 31]) for (const kind of ['village', 'farm']) {
+        const j = g.jobs()[1];
+        g.startJob({ ...j, place: { name: 'Barrowby', kind, region: 'Barrowfields', ruin: 3 }, objective: 'larder', boss: 'SKARN', rooms: 1, seed });
+        await wait(50);
+        const doors = g.room.map.blocks.filter((b) => b.door && !b.locked && b.fate !== 'blocked');
+        for (const d of doors) {
+          g.enter(d);
+          await wait(50);
+          const grim = g.room.map.grim ?? [];
+          if (grim.some((q) => q.kind === 'hung')) {
+            const q = grim.find((q) => q.kind === 'pot') ?? grim.find((q) => q.kind === 'hung');
+            g.room.enemies.forEach((e) => { e.cooldown = 99; e.x = 1; e.y = 1; });
+            Object.assign(g.hero, { x: q.x + 0.6, y: Math.min(g.room.map.h - 1, q.y + 2.2), fx: 0, fy: -1 });
+            return q.kind;
+          }
+          g.leave();
+          await wait(30);
+        }
+      }
+      return null;
     });
-    await page.waitForTimeout(600);
-    await page.evaluate(() => {
-      const g = window.__game, r = g.room, d = r.map.blocks.find((b) => b.kind === 'den') ?? r.map.blocks.find((b) => b.kind === 'house' && b.door);
-      if (d) g.enter ? g.enter(d) : null;
-    });
+    console.log('den found', found);
     await page.waitForTimeout(900);
-    await page.evaluate(() => { const r = window.__room, q = (r.map.grim ?? []).find((q) => q.kind === 'hung' || q.kind === 'pot'); if (q) Object.assign(window.__game.hero, { x: q.x, y: q.y + 2.5 }); r.enemies.forEach((e) => (e.cooldown = 99)); });
-    await page.waitForTimeout(700);
   },
   async wood(page) {
     await page.evaluate(() => window.__game.mode !== 'wood' && window.__game.startWood());

@@ -124,7 +124,7 @@ export class Overlay {
       y = Math.min(this.H - pad, Math.max(pad, y));
       diamond(g, Math.round(x), Math.round(y) + (off ? 0 : bob), off ? 2 : 3);
     }
-    for (const d of m.doors) {
+    if (!room.indoors) for (const d of m.doors) {
       const [x, y] = P(d.x, 2.2, d.y);
       d.who.forEach((w, i) => drawText(g, w.name.toUpperCase(), Math.round(x - textWidth(w.name) / 2), Math.round(y - 8 * (i + 1)), '#9ad8a8'));
     }

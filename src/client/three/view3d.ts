@@ -20,6 +20,7 @@ import { Lights, type L3 } from './lights3d';
 import { QUALITY, perfOn, quality, type Quality } from './look';
 import { Overlay, type Marks } from './overlay3d';
 import { People } from './people3d';
+import { Grim3D } from './grim3d';
 import { drawExtras, drawMist3 } from './extras3d';
 import { drawTags } from './tags3d';
 import { Perf } from './perf3d';
@@ -42,6 +43,7 @@ export class View3D {
   private actors = new Actors();
   private buildings = new Buildings();
   private people = new People();
+  private grim = new Grim3D();
   private ground: Ground | null = null;
   private map: GameMap | null = null;
   private overlay = new Overlay();
@@ -66,7 +68,7 @@ export class View3D {
     game?.after(this.canvas, this.overlay.canvas);
     this.overlay.canvas.style.display = 'none';
     this.postScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.post));
-    this.scene.add(this.lights.group, this.fires.group, this.actors.group, this.buildings.group, this.people.group);
+    this.scene.add(this.lights.group, this.fires.group, this.actors.group, this.buildings.group, this.people.group, this.grim.group);
     this.resize();
     addEventListener('resize', () => this.resize());
   }
@@ -153,6 +155,7 @@ export class View3D {
       fires.push([x, 0.5, y, e.kind === 'butcher' ? 1.3 : 0.8]);
     }
     roomLights(room, fx, lerp, ls);
+    this.grim.update(now, fires, ls);
     this.lights.setSky(map.theme, at.x, at.z);
     this.lights.place(ls, at.x, at.z, now);
     this.fires.draw(fires, now);
@@ -200,6 +203,7 @@ export class View3D {
     if (this.ground) this.scene.remove(this.ground.group), this.ground.dispose();
     this.buildings.clear();
     this.people.clear();
+    this.grim.build(map);
     this.ground = buildGround(map, paintMap(map));
     this.scene.add(this.ground.group);
     this.map = map;
