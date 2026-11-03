@@ -45,7 +45,7 @@ export function rollRelic(rng: Rng, elemental = RELIC_DROP.elemental, loud = REL
   return makeRelic(rng, kind, el, el ? (rng.next() < loud ? 3 : 2) : 1);
 }
 
-/** Its name on screen: "BONE BELL", "FROST JAVELIN", "LOUD STORM HOOK". */
+/** Its name on screen: "BONE WHISTLE", "FROST JAVELIN", "LOUD STORM HOOK". */
 export function relicName(r: RelicItem): string {
   if (!r.el) return RELICS[r.kind].name;
   return (r.tier === 3 ? 'LOUD ' : '') + ELEMENT_NAME[r.el] + ' ' + (r.kind === 'sentry' ? RELICS.sentry.name : RELICS[r.kind].short);

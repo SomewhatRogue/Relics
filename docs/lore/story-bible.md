@@ -242,3 +242,18 @@ most Want among the heroes is the one the bells don't spare).
 - Ivo's bench sells frost flasks and rerolls a modifier even while he isn't setting elements.
 - Dessa is one of the traders camped outside the north gate; her Market Row stall opens only once the council lets the traders in. Tobin's stall is there either way.
 - Wall Brandy (Kyle's call): doubles your damage, halves your speed and stamina, for a few seconds.
+
+## Relics fade, the step, and the church's light (recorded 2026-11-03; Kyle's call, lore keeper)
+- Relics fade with use and go dark. Isolde recharges plain ones round the back for gold, and what she does stays unsaid. The fee is trade, like her training fees; it never goes in the Lantern box and never touches the Want.
+- Elemental relics are found that way (born with it), never set by Ivo. They hold more, the church won't touch them, and why stays off screen. LOUD is the rarest.
+- Odric takes relics at the step and they sit with the others. Leave two, take one draws from what other heroes have left; Odric brings it out and doesn't say whose it was.
+- The church's light: Isolde gives it to whoever leaves a relic with life in it. On screen it is only ever "the church's light" (LIT), never the Lantern, never "blessed". The hungry come for whoever carries it, and no line says why (the censer rule).
+- Ivo hears relics; a fading one goes quiet.
+- The bone whistle: goblins stop to listen, since it sounds like one of theirs. Nothing on screen says why. Bells stay the town's, kept for chapter 5.
+- Every relic spares friends (SPARES FRIENDS, SPARED), and relic telegraphs are gold, never the goblins' red.
+- Open for Kyle: does leaving a relic on the step lower the Want, as giving up hungry gear does? Does carrying or using relics grow it?
+
+## Houses alight (recorded 2026-11-03; Kyle's call, lore keeper)
+- A woodpile, dark with oil, stacked against a side wall of a job house. Crouch at it (BURN) and the house goes up; the hungry inside come out burning. Nobody can go in once it's alight.
+- The muffled cry and SOMEONE'S INSIDE mean a real captive, always. A mimic cry, if one ever comes, can't use this prompt or this sound.
+- Open for Kyle: whose woodpile is it? The lore keeper leans to the hungry's own hoard.

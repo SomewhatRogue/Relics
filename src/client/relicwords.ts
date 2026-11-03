@@ -11,9 +11,9 @@ export const RELIC_LINES: Partial<Record<RelicId, string>> = {
   hook: 'Hooks the first thing it reaches. Small goblins and loose barrels come to you; anything heavier pulls you to it.',
   lodestone: 'Lobbed. Where it lands it drags goblins in, the light ones fastest, then bursts.',
   bomb: 'Lobbed. It bursts, throws goblins and barrels about and knocks the small ones silly.',
-  sentry: 'Set it down and it shoots whatever goblin comes near for a while. Its bolts leave them limping.',
-  bell: 'Ring it. Goblins near you flinch and lose their swing, and friends near you are quicker on their feet for a bit.',
-  knuckle: 'A punch that carries. Everything in a line in front of you is knocked flying, and the next blow on them lands harder.',
+  sentry: 'Set it down and it shoots whatever goblin comes near for a while. Its arrows leave them limping.',
+  bell: 'Blow it. Goblins near you stop to listen and lose their swing, and friends near you are quicker on their feet for a bit.',
+  knuckle: 'A punch that carries. Everything in a line in front of you is knocked flying, and the next blow anyone lands on them hits harder.',
 };
 
 export const RELICW = {
@@ -22,10 +22,10 @@ export const RELICW = {
   charge: (n: number, max: number) => `CHARGE ${n} / ${max}`,
   dark: 'DARK',
   darkLine: 'Gone dark. It does nothing now until the church sees to it.',
-  darkElLine: 'Gone dark, and it\'s not one the church can bring back. Leave it on the step, or put it in with another.',
+  darkElLine: 'Gone dark, and the church can\'t bring this kind back. Leave it on the step, or leave it there with another one and take one back.',
   loud: 'LOUD',
   fades: 'Every use spends a little of it.',
-  noRecharge: 'Born with an element. It holds more, but the church can\'t bring it back once it fades.',
+  noRecharge: 'Born with an element. It holds more, but the church can\'t recharge it.',
   /** The RELIC button pressed with a dark one in hand. */
   pressedDark: 'DARK',
   /** Spared by a friend's relic. */
@@ -37,25 +37,25 @@ export const RELICW = {
   /** The church (Father Odric) and its relic panel. */
   churchButton: 'RELICS',
   churchTitle: 'THE STEP',
-  churchIntro: "Fading, is it? Give it here, I'll take it round to the Lantern. It'll cost you. Not one with an element in it, mind. I won't touch those.",
-  none: 'You have no relics. They come out of the named butchers, now and then, and always out of the one at the bottom of a deep dive.',
+  churchIntro: "Fading, is it? Mother Isolde sees to those, round the back, and she'll want paying for it. Not the ones with fire or frost or storm in them, mind. She won't have those in the house.",
+  none: 'You have no relics. Now and then one comes out of a named butcher, and there\'s always one in the butcher at the bottom of a deep job.',
   recharge: (n: number) => `RECHARGE (${n})`,
   full: 'FULL',
   leave: (n: number) => (n ? `LEAVE IT (LIGHT FOR ${n} ${n === 1 ? 'JOB' : 'JOBS'})` : 'LEAVE IT'),
   leaveDark: 'LEAVE IT (NO LIGHT)',
   odricLeave: "Leave it on the step with the rest, I'll see to it. Go round the back after, Isolde will light you something for the road.",
-  odricLeaveDark: "Dark as a cellar, that one. Leave it all the same. I'll see to it.",
+  odricLeaveDark: "Dark as a cellar, that one. Leave it all the same, it can sit with the others.",
   recharged: 'Isolde takes it round the back. When she brings it out again it\'s warm, and she doesn\'t say what she did.',
   litNow: (n: number) => `You carry the church's light for your next ${n} ${n === 1 ? 'job' : 'jobs'}: your blows land harder, and the goblins come for you first.`,
   litNone: 'The light is for whoever leaves something that still has some life in it.',
   /** Two for one. */
-  twoTitle: 'TWO FOR ONE',
+  twoTitle: 'LEAVE TWO, TAKE ONE',
   twoLine: 'Leave two on the step together and take one back from what\'s been left before. You never know which.',
   pick: 'PICK TWO',
   picked: (n: number) => (n === 2 ? 'Two picked.' : n === 1 ? 'One picked. One more.' : 'Tap two of your relics.'),
-  odds: (el: number) => `${Math.round(el * 100)} IN 100 IT COMES BACK WITH AN ELEMENT.`,
+  odds: (el: number) => `${Math.round(el * 100)} IN 100 IT HAS AN ELEMENT IN IT.`,
   give: 'LEAVE THE TWO',
-  got: (name: string) => `It comes out of the light as the ${name}.`,
+  got: (name: string) => `Odric brings the ${name} out to you. He doesn't say whose it was.`,
   carry: 'CARRY IT',
   carrying: 'CARRYING',
   back: 'BACK',
@@ -69,6 +69,6 @@ export const RELICW = {
   shelfHint: 'It\'s with your other relics, in your pack.',
   /** Ivo at his bench, of a fading relic (the lore keeper's draft). */
   ivoFading: "Hear that? No, you don't, and that's the trouble. It was going like a hive a week ago. Now it's more like a cat that's thinking about it.",
-  ivoDark: "Nothing. Not a whisper. Take it up the hill to the church, they'll know what to do with it.",
-  ivoBright: 'Listen to it. No? Shame. It\'s singing.',
+  ivoDark: "Nothing, not a peep out of it, poor thing. Take it over to the church, they'll know what to do with it, or Isolde will anyway.",
+  ivoBright: "Listen to that, it's fair singing. No? Ah, well, most people haven't got the ears for it.",
 };

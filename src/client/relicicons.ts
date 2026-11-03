@@ -14,7 +14,7 @@ const KINDS: Partial<Record<RelicId, Paint>> = {
   lodestone: (px, line) => { for (let y = 3; y < 10; y++) line(3 + (y % 2), y, 8 + (y > 5 ? 1 : 0), y, y < 6 ? '#5a4a7a' : '#3a2e50'); px(5, 4, '#d8c0ff'); px(2, 2, G), px(10, 2, G), px(1, 10, G); },
   bomb: (px, line) => { for (let y = 4; y < 11; y++) { const h = y === 4 || y === 10 ? 2 : 3; line(5 - h, y, 6 + h, y, y < 7 ? '#6a7a3a' : '#4a5a2a'); } px(4, 5, '#a8c070'); line(6, 3, 8, 1, BD); px(9, 0, G), px(10, 1, '#ff9a3c'); },
   sentry: (px, line) => { line(1, 4, 11, 4, W); line(1, 4, 6, 2, IR); line(11, 4, 6, 2, IR); line(6, 1, 6, 7, ID); line(6, 7, 3, 11, W); line(6, 7, 9, 11, W); line(6, 7, 6, 11, W); px(6, 5, G); },
-  bell: (px, line) => { line(5, 1, 6, 1, BD); for (let y = 2; y < 9; y++) { const h = 1 + Math.floor((y - 1) / 2); line(6 - h, y, 5 + h, y, y % 3 ? B : BD); } line(1, 9, 10, 9, BD); px(5, 10, B), px(6, 10, B); },
+  bell: (px, line) => { line(2, 5, 9, 5, B); line(2, 6, 9, 6, B); line(0, 4, 0, 7, BD); line(1, 4, 1, 7, B); line(10, 4, 10, 7, BD); px(5, 5, BD); px(7, 5, BD); line(2, 7, 9, 7, BD); },
   knuckle: (px, line) => { for (let x = 1; x < 11; x += 3) { line(x, 3, x + 1, 3, B); line(x, 4, x + 1, 7, BD); } line(1, 8, 10, 8, B); line(2, 9, 9, 10, BD); },
 };
 

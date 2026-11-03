@@ -113,7 +113,7 @@ export const RELICS = {
   // The found relics beyond the javelin, hook and lodestone (shared/relickit.ts).
   bomb: { name: 'GALL BOMB', short: 'BOMB', cooldown: BOMB.cooldown, windup: BOMB.windup, recover: BOMB.recover, range: BOMB.range },
   sentry: { name: 'WIND-UP BOW', short: 'WIND-UP', cooldown: SENTRY.cooldown, windup: SENTRY.windup, recover: SENTRY.recover, range: 0 },
-  bell: { name: 'BONE BELL', short: 'BELL', cooldown: BELL.cooldown, windup: BELL.windup, recover: BELL.recover, range: BELL.radius },
+  bell: { name: 'BONE WHISTLE', short: 'WHISTLE', cooldown: BELL.cooldown, windup: BELL.windup, recover: BELL.recover, range: BELL.radius },
   knuckle: { name: "BUTCHER'S KNUCKLE", short: 'KNUCKLE', cooldown: KNUCKLE.cooldown, windup: KNUCKLE.windup, recover: KNUCKLE.recover, range: KNUCKLE.length },
 };
 export type RelicId = keyof typeof RELICS;
