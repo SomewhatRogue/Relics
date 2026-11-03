@@ -60,7 +60,7 @@ export class PartyCard {
     const pips = who.map(([, c]) => `<i style="background:${col(c)}"></i>`).join('') + '<i class="free"></i>'.repeat(Math.max(0, PARTY_MAX - who.length));
     const slots = `${q.members.length}/${PARTY_MAX}`, lead = q.members[0][1];
     const line = `<button class="pc-line" data-toggle aria-expanded="${this.open}"><b class="kind k-${q.job.kind}">${KIND[q.job.kind]}</b>` +
-      `<span class="pc-t">${esc(q.job.title)}</span><span class="pips">${pips}</span><span class="slots">${slots}</span><span class="chev">${this.open ? '-' : '+'}</span></button>`;
+      `<span class="pc-t">${esc(q.job.title)}</span><span class="pips">${pips}</span><span class="slots">${slots}</span><span class="chev">${this.open ? '\u25BE' : '\u25B8'}</span></button>`;
     if (!this.open) return void (this.card.innerHTML = line, this.card.className = 'shut');
     const names = who.map(([n, c], i) => `<li><i style="background:${col(c)}"></i><span style="color:${col(c)}">${esc(n)}</span>${i === 0 ? `<em>${PW.leads}</em>` : ''}</li>`).join('');
     const acts = q.mine

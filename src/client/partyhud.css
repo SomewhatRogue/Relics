@@ -4,7 +4,7 @@
 #partyhud { position: fixed; z-index: 5; left: calc(12px + env(safe-area-inset-left)); top: calc(62px + env(safe-area-inset-top)); width: 240px; display: flex; flex-direction: column; gap: 6px; pointer-events: none; font-size: 11px; font-weight: 500; color: #d8d4de; }
 #partyhud > * { pointer-events: auto; }
 body.panel-up #partyhud { z-index: 7; }
-body.touch #partyhud { left: calc(10px + env(safe-area-inset-left)); top: calc(54px + env(safe-area-inset-top)); width: min(56vw, 232px); }
+body.touch #partyhud { left: calc(10px + env(safe-area-inset-left)); top: calc(54px + env(safe-area-inset-top)); width: min(52vw, 206px); }
 body.touch.panel-up #partyhud { top: auto; bottom: calc(6px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: min(92vw, 340px); flex-direction: column-reverse; }
 body.touch.panel-up #partycard.open > :not(.pc-line) { display: none; }
 body.touch.in-party #tip { display: none; }
