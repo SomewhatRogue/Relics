@@ -234,6 +234,19 @@ and burns out a goblin den on a job.
       wilder places: nests that hatch waves, poison, the brood mother's glob, fire as their weakness
       (2026-11-01, Opus 5.5; lore placement waiting on the lore keeper)
 
+## Open, soon but not yet: red eyes and gold eyes (Kyle, 2026-11-03)
+
+Kyle loves it; hold until after the network tests on the new map types (usage limits). Lore keeper pass before any words land.
+- One dial per hero, red to gold, replacing the Want as a bare number. Toward red: hungry gear worn and its kills, hoarding.
+  Toward gold: giving at the Lantern, giving things up at the church, leaving relics on the step, freeing captives, clearing town trouble.
+- The eyes show it to everyone: faint tint near the middle; at the ends, burning red with a little smoke, or a warm gold glow.
+- Gold rewards are the town's: cheaper prices with Edda, Gannet, Halvard and Isolde; the church's light lasts longer; heals and help-ups a bit stronger; townsfolk greet you.
+- Red rewards are the fight's: more damage in steps, hungry gifts stronger. Its costs: prices up and some keepers refuse at the far end, goblins come for you first,
+  a chance of town trouble tied to you (a break-in at your house, a shop shut until it's cleared), and in the finale the bells don't spare the reddest.
+- Red should tempt, never just be bad. Giving pulls a red hero back.
+- Relics stay out of it: fading is their price.
+- Build in three steps: (1) the dial and the eyes, (2) gold prices and red damage, (3) town trouble (after the big maps).
+
 ## Next (in order)
 
 1. Kyle plays slice 3. Tune: job length, goblin counts, gold and experience, the town's layout.
