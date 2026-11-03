@@ -2492,3 +2492,34 @@ strong based on physics and buff or debuff ... clear that it doesn't have friend
 - Tests: `tests/relicfight.test.ts` (charge, dark refusal, each kind, friends untouched),
   `tests/relicchurch.test.ts` (recharge, light, two for one, drops, migration, charge kept). Screenshots:
   `scripts/relics.cjs`.
+
+## 2026-11-03: the town hall votes on its walls, giving a relic up is plain, the way out is lit (Kyle; Claude Opus 5.5)
+
+- **The church step.** LEAVE IT is now GIVE IT UP, and a first tap only asks: the card shows "Gone for
+  good. You carry the church's light for n jobs: +15% damage, and goblins come for you first." with YES,
+  GIVE IT UP and KEEP IT. A line above the cards says the same before anything is tapped. Two for one
+  says both are gone for good and gives no light, and asks the same way (GIVE BOTH UP, then YES, GIVE
+  BOTH UP). The light's line is built from `LIT.dmg`, so the number can't drift from the fight. The LIT
+  badge on the HUD says it on hover or as a note on a tap (`client/litbadge.ts`).
+- **One CLOSE.** The tally panels (Odric's first talk, and Isolde's) had their own CLOSE and the panel's;
+  they now keep one.
+- **The town hall.** Two boards on the wall either side of the valley map (`vote` hangs), one per choice,
+  each with its short name (new `Choice.short`: FARM THEM, TAKE THEM IN) and the names of who voted for
+  it; across the top, when it closes ("CLOSES AT 4 VOTES: 3 TO GO"; alone, "YOUR VOTE DECIDES"; then
+  what the council chose). There's no clock on a vote, so "closes" is the quorum. Names come from the
+  world: `WorldState.voters` (voter, a device, to the name of the hero who last voted from it), set in
+  `contribute` (so the server keeps it too; names are already cleaned there). One set of rows
+  (`client/voteboards.ts`) is drawn by both views: on the flat glow layer, and in 2.5D on the overlay,
+  each row placed on the wall's face by projection (a texture on the wall smeared under the 3D post
+  pass). The shelves, banner and notices came off that wall; the torches moved between boards and map.
+- **Under the boards.** Alder Bram argues for the plough and Goodwife Sell for the camp (existing
+  townsfolk; their usual talk returns once the council has chosen). Voting is still at the reeve only.
+- **The reeve across his table.** `Npc.reach`: a person can be talked to from that much further off.
+  Hollis has 1.4 tiles more, enough from the near side of the table.
+- **The way out.** Every way out of a room (`map.exit`, or roads at a fork: what the room judges you
+  leaving by) has a lit threshold on the floor with an arrow out, when it's open: `client/exitmark.ts`
+  places it and draws the flat one, `three/exitmat3d.ts` the 2.5D one. It replaced the chevrons.
+- **Ivo is busy** for now (Kyle): one line, no panel. Relics are still carried from the pack's relic card.
+  His old bench stays in `shops.ts` behind `IVO_BUSY`; the town tip no longer sends you to him for relics.
+- New words for the lore keeper and line editor: listed in the report for this change (relicwords,
+  storewords FORGE.busy, councilwords).

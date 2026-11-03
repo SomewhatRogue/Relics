@@ -14,6 +14,8 @@ import { drawText, textWidth } from '../pixfont';
 import { OX, OY, PX } from '../world';
 import type { Lerp } from './actors3d';
 import { BOXFIGS } from './look';
+import { ROWS, boardRows } from '../voteboards';
+import { WALL_H } from './ground';
 
 export type Proj = (x: number, y: number, z: number) => [number, number];
 export interface Marks { marks: Target[]; doors: DoorMark[]; pointTo: { x: number; y: number } | null; focus?: { x: number; y: number } | null; fanfare?: boolean }
@@ -37,6 +39,12 @@ export class Overlay {
   draw(room: ArenaRoom, meId: string, fx: Fx, m: Marks, P: Proj, lerp: Lerp, now: number, ppu: number): void {
     const g = this.g, k = ppu / PX, up = (z?: number) => (z ?? 0) * 0.75;
     g.clearRect(0, 0, this.W, this.H);
+    // The town hall's vote boards' words, each row placed on the wall's face (../voteboards.ts).
+    // (Rows under a board's name go a fixed step below it: the wall is foreshortened, and lines would touch.)
+    for (const r of boardRows(room.map)) {
+      const [x, y0] = P(r.x, WALL_H * (1 - (Math.min(r.row, 9) + 2.5) / ROWS), 0.05), y = y0 + Math.max(0, r.row - 9) * (7 / 6);
+      drawText(g, r.s, Math.round(x - textWidth(r.s) / 2), Math.round(y - 2), r.col);
+    }
     // The 2D effects: a world pixel is a spot on the floor (its height baked into its y, as in 2D).
     const at = (px: number, py: number, h = 0) => P((px - OX) / PX, h, (py - OY) / PX);
     for (const gb of fx.gore.gibs) {

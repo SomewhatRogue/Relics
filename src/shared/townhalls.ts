@@ -64,7 +64,7 @@ export function hall(door: string): GameMap | null {
   if (door === 'townhall') return room('THE TOWN HALL', 12, 8, HOME,
     [b('desk', 3, 2.4, 6, 1)],
     [{ ...n('REEVE HOLLIS', 6, 1.7, 'council', 'reeve'), reach: 1.4 }, n('ALDER BRAM', 2.2, 1.3, 'advocate', 'elder', 3), n('GOODWIFE SELL', 9.8, 1.3, 'advocate', 'villager', 4)],
-    { marks: [mk('rug', 2.4, 1.8, 7.2, 2.6)], hangs: [hang('vote', 0.4, 3.6), hang('map', 4.4, 3.2), hang('vote', 8, 3.6)] });
+    { marks: [mk('rug', 2.4, 1.8, 7.2, 2.6)], hangs: [hang('vote', 0.4, 3.6), hang('map', 4.4, 3.2), hang('vote', 8, 3.6)], torches: [{ x: 4.2, y: -1.6 }, { x: 7.8, y: -1.6 }] });
   return null;
 }
 

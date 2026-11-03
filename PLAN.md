@@ -301,7 +301,8 @@ Kyle loves it; hold until after the network tests on the new map types (usage li
    DONE 2026-11-02: chat. WORLD and NEAR in town, the party on a job; bubbles over heads; a phone
    panel and quick lines; mute and a slur filter (docs/DECISIONS.md, `scripts/chat-online.cjs`).
 4. World quests: open only with 3+ in town; hard.
-5. Town votes. DONE 2026-11-01: one voice per device (all its heroes share it). Without sign-in a
+5. Town votes. DONE 2026-11-03: the town hall shows each choice on its own board with who voted for it and when it closes, someone under each argues it, the reeve heard across his table.
+   DONE 2026-11-01: one voice per device (all its heroes share it). Without sign-in a
    second browser is still a second voice. Real one-per-
    person needs a sign-in (Google, Apple or an email link). Start per device; add sign-in if it's
    ever gamed.
