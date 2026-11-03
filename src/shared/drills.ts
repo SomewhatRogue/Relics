@@ -59,15 +59,10 @@ export function drillGain(id: DrillId, cls: HeroClass, ranks: number): string {
  * leaves behind (a snare where they jumped from, an image where they blinked from).
  */
 export const TEACHES = { skill: { level: 3, price: 150 }, leave: { level: 5, price: 250 } } as const;
+/** Each class's three skills (SKILL_CHOICES order), taught one by one: the first is the `skill` lesson
+ *  above; the second from level 5, the third from level 7 (2026-11-02). */
+export const SKILL_STEPS = [TEACHES.skill, { level: 5, price: 250 }, { level: 7, price: 400 }] as const;
 export const LEAVES: Partial<Record<HeroClass, { name: string; short: string; text: string; gain: string }>> = {
   RANGER: { name: 'SNARE ON THE JUMP', short: 'SNARE', text: 'Jumping back leaves a snare where you stood', gain: 'a snare where you jumped' },
   MAGE: { name: 'IMAGE ON THE BLINK', short: 'IMAGE', text: 'Blinking leaves an image of you behind, and the goblins go for it', gain: 'an image where you blinked' },
-};
-/** A few words for each class skill, on the trainer's list. */
-export const SKILL_GAIN: Record<HeroClass, string> = {
-  WARRIOR: 'learn both, carry one',
-  RANGER: 'pins a goblin down, slows a big one',
-  ROGUE: 'step behind a goblin',
-  MAGE: 'fire, frost, storm',
-  HEALER: 'ground that mends',
 };

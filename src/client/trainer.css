@@ -47,3 +47,28 @@
 #panel .tr-ladder li.next { background: #2a2416; }
 #panel .tr-ladder li.next em { color: #ffd27a; }
 #panel .tr-ladder li.lock { opacity: 0.45; }
+/* Sections (trainsections.ts): a header you tap to open or close, with where you stand in it. */
+#panel .tr-sec { margin: 8px 0 0; border: 1px solid #2e2a36; border-radius: 4px; background: #17151d; }
+#panel .tr-sh { display: grid; grid-template-columns: 14px 1fr auto; align-items: center; column-gap: 6px; width: 100%; min-height: 44px; margin: 0; padding: 6px 10px; text-align: left; background: none; border: 0; border-radius: 4px; color: #c8b080; }
+#panel .tr-sh b { grid-column: 2; font-size: 11px; letter-spacing: 0.15em; font-weight: 600; }
+#panel .tr-sum { grid-column: 2 / span 2; font-size: 10px; color: #9a94a4; letter-spacing: 0.04em; }
+#panel .tr-ready { grid-column: 3; grid-row: 1; font-style: normal; font-size: 10px; font-weight: 600; color: #1a1408; background: #ffd27a; padding: 1px 6px; border-radius: 3px; }
+#panel .tr-chev { grid-row: 1 / span 2; width: 0; height: 0; border-left: 5px solid #c8b080; border-top: 4px solid transparent; border-bottom: 4px solid transparent; transition: transform 0.12s; }
+#panel .tr-sec.open .tr-chev { transform: rotate(90deg); }
+#panel .tr-sb { display: none; padding: 0 6px 6px; }
+#panel .tr-sec.open .tr-sb { display: block; }
+#panel .tr-note { margin: 2px 4px 2px; font-size: 10px; color: #8a8494; }
+/* A skill: name and its state, what it does, and the level it's taught at. */
+#panel .tr-skill { display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 8px; row-gap: 2px; width: 100%; min-height: 52px; margin: 0 0 5px; padding: 7px 10px; text-align: left; background: #211e29; border: 1px solid #3a3644; border-radius: 4px; color: #e8e4ee; }
+#panel .tr-skill .tr-n { grid-column: 1; font-size: 12px; }
+#panel .tr-skill .tr-t { grid-column: 2; grid-row: 1; font-style: normal; font-size: 11px; color: #c8c4d0; text-align: right; }
+#panel .tr-skill .tr-d { grid-column: 1 / span 2; font-size: 10px; line-height: 1.35; color: #c8c4d0; }
+#panel .tr-skill .tr-lv { grid-column: 1 / span 2; font-size: 10px; color: #8a8494; letter-spacing: 0.06em; }
+#panel .tr-skill.s-known .tr-t { color: #9fd0ff; font-weight: 600; }
+#panel .tr-skill.carried { border-color: #ffd27a; background: #2e2516; }
+#panel .tr-skill.carried .tr-t { color: #ffd27a; }
+#panel .tr-skill.s-buy { border-color: #9ad8a8; }
+#panel .tr-skill.s-buy .tr-t { color: #9ad8a8; font-weight: 600; }
+#panel .tr-skill.s-poor .tr-t { color: #c07a6a; }
+#panel .tr-skill.s-locked .tr-n, #panel .tr-skill.s-locked .tr-d, #panel .tr-skill.s-needs .tr-n, #panel .tr-skill.s-needs .tr-d { opacity: 0.55; }
+#panel .tr-skill.s-locked .tr-lv { color: #c8b080; }

@@ -49,5 +49,7 @@ export function learnLesson(p: Profile, l: Lesson): boolean {
   if (lessonState(p, l) !== 'buy') return false;
   p.gold -= TEACHES[l].price;
   p.learned = [...(p.learned ?? []), l];
+  // Taught the first skill now: the later ones are each bought (shared/skillteach.ts).
+  if (l === 'skill') p.taught ??= [];
   return true;
 }
