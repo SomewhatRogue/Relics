@@ -58,6 +58,6 @@ export const FORGE = {
   ivo: "No elements for a while, I'm sorry, and please don't ask me why. Whatever's set in yours stays set, it's happy where it is.",
   shut: 'Ivo is not setting elements for now.',
   /** Ivo, busy: he doesn't talk to you for now. */
-  busy: "Ivo is bent over his bench, squinting at something in his tongs. He doesn't look up.",
+  busy: "Ivo is bent over his bench with something held up to his ear, and he doesn't look up.",
   element: 'AN ELEMENT (NOT FOR NOW)',
 };

@@ -27,10 +27,10 @@ export const RELICW = {
   charge: (n: number, max: number) => `CHARGE ${n} / ${max}`,
   dark: 'DARK',
   darkLine: 'Gone dark. It does nothing now until the church sees to it.',
-  darkElLine: 'Gone dark, and the church can\'t bring this kind back. Give it up on the step, or give it up with another and take one back.',
+  darkElLine: 'Gone dark, and the church won\'t bring this kind back. You can still give it up on the step, on its own or with another to take one back.',
   loud: 'LOUD',
   fades: 'Every use spends a little of it.',
-  noRecharge: 'Born with an element. It holds more, but the church can\'t recharge it.',
+  noRecharge: 'Born with an element. It holds more, but the church won\'t recharge it.',
   /** The RELIC button pressed with a dark one in hand. */
   pressedDark: 'DARK',
   /** Spared by a friend's relic. */
@@ -51,7 +51,7 @@ export const RELICW = {
   leave: (n: number) => (n ? `GIVE IT UP (LIGHT FOR ${n} ${n === 1 ? 'JOB' : 'JOBS'})` : 'GIVE IT UP'),
   leaveDark: 'GIVE IT UP (NO LIGHT)',
   /** The second tap: what you lose and what you get. */
-  leaveWarn: (n: number) => (n ? `Gone for good. You carry the church's light for ${jobs(n)}: ${LIGHT}.` : "Gone for good, and it's too dark to give you any light."),
+  leaveWarn: (n: number) => (n ? `Gone for good. You carry the church's light for ${jobs(n)}: ${LIGHT}.` : "Gone for good. It's gone dark, so there's no light for this one."),
   leaveSure: 'YES, GIVE IT UP',
   keep: 'KEEP IT',
   odricLeave: "That's it, on the step with the rest. Go round the back after, and Isolde will ^light^ you something for the road.",

@@ -26,7 +26,7 @@ export function closeNight(closes: number, now = Date.now()): [number, string] {
 
 /** Rows on the wall: row 0 is its top, screen row 8 in the flat view (as the 3D wall's face). */
 export const WALL_TOP = 8, ROWS = OY - WALL_TOP;
-const NAMES_SHOWN = 3;
+const NAMES_SHOWN = 2;
 
 /** One line of words: centred on tile `x`, its top at wall row `row`. */
 export interface BoardRow { s: string; x: number; row: number; col: string }
