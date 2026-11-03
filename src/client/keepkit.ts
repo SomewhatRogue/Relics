@@ -19,6 +19,10 @@ const fromHero = (h: Hero, p: Profile): Kit => ({
 });
 const fromProfile = (p: Profile): Kit => ({ weapon: p.weapon, arms: p.arms, bag: p.bag, armor: p.armor, rings: p.rings, belt: p.belt, glow: p.glow, relic: p.relic, channel: p.augments.channel ?? '' });
 
+const sameList = <T>(a: T[], b: T[]) => a.length === b.length && a.every((x, i) => x === b[i]);
+const same = (a: Kit, b: Kit) => a.weapon === b.weapon && a.glow === b.glow && a.relic === b.relic && a.channel === b.channel && a.armor === b.armor
+  && sameList(a.bag, b.bag) && sameList(a.rings, b.rings) && sameList(a.belt, b.belt) && sameList(Object.entries(a.arms).flat(), Object.entries(b.arms).flat());
+
 /**
  * The room's word on this hero's kit, into their profile. True when anything changed (the caller
  * stores the save). `copy`: a friend's hero comes from the leader's patches, so its pieces are copied;
@@ -26,6 +30,8 @@ const fromProfile = (p: Profile): Kit => ({ weapon: p.weapon, arms: p.arms, bag:
  */
 export function keepKit(p: Profile, h: Hero, copy: boolean): boolean {
   const now = fromHero(h, p);
+  // (The same pieces, as the leader's own nearly always has: no need to look closer.)
+  if (same(now, fromProfile(p))) return false;
   if (JSON.stringify(now) === JSON.stringify(fromProfile(p))) return false;
   const k = copy ? (JSON.parse(JSON.stringify(now)) as Kit) : now;
   Object.assign(p, { weapon: k.weapon, arms: { ...k.arms }, bag: [...k.bag], armor: k.armor, rings: [...k.rings], belt: [...k.belt], glow: k.glow, relic: k.relic });
