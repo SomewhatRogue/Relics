@@ -18,7 +18,7 @@ export const POTIONS: Record<PotionId, { name: string; short: string; text: stri
   brandy: { name: 'WALL BRANDY', short: 'BRANDY', text: 'Doubles your damage, halves your speed and stamina.', price: 15, thrown: false, col: '#d4a537' },
   oil: { name: 'LAMP OIL', short: 'OIL', text: 'Bursts into flame when thrown.', price: 20, thrown: true, col: '#ff9a3c' },
   frost: { name: 'FROST FLASK', short: 'FROST', text: 'Chills what it splashes. A second splash freezes.', price: 25, thrown: true, col: '#9fd0ff' },
-  smoke: { name: 'SMOKE FLASK', short: 'SMOKE', text: 'Hides anyone in it from goblins, unless they\'re close.', price: 25, thrown: true, col: '#9a94a8' },
+  smoke: { name: 'SMOKE FLASK', short: 'SMOKE', text: 'Goblins can\'t see anyone in it unless they get close.', price: 25, thrown: true, col: '#9a94a8' },
 };
 
 /** How long a drink lasts, for the card (seconds), when it's not in the text already. */

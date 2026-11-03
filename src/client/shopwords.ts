@@ -29,7 +29,7 @@ export const SHOPW = {
   bought: 'In your pack.',
   fine: 'Fine: one modifier.',
   forged: 'Forged: two modifiers, or one and an element.',
-  ring: 'A ring. Forged: two modifiers, or one and an element.',
+  ring: 'Forged: two modifiers, or one and an element.',
   reroll: 'Turns this modifier into another.',
   pack: (size: number) => `Two old packs stitched into one. Holds ${size}.`,
   shelves: (size: number) => `Room for ${size} in the vault.`,
