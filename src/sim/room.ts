@@ -37,8 +37,7 @@ import { forgedElement, has, traitsOf } from './traits';
 import { fireHook, stepHook } from './hook';
 import { stepJavelin, throwJavelin } from './javelin';
 import { laySnare, stepHound, stepSnare } from './ranger';
-import { healOf, healReach, perfectMult, smiteStun } from './knacks';
-import { knack } from './gearstats';
+import { burstMult, healOf, healReach, perfectMult, smiteStun } from './knacks';
 import { stepNests } from './spiders';
 import { cure, stepPoison } from './poison';
 import { stepPuddles } from './puddles';
@@ -355,7 +354,7 @@ export class ArenaRoom {
     // The Jealous Rod: a charged spell jumps to every goblin near what it hits.
     if (full && wears(h, 'jealous')) for (const b of this.bolts.slice(bolts)) b.chain = true;
     // WIDE BURST: a Mage's bursts reach further.
-    for (const b of this.bolts.slice(bolts)) b.burst *= 1 + knack(h, 'burst');
+    for (const b of this.bolts.slice(bolts)) b.burst *= burstMult(h);
     const heal = healOf(h, s);
     if (!heal) return;
     w.ev.push({ k: 'bless', x: h.x, y: h.y });

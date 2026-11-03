@@ -2,7 +2,7 @@
  * The fight's numbers as a hero's knacks move them (shared/perks.ts). Each is the one the room judges
  * and the one the client draws: the parry flash on a telegraph, the white flash at full draw.
  */
-import { BASH, BLESSING, DECOY, GUARD, HEAL_RADIUS, HORN, HOUND, RELEASE, SNARE, WARD, WEAPONS, type Swing } from '../shared/tuning';
+import { BASH, BLESSING, DECOY, GUARD, HEAL_RADIUS, HORN, HOUND, RELEASE, SNARE, STEALTH, WARD, WEAPONS, type Swing } from '../shared/tuning';
 import { knack, statsOf } from './gearstats';
 import type { Hero } from './types';
 
@@ -22,6 +22,8 @@ export const dodgeBreath = (h: Hero) => statsOf(h).dodgeCost * (1 - knack(h, 'li
 export const slipWindow = (h: Hero) => WEAPONS[h.weapon].dodge.iTo + (h.lenience ?? 0) + knack(h, 'slip');
 /** Behind a goblin: where its facing points away by more than this (a dot product; higher is wider). */
 export const rearCos = (h: Hero) => GUARD.rearCos + knack(h, 'angle');
+/** Creeping: goblins at rest see you at this share of their sight. */
+export const sneakSight = (h: Hero) => STEALTH.sneak * (1 - knack(h, 'quiet'));
 /** How long the blink's image stays. */
 export const decoyTime = (h: Hero) => DECOY.time + knack(h, 'image');
 
@@ -53,5 +55,7 @@ export function healOf(h: Hero, s: Swing): number {
   const next = h.heavy ? undefined : WEAPONS[h.weapon].combo[h.combo + 1];
   return next?.heal ? next.heal * knack(h, 'mercy') : 0;
 }
+/** A spell's burst radius, as a share of its own (WIDE BURST). */
+export const burstMult = (h: Hero) => 1 + knack(h, 'burst');
 /** A smite's stun. */
 export const smiteStun = (h: Hero, s: Swing) => (s.stun ?? 1) + knack(h, 'smiteStun');

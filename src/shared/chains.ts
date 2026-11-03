@@ -95,6 +95,6 @@ export function fitPerks(p: Profile): void {
     if (id && PERKS[id] && !kept.includes(id)) kept.push(id);
   }
   p.perks = kept;
-  p.picks = Math.max(0, p.picks) + had.length - kept.length;
+  p.picks = Math.max(0, p.picks || 0) + had.length - kept.length;
   p.picks = Math.max(p.picks, p.level - 1 - kept.length);
 }
