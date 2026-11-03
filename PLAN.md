@@ -17,6 +17,11 @@ QUALITY: LOW / MID / HIGH under VIEW changes it live and is remembered (HIGH to 
 flips back to FLAT and nothing else changed; and it feels smooth on his phone at HIGH (or he drops it).
 Not yet in 2.5D: Blender art; furniture and props inside halls are plain boxes in their colours; the
 tower's coloured smoke and the forge's smoke.
+Then (Kyle and friends: "We like the 2.5D, but flat has cleaner, brighter colours. It's too dark in
+2.5D", and in the wood on his phone: "It looked like Minecraft from super far back"): 2.5D lit to flat's
+levels, closer in on phones, round trees and cone pines, the trainer skills' areas, BRIGHT - / + in the
+gear box. *Done when* Kyle and his friends find 2.5D as bright and clean as FLAT at night and by day
+(night still night, torchlight still pooling), and the wood on his phone reads like the job rooms.
 
 **Three skills a class, training in sections** (Claude Opus 5.5, 2026-11-02; Kyle: "only one or two
 available per class. Let's try to think of 3 per class", "training to be its own expandable /
