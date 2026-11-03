@@ -307,7 +307,7 @@ function hud(now: number): void {
 
 /** The LEAVE button's question, alone and in a party. */
 const LEAVE_SOLO = "The job's lost if you go, and you keep half the gold you've picked up.";
-const LEAVE_PARTY = "Your party carries on without you, and you keep the gold you've picked up.";
+const LEAVE_PARTY = "Your party carries on without you. You keep the gold you've picked up, but not the job's pay.";
 
 /** On the banner once you're out of a job (your party carries on without you). */
 const OUT_TEXT = "You're out till the job's done. Your party carries on";
