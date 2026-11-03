@@ -69,6 +69,17 @@ const SCENES = {
     await at(page, 31, 21, 1, 0.3);
     await page.waitForTimeout(800);
   },
+  async halls(page) { await clock(page, MIDNIGHT); await at(page, 40, 10, 0, -1); await page.waitForTimeout(900); },
+  async street(page) {
+    await page.evaluate(() => {
+      const g = window.__game, j = g.jobs()[1];
+      g.startJob({ ...j, place: { name: 'Barrowby', kind: 'village', region: 'Barrowfields', ruin: 1 }, objective: 'rescue', boss: 'SKARN', rooms: 1, seed: 7 });
+      const h = g.room.map.blocks.find((b) => b.kind === 'house');
+      g.room.enemies.forEach((e) => (e.cooldown = 99));
+      if (h) Object.assign(g.hero, { x: h.x + h.w / 2, y: h.y + h.h + 2.5 });
+    });
+    await page.waitForTimeout(900);
+  },
   async gear(page) {
     await page.evaluate(() => document.getElementById('opts').click());
     await page.waitForTimeout(400);

@@ -13,7 +13,7 @@ import { part, pivot } from './rig';
 import type { Spot } from './rounds3d';
 
 const CLOTH = ['#5a4a3a', '#4a5a6a', '#6a5a48', '#5a3a3a'];
-const rope = M(0x8a7a5a), iron = M(0x2a2630), rim = M(0x57525e), dark = M(0x2e0a0a), red = M(0x6a1212), drop = M(0x5a1616);
+const rope = M(0x8a7a5a), iron = M(0x2a2630), rim = M(0x57525e), dark = M(0x3a0808), red = M(0x8a1414), drop = M(0x5a1616);
 
 interface Hung { root: THREE.Group; body: THREE.Group; drip: THREE.Mesh; k: number }
 interface Pot { root: THREE.Group; steam: THREE.Mesh[]; k: number; x: number; z: number }
@@ -71,9 +71,11 @@ function hung(x: number, z: number, k: number): Hung {
   for (const s of [-1, 1]) part(body, 0.13, 0.55, 0.14, cloth, s * 0.08, -0.32, 0);
   part(body, 0.38, 0.62, 0.22, cloth, 0, -0.9, 0);
   // Opened: the dark inside, red at the edges, ribs showing.
-  part(body, 0.16, 0.5, 0.04, dark, 0, -0.88, 0.11);
-  for (const s of [-1, 1]) part(body, 0.03, 0.5, 0.04, red, s * 0.09, -0.88, 0.115);
-  for (let i = 0; i < 3; i++) part(body, 0.26, 0.03, 0.03, bone, 0, -0.98 + i * 0.09, 0.12);
+  for (const f of [1, -1]) {
+    part(body, 0.22, 0.54, 0.04, dark, 0, -0.88, f * 0.11);
+    for (const s of [-1, 1]) part(body, 0.05, 0.54, 0.04, red, s * 0.12, -0.88, f * 0.115);
+    for (let i = 0; i < 3; i++) part(body, 0.3, 0.035, 0.03, bone, 0, -0.98 + i * 0.1, f * 0.125);
+  }
   if (k % 3 === 0) part(body, 0.08, 0.2, 0.06, M(hex(GUT[0])), 0.03, -1.12, 0.13);
   // Arms hanging past the head, the hands open; the head with its hair.
   for (const s of [-1, 1]) part(body, 0.11, 0.6, 0.12, cloth, s * 0.25, -1.38, 0), part(body, 0.1, 0.1, 0.1, skin, s * 0.25, -1.72, 0);
