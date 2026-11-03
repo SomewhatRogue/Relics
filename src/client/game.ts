@@ -46,6 +46,9 @@ import { Followers } from './followers';
 import { JobRooms, doorPushed, type DoorMark, type SavedHouses } from './jobrooms';
 import type { Parties } from './parties';
 
+/** Seconds the screen takes to go dark after a lost job, before town. */
+export const FADE_OUT = 2.4;
+
 export type Mode = 'town' | 'yard' | 'run' | 'wood';
 /** A whole job, to lead it from (coop.ts sends it every 2 s): `me` is whoever leads. */
 interface JobSave { run: Run; room: Record<string, unknown>; houses?: SavedHouses; members: [string, string][]; key?: number }
@@ -77,6 +80,8 @@ export class Game {
   greeting: string | null = null;
   /** Set when a run ends; the UI shows it and clears it. */
   result: Result | null = null;
+  /** When the job was lost (room time), for the fade out before town. */
+  beatenAt: number | null = null;
   /**
    * Inside a building: the room outside (it keeps running: fires burn, dens breed), the door you came
    * in by, and your hero there (in town, kept aside). Online, the party leader runs every room someone is in.
@@ -531,7 +536,11 @@ export class Game {
     if (this.mode === 'run' && this.run) {
       const street = this.fightRoom;
       street.exitOpen = goal(this.run, street, sum(this.houses())).done;
-      if (this.run.failed) this.finish('beaten');
+      // Beaten: a slow fade from where you fell (main.ts), then town.
+      if (this.run.failed) {
+        this.beatenAt ??= this.room.time;
+        if (this.room.time - this.beatenAt >= FADE_OUT) (this.beatenAt = null), this.finish('beaten');
+      }
       else if (!this.outside && this.room.exitOpen) {
         // The way on takes the whole party, standing in it together; at a fork, the road they stand in.
         const road = this.room.map.roads?.find((r) => this.together(r.area));
@@ -792,6 +801,7 @@ export class Game {
    * you). `withParty`: a job with friends (going early keeps the pot as it was; alone, the job's lost).
    */
   private finish(how: How, followed = false, withParty = false): void {
+    this.beatenAt = null;
     const run = this.run!, p = this.profile, w = this.world, won = how === 'won', key = this.jobKey;
     const party = this.coop ? this.coop.members.map(([id, name]) => (id === p.id ? p.name : name)) : [p.name];
     // Leading: everyone's told how it went (each friend's game pays them from the run).

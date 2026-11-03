@@ -368,6 +368,12 @@ function tick(t: number): void {
   game.coop?.frame(t / 1000);
   for (const ev of evs) {
     fx.on(ev);
+    // My own get-ups in a party: how many are left, when I go down and when I get up.
+    const party = game.room.heroes.filter((x) => x.id !== 'squire').length > 1;
+    if (party && game.mode === 'run' && (ev.k === 'down' || ev.k === 'gotup' || ev.k === 'pickedup') && (ev as { id?: string }).id === game.hero.id) {
+      const [sx, sy] = toPx(ev.x, ev.y);
+      fx.say(sx, sy - 34, game.hero.selfUp ? 'NO GET-UPS LEFT' : '1 GET-UP LEFT', game.hero.selfUp ? '#ff6a7a' : '#ffd27a', 2.6);
+    }
     // Down alone on a job: how many more times you'll get up.
     if (ev.k === 'down' && game.mode === 'run' && game.run && game.room.heroes.filter((x) => x.id !== 'squire').length < 2 && Math.abs(ev.x - game.hero.x) < 0.01) {
       const left = MAX_DOWNS - game.run.downs;
@@ -378,6 +384,10 @@ function tick(t: number): void {
     if (ev.k === 'parry') parries++;
   }
   sounds.frame(game, t / 1000);
+  // Lost the job: fade out where you fell; back in town, fade up out of the dark.
+  const fade = document.getElementById('fade') ?? Object.assign(document.body.appendChild(document.createElement('div')), { id: 'fade' });
+  if (game.beatenAt !== null && !fade.classList.contains('dark')) fade.classList.remove('up'), fade.classList.add('dark');
+  else if (game.beatenAt === null && fade.classList.contains('dark')) fade.classList.add('up'), fade.classList.remove('dark');
   watchDust(game.room, fx);
   // Back in the open in town: see what the world has been up to (at most every 30 s).
   if (game.mode === 'town' && !game.outside) void link.refresh();
