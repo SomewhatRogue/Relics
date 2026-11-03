@@ -33,6 +33,10 @@ const TREASURE_SOLD = 20;
 import { rebase } from '../sim/rebase';
 import { CoopGuest, CoopHost, loadRoom, saveRoom, type Friend } from './coop';
 import { forgetSession, keepSession, keptJob, type Session } from './session';
+import { bankEnd, bankJob, banked, soloJob, unbank } from './jobbank';
+import { dropOwed, owedTo } from './owed';
+import { dressKit, forgetTaken, keepKit } from './keepkit';
+import { ONLINE } from './relay';
 import { dayPhase, townLight } from '../shared/daylight';
 import { Followers } from './followers';
 import { JobRooms, doorPushed, type DoorMark, type SavedHouses } from './jobrooms';
@@ -41,7 +45,14 @@ import type { Parties } from './parties';
 export type Mode = 'town' | 'yard' | 'run' | 'wood';
 /** A whole job, to lead it from (coop.ts sends it every 2 s): `me` is whoever leads. */
 interface JobSave { run: Run; room: Record<string, unknown>; houses?: SavedHouses; members: [string, string][]; key?: number }
-export interface Result { won: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number; relic?: RelicId; treasure: Item[]; sold: Item[]; lost?: number }
+/**
+ * How a job ended for this player: won; driven back (beaten, or gone home from a job alone: half the
+ * gold); or gone early from a party, by LEAVE or cut off from it (the gold picked up while with them).
+ */
+export type How = 'won' | 'beaten' | 'left' | 'dropped';
+export interface Result { won: boolean; how: How; half: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number; relic?: RelicId; treasure: Item[]; sold: Item[]; lost?: number }
+/** A leader back after a reload waits this long (the room held) for a friend to answer before the job's given up. */
+const HOLD = 10;
 /** Something you can use where you stand: a spot, a person, or a door. */
 export interface Near { label: string; talk?: SpotId; arg?: number; key?: string; door?: Block; chest?: number; npc?: Npc }
 
@@ -95,6 +106,11 @@ export class Game {
   /** Levels grown, counted out to the room (sim/grow.ts); and how many of this job's are lit already. */
   levelSeq = 0;
   private grown = 0;
+  /** The job's own name (the party's room code, or this device's for a job alone): paid once, by it. */
+  jobKey = '';
+  /** Leading again after a reload: the room waits till this for a friend to answer (HOLD). */
+  private holdUntil = 0;
+  private settling = false;
 
   constructor() {
     this.enterTown();
@@ -294,7 +310,11 @@ export class Game {
 
   /** A friend arrives in the job (or back after losing their signal: their hero is still here). */
   addFriend(id: string, f: Friend): void {
-    if (this.mode !== 'run' || this.room.heroes.some((x) => x.id === id) || this.rooms.roomOf(id)) return;
+    if (this.mode !== 'run') return;
+    // Already here from the job as it was saved (a reload, a takeover): their kit as their own save has it.
+    const had = this.roomOf(id)?.heroes.find((x) => x.id === id);
+    if (had && f.profile) return dressKit(had, f.profile), forgetTaken(this.rooms.all(), f.profile);
+    if (had) return;
     this.synced.delete(id);
     this.bring(id, f);
   }
@@ -420,6 +440,7 @@ export class Game {
     this.rooms.reset(null);
     this.run = newRun(job);
     this.run.party = party;
+    this.jobKey = soloJob();
     this.place(runRoom(this.run));
     this.rooms.reset(this.room);
     // A coin in the well: you set out blessed.
@@ -431,6 +452,8 @@ export class Game {
     // Following a friend's job: their room is drawn here; nothing runs in this browser.
     if (this.remote) return this.stepRemote();
     intent = this.own(intent);
+    // Back to lead after a reload: the room waits for a friend to answer (nobody does: the job's gone).
+    if (this.holdUntil && this.waiting()) return [];
     const h = this.hero;
     // The wood holds the world still for a lesson's card, a freeze-frame, a word of praise.
     if (this.mode === 'wood' && this.wood?.hold && this.holding(intent, dt)) return [];
@@ -474,7 +497,7 @@ export class Game {
     stepped.set(here, ev);
     this.stepped = stepped;
     this.followers.step(here);
-    if (this.mode === 'run' && this.run) tally(this.run, here, ev, ME);
+    if (this.mode === 'run' && this.run) tally(this.run, here, ev, ME), this.bankIt(this.run);
     this.growing();
     // Wickhold keeps the shared day: the light turns with the clock, the same on every screen.
     if (this.mode === 'town' && !this.outside) this.room.map.theme = townLight(this.townTheme ??= this.room.map.theme, dayPhase(Date.now()));
@@ -491,12 +514,12 @@ export class Game {
     if (this.mode === 'run' && this.run) {
       const street = this.fightRoom;
       street.exitOpen = goal(this.run, street, sum(this.houses())).done;
-      if (this.run.failed) this.finish(false);
+      if (this.run.failed) this.finish('beaten');
       else if (!this.outside && this.room.exitOpen) {
         // The way on takes the whole party, standing in it together; at a fork, the road they stand in.
         const road = this.room.map.roads?.find((r) => this.together(r.area));
         if (road || this.together(this.room.map.exit)) {
-          if (isFinal(this.run)) this.finish(true);
+          if (isFinal(this.run)) this.finish('won');
           else {
             this.run.index++;
             if (road) this.run.roads[this.run.index] = road.road;
@@ -542,16 +565,16 @@ export class Game {
       g.leave();
       this.remote = null;
       this.run = g.run ?? this.run;
-      return this.finish(false, true);
+      return this.finish('left', true, true);
     }
-    const c = this.coop;
-    if (c?.company) (c.handOver(), (this.coop = null));
-    this.finish(false);
+    const c = this.coop, party = !!c?.company;
+    if (party) (c!.handOver(), (this.coop = null));
+    this.finish('left', false, party);
   }
 
   /** Test hook: end the run now (won or lost), as if its last room were done. */
   endForTest(won: boolean): void {
-    if (this.run) this.finish(won);
+    if (this.run) this.finish(won ? 'won' : 'beaten');
   }
 
   /** Leading a party: set out, and this browser runs the job for everyone in it. */
@@ -567,6 +590,7 @@ export class Game {
     if (!go) return;
     this.coop = new CoopHost(go.room, this.profile.id, this.profile.name, this, go.members);
     this.startJob(go.job, go.members.length);
+    this.jobKey = go.room;
     keepSession({ code: go.room, lead: '', job: go.job, hero: this.profile.id });
     this.stepDown(go.job);
   }
@@ -598,6 +622,10 @@ export class Game {
     this.outside = null;
     this.rooms.reset(null);
     this.remote = g;
+    this.holdUntil = 0;
+    this.jobKey = g.code;
+    // The end, heard while this page is hidden, is kept at once (a phone may kill the page before it's back).
+    g.onEnd = (e) => bankEnd(this.profile.id, g.code, e);
     // Until the leader's room arrives: the job as it was posted.
     this.run = newRun(g.job);
     keepSession({ code: g.code, lead: g.lead, job: g.job, hero: this.profile.id });
@@ -625,6 +653,11 @@ export class Game {
     this.rooms.load(street, o.houses);
     if (!this.rooms.roomOf(ME)) Object.assign(street.join(ME), street.map.hero), this.equip(street.heroes.find((x) => x.id === ME)!);
     this.room = this.rooms.roomOf(ME)!;
+    // My kit as my save has it (newer than the job's save: a pickup in its last moments stays mine, and isn't on the floor again).
+    dressKit(this.hero, this.profile);
+    forgetTaken(this.rooms.all(), this.profile);
+    this.jobKey = code;
+    this.holdUntil = want === 'host' ? performance.now() / 1000 + HOLD : 0;
     const door = this.rooms.doorOf(this.room);
     this.outside = door ? { room: street, door, hero: this.hero } : null;
     this.roomKey = Math.max(this.roomKey, o.key ?? 0) + 2;
@@ -638,17 +671,76 @@ export class Game {
     const g = this.remote!, now = performance.now() / 1000;
     // Their room once it has me in it (until then, the town stands still behind the wait).
     if (g.room?.heroes.some((x) => x.id === ME)) (this.room = g.room), (this.run = g.run ?? this.run), this.keepRemoteGear(this.hero);
+    // (Only the leader's word goes in the tally: not the job as posted, while I wait to get back in.)
+    if (g.run) this.bankIt(g.run);
     const ev = g.take();
     this.growing();
     if (g.shouldTake(now)) return this.takeOver(g), ev;
-    const end = g.ended ?? (g.lost(now) ? { won: false, run: g.run ?? newRun(g.job) } : null);
-    if (end) {
+    if (g.ended) {
       g.close();
       this.remote = null;
-      this.run = end.run;
-      this.finish(end.won, true);
-    }
+      this.run = g.ended.run;
+      this.finish(g.ended.won ? 'won' : 'beaten', true, true);
+    } else if (g.lost(now)) this.dead();
     return ev;
+  }
+
+  /** This player's tally for the job, kept on this device as it changes (jobbank.ts: only used if the server's out of reach). */
+  private bankIt(run: Run): void {
+    if (this.jobKey && this.profile.id) bankJob(this.profile.id, { job: this.jobKey, run, party: !!(this.remote || (this.coop && this.coop.members.length > 1)) });
+  }
+
+  /** Leading again after a reload and the room held: still nobody? Then the party's gone. */
+  private waiting(): boolean {
+    if (!this.coop || [...this.coop.friends.values()].some((f) => f.profile)) return (this.holdUntil = 0), false;
+    if (performance.now() / 1000 > this.holdUntil) this.dead();
+    return true;
+  }
+
+  /**
+   * The job can't be got back into (its leader gone and nobody took it on; back to lead it and nobody
+   * answered): home, and what it owes me comes from the leader's record (settle).
+   */
+  private dead(): void {
+    this.coop?.close();
+    this.remote?.close();
+    this.coop = this.remote = null;
+    this.holdUntil = 0;
+    forgetSession();
+    this.run = null;
+    this.enterTown({ x: 24.1, y: 14.8 });
+    void this.settle();
+  }
+
+  /**
+   * Whatever a job still owes this hero (it ended while they were away, or fell apart under them):
+   * the leader's record on the server, or (that out of reach, or a job alone) this device's tally.
+   * Paid once: the job goes in the hero's save as paid in the same store as the gold.
+   */
+  async settle(): Promise<void> {
+    const p = this.profile, id = p.id;
+    if (!id || this.settling) return;
+    this.settling = true;
+    try {
+      const list = ONLINE ? await owedTo(id) : null;
+      // (Moved on meanwhile: another hero, or out on a job. It waits for next time.)
+      if (this.profile !== p || this.mode !== 'town' || this.run || this.result) return;
+      const paid = new Set(p.paid ?? []), bank = banked(id);
+      for (const o of list ?? []) if (paid.has(o.job)) dropOwed(id, o.job);
+      const due = (list ?? []).find((o) => !paid.has(o.job));
+      // This device's own: a job alone (never on the server), or any when the server's out of reach.
+      const mine = bank && !paid.has(bank.job) && (!bank.party || list === null) ? bank : null;
+      if (bank && (!mine || due?.job === bank.job)) unbank(id);
+      const pay: { job: string; run: Run; end?: How; party: boolean } | null = due ? { job: due.job, run: due.run, end: due.run.end, party: true } : mine && { job: mine.job, run: mine.end?.run ?? mine.run, end: mine.end ? (mine.end.won ? 'won' : 'beaten') : undefined, party: mine.party };
+      if (!pay) return;
+      this.jobKey = pay.job;
+      // Nothing earned: let it go quietly.
+      if (!pay.end && !pay.run.gold && !pay.run.xp) return void ((p.paid = [...paid, pay.job].slice(-12)), store(this.save), unbank(id), ONLINE && dropOwed(id, pay.job));
+      this.run = pay.run;
+      this.finish(pay.end ?? 'dropped', true, pay.party);
+    } finally {
+      this.settling = false;
+    }
   }
 
   /**
@@ -667,20 +759,28 @@ export class Game {
     return b && { x: doorAt(b).x, y: doorAt(b).y + 0.5 };
   }
 
-  /** The run's over. `followed`: it was a friend's job (they write it on the board, not you). */
-  private finish(won: boolean, followed = false): void {
-    const run = this.run!, p = this.profile, w = this.world;
+  /**
+   * The run's over, `how` (see How). `followed`: it was a friend's job (they write it on the board, not
+   * you). `withParty`: a job with friends (going early keeps the pot as it was; alone, the job's lost).
+   */
+  private finish(how: How, followed = false, withParty = false): void {
+    const run = this.run!, p = this.profile, w = this.world, won = how === 'won', key = this.jobKey;
     const party = this.coop ? this.coop.members.map(([id, name]) => (id === p.id ? p.name : name)) : [p.name];
     // Leading: everyone's told how it went (each friend's game pays them from the run).
     this.coop?.end(won, run);
     forgetSession();
     this.coop?.close();
     this.coop = null;
+    this.holdUntil = 0;
+    // Paid already (a reload in the middle of paying it): never twice.
+    if (key && p.paid?.includes(key)) return void ((this.run = null), unbank(p.id), this.enterTown({ x: 24.1, y: 14.8 }));
+    // Driven back (or gone home from a job alone): half the gold. Gone early from a party: what was picked up while with them.
+    const half = !won && !(withParty && (how === 'left' || how === 'dropped'));
     // Driven back in the Ransom Coat: all of it, not half.
-    const ransom = !won && p.armor?.hungry === 'ransom';
+    const ransom = half && p.armor?.hungry === 'ransom';
     // A bigger party: more pay and a better treasure; experience shared out so it's a little more, not a multiple (shared/pace.ts).
     const crowd = Math.max(1, run.party ?? 1), bonus = 1 + PARTY.reward * (crowd - 1);
-    const gold = won ? run.gold + Math.round(run.job.reward * rewardMult(w) * bonus) : ransom ? 0 : Math.round(run.gold / 2);
+    const gold = won ? run.gold + Math.round(run.job.reward * rewardMult(w) * bonus) : ransom ? 0 : half ? Math.round(run.gold / 2) : run.gold;
     if (ransom) p.gold = 0;
     // The Want grows with every job finished in hungry gear, and with what it killed.
     const hungry = this.hungryWorn();
@@ -700,13 +800,17 @@ export class Game {
     const found = won ? treasure(run.job, p.cls, p.id, p.runs, crowd) : [], kept = found.slice(0, Math.max(0, bagSize(p) - p.bag.length)), sold = found.slice(kept.length);
     p.bag.push(...kept);
     p.gold += sold.length * TREASURE_SOLD;
-    this.result = { won, job: run.job, gold, xp, rescued, levels, relic, treasure: kept, sold, lost: run.lost ?? 0 };
+    this.result = { won, how, half, job: run.job, gold, xp, rescued, levels, relic, treasure: kept, sold, lost: run.lost ?? 0 };
     this.run = null;
+    // Paid: marked so in the same store as the pay (the give below), then the tallies let go.
+    if (key) p.paid = [...(p.paid ?? []), key].slice(-12);
     this.give({
       stats: { jobs: won ? 1 : 0, saved: rescued, kills: run.kills, dens: run.dens, butchers: run.butchers ?? 0, gold, raised: mine(run.raised, ME), falls: mine(run.falls, ME), carried: mine(run.carried, ME), teamkills: mine(run.teamkills, ME), rescueHits: run.rescueHits?.[ME] ?? 0, rescueKills: run.rescueKills?.[ME] ?? 0 }, rescued, dens: run.dens, days: 1,
       story: won && run.job.objective === 'story' ? run.job.id : undefined,
       deed: won && !followed ? { title: run.job.title, place: run.job.place.name, party } : undefined,
     });
+    unbank(p.id);
+    if (ONLINE && key && !key.startsWith('solo-')) dropOwed(p.id, key);
     this.enterTown({ x: 24.1, y: 14.8 });
   }
 
@@ -910,20 +1014,13 @@ export class Game {
 
   /** The room changed what's in hand, in the pack, or carried: the hero's save follows. */
   /** Following a friend's job: what my hero picks up, drinks or puts on there is mine to keep. */
+  /** (Kit as keepkit.ts keeps it: a weapon swapped from the pack, a relic carried, the Mage's element too.) */
   private keepRemoteGear(h: Hero): void {
-    const p = this.profile, now = { bag: h.bag ?? p.bag, arms: h.arms ?? p.arms, armor: h.armor ?? p.armor, rings: h.rings ?? p.rings, belt: h.belt ?? p.belt, glow: h.glow ?? p.glow };
-    if (JSON.stringify(now) === JSON.stringify({ bag: p.bag, arms: p.arms, armor: p.armor, rings: p.rings, belt: p.belt, glow: p.glow })) return;
-    Object.assign(p, JSON.parse(JSON.stringify(now)));
-    store(this.save);
+    if (keepKit(this.profile, h, true)) store(this.save);
   }
 
   private keepGear(h: Hero): void {
-    const p = this.profile, relic = h.relics[1] ?? '';
-    // The Mage's channelled element goes with it from room to room.
-    if ((h.augments.channel ?? '') !== (p.augments.channel ?? '')) (p.augments.channel = h.augments.channel), store(this.save);
-    if (h.weapon === p.weapon && h.bag.length === p.bag.length && h.arms[h.weapon] === p.arms[p.weapon] && relic === p.relic && h.glow === p.glow && h.armor === p.armor && h.rings.join() === p.rings.join() && h.rings.every((r, i) => r === p.rings[i]) && h.rings.length === p.rings.length && h.belt.join() === p.belt.join() && h.bag.every((it, i) => it === p.bag[i])) return;
-    Object.assign(p, { weapon: h.weapon, arms: { ...h.arms }, bag: [...h.bag], relic, glow: h.glow, belt: [...h.belt], armor: h.armor, rings: [...h.rings] });
-    store(this.save);
+    if (keepKit(this.profile, h, false)) store(this.save);
   }
 
   /** Carry a relic you've found into your next job (at the relic-wright). */

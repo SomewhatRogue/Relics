@@ -10,6 +10,7 @@ import { createServer } from 'node:http';
 import { extname, join, normalize } from 'node:path';
 import { WebSocketServer } from 'ws';
 import { Relay, memoryBackend, redisBackend } from '../api/_relay';
+import owed from '../api/owed';
 
 const bus = { kv: new Map(), subs: new Map() };
 /**
@@ -40,6 +41,8 @@ const TYPES: Record<string, string> = { '.html': 'text/html', '.js': 'text/javas
 
 const http = createServer((req, res) => {
   const url = new URL(req.url ?? '/', 'http://x');
+  // What a job owes its players (api/owed.ts), as the Vercel function serves it.
+  if (url.pathname === '/api/owed') return void owed(req, res);
   let file = normalize(join(DIST, url.pathname));
   if (!file.startsWith(DIST) || !existsSync(file) || statSync(file).isDirectory()) file = join(DIST, 'index.html');
   res.writeHead(200, { 'Content-Type': TYPES[extname(file)] ?? 'application/octet-stream' });

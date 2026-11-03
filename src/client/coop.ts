@@ -31,6 +31,7 @@ import { NO_INTENT, type FightEvent, type Intent } from '../sim/types';
 import { RelaySocket, type RelayMsg } from './relay';
 import { Decoder, Encoder, stateOf, type Patch } from './snap';
 import { keepJob } from './session';
+import { OwedBook } from './owed';
 import type { DoorMark } from './jobrooms';
 
 const AWAY = 5, REJOIN = 5, BYE_WAIT = 2.5, SEND_EVERY = 0.05, FULL_EVERY = 4, GRACE = 60, LOST = 20, KEEP = 2, SAVE_EVERY = 2, TAKE = 9, TAKE_NEXT = 5;
@@ -81,9 +82,12 @@ export class CoopHost {
   private now = 0;
 
   private savedAt = -99;
+  /** What the job owes each of us, kept on the server as it goes (owed.ts). */
+  private book: OwedBook;
 
   constructor(readonly room: string, private myId: string, private myName: string, private game: HostGame, readonly members: [string, string][], want: 'host' | 'take' = 'host') {
     const now = performance.now() / 1000;
+    this.book = new OwedBook(room, myId);
     for (const [id, name] of members) if (id !== myId) this.friends.set(id, { name, profile: null, intent: NO_INTENT, heard: now, fresh: true, gone: false });
     this.sock = new RelaySocket(room, myId, want);
     this.sock.onMessage = (m) => this.heard(m);
@@ -118,6 +122,7 @@ export class CoopHost {
     }
     this.game.stepped = new Map();
     for (const [id, f] of this.friends) if (!f.gone && now - f.heard > GRACE) (f.gone = true), this.game.dropFriend(id);
+    this.book.frame(now, this.game.run, this.still());
     // The whole job, now and then, for a friend to take on if this browser goes.
     if (now - this.savedAt > SAVE_EVERY && this.company) {
       this.savedAt = now;
@@ -170,6 +175,11 @@ export class CoopHost {
     return !!f && (f.gone || this.now - f.heard > AWAY);
   }
 
+  /** Everyone still with the job now (me too): what it owes them goes on growing. */
+  still(): string[] {
+    return [this.myId, ...[...this.friends.keys()].filter((id) => !this.away(id))];
+  }
+
   /** Anyone still with me (not gone). */
   get company(): boolean {
     return [...this.friends.values()].some((f) => !f.gone);
@@ -178,6 +188,7 @@ export class CoopHost {
   /** The job is over: tell everyone how it went (their game pays them from the run). */
   end(won: boolean, run: Run): void {
     this.sock.send('*', { end: { won, run } });
+    this.book.end(won, run, this.still());
   }
 
   close(): void {
@@ -196,6 +207,8 @@ export class CoopGuest {
   /** Out in the street: who's indoors, over which door. */
   doorMarks: DoorMark[] = [];
   ended: { won: boolean; run: Run } | null = null;
+  /** Told the moment the end is heard (a hidden page only acts on it when it's back: jobbank.ts keeps it meanwhile). */
+  onEnd: (e: { won: boolean; run: Run }) => void = () => {};
   private sock: RelaySocket;
   private dec = new Decoder();
   private key = -1;
@@ -242,7 +255,7 @@ export class CoopGuest {
     // on in a moment (once their goodbye has freed the room).
     if (d.bye) return void ((this.left = true), (this.heardLead = this.now - TAKE + BYE_WAIT));
     // (The end's run swaps ids like a patch does, so my own tallies are under `me`.)
-    if (d.end) return void (this.ended = JSON.parse(JSON.stringify(d.end).split('"me"').join('"@lead"').split(`"${this.myId}"`).join('"me"')));
+    if (d.end) return void ((this.ended = JSON.parse(JSON.stringify(d.end).split('"me"').join('"@lead"').split(`"${this.myId}"`).join('"me"'))), this.onEnd(this.ended!));
     if (typeof d.save === 'string') return void (this.save = d.save);
     if (typeof d.s !== 'string') return;
     // The leader's own hero is `me` in their room; in mine, I am. (Ids are quoted whole, so only ids change.)

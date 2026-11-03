@@ -142,7 +142,7 @@ describe('hungry gear', () => {
     g.step(0.1, { ...NO_INTENT, gearSeq: 1, gearOp: 1, gearArg: g.profile.bag.length - 1 });
     expect(g.hungryWorn().length).toBe(1);
     g.startJob(g.jobs()[1]);
-    (g as unknown as { finish(w: boolean): void }).finish(true);
+    (g as unknown as { finish(how: string): void }).finish('won');
     expect(g.profile.want).toBeGreaterThanOrEqual(5);
     g.giveUp(g.hungryWorn()[0]);
     expect(g.hungryWorn().length).toBe(0);

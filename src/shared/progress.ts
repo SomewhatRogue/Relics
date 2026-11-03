@@ -98,6 +98,8 @@ export interface Profile {
   wish: boolean;
   /** Dice games played (seeds the next roll). */
   dice: number;
+  /** The last few jobs this hero has been paid for (client/jobbank.ts): a job is never paid twice. */
+  paid?: string[];
 }
 
 export const newProfile = (cls: HeroClass = 'WARRIOR', name = 'HERO'): Profile =>
