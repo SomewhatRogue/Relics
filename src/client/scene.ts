@@ -35,9 +35,10 @@ import { drawGlint, drawKindling, drawWoodpile } from './kindledraw';
 import { drawHung, drawPot } from './grimdraw';
 import { drawNpc } from './npcs';
 import { drawCaged, drawSurvivor } from './captives';
-import { behindMarks, drawWays } from './wayout';
+import { behindMarks, drawWays, edgeMark } from './wayout';
 import { drawBoards } from './voteboards';
 import { drawQuestMarks, onScreen } from './questmarks';
+import { CHASE, chaseLabel, chasers } from './chasers';
 import { drawDoorMarks } from './doormarks';
 import type { DoorMark } from './jobrooms';
 import type { Target } from '../sim/targets';
@@ -357,6 +358,15 @@ export class Scene {
     // What the goal is about: a gold mark over each, or a point at the edge toward the nearest.
     const markLights = drawQuestMarks(c, this.marks, (t) => (t.id !== undefined ? lerp('e:' + t.id, t.x, t.y) : onScreen(t)), cx, cy, view, me ?? null, now);
     if (!room.indoors) markLights.push(...drawDoorMarks(c, this.doors, cx, cy));
+    if (me) {
+      // Goblins on your trail off screen: a red point at the edge toward each, and a count.
+      let off = 0;
+      for (const e of chasers(room, me)) {
+        const [ex, ey] = lerp('e:' + e.id, e.x, e.y);
+        if (edgeMark(c.glow, ex - cx, ey - cy - 8, view, Math.sin(now * 8) * 1.5, CHASE.red)) off++;
+      }
+      if (off) drawText(c.glow, chaseLabel(off), Math.round(this.vw / 2 - textWidth(chaseLabel(off)) / 2), Math.round(view.top + 2), CHASE.red);
+    }
     drawBlazeAbove(c, room, cx, cy);
 
     const lights: Light[] = [...wayLights, ...markLights];

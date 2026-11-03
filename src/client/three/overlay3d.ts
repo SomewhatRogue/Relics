@@ -11,6 +11,7 @@ import type { DoorMark } from '../jobrooms';
 import type { Fx } from '../fx';
 import { GUARD, PARTY, WEAPONS } from '../../shared/tuning';
 import { drawText, textWidth } from '../pixfont';
+import { CHASE, chaseLabel, chasePoint, chasers } from '../chasers';
 import { OX, OY, PX } from '../world';
 import type { Lerp } from './actors3d';
 import { BOXFIGS } from './look';
@@ -143,11 +144,26 @@ export class Overlay {
       drawText(g, r.label, Math.round(x - textWidth(r.label) / 2), Math.round(y), r.road === 'high' ? '#ffd27a' : '#9fe8ff');
     }
     const me = room.heroes.find((h) => h.id === meId), p = m.pointTo;
+    if (me) this.chasing(room, me, P, lerp);
     if (!me || !p) return;
     const [hx, hy] = lerp('h:' + me.id, me.x, me.y), [ax, ay] = P(hx, 0, hy), [bx, by] = P(p.x, 0, p.y), l = Math.hypot(bx - ax, by - ay) || 1, ux = (bx - ax) / l, uy = (by - ay) / l;
     const d = 13 + Math.sin(now * 5) * 3, cx = ax + ux * d, cy = ay + uy * d;
     g.fillStyle = '#ffd27a';
     for (let q = 0; q < 6; q++) for (let s = -q; s <= q; s++) g.fillRect(Math.round(cx + ux * (6 - q) - uy * s * 0.9), Math.round(cy + uy * (6 - q) + ux * s * 0.9), 1, 1);
+  }
+
+  /** Goblins on your trail off screen: a red point at the edge toward each, and a count at the top. */
+  private chasing(room: ArenaRoom, me: { x: number; y: number }, P: Proj, lerp: Lerp): void {
+    const g = this.g, pad = 6;
+    let off = 0;
+    for (const e of chasers(room, me)) {
+      const [ex, ey] = lerp('e:' + e.id, e.x, e.y), [x, y] = P(ex, 1, ey);
+      if (x >= pad && y >= pad && x <= this.W - pad && y <= this.H - pad) continue;
+      const cx = this.W / 2, cy = this.H / 2, dx = x - cx, dy = y - cy, l = Math.hypot(dx, dy) || 1;
+      chasePoint(g, Math.min(this.W - pad, Math.max(pad, x)), Math.min(this.H - pad, Math.max(pad, y)), dx / l, dy / l);
+      off++;
+    }
+    if (off) drawText(g, chaseLabel(off), Math.round(this.W / 2 - textWidth(chaseLabel(off)) / 2), 14, CHASE.red);
   }
 }
 
