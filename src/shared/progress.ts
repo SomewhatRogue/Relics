@@ -10,8 +10,8 @@ import { CLASS_ARMOR } from './gear.js';
 import type { Augment, RelicId } from './magic.js';
 import { CLASS_KITS, type HeroClass, type WeaponId } from './weapons.js';
 
-export { PERKS, perkFx, perkText, type Fx, type FxKey, type PerkId } from './perks.js';
-export { CHAINS, CLASS_CHAINS, classPerks, fitPerks, nextStep, perkOffer, type ChainId } from './chains.js';
+export { PERKS, perkFx, perkText, type Fx, type FxKey, type Knack, type PerkId } from './perks.js';
+export { CHAINS, CLASS_CHAINS, chainOf, classPerks, fitPerks, nextStep, perkOffer, resetPerks, takePerk, type ChainId } from './chains.js';
 import type { PerkId } from './perks.js';
 
 /** Chapter 1's level cap (it lifts when the council moves the story on). */

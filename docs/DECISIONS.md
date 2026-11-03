@@ -49,6 +49,57 @@ options to toggle between?", the ? panel had "WAY too much info", and he calls t
 - New words (for the lore keeper and line editor): VIEW: FLAT, VIEW: 2.5D, "2.5D shows on jobs for
   now", SOUND, MUSIC.
 
+## 2026-11-02: knacks per class, a free reset, a pick you can't miss (Kyle; Claude Opus 5.5)
+
+Kyle: "Knacks is also sort of hard to see / tell that it's there. It's hard to know that I have a
+choice currently." "We should let people reset their knacks whenever, for free." "Knacks should be
+different per class. Movement speed, dodge distance, throwing dagger damage, or the window for a
+'perfect' attack, etc."
+
+- **Each class its own four chains of three** (`shared/chains.ts`, `shared/perks.ts`); the shared BODY
+  and BREATH rows are gone (no one row fit every class). Ids carry the class's letter (w_, r_, g_, m_,
+  h_). Warrior: GUARD (parry +0.04 s, block -25% breath, counter +25%), PLATE (+20 health, 8% less
+  hurt, +6% speed), HEAVY BLOW (charge 15% faster, full charge +15%, knock +25%), SKILL (skill and
+  relic 20% sooner, shield charge and war cry +20% further, +40% longer). Ranger: BOW (draw 15% faster,
+  a shot loosed on the white flash +20%, the flash +0.15 s), JUMP (20% sooner, 20% further, +6%
+  speed), SNARE (25% sooner, holds 25% longer, three down), HOUND (25% sooner, bite 7 to 9, one more
+  bite). Rogue: DASH (20% less breath, 15% further, the last-moment window +0.08 s), BACKSTAB (behind
+  from further round, backstab +15%, ambush +25%), KNIVES (6% quicker, held blow +20% at full: the
+  thrown dagger, lunge or bolt, held 15% sooner), SHADOW (+6% speed, shadowstep and relic 20% sooner,
+  seen creeping 20% later). Mage: BLINK (20% sooner, 20% further, image +1.5 s), CHANNEL (primed
+  1.5x to 1.75x, 15 breath back a turn, two primed spells), SPELLS (charge 12% faster, bursts 20%
+  wider, +6% damage), BREATH (breath back 25% faster, blink 20% less breath, casts 6% quicker).
+  Healer: GUARD (parry +0.04 s, block -25% breath, counter window +0.6 s), MERCY (heals +12%, heal
+  reach +20%, the blow before the healing blow heals for half), SMITE (charge 12% faster, smite stun
+  +0.4 s, full charge +15%), SANCTUARY (sanctuary and relic 20% sooner, blessing +25%, blessed ground
+  and ward +1.5 s). Modest by test: no whole tree moves a share past a third.
+- **One source.** Every knack number is read through `sim/knacks.ts` (parry window, counter window,
+  release window, dodge reach and breath, last-moment window, behind angle, creeping sight, snare,
+  hound, shield charge, war cry, blessing, ward, heal reach and size, burst, smite stun) or the gear
+  stats (`sim/gearstats.ts`, which now caches the knack sum). The telegraph's white parry flash
+  (`client/scene.ts`) now uses the same `parryWindow` the room judges (it left out gear's PARRY
+  before), and a bow's white at full draw (`client/actors.ts`) shows exactly the clean-release window.
+  `tests/knackfx.test.ts` runs each of the 60 steps through what the room does and checks it moves.
+- **Reset, free, any time out of a fight**: RESET on the knacks screen (with a confirm), wherever it
+  was opened from, while in town (`Game.knacksOpen`: mode town; the job's end is shown in town). Every
+  knack comes back as a pick. Because of that, picks are taken on the knacks screen itself too, not
+  only at the trainer (the trainer's pick rows stay). On a job the screen is a look only and says to
+  take it back in Wickhold.
+- **A pick you can't miss.** A pulsing gold dot with the count on PACK (any element with
+  `data-picks`, set by `client/knackcues.ts`, so it moves with the button) and on KNACKS in the pack;
+  "A knack to pick." and a PICK A KNACK button at the job's end; LEVEL N: A KNACK TO PICK once at the
+  hero's feet back in town (under them, so the town banner can't cover it); the town banner says
+  (A KNACK TO PICK). With picks waiting, the knacks screen opens with the two offers at the top, in
+  full, each with TAKE.
+- **Old heroes** (`fitPerks`): each old knack lands on the class step that moves the same number
+  (a Warrior's guard, ironhide, counter, tough, scarred, fleet, heft, heavy hands, relic-wise; a
+  Ranger's steady hand, footwork, fleet; a Rogue's shadowed, quick hands, fleet, relic-wise; a Mage's
+  focus or footwork, deep charge, potent, endurance; a Healer's guard, ironhide, devotion, mender,
+  relic-wise); anything else, or a second old knack on one step, comes back as a pick; and taken plus
+  waiting is never less than the levels gained.
+- **New words for the lore keeper and line editor**: every chain and knack name and line in
+  `shared/perks.ts` and `shared/chains.ts`; the screen's words in `client/treewords.ts`.
+
 ## 2026-11-02: chat, world and near in town, the party on a job (Kyle; Claude Opus 5.5)
 
 Kyle: "in-game chat, local and world (world logs down below for when you're in the world area, local

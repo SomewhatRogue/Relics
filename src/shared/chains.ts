@@ -1,61 +1,100 @@
 /**
- * The knacks tree: each class walks four chains of three steps, two shared (BODY, BREATH) and two its
- * own (its guard or its feet, and its trade). Each step leads to the next. A level up offers the next
- * step of two different chains (Kyle, 2026-11-02: "see what each chain can unlock as a next step").
- * Nothing on a class's chains asks for a move it doesn't have: no parry for a Rogue or Mage, no dodge
- * for a Warrior or Healer.
+ * The knacks tree: each class walks four chains of three steps, all its own (Kyle, 2026-11-02: "Knacks
+ * should be different per class. Movement speed, dodge distance, throwing dagger damage, or the window
+ * for a 'perfect' attack"). A level up offers the next step of two different chains. Picks are taken
+ * on the knacks screen anywhere out of a fight, and can all be given back for nothing (resetPerks).
  */
 import { PERKS, type PerkId } from './perks.js';
 import type { Profile } from './progress.js';
 import { Rng } from './rng.js';
 import type { HeroClass } from './weapons.js';
 
-export type ChainId = 'body' | 'breath' | 'guard' | 'jump' | 'feet' | 'blink' | 'weight' | 'bow' | 'knife' | 'spells' | 'mercy';
-export const CHAINS: Record<ChainId, { name: string; steps: PerkId[] }> = {
-  body: { name: 'BODY', steps: ['tough', 'secondwind', 'scarred'] },
-  breath: { name: 'BREATH', steps: ['endurance', 'longwind', 'relicsworn'] },
-  guard: { name: 'GUARD', steps: ['guard', 'ironhide', 'counter'] },
-  jump: { name: 'FEET', steps: ['footwork', 'guard', 'fleet'] },
-  feet: { name: 'FEET', steps: ['footwork', 'fleet', 'slip'] },
-  blink: { name: 'BLINK', steps: ['focus', 'fleet', 'footwork'] },
-  weight: { name: 'WEIGHT', steps: ['heft', 'heavy', 'keen'] },
-  bow: { name: 'BOW', steps: ['steadyhand', 'longshot', 'keen'] },
-  knife: { name: 'KNIFE', steps: ['shadowed', 'keen', 'quick'] },
-  spells: { name: 'SPELLS', steps: ['charge', 'potent', 'keen'] },
-  mercy: { name: 'MERCY', steps: ['devotion', 'mender', 'heavy'] },
-};
+export const CHAINS = {
+  w_guard: { name: 'GUARD', steps: ['w_parry', 'w_block', 'w_counter'] },
+  w_plate: { name: 'PLATE', steps: ['w_health', 'w_tough', 'w_foot'] },
+  w_heavy: { name: 'HEAVY BLOW', steps: ['w_charge', 'w_full', 'w_knock'] },
+  w_skill: { name: 'CHARGE OR CRY', steps: ['w_focus', 'w_far', 'w_hold'] },
+  r_bow: { name: 'BOW', steps: ['r_draw', 'r_true', 'r_flash'] },
+  r_jump: { name: 'JUMP', steps: ['r_jump', 'r_leap', 'r_foot'] },
+  r_snare: { name: 'SNARE', steps: ['r_snare', 'r_hold', 'r_three'] },
+  r_hound: { name: 'HOUND', steps: ['r_hound', 'r_bite', 'r_bites'] },
+  g_dash: { name: 'DASH', steps: ['g_light', 'g_leap', 'g_slip'] },
+  g_back: { name: 'BACKSTAB', steps: ['g_angle', 'g_rear', 'g_ambush'] },
+  g_knives: { name: 'KNIVES', steps: ['g_quick', 'g_throw', 'g_draw'] },
+  g_shadow: { name: 'SHADOW', steps: ['g_foot', 'g_focus', 'g_quiet'] },
+  m_blink: { name: 'BLINK', steps: ['m_blink', 'm_leap', 'm_image'] },
+  m_channel: { name: 'CHANNEL', steps: ['m_primed', 'm_clear', 'm_twice'] },
+  m_spells: { name: 'SPELLS', steps: ['m_draw', 'm_burst', 'm_dmg'] },
+  m_breath: { name: 'STAMINA', steps: ['m_breath', 'm_light', 'm_quick'] },
+  h_guard: { name: 'GUARD', steps: ['h_parry', 'h_block', 'h_counter'] },
+  h_mercy: { name: 'MERCY', steps: ['h_mend', 'h_reach', 'h_mercy'] },
+  h_smite: { name: 'SMITE', steps: ['h_draw', 'h_stun', 'h_full'] },
+  h_sanct: { name: 'SANCTUARY', steps: ['h_focus', 'h_bless', 'h_long'] },
+} satisfies Record<string, { name: string; steps: PerkId[] }>;
+export type ChainId = keyof typeof CHAINS;
+
 export const CLASS_CHAINS: Record<HeroClass, ChainId[]> = {
-  WARRIOR: ['body', 'breath', 'guard', 'weight'],
-  RANGER: ['body', 'breath', 'jump', 'bow'],
-  ROGUE: ['body', 'breath', 'feet', 'knife'],
-  MAGE: ['body', 'breath', 'blink', 'spells'],
-  HEALER: ['body', 'breath', 'guard', 'mercy'],
+  WARRIOR: ['w_guard', 'w_plate', 'w_heavy', 'w_skill'],
+  RANGER: ['r_bow', 'r_jump', 'r_snare', 'r_hound'],
+  ROGUE: ['g_dash', 'g_back', 'g_knives', 'g_shadow'],
+  MAGE: ['m_blink', 'm_channel', 'm_spells', 'm_breath'],
+  HEALER: ['h_guard', 'h_mercy', 'h_smite', 'h_sanct'],
 };
 
+const stepsOf = (c: ChainId): PerkId[] => CHAINS[c].steps;
 /** Every knack a class can take. */
-export const classPerks = (cls: HeroClass): PerkId[] => [...new Set(CLASS_CHAINS[cls].flatMap((c) => CHAINS[c].steps))];
+export const classPerks = (cls: HeroClass): PerkId[] => CLASS_CHAINS[cls].flatMap(stepsOf);
+/** The chain a knack sits on (for the class that has it). */
+export const chainOf = (id: PerkId): ChainId | undefined => (Object.keys(CHAINS) as ChainId[]).find((c) => stepsOf(c).includes(id));
 
 /** How far along a chain a hero is: the next step not yet taken (-1: all taken). */
-export const nextStep = (chain: ChainId, perks: readonly string[]) => CHAINS[chain].steps.findIndex((s) => !perks.includes(s));
+export const nextStep = (chain: ChainId, perks: readonly string[]) => stepsOf(chain).findIndex((s) => !perks.includes(s));
 
 /** What a level up offers: the next step of two different chains (the same two until one is taken). */
 export function perkOffer(p: Pick<Profile, 'cls' | 'level' | 'perks'>): PerkId[] {
   const open = CLASS_CHAINS[p.cls].filter((c) => nextStep(c, p.perks) >= 0);
   const out: PerkId[] = [];
   for (const c of new Rng(p.level * 13 + p.perks.length * 7 + 3).shuffle(open)) {
-    const s = CHAINS[c].steps[nextStep(c, p.perks)];
-    if (!out.includes(s)) out.push(s);
+    out.push(stepsOf(c)[nextStep(c, p.perks)]);
     if (out.length === 2) break;
   }
   return out;
 }
 
+/** Take a knack: only one of the two on offer, and only with a pick waiting. True if taken. */
+export function takePerk(p: Profile, id: PerkId): boolean {
+  if (p.picks <= 0 || !perkOffer(p).includes(id)) return false;
+  p.perks.push(id);
+  p.picks--;
+  return true;
+}
+
+/** Give every knack back for nothing: each comes back as a pick, to take again. */
+export function resetPerks(p: Profile): void {
+  p.picks += p.perks.length;
+  p.perks = [];
+}
+
 /**
- * Old heroes onto the tree: a knack their class can't use (a Rogue's parry) comes back as a pick to
- * spend again; any other old knack sits on its chain, lit, wherever it falls.
+ * Old knacks (before each class had its own chains) onto the new ones, by class: each lands on the step
+ * that moves the same number. One with no home (or a second on the same step) comes back as a pick.
  */
+const OLD: Record<HeroClass, Record<string, PerkId>> = {
+  WARRIOR: { guard: 'w_parry', ironhide: 'w_block', counter: 'w_counter', tough: 'w_health', scarred: 'w_tough', fleet: 'w_foot', heft: 'w_knock', heavy: 'w_full', relicsworn: 'w_focus' },
+  RANGER: { steadyhand: 'r_draw', footwork: 'r_jump', fleet: 'r_foot' },
+  ROGUE: { shadowed: 'g_rear', quick: 'g_quick', fleet: 'g_foot', relicsworn: 'g_focus' },
+  MAGE: { focus: 'm_blink', footwork: 'm_blink', charge: 'm_draw', potent: 'm_dmg', endurance: 'm_breath' },
+  HEALER: { guard: 'h_parry', ironhide: 'h_block', devotion: 'h_bless', mender: 'h_mend', relicsworn: 'h_focus' },
+};
+
+/** A loaded hero onto its class's tree; never a level's pick lost (taken plus waiting covers every level up). */
 export function fitPerks(p: Profile): void {
-  const ok = classPerks(p.cls), kept = p.perks.filter((k) => ok.includes(k) && PERKS[k]);
-  p.picks += p.perks.length - kept.length;
-  p.perks = [...new Set(kept)];
+  const mine = classPerks(p.cls), had = p.perks as string[], kept: PerkId[] = [];
+  for (const k of had) {
+    const id = (mine.includes(k as PerkId) ? k : OLD[p.cls][k]) as PerkId | undefined;
+    if (id && PERKS[id] && !kept.includes(id)) kept.push(id);
+  }
+  p.perks = kept;
+  p.picks = Math.max(0, p.picks || 0) + had.length - kept.length;
+  p.picks = Math.max(p.picks, p.level - 1 - kept.length);
 }

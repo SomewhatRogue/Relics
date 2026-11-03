@@ -11,6 +11,7 @@ import type { World } from './elements';
 import { damageProp } from './props';
 import { bashSurvivors } from './survivorhits';
 import type { Enemy, FightEvent, Hero } from './types';
+import { bashReach, bashStun } from './knacks';
 
 const hitBy = new WeakMap<Hero, Set<number>>();
 
@@ -23,7 +24,7 @@ export function startBash(h: Hero, ev: FightEvent[]): void {
 
 /** One tick of the run (the hero's act clock has already moved on). */
 export function stepBash(h: Hero, w: Enemy[], world: World, dt: number): void {
-  const v = BASH.distance / BASH.time, x0 = h.x, y0 = h.y;
+  const v = bashReach(h) / BASH.time, x0 = h.x, y0 = h.y;
   h.x += h.rollDx * v * dt;
   h.y += h.rollDy * v * dt;
   collide(h, HERO.radius);
@@ -40,7 +41,7 @@ export function stepBash(h: Hero, w: Enemy[], world: World, dt: number): void {
     if (damage(e, BASH.dmg, world.now, world.ev, { heavy: true, dx: ox, dy: oy })) continue;
     shove(e, ox, oy, BASH.knock, e.weight);
     if (held(e, world.now)) continue;
-    if (e.weight <= 1) Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: BASH.stun }), world.ev.push({ k: 'stunned', x: e.x, y: e.y });
+    if (e.weight <= 1) Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: bashStun(h) }), world.ev.push({ k: 'stunned', x: e.x, y: e.y });
     else if (!e.attack?.unblockable) Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: BASH.stagger });
   }
   for (const p of world.props) {

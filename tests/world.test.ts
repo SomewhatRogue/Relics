@@ -148,7 +148,7 @@ describe('the town', () => {
     const p = newProfile('RANGER');
     p.picks = 1;
     expect(perkOffer(p)).toHaveLength(2);
-    const h = { perks: ['steadyhand'] } as never;
+    const h = { perks: ['r_draw'] } as never;
     expect(chargeFull(WEAPONS.longbow, h)).toBeLessThan(chargeFull(WEAPONS.longbow));
   });
 });

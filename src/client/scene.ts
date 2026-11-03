@@ -2,6 +2,7 @@
  * One frame: camera, the flat (lit) layer in depth order, the glowing layer, then the lighting pass.
  * The scene is painted at a low resolution and scaled up by a whole number so pixels stay crisp.
  */
+import { parryWindow } from '../sim/knacks';
 import { ARENA, npcAt, type GameMap } from '../shared/arena';
 import { GRAB, GUARD, POTION, TIERS, WEAPONS } from '../shared/tuning';
 import { lightsHolder } from './heldkits';
@@ -168,7 +169,7 @@ export class Scene {
     setSun(map.theme);
     const tk = torchIn(map.theme);
     if (room.puddles?.length) drawPuddles(c, room.puddles, cx, cy, room.time, now);
-    const pw = me ? WEAPONS[me.weapon].parryWindow + me.lenience : 0.3;
+    const pw = me ? parryWindow(me) : 0.3;
     for (const e of room.enemies) if (e.attack && e.act === 'attack') drawTelegraph(c, e.attack, cx, cy, pw);
     // A house on fire: where it burns, where it's about to, where a beam is coming down (blazedraw.ts).
     drawBlaze(c, room, cx, cy);

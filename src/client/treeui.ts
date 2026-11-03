@@ -1,33 +1,41 @@
 /**
- * The knacks tree (Kyle, 2026-11-02: "its own sort of area you can see grow"): every chain of the
- * hero's class as a row of three steps, taken steps lit gold, the two on offer lit green, each chain's
- * next step bright, later steps dim. Tap a step for what it does. Opened from the pack, from the job's
- * end when you've grown, and from your trainer, the one place a pick is taken (`take`).
+ * The knacks screen (Kyle, 2026-11-02: "its own sort of area you can see grow"; "hard to know that I
+ * have a choice"). With a pick waiting, the two on offer sit at the top in full, each with TAKE. Below,
+ * every chain of the hero's class as a row of three: taken steps lit gold, the two on offer green, each
+ * chain's next step bright, later steps dim; tap one for what it does. Opened from the pack, the job's
+ * end and the trainer; picks are taken and RESET (free, every knack back as a pick) anywhere out of a
+ * fight (Game.knacksOpen). On a job it's a look only.
  */
-import { CHAINS, CLASS_CHAINS, PERKS, nextStep, perkOffer, perkText, type PerkId } from '../shared/progress';
+import { CHAINS, CLASS_CHAINS, PERKS, chainOf, nextStep, perkOffer, perkText, type PerkId } from '../shared/progress';
 import type { Game } from './game';
 import type { Button, Panel } from './panels';
 import { xpHead } from './xphead';
+import { KNW } from './treewords';
 import './tree.css';
 
-export interface TreeOpts { take?: boolean; back?: () => void; sel?: PerkId }
+export interface TreeOpts { back?: () => void; sel?: PerkId }
 type State = 'have' | 'offer' | 'next' | 'later';
 
-/** Each step's state for this hero. */
 function stateOf(id: PerkId, i: number, next: number, perks: string[], offer: PerkId[]): State {
   if (perks.includes(id)) return 'have';
   if (offer.includes(id)) return 'offer';
   return i === next ? 'next' : 'later';
 }
 
-const TAG: Record<State, string> = { have: 'TAKEN', offer: 'ON OFFER', next: 'NEXT', later: 'LATER' };
+/** The two on offer, in full, at the top. */
+function offers(offer: PerkId[], picks: number, take: boolean): string {
+  if (!offer.length) return `<p class="kn-note">${KNW.howItWorks}</p>`;
+  const cards = offer.map((id) => `<div class="kn-card"><i>${CHAINS[chainOf(id)!].name}</i><b>${PERKS[id].name}</b><span>${perkText(id)}</span>` +
+    (take ? `<button data-take="${id}">${KNW.take}</button>` : '') + '</div>').join('');
+  return `<div class="kn-offer"><h3>${KNW.waiting(picks)}</h3><div class="kn-cards">${cards}</div>${take ? '' : `<p class="kn-note">${KNW.notHere}</p>`}</div>`;
+}
 
 export function openTree(g: Game, panel: Panel, o: TreeOpts = {}): void {
-  const p = g.profile, offer = p.picks > 0 ? perkOffer(p) : [], sel = o.sel ?? offer[0];
+  const p = g.profile, take = g.knacksOpen, offer = p.picks > 0 ? perkOffer(p) : [], sel = o.sel;
   const again = (s?: PerkId) => openTree(g, panel, { ...o, sel: s });
   let picked: { id: PerkId; state: State } | null = null;
   const rows = CLASS_CHAINS[p.cls].map((c) => {
-    const steps = CHAINS[c].steps, next = nextStep(c, p.perks), have = steps.filter((s) => p.perks.includes(s)).length;
+    const steps = CHAINS[c].steps as PerkId[], next = nextStep(c, p.perks), have = steps.filter((s) => p.perks.includes(s)).length;
     const nodes = steps.map((id, i) => {
       const st = stateOf(id, i, next, p.perks, offer);
       if (id === sel) picked = { id, state: st };
@@ -36,13 +44,22 @@ export function openTree(g: Game, panel: Panel, o: TreeOpts = {}): void {
     }).join('');
     return `<div class="kn-chain"><div class="kn-h"><b>${CHAINS[c].name}</b><i>${have} / ${steps.length}</i></div><div class="kn-row">${nodes}</div></div>`;
   }).join('');
-  const waiting = p.picks > 1 ? `${p.picks} PICKS WAITING` : 'A PICK WAITING';
-  const note = !offer.length ? 'Each level up offers the next step on two chains.' : o.take ? `${waiting}: take one of the two in green.` : `${waiting}. Take ${p.picks > 1 ? 'them' : 'it'} at your trainer.`;
   const pk = picked as { id: PerkId; state: State } | null;
-  const detail = pk ? `<div class="kn-detail s-${pk.state}"><div><b>${PERKS[pk.id].name}</b><em>${TAG[pk.state]}</em></div><span>${perkText(pk.id, p.cls)}</span></div>` : '';
+  const detail = pk ? `<div class="kn-detail s-${pk.state}"><div><b>${PERKS[pk.id].name}</b><em>${KNW.tag[pk.state]}</em></div><span>${perkText(pk.id)}</span></div>` : '';
   const buttons: Button[] = [];
-  if (pk && pk.state === 'offer' && o.take) buttons.push({ label: `TAKE ${PERKS[pk.id].name}`, primary: true, act: () => (g.pickPerk(pk.id), again(pk.id)) });
-  if (o.back) buttons.push({ label: 'BACK', act: o.back });
-  panel.show('KNACKS', xpHead(p) + `<p class="kn-note">${note}</p><div class="kn-tree">${rows}</div>` + detail, buttons);
+  const takeIt = (id: PerkId) => (g.pickPerk(id), again());
+  if (pk && pk.state === 'offer' && take) buttons.push({ label: `${KNW.take} ${PERKS[pk.id].name}`, primary: true, act: () => takeIt(pk.id) });
+  if (take && p.perks.length) buttons.push({ label: KNW.reset, act: () => confirmReset(g, panel, () => again()) });
+  if (o.back) buttons.push({ label: KNW.back, act: o.back });
+  panel.show(KNW.title, xpHead(p) + offers(offer, p.picks, take) + `<div class="kn-tree">${rows}</div>` + detail, buttons);
   document.querySelectorAll<HTMLElement>('#panel [data-node]').forEach((b) => b.addEventListener('click', () => again(b.dataset.node as PerkId)));
+  document.querySelectorAll<HTMLElement>('#panel [data-take]').forEach((b) => b.addEventListener('click', () => takeIt(b.dataset.take as PerkId)));
+}
+
+/** Are you sure: every knack comes back as a pick, for nothing. */
+function confirmReset(g: Game, panel: Panel, back: () => void): void {
+  panel.show(KNW.resetTitle, `<p>${KNW.resetLine(g.profile.perks.length)}</p>`, [
+    { label: KNW.resetYes, primary: true, act: () => (g.resetPerks(), back()) },
+    { label: KNW.keep, act: back },
+  ]);
 }

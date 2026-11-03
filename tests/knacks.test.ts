@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CHAINS, CLASS_CHAINS, PERKS, classPerks, fitPerks, newProfile, nextStep, perkOffer, perkText, type PerkId } from '../src/shared/progress';
+import { CHAINS, CLASS_CHAINS, PERKS, classPerks, fitPerks, newProfile, nextStep, perkOffer, perkText, resetPerks, takePerk, type PerkId } from '../src/shared/progress';
 import { CLASS_DODGES, CLASS_GUARD, CLASS_KITS, CLASS_ORDER, MODS, TIER_ORDER, modFits, reroll, rollGear, rollHungry, rollTier, traitText, traitsFor, type HeroClass, type Item, type ModId } from '../src/shared/tuning';
 import { trainerRows } from '../src/shared/trainrows';
 import { treasure } from '../src/shared/treasure';
@@ -18,11 +18,14 @@ function wordsFit(text: string, c: HeroClass): void {
 /** What each knack asks of the hero, by what it moves. */
 function perkFits(id: PerkId, c: HeroClass): boolean {
   const fx = PERKS[id].fx;
-  if (fx.parry || fx.counter) return guard(c) !== 'none' && (!fx.counter || guard(c) === 'full');
+  if (fx.parry || fx.counter || fx.counterTime) return guard(c) === 'full';
   if (fx.block) return guard(c) === 'full';
-  if (fx.dodge) return dodges(c);
-  if (fx.bless || fx.mending) return c === 'HEALER';
-  if (fx.rear) return c === 'ROGUE';
+  if (fx.dodge || fx.leap || fx.light || fx.slip) return dodges(c);
+  if (fx.bless || fx.blessTime || fx.mending || fx.mercy || fx.mercyReach || fx.smiteStun) return c === 'HEALER';
+  if (fx.rear || fx.angle || fx.ambush || fx.quiet) return c === 'ROGUE';
+  if (fx.perfect || fx.flash || fx.snareCd || fx.snareHold || fx.snares || fx.houndEvery || fx.houndBite || fx.houndBites) return c === 'RANGER';
+  if (fx.primed || fx.clear || fx.twice || fx.burst || fx.image) return c === 'MAGE';
+  if (fx.skillFar || fx.skillHold) return c === 'WARRIOR';
   return true;
 }
 
@@ -48,25 +51,53 @@ describe('the knacks tree', () => {
     }
   });
 
-  it('each class has four chains of three, with no knack twice', () => {
+  it('each class has four chains of three, all its own: no knack twice, none shared with another class', () => {
+    const seen = new Set<string>();
     for (const c of CLASS_ORDER) {
       expect(CLASS_CHAINS[c]).toHaveLength(4);
-      expect(classPerks(c)).toHaveLength(12);
+      expect(new Set(classPerks(c)).size).toBe(12);
+      for (const id of classPerks(c)) expect(seen.has(id), id).toBe(false), seen.add(id);
     }
+    expect(seen.size).toBe(Object.keys(PERKS).length);
   });
 
-  it("an old hero keeps their knacks; one their class can't use comes back as a pick", () => {
+  it('a pick is taken only from the two on offer; reset gives every knack back as a pick, free', () => {
     const p = newProfile('ROGUE');
-    Object.assign(p, { perks: ['tough', 'guard', 'footwork'], picks: 0 });
-    fitPerks(p);
-    expect(p.perks).toEqual(['tough', 'footwork']);
-    expect(p.picks).toBe(1);
+    Object.assign(p, { level: 4, picks: 3, gold: 50 });
+    expect(takePerk(p, 'g_ambush')).toBe(false);
+    for (let i = 0; i < 3; i++) expect(takePerk(p, perkOffer(p)[0])).toBe(true);
+    expect(p.picks).toBe(0);
+    expect(takePerk(p, perkOffer(p)[0])).toBe(false);
+    resetPerks(p);
+    expect(p).toMatchObject({ perks: [], picks: 3, gold: 50 });
+  });
+
+  it('old knacks land on the class chains; what has no home comes back as a pick; no level is lost', () => {
+    const r = newProfile('ROGUE');
+    Object.assign(r, { level: 5, perks: ['tough', 'guard', 'shadowed', 'fleet'], picks: 0 });
+    fitPerks(r);
+    expect(r.perks).toEqual(['g_rear', 'g_foot']);
+    expect(r.picks).toBe(2);
     const w = newProfile('WARRIOR');
-    Object.assign(w, { perks: ['secondwind', 'ironhide'], picks: 0 });
+    Object.assign(w, { level: 3, perks: ['secondwind', 'ironhide'], picks: 0 });
     fitPerks(w);
-    expect(w.perks).toEqual(['secondwind', 'ironhide']);
+    expect(w.perks).toEqual(['w_block']);
+    expect(w.picks).toBe(1);
     // Step two without step one: the first step is still the next on offer.
-    expect(nextStep('body', w.perks)).toBe(0);
+    expect(nextStep('w_guard', w.perks)).toBe(0);
+    // Two old knacks onto one step: the second comes back.
+    const m = newProfile('MAGE');
+    Object.assign(m, { level: 3, perks: ['focus', 'footwork'], picks: 0 });
+    fitPerks(m);
+    expect([m.perks, m.picks]).toEqual([['m_blink'], 1]);
+    // A save that somehow lost picks: taken plus waiting covers every level up.
+    const lost = newProfile('HEALER');
+    Object.assign(lost, { level: 6, perks: ['h_parry'], picks: 1 });
+    fitPerks(lost);
+    expect(lost.picks).toBe(4);
+    // New knacks of the class stay as they are.
+    fitPerks(lost);
+    expect([lost.perks, lost.picks]).toEqual([['h_parry'], 4]);
   });
 });
 

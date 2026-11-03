@@ -2,8 +2,9 @@
  * The Mage's magic: the channel (a tap turns the spells to the next element at once, and primes the
  * next spell), and the spell each kit casts in each element.
  */
-import { CHANNEL, STORM, technique, type Augment, type Element, type Swing, type TraitId } from '../shared/tuning';
+import { CHANNEL, HERO, STORM, technique, type Augment, type Element, type Swing, type TraitId } from '../shared/tuning';
 import { shoot } from './bolts';
+import { knack } from './gearstats';
 import type { Bolt, FightEvent, Hero } from './types';
 
 /** The element a Mage's spells are cast in now (fire to start with). */
@@ -14,14 +15,18 @@ export function turnElement(h: Hero, ev: FightEvent[]): void {
   const order = CHANNEL.order, next = order[(order.indexOf(castElement(h)) + 1) % order.length];
   h.augments.channel = next;
   h.primed = true;
+  // TWICE PRIMED: more than one spell; CLEAR HEAD: a little breath back.
+  h.primeLeft = 1 + knack(h, 'twice');
+  h.stamina = Math.min(HERO.stamina, h.stamina + knack(h, 'clear'));
   ev.push({ k: 'channeled', x: h.x, y: h.y, el: next });
 }
 
 /** A spell's primed multiplier (spent by this spell): CHANNEL.primed, more with the Mage's technique. */
 export function spendPrimed(h: Hero): number {
   if (!h.primed) return 1;
-  h.primed = false;
-  return CHANNEL.primed + technique(h.drills, 'MAGE');
+  h.primeLeft = (h.primeLeft ?? 1) - 1;
+  h.primed = h.primeLeft > 0;
+  return CHANNEL.primed + technique(h.drills, 'MAGE') + knack(h, 'primed');
 }
 
 /**

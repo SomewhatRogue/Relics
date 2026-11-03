@@ -10,15 +10,16 @@
  */
 import { HOUND, SNARE, WEAPONS, technique } from '../shared/tuning';
 import { damage, isDead } from './damage';
+import { houndBite, houndBites, houndWait, snareHold, snareMax, snareWait } from './knacks';
 import { knows, type Enemy, type FightEvent, type Hero, type Hound, type Snare } from './types';
 
 /** Jumped back as a Ranger: leave a snare where you stood (if one's ready). */
 export function laySnare(h: Hero, snares: Snare[], now: number, ev: FightEvent[]): void {
   if (WEAPONS[h.weapon].cls !== 'RANGER' || now < h.snareReady || !knows(h, 'leave')) return;
-  h.snareReady = now + SNARE.cooldown;
+  h.snareReady = now + snareWait(h);
   const mine = snares.filter((s) => s.owner === h.id);
-  if (mine.length >= SNARE.max) snares.splice(snares.indexOf(mine[0]), 1);
-  snares.push({ owner: h.id, x: h.rollX, y: h.rollY, until: now + SNARE.life, hold: SNARE.hold * (1 + technique(h.drills, 'RANGER')) });
+  if (mine.length >= snareMax(h)) snares.splice(snares.indexOf(mine[0]), 1);
+  snares.push({ owner: h.id, x: h.rollX, y: h.rollY, until: now + SNARE.life, hold: snareHold(h) * (1 + technique(h.drills, 'RANGER')) });
   ev.push({ k: 'snareset', x: h.rollX, y: h.rollY });
 }
 
@@ -76,7 +77,7 @@ export function stepHound(h: Hero, enemies: Enemy[], now: number, dt: number, ev
     Object.assign(d, { state: 'run', target: pick.id, t: 0, bites: 0 });
     return void ev.push({ k: 'bark', x: d.x, y: d.y });
   }
-  const every = HOUND.every * (h.calmHound ? 1.5 : 1);
+  const every = houndWait(h) * (h.calmHound ? 1.5 : 1);
   if (!prey || d.t > 6) return void Object.assign(d, { state: 'heel', target: 0, next: now + every + (h.id.length % 3) });
   if (d.state === 'run') {
     if (to(prey.x, prey.y, HOUND.speed * 1.3, 0.6) <= 0.65) Object.assign(d, { state: 'bite', t: HOUND.biteEvery });
@@ -87,8 +88,8 @@ export function stepHound(h: Hero, enemies: Enemy[], now: number, dt: number, ev
   if (d.t < HOUND.biteEvery) return;
   d.t = 0;
   d.target = prey.id;
-  damage(prey, HOUND.bite, now, ev, { src: 'hound', how: 'opened' });
+  damage(prey, houndBite(h), now, ev, { src: 'hound', how: 'opened' });
   // It knocks a small one off its stride (not while you're training: you're meant to meet that blow).
   if (prey.kind === 'scrapper' && !isDead(prey) && !h.calmHound) Object.assign(prey, { attack: null, act: 'flinch', actT: 0, actDur: 0.35 });
-  if (++d.bites >= HOUND.bites || isDead(prey)) Object.assign(d, { state: 'heel', target: 0, next: now + every + (h.id.length % 3) });
+  if (++d.bites >= houndBites(h) || isDead(prey)) Object.assign(d, { state: 'heel', target: 0, next: now + every + (h.id.length % 3) });
 }

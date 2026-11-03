@@ -7,7 +7,7 @@ import { healMult } from './lantern';
 import { heals } from './hungry';
 import { collide } from '../shared/arena';
 import { BLESSING, HERO, HORN, SHADOWSTEP, WARD } from '../shared/tuning';
-import { knack } from './gearstats';
+import { blessRadius, blessTime, hornReach, hornTime, wardHp, wardTime } from './knacks';
 import { damage, held, isDead, isDummy } from './damage';
 import { afflict, type World } from './elements';
 import type { Enemy, FightEvent, Hero, Intent, Zone } from './types';
@@ -70,7 +70,7 @@ export function hallow(h: Hero, aim: Intent | undefined, now: number, el: Zone['
     (x = h.x + aim.ax * k), (y = h.y + aim.ay * k);
   }
   ev.push({ k: 'hallow', x, y });
-  return { x, y, r: BLESSING.radius * (1 + knack(h, 'bless')), until: now + BLESSING.time, next: now, owner: h.id, el };
+  return { x, y, r: blessRadius(h), until: now + blessTime(h), next: now, owner: h.id, el };
 }
 
 /** Each blessed circle, every half second: allies in it mend and are blessed; goblins in it burn. Returns the ones still lit. */
@@ -95,8 +95,8 @@ export function stepZones(zones: Zone[], w: World): Zone[] {
 /** Ward an ally (or yourself): a shell that takes the blows and throws arrows back. */
 export function ward(h: Hero, heroes: Hero[], aim: Intent | undefined, now: number, ev: FightEvent[]): void {
   const t = allyFor(h, heroes, aim, WARD.range);
-  t.wardUntil = now + WARD.time;
-  t.wardHp = WARD.hp * (1 + knack(h, 'bless'));
+  t.wardUntil = now + wardTime(h);
+  t.wardHp = wardHp(h);
   if (t !== h) ev.push({ k: 'beam', x: h.x, y: h.y, x2: t.x, y2: t.y });
   ev.push({ k: 'ward', x: t.x, y: t.y });
 }
@@ -105,10 +105,10 @@ export function ward(h: Hero, heroes: Hero[], aim: Intent | undefined, now: numb
  *  small ones right beside them flinch. */
 export function rally(h: Hero, enemies: Enemy[], now: number, ev: FightEvent[]): void {
   ev.push({ k: 'rally', x: h.x, y: h.y });
-  h.rallyUntil = now + HORN.time;
+  h.rallyUntil = now + hornTime(h);
   for (const e of enemies) {
     const d = Math.hypot(e.x - h.x, e.y - h.y);
-    if (isDead(e) || d > HORN.radius) continue;
+    if (isDead(e) || d > hornReach(h)) continue;
     Object.assign(e, { alert: true, feeding: false });
     if (e.weight <= 1 && !held(e, now) && d <= HORN.scare) Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: 0.5 });
   }

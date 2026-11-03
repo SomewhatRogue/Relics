@@ -227,3 +227,8 @@ most Want among the heroes is the one the bells don't spare).
 - Ivo isn't setting elements for now (from 2026-11-02); what's set stays set. The reason stays off screen till Kyle decides.
 - Storing, selling and buying back are trade, like trainers' fees: they never touch the Want.
 - Open for Kyle: Dessa's steel (Tolmouth per the bible, "Wickhold steel" in her line), and who sets the elements in her stock while Ivo is shut.
+
+## Stamina and knacks (recorded 2026-11-02; Kyle's call, lore keeper)
+- Stat labels say stamina (STAMINA RECOVERY, "block -25% stamina"); sentences may still say breath. This replaces the older rule that players never see "stamina".
+- "Knacks" is the on-screen word for what a level buys. Each class has its own four chains. Knacks are taken and reset only in Wickhold, the reset is free, and none of it touches the Want.
+- On-screen terms: the bow's "white flash" at full draw; "blessed ground" and "the ward" for Sanctuary; the Warrior's skill chain is CHARGE OR CRY.

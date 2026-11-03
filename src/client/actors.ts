@@ -1,6 +1,7 @@
 /** Drawing a hero: the class's body, the weapon in hand, the dodge, charge and stun. */
 import { CHARGE, WARD, WEAPONS, WANT } from '../shared/tuning';
 import { chargeFull } from '../sim/hero';
+import { parryWindow, releaseWindow } from '../sim/knacks';
 import { castElement } from '../sim/channel';
 import type { Hero } from '../sim/types';
 import { blit, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
@@ -88,7 +89,7 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'b
   const side = h.fx >= -0.2 ? 1 : -1, px = bx + side * 3 + ax, py = by - 8 + ay, p = pose(h, c.now);
   // The sword and shield's release: the shield flashes as the blow goes out (the blade too, held.ts).
   const snap = h.weapon === 'sword' && (pz.phase === 'release' || pz.phase === 'contact');
-  const fresh = t - h.parryOpenAt < WEAPONS[h.weapon].parryWindow;
+  const fresh = t - h.parryOpenAt < parryWindow(h);
   const shieldAt: [number, number] = h.blocking || fresh ? [bx + mid + h.fx * 6, by - 7 + low + h.fy * 4] : [bx + mid - side * 4, by - 6 + low];
   const drawGear = () => {
     if (h.weapon === 'sword') blit(c, SPRITES.shield, shieldAt[0], shieldAt[1] + 4, false, fresh || snap ? 0.85 : 0);
@@ -122,10 +123,12 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'b
   if (fresh && h.weapon !== 'sword') smear(c.glow, bx, by - 8, Math.atan2(h.fy, h.fx) - 0.7, Math.atan2(h.fy, h.fx) + 0.7, 7, 9, '#cfe8ff');
   // A blade's charge gathers at the hand (a caster's draws into the tip instead, held.ts).
   if (h.act === 'charge' && cls !== 'MAGE') {
-    const k = Math.min(1, (h.actT + CHARGE.start) / chargeFull(WEAPONS[h.weapon], h));
+    const held = h.actT + CHARGE.start, full = chargeFull(WEAPONS[h.weapon], h), k = Math.min(1, held / full);
+    // A draw's white is its clean-release window, the one the room judges (sim/knacks.ts); a blade stays white once full.
+    const white = k >= 1 && (!WEAPONS[h.weapon].heavy.shot || held <= full + releaseWindow(h));
     for (let i = 0; i < 4; i++) {
       const t = c.now * 4 + i * 1.57, r = 6 - 3 * k;
-      c.glow.fillStyle = k >= 1 ? '#ffffff' : '#ffd860';
+      c.glow.fillStyle = white ? '#ffffff' : '#ffd860';
       c.glow.fillRect(Math.round(px + Math.cos(t) * r), Math.round(py + Math.sin(t) * r * 0.5), 1, 1);
     }
   }
