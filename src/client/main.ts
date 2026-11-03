@@ -197,7 +197,7 @@ function hud(now: number): void {
   pack.update(me);
   lesson.update();
   $('#packbtn').classList.toggle('on', pack.open);
-  knackCues(game, panel.open, $('#packbtn'), (x, y, s) => fx.say(toPx(x, y)[0], toPx(x, y)[1] - 40, s, '#ffd27a', 3.2));
+  knackCues(game, panel.open, $('#packbtn'), (x, y, s) => fx.say(toPx(x, y)[0], toPx(x, y)[1] + 14, s, '#ffd27a', 3.2));
   if (input.touch) {
     // GRAB shows only when there's something to grab (or to throw); ATTACK becomes SLAM.
     const carrying = me.act === 'carry';
@@ -282,7 +282,7 @@ function hud(now: number): void {
     $('#banner').innerHTML = game.outside
       ? `<b>${room.map.name}</b> Walk out at the bottom<span>${pr.gold} GOLD  LEVEL ${pr.level}</span>`
       : game.mode === 'town'
-      ? `<b>WICKHOLD</b> DAY ${game.world.day}<span>${pr.gold} GOLD  LEVEL ${pr.level}${pr.picks ? '  (A KNACK TO PICK: PACK)' : ''}  ${game.world.rescued} HOME${link.online ? '  WORLD ' + link.group.toUpperCase() : ''}</span>`
+      ? `<b>WICKHOLD</b> DAY ${game.world.day}<span>${pr.gold} GOLD  LEVEL ${pr.level}${pr.picks ? '  (A KNACK TO PICK)' : ''}  ${game.world.rescued} HOME${link.online ? '  WORLD ' + link.group.toUpperCase() : ''}</span>`
       : `<b>TRAINING YARD</b> Walk out at the bottom to go back to town`;
   }
   const spot = game.near(), busy = panel.open || title.open;

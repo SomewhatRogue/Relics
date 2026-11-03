@@ -1,7 +1,7 @@
 /**
  * Telling you a knack is waiting (Kyle, 2026-11-02: "hard to know that I have a choice"): the count on
- * the PACK button (a pulsing gold dot, tree.css), and once after a job you grew on, a line over your
- * hero back in town. Called each frame from main.ts.
+ * the PACK button (a pulsing gold dot, tree.css), and once after a job you grew on, a line at your
+ * hero's feet back in town (under them, clear of the town banner). Called each frame from main.ts.
  */
 import type { Game } from './game';
 import { KNW } from './treewords';

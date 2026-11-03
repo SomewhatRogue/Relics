@@ -10,6 +10,15 @@ Tobin on Market Row, sells him something and buys it back, stores a piece in the
 house, upgrades and melts at Halvard's anvil, and finds Ivo's elements greyed out. Open: Edda, Tobin, the
 counting house and every line in `client/storewords.ts` through the lore keeper and line editor.
 
+**Knacks per class, free reset, a pick you can't miss** (Claude Opus 5.5, 2026-11-02; Kyle: "Knacks
+should be different per class", "reset their knacks whenever, for free", "hard to know that I have a
+choice"). Built; waiting on Kyle's play. *Done when* each class's KNACKS screen shows four chains of
+its own (no shared BODY or BREATH), every step moves a number that class's kit uses in the fight, a
+waiting pick shows as a gold count on PACK and on KNACKS, a line and a PICK A KNACK button at the job's
+end and a line under the hero back in town, the two on offer sit at the top with TAKE, and RESET gives
+every knack back free anywhere in town. Open: the new words (list in DECISIONS) through the lore keeper
+and line editor; the badge follows `#packbtn` if the corner buttons move into the gear menu.
+
 **Slower growth, the knacks tree, class-true offers** (Claude Opus 5.5, 2026-11-02; Kyle: "purple
 loot too fast as well as leveling up too fast", "its own sort of area you can see grow", "the Rogue can
 only dodge"). Built; waiting on Kyle's play. *Done when* a new hero is about level 5 after nine or ten
