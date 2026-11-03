@@ -5,9 +5,12 @@
  */
 import * as THREE from 'three';
 
-const UNIT = new THREE.BoxGeometry(1, 1, 1).toNonIndexed();
-const UP = UNIT.getAttribute('position').array as Float32Array;
-const UN = UNIT.getAttribute('normal').array as Float32Array;
+type Shape = [Float32Array, Float32Array];
+const shape = (g: THREE.BufferGeometry): Shape => ((g = g.toNonIndexed()), [g.getAttribute('position').array as Float32Array, g.getAttribute('normal').array as Float32Array]);
+const BOX = shape(new THREE.BoxGeometry(1, 1, 1));
+// A six-sided cone (a pine's tier) and a twenty-faced lump (a leafy crown): low enough to read as pixel art.
+const CONE = shape(new THREE.ConeGeometry(0.5, 1, 6, 1));
+const LUMP = shape(new THREE.IcosahedronGeometry(0.5, 0));
 const mat = new THREE.Matrix4(), nmat = new THREE.Matrix3(), q = new THREE.Quaternion(), e = new THREE.Euler(), v = new THREE.Vector3(), s = new THREE.Vector3(), p = new THREE.Vector3();
 const col = new THREE.Color();
 
@@ -38,6 +41,20 @@ export class Boxes {
 
   /** A box by its centre, size, colour and turn (y, then x, then z). */
   c(x: number, y: number, z: number, w: number, h: number, d: number, hex: number, ry = 0, rx = 0, rz = 0): void {
+    this.put(BOX, x, y, z, w, h, d, hex, ry, rx, rz);
+  }
+
+  /** A six-sided cone by its centre, width across and height. */
+  cone(x: number, y: number, z: number, w: number, h: number, hex: number, ry = 0): void {
+    this.put(CONE, x, y, z, w, h, w, hex, ry);
+  }
+
+  /** A rounded lump by its centre and size (a crown of leaves, a bush). */
+  lump(x: number, y: number, z: number, w: number, h: number, d: number, hex: number, ry = 0): void {
+    this.put(LUMP, x, y, z, w, h, d, hex, ry);
+  }
+
+  private put([UP, UN]: Shape, x: number, y: number, z: number, w: number, h: number, d: number, hex: number, ry = 0, rx = 0, rz = 0): void {
     mat.compose(p.set(x, y, z), q.setFromEuler(e.set(rx, ry, rz, 'YXZ')), s.set(w, h, d));
     nmat.getNormalMatrix(mat);
     col.setHex(hex);

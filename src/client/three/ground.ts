@@ -75,7 +75,7 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
       const w = Math.min(0.5, b - x), th = m.theme.back;
       if (th === 'stone' || th === 'plaster') B.b(x + w / 2, WALL_H, -0.5, w - 0.03, 0.14, 1.2, jit(0x4f4a5c, 0.1, r));
       else if (th === 'palisade') B.c(x + w / 2, WALL_H + 0.12, -0.2, 0.22, 0.3, 0.22, jit(0x4a3424, 0.1, r), 0.78);
-      else if (th === 'trees') B.c(x + w / 2, WALL_H + 0.2 + r.next() * 0.5, -0.6, 0.9, 0.7, 1.2, jit(0x1c2817, 0.2, r), r.next());
+      else if (th === 'trees') B.lump(x + w / 2, WALL_H + 0.25 + r.next() * 0.4, -0.6, 1.1, 0.85, 1.3, jit(0x24391f, 0.2, r), r.next() * 3);
       else B.c(x + w / 2, WALL_H + r.next() * 0.3, -0.5, 0.6, 0.5, 1.1, jit(0x34313a, 0.2, r), r.next(), 0.2);
     }
   }

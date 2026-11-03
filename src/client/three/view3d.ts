@@ -28,6 +28,9 @@ import { makeRT, postMaterial } from './post';
 import { roomLights } from './roomlights';
 import type { Spot } from './rounds3d';
 
+/** How much of the flat view's floor the 2.5D view shows: on a phone held upright a little closer in. */
+const ZOOM = { tall: 0.8, wide: 1 };
+
 export class View3D {
   readonly canvas: HTMLCanvasElement;
   private gl: THREE.WebGLRenderer;
@@ -101,9 +104,11 @@ export class View3D {
     const Dw = innerWidth * this.dpr, Dh = innerHeight * this.dpr;
     const S = (this.S = Math.max(1, Math.round(Math.sqrt((Dw * Dh) / this.q.area))));
     const W = Math.ceil(Dw / S), H = Math.ceil(Dh / S);
-    // As many tiles across as the pixel scene shows, a little closer in.
-    const s2 = Math.max(1, Math.round(Math.sqrt((Dw * Dh) / 82000))), tiles = (Dw / s2 / 16) * 0.85;
-    this.view.size(W, H, W / tiles);
+    // As much floor as the pixel scene shows (its tiles across times down, scene.ts), so a figure stands
+    // about as big as there: tilted, the view takes in more rows and fewer columns than the flat one.
+    // `__zoom3` (a share of that floor) is for screenshots.
+    const s2 = Math.max(1, Math.round(Math.sqrt((Dw * Dh) / 82000))), floor = ((Dw / s2 / 16) * (Dh / s2 / 16)) * ((globalThis as { __zoom3?: number }).__zoom3 ?? (Dh > Dw ? ZOOM.tall : ZOOM.wide));
+    this.view.size(W, H, Math.sqrt((W * H) / (Math.sin(PITCH) * floor)));
     this.gl.setSize(W, H, false);
     const css: [string, string] = [(W * S) / this.dpr + 'px', (H * S) / this.dpr + 'px'];
     [this.canvas.style.width, this.canvas.style.height] = css;

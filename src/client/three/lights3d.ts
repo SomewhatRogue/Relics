@@ -36,11 +36,16 @@ export class Lights {
 
   /** The room's light: its ambient, and moonlight (or the sun by day) slanting in, centred on (cx, cz). */
   setSky(t: Theme, cx: number, cz: number): void {
-    const [r, g, b] = t.ambient;
-    this.amb.color.setRGB(r * 1.35, g * 1.35, b * 1.35);
+    // As bright as the flat view's pass (light.ts: the ambient times 1.55), split between a soft fill
+    // and a key slanting in from the sky in the ambient's own colour, so a lit floor lands near its
+    // flat colour and faces still model. At night the moon adds its blue-silver to the key; indoors
+    // (no moon) the room's own warmth stays warm.
+    const [r, g, b] = t.ambient, f = 1.55 * 0.75, k = 1.55 * 0.45, m = t.day ? 0 : (t.moon ?? 0) * 1.55;
+    this.amb.color.setRGB(r * f, g * f, b * f);
     this.amb.intensity = Math.PI;
-    if (t.day) this.sky.color.setRGB(1, 0.93, 0.8), (this.sky.intensity = 0.9 * Math.PI);
-    else this.sky.color.setRGB(0.55, 0.62, 0.9), (this.sky.intensity = Math.max(0.3, (t.moon ?? 0) * 1.6) * Math.PI);
+    const sun = t.day ? [1.06, 1, 0.9] : [1, 1, 1];
+    this.sky.color.setRGB(r * k * sun[0] + 0.6 * m, g * k * sun[1] + 0.67 * m, b * k * sun[2] + 0.92 * m);
+    this.sky.intensity = Math.PI;
     this.sky.position.set(cx - 8, 22, cz + 10);
     this.sky.target.position.set(cx, 0, cz);
   }

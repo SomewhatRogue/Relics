@@ -8,7 +8,8 @@ import { Boxes, Seed, jit } from './boxes';
 
 export type Spot = [number, number, number, number];
 
-const LEAF = [0x22301e, 0x2a3a22, 0x33452a], PINE = [0x1c2a1e, 0x223424, 0x2a3e2a];
+// The flat view's tree and pine colours (sprites.ts), so a wood is the same green in both.
+const LEAF = [0x2f4a28, 0x3a5a30, 0x24391f], PINE = [0x1c3522, 0x24412a, 0x1f3a26];
 
 export function addRound(B: Boxes, o: Round, fires: Spot[], r: Seed): void {
   const x = o.x, z = o.y, R = Math.max(0.25, o.r), bark = 0x3a2a1e, wood = 0x5a3d22, stone = 0x55505e;
@@ -20,15 +21,16 @@ export function addRound(B: Boxes, o: Round, fires: Spot[], r: Seed): void {
         for (let i = 0; i < 4; i++) B.c(x + (r.next() - 0.5) * 0.4, 1.2 + i * 0.2, z, 0.08, 0.7, 0.08, 0x4a3e34, r.next() * 3, 0, 0.6 * (i % 2 ? 1 : -1));
         break;
       }
-      for (let i = 0; i < 5; i++) {
-        const s = R * (1.7 - i * 0.22) + r.next() * 0.2;
-        B.c(x + (r.next() - 0.5) * 0.3, 1.4 + i * 0.32, z + (r.next() - 0.5) * 0.3, s, 0.42, s, jit(LEAF[i % 3], 0.1, r), r.next());
-      }
+      // A round crown of a few lumps, the biggest low, a lighter one up on the sunny side.
+      B.lump(x, 1.85, z, R * 2.6, R * 2.1, R * 2.4, jit(LEAF[0], 0.08, r), r.next() * 3);
+      B.lump(x + (r.next() - 0.5) * R, 1.75 + r.next() * 0.2, z + R * 0.5, R * 1.7, R * 1.4, R * 1.5, jit(LEAF[2], 0.08, r), r.next() * 3);
+      B.lump(x - R * 0.35, 2.25, z + R * 0.2, R * 1.5, R * 1.2, R * 1.4, jit(LEAF[1], 0.08, r), r.next() * 3);
       break;
     }
     case 'pine':
       B.b(x, 0, z, 0.24, 0.8, 0.24, bark);
-      for (let i = 0; i < 5; i++) B.c(x, 0.8 + i * 0.4, z, R * (2 - i * 0.36), 0.36, R * (2 - i * 0.36), jit(PINE[i % 3], 0.08, r), i * 0.4);
+      // Three tiers, each a cone overlapping the one under it (the flat sprite's stacked triangles).
+      for (let i = 0; i < 3; i++) B.cone(x, 1.25 + i * 0.62, z, R * (2.5 - i * 0.62), 1.1 - i * 0.12, jit(PINE[i], 0.06, r), r.next() * 2);
       break;
     case 'rock':
     case 'stone':

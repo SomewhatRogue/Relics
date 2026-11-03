@@ -16,11 +16,17 @@ const ATT = 'float getDistanceAttenuation( const in float lightDistance, const i
 if (THREE.ShaderChunk.lights_pars_begin.includes(ATT)) THREE.ShaderChunk.lights_pars_begin = THREE.ShaderChunk.lights_pars_begin.replace(ATT, ATT.replace('#if defined ( LEGACY_LIGHTS )', '#if 1'));
 // Hex colours mean what they say (as the 2D canvas paints them): no colour-space conversion anywhere.
 THREE.ColorManagement.enabled = false;
+// Wrapped light: a face turned partly away from a light still takes some of it. The flat view lights
+// a sprite as brightly as the floor under it; this keeps the 3D faces' shading (depth) but stops the
+// upright faces (walls, people) going murky next to a floor lit square on.
+const NL = 'float dotNL = saturate( dot( geometryNormal, directLight.direction ) );';
+if (THREE.ShaderChunk.lights_lambert_pars_fragment.includes(NL)) THREE.ShaderChunk.lights_lambert_pars_fragment = THREE.ShaderChunk.lights_lambert_pars_fragment.replace(NL, 'float dotNL = saturate( dot( geometryNormal, directLight.direction ) * 0.6 + 0.4 );');
 
 const TOON = `
 {
   vec3 alb = max(diffuseColor.rgb, vec3(0.004));
   vec3 irr = (reflectedLight.directDiffuse + reflectedLight.indirectDiffuse) / alb;
+  irr = max(irr, vec3(0.19));
   float L = max(max(irr.r, irr.g), irr.b);
   float bz = bay4(gl_FragCoord.xy) - 0.5;
   float q = floor(sqrt(L) * 5.0 + bz * 0.6 + 0.5) / 5.0;
@@ -60,7 +66,8 @@ void main(){
     float dd = D(uv - vec2(0.0, t.y)), du = D(uv + vec2(0.0, t.y));
     float behind = max(max(dl, dr), max(du, dd)) - d;
     float lap = dl + dr + du + dd - 4.0 * d;
-    if (behind > 0.32) col = col * 0.22 + vec3(0.006, 0.005, 0.012);
+    // An edge in front of something further off: a darker shade of its own colour, not black.
+    if (behind > 0.32) { vec3 o = col * 0.42; col = max(mix(vec3(dot(o, vec3(0.3, 0.55, 0.15))), o, 1.4), 0.0) + vec3(0.006, 0.005, 0.012); }
     else if (lap > 0.04) col *= 1.4;
     else if (lap < -0.04) col *= 0.72;
   }
