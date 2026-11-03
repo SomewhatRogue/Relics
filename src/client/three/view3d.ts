@@ -6,6 +6,7 @@
  */
 import * as THREE from 'three';
 import type { ArenaRoom } from '../../sim/room';
+import type { Hero } from '../../sim/types';
 import type { GameMap } from '../../shared/arena';
 import type { Fx } from '../fx';
 import { paintMap } from '../world';
@@ -16,7 +17,7 @@ import { Cam, FAR, NEAR, PITCH } from './camera3d';
 import { Fires } from './fire3d';
 import { buildGround, type Ground } from './ground';
 import { Lights, type L3 } from './lights3d';
-import { QUALITY, perfOn, quality } from './look';
+import { QUALITY, perfOn, quality, type Quality } from './look';
 import { Overlay, type Marks } from './overlay3d';
 import { Perf } from './perf3d';
 import { makeRT, postMaterial } from './post';
@@ -66,6 +67,20 @@ export class View3D {
     addEventListener('resize', () => this.resize());
   }
 
+  /** LOW, MID or HIGH, live: the light pool and the moon's shadow are rebuilt, the scene repainted at its new size. */
+  setQuality(name: Quality): void {
+    this.q = QUALITY[name];
+    this.scene.remove(this.lights.group);
+    this.lights = new Lights(this.q.lights, this.q.shadow);
+    this.scene.add(this.lights.group);
+    this.gl.shadowMap.enabled = this.q.shadow > 0;
+    this.scene.traverse((o) => {
+      const m = (o as THREE.Mesh).material as THREE.Material | THREE.Material[] | undefined;
+      for (const x of Array.isArray(m) ? m : m ? [m] : []) x.needsUpdate = true;
+    });
+    this.resize();
+  }
+
   /** Swap which canvas shows: this one, or the pixel scene's. */
   show(on: boolean): void {
     const d = on ? '' : 'none';
@@ -109,7 +124,7 @@ export class View3D {
     return [px * k, py * k];
   }
 
-  render(room: ArenaRoom, meId: string, fx: Fx, now: number, dt: number, marks: Marks): void {
+  render(room: ArenaRoom, meId: string, fx: Fx, now: number, dt: number, marks: Marks, others: Hero[] = [], _job = true): void {
     const t0 = performance.now(), map = room.map, a = room.alpha;
     if (this.map !== map) this.setMap(map);
     const lerp: Lerp = (key, x, y) => {

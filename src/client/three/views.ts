@@ -1,6 +1,6 @@
 /**
- * Which view draws this frame: the pixel scene, or the 3D view when the VIEW switch says 3D and this
- * is a job (town and the wood stay in pixels for now). The 3D view (and three.js with it) is loaded
+ * Which view draws this frame: the pixel scene, or the 3D view when the VIEW switch says 2.5D (jobs,
+ * Wickhold and its halls, the yard and the wood alike). The 3D view (and three.js with it) is loaded
  * the first time it's wanted, so the pixel game starts no slower. Swapping is live: both draw the
  * same room, so only the canvas changes.
  */
@@ -18,10 +18,12 @@ export class Views {
   private failed = false;
   private on3d = false;
 
-  constructor(private scene: Scene) {}
+  constructor(private scene: Scene) {
+    this.switch.qualityChanged = (q) => this.v3?.setQuality(q);
+  }
 
   render(room: ArenaRoom, meId: string, fx: Fx, now: number, dt: number, others: Hero[], job: boolean): void {
-    const want = this.switch.look === '3d' && job && !this.failed;
+    const want = this.switch.look === '3d' && !this.failed;
     if (want && !this.v3 && !this.loading) {
       this.loading = true;
       import('./view3d')
@@ -31,7 +33,7 @@ export class Views {
     }
     const use = want && !!this.v3;
     if (use !== this.on3d) (this.on3d = use), this.v3?.show(use);
-    if (use) this.v3!.render(room, meId, fx, now, dt, this.scene);
+    if (use) this.v3!.render(room, meId, fx, now, dt, this.scene, others, job);
     else this.scene.render(room, meId, fx, now, dt, others);
   }
 
