@@ -6,9 +6,10 @@
  */
 import { HUNGRY_FX } from './hungry';
 import { collide } from '../shared/arena';
-import { CRIT, FLINCH, HERO, LODESTONE, NET, VARIANTS, type Augment, type Swing, type TraitId } from '../shared/tuning';
+import { CRIT, FLINCH, HERO, LODESTONE, NET, VARIANTS, WEAPONS, type Augment, type Swing, type TraitId } from '../shared/tuning';
 import { shove } from './bodies';
-import { damage, frozen, isDead } from './damage';
+import { damage, frozen, isDead, isDummy } from './damage';
+import { backstabOf, fromBehind, rogueShot } from './backshot';
 import { afflict, shatter, type World } from './elements';
 import { allyHit, players } from './party';
 import { rollCrit } from './combat';
@@ -93,7 +94,10 @@ function strike(w: World, b: Bolt, e: Enemy): void {
   const by = w.heroes.find((h) => h.id === b.owner), crit = !!by && rollCrit(by);
   // A shot into a shield-bearer's board (it's facing the shot) does little; lightning goes round it.
   const boarded = e.variant === 'shield' && b.el !== 'storm' && e.alert !== false && e.fx * -b.dx + e.fy * -b.dy > 0.3 && b.knock < 8;
-  if (damage(e, Math.round(b.dmg * (crit ? CRIT : 1) * (boarded ? VARIANTS.shield.front : 1)), w.now, w.ev, { heavy: b.knock >= 8 || crit, flinch: FLINCH, mult: true, brutal: b.traits.includes('brutal'), dx: b.dx, dy: b.dy, src: b.kind, el: b.el })) return;
+  // A Rogue's bolt or knife in a goblin's back is a backstab too, at that weapon's rate.
+  const back = !!by && rogueShot(b) && WEAPONS[by.weapon].cls === 'ROGUE' && !isDummy(e) && fromBehind(e, b.dx, b.dy, by);
+  const rear = back && by ? backstabOf(by) : 1;
+  if (damage(e, Math.round(b.dmg * rear * (crit ? CRIT : 1) * (boarded ? VARIANTS.shield.front : 1)), w.now, w.ev, { heavy: b.knock >= 8 || crit, flinch: FLINCH, mult: true, brutal: b.traits.includes('brutal'), dx: b.dx, dy: b.dy, src: b.kind, el: b.el, backstab: back })) return;
   if (e.act !== 'pinned') shove(e, b.dx, b.dy, b.knock, e.weight);
   // A hand crossbow's bolt dazes a small goblin where it stands (not a butcher).
   if (b.stun && e.kind !== 'butcher' && e.act !== 'pinned') Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: b.stun });

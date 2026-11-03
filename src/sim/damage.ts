@@ -28,6 +28,8 @@ export function kill(e: Enemy, ev: FightEvent[], how: DeathKind = 'fall', dx = 0
 
 export interface DamageOpts {
   heavy?: boolean;
+  /** Landed in its back (a Rogue's shot): the BACKSTAB pop. */
+  backstab?: boolean;
   /** Light goblins flinch this long (0: no flinch). */
   flinch?: number;
   /** Stunned, pinned and frozen goblins take GUARD.stunnedMult. */
@@ -64,7 +66,7 @@ export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: Da
   if (o.mult && (e.act === 'stunned' || e.act === 'pinned' || frozen(e, now) || snared(e, now))) n = Math.round(n * GUARD.stunnedMult * (o.brutal ? TRAIT.brutal : 1));
   e.hp -= n;
   e.hitAt = now;
-  ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy: !!o.heavy, on: 'enemy', tick: o.tick, src: o.src, big: e.kind === 'butcher' });
+  ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy: !!o.heavy, on: 'enemy', tick: o.tick, src: o.src, big: e.kind === 'butcher', ...(o.backstab ? { backstab: true } : {}) });
   if (isDummy(e)) {
     if (e.hp <= 0) e.hp = e.maxHp;
     return false;
