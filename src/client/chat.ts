@@ -73,7 +73,7 @@ export class Chat {
       document.body.classList.toggle('chat-job', where === 'party');
       this.box.set('shut');
     }
-    this.bubbles.frame(now, (x, y) => this.scene.tileScreen(x, y));
+    this.bubbles.frame(now, (x, y, up) => this.scene.tileScreen(x, y, up));
     this.log.frame(now);
   }
 

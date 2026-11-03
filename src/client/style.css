@@ -436,4 +436,5 @@ body[data-mode='run'] #tips { display: none; }
 #options button { height: 30px; min-width: 128px; padding: 0 10px; background: #1b1922; border: 1px solid #4f4a5c; border-radius: 4px; font-size: 10px; letter-spacing: 0.12em; text-align: left; }
 #options #viewbtn { border-color: #c8b080; color: #ffe6b0; }
 #options #viewbtn.on { background: #4a3414; border-color: #ffd27a; }
-#options .note { color: #8a8494; font-size: 9px; margin-top: -3px; }
+#options #qualitybtn { margin-top: -2px; color: #d8d4de; }
+#options #qualitybtn[hidden] { display: none; }

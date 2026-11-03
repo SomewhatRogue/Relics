@@ -1,11 +1,11 @@
 /**
  * The five classes as low-poly figures built from boxes, in each class's three looks (the colours of
- * the pixel sprites in sprites.ts). What's in the hands follows the kit (sword and shield, greatsword,
- * spear; a bow; twin daggers; wand, staff or rod; mace and censer).
+ * the pixel sprites in sprites.ts). What's in the hands follows the kit, each its own (kits3d.ts).
  */
 import * as THREE from 'three';
 import { WEAPONS, type WeaponId } from '../../shared/tuning';
 import { G, M, hex } from './mats';
+import { hands } from './kits3d';
 import { blob, collect, middle, part, pivot, stars, type Figure } from './rig';
 
 type Cls = 'WARRIOR' | 'RANGER' | 'ROGUE' | 'MAGE' | 'HEALER';
@@ -28,46 +28,7 @@ export interface HeroFig extends Figure {
   tip: THREE.Mesh | null;
 }
 
-const steelBlade = M(0xe4eaf2), wood = M(0x5a3d22), dark = M(0x16141c);
-
-function hands(cls: Cls, w: WeaponId, held: THREE.Group, off: THREE.Group, c: Pal): THREE.Mesh | null {
-  const metal = M(hex(c[2])), gold = M(0xd4a537);
-  if (cls === 'WARRIOR') {
-    if (w === 'spear') return part(held, 0.05, 2.1, 0.05, wood, 0, 0.35, 0.1, 0.25), part(held, 0.08, 0.28, 0.04, steelBlade, 0, 1.45, 0.38, 0.25), null;
-    const long = w === 'greatsword';
-    part(held, 0.28, 0.06, 0.07, metal, 0, -0.04, 0);
-    part(held, long ? 0.12 : 0.09, long ? 1.2 : 0.8, 0.035, steelBlade, 0, long ? -0.66 : -0.46, 0);
-    part(held, 0.05, 0.12, 0.05, gold, 0, 0.06, 0);
-    if (!long) {
-      part(off, 0.5, 0.58, 0.08, M(hex(c[4])), 0, 0, 0.12);
-      part(off, 0.54, 0.06, 0.1, metal, 0, 0.29, 0.12);
-      part(off, 0.08, 0.58, 0.1, gold, 0, 0, 0.13);
-    }
-    return null;
-  }
-  if (cls === 'RANGER') {
-    part(held, 0.06, 0.36, 0.03, steelBlade, 0, -0.22, 0);
-    if (w === 'crossbow') return part(off, 0.5, 0.06, 0.08, wood, 0, 0, 0.2), part(off, 0.08, 0.08, 0.5, wood, 0, 0, 0.1), null;
-    const len = w === 'shortbow' ? 0.36 : 0.5;
-    for (const s of [-1, 1]) part(off, 0.05, len, 0.05, wood, 0, s * len * 0.45, 0.1 - Math.abs(s) * 0.02, s * 0.5);
-    part(off, 0.015, len * 1.7, 0.015, M(0xd8d0bc), 0, 0, -0.04);
-    return null;
-  }
-  if (cls === 'ROGUE') {
-    for (const g of [held, off]) part(g, 0.13, 0.04, 0.05, metal, 0, -0.04, 0), part(g, 0.05, 0.32, 0.025, steelBlade, 0, -0.22, 0);
-    return null;
-  }
-  if (cls === 'MAGE') {
-    const len = w === 'wand' ? 0.4 : w === 'rod' ? 0.8 : 1.5;
-    part(held, 0.06, len, 0.06, w === 'rod' ? M(0x8a8494) : wood, 0, -0.1 + len * 0.35, 0.05);
-    return part(held, 0.13, 0.13, 0.13, G(0xc9a8ff), 0, -0.1 + len * 0.85, 0.05);
-  }
-  // The Cleric: a flanged mace in the right hand, the censer swinging from the left on its chain.
-  part(held, 0.06, 0.5, 0.06, wood, 0, -0.22, 0);
-  part(held, 0.18, 0.18, 0.18, M(0x8a8e98), 0, -0.48, 0, 0, 0.78);
-  part(off, 0.02, 0.3, 0.02, M(0x6a6470), 0, -0.15, 0);
-  return part(off, 0.15, 0.15, 0.15, G(0xff9a3c, 0.3), 0, -0.34, 0);
-}
+const dark = M(0x16141c);
 
 export function makeHero(cls: Cls, look: number, weapon: WeaponId): HeroFig {
   const c = PALS[cls][look] ?? PALS[cls][0], root = new THREE.Group();

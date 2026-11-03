@@ -9,10 +9,10 @@ import { makeSprite, type Sprite } from './sprites';
 import { drawWork } from './siegedraw';
 
 type Part = Parameters<typeof makeSprite>[2][number];
-interface Look { body: string; trim: string; skin: string; hair: Part[]; apron?: string }
+export interface Look { body: string; trim: string; skin: string; hair: Part[]; apron?: string }
 
 const SKIN = '#c79c78', DARK = '#a07a5a';
-const LOOKS: Record<string, Look> = {
+export const LOOKS: Record<string, Look> = {
   smith: { body: '#4a3a30', trim: '#2a2018', skin: DARK, apron: '#5a3d22', hair: [['r', 4, 1, 4, 1, '#2a2018'], ['r', 4, 5, 4, 2, '#2a2018']] },
   wright: { body: '#3a4a6a', trim: '#c9a8ff', skin: SKIN, hair: [['r', 3, 0, 6, 2, '#4a3a6a'], ['p', 6, 6, '#9a8a7a']] },
   priest: { body: '#26222c', trim: '#d4a537', skin: SKIN, hair: [['r', 4, 1, 4, 1, '#8a8494']] },

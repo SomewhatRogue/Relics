@@ -9,10 +9,10 @@ import type { EnemyAttack } from '../../sim/types';
 import { BAYER } from './post';
 
 const FS = BAYER + `
-uniform float uKind, uR, uW, uCos, uProg, uUnb, uNow, uT, uSlam; uniform vec2 uSize; varying vec2 vP;
+uniform float uKind, uR, uW, uCos, uProg, uUnb, uNow, uT, uSlam, uChev; uniform vec2 uSize; varying vec2 vP;
 void main(){
   vec2 p = vP * uSize; vec2 fc = floor(gl_FragCoord.xy);
-  float ew = 0.09, edgeD, inside, along;
+  float ew = 0.09, edgeD, inside, along, dist = length(p);
   if (uKind < 0.5) { float d = length(p); inside = step(d, uR); edgeD = uR - d; along = d / uR; }
   else if (uKind < 1.5) {
     float d = length(p); float c = p.x / max(d, 0.0001);
@@ -21,7 +21,7 @@ void main(){
     edgeD = min(uR - d, side); along = d / uR;
   } else {
     float x = p.x + uR * 0.5; inside = step(0.0, x) * step(x, uR) * step(abs(p.y), uW);
-    edgeD = min(uW - abs(p.y), uR - x); along = x / uR;
+    edgeD = min(uW - abs(p.y), uR - x); along = x / uR; dist = x;
   }
   if (inside < 0.5) discard;
   vec3 col; float al;
@@ -33,6 +33,10 @@ void main(){
     else if (uNow > 0.5) { col = vec3(1.0); al = 0.0; }
     else if (uUnb > 0.5) { col = stripe > 0.5 ? vec3(1.0, 0.82, 0.25) : vec3(0.17, 0.08, 0.03); al = stripe > 0.5 ? 0.25 : 1.0; }
     else { col = fill; al = 0.3; }
+  } else if (uChev > 0.5 && fract((dist - abs(p.y) * 0.9) * 1.7 - uT * 1.6) < 0.22) {
+    // A lunge or a charge: chevrons running out along it, the way it's coming.
+    if (mod(fc.x + fc.y, 2.0) > 0.5 && along > uProg) discard;
+    col = uNow > 0.5 ? vec3(1.0) : vec3(1.0, 0.62, 0.45); al = 0.35;
   } else if (along < uProg) {
     if (mod(fc.x + fc.y, 2.0) > 0.5) discard;
     col = uNow > 0.5 ? vec3(1.0, 0.91, 0.88) : fill * (0.85 + 0.15 * sin(uT * 20.0)); al = 0.6;
@@ -47,7 +51,7 @@ const GEO = new THREE.PlaneGeometry(1, 1);
 
 export function makeTele(): THREE.Mesh {
   const mat = new THREE.ShaderMaterial({
-    uniforms: { uKind: { value: 0 }, uR: { value: 1 }, uW: { value: 0.5 }, uCos: { value: 0 }, uProg: { value: 0 }, uUnb: { value: 0 }, uNow: { value: 0 }, uT: { value: 0 }, uSlam: { value: 0 }, uSize: { value: new THREE.Vector2(1, 1) } },
+    uniforms: { uKind: { value: 0 }, uR: { value: 1 }, uW: { value: 0.5 }, uCos: { value: 0 }, uProg: { value: 0 }, uUnb: { value: 0 }, uNow: { value: 0 }, uT: { value: 0 }, uSlam: { value: 0 }, uChev: { value: 0 }, uSize: { value: new THREE.Vector2(1, 1) } },
     vertexShader: 'varying vec2 vP; void main(){ vP = position.xy; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
     fragmentShader: FS,
     blending: THREE.NoBlending,
@@ -70,6 +74,7 @@ export function shapeTele(m: THREE.Mesh, a: EnemyAttack, pw: number, now: number
   u.uNow.value = !a.unblockable && a.windup - a.t <= pw && a.t < a.windup ? 1 : 0;
   u.uUnb.value = a.unblockable || round || a.kind === 'charge' || a.kind === 'draw' ? 1 : 0;
   u.uSlam.value = a.kind === 'slam' ? 1 : 0;
+  u.uChev.value = lane || (!round && !shot && a.arc <= 40 && a.range >= 2) ? 1 : 0;
   const yaw = -Math.atan2(a.dy, a.dx);
   if (round) {
     u.uKind.value = 0;

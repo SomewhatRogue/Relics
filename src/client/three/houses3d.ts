@@ -11,7 +11,8 @@ import { LOOK } from '../blocks';
 import { houseOf } from '../cottage';
 import { Boxes, Seed, jit } from './boxes';
 import { G, VCOL, hex } from './mats';
-import { gable, tent } from './roofs3d';
+import { gable } from './roofs3d';
+import { cone, dressHall, roofGap } from './halls3d';
 import { flatBlock } from './walls3d';
 
 /** Eave height (tiles) by kind. */
@@ -48,6 +49,12 @@ export function buildBlock(b: Block): Built {
   // A wall from a0 to a1 along x (front or back) or z (sides), courses of stone or planks.
   const wall = (ax: 'x' | 'z', a0: number, a1: number, c: number, y0: number, y1: number) => {
     const ch = stone ? 0.3 : 0.24;
+    // Mortar (or the boards' backing) behind the courses, so a seam shows a dark line, never a hole through.
+    if (!ruined && a1 - a0 > 0.05) {
+      const m = shade(wallC, 0.6), l = a1 - a0, mc = (a0 + a1) / 2;
+      if (ax === 'x') W.b(mc, y0, c, l, y1 - y0 - 0.02, t - 0.08, m);
+      else W.b(c, y0, mc, t - 0.08, y1 - y0 - 0.02, l, m);
+    }
     for (let y = y0, row = 0; y < y1 - 0.01; y += ch, row++) {
       const top = ruined ? 0.15 + r.next() * 0.55 : y1;
       if (y > top) continue;
@@ -100,7 +107,8 @@ export function buildBlock(b: Block): Built {
       group.add(pane);
     }
     const thatch = home?.thatch && b.kind === 'house';
-    const ridge = gable(R, x0, x1, z0, z1, H, { col: thatch ? shade(0x8a7448, k) : shade(hex(L.roof), k), ridge: shade(hex(L.ridge), k), gable: wallC, thatch: !!thatch, holes: b.fate === 'wrecked' ? 0.25 : alight ? 0.12 : 0 }, r);
+    const ridge = b.kind === 'tower' ? cone(R, x0, x1, z0, z1, H, r) : gable(R, x0, x1, z0, z1, H, { col: thatch ? shade(0x8a7448, k) : shade(hex(L.roof), k), ridge: shade(hex(L.ridge), k), gable: wallC, thatch: !!thatch, holes: b.fate === 'wrecked' ? 0.25 : alight ? 0.12 : 0, gap: roofGap(b) }, r);
+    if (b.label && b.door && !charred) dressHall(W, b, H, group, r);
     if (alight) for (let x = x0 + 0.4; x < x1 - 0.2; x += 0.9) fires.push([x, ridge - 0.1, (z0 + z1) / 2 + (r.next() - 0.5) * 0.6, 1.4]);
     if (alight && door !== null) fires.push([door, dh * 0.6, z1 - 0.3, 1]);
     // A chimney.
@@ -111,7 +119,6 @@ export function buildBlock(b: Block): Built {
     W.b((x0 + x1) / 2, 0, (z0 + z1) / 2, b.w - 0.3, 0.05, b.h - 0.3, 0x1a1414);
     for (let i = 0; i < 5; i++) fires.push([x0 + 0.3 + r.next() * (b.w - 0.6), 0.08, z0 + 0.3 + r.next() * (b.h - 0.6), 0.25]);
   }
-  if (b.kind === 'tower') tent(R, x0, x1, z0, z1, 0x3a3050, 0x4a3e66, r);
   const wm = W.mesh(VCOL), roof = R.mesh(VCOL);
   if (wm) group.add(wm);
   if (roof) group.add(roof);

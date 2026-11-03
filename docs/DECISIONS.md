@@ -2,6 +2,61 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-02: the 2.5D view everywhere, a quality switch, the hand crossbow (Kyle; Claude Opus 5.5)
+
+Kyle played 2.5D on jobs ("It seemed to run really well") and asked: "No 2.5D in the main hub area?",
+"Let's get townsfolk, hanged bodies etc. That stuff is amazing", "Let's do higher quality, but let
+someone change the quality themselves", and "I got the hand crossbow as the Rogue and it went OVER my
+twin daggers instead of replacing them, which felt weird, and didn't seem to change anything."
+
+- **Everywhere, still a second drawer.** VIEW: 2.5D now draws whatever room the game is in: Wickhold and
+  its halls, the training yard, the wood, jobs. No sim, relay or coop change. The "2.5D shows on jobs for
+  now" line is gone. What the flat view draws beside the room is drawn too: the map's people
+  (`three/npcs3d.ts` in the colours of npcs.ts's looks, `three/work3d.ts` for what they're at: guards'
+  spears on their rounds, the gravedigger carrying the dead and digging, the whetstone, the well, the
+  column's dead in what they bled, Hew after the bite), other players in town (`three/people3d.ts`, drawn
+  only), a Mage's blink image (a dithered violet copy, flickering), and the yard's cage.
+- **Words and marks** go on the flat layer as in FLAT (`three/tags3d.ts`): gold marks over anyone to
+  talk to, their name when close, other players' names, buildings' names on their fronts. Speech
+  bubbles take a height (`tileScreen(x, y, up)`), so they stand over a 3D head as over a sprite.
+- **The rest of the flat view's extras** (`three/extras3d.ts`), each from the room or the flat code
+  itself so it matches: swing trails from held.ts's own pose (the arc that's judged), status icons
+  (status.ts), the hook's line (relicsdraw.ts), drummers' reach and beat, edge marks for the freed,
+  the relic held up in the wood, dawn's mist anchored to the ground, crows, the dog, moths and smoke.
+- **Grim, within the bible** (`three/grim3d.ts`, "Dens and big houses"): the larder's hung by the
+  ankles from a rafter hook, opened, turning and dripping; the cook-pot on its fire with an arm or a
+  leg over the rim, steam rising. Grown people only; the rest of the gore is the floor's own painting.
+  The gallows and hurdles are `three/siege3d.ts` (a noose, a crow on the beam).
+- **Each hall as itself** (`three/halls3d.ts`, after exterior.ts): the tower's bent slate cone and slits
+  lit odd colours, the barracks' shields and banner, the lodge's antlers and pelts, the church's belfry
+  and round window, the Rat's casks and lamp, the forge's chimney stack, the town hall's notices, the
+  infirmary's herbs, the counting house's fallen-in end.
+- **Rough edges.** Thatch is laid in courses with a darker cut edge and loose straw, so it reads as rows
+  catching the light. Walls have mortar behind the stones and roofs an underlay, so seams show as lines
+  rather than holes (at HIGH they had shown as black flecks). The lunger coils back over its wind-up and
+  throws itself along the red, and lunges and charges carry chevrons running the way they come. The
+  Stoker's cutscene moves the 2.5D camera as it does the flat one.
+- **Every kit its own in hand** (`three/kits3d.ts`): sword and shield, greatsword, spear; longbow,
+  shortbow, crossbow; twin daggers, the rapier, the hand crossbow with a knife; wand, the staff's crook,
+  the banded rod; mace, sword and censer, flail (the censer at every Cleric's belt). A new figure is
+  built when the kit changes, so one replaces the other.
+- **The hand crossbow.** The room was right: equipping it from the pack makes the hero's weapon the hand
+  crossbow, the tap is the knife, the hold is a bolt that dazes (`tests/handbow.test.ts` goes through
+  the pack the way PACK does). What was wrong was the drawing: 2.5D gave every Rogue twin daggers
+  whatever the kit, and FLAT drew the knife (which looks like a dagger) with the crossbow hanging beside
+  it. FLAT now holds the crossbow in hand, the knife sheathed at the belt, out only for a stab.
+- **Quality.** HIGH to start on every device. QUALITY: LOW / MID / HIGH sits under VIEW in the gear box
+  while 2.5D is on, changes live (the light pool and the moon's shadow are rebuilt, the canvas resized)
+  and is remembered; `?q=` still wins. `?perf=1` keeps the readout.
+- **Measured headless (software GL, SwiftShader; a real GPU is far quicker).** Wickhold at night, frame
+  ms: phone 390x844@3 low 47, mid 138, high 185 (draw 15, 33, 36); laptop 1280x800@2 low 45, mid 135,
+  high 184. At HIGH: a hall inside 91, a den 103, the wood 143 (phone), a job street 158. Draw calls 90
+  to 170 in town, about 560 in the wood (each of the column's dead is its own figure).
+- **Online in 2.5D.** Town presence and chat pass with 2.5D on (scripts take `LOOK=3d`). The party
+  run's "Sam's walk is smooth" step fails at HIGH under SwiftShader only (frames near 300 ms, five looks
+  in 1.2 s), and passes at LOW and in FLAT; worth watching on Kyle's phone.
+- New words (for the lore keeper and line editor): QUALITY: LOW, QUALITY: MID, QUALITY: HIGH.
+
 ## 2026-11-02: the 2.5D view (low-res 3D) on jobs, and options under a gear (Kyle; Claude Opus 5.5)
 
 Kyle saw the 2.5D look test (low-res 3D that reads as pixel art) and wants that style. Step 1: a second

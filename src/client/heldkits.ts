@@ -89,11 +89,16 @@ export function drawKit(c: Ctx, h: Hero, px: number, py: number, ox: number, oy:
     if (aiming(h)) {
       handbow(c, ox, oy, p.a, !(s && h.actT > s.windup + 0.05));
       if (p.pull >= 1) (c.glow.fillStyle = '#ffffff'), c.glow.fillRect(Math.round(ox + Math.cos(p.a) * 7), Math.round(oy + Math.sin(p.a) * 7), 1, 1);
-    } else {
-      // The knife in hand; the crossbow hangs at the off hand.
+    } else if (h.act === 'attack') {
+      // A tap is the knife: out in hand for the stab, the crossbow at the off hand meanwhile.
       line(g, ox, oy, p.a, 0, 2, '#2a2420');
-      line(g, ox, oy, p.a, 2, 7, '#e6ecf0');
+      line(g, ox, oy, p.a, 2, 6, '#e6ecf0');
       handbow(c, px - side * 7, py + 2, Math.PI / 2 - side * 0.5, true);
+    } else {
+      // Otherwise the hand crossbow is what's in hand (it replaces the daggers), the knife sheathed at the belt.
+      handbow(c, ox, oy, p.a, true);
+      g.fillStyle = '#2a2420';
+      g.fillRect(Math.round(px - side * 6), Math.round(py + 3), 1, 3);
     }
   } else if (h.weapon === 'censer') {
     if (swingingCenser(h)) {

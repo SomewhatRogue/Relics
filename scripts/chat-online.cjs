@@ -25,7 +25,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     const ctx = await browser.newContext(opts);
     const page = await ctx.newPage();
     page.on('pageerror', (e) => report.errors.push(`${name}: ${e}`));
-    await page.goto(`http://127.0.0.1:${PORT}/`);
+    await page.goto(`http://127.0.0.1:${PORT}/${process.env.LOOK ? '?look=' + process.env.LOOK : ''}`);
     await page.waitForFunction(() => window.__game);
     await page.evaluate(([cls, name]) => { window.__game.create(cls, name); if (window.__game.mode === 'wood') window.__game.skipWood(); document.getElementById('title').hidden = true; window.__title.open = false; }, [cls, name]);
     return { name, ctx, page };
@@ -68,6 +68,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     step('and floats over Sam', await until(kyle, () => window.__chat.bubbles().includes('Mind the guard, he bites.')));
     await wait(250);
     await shot(kyle, 'phone-town-bubble-peek.png');
+    await shot(sam, 'laptop-town-bubble.png');
     // Kyle answers from the phone's panel: CHAT, type, SAY.
     await kyle.page.tap('#chatbtn');
     step("the phone's CHAT opens the panel", await until(kyle, () => document.body.classList.contains('chat-open')));

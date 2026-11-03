@@ -2,17 +2,21 @@
 
 ## Current slice
 
-**The 2.5D view on jobs, options under a gear** (Claude Opus 5.5, 2026-11-02; Kyle: wants the look
-test's low-res 3D, "a button someone can get to from options", the ? panel "WAY too much info").
-Step 1 built; waiting on Kyle's play. *Done when* Kyle taps the gear on his phone and his laptop, picks
-VIEW: 2.5D mid-fight and the job carries on in low-res 3D (houses with doors, burning houses, goblins
-with glowing eyes, the butcher's red that fills and flashes white, a striped edge on what can't be
-blocked, friends' names over their heads, the gold marks and the arrow to the way on), flips back to
-FLAT and nothing else changed; it's remembered next time; and it feels smooth on his phone (or ?q=low
-does). Not yet in 2.5D: town and the wood; a Mage's blink image; the grappling hook's line; drummers'
-reach rings; swing trails; NPCs and the goblins' grim leavings (hung bodies, the pot); the hungry
-gear's marks and status icons over goblins; marks at the edge for the freed who fall behind; the
-relic held up in the wood; mist; Blender art.
+**The 2.5D view everywhere, options under a gear** (Claude Opus 5.5, 2026-11-02; Kyle: wants the look
+test's low-res 3D, "a button someone can get to from options", then "No 2.5D in the main hub area?",
+"townsfolk, hanged bodies etc. That stuff is amazing", "higher quality, but let someone change the
+quality themselves"). Step 2 built; waiting on Kyle's play. *Done when* Kyle picks VIEW: 2.5D and all of
+Wickhold is in it by day and by night (the square, the stalls, each hall dressed as itself from the
+street, the gallows, the gravedigger at his work, the guards on their rounds, the folk with gold marks,
+other players with their names and chat bubbles over their heads, doors he walks into), every hall
+inside, the training yard, the wood with Hew and the Stoker's cutscene camera, and every job (the hung
+and the pot in the dens, a lunger he can read, the drummers' rings, swing trails, what's on a goblin,
+the hook's line, a Mage's blink image, marks at the edge for the freed left behind, the relic held up,
+mist); a Rogue's hand crossbow is in the hand instead of the daggers (in FLAT too), every kit its own;
+QUALITY: LOW / MID / HIGH under VIEW changes it live and is remembered (HIGH to start, on every device);
+flips back to FLAT and nothing else changed; and it feels smooth on his phone at HIGH (or he drops it).
+Not yet in 2.5D: Blender art; furniture and props inside halls are plain boxes in their colours; the
+tower's coloured smoke and the forge's smoke.
 
 **Three skills a class, training in sections** (Claude Opus 5.5, 2026-11-02; Kyle: "only one or two
 available per class. Let's try to think of 3 per class", "training to be its own expandable /

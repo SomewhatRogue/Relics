@@ -48,3 +48,10 @@ export const XRAY = new THREE.ShaderMaterial({
 
 /** A '#rrggbb' string as a number. */
 export const hex = (s: string) => parseInt(s.slice(1, 7), 16);
+
+/** A Mage's blink image: a pale violet figure, dithered half away so it reads as not quite there. */
+export const GHOST = new THREE.ShaderMaterial({
+  vertexShader: 'void main(){ gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+  fragmentShader: 'void main(){ if (mod(floor(gl_FragCoord.x) + floor(gl_FragCoord.y), 2.0) > 0.5) discard; gl_FragColor = vec4(0.79, 0.66, 1.0, 0.2); }',
+  blending: THREE.NoBlending,
+});

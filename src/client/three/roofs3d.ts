@@ -14,6 +14,8 @@ export interface RoofOpts {
   holes?: number;
   /** Pitch (radians). */
   angle?: number;
+  /** A span along x with no roof (fallen in). */
+  gap?: [number, number];
 }
 
 /** Every other row a shade darker, so the rows read. */
@@ -25,6 +27,11 @@ export function gable(B: Boxes, x0: number, x1: number, z0: number, z1: number, 
   const sl = hd / Math.cos(a), ridgeY = h + ((z1 - z0) / 2) * Math.tan(a);
   const rowL = o.thatch ? 0.34 : 0.28, n = Math.ceil(sl / rowL), th = o.thatch ? 0.16 : 0.07;
   for (const side of [1, -1]) {
+    // An underlay a shade darker under the courses, so the gaps between shingles read as lines, not holes.
+    if (!o.holes) {
+      const segs = o.gap ? [[x0 - ov, o.gap[0]], [o.gap[1], x1 + ov]] : [[x0 - ov, x1 + ov]];
+      for (const [u0, u1] of segs) if (u1 - u0 > 0.05) B.c((u0 + u1) / 2, ridgeY - (sl / 2) * Math.sin(a) + 0.02, zc + side * (sl / 2) * Math.cos(a), u1 - u0, 0.04, sl, dim(dim(o.col)), 0, side * a);
+    }
     for (let i = 0; i < n; i++) {
       const s = ((i + 0.5) * sl) / n;
       let x = x0 - ov - (i % 2) * 0.22;
@@ -32,12 +39,21 @@ export function gable(B: Boxes, x0: number, x1: number, z0: number, z1: number, 
         const L = o.thatch ? 0.8 + r.next() * 0.5 : 0.4 + r.next() * 0.2, xa = Math.max(x, x0 - ov), xb = Math.min(x + L, x1 + ov);
         x += L;
         if (xb - xa < 0.05 || (o.holes && r.next() < o.holes && i > 0 && i < n - 1)) continue;
+        if (o.gap && (xa + xb) / 2 > o.gap[0] && (xa + xb) / 2 < o.gap[1]) continue;
         const y = ridgeY - s * Math.sin(a) + th * 0.5 + 0.04, z = zc + side * s * Math.cos(a);
-        B.c((xa + xb) / 2, y, z, xb - xa + (o.thatch ? 0.05 : -0.03), th, rowL + 0.06, jit(i % 2 ? o.col : dim(o.col), o.thatch ? 0.1 : 0.14, r), 0, side * a);
+        B.c((xa + xb) / 2, y, z, xb - xa + (o.thatch ? 0.05 : -0.03), th, rowL + 0.06, jit(i % 2 ? o.col : dim(o.col), o.thatch ? 0.16 : 0.14, r), 0, side * a);
+        if (!o.thatch) continue;
+        // Thatch: each course's cut edge a shade darker, standing proud of the one below, with loose
+        // straw here and there, so the roof reads as bundles in rows rather than one tan slope.
+        const lo = s + rowL / 2, ly = ridgeY - lo * Math.sin(a) + th * 0.35, lz = zc + side * lo * Math.cos(a);
+        B.c((xa + xb) / 2, ly, lz, xb - xa + 0.05, th * 0.7, 0.07, dim(dim(o.col)), 0, side * a);
+        for (let t = xa + 0.1; t < xb - 0.1; t += 0.22) if (r.next() < 0.35) B.c(t, ly + 0.03, lz + side * 0.02, 0.05, 0.05, 0.12, jit(r.next() < 0.5 ? 0xb89a5a : 0x6a5634, 0.1, r), 0, side * a + (r.next() - 0.5) * 0.6);
       }
     }
   }
-  B.c((x0 + x1) / 2, ridgeY + 0.06, zc, x1 - x0 + ov * 2 + 0.1, 0.14, 0.18, o.ridge);
+  if (o.gap) {
+    for (const [a0, a1] of [[x0 - ov, o.gap[0]], [o.gap[1], x1 + ov]]) if (a1 - a0 > 0.05) B.c((a0 + a1) / 2, ridgeY + 0.06, zc, a1 - a0, 0.14, 0.18, o.ridge);
+  } else B.c((x0 + x1) / 2, ridgeY + 0.06, zc, x1 - x0 + ov * 2 + 0.1, o.thatch ? 0.22 : 0.14, o.thatch ? 0.34 : 0.18, o.ridge);
   // The gable ends, stepped.
   for (const gx of [x0 + 0.1, x1 - 0.1]) {
     for (let y = 0; y < ridgeY - h - 0.05; y += 0.25) {

@@ -35,6 +35,15 @@ export function poseFoe(f: FoeFig, e: Enemy, t: number, now: number, walked: num
         (f.aR.rotation.x = f.aL.rotation.x = winding ? -3.0 * ease(wk) : -3.0 + hit * 2.6), (f.mid.position.y += winding ? -0.06 * wk : Math.sin(hit * Math.PI) * 0.2);
         break;
       case 'stab':
+        if (a.arc <= 40) {
+          // The lunger: coiled back low over the wind-up, the spear drawn right back; then thrown out
+          // full length along the red, the back leg straight behind.
+          const c = ease(wk);
+          if (winding) (f.mid.rotation.x = -0.3 * c), (f.mid.position.y -= 0.12 * c), (f.mid.position.z = -0.25 * c), (f.aR.rotation.x = 1.3 * c), (f.aL.rotation.x = -0.9 * c), (f.legs[0].rotation.x = -0.6 * c), (f.legs[1].rotation.x = 0.5 * c);
+          else (f.mid.rotation.x = 0.65), (f.mid.position.z = 0.55), (f.mid.position.y -= 0.06), (f.aR.rotation.x = -1.65), (f.aL.rotation.x = 0.6), (f.legs[0].rotation.x = -0.9), (f.legs[1].rotation.x = 0.9);
+          break;
+        }
+      // falls through
       case 'pounce':
       case 'bite':
         (f.aR.rotation.x = winding ? 0.7 * ease(wk) : -1.5), (f.mid.rotation.x = winding ? -0.2 * wk : 0.35), (f.mid.position.z = winding ? -0.1 * wk : 0.25);

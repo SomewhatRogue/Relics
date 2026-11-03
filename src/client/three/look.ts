@@ -1,7 +1,8 @@
 /**
  * Which view draws a job: the pixel scene (FLAT, the default) or the low-res 3D one (2.5D). Set by
  * ?look=3d (or 2.5d) in the address, or by the VIEW switch (remembered on this device). Also the
- * 3D quality (?q=low|mid|high, mid on a phone, high otherwise) and the frame-time readout (?perf=1).
+ * 3D quality (?q=low|mid|high, or the QUALITY switch, remembered; high on every device unless
+ * someone picks less) and the frame-time readout (?perf=1).
  */
 export type Look = 'pixel' | '3d';
 export type Quality = 'low' | 'mid' | 'high';
@@ -40,10 +41,28 @@ export const QUALITY: Record<Quality, QualitySpec> = {
   high: { area: 90000, lights: 12, shadow: 2048 },
 };
 
+const QKEY = 'relic.quality';
+const isQ = (q: unknown): q is Quality => q === 'low' || q === 'mid' || q === 'high';
+
+/** The quality to draw at: the address wins, then what this device last chose, then high. */
 export function quality(): Quality {
   const q = url.get('q');
-  if (q === 'low' || q === 'mid' || q === 'high') return q;
-  return matchMedia('(pointer: coarse)').matches ? 'mid' : 'high';
+  if (isQ(q)) return q;
+  try {
+    const s = localStorage.getItem(QKEY);
+    if (isQ(s)) return s;
+  } catch {
+    /* nothing remembered */
+  }
+  return 'high';
+}
+
+export function saveQuality(q: Quality): void {
+  try {
+    localStorage.setItem(QKEY, q);
+  } catch {
+    /* this session only */
+  }
 }
 
 export const perfOn = () => url.get('perf') === '1';
