@@ -561,8 +561,8 @@ export class Game {
   }
 
   setOut(): void {
-    const mine = this.parties?.list().find((q) => q.mine);
-    if (mine && !this.canTake(mine.job, mine.members.length)) return;
+    const mine = this.parties?.current(), job = this.parties?.myJob;
+    if (mine && job && !this.canTake(job, mine.members.length)) return;
     const go = this.parties?.setOut();
     if (!go) return;
     this.coop = new CoopHost(go.room, this.profile.id, this.profile.name, this, go.members);

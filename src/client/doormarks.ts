@@ -11,7 +11,7 @@ import type { Light } from './light';
 import { drawText, textWidth } from './pixfont';
 import { OX, OY, PX } from './world';
 
-const CLASS_COL: Record<HeroClass, string> = { WARRIOR: '#f0b070', RANGER: '#9ee07a', ROGUE: '#d8d0e8', MAGE: '#c0a4ff', HEALER: '#fff09a' };
+export const CLASS_COL: Record<HeroClass, string> = { WARRIOR: '#f0b070', RANGER: '#9ee07a', ROGUE: '#d8d0e8', MAGE: '#c0a4ff', HEALER: '#fff09a' };
 /** Screen pixels above the door's foot to the first name's top, and from one name to the next. */
 const LIFT = 30, LINE = 7;
 
