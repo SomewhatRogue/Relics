@@ -19,8 +19,9 @@ whenever we're ready, with a little UI notification of who else signed up for th
   elsewhere opens the parties gathering from anywhere), SAM joined your party, SAM left, You're in KYLE's
   party, and why one's gone. One per happening, a soft two-note chime, gone in 4.5 s, three at most.
 - **Setting out has a beat** (`client/setout.ts`): the leader's SET OUT closes any panel and the pack, says
-  SETTING OUT and where for 1.4 s, then goes; every member gets the same beat wherever they are, then is
-  pulled in. Nobody can join during the leader's beat.
+  SETTING OUT and where for 1.4 s, then goes. The party is told at the start of the beat (and comes down,
+  so nobody joins late), so every member's beat runs alongside the leader's, wherever they are, and they
+  arrive about as the leader does (stress scene 14 caught the members a whole beat behind at first).
 - **Online, small and steady** (`shared/lobby.ts` pure and tested, `client/parties.ts`): the offer the town
   carries is a tag of the job (id, title, kind, place, size) instead of the whole posting, under 220
   bytes; the whole job goes once, with the set-out word. The party's grace is 20 s (PARTY_GRACE, longer
