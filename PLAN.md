@@ -234,6 +234,15 @@ and burns out a goblin den on a job.
       wilder places: nests that hatch waves, poison, the brood mother's glob, fire as their weakness
       (2026-11-01, Opus 5.5; lore placement waiting on the lore keeper)
 
+## Next up: the big map as a real job (Kyle played ?bigmap=1, 2026-11-03: "VERY fun")
+
+Kyle's asks after playing the load test, in order:
+1. Objectives and a goal: a few pinned side-tasks (poison the larder, wreck a siege engine, free prisoners, hold a spot) and a way out; today it's goblins and nothing to do.
+2. Variety and vignettes: goblin camps around a fire, goblins burning a house, a feast, a patrol, prisoners led off. Little scenes that play out until you show up, so places don't all look the same.
+3. Houses and dens to go in, set into the big map (reuse jobrooms and houses alight).
+4. An alert for goblins chasing you off screen: arrows at the screen edge with a count ("3 CHASING"), sized for phones.
+5. Then the online pieces from the load test (DECISIONS 2026-11-03): send each friend only what's near, the map built from the seed on every screen, a compact save. Then it goes on the board as a job (the Barrowfields first).
+
 ## Open, soon but not yet: red eyes and gold eyes (Kyle, 2026-11-03)
 
 Kyle loves it; hold until after the network tests on the new map types (usage limits). Lore keeper pass before any words land.
