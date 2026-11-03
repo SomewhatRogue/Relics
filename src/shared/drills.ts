@@ -22,7 +22,7 @@ export const DRILLS: Record<DrillId, { name: string; text: string; gain: string;
   health: { name: 'HEALTH', text: 'More health', gain: '+# health', per: 8, levels: STAT_LEVELS, max: 5, price: 80 },
   speed: { name: 'SPEED', text: 'Faster on your feet', gain: '+#% speed', per: 0.03, levels: STAT_LEVELS, max: 5, price: 100 },
   crit: { name: 'CRITICAL', text: 'A chance for any hit to land half again as hard', gain: '+#% crit chance', per: 0.04, levels: STAT_LEVELS, max: 5, price: 120 },
-  wind: { name: 'BREATH', text: 'Your breath comes back faster', gain: 'breath back #% faster', per: 0.08, levels: STAT_LEVELS, max: 5, price: 70 },
+  wind: { name: 'BREATH', text: 'Your breath comes back faster', gain: 'stamina recovery +#%', per: 0.08, levels: STAT_LEVELS, max: 5, price: 70 },
   skill: { name: 'SKILL', text: 'Your class skill comes back sooner', gain: 'skill back #% sooner', per: 0.08, levels: [4, 7, 10], max: 3, price: 160 },
   technique: { name: 'TECHNIQUE', text: '', gain: '', per: 0, levels: [5, 8, 10], max: 3, price: 180 },
 };

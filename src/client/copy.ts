@@ -24,7 +24,7 @@ export const COPY = {
   intoPack: 'INTO THE PACK',
   drunkNext: 'DRUNK FIRST',
   dragHint: 'Drag a piece onto its slot to wear it, or into the pack to take it off. Tap one to see it.',
-  stats: 'AS YOU STAND',
+  stats: 'STATS',
   belt: 'BELT',
   next: 'NEXT',
   pour: 'POUR OUT',

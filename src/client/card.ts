@@ -50,7 +50,7 @@ export function sheet(w: Worn): Row[] {
     { label: 'DAMAGE TAKEN', v: g.taken, unit: '%', low: true },
     { label: 'WALK', v: k.speed * g.speed, unit: '%' },
     { label: 'DODGE EVERY', v: k.dodge.cooldown * (1 - g.dodge), unit: 's', low: true },
-    { label: 'BREATH BACK', v: 1 + g.breath, unit: '%' },
+    { label: 'STAMINA RECOVERY', v: 1 + g.breath, unit: '%' },
     { label: 'SKILL RECHARGE', v: 1 - g.focus, unit: '%', low: true },
     { label: 'HEALING GIVEN', v: 1 + g.mending, unit: '%' },
   ];
