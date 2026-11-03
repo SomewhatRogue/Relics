@@ -1763,3 +1763,42 @@ on a level up and wants to see it grow as its own place; a Rogue was offered "on
 - New words (for the lore keeper and line editor): KNACKS button and title; SEE KNACKS, SEE THE TREE;
   chain names; the new knacks SCARRED, LONG WIND, COUNTERSTROKE, FLEET, SLIPPERY, HEFT, HEAVY HANDS,
   KEEN, LONG SHOT, QUICK HANDS, DEEP CHARGE, POTENT, MENDER with their lines; the tree's notes.
+
+## Level ups, Wall Brandy, and every shop laid out one way (2026-11-02, Claude Opus 5.5)
+Kyle: a level up gives full health and a flash in the class's colour; townspeople stop explaining
+things they don't sell; shops say what the place is, then the keeper and their lines, then the goods
+as a list with a card on tap; Wall Brandy doubles damage and halves speed and stamina.
+- **Level up in the room** (`sim/grow.ts`): the player's own game counts levels and sends `levelSeq`
+  (a press counter, optional so older guests still read). The room fills that hero's health (not if
+  they're down) and pushes a `levelup` event with the class, so the whole party sees it. Levels are
+  only paid at a job's end, so on a job a level is lit the moment it's sure (`dueLevels`: what a lost
+  job would still pay: the kills and rescues so far, shared for the party); any the job's own pay adds
+  are lit back in Wickhold, seen by you only (the town has no shared room; townfolk don't carry it).
+- **The flash** (`client/fxlevel.ts`, `LEVEL_GLOW`): rings at the feet and chest, a halo opening slowly,
+  sparks, motes rising and a column of light, a light flash and LEVEL UP. Warrior gold and steel,
+  Ranger green, Rogue dark violet with smoke-black wisps and a dim light, Mage arcane blue and violet,
+  Cleric the Lantern's gold. A short rising chime (`sfx.levelup`).
+- **Wall Brandy** (`sim/brandy.ts`, numbers in `POTION`): for its 6 seconds, blows and shots
+  (melee in `combat.ts`, shots and spells in `room.loose`) x2, walking x0.5 (the follower's prediction
+  too), and breath capped at half (current breath drops to half, comes back to half; winded clears at
+  half). It no longer fills breath. Relic and skill damage (javelin, hook, smite zones) is not doubled.
+  The card says "breath", not Kyle's "stamina": players never see "stamina" (story bible).
+- **Potion lines** short and true: Bitter "Heals 40 over 2 seconds and cures poison." (numbers from
+  POTION), Brandy Kyle's line with breath, Oil Kyle's line, Frost "Chills what it splashes. A second
+  splash freezes.", Smoke "Hides anyone in it from goblins, unless they're close." The card adds
+  "Lasts 6 seconds." for Brandy and "Thrown where you aim." for Frost and Smoke.
+- **Moll** plays dice and nothing else; the smoke line and SMOKE button are gone from her table.
+  Smoke is now Gannet's, over the bar, with Brandy and Oil (my call: it had to be sold somewhere; the
+  belt's empty line now names Agne, Gannet and Ivo). No other panel explained something its keeper
+  doesn't deal in; every potion explanation now lives only in that good's card.
+- **Shops** (`client/shopui.ts`, `shopwords.ts`, `shopgoods.ts`, `shops.ts`, `stores.ts`): the title
+  is the place, then its line, the keeper's name, their lines, FOR SALE as rows (picture, name,
+  price), then anything else the place does. Tap a row: a small card with what it does, the price,
+  BUY (or why not), and for gear, what you got afterwards. The Drowned Rat, the infirmary, Dessa's
+  stall, Ivo's bench (frost flasks and rerolls as goods; relics and the shut elements under it), the
+  Counting House (more shelves, then vault and pack), Tobin's stall (buy-backs and a bigger pack as
+  goods, then SELL FROM YOUR PACK), the forge (Halvard's rack as goods, then the anvil; the separate
+  rack panel is gone). The church sells nothing, so it's unchanged; Moll's dice too.
+- `tests/grow.test.ts` (heal, once a level, a friend's level, down stays down, the sure-level rule) and
+  a Brandy test in `tests/potions.test.ts` (x2 damage, half walk, half breath, all back after).
+  `scripts/shops.cjs` screenshots the shops and both flashes.

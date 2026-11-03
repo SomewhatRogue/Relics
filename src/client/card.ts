@@ -27,6 +27,8 @@ export const HOW: Record<WeaponId, string> = {
 const ARMOR_HOW = { light: 'Light: full speed and a full dodge, full damage taken.', medium: 'Medium: 5% slower, 12% less damage taken.', heavy: 'Heavy: 12% slower, a shorter dodge that costs more breath, 25% less damage taken, and small goblins can\'t stagger you.' };
 /** The same for a class with no dodge (a Warrior, a Healer): nothing about a dodge it hasn't got. */
 const ARMOR_FEET = { ...ARMOR_HOW, light: 'Light: full speed, full damage taken.', heavy: 'Heavy: 12% slower, 25% less damage, and small goblins can\'t stagger you.' };
+/** How a weight of armor wears, for a class (one with no dodge hears nothing about one). */
+export const armorHow = (a: keyof typeof ARMOR_HOW, cls?: HeroClass) => (cls && !CLASS_DODGES[cls] ? ARMOR_FEET : ARMOR_HOW)[a];
 /** Rows a class has no use for: a parry it can't make, a block it can't hold, a dodge it hasn't got, heals it doesn't give. */
 export const shown = (r: Row, cls: HeroClass) =>
   !(r.label === 'PARRY WINDOW' && CLASS_GUARD[cls] === 'none') && !(r.label === 'THROUGH A BLOCK' && CLASS_GUARD[cls] !== 'full') &&
@@ -81,7 +83,7 @@ export function compare(h: Hero, it: Item): string {
 /** The card: tier, name, how it fights, what's on it. */
 export function card(it: Item, h?: Hero): string {
   const t = TIERS[it.quality], s = slotOf(it), cls = h ? WEAPONS[h.weapon].cls : it.kit ? WEAPONS[it.kit].cls : undefined;
-  const how = s === 'weapon' ? (h && it.kit !== h.weapon ? HOW[it.kit!] : '') : s === 'armor' ? (cls && !CLASS_DODGES[cls] ? ARMOR_FEET : ARMOR_HOW)[it.armor ?? 'light'] : '';
+  const how = s === 'weapon' ? (h && it.kit !== h.weapon ? HOW[it.kit!] : '') : s === 'armor' ? armorHow(it.armor ?? 'light', cls) : '';
   const mods = (it.mods ?? []).map((m) => `<div class="tr"><b>${MODS[m.id].name} ${m.v > 0 ? '+' : ''}${MODS[m.id].unit === '%' ? Math.round(m.v * 100) + '%' : MODS[m.id].unit === 's' ? m.v + ' s' : m.v}</b> ${MOD_TEXT[m.id]}</div>`);
   const traits = it.traits.map((k) => `<div class="tr"><b>${TRAITS[k].name}</b> ${traitText(k, cls)}</div>`);
   return `<div class="card-head" style="--t:${t.col}"><span class="chip">${t.name}</span><b>${itemName(it)}</b></div>` +
