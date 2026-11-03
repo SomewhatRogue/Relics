@@ -22,10 +22,10 @@ import { boltLook, makeBolt, makeExit, makeJavelin, makeRing, makeSmoke, placeBo
 import { TIERS } from '../../shared/gear';
 import type { Figure } from './rig';
 
-/** Heroes are drawn a second time on layer 1, as a silhouette wherever a wall or a roof hides them. */
+/** Heroes are drawn on their own layer, after the rest: as a silhouette wherever a wall or a roof hides them, then over it as themselves. */
 export const XRAY_LAYER = 1;
 function xray<T extends Figure>(f: T): T {
-  f.root.traverse((o) => !o.userData.keep && o.layers.enable(XRAY_LAYER));
+  f.root.traverse((o) => !o.userData.keep && o.layers.set(XRAY_LAYER));
   return f;
 }
 

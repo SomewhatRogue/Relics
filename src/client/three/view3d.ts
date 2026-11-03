@@ -134,19 +134,25 @@ export class View3D {
     this.fires.draw(fires, now);
     this.actors.update(room, meId, now, lerp);
     this.ground!.decals(fx);
-    this.gl.setRenderTarget(this.rt);
-    this.gl.render(this.scene, this.view.cam);
-    const calls = (this.calls = this.gl.info.render.calls), tris = this.gl.info.render.triangles;
-    // Again, just the heroes, as a silhouette where something nearer hides them.
-    const cam = this.view.cam;
+    // Everything but the heroes; then the heroes as a silhouette where something nearer hides them;
+    // then the heroes themselves over that, so only the hidden parts stay a silhouette.
+    const cam = this.view.cam, gl = this.gl;
+    gl.setRenderTarget(this.rt);
+    cam.layers.set(0);
+    gl.render(this.scene, cam);
+    let calls = gl.info.render.calls, tris = gl.info.render.triangles;
     cam.layers.set(XRAY_LAYER);
+    gl.autoClear = false;
+    gl.shadowMap.autoUpdate = false;
     this.scene.overrideMaterial = XRAY;
-    this.gl.autoClear = false;
-    this.gl.shadowMap.autoUpdate = false;
-    this.gl.render(this.scene, cam);
-    this.gl.shadowMap.autoUpdate = true;
-    this.gl.autoClear = true;
+    gl.render(this.scene, cam);
     this.scene.overrideMaterial = null;
+    gl.render(this.scene, cam);
+    calls += gl.info.render.calls * 2;
+    tris += gl.info.render.triangles * 2;
+    this.calls = calls;
+    gl.shadowMap.autoUpdate = true;
+    gl.autoClear = true;
     cam.layers.set(0);
     this.post.uniforms.tCol.value = this.rt!.texture;
     this.post.uniforms.tDep.value = this.rt!.depthTexture;

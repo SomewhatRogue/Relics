@@ -40,7 +40,7 @@ export const ICE = toonize(new THREE.MeshLambertMaterial({ color: 0xa8d8f0, flat
  */
 export const XRAY = new THREE.ShaderMaterial({
   vertexShader: 'void main(){ gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
-  fragmentShader: 'void main(){ if (mod(floor(gl_FragCoord.x) + floor(gl_FragCoord.y), 2.0) > 0.5) discard; gl_FragColor = vec4(0.62, 0.56, 0.86, 0.55); }',
+  fragmentShader: 'void main(){ if (mod(floor(gl_FragCoord.x) + floor(gl_FragCoord.y), 2.0) > 0.5) discard; gl_FragColor = vec4(0.86, 0.8, 1.0, 0.35); }',
   depthFunc: THREE.GreaterDepth,
   depthWrite: false,
   blending: THREE.NoBlending,

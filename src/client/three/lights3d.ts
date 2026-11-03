@@ -22,6 +22,9 @@ export class Lights {
       this.group.add(l);
     }
     this.group.add(this.amb, this.sky, this.sky.target);
+    // The heroes are drawn on layer 1 (view3d.ts): the lights shine there too, and the moon casts their shadows.
+    this.group.traverse((o) => o.layers.enable(1));
+    this.sky.shadow.camera.layers.enable(1);
     if (shadow) {
       this.sky.castShadow = true;
       this.sky.shadow.mapSize.set(shadow, shadow);

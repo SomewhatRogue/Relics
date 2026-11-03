@@ -42,6 +42,7 @@ import { openTree } from './treeui';
 import { LessonView } from './lesson';
 import { Scene } from './scene';
 import { Views } from './three/views';
+import { options } from './options';
 import { setMusic, setMuted } from './sfx';
 import { Music } from './music';
 import { Soundscape } from './soundscape';
@@ -440,8 +441,7 @@ try {
 }
 tipsOn(tipsWanted);
 $('#tips').addEventListener('click', () => tipsOn(!document.body.classList.contains('tips')));
-$('#help').addEventListener('click', () => $('#how').toggleAttribute('hidden'));
-$('#how').addEventListener('click', () => $('#how').setAttribute('hidden', ''));
+options();
 if (input.touch) document.body.classList.add('touch');
 
 // Test hooks: read the fight as data, never as pixels.

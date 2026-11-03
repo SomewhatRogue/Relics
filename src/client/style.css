@@ -40,17 +40,9 @@ body[data-mode='run'] #heroes { display: none; }
 #tip.gone { opacity: 0; }
 /* Tips only when switched on (TIPS in the corner). */
 body:not(.tips) #tip { display: none; }
-#corner #tips { width: auto; padding: 0 8px; font-size: 10px; }
 #tips.off { color: #6a647a; }
 body.touch #tip { top: calc(76px + env(safe-area-inset-top)); }
 
-#how { position: fixed; inset: 0; display: flex; flex-direction: column; justify-content: center; padding: 24px max(24px, calc(50vw - 260px)); background: #0d0b10ee; font-weight: 500; font-size: 13px; z-index: 5; }
-#how[hidden] { display: none; }
-#how h2 { font-size: 15px; color: #ffd27a; margin: 0 0 8px; }
-#how ul { padding-left: 18px; margin: 8px 0; }
-#how li { margin-bottom: 6px; }
-#how b { color: #ffd27a; }
-#how .dim { color: #8a8494; }
 
 #touch[hidden] { display: none; }
 .stick-zone { position: fixed; left: 0; bottom: 0; width: 55vw; height: 55vh; }
@@ -158,7 +150,7 @@ body[data-mode='run'] .tb.use.chest { width: 64px; height: 64px; left: calc(24px
 body.touch #hud { width: 138px; }
 body.touch #corner { gap: 4px; }
 body.touch #corner button { width: 30px; }
-body.touch #corner #heroes, body.touch #corner #tips, body.touch #corner #leave { width: auto; padding: 0 5px; }
+body.touch #corner #heroes, body.touch #corner #opts, body.touch #corner #leave { width: auto; padding: 0 5px; }
 
 /* Town works, the Roll of the Brave, dice. */
 #panel .work { border: 1px solid #3a3644; border-radius: 4px; padding: 7px 9px; margin-bottom: 7px; line-height: 1.5; }
@@ -436,8 +428,12 @@ body[data-mode='run'] #tips { display: none; }
 /* A long weapon line wraps short of the corner buttons instead of running under them. */
 #hud .gear.kit { white-space: normal; width: min(230px, 58vw); display: block; line-height: 1.35; }
 
-/* The VIEW switch at the top of the ? panel (three/switch.ts). */
-#viewswitch { position: absolute; top: calc(10px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 10px; background: #14121af2; border: 1px solid #4f4a5c; border-radius: 6px; z-index: 1; }
-#viewswitch button { height: 32px; padding: 0 14px; background: #1b1922; border: 1px solid #c8b080; border-radius: 4px; color: #ffe6b0; font-size: 11px; letter-spacing: 0.12em; }
-#viewswitch button.on { background: #4a3414; border-color: #ffd27a; }
-#viewswitch span { color: #8a8494; font-size: 10px; }
+/* OPTIONS: a small box under the corner row (three/options.ts): the view, sound, music, tips. */
+#corner #opts { width: auto; padding: 0 8px; font-size: 10px; }
+#corner #opts.on { background: #2e2516; border-color: #ffd27a; color: #ffd27a; }
+#options { position: fixed; z-index: 6; right: calc(10px + env(safe-area-inset-right)); top: calc(42px + env(safe-area-inset-top)); display: flex; flex-direction: column; gap: 6px; padding: 8px; background: #14121af2; border: 1px solid #4f4a5c; border-radius: 6px; }
+#options[hidden] { display: none; }
+#options button { height: 30px; min-width: 128px; padding: 0 10px; background: #1b1922; border: 1px solid #4f4a5c; border-radius: 4px; font-size: 10px; letter-spacing: 0.12em; text-align: left; }
+#options #viewbtn { border-color: #c8b080; color: #ffe6b0; }
+#options #viewbtn.on { background: #4a3414; border-color: #ffd27a; }
+#options .note { color: #8a8494; font-size: 9px; margin-top: -3px; }
