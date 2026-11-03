@@ -14,6 +14,8 @@ import { G, VCOL, hex } from './mats';
 import { gable } from './roofs3d';
 import { cone, dressHall, roofGap } from './halls3d';
 import { flatBlock } from './walls3d';
+import { woodpile } from './woodpile3d';
+import type { Kindling } from '../../shared/kindling';
 import { asLamp, lampMeshes } from './lamps3d';
 
 /** Eave height (tiles) by kind. */
@@ -40,7 +42,7 @@ const shade = (c: number, k: number) => {
   return col.setRGB(col.r * k, col.g * k, col.b * k).getHex();
 };
 
-export function buildBlock(b: Block): Built {
+export function buildBlock(b: Block, kin?: Kindling | null): Built {
   const group = new THREE.Group(), fires: Built['fires'] = [];
   if (!ROOFED.has(b.kind)) return { group: flatBlock(b, group, fires), roof: null, fires, top: 1, lamps: [] };
   const st = blockState(b), ruined = st >= 4, alight = st % 2 === 1, charred = st >= 2 || alight;
@@ -123,6 +125,7 @@ export function buildBlock(b: Block): Built {
     W.b((x0 + x1) / 2, 0, (z0 + z1) / 2, b.w - 0.3, 0.05, b.h - 0.3, 0x1a1414);
     for (let i = 0; i < 5; i++) fires.push([x0 + 0.3 + r.next() * (b.w - 0.6), 0.08, z0 + 0.3 + r.next() * (b.h - 0.6), 0.25]);
   }
+  if (kin) woodpile(W, kin, alight, ruined);
   const wm = W.mesh(VCOL), roof = R.mesh(VCOL);
   if (wm) group.add(wm);
   if (roof) group.add(roof);

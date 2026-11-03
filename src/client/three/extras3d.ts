@@ -13,6 +13,8 @@ import type { Ctx } from '../draw';
 import { pose } from '../held';
 import { drawHook } from '../relicsdraw';
 import { drawStatus } from '../status';
+import { kindling } from '../../shared/kindling';
+import { drawGlint, drawKindling } from '../kindledraw';
 import { drawLife } from '../streetlife';
 import { edgeMark, type View } from '../wayout';
 import { PX } from '../world';
@@ -31,6 +33,15 @@ export function drawExtras(g: CanvasRenderingContext2D, x: Extra): void {
   for (const r of room.map.rounds) if (r.kind === 'crows' || r.kind === 'dog' || r.kind === 'moths' || r.kind === 'smoke') {
     const [sx, sy] = P(r.x, 0, r.y);
     if (sx > -60 && sy > -140 && sx < x.W + 60 && sy < x.H + 60) drawLife(c, r, sx, sy);
+  }
+  // A house's kindling: the glint while you're near, the ring while someone lights it (kindledraw.ts).
+  const meH = room.heroes.find((h) => h.id === x.meId);
+  for (const b of room.map.blocks) {
+    const k = kindling(b, room.map.blocks, room.map.w, room.map.h);
+    if (!k) continue;
+    const [sx, sy] = P(k.x, 0, k.y), d = meH && !b.ruined && (b.burning ?? -1) < 0 ? Math.hypot(meH.x - k.x, meH.y - k.y) : 99;
+    drawGlint(c, sx, sy - 4, d, b.look ?? 0);
+    drawKindling(c, b, sx, sy);
   }
   // A drummer's reach on the floor, its beat going out, and the goblins it has roused.
   const beat = (room.time % DRUMMER.beat) / DRUMMER.beat;

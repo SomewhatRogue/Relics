@@ -74,5 +74,8 @@ export function runInterior(job: Job, roomIndex: number, blockIndex: number, doo
     grim: grim.length ? grim : undefined, marks: marks.length ? marks : undefined,
     blaze: fire ? planBlaze({ ...l, props }, new Rng(seed * 19 + 5), cage) : undefined,
   };
-  return { map, foes, props, chests: [] };
+  // Now and then a chest worth the trip in (on a stream of its own, so nothing else about the house moves).
+  const cr = new Rng(seed * 43 + 19), want = big(job, roomIndex, seed) ? 0.4 : barn ? 0.15 : home.kind === 'looted' ? 0.06 : 0.2;
+  const spot = !fire && cr.next() < want ? freeSpot({ ...l, props }, cr, 0.45, 1, h - 2.6) : null;
+  return { map, foes, props, chests: spot ? [spot] : [] };
 }

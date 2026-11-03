@@ -6,6 +6,7 @@
  */
 import type { ArenaRoom } from '../../sim/room';
 import { nestEmber } from '../nestfire';
+import { burningAt } from '../../shared/blaze';
 import { TIERS, WEAPONS } from '../../shared/tuning';
 import { lightsHolder } from '../heldkits';
 import { EL_LIGHT, heldEl } from '../palette';
@@ -27,6 +28,8 @@ export function roomLights(room: ArenaRoom, fx: Fx, lerp: Lerp, out: L3[]): void
     if (((b.burning ?? -1) >= 0 || b.smoulder || b.fate === 'burning') && !b.ruined) add(mx, 2.4, mz + 0.6, R(70 + b.w * 10), 1.2, [1, 0.55, 0.25], 13);
     if (b.ruined) add(mx, 0.8, mz, R(22 + b.w * 3), 0.35, [1, 0.35, 0.15], 7);
   }
+  // A house on fire inside: each patch alight (shared/blaze.ts).
+  if (map.blaze) for (const a of burningAt(map.blaze, room.time)) add(a.x + a.w / 2, 0.9, a.y + a.h / 2, R(50), 0.9, [1, 0.55, 0.25], 11);
   for (const c of room.chests) if (c.state !== 'shut') add(c.x, 0.8, c.y + 0.2, c.state === 'opening' ? R(16 + 30 * (c.t / 1.2)) : R(26), c.state === 'opening' ? 0.4 + 0.5 * (c.t / 1.2) : 0.35, tint(TIERS[c.tier].col));
   for (const m of room.coals) add(m.x, 0.6, m.y, R(26), 0.6 * Math.min(1, m.life / 4), [1, 0.6, 0.28], 7);
   for (const z of room.zones) if (!z.kind) add(z.x, 0.8, z.y, z.r * 1.5 + 0.5, 0.8 * Math.min(1, (z.until - room.time) / 1.2), [1, 0.85, 0.5]);

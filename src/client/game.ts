@@ -23,6 +23,7 @@ import { woodMap, WOOD_PROPS } from '../shared/wood';
 import { bagFull, bagSize } from '../shared/bags';
 import { refreshHealth, statsOf } from '../sim/gearstats';
 import { houseCaptives, sum } from '../sim/goal';
+import { HouseIndoors } from './houseindoors';
 import { goal, isFinal, mine, newRun, runRoom, tally, type Run } from '../sim/run';
 import { NO_INTENT, knows, type FightEvent, type Hero, type Intent, type Learned } from '../sim/types';
 import { players } from '../sim/party';
@@ -96,6 +97,8 @@ export class Game {
   private followers = new Followers();
   /** On a job: the street and its houses, each player in whichever they walked into (jobrooms.ts). */
   readonly rooms = new JobRooms(this.followers);
+  /** What's inside the job's houses, for a house set alight (houseindoors.ts). */
+  private indoors = (this.rooms.inside = new HouseIndoors(this.rooms, () => (this.mode === 'run' ? this.run : null), (r) => this.coop?.fresh(r)));
   /** Each room's events from the latest step (the leader sends each friend their own room's). */
   stepped = new Map<ArenaRoom, FightEvent[]>();
   /** Each room's own number, for friends to know when theirs is a different one. */
@@ -515,8 +518,8 @@ export class Game {
     if (door && intent.my < -0.5 && Math.abs(h.x - doorAt(door).x) < 0.7) this.enter(door);
     else if (this.outside && inArea(this.room.map.exit, h.x, h.y)) this.leave();
     else if (this.mode === 'yard' && inArea(this.room.map.exit, h.x, h.y)) this.enterTown(this.doorOf('hall'));
-    // Your friends go in and out on their own.
-    if (this.mode === 'run') this.friendDoors();
+    // Your friends go in and out on their own; a house set alight with anyone in throws them out as it falls.
+    if (this.mode === 'run') (this.friendDoors(), this.outOfTheFire(), this.indoors.cries());
     if (this.mode === 'run' && this.run) {
       const street = this.fightRoom;
       street.exitOpen = goal(this.run, street, sum(this.houses())).done;
@@ -538,6 +541,13 @@ export class Game {
       }
     }
     return ev;
+  }
+
+  /** A house set alight from outside falling in: everyone still in it out in the street (sim/houseburn.ts). */
+  private outOfTheFire(): void {
+    const out: string[] = [];
+    for (const [b, r] of this.rooms.houses) if (r.blaze?.fallen && (b.burning ?? -1) >= 0) out.push(...players(r.heroes).map((h) => h.id));
+    for (const id of out) this.comeOut(id);
   }
 
   /**

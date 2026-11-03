@@ -113,6 +113,11 @@ export class CoopHost {
     } else if (d.t === 'in' && d.i && typeof d.i === 'object') (f.intent = { ...NO_INTENT, ...d.i }), (f.at = typeof (d as { at?: unknown }).at === 'number' ? (d as { at: number }).at : f.at);
   }
 
+  /** Send this room whole next time (its map changed under it: a house set alight with someone inside). */
+  fresh(room: ArenaRoom): void {
+    this.sending.delete(room);
+  }
+
   /** Each frame, after the rooms have run: collect their events; send each friend their room when it's time. */
   frame(now: number): void {
     this.now = now;

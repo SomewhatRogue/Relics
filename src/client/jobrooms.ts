@@ -14,6 +14,7 @@ import { release } from '../sim/grab';
 import { players } from '../sim/party';
 import { dropProp } from '../sim/props';
 import { rebase } from '../sim/rebase';
+import type { Indoors } from '../sim/houseburn';
 import type { ArenaRoom } from '../sim/room';
 import { interiorRoom, type Run } from '../sim/run';
 import { walkOut } from '../sim/survivors';
@@ -31,6 +32,8 @@ export class JobRooms {
   street: ArenaRoom | null = null;
   /** Its houses, once anyone has been in (their goblins stay dead). */
   readonly houses = new Map<Block, ArenaRoom>();
+  /** What's in the houses, for a street's house fires (houseindoors.ts). */
+  inside?: Indoors;
 
   constructor(private followers: Followers) {}
 
@@ -38,6 +41,7 @@ export class JobRooms {
   reset(street: ArenaRoom | null): void {
     this.street = street;
     this.houses.clear();
+    if (street) street.houseIn = this.inside;
   }
 
   all(): ArenaRoom[] {

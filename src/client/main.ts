@@ -30,6 +30,7 @@ import { WORK_ORDER } from '../shared/works';
 import { grabbable } from '../sim/grab';
 import { raisable } from '../sim/party';
 import { torchable } from '../sim/torch';
+import { kindleable } from '../sim/kindle';
 import { liftable } from '../sim/props';
 import { relicLabel } from '../sim/hero';
 import { castElement } from '../sim/channel';
@@ -212,8 +213,8 @@ function hud(now: number): void {
     $('.tb.roll').hidden = !CLASS_DODGES[WEAPONS[me.weapon].cls];
     // By a friend who's down, GRAB helps them up.
     const raise = me.act === 'idle' && raisable(me, room.heroes);
-    // By a nest, GRAB sets it alight (sim/torch.ts).
-    const burn = !raise && !!torchable(me, room.enemies);
+    // By a nest, or at a house's kindling, GRAB sets it alight (sim/torch.ts, sim/kindle.ts).
+    const burn = !raise && (!!torchable(me, room.enemies) || (game.mode === 'run' && !!kindleable(me, room.map)));
     $('.tb.grab').hidden = !can && !lifter && !raise && !burn;
     $('.tb.grab').classList.toggle('dim', !can && !raise && !burn);
     $('.tb.grab').classList.toggle('raise', raise || burn);
@@ -294,7 +295,7 @@ function hud(now: number): void {
   if (spot) $('#prompt').textContent = (input.touch ? '' : spot?.chest ? 'F  ' : game.mode === 'run' ? '' : 'E  ') + (spot.door || !spot.talk ? spot.label : 'TALK: ' + spot.label);
   // A friend down at your feet: the key that gets them up.
   if (!spot && !busy && !input.touch && game.mode === 'run' && game.hero.act === 'idle' && raisable(game.hero, game.room.heroes)) ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  HELP UP');
-  else if (!spot && !busy && !input.touch && game.mode === 'run' && torchable(game.hero, game.room.enemies)) ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  BURN');
+  else if (!spot && !busy && !input.touch && game.mode === 'run' && (torchable(game.hero, game.room.enemies) || kindleable(game.hero, game.room.map))) ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  BURN');
   $('.tb.use').hidden = !spot || busy;
   $('.tb.use').classList.toggle('chest', !!spot?.chest);
   if (spot) $('.tb.use').textContent = spot.chest ? 'OPEN' : spot.door ? 'ENTER' : spot.talk && spot.talk !== 'board' && spot.talk !== 'market' && spot.talk !== 'gate' ? 'TALK' : 'USE';

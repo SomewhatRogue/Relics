@@ -15,6 +15,7 @@ import { XRAY } from './mats';
 import { Buildings } from './buildings3d';
 import { Cam, FAR, NEAR, PITCH } from './camera3d';
 import { Fires } from './fire3d';
+import { burningAt } from '../../shared/blaze';
 import { buildGround, type Ground } from './ground';
 import { lampsNow } from './lamps3d';
 import { Lights, type L3 } from './lights3d';
@@ -170,6 +171,8 @@ export class View3D {
       const [x, y] = lerp('e:' + e.id, e.x, e.y);
       fires.push([x, 0.5, y, e.kind === 'butcher' || e.ashAt ? 1.3 : 0.8]);
     }
+    // A house on fire inside: flames over every patch alight (shared/blaze.ts), as the flat view draws them.
+    if (map.blaze) for (const a of burningAt(map.blaze, room.time)) for (let fx0 = a.x + 0.3; fx0 < a.x + a.w; fx0 += 0.55) fires.push([fx0, 0.05, a.y + a.h / 2, 0.9]);
     roomLights(room, fx, lerp, ls);
     this.grim.update(now, fires, ls);
     this.lights.setSky(map.theme, at.x, at.z);

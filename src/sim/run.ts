@@ -59,7 +59,7 @@ export function runRoom(run: Run): ArenaRoom {
 /** Inside a cottage or barn in the current room (you can always walk back out). */
 export function interiorRoom(run: Run, blockIndex: number, door: string): ArenaRoom {
   const plan = runInterior(run.job, run.index, blockIndex, door);
-  const room = new ArenaRoom(run.job.seed * 3 + run.index * 11 + blockIndex + 7, { map: plan.map, foes: plan.foes, furniture: plan.props });
+  const room = new ArenaRoom(run.job.seed * 3 + run.index * 11 + blockIndex + 7, { map: plan.map, foes: plan.foes, furniture: plan.props, chests: plan.chests });
   room.exitOpen = true;
   room.indoors = true;
   return room;
