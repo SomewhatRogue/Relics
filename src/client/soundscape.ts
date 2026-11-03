@@ -18,6 +18,9 @@ import { spiderSounds } from './spidersfx';
 import { isSpiderKind } from '../shared/spiders';
 import { blockSound, chargedSound, hitSound, shotSound, swingSound, woodSounds } from './weaponsfx';
 
+/** How far off a fight can still be heard, in tiles: a little past a screen. */
+const EARSHOT = 16;
+
 type AnyFx = Record<string, ((...a: unknown[]) => void) | undefined>;
 
 export class Soundscape {
@@ -46,7 +49,13 @@ export class Soundscape {
     return best;
   }
 
+  /** The player's hero, to leave out what happens far off on a big map (set each frame in the ambient pass). */
+  private me: Hero | undefined;
+
   event(ev: FightEvent, room: ArenaRoom, now: number): void {
+    // Out of earshot: a fight two screens away on a big map makes no sound here.
+    const at = ev as { x?: number; y?: number }, me = this.me;
+    if (me && typeof at.x === 'number' && typeof at.y === 'number' && Math.hypot(at.x - me.x, at.y - me.y) > EARSHOT) return;
     if (ev.k === 'swing') return swingSound(ev.src, ev.heavy);
     if (ev.k === 'chest') return chestSound(ev.state, ev.tier);
     if (ev.k === 'shoot') return shotSound(ev.kind, this.heroAt(room, ev.x, ev.y)?.weapon);
@@ -106,6 +115,7 @@ export class Soundscape {
   /** Every frame: doors, goblin chatter, fire, and the music. */
   frame(g: Game, now: number): void {
     const room = g.room, me = g.hero;
+    this.me = me;
     if (g.outside !== this.wasInside) {
       if (g.outside || this.wasInside) woodSounds.door();
       this.wasInside = g.outside;

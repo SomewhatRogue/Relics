@@ -17,7 +17,8 @@ export function addBots(room: ArenaRoom, ids: string[], drive: string[] = ids): 
   const at = spreadOut(room.map.w, room.map.h);
   return ids.flatMap((id, i) => {
     const h = room.join(id);
-    Object.assign(h, { x: at[i % 4].x, y: at[i % 4].y, safeT: 1e9 });
+    // Bots can't be hurt; a real player's hero can (and doesn't blink with an endless arrival grace).
+    Object.assign(h, { x: at[i % 4].x, y: at[i % 4].y }, drive.includes(id) ? { safeT: 1e9 } : {});
     room.prev.set('h:' + id, [h.x, h.y]);
     return drive.includes(id) ? [newBot(id, at[i % 4], 1000 + i * 17)] : [];
   });
