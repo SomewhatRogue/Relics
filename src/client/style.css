@@ -438,3 +438,7 @@ body[data-mode='run'] #tips { display: none; }
 #options #viewbtn.on { background: #4a3414; border-color: #ffd27a; }
 #options #qualitybtn { margin-top: -2px; color: #d8d4de; }
 #options #qualitybtn[hidden] { display: none; }
+#options #brightrow { display: flex; align-items: center; gap: 4px; margin-top: -2px; font-size: 10px; letter-spacing: 0.12em; color: #d8d4de; }
+#options #brightrow[hidden] { display: none; }
+#options #brightrow span { flex: 1; padding-left: 10px; }
+#options #brightrow button { min-width: 30px; width: 30px; padding: 0; text-align: center; font-size: 14px; }

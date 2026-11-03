@@ -66,3 +66,29 @@ export function saveQuality(q: Quality): void {
 }
 
 export const perfOn = () => url.get('perf') === '1';
+
+/** BRIGHT: steps either side of as drawn (-2 to +3), for dim screens; remembered (?b= in the address wins). */
+export const BRIGHT = { lo: -2, hi: 3 };
+const BKEY = 'relic.bright';
+const clampB = (n: number) => Math.max(BRIGHT.lo, Math.min(BRIGHT.hi, Math.round(n) || 0));
+
+export function bright(): number {
+  const b = url.get('b');
+  if (b !== null) return clampB(+b);
+  try {
+    return clampB(+(localStorage.getItem(BKEY) ?? 0));
+  } catch {
+    return 0;
+  }
+}
+
+export function saveBright(n: number): void {
+  try {
+    localStorage.setItem(BKEY, String(n));
+  } catch {
+    /* this session only */
+  }
+}
+
+/** A step as the post pass's gamma: each step lifts the darks a little more than the lights. */
+export const brightGamma = (n: number) => 1 + n * 0.14;

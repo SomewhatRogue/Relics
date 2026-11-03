@@ -50,10 +50,10 @@ export const QUAD_VS = 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = v
 /** Outlines from depth, creases, and a little bloom from the glowing; drawn straight to the low-res canvas. */
 export function postMaterial(near: number, far: number): THREE.ShaderMaterial {
   return new THREE.ShaderMaterial({
-    uniforms: { tCol: { value: null }, tDep: { value: null }, uRes: { value: new THREE.Vector2(1, 1) } },
+    uniforms: { tCol: { value: null }, tDep: { value: null }, uRes: { value: new THREE.Vector2(1, 1) }, uGamma: { value: 1 } },
     vertexShader: QUAD_VS,
     fragmentShader: BAYER + `
-uniform sampler2D tCol; uniform sampler2D tDep; uniform vec2 uRes;
+uniform sampler2D tCol; uniform sampler2D tDep; uniform vec2 uRes; uniform float uGamma;
 float D(vec2 p){ return ${near.toFixed(1)} + texture2D(tDep, p).x * ${(far - near).toFixed(1)}; }
 vec3 glowAt(vec2 p){ vec4 s = texture2D(tCol, p); return s.rgb * (1.0 - s.a); }
 void main(){
@@ -75,7 +75,7 @@ void main(){
   g += (glowAt(uv + vec2(t.x, 0.0)) + glowAt(uv - vec2(t.x, 0.0)) + glowAt(uv + vec2(0.0, t.y)) + glowAt(uv - vec2(0.0, t.y))) * 0.2;
   g += (glowAt(uv + t) + glowAt(uv - t) + glowAt(uv + vec2(t.x, -t.y)) + glowAt(uv + vec2(-t.x, t.y))) * 0.1;
   g = floor(g * 5.0 + bay4(px)) / 5.0;
-  gl_FragColor = vec4(col + g * (1.0 - c.a * 0.3), 1.0);
+  gl_FragColor = vec4(pow(max(col + g * (1.0 - c.a * 0.3), 0.0), vec3(uGamma)), 1.0);
 }`,
     depthTest: false,
     depthWrite: false,

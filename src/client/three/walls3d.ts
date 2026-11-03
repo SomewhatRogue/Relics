@@ -50,9 +50,19 @@ export function flatBlock(b: Block, group: THREE.Group, fires: [number, number, 
     tent(B, x0, x1, z0, z1, dk(roof), dk(hex(L.ridge)), r);
   } else if (b.kind === 'gallows' || b.kind === 'hurdle') {
     siegeBlock(B, b, r);
+  } else if (b.kind === 'rack') {
+    // Split logs stacked along it between two posts: a cordwood pile, not a box.
+    const along = b.w >= b.h, len = (along ? b.w : b.h) - 0.2, deep = along ? b.h : b.w;
+    for (const e of [-1, 1]) B.b(along ? cx + e * (len / 2 + 0.04) : cx, 0, along ? cz : cz + e * (len / 2 + 0.04), 0.09, 0.95, 0.09, 0x3a2a1a);
+    for (let row = 0; row < 4; row++) for (let d = -deep / 2 + 0.14 + (row % 2) * 0.1; d < deep / 2 - 0.08; d += 0.24) {
+      const y = 0.1 + row * 0.2, c = jit(row % 2 ? 0x7a5230 : 0x6b4a2b, 0.15, r);
+      B.c(along ? cx : cx + d, y, along ? cz + d : cz, along ? len : 0.2, 0.19, along ? 0.2 : len, c);
+    }
   } else if (b.kind === 'cart') {
     B.b(cx, 0.32, cz, b.w * 0.9, 0.28, b.h * 0.8, dk(wall));
     B.b(cx, 0.6, cz, b.w * 0.9, 0.12, b.h * 0.8, dk(roof));
+    // The bed's side boards, so it reads as a wagon and not a table.
+    for (const s of [-1, 1]) B.b(cx, 0.66, cz + s * b.h * 0.38, b.w * 0.9, 0.22, 0.07, dk(wall));
     for (const s of [-1, 1]) B.c(cx, 0.28, cz + s * b.h * 0.42, 0.56, 0.56, 0.08, dk(0x3a2a1a), 0, 0, 0.4);
     B.b(x1 + 0.3, 0.3, cz, 0.8, 0.06, 0.06, 0x4a3420);
   } else {
@@ -61,7 +71,9 @@ export function flatBlock(b: Block, group: THREE.Group, fires: [number, number, 
     B.b(cx, 0, cz, b.w - 0.04, h - 0.08, b.h - 0.04, jit(dk(wall), 0.08, r));
     B.b(cx, h - 0.08, cz, b.w, 0.08, b.h, dk(roof));
   }
-  if (alight) for (let x = x0 + 0.3; x < x1; x += 1) fires.push([x, 0.4, cz, 0.9]);
+  // Flames along it: a burning wagon's bed full of them (on top of the bed, not inside it).
+  const cart = b.kind === 'cart';
+  if (alight) for (let x = x0 + 0.3; x < x1; x += cart ? 0.55 : 1) fires.push([x, cart ? 0.7 : 0.4, cz + (cart ? (r.next() - 0.5) * 0.4 : 0), cart ? 1.15 : 0.9]);
   const m = B.mesh(VCOL);
   if (m) group.add(m);
   return group;

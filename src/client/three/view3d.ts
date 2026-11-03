@@ -17,12 +17,13 @@ import { Cam, FAR, NEAR, PITCH } from './camera3d';
 import { Fires } from './fire3d';
 import { buildGround, type Ground } from './ground';
 import { Lights, type L3 } from './lights3d';
-import { QUALITY, perfOn, quality, type Quality } from './look';
+import { QUALITY, brightGamma, perfOn, quality, type Quality } from './look';
 import { Overlay, type Marks } from './overlay3d';
 import { People } from './people3d';
 import { Grim3D } from './grim3d';
 import { drawExtras, drawMist3 } from './extras3d';
 import { drawTags } from './tags3d';
+import { drawSkills3 } from './skills3d';
 import { Perf } from './perf3d';
 import { makeRT, postMaterial } from './post';
 import { roomLights } from './roomlights';
@@ -88,6 +89,11 @@ export class View3D {
       for (const x of Array.isArray(m) ? m : m ? [m] : []) x.needsUpdate = true;
     });
     this.resize();
+  }
+
+  /** BRIGHT's step: a gamma in the post pass. */
+  setBright(n: number): void {
+    this.post.uniforms.uGamma.value = 1 / brightGamma(n);
   }
 
   /** Swap which canvas shows: this one, or the pixel scene's. */
@@ -194,6 +200,7 @@ export class View3D {
     const P = (x: number, y: number, z: number) => this.view.px(x, y, z), og = this.overlay.g;
     const ex = { room, meId, lerp, P, now, W: this.view.W, H: this.view.H, fanfare: !!marks.fanfare, mist: [at.x * this.view.ppu, at.z * this.view.ppu * Math.sin(PITCH)] as [number, number] };
     this.overlay.draw(room, meId, fx, marks, P, lerp, now, this.view.ppu);
+    drawSkills3(og, room, P, lerp, this.view.ppu, now);
     drawExtras(og, ex);
     drawTags(og, map, room.time, this.heroAt ? { x: this.heroAt[0], y: this.heroAt[1] } : null, others, P, now);
     drawMist3(og, map.theme, ex);

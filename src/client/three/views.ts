@@ -20,6 +20,7 @@ export class Views {
 
   constructor(private scene: Scene) {
     this.switch.qualityChanged = (q) => this.v3?.setQuality(q);
+    this.switch.brightChanged = (n) => this.v3?.setBright(n);
   }
 
   render(room: ArenaRoom, meId: string, fx: Fx, now: number, dt: number, others: Hero[], job: boolean): void {
@@ -27,7 +28,7 @@ export class Views {
     if (want && !this.v3 && !this.loading) {
       this.loading = true;
       import('./view3d')
-        .then((m) => (this.v3 = new m.View3D()))
+        .then((m) => (this.v3 = new m.View3D()).setBright(this.switch.bright))
         .catch(() => (this.failed = true))
         .finally(() => (this.loading = false));
     }

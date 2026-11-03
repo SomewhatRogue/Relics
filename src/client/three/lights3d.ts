@@ -9,6 +9,9 @@ import type { Theme } from '../../shared/arena';
 /** A light in tiles: x, height, z; reach; strength; colour 0..1; flicker rate (0: steady). */
 export interface L3 { x: number; y: number; z: number; r: number; i: number; c: [number, number, number]; f?: number }
 
+/** The sun's warmth over the day's ambient. */
+const SUN = [1.06, 1, 0.9];
+
 export class Lights {
   readonly group = new THREE.Group();
   private pool: THREE.PointLight[] = [];
@@ -40,11 +43,11 @@ export class Lights {
     // and a key slanting in from the sky in the ambient's own colour, so a lit floor lands near its
     // flat colour and faces still model. At night the moon adds its blue-silver to the key; indoors
     // (no moon) the room's own warmth stays warm.
-    const [r, g, b] = t.ambient, f = 1.55 * 0.75, k = 1.55 * 0.45, m = t.day ? 0 : (t.moon ?? 0) * 1.55;
+    const [r, g, b] = t.ambient, f = 1.55 * 0.75, k = 1.55 * 0.45, m = t.day ? 0 : (t.moon ?? 0) * 1.3;
     this.amb.color.setRGB(r * f, g * f, b * f);
     this.amb.intensity = Math.PI;
-    const sun = t.day ? [1.06, 1, 0.9] : [1, 1, 1];
-    this.sky.color.setRGB(r * k * sun[0] + 0.6 * m, g * k * sun[1] + 0.67 * m, b * k * sun[2] + 0.92 * m);
+    const [sr, sg, sb] = t.day ? SUN : [1, 1, 1];
+    this.sky.color.setRGB(r * k * sr + 0.6 * m, g * k * sg + 0.67 * m, b * k * sb + 0.92 * m);
     this.sky.intensity = Math.PI;
     this.sky.position.set(cx - 8, 22, cz + 10);
     this.sky.target.position.set(cx, 0, cz);
@@ -61,7 +64,7 @@ export class Lights {
       p.position.set(l.x, l.y, l.z);
       p.color.setRGB(l.c[0], l.c[1], l.c[2]);
       p.distance = l.r * fl;
-      p.intensity = l.i * 2.2 * Math.PI;
+      p.intensity = l.i * 2.6 * Math.PI;
     });
   }
 }
