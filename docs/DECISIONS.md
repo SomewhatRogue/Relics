@@ -2,6 +2,44 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-03: the lamps keep the hour; 2.5D's night back to FLAT's (Kyle; Claude Opus 5.5)
+
+Kyle: "Town looks a little too bright now, but maybe it's daytime. If there is day and night, we should
+turn off fires at night except for the wild burning ones." Read as: the fires people tend are out by
+day and lit at dusk and through the night; the wild ones burn whatever the hour.
+
+- **One rule, both views** (`shared/lamps.ts`, `lampAt(theme, x, y)`). Lamps: wall torches, braziers,
+  lamp posts (the square's, the lane's, Perrin's garden), a hall's door lamp, lamplit windows (the halls,
+  the church, the tavern, a job's cottage with its fire going), the torches either side of an open way
+  out, and the heroes' carried lanterns (already off by day). Wild, never put out: a house or wagon on
+  fire, embers and smoulder, a goblin camp's fire (job braziers and cottage camps, `wild` on the map),
+  the Tulls' brazier inside the gate (they live round it), cookfires, spell and skill fire, a burning
+  goblin. Also always lit: the Last Lantern (it never goes out), the forge's fire (worked all day),
+  anything indoors, the yard, Hew's wood, underground (lamps are lit whenever anyone's there).
+- **When.** In Wickhold by the shared clock: the first lamp is lit at phase 0.71 (daylight about 0.65,
+  as dusk starts) and the first put out at 0.285 (about 0.6 after dawn). The lamplighter goes round:
+  each lamp has its own place in the round from where it stands, so they come on one by one over 0.012
+  of the day (about half a minute) and go out the same way, each flame catching over a few seconds. The
+  day only runs forward and a lamp lights at a darker point than it's put out, so nothing flickers (a
+  test walks the whole day and counts one lighting and one putting out per lamp). On a job by its hour:
+  out in broad day, lit at dawn (not yet put out), dusk and night.
+- **Out means out.** A cold brazier is grey ash, a torch a charred head, a post an empty lamp, a door
+  lamp and windows dark glass, and none of them give any light, so by day the sun does it all. The
+  fires that stay lit count for less under the sun, as on a day job (the town's `torch` now runs from
+  1 at night to 0.35 at noon), so the Last Lantern no longer throws a warm pool across the square at noon.
+- **2.5D's night** (`three/lights3d.ts`). The moon's blue-silver key was about twice FLAT's moon pool
+  across the whole square (FLAT's is a pool over the middle at the theme's strength), which made the
+  square cooler and greyer than FLAT. Now `MOON` 0.6 (was 1.3), and the point lights a little stronger
+  and further (`POINT` 3.1, was 2.6; `REACH` 1.15), so the lamps carry the night in warm pools.
+- **Numbers** (luma, saturation, warmth as mean R minus B; the square at 31,21 where the last entry
+  measured, phone): midnight FLAT 63 / 0.32 / 14, 2.5D before 65 / 0.27 / 7, after 60 / 0.31 / 16; on a
+  laptop FLAT 60 / 0.31 / 14, 2.5D before 64 / 0.29 / 12, after 59 / 0.33 / 20. A job street at night
+  (burning house, goblin fire): FLAT 40, 2.5D before 42, after 41, saturation 0.45 / 0.39 / 0.45. Noon,
+  lamps out: FLAT 92 to 76, 2.5D 98 to 86 (still clearly day, a little brighter than FLAT). Dusk (0.74,
+  every lamp lit): FLAT 69, 2.5D 70, the warmest of the three.
+- **Testing the hour** (`client/townclock.ts`): `?day=0.5` in the address (0 midnight, 0.25 dawn, 0.5
+  noon, 0.75 dusk) or `window.__setDay(0.75)`, `__setDay(null)` to give the clock back.
+
 ## 2026-11-02: 2.5D figures are FLAT's pixel figures standing in the 3D world (Kyle; Claude Opus 5.5)
 
 Kyle: "In 2.5D the mage looks blocky, so does the big orc. Also when the spearmen are attacking they

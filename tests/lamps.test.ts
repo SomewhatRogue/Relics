@@ -12,6 +12,9 @@ describe('the lamps', () => {
     expect(lampsLit(0)).toBe(1);
     expect(lampAt(townLight(base, 0.5), 25, 15)).toBe(0);
     expect(lampAt(townLight(base, 0.02), 25, 15)).toBe(1);
+    // A fire that's always lit (the Last Lantern, a camp's) counts for less under the noon sun.
+    expect(townLight(base, 0.5).torch).toBeCloseTo(0.35);
+    expect(townLight(base, 0).torch).toBe(1);
   });
   it('come on one by one through the lamplighter\'s round, and go out the same way', () => {
     expect(lampsLit(LIT_AT - 0.001, 0)).toBe(0);

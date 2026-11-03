@@ -2,6 +2,14 @@
 
 ## Current slice
 
+**The lamps keep the hour** (Claude Opus 5.5, 2026-11-03; Kyle: "turn off fires at night except for
+the wild burning ones", read as: tended fires out by day, wild ones always). Built; waiting on Kyle's
+play. *Done when* by day in Wickhold the braziers are ash, the torches and lamp posts out and the
+windows dark, in FLAT and 2.5D; as dusk comes the lamps light one by one and carry the night in warm
+pools, and go out the same way after dawn; burning houses, wagons, goblin fires and the Tulls' brazier
+burn whatever the hour; a day job's torches are out and a night job's lit; and 2.5D at night feels like
+FLAT's night, not brighter or bluer. `?day=0.5` or `__setDay(p)` to look at any hour.
+
 **Host a job, wander town, set out when ready** (Claude Opus 5.5, 2026-11-02; Kyle: "host a job and
 then wander around town, same with others, and start whenever we're ready, with a little UI notification
 of who else signed up"). Built; waiting on Kyle's play. *Done when* Kyle gathers a party at the board and
