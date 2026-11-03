@@ -170,7 +170,7 @@ async function leaveWhileIn(k) {
   await house(k, kyle, 0, 'dead');
   await k.wait(2600); // (a whole-job save goes out every 2 s)
   await k.leave(kyle);
-  k.step('Kyle is home', await k.home(kyle));
+  k.step('Kyle is home', await k.home(kyle, 'HOME EARLY'));
   k.step('Sam takes the job on', await k.until(sam, () => !!window.__game.coop && !window.__game.remote, null, 8000));
   const s = await k.ev(sam, () => { const g = window.__game; return { indoors: !!g.room.indoors, door: !!g.outside, street: !!g.rooms.street, houses: g.rooms.houses.size, ids: g.rooms.all().flatMap((r) => r.heroes.map((h) => h.id)).join() }; });
   k.step('still inside the same house, the street behind its door', s.indoors && s.door && s.street && s.houses === 1, s);

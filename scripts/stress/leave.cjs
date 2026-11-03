@@ -5,7 +5,7 @@ async function guestLeaves(k) {
   const kyle = await k.open('KYLEA', 'WARRIOR'), sam = await k.open('SAMA', 'RANGER', true);
   if (!(await k.party(kyle, sam))) return;
   await k.leave(sam);
-  k.step('Sam is home with a result', await k.home(sam));
+  k.step('Sam is home with a result', await k.home(sam, 'HOME EARLY'));
   k.step("Kyle's room lets Sam's hero go within 2 s", await k.until(kyle, () => window.__game.room.heroes.length === 1, null, 2000));
   k.step('Kyle still leads the job', (await k.role(kyle)) === 'lead');
   const g0 = await k.ev(kyle, () => window.__game.profile.gold);
@@ -21,7 +21,7 @@ async function leaderLeaves(k) {
   const goblins = await k.alive(sam);
   const at = await k.hero(sam, 'me');
   await k.leave(kyle);
-  k.step('Kyle is home with a result', await k.home(kyle));
+  k.step('Kyle is home with a result', await k.home(kyle, 'HOME EARLY'));
   k.step('Sam takes the job on within 5 s', await k.until(sam, () => window.__game.mode === 'run' && !!window.__game.coop && !window.__game.remote, null, 5000));
   const now = await k.alive(sam);
   k.step('the same goblins in it', now === goblins, `${now.split(',').length} of ${goblins.split(',').length}`);
@@ -39,7 +39,7 @@ async function leaderOfThree(k) {
   if (!(await k.party(kyle, sam, ana))) return;
   await k.wait(2500);
   await k.leave(kyle);
-  k.step('Kyle is home', await k.home(kyle));
+  k.step('Kyle is home', await k.home(kyle, 'HOME EARLY'));
   // (Ids in line: the lower takes it on; the other waits longer, in case the first is gone too.)
   const [first, second] = [sam, ana].sort((a, b) => (a.id < b.id ? -1 : 1));
   k.step(`${first.name} takes the job on`, await k.until(first, () => !!window.__game.coop && !window.__game.remote, null, 6000));
