@@ -1,7 +1,7 @@
 /**
- * Which view draws a job: the pixel scene (the default) or the low-res 3D one. Set by ?look=3d in the
- * address, or by the VIEW switch (remembered on this device). Also the 3D quality (?q=low|mid|high,
- * mid on a phone, high otherwise) and the frame-time readout (?perf=1).
+ * Which view draws a job: the pixel scene (FLAT, the default) or the low-res 3D one (2.5D). Set by
+ * ?look=3d (or 2.5d) in the address, or by the VIEW switch (remembered on this device). Also the
+ * 3D quality (?q=low|mid|high, mid on a phone, high otherwise) and the frame-time readout (?perf=1).
  */
 export type Look = 'pixel' | '3d';
 export type Quality = 'low' | 'mid' | 'high';
@@ -12,8 +12,8 @@ const url = new URLSearchParams(location.search);
 /** The view to start in: the address wins, then what this device last chose. */
 export function startLook(): Look {
   const u = url.get('look');
-  if (u === '3d') return '3d';
-  if (u === 'pixel' || u === '2d') return 'pixel';
+  if (u === '3d' || u === '2.5d') return '3d';
+  if (u === 'pixel' || u === 'flat' || u === '2d') return 'pixel';
   try {
     return localStorage.getItem(KEY) === '3d' ? '3d' : 'pixel';
   } catch {

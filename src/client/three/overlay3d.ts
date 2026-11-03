@@ -1,14 +1,15 @@
 /**
  * The flat layer over the 3D view, at the same low resolution and drawn unlit: the 3x5 pixel font for
  * names over friends' heads, a downed hero's count, calls and numbers; quest marks (or a point at the
- * edge toward one off screen), the arrow at your feet toward the way on, goblins' health, and the 2D
+ * edge toward one off screen), the arrow at your feet toward the way on, goblins' health, a Rogue's
+ * backstab arcs, and the 2D
  * effects themselves (sparks, rings, lightning, gore, words), each placed where the room says it is.
  */
 import type { ArenaRoom } from '../../sim/room';
 import type { Target } from '../../sim/targets';
 import type { DoorMark } from '../jobrooms';
 import type { Fx } from '../fx';
-import { PARTY } from '../../shared/tuning';
+import { GUARD, PARTY, WEAPONS } from '../../shared/tuning';
 import { drawText, textWidth } from '../pixfont';
 import { OX, OY, PX } from '../world';
 import type { Lerp } from './actors3d';
@@ -62,6 +63,21 @@ export class Overlay {
         const q = i / n, j = i && i < n ? (Math.random() - 0.5) * 5 : 0;
         g.fillRect(Math.round(x0 + (x1 - x0) * q + j), Math.round(y0 + (y1 - y0) * q + j), 1, 1);
       }
+    }
+    // A Rogue's kit in hand: each near goblin's back, where a backstab lands (bright once you're behind it).
+    const me = room.heroes.find((h) => h.id === meId);
+    if (me && WEAPONS[me.weapon].cls === 'ROGUE') for (const e of room.enemies) {
+      if (e.act === 'dead' || e.kind === 'dummy' || e.kind === 'swingDummy') continue;
+      const [ex, ey] = lerp('e:' + e.id, e.x, e.y), tx = me.x - e.x, ty = me.y - e.y, tl = Math.hypot(tx, ty) || 1;
+      if (tl > 6) continue;
+      const behind = (e.fx * tx + e.fy * ty) / tl < GUARD.rearCos, back = Math.atan2(-e.fy, -e.fx), r = e.radius + 0.3;
+      g.fillStyle = '#b080ff';
+      g.globalAlpha = behind ? 0.95 : 0.35;
+      for (let q = -1.1; q <= 1.1; q += 0.12) {
+        const [x, y] = P(ex + Math.cos(back + q) * r, 0.05 + up(e.z), ey + Math.sin(back + q) * r);
+        g.fillRect(Math.round(x), Math.round(y), 1, 1);
+      }
+      g.globalAlpha = 1;
     }
     // Goblins' health, over the hurt ones; the butcher's "!" over a blow that can't be blocked.
     for (const e of room.enemies) {

@@ -150,7 +150,7 @@ body[data-mode='run'] .tb.use.chest { width: 64px; height: 64px; left: calc(24px
 body.touch #hud { width: 138px; }
 body.touch #corner { gap: 4px; }
 body.touch #corner button { width: 30px; }
-body.touch #corner #heroes, body.touch #corner #opts, body.touch #corner #leave { width: auto; padding: 0 5px; }
+body.touch #corner #leave { width: auto; padding: 0 5px; }
 
 /* Town works, the Roll of the Brave, dice. */
 #panel .work { border: 1px solid #3a3644; border-radius: 4px; padding: 7px 9px; margin-bottom: 7px; line-height: 1.5; }
@@ -428,8 +428,8 @@ body[data-mode='run'] #tips { display: none; }
 /* A long weapon line wraps short of the corner buttons instead of running under them. */
 #hud .gear.kit { white-space: normal; width: min(230px, 58vw); display: block; line-height: 1.35; }
 
-/* OPTIONS: a small box under the corner row (three/options.ts): the view, sound, music, tips. */
-#corner #opts { width: auto; padding: 0 8px; font-size: 10px; }
+/* Options: the gear in the corner row opens a small box (options.ts): heroes, the view, sound, music, tips. */
+#corner #opts { display: flex; align-items: center; justify-content: center; }
 #corner #opts.on { background: #2e2516; border-color: #ffd27a; color: #ffd27a; }
 #options { position: fixed; z-index: 6; right: calc(10px + env(safe-area-inset-right)); top: calc(42px + env(safe-area-inset-top)); display: flex; flex-direction: column; gap: 6px; padding: 8px; background: #14121af2; border: 1px solid #4f4a5c; border-radius: 6px; }
 #options[hidden] { display: none; }
