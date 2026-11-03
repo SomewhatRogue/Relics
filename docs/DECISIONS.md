@@ -1763,3 +1763,48 @@ on a level up and wants to see it grow as its own place; a Rogue was offered "on
 - New words (for the lore keeper and line editor): KNACKS button and title; SEE KNACKS, SEE THE TREE;
   chain names; the new knacks SCARRED, LONG WIND, COUNTERSTROKE, FLEET, SLIPPERY, HEFT, HEAVY HANDS,
   KEEN, LONG SHOT, QUICK HANDS, DEEP CHARGE, POTENT, MENDER with their lines; the tree's notes.
+
+## 2026-11-02: three skills a class, and training in sections (Kyle; Claude Opus 5.5)
+
+Kyle: "it sucks that there's only one or two available per class. Let's try to think of 3 per class.
+Beyond that, I want training to be its own expandable / collapsible area."
+
+- **The fifteen** (`shared/magic.ts` SKILL_CHOICES, numbers in `shared/skillkit.ts`, lines in
+  `shared/skillwords.ts`). Each changes how the class plays and sits at a cooldown like the first's.
+  Warrior: SHIELD CHARGE (move), WAR CRY (pull the room to you), SHIELD STAMP (a ring around you, 0.35 s
+  windup, 2.6 tiles, 16 damage, small ones flat 1.4 s, big ones stagger, 14 s). Ranger: HUNTER'S NET
+  (snare), VOLLEY (a spot up to 8 tiles off; after 0.7 s arrows fall there every 0.3 s for 2.4 s, 5 a
+  fall in 2.2 tiles, small ones held flinching, 18 s), SEND THE HOUND (the hound runs 1.8x at the goblin
+  you face within 9 and pins it 2.6 s, big ones slowed, 16 s). Rogue: SHADOWSTEP (get behind), VANISH
+  (smoke at your feet: no goblin sees you, even close, for 4 s or till you strike; blows wound up at you
+  dropped; small ones in 2.2 tiles cough 0.8 s; 18 s), KNIFE FAN (five knives across 1 radian, 11 each,
+  12 s). Mage: ELEMENTAL CHANNEL (switch), FIRE RING (2.6 tiles, 12 damage, thrown off and set alight,
+  burns on 4 s lighting anyone who walks in, 16 s), STORM TETHER (the goblin faced within 7, struck for 6
+  storm every 0.5 s for 4 s, jumping on to those near it, snaps past 9, moves on when it dies, 16 s).
+  Carrying the ring or the tether, a Mage's spells are fire (my call: the Channel is what changes them,
+  so giving it up is the price). Cleric: SANCTUARY (ground and ward), CENSER CHAIN (hauls the friend
+  most hurt within 8, or the one you point at, to your side blessed 3 s; alone, it drags in the small
+  goblin you face, reeling 1 s; 14 s), LANTERN LIGHT (0.3 s windup, 3 tiles: 12 damage and 12 mending,
+  both growing with coals like every heal, small ones blinded 1 s, 18 s).
+- **The room decides**: one dispatcher (`sim/skills.ts`) fires and steps them; one small file each
+  (`stamp.ts`, `areas.ts`, `sic.ts`, `rogue.ts`, `tether.ts`, `cleric.ts`, `facing.ts`). What they
+  leave lives in lists a friend's screen is sent already: zones (now with a `kind`: volley, fire), bolts
+  (knives), smokes (vanish), and fields on heroes and goblins (`tether`, `vanishUntil`, `tow`, the
+  hound's `pin`). Rings are drawn (`client/skillsdraw.ts`) from the same numbers, while the hero winds
+  up; player rings are never red.
+- **Taught one by one** (`shared/skillteach.ts`, `SKILL_STEPS` in drills.ts): the first at level 3 for
+  150 (the old `skill` lesson), the second at 5 for 250, the third at 7 for 400. A new skill is carried
+  at once; changing which you carry stays free at the trainer. Old heroes keep what they had: a Warrior
+  taught before today (no `taught` list yet) still knows the War Cry.
+- **The screen** (`client/trainerui.ts`, `client/trainsections.ts`): SKILLS, TECHNIQUE (the class
+  technique and the dodge's leave-behind), RANKS and KNACKS, each a header you tap. Closed, a header
+  says where you stand (CARRYING WAR CRY, 2 OF 3, NEXT AT LEVEL 7; SLAM 1/3; 6 OF 28) and how many things
+  inside are READY. Open on a phone the first time: SKILLS and RANKS; after that as you left them, on
+  that device (localStorage). A skill row says CARRYING, CARRY, LEARN, or its level, its line, and
+  TAUGHT AT LEVEL n FOR n GOLD. Level-up picks stay above the sections.
+- New words (for the lore keeper and line editor): SHIELD STAMP, VOLLEY, SEND THE HOUND, VANISH, KNIFE
+  FAN, FIRE RING, STORM TETHER, CENSER CHAIN, LANTERN LIGHT and their buttons (STAMP, VOLLEY, HOUND,
+  VANISH, KNIVES, RING, TETHER, CHAIN, LIGHT); all fifteen lines in `skillwords.ts`; the class sheets'
+  "Later it teaches..." sentence; callouts STAMP, GONE, FIRE RING, PINNED; headers TECHNIQUE, RANKS;
+  CARRYING, CARRY, LEARN, READY, NEXT AT LEVEL, TAUGHT AT LEVEL n FOR n GOLD; the carry note.
+

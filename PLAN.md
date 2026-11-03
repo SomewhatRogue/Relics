@@ -2,6 +2,15 @@
 
 ## Current slice
 
+**Three skills a class, training in sections** (Claude Opus 5.5, 2026-11-02; Kyle: "only one or two
+available per class. Let's try to think of 3 per class", "training to be its own expandable /
+collapsible area"). Built; waiting on Kyle's play. *Done when* each class's trainer shows three skills,
+the first at level 3 for 150, the next at 5 for 250, the last at 7 for 400, each with a line on what it
+does; Kyle buys one, carries it at once, and swaps back for nothing; each new skill does what its line
+says in the yard and online; and SKILLS, TECHNIQUE, RANKS and KNACKS open and close with a tap, say
+where he stands while closed, and stay as he left them next visit. Open: the new names and lines
+through the lore keeper and line editor; the 3D view's agent may want to draw the new rings too.
+
 **The pack, the vault, Tobin's stall, the forge** (Claude Opus 5.5, 2026-11-02; Kyle: "Castle of the
 Winds or Diablo style", "a somewhat ruined bank", "a generic merchant"). Built; waiting on Kyle's play.
 *Done when* Kyle opens PACK on a job and sees what's on each part of his hero, taps a piece and reads it
