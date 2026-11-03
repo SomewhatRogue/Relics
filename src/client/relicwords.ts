@@ -27,10 +27,10 @@ export const RELICW = {
   charge: (n: number, max: number) => `CHARGE ${n} / ${max}`,
   dark: 'DARK',
   darkLine: 'Gone dark. It does nothing now until the church sees to it.',
-  darkElLine: 'Gone dark, and the church won\'t bring this kind back. You can still give it up on the step, on its own or with another to take one back.',
+  darkElLine: 'Gone dark, and the church won\'t bring this kind back. You can still give it up on the step, on its own, or with another for one in return.',
   loud: 'LOUD',
   fades: 'Every use spends a little of it.',
-  noRecharge: 'Born with an element. It holds more, but the church won\'t recharge it.',
+  noRecharge: 'Born with an element. It holds more charge, but the church won\'t recharge it.',
   /** The RELIC button pressed with a dark one in hand. */
   pressedDark: 'DARK',
   /** Spared by a friend's relic. */
@@ -51,7 +51,7 @@ export const RELICW = {
   leave: (n: number) => (n ? `GIVE IT UP (LIGHT FOR ${n} ${n === 1 ? 'JOB' : 'JOBS'})` : 'GIVE IT UP'),
   leaveDark: 'GIVE IT UP (NO LIGHT)',
   /** The second tap: what you lose and what you get. */
-  leaveWarn: (n: number) => (n ? `Gone for good. You carry the church's light for ${jobs(n)}: ${LIGHT}.` : "Gone for good. It's gone dark, so there's no light for this one."),
+  leaveWarn: (n: number) => (n ? `Gone for good. You carry the church's light for ${jobs(n)}: ${LIGHT}.` : "Gone for good. It's dark, so there's no light for this one."),
   leaveSure: 'YES, GIVE IT UP',
   keep: 'KEEP IT',
   odricLeave: "That's it, on the step with the rest. Go round the back after, and Isolde will ^light^ you something for the road.",
@@ -61,7 +61,7 @@ export const RELICW = {
   litNone: 'The light is for whoever leaves a relic with some life still in it.',
   /** Two for one. */
   twoTitle: 'LEAVE TWO, TAKE ONE',
-  twoLine: 'Give two up on the step, both gone for good, and take back one that someone left before. You never know which. No light for these.',
+  twoLine: "Give two up on the step, both gone for good, and take back one that someone else left. You don't choose which, and there's no light for these.",
   pick: 'PICK TWO',
   picked: (n: number) => (n === 2 ? 'Two picked.' : n === 1 ? 'One picked. One more.' : 'Tap two of your relics.'),
   odds: (el: number) => `${Math.round(el * 100)} IN 100 IT HAS AN ELEMENT.`,
@@ -75,7 +75,7 @@ export const RELICW = {
   tapSkip: 'TAP TO SKIP',
   /** The HUD while carrying the light, and the job result. */
   litBadge: 'LIT',
-  litLeft: (n: number) => (n ? `The church's light goes with you for ${jobs(n)} more: ${LIGHT}.` : 'The church\'s light has burned out.'),
+  litLeft: (n: number) => (n ? `The church's light goes with you for ${n} more ${n === 1 ? 'job' : 'jobs'}: ${LIGHT}.` : 'The church\'s light has burned out.'),
   /** The job result: a relic cut out of the boss, or picked up. */
   cutOut: (boss: string, name: string) => `<b>You cut the ${name} out of ${boss}.</b>`,
   carryHint: 'It\'s on your RELIC button.',
