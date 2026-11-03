@@ -23,7 +23,8 @@ diffuseColor.a = 1.0;
 // out is "how ordinary" (post.ts): just under 1 keeps the outline pass off the card.
 const OVER = `
 if (keepLit) gl_FragColor = vec4(mix(gl_FragColor.rgb, glowT.rgb, glowT.a), min(0.99, 1.0 - glowT.a));
-else gl_FragColor = vec4(glowT.rgb, 0.0);
+// A faint one (a lunge's afterimage, a fading ghost) reads as dimmer pixels, not fewer bright ones.
+else gl_FragColor = vec4(mix(vec3(0.05), glowT.rgb, min(1.0, glowT.a * 1.6)), 1.0 - glowT.a);
 `;
 
 /** The lit card material: `lit` as the map, `glow` beside it. */

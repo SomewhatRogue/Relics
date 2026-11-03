@@ -46,18 +46,13 @@ const SCENES = {
   },
   async lunge(page) {
     await clock(page, NOON);
+    await page.waitForTimeout(300);
     await page.evaluate(() => {
-      const g = window.__game, j = g.jobs()[1];
-      g.startJob({ ...j, place: { name: 'Barrowby', kind: 'village', region: 'Barrowfields', ruin: 1 }, objective: 'rescue', boss: 'SKARN', rooms: 1, seed: 7 });
-    });
-    await page.waitForTimeout(400);
-    await page.evaluate(() => {
-      const r = window.__hold(), me = r.heroes[0], h = r.map.blocks.find((b) => b.kind === 'house');
-      const x = h ? h.x + h.w / 2 : 10, y = h ? h.y + h.h + 3 : 10;
-      Object.assign(me, { x: x + 3.5, y: y + 2, fx: -1, fy: 0, act: 'idle', moving: false });
+      const r = window.__hold(), me = r.heroes[0], x = 35, y = 22.5;
+      Object.assign(me, { x: x + 1.2, y: y + 0.4, fx: -1, fy: 0, act: 'idle', moving: false });
       // Wind-up, the stab, the recover, and after it (each its own lunger, top to bottom).
       r.enemies = [0.6, 0.86, 1.08, 1.4].map((t, i) => {
-        const e = window.__foe(910 + i, 'scrapper', x - 2, y - 1.2 + i * 1.3, { variant: 'lunger', fx: 1, fy: 0 });
+        const e = window.__foe(910 + i, 'scrapper', x - 2.6, y - 2 + i * 1.3, { variant: 'lunger', fx: 1, fy: 0 });
         return window.__hit(e, 'stab', t, { windup: 0.8, active: 0.1, recover: 0.8, arc: 24, range: 3, unblockable: true });
       });
     });
@@ -67,7 +62,7 @@ const SCENES = {
     await clock(page, MIDNIGHT);
     await page.waitForTimeout(300);
     await page.evaluate(() => {
-      const r = window.__hold(), me = r.heroes[0], t = [...r.map.torches].sort((a, b) => Math.hypot(a.x - 31, a.y - 21) - Math.hypot(b.x - 31, b.y - 21))[0] ?? { x: 31, y: 20 };
+      const r = window.__hold(), me = r.heroes[0], t = [...r.map.torches].filter((q) => q.y > 8 && q.y < r.map.h - 8 && q.x > 6 && q.x < r.map.w - 6).sort((a, b) => Math.hypot(a.x - 31, a.y - 21) - Math.hypot(b.x - 31, b.y - 21))[0] ?? { x: 31, y: 20 };
       Object.assign(me, { x: t.x, y: t.y + 3.2, fx: 0, fy: -1, act: 'idle', moving: false });
       const F = window.__foe;
       r.enemies = [
