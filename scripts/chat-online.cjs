@@ -105,8 +105,9 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     await sam.page.evaluate(() => window.__openSpot('board'));
     await until(sam, () => !!document.querySelector('#panel [data-joinparty]'));
     await sam.page.click('#panel [data-joinparty]');
-    await until(kyle, () => document.querySelector('#panel .job.party .m')?.textContent.includes('SAM'));
-    await kyle.page.click('#panel [data-setout]');
+    await until(kyle, () => !!window.__game.parties?.current()?.members.some((m) => m[1] === 'SAM'));
+    await kyle.page.evaluate(() => document.querySelector('#partycard.shut .pc-line')?.click());
+    await kyle.page.click('#partycard [data-setout]');
     step('on the job together', await until(sam, () => window.__game.mode === 'run' && window.__game.room.heroes.some((h) => h.id === '@lead'), null, 12000));
     step('party chat is on for both', await until(kyle, () => window.__chat.where() === 'party') && await until(sam, () => window.__chat.where() === 'party'));
     await wait(1500); // (the party's chat room opening)

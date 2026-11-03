@@ -33,6 +33,8 @@ export class Parties {
   private seen = new Set<string>();
   private was: { lead: string; m: Member[] } | null = null;
   private askedAt = -99;
+  /** The leader of the party I asked into, as last seen (for the news once they've gone). */
+  private leadName = '';
   private offSince = -1;
   private keptAt = -99;
   private now = 0;
@@ -90,6 +92,7 @@ export class Parties {
   join(lead: string): void {
     this.quit();
     this.joined = lead;
+    this.leadName = this.town.where(lead)?.hero.tag ?? '';
     this.heard.set(lead, this.now);
     this.ask();
     this.changed();
@@ -133,7 +136,8 @@ export class Parties {
   /** A member: still in, still asking, or the party's gone. */
   private follow(me: string, now: number): void {
     const lead = this.joined!, o = this.town.others().find((x) => x.id === lead)?.pt, offer = isOffer(o) ? o : undefined;
-    const s = standing(offer, me, this.heard.get(lead) ?? now, now), name = offer?.m[0][1] ?? this.was?.m[0]?.[1] ?? 'THE LEADER';
+    if (offer) this.leadName = offer.m[0][1];
+    const s = standing(offer, me, this.heard.get(lead) ?? now, now), name = this.leadName || cleanName('');
     // Not there just now (a reload, a moment's lag): wait, within the grace.
     if (s === 'off' && !this.town.where(lead)) return;
     if (s === 'off' && this.offSince < 0) this.offSince = now;
@@ -175,7 +179,7 @@ export class Parties {
     if (d.k === 'quit' && m && !this.hold) return void (drop(m, from) && this.changed());
     if (d.k === 'disband' && this.joined === from) {
       this.joined = null;
-      this.onNews({ k: 'off', name: this.town.where(from)?.hero.tag ?? this.was?.m[0]?.[1] ?? cleanName('') });
+      this.onNews({ k: 'off', name: this.town.where(from)?.hero.tag ?? (this.leadName || cleanName('')) });
       return this.changed();
     }
     if (d.k === 'go' && this.joined === from && typeof d.room === 'string' && d.j && typeof d.j === 'object' && Array.isArray(d.m)) {
