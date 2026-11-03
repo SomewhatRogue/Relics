@@ -19,7 +19,7 @@ import { workDone } from './works.js';
 
 /** What talking to someone (or using a spot) opens. */
 export type SpotId = 'board' | 'council' | 'church' | 'smith' | 'wright' | 'trainer' | 'market' | 'infirmary' | 'granary' | 'home' | 'chat'
-  | 'yard' | 'gate' | 'hew' | 'works' | 'roll' | 'well' | 'bard' | 'dice' | 'tavern' | 'sewer' | 'locked' | 'bank' | 'merchant';
+  | 'yard' | 'gate' | 'hew' | 'works' | 'roll' | 'well' | 'bard' | 'dice' | 'tavern' | 'sewer' | 'locked' | 'bank' | 'merchant' | 'advocate';
 export interface Spot { id: SpotId; x: number; y: number; label: string; key?: string }
 
 export const SPOTS: Spot[] = [

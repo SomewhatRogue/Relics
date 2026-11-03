@@ -36,6 +36,7 @@ import { drawHung, drawPot } from './grimdraw';
 import { drawNpc } from './npcs';
 import { drawCaged, drawSurvivor } from './captives';
 import { behindMarks, drawWays } from './wayout';
+import { drawBoards } from './voteboards';
 import { drawQuestMarks, onScreen } from './questmarks';
 import { drawDoorMarks } from './doormarks';
 import type { DoorMark } from './jobrooms';
@@ -322,6 +323,8 @@ export class Scene {
     if (map === ARENA) items.push({ y: OY + ARENA.cage.y * PX, draw: () => this.cage(c, OX + ARENA.cage.x * PX - cx, OY + ARENA.cage.y * PX - cy, now) });
     // The way out: stakes across the gap while it's shut; lit, torches and chevrons once it's open (wayout.ts).
     const wayLights = drawWays(c, map, room.exitOpen, cx, cy, now);
+    // The town hall's vote boards: who voted for what, and when it closes (voteboards.ts).
+    drawBoards(glow, map, cx, cy);
     // Blessed ground: a ring of gold on the floor, light rising off it.
     for (const s of room.snares) drawSnare(c, s, OX + s.x * PX - cx, OY + s.y * PX - cy);
     for (const z of room.zones) {

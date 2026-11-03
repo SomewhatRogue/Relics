@@ -27,6 +27,8 @@ export interface WorldState {
   dens: number;
   /** Council votes in progress: decision id -> voter (a device; a hero id in old worlds) -> choice. */
   ballots: Record<string, Record<string, string>>;
+  /** Who each voter is, by the hero who last voted from there (the town hall's boards). */
+  voters?: Record<string, string>;
   /** Jobs done lately, for the board, newest first (worldsync DEEDS). */
   deeds?: { day: number; title: string; place: string; party: string[] }[];
   /** Works finished lately (newest first), for what people talk about (shared/townsays.ts). */
@@ -39,7 +41,8 @@ export const newWorld = (): WorldState => ({ chapter: 1, day: 1, rescued: 0, sto
 
 export const QUORUM = 4;
 
-export interface Choice { id: string; label: string; text: string }
+/** `short`: the name on its board in the town hall (fits 12 letters). */
+export interface Choice { id: string; label: string; short: string; text: string }
 export interface Decision { id: string; question: string; choices: Choice[] }
 
 /** Chapter 1, the bones only: bring people home, ring Barrowby's bell, then decide the north fields. */
@@ -56,8 +59,8 @@ export const CHAPTER_1 = {
     id: 'north-fields',
     question: 'The north fields are ours again, for now. What does Wickhold do with them?',
     choices: [
-      { id: 'farm', label: 'Farm them', text: 'Plough them. Bread in winter and gold in the coffers: every job pays a quarter more, and a granary goes up by the north gate. The camp outside stays outside.' },
-      { id: 'refugees', label: 'Take in the refugees', text: 'Open the gate to the camp. Four more souls on Rescue Row, more mouths, and a trader who knows the roads opens a stall on Market Row.' },
+      { id: 'farm', label: 'Farm them', short: 'FARM THEM', text: 'Plough them. Bread in winter and gold in the coffers: every job pays a quarter more, and a granary goes up by the north gate. The camp outside stays outside.' },
+      { id: 'refugees', label: 'Take in the refugees', short: 'TAKE THEM IN', text: 'Open the gate to the camp. Four more souls on Rescue Row, more mouths, and a trader who knows the roads opens a stall on Market Row.' },
     ],
   } as Decision,
 };

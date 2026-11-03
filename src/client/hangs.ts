@@ -1,6 +1,6 @@
 /**
  * What hangs on a hall's back wall, painted once into the room's still layer (world.ts): the tower's
- * star chart, shields and a banner in the barracks, antlers, pelts and bows at the lodge, the church's
+ * star chart, shields and a banner in the barracks, the town hall's vote boards, antlers, pelts and bows at the lodge, the church's
  * windows, the smith's tools, herbs drying, notices, the Drowned Rat's sign, the valley's map.
  */
 import type { GameMap } from '../shared/arena';
@@ -45,6 +45,11 @@ const HANG: Record<Hang['kind'], (rect: Rect, rng: Rng, x: number, w: number, h:
     for (let i = 0; i < w; i += 3) rect(x + i, LOW - 4, 2, 2 + (i % 2), '#5a1818');
     const cx = x + Math.round(w / 2);
     rect(cx - 1, TOP + 10, 3, 6, '#d4a537'), rect(cx, TOP + 8, 1, 2, '#ffd27a');
+  },
+  vote(rect, _rng, x, w) {
+    // A vote board: a plank frame round a sheet of old sailcloth, nailed at the corners (the words: voteboards.ts).
+    rect(x, TOP + 1, w, LOW - TOP, '#4a3420'), rect(x + 2, TOP + 3, w - 4, LOW - TOP - 4, '#5e5240');
+    for (const nx of [x + 2, x + w - 3]) for (const ny of [TOP + 3, LOW - 2]) rect(nx, ny, 1, 1, '#9aa3ad');
   },
   map(rect, rng, x, w) {
     rect(x, TOP, w, LOW - TOP - 4, '#6a5a3a'), rect(x + 1, TOP + 1, w - 2, LOW - TOP - 6, '#9a8a62');

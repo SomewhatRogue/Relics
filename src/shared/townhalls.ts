@@ -59,10 +59,12 @@ export function hall(door: string): GameMap | null {
     [b('counter', 3, 1.4, 5, 0.8), b('shelf', 0.6, 0.1, 2.2, 0.5), b('rubble', 8.2, 0.4, 2.4, 1.4), b('rubble', 0.4, 5.6, 1.4, 0.9), b('sacks', 9.4, 5, 1.2, 1)],
     [n('KEEPER EDDA', 5.5, 1.1, 'bank', 'villager')],
     { marks: [mk('rushes', 2.6, 3, 6, 3)], hangs: [hang('notices', 4.8, 1.4)], braziers: [{ x: 2, y: 3.2, r: 0.35 }] });
+  // The council's two choices on boards either side of the valley map, someone under each to argue it
+  // (client/voteboards.ts, councilui.ts); the reeve heard from across his table.
   if (door === 'townhall') return room('THE TOWN HALL', 12, 8, HOME,
-    [b('desk', 3, 2.4, 6, 1), b('shelf', 1, 0.2, 2, 0.5), b('shelf', 9, 0.2, 2, 0.5)],
-    [n('REEVE HOLLIS', 6, 1.7, 'council', 'reeve'), n('ALDER BRAM', 2.2, 3, 'chat', 'elder', 3), n('GOODWIFE SELL', 9.8, 3, 'chat', 'villager', 4)],
-    { marks: [mk('rug', 2.4, 1.8, 7.2, 2.6)], hangs: [hang('banner', 0.1, 0.8), hang('map', 4.2, 3.6), hang('notices', 8.2, 0.7)] });
+    [b('desk', 3, 2.4, 6, 1)],
+    [{ ...n('REEVE HOLLIS', 6, 1.7, 'council', 'reeve'), reach: 1.4 }, n('ALDER BRAM', 2.2, 1.3, 'advocate', 'elder', 3), n('GOODWIFE SELL', 9.8, 1.3, 'advocate', 'villager', 4)],
+    { marks: [mk('rug', 2.4, 1.8, 7.2, 2.6)], hangs: [hang('vote', 0.4, 3.6), hang('map', 4.4, 3.2), hang('vote', 8, 3.6)] });
   return null;
 }
 

@@ -74,7 +74,7 @@ export type MarkKind = 'blood' | 'drag' | 'debris' | 'scorch' | 'trample' | 'pla
  * line from (x, y) to (x + w, y + h) `line` tiles either side. Paint only.
  */
 /** What hangs on a hall's back wall. */
-export type HangKind = 'stars' | 'shields' | 'banner' | 'map' | 'antlers' | 'pelts' | 'bows' | 'window' | 'tools' | 'herbs' | 'notices' | 'sign' | 'shelves';
+export type HangKind = 'vote' | 'stars' | 'shields' | 'banner' | 'map' | 'antlers' | 'pelts' | 'bows' | 'window' | 'tools' | 'herbs' | 'notices' | 'sign' | 'shelves';
 export type SoilMat = 'cobble' | 'earth' | 'mud' | 'swept' | 'straw' | 'ash' | 'wet'
   // Out on a job: grass over another floor, a ploughed field in rows, grain standing.
   | 'grass' | 'furrow' | 'crop';
@@ -92,6 +92,8 @@ export interface Road { area: Area; road: 'high' | 'low'; label: string }
 /** Someone to talk to: `talk` says what they offer (a town spot's panel), `look` how they're drawn. */
 export interface Npc {
   x: number; y: number; name: string; talk: string; look: string; arg?: number;
+  /** Talked to from this much further off than anyone else (the reeve across his table), in tiles. */
+  reach?: number;
   /** A round they walk (a guard's patrol), at `speed` tiles a second; they don't block anyone. */
   path?: [number, number][];
   speed?: number;

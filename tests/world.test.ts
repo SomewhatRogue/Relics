@@ -172,6 +172,9 @@ describe('the board and the council, shared', () => {
     contribute(w, { hero: { id: 'hone000001', name: 'ONE', cls: 'MAGE' }, vote: a, voter: 'dphone0001' }, 9);
     contribute(w, { hero: { id: 'htwo000002', name: 'TWO', cls: 'ROGUE' }, vote: b, voter: 'dphone0001' }, 9);
     expect(Object.keys(w.ballots[CHAPTER_1.decision.id])).toEqual(['dphone0001']);
+    // The town hall's boards name the voice by the hero who last cast it, under what it's for now.
+    const { ballot } = await import('../src/shared/worldsync');
+    expect(ballot(w).names).toEqual({ [b]: ['TWO'] });
   });
   it('the world server cleans a deed and a voter from the wire', async () => {
     const { clean } = await import('../api/_world');

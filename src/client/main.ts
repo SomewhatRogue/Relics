@@ -4,6 +4,7 @@ import { isDark, relicFill } from '../shared/relicitems';
 import { fillCol } from './reliccard';
 import { RELICW } from './relicwords';
 import { hookLitBadge } from './litbadge';
+import { setVotes } from './voteboards';
 import { HERO, CLASS_GUARD, CLASS_DODGES, POTIONS, CLASS_ORDER, RELICS, TRAITS, WEAPONS, itemName, type HeroClass } from '../shared/tuning';
 import { CLASS_NAME } from '../shared/classes';
 import { LOOKS, heroLook } from './sprites';
@@ -247,6 +248,7 @@ function hud(now: number): void {
   $('.rcd').innerHTML = relic ? (input.touch ? '' : 'R ') + (it && isDark(it) ? RELICS[relic].short + ' ' + RELICW.dark : tag(relic)) + (it ? `<i class="rchgl" style="--chg:${chg};--chgc:${chgc}"></i>` : '') : '';
   $('.rcd').classList.toggle('wait', !!relic && (left(relic) > 0 || (!!it && isDark(it))));
   $('.litbadge').hidden = !me.lit;
+  setVotes(game.world, !!game.link?.online);
   if (input.touch) {
     const sb = $('.tb.relic'), rb = $('.tb.relic2');
     sb.hidden = !known;

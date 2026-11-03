@@ -5,7 +5,7 @@
  */
 import type { HeroClass } from './weapons.js';
 import type { Stats } from './progress.js';
-import { CHAPTER_1, QUORUM, vote, type WorldState } from './story.js';
+import { CHAPTER_1, QUORUM, councilOpen, vote, type WorldState } from './story.js';
 import { nights } from './raids.js';
 import { WORK_ORDER, workDone, type WorkId } from './works.js';
 
@@ -52,6 +52,7 @@ export function contribute(w: WorldState, c: Contribution, quorum = QUORUM, raid
   for (const k of WORK_ORDER) if (!was.includes(k) && workDone(w, k)) (w.mended ??= []).unshift({ id: k, day: w.day }), (w.mended.length = Math.min(w.mended.length, MENDED_KEPT));
   if (raids) nights(w, day);
   if (c.story && !w.storyDone.includes(c.story)) w.storyDone.push(c.story);
+  if (c.vote && councilOpen(w)) (w.voters ??= {})[c.voter ?? c.hero.id] = c.hero.name;
   if (c.vote) vote(w, c.voter ?? c.hero.id, c.vote, quorum);
   if (c.deed) (w.deeds ??= []).unshift({ ...c.deed, day: w.day }), (w.deeds.length = Math.min(w.deeds.length, DEEDS));
 }
@@ -60,9 +61,9 @@ export function contribute(w: WorldState, c: Contribution, quorum = QUORUM, raid
 export type Board = Record<keyof Stats, { id: string; name: string; cls: HeroClass; n: number }[]>;
 export const BOARD_SIZE = 10;
 
-/** How many have voted on the open council decision, and for what. */
-export function ballot(w: WorldState): { voters: number; counts: Record<string, number> } {
-  const b = w.ballots[CHAPTER_1.decision.id] ?? {}, counts: Record<string, number> = {};
-  for (const c of Object.values(b)) counts[c] = (counts[c] ?? 0) + 1;
-  return { voters: Object.keys(b).length, counts };
+/** How many have voted on the open council decision, for what, and who (names, by choice, in voting order). */
+export function ballot(w: WorldState): { voters: number; counts: Record<string, number>; names: Record<string, string[]> } {
+  const b = w.ballots[CHAPTER_1.decision.id] ?? {}, counts: Record<string, number> = {}, names: Record<string, string[]> = {};
+  for (const [who, c] of Object.entries(b)) (counts[c] = (counts[c] ?? 0) + 1), (names[c] ??= []).push(w.voters?.[who] ?? 'A HERO');
+  return { voters: Object.keys(b).length, counts, names };
 }

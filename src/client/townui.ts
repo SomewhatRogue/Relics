@@ -31,6 +31,7 @@ import { openTree } from './treeui';
 import { relicName } from '../shared/relicitems';
 import { RELICW } from './relicwords';
 import { openStep } from './churchrelics';
+import { openAdvocate } from './councilui';
 import { KNW } from './treewords';
 
 /** Words from another player's browser, made safe to show. */
@@ -86,6 +87,9 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     panel.show('THE COUNCIL SITS', status + p(`<b>${d.question}</b>`) + d.choices.map((c) => p(`<b>${c.label}.</b> ${c.text} <span class="dim">(${b.counts[c.id] ?? 0} for)</span>`)).join('') +
       p(need > 1 ? `The council decides when ${need} heroes have voted: ${b.voters} so far.${mine ? ' Your voice is in; you can change it until it decides.' : ''}` : 'Playing alone, off the shared world: your vote decides.'),
       d.choices.map((c) => ({ label: `${mine === c.id ? 'VOTED: ' : 'VOTE: '}${c.label.toUpperCase()}`, primary: mine !== c.id, act: () => (g.vote(c.id), again()) })));
+  } else if (id === 'advocate') {
+    // Under each vote board, someone arguing for it while the council's undecided; after, the usual talk.
+    if (!openAdvocate(g, panel, arg)) openSpot('chat', g, panel, arg);
   } else if (id === 'trainer') {
     // Each class has its own teacher, somewhere in town; only yours will train you.
     const cls = CLASS_ORDER[arg] ?? 'WARRIOR', t = TRAINERS[cls], who = t.name.split(' ').slice(-1)[0];

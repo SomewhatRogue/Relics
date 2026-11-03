@@ -849,11 +849,11 @@ export class Game {
 
   /** The nearest thing to use where the hero stands: a person, a door, a spot in the open. */
   near(): Near | null {
-    const h = this.hero, map = this.room.map, all: (Near & { x: number; y: number })[] = [];
+    const h = this.hero, map = this.room.map, all: (Near & { x: number; y: number; reach?: number })[] = [];
     for (const n of map.npcs ?? []) {
       if (n.pose || n.mute) continue;
       const at = npcAt(n, this.room.time);
-      all.push({ x: at.x, y: at.y, label: n.name, talk: n.talk as SpotId, arg: n.arg, npc: n });
+      all.push({ x: at.x, y: at.y, label: n.name, talk: n.talk as SpotId, arg: n.arg, npc: n, reach: n.reach });
     }
     for (const b of map.blocks) {
       if (!b.door || b.ruined || (b.burning ?? -1) >= 0) continue;
@@ -864,7 +864,7 @@ export class Game {
     for (const c of this.room.chests) if (c.state === 'shut') all.push({ x: c.x, y: c.y, label: c.chained ? 'A CHAINED CHEST' : 'OPEN THE CHEST', chest: c.id });
     let best: Near | null = null, bd = SPOT_REACH;
     for (const n of all) {
-      const d = Math.hypot(n.x - h.x, n.y - h.y) * (n.door ? 1.4 : 1);
+      const d = Math.hypot(n.x - h.x, n.y - h.y) * (n.door ? 1.4 : 1) - (n.reach ?? 0);
       if (d <= bd) (bd = d), (best = n);
     }
     return best;
