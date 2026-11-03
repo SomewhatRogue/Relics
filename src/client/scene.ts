@@ -21,6 +21,7 @@ import { drawChest, drawFlask, drawPickup, drawSmoke } from './relicsdraw';
 const tint = (h: string): [number, number, number] => [parseInt(h.slice(1, 3), 16) / 255, parseInt(h.slice(3, 5), 16) / 255, parseInt(h.slice(5, 7), 16) / 255];
 import { drawBolt, drawDrop, drawCoal, drawHook, drawJavelin } from './relicsdraw';
 import { drawStatus } from './status';
+import { nestEmber } from './nestfire';
 import { drawLifted, drawProp } from './propsdraw';
 import type { Fx } from './fx';
 import { Lighting, type Light } from './light';
@@ -405,6 +406,9 @@ export class Scene {
       else lights.push({ x, y, r: b.kind === 'orb' ? 50 : 30, i: 0.7, c: EL_LIGHT[b.el] });
     }
     for (const e of room.enemies) {
+      // A nest being lit, or its ash still smouldering (nestfire.ts): a small warm glow.
+      const ember = nestEmber(e);
+      if (ember) lights.push({ x: OX + e.x * PX - cx, y: OY + e.y * PX - cy - 4, r: 24, i: ember, c: [1, 0.55, 0.25] });
       if (e.act === 'dead') continue;
       const [x, y] = lerp('e:' + e.id, e.x, e.y);
       // A nest burned out up close throws a bigger, warmer light (sim/torch.ts).

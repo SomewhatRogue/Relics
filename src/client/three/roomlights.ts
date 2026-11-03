@@ -5,6 +5,7 @@
  * spells, burning or frozen goblins, and the flashes of big hits (fx.ts).
  */
 import type { ArenaRoom } from '../../sim/room';
+import { nestEmber } from '../nestfire';
 import { TIERS, WEAPONS } from '../../shared/tuning';
 import { lightsHolder } from '../heldkits';
 import { EL_LIGHT, heldEl } from '../palette';
@@ -42,6 +43,8 @@ export function roomLights(room: ArenaRoom, fx: Fx, lerp: Lerp, out: L3[]): void
       add(ax, 0.6, ay, R(40), 0.35 * k, [1, 0.25, 0.15]);
       if (a.kind === 'hex') add(e.x, 1.3, e.y, R(18 + 22 * k), 0.3 + 0.5 * k, [0.55, 1, 0.3]);
     }
+    const ember = nestEmber(e);
+    if (ember) add(e.x, 0.5, e.y, R(24), ember, [1, 0.55, 0.25], 9);
     if (e.act === 'dead') continue;
     const [x, y] = lerp('e:' + e.id, e.x, e.y);
     if (e.burnUntil > room.time) add(x, 1, y, R(e.ashAt ? 70 : 44), e.ashAt ? 0.95 : 0.75, [1, 0.55, 0.25], 17);

@@ -17,7 +17,6 @@ export function spiderFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean 
       fx.shake = Math.max(fx.shake, 1);
       return true;
     case 'torched':
-      fx.say(x, y - 30, 'ALIGHT', '#ffb040', 1.2);
       fx.burst(x, y - 8, 22, ['#fff1b0', '#ffd27a', '#ff9a3c', '#ff6a20'], 70, true);
       fx.flashes.push({ x, y: y - 8, r: 70, i: 0.9, c: [1, 0.6, 0.25], life: 0.35, max: 0.35 });
       fx.shake = Math.max(fx.shake, 1.5);
