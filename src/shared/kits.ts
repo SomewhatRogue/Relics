@@ -70,6 +70,7 @@ export const MORE_KITS: Record<MoreKitId, Weapon> = {
    * brought down overhead, and holy light cracks out where it lands (a smite at arm's length, wider).
    */
   flail: {
+    breaker: true,
     name: 'FLAIL',
     cls: 'HEALER',
     combo: [

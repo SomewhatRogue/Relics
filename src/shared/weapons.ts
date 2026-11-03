@@ -97,6 +97,9 @@ export interface Weapon {
   front?: number;
   /** Each blow finds one goblin (the nearest in reach), never a crowd. */
   single?: boolean;
+  /** Heavy enough that a charged blow knocks a goblin out of a heavy wind-up (a butcher's, a heavy's, a
+   *  cleave or slam). Only the big weapons, and they pay for it with a narrow parry (Kyle, 2026-11-03). */
+  breaker?: boolean;
   /** A tap of block this close before a hit lands is a parry. */
   parryWindow: number;
   /** Blows within this arc (degrees, centred on where you face) can be blocked or parried. */
@@ -132,6 +135,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     dodge: ROLL,
   },
   greatsword: {
+    breaker: true,
     name: 'GREATSWORD',
     cls: 'WARRIOR',
     combo: [

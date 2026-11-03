@@ -77,12 +77,15 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   }
   // A heavy blow breaks the frozen.
   if (ice && heavy) return shatter(e, now, ev), n;
-  // Light goblins flinch out of their wind-up on any hit; the butcher only to a strong heavy.
-  const big = h.heavy && h.power >= 0.7;
+  // Light goblins flinch out of their wind-up on any hit. A heavy wind-up (a butcher's, a heavy's, a cleave
+  // or slam, a striped blow; never a hexer's spell, which any blow breaks) only to a strong charged blow
+  // from a big weapon (the greatsword, the flail).
+  const big = h.heavy && h.power >= 0.7 && !!WEAPONS[h.weapon].breaker;
+  const a = e.attack, heavyWind = !!a && (e.kind === 'butcher' || e.variant === 'heavy' || a.kind === 'cleave' || a.kind === 'slam' || (a.unblockable && a.kind !== 'hex'));
   // Nothing stops a charge once it's coming.
   // (A Rogue's head-on blow doesn't knock anything off balance: only from behind.)
   const shakes = !(WEAPONS[h.weapon].front && !rear);
-  if (shakes && e.act !== 'stunned' && e.act !== 'pinned' && e.act !== 'carried' && !ice && e.attack?.kind !== 'charge' && (small(e) || big)) {
+  if (shakes && e.act !== 'stunned' && e.act !== 'pinned' && e.act !== 'carried' && !ice && e.attack?.kind !== 'charge' && (heavyWind ? big : small(e) || big)) {
     Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: big && e.kind === 'butcher' ? 0.6 : FLINCH });
   }
   return n;
