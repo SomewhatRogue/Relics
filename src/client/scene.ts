@@ -124,9 +124,10 @@ export class Scene {
     return [(this.heroAt[0] - this.cam.x) * k, (this.heroAt[1] - 8 - this.cam.y) * k, PX * k];
   }
 
-  /** A spot in the room (tiles) on screen, in CSS pixels (speech bubbles over heads: bubbles.ts). */
-  tileScreen(x: number, y: number): [number, number] {
+  /** A spot in the room (tiles) on screen, `up` tiles above it, in CSS pixels (speech bubbles over heads: bubbles.ts). */
+  tileScreen(x: number, y: number, up = 0): [number, number] {
     const k = this.scale / this.dpr;
+    y -= up;
     return [(OX + x * PX - this.cam.x) * k, (OY + y * PX - this.cam.y) * k];
   }
 

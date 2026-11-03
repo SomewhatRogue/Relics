@@ -29,7 +29,7 @@ export class Lights {
       this.sky.castShadow = true;
       this.sky.shadow.mapSize.set(shadow, shadow);
       this.sky.shadow.bias = -0.0015;
-      this.sky.shadow.normalBias = 0.02;
+      this.sky.shadow.normalBias = 0.06;
       Object.assign(this.sky.shadow.camera, { left: -16, right: 16, top: 16, bottom: -16, near: 1, far: 80 });
     }
   }

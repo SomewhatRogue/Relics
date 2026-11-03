@@ -40,7 +40,7 @@ export class Bubbles {
   }
 
   /** Each frame: follow the speakers, fade the old lines out. `toScreen` maps tiles to CSS pixels. */
-  frame(now: number, toScreen: (x: number, y: number) => [number, number]): void {
+  frame(now: number, toScreen: (x: number, y: number, up?: number) => [number, number]): void {
     const walls = this.all.size ? [...document.querySelectorAll<HTMLElement>(KEEP_CLEAR)].map((e) => e.getBoundingClientRect()).filter((r) => r.width && r.height) : [];
     for (const [who, b] of this.all) {
       const at = now < b.until ? b.where() : null;
@@ -49,7 +49,7 @@ export class Bubbles {
         this.all.delete(who);
         continue;
       }
-      this.place(b, toScreen(at.x, at.y - HEAD), toScreen(at.x, at.y + FEET)[1], walls);
+      this.place(b, toScreen(at.x, at.y, HEAD), toScreen(at.x, at.y + FEET)[1], walls);
       if (b.until - now < FADE) b.el.style.opacity = String(Math.max(0, (b.until - now) / FADE));
     }
   }

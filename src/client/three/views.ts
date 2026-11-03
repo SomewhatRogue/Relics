@@ -46,8 +46,8 @@ export class Views {
     return this.on3d ? this.v3!.heroScreen() : this.scene.heroScreen();
   }
 
-  tileScreen(x: number, y: number): [number, number] {
-    return this.on3d ? this.v3!.tileScreen(x, y) : this.scene.tileScreen(x, y);
+  tileScreen(x: number, y: number, up = 0): [number, number] {
+    return this.on3d ? this.v3!.tileScreen(x, y, up) : this.scene.tileScreen(x, y, up);
   }
 
   /** For tests and the perf script. */

@@ -15,11 +15,11 @@ import { OX, OY, PX } from '../world';
 import type { Lerp } from './actors3d';
 
 export type Proj = (x: number, y: number, z: number) => [number, number];
-export interface Marks { marks: Target[]; doors: DoorMark[]; pointTo: { x: number; y: number } | null }
+export interface Marks { marks: Target[]; doors: DoorMark[]; pointTo: { x: number; y: number } | null; focus?: { x: number; y: number } | null; fanfare?: boolean }
 
 export class Overlay {
   readonly canvas = document.createElement('canvas');
-  private g = this.canvas.getContext('2d')!;
+  readonly g = this.canvas.getContext('2d')!;
   private W = 1;
   private H = 1;
 
@@ -95,7 +95,8 @@ export class Overlay {
     // Friends' names over their heads; a downed hero's count.
     for (const h of room.heroes) {
       const [hx, hy] = lerp('h:' + h.id, h.x, h.y), [x, y] = P(hx, 1.75 + up(h.z), hy);
-      if (h.act === 'down' && !h.out) {
+      if (h.act === 'down' && (h.out || h.lying)) continue;
+      if (h.act === 'down') {
         const left = h.bleeding ? PARTY.bleed - h.actT : h.actDur - h.actT, s = String(Math.max(0, Math.ceil(left)));
         drawText(g, s, Math.round(x - textWidth(s) / 2), Math.round(y - 2), h.bleeding && !h.selfUp ? '#ffd27a' : '#ff6a5a');
       } else if (h.id !== meId && h.id !== 'squire') {

@@ -19,6 +19,9 @@ import { buildGround, type Ground } from './ground';
 import { Lights, type L3 } from './lights3d';
 import { QUALITY, perfOn, quality, type Quality } from './look';
 import { Overlay, type Marks } from './overlay3d';
+import { People } from './people3d';
+import { drawExtras, drawMist3 } from './extras3d';
+import { drawTags } from './tags3d';
 import { Perf } from './perf3d';
 import { makeRT, postMaterial } from './post';
 import { roomLights } from './roomlights';
@@ -38,6 +41,7 @@ export class View3D {
   private fires = new Fires();
   private actors = new Actors();
   private buildings = new Buildings();
+  private people = new People();
   private ground: Ground | null = null;
   private map: GameMap | null = null;
   private overlay = new Overlay();
@@ -62,7 +66,7 @@ export class View3D {
     game?.after(this.canvas, this.overlay.canvas);
     this.overlay.canvas.style.display = 'none';
     this.postScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.post));
-    this.scene.add(this.lights.group, this.fires.group, this.actors.group, this.buildings.group);
+    this.scene.add(this.lights.group, this.fires.group, this.actors.group, this.buildings.group, this.people.group);
     this.resize();
     addEventListener('resize', () => this.resize());
   }
@@ -118,9 +122,12 @@ export class View3D {
     return [x * k, y * k, ppu * k, ppu * Math.sin(PITCH) * k];
   }
 
-  /** A spot on the floor (tiles) in CSS pixels (speech bubbles over heads). */
-  tileScreen(x: number, y: number): [number, number] {
-    const [px, py] = this.view.px(x, 0, y), k = this.S / this.dpr;
+  /**
+   * A spot on the floor (tiles) in CSS pixels, `up` flat-view tiles above it (speech bubbles over
+   * heads): a 3D figure stands taller on screen than the flat sprite, so up is raised to match.
+   */
+  tileScreen(x: number, y: number, up = 0): [number, number] {
+    const [px, py] = this.view.px(x, up * 0.95, y), k = this.S / this.dpr;
     return [px * k, py * k];
   }
 
@@ -131,11 +138,13 @@ export class View3D {
       const p = room.prev.get(key);
       return p ? [p[0] + (x - p[0]) * a, p[1] + (y - p[1]) * a] : [x, y];
     };
-    const me = room.heroes.find((h) => h.id === meId);
+    const me = room.heroes.find((h) => h.id === meId), f = marks.focus;
     if (me) {
       const [hx, hy] = lerp('h:' + me.id, me.x, me.y), portrait = this.view.H > this.view.W * 1.2;
       this.heroAt = [hx, hy];
-      this.view.follow(map, hx + me.fx * 0.6, hy + me.fy * 0.5 + (portrait ? (this.view.H / this.view.ppu) * 0.1 : 0), dt, fx.shake);
+      // A cutscene's point of interest (the Stoker coming): the camera eases there instead.
+      if (f) this.view.follow(map, f.x, f.y, dt * 0.36, fx.shake);
+      else this.view.follow(map, hx + me.fx * 0.6, hy + me.fy * 0.5 + (portrait ? (this.view.H / this.view.ppu) * 0.1 : 0), dt, fx.shake);
     }
     const at = this.view.at, fires: Spot[] = [...this.ground!.fires], ls: L3[] = [...this.ground!.lights];
     this.buildings.update(map, this.heroAt, fires);
@@ -148,6 +157,7 @@ export class View3D {
     this.lights.place(ls, at.x, at.z, now);
     this.fires.draw(fires, now);
     this.actors.update(room, meId, now, lerp);
+    this.people.update(room, map, others, now);
     this.ground!.decals(fx);
     // Everything but the heroes; then the heroes as a silhouette where something nearer hides them;
     // then the heroes themselves over that, so only the hidden parts stay a silhouette.
@@ -173,7 +183,12 @@ export class View3D {
     this.post.uniforms.tDep.value = this.rt!.depthTexture;
     this.gl.setRenderTarget(null);
     this.gl.render(this.postScene, this.quad);
-    this.overlay.draw(room, meId, fx, marks, (x, y, z) => this.view.px(x, y, z), lerp, now, this.view.ppu);
+    const P = (x: number, y: number, z: number) => this.view.px(x, y, z), og = this.overlay.g;
+    const ex = { room, meId, lerp, P, now, W: this.view.W, H: this.view.H, fanfare: !!marks.fanfare, mist: [at.x * this.view.ppu, at.z * this.view.ppu * Math.sin(PITCH)] as [number, number] };
+    this.overlay.draw(room, meId, fx, marks, P, lerp, now, this.view.ppu);
+    drawExtras(og, ex);
+    drawTags(og, map, room.time, this.heroAt ? { x: this.heroAt[0], y: this.heroAt[1] } : null, others, P, now);
+    drawMist3(og, map.theme, ex);
     this.perf.frame(performance.now() - t0, performance.now(), `${this.view.W}x${this.view.H} x${this.S}`, calls, tris);
   }
 
@@ -184,6 +199,7 @@ export class View3D {
   private setMap(map: GameMap): void {
     if (this.ground) this.scene.remove(this.ground.group), this.ground.dispose();
     this.buildings.clear();
+    this.people.clear();
     this.ground = buildGround(map, paintMap(map));
     this.scene.add(this.ground.group);
     this.map = map;
