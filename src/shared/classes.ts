@@ -8,7 +8,7 @@ import { SKILL_STEPS, TEACHES } from './drills.js';
 
 const SKILL_AT = TEACHES.skill.level, LEAVE_AT = TEACHES.leave.level, [, SECOND, THIRD] = SKILL_STEPS.map((x) => x.level);
 /** The two skills taught later, and that you carry one. */
-const later = (a: string, b: string) => ` Later it teaches ${a} (level ${SECOND}) and ${b} (level ${THIRD}). You carry one skill at a time and change it there for nothing.`;
+const later = (a: string, b: string) => ` The same trainer teaches ${a} at level ${SECOND} and ${b} at level ${THIRD}. You carry one skill at a time, and changing it there costs nothing.`;
 
 /** What a class is called on screen (the Healer is a Cleric; the id stays HEALER). */
 export const CLASS_NAME: Record<HeroClass, string> = { WARRIOR: 'WARRIOR', RANGER: 'RANGER', ROGUE: 'ROGUE', MAGE: 'MAGE', HEALER: 'CLERIC' };
@@ -40,7 +40,7 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     line: 'Sword and shield. Holds the line.',
     pitch: "Somebody has to stand in the door. You're the one with the shield.",
     weapon: 'Sword and shield',
-    skill: `Shield Charge: run shield first the way you face, knocking small goblins flat, staggering big ones and bursting crates, until a wall stops you. Your trainer teaches it from level ${SKILL_AT}.${later('the War Cry, which brings every goblin in earshot to you', 'the Shield Stamp, which throws back everything close')}`,
+    skill: `Shield Charge: run shield first the way you face, knocking small goblins flat, staggering big ones and bursting crates, until a wall stops you. Your trainer teaches it from level ${SKILL_AT}.${later('the War Cry', 'the Shield Stamp')}`,
     cant: 'Nothing at range. Slow feet.',
     guard: "Can hold a block and parry, and the shield covers nearly everything in front. Can't roll: walk out of anything striped.",
     stats: { POWER: 4, GUARD: 5, SPEED: 2, RANGE: 1, SUPPORT: 3 },
@@ -80,7 +80,7 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     line: 'Mace and censer. Keeps you standing.',
     pitch: 'Stitch them shut, then go and hit whatever opened them.',
     weapon: 'Mace and censer',
-    skill: `Sanctuary: blessed ground mends allies and burns goblins, and wards whoever's worst hurt. Your trainer teaches it from level ${SKILL_AT}.${later('the Censer Chain', 'the Lantern Light')}`,
+    skill: `Sanctuary: blessed ground mends allies and burns goblins, and wards whoever's worst hurt. Your trainer teaches it from level ${SKILL_AT}.${later('the Censer Chain', 'the Censer Light')}`,
     cant: 'Slow, short reach.',
     guard: "Can hold a block and parry, though a mace and censer let a little more through than a shield. Can't roll: walk out of anything striped.",
     note: 'Feed the censer what butchers leave. It heals hotter, and draws teeth.',

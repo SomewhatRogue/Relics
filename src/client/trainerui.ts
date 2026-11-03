@@ -57,7 +57,7 @@ export function openTrainer(g: Game, panel: Panel, title: string, who: string, g
   const sNext = nextLevel(skills);
   const skillSum = [known.length ? `CARRYING ${RELICS[carried].name}` : '', `${known.length} OF ${choices.length}`, sNext ? `NEXT AT LEVEL ${sNext}` : ''].filter(Boolean).join(' &middot; ');
   const skillBody = skills.map((r) => skillRow(r, carried, !!r.skill && knowsSkill(p, r.skill))).join('') +
-    (known.length > 1 ? '<p class="tr-note">Tap a skill you know to carry it. One at a time, changed here for nothing.</p>' : '');
+    (known.length > 1 ? '<p class="tr-note">Tap a skill you know to carry it. You carry one at a time, and changing it here costs nothing.</p>' : '');
   // The class's own craft, and the base stats.
   const tech = craft.find((r) => r.id === 'technique')!, cNext = nextLevel(craft);
   const craftSum = `${tech.name} ${tech.rank}/${tech.max}` + (cNext ? ` &middot; NEXT AT LEVEL ${cNext}` : '');

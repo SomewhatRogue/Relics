@@ -117,7 +117,7 @@ most Want among the heroes is the one the bells don't spare).
   Sanctuary. Since 2026-11-02 each trainer teaches three, one at a time (levels 3, 5 and 7; the hero carries one and
   changes it there): Cole the Shield Charge, War Cry and Shield Stamp; Maeve the Net, Volley and Send the Hound; Whisper
   Shadowstep, Vanish and the Knife Fan; Vell the Channel, Fire Ring and Storm Tether (a Mage carrying either of those casts
-  fire); Isolde Sanctuary, the Censer Chain and Lantern Light (the coal's light, like every heal). Pending the lore keeper. From level 5, for 250 gold (was level 3 for 80), Maeve teaches the snare on the jump and Vell the image on the
+  fire); Isolde Sanctuary, the Censer Chain and the Censer Light (the censer opened: the coal's light, growing with the coals like every heal). Never named for the Lantern on screen (lore keeper, 2026-11-02). Send the Hound pins small goblins and only hangs off big ones; sending it calls it back even from a bolt (the one exception to coming back when it's ready); it still bolts from a butcher's swing. The Vanish smoke is a Rogue's powder, not magic or shard-stuff. From level 5, for 250 gold (was level 3 for 80), Maeve teaches the snare on the jump and Vell the image on the
   blink (the Mage's own craft through the focus, not shard-stuff; the goblins go for it a couple of
   seconds and no longer). Paying is trade and never touches the Want. Until Vell teaches the Channel a
   Mage's spells are fire. Old heroes keep what they had; no in-world explanation is ever written.

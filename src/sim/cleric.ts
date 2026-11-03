@@ -1,6 +1,6 @@
 /**
  * The Cleric's other skills. CENSER CHAIN: the censer's chain hauls a friend in need to the Cleric's
- * side, blessed; with no friend in reach it drags in the goblin they face. LANTERN LIGHT: the censer
+ * side, blessed; with no friend in reach it drags in the goblin they face. CENSER LIGHT: the censer
  * opened, its coal's light flooding out at the end of the windup (the ring is drawn from the same
  * LIGHT numbers): goblins in it scorched and thrown back, small ones blinded; friends in it mend.
  */

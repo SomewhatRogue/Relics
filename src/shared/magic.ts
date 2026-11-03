@@ -108,7 +108,7 @@ export const RELICS = {
   firering: { name: 'FIRE RING', short: 'RING', cooldown: FIRE_RING.cooldown, windup: FIRE_RING.windup, recover: FIRE_RING.recover, range: FIRE_RING.radius },
   tether: { name: 'STORM TETHER', short: 'TETHER', cooldown: TETHER.cooldown, windup: TETHER.windup, recover: TETHER.recover, range: TETHER.range },
   chain: { name: 'CENSER CHAIN', short: 'CHAIN', cooldown: CHAIN.cooldown, windup: CHAIN.windup, recover: CHAIN.recover, range: CHAIN.range },
-  light: { name: 'LANTERN LIGHT', short: 'LIGHT', cooldown: LIGHT.cooldown, windup: LIGHT.windup, recover: LIGHT.recover, range: LIGHT.radius },
+  light: { name: 'CENSER LIGHT', short: 'LIGHT', cooldown: LIGHT.cooldown, windup: LIGHT.windup, recover: LIGHT.recover, range: LIGHT.radius },
 };
 export type RelicId = keyof typeof RELICS;
 export const RELIC_ORDER: RelicId[] = ['javelin', 'hook', 'bash', 'horn', 'stamp', 'net', 'volley', 'sic', 'shadow', 'vanish', 'knives', 'lodestone', 'firering', 'tether', 'blessing', 'ward', 'sanctuary', 'chain', 'light'];
