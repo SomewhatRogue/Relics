@@ -9,7 +9,7 @@ import { townInterior } from '../shared/interiors';
 import { board, STORY_PARTY, type Job } from '../shared/jobs';
 import { WORKS, workDone, workOpen, workProgress, WORK_ORDER, type WorkId } from '../shared/works';
 import { contribute, type Contribution } from '../shared/worldsync';
-import { HERO_SLOTS, SHOP, gainXp, newProfile, perkFx, perkOffer, type PerkId, type Profile } from '../shared/progress';
+import { HERO_SLOTS, SHOP, gainXp, newProfile, perkFx, resetPerks, takePerk, type PerkId, type Profile } from '../shared/progress';
 import { jobXp } from '../shared/pace';
 import { Rng } from '../shared/rng';
 import { CHAPTER_1, QUORUM, rewardMult, type WorldState } from '../shared/story';
@@ -49,6 +49,8 @@ const NAMES: Record<string, string> = { cottage: 'THE COTTAGE', barn: 'THE BARN'
 
 export class Game {
   mode: Mode = 'town';
+  /** Grown on the last job: say so over the hero once, back in town (main.ts). */
+  levelPop = 0;
   room!: ArenaRoom;
   run: Run | null = null;
   save: Save = load();
@@ -680,6 +682,7 @@ export class Game {
     p.gold += gold;
     p.runs++;
     const levels = gainXp(p, xp);
+    if (levels) this.levelPop = p.level;
     // The bottom of a deep dive: a relic pried out of the butcher (one you don't have; the first is carried at once).
     const relic = won && run.job.deep ? FOUND_RELICS.find((r) => !p.relics.includes(r)) : undefined;
     if (relic) (p.relics.push(relic), p.relic ||= relic);
@@ -1018,12 +1021,22 @@ export class Game {
     return { you, moll, won };
   }
 
+  /** Knacks are taken and given back anywhere out of a fight: in town (the job's end is shown there too). */
+  get knacksOpen(): boolean {
+    return this.mode === 'town';
+  }
+
+  /** Take one of the two knacks on offer (shared/chains.ts). */
   pickPerk(id: PerkId): void {
-    const p = this.profile;
-    // Only one of the two the tree offers now (shared/chains.ts).
-    if (p.picks <= 0 || !perkOffer(p).includes(id)) return;
-    p.perks.push(id);
-    p.picks--;
+    if (!this.knacksOpen || !takePerk(this.profile, id)) return;
+    this.equip(this.hero, this.hero);
+    store(this.save);
+  }
+
+  /** Give every knack back, free: each comes back as a pick. */
+  resetPerks(): void {
+    if (!this.knacksOpen || !this.profile.perks.length) return;
+    resetPerks(this.profile);
     this.equip(this.hero, this.hero);
     store(this.save);
   }

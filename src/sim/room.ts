@@ -37,6 +37,8 @@ import { forgedElement, has, traitsOf } from './traits';
 import { fireHook, stepHook } from './hook';
 import { stepJavelin, throwJavelin } from './javelin';
 import { laySnare, stepHound, stepSnare } from './ranger';
+import { healOf, healReach, perfectMult, smiteStun } from './knacks';
+import { knack } from './gearstats';
 import { stepNests } from './spiders';
 import { cure, stepPoison } from './poison';
 import { stepPuddles } from './puddles';
@@ -327,7 +329,7 @@ export class ArenaRoom {
   private loose(h: Hero, s: Swing, w: World): void {
     s = { ...s };
     // Blessed, a DEADEYE perfect release, a TEMPO hit after a dodge through a blow.
-    let mult = (h.blessedUntil > w.now ? BLESSING.dmgMult : 1) * (h.heavy && h.perfect && has(h, 'deadeye') ? TRAIT.deadeye : 1);
+    let mult = (h.blessedUntil > w.now ? BLESSING.dmgMult : 1) * (h.heavy && h.perfect ? perfectMult(h) * (has(h, 'deadeye') ? TRAIT.deadeye : 1) : 1);
     if (s.shot && h.tempoUntil > w.now) (mult *= TRAIT.tempo), (h.tempoUntil = -9);
     // The high ground: shots from up on a ledge.
     if (s.shot && (h.z ?? 0) > 0) mult *= HEIGHT.shot;
@@ -340,6 +342,7 @@ export class ArenaRoom {
       if (full) (mult *= 2), (s = { ...s, pierce: true });
     }
     const bolts = this.bolts.length;
+    if (s.shot === 'smite') s.stun = smiteStun(h, s);
     if (s.shot === 'smite') this.bolts.push(smite(h, s, Math.min(s.range, this.aimDistance(h, s.range, 3.5)), mult, traitsOf(h), s.delay));
     else if (s.shot) {
       // A Mage's spells take the element it last channelled (fire to start with); the first after a turn is primed.
@@ -351,13 +354,16 @@ export class ArenaRoom {
     }
     // The Jealous Rod: a charged spell jumps to every goblin near what it hits.
     if (full && wears(h, 'jealous')) for (const b of this.bolts.slice(bolts)) b.chain = true;
-    if (!s.heal) return;
+    // WIDE BURST: a Mage's bursts reach further.
+    for (const b of this.bolts.slice(bolts)) b.burst *= 1 + knack(h, 'burst');
+    const heal = healOf(h, s);
+    if (!heal) return;
     w.ev.push({ k: 'bless', x: h.x, y: h.y });
     for (const o of this.heroes) {
-      if (o.act === 'down' || Math.hypot(o.x - h.x, o.y - h.y) > HEAL_RADIUS) continue;
+      if (o.act === 'down' || Math.hypot(o.x - h.x, o.y - h.y) > healReach(h)) continue;
       // A heal draws a stack of poison too.
       cure(o, false, this.events);
-      const n = Math.min(o.maxHp - o.hp, Math.round(heals(o, h, s.heal * healMult(h) * (1 + technique(h.drills, 'HEALER')))));
+      const n = Math.min(o.maxHp - o.hp, Math.round(heals(o, h, heal * healMult(h) * (1 + technique(h.drills, 'HEALER')))));
       if (n <= 0) continue;
       o.hp += n;
       w.ev.push({ k: 'heal', x: o.x, y: o.y, n });

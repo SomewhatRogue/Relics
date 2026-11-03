@@ -47,7 +47,7 @@ export function openTrainer(g: Game, panel: Panel, title: string, who: string, g
   panel.show(title, html);
   const on = (sel: string, f: (b: HTMLElement) => void) => document.querySelectorAll<HTMLElement>(`#panel ${sel}`).forEach((b) => b.addEventListener('click', () => f(b)));
   on('[data-pick]', (b) => (g.pickPerk(b.dataset.pick as never), again()));
-  on('[data-tree]', () => openTree(g, panel, { take: true, back: again }));
+  on('[data-tree]', () => openTree(g, panel, { back: again }));
   on('[data-carry]', (b) => (g.chooseSkill(b.dataset.carry as RelicId), again()));
   on('[data-row]', (b) => openRow(g, panel, title, b.dataset.row!, again));
 }

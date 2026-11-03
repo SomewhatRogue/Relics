@@ -8,6 +8,7 @@ import type { Rng } from '../shared/rng';
 import { hexFriendly, isBackline, stepBackline } from './backline';
 import { shove, slide } from './bodies';
 import { attackCovers, hitHero } from './combat';
+import { knack } from './gearstats';
 import { damage, frozen, isDead, kill, snared } from './damage';
 import { shatter } from './elements';
 import { has } from './traits';
@@ -273,7 +274,7 @@ function notice(e: Enemy, heroes: Hero[], others: Enemy[], now: number, ev: Figh
     // Darker hours, less far (shared/timeofday.ts); a censer's glow carries less by day.
     const far = (e.kind === 'spider' ? SPIDER.sight : ALERT.sight) * sightIn(theme);
     const sight = e.variant === 'looter' ? 1.6 : e.feeding ? far * 0.5 : ahead ? far : ALERT.behind;
-    if (d < sight * (h.sneaking && h.act !== 'roll' ? STEALTH.sneak : 1) + seenFrom(h) * glowIn(theme)) seen = true;
+    if (d < sight * (h.sneaking && h.act !== 'roll' ? STEALTH.sneak * (1 - knack(h, 'quiet')) : 1) + seenFrom(h) * glowIn(theme)) seen = true;
   }
   for (const o of others) if (o !== e && o.alert && (isDead(o) || o.hitAt > now - 0.2) && Math.hypot(o.x - e.x, o.y - e.y) < ALERT.hear) seen = true;
   if (!seen) return false;

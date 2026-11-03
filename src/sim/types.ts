@@ -200,6 +200,8 @@ export interface Hero extends Body {
   tempoUntil: number;
   /** A Mage just turned element: its next spell is primed (CHANNEL.primed). */
   primed?: boolean;
+  /** Primed spells left (TWICE PRIMED: two). */
+  primeLeft?: number;
   maxHp: number;
   /** Perks chosen at the trainer (see shared/progress). */
   perks: string[];

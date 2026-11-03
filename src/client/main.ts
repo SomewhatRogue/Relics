@@ -39,6 +39,7 @@ import { Input } from './input';
 import { LootCard } from './lootcard';
 import { PackView } from './pack';
 import { openTree } from './treeui';
+import { knackCues } from './knackcues';
 import { LessonView } from './lesson';
 import { Scene } from './scene';
 import { setMusic, setMuted } from './sfx';
@@ -196,6 +197,7 @@ function hud(now: number): void {
   pack.update(me);
   lesson.update();
   $('#packbtn').classList.toggle('on', pack.open);
+  knackCues(game, panel.open, $('#packbtn'), (x, y, s) => fx.say(toPx(x, y)[0], toPx(x, y)[1] - 40, s, '#ffd27a', 3.2));
   if (input.touch) {
     // GRAB shows only when there's something to grab (or to throw); ATTACK becomes SLAM.
     const carrying = me.act === 'carry';
@@ -280,7 +282,7 @@ function hud(now: number): void {
     $('#banner').innerHTML = game.outside
       ? `<b>${room.map.name}</b> Walk out at the bottom<span>${pr.gold} GOLD  LEVEL ${pr.level}</span>`
       : game.mode === 'town'
-      ? `<b>WICKHOLD</b> DAY ${game.world.day}<span>${pr.gold} GOLD  LEVEL ${pr.level}${pr.picks ? '  (FIND YOUR TRAINER)' : ''}  ${game.world.rescued} HOME${link.online ? '  WORLD ' + link.group.toUpperCase() : ''}</span>`
+      ? `<b>WICKHOLD</b> DAY ${game.world.day}<span>${pr.gold} GOLD  LEVEL ${pr.level}${pr.picks ? '  (A KNACK TO PICK: PACK)' : ''}  ${game.world.rescued} HOME${link.online ? '  WORLD ' + link.group.toUpperCase() : ''}</span>`
       : `<b>TRAINING YARD</b> Walk out at the bottom to go back to town`;
   }
   const spot = game.near(), busy = panel.open || title.open;
@@ -456,7 +458,7 @@ w.__renderMusic = (...a: Parameters<typeof import('./musicrender').renderMusic>)
 w.__title = title;
 w.__panel = panel;
 w.__pack = pack;
-w.__openTree = (take = false) => openTree(game, panel, { take });
+w.__openTree = () => openTree(game, panel);
 w.__openSpot = (id: string, arg = 0, key = '') => openSpot(id as never, game, panel, arg, key);
 // A job on a village street (houses to go into), for the party tests to set out on.
 w.__villageJob = (seed = 7) => import('../shared/jobs').then((m) => ({ ...m.board(1)[0], place: m.PLACES.find((p) => p.kind === 'village')!, objective: 'hunt', boss: 'SKARN', rooms: 3, seed, deep: false }));

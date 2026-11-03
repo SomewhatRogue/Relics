@@ -8,6 +8,7 @@ import { slide } from './bodies';
 import { BAG } from '../shared/bags';
 import { applyGear, turnBelt } from './pack';
 import { knack, statsOf } from './gearstats';
+import { decoyTime, dodgeBreath, dodgeReach, releaseWindow } from './knacks';
 import { fedMult, jealousBlocks, jealousCooldown, needlesBreath, wears } from './hungry';
 import { hitEnemy } from './combat';
 import { knows, type Enemy, type FightEvent, type Hero, type Intent } from './types';
@@ -29,7 +30,7 @@ export function currentSwing(h: Hero): Swing {
   const w = WEAPONS[h.weapon], g = statsOf(h);
   const k = h.power, hv = w.heavy;
   // A drawn shot only pierces at a full draw.
-  const s = !h.heavy ? w.combo[h.combo] : { ...hv, dmg: Math.round(hv.dmg + (hv.dmgFull - hv.dmg) * k), knock: hv.knock + (hv.knockFull - hv.knock) * k, pierce: hv.pierce && k >= 1 };
+  const s = !h.heavy ? w.combo[h.combo] : { ...hv, dmg: Math.round(hv.dmg + (hv.dmgFull * (1 + (g.fx.full ?? 0)) - hv.dmg) * k), knock: hv.knock + (hv.knockFull - hv.knock) * k, pierce: hv.pierce && k >= 1 };
   // Modifiers: how well (shared/gear.ts).
   if (!g.damage && !g.quick && !g.reach && !g.knock && fedMult(h) === 1) return s;
   const fed = fedMult(h);
@@ -179,7 +180,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   const dodge = w.dodge;
   const wantsRoll = CLASS_DODGES[w.cls] && now - h.rollQueuedAt < INPUT_BUFFER && now - h.lastRollAt >= dodge.cooldown * (1 - statsOf(h).dodge) && h.stamina >= 1 && !h.winded;
   if (h.act === 'roll') {
-    const k = (dodge.distance * statsOf(h).dodgeDist) / dodge.time;
+    const k = dodgeReach(h) / dodge.time;
     h.x += h.rollDx * k * dt;
     h.y += h.rollDy * k * dt;
     collide(h, HERO.radius);
@@ -215,7 +216,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
       // A draw (a shot on the hold) wants a clean release: on the white flash is perfect; held too long, it shakes and weakens.
       const held = h.actT + CHARGE.start, full = chargeFull(w, h), drawn = !!w.heavy.shot;
       h.power = Math.min(1, held / full);
-      h.perfect = drawn && held >= full && held <= full + RELEASE.perfect;
+      h.perfect = drawn && held >= full && held <= full + releaseWindow(h);
       if (drawn && held > full + RELEASE.overdraw) h.power = RELEASE.overdrawn;
       if (h.perfect) ev.push({ k: 'perfect', x: h.x, y: h.y });
       startSwing(h, -1, inp, enemies, now, ev);
@@ -324,8 +325,8 @@ function startRoll(h: Hero, inp: Intent, now: number, ev: FightEvent[]): void {
   h.rollX = h.x;
   h.rollY = h.y;
   // A blink leaves an image of you where you stood, and the goblins near it go for that.
-  if (kind === 'blink' && knows(h, 'leave')) Object.assign(h, { decoyX: h.x, decoyY: h.y, decoyUntil: now + DECOY.time });
+  if (kind === 'blink' && knows(h, 'leave')) Object.assign(h, { decoyX: h.x, decoyY: h.y, decoyUntil: now + decoyTime(h) });
   h.rollQueuedAt = -9;
-  spend(h, WEAPONS[h.weapon].dodge.stamina * DODGE.cost * statsOf(h).dodgeCost, now);
+  spend(h, WEAPONS[h.weapon].dodge.stamina * DODGE.cost * dodgeBreath(h), now);
   ev.push({ k: kind === 'blink' ? 'blink' : 'roll', x: h.x, y: h.y });
 }
