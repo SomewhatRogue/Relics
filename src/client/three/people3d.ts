@@ -15,6 +15,7 @@ import { makeNpc, type NpcFig } from './npcs3d';
 import { Pool } from './pool3d';
 import { flash, part } from './rig';
 import { poseNpc } from './work3d';
+import { BOXFIGS } from './look';
 
 export class People {
   readonly group = new THREE.Group();
@@ -36,6 +37,15 @@ export class People {
 
   update(room: ArenaRoom, map: GameMap, others: Hero[], now: number): void {
     for (const p of [this.npcs, this.others, this.decoys]) p.begin();
+    // Flat cards stand for all of these (cards3d.ts) unless ?figs=3d.
+    if (BOXFIGS) this.boxes(room, map, others, now);
+    for (const p of [this.npcs, this.others, this.decoys]) p.end();
+    if (map === ARENA && !this.cage) this.group.add((this.cage = cage()));
+    if (map !== ARENA && this.cage) this.group.remove(this.cage), (this.cage = null);
+    if (this.cage) this.cage.children[0].position.x = Math.floor(now * 0.7) % 4 === 0 ? 0.06 : 0;
+  }
+
+  private boxes(room: ArenaRoom, map: GameMap, others: Hero[], now: number): void {
     (map.npcs ?? []).forEach((n, i) => {
       const at = npcAt(n, room.time), key = 'n' + i + n.name, f = this.npcs.get(key, n.look, () => makeNpc(n.look));
       poseNpc(f, n, at.fx, at.fy, at.x, now, this.stride(key, at.x, at.y));
@@ -56,10 +66,6 @@ export class People {
       const left = h.decoyUntil - room.time;
       f.root.visible = Math.sin(room.time * 18) > -0.5 && (left > 0.5 || Math.floor(now * 20) % 2 === 0);
     }
-    for (const p of [this.npcs, this.others, this.decoys]) p.end();
-    if (map === ARENA && !this.cage) this.group.add((this.cage = cage()));
-    if (map !== ARENA && this.cage) this.group.remove(this.cage), (this.cage = null);
-    if (this.cage) this.cage.children[0].position.x = Math.floor(now * 0.7) % 4 === 0 ? 0.06 : 0;
   }
 
   clear(): void {

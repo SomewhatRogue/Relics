@@ -17,7 +17,9 @@ import { Cam, FAR, NEAR, PITCH } from './camera3d';
 import { Fires } from './fire3d';
 import { buildGround, type Ground } from './ground';
 import { Lights, type L3 } from './lights3d';
-import { QUALITY, brightGamma, perfOn, quality, type Quality } from './look';
+import { BOXFIGS, QUALITY, brightGamma, perfOn, quality, type Quality } from './look';
+import { Figs } from './figs3d';
+import { putCards } from './cards3d';
 import { Overlay, type Marks } from './overlay3d';
 import { People } from './people3d';
 import { Grim3D } from './grim3d';
@@ -45,6 +47,7 @@ export class View3D {
   private lights = new Lights(this.q.lights, this.q.shadow);
   private fires = new Fires();
   private actors = new Actors();
+  private figs = new Figs();
   private buildings = new Buildings();
   private people = new People();
   private grim = new Grim3D();
@@ -72,7 +75,7 @@ export class View3D {
     game?.after(this.canvas, this.overlay.canvas);
     this.overlay.canvas.style.display = 'none';
     this.postScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.post));
-    this.scene.add(this.lights.group, this.fires.group, this.actors.group, this.buildings.group, this.people.group, this.grim.group);
+    this.scene.add(this.lights.group, this.fires.group, this.actors.group, this.buildings.group, this.people.group, this.grim.group, this.figs.group);
     this.resize();
     addEventListener('resize', () => this.resize());
   }
@@ -172,6 +175,12 @@ export class View3D {
     this.fires.draw(fires, now);
     this.actors.update(room, meId, now, lerp);
     this.people.update(room, map, others, now);
+    const P = (x: number, y: number, z: number) => this.view.px(x, y, z);
+    if (!BOXFIGS) {
+      this.figs.begin(this.view.ppu, P, this.view.W, this.view.H, now, room.time);
+      putCards(this.figs, room, meId, others, lerp);
+      this.figs.end();
+    }
     this.ground!.decals(fx);
     // Everything but the heroes; then the heroes as a silhouette where something nearer hides them;
     // then the heroes themselves over that, so only the hidden parts stay a silhouette.
@@ -183,9 +192,12 @@ export class View3D {
     cam.layers.set(XRAY_LAYER);
     gl.autoClear = false;
     gl.shadowMap.autoUpdate = false;
-    this.scene.overrideMaterial = XRAY;
+    // Box figures take the silhouette as an override; cards swap to theirs (cut to the figure's shape).
+    if (BOXFIGS) this.scene.overrideMaterial = XRAY;
+    else this.figs.xray(true);
     gl.render(this.scene, cam);
     this.scene.overrideMaterial = null;
+    this.figs.xray(false);
     gl.render(this.scene, cam);
     calls += gl.info.render.calls * 2;
     tris += gl.info.render.triangles * 2;
@@ -197,18 +209,18 @@ export class View3D {
     this.post.uniforms.tDep.value = this.rt!.depthTexture;
     this.gl.setRenderTarget(null);
     this.gl.render(this.postScene, this.quad);
-    const P = (x: number, y: number, z: number) => this.view.px(x, y, z), og = this.overlay.g;
+    const og = this.overlay.g;
     const ex = { room, meId, lerp, P, now, W: this.view.W, H: this.view.H, fanfare: !!marks.fanfare, mist: [at.x * this.view.ppu, at.z * this.view.ppu * Math.sin(PITCH)] as [number, number] };
     this.overlay.draw(room, meId, fx, marks, P, lerp, now, this.view.ppu);
     drawSkills3(og, room, P, lerp, this.view.ppu, now);
     drawExtras(og, ex);
     drawTags(og, map, room.time, this.heroAt ? { x: this.heroAt[0], y: this.heroAt[1] } : null, others, P, now);
     drawMist3(og, map.theme, ex);
-    this.perf.frame(performance.now() - t0, performance.now(), `${this.view.W}x${this.view.H} x${this.S}`, calls, tris);
+    this.perf.frame(performance.now() - t0, performance.now(), `${this.view.W}x${this.view.H} x${this.S}` + (BOXFIGS ? '' : `, ${this.figs.count} figs ${this.figs.ms.toFixed(1)} ms`), calls, tris);
   }
 
   get stats() {
-    return { ...this.perf.stats, W: this.view.W, H: this.view.H, S: this.S, calls: this.calls };
+    return { ...this.perf.stats, W: this.view.W, H: this.view.H, S: this.S, calls: this.calls, figs: this.figs.ms, cards: this.figs.count };
   }
 
   private setMap(map: GameMap): void {
