@@ -2,6 +2,41 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-02: host a job, wander town, set out when ready (Kyle; Claude Opus 5.5)
+
+Kyle: "I would like to be able to host a job and then wander around town, same with others, and start
+whenever we're ready, with a little UI notification of who else signed up for the job."
+
+- **GATHER A PARTY posts and lets you go.** The board closes; you walk anywhere in Wickhold (halls,
+  shops, the vault) while the party's up. The board still lists parties (`client/partyboard.ts`).
+- **A party card on the HUD** (`client/partycard.ts`, `partyhud.css`) in town while you lead or are in
+  one, indoors too: the job's kind and name, pips in class colours for who's in plus empty ones for free
+  slots, 2/4; opened out, the names (class colours from the weapon each carries in town), the leader
+  marked LEADS, and SET OUT (greyed with NEEDS 3 TO SET OUT for a story job short of people) and CANCEL
+  for the leader, LEAVE for the rest. A phone shows the one line under the HUD and opens on a tap; a
+  laptop shows it all. With a panel up on a phone it drops to the bottom as one line, so the panel reads.
+- **Toasts** (`client/partytoast.ts`) under the card: KYLE is gathering for ... (with JOIN on it, and a tap
+  elsewhere opens the parties gathering from anywhere), SAM joined your party, SAM left, You're in KYLE's
+  party, and why one's gone. One per happening, a soft two-note chime, gone in 4.5 s, three at most.
+- **Setting out has a beat** (`client/setout.ts`): the leader's SET OUT closes any panel and the pack, says
+  SETTING OUT and where for 1.4 s, then goes; every member gets the same beat wherever they are, then is
+  pulled in. Nobody can join during the leader's beat.
+- **Online, small and steady** (`shared/lobby.ts` pure and tested, `client/parties.ts`): the offer the town
+  carries is a tag of the job (id, title, kind, place, size) instead of the whole posting, under 220
+  bytes; the whole job goes once, with the set-out word. The party's grace is 20 s (PARTY_GRACE, longer
+  than the town's 12 s so a reload through the start screen fits): a member quiet past it is let go, and
+  a leader quiet past it ends the party for everyone. Both sides keep their party in localStorage for
+  the grace (`client/partykeep.ts`), so a reload on either side comes back to it. A member not yet listed
+  asks again every 3 s, so one lost word never strands anyone. Leaving Wickhold (the yard, a job alone)
+  takes your party down or leaves the one you're in, said before the town's socket closes.
+- **Tests.** `tests/lobby.test.ts`; `scripts/lobby-online.cjs` (in `npm run test:online`): host posts and
+  walks into the forge, a friend on a phone joins from the toast, the host's card shows him, the friend
+  walks into the counting house and opens the vault, the host sets out from his card, both arrive; a
+  member reloads and stays in, then leaves and the host is told; the host reloads with the party intact,
+  then cancels; the host goes to the yard; the host's page dies and the party breaks up after the grace.
+  The other online scripts and the stress kit now set out from the card.
+- Open: every new word (`client/partywords.ts`) through the lore keeper and the line editor.
+
 ## 2026-11-02: the 2.5D view everywhere, a quality switch, the hand crossbow (Kyle; Claude Opus 5.5)
 
 Kyle played 2.5D on jobs ("It seemed to run really well") and asked: "No 2.5D in the main hub area?",
