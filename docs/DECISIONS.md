@@ -2252,3 +2252,63 @@ Beyond that, I want training to be its own expandable / collapsible area."
   "Later it teaches..." sentence; callouts STAMP, GONE, FIRE RING, PINNED; headers TECHNIQUE, RANKS;
   CARRYING, CARRY, LEARN, READY, NEXT AT LEVEL, TAUGHT AT LEVEL n FOR n GOLD; the carry note.
 
+
+## 2026-11-03: relics fade, the church takes them, and seven kinds to find (Kyle; Claude Opus 5.5)
+
+Kyle: "Relics fade with usage but can be recharged at the church", "We should have more relic types",
+elements built into a relic ("rare and more valuable, higher tier, more durable, still fades, but can't
+be recharged"), "If you leave a relic higher charged at the church you get something", "Donate two, get
+one random one back", relics a rare drop; then "I like relics being interactive with the world also ...
+strong based on physics and buff or debuff ... clear that it doesn't have friendly fire".
+
+- **Relics are items** (`shared/relicitems.ts`): id, kind, tier, element or none, charge. Plain tier 1
+  holds 24 uses; elemental tier 2 holds 36; LOUD elemental (tier 3) 48. Every use spends one (the room
+  spends it as the relic fires, `sim/charge.ts`); at nothing it's DARK: the RELIC button greys, a press
+  says DARK and does nothing, and it's kept. The class skill has no charge. Saves migrate: every old kind
+  owned becomes a full plain relic, still carried (`fitRelics`, in `client/save.ts`). Ivo's element
+  setting stays shut; found relics come with theirs built in.
+- **Seven kinds, all sparing friends** (`shared/relickit.ts`, `sim/foundrelics.ts`): JAVELIN (pins),
+  GRAPPLING HOOK (now also yanks a barrel, crate or plank back at you, bowling goblins over; heavier
+  props pull you), LODESTONE (was an orphan Mage relic; drags goblins in, bursts), GALL BOMB (lobbed,
+  2.2 tiles, 16 damage, throws goblins and barrels, small ones dazed 1 s, heavy ones slide less), WIND-UP
+  BOW (set down, shoots the nearest goblin in 5.5 tiles every 0.55 s for 7 s, each bolt hobbles: 60% pace
+  for 1.6 s), BONE BELL (goblins in 3.4 tiles flinch and drop their swing unless striped, small ones
+  pushed back; friends in reach quickened x1.25 for 4 s), BUTCHER'S KNUCKLE (a line 5 long: 12 damage,
+  thrown back hard, small ones stunned 0.9 s, every goblin hit MARKED: the next blow from anyone x1.5).
+  Each buffs friends or debuffs goblins. Cut from the brief's examples: tooth, cinder, heart (a fire
+  patch and a heal didn't act on the world).
+- **No friendly fire, and you can see it**: relic shots and blasts carry `relic` (sim/bolts.ts) and never
+  hurt a friend or anyone freed; a friend inside a blast or the knuckle's line gets SPARED in warm white
+  with a gold flicker; every relic telegraph and area is gold (the lodestone's purple well too), never
+  the goblins' red; every relic card says SPARES FRIENDS. Tests prove no damage, no shove.
+- **Rarity**: a named butcher drops a relic 12 in 100 (the room's own seeded stream, `relicRng`, so loot
+  and goblins don't shift), picked up by whoever walks over it and carried at once if nothing is. A won
+  deep dive surely gives one: a kind you lack (plain, full), else any. Any rolled relic is elemental 15
+  in 100, and LOUD 30 in 100 of those (about 4.5 overall). The wood still gives the javelin.
+- **The church** (THE STEP, from Father Odric's RELICS button; `shared/church.ts`, `client/churchrelics.ts`):
+  RECHARGE a plain one, 3 gold a missing charge (a dark plain one 72); Isolde takes it round to the
+  Lantern. Elemental ones are refused. LEAVE IT: the relic's gone and you carry the church's light for
+  jobs: floor(fill x (3 + tier - 1) + 0.2), so full plain 3, half 1, nearly dark 0, a full elemental 4,
+  a full LOUD 5, adding up to at most 6. Lit: blows land x1.15, and goblins judge you 3 tiles nearer and
+  notice you 2 further off (the censer coal's rule, `sim/lantern.ts`). One job spent per job, won or not.
+  LIT on the HUD; the job result says how many are left.
+- **Two for one at the church, not Ivo's** (my call: the step is where things are given up, and the
+  one back is "from what's been left before"). Tap two, see "N IN 100 IT COMES BACK WITH AN ELEMENT",
+  leave them. Odds: elemental 10 + 30 per elemental put in + 15 per bright one (75% full or more), cap 85;
+  LOUD 20 + 30 per LOUD + 10 per bright. The roll is seeded by the hero's id and their forge count, made
+  and saved before the light starts: a reload gives the same relic, the next forge a new one. The forge
+  (`client/forgeanim.ts`, 2.6 s, a tap skips): the two drawn in, a column of warm light, relic pictures
+  flickering past slowing like a wheel, a flash, the new one turning in the light with its name.
+- **Online**: charge lives on the hero in the leader's room (`found`, `relicItem`), so the leader's room
+  decides uses; each player's own game writes it to their save as it changes (keepkit.ts, like the pack),
+  so a drop keeps what was spent. The church's light is set from each player's own save when the room
+  dresses them and spent by their own game at the end.
+- New words for the lore keeper and line editor: all of `client/relicwords.ts` (each kind's line, SPARES
+  FRIENDS, CHARGE n / n, DARK, LOUD, SPARED, QUICK, MARKED, SLOWED, RELIC, THE STEP, RELICS, RECHARGE (n),
+  FULL, LEAVE IT (LIGHT FOR n JOBS), LEAVE IT (NO LIGHT), TWO FOR ONE and its lines, LEAVE THE TWO, CARRY
+  IT, TAP TO SKIP, LIT, Isolde's and Odric's lines, Ivo's three on how a relic sounds), the names GALL
+  BOMB, WIND-UP BOW (button WIND-UP), BONE BELL, BUTCHER'S KNUCKLE, and "FIRE BOMB"/"LOUD STORM WIND-UP
+  BOW" style names; BELL on the bell's ring. "Blessed" is not used for the church's light.
+- Tests: `tests/relicfight.test.ts` (charge, dark refusal, each kind, friends untouched),
+  `tests/relicchurch.test.ts` (recharge, light, two for one, drops, migration, charge kept). Screenshots:
+  `scripts/relics.cjs`.

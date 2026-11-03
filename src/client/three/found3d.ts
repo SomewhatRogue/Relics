@@ -48,6 +48,7 @@ export function drawFound3(g: CanvasRenderingContext2D, room: ArenaRoom, P: Proj
   for (const b of room.bolts) if (b.kind === 'bomb') ring(g, P, ppu, b.tx, b.ty, BOMB.radius, 0.5 + 0.3 * Math.sin(now * 16), now, 3);
   for (const zn of room.zones) {
     if (zn.kind !== 'sentry') continue;
+    ring(g, P, ppu, zn.x, zn.y, zn.r, 0.4 * Math.min(1, (zn.until - room.time) / 0.6), room.time * 0.3, 4);
     const [bx, by] = P(zn.x, 0, zn.y);
     paintSentry((dx, dy, col) => ((g.fillStyle = col), g.fillRect(Math.round(bx + dx), Math.round(by + dy), 1, 1)), zn, room.time);
   }

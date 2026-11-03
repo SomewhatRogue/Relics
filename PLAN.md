@@ -2,6 +2,17 @@
 
 ## Current slice
 
+**Relics fade, the church takes them, seven to find** (Claude Opus 5.5, 2026-11-03; Kyle: "Relics fade
+with usage but can be recharged at the church", "more relic types", "Donate two, get one", "interactive
+with the world ... clear that it doesn't have friendly fire"). Built; waiting on Kyle's play. *Done when*
+Kyle's RELIC button shows a charge bar that drops a notch a use and greys to DARK at nothing; Odric's
+RELICS button opens THE STEP with each relic's card, RECHARGE for gold (not the elemental ones) and LEAVE
+IT for jobs of LIT (blows harder, goblins come for him first, LIT on the HUD, counted down in the result);
+TWO FOR ONE plays the light and gives the same relic after a reload; a named butcher now and then and
+every won deep dive give one; the bomb, wind-up bow, bell and knuckle each do what their card says in
+FLAT and 2.5D, all in gold, and a friend caught in one reads SPARED and takes nothing, online too. Open:
+`client/relicwords.ts` through the lore keeper and line editor.
+
 **Nests you can reach and burn out** (Claude Opus 5.5, 2026-11-03; Kyle: spiders "respawn too quickly
 so it's hard to kill their nest", too much HP for a Rogue, "if you run up to it you can light it on
 fire and it burns out"). Built; waiting on Kyle's play. *Done when* a nest's waves come every 12 s solo

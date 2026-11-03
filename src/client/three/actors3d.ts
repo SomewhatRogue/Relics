@@ -95,7 +95,8 @@ export class Actors {
     for (const c of room.coals) this.things.get('o' + c.id, '', () => ({ root: makeCoal() })).root.position.set(c.x, Math.sin(now * 6 + c.id) * 0.02, c.y);
     for (const b of room.bolts) placeBolt(this.things.get('b' + b.id, boltLook(b), () => ({ root: makeBolt(b) })).root, b, 0);
     for (const j of room.javelins) placeJavelin(this.things.get('j' + j.id, '', () => ({ root: makeJavelin() })).root, j, 0);
-    room.zones.forEach((z, i) => this.things.get('z' + i, String(z.r), () => ({ root: makeRing(z.r, 0xffd27a, true, 0.12) })).root.position.set(z.x, 0.04, z.y));
+    // (A wind-up bow's reach is dotted on the overlay, as in the flat view: found3d.ts.)
+    room.zones.forEach((z, i) => z.kind !== 'sentry' && this.things.get('z' + i, String(z.r), () => ({ root: makeRing(z.r, 0xffd27a, true, 0.12) })).root.position.set(z.x, 0.04, z.y));
     room.snares.forEach((s, i) => this.things.get('n' + i, '', () => ({ root: makeRing(0.35, 0x8a6a3a, false, 0.06) })).root.position.set(s.x, 0.03, s.y));
     room.smokes.forEach((s, i) => {
       const o = this.things.get('m' + i, '', () => ({ root: makeSmoke(POTION.smokeR) })).root;

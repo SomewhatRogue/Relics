@@ -48,7 +48,7 @@ export function rollRelic(rng: Rng, elemental = RELIC_DROP.elemental, loud = REL
 /** Its name on screen: "BONE BELL", "FROST JAVELIN", "LOUD STORM HOOK". */
 export function relicName(r: RelicItem): string {
   if (!r.el) return RELICS[r.kind].name;
-  return (r.tier === 3 ? 'LOUD ' : '') + ELEMENT_NAME[r.el] + ' ' + RELICS[r.kind].short;
+  return (r.tier === 3 ? 'LOUD ' : '') + ELEMENT_NAME[r.el] + ' ' + (r.kind === 'sentry' ? RELICS.sentry.name : RELICS[r.kind].short);
 }
 
 /** Before relics had charge, a hero kept a list of kinds and the one carried: each becomes a full plain relic. */

@@ -41,8 +41,9 @@ export function paintSentry(px: Px, z: Zone, t: number): void {
 /** The gall bomb in its arc: a green gall with a lit fuse. */
 export function paintBomb(px: Px, b: Bolt, t: number): void {
   const up = -Math.round(Math.sin(Math.PI * Math.min(1, b.t / b.flight)) * 22);
-  for (let y = -1; y <= 1; y++) for (let x = -1; x <= 1; x++) px(x, up - 4 + y, y < 0 ? '#8aa050' : '#4a5a2a');
-  px(1, up - 6, Math.floor(t * 20) % 2 ? '#ff9a3c' : WARM);
+  for (let y = -2; y <= 2; y++) for (let x = -2; x <= 2; x++) if (Math.abs(x) + Math.abs(y) < 4) px(x, up - 5 + y, y < 0 ? '#8aa050' : '#4a5a2a');
+  px(-1, up - 6, '#c8d890');
+  px(1, up - 8, '#a89878'), px(2, up - 9, Math.floor(t * 20) % 2 ? '#ff9a3c' : WARM);
 }
 
 export function drawFound(c: Ctx, room: ArenaRoom, cx: number, cy: number): void {

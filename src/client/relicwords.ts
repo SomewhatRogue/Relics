@@ -37,7 +37,7 @@ export const RELICW = {
   /** The church (Father Odric) and its relic panel. */
   churchButton: 'RELICS',
   churchTitle: 'THE STEP',
-  churchIntro: 'A plain relic that\'s fading, Isolde will take round to the Lantern for you, for a price. One with an element in it she won\'t touch.',
+  churchIntro: "Fading, is it? Give it here, I'll take it round to the Lantern. It'll cost you. Not one with an element in it, mind. I won't touch those.",
   none: 'You have no relics. They come out of the named butchers, now and then, and always out of the one at the bottom of a deep dive.',
   recharge: (n: number) => `RECHARGE (${n})`,
   full: 'FULL',
