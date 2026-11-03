@@ -28,7 +28,7 @@ export const COPY = {
   belt: 'BELT',
   next: 'NEXT',
   pour: 'POUR OUT',
-  beltEmpty: 'Empty. Agne, Gannet, Moll and Ivo sell them, and goblins drop them.',
+  beltEmpty: 'Empty. Agne, Gannet and Ivo sell them, and goblins drop them.',
   takes: 'Goes in your pack.',
   full: 'Your pack is full.',
   otherClass: 'For a {Class}.',
@@ -63,7 +63,6 @@ export const TALLY = {
 };
 
 export const SMITH = {
-  greet: 'Good steel. Gold first.',
   bought: "In your pack. He's already oiling the next one.",
   anvil: 'Spares in the fire. Steel and gold for the rest.',
   hungry: 'Not that one. Not in my fire.',

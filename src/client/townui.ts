@@ -1,20 +1,17 @@
 /** What each person in Wickhold says and offers, the spots in the open, and the end-of-run results. */
 import { FAMILIES, PATIENTS } from '../shared/interiors';
-import { SHOP } from '../shared/progress';
 import { openTrainer } from './trainerui';
-import { CHAPTER_1, QUORUM, chapterGoals, councilOpen, marketOpen, rewardMult } from '../shared/story';
-import { TRAINERS, housesFor, type SpotId } from '../shared/town';
+import { CHAPTER_1, QUORUM, chapterGoals, councilOpen, rewardMult } from '../shared/story';
+import { TRAINERS, type SpotId } from '../shared/town';
 import { ballot } from '../shared/worldsync';
 import { openSquare } from './squareui';
-import { WANT, MODS, REROLL, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_ORDER, SKILL_CHOICES, ELEMENT_NAME, RELICS, TRAITS, WEAPONS, itemName, type Item } from '../shared/tuning';
+import { CLASS_ORDER, RELICS, TRAITS, itemName, type Item } from '../shared/tuning';
 import { device, type Game } from './game';
 import { line } from './speech';
-import { bagFull } from '../shared/bags';
 import { openStore } from './stores';
-import { FORGE, PAWN } from './storewords';
-import { CHURCH, COAL, COPY, TALLY } from './copy';
+import { openShop } from './shops';
+import { CHURCH, COAL, TALLY } from './copy';
 import { LINES } from '../shared/wood';
-import { card, compare } from './card';
 import type { Panel } from './panels';
 import { RUMOURS } from './rumours';
 import { PARTY_MAX } from './parties';
@@ -44,7 +41,7 @@ const itemLine = (i: Item) => `<b>${itemName(i)}</b>: ${i.traits.map((t) => `${T
 export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): void {
   const pr = g.profile, w = g.world, again = () => openSpot(id, g, panel, arg, key);
   if (openSquare(id, g, panel, arg, key)) return;
-  if (openStore(id, g, panel)) return;
+  if (openStore(id, g, panel) || openShop(id, g, panel)) return;
   if (id === 'board') {
     const jobs = g.jobs(), pt = g.parties;
     // Online: the parties gathering, and the board's jobs taken alone or with a party.
@@ -110,28 +107,6 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     // One spoken line at most: grown since you were last here, or (a Cleric) coals for the censer.
     const greet = pr.picks > 0 ? TEACH[pr.cls][0] : pr.cls === 'HEALER' && pr.glow > 0 ? COAL.isolde : '';
     openTrainer(g, panel, `${t.name}, ${CLASS_NAME[cls]} TRAINER`, name, greet);
-  } else if (id === 'market') {
-    // Dessa, once the council lets the traders in (Halvard's anvil and Tobin's stall: stores.ts).
-    if (!marketOpen(w)) return panel.show('MARKET ROW', p(PAWN.emptyRow));
-    const cost = SHOP.forged, full = bagFull(pr);
-    const html = say('Dessa', 'Wickhold steel, with a little weather in it. Fire, frost, storm. Price is the price.') + p(`Forged (blue): two modifiers, or one and an element. ${cost} gold each.`) + p(full ? COPY.full : `You have ${pr.gold} gold.`);
-    const sold = (label: string, buy: () => Item | null) => ({ label: `${label} (${cost})`, primary: true, disabled: full || pr.gold < cost, act: () => {
-      const it = buy();
-      if (it) panel.show('BOUGHT', `<div class="bought">${card(it, g.hero)}${compare(g.hero, it)}</div>` + p('Dessa counts your coin twice and smiles once.'), [{ label: 'MORE', act: again }]);
-    } });
-    panel.show('DESSA THE TRADER', html, [...CLASS_KITS[pr.cls].map((k) => sold(WEAPONS[k].name, () => g.buy('forged', k))), sold('A RING', () => g.buy('forged', pr.weapon, 'ring'))]);
-  } else if (id === 'wright') {
-    // Your skill, and any relic you've found: fit an element, or choose which relic to carry.
-    const rel = [...SKILL_CHOICES[pr.cls], ...pr.relics];
-    // Not setting elements for now (Kyle, 2026-11-02): one greyed button a relic shows where it was; what's set stays set.
-    const html = (g.gearList().some((it) => it.quality === 'hungry') ? say('Ivo', CHURCH.ivo) : '') + say('Ivo', FORGE.ivo) + p(`<span class="dim">${FORGE.shut}</span>`) +
-      rel.map((r, i) => p(`<b>${RELICS[r].name}</b>${i ? (pr.relic === r ? ' (carried)' : ' (on the shelf)') : ' (your skill)'}: ${pr.augments[r] ? ELEMENT_NAME[pr.augments[r] as keyof typeof ELEMENT_NAME] : 'plain'}`)).join('');
-    const carry = pr.relics.filter((r) => r !== pr.relic).map((r) => ({ label: `CARRY THE ${RELICS[r].short}`, primary: true, act: () => (g.carry(r), again()) }));
-    const buttons = [...carry, ...rel.map((r) => ({ label: `${RELICS[r].short}: ${FORGE.element}`, disabled: true, act: () => {} }))];
-    // Ivo also rerolls one modifier on a worn piece for gold.
-    const worn = g.gearList().filter((it) => !pr.bag.includes(it) && it.quality !== 'plain' && it.quality !== 'hungry');
-    const rerolls = worn.flatMap((it) => (it.mods ?? []).map((m, k) => ({ label: `${itemName(it)}: REROLL ${MODS[m.id].name} (${REROLL})`, disabled: pr.gold < REROLL, act: () => (g.rerollMod(it, k), again()) })));
-    panel.show('IVO THE RELIC-WRIGHT', html + shelf(['frost']) + (rerolls.length ? p(`He'll turn one modifier on anything you wear into another, ${REROLL} gold.`) : ''), [...buttons, ...rerolls, ...potionButtons(g, ['frost'], again)]);
   } else if (id === 'hew') {
     panel.show('HEW', say('Hew', g.wood && g.wood.stage >= 2 ? LINES.north : LINES.later));
   } else if (id === 'church') {
@@ -147,9 +122,6 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       p(`Given to the Lantern so far: ${w.lantern} gold.`) + p(`You have ${pr.gold} gold.`),
       [...[20, 100].map((n) => ({ label: `GIVE ${n}`, disabled: pr.gold < n || pr.armor?.hungry === 'ransom', act: () => (g.donate(n), again()) })),
         ...hungry.map((it) => ({ label: `LEAVE ${itemName(it)} ON THE STEP`, act: () => (g.giveUp(it), panel.show('FATHER ODRIC', say('Father Odric', CHURCH.left), [{ label: 'CLOSE', act: () => panel.hide() }], true)) }))]);
-  } else if (id === 'infirmary') {
-    panel.show('SISTER AGNE', say('Sister Agne', w.rescued ? `${w.rescued} through that gate so far. Some of them still won\'t sleep in the dark. I leave a candle.` : 'Empty beds. First time in my life I\'ve wanted them full. Bring someone home and I\'ll have work.') +
-      p(`Lit houses on Rescue Row: ${housesFor(w.rescued)}.`) + (pr.want >= WANT.noticed ? say('Sister Agne', CHURCH.agne) : '') + shelf(['bitter']) + p(`You have ${pr.gold} gold. Belt: ${pr.belt.length} of ${POTION.belt}.`), potionButtons(g, ['bitter'], again));
   } else if (id === 'yard') {
     panel.show('SQUIRE PELL', say('Squire Pell', "Yard's out back. Straw men, a butcher made of sacking on a chain, and me. Mostly me, getting hit. If you're the sort that heals, I'd take it kindly."), [{ label: 'TO THE YARD', primary: true, act: () => (panel.hide(), g.enterYard()) }]);
   } else if (id === 'granary') {
@@ -166,11 +138,6 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     panel.show('THE NORTH GATE', p('Oak and iron, and the hungry on the other side of it. The gate opens for a job, not before: the board is in the square.'));
   }
 }
-
-/** Potion buttons for a shop: each kind this one sells, at its price. */
-export const potionButtons = (g: Game, ids: PotionId[], again: () => void) =>
-  ids.map((id) => ({ label: `${POTIONS[id].short} (${POTIONS[id].price})`, disabled: g.profile.gold < POTIONS[id].price || g.profile.belt.length >= POTION.belt, act: () => (g.buyPotion(id), again()) }));
-const shelf = (ids: PotionId[]) => ids.map((id) => p(`<b>${POTIONS[id].name}</b>: ${POTIONS[id].text}`)).join('');
 
 const title = (s: string) => s.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 /** What each trainer says to a hero not of their class ({who}, {where}: that hero's own trainer). */

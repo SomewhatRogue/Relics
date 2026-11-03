@@ -1,18 +1,22 @@
 /**
- * Wickhold's three places for gear, each a panel of squares (cells.ts): tap a piece for its card and
- * what can be done with it here. The vault under the counting house (Keeper Edda: pack to vault and
- * back, more shelves for gold), Tobin's pawn stall on Market Row (sell anything but hungry gear, buy it
- * back at what he paid until you're home from your next job, a bigger pack for gold), and Halvard's
- * anvil at the forge (a level up for gold and steel, melt a spare down for steel, and his rack).
+ * Wickhold's three places for gear, laid out like every shop (shopui.ts: the place, the keeper, the
+ * goods) with a panel of squares under it (cells.ts): tap a piece for its card and what can be done
+ * with it here. The vault under the counting house (Keeper Edda: pack to vault and back, more shelves
+ * for gold), Tobin's pawn stall on Market Row (sell anything but hungry gear, buy it back at what he
+ * paid until you're home from your next job, a bigger pack for gold), and Halvard's forge (his rack of
+ * Fine gear, then the anvil: a level up for gold and steel, or melt a spare down for steel).
  * The rules are shared/bags.ts; this keeps the hero in step with the save after each one.
  */
 import { bagSize, growBag, growVault, nextBag, nextVault, pawn, pawns, redeem, stow, unstow, vaultSize } from '../shared/bags';
-import { ARMOR, CLASS_KITS, STEEL, WEAPONS, nextLevel, sellValue, type Item } from '../shared/tuning';
-import { SHOP } from '../shared/progress';
+import { CLASS_KITS, STEEL, TIERS, itemName, nextLevel, sellValue, type Item } from '../shared/tuning';
 import type { SpotId } from '../shared/town';
 import type { Game } from './game';
-import type { Panel } from './panels';
-import { card } from './card';
+import type { Button, Panel } from './panels';
+import { card, compare } from './card';
+import { itemIcon } from './itemicons';
+import { goodsList, says, shopHead, wireGoods, type Good } from './shopui';
+import { gearGood } from './shopgoods';
+import { PLACES, SHOPW } from './shopwords';
 import { cell, grid, sideBySide } from './cells';
 import { line } from './speech';
 import { SMITH } from './copy';
@@ -33,17 +37,18 @@ function sync(g: Game): void {
   g.keep();
 }
 
-/** Show a store; tapping a square chooses it, a `data-act` button does what it says. */
-function show(panel: Panel, title: string, html: string, acts: Record<string, () => void>, again: () => void, buttons: { label: string; act: () => void; primary?: boolean; disabled?: boolean }[] = []): void {
+/** Show a store; tapping a square chooses it, a `data-act` button does what it says, a good brings up its card. */
+function show(panel: Panel, title: string, html: string, acts: Record<string, () => void>, again: () => void, goods: Good[] = [], buttons: Button[] = []): void {
   const scroll = document.querySelector('#panel .card')?.scrollTop ?? 0;
   panel.show(title, `<div class="store">${html}</div>`, buttons);
   const box = document.querySelector('#panel .card');
   if (box) box.scrollTop = scroll;
   document.querySelectorAll<HTMLElement>('#panel [data-src]').forEach((t) => t.addEventListener('click', () => ((sel = sel === t.dataset.src ? null : t.dataset.src!), again())));
   document.querySelectorAll<HTMLButtonElement>('#panel [data-act]').forEach((b) => b.addEventListener('click', (e) => (e.stopPropagation(), acts[b.dataset.act!]?.(), (sel = null), again())));
+  wireGoods(goods, again);
 }
 
-/** The vault, a counting house that's lost half its roof. */
+/** The vault, a counting house that's lost half its roof: more shelves for sale, then the vault and your pack. */
 function bank(g: Game, panel: Panel): void {
   const pr = g.profile, stash = pr.stash ?? [], [s, si] = (sel ?? '').split(':'), i = Number(si), more = nextVault(pr);
   let detail = p(BANK.tap);
@@ -51,30 +56,34 @@ function bank(g: Game, panel: Panel): void {
     const it = pr.bag[i], hungry = it.quality === 'hungry';
     detail = sideBySide(g.hero, it, false, hungry ? say('Edda', BANK.hungry) : `<div class="btns">${act(BANK.store, 'store', stash.length < vaultSize(pr))}</div>`);
   } else if (s === 'vault' && stash[i]) detail = sideBySide(g.hero, stash[i], false, `<div class="btns">${act(BANK.take, 'take', pr.bag.length < bagSize(pr))}</div>`);
-  show(panel, BANK.name, h3(BANK.vault, `${stash.length} / ${vaultSize(pr)}`) + grid(stash, vaultSize(pr), 'vault', sel) +
+  const goods: Good[] = more ? [{ name: BANK.shelves, price: more.gold, about: p(SHOPW.shelves(more.size)), why: pr.gold < more.gold ? SHOPW.poor : '', buy: () => void (growVault(pr) && sync(g)) }] : [];
+  show(panel, PLACES.bank.name, shopHead(PLACES.bank, says('Edda', BANK.greet)) + goodsList(goods, more ? SHOPW.gold(pr.gold) : BANK.biggest) +
+    h3(BANK.vault, `${stash.length} / ${vaultSize(pr)}`) + grid(stash, vaultSize(pr), 'vault', sel) +
     h3('PACK', `${pr.bag.length} / ${bagSize(pr)}`) + grid(pr.bag, bagSize(pr), 'bag', sel) +
-    `<div class="sdetail">${detail}</div>` + p(`<span class="dim">${BANK.safe} You have ${pr.gold} gold.</span>`) + say('Edda', BANK.greet),
-  { store: () => stow(pr, i) && sync(g), take: () => unstow(pr, i) && sync(g) }, () => bank(g, panel),
-  [more ? { label: BANK.more(more.size, more.gold), disabled: pr.gold < more.gold, act: () => (growVault(pr) && sync(g), bank(g, panel)) } : { label: BANK.biggest, disabled: true, act: () => {} }]);
+    `<div class="sdetail">${detail}</div>` + p(`<span class="dim">${BANK.safe}</span>`),
+  { store: () => stow(pr, i) && sync(g), take: () => unstow(pr, i) && sync(g) }, () => bank(g, panel), goods);
 }
 
-/** Tobin's stall: sell, buy back, a bigger pack. */
+/** Tobin's stall: what he'll sell you back and a bigger pack, then your pack to sell from. */
 function merchant(g: Game, panel: Panel): void {
   const pr = g.profile, held = pawns(pr), [s, si] = (sel ?? '').split(':'), i = Number(si), more = nextBag(pr), room = pr.bag.length < bagSize(pr);
-  let detail = '';
+  let detail = p(PAWN.rule);
   if (s === 'bag' && pr.bag[i]) {
     const it = pr.bag[i], price = sellValue(it);
     detail = sideBySide(g.hero, it, false, price > 0 ? `<div class="btns">${act(PAWN.sell(price), 'sell')}</div>` : say('Tobin', PAWN.hungry));
-  } else if (s === 'back' && held[i]) detail = card(held[i].item, g.hero) + `<div class="btns">${act(PAWN.buy(held[i].price), 'buy', pr.gold >= held[i].price && room)}</div>`;
-  const backs = held.map((x) => x.item), tags = (_: Item, k: number) => held[k].price + 'G';
-  show(panel, PAWN.name, p(`You have ${pr.gold} gold.`) + h3('PACK', `${pr.bag.length} / ${bagSize(pr)}`) + grid(pr.bag, bagSize(pr), 'bag', sel, undefined, (it) => (sellValue(it) ? '+' + sellValue(it) + 'G' : '')) +
-    h3(PAWN.back) + (backs.length ? grid(backs, backs.length, 'back', sel, undefined, tags) : p(`<span class="dim">${PAWN.none}</span>`)) +
-    `<div class="sdetail">${detail || p(PAWN.rule)}</div>` + say('Tobin', PAWN.greet) + say('Tobin', PAWN.packs),
-  { sell: () => pawn(pr, i) && sync(g), buy: () => redeem(pr, i) && sync(g) }, () => merchant(g, panel),
-  [more ? { label: PAWN.more(more.size, more.gold), primary: true, disabled: pr.gold < more.gold, act: () => (growBag(pr) && sync(g), merchant(g, panel)) } : { label: PAWN.biggest, disabled: true, act: () => {} }]);
+  }
+  const goods: Good[] = [
+    ...held.map((x, k) => ({ name: itemName(x.item), price: x.price, icon: itemIcon(x.item), col: TIERS[x.item.quality].col, label: PAWN.back, about: card(x.item, g.hero) + compare(g.hero, x.item),
+      why: !room ? SHOPW.packFull : pr.gold < x.price ? SHOPW.poor : '', buy: () => void (redeem(pr, k) && sync(g)) })),
+    ...(more ? [{ name: PAWN.bigger, price: more.gold, about: p(SHOPW.pack(more.size)), why: pr.gold < more.gold ? SHOPW.poor : '', buy: () => void (growBag(pr) && sync(g)) }] : []),
+  ];
+  show(panel, PLACES.pawn.name, shopHead(PLACES.pawn, says('Tobin', PAWN.greet)) + goodsList(goods, SHOPW.gold(pr.gold) + (more ? '' : ' ' + PAWN.biggest)) +
+    h3(SHOPW.sell, `${pr.bag.length} / ${bagSize(pr)}`) + grid(pr.bag, bagSize(pr), 'bag', sel, undefined, (it) => (sellValue(it) ? '+' + sellValue(it) + 'G' : '')) +
+    `<div class="sdetail">${detail}</div>`,
+  { sell: () => pawn(pr, i) && sync(g) }, () => merchant(g, panel), goods);
 }
 
-/** Halvard's anvil: up a level, or into the fire for steel. */
+/** Halvard's forge: his rack (Fine gear for gold), then the anvil: up a level, or into the fire for steel. */
 function forge(g: Game, panel: Panel): void {
   const pr = g.profile, h = g.hero, held = pr.arms[pr.weapon], worn = [held, pr.armor, ...pr.rings].filter((x): x is Item => !!x);
   const [s, si] = (sel ?? '').split(':'), i = Number(si), it = s === 'worn' ? worn[i] : s === 'bag' ? pr.bag[i] : undefined;
@@ -86,25 +95,11 @@ function forge(g: Game, panel: Panel): void {
     const note = hungry ? say('Halvard', SMITH.hungry) : (next ? '' : p(FORGE.top)) + (s === 'worn' ? p(`<span class="dim">${FORGE.meltWorn}</span>`) : '');
     detail = sideBySide(h, it, s === 'worn', note + (up || melt ? `<div class="btns">${up}${melt}</div>` : ''));
   }
-  show(panel, 'HALVARD THE SMITH', p(`You have ${pr.gold} gold and ${pr.steel} steel.`) +
-    h3('WORN') + `<div class="cells">${worn.map((x, k) => cell(x, 'worn:' + k, { sel })).join('')}</div>` +
-    h3('PACK', `${pr.bag.length} / ${bagSize(pr)}`) + grid(pr.bag, bagSize(pr), 'bag', sel) + `<div class="sdetail">${detail}</div>` + say('Halvard', SMITH.anvil),
-  { up: () => it && g.upgrade(it), melt: () => it && g.melt(it) }, () => forge(g, panel),
-  [{ label: FORGE.rack, act: () => rack(g, panel) }]);
-}
-
-/** Halvard's rack: Fine gear for gold, as before. */
-function rack(g: Game, panel: Panel): void {
-  const pr = g.profile, cost = SHOP.fine, full = pr.bag.length >= bagSize(pr), back = () => rack(g, panel);
-  const sold = (label: string, buy: () => Item | null) => ({ label: `${label} (${cost})`, primary: true, disabled: full || pr.gold < cost, act: () => {
-    const it = buy();
-    if (it) panel.show('BOUGHT', `<div class="store">${sideBySide(g.hero, it)}</div>` + p(SMITH.bought), [{ label: 'MORE', act: back }, { label: 'THE ANVIL', act: () => forge(g, panel) }]);
-  } });
-  panel.show(FORGE.rack, say('Halvard', SMITH.greet) + p(`Fine (green): one modifier. ${cost} gold each.`) + p(full ? 'Your pack is full.' : `You have ${pr.gold} gold.`), [
-    ...CLASS_KITS[pr.cls].map((k) => sold(WEAPONS[k].name, () => g.buy('fine', k))),
-    ...(['light', 'medium', 'heavy'] as const).map((a) => sold(ARMOR[a].name, () => g.buy('fine', pr.weapon, 'armor', a))),
-    { label: 'THE ANVIL', act: () => forge(g, panel) },
-  ]);
+  const goods = [...CLASS_KITS[pr.cls].map((kit) => gearGood(g, 'fine', { kit }, SMITH.bought)), ...(['light', 'medium', 'heavy'] as const).map((armor) => gearGood(g, 'fine', { armor }, SMITH.bought))];
+  show(panel, PLACES.forge.name, shopHead(PLACES.forge, says('Halvard', SMITH.anvil)) + goodsList(goods, `You have ${pr.gold} gold and ${pr.steel} steel.`) +
+    h3(FORGE.title) + h3('WORN') + `<div class="cells">${worn.map((x, k) => cell(x, 'worn:' + k, { sel })).join('')}</div>` +
+    h3('PACK', `${pr.bag.length} / ${bagSize(pr)}`) + grid(pr.bag, bagSize(pr), 'bag', sel) + `<div class="sdetail">${detail}</div>`,
+  { up: () => it && g.upgrade(it), melt: () => it && g.melt(it) }, () => forge(g, panel), goods);
 }
 
 /** Open one of these if `id` is one; false otherwise (townui.ts handles the rest). */

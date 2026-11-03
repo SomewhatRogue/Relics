@@ -232,3 +232,10 @@ most Want among the heroes is the one the bells don't spare).
 - Stat labels say stamina (STAMINA RECOVERY, "block -25% stamina"); sentences may still say breath. This replaces the older rule that players never see "stamina".
 - "Knacks" is the on-screen word for what a level buys. Each class has its own four chains. Knacks are taken and reset only in Wickhold, the reset is free, and none of it touches the Want.
 - On-screen terms: the bow's "white flash" at full draw; "blessed ground" and "the ward" for Sanctuary; the Warrior's skill chain is CHARGE OR CRY.
+
+## Who sells what (recorded 2026-11-02; Kyle's call, lore keeper)
+- Gannet sells Wall Brandy, Lamp Oil and smoke flasks over the bar at the Drowned Rat (what the watch drinks and throws). Dicer Moll plays knucklebones and sells nothing. Who makes the smoke stays unsaid; nothing comes in from outside.
+- Agne sells the Bitter, Gannet the brandy, oil and smoke, Ivo the frost flasks. Goblins drop all of them.
+- Ivo's bench sells frost flasks and rerolls a modifier even while he isn't setting elements.
+- Dessa is one of the traders camped outside the north gate; her Market Row stall opens only once the council lets the traders in. Tobin's stall is there either way.
+- Wall Brandy (Kyle's call): doubles your damage, halves your speed and stamina, for a few seconds.

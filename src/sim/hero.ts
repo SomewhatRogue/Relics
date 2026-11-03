@@ -3,7 +3,7 @@
  * A tap of attack swings on release; holding past CHARGE.start charges a heavy instead.
  */
 import { collide, wadeAt } from '../shared/arena';
-import { DODGE, CLASS_DODGES, CLASS_GUARD, DECOY, POTION, AUGMENTS, CHARGE, GRAB, HORN, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon, drilled, STEALTH } from '../shared/tuning';
+import { DODGE, CLASS_DODGES, CLASS_GUARD, DECOY, AUGMENTS, CHARGE, GRAB, HORN, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon, drilled, STEALTH } from '../shared/tuning';
 import { slide } from './bodies';
 import { BAG } from '../shared/bags';
 import { applyGear, turnBelt } from './pack';
@@ -11,6 +11,7 @@ import { knack, statsOf } from './gearstats';
 import { decoyTime, dodgeBreath, dodgeReach, releaseWindow } from './knacks';
 import { fedMult, jealousBlocks, jealousCooldown, needlesBreath, wears } from './hungry';
 import { hitEnemy } from './combat';
+import { brandySpeed, breathCap } from './brandy';
 import { knows, type Enemy, type FightEvent, type Hero, type Intent } from './types';
 
 export function newHero(id: string, x: number, y: number): Hero {
@@ -64,12 +65,12 @@ function face(h: Hero, inp: Intent, enemies: Enemy[], snap: boolean, reach = 3.2
   if (l > 0.01) (h.fx = x / l), (h.fy = y / l);
 }
 
-function walk(h: Hero, inp: Intent, k: number, dt: number): void {
+function walk(h: Hero, inp: Intent, k: number, dt: number, now: number): void {
   const m = Math.min(1, Math.hypot(inp.mx, inp.my));
   // Creeping: harder to see (STEALTH). (Standing in plain sight isn't.)
   h.sneaking = m >= 0.05 && m < STEALTH.slow;
   if (m < 0.05) return;
-  const l = Math.hypot(inp.mx, inp.my), sp = HERO.speed * WEAPONS[h.weapon].speed * statsOf(h).speed * k * m * wadeAt(h.x, h.y);
+  const l = Math.hypot(inp.mx, inp.my), sp = HERO.speed * WEAPONS[h.weapon].speed * statsOf(h).speed * k * m * wadeAt(h.x, h.y) * brandySpeed(h, now);
   h.x += (inp.mx / l) * sp * dt;
   h.y += (inp.my / l) * sp * dt;
   h.moving = true;
@@ -161,8 +162,11 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   }
   if (h.hitstop > 0) return void (h.hitstop -= dt);
   if (h.stamina <= 0 && !h.winded) (h.winded = true), ev.push({ k: 'winded', x: h.x, y: h.y });
-  if (now - h.staminaAt > (h.winded ? HERO.windedDelay * (1 - knack(h, 'winded')) : HERO.regenDelay)) h.stamina = Math.min(HERO.stamina, h.stamina + HERO.staminaRegen * (h.brandyUntil > now ? POTION.brandyRegen : 1) * (1 + statsOf(h).breath) * needlesBreath(h, enemies) * dt);
-  if (h.winded && h.stamina >= HERO.stamina) (h.winded = false), ev.push({ k: 'breath', x: h.x, y: h.y });
+  // Wall Brandy halves the most breath you can have while it lasts (sim/brandy.ts).
+  const most = breathCap(h, now);
+  if (h.stamina > most) h.stamina = most;
+  if (now - h.staminaAt > (h.winded ? HERO.windedDelay * (1 - knack(h, 'winded')) : HERO.regenDelay)) h.stamina = Math.min(most, h.stamina + HERO.staminaRegen * (1 + statsOf(h).breath) * needlesBreath(h, enemies) * dt);
+  if (h.winded && h.stamina >= most) (h.winded = false), ev.push({ k: 'breath', x: h.x, y: h.y });
   h.actT += dt;
   h.moving = false;
   h.blocking = false;
@@ -193,7 +197,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     if (h.act === 'slam' && h.actT >= GRAB.slamWindup + GRAB.slamRecover) return void Object.assign(h, { act: 'idle', actT: 0 });
     face(h, inp, enemies, false);
     if (wantsRoll) return acts.drop(h), startRoll(h, inp, now, ev);
-    return acts.carry(h, inp, (k) => walk(h, inp, k, dt));
+    return acts.carry(h, inp, (k) => walk(h, inp, k, dt, now));
   }
   if (h.act === 'throw') {
     const r = RELICS[h.relic];
@@ -208,7 +212,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   if (h.act === 'charge') {
     if (wantsRoll) return startRoll(h, inp, now, ev);
     face(h, inp, enemies, false);
-    walk(h, inp, w.chargeSpeed, dt);
+    walk(h, inp, w.chargeSpeed, dt, now);
     collide(h, HERO.radius);
     const full = chargeFull(w, h) - CHARGE.start;
     if (h.actT >= full && h.actT - dt < full) ev.push({ k: 'charged', x: h.x, y: h.y });
@@ -278,7 +282,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   if (inp.block && CLASS_GUARD[w.cls] === 'parry' && now - h.lastBlockPress > 0.35 && h.toldAt < h.lastBlockPress) (h.toldAt = now), ev.push({ k: 'noblock', x: h.x, y: h.y });
   // Guarding with no aim (a phone) turns to the nearest threat, so a parry faces the right way.
   face(h, inp, enemies, h.blocking || now - h.lastBlockPress < 0.3);
-  walk(h, inp, h.blocking ? w.blockSpeed : 1, dt);
+  walk(h, inp, h.blocking ? w.blockSpeed : 1, dt, now);
   collide(h, HERO.radius);
 }
 

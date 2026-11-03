@@ -17,6 +17,7 @@
  *   (Game.takeOver); the others hear who leads now and follow them. The old leader, back, follows
  *   them; a leader whose page only reloaded leads again from the job as it kept it (Game.resume).
  */
+import { brandySpeed } from '../sim/brandy';
 import type { Job } from '../shared/jobs';
 import type { Profile } from '../shared/progress';
 import { HERO, TICK, WEAPONS } from '../shared/tuning';
@@ -326,7 +327,7 @@ export class CoopGuest {
     if (!room || !h || !s) return;
     const free = h.act === 'idle' && !h.carrying && !h.lifting;
     const m = Math.min(1, Math.hypot(intent.mx, intent.my)), l = Math.hypot(intent.mx, intent.my) || 1;
-    const sp = free && m >= 0.05 ? HERO.speed * WEAPONS[h.weapon].speed * statsOf(h).speed * m : 0, vx = (intent.mx / l) * sp, vy = (intent.my / l) * sp;
+    const sp = free && m >= 0.05 ? HERO.speed * WEAPONS[h.weapon].speed * statsOf(h).speed * m * brandySpeed(h, room.time) : 0, vx = (intent.mx / l) * sp, vy = (intent.my / l) * sp;
     const p = (this.pred ??= { ...s });
     // Busy (rolling, swinging, hit, down): exactly where the leader has me.
     const now = this.now;

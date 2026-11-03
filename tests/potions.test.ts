@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { COINS, POTION, TICK } from '../src/shared/tuning';
+import { COINS, HERO, POTION, TICK } from '../src/shared/tuning';
 import { Rng } from '../src/shared/rng';
 import { dropPickups, stepPickups } from '../src/sim/pickups';
 import { ArenaRoom } from '../src/sim/room';
@@ -48,7 +48,7 @@ describe('gold and potions on the floor', () => {
 });
 
 describe('the belt', () => {
-  it("Sister's Bitter heals 40 over two seconds; Wall Brandy fills breath", () => {
+  it("Sister's Bitter heals 40 over two seconds", () => {
     const room = new ArenaRoom(1, { scrappers: false });
     const h = room.join('me');
     Object.assign(h, { hp: 30, belt: ['bitter', 'brandy'] });
@@ -58,11 +58,41 @@ describe('the belt', () => {
     expect(h.hp).toBeLessThan(70);
     run(room, 1.5);
     expect(Math.round(h.hp)).toBe(70);
-    h.stamina = 5;
-    room.setIntent('me', intent({ potionSeq: 2 }));
-    run(room, 0.1);
-    expect(h.stamina).toBeGreaterThan(95);
-    expect(h.belt).toEqual([]);
+  });
+
+  it('Wall Brandy doubles your blows and halves your walk and your breath, for as long as it lasts', () => {
+    const blow = (drink: boolean) => {
+      const room = new ArenaRoom(1, { scrappers: false });
+      const h = room.join('me'), d = room.enemies.find((e) => e.kind === 'dummy')!;
+      Object.assign(h, { x: d.x, y: d.y - 1.1, fx: 0, fy: 1, belt: drink ? ['brandy'] : [] });
+      if (drink) room.setIntent('me', intent({ potionSeq: 1 })), run(room, POTION.cooldown + 0.1);
+      const hp = d.hp;
+      room.setIntent('me', intent({ potionSeq: drink ? 1 : 0, attackSeq: 1, ax: 0, ay: 1 }));
+      run(room, 0.6);
+      return { dealt: hp - d.hp, h, room };
+    };
+    const sober = blow(false), drunk = blow(true);
+    expect(sober.dealt).toBeGreaterThan(0);
+    expect(drunk.dealt).toBe(sober.dealt * POTION.brandyDmg);
+    // Breath tops out at half; walking covers half the ground.
+    const { h, room } = drunk;
+    expect(h.stamina).toBeLessThanOrEqual(HERO.stamina * POTION.brandyBreath);
+    const walk = (r: ArenaRoom, hero: typeof h) => {
+      r.enemies = [];
+      Object.assign(hero, { x: 6, y: 6 });
+      const x = hero.x;
+      r.setIntent('me', intent({ potionSeq: 1, attackSeq: 1, mx: 1 }));
+      run(r, 0.3);
+      return hero.x - x;
+    };
+    const slow = walk(room, h), fast = walk(sober.room, sober.h);
+    expect(slow / fast).toBeCloseTo(POTION.brandySpeed, 1);
+    // Worn off: full breath comes back, and full speed.
+    room.setIntent('me', intent({ potionSeq: 1, attackSeq: 1 }));
+    run(room, POTION.brandyTime);
+    expect(h.stamina).toBeGreaterThan(HERO.stamina * POTION.brandyBreath);
+    expect(h.brandyUntil).toBeLessThan(room.time);
+    expect(walk(room, h) / fast).toBeCloseTo(1, 1);
   });
 
   it('lamp oil thrown where you aim sets goblins burning; smoke hides you from them', () => {
