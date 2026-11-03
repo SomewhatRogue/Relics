@@ -66,9 +66,11 @@ function kit(browser, port, report) {
       await ev(p, () => window.__openSpot('board'));
       await until(p, () => !!document.querySelector('#panel [data-joinparty]'));
       await p.page.click('#panel [data-joinparty]');
-      await until(lead, (n) => document.querySelector('#panel .job.party .m')?.textContent.includes(n), p.name);
+      await ev(p, () => window.__panel.hide());
+      await until(lead, (n) => !!window.__game.parties?.current()?.members.some((m) => m[1] === n), p.name);
     }
-    await lead.page.click('#panel [data-setout]');
+    await lead.page.evaluate(() => document.querySelector('#partycard.shut .pc-line')?.click());
+    await lead.page.click('#partycard [data-setout]');
     let ok = await until(lead, () => window.__game.mode === 'run');
     for (const p of rest) ok = (await until(p, () => window.__game.mode === 'run' && window.__game.room.heroes.some((h) => h.id === 'me') && window.__game.room.heroes.some((h) => h.id === '@lead'), null, 15000)) && ok;
     ok = (await until(lead, (n) => window.__game.room.heroes.length >= n, rest.length + 1)) && ok;

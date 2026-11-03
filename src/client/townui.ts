@@ -14,7 +14,8 @@ import { CHURCH, COAL, TALLY } from './copy';
 import { LINES } from '../shared/wood';
 import type { Panel } from './panels';
 import { RUMOURS } from './rumours';
-import { PARTY_MAX } from './parties';
+import { partyList, wireParties } from './partyboard';
+import { postedToast } from './partytoast';
 import { CLASS_NAME } from '../shared/classes';
 import { KIND, SIZES, STORY_PARTY, danger } from '../shared/jobs';
 import { TIME_WORD, timeOf } from '../shared/timeofday';
@@ -46,14 +47,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     const jobs = g.jobs(), pt = g.parties;
     // Online: the parties gathering, and the board's jobs taken alone or with a party.
     if (pt) pt.onChange = () => panel.open && document.querySelector('#panel h2')?.textContent?.startsWith('JOB BOARD') && openSpot('board', g, panel);
-    const parties = pt?.list() ?? [];
-    const partyHtml = parties.length ? '<h3>PARTIES</h3>' + parties.map((q, i) =>
-      `<div class="job party"><div class="t">${q.mine ? 'YOUR PARTY' : `${esc(q.members[0][1])}'S PARTY`}: ${esc(q.job.title)}</div>` +
-      `<div class="m">${esc(q.job.place.name)}. ${q.members.map((m) => esc(m[1])).join(', ')} (${q.members.length} of ${PARTY_MAX})</div>` +
-      (q.mine ? `${g.canTake(q.job, q.members.length) ? '<button data-setout>SET OUT</button>' : `<div class="d">NEEDS ${STORY_PARTY} TO SET OUT</div>`} <button data-quit class="ghost">TAKE IT DOWN</button>`
-        : q.in ? `<div class="d">WAITING ON ${esc(q.members[0][1])}</div><button data-quit class="ghost">LEAVE</button>`
-        : q.asked ? `<div class="d">ASKED TO JOIN</div><button data-quit class="ghost">NEVER MIND</button>`
-        : q.members.length < PARTY_MAX ? `<button data-joinparty="${i}">JOIN</button>` : '<div class="d">FULL</div>') + '</div>').join('') : '';
+    const { html: partyHtml, parties } = partyList(g);
     // Jobs done lately, by whoever did them (the shared world's, online).
     const deeds = (w.deeds ?? []).slice(0, 5), raid = w.raids?.[0];
     // The town hit, while the raid is still the newest thing on the board.
@@ -74,10 +68,9 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     const on = (sel: string, f: (b: HTMLButtonElement) => void) => document.querySelectorAll<HTMLButtonElement>(`#panel ${sel}`).forEach((b) => b.addEventListener('click', () => f(b)));
     on('[data-open]', (b) => ((boardOpen = boardOpen === jobs[Number(b.dataset.open)].id ? '' : jobs[Number(b.dataset.open)].id), openSpot('board', g, panel)));
     on('[data-job]', (b) => g.canTake(jobs[Number(b.dataset.job)], 1) && (panel.hide(), pt?.quit(), g.startJob(jobs[Number(b.dataset.job)])));
-    on('[data-gather]', (b) => pt?.gather(jobs[Number(b.dataset.gather)]));
-    on('[data-joinparty]', (b) => pt?.join(parties[Number(b.dataset.joinparty)].lead));
-    on('[data-quit]', () => pt?.quit());
-    on('[data-setout]', () => (panel.hide(), g.setOut()));
+    // A party posted, the panel closes: walk where you like while it gathers (the HUD card: partycard.ts).
+    on('[data-gather]', (b) => (pt?.gather(jobs[Number(b.dataset.gather)]), panel.hide(), postedToast()));
+    wireParties(g, panel, parties, () => openSpot('board', g, panel));
   } else if (id === 'council') {
     const goals = chapterGoals(w), d = CHAPTER_1.decision, done = w.flags[d.id];
     const status = p(`<b>${CHAPTER_1.name}</b>`) + p(`People brought home: ${goals.rescued} of ${goals.rescuedGoal}. Story mission, ${CHAPTER_1.mission.title}: ${goals.story ? 'done' : 'not yet'}.`);

@@ -2,6 +2,15 @@
 
 ## Current slice
 
+**Host a job, wander town, set out when ready** (Claude Opus 5.5, 2026-11-02; Kyle: "host a job and
+then wander around town, same with others, and start whenever we're ready, with a little UI notification
+of who else signed up"). Built; waiting on Kyle's play. *Done when* Kyle gathers a party at the board and
+the board closes; he walks into a hall or a shop and his party card is there with who's in and the slots;
+a friend gets a toast that he's gathering and joins from it; Kyle gets a toast that they joined; he sets
+out from the card while the friend is in the vault, and the friend gets SETTING OUT and arrives in the job
+with him; a friend leaving or a cancel shows a toast; and a reload on either side keeps the party. Open:
+the new words (`client/partywords.ts`) through the lore keeper and line editor.
+
 **The 2.5D view everywhere, options under a gear** (Claude Opus 5.5, 2026-11-02; Kyle: wants the look
 test's low-res 3D, "a button someone can get to from options", then "No 2.5D in the main hub area?",
 "townsfolk, hanged bodies etc. That stuff is amazing", "higher quality, but let someone change the

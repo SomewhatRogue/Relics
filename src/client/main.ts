@@ -6,7 +6,7 @@ import { ONLINE } from './relay';
 import { Townfolk } from './townfolk';
 import { toPx } from './world';
 import { Parties } from './parties';
-import { CoopGuest } from './coop';
+import { Lobby } from './lobby';
 import { session, touchSession } from './session';
 import { MAX_DOWNS } from '../sim/run';
 import { WayWatch, wayTarget } from './wayfind';
@@ -60,12 +60,8 @@ function online(): Townfolk | null {
   if (townfolk && townfolk.id !== game.profile.id) townfolk.leave(), (townfolk = null);
   if (!townfolk) {
     townfolk = new Townfolk(game.profile.id);
-    const parties = (game.parties = new Parties(townfolk, () => ({ id: game.profile.id, name: game.profile.name })));
-    // Called to a friend's job: off you go with them.
-    parties.onGo = (room, job, lead) => {
-      panel.hide();
-      game.startRemote(new CoopGuest(room, game.profile.id, lead, () => game.profile, job));
-    };
+    // Parties gathered in town: the HUD card, toasts, being pulled into a friend's job (lobby.ts).
+    lobby.attach(townfolk, (game.parties = new Parties(townfolk, () => ({ id: game.profile.id, name: game.profile.name }))));
     chat.attach(townfolk);
   }
   return townfolk;
@@ -78,6 +74,7 @@ const fx = new Fx();
 const ways = new WayWatch();
 const panel = new Panel();
 const input = new Input(() => views.heroScreen());
+const lobby = new Lobby(game, panel, input.touch, () => pack.toggle(false));
 const $ = (s: string) => document.querySelector(s) as HTMLElement;
 const card = new LootCard((id) => input.take(id));
 const lesson = new LessonView(game, input.touch);
@@ -378,7 +375,9 @@ function tick(t: number): void {
   }
   // Online: everyone else in Wickhold, while you're there.
   const inTown = game.mode === 'town', h = game.hero;
-  online()?.step(inTown && h ? { n: game.profile.name, w: h.weapon, l: h.look ?? 0, at: game.room.map.name, p: [h.x, h.y, h.fx, h.fy, h.moving ? 1 : 0] } : null, t / 1000, dt);
+  const town = online();
+  lobby.frame(inTown, t / 1000, !title.open);
+  town?.step(inTown && h ? { n: game.profile.name, w: h.weapon, l: h.look ?? 0, at: game.room.map.name, p: [h.x, h.y, h.fx, h.fy, h.moving ? 1 : 0] } : null, t / 1000, dt);
   // (Off screen, leading a job in the background: nothing to draw.)
   if (document.hidden) return;
   views.render(game.room, ME, fx, t / 1000, dt, inTown ? (townfolk?.here(game.room.map.name) ?? []) : [], game.mode === 'run');

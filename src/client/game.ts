@@ -588,10 +588,11 @@ export class Game {
     return job.objective !== 'story' || !this.link?.online || party >= STORY_PARTY;
   }
 
-  setOut(): void {
-    const mine = this.parties?.list().find((q) => q.mine);
-    if (mine && !this.canTake(mine.job, mine.members.length)) return;
-    const go = this.parties?.setOut();
+  setOut(told?: ReturnType<Parties['setOut']>): void {
+    // (`told`: the party was already told where to go, at the start of the setting-out beat: setout.ts.)
+    const mine = this.parties?.current(), job = this.parties?.myJob;
+    if (!told && mine && job && !this.canTake(job, mine.members.length)) return;
+    const go = told ?? this.parties?.setOut();
     if (!go) return;
     this.coop = new CoopHost(go.room, this.profile.id, this.profile.name, this, go.members);
     this.startJob(go.job, go.members.length);
