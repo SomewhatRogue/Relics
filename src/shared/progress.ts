@@ -8,6 +8,7 @@ import type { Pawn } from './bags.js';
 import type { PotionId } from './potions.js';
 import { CLASS_ARMOR } from './gear.js';
 import type { Augment, RelicId } from './magic.js';
+import type { RelicItem } from './relicitems.js';
 import { CLASS_KITS, type HeroClass, type WeaponId } from './weapons.js';
 
 export { PERKS, perkFx, perkText, type Fx, type FxKey, type Knack, type PerkId } from './perks.js';
@@ -83,9 +84,12 @@ export interface Profile {
   /** Worn armor and rings (shared/gear.ts). */
   armor: Item | null;
   rings: Item[];
-  /** Relics found at the end of deep dives, and the one carried into a job ('' none). */
-  relics: RelicId[];
-  relic: RelicId | '';
+  /** Relics owned, each with its charge (shared/relicitems.ts), and the id of the one carried ('' none). */
+  relics: RelicItem[];
+  relic: string;
+  /** Jobs left carrying the church's light (shared/church.ts), and relics forged two for one so far (seeds the next). */
+  lit?: number;
+  forges?: number;
   /** The class skill carried, when the class has a choice of them (the first, until picked). */
   skill?: RelicId;
   /** Which of its class's three looks (chosen when made). */

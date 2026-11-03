@@ -2,6 +2,7 @@
 import type { Bolt, Drop, Hero, Hook, Javelin } from '../sim/types';
 import type { Coal } from '../sim/lantern';
 import type { Pickup } from '../sim/pickups';
+import { relicCol } from './relicicons';
 import type { Smoke } from '../sim/flasks';
 import type { Chest } from '../sim/chests';
 import { POTIONS, TIERS, TIER_ORDER } from '../shared/tuning';
@@ -98,7 +99,7 @@ export function drawBolt(c: Ctx, b: Bolt, x: number, y: number): void {
   if (b.kind === 'lodestone') {
     if (b.state === 'well') {
       const r = 3.6 * 16;
-      c.glow.fillStyle = b.el ? col : '#b080ff';
+      c.glow.fillStyle = b.el ? col : '#ffd27a';
       for (let i = 0; i < 24; i++) {
         const t = c.now * -3 + (i / 24) * Math.PI * 2, rr = r * (((c.now * 0.9 + i / 24) % 1) * 0.9 + 0.1);
         c.glow.globalAlpha = 0.25 + 0.5 * (1 - rr / r);
@@ -161,6 +162,15 @@ export function drawPickup(c: Ctx, p: Pickup, x: number, y: number): void {
       c.glow.globalAlpha = fade;
     }
     if (Math.floor(c.now * 2 + p.id) % 3 === 0) (c.glow.fillStyle = '#fff1d0'), c.glow.fillRect(Math.round(x), Math.round(y - 3), 1, 1);
+  } else if (p.relic) {
+    // A relic: a small gold stone stood upright, glowing, with a ring of light under it.
+    const col = relicCol(p.relic), bob = Math.round(Math.sin(c.now * 2.5 + p.id) * 1.5);
+    c.lit.fillStyle = '#d9a13a';
+    c.lit.fillRect(Math.round(x - 1), Math.round(y - 8 + bob), 3, 5);
+    c.glow.fillStyle = col;
+    c.glow.fillRect(Math.round(x), Math.round(y - 9 + bob), 1, 6);
+    c.glow.globalAlpha = 0.5 * fade;
+    for (let a = 0; a < Math.PI * 2; a += 0.5) c.glow.fillRect(Math.round(x + Math.cos(a + c.now) * 5), Math.round(y + Math.sin(a + c.now) * 2), 1, 1);
   } else if (p.potion) {
     const col = POTIONS[p.potion].col, bob = Math.round(Math.sin(c.now * 3 + p.id));
     c.lit.fillStyle = '#5a4a32';

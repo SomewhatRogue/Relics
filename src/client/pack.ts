@@ -19,6 +19,9 @@ import { PACKW } from './storewords';
 import { fits, moveOf } from './packmoves';
 export { moveOf };
 import './pack.css';
+import { relicName } from '../shared/relicitems';
+import { fillCol, relicCard } from './reliccard';
+import { relicItemIcon } from './relicicons';
 
 /** Where a piece is: in the pack (`bag:i`), in hand, worn (`armor`, `ring:k`), the relic carried, the skill, or on the belt (`belt:i`). */
 export type Spot = string;
@@ -95,12 +98,12 @@ export class PackView {
 
   /** Your hero, with a square on each part that wears something. */
   private doll(h: Hero): string {
-    const [, carried] = h.relics, held = h.arms[h.weapon], sel = this.sel, look = figure(WEAPONS[h.weapon].cls, h.look ?? 0);
+    const [, carried] = h.relics, it = carried ? h.found.find((r) => r.id === h.relicItem) : undefined, held = h.arms[h.weapon], sel = this.sel, look = figure(WEAPONS[h.weapon].cls, h.look ?? 0);
     const slot = (name: string, inner: string) => `<div class="slot ${name}">${inner}</div>`;
     const hand = cell(held ?? null, 'hand', { dst: 'hand', sel, label: held ? PACKW.hand : WEAPONS[h.weapon].name, icon: held ? undefined : itemIcon({ kit: h.weapon, quality: 'plain', traits: [] }), col: held ? undefined : '#e8e4ee' });
     const belt = Array.from({ length: POTION.belt }, (_, i) => cell(null, h.belt[i] ? 'belt:' + i : null, { dst: i === 0 ? 'belt' : undefined, sel, icon: h.belt[i] ? potionIcon(h.belt[i]) : undefined, col: h.belt[i] ? POTIONS[h.belt[i]].col : undefined, tag: i === 0 && h.belt[i] ? '1ST' : undefined })).join('');
     return '<div class="doll">' +
-      slot('s-relic', cell(null, carried ? 'relic' : null, { dst: 'relic', sel, label: PACKW.relic, icon: carried ? relicIcon() : undefined, col: carried ? '#ffd27a' : undefined })) +
+      slot('s-relic', cell(null, carried ? 'relic' : null, { dst: 'relic', sel, label: PACKW.relic, icon: it ? relicItemIcon(it) : carried ? relicIcon() : undefined, col: it ? fillCol(it) : carried ? '#ffd27a' : undefined })) +
       slot('s-skill', cell(null, 'skill', { sel, label: PACKW.skill, icon: skillIcon(), col: '#5a8ac8', dim: true })) +
       slot('s-hand', hand) +
       slot('s-body', cell(h.armor, h.armor ? 'armor' : null, { dst: 'armor', sel, label: PACKW.body })) +
@@ -125,13 +128,14 @@ export class PackView {
     if (s === 'armor' && h.armor) return row(sideBySide(h, h.armor, true), btn(COPY.takeOff, GEAR.unarm, 0, 'ghost'));
     if (s === 'ring' && h.rings[i]) return row(sideBySide(h, h.rings[i], true), h.rings[i].hungry === 'wedding' ? '' : btn(COPY.takeOff, GEAR.off, i, 'ghost'));
     if (s === 'relic' && h.relics[1]) {
-      const others = h.found.map((r, k) => (r === h.relics[1] ? '' : btn(`${COPY.carry} ${RELICS[r].short}`, GEAR.carry, k, 'go'))).join('');
-      return row(`<b>${RELICS[h.relics[1]].name}</b>${el(h.relics[1], h)}`, others + btn(COPY.putAway, GEAR.carry, -1, 'ghost'));
+      const it = h.found.find((r) => r.id === h.relicItem);
+      const others = h.found.map((r, k) => (r.id === h.relicItem ? '' : btn(`${COPY.carry} ${relicName(r)}`, GEAR.carry, k, 'go'))).join('');
+      return row(it ? relicCard(it) : `<b>${RELICS[h.relics[1]].name}</b>${el(h.relics[1], h)}`, others + btn(COPY.putAway, GEAR.carry, -1, 'ghost'));
     }
     if (s === 'skill') return row(`<b>${RELICS[h.relics[0]].name}</b>${el(h.relics[0], h)}`, '', PACKW.skillLine);
     if (s === 'belt' && h.belt[i]) return row(`<b>${POTIONS[h.belt[i]].name}</b><div class="tr">${POTIONS[h.belt[i]].text}</div>`, (i ? btn(COPY.next, GEAR.front, i, 'go') : '') + btn(COPY.pour, GEAR.pour, i, 'ghost'));
     // Nothing chosen: relics found but not carried can still be picked up here.
-    const shelf = h.found.filter((r) => r !== h.relics[1]).map((r) => btn(`${COPY.carry} ${RELICS[r].short}`, GEAR.carry, h.found.indexOf(r), 'go')).join('');
+    const shelf = h.found.filter((r) => r.id !== h.relicItem).map((r) => btn(`${COPY.carry} ${relicName(r)}`, GEAR.carry, h.found.indexOf(r), 'go')).join('');
     return row(`<div class="none">${matchMedia('(hover: hover)').matches ? PACKW.hover : PACKW.hint}</div>`, shelf);
   }
 

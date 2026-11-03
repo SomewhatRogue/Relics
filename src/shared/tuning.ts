@@ -23,6 +23,7 @@ export const HERO = {
 export * from './weapons.js';
 export * from './magic.js';
 export * from './skillkit.js';
+export * from './relickit.js';
 export * from './loot.js';
 export * from './props.js';
 export * from './progress.js';

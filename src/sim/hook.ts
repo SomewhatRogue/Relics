@@ -4,7 +4,9 @@
  * pulls the owner across instead. A miss reels the hook back.
  */
 import { collide } from '../shared/arena';
-import { CLASS_GUARD, HERO, HOOK, WEAPONS } from '../shared/tuning';
+import { CLASS_GUARD, HERO, HOOK, HOOK_PROP, WEAPONS } from '../shared/tuning';
+import { shove } from './bodies';
+import type { World } from './elements';
 import { isDead } from './damage';
 import type { Afflict } from './javelin';
 import type { Enemy, FightEvent, Hero, Hook } from './types';
@@ -20,7 +22,7 @@ function release(h: Hero | undefined): void {
 }
 
 /** Advance one hook a tick; false when it is done. */
-export function stepHook(k: Hook, heroes: Hero[], enemies: Enemy[], now: number, dt: number, ev: FightEvent[], afflict: Afflict = () => {}): boolean {
+export function stepHook(k: Hook, heroes: Hero[], enemies: Enemy[], now: number, dt: number, ev: FightEvent[], afflict: Afflict = () => {}, w?: World): boolean {
   const h = heroes.find((x) => x.id === k.owner);
   if (!h || h.act === 'down' || h.act === 'hurt' || h.act === 'stun') {
     release(h);
@@ -38,6 +40,20 @@ export function stepHook(k: Hook, heroes: Hero[], enemies: Enemy[], now: number,
       k.y = p.y;
       k.travelled += d;
       if (Math.hypot(p.x - want.x, p.y - want.y) > 1e-4) {
+        k.state = 'zip';
+        Object.assign(h, { act: 'zip', actT: 0, kvx: 0, kvy: 0 });
+        ev.push({ k: 'latch', x: k.x, y: k.y, dx: k.dx, dy: k.dy });
+        return true;
+      }
+      // A barrel, a crate, a plank: yanked back at you (bowling over goblins on the way); a heavier one pulls you to it.
+      const prop = w?.props.find((q) => !q.broken && !q.lifted && Math.hypot(q.x - k.x, q.y - k.y) <= q.radius + 0.15);
+      if (prop && prop.weight <= HOOK_PROP.maxWeight) {
+        prop.lastBy = h.id;
+        shove(prop, -k.dx, -k.dy, HOOK_PROP.yank, prop.weight);
+        ev.push({ k: 'hookprop', x: h.x, y: h.y, x2: prop.x, y2: prop.y });
+        return false;
+      }
+      if (prop) {
         k.state = 'zip';
         Object.assign(h, { act: 'zip', actT: 0, kvx: 0, kvy: 0 });
         ev.push({ k: 'latch', x: k.x, y: k.y, dx: k.dx, dy: k.dy });

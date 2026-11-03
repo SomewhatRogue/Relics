@@ -102,6 +102,9 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'b
       else if (h.relic === 'horn') line(c.lit, bx + side * 2, by - 13, -Math.PI / 2 + side * 0.9, 0, 6, '#d8c48a', 2);
       else if (h.relic === 'net') (c.lit.fillStyle = '#8a7a5a'), c.lit.fillRect(Math.round(bx - side * 5), Math.round(by - 13), 3, 3);
       else if (h.relic === 'lodestone') (c.lit.fillStyle = '#3a3440'), c.lit.fillRect(Math.round(bx - side * 5), Math.round(by - 14), 3, 3);
+      else if (h.relic === 'bomb') (c.lit.fillStyle = '#5a6a30'), c.lit.fillRect(Math.round(bx - side * 5), Math.round(by - 14), 3, 3);
+      else if (h.relic === 'bell') (c.lit.fillStyle = '#e8dcc0'), c.lit.fillRect(Math.round(bx + side * 4), Math.round(by - 13), 2, 3);
+      else if (h.relic === 'knuckle') (c.lit.fillStyle = '#e8dcc0'), c.lit.fillRect(Math.round(bx + side * 4), Math.round(by - 11), 3, 2);
       const el = h.augments[h.relic];
       if (el) (c.glow.fillStyle = EL_COL[el]), c.glow.fillRect(Math.round(bx - side * 3), Math.round(by - 12), 1, 1);
     }

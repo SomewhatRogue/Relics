@@ -46,7 +46,10 @@ export function makeBolt(b: Bolt): THREE.Group {
       break;
     case 'lodestone':
       part(g, 0.22, 0.2, 0.22, M(0x4a3a6a), 0, 0, 0);
-      if (b.state === 'well') part(g, 1.4, 0.02, 1.4, G(hex(b.el ? EL_COL[b.el] : '#b080ff'), 0.6), 0, -0.4, 0);
+      if (b.state === 'well') part(g, 1.4, 0.02, 1.4, G(hex(b.el ? EL_COL[b.el] : '#ffd27a'), 0.6), 0, -0.4, 0);
+      break;
+    case 'bomb':
+      part(g, 0.26, 0.24, 0.26, M(0x5a6a30), 0, 0, 0), part(g, 0.04, 0.12, 0.04, M(0xa89878), 0.06, 0.16, 0), part(g, 0.06, 0.06, 0.06, G(0xff9a3c), 0.08, 0.24, 0);
       break;
     default:
       part(g, 0.14, 0.2, 0.14, G(hex(POTIONS[b.potion ?? 'oil'].col), 0.3), 0, 0, 0);
@@ -61,6 +64,9 @@ export function placeBolt(o: THREE.Object3D, b: Bolt, lift: number): void {
   if (b.kind === 'flask') {
     const k = Math.min(1, b.t / Math.max(0.01, b.flight));
     y = 0.5 + 4 * k * (1 - k) * 1.6;
+  } else if (b.kind === 'bomb' || (b.kind === 'lodestone' && b.state !== 'well')) {
+    const k = Math.min(1, b.t / Math.max(0.01, b.flight));
+    y = 0.35 + 4 * k * (1 - k) * 1.5;
   } else if (b.kind === 'smite') y = 0.5 + Math.max(0, 1 - b.t / Math.max(0.01, b.flight)) * 3;
   else if (b.kind === 'net') y = 0.3;
   else if (b.state === 'well') y = 0.4;

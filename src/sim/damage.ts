@@ -1,5 +1,5 @@
 /** Damage to an enemy from anything (blades, shots, blasts, burning), and what death resets. */
-import { BROOD, BUTCHER, GUARD, OVERKILL, SCRAPPER, SPIDER, SWING_DUMMY, TRAIT, WEAK_POP, weakOn, type Hurt } from '../shared/tuning';
+import { BROOD, BUTCHER, GUARD, OVERKILL, SCRAPPER, SPIDER, SWING_DUMMY, TRAIT, WEAK_POP, weakOn, MARK, type Hurt } from '../shared/tuning';
 import type { DeathKind, Enemy, FightEvent } from './types';
 
 const SPEC = { butcher: BUTCHER, scrapper: SCRAPPER, spider: SPIDER, brood: BROOD } as Record<string, { stun: number; respawn: number } | undefined>;
@@ -63,6 +63,8 @@ export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: Da
   const weak = weakOn(e, o.el || 'physical');
   if (weak !== 1) n = Math.max(1, Math.round(n * weak));
   if (!o.tick) sayWeak(e, weak, now, ev, o.el || 'physical');
+  // Marked by a relic: the next real blow lands harder, and the mark is spent.
+  if (!o.tick && (e.markUntil ?? -9) > now) (n = Math.round(n * MARK.mult)), (e.markUntil = 0);
   if (o.mult && (e.act === 'stunned' || e.act === 'pinned' || frozen(e, now) || snared(e, now))) n = Math.round(n * GUARD.stunnedMult * (o.brutal ? TRAIT.brutal : 1));
   e.hp -= n;
   e.hitAt = now;

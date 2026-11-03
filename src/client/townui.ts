@@ -28,6 +28,9 @@ import { lossText } from '../shared/raids';
 import { MEND_UI, PERRIN } from '../shared/mendlines';
 import { dusk } from './streetlife';
 import { openTree } from './treeui';
+import { relicName } from '../shared/relicitems';
+import { RELICW } from './relicwords';
+import { openStep } from './churchrelics';
 import { KNW } from './treewords';
 
 /** Words from another player's browser, made safe to show. */
@@ -114,6 +117,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       (hungry.length ? say('Father Odric', CHURCH.hungry) : '') + (pr.armor?.hungry === 'ransom' ? p(CHURCH.ransom) : '') +
       p(`Given to the Lantern so far: ${w.lantern} gold.`) + p(`You have ${pr.gold} gold.`),
       [...[20, 100].map((n) => ({ label: `GIVE ${n}`, disabled: pr.gold < n || pr.armor?.hungry === 'ransom', act: () => (g.donate(n), again()) })),
+        { label: RELICW.churchButton, primary: pr.relics.length > 0, act: () => openStep(g, panel, again) },
         ...hungry.map((it) => ({ label: `LEAVE ${itemName(it)} ON THE STEP`, act: () => (g.giveUp(it), panel.show('FATHER ODRIC', say('Father Odric', CHURCH.left), [{ label: 'CLOSE', act: () => panel.hide() }], true)) }))]);
   } else if (id === 'yard') {
     panel.show('SQUIRE PELL', say('Squire Pell', "Yard's out back. Straw men, a butcher made of sacking on a chain, and me. Mostly me, getting hit. If you're the sort that heals, I'd take it kindly."), [{ label: 'TO THE YARD', primary: true, act: () => (panel.hide(), g.enterYard()) }]);
@@ -189,7 +193,8 @@ export function showResult(g: Game, panel: Panel): void {
   if (r.levels) lines.push(`You've grown to level ${g.profile.level}. ${title(TRAINERS[g.profile.cls].name)} will want to see you, at ${TRAINERS[g.profile.cls].where}.`);
   if (r.treasure.length) lines.push(`<b>Treasure in your pack:</b> ${r.treasure.map((i) => `<b>${itemName(i)}</b>`).join(' and ')}.`);
   for (const i of r.sold) lines.push(`No room in your pack for the ${itemName(i)}, so it went for 20 gold.`);
-  if (r.relic) lines.push(`<b>You cut a relic out of ${r.job.boss}: the ${RELICS[r.relic].name}.</b> It's on your RELIC button.`);
+  if (r.relic) lines.push(RELICW.cutOut(r.job.boss ?? '', relicName(r.relic)) + ' ' + (g.profile.relic === r.relic.id ? RELICW.carryHint : RELICW.shelfHint));
+  if (r.lit !== undefined) lines.push(RELICW.litLeft(r.lit));
   if (r.won && r.job.objective === 'story') lines.push(`<b>Barrowby's bell rings across the valley.</b> The council can sit once enough people are home.`);
   const html = p(`<b>${r.job.title}</b>`) + lines.map(p).join(''), done = { label: 'BACK TO WICKHOLD', primary: true, act: () => panel.hide() };
   // Grown: a knack to pick, straight from here (the line comes and goes with the picks).

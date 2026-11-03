@@ -49,7 +49,7 @@ export function stepAreas(zones: Zone[], w: World): void {
         afflict(w, e, z.el, VOLLEY.dmg);
         if (e.weight <= 1 && !held(e, w.now) && !isDummy(e)) Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: VOLLEY.flinch });
       }
-    } else {
+    } else if (z.kind === 'fire') {
       z.next += FIRE_RING.every;
       for (const e of w.enemies) if (inside(e, z) && !isDummy(e) && e.burnUntil <= w.now) (e.lastBy = z.owner), afflict(w, e, 'fire', FIRE_RING.dmg);
     }

@@ -125,21 +125,22 @@ describe('relics come from deep dives', () => {
     expect(g.profile.relics).toEqual([]);
     g.startJob(deepDive(1));
     win(g);
-    expect(g.result?.relic).toBe('javelin');
+    // A kind you don't have: the first found, plain and full, carried at once.
+    expect(g.result?.relic).toMatchObject({ kind: 'javelin', tier: 1, el: '', charge: 24 });
     expect(g.hero.relics).toEqual(['channel', 'javelin']);
-    g.carry('hook');
-    expect(g.profile.relic).toBe('javelin');
+    const jav = g.profile.relic;
     g.startJob(deepDive(2));
     win(g);
-    expect(g.result?.relic).toBe('hook');
-    g.carry('hook');
+    expect(g.result?.relic?.kind).toBe('hook');
+    expect(g.profile.relic).toBe(jav);
+    g.carry(g.result!.relic!.id);
     expect(g.hero.relics).toEqual(['channel', 'hook']);
     // From the pack: put it away, then carry the javelin again.
     g.step(0.1, { ...NO_INTENT, gearSeq: 1, gearOp: 3, gearArg: -1 });
     expect(g.profile.relic).toBe('');
     g.step(0.1, { ...NO_INTENT, gearSeq: 2, gearOp: 3, gearArg: 0 });
     expect(g.hero.relics).toEqual(['channel', 'javelin']);
-    expect(g.profile.relic).toBe('javelin');
+    expect(g.profile.relic).toBe(jav);
   });
 });
 

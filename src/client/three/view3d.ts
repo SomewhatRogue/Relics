@@ -28,6 +28,7 @@ import { Grim3D } from './grim3d';
 import { drawExtras, drawMist3 } from './extras3d';
 import { drawTags } from './tags3d';
 import { drawSkills3 } from './skills3d';
+import { drawFound3 } from './found3d';
 import { Perf } from './perf3d';
 import { makeRT, postMaterial } from './post';
 import { roomLights } from './roomlights';
@@ -218,6 +219,7 @@ export class View3D {
     const ex = { room, meId, lerp, P, now, W: this.view.W, H: this.view.H, fanfare: !!marks.fanfare, mist: [at.x * this.view.ppu, at.z * this.view.ppu * Math.sin(PITCH)] as [number, number] };
     this.overlay.draw(room, meId, fx, marks, P, lerp, now, this.view.ppu);
     drawSkills3(og, room, P, lerp, this.view.ppu, now);
+    drawFound3(og, room, P, lerp, this.view.ppu, now);
     drawExtras(og, ex);
     drawTags(og, map, room.time, this.heroAt ? { x: this.heroAt[0], y: this.heroAt[1] } : null, others, P, now);
     drawMist3(og, map.theme, ex);

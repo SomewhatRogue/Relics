@@ -7,7 +7,7 @@ import { ELEMENT_TRAITS, POTIONS, slotOf, type Item, type PotionId } from '../sh
 
 const S = 12;
 const M = '#d8dce6', MD = '#7a8090', W = '#8a5a30', WD = '#5a3a1e', G = '#d9b13a', C = '#9a6a3a';
-type Paint = (px: (x: number, y: number, c: string) => void, line: (a: number, b: number, c: number, d: number, col: string) => void) => void;
+export type Paint = (px: (x: number, y: number, c: string) => void, line: (a: number, b: number, c: number, d: number, col: string) => void) => void;
 
 const blade = (len: number, wide: boolean, guard: string): Paint => (px, line) => {
   line(11, 0, 11 - len, len, M);
@@ -48,7 +48,7 @@ function tunic(px: (x: number, y: number, c: string) => void, line: (a: number, 
 }
 
 const made = new Map<string, string>();
-function draw(key: string, paint: Paint): string {
+export function draw(key: string, paint: Paint): string {
   if (made.has(key)) return made.get(key)!;
   if (typeof document === 'undefined') return '';
   const c = document.createElement('canvas');

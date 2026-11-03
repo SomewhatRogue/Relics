@@ -11,17 +11,19 @@ import { refreshHealth } from '../sim/gearstats';
 import type { ArenaRoom } from '../sim/room';
 import type { Hero } from '../sim/types';
 
-type Kit = Pick<Profile, 'weapon' | 'arms' | 'bag' | 'armor' | 'rings' | 'belt' | 'glow' | 'relic'> & { channel: string };
+type Kit = Pick<Profile, 'weapon' | 'arms' | 'bag' | 'armor' | 'rings' | 'belt' | 'glow' | 'relic' | 'relics'> & { channel: string };
 
 const fromHero = (h: Hero, p: Profile): Kit => ({
   weapon: h.weapon ?? p.weapon, arms: h.arms ?? p.arms, bag: h.bag ?? p.bag, armor: h.armor === undefined ? p.armor : h.armor, rings: h.rings ?? p.rings,
-  belt: h.belt ?? p.belt, glow: h.glow ?? p.glow, relic: h.relics ? h.relics[1] ?? '' : p.relic, channel: h.augments?.channel ?? p.augments.channel ?? '',
+  belt: h.belt ?? p.belt, glow: h.glow ?? p.glow, relic: h.relics ? (h.relics[1] ? h.relicItem ?? '' : '') : p.relic, relics: h.found ?? p.relics, channel: h.augments?.channel ?? p.augments.channel ?? '',
 });
-const fromProfile = (p: Profile): Kit => ({ weapon: p.weapon, arms: p.arms, bag: p.bag, armor: p.armor, rings: p.rings, belt: p.belt, glow: p.glow, relic: p.relic, channel: p.augments.channel ?? '' });
+const fromProfile = (p: Profile): Kit => ({ weapon: p.weapon, arms: p.arms, bag: p.bag, armor: p.armor, rings: p.rings, belt: p.belt, glow: p.glow, relic: p.relic, relics: p.relics, channel: p.augments.channel ?? '' });
 
+/** A relic's charge is spent in the room: compared by id and charge, kept as copies. */
+const relicSig = (rs: Profile['relics']) => rs.map((r) => r.id + ':' + r.charge).join(',');
 const sameList = <T>(a: T[], b: T[]) => a.length === b.length && a.every((x, i) => x === b[i]);
 const same = (a: Kit, b: Kit) => a.weapon === b.weapon && a.glow === b.glow && a.relic === b.relic && a.channel === b.channel && a.armor === b.armor
-  && sameList(a.bag, b.bag) && sameList(a.rings, b.rings) && sameList(a.belt, b.belt) && sameList(Object.entries(a.arms).flat(), Object.entries(b.arms).flat());
+  && relicSig(a.relics) === relicSig(b.relics) && sameList(a.bag, b.bag) && sameList(a.rings, b.rings) && sameList(a.belt, b.belt) && sameList(Object.entries(a.arms).flat(), Object.entries(b.arms).flat());
 
 /**
  * The room's word on this hero's kit, into their profile. True when anything changed (the caller
@@ -34,7 +36,7 @@ export function keepKit(p: Profile, h: Hero, copy: boolean): boolean {
   if (same(now, fromProfile(p))) return false;
   if (JSON.stringify(now) === JSON.stringify(fromProfile(p))) return false;
   const k = copy ? (JSON.parse(JSON.stringify(now)) as Kit) : now;
-  Object.assign(p, { weapon: k.weapon, arms: { ...k.arms }, bag: [...k.bag], armor: k.armor, rings: [...k.rings], belt: [...k.belt], glow: k.glow, relic: k.relic });
+  Object.assign(p, { weapon: k.weapon, arms: { ...k.arms }, bag: [...k.bag], armor: k.armor, rings: [...k.rings], belt: [...k.belt], glow: k.glow, relic: k.relic, relics: k.relics.map((r) => ({ ...r })) });
   p.augments.channel = k.channel as Profile['augments']['channel'];
   return true;
 }
@@ -42,7 +44,7 @@ export function keepKit(p: Profile, h: Hero, copy: boolean): boolean {
 /** Dress a restored hero's kit from their profile (their health and the rest stay as the room had them). */
 export function dressKit(h: Hero, p: Profile): void {
   const k = JSON.parse(JSON.stringify(fromProfile(p))) as Kit;
-  Object.assign(h, { weapon: k.weapon, arms: k.arms, bag: k.bag, armor: k.armor, rings: k.rings, belt: k.belt, glow: k.glow, bagSize: bagSize(p) });
+  Object.assign(h, { weapon: k.weapon, arms: k.arms, bag: k.bag, armor: k.armor, rings: k.rings, belt: k.belt, glow: k.glow, found: k.relics, bagSize: bagSize(p) });
   refreshHealth(h);
 }
 

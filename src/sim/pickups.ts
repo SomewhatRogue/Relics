@@ -7,8 +7,9 @@ import { COINS, POTION, POTION_DROPS, POTION_ORDER, type PotionId } from '../sha
 import type { Rng } from '../shared/rng';
 import type { Enemy, FightEvent, Hero } from './types';
 import { HUNGRY_FX, wears } from './hungry';
+import { RELIC_DROP, relicName, rollRelic, type RelicItem } from '../shared/relicitems';
 
-export interface Pickup { id: number; x: number; y: number; life: number; gold?: number; potion?: PotionId }
+export interface Pickup { id: number; x: number; y: number; life: number; gold?: number; potion?: PotionId; relic?: RelicItem }
 let nextId = 1;
 
 const kindOf = (e: Enemy) => (e.name ? 'named' : e.kind === 'butcher' ? 'butcher' : e.bow ? 'archer' : 'scrapper');
@@ -24,6 +25,26 @@ export function dropPickups(e: Enemy, pickups: Pickup[], rng: Rng): void {
     for (const p of POTION_ORDER) if ((r -= w[p]) < 0) { pick = p; break; }
     pickups.push({ id: nextId++, x: e.x + 0.4, y: e.y + 0.2, life: COINS.life, potion: pick });
   }
+}
+
+/** A named butcher, now and then, leaves a relic where it fell (its own seeded stream: RELIC_DROP.named). */
+export function dropRelic(e: Enemy, pickups: Pickup[], rng: Rng): void {
+  if (!e.name || e.respawns || e.kind !== 'butcher') return;
+  if (rng.next() >= RELIC_DROP.named) return;
+  pickups.push({ id: nextId++, x: e.x - 0.3, y: e.y + 0.3, life: RELIC_LIFE, relic: rollRelic(rng) });
+}
+/** A relic on the floor waits a long while (it's worth walking back for). */
+const RELIC_LIFE = 90;
+
+/** A relic picked up: kept, and carried at once if nothing is. */
+function takeRelic(h: Hero, r: RelicItem, ev: FightEvent[]): void {
+  h.found = [...(h.found ?? []), r];
+  if (!h.relics[1]) {
+    h.relics = [h.relics[0], r.kind];
+    h.relicItem = r.id;
+    h.augments[r.kind] = r.el;
+  }
+  ev.push({ k: 'relicfound', x: h.x, y: h.y }, { k: 'loot', x: h.x, y: h.y, name: relicName(r) });
 }
 
 const players = (heroes: Hero[]) => heroes.filter((h) => h.id !== 'squire');
@@ -44,6 +65,7 @@ export function stepPickups(pickups: Pickup[], heroes: Hero[], ev: FightEvent[],
       }
       return false;
     }
+    if (h && p.relic) return takeRelic(h, p.relic, ev), false;
     if (h && p.potion) {
       h.belt.push(p.potion);
       ev.push({ k: 'potion', x: h.x, y: h.y, kind: p.potion });

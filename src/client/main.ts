@@ -1,4 +1,8 @@
 /** Relic: Wickhold, the Training Yard and runs. The rooms run here in the browser (solo is a party of one). */
+import { carriedItem } from '../sim/charge';
+import { isDark, relicFill } from '../shared/relicitems';
+import { fillCol } from './reliccard';
+import { RELICW } from './relicwords';
 import { HERO, CLASS_GUARD, CLASS_DODGES, POTIONS, CLASS_ORDER, RELICS, TRAITS, WEAPONS, itemName, type HeroClass } from '../shared/tuning';
 import { CLASS_NAME } from '../shared/classes';
 import { LOOKS, heroLook } from './sprites';
@@ -234,8 +238,11 @@ function hud(now: number): void {
   // (The Mage's channel shows the element its spells are in now, in that colour.)
   const skillEl = skill === 'channel' ? castElement(me) : me.augments[skill];
   $('.rlc').dataset.el = skillEl;
-  $('.rcd').textContent = relic ? (input.touch ? '' : 'R ') + tag(relic) : '';
-  $('.rcd').classList.toggle('wait', !!relic && left(relic) > 0);
+  // The relic carried: its charge as a bar (gold, amber, low, or DARK and greyed).
+  const it = relic ? carriedItem(me) : undefined, chg = it ? Math.round(relicFill(it) * 100) + '%' : '', chgc = it ? fillCol(it) : '';
+  $('.rcd').innerHTML = relic ? (input.touch ? '' : 'R ') + (it && isDark(it) ? RELICS[relic].short + ' ' + RELICW.dark : tag(relic)) + (it ? `<i class="rchgl" style="--chg:${chg};--chgc:${chgc}"></i>` : '') : '';
+  $('.rcd').classList.toggle('wait', !!relic && (left(relic) > 0 || (!!it && isDark(it))));
+  $('.litbadge').hidden = !me.lit;
   if (input.touch) {
     const sb = $('.tb.relic'), rb = $('.tb.relic2');
     sb.hidden = !known;
@@ -244,6 +251,9 @@ function hud(now: number): void {
     sb.style.setProperty('--cd', 100 * (1 - left(skill) / RELICS[skill].cooldown) + '%');
     rb.hidden = !relic;
     if (relic) (rb.textContent = RELICS[relic].short), (rb.dataset.el = me.augments[relic]), rb.style.setProperty('--cd', 100 * (1 - left(relic) / RELICS[relic].cooldown) + '%');
+    rb.style.setProperty('--chg', it ? chg : '0%');
+    rb.style.setProperty('--chgc', chgc || '#ffd27a');
+    rb.classList.toggle('dark', !!it && isDark(it));
   }
   // The belt: the potion that's next (Q, POTION) and how many more.
   const next = me.belt[0];

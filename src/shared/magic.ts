@@ -1,5 +1,6 @@
 /** Relics (rechargeable magic items) and the elements that can be fitted to them. */
 import { CHAIN, FIRE_RING, KNIVES, LIGHT, SIC, STAMP, TETHER, VANISH, VOLLEY } from './skillkit.js';
+import { BELL, BOMB, KNUCKLE, SENTRY } from './relickit.js';
 /**
  * The Warrior's relic: a javelin thrown at range, recharging. It carries anything light enough and
  * pins it to the first wall or pillar it reaches; it sticks into anything heavier.
@@ -109,9 +110,14 @@ export const RELICS = {
   tether: { name: 'STORM TETHER', short: 'TETHER', cooldown: TETHER.cooldown, windup: TETHER.windup, recover: TETHER.recover, range: TETHER.range },
   chain: { name: 'CENSER CHAIN', short: 'CHAIN', cooldown: CHAIN.cooldown, windup: CHAIN.windup, recover: CHAIN.recover, range: CHAIN.range },
   light: { name: 'CENSER LIGHT', short: 'LIGHT', cooldown: LIGHT.cooldown, windup: LIGHT.windup, recover: LIGHT.recover, range: LIGHT.radius },
+  // The found relics beyond the javelin, hook and lodestone (shared/relickit.ts).
+  bomb: { name: 'GALL BOMB', short: 'BOMB', cooldown: BOMB.cooldown, windup: BOMB.windup, recover: BOMB.recover, range: BOMB.range },
+  sentry: { name: 'WIND-UP BOW', short: 'WIND-UP', cooldown: SENTRY.cooldown, windup: SENTRY.windup, recover: SENTRY.recover, range: 0 },
+  bell: { name: 'BONE BELL', short: 'BELL', cooldown: BELL.cooldown, windup: BELL.windup, recover: BELL.recover, range: BELL.radius },
+  knuckle: { name: "BUTCHER'S KNUCKLE", short: 'KNUCKLE', cooldown: KNUCKLE.cooldown, windup: KNUCKLE.windup, recover: KNUCKLE.recover, range: KNUCKLE.length },
 };
 export type RelicId = keyof typeof RELICS;
-export const RELIC_ORDER: RelicId[] = ['javelin', 'hook', 'bash', 'horn', 'stamp', 'net', 'volley', 'sic', 'shadow', 'vanish', 'knives', 'lodestone', 'firering', 'tether', 'blessing', 'ward', 'sanctuary', 'chain', 'light'];
+export const RELIC_ORDER: RelicId[] = ['javelin', 'hook', 'bash', 'horn', 'stamp', 'net', 'volley', 'sic', 'shadow', 'vanish', 'knives', 'lodestone', 'firering', 'tether', 'blessing', 'ward', 'sanctuary', 'chain', 'light', 'bomb', 'sentry', 'bell', 'knuckle'];
 /** Two abilities at most: the class's own skill, and one found relic carried with it. */
 export const RELIC_SLOTS = 2;
 /** Each class's skill (on the SKILL button): the first of its choices, until the hero picks another. */
@@ -123,10 +129,11 @@ export const CLASS_SKILL: Record<'WARRIOR' | 'RANGER' | 'ROGUE' | 'MAGE' | 'HEAL
   HEALER: 'sanctuary',
 };
 /**
- * Relics are found, never given: pried out of the named butcher at the end of a deep dive, one you
- * don't have yet each time. Any class can carry one (on the RELIC button).
+ * Relics are found, never given (the javelin aside, from the wood): rarely off a named butcher, and
+ * surely at the bottom of a won deep dive. Any class can carry one (on the RELIC button); each is an
+ * item with its own charge (shared/relicitems.ts). None of them ever hurts a friend.
  */
-export const FOUND_RELICS: RelicId[] = ['javelin', 'hook'];
+export const FOUND_RELICS: RelicId[] = ['javelin', 'hook', 'lodestone', 'bomb', 'sentry', 'bell', 'knuckle'];
 /** A hero's abilities: their skill, then the relic they carry (if any). */
 export const abilitiesOf = (cls: keyof typeof CLASS_SKILL, carried?: RelicId | '', skill?: RelicId) => [skill && SKILL_CHOICES[cls].includes(skill) ? skill : CLASS_SKILL[cls], ...(carried ? [carried] : [])];
 /** The skills a class's trainer teaches, in the order taught (levels and prices: SKILL_STEPS in

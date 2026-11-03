@@ -202,7 +202,8 @@ describe('the prologue wood', () => {
     Object.assign(g.hero, { x: 1.6, y: 4 });
     g.step(0.05, NO_INTENT);
     expect(g.mode).toBe('town');
-    expect(g.profile).toMatchObject({ prologue: true, tally: true, relic: 'javelin' });
+    expect(g.profile).toMatchObject({ prologue: true, tally: true });
+    expect(g.profile.relics.find((r) => r.id === g.profile.relic)?.kind).toBe('javelin');
     expect(g.greeting).toBe('orla');
   });
 
@@ -211,7 +212,8 @@ describe('the prologue wood', () => {
     g.create('HEALER', 'ivy');
     g.skipWood();
     expect(g.mode).toBe('town');
-    expect(g.profile).toMatchObject({ prologue: true, cold: true, relic: 'javelin' });
+    expect(g.profile).toMatchObject({ prologue: true, cold: true });
+    expect(g.profile.relics.find((r) => r.id === g.profile.relic)).toMatchObject({ kind: 'javelin', tier: 1, el: '', charge: 24 });
     expect(g.hero.cold).toBe(true);
   });
 });

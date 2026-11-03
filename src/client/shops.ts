@@ -3,6 +3,9 @@
  * oil and smoke), the infirmary (Agne's Bitter), Dessa's stall on Market Row (Forged steel), and Ivo's
  * bench at the forge (frost flasks, a modifier turned). The vault, Tobin and Halvard: stores.ts.
  */
+import { relicFill, relicName } from '../shared/relicitems';
+import { relicCard } from './reliccard';
+import { RELICW } from './relicwords';
 import { CLASS_KITS, ELEMENT_NAME, MODS, POTION, REROLL, RELICS, SKILL_CHOICES, TIERS, WANT, itemName, type PotionId } from '../shared/tuning';
 import { marketOpen } from '../shared/story';
 import { housesFor, type SpotId } from '../shared/town';
@@ -50,20 +53,24 @@ function trader(g: Game, panel: Panel): void {
   show(panel, PLACES.trader, says('Dessa', 'Wickhold steel, with a little weather in it. Fire, frost, storm. Price is the price.'), goods, SHOPW.gold(pr.gold), again);
 }
 
-/** Ivo's bench: frost flasks and a modifier turned, the relics you carry, and no elements for now. */
+/** Ivo's bench: frost flasks and a modifier turned, the relics you own (he hears how bright each is), and no elements for now. */
 function wright(g: Game, panel: Panel): void {
-  const pr = g.profile, again = () => wright(g, panel), rel = [...SKILL_CHOICES[pr.cls], ...pr.relics];
-  const lines = (g.gearList().some((it) => it.quality === 'hungry') ? says('Ivo', CHURCH.ivo) : '') + says('Ivo', FORGE.ivo) + dim(FORGE.shut);
+  const pr = g.profile, again = () => wright(g, panel), skills = SKILL_CHOICES[pr.cls];
+  const held = pr.relics.find((r) => r.id === pr.relic), fill = held ? relicFill(held) : -1;
+  // He hears the one you carry: dark, fading, or singing.
+  const heard = !held ? '' : fill <= 0 ? RELICW.ivoDark : fill < 0.5 ? RELICW.ivoFading : fill >= 0.9 ? RELICW.ivoBright : '';
+  const lines = (g.gearList().some((it) => it.quality === 'hungry') ? says('Ivo', CHURCH.ivo) : '') + (heard ? says('Ivo', heard) : '') + says('Ivo', FORGE.ivo) + dim(FORGE.shut);
   const worn = g.gearList().filter((it) => !pr.bag.includes(it) && it.quality !== 'plain' && it.quality !== 'hungry');
   const turns: Good[] = worn.flatMap((it) => (it.mods ?? []).map((m, k) => ({
     name: `${itemName(it)}: ${MODS[m.id].name}`, price: REROLL, icon: itemIcon(it), col: TIERS[it.quality].col, label: 'REROLL',
     about: p(SHOPW.reroll), why: pr.gold < REROLL ? SHOPW.poor : '', buy: () => void g.rerollMod(it, k),
   })));
-  // Not setting elements for now (Kyle, 2026-11-02): one greyed button a relic shows where it was; what's set stays set.
-  const relics = '<div class="shop"><h3 class="gh">RELICS</h3>' + rel.map((r, i) => p(`<b>${RELICS[r].name}</b>${i ? (pr.relic === r ? ' (carried)' : ' (on the shelf)') : ' (your skill)'}: ${pr.augments[r] ? ELEMENT_NAME[pr.augments[r] as keyof typeof ELEMENT_NAME] : 'plain'}`)).join('') + '</div>';
-  const carry = pr.relics.filter((r) => r !== pr.relic).map((r) => ({ label: `CARRY THE ${RELICS[r].short}`, primary: true, act: () => (g.carry(r), again()) }));
+  // Not setting elements for now (Kyle, 2026-11-02): one greyed button a skill shows where it was; found relics come with theirs built in.
+  const relics = '<div class="shop"><h3 class="gh">RELICS</h3>' + pr.relics.map((r) => relicCard(r, { brief: true, tag: r.id === pr.relic ? RELICW.carrying : '' })).join('') +
+    (pr.relics.length ? '' : p(RELICW.none)) + skills.map((r) => p(`<b>${RELICS[r].name}</b> (your skill): ${pr.augments[r] ? ELEMENT_NAME[pr.augments[r] as keyof typeof ELEMENT_NAME] : 'plain'}`)).join('') + '</div>';
+  const carry = pr.relics.filter((r) => r.id !== pr.relic).map((r) => ({ label: `CARRY THE ${relicName(r)}`, primary: true, act: () => (g.carry(r.id), again()) }));
   show(panel, PLACES.wright, lines, [potionGood(g, 'frost'), ...turns], beltFoot(g), again,
-    [...carry, ...rel.map((r) => ({ label: `${RELICS[r].short}: ${FORGE.element}`, disabled: true, act: () => {} }))], relics);
+    [...carry, ...skills.map((r) => ({ label: `${RELICS[r].short}: ${FORGE.element}`, disabled: true, act: () => {} }))], relics);
 }
 
 /** Open one of these if `id` is one; false otherwise. */

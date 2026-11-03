@@ -94,8 +94,10 @@ export function makeDrop(col: string): THREE.Group {
   return root;
 }
 
-export function makePickup(gold: boolean, potion?: string): THREE.Group {
+export function makePickup(gold: boolean, potion?: string, relic?: string): THREE.Group {
   const root = new THREE.Group();
+  // A relic: a little gold standing stone, glowing in its element's colour.
+  if (relic) return part(root, 0.16, 0.3, 0.16, G(hex(relic), 0.6), 0, 0.2, 0, 0.6), part(root, 0.5, 0.02, 0.5, G(hex(relic), 0.15), 0, 0.02, 0), root;
   if (gold) for (let i = 0; i < 3; i++) part(root, 0.12, 0.05, 0.12, G(0xffd27a, 0.3), (i - 1) * 0.1, 0.03 + (i % 2) * 0.05, (i % 2) * 0.08);
   else part(root, 0.14, 0.2, 0.14, G(hex(potion ? POTIONS[potion as keyof typeof POTIONS].col : '#c0392b'), 0.35), 0, 0.12, 0), part(root, 0.06, 0.08, 0.06, M(0x6a4a2a), 0, 0.26, 0);
   return root;

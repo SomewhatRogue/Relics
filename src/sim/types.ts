@@ -1,4 +1,5 @@
 /** The fight's state. Plain data: the same shape is drawn locally and (later) sent to friends. */
+import type { RelicItem } from '../shared/relicitems';
 import type { Augment, Item, PotionId, Tier, PropKind, Quality, RelicId, TraitId, WeaponId, Hurt, HeroClass } from '../shared/tuning';
 
 /** What a player's device sends: held state plus press counters, so a quick tap is never lost. */
@@ -203,8 +204,13 @@ export interface Hero extends Body {
   grudges?: Record<string, number>;
   /** A Healer's censer gone cold (the prologue, until Isolde relights it): no heals given. */
   cold: boolean;
-  /** Relics this hero has won (one at a time is carried, in relics[1]). */
-  found: RelicId[];
+  /** Relics this hero owns, each with its charge (one at a time is carried: `relicItem`, its kind in relics[1]). */
+  found: RelicItem[];
+  relicItem: string;
+  /** Carrying the church's light this job (shared/church.ts LIT). */
+  lit?: boolean;
+  /** Quickened by a bone bell until then (BELL.quick). */
+  quickUntil?: number;
   /** The draw in flight was released on the white flash. */
   perfect: boolean;
   /** Dodged through a blow (TEMPO): the next hit before then lands double. */
@@ -292,6 +298,9 @@ export interface Enemy extends Body {
   frozenUntil: number;
   /** Caught in a hunter's net until then (small goblins can't move or act; big ones are slowed). */
   snareUntil: number;
+  /** A relic's marks: the next blow lands harder (MARK) until `markUntil`; hobbled (HOBBLE) until `hobbleUntil`. */
+  markUntil?: number;
+  hobbleUntil?: number;
   /** The hero who last hit it (who threw it into the wall). */
   lastBy: string;
   /** How it died, for the body left behind. */
@@ -393,7 +402,10 @@ export interface Zone {
   el: Augment;
   /** Not blessed ground but a skill's area (sim/areas.ts): a Ranger's volley (falling from `at`), a
    *  Mage's fire ring burning on. */
-  kind?: 'volley' | 'fire';
+  kind?: 'volley' | 'fire' | 'sentry';
+  /** A wind-up bow's aim (for drawing it turned to what it shoots). */
+  ax?: number;
+  ay?: number;
   at?: number;
 }
 
@@ -455,6 +467,10 @@ export type FightEvent =
    *  ring, a tether strike (to x2, y2), a chain (to x2, y2), the lantern light, a hound sent or pinning. */
   | { k: 'stamp' | 'volleyshot' | 'arrowfall' | 'vanish' | 'knives' | 'firering' | 'lanternlight' | 'sic' | 'houndpin'; x: number; y: number }
   | { k: 'tetherzap' | 'chainpull'; x: number; y: number; x2: number; y2: number }
+  /** Found relics (sim/foundrelics.ts): a bell rung, a friend quickened, a bomb thrown, a wind-up bow set
+   *  down or winding down, a goblin marked or hobbled, a friend in a relic's reach spared, a dark relic pressed. */
+  | { k: 'bell' | 'quick' | 'bombthrow' | 'sentry' | 'sentryend' | 'marked' | 'hobbled' | 'spared' | 'dark' | 'relicfound'; x: number; y: number }
+  | { k: 'knuckle' | 'hookprop'; x: number; y: number; x2: number; y2: number }
   /** A house on fire (sim/blaze.ts): a beam down, the roof in, someone caged lost with it. */
   | { k: 'rafter' | 'housefall' | 'cagelost'; x: number; y: number }
   /** Spiders: a wave hatching, a hero poisoned or cured, a glob landing. */
@@ -512,7 +528,11 @@ export interface Javelin {
 export interface Bolt {
   id: number;
   owner: string;
-  kind: 'arrow' | 'bolt' | 'knife' | 'spark' | 'orb' | 'lance' | 'smite' | 'net' | 'lodestone' | 'flask';
+  kind: 'arrow' | 'bolt' | 'knife' | 'spark' | 'orb' | 'lance' | 'smite' | 'net' | 'lodestone' | 'flask' | 'bomb';
+  /** A relic's: it never hurts a friend or anyone freed (friends caught in it are told they're spared). */
+  relic?: boolean;
+  /** Hobbles what it hits (a wind-up bow's bolt). */
+  hobble?: boolean;
   /** A Mage's frost burst: freezes solid at once (frost twice). */
   freeze?: boolean;
   /** A thrown flask's potion. */

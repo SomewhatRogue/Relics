@@ -12,6 +12,7 @@ import { decoyTime, dodgeBreath, dodgeReach, releaseWindow } from './knacks';
 import { fedMult, jealousBlocks, jealousCooldown, needlesBreath, wears } from './hungry';
 import { hitEnemy } from './combat';
 import { brandySpeed, breathCap } from './brandy';
+import { quickMult, relicDark, spendCharge } from './charge';
 import { knows, type Enemy, type FightEvent, type Hero, type Intent } from './types';
 
 export function newHero(id: string, x: number, y: number): Hero {
@@ -20,8 +21,8 @@ export function newHero(id: string, x: number, y: number): Hero {
     act: 'idle', actT: 0, actDur: 0, combo: 0, heavy: false, power: 0, counter: false, hitIds: [], blocking: false,
     parryOpenAt: -9, lastBlockPress: -9, rollDx: 0, rollDy: 1, lastRollAt: -9, rollX: -99, rollY: -99, decoyX: 0, decoyY: 0, decoyUntil: -9, toldAt: -9, snareReady: 0, hound: null, counterUntil: -9,
     attackQueuedAt: -9, rollQueuedAt: -9, relic: 'bash', relics: abilitiesOf('WARRIOR'), relicQueuedAt: -9,
-    relicReady: { javelin: 0, hook: 0, horn: 0, bash: 0, net: 0, shadow: 0, channel: 0, lodestone: 0, blessing: 0, ward: 0, sanctuary: 0, stamp: 0, volley: 0, sic: 0, vanish: 0, knives: 0, firering: 0, tether: 0, chain: 0, light: 0 },
-    augments: { javelin: '', hook: '', horn: '', bash: '', net: '', shadow: '', channel: '', lodestone: '', blessing: '', ward: '', sanctuary: '', stamp: '', volley: '', sic: '', vanish: '', knives: '', firering: '', tether: '', chain: '', light: '' }, blessedUntil: -9, wardUntil: -9, wardHp: 0, rallyUntil: -9, arms: {}, bag: [], bagSize: BAG.start, armor: null, rings: [], baseHp: HERO.hp, purse: 0, fed: 0, lastKill: 0, biteAt: 0, ransomed: false, want: 0, cold: false, found: [], glow: 0, belt: [], potionReady: 0, mendLeft: 0, brandyUntil: -9, hiddenUntil: -9, perfect: false, tempoUntil: -9, carrying: 0, lifting: 0, grabQueuedAt: -9, z: 0, hitstop: 0, lenience: 0,
+    relicReady: { javelin: 0, hook: 0, horn: 0, bash: 0, net: 0, shadow: 0, channel: 0, lodestone: 0, blessing: 0, ward: 0, sanctuary: 0, stamp: 0, volley: 0, sic: 0, vanish: 0, knives: 0, firering: 0, tether: 0, chain: 0, light: 0, bomb: 0, sentry: 0, bell: 0, knuckle: 0 },
+    augments: { javelin: '', hook: '', horn: '', bash: '', net: '', shadow: '', channel: '', lodestone: '', blessing: '', ward: '', sanctuary: '', stamp: '', volley: '', sic: '', vanish: '', knives: '', firering: '', tether: '', chain: '', light: '', bomb: '', sentry: '', bell: '', knuckle: '' }, blessedUntil: -9, wardUntil: -9, wardHp: 0, rallyUntil: -9, arms: {}, bag: [], bagSize: BAG.start, armor: null, rings: [], baseHp: HERO.hp, purse: 0, fed: 0, lastKill: 0, biteAt: 0, ransomed: false, want: 0, cold: false, found: [], relicItem: '', glow: 0, belt: [], potionReady: 0, mendLeft: 0, brandyUntil: -9, hiddenUntil: -9, perfect: false, tempoUntil: -9, carrying: 0, lifting: 0, grabQueuedAt: -9, z: 0, hitstop: 0, lenience: 0,
     seen: { attack: 0, block: 0, roll: 0, weapon: 0, relic: 0, relicSwap: 0, relicPick: 0, augment: 0, cls: 0, take: 0, grab: 0, gear: 0, potion: 0, belt: 0, open: 0 },
   };
 }
@@ -70,7 +71,7 @@ function walk(h: Hero, inp: Intent, k: number, dt: number, now: number): void {
   // Creeping: harder to see (STEALTH). (Standing in plain sight isn't.)
   h.sneaking = m >= 0.05 && m < STEALTH.slow;
   if (m < 0.05) return;
-  const l = Math.hypot(inp.mx, inp.my), sp = HERO.speed * WEAPONS[h.weapon].speed * statsOf(h).speed * k * m * wadeAt(h.x, h.y) * brandySpeed(h, now);
+  const l = Math.hypot(inp.mx, inp.my), sp = HERO.speed * WEAPONS[h.weapon].speed * statsOf(h).speed * k * m * wadeAt(h.x, h.y) * brandySpeed(h, now) * quickMult(h, now);
   h.x += (inp.mx / l) * sp * dt;
   h.y += (inp.my / l) * sp * dt;
   h.moving = true;
@@ -104,6 +105,7 @@ function gear(h: Hero, inp: Intent, ev: FightEvent[]): void {
   if (inp.gearSeq !== h.seen.gear && (h.act === 'idle' || inp.gearOp === 2 || inp.gearOp >= 4)) (h.seen.gear = inp.gearSeq), applyGear(h, inp.gearOp, inp.gearArg, ev);
   if (inp.augmentSeq !== h.seen.augment) {
     h.seen.augment = inp.augmentSeq;
+    if (h.relic === h.relics[1] && h.relicItem) return;
     h.augments[h.relic] = AUGMENTS[(AUGMENTS.indexOf(h.augments[h.relic]) + 1) % AUGMENTS.length];
     ev.push({ k: 'relic', x: h.x, y: h.y, name: relicLabel(h) });
   }
@@ -203,6 +205,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     const r = RELICS[h.relic];
     if (h.actT >= r.windup && h.actT - dt < r.windup) {
       acts.fire(h);
+      spendCharge(h);
       h.relicReady[h.relic] = now + r.cooldown * jealousCooldown(h) * (1 - statsOf(h).focus) * (h.relic === h.relics[0] ? 1 - drilled(h.drills, 'skill') : 1);
       if (h.relic === 'hook' || h.relic === 'javelin' || h.relic === 'net' || h.relic === 'lodestone') ev.push({ k: h.relic === 'hook' ? 'hookfire' : 'throw', x: h.x, y: h.y, dx: h.fx, dy: h.fy });
     }
@@ -263,6 +266,8 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   if (now - h.grabQueuedAt < INPUT_BUFFER && acts.grab(h)) return;
   // The class skill, not yet taught, does nothing (the press is spent).
   if (now - h.relicQueuedAt < INPUT_BUFFER && h.relic === h.relics[0] && !knows(h, 'skill')) h.relicQueuedAt = -9;
+  // A dark relic does nothing (the press is spent): it wants recharging at the church.
+  if (now - h.relicQueuedAt < INPUT_BUFFER && relicDark(h)) (h.relicQueuedAt = -9), ev.push({ k: 'dark', x: h.x, y: h.y });
   if (now - h.relicQueuedAt < INPUT_BUFFER && now >= h.relicReady[h.relic] && !jealousBlocks(h)) {
     // A blessing turns to nobody: the room picks the ally.
     if (h.relic !== 'blessing' && h.relic !== 'horn' && h.relic !== 'bash') face(h, inp, enemies, true, RELICS[h.relic].range);

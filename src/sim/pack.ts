@@ -3,6 +3,7 @@
  * intent (sim/types.ts gearOp) and the room applies them, so a friend's pack works the same online.
  * The world doesn't stop while you rummage.
  */
+import { relicName } from '../shared/relicitems';
 import { CLASS_KITS, RELICS, WEAPONS, abilitiesOf, itemName, slotOf, type Item } from '../shared/tuning';
 import { refreshHealth } from './gearstats';
 import { BAG } from '../shared/bags';
@@ -73,9 +74,13 @@ export function applyGear(h: Hero, op: number, arg: number, ev: FightEvent[]): v
   } else if (op === GEAR.carry) {
     const r = arg >= 0 ? h.found[arg] : undefined;
     if (arg >= 0 && !r) return;
-    h.relics = abilitiesOf(cls, r, h.relics[0]);
-    if (!h.relics.includes(h.relic)) h.relic = h.relics[0];
-    ev.push({ k: 'relic', x: h.x, y: h.y, name: r ? RELICS[r].name : RELICS[h.relics[0]].name });
+    const was = h.relic === h.relics[1];
+    h.relics = abilitiesOf(cls, r?.kind, h.relics[0]);
+    h.relicItem = r?.id ?? '';
+    // Its element is built in (shared/relicitems.ts).
+    if (r) h.augments[r.kind] = r.el;
+    if (!h.relics.includes(h.relic) || (was && r)) h.relic = r ? r.kind : h.relics[0];
+    ev.push({ k: 'relic', x: h.x, y: h.y, name: r ? relicName(r) : RELICS[h.relics[0]].name });
   }
 }
 
