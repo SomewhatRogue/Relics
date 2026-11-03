@@ -6,6 +6,7 @@
  * freed who's fallen behind out of sight, and the point those (and the quest marks) share. Drawing only.
  */
 import type { Area, GameMap } from '../shared/arena';
+import { lampAt } from '../shared/lamps';
 import type { Survivor } from '../sim/types';
 import type { Ctx } from './draw';
 import type { Light } from './light';
@@ -56,11 +57,13 @@ export function drawWays(c: Ctx, m: GameMap, open: boolean, cx: number, cy: numb
       // Light in the gap, stronger toward the floor.
       for (let i = 0; i < 12; i++) (g.globalAlpha = 0.06 + i * 0.025), (g.fillStyle = '#ffe2a0'), g.fillRect(Math.round(x0 + 2), Math.round(y0 - 46 + i * 4), w - 4, 4);
       g.globalAlpha = 1;
-      // A torch either side, on the floor in front of the posts.
+      // A torch either side, on the floor in front of the posts: lit with the other lamps (shared/lamps.ts).
+      const on = lampAt(m.theme, a.x, a.y);
       for (const tx of [x0 - 7, x0 + w + 6]) {
         (l.fillStyle = '#4a3424'), l.fillRect(Math.round(tx), Math.round(y0 + 2), 2, 12);
-        flame(g, tx + 1, y0 + 1, now);
-        lights.push({ x: tx + 1, y: y0, r: 80 + Math.sin(now * 11 + tx) * 4, i: 1.1, c: [1, 0.7, 0.4] });
+        if (on <= 0) (l.fillStyle = '#1a1410'), l.fillRect(Math.round(tx), Math.round(y0), 2, 2);
+        else if (on > 0.5) flame(g, tx + 1, y0 + 1, now);
+        if (on > 0) lights.push({ x: tx + 1, y: y0, r: 80 + Math.sin(now * 11 + tx) * 4, i: 1.1 * on, c: [1, 0.7, 0.4] });
       }
       lights.push({ x: mid, y: y0 - 6, r: 60, i: 0.7, c: [1, 0.9, 0.7] });
       chevrons(g, mid, y0 + 14, -1, now);

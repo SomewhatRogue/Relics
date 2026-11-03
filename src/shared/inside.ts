@@ -68,7 +68,7 @@ export function runInterior(job: Job, roomIndex: number, blockIndex: number, doo
     ambient: fire ? [0.24, 0.15, 0.12] : torches.length ? [0.19, 0.16, 0.17] : [0.15, 0.15, 0.2],
   };
   const map: GameMap = {
-    name: l.name, w, h, wallFace: 3, rounds, blocks: l.blocks, braziers: camp ? [{ ...camp, r: 0.35 }] : [], torches,
+    name: l.name, w, h, wallFace: 3, rounds, blocks: l.blocks, braziers: camp ? [{ ...camp, r: 0.35, wild: true }] : [], torches,
     hero: { x: w / 2, y: h - 1.3 }, exit: { x: w / 2 - 1, y: h - 0.7, w: 2, h: 0.7 }, theme,
     npcs: npcs.length ? npcs : undefined, sleepers: sleepers.length ? sleepers : undefined,
     grim: grim.length ? grim : undefined, marks: marks.length ? marks : undefined,

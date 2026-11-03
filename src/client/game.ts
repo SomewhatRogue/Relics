@@ -37,7 +37,8 @@ import { bankEnd, bankJob, banked, soloJob, unbank } from './jobbank';
 import { dropOwed, owedTo } from './owed';
 import { dressKit, forgetTaken, keepKit } from './keepkit';
 import { ONLINE } from './relay';
-import { dayPhase, townLight } from '../shared/daylight';
+import { townLight } from '../shared/daylight';
+import { townPhase } from './townclock';
 import { Followers } from './followers';
 import { JobRooms, doorPushed, type DoorMark, type SavedHouses } from './jobrooms';
 import type { Parties } from './parties';
@@ -505,7 +506,7 @@ export class Game {
     if (this.mode === 'run' && this.run && [...stepped.values()].some((e) => e.length)) this.bankIt(this.run);
     this.growing();
     // Wickhold keeps the shared day: the light turns with the clock, the same on every screen.
-    if (this.mode === 'town' && !this.outside) this.room.map.theme = townLight(this.townTheme ??= this.room.map.theme, dayPhase(Date.now()));
+    if (this.mode === 'town' && !this.outside) this.room.map.theme = townLight(this.townTheme ??= this.room.map.theme, townPhase());
     if (this.mode === 'wood' && this.wood) return this.stepWoodFrame(h, ev, dt);
     this.keepGear(h);
     for (const e of ev) if (e.k === 'spend' && e.id === ME) this.spend(e.n);

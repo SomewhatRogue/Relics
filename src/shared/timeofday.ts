@@ -7,6 +7,7 @@
  */
 import type { Theme } from './arena.js';
 import type { Job, PlaceKind } from './jobs.js';
+import { lampsFor } from './lamps.js';
 import { Rng } from './rng.js';
 
 export type Time = 'dawn' | 'day' | 'dusk' | 'night';
@@ -51,7 +52,7 @@ export function lightFor(base: Theme, kind: PlaceKind, time: Time): Theme {
   if (!open) return { ...base, time, torch: 1, sight: TIMES.night.sight, glow: 1 };
   // The sky's light through the place's own tint (a little of it), as much as the place lets in.
   const sky = mix(base.ambient, t.ambient, open);
-  return { ...base, ambient: sky, moon: base.moon * t.moon, day: time === 'day', torch: t.torch, mist: t.mist * open, sun: t.sun, time, sight: t.sight, glow: t.glow };
+  return { ...base, ambient: sky, moon: base.moon * t.moon, day: time === 'day', torch: t.torch, lamps: lampsFor(time), mist: t.mist * open, sun: t.sun, time, sight: t.sight, glow: t.glow };
 }
 
 /** How far a resting goblin sees here, and how far a censer gives you away (shares; 1 off a job). */

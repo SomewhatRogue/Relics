@@ -128,10 +128,10 @@ export function planRoom(job: Job, index: number, road?: RoadId): RoomPlan {
   // The place itself, to its plan, round the ways in and out, the raised ground, the water and the job's spots.
   site = layOut(job, index, { w: W, h: H, fork, water }, roads ? roads.map((r) => r.area) : [EXIT], ledges.flatMap((l) => [l, ...l.ramps]), [...spots], SPAWN);
   blocks.push(...site.blocks), rounds.push(...site.rounds), props.push(...site.props);
-  // Goblins at their fires: a band or two by each, at rest until they see you. The first room is all
+  // Goblins at their fires (wild: they burn whatever the hour, shared/lamps.ts): a band or two by each, at rest until they see you. The first room is all
   // small ones; butchers come deeper in.
   const fires = [spot(0.35, 3, H - 7), spot(0.35, 3, H / 2)].filter(Boolean) as { x: number; y: number }[];
-  const braziers = fires.map((f) => ({ ...f, r: 0.35 }));
+  const braziers = fires.map((f) => ({ ...f, r: 0.35, wild: true }));
   const ruin = job.place.ruin;
   const n = Math.max(2, Math.min(10, 4 + ruin + index + (road === 'low' ? 2 : road === 'high' ? -2 : 0)));
   for (let i = 0; i < n; i++) {

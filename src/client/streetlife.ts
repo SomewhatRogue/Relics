@@ -4,7 +4,8 @@
  * has its lamp, moths round it after dark, with a soft light over the beds.
  */
 import type { Round } from '../shared/arena';
-import { dayPhase, daylight } from '../shared/daylight';
+import { daylight } from '../shared/daylight';
+import { townPhase } from './townclock';
 import type { Ctx } from './draw';
 
 /** Three crows: they peck, hop, and now and then one flaps up and settles again. */
@@ -27,7 +28,7 @@ function crows(c: Ctx, r: Round, x: number, y: number): void {
 }
 
 /** How dark it is in Wickhold now (0 day, 1 night). */
-export const dusk = () => 1 - daylight(dayPhase(Date.now()));
+export const dusk = () => 1 - daylight(townPhase());
 
 /** Moths round the garden lamp (the round stands at its foot): specks on the glow layer, after dusk. */
 function moths(c: Ctx, r: Round, x: number, y: number): void {

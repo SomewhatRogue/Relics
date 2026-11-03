@@ -43,6 +43,8 @@ import { drawMist, setSun, torchIn } from './daytime';
 import { drawPuddles } from './spiders';
 import { drawSkills, skillLights } from './skillsdraw';
 import { witchColour } from './hallsdraw';
+import { brazierOn, drawBrazier, drawLamps } from './lampsdraw';
+import { lampAt } from '../shared/lamps';
 
 
 /** The view's jolt this frame (heropose.ts), reused. */
@@ -291,13 +293,13 @@ export class Scene {
     for (const r of map.rounds) items.push({ y: OY + r.y * PX, draw: () => drawRound(c, r, OX + r.x * PX - cx, OY + r.y * PX - cy) });
     for (const b of map.blocks) {
       const [bx, by] = blockAt(b);
-      items.push({ y: blockFoot(b), draw: () => drawBlock(c, b, bx - cx, by - cy, true) });
+      items.push({ y: blockFoot(b), draw: () => drawBlock(c, b, bx - cx, by - cy, lampAt(map.theme, b.x, b.y) > 0.5) });
     }
     for (const n of map.npcs ?? []) {
       const at = npcAt(n, room.time), near = !!me && Math.hypot(me.x - at.x, me.y - at.y) <= SPOT_REACH;
       items.push({ y: OY + at.y * PX, draw: () => drawNpc(c, n, OX + at.x * PX - cx, OY + at.y * PX - cy, near && !n.mute, at.fx, !!n.path, at.x) });
     }
-    for (const b of map.braziers) items.push({ y: OY + b.y * PX, draw: () => this.brazier(c, OX + b.x * PX - cx, OY + b.y * PX + 2 - cy, now) });
+    for (const b of map.braziers) items.push({ y: OY + b.y * PX, draw: () => drawBrazier(c, OX + b.x * PX - cx, OY + b.y * PX + 2 - cy, now, brazierOn(map, b)) });
     // What the goblins left that moves: one hung from a hook, the pot on their fire (grimdraw.ts).
     for (const q of map.grim ?? []) {
       const x = OX + q.x * PX - cx, y = OY + q.y * PX - cy;
@@ -349,22 +351,10 @@ export class Scene {
       if (!d.item.traits.some((t) => t === 'ember' || t === 'rime' || t === 'storm')) continue;
       lights.push({ x: OX + d.x * PX - cx, y: OY + d.y * PX - cy - 6, r: 22, i: 0.5, c: [1, 0.9, 0.6] });
     }
-    for (const t of map.torches) {
-      const x = OX + t.x * PX - cx, y = OY + t.y * PX - cy;
-      this.flame(glow, x, y - 1, now, 1);
-      lights.push({ x, y: y - 3, r: 118 + Math.sin(now * 13 + x) * 4 + Math.sin(now * 7.3) * 3, i: 1.15 * tk, c: [1, 0.66, 0.36] });
-    }
-    for (const b of map.braziers) {
-      const x = OX + b.x * PX - cx, y = OY + b.y * PX - cy;
-      lights.push({ x, y: y - 8, r: 78 + Math.sin(now * 11 + x) * 3, i: 0.95 * tk, c: [1, 0.6, 0.3] });
-    }
+    // The tended lamps, lit or put out by the hour (lampsdraw.ts, shared/lamps.ts).
+    drawLamps(c, map, cx, cy, now, tk, lights);
     // Moonlight through a ceiling grate over the middle of the room.
     if (map.theme.moon && !map.theme.day) lights.push({ x: OX + (map.w / 2) * PX - cx, y: OY + (map.h / 2) * PX - cy, r: 125 * Math.max(1, map.w / 22), i: map.theme.moon, c: [0.55, 0.62, 0.9] });
-    for (const r of map.rounds) if (r.kind === 'post') {
-      const x = OX + r.x * PX - cx, y = OY + r.y * PX - cy - 24;
-      this.flame(glow, x, y + 2, now, 1);
-      lights.push({ x, y, r: 64, i: 0.8 * tk, c: [1, 0.72, 0.42] });
-    }
     // Perrin's garden after dark: a soft pool of lamplight over the benches and the beds.
     // Inside the halls: candlelight, and the tower's coloured fire.
     for (const r of map.rounds) {
@@ -372,7 +362,7 @@ export class Scene {
       if (r.kind === 'witchfire') lights.push({ x: OX + r.x * PX - cx, y: OY + r.y * PX - cy - 10, r: 90 + Math.sin(now * 5) * 4, i: 1.1, c: witchColour(now) });
     }
     for (const r of map.rounds) if (r.kind === 'moths' && !map.theme.day) lights.push({ x: OX + r.x * PX - cx - 36, y: OY + r.y * PX - cy - 34, r: 84, i: 0.4 * dusk(), c: [1, 0.84, 0.58] });
-    for (const r of map.rounds) if (r.kind === 'lantern') lights.push({ x: OX + r.x * PX - cx, y: OY + r.y * PX - cy - 28, r: 150 + Math.sin(now * 3) * 4, i: 1.25, c: [1, 0.78, 0.45] });
+    for (const r of map.rounds) if (r.kind === 'lantern') lights.push({ x: OX + r.x * PX - cx, y: OY + r.y * PX - cy - 28, r: 150 + Math.sin(now * 3) * 4, i: 1.25 * tk, c: [1, 0.78, 0.45] });
     for (const b of map.blocks) {
       const [bx, by] = blockAt(b), mx = bx + (b.w * PX) / 2 - cx;
       // A building on fire lights the whole street; its ashes smoulder.
@@ -381,7 +371,9 @@ export class Scene {
       // A job's cottage with its fire going shows a little light at the windows.
       const home = houseOf(b), fire = !!home?.lit && b.kind === 'house' && !b.ruined && (b.burning ?? -1) < 0;
       if (!fire && (b.maxHp || (b.kind !== 'house' && b.kind !== 'church' && b.kind !== 'hall' && b.kind !== 'forge'))) continue;
-      lights.push({ x: bx + (b.w * PX) / 2 - cx, y: by + b.h * PX - cy, r: 34, i: 0.45, c: b.kind === 'forge' ? [1, 0.5, 0.25] : [1, 0.8, 0.5] });
+      // Lamplight at the windows only while the lamps are lit; the forge's fire is worked all day.
+      const on = b.kind === 'forge' ? 1 : lampAt(map.theme, b.x, b.y);
+      if (on > 0) lights.push({ x: bx + (b.w * PX) / 2 - cx, y: by + b.h * PX - cy, r: 34, i: 0.45 * on, c: b.kind === 'forge' ? [1, 0.5, 0.25] : [1, 0.8, 0.5] });
     }
     lights.push(...skillLights(room, cx, cy, now));
     for (const z of room.zones) if (!z.kind) lights.push({ x: OX + z.x * PX - cx, y: OY + z.y * PX - cy - 6, r: z.r * PX * 1.4, i: 0.8 * Math.min(1, (z.until - room.time) / 1.2), c: [1, 0.85, 0.5] });
@@ -430,24 +422,6 @@ export class Scene {
     // Only lights that reach the screen (a town has more than the pass can take at once).
     const seen = lights.filter((l) => l.x + l.r > 0 && l.x - l.r < this.vw && l.y + l.r > 0 && l.y - l.r < this.vh);
     this.lighting.render(this.base, this.glowC, seen, map.theme.ambient);
-  }
-
-  private flame(g: CanvasRenderingContext2D, x: number, y: number, now: number, size: number): void {
-    const f = Math.floor(now * 10 + x) % 3;
-    const px = (dx: number, dy: number, col: string) => ((g.fillStyle = col), g.fillRect(Math.round(x + dx), Math.round(y + dy), 1, 1));
-    px(0, 0, '#fff1b0');
-    px(-1, 0, '#ff9a3c');
-    px(1, 0, '#ff9a3c');
-    px(0, -1, '#ffd27a');
-    px(0, -2 - (f === 0 ? 1 : 0), '#ffb44c');
-    px(f === 1 ? 1 : -1, -3, '#ff7a28');
-    if (size > 1) px(f === 2 ? -1 : 1, -1, '#ffd27a'), px(0, -4, '#ff6a20');
-  }
-
-  private brazier(c: Ctx, x: number, y: number, now: number): void {
-    blit(c, SPRITES.brazier, x, y);
-    this.flame(c.glow, x - 2, y - 10, now, 2);
-    this.flame(c.glow, x + 2, y - 10, now + 0.37, 2);
   }
 
   private cage(c: Ctx, x: number, y: number, now: number): void {

@@ -9,6 +9,12 @@ import type { Theme } from '../../shared/arena';
 /** A light in tiles: x, height, z; reach; strength; colour 0..1; flicker rate (0: steady). */
 export interface L3 { x: number; y: number; z: number; r: number; i: number; c: [number, number, number]; f?: number }
 
+/** How strong the moon's blue-silver key is (FLAT's moon is a pool over the middle at its theme strength). */
+const MOON = 0.6;
+/** A point light's strength and reach over its FLAT figures: FLAT's pools are lit in screen space with
+ *  no slant, so in 3D (lights up off the floor, faces turned from them) they need a little more of both. */
+const POINT = 3.1;
+const REACH = 1.15;
 /** The sun's warmth over the day's ambient. */
 const SUN = [1.06, 1, 0.9];
 
@@ -43,7 +49,7 @@ export class Lights {
     // and a key slanting in from the sky in the ambient's own colour, so a lit floor lands near its
     // flat colour and faces still model. At night the moon adds its blue-silver to the key; indoors
     // (no moon) the room's own warmth stays warm.
-    const [r, g, b] = t.ambient, f = 1.55 * 0.75, k = 1.55 * 0.45, m = t.day ? 0 : (t.moon ?? 0) * 1.3;
+    const [r, g, b] = t.ambient, f = 1.55 * 0.75, k = 1.55 * 0.45, m = t.day ? 0 : (t.moon ?? 0) * MOON;
     this.amb.color.setRGB(r * f, g * f, b * f);
     this.amb.intensity = Math.PI;
     const [sr, sg, sb] = t.day ? SUN : [1, 1, 1];
@@ -63,8 +69,8 @@ export class Lights {
       const fl = l.f ? 1 + Math.sin(now * l.f + l.x * 3.1) * 0.06 + Math.sin(now * l.f * 0.57 + l.z) * 0.05 : 1;
       p.position.set(l.x, l.y, l.z);
       p.color.setRGB(l.c[0], l.c[1], l.c[2]);
-      p.distance = l.r * fl;
-      p.intensity = l.i * 2.6 * Math.PI;
+      p.distance = l.r * REACH * fl;
+      p.intensity = l.i * POINT * Math.PI;
     });
   }
 }

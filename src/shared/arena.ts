@@ -144,6 +144,10 @@ export interface Theme {
   sun?: number;
   sight?: number;
   glow?: number;
+  /** The tended lamps (shared/lamps.ts): Wickhold's hour on the shared clock (lamps lit one by one at
+   *  dusk), or a job's lamps at its hour (0 out, 1 lit). Neither: lit (indoors, the yard, the wood). */
+  dayAt?: number;
+  lamps?: number;
 }
 
 export interface GameMap {
@@ -154,7 +158,8 @@ export interface GameMap {
   wallFace: number;
   rounds: Round[];
   blocks: Block[];
-  braziers: Circle[];
+  /** `wild`: a camp's fire, burning whatever the hour (shared/lamps.ts); the rest are tended lamps. */
+  braziers: (Circle & { wild?: boolean })[];
   torches: { x: number; y: number }[];
   hero: { x: number; y: number };
   /** Walk into this to leave (opens when the room says so). */

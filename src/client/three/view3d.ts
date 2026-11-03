@@ -16,6 +16,7 @@ import { Buildings } from './buildings3d';
 import { Cam, FAR, NEAR, PITCH } from './camera3d';
 import { Fires } from './fire3d';
 import { buildGround, type Ground } from './ground';
+import { lampsNow } from './lamps3d';
 import { Lights, type L3 } from './lights3d';
 import { BOXFIGS, QUALITY, brightGamma, perfOn, quality, type Quality } from './look';
 import { Figs } from './figs3d';
@@ -163,6 +164,7 @@ export class View3D {
       else this.view.follow(map, hx + me.fx * 0.6, hy + me.fy * 0.5 + (portrait ? (this.view.H / this.view.ppu) * 0.1 : 0), dt, fx.shake);
     }
     const at = this.view.at, fires: Spot[] = [...this.ground!.fires], ls: L3[] = [...this.ground!.lights];
+    lampsNow(map.theme, this.ground!.lamps, fires, ls);
     this.buildings.update(map, this.heroAt, fires);
     for (const e of room.enemies) if (e.act !== 'dead' && e.burnUntil > room.time) {
       const [x, y] = lerp('e:' + e.id, e.x, e.y);

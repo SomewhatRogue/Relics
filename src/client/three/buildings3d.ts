@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import type { GameMap } from '../../shared/arena';
 import { blockState, buildBlock, type Built } from './houses3d';
 import type { Spot } from './rounds3d';
+import { setLampMeshes } from './lamps3d';
 
 export class Buildings {
   readonly group = new THREE.Group();
@@ -40,6 +41,7 @@ export class Buildings {
       if (roof) roof.visible = !cut;
       e.b.group.scale.y = cut ? 0.3 : 1;
       fires.push(...e.b.fires);
+      setLampMeshes(map.theme, blk.x, blk.y, e.b.lamps);
     });
     for (const [i, e] of this.built) if (i >= map.blocks.length) this.drop(e.b), this.built.delete(i);
   }
