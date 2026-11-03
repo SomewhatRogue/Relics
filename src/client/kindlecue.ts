@@ -32,7 +32,7 @@ export function kindleCue(map: GameMap, me: Hero | undefined, say: (x: number, y
 }
 
 /** Shouted from inside a burning house with someone caged in it (for the lore keeper and line editor). */
-export const BURN_CRIES = ['HELP! IN HERE!', "IT'S BURNING!", "I'M BURNING!", 'PLEASE, THE DOOR!', 'GET ME OUT!'];
+export const BURN_CRIES = ["SOMEBODY, I'M BURNING!", "IT WON'T OPEN, THE CAGE WON'T OPEN!", 'GET ME OUT, PLEASE, PLEASE!', "IT'S IN MY HAIR!", 'AAAGH!'];
 const lastCry = new Map<number, number>();
 
 /** Each frame: from each house alight with someone still caged inside, a shout every couple of seconds. */

@@ -255,5 +255,6 @@ most Want among the heroes is the one the bells don't spare).
 
 ## Houses alight (recorded 2026-11-03; Kyle's call, lore keeper)
 - A woodpile, dark with oil, stacked against a side wall of a job house. Crouch at it (BURN) and the house goes up; the hungry inside come out burning. Nobody can go in once it's alight.
-- The muffled cry and SOMEONE'S INSIDE mean a real captive, always. A mimic cry, if one ever comes, can't use this prompt or this sound.
+- The muffled cry and SOMEONE'S IN THERE mean a real captive, always. A mimic cry, if one ever comes, can't use this prompt or this sound.
+- A captive's shouts from a burning house are pain and the cage, never "help me" (that's the mimic's line), so a mimic can't be mistaken for them. They stop when the roof comes in.
 - Open for Kyle: whose woodpile is it? The lore keeper leans to the hungry's own hoard.
