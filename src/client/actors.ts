@@ -4,7 +4,7 @@ import { chargeFull } from '../sim/hero';
 import { parryWindow, releaseWindow } from '../sim/knacks';
 import { castElement } from '../sim/channel';
 import type { Hero } from '../sim/types';
-import { blit, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
+import { BARE, blit, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
 import { armOffset, drawFigure, layout } from './figure';
 import { heroCut, jointed } from './joints';
 import { heroPose } from './heropose';
@@ -72,8 +72,9 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'b
   // Allies show their health at their feet, and their name (nothing at all on the pick screen).
   else if (me === false) {
     ring(c, x, y, 7, '#5ad07a', h.hp / 100, '#1a3a22');
+    // (On a 2.5D card the name goes over the head instead, three/overlay3d.ts.)
     const name = (h.tag ?? h.id).toUpperCase();
-    drawText(c.glow, name, Math.round(x - name.length * 2), Math.round(y + 6), '#9ad8a8');
+    if (!BARE.on) drawText(c.glow, name, Math.round(x - name.length * 2), Math.round(y + 6), '#9ad8a8');
   }
   if (h.act === 'roll' || h.act === 'zip' || h.act === 'bash') {
     const dx = h.act === 'zip' ? h.fx : h.rollDx, dy = h.act === 'zip' ? h.fy : h.rollDy;

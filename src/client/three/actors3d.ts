@@ -21,6 +21,7 @@ import { makeChest, makeCoal, makeDrop, makePickup, makeProp, poseChest, type Ch
 import { boltLook, makeBolt, makeExit, makeJavelin, makeRing, makeSmoke, placeBolt, placeJavelin } from './shots3d';
 import { TIERS } from '../../shared/gear';
 import type { Figure } from './rig';
+import { BOXFIGS } from './look';
 
 /** Heroes are drawn on their own layer, after the rest: as a silhouette wherever a wall or a roof hides them, then over it as themselves. */
 export const XRAY_LAYER = 1;
@@ -55,24 +56,17 @@ export class Actors {
   update(room: ArenaRoom, meId: string, now: number, lerp: Lerp): void {
     const t = room.time, lift = (z?: number) => (z ?? 0) * LEDGE_H, me = room.heroes.find((h) => h.id === meId);
     for (const p of [this.heroes, this.foes, this.folk, this.hounds, this.teles, this.things, this.chests]) p.begin();
-    for (const h of room.heroes) this.hero(h, lerp, now, lift(h.z));
+    // The figures are flat cards (cards3d.ts) unless ?figs=3d: then these, built from boxes.
+    if (BOXFIGS) for (const h of room.heroes) this.hero(h, lerp, now, lift(h.z));
     for (const e of room.enemies) {
-      const f = this.foes.get('e' + e.id, foeLook(e), () => (e.kind === 'spider' || e.kind === 'brood' || e.kind === 'nest' ? makeSpider(e) : e.kind === 'dummy' || e.kind === 'swingDummy' ? makeDummy(e) : makeGoblin(e)));
-      const carrier = room.heroes.find((h) => h.carrying === e.id);
-      const [x, y] = carrier ? lerp('h:' + carrier.id, carrier.x, carrier.y) : lerp('e:' + e.id, e.x, e.y);
-      if (!poseFoe(f, e, t, now, this.stride('e' + e.id, x, y))) f.root.visible = false;
-      f.root.position.x = x;
-      f.root.position.z = y;
-      f.root.position.y += carrier ? 1.25 + lift(carrier.z) : lift(e.z);
-      if (carrier) (f.mid.rotation.z = Math.PI / 2), (f.legs[0].rotation.x = Math.sin(now * 14) * 0.6);
-      if (asleep(room.map, e)) (f.mid.rotation.z = Math.PI / 2), (f.mid.position.y = 0.15);
+      if (BOXFIGS) this.foe(room, e, now, lerp);
       if (e.attack && e.act === 'attack') {
         const m = this.teles.get('t' + e.id, '', () => ({ root: makeTele() })).root;
         const pw = me ? WEAPONS[me.weapon].parryWindow + me.lenience : 0.3;
         m.visible = shapeTele(m, e.attack, pw, now, lift(e.z));
       }
     }
-    for (const s of room.survivors ?? []) {
+    if (BOXFIGS) for (const s of room.survivors ?? []) {
       if (s.gone) continue;
       const [x, y] = lerp('s:' + s.id, s.x, s.y), f = this.folk.get('s' + s.id, '', () => makeFolk(s.id));
       poseFolk(f, s, t, this.stride('s' + s.id, x, y));
@@ -111,6 +105,19 @@ export class Actors {
     const ex = room.map.exit;
     if (ex && ex.y < 1) this.things.get('exit', String(room.exitOpen), () => ({ root: makeExit(ex.w, room.exitOpen) })).root.position.set(ex.x, 0, ex.y - 0.4);
     for (const p of [this.heroes, this.foes, this.folk, this.hounds, this.teles, this.things, this.chests]) p.end();
+  }
+
+  private foe(room: ArenaRoom, e: ArenaRoom['enemies'][number], now: number, lerp: Lerp): void {
+    const lift = (z?: number) => (z ?? 0) * LEDGE_H;
+    const f = this.foes.get('e' + e.id, foeLook(e), () => (e.kind === 'spider' || e.kind === 'brood' || e.kind === 'nest' ? makeSpider(e) : e.kind === 'dummy' || e.kind === 'swingDummy' ? makeDummy(e) : makeGoblin(e)));
+    const carrier = room.heroes.find((h) => h.carrying === e.id);
+    const [x, y] = carrier ? lerp('h:' + carrier.id, carrier.x, carrier.y) : lerp('e:' + e.id, e.x, e.y);
+    if (!poseFoe(f, e, room.time, now, this.stride('e' + e.id, x, y))) f.root.visible = false;
+    f.root.position.x = x;
+    f.root.position.z = y;
+    f.root.position.y += carrier ? 1.25 + lift(carrier.z) : lift(e.z);
+    if (carrier) (f.mid.rotation.z = Math.PI / 2), (f.legs[0].rotation.x = Math.sin(now * 14) * 0.6);
+    if (asleep(room.map, e)) (f.mid.rotation.z = Math.PI / 2), (f.mid.position.y = 0.15);
   }
 
   private hero(h: Hero, lerp: Lerp, now: number, up: number): void {

@@ -10,6 +10,12 @@ export type Quality = 'low' | 'mid' | 'high';
 const KEY = 'relic.look';
 const url = new URLSearchParams(location.search);
 
+/**
+ * The figures in 2.5D: the flat game's pixel figures on cards (figs3d.ts, the default), or with
+ * ?figs=3d the low-poly figures built from boxes (heroes3d.ts and the rest, kept for Blender models).
+ */
+export const BOXFIGS = url.get('figs') === '3d';
+
 /** The view to start in: the address wins, then what this device last chose. */
 export function startLook(): Look {
   const u = url.get('look');

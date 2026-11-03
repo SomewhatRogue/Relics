@@ -109,7 +109,11 @@ export function spin(c: Ctx, s: Sprite, x: number, y: number, a: number, alpha =
 /** The low sun this frame (client/daytime.ts): shadows stretch east at dusk (+), west at dawn (-). */
 export const SUN = { k: 0 };
 
+/** Drawing a figure onto a 2.5D card (three/figs3d.ts): the 3D floor gives it its shadow instead. */
+export const BARE = { on: false };
+
 export function shadow(c: Ctx, x: number, y: number, rx: number): void {
+  if (BARE.on) return;
   const k = SUN.k, sx = x + rx * 0.8 * k, w0 = rx * (1 + Math.abs(k) * 0.9);
   c.lit.fillStyle = k ? 'rgba(8,6,12,0.45)' : 'rgba(8,6,12,0.55)';
   const ry = Math.max(1, Math.round(rx / 3));

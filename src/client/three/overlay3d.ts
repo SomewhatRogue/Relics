@@ -13,6 +13,7 @@ import { GUARD, PARTY, WEAPONS } from '../../shared/tuning';
 import { drawText, textWidth } from '../pixfont';
 import { OX, OY, PX } from '../world';
 import type { Lerp } from './actors3d';
+import { BOXFIGS } from './look';
 
 export type Proj = (x: number, y: number, z: number) => [number, number];
 export interface Marks { marks: Target[]; doors: DoorMark[]; pointTo: { x: number; y: number } | null; focus?: { x: number; y: number } | null; fanfare?: boolean }
@@ -79,8 +80,9 @@ export class Overlay {
       }
       g.globalAlpha = 1;
     }
-    // Goblins' health, over the hurt ones; the butcher's "!" over a blow that can't be blocked.
-    for (const e of room.enemies) {
+    // Goblins' health, over the hurt ones; the butcher's "!" over a blow that can't be blocked. Flat
+    // figures (figs3d.ts) bring their own, as the flat view draws them: a ring at the feet, names, counts.
+    if (BOXFIGS) for (const e of room.enemies) {
       if (e.act === 'dead' || e.kind === 'dummy' || e.kind === 'swingDummy') continue;
       const big = e.kind === 'butcher' || e.kind === 'brood' || e.variant === 'heavy', [ex, ey] = lerp('e:' + e.id, e.x, e.y), [x, y] = P(ex, (big ? 2.6 : 1.3) + up(e.z), ey);
       if (e.hp < e.maxHp && (room.time - e.hitAt < 3 || e.hp < e.maxHp * 0.5)) {
@@ -92,10 +94,10 @@ export class Overlay {
       }
       if (e.attack?.unblockable && e.attack.t < e.attack.windup) drawText(g, '!', Math.round(x - 1), Math.round(y - 9 - (Math.floor(now * 6) % 2)), '#ffd040');
     }
-    // Friends' names over their heads; a downed hero's count.
+    // Friends' names over their heads; a downed hero's count (a flat figure's card carries that).
     for (const h of room.heroes) {
-      const [hx, hy] = lerp('h:' + h.id, h.x, h.y), [x, y] = P(hx, 1.75 + up(h.z), hy);
-      if (h.act === 'down' && (h.out || h.lying)) continue;
+      const [hx, hy] = lerp('h:' + h.id, h.x, h.y), [x, y] = P(hx, (BOXFIGS ? 1.75 : 1.5) + up(h.z), hy);
+      if (h.act === 'down' && (h.out || h.lying || !BOXFIGS)) continue;
       if (h.act === 'down') {
         const left = h.bleeding ? PARTY.bleed - h.actT : h.actDur - h.actT, s = String(Math.max(0, Math.ceil(left)));
         drawText(g, s, Math.round(x - textWidth(s) / 2), Math.round(y - 2), h.bleeding && !h.selfUp ? '#ffd27a' : '#ff6a5a');

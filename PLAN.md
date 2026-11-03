@@ -31,6 +31,13 @@ Then (Kyle and friends: "We like the 2.5D, but flat has cleaner, brighter colour
 levels, closer in on phones, round trees and cone pines, the trainer skills' areas, BRIGHT - / + in the
 gear box. *Done when* Kyle and his friends find 2.5D as bright and clean as FLAT at night and by day
 (night still night, torchlight still pooling), and the wood on his phone reads like the job rooms.
+Then (Kyle: "In 2.5D the mage looks blocky, so does the big orc ... I really like how the terrain and
+land look in 2.5D but the enemies I'm not loving"; then on the first shot, "Yes. Love. Do it."): the
+figures in 2.5D are FLAT's own pixel figures standing in the 3D world (HD-2D), the box figures kept
+behind ?figs=3d. *Done when* every hero, goblin, the butcher and the Stoker, spiders, the freed, the
+hound and Wickhold's folk in 2.5D look just as they do in FLAT, crisp, lit by the torches and the moon,
+with a shadow, glowing eyes in the dark, names over friends' heads, a silhouette behind walls, and the
+spearman's stab reads as a stab in both views.
 
 **Three skills a class, training in sections** (Claude Opus 5.5, 2026-11-02; Kyle: "only one or two
 available per class. Let's try to think of 3 per class", "training to be its own expandable /
