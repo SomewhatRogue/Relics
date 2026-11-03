@@ -41,7 +41,8 @@ export function applyGear(h: Hero, op: number, arg: number, ev: FightEvent[]): v
     if ((arg >= 0 && !it) || (arg < 0 && h.arms[h.weapon] && full(h))) return;
     if (it && slotOf(it) !== 'weapon') return wear(h, arg, it, ev);
     if (it && WEAPONS[it.kit!].cls !== cls) return;
-    const old = h.arms[h.weapon];
+    // What was in hand goes in the pack, the plain one a hero starts with too (so it's never lost under the new).
+    const old = h.arms[h.weapon] ?? (it ? ({ slot: 'weapon', kit: h.weapon, quality: 'plain', traits: [], mods: [], level: 0 } as Item) : undefined);
     if (it) h.bag.splice(arg, 1);
     if (old) h.bag.push(old);
     h.weapon = it ? it.kit! : CLASS_KITS[cls][0];

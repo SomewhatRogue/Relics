@@ -45,13 +45,15 @@ describe('heroes', () => {
     g.step(0.1, { ...NO_INTENT, gearSeq: 1, gearOp: 1, gearArg: 0 });
     expect(g.hero.weapon).toBe('crossbow');
     expect(g.hero.arms.crossbow).toBe(bow);
-    expect(load().heroes[0]).toMatchObject({ weapon: 'crossbow', bag: [] });
+    // The plain longbow it started with goes in the pack, not lost under the new one.
+    expect(load().heroes[0]).toMatchObject({ weapon: 'crossbow', bag: [{ kit: 'longbow', quality: 'plain' }] });
     // Back to the plain longbow: the crossbow goes back in the pack.
     g.step(0.1, { ...NO_INTENT, gearSeq: 2, gearOp: 1, gearArg: -1 });
     expect(g.hero.weapon).toBe('longbow');
-    expect(load().heroes[0].bag).toEqual([bow]);
+    expect(load().heroes[0].bag).toContainEqual(bow);
+    // Dropping the first piece (the spare plain longbow) leaves the crossbow.
     g.step(0.1, { ...NO_INTENT, gearSeq: 3, gearOp: 2, gearArg: 0 });
-    expect(load().heroes[0].bag).toEqual([]);
+    expect(load().heroes[0].bag).toEqual([bow]);
   });
 
   it('an old save keeps the weapon in hand; its other weapons go in the pack', () => {
