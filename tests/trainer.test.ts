@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { DRILLS, DRILL_ORDER, TEACHES, drillLevel, drillPrice, newProfile, type DrillId } from '../src/shared/tuning';
 import { buyDrill, drillState, learnLesson, lessonState } from '../src/shared/training';
 import { trainerRows } from '../src/shared/trainrows';
+import { knowsSkill, learnSkill, skillState } from '../src/shared/skillteach';
+import { SKILL_STEPS } from '../src/shared/drills';
 
 const hero = (level: number, gold: number, cls: Parameters<typeof newProfile>[0] = 'WARRIOR') => Object.assign(newProfile(cls), { level, gold });
 
@@ -72,7 +74,8 @@ describe('trainer', () => {
 
   it('the rows say what can be bought, what is locked and what is done', () => {
     const fresh = trainerRows(hero(1, 0, 'MAGE'));
-    expect(fresh.map((x) => x.id)).toEqual(['skill', 'leave', ...DRILL_ORDER]);
+    expect(fresh.map((x) => x.id)).toEqual(['skill', 'firering', 'tether', 'leave', ...DRILL_ORDER]);
+    expect(new Set(fresh.map((x) => x.key)).size).toBe(fresh.length);
     expect(fresh.every((x) => x.state === 'locked')).toBe(true);
     expect(fresh.find((x) => x.id === 'power')!.tag).toBe('LEVEL 2');
     expect(fresh.find((x) => x.id === 'leave')!.tag).toBe('LEVEL 5');
@@ -98,5 +101,38 @@ describe('trainer', () => {
     expect(done.tag).toBe('MAX');
     expect(done.gain).toBe('');
     expect(trainerRows(top).find((x) => x.id === 'speed')!.state).toBe('poor');
+  });
+
+  it('three skills a class: the first at level 3, the next at 5 and 7, each bought on its own', () => {
+    expect(SKILL_STEPS.map((x) => x.level)).toEqual([3, 5, 7]);
+    expect(SKILL_STEPS.map((x) => x.price)).toEqual([150, 250, 400]);
+    const p = hero(5, 1000, 'ROGUE');
+    // The second waits on the first.
+    expect(skillState(p, 'vanish')).toBe('needs');
+    expect(learnSkill(p, 'vanish')).toBe(false);
+    expect(learnSkill(p, 'shadow')).toBe(true);
+    expect(learnSkill(p, 'vanish')).toBe(true);
+    expect(p.gold).toBe(1000 - 150 - 250);
+    expect(knowsSkill(p, 'vanish')).toBe(true);
+    // The third waits on level 7.
+    expect(skillState(p, 'knives')).toBe('locked');
+    expect(trainerRows(p).find((x) => x.id === 'knives')!.tag).toBe('LEVEL 7');
+    p.level = 7;
+    expect(learnSkill(p, 'knives')).toBe(true);
+    expect(trainerRows(p).filter((x) => x.group === 'skills').every((x) => x.state === 'max')).toBe(true);
+  });
+
+  it('a Warrior taught before there were three keeps the War Cry; a new one buys it', () => {
+    const old = Object.assign(hero(3, 0), { learned: ['skill'] as ('skill' | 'leave')[] });
+    expect(knowsSkill(old, 'horn')).toBe(true);
+    expect(knowsSkill(old, 'stamp')).toBe(false);
+    old.level = 7;
+    old.gold = 400;
+    expect(learnSkill(old, 'stamp')).toBe(true);
+    expect(knowsSkill(old, 'horn')).toBe(true);
+    const fresh = hero(3, 150);
+    expect(learnSkill(fresh, 'bash')).toBe(true);
+    expect(knowsSkill(fresh, 'horn')).toBe(false);
+    expect(skillState(fresh, 'horn')).toBe('locked');
   });
 });

@@ -1,4 +1,5 @@
 /** Relics (rechargeable magic items) and the elements that can be fitted to them. */
+import { CHAIN, FIRE_RING, KNIVES, LIGHT, SIC, STAMP, TETHER, VANISH, VOLLEY } from './skillkit.js';
 /**
  * The Warrior's relic: a javelin thrown at range, recharging. It carries anything light enough and
  * pins it to the first wall or pillar it reaches; it sticks into anything heavier.
@@ -98,9 +99,19 @@ export const RELICS = {
   blessing: { name: 'BLESSED GROUND', short: 'BLESS', cooldown: BLESSING.cooldown, windup: BLESSING.windup, recover: BLESSING.recover, range: BLESSING.range },
   ward: { name: 'WARD', short: 'WARD', cooldown: WARD.cooldown, windup: WARD.windup, recover: WARD.recover, range: WARD.range },
   sanctuary: { name: 'SANCTUARY', short: 'SANCTUARY', cooldown: SANCTUARY.cooldown, windup: SANCTUARY.windup, recover: SANCTUARY.recover, range: WARD.range },
+  // The skills taught after the first (shared/skillkit.ts).
+  stamp: { name: 'SHIELD STAMP', short: 'STAMP', cooldown: STAMP.cooldown, windup: STAMP.windup, recover: STAMP.recover, range: STAMP.radius },
+  volley: { name: 'VOLLEY', short: 'VOLLEY', cooldown: VOLLEY.cooldown, windup: VOLLEY.windup, recover: VOLLEY.recover, range: VOLLEY.range },
+  sic: { name: 'SEND THE HOUND', short: 'HOUND', cooldown: SIC.cooldown, windup: SIC.windup, recover: SIC.recover, range: SIC.range },
+  vanish: { name: 'VANISH', short: 'VANISH', cooldown: VANISH.cooldown, windup: VANISH.windup, recover: VANISH.recover, range: 0 },
+  knives: { name: 'KNIFE FAN', short: 'KNIVES', cooldown: KNIVES.cooldown, windup: KNIVES.windup, recover: KNIVES.recover, range: KNIVES.range },
+  firering: { name: 'FIRE RING', short: 'RING', cooldown: FIRE_RING.cooldown, windup: FIRE_RING.windup, recover: FIRE_RING.recover, range: FIRE_RING.radius },
+  tether: { name: 'STORM TETHER', short: 'TETHER', cooldown: TETHER.cooldown, windup: TETHER.windup, recover: TETHER.recover, range: TETHER.range },
+  chain: { name: 'CENSER CHAIN', short: 'CHAIN', cooldown: CHAIN.cooldown, windup: CHAIN.windup, recover: CHAIN.recover, range: CHAIN.range },
+  light: { name: 'CENSER LIGHT', short: 'LIGHT', cooldown: LIGHT.cooldown, windup: LIGHT.windup, recover: LIGHT.recover, range: LIGHT.radius },
 };
 export type RelicId = keyof typeof RELICS;
-export const RELIC_ORDER: RelicId[] = ['javelin', 'hook', 'bash', 'horn', 'net', 'shadow', 'lodestone', 'blessing', 'ward', 'sanctuary'];
+export const RELIC_ORDER: RelicId[] = ['javelin', 'hook', 'bash', 'horn', 'stamp', 'net', 'volley', 'sic', 'shadow', 'vanish', 'knives', 'lodestone', 'firering', 'tether', 'blessing', 'ward', 'sanctuary', 'chain', 'light'];
 /** Two abilities at most: the class's own skill, and one found relic carried with it. */
 export const RELIC_SLOTS = 2;
 /** Each class's skill (on the SKILL button): the first of its choices, until the hero picks another. */
@@ -118,8 +129,15 @@ export const CLASS_SKILL: Record<'WARRIOR' | 'RANGER' | 'ROGUE' | 'MAGE' | 'HEAL
 export const FOUND_RELICS: RelicId[] = ['javelin', 'hook'];
 /** A hero's abilities: their skill, then the relic they carry (if any). */
 export const abilitiesOf = (cls: keyof typeof CLASS_SKILL, carried?: RelicId | '', skill?: RelicId) => [skill && SKILL_CHOICES[cls].includes(skill) ? skill : CLASS_SKILL[cls], ...(carried ? [carried] : [])];
-/** The skills a class's trainer teaches together; a hero carries one at a time and changes it at the trainer. */
-export const SKILL_CHOICES: Record<keyof typeof CLASS_SKILL, RelicId[]> = { WARRIOR: ['bash', 'horn'], RANGER: ['net'], ROGUE: ['shadow'], MAGE: ['channel'], HEALER: ['sanctuary'] };
+/** The skills a class's trainer teaches, in the order taught (levels and prices: SKILL_STEPS in
+ *  drills.ts); a hero carries one at a time and changes it at the trainer. */
+export const SKILL_CHOICES: Record<keyof typeof CLASS_SKILL, RelicId[]> = {
+  WARRIOR: ['bash', 'horn', 'stamp'],
+  RANGER: ['net', 'volley', 'sic'],
+  ROGUE: ['shadow', 'vanish', 'knives'],
+  MAGE: ['channel', 'firering', 'tether'],
+  HEALER: ['sanctuary', 'chain', 'light'],
+};
 
 /**
  * Magic augments: an element fitted to a relic (the Mage's spells cast with the equipped relic's).

@@ -53,6 +53,9 @@ export interface Profile {
   drills?: Drills;
   /** What the trainer has taught: the class skill, the dodge's leave-behind. Undefined on old heroes (they know it all). */
   learned?: ('skill' | 'leave')[];
+  /** The class skills taught after the first (shared/skillteach.ts). Undefined on heroes taught before
+   *  there were three: a Warrior of then knows the War Cry too. */
+  taught?: RelicId[];
   /** Level ups not yet spent at the trainer. */
   picks: number;
   /** The weapon in hand (`weapon`, plain if `arms` has nothing for it) and the pack. */

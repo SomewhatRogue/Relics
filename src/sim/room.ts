@@ -33,6 +33,7 @@ import { sweepSurvivors } from './survivorhits';
 import { dropFrom, stepDrops, takeLoot } from './loot';
 import { hallow, rally, shadowstep, stepZones, ward } from './relics';
 import { castElement, castSpell, spendPrimed, turnElement } from './channel';
+import { fireSkill, stepSkills } from './skills';
 import { forgedElement, has, traitsOf } from './traits';
 import { fireHook, stepHook } from './hook';
 import { stepJavelin, throwJavelin } from './javelin';
@@ -240,6 +241,7 @@ export class ArenaRoom {
     // The freed: home out in the open at the way in; brought out of a house, maybe goblins waiting.
     const door = stepSurvivors(w, TICK, this.indoors ? null : this.map.hero);
     if (door) ambush(this.enemies, this.heroes, this.doorRng, door.x, door.y, this.events);
+    stepSkills(this, w, TICK);
     this.zones = stepZones(this.zones, w);
     separate(this.heroes, this.enemies, this.props);
     this.landings();
@@ -280,6 +282,8 @@ export class ArenaRoom {
 
   /** A melee blow landed: a forged weapon's element on a charged hit or counter; REAPER on a backstab or counter kill. */
   private struck(h: Hero, e: Enemy, n: number, w: World): void {
+    // A Rogue out of a vanish: seen again the moment they strike.
+    h.vanishUntil = undefined;
     // Skarn's Cleaver: every hit heals a fifth of what it dealt.
     if (wears(h, 'cleaver') && h.hp < h.maxHp) {
       const back = Math.min(h.maxHp - h.hp, Math.round(n * HUNGRY_FX.leech));
@@ -301,6 +305,7 @@ export class ArenaRoom {
 
   private fire(h: Hero, w: World): void {
     const el = h.augments[h.relic];
+    if (fireSkill(h, this, w, h.blessedUntil > w.now ? BLESSING.dmgMult : 1)) return;
     if (h.relic === 'hook') this.hooks.push(fireHook(h));
     else if (h.relic === 'javelin') this.javelins.push(throwJavelin(h));
     else if (h.relic === 'net') this.bolts.push(throwNet(h, el));

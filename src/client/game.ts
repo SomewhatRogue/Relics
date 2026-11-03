@@ -15,6 +15,7 @@ import { Rng } from '../shared/rng';
 import { CHAPTER_1, QUORUM, rewardMult, type WorldState } from '../shared/story';
 import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
 import { buyDrill, learnLesson } from '../shared/training';
+import { knowsSkill, learnSkill } from '../shared/skillteach';
 import { ARRIVE_SAFE, PARTY, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, FOUND_RELICS, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, sellValue, giveValue, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
 import { ArenaRoom } from '../sim/room';
 import { lessonOf, newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
@@ -1061,10 +1062,20 @@ export class Game {
     store(this.save);
   }
 
+  /** Pay your trainer to teach you another of your class's skills (shared/skillteach.ts); you carry it at once. */
+  learnSkill(r: RelicId): void {
+    const p = this.profile;
+    if (!learnSkill(p, r)) return;
+    const h = this.hero;
+    h.learned = p.learned;
+    this.chooseSkill(r);
+    store(this.save);
+  }
+
   /** Carry another of your class's skills (once taught; free, at the trainer). */
   chooseSkill(r: RelicId): void {
     const p = this.profile, h = this.hero;
-    if (!SKILL_CHOICES[p.cls].includes(r) || !knows(h, 'skill')) return;
+    if (!SKILL_CHOICES[p.cls].includes(r) || !knowsSkill(p, r)) return;
     const was = h.relics[0];
     p.skill = r;
     h.relics = abilitiesOf(p.cls, h.relics[1], r);
