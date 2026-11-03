@@ -2,6 +2,135 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-03: one big map, measured before it's designed (Kyle; Claude Opus 5.5)
+
+Kyle wants raids on one big, mostly open map, 8 to 12 times a room, with a few buildings and camps; the
+fear is lag on whoever hosts (a phone, maybe) and on the relay. Built a test map and measured. Nothing
+here is a real job yet; it lives behind `?hero=WARRIOR&bigmap=1` and `scripts/bigmap/`.
+
+**What was built** (test only unless said):
+- `shared/bigmap.ts` + `shared/bigchunks.ts`: one seed gives a 96 by 72 map (8 by 6 chunks of 12; a room
+  is 28 by 24, so about 10x) of open ground, groves, farms, camps with wild fires, ridges and ruins,
+  every solid thing 1.5 tiles off its chunk's edge so the seams are always open, and `n` goblins
+  weighted to camps. `sim/bigroom.ts` builds the room; `sim/bots.ts` drives heroes by Intent only.
+- **Dozing** (`sim/sleep.ts`, `SLEEP` in tuning, `Enemy.dozing`, `ArenaRoom` option `sleep`): a goblin
+  farther than 24 tiles from every hero is not stepped at all (holds where it stands); it wakes inside
+  24 and dozes again past 30. The room runs the tick on the awake list and merges the dozers back in
+  their order, so bolts, pushes, targeting, drums and elements are all near-only for free. Off unless
+  a room asks (no room of today's size could use it: 24 tiles is past any corner of it).
+- **Near-only costs in the sim, carried over now** (on only when many bodies or a big map, so today's
+  rooms run the old loops): pushing bodies apart checks near pairs only past 80 bodies
+  (`sim/pairgrid.ts`, same pairs in the same order); `collide` looks only at the round things, braziers
+  and blocks bucketed near it on maps over 3000 square tiles (`shared/mapgrid.ts`, same pushes, tested);
+  a resting goblin listens only to the goblins that are fighting, just hit or dead (`noisy` in
+  `sim/enemies.ts`, once a tick in a crowd). Before these, 600 goblins cost about 30 ms a tick in Node.
+- **Relay fix, carried over now** (`api/room.ts`): a message over the socket's 64 KiB `maxPayload` made
+  `ws` emit 'error' on a socket nobody listened to, which threw and took the whole Vercel instance down
+  with every room on it (reproduced locally). It now logs and only that socket closes (1009).
+- `client/interest.ts` (prototype, not wired in): `stateFor` (each friend: all heroes and buildings,
+  everything else within 20 tiles), `eventsFor`, and `quiet` (a goblin's `cooldown` isn't drawn so isn't
+  sent; `actT` goes as `a0`, when the act began, which only changes with the act).
+
+**Node, the room's tick** (`npx tsx scripts/bigmap/measure.ts 30`; CPU ms a tick, 30 s of play at
+30 Hz, four bots that can't be hurt and swing at what comes close; "spread": one in each quarter;
+"together": roaming one quarter as a party; this 2-core box is shared with other agents, so wall time
+was noisy and CPU time is what's shown):
+
+| bots | goblins | dozing | tick mean ms | p95 | awake (mean) |
+|---|---|---|---|---|---|
+| today's village street | 5 | n/a | 0.37 | 1.55 | |
+| spread | 100 | off / on | 0.68 / 0.48 | 2.54 / 0.71 | 74 / 67 |
+| spread | 300 | off / on | 1.75 / 1.34 | 2.88 / 1.93 | 248 / 226 |
+| spread | 600 | off / on | 4.01 / 4.63 | 6.3 / 6.8 | 529 / 503 |
+| together | 100 | off / on | 0.50 / 0.31 | 0.64 / 0.42 | 91 / 35 |
+| together | 300 | off / on | 2.32 / 1.02 | 4.88 / 1.76 | 277 / 118 |
+| together | 600 | off / on | 6.46 / 2.38 | 11.81 / 4.19 | 556 / 222 |
+
+Four heroes spread to the quarters keep almost the whole 96 by 72 awake (four 24-tile rings cover it),
+so dozing only pays when the party is together or the map is bigger than four rings. What's left of a
+tick is mostly resting goblins looking about (`notice`) and pushing.
+
+**Browser, the leader's frames** (`node scripts/bigmap/browser.cjs perf`, preview on 4220; four heroes
+spread, the leader's own walked by a bot; dozing on; headless Chromium with SwiftShader, so the GPU is
+software on the same 2 cores: 2.5D numbers are far below a real GPU, read them against today's row):
+
+| goblins | view | device | fps | frame mean / p95 ms | room ms a frame | draw ms a frame (JS) |
+|---|---|---|---|---|---|---|
+| today's job (5) | flat | laptop | 42.5 | 23.5 / 33.4 | | |
+| today's job (5) | flat | phone (CPU /4) | 24.3 | 41.1 / 50.1 | | |
+| today's job (5) | 2.5D | laptop | 7.9 | 127 / 150 | | |
+| today's job (5) | 2.5D | phone (CPU /4) | 5.7 | 174 / 217 | | |
+| 100 | flat | laptop | 52.3 | 19.1 / 33.4 | 0.47 | 3.95 |
+| 100 | flat | phone (CPU /4) | 24.2 | 41.3 / 66.7 | 3.1 | 15.1 |
+| 100 | 2.5D | laptop | 5.3 | 190 / 233 | 2.3 | 17.3 |
+| 100 | 2.5D | phone (CPU /4) | 3.0 | 335 / 517 | 11.6 | 78.7 |
+| 300 | flat | laptop | 57.3 | 17.5 / 16.8 | 0.77 | 5.3 |
+| 300 | flat | phone (CPU /4) | 17.1 | 58.4 / 83.4 | 10.3 | 25.8 |
+| 300 | 2.5D | laptop | 6.5 | 155 / 183 | 5.1 | 21.0 |
+| 300 | 2.5D | phone (CPU /4) | 3.5 | 290 / 383 | 19.5 | 94.2 |
+| 600 | flat | laptop | 43.4 | 23.1 / 33.4 | 2.4 | 8.9 |
+| 600 | flat | phone (CPU /4) | 8.7 | 115 / 150 | 40.3 | 43.5 |
+| 600 | 2.5D | laptop | 4.8 | 210 / 317 | 10.5 | 27.4 |
+| 600 | 2.5D | phone (CPU /4) | 1.4 | 733 / 883 | 63.7 | 143.4 |
+
+A big map with 100 goblins costs a phone host what today's room does. At 300 (about 230 awake) the
+phone's frame is 1.4x today's in flat and the room alone is 10 ms of a 16.7 ms frame; at 600 it's 2.8x
+and unplayable. Drawing grows with goblins too: neither view skips what's off screen, and the flat
+lighting pass takes the first 32 lights in the list wherever they are (a big map with many camp fires
+would lose the ones on screen).
+
+**What the leader sends** (same Node script; patches every 0.05 s, a full one every 4 s, as
+`CoopHost.frame` does, each in `RelaySocket.send`'s envelope; KB a second each friend receives; the
+relay's ceiling for one message is 64 KiB):
+
+| bots | goblins | whole room, today (KB/s) | biggest msg KB | near only (KB/s, worst friend) | biggest KB | near + quiet clocks (KB/s) | biggest KB | save every 2 s KB |
+|---|---|---|---|---|---|---|---|---|
+| today's street | 5 | 19.3 | 23.2 | 17 (17) | 14.5 | 13.7 | 14.4 | 24.8 |
+| spread | 100 | 123.5 | **82.3** | 33.8 (38.4) | 25.2 | 22.6 | 24.7 | **94.2** |
+| spread | 300 | 335.8 | **187** | 72.4 (82.3) | 45.3 | 41.5 | 43.8 | **217** |
+| spread | 600 | 662.2 | **342** | 122.2 (146.1) | **71.5** | 65.2 | **68.7** | **396** |
+| together | 100 | 76.1 | **80.8** | 38.7 (40.7) | 26.5 | 26.7 | 25.9 | **89.6** |
+| together | 300 | 193.4 | **186** | 88.2 (98.8) | 58.3 | 51.0 | 56.5 | **207** |
+| together | 600 | 355.1 | **342** | 163.2 (176.2) | **101** | 89.5 | **97.6** | **383** |
+
+(Bold: over the 64 KiB ceiling.) How it travels: the leader sends one message to '*' when everyone's in
+one room, so the leader uploads it once and the relay fans it out; per-friend sends mean one upload per
+friend. Each message is a Redis PUBLISH only when the party is split over Vercel instances (else kept
+local): 20 a second per room either way, whatever their size. Anything over 64 KiB closes the leader's
+socket (and, before today's fix, crashed the instance); 64,000 to 65,536 characters are dropped silently
+(`MAX_MSG`). Today's whole-room full snapshot carries the whole map (14.8 KB here) every 4 s, and the
+handing-on save (the whole room as JSON, about 0.8 KB a goblin) goes every 2 s: at 100 goblins both are
+already over the ceiling. What fills a patch: in a 300-goblin patch, `cooldown` 28% and `actT` 20%
+(clocks ticking every tick), x and y 7% each; dead goblins keep ticking both forever.
+
+**Recommendation.**
+- **Map size**: 96 by 72 (about 10 rooms) is fine. The map itself costs nothing much now (15 KB, and
+  collision only looks near); goblins awake near the party are the cost.
+- **Goblins**: on a **phone host**, about **150 to 200** on the whole map, placed so no more than about
+  60 to 80 are ever within 24 tiles of the party (camps spread out, not one horde), dozing on. On a
+  **laptop host**, **300 to 400**; 600 runs (4 to 6 ms a tick) but the sends don't fit. If the leader may
+  be a phone, design to the phone numbers.
+- **Interest-limited sending is needed**, not optional: the whole-room full snapshot breaks the relay's
+  ceiling at 100 goblins. With it plus quiet clocks a friend gets about 23 to 50 KB/s and the biggest
+  message stays under 64 KiB up to about 300 goblins. Also needed before a big map ships: the map goes
+  as its seed (built on the friend's side), not in every full; the save goes compact (or in parts, or
+  only what's near), since it's over the ceiling at 100 goblins.
+- **Wake radius 24 tiles, doze at 30** (two screens of a hero; any goblin's sight is 6.5 and an arrow's
+  reach 8). Smaller saves little and risks goblins freezing in sight on a laptop's wide screen.
+
+**Carries over** (already on this branch): dozing (`sim/sleep.ts`), near pairs and the map lookup,
+`noisy`, the relay's error listener, the seeded chunk generator as a starting point (the real one wants
+roads, a goal and doors), and the bots for future load tests. **Still to do for the real build**:
+wire `stateFor`/`quiet` into `CoopHost.frame` (an Encoder per friend, the guest's Decoder works out
+`actT` from `a0`), map by seed, a compact save, skip off-screen goblins and props in both views, cull
+lights to the screen before the 32-light cap, and stop dead goblins' clocks.
+
+Screenshots: `node scripts/bigmap/browser.cjs shots <dir>` (phone and laptop, flat and 2.5D, close by
+a hero; an overview of the whole field with the party spread, and one with a hero alone at the way in,
+awake goblins green and dozing grey). Tests: `tests/bigmap.test.ts` (same seed same map, every goblin
+reachable, the map lookup pushes the same as checking everything, near pairs the same as all pairs,
+dozers hold still and wake when a hero comes near, the room keeps its order).
+
 ## 2026-11-03: nests come back slower, and burn out up close (Kyle; Claude Opus 5.5)
 
 Kyle: "I love them but they respawn too quickly so it's hard to kill their nest. Nests should have less
