@@ -107,6 +107,8 @@ if (quick && CLASS_ORDER.includes(quick)) {
   if (new URLSearchParams(location.search).get('wood') !== '1' && game.mode === 'wood') game.skipWood();
 }
 else title.show();
+// The big map's load test (?hero=WARRIOR&bigmap=1: bigmode.ts), loaded only when asked.
+if (quick && new URLSearchParams(location.search).get('bigmap') === '1') void import('./bigmode').then((m) => m.startBig(game, new URLSearchParams(location.search)));
 // A recovery code here: if another device sent these heroes on since, take that copy (only before play).
 void recovery.start((s) => title.open && (game.adopt(s), title.show(), true));
 /** Talk to whoever you stand by, use the spot, or go in at the door (E or F on a laptop, USE on a phone). */
