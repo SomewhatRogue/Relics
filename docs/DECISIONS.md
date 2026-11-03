@@ -46,8 +46,14 @@ world, draw the characters as the game's own sprites. On the first shot Kyle sai
   (software GL in headless Chrome, so slower than a phone). Draw calls about halve (82 to 36 in the
   square). Alternating runs of box figures and cards in the square, headless, showed no measurable
   difference in frame time (medians about 48 against 41 ms draw); the 390 ms frame in the first shot
-  was load from a parallel run, not the cards. Both atlas textures go up every frame something was drawn
-  (960 by 192 pixels each for up to twenty figures).
+  was load from a parallel run, not the cards. In town on a laptop page, three alternating runs each:
+  2.3 to 3.3 frames a second with box figures, 3.0 to 4.0 with cards (software GL on a loaded two-core
+  box). Both atlas textures go up every frame something was drawn (960 by 192 pixels each for up to
+  twenty figures). Not done: redrawing only the cells whose pose changed (the flat code draws from the
+  wall clock too, so there's no cheap test for "unchanged"); worth it only if a phone shows the upload.
+- **Online with 2.5D on** (`LOOK=3d`): the party run passes; the chat run's "Kyle hears Sam's world
+  line" and the town run's "Sam walked" fail the same way with the box figures (`LOOK='3d&figs=3d'`),
+  so they come from 2.5D at three frames a second in software GL, not from the cards; FLAT passes.
 
 
 ## 2026-11-02: 2.5D as bright as FLAT, closer in on phones, trees that aren't voxels (Kyle; Claude Opus 5.5)
