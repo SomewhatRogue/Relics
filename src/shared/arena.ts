@@ -3,6 +3,8 @@
  * floor runs from (0, 0) to (w, h); the back wall's face is drawn above y = 0. One map is in use at
  * a time (the room that's running sets it), so collision never needs it passed around.
  */
+import { nearby } from './mapgrid.js';
+
 export type Circle = { x: number; y: number; r: number };
 export type RoundKind = 'pillar' | 'tree' | 'pine' | 'rock' | 'hay' | 'well' | 'lantern' | 'support' | 'stump' | 'target' | 'stone' | 'post' | 'grate' | 'statue' | 'bush' | 'reed' | 'deadtree'
   // Paint only, a speck to bump: crows at the blood, moths round a garden lamp.
@@ -267,10 +269,12 @@ export function collide(p: { x: number; y: number }, r: number): void {
   const m = MAP;
   p.x = Math.max(r, Math.min(m.w - r, p.x));
   p.y = Math.max(r * 0.6, Math.min(m.h - r, p.y));
-  for (const c of m.rounds) push(p, r, c);
-  for (const c of m.braziers) push(p, r, c);
+  // A big map: only what's near (shared/mapgrid.ts).
+  const near = nearby(m, p.x, p.y) ?? m;
+  for (const c of near.rounds) push(p, r, c);
+  for (const c of near.braziers) push(p, r, c);
   for (const n of m.npcs ?? []) if (!n.path && !n.pose) push(p, r, { x: n.x, y: n.y, r: 0.32 });
-  for (const b of m.blocks) {
+  for (const b of near.blocks) {
     if (!b.ruined) box(p, r, b);
   }
   if (m.ledges) levels(m, p as { x: number; y: number; z?: number; dropped?: number; kvx?: number; kvy?: number }, r);

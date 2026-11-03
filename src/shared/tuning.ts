@@ -209,3 +209,10 @@ export const FLINCH = 0.3;
  * (never below 1 health), and anyone still caged is lost.
  */
 export const HOUSEFIRE = { warn: 3, dps: 14, beamWarn: 1.6, beamR: 0.95, beamDmg: 22, beamBurn: 5, fallWarn: 10, fallDmg: 18, fallMin: 52, fallMax: 64 };
+/**
+ * A big map (shared/bigmap.ts): a goblin farther than `wake` tiles from every hero dozes (sim/sleep.ts):
+ * it holds where it stands and costs the room nothing. It wakes inside `wake` and dozes again only past
+ * `doze`, so one on the edge doesn't flicker. A laptop screen is about 23 tiles across, a phone's about
+ * 26 tall: `wake` is about two screens of a hero's reach, well past any goblin's sight or an arrow's.
+ */
+export const SLEEP = { wake: 24, doze: 30 };
