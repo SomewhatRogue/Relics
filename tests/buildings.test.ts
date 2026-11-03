@@ -106,7 +106,7 @@ describe('the forge', () => {
 });
 
 describe('relics come from deep dives', () => {
-  const win = (g: Game) => (g as unknown as { finish(won: boolean): void }).finish(true);
+  const win = (g: Game) => (g as unknown as { finish(how: string): void }).finish('won');
 
   it('every board has one deep dive: five rooms, a named butcher at the bottom', () => {
     const deep = board(3, false).filter((j) => j.deep);

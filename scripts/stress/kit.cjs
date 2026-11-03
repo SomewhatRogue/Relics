@@ -108,6 +108,17 @@ function kit(browser, port, report) {
   }, hidden);
   /** A phone that suspended the page outright: nothing runs at all until it thaws. */
   const freeze = (p, frozen = true) => ev(p, (frozen) => (frozen ? (window.__frozen = true) : window.__thaw()), frozen);
+  /** The page gone (a crash, a closed tab): nothing kept but what's in this browser's storage. */
+  const crash = (p) => p.page.close();
+  /** The game opened again in the same browser (its storage as it was), the title put away. */
+  async function reopen(p) {
+    if (!p.page.isClosed()) await p.page.close();
+    p.page = await p.ctx.newPage();
+    watch(p);
+    await p.page.goto(`http://127.0.0.1:${port}/`);
+    await p.page.waitForFunction(() => window.__game);
+    await ev(p, () => { document.getElementById('title').hidden = true; window.__title.open = false; });
+  }
   async function reload(p) {
     await p.page.reload();
     await p.page.waitForFunction(() => window.__game);
@@ -132,7 +143,7 @@ function kit(browser, port, report) {
     return true;
   }
 
-  return { set scene(s) { scene = s; }, step, until, ev, open, party, role, alive, clear, put, exitAt, down, hero, leave, home, hide, freeze, reload, finish, wait, ROOT };
+  return { set scene(s) { scene = s; }, step, until, ev, open, party, role, alive, clear, put, exitAt, down, hero, leave, home, hide, freeze, reload, crash, reopen, finish, wait, ROOT };
 }
 
 module.exports = { kit, wait };

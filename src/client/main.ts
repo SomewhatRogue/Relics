@@ -307,14 +307,14 @@ function hud(now: number): void {
 
 /** The LEAVE button's question, alone and in a party. */
 const LEAVE_SOLO = "The job's lost if you go, and you keep half the gold you've picked up.";
-const LEAVE_PARTY = "Your party carries on without you, and you keep half the gold you've picked up.";
+const LEAVE_PARTY = "Your party carries on without you. You keep the gold you've picked up, but not the job's pay.";
 
 /** On the banner once you're out of a job (your party carries on without you). */
 const OUT_TEXT = "You're out till the job's done. Your party carries on";
 
 let last = performance.now();
 let still: Intent | null = null;
-let resumed = false, touchedAt = 0;
+let resumed = '', touchedAt = 0;
 function tick(t: number): void {
   // (The first frame can stamp a hair before the page clock: never step backwards.)
   const dt = Math.max(0, Math.min(0.1, (t - last) / 1000));
@@ -328,10 +328,12 @@ function tick(t: number): void {
   // Whoever you're talking to stops their round till you're done (the world doesn't: it's shared).
   if (talking && !panel.open) (talking.lag = (talking.lag ?? 0) + game.room.time - (talking.heldAt ?? game.room.time)), (talking.heldAt = undefined), (talking = null);
   // Back after a reload in the middle of a job with friends: straight back in (once, once a hero's chosen).
-  if (ONLINE && !resumed && !title.open) {
-    resumed = true;
-    const s = session(game.profile.id);
-    if (s && game.mode === 'town') game.resume(s);
+  // Or a job that ended while this hero was away (or fell apart): whatever it still owes them, paid once.
+  if (resumed !== game.profile.id && game.profile.id && !title.open && game.mode === 'town') {
+    resumed = game.profile.id;
+    const s = ONLINE ? session(game.profile.id) : null;
+    if (s) game.resume(s);
+    else void game.settle();
   }
   if ((game.coop || game.remote) && t - touchedAt > 20000) (touchedAt = t), touchSession();
   // Following a friend's job: my input goes to them.

@@ -181,10 +181,18 @@ const CHAT: Record<number, { name: string; line: string }> = {
 const CHILD = ['We have a door now. A real one, with a latch. I open it all the time.', 'Did you kill the big one? The one with the chains? Was it heavy?', 'I saw one once, through the wall. It had a spoon. Why did it have a spoon?', "Mam says I can't come with you. Yet."];
 const SURVIVOR = ['They kept us in the dark so long I forgot what my hands looked like. Thank you for the candle.', 'My brother is still out at the Copperdeep. They took the ones who could dig. If you go down there...', 'I can hold a pitchfork. When my legs hold me, I will.'];
 
+/** A job not won, by how it ended (Game.finish): driven back, gone early from a party, or cut off from it. */
+const ENDED = {
+  half: 'Driven back: half the gold, nobody saved.',
+  left: "You left before the end. You keep the gold you picked up, but not the job's pay.",
+  cut: "You were cut off from your party. You keep the gold you picked up, but not the job's pay.",
+  lostCut: 'You were cut off, and your party was driven back. Half the gold, nobody home.',
+};
+
 export function showResult(g: Game, panel: Panel): void {
   const r = g.result!;
   g.result = null;
-  const lines = [`Gold: ${r.gold}`, `Experience: ${r.xp}`, r.won ? `People brought home: ${r.rescued}` : 'Driven back: half the gold, nobody saved.', ...(r.lost ? [`Lost to the fire: ${r.lost}`] : [])];
+  const lines = [`Gold: ${r.gold}`, `Experience: ${r.xp}`, r.won ? `People brought home: ${r.rescued}` : ENDED[r.half ? (r.how === 'dropped' ? 'lostCut' : 'half') : r.how === 'dropped' ? 'cut' : 'left'], ...(r.lost ? [`Lost to the fire: ${r.lost}`] : [])];
   if (r.levels) lines.push(`You've grown to level ${g.profile.level}. ${title(TRAINERS[g.profile.cls].name)} will want to see you, at ${TRAINERS[g.profile.cls].where}.`);
   if (r.treasure.length) lines.push(`<b>Treasure in your pack:</b> ${r.treasure.map((i) => `<b>${itemName(i)}</b>`).join(' and ')}.`);
   for (const i of r.sold) lines.push(`No room in your pack for the ${itemName(i)}, so it went for 20 gold.`);
@@ -195,7 +203,7 @@ export function showResult(g: Game, panel: Panel): void {
   const again = () => {
     const n = g.profile.picks, pick = n ? p(`${KNW.jobLine(n)}`) : '';
     const tree = n ? [{ label: KNW.pick, primary: true, act: () => openTree(g, panel, { back: again }) }] : r.levels ? [{ label: KNW.see, act: () => openTree(g, panel, { back: again }) }] : [];
-    panel.show(r.won ? 'JOB DONE' : 'DRIVEN BACK', html + pick, [...tree, { ...done, primary: !n }], true);
+    panel.show(r.won ? 'JOB DONE' : r.half ? 'DRIVEN BACK' : 'HOME EARLY', html + pick, [...tree, { ...done, primary: !n }], true);
   };
   again();
 }
