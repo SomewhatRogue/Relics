@@ -23,6 +23,14 @@ TWO FOR ONE plays the light and gives the same relic after a reload; a named but
 every won deep dive give one; the bomb, wind-up bow, bell and knuckle each do what their card says in
 FLAT and 2.5D, all in gold, and a friend caught in one reads SPARED and takes nothing, online too. Open:
 `client/relicwords.ts` through the lore keeper and line editor.
+**One big map, measured first** (Claude Opus 5.5, 2026-11-03; Kyle: raids on "one big, coherent, mostly
+open map", 8 to 12 rooms' worth, without lag on a phone host or the relay). Measured; the numbers and
+the recommendation are in docs/DECISIONS.md. Test only: `?hero=WARRIOR&bigmap=1` (`n=`, `sleep=0`,
+`auto=1`, `bots=0`, `overview=1`), `npx tsx scripts/bigmap/measure.ts`, `node scripts/bigmap/browser.cjs`.
+Landed for real: dozing goblins (off unless a room asks), near-only pushes and collision on big maps,
+and the relay no longer crashes on a message over 64 KiB. *Next, before a big map ships:* each friend
+sent only what's near them with quiet clocks, the map sent as its seed, a compact save, and both views
+skipping what's off screen.
 
 **Nests you can reach and burn out** (Claude Opus 5.5, 2026-11-03; Kyle: spiders "respawn too quickly
 so it's hard to kill their nest", too much HP for a Rogue, "if you run up to it you can light it on

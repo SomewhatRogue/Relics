@@ -277,13 +277,24 @@ function notice(e: Enemy, heroes: Hero[], others: Enemy[], now: number, ev: Figh
     const sight = e.variant === 'looter' ? 1.6 : e.feeding ? far * 0.5 : ahead ? far : ALERT.behind;
     if (d < sight * (h.sneaking && h.act !== 'roll' ? sneakSight(h) : 1) + seenFrom(h) * glowIn(theme)) seen = true;
   }
-  for (const o of others) if (o !== e && o.alert && (isDead(o) || o.hitAt > now - 0.2) && Math.hypot(o.x - e.x, o.y - e.y) < ALERT.hear) seen = true;
+  for (const o of noisy(others, now)) if (o !== e && o.alert && (isDead(o) || o.hitAt > now - 0.2) && Math.hypot(o.x - e.x, o.y - e.y) < ALERT.hear) seen = true;
   if (!seen) return false;
   for (const o of others) if (o.alert === false && Math.hypot(o.x - e.x, o.y - e.y) < ALERT.shout) o.alert = true;
   e.alert = true;
   e.cooldown = Math.max(e.cooldown, 0.6);
   ev.push({ k: 'spotted', x: e.x, y: e.y });
   return true;
+}
+
+/**
+ * Who could be heard: in a crowd (a big map), the goblins that are fighting, hurt this moment or lying
+ * dead, found once a tick rather than once for every goblin at rest; a room's few are just all checked.
+ */
+let heard: { list: Enemy[]; now: number; out: Enemy[] } | null = null;
+function noisy(others: Enemy[], now: number): Enemy[] {
+  if (others.length <= 80) return others;
+  if (heard?.list !== others || heard.now !== now) heard = { list: others, now, out: others.filter((o) => o.alert && (isDead(o) || o.hitAt > now - 0.2)) };
+  return heard.out;
 }
 
 /** At rest: a few steps here and there about where it was put, turning to look. */

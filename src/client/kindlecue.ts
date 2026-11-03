@@ -1,7 +1,7 @@
 /**
  * The warning at a house's kindling (Kyle, 2026-11-03: "I don't want people to burn the wrong house"):
  * stand at the woodpile of a house with someone still caged inside (`cry` on its block, from the
- * leader's game) and you hear a muffled cry through the wall, and a small SOMEONE'S INSIDE shows over
+ * leader's game) and you hear a muffled cry through the wall, and a small SOMEONE'S IN THERE shows over
  * the pile. Once each time you come up to it. Never a joke. Sound and words only: nothing here decides.
  */
 import type { GameMap } from '../shared/arena';
@@ -11,7 +11,7 @@ import type { Hero } from '../sim/types';
 import { sfxOut } from './sfx';
 
 /** The words over the pile (for the lore keeper and line editor). */
-export const CRY_CUE = "SOMEONE'S INSIDE";
+export const CRY_CUE = "SOMEONE'S IN THERE";
 
 let heard = -1;
 

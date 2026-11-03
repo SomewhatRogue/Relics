@@ -49,6 +49,7 @@ import { brandyDmg } from './brandy';
 import { litMult } from './charge';
 import { fireFound, stepSentries } from './foundrelics';
 import { grow } from './grow';
+import { awake, merge } from './sleep';
 import { NO_INTENT, type Puddle, type Zone, type Bolt, type Drop, type Enemy, type Prop, type FightEvent, type Hero, type Hook, type Intent, type Javelin, type Snare, type Survivor } from './types';
 
 export class ArenaRoom {
@@ -106,12 +107,17 @@ export class ArenaRoom {
   /** The way out is open (a run room once its goal is met; the training yard always). */
   exitOpen = false;
   private squire: boolean;
+  /** A big map: goblins far from every hero doze and aren't stepped (sim/sleep.ts). */
+  sleepFar = false;
+  /** Every goblin, dozers too, while a big map's tick runs on the awake ones (null between ticks). */
+  private whole: Enemy[] | null = null;
 
   /**
    * The training room by default. A run room passes its `map`, `foes` and `props` (its goblins stay
    * dead and its furniture doesn't come back). `squire`: a training partner to heal and bless.
    */
-  constructor(seed = 1, opts: { scrappers?: boolean; squire?: boolean; props?: boolean; map?: GameMap; foes?: Foe[]; furniture?: { kind: PropKind; x: number; y: number }[]; chests?: { x: number; y: number; chained?: boolean }[]; danger?: number } = {}) {
+  constructor(seed = 1, opts: { scrappers?: boolean; squire?: boolean; props?: boolean; map?: GameMap; foes?: Foe[]; furniture?: { kind: PropKind; x: number; y: number }[]; chests?: { x: number; y: number; chained?: boolean }[]; danger?: number; sleep?: boolean } = {}) {
+    this.sleepFar = !!opts.sleep;
     this.chests = (opts.chests ?? []).map((c) => newChest(c.x, c.y, c.chained));
     this.danger = opts.danger ?? 0;
     this.rng = new Rng(seed);
@@ -191,6 +197,18 @@ export class ArenaRoom {
   }
 
   step(): void {
+    if (!this.sleepFar) return this.stepAll();
+    // On a big map the tick runs on the awake goblins only; the dozers go back in their places after.
+    const all = (this.whole = this.enemies);
+    this.enemies = awake(all, this.heroes);
+    try {
+      this.stepAll();
+    } finally {
+      (this.enemies = merge(all, this.enemies)), (this.whole = null);
+    }
+  }
+
+  private stepAll(): void {
     useMap(this.map);
     for (const h of this.heroes) this.prev.set('h:' + h.id, [h.x, h.y]);
     for (const e of this.enemies) this.prev.set('e:' + e.id, [e.x, e.y]);
@@ -282,7 +300,7 @@ export class ArenaRoom {
 
   /** Something new in the room (a den's goblin, a nest's spider), awake and for good. */
   private spawn(kind: 'scrapper' | 'spider', x: number, y: number): Enemy {
-    const e = newEnemy(Math.max(0, ...this.enemies.map((o) => o.id)) + 1, kind, x, y);
+    const e = newEnemy(Math.max(0, ...(this.whole ?? this.enemies).map((o) => o.id), ...this.enemies.map((o) => o.id)) + 1, kind, x, y);
     e.respawns = false;
     this.enemies.push(e);
     return e;

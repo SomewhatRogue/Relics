@@ -237,3 +237,10 @@ export const HOUSEBURN = {
  * catches every time.
  */
 export const CATCH = { oil: 0.9, barrel: 0.9, blast: 0.75, edge: 0.12, spark: 0.12, ring: 0.3, rub: 0.04, spread: 0.02, wall: 0.4, spot: 0.9 };
+/**
+ * A big map (shared/bigmap.ts): a goblin farther than `wake` tiles from every hero dozes (sim/sleep.ts):
+ * it holds where it stands and costs the room nothing. It wakes inside `wake` and dozes again only past
+ * `doze`, so one on the edge doesn't flicker. A laptop screen is about 23 tiles across, a phone's about
+ * 26 tall: `wake` is about two screens of a hero's reach, well past any goblin's sight or an arrow's.
+ */
+export const SLEEP = { wake: 24, doze: 30 };

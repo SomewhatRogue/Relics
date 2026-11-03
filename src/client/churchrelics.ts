@@ -25,7 +25,7 @@ export function openStep(g: Game, panel: Panel, back: () => void, said = ''): vo
   const pr = g.profile, again = (s = '') => openStep(g, panel, back, s);
   picked = picked.filter((id) => pr.relics.some((r) => r.id === id));
   const lit = pr.lit ?? 0;
-  const head = (said ? say('Father Odric', said) : say('Isolde', RELICW.churchIntro)) + (lit ? p(`<b>${RELICW.litLeft(lit)}</b>`) : '') + p(`You have ${pr.gold} gold.`);
+  const head = (said.startsWith('~') ? p(said.slice(1)) : said ? say('Father Odric', said) : say('Father Odric', RELICW.churchIntro)) + (lit ? p(`<b>${RELICW.litLeft(lit)}</b>`) : '') + p(`You have ${pr.gold} gold.`);
   const rows = pr.relics.map((r) => {
     const cost = rechargeCost(r), n = litFor(r);
     const re = r.el ? '' : b('recharge', r.id, canRecharge(r) ? RELICW.recharge(cost) : RELICW.full, { off: !canRecharge(r) || pr.gold < cost });
@@ -38,7 +38,7 @@ export function openStep(g: Game, panel: Panel, back: () => void, said = ''): vo
   for (const el of root?.querySelectorAll<HTMLButtonElement>('[data-rop]') ?? []) el.onclick = (e) => {
     e.stopPropagation();
     const id = el.dataset.rid!, op = el.dataset.rop;
-    if (op === 'recharge') return recharge(pr, id) ? (g.relicsChanged(), again(RELICW.recharged)) : undefined;
+    if (op === 'recharge') return recharge(pr, id) ? (g.relicsChanged(), again('~' + RELICW.recharged)) : undefined;
     if (op === 'leave') {
       const r = pr.relics.find((x) => x.id === id), was = pr.lit ?? 0;
       if (!r || leaveRelic(pr, id) < 0) return;

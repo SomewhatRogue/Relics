@@ -336,6 +336,8 @@ export interface Enemy extends Body {
   lightT?: number;
   /** A nest alight: the room time it's ash (0 not alight). */
   ashAt?: number;
+  /** Too far from every hero to think or move this tick (sim/sleep.ts, on a big map). */
+  dozing?: boolean;
 }
 
 /** How a goblin died: fell, lost its head, burst apart, burned, or shattered. */

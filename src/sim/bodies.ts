@@ -2,6 +2,10 @@
 import { collide } from '../shared/arena';
 import { HERO, KNOCK } from '../shared/tuning';
 import type { Body, Enemy, Hero, Prop } from './types';
+import { nearPairs } from './pairgrid';
+
+/** More bodies than this and only near pairs are checked. */
+const CROWD = 80;
 
 /** Shove a body along (dx, dy) (a unit vector) by `impulse`, lightened or deadened by its weight. */
 export function shove(b: Body, dx: number, dy: number, impulse: number, weight: number): void {
@@ -44,16 +48,19 @@ export function separate(heroes: Hero[], enemies: Enemy[], props: Prop[] = []): 
     list.push({ b: e, r: e.radius, inv: isFinite(e.weight) && e.act !== 'pinned' ? 1 / e.weight : 0 });
   }
   for (const p of props) if (!p.broken && !p.lifted) list.push({ b: p, r: p.radius, inv: 1 / p.weight });
-  for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) {
+  const pair = (i: number, j: number) => {
     const p = list[i], q = list[j], sum = p.inv + q.inv;
-    if (!sum) continue;
+    if (!sum) return;
     const dx = q.b.x - p.b.x, dy = q.b.y - p.b.y, d = Math.hypot(dx, dy), min = p.r + q.r;
-    if (d >= min) continue;
+    if (d >= min) return;
     const nx = d > 1e-6 ? dx / d : 1, ny = d > 1e-6 ? dy / d : 0, over = min - d;
     p.b.x -= nx * over * (p.inv / sum);
     p.b.y -= ny * over * (p.inv / sum);
     q.b.x += nx * over * (q.inv / sum);
     q.b.y += ny * over * (q.inv / sum);
-  }
+  };
+  // A crowd (a big map): only pairs near enough to touch (sim/pairgrid.ts). A room's few: every pair.
+  if (list.length > CROWD) nearPairs(Float64Array.from(list, (it) => it.b.x), Float64Array.from(list, (it) => it.b.y), list.length, 2.5, pair);
+  else for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) pair(i, j);
   for (const it of list) collide(it.b, it.r);
 }

@@ -1,6 +1,6 @@
 // A house set alight from outside, flat and 2.5D, phone and laptop: the kindling glinting as you come
 // up, crouched lighting it (the ring), the house burning with its goblins coming out on fire, the burnt
-// shell after, and SOMEONE'S INSIDE at a house with someone caged. Usage: node scripts/houseburn.cjs [url] [outdir].
+// shell after, and SOMEONE'S IN THERE at a house with someone caged. Usage: node scripts/houseburn.cjs [url] [outdir].
 const { chromium } = require('playwright');
 const url = process.argv[2] || 'http://localhost:4209/';
 const out = process.argv[3] || 'shots';

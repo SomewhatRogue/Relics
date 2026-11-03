@@ -39,6 +39,10 @@ function getRelay(): Promise<Relay> {
 }
 
 wss.on('connection', (ws, req) => {
+  // A message over maxPayload (64 KiB) closes this socket with 1009 and emits 'error': unheard, that
+  // error would throw and take the whole instance down with everyone on it (found by the big map's
+  // load test, docs/DECISIONS.md 2026-11-03).
+  ws.on('error', (e) => console.log(JSON.stringify({ relay: 1, ev: 'sockerr', msg: String(e?.message ?? e) })));
   getRelay()
     .then((r) => r.attach(ws, new URL(req.url ?? '/', 'http://localhost')))
     .catch(() => ws.close(1011));
