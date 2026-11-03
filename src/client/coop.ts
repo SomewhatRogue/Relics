@@ -43,6 +43,8 @@ const AWAY = 5, REJOIN = 5, BYE_WAIT = 2.5, SEND_EVERY = 0.05, FULL_EVERY = 4, G
  * `snap` tiles off (a knockback, a pull). Rolls, swings and hits are the leader's alone.
  */
 const PREDICT = { ease: 12, snap: 1.5, trip: 0.15 };
+/** A hero's fields that are their kit (client/keepkit.ts). */
+const KIT = ['weapon', 'arms', 'bag', 'armor', 'rings', 'belt', 'glow', 'relics', 'augments'];
 /** A friend in the leader's room. */
 export interface Friend { name: string; profile: Profile | null; intent: Intent; heard: number; fresh: boolean; gone: boolean; /** Their clock on the newest input used (handed back, so they can time the trip). */ at?: number }
 /** What the leader's game tells the host to send, and is told by it. */
@@ -207,6 +209,8 @@ export class CoopGuest {
   /** Out in the street: who's indoors, over which door. */
   doorMarks: DoorMark[] = [];
   ended: { won: boolean; run: Run } | null = null;
+  /** Counts up each time the leader's word changes my kit (so the game needn't compare it every frame). */
+  kitSeq = 0;
   /** Told the moment the end is heard (a hidden page only acts on it when it's back: jobbank.ts keeps it meanwhile). */
   onEnd: (e: { won: boolean; run: Run }) => void = () => {};
   private sock: RelaySocket;
@@ -278,6 +282,8 @@ export class CoopGuest {
     for (const s of room.survivors) room.prev.set('s:' + s.id, [s.x, s.y]);
     // Where the leader has me, when this patch says (my hero's own x, y get my walk between patches).
     const mine = body.p.heroes?.u.find(([k]) => k === 'me')?.[1] as { x?: number; y?: number } | undefined;
+    // My kit touched (a whole room, or a patch with my pack, hands or belt in it): my save looks again.
+    if (body.f || (mine && KIT.some((f) => f in mine))) this.kitSeq++;
     const s = this.dec.apply(body.p, !!body.f) as unknown as Record<string, unknown[]>;
     const meNow = (s.heroes as Hero[] | undefined)?.find((h) => h.id === 'me');
     if (meNow && (body.f || mine?.x !== undefined || mine?.y !== undefined || !this.server)) this.server = { x: mine?.x ?? meNow.x, y: mine?.y ?? meNow.y };

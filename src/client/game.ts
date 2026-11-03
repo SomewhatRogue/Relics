@@ -111,6 +111,9 @@ export class Game {
   /** Leading again after a reload: the room waits till this for a friend to answer (HOLD). */
   private holdUntil = 0;
   private settling = false;
+  /** The leader's kit word last looked at, and their run last tallied (following a friend's job). */
+  private kitSeen = -1;
+  private bankedRun: Run | null = null;
 
   constructor() {
     this.enterTown();
@@ -497,7 +500,9 @@ export class Game {
     stepped.set(here, ev);
     this.stepped = stepped;
     this.followers.step(here);
-    if (this.mode === 'run' && this.run) tally(this.run, here, ev, ME), this.bankIt(this.run);
+    if (this.mode === 'run' && this.run) tally(this.run, here, ev, ME);
+    // (The run only changes on the room's events: the tally's kept when there were some.)
+    if (this.mode === 'run' && this.run && [...stepped.values()].some((e) => e.length)) this.bankIt(this.run);
     this.growing();
     // Wickhold keeps the shared day: the light turns with the clock, the same on every screen.
     if (this.mode === 'town' && !this.outside) this.room.map.theme = townLight(this.townTheme ??= this.room.map.theme, dayPhase(Date.now()));
@@ -670,9 +675,12 @@ export class Game {
   private stepRemote(): FightEvent[] {
     const g = this.remote!, now = performance.now() / 1000;
     // Their room once it has me in it (until then, the town stands still behind the wait).
-    if (g.room?.heroes.some((x) => x.id === ME)) (this.room = g.room), (this.run = g.run ?? this.run), this.keepRemoteGear(this.hero);
-    // (Only the leader's word goes in the tally: not the job as posted, while I wait to get back in.)
-    if (g.run) this.bankIt(g.run);
+    if (g.room?.heroes.some((x) => x.id === ME)) {
+      (this.room = g.room), (this.run = g.run ?? this.run);
+      if (g.kitSeq !== this.kitSeen) (this.kitSeen = g.kitSeq), this.keepRemoteGear(this.hero);
+    }
+    // (Only the leader's word goes in the tally, when a new one comes: not the job as posted, while I wait to get back in.)
+    if (g.run && g.run !== this.bankedRun) this.bankIt((this.bankedRun = g.run));
     const ev = g.take();
     this.growing();
     if (g.shouldTake(now)) return this.takeOver(g), ev;
