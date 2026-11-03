@@ -23,12 +23,12 @@ export const PW = {
   // Toasts (partytoast.ts).
   posted: (lead: string, job: string) => `${lead} is gathering for ${job}`,
   joined: (who: string) => `${who} joined your party`,
-  left: (who: string) => `${who} left`,
+  left: (who: string) => `${who} left your party`,
   in: (lead: string) => `You're in ${lead}'s party`,
   off: (lead: string) => `${lead} called the party off`,
   quiet: (lead: string) => `${lead}'s party broke up`,
   isFull: (lead: string) => `${lead}'s party is full`,
-  up: 'Your party is posted. Walk where you like and set out from your card',
+  up: 'Your party is posted. Walk where you like and set out from your card.',
   // The beat before a party goes (setout.ts).
   beat: 'SETTING OUT',
   beatLead: (place: string) => `You lead the party out to ${place}.`,
