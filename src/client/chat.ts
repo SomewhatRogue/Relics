@@ -84,7 +84,8 @@ export class Chat {
     const line = this.net.send(ch, this.game.profile.name, said);
     if (!line) return;
     this.add({ from: this.game.profile.id, name: line.name, ch, text: line.text, mine: true });
-    if (ch !== 'world') this.bubbles.say('me', line.text, now, () => at(this.game.hero));
+    // Every line you say floats over you for a bit (world ones too, Kyle 2026-11-03), and stays in the log.
+    this.bubbles.say('me', line.text, now, () => at(this.game.hero));
     if (line.struck) this.strike(this.game.profile.id, line.name);
   }
 
@@ -97,6 +98,9 @@ export class Chat {
     } else if (this.where !== 'town') return;
     else if (l.ch === 'local') {
       if (!this.near(l.from)) return;
+      this.bubbles.say(l.from, l.text, now, () => (this.near(l.from, NEAR * 2) ? at(this.town?.where(l.from)?.hero) : null));
+    } else if (l.ch === 'world') {
+      // A world line over the speaker too, when they're in town where you can see them.
       this.bubbles.say(l.from, l.text, now, () => (this.near(l.from, NEAR * 2) ? at(this.town?.where(l.from)?.hero) : null));
     }
     this.add({ from: l.from, name: l.name, ch: l.ch, text: l.text });

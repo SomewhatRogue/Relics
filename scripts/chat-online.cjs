@@ -1,6 +1,6 @@
 // Chat end to end: two players (Kyle on a phone, Sam on a laptop) on different relay instances.
 // In town: a world line reaches the other; a NEAR line only when they stand close (and then as a
-// bubble); typing never moves the hero; a muted player goes unheard. On a job together: the party
+// bubble, world lines too); typing never moves the hero; a muted player goes unheard. On a job together: the party
 // hears each other's quick lines and typed lines, as bubbles. Screenshots of each into SHOTS.
 // Usage: node scripts/chat-online.cjs   (builds with VITE_ONLINE unless NOBUILD; PORT, default 8795)
 const { execSync, spawn } = require('child_process');
@@ -54,7 +54,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     step(`typing never moves the hero (${s0.x.toFixed(2)},${s0.y.toFixed(2)} to ${s1.x.toFixed(2)},${s1.y.toFixed(2)})`, Math.hypot(s1.x - s0.x, s1.y - s0.y) < 0.01);
     await sam.page.keyboard.press('Enter');
     step("Kyle hears Sam's world line", await logHas(kyle, 'Who wants the mill job? Ask Dunn'));
-    step('a world line is no bubble', (await kyle.page.evaluate(() => window.__chat.bubbles())).length === 0);
+    step('a world line floats over Sam too', await until(kyle, () => window.__chat.bubbles().includes('Who wants the mill job? Ask Dunn')));
     // A NEAR line from far off: not heard.
     await wait(1700);
     await sam.page.evaluate(() => window.__chat.say('Anyone near the well?', 'local'));
