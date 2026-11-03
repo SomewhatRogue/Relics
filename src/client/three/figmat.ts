@@ -28,7 +28,7 @@ else gl_FragColor = vec4(glowT.rgb, 0.0);
 
 /** The lit card material: `lit` as the map, `glow` beside it. */
 export function cardMaterial(lit: THREE.Texture, glow: THREE.Texture): THREE.MeshLambertMaterial {
-  const m = toonize(new THREE.MeshLambertMaterial({ map: lit, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -4 }));
+  const m = toonize(new THREE.MeshLambertMaterial({ map: lit, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -8 }));
   const toon = m.onBeforeCompile;
   const tGlow = { value: glow };
   m.onBeforeCompile = (sh, r) => {
@@ -67,7 +67,7 @@ export const POOL = new THREE.ShaderMaterial({
 void main(){ float r = length(vUv - 0.5) * 2.0; if (r > 1.0 || bay4(gl_FragCoord.xy) > 0.62 - r * 0.25) discard; gl_FragColor = vec4(0.03, 0.025, 0.045, 1.0); }`,
   depthWrite: false,
   polygonOffset: true,
-  polygonOffsetFactor: -2,
+  polygonOffsetFactor: -1,
   polygonOffsetUnits: -2,
   blending: THREE.NoBlending,
 });

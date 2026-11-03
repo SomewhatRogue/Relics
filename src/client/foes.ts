@@ -18,6 +18,8 @@ import { SPIDER_SPRITES } from './spidersprites';
 import { isSpiderKind } from '../shared/spiders';
 
 const ARM: [number, number] = [0, 0];
+/** Where scrapper() last put the body and the weapon hand (pixels from the feet), for its kit. */
+const AT = { bx: 0, by: 0, hx: 0, hy: 0 };
 import { OX, OY, PX } from './world';
 
 function cleaver(c: Ctx, x: number, y: number, a: number): void {
@@ -61,6 +63,7 @@ function butcher(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
 }
 
 function scrapper(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
+  AT.bx = AT.by = AT.hx = AT.hy = 0;
   // Hit hard: head over heels once, with a hop. Thrown: tumbling end over end through the air.
   const tb = e.act === 'carried' || e.act === 'pinned' ? null : tumble(e, t);
   if (tb) return shadow(c, x, y, 4), spin(c, SPRITES.scrapper, x, y - 7 - tb.hop, tb.a);
@@ -80,7 +83,9 @@ function scrapper(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
   const body = jointed(up ? SPRITES.scrapperUp : SPRITES.scrapper, SCRAPPER_CUT);
   layout(body, bx, by, e.fx < -0.2, pz);
   const [ax, ay] = armOffset(ARM), kx = bx + ax, ky = by + ay;
-  const knife = () => (e.bow ? bow(c, e, kx, ky, fa) : e.variant === 'hexer' || e.variant === 'drummer' ? drawKit(c, e, bx, by, ax, ay, t) : line(c.lit, kx + Math.cos(fa) * reach, ky - 6 + Math.sin(fa) * reach, fa, 0, 4, '#cfd6dc'));
+  Object.assign(AT, { bx: bx - x, by: by - y, hx: bx + ax - x, hy: by + ay - y });
+  // A lunger's weapon is its spear (kit()): no knife besides.
+  const knife = () => (e.bow ? bow(c, e, kx, ky, fa) : e.variant === 'hexer' || e.variant === 'drummer' ? drawKit(c, e, bx, by, ax, ay, t) : e.variant === 'lunger' ? undefined : line(c.lit, kx + Math.cos(fa) * reach, ky - 6 + Math.sin(fa) * reach, fa, 0, 4, '#cfd6dc'));
   if (up) knife();
   drawFigure(c, body, bx, by, pz);
   if (!up) knife();
@@ -281,9 +286,14 @@ export function drawHeld(c: Ctx, e: Enemy, x: number, y: number, fx: number, fy:
   spin(c, s, x, y - 27, Math.PI / 2 + Math.sin(c.now * 18) * 0.3);
 }
 
-/** What marks a run goblin's kind: a board on its arm, a long spear, a brute's club. */
-function kit(c: Ctx, e: Enemy, x: number, y: number): void {
-  const f = e.fx >= 0 ? 1 : -1, g = c.lit;
+/**
+ * What marks a run goblin's kind: a board on its arm, a long spear, a brute's club. Each goes with the
+ * body as scrapper() posed it: the spear and the club in the weapon hand, so the stab drives the spear
+ * out along the lunge and the club goes up with the arm.
+ */
+function kit(c: Ctx, e: Enemy, x0: number, y0: number): void {
+  const f = e.fx >= 0 ? 1 : -1, g = c.lit, held = e.variant === 'lunger' || e.variant === 'heavy';
+  const x = x0 + (held ? AT.hx : AT.bx), y = y0 + (held ? AT.hy : AT.by);
   if (e.variant === 'shield') {
     // A door-plank shield, held toward whatever it faces.
     g.fillStyle = '#5a3f28';

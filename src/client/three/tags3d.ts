@@ -9,6 +9,7 @@ import { SPOT_REACH } from '../../shared/town';
 import type { Hero } from '../../sim/types';
 import { drawText, textWidth } from '../pixfont';
 import type { Proj } from './overlay3d';
+import { BOXFIGS } from './look';
 
 /** Over-the-head heights (tiles) for a grown townsperson, and a child. */
 const HEAD = 1.65, SMALL = 1.05;
@@ -21,7 +22,8 @@ export function drawTags(g: CanvasRenderingContext2D, map: GameMap, t: number, m
     if (x < -w || y < -8 || x > g.canvas.width + w || y > g.canvas.height + 8) continue;
     drawText(g, b.label, Math.round(x - w / 2), Math.round(y), b.kind === 'stall' ? '#f0e0b0' : '#d8c48a');
   }
-  for (const n of map.npcs ?? []) {
+  // A flat figure (cards3d.ts) carries its own mark and name, as in the flat view.
+  if (BOXFIGS) for (const n of map.npcs ?? []) {
     if (n.mute || n.pose) continue;
     const at = npcAt(n, t), near = !!me && Math.hypot(me.x - at.x, me.y - at.y) <= SPOT_REACH;
     const [x, y] = P(at.x, (n.look === 'child' ? SMALL : HEAD) + (n.look === 'mage' ? 0.45 : 0) + (n.lift ?? 0) / 16, at.y);
@@ -34,7 +36,7 @@ export function drawTags(g: CanvasRenderingContext2D, map: GameMap, t: number, m
     }
   }
   for (const h of others) {
-    const [x, y] = P(h.x, 1.75, h.y), name = (h.tag ?? h.id).toUpperCase();
+    const [x, y] = P(h.x, BOXFIGS ? 1.75 : 1.5, h.y), name = (h.tag ?? h.id).toUpperCase();
     drawText(g, name, Math.round(x - textWidth(name) / 2), Math.round(y - 6), '#9ad8a8');
   }
 }

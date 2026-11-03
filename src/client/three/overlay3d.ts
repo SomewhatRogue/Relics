@@ -94,10 +94,10 @@ export class Overlay {
       }
       if (e.attack?.unblockable && e.attack.t < e.attack.windup) drawText(g, '!', Math.round(x - 1), Math.round(y - 9 - (Math.floor(now * 6) % 2)), '#ffd040');
     }
-    // Friends' names over their heads; a downed hero's count.
-    if (BOXFIGS) for (const h of room.heroes) {
-      const [hx, hy] = lerp('h:' + h.id, h.x, h.y), [x, y] = P(hx, 1.75 + up(h.z), hy);
-      if (h.act === 'down' && (h.out || h.lying)) continue;
+    // Friends' names over their heads; a downed hero's count (a flat figure's card carries that).
+    for (const h of room.heroes) {
+      const [hx, hy] = lerp('h:' + h.id, h.x, h.y), [x, y] = P(hx, (BOXFIGS ? 1.75 : 1.5) + up(h.z), hy);
+      if (h.act === 'down' && (h.out || h.lying || !BOXFIGS)) continue;
       if (h.act === 'down') {
         const left = h.bleeding ? PARTY.bleed - h.actT : h.actDur - h.actT, s = String(Math.max(0, Math.ceil(left)));
         drawText(g, s, Math.round(x - textWidth(s) / 2), Math.round(y - 2), h.bleeding && !h.selfUp ? '#ffd27a' : '#ff6a5a');
