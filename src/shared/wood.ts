@@ -212,7 +212,7 @@ export const LINES = {
     relic: 'Press RELIC to throw it. It pins a small goblin to the nearest wall, then comes back to your hand.',
     grab: "Grab a crate or barrel, grab again to throw. Small goblins too: from behind, or while they reel, feed or swing. What you throw hurts what it hits.",
     backstab: 'Hits from behind do far more damage.',
-    heavy: 'Hold attack to a full charge, then let go. A full shot hits much harder.',
+    heavy: 'Hold attack and let go on the white flash. That full shot, a PERFECT, hits much harder.',
     slip: "Dodge just as a blow lands to pass through it. That staggers the attacker (not arrows).",
     /** The dodge lesson's line for a class that can't hold a block. */
     rollLight: "You can't block. Dodge out of any red before it lands.",

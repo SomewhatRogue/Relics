@@ -165,12 +165,12 @@ const CHAT: Record<number, { name: string; line: string }> = {
   0: { name: 'OLD WENNA', line: "Seventy-one winters. Saw the walls go up, saw the last bell go into the pot for arrowheads. I'll see the hungry off this valley too, or I'll haunt the lot of you." },
   1: { name: 'TAM', line: "Is it true you can throw a greenie at another greenie? Did it burst? Mam says don't ask about the bursting. Did it, though?" },
   2: { name: 'MARTA', line: 'I pray for the ones still out there. Then I pray you lot walk faster.' },
-  3: { name: 'ALDER BRAM', line: 'Every choice this council makes, somebody pays for. My job is to make sure it is somebody with teeth.' },
+  3: { name: 'ALDER BRAM', line: 'Every choice this council makes, somebody pays for it. I\'d sooner it was the hungry.' },
   4: { name: 'GOODWIFE SELL', line: 'Farm or refugees. I have heard both argued till the candles gave out, and the candles were the only ones talking sense.' },
   5: { name: 'GATE GUARD', line: 'Gate opens for a job, and shuts behind you whether you\'re through or not. Board is in the square.' },
   6: { name: 'SERGEANT DUNN', line: 'Two of us for a whole wall, and boots that let the rain in. Put coin in the town works and I will find you a proper watch. And boots.' },
-  7: { name: 'WATCHMAN HOB', line: 'Quiet tonight. I said that last night and a tallyman took the Fosters\' goat off the wall. So, not quiet.' },
-  8: { name: 'WATCHMAN PIKE', line: 'New spear, new boots, same teeth out there. Still. Good boots.' },
+  7: { name: 'WATCHMAN HOB', line: 'Quiet tonight. I said that last night and one of them took the Fosters\' goat off the wall. So, not quiet.' },
+  8: { name: 'WATCHMAN PIKE', line: 'New spear and new boots, and the same teeth out there. Still, good boots.' },
   9: { name: 'OLD MERREN', line: 'Father Odric nailed that chapel shut with his own hands, the night the siege broke. I asked him why. He said, so it stays where it is.' },
   13: { name: 'CORPORAL BRISK', line: "Cole says I'll make sergeant when Dunn dies. Dunn says he's not dying till he gets new boots. So that's me, corporal for life." },
   15: { name: PERRIN.name, line: PERRIN.stages[0] },
@@ -180,7 +180,7 @@ const CHAT: Record<number, { name: string; line: string }> = {
   19: { name: 'RECRUIT WAT', line: "Master Cole says a dull blade's a gift to the other fellow, so they get *nothing* from me." },
   14: { name: 'ORLA OF THE WATCH', line: "Third night on the east wall. Something out there whistles when I whistle. I've stopped whistling." },
   11: { name: 'A DRUNK', line: 'Moll cheats. Everyone knows Moll cheats. I keep playing her. What does that make me? Don\'t answer that. Buy me one.' },
-  12: { name: 'A CARD SHARP', line: 'Whisper talks to his own kind. If you have to ask which kind, you are not it.' },
+  12: { name: 'A CARD SHARP', line: 'Whisper, round the back, trains rogues and nobody else. If you have to ask, you\'re not one.' },
 };
 const CHILD = ['We have a door now. A real one, with a latch. I open it all the time.', 'Did you kill the big one? The one with the chains? Was it heavy?', 'I saw one once, through the wall. It had a spoon. Why did it have a spoon?', "Mam says I can't come with you. Yet."];
 const SURVIVOR = ['They kept us in the dark so long I forgot what my hands looked like. Thank you for the candle.', 'My brother is still out at the Copperdeep. They took the ones who could dig. If you go down there...', 'I can hold a pitchfork. When my legs hold me, I will.'];
