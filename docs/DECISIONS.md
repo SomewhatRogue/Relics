@@ -2,6 +2,50 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-04: a friend's pack, the wood walled in with scenes past it, and Hew's death made quick (Kyle; Claude Opus 5.5)
+
+- **A friend's pack crashed.** Kyle: "I wasn't able to open inventory; the game would crash when I was
+  not hosting." The leader's patches (`client/snap.ts`) left `found` (the relics a hero owns) off every
+  hero, so on a friend's screen `hero.found` was undefined and the pack threw reading it the moment it
+  drew its relic shelf (`TypeError ... reading 'filter'`), every frame, taking the HUD with it. `found`
+  now goes in the patches: the friend's pack lists the same relics, in the same order, that the leader's
+  room carries by index, and a charge spent or a relic won on a job now reaches the friend's save
+  (keepkit.ts already read `h.found`). The pack also reads any list a patch hasn't brought yet as empty.
+  Stress scenario 27 (`scripts/stress/pack.cjs`): the pack in town, then as a guest on a job: a ring on,
+  armor swapped, a piece dropped, the belt reordered, two relics carried, all holding on the leader's
+  room, the friend's screen and the friend's save; then inside a house (a ring off), and the leader's
+  pack in town and indoors. No page errors.
+- **The wood is walled in.** Kyle: "too easy to go through trees and get lost off the path." The old
+  tree lines followed each clearing's edge and left gaps where two edges met; a flood fill walked out
+  into 2300 half-tiles of open wood. Now `shared/woodedge.ts` puts a tree on every tile outside the
+  clearings and the ways between that touches one (r 0.6, a tile apart: no gap a body fits through,
+  corner to corner included), a second row behind, and the wood thinning out to the map's edge.
+  `tests/woodedge.test.ts` flood-fills it: nothing reachable outside the clearings and gates, every
+  clearing and the road still reachable, every scene over 2.4 tiles from anywhere you can stand. A worn
+  earth path runs gate to gate (`WOOD_PATH`). 596 trees (was about 330).
+- **Scenes past the trees** (Kyle: "background goblins fighting or killing things that you can't
+  reach"): `shared/woodscenes.ts` says where; `client/vignettes.ts`, `vigshots.ts`, `vigkit.ts` and
+  `beasts.ts` play and draw them. Two goblins at each other with knives over a dead ox from the baggage
+  train while a third eats (north of the field); two dragging one of the dead off by the arms into the
+  trees, a blood trail behind (north of the field); their fire with a carcass turning on the spit, the
+  boots they took off the dead in a heap, one asleep (by Hew's clearing); a deer run down and speared
+  (south of the stream); the last soldier of the column on his feet with three round him: he cuts one
+  down, is stabbed in the side and from behind, kneels, falls, and they're at him (south of the stream).
+  The squabble and the fire loop; the rest play once when you first come near and stay as they ended.
+  Paint only: never in the room, so nothing can hit, shoot, pin or be hurt by them; drawn by the same
+  code as the real goblins, in both views, on the room's clock (held when the world is held). The edge
+  in front of each is brambles and rocks you can see over; the wood round each is left open.
+- **Hew's death** (Kyle: "have the big monster grab Hew and he starts screaming and dies... his head
+  exploded and is thrown against a wall and slides down it, then the monster bellows and attacks you").
+  `sim/woodcut.ts` (out of `sim/wood.ts`): grabbed; his last shout (kept: "Get the count to Odric",
+  which the tally stick hangs on); a scream; the last cut off; the head burst (the bite's gore, kept);
+  thrown into his hut's front wall and down it, a smear left on the wall (`Npc.smear`); the Stoker
+  bellows, no words, and comes at once (cooldown 0.4). The Stoker's line is gone from the game. Grab to
+  attack is under five seconds.
+- **The road out is short** (Kyle: "don't make them walk a huge way away to get to the town"):
+  `ROAD_OUT` is now just west of the hut's gate (x 37 to 40), not the far end of the road.
+- New player-facing line for the lore keeper and line editor: Hew's scream `LINES.screams[0]`.
+
 ## 2026-11-03: the Ranger's weapons rework: the longbow blinds, the crossbow winds and glints (Kyle; Claude Opus 5.5)
 
 The third class through Kyle's weapons rework. The Ranger has the best dodge (the jump back and its
