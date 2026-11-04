@@ -16,6 +16,7 @@ import { soak } from './holy';
 import { clericHit } from './flail';
 import { stun } from './stuns';
 import type { Enemy, EnemyAttack, FightEvent, Hero } from './types';
+import { travelTo } from '../shared/sweep';
 
 export { respawnOf, stunOf } from './damage';
 
@@ -177,7 +178,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   // The Stoker's draw: hooked along the line and hauled to its feet, stunned for a free sweep.
   if (a.kind === 'draw') {
     const l = Math.hypot(e.x - h.x, e.y - h.y) || 1, to = VARIANTS.stoker.pullTo;
-    Object.assign(h, { x: e.x - ((e.x - h.x) / l) * to, y: e.y - ((e.y - h.y) / l) * to, kvx: 0, kvy: 0, act: 'stun', actT: 0, actDur: VARIANTS.stoker.pullStun });
+    travelTo(h, e.x - ((e.x - h.x) / l) * to, e.y - ((e.y - h.y) / l) * to, HERO.radius);
+    Object.assign(h, { kvx: 0, kvy: 0, act: 'stun', actT: 0, actDur: VARIANTS.stoker.pullStun });
     h.hp -= soak(h, a.dmg, now, ev);
     e.cooldown = 0;
     ev.push({ k: 'hit', x: h.x, y: h.y, n: a.dmg, heavy: true, on: 'hero', src: 'draw' });

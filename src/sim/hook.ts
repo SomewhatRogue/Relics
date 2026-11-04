@@ -3,6 +3,7 @@
  * a light enemy is reeled in to its owner and arrives reeling; a heavy enemy, a wall or a pillar
  * pulls the owner across instead. A miss reels the hook back.
  */
+import { travel, travelTo } from '../shared/sweep';
 import { collide } from '../shared/arena';
 import { CLASS_GUARD, HERO, HOOK, HOOK_PROP, WEAPONS } from '../shared/tuning';
 import { shove } from './bodies';
@@ -120,16 +121,12 @@ export function stepHook(k: Hook, heroes: Hero[], enemies: Enemy[], now: number,
   h.fx = dx / (d || 1);
   h.fy = dy / (d || 1);
   if (d - step <= stopAt || h.actT > 1.2) {
-    h.x = k.x - h.fx * stopAt;
-    h.y = k.y - h.fy * stopAt;
-    collide(h, HERO.radius);
+    travelTo(h, k.x - h.fx * stopAt, k.y - h.fy * stopAt, HERO.radius);
     release(h);
     ev.push({ k: 'land', x: h.x, y: h.y, dx: h.fx, dy: h.fy });
     return false;
   }
-  h.x += h.fx * step;
-  h.y += h.fy * step;
+  travel(h, h.fx * step, h.fy * step, HERO.radius);
   h.actT += dt;
-  collide(h, HERO.radius);
   return true;
 }
