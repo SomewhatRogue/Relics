@@ -120,7 +120,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       g.keep();
       return panel.show('FATHER ODRIC', p('You give him the hazel stick. He counts the notches with his thumb, eleven, then takes out a knife and cuts a twelfth.') + say('Father Odric', TALLY.odric), [{ label: 'CLOSE', act: again }], true);
     }
-    panel.show('FATHER ODRIC', say('Father Odric', 'Give what you can spare. Then a little of what you can\'t. That\'s the part it burns.') + (pr.cls === 'HEALER' ? say('Father Odric', COAL.odric) : '') +
+    panel.show('FATHER ODRIC', say('Father Odric', 'Give what you can spare to the Lantern. It keeps the light burning, and it does the giver good, more than you\'d think.') + (pr.cls === 'HEALER' ? say('Father Odric', COAL.odric) : '') +
       (hungry.length ? say('Father Odric', CHURCH.hungry) : '') +
       p(`Given to the Lantern so far: ${w.lantern} gold.`) + p(`You have ${pr.gold} gold.`),
       [...[20, 100].map((n) => ({ label: `GIVE ${n}`, disabled: pr.gold < n || pr.armor?.hungry === 'ransom', act: () => (g.donate(n), again()) })),

@@ -159,7 +159,7 @@ export const LINES = {
   parry: "Now, this big one breaks a guard like kindling. I turned over a few on that field who'd held theirs up and waited, shields _split down the middle_. You want to *meet* it, I'd say, not wait for it.",
   hut: "That's ^home^, kettle's older than you are. Hang on, I *didn't* leave that door open.",
   round: "Wait here, stray, I'll go round the back.",
-  last: "Get my tally to Odric, stray, Father Odric! It's every one I burned, he'll be wanting it.",
+  last: "Get my tally stick to Odric, stray, Father Odric! It's every one I burned, he'll be wanting it.",
   /** Screamed with it holding him (woodcut.ts); then the last, cut off. */
   screams: ["Get off! Get *off* me! Aah! AAAH!"],
   scream: 'No! No, no, n',

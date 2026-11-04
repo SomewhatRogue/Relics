@@ -37,11 +37,11 @@ export const COPY = {
 /** The Healer's coal (sim/lantern.ts). What it does is on the class card (CENSER, shared/classes.ts). */
 export const COAL = {
   name: 'COALS',
-  line: 'Your heals are stronger. Goblins notice you from further off and go for you first.',
+  line: 'Stronger heals. Goblins notice you from further off and go for you first.',
   pickup: 'CENSER FED',
   /** Said to a Healer whose censer has been fed (Kyle: say it plainly). */
   isolde: "You've been feeding that censer. Your heals are stronger for it, but the goblins will come for you sooner. Keep your back to a wall.",
-  odric: 'Lit from the Lantern, like every one before it. Feed it what you find out there. Have you eaten today? You look thin.',
+  odric: 'Lit from the Lantern, like every one before it. Feed it the coals the butchers leave. Have you eaten today? You look thin.',
 };
 
 /** Hungry gear at the church, and the town noticing the Want (lore keeper; Kyle cut two, 2026-11-04). */
