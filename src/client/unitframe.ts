@@ -2,11 +2,17 @@
  * The unit frame at the top left: your hero's face in an iron socket with the level on its corner, a
  * chunky health bar with a darker trail that drains a moment after a hit, stamina under it (a laptop's;
  * a phone's is the pips round ATTACK), and a row of small marks for what's on you now (blessed, warded,
- * poisoned, brandy, smoke, the church's light). A tap on the face shows the weapon and kit lines.
+ * poisoned, brandy, smoke, the church's light). A tap on the face shows the weapon and kit lines. On a
+ * job, small hearts under the health bar: the times you can still get back up (alone, a heart each; in a
+ * party, your one get-up). Tapped or hovered, they say what they are.
  */
 import { heroLook } from './sprites';
 import { icon, type IconId } from './icons';
 import type { Game } from './game';
+import { MAX_DOWNS } from '../sim/run';
+
+/** What the hearts are, on a tap or a hover (Kyle: keep the words plain). */
+const UPS_SAY = 'Times you can get back up this job';
 
 const $ = (s: string) => document.querySelector(s) as HTMLElement;
 
@@ -17,9 +23,15 @@ export class UnitFrame {
   private trailAt = 0;
   private hpWas = 1;
   private buffKey = '';
+  private upsKey = '';
+  private upsSaidAt = -9;
 
   constructor() {
     $('#hud .face').addEventListener('click', (e) => (e.stopPropagation(), document.body.classList.toggle('sheet-open')));
+    const ups = $('#hud .ups');
+    ups.title = UPS_SAY;
+    ups.dataset.say = UPS_SAY;
+    ups.addEventListener('click', (e) => (e.stopPropagation(), (this.upsSaidAt = performance.now() / 1000)));
   }
 
   update(game: Game, now: number): void {
@@ -40,6 +52,7 @@ export class UnitFrame {
     $('#hud .hp').classList.toggle('low', low);
     // (The screen's edge darkens red in steps while you're low: hud.css.)
     document.body.classList.toggle('hp-low', low);
+    this.hearts(game, now);
     // What's on you now.
     const marks: IconId[] = [];
     if (me.poison) marks.push('poison');
@@ -63,6 +76,23 @@ export class UnitFrame {
         row.prepend(c);
       }
     }
+  }
+
+  /** The get-ups left as hearts, full then hollow; their meaning shown for 2.5 s after a tap. */
+  private hearts(game: Game, now: number): void {
+    const run = game.mode === 'run' ? game.run : null, me = game.hero, el = $('#hud .ups');
+    let full = 0, spent = 0;
+    if (run) {
+      const solo = game.room.heroes.filter((x) => x.id !== 'squire').length < 2;
+      [full, spent] = solo ? [Math.max(0, MAX_DOWNS - run.downs), Math.min(MAX_DOWNS, run.downs)] : me.selfUp ? [0, 1] : [1, 0];
+    }
+    const key = run ? `${full}/${spent}` : '';
+    if (key !== this.upsKey) {
+      this.upsKey = key;
+      el.hidden = !run;
+      el.innerHTML = '<i class="ht"></i>'.repeat(full) + '<i class="ht no"></i>'.repeat(spent);
+    }
+    el.classList.toggle('say', now - this.upsSaidAt < 2.5);
   }
 
   /** The head and shoulders of the hero's own sprite, upscaled by whole pixels into the socket. */

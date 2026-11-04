@@ -22,6 +22,10 @@ export const ICONS: Record<string, Grid> = {
   dash: ['............', '.ww...ww....', '..ww...ww...', '...ww...ww..', '....ww...ww.', '.....ww...ww', '....ww...ww.', '...ww...ww..', '..ww...ww...', '.ww...ww....', '............', '............'],
   blink: ['.....p......', '.....p......', '....pPp.....', '..p.pWp.p...', 'pppPWWWPppp.', '..p.pWp.p...', '....pPp.....', '.....p......', '.....p...p..', '........pWp.', '.........p..', '............'],
   roll: ['............', '...wwwww....', '..w.....w...', '.w.......w..', '.w......www.', '.w.......w..', '.w..........', '..w.........', '...wwwww....', '............', '............', '............'],
+  // The crossbow's RELOAD: a bolt in a winding arrow.
+  reload: ['....wwww....', '..ww....ww..', '.w...gg...wW', '.w..gssg..WW', 'w....bb.....', 'w....bb.....', 'w....bb....w', '.w...bb....w', '.w..yyyy..w.', '..ww.yy.ww..', '....wwww....', '............'],
+  // The options box's BUTTONS (what each icon means): a round button with a letter on it.
+  buttons: ['............', '...ssssss...', '..sggggggs..', '.sgg.ww.ggs.', '.sg.w..w.gs.', '.sg.wwww.gs.', '.sg.w..w.gs.', '.sgg....ggd.', '..sggggggd..', '...dddddd...', '............', '............'],
   // The context slot's actions.
   grab: ['....h.h.....', '..h.h.h.h...', '..h.h.h.h...', '..h.h.h.h...', '..hhhhhhh.h.', '..hhhhhhhhh.', '..hhhhhhhh..', '..hhhhhhh...', '...hhhhhh...', '...hhhhh....', '....HHHH....', '............'],
   throw: ['.......wwww.', '.........ww.', '........w.w.', '.......w..w.', '......w.....', '.....w......', '....w.......', '...h........', '..hhh.......', '.hhhhh......', '..hhh.......', '............'],
@@ -56,5 +60,5 @@ export const iconUrl = (id: IconId, tint?: string) => gridUrl('i-' + id, ICONS[i
 export function iconVars(): void {
   if (typeof document === 'undefined') return;
   const root = document.documentElement.style;
-  for (const id of ['pack', 'cog', 'chat', 'leave', 'heroes', 'sound', 'music', 'tips', 'view', 'heart', 'hollow', 'coin', 'skull', 'room', 'roomon', 'lit']) root.setProperty('--ic-' + id, `url(${iconUrl(id)})`);
+  for (const id of ['pack', 'cog', 'chat', 'leave', 'heroes', 'sound', 'music', 'tips', 'view', 'heart', 'hollow', 'coin', 'skull', 'room', 'roomon', 'lit', 'buttons']) root.setProperty('--ic-' + id, `url(${iconUrl(id)})`);
 }

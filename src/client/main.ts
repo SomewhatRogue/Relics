@@ -69,7 +69,12 @@ import { paintFrames } from './frames';
 import { iconVars } from './icons';
 import { Cluster } from './cluster';
 import { UnitFrame } from './unitframe';
-import { heartsHtml, roomsHtml, titleCase } from './tracker';
+import { roomsHtml, titleCase } from './tracker';
+import { ObjFlash } from './objflash';
+import { UnlockFlash } from './unlockflash';
+import { ownCue } from './owncues';
+import { Purse } from './purse';
+import { legend } from './legend';
 
 // The UI's frames and icons, drawn once before anything shows.
 paintFrames();
@@ -112,6 +117,7 @@ void link.refresh(true);
 const sounds = new Soundscape(music);
 const recovery = new Recovery(() => game.save);
 const unit = new UnitFrame();
+const objFlash = new ObjFlash(), unlocks = new UnlockFlash(), purse = new Purse();
 const cluster = input.touch ? new Cluster() : null;
 const title = new Title(game, () => undefined, recovery);
 /** Chat (online): world and near in town, the party on a job. */
@@ -164,6 +170,8 @@ $('#heroes').addEventListener('click', () => {
   if (game.mode !== 'run' && !panel.open) pack.toggle(false), title.show();
 });
 $('#packbtn').addEventListener('click', () => pack.toggle());
+// What each button means (legend.ts), from the gear's box.
+$('#legendbtn').addEventListener('click', () => (pack.toggle(false), void legend(game, panel, input.touch)));
 // Leave the job early, for town (game.leaveJob says what that means alone, following or leading).
 $('#leave').addEventListener('click', () => {
   if (game.mode !== 'run' || panel.open) return;
@@ -185,7 +193,7 @@ const KIT: Record<string, string> = {
   daggers: 'LONG DASH  ONE AT A TIME  BACKSTAB 2.5X',
   longbow: 'TAP: SHORT SWORD  HOLD: DRAW  LET GO ON THE FLASH TO BLIND',
   shortbow: 'TAP: SHORT SWORD  HOLD: QUICK SHOT ON THE MOVE',
-  crossbow: 'TAP: SHORT SWORD  HOLD: AIM, OR WIND WHEN EMPTY',
+  crossbow: 'TAP: SHORT SWORD  HOLD: AIM, LET GO TO FIRE',
   wand: "SPARKS ON THE MOVE  HOLD: BURST (20 STAMINA), BREAKS BLOWS ON THE FLASH",
   staff: "CLOSE SLASH  HOLD: WALL (30 STAMINA)",
   spellblade: "HITS CHARGE IT  HOLD: WREATHE, FREE ON THE FLASH  CATCH AS A BLOW LANDS",
@@ -202,7 +210,7 @@ const townTips = input.touch
   : ['Walk to the JOB BOARD and press E to take a job', 'Walk up into a door to go in. Press E by anyone to talk', 'The FORGE: Halvard upgrades your gear or melts it down for steel', 'The TRAINING HALL: perks, and the squire takes you to the yard', 'The TOWN HALL: the reeve and the council decide the chapter'];
 const tips = input.touch
   ? ['Stun or get behind a small goblin, then GRAB it', 'Warriors can GRAB barrels and tables and throw them', 'Break the oil barrel near goblins and they burn', 'Holding one: SLAM it, or THROW it at another', 'POTION drinks or throws the front of your belt', 'Traits reward skill: parries, dodges, perfect releases', 'Walk into a cottage or barn: goblins, and sometimes someone caged', 'HEALER: SANCTUARY blesses the ground and wards whoever is most hurt', 'Oil and fire burn wooden buildings down. Burn out the dens', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'SKILL: every class has one. Each recharges', 'Striped circles cannot be blocked: dodge out, or walk out', 'DEEP jobs end at a named butcher. Win one for a RELIC', 'TWIN DAGGERS: dash behind a goblin and BACKSTAB', 'Push the stick part way to creep. Resting goblins see you late: hit first for an AMBUSH']
-  : ['G grabs a stunned goblin (or one you got behind). Click to slam, G to throw', 'Warriors: G lifts barrels and tables. Throw them, or slam them down', 'Break the oil barrel near goblins and they burn', 'Q drinks or throws the potion at the front of your belt. Hold Q to bring the next one to the front', 'Bows: release on the white flash. Held too long, the shot weakens', 'Walk up into a cottage door to go in. Fire burns buildings down', 'Cleric: E for SANCTUARY. Blessed ground, and a ward that throws arrows back', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: your class skill. R: a relic, once you have won one on a DEEP job', 'Striped circles cannot be blocked: SPACE to dodge, or walk out', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or spellblade', 'Daggers: dash behind a goblin and BACKSTAB', 'Hold Shift to creep. Resting goblins see you late: hit first for an AMBUSH'];
+  : ['G grabs a stunned goblin (or one you got behind). Click to slam, G to throw', 'Warriors: G lifts barrels and tables. Throw them, or slam them down', 'Break the oil barrel near goblins and they burn', 'Q drinks or throws the potion at the front of your belt. Hold Q to bring the next one to the front', 'Bows: release on the white flash. Held too long, the shot weakens', 'Walk up into a cottage door to go in. Fire burns buildings down', 'Cleric: E for SANCTUARY. Blessed ground, and a ward that throws arrows back', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: your class skill. R: a relic, once you have won one on a DEEP job', 'Striped circles cannot be blocked: SPACE to dodge, or walk out', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or spellblade', 'Daggers: dash behind a goblin and BACKSTAB', 'Crossbow: hold C to wind it. Wind it all in one go, standing still, and the bolt glints', 'Hold Shift to creep. Resting goblins see you late: hit first for an AMBUSH'];
 let tipAt = -99, tipI = 0;
 
 function hud(now: number): void {
@@ -226,7 +234,7 @@ function hud(now: number): void {
   $('.st').classList.toggle('spell', cost > 0);
   $('.st').classList.toggle('short', cost > 0 && (me.stamina < cost || !!me.winded));
   $('.st').style.setProperty('--cost', Math.min(100, cost) + '%');
-  const kit = KIT[me.weapon] + (guard === 'none' ? '  NO GUARD' : guard === 'parry' ? '  PARRY, NO BLOCK' : '') + (WEAPONS[me.weapon].cls === 'MAGE' ? '  ' + (me.augments.channel || 'fire').toUpperCase() : '');
+  const kit = KIT[me.weapon] + (WEAPONS[me.weapon].reloads ? (input.touch ? '  HOLD RELOAD TO WIND' : '  HOLD C TO RELOAD') : '') + (guard === 'none' ? '  NO GUARD' : guard === 'parry' ? '  PARRY, NO BLOCK' : '') + (WEAPONS[me.weapon].cls === 'MAGE' ? '  ' + (me.augments.channel || 'fire').toUpperCase() : '');
   $('.kit').textContent = item ? item.traits.map((t) => TRAITS[t].name).join(' + ') + '  ' + kit : kit;
   card.update(room, me, !input.touch);
   pack.update(me);
@@ -276,21 +284,21 @@ function hud(now: number): void {
   $('#banner').classList.toggle('faint', game.mode === 'run' && game.hero.y < 7);
   if (game.mode === 'wood' && wood) {
     const g = woodGoal(wood, input.touch);
-    $('#banner').innerHTML = `<b>${g.title}</b> ${g.text}<span>GREYHOLLOW, THE DAY AFTER</span>`;
+    objFlash.watchWood(wood.stage, now);
+    $('#banner').innerHTML = objFlash.show(`<b>${g.title}</b> <div class="obj">${g.text}</div><span>GREYHOLLOW, THE DAY AFTER</span>`, now);
     const boss = room.enemies.find((e) => e.name && e.act !== 'dead');
     $('#boss').hidden = !boss || wood.cut >= 0;
     if (boss) ($('#boss b').textContent = boss.name!), ($('#boss i').style.width = (100 * boss.hp) / boss.maxHp + '%');
   } else if (game.mode === 'run' && run) {
     const g = { text: me.out ? OUT_TEXT : game.goalText() };
-    // Alone, the times you can still get up (a heart each); in a party, your one get-up of the job.
-    const solo = room.heroes.filter((x) => x.id !== 'squire').length < 2, ups = MAX_DOWNS - run.downs;
-    const hearts = solo ? heartsHtml(Math.max(0, ups), Math.min(MAX_DOWNS, run.downs)) : heartsHtml(me.selfUp ? 0 : 1, me.selfUp ? 1 : 0);
-    $('#banner').innerHTML = `<b>${titleCase(run.job.place.name)}${roomsHtml(run.index, run.job.rooms)}</b> ${g.text}<span><i class="coin"></i>+${run.gold}${hearts}${run.rescued ? `<em>SAVED ${run.rescued}</em>` : ''}</span>`;
+    // (The hearts, the get-ups left, are under the health bar: unitframe.ts.)
+    $('#banner').innerHTML = objFlash.show(`<b>${titleCase(run.job.place.name)}${roomsHtml(run.index, run.job.rooms)}</b> <div class="obj">${g.text}</div><span><i class="coin"></i>+${run.gold}${run.rescued ? `<em>SAVED ${run.rescued}</em>` : ''}</span>`, now);
     const boss = room.enemies.find((e) => e.name && e.act !== 'dead');
     $('#boss').hidden = !boss;
     if (boss) ($('#boss b').textContent = boss.name!), ($('#boss i').style.width = (100 * boss.hp) / boss.maxHp + '%');
   } else {
     $('#boss').hidden = true;
+    objFlash.watchWood(-1, now);
     $('#banner').innerHTML = game.outside
       ? `<b>${titleCase(room.map.name)}</b> Walk out at the bottom<span><i class="coin"></i>${pr.gold}</span>`
       : game.mode === 'town'
@@ -306,6 +314,11 @@ function hud(now: number): void {
   // The touch buttons round ATTACK, and the unit frame (cluster.ts, unitframe.ts).
   cluster?.update(game, spot, busy, now);
   unit.update(game, now);
+  // The wood's buttons, flashed gold as each is given (unlockflash.ts); coins and the anvil in town (purse.ts).
+  unlocks.update(game.mode === 'wood' ? game.taught() : null, pr.cls, input.touch, now, (s) => fx.say(toPx(me.x, me.y)[0], toPx(me.x, me.y)[1] - 40, s, '#ffd27a', 2.6));
+  purse.update(game);
+  // A laptop's empty crossbow: the key to wind it, on the prompt line.
+  if (!input.touch && $('#prompt').hidden && !busy && game.mode !== 'town' && WEAPONS[me.weapon].reloads && me.xbowEmpty) ($('#prompt').hidden = false), ($('#prompt').textContent = 'C  RELOAD');
   const list = game.mode === 'town' ? townTips : tips;
   if (now - tipAt > 6) {
     tipAt = now;
@@ -352,6 +365,7 @@ function tick(t: number): void {
   game.coop?.frame(t / 1000);
   for (const ev of evs) {
     fx.on(ev);
+    ownCue(ev, game.hero.id, fx, t / 1000);
     // My own get-ups in a party: how many are left, when I go down and when I get up.
     const party = game.room.heroes.filter((x) => x.id !== 'squire').length > 1;
     if (party && game.mode === 'run' && (ev.k === 'down' || ev.k === 'gotup' || ev.k === 'pickedup') && (ev as { id?: string }).id === game.hero.id) {
@@ -391,6 +405,7 @@ function tick(t: number): void {
   scene.pointTo = game.wood && game.wood.stage === 5 && !game.wood.hold ? { x: ROAD_OUT.x + 1, y: ROAD_OUT.y + ROAD_OUT.h / 2 } : wayTarget(game);
   // The way on just opened: say which way, over you.
   const opened = ways.check(game);
+  if (opened) objFlash.done(t / 1000);
   if (opened && game.hero) {
     const [sx, sy] = toPx(game.hero.x, game.hero.y);
     fx.say(sx, sy - 40, opened, '#ffd27a', 2.6);

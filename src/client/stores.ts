@@ -16,6 +16,7 @@ import { card, compare } from './card';
 import { itemIcon } from './itemicons';
 import { goodsList, says, shopHead, wireGoods, type Good } from './shopui';
 import { gearGood } from './shopgoods';
+import { sfxTown } from './sfxtown';
 import { PLACES, SHOPW } from './shopwords';
 import { cell, grid, sideBySide } from './cells';
 import { line } from './speech';
@@ -95,11 +96,13 @@ function forge(g: Game, panel: Panel): void {
     const note = hungry ? say('Halvard', SMITH.hungry) : (next ? '' : p(FORGE.top)) + (s === 'worn' ? p(`<span class="dim">${FORGE.meltWorn}</span>`) : '');
     detail = sideBySide(h, it, s === 'worn', note + (up || melt ? `<div class="btns">${up}${melt}</div>` : ''));
   }
-  const goods = [...CLASS_KITS[pr.cls].map((kit) => gearGood(g, 'fine', { kit }, SMITH.bought)), ...(['light', 'medium', 'heavy'] as const).map((armor) => gearGood(g, 'fine', { armor }, SMITH.bought))];
+  // Whatever he makes, ups or melts rings on the anvil (sfxtown.ts).
+  const hammered = (x: Good): Good => ({ ...x, buy: () => { const had = pr.gold, out = x.buy(); if (pr.gold < had) sfxTown.anvil(); return out; } });
+  const goods = [...CLASS_KITS[pr.cls].map((kit) => gearGood(g, 'fine', { kit }, SMITH.bought)), ...(['light', 'medium', 'heavy'] as const).map((armor) => gearGood(g, 'fine', { armor }, SMITH.bought))].map(hammered);
   show(panel, PLACES.forge.name, shopHead(PLACES.forge, says('Halvard', SMITH.anvil)) + goodsList(goods, `You have ${pr.gold} gold and ${pr.steel} steel.`) +
     h3(FORGE.title) + h3('WORN') + `<div class="cells">${worn.map((x, k) => cell(x, 'worn:' + k, { sel })).join('')}</div>` +
     h3('PACK', `${pr.bag.length} / ${bagSize(pr)}`) + grid(pr.bag, bagSize(pr), 'bag', sel) + `<div class="sdetail">${detail}</div>`,
-  { up: () => it && g.upgrade(it), melt: () => it && g.melt(it) }, () => forge(g, panel), goods);
+  { up: () => it && g.upgrade(it) && sfxTown.anvil(), melt: () => it && g.melt(it) && sfxTown.anvil() }, () => forge(g, panel), goods);
 }
 
 /** Open one of these if `id` is one; false otherwise (townui.ts handles the rest). */

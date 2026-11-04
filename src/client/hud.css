@@ -30,6 +30,13 @@
 #hud .st.spell.short::after { background: var(--blood-hi); width: calc(2 * var(--px)); }
 @keyframes winded { 50% { opacity: 0.35; } }
 body.touch #hud .st { display: none; }
+/* The get-ups left, as hearts just under the health bar (unitframe.ts); a tap or a hover says what they are. */
+#hud .ups { pointer-events: auto; position: relative; display: flex; gap: var(--px); align-self: flex-start; min-height: 0; height: auto; padding: 2px 2px 2px 0; margin: -1px 0 0; border: 0; background: none; cursor: help; }
+#hud .ups[hidden] { display: none; }
+#hud .ups .ht { display: block; width: calc(9 * var(--px)); height: calc(8 * var(--px)); background: var(--ic-heart) center / 100% 100% no-repeat; image-rendering: pixelated; }
+#hud .ups .ht.no { background-image: var(--ic-hollow); }
+#hud .ups.say::after, #hud .ups:hover::after { content: attr(data-say); position: absolute; left: 0; top: calc(100% + 2px); z-index: 3; padding: 2px 6px; white-space: nowrap; font: 400 var(--fs-text)/1.2 var(--font-body); color: var(--bone); text-shadow: none;
+  border: var(--edge-s) solid transparent; border-image: var(--f-iron) 3 fill / var(--edge-s) stretch; }
 #hud .buffs { display: flex; gap: 2px; min-height: 0; }
 #hud .buffs canvas { width: calc(11 * var(--px)); height: auto; image-rendering: pixelated; }
 #hud .litbadge { pointer-events: auto; cursor: help; width: calc(11 * var(--px)); height: calc(11 * var(--px)); font-size: 0; color: transparent; background: var(--ic-lit) center / 100% 100% no-repeat; image-rendering: pixelated; }
@@ -71,6 +78,7 @@ body:not(.touch) #corner button { width: 40px; height: 40px; }
 #options #mute::before { background-image: var(--ic-sound); }
 #options #music::before { background-image: var(--ic-music); }
 #options #tips::before { background-image: var(--ic-tips); }
+#options #legendbtn::before { background-image: var(--ic-buttons); }
 #options #viewbtn::before { background-image: var(--ic-view); }
 #options #leave::before { background-image: var(--ic-leave); }
 #options button.off { color: var(--stone-300); border-image-source: var(--f-dim); }
@@ -102,6 +110,14 @@ body:not([data-mode='run']) #leave, body[data-mode='run'] #heroes, body[data-mod
 #banner .rm.done { opacity: 1; }
 #banner .rm.on { background-image: var(--ic-roomon); opacity: 1; }
 #banner.faint { opacity: 0.3; }
+/* An objective done (objflash.ts): it flashes, turns gold with a shine sweeping across, and holds a moment. */
+#banner .obj { position: relative; display: inline-block; }
+#banner .obj.done { color: var(--gilt); padding: 0 4px; margin: 0 -4px; overflow: hidden; animation: obj-flash 0.24s steps(1) 3; background: #3a2a0ac0; box-shadow: inset 0 0 0 var(--px) var(--gold); }
+#banner .obj.done::after { content: ''; position: absolute; top: 0; bottom: 0; left: -40%; width: 30%; pointer-events: none;
+  background: linear-gradient(100deg, transparent 0 30%, #fff6d0c0 30% 55%, transparent 55%); animation: obj-shine 0.9s steps(9) 0.3s 2 both; }
+@keyframes obj-flash { 50% { color: #ffffff; background: #e0a640d0; } }
+@keyframes obj-shine { from { left: -40%; } to { left: 110%; } }
+@media (prefers-reduced-motion: reduce) { #banner .obj.done, #banner .obj.done::after { animation: none; } }
 body.touch #banner { left: calc(8px + env(safe-area-inset-left)); transform: none; top: calc(70px + env(safe-area-inset-top)); max-width: min(270px, calc(100vw - 16px)); text-align: left; }
 body.touch #banner span { justify-content: flex-start; }
 

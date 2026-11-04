@@ -44,6 +44,25 @@ describe('the Warrior has no dodge (Kyle, 2026-11-04)', () => {
   });
 });
 
+describe('GRAB with nothing to take hold of (Kyle, 2026-11-04)', () => {
+  it('says so to that hero, at most once a second', () => {
+    const { run } = arena('sword', [2]);
+    const a = run(0.4, { grabSeq: 1 });
+    expect(a.filter((x) => x.k === 'nograb' && x.id === 'me').length).toBe(1);
+    const b = run(0.4, { grabSeq: 2 });
+    expect(b.some((x) => x.k === 'nograb')).toBe(false);
+    run(0.4, { grabSeq: 2 });
+    const c = run(0.5, { grabSeq: 3 });
+    expect(c.some((x) => x.k === 'nograb')).toBe(true);
+  });
+  it('says nothing when the press took hold of something', () => {
+    const { e, run } = arena('sword', [8.2]);
+    Object.assign(e, { act: 'stunned', actT: 0, actDur: 9, fx: 0, fy: -1 });
+    const ev = run(0.4, { grabSeq: 1 });
+    expect(ev.some((x) => x.k === 'nograb')).toBe(false);
+  });
+});
+
 describe('the sword and shield', () => {
   it('held past the flash, the shield bash stuns only the goblin in front, for less', () => {
     const { es, loose } = arena('sword', [7.9, 7.9]);
