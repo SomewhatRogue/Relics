@@ -2,11 +2,15 @@
  * The prologue: the wood in Greyhollow the day after the column fell (docs and lines from the lore
  * keeper; the plan is the Claude Doc "Relic: The Prologue"). One hand-laid map of five areas joined by
  * paths, each path blocked (a fallen tree, briars, a log at the ford, the rise) until the lesson before
- * it is done; then the road out to Wickhold. Hew walks ahead and says one line per lesson.
+ * it is done; then the road out to Wickhold. Hew walks ahead and says one line per lesson. The wood
+ * either side of the way is solid (woodedge.ts), and what the goblins are at out past it can be seen
+ * through the trees and never reached (woodscenes.ts).
  */
 import type { Area, Block, GameMap, Round } from './arena.js';
 import { THEMES, type Foe } from './terrain.js';
 import type { HeroClass } from './weapons.js';
+import { thicket } from './woodedge.js';
+import { VIGNETTES, VIGNETTE_MARKS, VIGNETTE_ROUNDS, WOOD_PATH } from './woodscenes.js';
 
 export const WOOD = { w: 64, h: 40 };
 type Rect = { x: number; y: number; w: number; h: number };
@@ -28,34 +32,19 @@ export const GATES: { open: Rect; block: Block }[] = [
   { open: { x: 50, y: 12, w: 4, h: 2 }, block: { x: 50.4, y: 12.2, w: 3.2, h: 1.6, kind: 'fence' } },
   { open: { x: 42, y: 3, w: 2, h: 4 }, block: { x: 42.2, y: 3.4, w: 1.6, h: 3.2, kind: 'fence' } },
 ];
-/** Where Wickhold's road leaves the map (walk into it after the fight). */
-export const ROAD_OUT: Area = { x: 1, y: 2, w: 1.5, h: 5 };
+/** Where Wickhold's road leaves the wood: just west of the hut's gate, so after the fight it's a few
+ *  steps, not the length of the wood (Kyle, 2026-11-04: "don't make them walk a huge way away"). */
+export const ROAD_OUT: Area = { x: 37, y: 2, w: 3, h: 5 };
 
 const inside = (r: Rect, x: number, y: number) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
 export const areaAt = (x: number, y: number) => AREAS.findIndex((r) => inside(r, x, y));
 
-/** Trees along every area's edge, leaving the ways between open (the gates close them). */
-function treeLines(): Round[] {
-  const out: Round[] = [], gap = (x: number, y: number) => GATES.some((g) => inside({ x: g.open.x - 0.4, y: g.open.y - 0.4, w: g.open.w + 0.8, h: g.open.h + 0.8 }, x, y));
-  const add = (x: number, y: number, i: number) => {
-    if (gap(x, y) || x < 0.5 || y < 0.5 || x > WOOD.w - 0.5 || y > WOOD.h - 0.5) return;
-    if (out.some((t) => Math.hypot(t.x - x, t.y - y) < 0.8)) return;
-    out.push({ x, y, r: 0.55, kind: i % 3 ? 'pine' : 'tree' });
-  };
-  AREAS.forEach((r, k) => {
-    for (let x = r.x; x <= r.x + r.w; x += 1) add(x, r.y - 0.2, x + k), add(x, r.y + r.h + 0.2, x + k + 1);
-    for (let y = r.y; y <= r.y + r.h; y += 1) add(r.x - 0.2, y, y + k), add(r.x + r.w + 0.2, y, y + k + 1);
-  });
-  // The ways between: trees along their sides.
-  for (const g of GATES) {
-    const along = g.open.w > g.open.h;
-    for (let t = 0; t <= (along ? g.open.h : g.open.w); t += 1)
-      along ? (add(g.open.x - 0.3, g.open.y + t, t), add(g.open.x + g.open.w + 0.3, g.open.y + t, t + 1)) : (add(g.open.x + t, g.open.y - 0.3, t), add(g.open.x + t, g.open.y + g.open.h + 0.3, t + 1));
-  }
+/** The wood (shared/woodedge.ts): solid either side of the way through, the scenes past it left open. */
+function trees(): Round[] {
+  const open = [...AREAS, ...GATES.map((g) => g.open)];
   // A few trees standing inside the areas (never on the paths in the middle).
   const loose: [number, number][] = [[5, 28], [14, 37], [27, 36], [37, 30], [26, 14], [38, 22], [47, 26], [60, 17], [46, 4], [60, 9], [8, 4], [20, 6], [33, 3]];
-  for (const [x, y] of loose) out.push({ x, y, r: 0.5, kind: 'pine' });
-  return out;
+  return [...thicket(open, WOOD.w, WOOD.h, VIGNETTES), ...loose.map(([x, y]) => ({ x, y, r: 0.5, kind: 'pine' as const })), ...VIGNETTE_ROUNDS];
 }
 
 /** What came off the burning carts on the field: something for a Warrior to pick up and throw. */
@@ -76,7 +65,7 @@ export function woodMap(): GameMap {
     ...GATES.map((g) => ({ ...g.block })),
   ];
   return {
-    name: 'GREYHOLLOW', w: WOOD.w, h: WOOD.h, wallFace: 3, rounds: treeLines(), blocks,
+    name: 'GREYHOLLOW', w: WOOD.w, h: WOOD.h, wallFace: 3, rounds: trees(), blocks, soil: WOOD_PATH, marks: VIGNETTE_MARKS, vignettes: VIGNETTES,
     braziers: [{ x: 5.2, y: 30.6, r: 0.5 }, { x: 16.2, y: 26.6, r: 0.5 }, { x: 32.5, y: 17.5, r: 0.5 }, { x: 52.5, y: 8.5, r: 0.4 }],
     torches: [], hero: { x: 8, y: 34 }, exit: null, theme: { ...THEMES.forest, ambient: [0.86, 0.84, 0.74], moon: 0, day: true },
     npcs: [{ x: 0.6, y: 35.2, name: 'HEW', talk: 'hew', look: 'burner' }, ...FIELD_DEAD.map(([x, y], i) => ({ x, y, name: '', talk: 'dead', look: i % 3 ? 'soldier' : 'soldier2', pose: 'corpse' as const }))],
@@ -162,7 +151,7 @@ export const STOKER_CALLS: { at: number; foes: (Foe & { variant?: 'looter' | 'lu
   { at: 1 / 3, foes: [{ kind: 'scrapper', x: 45, y: 4, awake: true }, { kind: 'scrapper', variant: 'lunger', x: 61, y: 2, awake: true }, { kind: 'scrapper', x: 55, y: 11, awake: true }] },
 ];
 
-/** Hew's lines (lore keeper), and the Stoker's. */
+/** Hew's lines (lore keeper). The Stoker never speaks: it bellows. */
 export const LINES = {
   attack: "There, see, they're at the boots again, it's *always* the boots first with them, I don't know why. And don't stop at one knock, mind. I watched a lad do that once, and _it got up_.",
   dodge: "See that one, how it's crouching? When they get down low like that they're coming *straight through you*, shield or no shield, and there's no stopping them. Best not be standing there when it arrives, is all.",
@@ -171,9 +160,9 @@ export const LINES = {
   hut: "That's ^home^, kettle's older than you are. Hang on, I *didn't* leave that door open.",
   round: "Wait here, stray, I'll go round the back.",
   last: "Get the count to Odric, stray, Father Odric, he'll be wanting it.",
-  /** Cut off by the bite. */
+  /** Screamed with it holding him (woodcut.ts); then the last, cut off. */
+  screams: ["Get off! Get *off* me! Aah! AAAH!"],
   scream: 'No! No, no, n',
-  stoker: 'Eleven you burn. Eleven of mine. So, this one I _keep_.',
   north: "They all went north and left the field half-picked. I've *never* known them leave meat.",
   up: ['Up you get, and spit that dirt out.', "Not yet, stray, I've enough to burn as it is.", 'Have a breather, then go at it again, ~properly~ this time.'],
   relic: "There's something hard under its breastbone, grown in like a knot in oak, and it takes Hew's poker and most of what you've got left to lever it out. It's a javelin, haft and all, longer than the wound it came out of, and ~warm~.",

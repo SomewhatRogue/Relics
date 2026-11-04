@@ -8,9 +8,10 @@ import { attackCovers } from './combat';
 import { AREAS, FEEDING, GATES, GOBLIN_DEAD, LINES, ROAD_OUT, STOKER, STOKER_CALLS, areaAt, lessonsFor, type Lesson, type Teach } from '../shared/wood';
 import { dodgeName, type HeroClass } from '../shared/weapons';
 import { inArea } from '../shared/arena';
-import type { Foe } from '../shared/terrain';
 import { isDead } from './damage';
-import { newEnemy } from './enemies';
+import { HERO_ID, hew, say, spawn } from './woodkit';
+import { stepCut } from './woodcut';
+export { CUT, skipCut } from './woodcut';
 import type { ArenaRoom } from './room';
 import type { Enemy, FightEvent, Hero } from './types';
 
@@ -54,21 +55,6 @@ export interface WoodState {
 /** What the world is held for, and what lets it go on. */
 export type Move = 'move' | Teach;
 export interface Hold { kind: 'card' | 'act' | 'praise' | 'talk' | 'relic'; who: string; text: string; how?: string; move?: Move; need: 'continue' | 'move' | 'attack' | 'roll' | 'block' | 'time'; t: number; until: number }
-
-const HERO_ID = 'me';
-const hew = (room: ArenaRoom) => room.map.npcs?.find((n) => n.talk === 'hew');
-/** A caption, up long enough to read (about a third of a second a word, never less than asked). */
-const say = (w: WoodState, room: ArenaRoom, who: string, text: string, s = 5) => (w.caption = { who, text, until: room.time + Math.max(s, 1.2 + text.split(' ').length * 0.32) });
-
-function spawn(room: ArenaRoom, f: Foe & { variant?: Enemy['variant'] }): Enemy {
-  const e = newEnemy(Math.max(0, ...room.enemies.map((o) => o.id)) + 1, f.kind, f.x, f.y);
-  if (f.variant === 'looter' || f.variant === 'lunger' || f.variant === 'heavy') e.hp = e.maxHp = { looter: 14, lunger: 30, heavy: 110 }[f.variant];
-  if (f.variant === 'stoker') e.hp = e.maxHp = 520;
-  // Every goblin in the wood but the Stoker is drilled: slower wind-ups, one at a time.
-  Object.assign(e, { respawns: false, name: f.name, bow: f.bow, variant: f.variant, alert: f.awake ?? false, drill: f.variant !== 'stoker' });
-  room.enemies.push(e);
-  return e;
-}
 
 /** Waking, in seconds: the fade in, his slow walk over; then his lines wait for a tap; a breath on your feet. */
 export const WAKE = { fade: 2.5, arrive: 5.2, standing: 0.8 };
@@ -161,90 +147,9 @@ function drill(w: WoodState, e: Enemy | null, parryWindow: number, h: Hero): voi
   w.hold = { kind: 'act', who: '', text: LINES.now[move as 'step' | 'roll' | 'block' | 'parry' | 'slip'], move, need: move === 'step' ? 'move' : move === 'roll' || move === 'slip' ? 'roll' : 'block', t: 0, until: 0 };
 }
 
-/** Skip the cutscene (the game offers it once it has been seen). */
-export function skipCut(w: WoodState, room: ArenaRoom): void {
-  if (w.cut < 0) return;
-  w.cut = CUT.end;
-  stepCut(w, room, [], 0);
-}
-
 function openGate(room: ArenaRoom, i: number): void {
   const g = GATES[i].block;
   room.map.blocks = room.map.blocks.filter((b) => b.x !== g.x || b.y !== g.y || b.kind !== g.kind);
-}
-
-/** Hew's death, beat by beat (seconds): he walks round the hut; the ground shakes; the Stoker rises
- *  behind the cordwood, looks, and runs him down; lifts him off his feet; bites; throws the body; and
- *  bellows at you. Hew and the Stoker are puppeted here (the Stoker's own mind is held still). */
-export const CUT = { walk: 0.4, rumble: 2.6, rise: 3.4, run: 4.3, grab: 5.0, last: 5.3, bite: 7.9, toss: 8.5, land: 9.2, bellow: 9.8, line: 10.4, end: 12.8 };
-const BACK = { x: 55.5, y: 7.4 };
-
-function stepCut(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: number): void {
-  const t0 = w.cut, t = (w.cut += dt), at = (s: number) => t0 < s && t >= s, n = hew(room);
-  const ease = (k: number) => k * k * (3 - 2 * k), span = (a: number, b: number) => Math.max(0, Math.min(1, (t - a) / (b - a)));
-  let s = room.enemies.find((e) => e.id === w.stoker);
-  // (If he's somehow behind, he's at his door when it starts.)
-  if (n && t0 === 0 && Math.hypot(n.x - 52, n.y - 10) > 4) (n.x = 52), (n.y = 10);
-  // He goes round the side of the hut to the cordwood, at an old man's pace.
-  if (at(CUT.walk)) say(w, room, 'HEW', LINES.round, 2.2);
-  if (n && t < CUT.rise) {
-    const dx = BACK.x - n.x, dy = BACK.y - n.y, d = Math.hypot(dx, dy);
-    n.walking = d > 0.05;
-    if (d > 0.05) (n.x += (dx / d) * Math.min(d, 1.6 * dt)), (n.y += (dy / d) * Math.min(d, 1.6 * dt));
-  }
-  if (at(CUT.rumble)) ev.push({ k: 'rumble', x: STOKER.x, y: STOKER.y });
-  if (at(CUT.rise)) {
-    s = spawn(room, STOKER);
-    w.stoker = s.id;
-    Object.assign(s, { fx: -1, fy: 0.6 });
-    if (n) n.walking = false;
-    ev.push({ k: 'spotted', x: s.x, y: s.y });
-  }
-  if (s) s.hitstop = 1;
-  // It looks at him a breath, then runs him down.
-  if (s && n && t >= CUT.run && t < CUT.grab) {
-    const k = ease(span(CUT.run, CUT.grab)), tx = n.x + 0.9, ty = n.y - 0.4;
-    s.x = STOKER.x + (tx - STOKER.x) * k;
-    s.y = STOKER.y + (ty - STOKER.y) * k;
-    s.moving = true;
-    const l = Math.hypot(n.x - s.x, n.y - s.y) || 1;
-    (s.fx = (n.x - s.x) / l), (s.fy = (n.y - s.y) / l);
-  }
-  if (at(CUT.grab) && s) (s.moving = false), ev.push({ k: 'impact', x: s.x, y: s.y, kind: 'cleave' });
-  // Off his feet, held up at its mouth; he gets his last words out.
-  if (n && t >= CUT.grab && t < CUT.toss) n.lift = 22 * ease(span(CUT.grab, CUT.grab + 0.5)) + (t > CUT.grab + 0.5 && t < CUT.bite ? Math.sin(t * 30) * 0.8 : 0);
-  if (at(CUT.last)) say(w, room, 'HEW', LINES.last, 2);
-  // Its jaws come down: his words stop, and he screams, and then nothing.
-  if (at(CUT.bite - 0.55)) w.caption = { who: 'HEW', text: LINES.scream, until: room.time + 0.55 };
-  if (at(CUT.bite)) w.caption = null;
-  if (at(CUT.bite) && n) {
-    n.pose = 'headless';
-    ev.push({ k: 'bite', x: n.x, y: n.y });
-    w.hewAlive = false;
-  }
-  // Thrown up onto its own cordwood pile, like a log: kept, not wasted.
-  if (n && t >= CUT.toss && t < CUT.land) {
-    const k = span(CUT.toss, CUT.land), from = { x: (s?.x ?? 56) - 0.9, y: (s?.y ?? 7) + 0.4 }, to = { x: 59.3, y: 6.7 };
-    n.x = from.x + (to.x - from.x) * k;
-    n.y = from.y + (to.y - from.y) * k;
-    n.lift = 22 * (1 - k) + 40 * Math.sin(Math.PI * k) + 6 * k;
-  }
-  if (at(CUT.land) && n) (n.lift = 6), (n.pose = 'body'), ev.push({ k: 'thud', x: n.x, y: n.y });
-  // Then it turns on you, and bellows.
-  if (s && t >= CUT.land) {
-    const h = room.heroes.find((x) => x.id === HERO_ID), l = h ? Math.hypot(h.x - s.x, h.y - s.y) || 1 : 1;
-    if (h) (s.fx = (h.x - s.x) / l), (s.fy = (h.y - s.y) / l);
-  }
-  if (at(CUT.bellow) && s) ev.push({ k: 'bellow', x: s.x, y: s.y });
-  if (at(CUT.line)) say(w, room, 'THE STOKER', LINES.stoker, 2.2);
-  if (t >= CUT.end) {
-    if (n) Object.assign(n, { pose: 'body', lift: 6, walking: false, name: '', talk: 'hewdead' }, n.pose === 'body' ? {} : { x: 59.3, y: 6.7 });
-    w.hewAlive = false;
-    const e = room.enemies.find((x) => x.id === w.stoker) ?? spawn(room, STOKER);
-    w.stoker = e.id;
-    Object.assign(e, { alert: true, cooldown: 1.2, hitstop: 0, moving: false });
-    w.cut = -1;
-  }
 }
 
 /** Fall in the wood and Hew hauls you up; fall to the Stoker and the fight starts again. */

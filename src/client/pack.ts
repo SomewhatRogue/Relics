@@ -140,7 +140,9 @@ export class PackView {
   }
 
   /** Each frame: redraw only the parts whose contents have changed (and never mid-drag). */
-  update(h: Hero): void {
+  update(hero: Hero): void {
+    // (A friend's hero is the leader's word on it, patched in: any list not there yet reads as empty.)
+    const h: Hero = { ...hero, found: hero.found ?? [], bag: hero.bag ?? [], belt: hero.belt ?? [], rings: hero.rings ?? [], arms: hero.arms ?? {}, augments: hero.augments ?? {} };
     this.h = h;
     if (!this.open || this.el.querySelector('.dragging')) return;
     const town = this.town(), gear = JSON.stringify([h.weapon, h.arms[h.weapon], h.bag, h.bagSize, h.relics, h.found, h.augments, h.belt, h.armor, h.rings, town]);

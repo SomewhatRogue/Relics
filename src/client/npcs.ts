@@ -60,6 +60,9 @@ SPRITES.child = makeSprite(9, 11, [
   ['p', 3, 3, '#141218'], ['p', 5, 3, '#141218'], ['r', 3, 0, 4, 1, '#8a5a2a'],
 ]);
 
+/** Someone's sprite by their look (the soldier past the trees in the wood is drawn from it: vigshots.ts). */
+export const personSprite = (look: string): Sprite => SPRITES[look] ?? SPRITES.villager;
+
 /** Someone standing about, breathing; a gold mark overhead says you can talk to them, their name when you're close. */
 /** One of the column's dead: on their back or side, in what they bled. */
 function drawCorpse(c: Ctx, s: Sprite, x: number, y: number, n: Npc): void {
@@ -73,6 +76,20 @@ function drawCorpse(c: Ctx, s: Sprite, x: number, y: number, n: Npc): void {
   for (const t of [c.lit, c.glow]) t.restore();
   // Now and then an arrow still in them.
   if (k % 3 === 0) (g.fillStyle = '#6b4a2b'), g.fillRect(Math.round(x + 1), Math.round(y - 9), 1, 6), (g.fillStyle = '#d8d0bc'), g.fillRect(Math.round(x), Math.round(y - 10), 3, 1);
+}
+
+/** Red down a wall from where a body hit it (`top` pixels up) to where it is now (`low`), wider and wetter at the top. */
+function drawSmear(c: Ctx, x: number, y: number, top: number, low: number): void {
+  const g = c.lit;
+  for (let h = Math.round(low); h <= top; h++) {
+    const k = (h - low) / Math.max(1, top - low), w = 2 + Math.round(k * 3) + ((h * 7) % 3 === 0 ? 1 : 0);
+    g.fillStyle = h % 4 ? '#6a0c0c' : '#4a0808';
+    g.fillRect(Math.round(x - w / 2 + ((h * 5) % 3) - 1), Math.round(y - 8 - h), w, 1);
+  }
+  // Where it hit: a burst of it, and runs below.
+  g.fillStyle = '#7a1010';
+  g.fillRect(Math.round(x - 5), Math.round(y - 10 - top), 10, 3);
+  for (const dx of [-4, -1, 3]) g.fillRect(Math.round(x + dx), Math.round(y - 7 - top), 1, 4 + ((dx + 5) % 4));
 }
 
 /** Hew after the bite: still held up without his head, or thrown down on his side. */
@@ -102,6 +119,7 @@ export function drawNpc(c: Ctx, n: Npc, x: number, y: number, near: boolean, fx 
   const bob = n.pose ? 0 : Math.floor(c.now * (walking ? (n.sneak ? 4 : 7) : 1.5) + n.x) % 2 ? -1 : 0;
   shadow(c, x, y, 5);
   if (n.pose === 'corpse') return drawCorpse(c, s, x, y, n);
+  if (n.smear) drawSmear(c, x, y, n.smear, n.lift ?? 0);
   if (n.pose) return drawDead(c, s, x, y, n);
   blit(c, s, x, y - (n.lift ?? 0) + bob, walking ? fx < 0 : Math.floor(c.now * 0.25 + n.y) % 2 === 0, 0, n.sneak ? 0.78 : 1);
   // A guard carries a spear upright.
