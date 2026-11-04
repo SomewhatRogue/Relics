@@ -268,7 +268,11 @@ Every weapon gets a quick attack, a charged attack, a perfect-timed hit and a re
   - Quick: an elemental slash in front of you, close and slow, not all round.
   - Hold: a wall of your element in front of you. You stand still a moment while you cast.
   - Perfect: a bigger wall.
-- The tome idea is dropped. The rod's slot gets a new weapon for what the Mage kit lacks (see the proposal: an orb that tethers).
+- The tome and orb ideas are dropped. The rod's slot becomes a SPELLBLADE, the combat mage (Kyle: yes). The name needs the lore keeper's check.
+  - Quick: a plain three-hit sword chain; each hit that lands builds a little charge, and the blade glows.
+  - Hold: spend magic (stamina) to wreathe the blade in your element for the next few swings: fire burns, frost slows, storm jumps to a second goblin. The last swing throws a short wave forward.
+  - Perfect: press block just as a blow lands. You catch it on the blade for no damage, and the blade fully charges for free.
+  - Weakness: no range, it eats magic, and it puts a lightly armored Mage in melee.
 - Mage: big spells cost stamina ("magic"), like the blink. Make them impactful.
 - Flail: spin it up and release for a bit more reach, standing still. Standard hits shove goblins a little, never over a shield. Perfect hits stun.
 
