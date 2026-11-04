@@ -55,6 +55,8 @@ export function runRoom(run: Run): ArenaRoom {
   const room = new ArenaRoom(run.job.seed + run.index, { map: plan.map, foes: scaleFoes(plan.foes, n, run.job.seed * 17 + run.index * 5 + 2), furniture: plan.props, chests: plan.chests, danger });
   scaleBosses(room.enemies, n);
   room.dread = { by: dreadFor(run.job) };
+  // Out in the open, a cage can hold a false prisoner (sim/falsecage.ts); never inside a house.
+  room.falseCages = true;
   return room;
 }
 

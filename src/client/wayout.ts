@@ -8,6 +8,7 @@
 import type { Area, GameMap } from '../shared/arena';
 import { lampAt } from '../shared/lamps';
 import type { Survivor } from '../sim/types';
+import { waiting } from '../sim/survivors';
 import type { Ctx } from './draw';
 import type { Light } from './light';
 import { OX, OY, PX } from './world';
@@ -112,7 +113,7 @@ export function edgeMark(g: CanvasRenderingContext2D, sx: number, sy: number, v:
 export function behindMarks(c: Ctx, list: Survivor[], cx: number, cy: number, v: View, now: number): void {
   const g = c.glow;
   for (const s of list) {
-    if (s.dead || s.gone || s.home >= 0) continue;
+    if (s.gone || !waiting(s)) continue;
     const at = edgeMark(g, OX + s.x * PX - cx, OY + s.y * PX - cy - 8, v, Math.sin(now * 6 + s.id) * 1.5, '#c8f0c0');
     if (!at) continue;
     // A head and shoulders.

@@ -14,7 +14,8 @@ export class Gore {
 
   constructor(private fx: Fx) {}
 
-  private fling(x: number, y: number, z: number, n: number, cols: string[], speed: number, lift: number, size: number, dx = 0, dy = 0): void {
+  /** `n` pieces from (x, y) at height `z`, flying out (along dx, dy) and landing as stains. */
+  fling(x: number, y: number, z: number, n: number, cols: string[], speed: number, lift: number, size: number, dx = 0, dy = 0): void {
     for (let i = 0; i < n; i++) {
       const a = Math.random() * Math.PI * 2, s = speed * (0.3 + Math.random() * 0.9);
       this.gibs.push({ x, y, z, vx: Math.cos(a) * s + dx * speed * 0.6, vy: Math.sin(a) * s * 0.6 + dy * speed * 0.4, vz: lift * (0.5 + Math.random()), col: cols[i % cols.length], size, head: false, big: false, bounced: false });
@@ -25,6 +26,24 @@ export class Gore {
   splinters(x: number, y: number, big: boolean, dx: number, dy: number): void {
     this.fling(x, y, 6, big ? 18 : 10, ['#8b6a3a', '#7a5230', '#5a3d22', '#4a4652'], big ? 80 : 60, 90, 2, dx, dy);
     this.fling(x, y, 6, 10, ['#9a7a4a', '#6b4a2b'], 70, 120, 1, dx, dy);
+  }
+
+  /**
+   * A false prisoner tearing open from inside (../fxcages.ts): what's left of a person goes every way,
+   * a fountain of blood from the middle of it, bone, and a few green bits of what was in there.
+   */
+  torn(x: number, y: number): void {
+    const fx = this.fx, mid = 7;
+    this.fling(x, y, mid, 16, ['#c79c78', '#b88a6a', '#6a5a48', '#5a4a3a', ...BLOOD], 85, 120, 2);
+    this.fling(x, y, mid, 6, [BONE], 70, 130, 1);
+    this.fling(x, y, mid, 5, SKIN, 50, 80, 1);
+    for (let i = 0; i < 40; i++) this.gibs.push({ x: x + (Math.random() - 0.5) * 3, y, z: mid, vx: (Math.random() - 0.5) * 60, vy: (Math.random() - 0.5) * 24, vz: 40 + Math.random() * 100, col: BLOOD[i % 3], size: i % 6 ? 1 : 2, head: false, big: false, bounced: true });
+    for (let i = 0; i < 50; i++) {
+      const a = Math.random() * Math.PI * 2, r = Math.random() * 13;
+      fx.decal(x + Math.cos(a) * r, y + Math.sin(a) * r * 0.5, BLOOD[i % 3]);
+    }
+    fx.burst(x, y - mid, 26, BLOOD, 100, false, 200, true);
+    fx.shake = Math.max(fx.shake, 6);
   }
 
   /** A goblin died (x, y in screen pixels). */

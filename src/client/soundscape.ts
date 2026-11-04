@@ -133,6 +133,9 @@ export class Soundscape {
     }
     if (ev.k === 'impact') return ev.kind === 'slam' ? sfx.boom() : ev.kind === 'hex' ? goblin.hexBurst() : undefined;
     if (ev.k === 'chop' || ev.k === 'blaze' || ev.k === 'collapse') return woodSounds[ev.k]();
+    // A blow a prop held: a cage's bars ring, wood thuds. A false prisoner tearing open (its goblins cackle: 'spotted').
+    if (ev.k === 'prophit') return ev.kind === 'cage' ? (blockSound('sword'), woodSounds.chop()) : woodSounds.chop();
+    if (ev.k === 'torn') return sfx.death('burst'), spiderSounds.splat();
     if (ev.k === 'rafter') return woodSounds.collapse();
     if (ev.k === 'housefall') return woodSounds.collapse(), sfx.boom();
     if (ev.k === 'denspawn') return goblin.screech();

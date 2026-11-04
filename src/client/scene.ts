@@ -36,6 +36,7 @@ import { drawHung, drawPot } from './grimdraw';
 import { drawNpc } from './npcs';
 import { vignetteFigs } from './vignettes';
 import { drawCaged, drawSurvivor } from './captives';
+import { propShake } from './propshake';
 import { behindMarks, drawWays, edgeMark } from './wayout';
 import { drawBoards } from './voteboards';
 import { drawQuestMarks, onScreen } from './questmarks';
@@ -255,7 +256,8 @@ export class Scene {
       // Someone caged: a mark over them, and their call when you're close.
       if (p.kind === 'cage' && !p.broken) {
         const near = !!me && Math.hypot(me.x - p.x, me.y - p.y) < 7;
-        items.push({ y: OY + p.y * PX + 0.2, draw: () => drawCaged(c, x, y, room.time, near, p.id) });
+        const jx = Math.round(propShake(p, room.time)[0] * PX);
+        items.push({ y: OY + p.y * PX + 0.2, draw: () => drawCaged(c, x + jx, y, room.time, near, p.id) });
       }
     }
     // The freed, where the room has them (the dead lie under everyone; the gone are gone).

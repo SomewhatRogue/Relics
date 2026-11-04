@@ -3129,3 +3129,42 @@ giant hidden shadow monster thing that crushes you."
 - Tests: `tests/dread.test.ts` (the stages at their times, stepping back in, the body put back, town's
   set back, a party's down, a solo heart, wild against settled, the snapshot, a blink and a shadowstep
   at a fence, the bed by the wall). Screenshots: `node scripts/dread-look.cjs`.
+## 2026-11-04: Cage hits you can see, and false prisoners (Claude Opus 5.5)
+
+Kyle: "In 2.5D it's not clear when you're hitting the cage (no shake)" and "Sometimes when you rescue a
+prisoner, their body gets ripped apart and it's 2 goblins who then attack you (1 in 20 chance)."
+- **Hits.** The flat view only flashed a prop for a frame and the 2.5D model did nothing; no event said a
+  blow had landed. Now `damageProp` pushes `prophit` when a cage, barrel, oil barrel, crate, table or
+  larder rack takes a blow and holds (never planks and staves on the floor). Both views shudder the prop
+  on its spot for `PROP.shake` (0.22 s, `client/propshake.ts`, one function for both) and flash it (the
+  2.5D model goes a lit pale, not the figures' unlit white, which turned the cage into a white block).
+  The shared effects (`client/fxcages.ts`) throw sparks off a cage's bars, splinters and dust, a spatter
+  off a larder rack, a small screen jolt; sound is an iron clang plus a thud for a cage, a thud for wood.
+  `chop` (a blow on a den or wooden wall) had only its sound in both views: it now throws splinters too.
+  Damage state: the flat view shows none for props, so neither does 2.5D; buildings already show theirs
+  in both.
+- **The roll.** As a cage breaks, `rollFalse` on the room's own `cageRng` (seeded `seed * 2971 + 41`, so it
+  never shifts a goblin's, loot's or fire's roll): `FALSE_CAGE.chance` 1 in 20. The stream is handed to
+  the World only when `room.falseCages && !room.indoors`; `runRoom` sets `falseCages`, `interiorRoom`
+  never does, the yard and town never do. So the cages that can be false: the rescue's and the story
+  mission's cages in a job's last room, and the low road's cage in each room. Never a captive in a house
+  (the cry at its woodpile, SOMEONE'S IN THERE, is always real), never off a job.
+- **The reveal** (`sim/falsecage.ts`): a Survivor with `tearAt` (break + `FALSE_CAGE.lurch`, 0.9 s). It
+  stands silent where the cage was and lurches harder and faster (`client/falsedraw.ts`, used by the flat
+  view and the 2.5D card; the box figures jerk and swell), splits down the middle and two red eyes show.
+  At `tearAt` the room marks it gone, pushes `torn` (gore.ts `torn`: a body coming apart from inside) and
+  spawns `FALSE_CAGE.goblins` (2) scrappers, alert, either side, held in a `flinch` of `FALSE_CAGE.beat`
+  (0.6 s) so it reads, each with a `spotted` (the "!" and a goblin cackle). Then they come for you.
+- **No words.** A false one says none of the captives' lines and never "help me" (the mimic's line, story
+  bible); no new player-facing line was written.
+- **The goal.** `waiting(s)` (freed, not home, not false) is what the goal, the marks, the way-finding,
+  the edge marks and `walkOut` count; a false one is never hurt by the party (`living`), never tallied as
+  rescued or killed. A rescue with a false prisoner finishes on the real ones.
+- **Online.** Decided in the leader's room; `tearAt` rides in the survivor list friends already get, and
+  `torn` and `spotted` with the room's events.
+- Fixed on the way: the 2.5D figures' atlas cleared every card drawn earlier in a frame when it grew (a
+  canvas resize wipes it), so a hero could blink out the frame new goblins appeared. It now keeps them.
+- Tests: `tests/falsecage.test.ts` (the rate over 5000 seeded rolls, the reveal and the beat, the rescue
+  finishing, house captives never false, determinism and the online patch), `tests/props.test.ts`
+  (`prophit`). Pictures: `scripts/cages.cjs` (Playwright's clock, stepped a frame at a time).
+

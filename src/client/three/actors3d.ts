@@ -19,6 +19,7 @@ import { poseFoe } from './foepose3d';
 import { makeFolk, makeHound, poseFolk, poseHound } from './folk3d';
 import { Pool, type Held } from './pool3d';
 import { makeTele, shapeTele } from './teleg3d';
+import { shakeProp } from './prophit3d';
 import { makeChest, makeCoal, makeDrop, makePickup, makeProp, poseChest, type ChestFig } from './props3d';
 import { boltLook, makeBolt, makeExit, makeJavelin, makeRing, makeSmoke, placeBolt, placeJavelin } from './shots3d';
 import { TIERS } from '../../shared/gear';
@@ -81,6 +82,7 @@ export class Actors {
       const [x, y] = carrier ? lerp('h:' + carrier.id, carrier.x, carrier.y) : [p.x, p.y];
       o.position.set(x, carrier ? 1.3 : (p.air ?? 0) > 0 ? 0.3 : lift(p.z), y);
       o.rotation.set(0, p.spin, (p.air ?? 0) > 0 ? p.spin * 2 : 0);
+      if (!carrier) shakeProp(o, p, t);
     }
     for (const c of room.chests) {
       const f = this.chests.get('c' + c.id, '', makeChest);

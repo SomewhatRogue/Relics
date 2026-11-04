@@ -10,6 +10,7 @@ import { blit, shadow, type Ctx } from './draw';
 import { drawText, textWidth } from './pixfont';
 import type { Survivor } from '../sim/types';
 import { SURVIVOR } from '../shared/tuning';
+import { drawFalse } from './falsedraw';
 
 /** What the caged call out (lore keeper and line editor), and what the freed say. */
 export const BEG = ['Please! Over here!', "Don't leave us in here!", "They'll be back. Please!"];
@@ -30,6 +31,8 @@ export function drawCaged(c: Ctx, x: number, y: number, now: number, near: boole
 /** One of the freed at (sx, sy) on screen; `now` is the room's time. */
 export function drawSurvivor(c: Ctx, s: Survivor, sx: number, sy: number, now: number): void {
   const spr = SPRITES.survivor;
+  // Not who they seem: it lurches, then tears open (falsedraw.ts).
+  if (s.tearAt !== undefined) return s.gone ? undefined : drawFalse(c, s, sx, sy, now);
   if (s.dead) return drawFallen(c, s, sx, sy, now);
   const t = now - s.at, home = s.home >= 0 ? now - s.home : -1;
   // Walking home, fading out toward the way in.

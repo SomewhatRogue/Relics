@@ -416,6 +416,8 @@ export interface Survivor extends Body {
   home: number;
   out: boolean;
   gone: boolean;
+  /** A false prisoner (sim/falsecage.ts): the room time it tears open. Never counted as freed. */
+  tearAt?: number;
 }
 
 /** A barrel, crate, table or broken piece: a body that can be smashed, pushed, lifted and thrown. */
@@ -549,6 +551,10 @@ export type FightEvent =
   /** A survivor brought home: out of their house, or back to where the party came in. */
   | { k: 'survivorhome'; x: number; y: number; id: number }
   | { k: 'propbreak'; x: number; y: number; kind: PropKind; dx: number; dy: number }
+  /** A blow a prop took and held (it shakes and flashes; drawn the same in both views). */
+  | { k: 'prophit'; x: number; y: number; kind: PropKind; dx: number; dy: number }
+  /** A false prisoner tearing open, goblins coming out of it (sim/falsecage.ts). */
+  | { k: 'torn'; x: number; y: number }
   /** A hero grew a level: full health, and a flash in the class's colour (sim/grow.ts). */
   | { k: 'levelup'; x: number; y: number; id: string; cls: HeroClass };
 

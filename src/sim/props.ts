@@ -10,6 +10,7 @@ import { inArc } from './combat';
 import { damage, isDead } from './damage';
 import { afflict, type World } from './elements';
 import { freeSurvivor } from './survivors';
+import { rollFalse } from './falsecage';
 import { blastSurvivors } from './survivorhits';
 import type { Enemy, FightEvent, Hero, Intent, Prop } from './types';
 
@@ -32,14 +33,17 @@ export function damageProp(p: Prop, n: number, w: PropWorld, dx = 0, dy = 0): vo
   if (p.broken) return;
   p.hp -= n;
   p.hitAt = w.now;
-  if (p.hp <= 0) breakProp(p, w, dx, dy);
+  if (p.hp <= 0) return breakProp(p, w, dx, dy);
+  // It held: it shakes and flashes, wood flies, a cage's bars ring (both views draw this the same).
+  if (n > 0 && (PROPS[p.kind].pieces !== null || p.kind === 'larder')) w.ev.push({ k: 'prophit', x: p.x, y: p.y, kind: p.kind, dx, dy });
 }
 
 function breakProp(p: Prop, w: PropWorld, dx: number, dy: number): void {
   const spec = PROPS[p.kind];
   Object.assign(p, { broken: true, lifted: false, kvx: 0, kvy: 0, respawnAt: p.home ? w.now + PROP.respawn : -1 });
   w.ev.push({ k: 'propbreak', x: p.x, y: p.y, kind: p.kind, dx, dy });
-  if (p.kind === 'cage') w.ev.push({ k: 'freed', x: p.x, y: p.y }), w.survivors && freeSurvivor(w.survivors, p.x, p.y, w.now);
+  // Whoever was inside stands up; out in the open on a job, 1 in 20 isn't who they seem (sim/falsecage.ts).
+  if (p.kind === 'cage') w.ev.push({ k: 'freed', x: p.x, y: p.y }), w.survivors && freeSurvivor(w.survivors, p.x, p.y, w.now, rollFalse(w.cages));
   if (spec.pieces) for (let i = 0; i < spec.pieces.n; i++) {
     const a = (i / spec.pieces.n) * Math.PI * 2 + 0.6, q = newProp(spec.pieces.kind, p.x + Math.cos(a) * 0.3, p.y + Math.sin(a) * 0.3, false);
     Object.assign(q, { kvx: Math.cos(a) * 5 + dx * 4, kvy: Math.sin(a) * 5 + dy * 4, fadeAt: w.now + PROP.pieceLife, lastBy: p.lastBy });

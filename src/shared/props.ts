@@ -47,7 +47,17 @@ export const PROP = {
   pieceLife: 25,
   /** The oil barrel bursts into flame. */
   oilRadius: 1.8,
+  /** Drawing only: a prop that takes a blow and holds shakes this long (both views). */
+  shake: 0.22,
 };
+
+/**
+ * A false prisoner (sim/falsecage.ts): `chance` of a cage out in the open, rolled on the room's own
+ * stream as it breaks. What stands up `lurch`es that long, then tears open and `goblins` come out of it,
+ * held `beat` seconds (so it reads) before they go for you. Never a captive in a house: the cry at a
+ * house's woodpile is always someone real (the story bible).
+ */
+export const FALSE_CAGE = { chance: 1 / 20, lurch: 0.9, beat: 0.6, goblins: 2, spread: 0.45 };
 
 /**
  * Whoever was in a cage, once it breaks (sim/survivors.ts). Not fighters: a couple of blows kill them.

@@ -14,6 +14,7 @@ import { isSpiderKind } from '../shared/spiders';
 import type { ArenaRoom } from './room';
 import type { Run } from './run';
 import { bossOf, densLeft, racksLeft } from './targets';
+import { waiting } from './survivors';
 
 export interface Captives { caged: number; waiting: number }
 
@@ -36,7 +37,7 @@ export function captivesLeft(c: Captives): string {
 export function inRoom(room: ArenaRoom): Captives {
   return {
     caged: room.props.filter((p) => p.kind === 'cage' && !p.broken).length,
-    waiting: room.survivors.filter((s) => !s.dead && s.home < 0).length,
+    waiting: room.survivors.filter(waiting).length,
   };
 }
 

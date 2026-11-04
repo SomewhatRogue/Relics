@@ -167,10 +167,19 @@ export class Figs {
 
   /** More rows in the atlas: new canvases' worth of texture, every card's corners moved to match. */
   private grow(rows: number): void {
+    // Resizing a canvas wipes it: keep the cells already drawn this frame (a hero drawn before a new
+    // goblin needed the room went blank for a frame whenever the atlas grew).
+    const keep = [this.litC, this.glowC].map((cv) => {
+      const k = document.createElement('canvas');
+      (k.width = cv.width), (k.height = cv.height), k.getContext('2d')!.drawImage(cv, 0, 0);
+      return k;
+    });
     this.rows = rows;
     this.litC.width = this.glowC.width = COLS * CELL.w;
     this.litC.height = this.glowC.height = rows * CELL.h;
     for (const g of [this.lit, this.glow]) g.imageSmoothingEnabled = false;
+    this.lit.drawImage(keep[0], 0, 0);
+    this.glow.drawImage(keep[1], 0, 0);
     this.litTex.dispose();
     this.glowTex.dispose();
     this.litTex = this.texture(this.litC);

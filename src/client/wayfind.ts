@@ -8,6 +8,7 @@
 import type { Area } from '../shared/arena';
 import { wayDir } from '../sim/goal';
 import type { ArenaRoom } from '../sim/room';
+import { waiting } from '../sim/survivors';
 import type { Game } from './game';
 import { waysOut } from './wayout';
 
@@ -33,7 +34,7 @@ export function wayTarget(game: Game): P | null {
 
 function target(room: ArenaRoom, me: P, houses: { x: number; y: number; waiting: number }[]): P | null {
   const cages = room.props.filter((p) => p.kind === 'cage' && !p.broken);
-  const freed = room.survivors.some((s) => !s.dead && s.home < 0);
+  const freed = room.survivors.some(waiting);
   if (room.indoors) return nearest(me, cages) ?? (freed && room.map.exit ? mid(room.map.exit) : null);
   if (room.exitOpen) return nearest(me, waysOut(room.map).map(mid));
   return nearest(me, cages) ?? (freed ? room.map.hero : nearest(me, houses.filter((h) => h.waiting)));

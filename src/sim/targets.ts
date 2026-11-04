@@ -16,6 +16,7 @@ import { isDead } from './damage';
 import type { ArenaRoom } from './room';
 import type { Run } from './run';
 import type { Enemy } from './types';
+import { waiting } from './survivors';
 
 export type TargetKind = 'cage' | 'door' | 'out' | 'nest' | 'larder' | 'den' | 'boss';
 /** `id`: a goblin or nest's id (it moves, so it's drawn where it's drawn). */
@@ -37,7 +38,7 @@ export function targets(run: Run | null, room: ArenaRoom, houses: HouseAt[] = []
   if (!run) return [];
   const out: Target[] = [];
   for (const p of room.props) if (p.kind === 'cage' && !p.broken) out.push({ kind: 'cage', x: p.x, y: p.y });
-  const freed = room.survivors.some((s) => !s.dead && s.home < 0);
+  const freed = room.survivors.some(waiting);
   if (room.indoors) {
     // In a house: the cages, then out of the door with whoever's freed.
     const ex = room.map.exit;
