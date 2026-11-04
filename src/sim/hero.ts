@@ -3,7 +3,7 @@
  * A tap of attack swings on release; holding past CHARGE.start charges a heavy instead.
  */
 import { collide, wadeAt } from '../shared/arena';
-import { DODGE, CLASS_DODGES, CLASS_GUARD, DECOY, AUGMENTS, CHARGE, GRAB, HORN, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon, drilled, STEALTH } from '../shared/tuning';
+import { DODGE, CLASS_DODGES, CLASS_GUARD, DECOY, AUGMENTS, CHARGE, GRAB, HORN, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon, drilled, STEALTH, dodgeOf } from '../shared/tuning';
 import { slide } from './bodies';
 import { BAG } from '../shared/bags';
 import { applyGear, turnBelt } from './pack';
@@ -11,6 +11,7 @@ import { knack, statsOf } from './gearstats';
 import { decoyTime, dodgeBreath, dodgeReach, releaseWindow } from './knacks';
 import { fedMult, jealousBlocks, jealousCooldown, needlesBreath, wears } from './hungry';
 import { hitEnemy } from './combat';
+import { quake } from './warrior';
 import { brandySpeed, breathCap } from './brandy';
 import { quickMult, relicDark, spendCharge } from './charge';
 import { knows, type Enemy, type FightEvent, type Hero, type Intent } from './types';
@@ -172,7 +173,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   h.actT += dt;
   h.moving = false;
   h.blocking = false;
-  if (h.act !== 'roll' && h.act !== 'down' && h.act !== 'zip' && h.act !== 'bash' && slide(h, HERO.radius, dt)) ev.push({ k: 'wallhit', x: h.x, y: h.y });
+  if (h.act !== 'roll' && h.act !== 'step' && h.act !== 'down' && h.act !== 'zip' && h.act !== 'bash' && slide(h, HERO.radius, dt)) ev.push({ k: 'wallhit', x: h.x, y: h.y });
 
   if (h.act === 'down') {
     if (h.actT >= h.actDur) Object.assign(h, { act: 'idle', hp: h.maxHp, stamina: HERO.stamina, actT: 0 });
@@ -183,10 +184,11 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     return;
   }
   const w = WEAPONS[h.weapon];
-  const dodge = w.dodge;
-  const wantsRoll = CLASS_DODGES[w.cls] && now - h.rollQueuedAt < INPUT_BUFFER && now - h.lastRollAt >= dodge.cooldown * (1 - statsOf(h).dodge) && h.stamina >= 1 && !h.winded;
-  if (h.act === 'roll') {
-    const k = dodgeReach(h) / dodge.time;
+  // A Warrior's dodge button is a short step (shared/warrior.ts); a Healer's does nothing.
+  const dodge = dodgeOf(w) ?? w.dodge;
+  const wantsRoll = !!dodgeOf(w) && now - h.rollQueuedAt < INPUT_BUFFER && now - h.lastRollAt >= dodge.cooldown * (1 - statsOf(h).dodge) && h.stamina >= 1 && !h.winded;
+  if (h.act === 'roll' || h.act === 'step') {
+    const k = (h.act === 'step' ? dodge.distance : dodgeReach(h)) / dodge.time;
     h.x += h.rollDx * k * dt;
     h.y += h.rollDy * k * dt;
     collide(h, HERO.radius);
@@ -224,7 +226,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
       const held = h.actT + CHARGE.start, full = chargeFull(w, h), drawn = !!w.heavy.shot;
       h.power = Math.min(1, held / full);
       // (A rapier's lunge has its flash too: on it, the thrust skewers.)
-      h.perfect = (drawn || !!w.heavy.skewer) && held >= full && held <= full + releaseWindow(h);
+      h.perfect = (drawn || !!w.heavy.skewer || !!w.heavy.quake) && held >= full && held <= full + releaseWindow(h);
       if (drawn && held > full + RELEASE.overdraw) h.power = RELEASE.overdrawn;
       if (h.perfect) ev.push({ k: 'perfect', x: h.x, y: h.y });
       startSwing(h, -1, inp, enemies, now, ev);
@@ -241,6 +243,8 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
       collide(h, HERO.radius);
     } else if (h.actT < s.windup + s.active) {
       if (h.actT - dt < s.windup) acts.loose(h, s);
+      // The greatsword's overhead loosed on the white flash: a shockwave (sim/warrior.ts).
+      if (h.actT - dt < s.windup && h.heavy && h.perfect && s.quake) quake(h, enemies, now, ev);
       if (!s.shot) {
         // A Rogue's knives find one goblin a blow (the nearest in reach), a rapier's lunge two; everything else cuts through all.
         const most = s.hits ?? (w.single ? 1 : 0), near = most ? [...enemies].sort((a, b) => Math.hypot(a.x - h.x, a.y - h.y) - Math.hypot(b.x - h.x, b.y - h.y)) : enemies;
@@ -283,9 +287,9 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     if (now - h.attackQueuedAt >= CHARGE.start) return startCharge(h);
   }
   // Only a Warrior's or Healer's kit holds a block.
-  h.blocking = inp.block && h.stamina > 0 && !h.winded && CLASS_GUARD[w.cls] === 'full';
+  h.blocking = inp.block && h.stamina > 0 && !h.winded && CLASS_GUARD[w.cls] === 'full' && !w.parryOnly;
   // Holding block as a Ranger or Rogue does nothing: say so, once a press.
-  if (inp.block && CLASS_GUARD[w.cls] === 'parry' && now - h.lastBlockPress > 0.35 && h.toldAt < h.lastBlockPress) (h.toldAt = now), ev.push({ k: 'noblock', x: h.x, y: h.y });
+  if (inp.block && (CLASS_GUARD[w.cls] === 'parry' || w.parryOnly) && now - h.lastBlockPress > 0.35 && h.toldAt < h.lastBlockPress) (h.toldAt = now), ev.push({ k: 'noblock', x: h.x, y: h.y });
   // Guarding with no aim (a phone) turns to the nearest threat, so a parry faces the right way.
   face(h, inp, enemies, h.blocking || now - h.lastBlockPress < 0.3);
   walk(h, inp, h.blocking ? w.blockSpeed : 1, dt, now);
@@ -319,8 +323,16 @@ function startSwing(h: Hero, i: number, inp: Intent, enemies: Enemy[], now: numb
 }
 
 function startRoll(h: Hero, inp: Intent, now: number, ev: FightEvent[]): void {
-  const kind = WEAPONS[h.weapon].dodge.kind;
+  const dodge = dodgeOf(WEAPONS[h.weapon]) ?? WEAPONS[h.weapon].dodge, kind = dodge.kind;
   let x = inp.mx, y = inp.my;
+  // A Warrior's step: where you push (back from where you face, with no push), still facing; no protection.
+  if (kind === 'step') {
+    if (Math.hypot(x, y) < 0.1) (x = -h.fx), (y = -h.fy);
+    const l = Math.hypot(x, y);
+    Object.assign(h, { rollDx: x / l, rollDy: y / l, act: 'step', actT: 0, kvx: 0, kvy: 0, lastRollAt: now, rollX: h.x, rollY: h.y, rollQueuedAt: -9 });
+    spend(h, dodge.stamina, now);
+    return void ev.push({ k: 'step', x: h.x, y: h.y });
+  }
   // A backstep always hops away from where you face, and you keep facing the threat.
   if (kind === 'backstep') (x = -h.fx), (y = -h.fy);
   if (Math.hypot(x, y) < 0.1) (x = h.fx), (y = h.fy);

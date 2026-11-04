@@ -14,9 +14,9 @@ beforeEach(() => void (CLASS_DODGES.WARRIOR = true));
 afterEach(() => void (CLASS_DODGES.WARRIOR = false));
 
 describe('no dodge', () => {
-  it('a Warrior or a Healer presses dodge and nothing happens', () => {
+  it('a Healer presses dodge and nothing happens (a Warrior steps: warrior.test.ts)', () => {
     CLASS_DODGES.WARRIOR = false;
-    for (const weapon of ['sword', 'mace'] as const) {
+    for (const weapon of ['mace'] as const) {
       const room = new ArenaRoom(1);
       const h = room.join('me');
       h.weapon = weapon;
@@ -148,15 +148,16 @@ describe('guarding against the butcher', () => {
     expect(h.hp).toBeLessThan(HERO.hp);
   });
 
-  it('a counter after a parry hits for the counter multiplier', () => {
-    const { room, b } = setup();
+  it('a counter after a parry hits for the counter multiplier (a greatsword: no riposte)', () => {
+    const { room, h, b } = setup();
+    h.weapon = 'greatsword';
     until(room, 0.1);
     room.setIntent('me', intent({ blockSeq: 1 }));
     run(room, ticks(0.2));
     const before = b.hp;
     room.setIntent('me', intent({ blockSeq: 1, attackSeq: 1, ay: -1 }));
-    run(room, ticks(0.6));
-    expect(before - b.hp).toBe(Math.round(SWORD.combo[0].dmg * GUARD.counterMult));
+    run(room, ticks(0.8));
+    expect(before - b.hp).toBe(Math.round(WEAPONS.greatsword.combo[0].dmg * GUARD.counterMult));
   });
 
   it('running out of stamina while blocking is a guard break', () => {
@@ -240,18 +241,21 @@ describe('weapons and heavies', () => {
     expect(hits).toBeGreaterThanOrEqual(3);
   });
 
-  it('holding attack charges a heavy that hits harder than a tap', () => {
+  it('holding attack charges a heavy that hits harder than a tap (the greatsword, held past its flash)', () => {
+    const GS = WEAPONS.greatsword;
     const tap = onTarget(1);
+    tap.h.weapon = 'greatsword';
     tap.room.setIntent('me', intent({ attackSeq: 1, ay: -1 }));
-    run(tap.room, ticks(0.6));
+    run(tap.room, ticks(0.8));
     const tapDmg = tap.t.maxHp - tap.t.hp;
     const hold = onTarget(1);
+    hold.h.weapon = 'greatsword';
     hold.room.setIntent('me', intent({ attackSeq: 1, attack: true, ay: -1 }));
-    run(hold.room, ticks(CHARGE.full + 0.1));
+    run(hold.room, ticks(CHARGE.full + 0.4));
     expect(hold.h.act).toBe('charge');
     hold.room.setIntent('me', intent({ attackSeq: 1, attack: false, ay: -1 }));
     run(hold.room, ticks(0.6));
-    expect(hold.t.maxHp - hold.t.hp).toBe(SWORD.heavy.dmgFull);
+    expect(hold.t.maxHp - hold.t.hp).toBe(GS.heavy.dmgFull);
     expect(hold.t.maxHp - hold.t.hp).toBeGreaterThan(tapDmg * 2);
   });
 

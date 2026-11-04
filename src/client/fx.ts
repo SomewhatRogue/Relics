@@ -12,6 +12,7 @@ import { CRY } from './captives';
 import { spiderFx } from './fxspiders';
 import { weakFx } from './fxweak';
 import { venomFx } from './fxvenom';
+import { warriorFx } from './fxwarrior';
 import { levelFx } from './fxlevel';
 import { skillFx } from './fxskills';
 import { relicFx } from './fxrelics';
@@ -76,13 +77,13 @@ export class Fx {
     this.decals.push({ x: Math.round(x), y: Math.round(y), col });
   }
 
-  private debris(x: number, y: number, n: number): void {
+  debris(x: number, y: number, n: number): void {
     this.burst(x, y, n, ['#6a647a', '#4f4a5c', '#8a8494'], 70, false, 220, true);
   }
 
   on(ev: FightEvent): void {
     const [x, y] = toPx(ev.x, ev.y);
-    if (spiderFx(this, ev, x, y) || weakFx(this, ev, x, y) || venomFx(this, ev, x, y) || levelFx(this, ev, x, y) || skillFx(this, ev, x, y) || relicFx(this, ev, x, y)) return;
+    if (spiderFx(this, ev, x, y) || weakFx(this, ev, x, y) || venomFx(this, ev, x, y) || warriorFx(this, ev, x, y) || levelFx(this, ev, x, y) || skillFx(this, ev, x, y) || relicFx(this, ev, x, y)) return;
     switch (ev.k) {
       case 'impact':
         if (ev.kind === 'slam') {

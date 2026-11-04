@@ -62,6 +62,12 @@ export class Soundscape {
     if (ev.k === 'shoot' && ev.kind === 'dart') return spiderSounds.hiss();
     if (ev.k === 'skewer') return spiderSounds.wetbite();
     if (ev.k === 'puke') return spiderSounds.spit(), spiderSounds.splat();
+    // The Warrior's: a step's footfall, the shield's thump, a riposte's ring, the shockwave, the pin.
+    if (ev.k === 'step') return sfx.land();
+    if (ev.k === 'shieldbash') return sfx.block(), sfx.bodyhit();
+    if (ev.k === 'riposte') return sfx.parry(), sfx.backstab();
+    if (ev.k === 'quake') return sfx.slam(), sfx.rumble();
+    if (ev.k === 'pin') return sfx.javstick();
     if (ev.k === 'shoot') return shotSound(ev.kind, this.heroAt(room, ev.x, ev.y)?.weapon);
     if (ev.k === 'charged') return chargedSound(this.heroAt(room, ev.x, ev.y)?.weapon ?? '');
     if (ev.k === 'block') return blockSound(this.heroAt(room, ev.x, ev.y)?.weapon ?? '');

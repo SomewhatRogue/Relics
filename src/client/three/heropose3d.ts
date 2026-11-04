@@ -66,6 +66,10 @@ export function poseHero(f: HeroFig, h: Hero, now: number, walked: number): void
       else (f.mid.rotation.x = k * Math.PI * 2), (f.mid.position.y -= Math.sin(k * Math.PI) * 0.2), (f.legs[0].rotation.x = f.legs[1].rotation.x = -1.2);
       break;
     }
+    case 'step':
+      // A Warrior's shoulder step: a low lean, the lead foot out.
+      (f.mid.rotation.x = 0.25), (f.legs[0].rotation.x = 0.5), (f.legs[1].rotation.x = -0.4);
+      break;
     case 'hurt':
       (f.mid.rotation.x = -0.3), (f.aR.rotation.x = 0.3), (f.aL.rotation.x = 0.3);
       break;

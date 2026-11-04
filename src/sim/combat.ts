@@ -1,6 +1,6 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, parry, roll). */
 import { litMult } from './charge';
-import { BLESSING, DODGE, WARD, FLINCH, HORN, OVERKILL, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing, CLASS_DODGES, CRIT, STEALTH, technique, weakOn } from '../shared/tuning';
+import { BLESSING, DODGE, WARD, FLINCH, HORN, OVERKILL, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing, CLASS_DODGES, RIPOSTE, CRIT, STEALTH, technique, weakOn } from '../shared/tuning';
 import { shove } from './bodies';
 import { knack, statsOf } from './gearstats';
 import { counterWindow, parryWindow, rearCos, slipWindow } from './knacks';
@@ -10,6 +10,7 @@ import { poison } from './poison';
 import { shatter } from './elements';
 import { has } from './traits';
 import { brandyDmg } from './brandy';
+import { lunging, riposteNow, shaftMult, warriorHit } from './warrior';
 import type { Enemy, EnemyAttack, FightEvent, Hero } from './types';
 
 export { respawnOf, stunOf } from './damage';
@@ -30,6 +31,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   if ((h.z ?? 0) !== (e.z ?? 0) || !inArc(h.x, h.y, h.fx, h.fy, e.x, e.y, s.range, s.arc, e.radius)) return 0;
   h.hitIds.push(e.id);
   e.lastBy = h.id;
+  const wasLunging = lunging(e);
   const heavy = h.counter || h.heavy || s.knock >= 7;
   // From behind: the hero stands where the enemy's facing points away (dummies have no back).
   const tx = h.x - e.x, ty = h.y - e.y, tl = Math.hypot(tx, ty) || 1;
@@ -48,7 +50,10 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   const boarded = e.variant === 'shield' && !rear && !heavy && !heldFast && !ambush && !WEAPONS[h.weapon].overShield;
   const weak = weakOn(e);
   sayWeak(e, weak, now, ev, 'physical');
-  const mult = weak * (h.counter ? counter : heldFast ? held : 1) * rearMult * blessed * tempo * (crit ? CRIT : 1) * (ambush ? STEALTH.ambush * (1 + knack(h, 'ambush')) : 1) * (boarded ? VARIANTS.shield.front : 1) * brandyDmg(h, now) * litMult(h);
+  // The sword's riposte (a counter straight off the parry) doubles the counter; the spear's shaft halves a blow up close.
+  const riposte = riposteNow(h, now);
+  if (riposte && h.hitIds.filter((id) => id > 0).length === 1) ev.push({ k: 'perfect', x: h.x, y: h.y }, { k: 'riposte', x: e.x, y: e.y });
+  const mult = weak * (h.counter ? counter * (riposte ? RIPOSTE.mult : 1) : heldFast ? held : 1) * shaftMult(h, s, e) * rearMult * blessed * tempo * (crit ? CRIT : 1) * (ambush ? STEALTH.ambush * (1 + knack(h, 'ambush')) : 1) * (boarded ? VARIANTS.shield.front : 1) * brandyDmg(h, now) * litMult(h);
   // Mother Rust's Needles: a backstab kills anything short of a butcher.
   const n = rear && e.kind === 'scrapper' && wears(h, 'needles') ? Math.max(e.hp, Math.round(s.dmg * mult)) : Math.round(s.dmg * mult);
   e.hp -= n;
@@ -77,6 +82,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   }
   // A heavy blow breaks the frozen.
   if (ice && heavy) return shatter(e, now, ev), n;
+  if (warriorHit(h, s, e, wasLunging, now, ev)) return n;
   // Light goblins flinch out of their wind-up on any hit. A heavy wind-up (a butcher's, a heavy's, a cleave
   // or slam, a striped blow; never a hexer's spell, which any blow breaks) only to a strong charged blow
   // from a big weapon (the greatsword, the flail).
@@ -147,7 +153,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     // so the blow lands where you were a breath ago, it staggers the attacker just as rolling through does.
     if (h.lastRollAt >= now - a.windup && attackCovers(a, { ...h, x: h.rollX, y: h.rollY })) {
       ev.push({ k: 'dodge', x: h.x, y: h.y });
-      if (now - h.lastRollAt <= slipWindow(h)) slipped(e, a, h, ev);
+      if (CLASS_DODGES[WEAPONS[h.weapon].cls] && now - h.lastRollAt <= slipWindow(h)) slipped(e, a, h, ev);
     }
     // No dodge (a Warrior, a Healer): walked out of a striped blow meant for you. That's the dodge.
     else if (!CLASS_DODGES[WEAPONS[h.weapon].cls] && a.unblockable && a.aimed === h.id) ev.push({ k: 'dodge', x: h.x, y: h.y });
@@ -181,6 +187,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   const canGuard = !a.unblockable && facing && (h.act === 'idle' || h.act === 'attack' || h.act === 'charge');
   if (canGuard && now - h.parryOpenAt <= parryWindow(h)) {
     h.counterUntil = now + counterWindow(h);
+    h.parriedAt = now;
     h.parryOpenAt = -9;
     if (has(h, 'bulwark')) h.stamina = HERO.stamina;
     h.hitstop = Math.max(h.hitstop, HITSTOP.parry);

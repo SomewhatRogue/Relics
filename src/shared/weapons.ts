@@ -38,6 +38,10 @@ export interface Swing {
   venom?: boolean;
   /** A rapier's lunge: released on the white flash it skewers what it hits (a bleed and a stagger). */
   skewer?: boolean;
+  /** A shield bash: stuns the goblin it strikes (shared/warrior.ts SHIELD_BASH). */
+  shieldBash?: boolean;
+  /** An overhead: released on the white flash it sends out a shockwave (shared/warrior.ts QUAKE). */
+  quake?: boolean;
 }
 
 export interface Heavy extends Swing {
@@ -51,7 +55,7 @@ export interface Heavy extends Swing {
  * face and keeps you facing; 'dash' is a fast, long, low run. Untouchable between iFrom and iTo.
  */
 export interface Dodge {
-  kind: 'roll' | 'backstep' | 'dash' | 'blink';
+  kind: 'roll' | 'backstep' | 'dash' | 'blink' | 'step';
   distance: number;
   time: number;
   iFrom: number;
@@ -121,6 +125,14 @@ export interface Weapon {
   /** Its blows come over a shield-bearer's board (a flail). */
   overShield?: boolean;
   dodge: Dodge;
+  /** No held block: block is only ever a parry (the greatsword). */
+  parryOnly?: boolean;
+  /** A counter soon after the parry is a riposte (the sword; shared/warrior.ts RIPOSTE). */
+  ripostes?: boolean;
+  /** Stops a charging or lunging goblin dead, pinned (the spear; shared/warrior.ts PIN). */
+  pins?: boolean;
+  /** Goblins too close take the shaft, not the point (the spear; shared/warrior.ts SHAFT). */
+  shaft?: boolean;
 }
 
 type KitId = 'sword' | 'greatsword' | 'spear' | 'daggers' | 'longbow' | 'shortbow' | 'crossbow' | 'wand' | 'staff' | 'rod' | 'mace' | MoreKitId;
@@ -134,8 +146,9 @@ export const WEAPONS: Record<KitId, Weapon> = {
       { windup: 0.09, active: 0.08, recover: 0.2, dmg: 12, range: 1.45, arc: 110, lunge: 0.35, knock: 3 },
       { windup: 0.16, active: 0.1, recover: 0.36, dmg: 22, range: 1.6, arc: 140, lunge: 0.6, knock: 7 },
     ],
-    heavy: { windup: 0.08, active: 0.12, recover: 0.42, dmg: 24, dmgFull: 45, range: 1.8, arc: 170, lunge: 0.8, knock: 6, knockFull: 13 },
-    chip: 0.12, blockSpeed: 0.45, chargeSpeed: 0.4, parryWindow: 0.36, guardArc: 170, guardCost: 1, speed: 0.9,
+    // Held: a shield bash that stuns the goblin in front (Kyle's rework): short, little damage, a solid stagger.
+    heavy: { windup: 0.06, active: 0.1, recover: 0.32, dmg: 6, dmgFull: 12, range: 1.35, arc: 80, lunge: 0.5, knock: 5, knockFull: 9, hits: 1, shieldBash: true },
+    chip: 0.12, blockSpeed: 0.45, chargeSpeed: 0.4, parryWindow: 0.36, guardArc: 170, guardCost: 1, speed: 0.9, ripostes: true,
     dodge: ROLL,
   },
   greatsword: {
@@ -143,24 +156,29 @@ export const WEAPONS: Record<KitId, Weapon> = {
     name: 'GREATSWORD',
     cls: 'WARRIOR',
     combo: [
-      { windup: 0.22, active: 0.12, recover: 0.3, dmg: 24, range: 2.0, arc: 160, lunge: 0.4, knock: 6 },
-      { windup: 0.24, active: 0.12, recover: 0.5, dmg: 32, range: 2.1, arc: 170, lunge: 0.55, knock: 10 },
+      // Wide, slow sweeps for a crowd.
+      { windup: 0.22, active: 0.12, recover: 0.3, dmg: 24, range: 2.1, arc: 210, lunge: 0.4, knock: 6 },
+      { windup: 0.24, active: 0.12, recover: 0.5, dmg: 32, range: 2.2, arc: 240, lunge: 0.55, knock: 10 },
     ],
-    heavy: { windup: 0.1, active: 0.16, recover: 0.6, dmg: 38, dmgFull: 75, range: 2.3, arc: 220, lunge: 0.9, knock: 10, knockFull: 20 },
-    chip: 0.3, blockSpeed: 0.35, chargeSpeed: 0.25, parryWindow: 0.2, guardArc: 110, guardCost: 1.5, speed: 0.78,
+    // Held: the overhead (it breaks heavy wind-ups); let go on the white flash and it sends out a shockwave.
+    heavy: { windup: 0.1, active: 0.16, recover: 0.6, dmg: 38, dmgFull: 75, range: 2.4, arc: 110, lunge: 0.9, knock: 10, knockFull: 20, quake: true },
+    // No held block at all: block is a parry in its narrow window, or nothing.
+    chip: 0.3, blockSpeed: 0.35, chargeSpeed: 0.25, parryWindow: 0.2, guardArc: 110, guardCost: 1.5, speed: 0.78, parryOnly: true,
     dodge: { kind: 'roll', distance: 1.9, time: 0.4, iFrom: 0.06, iTo: 0.28, stamina: 34, cooldown: 1.4 },
   },
   spear: {
     name: 'SPEAR',
     cls: 'WARRIOR',
     combo: [
-      { windup: 0.08, active: 0.07, recover: 0.16, dmg: 9, range: 2.3, arc: 26, lunge: 0.25, knock: 2, thrust: true },
-      { windup: 0.07, active: 0.07, recover: 0.16, dmg: 9, range: 2.3, arc: 26, lunge: 0.25, knock: 2, thrust: true },
-      { windup: 0.08, active: 0.07, recover: 0.16, dmg: 10, range: 2.3, arc: 26, lunge: 0.25, knock: 3, thrust: true },
+      // Long thrusts with a small push, to keep goblins at the point.
+      { windup: 0.08, active: 0.07, recover: 0.16, dmg: 9, range: 2.5, arc: 26, lunge: 0.25, knock: 4, thrust: true },
+      { windup: 0.07, active: 0.07, recover: 0.16, dmg: 9, range: 2.5, arc: 26, lunge: 0.25, knock: 4, thrust: true },
+      { windup: 0.08, active: 0.07, recover: 0.16, dmg: 10, range: 2.5, arc: 26, lunge: 0.25, knock: 5, thrust: true },
       { windup: 0.18, active: 0.1, recover: 0.36, dmg: 18, range: 2.7, arc: 30, lunge: 1.1, knock: 9, thrust: true },
     ],
-    heavy: { windup: 0.06, active: 0.14, recover: 0.4, dmg: 22, dmgFull: 42, range: 3.0, arc: 34, lunge: 2.4, knock: 9, knockFull: 16, thrust: true },
-    chip: 0.22, blockSpeed: 0.4, chargeSpeed: 0.35, parryWindow: 0.24, guardArc: 120, guardCost: 1.3, speed: 0.86,
+    // Held: a lunge that runs through up to three in a line.
+    heavy: { windup: 0.06, active: 0.14, recover: 0.4, dmg: 22, dmgFull: 42, range: 3.0, arc: 34, lunge: 2.4, knock: 9, knockFull: 16, thrust: true, hits: 3 },
+    chip: 0.22, blockSpeed: 0.4, chargeSpeed: 0.35, parryWindow: 0.24, guardArc: 120, guardCost: 1.3, speed: 0.86, pins: true, shaft: true,
     dodge: { kind: 'backstep', distance: 2, time: 0.26, iFrom: 0.02, iTo: 0.18, stamina: 22, cooldown: 1.0 },
   },
   /** The Rogue's kit: weak from the front, brutal from behind, and the only one quick on its feet. */
@@ -267,7 +285,7 @@ export const CLASS_ORDER: HeroClass[] = ['WARRIOR', 'RANGER', 'ROGUE', 'MAGE', '
  * unblockable blow they step out of on their feet. The light classes dodge and can't hold a guard.
  */
 /** What a class's dodge button says on a phone. */
-export const dodgeName = (cls: HeroClass): string => ({ ROGUE: 'DASH', RANGER: 'JUMP', MAGE: 'BLINK' } as Partial<Record<HeroClass, string>>)[cls] ?? 'ROLL';
+export const dodgeName = (cls: HeroClass): string => ({ ROGUE: 'DASH', RANGER: 'JUMP', MAGE: 'BLINK', WARRIOR: 'STEP' } as Partial<Record<HeroClass, string>>)[cls] ?? 'ROLL';
 export const CLASS_DODGES: Record<HeroClass, boolean> = { WARRIOR: false, HEALER: false, ROGUE: true, RANGER: true, MAGE: true };
 export const CLASS_GUARD: Record<HeroClass, 'full' | 'parry' | 'none'> = { WARRIOR: 'full', HEALER: 'full', ROGUE: 'none', RANGER: 'parry', MAGE: 'none' };
 /** The Mage's blink leaves an image of them where they stood: goblins near it go for it instead. */

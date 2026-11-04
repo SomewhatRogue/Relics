@@ -5,7 +5,7 @@ import { fillCol } from './reliccard';
 import { RELICW } from './relicwords';
 import { hookLitBadge } from './litbadge';
 import { setVotes } from './voteboards';
-import { HERO, CLASS_GUARD, CLASS_DODGES, POTIONS, CLASS_ORDER, RELICS, TRAITS, WEAPONS, itemName, type HeroClass } from '../shared/tuning';
+import { HERO, CLASS_GUARD, dodgeName, dodgeOf, POTIONS, CLASS_ORDER, RELICS, TRAITS, WEAPONS, itemName, type HeroClass } from '../shared/tuning';
 import { CLASS_NAME } from '../shared/classes';
 import { LOOKS, heroLook } from './sprites';
 import { ONLINE } from './relay';
@@ -163,9 +163,9 @@ $('.tb.use').addEventListener('touchstart', (e) => (e.preventDefault(), use()), 
 
 /** One line on how each kit guards and dodges. */
 const KIT: Record<string, string> = {
-  sword: 'EASY PARRY  WIDE GUARD  ROLL',
-  greatsword: 'TIGHT PARRY  HEAVY ROLL',
-  spear: 'BACKSTEP  KEEPS FACING',
+  sword: 'BEST GUARD  HOLD: SHIELD BASH  QUICK COUNTER: RIPOSTE',
+  greatsword: 'NO BLOCK, PARRY ONLY  HOLD: OVERHEAD, SHOCKWAVE ON THE FLASH',
+  spear: 'LONG REACH  HOLD: LUNGE THROUGH THREE  PINS A CHARGE',
   daggers: 'LONG DASH  ONE AT A TIME  BACKSTAB 2.5X',
   longbow: 'TAP: SHORT SWORD  HOLD 1.4S: PIERCING SHOT',
   shortbow: 'TAP: SHORT SWORD  HOLD: QUICK SHOT ON THE MOVE',
@@ -223,9 +223,9 @@ function hud(now: number): void {
     // A Warrior always has GRAB (dimmed till there's something to take hold of); others only when there is.
     const lifter = WEAPONS[me.weapon].cls === 'WARRIOR';
     // The dodge button says what your dodge is.
-    $('.tb.roll').textContent = ({ roll: 'ROLL', backstep: 'JUMP', dash: 'DASH', blink: 'BLINK' } as Record<string, string>)[WEAPONS[me.weapon].dodge.kind] ?? 'ROLL';
-    // A Warrior or Healer has no dodge, so no button for one.
-    $('.tb.roll').hidden = !CLASS_DODGES[WEAPONS[me.weapon].cls];
+    $('.tb.roll').textContent = dodgeName(WEAPONS[me.weapon].cls);
+    // A Healer has no dodge, so no button for one; a Warrior's is the short STEP.
+    $('.tb.roll').hidden = !dodgeOf(WEAPONS[me.weapon]);
     // By a friend who's down, GRAB helps them up.
     const raise = me.act === 'idle' && raisable(me, room.heroes);
     // By a nest, or at a house's kindling, GRAB sets it alight (sim/torch.ts, sim/kindle.ts).

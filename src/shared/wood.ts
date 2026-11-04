@@ -122,12 +122,13 @@ export const LESSONS: Lesson[] = [
 const L = LESSONS, light = ['attack', 'roll'] as Lesson['moves'];
 const slip = (foes = L[3].foes): Lesson => ({ ...L[3], teach: 'LAST SECOND', card: 'slip', moves: light, count: 'slip', need: 2, foes });
 const scr = (x: number, y: number, v?: 'looter' | 'lunger' | 'heavy') => ({ kind: 'scrapper' as const, ...(v ? { variant: v } : {}), x, y, awake: true });
-// A Warrior or Healer has no dodge at all: what they learn on the path is to walk out of the stripes.
+// A Warrior or Healer has no real dodge: what they learn on the path is to walk out of the stripes.
 const heavy = (l: Lesson, more: Lesson['moves'] = []): Lesson => ({ ...l, moves: [...l.moves.filter((m) => m !== 'roll'), ...more] });
 const step: Lesson = { ...L[1], teach: 'STEP OUT', card: 'step', moves: ['attack'], foes: [scr(31, 31, 'lunger'), scr(37, 35, 'lunger')] };
 const BY_CLASS: Record<HeroClass, Lesson[]> = {
   // Only the Warrior lifts: after the first three, the next two are for grabbing and throwing.
-  WARRIOR: [{ ...L[0], count: 'grab', need: 1, moves: ['attack', 'grab'] }, step, heavy(L[2], ['grab']), heavy(L[3], ['grab']), heavy(L[4])],
+  // A Warrior's dodge button is a short STEP with no protection: it shows from the path on, a help in walking out.
+  WARRIOR: [{ ...L[0], count: 'grab', need: 1, moves: ['attack', 'grab'] }, { ...step, moves: ['attack', 'roll'] }, { ...L[2], moves: [...L[2].moves, 'grab'] }, { ...L[3], moves: [...L[3].moves, 'grab'] }, L[4]],
   HEALER: [L[0], step, { ...heavy(L[2]), need: 4 }, heavy(L[3]), heavy(L[4])],
   ROGUE: [
     { ...L[0], foes: [...L[0].foes, { kind: 'scrapper', variant: 'looter', x: 10, y: 37 }] },
