@@ -13,6 +13,7 @@ import type { Ctx } from '../draw';
 import { pose } from '../held';
 import { drawHook } from '../relicsdraw';
 import { drawStatus } from '../status';
+import { drawLoad } from '../xbowmark';
 import { houseAlight, kindling } from '../../shared/kindling';
 import { drawGlint, drawHouseSmoke, drawKindling } from '../kindledraw';
 import { drawLife } from '../streetlife';
@@ -73,6 +74,11 @@ export function drawExtras(g: CanvasRenderingContext2D, x: Extra): void {
     drawHook(c, k, hx, hy, kx, ky);
   }
   if (BOXFIGS) for (const h of room.heroes) trail(g, h, lerp, P, now, up(h.z));
+  // A crossbow's load over its Ranger (a flat figure carries its own: actors.ts).
+  if (BOXFIGS) for (const h of room.heroes) {
+    const [hx, hy] = lerp('h:' + h.id, h.x, h.y), [sx, sy] = P(hx, up(h.z), hy);
+    drawLoad(c, h, sx, sy);
+  }
   // The relic held up over your head in a turning ring of light (the wood's find).
   const me = room.heroes.find((h) => h.id === x.meId);
   if (me && x.fanfare) {

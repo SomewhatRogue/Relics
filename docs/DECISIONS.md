@@ -2,6 +2,56 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-03: the Ranger's weapons rework: the longbow blinds, the crossbow winds and glints (Kyle; Claude Opus 5.5)
+
+The third class through Kyle's weapons rework. The Ranger has the best dodge (the jump back and its
+snare, unchanged) and the weakest guard (a parry, never a held block). Every bow is the short sword on a
+tap (8 then 10, the `RANGER_BLADE` it already had) and the bow on a hold. Numbers in `shared/ranger.ts`
+and `shared/weapons.ts`, the rules in `sim/crossbow.ts` and `sim/rangershots.ts`, all judged in the room.
+
+- **Longbow**: quick, the short sword. Held, the draw: 18 growing to 55 over 1.4 s (the draw it had), the
+  arrow piercing a line; walking while drawing stays slow (0.3 of your pace). Perfect: let go on the
+  white flash (the same window and flash as before) and the arrow is a sure crit (55 x 1.5 = 83) and
+  BLINDS each goblin it strikes for 2 s (a butcher 1 s). A blinded goblin drops whatever blow it had
+  going, can't pick out a hero at all, and gropes about at under half its pace, turning every 0.7 s
+  (headings from its id and the room's clock, no randomness). Judgment call: a goblin blinded mid charge
+  stops too, since it can't see the line it showed you.
+- **Shortbow**: unchanged (Kyle loves it). Its perfect (the white flash) already existed but showed only
+  PERFECT at the bow; now the arrow strikes with a clean white spark too, so the hit reads. No numbers changed.
+- **Crossbow**, reworked. A tap is the short sword. The hold is one state machine (`sim/crossbow.ts`):
+  - a bolt on it: the hold raises it to aim (0.3 s to the raised sound), and letting go looses it: 60,
+    through three goblins, each shoved hard (12), then a 0.35 s recover. It is empty after.
+  - empty: the hold winds instead. You stand to it; 1 s of winding is a full reload. Letting go or pushing
+    the stick ends the piece and keeps what's wound, so you can move between pieces. Letting go after a
+    wind never looses (a fresh hold aims), so a reload can't fire by accident. A dodge out of it keeps the wind too.
+  - glint: a reload wound from nothing to full without letting go or moving glints. The glinted bolt is
+    the perfect one: PERFECT, 1.5x damage (90), 1.6x the shove, and it runs through the whole line.
+    The glint, not the white flash, is the crossbow's perfect, so its aim shows no white.
+  - Phone: hold ATTACK to aim, let go to fire; when it's empty, hold ATTACK and keep your thumb off the
+    stick until the star shows. Laptop: the same on the left button; WASD ends a piece of winding.
+  - The old crossbow fired on the press with a 1.15 s recover as its reload; that recover is now the wind.
+- **Seen** (`client/fxranger.ts`, one overlay, so both views): BLINDED in white with a flash, ring and
+  burst; on a blinded goblin a flickering white glare over its eyes and sparks circling its head
+  (`client/status.ts`). A shortbow's clean hit: a small white ring and spark. A glinted bolt: a straight
+  bright line from where it was loosed to each goblin it ran through, a flash on each. On the hero
+  (`client/xbowmark.ts`, flat figures and box figures): over an empty crossbow a grey hollow bolt in a
+  ring that fills as it winds (gold while the wind is still clean); a breathing star of light at the hand
+  when the bolt glints. The crossbow in hand shows a bolt on it only when it's loaded.
+- **Sounds** from the kit: BLINDED the perfect chime and the flare, the clean hit the perfect chime, the
+  wind the hook's latch, loaded the latch and a block, the glint the latch and the chime, the glinted bolt's
+  line the javelin's stick.
+- **Online**: the load (`xbowEmpty`, `xbowWind`, `winding`, `xbowClean`, `xbowGlint`) lives on the hero
+  and `blindUntil` on the goblin, so guests get them in the snapshot.
+- New lines for the lore keeper and line editor: BLINDED, the longbow and crossbow card lines
+  (`client/card.ts`) and their kit lines (`client/main.ts`).
+
+Tests: `tests/rangerkit.test.ts` (the longbow's sword against its draw, damage growing with the hold, the
+perfect crit and blind, a blinded goblin never starting a blow until it sees again, a blow stopped mid
+swing, a butcher's shorter blind; the shortbow's numbers unchanged and its perfect not blinding; the
+crossbow's sword tap, the loaded shot through three and no more with a shove, winding in pieces that
+keep and walking between them, no glint from pieces, the stick ending a piece, the glint on an unbroken
+reload with the 1.5x bolt through the whole line and the harder shove).
+
 ## 2026-11-03: the Warrior's weapons rework: the step, the shield bash and riposte, the shockwave, the pin (Kyle; Claude Opus 5.5)
 
 The second class through Kyle's weapons rework. The Warrior is the tank, and each weapon trades damage

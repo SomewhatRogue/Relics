@@ -215,6 +215,13 @@ export interface Hero extends Body {
   quickUntil?: number;
   /** The draw in flight was released on the white flash. */
   perfect: boolean;
+  /** The crossbow (sim/crossbow.ts): no bolt on it; the reload wound so far (0 to 1); this hold is winding,
+   *  not aiming; this wind began from nothing and hasn't been broken; the bolt on it glints. */
+  xbowEmpty?: boolean;
+  xbowWind?: number;
+  winding?: boolean;
+  xbowClean?: boolean;
+  xbowGlint?: boolean;
   /** Dodged through a blow (TEMPO): the next hit before then lands double. */
   tempoUntil: number;
   /** A Mage just turned element: its next spell is primed (CHANNEL.primed). */
@@ -307,6 +314,8 @@ export interface Enemy extends Body {
   venomNext?: number;
   venomHard?: boolean;
   pukeUntil?: number;
+  /** Blinded by a longbow's perfect arrow until (sim/rangershots.ts): it can't pick out a hero. */
+  blindUntil?: number;
   /** When it last retched (once every VENOM.pukeEvery seconds at most). */
   pukeAt?: number;
   /** Caught in a hunter's net until then (small goblins can't move or act; big ones are slowed). */
@@ -474,9 +483,9 @@ export type FightEvent =
   | { k: 'drop'; x: number; y: number; q: Quality }
   | { k: 'shoot'; x: number; y: number; dx: number; dy: number; kind: Bolt['kind']; el: Augment; primed?: boolean }
   | { k: 'burst'; x: number; y: number; r: number; el: Augment }
-  | { k: 'shock' | 'beam'; x: number; y: number; x2: number; y2: number }
+  | { k: 'shock' | 'beam' | 'boltline'; x: number; y: number; x2: number; y2: number }
   | { k: 'heal'; x: number; y: number; n: number }
-  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle' | 'lift' | 'oilfire' | 'freed' | 'exitopen' | 'blaze' | 'chop' | 'denspawn' | 'hallow' | 'ward' | 'warded' | 'reflect' | 'wardbreak' | 'spotted' | 'skewer' | 'envenom' | 'step' | 'riposte' | 'shieldbash' | 'quake' | 'pin'; x: number; y: number }
+  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle' | 'lift' | 'oilfire' | 'freed' | 'exitopen' | 'blaze' | 'chop' | 'denspawn' | 'hallow' | 'ward' | 'warded' | 'reflect' | 'wardbreak' | 'spotted' | 'skewer' | 'envenom' | 'step' | 'riposte' | 'shieldbash' | 'quake' | 'pin' | 'blinded' | 'wind' | 'loaded' | 'glint' | 'trueshot'; x: number; y: number }
   /** A goblin retching up a perfect dart's poison, facing (dx, dy) (sim/venom.ts). */
   | { k: 'puke'; x: number; y: number; dx: number; dy: number }
   | { k: 'collapse'; x: number; y: number; w: number; h: number }
@@ -575,6 +584,11 @@ export interface Bolt {
   stun: number;
   /** A poisoner's dart: poisons what it hits (2: loosed perfect, it retches first). */
   poison?: 1 | 2;
+  /** Loosed on the white flash (a clean hit shows); a longbow's blinds and is a sure crit. */
+  perfect?: boolean;
+  blind?: boolean;
+  /** A plain crossbow bolt runs through this many goblins at most (a glinted one, the whole line). */
+  pierceLeft?: number;
   /** The shooter's weapon traits (BRUTAL counts on a shot). */
   traits: TraitId[];
   /** Lobbed and dropped things go from (sx, sy) to (tx, ty) over `flight` seconds, `t` so far. */

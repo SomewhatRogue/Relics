@@ -10,6 +10,7 @@ import { heroCut, jointed } from './joints';
 import { heroPose } from './heropose';
 import { drawWeapon, pose } from './held';
 import { EL_COL } from './palette';
+import { drawLoad } from './xbowmark';
 import { drawText } from './pixfont';
 import { PARTY } from '../shared/tuning';
 import { LOOKS, SPRITES, heroLook } from './sprites';
@@ -126,10 +127,11 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'b
   if (!up) drawGear();
   if (fresh && h.weapon !== 'sword') smear(c.glow, bx, by - 8, Math.atan2(h.fy, h.fx) - 0.7, Math.atan2(h.fy, h.fx) + 0.7, 7, 9, '#cfe8ff');
   // A blade's charge gathers at the hand (a caster's draws into the tip instead, held.ts).
-  if (h.act === 'charge' && cls !== 'MAGE') {
+  if (h.act === 'charge' && cls !== 'MAGE' && !h.winding) {
     const held = h.actT + CHARGE.start, full = chargeFull(WEAPONS[h.weapon], h), k = Math.min(1, held / full);
     // A draw's white is its clean-release window, the one the room judges (sim/knacks.ts); a blade stays white once full.
-    const white = k >= 1 && (!WEAPONS[h.weapon].heavy.shot || held <= full + releaseWindow(h));
+    // (A crossbow's perfect is its glint, not the flash: aiming, it stays gold; winding, it shows nothing here.)
+    const white = k >= 1 && (!WEAPONS[h.weapon].heavy.shot || held <= full + releaseWindow(h)) && !WEAPONS[h.weapon].reloads;
     for (let i = 0; i < 4; i++) {
       const t = c.now * 4 + i * 1.57, r = 6 - 3 * k;
       c.glow.fillStyle = white ? '#ffffff' : '#ffd860';
@@ -146,6 +148,7 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'b
     }
   }
   aura(c, h, bx, by, t);
+  drawLoad(c, h, bx, by);
 }
 
 /** Blessed: gold motes rising. Rallied: a red pennant flicker overhead. */

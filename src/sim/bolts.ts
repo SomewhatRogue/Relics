@@ -20,6 +20,7 @@ import { blastSurvivors, shotSurvivor, survivorIn } from './survivorhits';
 import type { Bolt, Enemy, Hero } from './types';
 import { hobble, spare } from './foundrelics';
 import { envenom } from './venom';
+import { markShot, perfectStrike, spent } from './rangershots';
 
 let nextId = 1;
 
@@ -33,6 +34,8 @@ export function shoot(h: Hero, s: Swing, el: Augment, mult = 1, traits: TraitId[
   const b: Bolt = { ...base(h, s.shot!, el), traits, speed: s.speed ?? 20, range: s.range, dmg: Math.round(s.dmg * mult), knock: s.knock, pierce: !!s.pierce, burst: s.burst ?? 0, stun: s.stun ?? 0 };
   // A poisoner's dart: loosed on the white flash, it retches what it hits (sim/venom.ts).
   if (s.venom) b.poison = h.heavy && h.perfect ? 2 : 1;
+  // The Ranger's: a longbow's perfect arrow blinds, a crossbow bolt runs through a few (a glinted one, all).
+  markShot(h, s, b);
   return b;
 }
 
@@ -99,13 +102,15 @@ function openNet(w: World, b: Bolt): void {
 function strike(w: World, b: Bolt, e: Enemy): void {
   const wasFrozen = frozen(e, w.now);
   e.lastBy = b.owner;
-  const by = w.heroes.find((h) => h.id === b.owner), crit = !!by && rollCrit(by);
+  const by = w.heroes.find((h) => h.id === b.owner), crit = !!by && (!!b.blind || rollCrit(by));
   // A shot into a shield-bearer's board (it's facing the shot) does little; lightning goes round it.
   const boarded = e.variant === 'shield' && b.el !== 'storm' && e.alert !== false && e.fx * -b.dx + e.fy * -b.dy > 0.3 && b.knock < 8;
   // A Rogue's bolt or knife in a goblin's back is a backstab too, at that weapon's rate.
   const back = !!by && rogueShot(b) && WEAPONS[by.weapon].cls === 'ROGUE' && !isDummy(e) && fromBehind(e, b.dx, b.dy, by);
   const rear = back && by ? backstabOf(by) : 1;
-  if (damage(e, Math.round(b.dmg * rear * (crit ? CRIT : 1) * (boarded ? VARIANTS.shield.front : 1)), w.now, w.ev, { heavy: b.knock >= 8 || crit, flinch: FLINCH, mult: true, brutal: b.traits.includes('brutal'), dx: b.dx, dy: b.dy, src: b.kind, el: b.el, backstab: back })) return;
+  const dead = damage(e, Math.round(b.dmg * rear * (crit ? CRIT : 1) * (boarded ? VARIANTS.shield.front : 1)), w.now, w.ev, { heavy: b.knock >= 8 || crit, flinch: FLINCH, mult: true, brutal: b.traits.includes('brutal'), dx: b.dx, dy: b.dy, src: b.kind, el: b.el, backstab: back });
+  perfectStrike(b, e, w.now, w.ev);
+  if (dead) return;
   if (e.act !== 'pinned') shove(e, b.dx, b.dy, b.knock, e.weight);
   if (b.hobble) hobble(e, w);
   if (b.poison) envenom(e, b.poison === 2, w.now, w.ev);
@@ -165,7 +170,7 @@ export function stepBolt(b: Bolt, w: World, dt: number): boolean {
       if (b.burst) return blast(w, b, b.x, b.y), false;
       b.hit.push(e.id);
       strike(w, b, e);
-      if (!b.pierce) return false;
+      if (spent(b)) return false;
     }
     // A teammate in the way takes it (not the one who loosed it, and not a net).
     const ally = b.kind === 'net' || b.relic || players(w.heroes).length < 2 ? undefined : w.heroes.find((h) => h.id !== b.owner && h.id !== 'squire' && h.act !== 'down' && h.act !== 'roll' && !b.hitHeroes?.includes(h.id) && Math.hypot(h.x - b.x, h.y - b.y) <= HERO.radius + 0.1);

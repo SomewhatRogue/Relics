@@ -13,6 +13,7 @@ import { spiderFx } from './fxspiders';
 import { weakFx } from './fxweak';
 import { venomFx } from './fxvenom';
 import { warriorFx } from './fxwarrior';
+import { rangerFx } from './fxranger';
 import { levelFx } from './fxlevel';
 import { skillFx } from './fxskills';
 import { relicFx } from './fxrelics';
@@ -21,7 +22,7 @@ interface Part { x: number; y: number; vx: number; vy: number; life: number; max
 interface Text { x: number; y: number; s: string; col: string; life: number; rise?: number }
 interface Ring { x: number; y: number; life: number; max: number; col: string; size?: number }
 /** A lightning arc between two points, in world pixels. */
-interface Arc { x: number; y: number; x2: number; y2: number; life: number; col?: string }
+interface Arc { x: number; y: number; x2: number; y2: number; life: number; col?: string; /** A straight line (a glinted bolt's path), not lightning. */ straight?: boolean }
 interface Flash extends Light { life: number; max: number }
 
 export class Fx {
@@ -83,7 +84,7 @@ export class Fx {
 
   on(ev: FightEvent): void {
     const [x, y] = toPx(ev.x, ev.y);
-    if (spiderFx(this, ev, x, y) || weakFx(this, ev, x, y) || venomFx(this, ev, x, y) || warriorFx(this, ev, x, y) || levelFx(this, ev, x, y) || skillFx(this, ev, x, y) || relicFx(this, ev, x, y)) return;
+    if (spiderFx(this, ev, x, y) || weakFx(this, ev, x, y) || venomFx(this, ev, x, y) || warriorFx(this, ev, x, y) || rangerFx(this, ev, x, y) || levelFx(this, ev, x, y) || skillFx(this, ev, x, y) || relicFx(this, ev, x, y)) return;
     switch (ev.k) {
       case 'impact':
         if (ev.kind === 'slam') {
@@ -333,7 +334,7 @@ export class Fx {
       g.fillStyle = Math.random() < 0.5 ? '#ffffff' : a.col ?? '#fff27a';
       const n = Math.max(2, Math.round(Math.hypot(a.x2 - a.x, a.y2 - a.y) / 3));
       for (let i = 0; i <= n; i++) {
-        const k = i / n, j = i && i < n ? (Math.random() - 0.5) * 5 : 0;
+        const k = i / n, j = i && i < n && !a.straight ? (Math.random() - 0.5) * 5 : 0;
         g.fillRect(Math.round(a.x + (a.x2 - a.x) * k - cx + j), Math.round(a.y + (a.y2 - a.y) * k - cy - 10 + j), 1, 1);
       }
     }

@@ -12,6 +12,7 @@ import { decoyTime, dodgeBreath, dodgeReach, releaseWindow } from './knacks';
 import { fedMult, jealousBlocks, jealousCooldown, needlesBreath, wears } from './hungry';
 import { hitEnemy } from './combat';
 import { quake } from './warrior';
+import { beginHold, looseBolt, stepWind } from './crossbow';
 import { brandySpeed, breathCap } from './brandy';
 import { quickMult, relicDark, spendCharge } from './charge';
 import { knows, type Enemy, type FightEvent, type Hero, type Intent } from './types';
@@ -216,6 +217,8 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   }
   if (h.act === 'charge') {
     if (wantsRoll) return startRoll(h, inp, now, ev);
+    // An empty crossbow's hold winds a reload instead of aiming (sim/crossbow.ts).
+    if (stepWind(h, inp, dt, ev)) return;
     face(h, inp, enemies, false);
     walk(h, inp, w.chargeSpeed, dt, now);
     collide(h, HERO.radius);
@@ -228,6 +231,8 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
       // (A rapier's lunge has its flash too: on it, the thrust skewers.)
       h.perfect = (drawn || !!w.heavy.skewer || !!w.heavy.quake) && held >= full && held <= full + releaseWindow(h);
       if (drawn && held > full + RELEASE.overdraw) h.power = RELEASE.overdrawn;
+      // A crossbow's perfect is its glint, not the flash.
+      looseBolt(h);
       if (h.perfect) ev.push({ k: 'perfect', x: h.x, y: h.y });
       startSwing(h, -1, inp, enemies, now, ev);
       ev.push({ k: 'heavy', x: h.x, y: h.y });
@@ -301,6 +306,7 @@ function startCharge(h: Hero): void {
   h.actT = 0;
   h.attackQueuedAt = -9;
   h.heavy = false;
+  beginHold(h);
 }
 
 /** Start combo step `i`, or the heavy when i is -1. */

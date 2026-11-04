@@ -258,6 +258,9 @@ Every weapon gets a quick attack, a charged attack, a perfect-timed hit and a re
   overhead, the spear's lunge runs through three, pins a charge, and does half with the shaft up close.
 - [x] Rogue (built 2026-11-03, Claude Opus 5.5; see DECISIONS): Shadow Step stuns 1 s, the rapier's perfect lunge skewers and bleeds,
   daggers unchanged, the poisoner's kit replaces the hand crossbow (name SHORTSWORD AND DARTS pending the lore keeper).
+- [x] Ranger (built 2026-11-03, Claude Opus 5.5; see DECISIONS): every bow is the short sword on a tap; the longbow's
+  perfect release is a sure crit that BLINDS 2 s, the shortbow unchanged with a clean-hit spark, the crossbow aims when
+  loaded and winds when empty (1 s, in pieces), a reload wound in one go glints for a 1.5x bolt through the whole line.
 - Rogue: Shadow Step behind a goblin stuns it 1 s for free hits.
 - The hand crossbow becomes the poisoner's kit:
   - Quick: a short sword, a bit wider than the daggers but slower. Not much damage, but not reduced either.
