@@ -1,4 +1,5 @@
 /** Enemies' turns: the goblin butcher, goblin scrappers, and the two training dummies. */
+import { blinded, stumble } from './rangershots';
 import { lure, seenFrom } from './lantern';
 import { visible } from './flasks';
 import { HUNGRY_FX, wears } from './hungry';
@@ -184,6 +185,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     if (e.actT >= e.actDur) Object.assign(e, { act: after(e), actT: 0, cooldown: e.act === 'stunned' ? 0.6 : 0.3 });
     return;
   }
+  // Blinded by a longbow's perfect arrow: it gropes about and goes for nobody (sim/rangershots.ts).
+  if (blinded(e, now)) return void (spec && stumble(e, spec.speed, now, dt));
   if (e.act === 'attack') {
     if (runAttack(e, heroes, now, dt, ev, others) && e.act === 'attack') {
       Object.assign(e, { attack: null, act: after(e), actT: 0, cooldown: e.variant === 'hexer' ? HEXER.pause : spec ? spec.pauseBetween : SWING_DUMMY.every });

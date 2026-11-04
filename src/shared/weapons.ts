@@ -42,6 +42,8 @@ export interface Swing {
   shieldBash?: boolean;
   /** An overhead: released on the white flash it sends out a shockwave (shared/warrior.ts QUAKE). */
   quake?: boolean;
+  /** A longbow's draw: released on the white flash it is a sure crit and blinds (shared/ranger.ts BLIND). */
+  blinds?: boolean;
 }
 
 export interface Heavy extends Swing {
@@ -133,6 +135,8 @@ export interface Weapon {
   pins?: boolean;
   /** Goblins too close take the shaft, not the point (the spear; shared/warrior.ts SHAFT). */
   shaft?: boolean;
+  /** A bolt has to be wound on: a hold aims a loaded crossbow and winds an empty one (shared/ranger.ts XBOW). */
+  reloads?: boolean;
 }
 
 type KitId = 'sword' | 'greatsword' | 'spear' | 'daggers' | 'longbow' | 'shortbow' | 'crossbow' | 'wand' | 'staff' | 'rod' | 'mace' | MoreKitId;
@@ -196,12 +200,13 @@ export const WEAPONS: Record<KitId, Weapon> = {
     chip: 0.45, blockSpeed: 0.6, chargeSpeed: 0.7, backstab: 2.5, front: 0.5, single: true, parryWindow: 0.2, guardArc: 100, guardCost: 1.8, speed: 1.12,
     dodge: { kind: 'dash', distance: 4.3, time: 0.22, iFrom: 0, iTo: 0.22, stamina: 30, cooldown: 0.35 },
   },
-  /** One arrow per press. The long draw is the point: 1.4 s to a shot that pierces a whole line. */
+  /** A short sword on a tap; held, the longbow draws for 1.4 s, harder the longer, and pierces a line.
+   *  Let go on the white flash: a sure crit that blinds (shared/ranger.ts). Slow to walk while drawing. */
   longbow: {
     name: 'LONGBOW',
     cls: 'RANGER',
     combo: RANGER_BLADE,
-    heavy: { windup: 0.04, active: 0.05, recover: 0.45, dmg: 18, dmgFull: 55, range: 15, arc: 0, lunge: -0.3, knock: 4, knockFull: 15, shot: 'arrow', speed: 34, pierce: true },
+    heavy: { windup: 0.04, active: 0.05, recover: 0.45, dmg: 18, dmgFull: 55, range: 15, arc: 0, lunge: -0.3, knock: 4, knockFull: 15, shot: 'arrow', speed: 34, pierce: true, blinds: true },
     draw: 1.4,
     chip: 0.4, blockSpeed: 0.4, chargeSpeed: 0.3, parryWindow: 0.22, guardArc: 100, guardCost: 1.6, speed: 0.85,
     dodge: RANGER_JUMP,
@@ -216,14 +221,15 @@ export const WEAPONS: Record<KitId, Weapon> = {
     chip: 0.45, blockSpeed: 0.45, chargeSpeed: 0.7, parryWindow: 0.22, guardArc: 100, guardCost: 1.7, speed: 0.92,
     dodge: RANGER_JUMP,
   },
-  /** Drawn like the bows now (hold): one heavy bolt that hurls small goblins into walls, then a long reload. */
+  /** A short sword on a tap. Held with a bolt on it, the crossbow comes up to aim and lets go on release:
+   *  a heavy bolt through a line that shoves. Held empty, it winds a reload instead (sim/crossbow.ts). */
   crossbow: {
     name: 'CROSSBOW',
     cls: 'RANGER',
     combo: RANGER_BLADE,
-    heavy: { windup: 0.06, active: 0.04, recover: 1.15, dmg: 34, dmgFull: 34, range: 13, arc: 0, lunge: -0.2, knock: 12, knockFull: 12, shot: 'bolt', speed: 36 },
-    draw: 0.8,
-    chip: 0.35, blockSpeed: 0.4, chargeSpeed: 0.4, parryWindow: 0.22, guardArc: 110, guardCost: 1.5, speed: 0.82,
+    heavy: { windup: 0.06, active: 0.04, recover: 0.35, dmg: 60, dmgFull: 60, range: 13, arc: 0, lunge: -0.2, knock: 12, knockFull: 12, shot: 'bolt', speed: 36, pierce: true },
+    draw: 0.3,
+    chip: 0.35, blockSpeed: 0.4, chargeSpeed: 0.4, parryWindow: 0.22, guardArc: 110, guardCost: 1.5, speed: 0.82, reloads: true,
     dodge: RANGER_JUMP,
   },
   /** The Mage's quick spell: a flick of sparks, or a short 0.6 s cast for a bigger one. */
