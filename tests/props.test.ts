@@ -99,3 +99,18 @@ describe('props', () => {
     expect(room.props.some((q) => q.kind === 'stave')).toBe(false);
   });
 });
+
+describe('a blow a prop holds', () => {
+  it('says so (prophit: both views shake and flash it, splinters and sparks fly), and a piece on the floor does not', () => {
+    const { room, h, p } = setup('barrel');
+    room.setIntent(h.id, intent({ attackSeq: 1 }));
+    const ev = run(room, 0.6);
+    expect(p.broken).toBe(false);
+    expect(p.hitAt).toBeGreaterThan(0);
+    expect(ev).toContainEqual(expect.objectContaining({ k: 'prophit', kind: 'barrel' }));
+    const plank = newProp('plank', 9, 8.2, false);
+    room.props = [plank];
+    room.setIntent(h.id, intent({ attackSeq: 2 }));
+    expect(run(room, 0.6).some((e) => e.k === 'prophit')).toBe(false);
+  });
+});

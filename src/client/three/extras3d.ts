@@ -8,6 +8,7 @@
 import type { Theme } from '../../shared/arena';
 import { DRUMMER } from '../../shared/backline';
 import type { ArenaRoom } from '../../sim/room';
+import { waiting } from '../../sim/survivors';
 import { drawMist } from '../daytime';
 import type { Ctx } from '../draw';
 import { pose } from '../held';
@@ -100,7 +101,7 @@ export function drawExtras(g: CanvasRenderingContext2D, x: Extra): void {
   // Anyone you've freed who's fallen behind out of sight: a mark at the edge, toward them.
   const tall = x.H > x.W * 1.2, view: View = { vw: x.W, vh: x.H, top: tall ? x.H * 0.2 : 20, bottom: tall ? x.H * 0.3 : 20 };
   for (const s of room.survivors ?? []) {
-    if (s.dead || s.gone || s.home >= 0) continue;
+    if (s.gone || !waiting(s)) continue;
     const [sx, sy] = lerp('s:' + s.id, s.x, s.y), [px, py] = P(sx, 0.6, sy), at = edgeMark(g, px, py, view, Math.sin(now * 6 + s.id) * 1.5, '#c8f0c0');
     if (!at) continue;
     g.fillRect(Math.round(at.x - 1), Math.round(at.y - 3), 3, 3);

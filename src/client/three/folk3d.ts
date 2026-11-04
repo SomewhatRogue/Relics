@@ -5,6 +5,7 @@
 import * as THREE from 'three';
 import type { Hound, Survivor } from '../../sim/types';
 import { M } from './mats';
+import { lurchOf } from '../falsedraw';
 import { blob, collect, flash, middle, part, pivot, rest, stars, walk, type Figure } from './rig';
 
 const CLOTH = [0x6a5a48, 0x5a6a7a, 0x7a5a4a, 0x4a5a3a], HAIR = [0x3a2a1e, 0x6a4a2a, 0x2a2420, 0x8a7a6a];
@@ -29,6 +30,14 @@ export function poseFolk(f: Figure, s: Survivor, t: number, walked: number): voi
   rest(f);
   f.root.rotation.y = s.fx >= 0 ? Math.PI / 2 : -Math.PI / 2;
   if (s.dead) return void ((f.mid.rotation.z = Math.PI / 2), (f.mid.position.y = 0.12));
+  // A false prisoner (../falsedraw.ts): it jerks and swells, arms hanging, till it tears open.
+  if (s.tearAt !== undefined) {
+    const k = lurchOf(s, t), b = Math.floor(t * (6 + k * 16)), j = b % 3 === 0 ? (b % 2 ? 1 : -1) * (0.2 + k * 0.3) : 0;
+    (f.mid.rotation.z = j), (f.mid.rotation.x = k > 0.6 ? Math.sin(t * 55) * 0.15 * k : 0), (f.head.rotation.z = -j * 1.5);
+    f.body.scale.set(1 + k * 0.2, 1 + k * 0.1, 1 + k * 0.2);
+    return flash(f, false);
+  }
+  f.body.scale.set(1, 1, 1);
   if (s.moving) walk(f, walked * 4.5, 1);
   // Just out of the cage: hands up a moment in thanks.
   if (t - s.at < 1.2) f.aR.rotation.x = f.aL.rotation.x = -2.6;

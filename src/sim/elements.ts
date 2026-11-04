@@ -23,6 +23,8 @@ export interface World {
   ev: FightEvent[];
   /** The room's fire stream: whether a house catches (sim/catching.ts). */
   rng?: Rng;
+  /** The room's cage stream, only where a cage can hold a false prisoner (sim/falsecage.ts). */
+  cages?: Rng;
 }
 
 const dist = (a: { x: number; y: number }, b: { x: number; y: number }) => Math.hypot(a.x - b.x, a.y - b.y);

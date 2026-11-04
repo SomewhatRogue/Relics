@@ -266,6 +266,17 @@ and burns out a goblin den on a job.
       wilder places: nests that hatch waves, poison, the brood mother's glob, fire as their weakness
       (2026-11-01, Opus 5.5; lore placement waiting on the lore keeper)
 
+## Cages: hits you can see, and false prisoners (Kyle, 2026-11-04; Claude Opus 5.5)
+
+- DONE: a blow a cage, barrel, crate, table or larder rack holds now says so in both views (`prophit`):
+  it shudders on its spot and flashes, sparks off a cage's bars, splinters and dust, an iron clang or a
+  wooden thud. A den or wooden wall chopped throws splinters (it had only the sound).
+- DONE: false prisoners (`sim/falsecage.ts`): 1 in 20 cages out in the open on a job, rolled on the
+  room's own cage stream. It lurches, tears open, two goblins come out with a cackle, held 0.6 s. Never
+  in a house; never counted as freed, so the rescue goal still finishes.
+- Open for Kyle: false prisoners in the story mission's cages too (they can be today), or only on
+  plain jobs and the low road?
+
 ## Terrain nodes (docs/terrain-nodes.md; Kyle 2026-11-04)
 - [x] Slice 1 + 1b (2026-11-04, Opus 5.5): routed jobs (`layout: 2`), approach rooms that differ room to
       room and job to job, the heart with its landmarks fixed and three sub-layouts, one landmark and one

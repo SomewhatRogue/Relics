@@ -30,6 +30,7 @@ import { startBash, stepBash } from './bash';
 import { dropProp, newProp, propImpacts, roomProps, stepLift, stepProps, sweepProps, tryLift } from './props';
 import { startRaise, stepParty, sweepAllies } from './party';
 import { stepSurvivors } from './survivors';
+import { stepFalse } from './falsecage';
 import { ambush } from './ambush';
 import { stepBlaze, type BlazeState } from './blaze';
 import { sweepSurvivors } from './survivorhits';
@@ -106,6 +107,10 @@ export class ArenaRoom {
   private fireRng: Rng;
   /** Relics off named butchers on their own stream too. */
   private relicRng: Rng;
+  /** Whether what's in a broken cage is false (sim/falsecage.ts), on its own stream as well. */
+  private cageRng: Rng;
+  /** An outdoor job room: a cage here can hold a false prisoner (never in a house: run.ts sets this). */
+  falseCages = false;
   private acc = 0;
 
   /** The map this room is played on. */
@@ -131,6 +136,7 @@ export class ArenaRoom {
     this.doorRng = new Rng(seed * 104729 + 31);
     this.fireRng = new Rng(seed * 7351 + 17);
     this.relicRng = new Rng(seed * 31337 + 7);
+    this.cageRng = new Rng(seed * 2971 + 41);
     this.map = opts.map ?? ARENA;
     useMap(this.map);
     this.squire = !!opts.squire;
@@ -223,6 +229,7 @@ export class ArenaRoom {
     this.time += TICK;
     this.tick++;
     const w: World = { heroes: this.heroes, enemies: this.enemies, javelins: this.javelins, props: this.props, survivors: this.survivors, now: this.time, ev: this.events, rng: this.fireRng };
+    if (this.falseCages && !this.indoors) w.cages = this.cageRng;
     const hit = (e: Enemy, el: Hero['augments']['javelin'], n: number) => afflict(w, e, el, n);
     const acts: HeroActs = {
       fire: (h) => this.fire(h, w),
@@ -286,6 +293,8 @@ export class ArenaRoom {
     // The freed: home out in the open at the way in; brought out of a house, maybe goblins waiting.
     const door = stepSurvivors(w, TICK, this.indoors ? null : this.map.hero);
     if (door) ambush(this.enemies, this.heroes, this.doorRng, door.x, door.y, this.events);
+    // A false prisoner tears open: its goblins come out (sim/falsecage.ts).
+    stepFalse(this.survivors, this.time, this.events, (x, y) => this.spawn('scrapper', x, y));
     stepSkills(this, w, TICK);
     stepSentries(this.zones, this.bolts, w);
     this.zones = stepZones(this.zones, w);

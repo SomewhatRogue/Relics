@@ -8,22 +8,26 @@
  * stays where they fell. Goblins leave them be for now.
  */
 import { collide } from '../shared/arena';
-import { BURN, HERO, SURVIVOR } from '../shared/tuning';
+import { BURN, FALSE_CAGE, HERO, SURVIVOR } from '../shared/tuning';
 import { slide } from './bodies';
 import type { World } from './elements';
 import { players } from './party';
 import { survivorHazards } from './survivorhits';
 import type { FightEvent, Hero, Survivor } from './types';
 
-/** The survivors still to be brought home in a world (none if it has no list): the ones that can be hurt. */
-export const living = (w: { survivors?: Survivor[] }) => (w.survivors ?? []).filter((s) => !s.dead && s.home < 0);
+/** Freed and still to be brought home (never a false prisoner: sim/falsecage.ts). What the goal counts. */
+export const waiting = (s: Survivor) => !s.dead && s.home < 0 && s.tearAt === undefined;
 
-/** A cage broke at (x, y): whoever was in it stands up there. */
-export function freeSurvivor(list: Survivor[], x: number, y: number, now: number): Survivor {
+/** The survivors still to be brought home in a world (none if it has no list): the ones that can be hurt. */
+export const living = (w: { survivors?: Survivor[] }) => (w.survivors ?? []).filter(waiting);
+
+/** A cage broke at (x, y): whoever was in it stands up there (`fake`: a false prisoner, sim/falsecage.ts). */
+export function freeSurvivor(list: Survivor[], x: number, y: number, now: number, fake = false): Survivor {
   const s: Survivor = {
     id: list.length + 1, x, y, z: 0, kvx: 0, kvy: 0, hp: SURVIVOR.hp, maxHp: SURVIVOR.hp, at: now, hitAt: -9, by: '', dead: false, deadAt: -9,
     burnUntil: 0, burnNext: 0, burnBy: '', fx: 1, moving: false, home: -1, out: false, gone: false,
   };
+  if (fake) s.tearAt = now + FALSE_CAGE.lurch;
   list.push(s);
   return s;
 }
@@ -65,7 +69,8 @@ export function stepSurvivors(w: World, dt: number, entrance: { x: number; y: nu
     if (s.gone) continue;
     slide(s, SURVIVOR.radius, dt);
     s.dropped = undefined;
-    if (s.dead) continue;
+    // A false prisoner stands where the cage was, lurching, till it tears open (sim/falsecage.ts).
+    if (s.dead || s.tearAt !== undefined) continue;
     if (s.home >= 0) {
       leaving(s, entrance, w.now, dt);
       continue;
@@ -138,7 +143,7 @@ function nearest(s: Survivor, heroes: Hero[]): Hero | undefined {
  * room's next tick, which may bring an ambush).
  */
 export function walkOut(from: Survivor[], heroes: Hero[], to: Survivor[], x: number, y: number): void {
-  const going = from.filter((s) => !s.dead && s.home < 0 && !!nearest(s, heroes));
+  const going = from.filter((s) => waiting(s) && !!nearest(s, heroes));
   going.forEach((s, i) => {
     from.splice(from.indexOf(s), 1);
     // (No collide here: the map in use is still the house's. The street's own tick settles them.)
