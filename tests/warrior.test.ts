@@ -1,0 +1,145 @@
+/** The Warrior's rework (shared/warrior.ts, sim/warrior.ts): the step, the shield bash, the riposte, the greatsword, the spear. */
+import { describe, expect, it } from 'vitest';
+import { GUARD, PIN, QUAKE, RIPOSTE, ROLL, SHAFT, SHIELD_BASH, STEP, TICK, WEAPONS, type WeaponId } from '../src/shared/tuning';
+import { ArenaRoom } from '../src/sim/room';
+import { newEnemy } from '../src/sim/enemies';
+import { hitHero } from '../src/sim/combat';
+import { NO_INTENT, type Enemy, type EnemyAttack, type FightEvent, type Intent } from '../src/sim/types';
+
+/** A Warrior with `weapon` at (9, 9) facing up, goblins at (9, y) for each y, kept in place unless `free`. */
+function arena(weapon: WeaponId, ys: number[] = [7.6], kind: Enemy['kind'] = 'scrapper', free = false) {
+  const room = new ArenaRoom(1, { scrappers: false, props: false });
+  const h = room.join('me');
+  Object.assign(h, { weapon, x: 9, y: 9, fx: 0, fy: -1 });
+  const es = ys.map((y, i) => Object.assign(newEnemy(10 + i, kind, 9, y), { cooldown: 99, hp: 400, maxHp: 400, alert: true, fx: 0, fy: 1, respawns: false }));
+  room.enemies = es;
+  let seq = 0;
+  const run = (s: number, i: Partial<Intent> = {}): FightEvent[] => {
+    const out: FightEvent[] = [];
+    room.setIntent('me', { ...NO_INTENT, ay: -1, ...i });
+    for (let k = 0; k < Math.round(s / TICK); k++) {
+      room.step();
+      out.push(...room.events);
+      if (!free) es.forEach((e, j) => Object.assign(e, { x: 9, y: ys[j], kvx: 0, kvy: 0, cooldown: 99 }));
+    }
+    return out;
+  };
+  const tap = (after = 0.7) => (seq++, run(after, { attackSeq: seq }));
+  const loose = (hold: number, after: number) => (seq++, [...run(hold, { attackSeq: seq, attack: true }), ...run(after, { attackSeq: seq, attack: false })]);
+  return { room, h, es, e: es[0], run, tap, loose };
+}
+const lost = (e: Enemy) => e.maxHp - e.hp;
+/** A blow from straight above, landing on the hero now. */
+const blow = (x: number, y: number): EnemyAttack => ({ kind: 'swing', t: 1, windup: 1, active: 0.1, recover: 0.3, dmg: 10, knock: 2, unblockable: false, dx: 0, dy: 1, ox: x, oy: y - 1.2, range: 2, arc: 90, cx: 0, cy: 0, radius: 0, done: false });
+
+describe("the Warrior's step", () => {
+  it('goes about half a roll, quicker, on the dodge button', () => {
+    const { h, run } = arena('sword', [2]);
+    const ev = run(STEP.time + 0.05, { rollSeq: 1, mx: 1, ay: 0 });
+    expect(ev.some((x) => x.k === 'step')).toBe(true);
+    expect(h.x - 9).toBeGreaterThan(STEP.distance * 0.85);
+    expect(h.x - 9).toBeLessThan(STEP.distance * 1.1);
+    expect(STEP.distance).toBeLessThanOrEqual(ROLL.distance * 0.55);
+    expect(STEP.time).toBeLessThan(ROLL.time);
+    // It keeps you facing where you were.
+    expect(h.fy).toBeLessThan(-0.9);
+  });
+  it('gives no protection: a blow that lands mid-step still lands', () => {
+    const { room, h, e, run } = arena('sword', [2]);
+    run(0.04, { rollSeq: 1, mx: 1, ay: 0 });
+    expect(h.act).toBe('step');
+    const hp = h.hp;
+    hitHero(e, blow(h.x, h.y), h, room.time, []);
+    expect(h.hp).toBeLessThan(hp);
+  });
+});
+
+describe('the sword and shield', () => {
+  it('held, the shield bash stuns the goblin in front for longer the fuller the charge', () => {
+    const { e, loose } = arena('sword');
+    const ev = loose(1, 0.15);
+    expect(ev.some((x) => x.k === 'shieldbash')).toBe(true);
+    expect(e.act).toBe('stunned');
+    expect(e.actDur).toBeCloseTo(SHIELD_BASH.stunFull, 1);
+    expect(lost(e)).toBeLessThanOrEqual(WEAPONS.sword.heavy.dmgFull);
+  });
+  it('a counter straight off the parry is a riposte: twice the counter; later, a plain counter', () => {
+    const counterHit = (wait: number) => {
+      const { room, h, e, tap, run } = arena('sword');
+      // A blow lands with the parry open: parried.
+      h.parryOpenAt = room.time;
+      hitHero(e, blow(h.x, h.y), h, room.time, []);
+      expect(e.act).toBe('stunned');
+      run(wait);
+      const before = e.hp;
+      const ev = tap();
+      return { n: before - e.hp, ev };
+    };
+    const quick = counterHit(0.1), late = counterHit(RIPOSTE.window + 0.2);
+    const base = WEAPONS.sword.combo[0].dmg * GUARD.counterMult;
+    expect(quick.n).toBe(Math.round(base * RIPOSTE.mult));
+    expect(quick.ev.some((x) => x.k === 'riposte')).toBe(true);
+    expect(quick.ev.some((x) => x.k === 'perfect')).toBe(true);
+    expect(late.n).toBe(Math.round(base));
+    expect(late.ev.some((x) => x.k === 'riposte')).toBe(false);
+  });
+});
+
+describe('the greatsword', () => {
+  it('holding block gives no guard; a tap in the window still parries', () => {
+    const held = arena('greatsword', [2]);
+    held.run(0.2, { block: true, blockSeq: 0 });
+    expect(held.h.blocking).toBe(false);
+    const hp = held.h.hp;
+    hitHero(held.e, blow(held.h.x, held.h.y), held.h, held.room.time, []);
+    expect(held.h.hp).toBeLessThan(hp);
+
+    const tapped = arena('greatsword', [7.6]);
+    tapped.run(TICK, { blockSeq: 1 });
+    hitHero(tapped.e, blow(tapped.h.x, tapped.h.y), tapped.h, tapped.room.time, []);
+    expect(tapped.h.hp).toBe(tapped.h.maxHp);
+    expect(tapped.e.act).toBe('stunned');
+  });
+  it('the overhead loosed on the white flash sends out a shockwave that knocks nearby goblins down', () => {
+    // One in front of the blade, one off to the side the overhead doesn't reach.
+    const { es, loose } = arena('greatsword', [7.6, 7.6], 'scrapper', true);
+    Object.assign(es[1], { x: 10.6 });
+    const ev = loose(0.9 + 0.08, 0.3);
+    expect(ev.some((x) => x.k === 'perfect')).toBe(true);
+    expect(ev.some((x) => x.k === 'quake')).toBe(true);
+    expect(es[1].act).toBe('stunned');
+    expect(es[1].actDur).toBe(QUAKE.down);
+    expect(lost(es[1])).toBe(QUAKE.dmg);
+  });
+  it('held past the flash, no shockwave', () => {
+    const { loose } = arena('greatsword');
+    expect(loose(0.9 + 0.5, 0.4).some((x) => x.k === 'quake')).toBe(false);
+  });
+});
+
+describe('the spear', () => {
+  it('the held lunge runs through three goblins in a line', () => {
+    const { es, loose } = arena('spear', [7.4, 6.8, 6.2, 5.6]);
+    const ev = loose(0.9 + 0.5, 0.4);
+    // (The fourth may still be bowled over by the others: a body blow, not the point.)
+    expect(ev.filter((x) => x.k === 'hit' && x.src === 'spear').length).toBe(3);
+    expect(lost(es[0])).toBe(WEAPONS.spear.heavy.dmgFull);
+  });
+  it('a goblin caught mid-charge is stopped dead and pinned', () => {
+    const { e, tap } = arena('spear', [7.4]);
+    Object.assign(e, { act: 'attack', attack: { ...blow(9, 9), kind: 'charge', t: 0.1, windup: 0.5, unblockable: true } });
+    const ev = tap(0.25);
+    expect(ev.some((x) => x.k === 'pin')).toBe(true);
+    expect(ev.some((x) => x.k === 'perfect')).toBe(true);
+    expect(e.act).toBe('pinned');
+    expect(e.actDur).toBe(PIN.time);
+    expect(e.attack).toBe(null);
+  });
+  it('too close, the shaft does less than the point', () => {
+    const near = arena('spear', [8.3]), far = arena('spear', [7.2]);
+    near.tap(0.3);
+    far.tap(0.3);
+    expect(lost(near.e)).toBe(Math.round(WEAPONS.spear.combo[0].dmg * SHAFT.mult));
+    expect(lost(far.e)).toBe(WEAPONS.spear.combo[0].dmg);
+  });
+});

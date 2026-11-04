@@ -13,9 +13,10 @@ import type { Enemy, FightEvent, Hero } from './types';
 /** A counter started this soon after the parry, with a kit that ripostes. */
 export const riposteNow = (h: Hero, now: number) => h.counter && !!WEAPONS[h.weapon].ripostes && now - (h.parriedAt ?? -9) <= RIPOSTE.window;
 
-/** The spear's shaft: a goblin inside half its reach takes the shaft, not the point. */
+/** The spear's shaft: a goblin inside half its reach takes the shaft, not the point (a quick thrust;
+ *  the held lunge drives the point home, since it carries you in among them). */
 export function shaftMult(h: Hero, s: Swing, e: Enemy): number {
-  if (!WEAPONS[h.weapon].shaft) return 1;
+  if (!WEAPONS[h.weapon].shaft || h.heavy) return 1;
   return Math.hypot(e.x - h.x, e.y - h.y) - e.radius < s.range * SHAFT.near ? SHAFT.mult : 1;
 }
 

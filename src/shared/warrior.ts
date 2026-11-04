@@ -23,5 +23,5 @@ export const RIPOSTE = { window: 0.5, mult: 2 };
 export const QUAKE = { ahead: 1.4, radius: 2.6, down: 1.2, big: 0.5, dmg: 12, knock: 9 };
 /** The spear's perfect hit: a goblin charging or lunging is stopped dead and pinned this long. */
 export const PIN = { time: 1.0 };
-/** The spear's weakness: a goblin inside `near` of its reach takes `mult` (the shaft, not the point). */
+/** The spear's weakness: a goblin inside `near` of its reach takes `mult` from a quick thrust (the shaft, not the point). */
 export const SHAFT = { near: 0.5, mult: 0.5 };
