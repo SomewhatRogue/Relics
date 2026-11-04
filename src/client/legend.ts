@@ -43,28 +43,28 @@ async function rows(g: Game, touch: boolean): Promise<Row[]> {
   out.push({ face: round(await pic(safe(() => itemIcon(it)))), name: 'ATTACK', key: 'LEFT CLICK',
     text: kitRows(me.weapon).map(([l, v]) => `<i>${l}</i> ${v}`).join('<br>') });
   const guard = guardOf(kit);
-  if (guard === 'full') out.push({ face: { shape: 'shield', size: 28, grade: 'iron', icon: icon('block') }, name: 'BLOCK', key: 'RIGHT CLICK', text: 'Hold to block. Tap it while the red is flashing white to parry.' });
-  if (guard === 'parry') out.push({ face: { shape: 'shield', size: 28, grade: 'iron', icon: icon('parry') }, name: 'PARRY', key: 'RIGHT CLICK', text: "Tap it while the red is flashing white to parry. You can't hold a block." + (kit.spellblade ? ' A parry fills your blade.' : '') });
+  if (guard === 'full') out.push({ face: { shape: 'shield', size: 28, grade: 'iron', icon: icon('block') }, name: 'BLOCK', key: 'RIGHT CLICK', text: 'Hold to block. Tap while the red flashes white to parry.' });
+  if (guard === 'parry') out.push({ face: { shape: 'shield', size: 28, grade: 'iron', icon: icon('parry') }, name: 'PARRY', key: 'RIGHT CLICK', text: "Tap while the red flashes white to parry. No held block." + (kit.spellblade ? ' A parry fills your blade.' : '') });
   if (dodgeOf(kit)) {
     const dn = dodgeName(cls);
-    out.push({ face: { shape: 'diamond', size: 30, grade: 'iron', icon: icon(({ JUMP: 'jump', DASH: 'dash', BLINK: 'blink' } as Record<string, IconId>)[dn] ?? 'roll') }, name: dn, key: 'SPACE', text: 'Get out of the way of a blow, even one with a striped edge.' });
+    out.push({ face: { shape: 'diamond', size: 30, grade: 'iron', icon: icon(({ JUMP: 'jump', DASH: 'dash', BLINK: 'blink' } as Record<string, IconId>)[dn] ?? 'roll') }, name: dn, key: 'SPACE', text: 'Get out of any blow, even a striped one.' });
   }
-  if (kit.reloads) out.push({ face: round(icon('reload'), 'gilt'), name: 'RELOAD', key: 'C', text: 'Hold to wind the crossbow. Wind it all in one go, standing still, and the bolt glints: that shot hits harder and goes through the whole line.' });
+  if (kit.reloads) out.push({ face: round(icon('reload'), 'gilt'), name: 'RELOAD', key: 'C', text: 'Hold to wind the crossbow. Wind it in one go, standing still, and the bolt glints (a PERFECT).' });
   const [skill, relic] = me.relics;
-  if (knows(me, 'skill')) out.push({ face: round(skillCanvas(skill, skill === 'channel' ? castElement(me) : me.augments[skill])), name: 'SKILL', key: 'E', text: `Your class skill, ${RELICS[skill].name}. The dark sweep and the number count down till you can use it again.` });
+  if (knows(me, 'skill')) out.push({ face: round(skillCanvas(skill, skill === 'channel' ? castElement(me) : me.augments[skill])), name: 'SKILL', key: 'E', text: `Your class skill, ${RELICS[skill].name}. The dark sweep and the number count down to the next use.` });
   const carried = relic ? carriedItem(me) : undefined;
-  if (relic) out.push({ face: round(await pic(relicItemIcon(carried ?? ({ kind: relic, charge: 1 } as Parameters<typeof relicItemIcon>[0])))), name: 'RELIC', key: 'R', text: 'The relic you carry. The bar along its foot is how much it has left.' });
+  if (relic) out.push({ face: round(await pic(relicItemIcon(carried ?? ({ kind: relic, charge: 1 } as Parameters<typeof relicItemIcon>[0])))), name: 'RELIC', key: 'R', text: 'The relic you carry. The bar along its foot is its charge.' });
   const next = me.belt[0];
-  out.push({ face: { shape: 'orb', size: 30, grade: 'iron', fill: 0.7, liquid: '#a8261c', icon: next ? await pic(potionIcon(next)) : null }, name: 'HEALTH', key: 'Q', text: 'Your health. Tap to drink the potion on it. Hold to bring the next one forward. The number is how many you have.' });
+  out.push({ face: { shape: 'orb', size: 30, grade: 'iron', fill: 0.7, liquid: '#a8261c', icon: next ? await pic(potionIcon(next)) : null }, name: 'HEALTH', key: 'Q', text: 'Your health. Tap to drink the front potion, hold to bring the next forward. The number is how many you have.' });
   // The gilt slot: what it can say.
   const ctx: [IconId, string, string, string][] = [
-    ['grab', 'GRAB', 'G', "Pick up a stunned goblin, or a small one you've got behind, then press again to throw it." + (cls === 'WARRIOR' ? ' You can lift crates and barrels too.' : '')],
-    ['help', 'HELP UP', 'G', "Get a friend who's down back on their feet."],
-    ['burn', 'BURN', 'G', 'Set fire to a spider nest, or to the oiled woodpile against a house.'],
+    ['grab', 'GRAB', 'G', 'Pick up a stunned goblin, or a small one from behind. Press again to throw.' + (cls === 'WARRIOR' ? ' Crates and barrels too.' : '')],
+    ['help', 'HELP UP', 'G', 'Get a downed friend back up.'],
+    ['burn', 'BURN', 'G', 'Set fire to a spider nest, or an oiled woodpile by a house.'],
     ['open', 'OPEN', 'F', 'Open a chest.'],
-    ['chat', 'TALK', 'E', "Talk to whoever you're standing by."],
-    ['enter', 'ENTER', 'E', 'Go in through the door.'],
-    ['use', 'USE', 'E', "Use what you're standing by: the job board, the market, the gate."],
+    ['chat', 'TALK', 'E', "Talk to whoever you're by."],
+    ['enter', 'ENTER', 'E', 'Go through the door.'],
+    ['use', 'USE', 'E', "Use the job board, market or gate you're by."],
   ];
   for (const [ic, name, key, text] of ctx) out.push({ face: round(icon(ic), 'gilt'), name, key, text });
   return out.map((r) => ({ ...r, key: touch ? '' : r.key, ...drawn(r.face) }));

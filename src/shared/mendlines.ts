@@ -98,7 +98,7 @@ export const RAID: Partial<Record<Who, string>> = {
   gate: "They never came near the gate. They don't need it, and that's what worries me.",
   dunn: "They came over where the wall's weakest, same as always, and we only held the square. Put coin in and we'll mend it again.",
   hob: "I was on the north stretch when they came over. I'll not talk about it, but my boots are ruined.",
-  pike: "They smashed two lamps and I've not slept since. Lamps you can buy.",
+  pike: "They smashed two lamps, and I've not slept since. The lamps we can buy again.",
   orla: "Did you hear them in the night? They whistle going over the wall, and I'd know it anywhere now.",
   perrin: "They went through my beds and didn't take anything. Just walked up and down them in rows, and I can't stop thinking about it.",
 };
@@ -133,5 +133,5 @@ export const MEND_UI = {
   board: (day: number, loss: string) => `Day ${day}: the hungry came over the north wall in the night. ${loss.charAt(0).toUpperCase() + loss.slice(1)}.`,
   hollis: "Every coin you give goes in my book, and every den you burn.",
   done: 'Done',
-  gear: 'Weapons and armour given to the walls count for 50% more than Tobin would pay.',
+  gear: 'Weapons and armor given here count for 50% more than Tobin pays.',
 };

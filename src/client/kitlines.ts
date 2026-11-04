@@ -15,17 +15,17 @@ export const KIT: Record<WeaponId, KitRow> = {
   greatsword: { tap: 'Wide, slow sweeps', hold: 'Overhead', perfect: 'Shockwave, knocks flat' },
   spear: { tap: 'Long thrusts', hold: 'Lunge through three', perfect: 'Pins all it runs through', also: 'Pins a charging goblin' },
   // Ranger (shared/ranger.ts): the short sword on a tap, the bow on a hold.
-  longbow: { tap: 'Short sword', hold: 'Draw bow', perfect: 'Blinds and crits' },
+  longbow: { tap: 'Short sword', hold: 'Draw bow', perfect: 'Blinds, critical hit' },
   shortbow: { tap: 'Short sword', hold: 'Quick shot, walking', perfect: 'Full-power shot' },
-  crossbow: { tap: 'Short sword', hold: 'Aim and fire', perfect: 'Glint: 1.5x, whole line', also: 'RELOAD winds it' },
+  crossbow: { tap: 'Short sword', hold: 'Aim and fire', perfect: 'Glint: 1.5x damage, whole line', also: 'RELOAD winds it' },
   // Rogue (shared/venom.ts): the daggers' thrown knife is a drawn shot, so its flash is simply full power.
-  daggers: { tap: 'Fast stabs', hold: 'Throw a dagger', perfect: 'Full-power throw', also: '2.5x from behind' },
+  daggers: { tap: 'Fast stabs', hold: 'Throw a dagger', perfect: 'Full-power throw', also: '2.5x damage from behind' },
   rapier: { tap: 'Long thrusts', hold: 'Lunge through two', perfect: 'Skewers, bleeds' },
   poisoner: { tap: 'Short sword, hits two', hold: 'Poison dart', perfect: 'Stuns, stronger poison' },
   // Mage (shared/mage.ts): the big spells cost magic (a Mage's bar, shared/barword.ts).
   wand: { tap: 'Sparks on the move', hold: 'Burst, costs magic', perfect: 'Interrupts any attack', also: 'Spark interrupts a wind-up' },
   staff: { tap: 'Close slash', hold: 'Raise a wall, costs magic', perfect: 'Bigger wall' },
-  spellblade: { tap: 'Cuts charge the blade', hold: 'Wreathe the blade, costs magic', perfect: 'Free wreathe', also: 'Parry fills the blade' },
+  spellblade: { tap: 'Cuts charge the blade', hold: 'Enchant the blade, costs magic', perfect: 'Free enchant', also: 'Parry fills the blade' },
   // Cleric (shared/cleric.ts): every perfect shields friends near you.
   mace: { tap: 'Short blows, 3rd heals', hold: 'Smite, stuns', perfect: 'Harder, shields friends' },
   censer: { tap: 'Two cuts, healing swing', hold: 'Whirl, sets alight', perfect: 'Coals flare, shields friends' },

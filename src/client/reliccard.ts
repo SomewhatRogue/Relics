@@ -1,11 +1,12 @@
 /**
- * A relic's card, the same in the pack, at the church and at Ivo's bench: its picture, name, a LOUD or
- * element tag, SPARES FRIENDS, the charge as a bar and a count, and what it does. Also the small charge
+ * A relic's card, the same in the pack, at the church and at Ivo's bench: its picture, name (LOUD and the
+ * element are in it), SPARES FRIENDS, the charge as a bar and a count, then USE and CHARGE rows. Also the small charge
  * bar the RELIC button carries.
  */
 import { isDark, relicFill, relicMax, relicName, type RelicItem } from '../shared/relicitems';
 import { relicCol, relicItemIcon } from './relicicons';
 import { RELICW, RELIC_LINES } from './relicwords';
+import { labelRows } from './card';
 import './relics.css';
 
 /** The bar: gold while bright, amber past half, red-brown near the end, grey when dark. */
@@ -17,8 +18,8 @@ export function chargeBar(r: RelicItem): string {
 
 /** `pick`: a data attribute for a tap (the church's picker), `on`: shown chosen. */
 export function relicCard(r: RelicItem, opts: { pick?: string; on?: boolean; tag?: string; brief?: boolean } = {}): string {
-  const dark = isDark(r), tags = [r.tier === 3 ? RELICW.loud : '', dark ? RELICW.dark : '', RELICW.spares, opts.tag ?? ''].filter(Boolean);
-  const line = opts.brief ? '' : `<div class="rline">${RELIC_LINES[r.kind] ?? ''} ${dark ? (r.el ? RELICW.darkElLine : RELICW.darkLine) : r.el ? RELICW.noRecharge : RELICW.fades}</div>`;
+  const dark = isDark(r), tags = [dark ? RELICW.dark : '', RELICW.spares, opts.tag ?? ''].filter(Boolean);
+  const line = opts.brief ? '' : labelRows([['USE', RELIC_LINES[r.kind] ?? ''], ['CHARGE', dark ? (r.el ? RELICW.darkElLine : RELICW.darkLine) : r.el ? RELICW.noRecharge : RELICW.fades]], 'rline');
   return `<div class="rcard${dark ? ' dark' : ''}${opts.on ? ' on' : ''}"${opts.pick ? ` data-rpick="${opts.pick}"` : ''}>` +
     `<img class="ricon" src="${relicItemIcon(r)}" alt="">` +
     `<div class="rbody"><b style="color:${relicCol(r)}">${relicName(r)}</b>` +

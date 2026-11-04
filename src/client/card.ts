@@ -3,7 +3,7 @@
  * and what it would change against what you wear now, in the numbers the room uses. Green better, red
  * worse. Used by the loot card, chests and the pack.
  */
-import { CLASS_DODGES, CLASS_GUARD, guardOf, HUNGRY, type HungryId, MODS, MOD_TEXT, TIERS, TRAITS, WEAPONS, CHARGE, gearStats, itemName, slotOf, traitText, type HeroClass, type Item, type WeaponId } from '../shared/tuning';
+import { CLASS_DODGES, CLASS_GUARD, guardOf, HUNGRY, type HungryId, LASTS, POTIONS, type PotionId, MODS, MOD_TEXT, TIERS, TRAITS, WEAPONS, CHARGE, gearStats, itemName, slotOf, traitText, type HeroClass, type Item, type WeaponId } from '../shared/tuning';
 import type { Hero } from '../sim/types';
 import { kitRows } from './kitlines';
 import { areas } from './guardarea';
@@ -11,8 +11,11 @@ import { barWord, barWords } from '../shared/barword';
 
 /** How a weapon fights, as three short labelled rows (TAP, HOLD, PERFECT, and ALSO where there's a
  *  bonus; kitlines.ts), then its GUARD and DODGE areas (guardarea.ts). */
-export const weaponHow = (w: WeaponId): string =>
-  `<div class="kitrows">${kitRows(w).map(([l, v]) => `<div><b>${l}</b><span>${v}</span></div>`).join('')}</div>` + areas(w);
+export const weaponHow = (w: WeaponId): string => labelRows(kitRows(w)) + areas(w);
+/** Short labelled rows, a label on the left and a few words on the right (TAP / HOLD / PERFECT, GIFT /
+ *  COST, EFFECT / LASTS, USE / CHARGE...): the one way the game shows what a thing does. */
+export const labelRows = (rows: [string, string][], cls = ''): string =>
+  `<div class="kitrows${cls ? ' ' + cls : ''}">${rows.filter(([, v]) => v).map(([l, v]) => `<div><b>${l}</b><span>${v}</span></div>`).join('')}</div>`;
 /** How a weight of armor wears, a line for each thing it changes (Kyle: "put each thing on its own line"). */
 const ARMOR_HOW = {
   light: ['Light', 'Full speed', 'Full dodge', 'Full damage taken'],
@@ -83,12 +86,20 @@ export function compare(h: Hero, it: Item): string {
 export function card(it: Item, h?: Hero): string {
   const t = TIERS[it.quality], s = slotOf(it), cls = h ? WEAPONS[h.weapon].cls : it.kit ? WEAPONS[it.kit].cls : undefined;
   const how = s === 'weapon' ? weaponHow(it.kit!) : s === 'armor' ? armorHow(it.armor ?? 'light', cls) : '';
-  const mods = (it.mods ?? []).map((m) => `<div class="tr"><b>${barWords(MODS[m.id].name, cls)} ${m.v > 0 ? '+' : ''}${MODS[m.id].unit === '%' ? Math.round(m.v * 100) + '%' : MODS[m.id].unit === 's' ? m.v + ' s' : m.v}</b> ${barWords(MOD_TEXT[m.id], cls)}</div>`);
-  const traits = it.traits.map((k) => `<div class="tr"><b>${barWords(TRAITS[k].name, cls)}</b> ${traitText(k, cls)}</div>`);
+  // "NAME +10%: what it does" and "NAME: what it does" (Kyle: "STAMINA ON PARRY: parry refills stamina").
+  const mods = (it.mods ?? []).map((m) => `<div class="tr"><b>${barWords(MODS[m.id].name, cls)} ${m.v > 0 ? '+' : ''}${MODS[m.id].unit === '%' ? Math.round(m.v * 100) + '%' : MODS[m.id].unit === 's' ? m.v + ' s' : m.v}${MOD_TEXT[m.id] ? ':' : ''}</b> ${barWords(MOD_TEXT[m.id], cls)}</div>`);
+  const traits = it.traits.map((k) => `<div class="tr"><b>${barWords(TRAITS[k].name, cls)}:</b> ${traitText(k, cls)}</div>`);
   return `<div class="card-head" style="--t:${t.col}"><span class="chip">${t.name}</span><b>${itemName(it)}</b></div>` +
     (how ? `<div class="how">${how}</div>` : '') + [...mods, ...traits].join('') +
-    (it.hungry ? `<div class="gift">${HUNGRY[it.hungry as HungryId].gift}</div><div class="cost">${HUNGRY[it.hungry as HungryId].cost}</div>` : '') + (mods.length + traits.length || it.hungry ? '' : `<div class="tr">Plain. No modifiers.</div>`);
+    (it.hungry ? hungryRows(it.hungry as HungryId, cls) : '') + (mods.length + traits.length || it.hungry ? '' : `<div class="tr">Plain. No modifiers.</div>`);
 }
+
+/** A potion: EFFECT, LASTS, and THROWN for a flask. */
+export const potionRows = (id: PotionId, cls?: HeroClass): string =>
+  labelRows([['EFFECT', barWords(POTIONS[id].text, cls)], ['LASTS', LASTS[id] ? `${LASTS[id]} s` : ''], ['USE', POTIONS[id].thrown ? 'Thrown where you aim' : 'Drink']]);
+/** Hungry gear's bargain, GIFT then COST, in its red rows. */
+export const hungryRows = (id: HungryId, cls?: HeroClass): string =>
+  labelRows([['GIFT', barWords(HUNGRY[id].gift, cls)], ['COST', barWords(HUNGRY[id].cost, cls)]], 'hungry');
 
 /** The hero sheet: every number, as worn. */
 export const heroSheet = (h: Hero) => '<div class="cmp sheet">' + sheet(worn(h)).filter((r) => shown(r, h.weapon)).map((r) => `<div><span>${r.label}</span><b>${fmt(r)}</b></div>`).join('') + '</div>';

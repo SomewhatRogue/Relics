@@ -8,9 +8,9 @@ export const COPY = {
   relic: 'RELIC',
   packed: 'SPARES',
   relicEmpty: 'None yet. They come from deep jobs.',
-  packEmpty: 'Empty. Take gear off goblins, out of chests, or buy from Halvard.',
-  packFull: 'Your pack is full. Drop something.',
-  plain: 'Plain. No traits.',
+  packEmpty: 'Empty. Gear comes from goblins, chests and Halvard.',
+  packFull: 'Pack full. Drop something.',
+  plain: 'Plain. No modifiers.',
   stillGoing: 'The fight goes on while your pack is open.',
   equip: 'EQUIP',
   /** On the hand's card: one button for each weapon of your class in the pack. */
@@ -23,25 +23,25 @@ export const COPY = {
   takeOff: 'TAKE OFF',
   intoPack: 'INTO THE PACK',
   drunkNext: 'DRUNK FIRST',
-  dragHint: 'Drag a piece onto its slot to wear it, or into the pack to take it off. Tap one to see it.',
+  dragHint: 'Drag a piece onto its slot to wear it, or into the pack to take it off. Tap to see it.',
   stats: 'STATS',
   belt: 'BELT',
   next: 'NEXT',
   pour: 'POUR OUT',
-  beltEmpty: 'Empty. Agne and Gannet sell them, and goblins drop them.',
+  beltEmpty: 'Empty. Agne and Gannet sell potions; goblins drop them.',
   takes: 'Goes in your pack.',
-  full: 'Your pack is full.',
+  full: 'Pack full.',
   otherClass: 'For a {Class}.',
 };
 
 /** The Healer's coal (sim/lantern.ts). What it does is on the class card (CENSER, shared/classes.ts). */
 export const COAL = {
   name: 'COALS',
-  line: 'Your heals are stronger. Goblins notice you from further off and go for you first.',
+  line: 'Stronger heals. Goblins notice you from further off and go for you first.',
   pickup: 'CENSER FED',
   /** Said to a Healer whose censer has been fed (Kyle: say it plainly). */
   isolde: "You've been feeding that censer. Your heals are stronger for it, but the goblins will come for you sooner. Keep your back to a wall.",
-  odric: 'Lit from the Lantern, like every one before it. Feed it what you find out there. Have you eaten today? You look thin.',
+  odric: 'Lit from the Lantern, like every one before it. Feed it the coals the butchers leave. Have you eaten today? You look thin.',
 };
 
 /** Hungry gear at the church, and the town noticing the Want (lore keeper; Kyle cut two, 2026-11-04). */
@@ -61,7 +61,7 @@ export const TALLY = {
 
 export const SMITH = {
   bought: "In your pack. He's already oiling the next one.",
-  anvil: 'Spares in the fire. Steel and gold for the rest.',
+  anvil: 'Melt your spares for steel. Steel and gold buys an upgrade.',
   hungry: 'Not that one. Not in my fire.',
   sell: 'Leave it on the bench. I buy cheaper than I sell.',
 };

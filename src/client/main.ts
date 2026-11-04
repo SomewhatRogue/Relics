@@ -191,11 +191,11 @@ $('.tb.use').addEventListener('touchstart', (e) => (e.preventDefault(), use()), 
 
 let parries = 0;
 const townTips = input.touch
-  ? ['Walk to the JOB BOARD and tap USE to take a job', 'Walk up into a door to go in. Everyone inside has something to say', 'The FORGE: Halvard upgrades your gear or melts it down for steel', 'The TRAINING HALL: knacks, and the squire takes you to the yard', 'The TOWN HALL: vote on what Wickhold does next']
-  : ['Walk to the JOB BOARD and press E to take a job', 'Walk up into a door to go in. Press E by anyone to talk', 'The FORGE: Halvard upgrades your gear or melts it down for steel', 'The TRAINING HALL: knacks, and the squire takes you to the yard', 'The TOWN HALL: vote on what Wickhold does next'];
+  ? ['JOB BOARD: tap USE to take a job', 'Walk into a door to go in', 'FORGE: Halvard upgrades gear or melts it for steel', 'TRAINING HALL: knacks, and the practice yard', 'TOWN HALL: vote on what Wickhold does next']
+  : ['JOB BOARD: press E to take a job', 'Walk into a door to go in. E by anyone to talk', 'FORGE: Halvard upgrades gear or melts it for steel', 'TRAINING HALL: knacks, and the practice yard', 'TOWN HALL: vote on what Wickhold does next'];
 const tips = input.touch
-  ? ['Stun or get behind a small goblin, then GRAB it', 'Warriors can GRAB barrels and tables and throw them', 'Break an oil barrel near goblins to set them on fire', 'Holding a goblin? SLAM it down, or THROW it at another', 'POTION drinks the potion at the front of your belt', 'Most item traits pay off when you parry, dodge or hit a PERFECT', 'Cottages and barns hold goblins, and sometimes someone in a cage', 'CLERIC: SANCTUARY blesses the ground and wards whoever is most hurt', 'Oil and fire burn wooden buildings down. Burn out the dens', 'Two frost hits freeze a goblin. A heavy blow then shatters it', 'Fire on a chilled goblin makes STEAM, which stuns. Storm on a burning one makes a FLARE, which knocks goblins back', 'Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'SKILL uses your class skill, which your trainer teaches from level 3', 'Red with a striped edge can\'t be blocked: dodge or walk out of it', 'DEEP jobs end at a named butcher, who always carries a RELIC', 'TWIN DAGGERS: dash behind a goblin and BACKSTAB', 'Push the stick part way to creep. Hit a goblin that hasn\'t seen you for an AMBUSH']
-  : ['G grabs a stunned goblin (or one you got behind). Click to slam, G to throw', 'Warriors: G lifts barrels and tables. Throw them, or slam them down', 'Break an oil barrel near goblins to set them on fire', 'Q drinks the potion at the front of your belt. Hold Q to bring the next one to the front', 'Bows: let go on the white flash for a PERFECT. Hold too long and the shot weakens', 'Walk up into a cottage door to go in. Fire burns buildings down', 'Cleric: E uses SANCTUARY, which blesses the ground and wards whoever is most hurt', 'Two frost hits freeze a goblin. A heavy blow then shatters it', 'Fire on a chilled goblin makes STEAM, which stuns. Storm on a burning one makes a FLARE, which knocks goblins back', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: your class skill. R: a relic, once you have won one on a DEEP job', 'Red with a striped edge can\'t be blocked: SPACE to dodge, or walk out of it', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or spellblade', 'Daggers: dash behind a goblin and BACKSTAB', 'Hold Shift to creep. Hit a goblin that hasn\'t seen you for an AMBUSH', 'Crossbow: hold C to wind it. Wind it all in one go, standing still, and the bolt glints for a shot that hits harder and goes through the whole line'];
+  ? ['Stun or get behind a small goblin, then GRAB it', 'Warriors: GRAB barrels and tables, and throw them', 'Break an oil barrel near goblins to set them on fire', 'Holding a goblin? SLAM it down, or THROW it at another', 'POTION drinks your front potion', 'Most item traits pay off when you parry, dodge or hit a PERFECT', 'Cottages and barns hold goblins, and sometimes someone in a cage', 'Oil and fire burn wooden buildings down. Burn out the dens', 'Two frost hits freeze a goblin. A heavy blow then shatters it', 'Fire on a chilled goblin: STEAM, which stuns. Storm on a burning one: FLARE, which knocks back', 'SKILL: your class skill, taught by your trainer from level 3', 'Red with a striped edge can\'t be blocked: dodge or walk out of it', 'DEEP jobs end at a named butcher, who always carries a RELIC', 'TWIN DAGGERS: dash behind a goblin and BACKSTAB', 'Push the stick part way to creep. Hit a goblin that hasn\'t seen you for an AMBUSH']
+  : ['G grabs a stunned goblin (or one you got behind). Click to slam, G to throw', 'Warriors: G lifts barrels and tables. Throw them, or slam them down', 'Break an oil barrel near goblins to set them on fire', 'Q drinks your front potion. Hold Q to bring the next forward', 'Bows: let go on the white flash for a PERFECT. Hold too long and the shot weakens', 'Walk into a cottage door to go in. Fire burns buildings down', 'Two frost hits freeze a goblin. A heavy blow then shatters it', 'Fire on a chilled goblin: STEAM, which stuns. Storm on a burning one: FLARE, which knocks back', 'E: your class skill. R: a relic, once you have won one on a DEEP job', 'Red with a striped edge can\'t be blocked: SPACE to dodge, or walk out of it', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or spellblade', 'Daggers: dash behind a goblin and BACKSTAB', 'Hold Shift to creep. Hit a goblin that hasn\'t seen you for an AMBUSH'];
 let tipAt = -99, tipI = 0;
 
 function hud(now: number): void {
@@ -291,7 +291,7 @@ function hud(now: number): void {
       ? `<b>${titleCase(room.map.name)}</b> Walk out at the bottom<span><i class="coin"></i>${pr.gold}</span>`
       : game.mode === 'town'
       ? `<b>Wickhold</b> DAY ${game.world.day}<span><i class="coin"></i>${pr.gold}${pr.picks ? '<em>(A KNACK TO PICK)</em>' : ''}<em>${game.world.rescued} HOME</em>${link.online ? '<em>WORLD ' + link.group.toUpperCase() + '</em>' : ''}</span>`
-      : `<b>Training Yard</b> Walk out at the bottom to go back to town`;
+      : `<b>Training Yard</b> Walk out at the bottom for town`;
   }
   const spot = game.near(), busy = panel.open || title.open;
   $('#prompt').hidden = !spot || busy;
@@ -317,8 +317,8 @@ function hud(now: number): void {
 }
 
 /** The LEAVE button's question, alone and in a party. */
-const LEAVE_SOLO = "The job's lost if you go, and you keep half the gold you've picked up.";
-const LEAVE_PARTY = "Your party carries on without you. You keep the gold you've picked up, but not the job's pay.";
+const LEAVE_SOLO = "The job fails. You keep half the gold you've picked up.";
+const LEAVE_PARTY = "Your party carries on. You keep the gold you've picked up, not the job's pay.";
 
 /** On the banner once you're out of a job (your party carries on without you). */
 const OUT_TEXT = "You're out till the job's done. Your party carries on";

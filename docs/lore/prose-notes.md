@@ -153,7 +153,7 @@ callouts, the job board, party and lobby text, and the church, council and relic
   well-timed block), health, damage, friends, foes. If a word means a mechanic on one screen, it
   means the same mechanic on every screen.
 - **Two white flashes, two phrasings.** "The white flash" is a hold's cue: let go on it (a bow's
-  draw, the spellblade's wreathe, every "ON THE FLASH" in the kit lines). The parry's cue is always
+  draw, the spellblade's enchant, every "ON THE FLASH" in the kit lines). The parry's cue is always
   "the red flashes white" (or "while the red is flashing white"): the red telegraph on the floor
   turning white. Never call the parry cue "the white flash", so the two never blur.
 - **Mercy stays off screen.** The word is reserved for the Unmaking in the story bible.

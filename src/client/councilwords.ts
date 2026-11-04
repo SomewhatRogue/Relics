@@ -35,7 +35,7 @@ export const ADVOCATES: Record<number, { choice: string; title: string; who: str
 
 /** The reeve's panel: when it closes, and that you can change your mind until then. */
 export const COUNCILW = {
-  closes: (nights: number, day: string) => `Everyone in Wickhold has a voice, and voting runs all week. It closes ${nights <= 0 ? 'tonight' : nights === 1 ? 'tomorrow' : day.charAt(0) + day.slice(1).toLowerCase()} at midnight (Pacific time), and whichever side has the most voices then wins.`,
+  closes: (nights: number, day: string) => `Everyone in Wickhold can vote, all week. Voting closes ${nights <= 0 ? 'tonight' : nights === 1 ? 'tomorrow' : day.charAt(0) + day.slice(1).toLowerCase()} at midnight (Pacific time). Most votes wins.`,
   tied: 'It was a tie, so the council sits one more night. If it\'s still a tie, Hollis breaks it himself.',
   yours: 'Your voice is in. You can change it until voting closes.',
 };

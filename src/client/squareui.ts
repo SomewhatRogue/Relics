@@ -45,7 +45,7 @@ export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key:
     const where = link?.online ? `World: <b>${link.group.toUpperCase()}</b>.` : 'Your own heroes only, until you play online.';
     const tabs = `<div class="rtabs">${(['brave', 'unlucky'] as const).map((s) => `<button data-side="${s}" class="${s === rollSide ? 'on' : ''}">${s === 'brave' ? 'THE BRAVE' : 'THE UNLUCKY'}</button>`).join('')}</div>`;
     const html = tabs + p(where) + rollHtml(board, pr, rollSide) +
-      (link ? `<label class="code">WORLD CODE <input id="wcode" maxlength="24" value="${esc(link.group)}" autocomplete="off" spellcheck="false"></label><p class="dim">A code of your own makes a town apart. WICKHOLD is everyone.</p>` : '');
+      (link ? `<label class="code">WORLD CODE <input id="wcode" maxlength="24" value="${esc(link.group)}" autocomplete="off" spellcheck="false"></label><p class="dim">Type your own code for a private town. WICKHOLD is the one everyone shares.</p>` : '');
     panel.show('THE ROLL OF THE BRAVE', html, [...(link ? [{ label: 'PLAY IN THIS WORLD', act: () => {
       const v = (document.getElementById('wcode') as HTMLInputElement | null)?.value ?? '';
       link!.join(v);
@@ -55,8 +55,8 @@ export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key:
     return true;
   }
   if (id === 'well') {
-    panel.show('THE WELL', p('Old as the town, and the water\'s tasted of copper since the siege. People drop a coin in for luck. Father Odric says that\'s a coin kept, not given, and drops one in anyway.') +
-      p(pr.wish ? 'Your coin is in. Your next job starts lucky.' : `A coin (${SHOP.wish} gold) for luck: you start your next job with +${Math.round((BLESSING.dmgMult - 1) * 100)}% damage and ${Math.round((1 - BLESSING.taken) * 100)}% less damage taken for 20 seconds.`),
+    panel.show('THE WELL', p('Old as the town, and the water\'s tasted of copper since the siege. People drop a coin in for luck, Father Odric too.') +
+      p(pr.wish ? 'Your coin is in. Your next job starts lucky.' : `A coin (${SHOP.wish} gold) for luck: +${Math.round((BLESSING.dmgMult - 1) * 100)}% damage and ${Math.round((1 - BLESSING.taken) * 100)}% less damage taken for the first 20 s of your next job.`),
       pr.wish ? [] : [{ label: `DROP A COIN (${SHOP.wish})`, primary: true, disabled: pr.gold < SHOP.wish, act: () => (g.wish(), again()) }]);
     return true;
   }

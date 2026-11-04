@@ -26,6 +26,7 @@ import { TIME_WORD, timeOf } from '../shared/timeofday';
 /** The job open on the board (by id), if any. */
 let boardOpen = '';
 import { treasureWord } from '../shared/treasure';
+import { labelRows } from './card';
 import { SPEAKER, townSays } from '../shared/townsays';
 import { lossText } from '../shared/raids';
 import { MEND_UI, PERRIN } from '../shared/mendlines';
@@ -66,7 +67,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       const open = boardOpen === j.id, size = SIZES[j.size ?? 'medium'], pay = Math.round(j.reward * rewardMult(w)), story = j.objective === 'story';
       const alone = g.canTake(j, 1), head = `<button class="jhead" data-open="${i}"><b class="kind k-${j.objective}">${KIND[j.objective]}</b><span class="where">${esc(j.place.name)}</span><span class="len">${size.label}</span><span class="when t-${timeOf(j)}">${TIME_WORD[timeOf(j)]}</span>${pips(danger(j))}<em>${pay}g</em></button>`;
       const more = open ? `<div class="jmore"><div class="t">${story ? 'STORY: ' : ''}${j.title}</div>` +
-        `<div class="m">${j.place.region}. ${RUIN[j.place.ruin]}. ${j.rooms} rooms, ${size.minutes}. Pays ${pay} gold and ${treasureWord(j)}.</div>` +
+        labelRows([['WHERE', `${j.place.region}, ${RUIN[j.place.ruin].toLowerCase()}`], ['ROOMS', `${j.rooms}, ${size.minutes}`], ['PAYS', `${pay} gold and ${treasureWord(j)}`]], 'm') +
         `<div class="d">${j.text}</div>` + (story && !alone ? `<div class="need">Needs ${STORY_PARTY} to set out.</div>` : '') +
         (alone ? `<button data-job="${i}">${pt ? 'GO ALONE' : 'TAKE THE JOB'}</button>` : '') + (pt ? ` <button data-gather="${i}">GATHER A PARTY</button>` : '') + '</div>' : '';
       return `<div class="job ${story ? 'story' : j.deep ? 'deep' : ''}${open ? ' open' : ''}">${head}${more}</div>`;
@@ -120,7 +121,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     // The first time in after the wood: one line about Hew (Orla brought the stick; you carry nothing).
     const hew = pr.tally ? say('Father Odric', TALLY.odric) : '';
     if (pr.tally) (pr.tally = false), g.keep();
-    panel.show('FATHER ODRIC', hew + say('Father Odric', 'Give what you can spare. Then a little of what you can\'t. That\'s the part it burns.') + (pr.cls === 'HEALER' ? say('Father Odric', COAL.odric) : '') +
+    panel.show('FATHER ODRIC', hew + say('Father Odric', 'Give what you can spare to the Lantern. It keeps the light burning, and it does the giver good, more than you\'d think.') + (pr.cls === 'HEALER' ? say('Father Odric', COAL.odric) : '') +
       (hungry.length ? say('Father Odric', CHURCH.hungry) : '') +
       p(`Given to the Lantern so far: ${w.lantern} gold.`) + p(`You have ${pr.gold} gold.`),
       [...[20, 100].map((n) => ({ label: `GIVE ${n}`, disabled: pr.gold < n || pr.armor?.hungry === 'ransom', act: () => (g.donate(n), again()) })),
@@ -157,20 +158,20 @@ const TEACH: Record<string, [string, string]> = {
   WARRIOR: ['Again. Better. Pick one.', 'Again.'],
   RANGER: ['You came back with all your fingers. Good. Now learn something with them.', 'You breathe like a bull in a barley field. Out on the draw, not in. Come back when you\'ve shot something that shot back.'],
   ROGUE: ['Look at you, still alive. That\'s worth a lesson. A cheap one.', 'I don\'t teach. I let you watch me, and you pay for the seat. Come back with more to pay.'],
-  MAGE: ['Yes, yes, sit. No, not there. There. You\'ve grown, the relic says so. Pick, quickly, before I lose my nerve.', 'Don\'t touch that. Or that. Come back when the relic\'s heard more of you.'],
-  HEALER: ['Burn me, you\'re still breathing, and so is half the company. Choose.', 'Hold still, you great calf. There. Now go and get somebody else\'s blood on you, and come back when you\'ve learned something from it.'],
+  MAGE: ['Yes, yes, sit. No, not there. There. You\'ve grown, I can see it on you. Pick, quickly, before I lose my nerve.', 'Don\'t touch that. Or that. Come back when you\'ve a level more in you.'],
+  HEALER: ['Burn me, you\'re still breathing. Good. Choose.', 'Hold still, you great calf. There. Now go and get somebody else\'s blood on you, and come back when you\'ve learned something from it.'],
 };
 
 const CHAT: Record<number, { name: string; line: string }> = {
   0: { name: 'OLD WENNA', line: "Seventy-one winters. Saw the walls go up, saw the last bell go into the pot for arrowheads. I'll see the hungry off this valley too, or I'll haunt the lot of you." },
   1: { name: 'TAM', line: "Is it true you can throw a greenie at another greenie? Did it burst? Mam says don't ask about the bursting. Did it, though?" },
   2: { name: 'MARTA', line: 'I pray for the ones still out there. Then I pray you lot walk faster.' },
-  3: { name: 'ALDER BRAM', line: 'Every choice this council makes, somebody pays for. My job is to make sure it is somebody with teeth.' },
+  3: { name: 'ALDER BRAM', line: 'Every choice this council makes, somebody pays for it. I\'d sooner it was the hungry.' },
   4: { name: 'GOODWIFE SELL', line: 'Farm or refugees. I have heard both argued till the candles gave out, and the candles were the only ones talking sense.' },
   5: { name: 'GATE GUARD', line: 'Gate opens for a job, and shuts behind you whether you\'re through or not. Board is in the square.' },
   6: { name: 'SERGEANT DUNN', line: 'Two of us for a whole wall, and boots that let the rain in. Put coin in the town works and I will find you a proper watch. And boots.' },
-  7: { name: 'WATCHMAN HOB', line: 'Quiet tonight. I said that last night and a tallyman took the Fosters\' goat off the wall. So, not quiet.' },
-  8: { name: 'WATCHMAN PIKE', line: 'New spear, new boots, same teeth out there. Still. Good boots.' },
+  7: { name: 'WATCHMAN HOB', line: 'Quiet tonight. I said that last night and one of them took the Fosters\' goat off the wall. So, not quiet.' },
+  8: { name: 'WATCHMAN PIKE', line: 'New spear and new boots, and the same teeth out there. Still, good boots.' },
   9: { name: 'OLD MERREN', line: 'Father Odric nailed that chapel shut with his own hands, the night the siege broke. I asked him why. He said, so it stays where it is.' },
   13: { name: 'CORPORAL BRISK', line: "Cole says I'll make sergeant when Dunn dies. Dunn says he's not dying till he gets new boots. So that's me, corporal for life." },
   15: { name: PERRIN.name, line: PERRIN.stages[0] },
@@ -180,30 +181,31 @@ const CHAT: Record<number, { name: string; line: string }> = {
   19: { name: 'RECRUIT WAT', line: "Master Cole says a dull blade's a gift to the other fellow, so they get *nothing* from me." },
   14: { name: 'ORLA OF THE WATCH', line: "Third night on the east wall. Something out there whistles when I whistle. I've stopped whistling." },
   11: { name: 'A DRUNK', line: 'Moll cheats. Everyone knows Moll cheats. I keep playing her. What does that make me? Don\'t answer that. Buy me one.' },
-  12: { name: 'A CARD SHARP', line: 'Whisper talks to his own kind. If you have to ask which kind, you are not it.' },
+  12: { name: 'A CARD SHARP', line: 'Whisper, round the back, trains rogues and nobody else. If you have to ask, you\'re not one.' },
 };
 const CHILD = ['We have a door now. A real one, with a latch. I open it all the time.', 'Did you kill the big one? The one with the chains? Was it heavy?', 'I saw one once, through the wall. It had a spoon. Why did it have a spoon?', "Mam says I can't come with you. Yet."];
 const SURVIVOR = ['They kept us in the dark so long I forgot what my hands looked like. Thank you for the candle.', 'My brother is still out at the Copperdeep. They took the ones who could dig. If you go down there...', 'I can hold a pitchfork. When my legs hold me, I will.'];
 
 /** A job not won, by how it ended (Game.finish): driven back, gone early from a party, or cut off from it. */
 const ENDED = {
-  half: 'Driven back. You keep half the gold, and nobody you freed comes home.',
-  left: "You left before the end. You keep the gold you picked up, but not the job's pay.",
-  cut: "You were cut off from your party. You keep the gold you picked up, but not the job's pay.",
-  lostCut: 'You were cut off, and your party was driven back. You keep half the gold, and nobody you freed comes home.',
+  half: 'You keep half the gold. Nobody you freed comes home.',
+  left: "You left early. You keep the gold you picked up, not the job's pay.",
+  cut: "Cut off from your party. You keep the gold you picked up, not the job's pay.",
+  lostCut: 'Cut off, and your party was driven back. You keep half the gold. Nobody you freed comes home.',
 };
 
 export function showResult(g: Game, panel: Panel): void {
   const r = g.result!;
   g.result = null;
-  const lines = [`Gold: ${r.gold}`, `Experience: ${r.xp}`, r.won ? `People brought home: ${r.rescued}` : ENDED[r.half ? (r.how === 'dropped' ? 'lostCut' : 'half') : r.how === 'dropped' ? 'cut' : 'left'], ...(r.lost ? [`Lost to the fire: ${r.lost}`] : [])];
-  if (r.levels) lines.push(`You've grown to level ${g.profile.level}. ${title(TRAINERS[g.profile.cls].name)} will want to see you, at ${TRAINERS[g.profile.cls].where}.`);
+  const tally = labelRows([['GOLD', String(r.gold)], ['XP', String(r.xp)], ['SAVED', r.won ? String(r.rescued) : ''], ['LOST', r.lost ? `${r.lost} to the fire` : '']]);
+  const lines = r.won ? [] : [ENDED[r.half ? (r.how === 'dropped' ? 'lostCut' : 'half') : r.how === 'dropped' ? 'cut' : 'left']];
+  if (r.levels) lines.push(`<b>Level ${g.profile.level}.</b> ${title(TRAINERS[g.profile.cls].name)} trains you, at ${TRAINERS[g.profile.cls].where}.`);
   if (r.treasure.length) lines.push(`<b>Treasure in your pack:</b> ${r.treasure.map((i) => `<b>${itemName(i)}</b>`).join(' and ')}.`);
-  for (const i of r.sold) lines.push(`No room in your pack for the ${itemName(i)}, so it went for 20 gold.`);
+  for (const i of r.sold) lines.push(`No room for the ${itemName(i)}: sold for 20 gold.`);
   if (r.relic) lines.push(RELICW.cutOut(r.job.boss ?? '', relicName(r.relic)) + ' ' + (g.profile.relic === r.relic.id ? RELICW.carryHint : RELICW.shelfHint));
   if (r.lit !== undefined) lines.push(RELICW.litLeft(r.lit));
-  if (r.won && r.job.objective === 'story') lines.push(`<b>Barrowby's bell rings across the valley.</b> The council can sit once enough people are home.`);
-  const html = p(`<b>${r.job.title}</b>`) + lines.map(p).join(''), done = { label: 'BACK TO WICKHOLD', primary: true, act: () => panel.hide() };
+  if (r.won && r.job.objective === 'story') lines.push(`<b>Barrowby's bell rings across the valley.</b> The council sits once enough people are home.`);
+  const html = p(`<b>${r.job.title}</b>`) + tally + lines.map(p).join(''), done = { label: 'BACK TO WICKHOLD', primary: true, act: () => panel.hide() };
   // Grown: a knack to pick, straight from here (the line comes and goes with the picks).
   const again = () => {
     const n = g.profile.picks, pick = n ? p(`${KNW.jobLine(n)}`) : '';

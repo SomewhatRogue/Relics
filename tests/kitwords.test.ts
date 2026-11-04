@@ -33,7 +33,7 @@ describe('GUARD and DODGE areas, from the numbers', () => {
   });
   it("a Mage's bar is MAGIC on screen; everyone else's is STAMINA", () => {
     for (const w of CLASS_KITS.MAGE) expect(Object.values(KIT[w]).join(' ')).not.toMatch(/stamina/i);
-    expect(['wand', 'staff', 'spellblade'].map((w) => KIT[w as 'wand'].hold)).toEqual(['Burst, costs magic', 'Raise a wall, costs magic', 'Wreathe the blade, costs magic']);
+    expect(['wand', 'staff', 'spellblade'].map((w) => KIT[w as 'wand'].hold)).toEqual(['Burst, costs magic', 'Raise a wall, costs magic', 'Enchant the blade, costs magic']);
     expect(KIT.spellblade.also).toBe('Parry fills the blade');
     expect(barWords('Shorter dodge, costs more stamina', 'MAGE')).toBe('Shorter dodge, costs more magic');
     expect(barWords('STAMINA RECOVERY', 'RANGER')).toBe('STAMINA RECOVERY');

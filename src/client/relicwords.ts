@@ -10,15 +10,15 @@ const jobs = (n: number) => `${n} ${n === 1 ? 'job' : 'jobs'}`;
 /** What the church's light does, plainly (the same line on the step, the LIT badge and after). */
 const LIGHT = `+${Math.round((LIT.dmg - 1) * 100)}% damage, and goblins come for you first`;
 
-/** What each found relic does, one plain line (the card). */
+/** What each found relic does: the card's USE row, a few words. */
 export const RELIC_LINES: Partial<Record<RelicId, string>> = {
-  javelin: 'A hard throw. It carries small goblins to the nearest wall and pins them there, and sticks in big ones.',
-  hook: 'Hooks the first thing it reaches. Small goblins and loose barrels come to you; anything heavier pulls you to it.',
-  lodestone: 'Throw it and it pulls goblins in to where it lands, light ones fastest, then bursts.',
-  bomb: 'Throw it and it bursts where it lands, knocking goblins and barrels away and stunning the small ones.',
-  sentry: 'Set it down and it shoots whatever goblin comes near for a while. Its arrows leave them limping.',
-  bell: 'Blow it. Goblins near you stop to listen and drop their attacks, and friends near you move 25% faster for 4 seconds.',
-  knuckle: 'A punch that reaches. Everything in a line in front of you is knocked flying, and the next hit anyone lands on them does extra damage.',
+  javelin: 'Throw. Pins small goblins to a wall, sticks in big ones.',
+  hook: 'Hooks the first thing hit. Pulls small goblins and barrels to you, or you to anything heavier.',
+  lodestone: 'Throw. Pulls goblins to where it lands, then bursts.',
+  bomb: 'Throw. Bursts, knocks goblins and barrels away, stuns small ones.',
+  sentry: 'Set it down. Shoots goblins that come near for 7 s and slows them.',
+  bell: 'Goblins near you stop their attacks. Friends near you move 25% faster for 4 s.',
+  knuckle: 'Knocks everything in a line in front of you flying. The next hit on them does extra damage.',
 };
 
 export const RELICW = {
@@ -26,11 +26,11 @@ export const RELICW = {
   spares: 'SPARES FRIENDS',
   charge: (n: number, max: number) => `CHARGE ${n} / ${max}`,
   dark: 'DARK',
-  darkLine: 'Out of charge (dark). It does nothing until the church recharges it.',
-  darkElLine: 'Out of charge (dark), and the church won\'t recharge a relic with an element. You can still give it up on the step, alone, or with another relic to get one back.',
+  darkLine: 'None left. The church can recharge it.',
+  darkElLine: 'None left, and it can\'t be recharged. Give it up at the church.',
   loud: 'LOUD',
-  fades: 'Every use spends one charge.',
-  noRecharge: 'It has an element, so it holds more charge, but the church won\'t recharge it.',
+  fades: '1 per use. The church recharges it.',
+  noRecharge: '1 per use. Holds more, but can\'t be recharged.',
   /** The RELIC button pressed with a dark one in hand. */
   pressedDark: 'DARK',
   /** Spared by a friend's relic. */
@@ -43,11 +43,11 @@ export const RELICW = {
   churchButton: 'RELICS',
   churchTitle: 'THE STEP',
   churchIntro: "Fading, is it? Mother Isolde sees to those round the back, and she'll want paying. Not the ones with fire or frost or storm in them, mind, she *won't* have those in the house.",
-  none: 'You have no relics. Named butchers sometimes carry one, and the butcher at the bottom of a deep job always does.',
+  none: 'No relics. Named butchers sometimes carry one; the last butcher on a DEEP job always does.',
   recharge: (n: number) => `RECHARGE (${n})`,
   full: 'FULL',
   /** Above the cards: what giving one up means, before anything is tapped. */
-  stepHow: `Give a relic up here and it's gone for good. If it still has some life in it, you carry the church's light out for a few jobs: ${LIGHT}.`,
+  stepHow: `Give a relic up and it's gone for good. If it has charge left, you carry the church's light for a few jobs: ${LIGHT}.`,
   leave: (n: number) => (n ? `GIVE IT UP (LIGHT FOR ${n} ${n === 1 ? 'JOB' : 'JOBS'})` : 'GIVE IT UP'),
   leaveDark: 'GIVE IT UP (NO LIGHT)',
   /** The second tap: what you lose and what you get. */
@@ -56,12 +56,12 @@ export const RELICW = {
   keep: 'KEEP IT',
   odricLeave: "That's it, on the step with the rest. Go round the back after, and Isolde will ^light^ you something for the road.",
   odricLeaveDark: "Dark as a cellar, that one, but it can sit with the others all the same.",
-  recharged: 'Isolde takes it round the back. When she brings it out again it\'s warm, and she doesn\'t say what she did.',
+  recharged: 'Isolde takes it round the back and brings it out warm, fully charged. She doesn\'t say what she did.',
   litNow: (n: number) => `You carry the church's light for your next ${jobs(n)}: ${LIGHT}.`,
-  litNone: 'The light is for whoever leaves a relic with some life still in it.',
+  litNone: 'Only a relic with charge left gives the light.',
   /** Two for one. */
   twoTitle: 'LEAVE TWO, TAKE ONE',
-  twoLine: "Give two up on the step, both gone for good, and take back one that someone else left. You don't choose which, and there's no light for these.",
+  twoLine: "Give up two relics for one someone else left. You don't choose which. No light.",
   pick: 'PICK TWO',
   picked: (n: number) => (n === 2 ? 'Two picked.' : n === 1 ? 'One picked. One more.' : 'Tap two of your relics.'),
   odds: (el: number) => `${Math.round(el * 100)} IN 100 IT HAS AN ELEMENT.`,
@@ -81,7 +81,7 @@ export const RELICW = {
   carryHint: 'It\'s on your RELIC button.',
   shelfHint: 'It\'s with your other relics, in your pack.',
   /** Ivo at his bench, of a fading relic (the lore keeper's draft). */
-  ivoFading: "Hear that? No, you *don't*, and that's the trouble, it was going like a hive a week ago and now it's more like a cat that can't be bothered to purr.",
+  ivoFading: "Hear that? No, you *don't*, and that's the trouble. It hummed like a hive a week ago. It's running down.",
   ivoDark: "Not a peep out of it, poor thing. Take it to the church, they'll know what to do, or Isolde will anyway.",
   ivoBright: "Listen to that, it's fair singing. No? Ah, well, most people haven't got the ears for it.",
 };

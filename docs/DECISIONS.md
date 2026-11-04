@@ -2,6 +2,44 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-04: copy pass 3: Kyle's style everywhere, and mechanics shown as labelled rows (Kyle; Claude Opus 5.5)
+
+Kyle: "Take my copy changes as general guidance and suggestions, not specific one-to-one approval flows.
+We need to work on, in general, how we write and show things." The model is his style (prose-notes
+section 4): short, the effect first, a few words, fragments when clear, no flourish or riddles, explain
+once. Full list and his questions: `docs/copy-pass-3.md`; every changed row is marked in the `done`
+column of `docs/copy-inventory.csv` (regenerated, same ids, 318 rows touched).
+
+- **Showing.** One helper, `labelRows` (`client/card.ts`), draws every "LABEL  a few words" table in the
+  weapon card's style: traits as `NAME: effect` and modifiers as `NAME +10%: effect` (Kyle's "STAMINA ON
+  PARRY: parry refills stamina"); hungry gear GIFT / COST in red; potions EFFECT / LASTS / USE (shop and
+  belt; `LASTS` now covers the Bitter's 2 s heal); skills at the trainer USE / COOLDOWN / COST (cost until
+  learned; the old "TAUGHT AT LEVEL" line is gone); relics USE / CHARGE (the LOUD tag dropped, it's in the
+  name); job postings WHERE / ROOMS / PAYS; job results GOLD / XP / SAVED / LOST. `.kitrows` is now one
+  grid with the label column as wide as its widest label, so COOLDOWN fits on a phone.
+- **Writing.** Every knack, trait, modifier, drill, technique, hungry gear line, potion, skill and relic
+  line rewritten effect first. Tutorial instructions say DODGE (they said "roll" to a Ranger, Rogue and
+  Mage); the FULL SHOT lesson says what a PERFECT is. Legend, tips, pack, shop, vault, pawn, forge, works,
+  job board, results, council choices, the well and the title screen cut to the point.
+- **Names.** WIDE LAST SECOND is LATE DASH; the KNOCK modifier is KNOCKBACK (as the knack); POWER at the
+  trainer is STRENGTH (Kyle's class card word); the spellblade's "wreathe" is "enchant"; HARD THROW says
+  darts, not bolts (the poisoner's hold is a dart). The larder job's title said "Burn" but the job is
+  smashing racks: now "Smash the larder at X".
+- **Explain once.** Tips that repeated the legend or weapon card are gone (parry timing, hold to charge,
+  the crossbow glint, the Cleric's Sanctuary). Tobin's buy-back rule and the works' gear value are each
+  said once.
+- **Dialogue.** Voices kept; lines a first read would miss are cut or made plain (Odric's "the part it
+  burns", Hob's "tallyman", the card sharp's riddle, Bram's "somebody with teeth", Pike's lamps, Vell's
+  "the relic says so", the well's "coin kept, not given", the hunt notice's proof). Hew's last words name
+  the tally stick, so Odric taking "Hew's tally" lands. Kyle's own class card text is untouched.
+- **Consistency checked over every string:** stamina / MAGIC, "the red flashes white" for parry, "the white
+  flash" only for a hold, PERFECT, "armor", no shard, sliver, crown, Want or mercy on screen.
+- **Not run:** the lore-keeper and line-editor passes (no way to call them here). Ten questions for Kyle are
+  at the end of `docs/copy-pass-3.md`.
+- Tests: `tests/kitwords.test.ts` follows the spellblade's new HOLD row; `npm test`, `npm run check` and the
+  online tests pass. Phone shots of the knack panel, item and hungry cards, the trainer, the relic step, a
+  shop card and the church.
+
 ## 2026-11-04: Kyle's copy notes: the class card rebuilt, TAP / HOLD / PERFECT, GUARD and DODGE areas, two potions (Kyle; Claude Opus 5.5)
 
 Kyle commented on 50 lines of `docs/copy-inventory.csv` (`docs/kyle-copy-notes.txt`) and passed 55

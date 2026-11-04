@@ -80,7 +80,7 @@ export class Title {
       `<p class="lede">${COPY.homeLede}</p><div class="slots">` +
       hs.map((h, i) => `<div class="slot">${face(h.cls, h.look)}<div class="who"><b>${esc(h.name)}</b><span>${CLASS_NAME[h.cls]} &middot; LEVEL ${h.level} &middot; ${h.gold} GOLD</span></div>` +
         `<button data-play="${i}" class="primary">PLAY</button>${h.prologue ? `<button data-wood="${i}" class="ghost" title="Play the wood again">WOOD</button>` : ''}<button data-retire="${i}" class="ghost">${this.retiring === i ? 'SURE?' : 'RETIRE'}</button></div>`).join('') +
-      `</div>${hs.length < HERO_SLOTS ? '<button data-new class="wide">NEW HERO</button>' : '<p class="dim">Three heroes is the most. Retire one to make another.</p>'}${this.recoverButton()}</div>`;
+      `</div>${hs.length < HERO_SLOTS ? '<button data-new class="wide">NEW HERO</button>' : '<p class="dim">Three heroes at most. Retire one to make another.</p>'}${this.recoverButton()}</div>`;
   }
 
   private create(): void {
@@ -88,7 +88,7 @@ export class Title {
     this.preview = null;
     const back = this.g.save.heroes.length ? '<button data-back class="ghost wide">BACK</button>' : '';
     if (!this.detail) {
-      this.el.innerHTML = `<div class="tcard"><h1>RELIC</h1><div class="sub">A NEW CHAPTER</div><p class="lede">Choose your destiny.</p><div class="cgrid names">` +
+      this.el.innerHTML = `<div class="tcard"><h1>RELIC</h1><div class="sub">A NEW CHAPTER</div><p class="lede">Pick a class.</p><div class="cgrid names">` +
         CLASS_ORDER.map((k) => `<button data-cls="${k}" class="ccard">${face(k)}<b>${CLASS_NAME[k]}</b></button>`).join('') + `</div>${back}${this.recoverButton()}</div>`;
       return;
     }

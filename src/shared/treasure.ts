@@ -1,6 +1,6 @@
 /** The treasure at the end of a job won (TREASURE in loot.ts): rolled for one player alone. */
 /** What the board says a job's treasure is. */
-export const treasureWord = (job: Job) => (job.rooms >= 5 ? 'two pieces of treasure, a cut above' : job.rooms >= 3 ? 'a piece of treasure, maybe two' : 'a piece of treasure');
+export const treasureWord = (job: Job) => (job.rooms >= 5 ? 'two pieces of treasure, better than most' : job.rooms >= 3 ? 'one piece of treasure, maybe two' : 'one piece of treasure');
 import { rollTier } from './gear';
 import { rollAny } from './hungry';
 import type { Job } from './jobs';

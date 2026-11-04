@@ -11,7 +11,7 @@ import { ELEMENT_NAME, LANTERN, POTION, POTIONS, RELICS, WEAPONS, type RelicId }
 import { GEAR, full } from '../sim/pack';
 import type { Hero } from '../sim/types';
 import { COAL, COPY } from './copy';
-import { heroSheet } from './card';
+import { heroSheet, potionRows } from './card';
 import { cell, grid, plainKit, sideBySide } from './cells';
 import { itemIcon, potionIcon, relicIcon, skillIcon } from './itemicons';
 import { drag } from './packdrag';
@@ -134,7 +134,7 @@ export class PackView {
       return row(it ? relicCard(it) : `<b>${RELICS[h.relics[1]].name}</b>${el(h.relics[1], h)}`, others + btn(COPY.putAway, GEAR.carry, -1, 'ghost'));
     }
     if (s === 'skill') return row(`<b>${RELICS[h.relics[0]].name}</b>${el(h.relics[0], h)}`, '', PACKW.skillLine);
-    if (s === 'belt' && h.belt[i]) return row(`<b>${POTIONS[h.belt[i]].name}</b><div class="tr">${barWords(POTIONS[h.belt[i]].text, WEAPONS[h.weapon].cls)}</div>`, (i ? btn(COPY.next, GEAR.front, i, 'go') : '') + btn(COPY.pour, GEAR.pour, i, 'ghost'));
+    if (s === 'belt' && h.belt[i]) return row(`<b>${POTIONS[h.belt[i]].name}</b>${potionRows(h.belt[i], WEAPONS[h.weapon].cls)}`, (i ? btn(COPY.next, GEAR.front, i, 'go') : '') + btn(COPY.pour, GEAR.pour, i, 'ghost'));
     // Nothing chosen: relics found but not carried can still be picked up here.
     const shelf = h.found.filter((r) => r.id !== h.relicItem).map((r) => btn(`${COPY.carry} ${relicName(r)}`, GEAR.carry, h.found.indexOf(r), 'go')).join('');
     return row(`<div class="none">${matchMedia('(hover: hover)').matches ? PACKW.hover : PACKW.hint}</div>`, shelf);

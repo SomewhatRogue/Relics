@@ -61,8 +61,8 @@ export const CHAPTER_1 = {
     id: 'north-fields',
     question: 'The north fields are ours again, for now. What does Wickhold do with them?',
     choices: [
-      { id: 'farm', label: 'Farm them', short: 'FARM THEM', text: 'Plough them. Bread in winter and gold in the coffers: every job pays 25% more, and a granary goes up by the north gate. The camp outside stays outside.' },
-      { id: 'refugees', label: 'Take in the refugees', short: 'TAKE THEM IN', text: 'Open the gate to the camp. Four more souls on Rescue Row, more mouths, and a trader who knows the roads opens a stall on Market Row.' },
+      { id: 'farm', label: 'Farm them', short: 'FARM THEM', text: 'Every job pays 25% more, and a granary goes up by the north gate. The camp outside stays outside.' },
+      { id: 'refugees', label: 'Take in the refugees', short: 'TAKE THEM IN', text: 'Open the gate to the camp. Four more people on Rescue Row, and Dessa the trader opens a stall on Market Row.' },
     ],
   } as Decision,
 };
