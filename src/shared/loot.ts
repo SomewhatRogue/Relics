@@ -9,16 +9,16 @@ import { HUNGRY, type HungryId } from './hungry.js';
 export type TraitId = 'riposte' | 'tempo' | 'bulwark' | 'deadeye' | 'crushing' | 'brutal' | 'reaper' | 'ember' | 'rime' | 'storm';
 
 export const TRAITS: Record<TraitId, { name: string; text: string }> = {
-  riposte: { name: 'RIPOSTE', text: 'Counters after a parry hit far harder' },
-  tempo: { name: 'SIDESTEP', text: 'Dodge through a blow: your next hit lands double' },
-  bulwark: { name: 'BULWARK', text: 'A parry fills your breath' },
-  deadeye: { name: 'TRUE RELEASE', text: 'Release on the white flash for a far bigger shot' },
-  crushing: { name: 'CRUSHING', text: 'Goblins you throw into walls take triple' },
-  brutal: { name: 'BRUTAL', text: 'Hits on stunned, pinned, netted or frozen goblins hurt far more' },
-  reaper: { name: 'REAPER', text: 'A backstab or counter that kills heals you' },
-  ember: { name: 'EMBERFORGED', text: 'Charged hits and full draws set goblins burning' },
-  rime: { name: 'RIMEFORGED', text: 'Charged hits and full draws chill (twice freezes)' },
-  storm: { name: 'STORMFORGED', text: 'Charged hits and full draws arc to nearby goblins' },
+  riposte: { name: 'RIPOSTE', text: 'Your counter after a parry does 40% more damage' },
+  tempo: { name: 'SIDESTEP', text: 'Dodge through a blow and your next hit within 1.5 s does double damage' },
+  bulwark: { name: 'STAMINA ON PARRY', text: 'A parry refills your stamina' },
+  deadeye: { name: 'DEADEYE', text: 'A shot let go on the white flash does 60% more damage' },
+  crushing: { name: 'CRUSHING', text: 'Goblins you knock into a wall take triple damage from it' },
+  brutal: { name: 'BRUTAL', text: 'Your hits on stunned, pinned, netted or frozen goblins do 50% more damage' },
+  reaper: { name: 'REAPER', text: 'Killing with a backstab or a counter heals you for 10' },
+  ember: { name: 'FIREFORGED', text: 'Your charged hits and full draws set goblins on fire' },
+  rime: { name: 'FROSTFORGED', text: 'Your charged hits and full draws chill goblins. Chill one twice to freeze it' },
+  storm: { name: 'STORMFORGED', text: 'Your charged hits and full draws also shock goblins near the one you hit' },
 };
 
 /** How much each trait does. */
@@ -45,7 +45,7 @@ export function traitsFor(kit: WeaponId): TraitId[] {
 }
 
 /** A trait's words for a class: REAPER without a parry is a backstab's alone. */
-export const traitText = (t: TraitId, cls?: HeroClass) => (t === 'reaper' && cls && CLASS_GUARD[cls] === 'none' ? 'A backstab that kills heals you' : TRAITS[t].text);
+export const traitText = (t: TraitId, cls?: HeroClass) => (t === 'reaper' && cls && CLASS_GUARD[cls] === 'none' ? 'Killing with a backstab heals you for 10' : TRAITS[t].text);
 
 /** Gear tiers, white to red (gear.ts). */
 export type Tier = 'plain' | 'fine' | 'forged' | 'tolmouth' | 'hungry';

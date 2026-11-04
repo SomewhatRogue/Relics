@@ -49,7 +49,7 @@ export const wardHp = (h: Hero) => WARD.hp * (1 + knack(h, 'bless'));
 export const wardTime = (h: Hero) => WARD.time + knack(h, 'blessTime');
 export const healReach = (h: Hero) => HEAL_RADIUS * (1 + knack(h, 'mercyReach'));
 
-/** What a swing heals: its own, or (QUICK MERCY) a share of the next blow's when that's the healing one. */
+/** What a swing heals: its own, or (EARLY HEAL) a share of the next blow's when that's the healing one. */
 export function healOf(h: Hero, s: Swing): number {
   if (s.heal) return s.heal;
   const next = h.heavy ? undefined : WEAPONS[h.weapon].combo[h.combo + 1];

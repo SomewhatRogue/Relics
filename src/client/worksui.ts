@@ -40,10 +40,10 @@ function detail(g: Game, panel: Panel, k: WorkId, back: () => void): void {
   panel.show('TOWN WORKS', html, [...gifts, ...(gear.length ? [{ label: 'GIVE GEAR', act: () => gearFor(g, panel, k, again) }] : []), { label: 'BACK', act: back }]);
 }
 
-/** A packed piece for the walls or the watch: it counts for more than Halvard would pay. */
+/** A packed piece for the walls or the watch: it counts for more than Tobin would pay. */
 function gearFor(g: Game, panel: Panel, k: WorkId, back: () => void): void {
   const can = g.profile.bag.filter((it) => giveValue(it) > 0);
-  panel.show('GIVE GEAR', p(`<b>${WORKS[k].name}</b>`) + p(can.length ? 'Hollis writes it down at what Halvard would give for it, and half again.' : 'Nothing in your pack the works can use.'), [
+  panel.show('GIVE GEAR', p(`<b>${WORKS[k].name}</b>`) + p(can.length ? 'Hollis writes it down as worth 50% more than Tobin would pay for it.' : 'Nothing in your pack the works can use.'), [
     ...can.map((it) => ({ label: `GIVE ${itemName(it)} (WORTH ${giveValue(it)})`, act: () => (g.giveGear(it, k), workDone(g.world, k) ? back() : gearFor(g, panel, k, back)) })),
     { label: 'BACK', act: back },
   ]);

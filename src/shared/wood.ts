@@ -207,8 +207,8 @@ export const LINES = {
     attack: 'Hit them. Tap for quick blows; hold for a heavy one.',
     roll: "A red mark with a striped edge can't be blocked. Roll out of it just before it lands.",
     step: "A red mark with a striped edge can't be blocked, and you can't roll. Walk out of it before it lands.",
-    block: 'Hold your guard while the red fills. Each block costs breath (the yellow bar).',
-    parry: 'Tap your guard the moment the red flashes white. It staggers them, and your next blow lands hard.',
+    block: 'Hold block while the red fills. Each block costs stamina (the yellow bar).',
+    parry: 'Tap block the moment the red flashes white. That parry staggers the goblin, and your next blow does extra damage.',
     relic: 'Throw it with your relic button. A small goblin is carried off and pinned to the nearest wall. It comes back to your hand after a few seconds.',
     grab: "Grab a crate or a barrel, then grab again to throw it. You can also grab a small goblin from behind, while it reels, or while it's busy feeding or swinging. Whatever you throw hurts whatever it hits.",
     backstab: 'Hit a goblin from behind and the blow lands far harder.',
@@ -218,5 +218,5 @@ export const LINES = {
     rollLight: "You can't hold a block, so roll out of any red before it lands. Nobody can block red with a striped edge.",
   },
   /** The freeze-frame prompts, the first times a lesson's blow comes. */
-  now: { step: 'NOW: STEP OUT', roll: 'NOW: ROLL OUT', block: 'NOW: GUARD UP', parry: 'NOW: TAP GUARD', slip: 'NOW: ROLL THROUGH', attack: 'HIT IT' },
+  now: { step: 'NOW: STEP OUT', roll: 'NOW: ROLL OUT', block: 'NOW: HOLD BLOCK', parry: 'NOW: TAP BLOCK', slip: 'NOW: ROLL THROUGH', attack: 'HIT IT' },
 };

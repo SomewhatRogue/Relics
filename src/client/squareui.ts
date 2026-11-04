@@ -5,7 +5,7 @@
  */
 import { SHOP, STAT_NAME, STAT_ORDER } from '../shared/progress';
 import { CLASS_NAME } from '../shared/classes';
-import type { HeroClass } from '../shared/tuning';
+import { BLESSING, type HeroClass } from '../shared/tuning';
 import { WORKS, workDone } from '../shared/works';
 import { openWorks } from './worksui';
 import { rollHtml } from './rollui';
@@ -56,7 +56,7 @@ export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key:
   }
   if (id === 'well') {
     panel.show('THE WELL', p('Old as the town, and the water\'s tasted of copper since the siege. People drop a coin in for luck. Father Odric says that\'s a coin kept, not given, and drops one in anyway.') +
-      p(pr.wish ? 'Your coin is in. Your next job starts lucky.' : `A coin (${SHOP.wish} gold): your next job starts lucky.`),
+      p(pr.wish ? 'Your coin is in. Your next job starts lucky.' : `A coin (${SHOP.wish} gold) for luck: you start your next job with +${Math.round((BLESSING.dmgMult - 1) * 100)}% damage and ${Math.round((1 - BLESSING.taken) * 100)}% less damage taken for 20 seconds.`),
       pr.wish ? [] : [{ label: `DROP A COIN (${SHOP.wish})`, primary: true, disabled: pr.gold < SHOP.wish, act: () => (g.wish(), again()) }]);
     return true;
   }

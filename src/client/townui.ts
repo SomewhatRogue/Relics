@@ -186,10 +186,10 @@ const SURVIVOR = ['They kept us in the dark so long I forgot what my hands looke
 
 /** A job not won, by how it ended (Game.finish): driven back, gone early from a party, or cut off from it. */
 const ENDED = {
-  half: 'Driven back: half the gold, nobody saved.',
+  half: 'Driven back. You keep half the gold, and nobody you freed comes home.',
   left: "You left before the end. You keep the gold you picked up, but not the job's pay.",
   cut: "You were cut off from your party. You keep the gold you picked up, but not the job's pay.",
-  lostCut: 'You were cut off, and your party was driven back. Half the gold, nobody home.',
+  lostCut: 'You were cut off, and your party was driven back. You keep half the gold, and nobody you freed comes home.',
 };
 
 export function showResult(g: Game, panel: Panel): void {

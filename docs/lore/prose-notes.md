@@ -123,3 +123,32 @@ Read against the books, our lines sound like someone writing *lines*. The tells:
 - **The plain instruction line stays plain.** What the player must press is told in the game's own
   voice, short and clear, separate from the character's words. The character never does the
   explaining.
+
+---
+
+## 4. Text that explains the game
+
+Kyle, November 2026: the game text is "too much and too little", it "uses obscure language instead
+of saying what things do", and it reads in "short, stilted sentences instead of direct and
+understandable". Standing notes: less is more; we overwrite. These rules are for every line that
+tells the player how something works: knacks, perks, item traits and mods, potions, relic words,
+shop and store text, the trainer, class cards, lessons, tips, options, status names, toasts,
+callouts, the job board, party and lobby text, and the church, council and relic panels.
+
+- **Say what it does, in plain words.** Name the effect, and the number when the number matters:
+  "+20% damage for 5 s", "Heals friends near you for 8".
+- **No riddles or invented jargon.** A knack, perk, item trait or button says its effect, not a
+  poetic phrase. Flavour goes in a separate, optional line, if anywhere.
+- **Natural sentences.** Neither clipped fragments nor long paragraphs. One or two sentences per
+  thing; a list only when there really are separate effects.
+- **Explain once, in the right place.** Don't repeat a rule on the card, the hint, the tip and the
+  toast. Pick the place the player looks when they need it and say it there.
+- **Names should hint at the effect.** QUICK STEP, not an obscure noun. If you need the card text to
+  know what the name means, the name is wrong.
+- **Keep the two voices apart.** The world's people (dialogue) keep their voice, but they must still
+  be clear about anything the player needs to act on. Game text (cards, knacks, buttons, tips,
+  stats) is plain, second-person and direct: "you", "your", "friends near you".
+- **Use the same word for the same thing everywhere.** Stamina (not breath or wind), PERFECT (the
+  well-timed block), the white flash (the parry window's cue), health, damage, friends, foes. If a
+  word means a mechanic on one screen, it means the same mechanic on every screen.
+- **Mercy stays off screen.** The word is reserved for the Unmaking in the story bible.
