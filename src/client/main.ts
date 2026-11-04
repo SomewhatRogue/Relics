@@ -63,6 +63,7 @@ import './style.css';
 import './ui.css';
 import './hud.css';
 import './cluster.css';
+import './skins.css';
 import { paintFrames } from './frames';
 import { iconVars } from './icons';
 import { Cluster } from './cluster';
@@ -279,7 +280,7 @@ function hud(now: number): void {
     // Alone, the times you can still get up (a heart each); in a party, your one get-up of the job.
     const solo = room.heroes.filter((x) => x.id !== 'squire').length < 2, ups = MAX_DOWNS - run.downs;
     const hearts = solo ? heartsHtml(Math.max(0, ups), Math.min(MAX_DOWNS, run.downs)) : heartsHtml(me.selfUp ? 0 : 1, me.selfUp ? 1 : 0);
-    $('#banner').innerHTML = `<b>${titleCase(run.job.place.name)}${roomsHtml(run.index, run.job.rooms)}</b> ${g.text}<span><i class="coin"></i>+${run.gold}${hearts}${run.rescued ? `  SAVED ${run.rescued}` : ''}</span>`;
+    $('#banner').innerHTML = `<b>${titleCase(run.job.place.name)}${roomsHtml(run.index, run.job.rooms)}</b> ${g.text}<span><i class="coin"></i>+${run.gold}${hearts}${run.rescued ? `<em>SAVED ${run.rescued}</em>` : ''}</span>`;
     const boss = room.enemies.find((e) => e.name && e.act !== 'dead');
     $('#boss').hidden = !boss;
     if (boss) ($('#boss b').textContent = boss.name!), ($('#boss i').style.width = (100 * boss.hp) / boss.maxHp + '%');
@@ -288,7 +289,7 @@ function hud(now: number): void {
     $('#banner').innerHTML = game.outside
       ? `<b>${titleCase(room.map.name)}</b> Walk out at the bottom<span><i class="coin"></i>${pr.gold}</span>`
       : game.mode === 'town'
-      ? `<b>Wickhold</b> DAY ${game.world.day}<span><i class="coin"></i>${pr.gold}${pr.picks ? '  (A KNACK TO PICK)' : ''}  ${game.world.rescued} HOME${link.online ? '  WORLD ' + link.group.toUpperCase() : ''}</span>`
+      ? `<b>Wickhold</b> DAY ${game.world.day}<span><i class="coin"></i>${pr.gold}${pr.picks ? '<em>(A KNACK TO PICK)</em>' : ''}<em>${game.world.rescued} HOME</em>${link.online ? '<em>WORLD ' + link.group.toUpperCase() + '</em>' : ''}</span>`
       : `<b>Training Yard</b> Walk out at the bottom to go back to town`;
   }
   const spot = game.near(), busy = panel.open || title.open;

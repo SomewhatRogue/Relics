@@ -96,7 +96,7 @@ export class Cluster {
     b.attack.show({ shape: 'round', size: 42, grade: 'iron', icon: atk, iconScale: carrying ? 1 : 2, pips: { lit: flick ? 0 : Math.ceil(st / 10), of: 10, col: me.winded ? '#d84a3a' : st < 25 ? '#a8a090' : '#ddd5c4' } }, '', '', carrying ? 'Slam' : 'Attack');
     b.block.show(guard === 'none' ? null : { shape: 'shield', size: 30, grade: 'iron', icon: icon(guard === 'parry' ? 'parry' : 'block') }, '', '', guard === 'parry' ? 'Parry' : 'Block');
     const dn = dodgeName(kit.cls);
-    b.roll.show(dodgeOf(kit) ? { shape: 'diamond', size: 30, grade: 'iron', icon: icon(DODGE[dn] ?? 'roll') } : null, '', '', dn);
+    b.roll.show(dodgeOf(kit) ? { shape: 'diamond', size: 34, grade: 'iron', icon: icon(DODGE[dn] ?? 'roll') } : null, '', dn, dn);
     // The class skill and the relic carried, each with its cooldown (a dark sweep and the seconds).
     const [skill, relic] = me.relics, left = (r: typeof skill) => Math.max(0, me.relicReady[r] - room.time);
     const el = skill === 'channel' ? castElement(me) : me.augments[skill];

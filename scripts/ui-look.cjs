@@ -16,7 +16,11 @@ const job = (page, cls) => page.evaluate(async (cls) => {
   h.hp = Math.round(h.maxHp * 0.42);
   h.stamina = 55;
   h.belt = ['bitter', 'oil', 'frost'];
-  if (cls === 'WARRIOR') h.relicReady[h.relics[0]] = r.time + 4.2;
+  // Every skill known, the class skill cooling, and (for a Warrior) a goblin frozen at arm's length to GRAB.
+  h.learned = undefined;
+  h.relicReady[h.relics[0]] = r.time + 4.2;
+  const near = r.enemies.filter((e) => e.act !== 'dead')[1];
+  if (cls === 'WARRIOR' && near) Object.assign(near, { x: h.x + 0.7, y: h.y, frozenUntil: r.time + 30 });
 }, cls);
 
 const SCENES = {
@@ -26,6 +30,7 @@ const SCENES = {
   async pack(page) { await job(page, 'WARRIOR'); await page.waitForTimeout(300); await page.evaluate(() => window.__pack.toggle(true)); await page.waitForTimeout(300); },
   async board(page) { await page.evaluate(() => window.__openSpot('board')); await page.waitForTimeout(1500); },
   async talk(page) { await page.evaluate(() => window.__openSpot('church')); await page.waitForTimeout(2500); },
+  async title(page) { await page.evaluate(() => window.__title.show()); await page.waitForTimeout(600); },
   async options(page) { await page.evaluate(() => document.getElementById('opts').click()); await page.waitForTimeout(300); },
 };
 

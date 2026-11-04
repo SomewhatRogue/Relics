@@ -88,6 +88,7 @@ body:not([data-mode='run']) #leave, body[data-mode='run'] #heroes, body[data-mod
 #banner:empty { display: none; }
 #banner b { display: block; font: 400 21px/1 var(--font-display); color: #f0e6cc; margin: 0 0 1px; }
 #banner span { display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 2px; font-size: 12px; color: var(--bone-dim); }
+#banner span em { margin-left: 8px; }
 #banner .coin { display: inline-block; width: calc(9 * var(--px)); height: calc(9 * var(--px)); background: var(--ic-coin) center / 100% 100% no-repeat; image-rendering: pixelated; }
 #banner .ups { display: inline-flex; gap: var(--px); margin-left: 6px; }
 #banner .ht { width: calc(9 * var(--px)); height: calc(8 * var(--px)); background: var(--ic-heart) center / 100% 100% no-repeat; image-rendering: pixelated; }

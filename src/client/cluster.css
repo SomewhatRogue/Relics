@@ -26,6 +26,8 @@ body.touch .stick.on { opacity: 1; }
 .tb i { position: absolute; left: 50%; bottom: -15px; transform: translateX(-50%); padding: 1px 4px; white-space: nowrap; font: 600 11px/1.1 var(--font-body); letter-spacing: 0.04em; color: var(--gilt); pointer-events: none;
   background: #0e0f12d8; }
 .tb i:empty, .tb.dim i { display: none; }
+/* The dodge keeps its name (STEP, JUMP, DASH, BLINK) small under it. */
+.tb.roll i { bottom: -11px; padding: 0 2px; font-size: 10px; color: var(--bone-dim); background: none; text-shadow: var(--px) var(--px) 0 #07080a; }
 .tb.relic i, .tb.relic2 i { color: var(--bone); bottom: auto; top: 50%; transform: translate(-50%, -50%); background: none; font-size: 10px; }
 
 .tb.attack { width: 84px; height: 84px; right: calc(28px + env(safe-area-inset-right)); bottom: calc(50px + env(safe-area-inset-bottom)); }
@@ -33,7 +35,7 @@ body.touch .stick.on { opacity: 1; }
 .tb.block { width: 60px; height: 60px; right: calc(133px + env(safe-area-inset-right)); bottom: calc(98px + env(safe-area-inset-bottom)); }
 .tb.relic { width: 56px; height: 56px; right: calc(94px + env(safe-area-inset-right)); bottom: calc(150px + env(safe-area-inset-bottom)); }
 .tb.relic2 { width: 56px; height: 56px; right: calc(30px + env(safe-area-inset-right)); bottom: calc(163px + env(safe-area-inset-bottom)); }
-.tb.potion { width: 64px; height: 64px; right: calc(150px + env(safe-area-inset-right)); bottom: calc(185px + env(safe-area-inset-bottom)); }
+.tb.potion { width: 64px; height: 64px; right: calc(160px + env(safe-area-inset-right)); bottom: calc(196px + env(safe-area-inset-bottom)); }
 .tb.grab, .tb.use { width: 60px; height: 60px; right: calc(60px + env(safe-area-inset-right)); bottom: calc(229px + env(safe-area-inset-bottom)); z-index: 2; }
 /* In town the way in or the word with someone takes ATTACK's place, big. */
 .tb.use.big { width: 84px; height: 84px; right: calc(28px + env(safe-area-inset-right)); bottom: calc(50px + env(safe-area-inset-bottom)); }
