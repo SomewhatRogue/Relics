@@ -8,6 +8,7 @@ import { hookLitBadge } from './litbadge';
 import { setVotes } from './voteboards';
 import { HERO, dodgeName, dodgeOf, POTIONS, CLASS_ORDER, RELICS, TRAITS, WEAPONS, itemName, type HeroClass } from '../shared/tuning';
 import { CLASS_NAME } from '../shared/classes';
+import { barWord } from '../shared/barword';
 import { LOOKS, heroLook } from './sprites';
 import { ONLINE } from './relay';
 import { Townfolk } from './townfolk';
@@ -203,6 +204,9 @@ function hud(now: number): void {
   $('.hp i').style.width = (100 * me.hp) / me.maxHp + '%';
   $('.hp').classList.toggle('poisoned', !!me.poison);
   $('.st i').style.width = me.stamina + '%';
+  // A Mage's bar is MAGIC: the word on its tooltip and a soft violet (shared/barword.ts).
+  const bw = barWord(WEAPONS[me.weapon].cls);
+  if ($('.st').title !== bw) ($('.st').title = bw), $('.st').classList.toggle('magic', bw === 'MAGIC');
   $('.st').classList.toggle('low', me.stamina < 25);
   // Winded: the bar flashes, fast while nothing's coming back, slower as it refills.
   $('.st').classList.toggle('winded', !!me.winded);
@@ -211,7 +215,7 @@ function hud(now: number): void {
   $('.who').title = `${CLASS_NAME[pr.cls]}, level ${pr.level}`;
   const item = me.arms[me.weapon];
   $('.wpn').textContent = item ? itemName(item) : WEAPONS[me.weapon].name;
-  // (The block button, and a spellblade's CATCH on it, are the touch cluster's: cluster.ts.)
+  // (The block button, a spellblade's PARRY on it too, is the touch cluster's: cluster.ts.)
   // A Mage's big spell: a mark on the bar at what it costs, red while you're short of it (sim/spells.ts).
   const cost = spellCost(me);
   $('.st').classList.toggle('spell', cost > 0);

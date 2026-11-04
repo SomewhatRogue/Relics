@@ -9,6 +9,7 @@ import type { Good } from './shopui';
 import { SHOPW } from './shopwords';
 import { weaponHow, armorHow, card, compare } from './card';
 import { itemIcon, potionIcon } from './itemicons';
+import { barWords } from '../shared/barword';
 
 const p = (s: string) => `<p>${s}</p>`;
 const dim = (s: string) => `<p class="dim">${s}</p>`;
@@ -18,7 +19,7 @@ export function potionGood(g: Game, id: PotionId): Good {
   const pr = g.profile, po = POTIONS[id], lasts = LASTS[id];
   return {
     name: po.name, price: po.price, icon: potionIcon(id), col: po.col,
-    about: p(po.text) + (lasts ? dim(SHOPW.lasts(lasts)) : '') + (po.thrown && !/thrown/i.test(po.text) ? dim(SHOPW.thrown) : ''),
+    about: p(barWords(po.text, pr.cls)) + (lasts ? dim(SHOPW.lasts(lasts)) : '') + (po.thrown && !/thrown/i.test(po.text) ? dim(SHOPW.thrown) : ''),
     why: pr.belt.length >= POTION.belt ? SHOPW.beltFull : pr.gold < po.price ? SHOPW.poor : '',
     buy: () => void g.buyPotion(id),
   };

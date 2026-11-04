@@ -201,7 +201,7 @@ describe('the spellblade', () => {
     expect(a.h.bladeCharge).toBe(1);
   });
 
-  it("block pressed as a blow lands catches it on the blade: no damage, the blade full (a bonus, no PERFECT)", () => {
+  it('block in the parry window is a real parry (stagger, counter window), and it fills the blade', () => {
     const room = new ArenaRoom(3, { scrappers: false });
     const h = room.join('me');
     const b = room.enemies[0];
@@ -222,8 +222,11 @@ describe('the spellblade', () => {
     for (let i = 0; i < Math.round(0.35 / TICK); i++) room.step(), ev.push(...room.events);
     expect(h.hp).toBe(HERO.hp);
     expect(h.bladeCharge).toBe(1);
-    expect(ev.some((x) => x.k === 'caught')).toBe(true);
-    expect(ev.some((x) => x.k === 'perfect')).toBe(false);
+    expect(ev.some((x) => x.k === 'parry')).toBe(true);
+    expect(ev.some((x) => x.k === 'stunned')).toBe(true);
+    expect(ev.some((x) => x.k === 'bladefull')).toBe(true);
+    expect(h.parriedAt ?? 0).toBeGreaterThan(0);
+    expect(h.counterUntil).toBeGreaterThan(h.parriedAt ?? 0);
     expect(BUTCHER.cleave.dmg).toBeGreaterThan(0);
   });
 });

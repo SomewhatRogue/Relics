@@ -8,6 +8,8 @@ import { RELICS, SKILL_CHOICES, type RelicId } from './magic.js';
 import { knowsSkill, skillState, skillStep } from './skillteach.js';
 import { SKILL_WORDS } from './skillwords.js';
 import type { Profile } from './progress.js';
+import type { HeroClass } from './weapons.js';
+import { barWords } from './barword.js';
 import { drillNeeds, drillState, hasLesson, lessonState, type Lesson, type TrainState } from './training.js';
 
 /** A pip: a rank you have, one your level allows, one still locked behind a level. */
@@ -87,10 +89,16 @@ function drillRow(p: Profile, id: DrillId): TrainRow {
   };
 }
 
+/** A Mage's row says magic where the others say stamina (shared/barword.ts). */
+const magicRow = (r: TrainRow, cls: HeroClass): TrainRow => cls !== 'MAGE' ? r : {
+  ...r, name: barWords(r.name, cls), text: barWords(r.text, cls), gain: barWords(r.gain, cls), now: barWords(r.now, cls), next: barWords(r.next, cls),
+  ladder: r.ladder.map((u) => ({ ...u, gain: barWords(u.gain, cls) })),
+};
+
 /** Everything this hero's trainer offers, in order: the class's three skills, the dodge's
  *  leave-behind, the drills. */
 export function trainerRows(p: Profile): TrainRow[] {
   const skills = [lessonRow(p, 'skill'), ...SKILL_CHOICES[p.cls].slice(1).map((r) => skillRow(p, r))];
   const leave = hasLesson(p, 'leave') ? [lessonRow(p, 'leave')] : [];
-  return [...skills, ...leave, ...DRILL_ORDER.map((id) => drillRow(p, id))];
+  return [...skills, ...leave, ...DRILL_ORDER.map((id) => drillRow(p, id))].map((r) => magicRow(r, p.cls));
 }

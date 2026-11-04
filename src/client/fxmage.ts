@@ -1,9 +1,9 @@
 /**
  * The Mage's kits, seen (sim/spells.ts, staffwall.ts and spellblade.ts decide them): magic spent rises
- * off the hero in violet; a spell with no stamina behind it fizzles in grey smoke with NOT ENOUGH STAMINA; a
+ * off the hero in violet (-40 MAGIC); a spell with too little magic behind it fizzles in grey smoke with NOT ENOUGH MAGIC; a
  * wand's spark that breaks a blow off throws a violet star and INTERRUPTED; the staff's slash sweeps an
  * arc of its element; a wall going up flashes along its length (the big one with a ring at each end);
- * the blade wreathed flares, a full blade glints, a caught blow rings in violet with CAUGHT, and the last
+ * the blade wreathed flares, a full blade glints (a parry fills it: fx.ts says PARRY), and the last
  * wreathed swing sends a wave of the element ahead. Cosmetic only; the one overlay draws in both views.
  */
 import type { FightEvent } from '../sim/types';
@@ -26,11 +26,11 @@ function sweep(fx: Fx, x: number, y: number, dx: number, dy: number, r: number, 
 export function mageFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
   switch (ev.k) {
     case 'magic':
-      fx.say(x, y - 22, '-' + ev.n, '#c9a8ff', 0.6);
+      fx.say(x, y - 22, `-${ev.n} MAGIC`, '#c9a8ff', 0.6);
       fx.burst(x, y - 10, 6, VIOLET, 30, true);
       return true;
     case 'fizzle':
-      fx.say(x, y - 30, 'NOT ENOUGH STAMINA', '#a8a0b8');
+      fx.say(x, y - 30, 'NOT ENOUGH MAGIC', '#a8a0b8');
       fx.burst(x, y - 10, 10, SMOKE, 25, false, -40);
       return true;
     case 'interrupt':
@@ -71,13 +71,6 @@ export function mageFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
     case 'bladefull':
       fx.rings.push({ x, y: y - 10, life: 0.3, max: 0.3, col: '#c9a8ff', size: 10 });
       fx.burst(x, y - 10, 8, VIOLET, 40, true);
-      return true;
-    case 'caught':
-      fx.say(x, y - 36, 'CAUGHT', '#d8c0ff');
-      fx.rings.push({ x, y: y - 12, life: 0.35, max: 0.35, col: '#c9a8ff', size: 16 });
-      fx.flashes.push({ x, y: y - 12, r: 56, i: 1.3, c: [0.8, 0.65, 1], life: 0.18, max: 0.18 });
-      fx.burst(x, y - 12, 20, ['#ffffff', '#c9a8ff', '#e8dcff'], 90, true);
-      fx.shake = Math.max(fx.shake, 2);
       return true;
   }
   return false;

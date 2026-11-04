@@ -41,9 +41,9 @@ const delta = (r: Row, d: number) => (r.unit === 's' ? (d > 0 ? '+' : '') + d.to
 
 /** Every number, now and with `it` on instead, and the change. */
 export function numbers(h: Hero, it: Item): string {
-  const cls = WEAPONS[h.weapon].cls, a = sheet(worn(h)), b = sheet(wearing(h, it));
+  const a = sheet(worn(h)), b = sheet(wearing(h, it));
   return '<div class="nums"><div class="nh"><span></span><i>NOW</i><i>WITH IT</i><i></i></div>' + a.map((r, i) => {
-    if (!shown(r, cls)) return '';
+    if (!shown(r, h.weapon)) return '';
     const n = b[i], d = n.v - r.v, same = Math.abs(d) < 1e-3, good = r.low ? d < 0 : d > 0;
     return `<div class="${same ? 'same' : good ? 'up' : 'down'}"><span>${r.label}</span><i>${fmt(r)}</i><b>${fmt(n)}</b><em>${same ? '' : delta(r, d)}</em></div>`;
   }).join('') + '</div>';

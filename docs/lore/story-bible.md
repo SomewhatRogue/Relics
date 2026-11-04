@@ -126,7 +126,7 @@ most Want among the heroes is the one the bells don't spare).
   paying for them is trade, not keeping or giving: it never touches the Want. Mother Isolde's fees buy
   linen and Sister's Bitter for the infirmary, never the Lantern box. Magister Vell teaches the Elemental
   Channel and sells the PRIMED SPELLS drill (was QUICK CHANNEL until the Channel became a quick switch, 2026-11-02). Players see "stamina", never
-  "breath" or "wind" (Kyle, 2026-11-04: one word for one thing). A job's length in real minutes is the game's own voice on the board only;
+  "breath" or "wind" (Kyle, 2026-11-04: one word for one thing); a Mage sees "magic" for the same bar (below). A job's length in real minutes is the game's own voice on the board only;
   characters and postings never measure a job in minutes.
 - **The valley, added** (recorded 2026-11-01, for the river, marsh and ruins jobs): Barrowfields: the
   Sheepwash (the shallow stretch where the valley washed its sheep, deep either side), Ketterby (a hamlet
@@ -235,7 +235,7 @@ most Want among the heroes is the one the bells don't spare).
 - Open for Kyle: Dessa's steel (Tolmouth per the bible, "Wickhold steel" in her line), and who sets the elements in her stock while Ivo is shut.
 
 ## Stamina and knacks (recorded 2026-11-02; Kyle's call, lore keeper)
-- Stat labels say stamina (STAMINA RECOVERY, "block -25% stamina"); sentences may still say breath. This replaces the older rule that players never see "stamina".
+- Stat labels say stamina (STAMINA RECOVERY, "block -25% stamina"), or magic for a Mage (MAGIC RECOVERY); sentences may still say breath. This replaces the older rule that players never see "stamina".
 - "Knacks" is the on-screen word for what a level buys. Each class has its own four chains. Knacks are taken and reset only in Wickhold, the reset is free, and none of it touches the Want.
 - On-screen terms: the bow's "white flash" at full draw; "blessed ground" and "the ward" for Sanctuary; the Warrior's skill chain is CHARGE OR CRY.
 
@@ -277,9 +277,10 @@ most Want among the heroes is the one the bells don't spare).
 
 ## The Mage's weapons (recorded 2026-11-04; Kyle's call, lore keeper)
 - The focus is the wand, the staff or the spellblade; the lance rod is gone. The spellblade's steel is Halvard's remelted or a pre-war piece, never from outside; the Channel works through it as through any focus.
-- The blade's charge is not a stored spell. Nothing on screen ever says a spell is caught, kept or stored in a blade or focus for later (that's the Blacktongue idea). A caught blow fills the blade; it is never kept in it.
-- A Mage's big spells spend stamina, said as STAMINA on screen, never "magic" (one bar, one name).
-- On-screen terms: CATCH and CAUGHT (a bonus on the parry window: the spellblade's block, pressed while the red flashes white, catches the blow and fills the blade), INTERRUPTED (a wand spark landing on a wind-up, a bonus; the wand's perfect is the burst let go on the white flash), WREATHE. The spellblade's perfect is the wreathe released on the white flash (updated 2026-11-04).
+- The blade's charge is not a stored spell. Nothing on screen ever says a spell is caught, kept or stored in a blade or focus for later (that's the Blacktongue idea). A parry fills the blade; nothing is ever kept in it.
+- A Mage's bar is MAGIC on screen (Kyle, 2026-11-04); every other class's is STAMINA. It's the same bar underneath: a Mage's spells and blink spend it, and it shows a soft violet. (Before: STAMINA for everyone, never "magic", one bar, one name.)
+- The spellblade parries like any parry-only weapon (Kyle, 2026-11-04: "Spellblade can perfect parry"): block pressed while the red flashes white is a PARRY, with the stagger and counter window any parry gives, and its parry fills the blade. CATCH and CAUGHT are retired.
+- On-screen terms: PARRY (the spellblade's, as anyone's), INTERRUPTED (a wand spark landing on a wind-up, a bonus; the wand's perfect is the burst let go on the white flash), WREATHE. The spellblade's perfect is the wreathe released on the white flash (updated 2026-11-04).
 - THE JEALOUS ROD is now THE JEALOUS WAND. Open for Kyle: hungry gear is "plain steel that sat in a butcher's fist", and a wand is wood; is it steel-shod, or does the line widen to "gear that sat in a butcher's fist"?
 
 ## The Cleric's weapons (recorded 2026-11-04; Kyle's call, lore keeper)

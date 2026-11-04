@@ -3,7 +3,7 @@
  * pulses gold for a few seconds with a small label naming it (cluster.css .unlock); on a laptop, which
  * has no buttons, the move and its key are said over your hero instead.
  */
-import { CLASS_GUARD, dodgeName, WEAPONS } from '../shared/weapons';
+import { guardOf, dodgeName, WEAPONS } from '../shared/weapons';
 import { knows, type Hero } from '../sim/types';
 
 const SECS = 4;
@@ -18,10 +18,9 @@ const BTN: Record<string, [string, string][]> = {
 };
 /** A laptop's: the move and its key. */
 const KEYS: Record<string, string> = { attack: 'ATTACK: LEFT CLICK', roll: 'DODGE: SPACE', block: 'BLOCK: RIGHT CLICK', relic: 'SKILL: E', potion: 'POTION: Q', grab: 'GRAB: G' };
-/** What this hero's guard is called: BLOCK, PARRY for a parry-only kit, CATCH for the spellblade. */
+/** What this hero's guard is called: BLOCK, or PARRY for a parry-only kit (the spellblade too). */
 function guardName(me: Hero): string {
-  const k = WEAPONS[me.weapon];
-  return k.catches ? 'CATCH' : k.parryOnly || CLASS_GUARD[k.cls] === 'parry' ? 'PARRY' : 'BLOCK';
+  return guardOf(WEAPONS[me.weapon]) === 'parry' ? 'PARRY' : 'BLOCK';
 }
 /** A laptop's line for a move: the hero's own word for it; the relic lesson names SKILL only once one is known. */
 function keyLine(m: string, me: Hero): string | null {

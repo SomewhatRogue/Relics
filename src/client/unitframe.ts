@@ -1,7 +1,7 @@
 /**
  * The unit frame at the top left: your hero's face in an iron socket with the level on its corner, a
  * chunky health bar with a darker trail that drains a moment after a hit, stamina under it (a laptop's;
- * a phone's is the pips round ATTACK), and a row of small marks for what's on you now (blessed, warded,
+ * a phone's is the pips round ATTACK, a Mage's magic round BLINK), and a row of small marks for what's on you now (blessed, warded,
  * poisoned, brandy, smoke, the church's light). A tap on the face shows the weapon and kit lines. On a
  * job, small hearts under the health bar: the times you can still get back up (alone, a heart each; in a
  * party, your one get-up). Tapped or hovered, they say what they are.

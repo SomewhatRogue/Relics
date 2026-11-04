@@ -3,10 +3,11 @@
  * and what it would change against what you wear now, in the numbers the room uses. Green better, red
  * worse. Used by the loot card, chests and the pack.
  */
-import { CLASS_DODGES, CLASS_GUARD, HUNGRY, type HungryId, MODS, MOD_TEXT, TIERS, TRAITS, WEAPONS, CHARGE, gearStats, itemName, slotOf, traitText, type HeroClass, type Item, type WeaponId } from '../shared/tuning';
+import { CLASS_DODGES, CLASS_GUARD, guardOf, HUNGRY, type HungryId, MODS, MOD_TEXT, TIERS, TRAITS, WEAPONS, CHARGE, gearStats, itemName, slotOf, traitText, type HeroClass, type Item, type WeaponId } from '../shared/tuning';
 import type { Hero } from '../sim/types';
 import { kitRows } from './kitlines';
 import { areas } from './guardarea';
+import { barWord, barWords } from '../shared/barword';
 
 /** How a weapon fights, as three short labelled rows (TAP, HOLD, PERFECT, and ALSO where there's a
  *  bonus; kitlines.ts), then its GUARD and DODGE areas (guardarea.ts). */
@@ -20,15 +21,17 @@ const ARMOR_HOW = {
 };
 /** The same for a class with no dodge (a Warrior, a Healer): nothing about a dodge it hasn't got. */
 const ARMOR_FEET = { ...ARMOR_HOW, light: ['Light', 'Full speed', 'Full damage taken'], heavy: ['Heavy', '12% slower', '25% less damage taken', "Small goblins can't stagger you"] };
-/** How a weight of armor wears, for a class (one with no dodge hears nothing about one): the weight, then a row each. */
+/** How a weight of armor wears, for a class (one with no dodge hears nothing about one; a Mage's bar is magic): the weight, then a row each. */
 export const armorHow = (a: keyof typeof ARMOR_HOW, cls?: HeroClass): string => {
   const [name, ...rows] = (cls && !CLASS_DODGES[cls] ? ARMOR_FEET : ARMOR_HOW)[a];
-  return `<div class="kitrows armor"><div><b>${name.toUpperCase()}</b><span>${rows.join('<br>')}</span></div></div>`;
+  return `<div class="kitrows armor"><div><b>${name.toUpperCase()}</b><span>${rows.map((r) => barWords(r, cls)).join('<br>')}</span></div></div>`;
 };
-/** Rows a class has no use for: a parry it can't make, a block it can't hold, a dodge it hasn't got, heals it doesn't give. */
-export const shown = (r: Row, cls: HeroClass) =>
-  !(r.label === 'PARRY WINDOW' && CLASS_GUARD[cls] === 'none') && !(r.label === 'THROUGH A BLOCK' && CLASS_GUARD[cls] !== 'full') &&
-  !(r.label === 'DODGE EVERY' && !CLASS_DODGES[cls]) && !(r.label === 'HEALING GIVEN' && cls !== 'HEALER');
+/** Rows a kit has no use for: a parry it can't make, a block it can't hold, a dodge it hasn't got, heals it doesn't give. */
+export const shown = (r: Row, w: WeaponId) => {
+  const cls = WEAPONS[w].cls, guard = guardOf(WEAPONS[w]);
+  return !(r.label === 'PARRY WINDOW' && guard === 'none') && !(r.label === 'THROUGH A BLOCK' && guard !== 'full') &&
+    !(r.label === 'DODGE EVERY' && !CLASS_DODGES[cls]) && !(r.label === 'HEALING GIVEN' && cls !== 'HEALER');
+};
 
 export interface Row { label: string; v: number; unit: '' | 's' | '%'; low?: boolean }
 interface Worn { weapon: WeaponId; item?: Item; armor: Item | null; rings: Item[]; baseHp: number }
@@ -48,7 +51,7 @@ export function sheet(w: Worn): Row[] {
     { label: 'DAMAGE TAKEN', v: g.taken, unit: '%', low: true },
     { label: 'WALK', v: k.speed * g.speed, unit: '%' },
     { label: 'DODGE EVERY', v: k.dodge.cooldown * (1 - g.dodge), unit: 's', low: true },
-    { label: 'STAMINA RECOVERY', v: 1 + g.breath, unit: '%' },
+    { label: `${barWord(k.cls)} RECOVERY`, v: 1 + g.breath, unit: '%' },
     { label: 'SKILL RECHARGE', v: 1 - g.focus, unit: '%', low: true },
     { label: 'HEALING GIVEN', v: 1 + g.mending, unit: '%' },
   ];
@@ -68,7 +71,7 @@ export function wearing(h: Hero, it: Item): Worn {
 /** The rows that change, old to new, green better, red worse. */
 export function compare(h: Hero, it: Item): string {
   const a = sheet(worn(h)), b = sheet(wearing(h, it));
-  const cls = WEAPONS[h.weapon].cls, rows = a.map((r, i) => ({ r, n: b[i] })).filter(({ r, n }) => shown(r, cls) && Math.abs(n.v - r.v) > 1e-3);
+  const rows = a.map((r, i) => ({ r, n: b[i] })).filter(({ r, n }) => shown(r, h.weapon) && Math.abs(n.v - r.v) > 1e-3);
   if (!rows.length) return '<div class="cmp none">No change to what you wear now.</div>';
   return '<div class="cmp">' + rows.map(({ r, n }) => {
     const up = n.v > r.v, good = r.low ? !up : up;
@@ -80,12 +83,12 @@ export function compare(h: Hero, it: Item): string {
 export function card(it: Item, h?: Hero): string {
   const t = TIERS[it.quality], s = slotOf(it), cls = h ? WEAPONS[h.weapon].cls : it.kit ? WEAPONS[it.kit].cls : undefined;
   const how = s === 'weapon' ? weaponHow(it.kit!) : s === 'armor' ? armorHow(it.armor ?? 'light', cls) : '';
-  const mods = (it.mods ?? []).map((m) => `<div class="tr"><b>${MODS[m.id].name} ${m.v > 0 ? '+' : ''}${MODS[m.id].unit === '%' ? Math.round(m.v * 100) + '%' : MODS[m.id].unit === 's' ? m.v + ' s' : m.v}</b> ${MOD_TEXT[m.id]}</div>`);
-  const traits = it.traits.map((k) => `<div class="tr"><b>${TRAITS[k].name}</b> ${traitText(k, cls)}</div>`);
+  const mods = (it.mods ?? []).map((m) => `<div class="tr"><b>${barWords(MODS[m.id].name, cls)} ${m.v > 0 ? '+' : ''}${MODS[m.id].unit === '%' ? Math.round(m.v * 100) + '%' : MODS[m.id].unit === 's' ? m.v + ' s' : m.v}</b> ${barWords(MOD_TEXT[m.id], cls)}</div>`);
+  const traits = it.traits.map((k) => `<div class="tr"><b>${barWords(TRAITS[k].name, cls)}</b> ${traitText(k, cls)}</div>`);
   return `<div class="card-head" style="--t:${t.col}"><span class="chip">${t.name}</span><b>${itemName(it)}</b></div>` +
     (how ? `<div class="how">${how}</div>` : '') + [...mods, ...traits].join('') +
     (it.hungry ? `<div class="gift">${HUNGRY[it.hungry as HungryId].gift}</div><div class="cost">${HUNGRY[it.hungry as HungryId].cost}</div>` : '') + (mods.length + traits.length || it.hungry ? '' : `<div class="tr">Plain. No modifiers.</div>`);
 }
 
 /** The hero sheet: every number, as worn. */
-export const heroSheet = (h: Hero) => '<div class="cmp sheet">' + sheet(worn(h)).filter((r) => shown(r, WEAPONS[h.weapon].cls)).map((r) => `<div><span>${r.label}</span><b>${fmt(r)}</b></div>`).join('') + '</div>';
+export const heroSheet = (h: Hero) => '<div class="cmp sheet">' + sheet(worn(h)).filter((r) => shown(r, h.weapon)).map((r) => `<div><span>${r.label}</span><b>${fmt(r)}</b></div>`).join('') + '</div>';

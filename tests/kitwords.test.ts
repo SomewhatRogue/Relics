@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { WEAPON_ORDER, CLASS_KITS, CLASS_ORDER } from '../src/shared/tuning';
 import { KIT, kitLine } from '../src/client/kitlines';
+import { barWords } from '../src/shared/barword';
 import { dodgeOfKit, guardKind, guardRating } from '../src/client/guardarea';
 import { CLASSES, CLASS_TAG } from '../src/shared/classes';
 import { dropPickups } from '../src/sim/pickups';
@@ -27,8 +28,15 @@ describe('GUARD and DODGE areas, from the numbers', () => {
     expect([guardRating('spear'), guardRating('flail')]).toEqual(['MED', 'MED']);
     expect([guardRating('greatsword'), guardKind('greatsword')]).toEqual(['LOW', 'PARRY ONLY']);
     expect(guardKind('longbow')).toBe('PARRY ONLY');
-    expect(guardKind('spellblade')).toBe('CATCH');
+    expect(guardKind('spellblade')).toBe('PARRY ONLY');
     expect([guardKind('daggers'), guardKind('wand')]).toEqual(['NONE', 'NONE']);
+  });
+  it("a Mage's bar is MAGIC on screen; everyone else's is STAMINA", () => {
+    for (const w of CLASS_KITS.MAGE) expect(Object.values(KIT[w]).join(' ')).not.toMatch(/stamina/i);
+    expect(['wand', 'staff', 'spellblade'].map((w) => KIT[w as 'wand'].hold)).toEqual(['Burst, costs magic', 'Raise a wall, costs magic', 'Wreathe the blade, costs magic']);
+    expect(KIT.spellblade.also).toBe('Parry fills the blade');
+    expect(barWords('Shorter dodge, costs more stamina', 'MAGE')).toBe('Shorter dodge, costs more magic');
+    expect(barWords('STAMINA RECOVERY', 'RANGER')).toBe('STAMINA RECOVERY');
   });
   it('names the dodge, or NONE for a Warrior or a Cleric', () => {
     expect(CLASS_ORDER.map((c) => dodgeOfKit(CLASS_KITS[c][0]))).toEqual(['NONE', 'JUMP', 'DASH', 'BLINK', 'NONE']);

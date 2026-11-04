@@ -3225,3 +3225,34 @@ prisoner, their body gets ripped apart and it's 2 goblins who then attack you (1
   finishing, house captives never false, determinism and the online patch), `tests/props.test.ts`
   (`prophit`). Pictures: `scripts/cages.cjs` (Playwright's clock, stepped a frame at a time).
 
+
+## 2026-11-04: a Mage's bar is MAGIC, and the spellblade parries (Kyle; Claude Opus 5.5)
+
+Kyle: "Change all Mage things to magic." and "Spellblade can perfect parry."
+
+- **MAGIC for a Mage** (`shared/barword.ts`: `barWord(cls)`, `barWords(text, cls)`). Same bar underneath
+  (`hero.stamina`); only the word and a soft violet tint change for a Mage. Where it shows: the kit rows
+  ("costs magic"), NOT ENOUGH MAGIC on a fizzle, "-40 MAGIC" rising off the hero, the Mage's knacks
+  (MAGIC ON CHANGE, QUICK RECOVERY, LIGHT BLINK, the MAGIC chain), the armor lines, MAGIC RECOVERY on
+  the sheet and cards, gear mods and traits on a Mage's card, the trainer's rows, Wall Brandy's words.
+  The laptop bar gets a MAGIC tooltip and goes violet (`.st.magic`, still red when winded). Every other
+  class keeps STAMINA.
+- **A Mage's magic on a phone** (Kyle: "it's not clear at all that I have a magic bar ... I don't know how
+  I can teleport", then "Oh, it's the pips. Those should just be around the blink, as a cooldown I
+  guess."). For a Mage the pips leave ATTACK and ring BLINK, violet, filling as magic comes back
+  (`cluster.ts`). Winded, BLINK goes dull stone: it can't fire. With less magic than a blink costs (60,
+  less with LIGHT BLINK) the cost shows small in red on its corner: it still fires, but leaves you
+  winded (that's the room's rule, `wantsRoll` in `sim/hero.ts`; unchanged). No extra bar under health
+  on a phone. Other classes keep their pips round ATTACK.
+- **The spellblade parries** (`shared/mage.ts`: `parryOnly`, `spellblade`; `guardOf(kit)` in
+  `shared/weapons.ts` says what a kit's block button does). Block in the parry window is a real parry
+  (`sim/combat.ts`): the goblin is staggered, the counter window opens, PARRY shows, as for the
+  greatsword. On top, `parryFills` (`sim/spellblade.ts`) fills the blade. Holding block says it can't
+  (`noblock`), as for any parry-only kit. CATCH, CAUGHT and the `caught` event are gone. On screen: the
+  touch button says PARRY, the BUTTONS legend's PARRY row adds "A parry fills your blade", GUARD reads
+  PARRY ONLY, the laptop hint says PARRY, the kit row's ALSO is "Parry fills the blade", and the sheet
+  shows the PARRY WINDOW. No PERFECT on a parry (none shows for any parry).
+- Not changed: trait and mod rolls stay by class, so a spellblade still can't roll RIPOSTE, BULWARK or
+  PARRY mods (Kyle's call if he wants them).
+- Tests: `tests/magekit.test.ts` (the parry: no damage, PARRY, stagger, counter window, blade full),
+  `tests/kitwords.test.ts` (PARRY ONLY, Mage rows say magic).

@@ -11,7 +11,7 @@ import { shatter } from './elements';
 import { has } from './traits';
 import { brandyDmg } from './brandy';
 import { lunging, riposteNow, shaftMult, warriorHit } from './warrior';
-import { catchBlow } from './spellblade';
+import { parryFills } from './spellblade';
 import { soak } from './holy';
 import { clericHit } from './flail';
 import { stun } from './stuns';
@@ -193,8 +193,6 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   const facing = (h.fx * tx + h.fy * ty) / tl > Math.cos(((w.guardArc / 2) * Math.PI) / 180);
   const canGuard = !a.unblockable && facing && (h.act === 'idle' || h.act === 'attack' || h.act === 'charge');
   if (canGuard && now - h.parryOpenAt <= parryWindow(h)) {
-    // A spellblade catches it on the blade instead: nothing taken, the blade full (sim/spellblade.ts).
-    if (w.catches) return catchBlow(h, e, now, ev);
     h.counterUntil = now + counterWindow(h);
     h.parriedAt = now;
     h.parryOpenAt = -9;
@@ -205,6 +203,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     shove(e, tx / tl, ty / tl, 4, e.weight);
     ev.push({ k: 'parry', x: (h.x + e.x) / 2, y: (h.y + e.y) / 2 });
     ev.push({ k: 'stunned', x: e.x, y: e.y });
+    // A spellblade's parry fills the blade too (sim/spellblade.ts).
+    parryFills(h, ev);
     return;
   }
   if (canGuard && h.blocking) {

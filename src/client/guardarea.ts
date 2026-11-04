@@ -4,10 +4,10 @@
  * (none) if it's none."). Worked out from the kit's own numbers, so a card never says more than the room
  * does. Shown on the weapon card (card.ts) and the class card (title.ts), one small line each.
  */
-import { CLASS_GUARD, WEAPONS, dodgeName, dodgeOf, type WeaponId } from '../shared/tuning';
+import { guardOf, WEAPONS, dodgeName, dodgeOf, type WeaponId } from '../shared/tuning';
 
 export type GuardRating = 'LOW' | 'MED' | 'HIGH';
-export type GuardKind = 'BLOCK AND PARRY' | 'PARRY ONLY' | 'CATCH' | 'NONE';
+export type GuardKind = 'BLOCK AND PARRY' | 'PARRY ONLY' | 'NONE';
 
 /**
  * The rating, from where the guard reaches (`guardArc`, degrees in front), what a blocked blow costs in
@@ -23,12 +23,10 @@ export function guardRating(w: WeaponId): GuardRating {
   return 'LOW';
 }
 
-/** What the block button does with this kit: hold a block and parry, parry only, the spellblade's catch, or nothing. */
+/** What the block button does with this kit: hold a block and parry, parry only (the spellblade too), or nothing. */
 export function guardKind(w: WeaponId): GuardKind {
-  const k = WEAPONS[w], g = CLASS_GUARD[k.cls];
-  if (k.catches) return 'CATCH';
-  if (g === 'none') return 'NONE';
-  return g === 'parry' || k.parryOnly ? 'PARRY ONLY' : 'BLOCK AND PARRY';
+  const g = guardOf(WEAPONS[w]);
+  return g === 'none' ? 'NONE' : g === 'parry' ? 'PARRY ONLY' : 'BLOCK AND PARRY';
 }
 
 /** The dodge button's name for this kit (ROLL, JUMP, DASH, BLINK), or NONE. */

@@ -25,7 +25,7 @@ export const CHAINS = {
   m_blink: { name: 'BLINK', steps: ['m_blink', 'm_leap', 'm_image'] },
   m_channel: { name: 'CHANNEL', steps: ['m_primed', 'm_clear', 'm_twice'] },
   m_spells: { name: 'SPELLS', steps: ['m_draw', 'm_burst', 'm_dmg'] },
-  m_breath: { name: 'STAMINA', steps: ['m_breath', 'm_light', 'm_quick'] },
+  m_breath: { name: 'MAGIC', steps: ['m_breath', 'm_light', 'm_quick'] },
   h_guard: { name: 'GUARD', steps: ['h_parry', 'h_block', 'h_counter'] },
   h_mercy: { name: 'HEALING', steps: ['h_mend', 'h_reach', 'h_mercy'] },
   h_smite: { name: 'SMITE', steps: ['h_draw', 'h_stun', 'h_full'] },

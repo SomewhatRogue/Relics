@@ -23,6 +23,9 @@ body.touch .stick.on { opacity: 1; }
 .tb.potion b { position: absolute; right: -2px; bottom: -2px; min-width: 18px; height: 18px; padding: 0 2px; font-size: var(--fs-text); line-height: 14px; text-align: center; text-shadow: none;
   border: calc(2 * var(--px)) solid transparent; border-image: var(--f-sunk) 2 fill / calc(2 * var(--px)) stretch; }
 .tb.potion b:empty { display: none; }
+/* A Mage's BLINK: what it costs, small on its corner in red, while you have less magic than that (cluster.ts). */
+.tb.roll.cost b { position: absolute; right: -4px; bottom: 2px; font-size: var(--fs-text); color: var(--blood-hi); }
+.tb.roll.cost b:empty { display: none; }
 .tb i { position: absolute; left: 50%; bottom: -15px; transform: translateX(-50%); padding: 1px 4px; white-space: nowrap; font: 400 var(--fs-text)/1.1 var(--font-body); letter-spacing: 0.04em; color: var(--gilt); pointer-events: none;
   background: #0e0f12d8; }
 .tb i:empty, .tb.dim i { display: none; }

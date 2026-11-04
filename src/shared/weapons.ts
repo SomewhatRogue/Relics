@@ -142,7 +142,7 @@ export interface Weapon {
   /** Its blows shove a goblin a little, but a shield-bearer's board stops the shove (a flail). */
   shoves?: boolean;
   dodge: Dodge;
-  /** No held block: block is only ever a parry (the greatsword). */
+  /** No held block: block is only ever a parry (the greatsword, the spellblade). */
   parryOnly?: boolean;
   /** A counter soon after the parry is a riposte (the sword; shared/warrior.ts RIPOSTE). */
   ripostes?: boolean;
@@ -154,8 +154,8 @@ export interface Weapon {
   reloads?: boolean;
   /** The quick attack is cast on the move, at this share of your pace (the wand). */
   castWalk?: number;
-  /** Block catches a blow on the blade as it lands (the spellblade; shared/mage.ts). */
-  catches?: boolean;
+  /** The spellblade (shared/mage.ts): its blows build the blade's charge, and a parry fills it. */
+  spellblade?: boolean;
 }
 
 type KitId = 'sword' | 'greatsword' | 'spear' | 'daggers' | 'longbow' | 'shortbow' | 'crossbow' | 'wand' | 'staff' | 'spellblade' | 'mace' | MoreKitId;
@@ -311,6 +311,8 @@ export const CLASS_DODGES: Record<HeroClass, boolean> = { WARRIOR: false, HEALER
 /** What the dodge button does for this kit: its own dodge, or nothing (a Warrior or Healer has none). */
 export const dodgeOf = (w: Weapon): Dodge | undefined => (CLASS_DODGES[w.cls] ? w.dodge : undefined);
 export const CLASS_GUARD: Record<HeroClass, 'full' | 'parry' | 'none'> = { WARRIOR: 'full', HEALER: 'full', ROGUE: 'none', RANGER: 'parry', MAGE: 'none' };
+/** What a kit's block button does: a parry-only kit parries whatever its class (the greatsword, the spellblade). */
+export const guardOf = (k: Weapon): 'full' | 'parry' | 'none' => (k.parryOnly ? 'parry' : CLASS_GUARD[k.cls]);
 /** The Mage's blink leaves an image of them where they stood: goblins near it go for it instead. */
 export const DECOY = { time: 2.5, lure: 5 };
 export const CLASS_KITS: Record<HeroClass, WeaponId[]> = {
