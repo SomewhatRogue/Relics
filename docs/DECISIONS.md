@@ -2,6 +2,94 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-04: the first expedition, the Barrowfields, online (Kyle; Claude Opus 5.5)
+
+Kyle: "the much more robust big map raid sort of mode, similar to Helldivers", after the big map's load
+test ("VERY fun"). Built as a posting on the board, THE BARROWFIELDS (one a day, a new map by its seed),
+taken alone or with a party through the usual lobby and set-out. Try it: `?hero=WARRIOR&exped=4`.
+
+**Online first** (the load test's limits, DECISIONS 2026-11-03):
+- **Near only, each friend their own** (`client/bigsend.ts`, `client/interest.ts`, wired into
+  `CoopHost.frame` for any room with `sleepFar`): every hero always; goblins, props, chests, bolts and the
+  rest within 20 tiles; buildings within 26, sent by their place in the map's list (`b<i>`) and merged into
+  the friend's own seed-built list (`mergeBlocks`); events within 30, but an expedition's (a horn, a job
+  done) and a friend down go to everyone. One Encoder per friend, so a goblin leaving the ring is dropped.
+- **Quiet clocks**: `cooldown` and `home` aren't sent, `actT` goes as `a0` (when the act began) and the
+  friend works it out (`loud`). A goblin dead for good stops its clocks after `STILL` (8 s) in the sim.
+- **The map is never sent**: a whole message says `ms: 1` and the friend builds `expedPlan(run.job)`.
+- The run, banner, names and house counts go only when they change (the run alone was a third of every
+  message). The expedition's view (`expedView`) only when it changes (progress in 5% steps, seconds whole).
+- **No message over the limit, ever** (`client/split.ts`, in `RelaySocket.send`): anything over 48,000
+  characters goes in parts of 22,000 (each under 64 KiB even fully escaped); the far end joins them.
+- **Compact save** (`client/bigsave.ts`): the map as a mark plus the buildings that changed; each goblin and
+  prop only as it differs from a fresh one; numbers to two places. Taking over or reloading rebuilds it.
+- A den on a big map breeds only with a hero within 24 tiles (else the far dens would fill it).
+
+**Measured** (`npx tsx scripts/bigmap/expedmeasure.ts 20`: a leader and three bot friends, KB a second each
+friend receives as CoopHost sends it, in the relay's envelope; save every 2 s):
+
+| party | goblins | tick mean / p95 ms | KB/s a friend (worst) | biggest msg KB | save whole KB | save compact KB (parts) |
+|---|---|---|---|---|---|---|
+| together | 150 | 2.2 / 6.0 | 23.9 (27.2) | 29.7 | 123.7 | 37.4 (1) |
+| together | 300 | 2.2 / 5.7 | 39.1 (47.7) | 45.6 | 204.1 | 60.4 (4) |
+| spread | 150 | 2.4 / 6.2 | 28.1 (36.8) | 28.9 | 132 | 44.8 (3) |
+| spread | 300 | 2.9 / 5.4 | 42.4 (51.1) | 45.8 | 215.9 | 73.7 (5) |
+
+(The bots can't be hurt, so their `safeT` ticks and is about 8% of a patch; real heroes send less.)
+**The real run** (`scripts/exped-online.cjs`, now in `npm run test:online`; Kyle on a laptop, Sam on a
+phone, 120 ms of lag, the local relay): Sam received 26.7 KB/s, 14.4 messages a second, biggest 33.8 KB
+(the save); Kyle sent 26.4 KB/s. Sam's copy held 6 goblins of Kyle's 151; Kyle's camp's horn showed on
+Sam's map across the field. Frames (headless, SwiftShader, both browsers on one 2-core box): Kyle 19 fps
+(52 / 83 ms), Sam 23 fps. Alone on the same box, flat: the expedition 32 fps laptop and 26 fps phone at
+CPU /4, a medium job 56 and 37; the page's own JS is 0.9 ms of room and 4.3 ms of drawing a frame on the
+laptop, the rest is SwiftShader's software GPU (the light pass with up to 32 lights). Read against a real
+phone before tuning further. The flat view now skips goblins and round things off screen on a big map.
+
+**The map** (`shared/expedmap.ts` and `expedkit.ts`, `expedland.ts`, `expedcamps.ts`, `expedfill.ts`):
+96 by 72, 4 by 3 nodes of 24 (each 2 by 2 of the load test's chunks), from the job's seed alone. A river
+across the middle with two fords; a cart road on each bank joined by a road over each ford; the way in by
+the cart road from the south or at a ford on the map's side; the way out off the top (the drove road), as
+far from the way in as the map allows. Nodes: the way in, the way out, the ruined hamlet (cottages on the
+road you can go into and set alight: the job-house interiors and houses alight, `settle` gives them their
+fates), three or four camps, the barrows, the wood's edge along the top, fields with hedges below the
+river, willows and reeds on its banks; groves anywhere. Each filler node gets one of the routed rooms' set
+pieces (`shared/vignettes.ts` read as is: at the fire, at the dead, the feast, asleep, a cart looted or
+wrecked, the column's dead). 150 goblins placed (`EXPED.goblins`), none within 14 tiles of the way in,
+200 alive at most (`EXPED.cap`), dozing on.
+
+**The structure** (`sim/exped.ts`, `expedpressure.ts`, `expedgoal.ts`, `expedroom.ts`; tuning `EXPED`):
+- Two or three jobs of six, by the seed: poison the larder's cookpot (stand at it 7 s), wreck the siege
+  engine (a wagon-bed with its arm, `look: 4`, smash or burn it), break the prisoners' cages, burn the dens,
+  hold the barrow shrine (75 s in its ring, a wave every 9 s while you do), kill the named butcher. Side
+  jobs: a chained cache, and a wayside shrine to pray at (3 s; the party blessed 90 s). Each job done pays
+  15% of the posting into the pot, a side job 10% and a piece of treasure more; the pot is halved if you
+  fail, as ever.
+- Pressure: a level every 150 s (to 5); blows, deaths, buildings down and oil fire make noise where they
+  happen; past enough of it, once the level's wait is up, a wave comes in from 25 to 28 tiles off (inside
+  the wake ring, at least 18 from every hero, never in water or a wall); a camp whose goblins see you blows
+  its horn (everyone in it comes, a wave on its heels, and it's known on the map); three patrols walk the
+  roads; a hunting party comes in from the edge toward the last noise every 110 s, sooner as it goes on.
+- Extraction: once the jobs are done the beacon opens; stand in its ring 2 s to light it, then hold it 60 s
+  (paused while nobody's in it, a wave every 7 s), then the watch comes and the way out opens: everyone up
+  walks north together. Everyone down and it fails (the party's rules; alone, three downs).
+- The map screen (MAP in the corner, M on a laptop; `client/expedmapui.ts`): the ground, dark where nobody's
+  been, the pins, the camps you know of (red once their horn has gone), the way in, the beacon once it's
+  open, friends by name. In the world: gold rings where you stand to do a job, filling; the beacon's fire;
+  a pale point at the screen's edge toward each friend off screen, with their name (both views).
+
+Tests: `tests/exped.test.ts` (same seed same map; every map pins two or three jobs with their parts and
+keeps the way in clear; walkable from the way in to every job, the beacon and the way out; every job kind
+completes; pay into the pot; the beacon opens, lights, holds, pauses and lets you out; everyone down fails;
+the level and the horn; waves out of sight and never past the cap), `tests/expedsend.test.ts` (near only
+is exactly the ring; a goblin leaving it is dropped and its clock comes back from `a0`; buildings merge;
+no message over the limit at 300 goblins and the map never goes; split and join; the compact save comes
+back the same). Screens: `node scripts/bigmap/expedlook.cjs <dir> [day]` (drop-in, map, a job, a horn, the
+beacon; phone and laptop, flat and 2.5D).
+
+Words new here are in `shared/expedjob.ts` (GOAL_WORDS, EXTRACT_WORDS, EXPED_SAYS, MAP_WORDS, the posting),
+waiting on the lore keeper and the line editor. Lore to check: the siege engine, the barrows and their
+shrine, the beacon and the watch coming out for a party (Orla's watch).
+
 ## 2026-11-04: copy pass 3: Kyle's style everywhere, and mechanics shown as labelled rows (Kyle; Claude Opus 5.5)
 
 Kyle: "Take my copy changes as general guidance and suggestions, not specific one-to-one approval flows.

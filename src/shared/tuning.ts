@@ -250,6 +250,34 @@ export const CATCH = { oil: 0.9, barrel: 0.9, blast: 0.75, edge: 0.12, spark: 0.
  * 26 tall: `wake` is about two screens of a hero's reach, well past any goblin's sight or an arrow's.
  */
 export const SLEEP = { wake: 24, doze: 30 };
+/** A goblin dead for good stops its clocks after this long (its fall and a nest's embers are done by then): nothing ticks to send. */
+export const STILL = 8;
+
+/**
+ * An expedition (shared/expedmap.ts, sim/exped.ts): one big map, dropped in, two or three pinned jobs,
+ * pressure that rises, a way out to call and hold. `goblins` placed at the start and `cap` alive at once
+ * are a phone host's numbers (DECISIONS 2026-11-03: 150 to 200 with dozing). Times in seconds, sizes in tiles.
+ * - `poison` at the cookpot, `hold` at the barrow shrine (`holdR` its ring), `pray` at a wayside shrine
+ *   (the party `blessed` that long), `call` standing in the way out's ring (`extractR`) to light the
+ *   beacon, then `extract` held in it (paused while nobody's in it) before the watch comes.
+ * - Pressure: every `escalate` the level goes up one (to `maxLevel`); noise (`noise`: a blow, a death, a
+ *   building down, oil fire, a horn) gathers where it's made and `fade`s; past `wave` heat, once
+ *   `waveEvery[level]` has gone by, `waveSize[level]` (and one more a friend) come from `waveFrom` tiles
+ *   off; a camp that sees you blows its horn (`horn` heat, a wave toward it at once). During a hold a
+ *   wave every `holdWave`; a new patrol from the edge every `patrolEvery`, sooner as it goes on.
+ * - The map screen counts ground as seen `seen` tiles round anyone, in cells of `cell`.
+ * - Pay: each main job done puts `goalPay` of the posting's pay in the pot, each side job `sidePay`.
+ */
+export const EXPED = {
+  goblins: 150, cap: 200,
+  poison: 7, hold: 75, holdR: 3.4, pray: 3, blessed: 90, call: 2, extract: 60, extractR: 4,
+  escalate: 150, maxLevel: 5,
+  noise: { hit: 1, death: 2, collapse: 5, oil: 4, horn: 14 }, fade: 25, wave: 12,
+  waveEvery: [50, 42, 35, 29, 24, 20], waveSize: [3, 4, 4, 5, 6, 7], waveFrom: [25, 28] as [number, number],
+  holdWave: 9, patrolEvery: 110, patrolSpeed: 1.1,
+  seen: 9, cell: 6,
+  goalPay: 0.15, sidePay: 0.1,
+};
 
 /**
  * How goblins find their way round water and anything long in the way (sim/pathing.ts): a grid of

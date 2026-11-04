@@ -1,0 +1,14 @@
+/* An expedition: MAP in the corner (only while on one), and the map screen over everything (expedmapui.ts). */
+#corner #mapbtn::before { background-image: var(--ic-map); }
+body:not(.exped) #corner #mapbtn { display: none; }
+#expedmap { position: fixed; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center; background: #0b0c0fcc;
+  padding: calc(10px + env(safe-area-inset-top)) calc(8px + env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) calc(8px + env(safe-area-inset-left)); }
+#expedmap[hidden] { display: none; }
+#expedmap .em-card { width: min(100%, 760px); display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 6px; }
+#expedmap h2 { margin: 0; font: 400 21px/1.05 var(--font-display); color: var(--gilt); text-shadow: 0 var(--px) 0 var(--stone-900); }
+#expedmap canvas { display: block; image-rendering: pixelated; border: calc(2 * var(--px)) solid #3a2a18; background: var(--parch); }
+#expedmap .em-key { color: var(--bone-dim); letter-spacing: 0.04em; text-align: center; }
+#expedmap button { min-width: 140px; }
+/* The board's special posting: THE BARROWFIELDS, edged in gilt. */
+#panel .job.exped { box-shadow: inset calc(3 * var(--px)) 0 0 var(--gold); }
+#panel .job .jhead .k-exped { color: #8a5a08; }

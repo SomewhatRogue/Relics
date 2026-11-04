@@ -15,6 +15,7 @@ import type { ArenaRoom } from './room';
 import type { Run } from './run';
 import { bossOf, densLeft, racksLeft } from './targets';
 import { waiting } from './survivors';
+import { expedGoal } from './expedgoal';
 
 export interface Captives { caged: number; waiting: number }
 
@@ -69,6 +70,7 @@ export const sum = (list: Captives[]): Captives => list.reduce((a, c) => ({ cage
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export function goal(run: Run, room: ArenaRoom, houses: Captives = { caged: 0, waiting: 0 }): { text: string; done: boolean } {
+  if (room.exped) return expedGoal(run, room);
   const goblins = room.enemies.filter((e) => !isDead(e)).length, o = run.job.objective, here = inRoom(room);
   // What has to be done (the cages out here, and everyone freed brought out), and who else is caged indoors.
   const need = { caged: here.caged, waiting: here.waiting + houses.waiting }, left = captivesLeft(need);

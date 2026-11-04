@@ -21,6 +21,7 @@ import { partyList, wireParties } from './partyboard';
 import { postedToast } from './partytoast';
 import { CLASS_NAME } from '../shared/classes';
 import { KIND, SIZES, STORY_PARTY, danger } from '../shared/jobs';
+import { EXPED_BOARD } from '../shared/expedjob';
 import { TIME_WORD, timeOf } from '../shared/timeofday';
 
 /** The job open on the board (by id), if any. */
@@ -65,12 +66,14 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     const pips = (n: number) => '<span class="pips">' + '<i class="on"></i>'.repeat(n) + '<i></i>'.repeat(5 - n) + '</span>';
     const html = partyHtml + doneHtml + (partyHtml || doneHtml ? '<h3>JOBS</h3>' : '') + jobs.map((j, i) => {
       const open = boardOpen === j.id, size = SIZES[j.size ?? 'medium'], pay = Math.round(j.reward * rewardMult(w)), story = j.objective === 'story';
-      const alone = g.canTake(j, 1), head = `<button class="jhead" data-open="${i}"><b class="kind k-${j.objective}">${KIND[j.objective]}</b><span class="where">${esc(j.place.name)}</span><span class="len">${size.label}</span><span class="when t-${timeOf(j)}">${TIME_WORD[timeOf(j)]}</span>${pips(danger(j))}<em>${pay}g</em></button>`;
+      // The expedition is its own posting (shared/expedjob.ts): one big map, not rooms.
+      const xp = !!j.exped;
+      const alone = g.canTake(j, 1), head = `<button class="jhead" data-open="${i}"><b class="kind k-${xp ? 'exped' : j.objective}">${xp ? EXPED_BOARD.kind : KIND[j.objective]}</b><span class="where">${esc(xp ? EXPED_BOARD.where : j.place.name)}</span><span class="len">${size.label}</span><span class="when t-${timeOf(j)}">${TIME_WORD[timeOf(j)]}</span>${pips(danger(j))}<em>${pay}g</em></button>`;
       const more = open ? `<div class="jmore"><div class="t">${story ? 'STORY: ' : ''}${j.title}</div>` +
-        labelRows([['WHERE', `${j.place.region}, ${RUIN[j.place.ruin].toLowerCase()}`], ['ROOMS', `${j.rooms}, ${size.minutes}`], ['PAYS', `${pay} gold and ${treasureWord(j)}`]], 'm') +
+        labelRows([['WHERE', `${j.place.region}, ${RUIN[j.place.ruin].toLowerCase()}`], xp ? ['MAP', EXPED_BOARD.rooms] : ['ROOMS', `${j.rooms}, ${size.minutes}`], ['PAYS', xp ? EXPED_BOARD.pays(pay) : `${pay} gold and ${treasureWord(j)}`]], 'm') +
         `<div class="d">${j.text}</div>` + (story && !alone ? `<div class="need">Needs ${STORY_PARTY} to set out.</div>` : '') +
         (alone ? `<button data-job="${i}">${pt ? 'GO ALONE' : 'TAKE THE JOB'}</button>` : '') + (pt ? ` <button data-gather="${i}">GATHER A PARTY</button>` : '') + '</div>' : '';
-      return `<div class="job ${story ? 'story' : j.deep ? 'deep' : ''}${open ? ' open' : ''}">${head}${more}</div>`;
+      return `<div class="job ${story ? 'story' : j.deep ? 'deep' : xp ? 'exped' : ''}${open ? ' open' : ''}">${head}${more}</div>`;
     }).join('');
     panel.show(`JOB BOARD, DAY ${w.day}`, html);
     const on = (sel: string, f: (b: HTMLButtonElement) => void) => document.querySelectorAll<HTMLButtonElement>(`#panel ${sel}`).forEach((b) => b.addEventListener('click', () => f(b)));

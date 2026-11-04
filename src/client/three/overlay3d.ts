@@ -12,6 +12,7 @@ import type { Fx } from '../fx';
 import { GUARD, PARTY, WEAPONS } from '../../shared/tuning';
 import { drawText, textWidth } from '../pixfont';
 import { CHASE, chaseLabel, chasePoint, chasers } from '../chasers';
+import { drawBeacon, drawExpedGround, friendMarks } from '../expeddraw';
 import { OX, OY, PX } from '../world';
 import type { Lerp } from './actors3d';
 import { BOXFIGS } from './look';
@@ -115,6 +116,10 @@ export class Overlay {
         drawText(g, name, Math.round(x - textWidth(name) / 2), Math.round(y - 6), '#9ad8a8');
       }
     }
+    // An expedition: the rings and the beacon on the ground, and friends off screen (../expeddraw.ts).
+    drawExpedGround(g, room, (x, y) => P(x, 0, y), now);
+    drawBeacon(g, room, (x, y) => P(x, 0, y), now, Math.max(0.6, k));
+    friendMarks(g, room, meId, (x, y) => P(x, 1, y), this.W, this.H, 16, 16);
     this.marks(room, meId, m, P, lerp, now);
     for (const t of fx.texts) {
       const [x, y] = at(t.x, t.y);

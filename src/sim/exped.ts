@@ -1,0 +1,119 @@
+/**
+ * An expedition's rules (Kyle, 2026-11-04, "similar to Helldivers"), run by the room every tick (the
+ * room decides everything): the pinned jobs and whether each is done, the side jobs, the way out (shut
+ * until the jobs are done, then lit by standing at the beacon, then held until the watch comes, then
+ * walked out of together), and what's been seen of the map. The pressure (waves, horns, patrols, the
+ * level going up) is sim/expedpressure.ts. Plain data on the room (`room.exped`), so a saved or
+ * handed-on room carries it, and a friend's screen draws its view (expedView).
+ */
+import type { GoalKind, SideKind } from '../shared/expedcamps';
+import type { ExpedPlan } from '../shared/expedmap';
+import type { P } from '../shared/expedkit';
+import { EXPED } from '../shared/tuning';
+import { isDead } from './damage';
+import { stepPressure } from './expedpressure';
+import type { ArenaRoom } from './room';
+import type { Enemy, FightEvent, Hero } from './types';
+
+export type Phase = 'shut' | 'open' | 'hold' | 'leave';
+export interface XGoal { kind: GoalKind | SideKind; x: number; y: number; done: boolean; p: number; blocks?: number[]; cages?: P[]; foe?: number; chest?: number }
+export interface XCamp { x: number; y: number; ids: number[]; alerted: boolean; known: boolean }
+export interface ExpedState {
+  goals: XGoal[]; sides: XGoal[]; camps: XCamp[];
+  zone: P & { r: number }; phase: Phase; lit: number; held: number;
+  /** Pressure: the level, the noise's heat and where it is, when the next wave, patrol and hold-wave may come. */
+  level: number; heat: number; hx: number; hy: number; nextWave: number; nextPatrol: number; nextHold: number;
+  patrols: { ids: number[]; path: P[]; i: number; dir: number }[];
+  /** Ground seen, a bit a cell (EXPED.cell), as hex; and a counter for the room's own rolls. */
+  seen: string; n: number; seed: number; party: number;
+}
+export type ExpedWhat = 'goal' | 'side' | 'open' | 'lit' | 'watch' | 'horn' | 'worse' | 'wave' | 'blessed';
+
+const W = 16, H = 12;
+const up = (h: Hero) => h.act !== 'down' && !h.out && h.id !== 'squire';
+
+/** A fresh expedition on a room built from `plan` (foe index i is goblin id i + 1). */
+export function newExped(plan: ExpedPlan, seed: number, party: number): ExpedState {
+  const g = (s: ExpedPlan['goals'][number]): XGoal => ({ kind: s.kind, x: s.x, y: s.y, done: false, p: 0, blocks: s.blocks, cages: s.cages, foe: s.foe === undefined ? undefined : s.foe + 1, chest: s.chest });
+  return {
+    goals: plan.goals.map(g), sides: plan.sides.map(g), camps: plan.camps.map((c) => ({ x: c.x, y: c.y, ids: c.foes.map((i) => i + 1), alerted: false, known: false })),
+    zone: { ...plan.zone, r: EXPED.extractR }, phase: 'shut', lit: 0, held: 0,
+    level: 0, heat: 0, hx: plan.map.hero.x, hy: plan.map.hero.y, nextWave: 60, nextPatrol: EXPED.patrolEvery, nextHold: 0,
+    patrols: plan.patrols.map((p) => ({ ids: p.foes.map((i) => i + 1), path: p.path, i: 1, dir: 1 })),
+    seen: '0'.repeat((W * H) / 4), n: 0, seed, party,
+  };
+}
+
+/** Every goblin (the dozers too, mid-tick on a big map). */
+export const everyone = (room: ArenaRoom): Enemy[] => room.allEnemies;
+
+/** One tick of the expedition's rules. */
+export function stepExped(room: ArenaRoom, ev: FightEvent[], dt: number): void {
+  const x = room.exped!, heroes = room.heroes.filter(up), t = room.time;
+  if (room.tick % 10 === 0) look(x, heroes);
+  for (const g of x.goals) if (!g.done && check(room, g, heroes, dt)) done(room, g, false, ev);
+  for (const g of x.sides) if (!g.done && check(room, g, heroes, dt)) done(room, g, true, ev);
+  const at = (r: number) => heroes.some((h) => Math.hypot(h.x - x.zone.x, h.y - x.zone.y) <= r);
+  if (x.phase === 'shut' && x.goals.every((g) => g.done)) (x.phase = 'open'), ev.push({ k: 'exped', x: x.zone.x, y: x.zone.y, what: 'open' });
+  else if (x.phase === 'open' && at(x.zone.r)) {
+    x.lit += dt;
+    if (x.lit >= EXPED.call) (x.phase = 'hold'), (x.nextHold = t), ev.push({ k: 'exped', x: x.zone.x, y: x.zone.y, what: 'lit' });
+  } else if (x.phase === 'hold' && at(x.zone.r + 0.5)) {
+    x.held += dt;
+    if (x.held >= EXPED.extract) (x.phase = 'leave'), ev.push({ k: 'exped', x: x.zone.x, y: x.zone.y, what: 'watch' });
+  }
+  stepPressure(room, x, heroes, ev, dt);
+}
+
+/** Is job `g` done (stepping its progress if it's one you stand at)? */
+function check(room: ArenaRoom, g: XGoal, heroes: Hero[], dt: number): boolean {
+  const near = (r: number) => heroes.some((h) => Math.hypot(h.x - g.x, h.y - g.y) <= r);
+  if (g.kind === 'larder' || g.kind === 'pray' || g.kind === 'shrine') {
+    const [r, s] = g.kind === 'shrine' ? [EXPED.holdR, EXPED.hold] : g.kind === 'pray' ? [1.6, EXPED.pray] : [1.6, EXPED.poison];
+    if (near(r)) g.p = Math.min(1, g.p + dt / s);
+    return g.p >= 1;
+  }
+  if (g.kind === 'engine' || g.kind === 'dens') return (g.blocks ?? []).every((i) => room.map.blocks[i]?.ruined);
+  if (g.kind === 'prisoners') return (g.cages ?? []).every((c) => !room.props.some((p) => p.kind === 'cage' && !p.broken && Math.hypot(p.x - c.x, p.y - c.y) < 0.6));
+  if (g.kind === 'butcher') {
+    const b = everyone(room).find((e) => e.id === g.foe);
+    return !b || isDead(b);
+  }
+  return g.chest === undefined || (room.chests[g.chest]?.state ?? 'open') !== 'shut';
+}
+
+function done(room: ArenaRoom, g: XGoal, side: boolean, ev: FightEvent[]): void {
+  g.done = true;
+  g.p = 1;
+  const i = (side ? room.exped!.sides : room.exped!.goals).indexOf(g);
+  ev.push({ k: 'exped', x: g.x, y: g.y, what: side ? 'side' : 'goal', i });
+  // A wayside shrine prayed at: the whole party blessed a while.
+  if (g.kind === 'pray') for (const h of room.heroes) (h.blessedUntil = room.time + EXPED.blessed), ev.push({ k: 'exped', x: h.x, y: h.y, what: 'blessed' });
+}
+
+/** Mark the ground round each hero seen (the map screen's explored ground). */
+function look(x: ExpedState, heroes: Hero[]): void {
+  const bits = x.seen.split('').map((c) => parseInt(c, 16)), s = EXPED.seen, c = EXPED.cell;
+  for (const h of heroes) for (let j = Math.floor((h.y - s) / c); j <= Math.floor((h.y + s) / c); j++) for (let i = Math.floor((h.x - s) / c); i <= Math.floor((h.x + s) / c); i++) {
+    if (i < 0 || j < 0 || i >= W || j >= H || Math.hypot((i + 0.5) * c - h.x, (j + 0.5) * c - h.y) > s + c / 2) continue;
+    const b = j * W + i;
+    bits[b >> 2] |= 1 << (b & 3);
+  }
+  x.seen = bits.map((v) => v.toString(16)).join('');
+  for (const cp of x.camps) if (!cp.known && seenAt(x.seen, cp.x, cp.y)) cp.known = true;
+}
+
+/** Whether the cell at (x, y) has been seen. */
+export function seenAt(seen: string, x: number, y: number): boolean {
+  const i = Math.floor(x / EXPED.cell), j = Math.floor(y / EXPED.cell);
+  if (i < 0 || j < 0 || i >= W || j >= H) return false;
+  const b = j * W + i;
+  return ((parseInt(seen[b >> 2], 16) >> (b & 3)) & 1) === 1;
+}
+export const SEEN = { w: W, h: H };
+
+/** What a friend's screen needs of it (the map screen, the pins, the banner): no patrols or heat. */
+export function expedView(x: ExpedState): Partial<ExpedState> {
+  const r = (g: XGoal): XGoal => ({ kind: g.kind, x: Math.round(g.x * 10) / 10, y: Math.round(g.y * 10) / 10, done: g.done, p: Math.round(g.p * 20) / 20, foe: g.foe });
+  return { goals: x.goals.map(r), sides: x.sides.map(r), camps: x.camps.map((c) => ({ ...c, x: Math.round(c.x), y: Math.round(c.y), ids: [] })), zone: x.zone, phase: x.phase, lit: Math.round(x.lit * 2) / 2, held: Math.floor(x.held), level: x.level, seen: x.seen };
+}

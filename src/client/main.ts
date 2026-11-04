@@ -1,4 +1,6 @@
 /** Relic: Wickhold, the Training Yard and runs. The rooms run here in the browser (solo is a party of one). */
+import { ExpedUi } from './expedui';
+import { expedition } from '../shared/expedjob';
 import { spellCost } from '../sim/spells';
 import { carriedItem } from '../sim/charge';
 import { isDark, relicFill } from '../shared/relicitems';
@@ -67,6 +69,7 @@ import './ui.css';
 import './hud.css';
 import './cluster.css';
 import './skins.css';
+import './exped.css';
 import { paintFrames } from './frames';
 import { iconVars } from './icons';
 import { Cluster } from './cluster';
@@ -101,6 +104,9 @@ function online(): Townfolk | null {
 }
 
 const scene = new Scene(document.getElementById('game') as HTMLCanvasElement);
+/** An expedition's MAP and its words (expedui.ts). */
+const expedUi = new ExpedUi();
+(window as unknown as { __expedUi: ExpedUi }).__expedUi = expedUi;
 /** The pixel scene, or the 3D view on a job when the VIEW switch says so (three/views.ts). */
 const views = new Views(scene);
 const fx = new Fx();
@@ -142,6 +148,10 @@ if (quick && CLASS_ORDER.includes(quick)) {
   if (new URLSearchParams(location.search).get('wood') !== '1' && game.mode === 'wood') game.skipWood();
 }
 else title.show();
+// ?hero=WARRIOR&exped=1: straight onto today's expedition (THE BARROWFIELDS), alone.
+// (?exped=4: the expedition posted on day 4, for a given map.)
+const xday = Number(new URLSearchParams(location.search).get('exped') ?? 0);
+if (quick && xday) game.startJob(expedition(xday > 1 ? xday : game.world.day));
 // The big map's load test (?hero=WARRIOR&bigmap=1: bigmode.ts), loaded only when asked.
 if (quick && new URLSearchParams(location.search).get('bigmap') === '1') void import('./bigmode').then((m) => m.startBig(game, new URLSearchParams(location.search)));
 // A recovery code here: if another device sent these heroes on since, take that copy (only before play).
@@ -280,8 +290,9 @@ function hud(now: number): void {
   } else if (game.mode === 'run' && run) {
     const g = { text: me.out ? OUT_TEXT : game.goalText() };
     // (The hearts, the get-ups left, are under the health bar: unitframe.ts.)
-    $('#banner').innerHTML = objFlash.show(`<b>${titleCase(run.job.place.name)}${roomsHtml(run.index, run.job.rooms)}</b> <div class="obj">${g.text}</div><span><i class="coin"></i>+${run.gold}${run.rescued ? `<em>SAVED ${run.rescued}</em>` : ''}</span>`, now);
-    const boss = room.enemies.find((e) => e.name && e.act !== 'dead');
+    $('#banner').innerHTML = objFlash.show(`<b>${titleCase(run.job.place.name)}${room.exped ? '' : roomsHtml(run.index, run.job.rooms)}</b> <div class="obj">${g.text}</div><span><i class="coin"></i>+${run.gold}${run.rescued ? `<em>SAVED ${run.rescued}</em>` : ''}</span>`, now);
+    // (On an expedition the named butcher's bar shows only once you're near it.)
+    const boss = room.enemies.find((e) => e.name && e.act !== 'dead' && (!room.exped || Math.hypot(e.x - me.x, e.y - me.y) < 14));
     $('#boss').hidden = !boss;
     if (boss) ($('#boss b').textContent = boss.name!), ($('#boss i').style.width = (100 * boss.hp) / boss.maxHp + '%');
   } else {
@@ -393,6 +404,12 @@ function tick(t: number): void {
   scene.marks = game.mode === 'run' ? targets(game.run, game.room, game.houses()) : [];
   scene.doors = game.mode === 'run' ? game.doorMarks() : [];
   scene.pointTo = game.wood && game.wood.stage === 5 && !game.wood.hold && spoken(game.wood) ? { x: ROAD_OUT.x + 1, y: ROAD_OUT.y + ROAD_OUT.h / 2 } : wayTarget(game);
+  // An expedition: MAP, the map screen, and a word over you as things happen (expedui.ts).
+  expedUi.frame(game.room, game.mode === 'run' && !!game.room.exped, evs, ME, t / 1000, (s, col) => {
+    if (!game.hero) return;
+    const [sx, sy] = toPx(game.hero.x, game.hero.y);
+    fx.say(sx, sy - 52, s, col, 3);
+  }, game.run?.job.boss);
   // The way on just opened: say which way, over you.
   const opened = ways.check(game);
   if (opened) objFlash.done(t / 1000);
