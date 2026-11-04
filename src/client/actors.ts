@@ -12,6 +12,7 @@ import { drawWeapon, pose } from './held';
 import { EL_COL } from './palette';
 import { drawLoad } from './xbowmark';
 import { drawBladeMark } from './blademark';
+import { drawHolyShield } from './holyshield';
 import { drawText } from './pixfont';
 import { PARTY } from '../shared/tuning';
 import { LOOKS, SPRITES, heroLook } from './sprites';
@@ -132,7 +133,8 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'b
     const held = h.actT + CHARGE.start, full = chargeFull(WEAPONS[h.weapon], h), k = Math.min(1, held / full);
     // A draw's white is its clean-release window, the one the room judges (sim/knacks.ts); a blade stays white once full.
     // (A crossbow's perfect is its glint, not the flash: aiming, it stays gold; winding, it shows nothing here.)
-    const white = k >= 1 && (!WEAPONS[h.weapon].heavy.shot || held <= full + releaseWindow(h)) && !WEAPONS[h.weapon].reloads;
+    // (Every Cleric hold is judged on its window too, so its white goes when the window does.)
+    const hv = WEAPONS[h.weapon].heavy, white = k >= 1 && (!(hv.shot || hv.holy) || held <= full + releaseWindow(h)) && !WEAPONS[h.weapon].reloads;
     for (let i = 0; i < 4; i++) {
       const t = c.now * 4 + i * 1.57, r = 6 - 3 * k;
       c.glow.fillStyle = white ? '#ffffff' : '#ffd860';
@@ -168,6 +170,7 @@ function aura(c: Ctx, h: Hero, x: number, y: number, t: number): void {
     c.glow.fillStyle = Math.floor(c.now * 4) % 2 ? '#ff6a5a' : '#ffb0a0';
     c.glow.fillRect(Math.round(x - 1), Math.round(y - 21), 3, 1);
   }
+  drawHolyShield(c, h, x, y, t);
   if (h.wardUntil > t) {
     // Warded: a shell of light, its dots thinning as it takes blows; it flickers before it fades.
     const share = Math.max(0.25, h.wardHp / WARD.hp), fading = h.wardUntil - t < 1 && Math.floor(c.now * 12) % 2;

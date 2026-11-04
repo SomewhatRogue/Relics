@@ -95,6 +95,7 @@ export class Title {
     this.el.innerHTML = `<div class="tcard"><h2 class="cname">${CLASS_NAME[c]}</h2><div class="stage"></div>` +
       `<div class="looks">${[0, 1, 2].map((i) => `<button data-look="${i}" class="${i === this.look ? 'on' : ''}">${face(c, i)}</button>`).join('')}</div>` +
       `<div class="bars">${STATS.map((k) => `<span>${k}</span><i>${'<em class="on"></em>'.repeat(s.stats[k])}${'<em></em>'.repeat(5 - s.stats[k])}</i>`).join('')}</div>` +
+      (s.perk ? `<p class="lede perk"><b>${s.perkLabel}</b> ${s.perk}</p>` : '') +
       `<label class="name">NAME <input maxlength="12" value="${NAMES[c]}" autocomplete="off" spellcheck="false"></label>` +
       `<button data-begin class="primary wide">BEGIN</button>${this.g.save.heroes.some((h) => h.prologue) ? '<button data-skipwood class="ghost wide">SKIP THE WOOD</button>' : ''}<button data-pick class="ghost wide">BACK</button></div>`;
     this.preview = new Preview(c, this.look);

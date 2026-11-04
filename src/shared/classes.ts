@@ -31,6 +31,9 @@ export interface ClassSheet {
   /** Anything else only this class has (one line), under its own heading. */
   note?: string;
   noteLabel?: string;
+  /** The class's own rule (the Cleric's mercy), shown on the class card under the ratings. */
+  perk?: string;
+  perkLabel?: string;
   /** Out of 5, against the other classes (judged from tuning.ts; keep honest when it changes). */
   stats: Record<Stat, number>;
 }
@@ -85,6 +88,8 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     guard: "Can hold a block and parry, though a mace and censer let a little more through than a shield. Can't roll: walk out of anything striped.",
     note: 'Feed the censer what butchers leave. It heals hotter, and draws teeth.',
     noteLabel: 'CENSER',
+    perk: "Nothing of yours hurts a friend, or anyone freed from a cage: your blows, smites, coals and fire all pass them by.",
+    perkLabel: "SPARES FRIENDS",
     stats: { POWER: 2, GUARD: 4, SPEED: 2, RANGE: 2, SUPPORT: 5 },
   },
 };

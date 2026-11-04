@@ -2,12 +2,14 @@
  * What of the party's reaches the freed (survivors.ts), at full weight, solo or in a party: they aren't
  * fighters. Swings, shots and spells, blasts, a slammed barrel, the oil going up, a thrown javelin,
  * goblins and props flung into them, the Warrior's shield charge, and fire caught from burning goblins
- * and buildings. A holy smite spares them as it spares the party; the hound and the net don't hurt them.
+ * and buildings. A holy smite spares them as it spares the party; the hound and the net don't hurt them;
+ * and nothing credited to a Cleric touches them (sim/mercy.ts): blows, shots, blasts, flung bodies, fire.
  */
 import { currentMap } from '../shared/arena';
 import { BASH, BLAZE, BURN, JAVELIN, KNOCK, PROP, SURVIVOR, type Augment, type Swing } from '../shared/tuning';
 import { inArc } from './combat';
 import { isDead } from './damage';
+import { isCleric, merciful } from './mercy';
 import type { World } from './elements';
 import { hurtSurvivor, igniteSurvivor, living } from './survivors';
 import type { Bolt, Hero, Survivor } from './types';
@@ -16,7 +18,7 @@ const key = (s: Survivor) => 's:' + s.id;
 
 /** A swing's live frames: a survivor in its arc takes it once a swing. */
 export function sweepSurvivors(h: Hero, sw: Swing, w: World): void {
-  if (sw.shot) return;
+  if (sw.shot || isCleric(h)) return;
   for (const s of living(w)) {
     if (h.hitAllies?.includes(key(s)) || (s.z ?? 0) !== (h.z ?? 0) || !inArc(h.x, h.y, h.fx, h.fy, s.x, s.y, sw.range, sw.arc, SURVIVOR.radius)) continue;
     (h.hitAllies ??= []).push(key(s));
@@ -31,12 +33,14 @@ export const survivorIn = (w: World, b: Bolt) =>
 /** A shot (no burst) lands in a survivor: once a shot, and a fire one sets them alight. */
 export function shotSurvivor(w: World, b: Bolt, s: Survivor): void {
   (b.hitHeroes ??= []).push(key(s));
+  if (merciful(w.heroes, b.owner)) return;
   hurtSurvivor(s, b.dmg, b.owner, w.now, w.ev, b.dx, b.dy);
   if (b.el === 'fire') igniteSurvivor(s, b.owner, w.now, w.ev);
 }
 
 /** A blast at (x, y): survivors in reach are hit and thrown outward; a fire one sets them alight. */
 export function blastSurvivors(w: World, x: number, y: number, r: number, dmg: number, by: string, el: Augment): void {
+  if (merciful(w.heroes, by)) return;
   for (const s of living(w)) {
     if (Math.hypot(s.x - x, s.y - y) > r + SURVIVOR.radius) continue;
     hurtSurvivor(s, dmg, by, w.now, w.ev, s.x - x, s.y - y);
@@ -46,6 +50,7 @@ export function blastSurvivors(w: World, x: number, y: number, r: number, dmg: n
 
 /** The Warrior's shield charge runs over them (once a charge; `hit` keeps the charge's tally). */
 export function bashSurvivors(h: Hero, w: World, hit: Set<number>): void {
+  if (isCleric(h)) return;
   for (const s of living(w)) {
     if (hit.has(-s.id) || Math.hypot(s.x - h.x, s.y - h.y) > 0.32 + SURVIVOR.radius + BASH.reach) continue;
     hit.add(-s.id);
@@ -74,7 +79,7 @@ export function survivorHazards(w: World, dt: number): void {
     if (j.state !== 'fly') continue;
     const step = JAVELIN.speed * dt;
     for (const s of list) {
-      if (s.dead || j.hit.includes(-s.id) || segDist(s.x, s.y, j.x - j.dx * step, j.y - j.dy * step, j.x, j.y) > SURVIVOR.radius + 0.18) continue;
+      if (s.dead || j.hit.includes(-s.id) || merciful(w.heroes, j.owner) || segDist(s.x, s.y, j.x - j.dx * step, j.y - j.dy * step, j.x, j.y) > SURVIVOR.radius + 0.18) continue;
       j.hit.push(-s.id);
       hurtSurvivor(s, JAVELIN.dmg, j.owner, w.now, w.ev, j.dx, j.dy);
       // It stops in them (unless it's already carrying a goblin to the wall).
@@ -86,7 +91,7 @@ export function survivorHazards(w: World, dt: number): void {
     if (s.dead) continue;
     const bumped = w.now - s.hitAt < SURVIVOR.bumpEvery;
     for (const e of w.enemies) {
-      if (bumped || isDead(e) || e.act === 'carried' || Math.hypot(e.x - s.x, e.y - s.y) > e.radius + SURVIVOR.radius + 0.05) continue;
+      if (bumped || isDead(e) || e.act === 'carried' || merciful(w.heroes, e.lastBy) || Math.hypot(e.x - s.x, e.y - s.y) > e.radius + SURVIVOR.radius + 0.05) continue;
       const rel = into(s, e);
       if (rel < KNOCK.bodySpeed) continue;
       w.ev.push({ k: 'bodyhit', x: (e.x + s.x) / 2, y: (e.y + s.y) / 2 });
@@ -95,9 +100,9 @@ export function survivorHazards(w: World, dt: number): void {
       break;
     }
     // A burning goblin close enough spreads it, like goblin to goblin.
-    for (const e of w.enemies) if (!isDead(e) && e.burnUntil > w.now && Math.hypot(e.x - s.x, e.y - s.y) <= e.radius + SURVIVOR.radius + BURN.spread) igniteSurvivor(s, e.lastBy, w.now, w.ev);
+    for (const e of w.enemies) if (!isDead(e) && e.burnUntil > w.now && !merciful(w.heroes, e.lastBy) && Math.hypot(e.x - s.x, e.y - s.y) <= e.radius + SURVIVOR.radius + BURN.spread) igniteSurvivor(s, e.lastBy, w.now, w.ev);
     for (const p of w.props) {
-      if (s.dead || w.now - s.hitAt < SURVIVOR.bumpEvery || p.broken || p.lifted || Math.hypot(p.x - s.x, p.y - s.y) > p.radius + SURVIVOR.radius + 0.05) continue;
+      if (s.dead || w.now - s.hitAt < SURVIVOR.bumpEvery || merciful(w.heroes, p.lastBy) || p.broken || p.lifted || Math.hypot(p.x - s.x, p.y - s.y) > p.radius + SURVIVOR.radius + 0.05) continue;
       const rel = into(s, p);
       if (rel < KNOCK.bodySpeed) continue;
       w.ev.push({ k: 'bodyhit', x: (p.x + s.x) / 2, y: (p.y + s.y) / 2 });

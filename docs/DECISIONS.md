@@ -2,6 +2,58 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-04: the Cleric's weapons rework: mercy, the holy shield, the smite's light, coals, the spun flail (Kyle; Claude Opus 5.5)
+
+The last class through Kyle's weapons rework, which is now complete. The Cleric guards and never dodges
+(CLASS_DODGES unchanged). Numbers in `shared/cleric.ts` and the kits (`shared/weapons.ts`, `kits.ts`),
+the rules in `sim/mercy.ts`, `sim/holy.ts`, `sim/censer.ts` and `sim/flail.ts`, all judged in the room
+and kept on the heroes and the room's coal list, so guests get every bit of it.
+
+- **Mercy, the class perk** (Kyle: "like rogue backstab"). Nothing credited to a Cleric hurts, knocks
+  back or sets alight another hero or anyone freed. Gated by the id the harm is credited to
+  (`merciful(heroes, by)`): swings on friends (`sweepAllies`) and the freed (`sweepSurvivors`); shots,
+  which now pass by friends and the freed; blasts on both; goblins and props a Cleric flung into the
+  freed; a Cleric's burning goblins spreading fire to the freed; javelins; the smite already spared
+  friends. Censer coals only ever touch goblins. Relics already spared everyone. On the class card
+  (title screen, under the ratings) as MERCY. Not gated: a house set alight burns whoever is inside,
+  whoever lit it (it's the house, not the Cleric).
+- **Every Cleric perfect is your own timing** (Kyle changed it mid-build: timed against a blow or an ally
+  being hit was too hard): let a held attack go on the white flash, as with the bows and the rapier, and
+  it shields friends. **The holy shield** (`HOLY_SHIELD`): soaks 20 damage, lasts 5 s, the Cleric's own
+  included; a fresh one tops an old one up and never stacks. A blow it soaks whole doesn't stagger. Drawn
+  on the hero as a gold shell of light with a halo (`client/holyshield.ts`, so both views), and it rings
+  as it takes a blow and breaks. The white of a Cleric's charge now goes when the window does.
+- **Mace and censer.** Quick: heavy blows kept, the third heals everyone near (8), but the reach is
+  short now (1.2, 1.2, 1.35; the sword's is 1.45): the weakness. Hold (kept, Kyle asked after it): the
+  smite on the goblin you face (range 6, stuns 1.2 s, 24 to 70), and its light mends every friend in the
+  burst 10 (as every heal, grown by the censer's coals). On the flash: 1.5x, and every friend in the light
+  and the Cleric are shielded, with a pillar of light where it falls.
+- **Sword and censer.** The third blow (the censer's arc) drops three coals along the arc at 0.8 of its
+  reach; each burns 6 s and sets alight a goblin standing in it (0.5 tiles); six a Cleric at most, the
+  oldest goes out. They live in the room's coal list beside the butchers' slivers (drawn, lit and sent the
+  same way), carrying their owner, and no censer feeds on them. Swinging the censer (the arc or the
+  whirl) through your own coals, at least 0.4 s old, bursts them: friends within 1.8 of one mend 6, once
+  a swing. Hold: the whirl all round, setting alight everything it hits (kept). On the flash: every coal
+  of yours within 5 tiles flares (14 and alight, 1.3 round it) and friends near you (3) are shielded.
+  Weakness, clumsy in tight spaces: a wall or pillar within the swing snags the chain (SNAGGED): half
+  damage, no coals, no burst, a 0.18 s jar.
+- **Flail.** Quick: the two slow sweeps (16, 20; the second heals 9) shove a goblin back a little (knock
+  5.5, 6.5, so neither counts as heavy), and `overShield` is gone: a shield-bearer's board takes the
+  blow as it takes any, and stops the shove. Hold, rooted (no walking at all once the spin begins): the
+  flail spun overhead; let go for a long sweep (reach 2.6 against 1.85, arc 240, 22 to 54) that doesn't
+  carry you. On the flash: what it hits is stunned 1 s (a butcher 0.5 s; a goblin mid striped blow or
+  charge can't be dazed) and friends near you are shielded. Still a breaker: a strong spun blow (70%
+  charge) knocks a goblin out of a heavy wind-up; the old held smite never could, being a shot.
+- **Seen and heard** (`client/fxcleric.ts`, sounds from the kit): PERFECT as ever, plus the smite's pillar
+  of light, coals bursting gold or flaring red-gold, steel sparks on a snag, a ring of stars on the
+  flail's stun. Shield: the ward's sounds; snag: a wall knock and a block.
+- Tests: `tests/cleric.test.ts` (no friendly fire on every path, the mace's reach, heals and smite, the
+  shield soaking and wearing off, the coals, the whirl, the burst, the flare, the snag, the flail's
+  rooted spin and reach, the shove and the board, the stun and the breaker); `tests/kits.test.ts` updated
+  for the flail.
+- Words for the lore keeper and the line editor: the class card's MERCY line, the three weapon cards,
+  the three KIT hints, and SNAGGED.
+
 ## 2026-11-04: the Mage's weapons rework: magic costs, the wand on the move, the staff's walls, the spellblade (Kyle; Claude Opus 5.5)
 
 The fourth class through Kyle's weapons rework. The Mage has no guard and blinks rather than rolls; its

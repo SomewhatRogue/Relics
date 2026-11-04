@@ -277,3 +277,9 @@ most Want among the heroes is the one the bells don't spare).
 - A Mage's big spells spend stamina, said as STAMINA on screen, never "magic" (one bar, one name).
 - On-screen terms: CATCH and CAUGHT (the spellblade's perfect), INTERRUPTED (the wand's perfect), WREATHE.
 - THE JEALOUS ROD is now THE JEALOUS WAND. Open for Kyle: hungry gear is "plain steel that sat in a butcher's fist", and a wand is wood; is it steel-shod, or does the line widen to "gear that sat in a butcher's fist"?
+
+## The Cleric's weapons (recorded 2026-11-04; Kyle's call, lore keeper)
+- Mace, censer (sword and censer), flail. On-screen terms: SMITE, SNAGGED, and "shield" / "shields" for the gold light on friends.
+- A Cleric spares friends and anyone freed from a cage (SPARES FRIENDS, like relics): their own way, not shard-stuff. "Mercy" stays off screen; the one mercy in this world is the Unmaking.
+- The shield of gold light is never called "holy" or "blessed" on screen; it's gold because it spares friends, like relics. A smite is never "called down" and never comes from a god: its light is the censer's.
+- Coals on the floor are spilled from the Lantern-lit censer and burn out. No line says they spend what the Cleric fed the censer.

@@ -52,9 +52,12 @@ export const MORE_KITS: Record<MoreKitId, Weapon> = {
     dodge: DASH,
   },
   /**
-   * A sword in the hand and the censer swung on its chain: two quick cuts, then the censer comes round
-   * in a wide arc, scattering coals that burn and healing the party. The best guard a Cleric has.
-   * Held: the censer whirled all the way round, burning everything near and healing again.
+   * A sword in the hand and the censer swung on its chain: two quick cuts, then the censer comes round in
+   * a wide arc, leaving burning coals on the floor and healing the party. The best guard a Cleric has.
+   * Swung through your own coals, it bursts them, mending friends near them. Held: the censer
+   * whirled all the way round, setting alight everything near and healing again; let go on the white
+   * flash and your coals flare and friends near you are shielded (shared/cleric.ts CENSER). Weakness:
+   * a wall in the swing snags the chain.
    */
   censer: {
     name: 'SWORD AND CENSER',
@@ -62,28 +65,30 @@ export const MORE_KITS: Record<MoreKitId, Weapon> = {
     combo: [
       { windup: 0.09, active: 0.08, recover: 0.2, dmg: 11, range: 1.45, arc: 110, lunge: 0.35, knock: 3 },
       { windup: 0.09, active: 0.08, recover: 0.2, dmg: 11, range: 1.45, arc: 110, lunge: 0.35, knock: 3 },
-      { windup: 0.2, active: 0.12, recover: 0.4, dmg: 12, range: 1.8, arc: 170, lunge: 0.3, knock: 5, heal: 8, burn: true },
+      { windup: 0.2, active: 0.12, recover: 0.4, dmg: 12, range: 1.8, arc: 170, lunge: 0.3, knock: 5, heal: 8, burn: true, coals: true },
     ],
-    heavy: { windup: 0.12, active: 0.14, recover: 0.5, dmg: 16, dmgFull: 36, range: 1.9, arc: 360, lunge: 0, knock: 5, knockFull: 10, heal: 8, burn: true },
+    heavy: { windup: 0.12, active: 0.14, recover: 0.5, dmg: 16, dmgFull: 36, range: 1.9, arc: 360, lunge: 0, knock: 5, knockFull: 10, heal: 8, burn: true, holy: true },
     draw: 1.1,
     chip: 0.12, blockSpeed: 0.45, chargeSpeed: 0.35, parryWindow: 0.34, guardArc: 165, guardCost: 1, speed: 0.86,
     dodge: CLERIC_ROLL,
   },
   /**
-   * Slow, wide sweeps that come over a shield-bearer's board; the second blow heals. Held: the flail
-   * brought down overhead, and holy light cracks out where it lands (a smite at arm's length, wider).
+   * Slow, wide sweeps that shove a goblin a little (never over a shield-bearer's board); the second blow
+   * heals. Held, rooted: the flail spun up, and let go it's a long sweep that doesn't carry you with it.
+   * Let go on the white flash and what it hits is stunned, and friends near you are shielded (shared/
+   * cleric.ts FLAIL). A strong spun blow knocks a goblin out of a heavy wind-up (`breaker`).
    */
   flail: {
     breaker: true,
     name: 'FLAIL',
     cls: 'HEALER',
     combo: [
-      { windup: 0.22, active: 0.12, recover: 0.3, dmg: 16, range: 1.85, arc: 200, lunge: 0.3, knock: 6 },
-      { windup: 0.24, active: 0.12, recover: 0.45, dmg: 20, range: 1.95, arc: 220, lunge: 0.4, knock: 8, heal: 9 },
+      { windup: 0.22, active: 0.12, recover: 0.3, dmg: 16, range: 1.85, arc: 200, lunge: 0.3, knock: 5.5 },
+      { windup: 0.24, active: 0.12, recover: 0.45, dmg: 20, range: 1.95, arc: 220, lunge: 0.4, knock: 6.5, heal: 9 },
     ],
-    heavy: { windup: 0.14, active: 0.05, recover: 0.55, dmg: 26, dmgFull: 60, range: 1.7, arc: 0, lunge: 0.3, knock: 6, knockFull: 12, shot: 'smite', burst: 1.7, stun: 1, delay: 0.08 },
+    heavy: { windup: 0.1, active: 0.14, recover: 0.5, dmg: 22, dmgFull: 54, range: 2.6, arc: 240, lunge: 0, knock: 8, knockFull: 14, holy: true, dazes: true },
     draw: 1,
-    chip: 0.25, blockSpeed: 0.4, chargeSpeed: 0.3, parryWindow: 0.24, guardArc: 130, guardCost: 1.3, speed: 0.8, blunt: true, overShield: true,
+    chip: 0.25, blockSpeed: 0.4, chargeSpeed: 0, parryWindow: 0.24, guardArc: 130, guardCost: 1.3, speed: 0.8, blunt: true, shoves: true,
     dodge: CLERIC_ROLL,
   },
 };
