@@ -88,8 +88,8 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     guard: "Can hold a block and parry, though a mace and censer let a little more through than a shield. Can't roll: walk out of anything striped.",
     note: 'Feed the censer what butchers leave. It heals hotter, and draws teeth.',
     noteLabel: 'CENSER',
-    perk: "Nothing of yours ever hurts a friend. Your blows, your smites, your coals and your fire pass them by, and the people you free as well.",
-    perkLabel: 'MERCY',
+    perk: "Nothing of yours hurts a friend, or anyone freed from a cage: your blows, smites, coals and fire all pass them by.",
+    perkLabel: "SPARES FRIENDS",
     stats: { POWER: 2, GUARD: 4, SPEED: 2, RANGE: 2, SUPPORT: 5 },
   },
 };
