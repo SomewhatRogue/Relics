@@ -12,13 +12,13 @@ const LIGHT = `+${Math.round((LIT.dmg - 1) * 100)}% damage, and goblins come for
 
 /** What each found relic does, one plain line (the card). */
 export const RELIC_LINES: Partial<Record<RelicId, string>> = {
-  javelin: 'Thrown hard. Small goblins ride it to the wall and stay pinned there; big ones take it in the body.',
+  javelin: 'A hard throw. It carries small goblins to the nearest wall and pins them there, and sticks in big ones.',
   hook: 'Hooks the first thing it reaches. Small goblins and loose barrels come to you; anything heavier pulls you to it.',
-  lodestone: 'Lobbed. Where it lands it drags goblins in, the light ones fastest, then bursts.',
-  bomb: 'Lobbed. It bursts, throws goblins and barrels about and knocks the small ones silly.',
+  lodestone: 'Throw it and it pulls goblins in to where it lands, light ones fastest, then bursts.',
+  bomb: 'Throw it and it bursts where it lands, knocking goblins and barrels away and stunning the small ones.',
   sentry: 'Set it down and it shoots whatever goblin comes near for a while. Its arrows leave them limping.',
-  bell: 'Blow it. Goblins near you stop to listen and lose their swing, and friends near you are quicker on their feet for a bit.',
-  knuckle: 'A punch that carries. Everything in a line in front of you is knocked flying, and the next blow anyone lands on them hits harder.',
+  bell: 'Blow it. Goblins near you flinch and drop their attacks, and friends near you move 25% faster for 4 seconds.',
+  knuckle: 'A punch that reaches. Everything in a line in front of you is knocked flying, and the next hit anyone lands on them does extra damage.',
 };
 
 export const RELICW = {
@@ -26,11 +26,11 @@ export const RELICW = {
   spares: 'SPARES FRIENDS',
   charge: (n: number, max: number) => `CHARGE ${n} / ${max}`,
   dark: 'DARK',
-  darkLine: 'Gone dark. It does nothing now until the church sees to it.',
-  darkElLine: 'Gone dark, and the church won\'t bring this kind back. You can still give it up on the step, on its own, or with another for one in return.',
+  darkLine: 'Out of charge (dark). It does nothing until the church recharges it.',
+  darkElLine: 'Out of charge (dark), and the church won\'t recharge a relic with an element. You can still give it up on the step, alone, or with another relic to get one back.',
   loud: 'LOUD',
-  fades: 'Every use spends a little of it.',
-  noRecharge: 'Born with an element. It holds more charge, but the church won\'t recharge it.',
+  fades: 'Every use spends one charge.',
+  noRecharge: 'It has an element, so it holds more charge, but the church won\'t recharge it.',
   /** The RELIC button pressed with a dark one in hand. */
   pressedDark: 'DARK',
   /** Spared by a friend's relic. */

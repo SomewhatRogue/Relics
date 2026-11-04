@@ -27,7 +27,7 @@ export const CHAINS = {
   m_spells: { name: 'SPELLS', steps: ['m_draw', 'm_burst', 'm_dmg'] },
   m_breath: { name: 'STAMINA', steps: ['m_breath', 'm_light', 'm_quick'] },
   h_guard: { name: 'GUARD', steps: ['h_parry', 'h_block', 'h_counter'] },
-  h_mercy: { name: 'MERCY', steps: ['h_mend', 'h_reach', 'h_mercy'] },
+  h_mercy: { name: 'HEALING', steps: ['h_mend', 'h_reach', 'h_mercy'] },
   h_smite: { name: 'SMITE', steps: ['h_draw', 'h_stun', 'h_full'] },
   h_sanct: { name: 'SANCTUARY', steps: ['h_focus', 'h_bless', 'h_long'] },
 } satisfies Record<string, { name: string; steps: PerkId[] }>;

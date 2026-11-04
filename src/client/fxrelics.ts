@@ -17,7 +17,7 @@ const flash = (fx: Fx, x: number, y: number, r: number, i: number, c: [number, n
 export function relicFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
   switch (ev.k) {
     case 'bell':
-      fx.say(x, y - 36, 'BELL', WARM);
+      fx.say(x, y - 36, 'WHISTLE', WARM);
       for (const [life, size] of [[0.35, 30], [0.5, 46], [0.65, 56]]) fx.rings.push({ x, y, life, max: life, col: GOLD, size });
       fx.burst(x, y - 14, 10, [WARM, '#e8dcc0'], 40, true);
       flash(fx, x, y - 10, 90, 0.9, [1, 0.88, 0.6], 0.2);

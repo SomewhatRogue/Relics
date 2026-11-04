@@ -70,10 +70,10 @@ export interface Job {
 const BOSSES = ['MAWL', 'SKARN', 'OLD KNUCKLES', 'OLD SPOON', 'GUTCHAIN', 'MOTHER RUST'];
 
 function describe(o: Objective, p: Place, boss: string): { title: string; text: string } {
-  if (o === 'rescue') return { title: `Rescue at ${p.name}`, text: `Folk alive in cages at ${p.name}, at last count. Last count was three days ago. Break the cages, bring them home, don't stop to count.` };
-  if (o === 'hunt') return { title: `Hunt ${boss}`, text: `${boss} has made a larder of ${p.name}, and a dozen little ones eat from it. Kill it and the rest lose their nerve. Bring back something to prove it; we\'ve been lied to before.` };
-  if (o === 'burn') return { title: `Burn out the dens at ${p.name}`, text: `The hungry have dug in at ${p.name}. Every hole you leave, they come back to. Burn every den. They hoard lamp oil; use theirs.` };
-  return { title: `Burn the larder at ${p.name}`, text: `They keep a larder at ${p.name}. Some of it is grain. Smash every rack, and don't look too long at the rest.` };
+  if (o === 'rescue') return { title: `Rescue at ${p.name}`, text: `There were folk alive in cages at ${p.name} three days ago, and some may be yet. Break the cages open and bring them home.` };
+  if (o === 'hunt') return { title: `Hunt ${boss}`, text: `${boss} has made a larder of ${p.name}, and a dozen little ones eat from it. Kill it and the rest lose their nerve. Bring back something to prove it, because we\'ve been lied to before.` };
+  if (o === 'burn') return { title: `Burn out the dens at ${p.name}`, text: `The hungry have dug dens at ${p.name}, and any den you leave, they come back to. Burn every one. They hoard lamp oil, so use theirs.` };
+  return { title: `Burn the larder at ${p.name}`, text: `They keep a larder at ${p.name}, and some of it is grain. Smash every rack, and don't look too long at the rest.` };
 }
 
 /** Under Wickhold itself: on the board once the town works have driven the goblins below to bay. */

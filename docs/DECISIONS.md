@@ -2827,3 +2827,22 @@ strong based on physics and buff or debuff ... clear that it doesn't have friend
   the close are refused. `memoryWorldStore` takes a clock for tests.
 - The boards' top line: VOTING CLOSES TONIGHT / TOMORROW NIGHT / SUNDAY NIGHT (by the Pacific
   calendar), then THE COUNCIL CHOSE: X. Each board: its count (n VOTES) and up to three names.
+
+## 2026-11-04: Text that explains the game says what it does (Claude Opus 5.5)
+
+Kyle: the explaining text was "too much and too little", with "obscure language instead of saying what
+things do" and "short, stilted sentences". The rules are now `docs/lore/prose-notes.md` section 4.
+- Knacks, traits, modifiers, drills, hungry gear, potions, relic and skill lines name the effect and the
+  number ("Blocking costs 25% less stamina"), not "a fifth" or "a little". Names hint at the effect:
+  IRONHIDE is EASY BLOCK, SCARRED is THICK SKIN, BULWARK is SECOND WIND, the element traits are
+  FIREFORGED / FROSTFORGED / STORMFORGED. The longbow trait TRUE RELEASE is DEADEYE, so it no longer
+  shares a name with the Ranger knack (now PERFECT SHOT).
+- One word per thing: **stamina** everywhere (the BREATH modifier and drill are STAMINA), **block** for the
+  button (lessons say "hold block", not "your guard"), **change element** for the Mage's channel.
+- "Mercy" is off screen (story bible): the Cleric's WIDE MERCY / EARLY MERCY / MERCY chain are WIDE HEAL,
+  EARLY HEAL and HEALING; Rowan's boss tune is "No Quarter at the Bell". Code ids keep `mercy`.
+- The well's coin now says what it buys (blessed for the first 20 s of the next job, numbers from
+  BLESSING). The "no guard" callout reads CAN'T BLOCK: ROLL / JUMP / DASH / BLINK for every class.
+- Every change is listed in `docs/copy-pass.md` for the lore keeper and line editor; the whole game's
+  copy is in `docs/copy-inventory.csv` (id, area, what, text) for Kyle's review. Not touched: `card.ts`
+  and the KIT lines (another pass).

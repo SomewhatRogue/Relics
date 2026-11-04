@@ -160,7 +160,7 @@ describe('traits pay off on execution', () => {
     expect(ev.some((e) => e.k === 'hit' && e.n === KNOCK.wallDmg * 3)).toBe(true);
   });
 
-  it('EMBERFORGED: a charged blow sets the goblin burning; a tap does not', () => {
+  it('FIREFORGED: a charged blow sets the goblin burning; a tap does not', () => {
     const { room, h, t } = onTarget(3);
     t.hp = 500;
     h.arms.sword = arm(['tempo', 'ember']);

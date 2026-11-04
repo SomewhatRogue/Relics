@@ -11,7 +11,7 @@ export const COPY = {
   packEmpty: 'Empty. Take gear off goblins, out of chests, or buy from Halvard.',
   packFull: 'Your pack is full. Drop something.',
   plain: 'Plain. No traits.',
-  stillGoing: 'Nothing waits while you rummage.',
+  stillGoing: 'The fight goes on while your pack is open.',
   equip: 'EQUIP',
   /** On the hand's card: one button for each weapon of your class in the pack. */
   swapTo: 'SWAP TO',
@@ -37,7 +37,7 @@ export const COPY = {
 /** The Healer's coal (sim/lantern.ts). */
 export const COAL = {
   name: 'COALS',
-  line: 'Heals burn hotter. The hungry find you first, from further off.',
+  line: 'Your heals are stronger. Goblins notice you from further off and go for you first.',
   pickup: 'CENSER FED',
   help: 'A dead butcher leaves a live coal for a little while. A Cleric who walks over it feeds the censer: stronger heals, for good, and the hungry hunt that Cleric first.',
   note: 'Feed the censer what butchers leave. It heals hotter, and draws teeth.',

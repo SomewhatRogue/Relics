@@ -15,10 +15,10 @@ export const POTION = { belt: 3, cooldown: 0.8, heal: 40, healTime: 2, brandyTim
 /** What each does, in a line (Kyle, 2026-11-02: short and true to the sim; the numbers are POTION's). */
 export const POTIONS: Record<PotionId, { name: string; short: string; text: string; price: number; thrown: boolean; col: string }> = {
   bitter: { name: "SISTER'S BITTER", short: 'BITTER', text: `Heals ${POTION.heal} over ${POTION.healTime} seconds and cures poison.`, price: 20, thrown: false, col: '#c0392b' },
-  brandy: { name: 'WALL BRANDY', short: 'BRANDY', text: 'Doubles your damage, halves your speed and stamina.', price: 15, thrown: false, col: '#d4a537' },
-  oil: { name: 'LAMP OIL', short: 'OIL', text: 'Bursts into flame when thrown.', price: 20, thrown: true, col: '#ff9a3c' },
-  frost: { name: 'FROST FLASK', short: 'FROST', text: 'Chills what it splashes. A second splash freezes.', price: 25, thrown: true, col: '#9fd0ff' },
-  smoke: { name: 'SMOKE FLASK', short: 'SMOKE', text: 'Goblins can\'t see anyone in it unless they get close.', price: 25, thrown: true, col: '#9a94a8' },
+  brandy: { name: 'WALL BRANDY', short: 'BRANDY', text: 'Doubles your damage, but halves your speed and the size of your stamina bar.', price: 15, thrown: false, col: '#d4a537' },
+  oil: { name: 'LAMP OIL', short: 'OIL', text: 'Bursts into flames where it lands and sets goblins on fire.', price: 20, thrown: true, col: '#ff9a3c' },
+  frost: { name: 'FROST FLASK', short: 'FROST', text: 'Chills every goblin it splashes. A second splash freezes them.', price: 25, thrown: true, col: '#9fd0ff' },
+  smoke: { name: 'SMOKE FLASK', short: 'SMOKE', text: 'Goblins can\'t see anyone inside the smoke unless they\'re close.', price: 25, thrown: true, col: '#9a94a8' },
 };
 
 /** How long a drink lasts, for the card (seconds), when it's not in the text already. */
