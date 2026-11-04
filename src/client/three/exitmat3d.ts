@@ -12,6 +12,12 @@ export function makeExitMat(t: ExitMat): THREE.Group {
   for (const x of [0.04, w - 0.04]) part(root, 0.08, 0.03, d, rim, x, 0.025, d / 2);
   // The arrow: a shaft and a head, pointing out of the room.
   const cx = w / 2, cz = d / 2, o = t.out;
+  if (t.dir === 'E' || t.dir === 'W') {
+    // Out through a side wall: the arrow points along the floor to the left or right.
+    part(root, 0.5, 0.035, 0.14, hot, cx - o * 0.1, 0.03, cz);
+    for (const s of [-1, 1]) part(root, 0.12, 0.035, 0.38, hot, cx + o * 0.25, 0.03, cz + s * 0.12, 0, -s * o * 0.8);
+    return root;
+  }
   part(root, 0.14, 0.035, 0.5, hot, cx, 0.03, cz - o * 0.1);
   for (const s of [-1, 1]) part(root, 0.38, 0.035, 0.12, hot, cx + s * 0.12, 0.03, cz + o * 0.25, 0, s * o * 0.8);
   return root;

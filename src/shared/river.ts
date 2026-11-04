@@ -7,7 +7,7 @@
  */
 import type { Mark, Water } from './arena.js';
 
-export interface River { y: number; h: number; water: Water[]; fords: { x: number; w: number }[]; bridge?: { x: number; w: number } }
+export interface River { y: number; h: number; water: Water[]; fords: { x: number; w: number }[]; bridge?: { x: number; w: number }; down?: boolean }
 
 /** How far each of the bridge's broken ends still reaches out over the water (tiles). */
 export const BRIDGE_END = 0.8;
@@ -46,4 +46,14 @@ export function bridgeBits(r: River): { marks: Mark[] } {
       { kind: 'debris', x: b.x + b.w - 0.4, y: r.y + r.h * 0.3, w: 1.8, h: 1 },
     ],
   };
+}
+
+/**
+ * The same river running down the room (a leg that goes left to right crosses it): deep water from the
+ * top wall to the bottom at x `x`, `w` wide, but for the fords (each a y and a length down it). Its
+ * `y` and `h` are its x and width, and `down` says so.
+ */
+export function riverDown(h: number, x: number, w: number, fords: { x: number; w: number }[]): River {
+  const across = river(h, x, w, fords);
+  return { ...across, down: true, water: across.water.map((q) => ({ x: q.y, y: q.x, w: q.h, h: q.w, deep: q.deep })) };
 }

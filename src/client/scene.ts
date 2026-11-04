@@ -307,6 +307,7 @@ export class Scene {
     }
     for (const r of map.rounds) items.push({ y: OY + r.y * PX, draw: () => drawRound(c, r, OX + r.x * PX - cx, OY + r.y * PX - cy) });
     for (const b of map.blocks) {
+      if (b.kind === 'sideway') continue;
       const [bx, by] = blockAt(b);
       items.push({ y: blockFoot(b), draw: () => drawBlock(c, b, bx - cx, by - cy, lampAt(map.theme, b.x, b.y) > 0.5) });
       // A house's kindling: its woodpile, glinting while you're near, the ring while someone lights it (kindledraw.ts).
@@ -358,8 +359,10 @@ export class Scene {
     drawFound(c, room, cx, cy);
     // At a fork, both ways out glow, each with its name.
     if (room.exitOpen) for (const r of map.roads ?? []) {
-      const e = r.area, ex = OX + e.x * PX - cx, ey = OY + e.y * PX - cy;
-      drawText(glow, r.label, Math.round(ex + (e.w * PX) / 2 - textWidth(r.label) / 2), Math.round(ey + e.h * PX + 34), r.road === 'high' ? '#ffd27a' : '#9fe8ff');
+      const e = r.area, ex = OX + e.x * PX - cx, ey = OY + e.y * PX - cy, tw = textWidth(r.label);
+      // Under a gap in the back wall; beside one in a side wall, inside the room.
+      const [tx, ty] = r.side === 'W' ? [ex + e.w * PX + 26, ey + (e.h * PX) / 2 - 3] : r.side === 'E' ? [ex - tw - 26, ey + (e.h * PX) / 2 - 3] : [ex + (e.w * PX) / 2 - tw / 2, ey + e.h * PX + 34];
+      drawText(glow, r.label, Math.round(tx), Math.round(ty), r.road === 'high' ? '#ffd27a' : '#9fe8ff');
     }
     items.sort((p, q) => p.y - q.y);
     for (const it of items) it.draw();

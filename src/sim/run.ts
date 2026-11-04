@@ -49,7 +49,7 @@ export const newRun = (job: Job): Run => ({ job, index: 0, gold: 0, xp: 0, rescu
 
 /** Build the room for the run's current index. */
 export function runRoom(run: Run): ArenaRoom {
-  const plan = planRoom(run.job, run.index, run.roads[run.index]), n = run.party ?? 1;
+  const plan = planRoom(run.job, run.index, run.roads[run.index], run.roads), n = run.party ?? 1;
   // Worse places and deep jobs shift every chest roll a tier up.
   const danger = (run.job.place.ruin >= 3 ? 1 : 0) + (run.job.deep ? 1 : 0);
   const room = new ArenaRoom(run.job.seed + run.index, { map: plan.map, foes: scaleFoes(plan.foes, n, run.job.seed * 17 + run.index * 5 + 2), furniture: plan.props, chests: plan.chests, danger });
@@ -66,8 +66,8 @@ export function interiorRoom(run: Run, blockIndex: number, door: string): ArenaR
   const room = new ArenaRoom(run.job.seed * 3 + run.index * 11 + blockIndex + 7, { map: plan.map, foes: plan.foes, furniture: plan.props, chests: plan.chests });
   room.exitOpen = true;
   room.indoors = true;
-  // Inside a house: the hungry, whatever the place.
-  room.dread = { by: 'swarm' };
+  // Inside a house: the hungry, whatever the place. Down a side way, the place's own.
+  room.dread = { by: door.startsWith('side:') ? dreadFor(run.job) : 'swarm' };
   return room;
 }
 

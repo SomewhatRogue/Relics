@@ -308,8 +308,17 @@ and burns out a goblin den on a job.
       set piece a room, the way out left, middle or right; the broken bridge and its ford; goblins that path
       round water and hedges; one weather pattern a job. Done when Kyle plays a long Barrowby job and no
       two rooms share a layout or a landmark and the last is the green with its well and shrine.
-- [ ] Slice 2: side exits and turning routes; wider rooms (about 34 by 20) for left-to-right legs.
-- [ ] Slice 3: side rooms, forks into different places, loops. Slice 4: transitions and biome changes.
+- [x] Slices 2, 3 and 4 (2026-11-04, Claude Opus 5.5; layout 3, DECISIONS): ways on by any side, 34 by 20 rooms for
+      side-to-side legs; forks whose roads are different rooms and come back into the same room by different
+      sides; side ways to dead ends (glade, pens, old workings, cave) through the house machinery; countries
+      crossed in order with a transition at every change (wood edge, coppice, causeway, ford into fen, carr,
+      ore road, mine head, outfall, village end); mixed rooms; banks, cover and chokes; weather carried across.
+      *Done when* Kyle plays a medium and a long job on his phone and laptop, flat and 2.5D: leaves a room by
+      a side through a lit gap with torches, starts the next at its other side, the gold arrow and WAY ON: EAST
+      agree; picks a road and comes into the next room from the side; goes through a side way into a glade and
+      back out; walks from the fields through the wood's edge into the carr. Shots: `node scripts/terrain-look.cjs`.
+- [ ] Next: a side room with two ways back; the vignettes below; art for the headframe, headstones and a punt;
+      the side way names and "1 more in the houses" through the lore keeper and line editor.
 - [ ] Vignettes needing new behaviour: burning a house, dragging a body, prisoners led off, the patrol.
 
 ## Next up: the big map as a real job (Kyle played ?bigmap=1, 2026-11-03: "VERY fun")

@@ -2,6 +2,71 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-04: terrain nodes slices 2 to 4: ways on by any side, forks that rejoin, side ways, countries that change (Kyle; Claude Opus 5.5)
+
+Kyle: "more nuanced map designs and combining themes", and earlier, jobs "almost always keep going up,
+never moving out to the right or left". Built slices 2, 3 and 4 of `docs/terrain-nodes.md` as **layout 3**
+(new jobs carry `layout: 3`; a saved `layout: 2` job plans exactly as before, a test holds its hash).
+
+- **Ports** (`shared/ports.ts`): a room is come into and left by any side. The way out is a 0.9-deep strip at
+  the edge; leaving by E means the next room is come into by W. A leg straight across from side to side is
+  a wider, shorter room, 34 by 20 (Kyle's yes); the rest stay 28 by 24. The spine (`shared/frame3.ts`) runs
+  from port to port: a straight leg wanders, a turn curves round its corner, a fork parts mid-room.
+- **What follows the way you're going**: the side walls and the 3/4 kerb are cut where a way goes through
+  them, posts either side, both views (`client/sidegaps.ts`, `three/ground.ts`); torches and a lit mat with
+  the arrow pointing through the wall (`exitmark.ts`, `three/exitmat3d.ts`, the 2.5D stakes turned); fork
+  labels beside a side gap; WAY ON: WEST from the room's own exit (unchanged `wayDir`); the party spreads
+  down a side way in (`sim/room.ts join`); goblins and the job's spots keep off every way, not just the top
+  one; ledges anywhere beside the track. The camera already follows the hero in any size of room.
+- **Built-up rooms stay bottom to top** (lane, yard, strips, the village's end, the camp in a village):
+  the doc's rule. Open rooms, transitions and mixed rooms take any ports (`shared/nodeports.ts PORTS`).
+  Fords and causeways go straight across; a ford on a side-to-side leg has its river running down the room.
+- **The route** (`shared/routeports.ts`, from `job.seed * 7919 + 101`, both roads rolled up front): on every
+  path no node twice running, no sub-layout twice, one landmark and one set piece a room never repeated, two
+  palette steps every room (now strict: the route rolls again if it can't), no third room running out by the
+  same side, and a medium or longer job always turns (a fork always has a way on to a side).
+- **Forks choose a path, and the roads meet again** (slice 3): the fork's two ways on are on different
+  sides; each road is its own room (different nodes); both lead into the same next room (same node, layout,
+  set piece) by different sides: the heart, or on a long job an approach room before it. HIGH and LOW keep
+  their fights. `planRoom` takes the roads taken so far (`run.roads`), so the room after knows its way in.
+- **Side ways** (slice 3): one or two a job, never at a fork or in the heart, on a side nobody comes or goes
+  by (E, W, or down through the kerb). A side way is a block with a door at the edge, so the house
+  machinery does the rest (`client/jobrooms.ts`): walk into it its way (`arena.ts pushingInto`), friends go in
+  on their own, its goblins stay dead, its captives count as a house's do, you come back out where you went
+  in. Its door names the dead end (`shared/sideway.ts`), planned in `shared/sideroom.ts`: a glade with its
+  spring, the hungry's pens, old workings, a cave pocket; a chest and one more thing (someone caged, a nest,
+  a cache of oil, a fouled shrine). The arrow points back out once the cage is open.
+- **Countries in order** (slice 4, `shared/countries.ts`): out of the north gate into the fields (or in at
+  the sewer door), through the place's region (the wood for Greyhollow, the rock for Copperdeep), to its own
+  country; a long job may take a third (a hamlet by the road, the wood before the fen). Never back out
+  into a country you left. Every change of country is a transition room (`JOINS`): the wood's edge or a
+  coppice (fields to wood), the causeway or a ford spreading into fen (fields to fen), the carr (wood to fen),
+  the ore road (fields to rock), the mine's head or a mine head below a hamlet (rock to under, out by the
+  adit), the outfall (fields to under, out by the culvert), the village's end (village to fields). The
+  transition is dressed half one, half the other, the change at a line across the way (a hedge and stile, a
+  line of willows, a palisade): the choke point the fight turns on.
+- **Mixed rooms** (`shared/sitemix.ts`): a farm burned out at the wood's edge, a roofless chapel with its graves
+  in the fields, a goblin camp built into a village street, a mine head below a hamlet.
+- **Nuance**: banks either side of a hollow way (hedged track, the ore road's cutting), a slope at the wood's
+  edge, the spoil shelf, rocky rises; all stone, archers on top, the ramp at the end nearer the track
+  (`shared/roomledge.ts`). Cover beside the track where the fight is: hurdles, a broken wall, spoil
+  (`shared/portkit.ts cover`). Bog water close on a causeway, pools in the carr and the fen (`shared/wetland.ts`).
+- **The weather carries across** (`shared/weather.ts`, layout 3): one pattern a job, each country taking it
+  its way (the fen holds its fog, the trees keep off some rain); fog never more than a step thicker or
+  thinner than the room before, none underground, creeping back in after.
+- **Goblins path the new shapes**: `sim/pathing.ts`'s straight-line check now looks a body's half-width
+  either side of the line, so a goblin no longer jams on a wall's corner it would graze (test: from every
+  goblin to the way in over a spread of rooms). A last pass moves anything the job put on cut-off ground
+  (`shared/roomreach.ts`).
+- **Measured** (500 board jobs, 1,300 approach rooms): ways on N 842, E 433, W 425; rooms come into by a side
+  406 of 1,300, hearts by a side 183 of 500; wide rooms 165; 400 forks, 366 rejoining by different sides; 542
+  side ways; 426 of 500 jobs turn (the 74 that don't are short); countries crossed 1 / 2 / 3: 247 / 181 / 72;
+  584 transition rooms, 202 mixed. Planning a room: about 4 ms (layout 2: under 1).
+- Not yet: true loops back into an earlier room (big map), a side room with two ways back, the vignettes
+  that need new behaviour, new art (headframe, headstones, a punt). Open for the lore keeper and line editor:
+  the side way names (THE GLADE, THE PENS, THE OLD WORKINGS, THE CAVE, shown as ENTER ...), and "1 more in
+  the houses" now also counting a side room's captive.
+
 ## 2026-11-04: copy pass 3: Kyle's style everywhere, and mechanics shown as labelled rows (Kyle; Claude Opus 5.5)
 
 Kyle: "Take my copy changes as general guidance and suggestions, not specific one-to-one approval flows.

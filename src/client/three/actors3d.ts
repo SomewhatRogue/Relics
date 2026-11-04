@@ -110,8 +110,14 @@ export class Actors {
     (room.puddles ?? []).forEach((p) => this.things.get('u' + p.id, String(p.r), () => ({ root: makeRing(p.r, 0x5a8a20, true, p.r) })).root.position.set(p.x, 0.025, p.y));
     const ex = room.map.exit;
     if (ex && ex.y < 1) this.things.get('exit', String(room.exitOpen), () => ({ root: makeExit(ex.w, room.exitOpen) })).root.position.set(ex.x, 0, ex.y - 0.4);
+    // A way out through a side wall: the same stakes (or chevrons), turned to face along it.
+    else if (ex && (ex.x < 1 || ex.x + ex.w > room.map.w - 1) && ex.w < 1.5) {
+      const e = this.things.get('exit', `side${ex.x < 1 ? 'W' : 'E'}${room.exitOpen}`, () => ({ root: makeExit(ex.h, room.exitOpen) })).root, west = ex.x < 1;
+      e.rotation.y = west ? Math.PI / 2 : -Math.PI / 2;
+      e.position.set(west ? ex.x - 0.4 : ex.x + ex.w + 0.4, 0, west ? ex.y + ex.h : ex.y);
+    }
     // The lit threshold with its arrow out, in front of every way out (../exitmark.ts).
-    if (room.exitOpen) exitMats(room.map).forEach((t, i) => this.things.get('exitmat' + i, `${t.w}:${t.d}:${t.out}`, () => ({ root: makeExitMat(t) })).root.position.set(t.x, 0, t.y));
+    if (room.exitOpen) exitMats(room.map).forEach((t, i) => this.things.get('exitmat' + i, `${t.w}:${t.d}:${t.out}:${t.dir}`, () => ({ root: makeExitMat(t) })).root.position.set(t.x, 0, t.y));
     for (const p of [this.heroes, this.foes, this.folk, this.hounds, this.teles, this.things, this.chests]) p.end();
   }
 

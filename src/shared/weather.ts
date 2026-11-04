@@ -32,8 +32,32 @@ export function patternOf(job: Job): { pattern: Pattern; peak: number; start: nu
   return { pattern, peak: job.rooms > 2 ? 1 + rng.int(job.rooms - 2) : rng.int(job.rooms), start: rng.range(0.05, 0.2) };
 }
 
+/** How each country takes the weather (layout 3): the fen holds its fog, the trees keep off some rain. */
+const TAKES: Record<string, { rain: number; fog: number }> = { fen: { rain: 1.1, fog: 1 }, wood: { rain: 0.7, fog: 0.8 }, rock: { rain: 1, fog: 0.55 }, fields: { rain: 1, fog: 0.65 }, village: { rain: 1, fog: 0.6 } };
+
+/**
+ * Layout 3: the job's one pattern carried across the countries it crosses, each taking it its own way,
+ * and fog never more than a step thicker or thinner than the room before (out of a mine it creeps back).
+ */
+function weather3(job: Job, index: number): Weather {
+  const r = routeOf(job), { pattern, peak, start } = patternOf(job);
+  let fog = 0, out: Weather = { rain: 0, storm: 0, fog: 0 };
+  for (let i = 0; i <= index; i++) {
+    const spec = r[i], under = spec.heart ? job.place.kind === 'mine' : spec.country === 'under' && !spec.from, k = TAKES[spec.country ?? (job.place.kind === 'marsh' || job.place.kind === 'river' ? 'fen' : job.place.kind === 'forest' ? 'wood' : 'fields')] ?? TAKES.fields;
+    const want = under || pattern !== 'fog' ? 0 : Math.min(0.85, (start + i * 0.18) * k.fog * 1.3);
+    fog = under ? 0 : Math.max(fog - 0.18, Math.min(fog + 0.18, want));
+    const d = Math.abs(i - peak);
+    out = under ? { rain: 0, storm: 0, fog: 0 }
+      : pattern === 'drizzle' ? { rain: Math.round((0.32 + (i % 2) * 0.06) * k.rain * 100) / 100, storm: 0, fog: 0 }
+      : pattern === 'storm' ? { rain: Math.round((([1, 0.5, 0.18][d] ?? 0) * k.rain) * 100) / 100, storm: [1, 0.35][d] ?? 0, fog: 0 }
+      : { rain: 0, storm: 0, fog: Math.round(fog * 100) / 100 };
+  }
+  return out;
+}
+
 /** The weather in one room of the job (none indoors or underground). */
 export function weatherIn(job: Job, index: number): Weather {
+  if (job.layout === 3) return weather3(job, index);
   const spec = routeOf(job)[index], under = spec.heart ? job.place.kind === 'mine' : spec.skin === 'under';
   if (under) return { rain: 0, storm: 0, fog: 0 };
   const { pattern, peak, start } = patternOf(job), d = Math.abs(index - peak);

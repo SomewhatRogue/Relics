@@ -17,6 +17,8 @@ import { ford } from './siteford.js';
 import { lane, strips, yard } from './sitelane.js';
 import { clearing, crossroads, track, woodpath } from './siteroad.js';
 import { pathMat } from './siteskin.js';
+import { PLANS3, landmark3 } from './sites3.js';
+import type { RouteNode } from './nodeports.js';
 import { approachTo, laneAt, type Pt } from './spine.js';
 import { fields, farmstead, green } from './sitevillage.js';
 import { manor, ruinvillage, street } from './sitetown.js';
@@ -61,6 +63,7 @@ export interface Routed { spec: RoomSpec; spine: Pt[][]; river?: River; seed: nu
 /** The plan a room gets, and the ground it's told about. */
 function planFor(job: Job, index: number, ground: Ground, r?: Routed): Site {
   if (!r) return PLANS[siteOf(job.place)](new Rng(placeSeed(job.place, index)), ground);
+  if (!r.spec.heart && r.spec.in) return PLANS3[r.spec.node as RouteNode](new Rng(r.seed), { ...ground, spec: r.spec, spine: r.spine, river: r.river });
   if (!r.spec.heart) return APPROACH[r.spec.node as ApproachNode](new Rng(r.seed), { ...ground, spec: r.spec, spine: r.spine, river: r.river });
   // A heart: its own stream for what stays put, the sub-layout's for what moves.
   const v = Number(r.spec.layout.split('-')[1] ?? 0);
@@ -77,11 +80,12 @@ export function layOut(job: Job, index: number, g: Omit<Ground, 'index' | 'kind'
   const plan = planFor(job, index, ground, r);
   const keep: Keep = { w: g.w, h: g.h, areas: [...ways, ...hard, ...g.water], spots: [...spots, { ...spawn, r: 2.2 }], spine: r?.spine };
   // A heart's way in, from wherever along the bottom you came in, over to its own lane.
-  if (r?.spec.heart && Math.abs(spawn.x - g.w / 2) > 1) path(plan, pathMat(r.spec.palette.soil), approachTo(spawn.x, g.w / 2, g.h).slice(0, 3), 1.05);
+  const aside = !!r?.spec.in && r.spec.in.side !== 'S';
+  if (r?.spec.heart && (aside || Math.abs(spawn.x - g.w / 2) > 1)) path(plan, pathMat(r.spec.palette.soil), (aside ? r.spine[0] : approachTo(spawn.x, g.w / 2, g.h)).slice(0, 3), 1.05);
   // A fork's two roads, from where the track parts to each way out.
   if (r && !r.spec.heart) for (const l of r.spine.slice(1)) path(plan, pathMat(r.spec.palette.soil), l, 0.95);
   const site = clearFor(plan, keep, { ...keep, areas: [...hard, ...g.water] });
-  if (r && !r.spec.heart) landmark(site, keep, r, new Rng(r.seed + 5));
+  if (r && !r.spec.heart) (r.spec.in ? landmark3 : landmark)(site, keep, r, new Rng(r.seed + 5));
   return site;
 }
 

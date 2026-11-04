@@ -1,6 +1,7 @@
 # Terrain nodes: rooms that feel like moving on
 
-Design doc, not built. Claude Opus 5.5, 2026-11-04, for Kyle and whoever builds it.
+Design doc. Claude Opus 5.5, 2026-11-04, for Kyle and whoever builds it. Built: slices 1 and 1b (layout 2),
+slices 2 to 4 (layout 3; see DECISIONS 2026-11-04). Still to come: slice 5 (the big map).
 
 Kyle: "each of the terrains kind of seemed to be the same map each time that you went up ... the same
 sort of houses, the same sort of elements across each one. I would like them to fit in thematically

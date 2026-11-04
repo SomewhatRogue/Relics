@@ -14,6 +14,8 @@ import type { Spot } from './sitekit.js';
 import { placeSeed, siteOf, siteWater } from './sites.js';
 import { peatWater } from './sitewild.js';
 import { approachTo, offAll, spineFor, type Pt } from './spine.js';
+import { frame3, type Frame3 } from './frame3.js';
+import { spawnAt } from './ports.js';
 
 export interface Frame {
   spec: RoomSpec | null;
@@ -27,6 +29,10 @@ export interface Frame {
   /** Kept clear of the job's spots (the river's length, each pool). */
   wet: Spot[];
   river?: River;
+  /** Layout 3: the room's size, and every way on with its port (and road, at a fork). */
+  w?: number;
+  h?: number;
+  ways?: Frame3['ways'];
 }
 
 /** The old water: a river across the middle with two fords, or a marsh's bog pools, a couple deep. */
@@ -60,25 +66,43 @@ function oldFrame(job: Job, index: number, W: number, H: number): Frame {
 /** How far each kind of approach room's spine wanders. */
 const BEND: Record<string, number> = { 'track/sbend': 4.5, 'track/bend': 2.6, 'track/hedged': 1.6, woodpath: 4, lane: 1, yard: 1.2, strips: 1.4, crossroads: 1.4, clearing: 2.2, ford: 2 };
 
-export function frameFor(job: Job, index: number, road: string | undefined, fork: boolean, W: number, H: number): Frame {
+/** A heart's frame: the way in (`line`, from wherever you came in over to its lane) and the place's own water, the same every visit. */
+function heartFrame(job: Job, f: Frame, line: Pt[], W: number, H: number): Frame {
+  const M = W / 2;
+  // The place's own water, the same every visit: its river, its cuttings, its bog pools.
+  const home = new Rng(placeSeed(job.place, 0) + 2), site = siteOf(job.place);
+  f.spine = [line];
+  if (site === 'peat') f.water = peatWater(new Rng(placeSeed(job.place, 0) + 1), W, H), (f.wet = f.water.map(areaSpot));
+  else if (site === 'camp' && job.place.kind === 'river') {
+    // Brokenbridge: the bridge in the middle, broken; one ford, off to the side, the only way over.
+    const y = home.range(H * 0.38, H * 0.48), left = home.next() < 0.5, fx = left ? home.range(3, 6) : home.range(W - 9.4, W - 6.4);
+    f.river = river(W, y, 2.6, [{ x: fx, w: 3.4 }], M), f.water = f.river.water, f.wet = riverSpots(f.river, W);
+    const c = fx + 1.7;
+    f.spine.push([[M, y + 2.6 + 3], [c, y + 2.6 + 1.2], [c, y - 1.2], [M, y - 3.2]]);
+  } else f.water = waters(job.place.kind, home, W, H, (x, y, r) => f.wet.push({ x, y, r }));
+  return f;
+}
+
+/** A layout-3 room's frame (shared/frame3.ts); its heart comes in by the bottom or low down a side. */
+function frame3Of(job: Job, index: number, took: string): Frame {
+  const spec = routeOf(job, took)[index];
+  if (!spec.heart) {
+    const g = frame3(job, spec);
+    return { spec, rng: g.rng, seed: g.seed, spawn: g.spawn, exit: g.exit, spine: g.spine, water: g.water, wet: g.wet, river: g.river, w: g.w, h: g.h, ways: g.ways };
+  }
+  const W = spec.w!, H = spec.h!, M = W / 2, p = spec.in!, seed = roomSeed(job, index, ''), y = p.at;
+  const line: Pt[] = p.side === 'S' ? approachTo(p.at, M, H) : p.side === 'W' ? [[0, y], [2.6, y], [M, H - 4.4], [M, 0]] : [[W, y], [W - 2.6, y], [M, H - 4.4], [M, 0]];
+  const f: Frame = { spec, rng: new Rng(seed), seed, spawn: spawnAt(p, W, H), exit: { x: M - 1, y: 0, w: 2, h: 0.9 }, water: [], wet: [], w: W, h: H, ways: [{ area: { x: M - 1, y: 0, w: 2, h: 0.9 }, port: spec.outs![0] }] };
+  return heartFrame(job, f, line, W, H);
+}
+
+export function frameFor(job: Job, index: number, road: string | undefined, fork: boolean, W: number, H: number, took3 = ''): Frame {
+  if (job.layout === 3) return frame3Of(job, index, took3);
   if (job.layout !== 2) return oldFrame(job, index, W, H);
   const spec = routeOf(job)[index], took = road === 'high' ? 'h' : road === 'low' ? 'l' : '', seed = roomSeed(job, index, took), geo = new Rng(seed + 11), M = W / 2;
   const inX = spec.heart && road ? (road === 'high' ? 6 : 22) : spec.inX, outX = spec.outX;
   const f: Frame = { spec, rng: new Rng(seed), seed, spawn: { x: inX, y: H - 2 }, exit: { x: outX - 1, y: 0, w: 2, h: 0.9 }, water: [], wet: [] };
-  if (spec.heart) {
-    // The place's own water, the same every visit: its river, its cuttings, its bog pools.
-    const home = new Rng(placeSeed(job.place, 0) + 2), site = siteOf(job.place);
-    f.spine = [approachTo(inX, M, H)];
-    if (site === 'peat') f.water = peatWater(new Rng(placeSeed(job.place, 0) + 1), W, H), (f.wet = f.water.map(areaSpot));
-    else if (site === 'camp' && job.place.kind === 'river') {
-      // Brokenbridge: the bridge in the middle, broken; one ford, off to the side, the only way over.
-      const y = home.range(H * 0.38, H * 0.48), left = home.next() < 0.5, fx = left ? home.range(3, 6) : home.range(W - 9.4, W - 6.4);
-      f.river = river(W, y, 2.6, [{ x: fx, w: 3.4 }], M), f.water = f.river.water, f.wet = riverSpots(f.river, W);
-      const c = fx + 1.7;
-      f.spine.push([[M, y + 2.6 + 3], [c, y + 2.6 + 1.2], [c, y - 1.2], [M, y - 3.2]]);
-    } else f.water = waters(job.place.kind, home, W, H, (x, y, r) => f.wet.push({ x, y, r }));
-    return f;
-  }
+  if (spec.heart) return heartFrame(job, f, approachTo(inX, M, H), W, H);
   // A fork's stem comes up to the middle (above the river, if there is one) and parts for the two roads.
   const fork3 = (stem: Pt[], mid: Pt): Pt[][] => [[...stem, mid], [mid, [6, 3], [4, 0]], [mid, [W - 6, 3], [W - 4, 0]]];
   if (spec.node === 'ford') {

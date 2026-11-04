@@ -177,8 +177,9 @@ export class ArenaRoom {
   join(id: string): Hero {
     let h = this.heroes.find((x) => x.id === id);
     if (!h) {
-      const s = this.map.hero;
-      h = newHero(id, s.x + this.heroes.length * 0.9, s.y);
+      // Spread along the way in: across it at the bottom, down it at a side (layout 3's ways in by a side wall).
+      const s = this.map.hero, k = this.heroes.length, aside = s.x < 3 || s.x > this.map.w - 3;
+      h = aside ? newHero(id, s.x, s.y + (k % 2 ? 1 : -1) * Math.ceil(k / 2) * 0.9) : newHero(id, s.x + k * 0.9, s.y);
       this.heroes.push(h);
       // The squire turns up with the first player (after them, so the room's first hero is a player).
       if (this.squire && !this.heroes.some((x) => x.id === 'squire')) {

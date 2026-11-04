@@ -13,17 +13,22 @@ import type { Ctx } from './draw';
 import type { Light } from './light';
 import { OX, OY, PX } from './world';
 import { drawExitMats } from './exitmark';
+import { drawSideGaps, paintSideGaps, sideGaps } from './sidegaps';
 
 type Rect = (x: number, y: number, w: number, h: number, col: string) => void;
 
 /** Every way out of the map: its exit, or the roads at a fork. */
 export const waysOut = (m: GameMap): Area[] => (m.exit ? [m.exit] : (m.roads ?? []).map((r) => r.area));
 const top = (a: Area) => a.y < 1;
+/** Ways out through the side walls (layout 3), drawn by sidegaps.ts; the rest here. */
+const bySide = (m: GameMap, a: Area) => (a.x < 1 && a.w < 1.5) || (a.x + a.w > m.w - 1 && a.w < 1.5);
 
 /** The gaps, painted into the map's still picture (world.ts). */
 export function paintGaps(m: GameMap, rect: Rect): void {
   const wood = m.theme.back === 'palisade' || m.theme.back === 'trees';
+  paintSideGaps(m, sideGaps(m, waysOut(m)), rect, m.w * PX + 16, m.h * PX + OY + 8);
   for (const a of waysOut(m)) {
+    if (bySide(m, a)) continue;
     const x0 = OX + Math.round(a.x * PX), w = Math.round(a.w * PX);
     if (top(a)) {
       // The passage through the wall: dark, the floor running back into it.
@@ -44,8 +49,9 @@ export function paintGaps(m: GameMap, rect: Rect): void {
 
 /** Shut or open, each frame (screen offset `cx`, `cy`); returns the torches' light. */
 export function drawWays(c: Ctx, m: GameMap, open: boolean, cx: number, cy: number, now: number): Light[] {
-  const lights: Light[] = [], g = c.glow, l = c.lit;
+  const lights: Light[] = drawSideGaps(c.glow, c.lit, m, sideGaps(m, waysOut(m)), open, cx, cy, now, flame), g = c.glow, l = c.lit;
   for (const a of waysOut(m)) {
+    if (bySide(m, a)) continue;
     const x0 = OX + a.x * PX - cx, w = a.w * PX, mid = x0 + w / 2;
     if (top(a)) {
       const y0 = OY - cy;

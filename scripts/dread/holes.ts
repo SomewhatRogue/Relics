@@ -6,7 +6,7 @@
  * shield charge, a shadowstep with nobody to step behind, a hard knockback. Prints what got out.
  *   npx tsx scripts/dread/holes.ts
  */
-import { collide, doorAt, inArea, useMap, type GameMap } from '../../src/shared/arena';
+import { collide, doorAt, doorOut, inArea, useMap, type GameMap } from '../../src/shared/arena';
 import { board, PLACES, type Job } from '../../src/shared/jobs';
 import { planRoom } from '../../src/shared/terrain';
 import { runInterior } from '../../src/shared/inside';
@@ -20,7 +20,7 @@ import { shadowstep } from '../../src/sim/relics';
 import { NO_INTENT } from '../../src/sim/types';
 import { newWorld } from '../../src/shared/story';
 
-type Spot = { x: number; y: number; what: string };
+type Spot = { x: number; y: number; what: string; z?: number };
 const maps: { name: string; map: GameMap; spots: Spot[] }[] = [];
 const add = (name: string, map: GameMap, spots: Spot[] = []) => maps.push({ name, map, spots });
 const world = newWorld();
@@ -35,9 +35,9 @@ for (const p of PLACES) for (const seed of [3, 41]) {
   for (let i = 0; i < 3; i++) {
     const plan = planRoom(job, i);
     const spots: Spot[] = [
-      ...plan.foes.filter((f) => f.kind !== 'nest').map((f) => ({ x: f.x, y: f.y, what: 'foe ' + f.kind })),
+      ...plan.foes.filter((f) => f.kind !== 'nest').map((f) => ({ x: f.x, y: f.y, z: f.z, what: 'foe ' + f.kind })),
       ...(plan.chests ?? []).map((c) => ({ x: c.x, y: c.y + 0.7, what: 'chest' })),
-      ...plan.map.blocks.filter((b) => b.door && b.fate !== 'blocked').map((b) => ({ x: doorAt(b).x, y: doorAt(b).y + 0.5, what: 'door' })),
+      ...plan.map.blocks.filter((b) => b.door && b.fate !== 'blocked').map((b) => ({ ...doorOut(b, 0.5), what: 'door' })),
       ...(plan.map.exit ? [{ x: plan.map.exit.x + plan.map.exit.w / 2, y: plan.map.exit.y + plan.map.exit.h / 2, what: 'exit' }] : []),
       ...(plan.map.roads ?? []).map((r) => ({ x: r.area.x + r.area.w / 2, y: r.area.y + r.area.h / 2, what: 'road' })),
     ];
@@ -54,7 +54,7 @@ const report: Record<string, number> = {}, examples: string[] = [];
 let falseAlarms = 0;
 for (const { name, map, spots } of maps) {
   useMap(map);
-  for (const s of spots) if (outOfBounds(map, s.x, s.y) && !inArea(map.exit, s.x, s.y)) (falseAlarms++, console.log(`FALSE ALARM? ${name}: ${s.what} at ${s.x.toFixed(1)},${s.y.toFixed(1)}`));
+  for (const s of spots) if (outOfBounds(map, s.x, s.y, s.z) && !inArea(map.exit, s.x, s.y)) (falseAlarms++, console.log(`FALSE ALARM? ${name}: ${s.what} at ${s.x.toFixed(1)},${s.y.toFixed(1)}`));
   if (outOfBounds(map, map.hero.x, map.hero.y)) console.log(`FALSE ALARM? ${name}: the way in`);
   // Spots on walkable ground near something solid, spread out.
   const near: Spot[] = [];
