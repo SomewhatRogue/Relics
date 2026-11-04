@@ -151,7 +151,7 @@ export const STOKER_CALLS: { at: number; foes: (Foe & { variant?: 'looter' | 'lu
   { at: 1 / 3, foes: [{ kind: 'scrapper', x: 45, y: 4, awake: true }, { kind: 'scrapper', variant: 'lunger', x: 61, y: 2, awake: true }, { kind: 'scrapper', x: 55, y: 11, awake: true }] },
 ];
 
-/** Hew's lines (lore keeper), and the Stoker's. */
+/** Hew's lines (lore keeper). The Stoker never speaks: it bellows. */
 export const LINES = {
   attack: "There, see, they're at the boots again, it's *always* the boots first with them, I don't know why. And don't stop at one knock, mind. I watched a lad do that once, and _it got up_.",
   dodge: "See that one, how it's crouching? When they get down low like that they're coming *straight through you*, shield or no shield, and there's no stopping them. Best not be standing there when it arrives, is all.",
