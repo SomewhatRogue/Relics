@@ -14,21 +14,21 @@ body.touch .stick.on { opacity: 1; }
 .knob { position: absolute; left: 50%; top: 50%; width: 36px; height: 36px; margin: -18px 0 0 -18px; background: var(--stick-knob) center / 100% 100% no-repeat; image-rendering: pixelated; }
 
 .tb { position: fixed; z-index: 1; display: flex; align-items: center; justify-content: center; padding: 0; margin: 0; border: 0; background: none; color: var(--bone); touch-action: none;
-  font: 600 11px/1 var(--font-body); letter-spacing: 0.04em; -webkit-tap-highlight-color: transparent; }
+  font: 400 var(--fs-text)/1 var(--font-body); letter-spacing: 0.04em; -webkit-tap-highlight-color: transparent; }
 .tb canvas { position: absolute; left: 50%; top: 50%; width: calc(var(--w, 28) * var(--px)); height: calc(var(--w, 28) * var(--px)); transform: translate(-50%, -50%); image-rendering: pixelated; pointer-events: none; }
 .tb.down canvas { transform: translate(-50%, calc(-50% + var(--px))); }
 /* Seconds left on a cooldown, the potions on the belt, and the context slot's word. */
-.tb b { position: relative; font: 600 16px/1 var(--font-body); color: var(--bone); pointer-events: none;
+.tb b { position: relative; font: 400 var(--fs)/1 var(--font-body); color: var(--bone); pointer-events: none;
   text-shadow: var(--px) 0 0 #07080a, calc(-1 * var(--px)) 0 0 #07080a, 0 var(--px) 0 #07080a, 0 calc(-1 * var(--px)) 0 #07080a; }
-.tb.potion b { position: absolute; right: -2px; bottom: -2px; min-width: 18px; height: 18px; padding: 0 2px; font-size: 12px; line-height: 14px; text-align: center; text-shadow: none;
+.tb.potion b { position: absolute; right: -2px; bottom: -2px; min-width: 18px; height: 18px; padding: 0 2px; font-size: var(--fs-text); line-height: 14px; text-align: center; text-shadow: none;
   border: calc(2 * var(--px)) solid transparent; border-image: var(--f-sunk) 2 fill / calc(2 * var(--px)) stretch; }
 .tb.potion b:empty { display: none; }
-.tb i { position: absolute; left: 50%; bottom: -15px; transform: translateX(-50%); padding: 1px 4px; white-space: nowrap; font: 600 11px/1.1 var(--font-body); letter-spacing: 0.04em; color: var(--gilt); pointer-events: none;
+.tb i { position: absolute; left: 50%; bottom: -15px; transform: translateX(-50%); padding: 1px 4px; white-space: nowrap; font: 400 var(--fs-text)/1.1 var(--font-body); letter-spacing: 0.04em; color: var(--gilt); pointer-events: none;
   background: #0e0f12d8; }
 .tb i:empty, .tb.dim i { display: none; }
 /* The dodge keeps its name (STEP, JUMP, DASH, BLINK) small under it. */
-.tb.roll i { bottom: -11px; padding: 0 2px; font-size: 10px; color: var(--bone-dim); background: none; text-shadow: var(--px) var(--px) 0 #07080a; }
-.tb.relic i, .tb.relic2 i { color: var(--bone); bottom: auto; top: 50%; transform: translate(-50%, -50%); background: none; font-size: 10px; }
+.tb.roll i { bottom: -11px; padding: 0 2px; font-size: var(--fs-text); color: var(--bone-dim); background: none; text-shadow: var(--px) var(--px) 0 #07080a; }
+.tb.relic i, .tb.relic2 i { color: var(--bone); bottom: auto; top: 50%; transform: translate(-50%, -50%); background: none; font-size: var(--fs-text); }
 
 .tb.attack { width: 84px; height: 84px; right: calc(28px + env(safe-area-inset-right)); bottom: calc(50px + env(safe-area-inset-bottom)); }
 .tb.roll { width: 60px; height: 60px; right: calc(136px + env(safe-area-inset-right)); bottom: calc(33px + env(safe-area-inset-bottom)); }

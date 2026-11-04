@@ -107,7 +107,7 @@ export class Cluster {
     const it = relic ? carriedItem(me) : undefined, dark = !!it && isDark(it);
     if (relic) {
       const l = left(relic);
-      b.relic.show({ shape: 'round', size: 28, grade: dark ? 'stone' : 'iron', icon: img(it ? relicItemIcon(it) : ''), ring: EL[me.augments[relic]], cd: dark ? 0 : l / RELICS[relic].cooldown, flash: this.flash('relic', l, room.time), charge: it ? relicFill(it) : undefined, chargeCol: it ? fillCol(it) : undefined }, l > 0 && !dark ? String(Math.ceil(l)) : '', '', RELICS[relic].name);
+      b.relic.show({ shape: 'round', size: 28, grade: dark ? 'stone' : 'iron', icon: img(relicItemIcon(it ?? ({ kind: relic, charge: 1 } as Parameters<typeof relicItemIcon>[0]))), ring: EL[me.augments[relic]], cd: dark ? 0 : l / RELICS[relic].cooldown, flash: this.flash('relic', l, room.time), charge: it ? relicFill(it) : undefined, chargeCol: it ? fillCol(it) : undefined }, l > 0 && !dark ? String(Math.ceil(l)) : '', '', RELICS[relic].name);
     } else b.relic.show(null);
     // The flask is the health orb: red to your health (green when poisoned), pulsing when low, the next potion in front.
     const next = me.belt[0], hp = me.hp / me.maxHp, low = hp < 0.3 && me.hp > 0;

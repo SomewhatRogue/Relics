@@ -7,10 +7,10 @@
   border: var(--edge-s) solid transparent; border-image: var(--f-iron) 3 fill / var(--edge-s) stretch; background: none; cursor: pointer; image-rendering: pixelated; }
 #hud .face canvas { display: block; width: calc(21 * var(--px)); height: calc(18 * var(--px)); image-rendering: pixelated; background: radial-gradient(circle at 50% 30%, #2b2e35, #121317 70%); }
 #hud .face:active { border-image-source: var(--f-iron-in); }
-#hud .lv { position: absolute; right: calc(-3 * var(--px)); bottom: calc(-4 * var(--px)); min-width: 18px; height: 18px; padding: 0 3px; font: 600 12px/12px var(--font-body); color: var(--bone); text-align: center;
+#hud .lv { position: absolute; right: calc(-3 * var(--px)); bottom: calc(-4 * var(--px)); min-width: 18px; height: 18px; padding: 0 3px; font: 400 var(--fs-text)/12px var(--font-body); color: var(--bone); text-align: center;
   border: calc(2 * var(--px)) solid transparent; border-image: var(--f-sunk) 2 fill / calc(2 * var(--px)) stretch; }
 #hud .col { display: flex; flex-direction: column; gap: 3px; width: 168px; padding-top: 1px; }
-#hud .who { font: 600 13px/1 var(--font-body); color: var(--bone); text-shadow: var(--px) var(--px) 0 var(--stone-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#hud .who { font: 400 var(--fs-text)/1 var(--font-body); color: var(--bone); text-shadow: var(--px) var(--px) 0 var(--stone-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* Health: a chunky bar in a sunk socket, a pale trail for the chunk just lost, a lighter line along the top. */
 #hud .bar { position: relative; height: calc(6 * var(--px) + 2 * 2 * var(--px)); border: calc(2 * var(--px)) solid transparent; border-image: var(--f-sunk) 2 fill / calc(2 * var(--px)) stretch; }
 #hud .bar i, #hud .bar .trail { position: absolute; left: 0; top: 0; height: 100%; display: block; }
@@ -31,7 +31,7 @@ body.touch #hud .st { display: none; }
 #hud .litbadge { pointer-events: auto; cursor: help; width: calc(11 * var(--px)); height: calc(11 * var(--px)); font-size: 0; color: transparent; background: var(--ic-lit) center / 100% 100% no-repeat; image-rendering: pixelated; }
 #hud .litbadge[hidden] { display: none; }
 /* The weapon, kit, skill, relic and belt lines: on a tap of the face (a laptop keeps the skill, relic and belt). */
-#hud .sheet { display: none; margin-top: 6px; max-width: min(300px, 80vw); padding: 4px 8px; font-size: 11px; line-height: 1.35; color: var(--bone-dim);
+#hud .sheet { display: none; margin-top: 6px; max-width: min(300px, 80vw); padding: 4px 8px; font-size: var(--fs-text); line-height: 1.35; color: var(--bone-dim);
   border: var(--edge) solid transparent; border-image: var(--f-stone) 4 / var(--edge) stretch; background: var(--stone-800); background-clip: padding-box; }
 body.sheet-open #hud .sheet { display: block; }
 body:not(.touch) #hud .sheet { display: block; border: 0; background: none; padding: 0 0 0 2px; text-shadow: var(--px) var(--px) 0 var(--stone-900); }
@@ -52,16 +52,16 @@ body[data-mode='town'] #hud .sheet .gear:not(:first-child) { display: none; }
 #corner #packbtn::before { background-image: var(--ic-pack); }
 #corner #opts::before { background-image: var(--ic-cog); }
 #corner #chatbtn::before { background-image: var(--ic-chat); }
-#corner #chatbtn { display: none; }
-body.chat-on #corner #chatbtn { display: block; }
-#corner #chatbtn.new::after, [data-picks]:not([data-picks='0'])::after { content: attr(data-picks); position: absolute; top: -4px; right: -4px; min-width: 14px; height: 14px; padding: 0 2px; border-radius: 0; box-shadow: 0 0 0 var(--px) var(--stone-900); background: var(--gold); color: var(--stone-900); font: 600 11px/14px var(--font-body); text-align: center; animation: pip 0.8s steps(1) infinite; }
+#corner #chatbtn, body.touch #corner #chatbtn { display: none; position: relative; right: auto; top: auto; height: 44px; padding: 0; background: none; }
+body.chat-on #corner #chatbtn, body.touch.chat-on #corner #chatbtn { display: block; }
+#corner #chatbtn.new::after, [data-picks]:not([data-picks='0'])::after { content: attr(data-picks); position: absolute; top: -4px; right: -4px; min-width: 14px; height: 14px; padding: 0 2px; border-radius: 0; box-shadow: 0 0 0 var(--px) var(--stone-900); background: var(--gold); color: var(--stone-900); font: 400 var(--fs-text)/14px var(--font-body); text-align: center; animation: pip 0.8s steps(1) infinite; }
 #corner #chatbtn.new::after { content: ''; min-width: 8px; width: 8px; height: 8px; top: 2px; right: 2px; }
 @keyframes pip { 50% { background: var(--gilt); } }
 body:not(.touch) #corner button { width: 40px; height: 40px; }
 
 #options { position: fixed; z-index: 6; right: calc(8px + env(safe-area-inset-right)); top: calc(62px + env(safe-area-inset-top)); display: flex; flex-direction: column; gap: 4px; padding: 4px; }
 #options[hidden] { display: none; }
-#options button { position: relative; min-width: 150px; height: 38px; min-height: 0; padding: 0 8px 0 calc(16 * var(--px)); text-align: left; font-size: 12px; }
+#options button { position: relative; min-width: 150px; height: 38px; min-height: 0; padding: 0 8px 0 calc(16 * var(--px)); text-align: left; font-size: var(--fs-text); }
 #options button::before { content: ''; position: absolute; left: 4px; top: 0; bottom: 0; margin: auto; width: calc(12 * var(--px)); height: calc(12 * var(--px)); background: center / 100% 100% no-repeat; image-rendering: pixelated; }
 #options #heroes::before { background-image: var(--ic-heroes); }
 #options #mute::before { background-image: var(--ic-sound); }
@@ -74,20 +74,20 @@ body:not(.touch) #corner button { width: 40px; height: 40px; }
 #options button.off::after { content: 'OFF'; position: absolute; right: 8px; color: var(--stone-500); }
 #options #viewbtn.on { border-image-source: var(--f-iron); color: var(--bone); }
 #options #qualitybtn[hidden], #options #brightrow[hidden] { display: none; }
-#options #brightrow { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--bone); }
+#options #brightrow { display: flex; align-items: center; gap: 4px; font-size: var(--fs-text); color: var(--bone); }
 #options #brightrow span { flex: 1; padding-left: 8px; }
-#options #brightrow button { min-width: 38px; width: 38px; padding: 0; text-align: center; font-size: 16px; }
+#options #brightrow button { min-width: 38px; width: 38px; padding: 0; text-align: center; font-size: var(--fs); }
 #options #brightrow button::before { display: none; }
 #options #leave { color: #e8a090; }
 body:not([data-mode='run']) #leave, body[data-mode='run'] #heroes, body[data-mode='run'] #tips { display: none; }
 
 /* The tracker: where you are and the way on. A phone's sits under the unit frame; a laptop's at the top centre. */
 #banner { position: fixed; z-index: 2; left: 50%; transform: translateX(-50%); top: calc(8px + env(safe-area-inset-top)); max-width: 46vw; padding: 2px 8px 3px; text-align: center; pointer-events: none;
-  font-size: 13px; line-height: 1.25; color: var(--bone); text-shadow: var(--px) var(--px) 0 var(--stone-900);
+  font-size: var(--fs-text); line-height: 1.25; color: var(--bone); text-shadow: var(--px) var(--px) 0 var(--stone-900);
   border: var(--edge) solid transparent; border-image: var(--f-stone) 4 / var(--edge) stretch; background: #15171bd8; background-clip: padding-box; }
 #banner:empty { display: none; }
 #banner b { display: block; font: 400 21px/1 var(--font-display); color: #f0e6cc; margin: 0 0 1px; }
-#banner span { display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 2px; font-size: 12px; color: var(--bone-dim); }
+#banner span { display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 2px; font-size: var(--fs-text); color: var(--bone-dim); }
 #banner span em { margin-left: 8px; }
 #banner .coin { display: inline-block; width: calc(9 * var(--px)); height: calc(9 * var(--px)); background: var(--ic-coin) center / 100% 100% no-repeat; image-rendering: pixelated; }
 #banner .ups { display: inline-flex; gap: var(--px); margin-left: 6px; }
@@ -107,12 +107,12 @@ body.touch #banner span { justify-content: flex-start; }
 #boss .bar i { display: block; height: 100%; background: linear-gradient(to bottom, #e86a50 0 var(--px), var(--blood) var(--px)); }
 body.touch #boss { bottom: auto; top: calc(150px + env(safe-area-inset-top)); width: min(300px, 76vw); }
 
-#prompt { position: fixed; z-index: 2; left: 50%; transform: translateX(-50%); bottom: calc(70px + env(safe-area-inset-bottom)); padding: 2px 8px; pointer-events: none; font: 600 12px/1.3 var(--font-body); letter-spacing: 0.04em; color: var(--gilt);
+#prompt { position: fixed; z-index: 2; left: 50%; transform: translateX(-50%); bottom: calc(70px + env(safe-area-inset-bottom)); padding: 2px 8px; pointer-events: none; font: 400 var(--fs-text)/1.3 var(--font-body); letter-spacing: 0.04em; color: var(--gilt);
   border: var(--edge-s) solid transparent; border-image: var(--f-gilt) 3 fill / var(--edge-s) stretch; }
 #prompt[hidden] { display: none; }
 body.touch #prompt { bottom: calc(300px + env(safe-area-inset-bottom)); }
 
-#tip { position: fixed; z-index: 2; left: 50%; transform: translateX(-50%); top: calc(54px + env(safe-area-inset-top)); padding: 2px 8px; pointer-events: none; font-size: 12px; color: var(--bone); white-space: nowrap; transition: opacity 0.6s steps(3);
+#tip { position: fixed; z-index: 2; left: 50%; transform: translateX(-50%); top: calc(54px + env(safe-area-inset-top)); padding: 2px 8px; pointer-events: none; font-size: var(--fs-text); color: var(--bone); white-space: nowrap; transition: opacity 0.6s steps(3);
   border: var(--edge-s) solid transparent; border-image: var(--f-iron) 3 fill / var(--edge-s) stretch; }
 #tip.gone { opacity: 0; }
 body:not(.tips) #tip { display: none; }

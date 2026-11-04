@@ -1,8 +1,8 @@
 /* Shops and stalls (shopui.ts): the place, the keeper, the goods, and the card over them. */
 #panel .shop .place { color: #b0aa9c; font-style: italic; margin: -2px 0 8px; }
-#panel .shop .keeper { color: #b8a47c; font-size: 10px; letter-spacing: 0.15em; font-weight: 600; margin: 4px 0 4px; }
+#panel .shop .keeper { color: #b8a47c; font-size: var(--fs-text); letter-spacing: 0.15em; font-weight: 400; margin: 4px 0 4px; }
 #panel .shop .says { margin: 0 0 6px; }
-#panel .shop h3.gh { margin: 10px 0 4px; color: #b8a47c; font-size: 10px; letter-spacing: 0.15em; font-weight: 600; }
+#panel .shop h3.gh { margin: 10px 0 4px; color: #b8a47c; font-size: var(--fs-text); letter-spacing: 0.15em; font-weight: 400; }
 #panel .goods { display: flex; flex-direction: column; gap: 4px; }
 #panel .good { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 36px; padding: 2px 10px 2px 6px; text-align: left; background: #22252a; border-color: #3a3e46; }
 #panel .good img, #panel .good .noicon { width: 24px; height: 24px; image-rendering: pixelated; flex: none; }

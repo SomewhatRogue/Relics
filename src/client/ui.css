@@ -1,8 +1,7 @@
 /* The UI's foundation: the two bundled pixel faces, the colour tokens, the frames (frames.ts draws
    them and sets --f-*), and the one button. Stone and bone carry the UI; gold means the way on. */
 @font-face { font-family: 'Jacquard 12'; src: url('./fonts/jacquard-12.woff2') format('woff2'); font-weight: 400; font-display: block; }
-@font-face { font-family: 'Pixelify Sans'; src: url('./fonts/pixelify-sans-400.woff2') format('woff2'); font-weight: 400; font-display: block; }
-@font-face { font-family: 'Pixelify Sans'; src: url('./fonts/pixelify-sans-600.woff2') format('woff2'); font-weight: 600 700; font-display: block; }
+@font-face { font-family: 'Tiny5'; src: url('./fonts/tiny5.woff2') format('woff2'); font-weight: 400 900; font-display: block; }
 
 :root {
   /* One art pixel of the UI, in CSS pixels: the world's own on a phone. */
@@ -12,13 +11,18 @@
   --gold: #e0a640; --gilt: #ffd27a;
   --blood: #b0281e; --blood-hi: #d84a3a; --warn: #d8402a;
   --rot: #7d9a3a; --rot-glow: #b8e46a; --up: #9cc95a; --down: #d8503a;
-  --font-body: 'Pixelify Sans', 'Trebuchet MS', sans-serif;
-  --font-display: 'Jacquard 12', 'Pixelify Sans', serif;
+  --font-body: 'Tiny5', 'Trebuchet MS', sans-serif;
+  --font-display: 'Jacquard 12', 'Tiny5', serif;
+  /* Tiny5 is drawn 8 pixels to the em: 8px and 16px are crisp on every screen, the text size is too
+     (12px is 3 device pixels a font pixel at 2x; 13.33px is 5 at 3x). */
+  --fs-s: 8px; --fs-text: 12px; --fs: 16px;
   --edge: calc(4 * var(--px));
   --edge-s: calc(3 * var(--px));
 }
+@media (min-resolution: 2.5dppx) { :root { --fs-text: 13.333px; } }
 html, body { background: var(--stone-900); }
-body { font: 400 13px/1.35 var(--font-body); color: var(--bone); letter-spacing: 0; -webkit-font-smoothing: none; -moz-osx-font-smoothing: grayscale; }
+* { font-synthesis: none; }
+body { font: 400 var(--fs-text)/1.35 var(--font-body); color: var(--bone); letter-spacing: 0; -webkit-font-smoothing: none; -moz-osx-font-smoothing: grayscale; }
 input { font-family: var(--font-body) !important; }
 em, i { font-style: normal; }
 
@@ -34,11 +38,11 @@ em, i { font-style: normal; }
 /* Headings: the blackletter for titles and name plates, at its own grid size; small caps labels in the body face. */
 #panel h2, #pack h2, #title h1, #title .cname, #title .dhead h2, #lesson .relic-name { font: 400 21px/1.05 var(--font-display); letter-spacing: 0; color: var(--gilt); text-shadow: 0 var(--px) 0 var(--stone-900); }
 #title h1 { font-size: 63px; text-shadow: 0 calc(2 * var(--px)) 0 #3a2410; }
-#panel h3, #pack h3, .rsec, #panel .tr-h, #panel .shop h3.gh, #panel .store h3.sh { font: 600 11px/1.2 var(--font-body); letter-spacing: 0.06em; color: var(--bone-dim); }
+#panel h3, #pack h3, .rsec, #panel .tr-h, #panel .shop h3.gh, #panel .store h3.sh { font: 400 var(--fs-text)/1.2 var(--font-body); letter-spacing: 0.04em; color: var(--bone-dim); }
 
 /* The one button. Iron, pushed in when pressed (down a pixel, its bevel turned over), gilt for the way on, dull stone when it can't be used. */
 :where(#panel, #title, #pack, #options, #chat, #partycard, #loot, #lesson, #partytoasts, #corner, #skipcut) button, :where(button#skipcut), .btn {
-  font: 600 12px/1 var(--font-body); color: var(--bone); letter-spacing: 0.04em; text-transform: uppercase;
+  font: 400 var(--fs-text)/1 var(--font-body); color: var(--bone); letter-spacing: 0.04em; text-transform: uppercase;
   background: none; border: var(--edge-s) solid transparent; border-radius: 0; box-shadow: none; filter: none;
   border-image: var(--f-iron) 3 fill / var(--edge-s) stretch; image-rendering: pixelated;
   padding: 0 8px; min-height: 36px; cursor: pointer; transition: none;

@@ -7,13 +7,13 @@
 #panel .job.deep { box-shadow: inset calc(3 * var(--px)) 0 0 #6a3aa8; }
 #panel .job.party { box-shadow: inset calc(3 * var(--px)) 0 0 var(--rot); }
 #panel .job.open { background: none; }
-#panel .job .jhead { gap: 6px; min-height: 34px; padding: 4px 4px; border-image: none; text-transform: none; font: 600 12px/1.1 var(--font-body); letter-spacing: 0; color: var(--ink); }
+#panel .job .jhead { gap: 6px; min-height: 34px; padding: 4px 4px; border-image: none; text-transform: none; font: 400 var(--fs-text)/1.1 var(--font-body); letter-spacing: 0; color: var(--ink); }
 #panel .job .jhead:active { transform: none; }
-#panel .job .jhead .kind { min-width: 44px; font-size: 10px; letter-spacing: 0.04em; text-transform: uppercase; color: #6a4818; }
+#panel .job .jhead .kind { min-width: 40px; font-size: var(--fs-s); letter-spacing: 0.04em; text-transform: uppercase; color: #6a4818; }
 #panel .job .jhead .k-rescue { color: #3a5a14; }
 #panel .job .jhead .k-hunt { color: #8a2412; }
 #panel .job .jhead .k-story { color: #7a4a08; }
-#panel .job .jhead .len, #panel .job .jhead .when { font-size: 10px; color: var(--ink-soft); text-transform: uppercase; }
+#panel .job .jhead .len, #panel .job .jhead .when { font-size: var(--fs-s); color: var(--ink-soft); text-transform: uppercase; }
 #panel .job .jhead .t-dawn { color: #2a4a6a; }
 #panel .job .jhead .t-dusk { color: #8a4a14; }
 #panel .job .jhead .t-night { color: #3a3a7a; }
@@ -24,6 +24,7 @@
 #panel .job b { color: #3a2a10; }
 #panel .job .need { color: #8a2412; }
 #panel .job .m { color: var(--ink-soft); }
+#panel .job .t { color: #6a4208; }
 
 /* The pack and the stores: empty places are sunk sockets, not dashed boxes. */
 body #pack .cells, #panel .cells, #pack .grid { border: 0; padding: 0; }
@@ -52,24 +53,24 @@ body #pack .detail, #panel .store .sdetail, .pair .side, .rcard, #panel .rcard, 
 #title .bars em.on { background: var(--bone-dim); }
 
 /* The wood: Hew's words in a stone box, the lesson's button gilt, the key caps iron. */
-#caption { border: var(--edge) solid transparent; border-image: var(--f-stone) 4 / var(--edge) stretch; border-radius: 0; background: var(--dither) 0 0 / calc(4 * var(--px)) repeat, #1b1d22f0; background-clip: padding-box; color: var(--bone); font-size: 14px; }
-#caption b { color: #d8b880; font: 600 11px/1.2 var(--font-body); letter-spacing: 0.08em; }
-#caption.praise { font-size: 18px; border-image-source: var(--f-gilt); }
+#caption { border: var(--edge) solid transparent; border-image: var(--f-stone) 4 / var(--edge) stretch; border-radius: 0; background: var(--dither) 0 0 / calc(4 * var(--px)) repeat, #1b1d22f0; background-clip: padding-box; color: var(--bone); font-size: var(--fs); }
+#caption b { color: #d8b880; font: 400 var(--fs-text)/1.2 var(--font-body); letter-spacing: 0.08em; }
+#caption.praise { font-size: var(--fs); border-image-source: var(--f-gilt); }
 #lesson .card { border-radius: 0; color: var(--bone); }
 #lesson .who { color: #d8b880; letter-spacing: 0.08em; }
-#lesson .line { font-size: 16px; }
+#lesson .line { font-size: var(--fs); }
 #lesson .how { color: var(--bone-dim); }
 #lesson .move span { color: var(--gilt); letter-spacing: 0.06em; }
-#lesson kbd { border: var(--edge-s) solid transparent; border-image: var(--f-iron) 3 fill / var(--edge-s) stretch; border-radius: 0; background: none; color: var(--bone); font: 600 14px/1 var(--font-body); }
-#lesson button { border: var(--edge-s) solid transparent; border-image: var(--f-gilt) 3 fill / var(--edge-s) stretch; border-radius: 0; background: none; color: var(--gilt); font-size: 13px; }
+#lesson kbd { border: var(--edge-s) solid transparent; border-image: var(--f-iron) 3 fill / var(--edge-s) stretch; border-radius: 0; background: none; color: var(--bone); font: 400 var(--fs)/1 var(--font-body); }
+#lesson button { border: var(--edge-s) solid transparent; border-image: var(--f-gilt) 3 fill / var(--edge-s) stretch; border-radius: 0; background: none; color: var(--gilt); font-size: var(--fs-text); }
 #lesson .go-hint { color: var(--gilt); animation: none; }
-#lesson.act .now { color: #fff1d0; text-shadow: var(--px) var(--px) 0 #7a2a10, calc(2 * var(--px)) calc(2 * var(--px)) 0 #07080a; font: 600 28px/1 var(--font-body); letter-spacing: 0.06em; }
+#lesson.act .now { color: #fff1d0; text-shadow: var(--px) var(--px) 0 #7a2a10, calc(2 * var(--px)) calc(2 * var(--px)) 0 #07080a; font: 400 28px/1 var(--font-body); letter-spacing: 0.06em; }
 #lesson.found-relic .card { border: var(--edge) solid transparent; border-image: var(--f-gilt) 3 / var(--edge) stretch; }
 #lesson.found-relic .found { letter-spacing: 0.2em; }
 #lesson.found-relic .relic-name { font-size: 42px; color: var(--gilt); text-shadow: var(--px) var(--px) 0 #3a2410; }
 #skipcut { border: var(--edge-s) solid transparent; border-image: var(--f-iron) 3 fill / var(--edge-s) stretch; border-radius: 0; background: none; color: var(--bone); letter-spacing: 0.08em; }
 
 /* Bubbles over heads: paper, square cut, a hard shadow. */
-#bubbles .bubble { background: #e8dcc0; color: var(--ink); box-shadow: 0 var(--px) 0 #07080a, 0 calc(-1 * var(--px)) 0 #07080a, var(--px) 0 0 #07080a, calc(-1 * var(--px)) 0 0 #07080a; font-weight: 600; }
+#bubbles .bubble { background: #e8dcc0; color: var(--ink); box-shadow: 0 var(--px) 0 #07080a, 0 calc(-1 * var(--px)) 0 #07080a, var(--px) 0 0 #07080a, calc(-1 * var(--px)) 0 0 #07080a; font-weight: 400; }
 #bubbles .bubble::after { border-top-color: #e8dcc0; }
 #bubbles .bubble.below::after { border-bottom-color: #e8dcc0; }
