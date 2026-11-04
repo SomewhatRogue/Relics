@@ -58,7 +58,7 @@ async function rows(g: Game, touch: boolean): Promise<Row[]> {
   out.push({ face: { shape: 'orb', size: 30, grade: 'iron', fill: 0.7, liquid: '#a8261c', icon: next ? await pic(potionIcon(next)) : null }, name: 'HEALTH', key: 'Q', text: 'Your health. Tap to drink the front potion, hold to bring the next forward. The number is how many you have.' });
   // The gilt slot: what it can say.
   const ctx: [IconId, string, string, string][] = [
-    ['grab', 'GRAB', 'G', 'Pick up a stunned goblin, or a small one from behind. Press again to throw.' + (cls === 'WARRIOR' ? ' Crates and barrels too.' : '')],
+    ['grab', 'GRAB', 'G', cls === 'WARRIOR' ? 'Pick up any small goblin, crate or barrel. Press again to throw.' : 'Pick up a stunned goblin, or a small one from behind. Press again to throw.'],
     ['help', 'HELP UP', 'G', 'Get a downed friend back up.'],
     ['burn', 'BURN', 'G', 'Set fire to a spider nest, or an oiled woodpile by a house.'],
     ['open', 'OPEN', 'F', 'Open a chest.'],

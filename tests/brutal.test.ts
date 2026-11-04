@@ -23,12 +23,22 @@ function setup(act: 'stunned' | 'chase' = 'stunned') {
 }
 
 describe('grab, slam, throw', () => {
-  it("can't grab a goblin that faces you and is ready", () => {
+  it("can't grab a goblin that faces you and is ready (unless you're a Warrior)", () => {
     const { room, h, t } = setup('chase');
     t.cooldown = 99;
+    h.weapon = 'mace';
     room.setIntent('me', intent({ grabSeq: 1, ay: -1 }));
     run(room, 0.1);
     expect(h.act).not.toBe('carry');
+  });
+
+  it('a Warrior picks up a small goblin that faces him and is ready', () => {
+    const { room, h, t } = setup('chase');
+    t.cooldown = 99;
+    h.weapon = 'sword';
+    room.setIntent('me', intent({ grabSeq: 1, ay: -1 }));
+    run(room, 0.1);
+    expect(h.act).toBe('carry');
   });
 
   it('grabs a stunned goblin and slams it into the ground', () => {

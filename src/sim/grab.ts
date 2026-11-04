@@ -1,10 +1,10 @@
 /**
- * Grab, slam, throw. Only a small goblin you've earned can be grabbed: stunned, netted, frozen,
+ * Grab, slam, throw. A Warrior picks up any small goblin in reach. Anyone else only one they've earned: stunned, netted, frozen,
  * staggered, busy (feeding, swinging at someone else, or just after a swing), or one you've got behind. Overhead, ATTACK slams it into the ground (a kill pounds its
  * head in); GRAB again throws it, and it hits whatever it flies into. It wriggles free in time.
  */
 import { collide } from '../shared/arena';
-import { GRAB, GUARD, HERO, technique } from '../shared/tuning';
+import { GRAB, GUARD, HERO, WEAPONS, technique } from '../shared/tuning';
 import { damage, frozen, isDead, snared } from './damage';
 import type { Enemy, FightEvent, Hero, Intent } from './types';
 import { stun } from './stuns';
@@ -14,6 +14,8 @@ export function grabbable(h: Hero, e: Enemy, now: number): boolean {
   if (isDead(e) || e.weight > 1 || e.act === 'carried' || e.act === 'pinned' || (e.z ?? 0) !== (h.z ?? 0)) return false;
   const dx = e.x - h.x, dy = e.y - h.y, d = Math.hypot(dx, dy);
   if (d > GRAB.reach + e.radius) return false;
+  // A Warrior just picks a small one up, front or back, whatever it's doing (Kyle, 2026-11-04).
+  if (WEAPONS[h.weapon].cls === 'WARRIOR') return true;
   const behind = (e.fx * -dx + e.fy * -dy) / (d || 1) < GUARD.rearCos;
   // Busy: feeding, swinging at someone else, or caught at the end of a swing that missed.
   const a = e.attack, busy = e.feeding || (!!a && (a.aimed !== h.id || a.t > a.windup + a.active));
