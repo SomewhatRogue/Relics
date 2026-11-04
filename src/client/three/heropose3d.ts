@@ -9,6 +9,7 @@ import type { Hero } from '../../sim/types';
 import type { HeroFig } from './heroes3d';
 import { G, hex } from './mats';
 import { flash, rest, walk } from './rig';
+import { tapCast, tapGlow } from '../magetap';
 
 const ease = (k: number) => 1 - (1 - Math.min(1, Math.max(0, k))) ** 2;
 
@@ -38,9 +39,16 @@ export function poseHero(f: HeroFig, h: Hero, now: number, walked: number): void
       break;
     }
     case 'attack': {
-      const e = ease(k * 1.6);
+      const e = ease(k * 1.6), tap = tapCast(h);
       if (bow) (f.aL.rotation.x = -1.55), (f.aR.rotation.x = -1.4 + e * 0.8);
-      else if (caster) (f.aR.rotation.x = -1.6), (f.mid.rotation.x = 0.12 * (1 - e));
+      else if (caster && tap && h.weapon !== 'spellblade') {
+        // The quick cast: the focus comes up, the wrist cocked back, then flicks out along the aim.
+        if (tap.wind) (f.aR.rotation.x = -1.6 - 0.9 * ease(tap.k)), (f.aR.rotation.z = -0.35 * ease(tap.k)), (f.mid.rotation.x = -0.06 * tap.k);
+        else {
+          const q = Math.min(1, tap.age / 0.12);
+          (f.aR.rotation.x = -1.35 - 0.25 * q), (f.aR.rotation.z = 0.25 * Math.sin(q * Math.PI)), (f.mid.rotation.x = 0.1 * (1 - q));
+        }
+      } else if (caster && h.weapon !== 'spellblade') (f.aR.rotation.x = -1.6), (f.mid.rotation.x = 0.12 * (1 - e));
       else if (h.heavy || cls === 'HEALER') (f.aR.rotation.x = -3.0 + e * 2.4), (f.mid.rotation.x = 0.25 * e);
       else if (h.weapon === 'spear') (f.aR.rotation.x = -1.5), (f.mid.position.z = -0.2 + e * 0.5), (f.mid.rotation.x = 0.2);
       else {
@@ -84,5 +92,11 @@ export function poseHero(f: HeroFig, h: Hero, now: number, walked: number): void
   }
   // A Mage's tip burns in the element its spells are in; brighter primed.
   if (f.tip && caster) f.tip.material = G(hex(EL_COL[heldEl(h)]), h.primed ? 0 : 0.2);
+  // A quick cast swells the focus's light as it gathers and flashes it white as it goes (../magetap.ts).
+  if (f.tip && caster && h.weapon !== 'spellblade') {
+    const tg = tapGlow(h);
+    f.tip.scale.setScalar(1 + 0.8 * tg);
+    if (tg > 0.6) f.tip.material = G(0xffffff, 0);
+  }
   flash(f, h.act === 'hurt' && h.actT < 0.08);
 }

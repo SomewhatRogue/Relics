@@ -48,6 +48,8 @@ function release(p: BodyPose, h: Hero, e: number): void {
   p.ox = -Math.round(h.fx * kick * e);
   p.oy = -Math.round(h.fy * kick * 0.6 * e);
   p.reach = R.reach * (s.thrust ? 1.5 : 1) * e;
+  // A Mage's quick spell is flicked out from the wrist: the arm goes forward with it, no kick back.
+  if (shot && !h.heavy && WEAPONS[h.weapon].cls === 'MAGE') (p.ox = p.oy = 0), (p.reach = M.release.reach * e);
 }
 
 /** The pose this frame; `t` is room time, `now` the wall clock (for shivers). Reused: read it at once. */

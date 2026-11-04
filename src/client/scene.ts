@@ -6,6 +6,7 @@ import { parryWindow } from '../sim/knacks';
 import { ARENA, npcAt, type GameMap } from '../shared/arena';
 import { GRAB, GUARD, POTION, TIERS, WEAPONS } from '../shared/tuning';
 import { lightsHolder } from './heldkits';
+import { tapEl, tapGlow } from './magetap';
 import type { ArenaRoom } from '../sim/room';
 import { drawHero } from './actors';
 import { drawHound, drawSnare } from './hound';
@@ -473,6 +474,12 @@ export class Scene {
       else if (e.frozenUntil > room.time) lights.push({ x: x - cx, y: y - cy - 8, r: 26, i: 0.4, c: [0.6, 0.85, 1] });
     }
     for (const h of room.heroes) {
+      // A Mage's quick cast: the hand lights up in its element as it gathers and flashes as it goes (magetap.ts).
+      const tg = tapGlow(h);
+      if (tg > 0) {
+        const [x, y] = lerp('h:' + h.id, h.x, h.y);
+        lights.push({ x: x + h.fx * 8 - cx, y: y - cy - 12 + h.fy * 5, r: 22 + 18 * tg, i: 0.9 * tg, c: EL_LIGHT[tapEl(h)] });
+      }
       if (!lightsHolder(h.weapon)) continue;
       const [x, y] = lerp('h:' + h.id, h.x, h.y);
       // A primed Mage (just channelled) burns brighter till the spell goes.

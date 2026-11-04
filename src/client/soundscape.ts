@@ -3,6 +3,7 @@
  * as they come, fires crackling, doors, and the music for where you are and how bad it's getting.
  */
 import { chestSound } from './sfx';
+import { mageTapSound } from './magesfx';
 import { isDead } from '../sim/damage';
 import { asleep } from './foes';
 import type { ArenaRoom } from '../sim/room';
@@ -56,6 +57,8 @@ export class Soundscape {
     // Out of earshot: a fight two screens away on a big map makes no sound here.
     const at = ev as { x?: number; y?: number }, me = this.me;
     if (me && typeof at.x === 'number' && typeof at.y === 'number' && Math.hypot(at.x - me.x, at.y - me.y) > EARSHOT) return;
+    // A Mage's quick cast: its flick, and its element as it lands (laid over the kit's own: magesfx.ts).
+    mageTapSound(ev, room);
     if (ev.k === 'swing') return swingSound(ev.src, ev.heavy);
     if (ev.k === 'chest') return chestSound(ev.state, ev.tier);
     // The poisoner's: the blowpipe's puff, a skewer's wet stab, a goblin retching (the spiders' own wet sounds).

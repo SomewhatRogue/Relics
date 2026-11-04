@@ -2,7 +2,7 @@
  * Effects that only decorate: sparks, blood (that stays on the floor), floating calls ("PARRY"),
  * rings, screen shake and short flashes of light. Cosmetic, so Math.random is fine here.
  */
-import type { FightEvent } from '../sim/types';
+import type { FightEvent, Hero } from '../sim/types';
 import { magicFx } from './fxmagic';
 import { Gore } from './gore';
 import type { Light } from './light';
@@ -20,6 +20,7 @@ import { levelFx } from './fxlevel';
 import { skillFx } from './fxskills';
 import { relicFx } from './fxrelics';
 import { cageFx } from './fxcages';
+import { mageTapFx } from './fxmagetap';
 
 interface Part { x: number; y: number; vx: number; vy: number; life: number; max: number; col: string; glow: boolean; grav: number; stick: boolean }
 interface Text { x: number; y: number; s: string; col: string; life: number; rise?: number }
@@ -37,6 +38,8 @@ export class Fx {
   decals: { x: number; y: number; col: string }[] = [];
   shake = 0;
   gore = new Gore(this);
+  /** The room's heroes (set each frame), so an effect can tell whose cast it was. */
+  heroes: readonly Hero[] = [];
 
   burst(x: number, y: number, n: number, cols: string[], speed: number, glow: boolean, grav = 0, stick = false): void {
     for (let i = 0; i < n; i++) {
@@ -87,6 +90,7 @@ export class Fx {
 
   on(ev: FightEvent): void {
     const [x, y] = toPx(ev.x, ev.y);
+    mageTapFx(this, ev, x, y, this.heroes);
     if (spiderFx(this, ev, x, y) || weakFx(this, ev, x, y) || venomFx(this, ev, x, y) || warriorFx(this, ev, x, y) || rangerFx(this, ev, x, y) || mageFx(this, ev, x, y) || clericFx(this, ev, x, y) || levelFx(this, ev, x, y) || skillFx(this, ev, x, y) || relicFx(this, ev, x, y) || cageFx(this, ev, x, y)) return;
     switch (ev.k) {
       case 'impact':

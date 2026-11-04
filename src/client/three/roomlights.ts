@@ -9,6 +9,7 @@ import { nestEmber } from '../nestfire';
 import { burningAt } from '../../shared/blaze';
 import { TIERS, WEAPONS } from '../../shared/tuning';
 import { lightsHolder } from '../heldkits';
+import { tapEl, tapGlow } from '../magetap';
 import { EL_LIGHT, heldEl } from '../palette';
 import { torchIn } from '../daytime';
 import type { Fx } from '../fx';
@@ -38,6 +39,9 @@ export function roomLights(room: ArenaRoom, fx: Fx, lerp: Lerp, out: L3[]): void
     const [x, y] = lerp('h:' + h.id, h.x, h.y), up = (h.z ?? 0) * 0.75;
     if (!map.theme.day) add(x, 1.6 + up, y + 0.3, map.theme.moon ? R(44) : R(90), (map.theme.moon ? 0.35 : 0.7) * tk, [0.95, 0.8, 0.6]);
     if (h.glow > 0 && WEAPONS[h.weapon].cls === 'HEALER') add(x, 0.8 + up, y, R(20 + h.glow * 3), 0.25 + h.glow * 0.04, [1, 0.62, 0.3], 9);
+    // A Mage's quick cast lights the hand as it gathers and flashes as it goes (../magetap.ts).
+    const tg = tapGlow(h);
+    if (tg > 0) add(x + h.fx * 0.5, 1.1 + up, y + h.fy * 0.5 + 0.2, R(22 + 18 * tg), 0.9 * tg, EL_LIGHT[tapEl(h)]);
     if (lightsHolder(h.weapon)) add(x, 1.2 + up, y + 0.2, R(h.primed ? 30 : 22), h.primed ? 0.55 : 0.4, WEAPONS[h.weapon].cls === 'HEALER' ? [1, 0.75, 0.4] : EL_LIGHT[heldEl(h)]);
   }
   for (const e of room.enemies) {

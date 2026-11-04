@@ -7,6 +7,7 @@ import { EL_COL, heldEl } from './palette';
 import { PX } from './world';
 import { bladeLength, censer, drawKit, kitPose } from './heldkits';
 import { bladeEdge } from './blademark';
+import { flourish, tapPose, tapSmearCol } from './castflourish';
 
 export interface Pose { a: number; ext: number; from?: number; thrust?: boolean; reach: number; pull: number }
 
@@ -22,7 +23,7 @@ export function pose(h: Hero, now: number): Pose {
     spellblade: fa + side * 1.1, mace: fa + side * 1.2,
   };
   const charge = Math.min(1, (h.actT + CHARGE.start) / chargeFull(WEAPONS[h.weapon], h));
-  const kit = kitPose(h, now, fa, side, charge);
+  const kit = kitPose(h, now, fa, side, charge) ?? tapPose(h, fa, side);
   if (kit) return kit;
   if (h.act === 'charge') {
     // Held past the flash, the draw starts to shake (and the shot weakens).
@@ -145,12 +146,14 @@ export function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): vo
     line(g, ox, oy, p.a, 0, 2, '#7a5aa8');
     line(g, ox + Math.cos(p.a) * 2, oy + Math.sin(p.a) * 2, p.a + Math.PI / 2, -1.5, 1.5, '#9aa3ad');
     bladeEdge(c, h, ox, oy, p.a);
+    flourish(c, h, ox, oy, p.a);
   } else if (h.weapon === 'wand') {
     line(g, ox, oy, p.a, 0, 6, '#6b4a2b');
     const tl = 7, tx = ox + Math.cos(p.a) * tl, ty = oy + Math.sin(p.a) * tl, r = Math.round(p.pull * 2);
     c.glow.fillStyle = el;
     c.glow.fillRect(Math.round(tx - r / 2), Math.round(ty - r / 2), r + 1, r + 1);
     tip(c, h, tx, ty, el);
+    flourish(c, h, tx, ty, p.a);
   } else if (h.weapon === 'staff') {
     line(g, ox, oy, p.a, -6, 12, '#6b4a2b');
     const tx = ox + Math.cos(p.a) * 13, ty = oy + Math.sin(p.a) * 13, r = 1 + Math.round(p.pull * 3);
@@ -161,6 +164,7 @@ export function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): vo
     c.glow.fillStyle = '#ffffff';
     c.glow.fillRect(Math.round(tx), Math.round(ty), 1, 1);
     tip(c, h, tx, ty, el);
+    flourish(c, h, tx, ty, p.a);
   } else if (h.weapon === 'mace') {
     if (p.pull > 0) {
       c.glow.globalAlpha = 0.3 + 0.6 * p.pull;
@@ -188,7 +192,7 @@ export function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): vo
   }
   if (p.from !== undefined) {
     // Frozen on contact (the hitstop): the trail burns white and fuller, the impact frame.
-    const hold = h.hitstop > 0, col = hold ? '#ffffff' : h.counter ? '#ffa040' : h.heavy ? '#ffe9a8' : '#ffffff';
+    const hold = h.hitstop > 0, tc = tapSmearCol(h), col = hold ? '#ffffff' : h.counter ? '#ffa040' : h.heavy ? '#ffe9a8' : '#ffffff';
     if (p.thrust) {
       c.glow.globalAlpha = hold ? 1 : 0.7;
       line(c.glow, px, py, p.a, 10, p.reach, col, hold ? 2 : 1);
@@ -196,7 +200,10 @@ export function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): vo
     } else if (hold) {
       // The room judges the whole arc as the blow lands: the contact frame shows all of it.
       const fa = Math.atan2(h.fy, h.fx);
-      smear(c.glow, px, py, p.from, 2 * fa - p.from, p.reach * 0.55, p.reach, col);
-    } else smear(c.glow, px, py, p.from, p.a, p.reach * 0.5, p.reach * 0.95, col);
+      // (A Mage's quick cut burns in its element round the white: castflourish.ts.)
+      if (tc) smear(c.glow, px, py, p.from, 2 * fa - p.from, p.reach * 0.4, p.reach * 1.05, tc);
+      smear(c.glow, px, py, p.from, 2 * fa - p.from, p.reach * (tc ? 0.7 : 0.55), p.reach, col);
+    } else if (tc) smear(c.glow, px, py, p.from, p.a, p.reach * 0.4, p.reach, tc), smear(c.glow, px, py, p.from, p.a, p.reach * 0.8, p.reach * 0.95, '#ffffff');
+    else smear(c.glow, px, py, p.from, p.a, p.reach * 0.5, p.reach * 0.95, col);
   }
 }

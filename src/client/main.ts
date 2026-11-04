@@ -81,6 +81,7 @@ import { kitLine } from './kitlines';
 import { ownCue } from './owncues';
 import { Purse } from './purse';
 import { legend } from './legend';
+import { mageTrails } from './fxmagetap';
 
 // The UI's frames and icons, drawn once before anything shows.
 paintFrames();
@@ -364,6 +365,7 @@ function tick(t: number): void {
   const evs = game.step(dt, still ?? live);
   // Leading one: the room goes out to the party.
   game.coop?.frame(t / 1000);
+  fx.heroes = game.room.heroes;
   for (const ev of evs) {
     fx.on(ev);
     ownCue(ev, game.hero.id, fx, t / 1000);
@@ -399,6 +401,7 @@ function tick(t: number): void {
     if (news) panel.show(news.title, news.html, [{ label: 'CLOSE', primary: true, act: () => panel.hide() }], true);
   }
   fx.update(dt);
+  mageTrails(fx, game.room, dt);
   scene.focus = game.cutFocus();
   scene.fanfare = game.wood?.hold?.kind === 'relic';
   scene.marks = game.mode === 'run' ? targets(game.run, game.room, game.houses()) : [];

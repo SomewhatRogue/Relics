@@ -8,6 +8,7 @@ import type { Chest } from '../sim/chests';
 import { POTIONS, TIERS, TIER_ORDER } from '../shared/tuning';
 import { line, type Ctx } from './draw';
 import { EL_COL } from './palette';
+import { drawSpell } from './spelldraw';
 
 const runes = (c: Ctx, x: number, y: number, a: number, from: number, to: number) => {
   c.glow.globalAlpha = 0.6 + 0.4 * Math.sin(c.now * 6);
@@ -135,13 +136,9 @@ export function drawBolt(c: Ctx, b: Bolt, x: number, y: number): void {
     for (let i = 0; i < 6; i++) c.lit.fillRect(Math.round(x + Math.cos(spin + i) * 2), Math.round(y - 8 + Math.sin(spin + i) * 2), 1, 1);
     return;
   }
+  // A Mage's spark or lance: spelldraw.ts.
+  if (b.kind === 'spark' || b.kind === 'lance') return drawSpell(c, b, x, y);
   const ty = y - 8;
-  if (b.kind === 'lance') {
-    c.glow.fillStyle = col;
-    line(c.glow, x, ty, back, 0, 12, col, 2);
-    line(c.glow, x, ty, back, 0, 12, '#ffffff');
-    return;
-  }
   const r = b.kind === 'orb' ? 2 + Math.round(Math.sin(c.now * 20)) * 0.5 : 1;
   c.glow.fillStyle = col;
   for (let i = 1; i <= 4; i++) {

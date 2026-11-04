@@ -32,14 +32,19 @@ export function makeBolt(b: Bolt): THREE.Group {
     case 'dart':
       part(g, 0.025, 0.025, 0.26, M(0xc8b890), 0, 0, 0), part(g, 0.05, 0.05, 0.06, G(0x9be040, 0.4), 0, 0, 0.14);
       break;
-    case 'spark':
-      part(g, 0.14, 0.14, 0.14, el, 0, 0, 0);
+    case 'spark': {
+      // A small star of the element round a white-hot core (a held spell's, that bursts, a size up).
+      const s = b.burst ? 1.4 : 1, white = G(0xffffff);
+      part(g, 0.26 * s, 0.1 * s, 0.1 * s, el, 0, 0, 0), part(g, 0.1 * s, 0.26 * s, 0.1 * s, el, 0, 0, 0), part(g, 0.1 * s, 0.1 * s, 0.3 * s, el, 0, 0, 0);
+      part(g, 0.13 * s, 0.13 * s, 0.13 * s, white, 0, 0, 0);
       break;
+    }
     case 'orb':
       part(g, 0.32, 0.32, 0.32, el, 0, 0, 0), part(g, 0.18, 0.18, 0.18, G(0xffffff), 0, 0, 0);
       break;
     case 'lance':
-      part(g, 0.08, 0.08, 1.1, el, 0, 0, 0);
+      // An icicle or a lance: the element along it and a bright white point.
+      part(g, 0.1, 0.1, 1.1, el, 0, 0, 0), part(g, 0.13, 0.13, 0.18, G(0xffffff), 0, 0, 0.55);
       break;
     case 'smite':
       part(g, 0.22, 3.0, 0.22, G(0xfff1b0, 0), 0, 1.5, 0), part(g, 0.5, 0.04, 0.5, G(0xffd27a, 0.2), 0, -0.48, 0);
