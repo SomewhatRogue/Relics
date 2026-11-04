@@ -60,7 +60,7 @@ const LIST = {
   // The Rogue: the dash, the backstab, the knives, the shadow.
   g_light: { name: 'LIGHT DASH', text: 'Dash costs 20% less stamina', gain: 'dash -20% stamina', fx: { light: 0.2 } },
   g_leap: { name: 'LONG DASH', text: 'Dash goes 15% further', gain: 'dash +15% further', fx: { leap: 0.15 } },
-  g_slip: { name: 'LATE DASH', text: '0.08 s longer to time a last-second dash (one just as a blow lands)', gain: 'last second +0.08 s', fx: { slip: 0.08 } },
+  g_slip: { name: 'LATE DASH', text: 'Last-second dash (just as a blow lands) 0.08 s easier to time', gain: 'window +0.08 s', fx: { slip: 0.08 } },
   g_angle: { name: 'WIDE BACKSTAB', text: 'Backstabs count from further round the side', gain: 'backstab from wider', fx: { angle: 0.15 } },
   g_rear: { name: 'HARD BACKSTAB', text: 'Backstabs do 15% more damage', gain: 'backstab +15%', fx: { rear: 0.15 } },
   g_ambush: { name: 'HARD AMBUSH', text: 'Ambushes do 25% more damage', gain: 'ambush +25%', fx: { ambush: 0.25 } },
@@ -86,7 +86,7 @@ const LIST = {
   // The Healer: guard, healing (the healing blow), the smite, the sanctuary.
   h_parry: { name: 'WIDE PARRY', text: 'Parry window 0.04 s longer', gain: 'parry +0.04 s', fx: { parry: 0.04 } },
   h_block: { name: 'EASY BLOCK', text: 'Blocking costs 25% less stamina', gain: 'block -25% stamina', fx: { block: 0.25 } },
-  h_counter: { name: 'LONG COUNTER', text: '0.6 s longer to counter after a parry', gain: 'counter +0.6 s', fx: { counterTime: 0.6 } },
+  h_counter: { name: 'LONG COUNTER', text: 'Counter window after a parry 0.6 s longer', gain: 'counter +0.6 s', fx: { counterTime: 0.6 } },
   h_mend: { name: 'STRONG HEALS', text: 'Heals you give are 12% bigger', gain: 'heals +12%', fx: { mending: 0.12 } },
   h_reach: { name: 'WIDE HEAL', text: 'Healing blow reaches 20% further', gain: 'heal reach +20%', fx: { mercyReach: 0.2 } },
   h_mercy: { name: 'EARLY HEAL', text: 'The blow before your healing blow heals too, for half', gain: 'blow before heals', fx: { mercy: 0.5 } },

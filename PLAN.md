@@ -2,6 +2,15 @@
 
 ## Current slice
 
+**Copy pass 3: how we write and show things** (Claude Opus 5.5, 2026-11-04; Kyle: "general guidance ...
+we need to work on, in general, how we write and show things"). Built; waiting on Kyle's read. *Done
+when* every mechanics and UI line reads in his style (short, effect first, no riddles, said once) and
+mechanics show as labelled rows on his phone: traits and modifiers as `NAME: effect`, hungry gear GIFT /
+COST, potions EFFECT / LASTS, skills USE / COOLDOWN / COST, relics USE / CHARGE, job postings WHERE /
+ROOMS / PAYS, results GOLD / XP / SAVED. Record: `docs/copy-pass-3.md` (best before-and-afters and ten
+questions), `docs/copy-inventory.csv` `done` column. *Next:* Kyle's answers, then the lore-keeper and
+line-editor passes over the new lines.
+
 **The UI redo, steps 1 to 3: stone, iron and gilt; the touch cluster; the top HUD** (Claude Opus 5.5,
 2026-11-04; Kyle: the UI reads as "AI slop", "emulate Diablo and Path of Exile, mobile first", "Build";
 the brief is `docs/ui-research.md`). Built; waiting on Kyle's play. *Done when* on his phone (upright)

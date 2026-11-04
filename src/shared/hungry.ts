@@ -14,7 +14,7 @@ interface Hungry { name: string; slot: 'weapon' | 'armor' | 'ring'; kit?: Weapon
 
 export const HUNGRY: Record<HungryId, Hungry> = {
   cleaver: { name: "SKARN'S CLEAVER", slot: 'weapon', kit: 'greatsword', cls: 'WARRIOR', from: 'SKARN', gift: 'Every hit heals you 20% of its damage.', cost: "Nobody else's heals work on you.", want: 5 },
-  pike: { name: 'THE LARDER PIKE', slot: 'weapon', kit: 'spear', cls: 'WARRIOR', gift: 'Each kill: +10% damage for the rest of the job, no cap.', cost: '8 s without a kill: it hurts you every second until you kill again.', want: 5 },
+  pike: { name: 'THE LARDER PIKE', slot: 'weapon', kit: 'spear', cls: 'WARRIOR', gift: 'Each kill: +10% damage for the rest of the job, no cap.', cost: 'Go 8 s without a kill and it hurts you every second until you kill again.', want: 5 },
   spendthrift: { name: 'SPENDTHRIFT', slot: 'weapon', kit: 'longbow', cls: 'RANGER', gift: 'Full draws go through goblins and do double damage.', cost: "Each arrow costs 1 gold. No gold, no draw.", want: 5 },
   needles: { name: "MOTHER RUST'S NEEDLES", slot: 'weapon', kit: 'daggers', cls: 'ROGUE', from: 'MOTHER RUST', gift: 'A backstab kills anything but a butcher.', cost: 'Stamina refills at half speed, and not at all while a goblin can see you.', want: 5 },
   jealous: { name: 'THE JEALOUS WAND', slot: 'weapon', kit: 'wand', cls: 'MAGE', gift: 'Spell bursts also hit every goblin near the target.', cost: "No relic while you hold it. Skill takes twice as long to recharge.", want: 5 },

@@ -61,9 +61,10 @@ em, i { font-style: normal; }
 ::selection { background: var(--gold); color: var(--stone-900); }
 
 /* A weapon's TAP / HOLD / PERFECT rows (kitlines.ts) and its GUARD and DODGE areas (guardarea.ts): on the
-   item card, the shop list and the class card. A label column in bone-dim, the words in bone. */
-.kitrows { display: grid; gap: 2px; margin: 4px 0; text-align: left; }
-.kitrows > div { display: grid; grid-template-columns: 8ch 1fr; column-gap: 8px; align-items: baseline; }
+   item card, the shop list and the class card. A label column (as wide as the widest label) in bone-dim,
+   the words in bone. */
+.kitrows { display: grid; grid-template-columns: max-content 1fr; gap: 2px 8px; margin: 4px 0; text-align: left; align-items: baseline; }
+.kitrows > div { display: contents; }
 :is(#panel, #pack, #loot, #title, body) .kitrows b, :is(#panel, #pack, #loot, #title, body) .area b { font: 400 var(--fs-text)/1.3 var(--font-body); letter-spacing: 0.04em; color: var(--bone-dim); }
 .kitrows span { color: var(--bone); line-height: 1.3; }
 /* The same rows elsewhere (card.ts labelRows): hungry gear's GIFT and COST in its reds, a skill's USE /
@@ -92,6 +93,8 @@ em, i { font-style: normal; }
 #title .crow span { line-height: 1.35; }
 #title .cnote { color: var(--stone-300); }
 /* In the pack's two narrow columns: each label over its words. */
-.pair .kitrows > div, .pair .area { grid-template-columns: 1fr; }
+.pair .kitrows, .pair .area { grid-template-columns: 1fr; }
+.pair .kitrows { row-gap: 0; }
+.pair .kitrows span { margin-bottom: 3px; }
 .pair .area { grid-template-columns: auto 1fr; row-gap: 1px; }
 .pair .area .v { grid-column: 1 / -1; }
