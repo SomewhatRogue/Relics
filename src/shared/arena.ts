@@ -100,6 +100,8 @@ export interface Npc {
   /** Cutscene puppetry: lifted off the ground (pixels), walking, or dead (`headless` standing, `body` on the ground). */
   lift?: number;
   walking?: boolean;
+  /** Cutscene puppetry: red up the wall behind them, this many pixels high (Hew, thrown into his hut's wall). */
+  smear?: number;
   /** Keeping low: crouched and creeping (Hew coming in past the goblins at the dead). */
   sneak?: boolean;
   /** Paint only, what they're busy at: carrying the dead and digging, at the whetstone, at the well. */

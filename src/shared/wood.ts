@@ -32,8 +32,9 @@ export const GATES: { open: Rect; block: Block }[] = [
   { open: { x: 50, y: 12, w: 4, h: 2 }, block: { x: 50.4, y: 12.2, w: 3.2, h: 1.6, kind: 'fence' } },
   { open: { x: 42, y: 3, w: 2, h: 4 }, block: { x: 42.2, y: 3.4, w: 1.6, h: 3.2, kind: 'fence' } },
 ];
-/** Where Wickhold's road leaves the map (walk into it after the fight). */
-export const ROAD_OUT: Area = { x: 1, y: 2, w: 1.5, h: 5 };
+/** Where Wickhold's road leaves the wood: just west of the hut's gate, so after the fight it's a few
+ *  steps, not the length of the wood (Kyle, 2026-11-04: "don't make them walk a huge way away"). */
+export const ROAD_OUT: Area = { x: 37, y: 2, w: 3, h: 5 };
 
 const inside = (r: Rect, x: number, y: number) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
 export const areaAt = (x: number, y: number) => AREAS.findIndex((r) => inside(r, x, y));
@@ -159,9 +160,9 @@ export const LINES = {
   hut: "That's ^home^, kettle's older than you are. Hang on, I *didn't* leave that door open.",
   round: "Wait here, stray, I'll go round the back.",
   last: "Get the count to Odric, stray, Father Odric, he'll be wanting it.",
-  /** Cut off by the bite. */
+  /** Screamed with it holding him (woodcut.ts); then the last, cut off. */
+  screams: ["Get off! Get *off* me! Aah! AAAH!"],
   scream: 'No! No, no, n',
-  stoker: 'Eleven you burn. Eleven of mine. So, this one I _keep_.',
   north: "They all went north and left the field half-picked. I've *never* known them leave meat.",
   up: ['Up you get, and spit that dirt out.', "Not yet, stray, I've enough to burn as it is.", 'Have a breather, then go at it again, ~properly~ this time.'],
   relic: "There's something hard under its breastbone, grown in like a knot in oak, and it takes Hew's poker and most of what you've got left to lever it out. It's a javelin, haft and all, longer than the wound it came out of, and ~warm~.",

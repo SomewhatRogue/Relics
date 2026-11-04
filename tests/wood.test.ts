@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { GATES, LESSONS, lessonsFor } from '../src/shared/wood';
+import { GATES, LESSONS, ROAD_OUT, lessonsFor } from '../src/shared/wood';
 import { kill } from '../src/sim/damage';
 import { NO_INTENT, type FightEvent } from '../src/sim/types';
 import { Game } from '../src/client/game';
@@ -185,11 +185,27 @@ describe('the prologue wood', () => {
     enter(g, 4);
     expect(w().cut).toBeGreaterThanOrEqual(0);
     expect(g.taught()).toEqual([]);
-    for (let i = 0; i < 400 && w().cut >= 0; i++) g.step(0.05, NO_INTENT);
+    // Grabbed, screaming, his head gone, thrown into his hut's wall, down it; it bellows and never speaks.
+    const said = new Set<string>(), evs = new Set<string>();
+    let slid = false;
+    for (let i = 0; i < 400 && w().cut >= 0; i++) {
+      for (const e of g.step(0.05, NO_INTENT)) evs.add(e.k);
+      if (w().caption) said.add(w().caption!.who + ': ' + w().caption!.text);
+      const n = g.room.map.npcs?.find((x) => x.talk === 'hew');
+      if (n?.smear && n.pose === 'headless') slid = true;
+    }
+    expect([...said].some((l) => l.startsWith('HEW: ') && l.includes('AAAH'))).toBe(true);
+    expect([...said].every((l) => l.startsWith('HEW: '))).toBe(true);
+    expect(evs.has('bite') && evs.has('thud') && evs.has('bellow')).toBe(true);
+    expect(slid).toBe(true);
     expect(w().hewAlive).toBe(false);
     expect(g.room.map.npcs?.some((n) => n.talk === 'hew')).toBe(false);
+    const body = g.room.map.npcs?.find((n) => n.talk === 'hewdead');
+    expect(body).toMatchObject({ pose: 'body', smear: 13 });
     const s = g.room.enemies.find((e) => e.name === 'THE STOKER')!;
     expect(s.alert).toBe(true);
+    // It comes for you at once.
+    expect(s.cooldown).toBeLessThan(1);
     kill(s, [], 'burst', 0, 1);
     g.step(0.05, NO_INTENT);
     expect(w().relic).toBe(true);
@@ -199,7 +215,9 @@ describe('the prologue wood', () => {
     g.continueHold();
     g.step(0.05, NO_INTENT);
     expect(w().hold).toBeNull();
-    Object.assign(g.hero, { x: 1.6, y: 4 });
+    // The road out is a few steps west of the hut, not the length of the wood.
+    expect(Math.hypot(ROAD_OUT.x - 52, ROAD_OUT.y - 6)).toBeLessThan(16);
+    Object.assign(g.hero, { x: ROAD_OUT.x + 1, y: ROAD_OUT.y + 2 });
     g.step(0.05, NO_INTENT);
     expect(g.mode).toBe('town');
     expect(g.profile).toMatchObject({ prologue: true, tally: true });
