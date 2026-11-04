@@ -164,6 +164,8 @@ export interface Theme {
   /** A routed job's weather (shared/weather.ts), paint only: rain (0 to 1) and a storm's lightning (0 to 1). */
   rain?: number;
   storm?: number;
+  /** How thick the fog lies (0 to 1), a veil over everything as well as the mist's bands. */
+  fog?: number;
 }
 
 export interface GameMap {

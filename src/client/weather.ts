@@ -1,6 +1,6 @@
 /**
  * A job's weather on screen (shared/weather.ts), over everything like the mist, in both views: rain
- * falling in thin slanted streaks with a little gloom, and in a storm the sky flashing white now and
+ * falling in thin slanted streaks with a little gloom, fog as a pale veil thickening into the distance, and in a storm the sky flashing white now and
  * then, sometimes twice. Cosmetic only; where each streak falls is worked out from the clock, so every
  * frame is the same without keeping any state.
  */
@@ -12,19 +12,28 @@ const hash = (n: number) => {
 };
 
 export function drawWeather(g: CanvasRenderingContext2D, theme: Theme, vw: number, vh: number, now: number): void {
-  const rain = theme.rain ?? 0, storm = theme.storm ?? 0;
+  const rain = theme.rain ?? 0, storm = theme.storm ?? 0, fog = theme.fog ?? 0;
+  if (fog > 0) {
+    // Fog: a pale veil, thicker toward the back of the room (farther off), over the mist's drifting bands.
+    for (let y = 0; y < vh; y += 4) {
+      g.globalAlpha = Math.min(0.5, fog * (0.16 + 0.22 * (1 - y / vh)));
+      g.fillStyle = '#aab6c0';
+      g.fillRect(0, y, vw, 4);
+    }
+    g.globalAlpha = 1;
+  }
   if (rain <= 0) return;
   // A little gloom under the cloud.
-  g.globalAlpha = 0.06 + 0.06 * rain;
+  g.globalAlpha = 0.1 + 0.12 * rain;
   g.fillStyle = '#1a2230';
   g.fillRect(0, 0, vw, vh);
   // Streaks: each its own speed and place, falling and drifting left with the wind.
-  const n = Math.round((vw * vh * rain) / 1400);
-  g.fillStyle = '#9fb0c4';
+  const n = Math.round((vw * vh * rain) / 520);
+  g.fillStyle = '#b4c4d6';
   for (let i = 0; i < n; i++) {
-    const sp = 220 + hash(i) * 120, len = 4 + Math.floor(hash(i + 0.5) * 4);
+    const sp = 220 + hash(i) * 120, len = 6 + Math.floor(hash(i + 0.5) * 5);
     const y = (hash(i + 0.25) * (vh + 40) + now * sp) % (vh + 40) - 20, x = ((hash(i + 0.75) * (vw + 60) - now * sp * 0.25) % (vw + 60) + vw + 60) % (vw + 60) - 30;
-    g.globalAlpha = 0.18 + hash(i + 0.1) * 0.22;
+    g.globalAlpha = 0.32 + hash(i + 0.1) * 0.3;
     for (let k = 0; k < len; k++) g.fillRect(Math.round(x - k / 3), Math.round(y + k), 1, 1);
   }
   // Where it lands: small splashes that come and go.

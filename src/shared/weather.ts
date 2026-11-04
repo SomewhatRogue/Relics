@@ -48,5 +48,5 @@ export function weatherIn(job: Job, index: number): Weather {
 export function weatherAt(job: Job, index: number, theme: Theme): Theme {
   const w = weatherIn(job, index);
   if (!w.rain && !w.fog) return theme;
-  return { ...theme, mist: Math.max(theme.mist ?? 0, w.fog * 2), rain: w.rain || undefined, storm: w.storm || undefined };
+  return { ...theme, mist: Math.max(theme.mist ?? 0, w.fog * 2.4), rain: w.rain || undefined, storm: w.storm || undefined, fog: w.fog || undefined };
 }
