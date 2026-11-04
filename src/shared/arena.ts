@@ -190,6 +190,8 @@ export interface GameMap {
   hangs?: { kind: HangKind; x: number; w: number }[];
   /** Paint only: marks on the floor (blood, scorch, dug beds, flowers). */
   marks?: Mark[];
+  /** Paint only: little scenes past the trees, never reached (the prologue wood's: shared/woodscenes.ts). */
+  vignettes?: import('./woodscenes.js').Vignette[];
   /** Paint only: what the goblins left in a house (shared/grim.ts). */
   grim?: Grim[];
   /** A house on fire inside (shared/blaze.ts): where it burns and when, the beams that come down, when it falls in. */
