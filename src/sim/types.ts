@@ -493,6 +493,8 @@ export type FightEvent =
   | { k: 'hit'; x: number; y: number; n: number; heavy: boolean; on: 'enemy' | 'hero'; counter?: boolean; crit?: boolean; ambush?: boolean; boarded?: boolean; backstab?: boolean; tick?: boolean; src?: string; big?: boolean }
   | { k: 'swing'; x: number; y: number; src: string; heavy: boolean }
   | { k: 'death'; x: number; y: number; how: DeathKind; dx: number; dy: number; kind: EnemyKind }
+  /** A shot stopped dead on a shield-bearer's board (sim/board.ts): a thunk, sparks, BLOCKED. */
+  | { k: 'deflect'; x: number; y: number }
   | { k: 'block' | 'parry' | 'guardbreak' | 'winded' | 'breath' | 'bash' | 'dodge' | 'slip' | 'out' | 'roll' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number }
   | { k: 'windup' | 'impact'; x: number; y: number; kind: AttackKind }
   /** The prologue's cutscene: the ground shaking, the bite, a body landing, the Stoker's bellow. */
@@ -642,6 +644,8 @@ export interface Bolt {
   blind?: boolean;
   /** A plain crossbow bolt runs through this many goblins at most (a glinted one, the whole line). */
   pierceLeft?: number;
+  /** Loosed on a full charge: it gets through a shield-bearer's board (sim/board.ts). */
+  charged?: boolean;
   /** The shooter's weapon traits (BRUTAL counts on a shot). */
   traits: TraitId[];
   /** Lobbed and dropped things go from (sx, sy) to (tx, ty) over `flight` seconds, `t` so far. */

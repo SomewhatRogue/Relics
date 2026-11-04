@@ -6,7 +6,7 @@
  */
 import { HUNGRY_FX } from './hungry';
 import { collide } from '../shared/arena';
-import { CRIT, FLINCH, HERO, LODESTONE, NET, VARIANTS, WEAPONS, type Augment, type Swing, type TraitId } from '../shared/tuning';
+import { CRIT, FLINCH, HERO, LODESTONE, NET, WEAPONS, type Augment, type Swing, type TraitId } from '../shared/tuning';
 import { shove } from './bodies';
 import { damage, frozen, isDead, isDummy } from './damage';
 import { backstabOf, fromBehind, rogueShot } from './backshot';
@@ -25,6 +25,7 @@ import { envenom } from './venom';
 import { markShot, perfectStrike, spent } from './rangershots';
 import { interrupt, windingUp } from './spells';
 import { mayStun, stun } from './stuns';
+import { boardFor, boardMult } from './board';
 
 let nextId = 1;
 
@@ -36,6 +37,10 @@ const base = (h: Hero, kind: Bolt['kind'], el: Augment): Bolt => ({
 /** Loose the swing's shot along the hero's facing; `mult` is the hero's damage (blessing, perfect release, tempo). */
 export function shoot(h: Hero, s: Swing, el: Augment, mult = 1, traits: TraitId[] = []): Bolt {
   const b: Bolt = { ...base(h, s.shot!, el), traits, speed: s.speed ?? 20, range: s.range, dmg: Math.round(s.dmg * mult), knock: s.knock, pierce: !!s.pierce, burst: s.burst ?? 0, stun: s.stun ?? 0 };
+  // A full draw gets through a shield-bearer's board (sim/board.ts). A crossbow is always wound full,
+  // so only its glint counts.
+  const kit = WEAPONS[h.weapon];
+  if (h.heavy && h.power >= 1 && kit && !kit.noCharge && !kit.reloads) b.charged = true;
   // A poisoner's dart: loosed on the white flash, it retches what it hits (sim/venom.ts).
   if (s.venom) b.poison = h.heavy && h.perfect ? 2 : 1;
   // A wand's spark breaks off a blow it lands in the wind-up of; its burst let go on the flash, anything (sim/spells.ts).
@@ -109,18 +114,22 @@ function openNet(w: World, b: Bolt): void {
   }
 }
 
-function strike(w: World, b: Bolt, e: Enemy): void {
+/** A shot lands on `e`; false if a shield-bearer's board stopped it dead (the shot is spent). */
+function strike(w: World, b: Bolt, e: Enemy): boolean {
   const wasFrozen = frozen(e, w.now), winding = !!b.interrupts && windingUp(e);
   e.lastBy = b.owner;
+  // Into a shield-bearer's board: a plain shot stops dead, a charged, perfect or piercing one gets through for less.
+  const board = boardFor(e, b, w.now);
+  if (board === 'blocked' && boardMult(board) <= 0) return w.ev.push({ k: 'deflect', x: e.x, y: e.y }), false;
   const by = w.heroes.find((h) => h.id === b.owner), crit = !!by && (!!b.blind || rollCrit(by));
-  // A shot into a shield-bearer's board (it's facing the shot) does little; lightning goes round it.
-  const boarded = e.variant === 'shield' && b.el !== 'storm' && e.alert !== false && e.fx * -b.dx + e.fy * -b.dy > 0.3 && b.knock < 8;
   // A Rogue's bolt or knife in a goblin's back is a backstab too, at that weapon's rate.
   const back = !!by && rogueShot(b) && WEAPONS[by.weapon].cls === 'ROGUE' && !isDummy(e) && fromBehind(e, b.dx, b.dy, by);
   const rear = back && by ? backstabOf(by) : 1;
-  const dead = damage(e, Math.round(b.dmg * rear * (crit ? CRIT : 1) * (boarded ? VARIANTS.shield.front : 1)), w.now, w.ev, { heavy: b.knock >= 8 || crit, flinch: FLINCH, mult: true, brutal: b.traits.includes('brutal'), dx: b.dx, dy: b.dy, src: b.kind, el: b.el, backstab: back });
+  const dead = damage(e, Math.round(b.dmg * rear * (crit ? CRIT : 1) * boardMult(board)), w.now, w.ev, { heavy: b.knock >= 8 || crit, flinch: FLINCH, mult: true, brutal: b.traits.includes('brutal'), dx: b.dx, dy: b.dy, src: b.kind, el: b.el, backstab: back });
+  // (A board tuned to let a little of a plain shot by still stops it there.)
+  if (board === 'blocked') w.ev.push({ k: 'deflect', x: e.x, y: e.y });
   perfectStrike(b, e, w.now, w.ev);
-  if (dead) return;
+  if (dead || board === 'blocked') return board !== 'blocked';
   if (e.act !== 'pinned') shove(e, b.dx, b.dy, b.knock, e.weight);
   interrupt(e, winding, !!b.breaks, b.owner, w.now, w.ev);
   if (b.hobble) hobble(e, w);
@@ -134,6 +143,7 @@ function strike(w: World, b: Bolt, e: Enemy): void {
     o.lastBy = b.owner;
     damage(o, Math.round(b.dmg * HUNGRY_FX.chainDmg), w.now, w.ev, { src: b.kind, el: b.el });
   }
+  return true;
 }
 
 /** Advance one bolt a tick; false when it is gone. */
@@ -180,8 +190,7 @@ export function stepBolt(b: Bolt, w: World, dt: number): boolean {
       if (b.kind === 'net') return openNet(w, b), false;
       if (b.burst) return blast(w, b, b.x, b.y), false;
       b.hit.push(e.id);
-      strike(w, b, e);
-      if (spent(b)) return false;
+      if (!strike(w, b, e) || spent(b)) return false;
     }
     // A teammate in the way takes it (not the one who loosed it, and not a net).
     // (A Cleric's shots pass by friends and the freed: sim/mercy.ts.)

@@ -64,7 +64,7 @@ export function stepSentries(zones: Zone[], bolts: Bolt[], w: World): void {
     const dx = best.x - z.x, dy = best.y - z.y, l = Math.hypot(dx, dy) || 1;
     (z.ax = dx / l), (z.ay = dy / l);
     const by = { id: z.owner, x: z.x - z.ax * 0.5, y: z.y - z.ay * 0.5, fx: z.ax, fy: z.ay } as Hero;
-    bolts.push({ ...shoot(by, BOLT, z.el), relic: true, hobble: true });
+    bolts.push({ ...shoot(by, BOLT, z.el), relic: true, hobble: true, charged: false });
   }
 }
 

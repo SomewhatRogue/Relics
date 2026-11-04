@@ -190,7 +190,7 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   if (blinded(e, now)) return void (spec && stumble(e, spec.speed, now, dt));
   if (e.act === 'attack') {
     if (runAttack(e, heroes, now, dt, ev, others) && e.act === 'attack') {
-      Object.assign(e, { attack: null, act: after(e), actT: 0, cooldown: e.variant === 'hexer' ? HEXER.pause : spec ? spec.pauseBetween : SWING_DUMMY.every });
+      Object.assign(e, { attack: null, act: after(e), actT: 0, cooldown: e.variant === 'hexer' ? HEXER.pause : e.attack?.kind === 'spit' ? BROOD.spitPause : spec ? spec.pauseBetween : SWING_DUMMY.every });
     }
     return;
   }

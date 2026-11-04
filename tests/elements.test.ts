@@ -151,7 +151,7 @@ describe("each element's job", () => {
 
   it('storm goes round a shield from the front; anything else meets the board', () => {
     const s = WEAPONS.wand.combo[0];
-    expect(sparkAt('')).toBe(Math.round(s.dmg * VARIANTS.shield.front));
+    expect(sparkAt('')).toBe(Math.round(s.dmg * VARIANTS.shield.shot));
     expect(sparkAt('storm')).toBe(Math.round(s.dmg * WEAK.shield.storm!));
   });
 

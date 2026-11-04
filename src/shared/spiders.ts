@@ -6,14 +6,18 @@
  */
 import type { EnemyAttackSpec, EnemySpec } from './tuning.js';
 
-/** A small spider. `pounce`: a short leap along a line it shows you (blockable, parryable). */
+/**
+ * A small spider. `pounce`: a short leap along a line it shows you (blockable, parryable).
+ * Kyle, 2026-11-04: still over-tuned and too fast. Now slower than a hero on foot (HERO.speed 4.4), a
+ * shorter leap with a longer wind-up to read, a longer breather between pounces, a little less bite.
+ */
 export const SPIDER: EnemySpec & { pounce: EnemyAttackSpec; sight: number; skitter: number; zig: number; spread: number } = {
-  hp: 14, radius: 0.24, weight: 0.35, speed: 4.6, reach: 2.4, respawn: 5, stun: 1.4, pauseBetween: 1.0, flinches: true, turn: 9,
-  pounce: { windup: 0.45, active: 0.2, recover: 0.5, dmg: 5, knock: 1.5, range: 2.4, arc: 0, radius: 0.42, unblockable: false },
+  hp: 12, radius: 0.24, weight: 0.35, speed: 3.6, reach: 2.0, respawn: 5, stun: 1.4, pauseBetween: 1.6, flinches: true, turn: 7,
+  pounce: { windup: 0.6, active: 0.2, recover: 0.65, dmg: 4, knock: 1.5, range: 2.0, arc: 0, radius: 0.42, unblockable: false },
   /** Sees you from this far at rest; zigzags `skitter` tiles to the side `zig` times a second. */
   sight: 5.5,
-  skitter: 0.9,
-  zig: 1.6,
+  skitter: 0.8,
+  zig: 1.3,
   /** Fire jumps between spiders this much further than between goblins. */
   spread: 0.5,
 };
@@ -23,12 +27,14 @@ export const SPIDER: EnemySpec & { pounce: EnemyAttackSpec; sight: number; skitt
  * where you stood when it began (striped: walk or dodge out of it), lands at `spit.radius` around that
  * spot and leaves a puddle there.
  */
-export const BROOD: EnemySpec & { bite: EnemyAttackSpec; spit: EnemyAttackSpec; spitFrom: number; spitChance: number } = {
-  hp: 240, radius: 0.7, weight: 3, speed: 1.3, reach: 1.7, respawn: 4, stun: 1.8, pauseBetween: 0.9, flinches: false, turn: 2.2,
-  bite: { windup: 0.8, active: 0.1, recover: 0.8, dmg: 14, knock: 5, range: 1.9, arc: 70, unblockable: false },
-  spit: { windup: 1.1, active: 0.1, recover: 1.0, dmg: 10, knock: 2, range: 7, radius: 1.3, unblockable: true },
+export const BROOD: EnemySpec & { bite: EnemyAttackSpec; spit: EnemyAttackSpec; spitFrom: number; spitChance: number; spitPause: number } = {
+  hp: 210, radius: 0.7, weight: 3, speed: 1.0, reach: 1.7, respawn: 4, stun: 1.8, pauseBetween: 1.2, flinches: false, turn: 2.0,
+  bite: { windup: 0.9, active: 0.1, recover: 0.8, dmg: 12, knock: 5, range: 1.9, arc: 70, unblockable: false },
+  spit: { windup: 1.25, active: 0.1, recover: 1.0, dmg: 8, knock: 2, range: 7, radius: 1.3, unblockable: true },
   spitFrom: 2.8,
-  spitChance: 0.75,
+  spitChance: 0.6,
+  /** After a spit she waits this long (not `pauseBetween`) before the next blow. */
+  spitPause: 2.4,
 };
 
 /**
@@ -41,9 +47,10 @@ export const BROOD: EnemySpec & { bite: EnemyAttackSpec; spit: EnemyAttackSpec; 
  * Burning it out (sim/torch.ts): stand within `reach` of it and press GRAB, and `light` seconds still
  * there sets it alight (a hit, a swing or a step away stops it). Alight, it hatches nothing, sets the
  * spiders on it burning, and is ash `burn` seconds later. From range it takes its `hp` (fire 3x).
- * Kyle, 2026-11-03: it came back too fast to kill, and was too tough for a Rogue.
+ * Kyle, 2026-11-03: it came back too fast to kill, and was too tough for a Rogue. 2026-11-04: fewer a
+ * wave (two, not three), and longer between them.
  */
-export const NEST = { hp: 55, radius: 0.65, wake: 8.5, first: 2, every: 12, fewer: 1, least: 9, rest: 5, wave: 3, party: 1, cap: 6, swell: 1, reach: 1.6, light: 1.2, burn: 3.5 };
+export const NEST = { hp: 55, radius: 0.65, wake: 8.5, first: 2.5, every: 14, fewer: 1, least: 11, rest: 6, wave: 2, party: 1, cap: 5, swell: 1, reach: 1.6, light: 1.2, burn: 3.5 };
 
 /** Seconds between a nest's waves with `party` players. */
 export const nestGap = (party: number) => Math.max(NEST.least, NEST.every - NEST.fewer * Math.max(0, party - 1));

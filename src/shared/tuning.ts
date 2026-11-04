@@ -177,8 +177,14 @@ export const STEALTH = { slow: 0.55, sneak: 0.45, ambush: 2.2, reel: 1.2 };
 export const VARIANTS = {
   looter: { hp: 14, speed: 0.55, stab: { windup: 0.85, active: 0.08, recover: 0.7, dmg: 5, knock: 2, range: 1.3, arc: 50, unblockable: false } as EnemyAttackSpec },
   lunger: { hp: 30, reach: 2.8, stab: { windup: 0.8, active: 0.1, recover: 0.8, dmg: 10, knock: 5, range: 3.0, arc: 24, unblockable: true } as EnemyAttackSpec },
-  /** Run goblins with a board: blows and shots from the front do `front` of themselves (from behind, or a heavy blow, all of it). */
-  shield: { hp: 44, front: 0.25 },
+  /**
+   * Run goblins with a board: blows from the front do `front` of themselves (from behind, or a heavy blow, all of it).
+   * Shots (arrows, bolts, darts, knives, spell bolts) within `cone` of its facing (the cosine: 0.5 is 60 degrees either
+   * side) meet the board: a plain one is stopped dead (`shot` of itself), and a charged, perfect or piercing one gets
+   * through for `through`. From the side or behind, or with it stunned, pinned, frozen or unaware, they land in full.
+   * Bursts and lightning go round it (sim/board.ts). Kyle, 2026-11-04: shields should be better against shots.
+   */
+  shield: { hp: 44, front: 0.25, cone: 0.5, shot: 0, through: 0.5 },
   /** The back of the pack (shared/backline.ts): a caster and a drummer. */
   hexer: HEXER,
   drummer: DRUMMER,

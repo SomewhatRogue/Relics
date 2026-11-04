@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { board, PLACES, SEWERS, type Job } from '../src/shared/jobs';
 import { planRoom, type Foe } from '../src/shared/terrain';
 import { spiderChance, SPIDERS } from '../src/shared/nests';
-import { BROOD, BURN, NEST, POISON, PUDDLE, SPIDER, TICK, weakness } from '../src/shared/tuning';
+import { BROOD, BURN, HERO, NEST, POISON, PUDDLE, SPIDER, TICK, weakness } from '../src/shared/tuning';
 import { ArenaRoom } from '../src/sim/room';
 import { damage, kill } from '../src/sim/damage';
 import { newEnemy } from '../src/sim/enemies';
@@ -63,6 +63,29 @@ describe('nests', () => {
     expect(foes.find((f) => f.kind === 'nest')!.wave).toBe(waveFor(3));
     expect(waveFor(3)).toBeGreaterThan(NEST.wave);
     expect(foes.filter((f) => f.kind === 'spider').length).toBeGreaterThan(1);
+  });
+});
+
+describe('the tuning (Kyle, 2026-11-04: over-tuned and too fast)', () => {
+  it('a spider is slower than a hero on foot, shows its pounce long enough to read, and rests between them', () => {
+    expect(SPIDER.speed).toBeLessThan(HERO.speed);
+    expect(SPIDER.pounce.windup).toBeGreaterThanOrEqual(0.55);
+    expect(SPIDER.pauseBetween).toBeGreaterThanOrEqual(1.5);
+    expect(SPIDER.pounce.range).toBeLessThanOrEqual(SPIDER.reach);
+  });
+
+  it('the brood mother waits longer after a spit than after a bite', () => {
+    expect(BROOD.spitPause).toBeGreaterThan(BROOD.pauseBetween);
+    const room = arena([{ kind: 'brood', x: 14, y: 10, awake: true }], 14, 16.5);
+    const h = room.heroes[0], b = room.enemies[0];
+    let rest = -1, was = false;
+    run(room, 6, () => {
+      const now = b.attack?.kind === 'spit';
+      if (was && !now && rest < 0) rest = b.cooldown;
+      was = now;
+      Object.assign(h, { hp: 100, act: 'idle' });
+    });
+    expect(rest).toBeCloseTo(BROOD.spitPause, 1);
   });
 });
 

@@ -111,8 +111,9 @@ describe('seeds', () => {
       const j: Job = { ...board(1)[2], place: p, rooms: 5, seed: 77, layout: undefined };
       for (let i = 0; i < 5; i++) all = fnv(all + ':' + fnv(JSON.stringify(planRoom(j, i))));
     }
-    // Taken from the rooms as they were before routed jobs (2026-11-04).
-    expect(all).toBe(3385864003);
+    // Taken from the rooms as they were before routed jobs (2026-11-04); retaken when a nest's wave went
+    // from three spiders to two (the count rides on the nest in the plan; the layout is unchanged).
+    expect(all).toBe(1134690767);
   });
 
   it('weather: one pattern a job; fog only ever creeps in, never more than a step a room; none underground', () => {

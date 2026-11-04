@@ -94,6 +94,8 @@ export class Soundscape {
     if (ev.k === 'flailstun') return sfx.perfect(), sfx.stunned();
     if (ev.k === 'shoot') return shotSound(ev.kind, this.heroAt(room, ev.x, ev.y)?.weapon);
     if (ev.k === 'charged') return chargedSound(this.heroAt(room, ev.x, ev.y)?.weapon ?? '');
+    // A shot stopped on a shield-bearer's board: the dull thunk of wood.
+    if (ev.k === 'deflect') return blockSound('board');
     if (ev.k === 'block') return blockSound(this.heroAt(room, ev.x, ev.y)?.weapon ?? '');
     // Someone you freed, hurt by the party, cries out (a burn's tick doesn't).
     if (ev.k === 'survivorhit') return ev.tick ? undefined : sfx.hurt();
