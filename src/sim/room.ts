@@ -7,7 +7,7 @@ import { ARENA, useMap, type GameMap } from '../shared/arena';
 import type { Foe } from '../shared/terrain';
 import type { PropKind } from '../shared/props';
 import { Rng } from '../shared/rng';
-import { BLESSING, GUARD, HEAL_RADIUS, HEIGHT, HERO, LODESTONE, MACE, TICK, TRAIT, WEAPONS, type Swing, VARIANTS } from '../shared/tuning';
+import { BLESSING, GUARD, SLEEP, HEAL_RADIUS, HEIGHT, HERO, LODESTONE, MACE, TICK, TRAIT, WEAPONS, type Swing, VARIANTS } from '../shared/tuning';
 import { separate } from './bodies';
 import { lobLodestone, shoot, smite, stepBolt, throwNet } from './bolts';
 import { afflict, stepElements, type World } from './elements';
@@ -59,6 +59,7 @@ import { awake, merge } from './sleep';
 import { NO_INTENT, type Puddle, type Zone, type Bolt, type Drop, type Enemy, type Prop, type FightEvent, type Hero, type Hook, type Intent, type Javelin, type Snare, type Survivor } from './types';
 import { stun } from './stuns';
 import { stepDread, type DreadRule } from './dread';
+import { stepExped, type ExpedState } from './exped';
 
 export class ArenaRoom {
   time = 0;
@@ -125,6 +126,8 @@ export class ArenaRoom {
   sleepFar = false;
   /** Every goblin, dozers too, while a big map's tick runs on the awake ones (null between ticks). */
   private whole: Enemy[] | null = null;
+  /** An expedition's rules and how it stands (sim/exped.ts): the jobs, the way out, the pressure. */
+  exped?: ExpedState;
 
   /**
    * The training room by default. A run room passes its `map`, `foes` and `props` (its goblins stay
@@ -172,6 +175,21 @@ export class ArenaRoom {
     if (opts.scrappers !== false) s.scrappers.forEach((p, i) => this.enemies.push(newEnemy(4 + i, 'scrapper', p.x, p.y)));
     if (opts.props === false) this.props = [];
     this.exitOpen = true;
+  }
+
+  /** Every goblin in the room, the dozing ones too (mid-tick on a big map, `enemies` is the awake ones). */
+  get allEnemies(): Enemy[] {
+    return this.whole ?? this.enemies;
+  }
+
+  /** A goblin come in from outside (an expedition's waves and patrols), for good. */
+  addFoe(kind: 'scrapper' | 'butcher', x: number, y: number): Enemy {
+    return this.spawn(kind, x, y);
+  }
+
+  /** Near enough a hero to be awake (a big map's den breeds only then, or the far dens would fill it). */
+  private nearHero(x: number, y: number): boolean {
+    return !this.sleepFar || this.heroes.some((h) => Math.hypot(h.x - x, h.y - y) < SLEEP.wake);
   }
 
   join(id: string): Hero {
@@ -283,7 +301,7 @@ export class ArenaRoom {
     impacts(this.enemies, this.time, this.events);
     propImpacts(w);
     this.props = w.props = stepProps(w, TICK);
-    stepBuildings(w, TICK, (x, y) => void this.spawn('scrapper', x, y));
+    stepBuildings(w, TICK, (x, y) => void this.spawn('scrapper', x, y), (x, y) => this.nearHero(x, y));
     // Nests hatch their waves; the brood mother's globs leave puddles; poison ticks (sim/spiders.ts, puddles.ts, poison.ts).
     // A nest set alight up close burns out (sim/torch.ts), and hatches nothing while it burns.
     stepTorch(this.enemies, this.heroes, this.time, TICK, this.events);
@@ -321,10 +339,11 @@ export class ArenaRoom {
     this.drops = stepDrops(this.drops, TICK);
     this.coals = stepCoals(this.coals, this.heroes, this.events, TICK);
     if (this.map.blaze) stepBlaze(this, TICK);
+    if (this.exped) stepExped(this, this.events, TICK);
   }
 
   /** Something new in the room (a den's goblin, a nest's spider), awake and for good. */
-  private spawn(kind: 'scrapper' | 'spider', x: number, y: number): Enemy {
+  private spawn(kind: 'scrapper' | 'spider' | 'butcher', x: number, y: number): Enemy {
     const e = newEnemy(Math.max(0, ...(this.whole ?? this.enemies).map((o) => o.id), ...this.enemies.map((o) => o.id)) + 1, kind, x, y);
     e.respawns = false;
     this.enemies.push(e);

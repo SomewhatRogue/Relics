@@ -474,6 +474,8 @@ export interface Drop {
 }
 
 export type FightEvent =
+  /** An expedition (sim/exped.ts): a job or side job done (`i` its place in the list), the way out open, lit, the watch come; a horn, worse, a wave. */
+  | { k: 'exped'; x: number; y: number; what: import('./exped').ExpedWhat; i?: number }
   /** A teammate downed you once too often this job. */
   | { k: 'grudge'; x: number; y: number; id: string; by: string }
   /** A hero down (`by`: the teammate whose blow did it), or picked up (`by`: who picked them up). */

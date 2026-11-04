@@ -321,6 +321,22 @@ and burns out a goblin den on a job.
       the side way names and "1 more in the houses" through the lore keeper and line editor.
 - [ ] Vignettes needing new behaviour: burning a house, dragging a body, prisoners led off, the patrol.
 
+## Expeditions: THE BARROWFIELDS (Kyle 2026-11-04, "similar to Helldivers"; Claude Opus 5.5)
+
+Built; waiting on Kyle's play (`?hero=WARRIOR&exped=4`, or the board's last posting). *Done when* on his
+phone and laptop, alone and with a friend online, Kyle takes THE BARROWFIELDS off the board, drops in at a
+cart road or a ford, opens MAP and sees two or three jobs pinned, walks the river, fields, wood's edge,
+hamlet and camps (each stretch with its own scene), does the jobs while waves, patrols and war-horns come at
+him and the pressure climbs, lights the beacon, holds it a minute and walks out north with the watch; the
+pay grows with each job done and side job. DECISIONS 2026-11-04 has the build and the numbers.
+- [x] Online: near only per friend, quiet clocks, map by seed, compact save, split messages, measured.
+- [x] The map from the node vocabulary; jobs, side jobs, pressure, extraction, map screen, friend markers.
+- [ ] Kyle's play: tune `EXPED` (goblins, waves, hold lengths, pay); night is dark out in the open.
+- [ ] The lore keeper and the line editor over `shared/expedjob.ts`.
+- [ ] Vignettes with new behaviour (goblins burning a house, dragging a body, prisoners led off) on the map.
+- [ ] Frame times on a real phone host (headless SwiftShader numbers only so far); 2.5D on the big map.
+- [ ] More expeditions (Greyhollow, Fenmere, Copperdeep) from the same pieces; the war map that picks them.
+
 ## Next up: the big map as a real job (Kyle played ?bigmap=1, 2026-11-03: "VERY fun")
 
 Kyle's asks after playing the load test, in order:

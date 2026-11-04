@@ -9,7 +9,7 @@
     "test": "vitest run",
     "look": "node scripts/look.cjs",
     "smoke": "node scripts/smoke.cjs",
-    "test:online": "node scripts/town-online.cjs && NOBUILD=1 node scripts/party-online.cjs && NOBUILD=1 node scripts/chat-online.cjs && NOBUILD=1 node scripts/lobby-online.cjs",
+    "test:online": "node scripts/town-online.cjs && NOBUILD=1 node scripts/party-online.cjs && NOBUILD=1 node scripts/chat-online.cjs && NOBUILD=1 node scripts/lobby-online.cjs && NOBUILD=1 node scripts/exped-online.cjs",
     "test:stress": "node scripts/stress-online.cjs"
   },
   "dependencies": {

@@ -14,6 +14,8 @@ import { ArenaRoom } from './room';
 import { allOut, players, scaleBosses, scaleFoes } from './party';
 import type { FightEvent } from './types';
 import { dreadFor } from './dreadplace';
+import { expedRoom } from './expedroom';
+import { EXPED } from '../shared/tuning';
 
 export interface Run {
   job: Job;
@@ -40,6 +42,8 @@ export interface Run {
   lost?: number;
   /** The road the party took into each room after a fork (by room index). */
   roads: Record<number, RoadId>;
+  /** An expedition's side jobs done (each a piece of treasure more, got out). */
+  sides?: number;
   /** Players in the party when each room is built (it scales the goblins; the ones left, if some went home). */
   party?: number;
 }
@@ -49,6 +53,8 @@ export const newRun = (job: Job): Run => ({ job, index: 0, gold: 0, xp: 0, rescu
 
 /** Build the room for the run's current index. */
 export function runRoom(run: Run): ArenaRoom {
+  // An expedition: one big map, not rooms (sim/expedroom.ts).
+  if (run.job.exped) return expedRoom(run.job, run.party ?? 1);
   const plan = planRoom(run.job, run.index, run.roads[run.index], run.roads), n = run.party ?? 1;
   // Worse places and deep jobs shift every chest roll a tier up.
   const danger = (run.job.place.ruin >= 3 ? 1 : 0) + (run.job.deep ? 1 : 0);
@@ -101,6 +107,10 @@ export function tally(run: Run, room: ArenaRoom, events: FightEvent[], me: strin
       if (ev.by) (run.rescueKills ??= {})[ev.by] = (run.rescueKills[ev.by] ?? 0) + 1;
     } else if (ev.k === 'cagelost') {
       run.lost = (run.lost ?? 0) + 1;
+    } else if (ev.k === 'exped' && (ev.what === 'goal' || ev.what === 'side')) {
+      // An expedition pays into the pot for each job done, got out or not (shared/tuning.ts EXPED).
+      run.gold += Math.round(run.job.reward * (ev.what === 'goal' ? EXPED.goalPay : EXPED.sidePay));
+      if (ev.what === 'side') run.sides = (run.sides ?? 0) + 1;
     } else if (ev.k === 'pickedup') {
       if (ev.id) bump(run.carried ??= {}, ev.id);
       if (ev.by) bump(run.raised ??= {}, ev.by);

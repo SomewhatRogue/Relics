@@ -17,8 +17,9 @@ import type { ArenaRoom } from './room';
 import type { Run } from './run';
 import type { Enemy } from './types';
 import { waiting } from './survivors';
+import { expedTargets } from './expedgoal';
 
-export type TargetKind = 'cage' | 'door' | 'out' | 'nest' | 'larder' | 'den' | 'boss';
+export type TargetKind = 'cage' | 'door' | 'out' | 'nest' | 'larder' | 'den' | 'boss' | 'job';
 /** `id`: a goblin or nest's id (it moves, so it's drawn where it's drawn). */
 export interface Target { kind: TargetKind; x: number; y: number; id?: number }
 /** A house's door and who's caged or freed behind it (sim/goal.ts houseCaptives). */
@@ -36,6 +37,8 @@ export const bossOf = (room: ArenaRoom): Enemy | undefined => room.enemies.find(
 /** Everything the room's goal wants done, where it is (tiles). Empty off a job. */
 export function targets(run: Run | null, room: ArenaRoom, houses: HouseAt[] = []): Target[] {
   if (!run) return [];
+  // An expedition: each job not yet done (the way out once they are), and the cages of its prisoners.
+  if (room.exped && !room.indoors) return expedTargets(room);
   const out: Target[] = [];
   for (const p of room.props) if (p.kind === 'cage' && !p.broken) out.push({ kind: 'cage', x: p.x, y: p.y });
   const freed = room.survivors.some(waiting);

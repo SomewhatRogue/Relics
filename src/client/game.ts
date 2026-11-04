@@ -9,6 +9,7 @@ import { travel } from '../shared/sweep';
 import type { DreadRule } from '../sim/dread';
 import { townInterior } from '../shared/interiors';
 import { board, STORY_PARTY, type Job } from '../shared/jobs';
+import { expedition } from '../shared/expedjob';
 import { WORKS, workDone, workOpen, workProgress, WORK_ORDER, type WorkId } from '../shared/works';
 import { contribute, type Contribution } from '../shared/worldsync';
 import { HERO_SLOTS, SHOP, gainXp, newProfile, perkFx, perkOffer, resetPerks, takePerk, type PerkId, type Profile } from '../shared/progress';
@@ -46,6 +47,7 @@ import { townLight } from '../shared/daylight';
 import { townPhase } from './townclock';
 import { Followers } from './followers';
 import { JobRooms, doorPushed, type DoorMark, type SavedHouses } from './jobrooms';
+import { packRoom, unpackRoom } from './bigsave';
 import type { Parties } from './parties';
 
 /** Seconds the screen takes to go dark after a lost job, before town. */
@@ -387,7 +389,8 @@ export class Game {
 
   /** The whole job to hand on: the street, and every house anyone's been in (with whoever's in them). */
   jobSave(): { room: Record<string, unknown>; houses: SavedHouses } {
-    return { room: saveRoom(this.rooms.street ?? this.fightRoom), houses: this.rooms.save() };
+    // (An expedition's street goes compact: bigsave.ts.)
+    return { room: packRoom(saveRoom(this.rooms.street ?? this.fightRoom), this.run?.job), houses: this.rooms.save() };
   }
 
   /** Back to Wickhold, at `at` (in front of a door) or the square. */
@@ -461,7 +464,8 @@ export class Game {
 
   /** Today's board, with the chapter's story mission on it until it's done. */
   jobs(): Job[] {
-    const list = board(this.world.day, workDone(this.world, 'sewers'));
+    // The day's expedition (THE BARROWFIELDS) at the foot of the board, its own posting.
+    const list = [...board(this.world.day, workDone(this.world, 'sewers')), expedition(this.world.day)];
     return this.world.storyDone.includes(CHAPTER_1.mission.id) ? list : [CHAPTER_1.mission, ...list];
   }
 
@@ -695,7 +699,7 @@ export class Game {
     this.followers.clear();
     this.run = o.run;
     // The street and every house anyone's been in, as they were; you're wherever your hero was.
-    const street = loadRoom(o.room);
+    const street = loadRoom(unpackRoom(o.room, o.run.job));
     this.rooms.load(street, o.houses);
     if (!this.rooms.roomOf(ME)) Object.assign(street.join(ME), street.map.hero), this.equip(street.heroes.find((x) => x.id === ME)!);
     this.room = this.rooms.roomOf(ME)!;
@@ -852,7 +856,7 @@ export class Game {
     const lit = p.lit ?? 0;
     if (lit > 0) p.lit = lit - 1;
     // The treasure at the end: yours alone. What won't fit in the pack is sold on the spot.
-    const found = won ? treasure(run.job, p.cls, p.id, p.runs, crowd) : [], kept = found.slice(0, Math.max(0, bagSize(p) - p.bag.length)), sold = found.slice(kept.length);
+    const found = won ? treasure(run.job, p.cls, p.id, p.runs, crowd, run.sides ?? 0) : [], kept = found.slice(0, Math.max(0, bagSize(p) - p.bag.length)), sold = found.slice(kept.length);
     p.bag.push(...kept);
     p.gold += sold.length * TREASURE_SOLD;
     this.result = { won, how, half, job: run.job, gold, xp, rescued, levels, relic, treasure: kept, sold, lost: run.lost ?? 0, lit: lit > 0 ? p.lit : undefined };

@@ -41,6 +41,7 @@ import { behindMarks, drawWays, edgeMark } from './wayout';
 import { drawBoards } from './voteboards';
 import { drawQuestMarks, onScreen } from './questmarks';
 import { CHASE, chaseLabel, chasers } from './chasers';
+import { drawBeacon, drawExpedGround, friendMarks } from './expeddraw';
 import { drawDoorMarks } from './doormarks';
 import type { DoorMark } from './jobrooms';
 import type { Target } from '../sim/targets';
@@ -174,6 +175,8 @@ export class Scene {
     const sh = fx.shake;
     const [kx, ky] = camKick(me, room.time, KICK);
     const cx = Math.round(this.cam.x + (Math.random() - 0.5) * sh) + kx, cy = Math.round(this.cam.y + (Math.random() - 0.5) * sh) + ky;
+    // A big map draws only what's near the screen (a margin for tall things and the lights' reach).
+    const big = map.w * map.h > 3000, off = (sx: number, sy: number) => sx < -48 || sy < -64 || sx > this.vw + 48 || sy > this.vh + 48;
 
     const lit = this.lit, glow = this.glow, c: Ctx = { lit, glow, now, t: room.time };
     lit.fillStyle = '#0d0b10';
@@ -241,6 +244,8 @@ export class Scene {
         continue;
       }
       const [x, y] = lerp('e:' + e.id, e.x, e.y), up = (e.z ?? 0) * LIFT;
+      // A big map: only what's on screen is drawn (DECISIONS 2026-11-03).
+      if (big && off(x - cx, y - cy)) continue;
       items.push({ y, draw: () => (drawEnemy(c, e, x - cx, y - up - cy, asleep(map, e)), drawStatus(c, e, x - cx, y - up - cy, room.time)) });
     }
     for (const p of room.props) {
@@ -305,7 +310,7 @@ export class Scene {
       const [ox, oy] = lerp('h:' + o.id, o.x, o.y);
       items.push({ y: OY + k.y * PX + 1, draw: () => drawHook(c, k, ox - cx, oy - cy, OX + k.x * PX - cx, OY + k.y * PX - cy) });
     }
-    for (const r of map.rounds) items.push({ y: OY + r.y * PX, draw: () => drawRound(c, r, OX + r.x * PX - cx, OY + r.y * PX - cy) });
+    for (const r of map.rounds) if (!big || !off(OX + r.x * PX - cx, OY + r.y * PX - cy)) items.push({ y: OY + r.y * PX, draw: () => drawRound(c, r, OX + r.x * PX - cx, OY + r.y * PX - cy) });
     for (const b of map.blocks) {
       if (b.kind === 'sideway') continue;
       const [bx, by] = blockAt(b);
@@ -364,8 +369,12 @@ export class Scene {
       const [tx, ty] = r.side === 'W' ? [ex + e.w * PX + 26, ey + (e.h * PX) / 2 - 3] : r.side === 'E' ? [ex - tw - 26, ey + (e.h * PX) / 2 - 3] : [ex + (e.w * PX) / 2 - tw / 2, ey + e.h * PX + 34];
       drawText(glow, r.label, Math.round(tx), Math.round(ty), r.road === 'high' ? '#ffd27a' : '#9fe8ff');
     }
+    // An expedition: the rings where a job is done by standing there, and the beacon (expeddraw.ts).
+    const ground = (x: number, y: number): [number, number] => [OX + x * PX - cx, OY + y * PX - cy];
+    drawExpedGround(glow, room, ground, now);
     items.sort((p, q) => p.y - q.y);
     for (const it of items) it.draw();
+    const beacons = drawBeacon(glow, room, ground, now);
     // Anyone you've freed who's fallen behind out of sight: a mark at the edge, toward them (clear of the HUD).
     const tall = this.vh > this.vw * 1.2, view = { vw: this.vw, vh: this.vh, top: tall ? this.vh * 0.2 : 20, bottom: tall ? this.vh * 0.3 : 20 };
     behindMarks(c, room.survivors ?? [], cx, cy, view, now);
@@ -380,11 +389,14 @@ export class Scene {
         if (edgeMark(c.glow, ex - cx, ey - cy - 8, view, Math.sin(now * 8) * 1.5, CHASE.red)) off++;
       }
       if (off) drawText(c.glow, chaseLabel(off), Math.round(this.vw / 2 - textWidth(chaseLabel(off)) / 2), Math.round(view.top + 2), CHASE.red);
+      // Friends off screen on an expedition: a pale point toward each, with their name.
+      friendMarks(c.glow, room, meId, (x, y) => ground(x, y - 1), this.vw, this.vh, view.top, view.bottom);
     }
     drawBlazeAbove(c, room, cx, cy);
 
     const lights: Light[] = [...wayLights, ...markLights];
     blazeLights(room, cx, cy, now, lights);
+    for (const b of beacons) lights.push({ x: OX + b.x * PX - cx, y: OY + b.y * PX - cy - 14, r: 150 + Math.sin(now * 9) * 8, i: 1.3, c: [1, 0.62, 0.3] });
     for (const m of room.coals) lights.push({ x: OX + m.x * PX - cx, y: OY + m.y * PX - cy - 4, r: 26 + Math.sin(now * 7 + m.id) * 3, i: 0.6 * Math.min(1, m.life / 4), c: [1, 0.6, 0.28] });
     for (const ch of room.chests) if (ch.state !== 'shut') lights.push({ x: OX + ch.x * PX - cx, y: OY + ch.y * PX - cy - 6, r: ch.state === 'opening' ? 16 + 30 * (ch.t / 1.2) : 26, i: ch.state === 'opening' ? 0.4 + 0.5 * (ch.t / 1.2) : 0.35, c: tint(TIERS[ch.tier].col) });
     for (const d of room.drops) {

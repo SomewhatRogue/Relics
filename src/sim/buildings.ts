@@ -47,7 +47,7 @@ export function blastBlocks(w: World, x: number, y: number, r: number, dmg: numb
 }
 
 /** Fire takes hold, burns, spreads and catches goblins; dens send out scrappers. `spawn` adds one at a den's door. */
-export function stepBuildings(w: World, dt: number, spawn: (x: number, y: number) => void): void {
+export function stepBuildings(w: World, dt: number, spawn: (x: number, y: number) => void, near: (x: number, y: number) => boolean = () => true): void {
   const blocks = currentMap().blocks;
   if (!blocks.some(wood)) return;
   for (const e of w.ev) {
@@ -77,6 +77,8 @@ export function stepBuildings(w: World, dt: number, spawn: (x: number, y: number
   for (const b of blocks) {
     if (b.kind !== 'den' || b.ruined || alive >= BLAZE.denCap) continue;
     const d = doorAt(b);
+    // (On a big map, a den nobody's near breeds nothing.)
+    if (!near(d.x, d.y)) continue;
     spawn(d.x, d.y + 0.2);
     w.ev.push({ k: 'denspawn', x: d.x, y: d.y });
     alive++;

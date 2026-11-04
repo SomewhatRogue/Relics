@@ -33,6 +33,10 @@ import { Decoder, Encoder, stateOf, type Patch } from './snap';
 import { keepJob } from './session';
 import { OwedBook } from './owed';
 import type { DoorMark } from './jobrooms';
+import { BigSend } from './bigsend';
+import { isBig, loud, mergeBlocks } from './interest';
+import { expedPlan } from '../shared/expedmap';
+import type { ExpedState } from '../sim/exped';
 
 const AWAY = 5, REJOIN = 5, BYE_WAIT = 2.5, SEND_EVERY = 0.05, FULL_EVERY = 4, GRACE = 60, LOST = 20, KEEP = 2, SAVE_EVERY = 2, TAKE = 9, TAKE_NEXT = 5;
 /**
@@ -82,6 +86,8 @@ export class CoopHost {
   private sentKey = new Map<string, number>();
   private sentAt = -9;
   private now = 0;
+  /** Big rooms (an expedition): each friend their own, near only (bigsend.ts). */
+  private big = new BigSend();
 
   private savedAt = -99;
   /** What the job owes each of us, kept on the server as it goes (owed.ts). */
@@ -116,6 +122,7 @@ export class CoopHost {
   /** Send this room whole next time (its map changed under it: a house set alight with someone inside). */
   fresh(room: ArenaRoom): void {
     this.sending.delete(room);
+    this.big.reset(room);
   }
 
   /** Each frame, after the rooms have run: collect their events; send each friend their room when it's time. */
@@ -147,6 +154,17 @@ export class CoopHost {
     for (const [id, f] of this.friends) (names[id] = f.name), f.at !== undefined && (acks[id] = f.at);
     const hc = g.houses(), dm = g.doorMarks(), goal = g.goalText();
     for (const [room, ids] of groups) {
+      if (isBig(room)) {
+        // A big room: each friend only what's near them, the map from its seed (bigsend.ts).
+        const k = g.keyOf(room), out = !room.indoors;
+        const common = { k, t: room.time, x: room.exitOpen ? 1 : 0, in: room.indoors ? 1 : 0, hc: out ? hc : [], dm: out ? dm : [], run: g.run, goal, names, acks };
+        for (const id of ids) {
+          const f = this.friends.get(id)!, m = this.big.body(room, id, now, f.fresh || this.sentKey.get(id) !== k, common, this.evs.get(room) ?? []);
+          this.sock.send(id, { s: m.s });
+          if (m.full) this.sentKey.set(id, k), (f.fresh = false);
+        }
+        continue;
+      }
       const k = g.keyOf(room), st = this.sending.get(room) ?? { enc: new Encoder(), fullAt: -99 };
       this.sending.set(room, st);
       const full = now - st.fullAt > FULL_EVERY || ids.some((id) => this.friends.get(id)!.fresh || this.sentKey.get(id) !== k);
@@ -220,12 +238,16 @@ export class CoopGuest {
   onEnd: (e: { won: boolean; run: Run }) => void = () => {};
   private sock: RelaySocket;
   private dec = new Decoder();
+  /** A big room: its buildings as the seed made them, and what the leader has said of each since. */
+  private base: ArenaRoom['map']['blocks'] | null = null;
+  private known = new Map<number, ArenaRoom['map']['blocks'][number]>();
   private key = -1;
   private lastAt = 0;
   private gap = SEND_EVERY;
   private events: FightEvent[] = [];
   private said = '';
   private saidAt = -9;
+  private names: Record<string, string> = {};
   private helloAt = -9;
   private now = 0;
   private firstAt = -1;
@@ -268,7 +290,7 @@ export class CoopGuest {
     if (typeof d.save === 'string') return void (this.save = d.save);
     if (typeof d.s !== 'string') return;
     // The leader's own hero is `me` in their room; in mine, I am. (Ids are quoted whole, so only ids change.)
-    let body: { p: Patch; f: number; k: number; map?: ArenaRoom['map']; t: number; x: number; in?: number; hc?: CoopGuest['houses']; dm?: DoorMark[]; run: Run | null; goal: string; ev: FightEvent[]; names: Record<string, string>; acks?: Record<string, number> };
+    let body: { p: Patch; f: number; k: number; map?: ArenaRoom['map']; ms?: number; blaze?: ArenaRoom['map']['blaze']; xs?: ExpedState; t: number; x: number; in?: number; hc?: CoopGuest['houses']; dm?: DoorMark[]; run: Run | null; goal: string; ev: FightEvent[]; names: Record<string, string>; acks?: Record<string, number> };
     try {
       body = JSON.parse(d.s.split('"me"').join('"@lead"').split(`"${this.myId}"`).join('"me"'));
     } catch {
@@ -276,11 +298,17 @@ export class CoopGuest {
     }
     // (Only a whole room to start from: a new leader's changes mean nothing without it.)
     if (!body.f && (!this.room || this.key < 0 || body.k !== this.key)) return;
-    if (body.f && (body.k !== this.key || !this.room) && body.map) {
-      this.room = new ArenaRoom(1, { map: body.map });
+    if (body.f && (body.k !== this.key || !this.room) && (body.map || (body.ms && body.run))) {
+      // A big room's map is built here from the job's seed, never sent (shared/expedmap.ts); its buildings come near only.
+      const map = body.map ?? expedPlan(body.run!.job).map;
+      this.room = new ArenaRoom(1, { map });
+      this.base = body.ms ? map.blocks : null;
+      this.known = new Map();
       this.key = body.k;
       this.pred = this.server = null;
     } else if (body.f && body.map && this.room) this.room.map.blaze = body.map.blaze;
+    else if (body.f && body.ms && this.room) this.room.map.blaze = body.blaze;
+    if (body.xs && this.room) this.room.exped = body.xs;
     // (The same room whole again: a house set alight from outside with me in it now burns: houseindoors.ts.)
     const room = this.room!;
     for (const h of room.heroes) room.prev.set('h:' + h.id, [h.x, h.y]);
@@ -296,8 +324,10 @@ export class CoopGuest {
     // Between frames too, my hero stays where I've walked it (the leader's word is in `server`).
     if (meNow && this.pred && meNow.act === 'idle') (meNow.x = this.pred.x), (meNow.y = this.pred.y);
     const r = room as unknown as Record<string, unknown>;
-    for (const [c, list] of Object.entries(s)) if (c === 'blocks') room.map.blocks = list as typeof room.map.blocks;
+    for (const [c, list] of Object.entries(s)) if (c === 'blocks') room.map.blocks = this.base ? mergeBlocks(this.base, list as Record<string, unknown>[], this.known) : (list as typeof room.map.blocks);
     else r[c] = list;
+    // Quiet clocks: each goblin's act timer from when its act began (interest.ts).
+    if (this.base) loud(room.enemies as unknown as Record<string, unknown>[], body.t);
     // My hero let go (I was away over a minute): it stays drawn where it was, and I say hello till
     // the leader brings it back (this copy is only drawn; the fight is the leader's).
     const mineNow = room.heroes.find((h) => h.id === 'me');
@@ -305,14 +335,16 @@ export class CoopGuest {
     if (mineNow) this.mine = mineNow;
     else if (this.mine) room.heroes.push(this.mine);
     // (The names came through the same swap: the leader's under '@lead', mine under 'me'.)
-    for (const h of room.heroes) h.tag = body.names[h.id] ?? h.tag;
+    // A big room's run, banner, names and houses come only when they change (bigsend.ts): keep the last.
+    if (body.names) this.names = body.names;
+    for (const h of room.heroes) h.tag = this.names[h.id] ?? h.tag;
     room.time = body.t;
     room.exitOpen = !!body.x;
     room.indoors = !!body.in;
-    this.houses = body.hc ?? [];
-    this.doorMarks = body.dm ?? [];
-    this.run = body.run;
-    this.goal = body.goal;
+    if ('hc' in body) this.houses = body.hc ?? [];
+    if ('dm' in body) this.doorMarks = body.dm ?? [];
+    if ('run' in body) this.run = body.run;
+    if ('goal' in body) this.goal = body.goal;
     // The trip there and back, from the newest input of mine the leader has used.
     const ack = body.acks?.me;
     if (ack !== undefined && ack !== this.ack) (this.ack = ack), (this.trip = this.trip * 0.7 + Math.min(1, Math.max(0, this.now - ack)) * 0.3);

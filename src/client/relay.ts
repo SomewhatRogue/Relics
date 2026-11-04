@@ -8,6 +8,8 @@
  * Relic's online play is off unless the page was built for the Vercel site (VITE_ONLINE) or is
  * pointed at a relay (`?relay=ws://...`): the one-file build played from an artifact has no server.
  */
+import { isPart, Joiner, splitMsg } from './split';
+
 const params = () => new URLSearchParams(typeof location === 'undefined' ? '' : location.search);
 export const ONLINE = !!(import.meta.env?.VITE_ONLINE || params().get('relay'));
 
@@ -91,7 +93,13 @@ export class RelaySocket {
       } else this.newHeard = true;
       this.heardAt = performance.now();
       try {
-        const m = JSON.parse(String(e.data)) as RelayMsg;
+        let m = JSON.parse(String(e.data)) as RelayMsg;
+        // A message too big for the relay came in parts (split.ts): only the whole of it goes on.
+        if (m.t === 'msg' && isPart(m.d)) {
+          const d = this.joiner.add(m.from, m.d);
+          if (d === undefined) return;
+          m = { ...m, d };
+        }
         // Told we host: say something at once, since only what a host sends keeps the room its.
         if (m.t === 'role' && m.role === 'host' && ws.readyState === WebSocket.OPEN) ws.send('{"ping":1}');
         if (m.t !== 'pong') this.onMessage(m);
@@ -108,6 +116,8 @@ export class RelaySocket {
   }
 
   private newHeard = false;
+  private joiner = new Joiner();
+  private partSeq = 0;
 
   /** Swap to a fresh connection before Vercel ends this one: open the new one, then drop the old. */
   private rotate(): void {
@@ -133,8 +143,10 @@ export class RelaySocket {
     return this.ws?.readyState === WebSocket.OPEN;
   }
 
+  /** Send `d` to `to` ('*' everyone); anything over the relay's limit goes in parts (split.ts). */
   send(to: string, d: unknown): void {
-    if (this.ws?.readyState === WebSocket.OPEN) this.ws.send(JSON.stringify({ to, d }));
+    const ws = this.ws;
+    if (ws?.readyState === WebSocket.OPEN) for (const m of splitMsg(to, d, ++this.partSeq)) ws.send(m);
   }
 
   close(): void {
