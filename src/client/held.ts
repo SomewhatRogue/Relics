@@ -132,8 +132,8 @@ export function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): vo
   } else if (h.weapon === 'longbow') bow(c, ox, oy, p.a, p.pull, 7);
   else if (h.weapon === 'shortbow') bow(c, ox, oy, p.a, p.pull, 4);
   else if (h.weapon === 'crossbow') {
-    // Stock along the aim, the prod across it; a bolt sits on it unless it's reloading.
-    const loaded = !(h.act === 'attack' && h.actT > currentSwing(h).windup + 0.1);
+    // Stock along the aim, the prod across it; a bolt sits on it unless it's empty (sim/crossbow.ts).
+    const loaded = !h.xbowEmpty;
     line(g, ox, oy, p.a, -3, 6, '#5a3d22', 2);
     line(g, ox + Math.cos(p.a) * 5, oy + Math.sin(p.a) * 5, p.a + Math.PI / 2, -4, 4, '#9aa3ad');
     if (loaded) line(g, ox, oy, p.a, 1, 8, '#cfd6dc');

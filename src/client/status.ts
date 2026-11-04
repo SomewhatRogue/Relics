@@ -1,5 +1,5 @@
 /** Elements on a goblin: flames while it burns, drifting frost while chilled, a block of ice when frozen;
- *  the Rogue's green poison, retching and bleeding (sim/venom.ts). */
+ *  the Rogue's green poison, retching and bleeding (sim/venom.ts); blinded by a longbow (sim/rangershots.ts). */
 import type { Enemy } from '../sim/types';
 import type { Ctx } from './draw';
 
@@ -58,6 +58,15 @@ export function drawStatus(c: Ctx, e: Enemy, x: number, y: number, t: number): v
     g.fillStyle = '#9a2a2a';
     const f = (c.now * 2) % 1;
     g.fillRect(Math.round(x + 1), Math.round(y - tall * (0.6 - f * 0.5)), 1, 2);
+  }
+  if ((e.blindUntil ?? 0) > t) {
+    // Blinded: a white glare across its eyes and sparks of light circling its head.
+    g.fillStyle = Math.floor(c.now * 10) % 2 ? '#ffffff' : '#e8f0ff';
+    g.fillRect(Math.round(x - 3), Math.round(y - tall + 2), 7, 1);
+    for (let i = 0; i < 3; i++) {
+      const a = c.now * 5 + (i / 3) * Math.PI * 2;
+      g.fillRect(Math.round(x + Math.cos(a) * (w + 1)), Math.round(y - tall - 2 + Math.sin(a) * 2), 1, 1);
+    }
   }
   if (e.chillUntil > t) {
     g.fillStyle = '#dff4ff';

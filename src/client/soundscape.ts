@@ -68,6 +68,13 @@ export class Soundscape {
     if (ev.k === 'riposte') return sfx.parry(), sfx.backstab();
     if (ev.k === 'quake') return sfx.slam(), sfx.rumble();
     if (ev.k === 'pin') return sfx.javstick();
+    // The Ranger's: a blinding arrow's flash, a clean hit, the crossbow's ratchet and its glint, a glinted bolt through a line.
+    if (ev.k === 'blinded') return sfx.perfect(), sfx.flare();
+    if (ev.k === 'trueshot') return sfx.perfect();
+    if (ev.k === 'wind') return sfx.latch();
+    if (ev.k === 'loaded') return sfx.latch(), sfx.block();
+    if (ev.k === 'glint') return sfx.latch(), sfx.perfect();
+    if (ev.k === 'boltline') return sfx.javstick();
     if (ev.k === 'shoot') return shotSound(ev.kind, this.heroAt(room, ev.x, ev.y)?.weapon);
     if (ev.k === 'charged') return chargedSound(this.heroAt(room, ev.x, ev.y)?.weapon ?? '');
     if (ev.k === 'block') return blockSound(this.heroAt(room, ev.x, ev.y)?.weapon ?? '');
