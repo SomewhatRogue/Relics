@@ -6,7 +6,7 @@ import { ArenaRoom } from '../src/sim/room';
 import { NO_INTENT } from '../src/sim/types';
 import { treasure } from '../src/shared/treasure';
 
-const at = (kind: Job['place']['kind'], rooms = 3): Job => ({ ...board(2)[1], rooms, place: { name: 'Test', kind, region: 'Fenmere', ruin: 2 }, objective: 'rescue', seed: 41 });
+const at = (kind: Job['place']['kind'], rooms = 3): Job => ({ ...board(2)[1], layout: undefined, rooms, place: { name: 'Test', kind, region: 'Fenmere', ruin: 2 }, objective: 'rescue', seed: 41 });
 
 describe('rivers and marshes', () => {
   it('a river runs right across, deep but for two fords; a hero wades a ford slowly and is stopped by the deep', () => {

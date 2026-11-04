@@ -19,7 +19,7 @@ const store = new Map<string, string>();
 
 const job = (seed: number, o: Partial<Job> & { ruin?: number; kind?: Job['place']['kind'] } = {}): Job => {
   const { ruin = 2, kind = 'farm', ...rest } = o;
-  return { ...board(1)[0], rooms: 3, objective: 'hunt', size: 'medium', ...rest, place: { ...PLACES.find((p) => p.kind === kind)!, ruin }, seed };
+  return { ...board(1)[0], layout: undefined, rooms: 3, objective: 'hunt', size: 'medium', ...rest, place: { ...PLACES.find((p) => p.kind === kind)!, ruin }, seed };
 };
 const BIG = ['THE LONGHOUSE', 'THE HALL HOUSE', 'THE GREAT BARN'];
 

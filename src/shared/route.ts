@@ -44,15 +44,11 @@ const steps = (a: Palette, b: Palette) => (['floor', 'back', 'soil', 'light'] as
 
 /** A palette for this skin that's a step from the room before (and from the heart, for the last approach). */
 function paletteFor(rng: Rng, skin: Skin, after: Palette[]): Palette {
-  const o = PALETTES[skin];
-  let best: Palette | null = null, bestScore = -1;
-  for (let t = 0; t < 40; t++) {
-    const p: Palette = { floor: rng.pick(o.floor), back: rng.pick(o.back), soil: rng.pick(o.soil), light: rng.pick(o.light) };
-    const score = Math.min(...after.map((a) => steps(a, p)), 4);
-    if (score > bestScore) (best = p), (bestScore = score);
-    if (score >= 2) break;
-  }
-  return best!;
+  const o = PALETTES[skin], all: Palette[] = [];
+  for (const floor of o.floor) for (const back of o.back) for (const soil of o.soil) for (const light of o.light) all.push({ floor, back, soil, light });
+  const score = (p: Palette) => Math.min(4, ...after.map((a) => steps(a, p)));
+  const best = Math.min(2, Math.max(...all.map(score)));
+  return rng.pick(all.filter((p) => score(p) >= best));
 }
 
 const memo = new Map<string, RoomSpec[]>();

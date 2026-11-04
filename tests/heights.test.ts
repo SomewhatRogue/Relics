@@ -8,7 +8,7 @@ import { newEnemy } from '../src/sim/enemies';
 import { newRun, runRoom } from '../src/sim/run';
 import { NO_INTENT } from '../src/sim/types';
 
-const job = (kind: Job['place']['kind'], objective: Job['objective'] = 'hunt'): Job => ({ ...board(1)[0], place: PLACES.find((p) => p.kind === kind)!, objective, boss: 'SKARN', seed: 31, rooms: 3 });
+const job = (kind: Job['place']['kind'], objective: Job['objective'] = 'hunt'): Job => ({ ...board(1)[0], layout: undefined, place: PLACES.find((p) => p.kind === kind)!, objective, boss: 'SKARN', seed: 31, rooms: 3 });
 /** The high road's room, empty but for what we put in. */
 function high(): { room: ArenaRoom; map: GameMap } {
   const plan = planRoom(job('mine'), 2, 'high');

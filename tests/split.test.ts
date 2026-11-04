@@ -16,7 +16,7 @@ import { damageProp } from '../src/sim/props';
 import { NO_INTENT, type Intent } from '../src/sim/types';
 import type { ArenaRoom } from '../src/sim/room';
 
-const job = (seed = 7): Job => ({ ...board(1)[0], rooms: 3, place: PLACES.find((p) => p.kind === 'village')!, objective: 'hunt', boss: 'SKARN', seed, deep: false });
+const job = (seed = 7): Job => ({ ...board(1)[0], layout: undefined, rooms: 3, place: PLACES.find((p) => p.kind === 'village')!, objective: 'hunt', boss: 'SKARN', seed, deep: false });
 const mid = (a: Area) => ({ x: a.x + a.w / 2, y: a.y + a.h / 2 });
 const SAM = 'sam-00001', ANA = 'ana-00001';
 

@@ -104,6 +104,8 @@ export function carr(rng: Rng, g: Ground): Site {
   // A causeway of trodden earth through it; willows on the hummocks, reeds round the pools.
   path(s, 'earth', [[M, H], [M + rng.range(-1.5, 1.5), 15], [M + rng.range(-1.5, 1.5), 7], [M, 0]], 1);
   for (const w of g.water) for (let i = 0; i < 4; i++) round(s, 'reed', w.x + d.range(0, w.w), d.next() < 0.5 ? w.y - 0.4 : w.y + w.h + 0.4, 0.3);
+  // A heart's sub-layout (a routed job): reed beds a step back from the pools, and stumps, where this visit has them.
+  if (g.dress) for (const w of g.water) for (let i = 0; i < 3; i++) round(s, i ? 'reed' : 'stump', w.x + d.range(-0.5, w.w + 0.5), d.next() < 0.5 ? w.y - 1.1 : w.y + w.h + 1.1, 0.3);
   for (let i = 0; i < 7; i++) {
     const x = rng.range(1.4, g.w - 1.4), y = rng.range(1.4, H - 4);
     if (g.water.some((w) => x > w.x - 1.4 && x < w.x + w.w + 1.4 && y > w.y - 1.4 && y < w.y + w.h + 1.4)) continue;

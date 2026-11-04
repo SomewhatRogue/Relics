@@ -14,7 +14,7 @@ import { frameFor } from './roomframe.js';
 import { oldBands } from './roomfoes.js';
 import { heartMarks, layOut } from './sites.js';
 import { siteClear, type Site, type Spot } from './sitekit.js';
-import { offAll } from './spine.js';
+import { approachTo, offAll } from './spine.js';
 import { rollBackline } from './roster.js';
 import { rollSpiders } from './nests.js';
 import { lightFor, timeOf } from './timeofday.js';
@@ -62,7 +62,7 @@ export function planRoom(job: Job, index: number, road?: RoadId): RoomPlan {
   const line = (x: number, y: number) => (fr.spine ? offAll(fr.spine, x, y) : Math.abs(x - MID));
   const free = (x: number, y: number, r: number, skip?: object) =>
     Math.hypot(x - SPAWN.x, y - SPAWN.y) > r + 2.4 && Math.hypot(x - ex, y - 0.5) > r + 2.4 && line(x, y) > r + 1.3 &&
-    spots.every((s) => s === skip || Math.hypot(s.x - x, s.y - y) > s.r + r + 0.9) && guard.every((s) => Math.hypot(s.x - x, s.y - y) > s.r + r + 0.6) && (!site || siteClear(site, x, y, r));
+    spots.every((s) => s === skip || Math.hypot(s.x - x, s.y - y) > s.r + r + 0.9) && guard.every((s) => Math.hypot(s.x - x, s.y - y) > s.r + r + 1.1) && (!site || siteClear(site, x, y, r));
   const spot = (r: number, y0 = 2.2, y1 = H - 3): { x: number; y: number } | null => {
     for (let t = 0; t < 50; t++) {
       const x = rng.range(1.4 + r, W - 1.4 - r), y = rng.range(y0 + r, y1 - r);
@@ -75,10 +75,16 @@ export function planRoom(job: Job, index: number, road?: RoadId): RoomPlan {
   for (const r of roads ?? []) spots.push({ x: r.area.x + 1, y: 0.8, r: 1.4 });
   spots.push(...fr.wet);
   const water = fr.water, ground = { w: W, h: H, fork, water }, routed = spec && fr.spine ? { spec, spine: fr.spine, river: fr.river, seed: fr.seed } : undefined;
-  if (routed && spec?.heart) guard.push(...heartMarks(job, ground, routed));
+  if (routed && spec?.heart) {
+    guard.push(...heartMarks(job, ground, routed));
+    // Come into a heart where its landmarks leave room (nearer the middle if a clamp or a pit prop is in the way).
+    const crowd = (x: number) => guard.some((g) => Math.hypot(g.x - x, g.y - SPAWN.y) < g.r + 3.2 || offAll([approachTo(x, MID, H)], g.x, g.y) < g.r + 1.7);
+    while (crowd(SPAWN.x) && Math.abs(SPAWN.x - MID) > 0.5) SPAWN.x += Math.sign(MID - SPAWN.x);
+    routed.spine[0] = approachTo(SPAWN.x, MID, H);
+  }
   const hits = (a: { x: number; y: number; w: number; h: number }) => guard.some((g) => g.x > a.x - g.r - 0.6 && g.x < a.x + a.w + g.r + 0.6 && g.y > a.y - g.r - 0.6 && g.y < a.y + a.h + g.r + 0.6);
   // Raised ground: always on the high road, sometimes elsewhere; archers up on it. Never over the way out, nor a heart's landmarks.
-  const foes: Foe[] = [], ledges: Ledge[] = [];
+  const foes: Foe[] = [], ledges: Ledge[] = [], onLedge = new Set<Spot>();
   if (!fork && obj !== 'burn' && (road === 'high' || (road !== 'low' && index >= 1 && rng.next() < 0.4))) {
     const big = road === 'high', lh = big ? 4.2 : 3.4;
     let lw = big ? 7.5 : 6.5, left = rng.next() < 0.5;
@@ -94,12 +100,14 @@ export function planRoom(job: Job, index: number, road?: RoadId): RoomPlan {
       ledges.push({ x: lx, y: 0, w: lw, h: lh, ramps: [ramp], kind: kind === 'mine' || kind === 'forest' ? 'rock' : 'wood' });
       for (let x = lx + 1; x < lx + lw; x += 1.5) spots.push({ x, y: lh / 2, r: lh / 2 + 0.3 });
       spots.push({ x: ramp.x + 0.9, y: ramp.y + ramp.h / 2, r: 1.5 });
+      // A routed room's ledge clears what's on it by its own ground (below); its spots only keep goblins and cages off it.
+      if (spec) for (const q of spots.slice(-Math.ceil((lw - 1) / 1.5) - 1)) onLedge.add(q);
       for (let i = 0; i < (big ? 3 : 2); i++) foes.push({ kind: 'scrapper', bow: true, z: 1, x: lx + 1.3 + i * (lw - 2.6) / Math.max(1, big ? 2 : 1), y: 1.3 + (i % 2) * 0.8 });
     }
   }
   // The objective first (it must fit), then the place itself, round the ways in and out, the raised ground, the water and the job's spots.
   const props = objectives({ obj, road, ledges: ledges.length > 0, spot, free, spots, blocks, props: [], W, H, MID, guarded: (x, y, r) => !hits({ x: x - r, y: y - r, w: r * 2, h: r * 2 }) });
-  site = layOut(job, index, ground, roads ? roads.map((r) => r.area) : [EXIT], ledges.flatMap((l) => [l, ...l.ramps]), [...spots], SPAWN, routed);
+  site = layOut(job, index, ground, roads ? roads.map((r) => r.area) : [EXIT], ledges.flatMap((l) => [l, ...l.ramps]), spots.filter((q) => !onLedge.has(q)), SPAWN, routed);
   blocks.push(...site.blocks), rounds.push(...site.rounds), props.push(...site.props);
   // Goblins: a routed room's set piece, or an old room's fires and its heap of the dead. The first room
   // is all small ones; butchers come deeper in.
@@ -119,8 +127,9 @@ export function planRoom(job: Job, index: number, road?: RoadId): RoomPlan {
   if (final && (obj === 'hunt' || obj === 'story')) foes.push({ kind: 'butcher', x: MID, y: 4.5, hp: obj === 'story' ? 560 : 420, name: job.boss });
   if (index >= 1 && ruin >= 2) foes.push({ kind: 'butcher', x: fires[0]?.x ?? MID, y: (fires[0]?.y ?? 6) - 1.2 });
   if (final && ruin >= 2 && obj !== 'hunt' && obj !== 'story') foes.push({ kind: 'butcher', x: fires[1]?.x ?? MID, y: (fires[1]?.y ?? 5) - 1.2 });
-  // The back of the pack: now and then a hexer or a drummer among them (shared/roster.ts).
-  rollBackline(foes, job, index);
+  // The back of the pack: now and then a hexer or a drummer among them (shared/roster.ts). A routed
+  // room rolls it last, after the spiders have thinned the band, so blades are always left to fight.
+  if (!spec) rollBackline(foes, job, index);
   // Chests: sometimes one in a room, always one in the last; on a deep job, a chained one by the named butcher.
   const chests: RoomPlan['chests'] = [];
   if (final || rng.next() < 0.4) {
@@ -130,6 +139,7 @@ export function planRoom(job: Job, index: number, road?: RoadId): RoomPlan {
   if (final && job.deep) chests.push({ x: MID + 2.2, y: 3.2, chained: true });
   // In the wilder places, sometimes spiders: nests that hatch waves, and deep in, a brood mother (shared/nests.ts).
   rollSpiders(foes, job, index, spot, H, W);
+  if (spec) rollBackline(foes, job, index);
   // Each house's look and fate outside come from the same seed as its inside.
   const spill = settle(job, index, blocks);
   // Lit for the job's hour (shared/timeofday.ts), as the place it is (an approach room, as its country):

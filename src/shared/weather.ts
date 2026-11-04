@@ -34,7 +34,7 @@ export function patternOf(job: Job): { pattern: Pattern; peak: number; start: nu
 
 /** The weather in one room of the job (none indoors or underground). */
 export function weatherIn(job: Job, index: number): Weather {
-  const spec = routeOf(job)[index], under = spec.heart ? job.place.kind === 'mine' : spec.palette.light === 'mine';
+  const spec = routeOf(job)[index], under = spec.heart ? job.place.kind === 'mine' : spec.skin === 'under';
   if (under) return { rain: 0, storm: 0, fog: 0 };
   const { pattern, peak, start } = patternOf(job), d = Math.abs(index - peak);
   if (pattern === 'drizzle') return { rain: 0.32 + (index % 2) * 0.06, storm: 0, fog: 0 };

@@ -17,6 +17,7 @@ import { hunt } from './spiders';
 import { glowIn, sightIn } from '../shared/timeofday';
 import type { Enemy, EnemyAttack, FightEvent, Hero } from './types';
 import { vanished } from './rogue';
+import { wayTo } from './pathing';
 
 const SPECS: Partial<Record<Enemy['kind'], EnemySpec>> = { butcher: BUTCHER, scrapper: SCRAPPER, spider: SPIDER, brood: BROOD };
 
@@ -208,7 +209,9 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   if (!spec) return;
   // On another level: a goblin with a blade goes round by the nearest ramp; an archer just shoots.
   const level = (t.z ?? 0) === (e.z ?? 0), via = level || e.bow ? null : rampFor(e);
-  const gx = via ? via.x : t.x, gy = via ? via.y : t.y, gd = Math.hypot(gx - e.x, gy - e.y) || 1;
+  // On the ground, round water and anything long in the way: by the ford, the bridge, the gap (sim/pathing.ts).
+  const go = !e.bow && !e.z ? wayTo(e, via ? via.x : t.x, via ? via.y : t.y) : via ?? t;
+  const gx = go.x, gy = go.y, gd = Math.hypot(gx - e.x, gy - e.y) || 1;
   // Turn toward where it's going at this enemy's own pace; it only attacks once it faces you.
   const ux = (gx - e.x) / gd, uy = (gy - e.y) / gd;
   const want = Math.atan2(uy, ux), have = Math.atan2(e.fy, e.fx);

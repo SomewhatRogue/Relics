@@ -78,6 +78,8 @@ export function layOut(job: Job, index: number, g: Omit<Ground, 'index' | 'kind'
   const keep: Keep = { w: g.w, h: g.h, areas: [...ways, ...hard, ...g.water], spots: [...spots, { ...spawn, r: 2.2 }], spine: r?.spine };
   // A heart's way in, from wherever along the bottom you came in, over to its own lane.
   if (r?.spec.heart && Math.abs(spawn.x - g.w / 2) > 1) path(plan, pathMat(r.spec.palette.soil), approachTo(spawn.x, g.w / 2, g.h).slice(0, 3), 1.05);
+  // A fork's two roads, from where the track parts to each way out.
+  if (r && !r.spec.heart) for (const l of r.spine.slice(1)) path(plan, pathMat(r.spec.palette.soil), l, 0.95);
   const site = clearFor(plan, keep, { ...keep, areas: [...hard, ...g.water] });
   if (r && !r.spec.heart) landmark(site, keep, r, new Rng(r.seed + 5));
   return site;

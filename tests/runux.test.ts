@@ -13,7 +13,7 @@ import type { ArenaRoom } from '../src/sim/room';
 import { WayWatch, wayTarget } from '../src/client/wayfind';
 
 const job = (kind: Job['place']['kind'] = 'village', objective: Job['objective'] = 'rescue', seed = 99): Job =>
-  ({ ...board(1)[0], rooms: 3, place: PLACES.find((p) => p.kind === kind)!, objective, boss: 'SKARN', seed, deep: false });
+  ({ ...board(1)[0], layout: undefined, rooms: 3, place: PLACES.find((p) => p.kind === kind)!, objective, boss: 'SKARN', seed, deep: false });
 const world = (r: ArenaRoom) => ({ heroes: r.heroes, enemies: r.enemies, javelins: r.javelins, props: r.props, survivors: r.survivors, now: r.time, ev: r.events });
 const mid = (a: Area) => ({ x: a.x + a.w / 2, y: a.y + a.h / 2 });
 

@@ -55,11 +55,11 @@ export function crossroads(rng: Rng, g: Ground): Site {
   patch(s, mat, lx - 2.6, ty - 1.8, 5.2, 3.6), patch(s, g.spec!.palette.soil, lx - 1.6, ty - 1.1, 3.2, 2.2);
   if (skin !== 'under') ruts(s, pts);
   // Banks in the four corners, kept back from both roads.
-  const near = (_t: number, _x: number, y: number) => Math.abs(y - ty) < 2.6 || Math.abs(y - ty2) < 2.6;
+  const gate = rng.range(0.15, 0.3), near = (t: number, _x: number, y: number) => Math.abs(y - ty) < 2.6 || Math.abs(y - ty2) < 2.6 || Math.abs(t - gate) < 0.05;
   bank(s, rng, skin, pts, -2.4, near), bank(s, rng, skin, pts, 2.4, near);
   for (const r of roads) {
     const y = r[0][1], l = laneAt(pts, y), west = r[0][0] < l, x0 = west ? 0.6 : l + 3, x1 = west ? l - 3 : g.w - 0.6;
-    if (x1 - x0 > 1) across(s, skin, x0, x1, y - 2.2), across(s, skin, x0, x1, y + 2.2);
+    if (x1 - x0 > 1) across(s, skin, x0, x1, y - 2.2, rng.range(0.25, 0.75)), across(s, skin, x0, x1, y + 2.2, rng.range(0.25, 0.75));
   }
   beyond(s, rng, skin, g.w, g.h, [pts, ...roads], 3.2);
   return s;

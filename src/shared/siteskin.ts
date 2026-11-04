@@ -76,10 +76,11 @@ export function scatter(s: Site, rng: Rng, w: number, h: number, lines: Pt[][], 
   }
 }
 
-/** A short hedge (or its skin's like) across a stretch, from x0 to x1 at y. */
-export function across(s: Site, skin: Skin, x0: number, x1: number, y: number): void {
-  if (skin === 'fields') hedge(s, x0, y, x1, y);
-  else if (skin === 'fen') hedge(s, x0, y, x1, y, () => false, 'reed', 0.3);
-  else if (skin === 'wood') hedge(s, x0, y, x1, y, (t) => Math.round(t * 20) % 2 === 1, 'tree', 0.5);
-  else hedge(s, x0, y, x1, y, (t) => Math.round(t * 12) % 2 === 1, 'rock', 0.5);
+/** A short hedge (or its skin's like) across a stretch, from x0 to x1 at y, with a gate at `gate` of the way along. */
+export function across(s: Site, skin: Skin, x0: number, x1: number, y: number, gate = 0.5): void {
+  const g = (t: number) => Math.abs(t - gate) < 1.1 / Math.max(1, x1 - x0);
+  if (skin === 'fields') hedge(s, x0, y, x1, y, g);
+  else if (skin === 'fen') hedge(s, x0, y, x1, y, g, 'reed', 0.3);
+  else if (skin === 'wood') hedge(s, x0, y, x1, y, (t) => g(t) || Math.round(t * 20) % 2 === 1, 'tree', 0.5);
+  else hedge(s, x0, y, x1, y, (t) => g(t) || Math.round(t * 12) % 2 === 1, 'rock', 0.5);
 }
