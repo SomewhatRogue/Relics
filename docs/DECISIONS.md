@@ -2,6 +2,51 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-04: every perfect on your own timing, and a stun cap per hero (Kyle; Claude Opus 5.5)
+
+Kyle, after playing: "it's hard to time a perfect against an enemy attack or an ally about to get hit",
+and he wants "a cap on how often each can be stunned per attacker". So every kit's perfect is now its
+own hold let go on the white flash (the Cleric's already was), and whatever was timed against a goblin's
+blow stays only as a bonus, with its own callout and no PERFECT.
+
+- **One rule, one place.** `sim/hero.ts` now makes any held attack let go inside the flash window a
+  perfect (every kit's hold has one), and that release is the only place PERFECT is said, so every
+  weapon shows it the same way. The crossbow keeps its glint, set just after. The four bonus events
+  (riposte, the spear's catch, a spark into a wind-up, the blade's catch) no longer say PERFECT; they keep
+  RIPOSTE, PINNED, INTERRUPTED and CAUGHT.
+- **Sword and shield** (`SHIELD_BASH`): on the flash the bash takes every goblin in a 140 degree arc in front
+  (`flashBash`, no one-goblin cap) and stuns each 1 s (a butcher half). Held past it, the goblin in front
+  only, 0.4 to 0.7 s by charge (was 0.6 to 1.2, which outdid the perfect). Riposte unchanged, a bonus.
+- **Spear** (`PIN`): the lunge on the flash pins whatever it runs through (up to three) 1 s, anything but a
+  nest. A goblin caught charging or lunging is still pinned, now 1.6 s, as a bonus.
+- **Wand**: the burst on the flash breaks off whatever a goblin it hits is doing (`Bolt.breaks`), striped
+  blows and charges too, a 0.6 s stagger. A spark landing mid wind-up still does it, as a bonus.
+- **Spellblade**: the wreathe on the flash costs nothing and leaves the blade full (so the next is free
+  too), with the blade-full ring. The catch on block stays, as a bonus.
+- **Checked, already flash-based**: rapier, poisoner (Rogue), greatsword (Warrior), longbow, shortbow
+  (Ranger), staff (Mage), every Cleric kit. The crossbow's is the glint, as before. Daggers' thrown knife
+  was already a drawn shot.
+- **The stun cap** (`shared/stuncap.ts` STUN_CAP, `sim/stuns.ts`): one hero can take the same goblin's turn
+  once every 6 s. Inside that the blow lands its damage, but the goblin isn't stopped and says SHRUGS IT
+  OFF (grey, quiet, once a second at most). Another hero can stop it at once, so a party chains stuns.
+  Every site goes through `stun()` or `mayStun()` with the attacker's id. **In:** daze (shield bash,
+  Shadowstep, the poisoner's retch, the flail's flash), the shockwave, both spear pins, the skewer's
+  stagger, the wand's interrupt, smites and relic bombs, a stunning bolt, the longbow's blind, the snare
+  and the net and the hound's pin (small goblins; a big one only slowed is not capped), the javelin's
+  wall pin (shrugged, it drops off), the hook's yank, the slam, the ambush reel, the ward's reflect, the
+  shield charge, the stamp, the censer chain and lantern light, the Vanish cough, the war cry's scare,
+  the bell, the knuckle, steam (credited to who set it off) and a fall off a ledge (to who knocked it).
+  **Out**, by judgment: the plain hit flinch any blow gives a small goblin (0.3 s, and the big weapons'
+  wind-up break), body blows, the hound's nip, the volley's 0.2 s ticks, carrying and throwing, a freeze
+  (built over two hits, maybe by two heroes), and a parry's or a slip's stun: those answer the goblin's
+  own blow, so a goblin that stops swinging is never held by them. The retch keeps its own 10 s cap too.
+- Tests: `tests/warrior.test.ts`, `tests/magekit.test.ts` (each new perfect on the flash, each old one a
+  bonus without PERFECT, held past the flash does neither), `tests/stuncap.test.ts` (shrugged inside 6 s,
+  another hero at once, the same hero after; in the room, a second flash bash still hurts but doesn't
+  stun, and a friend's does).
+- Words for the lore keeper and the line editor: SHRUGS IT OFF; the sword, spear, wand and spellblade
+  cards; their four KIT hints.
+
 ## 2026-11-04: the Cleric's weapons rework: mercy, the holy shield, the smite's light, coals, the spun flail (Kyle; Claude Opus 5.5)
 
 The last class through Kyle's weapons rework, which is now complete. The Cleric guards and never dodges
