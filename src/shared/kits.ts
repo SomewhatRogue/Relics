@@ -34,12 +34,12 @@ export const MORE_KITS: Record<MoreKitId, Weapon> = {
   /**
    * The poisoner's kit (it replaced the hand crossbow, 2026-11-03). A short sword for the close work:
    * a little wider than the daggers and slower, catching two at once; no great damage, but none lost
-   * head on either. Held: the blowgun up to the lips, and a dart at range that poisons (shared/venom.ts).
+   * head on either. Held: the blowpipe up to the lips, and a dart at range that poisons (shared/venom.ts).
    * Loosed on the white flash, the goblin retches first and its poison ticks harder. Weakness: the
    * poison is slow, the dart itself barely scratches, and the spiders and their nests shrug it off.
    */
   poisoner: {
-    name: 'SHORTSWORD AND DARTS',
+    name: 'SHORT SWORD AND BLOWPIPE',
     cls: 'ROGUE',
     combo: [
       { windup: 0.09, active: 0.08, recover: 0.18, dmg: 7, range: 1.3, arc: 130, lunge: 0.3, knock: 2, hits: 2 },

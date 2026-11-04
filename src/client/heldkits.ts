@@ -1,6 +1,6 @@
 /**
  * The Rogue's and Cleric's other kits in hand (held.ts has the rest): the rapier, the short sword and
- * blowgun, the sword and censer, the flail. Their rest and charge poses, and how each is drawn. Swings,
+ * blowpipe, the sword and censer, the flail. Their rest and charge poses, and how each is drawn. Swings,
  * thrusts and shots use held.ts's shared poses, so what sweeps on screen is the arc the room judges.
  */
 import { WEAPONS } from '../shared/tuning';
@@ -22,14 +22,14 @@ export function bladeLength(w: Hero['weapon']): number {
 
 /** The censer swinging on its chain now (a held censer swing, or the whirl). */
 const swingingCenser = (h: Hero) => h.weapon === 'censer' && (h.act === 'charge' || (h.act === 'attack' && !!currentSwing(h).burn));
-/** The blowgun up to the lips (drawing breath, or the dart just loosed). */
+/** The blowpipe up to the lips (drawing breath, or the dart just loosed). */
 const aiming = (h: Hero) => h.weapon === 'poisoner' && (h.act === 'charge' || (h.act === 'attack' && h.heavy));
 
 /** Rest and charge for these kits (null: held.ts's shared poses, or not one of these). */
 export function kitPose(h: Hero, now: number, fa: number, side: number, charge: number): Pose | null {
   if (!KITS.has(h.weapon) || h.act === 'attack' || h.blocking) return null;
   if (h.act === 'charge') {
-    // The fencer coils back for the lunge; the blowgun comes up to the lips.
+    // The fencer coils back for the lunge; the blowpipe comes up to the lips.
     if (h.weapon === 'rapier') return { a: fa, ext: -6 * charge, reach: 0, pull: charge };
     if (h.weapon === 'poisoner') return { a: fa, ext: -3, reach: 0, pull: charge };
     // The censer whirls round the Cleric, faster as it fills; the flail spins overhead.
@@ -68,8 +68,8 @@ function censerOnChain(c: Ctx, x: number, y: number, a: number, pull: number): v
   c.glow.globalAlpha = 1;
 }
 
-/** The blowgun along `a`: a reed tube, a green bead of poison at its mouth if a dart is in. */
-function blowgun(c: Ctx, x: number, y: number, a: number, loaded: boolean): void {
+/** The blowpipe along `a`: a reed tube, a green bead of poison at its mouth if a dart is in. */
+function blowpipe(c: Ctx, x: number, y: number, a: number, loaded: boolean): void {
   line(c.lit, x, y, a, -1, 9, '#7a6a3a');
   if (loaded) (c.glow.fillStyle = '#9be040'), c.glow.fillRect(Math.round(x + Math.cos(a) * 9), Math.round(y + Math.sin(a) * 9), 1, 1);
 }
@@ -94,12 +94,12 @@ export function drawKit(c: Ctx, h: Hero, px: number, py: number, ox: number, oy:
     if (out) line(c.glow, ox, oy, p.a, 6, 15, '#ffffff');
   } else if (h.weapon === 'poisoner') {
     if (aiming(h)) {
-      // The blowgun up, the sword held low meanwhile; the white flash at the mouth when a perfect breath is ready.
-      blowgun(c, ox, oy, p.a, !(s && h.actT > s.windup + 0.05));
+      // The blowpipe up, the sword held low meanwhile; the white flash at the mouth when a perfect breath is ready.
+      blowpipe(c, ox, oy, p.a, !(s && h.actT > s.windup + 0.05));
       if (p.pull >= 1) (c.glow.fillStyle = '#ffffff'), c.glow.fillRect(Math.round(ox + Math.cos(p.a) * 10), Math.round(oy + Math.sin(p.a) * 10), 1, 1);
       line(g, px - side * 7, py + 1, Math.PI / 2 + side * 0.3, 2, 8, '#e6ecf0');
     } else {
-      // The short sword in hand, the blowgun slung at the off side.
+      // The short sword in hand, the blowpipe slung at the off side.
       shortsword(c, ox, oy, p.a);
       if (out) line(c.glow, ox, oy, p.a, 4, 9, '#ffffff');
       line(g, px - side * 6, py + 4, Math.PI / 2 - side * 0.4, 0, 7, '#7a6a3a');
