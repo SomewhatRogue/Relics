@@ -11,7 +11,7 @@ export type TraitId = 'riposte' | 'tempo' | 'bulwark' | 'deadeye' | 'crushing' |
 export const TRAITS: Record<TraitId, { name: string; text: string }> = {
   riposte: { name: 'RIPOSTE', text: 'Your counter after a parry does 40% more damage' },
   tempo: { name: 'SIDESTEP', text: 'Dodge through a blow and your next hit within 1.5 s does double damage' },
-  bulwark: { name: 'SECOND WIND', text: 'A parry refills your stamina' },
+  bulwark: { name: 'STAMINA ON PARRY', text: 'A parry refills your stamina' },
   deadeye: { name: 'DEADEYE', text: 'A shot let go on the white flash does 60% more damage' },
   crushing: { name: 'CRUSHING', text: 'Goblins you knock into a wall take triple damage from it' },
   brutal: { name: 'BRUTAL', text: 'Your hits on stunned, pinned, netted or frozen goblins do 50% more damage' },

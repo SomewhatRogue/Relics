@@ -72,7 +72,7 @@ const BOSSES = ['MAWL', 'SKARN', 'OLD KNUCKLES', 'OLD SPOON', 'GUTCHAIN', 'MOTHE
 function describe(o: Objective, p: Place, boss: string): { title: string; text: string } {
   if (o === 'rescue') return { title: `Rescue at ${p.name}`, text: `There were folk alive in cages at ${p.name} three days ago, and some may be yet. Break the cages open and bring them home.` };
   if (o === 'hunt') return { title: `Hunt ${boss}`, text: `${boss} has made a larder of ${p.name}, and a dozen little ones eat from it. Kill it and the rest lose their nerve. Bring back something to prove it, because we\'ve been lied to before.` };
-  if (o === 'burn') return { title: `Burn out the dens at ${p.name}`, text: `The hungry have dug dens at ${p.name}, and any den you leave, they come back to. Burn every one. They hoard lamp oil, so use theirs.` };
+  if (o === 'burn') return { title: `Burn out the dens at ${p.name}`, text: `The hungry have put up dens at ${p.name}, and any den you leave, they come back to. Burn every one. They hoard lamp oil, so use theirs.` };
   return { title: `Burn the larder at ${p.name}`, text: `They keep a larder at ${p.name}, and some of it is grain. Smash every rack, and don't look too long at the rest.` };
 }
 

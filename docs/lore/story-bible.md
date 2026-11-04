@@ -124,8 +124,8 @@ most Want among the heroes is the one the bells don't spare).
 - **Trainers' fees** (recorded 2026-11-01): drills are bought from your own class's trainer, and
   paying for them is trade, not keeping or giving: it never touches the Want. Mother Isolde's fees buy
   linen and Sister's Bitter for the infirmary, never the Lantern box. Magister Vell teaches the Elemental
-  Channel and sells the FIRST SPELL drill (was QUICK CHANNEL until the Channel became a quick switch, 2026-11-02). Players see "breath", never
-  "stamina" or "wind". A job's length in real minutes is the game's own voice on the board only;
+  Channel and sells the PRIMED SPELLS drill (was QUICK CHANNEL until the Channel became a quick switch, 2026-11-02). Players see "stamina", never
+  "breath" or "wind" (Kyle, 2026-11-04: one word for one thing). A job's length in real minutes is the game's own voice on the board only;
   characters and postings never measure a job in minutes.
 - **The valley, added** (recorded 2026-11-01, for the river, marsh and ruins jobs): Barrowfields: the
   Sheepwash (the shallow stretch where the valley washed its sheep, deep either side), Ketterby (a hamlet
@@ -140,7 +140,9 @@ most Want among the heroes is the one the bells don't spare).
   Alder Bram ("Alder" is a council seat) and Goodwife Sell, Dessa, Pike and Orla of the watch, the
   eight Rescue Row families, the patients Amos, Letty and Corin. Whisper is "he".
 - **Town details.** Some nights there's a light in the keep's high window. Prayers are chalked over the
-  chapel planks. The well is as old as the town and has tasted of copper since the siege.
+  chapel planks. The well is as old as the town and has tasted of copper since the siege. A coin in it
+  gives the same as blessed ground for the first 20 s of your next job (+30% damage, 25% less taken), but
+  on screen it is always "luck", never "blessed": blessed is Sanctuary's ground only.
 - **Words players see.** "Deep job" for the daily long job with a named butcher at the bottom (never
   "deep dive"). Stamina is "breath". Heroes are a company; you "hire" another.
 - **Halvard** oils every blade on his rack, and the next one before you've paid for this one.
@@ -241,7 +243,7 @@ most Want among the heroes is the one the bells don't spare).
 - Agne sells the Bitter, Gannet the brandy, oil and smoke, Ivo the frost flasks. Goblins drop all of them.
 - Ivo's bench sells frost flasks and rerolls a modifier even while he isn't setting elements.
 - Dessa is one of the traders camped outside the north gate; her Market Row stall opens only once the council lets the traders in. Tobin's stall is there either way.
-- Wall Brandy (Kyle's call): doubles your damage, halves your speed and stamina, for a few seconds.
+- Wall Brandy (Kyle's call): doubles your damage, but halves your speed and the size of your stamina bar, for a few seconds.
 
 ## Relics fade, the step, and the church's light (recorded 2026-11-03; Kyle's call, lore keeper)
 - Relics fade with use and go dark. Isolde recharges plain ones round the back for gold, and what she does stays unsaid. The fee is trade, like her training fees; it never goes in the Lantern box and never touches the Want.
@@ -249,7 +251,7 @@ most Want among the heroes is the one the bells don't spare).
 - Odric takes relics at the step and they sit with the others. Leave two, take one draws from what other heroes have left; Odric brings it out and doesn't say whose it was.
 - The church's light: Isolde gives it to whoever leaves a relic with life in it. On screen it is only ever "the church's light" (LIT), never the Lantern, never "blessed". The hungry come for whoever carries it, and no line says why (the censer rule).
 - Ivo hears relics; a fading one goes quiet.
-- The bone whistle: goblins stop to listen, since it sounds like one of theirs. Nothing on screen says why. Bells stay the town's, kept for chapter 5.
+- The bone whistle: goblins stop to listen, since it sounds like one of theirs. Nothing on screen says why. Its callout is WHISTLE, never BELL. Bells stay the town's, kept for chapter 5.
 - Every relic spares friends (SPARES FRIENDS, SPARED), and relic telegraphs are gold, never the goblins' red.
 - Open for Kyle: does leaving a relic on the step lower the Want, as giving up hungry gear does? Does carrying or using relics grow it?
 

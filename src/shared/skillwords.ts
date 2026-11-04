@@ -12,7 +12,7 @@ export const SKILL_WORDS: Partial<Record<RelicId, string>> = {
   volley: 'Shoot high over a spot, and arrows come down on it for a few seconds.',
   sic: 'Your hound runs down the goblin you face, pinning a small one and hanging off a big one.',
   shadow: 'You appear behind the goblin you face.',
-  vanish: 'You vanish in a puff of smoke, and goblins lose track of you until you attack.',
+  vanish: 'You drop smoke at your feet, and goblins lose track of you until you attack.',
   knives: 'You throw five knives at once, spread wide.',
   channel: 'Changes your spells to the next element (fire, frost, storm). Your first spell after each change is primed and does 50% more damage.',
   firering: 'Fire bursts out around you and keeps burning where you stood. While this is your skill, your spells are always fire.',

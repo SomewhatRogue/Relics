@@ -120,7 +120,7 @@ heavy armor line still says "breath" where the rest of the game now says "stamin
 | shared/gear.ts | MOD_TEXT.mending | every heal you give | on every heal you give |
 | shared/loot.ts | riposte.text | Counters after a parry hit far harder | Your counter after a parry does 40% more damage |
 | shared/loot.ts | tempo.text | Dodge through a blow: your next hit lands double | Dodge through a blow and your next hit within 1.5 s does double damage |
-| shared/loot.ts | bulwark.name | BULWARK | SECOND WIND |
+| shared/loot.ts | bulwark.name | BULWARK | STAMINA ON PARRY |
 | shared/loot.ts | bulwark.text | A parry fills your breath | A parry refills your stamina |
 | shared/loot.ts | deadeye.name | TRUE RELEASE | DEADEYE |
 | shared/loot.ts | deadeye.text | Release on the white flash for a far bigger shot | A shot let go on the white flash does 60% more damage |
@@ -155,7 +155,7 @@ heavy armor line still says "breath" where the rest of the game now says "stamin
 | shared/hungry.ts | apron.cost | The hungry smell their own on you: every goblin comes for you first, and a named butcher looks at no one else. | Every goblin goes for you first, and a named butcher attacks no one else. |
 | shared/hungry.ts | ransom.gift | Once a room, a killing blow takes 50 gold instead of your life. | Once per room, a blow that would put you down takes 50 gold instead. |
 | shared/hungry.ts | ransom.cost | You can't give at the Lantern while you wear it; driven back, you lose all your gold, not half. | You can't give gold at the Lantern while you wear it, and if you're driven back you lose all your gold, not half. |
-| shared/hungry.ts | wedding.cost | It won't come off your finger; only the church can take it. And it gets into you faster than anything. | You can't take it off; only the church can. It also changes you faster than any other hungry piece. |
+| shared/hungry.ts | wedding.cost | It won't come off your finger; only the church can take it. And it gets into you faster than anything. | You can't take it off; only the church can. It also changes you faster than any other hungry gear. |
 | shared/hungry.ts | tooth.gift | Every kill recharges your skill and relic at once. | Every kill recharges your skill and relic straight away. |
 | shared/hungry.ts | tooth.cost | The party's gold from kills near you goes into your purse, and they see it go. | Gold from kills near you goes to you instead of being shared, and the party sees it happen. |
 | shared/potions.ts | brandy.text | Doubles your damage, halves your speed and stamina. | Doubles your damage, but halves your speed and the size of your stamina bar. |
@@ -170,20 +170,20 @@ heavy armor line still says "breath" where the rest of the game now says "stamin
 | shared/skillwords.ts | horn | Every goblin in earshot comes for you, and nobody else. | Every goblin near you comes after you, and leaves everyone else alone, for 5 seconds. |
 | shared/skillwords.ts | stamp | Bring the shield rim down hard, and every goblin close is thrown back, the small ones off their feet. | You slam your shield down. Every goblin close to you is knocked back, and small ones are knocked off their feet. |
 | shared/skillwords.ts | shadow | Step out of the dark behind the goblin you face. | You appear behind the goblin you face. |
-| shared/skillwords.ts | vanish | Smoke at your feet, and the goblins lose you until you strike. | You vanish in a puff of smoke, and goblins lose track of you until you attack. |
+| shared/skillwords.ts | vanish | Smoke at your feet, and the goblins lose you until you strike. | You drop smoke at your feet, and goblins lose track of you until you attack. |
 | shared/skillwords.ts | channel | Turn your spells to the next of fire, frost and storm, and the first spell after each turn lands harder. | Changes your spells to the next element (fire, frost, storm). Your first spell after each change is primed and does 50% more damage. |
 | shared/skillwords.ts | firering | While you carry it, your spells are fire. | While this is your skill, your spells are always fire. |
 | shared/skillwords.ts | tether | While you carry it, your spells are fire. | While this is your skill, your spells are always fire. |
 | shared/skillwords.ts | sanctuary | Blessed ground at your feet, and a ward on whoever needs it most. | Blesses the ground at your feet, which heals friends and burns goblins, and puts a ward on whoever is most hurt. |
 | shared/skillwords.ts | light | Open the censer. Goblins close by are scorched and thrown back, the small ones blinded, and friends close by mend. | You open the censer. Goblins close by are burned and knocked back, small ones are blinded, and friends close by are healed. |
 | shared/classes.ts | HEALER.note | Feed the censer what butchers leave. It heals hotter, and draws teeth. | Walk over the coal a dead butcher leaves to feed your censer. Your heals get stronger for good, but goblins notice you sooner and go for you first. |
-| shared/classes.ts | HEALER.perk | Nothing of yours hurts a friend, or anyone freed from a cage: your blows, smites, coals and fire all pass them by. | Nothing you do hurts a friend or anyone you've freed from a cage: your blows, smites, coals and fire pass through them. |
+| shared/classes.ts | HEALER.perk | Nothing of yours hurts a friend, or anyone freed from a cage: your blows, smites, coals and fire all pass them by. | Nothing you do hurts a friend or anyone freed from a cage: your blows, smites, coals and fire pass through them. |
 | client/copy.ts | COPY.stillGoing | Nothing waits while you rummage. | The fight goes on while your pack is open. |
 | client/copy.ts | COAL.line | Heals burn hotter. The hungry find you first, from further off. | Your heals are stronger. Goblins notice you from further off and go for you first. |
 | client/relicwords.ts | RELIC_LINES.javelin | Thrown hard. Small goblins ride it to the wall and stay pinned there; big ones take it in the body. | A hard throw. It carries small goblins to the nearest wall and pins them there, and sticks in big ones. |
 | client/relicwords.ts | RELIC_LINES.lodestone | Lobbed. Where it lands it drags goblins in, the light ones fastest, then bursts. | Throw it and it pulls goblins in to where it lands, light ones fastest, then bursts. |
 | client/relicwords.ts | RELIC_LINES.bomb | Lobbed. It bursts, throws goblins and barrels about and knocks the small ones silly. | Throw it and it bursts where it lands, knocking goblins and barrels away and stunning the small ones. |
-| client/relicwords.ts | RELIC_LINES.bell | Blow it. Goblins near you stop to listen and lose their swing, and friends near you are quicker on their feet for a bit. | Blow it. Goblins near you flinch and drop their attacks, and friends near you move 25% faster for 4 seconds. |
+| client/relicwords.ts | RELIC_LINES.bell | Blow it. Goblins near you stop to listen and lose their swing, and friends near you are quicker on their feet for a bit. | Blow it. Goblins near you stop to listen and drop their attacks, and friends near you move 25% faster for 4 seconds. |
 | client/relicwords.ts | RELIC_LINES.knuckle | A punch that carries. Everything in a line in front of you is knocked flying, and the next blow anyone lands on them hits harder. | A punch that reaches. Everything in a line in front of you is knocked flying, and the next hit anyone lands on them does extra damage. |
 | client/relicwords.ts | RELICW.darkLine | Gone dark. It does nothing now until the church sees to it. | Out of charge (dark). It does nothing until the church recharges it. |
 | client/relicwords.ts | RELICW.darkElLine | Gone dark, and the church won't bring this kind back. You can still give it up on the step, on its own, or with another for one in return. | Out of charge (dark), and the church won't recharge a relic with an element. You can still give it up on the step, alone, or with another relic to get one back. |
@@ -209,7 +209,7 @@ heavy armor line still says "breath" where the rest of the game now says "stamin
 | client/main.ts | tips (touch) | Push the stick part way to creep. Resting goblins see you late: hit first for an AMBUSH | Push the stick part way to creep. Hit a goblin that hasn't seen you for an AMBUSH |
 | client/main.ts | tips (desktop) | Break the oil barrel near goblins and they burn | Break an oil barrel near goblins to set them on fire |
 | client/main.ts | tips (desktop) | Bows: release on the white flash. Held too long, the shot weakens | Bows: let go on the white flash for a PERFECT. Hold too long and the shot weakens |
-| client/main.ts | tips (desktop) | Cleric: E for SANCTUARY. Blessed ground, and a ward that throws arrows back | Cleric: E casts SANCTUARY, which blesses the ground and wards whoever is most hurt |
+| client/main.ts | tips (desktop) | Cleric: E for SANCTUARY. Blessed ground, and a ward that throws arrows back | Cleric: E uses SANCTUARY, which blesses the ground and wards whoever is most hurt |
 | client/main.ts | tips (desktop) | Frost twice freezes. A heavy blow shatters the ice | Two frost hits freeze a goblin. A heavy blow then shatters it |
 | client/main.ts | tips (desktop) | Fire meets frost: STEAM. Storm on the burning: FLARE | Fire on a chilled goblin makes STEAM, which stuns. Storm on a burning one makes a FLARE, which knocks goblins back |
 | client/main.ts | tips (desktop) | Striped circles cannot be blocked: SPACE to dodge, or walk out | Red with a striped edge can't be blocked: SPACE to dodge, or walk out of it |
@@ -219,15 +219,14 @@ heavy armor line still says "breath" where the rest of the game now says "stamin
 | client/main.ts | townTips (touch) | The TOWN HALL: the reeve and the council decide the chapter | The TOWN HALL: vote on what Wickhold does next |
 | client/main.ts | townTips (desktop) | The TOWN HALL: the reeve and the council decide the chapter | The TOWN HALL: vote on what Wickhold does next |
 | client/fx.ts | callout when you press block with no block | NO BLOCK: {ROLL/JUMP/DASH/BLINK} (Ranger) or NO GUARD: {...} (others) | CAN'T BLOCK: {ROLL/JUMP/DASH/BLINK} |
-| client/squareui.ts | well (coin in) | Your coin is in. Your next job starts lucky. | Your coin is in. You start your next job blessed. |
-| client/squareui.ts | well (offer) | A coin ({wish} gold): your next job starts lucky. | A coin ({wish} gold), and you start your next job blessed: +30% damage and 25% less damage taken for 20 seconds. |
+| client/squareui.ts | well (offer) | A coin ({wish} gold): your next job starts lucky. | A coin ({wish} gold) for luck: you start your next job with +30% damage and 25% less damage taken for 20 seconds. |
 | client/townui.ts | ENDED.half | Driven back: half the gold, nobody saved. | Driven back. You keep half the gold, and nobody you freed comes home. |
 | client/townui.ts | ENDED.lostCut | You were cut off, and your party was driven back. Half the gold, nobody home. | You were cut off, and your party was driven back. You keep half the gold, and nobody you freed comes home. |
 | shared/story.ts | chapter 1 choice farm.text | every job pays a quarter more | every job pays 25% more |
 | shared/jobs.ts | notice rescue | Folk alive in cages at {name}, at last count. Last count was three days ago. Break the cages, bring them home, don't stop to count. | There were folk alive in cages at {name} three days ago, and some may be yet. Break the cages open and bring them home. |
 | shared/jobs.ts | notice hunt | Bring back something to prove it; we've been lied to before. | Bring back something to prove it, because we've been lied to before. |
-| shared/jobs.ts | notice burn | The hungry have dug in at {name}. Every hole you leave, they come back to. Burn every den. They hoard lamp oil; use theirs. | The hungry have dug dens at {name}, and any den you leave, they come back to. Burn every one. They hoard lamp oil, so use theirs. |
+| shared/jobs.ts | notice burn | The hungry have dug in at {name}. Every hole you leave, they come back to. Burn every den. They hoard lamp oil; use theirs. | The hungry have put up dens at {name}, and any den you leave, they come back to. Burn every one. They hoard lamp oil, so use theirs. |
 | shared/jobs.ts | notice larder | They keep a larder at {name}. Some of it is grain. Smash every rack, | They keep a larder at {name}, and some of it is grain. Smash every rack, |
 | client/scores-boss.ts | boss tune name (bard list) | No Mercy at the Bell | No Quarter at the Bell |
-| client/worksui.ts | give gear line | Hollis writes it down at what Halvard would give for it, and half again. | Hollis writes it down as worth 50% more than Halvard would pay for it. |
-| shared/mendlines.ts | MEND_UI.gear | Weapons and armour for the walls count for half again what Halvard would pay. | Weapons and armour given to the walls count for 50% more than Halvard would pay. |
+| client/worksui.ts | give gear line | Hollis writes it down at what Halvard would give for it, and half again. | Hollis writes it down as worth 50% more than Tobin would pay for it. |
+| shared/mendlines.ts | MEND_UI.gear | Weapons and armour for the walls count for half again what Halvard would pay. | Weapons and armour given to the walls count for 50% more than Tobin would pay. |

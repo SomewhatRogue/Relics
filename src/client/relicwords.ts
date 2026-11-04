@@ -17,7 +17,7 @@ export const RELIC_LINES: Partial<Record<RelicId, string>> = {
   lodestone: 'Throw it and it pulls goblins in to where it lands, light ones fastest, then bursts.',
   bomb: 'Throw it and it bursts where it lands, knocking goblins and barrels away and stunning the small ones.',
   sentry: 'Set it down and it shoots whatever goblin comes near for a while. Its arrows leave them limping.',
-  bell: 'Blow it. Goblins near you flinch and drop their attacks, and friends near you move 25% faster for 4 seconds.',
+  bell: 'Blow it. Goblins near you stop to listen and drop their attacks, and friends near you move 25% faster for 4 seconds.',
   knuckle: 'A punch that reaches. Everything in a line in front of you is knocked flying, and the next hit anyone lands on them does extra damage.',
 };
 

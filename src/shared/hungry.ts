@@ -21,7 +21,7 @@ export const HUNGRY: Record<HungryId, Hungry> = {
   keeping: { name: 'THE KEEPING MACE', slot: 'weapon', kit: 'mace', cls: 'HEALER', gift: 'Every kill feeds your censer a coal, so your heals grow stronger for good.', cost: 'Your heals do half as much for others and twice as much for you.', want: 5 },
   apron: { name: "THE BUTCHER'S APRON", slot: 'armor', armor: 'medium', gift: 'You take half damage from every blow.', cost: 'Every goblin goes for you first, and a named butcher attacks no one else.', want: 5 },
   ransom: { name: 'THE RANSOM COAT', slot: 'armor', armor: 'light', gift: 'Once per room, a blow that would put you down takes 50 gold instead.', cost: "You can't give gold at the Lantern while you wear it, and if you're driven back you lose all your gold, not half.", want: 5 },
-  wedding: { name: "SOMEONE'S WEDDING RING", slot: 'ring', gift: 'Every coin you pick up counts twice.', cost: "You can't take it off; only the church can. It also changes you faster than any other hungry piece.", want: 15 },
+  wedding: { name: "SOMEONE'S WEDDING RING", slot: 'ring', gift: 'Every coin you pick up counts twice.', cost: "You can't take it off; only the church can. It also changes you faster than any other hungry gear.", want: 15 },
   tooth: { name: 'THE TOOTH RING', slot: 'ring', gift: 'Every kill recharges your skill and relic straight away.', cost: "Gold from kills near you goes to you instead of being shared, and the party sees it happen.", want: 5 },
 };
 /** How the Want moves: per gold given at the Lantern, per piece given up, per kill made in hungry gear; when it shows (the eyes). */
