@@ -37,7 +37,7 @@ export class UnlockFlash {
   private until = new Map<HTMLElement, number>();
 
   /** Each frame: `taught` the wood's moves now (null out of the wood). `say` speaks over the hero (laptop). */
-  update(taught: string[] | null, me: Hero, touch: boolean, now: number, say: (s: string) => void): void {
+  update(taught: string[] | null, me: Hero, touch: boolean, now: number, say: (s: string) => void, wait = false): void {
     const cls = WEAPONS[me.weapon].cls;
     if (!taught) this.had = null;
     else {
@@ -59,6 +59,8 @@ export class UnlockFlash {
       }
     }
     for (const [el, t] of this.until) {
+      // (While the wood is teaching you to move, a button's flash waits its turn: it'd point the wrong way.)
+      if (wait) { this.until.set(el, Math.max(t, now + SECS)); el.classList.remove('unlock'); continue; }
       const on = now < t && !el.hidden;
       el.classList.toggle('unlock', on);
       if (now >= t) this.until.delete(el);

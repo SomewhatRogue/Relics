@@ -299,7 +299,8 @@ function hud(now: number): void {
   cluster?.update(game, spot, busy, now);
   unit.update(game, now);
   // The wood's buttons, flashed gold as each is given (unlockflash.ts); coins and the anvil in town (purse.ts).
-  unlocks.update(game.mode === 'wood' ? game.taught() : null, me, input.touch, now, (s) => fx.say(toPx(me.x, me.y)[0], toPx(me.x, me.y)[1] - 40, s, '#ffd27a', 2.6));
+  const moving = game.mode === 'wood' && (game.wood?.hold?.move === 'move' || game.wood?.hold?.move === 'step');
+  unlocks.update(game.mode === 'wood' ? game.taught() : null, me, input.touch, now, (s) => fx.say(toPx(me.x, me.y)[0], toPx(me.x, me.y)[1] - 40, s, '#ffd27a', 2.6), moving);
   purse.update(game);
   // A laptop's empty crossbow: the key to wind it, on the prompt line.
   if (!input.touch && $('#prompt').hidden && !busy && game.mode !== 'town' && WEAPONS[me.weapon].reloads && me.xbowEmpty) ($('#prompt').hidden = false), ($('#prompt').textContent = 'RELOAD: C');

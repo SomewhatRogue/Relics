@@ -10,8 +10,8 @@ import { finish, speak, typing } from './speech';
 
 const NAME: Record<Move, string> = { move: 'MOVE', step: 'WALK OUT', attack: 'ATTACK', roll: 'DODGE', block: 'BLOCK', parry: 'PARRY', skill: 'SKILL', relic: 'RELIC', grab: 'GRAB AND THROW', backstab: 'BACKSTAB', heavy: 'FULL SHOT', slip: 'LAST SECOND' };
 const KEY: Record<Move, [string, string]> = {
-  move: ['W A S D', 'THE STICK, LEFT'],
-  step: ['W A S D', 'THE STICK, LEFT'],
+  move: ['W A S D', 'THE LEFT STICK'],
+  step: ['W A S D', 'THE LEFT STICK'],
   attack: ['LEFT CLICK', 'ATTACK'],
   roll: ['SPACE', 'ROLL'],
   block: ['HOLD RIGHT CLICK', 'HOLD BLOCK'],
@@ -60,8 +60,10 @@ export class LessonView {
     // The fade in, while you lie there.
     this.fade.style.opacity = w && w.wake >= 0 && w.wake < 2.5 ? String(1 - w.wake / 2.5) : '0';
     document.body.classList.toggle('waking', !!w && w.wake >= 0);
-    for (const b of document.querySelectorAll('.tb.hint')) b.classList.remove('hint');
-    if (hold?.move && BUTTON[hold.move] && this.touch) document.querySelector(BUTTON[hold.move]!)?.classList.add('hint');
+    for (const b of document.querySelectorAll('.hint')) b.classList.remove('hint');
+    // Moving points at the stick (bottom left), never a button.
+    const at = hold?.move === 'move' || hold?.move === 'step' ? '#touch .stick' : hold?.move ? BUTTON[hold.move] : undefined;
+    if (at && this.touch) document.querySelector(at)?.classList.add('hint');
     const show = !!hold && hold.kind !== 'praise';
     const key = show ? hold!.kind + hold!.text + hold!.move : '';
     if (key === this.key) return;

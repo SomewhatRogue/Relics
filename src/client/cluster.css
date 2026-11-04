@@ -61,6 +61,10 @@ body[data-guard='none'] .tb.block { display: none; }
 /* (A square drawn by a child, since the round hit area would round an outline of the button's own.) */
 .tb:is(.hint, .cue, .unlock)::before { content: ''; position: absolute; inset: calc(4 * var(--px)); pointer-events: none;
   outline: calc(2 * var(--px)) solid var(--gilt); outline-offset: calc(2 * var(--px)); animation: hint 0.5s steps(1) infinite; }
+/* The move lesson points at the stick the same way. */
+#touch .stick.hint, body.touch.stick-known .stick.hint { z-index: 11; opacity: 1; }
+#touch .stick.hint::before { content: ''; position: absolute; inset: calc(4 * var(--px)); pointer-events: none;
+  outline: calc(2 * var(--px)) solid var(--gilt); outline-offset: calc(2 * var(--px)); animation: hint 0.5s steps(1) infinite; }
 @keyframes hint { 50% { outline-offset: calc(4 * var(--px)); outline-color: var(--gold); } }
 /* A button the wood has just given you: the same gold square, and its name over it (unlockflash.ts). */
 .tb.unlock { z-index: 11; }
