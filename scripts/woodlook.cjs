@@ -10,7 +10,7 @@ const only = process.argv[4] ? process.argv[4].split(',') : null;
 const SPOTS = {
   field: [12, 30, 1], path: [30, 33, 1], 'path-gate': [33, 27, 1], clearing: [32, 19, 1], stream: [50, 20, 1], hut: [52, 9, 1],
   // (For Hew's: the third number is the beat of the cutscene, in seconds, woodcut.ts.)
-  'hew-scream': [0, 0, 6.6], 'hew-burst': [0, 0, 7.6], 'hew-wall': [0, 0, 8.4], 'hew-down': [0, 0, 9.5],
+  'hew-scream': [0, 0, 5.6], 'hew-burst': [0, 0, 7.15], 'hew-wall': [0, 0, 7.95], 'hew-down': [0, 0, 9.05],
   carcass: [7, 26.5, 2], drag: [18, 26.5, 5], spit: [17, 6.5, 2], deer: [49, 27.5, 4], soldier: [58, 27.5, 4], 'soldier-end': [58, 27.5, 6],
 };
 

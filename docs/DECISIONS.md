@@ -3256,3 +3256,39 @@ Kyle: "Change all Mage things to magic." and "Spellblade can perfect parry."
   PARRY mods (Kyle's call if he wants them).
 - Tests: `tests/magekit.test.ts` (the parry: no damage, PARRY, stagger, counter window, blade full),
   `tests/kitwords.test.ts` (PARRY ONLY, Mage rows say magic).
+
+
+## 2026-11-04: Orla of the watch meets you in the wood and walks you to Wickhold (Kyle; Claude Opus 5.5)
+
+Kyle: "In the tutorial, remove Hew's warning about getting to Father whatever. Have, to the left, a
+guard on patrol come out to meet you, say some stuff and take you to town."
+
+- **Hew's last words are gone** (`LINES.last`). Grabbed, he goes straight to the screams; the cutscene
+  is 0.45 s shorter (`CUT` in `sim/woodcut.ts`; `scripts/woodlook.cjs` beats moved to match).
+- **The guard is Orla of the watch** (the bible already has her knowing Hew by his boots, and the
+  watch complains about boots). `sim/woodguard.ts`, lines in `shared/orla.ts`. Once the Stoker is dead
+  and the relic card is gone, and its callers are dead too, she comes along the road from the west,
+  out of sight (12 tiles west of you, never past the road out), walks up to you through the gap west of
+  the hut and stops a step off. The world holds for her four lines, a tap each (the same `talk` box as
+  Hew's waking): she saw the smoke from the road; those are Hew's boots, so that's him by the hut; you
+  lived through the field when nobody else from the column did; come with her to Wickhold, she'll take
+  his tally of the dead to Odric. Then she stoops by Hew's body a moment for the stick and walks west; THE
+  ROAD says "Follow Orla west, to Wickhold" and the arrow points at the road out.
+- **The road out** (`ROAD_OUT`, unchanged, a few steps west of the hut) takes you to Wickhold only once
+  she's spoken, so nobody leaves the wood before meeting her. Tapping her afterwards repeats her last line.
+- **At the gate**: Orla's greeting panel is gone (she isn't introduced twice). The road narration
+  (`LINES.road`, unchanged, the wet left heel) shows alone under WICKHOLD, one tap. `greeting` is `'road'`.
+- **The tally** (Kyle: "It's not clear that you get a tally stick, or what it means, or that you're
+  supposed to go to the church to turn it in. Let's simplify"): the simplest version. Orla takes it
+  ("his tally of the dead"); the player never carries or delivers anything, so no tracker objective or
+  quest marker. Odric's separate tally scene (the panel with the notches narration) is gone: the first
+  time you open the church after the wood, his usual panel starts with one plain line,
+  "Orla brought me Hew's tally of the dead. I've cut a notch on it for Hew." (`TALLY.odric`, cleared by
+  `profile.tally`). Not changed: a Healer's cold censer still gets no town objective; Isolde relights it
+  when the Healer visits their trainer, as before.
+- **Facing**: an NPC without a round can now carry `fx`/`fy` (`Npc` in `shared/arena.ts`, read by
+  `npcAt`), so Orla faces the way she walks in flat and 3D. Hew is unchanged (he sets neither).
+- Story bible's prologue and after-the-wood entries updated.
+- Tests: `tests/wood.test.ts` (the hut): no Odric in Hew's words; the road out does nothing before she
+  comes; she waits for the callers; she spawns well west, stops beside you, says her four lines; stoops
+  and leads west; the road out then reaches town and the road greeting.

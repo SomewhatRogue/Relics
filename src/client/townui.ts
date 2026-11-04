@@ -14,6 +14,7 @@ import { openStore } from './stores';
 import { openShop } from './shops';
 import { CHURCH, COAL, TALLY } from './copy';
 import { LINES } from '../shared/wood';
+import { ORLA } from '../shared/orla';
 import type { Panel } from './panels';
 import { RUMOURS } from './rumours';
 import { partyList, wireParties } from './partyboard';
@@ -111,15 +112,15 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     openTrainer(g, panel, `${t.name}, ${CLASS_NAME[cls]} TRAINER`, name, greet);
   } else if (id === 'hew') {
     panel.show('HEW', say('Hew', g.wood && g.wood.stage >= 2 ? LINES.north : LINES.later));
+  } else if (id === 'orla') {
+    panel.show(ORLA.name, say('Orla', ORLA.meet[ORLA.meet.length - 1]));
   } else if (id === 'church') {
     // Hungry gear is given up here, and only here. Odric doesn't ask what it is.
     const hungry = g.gearList().filter((it) => it.quality === 'hungry');
-    if (pr.tally) {
-      pr.tally = false;
-      g.keep();
-      return panel.show('FATHER ODRIC', p('You give him the hazel stick. He counts the notches with his thumb, eleven, then takes out a knife and cuts a twelfth.') + say('Father Odric', TALLY.odric), [{ label: 'CLOSE', act: again }], true);
-    }
-    panel.show('FATHER ODRIC', say('Father Odric', 'Give what you can spare. Then a little of what you can\'t. That\'s the part it burns.') + (pr.cls === 'HEALER' ? say('Father Odric', COAL.odric) : '') +
+    // The first time in after the wood: one line about Hew (Orla brought the stick; you carry nothing).
+    const hew = pr.tally ? say('Father Odric', TALLY.odric) : '';
+    if (pr.tally) (pr.tally = false), g.keep();
+    panel.show('FATHER ODRIC', hew + say('Father Odric', 'Give what you can spare. Then a little of what you can\'t. That\'s the part it burns.') + (pr.cls === 'HEALER' ? say('Father Odric', COAL.odric) : '') +
       (hungry.length ? say('Father Odric', CHURCH.hungry) : '') +
       p(`Given to the Lantern so far: ${w.lantern} gold.`) + p(`You have ${pr.gold} gold.`),
       [...[20, 100].map((n) => ({ label: `GIVE ${n}`, disabled: pr.gold < n || pr.armor?.hungry === 'ransom', act: () => (g.donate(n), again()) })),

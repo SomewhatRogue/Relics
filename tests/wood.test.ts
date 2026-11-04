@@ -3,6 +3,7 @@ import { GATES, LESSONS, ROAD_OUT, lessonsFor } from '../src/shared/wood';
 import { kill } from '../src/sim/damage';
 import { NO_INTENT, type FightEvent } from '../src/sim/types';
 import { Game } from '../src/client/game';
+import { ORLA } from '../src/shared/orla';
 
 const store = new Map<string, string>();
 (globalThis as unknown as { localStorage: unknown }).localStorage = { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => void store.set(k, v), removeItem: (k: string) => void store.delete(k) };
@@ -176,7 +177,7 @@ describe('the prologue wood', () => {
     expect(g.wood!.count).toBe(1);
   });
 
-  it('the hut: the cutscene kills Hew; the Stoker gives up the javelin; the road leads to Wickhold with the tally stick', () => {
+  it('the hut: the cutscene kills Hew; the Stoker gives up the javelin; Orla of the watch meets you and walks you to Wickhold', () => {
     const g = new Game();
     g.create('MAGE', 'stray');
     wake(g);
@@ -215,6 +216,40 @@ describe('the prologue wood', () => {
     g.continueHold();
     g.step(0.05, NO_INTENT);
     expect(w().hold).toBeNull();
+    // Walking straight to the road out before she comes doesn't leave the wood.
+    Object.assign(g.hero, { x: ROAD_OUT.x + 1, y: ROAD_OUT.y + 2 });
+    g.step(0.05, NO_INTENT);
+    expect(g.mode).toBe('wood');
+    // Hew's last words are gone: he only screams.
+    expect([...said].some((l) => l.includes('Odric'))).toBe(false);
+    // Orla waits for the Stoker's callers to be dead.
+    expect(g.room.map.npcs?.some((n) => n.talk === 'orla')).toBe(false);
+    for (const e of g.room.enemies) if (w().ids.includes(e.id) && e.act !== 'dead') kill(e, [], 'burst', 0, 1);
+    // Orla of the watch comes along the road from the west, up to you, and says her piece.
+    Object.assign(g.hero, { x: 54, y: 9 });
+    const orla = () => g.room.map.npcs?.find((n) => n.talk === 'orla');
+    g.step(0.05, NO_INTENT);
+    expect(orla()).toMatchObject({ name: ORLA.name, look: 'guard' });
+    expect(orla()!.x).toBeLessThan(g.hero.x - 8);
+    // Not yet: the road out waits for her.
+    const heard: string[] = [];
+    for (let i = 0; i < 400 && heard.length < ORLA.meet.length; i++) {
+      const h = w().hold;
+      if (h) {
+        expect(h.kind).toBe('talk');
+        heard.push(h.who + ': ' + h.text);
+        expect(Math.hypot(orla()!.x - g.hero.x, orla()!.y - g.hero.y)).toBeLessThanOrEqual(ORLA.near + 0.01);
+        g.continueHold();
+      }
+      g.step(0.05, NO_INTENT);
+    }
+    expect(heard).toEqual(ORLA.meet.map((t) => 'ORLA: ' + t));
+    // Then she stoops by Hew for the tally stick and leads you west.
+    for (let i = 0; i < 200 && w().guard?.phase !== 'lead'; i++) g.step(0.05, NO_INTENT);
+    expect(w().guard?.phase).toBe('lead');
+    const was = orla()!.x;
+    g.step(0.5, NO_INTENT);
+    expect(orla()!.x).toBeLessThan(was);
     // The road out is a few steps west of the hut, not the length of the wood.
     expect(Math.hypot(ROAD_OUT.x - 52, ROAD_OUT.y - 6)).toBeLessThan(16);
     Object.assign(g.hero, { x: ROAD_OUT.x + 1, y: ROAD_OUT.y + 2 });
@@ -222,7 +257,7 @@ describe('the prologue wood', () => {
     expect(g.mode).toBe('town');
     expect(g.profile).toMatchObject({ prologue: true, tally: true });
     expect(g.profile.relics.find((r) => r.id === g.profile.relic)?.kind).toBe('javelin');
-    expect(g.greeting).toBe('orla');
+    expect(g.greeting).toBe('road');
   });
 
   it('a second hero can skip the wood and still gets the javelin; a Healer comes out with a cold censer', () => {

@@ -3,7 +3,7 @@
  * dies... his head exploded and is thrown against a wall and slides down it, then the monster
  * bellows and attacks you"). Beat by beat, in seconds: he goes round the side of the hut; the ground
  * shakes; the Stoker comes up from behind the cordwood and runs him down; it has him off his feet;
- * he shouts the one thing he wants done, then screams; his head goes; it throws him into the front
+ * he screams (no last words: Kyle cut them, 2026-11-04); his head goes; it throws him into the front
  * of his own hut and he slides down the wall, leaving it red; it bellows, no words, and comes for
  * you. Hew and the Stoker are puppeted here (the Stoker's own mind is held still till the end).
  */
@@ -13,7 +13,7 @@ import type { FightEvent } from './types';
 import { HERO_ID, hew, say, spawn } from './woodkit';
 import type { WoodState } from './wood';
 
-export const CUT = { walk: 0.4, rumble: 2.6, rise: 3.4, run: 4.3, grab: 5.0, last: 5.15, scream: 6.35, cutoff: 7.05, burst: 7.5, toss: 7.75, wall: 8.1, slid: 8.9, bellow: 9.15, end: 9.8 };
+export const CUT = { walk: 0.4, rumble: 2.6, rise: 3.4, run: 4.3, grab: 5.0, scream: 5.3, cutoff: 6.6, burst: 7.05, toss: 7.3, wall: 7.65, slid: 8.45, bellow: 8.7, end: 9.35 };
 /** Where he goes round to (by the cordwood), and where he hits the hut's front wall (and how high up it, in pixels). */
 const BACK = { x: 55.5, y: 7.4 }, WALL = { x: 54.2, y: 6.2, up: 13 };
 
@@ -59,8 +59,7 @@ export function stepCut(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: num
   if (at(CUT.grab) && s) (s.moving = false), ev.push({ k: 'impact', x: s.x, y: s.y, kind: 'cleave' });
   // Off his feet, held up at its mouth, kicking; harder once he's screaming.
   if (n && t >= CUT.grab && t < CUT.toss) n.lift = 22 * ease(span(CUT.grab, CUT.grab + 0.5)) + (t > CUT.grab + 0.5 && t < CUT.burst ? Math.sin(t * (t > CUT.scream ? 44 : 30)) * (t > CUT.scream ? 1.6 : 0.8) : 0);
-  // What he wants done, shouted at you; then he screams, and it's cut off.
-  if (at(CUT.last)) shout(LINES.last, CUT.scream - CUT.last);
+  // He screams, and it's cut off.
   if (at(CUT.scream)) shout(LINES.screams[0], CUT.cutoff - CUT.scream);
   if (at(CUT.cutoff)) shout(LINES.scream, CUT.burst - CUT.cutoff);
   if (at(CUT.burst)) w.caption = null;

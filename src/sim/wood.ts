@@ -5,12 +5,12 @@
  * Plain data, stepped after the room each frame by whoever runs the room.
  */
 import { attackCovers } from './combat';
-import { AREAS, FEEDING, GATES, GOBLIN_DEAD, LINES, ROAD_OUT, STOKER, STOKER_CALLS, areaAt, lessonsFor, type Lesson, type Teach } from '../shared/wood';
+import { AREAS, FEEDING, GATES, GOBLIN_DEAD, LINES, STOKER, STOKER_CALLS, areaAt, lessonsFor, type Lesson, type Teach } from '../shared/wood';
 import { dodgeName, type HeroClass } from '../shared/weapons';
-import { inArea } from '../shared/arena';
 import { isDead } from './damage';
 import { HERO_ID, hew, say, spawn } from './woodkit';
 import { stepCut } from './woodcut';
+import { outOfWood, stepGuard, type Guard } from './woodguard';
 export { CUT, skipCut } from './woodcut';
 import type { ArenaRoom } from './room';
 import type { Enemy, FightEvent, Hero } from './types';
@@ -51,6 +51,8 @@ export interface WoodState {
   cls: HeroClass;
   /** Where you stood up: walking a little away starts the first lesson. */
   from: { x: number; y: number } | null;
+  /** Orla of the watch, come to meet you once the Stoker's dead (woodguard.ts). */
+  guard?: Guard;
 }
 /** What the world is held for, and what lets it go on. */
 export type Move = 'move' | Teach;
@@ -184,7 +186,8 @@ export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: nu
     if (d > 0.1) (n.x += (dx / d) * Math.min(d, 3 * dt)), (n.y += (dy / d) * Math.min(d, 3 * dt));
   }
   if (w.stage === 5) {
-    if (inArea(ROAD_OUT, h.x, h.y)) w.done = true;
+    stepGuard(w, room, h, dt);
+    if (!w.hold && outOfWood(w, h)) w.done = true;
     return;
   }
   // Walk into the area: the world stops while Hew says his piece and shows you the control; then its
@@ -263,7 +266,7 @@ export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: nu
 
 /** What to show over the field: the lesson, the control, how far along. */
 export function woodGoal(w: WoodState, touch: boolean): { title: string; text: string } {
-  if (w.stage === 5) return { title: 'THE ROAD', text: 'Follow the arrow west, to Wickhold' };
+  if (w.stage === 5) return { title: 'THE ROAD', text: !w.relic ? 'Follow the arrow west, to Wickhold' : w.guard?.phase === 'stick' || w.guard?.phase === 'lead' ? 'Follow Orla west, to Wickhold' : w.guard ? 'Someone is coming up the road' : 'Clear them' };
   if (w.stage === 4 && w.entered && w.cut < 0) return { title: 'KILL THE STOKER', text: lessonsFor(w.cls)[1].card === 'step' ? 'Get out of anything striped' : 'Dodge out of anything striped' };
   // On the way to the hut, and while Hew's there: no skill to teach a hero who has none yet.
   if (w.stage === 4) return { title: "HEW'S HUT", text: w.entered ? 'Wait for Hew' : 'Follow Hew' };

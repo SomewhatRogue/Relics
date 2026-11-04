@@ -80,7 +80,7 @@ export class Game {
   /** The prologue in progress (sim/wood.ts), and whether it's a replay. */
   wood: WoodState | null = null;
   private woodReplay = false;
-  /** Someone to greet a hero once (Orla, out of the wood). */
+  /** Something to show a hero once (the road into Wickhold, out of the wood). */
   greeting: string | null = null;
   /** Set when a run ends; the UI shows it and clears it. */
   result: Result | null = null;
@@ -183,7 +183,7 @@ export class Game {
     this.enterTown(this.gateSpot());
   }
 
-  /** What the wood leaves you: the javelin, Hew's tally stick, a cold censer for a Healer. */
+  /** What the wood leaves you: the javelin, Odric's word about Hew's tally (Orla took it), a cold censer for a Healer. */
   private giveWood(): void {
     const p = this.profile;
     if (!this.woodReplay) {
@@ -199,11 +199,11 @@ export class Game {
     return g ? { x: g.x, y: g.y + 1.6 } : { x: 28, y: 3 };
   }
 
-  /** Out of the wood at the north gate: Orla knows the boots. */
+  /** Out of the wood at the north gate, Orla of the watch having walked you there (sim/woodguard.ts). */
   private finishWood(): void {
     this.giveWood();
     this.wood = null;
-    this.greeting = this.woodReplay ? null : 'orla';
+    this.greeting = this.woodReplay ? null : 'road';
     this.enterTown(this.gateSpot());
   }
 

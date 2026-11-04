@@ -53,9 +53,9 @@ export const CHURCH = {
   gannet: 'Gannet won\'t meet your eye while he talks.',
 };
 
-/** After the wood: Odric takes Hew's tally stick; Isolde relights a Healer's censer (Kyle: plain, two lines if need be). */
+/** After the wood: Odric's one line about Hew, the first time in (Orla brought him the stick); Isolde relights a Healer's censer (Kyle: plain, two lines if need be). */
 export const TALLY = {
-  odric: "Hew's tally. A notch for each of the column he burned, so the hungry couldn't have them. I keep the count of our dead. They go on it, and so does Hew.",
+  odric: "Orla brought me Hew's tally of the dead, and I've cut a notch on it for him.",
   isolde: "Your censer went cold on the field, and a cold censer can't heal. It's lit again, so your heals work.",
 };
 

@@ -106,6 +106,9 @@ export interface Npc {
   smear?: number;
   /** Keeping low: crouched and creeping (Hew coming in past the goblins at the dead). */
   sneak?: boolean;
+  /** Cutscene puppetry: which way someone without a round faces (Orla walking up the road). */
+  fx?: number;
+  fy?: number;
   /** Paint only, what they're busy at: carrying the dead and digging, at the whetstone, at the well. */
   work?: 'bury' | 'dig' | 'whet' | 'well';
   /** Somebody in the background: no mark over them, nobody to talk to. */
@@ -119,7 +122,7 @@ export interface Npc {
 /** Where someone is at time `t` (walking their round, or standing where they stand), and which way they face. */
 export function npcAt(n: Npc, t: number): { x: number; y: number; fx: number; fy: number } {
   const p = n.path;
-  if (!p || p.length < 2) return { x: n.x, y: n.y, fx: 0, fy: 1 };
+  if (!p || p.length < 2) return { x: n.x, y: n.y, fx: n.fx ?? 0, fy: n.fy ?? 1 };
   const seg = p.map((a, i) => {
     const b = p[(i + 1) % p.length];
     return { a, b, len: Math.hypot(b[0] - a[0], b[1] - a[1]) };

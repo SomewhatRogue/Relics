@@ -204,11 +204,15 @@ barns), with some empty, some with goblins asleep, some at a body, and the door 
 
 **The prologue wood** (built 2026-11-01; waiting on Kyle's play). *Done when* a new hero wakes on the
 field, learns attack, dodge, block and parry from Hew, watches him die, kills the Stoker for the
-javelin, and walks into Wickhold with the tally stick.
+javelin, and walks into Wickhold.
 Reworked 2026-11-04 (Claude Opus 5.5, from Kyle's play): the wood is solid either side of the way
 through, with goblin scenes past the trees you can see and never reach; Hew is grabbed, screams, and
 is thrown into his hut's wall; the Stoker bellows without a word and attacks; the road out is a few
 steps west of the hut. *Done when* Kyle can't get lost off the path and reaches Wickhold soon after the fight.
+Orla, 2026-11-04 (Claude Opus 5.5, from Kyle): Hew dies without last words; once the Stoker and its
+callers are dead, Orla of the watch comes along the road from the west, says four lines, takes Hew's tally
+stick for Odric and leads the hero west; no second greeting at the gate. *Done when* Kyle meets her by the
+hut on his phone and is in Wickhold a few steps after she's spoken.
 
 **Loot and gear** (built 2026-11-01, all six slices; waiting on Kyle's play). *Done when* Kyle finds gold
 and potions on a job, opens a chest, compares and equips a better tier, upgrades at the anvil, and

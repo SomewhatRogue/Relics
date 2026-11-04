@@ -28,8 +28,8 @@ import { Title } from './title';
 import { Recovery } from './recovery';
 import { woodGoal } from '../sim/wood';
 import { LINES, ROAD_OUT } from '../shared/wood';
+import { spoken } from '../sim/woodguard';
 const WOOD_ROAD = LINES.road;
-const ORLA = ["Those are *Hew's* boots.", "Ah. Well. Church is up past the Lantern, and you'll want to see Hollis after, he'll have you working before your feet are dry."];
 let shownCap = '';
 import { WorldLink } from './worldlink';
 import { setLink } from './squareui';
@@ -380,8 +380,8 @@ function tick(t: number): void {
   // Back in the open in town: see what the world has been up to (at most every 30 s).
   if (game.mode === 'town' && !game.outside) void link.refresh();
   if (game.result && !panel.open) showResult(game, panel);
-  // Out of the wood: Orla at the gate.
-  if (game.greeting === 'orla' && !panel.open) (game.greeting = null), panel.show('ORLA OF THE WATCH', `<p class="dim">${line(WOOD_ROAD)}</p><p><b>Orla:</b> ${line(`"${ORLA[0]}"`, 'ORLA')}</p><p>She looks at your feet a long while.</p><p><b>Orla:</b> ${line(`"${ORLA[1]}"`, 'ORLA')}</p>`, [{ label: 'INTO WICKHOLD', primary: true, act: () => panel.hide() }], true);
+  // Out of the wood: the road to Wickhold (Orla walked you here; she met you in the wood).
+  if (game.greeting === 'road' && !panel.open) (game.greeting = null), panel.show('WICKHOLD', `<p class="dim">${line(WOOD_ROAD)}</p>`, [{ label: 'INTO WICKHOLD', primary: true, act: () => panel.hide() }], true);
   // Back to a town the hungry raided while you were away: Dunn tells you, the first time you see it.
   else if (game.mode === 'town' && !game.outside && !panel.open && !title.open && !game.result) {
     const news = raidNews(game.world);
@@ -392,7 +392,7 @@ function tick(t: number): void {
   scene.fanfare = game.wood?.hold?.kind === 'relic';
   scene.marks = game.mode === 'run' ? targets(game.run, game.room, game.houses()) : [];
   scene.doors = game.mode === 'run' ? game.doorMarks() : [];
-  scene.pointTo = game.wood && game.wood.stage === 5 && !game.wood.hold ? { x: ROAD_OUT.x + 1, y: ROAD_OUT.y + ROAD_OUT.h / 2 } : wayTarget(game);
+  scene.pointTo = game.wood && game.wood.stage === 5 && !game.wood.hold && spoken(game.wood) ? { x: ROAD_OUT.x + 1, y: ROAD_OUT.y + ROAD_OUT.h / 2 } : wayTarget(game);
   // The way on just opened: say which way, over you.
   const opened = ways.check(game);
   if (opened) objFlash.done(t / 1000);
