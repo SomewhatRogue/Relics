@@ -46,7 +46,7 @@ export const MORE_KITS: Record<MoreKitId, Weapon> = {
       { windup: 0.09, active: 0.08, recover: 0.18, dmg: 7, range: 1.3, arc: 130, lunge: 0.3, knock: 2, hits: 2 },
       { windup: 0.14, active: 0.09, recover: 0.32, dmg: 10, range: 1.4, arc: 150, lunge: 0.45, knock: 4, hits: 3 },
     ],
-    heavy: { windup: 0.05, active: 0.04, recover: 0.3, dmg: 4, dmgFull: 8, range: 9, arc: 0, lunge: -0.1, knock: 0, knockFull: 1, shot: 'dart', speed: 22, venom: true },
+    heavy: { windup: 0.05, active: 0.04, recover: 0.3, dmg: 2, dmgFull: 4, range: 9, arc: 0, lunge: -0.1, knock: 0, knockFull: 1, shot: 'dart', speed: 22, venom: true },
     draw: 0.6,
     chip: 0.45, blockSpeed: 0.6, chargeSpeed: 0.75, backstab: 2, parryWindow: 0.2, guardArc: 100, guardCost: 1.8, speed: 1.08,
     dodge: DASH,

@@ -307,6 +307,8 @@ export interface Enemy extends Body {
   venomNext?: number;
   venomHard?: boolean;
   pukeUntil?: number;
+  /** When it last retched (once every VENOM.pukeEvery seconds at most). */
+  pukeAt?: number;
   /** Caught in a hunter's net until then (small goblins can't move or act; big ones are slowed). */
   snareUntil: number;
   /** A relic's marks: the next blow lands harder (MARK) until `markUntil`; hobbled (HOBBLE) until `hobbleUntil`. */

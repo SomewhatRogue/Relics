@@ -9,10 +9,12 @@
 export const SKEWER = { dmg: 3, every: 0.5, time: 3, stagger: 0.7 };
 
 /**
- * Poison on a goblin: `dmg` a stack a tick every `every` seconds, for `time` seconds after the last dart,
- * up to `most` stacks. A perfect dart: it retches `puke` seconds (held fast), and its ticks are `hard` times.
+ * Poison on a goblin (Kyle, 2026-11-03: the dart barely hurts, the poison builds): `dmg` a stack a tick
+ * every `every` seconds, for `time` seconds after the last dart (each dart resets it), up to `most`
+ * stacks. A perfect dart makes its ticks `hard` times, and makes it retch `puke` seconds (held fast), but
+ * a goblin retches at most once every `pukeEvery` seconds, so one can't be held down by darts alone.
  */
-export const VENOM = { dmg: 2, every: 0.5, time: 4, most: 3, hard: 2, puke: 1 };
+export const VENOM = { dmg: 1, every: 0.5, time: 10, most: 5, hard: 2, puke: 1, pukeEvery: 10 };
 
 /**
  * How much of the poison a foe takes, by its weakness row (shared/weakness.ts foeKind): butchers and

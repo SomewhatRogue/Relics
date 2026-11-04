@@ -44,8 +44,10 @@ export function envenom(e: Enemy, perfect: boolean, now: number, ev: FightEvent[
   ev.push({ k: 'envenom', x: e.x, y: e.y });
   if (!perfect) return;
   e.venomHard = true;
+  // Retching only once in a while, so darts alone can't hold one goblin down.
+  if (now - (e.pukeAt ?? -1e9) < VENOM.pukeEvery) return;
   const retch = VENOM.puke * takes;
-  if (daze(e, retch, ev)) (e.pukeUntil = now + retch), ev.push({ k: 'puke', x: e.x, y: e.y, dx: e.fx, dy: e.fy });
+  if (daze(e, retch, ev)) (e.pukeUntil = now + retch), (e.pukeAt = now), ev.push({ k: 'puke', x: e.x, y: e.y, dx: e.fx, dy: e.fy });
 }
 
 /** Once a tick: bleeds and poison tick (a small number each), and wear off. */

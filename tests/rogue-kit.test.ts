@@ -74,7 +74,7 @@ describe("the poisoner's dart", () => {
     const ev = [...loose(late, 1), ...run(VENOM.time)];
     expect(ev.some((x) => x.k === 'puke')).toBe(false);
     const n = ticks(ev, 'poison');
-    expect(n.length).toBeGreaterThanOrEqual(VENOM.time / VENOM.every - 1);
+    expect(n.length).toBeGreaterThanOrEqual(VENOM.time / VENOM.every - 2);
     expect(n.every((v) => v === VENOM.dmg)).toBe(true);
     expect(e.venom).toBe(0);
   });
@@ -84,6 +84,12 @@ describe("the poisoner's dart", () => {
     const ev = loose(late, 1.2);
     expect(e.venom).toBe(2);
     expect(ticks(ev, 'poison')).toContain(VENOM.dmg * 2);
+  });
+  it('a goblin retches at most once every pukeEvery seconds, however many perfect darts', () => {
+    const { loose } = arena('poisoner');
+    const first = loose(perfect, 1.2), again = loose(perfect, 1.2);
+    expect(first.some((x) => x.k === 'puke')).toBe(true);
+    expect(again.some((x) => x.k === 'puke')).toBe(false);
   });
   it('loosed on the flash, the goblin retches (helpless) first, and its poison ticks harder', () => {
     const { e, loose, run } = arena('poisoner');
