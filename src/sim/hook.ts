@@ -10,6 +10,7 @@ import type { World } from './elements';
 import { isDead } from './damage';
 import type { Afflict } from './javelin';
 import type { Enemy, FightEvent, Hero, Hook } from './types';
+import { stun } from './stuns';
 
 let nextId = 1;
 
@@ -98,7 +99,7 @@ export function stepHook(k: Hook, heroes: Hero[], enemies: Enemy[], now: number,
       collide(e, e.radius);
       // Small ones arrive reeling; a butcher hauled in just arrives, angry.
       if (e.kind === 'butcher') Object.assign(e, { act: 'chase', cooldown: Math.max(e.cooldown, 0.4) });
-      else Object.assign(e, { act: 'stunned', actT: 0, actDur: HOOK.yankStun });
+      else if (!stun(e, k.owner, now, HOOK.yankStun, ev)) Object.assign(e, { act: 'chase', cooldown: Math.max(e.cooldown, 0.4) });
       ev.push({ k: 'land', x: e.x, y: e.y, dx: dx / d, dy: dy / d });
       return false;
     }

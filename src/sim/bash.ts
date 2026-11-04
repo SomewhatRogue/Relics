@@ -12,6 +12,7 @@ import { damageProp } from './props';
 import { bashSurvivors } from './survivorhits';
 import type { Enemy, FightEvent, Hero } from './types';
 import { bashReach, bashStun } from './knacks';
+import { stun } from './stuns';
 
 const hitBy = new WeakMap<Hero, Set<number>>();
 
@@ -41,8 +42,8 @@ export function stepBash(h: Hero, w: Enemy[], world: World, dt: number): void {
     if (damage(e, BASH.dmg, world.now, world.ev, { heavy: true, dx: ox, dy: oy })) continue;
     shove(e, ox, oy, BASH.knock, e.weight);
     if (held(e, world.now)) continue;
-    if (e.weight <= 1) Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: bashStun(h) }), world.ev.push({ k: 'stunned', x: e.x, y: e.y });
-    else if (!e.attack?.unblockable) Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: BASH.stagger });
+    if (e.weight <= 1) stun(e, h.id, world.now, bashStun(h), world.ev) && world.ev.push({ k: 'stunned', x: e.x, y: e.y });
+    else if (!e.attack?.unblockable) stun(e, h.id, world.now, BASH.stagger, world.ev, 'flinch');
   }
   for (const p of world.props) {
     if (p.lifted || p.broken || Math.hypot(p.x - h.x, p.y - h.y) > HERO.radius + p.radius + BASH.reach) continue;

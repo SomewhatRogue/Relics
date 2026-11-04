@@ -7,6 +7,7 @@ import { collide } from '../shared/arena';
 import { GRAB, GUARD, HERO, technique } from '../shared/tuning';
 import { damage, frozen, isDead, snared } from './damage';
 import type { Enemy, FightEvent, Hero, Intent } from './types';
+import { stun } from './stuns';
 
 /** Can this hero grab this goblin now? */
 export function grabbable(h: Hero, e: Enemy, now: number): boolean {
@@ -61,7 +62,7 @@ export function stepCarry(h: Hero, inp: Intent, enemies: Enemy[], now: number, d
       e.act = 'flinch';
       h.carrying = 0;
       ev.push({ k: 'slam', x: e.x, y: e.y });
-      if (!damage(e, Math.round(GRAB.slamDmg * (1 + technique(h.drills, 'WARRIOR'))), now, ev, { heavy: true, how: 'burst', dx: 0, dy: 1 })) Object.assign(e, { act: 'stunned', actT: 0, actDur: GRAB.slamStun });
+      if (!damage(e, Math.round(GRAB.slamDmg * (1 + technique(h.drills, 'WARRIOR'))), now, ev, { heavy: true, how: 'burst', dx: 0, dy: 1 })) stun(e, h.id, now, GRAB.slamStun, ev) || Object.assign(e, { actT: 0, actDur: 0.3 });
     }
     return;
   }

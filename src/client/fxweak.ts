@@ -1,6 +1,7 @@
 /**
  * WEAK and RESIST over a foe (shared/weakness.ts): WEAK bright in the colour of what landed it, with a
- * spray of sparks; RESIST small and grey, a short dull blip. Cosmetic only.
+ * spray of sparks; RESIST small and grey, a short dull blip. SHRUGS IT OFF, as quiet: a goblin the same
+ * hero stunned too lately to stun again (sim/stuns.ts). Cosmetic only.
  */
 import type { FightEvent } from '../sim/types';
 import type { Fx } from './fx';
@@ -12,6 +13,10 @@ export function weakFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
     const col = ev.el === 'physical' ? '#ffb040' : EL_COL[ev.el];
     fx.say(x, y - 42, 'WEAK', col);
     fx.burst(x, y - 8, 6, [col, '#fff1b0'], 55, true);
+    return true;
+  }
+  if (ev.k === 'shrug') {
+    fx.say(x, y - 40, 'SHRUGS IT OFF', '#8a8794', 0.45);
     return true;
   }
   if (ev.k === 'resist') {

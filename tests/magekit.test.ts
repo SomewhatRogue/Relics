@@ -4,7 +4,7 @@ import { BUTCHER, HERO, SPELL, TICK, WALL, WAND, WEAPONS, WREATHE, BLADE, type W
 import { ArenaRoom } from '../src/sim/room';
 import { newEnemy } from '../src/sim/enemies';
 import { renameKits } from '../src/shared/oldkits';
-import { NO_INTENT, type Enemy, type FightEvent, type Intent, type Zone } from '../src/sim/types';
+import { NO_INTENT, type Enemy, type EnemyAttack, type FightEvent, type Intent, type Zone } from '../src/sim/types';
 
 /** A Mage with `weapon` at (9, 9) facing up, in `el`, goblins at each (x, y), held in place unless `free`. */
 function arena(weapon: WeaponId, at: [number, number][] = [[9, 7.6]], el: Element = 'fire', free = false) {
@@ -41,7 +41,7 @@ describe('the wand', () => {
     expect(a.h.x - 9).toBeGreaterThan(full * WAND.walk * 0.9);
   });
 
-  it('a spark that lands mid wind-up breaks the blow off, PERFECT', () => {
+  it('a spark that lands mid wind-up breaks the blow off: a bonus, no PERFECT', () => {
     const a = arena('wand', [[9, 5]]);
     const ev0: FightEvent[] = [];
     // The goblin starts a blow; the spark is loosed into its wind-up.
@@ -49,8 +49,24 @@ describe('the wand', () => {
     a.e.act = 'attack';
     ev0.push(...a.tap(0.7));
     expect(ev0.some((x) => x.k === 'interrupt')).toBe(true);
-    expect(ev0.some((x) => x.k === 'perfect')).toBe(true);
+    expect(ev0.some((x) => x.k === 'perfect')).toBe(false);
     expect(a.e.attack).toBeNull();
+  });
+
+  it('the burst let go on the white flash breaks off whatever it hits, striped blows too, PERFECT', () => {
+    // Past its wind-up, mid a striped blow: a plain spark wouldn't stop it.
+    const striped = (): EnemyAttack => ({ kind: 'cleave', t: 0.9, windup: 0.5, active: 5, recover: 0.3, dmg: 10, knock: 2, unblockable: true, dx: 0, dy: 1, ox: 9, oy: 5, range: 1.3, arc: 90, cx: 0, cy: 0, radius: 0, done: false });
+    const a = arena('wand', [[9, 5]]);
+    Object.assign(a.e, { act: 'attack', attack: striped() });
+    const ev = a.loose(0.7, 0.4);
+    expect(ev.some((x) => x.k === 'perfect')).toBe(true);
+    expect(ev.some((x) => x.k === 'interrupt')).toBe(true);
+    expect(a.e.attack).toBeNull();
+    // Held past the flash, the same blow carries on.
+    const b = arena('wand', [[9, 5]]);
+    Object.assign(b.e, { act: 'attack', attack: striped() });
+    const ev2 = b.loose(1.0, 0.4);
+    expect(ev2.some((x) => x.k === 'interrupt')).toBe(false);
   });
 });
 
@@ -145,7 +161,8 @@ describe('the spellblade', () => {
 
   it('a hold spends magic to wreathe it; the last wreathed swing throws a wave of the element', () => {
     const a = arena('spellblade', [[9, 7.9], [9, 6.6]]);
-    const ev = [...a.loose(0.6, 0.6)];
+    // (Held past the flash: let go on it, it would be free.)
+    const ev = [...a.loose(0.9, 0.6)];
     expect(ev.find((x) => x.k === 'magic')).toMatchObject({ n: SPELL.wreathe });
     expect(a.es[0].burnUntil).toBeGreaterThan(a.room.time);
     for (let i = 0; i < WREATHE.swings; i++) ev.push(...a.tap(0.6));
@@ -174,7 +191,17 @@ describe('the spellblade', () => {
     expect(a.h.stamina).toBe(HERO.stamina);
   });
 
-  it("block pressed as a blow lands catches it on the blade: no damage, the blade full", () => {
+  it('the wreathe let go on the white flash is free and leaves the blade full, PERFECT', () => {
+    const a = arena('spellblade', [[2, 2]]);
+    const ev = a.loose(0.6, 0.3);
+    expect(ev.some((x) => x.k === 'perfect')).toBe(true);
+    expect(ev.some((x) => x.k === 'wreathe')).toBe(true);
+    expect(ev.some((x) => x.k === 'magic')).toBe(false);
+    expect(a.h.stamina).toBe(HERO.stamina);
+    expect(a.h.bladeCharge).toBe(1);
+  });
+
+  it("block pressed as a blow lands catches it on the blade: no damage, the blade full (a bonus, no PERFECT)", () => {
     const room = new ArenaRoom(3, { scrappers: false });
     const h = room.join('me');
     const b = room.enemies[0];
@@ -196,6 +223,7 @@ describe('the spellblade', () => {
     expect(h.hp).toBe(HERO.hp);
     expect(h.bladeCharge).toBe(1);
     expect(ev.some((x) => x.k === 'caught')).toBe(true);
+    expect(ev.some((x) => x.k === 'perfect')).toBe(false);
     expect(BUTCHER.cleave.dmg).toBeGreaterThan(0);
   });
 });

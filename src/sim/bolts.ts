@@ -24,6 +24,7 @@ import { hobble, spare } from './foundrelics';
 import { envenom } from './venom';
 import { markShot, perfectStrike, spent } from './rangershots';
 import { interrupt, windingUp } from './spells';
+import { mayStun, stun } from './stuns';
 
 let nextId = 1;
 
@@ -37,8 +38,8 @@ export function shoot(h: Hero, s: Swing, el: Augment, mult = 1, traits: TraitId[
   const b: Bolt = { ...base(h, s.shot!, el), traits, speed: s.speed ?? 20, range: s.range, dmg: Math.round(s.dmg * mult), knock: s.knock, pierce: !!s.pierce, burst: s.burst ?? 0, stun: s.stun ?? 0 };
   // A poisoner's dart: loosed on the white flash, it retches what it hits (sim/venom.ts).
   if (s.venom) b.poison = h.heavy && h.perfect ? 2 : 1;
-  // A wand's spark breaks off a blow it lands in the wind-up of (sim/spells.ts).
-  if (s.interrupts) b.interrupts = true;
+  // A wand's spark breaks off a blow it lands in the wind-up of; its burst let go on the flash, anything (sim/spells.ts).
+  if (s.interrupts) (b.interrupts = true), (b.breaks = h.heavy && h.perfect);
   // The Ranger's: a longbow's perfect arrow blinds, a crossbow bolt runs through a few (a glinted one, all).
   markShot(h, s, b);
   return b;
@@ -80,8 +81,8 @@ export function blast(w: World, b: Bolt, x: number, y: number): void {
     e.lastBy = b.owner;
     if (damage(e, b.dmg, w.now, w.ev, { heavy: true, flinch: 0.5, mult: true, brutal: b.traits.includes('brutal'), how: 'burst', dx: e.x - x, dy: e.y - y, src: b.kind, el: b.el })) continue;
     if (e.act !== 'pinned') shove(e, d > 0.05 ? (e.x - x) / d : b.dx, d > 0.05 ? (e.y - y) / d : b.dy, b.knock, e.weight);
-    interrupt(e, winding, w.heroes.find((h) => h.id === b.owner), w.ev);
-    if (b.stun && e.act !== 'pinned' && !(b.relic && e.weight > 1)) Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: b.stun });
+    interrupt(e, winding, !!b.breaks, b.owner, w.now, w.ev);
+    if (b.stun && e.act !== 'pinned' && !(b.relic && e.weight > 1)) stun(e, b.owner, w.now, b.stun, w.ev);
     if (wasFrozen && b.knock >= 8) shatter(e, w.now, w.ev);
     else (afflict(w, e, b.el, b.dmg), b.freeze && afflict(w, e, b.el, b.dmg));
   }
@@ -98,6 +99,8 @@ function openNet(w: World, b: Bolt): void {
   for (const e of w.enemies) {
     if (isDead(e) || e.act === 'carried' || Math.hypot(e.x - b.x, e.y - b.y) > b.burst + e.radius) continue;
     if (damage(e, b.dmg, w.now, w.ev, { src: b.kind, el: b.el })) continue;
+    // (A small one netted flat is a stun, so not twice running from the same hero: sim/stuns.ts.)
+    if (e.weight <= 1 && !mayStun(e, b.owner, w.now, w.ev)) continue;
     e.snareUntil = w.now + NET.snare;
     e.kvx = e.kvy = 0;
     if (e.act === 'attack' && e.weight <= 1) Object.assign(e, { attack: null, act: 'chase', actT: 0 });
@@ -119,11 +122,11 @@ function strike(w: World, b: Bolt, e: Enemy): void {
   perfectStrike(b, e, w.now, w.ev);
   if (dead) return;
   if (e.act !== 'pinned') shove(e, b.dx, b.dy, b.knock, e.weight);
-  interrupt(e, winding, by, w.ev);
+  interrupt(e, winding, !!b.breaks, b.owner, w.now, w.ev);
   if (b.hobble) hobble(e, w);
-  if (b.poison) envenom(e, b.poison === 2, w.now, w.ev);
+  if (b.poison) envenom(e, b.poison === 2, b.owner, w.now, w.ev);
   // A bolt that dazes stuns where it stands (never a butcher).
-  if (b.stun && e.kind !== 'butcher' && e.act !== 'pinned') Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: b.stun });
+  if (b.stun && e.kind !== 'butcher' && e.act !== 'pinned') stun(e, b.owner, w.now, b.stun, w.ev);
   if (wasFrozen && b.knock >= 8) shatter(e, w.now, w.ev);
   else (afflict(w, e, b.el, b.dmg), b.freeze && afflict(w, e, b.el, b.dmg));
   if (b.chain) for (const o of w.enemies) {

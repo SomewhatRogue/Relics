@@ -35,7 +35,7 @@ describe('Shadowstep', () => {
   it('stuns the goblin you land behind for a second', () => {
     const { h, e } = arena('daggers', 'scrapper', 6);
     const ev: FightEvent[] = [];
-    shadowstep(h, [e], ev);
+    shadowstep(h, [e], ev, 0);
     expect(e.act).toBe('stunned');
     expect(e.actDur).toBe(SHADOWSTEP.stun);
     expect(ev.some((x) => x.k === 'stunned')).toBe(true);
@@ -43,7 +43,7 @@ describe('Shadowstep', () => {
   it("doesn't stop a butcher mid striped blow", () => {
     const { h, e } = arena('daggers', 'butcher', 6);
     Object.assign(e, { act: 'attack', attack: { kind: 'cleave', t: 0.2, windup: 1, unblockable: true } });
-    shadowstep(h, [e], []);
+    shadowstep(h, [e], [], 0);
     expect(e.act).toBe('attack');
   });
 });

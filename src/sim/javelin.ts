@@ -8,6 +8,7 @@ import { GUARD, JAVELIN, KNOCK, type Augment } from '../shared/tuning';
 import { shove } from './bodies';
 import { isDead, kill } from './damage';
 import type { Enemy, FightEvent, Hero, Javelin } from './types';
+import { stun } from './stuns';
 
 /** Lands the javelin's augment on what it hits. */
 export type Afflict = (e: Enemy, el: Augment, n: number) => void;
@@ -59,7 +60,9 @@ export function stepJavelin(j: Javelin, enemies: Enemy[], now: number, dt: numbe
         ev.push({ k: 'pinned', x: j.x, y: j.y, dx: j.dx, dy: j.dy });
         ev.push({ k: 'hit', x: carried.x, y: carried.y, n: JAVELIN.pinDmg, heavy: true, on: 'enemy' });
         if (carried.hp <= 0) kill(carried, ev), (carried.corpse = 'pinned');
-        else Object.assign(carried, { act: 'pinned', actT: 0, actDur: JAVELIN.pinTime, kvx: 0, kvy: 0 }), afflict(carried, j.el, JAVELIN.pinDmg);
+        // (Pinned to the wall is a stun: from the same hero twice running, it drops off instead.)
+        else if (stun(carried, j.owner, now, JAVELIN.pinTime, ev, 'pinned', true)) afflict(carried, j.el, JAVELIN.pinDmg);
+        else Object.assign(carried, { act: 'flinch', actT: 0, actDur: 0.3 }), afflict(carried, j.el, JAVELIN.pinDmg);
       } else ev.push({ k: 'javwall', x: j.x, y: j.y, dx: j.dx, dy: j.dy });
       return true;
     }

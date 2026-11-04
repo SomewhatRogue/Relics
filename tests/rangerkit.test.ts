@@ -71,11 +71,11 @@ describe('the longbow', () => {
 
   it('blinding stops a blow mid swing', () => {
     const e = Object.assign(newEnemy(1, 'scrapper', 5, 5), { act: 'attack', attack: { kind: 'swing' } as EnemyAttack });
-    blind(e, 10, []);
+    blind(e, 'me', 10, []);
     expect(e.attack).toBeNull();
     expect(e.act).toBe('chase');
     const big = newEnemy(2, 'butcher', 5, 5);
-    blind(big, 10, []);
+    blind(big, 'me', 10, []);
     expect(big.blindUntil).toBeCloseTo(10 + BLIND.time * BLIND.big);
   });
 });

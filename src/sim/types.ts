@@ -330,6 +330,9 @@ export interface Enemy extends Body {
   blindUntil?: number;
   /** When it last retched (once every VENOM.pukeEvery seconds at most). */
   pukeAt?: number;
+  /** When each hero last took its turn (a stun, pin, blind and so on: sim/stuns.ts), and when it last said it shrugged one off. */
+  stunnedBy?: Record<string, number>;
+  shrugAt?: number;
   /** Caught in a hunter's net until then (small goblins can't move or act; big ones are slowed). */
   snareUntil: number;
   /** A relic's marks: the next blow lands harder (MARK) until `markUntil`; hobbled (HOBBLE) until `hobbleUntil`. */
@@ -508,7 +511,7 @@ export type FightEvent =
   | { k: 'burst'; x: number; y: number; r: number; el: Augment }
   | { k: 'shock' | 'beam' | 'boltline'; x: number; y: number; x2: number; y2: number }
   | { k: 'heal'; x: number; y: number; n: number }
-  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle' | 'lift' | 'oilfire' | 'freed' | 'exitopen' | 'blaze' | 'chop' | 'denspawn' | 'hallow' | 'ward' | 'warded' | 'reflect' | 'wardbreak' | 'spotted' | 'skewer' | 'envenom' | 'step' | 'riposte' | 'shieldbash' | 'quake' | 'pin' | 'blinded' | 'wind' | 'loaded' | 'glint' | 'trueshot' | 'holyshield' | 'shieldsoak' | 'shieldgone' | 'coalburst' | 'coalflare' | 'snag' | 'flailstun' | 'holysmite'; x: number; y: number }
+  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle' | 'lift' | 'oilfire' | 'freed' | 'exitopen' | 'blaze' | 'chop' | 'denspawn' | 'hallow' | 'ward' | 'warded' | 'reflect' | 'wardbreak' | 'spotted' | 'skewer' | 'envenom' | 'step' | 'riposte' | 'shieldbash' | 'quake' | 'pin' | 'blinded' | 'wind' | 'loaded' | 'glint' | 'trueshot' | 'holyshield' | 'shieldsoak' | 'shieldgone' | 'coalburst' | 'coalflare' | 'snag' | 'flailstun' | 'holysmite' | 'shrug'; x: number; y: number }
   /** A goblin retching up a perfect dart's poison, facing (dx, dy) (sim/venom.ts). */
   | { k: 'puke'; x: number; y: number; dx: number; dy: number }
   | { k: 'collapse'; x: number; y: number; w: number; h: number }
@@ -589,6 +592,8 @@ export interface Bolt {
   freeze?: boolean;
   /** A wand's: landing on a goblin mid wind-up, it breaks the blow off (sim/spells.ts). */
   interrupts?: boolean;
+  /** A wand's burst loosed on the white flash: it breaks off whatever the goblin it hits is doing. */
+  breaks?: boolean;
   /** A thrown flask's potion. */
   potion?: PotionId;
   /** The Jealous Rod: this shot jumps to every goblin near what it hits. */

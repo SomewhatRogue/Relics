@@ -9,6 +9,7 @@ import { collide, wadeAt } from '../shared/arena';
 import { BLIND, XBOW, type Swing } from '../shared/tuning';
 import { isDead } from './damage';
 import type { Bolt, Enemy, FightEvent, Hero } from './types';
+import { mayStun } from './stuns';
 
 /** Mark a loosed arrow or bolt with what its kit and the release make of it. */
 export function markShot(h: Hero, s: Swing, b: Bolt): void {
@@ -28,15 +29,16 @@ export const spent = (b: Bolt) => !b.pierce || (b.pierceLeft !== undefined && b.
 export function perfectStrike(b: Bolt, e: Enemy, now: number, ev: FightEvent[]): void {
   if (!b.perfect) return;
   if (b.kind === 'bolt') return void ev.push({ k: 'boltline', x: b.sx, y: b.sy, x2: e.x, y2: e.y });
-  if (b.blind) return blind(e, now, ev);
+  if (b.blind) return blind(e, b.owner, now, ev);
   ev.push({ k: 'trueshot', x: e.x, y: e.y });
 }
 
 export const blinded = (e: Enemy, now: number) => (e.blindUntil ?? -9) > now;
 
-/** Blinded: it drops whatever blow it had going and can't see a hero for a while. */
-export function blind(e: Enemy, now: number, ev: FightEvent[]): void {
-  if (isDead(e) || e.kind === 'nest' || e.act === 'carried') return;
+/** Blinded by hero `by`: it drops whatever blow it had going and can't see a hero for a while (not twice
+ *  running from the same hero: sim/stuns.ts). */
+export function blind(e: Enemy, by: string, now: number, ev: FightEvent[]): void {
+  if (isDead(e) || e.kind === 'nest' || e.act === 'carried' || !mayStun(e, by, now, ev)) return;
   e.blindUntil = now + BLIND.time * (e.kind === 'butcher' ? BLIND.big : 1);
   e.attack = null;
   if (e.act === 'attack') Object.assign(e, { act: 'chase', actT: 0 });

@@ -14,6 +14,7 @@ import { spotFor } from './facing';
 import { damageProp } from './props';
 import type { SkillRoom } from './skills';
 import type { Bolt, Enemy, Hero, Zone } from './types';
+import { stun } from './stuns';
 
 const live = (e: Enemy, h: { z?: number }) => !isDead(e) && e.act !== 'carried' && (e.z ?? 0) === (h.z ?? 0);
 const friends = (w: World) => w.heroes.filter((o) => o.id !== 'squire' && o.act !== 'down');
@@ -86,8 +87,8 @@ export function ringBell(h: Hero, w: World, el: Augment): void {
     afflict(w, e, el, BELL.dmg);
     if (held(e, w.now) || isDummy(e)) continue;
     if (e.weight <= 1) shove(e, d > 0.05 ? dx / d : h.fx, d > 0.05 ? dy / d : h.fy, BELL.push, e.weight);
-    if (e.weight <= 1) Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: BELL.small });
-    else if (!e.attack?.unblockable) Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: BELL.big });
+    if (e.weight <= 1) stun(e, h.id, w.now, BELL.small, w.ev, 'flinch');
+    else if (!e.attack?.unblockable) stun(e, h.id, w.now, BELL.big, w.ev, 'flinch');
   }
   for (const o of friends(w)) {
     if (Math.hypot(o.x - h.x, o.y - h.y) > BELL.radius) continue;
@@ -115,7 +116,7 @@ export function knuckle(h: Hero, w: World, el: Augment): void {
     if (e.act !== 'pinned') shove(e, h.fx, h.fy, KNUCKLE.knock, e.weight);
     afflict(w, e, el, KNUCKLE.dmg);
     if (!isDummy(e)) (e.markUntil = w.now + MARK.time), w.ev.push({ k: 'marked', x: e.x, y: e.y });
-    if (!held(e, w.now) && !isDummy(e) && e.weight <= 1) Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: KNUCKLE.stun });
+    if (!held(e, w.now) && !isDummy(e) && e.weight <= 1) stun(e, h.id, w.now, KNUCKLE.stun, w.ev);
   }
   for (const p of w.props) {
     if (p.broken || p.lifted) continue;
