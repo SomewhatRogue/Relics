@@ -35,7 +35,9 @@ export function wayTarget(game: Game): P | null {
 function target(room: ArenaRoom, me: P, houses: { x: number; y: number; waiting: number }[]): P | null {
   const cages = room.props.filter((p) => p.kind === 'cage' && !p.broken);
   const freed = room.survivors.some(waiting);
-  if (room.indoors) return nearest(me, cages) ?? (freed && room.map.exit ? mid(room.map.exit) : null);
+  // In a side way's dead end (its way back isn't at the bottom, as a house's door is), back out once the cage is open.
+  const ex = room.map.exit, aside = !!ex && ex.y + ex.h < room.map.h - 0.5;
+  if (room.indoors) return nearest(me, cages) ?? ((freed || aside) && ex ? mid(ex) : null);
   if (room.exitOpen) return nearest(me, waysOut(room.map).map(mid));
   return nearest(me, cages) ?? (freed ? room.map.hero : nearest(me, houses.filter((h) => h.waiting)));
 }

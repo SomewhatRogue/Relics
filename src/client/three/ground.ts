@@ -16,6 +16,8 @@ import { VCOL } from './mats';
 import { toonize } from './post';
 import { addRound, type Spot } from './rounds3d';
 import { addBridge } from './bridge3d';
+import { sideGaps } from '../sidegaps';
+import { waysOut } from '../wayout';
 
 /** How high the back wall stands, and a ledge (tiles). */
 export const WALL_H = 2.4;
@@ -83,8 +85,21 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   }
   for (const g of gaps) for (const gx of [g.x - 0.1, g.x + g.w + 0.1]) B.b(gx, 0, -0.2, 0.24, WALL_H + 0.3, 0.4, 0x3a3640);
   // Low side walls and a kerb along the front, so the room has edges without hiding anyone.
-  for (const sx of [-0.45, m.w + 0.45]) B.b(sx, 0, m.h / 2 - 0.5, 0.9, 1.0, m.h + 1, body);
-  B.b(m.w / 2, 0, m.h + 0.3, m.w + 1.8, 0.25, 0.6, body);
+  // Cut where a way out or a side way goes through them (layout 3: ../sidegaps.ts), a post either side.
+  const cuts = sideGaps(m, waysOut(m)), runs = (a: number, b: number, holes: [number, number][]) => {
+    const out: [number, number][] = [];
+    let at = a;
+    for (const [h0, h1] of holes.sort((p, q) => p[0] - q[0])) (out.push([at, h0]), (at = h1));
+    return [...out, [at, b] as [number, number]].filter(([p, q]) => q - p > 0.05);
+  };
+  for (const [sx, side] of [[-0.45, 'W'], [m.w + 0.45, 'E']] as const) {
+    const holes = cuts.filter((g) => g.side === side).map((g): [number, number] => [g.a.y, g.a.y + g.a.h]);
+    for (const [z0, z1] of runs(-1, m.h, holes)) B.b(sx, 0, (z0 + z1) / 2, 0.9, 1.0, z1 - z0, body);
+    for (const [z0, z1] of holes) for (const z of [z0, z1]) B.b(sx, 0, z, 0.3, 1.5, 0.3, 0x3a3640);
+  }
+  const kerb = cuts.filter((g) => g.side === 'S').map((g): [number, number] => [g.a.x, g.a.x + g.a.w]);
+  for (const [x0, x1] of runs(-0.9, m.w + 0.9, kerb)) B.b((x0 + x1) / 2, 0, m.h + 0.3, x1 - x0, 0.25, 0.6, body);
+  for (const [x0, x1] of kerb) for (const x of [x0, x1]) B.b(x, 0, m.h + 0.3, 0.3, 0.9, 0.3, 0x3a3640);
   for (const l of m.ledges ?? []) {
     B.b(l.x + l.w / 2, 0, l.y + l.h / 2, l.w, LEDGE_H, l.h, l.kind === 'wood' ? 0x5a3d22 : 0x3a3640);
     for (const rp of l.ramps) B.b(rp.x + rp.w / 2, 0, rp.y + rp.h / 2, rp.w, LEDGE_H * 0.45, rp.h, 0x46424e);

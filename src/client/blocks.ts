@@ -65,6 +65,8 @@ export const LOOK: Record<Block['kind'], Look> = {
   casks: { tall: 14, roof: '#3a2818', ridge: '#3a2818', wall: '#2a1d12', windows: false, furniture: true },
   pen: { tall: 9, roof: '#8a7448', ridge: '#6b4a2b', wall: '#5a3d22', windows: false, furniture: true },
   shack: { tall: 12, roof: '#8a7a5a', ridge: '#6a5a48', wall: '#4a3420', windows: false },
+  // A side way is a gap, painted with the room's ways out (wayout.ts), never drawn as a block.
+  sideway: { tall: 0, roof: '#000', ridge: '#000', wall: '#000', windows: false },
 };
 
 /** 0 standing, 1 charred (under half its health), 2 burned down. */

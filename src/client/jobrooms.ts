@@ -7,7 +7,7 @@
  * out with you (sim/survivors.ts walkOut, and maybe an ambush by the door), and a house that fell in
  * behind you is ash in the street. Over each door outside, the names of whoever's in there.
  */
-import { doorAt, useMap, type Block, type GameMap } from '../shared/arena';
+import { doorAt, doorOut, pushingInto, useMap, type Block, type GameMap } from '../shared/arena';
 import { SPOT_REACH } from '../shared/town';
 import { ARRIVE_SAFE, WEAPONS, type HeroClass } from '../shared/tuning';
 import { release } from '../sim/grab';
@@ -88,12 +88,12 @@ export class JobRooms {
   comeOut(h: Hero): ArenaRoom | null {
     const street = this.street, inside = this.roomOf(h.id), b = inside && this.doorOf(inside);
     if (!street || !inside || !b) return null;
-    const d = doorAt(b);
-    this.followers.through(inside, street, h, d.x, d.y + 0.6);
+    const d = doorOut(b, 0.6), far = doorOut(b, 1.1), at = doorOut(b, 0.5);
+    this.followers.through(inside, street, h, d.x, d.y);
     // Whoever they're leading comes out too: home (the street may have goblins waiting).
-    walkOut(inside.survivors, [h], street.survivors, d.x, d.y + 1.1);
+    walkOut(inside.survivors, [h], street.survivors, far.x, far.y);
     if (inside.blaze?.fallen) Object.assign(b, { ruined: true, smoulder: false });
-    carry(h, inside, street, d.x, d.y + 0.5, 1);
+    carry(h, inside, street, at.x, at.y, 1);
     return street;
   }
 
@@ -131,7 +131,7 @@ export function doorPushed(map: GameMap, h: Hero, i: Intent): Block | null {
     const d = doorAt(b), dist = Math.hypot(d.x - h.x, d.y - h.y) * 1.4;
     if (dist <= bd) (bd = dist), (best = b);
   }
-  return best && i.my < -0.5 && Math.abs(h.x - doorAt(best).x) < 0.7 ? best : null;
+  return best && pushingInto(best, h, i) ? best : null;
 }
 
 /** A hero carried from one room into another as they are (health, potions, cooldowns), its clock moved on. */

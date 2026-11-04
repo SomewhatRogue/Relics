@@ -28,6 +28,7 @@ export class Buildings {
   /** Bring every block up to date; `me` (tiles) lifts the roof of a building you're behind. Adds flames to `fires`. */
   update(map: GameMap, me: [number, number] | null, fires: Spot[]): void {
     map.blocks.forEach((blk, i) => {
+      if (blk.kind === 'sideway') return;
       const key = `${blk.kind}:${blk.x}:${blk.y}:${blk.w}:${blk.h}:${blk.door ?? ''}:${blk.locked ? 1 : 0}:${blockState(blk)}`;
       let e = this.built.get(i);
       if (!e || e.key !== key) {

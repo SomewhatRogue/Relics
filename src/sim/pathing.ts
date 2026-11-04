@@ -53,10 +53,16 @@ const cellOf = (g: Grid, x: number, y: number) => Math.max(0, Math.min(g.cols - 
 
 /** Can a goblin walk straight from a to b (no blocked cell on the way)? */
 function clear(g: Grid, ax: number, ay: number, bx: number, by: number): boolean {
-  const n = Math.ceil(Math.hypot(bx - ax, by - ay) / (C * 0.5));
-  for (let k = 1; k < n; k++) if (!g.cost[cellOf(g, ax + ((bx - ax) * k) / n, ay + ((by - ay) * k) / n)]) return false;
+  const l = Math.hypot(bx - ax, by - ay), n = Math.ceil(l / (C * 0.5)), sx = (-(by - ay) / (l || 1)) * BODY, sy = ((bx - ax) / (l || 1)) * BODY;
+  // The line down the middle, and either side of it a body's half-width out (a hedge or a wall's corner it would graze).
+  for (let k = 1; k < n; k++) {
+    const x = ax + ((bx - ax) * k) / n, y = ay + ((by - ay) * k) / n;
+    if (!g.cost[cellOf(g, x, y)] || !g.cost[cellOf(g, x + sx, y + sy)] || !g.cost[cellOf(g, x - sx, y - sy)]) return false;
+  }
   return true;
 }
+/** How far either side of its line a goblin's body reaches, for walking straight (a little under its radius). */
+const BODY = 0.3;
 
 /** Distance (in dry steps) from every cell within reach to the goal cell: a small Dijkstra over the grid. */
 function field(g: Grid, goal: number): Float32Array {

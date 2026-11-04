@@ -16,6 +16,7 @@ import { freeSpot, isFree, mirror, type Layout, type P } from './housekit.js';
 import type { Job } from './jobs.js';
 import { Rng } from './rng.js';
 import type { Foe, RoomPlan } from './terrain.js';
+import { sideRoom } from './sideroom.js';
 
 const LAYOUTS: Record<HouseKind, (rng: Rng) => Layout> = { cottage, backroom, weaver, smith, looted, store, stalls, haybarn, longhouse, manor, tithebarn };
 /** Who the dead were, by the place. */
@@ -23,6 +24,8 @@ const DEAD: Record<string, string> = { farm: 'farmer', field: 'farmer' };
 
 /** A cottage or barn on a job: same seed, same room. */
 export function runInterior(job: Job, roomIndex: number, blockIndex: number, door: string): RoomPlan {
+  // A side way's dead end (layout 3) is planned from its door, not a house's seed.
+  if (door.startsWith('side:')) return sideRoom(job, roomIndex, door);
   const seed = houseSeed(job, roomIndex, blockIndex), home = house(seed, door), rng = new Rng(seed);
   const ruin = job.place.ruin, barn = door === 'barn', end = fate(job, roomIndex, seed), g = grimness(job, roomIndex);
   let l = LAYOUTS[big(job, roomIndex, seed) ? bigKind(seed, door) : home.kind](rng);

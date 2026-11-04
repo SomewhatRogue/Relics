@@ -11,14 +11,20 @@
  * 5. the way on moves along the top (left, middle or right), never the same as the room before.
  */
 import type { Job } from './jobs.js';
+import type { Cache, Country, DeadEnd, RouteNode } from './nodeports.js';
+import type { Port } from './ports.js';
 import { HEART_SOIL, HEART_VARIANTS, LANDMARKS, LAYOUTS, PALETTES, PIECES, PIECES_IN, POOL, signatureOf, skinsFor, type ApproachNode, type Landmark, type NodeId, type Palette, type Piece, type Skin } from './nodes.js';
 import { Rng } from './rng.js';
 import { siteOf, type SiteKind } from './sites.js';
+import { route3 } from './routeports.js';
+
+/** A side way (layout 3): a gap at the room's edge to a dead-end room (shared/sideroom.ts). */
+export interface SideWay { port: Port; node: DeadEnd; layout: string; cache: Cache }
 
 export interface RoomSpec {
   index: number;
   heart: boolean;
-  node: NodeId;
+  node: NodeId | RouteNode;
   layout: string;
   /** The approach's country (a heart is its place's own). */
   skin: Skin | null;
@@ -28,13 +34,26 @@ export interface RoomSpec {
   landmark: Landmark | null;
   piece: Piece;
   palette: Palette;
+  /**
+   * Layout 3 (docs/terrain-nodes.md slices 2 to 4): the room's size, its way in and ways on by side
+   * (two at a fork, each with its road), the country it's in, the one a transition comes from, and a
+   * side way if it has one.
+   */
+  w?: number;
+  h?: number;
+  in?: Port;
+  outs?: (Port & { road?: 'high' | 'low' })[];
+  country?: Country;
+  from?: Skin;
+  fromCountry?: Country;
+  side?: SideWay;
 }
 
 /** The ways on along the top edge. */
 export const OUTS = [7, 14, 21];
 
 /** A heart's own floor and back wall, as its plan paints them (shared/sites.ts). */
-const HEART_LOOK: Record<SiteKind, [Palette['floor'], Palette['back']]> = {
+export const HEART_LOOK: Record<SiteKind, [Palette['floor'], Palette['back']]> = {
   green: ['grass', 'palisade'], farmstead: ['grass', 'palisade'], fields: ['wheat', 'trees'], camp: ['mud', 'trees'], street: ['cobble', 'stone'],
   manor: ['grass', 'stone'], ruinvillage: ['grass', 'stone'], wood: ['grass', 'trees'], mine: ['rock', 'rockface'], sheepwash: ['grass', 'trees'],
   peat: ['mud', 'trees'], carr: ['mud', 'trees'],
@@ -53,8 +72,12 @@ function paletteFor(rng: Rng, skin: Skin, after: Palette[]): Palette {
 
 const memo = new Map<string, RoomSpec[]>();
 
-/** The whole route, rolled once from the job (the same on every screen). */
-export function routeOf(job: Job): RoomSpec[] {
+/**
+ * The whole route, rolled once from the job (the same on every screen). Layout 3's is a small tree
+ * (shared/routeports.ts): `took` picks the road at its fork ("h" or "l"; before it, either).
+ */
+export function routeOf(job: Job, took = ''): RoomSpec[] {
+  if (job.layout === 3) return route3(job, took);
   const key = `${job.seed}|${job.place.name}|${job.rooms}|${job.objective}`;
   const had = memo.get(key);
   if (had) return had;

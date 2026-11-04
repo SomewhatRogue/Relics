@@ -27,6 +27,8 @@ export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall'
   | 'gallows' | 'hurdle'
   // A shack of scrap boards and sailcloth (a shanty, a camp).
   | 'shack'
+  // A side way out of a job's room to a dead end (shared/sideway.ts): a gap at the edge, drawn as one.
+  | 'sideway'
   // Inside the halls, each its own (client/hallsdraw.ts).
   | 'books' | 'stair' | 'dummy' | 'maptable' | 'dicetable' | 'skinbench' | 'desk' | 'tub' | 'bellows' | 'booth' | 'bunk' | 'casks';
 export interface Round extends Circle { kind: RoundKind }
@@ -34,6 +36,8 @@ export interface Block {
   x: number; y: number; w: number; h: number; kind: BlockKind; label?: string;
   /** Walk up into the door (bottom middle) to go in: the interior's id. */
   door?: string;
+  /** A side way: the side of the room it's in (you walk into it that way; its door spot is on the room's side of it). */
+  face?: 'N' | 'E' | 'S' | 'W';
   /** Wooden buildings in a run can be smashed and burned: health, when it caught fire (-1 not), burned down. */
   hp?: number; maxHp?: number; burning?: number; ruined?: boolean;
   /** Burning for show, never spreading or burning down (the wagons on the battlefield). */
@@ -90,7 +94,7 @@ export interface Mark { kind: MarkKind; x: number; y: number; w: number; h: numb
  */
 export interface Ledge { x: number; y: number; w: number; h: number; ramps: Area[]; kind?: 'rock' | 'wood' }
 /** A way out of a run room, when there's more than one: the road it leads to. */
-export interface Road { area: Area; road: 'high' | 'low'; label: string }
+export interface Road { area: Area; road: 'high' | 'low'; label: string; /** Layout 3: the side of the room it leaves by (else the top). */ side?: 'N' | 'E' | 'S' | 'W' }
 /** Someone to talk to: `talk` says what they offer (a town spot's panel), `look` how they're drawn. */
 export interface Npc {
   x: number; y: number; name: string; talk: string; look: string; arg?: number;
@@ -233,8 +237,23 @@ export const inRamp = (m: GameMap, x: number, y: number) => !!m.ledges?.some((l)
 /** The level a point is at (for things placed there). */
 export const levelAt = (m: GameMap, x: number, y: number) => (onLedge(m, x, y) ? 1 : 0);
 
+/** Which way you push to go in at a block's door (up the screen, or into a side way's side). */
+export const pushDir = (b: Block): [number, number] => (b.face === 'W' ? [-1, 0] : b.face === 'E' ? [1, 0] : b.face === 'S' ? [0, 1] : [0, -1]);
 /** A block's door: the spot in front of it you stand on to go in. */
-export const doorAt = (b: Block) => ({ x: b.x + b.w / 2, y: b.y + b.h + 0.45 });
+export const doorAt = (b: Block) => {
+  const [dx, dy] = pushDir(b);
+  return dx ? { x: dx < 0 ? b.x + b.w + 0.45 : b.x - 0.45, y: b.y + b.h / 2 } : dy > 0 ? { x: b.x + b.w / 2, y: b.y - 0.45 } : { x: b.x + b.w / 2, y: b.y + b.h + 0.45 };
+};
+/** Walking into a door: pushing its way, lined up with it. */
+export const pushingInto = (b: Block, h: { x: number; y: number }, i: { mx: number; my: number }) => {
+  const [dx, dy] = pushDir(b), d = doorAt(b);
+  return i.mx * dx + i.my * dy > 0.5 && (dx ? Math.abs(h.y - d.y) < 0.7 : Math.abs(h.x - d.x) < 0.7);
+};
+/** Where you come back out of a door: `k` tiles out from it into the room. */
+export const doorOut = (b: Block, k: number) => {
+  const [dx, dy] = pushDir(b), d = doorAt(b);
+  return { x: d.x - dx * k, y: d.y - dy * k };
+};
 /** A block that still stands in the way (burned-down ones are rubble you walk over). */
 export const solid = (b: Block) => !b.ruined;
 

@@ -4,7 +4,7 @@
  * to go in; taking a job starts a run (room after room until the job is done or you're driven back);
  * the results come home to the hero and the shared world, and the town changes with them.
  */
-import { doorAt, inArea, npcAt, useMap, type Area, type Block, type Npc, type Theme } from '../shared/arena';
+import { doorAt, inArea, npcAt, pushingInto, useMap, type Area, type Block, type Npc, type Theme } from '../shared/arena';
 import { travel } from '../shared/sweep';
 import type { DreadRule } from '../sim/dread';
 import { townInterior } from '../shared/interiors';
@@ -538,9 +538,9 @@ export class Game {
     if (this.mode === 'wood' && this.wood) return this.stepWoodFrame(h, ev, dt);
     this.keepGear(h);
     for (const e of ev) if (e.k === 'spend' && e.id === ME) this.spend(e.n);
-    // Walk up into a door to go in; out the bottom of a room to come back out.
+    // Walk up into a door (or into a side way, its way) to go in; out by the way you came in to come back out.
     const door = this.near()?.door;
-    if (door && intent.my < -0.5 && Math.abs(h.x - doorAt(door).x) < 0.7) this.enter(door);
+    if (door && pushingInto(door, h, intent)) this.enter(door);
     else if (this.outside && inArea(this.room.map.exit, h.x, h.y)) this.leave();
     else if (this.mode === 'yard' && inArea(this.room.map.exit, h.x, h.y)) this.enterTown(this.doorOf('hall'));
     // Your friends go in and out on their own; a house set alight with anyone in throws them out as it falls.

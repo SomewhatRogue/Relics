@@ -140,8 +140,8 @@ export class Overlay {
       d.who.forEach((w, i) => drawText(g, w.name.toUpperCase(), Math.round(x - textWidth(w.name) / 2), Math.round(y - 8 * (i + 1)), '#9ad8a8'));
     }
     if (room.exitOpen) for (const r of room.map.roads ?? []) {
-      const [x, y] = P(r.area.x + r.area.w / 2, 0, r.area.y + r.area.h + 1.2);
-      drawText(g, r.label, Math.round(x - textWidth(r.label) / 2), Math.round(y), r.road === 'high' ? '#ffd27a' : '#9fe8ff');
+      const a = r.area, tw = textWidth(r.label), [x, y] = r.side === 'W' ? P(a.x + a.w + 1.8, 0, a.y + a.h / 2) : r.side === 'E' ? P(a.x - 1.8, 0, a.y + a.h / 2) : P(a.x + a.w / 2, 0, a.y + a.h + 1.2);
+      drawText(g, r.label, Math.round(r.side === 'W' ? x : r.side === 'E' ? x - tw : x - tw / 2), Math.round(y), r.road === 'high' ? '#ffd27a' : '#9fe8ff');
     }
     const me = room.heroes.find((h) => h.id === meId), p = m.pointTo;
     if (me) this.chasing(room, me, P, lerp);

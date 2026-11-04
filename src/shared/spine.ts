@@ -6,14 +6,26 @@ import type { Rng } from './rng.js';
 
 export type Pt = [number, number];
 
-/** Distance from a point to a polyline. */
-export const off = (pts: Pt[], x: number, y: number) => Math.min(...pts.slice(1).map(([bx, by], i) => {
-  const [ax, ay] = pts[i], dx = bx - ax, dy = by - ay, t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy || 1)));
-  return Math.hypot(x - ax - dx * t, y - ay - dy * t);
-}));
+/** Distance from a point to a polyline (a plain loop: it's called a great deal). */
+export const off = (pts: Pt[], x: number, y: number): number => {
+  let best = Infinity;
+  for (let i = 1; i < pts.length; i++) {
+    const ax = pts[i - 1][0], ay = pts[i - 1][1], dx = pts[i][0] - ax, dy = pts[i][1] - ay, t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy || 1)));
+    const d = Math.hypot(x - ax - dx * t, y - ay - dy * t);
+    if (d < best) best = d;
+  }
+  return best;
+};
 
 /** Distance from a point to the nearest of several polylines. */
-export const offAll = (lines: Pt[][], x: number, y: number) => Math.min(...lines.map((p) => off(p, x, y)));
+export const offAll = (lines: Pt[][], x: number, y: number): number => {
+  let best = Infinity;
+  for (const p of lines) {
+    const d = off(p, x, y);
+    if (d < best) best = d;
+  }
+  return best;
+};
 
 /** Distance from a box to a polyline (sampled along the box's edges and middle; near enough for clearing). */
 export function boxOff(lines: Pt[][], a: { x: number; y: number; w: number; h: number }): number {
