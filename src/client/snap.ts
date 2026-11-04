@@ -13,8 +13,12 @@ type Coll = (typeof COLLS)[number];
 type Ent = Record<string, unknown>;
 /** Per collection: the order of keys (only when it changed), and each changed entity's changed fields. */
 export type Patch = Partial<Record<Coll, { o?: string[]; u: [string, Ent][] }>>;
-/** Hero fields a friend's screen never needs (the shelf, counters). The pack goes: what a friend picks up comes home with them. */
-const SKIP = new Set(['found', 'seen', 'hitIds', 'hitAllies', 'grudges', 'stats']);
+/**
+ * Hero fields a friend's screen never needs (counters). The pack goes: what a friend picks up comes
+ * home with them. So do the relics they own (`found`): their pack lists them and carries one by its
+ * place in the list, and a charge spent or a relic won on the job is theirs to keep.
+ */
+const SKIP = new Set(['seen', 'hitIds', 'hitAllies', 'grudges', 'stats']);
 
 const round = (v: unknown): unknown =>
   typeof v === 'number' ? (Number.isFinite(v) ? Math.round(v * 100) / 100 : v > 0 ? 1e9 : -1e9) : Array.isArray(v) ? v.map(round) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, round(x)])) : v;
