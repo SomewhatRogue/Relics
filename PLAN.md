@@ -238,6 +238,16 @@ and burns out a goblin den on a job.
       wilder places: nests that hatch waves, poison, the brood mother's glob, fire as their weakness
       (2026-11-01, Opus 5.5; lore placement waiting on the lore keeper)
 
+## Terrain nodes (docs/terrain-nodes.md; Kyle 2026-11-04)
+- [x] Slice 1 + 1b (2026-11-04, Opus 5.5): routed jobs (`layout: 2`), approach rooms that differ room to
+      room and job to job, the heart with its landmarks fixed and three sub-layouts, one landmark and one
+      set piece a room, the way out left, middle or right; the broken bridge and its ford; goblins that path
+      round water and hedges; one weather pattern a job. Done when Kyle plays a long Barrowby job and no
+      two rooms share a layout or a landmark and the last is the green with its well and shrine.
+- [ ] Slice 2: side exits and turning routes; wider rooms (about 34 by 20) for left-to-right legs.
+- [ ] Slice 3: side rooms, forks into different places, loops. Slice 4: transitions and biome changes.
+- [ ] Vignettes needing new behaviour: burning a house, dragging a body, prisoners led off, the patrol.
+
 ## Next up: the big map as a real job (Kyle played ?bigmap=1, 2026-11-03: "VERY fun")
 
 Kyle's asks after playing the load test, in order:

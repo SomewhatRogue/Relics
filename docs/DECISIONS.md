@@ -2,6 +2,62 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-04: terrain nodes slice 1 and 1b: approach rooms that change, a heart that stays, the broken bridge, goblins that path, weather (Kyle; Claude Opus 5.5)
+
+Kyle: rooms of a job felt like "the same map each time ... 3 maps in 1 quest where it was the SAME map
+with a river through the middle". Built slices 1 and 1b of `docs/terrain-nodes.md` with his answers.
+
+- **Reverses 2026-11-01's "the same place is the same every time"** for every room but the last. A job
+  now has a route (`shared/route.ts`, from `new Rng(seed * 7919 + 101)`): the **approach** rooms, then the
+  **heart** (the place's own room). Approach rooms are new spine-aware nodes (`shared/nodes.ts`): track,
+  crossroads, lane, clearing, ford, strips, yard, wood path, each with two or three sub-layouts, dressed
+  for the country they're in (fields, wood, fen, rock, under: `shared/siteskin.ts`).
+- **The heart** (Kyle: "the theme as well as the central room"): its plan, landmarks and theme come from
+  the place's own seed, so the green still has its well and shrine where they always are. It has three
+  sub-layouts (a second `dress` stream moves cottages, carts, hay, shacks, reeds), its set piece moves
+  job to job, and you come into it from wherever the room before let out (left, middle or right along
+  the bottom, a short bend over to its lane). Landmarks are guarded: the job's cages, dens, fires and
+  ledges go round them (a test holds them still over objectives, roads and seeds).
+- **Rules** (`tests/route.test.ts` over a thousand-odd jobs): no node twice running and no sub-layout
+  twice in a job; one landmark a room, never repeated, never the place's signature (Barrowby's well and
+  shrine, Hangman's gallows, Hesketh's hall front and so on are the heart's alone); two of floor, back
+  wall, ground and light change every room; one set piece a room, never repeated; the way out moves
+  along the top (x 7, 14 or 21), never where the last room's was, and the next room starts below it.
+- **Set pieces** from behaviour that exists (`shared/vignettes.ts`): at the fire, at the dead, the
+  feast (a long fire, the pot, the bones), asleep round a cold fire, looting a cart, the wrecked cart and
+  its oil, the column's dead along the road, and the broken bridge (their fire on the far bank).
+- **The river room** (Kyle: "make it clear the bridge in the centre is destroyed and the only crossable
+  path is through the shallows"): `shared/river.ts`. The bridge's two ends stand out over the water
+  (walkable, so you can go and look at the gap), its middle is deep water, snapped boards, posts, a rope
+  hanging off the far end, a beam in the river, boards caught downstream, drawn flat
+  (`client/bridgepaint.ts`) and stood up in 2.5D (`client/three/bridge3d.ts`). One ford, the only way
+  over: paler shallows, stepping stones in a line, white water at its lips, a worn track down to it
+  (`client/waterpaint.ts`; water is now painted over the ground's paths so a path stops at the bank).
+  Brokenbridge's own heart gets the same bridge and one ford. Judgment call: "up top" read as the ford off
+  to one side of the bridge (left or right by the seed), since the river runs across the room.
+- **Pathing** (Kyle: "enemies got stuck with the water"): `sim/pathing.ts`. A goblin with a clear line
+  walks straight, as before; a blocked one follows a flow field (Dijkstra on a half-tile grid of the room:
+  solids, deep water and ledge faces blocked, wading costs 1.8 a step), string-pulled to the farthest
+  point it can walk to straight. A field is a pure function of the room and the goal's cell, kept for a
+  dozen cells, so it's deterministic and costs one small search when a hero steps into a new cell. All
+  rooms, old jobs too. Tuning `PATH` in `shared/tuning.ts`.
+- **Weather** (Kyle's answer 3; no light drift, per answer 2): `shared/weather.ts`. One pattern a job from
+  its seed and country: drizzle, a storm that builds, breaks over one room with lightning and passes, fog
+  that creeps in by no more than 0.18 a room, or clear; none underground. Paint only (on the theme),
+  drawn with the mist in both views (`client/weather.ts`).
+- **Seeds and old saves**: new jobs carry `layout: 2`; a room is planned from `roomSeed(job, index,
+  took)`. A saved job without it plans exactly as before: a test hashes 100-odd old rooms against the
+  value taken before this change. For routed rooms only, the back of the pack is rolled after spiders so a
+  room never opens with too few blades (spiders thinning the band could break that; old rooms kept as
+  they were).
+- **Measured** (the doc's script, Jaccard of solid tiles): the same room on another visit 0.87 to 0.98,
+  now 0.03 to 0.05; the next room of a job 0.00 to 0.82 (0.46 average), now 0.03 to 0.05; the heart on
+  another visit 0.90, now 0.63 (landmarks kept, the rest moves). Ways out: 540 of 690 at the top middle,
+  now 149 left, 248 middle, 143 right, 150 forks. Barrowby's well in 96% of its rooms, now 20% (the heart).
+- Not yet (slice 2 on): side exits and turning routes, wider rooms for left-to-right legs (Kyle's yes),
+  side rooms, transition nodes, the vignettes that need new behaviour (torch-bearers, dragging,
+  prisoners led off, the patrol). No new player-facing lines were written.
+
 ## 2026-11-04: the Mage's weapons rework: magic costs, the wand on the move, the staff's walls, the spellblade (Kyle; Claude Opus 5.5)
 
 The fourth class through Kyle's weapons rework. The Mage has no guard and blinks rather than rolls; its
