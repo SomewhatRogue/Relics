@@ -253,14 +253,22 @@ Every weapon gets a quick attack, a charged attack, a perfect-timed hit and a re
 - Perfect hits stay visible ("PERFECT") with a stronger effect so they read.
 - Greatsword: wide sweeps, breaks heavy wind-ups; no held block, parry-counter only.
 - Daggers: charged stays the throwing dagger.
-- Rogue: Shadow Step behind a goblin stuns it 1 s for free hits. The hand crossbow is in question: rethink it as a stealth hit-and-get-out weapon (idea: a cosh).
+- Rogue: Shadow Step behind a goblin stuns it 1 s for free hits.
+- The hand crossbow becomes the poisoner's kit:
+  - Quick: a short sword, a bit wider than the daggers but slower. Not much damage, but not reduced either.
+  - Hold: a blowgun at range that poisons.
+  - Perfect: the goblin pukes first, and the poison ticks harder. Some goblins resist it.
 - Rapier: a perfect thrust skewers the goblin on the tip, which bleeds.
 - Longbow: a sword for the light attack, the bow on a held draw (more damage the longer). Perfect: blinds the target, or a sure crit.
 - Shortbow: as is (Kyle loves it).
 - Crossbow: a sword for the light attack. Hold to draw the crossbow and aim. A perfect shot pierces a line and shoves back.
   Hold again to reload (1 s in full, can be done in pieces); a full reload in one go glints, and the next shot does more. A ton of damage. May need a full rework.
-- Wand and staff: loved as they are.
-- The rod becomes a TOME: a fan in front for quick, a long beam when held, a star burst out from you on a perfect hold (short range, can hurt friends). Must not overlap the staff.
+- Wand: as is.
+- Staff (reworked):
+  - Quick: an elemental slash in front of you, close and slow, not all round.
+  - Hold: a wall of your element in front of you. You stand still a moment while you cast.
+  - Perfect: a bigger wall.
+- The tome idea is dropped. The rod's slot gets a new weapon for what the Mage kit lacks (see the proposal: an orb that tethers).
 - Mage: big spells cost stamina ("magic"), like the blink. Make them impactful.
 - Flail: spin it up and release for a bit more reach, standing still. Standard hits shove goblins a little, never over a shield. Perfect hits stun.
 
