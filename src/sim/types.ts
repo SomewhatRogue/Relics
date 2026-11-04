@@ -131,6 +131,11 @@ export interface Hero extends Body {
   /** A Healer's ward on this hero: until when, and how much more it can take. */
   wardUntil: number;
   wardHp: number;
+  /** A Cleric's holy shield (a perfect's, shared/cleric.ts HOLY_SHIELD): until when, and what it can still soak. */
+  shieldUntil?: number;
+  shieldHp?: number;
+  /** This censer swing caught its chain on a wall (sim/censer.ts): it lands at CENSER.snag. */
+  snagged?: boolean;
   /** Gave a war cry: every goblin that heard it comes for this hero until then. */
   rallyUntil: number;
   /** The weapon found for each kit (a kit not listed is the plain one). */
@@ -503,7 +508,7 @@ export type FightEvent =
   | { k: 'burst'; x: number; y: number; r: number; el: Augment }
   | { k: 'shock' | 'beam' | 'boltline'; x: number; y: number; x2: number; y2: number }
   | { k: 'heal'; x: number; y: number; n: number }
-  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle' | 'lift' | 'oilfire' | 'freed' | 'exitopen' | 'blaze' | 'chop' | 'denspawn' | 'hallow' | 'ward' | 'warded' | 'reflect' | 'wardbreak' | 'spotted' | 'skewer' | 'envenom' | 'step' | 'riposte' | 'shieldbash' | 'quake' | 'pin' | 'blinded' | 'wind' | 'loaded' | 'glint' | 'trueshot'; x: number; y: number }
+  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle' | 'lift' | 'oilfire' | 'freed' | 'exitopen' | 'blaze' | 'chop' | 'denspawn' | 'hallow' | 'ward' | 'warded' | 'reflect' | 'wardbreak' | 'spotted' | 'skewer' | 'envenom' | 'step' | 'riposte' | 'shieldbash' | 'quake' | 'pin' | 'blinded' | 'wind' | 'loaded' | 'glint' | 'trueshot' | 'holyshield' | 'shieldsoak' | 'shieldgone' | 'coalburst' | 'coalflare' | 'snag' | 'flailstun' | 'holysmite'; x: number; y: number }
   /** A goblin retching up a perfect dart's poison, facing (dx, dy) (sim/venom.ts). */
   | { k: 'puke'; x: number; y: number; dx: number; dy: number }
   | { k: 'collapse'; x: number; y: number; w: number; h: number }
@@ -575,6 +580,9 @@ export interface Bolt {
   kind: 'arrow' | 'bolt' | 'knife' | 'dart' | 'spark' | 'orb' | 'lance' | 'smite' | 'net' | 'lodestone' | 'flask' | 'bomb';
   /** A relic's: it never hurts a friend or anyone freed (friends caught in it are told they're spared). */
   relic?: boolean;
+  /** A mace's smite: its light mends friends in the burst this much; `holy`: let go on the flash, it shields them (sim/holy.ts). */
+  heal?: number;
+  holy?: boolean;
   /** Hobbles what it hits (a wind-up bow's bolt). */
   hobble?: boolean;
   /** A Mage's frost burst: freezes solid at once (frost twice). */

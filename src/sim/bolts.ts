@@ -12,6 +12,8 @@ import { damage, frozen, isDead, isDummy } from './damage';
 import { backstabOf, fromBehind, rogueShot } from './backshot';
 import { afflict, shatter, type World } from './elements';
 import { allyHit, players } from './party';
+import { merciful } from './mercy';
+import { smiteLight } from './holy';
 import { rollCrit } from './combat';
 import { blastProps, damageProp } from './props';
 import { blastBlocks } from './buildings';
@@ -83,9 +85,10 @@ export function blast(w: World, b: Bolt, x: number, y: number): void {
     if (wasFrozen && b.knock >= 8) shatter(e, w.now, w.ev);
     else (afflict(w, e, b.el, b.dmg), b.freeze && afflict(w, e, b.el, b.dmg));
   }
-  // Your own side caught in it (a holy smite spares them).
+  // Your own side caught in it (a holy smite spares them, and its light mends them: sim/holy.ts; a Cleric's harms no friend).
   if (b.relic) return spare(w, null, (h) => Math.hypot(h.x - x, h.y - y) <= b.burst + HERO.radius);
-  if (b.kind !== 'smite' && players(w.heroes).length > 1)
+  if (b.kind === 'smite') return smiteLight(w, b, x, y);
+  if (players(w.heroes).length > 1 && !merciful(w.heroes, b.owner))
     for (const h of w.heroes) if (Math.hypot(h.x - x, h.y - y) <= b.burst + HERO.radius) allyHit(b.owner, h, b.dmg, w.ev, h.x - x, h.y - y);
 }
 
@@ -178,7 +181,9 @@ export function stepBolt(b: Bolt, w: World, dt: number): boolean {
       if (spent(b)) return false;
     }
     // A teammate in the way takes it (not the one who loosed it, and not a net).
-    const ally = b.kind === 'net' || b.relic || players(w.heroes).length < 2 ? undefined : w.heroes.find((h) => h.id !== b.owner && h.id !== 'squire' && h.act !== 'down' && h.act !== 'roll' && !b.hitHeroes?.includes(h.id) && Math.hypot(h.x - b.x, h.y - b.y) <= HERO.radius + 0.1);
+    // (A Cleric's shots pass by friends and the freed: sim/mercy.ts.)
+    const mercy = merciful(w.heroes, b.owner);
+    const ally = b.kind === 'net' || b.relic || mercy || players(w.heroes).length < 2 ? undefined : w.heroes.find((h) => h.id !== b.owner && h.id !== 'squire' && h.act !== 'down' && h.act !== 'roll' && !b.hitHeroes?.includes(h.id) && Math.hypot(h.x - b.x, h.y - b.y) <= HERO.radius + 0.1);
     if (ally) {
       if (b.burst) return blast(w, b, b.x, b.y), false;
       (b.hitHeroes ??= []).push(ally.id);
@@ -186,7 +191,7 @@ export function stepBolt(b: Bolt, w: World, dt: number): boolean {
       if (!b.pierce) return false;
     }
     // Someone freed in the way takes it too (solo as well: they're no fighters).
-    const sv = b.kind === 'net' || b.relic ? undefined : survivorIn(w, b);
+    const sv = b.kind === 'net' || b.relic || mercy ? undefined : survivorIn(w, b);
     if (sv) {
       if (b.burst) return blast(w, b, b.x, b.y), false;
       shotSurvivor(w, b, sv);

@@ -4,13 +4,14 @@
  * was lit from the Last Lantern, for life: every heal they give grows, and the hungry smell it, notice
  * them sooner and go for them first. Nobody else can take one. See docs/lore/story-bible.md.
  */
-import { LANTERN, WEAPONS } from '../shared/tuning';
+import { CENSER, LANTERN, WEAPONS } from '../shared/tuning';
 import type { Enemy, FightEvent, Hero } from './types';
 import { statsOf } from './gearstats';
 /** The church's light (shared/church.ts) is lit from the Lantern too: the hungry come for whoever carries it. */
 import { LIT } from '../shared/church';
 
-export interface Coal { id: number; x: number; y: number; life: number }
+/** `owner`: a Cleric's censer dropped it (sim/censer.ts), at `at`; it burns goblins and feeds no censer. */
+export interface Coal { id: number; x: number; y: number; life: number; owner?: string; at?: number }
 let nextId = 1;
 
 const healer = (h: Hero) => WEAPONS[h.weapon].cls === 'HEALER';
@@ -24,10 +25,13 @@ export function dropCoal(e: Enemy, coals: Coal[]): void {
   if (e.kind === 'butcher') coals.push({ id: nextId++, x: e.x, y: e.y, life: LANTERN.life });
 }
 
-/** Healers take the coals they walk over; the rest fade. */
+/** A censer's coal (sim/censer.ts), numbered with the butchers' so the room's list keeps one id each. */
+export const censerCoal = (x: number, y: number, owner: string, now: number): Coal => ({ id: nextId++, x, y, life: CENSER.life, owner, at: now });
+
+/** Healers take the coals they walk over (not a censer's own); the rest fade. */
 export function stepCoals(coals: Coal[], heroes: Hero[], ev: FightEvent[], dt: number): Coal[] {
   return coals.filter((m) => {
-    const h = heroes.find((o) => healer(o) && o.act !== 'down' && o.glow < LANTERN.max && Math.hypot(o.x - m.x, o.y - m.y) < LANTERN.reach);
+    const h = !m.owner && heroes.find((o) => healer(o) && o.act !== 'down' && o.glow < LANTERN.max && Math.hypot(o.x - m.x, o.y - m.y) < LANTERN.reach);
     if (h) {
       h.glow++;
       ev.push({ k: 'coal', x: h.x, y: h.y, n: h.glow });

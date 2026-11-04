@@ -101,27 +101,25 @@ describe('the sword and censer', () => {
 });
 
 describe('the flail', () => {
-  it("its sweep comes over a shield-bearer's board, where the mace's doesn't", () => {
+  it("a shield-bearer's board takes its sweep, as it takes the mace's (no longer over the shield)", () => {
     const blow = (weapon: WeaponId) => {
       const { room, run } = arena(weapon, [{ x: 9, y: 7.9, variant: 'shield' }]);
       run(0.5, { attackSeq: 1 });
       return hurt(room.enemies[0]);
     };
-    expect(blow('flail')).toBe(WEAPONS.flail.combo[0].dmg);
+    expect(blow('flail')).toBe(Math.round(WEAPONS.flail.combo[0].dmg * VARIANTS.shield.front));
     expect(blow('mace')).toBe(Math.round(WEAPONS.mace.combo[0].dmg * VARIANTS.shield.front));
   });
 
-  it('the second blow heals; held, a smite cracks out close in front and stuns', () => {
-    const { room, h, run } = arena('flail', [{ x: 9, y: 7.6 }]);
+  it('the second blow heals; held, the spun release is a long sweep (sim/flail.ts; tests/cleric.test.ts)', () => {
+    const { room, h, run } = arena('flail', [{ x: 9, y: 9 - 2.4 }]);
     h.hp = 50;
     taps(run, 2, 0.6);
     run(0.4);
     expect(h.hp).toBe(50 + WEAPONS.flail.combo[1].heal!);
     const before = hurt(room.enemies[0]);
-    const ev = held(run, 1.2, 0.5);
-    expect(ev.some((e) => e.k === 'smite')).toBe(true);
-    expect(hurt(room.enemies[0]) - before).toBeGreaterThanOrEqual(WEAPONS.flail.heavy.dmgFull);
-    expect(room.enemies[0].act).toBe('stunned');
+    held(run, 1.2, 0.5);
+    expect(hurt(room.enemies[0])).toBeGreaterThan(before);
   });
 
   it('what it kills bursts, like the mace', () => {

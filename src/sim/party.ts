@@ -6,7 +6,7 @@
  *   Nobody comes: the first time in a job you get yourself up; the next, you're out until it ends.
  *   Raised by a friend, your own get-up isn't spent. Alone (or the last one left), it's the old way:
  *   up again in a moment.
- * - Friendly fire: your own side's blows, shots and blasts land on you at PARTY.friendly.
+ * - Friendly fire: your own side's blows, shots and blasts land on you at PARTY.friendly (never a Cleric's).
  * - Down a teammate PARTY.grudge times in one job and they hold a grudge.
  * - More players, more goblins (scaleFoes) and tougher named ones.
  */
@@ -16,6 +16,7 @@ import { toughen } from '../shared/roster';
 import { waveFor } from './spiders';
 import type { Foe } from '../shared/terrain';
 import { inArc } from './combat';
+import { isCleric } from './mercy';
 import type { Swing } from '../shared/tuning';
 import type { Enemy, FightEvent, Hero } from './types';
 
@@ -38,9 +39,9 @@ export function allyHit(by: string, h: Hero, dmg: number, ev: FightEvent[], dx =
   if ((g[by] = (g[by] ?? 0) + 1) === PARTY.grudge) ev.push({ k: 'grudge', x: h.x, y: h.y, id: h.id, by });
 }
 
-/** A swing's live frames: any teammate in its arc takes it once a swing. */
+/** A swing's live frames: any teammate in its arc takes it once a swing (never a Cleric's: sim/mercy.ts). */
 export function sweepAllies(h: Hero, s: Swing, heroes: Hero[], ev: FightEvent[]): void {
-  if (s.shot || !inParty(heroes)) return;
+  if (s.shot || !inParty(heroes) || isCleric(h)) return;
   for (const o of players(heroes)) {
     if (o === h || h.hitAllies?.includes(o.id) || (o.z ?? 0) !== (h.z ?? 0) || !inArc(h.x, h.y, h.fx, h.fy, o.x, o.y, s.range, s.arc, HERO.radius)) continue;
     (h.hitAllies ??= []).push(o.id);

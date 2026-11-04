@@ -7,7 +7,7 @@ import { ARENA, useMap, type GameMap } from '../shared/arena';
 import type { Foe } from '../shared/terrain';
 import type { PropKind } from '../shared/props';
 import { Rng } from '../shared/rng';
-import { BLESSING, GUARD, HEAL_RADIUS, HEIGHT, HERO, LODESTONE, TICK, TRAIT, WEAPONS, type Swing, technique, VARIANTS } from '../shared/tuning';
+import { BLESSING, GUARD, HEAL_RADIUS, HEIGHT, HERO, LODESTONE, MACE, TICK, TRAIT, WEAPONS, type Swing, VARIANTS } from '../shared/tuning';
 import { separate } from './bodies';
 import { lobLodestone, shoot, smite, stepBolt, throwNet } from './bolts';
 import { afflict, stepElements, type World } from './elements';
@@ -17,11 +17,13 @@ import { rouse } from './backline';
 import { newEnemy, stepEnemy } from './enemies';
 import { currentSwing, newHero, stepHero, type HeroActs } from './hero';
 import { damage, isDead } from './damage';
-import { HUNGRY_FX, heals, onKill, stepHungry, wears } from './hungry';
+import { HUNGRY_FX, onKill, stepHungry, wears } from './hungry';
 import { newChest, startChest, stepChests, type Chest } from './chests';
 import { stepFlask, stepPotions, usePotion, type Smoke } from './flasks';
 import { dropPickups, dropRelic, stepPickups, type Pickup } from './pickups';
-import { dropCoal, healMult, stepCoals, type Coal } from './lantern';
+import { dropCoal, stepCoals, type Coal } from './lantern';
+import { censerSwing, stepEmbers } from './censer';
+import { mend, shieldNear } from './holy';
 import { impacts } from './impacts';
 import { release, stepCarry, tryGrab } from './grab';
 import { startBash, stepBash } from './bash';
@@ -46,7 +48,7 @@ import { stepNests } from './spiders';
 import { startTorch, stepTorch } from './torch';
 import { startKindle, stepKindle } from './kindle';
 import { stepHouseFires, type HouseFire, type Indoors } from './houseburn';
-import { cure, stepPoison } from './poison';
+import { stepPoison } from './poison';
 import { stepPuddles } from './puddles';
 import { brandyDmg } from './brandy';
 import { litMult } from './charge';
@@ -277,6 +279,7 @@ export class ArenaRoom {
     stepNests(this.enemies, this.heroes, this.time, this.events, (x, y) => this.spawn('spider', x, y));
     this.puddles = stepPuddles(this.puddles, this.heroes, this.time, TICK, this.events);
     stepPoison(this.heroes, this.time, this.events);
+    stepEmbers(this.coals, w);
     stepElements(w);
     stepVenom(this.enemies, this.time, this.events);
     // The freed: home out in the open at the way in; brought out of a house, maybe goblins waiting.
@@ -386,6 +389,9 @@ export class ArenaRoom {
     // A staff raises its wall; its slash and a spellblade's swings go their own way (sim/staffwall.ts, spellblade.ts).
     if (s.wall) return void this.zones.push(raiseWall(h, w));
     if (looseBlade(h, s, w)) return;
+    // A censer snags on a wall, flares and bursts its coals, drops more (sim/censer.ts); a flail let go on the flash shields friends near.
+    censerSwing(h, s, w, this.coals);
+    if (s.dazes && h.heavy && h.perfect) shieldNear(h, this.heroes, HEAL_RADIUS, w.now, w.ev);
     s = { ...s };
     // Blessed, a DEADEYE perfect release, a TEMPO hit after a dodge through a blow.
     let mult = (h.blessedUntil > w.now ? BLESSING.dmgMult : 1) * (h.heavy && h.perfect ? perfectMult(h) * (has(h, 'deadeye') ? TRAIT.deadeye : 1) : 1) * brandyDmg(h, w.now) * litMult(h);
@@ -402,7 +408,9 @@ export class ArenaRoom {
     }
     const bolts = this.bolts.length;
     if (s.shot === 'smite') s.stun = smiteStun(h, s);
-    if (s.shot === 'smite') this.bolts.push(smite(h, s, Math.min(s.range, this.aimDistance(h, s.range, 3.5)), mult, traitsOf(h), s.delay));
+    // A mace's smite mends friends in its light; let go on the flash it lands harder and shields them (sim/holy.ts).
+    const holy = !!s.holy && h.heavy && h.perfect;
+    if (s.shot === 'smite') this.bolts.push({ ...smite(h, s, Math.min(s.range, this.aimDistance(h, s.range, 3.5)), mult * (holy ? MACE.perfect : 1), traitsOf(h), s.delay), heal: MACE.heal, holy });
     else if (s.shot) {
       // A Mage's spells take the element it last channelled (fire to start with); the first after a turn is primed.
       const mage = WEAPONS[h.weapon].cls === 'MAGE', primed = mage && !!h.primed;
@@ -418,14 +426,6 @@ export class ArenaRoom {
     const heal = healOf(h, s);
     if (!heal) return;
     w.ev.push({ k: 'bless', x: h.x, y: h.y });
-    for (const o of this.heroes) {
-      if (o.act === 'down' || Math.hypot(o.x - h.x, o.y - h.y) > healReach(h)) continue;
-      // A heal draws a stack of poison too.
-      cure(o, false, this.events);
-      const n = Math.min(o.maxHp - o.hp, Math.round(heals(o, h, heal * healMult(h) * (1 + technique(h.drills, 'HEALER')))));
-      if (n <= 0) continue;
-      o.hp += n;
-      w.ev.push({ k: 'heal', x: o.x, y: o.y, n });
-    }
+    for (const o of this.heroes) if (o.act !== 'down' && Math.hypot(o.x - h.x, o.y - h.y) <= healReach(h)) mend(h, o, heal, this.events);
   }
 }

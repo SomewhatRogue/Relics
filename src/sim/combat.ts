@@ -1,6 +1,6 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, parry, roll). */
 import { litMult } from './charge';
-import { BLESSING, DODGE, WARD, FLINCH, HORN, OVERKILL, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing, CLASS_DODGES, RIPOSTE, CRIT, STEALTH, technique, weakOn } from '../shared/tuning';
+import { CENSER, BLESSING, DODGE, WARD, FLINCH, HORN, OVERKILL, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing, CLASS_DODGES, RIPOSTE, CRIT, STEALTH, technique, weakOn } from '../shared/tuning';
 import { shove } from './bodies';
 import { knack, statsOf } from './gearstats';
 import { counterWindow, parryWindow, rearCos, slipWindow } from './knacks';
@@ -12,6 +12,8 @@ import { has } from './traits';
 import { brandyDmg } from './brandy';
 import { lunging, riposteNow, shaftMult, warriorHit } from './warrior';
 import { catchBlow } from './spellblade';
+import { soak } from './holy';
+import { clericHit } from './flail';
 import type { Enemy, EnemyAttack, FightEvent, Hero } from './types';
 
 export { respawnOf, stunOf } from './damage';
@@ -48,13 +50,13 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   if (tempo > 1) h.tempoUntil = -9;
   const crit = rollCrit(h), ambush = e.alert === false && !isDummy(e);
   // A shield-bearer takes a blow from the front on its board (unless it's heavy, held fast, or caught unaware).
-  const boarded = e.variant === 'shield' && !rear && !heavy && !heldFast && !ambush && !WEAPONS[h.weapon].overShield;
+  const boarded = e.variant === 'shield' && !rear && !heavy && !heldFast && !ambush;
   const weak = weakOn(e);
   sayWeak(e, weak, now, ev, 'physical');
   // The sword's riposte (a counter straight off the parry) doubles the counter; the spear's shaft halves a blow up close.
   const riposte = riposteNow(h, now);
   if (riposte && h.hitIds.filter((id) => id > 0).length === 1) ev.push({ k: 'perfect', x: h.x, y: h.y }, { k: 'riposte', x: e.x, y: e.y });
-  const mult = weak * (h.counter ? counter * (riposte ? RIPOSTE.mult : 1) : heldFast ? held : 1) * shaftMult(h, s, e) * rearMult * blessed * tempo * (crit ? CRIT : 1) * (ambush ? STEALTH.ambush * (1 + knack(h, 'ambush')) : 1) * (boarded ? VARIANTS.shield.front : 1) * brandyDmg(h, now) * litMult(h);
+  const mult = weak * (h.counter ? counter * (riposte ? RIPOSTE.mult : 1) : heldFast ? held : 1) * shaftMult(h, s, e) * rearMult * blessed * tempo * (crit ? CRIT : 1) * (ambush ? STEALTH.ambush * (1 + knack(h, 'ambush')) : 1) * (boarded ? VARIANTS.shield.front : 1) * brandyDmg(h, now) * litMult(h) * (h.snagged ? CENSER.snag : 1);
   // Mother Rust's Needles: a backstab kills anything short of a butcher.
   const n = rear && e.kind === 'scrapper' && wears(h, 'needles') ? Math.max(e.hp, Math.round(s.dmg * mult)) : Math.round(s.dmg * mult);
   e.hp -= n;
@@ -65,7 +67,8 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   // A blow sweeping all round (the healer's blessing) throws outward; anything else, along the swing.
   const ring = s.arc >= 360, dl = Math.hypot(e.x - h.x, e.y - h.y) || 1;
   const kx = ring ? (e.x - h.x) / dl : h.fx, ky = ring ? (e.y - h.y) / dl : h.fy;
-  if (e.act !== 'pinned' && e.act !== 'carried') shove(e, kx, ky, s.knock + (h.counter ? 5 : 0), e.weight);
+  // (A shield-bearer's board stops a flail's shove: sim/flail.ts.)
+  if (e.act !== 'pinned' && e.act !== 'carried' && !(boarded && WEAPONS[h.weapon].shoves)) shove(e, kx, ky, s.knock + (h.counter ? 5 : 0), e.weight);
   if (ambush && e.hp > 0) Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: STEALTH.reel });
   ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy, on: 'enemy', counter: h.counter, crit, ambush, boarded, backstab: rear && (rearMult >= 2 || WEAPONS[h.weapon].cls === 'ROGUE'), src: WEAPONS[h.weapon].cls === 'RANGER' ? 'sword' : h.weapon, big: e.kind === 'butcher' });
   if (isDummy(e)) {
@@ -83,7 +86,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   }
   // A heavy blow breaks the frozen.
   if (ice && heavy) return shatter(e, now, ev), n;
-  if (warriorHit(h, s, e, wasLunging, now, ev)) return n;
+  if (warriorHit(h, s, e, wasLunging, now, ev) || clericHit(h, s, e, ev)) return n;
   // Light goblins flinch out of their wind-up on any hit. A heavy wind-up (a butcher's, a heavy's, a cleave
   // or slam, a striped blow; never a hexer's spell, which any blow breaks) only to a strong charged blow
   // from a big weapon (the greatsword, the flail).
@@ -174,7 +177,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   if (a.kind === 'draw') {
     const l = Math.hypot(e.x - h.x, e.y - h.y) || 1, to = VARIANTS.stoker.pullTo;
     Object.assign(h, { x: e.x - ((e.x - h.x) / l) * to, y: e.y - ((e.y - h.y) / l) * to, kvx: 0, kvy: 0, act: 'stun', actT: 0, actDur: VARIANTS.stoker.pullStun });
-    h.hp -= a.dmg;
+    h.hp -= soak(h, a.dmg, now, ev);
     e.cooldown = 0;
     ev.push({ k: 'hit', x: h.x, y: h.y, n: a.dmg, heavy: true, on: 'hero', src: 'draw' });
     return downIfDead(h, ev);
@@ -215,7 +218,9 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     } else ev.push({ k: 'block', x: h.x, y: h.y });
     return;
   }
-  const n = Math.round(a.dmg * taken);
+  // A Cleric's holy shield soaks what it can (sim/holy.ts); a blow it takes whole doesn't stagger.
+  const n = soak(h, Math.round(a.dmg * taken), now, ev);
+  if (n <= 0) return void (h.hitstop = Math.max(h.hitstop, HITSTOP.light));
   h.hp -= n;
   // Heavy armor: a small goblin's blow doesn't stagger you.
   if (!(g.steady && e.kind === 'scrapper')) Object.assign(h, { act: 'hurt', actT: 0, actDur: HURT_STAGGER + a.knock * 0.012 });

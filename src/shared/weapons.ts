@@ -31,8 +31,14 @@ export interface Swing {
   stun?: number;
   /** A melee blow strikes at most this many goblins, nearest first (a rapier's lunge runs through two). */
   hits?: number;
-  /** Sets what it strikes burning (the censer's coals). */
+  /** The censer itself: sets what it strikes burning, bursts your coals it swings through, and snags on a wall (sim/censer.ts). */
   burn?: boolean;
+  /** Drops burning coals along its arc (the censer's swung arc; shared/cleric.ts CENSER). */
+  coals?: boolean;
+  /** A Cleric's held attack: let go on the white flash, it shields friends (shared/cleric.ts HOLY_SHIELD). */
+  holy?: boolean;
+  /** A flail's spun release: let go on the white flash, it stuns what it hits (shared/cleric.ts FLAIL). */
+  dazes?: boolean;
   /** A smite falls this long after the release (0.35 s if not set). */
   delay?: number;
   /** A poisoner's dart: poisons what it hits (shared/venom.ts). */
@@ -133,8 +139,8 @@ export interface Weapon {
   noCharge?: boolean;
   /** Goblins it kills burst (a mace, a flail). */
   blunt?: boolean;
-  /** Its blows come over a shield-bearer's board (a flail). */
-  overShield?: boolean;
+  /** Its blows shove a goblin a little, but a shield-bearer's board stops the shove (a flail). */
+  shoves?: boolean;
   dodge: Dodge;
   /** No held block: block is only ever a parry (the greatsword). */
   parryOnly?: boolean;
@@ -270,16 +276,18 @@ export const WEAPONS: Record<KitId, Weapon> = {
   },
   /** The combat Mage: a sword in three cuts, wreathed in the element on a hold (shared/mage.ts). */
   spellblade: SPELLBLADE,
-  /** The Healer: every third blow heals the party; held, a holy smite falls on the goblin you face. */
+  /** The Healer: heavy, short blows, every third heals the party; held, a holy smite falls on the goblin you
+   *  face, and its light mends friends in the burst. Let go on the white flash, it lands harder and shields
+   *  them (shared/cleric.ts MACE). Weakness: the shortest reach of any melee kit. */
   mace: {
     name: 'MACE AND CENSER',
     cls: 'HEALER',
     combo: [
-      { windup: 0.12, active: 0.08, recover: 0.22, dmg: 13, range: 1.4, arc: 100, lunge: 0.3, knock: 4 },
-      { windup: 0.12, active: 0.08, recover: 0.22, dmg: 13, range: 1.4, arc: 100, lunge: 0.3, knock: 4 },
-      { windup: 0.2, active: 0.1, recover: 0.4, dmg: 18, range: 1.6, arc: 130, lunge: 0.5, knock: 7, heal: 8 },
+      { windup: 0.12, active: 0.08, recover: 0.22, dmg: 13, range: 1.2, arc: 100, lunge: 0.3, knock: 4 },
+      { windup: 0.12, active: 0.08, recover: 0.22, dmg: 13, range: 1.2, arc: 100, lunge: 0.3, knock: 4 },
+      { windup: 0.2, active: 0.1, recover: 0.4, dmg: 18, range: 1.35, arc: 130, lunge: 0.5, knock: 7, heal: 8 },
     ],
-    heavy: { windup: 0.15, active: 0.05, recover: 0.55, dmg: 24, dmgFull: 70, range: 6, arc: 0, lunge: 0, knock: 4, knockFull: 10, shot: 'smite', burst: 1.3, stun: 1.2 },
+    heavy: { windup: 0.15, active: 0.05, recover: 0.55, dmg: 24, dmgFull: 70, range: 6, arc: 0, lunge: 0, knock: 4, knockFull: 10, shot: 'smite', burst: 1.3, stun: 1.2, holy: true },
     draw: 1.2,
     chip: 0.18, blockSpeed: 0.45, chargeSpeed: 0.35, parryWindow: 0.3, guardArc: 150, guardCost: 1.1, speed: 0.84, blunt: true,
     dodge: { kind: 'roll', distance: 2, time: 0.36, iFrom: 0.05, iTo: 0.28, stamina: 28, cooldown: 1.3 },

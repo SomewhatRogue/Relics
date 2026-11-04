@@ -231,7 +231,8 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
       const held = h.actT + CHARGE.start, full = chargeFull(w, h), drawn = !!w.heavy.shot;
       h.power = Math.min(1, held / full);
       // (A rapier's lunge has its flash too: on it, the thrust skewers.)
-      h.perfect = (drawn || !!w.heavy.skewer || !!w.heavy.quake || !!w.heavy.wall) && held >= full && held <= full + releaseWindow(h);
+      // (Every Cleric's hold too: let go on it, friends are shielded.)
+      h.perfect = (drawn || !!w.heavy.skewer || !!w.heavy.quake || !!w.heavy.wall || !!w.heavy.holy) && held >= full && held <= full + releaseWindow(h);
       if (drawn && held > full + RELEASE.overdraw) h.power = RELEASE.overdrawn;
       // A crossbow's perfect is its glint, not the flash.
       looseBolt(h);
@@ -331,6 +332,7 @@ function startSwing(h: Hero, i: number, inp: Intent, enemies: Enemy[], now: numb
   h.combo = Math.max(0, i);
   h.hitIds = [];
   h.hitAllies = [];
+  h.snagged = false;
   h.attackQueuedAt = -9;
   h.counter = now < h.counterUntil;
   if (h.counter) h.counterUntil = -9;
