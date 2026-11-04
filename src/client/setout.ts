@@ -37,7 +37,7 @@ function beat(panel: Panel, text: string, then: () => void): void {
   panel.show(PW.beat, `<p>${esc(text)}</p>`, [], true);
   setTimeout(() => {
     going = false;
-    if (panel.open && document.querySelector('#panel h2')?.textContent === PW.beat) panel.hide();
+    if (panel.open && document.querySelector('#panel h2')?.textContent?.toUpperCase() === PW.beat) panel.hide();
     then();
   }, BEAT_MS);
 }

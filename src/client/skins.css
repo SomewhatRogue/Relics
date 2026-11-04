@@ -1,0 +1,76 @@
+/* The older screens in the new material (ui.css): the job board's notices on parchment, the pack's
+   empty sockets, the wood's words and lesson cards, the start screen's names in the display face. */
+
+/* The job board: each job a paper notice; the story's has a gold edge, a deep one violet, a party's green. */
+#panel .job { padding: 0 2px; margin-bottom: 6px; color: var(--ink); border: var(--edge) solid transparent; border-image: var(--f-parch) 4 fill / var(--edge) stretch; background: none; }
+#panel .job.story { box-shadow: inset calc(3 * var(--px)) 0 0 var(--gold); }
+#panel .job.deep { box-shadow: inset calc(3 * var(--px)) 0 0 #6a3aa8; }
+#panel .job.party { box-shadow: inset calc(3 * var(--px)) 0 0 var(--rot); }
+#panel .job.open { background: none; }
+#panel .job .jhead { gap: 6px; min-height: 34px; padding: 4px 4px; border-image: none; text-transform: none; font: 400 var(--fs-text)/1.1 var(--font-body); letter-spacing: 0; color: var(--ink); }
+#panel .job .jhead:active { transform: none; }
+#panel .job .jhead .kind { min-width: 40px; font-size: var(--fs-s); letter-spacing: 0.04em; text-transform: uppercase; color: #6a4818; }
+#panel .job .jhead .k-rescue { color: #3a5a14; }
+#panel .job .jhead .k-hunt { color: #8a2412; }
+#panel .job .jhead .k-story { color: #7a4a08; }
+#panel .job .jhead .len, #panel .job .jhead .when { font-size: var(--fs-s); color: var(--ink-soft); text-transform: uppercase; }
+#panel .job .jhead .t-dawn { color: #2a4a6a; }
+#panel .job .jhead .t-dusk { color: #8a4a14; }
+#panel .job .jhead .t-night { color: #3a3a7a; }
+#panel .job .jhead em { color: #6a4208; }
+#panel .job .pips i { background: #a48c62; }
+#panel .job .pips i.on { background: #9a2414; }
+#panel .job .jmore, #panel .job .d { color: var(--ink); }
+#panel .job b { color: #3a2a10; }
+#panel .job .need { color: #8a2412; }
+#panel .job .m { color: var(--ink-soft); }
+#panel .job .t { color: #6a4208; }
+
+/* The pack and the stores: empty places are sunk sockets, not dashed boxes. */
+body #pack .cells, #panel .cells, #pack .grid { border: 0; padding: 0; }
+body #pack .tile, #panel .tile, .tile.ghost { background: var(--stone-750); border-width: var(--px); box-shadow: inset 0 0 0 var(--px) #07080a; }
+body #pack .tile.empty, #panel .tile.empty, #pack .tile.drop, body #pack .bag .tile.drop { border: calc(2 * var(--px)) solid transparent; border-image: var(--f-sunk) 2 fill / calc(2 * var(--px)) stretch; background: none; box-shadow: none; }
+body #pack .tile.empty i, #panel .tile.empty i { color: var(--stone-500); }
+body #pack .bag .tile.drop i { color: #b86050; }
+body #pack .tile.dim, #panel .tile.dim { border-style: solid; opacity: 0.6; }
+body #pack .tile.sel, #panel .tile.sel { outline: calc(2 * var(--px)) solid var(--bone); outline-offset: 0; }
+body #pack .tile.can, #pack .grid.can, body #pack .cells.can { outline: var(--px) solid var(--gold); }
+body #pack .tile.over, body #pack .cells.over { outline: calc(2 * var(--px)) solid var(--gilt); background: #2e2618; }
+#pack .head { margin-bottom: 2px; }
+#pack .x { font-size: 0; }
+#pack .x::before { content: ''; display: block; width: calc(5 * var(--px)); height: calc(5 * var(--px)); margin: auto; background: linear-gradient(45deg, transparent 40%, var(--bone) 40% 60%, transparent 60%), linear-gradient(-45deg, transparent 40%, var(--bone) 40% 60%, transparent 60%); }
+body #pack .detail, #panel .store .sdetail, .pair .side, .rcard, #panel .rcard, #panel .work, #panel .tr-sec { border: calc(2 * var(--px)) solid transparent; border-image: var(--f-sunk) 2 fill / calc(2 * var(--px)) stretch; background: none; }
+
+/* Single-word titles in the blackletter read as a capital and small letters ("Pack", "Relic"). */
+#pack h2, #title h1, #title .cname, #title .dhead h2, #lesson .relic-name { text-transform: lowercase; }
+#pack h2::first-letter, #title h1::first-letter, #title .cname::first-letter, #title .dhead h2::first-letter, #lesson .relic-name::first-letter { text-transform: uppercase; }
+#title h1 { letter-spacing: 0; color: var(--gilt); }
+#title .sub { letter-spacing: 0.1em; }
+#title .ccard b, #title .about b { color: var(--bone); }
+#title .rcode { font-size: 24px; text-shadow: none; }
+#title .name input, #panel .code input, #chat .box input { border: calc(2 * var(--px)) solid transparent; border-image: var(--f-sunk) 2 fill / calc(2 * var(--px)) stretch; background: none; color: var(--bone); }
+#title .preview { background: radial-gradient(ellipse at 50% 80%, #2b2e35 0%, #16171b 70%); }
+#title .bars em.on { background: var(--bone-dim); }
+
+/* The wood: Hew's words in a stone box, the lesson's button gilt, the key caps iron. */
+#caption { border: var(--edge) solid transparent; border-image: var(--f-stone) 4 / var(--edge) stretch; border-radius: 0; background: var(--dither) 0 0 / calc(4 * var(--px)) repeat, #1b1d22f0; background-clip: padding-box; color: var(--bone); font-size: var(--fs); }
+#caption b { color: #d8b880; font: 400 var(--fs-text)/1.2 var(--font-body); letter-spacing: 0.08em; }
+#caption.praise { font-size: var(--fs); border-image-source: var(--f-gilt); }
+#lesson .card { border-radius: 0; color: var(--bone); }
+#lesson .who { color: #d8b880; letter-spacing: 0.08em; }
+#lesson .line { font-size: var(--fs); }
+#lesson .how { color: var(--bone-dim); }
+#lesson .move span { color: var(--gilt); letter-spacing: 0.06em; }
+#lesson kbd { border: var(--edge-s) solid transparent; border-image: var(--f-iron) 3 fill / var(--edge-s) stretch; border-radius: 0; background: none; color: var(--bone); font: 400 var(--fs)/1 var(--font-body); }
+#lesson button { border: var(--edge-s) solid transparent; border-image: var(--f-gilt) 3 fill / var(--edge-s) stretch; border-radius: 0; background: none; color: var(--gilt); font-size: var(--fs-text); }
+#lesson .go-hint { color: var(--gilt); animation: none; }
+#lesson.act .now { color: #fff1d0; text-shadow: var(--px) var(--px) 0 #7a2a10, calc(2 * var(--px)) calc(2 * var(--px)) 0 #07080a; font: 400 28px/1 var(--font-body); letter-spacing: 0.06em; }
+#lesson.found-relic .card { border: var(--edge) solid transparent; border-image: var(--f-gilt) 3 / var(--edge) stretch; }
+#lesson.found-relic .found { letter-spacing: 0.2em; }
+#lesson.found-relic .relic-name { font-size: 42px; color: var(--gilt); text-shadow: var(--px) var(--px) 0 #3a2410; }
+#skipcut { border: var(--edge-s) solid transparent; border-image: var(--f-iron) 3 fill / var(--edge-s) stretch; border-radius: 0; background: none; color: var(--bone); letter-spacing: 0.08em; }
+
+/* Bubbles over heads: paper, square cut, a hard shadow. */
+#bubbles .bubble { background: #e8dcc0; color: var(--ink); box-shadow: 0 var(--px) 0 #07080a, 0 calc(-1 * var(--px)) 0 #07080a, var(--px) 0 0 #07080a, calc(-1 * var(--px)) 0 0 #07080a; font-weight: 400; }
+#bubbles .bubble::after { border-top-color: #e8dcc0; }
+#bubbles .bubble.below::after { border-bottom-color: #e8dcc0; }

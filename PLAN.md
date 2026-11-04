@@ -2,6 +2,34 @@
 
 ## Current slice
 
+**The UI redo, steps 1 to 3: stone, iron and gilt; the touch cluster; the top HUD** (Claude Opus 5.5,
+2026-11-04; Kyle: the UI reads as "AI slop", "emulate Diablo and Path of Exile, mobile first", "Build";
+the brief is `docs/ui-research.md`). Built; waiting on Kyle's play. *Done when* on his phone (upright)
+and laptop, flat and 2.5D: every word is in the two bundled pixel faces (Jacquard 12 for titles and
+names, Tiny5 for the rest, no system monospace left); panels, buttons and the HUD sit in drawn pixel
+frames (stone, iron, gilt for the way on, parchment for the job notices) with no rounded corners or
+soft glows, and every button is the one button (pressed sinks a pixel, gilt for the primary, dull stone
+when it can't be used); ATTACK sits bottom right with stamina as pips round it, the dodge a diamond with
+its name under it (STEP for the Warrior), the guard a shield (PARRY a buckler, none for a Mage or
+Rogue), the skill and relic round with a stepped cooldown sweep and the seconds, the flask the health
+orb (red to his health, pulsing when low, the next potion in front, the count on it), and one gilt
+context slot for GRAB, THROW, HELP UP, BURN and OPEN (USE, TALK and ENTER take ATTACK's place in town);
+none of it ever over his own hero, the camera running past a room's foot to keep him above it; the top
+left is his face in an iron socket with the level, a chunky health bar with a trail for the chunk just
+lost, and small marks for what's on him; the kit and weapon lines show on a tap of the face; the corner
+is CHAT, PACK and the gear as icons, LEAVE now inside the gear's box on a job; the tracker is one framed
+box with the place in blackletter, a diamond a room, a coin and drawn hearts. No new lines
+were written (the one new word is OFF on a switched-off option). `node scripts/ui-look.cjs` shoots every screen.
+*Next, in the brief's order:* 4. hit feedback (merged damage numbers in three sizes, status icons, hit
+stop and a white flash, the framed boss plate); 5. dialogue (the bottom box with bust portraits, the
+council as choice cards); 6. the pack, tooltip and compare (icon tiles, upgrade arrows, the bottom-sheet
+tooltip, only the changed rows, the new tier ladder); 7. loot and notices (auto pickup of gold and
+potions, ground labels and light pillars, pickup toasts instead of the loot card, the ribbon banner, the
+framed results); 8. one vendor screen (keeper plate, BUY, SELL and BUYBACK tabs, a tile grid, no modal
+on a modal); 9. party and chat (mini party frames, the quick-line wheel, the chat bottom sheet, the
+party card restyled); 10. the menu book and settings (tabs, HUD layout, the left-hand mirror, damage
+number options, the town map); 11. the laptop pass (the D4 bottom bar, key hints, vendor and pack side by side).
+
 **Setting a house alight** (Claude Opus 5.5, 2026-11-03; Kyle: "you can firebomb or light the house on
 fire ... flushes out or kills things inside", "a spot to the side that glints a little as you get close,
 but always the same spot", "a Mage can accidentally burn it down, ditto anyone who throws fire oil").

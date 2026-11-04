@@ -61,6 +61,19 @@ import { Soundscape } from './soundscape';
 import { line, speak } from './speech';
 import { Chat } from './chat';
 import './style.css';
+import './ui.css';
+import './hud.css';
+import './cluster.css';
+import './skins.css';
+import { paintFrames } from './frames';
+import { iconVars } from './icons';
+import { Cluster } from './cluster';
+import { UnitFrame } from './unitframe';
+import { heartsHtml, roomsHtml, titleCase } from './tracker';
+
+// The UI's frames and icons, drawn once before anything shows.
+paintFrames();
+iconVars();
 
 const game = new Game();
 hookLitBadge(() => game.profile.lit ?? 0);
@@ -98,6 +111,8 @@ setLink(link);
 void link.refresh(true);
 const sounds = new Soundscape(music);
 const recovery = new Recovery(() => game.save);
+const unit = new UnitFrame();
+const cluster = input.touch ? new Cluster() : null;
 const title = new Title(game, () => undefined, recovery);
 /** Chat (online): world and near in town, the party on a job. */
 const chat = new Chat(game, views, input.touch, () => panel.open || title.open);
@@ -200,13 +215,12 @@ function hud(now: number): void {
   // Winded: the bar flashes, fast while nothing's coming back, slower as it refills.
   $('.st').classList.toggle('winded', !!me.winded);
   $('.st').classList.toggle('empty', !!me.winded && room.time - me.staminaAt < HERO.windedDelay);
-  $('.who').textContent = `${pr.name}  ${CLASS_NAME[pr.cls]}  LV ${pr.level}`;
+  $('.who').textContent = pr.name;
+  $('.who').title = `${CLASS_NAME[pr.cls]}, level ${pr.level}`;
   const item = me.arms[me.weapon];
   $('.wpn').textContent = item ? itemName(item) : WEAPONS[me.weapon].name;
-  // The block button: a Mage has none; a Ranger or Rogue only taps it to parry.
-  // (A spellblade has no guard, but block catches a blow on the blade.)
+  // (The block button, and a spellblade's CATCH on it, are the touch cluster's: cluster.ts.)
   const guard = WEAPONS[me.weapon].catches ? 'catch' : CLASS_GUARD[WEAPONS[me.weapon].cls];
-  if (document.body.dataset.guard !== guard) (document.body.dataset.guard = guard), ($('.tb.block').textContent = guard === 'parry' ? 'PARRY' : guard === 'catch' ? 'CATCH' : 'BLOCK');
   // A Mage's big spell: a mark on the bar at what it costs, red while you're short of it (sim/spells.ts).
   const cost = spellCost(me);
   $('.st').classList.toggle('spell', cost > 0);
@@ -223,26 +237,6 @@ function hud(now: number): void {
   if (game.mode === 'run') kindleCue(room.map, me, (x, y, s) => fx.say(toPx(x, y)[0], toPx(x, y)[1] - 18, s, '#e8dcc8', 2.6));
   // A house alight with someone still caged inside: shouts from it until the roof comes in.
   if (game.mode === 'run') burningCries(room.map, room.time, (x, y, s) => fx.say(toPx(x, y)[0], toPx(x, y)[1] - 24, s, '#ffb08a', 1.8));
-  if (input.touch) {
-    // GRAB shows only when there's something to grab (or to throw); ATTACK becomes SLAM.
-    const carrying = me.act === 'carry';
-    const can = carrying || (me.act === 'idle' && (room.enemies.some((e) => grabbable(me, e, room.time)) || room.props.some((p) => liftable(me, p))));
-    // A Warrior always has GRAB (dimmed till there's something to take hold of); others only when there is.
-    const lifter = WEAPONS[me.weapon].cls === 'WARRIOR';
-    // The dodge button says what your dodge is.
-    $('.tb.roll').textContent = dodgeName(WEAPONS[me.weapon].cls);
-    // A Healer has no dodge, so no button for one; a Warrior's is the short STEP.
-    $('.tb.roll').hidden = !dodgeOf(WEAPONS[me.weapon]);
-    // By a friend who's down, GRAB helps them up.
-    const raise = me.act === 'idle' && raisable(me, room.heroes);
-    // By a nest, or at a house's kindling, GRAB sets it alight (sim/torch.ts, sim/kindle.ts).
-    const burn = !raise && (!!torchable(me, room.enemies) || (game.mode === 'run' && !!kindleable(me, room.map)));
-    $('.tb.grab').hidden = !can && !lifter && !raise && !burn;
-    $('.tb.grab').classList.toggle('dim', !can && !raise && !burn);
-    $('.tb.grab').classList.toggle('raise', raise || burn);
-    $('.tb.grab').textContent = raise ? 'HELP UP' : burn ? 'BURN' : carrying ? 'THROW' : 'GRAB';
-    $('.tb.attack').textContent = carrying ? 'SLAM' : 'ATTACK';
-  }
   // The class skill (E, SKILL) and the relic carried, if any (R, RELIC), each with its cooldown.
   const [skill, relic] = me.relics, left = (r: typeof skill) => Math.max(0, me.relicReady[r] - room.time);
   const tag = (r: typeof skill) => relicLabel(me, r) + (left(r) > 0 ? ' ' + left(r).toFixed(1) : '');
@@ -259,26 +253,9 @@ function hud(now: number): void {
   $('.litbadge').hidden = !me.lit;
   game.settleCouncil();
   setVotes(game.world);
-  if (input.touch) {
-    const sb = $('.tb.relic'), rb = $('.tb.relic2');
-    sb.hidden = !known;
-    sb.textContent = skill === 'channel' ? relicLabel(me, skill) : RELICS[skill].short;
-    sb.dataset.el = skillEl;
-    sb.style.setProperty('--cd', 100 * (1 - left(skill) / RELICS[skill].cooldown) + '%');
-    rb.hidden = !relic;
-    if (relic) (rb.textContent = RELICS[relic].short), (rb.dataset.el = me.augments[relic]), rb.style.setProperty('--cd', 100 * (1 - left(relic) / RELICS[relic].cooldown) + '%');
-    rb.style.setProperty('--chg', it ? chg : '0%');
-    rb.style.setProperty('--chgc', chgc || '#ffd27a');
-    rb.classList.toggle('dark', !!it && isDark(it));
-  }
   // The belt: the potion that's next (Q, POTION) and how many more.
   const next = me.belt[0];
   $('.belt').textContent = next ? (input.touch ? '' : 'Q ') + POTIONS[next].short + (me.belt.length > 1 ? `  +${me.belt.length - 1}` : '') : '';
-  if (input.touch) {
-    const pb = $('.tb.potion');
-    pb.hidden = !next;
-    if (next) (pb.textContent = POTIONS[next].short), (pb.style.borderColor = POTIONS[next].col);
-  }
   // The banner: where you are and what you're doing.
   const run = game.run;
   // The wood: the lesson and its control, how far along; Hew's words; the bars in the cutscene.
@@ -307,18 +284,18 @@ function hud(now: number): void {
     const g = { text: me.out ? OUT_TEXT : game.goalText() };
     // Alone, the times you can still get up (a heart each); in a party, your one get-up of the job.
     const solo = room.heroes.filter((x) => x.id !== 'squire').length < 2, ups = MAX_DOWNS - run.downs;
-    const hearts = `  <i class="ups">${solo ? '\u2665'.repeat(Math.max(0, ups)) + '\u2661'.repeat(Math.min(MAX_DOWNS, run.downs)) : me.selfUp ? '\u2661' : '\u2665'}</i>`;
-    $('#banner').innerHTML = `<b>${run.job.place.name.toUpperCase()} ${run.index + 1}/${run.job.rooms}</b> ${g.text}<span>+${run.gold} GOLD${hearts}${run.rescued ? `  SAVED ${run.rescued}` : ''}</span>`;
+    const hearts = solo ? heartsHtml(Math.max(0, ups), Math.min(MAX_DOWNS, run.downs)) : heartsHtml(me.selfUp ? 0 : 1, me.selfUp ? 1 : 0);
+    $('#banner').innerHTML = `<b>${titleCase(run.job.place.name)}${roomsHtml(run.index, run.job.rooms)}</b> ${g.text}<span><i class="coin"></i>+${run.gold}${hearts}${run.rescued ? `<em>SAVED ${run.rescued}</em>` : ''}</span>`;
     const boss = room.enemies.find((e) => e.name && e.act !== 'dead');
     $('#boss').hidden = !boss;
     if (boss) ($('#boss b').textContent = boss.name!), ($('#boss i').style.width = (100 * boss.hp) / boss.maxHp + '%');
   } else {
     $('#boss').hidden = true;
     $('#banner').innerHTML = game.outside
-      ? `<b>${room.map.name}</b> Walk out at the bottom<span>${pr.gold} GOLD  LEVEL ${pr.level}</span>`
+      ? `<b>${titleCase(room.map.name)}</b> Walk out at the bottom<span><i class="coin"></i>${pr.gold}</span>`
       : game.mode === 'town'
-      ? `<b>WICKHOLD</b> DAY ${game.world.day}<span>${pr.gold} GOLD  LEVEL ${pr.level}${pr.picks ? '  (A KNACK TO PICK)' : ''}  ${game.world.rescued} HOME${link.online ? '  WORLD ' + link.group.toUpperCase() : ''}</span>`
-      : `<b>TRAINING YARD</b> Walk out at the bottom to go back to town`;
+      ? `<b>Wickhold</b> DAY ${game.world.day}<span><i class="coin"></i>${pr.gold}${pr.picks ? '<em>(A KNACK TO PICK)</em>' : ''}<em>${game.world.rescued} HOME</em>${link.online ? '<em>WORLD ' + link.group.toUpperCase() + '</em>' : ''}</span>`
+      : `<b>Training Yard</b> Walk out at the bottom to go back to town`;
   }
   const spot = game.near(), busy = panel.open || title.open;
   $('#prompt').hidden = !spot || busy;
@@ -326,9 +303,9 @@ function hud(now: number): void {
   // A friend down at your feet: the key that gets them up.
   if (!spot && !busy && !input.touch && game.mode === 'run' && game.hero.act === 'idle' && raisable(game.hero, game.room.heroes)) ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  HELP UP');
   else if (!spot && !busy && !input.touch && game.mode === 'run' && (torchable(game.hero, game.room.enemies) || kindleable(game.hero, game.room.map))) ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  BURN');
-  $('.tb.use').hidden = !spot || busy;
-  $('.tb.use').classList.toggle('chest', !!spot?.chest);
-  if (spot) $('.tb.use').textContent = spot.chest ? 'OPEN' : spot.door ? 'ENTER' : spot.talk && spot.talk !== 'board' && spot.talk !== 'market' && spot.talk !== 'gate' ? 'TALK' : 'USE';
+  // The touch buttons round ATTACK, and the unit frame (cluster.ts, unitframe.ts).
+  cluster?.update(game, spot, busy, now);
+  unit.update(game, now);
   const list = game.mode === 'town' ? townTips : tips;
   if (now - tipAt > 6) {
     tipAt = now;

@@ -1,7 +1,7 @@
 /* The party card and its toasts (partycard.ts, partytoast.ts): a column under the HUD at the top left,
    clear of the banner, the corner buttons, the stick and the fight buttons. With a panel up on a phone
    it drops to the bottom, one line, so the panel's words stay readable. */
-#partyhud { position: fixed; z-index: 5; left: calc(12px + env(safe-area-inset-left)); top: calc(62px + env(safe-area-inset-top)); width: 240px; display: flex; flex-direction: column; gap: 6px; pointer-events: none; font-size: 11px; font-weight: 500; color: #d8d4de; }
+#partyhud { position: fixed; z-index: 5; left: calc(12px + env(safe-area-inset-left)); top: calc(62px + env(safe-area-inset-top)); width: 240px; display: flex; flex-direction: column; gap: 6px; pointer-events: none; font-size: var(--fs-text); font-weight: 500; color: #d8d0c0; }
 #partyhud > * { pointer-events: auto; }
 body.panel-up #partyhud { z-index: 7; }
 body.touch #partyhud { left: calc(10px + env(safe-area-inset-left)); top: calc(54px + env(safe-area-inset-top)); width: min(52vw, 206px); }
@@ -9,41 +9,41 @@ body.touch.panel-up #partyhud { top: auto; bottom: calc(6px + env(safe-area-inse
 body.touch.panel-up #partycard.open > :not(.pc-line) { display: none; }
 body.touch.in-party #tip { display: none; }
 
-#partycard { background: #14121aec; border: 1px solid #3f6a4a; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 10px #0008; }
+#partycard { background: #15171bec; border: 1px solid #4a5a3a; overflow: hidden; box-shadow: 0 2px 10px #0008; }
 #partycard[hidden] { display: none; }
-#partycard button { font: inherit; color: inherit; }
+#partycard button { font: inherit; }
 #partycard .pc-line { display: flex; align-items: center; gap: 6px; width: 100%; height: 28px; padding: 0 8px; background: transparent; border: 0; text-align: left; cursor: pointer; }
-#partycard .kind { flex: none; font-size: 9px; letter-spacing: 0.08em; padding: 1px 4px; border-radius: 2px; color: #0d0b10; background: #9fd0ff; }
+#partycard .kind { flex: none; font-size: var(--fs-s); letter-spacing: 0.08em; padding: 1px 4px; color: #0e0f12; background: #a9b4c2; }
 #partycard .kind.k-story { background: #ffd27a; }
-#partycard .kind.k-hunt { background: #ff9a8a; }
+#partycard .kind.k-hunt { background: #d86a50; }
 #partycard .kind.k-burn, #partycard .kind.k-larder { background: #f0b070; }
-#partycard .kind.k-rescue { background: #b8f0a8; }
+#partycard .kind.k-rescue { background: #9cc95a; }
 #partycard .pc-t { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: #ffe6b0; }
 #partycard .pips { flex: none; display: flex; gap: 2px; }
-#partycard .pips i, #partycard li i { display: block; width: 6px; height: 6px; border-radius: 1px; }
-#partycard .pips i.free { background: transparent; box-shadow: inset 0 0 0 1px #6a647a; }
-#partycard .slots { flex: none; color: #9fd0ff; font-size: 10px; }
-#partycard .chev { flex: none; width: 10px; text-align: center; color: #a8a2b4; }
-#partycard .pc-where { padding: 0 8px 4px; color: #a8a2b4; font-size: 10px; }
+#partycard .pips i, #partycard li i { display: block; width: 6px; height: 6px; }
+#partycard .pips i.free { background: transparent; }
+#partycard .slots { flex: none; color: #a9b4c2; font-size: var(--fs-text); }
+#partycard .chev { flex: none; width: 10px; text-align: center; color: #a39e94; }
+#partycard .pc-where { padding: 0 8px 4px; color: #a39e94; font-size: var(--fs-text); }
 #partycard ul { list-style: none; margin: 0; padding: 0 8px 4px; }
 #partycard li { display: flex; align-items: center; gap: 6px; height: 17px; }
-#partycard li em { font-style: normal; font-size: 9px; letter-spacing: 0.08em; color: #ffd27a; border: 1px solid #8a7a5a; border-radius: 2px; padding: 0 3px; }
+#partycard li em { font-style: normal; font-size: var(--fs-s); letter-spacing: 0.08em; color: #ffd27a; border: 1px solid #6a5a3a; padding: 0 3px; }
 #partycard .pc-acts { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 8px 8px; align-items: center; }
-#partycard .pc-acts button { height: 28px; padding: 0 10px; background: #2a2733; border: 1px solid #6a647a; border-radius: 4px; font-size: 10px; letter-spacing: 0.06em; cursor: pointer; }
+#partycard .pc-acts button { height: 28px; padding: 0 10px; font-size: var(--fs-text); letter-spacing: 0.06em; cursor: pointer; }
 #partycard .pc-acts .go { background: #4a3414; border-color: #ffd27a; color: #fff1d0; flex: 1; }
 #partycard .pc-acts button:disabled { opacity: 0.4; cursor: default; }
-#partycard .why { flex-basis: 100%; color: #9fd0ff; font-size: 10px; }
+#partycard .why { flex-basis: 100%; color: #a9b4c2; font-size: var(--fs-text); }
 body.touch #partycard .pc-line { height: 32px; }
 body.touch #partycard .pc-acts button { height: 34px; }
 
 #partytoasts { display: flex; flex-direction: column; gap: 4px; }
 #partytoasts:empty { display: none; }
-.ptoast { display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: #1b1922f0; border: 1px solid #4f4a5c; border-left: 3px solid #9fd0ff; border-radius: 4px; line-height: 1.3; cursor: pointer; animation: ptoast-in 0.25s ease-out; transition: opacity 0.5s; text-shadow: 0 1px 0 #000; }
+.ptoast { display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: #1b1d22f0; border: 1px solid #4b505a; border-left: 3px solid #a9b4c2; line-height: 1.3; cursor: pointer; animation: ptoast-in 0.25s ease-out; transition: opacity 0.5s; text-shadow: 0 1px 0 #000; }
 .ptoast span { flex: 1; min-width: 0; }
-.ptoast.good { border-left-color: #b8f0a8; }
-.ptoast.bad { border-left-color: #ff9a8a; }
+.ptoast.good { border-left-color: #9cc95a; }
+.ptoast.bad { border-left-color: #d86a50; }
 .ptoast.posted, .ptoast.mine { border-left-color: #ffd27a; }
-.ptoast button { flex: none; height: 26px; padding: 0 10px; background: #4a3414; border: 1px solid #ffd27a; border-radius: 4px; color: #fff1d0; font: inherit; font-size: 10px; cursor: pointer; }
+.ptoast button { flex: none; height: 26px; padding: 0 10px; font: inherit; font-size: var(--fs-text); cursor: pointer; }
 .ptoast.going { opacity: 0; }
 @keyframes ptoast-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .ptoast { animation: none; } }
