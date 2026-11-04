@@ -25,6 +25,7 @@ import { TIME_WORD, timeOf } from '../shared/timeofday';
 /** The job open on the board (by id), if any. */
 let boardOpen = '';
 import { treasureWord } from '../shared/treasure';
+import { labelRows } from './card';
 import { SPEAKER, townSays } from '../shared/townsays';
 import { lossText } from '../shared/raids';
 import { MEND_UI, PERRIN } from '../shared/mendlines';
@@ -65,7 +66,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       const open = boardOpen === j.id, size = SIZES[j.size ?? 'medium'], pay = Math.round(j.reward * rewardMult(w)), story = j.objective === 'story';
       const alone = g.canTake(j, 1), head = `<button class="jhead" data-open="${i}"><b class="kind k-${j.objective}">${KIND[j.objective]}</b><span class="where">${esc(j.place.name)}</span><span class="len">${size.label}</span><span class="when t-${timeOf(j)}">${TIME_WORD[timeOf(j)]}</span>${pips(danger(j))}<em>${pay}g</em></button>`;
       const more = open ? `<div class="jmore"><div class="t">${story ? 'STORY: ' : ''}${j.title}</div>` +
-        `<div class="m">${j.place.region}. ${RUIN[j.place.ruin]}. ${j.rooms} rooms, ${size.minutes}. Pays ${pay} gold and ${treasureWord(j)}.</div>` +
+        labelRows([['WHERE', `${j.place.region}, ${RUIN[j.place.ruin].toLowerCase()}`], ['ROOMS', `${j.rooms}, ${size.minutes}`], ['PAYS', `${pay} gold and ${treasureWord(j)}`]], 'm') +
         `<div class="d">${j.text}</div>` + (story && !alone ? `<div class="need">Needs ${STORY_PARTY} to set out.</div>` : '') +
         (alone ? `<button data-job="${i}">${pt ? 'GO ALONE' : 'TAKE THE JOB'}</button>` : '') + (pt ? ` <button data-gather="${i}">GATHER A PARTY</button>` : '') + '</div>' : '';
       return `<div class="job ${story ? 'story' : j.deep ? 'deep' : ''}${open ? ' open' : ''}">${head}${more}</div>`;
@@ -186,23 +187,24 @@ const SURVIVOR = ['They kept us in the dark so long I forgot what my hands looke
 
 /** A job not won, by how it ended (Game.finish): driven back, gone early from a party, or cut off from it. */
 const ENDED = {
-  half: 'Driven back. You keep half the gold, and nobody you freed comes home.',
-  left: "You left before the end. You keep the gold you picked up, but not the job's pay.",
-  cut: "You were cut off from your party. You keep the gold you picked up, but not the job's pay.",
-  lostCut: 'You were cut off, and your party was driven back. You keep half the gold, and nobody you freed comes home.',
+  half: 'You keep half the gold. Nobody you freed comes home.',
+  left: "You left early. You keep the gold you picked up, not the job's pay.",
+  cut: "Cut off from your party. You keep the gold you picked up, not the job's pay.",
+  lostCut: 'Cut off, and your party was driven back. You keep half the gold. Nobody you freed comes home.',
 };
 
 export function showResult(g: Game, panel: Panel): void {
   const r = g.result!;
   g.result = null;
-  const lines = [`Gold: ${r.gold}`, `Experience: ${r.xp}`, r.won ? `People brought home: ${r.rescued}` : ENDED[r.half ? (r.how === 'dropped' ? 'lostCut' : 'half') : r.how === 'dropped' ? 'cut' : 'left'], ...(r.lost ? [`Lost to the fire: ${r.lost}`] : [])];
-  if (r.levels) lines.push(`You've grown to level ${g.profile.level}. ${title(TRAINERS[g.profile.cls].name)} will want to see you, at ${TRAINERS[g.profile.cls].where}.`);
+  const tally = labelRows([['GOLD', String(r.gold)], ['XP', String(r.xp)], ['SAVED', r.won ? String(r.rescued) : ''], ['LOST', r.lost ? `${r.lost} to the fire` : '']]);
+  const lines = r.won ? [] : [ENDED[r.half ? (r.how === 'dropped' ? 'lostCut' : 'half') : r.how === 'dropped' ? 'cut' : 'left']];
+  if (r.levels) lines.push(`<b>Level ${g.profile.level}.</b> ${title(TRAINERS[g.profile.cls].name)} trains you, at ${TRAINERS[g.profile.cls].where}.`);
   if (r.treasure.length) lines.push(`<b>Treasure in your pack:</b> ${r.treasure.map((i) => `<b>${itemName(i)}</b>`).join(' and ')}.`);
-  for (const i of r.sold) lines.push(`No room in your pack for the ${itemName(i)}, so it went for 20 gold.`);
+  for (const i of r.sold) lines.push(`No room for the ${itemName(i)}: sold for 20 gold.`);
   if (r.relic) lines.push(RELICW.cutOut(r.job.boss ?? '', relicName(r.relic)) + ' ' + (g.profile.relic === r.relic.id ? RELICW.carryHint : RELICW.shelfHint));
   if (r.lit !== undefined) lines.push(RELICW.litLeft(r.lit));
-  if (r.won && r.job.objective === 'story') lines.push(`<b>Barrowby's bell rings across the valley.</b> The council can sit once enough people are home.`);
-  const html = p(`<b>${r.job.title}</b>`) + lines.map(p).join(''), done = { label: 'BACK TO WICKHOLD', primary: true, act: () => panel.hide() };
+  if (r.won && r.job.objective === 'story') lines.push(`<b>Barrowby's bell rings across the valley.</b> The council sits once enough people are home.`);
+  const html = p(`<b>${r.job.title}</b>`) + tally + lines.map(p).join(''), done = { label: 'BACK TO WICKHOLD', primary: true, act: () => panel.hide() };
   // Grown: a knack to pick, straight from here (the line comes and goes with the picks).
   const again = () => {
     const n = g.profile.picks, pick = n ? p(`${KNW.jobLine(n)}`) : '';

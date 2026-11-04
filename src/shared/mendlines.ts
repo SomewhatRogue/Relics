@@ -133,5 +133,5 @@ export const MEND_UI = {
   board: (day: number, loss: string) => `Day ${day}: the hungry came over the north wall in the night. ${loss.charAt(0).toUpperCase() + loss.slice(1)}.`,
   hollis: "Every coin you give goes in my book, and every den you burn.",
   done: 'Done',
-  gear: 'Weapons and armour given to the walls count for 50% more than Tobin would pay.',
+  gear: 'Weapons and armor given here count for 50% more than Tobin pays.',
 };
