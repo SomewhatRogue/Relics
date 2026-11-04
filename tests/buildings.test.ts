@@ -176,6 +176,26 @@ describe('Wickhold, inside', () => {
     expect(Math.abs(g.hero.x - d.x)).toBeLessThan(0.1);
     expect(g.room.heroes.filter((h) => h.id === ME).length).toBe(1);
   });
+
+  it('a greatsword bought and put on in the forge is still in hand after walking out (Kyle, 2026-11-03)', () => {
+    const g = new Game();
+    g.create('WARRIOR', 'bran');
+    g.skipWood();
+    const forge = g.room.map.blocks.find((b) => b.door === 'forge')!;
+    g.enter(forge);
+    expect(g.room.map.name).toBe('THE FORGE');
+    g.profile.gold = 500;
+    const sword = g.buy('fine', 'greatsword')!;
+    expect(sword).toBeTruthy();
+    g.step(0.1, { ...NO_INTENT, gearSeq: 1, gearOp: 1, gearArg: g.hero.bag.indexOf(sword) });
+    expect(g.hero.weapon).toBe('greatsword');
+    g.leave();
+    g.step(0.1, NO_INTENT);
+    expect(g.room.map.name).toBe('WICKHOLD');
+    expect(g.hero.weapon).toBe('greatsword');
+    expect(g.profile.weapon).toBe('greatsword');
+    expect(g.profile.arms.greatsword).toEqual(sword);
+  });
 });
 
 describe('buildings on a job', () => {

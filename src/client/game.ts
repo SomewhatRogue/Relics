@@ -441,6 +441,9 @@ export class Game {
     this.outside = null;
     this.room = o.room;
     this.room.heroes.push(h);
+    // Dressed again from the save: what you bought, put on or swapped inside comes out with you (the
+    // street's hero was left as it went in, and would otherwise be saved back over it).
+    this.equip(h, inner);
     Object.assign(h, { x: d.x, y: d.y + 0.5, fx: 0, fy: 1, hp: Math.max(1, inner.hp), relic: inner.relic, act: 'idle', actT: 0, kvx: 0, kvy: 0, rollQueuedAt: -9, attackQueuedAt: -9, relicQueuedAt: -9, grabQueuedAt: -9 });
     syncSeen(h, this.lastIntent);
     this.room.prev.set('h:' + ME, [h.x, h.y]);
