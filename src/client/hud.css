@@ -22,7 +22,10 @@
 #hud .st { height: calc(2 * var(--px) + 2 * 2 * var(--px)); width: 82%; }
 #hud .st i { background: linear-gradient(to bottom, #fff1d0 0 var(--px), #c8b880 var(--px)); }
 #hud .st.low i { background: #8a7a50; }
-#hud .st.winded i { background: var(--blood-hi); animation: winded 0.5s steps(2) infinite; }
+/* A Mage's bar is MAGIC: the same bar in a soft violet (shared/barword.ts). */
+#hud .st.magic i { background: linear-gradient(to bottom, #e6dcff 0 var(--px), #a890d8 var(--px)); }
+#hud .st.magic.low i { background: #6e6290; }
+#hud .st.winded i, #hud .st.magic.winded i { background: var(--blood-hi); animation: winded 0.5s steps(2) infinite; }
 #hud .st.empty { animation: winded 0.18s steps(2) infinite; }
 /* A Mage's big spell: what it costs, marked on the bar (red when you're short of it). */
 #hud .st { position: relative; }

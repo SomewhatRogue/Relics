@@ -4,6 +4,7 @@
  * into a wall, a fully charged hit). No stat sheets: at most two traits, one weapon per kit.
  */
 import { CLASS_DODGES, CLASS_GUARD, WEAPONS, type HeroClass, type WeaponId } from './weapons.js';
+import { barWords } from './barword.js';
 import { HUNGRY, type HungryId } from './hungry.js';
 
 export type TraitId = 'riposte' | 'tempo' | 'bulwark' | 'deadeye' | 'crushing' | 'brutal' | 'reaper' | 'ember' | 'rime' | 'storm';
@@ -45,7 +46,7 @@ export function traitsFor(kit: WeaponId): TraitId[] {
 }
 
 /** A trait's words for a class: REAPER without a parry is a backstab's alone. */
-export const traitText = (t: TraitId, cls?: HeroClass) => (t === 'reaper' && cls && CLASS_GUARD[cls] === 'none' ? 'Killing with a backstab heals you for 10' : TRAITS[t].text);
+export const traitText = (t: TraitId, cls?: HeroClass) => barWords(t === 'reaper' && cls && CLASS_GUARD[cls] === 'none' ? 'Killing with a backstab heals you for 10' : TRAITS[t].text, cls);
 
 /** Gear tiers, white to red (gear.ts). */
 export type Tier = 'plain' | 'fine' | 'forged' | 'tolmouth' | 'hungry';

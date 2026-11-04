@@ -339,6 +339,10 @@ Every weapon gets a quick attack, a charged attack, a perfect-timed hit and a re
   let go on the white flash; the sword's bash stuns a crowd, the spear pins, the wand's burst breaks any blow,
   the spellblade wreathes free. Riposte, the spear's catch, a spark into a wind-up and the blade's catch are
   bonuses. A hero stuns the same goblin once every 6 s at most (SHRUGS IT OFF); a friend still can.
+- [x] A Mage's bar is MAGIC, and the spellblade parries (2026-11-04, Claude Opus 5.5; see DECISIONS): a Mage
+  reads MAGIC wherever the bar is named (kit rows, NOT ENOUGH MAGIC, "-40 MAGIC", knacks, cards, trainer), in a
+  soft violet; others keep STAMINA. The spellblade's block is a real PARRY (stagger, counter window) that also
+  fills the blade. CATCH and CAUGHT are retired. On a phone a Mage's magic pips ring BLINK (violet), not ATTACK.
 - Rogue: Shadow Step behind a goblin stuns it 1 s for free hits.
 - The hand crossbow becomes the poisoner's kit:
   - Quick: a short sword, a bit wider than the daggers but slower. Not much damage, but not reduced either.

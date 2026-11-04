@@ -2,8 +2,8 @@
  * The Mage's kit rules (Kyle's weapons rework, 2026-11-04). Big spells cost magic (the stamina bar):
  * the wand's held burst, the staff's wall, the spellblade's wreathing, and the blink as before. The
  * wand casts on the move and its flash burst breaks blows off; the staff slashes close in its element and
- * raises a wall of it; the spellblade cuts, builds a charge, wreathes itself in the element and catches
- * a blow on the blade. The room judges with these numbers and the client draws from the same ones.
+ * raises a wall of it; the spellblade cuts, builds a charge, wreathes itself in the element, and its
+ * parry fills the blade. The room judges with these numbers and the client draws from the same ones.
  */
 import type { Dodge, Weapon } from './weapons.js';
 
@@ -45,9 +45,9 @@ export const BLINK: Dodge = { kind: 'blink', distance: 3.8, time: 0.12, iFrom: 0
 /**
  * The spellblade (it replaced the lance rod, 2026-11-04; old saves: shared/oldkits.ts). A plain sword in
  * three cuts. Held: magic spent to wreathe the blade (the release is a cut of its own); let go on the
- * flash, it's free and the blade stays full. A bonus: block pressed as a blow lands catches it on the
- * blade, no damage, and the blade is fully charged. Weakness:
- * no range, it eats magic, and a lightly armoured Mage stands in among them with no guard to hold.
+ * flash, it's free and the blade stays full. Block is a parry, like any parry-only weapon's, and a parry
+ * fills the blade. Weakness: no range, it eats magic, and a lightly armoured Mage stands in among them
+ * with no block to hold.
  */
 export const SPELLBLADE: Weapon = {
   name: 'SPELLBLADE',
@@ -59,6 +59,6 @@ export const SPELLBLADE: Weapon = {
   ],
   heavy: { windup: 0.08, active: 0.1, recover: 0.3, dmg: 14, dmgFull: 22, range: 1.55, arc: 150, lunge: 0.4, knock: 5, knockFull: 8, wreathes: true },
   draw: 0.5,
-  chip: 0.5, blockSpeed: 0.5, chargeSpeed: 0.5, parryWindow: 0.22, guardArc: 120, guardCost: 2, speed: 0.86, catches: true,
+  chip: 0.5, blockSpeed: 0.5, chargeSpeed: 0.5, parryWindow: 0.22, guardArc: 120, guardCost: 2, speed: 0.86, parryOnly: true, spellblade: true,
   dodge: BLINK,
 };

@@ -3,14 +3,15 @@
  * it looks this frame. The buttons and their presses are input.ts's; this only draws them (btnart.ts)
  * and says which are there: the class skill and the relic carried with their cooldowns, the guard
  * (BLOCK or PARRY, none for a Mage), the dodge (JUMP, DASH, BLINK, ROLL), the flask as the health orb,
- * stamina as pips round ATTACK, one gilt context slot (GRAB, THROW, HELP UP, BURN, OPEN, TALK), and a
+ * stamina as pips round ATTACK (a Mage's magic round BLINK), one gilt context slot (GRAB, THROW, HELP UP, BURN, OPEN, TALK), and a
  * crossbow's RELOAD. A Warrior or Healer has no dodge: the context slot takes the dodge's place, and a
  * Warrior's always shows GRAB (dimmed till there's something to take hold of).
  */
 import { carriedItem } from '../sim/charge';
 import { isDark, relicFill } from '../shared/relicitems';
 import { fillCol } from './reliccard';
-import { CLASS_GUARD, dodgeName, dodgeOf, HERO, RELICS, WEAPONS, type Item } from '../shared/tuning';
+import { DODGE as DODGE_RULE, guardOf, dodgeName, dodgeOf, HERO, RELICS, WEAPONS, type Item } from '../shared/tuning';
+import { dodgeBreath } from '../sim/knacks';
 import { knows } from '../sim/types';
 import { grabbable } from '../sim/grab';
 import { raisable } from '../sim/party';
@@ -92,17 +93,23 @@ export class Cluster {
     const on = this.stick.classList.contains('on');
     if (on && !this.stickOn && ++this.moves === 3) document.body.classList.add('stick-known');
     this.stickOn = on;
-    // A Mage has no guard, but a spellblade's block catches a blow on the blade.
-    const kit = WEAPONS[me.weapon], guard = kit.catches ? 'catch' : CLASS_GUARD[kit.cls];
+    // A Rogue and a Mage have no guard; a spellblade parries, like any parry-only kit.
+    const kit = WEAPONS[me.weapon], guard = guardOf(kit);
     if (document.body.dataset.guard !== guard) document.body.dataset.guard = guard;
     const carrying = me.act === 'carry';
     const atk = carrying ? icon('slam') : img(iconOf(me.arms[me.weapon], me.weapon));
-    const st = me.stamina, flick = me.winded && room.time - me.staminaAt < HERO.windedDelay ? Math.floor(now * 11) % 2 === 0 : false;
-    b.attack.show({ shape: 'round', size: 42, grade: 'iron', icon: atk, iconScale: carrying ? 1 : 2, pips: { lit: flick ? 0 : Math.ceil(st / 10), of: 10, col: me.winded ? '#d84a3a' : st < 25 ? '#a8a090' : '#ddd5c4' } }, '', '', carrying ? 'Slam' : 'Attack');
-    b.block.show(guard === 'none' ? null : { shape: 'shield', size: 30, grade: 'iron', icon: icon(guard === 'full' ? 'block' : 'parry') }, '', guard === 'catch' ? 'CATCH' : '', guard === 'full' ? 'Block' : guard === 'catch' ? 'Catch' : 'Parry');
+    // Stamina pips round ATTACK; a Mage's are MAGIC, round BLINK instead (Kyle: "Those should just be around the blink").
+    const mage = kit.cls === 'MAGE', st = me.stamina, flick = me.winded && room.time - me.staminaAt < HERO.windedDelay ? Math.floor(now * 11) % 2 === 0 : false;
+    const pips = { lit: flick ? 0 : Math.ceil(st / 10), of: 10, col: me.winded ? '#d84a3a' : mage ? (st < 25 ? '#8f86a8' : '#cdbdf0') : st < 25 ? '#a8a090' : '#ddd5c4' };
+    b.attack.show({ shape: 'round', size: 42, grade: 'iron', icon: atk, iconScale: carrying ? 1 : 2, ...(mage ? {} : { pips }) }, '', '', carrying ? 'Slam' : 'Attack');
+    b.block.show(guard === 'none' ? null : { shape: 'shield', size: 30, grade: 'iron', icon: icon(guard === 'full' ? 'block' : 'parry') }, '', kit.spellblade ? 'PARRY' : '', guard === 'full' ? 'Block' : 'Parry');
     const dn = dodgeName(kit.cls), dodges = !!dodgeOf(kit);
     if (document.body.dataset.dodge !== String(dodges)) document.body.dataset.dodge = String(dodges);
-    b.roll.show(dodges ? { shape: 'diamond', size: 34, grade: 'iron', icon: icon(DODGE[dn] ?? 'roll') } : null, '', dn, dn);
+    // A Mage's BLINK wears the magic pips, filling as it comes back. Winded it can't fire, so it goes dull;
+    // with less magic than it costs it still fires but leaves you winded, so the cost shows in red.
+    const cost = mage ? Math.round(kit.dodge.stamina * DODGE_RULE.cost * dodgeBreath(me)) : 0, dull = mage && (!!me.winded || st < 1);
+    b.roll.show(dodges ? { shape: 'diamond', size: 34, grade: dull ? 'stone' : 'iron', icon: icon(DODGE[dn] ?? 'roll'), ...(mage ? { pips } : {}) } : null, mage && st < cost ? String(cost) : '', dn, dn);
+    b.roll.el.classList.toggle('cost', mage);
     // A crossbow's RELOAD: gilt while it's empty (the dark sweep is what's still to wind), pulsing when ATTACK was held on it empty.
     const wind = me.xbowEmpty ? me.xbowWind ?? 0 : 0;
     b.reload.show(kit.reloads ? { shape: 'round', size: 26, grade: me.xbowEmpty ? 'gilt' : 'iron', icon: icon('reload'), cd: wind > 0 ? 1 - wind : 0 } : null, '', 'RELOAD', 'Reload');

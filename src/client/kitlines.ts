@@ -22,10 +22,10 @@ export const KIT: Record<WeaponId, KitRow> = {
   daggers: { tap: 'Fast stabs', hold: 'Throw a dagger', perfect: 'Full-power throw', also: '2.5x from behind' },
   rapier: { tap: 'Long thrusts', hold: 'Lunge through two', perfect: 'Skewers, bleeds' },
   poisoner: { tap: 'Short sword, hits two', hold: 'Poison dart', perfect: 'Stuns, stronger poison' },
-  // Mage (shared/mage.ts): the big spells cost stamina.
-  wand: { tap: 'Sparks on the move', hold: 'Burst, costs stamina', perfect: 'Interrupts any attack', also: 'Spark interrupts a wind-up' },
-  staff: { tap: 'Close slash', hold: 'Raise a wall, costs stamina', perfect: 'Bigger wall' },
-  spellblade: { tap: 'Cuts charge the blade', hold: 'Wreathe the blade, costs stamina', perfect: 'Free wreathe', also: 'Catch a blow on block' },
+  // Mage (shared/mage.ts): the big spells cost magic (a Mage's bar, shared/barword.ts).
+  wand: { tap: 'Sparks on the move', hold: 'Burst, costs magic', perfect: 'Interrupts any attack', also: 'Spark interrupts a wind-up' },
+  staff: { tap: 'Close slash', hold: 'Raise a wall, costs magic', perfect: 'Bigger wall' },
+  spellblade: { tap: 'Cuts charge the blade', hold: 'Wreathe the blade, costs magic', perfect: 'Free wreathe', also: 'Parry fills the blade' },
   // Cleric (shared/cleric.ts): every perfect shields friends near you.
   mace: { tap: 'Short blows, 3rd heals', hold: 'Smite, stuns', perfect: 'Harder, shields friends' },
   censer: { tap: 'Two cuts, healing swing', hold: 'Whirl, sets alight', perfect: 'Coals flare, shields friends' },

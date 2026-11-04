@@ -32,7 +32,7 @@ export function bladeEdge(c: Ctx, h: Hero, ox: number, oy: number, a: number): v
 
 /** Over the hero, (x, y) its feet on screen: the charge's ring, and a pip for each wreathed swing left. */
 export function drawBladeMark(c: Ctx, h: Hero, x: number, y: number, now: number): void {
-  if (!WEAPONS[h.weapon].catches || h.act === 'down') return;
+  if (!WEAPONS[h.weapon].spellblade || h.act === 'down') return;
   const g = c.glow, top = Math.round(y - 25), k = Math.min(1, h.bladeCharge ?? 0);
   if (wreathed(h, now) && h.wreatheEl) {
     const n = h.wreathe ?? 0;

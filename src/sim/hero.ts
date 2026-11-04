@@ -3,7 +3,7 @@
  * A tap of attack swings on release; holding past CHARGE.start charges a heavy instead.
  */
 import { collide, wadeAt } from '../shared/arena';
-import { DODGE, CLASS_DODGES, CLASS_GUARD, DECOY, AUGMENTS, CHARGE, GRAB, HORN, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon, drilled, STEALTH, dodgeOf } from '../shared/tuning';
+import { DODGE, CLASS_DODGES, DECOY, AUGMENTS, CHARGE, GRAB, HORN, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon, drilled, STEALTH, dodgeOf, guardOf } from '../shared/tuning';
 import { slide } from './bodies';
 import { BAG } from '../shared/bags';
 import { applyGear, turnBelt } from './pack';
@@ -148,11 +148,10 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   if (inp.rollSeq !== h.seen.roll) (h.seen.roll = inp.rollSeq), (h.rollQueuedAt = now);
   if (inp.blockSeq !== h.seen.block) {
     h.seen.block = inp.blockSeq;
-    // A Mage has no guard at all; the rest can at least tap a parry.
-    // (A spellblade has no guard either, but a press catches a blow on the blade: sim/spellblade.ts.)
-    const guard = CLASS_GUARD[WEAPONS[h.weapon].cls], catches = !!WEAPONS[h.weapon].catches;
-    if ((guard !== 'none' || catches) && !h.winded && now - h.lastBlockPress >= GUARD.parryRepress) h.parryOpenAt = now;
-    if (guard === 'none' && !catches && now - h.toldAt > 2) (h.toldAt = now), ev.push({ k: 'noguard', x: h.x, y: h.y, dodge: WEAPONS[h.weapon].dodge.kind });
+    // A Rogue and a Mage have no guard (a spellblade parries, as a parry-only kit); the rest can at least tap a parry.
+    const guard = guardOf(WEAPONS[h.weapon]);
+    if (guard !== 'none' && !h.winded && now - h.lastBlockPress >= GUARD.parryRepress) h.parryOpenAt = now;
+    if (guard === 'none' && now - h.toldAt > 2) (h.toldAt = now), ev.push({ k: 'noguard', x: h.x, y: h.y, dodge: WEAPONS[h.weapon].dodge.kind });
     h.lastBlockPress = now;
   }
   if (inp.classSeq !== h.seen.cls) {
@@ -311,9 +310,9 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     if (now - h.attackQueuedAt >= CHARGE.start && !emptyHold(h, now, ev)) return refuseSpell(h, now, ev) ? undefined : startCharge(h);
   }
   // Only a Warrior's or Healer's kit holds a block.
-  h.blocking = inp.block && h.stamina > 0 && !h.winded && CLASS_GUARD[w.cls] === 'full' && !w.parryOnly;
+  h.blocking = inp.block && h.stamina > 0 && !h.winded && guardOf(w) === 'full';
   // Holding block as a Ranger or Rogue does nothing: say so, once a press.
-  if (inp.block && (CLASS_GUARD[w.cls] === 'parry' || w.parryOnly) && now - h.lastBlockPress > 0.35 && h.toldAt < h.lastBlockPress) (h.toldAt = now), ev.push({ k: 'noblock', x: h.x, y: h.y });
+  if (inp.block && guardOf(w) === 'parry' && now - h.lastBlockPress > 0.35 && h.toldAt < h.lastBlockPress) (h.toldAt = now), ev.push({ k: 'noblock', x: h.x, y: h.y });
   // Guarding with no aim (a phone) turns to the nearest threat, so a parry faces the right way.
   face(h, inp, enemies, h.blocking || now - h.lastBlockPress < 0.3);
   walk(h, inp, h.blocking ? w.blockSpeed : 1, dt, now);

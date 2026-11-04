@@ -2,7 +2,7 @@
  * The spellblade and the staff's slash, in the room (numbers: shared/mage.ts). Every blade blow that
  * lands builds the charge. Wreathed (paid for in sim/spells.ts), the swings carry the element: fire
  * burns, frost slows, storm jumps on to one more goblin; the last throws a short wave of it forward.
- * Block pressed as a blow lands catches it on the blade: nothing taken, the blade full. The staff's
+ * Block is a parry, like any parry-only weapon's (sim/combat.ts), and a parry fills the blade. The staff's
  * slash carries the element on every cut. Judged here, kept on the hero, so a guest's blade glows too.
  */
 import { STORM, WEAPONS, WREATHE, type Augment, type Swing } from '../shared/tuning';
@@ -47,7 +47,7 @@ function wave(h: Hero, el: Augment, w: World): void {
  *  if there's one left (the last throws the wave). True if it was one of these. */
 export function looseBlade(h: Hero, s: Swing, w: World): boolean {
   if (s.slash) return w.ev.push({ k: 'slash', x: h.x, y: h.y, dx: h.fx, dy: h.fy, el: castElement(h) }), true;
-  if (!WEAPONS[h.weapon].catches) return false;
+  if (!WEAPONS[h.weapon].spellblade) return false;
   h.wreathed = (h.wreathe ?? 0) > 0 && w.now < (h.wreatheUntil ?? -9);
   if (!h.wreathed) return (h.wreathe = 0), true;
   h.wreathe! -= 1;
@@ -58,18 +58,15 @@ export function looseBlade(h: Hero, s: Swing, w: World): boolean {
 /** A Mage's blow landed for `n`: the blade builds its charge; a wreathed blade or a staff's slash brings its element. */
 export function bladeStruck(h: Hero, s: Swing, e: Enemy, n: number, w: World): void {
   if (s.slash) return void (!isDead(e) && bladeElement(w, h, e, castElement(h), n));
-  if (!WEAPONS[h.weapon].catches) return;
+  if (!WEAPONS[h.weapon].spellblade) return;
   buildCharge(h, w.ev);
   if (h.wreathed && !isDead(e)) bladeElement(w, h, e, h.wreatheEl ?? '', n);
 }
 
-/** The spellblade's bonus (its perfect is the wreathe on the flash): a blow caught on the blade as it lands. Nothing taken, the blade full. */
-export function catchBlow(h: Hero, e: Enemy, now: number, ev: FightEvent[]): void {
-  h.parryOpenAt = -9;
-  h.hitstop = Math.max(h.hitstop, 0.12);
-  e.hitstop = 0.12;
+/** A spellblade's parry fills the blade (the parry itself is any parry: sim/combat.ts). */
+export function parryFills(h: Hero, ev: FightEvent[]): void {
+  if (!WEAPONS[h.weapon].spellblade) return;
   const was = h.bladeCharge ?? 0;
   h.bladeCharge = 1;
-  ev.push({ k: 'caught', x: (h.x + e.x) / 2, y: (h.y + e.y) / 2 });
   if (was < 1) ev.push({ k: 'bladefull', x: h.x, y: h.y });
 }

@@ -148,7 +148,8 @@ callouts, the job board, party and lobby text, and the church, council and relic
 - **Keep the two voices apart.** The world's people (dialogue) keep their voice, but they must still
   be clear about anything the player needs to act on. Game text (cards, knacks, buttons, tips,
   stats) is plain, second-person and direct: "you", "your", "friends near you".
-- **Use the same word for the same thing everywhere.** Stamina (not breath or wind), PERFECT (the
+- **Use the same word for the same thing everywhere.** Stamina (not breath or wind), and MAGIC for
+  a Mage's same bar (Kyle, 2026-11-04: a Mage reads MAGIC everywhere the bar is named), PERFECT (the
   well-timed block), health, damage, friends, foes. If a word means a mechanic on one screen, it
   means the same mechanic on every screen.
 - **Two white flashes, two phrasings.** "The white flash" is a hold's cue: let go on it (a bow's

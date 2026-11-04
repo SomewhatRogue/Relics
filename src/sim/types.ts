@@ -507,7 +507,7 @@ export type FightEvent =
    *  want of it, a blow broken off by a wand's spark, a staff's slash or a blade's wave (along dx, dy), a
    *  wall raised (`len` long, `big` on the flash), the blade wreathed, full of charge, a blow caught on it. */
   | { k: 'magic'; x: number; y: number; n: number }
-  | { k: 'fizzle' | 'interrupt' | 'bladefull' | 'caught'; x: number; y: number }
+  | { k: 'fizzle' | 'interrupt' | 'bladefull'; x: number; y: number }
   | { k: 'slash' | 'bladewave'; x: number; y: number; dx: number; dy: number; el: Augment }
   | { k: 'wallup'; x: number; y: number; dx: number; dy: number; el: Augment; len: number; big: boolean }
   | { k: 'wreathe'; x: number; y: number; el: Augment }
