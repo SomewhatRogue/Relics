@@ -13,6 +13,7 @@ import { faced } from './facing';
 import { heals } from './hungry';
 import { healMult } from './lantern';
 import type { Body, Hero, Intent } from './types';
+import { stun } from './stuns';
 
 /** The friend a chain means: nearest the pointer (a laptop), else the most hurt; never yourself. */
 function friendFor(h: Hero, heroes: Hero[], aim: Intent | undefined): Hero | undefined {
@@ -40,8 +41,8 @@ export function censerChain(h: Hero, w: World, aim: Intent | undefined): void {
   w.ev.push({ k: 'chainpull', x: h.x, y: h.y, x2: e.x, y2: e.y });
   e.lastBy = h.id;
   if (damage(e, CHAIN.dmg, w.now, w.ev, { flinch: 0.3 }) || isDummy(e) || held(e, w.now)) return;
-  if (e.weight <= 1) towTo(e, h, HERO.radius + e.radius + 0.3, w.now), Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: CHAIN.stun });
-  else if (!e.attack?.unblockable) Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: 0.4 });
+  if (e.weight <= 1) towTo(e, h, HERO.radius + e.radius + 0.3, w.now), stun(e, h.id, w.now, CHAIN.stun, w.ev);
+  else if (!e.attack?.unblockable) stun(e, h.id, w.now, 0.4, w.ev, 'flinch');
 }
 
 /** Every towed body, a tick: on toward where the chain pulls it. */
@@ -76,6 +77,6 @@ export function lanternLight(h: Hero, w: World, el: Augment): void {
     if (damage(e, Math.round(LIGHT.dmg * k), w.now, w.ev, { heavy: true, dx: ux, dy: uy, how: 'burn', src: 'smite' })) continue;
     shove(e, ux, uy, LIGHT.knock, e.weight);
     afflict(w, e, el, LIGHT.dmg);
-    if (e.weight <= 1 && !held(e, w.now) && !isDummy(e)) Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: LIGHT.blind }), w.ev.push({ k: 'stunned', x: e.x, y: e.y });
+    if (e.weight <= 1 && !held(e, w.now) && !isDummy(e) && stun(e, h.id, w.now, LIGHT.blind, w.ev)) w.ev.push({ k: 'stunned', x: e.x, y: e.y });
   }
 }

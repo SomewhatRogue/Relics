@@ -302,6 +302,10 @@ Every weapon gets a quick attack, a charged attack, a perfect-timed hit and a re
   the mace keeps its smite, whose light mends, and has short reach; the censer leaves coals that burn, burst
   to heal when swung through and flare on the flash, and snags on walls; the flail spins rooted for a long
   sweep, shoves (not through a shield) and stuns on the flash. **The weapons rework is complete.**
+- [x] Perfects on your own timing (2026-11-04, Claude Opus 5.5; see DECISIONS): every kit's perfect is its hold
+  let go on the white flash; the sword's bash stuns a crowd, the spear pins, the wand's burst breaks any blow,
+  the spellblade wreathes free. Riposte, the spear's catch, a spark into a wind-up and the blade's catch are
+  bonuses. A hero stuns the same goblin once every 6 s at most (SHRUGS IT OFF); a friend still can.
 - Rogue: Shadow Step behind a goblin stuns it 1 s for free hits.
 - The hand crossbow becomes the poisoner's kit:
   - Quick: a short sword, a bit wider than the daggers but slower. Not much damage, but not reduced either.

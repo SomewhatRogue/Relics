@@ -12,9 +12,10 @@ import { damage, held, isDead, isDummy } from './damage';
 import { afflict, type World } from './elements';
 import { daze } from './venom';
 import type { Enemy, FightEvent, Hero, Intent, Zone } from './types';
+import { stun } from './stuns';
 
 /** Step behind the goblin you face (or the nearest one in reach), facing its back. */
-export function shadowstep(h: Hero, enemies: Enemy[], ev: FightEvent[]): void {
+export function shadowstep(h: Hero, enemies: Enemy[], ev: FightEvent[], now: number): void {
   let best: Enemy | null = null, bd = Infinity;
   for (const e of enemies) {
     if (isDead(e) || e.act === 'carried') continue;
@@ -34,7 +35,7 @@ export function shadowstep(h: Hero, enemies: Enemy[], ev: FightEvent[]): void {
     h.fx = dx / d;
     h.fy = dy / d;
     // Out of the dark at its back: it reels a moment, for free stabs (not mid striped blow or charge).
-    if (!isDummy(best)) daze(best, SHADOWSTEP.stun, ev);
+    if (!isDummy(best)) daze(best, SHADOWSTEP.stun, h.id, now, ev);
   } else {
     h.x += h.fx * 3;
     h.y += h.fy * 3;
@@ -114,6 +115,6 @@ export function rally(h: Hero, enemies: Enemy[], now: number, ev: FightEvent[]):
     const d = Math.hypot(e.x - h.x, e.y - h.y);
     if (isDead(e) || d > hornReach(h)) continue;
     Object.assign(e, { alert: true, feeding: false });
-    if (e.weight <= 1 && !held(e, now) && d <= HORN.scare) Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: 0.5 });
+    if (e.weight <= 1 && !held(e, now) && d <= HORN.scare) stun(e, h.id, now, 0.5, ev, 'flinch');
   }
 }

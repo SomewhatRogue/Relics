@@ -11,8 +11,8 @@ import type { Enemy, FightEvent, Hero } from './types';
 
 /** After a Cleric's blow has hurt a goblin that still stands: true if it took over from the usual flinch
  *  (a goblin mid striped blow or charge can't be dazed: the breaker's flinch still has its go at it). */
-export function clericHit(h: Hero, s: Swing, e: Enemy, ev: FightEvent[]): boolean {
-  if (!s.dazes || !h.heavy || !h.perfect || isDead(e) || !daze(e, FLAIL.stun * (e.kind === 'butcher' ? FLAIL.big : 1), ev)) return false;
+export function clericHit(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEvent[]): boolean {
+  if (!s.dazes || !h.heavy || !h.perfect || isDead(e) || !daze(e, FLAIL.stun * (e.kind === 'butcher' ? FLAIL.big : 1), h.id, now, ev)) return false;
   ev.push({ k: 'flailstun', x: e.x, y: e.y });
   return true;
 }

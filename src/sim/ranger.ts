@@ -12,6 +12,7 @@ import { HOUND, SNARE, WEAPONS, technique } from '../shared/tuning';
 import { damage, isDead } from './damage';
 import { houndBite, houndBites, houndWait, snareHold, snareMax, snareWait } from './knacks';
 import { knows, type Enemy, type FightEvent, type Hero, type Hound, type Snare } from './types';
+import { stun } from './stuns';
 
 /** Jumped back as a Ranger: leave a snare where you stood (if one's ready). */
 export function laySnare(h: Hero, snares: Snare[], now: number, ev: FightEvent[]): void {
@@ -29,8 +30,9 @@ export function stepSnare(s: Snare, enemies: Enemy[], now: number, ev: FightEven
   const e = enemies.find((o) => !isDead(o) && o.kind !== 'dummy' && o.kind !== 'swingDummy' && (o.z ?? 0) === 0 && Math.hypot(o.x - s.x, o.y - s.y) < SNARE.radius + o.radius);
   if (!e) return true;
   const hold = s.hold ?? SNARE.hold;
+  // (A small one held is a stun: the same Ranger's snare doesn't hold it twice running. The snare is sprung either way.)
+  if (e.weight <= 1 && !stun(e, s.owner, now, hold, ev)) return false;
   e.snareUntil = now + hold;
-  if (e.weight <= 1) Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: hold });
   ev.push({ k: 'snared', x: e.x, y: e.y });
   return false;
 }

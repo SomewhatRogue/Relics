@@ -9,6 +9,7 @@ import { shove } from './bodies';
 import { clearElements, damage, frozen, isDummy } from './damage';
 import type { Rng } from '../shared/rng';
 import type { Enemy, FightEvent, Hero, Javelin, Prop, Survivor } from './types';
+import { stun } from './stuns';
 
 /** Everything an element can reach, for one tick. */
 export interface World {
@@ -93,7 +94,8 @@ function steam(w: World, e: Enemy): void {
   for (const o of w.enemies) {
     if (o.act === 'dead' || dist(o, e) > STEAM.radius + o.radius) continue;
     if (damage(o, STEAM.dmg, now, ev)) continue;
-    if (o.act !== 'pinned' && o.act !== 'carried') Object.assign(o, { attack: null, act: 'stunned', actT: 0, actDur: STEAM.stun });
+    // (A stun from whoever set the steam off, so not twice running from them: sim/stuns.ts.)
+    if (o.act !== 'pinned' && o.act !== 'carried') stun(o, e.lastBy, now, STEAM.stun, ev);
   }
 }
 

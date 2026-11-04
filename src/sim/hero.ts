@@ -11,7 +11,7 @@ import { knack, statsOf } from './gearstats';
 import { decoyTime, dodgeBreath, dodgeReach, releaseWindow } from './knacks';
 import { fedMult, jealousBlocks, jealousCooldown, needlesBreath, wears } from './hungry';
 import { hitEnemy } from './combat';
-import { quake } from './warrior';
+import { flashBash, quake } from './warrior';
 import { beginHold, looseBolt, stepWind } from './crossbow';
 import { brandySpeed, breathCap } from './brandy';
 import { quickMult, relicDark, spendCharge } from './charge';
@@ -35,7 +35,8 @@ export function currentSwing(h: Hero): Swing {
   const w = WEAPONS[h.weapon], g = statsOf(h);
   const k = h.power, hv = w.heavy;
   // A drawn shot only pierces at a full draw.
-  const s = !h.heavy ? w.combo[h.combo] : { ...hv, dmg: Math.round(hv.dmg + (hv.dmgFull * (1 + (g.fx.full ?? 0)) - hv.dmg) * k), knock: hv.knock + (hv.knockFull - hv.knock) * k, pierce: hv.pierce && k >= 1 };
+  // (The sword's bash let go on the flash takes every goblin in a wider arc: sim/warrior.ts.)
+  const s = !h.heavy ? w.combo[h.combo] : flashBash(h, { ...hv, dmg: Math.round(hv.dmg + (hv.dmgFull * (1 + (g.fx.full ?? 0)) - hv.dmg) * k), knock: hv.knock + (hv.knockFull - hv.knock) * k, pierce: hv.pierce && k >= 1 });
   // Modifiers: how well (shared/gear.ts).
   if (!g.damage && !g.quick && !g.reach && !g.knock && fedMult(h) === 1) return s;
   const fed = fedMult(h);
@@ -230,9 +231,9 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
       // A draw (a shot on the hold) wants a clean release: on the white flash is perfect; held too long, it shakes and weakens.
       const held = h.actT + CHARGE.start, full = chargeFull(w, h), drawn = !!w.heavy.shot;
       h.power = Math.min(1, held / full);
-      // (A rapier's lunge has its flash too: on it, the thrust skewers.)
-      // (Every Cleric's hold too: let go on it, friends are shielded.)
-      h.perfect = (drawn || !!w.heavy.skewer || !!w.heavy.quake || !!w.heavy.wall || !!w.heavy.holy) && held >= full && held <= full + releaseWindow(h);
+      // Every kit's perfect is its own hold let go on the flash (Kyle, 2026-11-04): the rapier skewers, a
+      // Cleric shields friends, the sword's bash stuns a crowd, the spear pins, the spellblade wreathes free.
+      h.perfect = held >= full && held <= full + releaseWindow(h);
       if (drawn && held > full + RELEASE.overdraw) h.power = RELEASE.overdrawn;
       // A crossbow's perfect is its glint, not the flash.
       looseBolt(h);

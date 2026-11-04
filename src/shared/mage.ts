@@ -1,7 +1,7 @@
 /**
  * The Mage's kit rules (Kyle's weapons rework, 2026-11-04). Big spells cost magic (the stamina bar):
  * the wand's held burst, the staff's wall, the spellblade's wreathing, and the blink as before. The
- * wand casts on the move and its perfect breaks a blow off; the staff slashes close in its element and
+ * wand casts on the move and its flash burst breaks blows off; the staff slashes close in its element and
  * raises a wall of it; the spellblade cuts, builds a charge, wreathes itself in the element and catches
  * a blow on the blade. The room judges with these numbers and the client draws from the same ones.
  */
@@ -12,8 +12,9 @@ import type { Dodge, Weapon } from './weapons.js';
 export const SPELL = { burst: 20, wall: 30, wreathe: 35 };
 
 /** The wand. Its quick bolt is cast on the move at `walk` of your pace, turning to the aim as it comes
- *  up. Its perfect: a bolt that lands on a goblin mid wind-up breaks the blow off and staggers it
- *  `stun` s (a butcher `big` as long). */
+ *  up. Its perfect: the burst let go on the white flash breaks off whatever the goblins it hits are
+ *  doing and staggers them `stun` s (a butcher `big` as long). A bonus: any spark that lands on a
+ *  goblin mid wind-up does the same. */
 export const WAND = { walk: 0.9, stun: 0.6, big: 0.5 };
 
 /**
@@ -26,7 +27,8 @@ export const WAND = { walk: 0.9, stun: 0.6, big: 0.5 };
 export const WALL = { ahead: 1.7, len: 2.4, lenFull: 3.6, thick: 0.5, life: 5, bigLen: 5.6, bigThick: 0.8, bigLife: 7, every: 0.5, fire: 5, shock: 9, flinch: 0.4, holds: 1 };
 
 /** The spellblade's charge: each blow that lands adds `perHit` (full at 1) and the blade glows the more.
- *  Wreathing costs SPELL.wreathe times what's left to fill, so a full blade wreathes for nothing. */
+ *  Wreathing costs SPELL.wreathe times what's left to fill, so a full blade wreathes for nothing. Its
+ *  perfect: wreathe let go on the white flash costs nothing and leaves the blade full. */
 export const BLADE = { perHit: 0.15 };
 
 /**
@@ -42,8 +44,9 @@ export const BLINK: Dodge = { kind: 'blink', distance: 3.8, time: 0.12, iFrom: 0
 
 /**
  * The spellblade (it replaced the lance rod, 2026-11-04; old saves: shared/oldkits.ts). A plain sword in
- * three cuts. Held: magic spent to wreathe the blade (the release is a cut of its own). Perfect: block
- * pressed as a blow lands catches it on the blade, no damage, and the blade is fully charged. Weakness:
+ * three cuts. Held: magic spent to wreathe the blade (the release is a cut of its own); let go on the
+ * flash, it's free and the blade stays full. A bonus: block pressed as a blow lands catches it on the
+ * blade, no damage, and the blade is fully charged. Weakness:
  * no range, it eats magic, and a lightly armoured Mage stands in among them with no guard to hold.
  */
 export const SPELLBLADE: Weapon = {

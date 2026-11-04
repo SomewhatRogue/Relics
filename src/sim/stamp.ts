@@ -9,6 +9,7 @@ import { damage, held, isDead } from './damage';
 import { afflict, type World } from './elements';
 import { blastProps } from './props';
 import type { Hero } from './types';
+import { stun } from './stuns';
 
 export function stamp(h: Hero, w: World, el: Augment): void {
   w.ev.push({ k: 'stamp', x: h.x, y: h.y });
@@ -22,8 +23,8 @@ export function stamp(h: Hero, w: World, el: Augment): void {
     shove(e, ux, uy, STAMP.knock, e.weight);
     afflict(w, e, el, STAMP.dmg);
     if (held(e, w.now)) continue;
-    if (e.weight <= 1) Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: STAMP.stun }), w.ev.push({ k: 'stunned', x: e.x, y: e.y });
-    else if (!e.attack?.unblockable) Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: STAMP.stagger });
+    if (e.weight <= 1) stun(e, h.id, w.now, STAMP.stun, w.ev) && w.ev.push({ k: 'stunned', x: e.x, y: e.y });
+    else if (!e.attack?.unblockable) stun(e, h.id, w.now, STAMP.stagger, w.ev, 'flinch');
   }
   blastProps(h.x, h.y, STAMP.radius, STAMP.propDmg, STAMP.knock, w);
 }

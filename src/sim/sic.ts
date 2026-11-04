@@ -6,6 +6,7 @@
 import { HOUND, SIC } from '../shared/tuning';
 import { isDead } from './damage';
 import { faced } from './facing';
+import { stun } from './stuns';
 import type { Enemy, FightEvent, Hero } from './types';
 
 export function sendHound(h: Hero, enemies: Enemy[], now: number, ev: FightEvent[]): void {
@@ -31,8 +32,8 @@ export function stepSic(h: Hero, enemies: Enemy[], now: number, dt: number, ev: 
   }
   if (Math.hypot(prey.x - d.x, prey.y - d.y) > 0.7) return;
   d.pin = false;
-  prey.snareUntil = Math.max(prey.snareUntil, now + SIC.pin);
   prey.lastBy = h.id;
-  if (prey.weight <= 1) Object.assign(prey, { attack: null, act: 'stunned', actT: 0, actDur: SIC.pin });
+  // (A small one pinned flat is a stun, so not twice running from the same Ranger: sim/stuns.ts.)
+  if (prey.weight > 1 || stun(prey, h.id, now, SIC.pin, ev)) prey.snareUntil = Math.max(prey.snareUntil, now + SIC.pin);
   ev.push({ k: 'houndpin', x: prey.x, y: prey.y });
 }

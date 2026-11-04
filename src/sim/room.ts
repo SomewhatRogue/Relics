@@ -56,6 +56,7 @@ import { fireFound, stepSentries } from './foundrelics';
 import { grow } from './grow';
 import { awake, merge } from './sleep';
 import { NO_INTENT, type Puddle, type Zone, type Bolt, type Drop, type Enemy, type Prop, type FightEvent, type Hero, type Hook, type Intent, type Javelin, type Snare, type Survivor } from './types';
+import { stun } from './stuns';
 
 export class ArenaRoom {
   time = 0;
@@ -324,7 +325,7 @@ export class ArenaRoom {
       this.events.push({ k: 'land', x: b.x, y: b.y, dx: 0, dy: 1 });
       if (!('kind' in b) || v < HEIGHT.fallSpeed || isDead(b)) continue;
       if (!damage(b, HEIGHT.fallDmg, this.time, this.events, { how: 'fall', dx: b.kvx, dy: b.kvy }) && b.act !== 'carried')
-        Object.assign(b, { attack: null, act: 'stunned', actT: 0, actDur: HEIGHT.fallStun });
+        stun(b, b.lastBy, this.time, HEIGHT.fallStun, this.events);
     }
   }
 
@@ -341,7 +342,7 @@ export class ArenaRoom {
     }
     const charged = (h.heavy && h.power >= 0.7) || h.counter;
     // A rapier's lunge loosed on the white flash: run through on the tip, staggered and bleeding.
-    if (h.heavy && h.perfect && currentSwing(h).skewer) skewer(e, w.now, w.ev);
+    if (h.heavy && h.perfect && currentSwing(h).skewer) skewer(e, h.id, w.now, w.ev);
     if (isDead(e)) {
       const tx = h.x - e.x, ty = h.y - e.y, rear = (e.fx * tx + e.fy * ty) / (Math.hypot(tx, ty) || 1) < GUARD.rearCos;
       if (has(h, 'reaper') && (h.counter || rear)) {
@@ -362,7 +363,7 @@ export class ArenaRoom {
     else if (h.relic === 'javelin') this.javelins.push(throwJavelin(h));
     else if (h.relic === 'net') this.bolts.push(throwNet(h, el));
     else if (h.relic === 'lodestone') this.bolts.push({ ...lobLodestone(h, this.aimDistance(h, LODESTONE.range, LODESTONE.fallback), el), relic: true });
-    else if (h.relic === 'shadow') shadowstep(h, this.enemies, w.ev);
+    else if (h.relic === 'shadow') shadowstep(h, this.enemies, w.ev, w.now);
     else if (h.relic === 'channel') turnElement(h, w.ev);
     else if (h.relic === 'horn') rally(h, this.enemies, w.now, w.ev);
     else if (h.relic === 'bash') startBash(h, w.ev);

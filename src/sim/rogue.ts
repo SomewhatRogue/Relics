@@ -8,6 +8,7 @@ import { shoot } from './bolts';
 import { held, isDead } from './damage';
 import type { Smoke } from './flasks';
 import type { Bolt, Enemy, FightEvent, Hero } from './types';
+import { stun } from './stuns';
 
 export function vanish(h: Hero, enemies: Enemy[], smokes: Smoke[], now: number, ev: FightEvent[]): void {
   h.vanishUntil = now + VANISH.time;
@@ -17,7 +18,7 @@ export function vanish(h: Hero, enemies: Enemy[], smokes: Smoke[], now: number, 
     if (isDead(e)) continue;
     // Lost you: anything winding up at you lets it go.
     if (e.attack && e.attack.aimed === h.id && e.attack.t < e.attack.windup) Object.assign(e, { attack: null, act: 'chase', actT: 0 });
-    if (e.weight <= 1 && !held(e, now) && Math.hypot(e.x - h.x, e.y - h.y) <= VANISH.radius + e.radius) Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: VANISH.cough });
+    if (e.weight <= 1 && !held(e, now) && Math.hypot(e.x - h.x, e.y - h.y) <= VANISH.radius + e.radius) stun(e, h.id, now, VANISH.cough, ev, 'flinch');
   }
 }
 

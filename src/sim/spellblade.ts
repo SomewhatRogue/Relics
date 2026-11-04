@@ -63,13 +63,13 @@ export function bladeStruck(h: Hero, s: Swing, e: Enemy, n: number, w: World): v
   if (h.wreathed && !isDead(e)) bladeElement(w, h, e, h.wreatheEl ?? '', n);
 }
 
-/** The spellblade's perfect: a blow caught on the blade as it lands. Nothing taken, the blade full. */
+/** The spellblade's bonus (its perfect is the wreathe on the flash): a blow caught on the blade as it lands. Nothing taken, the blade full. */
 export function catchBlow(h: Hero, e: Enemy, now: number, ev: FightEvent[]): void {
   h.parryOpenAt = -9;
   h.hitstop = Math.max(h.hitstop, 0.12);
   e.hitstop = 0.12;
   const was = h.bladeCharge ?? 0;
   h.bladeCharge = 1;
-  ev.push({ k: 'perfect', x: h.x, y: h.y }, { k: 'caught', x: (h.x + e.x) / 2, y: (h.y + e.y) / 2 });
+  ev.push({ k: 'caught', x: (h.x + e.x) / 2, y: (h.y + e.y) / 2 });
   if (was < 1) ev.push({ k: 'bladefull', x: h.x, y: h.y });
 }

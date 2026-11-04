@@ -55,13 +55,23 @@ describe("the Warrior's step", () => {
 });
 
 describe('the sword and shield', () => {
-  it('held, the shield bash stuns the goblin in front for longer the fuller the charge', () => {
-    const { e, loose } = arena('sword');
+  it('held past the flash, the shield bash stuns only the goblin in front, for less', () => {
+    const { es, loose } = arena('sword', [7.9, 7.9]);
+    Object.assign(es[1], { x: 10 });
+    const ev = loose(1.4, 0.15);
+    expect(ev.some((x) => x.k === 'perfect')).toBe(false);
+    expect(ev.filter((x) => x.k === 'shieldbash').length).toBe(1);
+    expect(es[0].act).toBe('stunned');
+    expect(es[0].actDur).toBeCloseTo(SHIELD_BASH.stunFull, 1);
+    expect(es[1].act).not.toBe('stunned');
+    expect(lost(es[0])).toBeLessThanOrEqual(WEAPONS.sword.heavy.dmgFull);
+  });
+  it('let go on the white flash, the bash stuns every goblin in its arc for a full second, PERFECT', () => {
+    const { es, loose } = arena('sword', [7.9, 7.9, 7.9]);
+    Object.assign(es[1], { x: 10 }), Object.assign(es[2], { x: 8 });
     const ev = loose(1, 0.15);
-    expect(ev.some((x) => x.k === 'shieldbash')).toBe(true);
-    expect(e.act).toBe('stunned');
-    expect(e.actDur).toBeCloseTo(SHIELD_BASH.stunFull, 1);
-    expect(lost(e)).toBeLessThanOrEqual(WEAPONS.sword.heavy.dmgFull);
+    expect(ev.some((x) => x.k === 'perfect')).toBe(true);
+    for (const e of es) expect(e.act).toBe('stunned'), expect(e.actDur).toBe(SHIELD_BASH.perfect);
   });
   it('a counter straight off the parry is a riposte: twice the counter; later, a plain counter', () => {
     const counterHit = (wait: number) => {
@@ -79,7 +89,8 @@ describe('the sword and shield', () => {
     const base = WEAPONS.sword.combo[0].dmg * GUARD.counterMult;
     expect(quick.n).toBe(Math.round(base * RIPOSTE.mult));
     expect(quick.ev.some((x) => x.k === 'riposte')).toBe(true);
-    expect(quick.ev.some((x) => x.k === 'perfect')).toBe(true);
+    // A bonus, not the sword's perfect: no PERFECT.
+    expect(quick.ev.some((x) => x.k === 'perfect')).toBe(false);
     expect(late.n).toBe(Math.round(base));
     expect(late.ev.some((x) => x.k === 'riposte')).toBe(false);
   });
@@ -125,15 +136,25 @@ describe('the spear', () => {
     expect(ev.filter((x) => x.k === 'hit' && x.src === 'spear').length).toBe(3);
     expect(lost(es[0])).toBe(WEAPONS.spear.heavy.dmgFull);
   });
-  it('a goblin caught mid-charge is stopped dead and pinned', () => {
+  it('a goblin caught mid-charge is stopped dead and pinned, longer: a bonus, no PERFECT', () => {
     const { e, tap } = arena('spear', [7.4]);
     Object.assign(e, { act: 'attack', attack: { ...blow(9, 9), kind: 'charge', t: 0.1, windup: 0.5, unblockable: true } });
     const ev = tap(0.25);
     expect(ev.some((x) => x.k === 'pin')).toBe(true);
-    expect(ev.some((x) => x.k === 'perfect')).toBe(true);
+    expect(ev.some((x) => x.k === 'perfect')).toBe(false);
     expect(e.act).toBe('pinned');
-    expect(e.actDur).toBe(PIN.time);
+    expect(e.actDur).toBe(PIN.caught);
     expect(e.attack).toBe(null);
+    expect(PIN.caught).toBeGreaterThan(PIN.flash);
+  });
+  it('the lunge let go on the white flash pins whatever it runs through, PERFECT; past the flash, nothing', () => {
+    const flash = arena('spear', [7.4, 6.8]);
+    const ev = flash.loose(1, 0.2);
+    expect(ev.some((x) => x.k === 'perfect')).toBe(true);
+    for (const e of flash.es) expect(e.act).toBe('pinned'), expect(e.actDur).toBe(PIN.flash);
+    const late = arena('spear', [7.4]);
+    late.loose(1.4, 0.2);
+    expect(late.e.act).not.toBe('pinned');
   });
   it('too close, the shaft does less than the point', () => {
     const near = arena('spear', [8.3]), far = arena('spear', [7.2]);
