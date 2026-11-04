@@ -568,3 +568,10 @@ same seed on every screen. Files: `shared/bigmap.ts` (the route on the grid), `s
 3. Weather (rain, fog) now or later?
 4. Room shape: keep 28 by 24 for sideways rooms, or let a W to E room be wider and shorter (about 34
    by 20)?
+
+## Kyle's answers (2026-11-04)
+
+1. Keep the heart fixed: to talk through (he thinks we agree).
+2. Light drift on long jobs: no, keep the light as it is for now.
+3. Weather: yes, matched to the job's theme. A job has one weather pattern carried through most of the map (light sprinkles, or quick thunderstorms passing). It may change from room to room, but only as a pattern that makes sense: fog creeps in slowly over rooms, never suddenly thick.
+4. Wider rooms for left-to-right legs: yes.
