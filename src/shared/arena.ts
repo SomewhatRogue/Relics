@@ -63,6 +63,8 @@ export interface Block {
 }
 /** Paint only, on the floor: never collided against or decided on. */
 export type MarkKind = 'blood' | 'drag' | 'debris' | 'scorch' | 'trample' | 'planks' | 'beds' | 'flowers' | 'mound' | 'fallenpost' | 'green'
+  // A bridge broken in the middle (shared/river.ts): its two ends over the water, the gap between.
+  | 'bridge'
   // The ground itself (shared/ground.ts): flagstones, packed earth, mud, wheel ruts, a trodden path,
   // missing cobbles, puddles, straw, weeds, a drain, spent arrows.
   | 'flags' | 'earth' | 'mud' | 'ruts' | 'path' | 'holes' | 'puddle' | 'straw' | 'weeds' | 'gutter' | 'arrows'
@@ -159,6 +161,9 @@ export interface Theme {
    *  dusk), or a job's lamps at its hour (0 out, 1 lit). Neither: lit (indoors, the yard, the wood). */
   dayAt?: number;
   lamps?: number;
+  /** A routed job's weather (shared/weather.ts), paint only: rain (0 to 1) and a storm's lightning (0 to 1). */
+  rain?: number;
+  storm?: number;
 }
 
 export interface GameMap {

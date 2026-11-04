@@ -5,6 +5,7 @@
  */
 import type { Theme } from '../shared/arena';
 import { SUN } from './draw';
+import { drawWeather } from './weather';
 
 /** Set the shadows for this frame's map (the town and indoors have no low sun). */
 export function setSun(theme: Theme): void {
@@ -32,6 +33,8 @@ function mistTile(): HTMLCanvasElement {
 
 /** Dawn's mist: soft bands anchored to the world (so they stay put as you walk), drifting slowly east. */
 export function drawMist(g: CanvasRenderingContext2D, theme: Theme, vw: number, vh: number, cx: number, cy: number, now: number): void {
+  // A routed job's rain and storm come over everything with the mist (client/weather.ts).
+  drawWeather(g, theme, vw, vh, now);
   const m = theme.mist ?? 0;
   if (m <= 0) return;
   tile ??= mistTile();

@@ -17,14 +17,14 @@ function walled(s: Site, x: number, y: number, w: number, h: number, gate: 'left
 }
 
 export function street(rng: Rng, g: Ground): Site {
-  const s = newSite('cobble', 'stone'), M = g.w / 2, H = g.h;
+  const s = newSite('cobble', 'stone'), M = g.w / 2, H = g.h, d = g.dress ?? rng;
   // Gutters down both sides of the street, worn earth in the middle; muddy yards behind the terraces.
   mark(s, 'gutter', M - 2.7, 0.3, 0.3, H - 0.6), mark(s, 'gutter', M + 2.4, 0.3, 0.3, H - 0.6);
   line(s, 'earth', M, H, M, 0, 0.6);
   patch(s, 'mud', 0.4, 0.2, M - 3.6, 2.6, false), patch(s, 'mud', M + 3, 0.2, M - 3.4, 2.6, false);
   // Terraces of stone, front doors on the street.
   for (const y of [3, 13.4]) for (let i = 0; i < 3; i++) {
-    if (rng.next() < 0.1) continue;
+    if (d.next() < 0.1) continue;
     block(s, 'house', 0.8 + i * 3.4, y, 3.3, 2.2, { style: 'stone' });
     block(s, 'house', M + 3 + i * 3.4, y, 3.3, 2.2, { style: 'stone' });
   }
@@ -41,13 +41,13 @@ export function street(rng: Rng, g: Ground): Site {
   if (rng.next() < 0.5) round(s, 'fountain', left ? M + 2.8 : M - 2.8, 10, 0.8);
   else round(s, 'cross', left ? M + 2.2 : M - 2.2, 10, 0.4);
   // Stalls at the bottom of the street, and the gatehouse round the way on at the top.
-  for (const x of [1.4, 5, M + 4, M + 7.6]) if (rng.next() < 0.7) block(s, 'stall', x, 18.2, 3, 1.4), prop(s, 'crate', x + 1.5, 20.2);
+  for (const x of [1.4, 5, M + 4, M + 7.6]) if (d.next() < 0.7) block(s, 'stall', x, 18.2, 3, 1.4), prop(s, 'crate', x + 1.5, 20.2);
   if (!g.fork) s.gates.push({ kind: 'wall', x: M - 4.7, y: 0, w: 3.1, h: 1.3 }, { kind: 'wall', x: M + 1.6, y: 0, w: 3.1, h: 1.3 });
   return s;
 }
 
 export function manor(rng: Rng, g: Ground): Site {
-  const s = newSite('grass', 'stone'), M = g.w / 2, H = g.h;
+  const s = newSite('grass', 'stone'), M = g.w / 2, H = g.h, d = g.dress ?? rng;
   // The gravel drive and its turning circle; the hall's front, burned, either side of the way on.
   line(s, 'swept', M, H, M, 0, 1.5), patch(s, 'swept', M - 4.5, 3.4, 9, 4.6);
   block(s, 'hall', M - 7.6, 0.3, 5.2, 3.2, { worn: true }), block(s, 'hall', M + 2.4, 0.3, 5.2, 3.2, { worn: true });
@@ -64,33 +64,33 @@ export function manor(rng: Rng, g: Ground): Site {
   block(s, 'barn', cx + 2.4, 5.8, 5, 3), round(s, 'well', cx + 1.2, 11.6, 0.5), block(s, 'cart', cx + 4.6, 12.4, 2.8, 1.2);
   prop(s, 'barrel', cx + 0.8, 9.2), prop(s, 'crate', g.w - 1.2, 9.6);
   // Lawns going to seed, old trees, a broken colonnade near the gate, the gate piers.
-  for (const x of [2, 5.4, g.w - 2.2, g.w - 5.6]) round(s, 'tree', x + rng.range(-0.5, 0.5), rng.range(17.5, 19.5), 0.6);
-  for (let y = 17.6; y < 21; y += 1.6) for (const sx of [-1, 1]) round(s, rng.next() < 0.7 ? 'pillar' : 'stone', M + sx * 3.4, y, 0.4);
+  for (const x of [2, 5.4, g.w - 2.2, g.w - 5.6]) round(s, 'tree', x + d.range(-0.5, 0.5), d.range(17.5, 19.5), 0.6);
+  for (let y = 17.6; y < 21; y += 1.6) for (const sx of [-1, 1]) round(s, d.next() < 0.7 ? 'pillar' : 'stone', M + sx * 3.4, y, 0.4);
   s.gates.push({ kind: 'wall', x: M - 6, y: 22.3, w: 2.2, h: 1 }, { kind: 'wall', x: M + 3.8, y: 22.3, w: 2.2, h: 1 });
   mark(s, 'weeds', 0, H - 0.8, g.w, 0.7);
   return s;
 }
 
 export function ruinvillage(rng: Rng, g: Ground): Site {
-  const s = newSite('grass', 'stone'), M = g.w / 2, H = g.h;
+  const s = newSite('grass', 'stone'), M = g.w / 2, H = g.h, d = g.dress ?? rng;
   // The old lane, gone to grass in places.
-  path(s, 'earth', [[M, H], [M + rng.range(-1, 1), 12], [M, 0]], 1.2);
-  for (let i = 0; i < 4; i++) patch(s, 'grass', M - 1.4 + rng.range(-0.5, 0.5), rng.range(1, H - 3), 2.8, 1.6);
+  path(s, 'earth', [[M, H], [M + d.range(-1, 1), 12], [M, 0]], 1.2);
+  for (let i = 0; i < 4; i++) patch(s, 'grass', M - 1.4 + d.range(-0.5, 0.5), d.range(1, H - 3), 2.8, 1.6);
   // Where the houses stood: a back wall, a side, a bit of front, the floor's flags, rubble.
   for (const y of [1.6, 8.2, 15]) for (const sx of [-1, 1]) {
-    if (rng.next() < 0.15) continue;
-    const fx = sx < 0 ? M - 7.6 + rng.range(-0.4, 0.4) : M + 3 + rng.range(-0.4, 0.4);
+    if (d.next() < 0.15) continue;
+    const fx = sx < 0 ? M - 7.6 + d.range(-0.4, 0.4) : M + 3 + d.range(-0.4, 0.4);
     mark(s, 'flags', fx + 0.4, y + 0.5, 3.4, 2.2), mark(s, 'weeds', fx, y, 4.2, 3);
-    block(s, 'wall', fx, y, rng.range(2.4, 4.2), 0.5);
-    if (rng.next() < 0.7) block(s, 'wall', rng.next() < 0.5 ? fx : fx + 3.7, y + 0.5, 0.5, rng.range(1.2, 2.4));
-    if (rng.next() < 0.5) block(s, 'wall', fx, y + 2.6, 1.4, 0.5);
-    if (rng.next() < 0.6) block(s, 'rubble', fx + 1.6, y + 1.3, 1.6, 1);
+    block(s, 'wall', fx, y, d.range(2.4, 4.2), 0.5);
+    if (d.next() < 0.7) block(s, 'wall', d.next() < 0.5 ? fx : fx + 3.7, y + 0.5, 0.5, d.range(1.2, 2.4));
+    if (d.next() < 0.5) block(s, 'wall', fx, y + 2.6, 1.4, 0.5);
+    if (d.next() < 0.6) block(s, 'rubble', fx + 1.6, y + 1.3, 1.6, 1);
   }
   // The old market: columns round it, a statue still standing or fallen.
   for (const sx of [-1, 1]) for (let y = 10.2; y < 15; y += 2.2) if (rng.next() < 0.8) round(s, 'pillar', M + sx * 2.9, y, 0.45);
   round(s, rng.next() < 0.6 ? 'statue' : 'cross', M + (rng.next() < 0.5 ? -4.6 : 4.6), 13, 0.45);
-  for (let i = 0; i < 6; i++) round(s, 'stone', rng.range(1, g.w - 1), rng.range(1, H - 3), 0.35);
-  for (let i = 0; i < 3; i++) round(s, rng.next() < 0.5 ? 'deadtree' : 'bush', rng.range(1, g.w - 1), rng.range(1, H - 4), 0.4);
+  for (let i = 0; i < 6; i++) round(s, 'stone', d.range(1, g.w - 1), d.range(1, H - 3), 0.35);
+  for (let i = 0; i < 3; i++) round(s, d.next() < 0.5 ? 'deadtree' : 'bush', d.range(1, g.w - 1), d.range(1, H - 4), 0.4);
   prop(s, 'crate', 2, H - 4), prop(s, 'barrel', g.w - 2, H - 4.5), prop(s, 'oil', g.w - 2.6, 7);
   return s;
 }

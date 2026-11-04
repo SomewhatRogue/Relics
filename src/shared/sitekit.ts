@@ -7,6 +7,7 @@
  */
 import type { Area, Block, BlockKind, Mark, Round, RoundKind, Soil, Theme } from './arena.js';
 import { WOOD, type PropKind } from './props.js';
+import { boxOff, type Pt } from './spine.js';
 
 export type Spot = { x: number; y: number; r: number };
 export interface Site {
@@ -62,8 +63,11 @@ export function hedge(s: Site, x1: number, y1: number, x2: number, y2: number, g
   for (let i = 0; i <= n; i++) if (!gap(i / n)) round(s, kind, x1 + ((x2 - x1) * i) / n, y1 + ((y2 - y1) * i) / n, r);
 }
 
-/** What must stay clear in every room: the way in, the way out, the forks' roads, the middle line between. */
-export interface Keep { w: number; h: number; areas: Area[]; spots: Spot[] }
+/**
+ * What must stay clear in every room: the way in, the way out, the forks' roads, the line between (the
+ * middle column on an old job, the spine on a routed one).
+ */
+export interface Keep { w: number; h: number; areas: Area[]; spots: Spot[]; spine?: Pt[][] }
 
 const boxDist = (a: Area, x: number, y: number) => Math.hypot(x - Math.max(a.x, Math.min(a.x + a.w, x)), y - Math.max(a.y, Math.min(a.y + a.h, y)));
 const boxGap = (a: Area, b: Area) => Math.max(0, Math.max(a.x - b.x - b.w, b.x - a.x - a.w), Math.max(a.y - b.y - b.h, b.y - a.y - a.h));
@@ -71,10 +75,14 @@ const boxGap = (a: Area, b: Area) => Math.max(0, Math.max(a.x - b.x - b.w, b.x -
 /** Does a thing of this box (solid or not) sit where it mustn't? */
 function blocked(k: Keep, a: Area, solid: boolean, middle = true): boolean {
   if (a.x < 0.3 || a.y < 0 || a.x + a.w > k.w - 0.3 || a.y + a.h > k.h - 0.3) return true;
-  if (solid && middle && a.x < k.w / 2 + 1.4 && a.x + a.w > k.w / 2 - 1.4 && a.y < k.h - 0.5) return true;
+  if (solid && middle && !k.spine && a.x < k.w / 2 + 1.4 && a.x + a.w > k.w / 2 - 1.4 && a.y < k.h - 0.5) return true;
+  if (solid && middle && k.spine && boxOff(k.spine, a) < 1.4) return true;
   if (k.areas.some((q) => boxGap(q, a) < (solid ? 0.6 : 0))) return true;
   return k.spots.some((p) => boxDist(a, p.x, p.y) < p.r + (solid ? 0.6 : 0.2));
 }
+
+/** Could a solid round thing of radius `r` stand at (x, y)? */
+export const fits = (k: Keep, x: number, y: number, r: number) => !blocked(k, { x: x - r, y: y - r, w: r * 2, h: r * 2 }, true);
 
 /** Drop whatever lands where it mustn't (a gatehouse by `gate`'s rules). Ground shapes and marks are paint: they stay. */
 export function clearFor(s: Site, k: Keep, gate: Keep): Site {
