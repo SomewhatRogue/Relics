@@ -32,7 +32,7 @@ export function warriorFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean
     case 'quake': {
       // The ring grows out to the shockwave's real reach.
       const r = QUAKE.radius * PX;
-      fx.rings.push({ x, y, life: 0.4, max: 0.4, col: '#ffe9a8', size: r }, { x, y, life: 0.3, max: 0.3, col: '#ffffff', size: r * 0.6 });
+      fx.rings.push({ x, y, life: 0.55, max: 0.55, col: '#ffe9a8', size: r }, { x, y, life: 0.45, max: 0.45, col: '#ffd27a', size: r * 0.75 }, { x, y, life: 0.35, max: 0.35, col: '#ffffff', size: r * 0.5 });
       fx.flashes.push({ x, y: y - 6, r: r * 2, i: 1.2, c: [1, 0.9, 0.6], life: 0.2, max: 0.2 });
       fx.crack(x, y, 14);
       fx.debris(x, y, 18);

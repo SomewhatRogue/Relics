@@ -2,6 +2,50 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-03: the Warrior's weapons rework: the step, the shield bash and riposte, the shockwave, the pin (Kyle; Claude Opus 5.5)
+
+The second class through Kyle's weapons rework. The Warrior is the tank, and each weapon trades damage
+against shielding. Numbers in `shared/warrior.ts` and `shared/weapons.ts`, the rules in `sim/warrior.ts`,
+all judged in the room.
+
+- **No roll: a step.** The dodge button is now a short shoulder step for the Warrior (`STEP`): 1.2 tiles
+  (the roll is 2.4) in 0.16 s (the roll 0.32), 12 breath, again after 0.55 s. It has no protection at all
+  (its own act, `step`, which nothing treats as a roll), and it never counts as a last-second slip; a
+  striped blow is still stepped out of on your feet. With no push it steps back from where you face; you keep facing.
+  The button shows STEP on a phone (`dodgeName`, `dodgeOf`). The kits keep their old rolls in `dodge`,
+  since `CLASS_DODGES.WARRIOR` stays false (no TEMPO trait, no DODGE gear mod, no dodge rows on the card)
+  and the fight tests that lend the sword a roll still lend it. The tutorial's STEP OUT lesson now shows the
+  STEP button from the path on (it used to hide the dodge for a Warrior for good). No Warrior knack touched
+  the roll's distance, so none changed. The Healer still has no dodge.
+- **Sword and shield**: quick, the three-cut chain (12, 12, 22), the best guard (unchanged). Held, a shield
+  bash: reach 1.35, one goblin, 6 to 12 damage, and it stuns it 0.6 s to 1.2 s at full charge (a butcher
+  half as long); it doesn't stop a striped blow or a charge. Perfect: a counter started within 0.5 s of the
+  parry is a RIPOSTE, twice the counter (12 x 2.5 x 2 = 60 off the first cut); the plain counter (x2.5
+  within 1.6 s) is still there after it. Seen: PERFECT, RIPOSTE in gold, a gold ring and flash.
+- **Greatsword**: quick, two wide slow sweeps (arcs 210 and 240, up from 160 and 170). Held, the overhead
+  (arc 110, reach 2.4, 38 to 75), still the `breaker`. Perfect: let go on the white flash (the rapier's
+  window) and a shockwave lands 1.4 tiles ahead: every goblin within 2.6 takes 12, is shoved and knocked
+  flat for 1.2 s (a butcher 0.6 s), losing its wind-up, striped or not; only a charge carries on. Trade-off:
+  no held block at all (`parryOnly`); a tap of block is still a parry in its narrow 0.2 s window, and
+  holding block says so as the Ranger's does.
+- **Spear**: quick, long thrusts (reach 2.5, up from 2.3) with a bigger push (4, 4, 5, then 9). Held, the
+  lunge runs through up to three goblins (`hits: 3`), 22 to 42. Perfect: any spear hit on a goblin that is
+  charging, pouncing or mid lunger stab stops it dead and pins it for 1 s. Weakness: a quick thrust on a
+  goblin inside half its reach does half (the shaft); judgment call, the held lunge is exempt, since the
+  lunge carries you in among them and the point is the whole idea of it.
+- Sounds from the kit: a step the footfall, the bash the block and body thump, a riposte the parry and the
+  backstab sting, the shockwave the slam and rumble, a pin the javelin's stick. Effects in
+  `client/fxwarrior.ts` (one overlay, so both views).
+- New lines for the lore keeper and line editor: RIPOSTE, PINNED, the STEP button, the three card lines
+  (`client/card.ts`) and the three kit lines (`client/main.ts`).
+
+Tests: `tests/warrior.test.ts` (the step's distance and no protection, the bash stun, the riposte doubling
+and the late plain counter, the greatsword's held block giving no guard and its parry still working, the
+shockwave on a perfect release and none held too long, the spear's three-goblin lunge, the charge pin, the
+shaft penalty). `fight.test.ts`: the counter test uses the greatsword (a sword's quick counter is now a
+riposte), the charged-heavy test uses the greatsword held past its flash, and "no dodge" is now the
+Healer's alone.
+
 ## 2026-11-03: the Rogue's weapons rework: Shadowstep stuns, the rapier skewers, the poisoner's kit (Kyle; Claude Opus 5.5)
 
 The first class through Kyle's weapons rework (PLAN "Open: weapons rework"): every weapon a quick attack,

@@ -253,6 +253,9 @@ Every weapon gets a quick attack, a charged attack, a perfect-timed hit and a re
 - Perfect hits stay visible ("PERFECT") with a stronger effect so they read.
 - Greatsword: wide sweeps, breaks heavy wind-ups; no held block, parry-counter only.
 - Daggers: charged stays the throwing dagger.
+- [x] Warrior (built 2026-11-03, Claude Opus 5.5; see DECISIONS): no roll but a short STEP with no protection, the sword's
+  shield bash stuns and a quick counter ripostes for double, the greatsword is parry-only with a shockwave on a perfect
+  overhead, the spear's lunge runs through three, pins a charge, and does half with the shaft up close.
 - [x] Rogue (built 2026-11-03, Claude Opus 5.5; see DECISIONS): Shadow Step stuns 1 s, the rapier's perfect lunge skewers and bleeds,
   daggers unchanged, the poisoner's kit replaces the hand crossbow (name SHORTSWORD AND DARTS pending the lore keeper).
 - Rogue: Shadow Step behind a goblin stuns it 1 s for free hits.
