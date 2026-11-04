@@ -26,25 +26,52 @@ body.touch .stick.on { opacity: 1; }
 .tb i { position: absolute; left: 50%; bottom: -15px; transform: translateX(-50%); padding: 1px 4px; white-space: nowrap; font: 400 var(--fs-text)/1.1 var(--font-body); letter-spacing: 0.04em; color: var(--gilt); pointer-events: none;
   background: #0e0f12d8; }
 .tb i:empty, .tb.dim i { display: none; }
-/* The dodge keeps its name (STEP, JUMP, DASH, BLINK) small under it. */
+/* The dodge keeps its name (JUMP, DASH, BLINK, ROLL) small under it. */
 .tb.roll i { bottom: -11px; padding: 0 2px; font-size: var(--fs-text); color: var(--bone-dim); background: none; text-shadow: var(--px) var(--px) 0 #07080a; }
 .tb.relic i, .tb.relic2 i { color: var(--bone); bottom: auto; top: 50%; transform: translate(-50%, -50%); background: none; font-size: var(--fs-text); }
 
-.tb.attack { width: 84px; height: 84px; right: calc(28px + env(safe-area-inset-right)); bottom: calc(50px + env(safe-area-inset-bottom)); }
-.tb.roll { width: 60px; height: 60px; right: calc(136px + env(safe-area-inset-right)); bottom: calc(33px + env(safe-area-inset-bottom)); }
-.tb.block { width: 60px; height: 60px; right: calc(133px + env(safe-area-inset-right)); bottom: calc(98px + env(safe-area-inset-bottom)); }
-.tb.relic { width: 56px; height: 56px; right: calc(94px + env(safe-area-inset-right)); bottom: calc(150px + env(safe-area-inset-bottom)); }
-.tb.relic2 { width: 56px; height: 56px; right: calc(30px + env(safe-area-inset-right)); bottom: calc(163px + env(safe-area-inset-bottom)); }
+/* Hit areas (Kyle: "might be too close together on mobile"): every one round, at least 52px across
+   (ATTACK 92), with at least 8px between any two, often wider than the drawn art. Centres from the
+   bottom right corner: ATTACK (70, 92); the ring at about 100 from it: the dodge (166, 63), the guard
+   (160, 140), the skill (112, 190), the relic (46, 194); further out the health orb (192, 228), the
+   context slot (90, 259) and a crossbow's RELOAD (232, 118). A Warrior or Healer has no dodge, so the
+   context slot sits in the dodge's place. scripts/ui-look.cjs measures the gaps. */
+.tb { border-radius: 50%; }
+.tb.attack { width: 92px; height: 92px; right: calc(24px + env(safe-area-inset-right)); bottom: calc(46px + env(safe-area-inset-bottom)); }
+.tb.roll { width: 62px; height: 62px; right: calc(135px + env(safe-area-inset-right)); bottom: calc(32px + env(safe-area-inset-bottom)); }
+.tb.block { width: 62px; height: 62px; right: calc(129px + env(safe-area-inset-right)); bottom: calc(109px + env(safe-area-inset-bottom)); }
+.tb.relic { width: 56px; height: 56px; right: calc(84px + env(safe-area-inset-right)); bottom: calc(162px + env(safe-area-inset-bottom)); }
+.tb.relic2 { width: 56px; height: 56px; right: calc(18px + env(safe-area-inset-right)); bottom: calc(166px + env(safe-area-inset-bottom)); }
 .tb.potion { width: 64px; height: 64px; right: calc(160px + env(safe-area-inset-right)); bottom: calc(196px + env(safe-area-inset-bottom)); }
 .tb.grab, .tb.use { width: 60px; height: 60px; right: calc(60px + env(safe-area-inset-right)); bottom: calc(229px + env(safe-area-inset-bottom)); z-index: 2; }
+body[data-dodge='false'] .tb.grab { width: 62px; height: 62px; right: calc(135px + env(safe-area-inset-right)); bottom: calc(32px + env(safe-area-inset-bottom)); }
+.tb.reload { width: 52px; height: 52px; right: calc(206px + env(safe-area-inset-right)); bottom: calc(92px + env(safe-area-inset-bottom)); }
+/* ATTACK held on an empty crossbow: RELOAD pulses gold for a moment (owncues.ts). */
+.tb.reload.cue { z-index: 11; }
+.tb.reload.cue::before { animation-duration: 0.25s; }
 /* In town the way in or the word with someone takes ATTACK's place, big. */
-.tb.use.big { width: 84px; height: 84px; right: calc(28px + env(safe-area-inset-right)); bottom: calc(50px + env(safe-area-inset-bottom)); }
+.tb.use.big { width: 92px; height: 92px; right: calc(24px + env(safe-area-inset-right)); bottom: calc(46px + env(safe-area-inset-bottom)); }
 .tb.use.big i { bottom: auto; top: -16px; }
-body[data-mode='town'] .tb.roll { right: calc(136px + env(safe-area-inset-right)); bottom: calc(33px + env(safe-area-inset-bottom)); }
-body[data-mode='town'] .tb.attack, body[data-mode='town'] .tb.block, body[data-mode='town'] .tb.relic, body[data-mode='town'] .tb.relic2, body[data-mode='town'] .tb.potion, body[data-mode='town'] .tb.grab { display: none; }
+body[data-mode='town'] .tb.reload, body[data-mode='town'] .tb.attack, body[data-mode='town'] .tb.block, body[data-mode='town'] .tb.relic, body[data-mode='town'] .tb.relic2, body[data-mode='town'] .tb.potion, body[data-mode='town'] .tb.grab { display: none; }
 body[data-mode='run'] .tb.use:not(.chest) { display: none; }
 body[data-guard='none'] .tb.block { display: none; }
-.tb[hidden], .tb.relic2[hidden], .tb.grab[hidden], .tb.use[hidden], .tb.potion[hidden] { display: none !important; }
+.tb[hidden], .tb.reload[hidden], .tb.relic2[hidden], .tb.grab[hidden], .tb.use[hidden], .tb.potion[hidden] { display: none !important; }
 /* The wood's lesson points at the button to press: a gold square stepping in and out round it. */
-.tb.hint { z-index: 11; outline: calc(2 * var(--px)) solid var(--gilt); outline-offset: calc(2 * var(--px)); animation: hint 0.5s steps(1) infinite; }
+.tb.hint { z-index: 11; }
+/* (A square drawn by a child, since the round hit area would round an outline of the button's own.) */
+.tb:is(.hint, .cue, .unlock)::before { content: ''; position: absolute; inset: calc(4 * var(--px)); pointer-events: none;
+  outline: calc(2 * var(--px)) solid var(--gilt); outline-offset: calc(2 * var(--px)); animation: hint 0.5s steps(1) infinite; }
 @keyframes hint { 50% { outline-offset: calc(4 * var(--px)); outline-color: var(--gold); } }
+/* A button the wood has just given you: the same gold square, and its name over it (unlockflash.ts). */
+.tb.unlock { z-index: 11; }
+.tb.unlock::after { content: attr(data-unlock); position: absolute; left: 50%; bottom: calc(100% + 6px); transform: translateX(-50%); padding: 1px 4px; white-space: nowrap; pointer-events: none;
+  font: 400 var(--fs-text)/1.1 var(--font-body); letter-spacing: 0.04em; color: var(--stone-900); background: var(--gilt); animation: unlock 0.5s steps(1) infinite; }
+@keyframes unlock { 50% { background: var(--gold); } }
+
+/* BUTTONS (legend.ts): each of your buttons as the cluster draws it, its name, and a plain line. */
+.legend { display: flex; flex-direction: column; gap: 6px; text-align: left; }
+.legend .lg { display: grid; grid-template-columns: calc(30 * var(--px)) 1fr; column-gap: 8px; align-items: center; }
+.legend .lg img { grid-row: span 2; height: auto; image-rendering: pixelated; justify-self: center; }
+.legend .lg b { font: 400 var(--fs-text)/1.2 var(--font-body); letter-spacing: 0.04em; color: var(--gilt); }
+.legend .lg b kbd { margin-left: 8px; color: var(--bone-dim); font: inherit; }
+.legend .lg p { margin: 0; font-size: var(--fs-text); line-height: 1.3; color: var(--bone); }

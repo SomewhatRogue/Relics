@@ -14,9 +14,9 @@ beforeEach(() => void (CLASS_DODGES.WARRIOR = true));
 afterEach(() => void (CLASS_DODGES.WARRIOR = false));
 
 describe('no dodge', () => {
-  it('a Healer presses dodge and nothing happens (a Warrior steps: warrior.test.ts)', () => {
+  it('a Warrior or a Healer presses dodge and nothing happens', () => {
     CLASS_DODGES.WARRIOR = false;
-    for (const weapon of ['mace'] as const) {
+    for (const weapon of ['sword', 'mace'] as const) {
       const room = new ArenaRoom(1);
       const h = room.join('me');
       h.weapon = weapon;

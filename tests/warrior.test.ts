@@ -1,6 +1,6 @@
-/** The Warrior's rework (shared/warrior.ts, sim/warrior.ts): the step, the shield bash, the riposte, the greatsword, the spear. */
+/** The Warrior's rework (shared/warrior.ts, sim/warrior.ts): no dodge, the shield bash, the riposte, the greatsword, the spear. */
 import { describe, expect, it } from 'vitest';
-import { GUARD, PIN, QUAKE, RIPOSTE, ROLL, SHAFT, SHIELD_BASH, STEP, TICK, WEAPONS, type WeaponId } from '../src/shared/tuning';
+import { GUARD, PIN, QUAKE, RIPOSTE, SHAFT, SHIELD_BASH, TICK, WEAPONS, type WeaponId } from '../src/shared/tuning';
 import { ArenaRoom } from '../src/sim/room';
 import { newEnemy } from '../src/sim/enemies';
 import { hitHero } from '../src/sim/combat';
@@ -32,25 +32,34 @@ const lost = (e: Enemy) => e.maxHp - e.hp;
 /** A blow from straight above, landing on the hero now. */
 const blow = (x: number, y: number): EnemyAttack => ({ kind: 'swing', t: 1, windup: 1, active: 0.1, recover: 0.3, dmg: 10, knock: 2, unblockable: false, dx: 0, dy: 1, ox: x, oy: y - 1.2, range: 2, arc: 90, cx: 0, cy: 0, radius: 0, done: false });
 
-describe("the Warrior's step", () => {
-  it('goes about half a roll, quicker, on the dodge button', () => {
-    const { h, run } = arena('sword', [2]);
-    const ev = run(STEP.time + 0.05, { rollSeq: 1, mx: 1, ay: 0 });
-    expect(ev.some((x) => x.k === 'step')).toBe(true);
-    expect(h.x - 9).toBeGreaterThan(STEP.distance * 0.85);
-    expect(h.x - 9).toBeLessThan(STEP.distance * 1.1);
-    expect(STEP.distance).toBeLessThanOrEqual(ROLL.distance * 0.55);
-    expect(STEP.time).toBeLessThan(ROLL.time);
-    // It keeps you facing where you were.
-    expect(h.fy).toBeLessThan(-0.9);
+describe('the Warrior has no dodge (Kyle, 2026-11-04)', () => {
+  it('pressing dodge does nothing, with any of the three kits', () => {
+    for (const weapon of ['sword', 'greatsword', 'spear'] as const) {
+      const { h, run } = arena(weapon, [2]);
+      const ev = run(0.4, { rollSeq: 1, mx: 0, ay: 0 });
+      expect(ev.some((x) => x.k === 'roll')).toBe(false);
+      expect(h.act).not.toBe('roll');
+      expect(h.x).toBe(9);
+    }
   });
-  it('gives no protection: a blow that lands mid-step still lands', () => {
-    const { room, h, e, run } = arena('sword', [2]);
-    run(0.04, { rollSeq: 1, mx: 1, ay: 0 });
-    expect(h.act).toBe('step');
-    const hp = h.hp;
-    hitHero(e, blow(h.x, h.y), h, room.time, []);
-    expect(h.hp).toBeLessThan(hp);
+});
+
+describe('GRAB with nothing to take hold of (Kyle, 2026-11-04)', () => {
+  it('says so to that hero, at most once a second', () => {
+    const { run } = arena('sword', [2]);
+    const a = run(0.4, { grabSeq: 1 });
+    expect(a.filter((x) => x.k === 'nograb' && x.id === 'me').length).toBe(1);
+    const b = run(0.4, { grabSeq: 2 });
+    expect(b.some((x) => x.k === 'nograb')).toBe(false);
+    run(0.4, { grabSeq: 2 });
+    const c = run(0.5, { grabSeq: 3 });
+    expect(c.some((x) => x.k === 'nograb')).toBe(true);
+  });
+  it('says nothing when the press took hold of something', () => {
+    const { e, run } = arena('sword', [8.2]);
+    Object.assign(e, { act: 'stunned', actT: 0, actDur: 9, fx: 0, fy: -1 });
+    const ev = run(0.4, { grabSeq: 1 });
+    expect(ev.some((x) => x.k === 'nograb')).toBe(false);
   });
 });
 

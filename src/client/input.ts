@@ -2,7 +2,7 @@
  * Turns keys, mouse and touch into an Intent. Laptop: WASD to move, mouse to aim, left click to
  * attack, hold right click to block (tap it to parry), Space to roll; J / K work too;
  * E the class skill, R the relic carried, G grab (then click to slam, G to throw), Q a potion (held:
- * turn the belt instead). Phone (upright):
+ * turn the belt instead), C held winds a crossbow. Phone (upright):
  * a floating stick on the left, Attack, Block and Roll under the right thumb.
  */
 import { NO_INTENT, type Intent } from '../sim/types';
@@ -16,6 +16,7 @@ export class Input {
   private mouse: [number, number] | null = null;
   private blockHeld = { mouse: false, key: false, touch: false };
   private attackHeld = { mouse: false, key: false, touch: false };
+  private reloadHeld = { key: false, touch: false };
   private stick = { id: '', ox: 0, oy: 0, x: 0, y: 0 };
   private stickEl!: HTMLElement;
   private knobEl!: HTMLElement;
@@ -34,6 +35,7 @@ export class Input {
       if (k === 'r') this.use(1);
       if (k === 'g') this.intent.grabSeq++;
       if (k === 'q') this.potion.down();
+      if (k === 'c') this.reload(true);
       if (k === 'k') (this.intent.blockSeq++), (this.blockHeld.key = true);
     });
     addEventListener('keyup', (e) => {
@@ -42,12 +44,14 @@ export class Input {
       if (k === 'k') this.blockHeld.key = false;
       if (k === 'j') this.attackHeld.key = false;
       if (k === 'q') this.potion.up();
+      if (k === 'c') this.reloadHeld.key = false;
     });
     addEventListener('blur', () => {
       this.keys.clear();
       this.potion.cancel();
       this.blockHeld = { mouse: false, key: false, touch: false };
       this.attackHeld = { mouse: false, key: false, touch: false };
+      this.reloadHeld = { key: false, touch: false };
     });
     addEventListener('mousemove', (e) => (this.mouse = [e.clientX, e.clientY]));
     addEventListener('mousedown', (e) => {
@@ -117,6 +121,7 @@ export class Input {
     pb.addEventListener('touchend', (e) => (e.preventDefault(), pb.classList.remove('down'), this.potion.up()), { passive: false });
     pb.addEventListener('touchcancel', () => (pb.classList.remove('down'), this.potion.cancel()));
     btn('.roll', () => this.intent.rollSeq++);
+    btn('.reload', () => this.reload(false), () => (this.reloadHeld.touch = false));
     btn('.block', () => ((this.intent.blockSeq++), (this.blockHeld.touch = true)), () => (this.blockHeld.touch = false));
   }
 
@@ -125,6 +130,13 @@ export class Input {
     this.intent.relicPick = slot;
     this.intent.relicPickSeq++;
     this.intent.relicSeq++;
+  }
+
+  /** RELOAD pressed (C, or the crossbow's button): counted, and held till it's let go. */
+  private reload(key: boolean): void {
+    this.intent.reloadSeq = (this.intent.reloadSeq ?? 0) + 1;
+    if (key) this.reloadHeld.key = true;
+    else this.reloadHeld.touch = true;
   }
 
   /** Change gear from the pack (see sim/pack.ts GEAR). */
@@ -160,6 +172,7 @@ export class Input {
     i.my = Math.abs(my) < 0.12 ? 0 : my;
     i.block = this.blockHeld.mouse || this.blockHeld.key || this.blockHeld.touch;
     i.attack = this.attackHeld.mouse || this.attackHeld.key || this.attackHeld.touch;
+    i.reload = this.reloadHeld.key || this.reloadHeld.touch;
     i.ax = i.ay = 0;
     const hs = this.heroScreen();
     // Aim in tiles: the direction to the mouse, and how far (a lobbed flask lands there). The 3D view's

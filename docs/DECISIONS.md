@@ -2,6 +2,66 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-04: class fixes after the new UI: no Warrior step, a crossbow RELOAD, a legend, fat fingers (Kyle; Claude Opus 5.5)
+
+Kyle played the pixel UI ("generally much cleaner") and sent nine notes.
+
+- **The Warrior has no step and no dodge** ("idk why it would say that. The grab should be there").
+  `STEP`, `CLASS_STEP`, the `step` act, event, pose, dust, sound and icon are gone; `dodgeOf` now lives in
+  `shared/weapons.ts` and is just "a dodging class's own dodge, or nothing". A Warrior's or Healer's dodge
+  press does nothing (fight.test.ts). The wood's path lesson for a Warrior is back to walking out of the
+  striped blow with no button (as the Healer's always was), and it is now called WALK OUT, not STEP OUT,
+  so nothing says "step". On the cluster, a class with no dodge has the context slot in the dodge's
+  place (`body[data-dodge='false']`); a Warrior's always shows GRAB, dimmed till there's something to
+  take hold of. A Healer's shows only when there's something (to help up, burn or grab), in the same place.
+- **NOTHING TO GRAB.** A GRAB press that lapses unused while you're free (nothing to take hold of, throw,
+  help up or burn) makes the room say `nograb` to that hero, at most once a second (`toldAt`, shared with
+  the other "can't do that" notes). Only that hero's client shows it, over them, with a soft dull knock
+  (`client/owncues.ts`).
+- **The crossbow's reload is its own button** ("if you try holding down attack without it reloaded it
+  asks you to reload"). A new intent field, `reload` held and `reloadSeq` counted (optional, so an older
+  guest's intent still reads; works online through the same intent). `sim/crossbow.ts`: RELOAD held while
+  empty and standing still winds, in pieces as before (let go or push the stick and the piece ends with
+  the wind kept); an unbroken full reload from nothing glints, as before; wound, you're free at once.
+  ATTACK held on an empty crossbow winds nothing: the press is spent and the room says `reloadcue` (once
+  a second) so the RELOAD button pulses gold and RELOAD is said over you, with a dry click. A tap of
+  ATTACK is still the short sword. Phone: a round RELOAD button (gilt while empty, the dark sweep showing
+  what's still to wind), only with a crossbow. Laptop: **C** (free: E, R, G, Q, F, J, K, I and Tab are
+  taken), on the prompt line while empty, in the kit line, a tip and the weapon card.
+- **BUTTONS** in the gear's box opens a framed panel of this hero's buttons, each drawn by the cluster's
+  own code (`btnart.ts` with `icons.ts`, `skillicons.ts`, the item and relic icons), its name, a plain
+  line, and on a laptop its key: attack, the guard (block, parry or catch), the dodge, RELOAD, the skill,
+  the relic, the health orb, and every context word (GRAB, HELP UP, BURN, OPEN, TALK, ENTER, USE).
+  `client/legend.ts`.
+- **The wood flashes what it gives you.** The first time a lesson gives a move, its button pulses gold
+  for 4 s with its name over it (`client/unlockflash.ts`); a laptop says the move and its key over you.
+- **Fat fingers.** Every cluster button's hit area is now round (`border-radius` on the invisible button,
+  so the art stays square-pixelled), at least 52px (ATTACK 92), and at least 10px from any other on a
+  390x844 phone, measured by `scripts/ui-look.cjs`. Respaced round ATTACK; the cluster still stays under
+  about 260px. The lesson pointer and the new pulses draw their gold square on a child, since the round
+  hit area would round an outline.
+- **Hearts under the health bar** ("It's NOT clear what the 3 hearts mean"). The get-ups left (alone, a
+  heart each; in a party, your one get-up) moved from the tracker into the unit frame, just under the HP
+  bar, as small heart icons; a tap or a hover says "Times you can get back up this job".
+- **An objective done flashes gold** (`client/objflash.ts`). When a wood lesson is passed or a job's way
+  on opens, the tracker holds the objective it had, counted out ("3 / 3", "(1 left)" dropped), flashes it,
+  turns it gold with a shine sweeping across, keeps it 1.8 s, then the next one shows. A small rising chime.
+- **Sounds** (`client/sfxtown.ts`, procedural from the kit's `tone` and `burst`): coins whenever gold
+  changes hands off a job (`client/purse.ts` listens to the purse, so every stall, the pawn stall, the
+  vault, the church's recharge and the job's pay are all heard); a hammer on the anvil when Halvard
+  makes, ups or melts a piece (his own buttons in `stores.ts`); the chime; the dull knock; the empty click.
+
+New or changed player-facing lines, for the lore keeper and the line editor: the lesson name WALK OUT and
+its freeze NOW: WALK OUT, the goal MOVE BEFORE IT LANDS; NOTHING TO GRAB; RELOAD; C  RELOAD; the crossbow's
+kit and card lines and the laptop tip; "Times you can get back up this job"; the unlock labels; every
+BUTTONS line (`legend.ts`).
+
+Tests: `tests/warrior.test.ts` (no dodge on any Warrior kit; NOTHING TO GRAB once a second, and not when
+the press took hold), `tests/fight.test.ts` (a Warrior or a Healer presses dodge and nothing happens),
+`tests/rangerkit.test.ts` (ATTACK held empty winds nothing and cues RELOAD, a tap is still the sword;
+RELOAD winds in pieces and keeps the wind; the stick ends a piece; RELOAD on a loaded crossbow does
+nothing; a full reload in one go glints). 619 pass; `npm run test:online` passes.
+
 ## 2026-11-04: every perfect on your own timing, and a stun cap per hero (Kyle; Claude Opus 5.5)
 
 Kyle, after playing: "it's hard to time a perfect against an enemy attack or an ally about to get hit",

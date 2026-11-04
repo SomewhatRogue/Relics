@@ -2,8 +2,10 @@
  * The touch buttons as one cluster round ATTACK (bottom right, upright phone): what each shows and how
  * it looks this frame. The buttons and their presses are input.ts's; this only draws them (btnart.ts)
  * and says which are there: the class skill and the relic carried with their cooldowns, the guard
- * (BLOCK or PARRY, none for a Mage), the dodge (STEP, JUMP, DASH, BLINK), the flask as the health orb,
- * stamina as pips round ATTACK, and one gilt context slot (GRAB, THROW, HELP UP, BURN, OPEN, TALK).
+ * (BLOCK or PARRY, none for a Mage), the dodge (JUMP, DASH, BLINK, ROLL), the flask as the health orb,
+ * stamina as pips round ATTACK, one gilt context slot (GRAB, THROW, HELP UP, BURN, OPEN, TALK), and a
+ * crossbow's RELOAD. A Warrior or Healer has no dodge: the context slot takes the dodge's place, and a
+ * Warrior's always shows GRAB (dimmed till there's something to take hold of).
  */
 import { carriedItem } from '../sim/charge';
 import { isDark, relicFill } from '../shared/relicitems';
@@ -22,11 +24,12 @@ import { relicItemIcon } from './relicicons';
 import { skillCanvas } from './skillicons';
 import { icon, type IconId } from './icons';
 import { paintButton, type Face } from './btnart';
+import { reloadCue } from './owncues';
 import { stickVars } from './stickart';
 import type { Game } from './game';
 
 const EL: Record<string, string> = { fire: '#ff9a3c', frost: '#bfe8ff', storm: '#fff27a' };
-const DODGE: Record<string, IconId> = { STEP: 'step', JUMP: 'jump', DASH: 'dash', BLINK: 'blink', ROLL: 'roll' };
+const DODGE: Record<string, IconId> = { JUMP: 'jump', DASH: 'dash', BLINK: 'blink', ROLL: 'roll' };
 type Spot = ReturnType<Game['near']>;
 
 /** An image source from a data URL, once it has loaded (null till then: the button repaints when it has). */
@@ -71,6 +74,7 @@ export class Cluster {
   private b = {
     attack: new Btn('.tb.attack'), block: new Btn('.tb.block'), roll: new Btn('.tb.roll'), skill: new Btn('.tb.relic'),
     relic: new Btn('.tb.relic2'), potion: new Btn('.tb.potion'), grab: new Btn('.tb.grab'), use: new Btn('.tb.use'),
+    reload: new Btn('.tb.reload'),
   };
   private ready: Record<string, boolean> = {};
   private stick = document.querySelector('#touch .stick') as HTMLElement;
@@ -96,8 +100,14 @@ export class Cluster {
     const st = me.stamina, flick = me.winded && room.time - me.staminaAt < HERO.windedDelay ? Math.floor(now * 11) % 2 === 0 : false;
     b.attack.show({ shape: 'round', size: 42, grade: 'iron', icon: atk, iconScale: carrying ? 1 : 2, pips: { lit: flick ? 0 : Math.ceil(st / 10), of: 10, col: me.winded ? '#d84a3a' : st < 25 ? '#a8a090' : '#ddd5c4' } }, '', '', carrying ? 'Slam' : 'Attack');
     b.block.show(guard === 'none' ? null : { shape: 'shield', size: 30, grade: 'iron', icon: icon(guard === 'full' ? 'block' : 'parry') }, '', guard === 'catch' ? 'CATCH' : '', guard === 'full' ? 'Block' : guard === 'catch' ? 'Catch' : 'Parry');
-    const dn = dodgeName(kit.cls);
-    b.roll.show(dodgeOf(kit) ? { shape: 'diamond', size: 34, grade: 'iron', icon: icon(DODGE[dn] ?? 'roll') } : null, '', dn, dn);
+    const dn = dodgeName(kit.cls), dodges = !!dodgeOf(kit);
+    if (document.body.dataset.dodge !== String(dodges)) document.body.dataset.dodge = String(dodges);
+    b.roll.show(dodges ? { shape: 'diamond', size: 34, grade: 'iron', icon: icon(DODGE[dn] ?? 'roll') } : null, '', dn, dn);
+    // A crossbow's RELOAD: gilt while it's empty (the dark sweep is what's still to wind), pulsing when ATTACK was held on it empty.
+    const wind = me.xbowEmpty ? me.xbowWind ?? 0 : 0;
+    b.reload.show(kit.reloads ? { shape: 'round', size: 26, grade: me.xbowEmpty ? 'gilt' : 'iron', icon: icon('reload'), cd: wind > 0 ? 1 - wind : 0 } : null, '', 'RELOAD', 'Reload');
+    b.reload.el.classList.toggle('dim', !me.xbowEmpty);
+    b.reload.el.classList.toggle('cue', !!me.xbowEmpty && reloadCue > now);
     // The class skill and the relic carried, each with its cooldown (a dark sweep and the seconds).
     const [skill, relic] = me.relics, left = (r: typeof skill) => Math.max(0, me.relicReady[r] - room.time);
     const el = skill === 'channel' ? castElement(me) : me.augments[skill];
@@ -122,13 +132,14 @@ export class Cluster {
     const use = !!spot && !busy && (mode !== 'run' || !!spot.chest);
     const what: IconId = raise ? 'help' : burn ? 'burn' : carrying ? 'throw' : 'grab';
     const word = raise ? 'HELP UP' : burn ? 'BURN' : carrying ? 'THROW' : 'GRAB';
-    const showGrab = (active || lifter) && !(use && !active && mode !== 'town');
+    // (With no dodge the slot has its own place, so a USE or OPEN can show beside it.)
+    const showGrab = (active || lifter) && (!dodges || !(use && !active && mode !== 'town'));
     b.grab.show(showGrab ? { shape: 'round', size: 29, grade: active ? 'gilt' : 'stone', icon: icon(what) } : null, '', word, word);
     b.grab.el.classList.toggle('dim', !active);
     const uw = spot?.chest ? 'OPEN' : spot?.door ? 'ENTER' : spot?.talk && spot.talk !== 'board' && spot.talk !== 'market' && spot.talk !== 'gate' ? 'TALK' : 'USE';
     const ui: IconId = uw === 'OPEN' ? 'open' : uw === 'ENTER' ? 'enter' : uw === 'TALK' ? 'chat' : 'use';
     const big = mode === 'town';
-    b.use.show(use && !(showGrab && active) ? { shape: 'round', size: big ? 42 : 29, grade: 'gilt', icon: icon(ui), iconScale: big ? 2 : 1 } : null, '', uw, uw);
+    b.use.show(use && !(showGrab && active && dodges) ? { shape: 'round', size: big ? 42 : 29, grade: 'gilt', icon: icon(ui), iconScale: big ? 2 : 1 } : null, '', uw, uw);
     b.use.el.classList.toggle('chest', !!spot?.chest);
     b.use.el.classList.toggle('big', big);
   }

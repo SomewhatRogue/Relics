@@ -12,7 +12,7 @@ import { decoyTime, dodgeBreath, dodgeReach, releaseWindow } from './knacks';
 import { fedMult, jealousBlocks, jealousCooldown, needlesBreath, wears } from './hungry';
 import { hitEnemy } from './combat';
 import { flashBash, quake } from './warrior';
-import { beginHold, looseBolt, stepWind } from './crossbow';
+import { beginHold, emptyHold, looseBolt, reloadPressed, startWind, stepWind } from './crossbow';
 import { brandySpeed, breathCap } from './brandy';
 import { quickMult, relicDark, spendCharge } from './charge';
 import { paySpell, refuseSpell } from './spells';
@@ -137,6 +137,11 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   }
   if (inp.attackSeq !== h.seen.attack) (h.seen.attack = inp.attackSeq), (h.attackQueuedAt = now);
   if (inp.grabSeq !== h.seen.grab) (h.seen.grab = inp.grabSeq), (h.grabQueuedAt = now);
+  // A GRAB press that found nothing to take hold of, throw, help up or burn: say so, at most once a second.
+  if (h.grabQueuedAt > -9 && now - h.grabQueuedAt >= INPUT_BUFFER) {
+    if (h.act === 'idle' && now - h.toldAt > 1) (h.toldAt = now), ev.push({ k: 'nograb', x: h.x, y: h.y, id: h.id });
+    h.grabQueuedAt = -9;
+  }
   // Hit, stunned or downed while carrying: you drop it.
   if ((h.carrying || h.lifting) && h.act !== 'carry' && h.act !== 'slam') acts.drop(h);
   if (inp.rollSeq !== h.seen.roll) (h.seen.roll = inp.rollSeq), (h.rollQueuedAt = now);
@@ -177,7 +182,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   h.actT += dt;
   h.moving = false;
   h.blocking = false;
-  if (h.act !== 'roll' && h.act !== 'step' && h.act !== 'down' && h.act !== 'zip' && h.act !== 'bash' && slide(h, HERO.radius, dt)) ev.push({ k: 'wallhit', x: h.x, y: h.y });
+  if (h.act !== 'roll' && h.act !== 'down' && h.act !== 'zip' && h.act !== 'bash' && slide(h, HERO.radius, dt)) ev.push({ k: 'wallhit', x: h.x, y: h.y });
 
   if (h.act === 'down') {
     if (h.actT >= h.actDur) Object.assign(h, { act: 'idle', hp: h.maxHp, stamina: HERO.stamina, actT: 0 });
@@ -188,11 +193,11 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     return;
   }
   const w = WEAPONS[h.weapon];
-  // A Warrior's dodge button is a short step (shared/warrior.ts); a Healer's does nothing.
-  const dodge = dodgeOf(w) ?? w.dodge;
+  // A Warrior's or Healer's dodge press does nothing (they have no dodge).
+  const dodge = w.dodge;
   const wantsRoll = !!dodgeOf(w) && now - h.rollQueuedAt < INPUT_BUFFER && now - h.lastRollAt >= dodge.cooldown * (1 - statsOf(h).dodge) && h.stamina >= 1 && !h.winded;
-  if (h.act === 'roll' || h.act === 'step') {
-    const k = (h.act === 'step' ? dodge.distance : dodgeReach(h)) / dodge.time;
+  if (h.act === 'roll') {
+    const k = dodgeReach(h) / dodge.time;
     h.x += h.rollDx * k * dt;
     h.y += h.rollDy * k * dt;
     collide(h, HERO.radius);
@@ -220,7 +225,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   }
   if (h.act === 'charge') {
     if (wantsRoll) return startRoll(h, inp, now, ev);
-    // An empty crossbow's hold winds a reload instead of aiming (sim/crossbow.ts).
+    // RELOAD held on an empty crossbow winds it (sim/crossbow.ts).
     if (stepWind(h, inp, dt, ev)) return;
     face(h, inp, enemies, false);
     walk(h, inp, w.chargeSpeed, dt, now);
@@ -276,7 +281,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
       const queued = now - h.attackQueuedAt < INPUT_BUFFER && h.attackQueuedAt > now - h.actT;
       if (queued && !h.heavy && h.combo < w.combo.length - 1) {
         if (!inp.attack) return startSwing(h, h.combo + 1, inp, enemies, now, ev);
-        if (now - h.attackQueuedAt >= CHARGE.start) return refuseSpell(h, now, ev) ? undefined : startCharge(h);
+        if (now - h.attackQueuedAt >= CHARGE.start && !emptyHold(h, now, ev)) return refuseSpell(h, now, ev) ? undefined : startCharge(h);
       }
       if (wantsRoll) return startRoll(h, inp, now, ev);
       if (h.actT >= swingTime(s)) (h.act = 'idle'), (h.actT = 0);
@@ -286,6 +291,8 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   // Idle or walking.
   if (wantsRoll) return startRoll(h, inp, now, ev);
   if (now - h.grabQueuedAt < INPUT_BUFFER && acts.grab(h)) return;
+  // The crossbow's RELOAD, held or tapped, while it's empty and you stand still (sim/crossbow.ts).
+  if (startWind(h, inp, reloadPressed(h, inp))) return;
   // The class skill, not yet taught, does nothing (the press is spent).
   if (now - h.relicQueuedAt < INPUT_BUFFER && h.relic === h.relics[0] && !knows(h, 'skill')) h.relicQueuedAt = -9;
   // A dark relic does nothing (the press is spent): it wants recharging at the church.
@@ -301,7 +308,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   if (now - h.attackQueuedAt < CHARGE.start + INPUT_BUFFER && h.attackQueuedAt > -9) {
     // The crossbow looses on the press; everything else waits to see if it's a tap or a hold.
     if (!inp.attack || w.noCharge) return startSwing(h, 0, inp, enemies, now, ev);
-    if (now - h.attackQueuedAt >= CHARGE.start) return refuseSpell(h, now, ev) ? undefined : startCharge(h);
+    if (now - h.attackQueuedAt >= CHARGE.start && !emptyHold(h, now, ev)) return refuseSpell(h, now, ev) ? undefined : startCharge(h);
   }
   // Only a Warrior's or Healer's kit holds a block.
   h.blocking = inp.block && h.stamina > 0 && !h.winded && CLASS_GUARD[w.cls] === 'full' && !w.parryOnly;
@@ -342,16 +349,8 @@ function startSwing(h: Hero, i: number, inp: Intent, enemies: Enemy[], now: numb
 }
 
 function startRoll(h: Hero, inp: Intent, now: number, ev: FightEvent[]): void {
-  const dodge = dodgeOf(WEAPONS[h.weapon]) ?? WEAPONS[h.weapon].dodge, kind = dodge.kind;
+  const dodge = WEAPONS[h.weapon].dodge, kind = dodge.kind;
   let x = inp.mx, y = inp.my;
-  // A Warrior's step: where you push (back from where you face, with no push), still facing; no protection.
-  if (kind === 'step') {
-    if (Math.hypot(x, y) < 0.1) (x = -h.fx), (y = -h.fy);
-    const l = Math.hypot(x, y);
-    Object.assign(h, { rollDx: x / l, rollDy: y / l, act: 'step', actT: 0, kvx: 0, kvy: 0, lastRollAt: now, rollX: h.x, rollY: h.y, rollQueuedAt: -9 });
-    spend(h, dodge.stamina, now);
-    return void ev.push({ k: 'step', x: h.x, y: h.y });
-  }
   // A backstep always hops away from where you face, and you keep facing the threat.
   if (kind === 'backstep') (x = -h.fx), (y = -h.fy);
   if (Math.hypot(x, y) < 0.1) (x = h.fx), (y = h.fy);
