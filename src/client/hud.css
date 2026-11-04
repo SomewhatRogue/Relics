@@ -33,6 +33,8 @@ body.touch #hud .st { display: none; }
 /* The get-ups left, as hearts just under the health bar (unitframe.ts); a tap or a hover says what they are. */
 #hud .ups { pointer-events: auto; position: relative; display: flex; gap: var(--px); align-self: flex-start; min-height: 0; height: auto; padding: 2px 2px 2px 0; margin: -1px 0 0; border: 0; background: none; cursor: help; }
 #hud .ups[hidden] { display: none; }
+/* (The unit frame comes up over the tracker while the hearts say what they are.) */
+#hud:has(.ups.say, .ups:hover) { z-index: 4; }
 #hud .ups .ht { display: block; width: calc(9 * var(--px)); height: calc(8 * var(--px)); background: var(--ic-heart) center / 100% 100% no-repeat; image-rendering: pixelated; }
 #hud .ups .ht.no { background-image: var(--ic-hollow); }
 #hud .ups.say::after, #hud .ups:hover::after { content: attr(data-say); position: absolute; left: 0; top: calc(100% + 2px); z-index: 3; padding: 2px 6px; white-space: nowrap; font: 400 var(--fs-text)/1.2 var(--font-body); color: var(--bone); text-shadow: none;
@@ -102,9 +104,6 @@ body:not([data-mode='run']) #leave, body[data-mode='run'] #heroes, body[data-mod
 #banner span { display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 2px; font-size: var(--fs-text); color: var(--bone-dim); }
 #banner span em { margin-left: 8px; }
 #banner .coin { display: inline-block; width: calc(9 * var(--px)); height: calc(9 * var(--px)); background: var(--ic-coin) center / 100% 100% no-repeat; image-rendering: pixelated; }
-#banner .ups { display: inline-flex; gap: var(--px); margin-left: 6px; }
-#banner .ht { width: calc(9 * var(--px)); height: calc(8 * var(--px)); background: var(--ic-heart) center / 100% 100% no-repeat; image-rendering: pixelated; }
-#banner .ht.no { background-image: var(--ic-hollow); }
 #banner .rooms { display: inline-flex; gap: var(--px); margin-left: 6px; vertical-align: 3px; }
 #banner .rm { width: calc(7 * var(--px)); height: calc(7 * var(--px)); background: var(--ic-room) center / 100% 100% no-repeat; image-rendering: pixelated; opacity: 0.7; }
 #banner .rm.done { opacity: 1; }

@@ -1,5 +1,5 @@
 // The UI on a phone and a laptop, flat and 2.5D: town, a fight on a job (hurt, a skill cooling), the pack,
-// a panel (the job board), someone talking, and the gear box. Usage:
+// a panel (the job board), someone talking, and the gear box; on a phone, how far apart the buttons' hit areas are. Usage:
 // node scripts/ui-look.cjs [url] [outdir] [only,these]. Prints page errors.
 const { chromium } = require('playwright');
 const url = process.argv[2] || 'http://localhost:4290/';
@@ -54,7 +54,14 @@ const SCENES = {
     await page.waitForTimeout(400);
     await go(page);
     await page.screenshot({ path: `${out}/${dev}-${look}-${name}.png` });
-    console.log(dev, look, name, errors.length ? 'ERRORS ' + JSON.stringify(errors) : 'ok');
+    // On a phone, the touch buttons' round hit areas: the smallest one and the closest two (want 44+ and 8+).
+    const hits = dev === 'phone' ? await page.evaluate(() => {
+      const bs = [...document.querySelectorAll('#touch .tb')].filter((b) => b.getClientRects().length && getComputedStyle(b).display !== 'none').map((b) => { const r = b.getBoundingClientRect(); return { n: b.classList[1], x: r.x + r.width / 2, y: r.y + r.height / 2, d: r.width }; });
+      let gap = 999, pair = '';
+      for (const a of bs) for (const b of bs) if (a !== b) { const g = Math.hypot(a.x - b.x, a.y - b.y) - a.d / 2 - b.d / 2; if (g < gap) (gap = Math.round(g)), (pair = a.n + '/' + b.n); }
+      return bs.length ? ` hit areas: smallest ${Math.round(Math.min(...bs.map((b) => b.d)))}px, closest ${pair} ${gap}px apart` : '';
+    }) : '';
+    console.log(dev, look, name, (errors.length ? 'ERRORS ' + JSON.stringify(errors) : 'ok') + hits);
     await ctx.close();
   }
   await browser.close();
