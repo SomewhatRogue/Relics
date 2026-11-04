@@ -183,7 +183,7 @@ describe('the spellblade', () => {
     Object.assign(b, { x: 9, y: 6, cooldown: 0 });
     for (let i = 0; i < 400 && b.attack?.kind !== 'cleave'; i++) {
       room.step();
-      if (b.attack && b.attack.kind !== 'cleave') Object.assign(b, { attack: null, act: 'chase', cooldown: 0 }), Object.assign(h, { hp: HERO.hp, act: 'idle' });
+      if (b.attack && (b.attack.kind as string) !== 'cleave') Object.assign(b, { attack: null, act: 'chase', cooldown: 0 }), Object.assign(h, { hp: HERO.hp, act: 'idle' });
       Object.assign(h, { x: 9, y: 7.6, kvx: 0, kvy: 0 });
     }
     expect(b.attack?.kind).toBe('cleave');
@@ -204,13 +204,13 @@ describe('old saves', () => {
   it('a lance rod becomes a spellblade everywhere; the Jealous Rod becomes a wand', () => {
     const rod = { slot: 'weapon' as const, kit: 'rod' as WeaponId, quality: 'fine' as const, traits: [], mods: [], level: 2 };
     const jealous = { ...rod, quality: 'hungry' as const, hungry: 'jealous' };
-    const p = renameKits({ weapon: 'rod', arms: { rod }, bag: [rod, jealous], stash: [rod], buyback: [{ item: rod }] });
+    const p = renameKits({ weapon: 'rod', arms: { rod } as Record<string, typeof rod>, bag: [rod, jealous], stash: [rod], buyback: [{ item: rod }] });
     expect(p.weapon).toBe('spellblade');
     expect(p.arms!.spellblade).toMatchObject({ kit: 'spellblade', level: 2 });
     expect(p.bag!.map((i) => i.kit)).toEqual(['spellblade', 'wand']);
     expect(p.stash![0].kit).toBe('spellblade');
     expect(p.buyback![0].item.kit).toBe('spellblade');
-    const held = renameKits({ weapon: 'rod', arms: { rod: jealous } });
+    const held = renameKits({ weapon: 'rod', arms: { rod: jealous } as Record<string, typeof jealous> });
     expect(held.weapon).toBe('wand');
     expect(held.arms!.wand).toMatchObject({ hungry: 'jealous', kit: 'wand' });
   });
