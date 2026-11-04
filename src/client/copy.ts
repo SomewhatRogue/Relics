@@ -50,13 +50,13 @@ export const CHURCH = {
   agne: 'You\'ve a look about you. Sleep with a candle tonight. Humour me.',
   ivo: "Oh. That's a hungry one. Don't sleep with it under your pillow.",
   /** At Gannet's bar, the Drowned Rat (shops.ts), not the church. */
-  gannet: 'Gannet pours your drink and won\'t meet your eye.',
+  gannet: 'Gannet won\'t meet your eye while he talks.',
 };
 
 /** After the wood: Odric takes Hew's tally stick; Isolde relights a Healer's censer (Kyle: plain, two lines if need be). */
 export const TALLY = {
-  odric: "Hew's tally. A notch for each of the column he burned, so the goblins couldn't have them. I keep the count of our dead. They go on it, and so does Hew.",
-  isolde: "Your censer went cold on the field. A cold censer can't heal. I've relit it from the Lantern, so your heals work again.",
+  odric: "Hew's tally. A notch for each of the column he burned, so the hungry couldn't have them. I keep the count of our dead. They go on it, and so does Hew.",
+  isolde: "Your censer went cold on the field, and a cold censer can't heal. It's lit again, so your heals work.",
 };
 
 export const SMITH = {

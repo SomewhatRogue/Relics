@@ -145,7 +145,7 @@ most Want among the heroes is the one the bells don't spare).
   gives the same as blessed ground for the first 20 s of your next job (+30% damage, 25% less taken), but
   on screen it is always "luck", never "blessed": blessed is Sanctuary's ground only.
 - **Words players see.** "Deep job" for the daily long job with a named butcher at the bottom (never
-  "deep dive"). Stamina is "breath". Heroes are a company; you "hire" another.
+  "deep dive"). Heroes are a company; you "hire" another.
 - **Halvard** oils every blade on his rack, and the next one before you've paid for this one.
 - **The censer coal** (Kyle, 2026-11-01: kept). Every Healer's coal is lit from the Last Lantern when
   the church takes them on: the Lantern's light, not a piece of the shard, so the Lantern loses nothing.
@@ -279,7 +279,7 @@ most Want among the heroes is the one the bells don't spare).
 - The focus is the wand, the staff or the spellblade; the lance rod is gone. The spellblade's steel is Halvard's remelted or a pre-war piece, never from outside; the Channel works through it as through any focus.
 - The blade's charge is not a stored spell. Nothing on screen ever says a spell is caught, kept or stored in a blade or focus for later (that's the Blacktongue idea). A caught blow fills the blade; it is never kept in it.
 - A Mage's big spells spend stamina, said as STAMINA on screen, never "magic" (one bar, one name).
-- On-screen terms: CATCH and CAUGHT (a bonus on the parry window: the spellblade's block, pressed while the red flashes white, catches the blow and fills the blade), INTERRUPTED (the wand's perfect), WREATHE. The spellblade's perfect is the wreathe released on the white flash (updated 2026-11-04).
+- On-screen terms: CATCH and CAUGHT (a bonus on the parry window: the spellblade's block, pressed while the red flashes white, catches the blow and fills the blade), INTERRUPTED (a wand spark landing on a wind-up, a bonus; the wand's perfect is the burst let go on the white flash), WREATHE. The spellblade's perfect is the wreathe released on the white flash (updated 2026-11-04).
 - THE JEALOUS ROD is now THE JEALOUS WAND. Open for Kyle: hungry gear is "plain steel that sat in a butcher's fist", and a wand is wood; is it steel-shod, or does the line widen to "gear that sat in a butcher's fist"?
 
 ## The Cleric's weapons (recorded 2026-11-04; Kyle's call, lore keeper)
