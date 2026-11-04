@@ -45,6 +45,7 @@ import { relicLabel } from '../sim/hero';
 import { castElement } from '../sim/channel';
 import type { FightEvent } from '../sim/types';
 import { Fx } from './fx';
+import { DreadView } from './dreadfx';
 import { watchDust } from './dust';
 import { Input } from './input';
 import { LootCard } from './lootcard';
@@ -321,6 +322,7 @@ const LEAVE_PARTY = "Your party carries on without you. You keep the gold you've
 /** On the banner once you're out of a job (your party carries on without you). */
 const OUT_TEXT = "You're out till the job's done. Your party carries on";
 
+const dread = new DreadView();
 let last = performance.now();
 let still: Intent | null = null;
 let resumed = '', touchedAt = 0;
@@ -403,6 +405,8 @@ function tick(t: number): void {
   // (Off screen, leading a job in the background: nothing to draw.)
   if (document.hidden) return;
   views.render(game.room, ME, fx, t / 1000, dt, inTown ? (townfolk?.here(game.room.map.name) ?? []) : [], game.mode === 'run');
+  // Out of bounds: the dark closing in, what comes for you, and anyone taken (dreadfx.ts).
+  dread.frame(game.room.heroes.find((x) => x.id === ME), game.room.heroes, evs, views, fx, t / 1000, dt);
   hud(t / 1000);
   chat.frame();
 }

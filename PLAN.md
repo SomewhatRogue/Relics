@@ -30,6 +30,18 @@ on a modal); 9. party and chat (mini party frames, the quick-line wheel, the cha
 party card restyled); 10. the menu book and settings (tabs, HUD layout, the left-hand mirror, damage
 number options, the town map); 11. the laptop pass (the D4 bottom bar, key hints, vendor and pack side by side).
 
+**Off the edge of the world** (Claude Opus 5.5, 2026-11-04; Kyle: a friend who "likes trying to break
+things, like teleport through a wall", "a warning and a sense of dread", "swarmed by goblins ... or a
+giant hidden shadow monster thing that crushes you"). Built; waiting on Kyle's play. *Done when* a far
+blink, roll, step, shield charge, shadowstep, hook or knockback at any wall, fence, tree of the wood's
+wall or river stops at it, never through it (`npx tsx scripts/dread/holes.ts` finds none); and if a hero
+does get out of bounds, the edges darken and the colour drains at once with a line over them and a
+heartbeat, at 4 s something vast at the edge of the dark (wild) or the hungry's eyes gathering (settled),
+and at 8 s a hand out of the dark crushes them or the hungry pull them down, where they stood, on every
+screen; they're down under the party's rules (alone, one heart), put back where they last stood in
+bounds. In town and the yard only a flicker and a set back. Open: `client/dreadwords.ts` through the
+lore keeper and line editor; the Barrowby hedge planted too close to a cottage (terrain).
+
 **Setting a house alight** (Claude Opus 5.5, 2026-11-03; Kyle: "you can firebomb or light the house on
 fire ... flushes out or kills things inside", "a spot to the side that glints a little as you get close,
 but always the same spot", "a Mage can accidentally burn it down, ditto anyone who throws fire oil").
