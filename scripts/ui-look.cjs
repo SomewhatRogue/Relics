@@ -27,6 +27,9 @@ const SCENES = {
   async town(page) { await page.evaluate(() => Object.assign(window.__game.hero, { x: 31, y: 21 })); await page.waitForTimeout(700); },
   async fight(page) { await job(page, 'WARRIOR'); await page.waitForTimeout(1500); },
   async mage(page) { await job(page, 'MAGE'); await page.waitForTimeout(1200); },
+  async ranger(page) { await job(page, 'RANGER'); await page.waitForTimeout(1200); },
+  async rogue(page) { await job(page, 'ROGUE'); await page.waitForTimeout(1200); },
+  async healer(page) { await job(page, 'HEALER'); await page.waitForTimeout(1200); },
   async pack(page) { await job(page, 'WARRIOR'); await page.waitForTimeout(300); await page.evaluate(() => window.__pack.toggle(true)); await page.waitForTimeout(300); },
   async board(page) { await page.evaluate(() => window.__openSpot('board')); await page.waitForTimeout(1500); },
   async talk(page) { await page.evaluate(() => window.__openSpot('church')); await page.waitForTimeout(2500); },
@@ -44,7 +47,7 @@ const SCENES = {
     const errors = [];
     page.on('pageerror', (e) => errors.push(String(e)));
     page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
-    const cls = name === 'mage' ? 'MAGE' : 'WARRIOR';
+    const cls = { mage: 'MAGE', ranger: 'RANGER', rogue: 'ROGUE', healer: 'HEALER' }[name] ?? 'WARRIOR';
     await page.goto(url + `?hero=${cls}` + (look === '3d' ? '&look=3d' : '&look=flat'));
     await page.waitForFunction(() => window.__game);
     await page.evaluate((ms) => { Date.now = () => ms; }, NOON);

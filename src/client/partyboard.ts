@@ -40,7 +40,7 @@ export function wireParties(g: Game, panel: Panel, parties: Party[], again: () =
 
 /** Just the parties, from anywhere in town. */
 export function openParties(g: Game, panel: Panel): void {
-  const again = () => panel.open && document.querySelector('#panel h2')?.textContent === PW.gathering && openParties(g, panel);
+  const again = () => panel.open && document.querySelector('#panel h2')?.textContent?.toUpperCase() === PW.gathering && openParties(g, panel);
   const { html, parties } = partyList(g);
   panel.show(PW.gathering, html || `<p>${PW.none}</p>`);
   wireParties(g, panel, parties, again);

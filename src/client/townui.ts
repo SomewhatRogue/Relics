@@ -52,7 +52,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
   if (id === 'board') {
     const jobs = g.jobs(), pt = g.parties;
     // Online: the parties gathering, and the board's jobs taken alone or with a party.
-    if (pt) pt.onChange = () => panel.open && document.querySelector('#panel h2')?.textContent?.startsWith('JOB BOARD') && openSpot('board', g, panel);
+    if (pt) pt.onChange = () => panel.open && document.querySelector('#panel h2')?.textContent?.toUpperCase().startsWith('JOB BOARD') && openSpot('board', g, panel);
     const { html: partyHtml, parties } = partyList(g);
     // Jobs done lately, by whoever did them (the shared world's, online).
     const deeds = (w.deeds ?? []).slice(0, 5), raid = w.raids?.[0];
