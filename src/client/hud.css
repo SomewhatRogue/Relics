@@ -121,3 +121,9 @@ body.touch #tip { top: calc(150px + env(safe-area-inset-top)); white-space: norm
 /* The party card under the tracker on a phone (partyhud.css places it), and the town's chat peek under the corner. */
 body.touch #partyhud { top: calc(136px + env(safe-area-inset-top)); }
 body.touch #chatpeek { top: calc(64px + env(safe-area-inset-top)); max-width: 46vw; }
+
+/* Low health: hard bands of dark red round the screen's edge, stepping in and out. */
+body.hp-low::after { content: ''; position: fixed; inset: 0; z-index: 1; pointer-events: none; animation: hp-edge 0.6s steps(1) infinite;
+  box-shadow: inset 0 0 0 calc(3 * var(--px)) #5a0a0880, inset 0 0 0 calc(6 * var(--px)) #5a0a0848, inset 0 0 0 calc(10 * var(--px)) #5a0a0824; }
+@keyframes hp-edge { 50% { box-shadow: inset 0 0 0 calc(2 * var(--px)) #5a0a0860, inset 0 0 0 calc(4 * var(--px)) #5a0a0830, inset 0 0 0 calc(7 * var(--px)) #5a0a0818; } }
+@media (prefers-reduced-motion: reduce) { body.hp-low::after { animation: none; } }

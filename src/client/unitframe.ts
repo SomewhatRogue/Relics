@@ -36,7 +36,10 @@ export class UnitFrame {
     else if (now > this.trailAt) this.trail = Math.max(hp, this.trail - 0.9 * (1 / 60));
     this.hpWas = hp;
     ($('#hud .hp .trail') as HTMLElement).style.width = this.trail * 100 + '%';
-    $('#hud .hp').classList.toggle('low', hp < 0.3 && hp > 0);
+    const low = hp < 0.3 && hp > 0 && game.mode !== 'town';
+    $('#hud .hp').classList.toggle('low', low);
+    // (The screen's edge darkens red in steps while you're low: hud.css.)
+    document.body.classList.toggle('hp-low', low);
     // What's on you now.
     const marks: IconId[] = [];
     if (me.poison) marks.push('poison');

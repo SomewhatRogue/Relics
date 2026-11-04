@@ -2,6 +2,58 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-04: the UI redo, steps 1 to 3: one material on the pixel grid, a touch cluster, a unit frame (Kyle; Claude Opus 5.5)
+
+Kyle: the UI reads as "AI slop"; emulate Diablo and Path of Exile, mobile first. Built the first three
+steps of `docs/ui-research.md` as one slice. Drawing only: nothing in `src/sim/` or `src/shared/` changed.
+
+- **Two bundled pixel faces, no system monospace.** Display: Jacquard 12 (a pixel blackletter) for panel
+  titles, place names and name plates, in title case (a blackletter in capitals can't be read; panel
+  titles are title-cased in `panels.ts`, and the three places that matched a title's text now match it
+  without regard to case). Body: Tiny5, chosen over Pixelify Sans after looking at both: Pixelify's 5
+  reads as S and its C as O at UI sizes, Tiny5's don't. Tiny5 is 8 pixels to the em, so it is used only
+  at sizes that land on whole device pixels: 8px, 16px, and a text size of 12px (2x screens) or
+  13.33px (3x phones), as tokens (`--fs-s`, `--fs-text`, `--fs`); every older size was mapped onto them.
+  No faked bold (`font-synthesis: none`). Both OFL 1.1, copied from npm's `@fontsource` packages into
+  `src/client/fonts/` with their licences; credits in `docs/CREDITS.md`. Alagard isn't on npm.
+- **Colour tokens** on `:root` (`ui.css`): stone greys, bone, parchment and ink, the way-on gold, blood,
+  the goblin green, up and down. The purple-black neutrals and pastel accents across every stylesheet
+  were mapped onto the stone ladder (light blue info text to a cool steel grey, mint to the up green,
+  salmon to a muted red).
+- **Frames drawn in code** (`frames.ts`): stone, iron, gilt, parchment, plus pressed iron and gilt, a sunk
+  socket and a dull one, each a tiny 9-slice set on `:root` and shown with `border-image` at `--px` (2 CSS
+  pixels, a world pixel on a phone). No radii, no blurred glows anywhere in the UI.
+- **One button** (`ui.css`): iron; pressed, it sinks a pixel and its bevel turns over; gilt for the
+  primary; dull stone when it can't be used. The eight redefinitions lost their own fills, borders and
+  radii; a toggle that is on shows pushed in, not gold, so gold stays rare.
+- **The touch cluster** (`cluster.ts`, drawn by `btnart.ts`, placed by `cluster.css`): ATTACK bottom right
+  with the held weapon's icon and stamina as ten pips round its top left; a ring of about 100px (the dodge
+  low left as a diamond, the guard as a heater shield or, for a parry, a buckler, the skill and the relic
+  round); an outer ring for the flask as the health orb (red liquid to your health, green when poisoned,
+  pulsing below 30%, the next potion in front, the count on it) and the one gilt context slot (GRAB,
+  THROW, HELP UP, BURN, OPEN, with its word under it). Cooldowns are a dark sweep in 16 steps with the
+  seconds in the pixel face, and a one-frame white rim when ready. Every class skill has an icon
+  (`skillicons.ts`); found relics keep theirs. The input wiring is untouched: the same buttons, classes
+  and presses. The stick is a stone ring with an iron knob and a notch where walking turns to creeping;
+  its resting ghost goes after three moves.
+- **Never over the hero.** The cluster stays below about 300px. On an upright screen both cameras may now
+  run past a room's foot, and a room shorter than the screen follows the hero instead of sitting centred
+  (`scene.ts`, `three/camera3d.ts`), so your own hero is framed above the buttons. Other heroes can still
+  walk under them.
+- **The top HUD** (`unitframe.ts`, `hud.css`): your hero's own sprite as the face in an iron socket, the
+  level on its corner, a health bar 10 CSS pixels tall with a pale trail that holds the lost chunk for
+  0.4 s, a laptop's stamina bar under it, and status marks (poisoned, blessed, warded, mending, brandy,
+  smoke, tempo, the church's light). The weapon and kit lines left the always-on HUD: a tap on the face
+  shows them; a laptop keeps its skill, relic and belt lines (it has no cluster yet). The corner is CHAT,
+  PACK and the gear as icons in one iron group; LEAVE moved into the gear's box on a job, away from the
+  pack (it was being clipped). The tracker is one framed box: the place in blackletter with a diamond a
+  room (the one you're in gilt), the objective, a coin with the gold, drawn hearts. A low-health edge of
+  hard red bands steps in and out.
+- Also, since they were in the way: the job board's jobs are parchment notices; the pack's empty places
+  are sunk sockets, not dashed boxes; the wood's words and lesson cards are in stone with a gilt button.
+- `node scripts/ui-look.cjs [url] [out] [only]` shoots town, a hurt fight with a skill cooling, each
+  class, the pack, the board, a talk, the start screen and the gear box, phone and laptop, flat and 2.5D.
+
 ## 2026-11-03: the Ranger's weapons rework: the longbow blinds, the crossbow winds and glints (Kyle; Claude Opus 5.5)
 
 The third class through Kyle's weapons rework. The Ranger has the best dodge (the jump back and its
