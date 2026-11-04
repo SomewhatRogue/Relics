@@ -156,8 +156,8 @@ const TEACH: Record<string, [string, string]> = {
   WARRIOR: ['Again. Better. Pick one.', 'Again.'],
   RANGER: ['You came back with all your fingers. Good. Now learn something with them.', 'You breathe like a bull in a barley field. Out on the draw, not in. Come back when you\'ve shot something that shot back.'],
   ROGUE: ['Look at you, still alive. That\'s worth a lesson. A cheap one.', 'I don\'t teach. I let you watch me, and you pay for the seat. Come back with more to pay.'],
-  MAGE: ['Yes, yes, sit. No, not there. There. You\'ve grown, the relic says so. Pick, quickly, before I lose my nerve.', 'Don\'t touch that. Or that. Come back when the relic\'s heard more of you.'],
-  HEALER: ['Burn me, you\'re still breathing, and so is half the company. Choose.', 'Hold still, you great calf. There. Now go and get somebody else\'s blood on you, and come back when you\'ve learned something from it.'],
+  MAGE: ['Yes, yes, sit. No, not there. There. You\'ve grown, I can see it on you. Pick, quickly, before I lose my nerve.', 'Don\'t touch that. Or that. Come back when you\'ve a level more in you.'],
+  HEALER: ['Burn me, you\'re still breathing. Good. Choose.', 'Hold still, you great calf. There. Now go and get somebody else\'s blood on you, and come back when you\'ve learned something from it.'],
 };
 
 const CHAT: Record<number, { name: string; line: string }> = {

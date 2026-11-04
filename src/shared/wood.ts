@@ -159,7 +159,7 @@ export const LINES = {
   parry: "Now, this big one breaks a guard like kindling. I turned over a few on that field who'd held theirs up and waited, shields _split down the middle_. You want to *meet* it, I'd say, not wait for it.",
   hut: "That's ^home^, kettle's older than you are. Hang on, I *didn't* leave that door open.",
   round: "Wait here, stray, I'll go round the back.",
-  last: "Get the count to Odric, stray, Father Odric, he'll be wanting it.",
+  last: "Get my tally to Odric, stray, Father Odric! It's every one I burned, he'll be wanting it.",
   /** Screamed with it holding him (woodcut.ts); then the last, cut off. */
   screams: ["Get off! Get *off* me! Aah! AAAH!"],
   scream: 'No! No, no, n',
@@ -203,20 +203,20 @@ export const LINES = {
   praise: ["That's it, that's the way.", "Oh, that's good, do it like that.", "Done this before, ~haven't you~?", "Hah, you'll ^keep^, stray, I think."],
   /** The game's own plain line under each lesson, with the control shown beside it. */
   how: {
-    move: 'Make sure you can still move. Walk a few steps and get your legs back under you.',
-    attack: 'Hit them. Tap for quick blows; hold for a heavy one.',
-    roll: "A red mark with a striped edge can't be blocked. Roll out of it just before it lands.",
-    step: "A red mark with a striped edge can't be blocked, and you can't roll. Walk out of it before it lands.",
+    move: 'Walk a few steps.',
+    attack: 'Tap for quick blows. Hold for a heavy one.',
+    roll: "Red with a striped edge can't be blocked. Dodge out before it lands.",
+    step: "Red with a striped edge can't be blocked. Walk out before it lands.",
     block: 'Hold block while the red fills. Each block costs stamina (the yellow bar).',
-    parry: 'Tap block the moment the red flashes white. That parry staggers the goblin, and your next blow does extra damage.',
-    relic: 'Throw it with your relic button. A small goblin is carried off and pinned to the nearest wall. It comes back to your hand after a few seconds.',
-    grab: "Grab a crate or a barrel, then grab again to throw it. You can also grab a small goblin from behind, while it reels, or while it's busy feeding or swinging. Whatever you throw hurts whatever it hits.",
-    backstab: 'Hit a goblin from behind and the blow lands far harder.',
-    heavy: 'Hold attack until fully drawn or charged, then let go. A full shot hits much harder.',
-    slip: "You can't hold a block. Roll just as a blow lands to pass through it. That staggers whoever struck, unless it was an arrow.",
+    parry: 'Tap block while the red flashes white. A parry staggers the goblin, and your next blow does extra damage.',
+    relic: 'Press RELIC to throw it. It pins a small goblin to the nearest wall, then comes back to your hand.',
+    grab: "Grab a crate or barrel, grab again to throw. Small goblins too: from behind, or while they reel, feed or swing. What you throw hurts what it hits.",
+    backstab: 'Hits from behind do far more damage.',
+    heavy: 'Hold attack to a full charge, then let go. A full shot hits much harder.',
+    slip: "Dodge just as a blow lands to pass through it. That staggers the attacker (not arrows).",
     /** The dodge lesson's line for a class that can't hold a block. */
-    rollLight: "You can't hold a block, so roll out of any red before it lands. Nobody can block red with a striped edge.",
+    rollLight: "You can't block. Dodge out of any red before it lands.",
   },
   /** The freeze-frame prompts, the first times a lesson's blow comes. */
-  now: { step: 'NOW: WALK OUT', roll: 'NOW: ROLL OUT', block: 'NOW: HOLD BLOCK', parry: 'NOW: TAP BLOCK', slip: 'NOW: ROLL THROUGH', attack: 'HIT IT' },
+  now: { step: 'NOW: WALK OUT', roll: 'NOW: DODGE OUT', block: 'NOW: HOLD BLOCK', parry: 'NOW: TAP BLOCK', slip: 'NOW: DODGE THROUGH', attack: 'HIT IT' },
 };

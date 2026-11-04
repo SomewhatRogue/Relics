@@ -56,7 +56,7 @@ export const RELICW = {
   keep: 'KEEP IT',
   odricLeave: "That's it, on the step with the rest. Go round the back after, and Isolde will ^light^ you something for the road.",
   odricLeaveDark: "Dark as a cellar, that one, but it can sit with the others all the same.",
-  recharged: 'Isolde takes it round the back. When she brings it out again it\'s warm, and she doesn\'t say what she did.',
+  recharged: 'Isolde takes it round the back and brings it out warm, fully charged. She doesn\'t say what she did.',
   litNow: (n: number) => `You carry the church's light for your next ${jobs(n)}: ${LIGHT}.`,
   litNone: 'Only a relic with charge left gives the light.',
   /** Two for one. */
@@ -81,7 +81,7 @@ export const RELICW = {
   carryHint: 'It\'s on your RELIC button.',
   shelfHint: 'It\'s with your other relics, in your pack.',
   /** Ivo at his bench, of a fading relic (the lore keeper's draft). */
-  ivoFading: "Hear that? No, you *don't*, and that's the trouble, it was going like a hive a week ago and now it's more like a cat that can't be bothered to purr.",
+  ivoFading: "Hear that? No, you *don't*, and that's the trouble. It hummed like a hive a week ago. It's running down.",
   ivoDark: "Not a peep out of it, poor thing. Take it to the church, they'll know what to do, or Isolde will anyway.",
   ivoBright: "Listen to that, it's fair singing. No? Ah, well, most people haven't got the ears for it.",
 };

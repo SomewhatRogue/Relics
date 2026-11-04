@@ -18,23 +18,23 @@ const STAT_LEVELS = [2, 4, 6, 8, 10];
  * the first rank's price.
  */
 export const DRILLS: Record<DrillId, { name: string; text: string; gain: string; per: number; levels: number[]; max: number; price: number }> = {
-  power: { name: 'POWER', text: 'Your attacks and spells do more damage', gain: '+#% damage', per: 0.05, levels: STAT_LEVELS, max: 5, price: 80 },
+  power: { name: 'STRENGTH', text: 'More damage from attacks and spells', gain: '+#% damage', per: 0.05, levels: STAT_LEVELS, max: 5, price: 80 },
   health: { name: 'HEALTH', text: 'More health', gain: '+# health', per: 8, levels: STAT_LEVELS, max: 5, price: 80 },
-  speed: { name: 'SPEED', text: 'You move faster', gain: '+#% speed', per: 0.03, levels: STAT_LEVELS, max: 5, price: 100 },
-  crit: { name: 'CRITICAL', text: 'Gives every hit a chance to do 50% more damage', gain: '+#% crit chance', per: 0.04, levels: STAT_LEVELS, max: 5, price: 120 },
-  wind: { name: 'STAMINA', text: 'Your stamina comes back faster', gain: 'stamina recovery +#%', per: 0.08, levels: STAT_LEVELS, max: 5, price: 70 },
-  skill: { name: 'SKILL', text: 'Your class skill is ready again sooner', gain: 'skill back #% sooner', per: 0.08, levels: [4, 7, 10], max: 3, price: 160 },
+  speed: { name: 'SPEED', text: 'Move faster', gain: '+#% speed', per: 0.03, levels: STAT_LEVELS, max: 5, price: 100 },
+  crit: { name: 'CRITICAL', text: 'A chance for any hit to do 50% more damage', gain: '+#% crit chance', per: 0.04, levels: STAT_LEVELS, max: 5, price: 120 },
+  wind: { name: 'STAMINA', text: 'Stamina refills faster', gain: 'stamina refill +#%', per: 0.08, levels: STAT_LEVELS, max: 5, price: 70 },
+  skill: { name: 'SKILL', text: 'Skill recharges faster', gain: 'skill recharge #% faster', per: 0.08, levels: [4, 7, 10], max: 3, price: 160 },
   technique: { name: 'TECHNIQUE', text: '', gain: '', per: 0, levels: [5, 8, 10], max: 3, price: 180 },
 };
 /** What a crit does to a blow. */
 export const CRIT = 1.5;
 /** Each class's technique, rank by rank. */
 export const TECHNIQUE: Record<HeroClass, { name: string; text: string; gain: string; per: number }> = {
-  WARRIOR: { name: 'SLAM', text: 'Your slams do 25% more damage per rank', gain: '+#% slam damage', per: 0.25 },
-  HEALER: { name: "SURGEON'S HANDS", text: 'Your heals are 16% bigger per rank', gain: '+#% healing', per: 0.16 },
-  ROGUE: { name: 'KNIFEWORK', text: 'Your backstabs do 25% more damage per rank', gain: '+#% backstab damage', per: 0.25 },
-  RANGER: { name: 'TRAPPER', text: 'Your snares hold 20% longer per rank', gain: 'snares hold #% longer', per: 0.2 },
-  MAGE: { name: 'PRIMED SPELLS', text: 'Your primed spell, the first after you change element, does 20% more damage per rank', gain: '+#% primed spell', per: 0.2 },
+  WARRIOR: { name: 'SLAM', text: 'Slams do 25% more damage per rank', gain: '+#% slam damage', per: 0.25 },
+  HEALER: { name: "SURGEON'S HANDS", text: 'Heals 16% bigger per rank', gain: '+#% healing', per: 0.16 },
+  ROGUE: { name: 'KNIFEWORK', text: 'Backstabs do 25% more damage per rank', gain: '+#% backstab damage', per: 0.25 },
+  RANGER: { name: 'TRAPPER', text: 'Snares hold 20% longer per rank', gain: 'snares hold #% longer', per: 0.2 },
+  MAGE: { name: 'PRIMED SPELLS', text: 'Primed spells do 20% more damage per rank', gain: '+#% primed spell', per: 0.2 },
 };
 
 export type Drills = Partial<Record<DrillId, number>>;
