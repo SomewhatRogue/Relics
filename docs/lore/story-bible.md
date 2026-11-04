@@ -264,3 +264,9 @@ most Want among the heroes is the one the bells don't spare).
 - The greatsword can't hold a block, only parry: a greatsword Warrior's whole defence is the parry and the STEP (an exception to "they block").
 - On-screen terms: RIPOSTE, PINNED, SHOCKWAVE. A Warrior's shockwave knocks goblins flat, never friends.
 - Open for Kyle: can the spear pin a butcher, or only small goblins (as the Hound does)?
+
+## The Ranger's weapons (recorded 2026-11-03; Kyle's call, lore keeper)
+- Longbow, shortbow, crossbow, each with a short sword at the hip (pre-war or Halvard's, like the Rogue's). Bows and crossbows are valley-made or pre-war; their heads are Halvard's remelted steel, never from outside.
+- BLINDED: a clean shot on the white flash goes across the face. The hungry's eyes shine in the dark and that shine is what a Ranger aims at; nothing magic, and it wears off. No line ever says why their eyes shine.
+- The glint: a crossbow wound in one steady go sits square and the bolt lies true; the glint is light on its steel head. It's drawn steel-white, never gold (relics) or eye-coloured (the Want), and is only ever the crossbow's.
+- Open for Kyle: does BLINDED work on named butchers, or only small goblins? (Today a butcher is blinded half as long.)
