@@ -18,7 +18,7 @@ import { newRun, runRoom, tally } from '../src/sim/run';
 import { Rng } from '../src/shared/rng';
 import { NO_INTENT, type FightEvent, type Intent } from '../src/sim/types';
 
-const job = (seed = 7): Job => ({ ...board(1)[0], rooms: 3, place: PLACES.find((p) => p.kind === 'village')!, objective: 'hunt', boss: 'SKARN', seed, deep: false });
+const job = (seed = 7): Job => ({ ...board(1)[0], layout: undefined, rooms: 3, place: PLACES.find((p) => p.kind === 'village')!, objective: 'hunt', boss: 'SKARN', seed, deep: false });
 
 /** A village street, its goblins gone, me at the kindling of its first house that has one. */
 function street(seed = 7) {

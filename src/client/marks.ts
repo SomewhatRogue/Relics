@@ -7,6 +7,7 @@ import type { GameMap, Mark } from '../shared/arena';
 import { Rng } from '../shared/rng';
 import { GROUND, type Painter } from './groundpaint';
 import { HALL_FLOOR } from './hallfloor';
+import { paintBridge } from './bridgepaint';
 import { OX, OY, PX } from './world';
 
 type Rect = (x: number, y: number, w: number, h: number, col: string) => void;
@@ -32,6 +33,7 @@ function blob(rect: Rect, rng: Rng, x: number, y: number, w: number, h: number, 
 }
 
 const PAINT: Partial<Record<Mark['kind'], Painter>> = {
+  bridge: (rect, rng, x, y, w, h) => paintBridge(rect, rng, x, y, w, h),
   blood(rect, rng, x, y, w, h) {
     blob(rect, rng, x, y, w, h, BLOOD);
     // Spatter round the pool, and a darker heart where it's thickest.

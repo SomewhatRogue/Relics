@@ -11,6 +11,7 @@ import { paintMarks } from './marks';
 import { paintGrim } from './grimpaint';
 import { paintSoil } from './soil';
 import { paintGaps } from './wayout';
+import { paintWater } from './waterpaint';
 
 export const PX = 16;
 export const OX = 8;
@@ -71,23 +72,9 @@ export function paintMap(m: GameMap): HTMLCanvasElement {
     rect(x, y, 1, 2, '#3a4c2c');
     rect(x + 1, y + 1, 1, 1, '#46582f');
   }
-  // Water: deep runs dark with slow ripples; shallow shows the stones under it.
-  for (const wt of m.water ?? []) {
-    const [x0, y0] = toPx(wt.x, wt.y), w = wt.w * PX, h = wt.h * PX;
-    rect(x0 - 1, y0 - 1, w + 2, h + 2, wt.deep ? '#1a2a22' : '#3a3a2a');
-    rect(x0, y0, w, h, wt.deep ? '#122036' : '#3e5a62');
-    if (wt.deep) for (let i = 0; i < (w * h) / 60; i++) rect(x0 + rng.int(w - 3), y0 + rng.int(h), 3, 1, rng.next() < 0.5 ? '#1a2c46' : '#22405c');
-    else {
-      // A ford: sandy bottom through clear water, and stepping stones to show the way over.
-      for (let i = 0; i < (w * h) / 14; i++) rect(x0 + rng.int(w - 2), y0 + rng.int(h), 2, 1, rng.next() < 0.5 ? '#6a6a52' : '#4e6a6a');
-      for (let y = y0 + 4; y < y0 + h - 3; y += 7) {
-        const x = x0 + 3 + rng.int(Math.max(1, w - 10));
-        rect(x, y, 5, 3, '#8a8474'), rect(x + 1, y, 3, 1, '#a8a290'), rect(x, y + 3, 5, 1, '#2e3e44');
-      }
-    }
-    rect(x0, y0, w, 1, wt.deep ? '#2a4a5a' : '#7a9a9a');
-  }
   paintSoil(m, g);
+  // Water over the ground's paths (a path stops at the bank): client/waterpaint.ts.
+  paintWater(m, rect, rng, toPx, PX);
   paintMarks(m, rect);
   paintGrim(m, rect);
   g.fillStyle = 'rgba(0,0,0,0.35)';

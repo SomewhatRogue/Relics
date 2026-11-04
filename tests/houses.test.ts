@@ -7,7 +7,7 @@ import { PLACES, board, type Job } from '../src/shared/jobs';
 import { planRoom, type RoomPlan } from '../src/shared/terrain';
 
 const job = (seed: number, kind: Job['place']['kind'] = 'farm', objective: Job['objective'] = 'hunt', ruin = 1): Job =>
-  ({ ...board(1)[0], rooms: 3, place: { ...PLACES.find((p) => p.kind === kind)!, ruin }, objective, seed });
+  ({ ...board(1)[0], layout: undefined, rooms: 3, place: { ...PLACES.find((p) => p.kind === kind)!, ruin }, objective, seed });
 const layout = (p: RoomPlan) => JSON.stringify({ w: p.map.w, h: p.map.h, f: p.map.theme.floor, b: p.map.blocks, r: p.map.rounds, p: p.props });
 
 describe('houses on a job', () => {

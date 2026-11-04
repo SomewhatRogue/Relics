@@ -15,6 +15,7 @@ import type { L3 } from './lights3d';
 import { VCOL } from './mats';
 import { toonize } from './post';
 import { addRound, type Spot } from './rounds3d';
+import { addBridge } from './bridge3d';
 
 /** How high the back wall stands, and a ledge (tiles). */
 export const WALL_H = 2.4;
@@ -88,6 +89,7 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
     B.b(l.x + l.w / 2, 0, l.y + l.h / 2, l.w, LEDGE_H, l.h, l.kind === 'wood' ? 0x5a3d22 : 0x3a3640);
     for (const rp of l.ramps) B.b(rp.x + rp.w / 2, 0, rp.y + rp.h / 2, rp.w, LEDGE_H * 0.45, rp.h, 0x46424e);
   }
+  for (const k of m.marks ?? []) if (k.kind === 'bridge') addBridge(B, k);
   // The tended lamps (torches, braziers, lamp posts) give flames and light only while lit (lamps3d.ts).
   for (const o of m.rounds) {
     const n = fires.length;

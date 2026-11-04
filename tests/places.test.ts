@@ -15,20 +15,21 @@ describe('places', () => {
     expect(siteOf({ name: 'Nowhere', kind: 'ruins', region: 'Fenmere', ruin: 1 })).toBe('ruinvillage');
   });
 
-  it('the same place is laid out the same whatever the job; another room of it is another part of it', () => {
+  it('an old saved job: the same place is laid out the same whatever the job; another room of it is another part of it', () => {
+    // Routed jobs vary their approach rooms on purpose (tests/route.test.ts); an old one keeps its place's plan in every room.
     for (const p of PLACES) {
-      const a = planRoom(job(p.name, 11), 1).map, b = planRoom(job(p.name, 977, { objective: 'rescue' }), 1).map;
+      const a = planRoom(job(p.name, 11, { layout: undefined }), 1).map, b = planRoom(job(p.name, 977, { objective: 'rescue', layout: undefined }), 1).map;
       expect(JSON.stringify(a.soil), p.name).toBe(JSON.stringify(b.soil));
       expect(a.theme.floor).toBe(b.theme.floor);
-      expect(JSON.stringify(planRoom(job(p.name, 11), 1).map)).toBe(JSON.stringify(a));
+      expect(JSON.stringify(planRoom(job(p.name, 11, { layout: undefined }), 1).map)).toBe(JSON.stringify(a));
       expect(placeSeed(p, 0)).not.toBe(placeSeed(p, 1));
     }
-    const green = planRoom(job('Barrowby', 3), 0).map;
+    const green = planRoom(job('Barrowby', 3, { layout: undefined }), 0).map;
     expect(green.theme.floor).toBe('grass');
     expect(green.blocks.filter((b) => b.kind === 'house').length).toBeGreaterThanOrEqual(3);
     expect(green.rounds.some((r) => r.kind === 'well')).toBe(true);
-    expect(planRoom(job('Fennick Ford', 3), 0).map.blocks.some((b) => b.style === 'stone')).toBe(true);
-    expect(planRoom(job('The Charcoal Camps', 3), 0).map.blocks.filter((b) => b.kind === 'shack' || b.kind === 'tent').length).toBeGreaterThanOrEqual(6);
+    expect(planRoom(job('Fennick Ford', 3, { layout: undefined }), 0).map.blocks.some((b) => b.style === 'stone')).toBe(true);
+    expect(planRoom(job('The Charcoal Camps', 3, { layout: undefined }), 0).map.blocks.filter((b) => b.kind === 'shack' || b.kind === 'tent').length).toBeGreaterThanOrEqual(6);
   });
 
   it('in every place, for every job: the way in, the way out and everything the job needs can be walked to', () => {

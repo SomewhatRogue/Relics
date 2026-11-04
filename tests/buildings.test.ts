@@ -23,7 +23,7 @@ const store = new Map<string, string>();
 } as Storage;
 beforeEach(() => store.clear());
 
-const job = (kind: Job['place']['kind'], objective: Job['objective']): Job => ({ ...board(1)[0], rooms: 3, place: PLACES.find((p) => p.kind === kind)!, objective, seed: 77 });
+const job = (kind: Job['place']['kind'], objective: Job['objective']): Job => ({ ...board(1)[0], layout: undefined, rooms: 3, place: PLACES.find((p) => p.kind === kind)!, objective, seed: 77 });
 const up: Intent = { ...NO_INTENT, my: -1 };
 
 describe('heroes', () => {

@@ -7,11 +7,15 @@
 import type { Ground } from './sites.js';
 import { block, line, mark, newSite, patch, path, prop, round, type Site } from './sitekit.js';
 import type { Rng } from './rng.js';
+import { bridgeBits } from './river.js';
 
 export function camp(rng: Rng, g: Ground): Site {
-  const s = newSite('mud', 'trees'), M = g.w / 2, H = g.h, woods = g.kind === 'forest';
+  const s = newSite('mud', 'trees'), M = g.w / 2, H = g.h, woods = g.kind === 'forest', d = g.dress ?? rng;
+  rng = d;
   const pts: [number, number][] = [[M, H], [M - 1.6, 19], [M + 1.6, 14], [M - 1.4, 9], [M + 1.2, 4], [M, 0]];
-  path(s, 'earth', pts, 1.1), path(s, 'mud', pts, 0.45);
+  // Over a river with its bridge gone, the path comes to the bank and starts again on the far side.
+  const r = g.river?.bridge ? g.river : null, ways = r ? [[...pts.filter(([, y]) => y > r.y + r.h + 0.6), [M, r.y + r.h + 0.6]], [[M, r.y - 0.6], ...pts.filter(([, y]) => y < r.y - 0.6)]] as [number, number][][] : [pts];
+  for (const p of ways) path(s, 'earth', p, 1.1), path(s, 'mud', p, 0.45);
   // Rows of shacks and tents either side, each pushed up against the path, gaps between for yards.
   for (let y = 1.2 + rng.range(0, 0.6); y < H - 4.2; y += rng.range(2.8, 3.4)) for (const sx of [-1, 1]) {
     let edge = M + sx * rng.range(2.3, 3.4);
@@ -35,7 +39,13 @@ export function camp(rng: Rng, g: Ground): Site {
   // The latrine ditch down one side, the wet seeping out of it.
   const lx = rng.next() < 0.5 ? 0.9 : g.w - 0.9;
   line(s, 'wet', lx, 2, lx, H - 5, 0.5), mark(s, 'drag', lx - 0.3, 3, 0.6, H - 9);
-  if (g.kind === 'river') {
+  if (g.river?.bridge) {
+    // Brokenbridge: the bridge's two ends over the water, its middle gone (shared/river.ts).
+    const bits = bridgeBits(g.river), f = g.river.fords[0];
+    s.marks.push(...bits.marks);
+    path(s, 'earth', [[M, g.river.y + g.river.h + 3], [f.x + f.w / 2, g.river.y + g.river.h + 0.6]], 0.8), path(s, 'earth', [[f.x + f.w / 2, g.river.y - 0.6], [M, g.river.y - 3.2]], 0.8);
+    patch(s, 'mud', f.x - 0.7, g.river.y + g.river.h - 0.3, f.w + 1.4, 1.6), patch(s, 'mud', f.x - 0.7, g.river.y - 1.3, f.w + 1.4, 1.6);
+  } else if (g.kind === 'river') {
     // Where the bridge was: its stones heaped on both banks, its boards in the water.
     const river = g.water.filter((w) => w.deep).sort((a, b) => b.w - a.w)[0];
     if (river) {

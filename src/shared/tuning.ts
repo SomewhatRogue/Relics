@@ -250,3 +250,11 @@ export const CATCH = { oil: 0.9, barrel: 0.9, blast: 0.75, edge: 0.12, spark: 0.
  * 26 tall: `wake` is about two screens of a hero's reach, well past any goblin's sight or an arrow's.
  */
 export const SLEEP = { wake: 24, doze: 30 };
+
+/**
+ * How goblins find their way round water and anything long in the way (sim/pathing.ts): a grid of
+ * `cell` tiles, each blocked if it's within `pad` of something solid, deep water or a ledge's face;
+ * wading a ford costs `shallow` times a dry step, so they take it only when it's the way; a hero more
+ * than `reach` tiles off isn't pathed to (they head straight for them, as before).
+ */
+export const PATH = { cell: 0.5, pad: 0.22, shallow: 1.8, reach: 30 };
