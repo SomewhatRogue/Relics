@@ -2,6 +2,43 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-03: the Rogue's weapons rework: Shadowstep stuns, the rapier skewers, the poisoner's kit (Kyle; Claude Opus 5.5)
+
+The first class through Kyle's weapons rework (PLAN "Open: weapons rework"): every weapon a quick attack,
+a held attack, a perfect-timed hit that reads, and a trade-off. All of it is decided in the room (seeded,
+no `Math.random`), so a guest's goblins bleed and retch exactly as the leader's do.
+
+- **Shadowstep stuns** the goblin you land behind for 1 s (`SHADOWSTEP.stun`, `sim/relics.ts`), for free
+  stabs. Judgment call: not a goblin mid striped (unblockable) blow or mid charge, not a nest, not a
+  dummy; those carry on (`dazeable` in `sim/venom.ts`, shared by the retch).
+- **Daggers**: unchanged; the held attack is still the thrown dagger (tested).
+- **Rapier**: the held lunge now has the white flash a bow has (`Swing.skewer`, `sim/hero.ts`). Loosed on
+  it, each goblin the lunge runs through is skewered (`SKEWER` in `shared/venom.ts`): a 0.7 s stagger and a
+  bleed of 3 every 0.5 s for 3 s (18). There was no bleed or DoT on goblins but the burn, so the bleed is
+  new and lives with the poison in `sim/venom.ts`. Seen: a white flash at the tip, a spray of blood,
+  SKEWERED, red drips on the goblin, red tick numbers.
+- **The poisoner's kit** replaces the hand crossbow (new id `poisoner`; old saves holding a `handbow`
+  anywhere, the hand, pack, vault or buyback, are renamed on load: `shared/oldkits.ts`, `client/save.ts`).
+  - Quick: a short sword, 7, 7, 10, arc 130 to 150 (daggers 100), catching two goblins a blow (three on the
+    last), slower than the daggers (0.35 s a cut against 0.23). Full damage head on (no `front`), backstab x2.
+  - Hold (0.6 s draw): the blowgun, a dart to 9 tiles for 4 to 8 that puts on a poison stack: 2 a stack every
+    0.5 s for 4 s after the last dart, up to 3 stacks (16 a stack, 48 at three).
+  - Perfect release: the goblin retches first, held fast (stunned, so blows land x1.5) for 1 s while the poison
+    ticks, and that dose ticks double (`VENOM.hard`).
+  - Resistance (`VENOM_TAKES`): butchers, named butchers and the Stoker take half (and retch half as long);
+    spiders, the brood mother and nests take none. Both show the existing RESIST.
+  - Weakness: the dart barely scratches, the poison is slow, and it is useless on spiders and nests.
+  - Poison is drawn sickly green in both views (`client/status.ts` drips, a green light in `scene.ts` and
+    `three/roomlights.ts`); the dart, the blowgun and the short sword have their own looks flat and 3D; the
+    icon, card, hint line, loot lists and trait pools all know it. Sounds reuse the spider kit: the dart a
+    hiss, a skewer the wet bite, a retch the spit and splat.
+- Name suggested: SHORTSWORD AND DARTS (needs the lore keeper and line editor, with SKEWERED and RETCHING,
+  the card lines and the hint line). The story bible still says "hand crossbows" (line 210) for the lore keeper.
+
+Tests: `tests/rogue-kit.test.ts` (the stun and its striped-blow exception, the skewer bleed and no skewer
+when held too long, poison ticks, stacking, the retch and harder ticks, butcher half, spider and nest
+immune, the handbow save migration); `poisoner.test.ts` and `kits.test.ts` moved to the new kit.
+
 ## 2026-11-03: one big map, measured before it's designed (Kyle; Claude Opus 5.5)
 
 Kyle wants raids on one big, mostly open map, 8 to 12 times a room, with a few buildings and camps; the

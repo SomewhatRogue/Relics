@@ -253,6 +253,8 @@ Every weapon gets a quick attack, a charged attack, a perfect-timed hit and a re
 - Perfect hits stay visible ("PERFECT") with a stronger effect so they read.
 - Greatsword: wide sweeps, breaks heavy wind-ups; no held block, parry-counter only.
 - Daggers: charged stays the throwing dagger.
+- [x] Rogue (built 2026-11-03, Claude Opus 5.5; see DECISIONS): Shadow Step stuns 1 s, the rapier's perfect lunge skewers and bleeds,
+  daggers unchanged, the poisoner's kit replaces the hand crossbow (name SHORTSWORD AND DARTS pending the lore keeper).
 - Rogue: Shadow Step behind a goblin stuns it 1 s for free hits.
 - The hand crossbow becomes the poisoner's kit:
   - Quick: a short sword, a bit wider than the daggers but slower. Not much damage, but not reduced either.

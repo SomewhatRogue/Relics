@@ -1,5 +1,5 @@
 /**
- * A Rogue's backstab from range: a hand crossbow's bolt or a thrown knife that takes a goblin in the
+ * A Rogue's backstab from range: a poisoner's dart or a thrown knife that takes a goblin in the
  * back lands at that weapon's backstab rate, the same as a blade there would (combat.ts hitEnemy).
  */
 import { GUARD, WEAPONS, technique } from '../shared/tuning';
