@@ -19,6 +19,7 @@ import { sparkCatch } from './catching';
 import { blastSurvivors, shotSurvivor, survivorIn } from './survivorhits';
 import type { Bolt, Enemy, Hero } from './types';
 import { hobble, spare } from './foundrelics';
+import { envenom } from './venom';
 
 let nextId = 1;
 
@@ -29,7 +30,10 @@ const base = (h: Hero, kind: Bolt['kind'], el: Augment): Bolt => ({
 
 /** Loose the swing's shot along the hero's facing; `mult` is the hero's damage (blessing, perfect release, tempo). */
 export function shoot(h: Hero, s: Swing, el: Augment, mult = 1, traits: TraitId[] = []): Bolt {
-  return { ...base(h, s.shot!, el), traits, speed: s.speed ?? 20, range: s.range, dmg: Math.round(s.dmg * mult), knock: s.knock, pierce: !!s.pierce, burst: s.burst ?? 0, stun: s.stun ?? 0 };
+  const b: Bolt = { ...base(h, s.shot!, el), traits, speed: s.speed ?? 20, range: s.range, dmg: Math.round(s.dmg * mult), knock: s.knock, pierce: !!s.pierce, burst: s.burst ?? 0, stun: s.stun ?? 0 };
+  // A poisoner's dart: loosed on the white flash, it retches what it hits (sim/venom.ts).
+  if (s.venom) b.poison = h.heavy && h.perfect ? 2 : 1;
+  return b;
 }
 
 /** A spot `dist` tiles ahead of the hero, kept inside the room. */
@@ -104,7 +108,8 @@ function strike(w: World, b: Bolt, e: Enemy): void {
   if (damage(e, Math.round(b.dmg * rear * (crit ? CRIT : 1) * (boarded ? VARIANTS.shield.front : 1)), w.now, w.ev, { heavy: b.knock >= 8 || crit, flinch: FLINCH, mult: true, brutal: b.traits.includes('brutal'), dx: b.dx, dy: b.dy, src: b.kind, el: b.el, backstab: back })) return;
   if (e.act !== 'pinned') shove(e, b.dx, b.dy, b.knock, e.weight);
   if (b.hobble) hobble(e, w);
-  // A hand crossbow's bolt dazes a small goblin where it stands (not a butcher).
+  if (b.poison) envenom(e, b.poison === 2, w.now, w.ev);
+  // A bolt that dazes stuns where it stands (never a butcher).
   if (b.stun && e.kind !== 'butcher' && e.act !== 'pinned') Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: b.stun });
   if (wasFrozen && b.knock >= 8) shatter(e, w.now, w.ev);
   else (afflict(w, e, b.el, b.dmg), b.freeze && afflict(w, e, b.el, b.dmg));
@@ -203,7 +208,7 @@ function end(b: Bolt, w: World, wall: boolean): boolean {
   if (b.burst) return blast(w, b, b.x, b.y), false;
   // A fire shot that strikes a wooden wall throws sparks: now and then a house catches (sim/catching.ts).
   if (wall && b.el === 'fire') sparkCatch(b.x, b.y, w);
-  if (b.kind !== 'arrow' && b.kind !== 'bolt' && b.kind !== 'knife') return false;
+  if (b.kind !== 'arrow' && b.kind !== 'bolt' && b.kind !== 'knife' && b.kind !== 'dart') return false;
   b.state = 'stuck';
   b.life = wall ? 2.5 : 1.5;
   return true;

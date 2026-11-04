@@ -17,6 +17,9 @@ export const held = (e: Enemy, now: number) => e.act === 'stunned' || e.act === 
 
 export function clearElements(e: Enemy): void {
   e.burnUntil = e.chillUntil = e.frozenUntil = e.snareUntil = 0;
+  // The Rogue's bleeds and poison (sim/venom.ts) go with it.
+  e.bleedUntil = e.venomUntil = e.pukeUntil = e.venom = 0;
+  e.venomHard = false;
 }
 
 /** Death, and how (the body left behind and the gore depend on it); (dx, dy) is the blow's direction. */
@@ -34,7 +37,7 @@ export interface DamageOpts {
   flinch?: number;
   /** Stunned, pinned and frozen goblins take GUARD.stunnedMult. */
   mult?: boolean;
-  /** A burn tick: a small number, no blood. */
+  /** A tick (a burn, a bleed, poison): a small number, no blood of its own. */
   tick?: boolean;
   /** BRUTAL: the held-fast bonus is bigger. */
   brutal?: boolean;
@@ -74,7 +77,7 @@ export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: Da
     return false;
   }
   if (e.hp <= 0) {
-    const how = o.tick ? 'burn' : -e.hp >= OVERKILL ? 'burst' : o.how ?? 'fall';
+    const how = o.tick ? o.how ?? 'burn' : -e.hp >= OVERKILL ? 'burst' : o.how ?? 'fall';
     return kill(e, ev, how, o.dx ?? 0, o.dy ?? 0), true;
   }
   if (o.flinch && small(e) && !held(e, now)) Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: o.flinch });

@@ -9,14 +9,14 @@ import { burst, ready, tone } from './sfx';
 type Kit = 'sword' | 'greatsword' | 'spear' | 'daggers' | 'mace' | 'rapier' | 'flail' | 'blade' | 'shot';
 const kitOf = (src?: string): Kit =>
   src === 'sword' || src === 'greatsword' || src === 'spear' || src === 'daggers' || src === 'mace' || src === 'rapier' || src === 'flail' ? src
-    : src === 'handbow' ? 'daggers' : src === 'censer' ? 'sword'
+    : src === 'poisoner' ? 'daggers' : src === 'censer' ? 'sword'
     : src === 'longbow' || src === 'shortbow' || src === 'crossbow' || src === 'wand' || src === 'staff' || src === 'rod' ? 'shot' : 'blade';
 
 /** A blow swung (melee kits; ranged and spell kits sound on their shot instead). */
 export function swingSound(src: string, heavy: boolean): void {
   if (!ready()) return;
   const k = kitOf(src), h = heavy ? 1.3 : 1;
-  if (k === 'shot' || (src === 'handbow' && heavy)) return;
+  if (k === 'shot' || (src === 'poisoner' && heavy)) return;
   // The censer's chain rattles as it comes round.
   if (src === 'censer' && heavy) burst('highpass', 4000, 7000, 2, 0.18, 0.2), burst('highpass', 5000, 8000, 2, 0.12, 0.12, 0.12);
   if (k === 'rapier') return burst('highpass', 3500, 7000, 2, 0.28 * h, 0.06), tone('sine', 3200, 3000, 0.02, 0.06);
@@ -59,8 +59,6 @@ export function shotSound(kind: string, src?: string): void {
     tone('sine', f * 2, f * 1.4, 0.1, 0.1);
     return burst('highpass', 2500, 5500, 1, 0.22, 0.16, 0.02);
   }
-  // The hand crossbow: a light snap and a click.
-  if (kind === 'bolt' && src === 'handbow') return tone('square', 260, 120, 0.25, 0.06), burst('bandpass', 2400, 900, 2, 0.4, 0.07), tone('square', 2600, 2500, 0.04, 0.03, 0.09);
   if (kind === 'bolt') return tone('square', 150, 60, 0.4, 0.09), burst('bandpass', 1600, 500, 2, 0.65, 0.12), tone('square', 2400, 2200, 0.05, 0.04, 0.14), tone('square', 2000, 1900, 0.05, 0.04, 0.2);
   if (kind === 'spark') return tone('sine', 1300, 500, 0.16, 0.14), burst('bandpass', 3500, 1500, 3, 0.25, 0.1);
   if (kind === 'orb') return tone('sine', 180, 520, 0.3, 0.4), tone('triangle', 270, 780, 0.12, 0.4), burst('lowpass', 600, 2000, 0.7, 0.2, 0.4);
@@ -79,7 +77,7 @@ export function chargedSound(src: string): void {
 export function blockSound(src: string): void {
   if (!ready()) return;
   if (src === 'sword') return tone('triangle', 520, 480, 0.35, 0.25), burst('bandpass', 1800, 900, 4, 0.4, 0.1), tone('sine', 1560, 1500, 0.08, 0.4);
-  if (src === 'greatsword' || src === 'spear' || src === 'daggers' || src === 'rapier' || src === 'handbow' || src === 'censer') return tone('sine', 2200, 2150, 0.12, 0.35), burst('bandpass', 3000, 1500, 5, 0.35, 0.06);
+  if (src === 'greatsword' || src === 'spear' || src === 'daggers' || src === 'rapier' || src === 'poisoner' || src === 'censer') return tone('sine', 2200, 2150, 0.12, 0.35), burst('bandpass', 3000, 1500, 5, 0.35, 0.06);
   tone('triangle', 180, 120, 0.5, 0.12), burst('bandpass', 1400, 700, 3, 0.4, 0.1);
 }
 

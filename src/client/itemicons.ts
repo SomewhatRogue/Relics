@@ -26,7 +26,8 @@ const ICONS: Record<string, Paint> = {
   longbow: (px, line) => { line(2, 0, 6, 2, W); line(6, 2, 8, 6, W); line(8, 6, 6, 10, W); line(6, 10, 2, 11, W); line(2, 0, 2, 11, M); },
   shortbow: (px, line) => { line(3, 1, 7, 3, W); line(7, 3, 8, 6, W); line(8, 6, 7, 9, W); line(7, 9, 3, 11, W); line(3, 1, 3, 11, M); },
   crossbow: (px, line) => { line(6, 2, 6, 11, WD); line(1, 5, 11, 5, W); line(1, 5, 6, 3, M); line(11, 5, 6, 3, M); px(6, 1, M); },
-  handbow: (px, line) => { line(6, 4, 6, 10, WD); line(2, 6, 10, 6, W); line(2, 6, 6, 5, M); line(10, 6, 6, 5, M); line(5, 10, 3, 11, W); },
+  // A short sword and a blowgun crossed, a green drop at the tube's mouth.
+  poisoner: (px, line) => { line(9, 2, 4, 7, M); line(3, 8, 1, 10, W); px(4, 6, G), px(3, 7, G); line(1, 2, 10, 11, WD); px(0, 1, '#9be040'), px(1, 1, '#6ab82a'); },
   wand: (px, line) => { line(2, 10, 8, 4, W); px(9, 3, '#9fe8ff'), px(10, 2, '#fff'), px(11, 1, '#9fe8ff'), px(10, 4, '#9fe8ff'), px(8, 2, '#9fe8ff'); },
   staff: (px, line) => { line(1, 11, 8, 4, W); for (const [x, y] of [[9, 1], [10, 1], [9, 2], [10, 2], [8, 2], [11, 2], [9, 3], [10, 3]]) px(x, y, '#b57aff'); px(9, 1, '#fff'); },
   rod: (px, line) => { line(1, 11, 9, 3, MD); line(2, 11, 10, 3, M); px(10, 2, '#ff9a3c'), px(11, 1, '#ffd27a'), px(9, 2, '#ff9a3c'), px(10, 1, '#ff9a3c'); },

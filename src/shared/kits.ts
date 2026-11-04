@@ -10,12 +10,13 @@ const DASH: Dodge = { kind: 'dash', distance: 4.3, time: 0.22, iFrom: 0, iTo: 0.
 /** A Cleric's roll is never used (no dodge button), but every kit carries one. */
 const CLERIC_ROLL: Dodge = { kind: 'roll', distance: 2, time: 0.36, iFrom: 0.05, iTo: 0.28, stamina: 28, cooldown: 1.3 };
 
-export type MoreKitId = 'rapier' | 'handbow' | 'censer' | 'flail';
+export type MoreKitId = 'rapier' | 'poisoner' | 'censer' | 'flail';
 
 export const MORE_KITS: Record<MoreKitId, Weapon> = {
   /**
    * Reach and honest work head on: quick single thrusts that find one goblin, fairer from the front
-   * than the daggers and less brutal from behind. Held: a long lunge that runs through two in a line.
+   * than the daggers and less brutal from behind. Held: a long lunge that runs through two in a line;
+   * loosed on the white flash it skewers them on the tip, staggered and bleeding (shared/venom.ts SKEWER).
    */
   rapier: {
     name: 'RAPIER',
@@ -25,26 +26,29 @@ export const MORE_KITS: Record<MoreKitId, Weapon> = {
       { windup: 0.07, active: 0.06, recover: 0.16, dmg: 9, range: 1.85, arc: 26, lunge: 0.35, knock: 1, thrust: true },
       { windup: 0.12, active: 0.07, recover: 0.3, dmg: 13, range: 2, arc: 26, lunge: 0.6, knock: 3, thrust: true },
     ],
-    heavy: { windup: 0.08, active: 0.1, recover: 0.42, dmg: 16, dmgFull: 36, range: 2.2, arc: 24, lunge: 2.6, knock: 3, knockFull: 7, thrust: true, hits: 2 },
+    heavy: { windup: 0.08, active: 0.1, recover: 0.42, dmg: 16, dmgFull: 36, range: 2.2, arc: 24, lunge: 2.6, knock: 3, knockFull: 7, thrust: true, hits: 2, skewer: true },
     draw: 0.7,
     chip: 0.45, blockSpeed: 0.6, chargeSpeed: 0.6, backstab: 2, front: 0.8, single: true, parryWindow: 0.2, guardArc: 100, guardCost: 1.8, speed: 1.08,
     dodge: { ...DASH, distance: 3.8, cooldown: 0.45 },
   },
   /**
-   * A knife for the close work (two stabs and a slash, weak head on like the daggers) and a hand
-   * crossbow on the hold: a quick light bolt that dazes a small goblin, so the knife can go in.
+   * The poisoner's kit (it replaced the hand crossbow, 2026-11-03). A short sword for the close work:
+   * a little wider than the daggers and slower, catching two at once; no great damage, but none lost
+   * head on either. Held: the blowgun up to the lips, and a dart at range that poisons (shared/venom.ts).
+   * Loosed on the white flash, the goblin retches first and its poison ticks harder. Weakness: the
+   * poison is slow, the dart itself barely scratches, and the spiders and their nests shrug it off.
    */
-  handbow: {
-    name: 'HAND CROSSBOW',
+  poisoner: {
+    name: 'SHORTSWORD AND DARTS',
     cls: 'ROGUE',
     combo: [
-      { windup: 0.05, active: 0.06, recover: 0.13, dmg: 8, range: 1.2, arc: 70, lunge: 0.3, knock: 1, thrust: true },
-      { windup: 0.05, active: 0.06, recover: 0.13, dmg: 8, range: 1.2, arc: 70, lunge: 0.3, knock: 1, thrust: true },
-      { windup: 0.1, active: 0.08, recover: 0.3, dmg: 12, range: 1.3, arc: 110, lunge: 0.45, knock: 3 },
+      { windup: 0.09, active: 0.08, recover: 0.18, dmg: 7, range: 1.3, arc: 130, lunge: 0.3, knock: 2, hits: 2 },
+      { windup: 0.09, active: 0.08, recover: 0.18, dmg: 7, range: 1.3, arc: 130, lunge: 0.3, knock: 2, hits: 2 },
+      { windup: 0.14, active: 0.09, recover: 0.32, dmg: 10, range: 1.4, arc: 150, lunge: 0.45, knock: 4, hits: 3 },
     ],
-    heavy: { windup: 0.04, active: 0.04, recover: 0.32, dmg: 12, dmgFull: 22, range: 10, arc: 0, lunge: -0.1, knock: 2, knockFull: 4, shot: 'bolt', speed: 30, stun: 0.6 },
-    draw: 0.45,
-    chip: 0.45, blockSpeed: 0.6, chargeSpeed: 0.8, backstab: 2.2, front: 0.55, single: true, parryWindow: 0.2, guardArc: 100, guardCost: 1.8, speed: 1.1,
+    heavy: { windup: 0.05, active: 0.04, recover: 0.3, dmg: 4, dmgFull: 8, range: 9, arc: 0, lunge: -0.1, knock: 0, knockFull: 1, shot: 'dart', speed: 22, venom: true },
+    draw: 0.6,
+    chip: 0.45, blockSpeed: 0.6, chargeSpeed: 0.75, backstab: 2, parryWindow: 0.2, guardArc: 100, guardCost: 1.8, speed: 1.08,
     dodge: DASH,
   },
   /**

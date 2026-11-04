@@ -52,10 +52,12 @@ export function roomLights(room: ArenaRoom, fx: Fx, lerp: Lerp, out: L3[]): void
     const [x, y] = lerp('e:' + e.id, e.x, e.y);
     if (e.burnUntil > room.time) add(x, 1, y, R(e.ashAt ? 70 : 44), e.ashAt ? 0.95 : 0.75, [1, 0.55, 0.25], 17);
     else if (e.frozenUntil > room.time) add(x, 1, y, R(26), 0.4, [0.6, 0.85, 1]);
+    // Poisoned by a dart (sim/venom.ts): a sickly green about it.
+    if ((e.venom ?? 0) > 0 && (e.venomUntil ?? 0) > room.time) add(x, 0.8, y, R(22 + 6 * e.venom!), 0.45, [0.55, 1, 0.3]);
   }
   for (const j of room.javelins) add(j.x, 0.9, j.y, j.state === 'fly' ? R(34) : R(14), j.state === 'fly' ? 0.6 : 0.3 * Math.min(1, j.life), [0.55, 0.85, 1]);
   for (const b of room.bolts) {
-    if (b.kind === 'arrow' || b.kind === 'knife' || b.kind === 'net' || b.kind === 'bolt' || b.kind === 'flask') continue;
+    if (b.kind === 'arrow' || b.kind === 'knife' || b.kind === 'dart' || b.kind === 'net' || b.kind === 'bolt' || b.kind === 'flask') continue;
     if (b.kind === 'smite') add(b.x, 0.8, b.y, R(40), 0.9 * Math.min(1, b.t / b.flight), [1, 0.9, 0.6]);
     else if (b.kind === 'lodestone') add(b.x, 0.8, b.y, b.state === 'well' ? R(50) : R(12), 0.5, b.el ? EL_LIGHT[b.el] : [1, 0.85, 0.55]);
     else add(b.x, 0.7, b.y, b.kind === 'orb' ? R(50) : R(30), 0.7, EL_LIGHT[b.el]);

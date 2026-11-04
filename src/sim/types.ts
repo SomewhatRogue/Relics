@@ -296,6 +296,15 @@ export interface Enemy extends Body {
   burnNext: number;
   chillUntil: number;
   frozenUntil: number;
+  /** The Rogue's (sim/venom.ts): bleeding from a skewer until, its next tick; poison stacks, until, next
+   *  tick, ticking harder (a perfect dart); retching until. */
+  bleedUntil?: number;
+  bleedNext?: number;
+  venom?: number;
+  venomUntil?: number;
+  venomNext?: number;
+  venomHard?: boolean;
+  pukeUntil?: number;
   /** Caught in a hunter's net until then (small goblins can't move or act; big ones are slowed). */
   snareUntil: number;
   /** A relic's marks: the next blow lands harder (MARK) until `markUntil`; hobbled (HOBBLE) until `hobbleUntil`. */
@@ -463,7 +472,9 @@ export type FightEvent =
   | { k: 'burst'; x: number; y: number; r: number; el: Augment }
   | { k: 'shock' | 'beam'; x: number; y: number; x2: number; y2: number }
   | { k: 'heal'; x: number; y: number; n: number }
-  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle' | 'lift' | 'oilfire' | 'freed' | 'exitopen' | 'blaze' | 'chop' | 'denspawn' | 'hallow' | 'ward' | 'warded' | 'reflect' | 'wardbreak' | 'spotted'; x: number; y: number }
+  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle' | 'lift' | 'oilfire' | 'freed' | 'exitopen' | 'blaze' | 'chop' | 'denspawn' | 'hallow' | 'ward' | 'warded' | 'reflect' | 'wardbreak' | 'spotted' | 'skewer' | 'envenom'; x: number; y: number }
+  /** A goblin retching up a perfect dart's poison, facing (dx, dy) (sim/venom.ts). */
+  | { k: 'puke'; x: number; y: number; dx: number; dy: number }
   | { k: 'collapse'; x: number; y: number; w: number; h: number }
   /** The skills taught after the first (sim/skills.ts): a stamp, arrows falling, a vanish, knives, a fire
    *  ring, a tether strike (to x2, y2), a chain (to x2, y2), the lantern light, a hound sent or pinning. */
@@ -530,7 +541,7 @@ export interface Javelin {
 export interface Bolt {
   id: number;
   owner: string;
-  kind: 'arrow' | 'bolt' | 'knife' | 'spark' | 'orb' | 'lance' | 'smite' | 'net' | 'lodestone' | 'flask' | 'bomb';
+  kind: 'arrow' | 'bolt' | 'knife' | 'dart' | 'spark' | 'orb' | 'lance' | 'smite' | 'net' | 'lodestone' | 'flask' | 'bomb';
   /** A relic's: it never hurts a friend or anyone freed (friends caught in it are told they're spared). */
   relic?: boolean;
   /** Hobbles what it hits (a wind-up bow's bolt). */
@@ -558,6 +569,8 @@ export interface Bolt {
   hitHeroes?: string[];
   /** Stun on hit (a smite). */
   stun: number;
+  /** A poisoner's dart: poisons what it hits (2: loosed perfect, it retches first). */
+  poison?: 1 | 2;
   /** The shooter's weapon traits (BRUTAL counts on a shot). */
   traits: TraitId[];
   /** Lobbed and dropped things go from (sx, sy) to (tx, ty) over `flight` seconds, `t` so far. */

@@ -71,6 +71,16 @@ export function drawBolt(c: Ctx, b: Bolt, x: number, y: number): void {
     c.lit.globalAlpha = 1;
     return;
   }
+  if (b.kind === 'dart') {
+    // A blowgun's dart: a thin sliver with a green-wet tip, stuck a moment where it lands.
+    const ty = y - (b.state === 'stuck' ? 5 : 8);
+    c.lit.globalAlpha = b.state === 'stuck' ? Math.min(1, b.life / 0.8) : 1;
+    line(c.lit, x, ty, back, 0, 3, '#c8b890');
+    c.glow.fillStyle = '#9be040';
+    c.glow.fillRect(Math.round(x), Math.round(ty), 1, 1);
+    c.lit.globalAlpha = 1;
+    return;
+  }
   if (b.kind === 'arrow' || b.kind === 'bolt') {
     const bolt = b.kind === 'bolt', len = bolt ? 5 : 7;
     c.lit.globalAlpha = b.state === 'stuck' ? Math.min(1, b.life / 0.8) : 1;

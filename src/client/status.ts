@@ -1,4 +1,5 @@
-/** Elements on a goblin: flames while it burns, drifting frost while chilled, a block of ice when frozen. */
+/** Elements on a goblin: flames while it burns, drifting frost while chilled, a block of ice when frozen;
+ *  the Rogue's green poison, retching and bleeding (sim/venom.ts). */
 import type { Enemy } from '../sim/types';
 import type { Ctx } from './draw';
 
@@ -37,6 +38,26 @@ export function drawStatus(c: Ctx, e: Enemy, x: number, y: number, t: number): v
       g.fillStyle = cols[(i + f) % 4];
       g.fillRect(Math.round(fx), Math.round(fy), 1, f > 2 ? 2 : 1);
     }
+  }
+  if ((e.venom ?? 0) > 0 && (e.venomUntil ?? 0) > t) {
+    // Poisoned: a sickly green sweat over it and drips falling off, more for each stack (sim/venom.ts).
+    const n = 2 + e.venom! * 2;
+    for (let i = 0; i < n; i++) {
+      const f = (c.now * 1.6 + i * 0.37) % 1, fx = x - w + ((i * 5) % (w * 2));
+      g.fillStyle = i % 2 ? '#9be040' : '#6ab82a';
+      g.fillRect(Math.round(fx), Math.round(y - tall * (0.8 - f * 0.7)), 1, 1);
+    }
+  }
+  if ((e.pukeUntil ?? 0) > t) {
+    // Retching: a green stream from the mouth to the floor ahead of it.
+    g.fillStyle = '#9be040';
+    for (let k = 0; k < 6; k++) g.fillRect(Math.round(x + e.fx * (3 + k)), Math.round(y - tall * 0.7 + k * 1.5 + e.fy * k), 1, 1);
+  }
+  if ((e.bleedUntil ?? 0) > t) {
+    // Bleeding from a skewer: a dark drop or two running down.
+    g.fillStyle = '#9a2a2a';
+    const f = (c.now * 2) % 1;
+    g.fillRect(Math.round(x + 1), Math.round(y - tall * (0.6 - f * 0.5)), 1, 2);
   }
   if (e.chillUntil > t) {
     g.fillStyle = '#dff4ff';

@@ -7,7 +7,7 @@ describe('a Rogue backstabs with every weapon', () => {
   it('every Rogue kit lands at least twice as hard from behind', () => {
     const room = new ArenaRoom(1, { scrappers: false, props: false });
     const h = room.join('r');
-    for (const k of ['daggers', 'rapier', 'handbow'] as const) {
+    for (const k of ['daggers', 'rapier', 'poisoner'] as const) {
       h.weapon = k;
       expect(WEAPONS[k].cls).toBe('ROGUE');
       expect(backstabOf(h)).toBeGreaterThanOrEqual(2);

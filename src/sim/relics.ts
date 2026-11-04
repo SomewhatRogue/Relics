@@ -10,6 +10,7 @@ import { BLESSING, HERO, HORN, SHADOWSTEP, WARD } from '../shared/tuning';
 import { blessRadius, blessTime, hornReach, hornTime, wardHp, wardTime } from './knacks';
 import { damage, held, isDead, isDummy } from './damage';
 import { afflict, type World } from './elements';
+import { daze } from './venom';
 import type { Enemy, FightEvent, Hero, Intent, Zone } from './types';
 
 /** Step behind the goblin you face (or the nearest one in reach), facing its back. */
@@ -32,6 +33,8 @@ export function shadowstep(h: Hero, enemies: Enemy[], ev: FightEvent[]): void {
     const dx = best.x - h.x, dy = best.y - h.y, d = Math.hypot(dx, dy) || 1;
     h.fx = dx / d;
     h.fy = dy / d;
+    // Out of the dark at its back: it reels a moment, for free stabs (not mid striped blow or charge).
+    if (!isDummy(best)) daze(best, SHADOWSTEP.stun, ev);
   } else {
     h.x += h.fx * 3;
     h.y += h.fy * 3;

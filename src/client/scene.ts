@@ -427,7 +427,7 @@ export class Scene {
       lights.push({ x, y, r: j.state === 'fly' ? 34 : 14, i: j.state === 'fly' ? 0.6 : 0.3 * Math.min(1, j.life), c: [0.55, 0.85, 1] });
     }
     for (const b of room.bolts) {
-      if (b.kind === 'arrow' || b.kind === 'knife') continue;
+      if (b.kind === 'arrow' || b.kind === 'knife' || b.kind === 'dart') continue;
       const x = OX + b.x * PX - cx, y = OY + b.y * PX - cy - 8;
       if (b.kind === 'net' || b.kind === 'bolt') continue;
       if (b.kind === 'smite') lights.push({ x, y: y + 4, r: 40, i: 0.9 * Math.min(1, b.t / b.flight), c: [1, 0.9, 0.6] });
@@ -438,6 +438,8 @@ export class Scene {
       // A nest being lit, or its ash still smouldering (nestfire.ts): a small warm glow.
       const ember = nestEmber(e);
       if (ember) lights.push({ x: OX + e.x * PX - cx, y: OY + e.y * PX - cy - 4, r: 24, i: ember, c: [1, 0.55, 0.25] });
+      // Poisoned by a dart (sim/venom.ts): a sickly green about it.
+      if (e.act !== 'dead' && (e.venom ?? 0) > 0 && (e.venomUntil ?? 0) > room.time) lights.push({ x: OX + e.x * PX - cx, y: OY + e.y * PX - cy - 8, r: 22 + 6 * e.venom!, i: 0.45, c: [0.55, 1, 0.3] });
       if (e.act === 'dead') continue;
       const [x, y] = lerp('e:' + e.id, e.x, e.y);
       // A nest burned out up close throws a bigger, warmer light (sim/torch.ts).

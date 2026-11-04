@@ -11,6 +11,7 @@ import { BLESSING, GUARD, HEAL_RADIUS, HEIGHT, HERO, LODESTONE, TICK, TRAIT, WEA
 import { separate } from './bodies';
 import { lobLodestone, shoot, smite, stepBolt, throwNet } from './bolts';
 import { afflict, stepElements, type World } from './elements';
+import { skewer, stepVenom } from './venom';
 import { stepBuildings, sweepBlocks } from './buildings';
 import { rouse } from './backline';
 import { newEnemy, stepEnemy } from './enemies';
@@ -275,6 +276,7 @@ export class ArenaRoom {
     this.puddles = stepPuddles(this.puddles, this.heroes, this.time, TICK, this.events);
     stepPoison(this.heroes, this.time, this.events);
     stepElements(w);
+    stepVenom(this.enemies, this.time, this.events);
     // The freed: home out in the open at the way in; brought out of a house, maybe goblins waiting.
     const door = stepSurvivors(w, TICK, this.indoors ? null : this.map.hero);
     if (door) ambush(this.enemies, this.heroes, this.doorRng, door.x, door.y, this.events);
@@ -329,6 +331,8 @@ export class ArenaRoom {
       if (back > 0) (h.hp += back), w.ev.push({ k: 'heal', x: h.x, y: h.y, n: back });
     }
     const charged = (h.heavy && h.power >= 0.7) || h.counter;
+    // A rapier's lunge loosed on the white flash: run through on the tip, staggered and bleeding.
+    if (h.heavy && h.perfect && currentSwing(h).skewer) skewer(e, w.now, w.ev);
     if (isDead(e)) {
       const tx = h.x - e.x, ty = h.y - e.y, rear = (e.fx * tx + e.fy * ty) / (Math.hypot(tx, ty) || 1) < GUARD.rearCos;
       if (has(h, 'reaper') && (h.counter || rear)) {
@@ -393,7 +397,7 @@ export class ArenaRoom {
     else if (s.shot) {
       // A Mage's spells take the element it last channelled (fire to start with); the first after a turn is primed.
       const mage = WEAPONS[h.weapon].cls === 'MAGE', primed = mage && !!h.primed;
-      const el = s.shot === 'arrow' || s.shot === 'bolt' || s.shot === 'knife' ? forged : forged || (mage ? castElement(h) : h.augments[h.relic]);
+      const el = s.shot === 'arrow' || s.shot === 'bolt' || s.shot === 'knife' || s.shot === 'dart' ? forged : forged || (mage ? castElement(h) : h.augments[h.relic]);
       if (mage) this.bolts.push(...castSpell(h, s, el, mult * spendPrimed(h), traitsOf(h)));
       else this.bolts.push(shoot(h, s, el, mult, traitsOf(h)));
       w.ev.push({ k: 'shoot', x: h.x, y: h.y, dx: h.fx, dy: h.fy, kind: s.shot, el, ...(primed ? { primed } : {}) });

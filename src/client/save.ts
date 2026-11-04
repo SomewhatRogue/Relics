@@ -8,13 +8,16 @@ import { newWorld, type WorldState } from '../shared/story';
 import { WEAPONS, upgradeOld } from '../shared/tuning';
 import { fitStores } from '../shared/bags';
 import { fitRelics } from '../shared/relicitems';
+import { renameKits } from '../shared/oldkits';
 
 const KEY = 'relic.save.v2', OLD = 'relic.save.v1';
 /** `savedAt`: when it was last kept here (it only goes forward), to tell which copy is newer (recovery.ts). */
 export interface Save { heroes: Profile[]; current: number; world: WorldState; savedAt?: number }
 
 /** Fill in fields a saved hero predates. */
-const hero = (p: Partial<Profile>): Profile => {
+const hero = (old: Partial<Profile>): Profile => {
+  // The hand crossbow is the poisoner's kit now (shared/oldkits.ts).
+  const p = renameKits(old);
   const cls = p.cls ?? (p.weapon ? WEAPONS[p.weapon].cls : 'WARRIOR');
   const out = { ...newProfile(cls, p.name), ...p, cls };
   // Before the pack, a hero kept one weapon per kind: the one in hand stays, the rest go in the pack.

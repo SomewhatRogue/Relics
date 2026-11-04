@@ -58,6 +58,10 @@ export class Soundscape {
     if (me && typeof at.x === 'number' && typeof at.y === 'number' && Math.hypot(at.x - me.x, at.y - me.y) > EARSHOT) return;
     if (ev.k === 'swing') return swingSound(ev.src, ev.heavy);
     if (ev.k === 'chest') return chestSound(ev.state, ev.tier);
+    // The poisoner's: the blowgun's puff, a skewer's wet stab, a goblin retching (the spiders' own wet sounds).
+    if (ev.k === 'shoot' && ev.kind === 'dart') return spiderSounds.hiss();
+    if (ev.k === 'skewer') return spiderSounds.wetbite();
+    if (ev.k === 'puke') return spiderSounds.spit(), spiderSounds.splat();
     if (ev.k === 'shoot') return shotSound(ev.kind, this.heroAt(room, ev.x, ev.y)?.weapon);
     if (ev.k === 'charged') return chargedSound(this.heroAt(room, ev.x, ev.y)?.weapon ?? '');
     if (ev.k === 'block') return blockSound(this.heroAt(room, ev.x, ev.y)?.weapon ?? '');

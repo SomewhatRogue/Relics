@@ -8,7 +8,7 @@ import { rearCos } from './knacks';
 import type { Bolt, Enemy, Hero } from './types';
 
 /** Shots a Rogue throws or looses (not spells, nets or flasks). */
-export const rogueShot = (b: Bolt) => b.kind === 'bolt' || b.kind === 'knife';
+export const rogueShot = (b: Bolt) => b.kind === 'bolt' || b.kind === 'knife' || b.kind === 'dart';
 
 /** The shot is travelling the way the goblin faces: it takes it in the back. */
 export function fromBehind(e: Enemy, dx: number, dy: number, h?: Hero): boolean {

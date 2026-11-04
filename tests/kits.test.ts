@@ -60,21 +60,18 @@ describe('the rapier', () => {
   });
 });
 
-describe('the hand crossbow', () => {
-  it('a tap is the knife (no bolt); held, a quick bolt dazes a small goblin but not a butcher', () => {
-    const tap = arena('handbow', [{ x: 9, y: 8 }]);
-    const ev = tap.run(0.3, { attackSeq: 1 });
+describe("the poisoner's kit", () => {
+  it('a tap is the short sword, full damage head on, catching two; held, a dart that poisons (a little on its own)', () => {
+    const tap = arena('poisoner', [{ x: 8.7, y: 8 }, { x: 9.3, y: 8 }]);
+    const ev = tap.run(0.4, { attackSeq: 1 });
     expect(ev.some((e) => e.k === 'shoot')).toBe(false);
-    expect(hurt(tap.room.enemies[0])).toBeGreaterThan(0);
-    const shot = arena('handbow', [{ x: 9, y: 4 }]);
-    const out = held(shot.run, WEAPONS.handbow.draw!, 0.35);
-    expect(out.some((e) => e.k === 'shoot' && e.kind === 'bolt')).toBe(true);
-    expect(hurt(shot.room.enemies[0])).toBeGreaterThan(0);
-    expect(shot.room.enemies[0].act).toBe('stunned');
-    const big = arena('handbow', [{ kind: 'butcher', x: 9, y: 4 }]);
-    held(big.run, WEAPONS.handbow.draw!, 0.35);
-    expect(hurt(big.room.enemies[0])).toBeGreaterThan(0);
-    expect(big.room.enemies[0].act).not.toBe('stunned');
+    expect(hurt(tap.room.enemies[0])).toBe(WEAPONS.poisoner.combo[0].dmg);
+    expect(hurt(tap.room.enemies[1])).toBe(WEAPONS.poisoner.combo[0].dmg);
+    const shot = arena('poisoner', [{ x: 9, y: 4 }]);
+    const out = held(shot.run, WEAPONS.poisoner.draw! + 0.4, 0.4);
+    expect(out.some((e) => e.k === 'shoot' && e.kind === 'dart')).toBe(true);
+    expect(out.some((e) => e.k === 'envenom')).toBe(true);
+    expect(shot.room.enemies[0].venom).toBe(1);
   });
 });
 
@@ -138,7 +135,7 @@ describe('the flail', () => {
 describe('class rules hold for every kit', () => {
   const kitsOf = (cls: 'ROGUE' | 'HEALER') => (Object.keys(WEAPONS) as WeaponId[]).filter((k) => WEAPONS[k].cls === cls);
   it('three kits each; a Rogue never blocks and dashes; a Cleric guards and never dodges', () => {
-    expect(CLASS_KITS.ROGUE).toEqual(['daggers', 'rapier', 'handbow']);
+    expect(CLASS_KITS.ROGUE).toEqual(['daggers', 'rapier', 'poisoner']);
     expect(CLASS_KITS.HEALER).toEqual(['mace', 'censer', 'flail']);
     expect(CLASS_GUARD.ROGUE).toBe('none');
     expect(CLASS_DODGES.HEALER).toBe(false);

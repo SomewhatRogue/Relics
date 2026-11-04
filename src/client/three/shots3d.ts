@@ -29,6 +29,9 @@ export function makeBolt(b: Bolt): THREE.Group {
     case 'knife':
       part(g, 0.04, 0.02, 0.3, steel, 0, 0, 0);
       break;
+    case 'dart':
+      part(g, 0.025, 0.025, 0.26, M(0xc8b890), 0, 0, 0), part(g, 0.05, 0.05, 0.06, G(0x9be040, 0.4), 0, 0, 0.14);
+      break;
     case 'spark':
       part(g, 0.14, 0.14, 0.14, el, 0, 0, 0);
       break;

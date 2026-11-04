@@ -17,7 +17,7 @@ export interface Swing {
   thrust?: boolean;
   /** A ranged swing looses a shot at its first active frame instead of striking an arc. A smite falls
    * from above on a spot `range` tiles away at most (the goblin you face, or where you point). */
-  shot?: 'arrow' | 'bolt' | 'knife' | 'spark' | 'orb' | 'lance' | 'smite';
+  shot?: 'arrow' | 'bolt' | 'knife' | 'dart' | 'spark' | 'orb' | 'lance' | 'smite';
   /** Shot speed, tiles a second (the shot flies `range` tiles). */
   speed?: number;
   /** The shot passes through every body it hits. */
@@ -26,7 +26,7 @@ export interface Swing {
   burst?: number;
   /** Heals every standing hero within HEAL_RADIUS of the swinger. */
   heal?: number;
-  /** Stuns what it hits this long (a smite; a hand crossbow's bolt dazes small goblins only). */
+  /** Stuns what it hits this long (a smite). */
   stun?: number;
   /** A melee blow strikes at most this many goblins, nearest first (a rapier's lunge runs through two). */
   hits?: number;
@@ -34,6 +34,10 @@ export interface Swing {
   burn?: boolean;
   /** A smite falls this long after the release (0.35 s if not set). */
   delay?: number;
+  /** A poisoner's dart: poisons what it hits (shared/venom.ts). */
+  venom?: boolean;
+  /** A rapier's lunge: released on the white flash it skewers what it hits (a bleed and a stagger). */
+  skewer?: boolean;
 }
 
 export interface Heavy extends Swing {
@@ -253,7 +257,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
   ...MORE_KITS,
 };
 export type WeaponId = KitId;
-export const WEAPON_ORDER: WeaponId[] = ['sword', 'greatsword', 'spear', 'longbow', 'shortbow', 'crossbow', 'daggers', 'rapier', 'handbow', 'wand', 'staff', 'rod', 'mace', 'censer', 'flail'];
+export const WEAPON_ORDER: WeaponId[] = ['sword', 'greatsword', 'spear', 'longbow', 'shortbow', 'crossbow', 'daggers', 'rapier', 'poisoner', 'wand', 'staff', 'rod', 'mace', 'censer', 'flail'];
 /** The demo's class button cycles these; the weapon button swaps between a class's own kits. */
 export const CLASS_ORDER: HeroClass[] = ['WARRIOR', 'RANGER', 'ROGUE', 'MAGE', 'HEALER'];
 /** How each class guards: `full` holds a block and parries; `parry` can tap a parry but never holds a
@@ -271,7 +275,7 @@ export const DECOY = { time: 2.5, lure: 5 };
 export const CLASS_KITS: Record<HeroClass, WeaponId[]> = {
   WARRIOR: ['sword', 'greatsword', 'spear'],
   RANGER: ['longbow', 'shortbow', 'crossbow'],
-  ROGUE: ['daggers', 'rapier', 'handbow'],
+  ROGUE: ['daggers', 'rapier', 'poisoner'],
   MAGE: ['wand', 'staff', 'rod'],
   HEALER: ['mace', 'censer', 'flail'],
 };

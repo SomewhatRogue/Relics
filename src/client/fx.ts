@@ -11,6 +11,7 @@ import { toPx } from './world';
 import { CRY } from './captives';
 import { spiderFx } from './fxspiders';
 import { weakFx } from './fxweak';
+import { venomFx } from './fxvenom';
 import { levelFx } from './fxlevel';
 import { skillFx } from './fxskills';
 import { relicFx } from './fxrelics';
@@ -81,7 +82,7 @@ export class Fx {
 
   on(ev: FightEvent): void {
     const [x, y] = toPx(ev.x, ev.y);
-    if (spiderFx(this, ev, x, y) || weakFx(this, ev, x, y) || levelFx(this, ev, x, y) || skillFx(this, ev, x, y) || relicFx(this, ev, x, y)) return;
+    if (spiderFx(this, ev, x, y) || weakFx(this, ev, x, y) || venomFx(this, ev, x, y) || levelFx(this, ev, x, y) || skillFx(this, ev, x, y) || relicFx(this, ev, x, y)) return;
     switch (ev.k) {
       case 'impact':
         if (ev.kind === 'slam') {

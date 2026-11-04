@@ -1,7 +1,7 @@
 /**
  * What a hero holds, by kit, each its own thing in hand (a new figure is built when the kit changes,
  * so one replaces the other, never on top): sword and shield, greatsword, spear; longbow, shortbow,
- * crossbow (and the Ranger's short sword); twin daggers, the rapier, the hand crossbow with a knife;
+ * crossbow (and the Ranger's short sword); twin daggers, the rapier, the short sword with a blowgun;
  * wand, staff, rod; mace and censer, sword and censer, flail and censer.
  */
 import type * as THREE from 'three';
@@ -21,12 +21,11 @@ function censer(off: THREE.Group): THREE.Mesh {
   return part(off, 0.1, 0.06, 0.1, G(0xff9a3c, 0.3), 0, -0.29, 0);
 }
 
-/** A small crossbow along the hand: stock forward, the prod across, a bolt on it. */
-function handbow(g: THREE.Group, s: number): void {
-  part(g, 0.07 * s, 0.08 * s, 0.44 * s, M(0x8b6a3a), 0, -0.04, 0.16 * s);
-  part(g, 0.56 * s, 0.05 * s, 0.06 * s, M(0xcfd6dc), 0, -0.02, 0.32 * s);
-  part(g, 0.48 * s, 0.01, 0.01, string, 0, -0.02, 0.22 * s);
-  part(g, 0.025, 0.025, 0.3 * s, M(0xcfd6dc), 0, 0.02, 0.24 * s);
+/** The poisoner's blowgun: a long reed tube, bound at the ends, a sickly green bead at its mouth. */
+function blowgun(g: THREE.Group): void {
+  part(g, 0.05, 0.05, 0.8, M(0x7a6a3a), 0, 0, 0.3);
+  part(g, 0.07, 0.07, 0.05, dark, 0, 0, -0.08), part(g, 0.07, 0.07, 0.05, dark, 0, 0, 0.68);
+  part(g, 0.04, 0.04, 0.04, G(0x9be040, 0.4), 0, 0, 0.72);
 }
 
 /** Put the kit in `held` (the right hand) and `off` (the left). Returns what glows (a caster's tip, a censer's coal), or null. */
@@ -61,10 +60,11 @@ export function hands(cls: string, w: WeaponId, held: THREE.Group, off: THREE.Gr
       part(held, 0.04, 0.12, 0.04, dark, 0, 0.04, 0);
       return null;
     }
-    if (w === 'handbow') {
-      // The hand crossbow is what's in hand; a short knife in the other for the close work.
-      handbow(held, 1);
-      part(off, 0.05, 0.08, 0.05, dark, 0, -0.02, 0), part(off, 0.04, 0.18, 0.02, steel, 0, -0.14, 0);
+    if (w === 'poisoner') {
+      // A short sword in hand, a touch broader than a dagger; the blowgun along the other arm.
+      part(held, 0.15, 0.04, 0.05, metal, 0, -0.04, 0), part(held, 0.07, 0.48, 0.03, steel, 0, -0.3, 0);
+      part(held, 0.04, 0.1, 0.04, dark, 0, 0.04, 0);
+      blowgun(off);
       return null;
     }
     for (const g of [held, off]) part(g, 0.13, 0.04, 0.05, metal, 0, -0.04, 0), part(g, 0.05, 0.32, 0.025, steel, 0, -0.22, 0);

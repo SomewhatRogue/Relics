@@ -223,7 +223,8 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
       // A draw (a shot on the hold) wants a clean release: on the white flash is perfect; held too long, it shakes and weakens.
       const held = h.actT + CHARGE.start, full = chargeFull(w, h), drawn = !!w.heavy.shot;
       h.power = Math.min(1, held / full);
-      h.perfect = drawn && held >= full && held <= full + releaseWindow(h);
+      // (A rapier's lunge has its flash too: on it, the thrust skewers.)
+      h.perfect = (drawn || !!w.heavy.skewer) && held >= full && held <= full + releaseWindow(h);
       if (drawn && held > full + RELEASE.overdraw) h.power = RELEASE.overdrawn;
       if (h.perfect) ev.push({ k: 'perfect', x: h.x, y: h.y });
       startSwing(h, -1, inp, enemies, now, ev);
