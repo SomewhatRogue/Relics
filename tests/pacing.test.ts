@@ -53,6 +53,6 @@ describe('pacing', () => {
   it('a weapon rolled for a kind is that kind, and always for the class', () => {
     const rng = new Rng(4);
     for (let i = 0; i < 20; i++) expect(rollGear(rng, 'MAGE', 'fine', 'weapon', 'wand').kit).toBe('wand');
-    for (let i = 0; i < 20; i++) expect(['wand', 'staff', 'rod']).toContain(rollGear(rng, 'MAGE', 'forged').kit);
+    for (let i = 0; i < 20; i++) expect(['wand', 'staff', 'spellblade']).toContain(rollGear(rng, 'MAGE', 'forged').kit);
   });
 });

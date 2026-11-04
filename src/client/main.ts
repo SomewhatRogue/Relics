@@ -1,4 +1,5 @@
 /** Relic: Wickhold, the Training Yard and runs. The rooms run here in the browser (solo is a party of one). */
+import { spellCost } from '../sim/spells';
 import { carriedItem } from '../sim/charge';
 import { isDark, relicFill } from '../shared/relicitems';
 import { fillCol } from './reliccard';
@@ -170,9 +171,9 @@ const KIT: Record<string, string> = {
   longbow: 'TAP: SHORT SWORD  HOLD: DRAW  LET GO ON THE FLASH TO BLIND',
   shortbow: 'TAP: SHORT SWORD  HOLD: QUICK SHOT ON THE MOVE',
   crossbow: 'TAP: SHORT SWORD  HOLD: AIM, OR WIND WHEN EMPTY',
-  wand: 'QUICK SPARKS  0.6S CAST',
-  staff: 'HOLD 1.6S: BURSTING ORB',
-  rod: 'HOLD 1S: PIERCING LANCE',
+  wand: 'SPARKS ON THE MOVE  HOLD: BURST (20 MAGIC)',
+  staff: 'CLOSE SLASH  HOLD: WALL (30 MAGIC)',
+  spellblade: 'THREE CUTS CHARGE IT  HOLD: WREATHE  BLOCK: CATCH',
   mace: '3RD BLOW HEALS  HOLD: SMITE',
   rapier: 'LONG REACH  DASH  HOLD: LUNGE THROUGH TWO',
   poisoner: 'SHORT SWORD  DASH  HOLD: POISON DART',
@@ -186,7 +187,7 @@ const townTips = input.touch
   : ['Walk to the JOB BOARD and press E to take a job', 'Walk up into a door to go in. Press E by anyone to talk', 'The FORGE: Halvard upgrades your gear or melts it down for steel', 'The TRAINING HALL: perks, and the squire takes you to the yard', 'The TOWN HALL: the reeve and the council decide the chapter'];
 const tips = input.touch
   ? ['Stun or get behind a small goblin, then GRAB it', 'Warriors can GRAB barrels and tables and throw them', 'Break the oil barrel near goblins and they burn', 'Holding one: SLAM it, or THROW it at another', 'POTION drinks or throws the front of your belt', 'Traits reward skill: parries, dodges, perfect releases', 'Walk into a cottage or barn: goblins, and sometimes someone caged', 'HEALER: SANCTUARY blesses the ground and wards whoever is most hurt', 'Oil and fire burn wooden buildings down. Burn out the dens', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'SKILL: every class has one. Each recharges', 'Striped circles cannot be blocked: dodge out, or walk out', 'DEEP jobs end at a named butcher. Win one for a RELIC', 'TWIN DAGGERS: dash behind a goblin and BACKSTAB', 'Push the stick part way to creep. Resting goblins see you late: hit first for an AMBUSH']
-  : ['G grabs a stunned goblin (or one you got behind). Click to slam, G to throw', 'Warriors: G lifts barrels and tables. Throw them, or slam them down', 'Break the oil barrel near goblins and they burn', 'Q drinks or throws the potion at the front of your belt. Hold Q to bring the next one to the front', 'Bows: release on the white flash. Held too long, the shot weakens', 'Walk up into a cottage door to go in. Fire burns buildings down', 'Cleric: E for SANCTUARY. Blessed ground, and a ward that throws arrows back', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: your class skill. R: a relic, once you have won one on a DEEP job', 'Striped circles cannot be blocked: SPACE to dodge, or walk out', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or rod', 'Daggers: dash behind a goblin and BACKSTAB', 'Hold Shift to creep. Resting goblins see you late: hit first for an AMBUSH'];
+  : ['G grabs a stunned goblin (or one you got behind). Click to slam, G to throw', 'Warriors: G lifts barrels and tables. Throw them, or slam them down', 'Break the oil barrel near goblins and they burn', 'Q drinks or throws the potion at the front of your belt. Hold Q to bring the next one to the front', 'Bows: release on the white flash. Held too long, the shot weakens', 'Walk up into a cottage door to go in. Fire burns buildings down', 'Cleric: E for SANCTUARY. Blessed ground, and a ward that throws arrows back', 'Frost twice freezes. A heavy blow shatters the ice', 'Fire meets frost: STEAM. Storm on the burning: FLARE', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: your class skill. R: a relic, once you have won one on a DEEP job', 'Striped circles cannot be blocked: SPACE to dodge, or walk out', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or spellblade', 'Daggers: dash behind a goblin and BACKSTAB', 'Hold Shift to creep. Resting goblins see you late: hit first for an AMBUSH'];
 let tipAt = -99, tipI = 0;
 
 function hud(now: number): void {
@@ -203,8 +204,14 @@ function hud(now: number): void {
   const item = me.arms[me.weapon];
   $('.wpn').textContent = item ? itemName(item) : WEAPONS[me.weapon].name;
   // The block button: a Mage has none; a Ranger or Rogue only taps it to parry.
-  const guard = CLASS_GUARD[WEAPONS[me.weapon].cls];
-  if (document.body.dataset.guard !== guard) (document.body.dataset.guard = guard), ($('.tb.block').textContent = guard === 'parry' ? 'PARRY' : 'BLOCK');
+  // (A spellblade has no guard, but block catches a blow on the blade.)
+  const guard = WEAPONS[me.weapon].catches ? 'catch' : CLASS_GUARD[WEAPONS[me.weapon].cls];
+  if (document.body.dataset.guard !== guard) (document.body.dataset.guard = guard), ($('.tb.block').textContent = guard === 'parry' ? 'PARRY' : guard === 'catch' ? 'CATCH' : 'BLOCK');
+  // A Mage's big spell: a mark on the bar at what it costs, red while you're short of it (sim/spells.ts).
+  const cost = spellCost(me);
+  $('.st').classList.toggle('spell', cost > 0);
+  $('.st').classList.toggle('short', cost > 0 && (me.stamina < cost || !!me.winded));
+  $('.st').style.setProperty('--cost', Math.min(100, cost) + '%');
   const kit = KIT[me.weapon] + (guard === 'none' ? '  NO GUARD' : guard === 'parry' ? '  PARRY, NO BLOCK' : '') + (WEAPONS[me.weapon].cls === 'MAGE' ? '  ' + (me.augments.channel || 'fire').toUpperCase() : '');
   $('.kit').textContent = item ? item.traits.map((t) => TRAITS[t].name).join(' + ') + '  ' + kit : kit;
   card.update(room, me, !input.touch);

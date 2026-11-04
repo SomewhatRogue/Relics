@@ -11,6 +11,7 @@ import { heroPose } from './heropose';
 import { drawWeapon, pose } from './held';
 import { EL_COL } from './palette';
 import { drawLoad } from './xbowmark';
+import { drawBladeMark } from './blademark';
 import { drawText } from './pixfont';
 import { PARTY } from '../shared/tuning';
 import { LOOKS, SPRITES, heroLook } from './sprites';
@@ -149,6 +150,7 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'b
   }
   aura(c, h, bx, by, t);
   drawLoad(c, h, bx, by);
+  drawBladeMark(c, h, bx, by, t);
 }
 
 /** Blessed: gold motes rising. Rallied: a red pennant flicker overhead. */

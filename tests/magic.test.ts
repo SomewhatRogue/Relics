@@ -75,26 +75,6 @@ describe('class weapons', () => {
     expect(charged(room, 1).some((e) => e.k === 'shoot' && e.kind === 'bolt')).toBe(true);
   });
 
-  it("the staff's long cast bursts and throws a goblin back", () => {
-    const { room, h, t } = onTarget(3);
-    h.weapon = 'staff';
-    Object.assign(t, { x: 9, y: 6, hp: 500, maxHp: 500 });
-    const ev = charged(room, 1.7);
-    expect(ev.some((e) => e.k === 'burst')).toBe(true);
-    expect(t.y).toBeLessThan(5.5);
-  });
-
-  it("the rod's lance runs through a line", () => {
-    const { room, h } = onTarget(3);
-    const [a, b] = [room.enemies[3], room.enemies[4]];
-    h.weapon = 'rod';
-    Object.assign(a, { x: 9, y: 6, hp: 200, maxHp: 200 });
-    Object.assign(b, { x: 9, y: 3.5, cooldown: 99, act: 'stunned', actDur: 99, hp: 200, maxHp: 200 });
-    charged(room, 1.1);
-    expect(a.hp).toBeLessThan(200);
-    expect(b.hp).toBeLessThan(200);
-  });
-
   it("the mace's third blow heals; the held smite falls on the goblin and stuns it", () => {
     const { room, h, t } = onTarget(3);
     h.weapon = 'mace';

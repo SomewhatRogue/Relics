@@ -14,6 +14,7 @@ import { pose } from '../held';
 import { drawHook } from '../relicsdraw';
 import { drawStatus } from '../status';
 import { drawLoad } from '../xbowmark';
+import { drawBladeMark } from '../blademark';
 import { houseAlight, kindling } from '../../shared/kindling';
 import { drawGlint, drawHouseSmoke, drawKindling } from '../kindledraw';
 import { drawLife } from '../streetlife';
@@ -78,6 +79,7 @@ export function drawExtras(g: CanvasRenderingContext2D, x: Extra): void {
   if (BOXFIGS) for (const h of room.heroes) {
     const [hx, hy] = lerp('h:' + h.id, h.x, h.y), [sx, sy] = P(hx, up(h.z), hy);
     drawLoad(c, h, sx, sy);
+    drawBladeMark(c, h, sx, sy, room.time);
   }
   // The relic held up over your head in a turning ring of light (the wood's find).
   const me = room.heroes.find((h) => h.id === x.meId);

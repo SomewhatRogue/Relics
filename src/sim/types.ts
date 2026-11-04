@@ -226,6 +226,13 @@ export interface Hero extends Body {
   tempoUntil: number;
   /** A Mage just turned element: its next spell is primed (CHANNEL.primed). */
   primed?: boolean;
+  /** The spellblade (sim/spellblade.ts): its charge (0 to 1); wreathed swings left, until when, in which
+   *  element; whether the swing in hand is a wreathed one. */
+  bladeCharge?: number;
+  wreathe?: number;
+  wreatheUntil?: number;
+  wreatheEl?: Augment;
+  wreathed?: boolean;
   /** Primed spells left (TWICE PRIMED: two). */
   primeLeft?: number;
   maxHp: number;
@@ -425,8 +432,11 @@ export interface Zone {
   owner: string;
   el: Augment;
   /** Not blessed ground but a skill's area (sim/areas.ts): a Ranger's volley (falling from `at`), a
-   *  Mage's fire ring burning on. */
-  kind?: 'volley' | 'fire' | 'sentry';
+   *  Mage's fire ring burning on, a staff's wall of its element (sim/staffwall.ts). */
+  kind?: 'volley' | 'fire' | 'sentry' | 'wall';
+  /** A wall's half depth (its half length is `r`, its face along (ax, ay)), and raised on the flash. */
+  th?: number;
+  big?: boolean;
   /** A wind-up bow's aim (for drawing it turned to what it shoots). */
   ax?: number;
   ay?: number;
@@ -469,6 +479,14 @@ export type FightEvent =
   | { k: 'snareset' | 'bark' | 'yelp'; x: number; y: number }
   /** The Mage's channel: its spells now `el`, the first one primed. */
   | { k: 'channeled'; x: number; y: number; el: string }
+  /** The Mage's kits (sim/spells.ts, staffwall.ts, spellblade.ts): magic spent (`n`), a spell fizzled for
+   *  want of it, a blow broken off by a wand's spark, a staff's slash or a blade's wave (along dx, dy), a
+   *  wall raised (`len` long, `big` on the flash), the blade wreathed, full of charge, a blow caught on it. */
+  | { k: 'magic'; x: number; y: number; n: number }
+  | { k: 'fizzle' | 'interrupt' | 'bladefull' | 'caught'; x: number; y: number }
+  | { k: 'slash' | 'bladewave'; x: number; y: number; dx: number; dy: number; el: Augment }
+  | { k: 'wallup'; x: number; y: number; dx: number; dy: number; el: Augment; len: number; big: boolean }
+  | { k: 'wreathe'; x: number; y: number; el: Augment }
   | { k: 'weapon'; x: number; y: number; name: string }
   | { k: 'throw' | 'pinned' | 'javwall' | 'javstick' | 'hookfire' | 'latch' | 'yank' | 'land'; x: number; y: number; dx: number; dy: number }
   | { k: 'relic' | 'loot'; x: number; y: number; name: string }
@@ -561,6 +579,8 @@ export interface Bolt {
   hobble?: boolean;
   /** A Mage's frost burst: freezes solid at once (frost twice). */
   freeze?: boolean;
+  /** A wand's: landing on a goblin mid wind-up, it breaks the blow off (sim/spells.ts). */
+  interrupts?: boolean;
   /** A thrown flask's potion. */
   potion?: PotionId;
   /** The Jealous Rod: this shot jumps to every goblin near what it hits. */

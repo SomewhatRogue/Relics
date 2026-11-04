@@ -9,8 +9,8 @@ import { burst, ready, tone } from './sfx';
 type Kit = 'sword' | 'greatsword' | 'spear' | 'daggers' | 'mace' | 'rapier' | 'flail' | 'blade' | 'shot';
 const kitOf = (src?: string): Kit =>
   src === 'sword' || src === 'greatsword' || src === 'spear' || src === 'daggers' || src === 'mace' || src === 'rapier' || src === 'flail' ? src
-    : src === 'poisoner' ? 'daggers' : src === 'censer' ? 'sword'
-    : src === 'longbow' || src === 'shortbow' || src === 'crossbow' || src === 'wand' || src === 'staff' || src === 'rod' ? 'shot' : 'blade';
+    : src === 'poisoner' ? 'daggers' : src === 'censer' || src === 'spellblade' ? 'sword' : src === 'staff' ? 'mace'
+    : src === 'longbow' || src === 'shortbow' || src === 'crossbow' || src === 'wand' ? 'shot' : 'blade';
 
 /** A blow swung (melee kits; ranged and spell kits sound on their shot instead). */
 export function swingSound(src: string, heavy: boolean): void {
@@ -69,7 +69,7 @@ export function shotSound(kind: string, src?: string): void {
 export function chargedSound(src: string): void {
   if (!ready()) return;
   if (src === 'longbow' || src === 'shortbow') return burst('bandpass', 400, 900, 8, 0.25, 0.2), tone('triangle', 1320, 1760, 0.12, 0.15);
-  if (src === 'staff' || src === 'rod' || src === 'wand') return tone('sine', 440, 880, 0.15, 0.3), tone('sine', 660, 1320, 0.08, 0.3);
+  if (src === 'staff' || src === 'spellblade' || src === 'wand') return tone('sine', 440, 880, 0.15, 0.3), tone('sine', 660, 1320, 0.08, 0.3);
   tone('triangle', 1320, 1760, 0.2, 0.2);
 }
 
@@ -77,7 +77,7 @@ export function chargedSound(src: string): void {
 export function blockSound(src: string): void {
   if (!ready()) return;
   if (src === 'sword') return tone('triangle', 520, 480, 0.35, 0.25), burst('bandpass', 1800, 900, 4, 0.4, 0.1), tone('sine', 1560, 1500, 0.08, 0.4);
-  if (src === 'greatsword' || src === 'spear' || src === 'daggers' || src === 'rapier' || src === 'poisoner' || src === 'censer') return tone('sine', 2200, 2150, 0.12, 0.35), burst('bandpass', 3000, 1500, 5, 0.35, 0.06);
+  if (src === 'greatsword' || src === 'spear' || src === 'daggers' || src === 'rapier' || src === 'poisoner' || src === 'censer' || src === 'spellblade') return tone('sine', 2200, 2150, 0.12, 0.35), burst('bandpass', 3000, 1500, 5, 0.35, 0.06);
   tone('triangle', 180, 120, 0.5, 0.12), burst('bandpass', 1400, 700, 3, 0.4, 0.1);
 }
 

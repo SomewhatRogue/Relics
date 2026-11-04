@@ -30,7 +30,7 @@ const ICONS: Record<string, Paint> = {
   poisoner: (px, line) => { line(9, 2, 4, 7, M); line(3, 8, 1, 10, W); px(4, 6, G), px(3, 7, G); line(1, 2, 10, 11, WD); px(0, 1, '#9be040'), px(1, 1, '#6ab82a'); },
   wand: (px, line) => { line(2, 10, 8, 4, W); px(9, 3, '#9fe8ff'), px(10, 2, '#fff'), px(11, 1, '#9fe8ff'), px(10, 4, '#9fe8ff'), px(8, 2, '#9fe8ff'); },
   staff: (px, line) => { line(1, 11, 8, 4, W); for (const [x, y] of [[9, 1], [10, 1], [9, 2], [10, 2], [8, 2], [11, 2], [9, 3], [10, 3]]) px(x, y, '#b57aff'); px(9, 1, '#fff'); },
-  rod: (px, line) => { line(1, 11, 9, 3, MD); line(2, 11, 10, 3, M); px(10, 2, '#ff9a3c'), px(11, 1, '#ffd27a'), px(9, 2, '#ff9a3c'), px(10, 1, '#ff9a3c'); },
+  spellblade: (px, line) => { line(3, 8, 10, 1, W); line(4, 8, 11, 1, '#b57aff'); line(2, 6, 5, 9, M); line(1, 10, 3, 8, WD); px(11, 0, '#fff'); },
   mace: (px, line) => { line(1, 11, 7, 5, W); for (let y = 1; y < 6; y++) line(6, y, 10, y, y % 2 ? M : MD); px(8, 0, M), px(11, 3, M), px(5, 3, M); },
   flail: (px, line) => { line(0, 11, 4, 7, W); line(4, 7, 7, 5, MD); for (let y = 2; y < 6; y++) line(7, y, 10, y, M); px(11, 3, M), px(8, 1, M); },
   censer: (px, line) => { line(2, 0, 6, 4, MD); for (let y = 5; y < 10; y++) line(4, y, 9, y, y === 5 ? G : C); px(6, 7, '#ff9a3c'), px(7, 7, '#ffd27a'), px(5, 10, C), px(8, 10, C); },

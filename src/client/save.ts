@@ -16,7 +16,7 @@ export interface Save { heroes: Profile[]; current: number; world: WorldState; s
 
 /** Fill in fields a saved hero predates. */
 const hero = (old: Partial<Profile>): Profile => {
-  // The hand crossbow is the poisoner's kit now (shared/oldkits.ts).
+  // The hand crossbow is the poisoner's kit now, the lance rod the spellblade (shared/oldkits.ts).
   const p = renameKits(old);
   const cls = p.cls ?? (p.weapon ? WEAPONS[p.weapon].cls : 'WARRIOR');
   const out = { ...newProfile(cls, p.name), ...p, cls };

@@ -154,7 +154,7 @@ export function drawBolt(c: Ctx, b: Bolt, x: number, y: number): void {
   c.glow.fillRect(Math.round(x), Math.round(ty), 1, 1);
 }
 
-const KIT_COL: Record<string, string> = { sword: '#dfe6ec', greatsword: '#eef2f5', spear: '#8b6a3a', daggers: '#e6ecf0', longbow: '#8b6a3a', shortbow: '#6b4a2b', crossbow: '#5a3d22', wand: '#6b4a2b', staff: '#6b4a2b', rod: '#9aa3ad', mace: '#9aa3ad' };
+const KIT_COL: Record<string, string> = { sword: '#dfe6ec', greatsword: '#eef2f5', spear: '#8b6a3a', daggers: '#e6ecf0', longbow: '#8b6a3a', shortbow: '#6b4a2b', crossbow: '#5a3d22', wand: '#6b4a2b', staff: '#6b4a2b', spellblade: '#cfd6e8', mace: '#9aa3ad' };
 const FORGED: Record<string, string> = { ember: EL_COL.fire, rime: EL_COL.frost, storm: EL_COL.storm };
 
 /** Gold on the floor (a few coins, glinting) or a potion bottle in its colour. */
