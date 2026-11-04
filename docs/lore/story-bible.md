@@ -155,7 +155,7 @@ most Want among the heroes is the one the bells don't spare).
   keeps a little of every crumb: to the hungry it smells more like the Lantern each time, and they
   can't tell kept from given. A full censer is the nearest thing to the Lantern outside the walls.
 - **On screen:** "coals" and "the censer", never shard, sliver, crown or the Want, and never why the
-  hungry come for a Healer, only that they do. Isolde suspects ("I don't ask the coal its business");
+  hungry come for a Healer, only that they do. Isolde suspects, and says it plainly now (Kyle, 2026-11-04: a fed censer heals stronger and the goblins come sooner; "keep your back to a wall");
   Odric knows and changes the subject.
 - **Open question for Kyle (chapter 5):** do censer coals count toward the Want when the bells "don't
   spare" the one with the most? Recorded answer for now: no, because they're spent on others. Darker
@@ -164,7 +164,7 @@ most Want among the heroes is the one the bells don't spare).
   town that's now a larder; nobody makes it now), Hungry (the town's word for goblins). Hungry gear is
   plain steel that sat in a butcher's fist beside a sliver until the hunger took: the same stuff as a
   relic, a different kind of thing. "Steel", not scrap, is what melting gives (scrappers are goblins).
-  Sister's Bitter (Agne makes it), Wall Brandy (the watch drinks it), Lamp Oil (the hungry hoard it).
+  Sister's Bitter (Agne makes it), Wall Brandy (the watch drinks it). Lamp Oil is the hungry's hoard, in barrels on jobs; nobody sells it in a flask any more (Kyle, 2026-11-04).
 - **The Want, as built:** a hidden number per hero; grows with hungry gear worn and used, falls with
   gold given at the Lantern and hungry gear given up at the church (which feeds the Lantern). Its tell
   is the eyes. Turning into a named butcher is still Kyle's call.
@@ -178,8 +178,8 @@ most Want among the heroes is the one the bells don't spare).
   count of the dead. The hungry left that field half-picked and went north together (unexplained).
   Wickhold owes Hew for four loads of charcoal. Orla of the watch knew him by his boots. The boots were resoled twice and let the wet in at the left heel; he gives them to the hero, who reaches Wickhold with that foot wet through. He had been round every one of the field's dead since first light before he found the hero alive. He carries cordwood up the hill to his hut. The Stoker has no spoken line. It counts the eleven Hew burned as its own meat lost, but nothing on screen says so; it bellows and attacks. Its only voice in the prologue is the bellow and its calls for help. Hew sizes up each class when he finds them: a Warrior may have been with the column (he leaves it unasked); a Healer's censer is lit at the Lantern, not off a kiln; he keeps a hand on his purse around a Rogue and assumes they've had practice; a Ranger's bowstring got a soaking; he doesn't hold with magic (a backwoods view, not the town's: Wickhold has Vell's tower) and a Mage's focus is still humming. The hero's gender is never stated in the prologue; Hew calls them "stray". Hew's death, as built (changed by Kyle 2026-11-04): round the back of his hut by the cordwood, the Stoker comes up from behind the stack, runs him down and lifts him; he shouts to the hero to get the count to Odric, then screams; his head bursts; it throws him into the front wall of his own hut and he slides down it, leaving it red; the Stoker bellows, with no words, and attacks. (Before: it threw him onto the cordwood like a log and spoke its line.) No spoken or written line ever mentions the head. The Stoker's relic is the Relic Javelin, grown in under its breastbone, levered out with Hew's poker; every hero's first relic. The grappling hook is the next one found. The hero walks west out of the Greyhollow wood to Wickhold (Greyhollow lies east of the town; the hungry from the field went north). Open: does anyone ever burn Hew?
 - **After the wood:** the tally stick has eleven notches; Odric cuts the twelfth, for Hew, when it's handed
-  over. Odric knew Hew and owed him a beer he never came in for. Hew calls the hero "stray". A Healer's
-  censer goes cold on the field ("They do"); only the church relights it, and Isolde carries it there herself.
+  over. Odric keeps the count of the dead, and the eleven Hew burned and Hew himself go on it (Kyle, 2026-11-04: no beer; nobody drinks at the church, and "every name he had" is gone). Hew calls the hero "stray". A Healer's
+  censer goes cold on the field ("They do"); only the church relights it, and Isolde carries it there herself. A cold censer heals nobody, and she says so (Kyle, 2026-11-04: say what was lit and what it does; no "off your arse" to a holy warrior).
 
 - **The Ranger's hound** (recorded 2026-11-01; changed by Kyle 2026-11-01): a rough grey wolfhound bred at
   Huntress Maeve's lodge and sold out of it as a pup, and the Ranger's own dog before the column ever set out. It was
@@ -240,9 +240,9 @@ most Want among the heroes is the one the bells don't spare).
 - On-screen terms: the bow's "white flash" at full draw; "blessed ground" and "the ward" for Sanctuary; the Warrior's skill chain is CHARGE OR CRY.
 
 ## Who sells what (recorded 2026-11-02; Kyle's call, lore keeper)
-- Gannet sells Wall Brandy, Lamp Oil and smoke flasks over the bar at the Drowned Rat (what the watch drinks and throws). Dicer Moll plays knucklebones and sells nothing. Who makes the smoke stays unsaid; nothing comes in from outside.
-- Agne sells the Bitter, Gannet the brandy, oil and smoke, Ivo the frost flasks. Goblins drop all of them.
-- Ivo's bench sells frost flasks and rerolls a modifier even while he isn't setting elements.
+- Only two potions (Kyle, 2026-11-04: "just have Bitter (healing) and Brandy"). Agne sells the Bitter; Gannet sells Wall Brandy over the bar at the Drowned Rat. Goblins and chests drop both. The smoke and frost flasks and Lamp Oil in a flask are gone (Lamp Oil to be confirmed with Kyle; oil barrels on jobs stay). Dicer Moll plays knucklebones and sells nothing.
+- Ivo's bench rerolls a modifier even while he isn't setting elements, and sells nothing else.
+- (Before: Gannet also sold Lamp Oil and smoke flasks, Ivo frost flasks.)
 - Dessa is one of the traders camped outside the north gate; her Market Row stall opens only once the council lets the traders in. Tobin's stall is there either way.
 - Wall Brandy (Kyle's call): doubles your damage, but halves your speed and the size of your stamina bar, for a few seconds.
 
@@ -284,8 +284,8 @@ most Want among the heroes is the one the bells don't spare).
 
 ## The Cleric's weapons (recorded 2026-11-04; Kyle's call, lore keeper)
 - Mace, censer (sword and censer), flail. On-screen terms: SMITE, SNAGGED, and "shield" / "shields" for the gold light on friends.
-- A Cleric spares friends and anyone freed from a cage (SPARES FRIENDS, like relics): their own way, not shard-stuff. "Mercy" stays off screen; the one mercy in this world is the Unmaking.
-- The shield of gold light is never called "holy" or "blessed" on screen; it's gold because it spares friends, like relics. A smite is never "called down" and never comes from a god: its light is the censer's.
+- A Cleric spares friends and anyone freed from a cage: their own way, not shard-stuff. On the class card it is DIVINE SAVIOR, "Cannot harm allies" (Kyle, 2026-11-04; was SPARES FRIENDS). "Mercy" stays off screen; the one mercy in this world is the Unmaking.
+- **The Cleric is a holy warrior** (Kyle, 2026-11-04, overriding the lore keeper's "never holy"): "Holy warrior, last carriers of the sacred light. Heals friends, smites foes." and "What you lack in speed you make up for in divinity." Clerics carry the sacred light (the Lantern's, through the censer), smite with it, and the card may call that divinity. Still no named god on screen, and blessed ground stays Sanctuary's word. (Before: the gold shield was never "holy" on screen and a smite never came from a god.)
 - Coals on the floor are spilled from the Lantern-lit censer and burn out. No line says they spend what the Cleric fed the censer.
 
 ## The edge of the map (recorded 2026-11-04; Kyle's call, lore keeper)
@@ -294,3 +294,9 @@ most Want among the heroes is the one the bells don't spare).
 - In town you're just set back: nothing out there takes you within the walls.
 - On screen it's only ever "something" and "it", never "giant".
 - Keep it apart from the thing past the wall that whistles back at the watch, and from the old shard "down there first" at the Copperdeep. No line hints they're the same; joining them is Kyle's call, made on purpose.
+## The class card (recorded 2026-11-04; Kyle's words)
+- Each class shows a tagline under its name: WARRIOR "A bulwark or a blade, strong enough to throw men."; RANGER "Sword and bow, accompanied by a lifelong friend."; ROGUE "From the shadows, fast and fragile."; MAGE "Master of elements, powerful caster."; CLERIC "Holy warrior, last carriers of the sacred light. Heals friends, smites foes."
+- The Ranger's hound is "a lifelong friend": "Nips at their heels, smart enough to not go down" (it still never dies; see the hound above).
+- A Warrior is "strong enough to throw men" (the grab and throw). The Rogue is "weak head on, twice as strong from behind".
+- The Mage's storm spells on the card are Spark (tap) and Lightning Bolt (hold).
+- The pitch lines and the "can't" lines are gone from the card (Kyle cut both).

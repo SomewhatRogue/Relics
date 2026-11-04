@@ -7,7 +7,7 @@ import { bagFull } from '../shared/bags';
 import type { Game } from './game';
 import type { Good } from './shopui';
 import { SHOPW } from './shopwords';
-import { HOW, armorHow, card, compare } from './card';
+import { weaponHow, armorHow, card, compare } from './card';
 import { itemIcon, potionIcon } from './itemicons';
 
 const p = (s: string) => `<p>${s}</p>`;
@@ -29,10 +29,10 @@ export function gearGood(g: Game, quality: 'fine' | 'forged', what: { kit?: Weap
   const pr = g.profile, cost = SHOP[quality], slot = what.kit ? 'weapon' : what.armor ? 'armor' : 'ring';
   const shown: Item = { slot, kit: what.kit, armor: what.armor, quality, traits: [] };
   const name = what.kit ? WEAPONS[what.kit].name : what.armor ? ARMOR[what.armor].name : 'A RING';
-  const how = what.kit ? HOW[what.kit] : what.armor ? armorHow(what.armor, pr.cls) : '';
+  const how = what.kit ? weaponHow(what.kit) : what.armor ? armorHow(what.armor, pr.cls) : '';
   return {
     name, price: cost, icon: itemIcon(shown), col: TIERS[quality].col,
-    about: (how ? p(how) : '') + p(quality === 'fine' ? SHOPW.fine : slot === 'ring' ? SHOPW.ring : SHOPW.forged),
+    about: (how ? `<div class="how">${how}</div>` : '') + p(quality === 'fine' ? SHOPW.fine : slot === 'ring' ? SHOPW.ring : SHOPW.forged),
     why: bagFull(pr) ? SHOPW.packFull : pr.gold < cost ? SHOPW.poor : '',
     buy: () => {
       const it = g.buy(quality, what.kit ?? pr.weapon, slot, what.armor);

@@ -1,0 +1,55 @@
+shared/chatlines.ts:QUICK[1]: Follow me.
+shared/chatlines.ts:QUICK[3]: Ready.
+client/copy.ts:CHURCH.ivo: Oh. That's a hungry one. Don't sleep with it under your pillow.
+client/fx.ts:223: BLOCK
+client/fx.ts:232: PARRY
+client/fx.ts:110: STUNNED
+shared/classes.ts:CLASSES.MAGE.noteLabel: SPELLS
+client/chat.ts:83: Slow down a moment.
+client/chat.ts:140: is muted on this device. Tap or click the name to hear them again.
+shared/classes.ts:CLASSES.HEALER.skill#3: the Censer Light
+client/fx.ts:260: OUT
+client/copy.ts:CHURCH.agne: You've a look about you. Sleep with a candle tonight. Humour me.
+client/fx.ts:172: PINNED
+client/fx.ts:248: WINDED
+shared/chatlines.ts:QUICK[6]: Going in.
+shared/chatlines.ts:QUICK[0]: Help me up!
+shared/classes.ts:CLASSES.MAGE.skill#2: the Fire Ring
+client/fx.ts:208: COUNTER
+client/churchrelics.ts:head#1: Father Odric
+client/copy.ts:CHURCH.hungry: If there's something you're carrying you'd rather not, leave it on the step. I'll see to it.
+client/fx.ts:127: CAN'T BLOCK:
+client/fx.ts:213: BACKSTAB
+client/fx.ts:257: DOWN
+client/chatbox.ts:btn().textContent: CHAT
+shared/classes.ts:CLASSES.MAGE.skill#3: the Storm Tether
+client/fx.ts:241: DODGE
+shared/classes.ts:CLASSES.HEALER.weapon: Mace and censer
+client/fx.ts:237: GUARD BREAK
+shared/classes.ts:CLASSES.MAGE.weapon: Spark wand
+client/fx.ts:124: CAN'T BLOCK: TAP TO PARRY
+client/chatnet.ts:partyRoom: CH
+shared/chatlines.ts:QUICK[4]: Thanks.
+shared/chatrules.ts:36: STRANGER
+shared/chatlines.ts:QUICK[7]: Behind you!
+client/chatbox.ts:type.textContent: TYPE
+client/fx.ts:211: CRIT
+client/fx.ts:244: LAST SECOND
+client/chatbox.ts:say.textContent: SAY
+client/chatbox.ts:LABEL.world: WORLD
+client/churchrelics.ts:head#2: You have {gold} gold.
+client/copy.ts:COAL.line: Your heals are stronger. Goblins notice you from further off and go for you first.
+client/chatbox.ts:LABEL.party: PARTY
+shared/classes.ts:CLASSES.RANGER.noteLabel: HOUND
+client/chatlog.ts:TAG.party: PARTY
+shared/chatlines.ts:QUICK[2]: Wait.
+shared/classes.ts:CLASSES.HEALER.skill#2: the Censer Chain
+client/chatlog.ts:TAG.local: NEAR
+client/fx.ts:192: YANK
+client/fx.ts:263: UP
+client/chatbox.ts:LABEL.local: NEAR
+client/fx.ts:209: BLOCKED
+shared/chatlines.ts:QUICK[5]: Over here!
+client/chatbox.ts:input().placeholder: Say something
+shared/lobby.ts:cleanName: STRANGER
+client/fx.ts:210: AMBUSH

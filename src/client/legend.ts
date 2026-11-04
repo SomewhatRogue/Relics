@@ -12,7 +12,7 @@ import { icon, type IconId } from './icons';
 import { skillCanvas } from './skillicons';
 import { itemIcon, potionIcon } from './itemicons';
 import { relicItemIcon } from './relicicons';
-import { HOLD } from './kitlines';
+import { kitRows } from './kitlines';
 import type { Panel } from './panels';
 import type { Game } from './game';
 
@@ -39,9 +39,9 @@ const round = (ic: CanvasImageSource | null, grade: Face['grade'] = 'iron'): Fac
 async function rows(g: Game, touch: boolean): Promise<Row[]> {
   const me = g.hero, kit = WEAPONS[me.weapon], cls = kit.cls, out: Row[] = [];
   const it = me.arms[me.weapon] ?? ({ kit: me.weapon, traits: [] } as unknown as Item);
-  const ranger = cls === 'RANGER';
+  // The weapon's own rows (kitlines.ts): what a tap does, a hold, and a hold let go on the flash.
   out.push({ face: round(await pic(safe(() => itemIcon(it)))), name: 'ATTACK', key: 'LEFT CLICK',
-    text: kit.reloads ? 'Tap for the short sword. Hold to aim the crossbow, and let go to fire.' : ranger ? 'Tap for the short sword. Hold to draw the bow, and let go to shoot.' : `Tap to strike. Hold and let go for the ${HOLD[me.weapon] ?? 'heavy blow'}.` });
+    text: kitRows(me.weapon).map(([l, v]) => `<i>${l}</i> ${v}`).join('<br>') });
   const guard = kit.catches ? 'catch' : kit.parryOnly && CLASS_GUARD[cls] === 'full' ? 'parry' : CLASS_GUARD[cls];
   if (guard === 'full') out.push({ face: { shape: 'shield', size: 28, grade: 'iron', icon: icon('block') }, name: 'BLOCK', key: 'RIGHT CLICK', text: 'Hold to block. Tap it while the red is flashing white to parry.' });
   if (guard === 'parry') out.push({ face: { shape: 'shield', size: 28, grade: 'iron', icon: icon('parry') }, name: 'PARRY', key: 'RIGHT CLICK', text: "Tap it while the red is flashing white to parry. You can't hold a block." });
@@ -56,7 +56,7 @@ async function rows(g: Game, touch: boolean): Promise<Row[]> {
   const carried = relic ? carriedItem(me) : undefined;
   if (relic) out.push({ face: round(await pic(relicItemIcon(carried ?? ({ kind: relic, charge: 1 } as Parameters<typeof relicItemIcon>[0])))), name: 'RELIC', key: 'R', text: 'The relic you carry. The bar along its foot is how much it has left.' });
   const next = me.belt[0];
-  out.push({ face: { shape: 'orb', size: 30, grade: 'iron', fill: 0.7, liquid: '#a8261c', icon: next ? await pic(potionIcon(next)) : null }, name: 'HEALTH', key: 'Q', text: 'The red is your health. Tap to drink or throw the potion on it, and hold to bring the next one forward. The number is how many you have.' });
+  out.push({ face: { shape: 'orb', size: 30, grade: 'iron', fill: 0.7, liquid: '#a8261c', icon: next ? await pic(potionIcon(next)) : null }, name: 'HEALTH', key: 'Q', text: 'Your health. Tap to drink the potion on it. Hold to bring the next one forward. The number is how many you have.' });
   // The gilt slot: what it can say.
   const ctx: [IconId, string, string, string][] = [
     ['grab', 'GRAB', 'G', "Pick up a stunned goblin, or a small one you've got behind, then press again to throw it." + (cls === 'WARRIOR' ? ' You can lift crates and barrels too.' : '')],

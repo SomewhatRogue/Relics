@@ -1,7 +1,7 @@
 /**
- * The shops that sell over the counter, each laid out by shopui.ts: the Drowned Rat (Gannet's brandy,
- * oil and smoke), the infirmary (Agne's Bitter), Dessa's stall on Market Row (Forged steel), and Ivo's
- * bench at the forge (frost flasks, a modifier turned). The vault, Tobin and Halvard: stores.ts.
+ * The shops that sell over the counter, each laid out by shopui.ts: the Drowned Rat (Gannet's brandy),
+ * the infirmary (Agne's Bitter), Dessa's stall on Market Row (Forged steel), and Ivo's bench at the
+ * forge (a modifier turned). Only Bitter and Brandy are sold (Kyle, 2026-11-04). The vault, Tobin and Halvard: stores.ts.
  */
 import { relicFill, relicName } from '../shared/relicitems';
 import { relicCard } from './reliccard';
@@ -29,11 +29,11 @@ function show(panel: Panel, pl: Place, lines: string, goods: Good[], foot: strin
 const potions = (g: Game, ids: PotionId[]) => ids.map((id) => potionGood(g, id));
 const beltFoot = (g: Game) => `${SHOPW.gold(g.profile.gold)} ${SHOPW.belt(g.profile.belt.length, POTION.belt)}`;
 
-/** Gannet's bar: the rumour of the day, and what the watch drinks and throws. */
+/** Gannet's bar: the rumour of the day, and what the watch drinks. */
 function tavern(g: Game, panel: Panel): void {
   const pr = g.profile, again = () => tavern(g, panel);
   const lines = says('Gannet', RUMOURS[(g.world.day * 5 + pr.runs) % RUMOURS.length]) + (pr.want >= 30 ? dim(CHURCH.gannet) : '');
-  show(panel, PLACES.tavern, lines, potions(g, ['brandy', 'oil', 'smoke']), beltFoot(g), again);
+  show(panel, PLACES.tavern, lines, potions(g, ['brandy']), beltFoot(g), again);
 }
 
 /** Sister Agne, her beds, and the Bitter she makes. */
@@ -74,7 +74,7 @@ function wright(g: Game, panel: Panel): void {
   const relics = '<div class="shop"><h3 class="gh">RELICS</h3>' + pr.relics.map((r) => relicCard(r, { brief: true, tag: r.id === pr.relic ? RELICW.carrying : '' })).join('') +
     (pr.relics.length ? '' : p(RELICW.none)) + skills.map((r) => p(`<b>${RELICS[r].name}</b> (your skill): ${pr.augments[r] ? ELEMENT_NAME[pr.augments[r] as keyof typeof ELEMENT_NAME] : 'plain'}`)).join('') + '</div>';
   const carry = pr.relics.filter((r) => r.id !== pr.relic).map((r) => ({ label: `CARRY THE ${relicName(r)}`, primary: true, act: () => (g.carry(r.id), again()) }));
-  show(panel, PLACES.wright, lines, [potionGood(g, 'frost'), ...turns], beltFoot(g), again,
+  show(panel, PLACES.wright, lines, turns, beltFoot(g), again,
     [...carry, ...skills.map((r) => ({ label: `${RELICS[r].short}: ${FORGE.element}`, disabled: true, act: () => {} }))], relics);
 }
 
