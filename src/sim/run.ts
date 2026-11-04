@@ -13,6 +13,7 @@ import { isDead } from './damage';
 import { ArenaRoom } from './room';
 import { allOut, players, scaleBosses, scaleFoes } from './party';
 import type { FightEvent } from './types';
+import { dreadFor } from './dreadplace';
 
 export interface Run {
   job: Job;
@@ -53,6 +54,7 @@ export function runRoom(run: Run): ArenaRoom {
   const danger = (run.job.place.ruin >= 3 ? 1 : 0) + (run.job.deep ? 1 : 0);
   const room = new ArenaRoom(run.job.seed + run.index, { map: plan.map, foes: scaleFoes(plan.foes, n, run.job.seed * 17 + run.index * 5 + 2), furniture: plan.props, chests: plan.chests, danger });
   scaleBosses(room.enemies, n);
+  room.dread = { by: dreadFor(run.job) };
   return room;
 }
 
@@ -62,6 +64,8 @@ export function interiorRoom(run: Run, blockIndex: number, door: string): ArenaR
   const room = new ArenaRoom(run.job.seed * 3 + run.index * 11 + blockIndex + 7, { map: plan.map, foes: plan.foes, furniture: plan.props, chests: plan.chests });
   room.exitOpen = true;
   room.indoors = true;
+  // Inside a house: the hungry, whatever the place.
+  room.dread = { by: 'swarm' };
   return room;
 }
 

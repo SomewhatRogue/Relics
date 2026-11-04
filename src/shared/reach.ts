@@ -19,13 +19,15 @@ interface Grid { sig: string; cols: number; rows: number; ok: Uint8Array }
 const cache = new WeakMap<GameMap, Grid>();
 
 /** What the grid depends on that can change in play. */
-function sigOf(m: GameMap): string {
+type Pt = { x: number; y: number };
+function sigOf(m: GameMap, seeds: Pt[]): string {
   let s = 0, n = 0;
   for (const b of m.blocks) if (!b.ruined) (n++, (s += b.x * 3.1 + b.y * 7.3 + b.w + b.h));
-  return `${n}:${s.toFixed(2)}:${m.rounds.length}:${m.water?.length ?? 0}:${m.w}x${m.h}`;
+  for (const p of seeds) s += p.x * 11.7 + p.y * 5.3;
+  return `${n}:${s.toFixed(2)}:${m.rounds.length}:${m.water?.length ?? 0}:${m.w}x${m.h}:${seeds.length}`;
 }
 
-function build(m: GameMap): Grid {
+function build(m: GameMap, seeds: Pt[]): Grid {
   const cols = Math.ceil(m.w / CELL), rows = Math.ceil(m.h / CELL), bad = new Uint8Array(cols * rows);
   const span = (a: number, b: number, n: number) => [Math.max(0, Math.floor(a / CELL - 0.5)), Math.min(n - 1, Math.ceil(b / CELL - 0.5))];
   const box = (b: Area) => {
@@ -43,10 +45,13 @@ function build(m: GameMap): Grid {
   for (const c of m.rounds) round(c);
   for (const c of m.braziers) round(c);
   for (const w of m.water ?? []) if (w.deep) box(w);
-  // Flood from the way in (the nearest open cell to it), never cutting a corner between two closed cells.
+  // Flood from the way in (the nearest open cell to it, and to any other spot the room counts as one),
+  // never cutting a corner between two closed cells.
   const ok = new Uint8Array(cols * rows), q: number[] = [];
-  const seed = nearestOpen(bad, cols, rows, m.hero.x / CELL - 0.5, m.hero.y / CELL - 0.5);
-  if (seed >= 0) (ok[seed] = 1), q.push(seed);
+  for (const p of [m.hero, ...seeds]) {
+    const seed = nearestOpen(bad, cols, rows, p.x / CELL - 0.5, p.y / CELL - 0.5);
+    if (seed >= 0 && !ok[seed]) (ok[seed] = 1), q.push(seed);
+  }
   while (q.length) {
     const c = q.pop()!, i = c % cols, j = (c - i) / cols;
     for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) {
@@ -59,7 +64,7 @@ function build(m: GameMap): Grid {
       q.push(k);
     }
   }
-  return { sig: sigOf(m), cols, rows, ok };
+  return { sig: sigOf(m, seeds), cols, rows, ok };
 }
 
 function nearestOpen(bad: Uint8Array, cols: number, rows: number, fi: number, fj: number): number {
@@ -73,9 +78,9 @@ function nearestOpen(bad: Uint8Array, cols: number, rows: number, fi: number, fj
   return best;
 }
 
-function grid(m: GameMap): Grid {
+function grid(m: GameMap, seeds: Pt[] = []): Grid {
   let g = cache.get(m);
-  if (!g || g.sig !== sigOf(m)) cache.set(m, (g = build(m)));
+  if (!g || g.sig !== sigOf(m, seeds)) cache.set(m, (g = build(m, seeds)));
   return g;
 }
 
@@ -87,8 +92,8 @@ function grid(m: GameMap): Grid {
 export const TOUCH = 0.6;
 
 /** On ground that can be walked to, or touching it (`TOUCH`). */
-export function reachable(m: GameMap, x: number, y: number): boolean {
-  const g = grid(m), n = Math.ceil(TOUCH / CELL), ci = Math.round(x / CELL - 0.5), cj = Math.round(y / CELL - 0.5);
+export function reachable(m: GameMap, x: number, y: number, seeds: Pt[] = []): boolean {
+  const g = grid(m, seeds), n = Math.ceil(TOUCH / CELL), ci = Math.round(x / CELL - 0.5), cj = Math.round(y / CELL - 0.5);
   for (let j = cj - n; j <= cj + n; j++) for (let i = ci - n; i <= ci + n; i++) {
     if (i < 0 || j < 0 || i >= g.cols || j >= g.rows || !g.ok[j * g.cols + i]) continue;
     if (Math.hypot((i + 0.5) * CELL - x, (j + 0.5) * CELL - y) <= TOUCH) return true;
@@ -107,10 +112,10 @@ export function inSolid(m: GameMap, x: number, y: number, z = 0): boolean {
 }
 
 /** Out of bounds: past the edge, inside something, on ground nobody can walk to, or in an area marked forbidden. */
-export function outOfBounds(m: GameMap, x: number, y: number, z = 0, forbid: Area[] = []): boolean {
+export function outOfBounds(m: GameMap, x: number, y: number, z = 0, forbid: Area[] = [], seeds: Pt[] = []): boolean {
   if (x < 0 || y < 0 || x > m.w || y > m.h) return true;
   if (forbid.some((a) => inArea(a, x, y))) return true;
-  return inSolid(m, x, y, z) || !reachable(m, x, y);
+  return inSolid(m, x, y, z) || !reachable(m, x, y, seeds);
 }
 
 /** Strictly on an open cell that can be walked to (the hole-hunting script starts heroes only there). */

@@ -250,3 +250,12 @@ export const CATCH = { oil: 0.9, barrel: 0.9, blast: 0.75, edge: 0.12, spark: 0.
  * 26 tall: `wake` is about two screens of a hero's reach, well past any goblin's sight or an arrow's.
  */
 export const SLEEP = { wake: 24, doze: 30 };
+/**
+ * Out of bounds (sim/dread.ts): past a map's edge, inside something solid, or on ground nobody can walk
+ * to (shared/reach.ts). Out there the dread builds a second a second: the warning at once, worse at
+ * `late`, and at `take` the hero is seized and `crush` seconds later crushed (a job's wild places) or
+ * pulled down (its settled ones): downed, and the body put back on the last spot they stood in bounds.
+ * Back in bounds it drains `lift` times as fast as it came. In town and the yard nothing kills: out for
+ * `setback` seconds and you're put back after a dark flicker.
+ */
+export const DREAD = { late: 4, take: 8, crush: 1.1, lift: 5, setback: 1.2 };
