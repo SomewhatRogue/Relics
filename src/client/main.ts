@@ -72,6 +72,7 @@ import { UnitFrame } from './unitframe';
 import { roomsHtml, titleCase } from './tracker';
 import { ObjFlash } from './objflash';
 import { UnlockFlash } from './unlockflash';
+import { KIT } from './kitlines';
 import { ownCue } from './owncues';
 import { Purse } from './purse';
 import { legend } from './legend';
@@ -185,24 +186,6 @@ $('#skipcut').addEventListener('click', () => game.skipCut());
 $('#skipcut').addEventListener('touchstart', (e) => (e.preventDefault(), game.skipCut()), { passive: false });
 $('.tb.use').addEventListener('touchstart', (e) => (e.preventDefault(), use()), { passive: false });
 
-/** One line on how each kit guards and dodges. */
-const KIT: Record<string, string> = {
-  sword: 'BEST GUARD  HOLD: SHIELD BASH, STUNS A CROWD ON THE FLASH  QUICK COUNTER: RIPOSTE',
-  greatsword: 'PARRY ONLY  HOLD: OVERHEAD, SHOCKWAVE ON THE FLASH',
-  spear: 'LONG REACH  HOLD: LUNGE THROUGH THREE, PINS ON THE FLASH',
-  daggers: 'LONG DASH  ONE AT A TIME  BACKSTAB 2.5X',
-  longbow: 'TAP: SHORT SWORD  HOLD: DRAW  LET GO ON THE FLASH TO BLIND',
-  shortbow: 'TAP: SHORT SWORD  HOLD: QUICK SHOT ON THE MOVE',
-  crossbow: 'TAP: SHORT SWORD  HOLD: AIM, LET GO TO FIRE',
-  wand: "SPARKS ON THE MOVE  HOLD: BURST (20 STAMINA), BREAKS BLOWS ON THE FLASH",
-  staff: "CLOSE SLASH  HOLD: WALL (30 STAMINA)",
-  spellblade: "HITS CHARGE IT  HOLD: WREATHE, FREE ON THE FLASH  CATCH AS A BLOW LANDS",
-  mace: 'SHORT REACH  3RD BLOW HEALS  HOLD: SMITE, SHIELDS ON THE FLASH',
-  rapier: 'LONG REACH  DASH  HOLD: LUNGE THROUGH TWO',
-  poisoner: 'SHORT SWORD  DASH  HOLD: POISON DART',
-  censer: 'BEST GUARD  3RD BLOW LEAVES COALS  HOLD: WHIRL, SHIELDS ON THE FLASH',
-  flail: 'SHOVES  2ND BLOW HEALS  HOLD: SPIN, STUNS ON THE FLASH',
-};
 
 let parries = 0;
 const townTips = input.touch
@@ -210,7 +193,7 @@ const townTips = input.touch
   : ['Walk to the JOB BOARD and press E to take a job', 'Walk up into a door to go in. Press E by anyone to talk', 'The FORGE: Halvard upgrades your gear or melts it down for steel', 'The TRAINING HALL: knacks, and the squire takes you to the yard', 'The TOWN HALL: vote on what Wickhold does next'];
 const tips = input.touch
   ? ['Stun or get behind a small goblin, then GRAB it', 'Warriors can GRAB barrels and tables and throw them', 'Break an oil barrel near goblins to set them on fire', 'Holding a goblin? SLAM it down, or THROW it at another', 'POTION drinks or throws the potion at the front of your belt', 'Most item traits pay off when you parry, dodge or hit a PERFECT', 'Cottages and barns hold goblins, and sometimes someone in a cage', 'CLERIC: SANCTUARY blesses the ground and wards whoever is most hurt', 'Oil and fire burn wooden buildings down. Burn out the dens', 'Two frost hits freeze a goblin. A heavy blow then shatters it', 'Fire on a chilled goblin makes STEAM, which stuns. Storm on a burning one makes a FLARE, which knocks goblins back', 'Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'SKILL uses your class skill, which your trainer teaches from level 3', 'Red with a striped edge can\'t be blocked: dodge or walk out of it', 'DEEP jobs end at a named butcher, who always carries a RELIC', 'TWIN DAGGERS: dash behind a goblin and BACKSTAB', 'Push the stick part way to creep. Hit a goblin that hasn\'t seen you for an AMBUSH']
-  : ['G grabs a stunned goblin (or one you got behind). Click to slam, G to throw', 'Warriors: G lifts barrels and tables. Throw them, or slam them down', 'Break an oil barrel near goblins to set them on fire', 'Q drinks or throws the potion at the front of your belt. Hold Q to bring the next one to the front', 'Bows: let go on the white flash for a PERFECT. Hold too long and the shot weakens', 'Walk up into a cottage door to go in. Fire burns buildings down', 'Cleric: E uses SANCTUARY, which blesses the ground and wards whoever is most hurt', 'Two frost hits freeze a goblin. A heavy blow then shatters it', 'Fire on a chilled goblin makes STEAM, which stuns. Storm on a burning one makes a FLARE, which knocks goblins back', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: your class skill. R: a relic, once you have won one on a DEEP job', 'Red with a striped edge can\'t be blocked: SPACE to dodge, or walk out of it', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or spellblade', 'Daggers: dash behind a goblin and BACKSTAB', 'Hold Shift to creep. Hit a goblin that hasn\'t seen you for an AMBUSH', 'Crossbow: hold C to wind it. Wind it all in one go, standing still, and the bolt glints'];
+  : ['G grabs a stunned goblin (or one you got behind). Click to slam, G to throw', 'Warriors: G lifts barrels and tables. Throw them, or slam them down', 'Break an oil barrel near goblins to set them on fire', 'Q drinks or throws the potion at the front of your belt. Hold Q to bring the next one to the front', 'Bows: let go on the white flash for a PERFECT. Hold too long and the shot weakens', 'Walk up into a cottage door to go in. Fire burns buildings down', 'Cleric: E uses SANCTUARY, which blesses the ground and wards whoever is most hurt', 'Two frost hits freeze a goblin. A heavy blow then shatters it', 'Fire on a chilled goblin makes STEAM, which stuns. Storm on a burning one makes a FLARE, which knocks goblins back', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: your class skill. R: a relic, once you have won one on a DEEP job', 'Red with a striped edge can\'t be blocked: SPACE to dodge, or walk out of it', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or spellblade', 'Daggers: dash behind a goblin and BACKSTAB', 'Hold Shift to creep. Hit a goblin that hasn\'t seen you for an AMBUSH', 'Crossbow: hold C to wind it. Wind it all in one go, standing still, and the bolt glints for a shot that hits harder and goes through the whole line'];
 let tipAt = -99, tipI = 0;
 
 function hud(now: number): void {
@@ -315,10 +298,10 @@ function hud(now: number): void {
   cluster?.update(game, spot, busy, now);
   unit.update(game, now);
   // The wood's buttons, flashed gold as each is given (unlockflash.ts); coins and the anvil in town (purse.ts).
-  unlocks.update(game.mode === 'wood' ? game.taught() : null, pr.cls, input.touch, now, (s) => fx.say(toPx(me.x, me.y)[0], toPx(me.x, me.y)[1] - 40, s, '#ffd27a', 2.6));
+  unlocks.update(game.mode === 'wood' ? game.taught() : null, me, input.touch, now, (s) => fx.say(toPx(me.x, me.y)[0], toPx(me.x, me.y)[1] - 40, s, '#ffd27a', 2.6));
   purse.update(game);
   // A laptop's empty crossbow: the key to wind it, on the prompt line.
-  if (!input.touch && $('#prompt').hidden && !busy && game.mode !== 'town' && WEAPONS[me.weapon].reloads && me.xbowEmpty) ($('#prompt').hidden = false), ($('#prompt').textContent = 'C  RELOAD');
+  if (!input.touch && $('#prompt').hidden && !busy && game.mode !== 'town' && WEAPONS[me.weapon].reloads && me.xbowEmpty) ($('#prompt').hidden = false), ($('#prompt').textContent = 'RELOAD: C');
   const list = game.mode === 'town' ? townTips : tips;
   if (now - tipAt > 6) {
     tipAt = now;

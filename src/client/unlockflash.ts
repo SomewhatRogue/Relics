@@ -3,27 +3,42 @@
  * pulses gold for a few seconds with a small label naming it (cluster.css .unlock); on a laptop, which
  * has no buttons, the move and its key are said over your hero instead.
  */
-import { dodgeName, type HeroClass } from '../shared/weapons';
+import { CLASS_GUARD, dodgeName, WEAPONS } from '../shared/weapons';
+import { knows, type Hero } from '../sim/types';
 
 const SECS = 4;
 /** The phone's buttons for each move the wood teaches, and what each is called. */
 const BTN: Record<string, [string, string][]> = {
   attack: [['.tb.attack', 'ATTACK']],
   roll: [['.tb.roll', 'DODGE']],
-  block: [['.tb.block', 'GUARD']],
+  block: [['.tb.block', 'BLOCK']],
   relic: [['.tb.relic', 'SKILL'], ['.tb.relic2', 'RELIC']],
   potion: [['.tb.potion', 'POTION']],
   grab: [['.tb.grab', 'GRAB']],
 };
 /** A laptop's: the move and its key. */
-const KEYS: Record<string, string> = { attack: 'ATTACK: LEFT CLICK', roll: 'DODGE: SPACE', block: 'GUARD: RIGHT CLICK', relic: 'SKILL: E', potion: 'POTION: Q', grab: 'GRAB: G' };
+const KEYS: Record<string, string> = { attack: 'ATTACK: LEFT CLICK', roll: 'DODGE: SPACE', block: 'BLOCK: RIGHT CLICK', relic: 'SKILL: E', potion: 'POTION: Q', grab: 'GRAB: G' };
+/** What this hero's guard is called: BLOCK, PARRY for a parry-only kit, CATCH for the spellblade. */
+function guardName(me: Hero): string {
+  const k = WEAPONS[me.weapon];
+  return k.catches ? 'CATCH' : k.parryOnly || CLASS_GUARD[k.cls] === 'parry' ? 'PARRY' : 'BLOCK';
+}
+/** A laptop's line for a move: the hero's own word for it; the relic lesson names SKILL only once one is known. */
+function keyLine(m: string, me: Hero): string | null {
+  const cls = WEAPONS[me.weapon].cls;
+  if (m === 'roll') return KEYS.roll.replace('DODGE', dodgeName(cls));
+  if (m === 'block') return KEYS.block.replace('BLOCK', guardName(me));
+  if (m === 'relic') return knows(me, 'skill') ? KEYS.relic : me.relics[1] ? 'RELIC: R' : null;
+  return KEYS[m] ?? null;
+}
 
 export class UnlockFlash {
   private had: Set<string> | null = null;
   private until = new Map<HTMLElement, number>();
 
   /** Each frame: `taught` the wood's moves now (null out of the wood). `say` speaks over the hero (laptop). */
-  update(taught: string[] | null, cls: HeroClass, touch: boolean, now: number, say: (s: string) => void): void {
+  update(taught: string[] | null, me: Hero, touch: boolean, now: number, say: (s: string) => void): void {
+    const cls = WEAPONS[me.weapon].cls;
     if (!taught) this.had = null;
     else {
       // (The first frames of the wood, while you lie there, teach nothing: so only what comes after counts.)
@@ -31,13 +46,14 @@ export class UnlockFlash {
       this.had = new Set(taught);
       for (const m of fresh) {
         if (!touch) {
-          if (KEYS[m]) say(m === 'roll' ? KEYS[m].replace('DODGE', dodgeName(cls)) : KEYS[m]);
+          const line = keyLine(m, me);
+          if (line) say(line);
           continue;
         }
         for (const [sel, name] of BTN[m] ?? []) {
           const el = document.querySelector(sel) as HTMLElement | null;
           if (!el) continue;
-          el.dataset.unlock = m === 'roll' ? dodgeName(cls) : name;
+          el.dataset.unlock = m === 'roll' ? dodgeName(cls) : m === 'block' ? guardName(me) : name;
           this.until.set(el, now + SECS);
         }
       }

@@ -107,7 +107,8 @@ most Want among the heroes is the one the bells don't spare).
   town and is now a larder; Dessa's steel came from there. "Something was down there first" at the
   Copperdeep: an old shard, deep, that the goblins found rather than brought. Keep it for later.
 - **No dodge for Warriors and Healers** (recorded 2026-11-01, Kyle's call): they block, and walk out of
-  anything with a striped edge; the wood teaches them to STEP OUT. Every other class dodges its own way:
+  anything with a striped edge; the wood teaches them to WALK OUT. Warriors and Clerics have no dodge
+  button at all (updated 2026-11-04). Every other class dodges its own way:
   the Rogue dashes, the Ranger jumps, the Mage blinks.
 - **Class skills** (recorded 2026-11-01, Kyle's call): a hero comes out of the Greyhollow wood with
   their weapon, their own way out of a blow and the Relic Javelin, and knows no class skill; nothing in the wood
@@ -260,10 +261,11 @@ most Want among the heroes is the one the bells don't spare).
 - The muffled cry and SOMEONE'S IN THERE mean a real captive, always. A mimic cry, if one ever comes, can't use this prompt or this sound.
 - A captive's shouts from a burning house are pain and the cage, never "help me" (that's the mimic's line), so a mimic can't be mistaken for them. They stop when the roof comes in.
 - Open for Kyle: whose woodpile is it? The lore keeper leans to the hungry's own hoard.
+- Nests are spiders', dens are goblins' (recorded 2026-11-04, lore keeper). BURN covers two things only: a spider nest, and the oiled woodpile against a house. Never "goblin nest".
 
 ## The Warrior's weapons (recorded 2026-11-03; Kyle's call, lore keeper)
-- Sword and shield, greatsword, spear. Warriors don't roll: STEP is their own way out of a blow (the STEP OUT the wood teaches).
-- The greatsword can't hold a block, only parry: a greatsword Warrior's whole defence is the parry and the STEP (an exception to "they block").
+- Sword and shield, greatsword, spear. Warriors don't roll and have no dodge button at all: they walk out of a blow (the WALK OUT the wood teaches; updated 2026-11-04).
+- The greatsword can't hold a block, only parry: a greatsword Warrior's whole defence is the parry and walking out (an exception to "they block").
 - On-screen terms: RIPOSTE, PINNED, SHOCKWAVE. A Warrior's shockwave knocks goblins flat, never friends.
 - Open for Kyle: can the spear pin a butcher, or only small goblins (as the Hound does)?
 
@@ -277,7 +279,7 @@ most Want among the heroes is the one the bells don't spare).
 - The focus is the wand, the staff or the spellblade; the lance rod is gone. The spellblade's steel is Halvard's remelted or a pre-war piece, never from outside; the Channel works through it as through any focus.
 - The blade's charge is not a stored spell. Nothing on screen ever says a spell is caught, kept or stored in a blade or focus for later (that's the Blacktongue idea). A caught blow fills the blade; it is never kept in it.
 - A Mage's big spells spend stamina, said as STAMINA on screen, never "magic" (one bar, one name).
-- On-screen terms: CATCH and CAUGHT (the spellblade's perfect), INTERRUPTED (the wand's perfect), WREATHE.
+- On-screen terms: CATCH and CAUGHT (a bonus on the parry window: the spellblade's block, pressed while the red flashes white, catches the blow and fills the blade), INTERRUPTED (the wand's perfect), WREATHE. The spellblade's perfect is the wreathe released on the white flash (updated 2026-11-04).
 - THE JEALOUS ROD is now THE JEALOUS WAND. Open for Kyle: hungry gear is "plain steel that sat in a butcher's fist", and a wand is wood; is it steel-shod, or does the line widen to "gear that sat in a butcher's fist"?
 
 ## The Cleric's weapons (recorded 2026-11-04; Kyle's call, lore keeper)

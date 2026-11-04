@@ -12,7 +12,7 @@ import type { Game } from './game';
 import { MAX_DOWNS } from '../sim/run';
 
 /** What the hearts are, on a tap or a hover (Kyle: keep the words plain). */
-const UPS_SAY = 'Times you can get back up this job';
+const UPS_SAY = 'How many more times you can get back up on this job';
 
 const $ = (s: string) => document.querySelector(s) as HTMLElement;
 

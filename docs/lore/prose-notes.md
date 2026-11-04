@@ -149,6 +149,10 @@ callouts, the job board, party and lobby text, and the church, council and relic
   be clear about anything the player needs to act on. Game text (cards, knacks, buttons, tips,
   stats) is plain, second-person and direct: "you", "your", "friends near you".
 - **Use the same word for the same thing everywhere.** Stamina (not breath or wind), PERFECT (the
-  well-timed block), the white flash (the parry window's cue), health, damage, friends, foes. If a
-  word means a mechanic on one screen, it means the same mechanic on every screen.
+  well-timed block), health, damage, friends, foes. If a word means a mechanic on one screen, it
+  means the same mechanic on every screen.
+- **Two white flashes, two phrasings.** "The white flash" is a hold's cue: let go on it (a bow's
+  draw, the spellblade's wreathe, every "ON THE FLASH" in the kit lines). The parry's cue is always
+  "the red flashes white" (or "while the red is flashing white"): the red telegraph on the floor
+  turning white. Never call the parry cue "the white flash", so the two never blur.
 - **Mercy stays off screen.** The word is reserved for the Unmaking in the story bible.

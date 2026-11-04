@@ -124,7 +124,7 @@ export class Cluster {
     const next = me.belt[0], hp = me.hp / me.maxHp, low = hp < 0.3 && me.hp > 0;
     b.potion.show({ shape: 'orb', size: 32, grade: next ? 'iron' : 'stone', fill: hp, liquid: me.poison ? '#5a8a2a' : '#a8261c', pulse: low && Math.floor(now * 4) % 2 === 0, icon: next ? img(potionIcon(next)) : null }, me.belt.length > 1 ? String(me.belt.length) : '', '', next ? 'Drink or throw ' + next : 'Health');
     b.potion.el.classList.toggle('low', low);
-    // The context slot: help a friend up, set a nest or a house alight, grab, throw; or what's here to use.
+    // The context slot: help a friend up, set a spider nest or a house's woodpile alight, grab, throw; or what's here to use.
     const can = carrying || (me.act === 'idle' && (room.enemies.some((e) => grabbable(me, e, room.time)) || room.props.some((p) => liftable(me, p))));
     const raise = me.act === 'idle' && raisable(me, room.heroes);
     const burn = !raise && (!!torchable(me, room.enemies) || (mode === 'run' && !!kindleable(me, room.map)));
