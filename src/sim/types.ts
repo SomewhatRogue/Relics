@@ -54,7 +54,7 @@ export const NO_INTENT: Intent = { mx: 0, my: 0, ax: 0, ay: 0, attack: false, bl
 export type Learned = 'skill' | 'leave';
 export const knows = (h: { learned?: Learned[] }, l: Learned) => !h.learned || h.learned.includes(l);
 
-export type HeroAct = 'idle' | 'charge' | 'attack' | 'throw' | 'zip' | 'bash' | 'roll' | 'step' | 'hurt' | 'stun' | 'down' | 'carry' | 'slam';
+export type HeroAct = 'idle' | 'charge' | 'attack' | 'throw' | 'zip' | 'bash' | 'roll' | 'hurt' | 'stun' | 'down' | 'carry' | 'slam';
 
 /** Anything that can be pushed: a slide (knockback) decays each tick. */
 export interface Body {
@@ -511,7 +511,7 @@ export type FightEvent =
   | { k: 'burst'; x: number; y: number; r: number; el: Augment }
   | { k: 'shock' | 'beam' | 'boltline'; x: number; y: number; x2: number; y2: number }
   | { k: 'heal'; x: number; y: number; n: number }
-  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle' | 'lift' | 'oilfire' | 'freed' | 'exitopen' | 'blaze' | 'chop' | 'denspawn' | 'hallow' | 'ward' | 'warded' | 'reflect' | 'wardbreak' | 'spotted' | 'skewer' | 'envenom' | 'step' | 'riposte' | 'shieldbash' | 'quake' | 'pin' | 'blinded' | 'wind' | 'loaded' | 'glint' | 'trueshot' | 'holyshield' | 'shieldsoak' | 'shieldgone' | 'coalburst' | 'coalflare' | 'snag' | 'flailstun' | 'holysmite' | 'shrug'; x: number; y: number }
+  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle' | 'lift' | 'oilfire' | 'freed' | 'exitopen' | 'blaze' | 'chop' | 'denspawn' | 'hallow' | 'ward' | 'warded' | 'reflect' | 'wardbreak' | 'spotted' | 'skewer' | 'envenom' | 'riposte' | 'shieldbash' | 'quake' | 'pin' | 'blinded' | 'wind' | 'loaded' | 'glint' | 'trueshot' | 'holyshield' | 'shieldsoak' | 'shieldgone' | 'coalburst' | 'coalflare' | 'snag' | 'flailstun' | 'holysmite' | 'shrug'; x: number; y: number }
   /** A goblin retching up a perfect dart's poison, facing (dx, dy) (sim/venom.ts). */
   | { k: 'puke'; x: number; y: number; dx: number; dy: number }
   | { k: 'collapse'; x: number; y: number; w: number; h: number }

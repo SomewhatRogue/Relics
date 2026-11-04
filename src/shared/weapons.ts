@@ -72,7 +72,7 @@ export interface Heavy extends Swing {
  * face and keeps you facing; 'dash' is a fast, long, low run. Untouchable between iFrom and iTo.
  */
 export interface Dodge {
-  kind: 'roll' | 'backstep' | 'dash' | 'blink' | 'step';
+  kind: 'roll' | 'backstep' | 'dash' | 'blink';
   distance: number;
   time: number;
   iFrom: number;
@@ -306,8 +306,10 @@ export const CLASS_ORDER: HeroClass[] = ['WARRIOR', 'RANGER', 'ROGUE', 'MAGE', '
  * unblockable blow they step out of on their feet. The light classes dodge and can't hold a guard.
  */
 /** What a class's dodge button says on a phone. */
-export const dodgeName = (cls: HeroClass): string => ({ ROGUE: 'DASH', RANGER: 'JUMP', MAGE: 'BLINK', WARRIOR: 'STEP' } as Partial<Record<HeroClass, string>>)[cls] ?? 'ROLL';
+export const dodgeName = (cls: HeroClass): string => ({ ROGUE: 'DASH', RANGER: 'JUMP', MAGE: 'BLINK' } as Partial<Record<HeroClass, string>>)[cls] ?? 'ROLL';
 export const CLASS_DODGES: Record<HeroClass, boolean> = { WARRIOR: false, HEALER: false, ROGUE: true, RANGER: true, MAGE: true };
+/** What the dodge button does for this kit: its own dodge, or nothing (a Warrior or Healer has none). */
+export const dodgeOf = (w: Weapon): Dodge | undefined => (CLASS_DODGES[w.cls] ? w.dodge : undefined);
 export const CLASS_GUARD: Record<HeroClass, 'full' | 'parry' | 'none'> = { WARRIOR: 'full', HEALER: 'full', ROGUE: 'none', RANGER: 'parry', MAGE: 'none' };
 /** The Mage's blink leaves an image of them where they stood: goblins near it go for it instead. */
 export const DECOY = { time: 2.5, lure: 5 };

@@ -8,7 +8,7 @@ import type { Move } from '../sim/wood';
 import { dodgeName } from '../shared/weapons';
 import { finish, speak, typing } from './speech';
 
-const NAME: Record<Move, string> = { move: 'MOVE', step: 'STEP OUT', attack: 'ATTACK', roll: 'DODGE', block: 'BLOCK', parry: 'PARRY', skill: 'SKILL', relic: 'RELIC', grab: 'GRAB AND THROW', backstab: 'BACKSTAB', heavy: 'FULL SHOT', slip: 'LAST SECOND' };
+const NAME: Record<Move, string> = { move: 'MOVE', step: 'WALK OUT', attack: 'ATTACK', roll: 'DODGE', block: 'BLOCK', parry: 'PARRY', skill: 'SKILL', relic: 'RELIC', grab: 'GRAB AND THROW', backstab: 'BACKSTAB', heavy: 'FULL SHOT', slip: 'LAST SECOND' };
 const KEY: Record<Move, [string, string]> = {
   move: ['W A S D', 'THE STICK, LEFT'],
   step: ['W A S D', 'THE STICK, LEFT'],

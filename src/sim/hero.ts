@@ -177,7 +177,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   h.actT += dt;
   h.moving = false;
   h.blocking = false;
-  if (h.act !== 'roll' && h.act !== 'step' && h.act !== 'down' && h.act !== 'zip' && h.act !== 'bash' && slide(h, HERO.radius, dt)) ev.push({ k: 'wallhit', x: h.x, y: h.y });
+  if (h.act !== 'roll' && h.act !== 'down' && h.act !== 'zip' && h.act !== 'bash' && slide(h, HERO.radius, dt)) ev.push({ k: 'wallhit', x: h.x, y: h.y });
 
   if (h.act === 'down') {
     if (h.actT >= h.actDur) Object.assign(h, { act: 'idle', hp: h.maxHp, stamina: HERO.stamina, actT: 0 });
@@ -188,11 +188,11 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     return;
   }
   const w = WEAPONS[h.weapon];
-  // A Warrior's dodge button is a short step (shared/warrior.ts); a Healer's does nothing.
-  const dodge = dodgeOf(w) ?? w.dodge;
+  // A Warrior's or Healer's dodge press does nothing (they have no dodge).
+  const dodge = w.dodge;
   const wantsRoll = !!dodgeOf(w) && now - h.rollQueuedAt < INPUT_BUFFER && now - h.lastRollAt >= dodge.cooldown * (1 - statsOf(h).dodge) && h.stamina >= 1 && !h.winded;
-  if (h.act === 'roll' || h.act === 'step') {
-    const k = (h.act === 'step' ? dodge.distance : dodgeReach(h)) / dodge.time;
+  if (h.act === 'roll') {
+    const k = dodgeReach(h) / dodge.time;
     h.x += h.rollDx * k * dt;
     h.y += h.rollDy * k * dt;
     collide(h, HERO.radius);
@@ -342,16 +342,8 @@ function startSwing(h: Hero, i: number, inp: Intent, enemies: Enemy[], now: numb
 }
 
 function startRoll(h: Hero, inp: Intent, now: number, ev: FightEvent[]): void {
-  const dodge = dodgeOf(WEAPONS[h.weapon]) ?? WEAPONS[h.weapon].dodge, kind = dodge.kind;
+  const dodge = WEAPONS[h.weapon].dodge, kind = dodge.kind;
   let x = inp.mx, y = inp.my;
-  // A Warrior's step: where you push (back from where you face, with no push), still facing; no protection.
-  if (kind === 'step') {
-    if (Math.hypot(x, y) < 0.1) (x = -h.fx), (y = -h.fy);
-    const l = Math.hypot(x, y);
-    Object.assign(h, { rollDx: x / l, rollDy: y / l, act: 'step', actT: 0, kvx: 0, kvy: 0, lastRollAt: now, rollX: h.x, rollY: h.y, rollQueuedAt: -9 });
-    spend(h, dodge.stamina, now);
-    return void ev.push({ k: 'step', x: h.x, y: h.y });
-  }
   // A backstep always hops away from where you face, and you keep facing the threat.
   if (kind === 'backstep') (x = -h.fx), (y = -h.fy);
   if (Math.hypot(x, y) < 0.1) (x = h.fx), (y = h.fy);

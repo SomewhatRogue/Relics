@@ -17,8 +17,7 @@ export const ICONS: Record<string, Grid> = {
   // The guard: a heater shield to block, a buckler with a white spark to parry.
   block: ['gggggggggggg', 'suuuuyyuuuus', 'suuuuyyuuuus', 'suuuuyyuuuus', 'syyyyyyyyyys', 'suuuuyyuuuus', 'suuuuyyuuuus', '.suuuyyuuus.', '.suuuyyuuus.', '..suuyyuus..', '...suyyus...', '....ssss....'],
   parry: ['.........W..', '........WWW.', '.........W..', '..gggggg....', '.gsuuuuss...', 'gsuuyyuuss..', 'gsuyyyyuss..', 'gsuuyyuuss..', '.sssuusss...', '..ssssss....', '............', '............'],
-  // The dodges, one each (dodgeName): STEP, JUMP, DASH, BLINK, ROLL.
-  step: ['............', '......LLL...', '......LlL...', '......LlL...', '.ww...LlL...', '......LlL...', '.www..LllL..', '......LlllL.', '..ww..LllllL', '......LLLLLL', '............', '............'],
+  // The dodges, one each (dodgeName): JUMP, DASH, BLINK, ROLL.
   jump: ['.....ww.....', '....wwww....', '...ww..ww...', '..ww....ww..', '.ww......ww.', '............', '.....ww.....', '....wwww....', '...ww..ww...', '..ww....ww..', '............', '.o.o....o.o.'],
   dash: ['............', '.ww...ww....', '..ww...ww...', '...ww...ww..', '....ww...ww.', '.....ww...ww', '....ww...ww.', '...ww...ww..', '..ww...ww...', '.ww...ww....', '............', '............'],
   blink: ['.....p......', '.....p......', '....pPp.....', '..p.pWp.p...', 'pppPWWWPppp.', '..p.pWp.p...', '....pPp.....', '.....p......', '.....p...p..', '........pWp.', '.........p..', '............'],
