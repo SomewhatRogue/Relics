@@ -16,6 +16,7 @@ import type { DrillId } from '../shared/drills';
 import type { Game } from './game';
 import type { Panel } from './panels';
 import { line } from './speech';
+import { labelRows } from './card';
 import { openSecs, section, wireSections } from './trainsections';
 import './trainer.css';
 
@@ -27,13 +28,15 @@ const row = (r: TrainRow) =>
   `<button class="tr-row s-${r.state}" data-row="${r.key}"><span class="tr-n">${r.name}${pips(r.pips)}</span>` +
   `<span class="tr-g">${r.gain || r.now}</span><em class="tr-t">${r.tag}</em></button>`;
 
-/** A skill: what it does; carried, known (tap to carry), or the level and price it's taught at. */
+/** A skill: USE, COOLDOWN and, until it's known, COST (the level and gold it's taught for); carried,
+ *  known (tap to carry), or still to learn. */
 function skillRow(r: TrainRow, carried: RelicId, known: boolean): string {
   const on = known && r.skill === carried;
   const tag = on ? 'CARRYING' : known ? 'CARRY' : r.state === 'buy' ? 'LEARN' : r.tag;
-  const when = known ? '' : `<small class="tr-lv">TAUGHT AT LEVEL ${r.level} FOR ${r.price} GOLD</small>`;
+  const cost = known ? '' : `${r.price} gold, level ${r.level}${r.state === 'needs' ? `, after ${r.needs}` : ''}`;
+  const rows = labelRows([['USE', r.text], ['COOLDOWN', r.skill ? `${RELICS[r.skill].cooldown} s` : ''], ['COST', cost]]);
   return `<button class="tr-skill s-${known ? 'known' : r.state}${on ? ' carried' : ''}" ${known ? `data-carry="${r.skill}"` : `data-row="${r.key}"`}>` +
-    `<span class="tr-n">${r.name}</span><em class="tr-t">${tag}</em><span class="tr-d">${r.text}</span>${when}</button>`;
+    `<span class="tr-n">${r.name}</span><em class="tr-t">${tag}</em><span class="tr-d">${rows}</span></button>`;
 }
 
 const ready = (rs: TrainRow[]) => rs.filter((r) => r.state === 'buy').length;
@@ -57,7 +60,7 @@ export function openTrainer(g: Game, panel: Panel, title: string, who: string, g
   const sNext = nextLevel(skills);
   const skillSum = [known.length ? `CARRYING ${RELICS[carried].name}` : '', `${known.length} OF ${choices.length}`, sNext ? `NEXT AT LEVEL ${sNext}` : ''].filter(Boolean).join(' &middot; ');
   const skillBody = skills.map((r) => skillRow(r, carried, !!r.skill && knowsSkill(p, r.skill))).join('') +
-    (known.length > 1 ? '<p class="tr-note">Tap a skill you know to carry it. You carry one at a time, and changing it here costs nothing.</p>' : '');
+    (known.length > 1 ? '<p class="tr-note">Tap a skill you know to carry it. One at a time; changing is free.</p>' : '');
   // The class's own craft, and the base stats.
   const tech = craft.find((r) => r.id === 'technique')!, cNext = nextLevel(craft);
   const craftSum = `${tech.name} ${tech.rank}/${tech.max}` + (cNext ? ` &middot; NEXT AT LEVEL ${cNext}` : '');

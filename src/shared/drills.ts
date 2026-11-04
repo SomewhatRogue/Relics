@@ -63,6 +63,6 @@ export const TEACHES = { skill: { level: 3, price: 150 }, leave: { level: 5, pri
  *  above; the second from level 5, the third from level 7 (2026-11-02). */
 export const SKILL_STEPS = [TEACHES.skill, { level: 5, price: 250 }, { level: 7, price: 400 }] as const;
 export const LEAVES: Partial<Record<HeroClass, { name: string; short: string; text: string; gain: string }>> = {
-  RANGER: { name: 'SNARE ON THE JUMP', short: 'SNARE', text: 'Jumping back leaves a snare where you stood', gain: 'a snare where you jumped' },
-  MAGE: { name: 'IMAGE ON THE BLINK', short: 'IMAGE', text: 'Blinking leaves an image of you behind, and the goblins go for it', gain: 'an image where you blinked' },
+  RANGER: { name: 'SNARE ON THE JUMP', short: 'SNARE', text: 'Your jump leaves a snare where you stood', gain: 'a snare where you jumped' },
+  MAGE: { name: 'IMAGE ON THE BLINK', short: 'IMAGE', text: 'Your blink leaves an image behind that goblins go for', gain: 'an image where you blinked' },
 };

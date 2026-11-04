@@ -2,24 +2,23 @@
  * Goods as the shop list shows them (shopui.ts): a potion for the belt, or a kind of gear rolled when
  * you buy it (Halvard's Fine, Dessa's Forged). Every number comes from the same tuning the room uses.
  */
-import { ARMOR, LASTS, POTION, POTIONS, SHOP, TIERS, WEAPONS, type ArmorKind, type Item, type PotionId, type WeaponId } from '../shared/tuning';
+import { ARMOR, POTION, POTIONS, SHOP, TIERS, WEAPONS, type ArmorKind, type Item, type PotionId, type WeaponId } from '../shared/tuning';
 import { bagFull } from '../shared/bags';
 import type { Game } from './game';
 import type { Good } from './shopui';
 import { SHOPW } from './shopwords';
-import { weaponHow, armorHow, card, compare } from './card';
+import { weaponHow, armorHow, card, compare, potionRows } from './card';
 import { itemIcon, potionIcon } from './itemicons';
-import { barWords } from '../shared/barword';
 
 const p = (s: string) => `<p>${s}</p>`;
 const dim = (s: string) => `<p class="dim">${s}</p>`;
 
-/** One kind of potion: what it does, how long it lasts, whether it's thrown. */
+/** One kind of potion: EFFECT, LASTS and how it's used, as rows. */
 export function potionGood(g: Game, id: PotionId): Good {
-  const pr = g.profile, po = POTIONS[id], lasts = LASTS[id];
+  const pr = g.profile, po = POTIONS[id];
   return {
     name: po.name, price: po.price, icon: potionIcon(id), col: po.col,
-    about: p(barWords(po.text, pr.cls)) + (lasts ? dim(SHOPW.lasts(lasts)) : '') + (po.thrown && !/thrown/i.test(po.text) ? dim(SHOPW.thrown) : ''),
+    about: potionRows(id, pr.cls),
     why: pr.belt.length >= POTION.belt ? SHOPW.beltFull : pr.gold < po.price ? SHOPW.poor : '',
     buy: () => void g.buyPotion(id),
   };

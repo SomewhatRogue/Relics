@@ -66,6 +66,10 @@ em, i { font-style: normal; }
 .kitrows > div { display: grid; grid-template-columns: 8ch 1fr; column-gap: 8px; align-items: baseline; }
 :is(#panel, #pack, #loot, #title, body) .kitrows b, :is(#panel, #pack, #loot, #title, body) .area b { font: 400 var(--fs-text)/1.3 var(--font-body); letter-spacing: 0.04em; color: var(--bone-dim); }
 .kitrows span { color: var(--bone); line-height: 1.3; }
+/* The same rows elsewhere (card.ts labelRows): hungry gear's GIFT and COST in its reds, a skill's USE /
+   COOLDOWN / COST, a relic's USE / CHARGE, a potion's EFFECT / LASTS. */
+:is(#panel, #pack, #loot, #title, body) .kitrows.hungry b { color: #d8503a; }
+.kitrows.hungry span { color: #ffb0a0; }
 .areas { display: grid; gap: 3px; margin: 6px 0 2px; text-align: left; }
 .area { display: grid; grid-template-columns: 7ch calc(20 * var(--px)) 1fr; column-gap: 8px; align-items: center; }
 .area .pips { display: flex; gap: var(--px); }

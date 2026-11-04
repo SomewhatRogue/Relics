@@ -19,17 +19,17 @@ export const DORMANT_POTIONS: PotionId[] = ['oil', 'frost', 'smoke'];
  */
 export const POTION = { belt: 3, cooldown: 0.8, heal: 40, healTime: 2, brandyTime: 6, brandyDmg: 2, brandySpeed: 0.5, brandyBreath: 0.5, range: 5.5, fallback: 4, flight: 0.45, burst: 1.8, dmg: 8, smokeR: 2.2, smokeTime: 4.5, seen: 1.2 };
 
-/** What each does, in a line (Kyle, 2026-11-02: short and true to the sim; the numbers are POTION's). */
+/** What each does, a few words for the EFFECT row (Kyle, 2026-11-02: short and true to the sim; the numbers are POTION's). */
 export const POTIONS: Record<PotionId, { name: string; short: string; text: string; price: number; thrown: boolean; col: string }> = {
-  bitter: { name: "SISTER'S BITTER", short: 'BITTER', text: `Heals ${POTION.heal} over ${POTION.healTime} seconds and cures poison.`, price: 20, thrown: false, col: '#c0392b' },
-  brandy: { name: 'WALL BRANDY', short: 'BRANDY', text: 'Doubles your damage, but halves your speed and the size of your stamina bar.', price: 15, thrown: false, col: '#d4a537' },
-  oil: { name: 'LAMP OIL', short: 'OIL', text: 'Bursts into flames where it lands and sets goblins on fire.', price: 20, thrown: true, col: '#ff9a3c' },
-  frost: { name: 'FROST FLASK', short: 'FROST', text: 'Chills every goblin it splashes. A second splash freezes them.', price: 25, thrown: true, col: '#9fd0ff' },
-  smoke: { name: 'SMOKE FLASK', short: 'SMOKE', text: 'Goblins can\'t see anyone inside the smoke unless they\'re close.', price: 25, thrown: true, col: '#9a94a8' },
+  bitter: { name: "SISTER'S BITTER", short: 'BITTER', text: `Heals ${POTION.heal}, cures poison`, price: 20, thrown: false, col: '#c0392b' },
+  brandy: { name: 'WALL BRANDY', short: 'BRANDY', text: 'Double damage. Half speed, half stamina', price: 15, thrown: false, col: '#d4a537' },
+  oil: { name: 'LAMP OIL', short: 'OIL', text: 'Bursts into flames where it lands', price: 20, thrown: true, col: '#ff9a3c' },
+  frost: { name: 'FROST FLASK', short: 'FROST', text: 'Chills goblins it splashes. Two splashes freeze', price: 25, thrown: true, col: '#9fd0ff' },
+  smoke: { name: 'SMOKE FLASK', short: 'SMOKE', text: 'Goblins can\'t see anyone in the smoke unless close', price: 25, thrown: true, col: '#9a94a8' },
 };
 
-/** How long a drink lasts, for the card (seconds), when it's not in the text already. */
-export const LASTS: Partial<Record<PotionId, number>> = { brandy: POTION.brandyTime };
+/** How long a drink lasts, for the card's LASTS row (seconds): the Bitter heals over this, the Brandy holds this long. */
+export const LASTS: Partial<Record<PotionId, number>> = { bitter: POTION.healTime, brandy: POTION.brandyTime, smoke: POTION.smokeTime };
 
 /**
  * What goblins leave (sim/pickups.ts): gold `chance` and range by kind (archers a little more; named

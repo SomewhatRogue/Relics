@@ -29,7 +29,7 @@ export const MODS: Record<ModId, { name: string; on: Slot[]; mid: [number, numbe
   draw: { name: 'DRAW', on: ['weapon'], mid: [0.06, 0.12, 0.18, 0.25], unit: '%' },
   parry: { name: 'PARRY', on: ['weapon', 'ring'], mid: [0.02, 0.04, 0.06, 0.08], unit: 's' },
   guard: { name: 'GUARD', on: ['weapon', 'armor'], mid: [0.06, 0.12, 0.18, 0.25], unit: '%' },
-  knock: { name: 'KNOCK', on: ['weapon'], mid: [0.1, 0.2, 0.3, 0.45], unit: '%' },
+  knock: { name: 'KNOCKBACK', on: ['weapon'], mid: [0.1, 0.2, 0.3, 0.45], unit: '%' },
   health: { name: 'HEALTH', on: ['armor', 'ring'], mid: [5, 10, 15, 25], unit: '' },
   tough: { name: 'TOUGHNESS', on: ['armor'], mid: [0.03, 0.05, 0.08, 0.12], unit: '%' },
   breath: { name: 'STAMINA', on: ['armor', 'ring'], mid: [0.05, 0.1, 0.15, 0.25], unit: '%' },
@@ -38,12 +38,12 @@ export const MODS: Record<ModId, { name: string; on: Slot[]; mid: [number, numbe
   focus: { name: 'RECHARGE', on: ['ring'], mid: [0.05, 0.1, 0.15, 0.2], unit: '%' },
   mending: { name: 'HEALING', on: ['weapon', 'ring'], mid: [0.05, 0.1, 0.15, 0.25], unit: '%' },
 };
-/** What each modifier does, in words, for the card (sign shown by the value). */
+/** What each modifier does, a few words after its name and value on the card ('' when the name says it). */
 export const MOD_TEXT: Record<ModId, string> = {
-  damage: 'on every hit, shot and spell', quick: 'faster swings and casts', reach: 'longer reach and shot range', draw: 'faster to charge or draw',
-  parry: 'a longer parry window', guard: 'less damage through a block, and blocking costs less stamina', knock: 'hits knock goblins further', health: 'more health',
-  tough: 'less damage taken', breath: 'comes back faster', foot: 'you move faster', dodge: 'dodge again sooner',
-  focus: 'skill and relic ready again sooner', mending: 'on every heal you give',
+  damage: 'all hits, shots and spells', quick: 'faster swings and casts', reach: 'longer reach and range', draw: 'faster charge and draw',
+  parry: 'longer parry window', guard: 'less damage through a block, cheaper blocks', knock: 'knocks goblins further', health: '',
+  tough: 'less damage taken', breath: 'refills faster', foot: 'move faster', dodge: 'dodge recharges faster',
+  focus: 'skill and relic recharge faster', mending: 'bigger heals',
 };
 /**
  * Whether a modifier can roll for a class: nothing it can't use (Kyle, 2026-11-02). PARRY needs a parry,
