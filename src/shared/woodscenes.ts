@@ -38,7 +38,6 @@ export const VIGNETTE_MARKS: Mark[] = [
   { kind: 'drag', x: 18.7, y: 17.8, w: 0.6, h: 5 },
   { kind: 'blood', x: 46.9, y: 32.3, w: 1.6, h: 0.7 },
   { kind: 'blood', x: 57.4, y: 32.6, w: 1.8, h: 0.8 },
-  { kind: 'trample', x: 56.2, y: 31.2, w: 4, h: 2.6 },
 ];
 export const VIGNETTE_ROUNDS: Round[] = [{ x: 16.5, y: 11.5, r: 0.5, kind: 'cookfire' }];
 

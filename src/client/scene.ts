@@ -34,6 +34,7 @@ import { kindling } from '../shared/kindling';
 import { drawGlint, drawKindling, drawWoodpile } from './kindledraw';
 import { drawHung, drawPot } from './grimdraw';
 import { drawNpc } from './npcs';
+import { vignetteFigs } from './vignettes';
 import { drawCaged, drawSurvivor } from './captives';
 import { behindMarks, drawWays, edgeMark } from './wayout';
 import { drawBoards } from './voteboards';
@@ -314,6 +315,8 @@ export class Scene {
       const at = npcAt(n, room.time), near = !!me && Math.hypot(me.x - at.x, me.y - at.y) <= SPOT_REACH;
       items.push({ y: OY + at.y * PX, draw: () => drawNpc(c, n, OX + at.x * PX - cx, OY + at.y * PX - cy, near && !n.mute, at.fx, !!n.path, at.x) });
     }
+    // The scenes past the wood's trees (vignettes.ts): drawn like anyone, never in the room.
+    for (const f of vignetteFigs(map, room.time, me)) items.push({ y: OY + f.y * PX - (f.floor ? 20 : 0), draw: () => f.draw(c, OX + f.x * PX - cx, OY + f.y * PX - cy) });
     for (const b of map.braziers) items.push({ y: OY + b.y * PX, draw: () => drawBrazier(c, OX + b.x * PX - cx, OY + b.y * PX + 2 - cy, now, brazierOn(map, b)) });
     // What the goblins left that moves: one hung from a hook, the pot on their fire (grimdraw.ts).
     for (const q of map.grim ?? []) {

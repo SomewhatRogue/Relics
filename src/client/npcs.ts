@@ -60,6 +60,9 @@ SPRITES.child = makeSprite(9, 11, [
   ['p', 3, 3, '#141218'], ['p', 5, 3, '#141218'], ['r', 3, 0, 4, 1, '#8a5a2a'],
 ]);
 
+/** Someone's sprite by their look (the soldier past the trees in the wood is drawn from it: vigshots.ts). */
+export const personSprite = (look: string): Sprite => SPRITES[look] ?? SPRITES.villager;
+
 /** Someone standing about, breathing; a gold mark overhead says you can talk to them, their name when you're close. */
 /** One of the column's dead: on their back or side, in what they bled. */
 function drawCorpse(c: Ctx, s: Sprite, x: number, y: number, n: Npc): void {

@@ -9,7 +9,7 @@ const only = process.argv[4] ? process.argv[4].split(',') : null;
 /** name: [x, y, seconds to let a scene run]. */
 const SPOTS = {
   field: [12, 30, 1], path: [30, 33, 1], 'path-gate': [33, 27, 1], clearing: [32, 19, 1], stream: [50, 20, 1], hut: [52, 9, 1],
-  carcass: [6, 26.5, 2], drag: [27, 37, 3], deer: [40, 33, 5], spit: [30, 13, 2], soldier: [58, 25, 6],
+  carcass: [7, 26.5, 2], drag: [18, 26.5, 5], spit: [17, 6.5, 2], deer: [49, 27.5, 4], soldier: [58, 27.5, 4], 'soldier-end': [58, 27.5, 6],
 };
 
 (async () => {

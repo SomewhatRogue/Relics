@@ -2,7 +2,7 @@
  * Who stands in the 2.5D view as a flat figure (figs3d.ts), each drawn by the very code the flat view
  * draws them with (scene.ts): heroes and their hounds, a Mage's blink image, other players in town,
  * goblins of every kind and the butcher and the Stoker (with what's on them, status.ts), spiders and
- * nests, the freed, and the map's people (Wickhold's folk, Hew, the dead). Positions eased between
+ * nests, the freed, the map's people (Wickhold's folk, Hew, the dead), and the scenes past the wood's trees. Positions eased between
  * the room's ticks as everywhere else. Only draws.
  */
 import type { ArenaRoom } from '../../sim/room';
@@ -14,6 +14,7 @@ import { drawHero } from '../actors';
 import { asleep, drawEnemy, drawHeld } from '../foes';
 import { drawHound } from '../hound';
 import { drawNpc } from '../npcs';
+import { vignetteFigs } from '../vignettes';
 import { drawSurvivor } from '../captives';
 import { drawStatus } from '../status';
 import type { Lerp } from './actors3d';
@@ -57,6 +58,8 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
     const [x, y] = lerp('s:' + s.id, s.x, s.y);
     f.put('s' + s.id, x, lift(s.z), y, (c, px, py) => drawSurvivor(c, s, px, py, t), { pool: s.dead ? 0 : 0.2, bias: s.dead ? -0.3 : 0 });
   }
+  // The scenes past the wood's trees (../vignettes.ts).
+  for (const g of vignetteFigs(map, t, me)) f.put('w' + g.key, g.x, 0, g.y, g.draw, { pool: g.floor ? 0 : 0.28, bias: g.floor ? -0.3 : 0 });
   (map.npcs ?? []).forEach((n, i) => {
     const at = npcAt(n, t), near = !!me && Math.hypot(me.x - at.x, me.y - at.y) <= SPOT_REACH;
     f.put('n' + i + n.name, at.x, 0, at.y, (c, px, py) => drawNpc(c, n, px, py, near && !n.mute, at.fx, !!n.path, at.x), { pool: n.pose ? 0 : 0.3, bias: n.pose ? -0.3 : 0 });
