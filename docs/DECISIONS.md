@@ -2,6 +2,63 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-04: Kyle's copy notes: the class card rebuilt, TAP / HOLD / PERFECT, GUARD and DODGE areas, two potions (Kyle; Claude Opus 5.5)
+
+Kyle commented on 50 lines of `docs/copy-inventory.csv` (`docs/kyle-copy-notes.txt`) and passed 55
+(`docs/kyle-copy-ok.txt`). His notes win over the lore keeper's earlier choices and the story bible where
+they clash; the bible records each change as his call. The inventory has a new `done` column saying what
+happened to each line he commented on.
+
+- **The class card** (title screen, `client/title.ts`, `shared/classes.ts`): the name with Kyle's tagline
+  under it (`CLASS_TAG`), the looks, his line on how it plays, the ratings (POWER is STRENGTH), the GUARD and
+  DODGE areas for the class's first kit, his guard line, the class's own rows (the Cleric's DIVINE SAVIOR,
+  "Cannot harm allies"; CENSER; HOUND; SPELLS), and SKILL in his words, with one note under it: "Train skills
+  at your trainer. You can only have one active skill at a time." The pitch and the "can't" lines are gone
+  from the data. Kyle had rewritten four pitches before the cut; kept here in case he wants them back:
+  Warrior "When the sword fails you can always throw them against the wall.", Ranger "Forty paces is a long
+  way for them to run with an arrow in them.", Rogue "They're only scary if they see you coming", Mage "The
+  cleverest thing in the room, until you get a spear in the gut." The title screen now scrolls from the top
+  when a card is taller than the phone (it was centred, which cut the top off).
+- **What a weapon does is three rows** (Kyle: "Tap: Short sword / Hold: Draw bow / Perfect: Blinds"). One
+  table, `client/kitlines.ts` `KIT`: TAP, HOLD, PERFECT, and ALSO for a bonus (riposte, the spear's charge
+  pin, the spark into a wind-up, the blade's catch, RELOAD, the daggers' 2.5x from behind). It feeds the item
+  card and the shop list (`card.ts` `weaponHow`, replacing the `HOW` paragraphs), the BUTTONS legend's ATTACK
+  row, and the HUD hint line ("TAP: ...  HOLD: ...  PERFECT: ..."; the old NO GUARD / PARRY, NO BLOCK tags are
+  gone, the card says it). The weapon rows now show on every weapon card, your own kit's too. Facts from the
+  sim: every perfect is the hold let go on the white flash, the crossbow's is the glint. Judgment: the
+  daggers' throw and the shortbow have no perfect of their own beyond a full-power release (plus the PERFECT
+  SHOT knack and DEADEYE), so they say "Full-power throw" and "Full-power shot".
+- **GUARD and DODGE as rated areas** (`client/guardarea.ts`), on the weapon card and the class card, one line
+  each with pips. GUARD is LOW, MED or HIGH, from the kit's numbers: HIGH needs a guard arc of 150 degrees or
+  more, a guard cost of 1.1 or less and chip of 0.2 or less (sword and shield, mace, censer); MED 120, 1.5 and
+  0.3 (spear, flail); LOW anything less (greatsword, the bows, the spellblade). Then the kind: BLOCK AND PARRY,
+  PARRY ONLY (Ranger, greatsword), CATCH (spellblade) or NONE. DODGE is ROLL, JUMP, DASH, BLINK or NONE from
+  `dodgeOf` / `dodgeName`.
+- **Armor** on its card is one thing per line, and heavy armor says stamina, not breath. Kyle said "or magic
+  if it's a mage"; the bible has one bar called STAMINA for everyone, so it stays stamina.
+- **Only Bitter and Brandy** (Kyle: "just have Bitter (healing) and Brandy"). Gannet sells brandy only, Ivo
+  sells no flasks, goblins and chests drop only those two (`POTION_ORDER`; the drop weights for the rest are
+  0). Lamp Oil, the frost flask and the smoke flask stay in the code, dormant (`DORMANT_POTIONS`), so nothing
+  that could still be in a room breaks. A saved belt holding any of them gets Bitter in their place
+  (`client/save.ts`). Oil barrels on jobs and setting houses alight are untouched. Lamp Oil going is to be
+  confirmed with Kyle. Tips, the legend and the potion button say "drink", not "drink or throw".
+- **Church and coal lines**: Gannet's line is at his bar, not the church (reworded, no "short one"); the
+  bread line and the ransom line are cut; Odric's tally line drops the beer and says what the stick is;
+  Isolde says what she relit and what it does, and what a fed censer does, plainly. The unused COAL help and
+  note lines are gone (the class card says it).
+- **Kept from the OK list**: everything, except four skill names inside the old trainer sentence (the Censer
+  Chain and Light, the Fire Ring, the Storm Tether), which went with the sentence Kyle replaced.
+- **Kyle's style is the model** ("see my writing style and how I'm being to the point, and let's emulate
+  that"): a few words, the effect first, fragments fine when clear. Now a subsection of
+  `docs/lore/prose-notes.md` section 4, quoting his lines. The new lines here were cut to match (Odric,
+  Isolde, the armor rows, the legend's HEALTH line); dialogue keeps its voice but says the thing first.
+- **Not run**: the lore-keeper and line-editor passes (this pass had no way to call them). Kyle's exact text
+  was used where he gave it; the few lines written here (Odric, Isolde, Gannet, the TAP / HOLD / PERFECT
+  words) are for them to look at.
+- Tests: `tests/kitwords.test.ts` (every weapon has its three rows; the guard ratings and kinds from the
+  numbers; each class's dodge; no pitch or can't; drops are only Bitter and Brandy; an old belt's oil and
+  smoke come back as Bitter).
+
 ## 2026-11-04: class fixes after the new UI: no Warrior step, a crossbow RELOAD, a legend, fat fingers (Kyle; Claude Opus 5.5)
 
 Kyle played the pixel UI ("generally much cleaner") and sent nine notes.

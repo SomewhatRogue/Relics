@@ -41,9 +41,9 @@ body[data-mode='town'] .tb.attack, body[data-mode='town'] .tb.block, body[data-m
 #panel .job button { width: 100%; }
 
 /* The start screen: your heroes, or a new one. */
-#title { position: fixed; inset: 0; z-index: 8; display: flex; align-items: center; justify-content: center; padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); background: radial-gradient(ellipse at 50% 30%, #2a1e14ee, #0e0f12f4 70%); overflow-y: auto; touch-action: pan-y; }
+#title { position: fixed; inset: 0; z-index: 8; display: flex; align-items: flex-start; justify-content: center; padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); background: radial-gradient(ellipse at 50% 30%, #2a1e14ee, #0e0f12f4 70%); overflow-y: auto; touch-action: pan-y; }
 #title[hidden] { display: none; }
-#title .tcard { width: min(480px, 100%); display: flex; flex-direction: column; gap: 10px; font-weight: 500; color: #d8d0c0; }
+#title .tcard { margin-block: auto; width: min(480px, 100%); display: flex; flex-direction: column; gap: 10px; font-weight: 500; color: #d8d0c0; }
 #title h1 { margin: 0; font-size: 44px; letter-spacing: 0.3em; color: #ffd27a; text-align: center; text-shadow: 0 0 18px #ff9a3c88, 0 2px 0 #3a2410; }
 #title .sub { text-align: center; color: #b8a47c; font-size: var(--fs-text); letter-spacing: 0.2em; margin-top: -6px; }
 #title .lede { margin: 4px 0; text-align: center; line-height: 1.45; }
@@ -101,7 +101,7 @@ body.dicing #banner span { visibility: hidden; }
 #title .dhead .face { width: 54px; height: 72px; }
 #title .dhead h2 { margin: 0; color: #ffd27a; font-size: 22px; letter-spacing: 0.12em; }
 #title .dhead p { margin: 4px 0 0; line-height: 1.4; color: #ddd5c4; }
-#title .bars { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; align-items: center; padding: 10px 12px; background: #1b1d22; border: 1px solid #3a3e46; font-size: var(--fs-text); color: #b8a47c; letter-spacing: 0.08em; }
+#title .bars { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; align-items: center; padding: 8px 12px; background: #1b1d22; border: 1px solid #3a3e46; font-size: var(--fs-text); color: #b8a47c; letter-spacing: 0.08em; }
 #title .bars i { display: flex; gap: 4px; }
 #title .bars em { flex: 1; height: 8px; background: #2b2e35; }
 #title .bars em.on { background: #ffd27a; }

@@ -120,11 +120,11 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       return panel.show('FATHER ODRIC', p('You give him the hazel stick. He counts the notches with his thumb, eleven, then takes out a knife and cuts a twelfth.') + say('Father Odric', TALLY.odric), [{ label: 'CLOSE', act: again }], true);
     }
     panel.show('FATHER ODRIC', say('Father Odric', 'Give what you can spare. Then a little of what you can\'t. That\'s the part it burns.') + (pr.cls === 'HEALER' ? say('Father Odric', COAL.odric) : '') +
-      (hungry.length ? say('Father Odric', CHURCH.hungry) : '') + (pr.armor?.hungry === 'ransom' ? p(CHURCH.ransom) : '') +
+      (hungry.length ? say('Father Odric', CHURCH.hungry) : '') +
       p(`Given to the Lantern so far: ${w.lantern} gold.`) + p(`You have ${pr.gold} gold.`),
       [...[20, 100].map((n) => ({ label: `GIVE ${n}`, disabled: pr.gold < n || pr.armor?.hungry === 'ransom', act: () => (g.donate(n), again()) })),
         { label: RELICW.churchButton, primary: pr.relics.length > 0, act: () => openStep(g, panel, again) },
-        ...hungry.map((it) => ({ label: `LEAVE ${itemName(it)} ON THE STEP`, act: () => (g.giveUp(it), panel.show('FATHER ODRIC', say('Father Odric', CHURCH.left), [{ label: 'CLOSE', act: () => panel.hide() }], true)) }))]);
+        ...hungry.map((it) => ({ label: `LEAVE ${itemName(it)} ON THE STEP`, act: () => (g.giveUp(it), again()) }))]);
   } else if (id === 'yard') {
     panel.show('SQUIRE PELL', say('Squire Pell', "Yard's out back. Straw men, a butcher made of sacking on a chain, and me. Mostly me, getting hit. If you're the sort that heals, I'd take it kindly."), [{ label: 'TO THE YARD', primary: true, act: () => (panel.hide(), g.enterYard()) }]);
   } else if (id === 'granary') {

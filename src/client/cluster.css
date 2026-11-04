@@ -75,3 +75,5 @@ body[data-guard='none'] .tb.block { display: none; }
 .legend .lg b { font: 400 var(--fs-text)/1.2 var(--font-body); letter-spacing: 0.04em; color: var(--gilt); }
 .legend .lg b kbd { margin-left: 8px; color: var(--bone-dim); font: inherit; }
 .legend .lg p { margin: 0; font-size: var(--fs-text); line-height: 1.3; color: var(--bone); }
+/* The ATTACK row's TAP, HOLD, PERFECT labels (kitlines.ts). */
+.legend .lg p i { display: inline-block; min-width: 7.5ch; color: var(--bone-dim); letter-spacing: 0.04em; }

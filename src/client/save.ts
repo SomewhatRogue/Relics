@@ -5,7 +5,7 @@
  */
 import { HERO_SLOTS, fitPerks, newProfile, newStats, type Profile } from '../shared/progress';
 import { newWorld, type WorldState } from '../shared/story';
-import { WEAPONS, upgradeOld } from '../shared/tuning';
+import { DORMANT_POTIONS, WEAPONS, upgradeOld } from '../shared/tuning';
 import { fitStores } from '../shared/bags';
 import { fitRelics } from '../shared/relicitems';
 import { renameKits } from '../shared/oldkits';
@@ -22,6 +22,8 @@ const hero = (old: Partial<Profile>): Profile => {
   const out = { ...newProfile(cls, p.name), ...p, cls };
   // Before the pack, a hero kept one weapon per kind: the one in hand stays, the rest go in the pack.
   if (!p.belt) out.belt = [];
+  // Lamp Oil and the frost and smoke flasks are gone from the game (Kyle, 2026-11-04): any on a belt become Bitter.
+  out.belt = out.belt.map((x) => (DORMANT_POTIONS.includes(x) ? 'bitter' : x));
   if (p.armor === undefined) out.armor = newProfile(cls).armor;
   if (!p.rings) out.rings = [];
   out.steel ??= 0;

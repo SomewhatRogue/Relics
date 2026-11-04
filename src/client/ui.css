@@ -27,7 +27,7 @@ input { font-family: var(--font-body) !important; }
 em, i { font-style: normal; }
 
 /* A stone panel: the frame round the edge, the dithered face inside it. */
-.stone, #panel .card, #pack, #options, #loot, #lesson .card, #title .about, #title .slot, #title .bars, body.touch #chat, #partycard, #panel .spcard {
+.stone, #panel .card, #pack, #options, #loot, #lesson .card, #title .about, #title .slot, #title .bars, #title .csheet, body.touch #chat, #partycard, #panel .spcard {
   border: var(--edge) solid transparent; border-radius: 0; box-shadow: none;
   border-image: var(--f-stone) 4 / var(--edge) stretch;
   background: var(--dither) 0 0 / calc(4 * var(--px)) repeat, var(--stone-800);
@@ -59,3 +59,35 @@ em, i { font-style: normal; }
 #panel b, #pack .row b, #title .slot .who b { color: #f0e6cc; }
 #panel .dim, #title .dim, #pack .none, #pack .head span { color: var(--stone-300); }
 ::selection { background: var(--gold); color: var(--stone-900); }
+
+/* A weapon's TAP / HOLD / PERFECT rows (kitlines.ts) and its GUARD and DODGE areas (guardarea.ts): on the
+   item card, the shop list and the class card. A label column in bone-dim, the words in bone. */
+.kitrows { display: grid; gap: 2px; margin: 4px 0; text-align: left; }
+.kitrows > div { display: grid; grid-template-columns: 8ch 1fr; column-gap: 8px; align-items: baseline; }
+:is(#panel, #pack, #loot, #title, body) .kitrows b, :is(#panel, #pack, #loot, #title, body) .area b { font: 400 var(--fs-text)/1.3 var(--font-body); letter-spacing: 0.04em; color: var(--bone-dim); }
+.kitrows span { color: var(--bone); line-height: 1.3; }
+.areas { display: grid; gap: 3px; margin: 6px 0 2px; text-align: left; }
+.area { display: grid; grid-template-columns: 7ch calc(20 * var(--px)) 1fr; column-gap: 8px; align-items: center; }
+.area .pips { display: flex; gap: var(--px); }
+.area .pips em { width: calc(6 * var(--px)); height: calc(4 * var(--px)); background: var(--stone-700); box-shadow: inset 0 0 0 var(--px) var(--stone-900); }
+.area .pips em.on { background: var(--gilt); }
+.area .v { color: var(--bone); letter-spacing: 0.04em; }
+.area .v span { color: var(--bone-dim); }
+.area .v.none { color: var(--stone-300); }
+
+/* The class card on the hero-making screen (title.ts): the tagline under the name, how it plays, then one
+   stone sheet for GUARD and DODGE, the class's own rows and its skill. */
+#title .ctag { margin: -6px 0 0; text-align: center; color: var(--parch); line-height: 1.35; }
+#title .cline { margin: -4px 0 0; text-align: center; color: var(--bone-dim); line-height: 1.35; }
+#title .csheet { display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; text-align: left; }
+#title .csheet .areas { margin: 0; }
+#title .csheet p { margin: 0; line-height: 1.35; }
+#title .cguard { color: var(--bone-dim); }
+#title .crow { display: grid; grid-template-columns: auto; gap: 1px; padding-top: 6px; border-top: var(--px) solid var(--stone-700); }
+#title .crow b { font: 400 var(--fs-text)/1.2 var(--font-body); letter-spacing: 0.04em; color: var(--gilt); }
+#title .crow span { line-height: 1.35; }
+#title .cnote { color: var(--stone-300); }
+/* In the pack's two narrow columns: each label over its words. */
+.pair .kitrows > div, .pair .area { grid-template-columns: 1fr; }
+.pair .area { grid-template-columns: auto 1fr; row-gap: 1px; }
+.pair .area .v { grid-column: 1 / -1; }

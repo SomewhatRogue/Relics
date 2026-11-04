@@ -5,8 +5,9 @@
  */
 import { HERO_SLOTS } from '../shared/progress';
 import { CHAPTER_1 } from '../shared/story';
-import { CLASS_ORDER, type HeroClass } from '../shared/tuning';
-import { CLASSES, CLASS_NAME, STATS } from '../shared/classes';
+import { CLASS_KITS, CLASS_ORDER, type HeroClass } from '../shared/tuning';
+import { CLASSES, CLASS_NAME, CLASS_TAG, SKILL_NOTE, STATS } from '../shared/classes';
+import { areas } from './guardarea';
 import { Preview } from './preview';
 import { COPY, RECOVER } from './copy';
 import { RECOVERY, type Recovery } from './recovery';
@@ -91,11 +92,17 @@ export class Title {
         CLASS_ORDER.map((k) => `<button data-cls="${k}" class="ccard">${face(k)}<b>${CLASS_NAME[k]}</b></button>`).join('') + `</div>${back}${this.recoverButton()}</div>`;
       return;
     }
+    // The class card (Kyle, 2026-11-04): name and tagline, how it plays, the ratings, GUARD and DODGE
+    // (from the class's first kit), the class's own rule and extra, then its skill.
     const c = this.pick, s = CLASSES[c];
-    this.el.innerHTML = `<div class="tcard"><h2 class="cname">${CLASS_NAME[c]}</h2><div class="stage"></div>` +
+    const row = (label: string, text: string) => `<div class="crow"><b>${label}</b><span>${text}</span></div>`;
+    this.el.innerHTML = `<div class="tcard"><h2 class="cname">${CLASS_NAME[c]}</h2><p class="ctag">${CLASS_TAG[c]}</p><div class="stage"></div>` +
       `<div class="looks">${[0, 1, 2].map((i) => `<button data-look="${i}" class="${i === this.look ? 'on' : ''}">${face(c, i)}</button>`).join('')}</div>` +
+      `<p class="cline">${s.line}</p>` +
       `<div class="bars">${STATS.map((k) => `<span>${k}</span><i>${'<em class="on"></em>'.repeat(s.stats[k])}${'<em></em>'.repeat(5 - s.stats[k])}</i>`).join('')}</div>` +
-      (s.perk ? `<p class="lede perk"><b>${s.perkLabel}</b> ${s.perk}</p>` : '') +
+      `<div class="csheet">${areas(CLASS_KITS[c][0])}<p class="cguard">${s.guard}</p>` +
+      (s.perk ? row(s.perkLabel ?? '', s.perk) : '') + (s.note ? row(s.noteLabel ?? '', s.note) : '') +
+      row('SKILL', s.skill) + `<p class="cnote">${SKILL_NOTE}</p></div>` +
       `<label class="name">NAME <input maxlength="12" value="${NAMES[c]}" autocomplete="off" spellcheck="false"></label>` +
       `<button data-begin class="primary wide">BEGIN</button>${this.g.save.heroes.some((h) => h.prologue) ? '<button data-skipwood class="ghost wide">SKIP THE WOOD</button>' : ''}<button data-pick class="ghost wide">BACK</button></div>`;
     this.preview = new Preview(c, this.look);

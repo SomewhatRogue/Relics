@@ -5,30 +5,26 @@
  */
 import { CLASS_DODGES, CLASS_GUARD, HUNGRY, type HungryId, MODS, MOD_TEXT, TIERS, TRAITS, WEAPONS, CHARGE, gearStats, itemName, slotOf, traitText, type HeroClass, type Item, type WeaponId } from '../shared/tuning';
 import type { Hero } from '../sim/types';
+import { kitRows } from './kitlines';
+import { areas } from './guardarea';
 
-/** How each weapon type fights, in a line. */
-export const HOW: Record<WeaponId, string> = {
-  sword: 'Three quick cuts and the best guard. Hold to bash with the shield and stun the goblin in front. Let go on the flash and you stun every goblin in front of you for longer. Counter quickly after a parry for a riposte that hits twice as hard.',
-  greatsword: 'Two slow sweeps that catch a crowd. Hold for an overhead that breaks a heavy swing, and let go on the flash to knock every goblin near where it lands flat. It can only parry, never hold a block.',
-  spear: 'Long thrusts that keep goblins back. Hold to lunge through up to three, and let go on the flash to pin every one you hit. Catch a goblin as it charges or lunges and you pin it for longer. Too close in, you only hit with the shaft.',
-  daggers: 'A fast four-hit combo, two and a half times the damage from behind. A long dash.',
-  longbow: 'Two quick cuts with a short sword. Hold to draw the longbow: the longer you hold, the harder it hits, and the arrow goes through a row of goblins. Let go on the white flash for a sure crit that blinds the goblin it hits.',
-  shortbow: 'A quick draw, and you can walk while drawing.',
-  crossbow: 'Two quick cuts with a short sword. Hold to aim and let go to fire a heavy bolt that goes through three goblins and shoves them back. When it\'s empty, hold RELOAD (C on a laptop) to wind it. If you have to move, you keep what you\'ve wound. Wind it all in one go and the bolt glints, and the next shot hits harder and goes through the whole line.',
-  wand: "Quick sparks you can cast on the move. Hold for a burst, which costs stamina. Let go on the flash and it knocks every goblin it hits out of whatever it's doing. A spark that lands on a goblin winding up a blow knocks it out of the swing too.",
-  staff: "A slow slash of your element, close in. Stand and hold to raise a wall of it, which costs stamina: fire burns whatever crosses it, frost slows them and holds small goblins back, and storm shocks them. Let go on the white flash for a bigger wall.",
-  spellblade: "Three plain cuts, and every hit charges the blade. Hold to wreathe it in your element for the next few swings, and the last one throws a short wave ahead. It costs stamina, less the fuller the blade, and nothing when it's full. Let go on the flash and it's free, and the blade stays full. Press block just as a blow lands to catch it on the blade: you take nothing and the blade fills.",
-  mace: "Heavy, short blows, and every third one heals everyone near you. Hold to smite the goblin you face: it stuns, and friends in its light are healed. Let go on the white flash to hit harder and shield everyone in the light, you too.",
-  rapier: 'Quick thrusts at long reach, better head on than the daggers. Hold to lunge through two, and let go on the flash to skewer them so they bleed.',
-  poisoner: 'A short sword that catches two at once. Hold to raise the blowpipe, and let go on the flash to loose a poisoned dart; the goblin it hits stops to retch.',
-  censer: "Two cuts, then the censer swings round, healing everyone near and dropping burning coals that set goblins alight. Swing through your coals to burst them and heal friends close by. Hold to whirl it and set every goblin round you alight, and let go on the white flash to make your coals flare and shield friends near you. The chain snags on walls, so give it room. Guards best of the three.",
-  flail: "Slow, wide sweeps that shove goblins back, unless they're behind a shield, and the second one heals. Hold to spin it up, standing still, and let go for a long sweep. On the white flash it stuns whatever it hits and shields the friends near you.",
+/** How a weapon fights, as three short labelled rows (TAP, HOLD, PERFECT, and ALSO where there's a
+ *  bonus; kitlines.ts), then its GUARD and DODGE areas (guardarea.ts). */
+export const weaponHow = (w: WeaponId): string =>
+  `<div class="kitrows">${kitRows(w).map(([l, v]) => `<div><b>${l}</b><span>${v}</span></div>`).join('')}</div>` + areas(w);
+/** How a weight of armor wears, a line for each thing it changes (Kyle: "put each thing on its own line"). */
+const ARMOR_HOW = {
+  light: ['Light', 'Full speed', 'Full dodge', 'Full damage taken'],
+  medium: ['Medium', '5% slower', '12% less damage taken'],
+  heavy: ['Heavy', '12% slower', 'Shorter dodge, costs more stamina', '25% less damage taken', "Small goblins can't stagger you"],
 };
-const ARMOR_HOW = { light: 'Light: full speed and a full dodge, full damage taken.', medium: 'Medium: 5% slower, 12% less damage taken.', heavy: 'Heavy: 12% slower, a shorter dodge that costs more breath, 25% less damage taken, and small goblins can\'t stagger you.' };
 /** The same for a class with no dodge (a Warrior, a Healer): nothing about a dodge it hasn't got. */
-const ARMOR_FEET = { ...ARMOR_HOW, light: 'Light: full speed, full damage taken.', heavy: 'Heavy: 12% slower, 25% less damage, and small goblins can\'t stagger you.' };
-/** How a weight of armor wears, for a class (one with no dodge hears nothing about one). */
-export const armorHow = (a: keyof typeof ARMOR_HOW, cls?: HeroClass) => (cls && !CLASS_DODGES[cls] ? ARMOR_FEET : ARMOR_HOW)[a];
+const ARMOR_FEET = { ...ARMOR_HOW, light: ['Light', 'Full speed', 'Full damage taken'], heavy: ['Heavy', '12% slower', '25% less damage taken', "Small goblins can't stagger you"] };
+/** How a weight of armor wears, for a class (one with no dodge hears nothing about one): the weight, then a row each. */
+export const armorHow = (a: keyof typeof ARMOR_HOW, cls?: HeroClass): string => {
+  const [name, ...rows] = (cls && !CLASS_DODGES[cls] ? ARMOR_FEET : ARMOR_HOW)[a];
+  return `<div class="kitrows armor"><div><b>${name.toUpperCase()}</b><span>${rows.join('<br>')}</span></div></div>`;
+};
 /** Rows a class has no use for: a parry it can't make, a block it can't hold, a dodge it hasn't got, heals it doesn't give. */
 export const shown = (r: Row, cls: HeroClass) =>
   !(r.label === 'PARRY WINDOW' && CLASS_GUARD[cls] === 'none') && !(r.label === 'THROUGH A BLOCK' && CLASS_GUARD[cls] !== 'full') &&
@@ -83,7 +79,7 @@ export function compare(h: Hero, it: Item): string {
 /** The card: tier, name, how it fights, what's on it. */
 export function card(it: Item, h?: Hero): string {
   const t = TIERS[it.quality], s = slotOf(it), cls = h ? WEAPONS[h.weapon].cls : it.kit ? WEAPONS[it.kit].cls : undefined;
-  const how = s === 'weapon' ? (h && it.kit !== h.weapon ? HOW[it.kit!] : '') : s === 'armor' ? armorHow(it.armor ?? 'light', cls) : '';
+  const how = s === 'weapon' ? weaponHow(it.kit!) : s === 'armor' ? armorHow(it.armor ?? 'light', cls) : '';
   const mods = (it.mods ?? []).map((m) => `<div class="tr"><b>${MODS[m.id].name} ${m.v > 0 ? '+' : ''}${MODS[m.id].unit === '%' ? Math.round(m.v * 100) + '%' : MODS[m.id].unit === 's' ? m.v + ' s' : m.v}</b> ${MOD_TEXT[m.id]}</div>`);
   const traits = it.traits.map((k) => `<div class="tr"><b>${TRAITS[k].name}</b> ${traitText(k, cls)}</div>`);
   return `<div class="card-head" style="--t:${t.col}"><span class="chip">${t.name}</span><b>${itemName(it)}</b></div>` +

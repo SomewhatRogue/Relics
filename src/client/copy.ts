@@ -28,38 +28,35 @@ export const COPY = {
   belt: 'BELT',
   next: 'NEXT',
   pour: 'POUR OUT',
-  beltEmpty: 'Empty. Agne, Gannet and Ivo sell them, and goblins drop them.',
+  beltEmpty: 'Empty. Agne and Gannet sell them, and goblins drop them.',
   takes: 'Goes in your pack.',
   full: 'Your pack is full.',
   otherClass: 'For a {Class}.',
 };
 
-/** The Healer's coal (sim/lantern.ts). */
+/** The Healer's coal (sim/lantern.ts). What it does is on the class card (CENSER, shared/classes.ts). */
 export const COAL = {
   name: 'COALS',
   line: 'Your heals are stronger. Goblins notice you from further off and go for you first.',
   pickup: 'CENSER FED',
-  help: 'A dead butcher leaves a live coal for a little while. A Cleric who walks over it feeds the censer: stronger heals, for good, and the hungry hunt that Cleric first.',
-  note: 'Feed the censer what butchers leave. It heals hotter, and draws teeth.',
-  /** Said to a Healer whose censer has been fed (she suspects; he knows). */
-  isolde: "It takes to them, doesn't it? Burns sweeter after. I don't ask the coal its business, and I'd thank you not to. Keep your back to a wall.",
+  /** Said to a Healer whose censer has been fed (Kyle: say it plainly). */
+  isolde: "You've been feeding that censer. Your heals are stronger for it, but the goblins will come for you sooner. Keep your back to a wall.",
   odric: 'Lit from the Lantern, like every one before it. Feed it what you find out there. Have you eaten today? You look thin.',
 };
 
-/** Hungry gear at the church, and the town noticing the Want (lore keeper). */
+/** Hungry gear at the church, and the town noticing the Want (lore keeper; Kyle cut two, 2026-11-04). */
 export const CHURCH = {
   hungry: 'If there\'s something you\'re carrying you\'d rather not, leave it on the step. I\'ll see to it.',
-  left: "Good. There's bread in the back, if you'll take it.",
-  ransom: 'The coat won\'t let your hand open over the plate. Odric pretends not to see.',
   agne: 'You\'ve a look about you. Sleep with a candle tonight. Humour me.',
   ivo: "Oh. That's a hungry one. Don't sleep with it under your pillow.",
-  gannet: 'Gannet pours you a short one and doesn\'t meet your eye.',
+  /** At Gannet's bar, the Drowned Rat (shops.ts), not the church. */
+  gannet: 'Gannet pours your drink and won\'t meet your eye.',
 };
 
-/** After the wood (lore keeper to review): Odric takes Hew's count; Isolde relights a Healer's censer. */
+/** After the wood: Odric takes Hew's tally stick; Isolde relights a Healer's censer (Kyle: plain, two lines if need be). */
 export const TALLY = {
-  odric: "Hew. He never did come in for the beer. Leave it with me. I'll chalk them up with the others, every name he had, and his.",
-  isolde: "Went out on the field, did it? They do. There. Lit. Let it die again and I'll light the next one off your arse.",
+  odric: "Hew's tally. A notch for each of the column he burned, so the goblins couldn't have them. I keep the count of our dead. They go on it, and so does Hew.",
+  isolde: "Your censer went cold on the field. A cold censer can't heal. I've relit it from the Lantern, so your heals work again.",
 };
 
 export const SMITH = {

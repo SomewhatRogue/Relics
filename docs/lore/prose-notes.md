@@ -139,8 +139,8 @@ callouts, the job board, party and lobby text, and the church, council and relic
   "+20% damage for 5 s", "Heals friends near you for 8".
 - **No riddles or invented jargon.** A knack, perk, item trait or button says its effect, not a
   poetic phrase. Flavour goes in a separate, optional line, if anywhere.
-- **Natural sentences.** Neither clipped fragments nor long paragraphs. One or two sentences per
-  thing; a list only when there really are separate effects.
+- **Short and direct** (see Kyle's style below). One or two short sentences per thing, or a clear
+  fragment; never a paragraph. A list only when there really are separate effects.
 - **Explain once, in the right place.** Don't repeat a rule on the card, the hint, the tip and the
   toast. Pick the place the player looks when they need it and say it there.
 - **Names should hint at the effect.** QUICK STEP, not an obscure noun. If you need the card text to
@@ -156,3 +156,22 @@ callouts, the job board, party and lobby text, and the church, council and relic
   "the red flashes white" (or "while the red is flashing white"): the red telegraph on the floor
   turning white. Never call the parry cue "the white flash", so the two never blur.
 - **Mercy stays off screen.** The word is reserved for the Unmaking in the story bible.
+
+### Kyle's style (the model for game text; Kyle, 2026-11-04)
+
+Kyle's own copy notes are the style guide: "see my writing style and how I'm being to the point, and
+let's emulate that." He writes a few words, the effect first, no flourish. Fragments are fine when
+they're clear. Lines of his to copy the shape of:
+
+- "Heavy armor and effective blocking."
+- "Blinks away to dodge."
+- "Divine Savior: Cannot harm allies"
+- "Train skills at your trainer. You can only have one active skill at a time."
+- "Fed by the coals left behind by butchers. Permanent increase to healing, but increases enemy aggression."
+- "From the shadows, fast and fragile."
+- "Tap: Short sword / Hold: Draw bow / Perfect: Blinds."
+
+So: the name, a colon, what it does. No "you'll find that", no wind-up, no joke at the end of a
+rule. Weapon rows are two to four words each. When you rewrite anything near a line he wrote (a class
+card, a weapon row, GUARD and DODGE, a skill, a knack), match it. Dialogue keeps a character's voice,
+but says the thing the player needs in the first sentence or two, just as plainly.

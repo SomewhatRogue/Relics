@@ -6,7 +6,7 @@ import { fillCol } from './reliccard';
 import { RELICW } from './relicwords';
 import { hookLitBadge } from './litbadge';
 import { setVotes } from './voteboards';
-import { HERO, CLASS_GUARD, dodgeName, dodgeOf, POTIONS, CLASS_ORDER, RELICS, TRAITS, WEAPONS, itemName, type HeroClass } from '../shared/tuning';
+import { HERO, dodgeName, dodgeOf, POTIONS, CLASS_ORDER, RELICS, TRAITS, WEAPONS, itemName, type HeroClass } from '../shared/tuning';
 import { CLASS_NAME } from '../shared/classes';
 import { LOOKS, heroLook } from './sprites';
 import { ONLINE } from './relay';
@@ -72,7 +72,7 @@ import { UnitFrame } from './unitframe';
 import { roomsHtml, titleCase } from './tracker';
 import { ObjFlash } from './objflash';
 import { UnlockFlash } from './unlockflash';
-import { KIT } from './kitlines';
+import { kitLine } from './kitlines';
 import { ownCue } from './owncues';
 import { Purse } from './purse';
 import { legend } from './legend';
@@ -192,8 +192,8 @@ const townTips = input.touch
   ? ['Walk to the JOB BOARD and tap USE to take a job', 'Walk up into a door to go in. Everyone inside has something to say', 'The FORGE: Halvard upgrades your gear or melts it down for steel', 'The TRAINING HALL: knacks, and the squire takes you to the yard', 'The TOWN HALL: vote on what Wickhold does next']
   : ['Walk to the JOB BOARD and press E to take a job', 'Walk up into a door to go in. Press E by anyone to talk', 'The FORGE: Halvard upgrades your gear or melts it down for steel', 'The TRAINING HALL: knacks, and the squire takes you to the yard', 'The TOWN HALL: vote on what Wickhold does next'];
 const tips = input.touch
-  ? ['Stun or get behind a small goblin, then GRAB it', 'Warriors can GRAB barrels and tables and throw them', 'Break an oil barrel near goblins to set them on fire', 'Holding a goblin? SLAM it down, or THROW it at another', 'POTION drinks or throws the potion at the front of your belt', 'Most item traits pay off when you parry, dodge or hit a PERFECT', 'Cottages and barns hold goblins, and sometimes someone in a cage', 'CLERIC: SANCTUARY blesses the ground and wards whoever is most hurt', 'Oil and fire burn wooden buildings down. Burn out the dens', 'Two frost hits freeze a goblin. A heavy blow then shatters it', 'Fire on a chilled goblin makes STEAM, which stuns. Storm on a burning one makes a FLARE, which knocks goblins back', 'Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'SKILL uses your class skill, which your trainer teaches from level 3', 'Red with a striped edge can\'t be blocked: dodge or walk out of it', 'DEEP jobs end at a named butcher, who always carries a RELIC', 'TWIN DAGGERS: dash behind a goblin and BACKSTAB', 'Push the stick part way to creep. Hit a goblin that hasn\'t seen you for an AMBUSH']
-  : ['G grabs a stunned goblin (or one you got behind). Click to slam, G to throw', 'Warriors: G lifts barrels and tables. Throw them, or slam them down', 'Break an oil barrel near goblins to set them on fire', 'Q drinks or throws the potion at the front of your belt. Hold Q to bring the next one to the front', 'Bows: let go on the white flash for a PERFECT. Hold too long and the shot weakens', 'Walk up into a cottage door to go in. Fire burns buildings down', 'Cleric: E uses SANCTUARY, which blesses the ground and wards whoever is most hurt', 'Two frost hits freeze a goblin. A heavy blow then shatters it', 'Fire on a chilled goblin makes STEAM, which stuns. Storm on a burning one makes a FLARE, which knocks goblins back', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: your class skill. R: a relic, once you have won one on a DEEP job', 'Red with a striped edge can\'t be blocked: SPACE to dodge, or walk out of it', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or spellblade', 'Daggers: dash behind a goblin and BACKSTAB', 'Hold Shift to creep. Hit a goblin that hasn\'t seen you for an AMBUSH', 'Crossbow: hold C to wind it. Wind it all in one go, standing still, and the bolt glints for a shot that hits harder and goes through the whole line'];
+  ? ['Stun or get behind a small goblin, then GRAB it', 'Warriors can GRAB barrels and tables and throw them', 'Break an oil barrel near goblins to set them on fire', 'Holding a goblin? SLAM it down, or THROW it at another', 'POTION drinks the potion at the front of your belt', 'Most item traits pay off when you parry, dodge or hit a PERFECT', 'Cottages and barns hold goblins, and sometimes someone in a cage', 'CLERIC: SANCTUARY blesses the ground and wards whoever is most hurt', 'Oil and fire burn wooden buildings down. Burn out the dens', 'Two frost hits freeze a goblin. A heavy blow then shatters it', 'Fire on a chilled goblin makes STEAM, which stuns. Storm on a burning one makes a FLARE, which knocks goblins back', 'Tap BLOCK when the red flashes WHITE to PARRY', 'Hold ATTACK to charge a heavy blow', 'SKILL uses your class skill, which your trainer teaches from level 3', 'Red with a striped edge can\'t be blocked: dodge or walk out of it', 'DEEP jobs end at a named butcher, who always carries a RELIC', 'TWIN DAGGERS: dash behind a goblin and BACKSTAB', 'Push the stick part way to creep. Hit a goblin that hasn\'t seen you for an AMBUSH']
+  : ['G grabs a stunned goblin (or one you got behind). Click to slam, G to throw', 'Warriors: G lifts barrels and tables. Throw them, or slam them down', 'Break an oil barrel near goblins to set them on fire', 'Q drinks the potion at the front of your belt. Hold Q to bring the next one to the front', 'Bows: let go on the white flash for a PERFECT. Hold too long and the shot weakens', 'Walk up into a cottage door to go in. Fire burns buildings down', 'Cleric: E uses SANCTUARY, which blesses the ground and wards whoever is most hurt', 'Two frost hits freeze a goblin. A heavy blow then shatters it', 'Fire on a chilled goblin makes STEAM, which stuns. Storm on a burning one makes a FLARE, which knocks goblins back', 'Tap right click when the red flashes WHITE to PARRY', 'Hold left click to charge a heavy blow', 'E: your class skill. R: a relic, once you have won one on a DEEP job', 'Red with a striped edge can\'t be blocked: SPACE to dodge, or walk out of it', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or spellblade', 'Daggers: dash behind a goblin and BACKSTAB', 'Hold Shift to creep. Hit a goblin that hasn\'t seen you for an AMBUSH', 'Crossbow: hold C to wind it. Wind it all in one go, standing still, and the bolt glints for a shot that hits harder and goes through the whole line'];
 let tipAt = -99, tipI = 0;
 
 function hud(now: number): void {
@@ -211,13 +211,13 @@ function hud(now: number): void {
   const item = me.arms[me.weapon];
   $('.wpn').textContent = item ? itemName(item) : WEAPONS[me.weapon].name;
   // (The block button, and a spellblade's CATCH on it, are the touch cluster's: cluster.ts.)
-  const guard = WEAPONS[me.weapon].catches ? 'catch' : CLASS_GUARD[WEAPONS[me.weapon].cls];
   // A Mage's big spell: a mark on the bar at what it costs, red while you're short of it (sim/spells.ts).
   const cost = spellCost(me);
   $('.st').classList.toggle('spell', cost > 0);
   $('.st').classList.toggle('short', cost > 0 && (me.stamina < cost || !!me.winded));
   $('.st').style.setProperty('--cost', Math.min(100, cost) + '%');
-  const kit = KIT[me.weapon] + (WEAPONS[me.weapon].reloads ? (input.touch ? '  HOLD RELOAD TO WIND' : '  HOLD C TO RELOAD') : '') + (guard === 'none' ? '  NO GUARD' : guard === 'parry' ? '  PARRY, NO BLOCK' : '') + (WEAPONS[me.weapon].cls === 'MAGE' ? '  ' + (me.augments.channel || 'fire').toUpperCase() : '');
+  // TAP, HOLD and PERFECT (kitlines.ts), the crossbow's reload key, and a Mage's element now.
+  const kit = kitLine(me.weapon) + (WEAPONS[me.weapon].reloads ? (input.touch ? '  HOLD RELOAD TO WIND' : '  HOLD C TO RELOAD') : '') + (WEAPONS[me.weapon].cls === 'MAGE' ? '  ' + (me.augments.channel || 'fire').toUpperCase() : '');
   $('.kit').textContent = item ? item.traits.map((t) => TRAITS[t].name).join(' + ') + '  ' + kit : kit;
   card.update(room, me, !input.touch);
   pack.update(me);

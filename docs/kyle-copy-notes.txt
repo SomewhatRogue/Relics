@@ -1,0 +1,249 @@
+[Church] client/copy.ts:CHURCH.gannet
+  WHAT: Hungry gear at the church, and people noticing it
+  TEXT: Gannet pours you a short one and doesn't meet your eye.
+  NOTE: why would they pour you "a short one" at the church? or is this at the bar.
+
+[Church] client/copy.ts:CHURCH.left
+  WHAT: Hungry gear at the church, and people noticing it
+  TEXT: Good. There's bread in the back, if you'll take it.
+  NOTE: Nix this one I don't understand it.
+
+[Church] client/copy.ts:CHURCH.ransom
+  WHAT: Hungry gear at the church, and people noticing it
+  TEXT: The coat won't let your hand open over the plate. Odric pretends not to see.
+  NOTE: Not super obvious what this means. Remove.
+
+[Church] client/copy.ts:TALLY.isolde
+  WHAT: After the tutorial wood: Odric takes Hew's count, Isolde relights a Cleric's censer
+  TEXT: Went out on the field, did it? They do. There. Lit. Let it die again and I'll light the next one off your arse.
+  NOTE: Not clear what is being lit or what that's recharging at all from this dialogue. Should be more clear even if it takes 2 lines. Also what is "hew's count" ?  and a cleric wouldn' tsay "off your arse" necessarily to a holy man etc.
+
+[Church] client/copy.ts:TALLY.odric
+  WHAT: After the tutorial wood: Odric takes Hew's count, Isolde relights a Cleric's censer
+  TEXT: Hew. He never did come in for the beer. Leave it with me. I'll chalk them up with the others, every name he had, and his.
+  NOTE: Again why would they be drinking at church. Also waht is every name he had. makes no sense.
+
+[Class card] shared/classes.ts:CLASS_NAME.HEALER
+  WHAT: Class name, shown on the class pick screen, HUD and panels
+  TEXT: CLERIC
+  NOTE: CLERIC | Holy warrior, last carriers of the sacred light.  Heals friends, smites foes.
+
+[Class card] shared/classes.ts:CLASS_NAME.MAGE
+  WHAT: Class name, shown on the class pick screen, HUD and panels
+  TEXT: MAGE
+  NOTE: Mage | Master of elements, powerful caster
+
+[Class card] shared/classes.ts:CLASS_NAME.RANGER
+  WHAT: Class name, shown on the class pick screen, HUD and panels
+  TEXT: RANGER
+  NOTE: RANGER | Sword and bow, accompanied by a lifelong friend
+
+[Class card] shared/classes.ts:CLASS_NAME.ROGUE
+  WHAT: Class name, shown on the class pick screen, HUD and panels
+  TEXT: ROGUE
+  NOTE: ROGUE | From the shadows, fast and fragile.
+
+[Class card] shared/classes.ts:CLASS_NAME.WARRIOR
+  WHAT: Class name, shown on the class pick screen, HUD and panels
+  TEXT: WARRIOR
+  NOTE: WARRIOR | A bulwark or a blade, strong enough to throw men.
+
+[Class card] shared/classes.ts:NO_RELICS
+  WHAT: Shown on screen
+  TEXT: No relics to start. Pry them out of named butchers, at the bottom of deep jobs.
+  NOTE: Needs to be rewritten. No idea what a relic is or how you pry them from butchers or what a deep job is.  Maybe better to just say "No Relic"
+
+[Class card] shared/classes.ts:STATS[0]
+  WHAT: Rating label on the class card (out of 5)
+  TEXT: POWER
+  NOTE: Strength
+
+[Class card] shared/classes.ts:later
+  WHAT: Shown on screen
+  TEXT: The same trainer teaches {a} at level {SECOND} and {b} at level {THIRD}. You carry one skill at a time, and changing it there costs nothing.
+  NOTE: I have no idea what any of this means.  The essenence is this: Train skills at your trainer.  You can only have one active skill at a time.
+
+[Class card: Cleric] shared/classes.ts:CLASSES.HEALER.cant
+  WHAT: Class cant: class sheet text (not on screen at the moment)
+  TEXT: Slow, short reach.
+  NOTE: We should nix the entire "can't" section.
+
+[Class card: Cleric] shared/classes.ts:CLASSES.HEALER.guard
+  WHAT: Class guard: class sheet text (not on screen at the moment)
+  TEXT: Can hold a block and parry, though a mace and censer let a little more through than a shield. Can't roll: walk out of anything striped.
+  NOTE: Heavy armor and effective blocking.
+
+[Class card: Cleric] shared/classes.ts:CLASSES.HEALER.line
+  WHAT: Class line: class sheet text (not on screen at the moment)
+  TEXT: Mace and censer. Keeps you standing.
+  NOTE: What you lack in speed you make up for in divinity
+
+[Class card: Cleric] shared/classes.ts:CLASSES.HEALER.note
+  WHAT: Class note: class sheet text (not on screen at the moment)
+  TEXT: Walk over the coal a dead butcher leaves to feed your censer. Your heals get stronger for good, but goblins notice you sooner and go for you first.
+  NOTE: Fed by the coals left behind by butchers.  Permanent increase to healing, but increases enemy aggression.
+
+[Class card: Cleric] shared/classes.ts:CLASSES.HEALER.perk
+  WHAT: Class perk: shown on the class card when you make a hero
+  TEXT: Nothing you do hurts a friend or anyone freed from a cage: your blows, smites, coals and fire pass through them.
+  NOTE: Rewrite entirely: "Divine Savior:  Cannot harm allies"
+
+[Class card: Cleric] shared/classes.ts:CLASSES.HEALER.pitch
+  WHAT: Class pitch: class sheet text (not on screen at the moment)
+  TEXT: Stitch them shut, then go and hit whatever opened them.
+  NOTE: Nix.
+
+[Class card: Cleric] shared/classes.ts:CLASSES.HEALER.skill#1
+  WHAT: Class skill: class sheet text (not on screen at the moment)
+  TEXT: Sanctuary: blessed ground mends allies and burns goblins, and wards whoever's worst hurt. Your trainer teaches it from level {SKILL_AT}.{later}
+  NOTE: Sanctuary: Bless the ground around you to heal allies and burn foes.
+
+[Class card: Mage] shared/classes.ts:CLASSES.MAGE.cant
+  WHAT: Class cant: class sheet text (not on screen at the moment)
+  TEXT: Short of breath. Can't lift.
+  NOTE: Nix Class Can't text entirely.
+
+[Class card: Mage] shared/classes.ts:CLASSES.MAGE.guard
+  WHAT: Class guard: class sheet text (not on screen at the moment)
+  TEXT: Can't block or parry. Blinks out of reach instead, and the blink is slow to come back. From level {LEAVE_AT} your trainer can teach the blink to leave an image behind, which draws goblins off for a couple of seconds.
+  NOTE: Blinks away to dodge.
+
+[Class card: Mage] shared/classes.ts:CLASSES.MAGE.note
+  WHAT: Class note: class sheet text (not on screen at the moment)
+  TEXT: Fire: a firebolt (tap) or a fireball (hold). It burns and spreads, so it's best on a crowd. Frost: three icicles (tap) or a wide burst (hold). It slows goblins, and a second hit freezes them solid, so it's best on the big ones. Storm: every spell jumps to the next goblin and goes round a shield. Some goblins take more from one element and less from another, and spiders burn, so watch for WEAK and RESIST.
+  NOTE: Fire: a firebolt (tap) or a fireball (hold).  Burns and spreads.  Frost: three icicles (tap) or a wide burst (hold).  Slows and freezes.  Storm: Spark (tap) or Lightning Bolt (hold).  Chains between enemies at range, arcs through shields.
+
+[Class card: Mage] shared/classes.ts:CLASSES.MAGE.pitch
+  WHAT: Class pitch: class sheet text (not on screen at the moment)
+  TEXT: The cleverest thing in the room, until something hits you.
+  NOTE: The cleverest thing in the room, until you get a spear in the gut.
+
+[Class card: Mage] shared/classes.ts:CLASSES.MAGE.skill#1
+  WHAT: Class skill: class sheet text (not on screen at the moment)
+  TEXT: Elemental Channel: tap it and your spells turn to the next element (fire, frost, storm, and round again). The first spell after a change hits harder. Your trainer teaches it from level {SKILL_AT}.{later}
+  NOTE: Elemental Channel: Tap to alternate between elements.
+
+[Class card: Ranger] shared/classes.ts:CLASSES.RANGER.cant
+  WHAT: Class cant: class sheet text (not on screen at the moment)
+  TEXT: Light up close. Can't lift.
+  NOTE: Nix class can'ts entirely.
+
+[Class card: Ranger] shared/classes.ts:CLASSES.RANGER.guard
+  WHAT: Class guard: class sheet text (not on screen at the moment)
+  TEXT: Can't hold a block. Can parry, if the timing's right. Jumps back instead of rolling, and from level {LEAVE_AT} your trainer can teach the jump to leave a snare behind.
+  NOTE: Jumps back to dodge.  Perfect parry timing required.
+
+[Class card: Ranger] shared/classes.ts:CLASSES.RANGER.line
+  WHAT: Class line: class sheet text (not on screen at the moment)
+  TEXT: Blade and bow, and a hound.
+  NOTE: Blade, bow and a lifelong friend.
+
+[Class card: Ranger] shared/classes.ts:CLASSES.RANGER.note
+  WHAT: Class note: class sheet text (not on screen at the moment)
+  TEXT: Runs at your heel and now and then goes for whatever you're hitting. It can't be killed, but a butcher swinging close by will scare it off for a while.
+  NOTE: Nips at their heels, smart enough to not go down.
+
+[Class card: Ranger] shared/classes.ts:CLASSES.RANGER.pitch
+  WHAT: Class pitch: class sheet text (not on screen at the moment)
+  TEXT: Forty paces is a long way to run with an arrow in you.
+  NOTE: Forty paces is a long way for them to run with an arrow in them.
+
+[Class card: Ranger] shared/classes.ts:CLASSES.RANGER.skill#1
+  WHAT: Class skill: class sheet text (not on screen at the moment)
+  TEXT: Hunter's Net: pins a small goblin flat, slows a big one. Your trainer teaches it from level {SKILL_AT}.{later}
+  NOTE: Hunter's Net: Snares or slows.
+
+[Class card: Rogue] shared/classes.ts:CLASSES.ROGUE.cant
+  WHAT: Class cant: class sheet text (not on screen at the moment)
+  TEXT: Can't take a beating. Can't lift.
+  NOTE: Nix can'ts from all classes.
+
+[Class card: Rogue] shared/classes.ts:CLASSES.ROGUE.guard
+  WHAT: Class guard: class sheet text (not on screen at the moment)
+  TEXT: Can't block or parry. Dashes out of reach instead, further than anyone and far more often.
+  NOTE: Fast and nimble, rapid dodges available.
+
+[Class card: Rogue] shared/classes.ts:CLASSES.ROGUE.line
+  WHAT: Class line: class sheet text (not on screen at the moment)
+  TEXT: Twin daggers. Fast, and from behind.
+  NOTE: Twin daggers. Weak head on, twice as strong from behind.
+
+[Class card: Rogue] shared/classes.ts:CLASSES.ROGUE.pitch
+  WHAT: Class pitch: class sheet text (not on screen at the moment)
+  TEXT: Everything with teeth has a back. Go and stand there.
+  NOTE: They're only scary if they see you coming
+
+[Class card: Rogue] shared/classes.ts:CLASSES.ROGUE.skill#1
+  WHAT: Class skill: class sheet text (not on screen at the moment)
+  TEXT: Shadowstep: you're suddenly behind the goblin you face. Your trainer teaches it from level {SKILL_AT}.{later}
+  NOTE: Shadowstep: Enter the shadows and appear behind an enemy, stunning them briefly.
+
+[Class card: Warrior] shared/classes.ts:CLASSES.WARRIOR.cant
+  WHAT: Class cant: class sheet text (not on screen at the moment)
+  TEXT: Nothing at range. Slow feet.
+  NOTE: Nix all cant's from this area
+
+[Class card: Warrior] shared/classes.ts:CLASSES.WARRIOR.guard
+  WHAT: Class guard: class sheet text (not on screen at the moment)
+  TEXT: Can hold a block and parry, and the shield covers nearly everything in front. Can't roll: walk out of anything striped.
+  NOTE: Can hold a block in a large area and parry effectively.
+
+[Class card: Warrior] shared/classes.ts:CLASSES.WARRIOR.line
+  WHAT: Class line: class sheet text (not on screen at the moment)
+  TEXT: Sword and shield. Holds the line.
+  NOTE: Bulwark and blade.  Surprisingly effective.
+
+[Class card: Warrior] shared/classes.ts:CLASSES.WARRIOR.pitch
+  WHAT: Class pitch: class sheet text (not on screen at the moment)
+  TEXT: Somebody has to stand in the door. You're the one with the shield.
+  NOTE: When the sword fails you can always throw them against the wall.
+
+[Class card: Warrior] shared/classes.ts:CLASSES.WARRIOR.skill#1
+  WHAT: Class skill: class sheet text (not on screen at the moment)
+  TEXT: Shield Charge: run shield first the way you face, knocking small goblins flat, staggering big ones and bursting crates, until a wall stops you. Your trainer teaches it from level {SKILL_AT}.{later}
+  NOTE: Shield Charge: a quick charge in a straight line, stunning and displacing foes.
+
+[Cleric: censer coals] client/copy.ts:COAL.help
+  WHAT: The censer and its coals: pack line, pickup callout, and what Isolde and Odric say
+  TEXT: A dead butcher leaves a live coal for a little while. A Cleric who walks over it feeds the censer: stronger heals, for good, and the hungry hunt that Cleric first.
+  NOTE: I talk about this above but I think this should be moved from here.
+
+[Cleric: censer coals] client/copy.ts:COAL.isolde
+  WHAT: The censer and its coals: pack line, pickup callout, and what Isolde and Odric say
+  TEXT: It takes to them, doesn't it? Burns sweeter after. I don't ask the coal its business, and I'd thank you not to. Keep your back to a wall.
+  NOTE: No idea what any of this means.
+
+[Cleric: censer coals] client/copy.ts:COAL.note
+  WHAT: The censer and its coals: pack line, pickup callout, and what Isolde and Odric say
+  TEXT: Feed the censer what butchers leave. It heals hotter, and draws teeth.
+  NOTE: Nix this, confusing.
+
+[HUD] client/main.ts:KIT.censer
+  WHAT: Weapon line in the HUD under your name (what the kit does)
+  TEXT: BEST GUARD 3RD BLOW LEAVES COALS HOLD: WHIRL, SHIELDS ON THE FLASH
+  NOTE: I have no idea what this means.
+
+[HUD] client/main.ts:KIT.daggers
+  WHAT: Weapon line in the HUD under your name (what the kit does)
+  TEXT: LONG DASH ONE AT A TIME BACKSTAB 2.5X
+  NOTE: No idea what this means.
+
+[HUD] client/main.ts:KIT.flail
+  WHAT: Weapon line in the HUD under your name (what the kit does)
+  TEXT: SHOVES 2ND BLOW HEALS HOLD: SPIN, STUNS ON THE FLASH
+  NOTE: No idea what this means.
+
+[HUD] client/main.ts:KIT.greatsword
+  WHAT: Weapon line in the HUD under your name (what the kit does)
+  TEXT: PARRY ONLY HOLD: OVERHEAD, SHOCKWAVE ON THE FLASH
+  NOTE: No idea what this means.
+
+[Items] client/card.ts:ARMOR_HOW.heavy
+  WHAT: What an armor weight does, on its item card
+  TEXT: Heavy: 12% slower, a shorter dodge that costs more breath, 25% less damage taken, and small goblins can't stagger you.
+  NOTE: Breath isn't clear - should say stamina (or magic if it's a mage).  Remove "and" - so 25% less damage taken.  Small goblins can't stagger you.  (put each thing on it's own line too).
+
+[Items] client/card.ts:HOW.crossbow
+  WHAT: How a weapon fights, on its item card (pack, loot, shops)
+  TEXT: Two quick cuts with a short sword. Hold to aim and let go to fire a heavy bolt that goes through three goblins and shoves them back. When it's empty, hold to wind it, a bit at a time if you need to move. Wind it all in one go and the bolt glints, and the next shot hits harder and goes through the whole line.
+  NOTE: Way too long see my other write up.
