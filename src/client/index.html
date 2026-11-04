@@ -3,32 +3,39 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-    <meta name="theme-color" content="#0d0b10" />
+    <meta name="theme-color" content="#0e0f12" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <title>Relic</title>
   </head>
   <body>
     <canvas id="game"></canvas>
     <div id="hud">
-      <div class="who">WARRIOR</div>
-      <div class="bar hp"><i></i></div>
-      <div class="bar st"><i></i></div>
-      <div class="gear"><span class="wpn"></span></div>
-      <div class="gear kit"></div>
-      <div class="gear"><span class="rlc"></span><b class="rcd"></b></div>
-      <div class="gear belt"></div>
-      <div class="litbadge" hidden>LIT</div>
+      <div class="unit">
+        <button class="face" aria-label="Your hero: tap for your weapon"><canvas width="14" height="12"></canvas><b class="lv"></b></button>
+        <div class="col">
+          <div class="who">WARRIOR</div>
+          <div class="bar hp"><b class="trail"></b><i></i></div>
+          <div class="bar st"><i></i></div>
+          <div class="buffs"><div class="litbadge" hidden>LIT</div></div>
+        </div>
+      </div>
+      <div class="sheet">
+        <div class="gear"><span class="wpn"></span></div>
+        <div class="gear kit"></div>
+        <div class="gear"><span class="rlc"></span><b class="rcd"></b></div>
+        <div class="gear belt"></div>
+      </div>
     </div>
     <div id="corner">
       <button id="packbtn" aria-label="Your pack">PACK</button>
-      <button id="leave" aria-label="Leave the job">LEAVE</button>
-      <button id="opts" aria-label="Options" aria-expanded="false"><svg viewBox="0 0 10 10" width="16" height="16" aria-hidden="true" shape-rendering="crispEdges"><path fill="currentColor" d="M4 0h1v1h-1zM5 0h1v1h-1zM1 1h1v1h-1zM2 1h1v1h-1zM4 1h1v1h-1zM5 1h1v1h-1zM7 1h1v1h-1zM8 1h1v1h-1zM1 2h1v1h-1zM2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM5 2h1v1h-1zM6 2h1v1h-1zM7 2h1v1h-1zM8 2h1v1h-1zM2 3h1v1h-1zM3 3h1v1h-1zM6 3h1v1h-1zM7 3h1v1h-1zM0 4h1v1h-1zM1 4h1v1h-1zM2 4h1v1h-1zM7 4h1v1h-1zM8 4h1v1h-1zM9 4h1v1h-1zM0 5h1v1h-1zM1 5h1v1h-1zM2 5h1v1h-1zM7 5h1v1h-1zM8 5h1v1h-1zM9 5h1v1h-1zM2 6h1v1h-1zM3 6h1v1h-1zM6 6h1v1h-1zM7 6h1v1h-1zM1 7h1v1h-1zM2 7h1v1h-1zM3 7h1v1h-1zM4 7h1v1h-1zM5 7h1v1h-1zM6 7h1v1h-1zM7 7h1v1h-1zM8 7h1v1h-1zM1 8h1v1h-1zM2 8h1v1h-1zM4 8h1v1h-1zM5 8h1v1h-1zM7 8h1v1h-1zM8 8h1v1h-1zM4 9h1v1h-1zM5 9h1v1h-1z"/></svg></button>
+      <button id="opts" aria-label="Options" aria-expanded="false"></button>
     </div>
     <div id="options" hidden>
       <button id="heroes" aria-label="Your heroes">HEROES</button>
       <button id="mute" aria-label="Sound on or off">SOUND</button>
       <button id="music" aria-label="Music on or off">MUSIC</button>
       <button id="tips" aria-label="Tips on or off" class="off">TIPS</button>
+      <button id="leave" aria-label="Leave the job">LEAVE</button>
     </div>
     <div id="banner"></div>
     <div id="boss" hidden><b></b><div class="bar"><i></i></div></div>

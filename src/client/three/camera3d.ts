@@ -48,7 +48,9 @@ export class Cam {
     const hw = this.W / this.ppu / 2, hd = this.H / this.ppu / 2 / Math.sin(PITCH);
     const clamp = (v: number, lo: number, hi: number) => (lo > hi ? (lo + hi) / 2 : Math.max(lo, Math.min(hi, v)));
     this.at.x = clamp(this.at.x, hw - 1, map.w + 1 - hw);
-    this.at.z = clamp(this.at.z, hd - 1 - (WALL_H / Math.tan(PITCH)) * 0.8, map.h + 1 - hd);
+    // (Upright, the view may run past the room's foot, so the hero stays above the touch buttons.)
+    const foot = this.H > this.W * 1.2 ? hd * 0.44 : 0;
+    this.at.z = clamp(this.at.z, hd - 1 - (WALL_H / Math.tan(PITCH)) * 0.8, map.h + 1 - hd + foot);
     let r = this.at.dot(this.right), u = this.at.dot(this.up);
     const b = this.at.dot(this.back);
     r = Math.round(r * this.ppu) / this.ppu;

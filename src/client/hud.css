@@ -1,0 +1,122 @@
+/* The top of the screen (unitframe.ts, tracker.ts, main.ts hud()): the unit frame at the top left,
+   the job tracker under it (top centre on a laptop), the corner's icon buttons in one iron group,
+   the options box under them, the boss's plate, the prompt and the tips. */
+#hud { position: fixed; left: calc(10px + env(safe-area-inset-left)); top: calc(8px + env(safe-area-inset-top)); pointer-events: none; z-index: 2; }
+#hud .unit { display: flex; align-items: flex-start; gap: 4px; }
+#hud .face { pointer-events: auto; position: relative; flex: none; width: calc(21 * var(--px) + 2 * var(--edge-s)); height: calc(18 * var(--px) + 2 * var(--edge-s)); padding: 0; min-height: 0;
+  border: var(--edge-s) solid transparent; border-image: var(--f-iron) 3 fill / var(--edge-s) stretch; background: none; cursor: pointer; image-rendering: pixelated; }
+#hud .face canvas { display: block; width: calc(21 * var(--px)); height: calc(18 * var(--px)); image-rendering: pixelated; background: radial-gradient(circle at 50% 30%, #2b2e35, #121317 70%); }
+#hud .face:active { border-image-source: var(--f-iron-in); }
+#hud .lv { position: absolute; right: calc(-3 * var(--px)); bottom: calc(-4 * var(--px)); min-width: 18px; height: 18px; padding: 0 3px; font: 600 12px/12px var(--font-body); color: var(--bone); text-align: center;
+  border: calc(2 * var(--px)) solid transparent; border-image: var(--f-sunk) 2 fill / calc(2 * var(--px)) stretch; }
+#hud .col { display: flex; flex-direction: column; gap: 3px; width: 168px; padding-top: 1px; }
+#hud .who { font: 600 13px/1 var(--font-body); color: var(--bone); text-shadow: var(--px) var(--px) 0 var(--stone-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Health: a chunky bar in a sunk socket, a pale trail for the chunk just lost, a lighter line along the top. */
+#hud .bar { position: relative; height: calc(6 * var(--px) + 2 * 2 * var(--px)); border: calc(2 * var(--px)) solid transparent; border-image: var(--f-sunk) 2 fill / calc(2 * var(--px)) stretch; }
+#hud .bar i, #hud .bar .trail { position: absolute; left: 0; top: 0; height: 100%; display: block; }
+#hud .hp i { background: linear-gradient(to bottom, #e86a50 0 var(--px), var(--blood-hi) var(--px) calc(3 * var(--px)), var(--blood) calc(3 * var(--px)) calc(5 * var(--px)), #7a1a12 calc(5 * var(--px))); transition: width 0.08s steps(2); }
+#hud .hp .trail { background: #d8b080; }
+#hud .hp.poisoned i { background: linear-gradient(to bottom, var(--rot-glow) 0 var(--px), #8aac3a var(--px) calc(3 * var(--px)), var(--rot) calc(3 * var(--px)) calc(5 * var(--px)), #4a5a1a calc(5 * var(--px))); }
+#hud .hp.low i { animation: hp-low 0.5s steps(1) infinite; }
+@keyframes hp-low { 50% { filter: saturate(1.6) contrast(1.3); } }
+#hud .st { height: calc(2 * var(--px) + 2 * 2 * var(--px)); width: 82%; }
+#hud .st i { background: linear-gradient(to bottom, #fff1d0 0 var(--px), #c8b880 var(--px)); }
+#hud .st.low i { background: #8a7a50; }
+#hud .st.winded i { background: var(--blood-hi); animation: winded 0.5s steps(2) infinite; }
+#hud .st.empty { animation: winded 0.18s steps(2) infinite; }
+@keyframes winded { 50% { opacity: 0.35; } }
+body.touch #hud .st { display: none; }
+#hud .buffs { display: flex; gap: 2px; min-height: 0; }
+#hud .buffs canvas { width: calc(11 * var(--px)); height: auto; image-rendering: pixelated; }
+#hud .litbadge { pointer-events: auto; cursor: help; width: calc(11 * var(--px)); height: calc(11 * var(--px)); font-size: 0; color: transparent; background: var(--ic-lit) center / 100% 100% no-repeat; image-rendering: pixelated; }
+#hud .litbadge[hidden] { display: none; }
+/* The weapon, kit, skill, relic and belt lines: on a tap of the face (a laptop keeps the skill, relic and belt). */
+#hud .sheet { display: none; margin-top: 6px; max-width: min(300px, 80vw); padding: 4px 8px; font-size: 11px; line-height: 1.35; color: var(--bone-dim);
+  border: var(--edge) solid transparent; border-image: var(--f-stone) 4 / var(--edge) stretch; background: var(--stone-800); background-clip: padding-box; }
+body.sheet-open #hud .sheet { display: block; }
+body:not(.touch) #hud .sheet { display: block; border: 0; background: none; padding: 0 0 0 2px; text-shadow: var(--px) var(--px) 0 var(--stone-900); }
+body:not(.touch):not(.sheet-open) #hud .sheet .gear:is(:first-child, .kit) { display: none; }
+#hud .gear { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 2px; }
+#hud .gear.kit { color: var(--stone-300); }
+#hud .wpn { color: var(--bone); }
+#hud .rcd { color: var(--bone); }
+#hud .rcd.wait { color: var(--stone-500); }
+#hud .belt { color: #d8a090; }
+body[data-mode='town'] #hud .sheet .gear:not(:first-child) { display: none; }
+
+/* The corner: icon buttons in one iron group (CHAT, PACK, the gear); LEAVE lives in the gear's box on a job. */
+#corner { position: fixed; z-index: 3; right: calc(8px + env(safe-area-inset-right)); top: calc(8px + env(safe-area-inset-top)); display: flex; gap: 0; padding: 0;
+  border: calc(2 * var(--px)) solid transparent; border-image: var(--f-sunk) 2 fill / calc(2 * var(--px)) stretch; }
+#corner button { position: relative; width: 44px; height: 44px; min-height: 0; padding: 0; font-size: 0; color: transparent; }
+#corner button::before { content: ''; position: absolute; inset: 0; margin: auto; width: calc(14 * var(--px)); height: calc(14 * var(--px)); background: center / 100% 100% no-repeat; image-rendering: pixelated; }
+#corner #packbtn::before { background-image: var(--ic-pack); }
+#corner #opts::before { background-image: var(--ic-cog); }
+#corner #chatbtn::before { background-image: var(--ic-chat); }
+#corner #chatbtn { display: none; }
+body.chat-on #corner #chatbtn { display: block; }
+#corner #chatbtn.new::after, [data-picks]:not([data-picks='0'])::after { content: attr(data-picks); position: absolute; top: -4px; right: -4px; min-width: 14px; height: 14px; padding: 0 2px; border-radius: 0; box-shadow: 0 0 0 var(--px) var(--stone-900); background: var(--gold); color: var(--stone-900); font: 600 11px/14px var(--font-body); text-align: center; animation: pip 0.8s steps(1) infinite; }
+#corner #chatbtn.new::after { content: ''; min-width: 8px; width: 8px; height: 8px; top: 2px; right: 2px; }
+@keyframes pip { 50% { background: var(--gilt); } }
+body:not(.touch) #corner button { width: 40px; height: 40px; }
+
+#options { position: fixed; z-index: 6; right: calc(8px + env(safe-area-inset-right)); top: calc(62px + env(safe-area-inset-top)); display: flex; flex-direction: column; gap: 4px; padding: 4px; }
+#options[hidden] { display: none; }
+#options button { position: relative; min-width: 150px; height: 38px; min-height: 0; padding: 0 8px 0 calc(16 * var(--px)); text-align: left; font-size: 12px; }
+#options button::before { content: ''; position: absolute; left: 4px; top: 0; bottom: 0; margin: auto; width: calc(12 * var(--px)); height: calc(12 * var(--px)); background: center / 100% 100% no-repeat; image-rendering: pixelated; }
+#options #heroes::before { background-image: var(--ic-heroes); }
+#options #mute::before { background-image: var(--ic-sound); }
+#options #music::before { background-image: var(--ic-music); }
+#options #tips::before { background-image: var(--ic-tips); }
+#options #viewbtn::before { background-image: var(--ic-view); }
+#options #leave::before { background-image: var(--ic-leave); }
+#options button.off { color: var(--stone-300); border-image-source: var(--f-dim); }
+#options button.off::before { opacity: 0.35; }
+#options button.off::after { content: 'OFF'; position: absolute; right: 8px; color: var(--stone-500); }
+#options #viewbtn.on { border-image-source: var(--f-iron); color: var(--bone); }
+#options #qualitybtn[hidden], #options #brightrow[hidden] { display: none; }
+#options #brightrow { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--bone); }
+#options #brightrow span { flex: 1; padding-left: 8px; }
+#options #brightrow button { min-width: 38px; width: 38px; padding: 0; text-align: center; font-size: 16px; }
+#options #brightrow button::before { display: none; }
+#options #leave { color: #e8a090; }
+body:not([data-mode='run']) #leave, body[data-mode='run'] #heroes, body[data-mode='run'] #tips { display: none; }
+
+/* The tracker: where you are and the way on. A phone's sits under the unit frame; a laptop's at the top centre. */
+#banner { position: fixed; z-index: 2; left: 50%; transform: translateX(-50%); top: calc(8px + env(safe-area-inset-top)); max-width: 46vw; padding: 2px 8px 3px; text-align: center; pointer-events: none;
+  font-size: 13px; line-height: 1.25; color: var(--bone); text-shadow: var(--px) var(--px) 0 var(--stone-900);
+  border: var(--edge) solid transparent; border-image: var(--f-stone) 4 / var(--edge) stretch; background: #15171bd8; background-clip: padding-box; }
+#banner:empty { display: none; }
+#banner b { display: block; font: 400 21px/1 var(--font-display); color: #f0e6cc; margin: 0 0 1px; }
+#banner span { display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 2px; font-size: 12px; color: var(--bone-dim); }
+#banner .coin { display: inline-block; width: calc(9 * var(--px)); height: calc(9 * var(--px)); background: var(--ic-coin) center / 100% 100% no-repeat; image-rendering: pixelated; }
+#banner .ups { display: inline-flex; gap: var(--px); margin-left: 6px; }
+#banner .ht { width: calc(9 * var(--px)); height: calc(8 * var(--px)); background: var(--ic-heart) center / 100% 100% no-repeat; image-rendering: pixelated; }
+#banner .ht.no { background-image: var(--ic-hollow); }
+#banner .rooms { display: inline-flex; gap: var(--px); margin-left: 6px; vertical-align: 3px; }
+#banner .rm { width: calc(7 * var(--px)); height: calc(7 * var(--px)); background: var(--ic-room) center / 100% 100% no-repeat; image-rendering: pixelated; opacity: 0.7; }
+#banner .rm.done { opacity: 1; }
+#banner .rm.on { background-image: var(--ic-roomon); opacity: 1; }
+#banner.faint { opacity: 0.3; }
+body.touch #banner { left: calc(8px + env(safe-area-inset-left)); transform: none; top: calc(70px + env(safe-area-inset-top)); max-width: min(270px, calc(100vw - 16px)); text-align: left; }
+body.touch #banner span { justify-content: flex-start; }
+
+#boss { position: fixed; z-index: 2; left: 50%; transform: translateX(-50%); bottom: calc(14px + env(safe-area-inset-bottom)); width: min(360px, 60vw); text-align: center; pointer-events: none; }
+#boss b { display: block; font: 400 21px/1 var(--font-display); color: #e8a090; text-shadow: var(--px) var(--px) 0 var(--stone-900); }
+#boss .bar { position: relative; height: calc(4 * var(--px) + 4 * var(--px)); margin-top: 2px; border: calc(2 * var(--px)) solid transparent; border-image: var(--f-sunk) 2 fill / calc(2 * var(--px)) stretch; }
+#boss .bar i { display: block; height: 100%; background: linear-gradient(to bottom, #e86a50 0 var(--px), var(--blood) var(--px)); }
+body.touch #boss { bottom: auto; top: calc(150px + env(safe-area-inset-top)); width: min(300px, 76vw); }
+
+#prompt { position: fixed; z-index: 2; left: 50%; transform: translateX(-50%); bottom: calc(70px + env(safe-area-inset-bottom)); padding: 2px 8px; pointer-events: none; font: 600 12px/1.3 var(--font-body); letter-spacing: 0.04em; color: var(--gilt);
+  border: var(--edge-s) solid transparent; border-image: var(--f-gilt) 3 fill / var(--edge-s) stretch; }
+#prompt[hidden] { display: none; }
+body.touch #prompt { bottom: calc(300px + env(safe-area-inset-bottom)); }
+
+#tip { position: fixed; z-index: 2; left: 50%; transform: translateX(-50%); top: calc(54px + env(safe-area-inset-top)); padding: 2px 8px; pointer-events: none; font-size: 12px; color: var(--bone); white-space: nowrap; transition: opacity 0.6s steps(3);
+  border: var(--edge-s) solid transparent; border-image: var(--f-iron) 3 fill / var(--edge-s) stretch; }
+#tip.gone { opacity: 0; }
+body:not(.tips) #tip { display: none; }
+body.touch #tip { top: calc(150px + env(safe-area-inset-top)); white-space: normal; width: max-content; max-width: 92vw; text-align: center; }
+
+/* The party card under the tracker on a phone (partyhud.css places it), and the town's chat peek under the corner. */
+body.touch #partyhud { top: calc(136px + env(safe-area-inset-top)); }
+body.touch #chatpeek { top: calc(64px + env(safe-area-inset-top)); max-width: 46vw; }

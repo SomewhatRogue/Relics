@@ -4,25 +4,25 @@ body #pack .top { display: flex; gap: 10px; align-items: flex-start; margin-top:
 body #pack .doll { flex: none; display: grid; grid-template-columns: 44px 54px 44px; grid-template-areas: 'relic fig skill' 'hand fig body' 'ring0 fig ring1' 'belt belt belt'; gap: 6px 5px; }
 body #pack .s-relic { grid-area: relic; } body #pack .s-skill { grid-area: skill; } body #pack .s-hand { grid-area: hand; } body #pack .s-body { grid-area: body; }
 body #pack .s-ring0 { grid-area: ring0; } body #pack .s-ring1 { grid-area: ring1; } body #pack .s-belt { grid-area: belt; }
-body #pack .fig { grid-area: fig; display: flex; align-items: center; justify-content: center; background: radial-gradient(closest-side, #2e2838, transparent); }
+body #pack .fig { grid-area: fig; display: flex; align-items: center; justify-content: center; background: radial-gradient(closest-side, #2e3138, transparent); }
 body #pack .fig img { width: 52px; image-rendering: pixelated; filter: drop-shadow(0 2px 0 #000); }
-body #pack .s-belt > i { display: block; color: #8a8494; font-size: 8px; letter-spacing: 0.15em; font-style: normal; margin-bottom: 2px; }
+body #pack .s-belt > i { display: block; color: #8d929c; font-size: 8px; letter-spacing: 0.15em; font-style: normal; margin-bottom: 2px; }
 body #pack .beltrow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
 body #pack .beltrow .tile { aspect-ratio: auto; height: 34px; }
 body #pack .bag { flex: 1; min-width: 0; }
 body #pack .bag h3 { margin: 0 0 4px; }
-body #pack .bag h3 i.full { color: #ff8a7a; }
+body #pack .bag h3 i.full { color: #d8503a; }
 body #pack .bag .tile.drop { aspect-ratio: auto; height: 30px; margin-top: 5px; border: 2px dashed #7a3a32; background: #2a1414; cursor: default; }
-body #pack .bag .tile.drop i { position: static; color: #ff8a7a; font-size: 9px; }
-body #pack .note { color: #a8a2b4; font-size: 10px; line-height: 1.35; margin-top: 5px; }
-body #pack .note.warn { color: #ff8a7a; }
-body #pack .detail { margin-top: 8px; padding: 6px; background: #1a1821; border: 1px solid #34303f; border-radius: 4px; }
+body #pack .bag .tile.drop i { position: static; color: #d8503a; font-size: 9px; }
+body #pack .note { color: #a39e94; font-size: 10px; line-height: 1.35; margin-top: 5px; }
+body #pack .note.warn { color: #d8503a; }
+body #pack .detail { margin-top: 8px; padding: 6px; background: #1b1d22; border: 1px solid #33373e; }
 body #pack .detail .btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-body #pack .detail button { flex: 1; min-height: 34px; padding: 0 8px; background: #2a2733; border: 1px solid #6a647a; border-radius: 4px; color: #e8e4ee; font-size: 10px; }
-body #pack .detail button.go { background: #4a3414; border-color: #ffd27a; color: #fff1d0; }
-body #pack .detail button.ghost { background: transparent; color: #9a94a8; }
+body #pack .detail button { flex: 1; min-height: 34px; padding: 0 8px; font-size: 10px; }
+body #pack .detail button.go { }
+body #pack .detail button.ghost { }
 body #pack .foot details { margin-top: 8px; }
-body #pack .foot summary { color: #c8b080; font-size: 10px; letter-spacing: 0.15em; cursor: pointer; }
+body #pack .foot summary { color: #b8a47c; font-size: 10px; letter-spacing: 0.15em; cursor: pointer; }
 body.touch #pack .top { gap: 8px; }
 body #pack .cells { grid-template-columns: repeat(4, 1fr); }
 @media (min-width: 700px) {

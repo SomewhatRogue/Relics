@@ -164,7 +164,9 @@ export class Scene {
     if (this.painted !== map) (this.bg = paintMap(map)), (this.painted = map), (this.cam.ready = false);
     const clamp = (v: number, size: number, world: number) => (size >= world ? (world - size) / 2 : Math.max(0, Math.min(world - size, v)));
     this.cam.x = clamp(this.cam.x, this.vw, worldW(map));
-    this.cam.y = clamp(this.cam.y, this.vh, worldH(map));
+    // On an upright phone the camera may run past the room's foot, so the hero is never under the touch buttons.
+    const foot = this.vh > this.vw * 1.2 ? Math.round(this.vh * 0.22) : 0;
+    this.cam.y = clamp(this.cam.y, this.vh, worldH(map) + foot);
     const sh = fx.shake;
     const [kx, ky] = camKick(me, room.time, KICK);
     const cx = Math.round(this.cam.x + (Math.random() - 0.5) * sh) + kx, cy = Math.round(this.cam.y + (Math.random() - 0.5) * sh) + ky;

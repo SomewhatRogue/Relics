@@ -98,7 +98,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isM
     await wait(300);
     await shot(sam, 'phone-in-vault-card.png');
     await card(kyle, '[data-setout]');
-    step('Sam gets the setting-out beat, his vault closed', await until(sam, () => document.querySelector('#panel h2')?.textContent === 'SETTING OUT'));
+    step('Sam gets the setting-out beat, his vault closed', await until(sam, () => document.querySelector('#panel h2')?.textContent.toUpperCase() === 'SETTING OUT'));
     await shot(sam, 'phone-setting-out.png');
     step('Kyle sets out', await until(kyle, () => window.__game.mode === 'run', null, 10000));
     step("Sam is pulled into Kyle's job from indoors", await until(sam, () => window.__game.mode === 'run' && window.__game.room.heroes.some((h) => h.id === 'me') && window.__game.room.heroes.some((h) => h.id === '@lead'), null, 15000));

@@ -59,7 +59,7 @@ async function closedAway(k) {
   // Sam's own device tally, gone: what he's paid must be the leader's word.
   await sam.ctx.addInitScript(() => localStorage.removeItem('relic-job-bank'));
   await k.reopen(sam);
-  k.step('Sam opens the game: back in town, paid', await k.until(sam, () => window.__game.mode === 'town' && window.__panel.open && document.querySelector('#panel h2')?.textContent === 'HOME EARLY', null, 60000), await k.ev(sam, () => window.__game.mode));
+  k.step('Sam opens the game: back in town, paid', await k.until(sam, () => window.__game.mode === 'town' && window.__panel.open && document.querySelector('#panel h2')?.textContent.toUpperCase() === 'HOME EARLY', null, 60000), await k.ev(sam, () => window.__game.mode));
   const [g1, x1] = [await gold(sam), await xp(sam)];
   k.step(`the gold the party had picked up while he was there (${pot})`, g1 - g0 === pot, g1 - g0);
   k.step('and the experience', x1 > x0, [x0, x1]);
@@ -85,7 +85,7 @@ async function leaderCrash(k) {
   k.step('Sam takes it on to the end', (await k.finish(sam)) && (await k.until(sam, () => window.__game.mode === 'town', null, 10000)));
   await kyle.ctx.addInitScript(() => localStorage.removeItem('relic-job-bank'));
   await k.reopen(kyle);
-  k.step('Kyle opens the game: home, paid', await k.until(kyle, () => window.__game.mode === 'town' && window.__panel.open && document.querySelector('#panel h2')?.textContent === 'HOME EARLY', null, 40000), await k.ev(kyle, () => [window.__game.mode, !!window.__game.coop]));
+  k.step('Kyle opens the game: home, paid', await k.until(kyle, () => window.__game.mode === 'town' && window.__panel.open && document.querySelector('#panel h2')?.textContent.toUpperCase() === 'HOME EARLY', null, 40000), await k.ev(kyle, () => [window.__game.mode, !!window.__game.coop]));
   const [g1, x1] = [await gold(kyle), await xp(kyle)];
   k.step(`the gold picked up before the crash (${pot})`, g1 - g0 === pot, g1 - g0);
   k.step('and the experience', x1 > x0, [x0, x1]);

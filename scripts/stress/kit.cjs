@@ -100,7 +100,7 @@ function kit(browser, port, report) {
     await p.page.click('#panel button[data-i="0"]');
   }
   /** Back in town with the job's result up. */
-  const home = (p, title = 'DRIVEN BACK', ms = 8000) => until(p, (t) => window.__game.mode === 'town' && window.__panel.open && document.querySelector('#panel h2')?.textContent === t, title, ms);
+  const home = (p, title = 'DRIVEN BACK', ms = 8000) => until(p, (t) => window.__game.mode === 'town' && window.__panel.open && document.querySelector('#panel h2')?.textContent.toUpperCase() === t, title, ms);
 
   /** Out of sight (another tab, the phone locked): no frames; timers once a second. */
   const hide = (p, hidden = true) => ev(p, (hidden) => {
