@@ -84,6 +84,16 @@ export class Soundscape {
     if (ev.k === 'bladefull') return sfx.channeled();
     if (ev.k === 'slash' || ev.k === 'bladewave' || ev.k === 'wreathe') return ev.el === 'frost' ? sfx.chill() : ev.el === 'storm' ? sfx.shock() : sfx.ignite();
     if (ev.k === 'wallup') return ev.big && sfx.rumble(), ev.el === 'frost' ? sfx.freeze() : ev.el === 'storm' ? sfx.shock() : sfx.flare();
+    // The Cleric's: a shield given hums and blessed, takes a blow with a ward's ring, goes with a break; the
+    // perfect smite booms, coals burst warm or flare, the chain clangs on a wall, the flail's stun rings.
+    if (ev.k === 'holyshield') return sfx.ward();
+    if (ev.k === 'shieldsoak') return sfx.warded();
+    if (ev.k === 'shieldgone') return sfx.wardbreak();
+    if (ev.k === 'holysmite') return sfx.smite(), sfx.blessed();
+    if (ev.k === 'coalburst') return sfx.heal();
+    if (ev.k === 'coalflare') return sfx.flare(), sfx.ignite();
+    if (ev.k === 'snag') return sfx.wallhit(), sfx.block();
+    if (ev.k === 'flailstun') return sfx.perfect(), sfx.stunned();
     if (ev.k === 'shoot') return shotSound(ev.kind, this.heroAt(room, ev.x, ev.y)?.weapon);
     if (ev.k === 'charged') return chargedSound(this.heroAt(room, ev.x, ev.y)?.weapon ?? '');
     if (ev.k === 'block') return blockSound(this.heroAt(room, ev.x, ev.y)?.weapon ?? '');

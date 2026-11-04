@@ -18,11 +18,11 @@ export const HOW: Record<WeaponId, string> = {
   wand: "Quick sparks you can cast on the move. Hold for a burst, which costs stamina. A spark that lands on a goblin winding up a blow knocks it out of the swing.",
   staff: "A slow slash of your element, close in. Stand and hold to raise a wall of it, which costs stamina: fire burns whatever crosses it, frost slows them and holds small goblins back, and storm shocks them. Let go on the white flash for a bigger wall.",
   spellblade: "Three plain cuts, and every hit charges the blade. Hold to wreathe it in your element for the next few swings, and the last one throws a short wave ahead. It costs stamina, less the fuller the blade, and nothing when it's full. Press block just as a blow lands to catch it on the blade: you take nothing and the blade fills.",
-  mace: 'Every third blow heals everyone near. Hold for a smite that stuns.',
+  mace: "Heavy blows at short reach, and every third one heals everyone near you. Hold to call down a smite on the goblin you face: it stuns, and its light heals any friend standing in it. Let go on the white flash and it hits harder and shields everyone in the light, you too.",
   rapier: 'Quick thrusts at long reach, better head on than the daggers. Hold to lunge through two, and let go on the flash to skewer them so they bleed.',
   poisoner: 'A short sword that catches two at once. Hold to raise the blowpipe, and let go on the flash to loose a poisoned dart; the goblin it hits stops to retch.',
-  censer: 'Two cuts, then the censer burns goblins and heals everyone near. The best Cleric guard. Hold to whirl it.',
-  flail: 'Slow, wide sweeps that come over a shield. The second heals. Hold to bring down a smite close in.',
+  censer: "Two cuts, then the censer swings round, healing everyone near and leaving burning coals on the floor that set alight any goblin that steps in. Swing it through your coals and they burst, healing friends close by. Hold to whirl it and set everything around you alight, and let go on the white flash to make your coals flare and shield the friends near you. The chain catches on walls, so give it room. The best Cleric guard.",
+  flail: "Slow, wide sweeps that shove goblins back a little, though never through a shield. The second heals. Hold to spin it up, standing still, and let go for a long sweep. Let go on the white flash and whatever it hits is stunned, and the friends near you are shielded.",
 };
 const ARMOR_HOW = { light: 'Light: full speed and a full dodge, full damage taken.', medium: 'Medium: 5% slower, 12% less damage taken.', heavy: 'Heavy: 12% slower, a shorter dodge that costs more breath, 25% less damage taken, and small goblins can\'t stagger you.' };
 /** The same for a class with no dodge (a Warrior, a Healer): nothing about a dodge it hasn't got. */
