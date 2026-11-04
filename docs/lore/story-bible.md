@@ -258,3 +258,9 @@ most Want among the heroes is the one the bells don't spare).
 - The muffled cry and SOMEONE'S IN THERE mean a real captive, always. A mimic cry, if one ever comes, can't use this prompt or this sound.
 - A captive's shouts from a burning house are pain and the cage, never "help me" (that's the mimic's line), so a mimic can't be mistaken for them. They stop when the roof comes in.
 - Open for Kyle: whose woodpile is it? The lore keeper leans to the hungry's own hoard.
+
+## The Warrior's weapons (recorded 2026-11-03; Kyle's call, lore keeper)
+- Sword and shield, greatsword, spear. Warriors don't roll: STEP is their own way out of a blow (the STEP OUT the wood teaches).
+- The greatsword can't hold a block, only parry: a greatsword Warrior's whole defence is the parry and the STEP (an exception to "they block").
+- On-screen terms: RIPOSTE, PINNED, SHOCKWAVE. A Warrior's shockwave knocks goblins flat, never friends.
+- Open for Kyle: can the spear pin a butcher, or only small goblins (as the Hound does)?

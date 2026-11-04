@@ -9,8 +9,8 @@ import type { Hero } from '../sim/types';
 /** How each weapon type fights, in a line. */
 export const HOW: Record<WeaponId, string> = {
   sword: 'Three quick cuts and the best guard. Hold to bash with the shield and stun the goblin in front. Counter quickly after a parry for a riposte that hits twice as hard.',
-  greatsword: 'Two slow sweeps that catch a crowd. Hold for an overhead that breaks a heavy swing, and let go on the flash to knock everything near it flat. It can only parry, never hold a block.',
-  spear: 'Long thrusts that keep goblins back. Hold to lunge through three. Catch a goblin as it charges or lunges and you pin it, but too close in you only hit with the shaft.',
+  greatsword: 'Two slow sweeps that catch a crowd. Hold for an overhead that breaks a heavy swing, and let go on the flash to knock every goblin near where it lands flat. It can only parry, never hold a block.',
+  spear: 'Long thrusts that keep goblins back. Hold to lunge through up to three. Catch a goblin as it charges or lunges and you pin it. Too close in, you only hit with the shaft.',
   daggers: 'A fast four-hit combo, two and a half times the damage from behind. A long dash.',
   longbow: 'One arrow a press. A full 1.4 s draw pierces a line.',
   shortbow: 'A quick draw, and you can walk while drawing.',

@@ -164,7 +164,7 @@ $('.tb.use').addEventListener('touchstart', (e) => (e.preventDefault(), use()), 
 /** One line on how each kit guards and dodges. */
 const KIT: Record<string, string> = {
   sword: 'BEST GUARD  HOLD: SHIELD BASH  QUICK COUNTER: RIPOSTE',
-  greatsword: 'NO BLOCK, PARRY ONLY  HOLD: OVERHEAD, SHOCKWAVE ON THE FLASH',
+  greatsword: 'PARRY ONLY  HOLD: OVERHEAD, SHOCKWAVE ON THE FLASH',
   spear: 'LONG REACH  HOLD: LUNGE THROUGH THREE  PINS A CHARGE',
   daggers: 'LONG DASH  ONE AT A TIME  BACKSTAB 2.5X',
   longbow: 'TAP: SHORT SWORD  HOLD 1.4S: PIERCING SHOT',
