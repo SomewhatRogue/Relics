@@ -1,6 +1,6 @@
 /**
  * The Mage's kits, seen (sim/spells.ts, staffwall.ts and spellblade.ts decide them): magic spent rises
- * off the hero in violet; a spell with no magic behind it fizzles in grey smoke with NOT ENOUGH MAGIC; a
+ * off the hero in violet; a spell with no stamina behind it fizzles in grey smoke with NOT ENOUGH STAMINA; a
  * wand's spark that breaks a blow off throws a violet star and INTERRUPTED; the staff's slash sweeps an
  * arc of its element; a wall going up flashes along its length (the big one with a ring at each end);
  * the blade wreathed flares, a full blade glints, a caught blow rings in violet with CAUGHT, and the last
@@ -30,7 +30,7 @@ export function mageFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
       fx.burst(x, y - 10, 6, VIOLET, 30, true);
       return true;
     case 'fizzle':
-      fx.say(x, y - 30, 'NOT ENOUGH MAGIC', '#a8a0b8');
+      fx.say(x, y - 30, 'NOT ENOUGH STAMINA', '#a8a0b8');
       fx.burst(x, y - 10, 10, SMOKE, 25, false, -40);
       return true;
     case 'interrupt':
