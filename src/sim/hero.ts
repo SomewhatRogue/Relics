@@ -8,6 +8,7 @@ import { slide } from './bodies';
 import { BAG } from '../shared/bags';
 import { applyGear, turnBelt } from './pack';
 import { knack, statsOf } from './gearstats';
+import { travel } from '../shared/sweep';
 import { decoyTime, dodgeBreath, dodgeReach, releaseWindow } from './knacks';
 import { fedMult, jealousBlocks, jealousCooldown, needlesBreath, wears } from './hungry';
 import { hitEnemy } from './combat';
@@ -76,8 +77,8 @@ function walk(h: Hero, inp: Intent, k: number, dt: number, now: number): void {
   h.sneaking = m >= 0.05 && m < STEALTH.slow;
   if (m < 0.05) return;
   const l = Math.hypot(inp.mx, inp.my), sp = HERO.speed * WEAPONS[h.weapon].speed * statsOf(h).speed * k * m * wadeAt(h.x, h.y) * brandySpeed(h, now) * quickMult(h, now);
-  h.x += (inp.mx / l) * sp * dt;
-  h.y += (inp.my / l) * sp * dt;
+  // (Swept, so a hero stops at a gap too narrow for a body rather than being wedged into it.)
+  travel(h, (inp.mx / l) * sp * dt, (inp.my / l) * sp * dt, HERO.radius);
   h.moving = true;
 }
 
@@ -198,9 +199,8 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   const wantsRoll = !!dodgeOf(w) && now - h.rollQueuedAt < INPUT_BUFFER && now - h.lastRollAt >= dodge.cooldown * (1 - statsOf(h).dodge) && h.stamina >= 1 && !h.winded;
   if (h.act === 'roll') {
     const k = dodgeReach(h) / dodge.time;
-    h.x += h.rollDx * k * dt;
-    h.y += h.rollDy * k * dt;
-    collide(h, HERO.radius);
+    // (A blink covers over a tile a tick: in small steps, so it never comes out the far side of a wall.)
+    travel(h, h.rollDx * k * dt, h.rollDy * k * dt, HERO.radius);
     if (h.actT >= dodge.time) (h.act = 'idle'), (h.actT = 0);
     return;
   }

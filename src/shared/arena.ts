@@ -299,6 +299,9 @@ export function collide(p: { x: number; y: number }, r: number): void {
   if (m.ledges) levels(m, p as { x: number; y: number; z?: number; dropped?: number; kvx?: number; kvy?: number }, r);
   // Deep water stops bodies (things with a footing), never a shot over it.
   if (m.water && 'z' in p) for (const w of m.water) if (w.deep) box(p, r, w);
+  // Pushed out of something standing near the edge (a bed against a wall): never out past the edge.
+  p.x = Math.max(r, Math.min(m.w - r, p.x));
+  p.y = Math.max(r * 0.6, Math.min(m.h - r, p.y));
 }
 
 /**

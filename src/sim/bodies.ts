@@ -1,5 +1,6 @@
 /** Bodies in the room: knockback slides, wall slams, and nobody standing inside anybody else. */
 import { collide } from '../shared/arena';
+import { travel } from '../shared/sweep';
 import { HERO, KNOCK } from '../shared/tuning';
 import type { Body, Enemy, Hero, Prop } from './types';
 import { nearPairs } from './pairgrid';
@@ -22,9 +23,7 @@ export function slide(b: Body, r: number, dt: number): number {
     return 0;
   }
   const x0 = b.x, y0 = b.y, want = speed * dt;
-  b.x += b.kvx * dt;
-  b.y += b.kvy * dt;
-  collide(b, r);
+  travel(b, b.kvx * dt, b.kvy * dt, r);
   const moved = Math.hypot(b.x - x0, b.y - y0);
   if (moved < want * 0.5 && speed >= KNOCK.wallSpeed) {
     b.kvx = b.kvy = 0;

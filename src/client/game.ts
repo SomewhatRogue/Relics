@@ -4,7 +4,9 @@
  * to go in; taking a job starts a run (room after room until the job is done or you're driven back);
  * the results come home to the hero and the shared world, and the town changes with them.
  */
-import { doorAt, inArea, npcAt, type Area, type Block, type Npc, type Theme } from '../shared/arena';
+import { doorAt, inArea, npcAt, useMap, type Area, type Block, type Npc, type Theme } from '../shared/arena';
+import { travel } from '../shared/sweep';
+import type { DreadRule } from '../sim/dread';
 import { townInterior } from '../shared/interiors';
 import { board, STORY_PARTY, type Job } from '../shared/jobs';
 import { WORKS, workDone, workOpen, workProgress, WORK_ORDER, type WorkId } from '../shared/works';
@@ -19,7 +21,7 @@ import { knowsSkill, learnSkill } from '../shared/skillteach';
 import { ARRIVE_SAFE, HOUSEBURN, PARTY, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, FOUND_RELICS, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, sellValue, giveValue, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
 import { ArenaRoom } from '../sim/room';
 import { lessonOf, newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
-import { woodMap, WOOD_PROPS } from '../shared/wood';
+import { AREAS, woodMap, WOOD_PROPS } from '../shared/wood';
 import { bagFull, bagSize } from '../shared/bags';
 import { refreshHealth, statsOf } from '../sim/gearstats';
 import { houseCaptives, sum } from '../sim/goal';
@@ -64,6 +66,8 @@ const HOLD = 10;
 export interface Near { label: string; talk?: SpotId; arg?: number; key?: string; door?: Block; chest?: number; npc?: Npc }
 
 export const ME = 'me';
+/** Wickhold, its halls and the yard: out of bounds, you're only put back (sim/dread.ts). */
+const SET_BACK: DreadRule = { by: 'setback' };
 const NAMES: Record<string, string> = { cottage: 'THE COTTAGE', barn: 'THE BARN', home: 'THE HOUSE' };
 
 export class Game {
@@ -161,6 +165,8 @@ export class Game {
     this.run = null;
     this.woodReplay = replay;
     const room = new ArenaRoom(7, { map: woodMap(), furniture: WOOD_PROPS });
+    // Past the tree wall something waits; every clearing counts as ground, gates shut or not (sim/dread.ts).
+    room.dread = { by: 'shadow', seeds: AREAS.map((a) => ({ x: a.x + a.w / 2, y: a.y + a.h / 2 })) };
     this.place(room, room.map.hero);
     const h = this.hero, cls = this.profile.cls;
     // You come round with nothing but your class's weapon (your skill is your trainer's to teach); a
@@ -315,7 +321,9 @@ export class Game {
     else if (f.profile) (h = this.room.join(id)), this.equip(h, undefined, f.profile), this.mode === 'run' && (h.safeT = ARRIVE_SAFE);
     else return;
     const n = this.room.heroes.indexOf(h);
-    Object.assign(h, { x: me.x + (n % 2 ? 0.8 : -0.8), y: me.y + 0.3 * n, fx: me.fx, fy: me.fy, kvx: 0, kvy: 0, act: h.act === 'down' ? 'down' : 'idle', actT: h.act === 'down' ? h.actT : 0, tag: f.name });
+    // Beside you, as far as the ground allows (never into a wall you're standing against).
+    useMap(this.room.map), (h.x = me.x), (h.y = me.y), travel(h, n % 2 ? 0.8 : -0.8, 0.3 * n, HERO.radius);
+    Object.assign(h, { fx: me.fx, fy: me.fy, kvx: 0, kvy: 0, act: h.act === 'down' ? 'down' : 'idle', actT: h.act === 'down' ? h.actT : 0, tag: f.name });
     this.room.prev.set('h:' + id, [h.x, h.y]);
   }
 
@@ -391,14 +399,14 @@ export class Game {
   }
 
   private townRoom(): ArenaRoom {
-    return new ArenaRoom(this.world.day, { map: townMap(this.world), furniture: TOWN_PROPS });
+    return Object.assign(new ArenaRoom(this.world.day, { map: townMap(this.world), furniture: TOWN_PROPS }), { dread: SET_BACK });
   }
 
   enterYard(): void {
     this.outside = null;
     this.rooms.reset(null);
     this.mode = 'yard';
-    this.place(new ArenaRoom(this.world.day, { squire: true }));
+    this.place(Object.assign(new ArenaRoom(this.world.day, { squire: true }), { dread: SET_BACK }));
     this.hero.calmHound = true;
   }
 
@@ -411,6 +419,7 @@ export class Game {
     if (this.mode === 'run') return this.goIn(ME, b);
     const out = this.room, h = this.hero, inside = new ArenaRoom(this.world.day, { map: townInterior(b.door, this.world) });
     inside.exitOpen = true;
+    inside.dread = SET_BACK;
     out.heroes.splice(out.heroes.indexOf(h), 1);
     this.outside = { room: out, door: b, hero: h };
     this.place(inside, inside.map.hero, h, false);

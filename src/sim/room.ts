@@ -57,6 +57,7 @@ import { grow } from './grow';
 import { awake, merge } from './sleep';
 import { NO_INTENT, type Puddle, type Zone, type Bolt, type Drop, type Enemy, type Prop, type FightEvent, type Hero, type Hook, type Intent, type Javelin, type Snare, type Survivor } from './types';
 import { stun } from './stuns';
+import { stepDread, type DreadRule } from './dread';
 
 export class ArenaRoom {
   time = 0;
@@ -110,6 +111,8 @@ export class ArenaRoom {
 
   /** The map this room is played on. */
   map: GameMap;
+  /** What happens to a hero out of bounds here (sim/dread.ts); none, nothing does. */
+  dread: DreadRule | null = null;
   /** The way out is open (a run room once its goal is met; the training yard always). */
   exitOpen = false;
   private squire: boolean;
@@ -293,6 +296,8 @@ export class ArenaRoom {
     // A staff's walls: frost holds small goblins back, and each burns, chills or shocks (sim/staffwall.ts).
     stepWalls(this.zones, w);
     this.landings();
+    // Out of bounds: the dread, and what comes for anyone who stays out (sim/dread.ts).
+    stepDread(this.dread, this.map, this.heroes, this.enemies, TICK, this.events);
     for (const e of this.enemies) if (alive.has(e.id) && isDead(e)) dropFrom(e, this.heroes, this.drops, this.lootRng, this.events);
     for (const e of this.enemies) if (alive.has(e.id) && isDead(e)) {
       dropCoal(e, this.coals);

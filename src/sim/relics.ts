@@ -5,7 +5,7 @@
  */
 import { healMult } from './lantern';
 import { heals } from './hungry';
-import { collide } from '../shared/arena';
+import { travel, travelTo } from '../shared/sweep';
 import { BLESSING, HERO, HORN, SHADOWSTEP, WARD } from '../shared/tuning';
 import { blessRadius, blessTime, hornReach, hornTime, wardHp, wardTime } from './knacks';
 import { damage, held, isDead, isDummy } from './damage';
@@ -28,18 +28,15 @@ export function shadowstep(h: Hero, enemies: Enemy[], ev: FightEvent[], now: num
   ev.push({ k: 'blink', x: h.x, y: h.y });
   if (best) {
     const back = best.radius + HERO.radius + 0.25;
-    h.x = best.x - best.fx * back;
-    h.y = best.y - best.fy * back;
-    collide(h, HERO.radius);
+    // Through the dark, not through walls: a goblin with its back to a fence is stepped up to, not past.
+    travelTo(h, best.x - best.fx * back, best.y - best.fy * back, HERO.radius);
     const dx = best.x - h.x, dy = best.y - h.y, d = Math.hypot(dx, dy) || 1;
     h.fx = dx / d;
     h.fy = dy / d;
     // Out of the dark at its back: it reels a moment, for free stabs (not mid striped blow or charge).
     if (!isDummy(best)) daze(best, SHADOWSTEP.stun, h.id, now, ev);
   } else {
-    h.x += h.fx * 3;
-    h.y += h.fy * 3;
-    collide(h, HERO.radius);
+    travel(h, h.fx * 3, h.fy * 3, HERO.radius);
   }
   h.kvx = h.kvy = 0;
   ev.push({ k: 'shadow', x: h.x, y: h.y });

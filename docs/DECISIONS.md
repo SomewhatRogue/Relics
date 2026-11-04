@@ -3058,3 +3058,74 @@ things do" and "short, stilted sentences". The rules are now `docs/lore/prose-no
 - Every change is listed in `docs/copy-pass.md` for the lore keeper and line editor; the whole game's
   copy is in `docs/copy-inventory.csv` (id, area, what, text) for Kyle's review. Not touched: `card.ts`
   and the KIT lines (another pass).
+
+## 2026-11-04: off the edge of the world: the holes shut, and the dread for anyone who finds another (Kyle; Claude Opus 5.5)
+
+Kyle: a friend "likes trying to break things, like teleport through a wall"; "if you wander off the
+path you get a warning and a sense of dread, and if you stay out you get swarmed by goblins ... or a
+giant hidden shadow monster thing that crushes you."
+
+- **The holes, found by hunting them** (`scripts/dread/holes.ts`: every job place on two seeds and
+  their houses, the town and its halls, the yard and the wood; a hero stood by every wall, tree and
+  river tries a far blink, a roll, a shield charge, a shadowstep with nobody to step behind, a hard
+  knockback and plain walking). Before: about 5,700 ways out across 134 maps (before walking was tried). After: none, and no false
+  alarms (every goblin, chest, door, way out and townsperson stands on walkable ground).
+  - A tick is 1/30 s, so a Mage's far blink moves 1.27 tiles a tick, a roll or step most of a tile, a
+    shield charge and a 14+ tile/s knockback half a tile. `collide` pushes a body out by the nearest
+    side, so past the middle of a fence, a tree of the wood's wall, a river or the keep's 1.6-tile
+    wall (into the shut Old Chapel yard) it came out the far side. Now every one of those moves goes in
+    steps under a hero's radius (`shared/sweep.ts`, `travel`), sliding along what's in the way.
+  - Shadowstep teleported (behind a goblin across a fence, or 3 tiles ahead through anything): now it
+    travels there and stops at a wall. So do the hook's zip, the Stoker's draw and a friend brought
+    into a room beside you (they were dropped 0.8 tiles off with no collision, into a wall if you stood
+    against one).
+  - `collide` clamped to the map's edge first and pushed after, so a body squeezed between furniture
+    and the wall (the church's bed, 0.3 tiles off it) was pushed out past the edge. It clamps after too.
+  - A body could be wedged into a gap narrower than itself (Barrowby plants a hedge 0.46 tiles from a
+    cottage), pushed out of one thing into another. A swept step that ends wedged is taken back, so a
+    hero stops at the gap. Walking is swept too. (The hedge itself is the terrain's to fix.)
+- **Out of bounds** (`shared/reach.ts`): past the map's edge, the middle of a body inside something
+  `collide` stops bodies on, or on ground nobody can walk to from the way in. Walkable ground is a
+  quarter-tile grid flooded from the way in by the same things collision uses (blocks still standing,
+  round things, braziers, deep water; ledges count, joined by their ramps), never cutting a corner
+  between two shut cells; rebuilt when the blocks change (a gate opened, a house burned down). A body
+  touching walkable ground (within 0.6 tiles) is in, so a squeeze is never a crime. A room can also
+  forbid areas outright and add ways in: the wood counts every clearing as ground, gates shut or not,
+  so a cutscene that moves you never trips it; past its tree wall is out.
+- **The dread** (`sim/dread.ts`, `DREAD` in tuning), judged by the room every tick, so a guest's hero
+  is caught by the leader's room. Out of bounds, the dread builds a second a second: the warning at
+  once, worse at 4 s, seized at 8 s (held, nothing pressed does anything), and 1.1 s later crushed or
+  pulled down where they stand. Back in bounds it drains five times as fast as it came, so stepping
+  back in lifts it in a moment and dancing on the line doesn't reset it. The last spot each hero
+  stood in bounds is kept every tick; the taken body is put back there, downed.
+- **What comes, by place** (`sim/dreadplace.ts`): wild places (Hangman's Wood, the Copperdeep, the
+  Sheepwash, the Peat Cuts, Sallow Carr, and the prologue wood) send the shadow, a hand out of the dark
+  that crushes them; settled ones (villages, farms, fields, streets, the manor, the burned village,
+  the charcoal and river camps) and the inside of any house send the hungry, pouring out of the dark
+  and pulling them under. The swarm is drawn, not spawned: nothing to kill, loot or farm.
+- **The penalty: down, under the usual rules.** In a party, down and bleeding, a friend can get you
+  up, nobody comes and it's your one get-up or out. **Alone, it's one of your three downs** (my call,
+  not the whole job: the trick costs a heart and gains nothing, and three of them lose the job as
+  usual). A Ransom Coat can't buy it off.
+- **Town and the yard** (and Wickhold's halls) never kill: out 1.2 s, a dark flicker, a quiet line,
+  and you're back where you last stood in bounds, unhurt.
+- **On screen** (`client/dreadfx.ts`, `dreadart.ts`, `dreadsound.ts`), the same over FLAT and 2.5D: a
+  low-resolution overlay under the HUD, and a grey layer (`mix-blend-mode: saturation`) that drains the
+  colour. Your own hero: the edges darken and close in round you in dithered steps, breathing with a
+  heartbeat that quickens (about 1 s, 0.6 s, 0.36 s once seized), a low drone that swells, a breath far
+  off at the warning and a whisper at the late stage, and a plain line over you. Late stage: something
+  many times a hero's height rises at the edge of the dark, a small skull on a long neck leaning in,
+  pinprick eyes (wild); or pairs of sickly green eyes gather in the dark round you, more and more,
+  blinking (settled). Taken, on every screen, so a friend sees it: a dark pool under them, pale eyes
+  far above, and a hand bigger than a cottage coming down with its fingers spread round them, closing
+  at the crush, a heavy impact and a big shake, then rising away; or the hungry running in from all
+  round and piling on, then scattering back into the dark. Your own screen goes black for a moment.
+- **Online:** `dread`, `dreadBy` and `takenT` ride on the hero in the leader's patches (never set to
+  undefined, so the patches carry them); the `dread` events go to each friend with their room's.
+- New words for the lore keeper and line editor: all of `client/dreadwords.ts`. **Assumed for the lore
+  keeper:** the thing in the wild dark is never named or explained on screen, never called a shard, a
+  god, a demon or the Hungry King, and nothing says whether the hungry fear it. It could be what was
+  "down there first" at the Copperdeep, or not; that stays for later. It doesn't speak.
+- Tests: `tests/dread.test.ts` (the stages at their times, stepping back in, the body put back, town's
+  set back, a party's down, a solo heart, wild against settled, the snapshot, a blink and a shadowstep
+  at a fence, the bed by the wall). Screenshots: `node scripts/dread-look.cjs`.

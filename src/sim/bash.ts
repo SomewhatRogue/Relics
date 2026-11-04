@@ -3,7 +3,7 @@
  * over, knocked aside and reeling (so they can be grabbed); big ones stagger; crates and barrels burst
  * as you go through them; a wall stops you.
  */
-import { collide } from '../shared/arena';
+import { travel } from '../shared/sweep';
 import { BASH, HERO } from '../shared/tuning';
 import { shove } from './bodies';
 import { damage, held, isDead } from './damage';
@@ -26,9 +26,7 @@ export function startBash(h: Hero, ev: FightEvent[]): void {
 /** One tick of the run (the hero's act clock has already moved on). */
 export function stepBash(h: Hero, w: Enemy[], world: World, dt: number): void {
   const v = bashReach(h) / BASH.time, x0 = h.x, y0 = h.y;
-  h.x += h.rollDx * v * dt;
-  h.y += h.rollDy * v * dt;
-  collide(h, HERO.radius);
+  travel(h, h.rollDx * v * dt, h.rollDy * v * dt, HERO.radius);
   const moved = Math.hypot(h.x - x0, h.y - y0), hit = hitBy.get(h) ?? new Set<number>();
   for (const e of w) {
     if (isDead(e) || hit.has(e.id) || (e.z ?? 0) !== (h.z ?? 0)) continue;

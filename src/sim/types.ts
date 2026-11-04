@@ -210,6 +210,11 @@ export interface Hero extends Body {
   /** Seconds left of the grace on coming into a new room: nothing hurts this hero till it's gone. */
   safeT?: number;
   selfUp?: boolean;
+  /** Out of bounds (sim/dread.ts): seconds of dread built up (0 in bounds), what comes for them here,
+   *  and seconds since they were seized (-1 not). Sent to every screen: the dread is drawn from these. */
+  dread?: number;
+  dreadBy?: 'shadow' | 'swarm' | 'setback';
+  takenT?: number;
   /** Teammates this swing has already cut (friendly fire), and who has downed this hero how often. */
   hitAllies?: string[];
   grudges?: Record<string, number>;
@@ -473,6 +478,9 @@ export type FightEvent =
   | { k: 'down' | 'pickedup' | 'raising' | 'gotup'; x: number; y: number; id?: string; by?: string }
   /** A press that did nothing, said to that hero: GRAB with nothing to take hold of, ATTACK held on an empty crossbow. */
   | { k: 'nograb' | 'reloadcue'; x: number; y: number; id: string }
+  /** Out of bounds (sim/dread.ts): `n` 1 the warning, 2 worse, 3 seized, 4 crushed or pulled down where
+   *  they stood (x, y), 5 set back (town), 0 back in bounds. `by`: what came for them. */
+  | { k: 'dread'; x: number; y: number; id: string; n: number; by: 'shadow' | 'swarm' | 'setback' }
   /** A nest: someone crouching to set it alight; it catches. */
   | { k: 'kindling' | 'torched'; x: number; y: number; by: string }
   /** A house: someone crouching at its kindling spot; it's alight (sim/kindle.ts). */

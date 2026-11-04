@@ -287,3 +287,10 @@ most Want among the heroes is the one the bells don't spare).
 - A Cleric spares friends and anyone freed from a cage (SPARES FRIENDS, like relics): their own way, not shard-stuff. "Mercy" stays off screen; the one mercy in this world is the Unmaking.
 - The shield of gold light is never called "holy" or "blessed" on screen; it's gold because it spares friends, like relics. A smite is never "called down" and never comes from a god: its light is the censer's.
 - Coals on the floor are spilled from the Lantern-lit censer and burn out. No line says they spend what the Cleric fed the censer.
+
+## The edge of the map (recorded 2026-11-04; Kyle's call, lore keeper)
+- Past the edge of a wild place there is something huge with no name: a hunched shape with pale pinprick eyes, then a hand. It crushes a hero who stays out of bounds. An open mystery that stays one: never named, explained or heard speaking; never a shard, a god, a demon or the Hungry King. Nobody in town mentions it. Its eyes are cold white, never the hungry's green, the Want's colour or relic gold.
+- Past the edge of a settled place it's the hungry, many of them, out of the dark; you only see their eyes.
+- In town you're just set back: nothing out there takes you within the walls.
+- On screen it's only ever "something" and "it", never "giant".
+- Keep it apart from the thing past the wall that whistles back at the watch, and from the old shard "down there first" at the Copperdeep. No line hints they're the same; joining them is Kyle's call, made on purpose.
