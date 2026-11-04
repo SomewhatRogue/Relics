@@ -139,4 +139,4 @@ export function drawKit(c: Ctx, h: Hero, px: number, py: number, ox: number, oy:
 }
 
 /** Whether this kit lights its holder (a caster's tip, a Cleric's censer coal). */
-export const lightsHolder = (w: Hero['weapon']) => WEAPONS[w].cls === 'HEALER' || w === 'staff' || w === 'wand' || w === 'rod';
+export const lightsHolder = (w: Hero['weapon']) => WEAPONS[w].cls === 'HEALER' || w === 'staff' || w === 'wand';

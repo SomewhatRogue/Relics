@@ -6,6 +6,7 @@ import { ease, line, smear, type Ctx } from './draw';
 import { EL_COL, heldEl } from './palette';
 import { PX } from './world';
 import { bladeLength, censer, drawKit, kitPose } from './heldkits';
+import { bladeEdge } from './blademark';
 
 export interface Pose { a: number; ext: number; from?: number; thrust?: boolean; reach: number; pull: number }
 
@@ -18,7 +19,7 @@ export function pose(h: Hero, now: number): Pose {
   const rest: Partial<Record<Hero['weapon'], number>> = {
     sword: fa + side * 1.1, greatsword: -Math.PI / 2 - side * 0.7, spear: -Math.PI / 2 + side * 0.3, daggers: fa + side * 1.4,
     longbow: fa + side * 1.2, shortbow: fa + side * 1.1, crossbow: fa + side * 0.9, wand: fa + side * 1.1, staff: -Math.PI / 2 + side * 0.25,
-    rod: fa + side * 1, mace: fa + side * 1.2,
+    spellblade: fa + side * 1.1, mace: fa + side * 1.2,
   };
   const charge = Math.min(1, (h.actT + CHARGE.start) / chargeFull(WEAPONS[h.weapon], h));
   const kit = kitPose(h, now, fa, side, charge);
@@ -26,7 +27,8 @@ export function pose(h: Hero, now: number): Pose {
   if (h.act === 'charge') {
     // Held past the flash, the draw starts to shake (and the shot weakens).
     const over = h.actT + CHARGE.start > chargeFull(WEAPONS[h.weapon], h) + RELEASE.overdraw ? Math.sin(now * 70) * 0.09 : 0;
-    if (ranged(h)) return { a: (h.weapon === 'staff' ? -Math.PI / 2 + side * 0.25 : fa) + over, ext: 0, reach: 0, pull: charge };
+    // The staff is raised high while its wall gathers.
+    if (ranged(h) || h.weapon === 'staff') return { a: (h.weapon === 'staff' ? -Math.PI / 2 + side * 0.25 : fa) + over, ext: 0, reach: 0, pull: charge };
     // The healer lifts the mace to call down a smite.
     if (h.weapon === 'mace') return { a: -Math.PI / 2 + side * 0.2, ext: 0, reach: 0, pull: charge };
     if (h.weapon === 'spear') return { a: fa, ext: -5 * charge, reach: 0, pull: 0 };
@@ -137,9 +139,15 @@ export function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): vo
     line(g, ox, oy, p.a, -3, 6, '#5a3d22', 2);
     line(g, ox + Math.cos(p.a) * 5, oy + Math.sin(p.a) * 5, p.a + Math.PI / 2, -4, 4, '#9aa3ad');
     if (loaded) line(g, ox, oy, p.a, 1, 8, '#cfd6dc');
-  } else if (h.weapon === 'wand' || h.weapon === 'rod') {
-    line(g, ox, oy, p.a, 0, h.weapon === 'wand' ? 6 : 9, h.weapon === 'wand' ? '#6b4a2b' : '#9aa3ad');
-    const tl = h.weapon === 'wand' ? 7 : 10, tx = ox + Math.cos(p.a) * tl, ty = oy + Math.sin(p.a) * tl, r = Math.round(p.pull * 2);
+  } else if (h.weapon === 'spellblade') {
+    // A plain sword whose edge holds the charge (blademark.ts glows it).
+    line(g, ox, oy, p.a, 2, 12, '#cfd6e8');
+    line(g, ox, oy, p.a, 0, 2, '#7a5aa8');
+    line(g, ox + Math.cos(p.a) * 2, oy + Math.sin(p.a) * 2, p.a + Math.PI / 2, -1.5, 1.5, '#9aa3ad');
+    bladeEdge(c, h, ox, oy, p.a);
+  } else if (h.weapon === 'wand') {
+    line(g, ox, oy, p.a, 0, 6, '#6b4a2b');
+    const tl = 7, tx = ox + Math.cos(p.a) * tl, ty = oy + Math.sin(p.a) * tl, r = Math.round(p.pull * 2);
     c.glow.fillStyle = el;
     c.glow.fillRect(Math.round(tx - r / 2), Math.round(ty - r / 2), r + 1, r + 1);
     tip(c, h, tx, ty, el);

@@ -34,6 +34,8 @@ import { sweepSurvivors } from './survivorhits';
 import { dropFrom, stepDrops, takeLoot } from './loot';
 import { hallow, rally, shadowstep, stepZones, ward } from './relics';
 import { castElement, castSpell, spendPrimed, turnElement } from './channel';
+import { raiseWall, stepWalls } from './staffwall';
+import { bladeStruck, looseBlade } from './spellblade';
 import { fireSkill, stepSkills } from './skills';
 import { forgedElement, has, traitsOf } from './traits';
 import { fireHook, stepHook } from './hook';
@@ -284,6 +286,8 @@ export class ArenaRoom {
     stepSentries(this.zones, this.bolts, w);
     this.zones = stepZones(this.zones, w);
     separate(this.heroes, this.enemies, this.props);
+    // A staff's walls: frost holds small goblins back, and each burns, chills or shocks (sim/staffwall.ts).
+    stepWalls(this.zones, w);
     this.landings();
     for (const e of this.enemies) if (alive.has(e.id) && isDead(e)) dropFrom(e, this.heroes, this.drops, this.lootRng, this.events);
     for (const e of this.enemies) if (alive.has(e.id) && isDead(e)) {
@@ -325,6 +329,8 @@ export class ArenaRoom {
   private struck(h: Hero, e: Enemy, n: number, w: World): void {
     // A Rogue out of a vanish: seen again the moment they strike.
     h.vanishUntil = undefined;
+    // A Mage's blade builds its charge; a wreathed blade or a staff's slash carries the element.
+    bladeStruck(h, currentSwing(h), e, n, w);
     // Skarn's Cleaver: every hit heals a fifth of what it dealt.
     if (wears(h, 'cleaver') && h.hp < h.maxHp) {
       const back = Math.min(h.maxHp - h.hp, Math.round(n * HUNGRY_FX.leech));
@@ -377,6 +383,9 @@ export class ArenaRoom {
 
   /** A swing's moment of release: loose its shot (spells cast with the equipped relic's augment), smite, heal. */
   private loose(h: Hero, s: Swing, w: World): void {
+    // A staff raises its wall; its slash and a spellblade's swings go their own way (sim/staffwall.ts, spellblade.ts).
+    if (s.wall) return void this.zones.push(raiseWall(h, w));
+    if (looseBlade(h, s, w)) return;
     s = { ...s };
     // Blessed, a DEADEYE perfect release, a TEMPO hit after a dodge through a blow.
     let mult = (h.blessedUntil > w.now ? BLESSING.dmgMult : 1) * (h.heavy && h.perfect ? perfectMult(h) * (has(h, 'deadeye') ? TRAIT.deadeye : 1) : 1) * brandyDmg(h, w.now) * litMult(h);

@@ -11,6 +11,7 @@ import { shatter } from './elements';
 import { has } from './traits';
 import { brandyDmg } from './brandy';
 import { lunging, riposteNow, shaftMult, warriorHit } from './warrior';
+import { catchBlow } from './spellblade';
 import type { Enemy, EnemyAttack, FightEvent, Hero } from './types';
 
 export { respawnOf, stunOf } from './damage';
@@ -186,6 +187,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   const facing = (h.fx * tx + h.fy * ty) / tl > Math.cos(((w.guardArc / 2) * Math.PI) / 180);
   const canGuard = !a.unblockable && facing && (h.act === 'idle' || h.act === 'attack' || h.act === 'charge');
   if (canGuard && now - h.parryOpenAt <= parryWindow(h)) {
+    // A spellblade catches it on the blade instead: nothing taken, the blade full (sim/spellblade.ts).
+    if (w.catches) return catchBlow(h, e, now, ev);
     h.counterUntil = now + counterWindow(h);
     h.parriedAt = now;
     h.parryOpenAt = -9;

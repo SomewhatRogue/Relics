@@ -2,7 +2,7 @@
  * What a hero holds, by kit, each its own thing in hand (a new figure is built when the kit changes,
  * so one replaces the other, never on top): sword and shield, greatsword, spear; longbow, shortbow,
  * crossbow (and the Ranger's short sword); twin daggers, the rapier, the short sword with a blowgun;
- * wand, staff, rod; mace and censer, sword and censer, flail and censer.
+ * wand, staff, spellblade; mace and censer, sword and censer, flail and censer.
  */
 import type * as THREE from 'three';
 import type { WeaponId } from '../../shared/tuning';
@@ -77,12 +77,11 @@ export function hands(cls: string, w: WeaponId, held: THREE.Group, off: THREE.Gr
       part(held, 0.07, 0.07, 0.2, wood, 0, 1.25, 0.12), part(held, 0.07, 0.18, 0.07, wood, 0, 1.18, 0.2);
       return part(held, 0.15, 0.15, 0.15, G(0xc9a8ff), 0, 1.33, 0.05);
     }
-    if (w === 'rod') {
-      // Grey iron, banded, a squared head holding the light.
-      part(held, 0.06, 0.8, 0.06, M(0x8a8494), 0, 0.18, 0.05);
-      for (const y of [0, 0.3]) part(held, 0.09, 0.04, 0.09, M(0x5a5560), 0, y, 0.05);
-      part(held, 0.16, 0.06, 0.16, M(0x5a5560), 0, 0.6, 0.05);
-      return part(held, 0.12, 0.12, 0.12, G(0xc9a8ff), 0, 0.68, 0.05);
+    if (w === 'spellblade') {
+      // A plain sword, violet at the grip, its edge holding the light (the charge and the element).
+      part(held, 0.24, 0.05, 0.06, M(0x7a5aa8), 0, -0.04, 0), part(held, 0.05, 0.12, 0.05, dark, 0, 0.06, 0);
+      part(held, 0.08, 0.78, 0.03, steel, 0, -0.45, 0);
+      return part(held, 0.025, 0.7, 0.04, G(0xc9a8ff, 0.5), 0.045, -0.47, 0);
     }
     part(held, 0.05, 0.42, 0.05, M(0x6b4a2b), 0, -0.02, 0.05);
     return part(held, 0.1, 0.1, 0.1, G(0xc9a8ff), 0, 0.22, 0.05);

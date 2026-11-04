@@ -270,3 +270,10 @@ most Want among the heroes is the one the bells don't spare).
 - BLINDED: a clean shot on the white flash goes across the face. The hungry's eyes shine in the dark and that shine is what a Ranger aims at; nothing magic, and it wears off. No line ever says why their eyes shine.
 - The glint: a crossbow wound in one steady go sits square and the bolt lies true; the glint is light on its steel head. It's drawn steel-white, never gold (relics) or eye-coloured (the Want), and is only ever the crossbow's.
 - Open for Kyle: does BLINDED work on named butchers, or only small goblins? (Today a butcher is blinded half as long.)
+
+## The Mage's weapons (recorded 2026-11-04; Kyle's call, lore keeper)
+- The focus is the wand, the staff or the spellblade; the lance rod is gone. The spellblade's steel is Halvard's remelted or a pre-war piece, never from outside; the Channel works through it as through any focus.
+- The blade's charge is not a stored spell. Nothing on screen ever says a spell is caught, kept or stored in a blade or focus for later (that's the Blacktongue idea). A caught blow fills the blade; it is never kept in it.
+- A Mage's big spells spend stamina, said as STAMINA on screen, never "magic" (one bar, one name).
+- On-screen terms: CATCH and CAUGHT (the spellblade's perfect), INTERRUPTED (the wand's perfect), WREATHE.
+- THE JEALOUS ROD is now THE JEALOUS WAND. Open for Kyle: hungry gear is "plain steel that sat in a butcher's fist", and a wand is wood; is it steel-shod, or does the line widen to "gear that sat in a butcher's fist"?

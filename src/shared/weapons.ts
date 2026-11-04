@@ -1,4 +1,5 @@
 import { MORE_KITS, type MoreKitId } from './kits.js';
+import { BLINK, SPELLBLADE } from './mage.js';
 
 /**
  * Weapon kits. Until classes exist each weapon stands in for one (it carries its class's guard,
@@ -44,6 +45,14 @@ export interface Swing {
   quake?: boolean;
   /** A longbow's draw: released on the white flash it is a sure crit and blinds (shared/ranger.ts BLIND). */
   blinds?: boolean;
+  /** A wand's bolt: landing on a goblin mid wind-up, it breaks the blow off (shared/mage.ts WAND). */
+  interrupts?: boolean;
+  /** A staff's slash: a close cut in the Mage's element. */
+  slash?: boolean;
+  /** A staff's hold: raises a wall of the element in front (shared/mage.ts WALL); it strikes nothing itself. */
+  wall?: boolean;
+  /** A spellblade's hold: the blade is wreathed in the element (shared/mage.ts WREATHE). */
+  wreathes?: boolean;
 }
 
 export interface Heavy extends Swing {
@@ -137,9 +146,13 @@ export interface Weapon {
   shaft?: boolean;
   /** A bolt has to be wound on: a hold aims a loaded crossbow and winds an empty one (shared/ranger.ts XBOW). */
   reloads?: boolean;
+  /** The quick attack is cast on the move, at this share of your pace (the wand). */
+  castWalk?: number;
+  /** Block catches a blow on the blade as it lands (the spellblade; shared/mage.ts). */
+  catches?: boolean;
 }
 
-type KitId = 'sword' | 'greatsword' | 'spear' | 'daggers' | 'longbow' | 'shortbow' | 'crossbow' | 'wand' | 'staff' | 'rod' | 'mace' | MoreKitId;
+type KitId = 'sword' | 'greatsword' | 'spear' | 'daggers' | 'longbow' | 'shortbow' | 'crossbow' | 'wand' | 'staff' | 'spellblade' | 'mace' | MoreKitId;
 
 export const WEAPONS: Record<KitId, Weapon> = {
   sword: {
@@ -232,37 +245,31 @@ export const WEAPONS: Record<KitId, Weapon> = {
     chip: 0.35, blockSpeed: 0.4, chargeSpeed: 0.4, parryWindow: 0.22, guardArc: 110, guardCost: 1.5, speed: 0.82, reloads: true,
     dodge: RANGER_JUMP,
   },
-  /** The Mage's quick spell: a flick of sparks, or a short 0.6 s cast for a bigger one. */
+  /** The Mage's quick spell: a flick of sparks cast on the move, or a short 0.6 s cast for a bigger one
+   *  (it costs magic). A spark that lands on a goblin mid wind-up breaks the blow off (shared/mage.ts). */
   wand: {
     name: 'SPARK WAND',
     cls: 'MAGE',
-    // A cast: rooted to the spot for about half a second (Kyle).
-    combo: [{ windup: 0.3, active: 0.04, recover: 0.2, dmg: 8, range: 8, arc: 0, lunge: 0, knock: 2, shot: 'spark', speed: 17 }],
-    heavy: { windup: 0.06, active: 0.04, recover: 0.3, dmg: 10, dmgFull: 24, range: 9, arc: 0, lunge: 0, knock: 3, knockFull: 7, shot: 'spark', speed: 19, burst: 0.8 },
+    // Cast walking (Kyle, 2026-11-04): the left click never stops you.
+    combo: [{ windup: 0.3, active: 0.04, recover: 0.2, dmg: 8, range: 8, arc: 0, lunge: 0, knock: 2, shot: 'spark', speed: 17, interrupts: true }],
+    heavy: { windup: 0.06, active: 0.04, recover: 0.3, dmg: 10, dmgFull: 24, range: 9, arc: 0, lunge: 0, knock: 3, knockFull: 7, shot: 'spark', speed: 19, burst: 0.8, interrupts: true },
     draw: 0.6,
-    chip: 0.5, blockSpeed: 0.4, chargeSpeed: 0.55, parryWindow: 0.2, guardArc: 100, guardCost: 2, speed: 0.86,
-    dodge: { kind: 'blink', distance: 3.8, time: 0.12, iFrom: 0, iTo: 0.12, stamina: 40, cooldown: 2.6 },
+    chip: 0.5, blockSpeed: 0.4, chargeSpeed: 0.55, parryWindow: 0.2, guardArc: 100, guardCost: 2, speed: 0.86, castWalk: 0.9,
+    dodge: BLINK,
   },
-  /** The Mage's long spell: 1.6 s of gathering for an orb that bursts wide and throws everything. */
+  /** Close and slow: a slash in the Mage's element in front. Held, rooted, a wall of the element rises
+   *  in front of you (it costs magic); let go on the white flash and it's a bigger one (shared/mage.ts). */
   staff: {
     name: 'FOCUS STAFF',
     cls: 'MAGE',
-    combo: [{ windup: 0.36, active: 0.05, recover: 0.3, dmg: 10, range: 8, arc: 0, lunge: 0, knock: 3, shot: 'spark', speed: 14 }],
-    heavy: { windup: 0.12, active: 0.05, recover: 0.6, dmg: 20, dmgFull: 65, range: 9, arc: 0, lunge: 0, knock: 6, knockFull: 18, shot: 'orb', speed: 9, burst: 2.2 },
-    draw: 1.6,
-    chip: 0.5, blockSpeed: 0.35, chargeSpeed: 0.25, parryWindow: 0.2, guardArc: 100, guardCost: 2, speed: 0.8,
-    dodge: { kind: 'blink', distance: 3.8, time: 0.12, iFrom: 0, iTo: 0.12, stamina: 40, cooldown: 2.6 },
-  },
-  /** Between the two: a 1 s cast for a lance of force that runs through a line of goblins. */
-  rod: {
-    name: 'LANCE ROD',
-    cls: 'MAGE',
-    combo: [{ windup: 0.32, active: 0.04, recover: 0.24, dmg: 9, range: 8, arc: 0, lunge: 0, knock: 2, shot: 'spark', speed: 16 }],
-    heavy: { windup: 0.08, active: 0.04, recover: 0.45, dmg: 16, dmgFull: 40, range: 12, arc: 0, lunge: 0, knock: 5, knockFull: 12, shot: 'lance', speed: 30, pierce: true },
+    combo: [{ windup: 0.3, active: 0.1, recover: 0.42, dmg: 15, range: 1.9, arc: 150, lunge: 0.15, knock: 5, slash: true }],
+    heavy: { windup: 0.12, active: 0.05, recover: 0.45, dmg: 0, dmgFull: 0, range: 0, arc: 0, lunge: 0, knock: 0, knockFull: 0, wall: true },
     draw: 1,
-    chip: 0.5, blockSpeed: 0.4, chargeSpeed: 0.35, parryWindow: 0.2, guardArc: 100, guardCost: 2, speed: 0.84,
-    dodge: { kind: 'blink', distance: 3.8, time: 0.12, iFrom: 0, iTo: 0.12, stamina: 40, cooldown: 2.6 },
+    chip: 0.5, blockSpeed: 0.35, chargeSpeed: 0, parryWindow: 0.2, guardArc: 100, guardCost: 2, speed: 0.8,
+    dodge: BLINK,
   },
+  /** The combat Mage: a sword in three cuts, wreathed in the element on a hold (shared/mage.ts). */
+  spellblade: SPELLBLADE,
   /** The Healer: every third blow heals the party; held, a holy smite falls on the goblin you face. */
   mace: {
     name: 'MACE AND CENSER',
@@ -281,7 +288,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
   ...MORE_KITS,
 };
 export type WeaponId = KitId;
-export const WEAPON_ORDER: WeaponId[] = ['sword', 'greatsword', 'spear', 'longbow', 'shortbow', 'crossbow', 'daggers', 'rapier', 'poisoner', 'wand', 'staff', 'rod', 'mace', 'censer', 'flail'];
+export const WEAPON_ORDER: WeaponId[] = ['sword', 'greatsword', 'spear', 'longbow', 'shortbow', 'crossbow', 'daggers', 'rapier', 'poisoner', 'wand', 'staff', 'spellblade', 'mace', 'censer', 'flail'];
 /** The demo's class button cycles these; the weapon button swaps between a class's own kits. */
 export const CLASS_ORDER: HeroClass[] = ['WARRIOR', 'RANGER', 'ROGUE', 'MAGE', 'HEALER'];
 /** How each class guards: `full` holds a block and parries; `parry` can tap a parry but never holds a
@@ -300,7 +307,7 @@ export const CLASS_KITS: Record<HeroClass, WeaponId[]> = {
   WARRIOR: ['sword', 'greatsword', 'spear'],
   RANGER: ['longbow', 'shortbow', 'crossbow'],
   ROGUE: ['daggers', 'rapier', 'poisoner'],
-  MAGE: ['wand', 'staff', 'rod'],
+  MAGE: ['wand', 'staff', 'spellblade'],
   HEALER: ['mace', 'censer', 'flail'],
 };
 /** A healing blow reaches every hero this close to the healer. */

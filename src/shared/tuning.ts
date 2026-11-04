@@ -37,6 +37,7 @@ export * from './weakness.js';
 export * from './venom.js';
 export * from './warrior.js';
 export * from './ranger.js';
+export * from './mage.js';
 import { DRUMMER, HEXER } from './backline.js';
 
 /** Holding attack past `start` begins charging; the heavy is strongest at `full`. */

@@ -15,6 +15,7 @@ import { quake } from './warrior';
 import { beginHold, looseBolt, stepWind } from './crossbow';
 import { brandySpeed, breathCap } from './brandy';
 import { quickMult, relicDark, spendCharge } from './charge';
+import { paySpell, refuseSpell } from './spells';
 import { knows, type Enemy, type FightEvent, type Hero, type Intent } from './types';
 
 export function newHero(id: string, x: number, y: number): Hero {
@@ -141,9 +142,10 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   if (inp.blockSeq !== h.seen.block) {
     h.seen.block = inp.blockSeq;
     // A Mage has no guard at all; the rest can at least tap a parry.
-    const guard = CLASS_GUARD[WEAPONS[h.weapon].cls];
-    if (guard !== 'none' && !h.winded && now - h.lastBlockPress >= GUARD.parryRepress) h.parryOpenAt = now;
-    if (guard === 'none' && now - h.toldAt > 2) (h.toldAt = now), ev.push({ k: 'noguard', x: h.x, y: h.y, dodge: WEAPONS[h.weapon].dodge.kind });
+    // (A spellblade has no guard either, but a press catches a blow on the blade: sim/spellblade.ts.)
+    const guard = CLASS_GUARD[WEAPONS[h.weapon].cls], catches = !!WEAPONS[h.weapon].catches;
+    if ((guard !== 'none' || catches) && !h.winded && now - h.lastBlockPress >= GUARD.parryRepress) h.parryOpenAt = now;
+    if (guard === 'none' && !catches && now - h.toldAt > 2) (h.toldAt = now), ev.push({ k: 'noguard', x: h.x, y: h.y, dodge: WEAPONS[h.weapon].dodge.kind });
     h.lastBlockPress = now;
   }
   if (inp.classSeq !== h.seen.cls) {
@@ -229,10 +231,12 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
       const held = h.actT + CHARGE.start, full = chargeFull(w, h), drawn = !!w.heavy.shot;
       h.power = Math.min(1, held / full);
       // (A rapier's lunge has its flash too: on it, the thrust skewers.)
-      h.perfect = (drawn || !!w.heavy.skewer || !!w.heavy.quake) && held >= full && held <= full + releaseWindow(h);
+      h.perfect = (drawn || !!w.heavy.skewer || !!w.heavy.quake || !!w.heavy.wall) && held >= full && held <= full + releaseWindow(h);
       if (drawn && held > full + RELEASE.overdraw) h.power = RELEASE.overdrawn;
       // A crossbow's perfect is its glint, not the flash.
       looseBolt(h);
+      // A big spell is paid for now; short of magic, it fizzles and nothing is cast (sim/spells.ts).
+      if (!paySpell(h, now, ev)) return void Object.assign(h, { act: 'idle', actT: 0, perfect: false });
       if (h.perfect) ev.push({ k: 'perfect', x: h.x, y: h.y });
       startSwing(h, -1, inp, enemies, now, ev);
       ev.push({ k: 'heavy', x: h.x, y: h.y });
@@ -240,7 +244,13 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     return;
   }
   if (h.act === 'attack') {
-    const s = currentSwing(h);
+    const s = currentSwing(h), cast = !h.heavy ? w.castWalk ?? 0 : 0;
+    // A wand's quick spell is cast walking, turning to the aim as it comes up.
+    if (cast) {
+      if (h.actT < s.windup) face(h, inp, enemies, true, (s.range ?? 3.2) * 0.9);
+      walk(h, inp, cast, dt, now);
+      collide(h, HERO.radius);
+    }
     if (h.actT < s.windup) {
       const k = s.lunge / s.windup;
       h.x += h.fx * k * dt;
@@ -250,7 +260,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
       if (h.actT - dt < s.windup) acts.loose(h, s);
       // The greatsword's overhead loosed on the white flash: a shockwave (sim/warrior.ts).
       if (h.actT - dt < s.windup && h.heavy && h.perfect && s.quake) quake(h, enemies, now, ev);
-      if (!s.shot) {
+      if (!s.shot && !s.wall) {
         // A Rogue's knives find one goblin a blow (the nearest in reach), a rapier's lunge two; everything else cuts through all.
         const most = s.hits ?? (w.single ? 1 : 0), near = most ? [...enemies].sort((a, b) => Math.hypot(a.x - h.x, a.y - h.y) - Math.hypot(b.x - h.x, b.y - h.y)) : enemies;
         for (const e of near) {
@@ -264,7 +274,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
       const queued = now - h.attackQueuedAt < INPUT_BUFFER && h.attackQueuedAt > now - h.actT;
       if (queued && !h.heavy && h.combo < w.combo.length - 1) {
         if (!inp.attack) return startSwing(h, h.combo + 1, inp, enemies, now, ev);
-        if (now - h.attackQueuedAt >= CHARGE.start) return startCharge(h);
+        if (now - h.attackQueuedAt >= CHARGE.start) return refuseSpell(h, now, ev) ? undefined : startCharge(h);
       }
       if (wantsRoll) return startRoll(h, inp, now, ev);
       if (h.actT >= swingTime(s)) (h.act = 'idle'), (h.actT = 0);
@@ -289,7 +299,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   if (now - h.attackQueuedAt < CHARGE.start + INPUT_BUFFER && h.attackQueuedAt > -9) {
     // The crossbow looses on the press; everything else waits to see if it's a tap or a hold.
     if (!inp.attack || w.noCharge) return startSwing(h, 0, inp, enemies, now, ev);
-    if (now - h.attackQueuedAt >= CHARGE.start) return startCharge(h);
+    if (now - h.attackQueuedAt >= CHARGE.start) return refuseSpell(h, now, ev) ? undefined : startCharge(h);
   }
   // Only a Warrior's or Healer's kit holds a block.
   h.blocking = inp.block && h.stamina > 0 && !h.winded && CLASS_GUARD[w.cls] === 'full' && !w.parryOnly;

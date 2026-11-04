@@ -11,6 +11,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .hp i { background: #c8402f; }
 .hp.poisoned i { background: #6a9a2a; box-shadow: inset 0 -2px 0 #3a6a1a; }
 .st i { background: #d9b13a; }
+.st { position: relative; }
+/* A Mage's big spell: what it costs, marked on the bar (red when you're short of it). */
+.st.spell::after { content: ''; position: absolute; top: -3px; bottom: -3px; left: var(--cost); width: 1px; background: #c9a8ff; }
+.st.spell.short::after { background: #ff5a4a; width: 2px; }
 .st.low i { background: #7a6a30; }
 .st.winded i { background: #c84a3a; animation: winded 0.5s steps(2) infinite; }
 .st.empty { animation: winded 0.18s steps(2) infinite; }
