@@ -66,8 +66,9 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     await sam.page.evaluate(() => { window.__ys = []; window.__yt = setInterval(() => window.__ys.push(window.__game.hero.y), 30); });
     await sam.page.keyboard.down('w');
     await wait(1200);
-    await sam.page.keyboard.up('w');
+    // (Sampled while the key is down: the settle after he lets go is a separate matter.)
     const ys = await sam.page.evaluate(() => (clearInterval(window.__yt), window.__ys));
+    await sam.page.keyboard.up('w');
     const back = ys.slice(1).reduce((n, y, i) => n + (y > ys[i] + 0.04 ? 1 : 0), 0);
     step(`Sam's walk is smooth on his screen (${back} jerks back in ${ys.length} looks: ${ys.slice(1).map((y, i) => (y - ys[i]).toFixed(2)).join(" ")})`, back === 0);
     await wait(600);
