@@ -19,8 +19,8 @@ export const HOW: Record<WeaponId, string> = {
   staff: 'Hold 1.6 s for an orb that bursts wide.',
   rod: 'Hold 1 s for a lance through a line.',
   mace: 'Every third blow heals everyone near. Hold for a smite that stuns.',
-  rapier: 'Quick thrusts at long reach, better head on than daggers. Hold to lunge through two, and loose it on the flash to skewer them so they bleed.',
-  poisoner: 'A short sword that catches two at once. Hold to raise the blowgun: a dart that poisons. Loose it on the flash and the goblin retches first.',
+  rapier: 'Quick thrusts at long reach, better head on than the daggers. Hold to lunge through two, and let go on the flash to skewer them so they bleed.',
+  poisoner: 'A short sword that catches two at once. Hold to raise the blowpipe, and let go on the flash to loose a poisoned dart; the goblin it hits stops to retch.',
   censer: 'Two cuts, then the censer burns goblins and heals everyone near. The best Cleric guard. Hold to whirl it.',
   flail: 'Slow, wide sweeps that come over a shield. The second heals. Hold to bring down a smite close in.',
 };
