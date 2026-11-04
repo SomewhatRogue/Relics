@@ -2,6 +2,64 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-04: the Mage's weapons rework: magic costs, the wand on the move, the staff's walls, the spellblade (Kyle; Claude Opus 5.5)
+
+The fourth class through Kyle's weapons rework. The Mage has no guard and blinks rather than rolls; its
+big spells now cost magic (the stamina bar). Numbers in `shared/mage.ts` and `shared/weapons.ts`, the
+rules in `sim/spells.ts`, `sim/staffwall.ts` and `sim/spellblade.ts`, all judged in the room.
+
+- **Magic** (`SPELL`): the wand's held burst 20, the staff's wall 30, the spellblade's wreathing 35 (less
+  the blade's charge: a full blade wreathes for nothing), the blink as before (40 x 1.5 = 60). Quick
+  attacks are free. A hold you can't pay for (short of it, or winded) fizzles the moment it would begin:
+  nothing is spent, NOT ENOUGH MAGIC in grey smoke and a dull knock. Paid at the release: the bar dips and
+  "-30" rises off the hero in violet. The bar carries a violet mark at the held spell's cost for a Mage
+  kit, red while you're short of it (`client/main.ts`, `style.css`). Judgment call: the refusal is at the
+  start of the hold (a clear "no" at once), checked again at the release.
+- **Wand** (Kyle loves it): unchanged numbers (spark 8, burst 10 to 24, 0.6 s), but the quick spark is
+  cast walking at 0.9 of your pace (`castWalk`), turning to the aim while it comes up. Its perfect, new: a
+  spark (or burst) that lands on a goblin mid wind-up breaks the blow off and staggers it 0.6 s (a butcher
+  0.3 s), any blow, striped ones too, PERFECT and INTERRUPTED with a violet star. The white-flash release
+  on the held burst is kept as it was.
+- **Staff**, reworked. Quick: a slow close slash in your element (15, reach 1.9, arc 150, 0.3 s wind-up,
+  0.42 s recover): fire sets alight, frost chills, storm jumps on to one more. Hold (1 s draw), rooted (no
+  walking at all while it gathers, nor through the cast): a wall 1.7 tiles ahead across where you face,
+  2.4 to 3.6 tiles long by the hold, 0.5 deep, 5 s. Fire: what's in it scorched 5 and set burning every
+  0.5 s. Frost: chills (slows) what touches it, and its face is solid to anything no heavier than a scrapper
+  (a butcher walks through, chilled). Storm: shocks what's in it for 9 every 0.5 s, a flinch. Perfect (let
+  go on the white flash): the big wall, 5.6 long, 0.8 deep, 7 s, taller, with a ring at each end. Walls
+  live in the room's zones beside the fire ring (so guests get them), drawn in both views (`client/walldraw.ts`).
+- **Spellblade** replaces the lance rod (new id `spellblade`; a saved rod anywhere becomes one, its quality
+  and level kept: `shared/oldkits.ts`). Name SPELLBLADE pending the lore keeper. Quick: three plain cuts
+  (10, 10, 16); each hit that lands adds 0.15 charge, the edge glowing violet up its length, white when
+  full. Hold (0.5 s): pay to wreathe the blade in your element; the release is a cut of its own (14 to 22,
+  arc 150) and the first of four wreathed swings (6 s at most): fire burns, frost slows, storm jumps to the
+  nearest other goblin within 3 for 60%. The last throws a wave 2.2 tiles ahead across 100 degrees, 14 and
+  a shove, in the element. Perfect: block pressed within 0.22 s of a blow landing catches it on the blade:
+  nothing taken, no stun on the goblin, the blade full (CAUGHT). Weakness: no range, it eats magic, and a
+  Mage with no guard stands in among them. On a phone the block button shows CATCH for it.
+- **The Jealous Rod** (hungry) is a wand now: its gift rides a charged spell and the spellblade has none.
+  Old saves holding it keep it as a wand. Its name is unchanged (lore keeper).
+- **Seen** (`client/fxmage.ts`, one overlay, so both views; `client/blademark.ts` over the hero in both):
+  the costs, the fizzle, INTERRUPTED, a slash's arc of its element, a wall going up along its length, the
+  blade wreathed (the edge burning in the element, a pip a swing left), the charge ring, CAUGHT, the wave.
+  The spellblade has its own look flat and 3D, its icon, and its swing and block sounds (a sword's).
+- **Sounds** from the kit: magic spent and a full blade the channel's hum, a fizzle the wall knock, an
+  interrupt the perfect chime and a shock, a catch the parry and the chime, a slash, wreathing or wave the
+  element's (ignite, chill, shock), a wall going up its element's (flare, freeze, shock), the big one a rumble.
+- **Online**: the charge, the wreathing (`bladeCharge`, `wreathe`, `wreatheUntil`, `wreatheEl`) live on the
+  hero and the walls in the zones, so guests get them in the snapshot.
+- New lines for the lore keeper and line editor: NOT ENOUGH MAGIC, INTERRUPTED, CAUGHT, CATCH (the
+  button), SPELLBLADE, the three card lines (`client/card.ts`), the three kit lines and the tip line
+  (`client/main.ts`). The class blurb (`shared/classes.ts`) still only names the wand, as it did.
+
+Tests: `tests/magekit.test.ts` (the wand cast walking at near full pace, its interrupt; the burst's cost
+and a fizzle that spends nothing; the staff's slash arc in front, not behind or far, in fire; the wall
+raised ahead and the hero rooted; the big wall on the flash; fire burns and storm shocks in a wall, frost
+holds a scrapper back while a butcher walks through chilled; the spellblade's charge per hit, the
+wreathing's cost, its fire, the wave off the last swing, frost slowing and storm jumping, a full blade
+free, the catch; the rod save migration and the Jealous Rod to a wand). The old staff-orb and rod-lance
+tests went with those spells; `pacing.test.ts` rolls the new kit.
+
 ## 2026-11-03: the Ranger's weapons rework: the longbow blinds, the crossbow winds and glints (Kyle; Claude Opus 5.5)
 
 The third class through Kyle's weapons rework. The Ranger has the best dodge (the jump back and its

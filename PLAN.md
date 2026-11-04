@@ -261,6 +261,10 @@ Every weapon gets a quick attack, a charged attack, a perfect-timed hit and a re
 - [x] Ranger (built 2026-11-03, Claude Opus 5.5; see DECISIONS): every bow is the short sword on a tap; the longbow's
   perfect release is a sure crit that BLINDS 2 s, the shortbow unchanged with a clean-hit spark, the crossbow aims when
   loaded and winds when empty (1 s, in pieces), a reload wound in one go glints for a 1.5x bolt through the whole line.
+- [x] Mage (built 2026-11-04, Claude Opus 5.5; see DECISIONS): big spells cost magic (burst 20, wall 30, wreathe
+  35, blink 60) and fizzle if you're short; the wand casts walking and a spark into a wind-up breaks the blow
+  off; the staff slashes close in its element and raises a wall of it (a bigger one on the flash); the
+  spellblade replaces the rod: cuts charge it, a hold wreathes it, block catches a blow on the blade.
 - Rogue: Shadow Step behind a goblin stuns it 1 s for free hits.
 - The hand crossbow becomes the poisoner's kit:
   - Quick: a short sword, a bit wider than the daggers but slower. Not much damage, but not reduced either.
