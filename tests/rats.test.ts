@@ -17,7 +17,7 @@ function run(r: Rats, room: ArenaRoom, stains: ReturnType<typeof pool>, secs: nu
 }
 
 describe('rats on the blood', () => {
-  it('come to blood once nobody is near, scatter from a hero at 2.5 tiles (1.2 creeping), and come back one at a time', () => {
+  it('come to blood once nobody is near, scatter from a hero at 2.5 tiles (1.8 creeping), and come back one at a time', () => {
     const room = new ArenaRoom(1, {}), me = newHero('me', 1.5, 1.5), stains = pool(8, 7), r = new Rats();
     room.heroes = [me];
     let scattered = 0;
@@ -60,7 +60,7 @@ describe('rats on the blood', () => {
     // Creeping: closer before they go.
     const near = r.rats[0];
     run(r, room, stains, 8, t);
-    Object.assign(me, { x: near.x - 1.5, y: near.y, sneaking: true });
+    Object.assign(me, { x: near.x - 2.1, y: near.y, sneaking: true });
     r.frame(room, stains, room.heroes, 'me', t + 8.05);
     expect(near.state).not.toBe('flee');
   });

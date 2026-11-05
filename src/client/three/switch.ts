@@ -25,7 +25,7 @@ export class ViewSwitch {
   constructor(private changed: () => void) {
     this.btn.id = 'viewbtn';
     this.btn.setAttribute('aria-label', 'Switch between the flat view and the 2.5D view');
-    this.btn.addEventListener('click', () => this.set(this.look === '3d' ? 'pixel' : '3d'));
+    this.btn.addEventListener('click', () => this.set(this.look === '3d' && !this.failed ? 'pixel' : '3d'));
     this.qbtn.id = 'qualitybtn';
     this.qbtn.setAttribute('aria-label', 'How detailed the 2.5D view is drawn');
     this.qbtn.addEventListener('click', () => this.setQuality(ORDER[(ORDER.indexOf(this.quality) + 1) % ORDER.length]));
@@ -57,6 +57,13 @@ export class ViewSwitch {
     this.brightChanged(this.bright);
   }
 
+  /** Set by views.ts when 2.5D won't come up: the flat view shows, and the switch says why. */
+  private failed = false;
+  setFailed(f: boolean): void {
+    this.failed = f;
+    this.label();
+  }
+
   set(l: Look): void {
     this.look = l;
     saveLook(l);
@@ -65,8 +72,9 @@ export class ViewSwitch {
   }
 
   private label(): void {
-    this.btn.textContent = this.look === '3d' ? 'VIEW: 2.5D' : 'VIEW: FLAT';
-    this.btn.classList.toggle('on', this.look === '3d');
+    const bad = this.failed && this.look === '3d';
+    this.btn.textContent = bad ? '2.5D FAILED: RETRY' : this.look === '3d' ? 'VIEW: 2.5D' : 'VIEW: FLAT';
+    this.btn.classList.toggle('on', this.look === '3d' && !bad);
     this.qbtn.textContent = 'QUALITY: ' + this.quality.toUpperCase();
     this.qbtn.hidden = this.brow.hidden = this.look !== '3d';
     this.bval.textContent = 'BRIGHT ' + (this.bright > 0 ? '+' : '') + this.bright;

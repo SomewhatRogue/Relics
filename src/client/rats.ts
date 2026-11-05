@@ -1,6 +1,6 @@
 /**
  * Rats on the blood: a few small ones at a job's stains and bodies, and in Wickhold's alleys and by
- * the Drowned Rat's grate. Walk within 2.5 tiles (1.2 creeping) and they scatter, low and jittery,
+ * the Drowned Rat's grate. Walk within 2.5 tiles (1.8 creeping: a phone's half-pushed stick creeps, and rats should still go before you're on them) and they scatter, low and jittery,
  * away from you to the nearest wall, edge or shadow, and are gone; after 15 to 25 s with nobody near,
  * they come back one at a time. At most `RATS.cap` at once, the nearest spots first.
  *
@@ -12,7 +12,7 @@ import type { ArenaRoom } from '../sim/room';
 import type { Hero } from '../sim/types';
 import { StainSpots, TOWN_HAUNTS, blocked, bolthole, type Haunt } from './ratspots';
 
-export const RATS = { scare: 2.5, creep: 1.2, back: [15, 25], gap: [1.5, 3.5], cap: 8, reach: 18, flee: 7, walk: 1.6, quiet: 4 } as const;
+export const RATS = { scare: 2.5, creep: 1.8, back: [15, 25], gap: [1.5, 3.5], cap: 8, reach: 18, flee: 7, walk: 1.6, quiet: 4 } as const;
 
 export type RatState = 'idle' | 'in' | 'flee' | 'gone';
 export interface Rat { x: number; y: number; hx: number; hy: number; tx: number; ty: number; state: RatState; t: number; face: number; seed: number; spot: Spot }
