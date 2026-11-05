@@ -2,6 +2,7 @@
  * One frame: camera, the flat (lit) layer in depth order, the glowing layer, then the lighting pass.
  * The scene is painted at a low resolution and scaled up by a whole number so pixels stay crisp.
  */
+import { feetBand, upright } from './phoneband';
 import { parryWindow } from '../sim/knacks';
 import { ARENA, npcAt, type GameMap } from '../shared/arena';
 import { rats } from './rats';
@@ -177,8 +178,13 @@ export class Scene {
     this.cam.x = clamp(this.cam.x, this.vw, worldW(map));
     // On an upright phone the camera may run past the room's foot (a short room needn't sit centred), so
     // the hero is never under the touch buttons.
-    const foot = this.vh > this.vw * 1.2 ? Math.round(this.vh * 0.22) : 0, lo = clamp(-1e9, this.vh, worldH(map));
+    const foot = upright(this.vw, this.vh) ? Math.round(this.vh * 0.22) : 0, lo = clamp(-1e9, this.vh, worldH(map));
     this.cam.y = foot ? Math.max(lo, Math.min(Math.max(lo, worldH(map) - this.vh) + foot, this.cam.y)) : clamp(this.cam.y, this.vh, worldH(map));
+    // ...and wherever the room's edge is, the hero's feet stay between the top HUD and the cluster (phoneband.ts).
+    if (foot && me && this.heroAt && !this.focus) {
+      const [top, bottom] = feetBand(this.vh, this.scale / this.dpr), hy = this.heroAt[1];
+      this.cam.y = Math.max(hy - bottom, Math.min(hy - top, this.cam.y));
+    }
     const sh = fx.shake;
     const [kx, ky] = camKick(me, room.time, KICK);
     const cx = Math.round(this.cam.x + (Math.random() - 0.5) * sh) + kx, cy = Math.round(this.cam.y + (Math.random() - 0.5) * sh) + ky;

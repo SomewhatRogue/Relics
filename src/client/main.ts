@@ -76,6 +76,7 @@ import './exped.css';
 import { paintFrames } from './frames';
 import { iconVars } from './icons';
 import { Cluster } from './cluster';
+import { UnderButtons } from './underbtn';
 import { UnitFrame } from './unitframe';
 import { expedRows, roomsHtml, smallLine, titleCase, TRACKW } from './tracker';
 import { BannerFold, calm } from './bannerfold';
@@ -134,6 +135,8 @@ const unit = new UnitFrame();
 const fold = new BannerFold($('#banner'));
 const objFlash = new ObjFlash(), unlocks = new UnlockFlash(), purse = new Purse();
 const cluster = input.touch ? new Cluster() : null;
+/** A phone's buttons go faint over the hero or a telegraph (underbtn.ts). */
+const under = input.touch ? new UnderButtons() : null;
 const title = new Title(game, () => undefined, recovery);
 /** Chat (online): world and near in town, the party on a job. */
 const chat = new Chat(game, views, input.touch, () => panel.open || title.open);
@@ -456,6 +459,7 @@ function tick(t: number): void {
   // (Off screen, leading a job in the background: nothing to draw.)
   if (document.hidden) return;
   views.render(game.room, ME, fx, t / 1000, dt, inTown ? (townfolk?.here(game.room.map.name) ?? []) : [], game.mode === 'run');
+  under?.frame(views, game.room, game.room.heroes.find((x) => x.id === ME), t / 1000);
   // Out of bounds: the dark closing in, what comes for you, and anyone taken (dreadfx.ts).
   dread.frame(game.room.heroes.find((x) => x.id === ME), game.room.heroes, evs, views, fx, t / 1000, dt);
   hud(t / 1000);

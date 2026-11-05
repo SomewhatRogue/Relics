@@ -4,6 +4,7 @@
  * whole number with nearest-pixel sampling; the flat layer of words and marks goes over it at the same
  * size. Only draws; the room decides everything. Built the first time it's wanted (main.ts).
  */
+import { feetBand } from '../phoneband';
 import * as THREE from 'three';
 import type { ArenaRoom } from '../../sim/room';
 import type { Hero } from '../../sim/types';
@@ -164,7 +165,11 @@ export class View3D {
       this.heroAt = [hx, hy];
       // A cutscene's point of interest (the Stoker coming): the camera eases there instead.
       if (f) this.view.follow(map, f.x, f.y, dt * 0.36, fx.shake);
-      else this.view.follow(map, hx + me.fx * 0.6, hy + me.fy * 0.5 + (portrait ? (this.view.H / this.view.ppu) * 0.1 : 0), dt, fx.shake);
+      else {
+        // Upright: the hero's feet kept between the top HUD and the touch cluster (phoneband.ts).
+        const band = portrait ? feetBand(this.view.H, this.S / this.dpr) : null;
+        this.view.follow(map, hx + me.fx * 0.6, hy + me.fy * 0.5 + (portrait ? (this.view.H / this.view.ppu) * 0.1 : 0), dt, fx.shake, band ? { z: hy, top: band[0], bottom: band[1] } : undefined);
+      }
     }
     const at = this.view.at, fires: Spot[] = [...this.ground!.fires], ls: L3[] = [...this.ground!.lights];
     lampsNow(map.theme, this.ground!.lamps, fires, ls);
