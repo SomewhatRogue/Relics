@@ -1,6 +1,7 @@
 /**
  * The hungry's camps on an expedition's map, and what each main job is laid as (docs/terrain-nodes.md
- * 2.8, the warcamp): tents and shacks in a ring round a wild fire, a band at rest about it, a drummer.
+ * 2.8, the warcamp): tents and shacks in a ring round a wild fire, a band at rest about it (made a pack
+ * once the map is laid, shared/expedpacks.ts: a banner-bearer's, an oil crew's, a butcher's, a drum's).
  * A camp can hold one of the jobs: the larder and its cookpot, a siege engine half built, prisoners in
  * cages behind hurdles, the dens, or a named butcher at the fire. The barrows are where the old shrine
  * is held. Each returns where its job is and what it's made of (indexes into the kit's lists).
@@ -32,20 +33,11 @@ export function ring(k: Kit, at: P, n: number, d0: number, d1: number, more: Par
   return out;
 }
 
-/** Some of a band become the worse sorts, the worse the place. */
-export function vary(k: Kit, idx: number[], ruin: number): void {
-  for (const i of idx) {
-    const f = k.foes[i], r = k.rng.next();
-    if (f.kind !== 'scrapper' || f.bow || f.feeding || f.name || f.variant) continue;
-    if (r < 0.16 + ruin * 0.03) f.variant = 'lunger';
-    else if (r < 0.3 + ruin * 0.05) f.variant = 'shield';
-    else if (r < 0.38 + ruin * 0.05) f.variant = 'heavy';
-    else if (r > 0.9) f.bow = true;
-  }
-}
-
-/** A camp at `c` (its middle claimed already), with job `goal` if any. Returns the camp and the job's spot. */
-export function camp(k: Kit, c: P, goal: GoalKind | null, boss: string, ruin: number, index: number): { camp: Camp; spot: GoalSpot | null } {
+/**
+ * A camp at `c` (its middle claimed already), with job `goal` if any. Returns the camp, the job's spot,
+ * and the band at the fire (`band`, made a pack later; the job's own guards stay small ones).
+ */
+export function camp(k: Kit, c: P, goal: GoalKind | null, boss: string, index: number): { camp: Camp; spot: GoalSpot | null; band: number[] } {
   const rng = k.rng, foes: number[] = [];
   patch(k, 'mud', c.x - 5, c.y - 4, 10, 8);
   k.braziers.push({ x: c.x, y: c.y, r: 0.4, wild: true });
@@ -60,11 +52,8 @@ export function camp(k: Kit, c: P, goal: GoalKind | null, boss: string, ruin: nu
   }
   round(k, 'cookfire', c.x + 1.5, c.y + 0.7, 0.3);
   k.grim.push({ kind: 'bones', x: c.x - 1.4, y: c.y + 1, k: rng.int(4) });
-  foes.push(...ring(k, c, 6 + rng.int(4), 1.3, 3.2));
-  // The drummer: when the camp sees you, the beat goes up and the horn with it (sim/expedpressure.ts).
-  const dr = ring(k, c, 1, 1.4, 2.6, { variant: 'drummer' });
-  foes.push(...dr);
-  vary(k, foes, ruin);
+  const band = ring(k, c, 7 + rng.int(4), 1.3, 3.2);
+  foes.push(...band);
   const near = (r: number, d0 = 5, d1 = 8.5): P | null => {
     for (let t = 0; t < 40; t++) {
       const a = rng.range(0, Math.PI * 2), d = rng.range(d0, d1), x = c.x + Math.cos(a) * d, y = c.y + Math.sin(a) * d * 0.8;
@@ -126,8 +115,7 @@ export function camp(k: Kit, c: P, goal: GoalKind | null, boss: string, ruin: nu
     foes.push(f, ...ring(k, c, 3, 1.6, 2.8));
     spot = { kind: 'butcher', x: c.x, y: c.y - 1.6, camp: index, foe: f };
   }
-  if (ruin >= 2 && goal !== 'butcher' && rng.next() < 0.6) foes.push(k.foes.push({ kind: 'butcher', x: c.x + rng.range(-1, 1), y: c.y - 1.5 }) - 1);
-  return { camp: { x: c.x, y: c.y, foes }, spot };
+  return { camp: { x: c.x, y: c.y, foes }, spot, band };
 }
 
 /** The barrows: grassed mounds older than the villages, standing stones, and a shrine to hold. */

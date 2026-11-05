@@ -6,6 +6,7 @@
  * screen's edge toward each friend off screen, with their name. Drawing only.
  */
 import { EXPED } from '../shared/tuning';
+import { ringOf } from '../shared/expedrings';
 import type { ArenaRoom } from '../sim/room';
 import { drawText, textWidth } from './pixfont';
 
@@ -14,11 +15,12 @@ const FRIEND = '#7ad0ff';
 
 /** A dotted ring on the ground, `share` of it bright (how far along). */
 function ring(g: CanvasRenderingContext2D, P: Ground, x: number, y: number, r: number, share: number, now: number): void {
-  const n = Math.max(24, Math.round(r * 14));
+  // A hold's ring is wide (EXPED.holdR): closer dots, and two in three of the unlit shown, so it reads at night.
+  const big = r > 3, n = Math.max(24, Math.round(r * (big ? 20 : 14)));
   for (let i = 0; i < n; i++) {
     const t = (i / n) * Math.PI * 2 - Math.PI / 2, [px, py] = P(x + Math.cos(t) * r, y + Math.sin(t) * r);
-    const lit = i / n < share;
-    if (!lit && (i + Math.floor(now * 6)) % 3) continue;
+    const lit = i / n < share, beat = (i + Math.floor(now * 6)) % 3;
+    if (!lit && (big ? beat === 0 : beat)) continue;
     g.fillStyle = lit ? '#ffd27a' : '#a0782a';
     g.fillRect(Math.round(px), Math.round(py), lit ? 2 : 1, lit ? 2 : 1);
   }
@@ -30,7 +32,7 @@ export function drawExpedGround(g: CanvasRenderingContext2D, room: ArenaRoom, P:
   if (!x || room.indoors) return;
   for (const q of [...x.goals, ...x.sides]) {
     if (q.done || (q.kind !== 'larder' && q.kind !== 'shrine' && q.kind !== 'pray')) continue;
-    ring(g, P, q.x, q.y, q.kind === 'shrine' ? EXPED.holdR : 1.6, q.p, now);
+    ring(g, P, q.x, q.y, ringOf(q.kind), q.p, now);
   }
   if (x.phase === 'open') ring(g, P, x.zone.x, x.zone.y, x.zone.r, x.lit / EXPED.call, now);
   if (x.phase === 'hold' || x.phase === 'leave') ring(g, P, x.zone.x, x.zone.y, x.zone.r, x.phase === 'leave' ? 1 : x.held / EXPED.extract, now);

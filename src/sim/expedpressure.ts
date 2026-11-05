@@ -8,10 +8,12 @@
  * Nothing past EXPED.cap goblins alive. Rolls are the expedition's own (a counter on its seed).
  */
 import { collide, inArea, useMap } from '../shared/arena';
-import { EXPED, SLEEP, VARIANTS } from '../shared/tuning';
+import { EXPED, EXPED_PACKS, SLEEP } from '../shared/tuning';
+import { ringOf } from '../shared/expedrings';
 import { isDead } from './damage';
 import { walk } from './enemies';
 import { everyone, type ExpedState } from './exped';
+import { nearest, roomFor, toughen, waveFoe, waveRoles } from './expedwave';
 import type { ArenaRoom } from './room';
 import type { Enemy, FightEvent, Hero } from './types';
 
@@ -42,7 +44,8 @@ export function stepPressure(room: ArenaRoom, x: ExpedState, heroes: Hero[], ev:
   }
   // Holding the shrine or the beacon: they keep coming while you're there.
   const hold = x.phase === 'hold' ? x.zone : x.goals.find((g) => g.kind === 'shrine' && !g.done && g.p > 0);
-  if (hold && t >= x.nextHold && alive < EXPED.cap && heroes.some((h) => Math.hypot(h.x - hold.x, h.y - hold.y) < 8)) {
+  const holdR = ringOf(x.phase === 'hold' ? 'beacon' : 'shrine') + EXPED.holdNear;
+  if (hold && t >= x.nextHold && alive < EXPED.cap && heroes.some((h) => Math.hypot(h.x - hold.x, h.y - hold.y) < holdR)) {
     x.nextHold = t + EXPED.holdWave * (x.phase === 'hold' ? 0.8 : 1);
     wave(room, x, heroes, hold.x, hold.y, Math.min(size + (x.phase === 'hold' ? 2 : 0), EXPED.cap - alive));
   }
@@ -86,29 +89,29 @@ function open(room: ArenaRoom, px: number, py: number): boolean {
 }
 
 /**
- * `n` goblins come in out of sight: round the hero nearest (px, py), EXPED.waveFrom tiles off (inside
- * the wake ring, so they don't doze), on open ground, and at least 18 from every hero. `hunt`: they
- * come for you at once; else they walk to (px, py) and look about (a hunting party).
+ * `n` goblins come in out of sight, as one pack (sim/expedwave.ts): round the hero nearest (px, py),
+ * EXPED.waveFrom tiles off (inside the wake ring, so they don't doze), on open ground, and at least 18
+ * from every hero. `hunt`: they come for you at once; else they walk to (px, py) and look about (a
+ * hunting party).
  */
 export function wave(room: ArenaRoom, x: ExpedState, heroes: Hero[], px: number, py: number, n: number, hunt = true): number[] {
   if (n <= 0) return [];
-  const h = heroes.reduce((a, b) => (Math.hypot(b.x - px, b.y - py) < Math.hypot(a.x - px, a.y - py) ? b : a));
+  const h = nearest(heroes, px, py);
   const base = Math.atan2(h.y - py, h.x - px) + Math.PI;
   for (let t = 0; t < 24; t++) {
     const a = base + (roll(x) - 0.5) * Math.PI * (t < 8 ? 1 : 2), d = EXPED.waveFrom[0] + roll(x) * (EXPED.waveFrom[1] - EXPED.waveFrom[0]);
     const cx = h.x + Math.cos(a) * d, cy = h.y + Math.sin(a) * d;
     if (!open(room, cx, cy) || heroes.some((o) => Math.hypot(o.x - cx, o.y - cy) < 18) || d > SLEEP.doze - 0.5) continue;
-    const ids: number[] = [];
-    for (let i = 0; i < n; i++) {
+    const { roles, bunch } = waveRoles(x, n, roomFor(room, h), () => roll(x)), pack = EXPED_PACKS.wave0 + x.n, made: Enemy[] = [];
+    for (const role of roles) {
       const ox = cx + (roll(x) - 0.5) * 2.4, oy = cy + (roll(x) - 0.5) * 2.4;
       if (!open(room, ox, oy)) continue;
-      const r = roll(x), e = room.addFoe(r < 0.06 + x.level * 0.02 ? 'butcher' : 'scrapper', ox, oy);
-      const v = e.kind === 'scrapper' ? (r < 0.25 ? 'lunger' : r < 0.4 ? 'shield' : r < 0.47 ? 'heavy' : undefined) : undefined;
-      if (v) (e.variant = v), (e.hp = e.maxHp = VARIANTS[v].hp);
+      const e = waveFoe(room, role, ox, oy, pack, bunch);
       if (!hunt) e.alert = false;
-      ids.push(e.id);
+      made.push(e);
     }
-    return ids;
+    toughen(made, x.party);
+    return made.map((e) => e.id);
   }
   return [];
 }

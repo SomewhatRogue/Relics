@@ -2,6 +2,78 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-04: the Barrowfields tuned: packs and the new sorts, bigger hold rings, less gold (Kyle; Claude Opus 5.5)
+
+Kyle played the expedition on his phone ("really really fun"): "I didn't see too many enemy types, just
+big guys and little guys"; "A tonnnn of gold drop, maybe too much"; "It feels like it's hard to hold a
+position if you're not the tank ... I want the area you can hold to be larger so you can be agile".
+
+**Measured** (`npx tsx scripts/bigmap/expedtour.ts [days] [party]`, new: a hero who can't be hurt walks
+each job, side job, camp and stretch of the map nearest first, then lights and holds the beacon, fighting
+what's awake near them with real blows by Intent; walking is ghosted so the tour never sticks; the room
+does the rest. "Sorts met": any goblin awake within 10 tiles, by its sort; "specials near": specials awake
+within 10 tiles while fighting, each second):
+
+| | minutes | kills | piles | coins on the floor (kills / chests / other) | coins a kill | coins a pile | pay | sorts met (past the small one; fewest) | specials near mean / p90 / max |
+|---|---|---|---|---|---|---|---|---|---|
+| alone, before (8 runs) | 6.2 | 155 | 103 | 526 (491 / 13 / 22) | 3.2 | 5.1 | 242 | 6.8 (5.1; 5) | 1.3 / 3 / 9 |
+| alone, after (8 runs) | 9.6 | 183 | 30 | 308 (290 / 12 / 6) | 1.7 | 10.7 | 242 | 12.1 (9.5; 8) | 1.3 / 2 / 6 |
+| four, before (3 runs) | 4.5 | 163 | 108 | 526 (509 / 5 / 11) | 3.1 | 4.9 | 250 | 7 (5.3; 5) | 1.2 / 3 / 8 |
+| four, after (3 runs) | 4.3 | 196 | 33 | 319 (309 / 5 / 5) | 1.6 | 9.6 | 250 | 14.3 (11.7; 11) | 0.8 / 2 / 3 |
+
+Before, the sorts met were archer, butcher, heavy, lunger and shield (with a drummer or the named one):
+`vary` turned some of every band into lungers, shields and brutes. Gold came 93% from kills (a pile for two
+goblins in three), against 242 of pay from the jobs.
+
+- **Packs on the big map** (`shared/expedpacks.ts`, tuning `EXPED_PACKS`): each camp's band at the fire,
+  each stretch's set piece and each road patrol is one pack from the templates, laid by the job rooms' own
+  `lay` (now exported), on its own seeded stream after the ground is laid. What a band may be comes from its
+  ground: the open fields, banks and wood's edge draw wolves and a keeper, a netter's swarm, a swarm, a brute,
+  a thief's crowd; the hamlet roof archers, an oil and torch crew, a banner-bearer, a thief; the camps a
+  banner-bearer, an oil crew, a butcher, the shield wall, a drum, a hexer, a brute; the north road (where the
+  drove road leaves it) the log-carriers; the other roads a swarm, brute, netter, wolves or wall. One of each
+  before any twice. A camp keeps its whole band (the ones past the template stay on as small ones) and its
+  job's guards join its pack; a named butcher's camp takes no second big one. No blind hunters here. No pack
+  is laid within 14 tiles of the way in (so none is left a special without its pack). Specials: 3 a camp, 2 a
+  set piece or patrol.
+- **Carrion crows** on the dead out in the open and on the dead soldier by the chained chest: a body 75%, one
+  flock a stretch, three at most (`map.flocks`, built from the seed on every screen; the flock's state is
+  sent near only, as any collection is).
+- **Waves and hunting parties are packs** (`sim/expedwave.ts`): a template for the ALARM (`EXPED_PACKS.waves`:
+  swarms, brutes and netters at first; wolves and thieves from ALARM 1; banners and oil crews from 2; sappers
+  and log-carriers from 3; butchers, the wall and a drum late), its size as before (one more a friend).
+  Specials: 1, 1, 2, 2, 2, 3 a wave by ALARM, and none past 3 already awake within 14 tiles of who it's
+  coming for or still on their way from an earlier wave (a hold's waves come close together: before this the
+  tour saw 12 specials round the shrine at once). Each wave its own pack number (from 1000).
+- **A party** (`expedRoom`): `scalePacks` with 0.3 more small ones a pack a player past the first (a job
+  takes 0.5; a phone hosts this map), the centrepiece 35% tougher and the template's `more` from three; a
+  wave's centrepiece tougher too. Four players start with about 30 more goblins.
+- **Hold rings** (`EXPED.holdR`, `extractR`: 3.4 and 4 to 6 tiles; `grace` 1.5 s): one size for drawing and
+  judging (`shared/expedrings.ts ringOf`, used by `sim/exped.ts` and `client/expeddraw.ts`; the beacon's hold
+  was judged half a tile wider than drawn, now not). The shrine and the beacon's hold go on 1.5 s after the
+  last one steps out, then stop; they never start with nobody in the ring (tests: progress at the ring's
+  edge, through a step out, stopped after the grace). The beacon stands further down the drove road so all
+  its ring is on the map. A hold's waves come for anyone within 2 tiles of the ring's edge. The big rings
+  have closer dots, two in three of the unlit shown, so they read at night. On a phone held upright the
+  ring is a little wider than the screen.
+- **Less gold** (`EXPED_COINS`, used by `dropPickups` on an expedition's room): a small goblin a pile one
+  time in five, 6 to 11 (was 85%, 2 to 6); an archer a quarter, 6 to 12; a butcher half the time, 15 to 30;
+  a named one as ever; wolves none. About half the coins in under a third of the piles. Chests, a burnt
+  house's handful and the jobs' pay are unchanged.
+- **Online**: nothing new is sent but a goblin's `pack` and `role` (once, on the first patch) and the crows,
+  all near only. `npx tsx scripts/bigmap/expedmeasure.ts 10` (a party of four, now with its extra goblins;
+  another agent building on the same box): together, 150: 28.7 KB/s a friend (worst 34.1), biggest 36.6 KB,
+  compact save 43 KB; spread, 300: 52.1 (65.5), 43.2 KB, 80 KB in 5 parts. No message over the limit.
+
+Tests: `tests/exped.test.ts` (packs and caps, the new sorts where they belong and none blind, a roof archer
+on a roof, five or more kinds of special on every map, crows; a party's extra; waves as packs, sappers only
+late, no specials past the near cap; ring sizes, one source, the beacon's ring on the map; the grace; the
+coin budget against a job's table and in an expedition room; the beacon test now waits out the grace).
+Shots: phone and laptop, `?hero=ROGUE&exped=4` (the shrine's ring, the wolves and keeper, a banner's camp,
+an oil crew, the log-carriers, a netter, a thief's crowd, the beacon's ring). No new player-facing lines.
+Open: Kyle's play on the ring size (6 could go to 7) and the gold; roof archers only where a pack lands by
+a house, so not every run meets one.
+
 ## 2026-11-04: encounters as packs, and ten new sorts of the hungry (Kyle; Claude Opus 5.5)
 
 Kyle: "Too much chaos on the screen reads messy. I'd rather have more impactful battles, but splattering

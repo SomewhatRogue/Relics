@@ -29,8 +29,8 @@ pack waits until it sees him; a party of four meets more small ones and a toughe
 of specials; and each new sort does what its card in docs/DECISIONS.md says, flat and 2.5D, phone and laptop.
 `npx tsx scripts/encounters/measure.ts` measures it; `node scripts/foes-look.cjs` shoots each sort and two
 composed rooms. Open: NETTED, TAP TO BREAK FREE, CUT FREE, POTION STOLEN, N GOLD STOLEN, GOT AWAY through
-the lore keeper and line editor; the expedition's camps and waves still roll the old way, and the new
-sorts aren't in its waves yet.
+the lore keeper and line editor. (The expedition's camps, patrols and waves are packs now: DECISIONS
+2026-11-04, the Barrowfields tuned.)
 
 **Copy pass 3: how we write and show things** (Claude Opus 5.5, 2026-11-04; Kyle: "general guidance ...
 we need to work on, in general, how we write and show things"). Built; waiting on Kyle's read. *Done
@@ -361,7 +361,11 @@ him and the pressure climbs, lights the beacon, holds it a minute and walks out 
 pay grows with each job done and side job. DECISIONS 2026-11-04 has the build and the numbers.
 - [x] Online: near only per friend, quiet clocks, map by seed, compact save, split messages, measured.
 - [x] The map from the node vocabulary; jobs, side jobs, pressure, extraction, map screen, friend markers.
-- [ ] Kyle's play: tune `EXPED` (goblins, waves, hold lengths, pay); night is dark out in the open.
+- [x] Kyle's first play ("really really fun"), tuned (2026-11-04, Claude Opus 5.5): camps, set pieces, patrols and
+  waves are packs with the new sorts by stretch and ALARM, specials capped; hold rings of 6 tiles with 1.5 s of
+  grace; about half the gold on the floor, in bigger piles (`EXPED_PACKS`, `EXPED_COINS`; DECISIONS, the Barrowfields tuned).
+- [ ] Kyle's next play: do the rings feel right for a Rogue or Ranger (on a phone upright the ring is wider than the
+  screen), is the gold right, does every run meet enough sorts; night is dark out in the open.
 - [x] The lore keeper over `shared/expedjob.ts` and the side-way names (2026-11-04): SPLITNAIL and THE DROVER for
   BLACKNAIL and THE TANNER, CAPTIVES, CHEST, Lucky (not Blessed), ALARM (not PRESSURE), THE SPRING (not THE GLADE).
 - [ ] Kyle's calls on the new lore (DECISIONS 2026-11-04, Barrowfields lore): why the hungry want the barrow shrine.
