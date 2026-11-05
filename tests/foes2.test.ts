@@ -121,7 +121,7 @@ describe('carrion crows', () => {
     const { room, h } = flock();
     room.setIntent('me', { ...NO_INTENT, my: -0.3 });
     h.sneaking = true;
-    Object.assign(h, { y: 8 + CROWS.creep + 0.3 });
+    Object.assign(h, { y: 8 + CROWS.creep + 0.6 }); // (a creep is a steady half pace now)
     run(room, 0.2);
     expect(room.crows[0].up).toBe(-1);
     room.setIntent('me', { ...NO_INTENT, my: -1 });

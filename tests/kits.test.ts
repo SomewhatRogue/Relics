@@ -61,12 +61,12 @@ describe('the rapier', () => {
 });
 
 describe("the poisoner's kit", () => {
-  it('a tap is the short sword, full damage head on, catching two; held, a dart that poisons (a little on its own)', () => {
+  it('a tap is the short sword, 80% head on (Kyle, 2026-11-04), catching two; held, a dart that poisons (a little on its own)', () => {
     const tap = arena('poisoner', [{ x: 8.7, y: 8 }, { x: 9.3, y: 8 }]);
     const ev = tap.run(0.4, { attackSeq: 1 });
     expect(ev.some((e) => e.k === 'shoot')).toBe(false);
-    expect(hurt(tap.room.enemies[0])).toBe(WEAPONS.poisoner.combo[0].dmg);
-    expect(hurt(tap.room.enemies[1])).toBe(WEAPONS.poisoner.combo[0].dmg);
+    expect(hurt(tap.room.enemies[0])).toBe(Math.round(WEAPONS.poisoner.combo[0].dmg * WEAPONS.poisoner.front!));
+    expect(hurt(tap.room.enemies[1])).toBe(Math.round(WEAPONS.poisoner.combo[0].dmg * WEAPONS.poisoner.front!));
     const shot = arena('poisoner', [{ x: 9, y: 4 }]);
     const out = held(shot.run, WEAPONS.poisoner.draw! + 0.4, 0.4);
     expect(out.some((e) => e.k === 'shoot' && e.kind === 'dart')).toBe(true);
