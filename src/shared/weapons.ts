@@ -266,7 +266,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     dodge: BLINK,
   },
   /** Close and slow: a slash in the Mage's element in front. Held, rooted, the element's spell (it costs
-   *  magic): a fire pit dropped on a goblin, or all round you a frost nova or a charged ring (shared/spellbook.ts). */
+   *  magic): a wall of fire rolled out at a goblin, or all round you a frost nova or a charged ring (shared/spellbook.ts). */
   staff: {
     name: 'FOCUS STAFF',
     cls: 'MAGE',

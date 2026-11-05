@@ -2,6 +2,64 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-05: the staff's fire hold is a wall of fire rolled at a goblin (Kyle; Claude Opus 5.5)
+
+Kyle: "Wizard staff fire, hold down to make a wall of fire that moves towards the targeted enemy and stays
+up for a few seconds. That way we have lightning cage for AOE close, fire for range, and ice for close
+AOE." The fire pit (the entry below) is retired: `sim/firepit.ts`, `client/firepitdraw.ts` and
+`tests/firepit.test.ts` are gone. Numbers in `shared/spellbook.ts` FIRE_WALL, the room's rules in
+`sim/firewall.ts`, drawn by `client/firewalldraw.ts`.
+
+- **What it rolls at** (the pit's targeting kept): the nearest goblin within 6 tiles inside a 90 degree
+  cone in front, else the nearest within 6 anywhere, else a spot **4** tiles ahead (short of a wall). The
+  Mage turns to it. No line-of-sight check, as before.
+- **The wall.** A line 3 tiles long (4 on a perfect; WIDE BURST lengthens it as any area), 0.7 deep, square
+  to the way it goes. It rises 1 tile in front of the Mage at the release and rolls at 5 tiles a second
+  to where the goblin stood (it doesn't follow it), stopping short at a wall (0.3 off it) or at the 6 tile
+  reach. There it stands and burns 3 s (4.5 on a perfect); rain shortens that by the weather's burn share
+  (`burnFor`, 0.6): 1.8 s, 2.7 on a perfect. The zone is plain data: `tx, ty` its stop, `ax, ay` its way,
+  `r` half its length, `at` the moment it stands (`fell` once it has), and its middle is worked out from
+  those each tick (`wallAt`), so where it is never drifts.
+- **What it does.** Each goblin it touches, rolled over or stood on, takes 3 (times the hero's damage) and
+  is set alight at once, then again every 0.5 s while it stays in it. Each target keeps its own half-second
+  (`hit` on the zone), so a goblin it rolls through between two beats is never missed; what it rolled over
+  this tick counts as touched. Friends in it, the Mage and the freed too, take a third of what a goblin
+  loses a tick there (the wall's 3 and a burn's 4): **2 a tick**, on the same terms as the pit (a roll, the
+  grace on coming in and SHAKE IT OFF keep you out of it). Oil slicks it touches go up (`oil.ts`
+  `lightNear`, along its line each tick); wood it touches is tried once a wall (`catching.ts` `ignite` at
+  the fire ring's odds, so a house isn't rolled for every tick it stands against it).
+- **Balance, measured** (`tests/spellbook.test.ts`, one plain hold of 30 magic, everything in the 4 s
+  after the release with fire's burn counted): one goblin, wall of fire **45**, charged ring 40, hard frost
+  12 (and frozen); a pack of four, **158**, 160, 48. The pack in the test is now three where the wall stands
+  and one beside its path that it rolls through (out of the cone, so not the target): what the wall is
+  for. At 2 a beat the wall came to 38 on one and 136 on that pack (one rolled through takes a single
+  beat), so it's 3 a beat. Within 15% of the ring on both.
+- **Seen, both views, from the room's zone** (`client/firewalldraw.ts`, called by `spellground.ts` for the
+  flat glow layer and the 2.5D overlay). The pit's style along a line: the band filled #f2622a with a
+  #ff8c32 / #ffb050 flicker in a shifting dither and dark flecks, the striped edge (#ffd040 / #2a1408)
+  all the way round, embers, and tall tongues of flame standing up along it in two rows (about a tile
+  high, shorter at the ends, leaning back while it rolls) so it reads as a wall. In 2.5D bodies in it are
+  cut out of the overlay as with the pit. Light: three warm lights along it. The raise throws fire up
+  along the line and forward; standing (`wallup` event) throws it up all along it with a flash and a
+  shake. Sounds: the pit's soft whoosh on the raise, fire's whoosh and the flare when it stands.
+- **Online**: it's a zone (`kind: 'firewall'`), so it rides the patch, rolling and standing; a guest's
+  hold raises it on the leader's room.
+- **Words** (`client/kitlines.ts`, as Kyle's brief gave them): staff HOLD "Wall of fire rolls at a goblin",
+  PERFECT "Wider, burns longer", the book row "Tap flame sweep, hold wall of fire", fire's ALSO kept "Burns
+  you and friends too", the book card's ALSO "Wall of fire burns you and friends too". The HOLD is seven
+  words where the kit rows keep to five; `kitwords.test.ts` allows that one row. The class card's SPELLS
+  note ends "Wand far, staff round you (its fire rolls out at range), spellblade up close"
+  (`shared/classes.ts`). Not yet through the lore keeper and the line editor.
+
+Tests: `tests/firewall.test.ts` (the goblin in front though one behind is nearer, the cone's edge and the
+reach, the fallbacks; rolling at its speed and standing where the goblin stood for its life; stopping
+short at a fence and the fence catching; an oil slick going up; the perfect wider and longer, catching a
+goblin the plain one misses; a goblin rolled over set alight, the one stood on burned each beat, one past
+it untouched; a friend taking about a third and nothing once out, the Mage in its own wall; rain; a
+guest's hold and the same wall on the guest's screen rolling and standing), `spellbook.test.ts` (the staff's
+fire hold, the balance), `magekit.test.ts`, `kitwords.test.ts`. Seen on a phone, flat and 2.5D, rolling,
+standing and a perfect.
+
 ## 2026-11-05: the staff's fire hold is a fire pit dropped on a goblin (Kyle; Claude Opus 5.5)
 
 Kyle: "The wall of fire from staff is still not great. I don't know what to do with it, it's just super

@@ -35,17 +35,18 @@ describe('GUARD and DODGE areas, from the numbers', () => {
     for (const w of CLASS_KITS.MAGE) expect(Object.values(KIT[w]).join(' ')).not.toMatch(/stamina/i);
     // A Mage's kit shows what a hold costs in magic, on the card and in each element.
     for (const w of CLASS_KITS.MAGE) for (const el of ['', 'fire', 'frost', 'storm'] as const) expect(kitRows(w, el).find(([l]) => l === 'COST')?.[1]).toMatch(/magic/);
+    // Five words a row.
     for (const w of CLASS_KITS.MAGE) for (const el of ['fire', 'frost', 'storm'] as const) for (const v of Object.values(MAGE_KIT[w as 'wand'][el])) expect(v.split(/\s+/).length, v).toBeLessThanOrEqual(5);
     expect(kitLine('wand', 'storm')).toBe('TAP: LIGHTNING STREAM, TAP TO BUILD  HOLD: LIGHTNING STRIKE, STUNS  PERFECT: BIGGER, LONGER STUN');
     // The stream doesn't break blows: the wand's storm says what's true of it instead.
     expect(kitRows('wand', 'storm').find(([l]) => l === 'ALSO')?.[1]).toBe('Ignores shields, spares friends');
     expect(KIT.spellblade.also).toBe('Hits take magic, parry refills');
     expect(kitRows('spellblade', 'fire').find(([l]) => l === 'COST')?.[1]).toBe(`${SPELL.spellblade} magic a hold`);
-    // The staff's fire pit (Kyle, 2026-11-05): dropped on a goblin, and the card says once that it burns friends.
-    expect(kitLine('staff', 'fire')).toBe('TAP: FLAME SWEEP, BURNS  HOLD: FIRE PIT ON A GOBLIN  PERFECT: BIGGER, BURNS LONGER');
+    // The staff's wall of fire (Kyle, 2026-11-05): rolled at a goblin, and the card says once that it burns friends.
+    expect(kitLine('staff', 'fire')).toBe('TAP: FLAME SWEEP, BURNS  HOLD: ROLLING WALL OF FIRE  PERFECT: WIDER, BURNS LONGER');
     for (const el of ['', 'fire'] as const) expect(kitRows('staff', el).filter(([, v]) => /friends/i.test(v)).length).toBe(1);
     for (const el of ['frost', 'storm'] as const) expect(kitRows('staff', el).some(([, v]) => /friends/i.test(v))).toBe(false);
-    expect(kitRows('staff').find(([l]) => l === 'FIRE')?.[1]).toBe('Tap flame sweep, hold fire pit');
+    expect(kitRows('staff').find(([l]) => l === 'FIRE')?.[1]).toBe('Tap flame sweep, hold wall of fire');
     expect(barWords('Shorter dodge, costs more stamina', 'MAGE')).toBe('Shorter dodge, costs more magic');
     expect(barWords('STAMINA RECOVERY', 'RANGER')).toBe('STAMINA RECOVERY');
   });

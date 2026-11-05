@@ -1,7 +1,7 @@
 /**
  * A Mage's held spell, let go (numbers: shared/spellbook.ts). The element decides what it is and the
  * kit where it goes: the wand at range (a fireball, a cold blast, lightning called down where you aim), the
- * staff close (a fire pit dropped on a goblin; a frost nova and a charged ring all round you), the spellblade in close (a burning
+ * staff (a wall of fire rolled out at a goblin; a frost nova and a charged ring all round you), the spellblade in close (a burning
  * lunge, a shatter, a lightning dash). Let go on the white flash, each is its bigger self. Judged here,
  * into the room's own lists (bolts, zones), so a guest sees what was judged.
  */
@@ -12,7 +12,7 @@ import type { World } from './elements';
 import { coldBlast, nova, shatterBlow } from './frostholds';
 import { burstMult } from './knacks';
 import { startRush } from './rush';
-import { firePit } from './firepit';
+import { fireWall } from './firewall';
 import { callStrike } from './skystrike';
 import { stormRing } from './staffrings';
 import type { Bolt, Hero, Zone } from './types';
@@ -30,11 +30,11 @@ function wand(h: Hero, s: Swing, mult: number, r: HoldRoom, w: World, traits: Tr
   w.ev.push({ k: 'shoot', x: h.x, y: h.y, dx: h.fx, dy: h.fy, kind: 'spark', el });
 }
 
-/** The staff's: fire a pit dropped on a goblin (sim/firepit.ts); frost and storm round where you stand,
+/** The staff's: fire a wall rolled out at a goblin (sim/firewall.ts); frost and storm round where you stand,
  *  their size by the hold (the biggest on the flash). */
 function staff(h: Hero, s: Swing, mult: number, r: HoldRoom, w: World): void {
   const el = castElement(h), rad = (h.perfect ? STAFF_RING.rBig : STAFF_RING.r + (STAFF_RING.rFull - STAFF_RING.r) * Math.min(1, h.power)) * burstMult(h);
-  if (el === 'fire') r.zones.push(firePit(h, mult, burstMult(h), w));
+  if (el === 'fire') r.zones.push(fireWall(h, mult, burstMult(h), w));
   else if (el === 'storm') r.zones.push(stormRing(h, rad, mult, w));
   else nova(h, s, mult, w, rad);
 }

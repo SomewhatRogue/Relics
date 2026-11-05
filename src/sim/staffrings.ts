@@ -3,8 +3,8 @@
  * round where the Mage stands, never aimed. It's the whole round: every half second anything inside is
  * zapped and flinches (stunned, let go on the flash); a wet one zapped jumps it to the wet ones near,
  * once a pulse. It lives in the room's zones, so a guest sees the same ring that is judged
- * (client/spellground.ts draws it from these numbers). The staff's fire hold is a pit dropped on a
- * goblin now (sim/firepit.ts; Kyle, 2026-11-05).
+ * (client/spellground.ts draws it from these numbers). The staff's fire hold is a wall of fire rolled
+ * out at a goblin (sim/firewall.ts; Kyle, 2026-11-05).
  */
 import { STORM_RING } from '../shared/tuning';
 import { damage, isDead, isDummy } from './damage';
