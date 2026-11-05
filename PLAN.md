@@ -2,6 +2,12 @@
 
 ## Current slice
 
+**The hero clear of the buttons on a phone** (Claude Opus 5.5, 2026-11-04; Kyle: "Your potion and things can
+cover your character while in game"). Built; waiting on Kyle's play. *Done when* on his phone upright, flat
+and 2.5D, in town and on a job, the hero is never under a button (walking to the room's foot too), the
+health orb sits at the right edge over the relic, and a button the hero or a telegraph does pass under goes
+faint. Laptop unchanged.
+
 **Techniques: three moves a class** (Claude Opus 5.5, 2026-11-04; Kyle: "I want more techniques", "pure
 upgrades, not just choosing"). Built; waiting on Kyle's play. *Done when* each class but the Mage has three
 techniques at its trainer, rows under TECHNIQUE that say LEARNED, LEARN (level and price) or the level they

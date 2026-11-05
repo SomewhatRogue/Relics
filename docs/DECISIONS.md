@@ -3791,3 +3791,17 @@ lore keeper.
 - Tests: `tests/techniques.test.ts` (levels and prices, save ranks, rows, the Ranger's snare wait, each
   technique firing and not firing without it, the stun cap on JUDGEMENT, CUTPURSE seeded and once a
   goblin); `tests/trainer.test.ts` reads the Warrior's three rows.
+
+## 2026-11-04: the hero never under a button on a phone (Kyle; Claude Opus 5.5)
+
+Kyle: "Your potion and things can cover your character while in game and it's annoying on mobile."
+- **The band** (`client/phoneband.ts`): on an upright screen both cameras keep the hero's feet between
+  150 CSS px from the top (the unit frame and the folded tracker, then the hero's height) and 312 px from
+  the bottom (the cluster's top with a little air), running past the room's edge when they must. Flat:
+  `scene.ts` after its room clamp; 2.5D: `camera3d.ts` `follow(..., keep)` from `view3d.ts`. A cutscene's
+  focus is left alone. Laptops and a phone on its side are unchanged.
+- **The health orb moved** out of the middle of the screen's foot to the right edge over the relic
+  (centre 40, 262 from the bottom right); the context slot sits beside it (112, 262). Every gap is still
+  8 px or more (cluster.css has the numbers).
+- **The fallback** (`client/underbtn.ts`): any touch button the hero or a red telegraph passes under goes
+  to 35% (`.tb.under`), so the fight shows through it.

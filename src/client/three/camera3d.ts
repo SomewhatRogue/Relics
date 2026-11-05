@@ -6,6 +6,7 @@
 import * as THREE from 'three';
 import type { GameMap } from '../../shared/arena';
 import { WALL_H } from './ground';
+import { upright } from '../phoneband';
 
 export const PITCH = (36 * Math.PI) / 180;
 export const NEAR = 20;
@@ -39,8 +40,12 @@ export class Cam {
     this.ready = false;
   }
 
-  /** Ease toward (x, z) over dt, keep the view in the room, snap to the pixel grid, shake by `shake` pixels. */
-  follow(map: GameMap, x: number, z: number, dt: number, shake: number): void {
+  /**
+   * Ease toward (x, z) over dt, keep the view in the room, snap to the pixel grid, shake by `shake` pixels.
+   * `keep`: on an upright phone, the hero's floor z and the band (low-res pixels down the screen) their
+   * feet must stay in, over the room's edge if need be (phoneband.ts).
+   */
+  follow(map: GameMap, x: number, z: number, dt: number, shake: number, keep?: { z: number; top: number; bottom: number }): void {
     const k = this.ready ? Math.min(1, dt * 7) : 1;
     this.at.x += (x - this.at.x) * k;
     this.at.z += (z - this.at.z) * k;
@@ -49,9 +54,14 @@ export class Cam {
     const clamp = (v: number, lo: number, hi: number) => (lo > hi ? (lo + hi) / 2 : Math.max(lo, Math.min(hi, v)));
     this.at.x = clamp(this.at.x, hw - 1, map.w + 1 - hw);
     // (Upright, the view may run past the room's foot, a short room needn't sit centred, so the hero stays above the touch buttons.)
-    const foot = this.H > this.W * 1.2 ? hd * 0.44 : 0, zlo = hd - 1 - (WALL_H / Math.tan(PITCH)) * 0.8, zhi = map.h + 1 - hd;
+    const foot = upright(this.W, this.H) ? hd * 0.44 : 0, zlo = hd - 1 - (WALL_H / Math.tan(PITCH)) * 0.8, zhi = map.h + 1 - hd;
     const lo = zlo > zhi ? (zlo + zhi) / 2 : zlo;
     this.at.z = Math.max(lo, Math.min(Math.max(lo, zhi) + foot, this.at.z));
+    // A floor point's height on screen: H / 2 + (its z - at.z) * sin(pitch) * ppu.
+    if (keep) {
+      const per = Math.sin(PITCH) * this.ppu;
+      this.at.z = Math.max(keep.z - (keep.bottom - this.H / 2) / per, Math.min(keep.z - (keep.top - this.H / 2) / per, this.at.z));
+    }
     let r = this.at.dot(this.right), u = this.at.dot(this.up);
     const b = this.at.dot(this.back);
     r = Math.round(r * this.ppu) / this.ppu;
