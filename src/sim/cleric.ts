@@ -15,6 +15,7 @@ import { heals } from './hungry';
 import { healMult } from './lantern';
 import type { Body, Hero, Intent } from './types';
 import { stun } from './stuns';
+import { gave } from './score';
 
 /** The friend a chain means: nearest the pointer (a laptop), else the most hurt; never yourself. */
 function friendFor(h: Hero, heroes: Hero[], aim: Intent | undefined): Hero | undefined {
@@ -69,7 +70,7 @@ export function lanternLight(h: Hero, w: World, el: Augment): void {
   for (const o of w.heroes) {
     if (o.act === 'down' || Math.hypot(o.x - h.x, o.y - h.y) > LIGHT.radius + HERO.radius) continue;
     const n = Math.min(o.maxHp - o.hp, Math.round(heals(o, h, LIGHT.heal * k)));
-    if (n > 0) (o.hp += n), w.ev.push({ k: 'heal', x: o.x, y: o.y, n });
+    if (n > 0) (o.hp += n), gave(h.id, o.id, n), w.ev.push({ k: 'heal', x: o.x, y: o.y, n });
   }
   for (const e of w.enemies) {
     if (isDead(e) || e.act === 'carried') continue;

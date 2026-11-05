@@ -82,6 +82,7 @@ import { aimed } from './techranger';
 import { followGround, stepGround } from './techcleric';
 import { stepStorm } from './storm';
 import { stepLadder } from './ladder';
+import { useBoard, type Board } from './score';
 
 export class ArenaRoom {
   time = 0;
@@ -163,6 +164,8 @@ export class ArenaRoom {
   private whole: Enemy[] | null = null;
   /** An expedition's rules and how it stands (sim/exped.ts): the jobs, the way out, the pressure. */
   exped?: ExpedState;
+  /** A job's room: each hero's counts since the run last took them (sim/score.ts, run.ts tally); null, none kept. */
+  board: Board | null = null;
 
   /**
    * The training room by default. A run room passes its `map`, `foes` and `props` (its goblins stay
@@ -276,6 +279,16 @@ export class ArenaRoom {
   }
 
   step(): void {
+    // What each hero does is counted on this room's board while it steps (sim/score.ts), on a job only.
+    useBoard(this.board);
+    try {
+      this.stepOnce();
+    } finally {
+      useBoard(null);
+    }
+  }
+
+  private stepOnce(): void {
     if (!this.sleepFar) return this.stepAll();
     // On a big map the tick runs on the awake goblins only; the dozers go back in their places after.
     const all = (this.whole = this.enemies);

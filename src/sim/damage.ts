@@ -4,6 +4,7 @@ import type { DeathKind, Enemy, FightEvent } from './types';
 import { wet } from './wet';
 import { clanks, plated } from './ironhide';
 import { MARK_SIGN, isMarked } from '../shared/signs';
+import { count, dealt } from './score';
 
 const SPEC = { butcher: BUTCHER, scrapper: SCRAPPER, spider: SPIDER, brood: BROOD } as Record<string, { stun: number; respawn: number } | undefined>;
 export const stunOf = (e: Enemy) => SPEC[e.kind]?.stun ?? SWING_DUMMY.stun;
@@ -30,6 +31,8 @@ export function kill(e: Enemy, ev: FightEvent[], how: DeathKind = 'fall', dx = 0
   // Dying alight (burning past the blow that killed it), it passes the fire on (sim/elements.ts).
   if (e.kind !== 'nest' && e.burnUntil > (e.hitAt ?? -9)) e.embers = true;
   Object.assign(e, { hp: 0, act: 'dead', actT: 0, actDur: respawnOf(e), attack: null, kvx: 0, kvy: 0, death: how });
+  // The recap's kills: goblins, to whoever hit it last (not spiders or wolves, as the run counts).
+  if ((e.kind === 'scrapper' || e.kind === 'butcher') && e.variant !== 'wolf') count(e.lastBy, 'kills');
   clearElements(e);
   ev.push({ k: 'death', x: e.x, y: e.y, how, dx, dy, kind: e.kind });
 }
@@ -85,6 +88,7 @@ export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: Da
   n = plated(e, n, now, breaks, ev);
   e.hp -= n;
   e.hitAt = now;
+  dealt(e, e.lastBy, n, o.tick);
   ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy: !!o.heavy, on: 'enemy', tick: o.tick, src: o.src, big: e.kind === 'butcher', ...(o.backstab ? { backstab: true } : {}), ...(clank ? { plated: true } : {}) });
   if (isDummy(e)) {
     if (e.hp <= 0) e.hp = e.maxHp;

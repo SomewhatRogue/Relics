@@ -9,6 +9,10 @@ import { relicName } from '../shared/relicitems';
 import type { Profile } from '../shared/progress';
 import { mine, type Run } from '../sim/run';
 import type { ArenaRoom } from '../sim/room';
+import type { Score } from '../sim/score';
+import { CLASS_NAME } from '../shared/classes';
+import type { HeroClass } from '../shared/weapons';
+import { callouts, type CallId } from './recapcalls';
 
 export interface Recap {
   /** Rooms cleared of the job's rooms (not on an expedition). */
@@ -24,7 +28,12 @@ export interface Recap {
   /** Gear picked up off the floor, and relics found, by name. */
   found: string[];
   relics: string[];
+  /** Every hero in the party, this player first, with what they did and their callout (none for an old run). */
+  party: PartyLine[];
 }
+
+/** One hero's column in the recap. */
+export interface PartyLine { id: string; me: boolean; name: string; cls?: HeroClass; s: Score; call?: CallId }
 
 /** What a hero has on them at the start of a job, to tell what they picked up by its end. */
 export interface Kit { items: string[]; relics: string[] }
@@ -56,5 +65,25 @@ export function recapOf(run: Run, room: ArenaRoom | null, p: Profile, start: Kit
     // (A job paid long after it ended, on a later visit, has no honest time.)
     secs: secs > 0 && secs < 3 * 3600 ? secs : undefined,
     found, relics,
+    party: partyOf(run, p, me),
   };
+}
+
+/** The run's board as the recap's columns: this player first, then the rest as the room met them. */
+export function partyOf(run: Run, p: Profile, me: string): PartyLine[] {
+  const all = Object.entries(run.board ?? {}).sort(([a], [b]) => (a === me ? -1 : b === me ? 1 : 0));
+  const calls = callouts(all.map(([, s]) => s));
+  return all.map(([id, s], i) => ({
+    id, me: id === me, s, call: calls[i],
+    cls: id === me ? p.cls : s.cls,
+    name: (id === me ? p.name : s.name) || (s.cls ? CLASS_NAME[s.cls] : ''),
+  }));
+}
+
+/** At the job's end, the leader names everyone on the board: themselves, and each friend as the party knows them. */
+export function nameBoard(run: Run, me: string, p: Profile, members: [string, string][] = []): void {
+  const b = run.board;
+  if (!b) return;
+  if (b[me]) Object.assign(b[me], { name: p.name, cls: p.cls });
+  for (const [id, name] of members) if (b[id] && !b[id].name && id !== p.id) b[id].name = name;
 }

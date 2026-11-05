@@ -9,6 +9,7 @@
  * loses, so they step out. It lights oil and tries wood it touches. Rain shortens it (shared/sky.ts). It
  * lives in the room's zones, so a guest sees the same wall that is judged (client/firewalldraw.ts).
  */
+import { count } from './score';
 import { collide, currentMap } from '../shared/arena';
 import { burnFor } from '../shared/sky';
 import { BURN, CATCH, FIRE_WALL } from '../shared/tuning';
@@ -127,6 +128,7 @@ export function stepWalls(zones: Zone[], w: World, slicks: Slick[] = []): void {
         continue;
       }
       h.hp -= friend;
+      count(h.id, 'taken', friend);
       w.ev.push({ k: 'hit', x: h.x, y: h.y, n: friend, heavy: false, on: 'hero', src: 'fire' });
       downIfDead(h, w.ev);
     }

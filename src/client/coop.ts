@@ -40,6 +40,7 @@ import { isBig, loud, mergeBlocks } from './interest';
 import { expedPlan } from '../shared/expedmap';
 import { themeUnder } from '../shared/expedsky';
 import type { ExpedState } from '../sim/exped';
+import { asGuest } from './asguest';
 
 const AWAY = 5, REJOIN = 5, BYE_WAIT = 2.5, SEND_EVERY = 0.05, FULL_EVERY = 4, GRACE = 60, LOST = 20, KEEP = 2, SAVE_EVERY = 2, TAKE = 9, TAKE_NEXT = 5;
 /** A friend's stick and aim go to the leader at most this often (seconds); a button at once. */
@@ -47,6 +48,8 @@ const STICK_EVERY = 0.1;
 /** An Intent's buttons (everything but the stick and aim), to tell a press from a nudge of the stick. */
 const buttons = (i: Intent) => JSON.stringify({ ...i, mx: 0, my: 0, ax: 0, ay: 0 });
 const r2 = (v: number) => Math.round(v * 100) / 100;
+/** The run as a patch carries it: without the heroes' board, which rides whole in the end and the saves (sim/score.ts). */
+const lean = (r: Run | null): Run | null => (r?.board ? { ...r, board: undefined } : r);
 /**
  * Your own hero, on a friend's screen, moves the moment you press. The leader's word on where you
  * are is a trip there and back old, so the walking you've done here since then is added on top of
@@ -170,7 +173,7 @@ export class CoopHost {
       if (isBig(room)) {
         // A big room: each friend only what's near them, the map from its seed (bigsend.ts).
         const k = g.keyOf(room), out = !room.indoors;
-        const common = { k, t: room.time, x: room.exitOpen ? 1 : 0, in: room.indoors ? 1 : 0, hc: out ? hc : [], dm: out ? dm : [], run: g.run, goal, names, acks };
+        const common = { k, t: room.time, x: room.exitOpen ? 1 : 0, in: room.indoors ? 1 : 0, hc: out ? hc : [], dm: out ? dm : [], run: lean(g.run), goal, names, acks };
         for (const id of ids) {
           const f = this.friends.get(id)!, m = this.big.body(room, id, now, f.fresh || this.sentKey.get(id) !== k, common, this.evs.get(room) ?? []);
           this.sock.send(id, { s: m.s });
@@ -182,7 +185,7 @@ export class CoopHost {
       this.sending.set(room, st);
       const full = now - st.fullAt > FULL_EVERY || ids.some((id) => this.friends.get(id)!.fresh || this.sentKey.get(id) !== k);
       const p = st.enc.encode(stateOf(room), full), out = !room.indoors;
-      const body = { p, f: full ? 1 : 0, k, map: full ? { ...room.map, blocks: [] } : undefined, t: room.time, x: room.exitOpen ? 1 : 0, in: room.indoors ? 1 : 0, hc: out ? hc : [], dm: out ? dm : [], run: g.run, goal, ev: this.evs.get(room) ?? [], names, acks };
+      const body = { p, f: full ? 1 : 0, k, map: full ? { ...room.map, blocks: [] } : undefined, t: room.time, x: room.exitOpen ? 1 : 0, in: room.indoors ? 1 : 0, hc: out ? hc : [], dm: out ? dm : [], run: lean(g.run), goal, ev: this.evs.get(room) ?? [], names, acks };
       const s = JSON.stringify(body);
       // Everyone in the one room: one message for them all; else each their own.
       if (groups.size === 1) this.sock.send('*', { s });
@@ -302,7 +305,7 @@ export class CoopGuest {
     // on in a moment (once their goodbye has freed the room).
     if (d.bye) return void ((this.left = true), (this.heardLead = this.now - TAKE + BYE_WAIT));
     // (The end's run swaps ids like a patch does, so my own tallies are under `me`.)
-    if (d.end) return void ((this.ended = JSON.parse(JSON.stringify(d.end).split('"me"').join('"@lead"').split(`"${this.myId}"`).join('"me"'))), this.onEnd(this.ended!));
+    if (d.end) return void ((this.ended = asGuest(d.end, this.myId)), this.onEnd(this.ended!));
     if (typeof d.save === 'string') return void (this.save = d.save);
     if (typeof d.s !== 'string') return;
     // The leader's own hero is `me` in their room; in mine, I am. (Ids are quoted whole, so only ids change.)

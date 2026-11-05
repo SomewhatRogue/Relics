@@ -49,7 +49,7 @@ import { FULL, ONLINE } from './relay';
 import { townLight } from '../shared/daylight';
 import { onClock, townPhase } from './townclock';
 import { Followers } from './followers';
-import { kitOf, recapOf, type Kit, type Recap } from './recaptally';
+import { kitOf, nameBoard, recapOf, type Kit, type Recap } from './recaptally';
 import { JobRooms, doorPushed, type DoorMark, type SavedHouses } from './jobrooms';
 import { packRoom, unpackRoom } from './bigsave';
 import type { Parties } from './parties';
@@ -852,7 +852,8 @@ export class Game {
     this.beatenAt = null;
     const run = this.run!, p = this.profile, w = this.world, won = how === 'won', key = this.jobKey;
     const party = this.coop ? this.coop.members.map(([id, name]) => (id === p.id ? p.name : name)) : [p.name];
-    // Leading: everyone's told how it went (each friend's game pays them from the run).
+    // Leading: everyone's told how it went (each friend's game pays them from the run), each hero named on its board.
+    if (!followed) nameBoard(run, ME, p, this.coop?.members);
     this.coop?.end(won, run);
     forgetSession();
     this.coop?.close();

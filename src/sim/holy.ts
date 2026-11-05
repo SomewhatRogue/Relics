@@ -9,6 +9,7 @@ import { healMult } from './lantern';
 import { cure } from './poison';
 import type { World } from './elements';
 import type { Bolt, FightEvent, Hero } from './types';
+import { gave } from './score';
 
 /** Friends standing, within `r` of (x, y) (the squire too: a training partner to heal). */
 export const friendsNear = (heroes: Hero[], x: number, y: number, r: number) => heroes.filter((o) => o.act !== 'down' && Math.hypot(o.x - x, o.y - y) <= r + HERO.radius);
@@ -19,6 +20,7 @@ export function mend(by: Hero | undefined, o: Hero, n: number, ev: FightEvent[])
   const got = Math.min(o.maxHp - o.hp, Math.round(heals(o, by, n * healMult(by))));
   if (got <= 0) return;
   o.hp += got;
+  gave(by?.id, o.id, got);
   ev.push({ k: 'heal', x: o.x, y: o.y, n: got });
 }
 

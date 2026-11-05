@@ -5,6 +5,7 @@
 import { CLASS_SKILL, LANTERN, WEAPONS, type HungryId } from '../shared/tuning';
 import { isDead } from './damage';
 import type { Enemy, FightEvent, Hero } from './types';
+import { count } from './score';
 
 export const HUNGRY_FX = { leech: 0.2, fed: 0.1, starve: 8, bite: 3, chain: 4, chainDmg: 0.6, apron: 0.5, lure: 6, ransom: 50, near: 4 };
 
@@ -36,6 +37,7 @@ export function stepHungry(heroes: Hero[], enemies: Enemy[], now: number, ev: Fi
     if (!enemies.some((e) => !isDead(e) && e.alert !== false && !e.respawns)) continue;
     h.biteAt = now + 1;
     h.hp = Math.max(1, h.hp - HUNGRY_FX.bite);
+    count(h.id, 'taken', HUNGRY_FX.bite);
     ev.push({ k: 'hit', x: h.x, y: h.y, n: HUNGRY_FX.bite, heavy: false, on: 'hero', src: 'bite' } as FightEvent);
   }
 }

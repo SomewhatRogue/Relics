@@ -11,6 +11,7 @@ import { HOUSEBURN, HOUSEFIRE } from '../shared/tuning';
 import { downIfDead } from './combat';
 import { manaShield } from './manashield';
 import type { FightEvent, Hero, Prop, Survivor } from './types';
+import { count } from './score';
 
 export interface BlazeState { burnt: Record<string, number>; beams: number; fallen: boolean; smoked?: Record<string, number> }
 
@@ -28,6 +29,7 @@ export interface Burning {
 const scorch = (h: Hero, n: number, ev: FightEvent[], src: string) => {
   if (h.safeT || n <= 0) return;
   h.hp -= n;
+  count(h.id, 'taken', n);
   ev.push({ k: 'hit', x: h.x, y: h.y, n, heavy: n >= 20, on: 'hero', src });
   downIfDead(h, ev);
 };

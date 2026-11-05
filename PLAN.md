@@ -12,6 +12,14 @@ arrow in Hew, who goes down on one knee and lives, kills the goblins and MENDs h
 the Rogue's trainer offers Vanish, Knife Fan and the new Smoke Bomb, and an old Rogue who carried Shadow Step
 now carries Smoke Bomb. Numbers and every new line in DECISIONS 2026-11-05. Open: the lines through the lore
 keeper and the line editor (MEND or HEAL); the numbers once he's played.
+**No knack at a job's end; the party side by side** (Claude Opus 5.5, 2026-11-05; Kyle: "Shouldn't have knack
+picking after a mission, just let them return home and show them a recap of how they and all players did in
+that mission. Numbers killed, dodges, damage done etc."). Built; waiting on Kyle's play. *Done when* at any
+job's end, on his phone and laptop, alone or with friends, the recap has one button, BACK TO WICKHOLD; a
+column per hero (name, class, a callout only where they led) with KILLS, DAMAGE, DAMAGE TAKEN, DODGES,
+PARRIES and DOWNED, and + MORE for BLOCKS, PERFECT PARRIES, HELPED UP, HEALING GIVEN and BIGGEST HIT; every
+friend sees the same numbers; and a knack earned waits in the PACK (gold count on PACK, KNACKS N TO PICK
+inside). Open: the new words through the lore keeper and line editor (DECISIONS 2026-11-05).
 **The Mage's elements in the wood** (Claude Opus 5.5, 2026-11-05; Kyle: "have the Mage tutorial explain the
 elements in the full charge place. Have enemies that are weak and resistant to each type, and just explain you
 can cycle your elements and to watch out for that"). Built; waiting on Kyle's play. *Done when* a new Mage, on
