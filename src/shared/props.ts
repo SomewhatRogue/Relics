@@ -96,6 +96,9 @@ export const WOOD: Partial<Record<import('./arena').BlockKind, { hp: number; doo
   tent: { hp: 60 },
   shack: { hp: 80 },
   fence: { hp: 40 },
+  // Layout 4: a fallen trunk across the way, a fence of sharpened stakes round a war band's fire.
+  log: { hp: 90 },
+  stakes: { hp: 50 },
 };
 export const BLAZE = {
   /** Health a burning building loses a second. */

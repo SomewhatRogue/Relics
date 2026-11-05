@@ -57,6 +57,8 @@ export function minehead(rng: Rng, g: Ground): Site {
   }
   const c = offset(b.main, -side * 2.8, 1).find((q) => q.t > 0.5 && q.y > 3);
   if (c) block(b.s, 'cart', c.x - 1.2, c.y - 0.5, 2.4, 1);
+  // Layout 4: the headframe over the old shaft beside the adit, its sheave wheel up top (client/pieces.ts).
+  if (g.v4) block(b.s, 'headframe', Math.max(1, Math.min(b.w - 3.6, ex + side * 4.2 - 1.3)), 3.2, 2.6, 2.6);
   bankBy(b.s, rng, () => 'rock', b.main, -side * 2.6, b.w, b.h, (t) => t > 0.85 || rng.next() < 0.3);
   cover(b.s, rng, 'rock', b.lines, b.w, b.h, 2);
   country(b, rng, b.lines, 3);

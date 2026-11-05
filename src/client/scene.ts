@@ -4,7 +4,7 @@
  */
 import { feetBand, upright } from './phoneband';
 import { parryWindow } from '../sim/knacks';
-import { ARENA, npcAt, type GameMap } from '../shared/arena';
+import { ARENA, doorAt, npcAt, type GameMap } from '../shared/arena';
 import { rats } from './rats';
 import { drawRat } from './ratdraw';
 import { GRAB, GUARD, POTION, TIERS, WEAPONS } from '../shared/tuning';
@@ -43,6 +43,8 @@ import { drawGlint, drawKindling, drawWoodpile } from './kindledraw';
 import { drawHung, drawPot } from './grimdraw';
 import { drawNpc } from './npcs';
 import { vignetteFigs } from './vignettes';
+import { cueAt, drawCue, drawWayWord } from './waycues';
+import { drawHauled, drawRope, drawSceneRings, ropeOf } from './scenedraw';
 import { drawCaged, drawSurvivor } from './captives';
 import { propShake } from './propshake';
 import { behindMarks, drawWays, edgeMark } from './wayout';
@@ -351,12 +353,16 @@ export class Scene {
       const kx = OX + k.x * PX - cx, ky = OY + k.y * PX - cy, d = me && !b.ruined && (b.burning ?? -1) < 0 ? Math.hypot(me.x - k.x, me.y - k.y) : 99;
       items.push({ y: OY + k.y * PX, draw: () => drawWoodpile(c, k, kx, ky, b) });
       // (The glint and the ring after the house, so its sprite never wipes them.)
-      items.push({ y: blockFoot(b) + 0.1, draw: () => (drawGlint(c, kx, ky, d, b.look ?? 0), drawKindling(c, b, kx, ky)) });
+      const door = doorAt(b), dx = OX + door.x * PX - cx, dy = OY + door.y * PX - cy;
+      items.push({ y: blockFoot(b) + 0.1, draw: () => (drawGlint(c, kx, ky, d, b.look ?? 0), drawKindling(c, b, kx, ky), drawSceneRings(c, b, kx, ky, dx, dy)) });
     }
     for (const n of map.npcs ?? []) {
       const at = npcAt(n, room.time), near = !!me && Math.hypot(me.x - at.x, me.y - at.y) <= SPOT_REACH;
       items.push({ y: OY + at.y * PX, draw: () => drawNpc(c, n, OX + at.x * PX - cx, OY + at.y * PX - cy, near && !n.mute, at.fx, !!n.path && !at.still, at.x) });
     }
+    // Layout 4's scenes: a body being hauled, the prisoners' rope (scenedraw.ts).
+    for (const e of room.enemies) if (e.haul) items.push({ y: OY + e.haul.y * PX - 6, draw: () => drawHauled(c, e, OX + e.haul!.x * PX - cx, OY + e.haul!.y * PX - cy) });
+    for (const [x1, y1, x2, y2] of ropeOf(room)) items.push({ y: OY + Math.max(y1, y2) * PX + 0.5, draw: () => drawRope(c, OX + x1 * PX - cx, OY + y1 * PX - cy - 6, OX + x2 * PX - cx, OY + y2 * PX - cy - 6) });
     // The scenes past the wood's trees (vignettes.ts): drawn like anyone, never in the room.
     for (const f of vignetteFigs(map, room.time, me)) items.push({ y: OY + f.y * PX - (f.floor ? 20 : 0), draw: () => f.draw(c, OX + f.x * PX - cx, OY + f.y * PX - cy) });
     for (const b of map.braziers) items.push({ y: OY + b.y * PX, draw: () => drawBrazier(c, OX + b.x * PX - cx, OY + b.y * PX + 2 - cy, now, brazierOn(map, b)) });
@@ -393,17 +399,24 @@ export class Scene {
     drawSpellGround(c.glow, room, cx, cy);
     drawFound(c, room, cx, cy);
     // At a fork, both ways out glow, each with its name.
-    if (room.exitOpen) for (const r of map.roads ?? []) {
-      const e = r.area, ex = OX + e.x * PX - cx, ey = OY + e.y * PX - cy, tw = textWidth(r.label);
+    for (const r of map.roads ?? []) {
+      // Layout 4's ways say what's past them from the start (waycues.ts); the old roads once the way's open.
+      if (!room.exitOpen && !r.way) continue;
+      const e = r.area, ex = OX + e.x * PX - cx, ey = OY + e.y * PX - cy;
       // Under a gap in the back wall; beside one in a side wall, inside the room.
-      const [tx, ty] = r.side === 'W' ? [ex + e.w * PX + 26, ey + (e.h * PX) / 2 - 3] : r.side === 'E' ? [ex - tw - 26, ey + (e.h * PX) / 2 - 3] : [ex + (e.w * PX) / 2 - tw / 2, ey + e.h * PX + 34];
-      drawText(glow, r.label, Math.round(tx), Math.round(ty), r.road === 'high' ? '#ffd27a' : '#9fe8ff');
+      const [tx, ty] = r.side === 'W' ? [ex + e.w * PX + 26, ey + (e.h * PX) / 2 - 3] : r.side === 'E' ? [ex - 26, ey + (e.h * PX) / 2 - 3] : [ex + (e.w * PX) / 2, ey + e.h * PX + 34];
+      drawWayWord(glow, r, tx, ty, room.exitOpen);
     }
     // An expedition: the rings where a job is done by standing there, and the beacon (expeddraw.ts).
     const ground = (x: number, y: number): [number, number] => [OX + x * PX - cx, OY + y * PX - cy];
     drawExpedGround(glow, room, ground, now);
     items.sort((p, q) => p.y - q.y);
     for (const it of items) it.draw();
+    // What you can tell of each way at a fork (waycues.ts), over everything near its gap.
+    for (const r of map.roads ?? []) if (r.way) {
+      const q = cueAt(r, map);
+      drawCue(c, r.way, OX + q.x * PX - cx, OY + q.y * PX - cy - q.z * PX, r.area.x + r.area.y);
+    }
     const beacons = drawBeacon(glow, room, ground, now);
     // Anyone you've freed who's fallen behind out of sight: a mark at the edge, toward them (clear of the HUD).
     const tall = this.vh > this.vw * 1.2, view = { vw: this.vw, vh: this.vh, top: tall ? this.vh * 0.2 : 20, bottom: tall ? this.vh * 0.3 : 20 };

@@ -66,12 +66,13 @@ export interface Job {
   /** The hour (shared/timeofday.ts; old jobs without one: night if it was a night job, else day). */
   time?: Time;
   /**
-   * How its rooms are laid out: 3, a route that turns, forks, rejoins and crosses countries, with side
+   * How its rooms are laid out: 4, layout 3's with more kinds of room and scene, no room twice, and forks
+   * whose ways you can tell apart (shared/ways.ts); 3, a route that turns, forks, rejoins and crosses countries, with side
    * ways (shared/routeports.ts); 2, a route of different rooms to the place's heart, always bottom to
    * top (shared/route.ts); none, an old saved job, every room its place's own plan as it always was.
    * Saved jobs keep the layout they were made with.
    */
-  layout?: 2 | 3;
+  layout?: 2 | 3 | 4;
   /** An expedition (shared/expedjob.ts): one big map of the Barrowfields instead of rooms. */
   exped?: 'barrowfields';
 }
@@ -97,7 +98,7 @@ export function board(day: number, sewers = false): Job[] {
 export function deepDive(day: number): Job {
   const rng = new Rng(day * 613 + 7), place = rng.pick(PLACES.filter((p) => p.ruin >= 2)), boss = rng.pick(BOSSES), night = rng.next() < 0.5;
   return {
-    id: `d${day}-deep`, place: { ...place, ruin: 3 }, objective: 'hunt', twist: night ? 'night' : 'none', time: rollTime(day * 131 + 59, night), rooms: 5, boss, deep: true, size: 'long', layout: 3,
+    id: `d${day}-deep`, place: { ...place, ruin: 3 }, objective: 'hunt', twist: night ? 'night' : 'none', time: rollTime(day * 131 + 59, night), rooms: 5, boss, deep: true, size: 'long', layout: 4,
     reward: payFor(5, 3, false, 'long') + 40, seed: day * 131 + 59, title: `Deep: ${boss} at ${place.name}`,
     text: `Five rooms down through ${place.name}, the worst of it, and ${boss} at the bottom with a relic grown into it. Kill it and the relic is yours.`,
   };
@@ -115,7 +116,7 @@ function ordinary(day: number, sewers: boolean): Job[] {
     const place = places[i % places.length], objective = objectives[i], boss = rng.pick(BOSSES);
     const twist: Twist = rng.next() < 0.3 ? 'night' : 'none', rooms = SIZES[size].rooms, seed = day * 101 + i * 7 + 1;
     return {
-      id: `d${day}-${i}`, place, objective, twist, time: rollTime(seed, twist === 'night'), rooms, size, layout: 3, boss: objective === 'hunt' ? boss : undefined,
+      id: `d${day}-${i}`, place, objective, twist, time: rollTime(seed, twist === 'night'), rooms, size, layout: 4, boss: objective === 'hunt' ? boss : undefined,
       reward: payFor(rooms, place.ruin, twist === 'night', size), seed, ...describe(objective, place, boss),
     };
   });

@@ -22,6 +22,8 @@ import { spiderSounds } from './spidersfx';
 import { foeSound } from './foesounds';
 import { isSpiderKind } from '../shared/spiders';
 import { blockSound, chargedSound, hitSound, shotSound, swingSound, woodSounds } from './weaponsfx';
+import { cueAt } from './waycues';
+import { muffledCry } from './kindlecue';
 
 /** How far off a fight can still be heard, in tiles: a little past a screen. */
 const EARSHOT = 16;
@@ -34,6 +36,8 @@ export class Soundscape {
   private gnawAt = 0;
   private crackleAt = 0;
   private beatAt = 0;
+  private wayBeat = 0;
+  private cryAt = 0;
   private skitterAt = 0;
   private wasInside: unknown = null;
 
@@ -187,6 +191,14 @@ export class Soundscape {
       let near = 0;
       for (const e of room.enemies) if (e.drumming && !isDead(e)) near = Math.max(near, 1 - Math.hypot(e.x - me.x, e.y - me.y) / 14);
       goblin.drum(near, beat % 2 === 1);
+    }
+    // What you hear of a fork's ways as you come near (waycues.ts draws the rest): drums, someone crying out.
+    for (const r of room.map.roads ?? []) {
+      if (!r.way || (r.way !== 'drums' && r.way !== 'cries')) continue;
+      const q = cueAt(r, room.map), near = 1 - Math.hypot(q.x - me.x, q.y - me.y) / 16;
+      if (near <= 0) continue;
+      if (r.way === 'drums' && beat !== this.wayBeat) (this.wayBeat = beat), goblin.drum(near * 0.7, beat % 2 === 1);
+      if (r.way === 'cries' && now > this.cryAt) (this.cryAt = now + 3.5 + Math.random() * 3), muffledCry(900, 0.25 + near * 0.5);
     }
     // Spiders on the move close by: the dry patter of their legs.
     let legs = 0;

@@ -18,6 +18,8 @@ import { drawLoad } from '../xbowmark';
 import { drawBladeMark } from '../blademark';
 import { houseAlight, kindling } from '../../shared/kindling';
 import { drawGlint, drawHouseSmoke, drawKindling } from '../kindledraw';
+import { drawRope, drawSceneRings, ropeOf } from '../scenedraw';
+import { doorAt } from '../../shared/arena';
 import { drawLife } from '../streetlife';
 import { edgeMark, type View } from '../wayout';
 import { PX } from '../world';
@@ -60,6 +62,13 @@ export function drawExtras(g: CanvasRenderingContext2D, x: Extra): void {
     const [sx, sy] = P(k.x, 0, k.y), d = meH && !b.ruined && (b.burning ?? -1) < 0 ? Math.hypot(meH.x - k.x, meH.y - k.y) : 99;
     drawGlint(c, sx, sy - 4, d, b.look ?? 0);
     drawKindling(c, b, sx, sy);
+    const door = doorAt(b), [dx, dy] = P(door.x, 0, door.y);
+    drawSceneRings(c, b, sx, sy, dx, dy);
+  }
+  // The prisoners' rope (../scenedraw.ts), at waist height.
+  for (const [x1, y1, x2, y2] of ropeOf(room)) {
+    const [ax, ay] = P(x1, 0.45, y1), [bx, by] = P(x2, 0.45, y2);
+    drawRope(c, ax, ay, bx, by);
   }
   // A drummer's reach on the floor, its beat going out, and the goblins it has roused.
   const beat = (room.time % DRUMMER.beat) / DRUMMER.beat;

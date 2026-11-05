@@ -53,6 +53,11 @@ export const LOOK: Record<Block['kind'], Look> = {
   casks: { tall: 14, roof: '#3a2818', ridge: '#3a2818', wall: '#2a1d12', windows: false, furniture: true },
   pen: { tall: 9, roof: '#8a7448', ridge: '#6b4a2b', wall: '#5a3d22', windows: false, furniture: true },
   shack: { tall: 12, roof: '#8a7a5a', ridge: '#6a5a48', wall: '#4a3420', windows: false },
+  // Layout 4's pieces: painted from their boxes in both views (pieces.ts); `tall` covers the highest.
+  headframe: { tall: 56, roof: '#4a3420', ridge: '#2e2016', wall: '#4a3420', windows: false },
+  log: { tall: 12, roof: '#4a3a2a', ridge: '#3e3022', wall: '#4a3a2a', windows: false },
+  mill: { tall: 44, roof: '#3a3036', ridge: '#4a3e44', wall: '#6a6470', windows: false },
+  stakes: { tall: 18, roof: '#5a4a30', ridge: '#9a8a62', wall: '#4a3c26', windows: false },
   // A side way is a gap, painted with the room's ways out (wayout.ts), never drawn as a block.
   sideway: { tall: 0, roof: '#000', ridge: '#000', wall: '#000', windows: false },
 };

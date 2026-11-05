@@ -55,7 +55,7 @@ export function rollSpiders(foes: Foe[], job: Job, index: number, spot: Spot, h:
   let cut = SPIDERS.thin * nests;
   for (let i = foes.length - 1; i >= 0 && cut > 0; i--) {
     const f = foes[i];
-    if (f.kind === 'scrapper' && !f.bow && !f.variant && !f.feeding && !f.name) foes.splice(i, 1), cut--;
+    if (f.kind === 'scrapper' && !f.bow && !f.variant && !f.feeding && !f.name && !f.task) foes.splice(i, 1), cut--;
   }
   const b = SPIDERS.brood;
   if (index >= b.from - (job.deep ? 1 : 0) && rng.next() < b.chance + (job.deep ? b.deep : 0)) {

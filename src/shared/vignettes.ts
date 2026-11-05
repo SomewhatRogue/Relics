@@ -13,6 +13,8 @@ import type { Rng } from './rng.js';
 import { wooden } from './sitekit.js';
 import { along, type Pt } from './spine.js';
 import type { Foe } from './terrain.js';
+import type { GameMap } from './arena.js';
+import { SCENES4, scene4 } from './scenes4.js';
 
 type P = { x: number; y: number };
 /** What a set piece is laid with: the room's stream and its free-spot finder, and where it puts things. */
@@ -24,6 +26,10 @@ export interface Lay {
   foes: Foe[]; dead: Npc[]; braziers: (Circle & { wild?: boolean })[]; props: { kind: PropKind; x: number; y: number }[];
   blocks: Block[]; rounds: Round[]; marks: Mark[]; grim: Grim[]; sleepers: P[];
   spine?: Pt[][]; river?: River;
+  /** Layout 4's scenes: the way on's point at the edge (prisoners make for it), and what they add to the room. */
+  out?: Pt; chests?: P[]; flocks?: P[]; led?: GameMap['led']; oil?: NonNullable<GameMap['oil']>;
+  /** Ground for a scene beside the track (shared/room4.ts plotter): a w by h box, cleared of growth. */
+  plot?(w: number, h: number, near?: number): { x: number; y: number; w: number; h: number } | null;
 }
 
 /** `k` goblins round a point, at rest, `d0` to `d1` from it. */
@@ -40,14 +46,14 @@ export function band(l: Lay, at: P, k: number, d0 = 1, d1 = 2.4, more: Partial<F
 }
 
 /** A wild fire the goblins burn whatever the hour. */
-function fire(l: Lay, y0 = 3, y1 = l.H - 7): P | null {
+export function fire(l: Lay, y0 = 3, y1 = l.H - 7): P | null {
   const f = l.spot(0.35, y0, y1);
   if (f) l.braziers.push({ ...f, r: 0.35, wild: true });
   return f;
 }
 
 /** The dead: a body or two (whoever lived here; soldiers in the wood), and `k` of them eating. */
-function bodies(l: Lay, at: P, k: number, look?: string): void {
+export function bodies(l: Lay, at: P, k: number, look?: string): void {
   const who = look ?? ({ village: 'villager', farm: 'farmer', field: 'farmer', forest: 'soldier', mine: 'villager' } as Record<string, string>)[l.kind] ?? 'villager';
   l.dead.push({ x: at.x, y: at.y, name: '', talk: 'dead', look: who, pose: 'corpse' });
   if (l.rng.next() < 0.6) l.dead.push({ x: at.x + 0.6, y: at.y - 0.35, name: '', talk: 'dead', look: who === 'farmer' ? 'villager' : 'soldier2', pose: 'corpse' });
@@ -59,6 +65,8 @@ function bodies(l: Lay, at: P, k: number, look?: string): void {
 
 export function setPiece(l: Lay, piece: Piece): P[] {
   const { rng, n } = l;
+  // Layout 4's scenes (shared/scenes4.ts): their own files.
+  if (SCENES4.includes(piece)) return scene4(l, piece);
   if (piece === 'fire') {
     // At the fire: a band round each of two fires, at rest till they see you.
     const fires = [fire(l), fire(l, 3, l.H / 2)].filter(Boolean) as P[];

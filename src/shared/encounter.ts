@@ -21,7 +21,7 @@ export interface Compose {
 }
 
 const d = (a: P, b: P) => Math.hypot(a.x - b.x, a.y - b.y);
-const plain = (f: Foe) => f.kind === 'scrapper' && !f.bow && !f.variant && !f.name;
+const plain = (f: Foe) => f.kind === 'scrapper' && !f.bow && !f.variant && !f.name && !f.task;
 const mid = (fs: Foe[]): P => ({ x: fs.reduce((s, f) => s + f.x, 0) / fs.length, y: fs.reduce((s, f) => s + f.y, 0) / fs.length });
 export const isSpecial = (f: Foe) => !!f.role && f.role !== 'fodder' && f.role !== 'wolf' && f.role !== 'blind';
 /** How many specials a template puts in a pack. */

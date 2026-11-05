@@ -1,7 +1,8 @@
 # Terrain nodes: rooms that feel like moving on
 
 Design doc. Claude Opus 5.5, 2026-11-04, for Kyle and whoever builds it. Built: slices 1 and 1b (layout 2),
-slices 2 to 4 (layout 3; see DECISIONS 2026-11-04). Still to come: slice 5 (the big map).
+slices 2 to 4 (layout 3), the rest of slice 4 and the forks' ways (layout 4; see DECISIONS 2026-11-04). Still
+to come: slice 5 (the big map).
 
 Kyle: "each of the terrains kind of seemed to be the same map each time that you went up ... the same
 sort of houses, the same sort of elements across each one. I would like them to fit in thematically
@@ -439,20 +440,20 @@ something, and what happens when they see you. "Behaviour" says whether the gobl
 | **At the fire** | A band round a wild fire, at rest till they see you | Exists (resting at fires) | any outdoor; gallery, orechamber |
 | **At the dead** | A heap of the dead, goblins eating, slow to look up | Exists (`feeding`) | any |
 | **The feast** | A butcher at the head of a long fire, the pot on, bones, a band round it | Exists (resting + `pot`, `bones` grim) | warcamp, farmyard, clearing, orechamber |
-| **Burning a house** | Goblins with torches round a cottage; it catches as you arrive or when they see you; the hungry inside come out burning | New: a torch-bearer pose; the house's `burning` fate and houses alight already exist | lane, farmyard, green, fordtown, stackyard |
-| **Dragging a body** | One or two hauling a body along a `trail` toward their fire; they drop it and turn | New: a walk along a path with a body in tow (`trail` grim exists) | track, lane, woodedge, causeway |
-| **Prisoners led off** | A short line of captives roped together with an escort, walking for the far way out. Kill the escort before they reach it | New: survivors walking with escorts; a timer that's the distance | track, crossroads, ford, causeway, gallery |
-| **The patrol** | A few walking a loop of the room | New: waypoints | any, more in camps |
+| **Burning a house** | Goblins with torches round a cottage; it catches as you arrive or when they see you; the hungry inside come out burning | Built (layout 4): torch-bearers at its walls, a ring for how far it's caught, pulled out of the door once alight | lane, farmyard, green, fordtown, stackyard |
+| **Dragging a body** | One or two hauling a body along a `trail` toward their fire; they drop it and turn | Built (layout 4): two hauling to their fire, dropped when they see you | track, lane, woodedge, causeway |
+| **Prisoners led off** | A short line of captives roped together with an escort, walking for the far way out. Kill the escort before they reach it | Built (layout 4): roped survivors and two guards; freed when the guards die, gone at the way out | track, crossroads, ford, causeway, gallery |
+| **The patrol** | A few walking a loop of the room | Built (layout 4): three on a round of four points | any, more in camps |
 | **Asleep** | Goblins curled in the hay or by a cold fire | Exists (`sleepers`) | stackyard, farmyard, orechamber, glade |
 | **Looting a cart** | A wrecked cart, crates broken open, goblins at it | Exists (resting at a spot) + `cart`, `debris` | track, crossroads, bridge, ford |
 | **Archers on the heights** | Bows up on raised ground | Exists (ledges) | hollow way, woodedge slope, stepped gallery, wallwalk |
 | **Building an engine** | A half-built ram or throwing engine; goblins at it | New block (engine) and a "working" pose; the **wreck** side task | warcamp, crossroads, minehead |
 | **Wayside shrine** | A small shrine, fouled by the hungry, a candle stub | Piece exists (`shrine`) | track, crossroads, lane, churchyard |
-| **Wrecked cart** | Overturned, burned or not, barrels of oil (a fire trap) | Pieces exist | track, crossroads, bridge, ford, minehead |
-| **Hanging tree** | A big tree with the hungry's stock hung by the ankles from it (the larder rule), crows | New tree piece; `hung` grim used outdoors; `crows` exist | woodedge, glade, deepwood, track |
-| **The well** | A well with its winch; a cache on the rope (loot), or goblins using it | Piece exists (`well`) | green, lane, farmyard, fordtown, hallgrounds |
+| **Wrecked cart** | Overturned, burned or not, barrels of oil (a fire trap) | Built; layout 4 spills its oil (a slick from the start) | track, crossroads, bridge, ford, minehead |
+| **Hanging tree** | A big tree with the hungry's stock hung by the ankles from it (the larder rule), crows | Built (layout 4): the hanging tree piece, two hung, crows | woodedge, glade, deepwood, track |
+| **The well** | A well with its winch; a cache on the rope (loot), or goblins using it | Built (layout 4): a well, a chest at its lip, two at it | green, lane, farmyard, fordtown, hallgrounds |
 | **Broken bridge** | The deck gone, its boards in the water, wade downstream | Marks exist (Brokenbridge's) | bridge, ford, stream |
-| **Fallen tree** | A trunk across the path, the way bends round it | New piece (log) | track, woodedge, deepwood, coppice |
+| **Fallen tree** | A trunk across the path, the way bends round it | Built (layout 4): a log across the track, the way round its short end | track, woodedge, deepwood, coppice |
 | **Webbed** | Webs hung with what was caught, a nest | Exists (spiders, nests) | deepwood, cave, flooded, orechamber, carr |
 | **The column's dead** | Soldiers' bodies where they fell, picked over | Exists (`soldier` corpses) | track, woodedge, crossroads |
 
@@ -533,6 +534,19 @@ new plan files (`siteedge.ts`, `sitecave.ts`, `sitechurch.ts`), theme, light and
 node, new pieces (headframe, log, hanging tree, headstones, engine, stake fence) in `client/propsdraw.ts`
 and `client/three/props3d.ts`, the new behaviours for vignettes (torch-bearers, dragging, prisoners led
 off, patrol). Effort: L.
+
+**Built so far (2026-11-04).** Slices 1 and 1b as layout 2; slices 2 and 3 and most of 4 as layout 3 (the
+transitions: wood edge, coppice, causeway, fen ford, carr, ore road, mine head, outfall, village end; glade,
+pens, old workings and cave as side rooms). Layout 4 (new jobs) finishes slice 4: deep wood, glade, reed bed,
+flooded, collapse, chamber, cave, stackyard, mill, orchard, churchyard and barrows as rooms of the route, each
+with its layouts, water and light (`shared/nodes4.ts`, `sitewood4.ts`, `siteunder4.ts`, `sitefarm4.ts`,
+`sitechurch.ts`, `water4.ts`); the headframe, log, mill and wheel, stakes, hanging tree, headstones and apple
+trees in both views from one list (`client/pieces.ts`); the vignettes with new behaviour (burning a house,
+dragging a body, prisoners led off, the patrol) and the hanging tree, the fallen tree, the well's cache, the
+wrecked cart's oil (`shared/scenes4.ts`, `scenes4b.ts`, `sim/scenes.ts`, `sim/tasks.ts`). Forks no longer offer
+HIGH and LOW but two ways you can tell apart from where you stand (`shared/ways.ts`: SMOKE, CRIES, CROWS, DRUMS,
+QUIET, THE FORD, WEBS), each a different kind of room and a different pay. Not yet: the building engine, a punt,
+spiders by node, music by node, a side room with two ways back.
 
 **Slice 5: one vocabulary with big maps.** *Done when* `?bigmap=1` grows from the route on the grid:
 the same nodes, a route that turns across it, side cells and a loop, open seams, the same map from the

@@ -13,11 +13,16 @@ import { burntfarm, campvillage, chapelfields, hamletmine } from './sitemix.js';
 import { coppice, carredge, oreroad, villageend, woodedge } from './sitetrans.js';
 import { causeway, fenford, minehead, outfall } from './sitewet.js';
 import { fits, type Keep, type Site } from './sitekit.js';
+import { deepwood, glade, reedbed } from './sitewood4.js';
+import { cave, collapse, flooded, orechamber } from './siteunder4.js';
+import { mill, orchard, stackyard } from './sitefarm4.js';
+import { barrows, churchyard } from './sitechurch.js';
 import type { Ground, Routed } from './sites.js';
 
 export const PLANS3: Record<RouteNode, (rng: Rng, g: Ground) => Site> = {
   track: track3, crossroads: crossroads3, clearing: clearing3, woodpath: woodpath3, ford: ford3, lane, strips, yard,
   woodedge, coppice, carredge, oreroad, villageend, causeway, fenford, outfall, minehead, burntfarm, chapelfields, campvillage, hamletmine,
+  deepwood, glade, reedbed, flooded, collapse, cave, orechamber, stackyard, mill, orchard, churchyard, barrows,
 };
 
 /** The room's one landmark, a few steps off the track a third to two thirds of the way along (any other one goes). */

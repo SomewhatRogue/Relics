@@ -41,7 +41,9 @@ export function showResult(g: Game, panel: Panel): void {
   ], 'recap') : '';
   // What you came home with.
   const got = labelRows([
-    ['GOLD', String(r.gold)], ['XP', String(r.xp)], ['SAVED', r.won ? String(r.rescued) : ''], ['LOST', r.lost ? `${r.lost} to the fire` : ''],
+    ['GOLD', String(r.gold)], ['XP', String(r.xp)], ['SAVED', r.won ? String(r.rescued) : ''],
+    ['LOST', [r.lost ? `${r.lost} to the fire` : '', r.ledoff ? RECAPW.ledoff(r.ledoff) : ''].filter(Boolean).join(', ')],
+    [RECAPW.way, r.won ? r.way ?? '' : ''],
     [RECAPW.found, c?.found.join(', ') ?? ''],
     [RECAPW.treasure, r.treasure.map(itemName).join(', ')],
     [RECAPW.relic, c?.relics.join(', ') ?? ''],

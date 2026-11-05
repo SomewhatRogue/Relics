@@ -75,7 +75,8 @@ export function settle(job: Job, roomIndex: number, blocks: Block[]): Mark[] {
   const spill: Mark[] = [];
   blocks.forEach((b, i) => {
     if (!b.door) return;
-    const seed = (b.look = houseSeed(job, roomIndex, i)), end = fate(job, roomIndex, seed);
+    // A house the torch-bearers are at (layout 4) stands, its door open, whatever its fate would have been.
+    const seed = (b.look = houseSeed(job, roomIndex, i)), end = b.door.endsWith(':held') ? 'standing' : fate(job, roomIndex, seed);
     Object.assign(b, { fate: end, big: big(job, roomIndex, seed) });
     if (end === 'burning') b.smoulder = true;
     if (end === 'blocked') delete b.door;

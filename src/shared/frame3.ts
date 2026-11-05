@@ -12,14 +12,17 @@ import { Rng } from './rng.js';
 import { roomSeed, type RoomSpec } from './route.js';
 import { boxOff, off, type Pt } from './spine.js';
 import { wetBeside } from './wetland.js';
+import { isNode4 } from './nodes4.js';
+import { water4 } from './water4.js';
 
 export interface Frame3 {
   spec: RoomSpec; rng: Rng; seed: number; w: number; h: number;
-  spawn: { x: number; y: number }; exit: Area; ways: { area: Area; road?: 'high' | 'low'; port: Port }[];
+  spawn: { x: number; y: number }; exit: Area; ways: { area: Area; road?: 'high' | 'low'; port: Port & { way?: import('./ways.js').WayKind } }[];
   spine: Pt[][]; water: Water[]; wet: { x: number; y: number; r: number }[]; river?: River;
 }
 
-const BEND: Record<string, number> = { track: 2.6, woodpath: 3.6, clearing: 2.2, crossroads: 1.4, ford: 1.6, causeway: 0.5, fenford: 1.2, carredge: 2.8, woodedge: 2.2, coppice: 2, oreroad: 2.4, minehead: 1.4, outfall: 1.4, burntfarm: 2, chapelfields: 2.2, hamletmine: 1.4, villageend: 1, lane: 1, yard: 1.2, strips: 1.4, campvillage: 1.2 };
+const BEND: Record<string, number> = { track: 2.6, woodpath: 3.6, clearing: 2.2, crossroads: 1.4, ford: 1.6, causeway: 0.5, fenford: 1.2, carredge: 2.8, woodedge: 2.2, coppice: 2, oreroad: 2.4, minehead: 1.4, outfall: 1.4, burntfarm: 2, chapelfields: 2.2, hamletmine: 1.4, villageend: 1, lane: 1, yard: 1.2, strips: 1.4, campvillage: 1.2,
+  deepwood: 3.4, glade: 2, reedbed: 2.4, flooded: 1, collapse: 1.4, cave: 3, orechamber: 2.2, churchyard: 1.6, mill: 1.4, orchard: 1.2, stackyard: 1.4, barrows: 2.4 };
 
 /** A leg from one port to another: wandering if it runs straight across, curving round the corner if it turns. */
 export function leg(rng: Rng, w: number, h: number, a: Port, b: Port, bend: number, m = 4): Pt[] {
@@ -77,6 +80,7 @@ const spotOf = (q: Water) => ({ x: q.x + q.w / 2, y: q.y + q.h / 2, r: Math.max(
 /** The node's water, laid across or beside the way, and the track moved through a ford. */
 function water(f: Frame3, geo: Rng): void {
   const { spec, w, h } = f, n = spec.node, l = spec.layout, main = f.spine[0], down = spec.in!.side === 'W' || spec.in!.side === 'E';
+  if (isNode4(n)) return water4(f, geo);
   if (n === 'ford' || n === 'fenford' || n === 'outfall') {
     // A river across the way: fords to wade (two, one wide one, or a broken bridge and one), the track through the nearest.
     const len = down ? h : w, at = geo.range((down ? w : h) * 0.38, (down ? w : h) * 0.5), rw = n === 'fenford' ? 3.2 : 2.6;

@@ -42,7 +42,8 @@ describe('packs', () => {
       if (f.variant === 'blind') expect(r.j.place.kind).toBe('mine');
       if (f.variant === 'wolf') expect(['field', 'farm', 'forest', 'river', 'marsh']).toContain(r.j.place.kind);
       if (f.variant === 'roofer') expect(f.z).toBe(ROOF.z);
-      if (f.variant === 'torch') expect(r.foes.some((o) => o.variant === 'oiler' && o.pack === f.pack)).toBe(true);
+      // (Layout 4's torch-bearers at a house they're burning bring no oil thrower: shared/scenes4.ts.)
+      if (f.variant === 'torch' && f.task?.k !== 'kindle') expect(r.foes.some((o) => o.variant === 'oiler' && o.pack === f.pack)).toBe(true);
       if (f.variant === 'wolf') expect(r.foes.some((o) => o.variant === 'keeper' && o.pack === f.pack)).toBe(true);
     }
   });

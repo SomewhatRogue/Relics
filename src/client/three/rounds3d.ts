@@ -5,6 +5,8 @@
  */
 import type { Round } from '../../shared/arena';
 import { Boxes, Seed, jit } from './boxes';
+import { roundBoxes } from '../pieces';
+import { putBoxes } from './pieces3d';
 
 export type Spot = [number, number, number, number];
 
@@ -153,6 +155,12 @@ export function addRound(B: Boxes, o: Round, fires: Spot[], r: Seed): void {
         B.c(x + Math.cos(a) * 0.2, 0.22, z + Math.sin(a) * 0.2, 0.05, 0.46, 0.05, 0x2a2630, -a, 0, 0.18);
       }
       B.b(x, 0.4, z, 0.62, 0.16, 0.5, 0x2a2630), B.b(x, 0.56, z, 0.54, 0.02, 0.42, 0x3a3046);
+      break;
+    case 'hangtree':
+    case 'headstone':
+    case 'apple':
+      // Layout 4's pieces: the boxes the flat view paints (../pieces.ts).
+      putBoxes(B, roundBoxes(o), x, z);
       break;
     default:
       // Paint only (crows, moths, a dog, smoke): nothing to stand up.

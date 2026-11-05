@@ -14,10 +14,11 @@ import { slide } from './bodies';
 import type { World } from './elements';
 import { players } from './party';
 import { survivorHazards } from './survivorhits';
+import { stepLed } from './scenes';
 import type { FightEvent, Hero, Survivor } from './types';
 
 /** Freed and still to be brought home (never a false prisoner: sim/falsecage.ts). What the goal counts. */
-export const waiting = (s: Survivor) => !s.dead && s.home < 0 && s.tearAt === undefined;
+export const waiting = (s: Survivor) => !s.dead && s.home < 0 && s.tearAt === undefined && !s.taken;
 
 /** The survivors still to be brought home in a world (none if it has no list): the ones that can be hurt. */
 export const living = (w: { survivors?: Survivor[] }) => (w.survivors ?? []).filter(waiting);
@@ -76,6 +77,8 @@ export function stepSurvivors(w: World, dt: number, entrance: { x: number; y: nu
       leaving(s, entrance, w.now, dt);
       continue;
     }
+    // Roped and led off (layout 4, sim/scenes.ts) while a guard still drives them.
+    if (s.led && stepLed(s, w, dt)) continue;
     if (s.burnUntil > w.now && w.now >= s.burnNext) {
       s.burnNext = w.now + BURN.every;
       hurtSurvivor(s, BURN.dmg, s.burnBy, w.now, w.ev, 0, 0, true);

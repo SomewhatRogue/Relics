@@ -16,7 +16,10 @@ export type RoundKind = 'pillar' | 'tree' | 'pine' | 'rock' | 'hay' | 'well' | '
   // Paint only: a dog nosing about, smoke rising past the wall.
   | 'dog' | 'smoke'
   // Inside the halls: a stand of candles, a brazier of coloured fire (the mage's tower).
-  | 'candles' | 'witchfire';
+  | 'candles' | 'witchfire'
+  // Layout 4's pieces (client/pieces.ts draws both views from one list): the hungry's hanging tree, a
+  // headstone, an orchard's apple tree.
+  | 'hangtree' | 'headstone' | 'apple';
 export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall' | 'tent' | 'rockwall' | 'fence' | 'granary' | 'wall' | 'den'
   // Furniture, inside buildings.
   | 'counter' | 'bed' | 'shelf' | 'anvil' | 'altar' | 'pew' | 'bench' | 'hearth' | 'sacks'
@@ -31,7 +34,9 @@ export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall'
   // A side way out of a job's room to a dead end (shared/sideway.ts): a gap at the edge, drawn as one.
   | 'sideway'
   // Inside the halls, each its own (client/hallsdraw.ts).
-  | 'books' | 'stair' | 'dummy' | 'maptable' | 'dicetable' | 'skinbench' | 'desk' | 'tub' | 'bellows' | 'booth' | 'bunk' | 'casks';
+  | 'books' | 'stair' | 'dummy' | 'maptable' | 'dicetable' | 'skinbench' | 'desk' | 'tub' | 'bellows' | 'booth' | 'bunk' | 'casks'
+  // Layout 4's pieces (client/pieces.ts): a mine's headframe, a fallen trunk, a watermill and its wheel, a fence of sharpened stakes.
+  | 'headframe' | 'log' | 'mill' | 'stakes';
 export interface Round extends Circle { kind: RoundKind }
 export interface Block {
   x: number; y: number; w: number; h: number; kind: BlockKind; label?: string;
@@ -65,6 +70,16 @@ export interface Block {
   lightT?: number;
   /** Someone caged inside (the leader's game says so, from the house's plan or its room): a muffled cry at the kindling spot. */
   cry?: boolean;
+  /**
+   * Burning a house (layout 4, sim/scenes.ts): torch-bearers at it, how far it has caught (0 to 1; it
+   * goes up at 1, the ring at its kindling spot shows the same). `held`: someone caged inside it from
+   * the start (the cry is real); `pulled`: how many have been dragged out of the door once it's alight,
+   * and how far along the one being dragged out now is (seconds).
+   */
+  torched?: number;
+  held?: number;
+  pulled?: number;
+  pullT?: number;
 }
 /** Paint only, on the floor: never collided against or decided on. */
 export type MarkKind = 'blood' | 'drag' | 'debris' | 'scorch' | 'trample' | 'planks' | 'beds' | 'flowers' | 'mound' | 'fallenpost' | 'green'
@@ -95,7 +110,11 @@ export interface Mark { kind: MarkKind; x: number; y: number; w: number; h: numb
  */
 export interface Ledge { x: number; y: number; w: number; h: number; ramps: Area[]; kind?: 'rock' | 'wood' }
 /** A way out of a run room, when there's more than one: the road it leads to. */
-export interface Road { area: Area; road: 'high' | 'low'; label: string; /** Layout 3: the side of the room it leaves by (else the top). */ side?: 'N' | 'E' | 'S' | 'W' }
+export interface Road {
+  area: Area; road: 'high' | 'low'; label: string; /** Layout 3: the side of the room it leaves by (else the top). */ side?: 'N' | 'E' | 'S' | 'W';
+  /** Layout 4: what you can tell from here about the way (shared/ways.ts): its word is the label, its cue drawn past the gap. */
+  way?: import('./ways.js').WayKind;
+}
 /** Someone to talk to: `talk` says what they offer (a town spot's panel), `look` how they're drawn. */
 export interface Npc {
   x: number; y: number; name: string; talk: string; look: string; arg?: number;
@@ -225,6 +244,10 @@ export interface GameMap {
   blaze?: Blaze;
   /** Paint only: a stretch of the back wall that came down (tiles), and how far it's mended (0 to 3). */
   breach?: { x: number; w: number; stage: number };
+  /** Prisoners led off (layout 4, sim/scenes.ts): roped captives walking these points to the far way out, and how many. */
+  led?: { pts: [number, number][]; n: number };
+  /** Lamp oil spilled where the room begins (a wrecked cart's: a fire trap), as sim/oil.ts slicks. */
+  oil?: { x: number; y: number; r: number }[];
 }
 export interface Water { x: number; y: number; w: number; h: number; deep?: boolean }
 /**

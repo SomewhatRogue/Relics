@@ -50,6 +50,9 @@ export interface Run {
   began?: number;
   /** Players in the party when each room is built (it scales the goblins; the ones left, if some went home). */
   party?: number;
+  /** Layout 4: the freed brought out of each room (a way's pay counts its room's: shared/waypay.ts), and prisoners led off. */
+  saved?: Record<number, number>;
+  ledoff?: number;
 }
 
 export const MAX_DOWNS = 3;
@@ -109,10 +112,13 @@ export function tally(run: Run, room: ArenaRoom, events: FightEvent[], me: strin
       // Freed is not saved: they count once they're brought out (sim/survivors.ts).
       run.rescued++;
       run.xp += BOUNTY.rescue;
+      (run.saved ??= {})[run.index] = (run.saved[run.index] ?? 0) + 1;
     } else if (ev.k === 'survivorhit') {
       if (ev.by && !ev.tick) (run.rescueHits ??= {})[ev.by] = (run.rescueHits[ev.by] ?? 0) + 1;
     } else if (ev.k === 'survivordeath') {
       if (ev.by) (run.rescueKills ??= {})[ev.by] = (run.rescueKills[ev.by] ?? 0) + 1;
+    } else if (ev.k === 'ledoff') {
+      run.ledoff = (run.ledoff ?? 0) + 1;
     } else if (ev.k === 'cagelost') {
       run.lost = (run.lost ?? 0) + 1;
     } else if (ev.k === 'exped' && (ev.what === 'goal' || ev.what === 'side')) {

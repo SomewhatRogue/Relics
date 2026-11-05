@@ -16,6 +16,7 @@ import { HERO_SLOTS, SHOP, gainXp, newProfile, perkFx, perkOffer, resetPerks, ta
 import { dueLevels, jobXp } from '../shared/pace';
 import { Rng } from '../shared/rng';
 import { CHAPTER_1, rewardMult, settle, type WorldState } from '../shared/story';
+import { wayGot, wayLine } from '../shared/waypay';
 import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
 import { buyDrill, learnLesson } from '../shared/training';
 import { knowsSkill, learnSkill } from '../shared/skillteach';
@@ -62,7 +63,7 @@ interface JobSave { run: Run; room: Record<string, unknown>; houses?: SavedHouse
  * gold); or gone early from a party, by LEAVE or cut off from it (the gold picked up while with them).
  */
 export type How = 'won' | 'beaten' | 'left' | 'dropped';
-export interface Result { won: boolean; how: How; half: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number; relic?: RelicItem; treasure: Item[]; sold: Item[]; lost?: number; /** Jobs of the church's light left, if it went on this one. */ lit?: number; /** What happened, for the recap (recaptally.ts). */ recap?: Recap }
+export interface Result { won: boolean; how: How; half: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number; relic?: RelicItem; treasure: Item[]; sold: Item[]; lost?: number; /** Prisoners led off out of reach (layout 4). */ ledoff?: number; /** The way taken at a fork and what it paid (shared/waypay.ts). */ way?: string; /** Jobs of the church's light left, if it went on this one. */ lit?: number; /** What happened, for the recap (recaptally.ts). */ recap?: Recap }
 /** A leader back after a reload waits this long (the room held) for a friend to answer before the job's given up. */
 const HOLD = 10;
 /** Something you can use where you stand: a spot, a person, or a door. */
@@ -844,7 +845,9 @@ export class Game {
     const crowd = Math.max(1, run.party ?? 1), bonus = 1 + PARTY.reward * (crowd - 1);
     // Each one lost to a fire takes a share off the job's pay (shared/tuning.ts HOUSEBURN).
     const spared = 1 - Math.min(HOUSEBURN.lostMost, (run.lost ?? 0) * HOUSEBURN.lostCut);
-    const gold = won ? run.gold + Math.round(run.job.reward * rewardMult(w) * bonus * spared) : ransom ? 0 : half ? Math.round(run.gold / 2) : run.gold;
+    // The way taken at a fork (layout 4): a share more or less of the pay, more for each one saved down it (shared/waypay.ts).
+    const way = wayGot(run.job, run.roads, run.saved), wayPay = won && way ? way.pay : 0;
+    const gold = won ? run.gold + Math.round(run.job.reward * rewardMult(w) * bonus * spared * Math.max(0, 1 + wayPay)) : ransom ? 0 : half ? Math.round(run.gold / 2) : run.gold;
     if (ransom) p.gold = 0;
     // The Want grows with every job finished in hungry gear, and with what it killed.
     const hungry = this.hungryWorn();
@@ -867,10 +870,10 @@ export class Game {
     const lit = p.lit ?? 0;
     if (lit > 0) p.lit = lit - 1;
     // The treasure at the end: yours alone. What won't fit in the pack is sold on the spot.
-    const found = won ? treasure(run.job, p.cls, p.id, p.runs, crowd, run.sides ?? 0) : [], kept = found.slice(0, Math.max(0, bagSize(p) - p.bag.length)), sold = found.slice(kept.length);
+    const found = won ? treasure(run.job, p.cls, p.id, p.runs, crowd, (run.sides ?? 0) + (way?.treasure ?? 0)) : [], kept = found.slice(0, Math.max(0, bagSize(p) - p.bag.length)), sold = found.slice(kept.length);
     p.bag.push(...kept);
     p.gold += sold.length * TREASURE_SOLD;
-    this.result = { won, how, half, job: run.job, gold, xp, rescued, levels, relic, treasure: kept, sold, lost: run.lost ?? 0, lit: lit > 0 ? p.lit : undefined, recap };
+    this.result = { won, how, half, job: run.job, gold, xp, rescued, levels, relic, treasure: kept, sold, lost: run.lost ?? 0, ledoff: run.ledoff ?? 0, way: way ? wayLine(way) : undefined, lit: lit > 0 ? p.lit : undefined, recap };
     this.run = null;
     // Paid: marked so in the same store as the pay (the give below), then the tallies let go.
     if (key) p.paid = [...(p.paid ?? []), key].slice(-12);
