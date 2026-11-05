@@ -415,6 +415,8 @@ export interface Enemy extends Body {
   /** Near a standing banner this tick (sim/banner.ts); routed until; a fallen banner whose rout is done. */
   heart?: boolean;
   routUntil?: number;
+  /** When a quick blow last knocked it off balance (sim/combat.ts, POISE.relock). */
+  flinchAt?: number;
   spent?: boolean;
   /** A sneak-thief's haul (sim/thief.ts), how long it has lurked, and one that got away (no body). */
   loot?: { gold?: number; potion?: PotionId };

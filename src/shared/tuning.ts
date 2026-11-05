@@ -231,9 +231,10 @@ export const SWING_DUMMY = {
 
 /** How long a light enemy flinches when hit. */
 export const FLINCH = 0.3;
-/** A light goblin's wind-up only breaks to a quick blow in its first `early` share; after that it's
- *  committed, and only a charged blow, a perfect or a big breaker stops it (Kyle, 2026-11-04: too easy). */
-export const POISE = { early: 0.35 };
+/** Quick blows never break a wind-up: only a charged blow, a perfect or a big breaker does (Kyle,
+ *  2026-11-04: "most people are slamming quick attack, so it's not skill based"). A quick blow still
+ *  knocks an idle small goblin off balance, but not again for `relock` seconds, so mashing can't lock it. */
+export const POISE = { relock: 1.2 };
 
 /**
  * A house on fire inside (shared/blaze.ts, sim/blaze.ts). A patch smokes `warn` seconds before it
