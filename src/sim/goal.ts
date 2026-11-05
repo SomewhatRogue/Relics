@@ -16,6 +16,7 @@ import type { Run } from './run';
 import { bossOf, densLeft, racksLeft } from './targets';
 import { waiting } from './survivors';
 import { expedGoal } from './expedgoal';
+import { HELD_HINT, pickWay, type WayKind } from '../shared/ways';
 
 export interface Captives { caged: number; waiting: number }
 
@@ -82,7 +83,12 @@ export function goal(run: Run, room: ArenaRoom, houses: Captives = { caged: 0, w
     const fork = !!room.map.roads;
     // With spiders about (nests and all) it's the room to clear, not just the goblins.
     const what = room.enemies.some((e) => !isDead(e) && isSpiderKind(e.kind)) ? 'them out' : 'the goblins';
-    return { text: also(goblins ? `Clear ${what} (${goblins} left)` : fork ? 'Pick a road, together. HIGH: archers up top, fewer below. LOW: more goblins, someone caged' : way(false)), done: goblins === 0 };
+    // Layout 4: each way says what it is and what it pays (shared/ways.ts); a house alight with someone in it says so.
+    const ways = room.map.roads?.map((r) => r.way).filter((w): w is WayKind => !!w) ?? [];
+    const pick = ways.length ? pickWay(ways) : 'Pick a road, together. HIGH: archers up top, fewer below. LOW: more goblins, someone caged';
+    const held = room.map.blocks.some((b) => (b.held ?? 0) > (b.pulled ?? 0) && (b.burning ?? -1) >= 0 && !b.ruined && b.cry !== false);
+    const text = also(goblins ? `Clear ${what} (${goblins} left)` : fork ? pick : way(false));
+    return { text: held ? `${HELD_HINT}. ${text}` : text, done: goblins === 0 };
   }
   const freed = !need.caged && !need.waiting;
   if (o === 'rescue') return { text: freed ? also(`Everyone's out. ${way(true)}`) : people, done: freed };

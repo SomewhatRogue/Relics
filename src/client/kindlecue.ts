@@ -49,7 +49,7 @@ export function burningCries(map: GameMap, now: number, say: (x: number, y: numb
 }
 
 /** A voice through a wall: two falling syllables, the high end gone, quiet (or a scream: `open` lets the high end through). */
-function muffledCry(open = 520, loud = 0.5): void {
+export function muffledCry(open = 520, loud = 0.5): void {
   const o = sfxOut();
   if (!o) return;
   const c = o.ac, t = c.currentTime, lp = c.createBiquadFilter(), g = c.createGain();

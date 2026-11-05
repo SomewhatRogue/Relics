@@ -13,6 +13,8 @@ import { tent } from './roofs3d';
 import { siegeBlock } from './siege3d';
 import { furnish3d } from './furnish3d';
 import { hallFurn3d } from './hallfurn3d';
+import { PIECE_BLOCKS, blockBoxes } from '../pieces';
+import { putBoxes } from './pieces3d';
 
 export function flatBlock(b: Block, group: THREE.Group, fires: [number, number, number, number][]): THREE.Group {
   const r = new Seed(Math.round(b.x * 29 + b.y * 13 + 3)), L = LOOK[b.kind], B = new Boxes();
@@ -51,6 +53,9 @@ export function flatBlock(b: Block, group: THREE.Group, fires: [number, number, 
     B.b(cx, 0, z1 - 0.25, b.w - 0.2, 0.6, 0.35, dk(wall));
   } else if (b.kind === 'tent') {
     tent(B, x0, x1, z0, z1, dk(roof), dk(hex(L.ridge)), r);
+  } else if (PIECE_BLOCKS.has(b.kind)) {
+    // Layout 4's pieces: the boxes the flat view paints (../pieces.ts).
+    putBoxes(B, blockBoxes(b), x0, z0, dk);
   } else if (b.kind === 'gallows' || b.kind === 'hurdle') {
     siegeBlock(B, b, r);
   } else if (b.kind === 'rack' && b.label === 'CORDWOOD') {

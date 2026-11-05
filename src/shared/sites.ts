@@ -46,6 +46,8 @@ export const siteOf = (p: Place): SiteKind => BY_NAME[p.name] ?? BY_KIND[p.kind]
 export interface Ground {
   w: number; h: number; index: number; fork: boolean; kind: PlaceKind; name: string; water: Water[];
   spec?: RoomSpec; spine?: Pt[][]; river?: River; dress?: Rng;
+  /** A layout-4 job's room (its plans may add layout 4's pieces). */
+  v4?: boolean;
 }
 const PLANS: Record<SiteKind, (rng: Rng, g: Ground) => Site> = { green, farmstead, fields, camp, street, manor, ruinvillage, wood, mine, sheepwash, peat, carr };
 const APPROACH: Record<ApproachNode, (rng: Rng, g: Ground) => Site> = { track, crossroads, lane, clearing, ford, strips, yard, woodpath };
@@ -63,7 +65,7 @@ export interface Routed { spec: RoomSpec; spine: Pt[][]; river?: River; seed: nu
 /** The plan a room gets, and the ground it's told about. */
 function planFor(job: Job, index: number, ground: Ground, r?: Routed): Site {
   if (!r) return PLANS[siteOf(job.place)](new Rng(placeSeed(job.place, index)), ground);
-  if (!r.spec.heart && r.spec.in) return PLANS3[r.spec.node as RouteNode](new Rng(r.seed), { ...ground, spec: r.spec, spine: r.spine, river: r.river });
+  if (!r.spec.heart && r.spec.in) return PLANS3[r.spec.node as RouteNode](new Rng(r.seed), { ...ground, spec: r.spec, spine: r.spine, river: r.river, ...(job.layout === 4 ? { v4: true } : {}) });
   if (!r.spec.heart) return APPROACH[r.spec.node as ApproachNode](new Rng(r.seed), { ...ground, spec: r.spec, spine: r.spine, river: r.river });
   // A heart: its own stream for what stays put, the sub-layout's for what moves.
   const v = Number(r.spec.layout.split('-')[1] ?? 0);

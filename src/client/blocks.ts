@@ -18,6 +18,8 @@ import { dressOutside, liveOutside } from './exterior';
 import { drawHallRound } from './hallsdraw';
 import { wear, windowsLit } from './wear';
 import { OX, OY, PX } from './world';
+import { PIECE_BLOCKS, PIECE_ROUNDS } from './pieces';
+import { drawPieceBlock, drawPieceRound } from './piecedraw';
 
 export { LOOK };
 
@@ -107,6 +109,12 @@ function door(b: Block, rect: Rect, w: number, wallY: number, l: Look): void {
 /** (x, y) is the block's top-left on screen (the footprint's corner). */
 export function drawBlock(c: Ctx, b: Block, x: number, y: number, lit: boolean): void {
   const st = state(b);
+  // Layout 4's pieces: their boxes (pieces.ts), the same the 2.5D view builds; on fire like any wood.
+  if (PIECE_BLOCKS.has(b.kind) && st !== 2) {
+    drawPieceBlock(c, b, x, y);
+    if ((b.burning ?? -1) >= 0 || b.smoulder) flames(c, b, x, Math.round(y - LOOK[b.kind].tall), Math.round(b.w * PX), Math.round(b.h * PX), LOOK[b.kind].tall);
+    return;
+  }
   let got = cache.get(b);
   if (!got || got.s !== st) cache.set(b, (got = { s: st, c: paint(b, st) }));
   const cv = got.c, l = LOOK[b.kind], tall = st === 2 ? RUBBLE : l.tall, top = Math.round(y - tall);
@@ -208,6 +216,7 @@ export const blockAt = (b: Block): [number, number] => [OX + b.x * PX, OY + b.y 
 /** A round thing at its foot (x, y on screen). */
 export function drawRound(c: Ctx, r: Round, x: number, y: number): void {
   if (r.kind === 'pillar') return blit(c, SPRITES.pillar, x, y + 5);
+  if (PIECE_ROUNDS.has(r.kind)) return drawPieceRound(c, r, x, y);
   if (r.kind === 'crows' || r.kind === 'moths' || r.kind === 'dog' || r.kind === 'smoke') return void drawLife(c, r, x, y);
   if (r.kind === 'candles' || r.kind === 'witchfire') return void drawHallRound(c, r, x, y);
   if (drawSite(c, r, x, y)) return;

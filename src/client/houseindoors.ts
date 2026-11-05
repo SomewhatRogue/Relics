@@ -54,8 +54,10 @@ export class HouseIndoors implements Indoors {
   caged(i: number): number {
     const r = this.room(i);
     // Someone in there as it falls: that room's own fire counts its caged.
-    if (r) return players(r.heroes).length && !r.blaze?.fallen ? 0 : cages(r).length;
-    return this.plannedCages(i);
+    // (Anyone dragged out of its door while it burned is out: sim/scenes.ts.)
+    const out = this.rooms.street?.map.blocks[i]?.pulled ?? 0;
+    if (r) return players(r.heroes).length && !r.blaze?.fallen ? 0 : Math.max(0, cages(r).length - out);
+    return Math.max(0, this.plannedCages(i) - out);
   }
 
   caught(i: number, _from: number, fall: number): void {
@@ -71,7 +73,7 @@ export class HouseIndoors implements Indoors {
   cries(): void {
     this.rooms.street?.map.blocks.forEach((b, i) => {
       if (!burnable(b) || b.ruined) return;
-      const r = this.room(i), cry = (r ? cages(r).length : this.plannedCages(i)) > 0;
+      const r = this.room(i), cry = (r ? cages(r).length : this.plannedCages(i)) - (b.pulled ?? 0) > 0;
       if (b.cry !== cry) b.cry = cry;
     });
   }

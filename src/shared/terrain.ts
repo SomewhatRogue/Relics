@@ -27,6 +27,8 @@ import { sideBlock } from './sideway.js';
 import { doorAt } from './arena.js';
 import type { Role } from './encounters.js';
 import { composeRoom, crowsOn } from './encounter.js';
+import { ensure4, finish4, light4, name4, plotter, torches4, wayMore } from './room4.js';
+import { edgePt } from './ports.js';
 
 /** `wave`: a nest's spiders a wave (more in a party; shared/nests.ts). */
 export type FoeVariant = 'looter' | 'lunger' | 'heavy' | 'stoker' | 'shield' | 'hexer' | 'drummer'
@@ -35,7 +37,11 @@ export type FoeVariant = 'looter' | 'lunger' | 'heavy' | 'stoker' | 'shield' | '
  * `pack`: the fight it belongs to (shared/encounter.ts; a pack's shout wakes only its own), `role` what
  * it's for in it, `more` (a pack's centrepiece) the special a party of three or more adds.
  */
-export interface Foe { kind: 'scrapper' | 'butcher' | 'spider' | 'brood' | 'nest'; wave?: number; x: number; y: number; hp?: number; name?: string; bow?: boolean; z?: number; awake?: boolean; feeding?: boolean; variant?: FoeVariant; pack?: number; role?: Role; more?: Role }
+export interface Foe {
+  kind: 'scrapper' | 'butcher' | 'spider' | 'brood' | 'nest'; wave?: number; x: number; y: number; hp?: number; name?: string; bow?: boolean; z?: number; awake?: boolean; feeding?: boolean; variant?: FoeVariant; pack?: number; role?: Role; more?: Role;
+  /** Layout 4: what it's busy at when you come in (sim/tasks.ts), and a body it's hauling. */
+  task?: import('./scenes4.js').FoeTask; haul?: { x: number; y: number };
+}
 /** Which way the party went at a fork. */
 export type RoadId = Road['road'];
 export interface RoomPlan { map: GameMap; foes: Foe[]; props: { kind: PropKind; x: number; y: number }[]; chests: { x: number; y: number; chained?: boolean }[] }
@@ -74,6 +80,8 @@ export function planRoom(job: Job, index: number, road?: RoadId, taken?: Record<
   const fr = frameFor(job, index, road, isFork(job, index), ROOM.w, ROOM.h, took), rng = fr.rng, spec = fr.spec, SPAWN = fr.spawn, EXIT = fr.exit, ex = EXIT.x + EXIT.w / 2;
   // A layout-3 room is its route's size (wider for a leg that runs left to right); the rest are the old 28 by 24.
   const W = fr.w ?? ROOM.w, H = fr.h ?? ROOM.h, MID = W / 2, v3 = !!fr.ways, fork = v3 ? fr.ways!.length > 1 : isFork(job, index);
+  // Layout 4: a fork's roads are only its two branches; the way taken (spec.way) gives the room its fight.
+  const v4 = job.layout === 4, fight = v4 ? undefined : road;
   const ways = (fr.ways ?? []).map((q) => ({ x: q.area.x + q.area.w / 2, y: q.area.y + q.area.h / 2 }));
   const clearOfWays = (x: number, y: number, r: number) => (v3 ? ways.every((p) => Math.hypot(x - p.x, y - p.y) > r + 2.4) : Math.hypot(x - ex, y - 0.5) > r + 2.4);
   const rounds: Round[] = [], blocks: Block[] = [], spots: Spot[] = [], guard: Spot[] = [];
@@ -91,7 +99,7 @@ export function planRoom(job: Job, index: number, road?: RoadId, taken?: Record<
     return null;
   };
   // A fork's two ways out, kept clear; the room's water and what it keeps clear.
-  const roads: Road[] | undefined = !fork ? undefined : v3 ? fr.ways!.map((q) => ({ road: q.road!, label: ROADS[q.road!].label, area: q.area, side: q.port.side })) : (['high', 'low'] as RoadId[]).map((r, i) => ({ road: r, label: ROADS[r].label, area: { x: i ? W - 5 : 3, y: 0, w: 2, h: 0.9 } }));
+  const roads: Road[] | undefined = !fork ? undefined : v3 ? fr.ways!.map((q) => name4({ road: q.road!, label: ROADS[q.road!].label, area: q.area, side: q.port.side, ...(q.port.way ? { way: q.port.way } : {}) })) : (['high', 'low'] as RoadId[]).map((r, i) => ({ road: r, label: ROADS[r].label, area: { x: i ? W - 5 : 3, y: 0, w: 2, h: 0.9 } }));
   for (const r of roads ?? []) spots.push(v3 ? { x: r.area.x + r.area.w / 2, y: r.area.y + r.area.h / 2, r: 1.4 } : { x: r.area.x + 1, y: 0.8, r: 1.4 });
   // A side way (layout 3): its gap kept clear, nothing put down in front of it.
   const side = spec && v3 ? sideBlock(spec, W, H) : null;
@@ -110,7 +118,7 @@ export function planRoom(job: Job, index: number, road?: RoadId, taken?: Record<
   const hits = (a: { x: number; y: number; w: number; h: number }) => guard.some((g) => g.x > a.x - g.r - 0.6 && g.x < a.x + a.w + g.r + 0.6 && g.y > a.y - g.r - 0.6 && g.y < a.y + a.h + g.r + 0.6);
   // Raised ground: always on the high road, sometimes elsewhere; archers up on it. Never over the way out, nor a heart's landmarks.
   const foes: Foe[] = [], ledges: Ledge[] = [], onLedge = new Set<Spot>();
-  if (v3 && spec && !spec.heart) raise3({ rng, spec, road, obj, fork, index, W, H, spine: fr.spine!, water: fr.water, keepOff: [SPAWN, ...ways, ...(side ? [doorAt(side)] : [])], spots, onLedge, foes, ledges });
+  if (v3 && spec && !spec.heart) raise3({ rng, spec, road: fight, obj, fork, index, W, H, spine: fr.spine!, water: fr.water, keepOff: [SPAWN, ...ways, ...(side ? [doorAt(side)] : [])], spots, onLedge, foes, ledges });
   else if (!fork && obj !== 'burn' && (road === 'high' || (road !== 'low' && index >= 1 && rng.next() < 0.4))) {
     const big = road === 'high', lh = big ? 4.2 : 3.4;
     let lw = big ? 7.5 : 6.5, left = rng.next() < 0.5;
@@ -132,14 +140,16 @@ export function planRoom(job: Job, index: number, road?: RoadId, taken?: Record<
     }
   }
   // The objective first (it must fit), then the place itself, round the ways in and out, the raised ground, the water and the job's spots.
-  const props = objectives({ obj, road, ledges: ledges.length > 0, spot, free, spots, blocks, props: [], W, H, MID, guarded: (x, y, r) => !hits({ x: x - r, y: y - r, w: r * 2, h: r * 2 }) });
+  const props = objectives({ obj, road: fight, ledges: ledges.length > 0, spot, free, spots, blocks, props: [], W, H, MID, guarded: (x, y, r) => !hits({ x: x - r, y: y - r, w: r * 2, h: r * 2 }) });
   site = layOut(job, index, ground, [...(roads ? roads.map((r) => r.area) : [EXIT]), ...(side ? [side] : [])], ledges.flatMap((l) => [l, ...l.ramps]), spots.filter((q) => !onLedge.has(q)), SPAWN, routed);
   blocks.push(...site.blocks), rounds.push(...site.rounds), props.push(...site.props);
   // Goblins: a routed room's set piece, or an old room's fires and its heap of the dead. The first room
   // is all small ones; butchers come deeper in.
   const ruin = job.place.ruin, dead: Npc[] = [], braziers: GameMap['braziers'] = [], grim: Grim[] = [], sleepers: { x: number; y: number }[] = [], marks: GameMap['marks'] = [];
-  const n = Math.max(2, Math.min(10, 4 + ruin + index + (road === 'low' ? 2 : road === 'high' ? -2 : 0)));
+  const n = Math.max(v4 ? 1 : 2, Math.min(v4 ? 13 : 10, 4 + ruin + index + (fight === 'low' ? 2 : fight === 'high' ? -2 : 0) + wayMore(spec)));
   const lay: Lay = { rng, W, H, kind, n, spot, free, claim: (x, y, r) => void spots.push({ x, y, r }), foes, dead, braziers, props, blocks, rounds, marks, grim, sleepers, spine: fr.spine, river: fr.river };
+  if (v4 && spec) Object.assign(lay, { out: spec.heart ? undefined : edgePt(spec.outs![0], W, H), chests: [], flocks: [], oil: [], plot: fr.spine && plotter({ rng, W, H, spine: fr.spine, keepOff: [SPAWN, ...ways], blocks, rounds: [rounds, site.rounds], water: fr.water, spots }) });
+  if (v4 && spec && !spec.heart) ensure4(spec, blocks, lay.plot);
   const fires = spec ? setPiece(lay, spec.piece) : oldBands(lay);
   // Not every small goblin is the same: spear-lungers (roll out of the line), brutes (big, slow blows
   // to parry or dodge) and shield-bearers (hit them from behind, or hard). More of them deeper in.
@@ -159,7 +169,7 @@ export function planRoom(job: Job, index: number, road?: RoadId, taken?: Record<
   if (!spec) rollBackline(foes, job, index);
   // Chests: sometimes one in a room, always one in the last; on a deep job, a chained one by the named butcher.
   const chests: RoomPlan['chests'] = [];
-  if (final || rng.next() < 0.4) {
+  if ((final || rng.next() < 0.4) && spec?.way !== 'quiet') {
     const c = spot(0.6, 2.5, H - 5);
     if (c) chests.push(c);
   }
@@ -175,12 +185,12 @@ export function planRoom(job: Job, index: number, road?: RoadId, taken?: Record<
   // Lit for the job's hour (shared/timeofday.ts), as the place it is (an approach room, as its country):
   // broad day, a misty dawn, a long dusk, or night; a routed job's weather over it (shared/weather.ts).
   const lit: PlaceKind = spec && !spec.heart ? spec.palette.light : kind;
-  const theme: Theme = lightFor(THEMES[lit], lit, timeOf(job));
+  const theme: Theme = light4(lightFor(THEMES[lit], lit, timeOf(job)), v4 ? spec : null);
   const gaps = [EXIT, ...(roads ?? []).map((r) => r.area)].filter((a) => !v3 || a.y < 1);
   const torchAt = [{ x: 4.5, y: -1.6 }, { x: MID - 4, y: -1.6 }, { x: MID + 4, y: -1.6 }, { x: W - 4.5, y: -1.6 }];
   const map: GameMap = {
     name: job.place.name.toUpperCase(), w: W, h: H, wallFace: 3, rounds, blocks, braziers,
-    torches: TORCHES[lit] ? (spec ? torchAt.filter((t) => gaps.every((a) => Math.abs(t.x - (a.x + a.w / 2)) > 2.2)) : torchAt) : [], hero: { ...SPAWN }, exit: roads ? null : { ...EXIT }, theme,
+    torches: torches4(v4 ? spec : null, TORCHES[lit]) ? (spec ? torchAt.filter((t) => gaps.every((a) => Math.abs(t.x - (a.x + a.w / 2)) > 2.2)) : torchAt) : [], hero: { ...SPAWN }, exit: roads ? null : { ...EXIT }, theme,
     ledges: ledges.length ? ledges : undefined, roads, npcs: dead.length ? dead : undefined, water: water.length ? water : undefined,
     marks: spill.length ? spill : undefined,
   };
@@ -189,6 +199,7 @@ export function planRoom(job: Job, index: number, road?: RoadId, taken?: Record<
   if (grim.length) map.grim = grim;
   // Crows on the dead (sim/crows.ts): a layout-3 room's own roll.
   if (v3 && crowsOn(job, index, dead).length) map.flocks = crowsOn(job, index, dead);
+  if (v4 && spec && !spec.heart) finish4(lay, spec, map, chests, dead, spot), lay.flocks?.length && (map.flocks = [...(map.flocks ?? []), ...lay.flocks]);
   if (sleepers.length) map.sleepers = sleepers;
   if (spec) map.theme = weatherAt(job, index, map.theme);
   if (v3) keepReachable(map, foes, chests, props, (r) => spot(r, 1.5, H - 2));

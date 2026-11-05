@@ -97,7 +97,7 @@ function frame3Of(job: Job, index: number, took: string): Frame {
 }
 
 export function frameFor(job: Job, index: number, road: string | undefined, fork: boolean, W: number, H: number, took3 = ''): Frame {
-  if (job.layout === 3) return frame3Of(job, index, took3);
+  if (job.layout === 3 || job.layout === 4) return frame3Of(job, index, took3);
   if (job.layout !== 2) return oldFrame(job, index, W, H);
   const spec = routeOf(job)[index], took = road === 'high' ? 'h' : road === 'low' ? 'l' : '', seed = roomSeed(job, index, took), geo = new Rng(seed + 11), M = W / 2;
   const inX = spec.heart && road ? (road === 'high' ? 6 : 22) : spec.inX, outX = spec.outX;

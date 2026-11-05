@@ -11,6 +11,19 @@ says "Online this month: 12,300 of 500,000", and when the month is used up every
 plays on alone, a job in progress included. Numbers in DECISIONS 2026-11-04 ("Redis on a budget"). Open:
 the two new lines through the lore keeper and line editor; whether a hop lands beside the leader on Vercel
 (the relay's join lines say which instance each socket landed on).
+**Layout 4: forks you can tell apart, staged scenes, the rest of the rooms** (Claude Opus 5.5, 2026-11-04; Kyle:
+"more scenarios and map elements ... choices between screens, more than just high road, low road"). Built;
+waiting on Kyle's play. *Done when* on a medium or long job, phone and laptop, flat and 2.5D, Kyle comes to a
+fork and sees two different words over its ways before he's cleared it (SMOKE, CRIES, CROWS, DRUMS, QUIET, THE
+FORD, WEBS), each with its cue past the gap (smoke rolling up, crows wheeling, firelight and drums, water,
+webs), the goal line saying what each pays; goes down one into a different kind of room with that scene (a
+house the torch-bearers are getting going with someone crying inside; prisoners roped and led off for the far
+way out; a war band in its stakes with a drummer and a chest; the column's dead under crows; archers over a
+ford); and the recap's WAY row says what it paid. Across a long job no two rooms are the same kind, layout,
+landmark or scene, and he meets the dragged body, the patrol, the hanging tree, the fallen tree and the well's
+cache, and the new rooms (deep wood, glade, reed bed, flooded drift, collapse, chamber, cave, stackyard,
+watermill, orchard, churchyard, barrows). Shots: `node scripts/variety-look.cjs`. Open: every new word through
+the lore keeper and line editor (DECISIONS 2026-11-04, layout 4); the numbers once he's played.
 
 **Weather changes the fight** (Claude Opus 5.5, 2026-11-04; Kyle: "Let's do some weather and forget about wind
 affecting shots for now"). Built; waiting on Kyle's play. *Done when* each job on the board shows its sky
@@ -459,9 +472,16 @@ and burns out a goblin den on a job.
       a side through a lit gap with torches, starts the next at its other side, the gold arrow and WAY ON: EAST
       agree; picks a road and comes into the next room from the side; goes through a side way into a glade and
       back out; walks from the fields through the wood's edge into the carr. Shots: `node scripts/terrain-look.cjs`.
-- [ ] Next: a side room with two ways back; the vignettes below; art for the headframe, headstones and a punt;
-      the side way names and "1 more in the houses" through the lore keeper and line editor.
-- [ ] Vignettes needing new behaviour: burning a house, dragging a body, prisoners led off, the patrol.
+- [x] Layout 4 (2026-11-04, Claude Opus 5.5; DECISIONS): forks whose two ways are different kinds of room you can
+      tell apart (a word and a cue at each gap) and pay differently; the vignettes with new behaviour (burning a
+      house with someone inside, dragging a body, prisoners led off, the patrol) and the hanging tree, the fallen
+      tree, the well's cache, the wrecked cart's oil; the rest of slice 4's rooms (deep wood, glade, reed bed,
+      flooded, collapse, chamber, cave, stackyard, mill, orchard, churchyard, barrows) with their light; the
+      headframe, logs, mill and wheel, stakes, hanging tree, headstones and apple trees in both views from one
+      list; no room kind, layout, landmark or scene twice on a job; the next day's approach never the same.
+- [ ] Next: a side room with two ways back; a punt; the building engine and the wreck side task; the side way names,
+      "1 more in the houses" and layout 4's words through the lore keeper and line editor.
+- [ ] Layout 4's scenes on the big map (expeditions still use layout 3's seven).
 
 ## Expeditions: THE BARROWFIELDS (Kyle 2026-11-04, "similar to Helldivers"; Claude Opus 5.5)
 

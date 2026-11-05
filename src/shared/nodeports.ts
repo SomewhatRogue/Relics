@@ -18,13 +18,17 @@ export const SKIN_OF: Record<Country, Skin> = { village: 'fields', fields: 'fiel
 export type Transition = 'woodedge' | 'coppice' | 'causeway' | 'fenford' | 'carredge' | 'villageend' | 'oreroad' | 'minehead' | 'outfall';
 export type Mixed = 'burntfarm' | 'chapelfields' | 'campvillage' | 'hamletmine';
 export type DeadEnd = 'glade' | 'pens' | 'orechamber' | 'cave';
-export type RouteNode = ApproachNode | Transition | Mixed;
+/** Layout 4's rooms (shared/nodes4.ts): the rest of the vocabulary, each with its own plan, pieces and light. */
+export type Node4 = 'deepwood' | 'glade' | 'reedbed' | 'flooded' | 'collapse' | 'cave' | 'orechamber' | 'churchyard' | 'mill' | 'orchard' | 'stackyard' | 'barrows';
+export type RouteNode = ApproachNode | Transition | Mixed | Node4;
 
-export const LAYOUTS3: Record<Transition | Mixed | DeadEnd, string[]> = {
+export const LAYOUTS3: Record<Transition | Mixed | DeadEnd | Node4, string[]> = {
   woodedge: ['stile', 'ride', 'slope'], coppice: ['rows', 'ride'], causeway: ['straight', 'dogleg', 'broken'], fenford: ['spread', 'islands'],
   carredge: ['willows', 'pools'], villageend: ['row', 'green'], oreroad: ['spoil', 'cutting'], minehead: ['left', 'right'], outfall: ['grate', 'broken'],
   burntfarm: ['steading', 'byre'], chapelfields: ['nave', 'yard'], campvillage: ['street', 'square'], hamletmine: ['shelf', 'row'],
   glade: ['spring', 'ring'], pens: ['fold', 'cages'], orechamber: ['pillars', 'heaps'], cave: ['pool', 'winding'],
+  deepwood: ['narrow', 'rise'], reedbed: ['channels', 'pools'], flooded: ['drift', 'sump'], collapse: ['squeeze', 'fall'], churchyard: ['back', 'aside'],
+  mill: ['wheelleft', 'wheelright'], orchard: ['rows', 'overgrown'], stackyard: ['ricks', 'rickyard'], barrows: ['mounds', 'stones'],
 };
 
 /** The transitions between two countries (either way, but for the ones that only go in: the adit, the outfall). */
@@ -59,6 +63,8 @@ export const PORTS: Record<RouteNode, PortRule> = {
   track: 'any', crossroads: 'any', clearing: 'any', woodpath: 'any', ford: 'straight', strips: 'north', lane: 'north', yard: 'north',
   woodedge: 'any', coppice: 'any', causeway: 'straight', fenford: 'straight', carredge: 'any', villageend: 'north', oreroad: 'any', minehead: 'outnorth', outfall: 'outnorth',
   burntfarm: 'any', chapelfields: 'any', campvillage: 'north', hamletmine: 'outnorth',
+  deepwood: 'any', glade: 'any', reedbed: 'any', flooded: 'straight', collapse: 'straight', cave: 'any', orechamber: 'any', churchyard: 'any',
+  mill: 'any', orchard: 'any', stackyard: 'any', barrows: 'any',
 };
 /** Rooms that can be a fork (two ways on, on different sides). */
 export const FORKS: RouteNode[] = ['track', 'crossroads', 'clearing', 'woodpath', 'woodedge', 'oreroad', 'burntfarm', 'chapelfields', 'carredge'];

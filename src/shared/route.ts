@@ -12,6 +12,7 @@
  */
 import type { Job } from './jobs.js';
 import type { Cache, Country, DeadEnd, RouteNode } from './nodeports.js';
+import type { WayKind } from './ways.js';
 import type { Port } from './ports.js';
 import { HEART_SOIL, HEART_VARIANTS, LANDMARKS, LAYOUTS, PALETTES, PIECES, PIECES_IN, POOL, signatureOf, skinsFor, type ApproachNode, type Landmark, type NodeId, type Palette, type Piece, type Skin } from './nodes.js';
 import { Rng } from './rng.js';
@@ -42,7 +43,9 @@ export interface RoomSpec {
   w?: number;
   h?: number;
   in?: Port;
-  outs?: (Port & { road?: 'high' | 'low' })[];
+  outs?: (Port & { road?: 'high' | 'low'; way?: WayKind })[];
+  /** Layout 4: the way at the fork that led into this room (its scene, its goblins, its pay: shared/ways.ts). */
+  way?: WayKind;
   country?: Country;
   from?: Skin;
   fromCountry?: Country;
@@ -77,7 +80,7 @@ const memo = new Map<string, RoomSpec[]>();
  * (shared/routeports.ts): `took` picks the road at its fork ("h" or "l"; before it, either).
  */
 export function routeOf(job: Job, took = ''): RoomSpec[] {
-  if (job.layout === 3) return route3(job, took);
+  if (job.layout === 3 || job.layout === 4) return route3(job, took);
   const key = `${job.seed}|${job.place.name}|${job.rooms}|${job.objective}`;
   const had = memo.get(key);
   if (had) return had;

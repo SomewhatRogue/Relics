@@ -1,4 +1,5 @@
 /** Enemies' turns: the goblin butcher, goblin scrappers, and the two training dummies. */
+import { stepTask } from './tasks';
 import { blinded, stumble } from './rangershots';
 import { lure, seenFrom } from './lantern';
 import { visible } from './flasks';
@@ -219,6 +220,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     }
     return;
   }
+  // Busy at something when you came in (layout 4: sim/tasks.ts): a torch to a wall, the prisoners' rope, a round, a body.
+  if (e.task && stepTask(e, heroes, now, dt, ev, () => notice(e, heroes, others, now, ev))) return;
   if (e.alert === false && e.feeding) {
     if (!notice(e, heroes, others, now, ev)) return;
     e.feeding = false;

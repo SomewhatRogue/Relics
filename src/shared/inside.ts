@@ -27,7 +27,9 @@ export function runInterior(job: Job, roomIndex: number, blockIndex: number, doo
   // A side way's dead end (layout 3) is planned from its door, not a house's seed.
   if (door.startsWith('side:')) return sideRoom(job, roomIndex, door);
   const seed = houseSeed(job, roomIndex, blockIndex), home = house(seed, door), rng = new Rng(seed);
-  const ruin = job.place.ruin, barn = door === 'barn', end = fate(job, roomIndex, seed), g = grimness(job, roomIndex);
+  // A house being burned with someone in it (layout 4, shared/scenes4.ts): standing, and they're in there.
+  const held = door.endsWith(':held');
+  const ruin = job.place.ruin, barn = door === 'barn', end = held ? 'standing' : fate(job, roomIndex, seed), g = grimness(job, roomIndex);
   let l = LAYOUTS[big(job, roomIndex, seed) ? bigKind(seed, door) : home.kind](rng);
   if (rng.next() < 0.5) l = mirror(l);
   const { w, h } = l, props = [...l.props], foes: Foe[] = [], npcs: Npc[] = [], sleepers: P[] = [], marks: Mark[] = [];
@@ -38,7 +40,7 @@ export function runInterior(job: Job, roomIndex: number, blockIndex: number, doo
     if (s) l.blocks.push({ kind: 'rubble', x: s.x - 0.9, y: s.y - 0.5, w: 1.8, h: 1 }), marks.push({ kind: 'debris', x: s.x - 1.6, y: s.y + 0.4, w: 3.2, h: 1.4 });
   }
   // Someone caged, tucked away: always on a rescue, sometimes otherwise.
-  const cage = job.objective === 'rescue' || rng.next() < (barn ? 0.4 : 0.3) ? l.hide : undefined;
+  const cage = held || job.objective === 'rescue' || rng.next() < (barn ? 0.4 : 0.3) ? l.hide : undefined;
   if (cage) props.push({ kind: 'cage', ...cage });
   // Who's in (nobody, in a house on fire). A looted house often has its dead still in it, and goblins at them.
   const roll = fire ? 0.3 : rng.next(), body = !fire && (home.kind === 'looted' ? rng.next() < 0.7 : rng.next() < 0.2 + g * 0.05);

@@ -489,6 +489,9 @@ export interface Enemy extends Body {
   crackUntil?: number;
   crackAt?: number;
   cracked?: boolean;
+  /** Layout 4 (sim/tasks.ts): what it's busy at till it sees you, and the body it's hauling (where that lies). */
+  task?: import('../shared/scenes4').FoeTask;
+  haul?: { x: number; y: number };
 }
 
 /** How a goblin died: fell, lost its head, burst apart, burned, or shattered. */
@@ -523,6 +526,9 @@ export interface Survivor extends Body {
   gone: boolean;
   /** A false prisoner (sim/falsecage.ts): the room time it tears open. Never counted as freed. */
   tearAt?: number;
+  /** Led off on a rope (layout 4, sim/scenes.ts): how far along the room's led path; taken off out of the room for good. */
+  led?: { s: number };
+  taken?: boolean;
 }
 
 /** A barrel, crate, table or broken piece: a body that can be smashed, pushed, lifted and thrown. */
@@ -593,7 +599,7 @@ export type FightEvent =
   /** The newer sorts (sim/ownfoes.ts): a banner down and the goblins it routs; a net (who's in it, a struggle, cut out, free); a thief's grab, its loot back, gone. */
   /** A storm (sim/storm.ts): a strike's circle shown (the crackle), and the strike landing (the flash, the thunder after). */
   | { k: 'strikewarn' | 'strike'; x: number; y: number }
-  | { k: 'bannerfall' | 'routed' | 'struggle' | 'recovered' | 'escaped' | 'rooffall' | 'whip' | 'scatter' | 'howl' | 'dig' | 'surface' | 'unearthed' | 'slick' | 'oilwarn' | 'oilup' | 'crows' | 'listen'; x: number; y: number }
+  | { k: 'bannerfall' | 'routed' | 'struggle' | 'recovered' | 'escaped' | 'rooffall' | 'whip' | 'scatter' | 'howl' | 'dig' | 'surface' | 'unearthed' | 'slick' | 'oilwarn' | 'oilup' | 'crows' | 'listen' | 'ledoff' | 'pulled'; x: number; y: number }
   | { k: 'netted' | 'netfree'; x: number; y: number; id: string }
   /** A pack rush winding up (`n` goblins, `id` the hero it's on), and one parry that answered `n` of its blows
    *  (both at the fan's middle);

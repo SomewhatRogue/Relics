@@ -395,6 +395,87 @@ fight with the hero turning; two packs go after two different heroes; the same f
 plated and a perfect breaking it; a parry of its blow breaking it; half the burn; from the second room on
 and not in every room). Shots: `node scripts/rush-look.cjs [url] [dir]` (the rush winding up, the parry
 on all of them, an ironhide whole and broken; phone and laptop, flat and 2.5D).
+## 2026-11-04: layout 4: forks you can tell apart, staged scenes, the rest of the rooms, no repeats (Kyle; Claude Opus 5.5)
+
+Kyle: "We still need more scenarios and map elements, seeds etc. I want better diversity and interesting map
+types, and choices between screens, more than just high road, low road." And earlier: scenes "can be staged,
+or you arrive as a scene is occurring". New jobs carry **`layout: 4`**; a saved layout-3 job plans exactly as
+before (a new pin, `tests/layout3pin.test.ts`, taken before any of this), layout 2 as before.
+
+- **Forks you can tell apart** (`shared/ways.ts`, `route4.ts`): each way out of a fork has a word over its gap,
+  lit from the start, and a cue past it in both views (`client/waycues.ts`): SMOKE (smoke rolling up), CRIES
+  (heard as you come near), CROWS (wheeling over), DRUMS (firelight and the drum's ripple, heard), QUIET (a few
+  moths), THE FORD (water catching the light), WEBS (webs across the gap). The two ways are always two different
+  kinds of room with different scenes; each road's room is one of its way's rooms with its way's scene. The fork's
+  goal line says each way and what it pays. What it pays is worked out from the job and the roads taken
+  (`shared/waypay.ts`), so every player is paid the same, and the recap has a WAY row:
+
+  | Way | The room | Goblins | Pays |
+  |---|---|---|---|
+  | SMOKE | a house the torch-bearers are burning, someone caged inside | as usual | +15% of the job's pay for each one brought out of that room |
+  | CRIES | prisoners led off for the far way out between two guards | 1 fewer | +15% for each one brought out |
+  | CROWS | the column's dead, crows on them, a chest | as usual | a chest, +1 treasure |
+  | DRUMS | a war band in a ring of stakes round a long fire, a drummer, a chest | 3 more | +25%, a chest, +1 treasure |
+  | QUIET | goblins asleep, no chest | 3 fewer | 20% less |
+  | THE FORD | a river (or a flooded drift): archers on the far bank behind hurdles | 1 fewer | +15% |
+  | WEBS | two spider nests, a chest among them | 2 fewer | a chest, +1 treasure |
+
+  HIGH and LOW are still the run's two branch names (`run.roads`), so nothing new is sent; on layout 4 they no
+  longer bring the high road's ledge or the low road's cage: the way does.
+- **Scenes you walk in on** (`shared/scenes4.ts`, `scenes4b.ts`; rules `sim/scenes.ts`; goblins' work
+  `sim/tasks.ts`; numbers `shared/scenetune.ts` as `SCENE`). Each is mid-way when the room begins:
+  - *Burning a house*: two torch-bearers (the existing sort) at a cottage's side walls (one is put up by the
+    track if the room has none), someone caged inside (its door is `cottage:held`, so its inside always has
+    the cage and stands). The ring at its woodpile is how far it has caught: a third when you come in, full in
+    13 s more of a torch-bearer at it, and then it's alight (the house fire, the cries from inside, the goblins
+    driven out, as before). Kill them or come within 2.6 tiles and they stop. Once it burns, stand still at its
+    door 1.6 s (a green ring) and you pull the one inside out, alight and hurt; the roof coming in costs the
+    pay as any lost to fire did. The goal line says so while someone's in there.
+  - *Prisoners led off*: two or three roped together walking the room's length for the way on at 0.8 tiles a
+    second, a guard in front and one behind. Only in a room you cross straight (in one side, out the other).
+    Come within 2.6 of a guard or hit it and it stops to fight; with no guard driving them, they stand. Kill
+    both and they're freed: bring them out like anyone freed. Reach the way out and they're gone, with their
+    guards (LOST: n led off in the recap).
+  - *Dragging a body*: two hauling one of the dead along to their fire, a red trail behind it; they drop it and
+    turn when they see you. The body lies where they got it to (drawn from the goblin's `haul`).
+  - *The patrol*: three walking a round of four points that crosses the track, as any goblin at rest sees.
+  - *The hanging tree*: a big old tree, two hung by the ankles from its limb (the larder rule), blood under them,
+    crows; their fire beyond. Not underground or on the bare rock.
+  - *A fallen tree*: a trunk across the track, the way round its short end kept clear (checked walkable when it's
+    put down), two crouched behind it.
+  - *The well*: a well with its cache hauled up on the rope and left at its lip (a chest), two at it.
+  - *The wrecked cart* (layout 3's) now spills its oil under it on layout 4 (a slick from the start: a fire
+    trap) with two of them at it.
+- **The rest of the rooms** (slice 4's list): deep wood, glade, reed bed (`sitewood4.ts`); flooded drift,
+  collapse, worked-out chamber, cave (`siteunder4.ts`); stackyard, watermill, orchard (`sitefarm4.ts`);
+  churchyard, barrows (`sitechurch.ts`), each with two layouts, its water (`water4.ts`) and its own light
+  (`nodes4.ts NODE_LIGHT`: the deep wood at 0.6 of the wood's light and little moon, the cave at half and no
+  torches, the churchyard and the barrows under a bigger moon). Woodedge, coppice, causeway and the mine head
+  were already built as transitions; a layout-4 mine head has the headframe. A mill, a churchyard and a mine head
+  always show their mill, church and headframe (put down beside the track, growth cleared, if the plan found no
+  room by its water: `room4.ts ensure4`). The sewers under Wickhold take only
+  the drift and the collapse (no caves under the town).
+- **New pieces, one source for both views** (`client/pieces.ts`): the headframe, a fallen log, the mill and its
+  wheel, a fence of sharpened stakes, the hanging tree, headstones, apple trees, each a list of boxes; the flat
+  view paints it in three-quarter view (`piecedraw.ts`), the 2.5D view builds the same boxes (`three/pieces3d.ts`).
+  The log and the stakes are wood: they smash and burn.
+- **No repeats**: on a layout-4 job no two rooms on a path share a room kind (layout 3 only said not twice running),
+  a layout, a landmark or a scene, and a well's cache counts as the job's well. The next day's job to the same
+  place never has the same approach room for room: the route rolls again if it would (it looks at the day
+  before's board, from the job's id).
+- **Seeds**: all of it from the route's stream and the room's seed, as layout 3; the scenes' goblins carry their
+  work (`task`) and the prisoners' rope is on the map, so a friend's game draws the same. Tests:
+  `tests/variety.test.ts` (forks, pay and recap, no repeats, the next day, a cloned job, walkability of every new
+  room and scene, a layout-4 pin), `tests/scenes4.test.ts` (each scene sets up; prisoners led off unless stopped;
+  freed when the guards die; the house catches unless stopped; pulled out of the door; the patrol; the haul).
+  Shots: `node scripts/variety-look.cjs` (targets from `npx tsx scripts/variety/find.ts`).
+- **Open for the lore keeper and line editor** (not run here: this session couldn't call them): the seven words,
+  their seven goal lines and "Pick a way, together", "Someone's inside the burning house. Stand at its door to
+  pull them out", the recap's WAY row and its lines ("DRUMS: +25% pay, +1 treasure", "SMOKE: 1 saved, +15% pay",
+  "nothing more"), "n led off". New lore to record or reject: the valley churchyard (its belfry empty like the
+  rest), the barrows, the hanging tree as the hungry's larder tree, the watermill in Barrowfields.
+- **Open for Kyle**: the numbers above once he's played (the pay, how far along the house is, how fast the
+  prisoners walk); whether QUIET should also be a shorter way (it's a calmer room, not fewer rooms).
 
 ## 2026-11-04: the element is the Mage's spellbook; switching gets its own button; GRASP (Kyle; Claude Opus 5.5)
 

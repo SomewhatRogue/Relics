@@ -84,7 +84,11 @@ export const HEART_VARIANTS = 3;
  * A room's set piece (docs 4, slice 1b: the ones whose goblins' part already exists). `bridge` only
  * comes with the ford's broken bridge.
  */
-export type Piece = 'fire' | 'dead' | 'feast' | 'asleep' | 'cart' | 'wreck' | 'column' | 'bridge';
+export type Piece = 'fire' | 'dead' | 'feast' | 'asleep' | 'cart' | 'wreck' | 'column' | 'bridge'
+  // Layout 4's scenes (shared/scenes4.ts, scenes4b.ts): goblins burning a house, dragging a body,
+  // prisoners led off, a patrol, the hanging tree, a fallen tree, the well's cache, and the forks' ways
+  // (a war band's drums, spider nests, the ford under archers).
+  | 'burning' | 'drag' | 'prisoners' | 'patrol' | 'hanging' | 'fallen' | 'cache' | 'drums' | 'webs' | 'wading';
 export const PIECES: Piece[] = ['fire', 'dead', 'feast', 'asleep', 'cart', 'wreck', 'column'];
 /** Which set pieces each skin can hold (no carts underground). */
 export const PIECES_IN: Record<Skin, Piece[]> = {

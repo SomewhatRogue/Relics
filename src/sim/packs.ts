@@ -21,7 +21,7 @@ export function scalePacks(foes: Foe[], party: number, seed: number, fodder = EN
   if (party <= 1) return foes;
   const rng = new Rng(seed), extra: Foe[] = [], packs = [...new Set(foes.filter((f) => f.pack !== undefined).map((f) => f.pack!))];
   for (const id of packs) {
-    const mine = foes.filter((f) => f.pack === id), small = mine.filter((f) => !isSpecial(f) && !f.name && f.kind === 'scrapper');
+    const mine = foes.filter((f) => f.pack === id), small = mine.filter((f) => !isSpecial(f) && !f.name && f.kind === 'scrapper' && !f.task);
     const more = Math.round(small.length * fodder * (party - 1));
     for (let i = 0; i < more; i++) {
       const f = small[i % small.length], a = i * 2.4 + rng.range(-0.3, 0.3);

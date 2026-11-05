@@ -70,7 +70,7 @@ function weather3(job: Job, index: number): Weather {
 
 /** The weather in one room of the job (none indoors or underground). */
 export function weatherIn(job: Job, index: number): Weather {
-  if (job.layout === 3) return weather3(job, index);
+  if (job.layout === 3 || job.layout === 4) return weather3(job, index);
   const spec = routeOf(job)[index], under = spec.heart ? job.place.kind === 'mine' : spec.skin === 'under';
   if (under) return { rain: 0, storm: 0, fog: 0 };
   const { pattern, peak, start } = patternOf(job), d = Math.abs(index - peak);

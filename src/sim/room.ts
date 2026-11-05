@@ -59,6 +59,7 @@ import { burstMult, healOf, healReach, perfectMult, smiteStun } from './knacks';
 import { stepNests } from './spiders';
 import { startTorch, stepTorch } from './torch';
 import { startKindle, stepKindle } from './kindle';
+import { initScenes, stepScenes } from './scenes';
 import { stepHouseFires, type HouseFire, type Indoors } from './houseburn';
 import { stepPoison } from './poison';
 import { stepPuddles } from './puddles';
@@ -178,6 +179,8 @@ export class ArenaRoom {
     this.map = opts.map ?? ARENA;
     this.crows = newFlocks(this.map.flocks);
     useMap(this.map);
+    // Layout 4's scenes: prisoners on their rope, a wrecked cart's oil (sim/scenes.ts).
+    if (this.map.led || this.map.oil) this.slicks = initScenes(this.map, this.survivors, this.time);
     this.squire = !!opts.squire;
     if (opts.foes) {
       opts.foes.forEach((f, i) => {
@@ -187,6 +190,8 @@ export class ArenaRoom {
         packOnto(e, f);
         shapeFoe(e);
         Object.assign(e, { respawns: false, name: f.name, bow: f.bow, z: f.z ?? 0, alert: f.awake ?? false, feeding: f.feeding });
+        if (f.task) e.task = structuredClone(f.task);
+        if (f.haul) e.haul = { ...f.haul };
         if (f.wave) e.wave = f.wave;
         // At the dead: facing the body it's eating.
         const body = f.feeding ? (this.map.npcs ?? []).filter((n) => n.pose === 'corpse').sort((a, b) => Math.hypot(a.x - e.x, a.y - e.y) - Math.hypot(b.x - e.x, b.y - e.y))[0] : undefined;
@@ -350,6 +355,7 @@ export class ArenaRoom {
     // A nest set alight up close burns out (sim/torch.ts), and hatches nothing while it burns.
     stepTorch(this.enemies, this.heroes, this.time, TICK, this.events);
     stepKindle(this.map, this.heroes, this.time, TICK, this.events);
+    stepScenes(this.map, w, TICK);
     stepNests(this.enemies, this.heroes, this.time, this.events, (x, y) => this.spawn('spider', x, y));
     this.puddles = stepPuddles(this.puddles, this.heroes, this.time, TICK, this.events);
     stepPoison(this.heroes, this.time, this.events);

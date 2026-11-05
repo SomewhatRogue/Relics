@@ -18,6 +18,7 @@ import type { Lerp } from './actors3d';
 import { BOXFIGS } from './look';
 import { ROWS, boardRows } from '../voteboards';
 import { WALL_H } from './ground';
+import { cueAt, drawCue, drawWayWord } from '../waycues';
 
 export type Proj = (x: number, y: number, z: number) => [number, number];
 export interface Marks { marks: Target[]; doors: DoorMark[]; pointTo: { x: number; y: number } | null; focus?: { x: number; y: number } | null; fanfare?: boolean }
@@ -144,9 +145,15 @@ export class Overlay {
       const [x, y] = P(d.x, 2.2, d.y);
       d.who.forEach((w, i) => drawText(g, w.name.toUpperCase(), Math.round(x - textWidth(w.name) / 2), Math.round(y - 8 * (i + 1)), '#9ad8a8'));
     }
-    if (room.exitOpen) for (const r of room.map.roads ?? []) {
-      const a = r.area, tw = textWidth(r.label), [x, y] = r.side === 'W' ? P(a.x + a.w + 1.8, 0, a.y + a.h / 2) : r.side === 'E' ? P(a.x - 1.8, 0, a.y + a.h / 2) : P(a.x + a.w / 2, 0, a.y + a.h + 1.2);
-      drawText(g, r.label, Math.round(r.side === 'W' ? x : r.side === 'E' ? x - tw : x - tw / 2), Math.round(y), r.road === 'high' ? '#ffd27a' : '#9fe8ff');
+    for (const r of room.map.roads ?? []) {
+      // Layout 4's ways say what's past them from the start, their cue drawn past the gap (../waycues.ts).
+      if (!room.exitOpen && !r.way) continue;
+      const a = r.area, [x, y] = r.side === 'W' ? P(a.x + a.w + 1.8, 0, a.y + a.h / 2) : r.side === 'E' ? P(a.x - 1.8, 0, a.y + a.h / 2) : P(a.x + a.w / 2, 0, a.y + a.h + 1.2);
+      drawWayWord(g, r, x, y, room.exitOpen);
+      if (r.way) {
+        const q = cueAt(r, room.map), [cx, cy] = P(q.x, q.z + (r.side === 'E' || r.side === 'W' ? 0 : WALL_H * 0.4), q.y);
+        drawCue({ lit: g, glow: g, now, t: room.time }, r.way, cx, cy, a.x + a.y);
+      }
     }
     const me = room.heroes.find((h) => h.id === meId), p = m.pointTo;
     if (me) this.chasing(room, me, P, lerp);
