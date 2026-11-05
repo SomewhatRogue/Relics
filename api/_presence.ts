@@ -1,7 +1,7 @@
 /**
  * Which rooms need the bus. Redis's free plan is 500K commands a month (docs/REALTIME-REDIS-BUDGET.md)
  * and players usually share one instance, so a room's messages go out on the bus only while another
- * instance has players in it too.
+ * instance has players in it too (and then coalesced, _outbox.ts).
  *
  * Instances find each other by saying so, never by trusting PUBLISH's count to close a room: an
  * instance that gets its first player in a room says 'here' at once (and sends everything while the
@@ -12,6 +12,11 @@
 
 /** Say 'here' when nothing else has gone out on the bus for this long. */
 export const HERE_MS = 15_000;
+/**
+ * Alone in a room (no other instance heard), the beat is only a safety net for a newcomer's 'here'
+ * that went missing (their own 'here' is answered at once), so it comes less often.
+ */
+export const ALONE_MS = 60_000;
 /** Another instance heard within this long is still there (two beats can go missing). */
 export const REMOTE_MS = 40_000;
 /** A room just joined: everything goes out this long, while the instances already there answer. */
@@ -46,9 +51,15 @@ export class Presence {
     return was === undefined || now - was > REMOTE_MS;
   }
 
-  /** Another instance's last player went. */
+  /**
+   * Another instance's last player went. The guess from PUBLISH's count ('?') goes too: it may have
+   * been that very instance (a friend who hopped over to the leader's, relay.ts HOPS), which would keep
+   * the room on the bus for nothing for REMOTE_MS. If someone else is still listening, the next count
+   * says so again, and their own 'here' does anyway.
+   */
   away(room: string, origin: string): void {
     this.others.get(room)?.delete(origin);
+    this.others.get(room)?.delete('?');
   }
 
   /** Something went out on the bus; `count` is PUBLISH's reply (this instance included). */
@@ -68,8 +79,8 @@ export class Presence {
     return false;
   }
 
-  /** Rooms that have said nothing on the bus for HERE_MS. */
+  /** Rooms that have said nothing on the bus for HERE_MS (ALONE_MS with no other instance there). */
   due(now: number): string[] {
-    return [...this.spoke].filter(([, t]) => now - t >= HERE_MS).map(([r]) => r);
+    return [...this.spoke].filter(([r, t]) => now - t >= (this.shared(r, now) ? HERE_MS : ALONE_MS)).map(([r]) => r);
   }
 }

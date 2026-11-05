@@ -102,6 +102,18 @@ Test it both ways (see `tests/relay.test.ts`, "the relay spares Redis"): a few s
 one instance must publish only a handful of times, and a friend joining on a second instance must
 still get the hello through, a direct reply, and every following message.
 
+### b2. Bring a split party together (latency: a reconnect, once)
+A room split over two instances can't go below about one PUBLISH per instance a tenth of a second
+while it plays, however it batches: the leader's snapshots have to cross ~10 times a second. Relic
+(Nov 4 2026) tells a friend whose socket landed on another instance than the leader's (`far: 1` on
+the role, or on `hosted`), and the friend's socket reconnects, up to 3 times, swapped like a rotation
+(new socket first, old one closed once the new one talks), to try to land beside the leader. Each try
+is ~8 commands; a party that ends up together then costs Redis nothing as it plays. One trap: an
+instance that has published while the other was still subscribed has PUBLISH's count saying 2, and
+that guess must be dropped when the other says 'away', or it keeps the room on the bus for 40 s.
+Whether Vercel spreads a reconnect over its instances is for the live logs to show (each join logs
+its instance).
+
 ### c. Never send heartbeats through Redis (latency: none)
 Answer application pings at the instance (`{ping:1}` gets `{t:'pong'}` straight back). Liveness
 between players comes from the messages they already send.
@@ -110,8 +122,19 @@ between players comes from the messages they already send.
 Refresh a claim at most every 2 s per room, not per message. Better still: one `SET key val EX ttl`
 that carries both the claim and the last-seen time, rather than SET + EXPIRE (halves that line).
 
+Relic (Nov 4 2026): liveness is judged only by the last-seen time's value, so the claim itself can
+keep a long TTL (15 minutes, one EXPIRE every 5) and only the seen time is written: one SET at most
+every 7/16 of the stale time (3.5 s of 8). The client's heartbeat (4 s) is more than that, so a
+host saying nothing else is written on each beat and is never more than ~4 s old when judged.
+3,600 commands an hour per hosted room became ~1,000.
+
 ### e. Send less to begin with (latency: none, or better)
-- Inputs: send only when they change, plus a slow keepalive (Come Bye!: every 3 s).
+- Inputs: send only when they change, plus a slow keepalive (Come Bye!: every 3 s). A stick or a
+  mouse changes every frame, so "when it changes" is 60 a second: Relic sends a button at once
+  (marked urgent) and the stick and aim at most 10 times a second, rounded to hundredths.
+- Positions others only watch (a town): dead reckoning. Send the velocity with the position, let the
+  others carry the figure on along it, and speak only on a start, a stop, a turn, or half a tile of
+  drift (`src/client/reckon.ts`). Nothing at all with nobody to hear it.
 - Snapshots: ~15 a second with client interpolation feels smooth; 60 a second is 4× the cost for
   little gain. A compact wire format also saves bandwidth (Upstash's 10 GB a month counts payload).
 
@@ -120,16 +143,33 @@ Every PUBLISH that does go out is a round trip. Same region is ~1 ms; across the
 Pick the Upstash region to match the Vercel Functions region (Vercel's default is `iad1`, US East).
 
 ### g. Watch the meter
+- Count every command per instance in memory (Relic: `api/_meter.ts`, a counting decorator on the
+  backend), and add it now and then to a per-month key with one INCRBY that counts itself (at most
+  once a minute, only once 200 have built up or 15 minutes have passed: under 1% of the budget).
+  Read it back from one endpoint (`/api/room?meter=1`) and show it where the owner can see it.
 - Log a per-instance command counter every few minutes (one line, so it shows in runtime logs).
 - The Upstash console shows commands per day; check it after a playtest.
 - If commands start failing with a limit error, degrade: keep delivering locally, log it once, and
-  tell players on other instances the room can't reach them, rather than hanging.
+  tell players on other instances the room can't reach them, rather than hanging. Relic tells every
+  player `{t:'full'}` and closes with 4429; the client stops reconnecting and plays on alone (the
+  town and any job run in that browser), with one line saying so. The relay doesn't try Redis
+  again for 10 minutes.
+- **Count the steady costs, not just play.** Every open tab sits in a shared town: a tab left open
+  (or hidden in a phone's pocket) costs all month. Say nothing with nobody to hear, nothing but
+  the heartbeat while still, and leave the room after a minute hidden or a few minutes idle.
+  HTTP endpoints count too: a "look at the world" every 30 s per player was 15 commands each
+  (a sorted set per stat); keep the answer as one value and cache it per instance.
 
 ## 4. Things that save commands but cost latency (avoid for realtime)
 
 - **Polling** Redis lists or keys as mailboxes: commands on every poll, plus up to one poll
   interval of delay. Pub/sub pushes.
-- **Batching** several messages into one publish: saves commands only by waiting.
+- **Batching** several messages into one publish: saves commands only by waiting. Relic does it
+  anyway once a room is split over instances (`api/_outbox.ts`), because a split party otherwise
+  publishes once per snapshot and per input: at most one PUBLISH per room per instance a tenth of a
+  second, but the first after a quiet spell goes at once (no wait for sparse traffic like the town),
+  and a message marked urgent (a button pressed: `{to, d, u: 1}`) takes the queue with it at once,
+  so a parry is never held. Players on the same instance are delivered to at once, as before.
 - **Dropping the snapshot rate** below ~10 a second: players feel it.
 - **Sticky routing** isn't available on Vercel Functions; don't build on it. Measure how often
   rooms split across instances instead (log the instance id on join).

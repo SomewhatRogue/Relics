@@ -49,6 +49,16 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     step('Ava sees both', (await sees(ava, 'KYLE')) && (await sees(ava, 'SAM')));
     await sam.ctx.close();
     step('Sam closes the tab: gone for Kyle', await kyle.page.waitForFunction(() => !window.__town().here.some((h) => h.name === 'SAM'), null, { timeout: 15000 }).then(() => true, () => false));
+    // The month's Redis budget used up: Kyle's next step is refused; he's told, leaves the town's
+    // room, and plays on alone (a job runs in his own browser).
+    await new Promise((r) => http.get(`http://127.0.0.1:${PORT}/__spend`, (res) => (res.resume(), r())));
+    await kyle.page.keyboard.down('d');
+    await wait(600);
+    await kyle.page.keyboard.up('d');
+    step('budget used up: Kyle is told, and out of the town room', await kyle.page.waitForFunction(() => !window.__town().open && /full this month/.test(document.querySelector('#partytoasts')?.textContent ?? ''), null, { timeout: 8000 }).then(() => true, () => false));
+    await kyle.page.evaluate(() => window.__game.startJob(window.__game.jobs().find((j) => !j.exped)));
+    await wait(1500);
+    step('and plays a job on his own', await kyle.page.evaluate(() => window.__game.mode === 'run' && window.__game.room.heroes.length >= 1 && !window.__game.coop));
     report.ok = report.steps.every((s) => s.ok) && !report.errors.length;
   } catch (e) {
     report.errors.push(String(e));

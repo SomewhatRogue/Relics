@@ -13,6 +13,8 @@ export interface Store {
   del(key: string): Promise<void>;
   /** INCR: a number no other caller ever gets. */
   incr(key: string): Promise<number>;
+  /** INCRBY (the month's meter, _meter.ts). */
+  incrBy(key: string, n: number): Promise<number>;
 }
 export interface Bus {
   /**
@@ -53,6 +55,11 @@ export function memoryBackend(shared?: Shared): Backend {
         kv.set(k, { v: String(n), exp: Infinity });
         return n;
       },
+      incrBy: async (k, by) => {
+        const e = kv.get(k), n = (Number(live(k)) || 0) + by;
+        kv.set(k, { v: String(n), exp: e && e.exp >= Date.now() ? e.exp : Infinity });
+        return n;
+      },
     },
     bus: {
       publish: async (ch, m) => {
@@ -73,13 +80,16 @@ export function memoryBackend(shared?: Shared): Backend {
   };
 }
 
-/** Redis from the Vercel Marketplace (REDIS_URL): one connection for commands, one for pub/sub. */
-export async function redisBackend(url: string): Promise<Backend> {
+/**
+ * Redis from the Vercel Marketplace (REDIS_URL): one connection for commands, one for pub/sub.
+ * `onError`: what the clients report by themselves (Upstash over its limit says so here too).
+ */
+export async function redisBackend(url: string, onError: (e: unknown) => void = () => {}): Promise<Backend> {
   const { createClient } = await import('redis');
   const cmd = createClient({ url });
   const sub = cmd.duplicate();
-  cmd.on('error', () => {});
-  sub.on('error', () => {});
+  cmd.on('error', onError);
+  sub.on('error', onError);
   await Promise.all([cmd.connect(), sub.connect()]);
   return {
     shared: true,
@@ -93,6 +103,7 @@ export async function redisBackend(url: string): Promise<Backend> {
       expire: async (k, ttl) => void (await cmd.expire(k, ttl)),
       del: async (k) => void (await cmd.del(k)),
       incr: (k) => cmd.incr(k),
+      incrBy: (k, n) => cmd.incrBy(k, n),
     },
     bus: {
       publish: async (ch, m) => {
@@ -102,5 +113,26 @@ export async function redisBackend(url: string): Promise<Backend> {
       subscribe: (ch, fn) => sub.subscribe(ch, fn),
       unsubscribe: (ch) => sub.unsubscribe(ch),
     },
+  };
+}
+
+/**
+ * A backend that tells `onLimit` when Redis refuses a command because the plan's limit is reached
+ * (`isLimit`, _meter.ts), then fails the command as before. Every command goes through it.
+ */
+export function guarded(b: Backend, isLimit: (e: unknown) => boolean, onLimit: () => void): Backend {
+  const g = <A extends unknown[], T>(f: (...a: A) => Promise<T>) => async (...a: A): Promise<T> => {
+    try {
+      return await f(...a);
+    } catch (e) {
+      if (isLimit(e)) onLimit();
+      throw e;
+    }
+  };
+  const s = b.store, bus = b.bus;
+  return {
+    shared: b.shared,
+    store: { get: g(s.get), setNx: g(s.setNx), set: g(s.set), expire: g(s.expire), del: g(s.del), incr: g(s.incr), incrBy: g(s.incrBy) },
+    bus: { publish: g(bus.publish), subscribe: g(bus.subscribe), unsubscribe: g(bus.unsubscribe) },
   };
 }

@@ -2,6 +2,16 @@
 
 ## Current slice
 
+**Online on a budget** (Claude Opus 5.5, 2026-11-04; Kyle's Upstash showed 345K of its 500K commands a month
+after a few sessions, and "How do I know if I hit the limit with friends?"). Built; waiting on Kyle's play.
+*Done when* a tab left in town costs next to nothing (silent alone and while still, out of the room after a
+minute hidden or 3 minutes untouched, back at a look or a touch), a party split over two instances costs a
+fraction of what it did and a friend far from the leader reconnects to land beside them, the settings box
+says "Online this month: 12,300 of 500,000", and when the month is used up everyone is told in one line and
+plays on alone, a job in progress included. Numbers in DECISIONS 2026-11-04 ("Redis on a budget"). Open:
+the two new lines through the lore keeper and line editor; whether a hop lands beside the leader on Vercel
+(the relay's join lines say which instance each socket landed on).
+
 **Weather changes the fight** (Claude Opus 5.5, 2026-11-04; Kyle: "Let's do some weather and forget about wind
 affecting shots for now"). Built; waiting on Kyle's play. *Done when* each job on the board shows its sky
 (CLEAR, RAIN, FOG or STORM, an icon and the word, a WEATHER row on the card) and on the job: in rain burns

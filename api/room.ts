@@ -12,13 +12,27 @@ import { Relay, memoryBackend, redisBackend } from './_relay.js';
 // Last line of defence: one failed promise must never take the instance (and its players) down.
 process.on('unhandledRejection', (e) => console.log(JSON.stringify({ relay: 1, ev: 'unhandled', msg: String((e as Error)?.message ?? e) })));
 
-const server = http.createServer((_req, res) => {
+const json = (res: http.ServerResponse, code: number, body: unknown) => {
+  res.writeHead(code, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+  res.end(JSON.stringify(body));
+};
+/**
+ * Plain GETs: `?meter=1` is Redis's meter (the month's commands so far against the plan's 500K, and
+ * this instance's own count, _meter.ts), for the settings panel and for Kyle. Otherwise 426 (connect
+ * with a WebSocket), or 503 with {full: true} once the month's budget is used up.
+ */
+const server = http.createServer((req, res) => {
+  const url = new URL(req.url ?? '/', 'http://localhost');
+  if (url.searchParams.has('meter'))
+    return void getRelay().then((r) => r.meterView()).then((v) => json(res, 200, v), () => json(res, 503, { error: 'the relay is out of reach' }));
+  if (current?.full) return json(res, 503, { full: true, error: "this month's online budget is used up" });
   res.writeHead(426, { 'Content-Type': 'text/plain' });
   res.end('Relic rooms: connect with a WebSocket.');
 });
 const wss = new WebSocketServer({ server, maxPayload: 64 * 1024 });
 
 let relay: Promise<Relay> | null = null;
+let current: Relay | null = null;
 /**
  * The Redis connection URL: REDIS_URL or KV_URL as the Marketplace sets them, or any other variable
  * holding a redis:// or rediss:// URL (connecting storage with a custom prefix renames them, e.g.
@@ -32,7 +46,7 @@ function redisUrl(): string | undefined {
 
 function getRelay(): Promise<Relay> {
   const url = redisUrl();
-  return (relay ??= (url ? redisBackend(url) : Promise.resolve(memoryBackend())).then((b) => new Relay(b)).catch((e) => {
+  return (relay ??= (url ? redisBackend(url) : Promise.resolve(memoryBackend())).then((b) => (current = new Relay(b))).catch((e) => {
     relay = null;
     throw e;
   }));

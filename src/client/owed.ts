@@ -8,7 +8,8 @@
  */
 import type { Run } from '../sim/run';
 
-const API = '/api/owed', EVERY = 4, TIMEOUT = 6000;
+/** The leader writes each member's share at most every EVERY seconds (and at the end): each write is a Redis command a member. */
+const API = '/api/owed', EVERY = 15, TIMEOUT = 6000;
 /** One job's share as kept: the run as the leader had it, with this player's tallies under `me`. */
 export type OwedRun = Run & { end?: 'won' | 'beaten' };
 

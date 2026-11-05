@@ -1,15 +1,18 @@
 /**
  * The shared world's store: one world per code (the default, `wickhold`, is everyone's; a group can
  * make its own), and its Roll of the Brave. In Redis: the world as one JSON value, changed with an
- * optimistic WATCH (a clash retries), and a sorted set per stat. About a dozen commands per finished
- * run, a few per look at the board: far inside the free plan (docs/REALTIME-REDIS-BUDGET.md).
- * Without Redis it keeps worlds in memory (tests, local dev).
+ * optimistic WATCH (a clash retries), a sorted set per stat, and the Roll as it stands kept as one
+ * value beside the world. A look is one MGET (world and Roll), and each instance answers looks from
+ * what it read in the last LOOK_MS (every player in town looks every minute); a finished run is about
+ * two dozen commands. Every command is counted (_meter.ts). Without Redis it keeps worlds in memory
+ * (tests, local dev).
  */
 import { CLASS_ORDER } from '../src/shared/weapons.js';
 import { STAT_ORDER, newStats, type Stats } from '../src/shared/progress.js';
 import { CHAPTER_1, newWorld, settle, type WorldState } from '../src/shared/story.js';
 import { BOARD_SIZE, contribute, type Board, type Contribution } from '../src/shared/worldsync.js';
 import { WORK_ORDER } from '../src/shared/works.js';
+import { Meter } from './_meter.js';
 
 export interface WorldView { world: WorldState; board: Board }
 export interface WorldStore {
@@ -83,33 +86,50 @@ export function memoryWorldStore(clock = () => Date.now()): WorldStore {
   };
 }
 
-export async function redisWorldStore(url: string): Promise<WorldStore> {
+/** How long an instance answers looks at a world from what it last read. */
+export const LOOK_MS = 30_000;
+
+export async function redisWorldStore(url: string, meter = new Meter()): Promise<WorldStore> {
   const { createClient } = await import('redis');
   const r = createClient({ url });
   r.on('error', (e) => console.log(JSON.stringify({ world: 1, ev: 'err', msg: String(e?.message ?? e) })));
   await r.connect();
-  const wk = (g: string) => `rl:world:${g}`, bk = (g: string, k: string) => `rl:b:${g}:${k}`, nk = (g: string) => `rl:n:${g}`;
+  meter.attach({ incrBy: (k, n) => r.incrBy(k, n), expire: (k, t) => r.expire(k, t) });
+  const wk = (g: string) => `rl:world:${g}`, bk = (g: string, k: string) => `rl:b:${g}:${k}`, nk = (g: string) => `rl:n:${g}`, rk = (g: string) => `rl:roll:${g}`;
   const read = (raw: string | null): WorldState => ({ ...newWorld(), ...(raw ? JSON.parse(raw) : {}) });
+  const seen = new Map<string, { at: number; raw: string | null; board: Board }>();
+  /** The Roll worked out from the sorted sets (14 or 15 commands), and kept as one value (1 more). */
   async function board(g: string): Promise<Board> {
     const b = emptyBoard(), lists = await Promise.all(STAT_ORDER.map((k) => r.zRangeWithScores(bk(g, k), 0, BOARD_SIZE - 1, { REV: true })));
     const ids = [...new Set(lists.flat().map((x) => x.value))], names = ids.length ? await r.hmGet(nk(g), ids) : [];
+    meter.add('zrange', STAT_ORDER.length);
+    if (ids.length) meter.add('hmget');
     const who = new Map(ids.map((id, i) => [id, JSON.parse(names[i] ?? '{"name":"HERO","cls":"WARRIOR"}')]));
     STAT_ORDER.forEach((k, i) => (b[k] = lists[i].map((x) => ({ id: x.value, n: x.score, ...who.get(x.value) }))));
+    meter.add('set');
+    await r.set(rk(g), JSON.stringify(b));
     return b;
   }
   return {
     async load(g) {
-      const [raw, b] = await Promise.all([r.get(wk(g)), board(g)]);
+      let s = seen.get(g);
+      if (!s || Date.now() - s.at > LOOK_MS) {
+        meter.add('mget');
+        const [raw, roll] = await r.mGet([wk(g), rk(g)]);
+        seen.set(g, (s = { at: Date.now(), raw, board: roll ? JSON.parse(roll) : await board(g) }));
+      }
       // Settled as it's read (not written back: the same ballots give the same result; the next write keeps it).
-      const w = read(raw);
+      const w = read(s.raw);
       settle(w, Date.now());
-      return { world: w, board: b };
+      return { world: w, board: structuredClone(s.board) };
     },
     async apply(g, c) {
       let world = newWorld();
       for (let tries = 0; tries < 5; tries++) {
         try {
           world = await r.executeIsolated(async (iso) => {
+            // WATCH, GET, MULTI, SET, EXEC.
+            meter.add('watch'), meter.add('get'), meter.add('multi'), meter.add('set'), meter.add('exec');
             await iso.watch(wk(g));
             const w = read(await iso.get(wk(g)));
             contribute(w, c);
@@ -121,10 +141,14 @@ export async function redisWorldStore(url: string): Promise<WorldStore> {
           if (tries === 4) throw e;
         }
       }
+      // (A pipeline, not a transaction: MULTI and EXEC are commands too.)
       const m = r.multi().hSet(nk(g), c.hero.id, JSON.stringify({ name: c.hero.name, cls: c.hero.cls }));
-      for (const k of STAT_ORDER) if (c.stats?.[k]) m.zIncrBy(bk(g, k), c.stats[k]!, c.hero.id);
-      await m.exec();
-      return { world, board: await board(g) };
+      meter.add('hset');
+      for (const k of STAT_ORDER) if (c.stats?.[k]) m.zIncrBy(bk(g, k), c.stats[k]!, c.hero.id), meter.add('zincrby');
+      await m.execAsPipeline();
+      const b = await board(g);
+      seen.set(g, { at: Date.now(), raw: JSON.stringify(world), board: b });
+      return { world, board: structuredClone(b) };
     },
   };
 }

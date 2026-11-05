@@ -12,7 +12,8 @@ import { HERO, dodgeName, dodgeOf, POTIONS, CLASS_ORDER, RELICS, TRAITS, WEAPONS
 import { CLASS_NAME } from '../shared/classes';
 import { barWord } from '../shared/barword';
 import { LOOKS, heroLook } from './sprites';
-import { ONLINE } from './relay';
+import { ONLINE, fullForTest, onFull } from './relay';
+import { sayFull } from './netline';
 import { Townfolk } from './townfolk';
 import { toPx } from './world';
 import { Parties } from './parties';
@@ -108,6 +109,14 @@ function online(): Townfolk | null {
   }
   return townfolk;
 }
+
+// The month's online budget used up (relay.ts): out of the town's room, any job on goes on here alone, and a line says so.
+onFull(() => {
+  townfolk?.leave();
+  townfolk = null;
+  game.playAlone();
+  sayFull();
+});
 
 const scene = new Scene(document.getElementById('game') as HTMLCanvasElement);
 /** An expedition's MAP and its words (expedui.ts). */
@@ -420,8 +429,8 @@ function tick(t: number): void {
   if (game.beatenAt !== null && !fade.classList.contains('dark')) fade.classList.remove('up'), fade.classList.add('dark');
   else if (game.beatenAt === null && fade.classList.contains('dark')) fade.classList.add('up'), fade.classList.remove('dark');
   watchDust(game.room, fx);
-  // Back in the open in town: see what the world has been up to (at most every 30 s).
-  if (game.mode === 'town' && !game.outside) void link.refresh();
+  // Back in the open in town: see what the world has been up to (at most every minute; not while idle).
+  if (game.mode === 'town' && !game.outside && !townfolk?.dozing) void link.refresh();
   if (game.result && !panel.open) showResult(game, panel);
   // Out of the wood: the road to Wickhold (Orla walked you here; she met you in the wood).
   if (game.greeting === 'road' && !panel.open) (game.greeting = null), panel.show('WICKHOLD', `<p class="dim">${line(WOOD_ROAD)}</p>`, [{ label: 'INTO WICKHOLD', primary: true, act: () => panel.hide() }], true);
@@ -529,7 +538,8 @@ if (input.touch) document.body.classList.add('touch');
 
 // Test hooks: read the fight as data, never as pixels.
 const w = window as unknown as Record<string, unknown>;
-w.__town = () => ({ count: townfolk?.count ?? 0, here: townfolk?.here(game.room.map.name).map((h) => ({ name: h.tag, x: h.x, y: h.y })) ?? [] });
+w.__fullForTest = fullForTest;
+w.__town = () => ({ dozing: !!townfolk?.dozing, open: !!townfolk?.open, count: townfolk?.count ?? 0, here: townfolk?.here(game.room.map.name).map((h) => ({ name: h.tag, x: h.x, y: h.y })) ?? [] });
 w.__GAME_STATE__ = () => ({ mode: game.mode, wood: game.wood ? { wake: game.wood.wake, said: game.wood.said, stage: game.wood.stage, hold: game.wood.hold } : null, inside: game.outside ? game.room.map.name : null, title: title.open, time: game.room.time, hero: { ...game.hero }, enemies: game.room.enemies.map((e) => ({ ...e })), parries, run: game.run, profile: game.profile, world: game.world });
 w.render_game_to_text = () => `${game.mode} t=${game.room.time.toFixed(1)} hero ${game.hero.act} hp ${game.hero.hp} st ${Math.round(game.hero.stamina)} | ` + game.room.enemies.map((e) => `${e.kind} ${e.act} hp ${e.hp}${e.attack ? ' ' + e.attack.kind + ' ' + e.attack.t.toFixed(2) : ''}`).join(' | ');
 Object.defineProperty(w, '__room', { get: () => game.room });
