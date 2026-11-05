@@ -65,7 +65,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   const n = rear && e.kind === 'scrapper' && wears(h, 'needles') ? Math.max(e.hp, Math.round(s.dmg * mult)) : Math.round(s.dmg * mult);
   e.hp -= n;
   e.hitAt = now;
-  const stop = h.counter ? HITSTOP.parry : heavy ? HITSTOP.heavy : HITSTOP.light;
+  const stop = h.counter ? HITSTOP.parry : heavy || WEAPONS[h.weapon]?.ponderous ? HITSTOP.heavy : HITSTOP.light;
   h.hitstop = Math.max(h.hitstop, stop);
   e.hitstop = Math.max(e.hitstop, stop);
   // A blow sweeping all round (the healer's blessing) throws outward; anything else, along the swing.

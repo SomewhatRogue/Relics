@@ -144,6 +144,8 @@ export interface Weapon {
   dodge: Dodge;
   /** No held block: block is only ever a parry (the greatsword, the spellblade). */
   parryOnly?: boolean;
+  /** Every blow lands with the heavy hitstop: a slow, weighty weapon (the greatsword). */
+  ponderous?: boolean;
   /** A counter soon after the parry is a riposte (the sword; shared/warrior.ts RIPOSTE). */
   ripostes?: boolean;
   /** Stops a charging or lunging goblin dead, pinned (the spear; shared/warrior.ts PIN). */
@@ -179,14 +181,15 @@ export const WEAPONS: Record<KitId, Weapon> = {
     name: 'GREATSWORD',
     cls: 'WARRIOR',
     combo: [
-      // Wide, slow sweeps for a crowd.
-      { windup: 0.22, active: 0.12, recover: 0.3, dmg: 24, range: 2.1, arc: 210, lunge: 0.4, knock: 6 },
-      { windup: 0.24, active: 0.12, recover: 0.5, dmg: 32, range: 2.2, arc: 240, lunge: 0.55, knock: 10 },
+      // Wide, slow, ponderous sweeps for a crowd (Kyle 2026-11-04: slower first swing, big heavy hits).
+      // Each lands with the heavy hitstop; the pair does about 15% less a second than before.
+      { windup: 0.38, active: 0.12, recover: 0.42, dmg: 26, range: 2.1, arc: 210, lunge: 0.45, knock: 8 },
+      { windup: 0.34, active: 0.12, recover: 0.6, dmg: 36, range: 2.2, arc: 240, lunge: 0.6, knock: 12 },
     ],
     // Held: the overhead (it breaks heavy wind-ups); let go on the white flash and it sends out a shockwave.
     heavy: { windup: 0.1, active: 0.16, recover: 0.6, dmg: 38, dmgFull: 75, range: 2.4, arc: 110, lunge: 0.9, knock: 10, knockFull: 20, quake: true },
     // No held block at all: block is a parry in its narrow window, or nothing.
-    chip: 0.3, blockSpeed: 0.35, chargeSpeed: 0.25, parryWindow: 0.2, guardArc: 110, guardCost: 1.5, speed: 0.78, parryOnly: true,
+    chip: 0.3, blockSpeed: 0.35, chargeSpeed: 0.25, parryWindow: 0.2, guardArc: 110, guardCost: 1.5, speed: 0.78, parryOnly: true, ponderous: true,
     dodge: { kind: 'roll', distance: 1.9, time: 0.4, iFrom: 0.06, iTo: 0.28, stamina: 34, cooldown: 1.4 },
   },
   spear: {
