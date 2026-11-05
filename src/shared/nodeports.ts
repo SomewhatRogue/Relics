@@ -78,8 +78,8 @@ export const SIDE_ROOMS: Record<Country, DeadEnd[]> = {
 };
 /** What a side room holds beside its chest. */
 export type Cache = 'captive' | 'nest' | 'oil' | 'shrine';
-/** The name over a side way (ENTER THE GLADE). Placeholder words for the lore keeper and line editor. */
-export const SIDE_WORD: Record<DeadEnd, string> = { glade: 'THE GLADE', pens: 'THE PENS', orechamber: 'THE OLD WORKINGS', cave: 'THE CAVE' };
+/** The name over a side way (ENTER THE SPRING). Lore checked 2026-11-04. */
+export const SIDE_WORD: Record<DeadEnd, string> = { glade: 'THE SPRING', pens: 'THE PENS', orechamber: 'THE OLD WORKINGS', cave: 'THE CAVE' };
 
 /** A village's look (the fields' palettes do the rest of Barrowfields). */
 export const VILLAGE_PALETTE: { floor: Theme['floor'][]; back: Theme['back'][]; soil: SoilMat[]; light: PlaceKind[] } = {

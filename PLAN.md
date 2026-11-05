@@ -332,7 +332,9 @@ pay grows with each job done and side job. DECISIONS 2026-11-04 has the build an
 - [x] Online: near only per friend, quiet clocks, map by seed, compact save, split messages, measured.
 - [x] The map from the node vocabulary; jobs, side jobs, pressure, extraction, map screen, friend markers.
 - [ ] Kyle's play: tune `EXPED` (goblins, waves, hold lengths, pay); night is dark out in the open.
-- [ ] The lore keeper and the line editor over `shared/expedjob.ts`.
+- [x] The lore keeper over `shared/expedjob.ts` and the side-way names (2026-11-04): SPLITNAIL and THE DROVER for
+  BLACKNAIL and THE TANNER, CAPTIVES, CHEST, Lucky (not Blessed), ALARM (not PRESSURE), THE SPRING (not THE GLADE).
+- [ ] Kyle's calls on the new lore (DECISIONS 2026-11-04, Barrowfields lore): why the hungry want the barrow shrine.
 - [ ] Vignettes with new behaviour (goblins burning a house, dragging a body, prisoners led off) on the map.
 - [ ] Frame times on a real phone host (headless SwiftShader numbers only so far); 2.5D on the big map.
 - [ ] More expeditions (Greyhollow, Fenmere, Copperdeep) from the same pieces; the war map that picks them.

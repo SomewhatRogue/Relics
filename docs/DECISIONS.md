@@ -3482,3 +3482,14 @@ guard on patrol come out to meet you, say some stuff and take you to town."
 - Tests: `tests/wood.test.ts` (the hut): no Odric in Hew's words; the road out does nothing before she
   comes; she waits for the callers; she spawns well west, stops beside you, says her four lines; stoops
   and leads west; the road out then reaches town and the road greeting.
+
+
+## 2026-11-04: Barrowfields and side-way words, lore checked (Claude Opus 5.5)
+
+- Butchers: BLACKNAIL and THE TANNER became SPLITNAIL and THE DROVER (too near the Blacktongue title; tanning points at the books' skin goods).
+- The posting is in the town's voice ("The hungry have camps all over the Barrowfields..."), never "goblins" or "one big open map".
+- One word per thing: CAPTIVES (not prisoners), the CHAINED CHEST (not cache). The beacon is lit, not opened. The way out has no compass direction.
+- Praying at a wayside shrine gives the well's luck, so it reads "Lucky: +30% damage, 25% less damage taken for 90 s". "Blessed" stays Sanctuary's.
+- PRESSURE became ALARM: noise brings more of them.
+- THE GLADE became THE SPRING: the room shows up in the village, fields and fen too, and every one has its spring.
+- New lore to record or reject (Kyle): the barrows are grassed mounds older than the villages, with a shrine whose owner stays unsaid; siege engines in the Barrowfields foreshadow chapter 5 without naming the King; the beacon on the drove road brings the watch (a fire, not a bell; bells stay for chapter 5); horns are never magic; where the cookpot poison comes from stays unsaid, never the church; the chained chest's dead soldier stays unnamed. Open: why the hungry come at whoever holds the shrine.

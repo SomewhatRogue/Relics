@@ -9,7 +9,7 @@ import { payFor, PLACES, type Job } from './jobs.js';
 import { Rng } from './rng.js';
 import { rollTime } from './timeofday.js';
 
-export const EXPED_BOSSES = ['GRISTLE', 'OLD HOOK', 'BLACKNAIL', 'THE TANNER'];
+export const EXPED_BOSSES = ['GRISTLE', 'OLD HOOK', 'SPLITNAIL', 'THE DROVER'];
 
 /** The day's expedition. */
 export function expedition(day: number): Job {
@@ -18,33 +18,33 @@ export function expedition(day: number): Job {
   return {
     id: `d${day}-exped`, place, objective: 'hunt', twist: night ? 'night' : 'none', time: rollTime(seed, night), rooms: 1, size: 'long', boss, seed, exped: 'barrowfields',
     reward: payFor(6, 2, night, 'long') + 60, title: 'Expedition: the Barrowfields',
-    text: 'One big open map, goblins all over it. Do the jobs pinned on your map, then light the beacon on the drove road and hold it until the watch comes for you.',
+    text: 'The hungry have camps all over the Barrowfields. Do the jobs pinned on your map, then light the beacon on the drove road and hold it till the watch comes out for you.',
   };
 }
 
 /** The board's label and what the job's rows say. */
-export const EXPED_BOARD = { kind: 'EXPEDITION', where: 'THE BARROWFIELDS', rooms: 'One big map, about 20 minutes', pays: (n: number) => `${n} gold and treasure if you get out. Each job done adds to the pot` };
+export const EXPED_BOARD = { kind: 'EXPEDITION', where: 'THE BARROWFIELDS', rooms: 'One big map, about 20 minutes', pays: (n: number) => `${n} gold and treasure, more for each job done. Half if you don't get out` };
 
 /** Each job: its pin's name, what to do, and the banner once it's done. */
 export const GOAL_WORDS: Record<GoalKind | SideKind, { pin: string; todo: string; done: string }> = {
-  larder: { pin: 'LARDER', todo: 'Poison their cookpot: stand at it', done: 'Cookpot poisoned' },
+  larder: { pin: 'LARDER', todo: 'Poison the cookpot (stand at it)', done: 'Cookpot poisoned' },
   engine: { pin: 'ENGINE', todo: 'Wreck the siege engine', done: 'Siege engine wrecked' },
-  prisoners: { pin: 'PRISONERS', todo: 'Break the cages open', done: 'Prisoners freed' },
-  dens: { pin: 'DENS', todo: 'Burn the dens (their oil helps)', done: 'Dens burned' },
+  prisoners: { pin: 'CAPTIVES', todo: 'Break the cages open', done: 'Captives freed' },
+  dens: { pin: 'DENS', todo: "Burn the dens (there's oil by each)", done: 'Dens burned' },
   shrine: { pin: 'SHRINE', todo: 'Hold the barrow shrine: stand in its ring', done: 'Shrine held' },
   butcher: { pin: 'BUTCHER', todo: 'Kill {boss}', done: '{boss} is dead' },
-  cache: { pin: 'CACHE', todo: 'Side job: open the cache', done: 'Cache opened' },
-  pray: { pin: 'PRAY', todo: 'Side job: pray at the shrine (stand at it)', done: 'Blessed: more damage for 90 s' },
+  cache: { pin: 'CHEST', todo: 'Side job: open the chained chest', done: 'Chest opened' },
+  pray: { pin: 'PRAY', todo: 'Side job: pray at the shrine (stand at it)', done: 'Lucky: +30% damage, 25% less damage taken for 90 s' },
 };
 
 /** What the banner and the map screen say about the way out, by its state. */
 export const EXTRACT_WORDS = {
   pin: 'BEACON',
-  shut: 'The beacon opens once the pinned jobs are done',
+  shut: 'You can light the beacon once the pinned jobs are done',
   open: 'Jobs done. Light the beacon on the drove road',
   call: 'Stand by the beacon to light it',
   hold: (s: number) => `Hold the beacon until the watch comes: ${s} s`,
-  leave: 'The watch is here. Everyone north up the road',
+  leave: 'The watch is here. Out by the drove road',
   away: 'Nobody at the beacon. Get back to it',
 };
 
@@ -59,4 +59,4 @@ export const EXPED_SAYS = {
 };
 
 /** The map screen's own words. */
-export const MAP_WORDS = { button: 'MAP', title: 'THE BARROWFIELDS', close: 'CLOSE', camp: 'CAMP', start: 'WAY IN', level: (n: number) => `PRESSURE ${n} OF 5` };
+export const MAP_WORDS = { button: 'MAP', title: 'THE BARROWFIELDS', close: 'CLOSE', camp: 'CAMP', start: 'WAY IN', level: (n: number) => `ALARM ${n} OF 5` };

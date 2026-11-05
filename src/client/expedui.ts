@@ -4,7 +4,7 @@
  * happen: dropped in, a job done, a war-horn, more of them coming, the jobs all done, the beacon lit,
  * the watch come. The words are shared/expedjob.ts's.
  */
-import { EXPED_SAYS, GOAL_WORDS } from '../shared/expedjob';
+import { EXPED_SAYS, GOAL_WORDS, MAP_WORDS } from '../shared/expedjob';
 import type { ArenaRoom } from '../sim/room';
 import type { FightEvent } from '../sim/types';
 import { ExpedMap } from './expedmapui';
@@ -18,7 +18,7 @@ export class ExpedUi {
     const corner = document.getElementById('corner');
     if (!corner) return;
     const b = (this.btn = document.createElement('button'));
-    (b.id = 'mapbtn'), (b.textContent = 'MAP'), b.setAttribute('aria-label', 'Map');
+    (b.id = 'mapbtn'), (b.textContent = MAP_WORDS.button), b.setAttribute('aria-label', 'Map');
     b.addEventListener('click', () => this.map.toggle());
     corner.prepend(b);
     addEventListener('keydown', (e) => {
