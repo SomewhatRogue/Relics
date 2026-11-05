@@ -1,7 +1,8 @@
 /**
  * The touch buttons as one cluster round ATTACK (bottom right, upright phone): what each shows and how
  * it looks this frame. The buttons and their presses are input.ts's; this only draws them (btnart.ts)
- * and says which are there: the class skill and the relic carried with their cooldowns, the guard
+ * and says which are there: a Mage's ELEMENT (a small ring by ATTACK in the element's colour, its name
+ * over it), the class skill and the relic carried with their cooldowns, the guard
  * (BLOCK or PARRY, none for a Mage), the dodge (JUMP, DASH, BLINK, ROLL), the flask as the health orb,
  * stamina as pips round ATTACK (a Mage's magic round BLINK), one gilt context slot (GRAB, THROW, HELP UP, BURN, OPEN, TALK), and a
  * crossbow's RELOAD. A Warrior or Healer has no dodge: the context slot takes the dodge's place, and a
@@ -21,6 +22,7 @@ import { kindleable } from '../sim/kindle';
 import { liftable } from '../sim/props';
 import { relicLabel } from '../sim/hero';
 import { castElement } from '../sim/channel';
+import { CHANNEL, ELEMENT_NAME } from '../shared/tuning';
 import { itemIcon, potionIcon } from './itemicons';
 import { relicItemIcon } from './relicicons';
 import { skillCanvas } from './skillicons';
@@ -76,7 +78,7 @@ export class Cluster {
   private b = {
     attack: new Btn('.tb.attack'), block: new Btn('.tb.block'), roll: new Btn('.tb.roll'), skill: new Btn('.tb.relic'),
     relic: new Btn('.tb.relic2'), potion: new Btn('.tb.potion'), grab: new Btn('.tb.grab'), use: new Btn('.tb.use'),
-    reload: new Btn('.tb.reload'),
+    reload: new Btn('.tb.reload'), element: new Btn('.tb.element'),
   };
   private ready: Record<string, boolean> = {};
   private stick = document.querySelector('#touch .stick') as HTMLElement;
@@ -101,7 +103,9 @@ export class Cluster {
     const carrying = me.act === 'carry';
     const atk = carrying ? icon('slam') : img(iconOf(me.arms[me.weapon], me.weapon));
     // Stamina pips round ATTACK; a Mage's are MAGIC, round BLINK instead (Kyle: "Those should just be around the blink").
-    const mage = kit.cls === 'MAGE', st = me.stamina, flick = me.winded && room.time - me.staminaAt < HERO.windedDelay ? Math.floor(now * 11) % 2 === 0 : false;
+    const mage = kit.cls === 'MAGE', st = me.stamina;
+    if (document.body.dataset.mage !== String(mage)) document.body.dataset.mage = String(mage);
+    const flick = me.winded && room.time - me.staminaAt < HERO.windedDelay ? Math.floor(now * 11) % 2 === 0 : false;
     const pips = { lit: flick ? 0 : Math.ceil(st / 10), of: 10, col: me.winded ? '#d84a3a' : mage ? (st < 25 ? '#8f86a8' : '#cdbdf0') : st < 25 ? '#a8a090' : '#ddd5c4' };
     b.attack.show({ shape: 'round', size: 42, grade: 'iron', icon: atk, iconScale: carrying ? 1 : 2, ...(mage ? {} : { pips }) }, '', '', carrying ? 'Slam' : 'Attack');
     b.block.show(guard === 'none' ? null : { shape: 'shield', size: 30, grade: 'iron', icon: icon(guard === 'full' ? 'block' : 'parry') }, '', kit.spellblade ? 'PARRY' : '', guard === 'full' ? 'Block' : 'Parry');
@@ -119,7 +123,11 @@ export class Cluster {
     b.reload.el.classList.toggle('cue', !!me.xbowEmpty && reloadCue > now);
     // The class skill and the relic carried, each with its cooldown (a dark sweep and the seconds).
     const [skill, relic] = me.relics, left = (r: typeof skill) => Math.max(0, me.relicReady[r] - room.time);
-    const el = skill === 'channel' ? castElement(me) : me.augments[skill];
+    // A Mage's ELEMENT: the element it's in, its ring that colour, the switch's short cooldown as a sweep.
+    const mel = mage ? castElement(me) : 'fire', ml = mage ? Math.max(0, (me.relicReady.channel ?? 0) - room.time) : 0;
+    b.element.show(mage ? { shape: 'round', size: 22, grade: 'iron', icon: skillCanvas('channel', mel), ring: EL[mel], cd: ml / CHANNEL.cooldown, flash: this.flash('element', ml, room.time) } : null, '', ELEMENT_NAME[mel], 'Element: ' + ELEMENT_NAME[mel]);
+    if (mage && b.element.el.dataset.el !== mel) b.element.el.dataset.el = mel;
+    const el = me.augments[skill];
     if (knows(me, 'skill')) {
       const l = left(skill);
       b.skill.show({ shape: 'round', size: 28, grade: 'iron', icon: skillCanvas(skill, el), ring: EL[el], cd: l / RELICS[skill].cooldown, flash: this.flash('skill', l, room.time) }, l > 0 ? String(Math.ceil(l)) : '', skillCanvas(skill, el) ? '' : RELICS[skill].short, relicLabel(me, skill));

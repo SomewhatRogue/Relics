@@ -2,6 +2,17 @@
 
 ## Current slice
 
+**The element is the Mage's spellbook** (Claude Opus 5.5, 2026-11-04; Kyle agreed the design: "the
+element becomes the spellbook", the staff never aimed, switching on its own button, the skill slot a pull).
+Built; waiting on Kyle's play. *Done when* on his phone and laptop, flat and 2.5D, each Mage weapon's tap
+and hold is a different spell in fire, frost and storm (DECISIONS 2026-11-04 has the table): the wand's
+firebolt and fireball, icicles and cold blast, arc and lightning strike in a red striped mark; the staff's
+sweeps and a ring of fire, frost nova or charged ring all round him; the spellblade's cuts and a burning
+lunge, shatter or lightning dash; each perfect the bigger spell; the ELEMENT ring by ATTACK (X on the
+laptop) switches, coloured and named; GRASP drags the goblins in front together; and each element looks
+and sounds like itself. Open: GRASP's name and every new line (DECISIONS) through the lore keeper and line
+editor; the numbers once he has played.
+
 **A recap, quiet drops, a tracker that folds** (Claude Opus 5.5, 2026-11-04; Kyle, from his phone: "it should
 give you a mission recap", drops "shouldn't pop up unless you click on it", the mission "smaller in the top
 left unless you click it to expand"). Built; waiting on Kyle's play. *Done when* a job's end (won, lost or

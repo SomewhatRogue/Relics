@@ -4,6 +4,7 @@
  * opened, its coal's light flooding out at the end of the windup (the ring is drawn from the same
  * LIGHT numbers): goblins in it scorched and thrown back, small ones blinded; friends in it mend.
  */
+import { travel } from '../shared/sweep';
 import { collide } from '../shared/arena';
 import { CHAIN, HERO, LIGHT, type Augment } from '../shared/tuning';
 import { shove } from './bodies';
@@ -50,13 +51,15 @@ export function stepTows(bodies: Body[], now: number, dt: number): void {
   for (const b of bodies) {
     const t = b.tow;
     if (!t) continue;
-    const dx = t.x - b.x, dy = t.y - b.y, d = Math.hypot(dx, dy), step = CHAIN.speed * dt;
-    if (d <= step || now >= t.until) {
-      if (d <= step) (b.x = t.x), (b.y = t.y);
-      b.tow = undefined;
-    } else (b.x += (dx / d) * step), (b.y += (dy / d) * step);
+    const dx = t.x - b.x, dy = t.y - b.y, d = Math.hypot(dx, dy), step = (t.speed ?? CHAIN.speed) * dt, r = 'radius' in b ? (b as unknown as { radius: number }).radius : HERO.radius;
+    // A GRASP's drag (it has its own speed) is swept, so a wall stops it; the chain's as it always was.
+    const go = d <= step ? 1 : step / d, done = d <= step || now >= t.until;
+    if (t.speed) travel(b, dx * go, dy * go, r);
+    else if (d <= step) (b.x = t.x), (b.y = t.y);
+    else if (!done) (b.x += (dx / d) * step), (b.y += (dy / d) * step);
+    if (done) b.tow = undefined;
     b.kvx = b.kvy = 0;
-    collide(b, 'radius' in b ? (b as unknown as { radius: number }).radius : HERO.radius);
+    collide(b, r);
   }
 }
 

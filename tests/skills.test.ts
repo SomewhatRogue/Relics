@@ -113,10 +113,10 @@ describe('three skills a class', () => {
     expect(butcher.hp).toBeLessThan(500);
   });
 
-  it('FIRE RING: burns and throws off what is close, then lights what walks in; spells stay fire', () => {
+  it('FIRE RING: burns and throws off what is close, then lights what walks in; the element is the ELEMENT button\'s, whatever the skill', () => {
     const { room, h, s } = setup('MAGE', 'firering');
     h.augments.channel = 'frost';
-    expect(castElement(h)).toBe('fire');
+    expect(castElement(h)).toBe('frost');
     Object.assign(s, { x: 10.2, y: 10, act: 'stunned', actDur: 99 });
     fire(room);
     run(room, FIRE_RING.windup + 0.05);

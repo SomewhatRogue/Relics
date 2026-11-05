@@ -1,6 +1,6 @@
-/** The Mage's quick channel and each element's job: the primed spell, weaknesses and resistances, storm round a shield. */
+/** The Mage's ELEMENT button and each element's job: the primed spell, weaknesses and resistances, storm round a shield. */
 import { describe, expect, it } from 'vitest';
-import { BURN, CHANNEL, TICK, VARIANTS, WEAK, WEAK_POP, WEAPONS, type Hurt } from '../src/shared/tuning';
+import { BURN, CHANNEL, TAPS, TICK, VARIANTS, WEAK, WEAK_POP, WEAPONS, type Hurt } from '../src/shared/tuning';
 import { ArenaRoom } from '../src/sim/room';
 import { damage } from '../src/sim/damage';
 import { newEnemy } from '../src/sim/enemies';
@@ -37,26 +37,24 @@ function foe(key: string, id = 1, x = 9, y = 7): Enemy {
   return Object.assign(e, { hp: 999, maxHp: 999, alert: true });
 }
 
-describe('the quick channel', () => {
-  it('turns to the next element at once, comes back in about a second, and goes round', () => {
+describe('the ELEMENT button', () => {
+  it('turns to the next element at once on its own button, comes back in about a second, and goes round', () => {
     const { room, h } = mage();
-    expect(h.relic).toBe('channel');
-    room.setIntent('me', intent({ classSeq: 3, relicSeq: 1 }));
+    expect(h.relic).toBe('grasp');
+    room.setIntent('me', intent({ classSeq: 3, elementSeq: 1 }));
     const ev = run(room, 0.3);
     expect(ev.find((e) => e.k === 'channeled')).toMatchObject({ el: 'frost' });
     expect(h.act).toBe('idle');
     expect(h.relicReady.channel - room.time).toBeGreaterThan(CHANNEL.cooldown - 0.35);
     expect(h.relicReady.channel - room.time).toBeLessThanOrEqual(CHANNEL.cooldown);
-    // Too soon: nothing.
-    room.setIntent('me', intent({ classSeq: 3, relicSeq: 2 }));
+    // Too soon: it waits for the cooldown, then turns (the press isn't lost).
+    room.setIntent('me', intent({ classSeq: 3, elementSeq: 2 }));
     run(room, 0.2);
     expect(h.augments.channel).toBe('frost');
     run(room, CHANNEL.cooldown);
-    room.setIntent('me', intent({ classSeq: 3, relicSeq: 3 }));
-    run(room, 0.2);
     expect(h.augments.channel).toBe('storm');
     run(room, CHANNEL.cooldown);
-    room.setIntent('me', intent({ classSeq: 3, relicSeq: 4 }));
+    room.setIntent('me', intent({ classSeq: 3, elementSeq: 3 }));
     run(room, 0.2);
     expect(h.augments.channel).toBe('fire');
   });
@@ -64,11 +62,11 @@ describe('the quick channel', () => {
   it('primes the first spell after a turn (and only the first)', () => {
     const { room, h } = mage();
     h.augments.channel = 'storm';
-    room.setIntent('me', intent({ classSeq: 3, relicSeq: 1, ay: -1 }));
+    room.setIntent('me', intent({ classSeq: 3, elementSeq: 1, ay: -1 }));
     run(room, 0.2);
     expect(h.augments.channel).toBe('fire');
     const cast = (seq: number) => {
-      room.setIntent('me', intent({ classSeq: 3, relicSeq: 1, attackSeq: seq, ay: -1 }));
+      room.setIntent('me', intent({ classSeq: 3, elementSeq: 1, attackSeq: seq, ay: -1 }));
       const seen = new Set(room.bolts.map((b) => b.id));
       let dmg = 0, primed = false;
       for (let i = 0; i < Math.round(0.8 / TICK); i++) {
@@ -81,8 +79,10 @@ describe('the quick channel', () => {
     const first = cast(1), second = cast(2);
     expect(first.primed).toBe(true);
     expect(second.primed).toBe(false);
-    expect(first.dmg).toBe(Math.round(WEAPONS[h.weapon].combo[0].dmg * CHANNEL.primed));
-    expect(second.dmg).toBe(WEAPONS[h.weapon].combo[0].dmg);
+    // (Fire's tap is the spark at its TAPS share: its burn does the rest.)
+    const tap = Math.round(WEAPONS[h.weapon].combo[0].dmg * TAPS.wand.fire.dmg);
+    expect(first.dmg).toBe(Math.round(tap * CHANNEL.primed));
+    expect(second.dmg).toBe(tap);
     expect(h.primed).toBe(false);
   });
 });

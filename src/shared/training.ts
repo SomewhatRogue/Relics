@@ -13,9 +13,10 @@ export type TrainState = 'buy' | 'poor' | 'locked' | 'needs' | 'max';
 
 /** Has this hero been taught it? (Old heroes from before lessons know everything.) */
 export const knowsLesson = (p: Profile, l: Lesson) => !p.learned || p.learned.includes(l);
-/** The lesson a drill waits on: the skill's own drill, a Mage's channel, a Ranger's snares. */
+/** The lesson a drill waits on: the skill's own drill, a Ranger's snares. (A Mage's FIRST SPELL waits on
+ *  nothing: switching element is every Mage's from the start.) */
 export const drillNeeds = (p: Profile, id: DrillId): Lesson | null =>
-  id === 'skill' || (id === 'technique' && p.cls === 'MAGE') ? 'skill' : id === 'technique' && p.cls === 'RANGER' ? 'leave' : null;
+  id === 'skill' ? 'skill' : id === 'technique' && p.cls === 'RANGER' ? 'leave' : null;
 
 export function drillState(p: Profile, id: DrillId): TrainState {
   const r = p.drills?.[id] ?? 0, need = drillNeeds(p, id);

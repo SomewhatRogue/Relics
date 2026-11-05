@@ -68,10 +68,10 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     stats: { STRENGTH: 3, GUARD: 1, SPEED: 5, RANGE: 1, SUPPORT: 1 },
   },
   MAGE: {
-    line: 'Spark wand. Quick sparks at range.',
+    line: 'Spark wand. Spells at range.',
     weapon: 'Spark wand',
-    skill: 'Elemental Channel: Tap to alternate between elements.',
-    note: 'Fire: a firebolt (tap) or a fireball (hold). Burns and spreads. Frost: three icicles (tap) or a wide burst (hold). Slows and freezes. Storm: Spark (tap) or Lightning Bolt (hold). Chains between enemies at range, arcs through shields.',
+    skill: 'Grasp: Drags the goblins in front of you together, just ahead of you.',
+    note: 'Your element is your spellbook: switch it with ELEMENT. Fire burns crowds, frost slows and freezes, storm jumps and stuns. Your weapon sets the range.',
     noteLabel: 'SPELLS',
     guard: 'Blinks away to dodge.',
     stats: { STRENGTH: 3, GUARD: 0, SPEED: 2, RANGE: 4, SUPPORT: 2 },

@@ -55,10 +55,9 @@ export interface Swing {
   interrupts?: boolean;
   /** A staff's slash: a close cut in the Mage's element. */
   slash?: boolean;
-  /** A staff's hold: raises a wall of the element in front (shared/mage.ts WALL); it strikes nothing itself. */
-  wall?: boolean;
-  /** A spellblade's hold: the blade is wreathed in the element (shared/mage.ts WREATHE). */
-  wreathes?: boolean;
+  /** A Mage's hold: the element's spell for this kit (shared/spellbook.ts, sim/holds.ts); the swing
+   *  itself strikes nothing. */
+  spell?: boolean;
 }
 
 export interface Heavy extends Swing {
@@ -254,30 +253,30 @@ export const WEAPONS: Record<KitId, Weapon> = {
     chip: 0.35, blockSpeed: 0.4, chargeSpeed: 0.4, parryWindow: 0.22, guardArc: 110, guardCost: 1.5, speed: 0.82, reloads: true,
     dodge: RANGER_JUMP,
   },
-  /** The Mage's quick spell: a flick of sparks cast on the move, or a short 0.6 s cast for a bigger one
-   *  (it costs magic). A spark that lands on a goblin mid wind-up breaks the blow off (shared/mage.ts). */
+  /** The Mage at range: a quick bolt of the element cast on the move, or a short 0.6 s cast for the
+   *  element's big spell (it costs magic). A tap that lands mid wind-up breaks the blow off (shared/mage.ts). */
   wand: {
     name: 'SPARK WAND',
     cls: 'MAGE',
     // Cast walking (Kyle, 2026-11-04): the left click never stops you.
     combo: [{ windup: 0.3, active: 0.04, recover: 0.2, dmg: 8, range: 8, arc: 0, lunge: 0, knock: 2, shot: 'spark', speed: 17, interrupts: true }],
-    heavy: { windup: 0.06, active: 0.04, recover: 0.3, dmg: 10, dmgFull: 24, range: 9, arc: 0, lunge: 0, knock: 3, knockFull: 7, shot: 'spark', speed: 19, burst: 0.8, interrupts: true },
+    heavy: { windup: 0.06, active: 0.04, recover: 0.3, dmg: 10, dmgFull: 24, range: 9, arc: 0, lunge: 0, knock: 3, knockFull: 7, shot: 'spark', speed: 19, burst: 0.8, interrupts: true, spell: true },
     draw: 0.6,
     chip: 0.5, blockSpeed: 0.4, chargeSpeed: 0.55, parryWindow: 0.2, guardArc: 100, guardCost: 2, speed: 0.86, castWalk: 0.9,
     dodge: BLINK,
   },
-  /** Close and slow: a slash in the Mage's element in front. Held, rooted, a wall of the element rises
-   *  in front of you (it costs magic); let go on the white flash and it's a bigger one (shared/mage.ts). */
+  /** Close and slow: a slash in the Mage's element in front. Held, rooted, the element's spell all round
+   *  you (it costs magic): a ring of fire, a frost nova, a charged ring (shared/spellbook.ts). */
   staff: {
     name: 'FOCUS STAFF',
     cls: 'MAGE',
     combo: [{ windup: 0.3, active: 0.1, recover: 0.42, dmg: 15, range: 1.9, arc: 150, lunge: 0.15, knock: 5, slash: true }],
-    heavy: { windup: 0.12, active: 0.05, recover: 0.45, dmg: 0, dmgFull: 0, range: 0, arc: 0, lunge: 0, knock: 0, knockFull: 0, wall: true },
+    heavy: { windup: 0.12, active: 0.05, recover: 0.45, dmg: 12, dmgFull: 20, range: 0, arc: 0, lunge: 0, knock: 0, knockFull: 0, spell: true },
     draw: 1,
     chip: 0.5, blockSpeed: 0.35, chargeSpeed: 0, parryWindow: 0.2, guardArc: 100, guardCost: 2, speed: 0.8,
     dodge: BLINK,
   },
-  /** The combat Mage: a sword in three cuts, wreathed in the element on a hold (shared/mage.ts). */
+  /** The combat Mage: a sword in three cuts in the element, and the element's blade spell on a hold (shared/mage.ts). */
   spellblade: SPELLBLADE,
   /** The Healer: heavy, short blows, every third heals the party; held, a holy smite falls on the goblin you
    *  face, and its light mends friends in the burst. Let go on the white flash, it lands harder and shields

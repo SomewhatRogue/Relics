@@ -1,6 +1,6 @@
-/** The Mage's rework (shared/mage.ts, sim/spells.ts, sim/staffwall.ts, sim/spellblade.ts): magic costs, the wand, the staff, the spellblade. */
+/** The Mage's kits (shared/mage.ts, sim/spells.ts, sim/spellblade.ts): magic costs, the wand, the staff's slash and rooted hold, the spellblade's charge and parry. Each element's spells: spellbook.test.ts. */
 import { describe, expect, it } from 'vitest';
-import { BUTCHER, HERO, SPELL, TICK, WALL, WAND, WEAPONS, WREATHE, BLADE, type WeaponId, type Element } from '../src/shared/tuning';
+import { BUTCHER, HERO, SPELL, STAFF_RING, TICK, WAND, WEAPONS, BLADE, type WeaponId, type Element } from '../src/shared/tuning';
 import { ArenaRoom } from '../src/sim/room';
 import { newEnemy } from '../src/sim/enemies';
 import { renameKits } from '../src/shared/oldkits';
@@ -30,7 +30,7 @@ function arena(weapon: WeaponId, at: [number, number][] = [[9, 7.6]], el: Elemen
   return { room, h, es, e: es[0], run, tap, loose };
 }
 const lost = (e: Enemy) => e.maxHp - e.hp;
-const walls = (room: ArenaRoom) => room.zones.filter((z): z is Zone => z.kind === 'wall');
+const rings = (room: ArenaRoom) => room.zones.filter((z): z is Zone => z.kind === 'flamering' || z.kind === 'stormring');
 
 describe('the wand', () => {
   it('casts its quick spark walking at near full pace', () => {
@@ -71,22 +71,22 @@ describe('the wand', () => {
 });
 
 describe('magic costs', () => {
-  it("the wand's held burst spends 20 and says so", () => {
+  it("the wand's hold spends 20 and says so", () => {
     const a = arena('wand', [[9, 4]]);
     const ev = a.loose(0.7, 0.1);
-    expect(ev.find((x) => x.k === 'magic')).toMatchObject({ n: SPELL.burst });
-    expect(a.h.stamina).toBeLessThan(HERO.stamina - SPELL.burst + 5);
+    expect(ev.find((x) => x.k === 'magic')).toMatchObject({ n: SPELL.wand });
+    expect(a.h.stamina).toBeLessThan(HERO.stamina - SPELL.wand + 5);
   });
 
   it('a spell you cannot pay for fizzles at once, and nothing is cast or spent', () => {
     const a = arena('staff');
-    a.h.stamina = SPELL.wall - 10;
+    a.h.stamina = SPELL.staff - 10;
     a.h.staminaAt = 99;
     const ev = a.loose(1.1, 0.2);
     expect(ev.some((x) => x.k === 'fizzle')).toBe(true);
-    expect(walls(a.room).length).toBe(0);
-    expect(ev.some((x) => x.k === 'magic')).toBe(false);
-    expect(a.h.stamina).toBe(SPELL.wall - 10);
+    expect(rings(a.room).length).toBe(0);
+    expect(ev.some((x) => x.k === 'magic' || x.k === 'spell')).toBe(false);
+    expect(a.h.stamina).toBe(SPELL.staff - 10);
   });
 });
 
@@ -102,53 +102,29 @@ describe('the staff', () => {
     expect(front.burnUntil).toBeGreaterThan(a.room.time);
   });
 
-  it('a hold raises a wall in front, the hero rooted while it gathers', () => {
-    const a = arena('staff', [[2, 2]]);
-    a.loose(0.5, 0.2);
-    const w = walls(a.room)[0];
-    expect(w).toBeTruthy();
-    expect(w.y).toBeCloseTo(9 - WALL.ahead, 1);
-    expect(w.r * 2).toBeLessThan(WALL.lenFull);
-    expect(w.big).toBeFalsy();
+  it('a hold is rooted while it gathers, and its ring is centred on the Mage, bigger with the hold', () => {
     const b = arena('staff', [[2, 2]]);
     b.run(0.25, { attackSeq: 1, attack: true, mx: 1 });
     const x = b.h.x;
     b.run(0.5, { attackSeq: 1, attack: true, mx: 1 });
     expect(b.h.act).toBe('charge');
     expect(b.h.x).toBeCloseTo(x, 3);
+    const a = arena('staff', [[2, 2]]);
+    a.loose(0.5, 0.2);
+    const z = rings(a.room)[0];
+    expect([z.x, z.y]).toEqual([9, 9]);
+    expect(z.r).toBeGreaterThanOrEqual(STAFF_RING.r);
+    expect(z.r).toBeLessThan(STAFF_RING.rFull);
+    expect(z.big).toBe(false);
   });
 
-  it('let go on the white flash: a bigger wall', () => {
+  it('let go on the white flash: the biggest ring', () => {
     const a = arena('staff', [[2, 2]]);
     const ev = a.loose(WEAPONS.staff.draw! + 0.05, 0.2);
     expect(ev.some((x) => x.k === 'perfect')).toBe(true);
-    const w = walls(a.room)[0];
-    expect(w.big).toBe(true);
-    expect(w.r * 2).toBeCloseTo(WALL.bigLen, 5);
-    expect(w.until - a.room.time).toBeGreaterThan(WALL.life);
-  });
-
-  it('fire burns what crosses it; storm shocks it', () => {
-    for (const el of ['fire', 'storm'] as const) {
-      const a = arena('staff', [[9, 9 - WALL.ahead]], el);
-      a.loose(1.1, 0.6);
-      expect(lost(a.e)).toBeGreaterThan(0);
-      if (el === 'fire') expect(a.e.burnUntil).toBeGreaterThan(a.room.time);
-    }
-  });
-
-  it('frost holds a small goblin back and slows a butcher walking through', () => {
-    const a = arena('staff', [[9, 4]], 'frost', true);
-    a.loose(1.1, 0.2);
-    const w = walls(a.room)[0];
-    Object.assign(a.e, { x: 9, y: 4, kvx: 0, kvy: 0, cooldown: 0, act: 'chase' });
-    const b = Object.assign(newEnemy(30, 'butcher', 10.5, 4), { cooldown: 99, alert: true, respawns: false });
-    a.room.enemies.push(b);
-    a.run(3);
-    // The scrapper is still on the far side of the wall's face; the butcher came through, chilled.
-    expect(a.e.y).toBeLessThan(w.y - (w.th ?? 0));
-    expect(b.y).toBeGreaterThan(w.y);
-    expect(b.chillUntil).toBeGreaterThan(0);
+    const z = rings(a.room)[0];
+    expect(z.big).toBe(true);
+    expect(z.r).toBeCloseTo(STAFF_RING.rBig, 5);
   });
 });
 
@@ -159,46 +135,36 @@ describe('the spellblade', () => {
     expect(a.h.bladeCharge).toBeCloseTo(BLADE.perHit, 5);
   });
 
-  it('a hold spends magic to wreathe it; the last wreathed swing throws a wave of the element', () => {
-    const a = arena('spellblade', [[9, 7.9], [9, 6.6]]);
+  it('a hold costs 35 magic, less with the charge, and spends the charge', () => {
     // (Held past the flash: let go on it, it would be free.)
-    const ev = [...a.loose(0.9, 0.6)];
-    expect(ev.find((x) => x.k === 'magic')).toMatchObject({ n: SPELL.wreathe });
-    expect(a.es[0].burnUntil).toBeGreaterThan(a.room.time);
-    for (let i = 0; i < WREATHE.swings; i++) ev.push(...a.tap(0.6));
-    expect(ev.filter((x) => x.k === 'bladewave').length).toBe(1);
-    // The wave reached the goblin past the blade's reach.
-    expect(lost(a.es[1])).toBeGreaterThan(0);
-    expect(a.h.wreathe).toBe(0);
+    const a = arena('spellblade', [[2, 2]], 'frost');
+    const ev = a.loose(0.9, 0.3);
+    expect(ev.find((x) => x.k === 'magic')).toMatchObject({ n: SPELL.spellblade });
+    const b = arena('spellblade', [[2, 2]], 'frost');
+    b.h.bladeCharge = 0.6;
+    const ev2 = b.loose(0.9, 0.3);
+    expect(ev2.find((x) => x.k === 'magic')).toMatchObject({ n: Math.round(SPELL.spellblade * 0.4) });
+    expect(b.h.bladeCharge).toBe(0);
   });
 
-  it('frost slows and storm jumps to a second goblin', () => {
-    const f = arena('spellblade', [[9, 7.9]], 'frost');
-    f.loose(0.6, 0.6);
-    expect(f.e.chillUntil).toBeGreaterThan(f.room.time);
-    const s = arena('spellblade', [[9, 7.9], [11, 7.9]], 'storm');
-    const ev = s.loose(0.6, 0.6);
-    expect(ev.some((x) => x.k === 'shock')).toBe(true);
-    expect(lost(s.es[1])).toBeGreaterThan(0);
-  });
-
-  it('a full blade wreathes for nothing', () => {
-    const a = arena('spellblade');
+  it('a full blade casts for nothing', () => {
+    const a = arena('spellblade', [[2, 2]], 'frost');
     a.h.bladeCharge = 1;
-    const ev = a.loose(0.6, 0.3);
+    const ev = a.loose(0.9, 0.3);
     expect(ev.some((x) => x.k === 'magic')).toBe(false);
-    expect(ev.some((x) => x.k === 'wreathe')).toBe(true);
+    expect(ev.some((x) => x.k === 'spell')).toBe(true);
     expect(a.h.stamina).toBe(HERO.stamina);
   });
 
-  it('the wreathe let go on the white flash is free and leaves the blade full, PERFECT', () => {
-    const a = arena('spellblade', [[2, 2]]);
+  it('a hold let go on the white flash is free and keeps the charge, PERFECT', () => {
+    const a = arena('spellblade', [[2, 2]], 'frost');
+    a.h.bladeCharge = 0.3;
     const ev = a.loose(0.6, 0.3);
     expect(ev.some((x) => x.k === 'perfect')).toBe(true);
-    expect(ev.some((x) => x.k === 'wreathe')).toBe(true);
+    expect(ev.find((x) => x.k === 'spell')).toMatchObject({ what: 'shatter', big: true });
     expect(ev.some((x) => x.k === 'magic')).toBe(false);
     expect(a.h.stamina).toBe(HERO.stamina);
-    expect(a.h.bladeCharge).toBe(1);
+    expect(a.h.bladeCharge).toBeCloseTo(0.3, 5);
   });
 
   it('block in the parry window is a real parry (stagger, counter window), and it fills the blade', () => {

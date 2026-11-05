@@ -19,21 +19,13 @@ const T: TapCast = { wind: false, k: 0, age: 0 };
 export function tapCast(h: Hero): TapCast | null {
   if (WEAPONS[h.weapon].cls !== 'MAGE' || h.act !== 'attack' || h.heavy) return null;
   const s = currentSwing(h);
-  if (s.wall) return null;
   if (h.actT < s.windup) return (T.wind = true), (T.k = h.actT / Math.max(0.01, s.windup)), (T.age = 0), T;
   const age = h.actT - s.windup;
   return age < TAP_OUT ? ((T.wind = false), (T.k = 1), (T.age = age), T) : null;
 }
 
-/** Wreathed now (or about to be, on the cut being wound up). */
-const wreathing = (h: Hero) => (h.wreathe ?? 0) > 0 && !!h.wreatheEl;
-
-/** The colour a tap is cast in: the wand's and staff's in their element; a spellblade's cut in its
- *  wreathe's while wreathed, else the blade's own violet (an unwreathed cut carries no element). */
-export function tapEl(h: Hero): Augment {
-  if (WEAPONS[h.weapon].spellblade) return wreathing(h) ? h.wreatheEl! : '';
-  return castElement(h);
-}
+/** The colour a tap is cast in: every Mage kit's in its element (the element is the spellbook). */
+export const tapEl = (h: Hero): Augment => castElement(h);
 
 /** How brightly the hand burns with the cast (0..1): rising through the wind-up, a flash as it goes. */
 export function tapGlow(h: Hero): number {
@@ -70,7 +62,7 @@ export function hitEl(src: string, x: number, y: number, heroes: readonly Hero[]
     if (d < hd) (hd = d), (h = o);
   }
   if (!h) return 'fire';
-  return kit === 'spellblade' ? (h.wreathed && h.wreatheEl ? h.wreatheEl : '') : castElement(h);
+  return castElement(h);
 }
 
 /** The hero who made an event at (x, y) (the room puts a shot or slash at the caster's feet). */
