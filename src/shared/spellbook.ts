@@ -19,8 +19,8 @@ export const MAGE_KITS: MageKit[] = ['wand', 'staff', 'spellblade'];
  * STORM.share). The wand's frost tap is ICICLES of them, each `dmg` of the spark.
  */
 export const TAPS: Record<MageKit, Record<Element, { dmg: number; jumps?: number }>> = {
-  wand: { fire: { dmg: 0.45 }, frost: { dmg: 0.45 }, storm: { dmg: 1.35, jumps: 2 } },
-  staff: { fire: { dmg: 0.4 }, frost: { dmg: 1.05 }, storm: { dmg: 1.05, jumps: 1 } },
+  wand: { fire: { dmg: 0.9 }, frost: { dmg: 0.45 }, storm: { dmg: 1.35, jumps: 2 } },
+  staff: { fire: { dmg: 0.65 }, frost: { dmg: 1.05 }, storm: { dmg: 1.05, jumps: 1 } },
   spellblade: { fire: { dmg: 0.6 }, frost: { dmg: 1 }, storm: { dmg: 1, jumps: 1 } },
 };
 /** The wand's frost tap: `n` icicles fanned `spread` radians apart, flying `speed` times the spark's. */

@@ -166,7 +166,9 @@ export const AUGMENTS: Augment[] = ['', 'fire', 'frost', 'storm'];
 export const ELEMENT_NAME: Record<Element, string> = { fire: 'FIRE', frost: 'FROST', storm: 'STORM' };
 
 /** Fire's job, swarms: it burns on, and jumps to anything within `spread` (beyond both bodies). */
-export const BURN = { time: 3, every: 0.5, dmg: 7, spread: 0.7 };
+/** A burn: `dmg` every `every` s for `time` s. Kyle 2026-11-04 ("the fire burns a ton"): 7 a tick to 4, so a burn
+ *  alone no longer kills a small goblin outright; big ones and shield-bearers burn `tough` as long. */
+export const BURN = { time: 3, every: 0.5, dmg: 4, spread: 0.7, tough: 0.5 };
 /** Frost's job, control: chilled goblins move and turn at `slow` and wind up at `windup` of their pace;
  *  a second frost freezes them solid for `freeze` (a heavy blow then shatters them: SHATTER). */
 export const FROST = { chill: 3, slow: 0.5, windup: 0.6, freeze: 2.2 };
