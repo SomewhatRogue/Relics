@@ -70,8 +70,10 @@ export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: Da
   const weak = weakOn(e, o.el || 'physical');
   if (weak !== 1) n = Math.max(1, Math.round(n * weak));
   // Storm on a wet goblin lands harder (a tick, the stream's, has counted it already).
-  if (o.el === 'storm' && !o.tick && wet(e)) n = Math.round(n * STORM.wet);
-  if (!o.tick) sayWeak(e, weak, now, ev, o.el || 'physical');
+  const soak = o.el === 'storm' && !o.tick && wet(e);
+  if (soak) n = Math.round(n * STORM.wet);
+  // (Wet counts as a weakness to storm, so it says WEAK too.)
+  if (!o.tick) sayWeak(e, weak * (soak ? STORM.wet : 1), now, ev, o.el || 'physical');
   // Marked by a relic: the next real blow lands harder, and the mark is spent.
   if (!o.tick && (e.markUntil ?? -9) > now) (n = Math.round(n * MARK.mult)), (e.markUntil = 0);
   if (o.mult && (e.act === 'stunned' || e.act === 'pinned' || frozen(e, now) || snared(e, now))) n = Math.round(n * GUARD.stunnedMult * (o.brutal ? TRAIT.brutal : 1));

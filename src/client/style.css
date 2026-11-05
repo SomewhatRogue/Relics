@@ -181,7 +181,8 @@ body[data-mode='wood']:not([data-taught~='block']) .tb.block,
 body[data-mode='wood']:not([data-taught~='relic']) .tb.relic,
 body[data-mode='wood']:not([data-taught~='relic']) .tb.relic2,
 body[data-mode='wood']:not([data-taught~='potion']) .tb.potion,
-body[data-mode='wood']:not([data-taught~='grab']) .tb.grab { display: none !important; }
+body[data-mode='wood']:not([data-taught~='grab']) .tb.grab,
+body[data-mode='wood']:not([data-taught~='element']) .tb.element { display: none !important; }
 body[data-mode='wood'] .tb.use { display: none; }
 
 /* The wood's lessons: the card, the freeze-frame prompt, praise, the fade in, the button to press. */

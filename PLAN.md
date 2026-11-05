@@ -2,6 +2,15 @@
 
 ## Current slice
 
+**The Mage's elements in the wood** (Claude Opus 5.5, 2026-11-05; Kyle: "have the Mage tutorial explain the
+elements in the full charge place. Have enemies that are weak and resistant to each type, and just explain you
+can cycle your elements and to watch out for that"). Built; waiting on Kyle's play. *Done when* a new Mage, on
+his phone and laptop, finishes the FULL CHARGE in Hew's clearing and gets one more card (Hew on the three, the
+ELEMENT button pulsing gold, X on a laptop), and three goblins come out he can tell apart at a glance (dripping
+in a puddle, in a bark apron, embers and smoke off the kiln-hot one); storm on the wet one, fire on the
+aproned one and frost on the hot one say WEAK and count (WEAK HITS n / 3), the wrong element says RESIST, and
+the way to the stream opens once they're down. Other classes' woods unchanged. Open: Hew's line and the how
+line through the lore keeper and line editor (DECISIONS 2026-11-05).
 **Online on a budget** (Claude Opus 5.5, 2026-11-04; Kyle's Upstash showed 345K of its 500K commands a month
 after a few sessions, and "How do I know if I hit the limit with friends?"). Built; waiting on Kyle's play.
 *Done when* a tab left in town costs next to nothing (silent alone and while still, out of the room after a

@@ -10,6 +10,7 @@ import { drawRoundSign } from './telegraph2';
 import { drawKit } from './backline';
 import { KITTED, drawFoeKit } from './foekits';
 import { drawIronhide } from './ironhidedraw';
+import { drawLessonMark } from './lessonfoes';
 import { drawLogs, drawLogsDead } from './foedraw';
 import { drawMound, drawWolf } from './beastdraw';
 import { blit, blitBody, ease, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
@@ -94,6 +95,8 @@ function scrapper(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
   const knife = () => (e.bow ? bow(c, e, kx, ky, fa) : e.variant === 'hexer' || e.variant === 'drummer' ? drawKit(c, e, bx, by, ax, ay, t) : e.variant && KITTED.has(e.variant) ? drawFoeKit(c, e, bx, by, ax, ay, t) : e.variant === 'lunger' ? undefined : line(c.lit, kx + Math.cos(fa) * reach, ky - 6 + Math.sin(fa) * reach, fa, 0, 4, '#cfd6dc'));
   if (up) knife();
   drawFigure(c, body, bx, by, pz);
+  // The wood's element lesson: wet, aproned or kiln-hot (lessonfoes.ts).
+  drawLessonMark(c, e, bx, by);
   if (!up) knife();
   if (e.act === 'stunned') stars(c, bx, by - 15, 3, 5);
 }

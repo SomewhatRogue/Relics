@@ -87,8 +87,8 @@ export const FEEDING: [number, number][] = [[7.8, 29.7], [13.0, 32.0], [15.9, 35
  *  or full-charge hits (`heavy`). */
 export type Count = 'kills' | 'dodge' | 'block' | 'parry' | 'slip' | 'backstab' | 'heavy' | 'grab' | 'none';
 /** The move a lesson's card shows (its control comes from the device). */
-export type Teach = 'attack' | 'roll' | 'step' | 'block' | 'parry' | 'slip' | 'backstab' | 'heavy' | 'grab' | 'skill' | 'relic';
-export interface Lesson { area: number; name: string; teach: string; card?: Teach; moves: ('attack' | 'roll' | 'block' | 'relic' | 'potion' | 'grab')[]; count: Count; need: number; hew: [number, number]; foes: (Foe & { variant?: 'looter' | 'lunger' | 'heavy' | 'stoker' })[]; more?: Lesson['foes'] }
+export type Teach = 'attack' | 'roll' | 'step' | 'block' | 'parry' | 'slip' | 'backstab' | 'heavy' | 'grab' | 'skill' | 'relic' | 'element';
+export interface Lesson { area: number; name: string; teach: string; card?: Teach; moves: ('attack' | 'roll' | 'block' | 'relic' | 'potion' | 'grab' | 'element')[]; count: Count; need: number; hew: [number, number]; foes: (Foe & { variant?: 'looter' | 'lunger' | 'heavy' | 'stoker' })[]; more?: Lesson['foes'] }
 export const LESSONS: Lesson[] = [
   { area: 0, name: 'THE FIELD', teach: 'ATTACK', moves: ['attack'], count: 'kills', need: 0, hew: [5, 33],
     foes: [{ kind: 'scrapper', variant: 'looter', x: 8, y: 29 }, { kind: 'scrapper', variant: 'looter', x: 13, y: 31 }, { kind: 'scrapper', variant: 'looter', x: 16, y: 35 }],
@@ -143,6 +143,20 @@ const BY_CLASS: Record<HeroClass, Lesson[]> = {
 };
 export const lessonsFor = (cls: HeroClass): Lesson[] => BY_CLASS[cls] ?? L;
 
+/**
+ * A Mage's full charge goes on to one more step in the same clearing (sim/woodelement.ts): switching
+ * element. Three goblins, each marked by its look and each weak to one element (shared/weakness.ts):
+ * wet through (storm, by the wet rule), in a bark apron (fire), hot off the kiln (frost; shrugs off fire).
+ */
+export const ELEMENT_FOES: (Foe & { variant: 'soaked' | 'aproned' | 'kilnhot' })[] = [
+  // Close round the middle of the clearing, so all three are in sight on a phone.
+  { kind: 'scrapper', variant: 'kilnhot', x: 36.6, y: 16.0, awake: true },
+  { kind: 'scrapper', variant: 'aproned', x: 30.0, y: 22.0, awake: true },
+  { kind: 'scrapper', variant: 'soaked', x: 36.2, y: 21.8, awake: true },
+];
+/** What each of them is weak to. */
+export const WEAK_TO = { soaked: 'storm', aproned: 'fire', kilnhot: 'frost' } as const;
+
 /** The Stoker, and the two that come out of the trees at half its health. */
 export const STOKER: Foe & { variant: 'stoker' } = { kind: 'butcher', variant: 'stoker', x: 59, y: 4.5, name: 'THE STOKER', awake: false };
 /** The Stoker bellows for help twice: at two thirds of its health, and at one third (a bigger wave). */
@@ -196,6 +210,7 @@ export const LINES = {
     heavy: "Three coming up past the kilns, and slow about it, so there's time to draw it all the way back, and you take it, mind. I've seen half a draw go into one of them, and all it did was make it *cross*.",
     charge: "Four of them bunched round my kiln like they're warming their hands. If that thing does what I think it does, you'll let it build a good while first, I'd have thought. Don't tell me how, mind, I'd sooner not know.",
     grab: "Two more out of the trees, and fresh ones. Now, you're the size for it, I'd say, and there's crates come off those carts, so pick one up and throw it at them. Or get round the back of one while it's got its head down and pick *it* up instead. They hate that, I've noticed.",
+    element: "Now these three aren't alike, see, and you'll want to mind which is which. That one's wet through, it's been at my water butt again, and that one's got my old bark apron on, which goes up like *tinder*, I've lost two that way. And the one by the kiln's been sat on it so long it's hot as a hob, you'd not set fire to that one if you stood there all day.",
     slip: "Now, this big one breaks a guard like kindling, and you've not got much guard to break, so you wait for it, wait, and be gone *just* as it comes down, and then it's yours while it gets over the surprise.",
   },
   /** When you get it right (a short pause in the fight). */
@@ -213,6 +228,7 @@ export const LINES = {
     backstab: 'Hits from behind do far more damage.',
     heavy: 'Hold attack and let go on the white flash. That full shot, a PERFECT, hits much harder.',
     slip: "Dodge just as a blow lands to pass through it. That staggers the attacker (not arrows).",
+    element: 'ELEMENT switches between fire, frost and storm. Some goblins take extra from one (WEAK) and shrug off another (RESIST). Watch for it.',
     /** The dodge lesson's line for a class that can't hold a block. */
     rollLight: "You can't block. Dodge out of any red before it lands.",
   },

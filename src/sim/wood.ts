@@ -11,6 +11,7 @@ import { isDead } from './damage';
 import { HERO_ID, hew, say, spawn } from './woodkit';
 import { stepCut } from './woodcut';
 import { outOfWood, stepGuard, type Guard } from './woodguard';
+import { startElement, stepElementLesson, wantsElement, type ElementStep } from './woodelement';
 export { CUT, skipCut } from './woodcut';
 import type { ArenaRoom } from './room';
 import type { Enemy, FightEvent, Hero } from './types';
@@ -53,10 +54,12 @@ export interface WoodState {
   from: { x: number; y: number } | null;
   /** Orla of the watch, come to meet you once the Stoker's dead (woodguard.ts). */
   guard?: Guard;
+  /** A Mage's element step, after the full charge (sim/woodelement.ts). */
+  element?: ElementStep;
 }
 /** What the world is held for, and what lets it go on. */
 export type Move = 'move' | Teach;
-export interface Hold { kind: 'card' | 'act' | 'praise' | 'talk' | 'relic'; who: string; text: string; how?: string; move?: Move; need: 'continue' | 'move' | 'attack' | 'roll' | 'block' | 'time'; t: number; until: number }
+export interface Hold { kind: 'card' | 'act' | 'praise' | 'talk' | 'relic'; who: string; text: string; how?: string; move?: Move; need: 'continue' | 'move' | 'attack' | 'roll' | 'block' | 'element' | 'time'; t: number; until: number }
 
 /** Waking, in seconds: the fade in, his slow walk over; then his lines wait for a tap; a breath on your feet. */
 export const WAKE = { fade: 2.5, arrive: 5.2, standing: 0.8 };
@@ -211,6 +214,12 @@ export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: nu
     return;
   }
   if (!w.entered) return;
+  // A Mage's element step: its own count; the way on opens once its three are down.
+  if (w.element) {
+    oneAtATime(w, room, h.x, h.y);
+    if (stepElementLesson(w, room, ev)) onward(w, room);
+    return;
+  }
   const kind = lesson.count;
   let good = false;
   for (const e of ev) if (counts(kind, e)) (w.count += kind === 'kills' ? 0 : 1), (good = true);
@@ -258,10 +267,17 @@ export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: nu
     return;
   }
   if (!left.length && w.count >= lesson.need) {
-    openGate(room, w.stage);
-    if (w.stage === 1) say(w, room, 'HEW', LINES.north, 5);
-    Object.assign(w, { stage: w.stage + 1, entered: false, count: 0, ids: [] });
+    // A Mage's full charge goes on to switching element, in the same clearing.
+    if (wantsElement(w)) return startElement(w, room);
+    onward(w, room);
   }
+}
+
+/** The lesson's done: its gate opens and Hew goes on ahead. */
+function onward(w: WoodState, room: ArenaRoom): void {
+  openGate(room, w.stage);
+  if (w.stage === 1) say(w, room, 'HEW', LINES.north, 5);
+  Object.assign(w, { stage: w.stage + 1, entered: false, count: 0, ids: [], element: undefined });
 }
 
 /** What to show over the field: the lesson, the control, how far along. */
@@ -275,6 +291,7 @@ export function woodGoal(w: WoodState, touch: boolean): { title: string; text: s
     : { 'WALK OUT': 'MOVE BEFORE IT LANDS', GRAB: 'G BY A CRATE, G AGAIN TO THROW', ATTACK: 'CLICK', DODGE: 'SPACE', BLOCK: 'HOLD RIGHT CLICK', PARRY: 'TAP RIGHT CLICK WHILE THE RED FLASHES WHITE', SKILL: 'E', BACKSTAB: 'GET BEHIND, CLICK', 'FULL DRAW': 'HOLD LEFT CLICK, LET GO', 'FULL CHARGE': 'HOLD LEFT CLICK, LET GO', 'LAST SECOND': 'SPACE AS IT LANDS' };
   if (w.wake >= 0) return { title: '', text: '' };
   if (!w.entered) return { title: l.name, text: w.stage ? 'Follow Hew' : 'Walk' };
+  if (w.element) return { title: `ELEMENT: ${touch ? 'TAP ELEMENT' : 'X'}`, text: `WEAK HITS ${Math.min(w.count, 3)} / 3` };
   const what = { kills: '', dodge: 'DODGES', block: 'BLOCKS', parry: 'PARRIES', slip: 'LAST-SECOND DODGES', backstab: 'FROM BEHIND', heavy: 'FULL SHOTS', grab: 'THROWN', none: '' }[l.count];
   // A Warrior's field: hit them first; the throwing comes with the second pair.
   if (l.count === 'grab') return w.more ? { title: `GRAB: ${key.GRAB}`, text: `${what} ${Math.min(w.count, l.need)} / ${l.need}` } : { title: `ATTACK: ${key.ATTACK}`, text: 'Clear them' };

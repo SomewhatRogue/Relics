@@ -210,6 +210,8 @@ export const VARIANTS = {
   banner: { hp: BANNER.hp }, netter: { hp: NETTER.hp }, thief: { hp: THIEF.hp }, log: { hp: LOGS.hp }, roofer: { hp: ROOF.hp },
   ironhide: { hp: IRONHIDE.hp },
   wolf: { hp: WOLF.hp }, keeper: { hp: KEEPER.hp }, oiler: { hp: OIL.hp }, torch: { hp: TORCH.hp }, sapper: { hp: SAPPER.hp }, blind: { hp: CAVE.hp },
+  /** The Mage's element lesson (shared/wood.ts ELEMENT_FOES): plain small goblins but for what they're weak to. */
+  soaked: { hp: 24 }, aproned: { hp: 24 }, kilnhot: { hp: 24 },
   heavy: { hp: 110, reach: 1.7, speed: 0.75, swing: { windup: 1.0, active: 0.1, recover: 0.9, dmg: 18, knock: 8, range: 1.9, arc: 100, unblockable: false } as EnemyAttackSpec },
   stoker: {
     hp: 520,

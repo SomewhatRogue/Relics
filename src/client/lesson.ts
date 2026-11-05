@@ -8,7 +8,7 @@ import type { Move } from '../sim/wood';
 import { dodgeName } from '../shared/weapons';
 import { finish, speak, typing } from './speech';
 
-const NAME: Record<Move, string> = { move: 'MOVE', step: 'WALK OUT', attack: 'ATTACK', roll: 'DODGE', block: 'BLOCK', parry: 'PARRY', skill: 'SKILL', relic: 'RELIC', grab: 'GRAB AND THROW', backstab: 'BACKSTAB', heavy: 'FULL SHOT', slip: 'LAST SECOND' };
+const NAME: Record<Move, string> = { move: 'MOVE', step: 'WALK OUT', attack: 'ATTACK', roll: 'DODGE', block: 'BLOCK', parry: 'PARRY', skill: 'SKILL', relic: 'RELIC', grab: 'GRAB AND THROW', backstab: 'BACKSTAB', heavy: 'FULL SHOT', slip: 'LAST SECOND', element: 'ELEMENT' };
 const KEY: Record<Move, [string, string]> = {
   move: ['W A S D', 'THE LEFT STICK'],
   step: ['W A S D', 'THE LEFT STICK'],
@@ -22,8 +22,9 @@ const KEY: Record<Move, [string, string]> = {
   backstab: ['LEFT CLICK, FROM BEHIND', 'ATTACK, FROM BEHIND'],
   heavy: ['HOLD LEFT CLICK', 'HOLD ATTACK'],
   slip: ['SPACE, AS IT LANDS', 'ROLL, AS IT LANDS'],
+  element: ['X', 'ELEMENT'],
 };
-const BUTTON: Partial<Record<Move, string>> = { attack: '.tb.attack', roll: '.tb.roll', block: '.tb.block', parry: '.tb.block', skill: '.tb.relic', relic: '.tb.relic2', grab: '.tb.grab', backstab: '.tb.attack', heavy: '.tb.attack', slip: '.tb.roll' };
+const BUTTON: Partial<Record<Move, string>> = { attack: '.tb.attack', roll: '.tb.roll', block: '.tb.block', parry: '.tb.block', skill: '.tb.relic', relic: '.tb.relic2', grab: '.tb.grab', backstab: '.tb.attack', heavy: '.tb.attack', slip: '.tb.roll', element: '.tb.element' };
 
 export class LessonView {
   private el = document.createElement('div');

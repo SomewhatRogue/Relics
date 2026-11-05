@@ -15,9 +15,10 @@ const BTN: Record<string, [string, string][]> = {
   relic: [['.tb.relic', 'SKILL'], ['.tb.relic2', 'RELIC']],
   potion: [['.tb.potion', 'POTION']],
   grab: [['.tb.grab', 'GRAB']],
+  element: [['.tb.element', 'ELEMENT']],
 };
 /** A laptop's: the move and its key. */
-const KEYS: Record<string, string> = { attack: 'ATTACK: LEFT CLICK', roll: 'DODGE: SPACE', block: 'BLOCK: RIGHT CLICK', relic: 'SKILL: E', potion: 'POTION: Q', grab: 'GRAB: G' };
+const KEYS: Record<string, string> = { attack: 'ATTACK: LEFT CLICK', roll: 'DODGE: SPACE', block: 'BLOCK: RIGHT CLICK', relic: 'SKILL: E', potion: 'POTION: Q', grab: 'GRAB: G', element: 'ELEMENT: X' };
 /** What this hero's guard is called: BLOCK, or PARRY for a parry-only kit (the spellblade too). */
 function guardName(me: Hero): string {
   return guardOf(WEAPONS[me.weapon]) === 'parry' ? 'PARRY' : 'BLOCK';
