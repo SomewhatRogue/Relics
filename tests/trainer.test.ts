@@ -54,7 +54,7 @@ describe('trainer', () => {
     expect(drillState(p, 'skill')).toBe('buy');
     // A Warrior's dodge leaves nothing behind; a Ranger's technique waits on the snare.
     expect(learnLesson(Object.assign(hero(10, 1000), { learned: ['skill'] }), 'leave')).toBe(false);
-    const r = hero(drillLevel('technique', 0), 1000, 'RANGER');
+    const r = hero(Math.max(drillLevel('technique', 0), TEACHES.leave.level), 1000, 'RANGER');
     expect(drillState(r, 'technique')).toBe('needs');
     expect(learnLesson(r, 'leave')).toBe(true);
     expect(drillState(r, 'technique')).toBe('buy');
@@ -74,7 +74,8 @@ describe('trainer', () => {
 
   it('the rows say what can be bought, what is locked and what is done', () => {
     const fresh = trainerRows(hero(1, 0, 'MAGE'));
-    expect(fresh.map((x) => x.id)).toEqual(['skill', 'firering', 'tether', 'leave', ...DRILL_ORDER]);
+    // The technique drill is three rows of techniques, then the movement ladder's three rungs.
+    expect(fresh.map((x) => x.id)).toEqual(['skill', 'firering', 'tether', 'leave', ...DRILL_ORDER.flatMap((d) => (d === 'technique' ? ['primed', 'attuned', 'spellthief', 'blinkburst', 'blinkthrough', 'halfblink'] : [d]))]);
     expect(new Set(fresh.map((x) => x.key)).size).toBe(fresh.length);
     expect(fresh.every((x) => x.state === 'locked')).toBe(true);
     expect(fresh.find((x) => x.id === 'power')!.tag).toBe('LEVEL 2');

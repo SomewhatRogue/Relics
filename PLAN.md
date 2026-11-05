@@ -19,6 +19,17 @@ he reads the board at a glance (each job a row: title, kind, length, hour, weath
 and reads it in a card with the posting, its rows and GO ALONE, GATHER A PARTY and BACK; the expedition
 and the story mission use the same card (the story's says it needs a party); and gathering, joining and
 setting out with friends work as before. Open: the new words through the lore keeper and line editor.
+**The movement ladder, five classes; the Mage's three techniques** (Claude Opus 5.5, 2026-11-04; Kyle:
+"pure upgrades, not just choosing"). Built; waiting on Kyle's play. *Done when* each class's trainer has a
+section named for its dodge (JUMP, BLINK, DASH, GUARD, TAUNT) with three rungs taught in order at levels
+5, 10 and 15 for 250, 760 and 1450 gold, rows saying LEARNED, LEARN (level and price) or LEVEL n; each
+rung fires with a small tell (DECISIONS 2026-11-04 has the numbers): Ranger JUMP SHOT, TWO SNARES, HARD
+LANDING; Mage BLINK BURST, BLINK THROUGH, PERFECT BLINK; Rogue CALTROPS, THROUGH THE LEGS, SHAKE IT OFF;
+Healer SHELTER, MENDING PARRY, COVER; Warrior TAUNT on the dodge's slot (phone) and SPACE (laptop),
+STAND FAST, COWING ROAR, working for a guest online; and the Mage learns PRIMED SPELLS, ATTUNED and
+SPELLTHIEF at 4, 7 and 10. Old heroes start with no rungs. Open: the names and lines through the lore
+keeper and line editor; ATTUNED's storm part waits on the wet rule (wt-storm) reading `wetMult`; the
+third rungs wait on the level cap lifting past 10.
 
 **The hero clear of the buttons on a phone** (Claude Opus 5.5, 2026-11-04; Kyle: "Your potion and things can
 cover your character while in game"). Built; waiting on Kyle's play. *Done when* on his phone upright, flat
@@ -33,7 +44,7 @@ wait on, taught one at a time in order at levels 4, 7 and 10 for 180, 545 and 10
 learned with any of the class's weapons, each with a small tell when it fires: Warrior SLAM, SHOULDER
 CHARGE, IRON FEET; Rogue KNIFEWORK, SLIP AWAY, CUTPURSE; Ranger TRAPPER, QUICK NOCK, STEADY; Cleric MENDING
 HANDS, SANCTUARY STEP, JUDGEMENT (DECISIONS 2026-11-04 has the numbers). An old hero with technique rank n
-knows the first n. The Mage's row is unchanged (its ATTUNED and SPELLTHIEF come after the spell rewrite).
+knows the first n. The Mage's three (PRIMED SPELLS, ATTUNED, SPELLTHIEF) came with the movement ladder.
 Open: the names and the twelve lines through the lore keeper and line editor (SLIP AWAY stands in for
 Kyle's VANISH, the Rogue's skill's name); whether STEADY's new aim drift (a Ranger's shot on the move sways
 up to 3 degrees) feels right on the shortbow.
@@ -589,12 +600,7 @@ Kyle loves it; hold until after the network tests on the new map types (usage li
 - Next: barks as you walk past something newly mended; a raid you're in town for (a fight at the
   breach); other world events (a flood, a fire in the lane). The town remembers what it lost.
 
-## Next: the movement ladder, every 5 levels (Kyle 2026-11-04; Claude Opus 5.5)
+## Done: the movement ladder (built 2026-11-04, Claude Opus 5.5; see Current slice)
 
-Pure upgrades, no either-or: each class's trainer teaches the next rung at 5, 10 and 15. Names via the lore keeper.
-- Ranger (the jump): 5 shoot in the air; 10 the jump's snare catches two; 15 landing knocks small goblins over.
-- Mage (Blink): 5 a burst of your element where you vanished; 10 blink through a goblin to its back; 15 half cost right after a perfect.
-- Rogue (the roll; Shadow Step stays its own spell): 5 caltrops that slow and bleed; 10 roll through a goblin's legs, next hit a backstab; 15 a roll shakes off burning and poison.
-- Healer (no dodge; the guard): 5 friends within 2 tiles take less while you block; 10 a parry heals friends near you; 15 block for a friend beside you.
-- Warrior (no dodge; Kyle "maybe a taunt", still thinking): 5 TAUNT on the empty dodge slot, pulls goblins within 5 tiles; 10 taunted goblins hit softer, no knockback while it lasts; 15 the taunt staggers small ones.
-- Techniques become real moves too, all learned ones always on (Kyle: "pure upgrades"), three a class. Shape still to settle.
+Pure upgrades, every class every rung, at 5, 10 and 15. TWO SNARES stands for "the snare catches two"
+(TRAPPER already does that). The Mage's techniques are PRIMED SPELLS, ATTUNED, SPELLTHIEF.

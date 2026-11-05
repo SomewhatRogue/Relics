@@ -10,6 +10,7 @@
  */
 import { HOUND, SNARE, WEAPONS } from '../shared/tuning';
 import { catches } from './techranger';
+import { snareSpots } from './ladderranger';
 import { damage, isDead } from './damage';
 import { houndBite, houndBites, houndWait, snareHold, snareMax, snareWait } from './knacks';
 import { knows, type Enemy, type FightEvent, type Hero, type Hound, type Snare } from './types';
@@ -19,10 +20,15 @@ import { stun } from './stuns';
 export function laySnare(h: Hero, snares: Snare[], now: number, ev: FightEvent[]): void {
   if (WEAPONS[h.weapon].cls !== 'RANGER' || now < h.snareReady || !knows(h, 'leave')) return;
   h.snareReady = now + snareWait(h);
-  const mine = snares.filter((s) => s.owner === h.id);
-  if (mine.length >= snareMax(h)) snares.splice(snares.indexOf(mine[0]), 1);
-  snares.push({ owner: h.id, x: h.rollX, y: h.rollY, until: now + SNARE.life, hold: snareHold(h), left: catches(h) });
-  ev.push({ k: 'snareset', x: h.rollX, y: h.rollY });
+  // TWO SNARES: a pair across the jump, and twice as many down at once (sim/ladderranger.ts).
+  const spots = snareSpots(h), most = snareMax(h) * spots.length;
+  for (const [x, y] of spots) {
+    const mine = snares.filter((s) => s.owner === h.id);
+    if (mine.length >= most) snares.splice(snares.indexOf(mine[0]), 1);
+    snares.push({ owner: h.id, x, y, until: now + SNARE.life, hold: snareHold(h), left: catches(h) });
+    ev.push({ k: 'snareset', x, y });
+  }
+  if (spots.length > 1) ev.push({ k: 'twinsnare', x: h.rollX, y: h.rollY });
 }
 
 /** A goblin steps in: held (or slowed, if big). False once it has gone off or worn out. With TRAPPER

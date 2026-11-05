@@ -24,6 +24,8 @@ import { hearFrom, samePack } from './packs';
 import { stepOwn } from './ownfoes';
 import { netted } from './netter';
 import { blindNotice } from './blind';
+import { tauntTarget } from './taunt';
+import { CALTROPS } from '../shared/ladder';
 import type { Slick } from './oil';
 
 /** The room's oil slicks, for the torch-bearers (the room sets it before its goblins move). */
@@ -47,6 +49,9 @@ export function newEnemy(id: number, kind: Enemy['kind'], x: number, y: number):
 }
 
 function nearest(e: Enemy, heroes: Hero[], now: number): Hero | null {
+  // Taunted: it comes for the Warrior who roared, while it lasts (sim/taunt.ts).
+  const taunter = tauntTarget(e, heroes, now);
+  if (taunter) return taunter;
   // A war cry it heard: it comes for whoever gave it, and nobody else, until it wears off.
   const cried = heroes.find((h) => h.rallyUntil > now && h.act !== 'down' && Math.hypot(h.x - e.x, h.y - e.y) <= HORN.radius * 1.5);
   if (cried) return cried;
@@ -103,7 +108,7 @@ function runAttack(e: Enemy, heroes: Hero[], now: number, dt: number, ev: FightE
     ev.push({ k: 'impact', x: round ? a.cx : e.x, y: round ? a.cy : e.y, kind: a.kind });
     // Blows land on your own level; arrows reach up and down.
     const before = heroes.map((h) => h.hp);
-    for (const h of heroes) if (a.kind === 'shot' || (h.z ?? 0) === (e.z ?? 0)) hitHero(e, a, h, now, ev);
+    for (const h of heroes) if (a.kind === 'shot' || (h.z ?? 0) === (e.z ?? 0)) hitHero(e, a, h, now, ev, heroes);
     if (e.attack === null) return true;
     // Their own get in the way: a missed arrow takes the first goblin in its line; a butcher's blow
     // lands on any small goblin under it.
@@ -123,7 +128,7 @@ function runCharge(e: Enemy, a: EnemyAttack, heroes: Hero[], now: number, ev: Fi
   if (going) {
     a.cx = e.x + a.dx * 0.4;
     a.cy = e.y + a.dy * 0.4;
-    for (const h of heroes) if (!(a.hit ??= []).includes(h.id) && (h.z ?? 0) === (e.z ?? 0) && attackCovers(a, h)) (a.hit.push(h.id), hitHero(e, a, h, now, ev));
+    for (const h of heroes) if (!(a.hit ??= []).includes(h.id) && (h.z ?? 0) === (e.z ?? 0) && attackCovers(a, h)) (a.hit.push(h.id), hitHero(e, a, h, now, ev, heroes));
     // Its own in the way go flying.
     if (a.kind === 'charge') for (const o of others) if (o !== e && o.kind === 'scrapper' && !isDead(o) && !a.hit!.includes('g' + o.id) && attackCovers(a, o as unknown as Hero)) a.hit!.push('g' + o.id), damage(o, Math.round(a.dmg * FRIENDLY.blow), now, ev, { heavy: true, how: 'burst' }), shove(o, a.dx, a.dy, a.knock, o.weight);
     if (e.attack === null) return true;
@@ -234,7 +239,7 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   const want = Math.atan2(uy, ux), have = Math.atan2(e.fy, e.fx);
   let diff = want - have;
   diff = Math.atan2(Math.sin(diff), Math.cos(diff));
-  const slow = (e.chillUntil > now ? FROST.slow : 1) * (e.snareUntil > now ? NET.slow : 1) * (e.roused ? DRUMMER.rouse.pace : 1) * ((e.hobbleUntil ?? -9) > now ? HOBBLE.slow : 1);
+  const slow = (e.chillUntil > now ? FROST.slow : 1) * (e.snareUntil > now ? NET.slow : 1) * (e.roused ? DRUMMER.rouse.pace : 1) * ((e.hobbleUntil ?? -9) > now ? HOBBLE.slow : 1) * ((e.caltropUntil ?? -9) > now ? CALTROPS.slow : 1);
   const rate = e.variant === 'log' ? LOGS.turn : spec.turn, turn = Math.max(-rate * slow * dt, Math.min(rate * slow * dt, diff)), na = have + turn;
   e.fx = Math.cos(na);
   e.fy = Math.sin(na);

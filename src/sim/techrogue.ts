@@ -17,7 +17,10 @@ import type { Enemy, Hero } from './types';
 export function rogueStruck(h: Hero, e: Enemy, w: World): void {
   if (WEAPONS[h.weapon].cls !== 'ROGUE' || isDummy(e) || e.kind === 'nest') return;
   const tx = h.x - e.x, ty = h.y - e.y;
-  if ((e.fx * tx + e.fy * ty) / (Math.hypot(tx, ty) || 1) < rearCos(h)) backstabbed(h, e, w);
+  // (THROUGH THE LEGS made this hit a backstab wherever it came from: combat.ts hitEnemy.)
+  const legs = h.legsStab === e.id;
+  if (legs) h.legsStab = undefined;
+  if (legs || (e.fx * tx + e.fy * ty) / (Math.hypot(tx, ty) || 1) < rearCos(h)) backstabbed(h, e, w);
 }
 
 /** A backstab landed on `e` (killed or not): whatever techniques this Rogue knows. */

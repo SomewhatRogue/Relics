@@ -1,12 +1,12 @@
 /**
- * The trainer's screen in sections (SKILLS, TECHNIQUE, RANKS, KNACKS), each a header you tap to open
+ * The trainer's screen in sections (SKILLS, TECHNIQUE, the ladder, RANKS, KNACKS), each a header you tap to open
  * or close. Closed, a header still says where you stand in it and whether anything is ready to buy.
  * Which are open is remembered on this device (localStorage, a per-viewer convenience only).
  */
-export type SecId = 'skills' | 'craft' | 'ranks' | 'knacks';
+export type SecId = 'skills' | 'craft' | 'ladder' | 'ranks' | 'knacks';
 
 const KEY = 'relic.trainer.open';
-const DEFAULT: Record<SecId, boolean> = { skills: true, craft: false, ranks: true, knacks: false };
+const DEFAULT: Record<SecId, boolean> = { skills: true, craft: false, ladder: false, ranks: true, knacks: false };
 
 export function openSecs(): Record<SecId, boolean> {
   try {

@@ -97,7 +97,7 @@ export function drawSkills3(g: CanvasRenderingContext2D, room: ArenaRoom, P: Pro
 /** Their light, as the flat view gives it (skillsdraw.ts skillLights), in tiles for the 3D lights. */
 export function skillLights3(room: ArenaRoom, out: L3[]): void {
   for (const z of room.zones) {
-    if (!z.kind || z.kind === 'flamering' || z.kind === 'stormring') continue;
+    if (!z.kind || z.kind === 'flamering' || z.kind === 'stormring' || z.kind === 'caltrops' || z.kind === 'taunt') continue;
     const k = Math.min(1, (z.until - room.time) / 0.6);
     if (z.kind === 'fire') out.push({ x: z.x, y: 0.7, z: z.y, r: z.r * 1.6 + 0.6, i: 0.9 * k, c: [1, 0.55, 0.25], f: 15 });
     else if (room.time >= (z.at ?? 0)) out.push({ x: z.x, y: 1, z: z.y, r: z.r + 0.8, i: 0.3 * k, c: [1, 0.92, 0.7] });

@@ -13,6 +13,7 @@ import type { Enemy, FightEvent, Hero, Javelin, Prop, Survivor } from './types';
 import { stun } from './stuns';
 import { currentMap } from '../shared/arena';
 import { burnFor, spreadFor } from '../shared/sky';
+import { burnLonger, rimeUp } from './techmage';
 
 /** Everything an element can reach, for one tick. */
 export interface World {
@@ -50,6 +51,8 @@ export function afflict(w: World, e: Enemy, el: Augment, n: number, jumps: numbe
   if (el === 'fire') {
     if (frozen(e, now) || chilled(e, now)) return steam(w, e);
     ignite(e, now, ev);
+    // ATTUNED: a Mage's fire burns longer (sim/techmage.ts).
+    burnLonger(w, e);
   } else if (el === 'frost') {
     if (burning(e, now)) return steam(w, e);
     if (frozen(e, now)) return;
@@ -66,9 +69,11 @@ export function afflict(w: World, e: Enemy, el: Augment, n: number, jumps: numbe
   } else zap(w, e, n, jumps);
 }
 
-/** Frost that only slows (a Mage's tap, never a freeze on its own): fire on the chilled is steam, as ever. */
-export function chill(w: World, e: Enemy): void {
+/** Frost that only slows (a Mage's tap, never a freeze on its own): fire on the chilled is steam, as ever.
+ *  With ATTUNED, chilling hits (`share` of one each) build up and the third freezes (sim/techmage.ts). */
+export function chill(w: World, e: Enemy, share = 1): void {
   if (burning(e, w.now)) return afflict(w, e, 'frost', 0);
+  if (rimeUp(w, e, share)) return afflict(w, e, 'frost', 0);
   if (e.chillUntil <= w.now) w.ev.push({ k: 'chill', x: e.x, y: e.y });
   e.chillUntil = Math.max(e.chillUntil, w.now + FROST.chill);
 }

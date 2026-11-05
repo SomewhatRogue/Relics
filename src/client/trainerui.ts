@@ -2,7 +2,8 @@
  * Your trainer's screen, phone first: where you stand (level, experience to the next, gold), any
  * level-up picks waiting, then the training in sections you open and close (trainsections.ts):
  * SKILLS (the class's three, which you carry, what each does and the level it's taught at),
- * TECHNIQUE (the class's three techniques, or a Mage's ranks), RANKS (the base stats) and KNACKS (the tree). A row shows its
+ * TECHNIQUE (the class's three techniques), the movement ladder (titled by the dodge it climbs: JUMP,
+ * BLINK, DASH, GUARD, TAUNT), RANKS (the base stats) and KNACKS (the tree). A row shows its
  * ranks as pips, what the next rank adds, and its price, the level it waits on, or MAX; tap it for
  * the whole ladder and one buy button. The rows come from shared/trainrows.ts.
  */
@@ -13,6 +14,7 @@ import { RELICS, SKILL_CHOICES, CLASS_SKILL, type RelicId } from '../shared/magi
 import { trainerRows, type Pip, type TrainRow } from '../shared/trainrows';
 import { knowsSkill } from '../shared/skillteach';
 import type { DrillId } from '../shared/drills';
+import { LADDER_TITLE } from '../shared/ladder';
 import type { Game } from './game';
 import type { Panel } from './panels';
 import { line } from './speech';
@@ -59,6 +61,8 @@ const nextLevel = (rs: TrainRow[]) => Math.min(...rs.filter((r) => r.state === '
 export function openTrainer(g: Game, panel: Panel, title: string, who: string, greet: string): void {
   const p = g.profile, again = () => openTrainer(g, panel, title, who, greet), rows = trainerRows(p), open = openSecs();
   const skills = rows.filter((r) => r.group === 'skills'), craft = rows.filter((r) => r.group === 'craft'), ranks = rows.filter((r) => r.group === 'ranks');
+  const rungs = rows.filter((r) => r.group === 'ladder'), lNext = nextLevel(rungs);
+  const ladderSum = `${rungs.filter((r) => r.state === 'max').length} OF ${rungs.length}` + (lNext ? ` &middot; NEXT AT LEVEL ${lNext}` : '');
   // Level-up picks: tap one to take it.
   const offer = p.picks > 0 ? perkOffer(p) : [];
   const picks = offer.length ? `<h3 class="tr-h">${p.picks > 1 ? `${p.picks} PICKS WAITING` : 'A PICK WAITING'}</h3>` +
@@ -71,9 +75,9 @@ export function openTrainer(g: Game, panel: Panel, title: string, who: string, g
   const skillBody = skills.map((r) => skillRow(r, carried, !!r.skill && knowsSkill(p, r.skill))).join('') +
     (known.length > 1 ? '<p class="tr-note">Tap a skill you know to carry it. One at a time; changing is free.</p>' : '');
   // The class's own craft, and the base stats.
-  // A class's three techniques (rows of their own), or a Mage's one drill of ranks.
-  const techs = craft.filter((r) => r.tech), tech = craft.find((r) => r.id === 'technique'), cNext = nextLevel(craft);
-  const craftSum = (tech ? `${tech.name} ${tech.rank}/${tech.max}` : `${techs.filter((r) => r.state === 'max').length} OF ${techs.length}`) + (cNext ? ` &middot; NEXT AT LEVEL ${cNext}` : '');
+  // A class's three techniques, rows of their own (and the dodge's leave-behind lesson).
+  const techs = craft.filter((r) => r.tech), cNext = nextLevel(craft);
+  const craftSum = `${techs.filter((r) => r.state === 'max').length} OF ${techs.length}` + (cNext ? ` &middot; NEXT AT LEVEL ${cNext}` : '');
   const craftBody = craft.map((r) => (r.tech ? techRow(r) : row(r))).join('');
   const have = ranks.reduce((n, r) => n + r.rank, 0), all = ranks.reduce((n, r) => n + r.max, 0), rNext = nextLevel(ranks);
   const rankSum = `${have} OF ${all}` + (rNext && !ready(ranks) ? ` &middot; NEXT AT LEVEL ${rNext}` : '');
@@ -83,6 +87,7 @@ export function openTrainer(g: Game, panel: Panel, title: string, who: string, g
   const html = head(g) + (greet ? `<p><b>${who}:</b> ${line(`"${greet}"`, who)}</p>` : '') + picks +
     section('skills', 'SKILLS', skillSum, ready(skills), skillBody, open.skills) +
     section('craft', 'TECHNIQUE', craftSum, ready(craft), craftBody, open.craft) +
+    section('ladder', LADDER_TITLE[p.cls], ladderSum, ready(rungs), rungs.map(techRow).join(''), open.ladder) +
     section('ranks', 'RANKS', rankSum, ready(ranks), ranks.map(row).join(''), open.ranks) +
     section('knacks', 'KNACKS', p.perks.length ? `${p.perks.length} TAKEN` : 'NONE YET', p.picks, knackBody, open.knacks || !!picks);
   panel.show(title, html);
@@ -107,7 +112,7 @@ export function openRow(g: Game, panel: Panel, title: string, key: string, back:
     (r.lesson ? '' : `<div class="tr-now"><span>NOW</span><b>${r.now || 'nothing yet'}</b></div>` + (r.next ? `<div class="tr-now"><span>NEXT</span><b>${r.next}</b></div>` : '')) + ladder;
   const label = r.state === 'max' ? '' : r.state === 'locked' ? `LEVEL ${r.level}` : r.state === 'needs' ? `LEARN ${r.needs} FIRST` :
     `${r.lesson ? 'LEARN' : `RANK ${r.rank + 1}`}: ${r.price} GOLD`;
-  // (A technique is the technique drill's next rank.)
-  const buy = () => (r.skill && r.id !== 'skill' ? g.learnSkill(r.skill) : r.tech ? g.buyDrill('technique') : r.lesson ? g.learn(r.id as 'skill' | 'leave') : g.buyDrill(r.id as DrillId), stay());
+  // (A technique is the technique drill's next rank, a rung the ladder drill's.)
+  const buy = () => (r.skill && r.id !== 'skill' ? g.learnSkill(r.skill) : r.tech ? g.buyDrill('technique') : r.rung ? g.buyDrill('ladder') : r.lesson ? g.learn(r.id as 'skill' | 'leave') : g.buyDrill(r.id as DrillId), stay());
   panel.show(title, html, [...(label ? [{ label, primary: r.state === 'buy', disabled: r.state !== 'buy', act: buy }] : []), { label: 'BACK', act: back }]);
 }
