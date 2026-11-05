@@ -10,14 +10,21 @@ import type { FightEvent } from '../sim/types';
 import { TAP_SRC, heroAt, hitEl, tapCast, tapEl } from './magetap';
 import { burst, ready, tone } from './sfx';
 
-/** The flick of a quick cast going out. */
+/** Snaps and pops strung over `spread` seconds: fire catching as it goes. Cosmetic, so Math.random. */
+function crackle(n: number, spread: number, peak: number, delay = 0): void {
+  for (let i = 0; i < n; i++) {
+    const f = 2600 + Math.random() * 3800;
+    burst('highpass', f, f * 1.3, 5, peak * (0.55 + Math.random() * 0.6), 0.006 + Math.random() * 0.012, delay + Math.random() * spread);
+  }
+}
+
+/** A quick cast going out: a crackle and hiss of the element, moving fast (Kyle, 2026-11-04). */
 function castSound(el: Augment): void {
-  tone('sine', 1700, 2600, 0.07, 0.06);
-  burst('highpass', 6000, 8000, 1.5, 0.12, 0.03);
-  if (el === 'fire') burst('bandpass', 700, 1800, 1, 0.14, 0.1);
-  else if (el === 'frost') tone('triangle', 3136, 3100, 0.05, 0.12, 0.02);
-  else if (el === 'storm') tone('square', 2400, 1300, 0.04, 0.04, 0.01);
-  else tone('sine', 1320, 1760, 0.05, 0.1, 0.02);
+  if (el === 'frost') return burst('highpass', 8000, 4500, 1.2, 0.22, 0.14), crackle(4, 0.1, 0.12), tone('triangle', 3136, 3100, 0.04, 0.1, 0.03);
+  if (el === 'storm') return crackle(10, 0.14, 0.22), tone('square', 2600, 900, 0.05, 0.06, 0.01), burst('bandpass', 3000, 1200, 2, 0.16, 0.08);
+  // Fire, and a bare spark: a roaring whoosh with pops on it.
+  burst('bandpass', 2200, 600, 0.9, 0.24, 0.2);
+  crackle(7, 0.2, 0.2);
 }
 
 /** The element under a quick blow or spell landing. */

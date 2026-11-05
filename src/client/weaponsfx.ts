@@ -60,7 +60,8 @@ export function shotSound(kind: string, src?: string): void {
     return burst('highpass', 2500, 5500, 1, 0.22, 0.16, 0.02);
   }
   if (kind === 'bolt') return tone('square', 150, 60, 0.4, 0.09), burst('bandpass', 1600, 500, 2, 0.65, 0.12), tone('square', 2400, 2200, 0.05, 0.04, 0.14), tone('square', 2000, 1900, 0.05, 0.04, 0.2);
-  if (kind === 'spark') return tone('sine', 1300, 500, 0.16, 0.14), burst('bandpass', 3500, 1500, 3, 0.25, 0.1);
+  // The wand's spark: a fast hiss going past, like fire thrown hard (Kyle: no wimpy chirp). The crackle on top is magesfx.ts.
+  if (kind === 'spark') return burst('bandpass', 5200, 1300, 1.1, 0.42, 0.17), burst('lowpass', 1100, 260, 0.7, 0.32, 0.1), burst('highpass', 7000, 4200, 0.8, 0.16, 0.08);
   if (kind === 'orb') return tone('sine', 180, 520, 0.3, 0.4), tone('triangle', 270, 780, 0.12, 0.4), burst('lowpass', 600, 2000, 0.7, 0.2, 0.4);
   if (kind === 'lance') return tone('sawtooth', 300, 1800, 0.18, 0.22), burst('highpass', 2000, 5000, 1, 0.3, 0.18);
 }
