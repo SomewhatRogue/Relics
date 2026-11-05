@@ -27,6 +27,7 @@ import { blindNotice } from './blind';
 import { tauntTarget } from './taunt';
 import { CALTROPS } from '../shared/ladder';
 import type { Slick } from './oil';
+import { gather, rushClock, rushLocked } from './rushguard';
 
 /** The room's oil slicks, for the torch-bearers (the room sets it before its goblins move). */
 export const OWN_KIT: { slicks: Slick[] } = { slicks: [] };
@@ -98,7 +99,8 @@ export function begin(e: Enemy, kind: EnemyAttack['kind'], s: EnemyAttackSpec, t
 function runAttack(e: Enemy, heroes: Hero[], now: number, dt: number, ev: FightEvent[], others: Enemy[] = []): boolean {
   const a = e.attack!;
   // Chilled: the wind-up drags (the telegraph fills at the same slowed pace, so what you see holds).
-  a.t += a.t < a.windup && e.chillUntil > now ? dt * FROST.windup : dt;
+  // A pack rush's blow keeps the rush's own clock, so every one of them lands together (sim/rushguard.ts).
+  a.t = rushClock(a, now) ?? a.t + (a.t < a.windup && e.chillUntil > now ? dt * FROST.windup : dt);
   // Netted: no running at you and no throwing the hook. Whatever it was winding up for is lost.
   if ((a.kind === 'charge' || a.kind === 'draw') && e.snareUntil > now) return ev.push({ k: 'snared', x: e.x, y: e.y }), true;
   if (a.kind === 'charge' || a.kind === 'pounce') return runCharge(e, a, heroes, now, ev, others);
@@ -160,7 +162,8 @@ const after = (e: Enemy) => (e.kind === 'swingDummy' || e.kind === 'dummy' ? 'id
 export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: number, ev: FightEvent[], others: Enemy[] = []): void {
   // Dead for good and lying still: its clocks stop (nothing changes, so nothing is sent).
   if (e.act === 'dead' && !e.respawns && e.actT >= STILL) return;
-  if (e.hitstop > 0) return void (e.hitstop -= dt);
+  if (e.hitstop > 0 && !rushLocked(e)) return void (e.hitstop -= dt);
+  if (e.hitstop > 0) e.hitstop -= dt;
   e.actT += dt;
   e.moving = false;
   e.cooldown -= dt;
@@ -221,6 +224,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     e.feeding = false;
   }
   if (e.alert === false && !notice(e, heroes, others, now, ev)) return wander(e, rng, now, dt);
+  // Called into a pack rush: to its place in the fan (sim/packrush.ts).
+  if (e.rushTo && gather(e, (e.chillUntil > now ? FROST.slow : 1) * (e.roused ? DRUMMER.rouse.pace : 1), dt)) return;
   const t = nearest(e, heroes, now);
   if (!t || e.kind === 'dummy') return;
   const d = Math.hypot(t.x - e.x, t.y - e.y);

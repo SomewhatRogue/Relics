@@ -27,6 +27,8 @@ import { cover, parryMend, shelter } from './ladderhealer';
 import { braced, softer } from './taunt';
 import { stormCut } from './spellbook';
 import { wet } from './wet';
+import { clanks, crack, plated } from './ironhide';
+import { guardFrom, rushBlocked, rushParried, noteRush, rushStun } from './rushguard';
 
 export { respawnOf, stunOf } from './damage';
 
@@ -71,8 +73,10 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   const riposte = riposteNow(h, now);
   if (riposte && h.hitIds.filter((id) => id > 0).length === 1) ev.push({ k: 'riposte', x: e.x, y: e.y });
   const mult = weak * soaked * (h.counter ? counter * (riposte ? RIPOSTE.mult : 1) : heldFast ? held : 1) * shaftMult(h, s, e) * rearMult * blessed * tempo * (crit ? CRIT : 1) * (ambush ? STEALTH.ambush * (1 + knack(h, 'ambush')) : 1) * (boarded ? VARIANTS.shield.front : 1) * brandyDmg(h, now) * litMult(h) * (h.snagged ? CENSER.snag : 1) * ((e.routUntil ?? -9) > now ? BANNER.rout.hurt : 1);
+  // An ironhide's plates (sim/ironhide.ts): a charged blow or a perfect breaks its guard; else a fifth gets through.
+  const plate = clanks(e, now) && !(h.heavy || h.perfect), raw = plated(e, Math.round(s.dmg * mult), now, h.heavy || h.perfect, ev);
   // Mother Rust's Needles: a backstab kills anything short of a butcher.
-  const n = rear && e.kind === 'scrapper' && wears(h, 'needles') ? Math.max(e.hp, Math.round(s.dmg * mult)) : Math.round(s.dmg * mult);
+  const n = rear && e.kind === 'scrapper' && wears(h, 'needles') ? Math.max(e.hp, raw) : raw;
   e.hp -= n;
   e.hitAt = now;
   const stop = h.counter ? HITSTOP.parry : heavy || WEAPONS[h.weapon]?.ponderous ? HITSTOP.heavy : HITSTOP.light;
@@ -84,7 +88,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   // (A shield-bearer's board stops a flail's shove: sim/flail.ts.)
   if (e.act !== 'pinned' && e.act !== 'carried' && !(boarded && WEAPONS[h.weapon].shoves)) shove(e, kx, ky, s.knock + (h.counter ? 5 : 0), e.weight);
   if (ambush && e.hp > 0) stun(e, h.id, now, STEALTH.reel, ev);
-  ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy, on: 'enemy', counter: h.counter, crit, ambush, boarded, backstab: rear && (rearMult >= 2 || WEAPONS[h.weapon].cls === 'ROGUE'), src: WEAPONS[h.weapon].cls === 'RANGER' ? 'sword' : h.weapon, big: e.kind === 'butcher' });
+  ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy, on: 'enemy', counter: h.counter, crit, ambush, boarded, backstab: rear && (rearMult >= 2 || WEAPONS[h.weapon].cls === 'ROGUE'), src: WEAPONS[h.weapon].cls === 'RANGER' ? 'sword' : h.weapon, big: e.kind === 'butcher', ...(plate ? { plated: true } : {}) });
   if (isDummy(e)) {
     if (e.hp <= 0) e.hp = e.maxHp;
     if (ice && heavy) shatter(e, now, ev);
@@ -113,8 +117,9 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   // (A Rogue's head-on blow doesn't knock anything off balance: only from behind.)
   const shakes = !(WEAPONS[h.weapon].front && !rear);
   // Quick blows never break a wind-up (a hexer's spell excepted: any blow breaks it), and knock an idle one off balance only once a while (POISE).
+  // In a pack rush, a charged blow or a perfect breaks the one it hits, whatever it is; the rest still come.
   const skilled = h.heavy || h.perfect, breaks = skilled || a?.kind === 'hex' || (!a && now - (e.flinchAt ?? -9) > POISE.relock);
-  if (shakes && e.act !== 'stunned' && e.act !== 'pinned' && e.act !== 'carried' && !ice && e.attack?.kind !== 'charge' && (heavyWind ? big : (small(e) && breaks) || big)) {
+  if (shakes && e.act !== 'stunned' && e.act !== 'pinned' && e.act !== 'carried' && !ice && e.attack?.kind !== 'charge' && (a?.rush ? skilled : heavyWind ? big : (small(e) && breaks) || big)) {
     Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: big && e.kind === 'butcher' ? 0.6 : FLINCH });
     if (!skilled) e.flinchAt = now;
   }
@@ -227,26 +232,35 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   // Pushed away from where the blow came from (the slam's centre for a slam).
   const round = isRound(a.kind);
   const sx = round ? h.x - a.cx : -tx, sy = round ? h.y - a.cy : -ty, sl = Math.hypot(sx, sy) || 1;
-  // The kit's guard covers an arc in front: a shield covers nearly everything ahead.
-  const facing = (h.fx * tx + h.fy * ty) / tl > Math.cos(((w.guardArc / 2) * Math.PI) / 180);
+  // The kit's guard covers an arc in front: a shield covers nearly everything ahead. (A pack rush is
+  // judged from the middle of its fan, so one guard facing it covers every blow: sim/rushguard.ts.)
+  const [gx, gy] = guardFrom(e, a, h), gl = Math.hypot(gx, gy) || 1;
+  const facing = (h.fx * gx + h.fy * gy) / gl > Math.cos(((w.guardArc / 2) * Math.PI) / 180);
   const canGuard = !a.unblockable && facing && (h.act === 'idle' || h.act === 'attack' || h.act === 'charge');
-  if (canGuard && now - h.parryOpenAt <= parryWindow(h)) {
+  const again = rushParried(h, a, now);
+  if (canGuard && (now - h.parryOpenAt <= parryWindow(h) || again)) {
     h.counterUntil = now + counterWindow(h);
     h.parriedAt = now;
     h.parryOpenAt = -9;
     if (has(h, 'bulwark')) h.stamina = HERO.stamina;
     h.hitstop = Math.max(h.hitstop, HITSTOP.parry);
     e.hitstop = HITSTOP.parry;
-    Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: stunOf(e) });
+    // A parried ironhide's guard is broken; every goblin in a parried rush is held through the counter.
+    crack(e, now, ev);
+    noteRush(h, a, now, 'parry');
+    Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: rushStun(a, stunOf(e)) });
     shove(e, tx / tl, ty / tl, 4, e.weight);
-    ev.push({ k: 'parry', x: (h.x + e.x) / 2, y: (h.y + e.y) / 2 });
-    ev.push({ k: 'stunned', x: e.x, y: e.y });
+    ev.push({ k: 'parry', x: (h.x + e.x) / 2, y: (h.y + e.y) / 2, ...(again ? { more: true } : {}) });
+    ev.push({ k: 'stunned', x: e.x, y: e.y, ...(again ? { more: true } : {}) });
     // A spellblade's parry fills the blade too (sim/spellblade.ts); MENDING PARRY heals friends near (sim/ladderhealer.ts).
     parryFills(h, ev);
     parryMend(h, heroes, ev);
     return;
   }
   if (canGuard && h.blocking) {
+    // A pack rush: the one block takes every blow in it (its first blow's stamina paid for all).
+    if (rushBlocked(h, a, now)) return void ev.push({ k: 'block', x: h.x, y: h.y, more: true });
+    noteRush(h, a, now, 'block');
     // Too heavy to block: the guard breaks (it should have been parried).
     if (a.crush) h.stamina = 0;
     // A held block takes nothing off your health; it costs breath instead, and plenty of it.

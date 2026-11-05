@@ -14,12 +14,13 @@ import { markSlick, stepOiler, stepSlicks, stepTorch, type Slick } from './oil';
 import { maybeDig, stepSappers } from './sapper';
 import { stepCrows, type Flock } from './crows';
 import { stepBlind } from './blind';
+import { crackWatch, stepIronhide } from './ironhide';
 import { walk } from './enemies';
 import type { World } from './elements';
 import type { Pickup } from './pickups';
 import type { Enemy, EnemyAttack, FightEvent, Hero, Intent } from './types';
 
-const OWN = new Set(['banner', 'netter', 'thief', 'log', 'wolf', 'keeper', 'oiler', 'torch', 'blind']);
+const OWN = new Set(['banner', 'netter', 'thief', 'log', 'wolf', 'keeper', 'oiler', 'torch', 'blind', 'ironhide']);
 
 /** A new goblin of one of these sorts: its body (a small goblin's unless it says). */
 export function shapeFoe(e: Enemy): void {
@@ -53,6 +54,7 @@ export function stepOwn(e: Enemy, q: Turn, heroes: Hero[], others: Enemy[], rng:
   else if (e.variant === 'oiler') stepOiler(e, t, d, ux, uy, facing, speed, now, dt, ev);
   else if (e.variant === 'torch') stepTorch(e, t, d, ux, uy, facing, speed, kit.slicks, heroes, now, dt, ev);
   else if (e.variant === 'blind') stepBlind(e, heroes, others, now, dt, ev);
+  else if (e.variant === 'ironhide') stepIronhide(e, t, d, q.level, ux, uy, facing, speed, dt, ev);
   return true;
 }
 
@@ -68,9 +70,10 @@ export function beforeHeroes(heroes: Hero[], intents: Map<string, Intent>, none:
   stepNets(heroes, intents, none, now, ev);
 }
 
-/** Before the goblins move: who takes heart from a banner, and a fallen banner's rout. */
+/** Before the goblins move: who takes heart from a banner, and a fallen banner's rout; an ironhide's guard closing again. */
 export function beforeFoes(enemies: Enemy[], now: number, ev: FightEvent[]): void {
   hearten(enemies, now, ev);
+  crackWatch(enemies, now);
 }
 
 /** After they've moved: logs smash, roofs throw their archers, thieves get away or drop it, keepers' wolves scatter, sappers dig on, crows go up, oil spreads and burns. */

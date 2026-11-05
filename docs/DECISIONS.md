@@ -303,6 +303,98 @@ It's weird."
   clouding in water, drifting and fading, staining on the bank). `node scripts/water/look.cjs` shoots a
   river room, a ford with blood (at once and 3.6 s on) and a hero wading, phone and laptop, flat and 2.5D.
   No new player-facing lines.
+## 2026-11-04: pack rushes, and the ironhide: something to block and parry (Kyle; Claude Opus 5.5)
+
+Kyle: "I love blasting through waves but I also want to have to block sometimes and parry, you know." He
+approved both ideas with one rule: "As long as the ones that wind up can all be blocked or parried at
+once. Basically it checks to see allies around and joins attacks, so it's more block or dodge at once."
+
+**Pack rushes** (numbers `RUSH` in `shared/tuning.ts`; rules `sim/packrush.ts` and `sim/rushguard.ts`;
+drawn by `client/rushdraw.ts` in both views; on the room's own seeded stream, `rushRng`):
+- **When.** A pack is fighting while an awake goblin of it is within 8 tiles of a hero. Its first rush
+  is due 0.5 to 1.5 s into the fight, then every 6 to 10 s of fighting (seeded). Measured first with 6 to
+  10 s from the start, packs were dead before any came due (a bot clears a pack in about 4 to 5 s), so the
+  first comes as the pack closes in: a fight now usually opens with one, and a long fight has more.
+- **Who.** A free goblin of the pack (awake, on its feet, chasing or only getting its breath back after
+  a blow; not stunned, frozen, netted, carried, winding up, routed or blinded) calls it on a hero it isn't
+  behind, if two more of the pack are in the fight there. For 1.2 s packmates within 4.5 tiles of it
+  join as each comes free, up to 2 or 3 more (seeded). Only blade sorts join: small goblins, lungers,
+  shields, brutes, ironhides; never archers, back-liners, wolves or the newer sorts with their own tricks.
+- **The fan.** They walk to a fan 1.55 tiles before the hero on the pack's side, 0.42 radians apart (the
+  slots follow the hero as he moves). Once all are in place (2.4 s at most) and the fan's middle is in
+  front of the hero (cosine 0.55), they begin one 1.3 s wind-up together (a small goblin's is 0.55): a
+  9 damage stab each (14 for a brute or ironhide), one shared land time. Fewer than three in place: it
+  fizzles and the pack tries again 1.5 s later.
+- **Every blow in one instant.** Each blow of a rush keeps the room's clock (`land`), not its own: a
+  quick blow's hitstop or frost can't put one out of step. Frozen, netted or stunned in the wind-up, that
+  one is out; the rest still come.
+- **One guard answers it all.** The guard arc is judged from the fan's middle, so a guard facing it
+  covers every blow. One held block takes every blow for the stamina of one (BLOCK on each). One parry in
+  the window parries every blow (one press, one window: the rest of the instant's blows read the same
+  parry), each goblin stunned at least 2 s so the counter lands on any of them, and ALL PARRIED once. A
+  dodge, jump or blink through the instant slips them all (LAST SECOND, each staggered); rolled clear
+  before it, every blow misses. A Rogue or Mage (no guard) has the 1.3 s to see it and go.
+- **POISE.** A quick blow, or a quick shot's flinch, doesn't break a rush member's wind-up. A charged
+  blow or a perfect breaks the one it hits, whatever sort (a brute or ironhide too); the others still come.
+- **Never from behind or off screen.** Called only by goblins within 5.5 tiles that aren't behind the
+  hero; begun only once the fan's middle is in front of him. A hero with his back to the pack isn't rushed.
+- **A party.** One rush on a hero at a time; a second pack's goes to someone else. The hero with most of
+  the pack in front of them is picked.
+- **What both views draw.** Each goblin's own red sector telegraph, as ever, plus a red line linking
+  them across their feet that fills from the ends to the middle with the wind-up and flashes white with
+  their telegraphs while a parry would land; a shriek and a rising note as it begins.
+- Online: nothing new is sent but the goblins' `rushTo` (where it's walking) and the attack's `rush`,
+  `land`, `rcx`, `rcy`, and the hero's `rushGuard`. The room's rush clocks aren't sent; a new leader
+  starts them again.
+
+**Measured** (`npx tsx scripts/encounters/rushes.ts [rooms] [swing]`: 60 job rooms from 30 days of the
+board, bot heroes with a sword who can't be hurt walk at the nearest goblin that could rush, face it and
+swing every 0.6 s (or 1.2 s) within 2 tiles; fighting is the seconds such a goblin is awake within 8
+tiles of a hero):
+
+| party | swing | minutes fighting | rushes | a minute | a hero a minute | goblins a rush | most at once | s between rushes on one hero (median) |
+|---|---|---|---|---|---|---|---|---|
+| 1 | 0.6 s | 12.3 | 16 | 1.3 | 1.3 | 3.1 | 1 | 30.1 |
+| 4 | 0.6 s | 12.4 | 52 | 4.2 | 1.0 | 3.5 | 2 | 16.8 |
+| 1 | 1.2 s | 15.9 | 33 | 2.1 | 2.1 | 3.2 | 1 | 18.3 |
+| 4 | 1.2 s | 15.6 | 68 | 4.4 | 1.1 | 3.4 | 3 | 8.9 |
+
+So about one or two rushes a minute of fighting alone, about one a hero a minute in a party of four
+(more goblins a pack, so rushes of 3 or 4). A slower fighter meets more: a pack that lives longer rushes
+again. Many calls fizzle (a pack of two or three loses one before it gathers); that's left alone, as
+small packs splatter. Tune `RUSH.first` and `RUSH.every` once Kyle has played.
+
+**The ironhide** (`IRONHIDE` in `shared/raiders.ts`, rules `sim/ironhide.ts`, drawn by
+`client/ironhidedraw.ts` and `three/goblins3d.ts`; a placeholder name for the lore pass, and it clashes
+with the Warrior's and Healer's IRONHIDE perk chain key in `shared/chains.ts`, code only):
+- A goblin in iron scraps, 90 health, a middling pace (0.85 of a small goblin's), one heavy, readable
+  cleave (0.95 s wind-up, 16 damage, 90 degrees), blockable and parryable; only a big breaker's charged
+  blow breaks the wind-up, as a brute's.
+- Until its guard is broken it takes a fifth of anything (at least 1): blades, shots, spells, burns. A
+  parry of its blow, a charged blow or a perfect breaks it (from the room's other damage, any hit it calls
+  heavy: a burst, a crit, a hard-knocking shot), landing in full: ARMOR BROKEN, and for 3 s it takes full damage, more
+  from behind as usual. Drawn whole with a cap, a breastplate and a shoulder plate and a maul; broken,
+  the plates askew, the breastplate split and a gold and white crack, bright at first and pulsing.
+  Plated hits throw grey sparks.
+- It burns half as long (`BURN.tough`, with butchers, brutes and shields).
+- Packs: two templates, `iron` (an ironhide and 3 or 4 small ones) and `ironback` (a brute with an
+  ironhide at its side, ruin 1 and up), both from a job's second room. Over 60 days of the board it's in
+  none of the first rooms, 12% of second rooms, 18% of third and 27% of later ones. On the Barrowfields,
+  `iron` can be a camp's band and a wave's from ALARM 2.
+
+**New player-facing lines** (for the lore keeper and the line editor; not run here, no way to call them):
+ALL PARRIED (a parry that answered a whole rush), ARMOR BROKEN (an ironhide's guard broken). The name
+IRONHIDE is code only for now (nothing names sorts on screen).
+
+Tests: `tests/rush.test.ts` (the blows land in one instant, longer wind-up, all in front; one block takes
+them all for one blow's stamina; one parry parries them all, each stunned into the counter window, ALL
+PARRIED; a Rogue's dash and a Mage's blink escape all of it; a quick blow doesn't break a rush wind-up and
+a charged one breaks only that goblin's; none from behind and every rush's middle in front over a 30 s
+fight with the hero turning; two packs go after two different heroes; the same fight twice is the same),
+`tests/ironhide.test.ts` (a fifth until broken, full for the window, a fifth again after; a quick blade
+plated and a perfect breaking it; a parry of its blow breaking it; half the burn; from the second room on
+and not in every room). Shots: `node scripts/rush-look.cjs [url] [dir]` (the rush winding up, the parry
+on all of them, an ironhide whole and broken; phone and laptop, flat and 2.5D).
 
 ## 2026-11-04: the element is the Mage's spellbook; switching gets its own button; GRASP (Kyle; Claude Opus 5.5)
 

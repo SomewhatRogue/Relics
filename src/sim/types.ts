@@ -286,6 +286,8 @@ export interface Hero extends Body {
   /** A wand's storm stream (sim/stream.ts): on until `until`, held on goblin `id` (0 none yet) since
    *  `at` (its build), its next tick, the spark's share a tick, and what's owed below a whole point. */
   stream?: { id: number; at: number; until: number; next: number; tick: number; owe: number; oweJump: number };
+  /** The pack rush (sim/packrush.ts) this hero last met with a guard, the instant it landed, how, and how many blows. */
+  rushGuard?: { id: number; at: number; how: 'parry' | 'block'; n: number };
   /** Primed spells left (TWICE PRIMED: two). */
   primeLeft?: number;
   /** Techniques (shared/techniques.ts): SHOULDER CHARGE's straight walk (seconds, which way, last walked
@@ -345,6 +347,12 @@ export interface EnemyAttack {
   hit?: string[];
   /** Too heavy to block: a guard that meets it breaks (parry it instead). */
   crush?: boolean;
+  /** One blow of a pack rush (sim/packrush.ts): the rush, the room time every blow of it lands, and the
+   *  fan's middle (a guard facing it covers every blow). */
+  rush?: number;
+  land?: number;
+  rcx?: number;
+  rcy?: number;
 }
 
 export type EnemyKind = 'butcher' | 'scrapper' | 'dummy' | 'swingDummy' | 'spider' | 'brood' | 'nest';
@@ -474,6 +482,13 @@ export interface Enemy extends Body {
   heardX?: number;
   heardY?: number;
   heardAt?: number;
+  /** Called into a pack rush (sim/packrush.ts): its rush, where it's making for (its place in the fan) and
+   *  the hero it's for. Null once it winds up or the rush is off. */
+  rushTo?: { id: number; x: number; y: number; hx: number; hy: number } | null;
+  /** An ironhide (sim/ironhide.ts): its guard broken until, when it broke, and broken now (for drawing). */
+  crackUntil?: number;
+  crackAt?: number;
+  cracked?: boolean;
 }
 
 /** How a goblin died: fell, lost its head, burst apart, burned, or shattered. */
@@ -580,6 +595,11 @@ export type FightEvent =
   | { k: 'strikewarn' | 'strike'; x: number; y: number }
   | { k: 'bannerfall' | 'routed' | 'struggle' | 'recovered' | 'escaped' | 'rooffall' | 'whip' | 'scatter' | 'howl' | 'dig' | 'surface' | 'unearthed' | 'slick' | 'oilwarn' | 'oilup' | 'crows' | 'listen'; x: number; y: number }
   | { k: 'netted' | 'netfree'; x: number; y: number; id: string }
+  /** A pack rush winding up (`n` goblins, `id` the hero it's on), and one parry that answered `n` of its blows
+   *  (both at the fan's middle);
+   *  an ironhide's guard broken (sim/packrush.ts, sim/ironhide.ts). */
+  | { k: 'rush' | 'rushparried'; x: number; y: number; n: number; id: string }
+  | { k: 'cracked'; x: number; y: number }
   | { k: 'cutfree'; x: number; y: number; id: string; by: string }
   | { k: 'stolen'; x: number; y: number; id: string; n: number; potion?: PotionId }
   /** A hero down (`by`: the teammate whose blow did it), or picked up (`by`: who picked them up). */
@@ -596,12 +616,13 @@ export type FightEvent =
   /** A house alight (sim/houseburn.ts): a goblin driven out of its door; a chest inside burned, its charred leavings at the door; the smoke getting to someone inside. */
   | { k: 'flushed' | 'charred' | 'choke'; x: number; y: number }
   /** `src`: what landed it (a kit, or a shot's kind), for its sound; `big`: on the butcher. */
-  | { k: 'hit'; x: number; y: number; n: number; heavy: boolean; on: 'enemy' | 'hero'; counter?: boolean; crit?: boolean; ambush?: boolean; boarded?: boolean; backstab?: boolean; tick?: boolean; src?: string; big?: boolean }
+  | { k: 'hit'; x: number; y: number; n: number; heavy: boolean; on: 'enemy' | 'hero'; counter?: boolean; crit?: boolean; ambush?: boolean; boarded?: boolean; backstab?: boolean; tick?: boolean; src?: string; big?: boolean; plated?: boolean }
   | { k: 'swing'; x: number; y: number; src: string; heavy: boolean }
   | { k: 'death'; x: number; y: number; how: DeathKind; dx: number; dy: number; kind: EnemyKind }
   /** A shot stopped dead on a shield-bearer's board (sim/board.ts): a thunk, sparks, BLOCKED. */
   | { k: 'deflect'; x: number; y: number }
-  | { k: 'block' | 'parry' | 'guardbreak' | 'winded' | 'breath' | 'bash' | 'dodge' | 'slip' | 'out' | 'roll' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number }
+  /** `more`: another blow of a pack rush met by the same guard in the same instant (its words said once). */
+  | { k: 'block' | 'parry' | 'guardbreak' | 'winded' | 'breath' | 'bash' | 'dodge' | 'slip' | 'out' | 'roll' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number; more?: boolean }
   | { k: 'windup' | 'impact'; x: number; y: number; kind: AttackKind }
   /** The prologue's cutscene: the ground shaking, the bite, a body landing, the Stoker's bellow. */
   | { k: 'rumble' | 'bite' | 'thud' | 'bellow' | 'fanfare'; x: number; y: number }

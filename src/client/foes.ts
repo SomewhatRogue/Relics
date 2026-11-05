@@ -9,6 +9,7 @@ import { isRound } from '../sim/types';
 import { drawRoundSign } from './telegraph2';
 import { drawKit } from './backline';
 import { KITTED, drawFoeKit } from './foekits';
+import { drawIronhide } from './ironhidedraw';
 import { drawLogs, drawLogsDead } from './foedraw';
 import { drawMound, drawWolf } from './beastdraw';
 import { blit, blitBody, ease, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
@@ -317,4 +318,5 @@ function kit(c: Ctx, e: Enemy, x0: number, y0: number): void {
     g.fillRect(Math.round(x + f * 5 - (f < 0 ? 3 : 0)), Math.round(y - 8), 1, 1);
   } else if (e.variant === 'lunger') line(g, x + f * 2, y - 8, Math.atan2(e.fy, e.fx), 0, 12, '#6b4a2b', 1), line(g, x + f * 2, y - 8, Math.atan2(e.fy, e.fx), 11, 14, '#cfd6dc', 1);
   else if (e.variant === 'heavy') (g.fillStyle = '#3a2a1a'), g.fillRect(Math.round(x + f * 5), Math.round(y - 14), 2, 10), (g.fillStyle = '#4a3a2a'), g.fillRect(Math.round(x + f * 4), Math.round(y - 16), 4, 3);
+  else if (e.variant === 'ironhide') drawIronhide(c, e, x0 + AT.bx, y0 + AT.by, c.t ?? c.now);
 }

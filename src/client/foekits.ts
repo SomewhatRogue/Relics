@@ -1,16 +1,17 @@
 /**
  * What the newer goblins carry, drawn where a small goblin's knife would be (foes.ts poses the body):
  * the banner on its pole, the netter's net, the thief's hood and sack, the roof archer's hood, the
- * keeper's whip, the oil thrower's pot, the torch, the sapper's pick. Drawing only: the room says what
+ * keeper's whip, the oil thrower's pot, the torch, the sapper's pick, the ironhide's maul. Drawing only: the room says what
  * each is doing. `bx`, `by`: the feet as posed; `ax`, `ay`: the weapon arm's offset this frame.
  */
 import type { Enemy } from '../sim/types';
 import { line, type Ctx } from './draw';
 import { drawFoeKit2 } from './foekits2';
+import { drawMaul } from './ironhidedraw';
 
 const WOOD = '#7a5a38', HIDE = '#c8a878', HIDE2 = '#9a7a58', ROPE = '#a89a72', IRON = '#8a8a90', GOLD = '#ffd040', CLOTH = '#3a3040';
 
-export const KITTED = new Set(['banner', 'netter', 'thief', 'roofer', 'keeper', 'oiler', 'torch', 'sapper']);
+export const KITTED = new Set(['banner', 'netter', 'thief', 'roofer', 'keeper', 'oiler', 'torch', 'sapper', 'ironhide']);
 
 export function drawFoeKit(c: Ctx, e: Enemy, bx: number, by: number, ax: number, ay: number, t: number): void {
   const f = e.fx < -0.2 ? -1 : 1, hx = Math.round(bx + f * 3 + ax), hy = Math.round(by - 6 + ay), g = c.lit, a = e.attack;
@@ -72,5 +73,7 @@ export function drawFoeKit(c: Ctx, e: Enemy, bx: number, by: number, ax: number,
     return;
   }
   void t;
+  // An ironhide's maul (its plates go on over the body: ironhidedraw.ts).
+  if (e.variant === 'ironhide') return drawMaul(c, e, hx, hy, f, wind);
   drawFoeKit2(c, e, bx, by, hx, hy, f, wind);
 }

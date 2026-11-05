@@ -60,6 +60,20 @@ anyone wading leaves rings every couple of steps and landings and bodies splash;
 too, cross fords and streams straight, a little slower, never wedged on the bank. Wading is now 0.7 of
 dry pace for everyone (was 0.55). `npx tsx scripts/water/crossing.ts` measures the crossings (27 stuck of
 2235, now 3); `node scripts/water/look.cjs` shoots it (DECISIONS 2026-11-04).
+**Pack rushes and the ironhide: something to block and parry** (Claude Opus 5.5, 2026-11-04; Kyle: "I love
+blasting through waves but I also want to have to block sometimes and parry", "as long as the ones that
+wind up can all be blocked or parried at once"). Built; waiting on Kyle's play. *Done when* on his phone
+and laptop, flat and 2.5D, a pack in a fight now and then (as it comes in, then every 6 to 10 s of
+fighting) sends three or four goblins into a fan in front of him; they wind up together for 1.3 s with
+a red line linking them and a shriek, and every blow lands in the one instant; one held block takes them
+all for one blow's stamina, one parry as the red flashes white parries them all (ALL PARRIED) and leaves
+each stunned for the counter, a dodge, jump or blink through it slips them all; quick blows don't stop
+one winding up, a charged blow or a perfect stops the one it hits; never from behind or off screen, and
+never two on one friend at once. From a job's second room some packs have an ironhide: iron scraps, a
+maul, a fifth of any blow until a parry of its blow, a charged blow or a perfect breaks its guard
+(ARMOR BROKEN, the plates askew, a gold crack) for 3 s of full damage. Open: IRONHIDE's name, ALL PARRIED
+and ARMOR BROKEN through the lore keeper and line editor; how often rushes come once he's played
+(DECISIONS 2026-11-04 has the measure).
 
 **The hero clear of the buttons on a phone** (Claude Opus 5.5, 2026-11-04; Kyle: "Your potion and things can
 cover your character while in game"). Built; waiting on Kyle's play. *Done when* on his phone upright, flat
