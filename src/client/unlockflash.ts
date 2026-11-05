@@ -7,6 +7,8 @@ import { guardOf, dodgeName, WEAPONS } from '../shared/weapons';
 import { knows, type Hero } from '../sim/types';
 
 const SECS = 4;
+/** Grabs goblins at all (sim/grab.ts): a Warrior, or a Mage with the spellblade. */
+export const grabsGoblins = (me: Hero) => WEAPONS[me.weapon].cls === 'WARRIOR' || me.weapon === 'spellblade';
 /** The phone's buttons for each move the wood teaches, and what each is called. */
 const BTN: Record<string, [string, string][]> = {
   attack: [['.tb.attack', 'ATTACK']],
@@ -45,6 +47,8 @@ export class UnlockFlash {
       const fresh = this.had ? taught.filter((m) => !this.had!.has(m)) : [];
       this.had = new Set(taught);
       for (const m of fresh) {
+        // Only a Warrior, or a Mage with the spellblade, grabs goblins: nobody else is told about GRAB (Kyle, 2026-11-05).
+        if (m === 'grab' && !grabsGoblins(me)) continue;
         if (!touch) {
           const line = keyLine(m, me);
           if (line) say(line);

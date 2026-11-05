@@ -30,7 +30,8 @@ export function manaShield(h: Hero, n: number, now: number, ev: FightEvent[]): n
   h.wardAt = now;
   ev.push({ k: 'manaward', x: h.x, y: h.y, n: Math.round(spent) });
   // Ran out: the ward breaks (and what it couldn't take goes through to health).
-  if (took < n || cover(h) < 1) (h.wardBrokeAt = now), ev.push({ k: 'manabreak', x: h.x, y: h.y });
+  // (Broken, the odd bit of magic short of a whole point goes with it.)
+  if (took < n || cover(h) < 1) (h.stamina = M.keep), (h.wardBrokeAt = now), ev.push({ k: 'manabreak', x: h.x, y: h.y });
   return n - took;
 }
 

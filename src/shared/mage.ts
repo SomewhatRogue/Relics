@@ -23,7 +23,8 @@ export const WAND = { walk: 0.9, stun: 0.6, big: 0.5 };
  * refills it stays yours. A parry gives back `parry` magic, a perfect one (the blow landing within
  * `perfectIn` s of the press) `perfect`. Seen: the ward cracks for `crack` s off a hit, breaks for `broke` s.
  */
-export const MANA_SHIELD = { perDmg: 1, keep: 0.01, parry: 25, perfect: 40, perfectIn: 0.08, crack: 0.35, broke: 0.6 };
+/** `perDmg`: magic a point of damage costs the shield. 3 (Kyle, 2026-11-05: at 1 "you're sort of invincible"). */
+export const MANA_SHIELD = { perDmg: 3, keep: 0.01, parry: 25, perfect: 40, perfectIn: 0.08, crack: 0.35, broke: 0.6 };
 
 /** Every Mage kit's dodge: the blink (it leaves an image behind once the trainer has taught it). */
 export const BLINK: Dodge = { kind: 'blink', distance: 3.8, time: 0.12, iFrom: 0, iTo: 0.12, stamina: 40, cooldown: 2.6 };

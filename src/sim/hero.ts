@@ -151,7 +151,9 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   if (inp.grabSeq !== h.seen.grab) (h.seen.grab = inp.grabSeq), (h.grabQueuedAt = now);
   // A GRAB press that found nothing to take hold of, throw, help up or burn: say so, at most once a second.
   if (h.grabQueuedAt > -9 && now - h.grabQueuedAt >= INPUT_BUFFER) {
-    if (h.act === 'idle' && now - h.toldAt > 1) (h.toldAt = now), ev.push({ k: 'nograb', x: h.x, y: h.y, id: h.id });
+    // (Only a Warrior or a spellblade Mage is told: nobody else grabs goblins, Kyle 2026-11-05.)
+    const grabber = WEAPONS[h.weapon].cls === 'WARRIOR' || h.weapon === 'spellblade';
+    if (grabber && h.act === 'idle' && now - h.toldAt > 1) (h.toldAt = now), ev.push({ k: 'nograb', x: h.x, y: h.y, id: h.id });
     h.grabQueuedAt = -9;
   }
   // Hit, stunned or downed while carrying: you drop it.

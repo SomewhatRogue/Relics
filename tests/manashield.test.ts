@@ -48,7 +48,8 @@ describe('hits drain magic first', () => {
 
   it('an empty shield passes the rest to health, breaks, and does not wind you', () => {
     const a = hit('spellblade', 12, {}, 5);
-    expect(a.h.hp).toBe(HERO.hp - 7);
+    // 5 magic covers 5 / perDmg of the 12; the rest, rounded up, reaches health.
+    expect(a.h.hp).toBe(HERO.hp - Math.ceil(12 - 5 / MANA_SHIELD.perDmg));
     expect(a.h.stamina).toBeLessThan(1);
     expect(a.ev.some((x) => x.k === 'manabreak')).toBe(true);
     expect(a.h.wardBrokeAt).toBe(a.now);
@@ -141,7 +142,7 @@ describe('online', () => {
     dec.apply(enc.encode(stateOf(room), true), true);
     hitHero(e, blow(12), f, room.time, room.events);
     const got = dec.apply(JSON.parse(JSON.stringify(enc.encode(stateOf(room))))).heroes.find((h) => h.id === f.id)!;
-    expect(f.hp).toBe(HERO.hp - 4);
+    expect(f.hp).toBe(HERO.hp - Math.ceil(12 - 8 / MANA_SHIELD.perDmg));
     expect(got.hp).toBe(f.hp);
     expect(got.stamina).toBeCloseTo(f.stamina, 1);
     expect(got.wardAt).toBeCloseTo(room.time, 1);
