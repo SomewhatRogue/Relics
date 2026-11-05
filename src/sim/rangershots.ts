@@ -29,7 +29,7 @@ export const spent = (b: Bolt) => !b.pierce || (b.pierceLeft !== undefined && b.
 export function perfectStrike(b: Bolt, e: Enemy, now: number, ev: FightEvent[]): void {
   if (!b.perfect) return;
   if (b.kind === 'bolt') return void ev.push({ k: 'boltline', x: b.sx, y: b.sy, x2: e.x, y2: e.y });
-  if (b.blind) return blind(e, b.owner, now, ev);
+  if (b.blind && e.variant !== 'blind') return blind(e, b.owner, now, ev);
   ev.push({ k: 'trueshot', x: e.x, y: e.y });
 }
 

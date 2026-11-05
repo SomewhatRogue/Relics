@@ -8,7 +8,7 @@ import type { Enemy } from '../sim/types';
 import { line, type Ctx } from './draw';
 import { drawFoeKit2 } from './foekits2';
 
-const WOOD = '#7a5a38', HIDE = '#c8a878', HIDE2 = '#9a7a58', BONE = '#d8d0bc', ROPE = '#a89a72', IRON = '#8a8a90', GOLD = '#ffd040', CLOTH = '#3a3040';
+const WOOD = '#7a5a38', HIDE = '#c8a878', HIDE2 = '#9a7a58', ROPE = '#a89a72', IRON = '#8a8a90', GOLD = '#ffd040', CLOTH = '#3a3040';
 
 export const KITTED = new Set(['banner', 'netter', 'thief', 'roofer', 'keeper', 'oiler', 'torch', 'sapper']);
 
@@ -16,7 +16,7 @@ export function drawFoeKit(c: Ctx, e: Enemy, bx: number, by: number, ax: number,
   const f = e.fx < -0.2 ? -1 : 1, hx = Math.round(bx + f * 3 + ax), hy = Math.round(by - 6 + ay), g = c.lit, a = e.attack;
   const wind = a && a.t < a.windup ? a.t / a.windup : 0;
   if (e.variant === 'banner') {
-    // A pole twice its height, a stretched hide on it, teeth and rings hung off the bottom edge.
+    // A pole twice its height, a stretched cowhide on it (never a person's), their take hung off the bottom edge: keys, buckles, a spoon, a shoe.
     const px = hx, top = hy - 20, sway = Math.round(Math.sin(c.now * 2.2 + e.id) * 1);
     g.fillStyle = WOOD;
     g.fillRect(px, top, 1, 24);
@@ -27,12 +27,11 @@ export function drawFoeKit(c: Ctx, e: Enemy, bx: number, by: number, ax: number,
     // A daub of red across it: their mark.
     g.fillStyle = '#7a1d1d';
     g.fillRect(px + f * 3, top + 3, 2, 3);
-    g.fillStyle = BONE;
-    for (let i = 1; i < 7; i += 2) g.fillRect(px + f * i + sway, top + 8 + (i % 3 ? 1 : 0), 1, 1);
-    c.glow.fillStyle = GOLD;
-    c.glow.globalAlpha = 0.5 + 0.3 * Math.sin(c.now * 3 + e.id);
-    c.glow.fillRect(px + f * 5 + sway, top + 9, 1, 1);
-    c.glow.globalAlpha = 1;
+    const take = [IRON, '#7a5a38', '#b0a890'];
+    for (let i = 1; i < 7; i += 2) (g.fillStyle = take[(i >> 1) % 3]), g.fillRect(px + f * i + sway, top + 8 + (i % 3 ? 1 : 0), 1, 1);
+    // A dull glint of iron among it (steady: a pulse of gold reads as a relic).
+    g.fillStyle = '#8a8478';
+    g.fillRect(px + f * 5 + sway, top + 9, 1, 1);
     return;
   }
   if (e.variant === 'netter') {

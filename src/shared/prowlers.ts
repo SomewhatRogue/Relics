@@ -39,7 +39,7 @@ export const KEEPER = {
  * slick left there for `life` seconds (`radius`). On a slick you slide: you turn and stop at `grip` of
  * your usual. Its torch-bearer walks to a slick with someone on it and, from `reach`, throws its torch:
  * the slick pulses `warn` seconds and goes up, burning anyone in it `dps` a second for `burn` seconds.
- * Any fire of yours (a fire spell, a burst, a burning goblin, Lamp Oil) lights a slick too: turn it on them.
+ * Any fire of yours (a fire spell, a burst, a burning goblin, an oil barrel) lights a slick too: turn it on them.
  */
 export const OIL = {
   hp: 30,

@@ -3,6 +3,7 @@
  * cut out, a thief's grab and its loot back, a banner falling, dirt going up off a sapper, oil splashing
  * and catching, crows bursting off the dead. Words only where you need to act on them.
  */
+import { POTIONS, type PotionId } from '../shared/potions';
 import type { FightEvent } from '../sim/types';
 import type { Fx } from './fx';
 
@@ -17,7 +18,7 @@ export function foeFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
       return false;
     case 'netted':
       fx.say(x, y - 30, 'NETTED', '#e8d090');
-      fx.say(x, y - 22, 'TAP TO BREAK FREE', '#c8b880', 1.6);
+      fx.say(x, y - 22, 'ATTACK TO BREAK FREE', '#c8b880', 1.6);
       return true;
     case 'struggle':
       fx.burst(x, y - 8, 3, ['#a89a72'], 30, false);
@@ -30,10 +31,10 @@ export function foeFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
       fx.burst(x, y - 8, 10, ['#a89a72', '#8a7a58'], 50, false);
       return true;
     case 'stolen':
-      fx.say(x, y - 28, ev.potion ? 'POTION STOLEN' : `${ev.n} GOLD STOLEN`, '#ffd040');
+      fx.say(x, y - 28, ev.potion ? `${POTIONS[ev.potion as PotionId]?.short ?? 'POTION'} STOLEN` : `${ev.n} GOLD STOLEN`, '#ffd040');
       return true;
     case 'escaped':
-      fx.say(x, y - 22, 'GOT AWAY', '#a08a6a');
+      fx.say(x, y - 22, 'THIEF GOT AWAY', '#a08a6a');
       return true;
     case 'bannerfall':
       fx.burst(x, y - 18, 14, ['#8a6a4a', '#6a4a32', '#7a1d1d'], 60, false);

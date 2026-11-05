@@ -31,7 +31,7 @@ export function drawLogs(c: Ctx, e: Enemy, x: number, y: number): void {
     { x: x - e.fx * 10 - nx * gap * 0.4, y: y - e.fy * 5 - ny * gap * 0.2 },
   ].sort((p, q) => p.y - q.y);
   for (const p of ends) shadow(c, p.x, p.y, 8);
-  const draw = (p: { x: number; y: number }) => blit(c, e.fy < -0.55 ? SPRITES.butcherUp : SPRITES.butcherDown, Math.round(p.x + lean), Math.round(p.y + bob), flip);
+  const draw = (p: { x: number; y: number }) => blit(c, e.fy < -0.55 ? SPRITES.scrapperUp : SPRITES.scrapper, Math.round(p.x + lean), Math.round(p.y + bob), flip);
   draw(ends[0]);
   // The log: a thick trunk at shoulder height, banded with rope, its front end iron-shod.
   const ly = y - 13 + bob + (wind ? 2 : 0), len = 16;
@@ -54,7 +54,7 @@ export function drawLogsDead(c: Ctx, e: Enemy, x: number, y: number): void {
   c.lit.globalAlpha = fade;
   line(c.lit, x - Math.cos(fa) * 14, y - 2 - Math.sin(fa) * 7, fa, 0, 28, BARK, 3);
   c.lit.globalAlpha = 1;
-  for (const s of [-1, 1]) spin(c, SPRITES.butcherDown, x + e.fx * 10 * s, y - 4 + e.fy * 5 * s, -Math.PI / 2 * s, fade);
+  for (const s of [-1, 1]) spin(c, SPRITES.scrapper, x + e.fx * 10 * s, y - 4 + e.fy * 5 * s, -Math.PI / 2 * s, fade);
 }
 
 /** A weighted net over a hero (`x`, `y` their feet), shaking as they fight it; `k` how much is left (0..1). */
@@ -98,7 +98,7 @@ export function drawBanners(c: Ctx, enemies: Enemy[], at: At): void {
       for (let i = -2; i <= 2; i++) g.fillRect(Math.round(x + i * 2), Math.round(y + 2 - Math.abs(i)), 2, 1);
     }
     if ((e.routUntil ?? -9) > (c.t ?? c.now)) {
-      // Routed: no fight left, the whites of its eyes, hands up as it runs.
+      // Routed: no fight left, the whites of its eyes as it scatters.
       g.fillStyle = '#ffffff';
       g.globalAlpha = Math.floor(c.now * 8) % 2 ? 0.9 : 0.5;
       g.fillRect(Math.round(x - 4), Math.round(y - 15), 1, 2), g.fillRect(Math.round(x + 4), Math.round(y - 15), 1, 2);

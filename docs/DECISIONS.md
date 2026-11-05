@@ -51,7 +51,7 @@ drummers on top, butchers by rule, and a party copied the whole room again, spec
 3. **Oil thrower and torch-bearer**: a pot lobbed where you stand (striped circle) leaves a slick for 22 s;
    on it the stick takes hold at a third (wide turns, sliding on). The torch walks to a slick with someone
    on it and throws: the slick pulses 0.9 s and burns 6 s (12 a second to heroes, sets goblins alight).
-   Any fire of ours lights a slick: a fire burst, Lamp Oil, a fire ring, a burning goblin walking in.
+   Any fire of ours lights a slick: a fire burst, an oil barrel, a fire ring, a burning goblin walking in.
 4. **Banner-bearer**: a hide on a pole hung with what they've taken. Goblins within 5 tiles hit 25% harder
    and 10% sooner and can't be routed; it hangs behind and runs from a blade. Kill it and every goblin within
    7 tiles routs 4.5 s: runs, strikes nothing, takes blows 50% harder.
@@ -3575,3 +3575,13 @@ guard on patrol come out to meet you, say some stuff and take you to town."
 - PRESSURE became ALARM: noise brings more of them.
 - THE GLADE became THE SPRING: the room shows up in the village, fields and fen too, and every one has its spring.
 - New lore to record or reject (Kyle): the barrows are grassed mounds older than the villages, with a shrine whose owner stays unsaid; siege engines in the Barrowfields foreshadow chapter 5 without naming the King; the beacon on the drove road brings the watch (a fire, not a bell; bells stay for chapter 5); horns are never magic; where the cookpot poison comes from stays unsaid, never the church; the chained chest's dead soldier stays unnamed. Open: why the hungry come at whoever holds the shrine.
+
+
+## 2026-11-04: The new sorts, lore checked (Claude Opus 5.5)
+
+- Words: NETTED, then ATTACK TO BREAK FREE (laptops don't tap; every class has ATTACK). CUT FREE on the button and the popup. `{n} GOLD STOLEN`, BITTER STOLEN or BRANDY STOLEN, THIEF GOT AWAY.
+- The banner is a cowhide, never a person's skin, hung with keys, buckles, a spoon and a shoe (no teeth: a Blacktongue detail, and "Teeth" is the town's name for the hungry). A steady iron glint, never pulsing gold. Nothing on it rings: bells stay the town's.
+- Log-carriers are drawn as two ordinary goblins under the log, not butchers (a butcher's size comes from the sliver). No person is ever driven before the ram.
+- Blind hunters can't be BLINDED: the longbow's perfect still crits. Their sockets stay dark, never lit, so they're never mixed with the cold white eyes past the map's edge.
+- A routed goblin scatters; no hands up (too comic).
+- Lore to record or reject (Kyle): wolves are ordinary wolves kept chained and starved, no shard, never hurt the hound, no joke over a dead wolf; nets are for taking people alive; crows are ordinary crows that wake the hungry by accident (never big, ridden or feared by goblins); stolen gold never touches the Want. Open: where the blind hunters come from (lean: captives who turned in the dark of the Copperdeep), and whether sappers dig beside the captive diggers.
