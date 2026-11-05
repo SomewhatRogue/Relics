@@ -3,7 +3,7 @@
  * back lands at that weapon's backstab rate, the same as a blade there would (combat.ts hitEnemy).
  */
 import { GUARD, WEAPONS } from '../shared/tuning';
-import { knack } from './gearstats';
+import { knack, statsOf } from './gearstats';
 import { rearCos } from './knacks';
 import type { Bolt, Enemy, Hero } from './types';
 
@@ -20,5 +20,5 @@ export function fromBehind(e: Enemy, dx: number, dy: number, h?: Hero): boolean 
 /** How much harder a backstab lands for this hero's weapon and knacks. */
 export function backstabOf(h: Hero): number {
   const w = WEAPONS[h.weapon];
-  return (w.backstab ?? GUARD.rearMult) * (1 + knack(h, 'rear'));
+  return (w.backstab ?? GUARD.rearMult) * (1 + knack(h, 'rear') + statsOf(h).backstab);
 }

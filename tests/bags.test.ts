@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { BAG, VAULT, bagSize, fitStores, growBag, growVault, melt, pawn, pawns, redeem, stow, unstow, upgraded, vaultSize, type Stores } from '../src/shared/bags';
-import { rollGear, sellValue, STEEL } from '../src/shared/gear';
+import { rollGear, STEEL } from '../src/shared/gear';
+import { sellValue } from '../src/shared/prices';
 import { rollHungry } from '../src/shared/hungry';
 import { Rng } from '../src/shared/rng';
 import { fromJson } from '../src/client/save';

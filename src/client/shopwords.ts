@@ -32,4 +32,17 @@ export const SHOPW = {
   pack: (size: number) => `Two old packs stitched into one. Holds ${size}.`,
   shelves: (size: number) => `Room for ${size} in the vault.`,
   sell: 'SELL FROM YOUR PACK',
+  /** The vendors' stock turns every ten real minutes (shared/vendors.ts). */
+  fresh: (min: number) => (min <= 1 ? 'Fresh stock in under a minute.' : `Fresh stock in ${min} min.`),
+  soldOut: 'Nothing left on the counter.',
+  notYours: 'Not for your class.',
+  compare: 'COMPARE',
+  close: 'CLOSE',
+};
+
+/** Words on an item's card (card.ts). */
+export const CARDW = {
+  /** After a modifier the wearer can't use (a BLOCK on a Mage's plate). */
+  noUse: 'no use to you',
+  cost: 'COST',
 };

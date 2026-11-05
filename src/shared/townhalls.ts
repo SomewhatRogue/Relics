@@ -30,25 +30,26 @@ const hang = (kind: NonNullable<GameMap['hangs']>[number]['kind'], x: number, w:
 export function hall(door: string): GameMap | null {
   if (door === 'tower') return room('THE TOWER', 11, 10, { ...STONE, ambient: [0.16, 0.14, 0.27] },
     [b('books', 0.4, 0.2, 3, 0.7), b('books', 4.4, 0.2, 2.2, 0.7), b('stair', 8.8, 0.3, 2, 3.4), b('desk', 6.3, 3.6, 2.2, 0.8)],
-    [n('MAGISTER VELL', 5.5, 2.5, 'trainer', 'mage', 3)],
+    // Apprentice Lis sells the focus cupboard under the stair, at the desk (client/vendorui.ts).
+    [n('MAGISTER VELL', 5.5, 2.5, 'trainer', 'mage', 3), n('APPRENTICE LIS', 7.4, 3.1, 'vendor', 'mage', 3)],
     { rounds: [rd('witchfire', 2.2, 4.6, 0.4), rd('candles', 7.6, 1.3, 0.2)], marks: [mk('chalk', 3, 4.8, 5, 3.2)], hangs: [hang('stars', 6.8, 1.9)], torches: [{ x: 5.5, y: -1.6 }] });
   if (door === 'hall') return room('THE BARRACKS', 13, 8, STONE,
-    [b('rack', 1, 0.2, 3, 0.5), b('rack', 9, 0.2, 3, 0.5), b('bunk', 0.4, 3, 1.2, 2.4), b('bunk', 11.4, 3, 1.2, 2.4), b('maptable', 4.6, 3.7, 3.2, 1), b('dummy', 10, 5.4, 0.8, 0.6)],
-    [n('MASTER COLE', 4.5, 2.4, 'trainer', 'trainer', 0), n('SQUIRE PELL', 8.8, 3.2, 'yard', 'squire'), n('CORPORAL BRISK', 6.5, 5.4, 'chat', 'guard', 13)],
+    [b('rack', 1, 0.2, 3, 0.5), b('rack', 9, 0.2, 3, 0.5), b('counter', 9.4, 1.7, 1.8, 0.5), b('bunk', 0.4, 3, 1.2, 2.4), b('bunk', 11.4, 3, 1.2, 2.4), b('maptable', 4.6, 3.7, 3.2, 1), b('dummy', 10, 5.4, 0.8, 0.6)],
+    [n('MASTER COLE', 4.5, 2.4, 'trainer', 'trainer', 0), n('SQUIRE PELL', 8.8, 3.2, 'yard', 'squire'), n('CORPORAL BRISK', 6.5, 5.4, 'chat', 'guard', 13), n('QUARTERMASTER NELL', 10.3, 1.15, 'vendor', 'squire', 0)],
     { marks: [mk('rushes', 1.6, 1, 9.8, 6)], hangs: [hang('shields', 4.2, 1.7), hang('banner', 6.1, 0.8), hang('shields', 7.1, 1.7)] });
   if (door === 'lodge') return room("THE HUNTERS' LODGE", 11, 8, HOME,
     [b('rack', 0.8, 0.2, 4, 0.5), b('skinbench', 6.4, 2.8, 2.6, 0.8), b('sacks', 9.2, 4.6, 1.2, 1)],
-    [n('HUNTRESS MAEVE', 4, 2.4, 'trainer', 'ranger', 1)],
+    [n('HUNTRESS MAEVE', 4, 2.4, 'trainer', 'ranger', 1), n('BOWYER TEMS', 7.7, 2.1, 'vendor', 'ranger', 1)],
     { braziers: [{ x: 9.6, y: 1.2, r: 0.35 }], marks: [mk('pelt', 3, 4.4, 3.2, 1.6), mk('bowls', 1, 5.8, 1.4, 0.5)], hangs: [hang('antlers', 4.9, 1.6), hang('pelts', 6.6, 2.4), hang('bows', 0.8, 3.8)] });
   if (door === 'church') return room('THE CHURCH', 14, 9, STONE,
-    [b('altar', 6, 0.5, 2, 1), b('pew', 1.5, 3.4, 4, 0.6), b('pew', 8.5, 3.4, 4, 0.6), b('pew', 1.5, 5.4, 4, 0.6), b('pew', 8.5, 5.4, 4, 0.6), b('bed', 12.7, 5.6, 1, 2.2)],
-    [n('FATHER ODRIC', 7, 2.2, 'church', 'priest'), n('MOTHER ISOLDE', 11.6, 2.4, 'trainer', 'healer', 4), n('MARTA', 3.2, 4.6, 'chat', 'villager', 2)],
+    [b('altar', 6, 0.5, 2, 1), b('counter', 1.4, 2.2, 1.8, 0.5), b('pew', 1.5, 3.4, 4, 0.6), b('pew', 8.5, 3.4, 4, 0.6), b('pew', 1.5, 5.4, 4, 0.6), b('pew', 8.5, 5.4, 4, 0.6), b('bed', 12.7, 5.6, 1, 2.2)],
+    [n('FATHER ODRIC', 7, 2.2, 'church', 'priest'), n('MOTHER ISOLDE', 11.6, 2.4, 'trainer', 'healer', 4), n('MARTA', 3.2, 4.6, 'chat', 'villager', 2), n('VERGER OSWIN', 2.3, 1.6, 'vendor', 'priest', 4)],
     { rounds: [rd('candles', 5.3, 1, 0.2), rd('candles', 8.7, 1, 0.2), rd('candles', 0.8, 2.6, 0.2), rd('candles', 13.2, 2.6, 0.2)],
       marks: [mk('rug', 6.2, 1.6, 1.6, 7)], hangs: [hang('window', 2.4, 1.2), hang('window', 6.4, 1.2), hang('window', 10.4, 1.2)], torches: [{ x: 4.6, y: -1.6 }, { x: 9.4, y: -1.6 }] });
   if (door === 'tavern') return room('THE DROWNED RAT', 15, 9, { ...HOME, ambient: [0.26, 0.19, 0.16] },
     [b('counter', 1, 1.4, 5, 0.8), b('shelf', 1, 0.1, 5, 0.5), b('casks', 0.2, 3, 0.9, 1.8), b('dicetable', 8.1, 2.7, 2.2, 0.8), b('booth', 12.2, 0.2, 2.6, 1.3),
       b('bench', 11.6, 5, 2.4, 0.9), b('bench', 6, 5.4, 2.4, 0.9)],
-    [n('BARKEEP GANNET', 3.5, 1.1, 'tavern', 'villager'), n('DICER MOLL', 9.2, 3.9, 'dice', 'rogue'), n('WHISPER', 13.6, 2, 'trainer', 'rogue', 2),
+    [n('BARKEEP GANNET', 3.5, 1.1, 'tavern', 'villager'), n('DICER MOLL', 9.2, 3.9, 'dice', 'rogue'), n('WHISPER', 13.6, 2, 'trainer', 'rogue', 2), n('NETTLE', 11.1, 1.5, 'vendor', 'rogue', 2),
       n('A DRUNK', 6.6, 6.7, 'chat', 'villager', 11), n('A CARD SHARP', 12.4, 6.3, 'chat', 'rogue', 12)],
     { braziers: [{ x: 7.4, y: 1.1, r: 0.4 }], marks: [mk('sawdust', 0.4, 2.6, 14, 6)], hangs: [hang('sign', 9.2, 1.6), hang('notices', 6.1, 0.9)] });
   if (door === 'forge') return room('THE FORGE', 13, 8, { ...STONE, ambient: [0.28, 0.2, 0.2] },

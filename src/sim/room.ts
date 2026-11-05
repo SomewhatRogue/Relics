@@ -50,6 +50,7 @@ import { castTap } from './spellbook';
 import { stepStreams, streams } from './stream';
 import { stepSkyStrikes } from './skystrike';
 import { castHold } from './holds';
+import { statsOf } from './gearstats';
 import { stepRings } from './staffrings';
 import { stepWalls } from './firewall';
 import { stepRush } from './rush';
@@ -526,7 +527,7 @@ export class ArenaRoom {
     // A mace's smite mends friends in its light; let go on the flash it lands harder and shields them (sim/holy.ts).
     const holy = !!s.holy && h.heavy && h.perfect;
     // A Mage's hold is the element's spell (sim/holds.ts); the first after a turn of element is primed.
-    if (s.spell) castHold(h, s, mult * spendPrimed(h), { zones: this.zones, bolts: this.bolts, aim: (r, f) => this.aimDistance(h, r, f) }, w, traitsOf(h));
+    if (s.spell) castHold(h, s, mult * spendPrimed(h) * (1 + statsOf(h).spell), { zones: this.zones, bolts: this.bolts, aim: (r, f) => this.aimDistance(h, r, f) }, w, traitsOf(h));
     else if (s.shot === 'smite') this.bolts.push({ ...smite(h, s, Math.min(s.range, this.aimDistance(h, s.range, 3.5)), mult * (holy ? MACE.perfect : 1), traitsOf(h), s.delay), heal: MACE.heal, holy });
     else if (s.shot) {
       // A Mage's spells take the element it last channelled (fire to start with); the first after a turn is primed.

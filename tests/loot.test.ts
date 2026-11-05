@@ -46,7 +46,7 @@ describe('loot', () => {
     expect(TIERS.tolmouth.col).toBeTruthy();
     // Small goblins leave white or green; a named butcher blue or better.
     for (let i = 0; i < 30; i++) expect(['plain', 'fine']).toContain(rollTier(rng, 'scrapper'));
-    for (let i = 0; i < 30; i++) expect(['fine', 'forged', 'tolmouth', 'hungry']).toContain(rollTier(rng, 'named'));
+    for (let i = 0; i < 30; i++) expect(['fine', 'forged', 'tolmouth', 'touched', 'turning', 'hungry']).toContain(rollTier(rng, 'named'));
   });
 
   it('modifiers move the numbers the fight uses, up to the caps; armor and levels count', () => {

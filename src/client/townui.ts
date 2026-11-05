@@ -12,6 +12,7 @@ import { device, type Game } from './game';
 import { line } from './speech';
 import { openStore } from './stores';
 import { openShop } from './shops';
+import { openVendor } from './vendorui';
 import { CHURCH, COAL, TALLY } from './copy';
 import { LINES } from '../shared/wood';
 import { ORLA } from '../shared/orla';
@@ -37,6 +38,8 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
   const pr = g.profile, w = g.world, again = () => openSpot(id, g, panel, arg, key);
   if (openSquare(id, g, panel, arg, key)) return;
   if (openStore(id, g, panel) || openShop(id, g, panel)) return;
+  // A class's vendor, at a counter in its place (vendorui.ts); `arg` is the class.
+  if (id === 'vendor') return openVendor(g, panel, arg);
   if (id === 'board') {
     openBoard(g, panel);
   } else if (id === 'council') {

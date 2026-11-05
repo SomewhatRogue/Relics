@@ -303,3 +303,10 @@ most Want among the heroes is the one the bells don't spare).
 - A Warrior is "strong enough to throw men" (the grab and throw). The Rogue is "weak head on, twice as strong from behind".
 - The Mage's storm spells on the card are Spark (tap) and Lightning Bolt (hold).
 - The pitch lines and the "can't" lines are gone from the card (Kyle cut both).
+
+## Vendors and the rare tiers (recorded 2026-11-05; Kyle's call, lore keeper)
+- Tier names on screen: Plain, Fine, Forged, **Pre-war** (the purple; the steel is still Tolmouth's, but the chip says what it is), **Touched**, **Turning**, Hungry. Touched and turning gear is the same thing as hungry gear caught partway: steel that sat near the hunger a short while, then most of the way. On screen it is never shard, sliver or crown; the card says what it costs and nothing about why. Each grows the Want a little for every job it's worn on.
+- New people: **Quartermaster Nell** keeps the barracks stores (what comes back through the gate goes on her rack); **Bowyer Tems** keeps the bows at the back of the hunters' lodge and disagrees with Maeve about string; **Nettle** sells from a covered table at the back of the Drowned Rat, near Whisper, and doesn't ask; **Apprentice Lis** is Vell's apprentice and sells from the cupboard under his stair, mostly with his leave; **Verger Oswin** keeps the church's vestry and straightens the maces Isolde dents. Buying from them is trade and never touches the Want.
+- The church's vestry never stocks touched or turning gear. Tobin still won't touch hungry gear.
+- Every vendor's stock is the same for everyone at a time; why the goods change is never said.
+

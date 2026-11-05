@@ -5,7 +5,7 @@
  * The gifts and costs are wired into the fight in sim/hungry.ts.
  */
 import type { Rng } from './rng.js';
-import { MODS, TIERS, modFits, rollGear, type ModId } from './gear.js';
+import { MOD_COUNT, budget, modPool, rollGear, rollMods } from './gear.js';
 import type { Item } from './loot.js';
 import type { HeroClass, WeaponId } from './weapons.js';
 
@@ -33,13 +33,8 @@ export function rollHungry(rng: Rng, cls: HeroClass, from?: string): Item {
   const fits = HUNGRY_ORDER.filter((id) => (!HUNGRY[id].cls || HUNGRY[id].cls === cls) && (!HUNGRY[id].from || HUNGRY[id].from === from));
   const own = fits.find((id) => HUNGRY[id].from && HUNGRY[id].from === from);
   const id = own && rng.next() < 0.6 ? own : rng.pick(fits), d = HUNGRY[id];
-  const pool = (Object.keys(MODS) as ModId[]).filter((m) => MODS[m].on.includes(d.slot) && modFits(m, cls));
-  const mods: Item['mods'] = [];
-  for (let i = 0; i < TIERS.hungry.mods && pool.length; i++) {
-    const m = pool.splice(Math.floor(rng.next() * pool.length), 1)[0];
-    const v = MODS[m].mid[3] * (0.8 + rng.next() * 0.4);
-    mods.push({ id: m, v: MODS[m].unit === '' ? Math.round(v) : Math.round(v * 100) / 100 });
-  }
+  // Three modifiers, the biggest there are, from what the piece can roll for this class (mods.ts).
+  const mods = rollMods(rng, modPool(d.slot, cls, d.kit, d.armor), MOD_COUNT.hungry, d.slot === 'weapon' ? budget('hungry', 'weapon') : budget('hungry', d.slot, d.armor));
   return { slot: d.slot, kit: d.kit, armor: d.armor, quality: 'hungry', traits: [], mods, level: 0, hungry: id };
 }
 

@@ -299,6 +299,74 @@ camps, jobs and beacon; shot flat and 2.5D side by side; drawn properly in FLAT,
   and the standing stone upright; graves heaped with the marker standing; the beacon's four courses; the
   same every time). `walls3d.ts` takes `LOOK` from `blocklook.ts` so it loads in Node. No new
   player-facing words.
+## 2026-11-05: the shops reworked: seeded vendors in each class's place, the pawn sells, seven tiers, modifiers that do a weapon's job (Kyle; Claude Opus 5.5)
+
+Kyle: "Pawn should sell random items and you can sell anything to, also sells the bag upgrades. Specific
+class weapons should be sold by a vendor in the associated class area like the tavern and wizard tower and
+be randomized in what it is and traits every ten minutes real life. Chance for some really good things but
+priced appropriately. We also need to re-look at stats on items ... light armor high level can and should be
+just as good as heavy, and stats and bonuses rolled as attributes need to be related and not class
+specific." Then: "Wtf is tolmouth btw. Not clear. Maybe we also have yellow in there; orange, yellow and red
+are really good but rare and dangerous." Then: "buying and selling is noisy ... compare ... should be a
+toggle", an upgrade offered when you picked something to melt, and scrolling past stats to SELL.
+
+- **Seven tiers** (`shared/gear.ts` TIERS, TIER_ORDER; ids unchanged so every save loads): PLAIN white,
+  FINE green, FORGED blue, **PRE-WAR** purple (id `tolmouth`: the old name meant nothing on a chip; Tolmouth
+  stays the lore of where that steel came from), then the rare and dangerous three, each stronger and rarer
+  than the last: **TOUCHED** yellow (new, id `touched`), **TURNING** orange (new, id `turning`), HUNGRY red.
+  Touched and turning are hungry gear caught partway: steel near the hunger a short while, then most of the
+  way. Each has one COST row the fight feels (`shared/costs.ts`: more damage taken, slower stamina, slower
+  walk, less health or slower recharge; 8 points on TOUCHED, 14 on TURNING) and grows the Want by 1 or 2 a
+  job worn. HUNGRY keeps its named gift and cost, the church, and is still the top: biggest modifiers, the
+  chip filled dark red with a glow; the rare chips are filled in their colour.
+- **Modifiers are worth points** (`shared/mods.ts`): one point is about 1% less damage taken. A tier gives
+  each modifier its share (Fine 5, Forged 8, PRE-WAR 12, TOUCHED 14, TURNING 17, HUNGRY 20) and a roll lands
+  within a fifth of it. Counts: 0, 1, 2 (or 1 and an element), 2 and a trait, 3 and a trait and a cost, 3 and a
+  trait and a cost, 3 and the gift and cost.
+- **Weapons do their own job better**, never a flat DAMAGE pile: QUICKNESS, REACH, CHARGE on every kit;
+  SWEEP (wider arcs, swung kits only), FINISHER (the combo's last blow), KNOCKBACK (Warrior, Healer, the
+  big ones, the crossbow), BACKSTAB (Rogue kits), CRIT (Ranger and Rogue), PARRY (kits that parry), BLOCK
+  (kits that hold a block), HEALING (Healer), SPELL POWER and SPELL COST (Mage). Wired in the room:
+  `sim/hero.ts` currentSwing (sweep, finisher), `sim/combat.ts` and `backshot.ts` (backstab),
+  `sim/gearstats.ts` (gear crit with the drill's), `sim/spells.ts` (spell cost, never below 1), `sim/room.ts`
+  (spell power on the hold). DAMAGE stays on rings, and on old pieces that have it.
+- **The relevance rule:** a weapon rolls only for its own kit; armor rolls its weight's list (heavy BLOCK,
+  TOUGHNESS, HEALTH; medium HEALTH, TOUGHNESS, STAMINA, SPEED; light DODGE, STAMINA, SPEED, CRIT), never
+  PARRY; rings what anyone uses plus, rolled for a class, its own. Rolled for a class (drops, the class
+  vendors), nothing it can't use. Rolled for nobody (Tobin's table), armor keeps its weight's whole list, and
+  on the card a modifier the wearer can't use is dim with "no use to you".
+- **Light against heavy** (`shared/budget.ts`): heavy's frame (25% less taken, 12% slower, a shorter dearer
+  dodge, standing fast) is worth 9 points, medium's 7, light's 0, so from Fine up light gets 9 points back in
+  its modifiers and medium 2. Every weight adds up the same at every tier (test prints the table); plain plate
+  is the better plain piece.
+- **Prices** (`shared/prices.ts`): a middling piece is 25, 70, 180, 480, 1200, 2600 gold by tier (hungry
+  never sold), times the roll's quality squared (0.64 to 1.44), +10% a trait, armor 0.9, rings 0.8. A strong
+  TURNING weapon runs to about 3700, beside the 3600 pack. Tobin pays 30% of that, +8 a level.
+- **Vendors** (`shared/vendors.ts`, `client/vendorui.ts`, words in `client/vendorwords.ts`): a person at a
+  counter in each class's place: Quartermaster Nell (the barracks), Bowyer Tems (the hunters' lodge), Nettle
+  (a table at the back of the Drowned Rat, by Whisper), Apprentice Lis (at the desk in Vell's tower), Verger
+  Oswin (the church's vestry). Five pieces each (three of the class's weapons, an armor, a ring), rolled from
+  `floor(now / 10 min)` and the vendor: the same for every player and device in that window, "Fresh stock in
+  7 min." ticking on the panel. Odds a piece: Plain 8%, Fine 42%, Forged 35%, PRE-WAR 12%, TOUCHED 2.2%,
+  TURNING 0.8%; 12% of pieces roll strong (the top of the band, priced to match). Oswin's vestry never
+  stocks the rare three (the church won't hang up anything the hunger touched); its best is a strong PRE-WAR
+  piece (15%). A bought piece is gone for you until the stock turns (`Profile.bought`, this window only).
+  Anyone may look; a weapon only sells to its class.
+- **Tobin** sells six random pieces of any class from the same clock (Plain 35%, Fine 40%, Forged 19%,
+  PRE-WAR 5%, TOUCHED 1%), the bigger packs (prices kept: 400, 1000, 2000, 3600) and the buyback; and buys
+  anything but hungry gear.
+- **Halvard's rack is gone** (class vendors sell the gear now); the forge is two lists: UPGRADE WHAT YOU WEAR
+  (tap one: only UPGRADE) and MELT DOWN FROM YOUR PACK (tap one: only MELT DOWN).
+- **The shop card** (`client/shopui.ts` itemPop, every shop, store and vendor): the thing tapped and its stats
+  (no guard and dodge pictures), COMPARE off by default and remembered on the device (the changed rows only,
+  better and worse marked), and a bar at the foot that never scrolls away with only that piece's actions, the
+  price on the button.
+- **Drop odds:** a butcher 1% TOUCHED; a named butcher (and a hard job's treasure) TOUCHED 2.5%, TURNING
+  1.5%, HUNGRY 1% (was 2%); a chest 1%, 0.6%, 0.4% (hungry was 1%). Danger never lifts a roll into them.
+- **Words:** every new line went through the lore keeper's and the line editor's checklists (no agent tool
+  in this session, so done by hand against their files; see the report). For Kyle: whether Tobin should
+  take hungry gear after all ("you can sell anything to"); Dessa still sells Forged class weapons and rings
+  when the market's open; the hungry drop odds halved so red is rarest; Healers have no rare tier at a vendor.
 
 ## 2026-11-05: the staff's fire hold is a fire pit dropped on a goblin (Kyle; Claude Opus 5.5)
 

@@ -3,7 +3,8 @@
  * and what it would change against what you wear now, in the numbers the room uses. Green better, red
  * worse. Used by the loot card, chests and the pack.
  */
-import { CLASS_DODGES, CLASS_GUARD, guardOf, HUNGRY, type HungryId, LASTS, POTIONS, type PotionId, MODS, MOD_TEXT, TIERS, TRAITS, WEAPONS, CHARGE, gearStats, itemName, slotOf, traitText, type HeroClass, type Item, type WeaponId } from '../shared/tuning';
+import { CLASS_DODGES, CLASS_GUARD, guardOf, HUNGRY, type HungryId, LASTS, POTIONS, type PotionId, MODS, MOD_TEXT, TIERS, TRAITS, WEAPONS, CHARGE, GUARD, RARE, SPELL, costText, gearStats, itemName, modFits, slotOf, traitText, type HeroClass, type Item, type Mod, type MageKit, type WeaponId } from '../shared/tuning';
+import { CARDW } from './shopwords';
 import type { Hero } from '../sim/types';
 import { kitRows } from './kitlines';
 import { areas } from './guardarea';
@@ -31,9 +32,11 @@ export const armorHow = (a: keyof typeof ARMOR_HOW, cls?: HeroClass): string => 
 };
 /** Rows a kit has no use for: a parry it can't make, a block it can't hold, a dodge it hasn't got, heals it doesn't give. */
 export const shown = (r: Row, w: WeaponId) => {
-  const cls = WEAPONS[w].cls, guard = guardOf(WEAPONS[w]);
+  const k = WEAPONS[w], cls = k.cls, guard = guardOf(k);
   return !(r.label === 'PARRY WINDOW' && guard === 'none') && !(r.label === 'THROUGH A BLOCK' && guard !== 'full') &&
-    !(r.label === 'DODGE EVERY' && !CLASS_DODGES[cls]) && !(r.label === 'HEALING GIVEN' && cls !== 'HEALER');
+    !(r.label === 'DODGE EVERY' && !CLASS_DODGES[cls]) && !(r.label === 'HEALING GIVEN' && cls !== 'HEALER') &&
+    !(r.label === 'LAST BLOW' && k.combo.length < 2) && !(r.label === 'SWING ARC' && !k.combo.some((s) => !s.thrust && !s.shot && s.arc >= 100)) &&
+    !(r.label === 'BACKSTAB' && !k.backstab) && !((r.label === 'SPELL POWER' || r.label === 'SPELL COST') && cls !== 'MAGE');
 };
 
 export interface Row { label: string; v: number; unit: '' | 's' | '%'; low?: boolean }
@@ -41,7 +44,7 @@ interface Worn { weapon: WeaponId; item?: Item; armor: Item | null; rings: Item[
 
 /** The numbers that matter, for what's worn. */
 export function sheet(w: Worn): Row[] {
-  const g = gearStats(w.item, w.armor, w.rings), k = WEAPONS[w.weapon], first = k.combo[0], q = 1 - g.quick;
+  const g = gearStats(w.item, w.armor, w.rings), k = WEAPONS[w.weapon], first = k.combo[0], last = k.combo[k.combo.length - 1], q = 1 - g.quick;
   return [
     { label: 'HIT', v: Math.round(first.dmg * (1 + g.damage)), unit: '' },
     { label: 'FULL CHARGE', v: Math.round(k.heavy.dmgFull * (1 + g.damage)), unit: '' },
@@ -57,6 +60,13 @@ export function sheet(w: Worn): Row[] {
     { label: `${barWord(k.cls)} RECOVERY`, v: 1 + g.breath, unit: '%' },
     { label: 'SKILL RECHARGE', v: 1 - g.focus, unit: '%', low: true },
     { label: 'HEALING GIVEN', v: 1 + g.mending, unit: '%' },
+    // The new modifiers' own rows (shared/mods.ts), shown only for kits they act on (`shown`).
+    { label: 'LAST BLOW', v: Math.round(last.dmg * (1 + g.damage) * (1 + g.finisher)), unit: '' },
+    { label: 'SWING ARC', v: Math.round(first.arc * (1 + g.arc)), unit: '' },
+    { label: 'BACKSTAB', v: (k.backstab ?? GUARD.rearMult) * (1 + g.backstab), unit: '%' },
+    { label: 'CRIT CHANCE', v: g.crit, unit: '%' },
+    { label: 'SPELL POWER', v: 1 + g.spell, unit: '%' },
+    { label: 'SPELL COST', v: (SPELL[w.weapon as MageKit] ?? 0) * (1 - g.thrift), unit: '', low: true },
   ];
 }
 
@@ -82,15 +92,30 @@ export function compare(h: Hero, it: Item): string {
   }).join('') + '</div>';
 }
 
-/** The card: tier, name, how it fights, what's on it. */
-export function card(it: Item, h?: Hero): string {
+/** A modifier's value as shown: "+12%", "+0.04 s", "+9"; SPELL COST reads as the cut it is ("-12%"). */
+const modValue = (m: Mod) => {
+  const neg = m.id === 'thrift', v = neg ? -m.v : m.v, sign = v > 0 ? '+' : '';
+  return MODS[m.id].unit === '%' ? sign + Math.round(v * 100) + '%' : MODS[m.id].unit === 's' ? sign + v + ' s' : sign + v;
+};
+
+/** The card: tier, name, how it fights, what's on it. `brief` leaves out the guard and dodge pictures (a shop's card).
+ *  A modifier the wearer can't use shows dim, "no use to you" (shared/mods.ts); a touched or turning piece's COST is in red. */
+export function card(it: Item, h?: Hero, brief = false): string {
   const t = TIERS[it.quality], s = slotOf(it), cls = h ? WEAPONS[h.weapon].cls : it.kit ? WEAPONS[it.kit].cls : undefined;
-  const how = s === 'weapon' ? weaponHow(it.kit!) : s === 'armor' ? armorHow(it.armor ?? 'light', cls) : '';
+  const how = s === 'weapon' ? (brief ? labelRows(kitRows(it.kit!)) : weaponHow(it.kit!)) : s === 'armor' ? armorHow(it.armor ?? 'light', cls) : '';
+  // Whose hands it's judged in: the weapon itself, or what the wearer holds.
+  const kit = s === 'weapon' ? it.kit : h?.weapon;
   // "NAME +10%: what it does" and "NAME: what it does" (Kyle: "STAMINA ON PARRY: parry refills stamina").
-  const mods = (it.mods ?? []).map((m) => `<div class="tr"><b>${barWords(MODS[m.id].name, cls)} ${m.v > 0 ? '+' : ''}${MODS[m.id].unit === '%' ? Math.round(m.v * 100) + '%' : MODS[m.id].unit === 's' ? m.v + ' s' : m.v}${MOD_TEXT[m.id] ? ':' : ''}</b> ${barWords(MOD_TEXT[m.id], cls)}</div>`);
+  const mods = (it.mods ?? []).map((m) => {
+    const use = !cls || !(m.id in MODS) || modFits(m.id, cls, kit);
+    return `<div class="tr${use ? '' : ' nouse'}"><b>${barWords(MODS[m.id]?.name ?? m.id, cls)} ${modValue(m)}${MOD_TEXT[m.id] ? ':' : ''}</b> ${barWords(MOD_TEXT[m.id] ?? '', cls)}${use ? '' : ` <i>${CARDW.noUse}</i>`}</div>`;
+  });
   const traits = it.traits.map((k) => `<div class="tr"><b>${barWords(TRAITS[k].name, cls)}:</b> ${traitText(k, cls)}</div>`);
-  return `<div class="card-head" style="--t:${t.col}"><span class="chip">${t.name}</span><b>${itemName(it)}</b></div>` +
+  // The rare three wear their chip filled in; HUNGRY's darkest of all (ui.css).
+  const chip = RARE.includes(it.quality) ? ` rare ${it.quality}` : '';
+  return `<div class="card-head" style="--t:${t.col}"><span class="chip${chip}">${t.name}</span><b>${itemName(it)}</b></div>` +
     (how ? `<div class="how">${how}</div>` : '') + [...mods, ...traits].join('') +
+    (it.cost ? labelRows([[CARDW.cost, barWords(costText(it.cost), cls)]], 'hungry') : '') +
     (it.hungry ? hungryRows(it.hungry as HungryId, cls) : '') + (mods.length + traits.length || it.hungry ? '' : `<div class="tr">Plain. No modifiers.</div>`);
 }
 
@@ -102,4 +127,4 @@ export const hungryRows = (id: HungryId, cls?: HeroClass): string =>
   labelRows([['GIFT', barWords(HUNGRY[id].gift, cls)], ['COST', barWords(HUNGRY[id].cost, cls)]], 'hungry');
 
 /** The hero sheet: every number, as worn. */
-export const heroSheet = (h: Hero) => '<div class="cmp sheet">' + sheet(worn(h)).filter((r) => shown(r, h.weapon)).map((r) => `<div><span>${r.label}</span><b>${fmt(r)}</b></div>`).join('') + '</div>';
+export const heroSheet = (h: Hero) => '<div class="cmp sheet">' + sheet(worn(h)).filter((r) => shown(r, h.weapon) && !(r.label === 'CRIT CHANCE' && !r.v)).map((r) => `<div><span>${r.label}</span><b>${fmt(r)}</b></div>`).join('') + '</div>';

@@ -10,12 +10,23 @@
 #panel .good em { font-style: normal; color: #ffd27a; }
 #panel .good.off .gn, #panel .good.off em { opacity: 0.55; }
 #panel .spop { position: fixed; inset: 0; z-index: 7; display: flex; align-items: center; justify-content: center; padding: 16px; background: #0e0f1299; }
-#panel .spcard { width: min(300px, 100%); max-height: 80vh; overflow-y: auto; background: #23262c; border: 1px solid #ffd27a88; padding: 12px 14px; box-shadow: 0 6px 24px #000a; }
-#panel .spcard .ph { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+/* The card over a shop: head, a block of stats that scrolls, and a bar at the foot that never does. */
+#panel .spcard { display: flex; flex-direction: column; width: min(320px, 100%); max-height: 82vh; background: #23262c; border: 1px solid #ffd27a88; padding: 10px 12px; box-shadow: 0 6px 24px #000a; }
+#panel .spcard .ph { flex: none; display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
 #panel .spcard .ph img { width: 32px; height: 32px; image-rendering: pixelated; }
 #panel .spcard .ph b { flex: 1; }
-#panel .spcard .ph em { font-style: normal; color: #ffd27a; white-space: nowrap; }
-#panel .spcard .pa { line-height: 1.45; }
+#panel .spcard .pa { flex: 1 1 auto; min-height: 0; overflow-y: auto; line-height: 1.4; padding-right: 2px; }
 #panel .spcard .pa p { margin: 0 0 6px; }
-#panel .spcard .pb { display: flex; gap: 6px; margin-top: 10px; }
-#panel .spcard .pb button { flex: 1; }
+#panel .spcard .pa .how { margin: 2px 0 6px; }
+#panel .spcard .pa .tr { color: #c8c0b0; }
+#panel .spcard .pa .tr.nouse { opacity: 0.45; }
+#panel .spcard .pa .tr.nouse i { font-style: normal; color: #8d929c; }
+#panel .spcard .cmpt { display: block; width: 100%; margin: 8px 0 4px; padding: 4px; min-height: 30px; font-size: var(--fs-s); letter-spacing: 0.12em; background: #1b1d22; border-color: #3a3e46; color: #a39e94; }
+#panel .spcard .cmpt.on { color: #ffd27a; border-color: #ffd27a66; }
+#panel .spcard .pb { flex: none; margin-top: 8px; padding-top: 8px; border-top: 1px solid #3a3e46; }
+#panel .spcard .pb .why { margin: 0 0 6px; }
+#panel .spcard .pbb { display: flex; flex-wrap: wrap; gap: 6px; }
+#panel .spcard .pbb button { flex: 1 1 40%; }
+#panel .spcard .pbb button.primary { flex-basis: 100%; }
+/* The card's own name is already in the head: only its tier chip shows there. */
+#panel .spcard .pa .card-head b { display: none; }

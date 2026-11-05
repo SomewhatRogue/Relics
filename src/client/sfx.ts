@@ -487,7 +487,7 @@ export function chestSound(state: 'opening' | 'shut' | 'open', tier: string): vo
     return;
   }
   if (state === 'open') {
-    const steps = ['plain', 'fine', 'forged', 'tolmouth', 'hungry'].indexOf(tier);
+    const steps = ['plain', 'fine', 'forged', 'tolmouth', 'touched', 'turning', 'hungry'].indexOf(tier);
     burst('lowpass', 1200, 300, 0.7, 0.3, 0.15);
     if (tier === 'hungry') return tone('sawtooth', 110, 70, 0.3, 0.8);
     for (let i = 0; i <= steps; i++) tone('triangle', 520 * Math.pow(1.26, i), 520 * Math.pow(1.26, i), 0.22, 0.25, 0.08 + i * 0.12);
