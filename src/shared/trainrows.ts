@@ -70,7 +70,7 @@ function lessonRow(p: Profile, l: Lesson): TrainRow {
 /** A skill taught after the first: its level, its price, waiting on the first. */
 function skillRow(p: Profile, r: RelicId): TrainRow {
   const t = skillStep(p, r), state = skillState(p, r), have = knowsSkill(p, r), text = SKILL_WORDS[r] ?? '';
-  const needs = RELICS[SKILL_CHOICES[p.cls][0]].short;
+  const needs = RELICS[SKILL_CHOICES[p.cls][0]].name;
   return {
     id: r, key: 'learn:' + r, group: 'skills', lesson: true, skill: r, name: RELICS[r].name, text, rank: have ? 1 : 0, max: 1,
     pips: [have ? 'on' : p.level < t.level ? 'lock' : 'off'], gain: have ? '' : text, now: have ? text : '', next: have ? '' : text, state,

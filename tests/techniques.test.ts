@@ -74,7 +74,7 @@ describe('techniques at the trainer', () => {
     // At level 10 with none learned: the first is next, the rest wait on the one before.
     const fresh = trainerRows(Object.assign(newProfile('HEALER'), { level: 10, gold: 0 })).filter((r) => r.tech);
     expect(fresh.map((r) => r.state)).toEqual(['poor', 'needs', 'needs']);
-    expect(fresh[2].needs).toBe('SANCTUARY STEP');
+    expect(fresh[2].needs).toBe('WALKING SANCTUARY');
     // The Mage's row is as it was: one drill of ranks.
     const mage = trainerRows(Object.assign(newProfile('MAGE'), { level: 10 })).filter((r) => r.group === 'craft');
     expect(mage.map((r) => r.id)).toEqual(['leave', 'technique']);

@@ -93,7 +93,7 @@ describe('trainer', () => {
     expect(at('power').now).toBe('+10% damage');
     expect(at('power').next).toBe('+15% damage');
     // A Warrior's technique is three rows of moves now (shared/techniques.ts): the first at level 4.
-    expect(rows.filter((x) => x.tech).map((x) => x.name)).toEqual(['SLAM', 'SHOULDER CHARGE', 'IRON FEET']);
+    expect(rows.filter((x) => x.tech).map((x) => x.name)).toEqual(['WIDE SLAM', 'STRIDING BLOW', 'IRON FEET']);
     expect(rows.find((x) => x.tech === 'slam')!.state).toBe('buy');
 
     const top = hero(10, 0, 'ROGUE');

@@ -384,7 +384,7 @@ describe('corpses and backstabs', () => {
     expect(t.y).toBeLessThan(1);
   });
 
-  it("a Rogue's blow finds one goblin, and only knocks it off balance from behind", () => {
+  it("a Rogue's dagger blow finds two goblins (Kyle, 2026-11-04), and only knocks them off balance from behind", () => {
     const { room, h, t } = onTarget(3);
     const other = room.enemies[4];
     Object.assign(other, { x: t.x + 0.5, y: t.y, cooldown: 99, fx: 0, fy: 1 });
@@ -393,7 +393,7 @@ describe('corpses and backstabs', () => {
     h.weapon = 'daggers';
     room.setIntent('me', intent({ attackSeq: 1, ay: -1 }));
     run(room, ticks(0.25));
-    expect([t, other].filter((e) => e.hp < e.maxHp).length).toBe(1);
+    expect([t, other].filter((e) => e.hp < e.maxHp).length).toBe(2);
     expect(t.act === 'flinch' || other.act === 'flinch').toBe(false);
     // From behind, it reels.
     const back = onTarget(3);

@@ -26,17 +26,17 @@ export const TECHS: Record<HeroClass, TechId[]> = {
 
 /** The name on the trainer's row and what it does (Kyle's style: the effect first, plainly). */
 export const TECH_WORDS: Record<TechId, { name: string; text: string }> = {
-  slam: { name: 'SLAM', text: 'Slamming a goblin also bursts the small goblins right next to it.' },
-  shoulder: { name: 'SHOULDER CHARGE', text: 'Walk straight for 1 s and your next blow knocks down the first goblin it hits.' },
-  ironfeet: { name: 'IRON FEET', text: 'While you hold an attack, blows don\'t knock you back or stagger you.' },
+  slam: { name: 'WIDE SLAM', text: 'Slamming a goblin also kills the small goblins right next to it.' },
+  shoulder: { name: 'STRIDING BLOW', text: 'Walk one way for 1 s and your next blow knocks the first goblin it hits flat.' },
+  ironfeet: { name: 'IRON FEET', text: 'While you charge a blow, hits don\'t knock you back or stagger you.' },
   knifework: { name: 'KNIFEWORK', text: 'Backstabs make the goblin bleed for 3 s.' },
-  slip: { name: 'SLIP AWAY', text: 'A backstab kill hides you for 2 s.' },
-  cutpurse: { name: 'CUTPURSE', text: 'A backstab can knock 1 to 3 gold loose, once a goblin.' },
-  trapper: { name: 'TRAPPER', text: 'Your snares catch two goblins.' },
-  quicknock: { name: 'QUICK NOCK', text: 'After a perfect shot, the next one is ready at once.' },
-  steady: { name: 'STEADY', text: 'Your aim doesn\'t drift while you move.' },
+  slip: { name: 'SLIP AWAY', text: 'Kill with a backstab and goblins lose you for 2 s.' },
+  cutpurse: { name: 'CUTPURSE', text: 'A backstab has a 1 in 4 chance to knock 1 to 3 gold loose, once per goblin.' },
+  trapper: { name: 'TRAPPER', text: 'Each snare catches two goblins, not one.' },
+  quicknock: { name: 'QUICK NOCK', text: 'After a PERFECT shot, your next draw starts part drawn. A crossbow loads at once.' },
+  steady: { name: 'STEADY AIM', text: 'Your shots don\'t drift while you move.' },
   mending: { name: 'MENDING HANDS', text: 'Help friends up 50% faster.' },
-  sanctstep: { name: 'SANCTUARY STEP', text: 'Your blessed ground follows you for 3 s after you cast it.' },
+  sanctstep: { name: 'WALKING SANCTUARY', text: 'Sanctuary\'s blessed ground moves with you for its first 3 s.' },
   judgement: { name: 'JUDGEMENT', text: 'Hit a goblin that\'s attacking a friend and it\'s stunned for 1 s.' },
 };
 

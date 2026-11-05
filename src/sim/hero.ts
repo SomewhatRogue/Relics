@@ -2,6 +2,7 @@
  * A hero's turn each tick: presses, movement, the weapon's combo, the charged heavy, the roll.
  * A tap of attack swings on release; holding past CHARGE.start charges a heavy instead.
  */
+import { isDead } from './damage';
 import { collide, wadeAt } from '../shared/arena';
 import { DODGE, CLASS_DODGES, DECOY, AUGMENTS, CHARGE, GRAB, HORN, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, GUARD, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon, drilled, STEALTH, dodgeOf, guardOf } from '../shared/tuning';
 import { slide } from './bodies';
@@ -339,7 +340,9 @@ function startCharge(h: Hero, now: number): void {
 function startSwing(h: Hero, i: number, inp: Intent, enemies: Enemy[], now: number, ev: FightEvent[]): void {
   // Bows and staffs look for a goblin as far as they shoot.
   const shot = i < 0 ? WEAPONS[h.weapon].heavy : WEAPONS[h.weapon].combo[0];
-  face(h, inp, enemies, true, shot.shot ? shot.range * 0.9 : 3.2);
+  face(h, inp, enemies, true, shot.shot ? shot.range * 0.9 : shot.thrust && shot.lunge > 1.5 ? shot.range + shot.lunge : 3.2);
+  // A long lunge (the rapier's) bends onto a goblin close to where you aimed, so it doesn't sail past (Kyle, 2026-11-04).
+  if (shot.thrust && shot.lunge > 1.5) lungeOnto(h, enemies, shot.range + shot.lunge);
   h.act = 'attack';
   h.actT = 0;
   h.heavy = i < 0;
@@ -355,6 +358,18 @@ function startSwing(h: Hero, i: number, inp: Intent, enemies: Enemy[], now: numb
   primeShoulder(h, now);
   // (A Ranger's tap is the short sword: it sounds like one.)
   ev.push({ k: 'swing', x: h.x, y: h.y, src: !currentSwing(h).shot && WEAPONS[h.weapon].cls === 'RANGER' ? 'sword' : h.weapon, heavy: h.heavy });
+}
+
+/** Turn onto the nearest goblin within `reach` and about 30 degrees of where you face. */
+function lungeOnto(h: Hero, enemies: Enemy[], reach: number): void {
+  let best: Enemy | null = null, bd = Infinity;
+  for (const e of enemies) {
+    if (isDead(e) || e.act === 'carried' || e.kind === 'dummy' || e.kind === 'swingDummy') continue;
+    const dx = e.x - h.x, dy = e.y - h.y, d = Math.hypot(dx, dy);
+    if (d > reach + e.radius || (dx * h.fx + dy * h.fy) / (d || 1) < 0.86) continue;
+    if (d < bd) (bd = d), (best = e);
+  }
+  if (best) (h.fx = (best.x - h.x) / bd), (h.fy = (best.y - h.y) / bd);
 }
 
 function startRoll(h: Hero, inp: Intent, now: number, ev: FightEvent[]): void {
