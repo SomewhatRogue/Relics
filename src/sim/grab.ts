@@ -1,5 +1,5 @@
 /**
- * Grab, slam, throw. A Warrior picks up any small goblin in reach. Anyone else only one they've earned: stunned, netted, frozen,
+ * Grab, slam, throw. A Warrior picks up any small goblin in reach. A spellblade Mage only one it's earned (nobody else grabs goblins): stunned, netted, frozen,
  * staggered, busy (feeding, swinging at someone else, or just after a swing), or one you've got behind. Overhead, ATTACK slams it into the ground (a kill pounds its
  * head in); GRAB again throws it, and it hits whatever it flies into. It wriggles free in time.
  */
@@ -16,6 +16,9 @@ export function grabbable(h: Hero, e: Enemy, now: number): boolean {
   if (d > GRAB.reach + e.radius) return false;
   // A Warrior just picks a small one up, front or back, whatever it's doing (Kyle, 2026-11-04).
   if (WEAPONS[h.weapon].cls === 'WARRIOR') return true;
+  // Only a Warrior and a Mage with the spellblade (the battle mage) grab goblins at all (Kyle, 2026-11-04);
+  // the spellblade only one it has earned. Anyone can still lift a crate or barrel (sim/lift).
+  if (h.weapon !== 'spellblade') return false;
   const behind = (e.fx * -dx + e.fy * -dy) / (d || 1) < GUARD.rearCos;
   // Busy: feeding, swinging at someone else, or caught at the end of a swing that missed.
   const a = e.attack, busy = e.feeding || (!!a && (a.aimed !== h.id || a.t > a.windup + a.active));

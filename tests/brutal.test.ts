@@ -41,6 +41,16 @@ describe('grab, slam, throw', () => {
     expect(h.act).toBe('carry');
   });
 
+  it('only a Warrior or a spellblade Mage grabs a goblin, even a stunned one (Kyle, 2026-11-04)', () => {
+    for (const [weapon, can] of [['daggers', false], ['mace', false], ['longbow', false], ['wand', false], ['spellblade', true]] as const) {
+      const { room, h } = setup();
+      h.weapon = weapon;
+      room.setIntent('me', intent({ grabSeq: 1, ay: -1 }));
+      run(room, 0.1);
+      expect(h.act === 'carry', weapon).toBe(can);
+    }
+  });
+
   it('grabs a stunned goblin and slams it into the ground', () => {
     const { room, h, t } = setup();
     room.setIntent('me', intent({ grabSeq: 1, ay: -1 }));
