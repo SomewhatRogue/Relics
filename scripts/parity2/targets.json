@@ -1,0 +1,326 @@
+{
+ "targets": [
+  {
+   "name": "room-orchard",
+   "place": {
+    "name": "Barrowby",
+    "kind": "village",
+    "region": "Barrowfields",
+    "ruin": 1
+   },
+   "seed": 1,
+   "took": "h",
+   "room": 2,
+   "x": 3.1,
+   "y": 4.6,
+   "open": true
+  },
+  {
+   "name": "scene-drums",
+   "place": {
+    "name": "Barrowby",
+    "kind": "village",
+    "region": "Barrowfields",
+    "ruin": 1
+   },
+   "seed": 1,
+   "took": "h",
+   "room": 3,
+   "x": 12.8,
+   "y": 12.4
+  },
+  {
+   "name": "room-churchyard",
+   "place": {
+    "name": "Barrowby",
+    "kind": "village",
+    "region": "Barrowfields",
+    "ruin": 1
+   },
+   "seed": 1,
+   "took": "h",
+   "room": 3,
+   "x": 18.2,
+   "y": 22.5,
+   "open": true
+  },
+  {
+   "name": "scene-wreck",
+   "place": {
+    "name": "Tollan's Farm",
+    "kind": "farm",
+    "region": "Barrowfields",
+    "ruin": 1
+   },
+   "seed": 1,
+   "took": "h",
+   "room": 1,
+   "x": 24.2,
+   "y": 15.1
+  },
+  {
+   "name": "scene-wading",
+   "place": {
+    "name": "Tollan's Farm",
+    "kind": "farm",
+    "region": "Barrowfields",
+    "ruin": 1
+   },
+   "seed": 1,
+   "took": "h",
+   "room": 3,
+   "x": 21.7,
+   "y": 15.2
+  },
+  {
+   "name": "scene-burning",
+   "place": {
+    "name": "Tollan's Farm",
+    "kind": "farm",
+    "region": "Barrowfields",
+    "ruin": 1
+   },
+   "seed": 1,
+   "took": "l",
+   "room": 3,
+   "x": 10.5,
+   "y": 22.5
+  },
+  {
+   "name": "room-barrows",
+   "place": {
+    "name": "Lowfurrow Fields",
+    "kind": "field",
+    "region": "Barrowfields",
+    "ruin": 1
+   },
+   "seed": 1,
+   "took": "l",
+   "room": 3,
+   "x": 7,
+   "y": 18.9,
+   "open": true
+  },
+  {
+   "name": "room-glade",
+   "place": {
+    "name": "Fennick Ford",
+    "kind": "village",
+    "region": "Fenmere",
+    "ruin": 2
+   },
+   "seed": 1,
+   "took": "h",
+   "room": 1,
+   "x": 14,
+   "y": 14,
+   "open": true
+  },
+  {
+   "name": "scene-fallen",
+   "place": {
+    "name": "Fennick Ford",
+    "kind": "village",
+    "region": "Fenmere",
+    "ruin": 2
+   },
+   "seed": 1,
+   "took": "h",
+   "room": 2,
+   "x": 12.9,
+   "y": 15
+  },
+  {
+   "name": "room-reedbed",
+   "place": {
+    "name": "Fennick Ford",
+    "kind": "village",
+    "region": "Fenmere",
+    "ruin": 2
+   },
+   "seed": 1,
+   "took": "l",
+   "room": 3,
+   "x": 8.7,
+   "y": 20.5,
+   "open": true
+  },
+  {
+   "name": "scene-hanging",
+   "place": {
+    "name": "The Charcoal Camps",
+    "kind": "forest",
+    "region": "Greyhollow",
+    "ruin": 2
+   },
+   "seed": 1,
+   "took": "h",
+   "room": 2,
+   "x": 17.2,
+   "y": 22.5
+  },
+  {
+   "name": "scene-drag",
+   "place": {
+    "name": "Brokenbridge",
+    "kind": "river",
+    "region": "Copperdeep",
+    "ruin": 2
+   },
+   "seed": 1,
+   "took": "h",
+   "room": 1,
+   "x": 20.8,
+   "y": 17.3
+  },
+  {
+   "name": "room-deepwood",
+   "place": {
+    "name": "Sallow Carr",
+    "kind": "marsh",
+    "region": "Greyhollow",
+    "ruin": 2
+   },
+   "seed": 1,
+   "took": "h",
+   "room": 1,
+   "x": 14,
+   "y": 14,
+   "open": true
+  },
+  {
+   "name": "room-mill",
+   "place": {
+    "name": "Sallow Carr",
+    "kind": "marsh",
+    "region": "Greyhollow",
+    "ruin": 2
+   },
+   "seed": 1,
+   "took": "l",
+   "room": 3,
+   "x": 22.3,
+   "y": 19.5,
+   "open": true
+  },
+  {
+   "name": "room-collapse",
+   "place": {
+    "name": "The Wickhold Sewers",
+    "kind": "mine",
+    "region": "Wickhold",
+    "ruin": 2
+   },
+   "seed": 1,
+   "took": "h",
+   "room": 0,
+   "x": 14,
+   "y": 14,
+   "open": true
+  },
+  {
+   "name": "scene-prisoners",
+   "place": {
+    "name": "Barrowby",
+    "kind": "village",
+    "region": "Barrowfields",
+    "ruin": 1
+   },
+   "seed": 2,
+   "took": "l",
+   "room": 2,
+   "x": 17,
+   "y": 12
+  },
+  {
+   "name": "room-stackyard",
+   "place": {
+    "name": "Tollan's Farm",
+    "kind": "farm",
+    "region": "Barrowfields",
+    "ruin": 1
+   },
+   "seed": 2,
+   "took": "h",
+   "room": 1,
+   "x": 25.3,
+   "y": 21.1,
+   "open": true
+  },
+  {
+   "name": "scene-cache",
+   "place": {
+    "name": "Lowfurrow Fields",
+    "kind": "field",
+    "region": "Barrowfields",
+    "ruin": 1
+   },
+   "seed": 2,
+   "took": "h",
+   "room": 3,
+   "x": 4.9,
+   "y": 11.4
+  },
+  {
+   "name": "room-flooded",
+   "place": {
+    "name": "The Wickhold Sewers",
+    "kind": "mine",
+    "region": "Wickhold",
+    "ruin": 2
+   },
+   "seed": 3,
+   "took": "h",
+   "room": 3,
+   "x": 14,
+   "y": 14,
+   "open": true
+  },
+  {
+   "name": "room-orechamber",
+   "place": {
+    "name": "The Copperdeep Shafts",
+    "kind": "mine",
+    "region": "Copperdeep",
+    "ruin": 2
+   },
+   "seed": 4,
+   "took": "h",
+   "room": 3,
+   "x": 14,
+   "y": 14,
+   "open": true
+  },
+  {
+   "name": "room-minehead",
+   "place": {
+    "name": "The Copperdeep Shafts",
+    "kind": "mine",
+    "region": "Copperdeep",
+    "ruin": 2
+   },
+   "seed": 5,
+   "took": "l",
+   "room": 3,
+   "x": 15.1,
+   "y": 21.3,
+   "open": true
+  },
+  {
+   "name": "room-cave",
+   "place": {
+    "name": "The Copperdeep Shafts",
+    "kind": "mine",
+    "region": "Copperdeep",
+    "ruin": 2
+   },
+   "seed": 8,
+   "took": "l",
+   "room": 3,
+   "x": 14,
+   "y": 14,
+   "open": true
+  }
+ ],
+ "missing": []
+}

@@ -2,6 +2,86 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-05: 2.5D up to FLAT, second pass: braziers, palisades, fences, hurdles, stones, graves, the beacon (Kyle; Claude Opus 5.5)
+
+Kyle: "Some maps don't seem 2.5D, with braziers or goblin post-fence walls etc." Since the first parity
+pass the camps, layout 4's rooms and scenes and the Barrowfields had landed, and a few of their pieces
+were still a painting on a plane or a box where FLAT draws them properly.
+
+**The audit** (every country's job room, every layout-4 room kind and staged scene, the Barrowfields'
+camps, jobs and beacon; shot flat and 2.5D side by side; drawn properly in FLAT, flat or a box in 2.5D):
+
+- **The palisade back wall** (village, farm, green and farmstead rooms): FLAT paints rammed logs with
+  pointed tops; 2.5D showed that painting on a flat plane, a box behind it and small cones on top.
+  This was the "goblin post-fence wall".
+- **Braziers** (the camps' fires, the war band's long fire at DRUMS, the larder's pot fire, the town's):
+  FLAT has an iron bowl on a stem with coals in it; 2.5D had a post with a box on it.
+- **Fences** (fields, yards, the palisade across a lane where a village stops): FLAT paints posts close
+  together, a hand apart; 2.5D had three posts and two rails to a block, a low rail fence.
+- **Hurdles** (THE FORD's archers, the Barrowfields' cages, the siege): FLAT weaves withies between
+  stakes; 2.5D had stakes with plain rails.
+- **Boulders, standing stones, bushes, hay, charcoal clamps**: FLAT's are rounded (a boulder's ellipse,
+  a standing stone taller than wide with a rounded top, a bush's three clumps, a bale, a turfed mound);
+  2.5D built them as cubes. A churchyard's wall of boulders and every hedge (a row of bushes) read as
+  stacked boxes; the Barrowfields' and the barrows' standing stones were squat cubes.
+- **Graves and barrows** (the `mound` mark: churchyards, the Barrowfields' barrows): FLAT heaps the
+  earth and stands the stick cross at its head; 2.5D had only the floor painting.
+- **The well's rope** (THE WELL scene's cache, every well): FLAT has the rope down from the beam; 2.5D
+  had none.
+- **The Barrowfields' beacon**: a log pile and its fire painted on the flat layer, and no light at all
+  in 2.5D once lit.
+- Already standing, left alone: the stakes ring (sharpened, with its gaps), the headframe, the mill and
+  its wheel, the fallen tree, the hanging tree, headstones, apple trees, the wrecked cart, the burning
+  house's woodpile, tents, shacks and dens, the cookpot, cages, the siege engine (a cart in both views:
+  FLAT draws no arm on it either), cookfires, reeds, stumps, pillars, the water's banks (water3d.ts);
+  the drag trail, the oil slick and the rest painted on the floor are painted in FLAT too.
+
+**How** (drawing only; nothing in the room changes):
+
+- **One source.** Each piece is built from what FLAT paints it from: the map's `braziers`, its `fence`,
+  `hurdle` blocks and round things, the `mound` marks, the theme's `back`, the expedition's `zone` and
+  `phase`; in FLAT's colours and spacing (the brazier sprite's iron, bowl, rim and coals; a log every 6
+  pixels in the palisade's three browns with its dark seam; a fence post every 5 pixels; a stake every 7
+  in a hurdle; the beacon's four courses of 18, 14, 10 and 6 pixels).
+- **Files.** `three/brazier3d.ts` (a flared iron bowl in three courses on three splayed legs, its rim and
+  coals; flames in the bowl; light from the room's lamps as before, a camp's always), `three/palisade3d.ts`
+  (the palisade back wall as logs, each sharpened, a dark backing behind; the painted plane is gone for
+  this theme), `three/fence3d.ts` (posts a hand apart on two rails; chained blocks make one wall with
+  the map's gaps), `three/siege3d.ts` (the hurdle woven: each withy in front of one stake and behind the
+  next, the row above the other way), `three/nature3d.ts` (boulders, standing stones, bushes, bales and
+  clamps rounded), `three/mounds3d.ts` (graves and barrows heaped, the marker standing),
+  `three/beacon3d.ts` (the log pile, and once lit its fire and FLAT's light: reach 11 tiles, warm);
+  `rounds3d.ts` hands the rounded ones over and gives the well its rope and bucket; `ground.ts` takes the
+  brazier, palisade and mounds; `view3d.ts` the beacon; `overlay3d.ts` no longer paints it flat.
+- **Light for a phone.** Everything is still merged into the map's one mesh (the beacon is one mesh of
+  its own), so draw calls don't move. Measured headless on phone (390x844 at 3x, software GL, `?perf=1`
+  counts both hero passes; before -> after):
+
+  | scene | draw calls | triangles |
+  | --- | --- | --- |
+  | a Barrowfields camp (the busiest: tents, shacks, the brazier, cookfire, the band) | 56 -> 56 | 26,548 -> 33,304 |
+  | the Barrowfields by the cages and hurdle | 45 -> 45 | 27,614 -> 34,370 |
+  | the Barrowfields' beacon lit | 32 -> 33 | 23,478 -> 30,438 |
+  | DRUMS (layout 4: the war band in its stakes, two braziers) | 47 -> 47 | 5,616 -> 7,148 |
+  | a churchyard (layout 4: graves, headstones, the boulder wall) | 32 -> 32 | 9,630 -> 11,162 |
+  | Tollan's Farm (palisade wall, fences, bales) | 31 -> 30 | 8,742 -> 13,108 |
+
+  The Barrowfields is one big merged mesh, so every boulder and bush on its whole map counts: about
+  7,000 triangles more, three passes over. Frame times are within the noise of the shared box.
+- **Seen side by side.** `scripts/parity-look.cjs` now also takes layout 4's rooms and scenes (targets
+  from `npx tsx scripts/parity2/find.ts > scripts/parity2/targets.json`, one of each room kind and staged
+  scene, stood by its piece) and the Barrowfields at a camp, each job and the beacon (lit for the shot);
+  FLAT gets 1.5 s to settle its camera before its shot.
+- **Left as they were.** The trees back wall (its face is still the painted treeline under 3D crowns);
+  the low side walls (dark boxes, as FLAT's dark bands); tents (cloth slopes, plain like FLAT's); a
+  shack's roof is shingles in the sailcloth's colour, not patched cloth.
+- Tests: `tests/parity3d.test.ts` (every block in layout 4's rooms and the Barrowfields builds as itself,
+  never the plain box; a fence's posts by FLAT's spacing; the hurdle woven both sides; the brazier's legs,
+  flames in the bowl and its light; the palisade's logs and points; rocks, bushes, bales, clamps rounded
+  and the standing stone upright; graves heaped with the marker standing; the beacon's four courses; the
+  same every time). `walls3d.ts` takes `LOOK` from `blocklook.ts` so it loads in Node. No new
+  player-facing words.
+
 ## 2026-11-05: the staff's fire hold is a fire pit dropped on a goblin (Kyle; Claude Opus 5.5)
 
 Kyle: "The wall of fire from staff is still not great. I don't know what to do with it, it's just super

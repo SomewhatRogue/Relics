@@ -21,6 +21,9 @@ import { waysOut } from '../wayout';
 import { buildWater, SINK } from './water3d';
 import type { Wet } from '../wetfx';
 import { DEEP, levelAt, waterField } from '../waterfield';
+import { addBrazier } from './brazier3d';
+import { palisadeRun } from './palisade3d';
+import { addMounds } from './mounds3d';
 
 /** How high the back wall stands, and a ledge (tiles). */
 export const WALL_H = 2.4;
@@ -73,6 +76,11 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   segs.push([at, m.w + 1]);
   for (const [a, b] of segs) {
     if (b - a < 0.05) continue;
+    // A palisade: the logs themselves, stood up, not their painting (palisade3d.ts).
+    if (m.theme.back === 'palisade') {
+      palisadeRun(B, a, b, WALL_H, r);
+      continue;
+    }
     B.b((a + b) / 2, 0, -0.55, b - a, WALL_H, 1.1, body);
     const face = new THREE.Mesh(new THREE.PlaneGeometry(b - a, WALL_H), wallMat), uv = face.geometry.getAttribute('uv') as THREE.BufferAttribute;
     const u0 = (OX + a * PX) / bg.width, u1 = (OX + b * PX) / bg.width;
@@ -80,11 +88,10 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
     face.position.set((a + b) / 2, WALL_H / 2, 0.005);
     face.receiveShadow = true;
     group.add(face);
-    // What tops it: a stone coping, stake points, the trees' crowns, broken rock.
+    // What tops it: a stone coping, the trees' crowns, broken rock.
     for (let x = a; x < b - 0.01; x += 0.5) {
       const w = Math.min(0.5, b - x), th = m.theme.back;
       if (th === 'stone' || th === 'plaster') B.b(x + w / 2, WALL_H, -0.5, w - 0.03, 0.14, 1.2, jit(0x4f4a5c, 0.1, r));
-      else if (th === 'palisade') B.c(x + w / 2, WALL_H + 0.12, -0.2, 0.22, 0.3, 0.22, jit(0x4a3424, 0.1, r), 0.78);
       else if (th === 'trees') B.lump(x + w / 2, WALL_H + 0.25 + r.next() * 0.4, -0.6, 1.1, 0.85, 1.3, jit(0x24391f, 0.2, r), r.next() * 3);
       else B.c(x + w / 2, WALL_H + r.next() * 0.3, -0.5, 0.6, 0.5, 1.1, jit(0x34313a, 0.2, r), r.next(), 0.2);
     }
@@ -133,13 +140,10 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
     B.b(t.x, y - 0.02, onWall ? 0.06 : z, 0.11, 0.08, onWall ? 0.16 : 0.11, 0x1a1410);
     lamps.push({ x: t.x, y: t.y, fires: [[t.x, y, z, 0.7]], light: { x: t.x, y: y + 0.4, z: z + 0.5, r: 8, i: 1.1, c: [1, 0.66, 0.36], f: 13 } });
   }
-  for (const b of m.braziers) {
-    B.b(b.x, 0, b.y, 0.12, 0.6, 0.12, 0x2a2630);
-    B.b(b.x, 0.55, b.y, 0.55, 0.18, 0.55, 0x3a3640);
-    // Ash in the bowl (the flames stand over it while it's lit).
-    B.b(b.x, 0.73, b.y, 0.42, 0.02, 0.42, 0x5a5660);
-    lamps.push({ x: b.x, y: b.y, always: b.wild, fires: [[b.x - 0.1, 0.72, b.y, 1], [b.x + 0.12, 0.72, b.y + 0.05, 0.9]], light: { x: b.x, y: 1.4, z: b.y, r: 6, i: 0.95, c: [1, 0.6, 0.3], f: 11 } });
-  }
+  // Braziers: a bowl on legs, its coals, its flames and light (brazier3d.ts).
+  for (const b of m.braziers) addBrazier(B, b, lamps);
+  // Fresh graves and the barrows: heaped earth and the marker standing (mounds3d.ts).
+  addMounds(B, m, r);
   for (const o of m.rounds) {
     if (o.kind === 'cookfire') lights.push({ x: o.x, y: 1.6, z: o.y, r: 4.5, i: 0.8 * tk, c: [1, 0.72, 0.42], f: 9 });
     // The Last Lantern never goes out (but its light, like any fire's, fades under the sun: lamps3d.ts).

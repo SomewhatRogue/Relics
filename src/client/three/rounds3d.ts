@@ -7,6 +7,7 @@ import type { Round } from '../../shared/arena';
 import { Boxes, Seed, jit } from './boxes';
 import { roundBoxes } from '../pieces';
 import { putBoxes } from './pieces3d';
+import { addNature } from './nature3d';
 
 export type Spot = [number, number, number, number];
 
@@ -14,6 +15,8 @@ export type Spot = [number, number, number, number];
 const LEAF = [0x2f4a28, 0x3a5a30, 0x24391f], PINE = [0x1c3522, 0x24412a, 0x1f3a26];
 
 export function addRound(B: Boxes, o: Round, fires: Spot[], r: Seed): void {
+  // Boulders, standing stones, bushes, hay and clamps: rounded, as the flat view has them (nature3d.ts).
+  if (addNature(B, o, r)) return;
   const x = o.x, z = o.y, R = Math.max(0.25, o.r), bark = 0x3a2a1e, wood = 0x5a3d22, stone = 0x55505e;
   switch (o.kind) {
     case 'tree':
@@ -34,17 +37,6 @@ export function addRound(B: Boxes, o: Round, fires: Spot[], r: Seed): void {
       // Three tiers, each a cone overlapping the one under it (the flat sprite's stacked triangles).
       for (let i = 0; i < 3; i++) B.cone(x, 1.25 + i * 0.62, z, R * (2.5 - i * 0.62), 1.1 - i * 0.12, jit(PINE[i], 0.06, r), r.next() * 2);
       break;
-    case 'rock':
-    case 'stone':
-      for (let i = 0; i < (o.kind === 'rock' ? 3 : 1); i++) {
-        const s = R * (1.3 - i * 0.3);
-        B.c(x + (r.next() - 0.5) * R * 0.6, s * 0.35, z + (r.next() - 0.5) * R * 0.6, s, s * 0.7, s, jit(0x4a4652, 0.15, r), r.next() * 2, (r.next() - 0.5) * 0.4);
-      }
-      break;
-    case 'hay':
-      B.b(x, 0, z, R * 1.8, 0.6, R * 1.4, jit(0x9a8a4a, 0.1, r));
-      B.b(x, 0.6, z, R * 1.4, 0.3, R * 1.1, jit(0xa8985a, 0.1, r));
-      break;
     case 'well':
       for (let i = 0; i < 8; i++) {
         const a = (i / 8) * Math.PI * 2;
@@ -54,6 +46,9 @@ export function addRound(B: Boxes, o: Round, fires: Spot[], r: Seed): void {
       for (const s of [-1, 1]) B.b(x + s * R * 0.85, 0.6, z, 0.1, 1.0, 0.1, wood);
       B.b(x, 1.55, z, R * 2, 0.1, 0.1, wood);
       B.c(x, 1.75, z, R * 2.2, 0.08, R * 1.2, 0x4a2e22, 0, 0.3);
+      // The rope down from the beam (the sprite's), a bucket on it hauled up to the lip.
+      B.b(x, 0.98, z, 0.03, 0.58, 0.03, 0x8a8494);
+      B.b(x, 0.78, z, 0.2, 0.2, 0.2, 0x4a3420), B.b(x, 0.86, z, 0.22, 0.03, 0.22, 0x2a2630);
       break;
     case 'support':
       B.b(x, 0, z, 0.2, 2.1, 0.2, wood);
@@ -87,9 +82,6 @@ export function addRound(B: Boxes, o: Round, fires: Spot[], r: Seed): void {
       }
       fires.push([x, 0.05, z, 0.8]);
       break;
-    case 'bush':
-      for (let i = 0; i < 3; i++) B.c(x + (r.next() - 0.5) * R, 0.25 + i * 0.12, z + (r.next() - 0.5) * R * 0.6, R * 1.1, 0.45, R * 0.9, jit(LEAF[i % 3], 0.12, r), r.next());
-      break;
     case 'reed':
       for (let i = 0; i < 7; i++) B.b(x + (r.next() - 0.5) * R * 1.6, 0, z + (r.next() - 0.5) * R, 0.04, 0.5 + r.next() * 0.5, 0.04, jit(0x5a6a3a, 0.15, r));
       break;
@@ -104,10 +96,9 @@ export function addRound(B: Boxes, o: Round, fires: Spot[], r: Seed): void {
       B.b(x, 0.9, z, 0.36, 0.45, 0.22, 0x6a5a3a);
       B.b(x, 1.4, z, 0.24, 0.24, 0.24, 0xb89a5a);
       break;
-    case 'clamp':
     case 'peat':
-      B.b(x, 0, z, R * 1.6, 0.35, R * 1.6, jit(o.kind === 'clamp' ? 0x26201c : 0x3a2a1e, 0.1, r));
-      B.b(x, 0.35, z, R * 1.1, 0.25, R * 1.1, jit(o.kind === 'clamp' ? 0x1e1a18 : 0x34261c, 0.1, r));
+      B.b(x, 0, z, R * 1.6, 0.35, R * 1.6, jit(0x3a2a1e, 0.1, r));
+      B.b(x, 0.35, z, R * 1.1, 0.25, R * 1.1, jit(0x34261c, 0.1, r));
       break;
     case 'shrine':
       // A wayside shrine (sitedraw.ts): a box on a post under a red roof, a candle stub in the dark of it.

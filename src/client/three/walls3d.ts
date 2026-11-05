@@ -6,7 +6,7 @@
  */
 import * as THREE from 'three';
 import type { Block } from '../../shared/arena';
-import { LOOK } from '../blocks';
+import { LOOK } from '../blocklook';
 import { Boxes, Seed, jit } from './boxes';
 import { VCOL, hex } from './mats';
 import { tent } from './roofs3d';
@@ -15,6 +15,7 @@ import { furnish3d } from './furnish3d';
 import { hallFurn3d } from './hallfurn3d';
 import { PIECE_BLOCKS, blockBoxes } from '../pieces';
 import { putBoxes } from './pieces3d';
+import { fence3d } from './fence3d';
 
 export function flatBlock(b: Block, group: THREE.Group, fires: [number, number, number, number][]): THREE.Group {
   const r = new Seed(Math.round(b.x * 29 + b.y * 13 + 3)), L = LOOK[b.kind], B = new Boxes();
@@ -25,12 +26,7 @@ export function flatBlock(b: Block, group: THREE.Group, fires: [number, number, 
     for (let i = 0; i < Math.max(3, b.w * b.h); i++) B.c(x0 + r.next() * b.w, 0.05, z0 + r.next() * b.h, 0.3, 0.1, 0.12, 0x141012, r.next() * 3);
     for (let i = 0; i < 3; i++) fires.push([x0 + r.next() * b.w, 0.06, z0 + r.next() * b.h, 0.25]);
   } else if (b.kind === 'fence') {
-    const along = b.w >= b.h, n = Math.max(2, Math.round((along ? b.w : b.h) / 0.8));
-    for (let i = 0; i <= n; i++) {
-      const f = i / n;
-      B.b(along ? x0 + f * b.w : cx, 0, along ? cz : z0 + f * b.h, 0.1, 0.62, 0.1, jit(dk(wall), 0.12, r));
-    }
-    for (const y of [0.2, 0.45]) B.b(cx, y, cz, along ? b.w : 0.06, 0.07, along ? 0.06 : b.h, dk(hex(L.ridge)));
+    fence3d(B, b, r, dk);
   } else if (b.kind === 'rockwall' || b.kind === 'rubble') {
     const tall = b.kind === 'rubble' ? 0.4 : 1.1;
     for (let x = x0 + 0.25; x < x1; x += 0.45) for (let z = z0 + 0.25; z < z1; z += 0.45) {
