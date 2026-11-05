@@ -172,8 +172,9 @@ export const ELEMENT_NAME: Record<Element, string> = { fire: 'FIRE', frost: 'FRO
  *  longer kills a small goblin outright; big ones and shield-bearers burn `tough` as long. */
 export const BURN = { time: 3, every: 0.5, dmg: 4, spread: 0.7, tough: 0.5 };
 /** Frost's job, control: chilled goblins move and turn at `slow` and wind up at `windup` of their pace;
- *  a second frost freezes them solid for `freeze` (a heavy blow then shatters them: SHATTER). */
-export const FROST = { chill: 3, slow: 0.5, windup: 0.6, freeze: 2.2 };
+ *  a second frost freezes them solid for `freeze` (a heavy blow then shatters them: SHATTER). A small one
+ *  (weight 1 or less) stays frozen `small` times as long, a set-up for a heavy hit (FLING; Kyle, 2026-11-05). */
+export const FROST = { chill: 3, slow: 0.5, windup: 0.6, freeze: 2.2, small: 1.8 };
 /** Storm's job, shields and water (Kyle, 2026-11-04). It ignores a shield-bearer's board, front block
  *  and all. Dry, it jumps nowhere. On a wet goblin (in water, or out in the rain: sim/wet.ts) it lands
  *  `wet` times harder and jumps to every other wet goblin within `reach`, each taking `share` of the
@@ -181,4 +182,11 @@ export const FROST = { chill: 3, slow: 0.5, windup: 0.6, freeze: 2.2 };
 export const STORM = { reach: 3, wet: 1.5, share: 0.5, min: 6, flinch: 0.25, rodReach: 6, rodDmg: 10 };
 export const STEAM = { radius: 1.8, dmg: 10, stun: 0.9 };
 export const SHATTER = { dmg: 30 };
+/** A frozen small goblin hit by a heavy blow skids off on its ice (sim/iceslide.ts; Kyle, 2026-11-05): away
+ *  from the hitter at `speed` for `len` tiles, slowing evenly (`hardSpeed`, `hardLen` for a charged blow, a
+ *  smite or a Warrior's throw). The first wall, prop, goblin or hero it meets, it crashes into and shatters:
+ *  goblins within `r` take `dmg` and are chilled, the one it ploughed into takes `plough` and is knocked down
+ *  `down` s (`downBig` a big one; under the stun cap) and shoved `knock`; props in `r` take `propDmg`.
+ *  Heroes and the freed take nothing. Slid its whole length, it shatters there for less (`endR`, `endDmg`). */
+export const FLING = { speed: 11, len: 5.5, hardSpeed: 15, hardLen: 7, r: 1.5, dmg: 20, plough: 28, down: 1.2, downBig: 0.6, knock: 8, propDmg: 30, endR: 1, endDmg: 10 };
 export const FLARE = { radius: 1.6, dmg: 12, knock: 12 };

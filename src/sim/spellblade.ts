@@ -22,5 +22,6 @@ export function looseBlade(h: Hero, s: Swing, w: World): boolean {
 
 /** A Mage's blow landed for `n`: the element comes with it. */
 export function bladeStruck(h: Hero, s: Swing, e: Enemy, n: number, w: World): void {
-  if (mageCut(h, s) && !isDead(e)) tapElement(w, h, e, castElement(h), n);
+  // (One sent skidding by a staff's tap keeps its ice: no steam, no shatter in place. sim/iceslide.ts.)
+  if (mageCut(h, s) && !isDead(e) && !e.sled) tapElement(w, h, e, castElement(h), n);
 }

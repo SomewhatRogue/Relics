@@ -9,6 +9,7 @@ import { HUNGRY_FX, wears } from './hungry';
 import { damage, frozen, isDummy, kill, sayWeak, small, snared, stunOf } from './damage';
 import { poison } from './poison';
 import { shatter } from './elements';
+import { fling, hardHit, heavyHit } from './iceslide';
 import { has } from './traits';
 import { brandyDmg } from './brandy';
 import { lunging, riposteNow, shaftMult, warriorHit } from './warrior';
@@ -104,6 +105,8 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
     splat(h, e, now);
     return n;
   }
+  // A frozen small goblin under a heavy hit skids off away from you, to crash into what it meets (sim/iceslide.ts).
+  if (ice && heavyHit(h, s) && fling(e, h.id, (e.x - h.x) / dl + h.fx * 0.5, (e.y - h.y) / dl + h.fy * 0.5, hardHit(h), now, ev)) return n;
   // A heavy blow breaks the frozen.
   if (ice && heavy) return shatter(e, now, ev), n;
   // (Techniques: SHOULDER CHARGE knocks it down, JUDGEMENT stuns it off a friend: sim/techwarrior.ts, techcleric.ts.)

@@ -9,6 +9,7 @@ import { slamBurst } from './techwarrior';
 import { damage, frozen, isDead, snared } from './damage';
 import type { Enemy, FightEvent, Hero, Intent } from './types';
 import { stun } from './stuns';
+import { fling } from './iceslide';
 
 /** Can this hero grab this goblin now? */
 export function grabbable(h: Hero, e: Enemy, now: number): boolean {
@@ -92,6 +93,8 @@ export function stepCarry(h: Hero, inp: Intent, enemies: Enemy[], now: number, d
     Object.assign(e, { act: 'flinch', actT: 0, actDur: 0.9, kvx: h.fx * GRAB.throwSpeed, kvy: h.fy * GRAB.throwSpeed, air: GRAB.air, lastBy: h.id });
     Object.assign(h, { act: 'idle', actT: 0 });
     ev.push({ k: 'hurl', x: e.x, y: e.y });
+    // Thrown frozen: it skids off as ice, to crash and shatter on whatever it meets (sim/iceslide.ts).
+    fling(e, h.id, h.fx, h.fy, true, now, ev);
     return;
   }
   if (h.actT >= GRAB.hold) {

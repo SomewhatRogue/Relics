@@ -14,6 +14,7 @@ import { backstabbed } from './techrogue';
 import { legStab } from './ladderrogue';
 import { afflict, shatter, type World } from './elements';
 import { shotElement } from './spellbook';
+import { fling } from './iceslide';
 import { allyHit, players } from './party';
 import { merciful } from './mercy';
 import { smiteLight } from './holy';
@@ -88,6 +89,8 @@ export function blast(w: World, b: Bolt, x: number, y: number): void {
     const wasFrozen = frozen(e, w.now), winding = !!b.interrupts && windingUp(e);
     e.lastBy = b.owner;
     if (damage(e, b.dmg, w.now, w.ev, { heavy: true, flinch: 0.5, mult: true, brutal: b.traits.includes('brutal'), how: 'burst', dx: e.x - x, dy: e.y - y, src: b.kind, el: b.el })) continue;
+    // A smite on a frozen small one sends it skidding off from where it fell (sim/iceslide.ts).
+    if (wasFrozen && b.kind === 'smite' && fling(e, b.owner, d > 0.05 ? e.x - x : b.dx, d > 0.05 ? e.y - y : b.dy, true, w.now, w.ev)) continue;
     if (e.act !== 'pinned') shove(e, d > 0.05 ? (e.x - x) / d : b.dx, d > 0.05 ? (e.y - y) / d : b.dy, b.knock, e.weight);
     interrupt(e, winding, !!b.breaks, b.owner, w.now, w.ev);
     if (b.stun && e.act !== 'pinned' && !(b.relic && e.weight > 1)) stun(e, b.owner, w.now, b.stun, w.ev);

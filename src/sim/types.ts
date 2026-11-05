@@ -495,6 +495,8 @@ export interface Enemy extends Body {
   /** Layout 4 (sim/tasks.ts): what it's busy at till it sees you, and the body it's hauling (where that lies). */
   task?: import('../shared/scenes4').FoeTask;
   haul?: { x: number; y: number };
+  /** Frozen and skidding off a heavy hit (sim/iceslide.ts): who sent it, its velocity, how fast it slows, charged. */
+  sled?: { by: string; vx: number; vy: number; decel: number; hard: boolean } | null;
 }
 
 /** How a goblin died: fell, lost its head, burst apart, burned, or shattered. */
@@ -716,6 +718,8 @@ export type FightEvent =
   | { k: 'prophit'; x: number; y: number; kind: PropKind; dx: number; dy: number }
   /** A false prisoner tearing open, goblins coming out of it (sim/falsecage.ts). */
   | { k: 'torn'; x: number; y: number }
+  /** A frozen goblin sent skidding along (dx, dy) for `r` tiles, and its crash (`r` the burst; sim/iceslide.ts). */
+  | { k: 'fling' | 'icecrash'; x: number; y: number; dx: number; dy: number; r: number; big: boolean }
   /** A hero grew a level: full health, and a flash in the class's colour (sim/grow.ts). */
   | { k: 'levelup'; x: number; y: number; id: string; cls: HeroClass };
 

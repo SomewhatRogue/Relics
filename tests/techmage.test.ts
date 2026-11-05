@@ -45,7 +45,7 @@ describe("the Mage's techniques", () => {
     for (let t = 0; t < 2; t++) for (let i = 0; i < 3; i++) chill(w, e, ICICLE_SHARE);
     expect(e.frozenUntil > w.now).toBe(false);
     for (let i = 0; i < 3; i++) chill(w, e, ICICLE_SHARE);
-    expect(e.frozenUntil).toBeCloseTo(w.now + FROST.freeze);
+    expect(e.frozenUntil).toBeCloseTo(w.now + FROST.freeze * FROST.small); // (a small one: frozen longer)
     // Let the chill lapse and it starts over.
     const f = goblin(), v = world(h, f);
     chill(v, f), chill(v, f);
