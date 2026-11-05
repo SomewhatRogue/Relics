@@ -647,7 +647,7 @@ export type FightEvent =
    *  (a cone's or ring's radius, a rush's length), `big` let go on the flash. */
   | { k: 'spell'; x: number; y: number; dx: number; dy: number; el: Augment; what: SpellWhat; r: number; big: boolean }
   /** GRASP (sim/grasp.ts): cast from (x, y) along (dx, dy), `r` its reach; each goblin dragged, to (x2, y2). */
-  | { k: 'grasp'; x: number; y: number; dx: number; dy: number; r: number }
+  | { k: 'grasp'; x: number; y: number; dx: number; dy: number; r: number; arc: number; n: number }
   | { k: 'grasped'; x: number; y: number; x2: number; y2: number }
   | { k: 'weapon'; x: number; y: number; name: string }
   | { k: 'throw' | 'pinned' | 'javwall' | 'javstick' | 'hookfire' | 'latch' | 'yank' | 'land'; x: number; y: number; dx: number; dy: number }

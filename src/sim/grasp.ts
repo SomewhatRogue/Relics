@@ -27,7 +27,8 @@ export function graspRefused(h: Hero, ev: FightEvent[]): boolean {
 export function grasp(h: Hero, w: World): void {
   Object.assign(h, { stamina: Math.max(0, h.stamina - GRASP.cost), staminaAt: w.now });
   w.ev.push({ k: 'magic', x: h.x, y: h.y, n: GRASP.cost });
-  w.ev.push({ k: 'grasp', x: h.x, y: h.y, dx: h.fx, dy: h.fy, r: GRASP.range });
+  const cast = { k: 'grasp' as const, x: h.x, y: h.y, dx: h.fx, dy: h.fy, r: GRASP.range, arc: GRASP.arc, n: 0 };
+  w.ev.push(cast);
   const tx = h.x + h.fx * GRASP.to, ty = h.y + h.fy * GRASP.to;
   for (const e of w.enemies) {
     if (isDead(e) || isDummy(e) || e.kind === 'nest' || e.act === 'carried' || e.act === 'pinned' || !isFinite(e.weight) || (e.z ?? 0) !== (h.z ?? 0)) continue;
@@ -40,6 +41,7 @@ export function grasp(h: Hero, w: World): void {
       e.tow = { x: e.x + (dx / d) * go, y: e.y + (dy / d) * go, until: w.now + go / GRASP.speed + 0.1, speed: GRASP.speed };
       w.ev.push({ k: 'grasped', x: e.x, y: e.y, x2: e.tow.x, y2: e.tow.y });
     }
+    cast.n++;
     e.lastBy = h.id;
     e.alert = true;
     // (A big one mid a blow that can't be blocked keeps swinging; it's still dragged.)

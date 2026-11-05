@@ -34,14 +34,25 @@ function round(fx: Fx, x: number, y: number, rad: number, n: number, cols: strin
 /** True if it was one of these (and has been drawn). */
 export function spellFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
   if (ev.k === 'grasp') {
-    // Violet streaks from the reach's edge pulling in to the spot ahead.
-    const a = Math.atan2(ev.dy, ev.dx), tx = x + ev.dx * 1.5 * PX, ty = y - 8 + ev.dy * 1.5 * PX * 0.8;
-    for (let i = 0; i < 18; i++) {
-      const b = a + (Math.random() - 0.5) * 1.2, d = ev.r * PX * (0.5 + Math.random() * 0.5), sx = x + Math.cos(b) * d, sy = y - 8 + Math.sin(b) * d * 0.8, life = 0.3;
-      fx.parts.push({ x: sx, y: sy, vx: (tx - sx) / life, vy: (ty - sy) / life, life, max: life, col: VIOLET[i % 3], glow: true, grav: 0, stick: false });
+    // The reach drawn as it was judged (Kyle: "not clear what's happening"): the cone's edge in violet,
+    // then three waves of motes along its arc sweeping in to the spot ahead, so even an empty cast reads.
+    const a = Math.atan2(ev.dy, ev.dx), half = ((ev.arc ?? 70) / 2) * (Math.PI / 180), R = ev.r * PX;
+    const tx = x + ev.dx * 1.5 * PX, ty = y - 8 + ev.dy * 1.5 * PX * 0.8;
+    const at = (b: number, d: number) => [x + Math.cos(b) * d, y - 8 + Math.sin(b) * d * 0.8] as const;
+    for (const side of [-1, 1]) {
+      const [ex, ey] = at(a + side * half, R);
+      fx.arcs.push({ x, y: y - 8, x2: ex, y2: ey, life: 0.45, col: '#9a78e0', straight: true });
     }
-    fx.rings.push({ x: tx, y: ty, life: 0.35, max: 0.35, col: '#c9a8ff', size: 10 });
-    fx.flashes.push({ x: tx, y: ty, r: 50, i: 0.9, c: [0.8, 0.65, 1], life: 0.18, max: 0.18 });
+    for (let wave = 0; wave < 3; wave++) {
+      const d = R * (1 - wave * 0.22), n = 14 - wave * 3;
+      for (let i = 0; i < n; i++) {
+        const b = a - half + (i / (n - 1)) * half * 2, [sx, sy] = at(b, d), life = 0.32 + wave * 0.06;
+        fx.parts.push({ x: sx, y: sy, vx: (tx - sx) / life, vy: (ty - sy) / life, life, max: life, col: VIOLET[(i + wave) % 3], glow: true, grav: 0, stick: false });
+      }
+    }
+    fx.rings.push({ x: tx, y: ty, life: 0.45, max: 0.45, col: '#c9a8ff', size: 14 });
+    fx.flashes.push({ x: x + ev.dx * R * 0.5, y: y - 8 + ev.dy * R * 0.4, r: R, i: 0.8, c: [0.8, 0.65, 1], life: 0.25, max: 0.25 });
+    if (!ev.n) fx.say(tx, ty - 26, 'NOTHING IN REACH', '#c8c4d0', 1.1);
     return true;
   }
   if (ev.k === 'grasped') {
