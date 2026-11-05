@@ -38,6 +38,7 @@ import { makeRT, postMaterial } from './post';
 import { roomLights } from './roomlights';
 import type { Spot } from './rounds3d';
 import { WitchFires } from './witch3d';
+import { Beacon3D } from './beacon3d';
 import { drawFlues } from './smoke3d';
 import { drawBolts3, strikeLights3 } from './storm3d';
 import { flashTheme, fogLook } from '../skyfx';
@@ -64,6 +65,7 @@ export class View3D {
   private people = new People();
   private grim = new Grim3D();
   private witch = new WitchFires();
+  private beacon = new Beacon3D();
   private ground: Ground | null = null;
   private map: GameMap | null = null;
   private overlay = new Overlay();
@@ -89,7 +91,7 @@ export class View3D {
     game?.after(this.canvas, this.overlay.canvas);
     this.overlay.canvas.style.display = 'none';
     this.postScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.post));
-    this.scene.add(this.lights.group, this.fires.group, this.actors.group, this.buildings.group, this.people.group, this.grim.group, this.witch.group, this.figs.group);
+    this.scene.add(this.lights.group, this.fires.group, this.actors.group, this.buildings.group, this.people.group, this.grim.group, this.witch.group, this.beacon.group, this.figs.group);
     this.resize();
     addEventListener('resize', () => this.resize());
   }
@@ -193,6 +195,7 @@ export class View3D {
     strikeLights3(room, ls);
     this.witch.update(now, ls);
     this.grim.update(now, fires, ls);
+    this.beacon.update(room, fires, ls);
     // A lightning flash lifts the sky's light a beat (../skyfx.ts).
     this.lights.setSky(flashTheme(map.theme, Math.max(flashOf(room.strikes, room.time), skyFlash(room))), at.x, at.z);
     this.lights.place(ls, at.x, at.z, now);

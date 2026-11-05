@@ -1,8 +1,10 @@
 // FLAT and 2.5D side by side, the same moment in the same room (the VIEW switch flipped live): every
 // Wickhold hall inside, the yard, the square and a street, a cottage inside, a job room in each country
 // and the Barrowfields, phone and laptop. Prints 2.5D's draw calls and triangles for each.
+// Layout 4's rooms and scenes (targets from scripts/parity2/find.ts) and the Barrowfields' camps and jobs too.
 // Usage: node scripts/parity-look.cjs [url] [outdir] [only,these] [phone|laptop]
 const { chromium } = require('playwright');
+const { targets: L4 } = require('./parity2/targets.json');
 const url = process.argv[2] || 'http://localhost:4396/';
 const out = process.argv[3] || 'shots';
 const only = process.argv[4] ? process.argv[4].split(',') : null;
@@ -56,7 +58,42 @@ const job = (place, seed, inside) => async (page) => {
   }, [place, seed, !!inside]);
 };
 
+// A layout-4 job's room (scripts/parity2/targets.json): walk the rooms to it, stand at its pieces.
+const l4 = (s) => async (page) => {
+  await page.evaluate(async (s) => {
+    const g = window.__game, wait = (ms) => new Promise((r) => setTimeout(r, ms)), j = g.jobs()[1];
+    Date.now = () => 2400000 * 700 + 1200000;
+    g.startJob({ ...j, place: s.place, objective: 'hunt', boss: 'SKARN', rooms: 5, seed: s.seed, layout: 4, deep: false, twist: 'none', time: 'day' });
+    await wait(150);
+    for (let k = 0; k < s.room; k++) {
+      for (const e of g.room.enemies) Object.assign(e, { hp: 0, act: 'dead', respawns: false, death: 'burst' });
+      g.room.exitOpen = true;
+      const m = g.room.map, a = m.exit ?? m.roads.find((r) => r.road[0] === s.took).area;
+      Object.assign(g.hero, { x: a.x + a.w / 2, y: a.y + a.h / 2 });
+      await wait(300);
+    }
+    for (const e of g.room.enemies) e.cooldown = 99;
+    const m = g.room.map;
+    Object.assign(g.hero, { x: Math.max(1, Math.min(m.w - 1, s.x)), y: Math.max(1, Math.min(m.h - 1, s.y)), fx: 0, fy: -1 });
+  }, s);
+};
+// The Barrowfields at one of its jobs (a camp's fire, the engine, the cages, the barrows, the beacon).
+const exped = (what) => async (page) => {
+  await page.evaluate((what) => {
+    const g = window.__game;
+    Date.now = () => 2400000 * 700 + 1200000;
+    g.startJob(g.jobs().at(-1));
+    for (const e of g.room.enemies) e.cooldown = 99;
+    const x = g.room.exped, m = g.room.map, goal = x.goals.find((q) => q.kind === what);
+    if (what === 'beacon') x.phase = 'hold';
+    const at = what === 'beacon' ? { x: x.zone.x, y: x.zone.y } : what === 'camp' ? m.braziers.find((b) => b.wild) : goal ?? m.braziers.find((b) => b.wild);
+    Object.assign(g.hero, { x: at.x, y: Math.min(m.h - 1, at.y + 2.5), fx: 0, fy: -1 });
+  }, what);
+};
+
 const SCENES = {
+  ...Object.fromEntries(L4.map((t) => [t.name, l4(t)])),
+  'exped-camp': exped('camp'), 'exped-engine': exped('engine'), 'exped-prisoners': exped('prisoners'), 'exped-larder': exped('larder'), 'exped-dens': exped('dens'), 'exped-shrine': exped('shrine'), 'exped-beacon': exped('beacon'),
   tower: hallIn('tower'), barracks: hallIn('hall'), lodge: hallIn('lodge'), church: hallIn('church'), rat: hallIn('tavern'),
   forge: hallIn('forge'), bank: hallIn('bank'), townhall: hallIn('townhall'), infirmary: hallIn('infirmary'), home: hallIn('home:0'),
   'tower-stair': hallIn('tower', [8.6, 4.4]),
@@ -84,7 +121,7 @@ const SCENES = {
       // Hold the room still: nothing moves between the two shots.
       await page.evaluate(() => { const g = window.__game, h = { ...g.hero }; window.__hold = setInterval(() => Object.assign(g.hero, { x: h.x, y: h.y, fx: h.fx, fy: h.fy }), 16); });
       await page.evaluate(() => window.__views.switch.set('pixel'));
-      await page.waitForTimeout(700);
+      await page.waitForTimeout(1500);
       await page.screenshot({ path: `${out}/${name}-${dev}-flat.png` });
       await page.evaluate(() => window.__views.switch.set('3d'));
       await page.waitForFunction(() => window.__views.is3d, null, { timeout: 15000 });
