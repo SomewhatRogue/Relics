@@ -7,7 +7,7 @@ import { bagFull } from '../shared/bags';
 import type { Game } from './game';
 import type { Good } from './shopui';
 import { SHOPW } from './shopwords';
-import { weaponHow, armorHow, card, compare, potionRows } from './card';
+import { weaponHow, armorHow, card, potionRows } from './card';
 import { itemIcon, potionIcon } from './itemicons';
 
 const p = (s: string) => `<p>${s}</p>`;
@@ -36,7 +36,7 @@ export function gearGood(g: Game, quality: 'fine' | 'forged', what: { kit?: Weap
     why: bagFull(pr) ? SHOPW.packFull : pr.gold < cost ? SHOPW.poor : '',
     buy: () => {
       const it = g.buy(quality, what.kit ?? pr.weapon, slot, what.armor);
-      return it ? dim(said) + card(it, g.hero) + compare(g.hero, it) : undefined;
+      return it ? dim(said) + card(it, g.hero, true) : undefined;
     },
   };
 }

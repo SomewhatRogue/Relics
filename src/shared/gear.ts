@@ -1,72 +1,36 @@
 /**
- * Gear: tiers, modifiers, armor and rings. A weapon's type says HOW it attacks (weapons.ts); its
- * modifiers say how WELL. Plain (white) has none; Fine (green) one small; Forged (blue) two, or one
- * and an element; Tolmouth (purple) two large and a trait; Hungry (red) is the greed tier (hungry.ts).
+ * Gear: tiers, rolling a piece, upgrades and the sum of what's worn. A weapon's type says HOW it attacks
+ * (weapons.ts); its modifiers say how WELL (mods.ts, each worth points); budget.ts holds the weights.
+ * Seven tiers, white to red (Kyle, 2026-11-05): PLAIN, FINE, FORGED, PRE-WAR, then the rare and dangerous
+ * three, TOUCHED, TURNING and HUNGRY, each stronger and rarer than the last and each with a cost
+ * (costs.ts; HUNGRY's are its own, hungry.ts). Ids are as saved; only the names show.
  * Everything here moves a number the fight already uses (gearStats), so the card shows the truth.
  */
 import type { Rng } from './rng.js';
 import { ELEMENT_TRAITS, traitsFor, type Item, type Tier } from './loot.js';
-import { CLASS_DODGES, CLASS_GUARD, CLASS_KITS, type HeroClass, type WeaponId } from './weapons.js';
+import { CLASS_KITS, type HeroClass, type WeaponId } from './weapons.js';
+import { CAPS, MODS, MOD_COUNT, PER_MOD, modFits, modPool, modValue, rollMods, type ArmorKind, type ModId, type Slot } from './mods.js';
+import { ARMOR, budget } from './budget.js';
+import { rollCost } from './costs.js';
 
+export * from './mods.js';
+export * from './budget.js';
+
+/** Each tier: its name, colour, Halvard's level cap, and its step up the ladder. */
 export const TIERS: Record<Tier, { name: string; col: string; mods: number; step: number; cap: number }> = {
   plain: { name: 'PLAIN', col: '#e8e4ee', mods: 0, step: 0, cap: 2 },
-  fine: { name: 'FINE', col: '#7fd07a', mods: 1, step: 0, cap: 3 },
-  forged: { name: 'FORGED', col: '#6aa8ff', mods: 2, step: 1, cap: 4 },
-  tolmouth: { name: 'TOLMOUTH', col: '#b57aff', mods: 2, step: 2, cap: 5 },
-  hungry: { name: 'HUNGRY', col: '#ff4a3a', mods: 3, step: 3, cap: 0 },
+  fine: { name: 'FINE', col: '#7fd07a', mods: 1, step: 1, cap: 3 },
+  forged: { name: 'FORGED', col: '#6aa8ff', mods: 2, step: 2, cap: 4 },
+  tolmouth: { name: 'PRE-WAR', col: '#b57aff', mods: 2, step: 3, cap: 5 },
+  touched: { name: 'TOUCHED', col: '#f2d54a', mods: 3, step: 4, cap: 5 },
+  turning: { name: 'TURNING', col: '#ff9330', mods: 3, step: 5, cap: 5 },
+  hungry: { name: 'HUNGRY', col: '#ff3a2e', mods: 3, step: 6, cap: 0 },
 };
-export const TIER_ORDER: Tier[] = ['plain', 'fine', 'forged', 'tolmouth', 'hungry'];
+export const TIER_ORDER: Tier[] = ['plain', 'fine', 'forged', 'tolmouth', 'touched', 'turning', 'hungry'];
+/** The rare three: strong, dangerous, each with a cost. */
+export const RARE: Tier[] = ['touched', 'turning', 'hungry'];
+export const tierAtLeast = (t: Tier, floor: Tier) => TIER_ORDER.indexOf(t) >= TIER_ORDER.indexOf(floor);
 
-export type ModId = 'damage' | 'quick' | 'reach' | 'draw' | 'parry' | 'guard' | 'knock' | 'health' | 'tough' | 'breath' | 'foot' | 'dodge' | 'focus' | 'mending';
-export interface Mod { id: ModId; v: number }
-type Slot = 'weapon' | 'armor' | 'ring';
-
-/** Each modifier: its name, where it rolls, and the middle of its band at Fine, Forged, Tolmouth, Hungry. */
-export const MODS: Record<ModId, { name: string; on: Slot[]; mid: [number, number, number, number]; unit: '%' | 's' | '' }> = {
-  damage: { name: 'DAMAGE', on: ['weapon', 'ring'], mid: [0.05, 0.1, 0.15, 0.25], unit: '%' },
-  quick: { name: 'QUICKNESS', on: ['weapon', 'ring'], mid: [0.04, 0.08, 0.12, 0.18], unit: '%' },
-  reach: { name: 'REACH', on: ['weapon'], mid: [0.05, 0.1, 0.15, 0.2], unit: '%' },
-  draw: { name: 'DRAW', on: ['weapon'], mid: [0.06, 0.12, 0.18, 0.25], unit: '%' },
-  parry: { name: 'PARRY', on: ['weapon', 'ring'], mid: [0.02, 0.04, 0.06, 0.08], unit: 's' },
-  guard: { name: 'GUARD', on: ['weapon', 'armor'], mid: [0.06, 0.12, 0.18, 0.25], unit: '%' },
-  knock: { name: 'KNOCKBACK', on: ['weapon'], mid: [0.1, 0.2, 0.3, 0.45], unit: '%' },
-  health: { name: 'HEALTH', on: ['armor', 'ring'], mid: [5, 10, 15, 25], unit: '' },
-  tough: { name: 'TOUGHNESS', on: ['armor'], mid: [0.03, 0.05, 0.08, 0.12], unit: '%' },
-  breath: { name: 'STAMINA', on: ['armor', 'ring'], mid: [0.05, 0.1, 0.15, 0.25], unit: '%' },
-  foot: { name: 'SPEED', on: ['armor', 'ring'], mid: [0.03, 0.05, 0.08, 0.1], unit: '%' },
-  dodge: { name: 'DODGE', on: ['armor', 'ring'], mid: [0.06, 0.12, 0.18, 0.25], unit: '%' },
-  focus: { name: 'RECHARGE', on: ['ring'], mid: [0.05, 0.1, 0.15, 0.2], unit: '%' },
-  mending: { name: 'HEALING', on: ['weapon', 'ring'], mid: [0.05, 0.1, 0.15, 0.25], unit: '%' },
-};
-/** What each modifier does, a few words after its name and value on the card ('' when the name says it). */
-export const MOD_TEXT: Record<ModId, string> = {
-  damage: 'all hits, shots and spells', quick: 'faster swings and casts', reach: 'longer reach and range', draw: 'faster charge and draw',
-  parry: 'longer parry window', guard: 'less damage through a block, cheaper blocks', knock: 'knocks goblins further', health: '',
-  tough: 'less damage taken', breath: 'refills faster', foot: 'move faster', dodge: 'dodge recharges faster',
-  focus: 'skill and relic recharge faster', mending: 'bigger heals',
-};
-/**
- * Whether a modifier can roll for a class: nothing it can't use (Kyle, 2026-11-02). PARRY needs a parry,
- * GUARD a held block, DODGE a dodge button, MENDING a Healer.
- */
-export function modFits(id: ModId, cls: HeroClass): boolean {
-  if (id === 'parry') return CLASS_GUARD[cls] !== 'none';
-  if (id === 'guard') return CLASS_GUARD[cls] === 'full';
-  if (id === 'dodge') return CLASS_DODGES[cls];
-  if (id === 'mending') return cls === 'HEALER';
-  return true;
-}
-/** Most a full set can stack, so gear never breaks the fight. */
-export const CAPS: Partial<Record<ModId, number>> = { damage: 0.5, quick: 0.3, tough: 0.3, draw: 0.5, guard: 0.6, foot: 0.25, dodge: 0.4, focus: 0.4, breath: 0.6, reach: 0.4 };
-
-export type ArmorKind = 'light' | 'medium' | 'heavy';
-/** How armor moves and takes: walking speed, damage taken, dodge distance and its breath cost. */
-export const ARMOR: Record<ArmorKind, { name: string; speed: number; taken: number; dodge: number; cost: number; steady: boolean }> = {
-  light: { name: 'LEATHERS', speed: 1, taken: 1, dodge: 1, cost: 1, steady: false },
-  medium: { name: 'MAIL SHIRT', speed: 0.95, taken: 0.88, dodge: 1, cost: 1, steady: false },
-  heavy: { name: 'PLATE', speed: 0.88, taken: 0.75, dodge: 0.75, cost: 1.3, steady: true },
-};
-export const CLASS_ARMOR: Record<HeroClass, ArmorKind> = { WARRIOR: 'heavy', RANGER: 'light', ROGUE: 'light', MAGE: 'light', HEALER: 'medium' };
 /** Upgrades: per level, mods grow by a sixth; a weapon +3% damage, armor 1% less taken, a ring +2 health. */
 export const LEVEL = { mods: 1 / 6, damage: 0.03, tough: 0.01, health: 2 };
 
@@ -74,70 +38,67 @@ export const slotOf = (i: Item): Slot => i.slot ?? 'weapon';
 
 /** Halvard's levels: gold and steel for each next level (index = the level reached). Steel from melting by tier. */
 export const UPGRADE = [null, { gold: 30, steel: 2 }, { gold: 60, steel: 5 }, { gold: 120, steel: 10 }, { gold: 200, steel: 20 }, { gold: 320, steel: 35 }];
-export const STEEL: Record<Tier, number> = { plain: 1, fine: 3, forged: 8, tolmouth: 20, hungry: 0 };
+export const STEEL: Record<Tier, number> = { plain: 1, fine: 3, forged: 8, tolmouth: 20, touched: 30, turning: 45, hungry: 0 };
 export const REROLL = 40;
-/** What Halvard pays for a packed piece (never a hungry one), plus a little for each level on it. Given
- *  to the town works instead, a piece counts for `GIVE_MULT` times that toward the work. */
-export const SELL: Record<Tier, number> = { plain: 4, fine: 12, forged: 35, tolmouth: 90, hungry: 0 };
-export const GIVE_MULT = 1.5;
-export const sellValue = (i: Item) => (i.quality === 'hungry' ? 0 : SELL[i.quality] + (i.level ?? 0) * 8);
-export const giveValue = (i: Item) => Math.round(sellValue(i) * GIVE_MULT);
 /** The next level's price, or null at the tier's cap (and never for hungry gear). */
 export const nextLevel = (i: Item) => ((i.level ?? 0) < TIERS[i.quality].cap ? UPGRADE[(i.level ?? 0) + 1] : null);
 
-/** Ivo's reroll: modifier `k` becomes a different one this slot can roll, at the same tier. */
+/** Ivo's reroll: modifier `k` becomes a different one this piece can roll, worth what it was worth. */
 export function reroll(rng: Rng, i: Item, k: number, cls: HeroClass): Item {
-  const slot = slotOf(i), have = (i.mods ?? []).map((m) => m.id);
-  const pool = (Object.keys(MODS) as ModId[]).filter((id) => MODS[id].on.includes(slot) && !have.includes(id) && modFits(id, cls));
+  const have = (i.mods ?? []).map((m) => m.id);
+  const pool = modPool(slotOf(i), cls, i.kit, i.armor).filter((id) => !have.includes(id) && modFits(id, cls, i.kit));
   if (!pool.length || !i.mods?.[k]) return i;
-  const id = rng.pick(pool), mods = [...i.mods];
-  mods[k] = { id, v: value(rng, id, TIERS[i.quality].step) };
+  const id = rng.pick(pool), mods = [...i.mods], was = i.mods[k];
+  mods[k] = { id, v: modValue(id, (MODS[was.id].unit === '' ? was.v : was.v * 100) * MODS[was.id].per) };
   return { ...i, mods };
 }
 
-/** Roll a modifier's value in its band (a fifth either side of the middle), rounded to look tidy. */
-function value(rng: Rng, id: ModId, step: number): number {
-  const v = MODS[id].mid[step] * (0.8 + rng.next() * 0.4);
-  return MODS[id].unit === '' ? Math.round(v) : MODS[id].unit === 's' ? Math.round(v * 100) / 100 : Math.round(v * 100) / 100;
-}
-
-/** Roll a piece of gear of `tier` for `slot` (a weapon of `kit`, or any of the class's). Hungry gear comes from hungry.ts. */
-export function rollGear(rng: Rng, cls: HeroClass, tier: Tier, slot: Slot = 'weapon', kit?: WeaponId, armor?: ArmorKind): Item {
-  const t = tier === 'hungry' ? 'tolmouth' : tier, n = TIERS[t].mods, out: Item = { slot, quality: t, traits: [], mods: [], level: 0 };
-  if (slot === 'weapon') out.kit = kit ?? rng.pick(CLASS_KITS[cls]);
+/**
+ * Roll a piece of `tier` for `slot`: a weapon of `kit` (or any of the class's), armor of `armor` weight
+ * (or any). `cls` null rolls it for nobody in particular (the pawn's stall). `lean` (0 to 1) pushes every
+ * roll toward the top of its band: a strong piece. Hungry gear comes from hungry.ts.
+ */
+export function rollGear(rng: Rng, cls: HeroClass | null, tier: Tier, slot: Slot = 'weapon', kit?: WeaponId, armor?: ArmorKind, lean = 0): Item {
+  const t = tier === 'hungry' ? 'turning' : tier, n = MOD_COUNT[t], out: Item = { slot, quality: t, traits: [], mods: [], level: 0 };
+  if (slot === 'weapon') out.kit = kit ?? rng.pick(CLASS_KITS[cls ?? 'WARRIOR']);
   if (slot === 'armor') out.armor = armor ?? rng.pick(['light', 'medium', 'heavy'] as ArmorKind[]);
-  const pool = (Object.keys(MODS) as ModId[]).filter((id) => MODS[id].on.includes(slot) && modFits(id, cls));
+  const pool = modPool(slot, slot === 'weapon' ? null : cls, out.kit, out.armor);
   // Forged: half the time one modifier and an element instead of two.
   const element = slot === 'weapon' && t === 'forged' && rng.next() < 0.5;
-  for (let i = 0; i < n - (element ? 1 : 0) && pool.length; i++) {
-    const id = pool.splice(Math.floor(rng.next() * pool.length), 1)[0];
-    out.mods!.push({ id, v: value(rng, id, TIERS[t].step) });
-  }
+  // A weapon's modifiers each take a tier's share; armor and rings spread the whole budget (light's lift too).
+  out.mods = slot === 'weapon' ? rollMods(rng, pool, n - (element ? 1 : 0), PER_MOD[t] * (n - (element ? 1 : 0)), lean) : rollMods(rng, pool, n, budget(t, slot, out.armor), lean);
   if (element) out.traits.push(rng.pick(ELEMENT_TRAITS));
-  if (slot === 'weapon' && t === 'tolmouth') out.traits.push(rng.pick(traitsFor(out.kit!)));
+  if (slot === 'weapon' && (t === 'tolmouth' || t === 'touched' || t === 'turning')) out.traits.push(rng.pick(traitsFor(out.kit!)));
+  const cost = rollCost(rng, t);
+  if (cost) out.cost = cost;
   return out;
 }
 
 /**
- * Odds of each tier by where it came from. Tolmouth (purple) is a real find: a few in the first several
- * hours, mostly from long and deep jobs (Kyle, 2026-11-02: "purple loot too fast").
+ * Odds of each tier by where it came from. PRE-WAR (purple) is a real find; the rare three are each
+ * rarer than the last (Kyle, 2026-11-05: "rare and dangerous").
  */
 const ODDS: Record<'scrapper' | 'butcher' | 'named' | 'chest', [Tier, number][]> = {
   scrapper: [['plain', 0.7], ['fine', 0.3]],
-  butcher: [['plain', 0.2], ['fine', 0.55], ['forged', 0.23], ['tolmouth', 0.02]],
-  named: [['fine', 0.35], ['forged', 0.53], ['tolmouth', 0.1], ['hungry', 0.02]],
-  chest: [['plain', 0.45], ['fine', 0.37], ['forged', 0.15], ['tolmouth', 0.02], ['hungry', 0.01]],
+  butcher: [['plain', 0.2], ['fine', 0.55], ['forged', 0.22], ['tolmouth', 0.02], ['touched', 0.01]],
+  named: [['fine', 0.36], ['forged', 0.5], ['tolmouth', 0.09], ['touched', 0.025], ['turning', 0.015], ['hungry', 0.01]],
+  chest: [['plain', 0.45], ['fine', 0.37], ['forged', 0.14], ['tolmouth', 0.02], ['touched', 0.01], ['turning', 0.006], ['hungry', 0.004]],
 };
-/** Danger lifts a roll a tier a step, but only as far as Forged: Tolmouth and Hungry are found, never lifted into. */
+export const DROP_ODDS = ODDS;
+/** Danger lifts a roll a tier a step, but only as far as Forged: PRE-WAR and the rare three are found, never lifted into. */
 export const LIFT_TO: Tier = 'forged';
+/** A tier from a list of odds (the last one if the roll runs off the end). */
+export function pickTier(rng: Rng, odds: [Tier, number][]): Tier {
+  let r = rng.next();
+  for (const [tier, p] of odds) if ((r -= p) < 0) return tier;
+  return odds[odds.length - 1][0];
+}
 export function rollTier(rng: Rng, from: keyof typeof ODDS, shift = 0): Tier {
-  let r = rng.next(), t: Tier = ODDS[from][ODDS[from].length - 1][0];
-  for (const [tier, p] of ODDS[from]) if ((r -= p) < 0) { t = tier; break; }
-  const i = TIER_ORDER.indexOf(t), top = TIER_ORDER.indexOf(LIFT_TO);
+  const t = pickTier(rng, ODDS[from]), i = TIER_ORDER.indexOf(t), top = TIER_ORDER.indexOf(LIFT_TO);
   return i >= top ? t : TIER_ORDER[Math.min(top, i + shift)];
 }
 
-/** Old saves: a weapon with a trait and no modifiers becomes Tolmouth, keeping what it had. */
+/** Old saves: a weapon with a trait and no modifiers becomes PRE-WAR, keeping what it had. */
 export function upgradeOld(i: Item): Item {
   if (i.mods) return i;
   return { ...i, slot: 'weapon', quality: i.traits.length ? 'tolmouth' : 'plain', mods: [], level: 0 };
@@ -145,18 +106,29 @@ export function upgradeOld(i: Item): Item {
 
 export type GearStats = Record<ModId, number> & { speed: number; taken: number; dodgeDist: number; dodgeCost: number; steady: boolean };
 
-/** What everything worn adds up to (with each item's level, and the caps). */
+/** What everything worn adds up to (with each item's level, the caps, then any costs). */
 export function gearStats(weapon: Item | undefined, armor: Item | null | undefined, rings: Item[] = []): GearStats {
   const s = Object.fromEntries((Object.keys(MODS) as ModId[]).map((k) => [k, 0])) as Record<ModId, number>;
+  let taken = 1;
+  const costs: Item['cost'][] = [];
   for (const it of [weapon, armor, ...rings]) {
     if (!it) continue;
     const lv = it.level ?? 0, grow = 1 + lv * LEVEL.mods;
-    for (const m of it.mods ?? []) s[m.id] += m.v * grow;
+    for (const m of it.mods ?? []) if (m.id in s) s[m.id] += m.v * grow;
     if (slotOf(it) === 'weapon') s.damage += lv * LEVEL.damage;
     if (slotOf(it) === 'armor') s.tough += lv * LEVEL.tough;
     if (slotOf(it) === 'ring') s.health += lv * LEVEL.health;
+    if (it.cost) costs.push(it.cost);
   }
   for (const [k, cap] of Object.entries(CAPS)) s[k as ModId] = Math.min(cap!, s[k as ModId]);
+  // What touched and turning gear costs: taken off after the caps, so a cap never hides it.
+  for (const c of costs) {
+    if (c!.id === 'taken') taken *= 1 + c!.v;
+    else if (c!.id === 'winded') s.breath -= c!.v;
+    else if (c!.id === 'slow') s.foot -= c!.v;
+    else if (c!.id === 'frail') s.health -= c!.v;
+    else s.focus -= c!.v;
+  }
   const a = ARMOR[armor?.armor ?? 'light'];
-  return { ...s, speed: a.speed * (1 + s.foot), taken: a.taken * (1 - s.tough), dodgeDist: a.dodge, dodgeCost: a.cost, steady: a.steady };
+  return { ...s, speed: a.speed * (1 + s.foot), taken: a.taken * (1 - s.tough) * taken, dodgeDist: a.dodge, dodgeCost: a.cost, steady: a.steady };
 }

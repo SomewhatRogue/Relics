@@ -71,6 +71,9 @@ em, i { font-style: normal; }
    COOLDOWN / COST, a relic's USE / CHARGE, a potion's EFFECT / LASTS. */
 :is(#panel, #pack, #loot, #title, body) .kitrows.hungry b { color: #d8503a; }
 .kitrows.hungry span { color: #ffb0a0; }
+/* The rare three (shared/gear.ts RARE): the tier chip filled in its colour; HUNGRY dark red on red, the top and the worst. */
+.chip.rare { background: var(--t); color: #1a1410 !important; font-weight: 700; }
+.chip.rare.hungry { background: #5a0c08; color: #ff6a5a !important; border-color: #ff3a2e; box-shadow: 0 0 6px #ff3a2e88; }
 .areas { display: grid; gap: 3px; margin: 6px 0 2px; text-align: left; }
 .area { display: grid; grid-template-columns: 7ch calc(20 * var(--px)) 1fr; column-gap: 8px; align-items: center; }
 .area .pips { display: flex; gap: var(--px); }

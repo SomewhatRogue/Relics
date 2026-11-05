@@ -1,7 +1,10 @@
 /**
  * Every shop and stall in Wickhold, laid out one way (Kyle, 2026-11-02): what the place is in a line,
- * then who keeps it and what they say, then the goods as a list. Tap one and a small card comes up
- * with what it does and a BUY button. The words are shopwords.ts; each shop is shops.ts or stores.ts.
+ * then who keeps it and what they say, then the goods as a list. Tap one and a small card comes up.
+ * The card (Kyle, 2026-11-05: "buying and selling is noisy"): just the thing tapped, its stats in one
+ * block; the comparison with what you wear behind a COMPARE toggle (off at first, remembered on this
+ * device); and only that thing's actions, in a bar at the foot that never scrolls away, the price on the
+ * button. The words are shopwords.ts; each shop is shops.ts, stores.ts or vendorui.ts.
  */
 import { line } from './speech';
 import { SHOPW, type Place } from './shopwords';
@@ -20,7 +23,11 @@ export interface Good {
   /** Why it can't be bought now ('' if it can). */
   why: string;
   label?: string;
+  /** The comparison with what you wear, behind COMPARE (gear only). */
+  cmp?: () => string;
 }
+/** One action on a card's bar: its label (with the price or what you get), and doing it. */
+export interface Act { label: string; act: () => string | void; primary?: boolean; disabled?: boolean }
 
 const p = (s: string) => `<p>${s}</p>`;
 /** A line spoken by the keeper (typed in, in their voice). */
@@ -43,22 +50,44 @@ export function goodsList(goods: Good[], foot = '', head = SHOPW.forSale): strin
 /** Make the rows in the open panel tappable: each brings up its card. `again` redraws the shop. */
 export function wireGoods(goods: Good[], again: () => void): void {
   document.querySelectorAll<HTMLElement>('#panel [data-good]').forEach((b) =>
-    b.addEventListener('click', (e) => (e.stopPropagation(), pop(goods[Number(b.dataset.good)], again))));
+    b.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const g = goods[Number(b.dataset.good)];
+      itemPop({ icon: g.icon, name: g.name, col: g.col, body: g.about, cmp: g.cmp, why: g.why, again,
+        acts: [{ label: `${g.label ?? SHOPW.buy} (${g.price} GOLD)`, act: g.buy, primary: true, disabled: !!g.why }] });
+    }));
 }
 
-/** The small card over the shop: the good, what it does, and BUY (or why not). */
-function pop(g: Good, again: () => void): void {
-  const card = `<div class="ph">${g.icon ? `<img src="${g.icon}" alt="">` : ''}<b${g.col ? ` style="color:${g.col}"` : ''}>${g.name}</b><em>${g.price} GOLD</em></div>` +
-    `<div class="pa">${g.about}</div>${g.why ? `<p class="dim">${g.why}</p>` : ''}` +
-    `<div class="pb"><button class="primary" data-buy${g.why ? ' disabled' : ''}>${g.label ?? SHOPW.buy}</button><button data-shut>CLOSE</button></div>`;
-  open(card, () => {
-    const got = g.buy();
-    again();
-    if (got) open(`<div class="pa">${got}</div><div class="pb"><button class="primary" data-shut>OK</button></div>`);
+const CMP_KEY = 'relic.compare';
+/** COMPARE, on or off, remembered on this device (off if storage is shut). */
+export function compareOn(): boolean {
+  try { return localStorage.getItem(CMP_KEY) === '1'; } catch { return false; }
+}
+function setCompare(on: boolean): void {
+  try { localStorage.setItem(CMP_KEY, on ? '1' : '0'); } catch { /* the toggle still works for now */ }
+}
+
+export interface Pop { icon?: string; name: string; col?: string; body: string; cmp?: () => string; why?: string; acts: Act[]; again: () => void }
+
+/** The small card over a shop or store: the thing, its block of stats, COMPARE, and its bar of actions. */
+export function itemPop(o: Pop): void {
+  const on = !!o.cmp && compareOn();
+  const cmp = o.cmp ? `<button class="cmpt${on ? ' on' : ''}" data-cmp>${SHOPW.compare}${on ? ': ON' : ''}</button>${on ? o.cmp() : ''}` : '';
+  const bar = (o.why ? `<p class="dim why">${o.why}</p>` : '') + '<div class="pbb">' +
+    o.acts.map((a, i) => `<button class="${a.primary ? 'primary' : ''}" data-act="${i}"${a.disabled ? ' disabled' : ''}>${a.label}</button>`).join('') +
+    `<button data-shut>${SHOPW.close}</button></div>`;
+  open(`<div class="ph">${o.icon ? `<img src="${o.icon}" alt="">` : ''}<b${o.col ? ` style="color:${o.col}"` : ''}>${o.name}</b></div>` +
+    `<div class="pa">${o.body}${cmp}</div><div class="pb">${bar}</div>`, (t) => {
+    if (t.closest('[data-cmp]')) return setCompare(!on), itemPop(o);
+    const a = t.closest<HTMLElement>('[data-act]');
+    if (!a) return;
+    const got = o.acts[Number(a.dataset.act)]?.act();
+    o.again();
+    if (got) open(`<div class="pa">${got}</div><div class="pb"><div class="pbb"><button class="primary" data-shut>OK</button></div></div>`);
   });
 }
 
-function open(html: string, buy?: () => void): void {
+function open(html: string, click?: (t: HTMLElement) => void): void {
   document.querySelector('#panel .spop')?.remove();
   const host = document.querySelector('#panel');
   if (!host) return;
@@ -66,11 +95,11 @@ function open(html: string, buy?: () => void): void {
   el.className = 'spop';
   el.innerHTML = `<div class="spcard">${html}</div>`;
   host.appendChild(el);
-  const shut = () => el.remove();
   el.addEventListener('click', (e) => {
     e.stopPropagation();
     const t = e.target as HTMLElement;
-    if (t === el || t.closest('[data-shut]')) return shut();
-    if (t.closest('[data-buy]') && buy) shut(), buy();
+    if (t === el || t.closest('[data-shut]')) return el.remove();
+    if (t.closest('button:disabled')) return;
+    click?.(t);
   });
 }

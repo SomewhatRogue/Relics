@@ -5,7 +5,8 @@
  * Hungry gear never leaves you this way: it can't be stored, sold, melted or upgraded (the church only).
  * Pure rules on the saved hero; the town UI calls them and keeps the save (client/stores.ts).
  */
-import { STEEL, nextLevel, sellValue } from './gear.js';
+import { STEEL, nextLevel } from './gear.js';
+import { sellValue } from './prices.js';
 import type { Item } from './loot.js';
 
 /** Pack sizes in order, and the gold to reach each (index matches). */

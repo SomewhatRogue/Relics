@@ -47,9 +47,11 @@ export function currentSwing(h: Hero): Swing {
   // (The sword's bash let go on the flash takes every goblin in a wider arc: sim/warrior.ts.)
   const s = !h.heavy ? tapSwing(h, w.combo[h.combo]) : flashBash(h, { ...hv, dmg: Math.round(hv.dmg + (hv.dmgFull * (1 + (g.fx.full ?? 0)) - hv.dmg) * k), knock: hv.knock + (hv.knockFull - hv.knock) * k, pierce: hv.pierce && k >= 1 });
   // Modifiers: how well (shared/gear.ts).
-  if (!g.damage && !g.quick && !g.reach && !g.knock && fedMult(h) === 1) return s;
+  // FINISHER: the last blow of the combo (shared/mods.ts); SWEEP widens a swung arc, never a thrust or a shot.
+  const fin = !h.heavy && h.combo === w.combo.length - 1 && w.combo.length >= 2 ? g.finisher : 0, wide = !s.thrust && !s.shot && s.arc > 0 ? g.arc : 0;
+  if (!g.damage && !g.quick && !g.reach && !g.knock && !fin && !wide && fedMult(h) === 1) return s;
   const fed = fedMult(h);
-  return { ...s, dmg: Math.round(s.dmg * (1 + g.damage) * fed), windup: s.windup * (1 - g.quick), recover: s.recover * (1 - g.quick), range: s.range * (1 + g.reach), knock: s.knock * (1 + g.knock) };
+  return { ...s, dmg: Math.round(s.dmg * (1 + g.damage) * (1 + fin) * fed), windup: s.windup * (1 - g.quick), recover: s.recover * (1 - g.quick), range: s.range * (1 + g.reach), knock: s.knock * (1 + g.knock), arc: Math.min(360, s.arc * (1 + wide)) };
 }
 
 const swingTime = (s: Swing) => s.windup + s.active + s.recover;

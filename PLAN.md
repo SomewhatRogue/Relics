@@ -2,6 +2,17 @@
 
 ## Current slice
 
+**The shops reworked, seven tiers, modifiers that fit** (Claude Opus 5.5, 2026-11-05; Kyle: "Pawn should sell random
+items ... class weapons sold by a vendor in the associated class area ... every ten minutes", "Wtf is tolmouth",
+"orange, yellow and red are really good but rare and dangerous", "buying and selling is noisy"). Built; waiting
+on Kyle's play. *Done when* on his phone he walks into the barracks, the lodge, the back of the Drowned Rat,
+Vell's tower and the church's vestry and finds a person at a counter with five pieces and "Fresh stock in n
+min.", the same as a friend sees; Tobin sells six random pieces, the bigger packs and the buyback, and buys
+anything but hungry gear; a tapped piece shows just its card (PRE-WAR, TOUCHED, TURNING chips; SWEEP,
+FINISHER, BACKSTAB, SPELL POWER and the like; a red COST row on the rare ones; dim "no use to you"), COMPARE
+off until he turns it on, and the one action in a bar at the foot; the forge's UPGRADE and MELT DOWN are two
+lists. Numbers in DECISIONS 2026-11-05 ("the shops reworked"). Open: Kyle's calls listed there.
+
 **The Mage's elements in the wood** (Claude Opus 5.5, 2026-11-05; Kyle: "have the Mage tutorial explain the
 elements in the full charge place. Have enemies that are weak and resistant to each type, and just explain you
 can cycle your elements and to watch out for that"). Built; waiting on Kyle's play. *Done when* a new Mage, on

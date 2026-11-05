@@ -36,7 +36,7 @@ export const BANK = {
 export const PAWN = {
   name: 'TOBIN THE PAWNBROKER',
   stall: 'PAWN',
-  greet: "I'll buy it, whatever it is. Want it back, come quick. I'm not sentimental.",
+  greet: "I'll buy it, whatever it is, and sell you whatever the last one sold me. Want yours back, come quick. I'm not sentimental.",
   hungry: "No, put that away, I'm not touching it at any price. I've a family.",
   sold: 'Pleasure.',
   back: 'BUY BACK',
@@ -49,12 +49,13 @@ export const PAWN = {
 
 /** The forge, reworked: Halvard upgrades and melts; Ivo isn't setting elements for now. */
 export const FORGE = {
-  title: 'THE ANVIL',
-  pick: 'Tap a piece to upgrade it (gold and steel) or melt it (for steel).',
+  /** The anvil's two choices, each its own list (Kyle, 2026-11-05). */
+  upHead: 'UPGRADE WHAT YOU WEAR',
+  meltHead: 'MELT DOWN FROM YOUR PACK',
+  purse: (gold: number, steel: number) => `You have ${gold} gold and ${steel} steel.`,
   up: (lv: number, gold: number, steel: number) => `UPGRADE TO +${lv} (${gold} GOLD, ${steel} STEEL)`,
   top: 'As good as he can make it.',
   melt: (steel: number) => `MELT DOWN (+${steel} STEEL)`,
-  meltWorn: 'Take it off first to melt it.',
   ivo: "No elements for a while, I'm sorry, and please don't ask me why. Whatever's set in yours stays set, it's happy where it is.",
   shut: 'Ivo is not setting elements for now.',
   /** Ivo, busy: he doesn't talk to you for now. */

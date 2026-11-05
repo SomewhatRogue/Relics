@@ -11,13 +11,16 @@ import { isDead } from './damage';
 import { stun } from './stuns';
 import type { Enemy, FightEvent, Hero } from './types';
 import { spellthief } from './techmage';
+import { statsOf } from './gearstats';
 
 const blade = (h: Hero) => !!WEAPONS[h.weapon]?.spellblade;
 
 /** The magic this kit's hold costs (0: it isn't a spell). */
 export function spellCost(h: Hero): number {
   if (!WEAPONS[h.weapon]?.heavy.spell) return 0;
-  return SPELL[h.weapon as MageKit] ?? 0;
+  // SPELL COST on the focus (shared/mods.ts): a cheaper spell, never free.
+  const base = SPELL[h.weapon as MageKit] ?? 0;
+  return base ? Math.max(1, Math.round(base * (1 - statsOf(h).thrift))) : 0;
 }
 
 const short = (h: Hero) => spellCost(h) > 0 && (h.winded || h.stamina < spellCost(h));

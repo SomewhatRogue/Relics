@@ -68,6 +68,8 @@ export interface Profile {
   stash?: Item[];
   stashSize?: number;
   buyback?: Pawn[];
+  /** What's been bought off a vendor's stock this ten minutes (shared/vendors.ts). */
+  bought?: string[];
   /** Coals fed to a Healer's censer (sim/lantern.ts). */
   glow: number;
   /** Potions on the belt (shared/potions.ts). */

@@ -48,8 +48,9 @@ export function traitsFor(kit: WeaponId): TraitId[] {
 /** A trait's words for a class: REAPER without a parry is a backstab's alone. */
 export const traitText = (t: TraitId, cls?: HeroClass) => barWords(t === 'reaper' && cls && CLASS_GUARD[cls] === 'none' ? 'A backstab kill heals you 10' : TRAITS[t].text, cls);
 
-/** Gear tiers, white to red (gear.ts). */
-export type Tier = 'plain' | 'fine' | 'forged' | 'tolmouth' | 'hungry';
+/** Gear tiers, white to red (gear.ts): white, green, blue, purple (id 'tolmouth', shown PRE-WAR), then the
+ *  three rare and dangerous ones, yellow, orange and red. Ids stay as saved; only names show. */
+export type Tier = 'plain' | 'fine' | 'forged' | 'tolmouth' | 'touched' | 'turning' | 'hungry';
 export type Quality = Tier;
 export interface Item {
   /** Weapon (the default, for old saves), armor or ring. */
@@ -61,7 +62,10 @@ export interface Item {
   quality: Tier;
   traits: TraitId[];
   /** Modifiers on base stats (gear.ts). */
-  mods?: { id: 'damage' | 'quick' | 'reach' | 'draw' | 'parry' | 'guard' | 'knock' | 'health' | 'tough' | 'breath' | 'foot' | 'dodge' | 'focus' | 'mending'; v: number }[];
+  mods?: { id: 'damage' | 'quick' | 'reach' | 'draw' | 'parry' | 'guard' | 'knock' | 'health' | 'tough' | 'breath' | 'foot' | 'dodge' | 'focus' | 'mending'
+    | 'arc' | 'crit' | 'backstab' | 'finisher' | 'spell' | 'thrift'; v: number }[];
+  /** What a touched or turning piece costs you (costs.ts), as hungry gear has its own. */
+  cost?: { id: 'taken' | 'winded' | 'slow' | 'frail' | 'dull'; v: number };
   /** Halvard's upgrades, +0 to +5. */
   level?: number;
   /** A hungry piece's id (hungry.ts). */
