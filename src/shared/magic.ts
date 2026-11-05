@@ -101,7 +101,7 @@ export const RELICS = {
   net: { name: "HUNTER'S NET", short: 'NET', cooldown: NET.cooldown, windup: NET.windup, recover: NET.recover, range: NET.range },
   shadow: { name: 'SHADOWSTEP', short: 'SHADOW', cooldown: SHADOWSTEP.cooldown, windup: SHADOWSTEP.windup, recover: SHADOWSTEP.recover, range: SHADOWSTEP.range },
   channel: { name: 'ELEMENT', short: 'ELEMENT', cooldown: CHANNEL.cooldown, windup: CHANNEL.windup, recover: CHANNEL.recover, range: 0 },
-  grasp: { name: 'GRASP', short: 'GRASP', cooldown: GRASP.cooldown, windup: GRASP.windup, recover: GRASP.recover, range: GRASP.range },
+  grasp: { name: 'ROUND UP', short: 'ROUND UP', cooldown: GRASP.cooldown, windup: GRASP.windup, recover: GRASP.recover, range: GRASP.range },
   lodestone: { name: 'LODESTONE', short: 'LODESTONE', cooldown: LODESTONE.cooldown, windup: LODESTONE.windup, recover: LODESTONE.recover, range: LODESTONE.range },
   horn: { name: 'WAR CRY', short: 'WAR CRY', cooldown: HORN.cooldown, windup: HORN.windup, recover: HORN.recover, range: HORN.radius },
   bash: { name: 'SHIELD CHARGE', short: 'SHIELD', cooldown: BASH.cooldown, windup: BASH.windup, recover: BASH.recover, range: BASH.distance },

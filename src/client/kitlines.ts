@@ -23,12 +23,12 @@ export const KIT: Record<WeaponId, KitRow> = {
   rapier: { tap: 'Long thrusts', hold: 'Lunge through two', perfect: 'Skewers, bleeds' },
   poisoner: { tap: 'Short sword, hits two', hold: 'Poison dart', perfect: 'Stuns, stronger poison' },
   // Mage (shared/mage.ts): what a tap and a hold are, the element decides (MAGE_KIT below); these are fire's.
-  wand: { tap: 'Firebolt, burns', hold: 'Fireball, spreads fire', perfect: 'Bigger, interrupts any attack', also: 'Tap interrupts a wind-up' },
-  staff: { tap: 'Flame sweep, burns', hold: 'Ring of fire round you', perfect: 'Bigger, lasts longer' },
-  spellblade: { tap: 'Cuts set goblins alight', hold: 'Burning lunge', perfect: 'Longer, costs nothing', also: 'Parry fills the blade' },
+  wand: { tap: 'Firebolt, burns', hold: 'Fireball, burns a crowd', perfect: 'Bigger, interrupts any blow', also: 'Tap interrupts a wind-up' },
+  staff: { tap: 'Flame sweep, burns', hold: 'Circle of fire round you', perfect: 'Bigger, lasts longer' },
+  spellblade: { tap: 'Cuts burn', hold: 'Burning lunge', perfect: 'Longer, costs nothing', also: 'Parry fills the blade' },
   // Cleric (shared/cleric.ts): every perfect shields friends near you.
   mace: { tap: 'Short blows, 3rd heals', hold: 'Smite, stuns', perfect: 'Harder, shields friends' },
-  censer: { tap: 'Two cuts, healing swing', hold: 'Whirl, sets alight', perfect: 'Coals flare, shields friends' },
+  censer: { tap: 'Two cuts, healing swing', hold: 'Whirl, burns', perfect: 'Coals flare, shields friends' },
   flail: { tap: 'Wide shoves, 2nd heals', hold: 'Spin up, sweep', perfect: 'Stuns, shields friends' },
 };
 
@@ -37,28 +37,28 @@ export const KIT: Record<WeaponId, KitRow> = {
 export const MAGE_KIT: Record<MageKit, Record<Element, KitRow>> = {
   wand: {
     fire: KIT.wand,
-    frost: { tap: 'Three icicles, slow', hold: 'Cold blast, freezes', perfect: 'Wider, interrupts any attack' },
+    frost: { tap: 'Three icicles, chill', hold: 'Cold blast, freezes', perfect: 'Wider, interrupts any blow' },
     storm: { tap: 'Arc, jumps to two more', hold: 'Lightning strike, stuns', perfect: 'Bigger, longer stun' },
   },
   staff: {
     fire: KIT.staff,
-    frost: { tap: 'Frost slash, slows', hold: 'Frost nova, freezes', perfect: 'Bigger nova' },
-    storm: { tap: 'Crackling sweep, jumps', hold: 'Charged ring, zaps', perfect: 'Bigger, zaps stun' },
+    frost: { tap: 'Frost sweep, chills', hold: 'Hard frost, freezes all round', perfect: 'Bigger' },
+    storm: { tap: 'Crackling sweep, jumps', hold: 'Charged ring, jolts', perfect: 'Bigger, jolts stun' },
   },
   spellblade: {
     fire: KIT.spellblade,
     frost: { tap: 'Cuts chill', hold: 'Shatter the frozen', perfect: 'Wider, costs nothing' },
-    storm: { tap: 'Cuts arc to one more', hold: 'Lightning dash through', perfect: 'Longer, stuns, costs nothing' },
+    storm: { tap: 'Cuts jump to one more', hold: 'Lightning rush through', perfect: 'Longer, stuns, costs nothing' },
   },
 };
 
 /** A Mage's spellbook by element, for a weapon card that isn't in anyone's hand: "Tap firebolt, hold fireball". */
 const BOOK: Record<MageKit, Record<Element, string>> = {
   wand: { fire: 'Tap firebolt, hold fireball', frost: 'Tap icicles, hold cold blast', storm: 'Tap arc, hold lightning strike' },
-  staff: { fire: 'Tap flame sweep, hold ring of fire', frost: 'Tap frost slash, hold frost nova', storm: 'Tap crackling sweep, hold charged ring' },
-  spellblade: { fire: 'Cuts burn, hold burning lunge', frost: 'Cuts chill, hold shatter', storm: 'Cuts arc, hold lightning dash' },
+  staff: { fire: 'Tap flame sweep, hold circle of fire', frost: 'Tap frost sweep, hold hard frost', storm: 'Tap crackling sweep, hold charged ring' },
+  spellblade: { fire: 'Cuts burn, hold burning lunge', frost: 'Cuts chill, hold shatter', storm: 'Cuts jump, hold lightning rush' },
 };
-const COST: Record<MageKit, string> = { wand: `${SPELL.wand} magic a hold`, staff: `${SPELL.staff} magic a hold`, spellblade: `${SPELL.spellblade} magic a hold, less charged` };
+const COST: Record<MageKit, string> = { wand: `${SPELL.wand} magic a hold`, staff: `${SPELL.staff} magic a hold`, spellblade: `${SPELL.spellblade} magic a hold, less as the blade fills` };
 const isMage = (w: WeaponId): w is MageKit => w in MAGE_KIT;
 
 /** The rows in order, labelled, for a card or a legend (ALSO only where there is one). A Mage's kit in

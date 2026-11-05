@@ -70,8 +70,8 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
   MAGE: {
     line: 'Spark wand. Spells at range.',
     weapon: 'Spark wand',
-    skill: 'Grasp: Drags the goblins in front of you together, just ahead of you.',
-    note: 'Your element is your spellbook: switch it with ELEMENT. Fire burns crowds, frost slows and freezes, storm jumps and stuns. Your weapon sets the range.',
+    skill: 'Round Up: Drags the goblins in front of you into a bunch just ahead.',
+    note: 'Your element is your spellbook: switch it with ELEMENT. Fire burns crowds, frost chills (slows) and freezes, storm jumps and stuns. Wand far, staff round you, spellblade up close.',
     noteLabel: 'SPELLS',
     guard: 'Blinks away to dodge.',
     stats: { STRENGTH: 3, GUARD: 0, SPEED: 2, RANGE: 4, SUPPORT: 2 },
