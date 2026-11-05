@@ -32,7 +32,7 @@ export const MODS: Record<ModId, { name: string; unit: '%' | 's' | ''; per: numb
   quick: { name: 'QUICKNESS', unit: '%', per: 1 },
   reach: { name: 'REACH', unit: '%', per: 0.8 },
   arc: { name: 'SWEEP', unit: '%', per: 0.6 },
-  draw: { name: 'CHARGE', unit: '%', per: 0.67 },
+  draw: { name: 'QUICK HOLD', unit: '%', per: 0.67 },
   finisher: { name: 'FINISHER', unit: '%', per: 0.5 },
   knock: { name: 'KNOCKBACK', unit: '%', per: 0.4 },
   backstab: { name: 'BACKSTAB', unit: '%', per: 0.4 },
@@ -41,7 +41,7 @@ export const MODS: Record<ModId, { name: string; unit: '%' | 's' | ''; per: numb
   guard: { name: 'BLOCK', unit: '%', per: 0.67 },
   mending: { name: 'HEALING', unit: '%', per: 0.8 },
   spell: { name: 'SPELL POWER', unit: '%', per: 0.8 },
-  thrift: { name: 'SPELL COST', unit: '%', per: 1 },
+  thrift: { name: 'CHEAPER SPELLS', unit: '%', per: 1 },
   health: { name: 'HEALTH', unit: '', per: 0.6 },
   tough: { name: 'TOUGHNESS', unit: '%', per: 1 },
   breath: { name: 'STAMINA', unit: '%', per: 0.5 },
@@ -52,8 +52,8 @@ export const MODS: Record<ModId, { name: string; unit: '%' | 's' | ''; per: numb
 /** What each modifier does, after its name and value on the card ('' when the name says it). */
 export const MOD_TEXT: Record<ModId, string> = {
   damage: 'all hits, shots and spells', quick: 'faster swings and casts', reach: 'longer reach and range', arc: 'wider swings',
-  draw: 'faster charge and draw', finisher: 'the last blow of a combo hits harder', knock: 'knocks goblins further',
-  backstab: 'more damage from behind', crit: 'chance a hit does 50% more', parry: 'longer parry window',
+  draw: 'held attacks and bow draws build faster', finisher: 'the last blow of a combo hits harder', knock: 'knocks goblins further',
+  backstab: 'more damage from behind', crit: 'chance a hit does 50% more damage', parry: 'longer parry window',
   guard: 'less damage through a block, cheaper blocks', mending: 'bigger heals', spell: 'held spells hit harder',
   thrift: 'held spells cost less magic', health: '', tough: 'less damage taken', breath: 'refills faster', foot: 'move faster',
   dodge: 'dodge recharges faster', focus: 'skill and relic recharge faster',

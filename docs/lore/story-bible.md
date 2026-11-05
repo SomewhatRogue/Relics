@@ -171,7 +171,8 @@ most Want among the heroes is the one the bells don't spare).
   gold given at the Lantern and hungry gear given up at the church (which feeds the Lantern). Its tell
   is the eyes. Turning into a named butcher is still Kyle's call.
 - **On screen, "hungry gear"** is the term for butcher-touched gear (red). It can only be given up at the
-  church, never melted, traded or dropped.
+  church, never melted, traded or dropped. Since 2026-11-05 (Kyle) it may be left in the vault; that keeps it
+  off you, it doesn't give it up.
 - **The prologue** (2026-11-01, Kyle approved by building it): every new hero wakes on the field where the
   Greyhollow column died (undated: every hero plays it, whatever chapter the world is in). Hew, the last
   charcoal burner in Greyhollow, burned the column's dead so the hungry went without; he gave the hero
@@ -229,8 +230,8 @@ most Want among the heroes is the one the bells don't spare).
 - Dens on burn jobs are low, windowless huts the hungry put up themselves, not taken houses (recorded 2026-11-02). The longhouse, hall house and great barn stay the big houses.
 
 ## The Counting House, the pawn stall and the forge (recorded 2026-11-02; Kyle's call, lore keeper)
-- The Counting House stands west of the square, north of the infirmary. The town's tolls were counted there before the war; it was never the Wicks', so it isn't a second hoard. Half the roof came in the siege's last winter (bare rafters, a window boarded, a crack down the front) and nobody has had the timber since. The vault under the floor held. Keeper Edda writes down everything that goes in or out. The vault holds gear, never coin, never hungry gear. No line ever ties Edda to the Wicks.
-- Tobin the pawnbroker keeps the second stall on Market Row, there whether the market's open or not. A townsman, not a refugee trader. He buys anything but hungry gear and sells it back at what he paid till you're home from your next job; after that it's his. His bigger packs are old packs stitched together: no new leather comes in.
+- The Counting House stands west of the square, north of the infirmary. The town's tolls were counted there before the war; it was never the Wicks', so it isn't a second hoard. Half the roof came in the siege's last winter (bare rafters, a window boarded, a crack down the front) and nobody has had the timber since. The vault under the floor held. Keeper Edda writes down everything that goes in or out. The vault holds gear, never coin. Since 2026-11-05 (Kyle: a red piece is off you "if it's in the bank") it takes hungry gear too: Edda puts it on the bottom shelf on its own and writes the hero's name next to it so nobody thinks it's hers. (Before: never hungry gear.) No line ever ties Edda to the Wicks.
+- Tobin the pawnbroker keeps the second stall on Market Row, there whether the market's open or not. A townsman, not a refugee trader. He buys anything but touched, turning and hungry gear (since 2026-11-05; before, anything but hungry) and sells it back at what he paid till you're home from your next job; after that it's his. His bigger packs are old packs stitched together: no new leather comes in.
 - Halvard upgrades gear and melts it for steel; he doesn't buy gear. All steel in Wickhold is remelted.
 - Ivo isn't setting elements for now (from 2026-11-02); what's set stays set. The reason stays off screen till Kyle decides.
 - Storing, selling and buying back are trade, like trainers' fees: they never touch the Want.
@@ -306,7 +307,13 @@ most Want among the heroes is the one the bells don't spare).
 
 ## Vendors and the rare tiers (recorded 2026-11-05; Kyle's call, lore keeper)
 - Tier names on screen: Plain, Fine, Forged, **Pre-war** (the purple; the steel is still Tolmouth's, but the chip says what it is), **Touched**, **Turning**, Hungry. Touched and turning gear is the same thing as hungry gear caught partway: steel that sat near the hunger a short while, then most of the way. On screen it is never shard, sliver or crown; the card says what it costs and nothing about why. Each grows the Want a little for every job it's worn on.
-- New people: **Quartermaster Nell** keeps the barracks stores (what comes back through the gate goes on her rack); **Bowyer Tems** keeps the bows at the back of the hunters' lodge and disagrees with Maeve about string; **Nettle** sells from a covered table at the back of the Drowned Rat, near Whisper, and doesn't ask; **Apprentice Lis** is Vell's apprentice and sells from the cupboard under his stair, mostly with his leave; **Verger Oswin** keeps the church's vestry and straightens the maces Isolde dents. Buying from them is trade and never touches the Want.
-- The church's vestry never stocks touched or turning gear. Tobin still won't touch hungry gear.
+- New people: **Quartermaster Prue** keeps the barracks stores (what comes back through the gate goes on her rack); **Bowyer Tems** keeps the bows at the back of the hunters' lodge and disagrees with Maeve about string; **Nettle** sells from a covered table at the back of the Drowned Rat, near Whisper, and doesn't ask; **Apprentice Lis** is Vell's apprentice and sells wands, staves and a blade or two from the cupboard under his stair, mostly with his leave; **Verger Oswin** keeps the church's vestry, maces and flails hung beside the robes, and straightens the maces Isolde dents. Buying from them is trade and never touches the Want. The vestry's takings never go in the Lantern box, the same rule as Isolde's fees. (Quartermaster Prue was first written Nell; renamed by the lore keeper, 2026-11-05.)
+- The church's vestry never stocks touched or turning gear.
+- **Who buys the rare three** (Kyle, 2026-11-05: "Tobin can't buy anything Yellow, Orange or Red, he freaks out. You can sell to a shady guy in the tavern though, but it's very hush hush"):
+  - Tobin won't buy touched, turning or hungry gear, and never has any on his stall. Why he's so frightened of it stays unsaid; he has a family, and that's all he says.
+  - If a hero has any hungry gear on them, worn or in the pack, Tobin won't trade with them at all, buying, selling or selling back, and panics when they come up to his stall. In the vault or given up at the church, it's off them and he trades again.
+  - Nettle is the shady one in the tavern: from his table at the back of the Drowned Rat he quietly buys touched and turning gear, for less than it's worth, and there's no buying it back. He never buys hungry gear: the church is still the only place it can go, because giving it up there is what feeds the Lantern and eases the Want, and a fence would let a hero dodge that. Where Nettle sends what he buys is never said.
+  - Selling to Nettle is trade, like Tobin: it never touches the Want.
+  - The watch drink at the Drowned Rat (Wall Brandy is theirs), which is why Nettle keeps his voice down.
 - Every vendor's stock is the same for everyone at a time; why the goods change is never said.
 

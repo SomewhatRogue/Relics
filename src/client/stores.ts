@@ -5,9 +5,10 @@
  * the counting house (Keeper Edda: pack to vault and back, more shelves for gold); Tobin's pawn stall on
  * Market Row (his stock, rolled every ten minutes for everyone, shared/vendors.ts; a bigger pack; what
  * you sold him, back at what he paid until you're home from your next job; and he buys anything but
- * hungry gear); Halvard's forge (UPGRADE what you wear for gold and steel; MELT DOWN what's in your pack).
+ * the rare three, and won't trade at all with a hero carrying hungry gear, shared/fence.ts); Halvard's forge (UPGRADE what you wear for gold and steel; MELT DOWN what's in your pack).
  * The rules are shared/bags.ts; syncPack keeps the hero in step with the save after each one.
  */
+import { carriesHungry, tobinWont } from '../shared/fence';
 import { bagSize, growBag, growVault, nextBag, nextVault, pawn, pawns, redeem, stow, unstow, vaultSize } from '../shared/bags';
 import { STEEL, TIERS, itemName, nextLevel, sellValue, type Item } from '../shared/tuning';
 import type { SpotId } from '../shared/town';
@@ -55,8 +56,8 @@ function bank(g: Game, panel: Panel): void {
   const tap = (s: string, i: number) => {
     if (s === 'bag' && pr.bag[i]) {
       const it = pr.bag[i];
-      return it.quality === 'hungry' ? piece(g, it, [], again, says('Edda', BANK.hungry))
-        : piece(g, it, [{ label: BANK.store, primary: true, disabled: stash.length >= vaultSize(pr), act: () => void (stow(pr, i) && syncPack(g)) }], again);
+      return piece(g, it, [{ label: BANK.store, primary: true, disabled: stash.length >= vaultSize(pr), act: () => void (stow(pr, i) && syncPack(g)) }], again,
+        it.quality === 'hungry' ? says('Edda', BANK.hungry) : '');
     }
     if (s === 'vault' && stash[i]) piece(g, stash[i], [{ label: BANK.take, primary: true, disabled: pr.bag.length >= bagSize(pr), act: () => void (unstow(pr, i) && syncPack(g)) }], again);
   };
@@ -67,13 +68,19 @@ function bank(g: Game, panel: Panel): void {
   tap, again, goods);
 }
 
-/** Tobin's stall: his stock, a bigger pack and what he'll sell you back; then your pack to sell from. */
+/**
+ * Tobin's stall: his stock, a bigger pack and what he'll sell you back; then your pack to sell from, the
+ * rare three dim. Carrying hungry gear, you get his panic and nothing else (Kyle, 2026-11-05).
+ */
 function merchant(g: Game, panel: Panel): void {
   const pr = g.profile, held = pawns(pr), more = nextBag(pr), room = pr.bag.length < bagSize(pr), again = () => merchant(g, panel);
+  if (carriesHungry(pr)) return show(panel, PLACES.pawn.name, shopHead(PLACES.pawn, says('Tobin', PAWN.panic)) + p(`<span class="dim">${PAWN.panicRule}</span>`), () => {}, again);
+  const wont = (it: Item) => !!tobinWont(pr, it);
   const tap = (s: string, i: number) => {
     const it = s === 'bag' ? pr.bag[i] : undefined, price = it ? sellValue(it) : 0;
     if (!it) return;
-    piece(g, it, price > 0 ? [{ label: PAWN.sell(price), primary: true, act: () => void (pawn(pr, i) && syncPack(g)) }] : [], again, price > 0 ? '' : says('Tobin', PAWN.hungry));
+    if (wont(it)) return itemPop({ icon: itemIcon(it), name: itemName(it), col: TIERS[it.quality].col, body: says('Tobin', PAWN.hungry) + card(it, g.hero, true), acts: [], again, why: PAWN.wont });
+    piece(g, it, [{ label: PAWN.sell(price), primary: true, act: () => void (pawn(pr, i) && syncPack(g)) }], again);
   };
   const goods: Good[] = [
     ...stockGoods(g, 'pawn', again),
@@ -82,8 +89,8 @@ function merchant(g: Game, panel: Panel): void {
       cmp: () => compare(g.hero, x.item), why: !room ? SHOPW.packFull : pr.gold < x.price ? SHOPW.poor : '', buy: () => void (redeem(pr, k) && syncPack(g)) })),
   ];
   show(panel, PLACES.pawn.name, shopHead(PLACES.pawn, says('Tobin', PAWN.greet)) + goodsList(goods, `${SHOPW.gold(pr.gold)} ${freshLine()}` + (more ? '' : ' ' + PAWN.biggest)) +
-    h3(SHOPW.sell, `${pr.bag.length} / ${bagSize(pr)}`) + grid(pr.bag, bagSize(pr), 'bag', null, undefined, (it) => (sellValue(it) ? '+' + sellValue(it) + 'G' : '')) +
-    (held.length ? p(`<span class="dim">${PAWN.rule}</span>`) : ''),
+    h3(SHOPW.sell, `${pr.bag.length} / ${bagSize(pr)}`) + grid(pr.bag, bagSize(pr), 'bag', null, undefined, (it) => (wont(it) ? PAWN.no : '+' + sellValue(it) + 'G'), wont) +
+    (pr.bag.some(wont) ? p(`<span class="dim">${PAWN.wont}</span>`) : '') + (held.length ? p(`<span class="dim">${PAWN.rule}</span>`) : ''),
   tap, again, goods);
 }
 

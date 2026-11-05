@@ -22,11 +22,11 @@ export function cell(it: Item | null, src: string | null, opts: { dst?: string; 
     (opts.label ? `<i>${opts.label}</i>` : '') + '</div>';
 }
 
-/** A grid of `size` squares, filled from `items` in order; `prefix:i` is each one's pick. */
-export function grid(items: Item[], size: number, prefix: string, sel: string | null, dst?: string, tags?: (it: Item, i: number) => string): string {
+/** A grid of `size` squares, filled from `items` in order; `prefix:i` is each one's pick. `dim`: a piece shown dim (one a keeper won't take). */
+export function grid(items: Item[], size: number, prefix: string, sel: string | null, dst?: string, tags?: (it: Item, i: number) => string, dim?: (it: Item) => boolean): string {
   const n = Math.max(size, items.length);
   return `<div class="cells"${dst ? ` data-dst="${dst}"` : ''}>` +
-    Array.from({ length: n }, (_, i) => cell(items[i] ?? null, items[i] ? `${prefix}:${i}` : null, { sel, dst, tag: items[i] && tags ? tags(items[i], i) : undefined })).join('') + '</div>';
+    Array.from({ length: n }, (_, i) => cell(items[i] ?? null, items[i] ? `${prefix}:${i}` : null, { sel, dst, tag: items[i] && tags ? tags(items[i], i) : undefined, dim: !!items[i] && !!dim?.(items[i]) })).join('') + '</div>';
 }
 
 /** What `it` would take the place of: the weapon in hand, the armor worn, the older ring once both are on. */

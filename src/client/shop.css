@@ -30,3 +30,7 @@
 #panel .spcard .pbb button.primary { flex-basis: 100%; }
 /* The card's own name is already in the head: only its tier chip shows there. */
 #panel .spcard .pa .card-head b { display: none; }
+/* Tabs over a keeper's goods (Nettle's table: FOR SALE, UNDER THE CLOTH; fenceui.ts). */
+#panel .tabs { display: flex; gap: 6px; margin: 8px 0 2px; }
+#panel .tabs button { flex: 1; min-height: 34px; padding: 4px; font-size: var(--fs-s); letter-spacing: 0.12em; background: #1b1d22; border-color: #3a3e46; color: #a39e94; }
+#panel .tabs button.on { color: #ffd27a; border-color: #ffd27a88; background: #23262c; }

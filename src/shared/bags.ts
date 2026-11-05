@@ -2,11 +2,13 @@
  * Where a hero's spare gear lives: the pack (a few cells, more bought from Tobin the pawnbroker on
  * Market Row), the vault under the counting house (Keeper Edda; more shelves for gold), and Tobin's
  * buyback (what you sold him, back at the price he paid, until you come home from your next job).
- * Hungry gear never leaves you this way: it can't be stored, sold, melted or upgraded (the church only).
+ * Hungry gear can't be sold, melted or upgraded (the church takes it); since Kyle's rule of 2026-11-05 it
+ * may go in the vault, which is how a hero gets it off them for Tobin's sake (fence.ts).
  * Pure rules on the saved hero; the town UI calls them and keeps the save (client/stores.ts).
  */
 import { STEEL, nextLevel } from './gear.js';
 import { sellValue } from './prices.js';
+import { carriesHungry, tobinWont, type Carrier } from './fence.js';
 import type { Item } from './loot.js';
 
 /** Pack sizes in order, and the gold to reach each (index matches). */
@@ -50,10 +52,10 @@ export function growVault(p: Stores): boolean {
   return true;
 }
 
-/** Pack to vault (`i` in the pack). Never a hungry piece. */
+/** Pack to vault (`i` in the pack). Hungry pieces too (Kyle, 2026-11-05: "unless it's in the bank"). */
 export function stow(p: Stores, i: number): boolean {
   const it = p.bag[i], stash = (p.stash ??= []);
-  if (!it || hungry(it) || stash.length >= vaultSize(p)) return false;
+  if (!it || stash.length >= vaultSize(p)) return false;
   p.bag.splice(i, 1);
   stash.push(it);
   return true;
@@ -71,20 +73,20 @@ export function unstow(p: Stores, i: number): boolean {
 export function pawns(p: Stores): Pawn[] {
   return (p.buyback = (p.buyback ?? []).filter((x) => x.runs === p.runs));
 }
-/** Sell a packed piece to Tobin: gold now, and it waits in his buyback. */
-export function pawn(p: Stores, i: number): number {
+/** Sell a packed piece to Tobin: gold now, and it waits in his buyback. Not the rare three, and nothing at all from a hero carrying hungry gear (fence.ts). */
+export function pawn(p: Stores & Carrier, i: number): number {
   const it = p.bag[i], price = it ? sellValue(it) : 0;
-  if (!it || price <= 0) return 0;
+  if (!it || price <= 0 || tobinWont(p, it)) return 0;
   p.bag.splice(i, 1);
   p.gold += price;
   const kept = [...pawns(p), { item: it, price, runs: p.runs }];
   p.buyback = kept.slice(-BUYBACK.keep);
   return price;
 }
-/** Buy one back (`k` in pawns()), at what he paid. */
-export function redeem(p: Stores, k: number): boolean {
+/** Buy one back (`k` in pawns()), at what he paid (not while you carry hungry gear: he won't trade). */
+export function redeem(p: Stores & Carrier, k: number): boolean {
   const x = pawns(p)[k];
-  if (!x || p.gold < x.price || bagFull(p)) return false;
+  if (!x || p.gold < x.price || bagFull(p) || carriesHungry(p)) return false;
   p.gold -= x.price;
   p.buyback!.splice(k, 1);
   p.bag.push(x.item);

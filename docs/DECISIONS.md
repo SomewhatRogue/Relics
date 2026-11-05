@@ -343,7 +343,7 @@ toggle", an upgrade offered when you picked something to melt, and scrolling pas
   never sold), times the roll's quality squared (0.64 to 1.44), +10% a trait, armor 0.9, rings 0.8. A strong
   TURNING weapon runs to about 3700, beside the 3600 pack. Tobin pays 30% of that, +8 a level.
 - **Vendors** (`shared/vendors.ts`, `client/vendorui.ts`, words in `client/vendorwords.ts`): a person at a
-  counter in each class's place: Quartermaster Nell (the barracks), Bowyer Tems (the hunters' lodge), Nettle
+  counter in each class's place: Quartermaster Prue (the barracks; first written Nell), Bowyer Tems (the hunters' lodge), Nettle
   (a table at the back of the Drowned Rat, by Whisper), Apprentice Lis (at the desk in Vell's tower), Verger
   Oswin (the church's vestry). Five pieces each (three of the class's weapons, an armor, a ring), rolled from
   `floor(now / 10 min)` and the vendor: the same for every player and device in that window, "Fresh stock in
@@ -353,8 +353,8 @@ toggle", an upgrade offered when you picked something to melt, and scrolling pas
   piece (15%). A bought piece is gone for you until the stock turns (`Profile.bought`, this window only).
   Anyone may look; a weapon only sells to its class.
 - **Tobin** sells six random pieces of any class from the same clock (Plain 35%, Fine 40%, Forged 19%,
-  PRE-WAR 5%, TOUCHED 1%), the bigger packs (prices kept: 400, 1000, 2000, 3600) and the buyback; and buys
-  anything but hungry gear.
+  PRE-WAR 6%; was PRE-WAR 5%, TOUCHED 1% until the rules below), the bigger packs (prices kept: 400, 1000,
+  2000, 3600) and the buyback; and buys anything but the rare three (below).
 - **Halvard's rack is gone** (class vendors sell the gear now); the forge is two lists: UPGRADE WHAT YOU WEAR
   (tap one: only UPGRADE) and MELT DOWN FROM YOUR PACK (tap one: only MELT DOWN).
 - **The shop card** (`client/shopui.ts` itemPop, every shop, store and vendor): the thing tapped and its stats
@@ -367,6 +367,51 @@ toggle", an upgrade offered when you picked something to melt, and scrolling pas
   in this session, so done by hand against their files; see the report). For Kyle: whether Tobin should
   take hungry gear after all ("you can sell anything to"); Dessa still sells Forged class weapons and rings
   when the market's open; the hungry drop odds halved so red is rarest; Healers have no rare tier at a vendor.
+
+### Later the same day: who buys the rare three, and the lore keeper's fixes (Kyle; Claude Opus 5.5)
+
+Kyle: "Tobin can't buy anything Yellow, Orange or Red, he freaks out. You can sell to a shady guy in the
+tavern though, but it's very hush hush. Actually, let's make it so if you have a red item at all (equipped
+or otherwise) you can't sell ANYTHING to him unless it's in the bank or donated to the church, and he
+panics when you talk to him." Rules in `shared/fence.ts`; Tobin's stall `client/stores.ts`; Nettle's tab
+`client/fenceui.ts`; tests `tests/fence.test.ts`.
+
+- **Tobin won't touch TOUCHED, TURNING or HUNGRY.** `pawn()` refuses them (`tobinWont`). In his sell grid
+  they sit dim (dotted, faded, "NO" where the price goes) with "Tobin won't buy touched, turning or hungry
+  gear." under the grid and on the card, where he says his old line ("No, put that away, I'm not touching it
+  at any price. I've a family."). TOUCHED is out of his stock odds, so he never stocks the rare three.
+- **Hungry gear on you shuts his stall.** Any hungry piece worn, in a hand (held or not) or in the pack:
+  Tobin buys nothing, sells nothing and sells nothing back (`pawn` and `redeem` refuse; `carriesHungry`).
+  Chosen: he won't trade at all, not just won't buy, since Kyle said he panics. His panel is only his panic
+  line and the plain rule ("Tobin won't trade while you carry hungry gear. Leave it in the vault or give it
+  to the church."); no stock, no packs, no buyback. What he holds for you keeps its usual time, so a
+  buyback can run out while you carry red.
+- **The vault takes hungry gear now** (a change: it never did). Kyle's "unless it's in the bank" needs it,
+  or the vault case can't happen. Edda's refusal became a grudging yes on the piece's card. Stored, a piece
+  is off you for Tobin's sake; it is not given up, so the Want doesn't fall. Only the church gives it up.
+- **Nettle is the shady guy.** He already keeps the Rogue's table at the back of the Drowned Rat and his
+  greeting is about not asking, so no new person: his table gets a second tab, UNDER THE TABLE, beside FOR
+  SALE (open to any class). He buys TOUCHED and TURNING only, at 20% of the piece's price (+8 a level),
+  under Tobin's 30%, and it's gone (no buyback). Selling shows his quiet line. **Not HUNGRY**: the bible's
+  church rule stands (giving it up is what feeds the Lantern and lowers the Want; a fence would skip that),
+  so a hungry piece is dim there with "Only the church takes hungry gear." Nettle doesn't panic: he trades
+  with a hero carrying red. Selling to him never touches the Want.
+- **The lore keeper's fixes:** Quartermaster Nell is now QUARTERMASTER PRUE; Lis's cupboard is "Wands,
+  staves and a blade or two, in a cupboard under Vell's stair."; the vestry is "The church's vestry, maces
+  and flails hung up beside the robes."; the vestry's takings never go in the Lantern box (bible). Mods:
+  CHARGE is QUICK HOLD ("held attacks and bow draws build faster"), SPELL COST is CHEAPER SPELLS (its text
+  kept), CRIT's text is "chance a hit does 50% more damage". Costs: winded reads "Magic refills n% slower."
+  for a Mage and "Stamina refills n% slower." for everyone else (`costText(cost, cls)`); slow reads "You
+  move n% slower." "Turning" is used on screen only as the tier's name, never of a hero (checked).
+- **Words for the lore keeper and line editor** (written here without the agents): Tobin's panic, the plain
+  rule under it, the dim reason and "NO", Edda's hungry line, the tab name, what Nettle buys, his sold line,
+  and his two dim reasons. All in `client/storewords.ts` (PAWN, BANK) and `client/vendorwords.ts` (FENCE).
+- **Fixed on the way:** a keeper's line on a shop card (Tobin's, Edda's or Halvard's line about a hungry
+  piece, Nettle's sold line) came up empty, because spoken lines only typed in on panels. The card now types
+  them too (`client/shopui.ts` `open`), with the action bar visible from the start.
+- Phone shots (one build, `vite preview`): Tobin panicking, UNDER THE TABLE, Nettle's sold line, Tobin's dim
+  grid and refusal card. For the lore keeper: Tobin's greeting still says "I'll buy it, whatever it is",
+  which is no longer true.
 
 ## 2026-11-05: the staff's fire hold is a fire pit dropped on a goblin (Kyle; Claude Opus 5.5)
 

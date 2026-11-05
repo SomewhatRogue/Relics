@@ -6,7 +6,7 @@
  * device); and only that thing's actions, in a bar at the foot that never scrolls away, the price on the
  * button. The words are shopwords.ts; each shop is shops.ts, stores.ts or vendorui.ts.
  */
-import { line } from './speech';
+import { line, typeIn } from './speech';
 import { SHOPW, type Place } from './shopwords';
 import './shop.css';
 
@@ -95,6 +95,9 @@ function open(html: string, click?: (t: HTMLElement) => void): void {
   el.className = 'spop';
   el.innerHTML = `<div class="spcard">${html}</div>`;
   host.appendChild(el);
+  // A keeper's line on the card (Tobin, Edda, Halvard, Nettle) types in as it does on the panel; the bar stays put.
+  const body = el.querySelector<HTMLElement>('.pa');
+  if (body?.querySelector('[data-say]')) typeIn(body);
   el.addEventListener('click', (e) => {
     e.stopPropagation();
     const t = e.target as HTMLElement;

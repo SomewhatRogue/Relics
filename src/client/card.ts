@@ -92,7 +92,7 @@ export function compare(h: Hero, it: Item): string {
   }).join('') + '</div>';
 }
 
-/** A modifier's value as shown: "+12%", "+0.04 s", "+9"; SPELL COST reads as the cut it is ("-12%"). */
+/** A modifier's value as shown: "+12%", "+0.04 s", "+9"; CHEAPER SPELLS reads as the cut it is ("-12%"). */
 const modValue = (m: Mod) => {
   const neg = m.id === 'thrift', v = neg ? -m.v : m.v, sign = v > 0 ? '+' : '';
   return MODS[m.id].unit === '%' ? sign + Math.round(v * 100) + '%' : MODS[m.id].unit === 's' ? sign + v + ' s' : sign + v;
@@ -115,7 +115,7 @@ export function card(it: Item, h?: Hero, brief = false): string {
   const chip = RARE.includes(it.quality) ? ` rare ${it.quality}` : '';
   return `<div class="card-head" style="--t:${t.col}"><span class="chip${chip}">${t.name}</span><b>${itemName(it)}</b></div>` +
     (how ? `<div class="how">${how}</div>` : '') + [...mods, ...traits].join('') +
-    (it.cost ? labelRows([[CARDW.cost, barWords(costText(it.cost), cls)]], 'hungry') : '') +
+    (it.cost ? labelRows([[CARDW.cost, costText(it.cost, cls)]], 'hungry') : '') +
     (it.hungry ? hungryRows(it.hungry as HungryId, cls) : '') + (mods.length + traits.length || it.hungry ? '' : `<div class="tr">Plain. No modifiers.</div>`);
 }
 

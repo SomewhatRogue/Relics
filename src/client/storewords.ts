@@ -10,7 +10,7 @@ export const PACKW = {
   hint: 'Tap a piece to compare it with what you wear.',
   hover: 'Point at a piece to compare it with what you wear. Click to choose it.',
   inTown: 'In town: sell it to Tobin (Market Row) or store it in the vault (Counting House).',
-  hungry: 'Hungry gear can\'t be dropped or sold. Only the church takes it.',
+  hungry: "Hungry gear can't be dropped or sold. Give it up at the church, or leave it in the vault.",
   skillLine: 'Your class skill. Change it at your trainer.',
   fullJob: 'Pack full. Drop something to make room.',
   notYours: 'Not for your class.',
@@ -21,7 +21,8 @@ export const BANK = {
   name: 'THE COUNTING HOUSE',
   keeper: 'KEEPER EDDA',
   greet: "Roof's half gone since the siege, but the vault's under the floor and it's *sound*. Put in what you like, take out what you like, and I write it all down.",
-  hungry: "Not that one. I don't care what it's worth, it doesn't go down there.",
+  /** On a hungry piece's card: she takes it now (Kyle, 2026-11-05: off you "if it's in the bank"). */
+  hungry: "Fine, it can go down there, but on the bottom shelf on its own, and I'm writing your name next to it so nobody thinks it's mine.",
   grown: "That's another shelf down there for you. Mind your head on the stair, everybody cracks it the first time.",
   vault: 'VAULT',
   store: 'PUT IN THE VAULT',
@@ -36,8 +37,15 @@ export const BANK = {
 export const PAWN = {
   name: 'TOBIN THE PAWNBROKER',
   stall: 'PAWN',
-  greet: "I'll buy it, whatever it is, and sell you whatever the last one sold me. Want yours back, come quick. I'm not sentimental.",
+  greet: "I'll buy most things, and sell you whatever the last one sold me, and you can have yours back if you're quick about it, because I'm not sentimental. Nothing touched, mind, or worse than touched, so if that's what's in your sack you can keep it wrapped and keep walking.",
   hungry: "No, put that away, I'm not touching it at any price. I've a family.",
+  /** Talking to him while you carry hungry gear (Kyle, 2026-11-05: "he panics"); he won't trade at all. */
+  panic: "No, stop there, don't come any closer. I know what you've got on you. I'll not buy a thing off you while that's about, not a button, and I'll not sell you one either. Please, just go. I've a family.",
+  panicRule: "Tobin won't trade while you carry hungry gear. Leave it in the vault or give it up at the church.",
+  /** Under his sell grid when you've something he won't buy, and on its card. */
+  wont: "Tobin won't buy touched, turning or hungry gear.",
+  /** On a square he won't buy, where the price would be. */
+  no: 'NO',
   sold: 'Pleasure.',
   back: 'BUY BACK',
   sell: (gold: number) => `SELL (+${gold} GOLD)`,

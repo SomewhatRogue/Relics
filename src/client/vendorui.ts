@@ -15,6 +15,7 @@ import { itemIcon } from './itemicons';
 import { goodsList, says, shopHead, wireGoods, type Good } from './shopui';
 import { SHOPW } from './shopwords';
 import { VENDOR_PLACES } from './vendorwords';
+import { fenceBody, fenceTabs, wireFence, type Tab } from './fenceui';
 
 /** The hero in the room follows the save (else the next frame would put the old pack back). */
 export function syncPack(g: Game): void {
@@ -61,11 +62,25 @@ export function stockGoods(g: Game, v: VendorId, again: () => void): Good[] {
   });
 }
 
-/** A class's vendor, by the class's place in CLASS_ORDER (the Npc's arg). Anyone may look; weapons only fit their class. */
-export function openVendor(g: Game, panel: Panel, arg: number): void {
-  const cls = CLASS_ORDER[arg] ?? 'WARRIOR', pl = VENDOR_PLACES[cls], again = () => openVendor(g, panel, arg);
-  const goods = stockGoods(g, cls, again);
-  const foot = `${SHOPW.gold(g.profile.gold)} ${freshLine()}`;
-  panel.show(pl.name, shopHead(pl, says(pl.who, pl.greet)) + (goods.length ? goodsList(goods, foot) : `<div class="shop"><p>${SHOPW.soldOut}</p><p class="dim">${foot}</p></div>`));
-  wireGoods(goods, again);
+/**
+ * A class's vendor, by the class's place in CLASS_ORDER (the Npc's arg). Anyone may look; weapons only fit
+ * their class. Nettle's table (the Rogue's) has a second tab, UNDER THE CLOTH, where he buys (fenceui.ts).
+ */
+export function openVendor(g: Game, panel: Panel, arg: number, tab: Tab = 'sale'): void {
+  const cls = CLASS_ORDER[arg] ?? 'WARRIOR', pl = VENDOR_PLACES[cls], again = () => openVendor(g, panel, arg, tab), fence = cls === 'ROGUE';
+  const head = shopHead(pl, says(pl.who, pl.greet)) + (fence ? fenceTabs(tab) : '');
+  if (fence && tab === 'fence') {
+    clearInterval(ticking);
+    panel.show(pl.name, head + fenceBody(g));
+    wireFence(g, again, () => syncPack(g));
+  } else {
+    const goods = stockGoods(g, cls, again);
+    const foot = `${SHOPW.gold(g.profile.gold)} ${freshLine()}`;
+    panel.show(pl.name, head + (goods.length ? goodsList(goods, foot) : `<div class="shop"><p>${SHOPW.soldOut}</p><p class="dim">${foot}</p></div>`));
+    wireGoods(goods, again);
+  }
+  document.querySelectorAll<HTMLElement>('#panel [data-tab]').forEach((b) => b.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openVendor(g, panel, arg, b.dataset.tab as Tab);
+  }));
 }

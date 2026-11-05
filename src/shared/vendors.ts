@@ -27,7 +27,8 @@ export const stockLeft = (now: number) => STOCK_MS - (((now % STOCK_MS) + STOCK_
 /**
  * Tier odds per piece. A class vendor: mostly Fine and Forged, now and then PRE-WAR, rarely TOUCHED and
  * very rarely TURNING (about one window in seven has a rare piece, one in twenty-five a TURNING one).
- * The pawn: any class, mostly Plain to Forged, now and then better. Never HUNGRY: nobody will trade it.
+ * The pawn: any class, mostly Plain to Forged, now and then PRE-WAR. Never the rare three: Tobin won't
+ * touch them (Kyle, 2026-11-05), so he never has one to sell (shared/fence.ts).
  * The church's vestry: never the rare three (Oswin won't hang them up).
  * `strong`: the chance a piece rolls at the top of its band (`lean`), priced to match (prices.ts).
  */
@@ -35,7 +36,7 @@ export const STOCK: Record<'class' | 'church' | 'pawn', { count: number; odds: [
   /** The church's vestry won't hang up anything the hunger has touched: its best is a strong PRE-WAR piece. */
   church: { count: 5, odds: [['plain', 0.08], ['fine', 0.42], ['forged', 0.35], ['tolmouth', 0.15]], strong: 0.15, lean: 0.75 },
   class: { count: 5, odds: [['plain', 0.08], ['fine', 0.42], ['forged', 0.35], ['tolmouth', 0.12], ['touched', 0.022], ['turning', 0.008]], strong: 0.12, lean: 0.75 },
-  pawn: { count: 6, odds: [['plain', 0.35], ['fine', 0.4], ['forged', 0.19], ['tolmouth', 0.05], ['touched', 0.01]], strong: 0.08, lean: 0.75 },
+  pawn: { count: 6, odds: [['plain', 0.35], ['fine', 0.4], ['forged', 0.19], ['tolmouth', 0.06]], strong: 0.08, lean: 0.75 },
 };
 
 /** A seed from a vendor and a window: the same on every device. */

@@ -6,15 +6,16 @@
  * modifier but taken away, and each grows the Want a little for every job it's worn on.
  */
 import type { Rng } from './rng.js';
+import type { HeroClass } from './weapons.js';
 import type { Item, Tier } from './loot.js';
 import { band } from './mods.js';
 
 export type CostId = NonNullable<Item['cost']>['id'];
-/** Each cost: what one unit (1%, or 1 health) is worth in points, and its words for a value. */
-export const COSTS: Record<CostId, { unit: '%' | ''; per: number; text: (n: number) => string }> = {
+/** Each cost: what one unit (1%, or 1 health) is worth in points, and its words for a value (a Mage's bar is magic). */
+export const COSTS: Record<CostId, { unit: '%' | ''; per: number; text: (n: number, cls?: HeroClass) => string }> = {
   taken: { unit: '%', per: 1, text: (n) => `You take ${n}% more damage.` },
-  winded: { unit: '%', per: 0.5, text: (n) => `Stamina refills ${n}% slower.` },
-  slow: { unit: '%', per: 1, text: (n) => `You walk ${n}% slower.` },
+  winded: { unit: '%', per: 0.5, text: (n, cls) => `${cls === 'MAGE' ? 'Magic' : 'Stamina'} refills ${n}% slower.` },
+  slow: { unit: '%', per: 1, text: (n) => `You move ${n}% slower.` },
   frail: { unit: '', per: 0.6, text: (n) => `${n} less health.` },
   dull: { unit: '%', per: 0.8, text: (n) => `Skill and relic recharge ${n}% slower.` },
 };
@@ -26,8 +27,8 @@ export const TIER_WANT: Partial<Record<Tier, number>> = { touched: 1, turning: 2
 
 export const costValue = (id: CostId, pts: number) => (COSTS[id].unit === '' ? Math.max(1, Math.round(pts / COSTS[id].per)) : Math.round(pts / COSTS[id].per) / 100);
 export const costPoints = (c: NonNullable<Item['cost']>) => (COSTS[c.id].unit === '' ? c.v : c.v * 100) * COSTS[c.id].per;
-/** Its words on the card: "You take 8% more damage." */
-export const costText = (c: NonNullable<Item['cost']>) => COSTS[c.id].text(COSTS[c.id].unit === '' ? c.v : Math.round(c.v * 100));
+/** Its words on the card, for the wearer's class: "You take 8% more damage." */
+export const costText = (c: NonNullable<Item['cost']>, cls?: HeroClass) => COSTS[c.id].text(COSTS[c.id].unit === '' ? c.v : Math.round(c.v * 100), cls);
 
 /** A touched or turning piece's cost; none for any other tier. A strong roll doesn't soften it. */
 export function rollCost(rng: Rng, tier: Tier): Item['cost'] {

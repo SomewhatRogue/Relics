@@ -9,6 +9,8 @@ body #pack .tile i, #panel .tile i { position: absolute; bottom: 1px; left: 0; r
 body #pack .tile.empty, #panel .tile.empty { border-style: dashed; border-color: #3a3e46; background: #15131b; cursor: default; }
 body #pack .tile.empty i, #panel .tile.empty i { position: static; color: #5a5f69; font-size: var(--fs-s); }
 body #pack .tile.dim, #panel .tile.dim { border-style: dotted; background: #16181f; }
+#panel .tile.dim img { opacity: 0.4; }
+#panel .tile.dim em { color: #8d929c; }
 body #pack .tile.sel, #panel .tile.sel { background: #2a2d33; }
 body #pack .tile.can { }
 body #pack .tile.over, body #pack .cells.over { background: #2e2618; }

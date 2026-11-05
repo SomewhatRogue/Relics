@@ -32,7 +32,7 @@ describe('the pack and the vault', () => {
     expect(p.gold).toBe(10000 - BAG.gold.reduce((a, b) => a + b, 0));
   });
 
-  it('pieces go into the vault and back; never past its shelves or a full pack; never hungry gear', () => {
+  it('pieces go into the vault and back; never past its shelves or a full pack; hungry gear too (Kyle, 2026-11-05)', () => {
     const p = hero(BAG.start);
     expect(stow(p, 0)).toBe(true);
     expect([p.bag.length, p.stash!.length]).toEqual([7, 1]);
@@ -45,7 +45,8 @@ describe('the pack and the vault', () => {
     expect(growVault(p) && vaultSize(p)).toBe(24);
     expect(stow(p, 0)).toBe(true);
     p.bag.push(hungry());
-    expect(stow(p, p.bag.length - 1)).toBe(false);
+    expect(stow(p, p.bag.length - 1)).toBe(true);
+    expect(p.stash!.at(-1)!.quality).toBe('hungry');
   });
 
   it('the vault survives a save and a load', () => {

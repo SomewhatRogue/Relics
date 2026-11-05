@@ -94,12 +94,13 @@ describe("Tobin's stall", () => {
     const n = WINDOWS * STOCK.pawn.count, low = ((tiers.plain ?? 0) + (tiers.fine ?? 0) + (tiers.forged ?? 0)) / n;
     expect(low).toBeGreaterThan(0.9);
     expect(tiers.tolmouth).toBeGreaterThan(0);
-    expect(tiers.turning ?? 0).toBe(0);
+    // Never the rare three: he won't touch them (Kyle, 2026-11-05).
+    for (const t of RARE) expect(tiers[t] ?? 0, t).toBe(0);
   });
 
-  it('buys anything you carry at a fair cut of its worth (hungry gear only at the church)', () => {
+  it('buys anything but the rare three at a fair cut of its worth (fence.test.ts has the rest)', () => {
     const rng = new Rng(4);
-    for (const t of TIER_ORDER.filter((x) => x !== 'hungry')) for (const slot of ['weapon', 'armor', 'ring'] as const) {
+    for (const t of TIER_ORDER.filter((x) => !RARE.includes(x))) for (const slot of ['weapon', 'armor', 'ring'] as const) {
       const it = rollGear(rng, 'RANGER', t, slot), p = { ...shopper('RANGER', 0), bag: [it] };
       const v = sellValue(it);
       expect(v, `${t} ${slot}`).toBeGreaterThan(0);
