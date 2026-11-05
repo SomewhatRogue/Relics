@@ -1,7 +1,7 @@
 /** What each person in Wickhold says and offers, the spots in the open, and the end-of-run results. */
 import { FAMILIES, PATIENTS } from '../shared/interiors';
 import { openTrainer } from './trainerui';
-import { CHAPTER_1, chapterGoals, councilOpen, rewardMult } from '../shared/story';
+import { CHAPTER_1, chapterGoals, councilOpen } from '../shared/story';
 import { COUNCILW } from './councilwords';
 import { closeNight } from './voteboards';
 import { TRAINERS, type SpotId } from '../shared/town';
@@ -17,32 +17,17 @@ import { LINES } from '../shared/wood';
 import { ORLA } from '../shared/orla';
 import type { Panel } from './panels';
 import { RUMOURS } from './rumours';
-import { partyList, wireParties } from './partyboard';
-import { postedToast } from './partytoast';
+import { openBoard } from './boardui';
 import { CLASS_NAME } from '../shared/classes';
-import { KIND, SIZES, STORY_PARTY, danger } from '../shared/jobs';
-import { EXPED_BOARD } from '../shared/expedjob';
-import { TIME_WORD, timeOf } from '../shared/timeofday';
-import { SKY_ROW, SKY_WORD } from '../shared/sky';
-import { skyOfJob } from '../shared/weather';
-import { iconUrl } from './icons';
 
-/** The job open on the board (by id), if any. */
-let boardOpen = '';
-import { treasureWord } from '../shared/treasure';
-import { labelRows } from './card';
 import { SPEAKER, townSays } from '../shared/townsays';
-import { lossText } from '../shared/raids';
-import { MEND_UI, PERRIN } from '../shared/mendlines';
+import { PERRIN } from '../shared/mendlines';
 import { dusk } from './streetlife';
 import { RELICW } from './relicwords';
 import { openStep } from './churchrelics';
 import { openAdvocate } from './councilui';
 
-/** Words from another player's browser, made safe to show. */
-const esc = (v: unknown) => String(v ?? '').replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
-const RUIN = ['Held', 'Raided', 'Occupied', 'Razed', 'Blighted'];
 const p = (s: string) => `<p>${s}</p>`;
 // The quote marks type in with the words, so the end of the line never shows before it's said.
 const say = (who: string, s: string) => p(`<b>${who}:</b> ${line(`"${s}"`, who)}`);
@@ -53,37 +38,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
   if (openSquare(id, g, panel, arg, key)) return;
   if (openStore(id, g, panel) || openShop(id, g, panel)) return;
   if (id === 'board') {
-    const jobs = g.jobs(), pt = g.parties;
-    // Online: the parties gathering, and the board's jobs taken alone or with a party.
-    if (pt) pt.onChange = () => panel.open && document.querySelector('#panel h2')?.textContent?.toUpperCase().startsWith('JOB BOARD') && openSpot('board', g, panel);
-    const { html: partyHtml, parties } = partyList(g);
-    // Jobs done lately, by whoever did them (the shared world's, online).
-    const deeds = (w.deeds ?? []).slice(0, 5), raid = w.raids?.[0];
-    // The town hit, while the raid is still the newest thing on the board.
-    const raidHtml = raid && !deeds.some((d) => d.day > raid.day) ? `<div class="m">${esc(MEND_UI.board(raid.day, lossText(raid)))}</div>` : '';
-    const doneHtml = deeds.length || raidHtml ? '<h3>DONE LATELY</h3>' + raidHtml + deeds.map((d) => `<div class="m">Day ${Number(d.day) || 1}: ${esc(d.title)}, by ${d.party.map(esc).join(', ')}.</div>`).join('') : '';
-    // The list: what kind of job, how long, how hard, what it pays. Tap one for the rest.
-    const pips = (n: number) => '<span class="pips">' + '<i class="on"></i>'.repeat(n) + '<i></i>'.repeat(5 - n) + '</span>';
-    const html = partyHtml + doneHtml + (partyHtml || doneHtml ? '<h3>JOBS</h3>' : '') + jobs.map((j, i) => {
-      const open = boardOpen === j.id, size = SIZES[j.size ?? 'medium'], pay = Math.round(j.reward * rewardMult(w)), story = j.objective === 'story';
-      // The expedition is its own posting (shared/expedjob.ts): one big map, not rooms.
-      const xp = !!j.exped;
-      // The job's weather (shared/sky.ts): an icon and its word, the same for everyone who reads the board.
-      const sky = skyOfJob(j), wxIcon = sky === 'clear' && timeOf(j) === 'night' ? 'moon' : sky;
-      const alone = g.canTake(j, 1), head = `<button class="jhead" data-open="${i}"><b class="kind k-${xp ? 'exped' : j.objective}">${xp ? EXPED_BOARD.kind : KIND[j.objective]}</b><span class="where">${esc(xp ? EXPED_BOARD.where : j.place.name)}</span><span class="len">${size.label}</span><span class="when t-${timeOf(j)}">${TIME_WORD[timeOf(j)]}</span><span class="wx s-${sky}"><img alt="" src="${iconUrl(wxIcon)}">${SKY_WORD[sky]}</span>${pips(danger(j))}<em>${pay}g</em></button>`;
-      const more = open ? `<div class="jmore"><div class="t">${story ? 'STORY: ' : ''}${j.title}</div>` +
-        labelRows([['WHERE', `${j.place.region}, ${RUIN[j.place.ruin].toLowerCase()}`], xp ? ['MAP', EXPED_BOARD.rooms] : ['ROOMS', `${j.rooms}, ${size.minutes}`], ['PAYS', xp ? EXPED_BOARD.pays(pay) : `${pay} gold and ${treasureWord(j)}`], ['WEATHER', SKY_ROW[sky]]], 'm') +
-        `<div class="d">${j.text}</div>` + (story && !alone ? `<div class="need">Needs ${STORY_PARTY} to set out.</div>` : '') +
-        (alone ? `<button data-job="${i}">${pt ? 'GO ALONE' : 'TAKE THE JOB'}</button>` : '') + (pt ? ` <button data-gather="${i}">GATHER A PARTY</button>` : '') + '</div>' : '';
-      return `<div class="job ${story ? 'story' : j.deep ? 'deep' : xp ? 'exped' : ''}${open ? ' open' : ''}">${head}${more}</div>`;
-    }).join('');
-    panel.show(`JOB BOARD, DAY ${w.day}`, html);
-    const on = (sel: string, f: (b: HTMLButtonElement) => void) => document.querySelectorAll<HTMLButtonElement>(`#panel ${sel}`).forEach((b) => b.addEventListener('click', () => f(b)));
-    on('[data-open]', (b) => ((boardOpen = boardOpen === jobs[Number(b.dataset.open)].id ? '' : jobs[Number(b.dataset.open)].id), openSpot('board', g, panel)));
-    on('[data-job]', (b) => g.canTake(jobs[Number(b.dataset.job)], 1) && (panel.hide(), pt?.quit(), g.startJob(jobs[Number(b.dataset.job)])));
-    // A party posted, the panel closes: walk where you like while it gathers (the HUD card: partycard.ts).
-    on('[data-gather]', (b) => (pt?.gather(jobs[Number(b.dataset.gather)]), panel.hide(), postedToast()));
-    wireParties(g, panel, parties, () => openSpot('board', g, panel));
+    openBoard(g, panel);
   } else if (id === 'council') {
     const goals = chapterGoals(w), d = CHAPTER_1.decision, done = w.flags[d.id];
     const status = p(`<b>${CHAPTER_1.name}</b>`) + p(`People brought home: ${goals.rescued} of ${goals.rescuedGoal}. Story mission, ${CHAPTER_1.mission.title}: ${goals.story ? 'done' : 'not yet'}.`);

@@ -1,0 +1,44 @@
+/* The job board (boardui.ts): short rows to read at a glance, and a framed card for the one you tap. */
+#panel .jlist { display: flex; flex-direction: column; gap: 6px; }
+#panel .jrow { display: grid; grid-template-columns: 1fr auto; grid-template-areas: 't r' 'g r'; align-items: center; gap: 3px 10px; width: 100%; min-height: 48px; padding: 6px 8px 7px 10px; text-align: left;
+  border: var(--px) solid var(--stone-500); border-image: none; border-radius: 0; background: var(--stone-750); box-shadow: inset calc(3 * var(--px)) 0 0 var(--kc, var(--stone-500)); color: var(--bone); text-transform: none; letter-spacing: 0; }
+#panel .jrow:active { background: var(--stone-700); transform: none; }
+#panel .jrow .jt { grid-area: t; font: 400 14px/1.15 var(--font-body); color: var(--gilt); letter-spacing: 0.02em; }
+#panel .jrow .jtags { grid-area: g; }
+#panel .jrow .jr { grid-area: r; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+#panel .jrow em { font: 400 14px/1 var(--font-body); font-style: normal; color: var(--gilt); }
+
+/* The tags: the kind as a coloured chip, then the length, hour and weather in the dim face. */
+#panel .jtags { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font: 400 var(--fs-text)/1.2 var(--font-body); color: var(--bone-dim); letter-spacing: 0.04em; }
+#panel .jtags .kind { padding: 1px 4px; font: 400 var(--fs-text)/1.2 var(--font-body); color: var(--stone-900); background: var(--kc, var(--parch)); letter-spacing: 0.04em; }
+#panel .jtags .t-dawn { color: #a8c0d8; }
+#panel .jtags .t-dusk { color: #e0a070; }
+#panel .jtags .t-night { color: #9aa0e0; }
+#panel .jtags .wx { color: #b8c8d0; }
+#panel .k-hunt { --kc: #d86a50; }
+#panel .k-rescue { --kc: #9cc95a; }
+#panel .k-burn, #panel .k-larder { --kc: #f0b070; }
+#panel .k-story { --kc: #ffd27a; }
+#panel .k-exped { --kc: var(--gold); }
+#panel .k-deep, #panel .jrow.deep { --kc: #a37ad6; }
+#panel .jtags .k-deep { color: var(--stone-900); }
+
+/* Danger: five pips, lit for how hard. */
+#panel .jlist .pips, #panel .jcard .pips { display: inline-flex; gap: var(--px); vertical-align: middle; }
+#panel .jlist .pips i, #panel .jcard .pips i { display: block; width: calc(3 * var(--px)); height: calc(3 * var(--px)); background: var(--stone-500); }
+#panel .jlist .pips i.on, #panel .jcard .pips i.on { background: var(--blood-hi); }
+
+#panel .jdone .m { color: var(--bone-dim); margin-bottom: 3px; }
+
+/* The card: over the list, centred, the posting in full and three buttons. */
+#panel .jpop { position: fixed; inset: 0; z-index: 7; display: flex; align-items: center; justify-content: center; padding: 16px; background: #07080ad0; }
+#panel .jcard { width: min(400px, 100%); max-height: 88vh; overflow-y: auto; padding: 12px 14px 14px; color: var(--bone); box-shadow: inset 0 calc(3 * var(--px)) 0 var(--kc, var(--stone-500)); }
+#panel .jcard h4 { margin: 8px 0 8px; font: 400 26px/1.05 var(--font-display); color: var(--gilt); text-shadow: 0 var(--px) 0 var(--stone-900); }
+#panel .jcard .jtext { margin: 0 0 10px; font: 400 var(--fs)/1.35 var(--font-body); color: var(--parch); }
+#panel .jcard .kitrows.jrows { gap: 5px 12px; margin: 0 0 12px; }
+#panel .jcard .kitrows.jrows b { font-size: var(--fs-text); color: var(--bone-dim); }
+#panel .jcard .kitrows.jrows span { font: 400 14px/1.3 var(--font-body); color: var(--bone); }
+#panel .jcard .jbtns { display: flex; flex-wrap: wrap; gap: 6px; }
+#panel .jcard .jbtns button { flex: 1 1 40%; min-height: 40px; }
+#panel .jcard .jbtns button[data-back] { flex: 1 1 100%; }
+@media (min-width: 700px) { #panel .jcard .jbtns button[data-back] { flex: 0 0 auto; } }

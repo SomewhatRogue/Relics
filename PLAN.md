@@ -13,6 +13,12 @@ thunder after; never indoors or underground; and his hero is never slowed. The B
 (clear to rain, rain to storm, the fog lifting) with one line said. Flat and 2.5D, phone and laptop
 (`node scripts/weather-look.cjs`). Open: the new words through the lore keeper and line editor; the numbers
 once he's played (DECISIONS 2026-11-04).
+**The job board as a list and a card** (Claude Opus 5.5, 2026-11-04; Kyle: "Hard-to-read white text and
+complex. Maybe it pops out when you select one"). Built; waiting on Kyle's play. *Done when* on his phone
+he reads the board at a glance (each job a row: title, kind, length, hour, weather, danger, pay), taps one
+and reads it in a card with the posting, its rows and GO ALONE, GATHER A PARTY and BACK; the expedition
+and the story mission use the same card (the story's says it needs a party); and gathering, joining and
+setting out with friends work as before. Open: the new words through the lore keeper and line editor.
 
 **The hero clear of the buttons on a phone** (Claude Opus 5.5, 2026-11-04; Kyle: "Your potion and things can
 cover your character while in game"). Built; waiting on Kyle's play. *Done when* on his phone upright, flat
