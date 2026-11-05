@@ -6,7 +6,7 @@ const SPEC = { butcher: BUTCHER, scrapper: SCRAPPER, spider: SPIDER, brood: BROO
 export const stunOf = (e: Enemy) => SPEC[e.kind]?.stun ?? SWING_DUMMY.stun;
 export const respawnOf = (e: Enemy) => SPEC[e.kind]?.respawn ?? BUTCHER.respawn;
 /** Small enough that any blow knocks it out of its wind-up. */
-export const small = (e: Enemy) => e.kind === 'scrapper' || e.kind === 'spider';
+export const small = (e: Enemy) => (e.kind === 'scrapper' && e.variant !== 'log') || e.kind === 'spider';
 /** A function, so a check after something that may have killed it isn't narrowed away. */
 export const isDead = (e: Enemy) => e.act === 'dead';
 export const isDummy = (e: Enemy) => e.kind === 'dummy' || e.kind === 'swingDummy';

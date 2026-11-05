@@ -2,6 +2,88 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-04: encounters as packs, and ten new sorts of the hungry (Kyle; Claude Opus 5.5)
+
+Kyle: "Too much chaos on the screen reads messy. I'd rather have more impactful battles, but splattering
+little goblins is also fun", then of the ten new enemies, "I like them all, let's make them".
+
+**Measured first** (`npx tsx scripts/encounters/measure.ts`, 60 days of the board, 1,080 rooms, placement
+as planned; "wake group" is goblins within a shout of each other, and of one pack where there are packs):
+
+| party | goblins a room (mean/p90) | biggest wake group (mean/p90/max) | specials a room | kinds of special a room | rooms with 3+ kinds | wake group with 3+ specials |
+|---|---|---|---|---|---|---|
+| 1, before | 8.0 / 12 | 5.0 / 8 / 13 | 6.1 | 3.5 | 65% | 62% |
+| 1, after | 9.2 / 14 | 4.1 / 5 / 13 | 2.1 | 1.7 | 22% | 4% |
+| 4, before | 22.6 / 34 | 15.3 / 25 / 39 | 17.0 | 3.8 | 76% | 89% |
+| 4, after | 20.6 / 32 | 10.1 / 13 / 29 | 2.6 | 2.1 | 40% | 3% |
+
+Before, every small goblin rolled to be a lunger, shield or brute (about 78% of them deeper in), hexers and
+drummers on top, butchers by rule, and a party copied the whole room again, specials and all. After:
+
+- **Packs from templates** (`shared/encounters.ts` the table, `shared/encounter.ts` the rules, layout 3
+  only; layout 2 and old jobs plan exactly as before): the set piece's bands become two or three fights a
+  room, each one template: at most one centrepiece (a brute, a banner-bearer, a butcher, two shields, the
+  log-carriers, an oil thrower, a wolf-keeper, roof archers), at most one kind backing it, and small ones.
+  Picked by room (no butcher, banner or logs in a first room; the first fight is a swarm, a brute, a netter's
+  swarm, wolves, a thief's crowd or the blind hunters), place (wolves in the open, logs where there are
+  fields and lanes, roof archers where a house stands, the blind hunters only down a mine), ruin, and a cap
+  on specials a room (2, 3, 3, 4 by room; one more on a deep job or at ruin 3; ledge archers count).
+- **One fight at a time**: a pack's shout wakes only its own pack, and a fight in another pack is heard only
+  from 2.2 tiles (`sim/packs.ts`). Spiders and an old job's goblins wake as before.
+- **A party** meets half again as many small ones a player past the first in each pack, a centrepiece 35%
+  tougher a player, and from three players one more special a pack (the template's `more`), never copies
+  of the specials (`scalePacks`).
+- **Splattering**: a swarm's small ones have 22 health (a blow or two); a small goblin killed by a blow
+  slides on along it, the blow holds a beat (0.07 s, more for each more killed by the same swing), and a
+  bunch cut down together sprays wider and shakes harder (`SPLAT`, `client/gore.ts bunch`).
+
+**The ten** (numbers `shared/raiders.ts`, `shared/prowlers.ts`; rules one file each in `sim/`; hooked in by
+`sim/ownfoes.ts`; drawn in `client/foekits.ts`, `foekits2.ts`, `foedraw.ts`, `beastdraw.ts`,
+`telegraph2.ts`, the 2.5D view using the same figures and `three/foes3d.ts`; sounds from the kit,
+`client/foesounds.ts`). Each has a telegraph we already use and a counter the player already has.
+
+1. **Netter**: throws at whoever's furthest from a friend; a striped circle where they stood. Caught, held
+   4 s; each attack, dodge or guard press takes 0.45 s off, a swing of the stick 0.15 s; a friend's GRAB
+   within 1.5 tiles cuts them out at once (CUT FREE on the button). Goblins go for a netted hero first.
+2. **Sapper**: digs in from 9 tiles, goes under (nothing reaches it; it's held as a carried goblin is),
+   a mound and a trail of dirt, comes up 1.6 tiles behind its quarry in a striped cracking circle. A heavy
+   swing over it, a blast, or fire near forces it up stunned (2.2 s).
+3. **Oil thrower and torch-bearer**: a pot lobbed where you stand (striped circle) leaves a slick for 22 s;
+   on it the stick takes hold at a third (wide turns, sliding on). The torch walks to a slick with someone
+   on it and throws: the slick pulses 0.9 s and burns 6 s (12 a second to heroes, sets goblins alight).
+   Any fire of ours lights a slick: a fire burst, Lamp Oil, a fire ring, a burning goblin walking in.
+4. **Banner-bearer**: a hide on a pole hung with what they've taken. Goblins within 5 tiles hit 25% harder
+   and 10% sooner and can't be routed; it hangs behind and runs from a blade. Kill it and every goblin within
+   7 tiles routs 4.5 s: runs, strikes nothing, takes blows 50% harder.
+5. **Wolves and a wolf-keeper**: wolves the hungry keep chained and starved, so they hunt (Kyle asked for
+   wolves, dogs or something else: wolves, so no dog is ever killed for a laugh and the Ranger's wolfhound
+   stays the only dog). They circle to your side or back at 2.6 tiles and dart in on a short red lane
+   (block, parry, dodge). Kill the keeper and they scatter 6 s; any that get 13 tiles from everyone are gone,
+   and the rest come back without the circling. Open ground only (fields, farms, forest, river, marsh).
+6. **Sneak-thief**: lurks a few seconds, works round behind, grabs (a short wedge: block, parry or step out):
+   half your gold (12 to 30) or, carrying under 6, the front potion, and runs for the nearest edge away from
+   you. Kill it and it drops what it took; let it reach the edge or 16 tiles off and it's gone with it (the
+   job's pot loses the gold).
+7. **Roof archer**: up on a house or barn (level 2), never moves, shoots from 9 tiles. No blade reaches
+   it; arrows, spells, a thrown barrel do. Set the house alight and it's thrown down into the street, hurt
+   and burning.
+8. **Log-carriers**: two big goblins with a trunk, one heavy body (170 health, turning 1.1 radians a
+   second). From 3 tiles they run a 9-tile striped lane, smash barrels, crates, fences and carts on it,
+   knock anyone on it down 1 s, and stun themselves 2.4 s on a wall. After a run they stand 1.8 s and turn
+   slowly: hit them then.
+9. **Carrion crows**: a flock on the dead (layout 3 rooms in the open, 45% of rooms with the dead). Walk
+   within 2.6 tiles (creeping, 1), or fight within 3.5, and they burst up: anyone within 2.2 is lost in them
+   1.6 s (drawn on every screen) and every goblin within 10 tiles wakes. They settle again after 30 quiet s.
+10. **Blind hunters**: pale, eyeless, down mines only (Copperdeep, the sewers). They hear anyone walking
+   (not creeping) within 6.5, a fight within 13, a touch within 1.1; they go to the sound and slash; 3 s of
+   quiet and they've lost you.
+
+Tests: `tests/encounters.test.ts` (caps, one fight per pack, where each sort turns up, the first room, the
+party, a pack's shout), `tests/foes1.test.ts`, `tests/foes2.test.ts`. Shots: `node scripts/foes-look.cjs`.
+Open: every new player-facing word through the lore keeper and line editor (NETTED, TAP TO BREAK FREE, CUT
+FREE, POTION STOLEN, N GOLD STOLEN, GOT AWAY); the expedition's camps and waves still roll their goblins
+the old way (each camp is its own fight on the big map already); the new sorts don't yet ride in its waves.
+
 ## 2026-11-04: terrain nodes slices 2 to 4: ways on by any side, forks that rejoin, side ways, countries that change (Kyle; Claude Opus 5.5)
 
 Kyle: "more nuanced map designs and combining themes", and earlier, jobs "almost always keep going up,

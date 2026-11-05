@@ -235,6 +235,9 @@ export const SPRITES = {
   butcherDown: makeSprite(18, 22, [...butcherBase, ['p', 7, 5, '#ff4a3a'], ['p', 11, 5, '#ff4a3a'], ['p', 7, 8, '#e8e0c8'], ['p', 11, 8, '#e8e0c8'], ['r', 8, 7, 3, 1, '#2a1a14']]),
   butcherUp: makeSprite(18, 22, [...butcherBase, ['r', 6, 8, 6, 2, '#4a5a22']]),
   scrapper: makeSprite(11, 13, [['r', 3, 9, 2, 4, '#3a4a1f'], ['r', 6, 9, 2, 4, '#3a4a1f'], ['r', 2, 6, 7, 4, '#4a3a2a'], ['r', 2, 9, 7, 1, '#2a2018'], ['e', 5.5, 4, 3.4, 3, '#5b6b2a'], ['p', 0, 3, '#5b6b2a'], ['p', 1, 3, '#5b6b2a'], ['p', 10, 3, '#5b6b2a'], ['p', 9, 3, '#5b6b2a'], ['p', 4, 4, '#ff4a3a'], ['p', 6, 4, '#ff4a3a'], ['r', 4, 6, 3, 1, '#e8e0c8']]),
+  /** The blind hunters of the deep workings: bone-pale, long-eared, empty sockets where the eyes should glow. */
+  pale: makeSprite(11, 13, [['r', 3, 9, 2, 4, '#8a8478'], ['r', 6, 9, 2, 4, '#8a8478'], ['r', 2, 6, 7, 4, '#4a4440'], ['r', 2, 9, 7, 1, '#2a2420'], ['e', 5.5, 4, 3.4, 3, '#c8c2b0'], ['p', 0, 2, '#c8c2b0'], ['p', 1, 3, '#c8c2b0'], ['p', 10, 2, '#c8c2b0'], ['p', 9, 3, '#c8c2b0'], ['p', 4, 4, '#1a1614'], ['p', 6, 4, '#1a1614'], ['r', 4, 6, 3, 1, '#e8e0c8']]),
+  paleUp: makeSprite(11, 13, [['r', 3, 9, 2, 4, '#8a8478'], ['r', 6, 9, 2, 4, '#8a8478'], ['r', 2, 6, 7, 4, '#4a4440'], ['e', 5.5, 4, 3.4, 3, '#c8c2b0'], ['p', 0, 2, '#c8c2b0'], ['p', 10, 2, '#c8c2b0'], ['r', 3, 5, 5, 1, '#a8a290']]),
   scrapperUp: makeSprite(11, 13, [['r', 3, 9, 2, 4, '#3a4a1f'], ['r', 6, 9, 2, 4, '#3a4a1f'], ['r', 2, 6, 7, 4, '#4a3a2a'], ['e', 5.5, 4, 3.4, 3, '#5b6b2a'], ['p', 0, 3, '#5b6b2a'], ['p', 10, 3, '#5b6b2a'], ['r', 3, 5, 5, 1, '#4a5a22']]),
   // Bodies left behind: without a head (a red stump), or burned black.
   scrapperHeadless: makeSprite(11, 13, [...scrapperBody, ['r', 4, 5, 3, 1, '#7a1d1d'], ['p', 5, 4, '#9a2a2a']]),

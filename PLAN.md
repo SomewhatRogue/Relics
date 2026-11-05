@@ -2,6 +2,19 @@
 
 ## Current slice
 
+**Encounters as packs, and ten new sorts of the hungry** (Claude Opus 5.5, 2026-11-04; Kyle: "Too much chaos
+on the screen reads messy. I'd rather have more impactful battles, but splattering little goblins is also
+fun", and of the ten, "I like them all, let's make them"). Built; waiting on Kyle's play. *Done when* a job's
+rooms play as two or three fights in turn, each with one threat at its heart (a brute, a banner-bearer, a
+butcher, two shields, the log-carriers, an oil thrower, a wolf-keeper, roof archers) and small ones that go
+down in a blow or two and splatter in bunches (the body slides, the blow holds, the spray widens); the next
+pack waits until it sees him; a party of four meets more small ones and a tougher centrepiece, not a screen
+of specials; and each new sort does what its card in docs/DECISIONS.md says, flat and 2.5D, phone and laptop.
+`npx tsx scripts/encounters/measure.ts` measures it; `node scripts/foes-look.cjs` shoots each sort and two
+composed rooms. Open: NETTED, TAP TO BREAK FREE, CUT FREE, POTION STOLEN, N GOLD STOLEN, GOT AWAY through
+the lore keeper and line editor; the expedition's camps and waves still roll the old way, and the new
+sorts aren't in its waves yet.
+
 **Copy pass 3: how we write and show things** (Claude Opus 5.5, 2026-11-04; Kyle: "general guidance ...
 we need to work on, in general, how we write and show things"). Built; waiting on Kyle's read. *Done
 when* every mechanics and UI line reads in his style (short, effect first, no riddles, said once) and

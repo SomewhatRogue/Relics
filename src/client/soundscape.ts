@@ -15,6 +15,7 @@ import { SKILL_SOUNDS } from './fxskills';
 import { DRUMMER } from '../shared/tuning';
 import { butcher, goblin } from './voices';
 import { spiderSounds } from './spidersfx';
+import { foeSound } from './foesounds';
 import { isSpiderKind } from '../shared/spiders';
 import { blockSound, chargedSound, hitSound, shotSound, swingSound, woodSounds } from './weaponsfx';
 
@@ -56,6 +57,7 @@ export class Soundscape {
     // Out of earshot: a fight two screens away on a big map makes no sound here.
     const at = ev as { x?: number; y?: number }, me = this.me;
     if (me && typeof at.x === 'number' && typeof at.y === 'number' && Math.hypot(at.x - me.x, at.y - me.y) > EARSHOT) return;
+    if (foeSound(ev)) return;
     if (ev.k === 'swing') return swingSound(ev.src, ev.heavy);
     if (ev.k === 'chest') return chestSound(ev.state, ev.tier);
     // The poisoner's: the blowpipe's puff, a skewer's wet stab, a goblin retching (the spiders' own wet sounds).

@@ -2,6 +2,7 @@
  * Effects that only decorate: sparks, blood (that stays on the floor), floating calls ("PARRY"),
  * rings, screen shake and short flashes of light. Cosmetic, so Math.random is fine here.
  */
+import { foeFx } from './fxfoes';
 import type { FightEvent } from '../sim/types';
 import { magicFx } from './fxmagic';
 import { Gore } from './gore';
@@ -29,6 +30,9 @@ interface Arc { x: number; y: number; x2: number; y2: number; life: number; col?
 interface Flash extends Light { life: number; max: number }
 
 export class Fx {
+  /** Deaths a moment apart (a bunch splattered by one swing). */
+  private bunch = 0;
+  private bunchAt = -1e9;
   parts: Part[] = [];
   texts: Text[] = [];
   rings: Ring[] = [];
@@ -87,7 +91,7 @@ export class Fx {
 
   on(ev: FightEvent): void {
     const [x, y] = toPx(ev.x, ev.y);
-    if (spiderFx(this, ev, x, y) || weakFx(this, ev, x, y) || venomFx(this, ev, x, y) || warriorFx(this, ev, x, y) || rangerFx(this, ev, x, y) || mageFx(this, ev, x, y) || clericFx(this, ev, x, y) || levelFx(this, ev, x, y) || skillFx(this, ev, x, y) || relicFx(this, ev, x, y) || cageFx(this, ev, x, y)) return;
+    if (foeFx(this, ev, x, y) || spiderFx(this, ev, x, y) || weakFx(this, ev, x, y) || venomFx(this, ev, x, y) || warriorFx(this, ev, x, y) || rangerFx(this, ev, x, y) || mageFx(this, ev, x, y) || clericFx(this, ev, x, y) || levelFx(this, ev, x, y) || skillFx(this, ev, x, y) || relicFx(this, ev, x, y) || cageFx(this, ev, x, y)) return;
     switch (ev.k) {
       case 'impact':
         if (ev.kind === 'slam') {
@@ -251,9 +255,15 @@ export class Fx {
       case 'roll':
         this.burst(x, y, 6, ['#6a647a', '#57525e'], 25, false);
         break;
-      case 'death':
+      case 'death': {
         this.gore.death(ev, x, y);
+        // Several cut down together: each one more shakes harder and sprays more (SPLAT, splatting a bunch).
+        const t = performance.now();
+        this.bunch = t - this.bunchAt < 160 ? this.bunch + 1 : 1;
+        this.bunchAt = t;
+        if (this.bunch > 1 && ev.kind === 'scrapper') this.gore.bunch(x, y, ev.dx, ev.dy, this.bunch);
         break;
+      }
       case 'down':
         this.say(x, y - 26, 'DOWN', '#ff5a4a');
         break;

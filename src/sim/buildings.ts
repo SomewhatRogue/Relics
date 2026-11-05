@@ -17,7 +17,8 @@ import type { FightEvent, Hero } from './types';
 
 export { burning, wood } from './catching';
 
-function hurt(b: Block, n: number, ev: FightEvent[]): void {
+/** Knock `n` off a wooden block; at nothing it falls in. */
+export function hurtBlock(b: Block, n: number, ev: FightEvent[]): void {
   if (!wood(b)) return;
   b.hp = Math.max(0, b.hp! - n);
   if (b.hp > 0) return;
@@ -33,7 +34,7 @@ export function sweepBlocks(h: Hero, s: Swing, ev: FightEvent[]): void {
     if (!inArc(h.x, h.y, h.fx, h.fy, nx, ny, s.range, s.arc, 0.05)) return;
     h.hitIds.push(-10000 - i);
     ev.push({ k: 'chop', x: nx, y: ny });
-    hurt(b, s.dmg * BLAZE.melee * (h.heavy ? 1.5 : 1), ev);
+    hurtBlock(b, s.dmg * BLAZE.melee * (h.heavy ? 1.5 : 1), ev);
   });
 }
 
@@ -42,7 +43,7 @@ export function blastBlocks(w: World, x: number, y: number, r: number, dmg: numb
   for (const b of currentMap().blocks) {
     if (!wood(b)) continue;
     if (el === 'fire') burstCatch(b, x, y, r, oil, w);
-    if (nearest(b, x, y)[2] <= r && !(burnable(b) && burning(b))) hurt(b, dmg * BLAZE.blast, w.ev);
+    if (nearest(b, x, y)[2] <= r && !(burnable(b) && burning(b))) hurtBlock(b, dmg * BLAZE.blast, w.ev);
   }
 }
 
@@ -61,7 +62,7 @@ export function stepBuildings(w: World, dt: number, spawn: (x: number, y: number
   for (const b of blocks) {
     if (!burning(b)) continue;
     // A house alight burns on its own clock (sim/houseburn.ts); other wood burns down as it goes.
-    if (!burnable(b)) hurt(b, BLAZE.dps * dt, w.ev);
+    if (!burnable(b)) hurtBlock(b, BLAZE.dps * dt, w.ev);
     for (const e of w.enemies) if (!isDead(e) && e.burnUntil <= w.now && nearest(b, e.x, e.y)[2] <= e.radius + BLAZE.reach) afflict(w, e, 'fire', 4);
     if (w.now - b.burning! < BLAZE.spreadAfter) continue;
     for (const o of blocks) {

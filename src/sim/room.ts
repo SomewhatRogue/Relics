@@ -32,6 +32,11 @@ import { startRaise, stepParty, sweepAllies } from './party';
 import { stepSurvivors } from './survivors';
 import { stepFalse } from './falsecage';
 import { ambush } from './ambush';
+import { packOnto } from './packs';
+import { afterFoes, beforeFoes, beforeHeroes, shapeFoe } from './ownfoes';
+import { slipIntent, type Slick } from './oil';
+import { newFlocks, type Flock } from './crows';
+import { OWN_KIT } from './enemies';
 import { stepBlaze, type BlazeState } from './blaze';
 import { sweepSurvivors } from './survivorhits';
 import { dropFrom, stepDrops, takeLoot } from './loot';
@@ -82,6 +87,9 @@ export class ArenaRoom {
   smokes: Smoke[] = [];
   /** Poison where the brood mother's globs landed (sim/puddles.ts). */
   puddles: Puddle[] = [];
+  /** Lamp oil spilled by the oil throwers, lit or not (sim/oil.ts); crows on the dead (sim/crows.ts). */
+  slicks: Slick[] = [];
+  crows: Flock[] = [];
   /** Chests, and how far up the danger shifts what's in them (sim/chests.ts). */
   chests: Chest[] = [];
   danger = 0;
@@ -144,13 +152,16 @@ export class ArenaRoom {
     this.relicRng = new Rng(seed * 31337 + 7);
     this.cageRng = new Rng(seed * 2971 + 41);
     this.map = opts.map ?? ARENA;
+    this.crows = newFlocks(this.map.flocks);
     useMap(this.map);
     this.squire = !!opts.squire;
     if (opts.foes) {
       opts.foes.forEach((f, i) => {
         const e = newEnemy(i + 1, f.kind, f.x, f.y);
-        if (f.hp) e.hp = e.maxHp = f.hp;
         if (f.variant) (e.variant = f.variant), (e.hp = e.maxHp = VARIANTS[f.variant].hp);
+        if (f.hp) e.hp = e.maxHp = f.hp;
+        packOnto(e, f);
+        shapeFoe(e);
         Object.assign(e, { respawns: false, name: f.name, bow: f.bow, z: f.z ?? 0, alert: f.awake ?? false, feeding: f.feeding });
         if (f.wave) e.wave = f.wave;
         // At the dead: facing the body it's eating.
@@ -285,7 +296,10 @@ export class ArenaRoom {
     }
     stepChests(this.chests, this.heroes, this.drops, this.pickups, this.lootRng, this.events, TICK);
     for (const h of this.heroes) if (h.safeT) h.safeT = Math.max(0, h.safeT - TICK);
-    for (const h of this.heroes) stepHero(h, this.intents.get(h.id) ?? NO_INTENT, this.enemies, this.time, TICK, this.events, acts);
+    // The netted struggle (their presses go on it) and friends cut them out (sim/netter.ts).
+    beforeHeroes(this.heroes, this.intents, NO_INTENT, this.time, this.events);
+    // On an oil slick the stick takes hold slowly (sim/oil.ts).
+    for (const h of this.heroes) stepHero(h, slipIntent(h, this.intents.get(h.id) ?? NO_INTENT, TICK), this.enemies, this.time, TICK, this.events, acts);
     // A party: bleeding, picking each other up, going out.
     stepParty(this.heroes, TICK, this.events);
     // A Ranger who has just jumped back leaves a snare where they stood.
@@ -296,9 +310,12 @@ export class ArenaRoom {
     this.bolts = this.bolts.filter((b) => (b.kind === 'flask' ? stepFlask(b, w, TICK, this.smokes) : stepBolt(b, w, TICK)));
     // Who hears a drum this tick (sim/backline.ts), before anyone moves.
     rouse(this.enemies, this.time);
+    beforeFoes(this.enemies, this.time, this.events);
+    OWN_KIT.slicks = this.slicks;
     for (const e of this.enemies) stepEnemy(e, this.heroes, this.rng, this.time, TICK, this.events, this.enemies);
     for (const h of this.heroes) stepHound(h, this.enemies, this.time, TICK, this.events);
     impacts(this.enemies, this.time, this.events);
+    this.slicks = afterFoes(w, this.pickups, this.slicks, this.crows, TICK);
     propImpacts(w);
     this.props = w.props = stepProps(w, TICK);
     stepBuildings(w, TICK, (x, y) => void this.spawn('scrapper', x, y), (x, y) => this.nearHero(x, y));
@@ -326,8 +343,8 @@ export class ArenaRoom {
     this.landings();
     // Out of bounds: the dread, and what comes for anyone who stays out (sim/dread.ts).
     stepDread(this.dread, this.map, this.heroes, this.enemies, TICK, this.events);
-    for (const e of this.enemies) if (alive.has(e.id) && isDead(e)) dropFrom(e, this.heroes, this.drops, this.lootRng, this.events);
-    for (const e of this.enemies) if (alive.has(e.id) && isDead(e)) {
+    for (const e of this.enemies) if (alive.has(e.id) && isDead(e) && !e.escaped) dropFrom(e, this.heroes, this.drops, this.lootRng, this.events);
+    for (const e of this.enemies) if (alive.has(e.id) && isDead(e) && !e.escaped) {
       dropCoal(e, this.coals);
       dropPickups(e, this.pickups, this.lootRng);
       dropRelic(e, this.pickups, this.relicRng);

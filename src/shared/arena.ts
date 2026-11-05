@@ -200,6 +200,8 @@ export interface GameMap {
   water?: Water[];
   /** Where goblins lie asleep (drawn curled up; they lie as still as ones at the dead till they wake). */
   sleepers?: { x: number; y: number }[];
+  /** Carrion crows on the dead (sim/crows.ts): where each flock sits when the room begins. */
+  flocks?: { x: number; y: number }[];
   /** Paint only: what the ground is made of (shapes, in order), before the marks. */
   soil?: Soil[];
   /** Paint only: things hung on the back wall's face, from tile x for w tiles (client/hangs.ts). */

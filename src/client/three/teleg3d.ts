@@ -6,6 +6,7 @@
  */
 import * as THREE from 'three';
 import type { EnemyAttack } from '../../sim/types';
+import { isRound } from '../../sim/types';
 import { BAYER } from './post';
 
 const FS = BAYER + `
@@ -68,7 +69,7 @@ export function makeTele(): THREE.Mesh {
 export function shapeTele(m: THREE.Mesh, a: EnemyAttack, pw: number, now: number, lift: number): boolean {
   if (a.t >= a.windup + a.active) return false;
   const u = (m.material as THREE.ShaderMaterial).uniforms, prog = Math.min(1, a.t / a.windup);
-  const round = a.kind === 'slam' || a.kind === 'hex' || a.kind === 'spit', lane = a.kind === 'charge' || a.kind === 'draw' || a.kind === 'pounce', shot = a.kind === 'shot';
+  const round = isRound(a.kind), lane = a.kind === 'charge' || a.kind === 'draw' || a.kind === 'pounce', shot = a.kind === 'shot';
   u.uProg.value = prog;
   u.uT.value = now;
   u.uNow.value = !a.unblockable && a.windup - a.t <= pw && a.t < a.windup ? 1 : 0;
