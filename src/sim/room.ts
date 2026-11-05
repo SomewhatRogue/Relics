@@ -25,6 +25,7 @@ import { dropCoal, stepCoals, type Coal } from './lantern';
 import { censerSwing, stepEmbers } from './censer';
 import { mend, shieldNear } from './holy';
 import { impacts } from './impacts';
+import { stepSleds } from './iceslide';
 import { release, stepCarry, tryGrab } from './grab';
 import { startBash, stepBash } from './bash';
 import { dropProp, newProp, propImpacts, roomProps, stepLift, stepProps, sweepProps, tryLift } from './props';
@@ -347,6 +348,7 @@ export class ArenaRoom {
     stepRushes(this.rushes, this.enemies, this.heroes, this.rushRng, this.time, TICK, this.events);
     OWN_KIT.slicks = this.slicks;
     for (const e of this.enemies) stepEnemy(e, this.heroes, this.rng, this.time, TICK, this.events, this.enemies);
+    stepSleds(w);
     for (const h of this.heroes) stepHound(h, this.enemies, this.time, TICK, this.events);
     impacts(this.enemies, this.time, this.events);
     this.slicks = afterFoes(w, this.pickups, this.slicks, this.crows, TICK);

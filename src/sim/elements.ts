@@ -67,7 +67,8 @@ export function afflict(w: World, e: Enemy, el: Augment, n: number, how: StormHo
     if (frozen(e, now)) return;
     if (chilled(e, now)) {
       e.chillUntil = 0;
-      e.frozenUntil = now + FROST.freeze;
+      // A small one stays frozen longer: a set-up for a heavy hit to send it skidding (sim/iceslide.ts).
+      e.frozenUntil = now + FROST.freeze * (e.weight <= 1 ? FROST.small : 1);
       e.attack = null;
       if (e.act === 'attack' || e.act === 'chase' || e.act === 'flinch') Object.assign(e, { act: isDummy(e) ? 'idle' : 'chase', actT: 0 });
       ev.push({ k: 'freeze', x: e.x, y: e.y });

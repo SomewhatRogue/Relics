@@ -2,6 +2,65 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-05: frozen goblins are a set-up for heavy hits: they skid off and crash (Kyle; Claude Opus 5.5)
+
+Kyle: "I'd also like smaller goblins frozen to stay frozen longer, and to be hittable by the wizard and
+other units with heavier weapons: thrown by the warrior, or a greatsword wielder, smacked by a cleric mace
+or by the wizard's staff. Hit frozen enemies fly backwards sliding and crash into other units or walls and
+shatter, damaging what's around them." Numbers in `shared/magic.ts` (`FROST.small`, `FLING`), the room's
+rules in `sim/iceslide.ts`.
+
+- **A longer freeze for the small.** A goblin of weight 1 or less stays frozen `FROST.small` (1.8) times as
+  long: 3.96 s, not 2.2 (every freeze goes through `elements.ts` `afflict`, so the cold blast, the nova,
+  a flask's second splash and ATTUNED's third chill all get it). Big ones are unchanged.
+- **The stun cap, honestly.** A freeze stays outside the cap, as decided on 2026-11-04: it's built over two
+  frost hits or bought with a hold's magic, and now it usually ends in the goblin's death, not a turn
+  handed back. What the crash does to another goblin is a turn taken: the knockdown goes through
+  `daze()` with the hitter's id, so the same hero can't knock the same goblin flat twice inside 6 s (it
+  shrugs, and still takes the damage); a friend's crash can. The skid itself isn't a stun: the goblin
+  it happens to dies at the end of it.
+- **Heavy hits send it skidding** (`heavyHit`, `fling`): every greatsword blow, every mace blow, the
+  staff's taps (all three elements; the tap's element doesn't land on it, so fire doesn't steam it free),
+  any charged melee blow (a held swing of any melee kit: the sword's bash, the spear's and rapier's
+  lunges, the flail's and censer's spins, the greatsword's overhead), a mace's smite (`bolts.ts` blast),
+  and a Warrior's throw of a frozen goblin (`grab.ts`). Quick blows from the light kits (daggers,
+  rapier, the sword's taps, the flail's taps, the spellblade's cuts) chip it as before; the sword's third
+  cut and other heavy blows that aren't on the list still shatter it where it stands. Big goblins, named
+  ones and dummies never skid. It goes away from the hitter (from the hitter to the goblin, nudged half a
+  step along the hitter's facing), from the smite's centre, or along a throw: 11 tiles a second for 5.5
+  tiles, or 15 for 7 when charged (held 70% or more), a smite or a throw, slowing evenly like ice. It
+  waits out the blow's hitstop first, and stays frozen for the whole slide.
+- **The crash** (`stepSleds`): while it skids it's a missile. A wall (the sweep stops it), a prop, a goblin
+  or a hero it's closing on, and it crashes: it shatters and dies (`kill(..., 'shatter')`), goblins
+  within 1.5 tiles take 20 and are chilled, the one it ploughed into takes 28, is knocked down 1.2 s (a
+  big one 0.6 s) and shoved on along the slide; another frozen one in reach shatters too (the old 30);
+  props in reach take 30 and are thrown. Slid its whole length without meeting anything, it shatters
+  there for less: 1 tile round, 10, a chill, props 15.
+- **Friends take nothing, by judgment.** Where it goes is set by where it stood when it was hit, not
+  aimed, and on a phone in a scrum a friend in its path is never the hitter's mistake; the crash is a
+  reward for a set-up, so it shouldn't cost a friend health. So heroes and the freed are left out of the
+  burst entirely (not even chilled), and a hero in the way still stops it: a friend can stand as the wall.
+- **Seen and heard, both views** (`client/fxice.ts`, `client/icesound.ts`): sent off, a puff of frost and
+  a streak the way it's going with a whoosh and an icy hiss; skidding, a pale streak laid on the floor
+  behind it the whole way and glitter kicked off it (`iceTrails`, each frame, from the room's `sled`);
+  the crash, a fan of shards sprayed on along the slide, a white ring at the burst's own reach, a cold
+  flash, rime left on the floor and a screen shake (8, or 5 for the end-of-slide one), with a thud and a
+  big glassy crack; the existing SHATTER callout and sound come with the 'shatter' event. All of it is in
+  world pixels, so the 2.5D overlay draws the same. No new player-facing words.
+- **Determinism**: the room decides it all; the slide is `Enemy.sled` (who, velocity, slowing, charged),
+  which a guest gets in the patch like any field, and `fling` and `icecrash` events.
+- Where in shared files: `shared/magic.ts` (FROST.small, FLING), `sim/types.ts` (Enemy.sled, the two
+  events), `sim/elements.ts` (one line: the freeze time), `sim/combat.ts` (one line in `hitEnemy`, before
+  the old shatter), `sim/bolts.ts` (one line in `blast` for the smite), `sim/grab.ts` (one line in the
+  throw), `sim/spellblade.ts` (`bladeStruck` skips a skidding one), `sim/room.ts` (`stepSleds(w)` after the
+  goblins step), `client/fx.ts`, `client/main.ts` and `client/soundscape.ts` (one hook each).
+- Tests: `tests/iceslide.test.ts` (the longer freeze for the small only; each heavy kind sends one off and
+  light taps don't; a big one still shatters in place; the staff's fire tap doesn't steam it; the smite
+  and the throw; it stops on a wall and shatters; it ploughs into a goblin, knocks it down, hurts it most
+  and chills the ones beside; friends untouched; the full-length slide; the stun cap on the knockdown;
+  determinism). `tests/techmage.test.ts`: ATTUNED's freeze on a scrapper is the small one's now.
+  `node scripts/frozen-look.cjs [url] [outdir]` shoots a greatsword sending one up the yard and the crash.
+
 ## 2026-11-05: the staff's fire hold is a fire pit dropped on a goblin (Kyle; Claude Opus 5.5)
 
 Kyle: "The wall of fire from staff is still not great. I don't know what to do with it, it's just super

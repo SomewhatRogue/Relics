@@ -89,6 +89,7 @@ import { ownCue } from './owncues';
 import { Purse } from './purse';
 import { legend } from './legend';
 import { mageTrails } from './fxmagetap';
+import { iceTrails } from './fxice';
 
 // The UI's frames and icons, drawn once before anything shows.
 paintFrames();
@@ -443,6 +444,7 @@ function tick(t: number): void {
   }
   fx.update(dt);
   mageTrails(fx, game.room, dt);
+  iceTrails(fx, game.room, dt);
   scene.focus = game.cutFocus();
   scene.fanfare = game.wood?.hold?.kind === 'relic';
   scene.marks = game.mode === 'run' ? targets(game.run, game.room, game.houses()) : [];
