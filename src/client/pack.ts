@@ -17,6 +17,7 @@ import { itemIcon, potionIcon, relicIcon, skillIcon } from './itemicons';
 import { drag } from './packdrag';
 import { heroLook } from './sprites';
 import { PACKW } from './storewords';
+import { KNW } from './treewords';
 import { fits, moveOf } from './packmoves';
 export { moveOf };
 import './pack.css';
@@ -151,7 +152,7 @@ export class PackView {
     const [head, top, detail, foot] = this.parts;
     if (keys[0] !== this.keys[0]) {
       const size = h.bagSize || 8, isFull = full(h);
-      head.innerHTML = `<h2>${COPY.pack}</h2><span>${town ? '' : COPY.stillGoing}</span><button data-tree class="kn">${COPY.knacks}${this.tree.picks() ? `<i class="kn-dot">${this.tree.picks()}</i>` : ''}</button><button data-close class="x" aria-label="Close">&times;</button>`;
+      head.innerHTML = `<h2>${COPY.pack}</h2><span>${town ? '' : COPY.stillGoing}</span><button data-tree class="kn${this.tree.picks() ? ' pick' : ''}">${COPY.knacks}${this.tree.picks() ? `<em>${KNW.packPick(this.tree.picks())}</em>` : ''}</button><button data-close class="x" aria-label="Close">&times;</button>`;
       top.innerHTML = this.doll(h) + `<div class="bag"><h3>${PACKW.bag} <i class="${isFull ? 'full' : ''}">${h.bag.length} / ${size}</i></h3>` + grid(h.bag, size, 'bag', this.sel, 'bag') +
         (town ? '' : `<div class="tile drop" data-dst="drop"><i>${COPY.drop}</i></div>`) + (isFull && !town ? `<div class="note warn">${PACKW.fullJob}</div>` : '') + '</div>';
     }

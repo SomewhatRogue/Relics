@@ -20,6 +20,9 @@ export class Input {
   private stick = { id: '', ox: 0, oy: 0, x: 0, y: 0 };
   private stickEl!: HTMLElement;
   private knobEl!: HTMLElement;
+  /** A quick tap on the stick's side of the screen that never moved (a phone's tap on a drop: lootcard.ts). */
+  onTap: ((x: number, y: number) => void) | null = null;
+  private tapAt = { t: 0, x: 0, y: 0 };
   private potion = new PotionPress(() => this.intent.potionSeq++, () => (this.intent.beltSeq = (this.intent.beltSeq ?? 0) + 1));
 
   constructor(private heroScreen: () => [number, number, number, number?] | null) {
@@ -55,7 +58,7 @@ export class Input {
     });
     addEventListener('mousemove', (e) => (this.mouse = [e.clientX, e.clientY]));
     addEventListener('mousedown', (e) => {
-      if ((e.target as HTMLElement).closest('button')) return;
+      if ((e.target as HTMLElement).closest('button, [data-ui]')) return;
       this.mouse = [e.clientX, e.clientY];
       if (e.button === 0) (this.intent.attackSeq++), (this.attackHeld.mouse = true);
       if (e.button === 2) (this.intent.blockSeq++), (this.blockHeld.mouse = true);
@@ -78,6 +81,7 @@ export class Input {
       e.preventDefault();
       const t = e.changedTouches[0];
       Object.assign(this.stick, { id: String(t.identifier), ox: t.clientX, oy: t.clientY, x: 0, y: 0 });
+      this.tapAt = { t: performance.now(), x: t.clientX, y: t.clientY };
       this.stickEl.style.left = t.clientX + 'px';
       this.stickEl.style.top = t.clientY + 'px';
       this.stickEl.classList.add('on');
@@ -96,6 +100,7 @@ export class Input {
     };
     const end = (e: TouchEvent) => {
       for (const t of Array.from(e.changedTouches)) if (String(t.identifier) === this.stick.id) {
+        if (e.type === 'touchend' && performance.now() - this.tapAt.t < 280 && Math.hypot(t.clientX - this.tapAt.x, t.clientY - this.tapAt.y) < 12) this.onTap?.(t.clientX, t.clientY);
         Object.assign(this.stick, { id: '', x: 0, y: 0 });
         this.knobEl.style.transform = '';
         this.stickEl.classList.remove('on');

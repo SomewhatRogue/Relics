@@ -52,3 +52,8 @@
 #pack .kn { position: relative; }
 #pack .kn .kn-dot { font-style: normal; }
 @keyframes kn-dot { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.18); } }
+/* The pack's KNACKS with a pick waiting: gilt, a slow gold pulse, and "1 TO PICK" (pack.ts). */
+#pack .kn.pick { border-image-source: var(--f-gilt); color: var(--gilt); animation: kn-pick 1.2s steps(2) infinite; }
+#pack .kn.pick em { font-style: normal; margin-left: 6px; color: var(--gold); }
+@keyframes kn-pick { 50% { background-color: #3a2a0ac0; color: #fff2c0; } }
+@media (prefers-reduced-motion: reduce) { #pack .kn.pick { animation: none; } }

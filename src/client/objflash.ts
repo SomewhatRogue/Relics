@@ -21,6 +21,11 @@ export class ObjFlash {
     return html;
   }
 
+  /** A done objective is being held on the tracker. */
+  holding(now: number): boolean {
+    return now < this.until;
+  }
+
   /** The wood's lesson number this frame (-1 out of it): a step on is a lesson passed. */
   watchWood(stage: number, now: number): void {
     if (stage > this.stage && this.stage >= 0) this.done(now);

@@ -1,6 +1,6 @@
 /** Relic: Wickhold, the Training Yard and runs. The rooms run here in the browser (solo is a party of one). */
 import { ExpedUi } from './expedui';
-import { expedition } from '../shared/expedjob';
+import { GOAL_WORDS, expedition } from '../shared/expedjob';
 import { spellCost } from '../sim/spells';
 import { carriedItem } from '../sim/charge';
 import { isDark, relicFill } from '../shared/relicitems';
@@ -25,7 +25,8 @@ import type { Npc } from '../shared/arena';
 import { knows, type Intent } from '../sim/types';
 import { Game, ME } from './game';
 import { Panel } from './panels';
-import { openSpot, showResult } from './townui';
+import { openSpot } from './townui';
+import { showResult } from './recap';
 import { Title } from './title';
 import { Recovery } from './recovery';
 import { woodGoal } from '../sim/wood';
@@ -75,7 +76,8 @@ import { paintFrames } from './frames';
 import { iconVars } from './icons';
 import { Cluster } from './cluster';
 import { UnitFrame } from './unitframe';
-import { roomsHtml, titleCase } from './tracker';
+import { expedRows, roomsHtml, smallLine, titleCase, TRACKW } from './tracker';
+import { BannerFold, calm } from './bannerfold';
 import { ObjFlash } from './objflash';
 import { UnlockFlash } from './unlockflash';
 import { kitLine } from './kitlines';
@@ -128,6 +130,7 @@ void link.refresh(true);
 const sounds = new Soundscape(music);
 const recovery = new Recovery(() => game.save);
 const unit = new UnitFrame();
+const fold = new BannerFold($('#banner'));
 const objFlash = new ObjFlash(), unlocks = new UnlockFlash(), purse = new Purse();
 const cluster = input.touch ? new Cluster() : null;
 const title = new Title(game, () => undefined, recovery);
@@ -161,6 +164,8 @@ void recovery.start((s) => title.open && (game.adopt(s), title.show(), true));
 /** Talk to whoever you stand by, use the spot, or go in at the door (E or F on a laptop, USE on a phone). */
 const use = () => {
   const n = game.near();
+  // A drop of yours at your feet (and nothing else here): LOOK opens its card (lootcard.ts).
+  if (!n?.chest && !n?.door && game.mode === 'run' && card.near >= 0 && !panel.open && !title.open) return card.current >= 0 ? card.shut() : card.open(card.near);
   if (!n || panel.open || title.open) return;
   pack.toggle(false);
   if (n.chest) input.open(n.chest);
@@ -171,12 +176,21 @@ const use = () => {
   }
 };
 let talking: Npc | null = null;
+// A phone's tap on a drop of yours in reach opens its card (lootcard.ts); the stick takes every other tap.
+input.onTap = (x, y) => {
+  const hs = views.heroScreen(), me = game.hero, d = me && LootCard.nearest(game.room, me);
+  if (!hs || !d || game.mode !== 'run' || panel.open || title.open) return;
+  const dx = hs[0] + (d.x - me.x) * hs[2], dy = hs[1] + (d.y - me.y) * (hs[3] ?? hs[2]);
+  if (Math.hypot(x - dx, y - dy) < 36) card.open(d.id);
+};
 addEventListener('keydown', (e) => {
   if ((e.target as HTMLElement).closest('input')) return;
   const k = e.key.toLowerCase();
   if (game.wood && game.wood.cut >= 0 && (k === 'escape' || k === ' ' || k === 'enter')) return game.skipCut();
   if (game.wood?.hold && k === 'enter') return lesson.go();
+  // F at a drop: its card first, then F again takes it.
   if (k === 'f' && card.current >= 0) input.take(card.current);
+  else if (k === 'f' && card.near >= 0 && game.mode === 'run' && !panel.open) card.open(card.near);
   else if (k === 'f' && game.near()?.chest) use();
   else if ((k === 'e' || k === 'f') && game.mode === 'town') use();
   if (k === 'escape' && panel.open && !game.result) panel.hide();
@@ -285,14 +299,20 @@ function hud(now: number): void {
   if (game.mode === 'wood' && wood) {
     const g = woodGoal(wood, input.touch);
     objFlash.watchWood(wood.stage, now);
-    $('#banner').innerHTML = objFlash.show(`<b>${g.title}</b> <div class="obj">${g.text}</div><span>GREYHOLLOW, THE DAY AFTER</span>`, now);
+    // (The wood's lessons never fold: the control to learn is on it.)
+    fold.render(objFlash.show(`<b>${g.title}</b> <div class="obj">${g.text}</div><span>GREYHOLLOW, THE DAY AFTER</span>`, now), null, g.title + g.text, now);
     const boss = room.enemies.find((e) => e.name && e.act !== 'dead');
     $('#boss').hidden = !boss || wood.cut >= 0;
     if (boss) ($('#boss b').textContent = boss.name!), ($('#boss i').style.width = (100 * boss.hp) / boss.maxHp + '%');
   } else if (game.mode === 'run' && run) {
     const g = { text: me.out ? OUT_TEXT : game.goalText() };
     // (The hearts, the get-ups left, are under the health bar: unitframe.ts.)
-    $('#banner').innerHTML = objFlash.show(`<b>${titleCase(run.job.place.name)}${room.exped ? '' : roomsHtml(run.index, run.job.rooms)}</b> <div class="obj">${g.text}</div><span><i class="coin"></i>+${run.gold}${run.rescued ? `<em>SAVED ${run.rescued}</em>` : ''}</span>`, now);
+    // Folded: the objective and the room diamonds; an expedition's, how many jobs are left. Open: the lot,
+    // and on an expedition every pinned job and side job, done or what to do (bannerfold.ts, tracker.ts).
+    const x = game.fightRoom.exped, rooms = x ? '' : roomsHtml(run.index, run.job.rooms), left = x ? x.goals.filter((q) => !q.done).length : 0;
+    const full = objFlash.show(`<b>${titleCase(run.job.place.name)}${rooms}</b> ${x && !me.out && x.phase === 'shut' ? expedRows(x, GOAL_WORDS, run.job.boss ?? '') : `<div class="obj">${g.text}</div>`}<span><i class="coin"></i>+${run.gold}${run.rescued ? `<em>SAVED ${run.rescued}</em>` : ''}</span>`, now);
+    const small = smallLine(x && !me.out && x.phase === 'shut' ? TRACKW.jobsLeft(left, x.goals.length) : g.text, rooms);
+    fold.render(full, small, run.job.place.name + run.index + ':' + (x && !me.out && x.phase === 'shut' ? 'jobs' + left : calm(g.text)), now, objFlash.holding(now));
     // (On an expedition the named butcher's bar shows only once you're near it.)
     const boss = room.enemies.find((e) => e.name && e.act !== 'dead' && (!room.exped || Math.hypot(e.x - me.x, e.y - me.y) < 14));
     $('#boss').hidden = !boss;
@@ -300,21 +320,26 @@ function hud(now: number): void {
   } else {
     $('#boss').hidden = true;
     objFlash.watchWood(-1, now);
-    $('#banner').innerHTML = game.outside
+    const full = game.outside
       ? `<b>${titleCase(room.map.name)}</b> Walk out at the bottom<span><i class="coin"></i>${pr.gold}</span>`
       : game.mode === 'town'
       ? `<b>Wickhold</b> DAY ${game.world.day}<span><i class="coin"></i>${pr.gold}${pr.picks ? '<em>(A KNACK TO PICK)</em>' : ''}<em>${game.world.rescued} HOME</em>${link.online ? '<em>WORLD ' + link.group.toUpperCase() + '</em>' : ''}</span>`
       : `<b>Training Yard</b> Walk out at the bottom for town`;
+    // Folded: the place in one line (town: the day too).
+    const where = game.outside ? room.map.name.toUpperCase() : game.mode === 'town' ? TRACKW.town(game.world.day) : 'TRAINING YARD';
+    fold.render(full, smallLine(where), game.mode + where, now);
   }
   const spot = game.near(), busy = panel.open || title.open;
   $('#prompt').hidden = !spot || busy;
   if (spot) $('#prompt').textContent = (input.touch ? '' : spot?.chest ? 'F  ' : game.mode === 'run' ? '' : 'E  ') + (spot.door || !spot.talk ? spot.label : 'TALK: ' + spot.label);
+  // A drop at your feet, its card shut: the key that opens it (a phone has LOOK in the context slot).
+  else if (!busy && !input.touch && game.mode === 'run' && card.near >= 0 && card.current < 0) ($('#prompt').hidden = false), ($('#prompt').textContent = 'F  LOOK');
   // A friend down at your feet: the key that gets them up.
   if (!spot && !busy && !input.touch && game.mode === 'run' && cuttable(game.hero, game.room.heroes, game.room.time)) ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  CUT FREE');
   else if (!spot && !busy && !input.touch && game.mode === 'run' && game.hero.act === 'idle' && raisable(game.hero, game.room.heroes)) ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  HELP UP');
   else if (!spot && !busy && !input.touch && game.mode === 'run' && (torchable(game.hero, game.room.enemies) || kindleable(game.hero, game.room.map))) ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  BURN');
   // The touch buttons round ATTACK, and the unit frame (cluster.ts, unitframe.ts).
-  cluster?.update(game, spot, busy, now);
+  cluster?.update(game, spot, busy, now, game.mode === 'run' && card.near >= 0 ? (card.current >= 0 ? 'open' : 'shut') : '');
   unit.update(game, now);
   // The wood's buttons, flashed gold as each is given (unlockflash.ts); coins and the anvil in town (purse.ts).
   const moving = game.mode === 'wood' && (game.wood?.hold?.move === 'move' || game.wood?.hold?.move === 'step');
@@ -514,6 +539,7 @@ w.__renderMusic = (...a: Parameters<typeof import('./musicrender').renderMusic>)
 w.__title = title;
 w.__panel = panel;
 w.__pack = pack;
+w.__loot = card;
 w.__openTree = () => openTree(game, panel);
 w.__openSpot = (id: string, arg = 0, key = '') => openSpot(id as never, game, panel, arg, key);
 // A job on a village street (houses to go into), for the party tests to set out on.

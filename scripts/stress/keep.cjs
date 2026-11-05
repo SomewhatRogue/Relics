@@ -19,8 +19,9 @@ async function pickUp(k, lead, p, id, tag) {
     r.pickups.push({ id: 7000 + Math.floor(Math.random() * 999), x: h.x, y: h.y, life: 60, gold: 25 });
     r.drops.push({ id: 8000 + Math.floor(Math.random() * 999), x: h.x, y: h.y, life: 60, item });
   }, [id, ring(tag)]);
-  if (!(await k.until(p, () => !!document.querySelector('#loot button') && !document.getElementById('loot').hidden, null, 5000))) return false;
-  await p.page.click('#loot button');
+  // (The card stays shut until asked for: LOOK, a tap on the drop, or F. lootcard.ts.)
+  if (!(await k.until(p, () => (window.__loot.near >= 0 && window.__loot.current < 0 && window.__loot.open(window.__loot.near), !!document.querySelector('#loot button.primary') && !document.getElementById('loot').hidden), null, 5000))) return false;
+  await p.page.click('#loot button.primary');
   return k.until(p, (tag) => window.__game.profile.bag.some((it) => it.tag === tag), tag, 5000);
 }
 

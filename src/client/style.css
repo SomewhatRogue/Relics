@@ -17,6 +17,9 @@ body.touch #loot { bottom: auto; top: calc(160px + env(safe-area-inset-top)); }
 #loot .trait b { color: #ffd27a; }
 #loot .yours { color: #8d929c; margin-top: 4px; }
 #loot button { margin-top: 6px; width: 100%; height: 30px; }
+#loot .lbtns { display: flex; gap: 6px; }
+#loot .lbtns button { flex: 1; min-width: 0; }
+#loot .lbtns button[data-shut] { flex: 0 0 auto; width: auto; padding: 0 10px; }
 #loot[data-el='fire'], #loot[data-el='frost'], #loot[data-el='storm'] { border-color: var(--el); }
 #loot[data-el='fire'] { --el: #ff9a3c; }
 #loot[data-el='frost'] { --el: #bfe8ff; }

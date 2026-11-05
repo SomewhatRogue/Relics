@@ -3585,3 +3585,34 @@ guard on patrol come out to meet you, say some stuff and take you to town."
 - Blind hunters can't be BLINDED: the longbow's perfect still crits. Their sockets stay dark, never lit, so they're never mixed with the cold white eyes past the map's edge.
 - A routed goblin scatters; no hands up (too comic).
 - Lore to record or reject (Kyle): wolves are ordinary wolves kept chained and starved, no shard, never hurt the hound, no joke over a dead wolf; nets are for taking people alive; crows are ordinary crows that wake the hungry by accident (never big, ridden or feared by goblins); stolen gold never touches the Want. Open: where the blind hunters come from (lean: captives who turned in the dark of the Copperdeep), and whether sappers dig beside the captive diggers.
+
+## 2026-11-04: a recap before the knack, quiet drops, a tracker that folds (Kyle; Claude Opus 5.5)
+
+Kyle, from his phone: "On raid end or mission end it shouldn't immediately hit you with pick a knack; it
+should give you a mission recap though", "Items falling take up a TON of space on mobile ... it shouldn't
+pop up unless you click on it to pick up", "I want the mission to be smaller in the top left unless you
+click it to expand", "Ditto the where you are and what you have to do in the main area", and "Can knacks
+be highlighted if you click your inventory and have knacks to spend?"
+- **The recap** (`client/recap.ts`, counts in `client/recaptally.ts`, words in `client/recapwords.ts`): every
+  job's end, won, lost, left or an expedition, is one framed card in labelled rows: ROOMS (or JOBS and SIDE
+  JOBS on the Barrowfields), GOBLINS, DENS, DOWNED, TIME, a rule, then GOLD, XP, SAVED, LOST, FOUND (gear
+  picked up off the floor), TREASURE, RELIC. One button: NEXT: PICK A KNACK when a pick waits (it opens the
+  knacks), else BACK TO WICKHOLD. Each player's own: the run is the leader's, the downs and what was found
+  are this player's (what they carry now against what they carried when the job began). `Run.goals` counts
+  the pinned jobs done; `Run.began` is the leader's clock at setting out, for TIME only (never the fight).
+- **Drops stay quiet** (`client/lootcard.ts`): on the floor a drop is its sprite, glint and the LOOT or
+  FORGED word as it falls, nothing more. Its card (with the comparison) opens on LOOK in the phone's
+  context slot, a tap on the drop, or F on a laptop (the prompt reads F LOOK); TAKE or F again takes it,
+  CLOSE or walking off shuts it. Gold, potions and relics are picked up by walking over them and never had
+  a card.
+- **The tracker folds** (`client/bannerfold.ts`, pieces in `client/tracker.ts`), on phone and laptop, on a
+  job, in town and in the halls: one short line (the room diamonds and the objective; on an expedition
+  N OF M JOBS LEFT until they're done; WICKHOLD, DAY N in town), a + to show it opens. A tap opens it (an
+  expedition's opened tracker lists every pinned and side job, done or what to do), another tap folds it.
+  It opens by itself for 3 s when the objective or the place changes (a count going down isn't a change)
+  and while an objective's done flash plays. The wood's lessons never fold.
+- **Knacks waiting in the pack**: the pack's KNACKS button turns gilt with a slow pulse and reads
+  KNACKS 1 TO PICK (`KNW.packPick`); the gold count on PACK stays.
+- New lines, waiting on the lore keeper and line editor: ROOMS, JOBS, SIDE JOBS, GOBLINS, DENS, DOWNED,
+  TIME, FOUND, TREASURE, RELIC, "2 of 3", NEXT: PICK A KNACK, LOOK, F LOOK, CLOSE (loot card),
+  N OF M JOBS LEFT, DONE, WICKHOLD, DAY N, N TO PICK.

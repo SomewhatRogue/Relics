@@ -44,6 +44,10 @@ export interface Run {
   roads: Record<number, RoadId>;
   /** An expedition's side jobs done (each a piece of treasure more, got out). */
   sides?: number;
+  /** An expedition's pinned jobs done (the recap's JOBS row). */
+  goals?: number;
+  /** When the job set out (Date.now() on the leader's page): the recap's TIME, never the fight's. */
+  began?: number;
   /** Players in the party when each room is built (it scales the goblins; the ones left, if some went home). */
   party?: number;
 }
@@ -115,6 +119,7 @@ export function tally(run: Run, room: ArenaRoom, events: FightEvent[], me: strin
       // An expedition pays into the pot for each job done, got out or not (shared/tuning.ts EXPED).
       run.gold += Math.round(run.job.reward * (ev.what === 'goal' ? EXPED.goalPay : EXPED.sidePay));
       if (ev.what === 'side') run.sides = (run.sides ?? 0) + 1;
+      else run.goals = (run.goals ?? 0) + 1;
     } else if (ev.k === 'pickedup') {
       if (ev.id) bump(run.carried ??= {}, ev.id);
       if (ev.by) bump(run.raised ??= {}, ev.by);

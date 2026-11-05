@@ -87,7 +87,8 @@ export class Cluster {
     stickVars();
   }
 
-  update(game: Game, spot: Spot, busy: boolean, now: number): void {
+  /** `look`: a drop of yours at your feet, its card 'shut' or 'open' (lootcard.ts); '' for none. */
+  update(game: Game, spot: Spot, busy: boolean, now: number, look: '' | 'shut' | 'open' = ''): void {
     const me = game.hero, room = game.room, mode = game.mode, b = this.b;
     if (!me) return;
     // The stick's resting ghost goes once you've moved a few times.
@@ -137,18 +138,21 @@ export class Cluster {
     const raise = me.act === 'idle' && raisable(me, room.heroes), cut = cuttable(me, room.heroes, room.time);
     const burn = !raise && (!!torchable(me, room.enemies) || (mode === 'run' && !!kindleable(me, room.map)));
     const lifter = kit.cls === 'WARRIOR', active = can || raise || burn || cut;
-    const use = !!spot && !busy && (mode !== 'run' || !!spot.chest);
+    // A drop at your feet with nothing else here: LOOK opens its card.
+    const looking = !!look && !busy && !spot?.chest && !spot?.door;
+    const use = (!!spot && !busy && (mode !== 'run' || !!spot.chest)) || looking;
     const what: IconId = raise || cut ? 'help' : burn ? 'burn' : carrying ? 'throw' : 'grab';
     const word = cut ? 'CUT FREE' : raise ? 'HELP UP' : burn ? 'BURN' : carrying ? 'THROW' : 'GRAB';
     // (With no dodge the slot has its own place, so a USE or OPEN can show beside it.)
     const showGrab = (active || lifter) && (!dodges || !(use && !active && mode !== 'town'));
     b.grab.show(showGrab ? { shape: 'round', size: 29, grade: active ? 'gilt' : 'stone', icon: icon(what) } : null, '', word, word);
     b.grab.el.classList.toggle('dim', !active);
-    const uw = spot?.chest ? 'OPEN' : spot?.door ? 'ENTER' : spot?.talk && spot.talk !== 'board' && spot.talk !== 'market' && spot.talk !== 'gate' ? 'TALK' : 'USE';
-    const ui: IconId = uw === 'OPEN' ? 'open' : uw === 'ENTER' ? 'enter' : uw === 'TALK' ? 'chat' : 'use';
+    const uw = looking ? 'LOOK' : spot?.chest ? 'OPEN' : spot?.door ? 'ENTER' : spot?.talk && spot.talk !== 'board' && spot.talk !== 'market' && spot.talk !== 'gate' ? 'TALK' : 'USE';
+    const ui: IconId = uw === 'LOOK' ? 'use' : uw === 'OPEN' ? 'open' : uw === 'ENTER' ? 'enter' : uw === 'TALK' ? 'chat' : 'use';
     const big = mode === 'town';
     b.use.show(use && !(showGrab && active && dodges) ? { shape: 'round', size: big ? 42 : 29, grade: 'gilt', icon: icon(ui), iconScale: big ? 2 : 1 } : null, '', uw, uw);
-    b.use.el.classList.toggle('chest', !!spot?.chest);
+    b.use.el.classList.toggle('chest', !!spot?.chest || looking);
+    b.use.el.classList.toggle('on', looking && look === 'open');
     b.use.el.classList.toggle('big', big);
   }
 
