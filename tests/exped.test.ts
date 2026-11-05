@@ -7,6 +7,15 @@ import { NO_INTENT } from '../src/sim/types';
 import type { ArenaRoom } from '../src/sim/room';
 import type { XGoal } from '../src/sim/exped';
 import { walkable } from './walk';
+import { EXPED_COINS, EXPED_PACKS } from '../src/shared/tuning';
+import { isSpecial } from '../src/shared/encounter';
+import { ringOf } from '../src/shared/expedrings';
+import { Rng } from '../src/shared/rng';
+import type { Foe } from '../src/shared/terrain';
+import { wave } from '../src/sim/expedpressure';
+import { special } from '../src/sim/expedwave';
+import { dropPickups, type Pickup } from '../src/sim/pickups';
+import { newEnemy } from '../src/sim/enemies';
 
 const job = (day: number) => expedition(day);
 /** A room on day `day`'s map with one hero who can't be hurt, standing at (x, y). */
@@ -107,8 +116,9 @@ describe('an expedition: the Barrowfields', () => {
     expect(x.phase).toBe('open');
     steps(r, EXPED.call + 0.2);
     expect(x.phase).toBe('hold');
-    // Away from the beacon the hold waits.
+    // Away from the beacon the hold waits (after its grace).
     Object.assign(h, { x: x.zone.x + 12, y: x.zone.y + 12 });
+    steps(r, EXPED.grace + 0.2);
     const held = x.held;
     steps(r, 5);
     expect(x.held).toBe(held);
@@ -160,5 +170,140 @@ describe('an expedition: the Barrowfields', () => {
     r.step();
     expect(r.allEnemies.length).toBe(n);
     EXPED.cap = 200;
+  });
+});
+
+const sortOf = (f: { kind: string; name?: string; variant?: string; bow?: boolean }) => (f.kind === 'butcher' ? (f.name ? 'named' : 'butcher') : f.variant ?? (f.bow ? 'archer' : 'small'));
+
+describe('the Barrowfields as packs (Kyle: "just big guys and little guys")', () => {
+  it('makes each camp, set piece and patrol one pack, specials capped, the new sorts where they belong', () => {
+    const met = new Set<string>();
+    let flocks = 0;
+    for (let d = 1; d <= 12; d++) {
+      const p = expedPlan(job(d)), packs = new Map<number, Foe[]>();
+      for (const f of p.foes) if (f.pack !== undefined) packs.set(f.pack, [...(packs.get(f.pack) ?? []), f]);
+      // Specials capped, and no special alone without its pack (a pack is laid whole, clear of the way in).
+      for (const l of packs.values()) expect(l.filter(isSpecial).length).toBeLessThanOrEqual(EXPED_PACKS.specials.camp), expect(l.length).toBeGreaterThan(1);
+      // Each camp is one fight; each patrol one pack; the north road's is the log-carriers.
+      for (const c of p.camps) expect(new Set(c.foes.map((i) => p.foes[i].pack)).size).toBe(1);
+      for (const pt of p.patrols) expect(new Set(pt.foes.map((i) => p.foes[i].pack)).size).toBe(1);
+      expect(p.patrols[1].foes.some((i) => p.foes[i].variant === 'log')).toBe(true);
+      for (const f of p.foes) {
+        met.add(sortOf(f));
+        // Blind hunters stay in the mines; a roof archer is up on a roof.
+        expect(f.variant).not.toBe('blind');
+        if (f.variant === 'roofer') expect(p.map.blocks.some((b) => b.kind === 'house' && f.x > b.x && f.x < b.x + b.w && f.y > b.y && f.y < b.y + b.h && (f.z ?? 0) > 0)).toBe(true);
+      }
+      flocks += p.map.flocks?.length ?? 0;
+      expect(new Set(p.foes.filter(isSpecial).map(sortOf)).size, `day ${d}`).toBeGreaterThanOrEqual(5);
+    }
+    for (const s of ['wolf', 'keeper', 'netter', 'banner', 'oiler', 'torch', 'roofer', 'log', 'thief']) expect(met.has(s), s).toBe(true);
+    expect(flocks).toBeGreaterThan(6);
+  });
+
+  it('a party meets more small ones and a tougher centrepiece, not more specials', () => {
+    const one = runRoom(newRun(job(4))), four = (() => { const r = newRun(job(4)); r.party = 4; return runRoom(r); })();
+    const sp = (r: ArenaRoom) => r.allEnemies.filter((e) => e.role && e.role !== 'fodder' && e.role !== 'wolf').length;
+    expect(four.allEnemies.length).toBeGreaterThan(one.allEnemies.length);
+    expect(sp(four) - sp(one)).toBeLessThanOrEqual(new Set(one.allEnemies.map((e) => e.pack)).size);
+  });
+
+  it('sends waves as packs: wolves and netters early, sappers late, no more specials than a fight can read', { timeout: 60000 }, () => {
+    const { r, h } = room(6), x = r.exped!, seen = new Set<string>();
+    Object.assign(h, { x: 48, y: 50 });
+    for (const level of [0, 5]) for (let i = 0; i < 40; i++) {
+      x.level = level;
+      const before = r.allEnemies.length;
+      wave(r, x, r.heroes, 48, 50, EXPED.waveSize[level]);
+      const fresh = r.allEnemies.slice(before);
+      expect(new Set(fresh.map((e) => e.pack)).size).toBeLessThanOrEqual(1);
+      expect(fresh.filter((e) => special(e)).length).toBeLessThanOrEqual(EXPED_PACKS.specials.wave[level]);
+      for (const e of fresh) seen.add(`${level}:${sortOf(e)}`), (e.hp = 0), (e.act = 'dead');
+    }
+    expect(seen.has('0:sapper')).toBe(false);
+    expect(seen.has('5:sapper')).toBe(true);
+    expect([...seen].filter((s) => s.startsWith('0:') && s !== '0:small').length).toBeGreaterThan(0);
+    // Specials already about: the next wave brings none.
+    for (let i = 0; i < EXPED_PACKS.near; i++) Object.assign(r.addFoe('scrapper', h.x + 3, h.y), { variant: 'heavy', role: 'heavy', alert: true });
+    for (let i = 0; i < 10; i++) {
+      const before = r.allEnemies.length;
+      wave(r, x, r.heroes, 48, 50, EXPED.waveSize[5]);
+      expect(r.allEnemies.slice(before).filter((e) => special(e)).length).toBe(0);
+    }
+  });
+});
+
+describe('the hold rings (Kyle: "I want the area you can hold to be larger")', () => {
+  it('are big enough to roll and kite in, one size drawn and judged', () => {
+    expect(EXPED.holdR).toBeGreaterThanOrEqual(6);
+    expect(EXPED.extractR).toBeGreaterThanOrEqual(6);
+    expect(ringOf('shrine')).toBe(EXPED.holdR);
+    expect(ringOf('beacon')).toBe(EXPED.extractR);
+    const { r } = room(2);
+    expect(r.exped!.zone.r).toBe(ringOf('beacon'));
+    // The beacon's ring is on the map, all of it.
+    expect(r.exped!.zone.y - r.exped!.zone.r).toBeGreaterThan(0.9);
+  });
+
+  it('holds at the edge of the ring, through a short step out, and stops after the grace', { timeout: 60000 }, () => {
+    const d = dayWith('shrine'), { r, h } = room(d), g = r.exped!.goals.find((q) => q.kind === 'shrine')!;
+    // Nobody yet: nothing.
+    Object.assign(h, { x: g.x + EXPED.holdR + 3, y: g.y });
+    steps(r, 2);
+    expect(g.p).toBe(0);
+    // In at the edge (a Ranger kiting): it fills.
+    Object.assign(h, { x: g.x + EXPED.holdR - 0.4, y: g.y });
+    steps(r, 3, true);
+    const p0 = g.p;
+    expect(p0).toBeGreaterThan(2.5 / EXPED.hold);
+    // A roll out of it: still filling for the grace.
+    Object.assign(h, { x: g.x + EXPED.holdR + 3, y: g.y });
+    steps(r, EXPED.grace - 0.3);
+    expect(g.p).toBeGreaterThan(p0);
+    // Out for longer: it stops.
+    steps(r, 0.6);
+    const p1 = g.p;
+    steps(r, 4);
+    expect(g.p).toBe(p1);
+  });
+});
+
+describe('gold on the expedition (Kyle: "A tonnnn of gold drop")', () => {
+  it('drops about half the coins of a job, in a fifth of the piles, bigger', () => {
+    const rng = new Rng(7), dropped = (coins?: typeof EXPED_COINS) => {
+      const ps: Pickup[] = [];
+      for (let i = 0; i < 4000; i++) dropPickups({ ...newEnemy(i + 1, 'scrapper', 0, 0), respawns: false }, ps, rng, coins);
+      const g = ps.filter((p) => p.gold);
+      return { piles: g.length, coins: g.reduce((s, p) => s + p.gold!, 0) };
+    };
+    const job = dropped(), ex = dropped(EXPED_COINS);
+    expect(ex.coins / job.coins).toBeGreaterThan(0.4);
+    expect(ex.coins / job.coins).toBeLessThan(0.6);
+    expect(ex.piles / job.piles).toBeLessThan(0.3);
+    expect(ex.coins / ex.piles).toBeGreaterThan((2 * job.coins) / job.piles);
+    // Wolves leave none.
+    const ps: Pickup[] = [];
+    for (let i = 0; i < 200; i++) dropPickups({ ...newEnemy(i + 1, 'scrapper', 0, 0), variant: 'wolf', respawns: false }, ps, rng, EXPED_COINS);
+    expect(ps.filter((p) => p.gold).length).toBe(0);
+  });
+
+  it('is what an expedition room drops, and the jobs pay as before', { timeout: 60000 }, () => {
+    const { r, h } = room(3), ids = new Set<number>();
+    Object.assign(h, { x: 48, y: 50 });
+    let seq = 0, kills = 0;
+    for (let i = 0; i < 40; i++) {
+      const e = r.addFoe('scrapper', h.x, h.y - 1);
+      Object.assign(e, { hp: 1, maxHp: 1, alert: true });
+      for (let t = 0; t < 60 && e.act !== 'dead'; t++) {
+        r.setIntent('a', { ...NO_INTENT, ax: 0, ay: -1, attackSeq: t % 10 === 0 ? ++seq : seq });
+        r.step();
+        for (const p of r.pickups) if (p.gold) ids.add(p.id), expect(p.gold).toBeGreaterThanOrEqual(EXPED_COINS.scrapper.min);
+      }
+      if (e.act === 'dead') kills++;
+      Object.assign(e, { x: 2, y: 2 });
+    }
+    expect(kills).toBeGreaterThan(30);
+    expect(ids.size).toBeLessThan(kills * 0.45);
+    expect(EXPED.goalPay).toBe(0.15);
   });
 });

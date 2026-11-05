@@ -16,13 +16,13 @@ export const samePack = (a: { pack?: number }, b: { pack?: number }) => a.pack =
 /** How near a fight must be for this goblin to hear it. */
 export const hearFrom = (a: { pack?: number }, b: { pack?: number }) => (samePack(a, b) ? ALERT.hear : ENCOUNTER.hearOther);
 
-/** A routed room's goblins for a party of `party` (the room's own first, unchanged). */
-export function scalePacks(foes: Foe[], party: number, seed: number): Foe[] {
+/** A routed room's goblins for a party of `party` (the room's own first, unchanged). `fodder`: small ones a pack a player past the first. */
+export function scalePacks(foes: Foe[], party: number, seed: number, fodder = ENCOUNTER.party.fodder): Foe[] {
   if (party <= 1) return foes;
   const rng = new Rng(seed), extra: Foe[] = [], packs = [...new Set(foes.filter((f) => f.pack !== undefined).map((f) => f.pack!))];
   for (const id of packs) {
     const mine = foes.filter((f) => f.pack === id), small = mine.filter((f) => !isSpecial(f) && !f.name && f.kind === 'scrapper');
-    const more = Math.round(small.length * ENCOUNTER.party.fodder * (party - 1));
+    const more = Math.round(small.length * fodder * (party - 1));
     for (let i = 0; i < more; i++) {
       const f = small[i % small.length], a = i * 2.4 + rng.range(-0.3, 0.3);
       extra.push({ ...f, x: f.x + Math.cos(a) * 0.75, y: f.y + Math.sin(a) * 0.75 });

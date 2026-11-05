@@ -10,17 +10,19 @@ import type { GoalKind, SideKind } from '../shared/expedcamps';
 import type { ExpedPlan } from '../shared/expedmap';
 import type { P } from '../shared/expedkit';
 import { EXPED } from '../shared/tuning';
+import { holding, ringOf } from '../shared/expedrings';
 import { isDead } from './damage';
 import { stepPressure } from './expedpressure';
 import type { ArenaRoom } from './room';
 import type { Enemy, FightEvent, Hero } from './types';
 
 export type Phase = 'shut' | 'open' | 'hold' | 'leave';
-export interface XGoal { kind: GoalKind | SideKind; x: number; y: number; done: boolean; p: number; blocks?: number[]; cages?: P[]; foe?: number; chest?: number }
+/** `away`: a hold ring's seconds with nobody in it (shared/expedrings.ts). */
+export interface XGoal { kind: GoalKind | SideKind; x: number; y: number; done: boolean; p: number; blocks?: number[]; cages?: P[]; foe?: number; chest?: number; away?: number }
 export interface XCamp { x: number; y: number; ids: number[]; alerted: boolean; known: boolean }
 export interface ExpedState {
   goals: XGoal[]; sides: XGoal[]; camps: XCamp[];
-  zone: P & { r: number }; phase: Phase; lit: number; held: number;
+  zone: P & { r: number; away?: number }; phase: Phase; lit: number; held: number;
   /** Pressure: the level, the noise's heat and where it is, when the next wave, patrol and hold-wave may come. */
   level: number; heat: number; hx: number; hy: number; nextWave: number; nextPatrol: number; nextHold: number;
   patrols: { ids: number[]; path: P[]; i: number; dir: number }[];
@@ -37,7 +39,7 @@ export function newExped(plan: ExpedPlan, seed: number, party: number): ExpedSta
   const g = (s: ExpedPlan['goals'][number]): XGoal => ({ kind: s.kind, x: s.x, y: s.y, done: false, p: 0, blocks: s.blocks, cages: s.cages, foe: s.foe === undefined ? undefined : s.foe + 1, chest: s.chest });
   return {
     goals: plan.goals.map(g), sides: plan.sides.map(g), camps: plan.camps.map((c) => ({ x: c.x, y: c.y, ids: c.foes.map((i) => i + 1), alerted: false, known: false })),
-    zone: { ...plan.zone, r: EXPED.extractR }, phase: 'shut', lit: 0, held: 0,
+    zone: { ...plan.zone, r: ringOf('beacon') }, phase: 'shut', lit: 0, held: 0,
     level: 0, heat: 0, hx: plan.map.hero.x, hy: plan.map.hero.y, nextWave: 60, nextPatrol: EXPED.patrolEvery, nextHold: 0,
     patrols: plan.patrols.map((p) => ({ ids: p.foes.map((i) => i + 1), path: p.path, i: 1, dir: 1 })),
     seen: '0'.repeat((W * H) / 4), n: 0, seed, party,
@@ -58,7 +60,8 @@ export function stepExped(room: ArenaRoom, ev: FightEvent[], dt: number): void {
   else if (x.phase === 'open' && at(x.zone.r)) {
     x.lit += dt;
     if (x.lit >= EXPED.call) (x.phase = 'hold'), (x.nextHold = t), ev.push({ k: 'exped', x: x.zone.x, y: x.zone.y, what: 'lit' });
-  } else if (x.phase === 'hold' && at(x.zone.r + 0.5)) {
+  } else if (x.phase === 'hold' && holding(x.zone, at(x.zone.r), dt)) {
+    // Held while someone's in the ring, and a moment after they step out to roll or kite (EXPED.grace).
     x.held += dt;
     if (x.held >= EXPED.extract) (x.phase = 'leave'), ev.push({ k: 'exped', x: x.zone.x, y: x.zone.y, what: 'watch' });
   }
@@ -69,8 +72,9 @@ export function stepExped(room: ArenaRoom, ev: FightEvent[], dt: number): void {
 function check(room: ArenaRoom, g: XGoal, heroes: Hero[], dt: number): boolean {
   const near = (r: number) => heroes.some((h) => Math.hypot(h.x - g.x, h.y - g.y) <= r);
   if (g.kind === 'larder' || g.kind === 'pray' || g.kind === 'shrine') {
-    const [r, s] = g.kind === 'shrine' ? [EXPED.holdR, EXPED.hold] : g.kind === 'pray' ? [1.6, EXPED.pray] : [1.6, EXPED.poison];
-    if (near(r)) g.p = Math.min(1, g.p + dt / s);
+    const s = g.kind === 'shrine' ? EXPED.hold : g.kind === 'pray' ? EXPED.pray : EXPED.poison, inside = near(ringOf(g.kind));
+    // The shrine is a hold: a moment's grace after the last one steps out. The small rings count only while you stand there.
+    if (g.kind === 'shrine' ? holding(g, inside, dt) : inside) g.p = Math.min(1, g.p + dt / s);
     return g.p >= 1;
   }
   if (g.kind === 'engine' || g.kind === 'dens') return (g.blocks ?? []).every((i) => room.map.blocks[i]?.ruined);
@@ -115,5 +119,5 @@ export const SEEN = { w: W, h: H };
 /** What a friend's screen needs of it (the map screen, the pins, the banner): no patrols or heat. */
 export function expedView(x: ExpedState): Partial<ExpedState> {
   const r = (g: XGoal): XGoal => ({ kind: g.kind, x: Math.round(g.x * 10) / 10, y: Math.round(g.y * 10) / 10, done: g.done, p: Math.round(g.p * 20) / 20, foe: g.foe });
-  return { goals: x.goals.map(r), sides: x.sides.map(r), camps: x.camps.map((c) => ({ ...c, x: Math.round(c.x), y: Math.round(c.y), ids: [] })), zone: x.zone, phase: x.phase, lit: Math.round(x.lit * 2) / 2, held: Math.floor(x.held), level: x.level, seen: x.seen };
+  return { goals: x.goals.map(r), sides: x.sides.map(r), camps: x.camps.map((c) => ({ ...c, x: Math.round(c.x), y: Math.round(c.y), ids: [] })), zone: { x: x.zone.x, y: x.zone.y, r: x.zone.r }, phase: x.phase, lit: Math.round(x.lit * 2) / 2, held: Math.floor(x.held), level: x.level, seen: x.seen };
 }

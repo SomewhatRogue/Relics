@@ -14,10 +14,16 @@ let nextId = 1;
 
 const kindOf = (e: Enemy) => (e.name ? 'named' : e.kind === 'butcher' ? 'butcher' : e.bow ? 'archer' : 'scrapper');
 
-/** Where a goblin falls: maybe gold, maybe a potion. Dummies and the training butcher leave nothing. */
-export function dropPickups(e: Enemy, pickups: Pickup[], rng: Rng): void {
+/** What a kind leaves: a chance of a pile, and how big. */
+type Coins = Record<'scrapper' | 'archer' | 'butcher' | 'named', { chance: number; min: number; max: number }> & { wolf?: { chance: number; min: number; max: number } };
+
+/**
+ * Where a goblin falls: maybe gold, maybe a potion. Dummies and the training butcher leave nothing.
+ * `coins`: the table (an expedition's is its own, EXPED_COINS: fewer piles, bigger; no wolf leaves one).
+ */
+export function dropPickups(e: Enemy, pickups: Pickup[], rng: Rng, coins: Coins = COINS): void {
   if ((e.kind !== 'scrapper' && e.kind !== 'butcher') || e.respawns) return;
-  const k = kindOf(e), c = COINS[k];
+  const k = kindOf(e), c = (e.variant === 'wolf' && coins.wolf) || coins[k];
   if (rng.next() < c.chance) pickups.push({ id: nextId++, x: e.x, y: e.y, life: COINS.life, gold: c.min + Math.floor(rng.next() * (c.max - c.min + 1)) });
   if (rng.next() < POTION_DROPS[k]) {
     const w = POTION_DROPS.weights, total = POTION_ORDER.reduce((s, p) => s + w[p], 0);

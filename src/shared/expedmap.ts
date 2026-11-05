@@ -10,17 +10,18 @@
  * rest of the goblins in small knots, none near the way in.
  */
 import type { GameMap } from './arena.js';
-import { barrows, cache, camp, vary, type Camp, type GoalKind, type GoalSpot } from './expedcamps.js';
+import { barrows, cache, camp, type Camp, type GoalKind, type GoalSpot } from './expedcamps.js';
 import { bank, fields, grove, hamlet, scene, woodedge } from './expedfill.js';
 import { claim, COLS, free, MH, MW, newKit, NODE, ROWS, spotIn, type Kit, type P } from './expedkit.js';
 import { layLand, yOn, type Land } from './expedland.js';
+import { flocksOn, packAll, PACK0, type Band } from './expedpacks.js';
 import { settle } from './houses.js';
 import type { Job } from './jobs.js';
 import { PIECES, type Piece } from './nodes.js';
 import { Rng } from './rng.js';
 import { THEMES, type Foe, type RoomPlan } from './terrain.js';
 import { lightFor, timeOf } from './timeofday.js';
-import { EXPED } from './tuning.js';
+import { EXPED, EXPED_PACKS } from './tuning.js';
 
 export type NodeKind = 'in' | 'out' | 'hamlet' | 'camp' | 'barrows' | 'woodedge' | 'fields' | 'bank';
 export const GOALS: GoalKind[] = ['larder', 'engine', 'prisoners', 'dens', 'shrine', 'butcher'];
@@ -44,9 +45,10 @@ export function expedPlan(job: Job): ExpedPlan {
 }
 
 function build(job: Job): ExpedPlan {
-  const rng = new Rng(job.seed * 7919 + 33), k = newKit(rng), land = layLand(k), ruin = job.place.ruin;
+  const rng = new Rng(job.seed * 7919 + 33), k = newKit(rng), land = layLand(k);
   const inI = land.ins.r * COLS + land.ins.c, outI = land.ext.c;
-  const zone = { x: land.ext.x, y: 6.5 };
+  // (Far enough down the drove road that the whole of the beacon's ring is on the map.)
+  const zone = { x: land.ext.x, y: Math.max(6.5, EXPED.extractR + 1.5) };
   // Room to land at the way in, and to hold the way out.
   claim(k, land.ins.x, land.ins.y, 6), claim(k, zone.x, zone.y, EXPED.extractR + 1.2);
   const nodes: NodeKind[] = Array.from({ length: COLS * ROWS }, (_, i) => (Math.floor(i / COLS) === 0 ? 'woodedge' : Math.floor(i / COLS) === 1 ? 'bank' : 'fields'));
@@ -70,11 +72,13 @@ function build(job: Job): ExpedPlan {
   const barI = want.includes('shrine') || rng.next() < 0.6 ? left().sort((a, b) => dist(b, inI) - dist(a, inI))[0] : undefined;
   if (barI !== undefined) nodes[barI] = 'barrows';
   // The jobs' places, the big ones first (they want the room).
-  const goals: GoalSpot[] = [], camps: Camp[] = [];
+  const goals: GoalSpot[] = [], camps: Camp[] = [], bands: Band[] = [], open: number[] = [];
   campIs.forEach((i, j) => {
     const g = campJobs[j] ?? null, c = centre(k, i);
-    const made = camp(k, c, g, job.boss ?? 'MAWL', ruin, camps.length);
+    const made = camp(k, c, g, job.boss ?? 'MAWL', camps.length);
     camps.push(made.camp);
+    // A named butcher's camp has its centrepiece: the band at its fire backs it, no second big one.
+    bands.push(g === 'butcher' ? { idx: made.band, ground: 'camp', cap: 1, not: ['butcher'], keep: true } : { idx: made.band, ground: 'camp', cap: EXPED_PACKS.specials.camp, keep: true });
     if (made.spot) goals.push(made.spot);
   });
   if (barI !== undefined) {
@@ -89,6 +93,8 @@ function build(job: Job): ExpedPlan {
   // A cache: somewhere quiet in the wood or a far field.
   const far = left().concat([outI]).sort((a, b) => dist(b, inI) - dist(a, inI));
   const cI = far[0] ?? outI, cm = mid(cI), cs = cache(k, cm.x - 10, cm.y - 10, cm.x + 10, cm.y + 10);
+  // (The dead soldier by the chained chest draws the crows too.)
+  if (cs) open.push(k.dead.length - 1);
   if (cs) sides.push(cs);
   // Wayside shrine to pray at, when the barrows don't have one: on the road near the hamlet.
   if (!sides.some((s) => s.kind === 'pray')) {
@@ -103,7 +109,12 @@ function build(job: Job): ExpedPlan {
     if (r === 0) woodedge(k, c, n === 'woodedge' || n === 'out' ? 80 : 26, n === 'woodedge' || n === 'out' ? 18 : 7);
     if (r === 1) bank(k, c, land.riverAt);
     if (n === 'fields' || n === 'in') fields(k, c, r);
-    if (n === 'woodedge' || n === 'fields' || n === 'bank' || n === 'hamlet') vary(k, scene(k, c, r, pieces[i % pieces.length], 4 + rng.int(3)), ruin);
+    if (n === 'woodedge' || n === 'fields' || n === 'bank' || n === 'hamlet') {
+      const dead = k.dead.length, idx = scene(k, c, r, pieces[i % pieces.length], 4 + rng.int(3));
+      bands.push({ idx, ground: n === 'hamlet' ? 'hamlet' : 'open', cap: EXPED_PACKS.specials.scene });
+      // The dead out in the open, where the carrion crows come down.
+      if (n !== 'hamlet') open.push(...k.dead.slice(dead).map((_, q) => dead + q));
+    }
   });
   for (let i = 0; i < 9; i++) {
     const at = spotIn(k, 3, 3, MW - 3, MH - 3, 2.4, 1.2, false);
@@ -111,6 +122,17 @@ function build(job: Job): ExpedPlan {
   }
   if (nodes[inI] === 'in' && land.ins.how === 'road') scene(k, land.ins.c, land.ins.r, 'wreck', 0);
   const patrols = roadPatrols(k, land, inI);
+  // Each camp, set piece and patrol made one pack (shared/expedpacks.ts); the log-carriers on the north road.
+  patrols.forEach((p, j) => bands.push({ idx: p.foes, ground: j === 1 ? 'road' : 'patrol', cap: EXPED_PACKS.specials.patrol, road: -9 }));
+  const gone = new Set<Foe>(), packs = packAll(k, bands, job, land.ins, gone);
+  camps.forEach((c, j) => {
+    // The job's own guards (and a named butcher) belong to the camp's pack too.
+    const rest = c.foes.filter((f) => !bands[j].idx.includes(f));
+    // (A named one is the job's, not the pack's centrepiece: scaleBosses toughens it, not scalePacks.)
+    for (const f of rest) if (k.foes[f].pack === undefined) Object.assign(k.foes[f], { pack: PACK0 + j }, k.foes[f].name ? {} : { role: 'fodder' });
+    c.foes = [...packs[j], ...rest];
+  });
+  patrols.forEach((p, j) => (p.foes = packs[bands.length - patrols.length + j]));
   // The rest in small knots about the map, never within 18 tiles of the way in.
   for (let t = 0; t < 400 && k.foes.length < EXPED.goblins; t++) {
     const at = spotIn(k, 2, 2, MW - 2, MH - 2, 0.9, 1);
@@ -123,7 +145,8 @@ function build(job: Job): ExpedPlan {
     }
   }
   // None too near the way in, whatever laid them.
-  const near = new Set(k.foes.map((f, i) => (Math.hypot(f.x - land.ins.x, f.y - land.ins.y) < 14 ? i : -1)).filter((i) => i >= 0));
+  // (And those a pack didn't keep.)
+  const near = new Set(k.foes.map((f, i) => (Math.hypot(f.x - land.ins.x, f.y - land.ins.y) < 14 || gone.has(f) ? i : -1)).filter((i) => i >= 0));
   const keep = k.foes.map((_, i) => i).filter((i) => !near.has(i)), remap = new Map(keep.map((o, n) => [o, n]));
   k.foes = keep.map((i) => k.foes[i]);
   const re = (l: number[]) => l.flatMap((i) => (remap.has(i) ? [remap.get(i)!] : []));
@@ -131,15 +154,17 @@ function build(job: Job): ExpedPlan {
   for (const p of patrols) p.foes = re(p.foes);
   for (const g of goals) if (g.foe !== undefined) g.foe = remap.get(g.foe);
   const spill = settle(job, 0, k.blocks);
-  const open: P[] = [];
-  for (let y = 3; y < MH - 2; y += 4) for (let x = 3; x < MW - 2; x += 4) if (free(k, x, y, 0.8, 0)) open.push({ x, y });
+  const ground: P[] = [];
+  for (let y = 3; y < MH - 2; y += 4) for (let x = 3; x < MW - 2; x += 4) if (free(k, x, y, 0.8, 0)) ground.push({ x, y });
+  const flocks = flocksOn(open.map((i) => k.dead[i]), job);
   const theme = { ...lightFor(THEMES.field, 'field', timeOf(job)), floor: 'grass' as const, back: 'trees' as const };
   const map: GameMap = {
     name: 'THE BARROWFIELDS', w: MW, h: MH, wallFace: 3, rounds: k.rounds, blocks: k.blocks, braziers: k.braziers, torches: [],
     hero: { x: land.ins.x, y: land.ins.y }, exit: { x: land.ext.x - 1.5, y: 0, w: 3, h: 0.9 }, theme, water: k.water, soil: k.soil,
     marks: [...k.marks, ...spill], npcs: k.dead.length ? k.dead : undefined, grim: k.grim.length ? k.grim : undefined, sleepers: k.sleepers.length ? k.sleepers : undefined,
+    flocks: flocks.length ? flocks : undefined,
   };
-  return { map, foes: k.foes, props: k.props, chests: k.chests, nodes, land, camps, goals: mains, sides, patrols, zone, open };
+  return { map, foes: k.foes, props: k.props, chests: k.chests, nodes, land, camps, goals: mains, sides, patrols, zone, open: ground };
 }
 
 /** A free middle for a camp or the barrows in node `i` (searching a little past its edges). */

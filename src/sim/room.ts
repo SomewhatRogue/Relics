@@ -7,7 +7,7 @@ import { ARENA, useMap, type GameMap } from '../shared/arena';
 import type { Foe } from '../shared/terrain';
 import type { PropKind } from '../shared/props';
 import { Rng } from '../shared/rng';
-import { BLESSING, GUARD, SLEEP, HEAL_RADIUS, HEIGHT, HERO, LODESTONE, MACE, TICK, TRAIT, WEAPONS, type Swing, VARIANTS } from '../shared/tuning';
+import { BLESSING, GUARD, SLEEP, HEAL_RADIUS, HEIGHT, HERO, EXPED_COINS, LODESTONE, MACE, TICK, TRAIT, WEAPONS, type Swing, VARIANTS } from '../shared/tuning';
 import { separate } from './bodies';
 import { lobLodestone, shoot, smite, stepBolt, throwNet } from './bolts';
 import { afflict, stepElements, type World } from './elements';
@@ -346,7 +346,7 @@ export class ArenaRoom {
     for (const e of this.enemies) if (alive.has(e.id) && isDead(e) && !e.escaped) dropFrom(e, this.heroes, this.drops, this.lootRng, this.events);
     for (const e of this.enemies) if (alive.has(e.id) && isDead(e) && !e.escaped) {
       dropCoal(e, this.coals);
-      dropPickups(e, this.pickups, this.lootRng);
+      dropPickups(e, this.pickups, this.lootRng, this.exped ? EXPED_COINS : undefined);
       dropRelic(e, this.pickups, this.relicRng);
       const by = this.heroes.find((x) => x.id === e.lastBy);
       if (by) onKill(by, this.time, this.events);

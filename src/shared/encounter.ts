@@ -25,7 +25,7 @@ const plain = (f: Foe) => f.kind === 'scrapper' && !f.bow && !f.variant && !f.na
 const mid = (fs: Foe[]): P => ({ x: fs.reduce((s, f) => s + f.x, 0) / fs.length, y: fs.reduce((s, f) => s + f.y, 0) / fs.length });
 export const isSpecial = (f: Foe) => !!f.role && f.role !== 'fodder' && f.role !== 'wolf' && f.role !== 'blind';
 /** How many specials a template puts in a pack. */
-const cost = (t: Template) => (t.centre?.length ?? 0) + (t.support?.length ?? 0);
+export const cost = (t: Template) => (t.centre?.length ?? 0) + (t.support?.length ?? 0);
 /** Houses standing with their roofs on (a roof archer's perch). */
 export const roofsIn = (blocks: Block[]) => blocks.filter((b) => (b.kind === 'house' || b.kind === 'barn') && !b.ruined && b.fate !== 'wrecked' && b.fate !== 'burning' && b.w >= 2.4);
 
@@ -92,8 +92,8 @@ function perch(f: Foe, b: Block): void {
   delete f.feeding;
 }
 
-/** One band as template `t`: pack `id`. Returns the pack. */
-function lay(c: Compose, band: Foe[], t: Template, id: number, rng: Rng, roofs: Block[]): Foe[] {
+/** One band as template `t`: pack `id`. Returns the pack. (An expedition lays its packs with it too: shared/expedpacks.ts.) */
+export function lay(c: Compose, band: Foe[], t: Template, id: number, rng: Rng, roofs: Block[]): Foe[] {
   const m = mid(band), out: Foe[] = [], pool = [...band].sort((a, b) => d(a, m) - d(b, m));
   const take = (back: boolean) => {
     if (!pool.length) return addNear(c, m, back, rng);

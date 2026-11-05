@@ -279,24 +279,88 @@ export const STILL = 8;
  * are a phone host's numbers (DECISIONS 2026-11-03: 150 to 200 with dozing). Times in seconds, sizes in tiles.
  * - `poison` at the cookpot, `hold` at the barrow shrine (`holdR` its ring), `pray` at a wayside shrine
  *   (the party `blessed` that long), `call` standing in the way out's ring (`extractR`) to light the
- *   beacon, then `extract` held in it (paused while nobody's in it) before the watch comes.
- * - Pressure: every `escalate` the level goes up one (to `maxLevel`); noise (`noise`: a blow, a death, a
- *   building down, oil fire, a horn) gathers where it's made and `fade`s; past `wave` heat, once
+ *   beacon, then `extract` held in it before the watch comes. `standR`: the cookpot's and a wayside
+ *   shrine's ring. Every ring is drawn and judged at the same size (shared/expedrings.ts).
+ * - The two holds (Kyle, 2026-11-04: "I want the area you can hold to be larger so you can be agile if
+ *   you're an agile class"): rings of 6 tiles, room for a Rogue or Ranger to roll, kite and come back,
+ *   and `grace` seconds with nobody in the ring before the hold stops (it never starts with nobody in it).
+ * - Pressure: every `escalate` the level (ALARM) goes up one (to `maxLevel`); noise (`noise`: a blow, a
+ *   death, a building down, oil fire, a horn) gathers where it's made and `fade`s; past `wave` heat, once
  *   `waveEvery[level]` has gone by, `waveSize[level]` (and one more a friend) come from `waveFrom` tiles
  *   off; a camp that sees you blows its horn (`horn` heat, a wave toward it at once). During a hold a
- *   wave every `holdWave`; a new patrol from the edge every `patrolEvery`, sooner as it goes on.
+ *   wave every `holdWave` to anyone within `holdNear` of the ring's edge; a new patrol from the edge every
+ *   `patrolEvery`, sooner as it goes on.
  * - The map screen counts ground as seen `seen` tiles round anyone, in cells of `cell`.
  * - Pay: each main job done puts `goalPay` of the posting's pay in the pot, each side job `sidePay`.
  */
 export const EXPED = {
   goblins: 150, cap: 200,
-  poison: 7, hold: 75, holdR: 3.4, pray: 3, blessed: 90, call: 2, extract: 60, extractR: 4,
+  poison: 7, hold: 75, holdR: 6, pray: 3, blessed: 90, call: 2, extract: 60, extractR: 6, standR: 1.6, grace: 1.5,
   escalate: 150, maxLevel: 5,
   noise: { hit: 1, death: 2, collapse: 5, oil: 4, horn: 14 }, fade: 25, wave: 12,
   waveEvery: [50, 42, 35, 29, 24, 20], waveSize: [3, 4, 4, 5, 6, 7], waveFrom: [25, 28] as [number, number],
-  holdWave: 9, patrolEvery: 110, patrolSpeed: 1.1,
+  holdWave: 9, holdNear: 2, patrolEvery: 110, patrolSpeed: 1.1,
   seen: 9, cell: 6,
   goalPay: 0.15, sidePay: 0.1,
+};
+
+/**
+ * The expedition's fights as packs (Kyle, 2026-11-04: "I didn't see too many enemy types, just big guys
+ * and little guys"). Each camp, each stretch's set piece, each patrol and each wave is one pack from the
+ * templates (shared/encounters.ts), laid by shared/expedpacks.ts and sent by sim/expedwave.ts. `where`:
+ * the templates each kind of ground draws from (as long as the job's ruin, its roofs and the cap allow):
+ * `open` the fields, the river's banks and the wood's edge; `hamlet` the ruined hamlet; `camp` the
+ * hungry's camps; `road` the north road where the drove road leaves it; `patrol` the other roads.
+ * `waves[level]`: what a wave or a hunting party can be at each ALARM (sappers only late). Specials (any
+ * goblin past a small one) are capped so a fight reads: `specials` a pack (`wave[level]` for a wave), and
+ * a wave brings none past `near` already awake within `nearR` of who it's coming for (or
+ * of an earlier wave still on its way). A party: `party`
+ * more small ones a pack a player past the first (a job's packs take 0.5; a phone hosts this map), the
+ * centrepiece tougher and the template's one `more` from three players, as on a job (sim/packs.ts).
+ * `crows`: at most this many flocks on the dead out in the open, a body `crowChance` (one a stretch).
+ */
+export const EXPED_PACKS = {
+  where: {
+    open: ['wolves', 'netter', 'swarm', 'brute', 'thief'],
+    hamlet: ['roof', 'oil', 'banner', 'thief', 'swarm'],
+    camp: ['banner', 'oil', 'butcher', 'wall', 'drum', 'hexer', 'brute'],
+    road: ['logs'],
+    patrol: ['swarm', 'brute', 'netter', 'wolves', 'wall'],
+  } as Record<'open' | 'hamlet' | 'camp' | 'road' | 'patrol', string[]>,
+  waves: [
+    ['swarm', 'brute', 'netter'],
+    ['swarm', 'brute', 'netter', 'wolves', 'thief'],
+    ['swarm', 'brute', 'netter', 'wolves', 'banner', 'oil'],
+    ['brute', 'netter', 'wolves', 'banner', 'oil', 'sapper', 'logs'],
+    ['netter', 'wolves', 'banner', 'oil', 'sapper', 'logs', 'butcher', 'wall'],
+    ['wolves', 'banner', 'oil', 'sapper', 'logs', 'butcher', 'wall', 'drum'],
+  ],
+  specials: { camp: 3, scene: 2, patrol: 2, wave: [1, 1, 2, 2, 2, 3] },
+  near: 3, nearR: 14,
+  /** A wave's pack number: this plus the expedition's roll counter when it came (never one of the map's). */
+  wave0: 1000,
+  party: 0.3,
+  crows: 3, crowChance: 0.75,
+};
+
+/**
+ * Gold on the floor of an expedition (Kyle, 2026-11-04: "A tonnnn of gold drop, maybe too much"). Measured
+ * (`npx tsx scripts/bigmap/expedtour.ts`, eight runs alone): about 155 kills a run left 103 piles and 526
+ * coins on the ground (93% of it from kills at 3.2 coins a kill, a pile for two goblins in three; chests
+ * 13, a burnt house's or a thief's 22), next to 242 of pay from the jobs. Here a small goblin leaves a pile
+ * one time in five, but a bigger one: measured again, 183 kills left 30 piles and 308 coins (1.7 a kill,
+ * 10.7 a pile). About half the coins in under a third of the piles, so a pile reads as a find. A butcher's pile
+ * is as big, half as often; a named one's as on a job; wolves leave none. Potions drop as ever; the jobs'
+ * pay is unchanged.
+ */
+export const EXPED_COINS = {
+  scrapper: { chance: 0.2, min: 6, max: 11 },
+  archer: { chance: 0.25, min: 6, max: 12 },
+  butcher: { chance: 0.5, min: 15, max: 30 },
+  named: { chance: 1, min: 60, max: 100 },
+  wolf: { chance: 0, min: 0, max: 0 },
+  life: 30,
+  reach: 0.9,
 };
 
 /**
