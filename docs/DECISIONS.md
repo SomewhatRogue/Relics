@@ -3968,3 +3968,26 @@ Kyle: "Your potion and things can cover your character while in game and it's an
   8 px or more (cluster.css has the numbers).
 - **The fallback** (`client/underbtn.ts`): any touch button the hero or a red telegraph passes under goes
   to 35% (`.tb.under`), so the fight shows through it.
+
+## 2026-11-04: the job board as a list and a card (Kyle; Claude Opus 5.5)
+
+Kyle: "Mission selection is weird formatting now. Hard-to-read white text and complex. Maybe it pops out
+when you select one, and you can read it in more detail, more clearly, and decide to go alone, or group,
+or pass."
+- **The list** (`client/boardui.ts`, `client/board.css`): one dark row a job, a stripe down its left in the
+  kind's colour. The title in gold, then the kind as a coloured chip (HUNT, RESCUE, DENS, LARDER, STORY,
+  EXPEDITION, and DEEP beside it), the length, the hour and the weather in the dim face; the danger pips
+  and the pay on the right. The weather is the worst on the job's way (STORM, RAIN or FOG; clear says
+  nothing), from `shared/weather.ts`, so it's what he'll meet.
+- **The card**: a tap pops the job out, framed and centred over the list: its chip, the title in the
+  blackletter (names in capitals set in title case so it can be read), the posting in full in parchment,
+  then WHERE, ROOMS (MAP on the expedition), TIME, WEATHER, BOSS (only when the title doesn't name it),
+  DANGER, NEEDS (a story mission online: "A party of 3", and GO ALONE greyed) and PAYS, and three
+  buttons: GO ALONE (TAKE THE JOB offline), GATHER A PARTY, BACK. A tap on the dark round it is BACK too.
+  A fresh visit starts at the list; a redraw (a party gathering, joining) keeps the card open.
+- The buttons keep their hooks (`data-open`, `data-job`, `data-gather`), so the party flow, the lobby,
+  online joining and the online tests work as before. The parties gathering and DONE LATELY sit over the
+  list unchanged.
+- New words (`client/boardwords.ts`), waiting on the lore keeper and line editor: TIME, WEATHER, DANGER,
+  BOSS, NEEDS, DEEP, "A party of 3", RAIN, STORM, FOG, BACK on the card. WHERE, ROOMS, MAP, PAYS, GO
+  ALONE, TAKE THE JOB, GATHER A PARTY, JOBS and DONE LATELY were already on the board.
