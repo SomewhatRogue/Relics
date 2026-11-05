@@ -2,6 +2,15 @@
 
 ## Current slice
 
+**A recap, quiet drops, a tracker that folds** (Claude Opus 5.5, 2026-11-04; Kyle, from his phone: "it should
+give you a mission recap", drops "shouldn't pop up unless you click on it", the mission "smaller in the top
+left unless you click it to expand"). Built; waiting on Kyle's play. *Done when* a job's end (won, lost or
+the Barrowfields) shows a recap of rooms or jobs, goblins, downs, time, gold, xp and what he found, with one
+button that leads to the knack pick if one waits; a dropped piece shows no card until LOOK, a tap on it or
+F, and TAKE then takes it; the tracker is one line on his phone and laptop, opens on a tap or for 3 s when
+the objective changes; and the pack's KNACKS glows with 1 TO PICK. Open: the new words (DECISIONS) through
+the lore keeper and line editor.
+
 **Encounters as packs, and ten new sorts of the hungry** (Claude Opus 5.5, 2026-11-04; Kyle: "Too much chaos
 on the screen reads messy. I'd rather have more impactful battles, but splattering little goblins is also
 fun", and of the ten, "I like them all, let's make them"). Built; waiting on Kyle's play. *Done when* a job's

@@ -18,6 +18,8 @@ export const KNW = {
   see: 'SEE KNACKS',
   /** Over the hero, once, back in town. */
   pop: (level: number, picks: number) => `LEVEL ${level}${picks ? ': A KNACK TO PICK' : ''}`,
+  /** On the pack's KNACKS button while picks wait (Kyle: "highlighted if you click your inventory"). */
+  packPick: (n: number) => `${n} TO PICK`,
   /** The HUD's line in town. */
   hud: 'KNACK TO PICK',
 };

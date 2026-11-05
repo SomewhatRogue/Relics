@@ -32,12 +32,9 @@ import { SPEAKER, townSays } from '../shared/townsays';
 import { lossText } from '../shared/raids';
 import { MEND_UI, PERRIN } from '../shared/mendlines';
 import { dusk } from './streetlife';
-import { openTree } from './treeui';
-import { relicName } from '../shared/relicitems';
 import { RELICW } from './relicwords';
 import { openStep } from './churchrelics';
 import { openAdvocate } from './councilui';
-import { KNW } from './treewords';
 
 /** Words from another player's browser, made safe to show. */
 const esc = (v: unknown) => String(v ?? '').replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -188,32 +185,3 @@ const CHAT: Record<number, { name: string; line: string }> = {
 };
 const CHILD = ['We have a door now. A real one, with a latch. I open it all the time.', 'Did you kill the big one? The one with the chains? Was it heavy?', 'I saw one once, through the wall. It had a spoon. Why did it have a spoon?', "Mam says I can't come with you. Yet."];
 const SURVIVOR = ['They kept us in the dark so long I forgot what my hands looked like. Thank you for the candle.', 'My brother is still out at the Copperdeep. They took the ones who could dig. If you go down there...', 'I can hold a pitchfork. When my legs hold me, I will.'];
-
-/** A job not won, by how it ended (Game.finish): driven back, gone early from a party, or cut off from it. */
-const ENDED = {
-  half: 'You keep half the gold. Nobody you freed comes home.',
-  left: "You left early. You keep the gold you picked up, not the job's pay.",
-  cut: "Cut off from your party. You keep the gold you picked up, not the job's pay.",
-  lostCut: 'Cut off, and your party was driven back. You keep half the gold. Nobody you freed comes home.',
-};
-
-export function showResult(g: Game, panel: Panel): void {
-  const r = g.result!;
-  g.result = null;
-  const tally = labelRows([['GOLD', String(r.gold)], ['XP', String(r.xp)], ['SAVED', r.won ? String(r.rescued) : ''], ['LOST', r.lost ? `${r.lost} to the fire` : '']]);
-  const lines = r.won ? [] : [ENDED[r.half ? (r.how === 'dropped' ? 'lostCut' : 'half') : r.how === 'dropped' ? 'cut' : 'left']];
-  if (r.levels) lines.push(`<b>Level ${g.profile.level}.</b> ${title(TRAINERS[g.profile.cls].name)} trains you, at ${TRAINERS[g.profile.cls].where}.`);
-  if (r.treasure.length) lines.push(`<b>Treasure in your pack:</b> ${r.treasure.map((i) => `<b>${itemName(i)}</b>`).join(' and ')}.`);
-  for (const i of r.sold) lines.push(`No room for the ${itemName(i)}: sold for 20 gold.`);
-  if (r.relic) lines.push(RELICW.cutOut(r.job.boss ?? '', relicName(r.relic)) + ' ' + (g.profile.relic === r.relic.id ? RELICW.carryHint : RELICW.shelfHint));
-  if (r.lit !== undefined) lines.push(RELICW.litLeft(r.lit));
-  if (r.won && r.job.objective === 'story') lines.push(`<b>Barrowby's bell rings across the valley.</b> The council sits once enough people are home.`);
-  const html = p(`<b>${r.job.title}</b>`) + tally + lines.map(p).join(''), done = { label: 'BACK TO WICKHOLD', primary: true, act: () => panel.hide() };
-  // Grown: a knack to pick, straight from here (the line comes and goes with the picks).
-  const again = () => {
-    const n = g.profile.picks, pick = n ? p(`${KNW.jobLine(n)}`) : '';
-    const tree = n ? [{ label: KNW.pick, primary: true, act: () => openTree(g, panel, { back: again }) }] : r.levels ? [{ label: KNW.see, act: () => openTree(g, panel, { back: again }) }] : [];
-    panel.show(r.won ? 'JOB DONE' : r.half ? 'DRIVEN BACK' : 'HOME EARLY', html + pick, [...tree, { ...done, primary: !n }], true);
-  };
-  again();
-}

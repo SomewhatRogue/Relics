@@ -21,8 +21,12 @@ const url = process.argv[2] || 'http://localhost:4173/?hero=WARRIOR';
   await page.screenshot({ path: 'shots/loot-card-other.png' });
   await page.evaluate(() => Object.assign(window.__room.heroes[0], { x: 10.4, y: 9.2 }));
   await page.waitForTimeout(400);
+  await page.screenshot({ path: 'shots/loot-shut.png' });
+  // (The card opens only when asked for: LOOK, a tap on the drop, or F. lootcard.ts.)
+  await page.evaluate(() => window.__loot.open(window.__loot.near));
+  await page.waitForTimeout(400);
   await page.screenshot({ path: 'shots/loot-card.png' });
-  const btn = await page.locator('#loot button').boundingBox();
+  const btn = await page.locator('#loot button.primary').boundingBox();
   await page.touchscreen.tap(btn.x + btn.width / 2, btn.y + btn.height / 2);
   await page.waitForTimeout(400);
   console.log(await page.evaluate(() => { const h = window.__room.heroes[0]; return h.weapon + ' ' + JSON.stringify(h.arms.greatsword) + ' | ' + document.querySelector('#hud').innerText.replace(/\n/g, ' / '); }));

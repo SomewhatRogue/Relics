@@ -46,6 +46,7 @@ import { ONLINE } from './relay';
 import { townLight } from '../shared/daylight';
 import { townPhase } from './townclock';
 import { Followers } from './followers';
+import { kitOf, recapOf, type Kit, type Recap } from './recaptally';
 import { JobRooms, doorPushed, type DoorMark, type SavedHouses } from './jobrooms';
 import { packRoom, unpackRoom } from './bigsave';
 import type { Parties } from './parties';
@@ -61,7 +62,7 @@ interface JobSave { run: Run; room: Record<string, unknown>; houses?: SavedHouse
  * gold); or gone early from a party, by LEAVE or cut off from it (the gold picked up while with them).
  */
 export type How = 'won' | 'beaten' | 'left' | 'dropped';
-export interface Result { won: boolean; how: How; half: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number; relic?: RelicItem; treasure: Item[]; sold: Item[]; lost?: number; /** Jobs of the church's light left, if it went on this one. */ lit?: number }
+export interface Result { won: boolean; how: How; half: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number; relic?: RelicItem; treasure: Item[]; sold: Item[]; lost?: number; /** Jobs of the church's light left, if it went on this one. */ lit?: number; /** What happened, for the recap (recaptally.ts). */ recap?: Recap }
 /** A leader back after a reload waits this long (the room held) for a friend to answer before the job's given up. */
 const HOLD = 10;
 /** Something you can use where you stand: a spot, a person, or a door. */
@@ -128,6 +129,8 @@ export class Game {
   /** Leading again after a reload: the room waits till this for a friend to answer (HOLD). */
   private holdUntil = 0;
   private settling = false;
+  /** What this hero carried when the job began (the recap's FOUND and RELICS). */
+  private startKit: Kit | null = null;
   /** The leader's kit word last looked at, and their run last tallied (following a friend's job). */
   private kitSeen = -1;
   private bankedRun: Run | null = null;
@@ -397,6 +400,7 @@ export class Game {
   enterTown(at?: { x: number; y: number }): void {
     this.mode = 'town';
     this.outside = null;
+    this.startKit = null;
     this.rooms.reset(null);
     this.place(this.townRoom(), at);
   }
@@ -476,6 +480,7 @@ export class Game {
     this.rooms.reset(null);
     this.run = newRun(job);
     this.run.party = party;
+    this.run.began = Date.now();
     this.jobKey = soloJob();
     this.place(runRoom(this.run));
     this.rooms.reset(this.room);
@@ -486,6 +491,7 @@ export class Game {
   /** Advance with this frame's intent; returns the events (for effects and sound). */
   step(dt: number, intent: Intent): FightEvent[] {
     // Following a friend's job: their room is drawn here; nothing runs in this browser.
+    if (this.mode === 'run' && !this.startKit) this.startKit = kitOf(this.profile);
     if (this.remote) return this.stepRemote();
     intent = this.own(intent);
     // Back to lead after a reload: the room waits for a friend to answer (nobody does: the job's gone).
@@ -844,6 +850,9 @@ export class Game {
     const xp = jobXp(run.xp, won, crowd), rescued = won ? run.rescued : 0;
     p.gold += gold;
     p.runs++;
+    // The recap's counts, before the deep relic and the treasure go in the pack (recaptally.ts).
+    const recap = recapOf(run, this.mode === 'run' ? this.fightRoom : null, p, this.startKit, won, ME);
+    this.startKit = null;
     const levels = gainXp(p, xp);
     if (levels) this.levelPop = p.level;
     // Grown on the way home (the job's pay): lit up back in Wickhold.
@@ -859,7 +868,7 @@ export class Game {
     const found = won ? treasure(run.job, p.cls, p.id, p.runs, crowd, run.sides ?? 0) : [], kept = found.slice(0, Math.max(0, bagSize(p) - p.bag.length)), sold = found.slice(kept.length);
     p.bag.push(...kept);
     p.gold += sold.length * TREASURE_SOLD;
-    this.result = { won, how, half, job: run.job, gold, xp, rescued, levels, relic, treasure: kept, sold, lost: run.lost ?? 0, lit: lit > 0 ? p.lit : undefined };
+    this.result = { won, how, half, job: run.job, gold, xp, rescued, levels, relic, treasure: kept, sold, lost: run.lost ?? 0, lit: lit > 0 ? p.lit : undefined, recap };
     this.run = null;
     // Paid: marked so in the same store as the pay (the give below), then the tallies let go.
     if (key) p.paid = [...(p.paid ?? []), key].slice(-12);
