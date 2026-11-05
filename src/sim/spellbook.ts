@@ -8,6 +8,7 @@ import { ICICLES, STORM, TAPS, type Augment, type MageKit, type Swing, type Trai
 import { shoot } from './bolts';
 import { afflict, chill, type World } from './elements';
 import type { Bolt, Enemy, Hero } from './types';
+import { ICICLE_SHARE } from './techmage';
 
 /** How many more goblins a storm tap from this kit jumps to. */
 export const tapJumps = (kit: string): number => TAPS[kit as MageKit]?.storm.jumps ?? STORM.chains;
@@ -35,7 +36,7 @@ export function tapElement(w: World, h: Hero, e: Enemy, el: Augment, n: number):
 
 /** A shot's element landing: a tap's frost only chills; storm jumps as far as the shot says. */
 export function shotElement(w: World, b: Bolt, e: Enemy): void {
-  if (b.chills && b.el === 'frost') return chill(w, e);
+  if (b.chills && b.el === 'frost') return chill(w, e, ICICLE_SHARE);
   afflict(w, e, b.el, b.dmg, b.jumps);
   if (b.freeze) afflict(w, e, b.el, b.dmg, b.jumps);
 }

@@ -10,6 +10,7 @@ import { isDead } from './damage';
 import { begin, walk } from './enemies';
 import { afflict, type World } from './elements';
 import { downIfDead } from './combat';
+import { fireproof } from './ladderrogue';
 import type { Enemy, FightEvent, Hero, Intent } from './types';
 
 /** A slick of oil on the floor: lit (room time it went up, -1 not yet) and when it's gone. */
@@ -74,6 +75,11 @@ export function stepSlicks(slicks: Slick[], w: World, dt: number): Slick[] {
     for (const h of w.heroes) {
       if (h.act === 'down' || h.act === 'roll' || (h.z ?? 0) !== 0 || !on(s, h, HERO.radius * 0.5)) continue;
       if (Math.floor(now * 2) === Math.floor((now - dt) * 2)) continue;
+      // SHAKE IT OFF: just after a dash, the fire can't take (sim/ladderrogue.ts).
+      if (fireproof(h, now)) {
+        ev.push({ k: 'shakeoff', x: h.x, y: h.y });
+        continue;
+      }
       const n = Math.round(TORCH.dps / 2);
       h.hp -= n;
       ev.push({ k: 'hit', x: h.x, y: h.y, n, heavy: false, on: 'hero', src: 'fire' });

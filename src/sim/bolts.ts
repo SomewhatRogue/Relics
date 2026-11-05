@@ -11,6 +11,7 @@ import { shove } from './bodies';
 import { damage, frozen, isDead, isDummy } from './damage';
 import { backstabOf, fromBehind, rogueShot } from './backshot';
 import { backstabbed } from './techrogue';
+import { legStab } from './ladderrogue';
 import { afflict, shatter, type World } from './elements';
 import { shotElement } from './spellbook';
 import { allyHit, players } from './party';
@@ -126,7 +127,8 @@ function strike(w: World, b: Bolt, e: Enemy): boolean {
   if (board === 'blocked' && boardMult(board) <= 0) return w.ev.push({ k: 'deflect', x: e.x, y: e.y }), false;
   const by = w.heroes.find((h) => h.id === b.owner), crit = !!by && (!!b.blind || rollCrit(by));
   // A Rogue's bolt or knife in a goblin's back is a backstab too, at that weapon's rate.
-  const back = !!by && rogueShot(b) && WEAPONS[by.weapon].cls === 'ROGUE' && !isDummy(e) && fromBehind(e, b.dx, b.dy, by);
+  // (THROUGH THE LEGS: the next hit after dashing through a goblin's legs is a backstab: sim/ladderrogue.ts.)
+  const back = !!by && rogueShot(b) && WEAPONS[by.weapon].cls === 'ROGUE' && !isDummy(e) && (fromBehind(e, b.dx, b.dy, by) || legStab(by, e, w.now, w.ev, false));
   const rear = back && by ? backstabOf(by) : 1;
   const dead = damage(e, Math.round(b.dmg * rear * (crit ? CRIT : 1) * boardMult(board)), w.now, w.ev, { heavy: b.knock >= 8 || crit, flinch: FLINCH, mult: true, brutal: b.traits.includes('brutal'), dx: b.dx, dy: b.dy, src: b.kind, el: b.el, backstab: back });
   // (A board tuned to let a little of a plain shot by still stops it there.)

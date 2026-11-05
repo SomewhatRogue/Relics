@@ -72,6 +72,7 @@ import { stepExped, type ExpedState } from './exped';
 import { rogueStruck } from './techrogue';
 import { aimed } from './techranger';
 import { followGround, stepGround } from './techcleric';
+import { stepLadder } from './ladder';
 
 export class ArenaRoom {
   time = 0;
@@ -315,6 +316,8 @@ export class ArenaRoom {
     // A Ranger who has just jumped back leaves a snare where they stood.
     for (const h of this.heroes) if (h.act === 'roll' && h.actT === 0) laySnare(h, this.snares, this.time, this.events);
     this.snares = this.snares.filter((s) => stepSnare(s, this.enemies, this.time, this.events));
+    // The movement ladder: what a dodge (or a Warrior's taunt) does now, and caltrops on the floor (sim/ladder.ts).
+    stepLadder(this.heroes, this, w);
     this.javelins = this.javelins.filter((j) => stepJavelin(j, this.enemies, this.time, TICK, this.events, hit));
     this.hooks = this.hooks.filter((k) => stepHook(k, this.heroes, this.enemies, this.time, TICK, this.events, hit, w));
     this.bolts = this.bolts.filter((b) => (b.kind === 'flask' ? stepFlask(b, w, TICK, this.smokes) : stepBolt(b, w, TICK)));

@@ -42,6 +42,7 @@ export * from './warrior.js';
 export * from './ranger.js';
 export * from './mage.js';
 export * from './spellbook.js';
+export * from './ladder.js';
 export * from './cleric.js';
 export * from './stuncap.js';
 export * from './raiders.js';

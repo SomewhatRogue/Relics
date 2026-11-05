@@ -23,6 +23,8 @@ import { graspRefused } from './grasp';
 import { knows, type Enemy, type FightEvent, type Hero, type Intent } from './types';
 import { primeShoulder, stride } from './techwarrior';
 import { nockHead, quickNock } from './techranger';
+import { airShot, airSwing } from './ladderranger';
+import { blinkCost } from './laddermage';
 
 export function newHero(id: string, x: number, y: number): Hero {
   return {
@@ -206,10 +208,13 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   const dodge = w.dodge;
   const wantsRoll = !!dodgeOf(w) && now - h.rollQueuedAt < INPUT_BUFFER && now - h.lastRollAt >= dodge.cooldown * (1 - statsOf(h).dodge) && h.stamina >= 1 && !h.winded;
   if (h.act === 'roll') {
-    const k = dodgeReach(h) / dodge.time;
+    // (BLINK THROUGH sets a blink's own reach, to just past a goblin's back: sim/laddermage.ts.)
+    const k = (h.rollReach ?? dodgeReach(h)) / dodge.time;
     // (A blink covers over a tile a tick: in small steps, so it never comes out the far side of a wall.)
     travel(h, h.rollDx * k * dt, h.rollDy * k * dt, HERO.radius);
-    if (h.actT >= dodge.time) (h.act = 'idle'), (h.actT = 0);
+    // JUMP SHOT: an attack press mid-jump looses the bow, turned to the aim (sim/ladderranger.ts).
+    if (airShot(h, now, ev)) face(h, inp, enemies, true, w.heavy.range * 0.9), acts.loose(h, airSwing(h));
+    if (h.actT >= dodge.time) (h.act = 'idle'), (h.actT = 0), (h.landedAt = now);
     return;
   }
   if (h.act === 'bash') return acts.bash(h);
@@ -252,7 +257,8 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
       looseBolt(h);
       // A big spell is paid for now; short of magic, it fizzles and nothing is cast (sim/spells.ts).
       if (!paySpell(h, now, ev)) return void Object.assign(h, { act: 'idle', actT: 0, perfect: false });
-      if (h.perfect) ev.push({ k: 'perfect', x: h.x, y: h.y });
+      // (PERFECT BLINK: a blink soon after costs half: sim/laddermage.ts.)
+      if (h.perfect) (h.perfectAt = now), ev.push({ k: 'perfect', x: h.x, y: h.y });
       quickNock(h, now, ev);
       startSwing(h, -1, inp, enemies, now, ev);
       ev.push({ k: 'heavy', x: h.x, y: h.y });
@@ -394,9 +400,12 @@ function startRoll(h: Hero, inp: Intent, now: number, ev: FightEvent[]): void {
   h.lastRollAt = now;
   h.rollX = h.x;
   h.rollY = h.y;
+  // The movement ladder's per-dodge marks (sim/ladder.ts sets them again as the dodge begins).
+  h.rollReach = undefined;
+  h.airShot = false;
   // A blink leaves an image of you where you stood, and the goblins near it go for that.
   if (kind === 'blink' && knows(h, 'leave')) Object.assign(h, { decoyX: h.x, decoyY: h.y, decoyUntil: now + decoyTime(h) });
   h.rollQueuedAt = -9;
-  spend(h, WEAPONS[h.weapon].dodge.stamina * DODGE.cost * dodgeBreath(h), now);
+  spend(h, WEAPONS[h.weapon].dodge.stamina * DODGE.cost * dodgeBreath(h) * blinkCost(h, now, ev), now);
   ev.push({ k: kind === 'blink' ? 'blink' : 'roll', x: h.x, y: h.y });
 }

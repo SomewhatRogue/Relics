@@ -2,6 +2,71 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-04: the movement ladder, five classes; the Mage's ATTUNED and SPELLTHIEF (Kyle; Claude Opus 5.5)
+
+Kyle: "pure upgrades, not just choosing". Every class gets every rung of a three-rung ladder on its dodge
+(or, with none, what stands in for it), taught by its own trainer one at a time at levels 5, 10 and 15
+for the `ladder` drill's next rank (250, 760, 1450 gold). The save keeps `drills.ladder` as the count:
+an old hero has none. Rungs and every number in `shared/ladder.ts` (re-exported by tuning.ts), the
+room's rules in `sim/ladder.ts` (the per-tick step), `ladderranger.ts`, `laddermage.ts`,
+`ladderrogue.ts`, `ladderhealer.ts`, `taunt.ts`. Names are placeholders for the lore keeper.
+
+- **The trainer** (`shared/steprows.ts`, used by techniques and rungs alike; `client/trainerui.ts`): a
+  section of its own after TECHNIQUE, titled by what it climbs (JUMP, BLINK, DASH, GUARD, TAUNT), three
+  rows with EFFECT and COST, tagged LEARNED, LEARN, LEVEL n or NEEDS; "1 OF 3 · NEXT AT LEVEL 15".
+  Chapter 1's level cap is 10, so the third rung shows LEVEL 15 until the council lifts it.
+- **Ranger, the jump.** JUMP SHOT: an attack press mid-jump looses the bow at once at 60% of a full draw
+  (a crossbow its bolt, if one is on), once a jump. TWO SNARES (Kyle's "catches two" was already
+  TRAPPER, so this is the step up): the jump leaves a pair of snares 1.1 tiles apart across it, and
+  twice as many can be down; it waits on the SNARE lesson. HARD LANDING: landing knocks small goblins
+  within 1.3 tiles down 0.8 s (the stun cap), shoved outward.
+- **Mage, the blink.** BLINK BURST: where you blinked from, a burst 1.4 tiles round, 10 damage and your
+  element (fire sets alight, frost chills, storm hits and stops), judged at once and drawn at that size
+  for 0.35 s. BLINK THROUGH: a goblin within 0.5 tiles of the blink's line and in its reach is gone
+  through; you come out 0.15 tiles past its back (up to 1 tile past the blink's own reach), facing it.
+  PERFECT BLINK: a blink within 2 s of a PERFECT hold costs half (BLINK's cost on the phone shows it).
+- **Rogue, the dash** (the button says DASH). CALTROPS: dropped where the dash began, at most every 5 s,
+  0.9 tiles round, 6 s, two down at once; goblins on them move at half speed and bleed 3 s (a skewer's
+  ticks). THROUGH THE LEGS: dash through a goblin (the dash's swept line within its radius) and your
+  next hit within 2 s, blade or thrown, is a backstab with all its techniques. SHAKE IT OFF: a dash
+  clears all your poison, and for 1 s fire underfoot (a lit oil slick, a burning house's floor) can't
+  burn you. Heroes don't carry a burning status, so "shakes off burning" is that.
+- **Healer, the guard** (no dodge). SHELTER: friends within 2 tiles of a Healer holding a block take 70%
+  of a blow. MENDING PARRY: a parry heals friends within 3 tiles for 8 (as any of the Healer's heals,
+  so it also eases poison). COVER: a Healer blocking within 1.3 tiles of a friend, facing the blow,
+  takes it on the guard (breath as their own block, a guard break if it runs out) and the friend takes
+  nothing; never a striped blow or a Stoker's draw. `hitHero` now takes the room's heroes for these.
+- **Warrior, TAUNT** (no dodge). TAUNT sits on the dodge: the same press (Intent `rollSeq`, a counter,
+  so a guest's press reaches the leader's room), the dodge's slot on a phone (a diamond with the War
+  Cry's icon, its cooldown as a sweep and seconds, TAUNT under it; the context slot moves back to its
+  own place) and SPACE on a laptop (in BUTTONS too). A roar: goblins within 5 tiles come for you for 4 s
+  (before anyone else, even a war cry), again in 10 s; the roar's red ring is drawn at its reach.
+  STAND FAST: taunted goblins' blows land at 70% (block costs too), and while the roar lasts nothing
+  shoves or staggers you (as IRON FEET; dust and a red ring, no words). COWING ROAR: small goblins in
+  reach stagger 0.7 s (the stun cap). A different thing from the WAR CRY skill (9 tiles, 18 s).
+- **Seen as judged**: the caltrops, the burst and the roar are zones (`kind` caltrops, blinkburst,
+  taunt) drawn by `client/ladderground.ts` from the room's own numbers, in FLAT and 2.5D alike (called
+  from spellground.ts with each view's projection). Tells in `client/fxladder.ts`, sounds in
+  soundscape.ts, all reused bursts, rings and lines; one callout only, +N MAGIC for SPELLTHIEF.
+- **The Mage's techniques** (`shared/techniques.ts`, `sim/techmage.ts`), taught as the others' at levels
+  4, 7 and 10 (the Mage's were 5, 8, 10) for 180, 545, 1045. PRIMED SPELLS (its old ranked bump, the
+  name on screen, kept first so a Mage with ranks keeps it): a primed spell's x1.5 becomes x1.8.
+  ATTUNED: a Mage's fire burns 1.5 times as long (4.5 s, not 3); chilling hits on a goblin already
+  chilled build up and the third freezes it (a wand tap's three icicles count as one); storm's wet bonus
+  is x1.75, not x1.5 (Kyle changed storm to jump only to wet goblins; that code is in wt-storm, so
+  `wetMult(h, base)` in techmage.ts is the hook it should read, and `ATTUNED.wet` the number). SPELLTHIEF:
+  a hold let go on the flash gives back half its cost (wand 10, staff 15); a spellblade's perfect is free
+  already, so it gives back half of what that hold would have cost. The Mage's TECHNIQUE bump table and
+  `technique()` are gone.
+- New words (for the lore keeper and line editor): the fifteen rung names and EFFECT lines (RUNG_WORDS),
+  the five section titles, TAUNT under the button and its BUTTONS line (TAUNT_BUTTON), the three Mage
+  technique names and lines, the +N MAGIC callout.
+- Tests: `tests/ladder.test.ts` (levels and prices, rows, buying, old saves, the snare wait, each rung
+  firing and not without it, a guest's taunt), `tests/techmage.test.ts` (each Mage technique, and not
+  without it), `tests/techniques.test.ts` and `tests/trainer.test.ts` updated for the Mage's three.
+  `node scripts/ladder-look.cjs` shoots the trainer, the TAUNT button and roar, caltrops, a blink burst
+  and two snares.
+
 ## 2026-11-04: the element is the Mage's spellbook; switching gets its own button; GRASP (Kyle; Claude Opus 5.5)
 
 Kyle agreed the design: today every Mage weapon casts the same spell in every element, just tinted, and

@@ -12,6 +12,7 @@ import type { Bolt, Zone } from '../sim/types';
 import type { Light } from './light';
 import { EL_LIGHT } from './palette';
 import { OX, OY, PX } from './world';
+import { drawLadderGround } from './ladderground';
 
 /** Floor (x, z) at height y (tiles) to the screen. */
 type Proj = (x: number, y: number, z: number) => [number, number];
@@ -93,6 +94,8 @@ function draw(g: CanvasRenderingContext2D, room: ArenaRoom, P: Proj, ppu: number
     else if (z.kind === 'stormring') charged(g, z, P, room.time);
   }
   for (const b of room.bolts) if (b.kind === 'strike') mark(g, b, P, ppu);
+  // The movement ladder's caltrops, burst and roar, the same way (ladderground.ts).
+  drawLadderGround(g, room, P, ppu);
   g.globalAlpha = 1;
 }
 

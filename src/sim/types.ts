@@ -213,6 +213,22 @@ export interface Hero extends Body {
   /** Drills paid for at the trainer (shared/drills.ts), and a crit's own dice (seeded by the hero). */
   drills?: import('../shared/drills').Drills;
   critSeed?: number;
+  /** The movement ladder (shared/ladder.ts, sim/ladder*.ts): a JUMP SHOT spent this jump; a blink's own
+   *  reach (BLINK THROUGH) and the goblin it went through; the last PERFECT hold (PERFECT BLINK); the
+   *  next CALTROPS; THROUGH THE LEGS until then, and the goblin it was spent on; fireproof (SHAKE IT OFF)
+   *  until then; the TAUNT ready again, and the roar lasting (STAND FAST). Room times. */
+  airShot?: boolean;
+  /** When the last dodge ended (room time). */
+  landedAt?: number;
+  rollReach?: number;
+  throughId?: number;
+  perfectAt?: number;
+  caltropReady?: number;
+  legsUntil?: number;
+  legsStab?: number;
+  fireproofUntil?: number;
+  tauntReady?: number;
+  tauntUntil?: number;
   /** The name shown under someone else's hero (another player in town); their id otherwise. */
   tag?: string;
   /** Which of its class's three looks it wears (drawing only). */
@@ -378,6 +394,13 @@ export interface Enemy extends Body {
   /** A relic's marks: the next blow lands harder (MARK) until `markUntil`; hobbled (HOBBLE) until `hobbleUntil`. */
   markUntil?: number;
   hobbleUntil?: number;
+  /** The movement ladder: taunted by a Warrior (`tauntBy`) until then, its blows `tauntSoft` (STAND FAST);
+   *  slowed by caltrops until then; rime built up by an ATTUNED Mage's chilling hits (sim/techmage.ts). */
+  tauntBy?: string;
+  tauntUntil?: number;
+  tauntSoft?: boolean;
+  caltropUntil?: number;
+  rime?: number;
   /** The hero who last hit it (who threw it into the wall). */
   lastBy: string;
   /** How it died, for the body left behind. */
@@ -500,6 +523,9 @@ export interface Prop extends Body {
 }
 
 /** Blessed ground: a circle that mends and blesses allies and burns goblins, ticking every half second. */
+/** The movement ladder's ground (sim/ladder*.ts, drawn by client/ladderground.ts at the judged size):
+ *  a Rogue's caltrops, and the rings of a BLINK BURST and a TAUNT, shown the moment they're judged. */
+export type LadderZone = 'caltrops' | 'blinkburst' | 'taunt';
 export interface Zone {
   x: number;
   y: number;
@@ -510,7 +536,7 @@ export interface Zone {
   el: Augment;
   /** Not blessed ground but a skill's area (sim/areas.ts): a Ranger's volley (falling from `at`), a
    *  Mage's fire ring burning on, a staff's ring of fire or charged ring (sim/staffrings.ts). */
-  kind?: 'volley' | 'fire' | 'sentry' | 'flamering' | 'stormring';
+  kind?: 'volley' | 'fire' | 'sentry' | 'flamering' | 'stormring' | LadderZone;
   /** A staff's ring (sim/staffrings.ts): let go on the flash, and what it deals a touch (`n`). */
   big?: boolean;
   n?: number;
@@ -605,6 +631,9 @@ export type FightEvent =
       /** Techniques firing (shared/techniques.ts): SLAM's bursts, SHOULDER CHARGE ready and landing, IRON FEET,
        *  KNIFEWORK's bleed, SLIP AWAY, CUTPURSE, QUICK NOCK, STEADY, MENDING HANDS, SANCTUARY STEP, JUDGEMENT. */
       | 'slamburst' | 'shoulderready' | 'shoulder' | 'ironfeet' | 'cutbleed' | 'slipaway' | 'cutpurse' | 'quicknock' | 'steady' | 'mending' | 'sanctstep' | 'judged'; x: number; y: number }
+  /** The movement ladder and the Mage's techniques firing (shared/ladder.ts, techniques.ts): `r` a reach,
+   *  `el` an element, `n` magic given back, (x2, y2) the friend covered or the goblin gone through. */
+  | { k: 'airshot' | 'twinsnare' | 'landing' | 'blinkburst' | 'blinkthrough' | 'halfblink' | 'caltrops' | 'underlegs' | 'legstab' | 'shakeoff' | 'shelter' | 'parrymend' | 'coverfor' | 'taunt' | 'taunted' | 'braced' | 'attuned' | 'spellthief'; x: number; y: number; r?: number; el?: Augment; n?: number; x2?: number; y2?: number }
   /** A goblin retching up a perfect dart's poison, facing (dx, dy) (sim/venom.ts). */
   | { k: 'puke'; x: number; y: number; dx: number; dy: number }
   | { k: 'collapse'; x: number; y: number; w: number; h: number }

@@ -21,6 +21,9 @@ import { landed } from './ownfoes';
 import { travelTo } from '../shared/sweep';
 import { knockDown, rooted, takeShoulder } from './techwarrior';
 import { judge } from './techcleric';
+import { legStab } from './ladderrogue';
+import { cover, parryMend, shelter } from './ladderhealer';
+import { braced, softer } from './taunt';
 
 export { respawnOf, stunOf } from './damage';
 
@@ -45,7 +48,8 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   // From behind: the hero stands where the enemy's facing points away (dummies have no back).
   const tx = h.x - e.x, ty = h.y - e.y, tl = Math.hypot(tx, ty) || 1;
   // A nest is a mound of web: no back to stab and no front to glance off (Kyle: too hard for a Rogue).
-  const mound = e.kind === 'nest', rear = !isDummy(e) && !mound && (e.fx * tx + e.fy * ty) / tl < rearCos(h);
+  // (THROUGH THE LEGS: a hit just after dashing through a goblin counts as from behind: sim/ladderrogue.ts.)
+  const mound = e.kind === 'nest', rear = !isDummy(e) && !mound && ((e.fx * tx + e.fy * ty) / tl < rearCos(h) || legStab(h, e, now, ev));
   const ice = frozen(e, now), blessed = h.blessedUntil > now ? BLESSING.dmgMult : 1;
   const heldFast = e.act === 'stunned' || e.act === 'pinned' || ice || snared(e, now);
   // A Rogue's knives are weak head on (unless it's held fast): keep moving and get behind.
@@ -172,8 +176,9 @@ export function rollCrit(h: Hero): boolean {
   return x / 4294967296 < chance;
 }
 
-/** An enemy's attack lands on a hero: rolled through, parried, blocked, or taken. */
-export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: FightEvent[]): void {
+/** An enemy's attack lands on a hero: rolled through, parried, blocked, or taken. `heroes`: the room's,
+ *  for the Healer's guard rungs (sim/ladderhealer.ts). */
+export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: FightEvent[], heroes: Hero[] = []): void {
   // Just come into the room: nothing lands yet.
   if (h.safeT) return;
   if (h.act === 'down') return;
@@ -190,8 +195,10 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   }
   if (h.wardUntil > now && warded(e, a, h, now, ev)) return;
   const w = WEAPONS[h.weapon];
+  // STAND FAST: a taunted goblin's blow is worth less (sim/taunt.ts).
+  const soft = softer(e, now);
   // A blessed hero takes less from everything.
-  const g = statsOf(h), taken = (h.blessedUntil > now ? BLESSING.taken : 1) * g.taken * (wears(h, 'apron') ? HUNGRY_FX.apron : 1);
+  const g = statsOf(h), taken = (h.blessedUntil > now ? BLESSING.taken : 1) * g.taken * (wears(h, 'apron') ? HUNGRY_FX.apron : 1) * soft;
   // A spellblade's lightning dash: untouchable while it runs (sim/rush.ts).
   if (h.act === 'bash' && h.rush?.el === 'storm') return void ev.push({ k: 'dodge', x: h.x, y: h.y });
   if (h.act === 'roll' && h.actT >= w.dodge.iFrom && h.actT <= slipWindow(h)) {
@@ -200,6 +207,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     if (has(h, 'tempo')) (h.tempoUntil = now + TRAIT.tempoTime), ev.push({ k: 'tempo', x: h.x, y: h.y });
     return;
   }
+  // COVER: a Healer blocking beside you takes it on the guard for you (sim/ladderhealer.ts).
+  if (cover(e, a, h, heroes, soft, now, ev)) return;
   // The Stoker's draw: hooked along the line and hauled to its feet, stunned for a free sweep.
   if (a.kind === 'draw') {
     const l = Math.hypot(e.x - h.x, e.y - h.y) || 1, to = VARIANTS.stoker.pullTo;
@@ -228,18 +237,19 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     shove(e, tx / tl, ty / tl, 4, e.weight);
     ev.push({ k: 'parry', x: (h.x + e.x) / 2, y: (h.y + e.y) / 2 });
     ev.push({ k: 'stunned', x: e.x, y: e.y });
-    // A spellblade's parry fills the blade too (sim/spellblade.ts).
+    // A spellblade's parry fills the blade too (sim/spellblade.ts); MENDING PARRY heals friends near (sim/ladderhealer.ts).
     parryFills(h, ev);
+    parryMend(h, heroes, ev);
     return;
   }
   if (canGuard && h.blocking) {
     // Too heavy to block: the guard breaks (it should have been parried).
     if (a.crush) h.stamina = 0;
     // A held block takes nothing off your health; it costs breath instead, and plenty of it.
-    h.stamina -= a.dmg * GUARD.staminaPerDmg * w.guardCost * (1 - g.guard) * (1 - knack(h, 'block'));
+    h.stamina -= a.dmg * soft * GUARD.staminaPerDmg * w.guardCost * (1 - g.guard) * (1 - knack(h, 'block'));
     h.staminaAt = now;
     h.hitstop = Math.max(h.hitstop, HITSTOP.light);
-    shove(h, sx / sl, sy / sl, a.knock * 0.4, HERO.weight);
+    if (!braced(h, now)) shove(h, sx / sl, sy / sl, a.knock * 0.4, HERO.weight);
     if (h.stamina <= 0) {
       Object.assign(h, { stamina: 0, winded: true, act: 'stun', actT: 0, actDur: GUARD.guardBreakStun });
       ev.push({ k: 'guardbreak', x: h.x, y: h.y });
@@ -247,14 +257,16 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     return;
   }
   // A Cleric's holy shield soaks what it can (sim/holy.ts); a blow it takes whole doesn't stagger.
-  // IRON FEET: holding an attack, the blow lands but doesn't shove, stagger or knock down (sim/techwarrior.ts).
-  const n = soak(h, Math.round(a.dmg * taken), now, ev), feet = rooted(h);
+  // IRON FEET: holding an attack, the blow lands but doesn't shove, stagger or knock down (sim/techwarrior.ts);
+  // STAND FAST, while a taunt lasts, the same (sim/taunt.ts). SHELTER: a Healer blocking near takes some off.
+  const iron = rooted(h), brace = !iron && braced(h, now), feet = iron || brace;
+  const n = soak(h, Math.round(a.dmg * taken * shelter(h, heroes, ev)), now, ev);
   if (n <= 0) return void (h.hitstop = Math.max(h.hitstop, HITSTOP.light));
   h.hp -= n;
   // Heavy armor: a small goblin's blow doesn't stagger you.
   if (!(g.steady && e.kind === 'scrapper') && !feet) Object.assign(h, { act: 'hurt', actT: 0, actDur: HURT_STAGGER + a.knock * 0.012 });
   h.hitstop = Math.max(h.hitstop, HITSTOP.heavy);
-  if (feet) ev.push({ k: 'ironfeet', x: h.x, y: h.y });
+  if (feet) ev.push({ k: iron ? 'ironfeet' : 'braced', x: h.x, y: h.y });
   else shove(h, sx / sl, sy / sl, a.knock, HERO.weight);
   ev.push({ k: 'hit', x: h.x, y: h.y, n, heavy: n >= 25, on: 'hero', src: a.kind });
   // A spider's bite (or the brood mother's bite or glob) poisons.

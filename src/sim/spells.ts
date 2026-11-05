@@ -10,6 +10,7 @@ import { BLADE, SPELL, WAND, WEAPONS, type MageKit } from '../shared/tuning';
 import { isDead } from './damage';
 import { stun } from './stuns';
 import type { Enemy, FightEvent, Hero } from './types';
+import { spellthief } from './techmage';
 
 const blade = (h: Hero) => !!WEAPONS[h.weapon]?.spellblade;
 
@@ -32,9 +33,11 @@ export function refuseSpell(h: Hero, now: number, ev: FightEvent[]): boolean {
 
 /** The release: pay for the spell (false: it fizzled, nothing spent). Let go on the flash, a spellblade's is free. */
 export function paySpell(h: Hero, now: number, ev: FightEvent[]): boolean {
-  const free = blade(h) && h.perfect, n = free ? 0 : spellCost(h);
+  const cost = spellCost(h), free = blade(h) && h.perfect, n = free ? 0 : cost;
   if (!free && short(h)) return ev.push({ k: 'fizzle', x: h.x, y: h.y }), false;
   if (n > 0) Object.assign(h, { stamina: Math.max(0, h.stamina - n), staminaAt: now }), ev.push({ k: 'magic', x: h.x, y: h.y, n });
+  // SPELLTHIEF: on the flash, half of it back (sim/techmage.ts).
+  spellthief(h, cost, ev);
   // The charge paid for it (all of it, whatever was short of full).
   if (blade(h) && !free && WEAPONS[h.weapon].heavy.spell) h.bladeCharge = 0;
   return true;

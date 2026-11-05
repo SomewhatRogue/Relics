@@ -4,6 +4,7 @@
  * it; when the roof falls in, everyone inside is thrown out the door hurt (never killed by it), the
  * freed with them, and anyone still caged is lost. The room keeps the house's state on `blaze`.
  */
+import { fireproof } from './ladderrogue';
 import { burningAt, inBox } from '../shared/blaze';
 import type { Blaze } from '../shared/arena';
 import { HOUSEBURN, HOUSEFIRE } from '../shared/tuning';
@@ -39,7 +40,8 @@ export function stepBlaze(r: Burning, dt: number): void {
     if (h.act === 'down') continue;
     const on = fire.some((a) => inBox(a, h.x, h.y + 0.1));
     st.burnt[h.id] = on ? (st.burnt[h.id] ?? 0) + HOUSEFIRE.dps * dt : 0;
-    if (st.burnt[h.id] >= 4) (st.burnt[h.id] -= 4), scorch(h, 4, ev, 'fire');
+    // (SHAKE IT OFF: just after a dash the fire underfoot can't take: sim/ladderrogue.ts.)
+    if (st.burnt[h.id] >= 4) (st.burnt[h.id] -= 4), fireproof(h, t) ? ev.push({ k: 'shakeoff', x: h.x, y: h.y }) : scorch(h, 4, ev, 'fire');
     // Set alight from outside with someone in: after a grace, the smoke gets to them (sim/houseburn.ts).
     if (b.smoke === undefined || t < b.smoke) continue;
     const sm = (st.smoked ??= {});

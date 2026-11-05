@@ -7,6 +7,8 @@ import { guardOf, dodgeName, dodgeOf, RELICS, WEAPONS, type Item } from '../shar
 import { carriedItem } from '../sim/charge';
 import { castElement } from '../sim/channel';
 import { knows } from '../sim/types';
+import { taunts } from '../sim/taunt';
+import { TAUNT_BUTTON } from '../shared/ladder';
 import { paintButton, type Face } from './btnart';
 import { icon, type IconId } from './icons';
 import { skillCanvas } from './skillicons';
@@ -52,6 +54,8 @@ async function rows(g: Game, touch: boolean): Promise<Row[]> {
     const dn = dodgeName(cls);
     out.push({ face: { shape: 'diamond', size: 30, grade: 'iron', icon: icon(({ JUMP: 'jump', DASH: 'dash', BLINK: 'blink' } as Record<string, IconId>)[dn] ?? 'roll') }, name: dn, key: 'SPACE', text: 'Get out of any blow, even a striped one.' });
   }
+  // A Warrior's TAUNT, in the dodge's place (sim/taunt.ts).
+  else if (taunts(me)) out.push({ face: { shape: 'diamond', size: 30, grade: 'iron', icon: skillCanvas('horn', '') }, name: 'TAUNT', key: 'SPACE', text: TAUNT_BUTTON });
   if (kit.reloads) out.push({ face: round(icon('reload'), 'gilt'), name: 'RELOAD', key: 'C', text: 'Hold to wind the crossbow. Wind it in one go, standing still, and the bolt glints (a PERFECT).' });
   const [skill, relic] = me.relics;
   if (knows(me, 'skill')) out.push({ face: round(skillCanvas(skill, me.augments[skill])), name: 'SKILL', key: 'E', text: `Your class skill, ${RELICS[skill].name}. The dark sweep and the number count down to the next use.` });

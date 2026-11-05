@@ -3,8 +3,9 @@
  * to the next at once, again in CHANNEL.cooldown, and primes the next spell. Kept on the hero
  * (`augments.channel`, as saves have always had it), so a guest's screen has it too.
  */
-import { CHANNEL, HERO, INPUT_BUFFER, TAPS, WEAPONS, technique, type Element, type MageKit, type Swing } from '../shared/tuning';
+import { CHANNEL, HERO, INPUT_BUFFER, TAPS, WEAPONS, type Element, type MageKit, type Swing } from '../shared/tuning';
 import { knack } from './gearstats';
+import { primedMore } from './techmage';
 import type { FightEvent, Hero, Intent } from './types';
 
 /** The element a Mage's spells are cast in now: fire to start with. */
@@ -41,10 +42,10 @@ export function stepElement(h: Hero, inp: Intent, now: number, ev: FightEvent[])
   turnElement(h, ev, now);
 }
 
-/** A spell's primed multiplier (spent by this spell): CHANNEL.primed, more with the Mage's technique. */
+/** A spell's primed multiplier (spent by this spell): CHANNEL.primed, more with PRIMED SPELLS (sim/techmage.ts). */
 export function spendPrimed(h: Hero): number {
   if (!h.primed) return 1;
   h.primeLeft = (h.primeLeft ?? 1) - 1;
   h.primed = h.primeLeft > 0;
-  return CHANNEL.primed + technique(h.drills, 'MAGE') + knack(h, 'primed');
+  return CHANNEL.primed + primedMore(h) + knack(h, 'primed');
 }

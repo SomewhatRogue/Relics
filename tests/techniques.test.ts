@@ -1,6 +1,6 @@
 /** The class techniques (shared/techniques.ts): taught in order, kept from old saves, and each one firing in the room. */
 import { describe, expect, it } from 'vitest';
-import { CHARGE, PARTY, TICK, WEAPONS, drillLevel, drillPrice, newProfile, technique, type WeaponId } from '../src/shared/tuning';
+import { CHARGE, PARTY, TICK, WEAPONS, drillLevel, drillPrice, newProfile, type WeaponId } from '../src/shared/tuning';
 import { AIM_DRIFT, CUTPURSE, JUDGEMENT, MENDING, QUICK_NOCK, SANCT_STEP, SHOULDER, TECHS, TECH_WORDS, knowsTech } from '../src/shared/techniques';
 import { buyDrill, drillState, learnLesson } from '../src/shared/training';
 import { trainerRows } from '../src/shared/trainrows';
@@ -29,13 +29,12 @@ const world = (heroes: Hero[], enemies: Enemy[], now = 10, pickups: Pickup[] = [
 const blow = (e: Enemy, aimed: string, dy = 1): EnemyAttack => ({ kind: 'swing', aimed, t: 0.2, windup: 0.6, active: 0.1, recover: 0.3, dmg: 10, knock: 6, unblockable: false, dx: 0, dy, ox: e.x, oy: e.y, range: 2, arc: 90, cx: 0, cy: 0, radius: 0, done: false });
 
 describe('techniques at the trainer', () => {
-  it('three a class but the Mage, taught at levels 4, 7 and 10 for rising gold; the Mage keeps its ranks', () => {
-    for (const cls of ['WARRIOR', 'ROGUE', 'RANGER', 'HEALER'] as const) {
+  it('three a class, the Mage too, taught at levels 4, 7 and 10 for rising gold', () => {
+    for (const cls of ['WARRIOR', 'ROGUE', 'RANGER', 'HEALER', 'MAGE'] as const) {
       expect(TECHS[cls]).toHaveLength(3);
       expect([0, 1, 2].map((r) => drillLevel('technique', r, cls))).toEqual([4, 7, 10]);
     }
-    expect(TECHS.MAGE).toEqual([]);
-    expect([0, 1, 2].map((r) => drillLevel('technique', r, 'MAGE'))).toEqual([5, 8, 10]);
+    expect(TECHS.MAGE).toEqual(['primed', 'attuned', 'spellthief']);
     expect(drillPrice('technique', 1)).toBeGreaterThan(drillPrice('technique', 0));
     expect(drillPrice('technique', 2)).toBeGreaterThan(drillPrice('technique', 1));
     for (const t of Object.values(TECH_WORDS)) expect(t.text).not.toMatch(/\u2014/);
@@ -53,9 +52,9 @@ describe('techniques at the trainer', () => {
     // Another class's technique is never known, and no drills is nothing.
     expect(knowsTech(hero('sword', 3), 'knifework')).toBe(false);
     expect(knowsTech(Object.assign(newHero('x', 0, 0), { weapon: 'sword' as WeaponId }), 'slam')).toBe(false);
-    // The Mage's ranks still count as its bump.
-    expect(technique({ technique: 2 }, 'MAGE')).toBeCloseTo(0.4);
-    expect(technique({ technique: 3 }, 'WARRIOR')).toBe(0);
+    // A Mage with ranks keeps PRIMED SPELLS first (its old bump), then the new two.
+    expect(TECHS.MAGE.map((t) => knowsTech(hero('wand', 1), t))).toEqual([true, false, false]);
+    expect(knowsTech(hero('staff', 2), 'attuned')).toBe(true);
   });
 
   it('rows say learned, next (level and price) or locked; one bought at a time, in order', () => {
@@ -75,10 +74,10 @@ describe('techniques at the trainer', () => {
     const fresh = trainerRows(Object.assign(newProfile('HEALER'), { level: 10, gold: 0 })).filter((r) => r.tech);
     expect(fresh.map((r) => r.state)).toEqual(['poor', 'needs', 'needs']);
     expect(fresh[2].needs).toBe('WALKING SANCTUARY');
-    // The Mage's row is as it was: one drill of ranks.
+    // The Mage's are three rows too, PRIMED SPELLS first.
     const mage = trainerRows(Object.assign(newProfile('MAGE'), { level: 10 })).filter((r) => r.group === 'craft');
-    expect(mage.map((r) => r.id)).toEqual(['leave', 'technique']);
-    expect(mage[1].name).toBe('PRIMED SPELLS');
+    expect(mage.map((r) => r.id)).toEqual(['leave', 'primed', 'attuned', 'spellthief']);
+    expect(mage.map((r) => r.name)).toEqual(['IMAGE ON THE BLINK', 'PRIMED SPELLS', 'ATTUNED', 'SPELLTHIEF']);
   });
 
   it("a Ranger's first technique waits on the snare lesson", () => {

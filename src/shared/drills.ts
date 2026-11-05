@@ -7,7 +7,7 @@
  */
 import type { HeroClass } from './weapons.js';
 
-export type DrillId = 'power' | 'health' | 'speed' | 'crit' | 'wind' | 'skill' | 'technique';
+export type DrillId = 'power' | 'health' | 'speed' | 'crit' | 'wind' | 'skill' | 'technique' | 'ladder';
 export const DRILL_ORDER: DrillId[] = ['power', 'health', 'speed', 'crit', 'wind', 'skill', 'technique'];
 
 /** The level each rank needs: the base stats one rank every two levels; the skill and technique later. */
@@ -24,21 +24,16 @@ export const DRILLS: Record<DrillId, { name: string; text: string; gain: string;
   crit: { name: 'CRITICAL', text: 'A chance for any hit to do 50% more damage', gain: '+#% crit chance', per: 0.04, levels: STAT_LEVELS, max: 5, price: 120 },
   wind: { name: 'STAMINA', text: 'Stamina refills faster', gain: 'stamina refill +#%', per: 0.08, levels: STAT_LEVELS, max: 5, price: 70 },
   skill: { name: 'SKILL', text: 'Skill recharges faster', gain: 'skill recharge #% faster', per: 0.08, levels: [4, 7, 10], max: 3, price: 160 },
-  technique: { name: 'TECHNIQUE', text: '', gain: '', per: 0, levels: [5, 8, 10], max: 3, price: 180 },
+  technique: { name: 'TECHNIQUE', text: '', gain: '', per: 0, levels: [4, 7, 10], max: 3, price: 180 },
+  // The movement ladder (shared/ladder.ts): three rungs a class, one a rank. Not in DRILL_ORDER: its rows are the rungs.
+  ladder: { name: 'LADDER', text: '', gain: '', per: 0, levels: [5, 10, 15], max: 3, price: 250 },
 };
 /** What a crit does to a blow. */
 export const CRIT = 1.5;
-/**
- * A class's technique as a bump a rank: only the Mage's now. Every other class learns three moves
- * instead, one a rank (shared/techniques.ts, Kyle 2026-11-04: "pure upgrades, not just choosing").
- */
-export const TECHNIQUE: Partial<Record<HeroClass, { name: string; text: string; gain: string; per: number }>> = {
-  MAGE: { name: 'PRIMED SPELLS', text: 'Primed spells do 20% more damage per rank', gain: '+#% primed spell', per: 0.2 },
-};
-/** The levels the three technique moves are taught at (the Mage's ranks keep DRILLS.technique.levels). */
-export const TECH_LEVELS = [4, 7, 10];
-/** The levels a class's technique ranks need. */
-export const techLevels = (cls?: HeroClass) => (cls && !TECHNIQUE[cls] ? TECH_LEVELS : DRILLS.technique.levels);
+/** The levels every class's three techniques are taught at (shared/techniques.ts), the Mage's too now. */
+export const TECH_LEVELS = DRILLS.technique.levels;
+/** The levels a class's technique ranks need (the same for every class since the Mage has three too). */
+export const techLevels = (_cls?: HeroClass) => TECH_LEVELS;
 
 export type Drills = Partial<Record<DrillId, number>>;
 /** The levels a drill's ranks need (the technique's by class). */
@@ -51,10 +46,10 @@ export const drillCap = (id: DrillId, level: number, cls?: HeroClass) => levelsO
 export const drillPrice = (id: DrillId, rank: number) => Math.round((DRILLS[id].price * Math.pow(rank + 1, 1.6)) / 5) * 5;
 /** A drill's total, at its rank. */
 export const drilled = (d: Drills | undefined, id: DrillId) => (d?.[id] ?? 0) * DRILLS[id].per;
-export const technique = (d: Drills | undefined, cls: HeroClass) => (d?.technique ?? 0) * (TECHNIQUE[cls]?.per ?? 0);
 /** A few words for what `ranks` ranks of a drill give (one rank: what the next buys). */
 export function drillGain(id: DrillId, cls: HeroClass, ranks: number): string {
-  const d = (id === 'technique' && TECHNIQUE[cls]) || DRILLS[id];
+  void cls;
+  const d = DRILLS[id];
   return d.gain.replace('#', String(d.per < 1 ? Math.round(d.per * ranks * 100) : d.per * ranks));
 }
 

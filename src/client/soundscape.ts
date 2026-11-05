@@ -85,6 +85,14 @@ export class Soundscape {
     if (ev.k === 'quicknock') return sfx.latch();
     if (ev.k === 'judged') return sfx.smite();
     if (ev.k === 'mending' || ev.k === 'sanctstep') return sfx.blessed();
+    // The movement ladder and the Mage's techniques (sim/ladder*.ts, taunt.ts, techmage.ts).
+    if (ev.k === 'landing' || ev.k === 'braced') return sfx.bodyhit();
+    if (ev.k === 'airshot' || ev.k === 'twinsnare') return sfx.latch();
+    if (ev.k === 'blinkthrough' || ev.k === 'halfblink' || ev.k === 'spellthief') return sfx.channeled();
+    if (ev.k === 'caltrops' && ev.r) return sfx.gold();
+    if (ev.k === 'legstab') return sfx.backstab();
+    if (ev.k === 'parrymend' || ev.k === 'coverfor') return sfx.blessed();
+    if (ev.k === 'taunt') return sfx.rally();
     // The Ranger's: a blinding arrow's flash, a clean hit, the crossbow's ratchet and its glint, a glinted bolt through a line.
     if (ev.k === 'blinded') return sfx.perfect(), sfx.flare();
     if (ev.k === 'trueshot') return sfx.perfect();
