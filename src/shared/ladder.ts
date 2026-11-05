@@ -35,23 +35,23 @@ export const LADDER_TITLE: Record<HeroClass, string> = { RANGER: 'JUMP', MAGE: '
 export const RUNG_WORDS: Record<RungId, { name: string; text: string }> = {
   airshot: { name: 'JUMP SHOT', text: 'Tap attack mid-jump to shoot, 60% drawn.' },
   twinsnare: { name: 'TWO SNARES', text: 'Your jump leaves two snares side by side, not one.' },
-  landing: { name: 'HARD LANDING', text: 'Landing a jump knocks small goblins next to you over for 0.8 s.' },
-  blinkburst: { name: 'BLINK BURST', text: 'Blinking leaves a burst of your element where you stood.' },
+  landing: { name: 'HARD LANDING', text: 'Landing a jump knocks small goblins next to you flat for 0.8 s.' },
+  blinkburst: { name: 'BLINK BURST', text: 'Blinking leaves a burst of your element where you stood: 10 damage to goblins in it.' },
   blinkthrough: { name: 'BLINK THROUGH', text: 'Blink at a goblin to come out behind it, facing its back.' },
-  halfblink: { name: 'PERFECT BLINK', text: 'A blink within 2 s of a PERFECT costs half the magic.' },
+  halfblink: { name: 'PERFECT BLINK', text: 'A blink within 2 s of a PERFECT hold costs half the magic.' },
   caltrops: { name: 'CALTROPS', text: 'Your dash drops caltrops where you started, once every 5 s. Goblins on them slow down and bleed.' },
-  underlegs: { name: 'THROUGH THE LEGS', text: 'Dash through a goblin and your next hit within 2 s is a backstab.' },
-  shakeoff: { name: 'SHAKE IT OFF', text: 'Dashing clears your poison, and fire on the floor can\'t burn you for 1 s.' },
+  underlegs: { name: 'DASH THROUGH', text: 'Dash through a goblin and your next hit within 2 s is a backstab.' },
+  shakeoff: { name: 'SHAKE OFF', text: 'Dashing clears your poison, and fire on the floor can\'t burn you for 1 s.' },
   shelter: { name: 'SHELTER', text: 'While you block, friends within 2 tiles take 30% less damage.' },
-  parrymend: { name: 'MENDING PARRY', text: 'A parry heals friends within 3 tiles for 8.' },
-  cover: { name: 'COVER', text: 'Block next to a friend and you take the blows meant for them.' },
-  taunt: { name: 'TAUNT', text: 'A roar on its own button: goblins within 5 tiles come for you for 4 s, every 10 s.' },
-  standfast: { name: 'STAND FAST', text: 'While your taunt lasts, taunted goblins hit 30% softer and nothing knocks you back.' },
+  parrymend: { name: 'HEALING PARRY', text: 'A parry heals friends within 3 tiles for 8.' },
+  cover: { name: 'COVER', text: 'Block beside a friend and your guard takes blows meant for them. Not striped ones.' },
+  taunt: { name: 'TAUNT', text: 'Roar: goblins within 5 tiles come for you for 4 s. Once every 10 s.' },
+  standfast: { name: 'STAND FAST', text: 'While your taunt lasts, taunted goblins do 30% less damage, and no blow knocks you back or staggers you.' },
   cowing: { name: 'COWING ROAR', text: 'Your taunt staggers small goblins for 0.7 s.' },
 };
 
 /** The TAUNT button's line in BUTTONS (client/legend.ts). */
-export const TAUNT_BUTTON = 'Roar: goblins within 5 tiles come for you for 4 s, every 10 s.';
+export const TAUNT_BUTTON = 'Roar: goblins within 5 tiles come for you for 4 s. Once every 10 s.';
 
 /** JUMP SHOT: an attack press mid-jump looses the bow at once, `draw` of a full draw (a crossbow its bolt), once a jump. */
 export const AIR_SHOT = { draw: 0.6 };

@@ -37,12 +37,12 @@ export const TECH_WORDS: Record<TechId, { name: string; text: string }> = {
   trapper: { name: 'TRAPPER', text: 'Each snare catches two goblins, not one.' },
   quicknock: { name: 'QUICK NOCK', text: 'After a PERFECT shot, your next draw starts part drawn. A crossbow loads at once.' },
   steady: { name: 'STEADY AIM', text: 'Your shots don\'t drift while you move.' },
-  mending: { name: 'MENDING HANDS', text: 'Help friends up 50% faster.' },
+  mending: { name: 'HELPING HAND', text: 'Help friends up 50% faster.' },
   sanctstep: { name: 'WALKING SANCTUARY', text: 'Sanctuary\'s blessed ground moves with you for its first 3 s.' },
   judgement: { name: 'JUDGEMENT', text: 'Hit a goblin that\'s attacking a friend and it\'s stunned for 1 s.' },
-  primed: { name: 'PRIMED SPELLS', text: 'The first spell after a switch does 80% more damage, not 50%.' },
-  attuned: { name: 'ATTUNED', text: 'Fire burns 50% longer, three frost hits in a row freeze, and storm does 75% more to wet goblins, not 50%.' },
-  spellthief: { name: 'SPELLTHIEF', text: 'A PERFECT hold gives back half its magic.' },
+  primed: { name: 'PRIMED SPELLS', text: 'Primed spells do 80% more damage, not 50%.' },
+  attuned: { name: 'ATTUNED', text: 'Fire burns 50% longer, and three chills in a row freeze a goblin.' },
+  spellthief: { name: 'MAGIC BACK', text: 'A PERFECT hold gives back half its magic.' },
 };
 
 /** SLAM: small goblins within `reach` tiles of the one slammed burst, `most` of them. */

@@ -77,7 +77,7 @@ describe('techniques at the trainer', () => {
     // The Mage's are three rows too, PRIMED SPELLS first.
     const mage = trainerRows(Object.assign(newProfile('MAGE'), { level: 10 })).filter((r) => r.group === 'craft');
     expect(mage.map((r) => r.id)).toEqual(['leave', 'primed', 'attuned', 'spellthief']);
-    expect(mage.map((r) => r.name)).toEqual(['IMAGE ON THE BLINK', 'PRIMED SPELLS', 'ATTUNED', 'SPELLTHIEF']);
+    expect(mage.map((r) => r.name)).toEqual(['IMAGE ON THE BLINK', 'PRIMED SPELLS', 'ATTUNED', 'MAGIC BACK']);
   });
 
   it("a Ranger's first technique waits on the snare lesson", () => {
