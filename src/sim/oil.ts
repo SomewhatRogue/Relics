@@ -14,6 +14,7 @@ import { afflict, type World } from './elements';
 import { downIfDead } from './combat';
 import { fireproof } from './ladderrogue';
 import type { Enemy, FightEvent, Hero, Intent } from './types';
+import { manaShield } from './manashield';
 
 /** A slick of oil on the floor: lit (room time it went up, -1 not yet), how long it burns once lit (shorter in the rain), and when it's gone. */
 export interface Slick { id: number; x: number; y: number; r: number; until: number; lit: number; burn?: number }
@@ -84,7 +85,9 @@ export function stepSlicks(slicks: Slick[], w: World, dt: number): Slick[] {
         ev.push({ k: 'shakeoff', x: h.x, y: h.y });
         continue;
       }
-      const n = Math.round(TORCH.dps / 2);
+      // A spellblade's magic takes it first (sim/manashield.ts).
+      const n = manaShield(h, Math.round(TORCH.dps / 2), now, ev);
+      if (n <= 0) continue;
       h.hp -= n;
       ev.push({ k: 'hit', x: h.x, y: h.y, n, heavy: false, on: 'hero', src: 'fire' });
       downIfDead(h, ev);

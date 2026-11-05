@@ -276,8 +276,10 @@ export interface Hero extends Body {
   primed?: boolean;
   /** The ELEMENT button pressed then (waiting out the switch's cooldown, as any press waits). */
   elementQueuedAt?: number;
-  /** The spellblade (sim/spellblade.ts): its charge (0 to 1). */
-  bladeCharge?: number;
+  /** The spellblade's mana shield (sim/manashield.ts): when a hit last took magic, and when one last
+   *  ran it out (the ward cracks, then breaks, on screen). Old snapshots' `bladeCharge` is ignored. */
+  wardAt?: number;
+  wardBrokeAt?: number;
   /** A spellblade's held spell carrying the hero (sim/rush.ts, in the act 'bash'): a burning lunge or a
    *  lightning dash, `len` tiles, `dmg` to each goblin on the way, `big` let go on the flash. */
   rush?: { el: 'fire' | 'storm'; len: number; dmg: number; big: boolean; cast?: number };
@@ -638,10 +640,12 @@ export type FightEvent =
   | { k: 'snareset' | 'bark' | 'yelp'; x: number; y: number }
   /** The Mage's channel: its spells now `el`, the first one primed. */
   | { k: 'channeled'; x: number; y: number; el: string }
-  /** The Mage's kits (sim/spells.ts, spellblade.ts): magic spent (`n`), a spell fizzled for want of it, a
-   *  blow broken off by a wand's tap, the blade full of charge, a staff's slash (along dx, dy). */
-  | { k: 'magic'; x: number; y: number; n: number }
-  | { k: 'fizzle' | 'interrupt' | 'bladefull'; x: number; y: number }
+  /** The Mage's kits (sim/spells.ts, manashield.ts): magic spent (`n`), a spell fizzled for want of it, a
+   *  blow broken off by a wand's tap, a staff's slash (along dx, dy). The spellblade's shield: a hit took
+   *  `n` magic, the shield ran out, a parry gave `n` back (`big`: a perfect one). */
+  | { k: 'magic' | 'manaward'; x: number; y: number; n: number }
+  | { k: 'fizzle' | 'interrupt' | 'manabreak'; x: number; y: number }
+  | { k: 'manaup'; x: number; y: number; n: number; big?: boolean }
   | { k: 'slash'; x: number; y: number; dx: number; dy: number; el: Augment }
   /** A Mage's held spell going off (sim/holds.ts): `what` it is, from (x, y) along (dx, dy), `r` its size
    *  (a cone's or ring's radius, a rush's length), `big` let go on the flash. */

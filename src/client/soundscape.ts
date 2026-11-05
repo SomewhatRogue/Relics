@@ -106,11 +106,13 @@ export class Soundscape {
     if (ev.k === 'glint') return sfx.latch(), sfx.perfect();
     if (ev.k === 'boltline') return sfx.javstick();
     // The Mage's: magic spent hums, a fizzle is a dud, a broken blow rings, a slash whooshes in its
-    // element, the blade full chimes; a held spell and GRASP have their own (spellsound.ts).
+    // element; the spellblade's shield rings off a hit, breaks, and hums back on a parry; a held spell and GRASP have their own (spellsound.ts).
     if (ev.k === 'magic') return sfx.channeled();
     if (ev.k === 'fizzle') return sfx.wallhit();
     if (ev.k === 'interrupt') return sfx.perfect(), sfx.shock();
-    if (ev.k === 'bladefull') return sfx.channeled();
+    if (ev.k === 'manaward') return sfx.warded();
+    if (ev.k === 'manabreak') return sfx.wardbreak();
+    if (ev.k === 'manaup') return sfx.channeled();
     if (ev.k === 'slash') return ev.el === 'frost' ? sfx.chill() : ev.el === 'storm' ? sfx.shock() : sfx.ignite();
     if (spellSound(ev)) return;
     // The Cleric's: a shield given hums and blessed, takes a blow with a ward's ring, goes with a break; the

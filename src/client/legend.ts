@@ -9,6 +9,7 @@ import { castElement } from '../sim/channel';
 import { knows } from '../sim/types';
 import { taunts } from '../sim/taunt';
 import { TAUNT_BUTTON } from '../shared/ladder';
+import { SHIELD_LINE } from '../shared/classes';
 import { paintButton, type Face } from './btnart';
 import { icon, type IconId } from './icons';
 import { skillCanvas } from './skillicons';
@@ -49,7 +50,7 @@ async function rows(g: Game, touch: boolean): Promise<Row[]> {
   if (cls === 'MAGE') out.push({ face: { shape: 'round', size: 22, grade: 'iron', icon: skillCanvas('channel', castElement(me)), ring: EL_RING[castElement(me)] }, name: 'ELEMENT', key: 'X', text: `Switch element: fire, frost, storm. It changes what your tap and hold do. The first spell after a switch is primed: it does 50% more damage.` });
   const guard = guardOf(kit);
   if (guard === 'full') out.push({ face: { shape: 'shield', size: 28, grade: 'iron', icon: icon('block') }, name: 'BLOCK', key: 'RIGHT CLICK', text: 'Hold to block. Tap while the red flashes white to parry.' });
-  if (guard === 'parry') out.push({ face: { shape: 'shield', size: 28, grade: 'iron', icon: icon('parry') }, name: 'PARRY', key: 'RIGHT CLICK', text: "Tap while the red flashes white to parry. No held block." + (kit.spellblade ? ' A parry fills your blade.' : '') });
+  if (guard === 'parry') out.push({ face: { shape: 'shield', size: 28, grade: 'iron', icon: icon('parry') }, name: 'PARRY', key: 'RIGHT CLICK', text: "Tap while the red flashes white to parry. No held block." + (kit.spellblade ? ` ${SHIELD_LINE}` : '') });
   if (dodgeOf(kit)) {
     const dn = dodgeName(cls);
     out.push({ face: { shape: 'diamond', size: 30, grade: 'iron', icon: icon(({ JUMP: 'jump', DASH: 'dash', BLINK: 'blink' } as Record<string, IconId>)[dn] ?? 'roll') }, name: dn, key: 'SPACE', text: 'Get out of any blow, even a striped one.' });

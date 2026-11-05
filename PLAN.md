@@ -549,6 +549,10 @@ Every weapon gets a quick attack, a charged attack, a perfect-timed hit and a re
   reads MAGIC wherever the bar is named (kit rows, NOT ENOUGH MAGIC, "-40 MAGIC", knacks, cards, trainer), in a
   soft violet; others keep STAMINA. The spellblade's block is a real PARRY (stagger, counter window) that also
   fills the blade. CATCH and CAUGHT are retired. On a phone a Mage's magic pips ring BLINK (violet), not ATTACK.
+- [x] The spellblade's magic is its shield (2026-11-05, Claude Opus 5.5; see DECISIONS): with it in hand, blows,
+  shots and fire underfoot drain MAGIC before health (1 a point), striped blows go to health; a parry gives 25
+  back, a perfect one (the blow within 0.08 s of the press) 40. Holds cost their 35, no free full-blade holds.
+  The ring over the hero is now a ward round it in the element's colour that thins, cracks and breaks.
 - Rogue: Shadow Step behind a goblin stuns it 1 s for free hits.
 - The hand crossbow becomes the poisoner's kit:
   - Quick: a short sword, a bit wider than the daggers but slower. Not much damage, but not reduced either.

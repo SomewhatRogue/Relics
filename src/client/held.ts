@@ -141,7 +141,7 @@ export function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): vo
     line(g, ox + Math.cos(p.a) * 5, oy + Math.sin(p.a) * 5, p.a + Math.PI / 2, -4, 4, '#9aa3ad');
     if (loaded) line(g, ox, oy, p.a, 1, 8, '#cfd6dc');
   } else if (h.weapon === 'spellblade') {
-    // A plain sword whose edge holds the charge (blademark.ts glows it).
+    // A plain sword whose edge glows with your magic (blademark.ts).
     line(g, ox, oy, p.a, 2, 12, '#cfd6e8');
     line(g, ox, oy, p.a, 0, 2, '#7a5aa8');
     line(g, ox + Math.cos(p.a) * 2, oy + Math.sin(p.a) * 2, p.a + Math.PI / 2, -1.5, 1.5, '#9aa3ad');

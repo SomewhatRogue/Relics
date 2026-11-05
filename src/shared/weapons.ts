@@ -155,7 +155,7 @@ export interface Weapon {
   reloads?: boolean;
   /** The quick attack is cast on the move, at this share of your pace (the wand). */
   castWalk?: number;
-  /** The spellblade (shared/mage.ts): its blows build the blade's charge, and a parry fills it. */
+  /** The spellblade (shared/mage.ts): its magic is a shield hits drain before health, and a parry refills it. */
   spellblade?: boolean;
 }
 

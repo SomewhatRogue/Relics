@@ -1,6 +1,6 @@
 /** The Mage's kits (shared/mage.ts, sim/spells.ts, sim/spellblade.ts): magic costs, the wand, the staff's slash and rooted hold, the spellblade's charge and parry. Each element's spells: spellbook.test.ts. */
 import { describe, expect, it } from 'vitest';
-import { BUTCHER, HERO, SPELL, STAFF_RING, TICK, WAND, WEAPONS, BLADE, type WeaponId, type Element } from '../src/shared/tuning';
+import { BUTCHER, HERO, MANA_SHIELD, SPELL, STAFF_RING, TICK, WAND, WEAPONS, type WeaponId, type Element } from '../src/shared/tuning';
 import { ArenaRoom } from '../src/sim/room';
 import { newEnemy } from '../src/sim/enemies';
 import { renameKits } from '../src/shared/oldkits';
@@ -129,55 +129,37 @@ describe('the staff', () => {
 });
 
 describe('the spellblade', () => {
-  it('each blow that lands builds charge', () => {
-    const a = arena('spellblade');
-    a.tap(0.5);
-    expect(a.h.bladeCharge).toBeCloseTo(BLADE.perHit, 5);
-  });
-
-  it('a hold costs 35 magic, less with the charge, and spends the charge', () => {
+  it('a hold costs its 35 magic, every time (no free holds off a full blade)', () => {
     // (Held past the flash: let go on it, it would be free.)
     const a = arena('spellblade', [[2, 2]], 'frost');
     const ev = a.loose(0.9, 0.3);
     expect(ev.find((x) => x.k === 'magic')).toMatchObject({ n: SPELL.spellblade });
-    const b = arena('spellblade', [[2, 2]], 'frost');
-    b.h.bladeCharge = 0.6;
-    const ev2 = b.loose(0.9, 0.3);
-    expect(ev2.find((x) => x.k === 'magic')).toMatchObject({ n: Math.round(SPELL.spellblade * 0.4) });
-    expect(b.h.bladeCharge).toBe(0);
+    a.run(2.5);
+    const ev2 = a.loose(0.9, 0.3);
+    expect(ev2.find((x) => x.k === 'magic')).toMatchObject({ n: SPELL.spellblade });
   });
 
-  it('a full blade casts for nothing', () => {
+  it('a hold let go on the white flash is free, PERFECT', () => {
     const a = arena('spellblade', [[2, 2]], 'frost');
-    a.h.bladeCharge = 1;
-    const ev = a.loose(0.9, 0.3);
-    expect(ev.some((x) => x.k === 'magic')).toBe(false);
-    expect(ev.some((x) => x.k === 'spell')).toBe(true);
-    expect(a.h.stamina).toBe(HERO.stamina);
-  });
-
-  it('a hold let go on the white flash is free and keeps the charge, PERFECT', () => {
-    const a = arena('spellblade', [[2, 2]], 'frost');
-    a.h.bladeCharge = 0.3;
     const ev = a.loose(0.6, 0.3);
     expect(ev.some((x) => x.k === 'perfect')).toBe(true);
     expect(ev.find((x) => x.k === 'spell')).toMatchObject({ what: 'shatter', big: true });
     expect(ev.some((x) => x.k === 'magic')).toBe(false);
     expect(a.h.stamina).toBe(HERO.stamina);
-    expect(a.h.bladeCharge).toBeCloseTo(0.3, 5);
   });
 
-  it('block in the parry window is a real parry (stagger, counter window), and it fills the blade', () => {
+  it('block in the parry window is a real parry (stagger, counter window), and it refills magic', () => {
     const room = new ArenaRoom(3, { scrappers: false });
     const h = room.join('me');
     const b = room.enemies[0];
     for (const e of room.enemies.slice(1)) Object.assign(e, { x: 0.5, y: 15.5 });
     Object.assign(h, { weapon: 'spellblade', x: 9, y: 7.6, fx: 0, fy: -1 });
     Object.assign(b, { x: 9, y: 6, cooldown: 0 });
+    h.staminaAt = 1e9;
     for (let i = 0; i < 400 && b.attack?.kind !== 'cleave'; i++) {
       room.step();
       if (b.attack && (b.attack.kind as string) !== 'cleave') Object.assign(b, { attack: null, act: 'chase', cooldown: 0 }), Object.assign(h, { hp: HERO.hp, act: 'idle' });
-      Object.assign(h, { x: 9, y: 7.6, kvx: 0, kvy: 0 });
+      Object.assign(h, { x: 9, y: 7.6, kvx: 0, kvy: 0, stamina: 40 });
     }
     expect(b.attack?.kind).toBe('cleave');
     const a = b.attack!;
@@ -187,10 +169,10 @@ describe('the spellblade', () => {
     const ev: FightEvent[] = [];
     for (let i = 0; i < Math.round(0.35 / TICK); i++) room.step(), ev.push(...room.events);
     expect(h.hp).toBe(HERO.hp);
-    expect(h.bladeCharge).toBe(1);
+    expect(h.stamina).toBeGreaterThanOrEqual(40 + MANA_SHIELD.parry);
     expect(ev.some((x) => x.k === 'parry')).toBe(true);
     expect(ev.some((x) => x.k === 'stunned')).toBe(true);
-    expect(ev.some((x) => x.k === 'bladefull')).toBe(true);
+    expect(ev.some((x) => x.k === 'manaup')).toBe(true);
     expect(h.parriedAt ?? 0).toBeGreaterThan(0);
     expect(h.counterUntil).toBeGreaterThan(h.parriedAt ?? 0);
     expect(BUTCHER.cleave.dmg).toBeGreaterThan(0);

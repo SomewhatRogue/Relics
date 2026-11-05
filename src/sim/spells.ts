@@ -1,12 +1,12 @@
 /**
  * What a Mage's held spells cost, in the room (numbers: shared/mage.ts SPELL). A hold is refused at once
  * if you can't pay for it (it fizzles, nothing spent), and paid for at the release: the bar dips and says
- * by how much. A spellblade's costs less the more its blade is charged and spends the charge; let go on
- * the white flash it costs nothing and the charge is kept. And the wand's breaking: a hold let go on the
+ * by how much. A spellblade's costs its listed magic like any other (its magic is also its shield:
+ * sim/manashield.ts); let go on the white flash it costs nothing. And the wand's breaking: a hold let go on the
  * flash breaks off whatever a goblin it hits is doing (the perfect); a tap landing mid wind-up breaks
  * that blow (a bonus). Lives on the hero and the goblin, so a guest sees the same.
  */
-import { BLADE, SPELL, WAND, WEAPONS, type MageKit } from '../shared/tuning';
+import { SPELL, WAND, WEAPONS, type MageKit } from '../shared/tuning';
 import { isDead } from './damage';
 import { stun } from './stuns';
 import type { Enemy, FightEvent, Hero } from './types';
@@ -14,11 +14,10 @@ import { spellthief } from './techmage';
 
 const blade = (h: Hero) => !!WEAPONS[h.weapon]?.spellblade;
 
-/** The magic this kit's hold costs now (0: it isn't a spell). A charged blade casts for less. */
+/** The magic this kit's hold costs (0: it isn't a spell). */
 export function spellCost(h: Hero): number {
   if (!WEAPONS[h.weapon]?.heavy.spell) return 0;
-  const n = SPELL[h.weapon as MageKit] ?? 0;
-  return blade(h) ? Math.round(n * (1 - Math.min(1, h.bladeCharge ?? 0))) : n;
+  return SPELL[h.weapon as MageKit] ?? 0;
 }
 
 const short = (h: Hero) => spellCost(h) > 0 && (h.winded || h.stamina < spellCost(h));
@@ -38,8 +37,6 @@ export function paySpell(h: Hero, now: number, ev: FightEvent[]): boolean {
   if (n > 0) Object.assign(h, { stamina: Math.max(0, h.stamina - n), staminaAt: now }), ev.push({ k: 'magic', x: h.x, y: h.y, n });
   // SPELLTHIEF: on the flash, half of it back (sim/techmage.ts).
   spellthief(h, cost, ev);
-  // The charge paid for it (all of it, whatever was short of full).
-  if (blade(h) && !free && WEAPONS[h.weapon].heavy.spell) h.bladeCharge = 0;
   return true;
 }
 
@@ -52,11 +49,4 @@ export const windingUp = (e: Enemy) => !isDead(e) && e.kind !== 'nest' && e.act 
 export function interrupt(e: Enemy, was: boolean, breaks: boolean, by: string, now: number, ev: FightEvent[]): void {
   if ((!was && !breaks) || isDead(e) || e.kind === 'nest' || e.act === 'carried' || e.act === 'pinned') return;
   if (stun(e, by, now, WAND.stun * (e.kind === 'butcher' ? WAND.big : 1), ev, 'stunned', true)) ev.push({ k: 'interrupt', x: e.x, y: e.y });
-}
-
-/** A blade blow landed: a little more charge (and the blade says when it's full). */
-export function buildCharge(h: Hero, ev: FightEvent[]): void {
-  const was = h.bladeCharge ?? 0;
-  h.bladeCharge = Math.min(1, was + BLADE.perHit);
-  if (was < 1 && h.bladeCharge >= 1) ev.push({ k: 'bladefull', x: h.x, y: h.y });
 }

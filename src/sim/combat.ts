@@ -1,7 +1,7 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, parry, roll). */
 import { wetMult } from './techmage';
 import { litMult } from './charge';
-import { CENSER, BLESSING, DODGE, WARD, FLINCH, POISE, HORN, OVERKILL, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing, CLASS_DODGES, RIPOSTE, CRIT, STEALTH, weakOn, SPLAT, BANNER, STORM } from '../shared/tuning';
+import { CENSER, BLESSING, DODGE, WARD, FLINCH, POISE, HORN, OVERKILL, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing, CLASS_DODGES, RIPOSTE, CRIT, STEALTH, weakOn, SPLAT, BANNER, STORM, MANA_SHIELD } from '../shared/tuning';
 import { shove } from './bodies';
 import { knack, statsOf } from './gearstats';
 import { counterWindow, parryWindow, rearCos, slipWindow } from './knacks';
@@ -12,7 +12,7 @@ import { shatter } from './elements';
 import { has } from './traits';
 import { brandyDmg } from './brandy';
 import { lunging, riposteNow, shaftMult, warriorHit } from './warrior';
-import { parryFills } from './spellblade';
+import { manaShield, parryRefills } from './manashield';
 import { soak } from './holy';
 import { clericHit } from './flail';
 import { stun } from './stuns';
@@ -239,6 +239,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   const canGuard = !a.unblockable && facing && (h.act === 'idle' || h.act === 'attack' || h.act === 'charge');
   const again = rushParried(h, a, now);
   if (canGuard && (now - h.parryOpenAt <= parryWindow(h) || again)) {
+    // A spellblade's perfect parry: the blow lands just after the press (one rush's later blows aren't).
+    const tight = !again && now - h.parryOpenAt <= MANA_SHIELD.perfectIn;
     h.counterUntil = now + counterWindow(h);
     h.parriedAt = now;
     h.parryOpenAt = -9;
@@ -252,8 +254,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     shove(e, tx / tl, ty / tl, 4, e.weight);
     ev.push({ k: 'parry', x: (h.x + e.x) / 2, y: (h.y + e.y) / 2, ...(again ? { more: true } : {}) });
     ev.push({ k: 'stunned', x: e.x, y: e.y, ...(again ? { more: true } : {}) });
-    // A spellblade's parry fills the blade too (sim/spellblade.ts); MENDING PARRY heals friends near (sim/ladderhealer.ts).
-    parryFills(h, ev);
+    // A spellblade's parry refills its magic, its shield (sim/manashield.ts; once a rush); MENDING PARRY heals friends near (sim/ladderhealer.ts).
+    if (!again) parryRefills(h, tight, ev);
     parryMend(h, heroes, ev);
     return;
   }
@@ -274,11 +276,14 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     } else ev.push({ k: 'block', x: h.x, y: h.y });
     return;
   }
-  // A Cleric's holy shield soaks what it can (sim/holy.ts); a blow it takes whole doesn't stagger.
+  // A Cleric's holy shield soaks what it can (sim/holy.ts), then a spellblade's magic, unless the blow is
+  // striped (sim/manashield.ts); a blow they take whole doesn't stagger (a shield hit shoves a little).
   // IRON FEET: holding an attack, the blow lands but doesn't shove, stagger or knock down (sim/techwarrior.ts);
   // STAND FAST, while a taunt lasts, the same (sim/taunt.ts). SHELTER: a Healer blocking near takes some off.
   const iron = rooted(h), brace = !iron && braced(h, now), feet = iron || brace;
-  const n = soak(h, Math.round(a.dmg * taken * shelter(h, heroes, ev)), now, ev);
+  const soaked = soak(h, Math.round(a.dmg * taken * shelter(h, heroes, ev)), now, ev);
+  const n = a.unblockable ? soaked : manaShield(h, soaked, now, ev);
+  if (n < soaked && n <= 0 && !feet) shove(h, sx / sl, sy / sl, a.knock * 0.4, HERO.weight);
   if (n <= 0) return void (h.hitstop = Math.max(h.hitstop, HITSTOP.light));
   h.hp -= n;
   // Heavy armor: a small goblin's blow doesn't stagger you.

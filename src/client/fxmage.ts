@@ -2,7 +2,8 @@
  * The Mage's kits, seen (sim/spells.ts, staffwall.ts and spellblade.ts decide them): magic spent rises
  * off the hero in violet (-40 MAGIC); a spell with too little magic behind it fizzles in grey smoke with NOT ENOUGH MAGIC; a
  * wand's spark that breaks a blow off throws a violet star and INTERRUPTED; the staff's slash sweeps an
- * arc of its element; a full blade glints (a parry fills it: fx.ts says PARRY). The held spells are
+ * arc of its element; the spellblade's shield flashes when a hit takes magic, shatters when it runs out,
+ * and a parry's magic back rises off you (fx.ts says PARRY). The held spells are
  * fxspells.ts. Cosmetic only; the one overlay draws in both views.
  */
 import type { FightEvent } from '../sim/types';
@@ -47,9 +48,22 @@ export function mageFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
       fx.flashes.push({ x: x + ev.dx * 16, y: y - 8 + ev.dy * 12, r: 36, i: 0.8, c: EL_LIGHT[ev.el], life: 0.12, max: 0.12 });
       return true;
     }
-    case 'bladefull':
-      fx.rings.push({ x, y: y - 10, life: 0.3, max: 0.3, col: '#c9a8ff', size: 10 });
-      fx.burst(x, y - 10, 8, VIOLET, 40, true);
+    // The spellblade's shield (the ward itself is blademark.ts, drawn from the hero): a hit takes magic
+    // with a white flash, the ward breaking throws shards, a parry's magic back rises off you.
+    case 'manaward':
+      fx.say(x, y - 22, `-${ev.n} MAGIC`, '#c9a8ff', 0.6);
+      fx.burst(x, y - 10, 8, ['#ffffff', ...VIOLET], 55, true);
+      fx.flashes.push({ x, y: y - 10, r: 34, i: 0.7, c: [0.85, 0.75, 1], life: 0.1, max: 0.1 });
+      return true;
+    case 'manabreak':
+      fx.burst(x, y - 10, 18, ['#ffffff', ...VIOLET], 95, true);
+      fx.rings.push({ x, y: y - 10, life: 0.25, max: 0.25, col: '#ffffff', size: 16 });
+      fx.shake = Math.max(fx.shake, 2);
+      return true;
+    case 'manaup':
+      fx.say(x, y - 30, `+${ev.n} MAGIC`, ev.big ? '#ffffff' : '#c9a8ff', ev.big ? 0.9 : 0.7);
+      fx.rings.push({ x, y: y - 10, life: 0.3, max: 0.3, col: ev.big ? '#ffffff' : '#c9a8ff', size: ev.big ? 15 : 11 });
+      fx.burst(x, y - 10, ev.big ? 14 : 8, VIOLET, 40, true, -30);
       return true;
   }
   return false;

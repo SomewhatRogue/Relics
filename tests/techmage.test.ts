@@ -70,7 +70,7 @@ describe("the Mage's techniques", () => {
         expect(ev.some((x) => x.k === 'spellthief')).toBe(back > 0);
       }
     // A spellblade's perfect is free already: it gives back half of what the hold would have cost.
-    const b = Object.assign(mage('spellblade', 3), { stamina: 50, perfect: true, bladeCharge: 0 }), ev: FightEvent[] = [];
+    const b = Object.assign(mage('spellblade', 3), { stamina: 50, perfect: true }), ev: FightEvent[] = [];
     paySpell(b, 10, ev);
     expect(b.stamina).toBe(50 + Math.round(SPELL.spellblade * SPELLTHIEF.back));
   });

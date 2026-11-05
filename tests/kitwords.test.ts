@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { WEAPON_ORDER, CLASS_KITS, CLASS_ORDER } from '../src/shared/tuning';
+import { WEAPON_ORDER, CLASS_KITS, CLASS_ORDER, SPELL } from '../src/shared/tuning';
 import { KIT, MAGE_KIT, kitLine, kitRows } from '../src/client/kitlines';
 import { barWords } from '../src/shared/barword';
 import { dodgeOfKit, guardKind, guardRating } from '../src/client/guardarea';
@@ -39,7 +39,8 @@ describe('GUARD and DODGE areas, from the numbers', () => {
     expect(kitLine('wand', 'storm')).toBe('TAP: LIGHTNING STREAM, BUILDS UP  HOLD: LIGHTNING BOLT, IGNORES SHIELDS  PERFECT: WHOLE LINE, INTERRUPTS ANY BLOW');
     // The stream doesn't break blows: the wand's storm says what it does instead.
     expect(kitRows('wand', 'storm').find(([l]) => l === 'ALSO')?.[1]).toBe("Walk slowly while it's on");
-    expect(KIT.spellblade.also).toBe('Parry fills the blade');
+    expect(KIT.spellblade.also).toBe('Hits drain magic, parry refills');
+    expect(kitRows('spellblade', 'fire').find(([l]) => l === 'COST')?.[1]).toBe(`${SPELL.spellblade} magic a hold`);
     expect(barWords('Shorter dodge, costs more stamina', 'MAGE')).toBe('Shorter dodge, costs more magic');
     expect(barWords('STAMINA RECOVERY', 'RANGER')).toBe('STAMINA RECOVERY');
   });

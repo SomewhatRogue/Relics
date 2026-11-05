@@ -4513,3 +4513,76 @@ or pass."
 - New words (`client/boardwords.ts`), waiting on the lore keeper and line editor: TIME, WEATHER, DANGER,
   BOSS, NEEDS, DEEP, "A party of 3", RAIN, STORM, FOG, BACK on the card. WHERE, ROOMS, MAP, PAYS, GO
   ALONE, TAKE THE JOB, GATHER A PARTY, JOBS and DONE LATELY were already on the board.
+
+
+## 2026-11-05: the spellblade's magic is its shield (Kyle; Claude Opus 5.5)
+
+Kyle found the blade's charge ring unclear and chose "Magic is your shield": with the spellblade in hand,
+hits drain your MAGIC before your health, parries refill it, and below a spell's cost you can't cast it, so
+getting hit costs your spells. The ring over the hero shows the shield. The room decides it
+(`sim/manashield.ts`, numbers `MANA_SHIELD` in `shared/mage.ts`), and it lives on the hero (`stamina`,
+`wardAt`, `wardBrokeAt`), so a guest's screen draws the same ward.
+
+- **Hits drain magic first**: 1 magic a point of damage (`perDmg`; 1.25 and 1.5 measured no better, see
+  below). Only what magic can't cover reaches health. It takes blows and shots (`hitHero`, after a Cleric's
+  holy shield, which goes first so its gift isn't wasted) and fire underfoot (a burning oil slick,
+  `sim/oil.ts`; a burning house's floor, `sim/blaze.ts`). Judgment calls: striped (unblockable) blows go
+  straight to health, the Stoker's hook included; so do falling beams, smoke, poison ticks, weather
+  lightning and a friend's blows. A blow the shield takes whole doesn't stagger (a small shove, like a
+  block); one that breaks through staggers as any hit. A shield hit starts the refill wait over
+  (HERO.magicDelay, 2 s), as a cast does.
+- **Running dry doesn't wind you** (judgment): an empty bar winds a Mage until it is full again (no blink,
+  no parry for about 8 s), which would take away the parry that refills it. So the shield leaves a sliver
+  (`keep`, 0.01) and the hit that runs it out passes the rest to health.
+- **Parries refill it** (replaces filling the blade): a parry gives back 25 magic, a perfect one 40. A
+  perfect parry is new: the blow lands within 0.08 s of the press (the spellblade's whole window is 0.22 s),
+  so it's the late, tight one. One pack rush parried gives it once, not a blow at a time. Never past a full
+  bar. Shown as "+25 MAGIC" in violet, "+40 MAGIC" in white with a bigger ring (no PERFECT word, as no parry
+  shows one).
+- **Spells cost magic as normal**: the holds cost their listed 35 (no more free holds off a full blade);
+  short of it, the hold fizzles with NOT ENOUGH MAGIC as before. Kept: a hold let go on the white flash is
+  still free (the perfect's own reward, and SPELLTHIEF counts on it); you still need the 35 to start it.
+  `bladeCharge`, `BLADE`, `buildCharge`, `parryFills` and the `bladefull` event are gone; an old snapshot or
+  save carrying `bladeCharge` loads and the field is ignored.
+- **The ward** (`client/blademark.ts`, called from `actors.ts` flat and `three/extras3d.ts` 2.5D, so both
+  views): a shell of light round the hero and a circle at its feet in the element's colour, full and bright
+  with an inner shell when magic is high; as it drains its light thins out evenly (dots go dark in a fixed
+  scatter, so it doesn't empty round like a meter). A hit that takes magic cracks it: white jagged cracks
+  and the shell flashing white for 0.35 s, "-12 MAGIC" in violet and a flash of light (`fxmage.ts`, the
+  ward's ring sound). Running out breaks it: shards flying off for 0.6 s and the ward-break sound. The
+  blade's edge in hand glows by the magic too.
+- **Balance, measured** (a bot in the arena, 90 s against five scrappers at 3x health,
+  then four at 3x with a butcher; it taps, holds a spell (released past the flash, so it pays) whenever it
+  can, and in parry mode parries every blockable blow it sees coming, pressing 0.04 to 0.2 s early):
+
+  | | parried (perfect) | hits on the shield (magic) | magic back | hits to health (damage) | spells | downs |
+  |---|---|---|---|---|---|---|
+  | Scrappers, old rule, no parry | 0 | 0 | 0 | 91 (728) | 6 | 7 |
+  | Scrappers, old rule, parry | 27 | 0 | 0 | 63 (504) | 8 | 4 |
+  | Scrappers, shield, no parry | 0 | 46 (263) | 0 | 68 (473) | 2 | 4 |
+  | Scrappers, shield, parry | 32 (15) | 43 (344) | 730 | 0 (0) | 19 | 0 |
+  | Butcher, old rule, no parry | 0 | 0 | 0 | 72 (1258) | 9 | 11 |
+  | Butcher, old rule, parry | 21 | 0 | 0 | 51 (938) | 8 | 8 |
+  | Butcher, shield, no parry | 0 | 39 (339) | 0 | 53 (845) | 3 | 7 |
+  | Butcher, shield, parry | 23 (7) | 24 (271) | 526 | 21 (491) | 16 | 4 |
+
+  It's still the parry Mage: parrying keeps the shield up and the spells going (19 and 16 holds, against 2
+  and 3 for a Mage who eats every blow), and halves what reaches health. Standing and taking it, the shield
+  soaks a third of the damage but spells all but stop. At 1.25 and 1.5 magic a point the no-parry runs took
+  about the same health (458 and 506 on the scrappers) and the parry runs still kept it near nothing (0 and
+  15): the bar runs dry either way and the refill is the limit, so 1 stays (Kyle's number). The parrying
+  bot is better than a person: read the parry rows as the ceiling. (The bot is a scratch script, not in
+  the repo: a spellblade Mage stepping the room tick by tick, run once on main and once on this branch.)
+- **Words** (open: the lore keeper and line editor, no agents were at hand in this session): the kit's ALSO
+  row "Hits drain magic, parry refills" (was "Parry fills the blade"); its COST row "35 magic a hold" (was
+  "35 magic a hold, less as the blade fills"), both on the weapon card and the BUTTONS legend's ATTACK row;
+  "Spellblade: hits drain your magic before your health. Parry to refill it." (`SHIELD_LINE` in
+  `shared/classes.ts`) on the class card after "Blinks away to dodge." and on the BUTTONS legend's PARRY row
+  (was "A parry fills your blade."); callouts "-N MAGIC" (as a cast's) and "+N MAGIC" (as SPELLTHIEF's).
+- Tests: `tests/manashield.test.ts` (a blow and a shot drain magic before health; the refill wait restarts;
+  an empty shield passes the rest to health, breaks and doesn't wind; striped blows go to health; fire
+  underfoot burns magic first; the wand and staff take hits as before; a parry gives 25, a perfect one 40,
+  never past full; a hold below its cost fizzles; an old `bladeCharge` is ignored and an old save loads; a
+  guest's decoded snapshot carries the magic, the crack and the break). `tests/magekit.test.ts` (holds cost
+  35 every time, the flash is free, the parry refills magic), `tests/techmage.test.ts` and
+  `tests/kitwords.test.ts` follow. The spellbook balance test counts taps only, so it was unchanged.

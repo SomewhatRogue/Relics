@@ -43,6 +43,9 @@ export interface ClassSheet {
   stats: Record<Stat, number>;
 }
 
+/** The spellblade's mana shield in a line (sim/manashield.ts), on the class card and in BUTTONS. */
+export const SHIELD_LINE = 'Spellblade: hits drain your magic before your health. Parry to refill it.';
+
 export const CLASSES: Record<HeroClass, ClassSheet> = {
   WARRIOR: {
     line: 'Bulwark and blade. Surprisingly effective.',
@@ -73,7 +76,7 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     skill: 'Round Up: Drags the goblins in front of you into a bunch just ahead.',
     note: 'Your element is your spellbook: switch it with ELEMENT. Fire burns, and spreads when a burning goblin dies. Frost chills (slows) and freezes. Storm ignores shields. Wet goblins (in water, or out in the rain) take 1.5x from storm, and it jumps between them. Wand far, staff round you, spellblade up close.',
     noteLabel: 'SPELLS',
-    guard: 'Blinks away to dodge.',
+    guard: `Blinks away to dodge. ${SHIELD_LINE}`,
     stats: { STRENGTH: 3, GUARD: 0, SPEED: 2, RANGE: 4, SUPPORT: 2 },
   },
   HEALER: {
