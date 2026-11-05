@@ -136,8 +136,8 @@ export const RAID_NEWS = {
 export const FOREMAN = {
   name: 'FOREMAN JUDD',
   lines: [
-    "I don't pick what gets done, mind, the town does that with its coin and whoever turns up with a shovel, and I just point. Hollis writes it all in his book, every coin and every den burned, so don't go telling him you gave more than you did.",
-    "My lot sweep and haul and fill the barrow, or that's the idea, and whoever you catch leaning on a broom will swear they're ~thinking~. They aren't.",
+    "I don't pick the work, mind, the town does, with its coin. Hollis writes down every coin and every den burned, so don't round up.",
+    "My lot sweep and haul, or that's the idea, and anyone you catch leaning on a broom will swear they're thinking. They aren't.",
   ],
 };
 

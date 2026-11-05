@@ -9,7 +9,7 @@ export const RECAPW = {
   time: 'TIME',
   found: 'FOUND',
   treasure: 'TREASURE',
-  relic: 'RELIC',
+  relic: 'RELICS',
   /** "2 of 3". */
   of: (a: number, b: number) => `${a} of ${b}`,
   /** The one button: a knack waiting comes next, else home. */
