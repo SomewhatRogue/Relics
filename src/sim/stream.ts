@@ -1,8 +1,9 @@
 /**
  * The wand's storm tap: a stream of lightning from the hand that runs by itself (numbers: shared/spellbook.ts
  * STREAM; Kyle, 2026-11-05). One tap starts it for STREAM.keep s; each tap while it's on adds a step of
- * build (three at most) and starts the time again. It holds the nearest goblin in front and, if that one
- * dies or gets away, takes the next, keeping its build. Walking while it's on is the Mage's own pace.
+ * build (three at most) and starts the time again. It holds the nearest goblin, in front or behind (so you
+ * can run and keep it on), and if that one dies or gets away takes the next, keeping its build. Fully built it
+ * also hops to the nearest other goblin as a low pulse. Walking while it's on is the Mage's own pace.
  * Storm's rules hold: it ignores shields, and on a wet goblin it lands harder and jumps on to every wet one
  * near, every tick (sim/elements.ts). Kept on the hero (`stream`), so a guest draws the same line from the
  * same goblin at the same build.
@@ -92,5 +93,28 @@ export function stepStreams(w: World): void {
     if (n > 0 && damage(e, n, w.now, w.ev, { el: 'storm', src: 'spark', tick: true })) continue;
     if (w.now - was < STREAM.flicker) e.hitAt = was;
     afflict(w, e, 'storm', n, { cast: newCast(), jump: j });
+    hop(h, e, w);
   }
+}
+
+/** Fully built: a low pulse on to the nearest other goblin near the one held (none below the top step). */
+function hop(h: Hero, e: Enemy, w: World): void {
+  const st = h.stream!;
+  if (st.step < STREAM_TOP || isDead(e)) return void (st.hop = 0);
+  let best: Enemy | undefined, bd = Infinity;
+  for (const o of w.enemies) {
+    if (o === e || isDead(o) || isDummy(o) || o.act === 'carried' || (o.z ?? 0) !== (h.z ?? 0)) continue;
+    const d = Math.hypot(o.x - e.x, o.y - e.y) - o.radius;
+    if (d <= STREAM.hopReach && d < bd) (bd = d), (best = o);
+  }
+  st.hop = best?.id ?? 0;
+  if (!best) return;
+  st.oweHop = (st.oweHop ?? 0) + st.tick * streamBuild(st.step) * STREAM.hopShare;
+  const n = Math.floor(st.oweHop);
+  st.oweHop -= n;
+  if (n <= 0) return;
+  best.lastBy = h.id;
+  const was = best.hitAt;
+  if (damage(best, n, w.now, w.ev, { el: 'storm', src: 'spark', tick: true })) return;
+  if (w.now - was < STREAM.flicker) best.hitAt = was;
 }

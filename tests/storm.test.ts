@@ -170,6 +170,29 @@ describe("the wand's storm stream", () => {
     expect(Math.abs(rate(five, 1) - r3)).toBeLessThan(1.5);
   });
 
+  it('takes the nearest goblin behind you too, so you can run and keep it on (Kyle, 2026-11-05)', () => {
+    const a = mageArena('wand', [[9, 11.5]], 'storm');
+    const was = lost(a.e);
+    taps(a, 1);
+    a.run(0.6, { attackSeq: LAST });
+    expect(a.h.stream?.id).toBe(a.e.id);
+    expect(lost(a.e)).toBeGreaterThan(was);
+  });
+
+  it('fully built, it hops a low pulse on to the nearest other goblin; below that, never', () => {
+    const one = mageArena('wand', [[9, 6], [10.6, 6]], 'storm');
+    taps(one, 2);
+    one.run(1, { attackSeq: LAST });
+    expect(lost(one.es[1])).toBe(0);
+    const top = mageArena('wand', [[9, 6], [10.6, 6]], 'storm');
+    taps(top, 3);
+    const h0 = lost(top.e), o0 = lost(top.es[1]);
+    top.run(1, { attackSeq: LAST });
+    const held = lost(top.e) - h0, hopped = lost(top.es[1]) - o0;
+    expect(hopped).toBeGreaterThan(0);
+    expect(hopped).toBeLessThan(held * 0.5);
+  });
+
   it('keeps its build on the next goblin when its goblin dies', () => {
     const a = mageArena('wand', [[9, 6], [9.6, 5]], 'storm');
     taps(a, 3);

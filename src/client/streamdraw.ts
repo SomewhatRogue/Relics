@@ -68,6 +68,15 @@ export function drawStreams(g: CanvasRenderingContext2D, room: ArenaRoom, P: Pro
       const t = 0.2 + Math.random() * 0.7, fx = ax + (bx - ax) * t, fy = ay + (by - ay) * t;
       jag(g, fx, fy, fx + (Math.random() - 0.5) * (8 + 10 * k), fy + (Math.random() - 0.5) * (6 + 8 * k), '#fff27a', 0.7 * flick, 3, 1);
     }
+    // Fully built, the low pulse it hops on to a second goblin: a thin, faint line.
+    const o = h.stream!.hop ? room.enemies.find((x) => x.id === h.stream!.hop && x.act !== 'dead') : undefined;
+    if (o) {
+      const [ox, oz] = at('e:' + o.id, o.x, o.y), [cx, cy] = P(ox, 0.55, oz);
+      jag(g, bx, by, cx, cy, '#fff27a', 0.55 * flick, 4, 1);
+      g.globalAlpha = 0.8;
+      g.fillStyle = '#ffffff';
+      g.fillRect(Math.round(cx + (Math.random() - 0.5) * 5), Math.round(cy + (Math.random() - 0.5) * 5), 1, 1);
+    }
     // Sparks where it bites.
     g.globalAlpha = 0.9;
     g.fillStyle = '#ffffff';

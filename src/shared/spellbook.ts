@@ -50,7 +50,9 @@ export const COLD_BLAST = { range: 4, arc: 70, bigRange: 5.2, bigArc: 100, dmg: 
  * (shared/magic.ts), every tick. The goblin it holds flashes hit once every `flicker` s, not every tick
  * (drawing only).
  */
-export const STREAM = { reach: 5, slack: 0.5, cone: 20, keepCone: 50, keep: 1.5, steps: [1, 1.75, 2.5], every: 0.1, tick: 0.105, windup: 0.08, recover: 0.12, flicker: 0.3 };
+/** `cone`/`keepCone` 180: it takes whatever's nearest, behind you too, so you can run and keep it on (Kyle, 2026-11-05).
+ *  At full build it also `hop`s to the nearest other goblin within `hopReach` for `hopShare` of a tick. */
+export const STREAM = { reach: 5, slack: 0.5, cone: 180, keepCone: 180, hop: true, hopReach: 3, hopShare: 0.35, keep: 1.5, steps: [1, 1.75, 2.5], every: 0.1, tick: 0.105, windup: 0.08, recover: 0.12, flicker: 0.3 };
 
 /**
  * Wand, storm hold (Kyle, 2026-11-05: "I want the charge to call down a lightning strike in an AOE after a
