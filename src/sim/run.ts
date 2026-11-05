@@ -15,7 +15,8 @@ import { allOut, players, scaleBosses, scaleFoes } from './party';
 import type { FightEvent } from './types';
 import { dreadFor } from './dreadplace';
 import { expedRoom } from './expedroom';
-import { EXPED } from '../shared/tuning';
+import { EXPED, WEAPONS } from '../shared/tuning';
+import { blankScore, foldBoard, type Board, type Score } from './score';
 
 export interface Run {
   job: Job;
@@ -53,6 +54,8 @@ export interface Run {
   /** Layout 4: the freed brought out of each room (a way's pay counts its room's: shared/waypay.ts), and prisoners led off. */
   saved?: Record<number, number>;
   ledoff?: number;
+  /** What each hero in the party did, by hero id (sim/score.ts): the recap's side by side. */
+  board?: Board;
 }
 
 export const MAX_DOWNS = 3;
@@ -67,6 +70,7 @@ export function runRoom(run: Run): ArenaRoom {
   const danger = (run.job.place.ruin >= 3 ? 1 : 0) + (run.job.deep ? 1 : 0);
   const room = new ArenaRoom(run.job.seed + run.index, { map: plan.map, foes: scaleFoes(plan.foes, n, run.job.seed * 17 + run.index * 5 + 2), furniture: plan.props, chests: plan.chests, danger });
   scaleBosses(room.enemies, n);
+  room.board = {};
   room.dread = { by: dreadFor(run.job) };
   // Out in the open, a cage can hold a false prisoner (sim/falsecage.ts); never inside a house.
   room.falseCages = true;
@@ -79,12 +83,15 @@ export function interiorRoom(run: Run, blockIndex: number, door: string): ArenaR
   const room = new ArenaRoom(run.job.seed * 3 + run.index * 11 + blockIndex + 7, { map: plan.map, foes: plan.foes, furniture: plan.props, chests: plan.chests });
   room.exitOpen = true;
   room.indoors = true;
+  room.board = {};
   // Inside a house: the hungry, whatever the place. Down a side way, the place's own.
   room.dread = { by: door.startsWith('side:') ? dreadFor(run.job) : 'swarm' };
   return room;
 }
 
 const bump = (m: Record<string, number>, id: string) => (m[id] = (m[id] ?? 0) + 1);
+/** Hero `id`'s line on the run's board. */
+const line = (run: Run, id: string): Score => ((run.board ??= {})[id] ??= blankScore());
 /** One player's count from a per-player tally (an old saved run kept a single number). */
 export const mine = (t: Record<string, number> | number | undefined, id: string) => (typeof t === 'number' ? t : t?.[id] ?? 0);
 
@@ -131,7 +138,8 @@ export function tally(run: Run, room: ArenaRoom, events: FightEvent[], me: strin
       if (ev.by) bump(run.raised ??= {}, ev.by);
     }
     // Each player's own (so a friend following the job reads theirs, not the leader's).
-    if (ev.k === 'down' && ev.id) bump(run.falls ??= {}, ev.id);
+    if (ev.k === 'down' && ev.id) bump(run.falls ??= {}, ev.id), ev.id !== 'squire' && line(run, ev.id).downs++;
+    if (ev.k === 'pickedup' && ev.by) line(run, ev.by).raised++;
     if (ev.k === 'down' && ev.by) bump(run.teamkills ??= {}, ev.by);
     if (ev.k === 'down' && players(room.heroes).length < 2) {
       // Alone, three downs and it's lost; in a party, it's lost when everyone is out.
@@ -140,6 +148,18 @@ export function tally(run: Run, room: ArenaRoom, events: FightEvent[], me: strin
     }
   }
   if (run.downs >= MAX_DOWNS || allOut(room.heroes)) run.failed = true;
+  board(run, room);
+}
+
+/** The room's counts since the last step go on the run's board; every player in it has a line, with a name and class. */
+function board(run: Run, room: ArenaRoom): void {
+  if (!room.board) room.board = {};
+  else if (Object.keys(room.board).length) foldBoard(run.board ??= {}, room.board), (room.board = {});
+  for (const h of players(room.heroes)) {
+    const s = line(run, h.id);
+    s.cls = WEAPONS[h.weapon]?.cls ?? s.cls;
+    if (h.tag) s.name = h.tag;
+  }
 }
 
 /** The room's goal (sim/goal.ts). */

@@ -29,6 +29,7 @@ import { tauntTarget } from './taunt';
 import { CALTROPS } from '../shared/ladder';
 import type { Slick } from './oil';
 import { gather, rushClock, rushLocked } from './rushguard';
+import { count, dealt } from './score';
 
 /** The room's oil slicks, for the torch-bearers (the room sets it before its goblins move). */
 export const OWN_KIT: { slicks: Slick[] } = { slicks: [] };
@@ -140,7 +141,7 @@ function runCharge(e: Enemy, a: EnemyAttack, heroes: Hero[], now: number, ev: Fi
   if (a.t >= a.windup + a.active && !a.missed) {
     a.missed = true;
     const h = heroes.find((x) => x.id === a.aimed);
-    if (h && !(a.hit ?? []).includes(h.id) && h.act !== 'down' && !CLASS_DODGES[WEAPONS[h.weapon].cls]) ev.push({ k: 'dodge', x: h.x, y: h.y });
+    if (h && !(a.hit ?? []).includes(h.id) && h.act !== 'down' && !CLASS_DODGES[WEAPONS[h.weapon].cls]) ev.push({ k: 'dodge', x: h.x, y: h.y }), count(h.id, 'dodges');
   }
   return a.t >= a.windup + a.active + a.recover;
 }
@@ -192,6 +193,7 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
       const n = KNOCK.wallDmg * (by && has(by, 'crushing') ? TRAIT.crushing : 1);
       e.hp -= n;
       e.hitAt = now;
+      dealt(e, e.lastBy, n);
       ev.push({ k: 'wallhit', x: e.x, y: e.y });
       ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy: n > KNOCK.wallDmg, on: 'enemy' });
       if (e.hp <= 0) return kill(e, ev, 'burst', e.kvx, e.kvy);

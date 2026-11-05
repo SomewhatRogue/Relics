@@ -9,6 +9,7 @@ import { shove } from './bodies';
 import { isDead, kill } from './damage';
 import type { Enemy, FightEvent, Hero, Javelin } from './types';
 import { stun } from './stuns';
+import { dealt } from './score';
 
 /** Lands the javelin's augment on what it hits. */
 export type Afflict = (e: Enemy, el: Augment, n: number) => void;
@@ -75,6 +76,7 @@ export function stepJavelin(j: Javelin, enemies: Enemy[], now: number, dt: numbe
       const n = Math.round(JAVELIN.dmg * mult);
       e.hp -= n;
       e.hitAt = now;
+      dealt(e, j.owner, n);
       e.hitstop = 0.06;
       ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy: true, on: 'enemy' });
       if (e.kind === 'dummy' || e.kind === 'swingDummy') {

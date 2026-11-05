@@ -10,6 +10,7 @@ import { shove } from './bodies';
 import { knack, statsOf } from './gearstats';
 import { mend } from './holy';
 import type { Enemy, EnemyAttack, FightEvent, Hero } from './types';
+import { count } from './score';
 
 /** A Healer other than `h`, holding a block, who knows `id`, within `reach` of `h`. */
 function guardian(h: Hero, heroes: Hero[], id: RungId, reach: number): Hero | undefined {
@@ -49,6 +50,7 @@ export function cover(e: Enemy, a: EnemyAttack, h: Hero, heroes: Hero[], soft: n
   c.hitstop = Math.max(c.hitstop, HITSTOP.light);
   shove(c, -tx / tl, -ty / tl, a.knock * 0.4, 1);
   ev.push({ k: 'coverfor', x: c.x, y: c.y, x2: h.x, y2: h.y });
+  count(c.id, 'blocks');
   if (c.stamina > 0) return ev.push({ k: 'block', x: c.x, y: c.y }), true;
   Object.assign(c, { stamina: 0, winded: true, act: 'stun', actT: 0, actDur: GUARD.guardBreakStun });
   ev.push({ k: 'guardbreak', x: c.x, y: c.y });

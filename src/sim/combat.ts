@@ -29,6 +29,7 @@ import { stormCut } from './spellbook';
 import { wet } from './wet';
 import { clanks, crack, plated } from './ironhide';
 import { guardFrom, rushBlocked, rushParried, noteRush, rushStun } from './rushguard';
+import { count, dealt } from './score';
 
 export { respawnOf, stunOf } from './damage';
 
@@ -79,6 +80,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   const n = rear && e.kind === 'scrapper' && wears(h, 'needles') ? Math.max(e.hp, raw) : raw;
   e.hp -= n;
   e.hitAt = now;
+  dealt(e, h.id, n);
   const stop = h.counter ? HITSTOP.parry : heavy || WEAPONS[h.weapon]?.ponderous ? HITSTOP.heavy : HITSTOP.light;
   h.hitstop = Math.max(h.hitstop, stop);
   e.hitstop = Math.max(e.hitstop, stop);
@@ -195,11 +197,11 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     // Rolled (or jumped) out of it during the wind-up: a dodge all the same. Left to the last moment,
     // so the blow lands where you were a breath ago, it staggers the attacker just as rolling through does.
     if (h.lastRollAt >= now - a.windup && attackCovers(a, { ...h, x: h.rollX, y: h.rollY })) {
-      ev.push({ k: 'dodge', x: h.x, y: h.y });
+      ev.push({ k: 'dodge', x: h.x, y: h.y }), count(h.id, 'dodges');
       if (CLASS_DODGES[WEAPONS[h.weapon].cls] && now - h.lastRollAt <= slipWindow(h)) slipped(e, a, h, ev);
     }
     // No dodge (a Warrior, a Healer): walked out of a striped blow meant for you. That's the dodge.
-    else if (!CLASS_DODGES[WEAPONS[h.weapon].cls] && a.unblockable && a.aimed === h.id) ev.push({ k: 'dodge', x: h.x, y: h.y });
+    else if (!CLASS_DODGES[WEAPONS[h.weapon].cls] && a.unblockable && a.aimed === h.id) ev.push({ k: 'dodge', x: h.x, y: h.y }), count(h.id, 'dodges');
     return;
   }
   if (h.wardUntil > now && warded(e, a, h, now, ev)) return;
@@ -209,9 +211,9 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   // A blessed hero takes less from everything.
   const g = statsOf(h), taken = (h.blessedUntil > now ? BLESSING.taken : 1) * g.taken * (wears(h, 'apron') ? HUNGRY_FX.apron : 1) * soft;
   // A spellblade's lightning dash: untouchable while it runs (sim/rush.ts).
-  if (h.act === 'bash' && h.rush?.el === 'storm') return void ev.push({ k: 'dodge', x: h.x, y: h.y });
+  if (h.act === 'bash' && h.rush?.el === 'storm') return void (ev.push({ k: 'dodge', x: h.x, y: h.y }), count(h.id, 'dodges'));
   if (h.act === 'roll' && h.actT >= w.dodge.iFrom && h.actT <= slipWindow(h)) {
-    ev.push({ k: 'dodge', x: h.x, y: h.y });
+    ev.push({ k: 'dodge', x: h.x, y: h.y }), count(h.id, 'dodges');
     slipped(e, a, h, ev);
     if (has(h, 'tempo')) (h.tempoUntil = now + TRAIT.tempoTime), ev.push({ k: 'tempo', x: h.x, y: h.y });
     return;
@@ -224,6 +226,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     travelTo(h, e.x - ((e.x - h.x) / l) * to, e.y - ((e.y - h.y) / l) * to, HERO.radius);
     Object.assign(h, { kvx: 0, kvy: 0, act: 'stun', actT: 0, actDur: VARIANTS.stoker.pullStun });
     h.hp -= soak(h, a.dmg, now, ev);
+    count(h.id, 'taken', a.dmg);
     e.cooldown = 0;
     ev.push({ k: 'hit', x: h.x, y: h.y, n: a.dmg, heavy: true, on: 'hero', src: 'draw' });
     return downIfDead(h, ev);
@@ -253,6 +256,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: rushStun(a, stunOf(e)) });
     shove(e, tx / tl, ty / tl, 4, e.weight);
     ev.push({ k: 'parry', x: (h.x + e.x) / 2, y: (h.y + e.y) / 2, ...(again ? { more: true } : {}) });
+    // (The recap's: one parry a blow, a rush's later blows not again; perfect on the very press.)
+    if (!again) count(h.id, 'parries'), tight && count(h.id, 'perfect');
     ev.push({ k: 'stunned', x: e.x, y: e.y, ...(again ? { more: true } : {}) });
     // A spellblade's parry refills its magic, its shield (sim/manashield.ts; once a rush); MENDING PARRY heals friends near (sim/ladderhealer.ts).
     if (!again) parryRefills(h, tight, ev);
@@ -270,6 +275,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     h.staminaAt = now;
     h.hitstop = Math.max(h.hitstop, HITSTOP.light);
     if (!braced(h, now)) shove(h, sx / sl, sy / sl, a.knock * 0.4, HERO.weight);
+    count(h.id, 'blocks');
     if (h.stamina <= 0) {
       Object.assign(h, { stamina: 0, winded: true, act: 'stun', actT: 0, actDur: GUARD.guardBreakStun });
       ev.push({ k: 'guardbreak', x: h.x, y: h.y });
@@ -286,6 +292,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   if (n < soaked && n <= 0 && !feet) shove(h, sx / sl, sy / sl, a.knock * 0.4, HERO.weight);
   if (n <= 0) return void (h.hitstop = Math.max(h.hitstop, HITSTOP.light));
   h.hp -= n;
+  count(h.id, 'taken', n);
   // Heavy armor: a small goblin's blow doesn't stagger you.
   if (!(g.steady && e.kind === 'scrapper') && !feet) Object.assign(h, { act: 'hurt', actT: 0, actDur: HURT_STAGGER + a.knock * 0.012 });
   h.hitstop = Math.max(h.hitstop, HITSTOP.heavy);

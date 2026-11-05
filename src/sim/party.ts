@@ -21,6 +21,7 @@ import { isCleric } from './mercy';
 import type { Swing } from '../shared/tuning';
 import type { Enemy, FightEvent, Hero } from './types';
 import { raiseRate } from './techcleric';
+import { count } from './score';
 
 export const players = (heroes: Hero[]) => heroes.filter((h) => h.id !== 'squire');
 const inParty = (heroes: Hero[]) => players(heroes).length > 1;
@@ -30,6 +31,7 @@ export function allyHit(by: string, h: Hero, dmg: number, ev: FightEvent[], dx =
   if (h.id === by || h.id === 'squire' || h.act === 'down' || h.act === 'roll' || h.safeT) return;
   const n = Math.max(1, Math.round(dmg * PARTY.friendly));
   h.hp -= n;
+  count(h.id, 'taken', n);
   Object.assign(h, { act: 'hurt', actT: 0, actDur: HURT_STAGGER });
   const l = Math.hypot(dx, dy);
   if (l > 0.01) (h.kvx += (dx / l) * 3), (h.kvy += (dy / l) * 3);

@@ -19,6 +19,7 @@ import { fireproof } from './ladderrogue';
 import { lightNear, type Slick } from './oil';
 import { hurtSurvivor } from './survivors';
 import type { Enemy, Hero, Zone } from './types';
+import { count } from './score';
 
 /** In the pit, body and all. */
 export const inPit = (z: Zone, b: { x: number; y: number }, rad = 0) => Math.hypot(b.x - z.x, b.y - z.y) <= z.r + rad;
@@ -83,6 +84,7 @@ export function stepPits(zones: Zone[], w: World, slicks: Slick[] = []): void {
         continue;
       }
       h.hp -= friend;
+      count(h.id, 'taken', friend);
       w.ev.push({ k: 'hit', x: h.x, y: h.y, n: friend, heavy: false, on: 'hero', src: 'fire' });
       downIfDead(h, w.ev);
     }

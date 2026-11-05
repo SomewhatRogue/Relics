@@ -6,6 +6,7 @@
  */
 import { POISON } from '../shared/tuning';
 import type { FightEvent, Hero } from './types';
+import { count } from './score';
 
 export const poisoned = (h: Hero) => (h.poison ?? 0) > 0;
 
@@ -45,6 +46,7 @@ export function stepPoison(heroes: Hero[], now: number, ev: FightEvent[]): void 
     const n = Math.min(h.hp - 1, POISON.dmg * h.poison!);
     if (n <= 0) continue;
     h.hp -= n;
+    count(h.id, 'taken', n);
     ev.push({ k: 'hit', x: h.x, y: h.y, n, heavy: false, on: 'hero', tick: true, src: 'poison' });
   }
 }

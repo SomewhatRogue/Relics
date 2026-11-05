@@ -4755,3 +4755,56 @@ getting hit costs your spells. The ring over the hero shows the shield. The room
   guest's decoded snapshot carries the magic, the crack and the break). `tests/magekit.test.ts` (holds cost
   35 every time, the flash is free, the parry refills magic), `tests/techmage.test.ts` and
   `tests/kitwords.test.ts` follow. The spellbook balance test counts taps only, so it was unchanged.
+
+## 2026-11-05: no knack at a job's end; the whole party side by side in the recap (Kyle; Claude Opus 5.5)
+
+Kyle: "Shouldn't have knack picking after a mission, just let them return home and show them a recap of
+how they and all players did in that mission. Numbers killed, dodges, damage done etc."
+
+- **No knack pick at a job's end.** The recap's one button is BACK TO WICKHOLD, always (NEXT: PICK A
+  KNACK is gone, and recap.ts no longer opens the knacks screen). Knack points are banked on the hero as
+  before (`gainXp` adds `picks`); nothing is spent or lost. With one waiting, the card says "A knack to
+  pick: open your PACK." and back in town the cues from 2026-11-02 and 2026-11-04 do the rest: the gold
+  count on PACK (`data-picks`, knackcues.ts), LEVEL N: A KNACK TO PICK at the hero's feet once, and the
+  pack's gilt KNACKS N TO PICK button.
+- **The room counts each hero** (`sim/score.ts`). While a job's room steps it hands its `board` in
+  (`useBoard`, like `useMap`), and each count is made where the thing happens, keyed by hero id: KILLS
+  in `kill()` (goblins only, to `lastBy`, as the run counts them), DAMAGE in `damage()`, `hitEnemy`, a
+  wall and a javelin (what went into health, not the overkill), BIGGEST HIT (one blow, never a tick),
+  DAMAGE TAKEN at every place a hero loses health, DODGES at every `dodge` event (rolled, jumped or
+  blinked out of, or stepped out of a striped blow), PARRIES (one a blow; a rush's later blows not
+  again) and PERFECT PARRIES (the blow lands within `MANA_SHIELD.perfectIn`, 0.08 s, of the press),
+  BLOCKS (a held block or a Healer's COVER), HEALING GIVEN to friends only (lantern light, mend, blessed
+  ground). DOWNED and HELPED UP come off the `down` and `pickedup` events in `run.ts tally`, which folds
+  each room's board into `run.board` after every step and gives every player a line with their class.
+  No dice anywhere; the same fight counts the same. Rooms that aren't a job's (town, the yard, the wood)
+  keep no board.
+- **The same numbers for everyone.** `run.board` rides whole in the end message and the saves; a
+  friend's game swaps the ids as for any word from the leader (`client/asguest.ts`, now what coop.ts uses
+  for `d.end`), so their own column is `me`. The leader names everyone on it at the end (`nameBoard`:
+  their own name and class, each friend as the party knows them). Patches (20 a second) carry the run
+  without the board (`lean` in coop.ts).
+- **The recap** (`client/recapparty.ts`, `recap.css`): after ROOMS, GOBLINS and TIME, a dark sheet with
+  a column per hero (this player first, name in their class colour and underlined, the class under it),
+  six rows (KILLS, DAMAGE, DAMAGE TAKEN, DODGES, PARRIES, DOWNED) in 16px bone numbers, and + MORE for
+  BLOCKS, PERFECT PARRIES, HELPED UP, HEALING GIVEN, BIGGEST HIT. A number is gilt where that hero led.
+  With three or four heroes the labels narrow to their longest word so four columns fit a phone. The
+  top DOWNED row goes when the columns have it. GOLD, XP, SAVED, FOUND, TREASURE, RELICS and the lines
+  under them are as they were. An old run with no board shows the card as before.
+- **Callouts** (`client/recapcalls.ts`): one per hero, only for a real lead (more than anyone else, not
+  tied, more than nothing; a party of one leads nobody), the first they led at in this order: MOST
+  KILLS, MOST DAMAGE, MOST HEALING, HELPED FRIENDS UP, MOST PARRIES, MOST PERFECT PARRIES, MOST DODGES,
+  MOST BLOCKS, BIGGEST HIT, NEVER WENT DOWN (the only one not downed when everyone else was). Nothing
+  for damage taken or downs.
+- **Words.** Kept in Kyle's style (effect first, plain), the game's own words reused: DAMAGE, HEALING
+  GIVEN (the item card's), HELPED UP (the HELP UP button), PERFECT, friends. "KEPT EVERYONE UP" became
+  MOST HEALING: it isn't true when a friend went down, and its long word didn't fit four columns. The
+  lore-keeper and line-editor agents couldn't be run from this session (no agent tool), so their
+  checklists were applied by hand; the new lines still want their pass: KILLS, DAMAGE, DAMAGE TAKEN,
+  DODGES, PARRIES, BLOCKS, PERFECT PARRIES, HELPED UP, HEALING GIVEN, BIGGEST HIT, MORE, LESS, the ten
+  callouts above, and "A knack to pick: open your PACK." / "N knacks to pick: open your PACK."
+- Tests: `tests/recapboard.test.ts` (a scripted fight: two parries, one perfect, a block, a kill counting
+  3 into a butcher on 3 health, a Ranger's dodge, a blow taken and a down, each under its own hero; the
+  same twice; no board outside a job; a friend's recap reads the same numbers, their column first;
+  callouts only for a real lead; one button home, the knack banked and named on the card, PACK carrying
+  the count).

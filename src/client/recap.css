@@ -1,0 +1,25 @@
+/* The party side by side at a job's end (recapparty.ts): a label column, then a column for each hero.
+   A dark sheet, bone numbers big enough for a phone, gilt where a hero led. */
+#panel .party { margin: 8px -8px 2px; padding: 6px 6px 4px; background: var(--stone-900); box-shadow: inset 0 0 0 var(--px) var(--stone-700); }
+#panel .pt-grid { display: grid; grid-template-columns: minmax(5.2em, 7.2em) repeat(var(--n), minmax(0, 1fr)); column-gap: 5px; row-gap: 0; }
+/* Three or four heroes: the labels only as wide as their longest word (PERFECT), the same in both grids, so every column has room. */
+#panel .party.many .pt-grid { font-size: var(--fs-text); grid-template-columns: 4.7em repeat(var(--n), minmax(0, 1fr)); column-gap: 4px; }
+#panel .pt-grid > div { display: contents; }
+#panel .pt-grid > div > * { padding: 4px 0; border-top: var(--px) solid var(--stone-750); }
+#panel .pt-grid > div:first-child > * { border-top: 0; padding-top: 0; }
+#panel .pt-grid b { font: 400 var(--fs-text)/1.2 var(--font-body); letter-spacing: 0.04em; color: var(--bone-dim); align-self: center; }
+#panel .pt-grid span { font: 400 var(--fs)/1 var(--font-body); color: var(--bone); text-align: center; align-self: center; }
+#panel .pt-grid span.lead { color: var(--gilt); }
+/* Each hero's head: the name in their class's colour, the class, and a callout where they led. */
+#panel .pt-who { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; text-align: center; padding-bottom: 4px; }
+#panel .pt-who b { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 var(--fs-text)/1.2 var(--font-body); color: var(--cls); }
+#panel .pt-who em { font: 400 var(--fs-text)/1.2 var(--font-body); font-style: normal; letter-spacing: 0; color: var(--stone-300); }
+#panel .pt-who i { box-sizing: border-box; max-width: 100%; margin-top: 2px; padding: 2px 2px; font: 400 var(--fs-text)/1.15 var(--font-body); font-style: normal; letter-spacing: 0; color: var(--stone-900); background: var(--gilt); }
+#panel .pt-who.me b { text-decoration: underline; text-underline-offset: 3px; }
+/* MORE: the rest of the rows, a tap away. */
+#panel .pt-more summary { list-style: none; cursor: pointer; padding: 6px 0 2px; border-top: var(--px) solid var(--stone-750); font: 400 var(--fs-text)/1.2 var(--font-body); letter-spacing: 0.04em; color: var(--gilt); text-align: center; }
+#panel .pt-more summary::-webkit-details-marker { display: none; }
+#panel .pt-more summary::before { content: '+ '; }
+#panel .pt-more[open] summary::before { content: '- '; }
+#panel .pt-more .l, #panel .pt-more[open] .m { display: none; }
+#panel .pt-more[open] .l { display: inline; }

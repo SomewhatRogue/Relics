@@ -20,6 +20,7 @@ import { inStrike } from './stormshape';
 import { stun } from './stuns';
 import { hurtSurvivor } from './survivors';
 import type { Enemy, FightEvent, Hero, Strike, Survivor } from './types';
+import { count } from './score';
 
 /** What the storm needs of its room. */
 export interface StormRoom {
@@ -74,6 +75,7 @@ function land(r: StormRoom, s: Strike): void {
     if (h.act === 'down' || h.act === 'roll' || h.out || h.safeT || (h.z ?? 0) !== 0 || !inStrike(s, h)) continue;
     const [dx, dy] = away(s, h);
     h.hp -= LIGHTNING.heroDmg;
+    count(h.id, 'taken', LIGHTNING.heroDmg);
     ev.push({ k: 'hit', x: h.x, y: h.y, n: LIGHTNING.heroDmg, heavy: true, on: 'hero', src: 'storm' });
     (h.kvx += dx * LIGHTNING.knock), (h.kvy += dy * LIGHTNING.knock);
     downIfDead(h, ev);
