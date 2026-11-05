@@ -111,7 +111,7 @@ export class Actors {
     room.zones.forEach((z, i) => z.kind !== 'sentry' && z.kind !== 'firepit' && z.kind !== 'stormring' && z.kind !== 'caltrops' && z.kind !== 'blinkburst' && z.kind !== 'taunt' && z.kind !== 'skystrike' && this.things.get('z' + i, String(z.r), () => ({ root: makeRing(z.r, 0xffd27a, true, 0.12) })).root.position.set(z.x, 0.04, z.y));
     room.snares.forEach((s, i) => this.things.get('n' + i, '', () => ({ root: makeRing(0.35, 0x8a6a3a, false, 0.06) })).root.position.set(s.x, 0.03, s.y));
     room.smokes.forEach((s, i) => {
-      const o = this.things.get('m' + i, '', () => ({ root: makeSmoke(POTION.smokeR) })).root;
+      const o = this.things.get('m' + i, String(s.r ?? ''), () => ({ root: makeSmoke(s.r ?? POTION.smokeR) })).root;
       o.position.set(s.x, 0, s.y);
       o.rotation.y = now * 0.2;
     });

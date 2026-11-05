@@ -115,7 +115,7 @@ describe('class relics', () => {
     const { room, h } = onTarget(1);
     const seen: string[] = [];
     for (let i = 1; i <= 5; i++) room.setIntent('me', intent({ classSeq: i })), room.step(), seen.push(h.relics.join(' '));
-    expect(seen).toEqual(['net', 'shadow', 'grasp', 'sanctuary', 'bash']);
+    expect(seen).toEqual(['net', 'vanish', 'grasp', 'sanctuary', 'bash']);
   });
 
   it("the ranger's net snares a scrapper flat", () => {
@@ -132,12 +132,12 @@ describe('class relics', () => {
     expect(t.attack).toBeNull();
   });
 
-  it("the rogue's shadowstep lands behind the goblin, facing its back", () => {
+  it("the rogue's SHADOW STEP (its own button now) lands behind the goblin, facing its back", () => {
     const { room, h, t } = onTarget(0);
     asClass(room, 2);
     Object.assign(t, { x: 9, y: 5, fx: 0, fy: 1 });
     Object.assign(h, { x: 9, y: 9 });
-    room.setIntent('me', intent({ classSeq: 2, relicSeq: 1, ay: -1 }));
+    room.setIntent('me', intent({ classSeq: 2, signSeq: 1, ay: -1 }));
     run(room, 0.2);
     expect(h.y).toBeLessThan(t.y);
     expect(h.fy).toBeGreaterThan(0.9);

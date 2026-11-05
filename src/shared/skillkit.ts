@@ -25,6 +25,13 @@ export const VANISH = { cooldown: 18, windup: 0.06, recover: 0.1, time: 4, radiu
 /** The Rogue's knife fan: `count` knives thrown wide, `spread` radians either side of where you face. */
 export const KNIVES = { cooldown: 12, windup: 0.12, recover: 0.25, count: 5, spread: 0.5, dmg: 11, knock: 3, speed: 18, range: 7 };
 
+/** The Rogue's smoke bomb (Kyle, 2026-11-05; it took Shadow Step's place among the three): thrown up to
+ *  `range` (where you aim, else the goblin you face, else `fallback` ahead), it lands after `flight` and
+ *  smokes `radius` round for `time`. The smoke's rules (sim/smokebomb.ts, sim/flasks.ts): no goblin sees
+ *  anyone in it, nor anyone at all from inside it, unless close (POTION.seen); a blow wound up across
+ *  its edge is dropped, an archer's too. */
+export const SMOKEBOMB = { cooldown: 16, windup: 0.15, recover: 0.2, range: 6, fallback: 3.5, flight: 0.45, radius: 2.4, time: 5 };
+
 /** The Mage's fire ring: fire bursts out around you (`radius`), throwing goblins off and setting them
  *  alight, then burns on where it stood for `linger`, lighting anything that walks in (every `every`). */
 export const FIRE_RING = { cooldown: 16, windup: 0.2, recover: 0.3, radius: 2.6, dmg: 12, knock: 12, linger: 4, every: 0.5 };

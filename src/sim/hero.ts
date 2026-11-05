@@ -20,6 +20,7 @@ import { quickMult, relicDark, spendCharge } from './charge';
 import { paySpell, refuseSpell } from './spells';
 import { stepElement, tapSwing } from './channel';
 import { graspRefused } from './grasp';
+import { signDue, signPressed } from './signature';
 import { streamFace } from './stream';
 import { knows, type Enemy, type FightEvent, type Hero, type Intent } from './types';
 import { primeShoulder, stride } from './techwarrior';
@@ -33,8 +34,8 @@ export function newHero(id: string, x: number, y: number): Hero {
     act: 'idle', actT: 0, actDur: 0, combo: 0, heavy: false, power: 0, counter: false, hitIds: [], blocking: false,
     parryOpenAt: -9, lastBlockPress: -9, rollDx: 0, rollDy: 1, lastRollAt: -9, rollX: -99, rollY: -99, decoyX: 0, decoyY: 0, decoyUntil: -9, toldAt: -9, snareReady: 0, hound: null, counterUntil: -9,
     attackQueuedAt: -9, rollQueuedAt: -9, relic: 'bash', relics: abilitiesOf('WARRIOR'), relicQueuedAt: -9,
-    relicReady: { javelin: 0, hook: 0, horn: 0, bash: 0, net: 0, shadow: 0, channel: 0, grasp: 0, lodestone: 0, blessing: 0, ward: 0, sanctuary: 0, stamp: 0, volley: 0, sic: 0, vanish: 0, knives: 0, firering: 0, tether: 0, chain: 0, light: 0, bomb: 0, sentry: 0, bell: 0, knuckle: 0 },
-    augments: { javelin: '', hook: '', horn: '', bash: '', net: '', shadow: '', channel: '', grasp: '', lodestone: '', blessing: '', ward: '', sanctuary: '', stamp: '', volley: '', sic: '', vanish: '', knives: '', firering: '', tether: '', chain: '', light: '', bomb: '', sentry: '', bell: '', knuckle: '' }, blessedUntil: -9, wardUntil: -9, wardHp: 0, rallyUntil: -9, arms: {}, bag: [], bagSize: BAG.start, armor: null, rings: [], baseHp: HERO.hp, purse: 0, fed: 0, lastKill: 0, biteAt: 0, ransomed: false, want: 0, cold: false, found: [], relicItem: '', glow: 0, belt: [], potionReady: 0, mendLeft: 0, brandyUntil: -9, hiddenUntil: -9, perfect: false, tempoUntil: -9, carrying: 0, lifting: 0, grabQueuedAt: -9, z: 0, hitstop: 0, lenience: 0,
+    relicReady: { javelin: 0, hook: 0, horn: 0, bash: 0, net: 0, shadow: 0, channel: 0, grasp: 0, lodestone: 0, blessing: 0, ward: 0, sanctuary: 0, stamp: 0, volley: 0, sic: 0, vanish: 0, knives: 0, smoke: 0, firering: 0, tether: 0, chain: 0, light: 0, bomb: 0, sentry: 0, bell: 0, knuckle: 0 },
+    augments: { javelin: '', hook: '', horn: '', bash: '', net: '', shadow: '', channel: '', grasp: '', lodestone: '', blessing: '', ward: '', sanctuary: '', stamp: '', volley: '', sic: '', vanish: '', knives: '', smoke: '', firering: '', tether: '', chain: '', light: '', bomb: '', sentry: '', bell: '', knuckle: '' }, blessedUntil: -9, wardUntil: -9, wardHp: 0, rallyUntil: -9, arms: {}, bag: [], bagSize: BAG.start, armor: null, rings: [], baseHp: HERO.hp, purse: 0, fed: 0, lastKill: 0, biteAt: 0, ransomed: false, want: 0, cold: false, found: [], relicItem: '', glow: 0, belt: [], potionReady: 0, mendLeft: 0, brandyUntil: -9, hiddenUntil: -9, perfect: false, tempoUntil: -9, carrying: 0, lifting: 0, grabQueuedAt: -9, z: 0, hitstop: 0, lenience: 0,
     seen: { attack: 0, block: 0, roll: 0, weapon: 0, relic: 0, relicSwap: 0, relicPick: 0, augment: 0, cls: 0, take: 0, grab: 0, gear: 0, potion: 0, belt: 0, open: 0, element: 0 },
   };
 }
@@ -107,6 +108,8 @@ export interface HeroActs {
   drop: (h: Hero) => void;
   /** A shield charge in progress, each tick. */
   bash: (h: Hero) => void;
+  /** The class's own button going off (sim/signature.ts); true when it went. */
+  sign: (h: Hero) => boolean;
 }
 
 /** How a relic and its augment are named on screen: "JAVELIN FIRE". */
@@ -148,6 +151,10 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   if (inp.attackSeq !== h.seen.attack) (h.seen.attack = inp.attackSeq), (h.attackQueuedAt = now);
   // A Mage's ELEMENT button: the spellbook turns (sim/channel.ts).
   stepElement(h, inp, now, ev);
+  // The class's own button (sim/signature.ts): a MARK or a MEND goes in a swing too; a SHADOW STEP waits below.
+  signPressed(h, inp, now);
+  if (h.signing && h.act !== 'throw') h.signing = false;
+  if (signDue(h, now, false)) acts.sign(h);
   if (inp.grabSeq !== h.seen.grab) (h.seen.grab = inp.grabSeq), (h.grabQueuedAt = now);
   // A GRAB press that found nothing to take hold of, throw, help up or burn: say so, at most once a second.
   if (h.grabQueuedAt > -9 && now - h.grabQueuedAt >= INPUT_BUFFER) {
@@ -227,7 +234,12 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     return acts.carry(h, inp, (k) => walk(h, inp, k, dt, now, ev));
   }
   if (h.act === 'throw') {
-    const r = RELICS[h.relic];
+    const r = RELICS[h.signing ? 'shadow' : h.relic];
+    if (h.signing) {
+      if (h.actT >= r.windup && h.actT - dt < r.windup) acts.sign(h);
+      if (h.actT >= r.windup + r.recover) Object.assign(h, { act: 'idle', actT: 0, signing: false });
+      return;
+    }
     if (h.actT >= r.windup && h.actT - dt < r.windup) {
       acts.fire(h);
       spendCharge(h);
@@ -311,6 +323,12 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   if (now - h.grabQueuedAt < INPUT_BUFFER && acts.grab(h)) return;
   // An empty crossbow winds itself while you're not attacking; standing still the whole time, the bolt glints (sim/crossbow.ts).
   autoWind(h, Math.hypot(inp.mx, inp.my) >= 0.05, dt, ev);
+  // A SHADOW STEP, from a standstill or a walk: turned to the goblin first, then the shadow's own short
+  // wind-up and recovery, as when it was a skill (the act 'throw', `signing`).
+  if (signDue(h, now, true)) {
+    face(h, inp, enemies, true, RELICS.shadow.range);
+    return void Object.assign(h, { act: 'throw', actT: 0, signing: true, signQueuedAt: -9 });
+  }
   // The class skill, not yet taught, does nothing (the press is spent).
   if (now - h.relicQueuedAt < INPUT_BUFFER && h.relic === h.relics[0] && !knows(h, 'skill')) h.relicQueuedAt = -9;
   // A dark relic does nothing (the press is spent): it wants recharging at the church.

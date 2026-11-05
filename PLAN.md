@@ -2,6 +2,16 @@
 
 ## Current slice
 
+**Every class has its own button** (Claude Opus 5.5, 2026-11-05; Kyle: the Rogue, Ranger and Healer get a
+built-in move like GRAB and ELEMENT, taught in the tutorial). Built; waiting on Kyle's play. *Done when*, on his
+phone and laptop: a Rogue's SHADOW STEP, a Ranger's MARK and a Healer's MEND each sit by ATTACK where a Mage's
+ELEMENT does (V on a laptop), hidden in the wood till Hew's clearing, then pulsing gold; the Rogue steps behind
+one of two goblins with their backs turned and stabs it; the Ranger marks one (a gold chevron over it on every
+screen) and shoots it down, arrows bending a little toward it, the hound on it; the Healer sees an archer put an
+arrow in Hew, who goes down on one knee and lives, kills the goblins and MENDs him (and itself when worse off);
+the Rogue's trainer offers Vanish, Knife Fan and the new Smoke Bomb, and an old Rogue who carried Shadow Step
+now carries Smoke Bomb. Numbers and every new line in DECISIONS 2026-11-05. Open: the lines through the lore
+keeper and the line editor (MEND or HEAL); the numbers once he's played.
 **The Mage's elements in the wood** (Claude Opus 5.5, 2026-11-05; Kyle: "have the Mage tutorial explain the
 elements in the full charge place. Have enemies that are weak and resistant to each type, and just explain you
 can cycle your elements and to watch out for that"). Built; waiting on Kyle's play. *Done when* a new Mage, on

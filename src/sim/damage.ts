@@ -3,6 +3,7 @@ import { BROOD, BUTCHER, GUARD, OVERKILL, SCRAPPER, SPIDER, STORM, SWING_DUMMY, 
 import type { DeathKind, Enemy, FightEvent } from './types';
 import { wet } from './wet';
 import { clanks, plated } from './ironhide';
+import { MARK_SIGN, isMarked } from '../shared/signs';
 
 const SPEC = { butcher: BUTCHER, scrapper: SCRAPPER, spider: SPIDER, brood: BROOD } as Record<string, { stun: number; respawn: number } | undefined>;
 export const stunOf = (e: Enemy) => SPEC[e.kind]?.stun ?? SWING_DUMMY.stun;
@@ -76,6 +77,8 @@ export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: Da
   if (!o.tick) sayWeak(e, weak * (soak ? STORM.wet : 1), now, ev, o.el || 'physical');
   // Marked by a relic: the next real blow lands harder, and the mark is spent.
   if (!o.tick && (e.markUntil ?? -9) > now) (n = Math.round(n * MARK.mult)), (e.markUntil = 0);
+  // A Ranger's MARK: more from everyone, ticks too (sim/mark.ts).
+  if (isMarked(e, now)) n = Math.max(1, Math.round(n * MARK_SIGN.dmg));
   if (o.mult && (e.act === 'stunned' || e.act === 'pinned' || frozen(e, now) || snared(e, now))) n = Math.round(n * GUARD.stunnedMult * (o.brutal ? TRAIT.brutal : 1));
   // An ironhide's plates: a heavy hit breaks its guard, anything else barely gets through (sim/ironhide.ts).
   const breaks = !!o.heavy && !o.tick, clank = !o.tick && !breaks && clanks(e, now);

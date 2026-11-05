@@ -10,6 +10,7 @@ import type { World } from './elements';
 import { spotFor } from './facing';
 import type { Smoke } from './flasks';
 import { knifeFan, vanish } from './rogue';
+import { throwSmoke } from './smokebomb';
 import { sendHound, stepSic } from './sic';
 import { stamp } from './stamp';
 import { startTether, stepTethers } from './tether';
@@ -17,7 +18,7 @@ import type { Bolt, Hero, Intent, Zone } from './types';
 
 export interface SkillRoom { zones: Zone[]; bolts: Bolt[]; smokes: Smoke[]; intents: Map<string, Intent> }
 
-export const TAUGHT: RelicId[] = ['stamp', 'volley', 'sic', 'vanish', 'knives', 'firering', 'tether', 'chain', 'light'];
+export const TAUGHT: RelicId[] = ['stamp', 'volley', 'sic', 'vanish', 'knives', 'smoke', 'firering', 'tether', 'chain', 'light'];
 
 /** Fire one of these skills; false if `h.relic` isn't one of them. `mult`: the hero's damage now. */
 export function fireSkill(h: Hero, r: SkillRoom, w: World, mult: number): boolean {
@@ -28,6 +29,7 @@ export function fireSkill(h: Hero, r: SkillRoom, w: World, mult: number): boolea
     case 'sic': return sendHound(h, w.enemies, w.now, w.ev), true;
     case 'vanish': return vanish(h, w.enemies, r.smokes, w.now, w.ev), true;
     case 'knives': return r.bolts.push(...knifeFan(h, el, mult, w.ev)), true;
+    case 'smoke': return r.bolts.push(throwSmoke(h, w.enemies, aim, w.now, w.ev)), true;
     case 'firering': return r.zones.push(fireRing(h, w)), true;
     case 'tether': return startTether(h, w.enemies, w.now, w.ev), true;
     case 'chain': return censerChain(h, w, aim), true;

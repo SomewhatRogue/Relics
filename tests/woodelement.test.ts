@@ -43,6 +43,14 @@ function toElement(cls: HeroClass = 'MAGE'): Game {
   clear(g, lessonsFor(cls)[2].need);
   return g;
 }
+/** The Healer's step at its card: stand by Hew and MEND him (sim/woodheal.ts). */
+function mendHew(g: Game): void {
+  const s = g.wood!.sign, n = g.room.map.npcs?.find((x) => x.talk === 'hew');
+  if (s?.id !== 'heal' || s.phase !== 'card' || !n) return;
+  Object.assign(g.hero, { x: n.x + 1, y: n.y, hp: g.hero.maxHp, stamina: 100, winded: false });
+  g.step(0.05, { ...NO_INTENT, signSeq: (g.hero.seen.sign ?? 0) + 1 });
+  g.step(0.05, NO_INTENT);
+}
 const three = (g: Game) => g.room.enemies.filter((e) => g.wood!.ids.includes(e.id));
 const gateShut = (g: Game, i: number) => g.room.map.blocks.some((b) => b.x === GATES[i].block.x && b.y === GATES[i].block.y);
 const weakAt = (e: Enemy, el: 'fire' | 'frost' | 'storm'): FightEvent => ({ k: 'weak', x: e.x, y: e.y, el });
@@ -61,7 +69,9 @@ describe("the Mage's element step in the wood", () => {
       store.clear();
       const o = toElement(c);
       expect(o.wood!.element).toBeUndefined();
-      expect(o.wood!.stage).toBe(3);
+      // (A Rogue, Ranger or Healer goes on to their own button's step instead: sim/woodsign.ts.)
+      expect(o.wood!.stage).toBe(c === 'WARRIOR' ? 3 : 2);
+      expect(!!o.wood!.sign).toBe(c !== 'WARRIOR');
       expect(o.room.enemies.some((e) => e.variant === 'soaked' || e.variant === 'aproned' || e.variant === 'kilnhot')).toBe(false);
       expect(o.taught()).not.toContain('element');
     }
@@ -164,7 +174,7 @@ describe("the Mage's element step in the wood", () => {
       const w = () => g.wood!;
       for (let i = 0; i < 4; i++) {
         enter(g, i);
-        for (let k = 0; k < 4 && w().stage === i; k++) clear(g, lessonsFor(c)[i].need);
+        for (let k = 0; k < 4 && w().stage === i; k++) clear(g, lessonsFor(c)[i].need), mendHew(g);
         expect(w().stage, c + ' lesson ' + i).toBe(i + 1);
       }
       enter(g, 4);

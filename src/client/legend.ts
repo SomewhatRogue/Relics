@@ -16,6 +16,8 @@ import { skillCanvas } from './skillicons';
 import { itemIcon, potionIcon } from './itemicons';
 import { relicItemIcon } from './relicicons';
 import { kitRows } from './kitlines';
+import { SIGNS, SIGN_KEY, SIGN_WORDS } from '../shared/signs';
+import { signFor } from '../sim/signature';
 import type { Panel } from './panels';
 import type { Game } from './game';
 
@@ -48,6 +50,9 @@ async function rows(g: Game, touch: boolean): Promise<Row[]> {
     text: kitRows(me.weapon, cls === 'MAGE' ? castElement(me) : '').map(([l, v]) => `<i>${l}</i> ${v}`).join('<br>') });
   // A Mage's ELEMENT: the small ring by ATTACK, in the element's colour (cluster.ts).
   if (cls === 'MAGE') out.push({ face: { shape: 'round', size: 22, grade: 'iron', icon: skillCanvas('channel', castElement(me)), ring: EL_RING[castElement(me)] }, name: 'ELEMENT', key: 'X', text: `Switch element: fire, frost, storm. It changes what your tap and hold do. The first spell after a switch is primed: it does 50% more damage.` });
+  // A Rogue's, Ranger's or Healer's own button, in the same spot (shared/signs.ts), once the wood has given it.
+  const sg = signFor(me);
+  if (sg && g.taught().includes('sign')) out.push({ face: { shape: 'round', size: 22, grade: 'iron', icon: skillCanvas(sg, '') }, name: SIGNS[sg].name, key: SIGN_KEY, text: SIGN_WORDS[sg] });
   const guard = guardOf(kit);
   if (guard === 'full') out.push({ face: { shape: 'shield', size: 28, grade: 'iron', icon: icon('block') }, name: 'BLOCK', key: 'RIGHT CLICK', text: 'Hold to block. Tap while the red flashes white to parry.' });
   if (guard === 'parry') out.push({ face: { shape: 'shield', size: 28, grade: 'iron', icon: icon('parry') }, name: 'PARRY', key: 'RIGHT CLICK', text: "Tap while the red flashes white to parry. No held block." + (kit.spellblade ? ` ${SHIELD_LINE}` : '') });

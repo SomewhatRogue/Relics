@@ -98,6 +98,11 @@ export class Soundscape {
     if (ev.k === 'legstab') return sfx.backstab();
     if (ev.k === 'parrymend' || ev.k === 'coverfor') return sfx.blessed();
     if (ev.k === 'taunt') return sfx.rally();
+    // Each class's own button (shared/signs.ts): a MARK set, a MEND given; Hew struck; a smoke bomb thrown.
+    if (ev.k === 'hunted') return sfx.latch(), sfx.perfect();
+    if (ev.k === 'mended') return sfx.heal(), sfx.blessed();
+    if (ev.k === 'hewshot') return sfx.bodyhit();
+    if (ev.k === 'smokebomb') return sfx.latch();
     // The Ranger's: a blinding arrow's flash, a clean hit, the crossbow's ratchet and its glint, a glinted bolt through a line.
     if (ev.k === 'blinded') return sfx.perfect(), sfx.flare();
     if (ev.k === 'trueshot') return sfx.perfect();

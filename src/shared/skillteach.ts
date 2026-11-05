@@ -28,7 +28,9 @@ export const skillStep = (p: Profile, r: RelicId) => SKILL_STEPS[Math.max(0, ski
 
 export function skillState(p: Profile, r: RelicId): TrainState {
   const i = skillIndex(p, r);
-  if (i <= 0) return lessonState(p, 'skill');
+  // (Not one of this class's three, as Shadow Step isn't now: nothing to buy.)
+  if (i < 0) return 'max';
+  if (i === 0) return lessonState(p, 'skill');
   if (knowsSkill(p, r)) return 'max';
   const t = SKILL_STEPS[i];
   if (p.level < t.level) return 'locked';
@@ -38,6 +40,7 @@ export function skillState(p: Profile, r: RelicId): TrainState {
 
 /** Pay to be taught `r`. False (and nothing spent) unless it's buyable now. */
 export function learnSkill(p: Profile, r: RelicId): boolean {
+  if (skillIndex(p, r) < 0) return false;
   if (skillIndex(p, r) === 0) return learnLesson(p, 'skill');
   if (skillState(p, r) !== 'buy') return false;
   p.gold -= skillStep(p, r).price;

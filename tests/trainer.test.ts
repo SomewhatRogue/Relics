@@ -111,17 +111,19 @@ describe('trainer', () => {
     expect(SKILL_STEPS.map((x) => x.price)).toEqual([150, 250, 400]);
     const p = hero(5, 1000, 'ROGUE');
     // The second waits on the first.
-    expect(skillState(p, 'vanish')).toBe('needs');
-    expect(learnSkill(p, 'vanish')).toBe(false);
-    expect(learnSkill(p, 'shadow')).toBe(true);
+    // (A Rogue's three: Vanish, Knife Fan, Smoke Bomb; Shadow Step is its own button now.)
+    expect(skillState(p, 'knives')).toBe('needs');
+    expect(learnSkill(p, 'knives')).toBe(false);
+    expect(learnSkill(p, 'shadow')).toBe(false);
     expect(learnSkill(p, 'vanish')).toBe(true);
-    expect(p.gold).toBe(1000 - 150 - 250);
-    expect(knowsSkill(p, 'vanish')).toBe(true);
-    // The third waits on level 7.
-    expect(skillState(p, 'knives')).toBe('locked');
-    expect(trainerRows(p).find((x) => x.id === 'knives')!.tag).toBe('LEVEL 7');
-    p.level = 7;
     expect(learnSkill(p, 'knives')).toBe(true);
+    expect(p.gold).toBe(1000 - 150 - 250);
+    expect(knowsSkill(p, 'knives')).toBe(true);
+    // The third waits on level 7.
+    expect(skillState(p, 'smoke')).toBe('locked');
+    expect(trainerRows(p).find((x) => x.id === 'smoke')!.tag).toBe('LEVEL 7');
+    p.level = 7;
+    expect(learnSkill(p, 'smoke')).toBe(true);
     expect(trainerRows(p).filter((x) => x.group === 'skills').every((x) => x.state === 'max')).toBe(true);
   });
 

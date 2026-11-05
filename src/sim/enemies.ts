@@ -20,6 +20,7 @@ import { noticeFor, reachFor } from '../shared/sky';
 import type { Enemy, EnemyAttack, FightEvent, Hero } from './types';
 import { isRound } from './types';
 import { vanished } from './rogue';
+import { smokeBlind } from './smokebomb';
 import { wayTo } from './pathing';
 import { hearFrom, samePack } from './packs';
 import { stepOwn } from './ownfoes';
@@ -64,7 +65,7 @@ function nearest(e: Enemy, heroes: Hero[], now: number): Hero | null {
     const apron = wears(h, 'apron') ? (e.name ? 999 : HUNGRY_FX.lure) : 0;
     // A netted hero: they all come for them (sim/netter.ts).
     const raw = Math.hypot(h.x - e.x, h.y - e.y), d = raw - lure(h) - apron - (netted(h, now) ? NETTER.lure : 0);
-    if (!visible(h, raw, now) || vanished(h, now)) continue;
+    if (!visible(h, raw, now) || vanished(h, now) || smokeBlind(e, raw, now)) continue;
     if (d < bd) (bd = d), (best = h);
     // A Mage's blink image draws them off while it lasts: they swing at where you were.
     if (h.decoyUntil > now) {
@@ -311,7 +312,7 @@ function notice(e: Enemy, heroes: Hero[], others: Enemy[], now: number, ev: Figh
   for (const h of heroes) {
     if (h.act === 'down' || h.id === 'squire') continue;
     const dx = h.x - e.x, dy = h.y - e.y, d = Math.hypot(dx, dy);
-    if (!visible(h, d, now) || vanished(h, now)) continue;
+    if (!visible(h, d, now) || vanished(h, now) || smokeBlind(e, d, now)) continue;
     const ahead = (dx * e.fx + dy * e.fy) / (d || 1) > -0.2;
     // Looters picking the dead don't look up until something comes close.
     // Darker hours, less far (shared/timeofday.ts); a censer's glow carries less by day.

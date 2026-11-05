@@ -117,6 +117,18 @@ function drawDead(c: Ctx, s: Sprite, x: number, y: number, n: Npc): void {
   else c.lit.fillRect(Math.round(x - 2), Math.round(y - (n.lift ?? 0) - s.h + neck - 1), 4, 2);
 }
 
+/** An arrow stuck in a leg: the shaft slanting out, the fletching pale, a little blood. */
+function drawArrowIn(c: Ctx, x: number, y: number): void {
+  const g = c.lit, bx = Math.round(x + 1), by = Math.round(y - 6);
+  g.fillStyle = '#7a1010';
+  g.fillRect(bx - 1, by, 2, 2);
+  g.fillStyle = '#6b4a2b';
+  for (let i = 0; i < 6; i++) g.fillRect(bx + i, by - i, 1, 1);
+  g.fillStyle = '#e8dcc0';
+  g.fillRect(bx + 5, by - 7, 2, 1);
+  g.fillRect(bx + 6, by - 6, 1, 2);
+}
+
 export function drawNpc(c: Ctx, n: Npc, x: number, y: number, near: boolean, fx = 0, walking = false, tx = n.x): void {
   const s = SPRITES[n.look] ?? SPRITES.villager;
   walking ||= !!n.walking;
@@ -129,7 +141,9 @@ export function drawNpc(c: Ctx, n: Npc, x: number, y: number, near: boolean, fx 
   if (n.pose) return drawDead(c, s, x, y, n);
   // The works' crew face the way they walked in, so what's in their hands faces it too.
   const crew = !!n.work && CREW.has(n.work);
-  blit(c, s, x, y - (n.lift ?? 0) + bob, walking || crew ? fx < 0 : Math.floor(c.now * 0.25 + n.y) % 2 === 0, 0, n.sneak ? 0.78 : 1);
+  blit(c, s, x, y - (n.lift ?? 0) + bob, walking || crew ? fx < 0 : Math.floor(c.now * 0.25 + n.y) % 2 === 0, 0, n.sneak ? 0.78 : n.kneel ? 0.7 : 1);
+  // Hew with the archer's arrow in his leg, down on one knee (sim/woodheal.ts).
+  if (n.arrow) drawArrowIn(c, x, y);
   // A guard carries a spear upright.
   if (crew) drawCrew(c, n, x, y + bob, fx, walking);
   else if (n.work) drawWork(c, n, x, y + bob, tx, fx);

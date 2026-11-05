@@ -15,6 +15,7 @@ import { damage, isDead } from './damage';
 import { houndBite, houndBites, houndWait, snareHold, snareMax, snareWait } from './knacks';
 import { knows, type Enemy, type FightEvent, type Hero, type Hound, type Snare } from './types';
 import { stun } from './stuns';
+import { markOf } from './mark';
 
 /** Jumped back as a Ranger: leave a snare where you stood (if one's ready). */
 export function laySnare(h: Hero, snares: Snare[], now: number, ev: FightEvent[]): void {
@@ -85,7 +86,8 @@ export function stepHound(h: Hero, enemies: Enemy[], now: number, dt: number, ev
     // Now and then: what you've been hitting, or the nearest small goblin near you.
     // Training: never one that's swinging at you (that's yours to dodge or parry).
     const awake = enemies.filter((e) => !isDead(e) && e.alert !== false && e.kind === 'scrapper' && Math.hypot(e.x - h.x, e.y - h.y) < HOUND.reach && !(h.calmHound && e.attack));
-    const pick = awake.find((e) => e.lastBy === h.id && e.hitAt > now - 2) ?? awake.sort((a, b) => Math.hypot(a.x - h.x, a.y - h.y) - Math.hypot(b.x - h.x, b.y - h.y))[0];
+    // Your MARK first, wherever it is in reach (sim/mark.ts); then what you've been hitting.
+    const pick = markOf(h.id, enemies, now) ?? awake.find((e) => e.lastBy === h.id && e.hitAt > now - 2) ?? awake.sort((a, b) => Math.hypot(a.x - h.x, a.y - h.y) - Math.hypot(b.x - h.x, b.y - h.y))[0];
     if (!pick) return void (d.next = now + 1);
     Object.assign(d, { state: 'run', target: pick.id, t: 0, bites: 0 });
     return void ev.push({ k: 'bark', x: d.x, y: d.y });

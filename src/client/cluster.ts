@@ -2,7 +2,7 @@
  * The touch buttons as one cluster round ATTACK (bottom right, upright phone): what each shows and how
  * it looks this frame. The buttons and their presses are input.ts's; this only draws them (btnart.ts)
  * and says which are there: a Mage's ELEMENT (a small ring by ATTACK in the element's colour, its name
- * over it), the class skill and the relic carried with their cooldowns, the guard
+ * over it), a Rogue's SHADOW STEP, Ranger's MARK or Healer's MEND in the same spot (shared/signs.ts), the class skill and the relic carried with their cooldowns, the guard
  * (BLOCK or PARRY, none for a Mage), the dodge (JUMP, DASH, BLINK, ROLL), the flask as the health orb,
  * stamina as pips round ATTACK (a Mage's magic round BLINK), one gilt context slot (GRAB, THROW, HELP UP, BURN, OPEN, TALK), and a
  * crossbow's RELOAD. A Warrior or Healer has no dodge: the context slot takes the dodge's place, and a
@@ -27,6 +27,8 @@ import { liftable } from '../sim/props';
 import { relicLabel } from '../sim/hero';
 import { castElement } from '../sim/channel';
 import { CHANNEL, ELEMENT_NAME } from '../shared/tuning';
+import { SIGNS } from '../shared/signs';
+import { signFor, signLeft } from '../sim/signature';
 import { itemIcon, potionIcon } from './itemicons';
 import { relicItemIcon } from './relicicons';
 import { skillCanvas } from './skillicons';
@@ -81,7 +83,7 @@ export class Cluster {
   private b = {
     attack: new Btn('.tb.attack'), block: new Btn('.tb.block'), roll: new Btn('.tb.roll'), skill: new Btn('.tb.relic'),
     relic: new Btn('.tb.relic2'), potion: new Btn('.tb.potion'), grab: new Btn('.tb.grab'), use: new Btn('.tb.use'),
-    reload: new Btn('.tb.reload'), element: new Btn('.tb.element'),
+    reload: new Btn('.tb.reload'), element: new Btn('.tb.element'), sign: new Btn('.tb.sign'),
   };
   private ready: Record<string, boolean> = {};
   private stick = document.querySelector('#touch .stick') as HTMLElement;
@@ -131,6 +133,11 @@ export class Cluster {
     const mel = mage ? castElement(me) : 'fire', ml = mage ? Math.max(0, (me.relicReady.channel ?? 0) - room.time) : 0;
     b.element.show(mage ? { shape: 'round', size: 22, grade: 'iron', icon: skillCanvas('channel', mel), ring: EL[mel], cd: ml / CHANNEL.cooldown, flash: this.flash('element', ml, room.time) } : null, '', ELEMENT_NAME[mel], 'Element: ' + ELEMENT_NAME[mel]);
     if (mage && b.element.el.dataset.el !== mel) b.element.el.dataset.el = mel;
+    // A Rogue's, Ranger's or Healer's own button (shared/signs.ts), in the same spot, its wait as a sweep;
+    // there once the wood has given it, and then the guard steps out to make room for it.
+    const sg = signFor(me), sl = sg ? signLeft(me, room.time) : 0, given = !!sg && game.taught().includes('sign');
+    b.sign.show(sg ? { shape: 'round', size: 22, grade: 'iron', icon: skillCanvas(sg, ''), cd: sl / SIGNS[sg].cooldown, flash: this.flash('sign', sl, room.time) } : null, sl > 0 ? String(Math.ceil(sl)) : '', sg ? SIGNS[sg].name : '', sg ? SIGNS[sg].name : '');
+    if (document.body.dataset.sign !== String(given)) document.body.dataset.sign = String(given);
     const el = me.augments[skill];
     if (knows(me, 'skill')) {
       const l = left(skill);

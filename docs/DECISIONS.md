@@ -2,6 +2,110 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-05: every class has its own button: SHADOW STEP, MARK, MEND, each taught in the wood; SMOKE BOMB (Kyle; Claude Opus 5.5)
+
+Kyle: the Warrior (GRAB) and the Mage (ELEMENT) had a built-in button and the Rogue, Ranger and Healer
+didn't; give each of those three one and teach it in the tutorial. Numbers in `shared/signs.ts`, the room's
+rules in `sim/signature.ts` (the press), `sim/mark.ts`, `sim/healtap.ts`, and `sim/relics.ts` (the step,
+unchanged); the wood's steps in `sim/woodsign.ts`, `sim/woodheal.ts`, their goblins and lines in
+`shared/woodsigns.ts`.
+
+- **One button a hero, one counter.** `Intent.signSeq` (optional, so an older guest's intent still reads),
+  `Hero.seen.sign`, kept `INPUT_BUFFER` s; a guest's press goes off on the leader's room. Laptop key **V**
+  for all three (one hero has one; V sits by the Mage's X and the crossbow's C; E, R, Q, G, C, F, I, M, X,
+  J, K, Tab and Space were taken). Its cooldown is `Hero.signReady`. A press that finds nothing to do (no
+  goblin in reach, nobody hurt, no breath) is spent, costs nothing and says so over your own hero
+  (NOTHING TO MARK, NOBODY HURT, NOT ENOUGH STAMINA, `owncues.ts`). Stripped in town, and in the wood
+  until taught, as ELEMENT is (`Game.taught()` gains `sign`).
+- **The button** (`cluster.ts`, `.tb.sign`): ELEMENT's spot by ATTACK (a Mage never has both), its name
+  over it, its icon (`skillicons.ts`: the shadow's, a gold sight for MARK, a gold cross for MEND), the
+  cooldown as a sweep and the seconds on its face. Once it's given, a Ranger's PARRY and a Healer's BLOCK
+  step out to the spot a spellblade's PARRY uses for ELEMENT (`body[data-sign]`). Hidden in the wood until
+  its step, then the usual gold pulse and label (`unlockflash.ts`; the button's own name steps aside under
+  the label, ELEMENT's too). BUTTONS has a row (`SIGN_WORDS`), the laptop's skill line leads with it
+  ("V MARK 4.2"), the class card a row over SKILL (`ClassSheet.sign`).
+- **SHADOW STEP (Rogue)**: as it was, 20 s, no cost, the same 0.06 s wind-up and 0.12 s recovery (run as the
+  act `throw` with `Hero.signing`), turned to the goblin faced first. It left the trainer.
+- **MARK (Ranger)**: the goblin nearest the pointer (laptop), or the nearest faced within 0.8 rad (phone),
+  else the nearest, within **9** tiles, for **8 s**, on a **10 s** wait. It takes **15%** more from everyone,
+  ticks too (`damage()`). This Ranger's arrows and bolts turn toward it at up to **0.6 rad/s** while it's
+  within **0.35 rad** (20 degrees) of their path: over a 9 tile shot that's about 15 degrees at most, an aim
+  assist, not homing. The hound runs at it at once, and picks it first after. One mark a Ranger (the old one
+  is cleared, not deleted, so the patch carries it). Drawn from the goblin's own `markedBy`/`markedUntil`
+  on every screen (`signdraw.ts`, flat and the 2.5D overlay): a gold chevron bobbing over its head and a
+  turning gold sight round its feet, blinking in its last second. Gold, not the goblins' red. MARKED said
+  on it with a ring.
+- **MEND (Healer)**: **25** health (times the Healer's heal multiplier) to the nearest hurt friend within
+  **4** tiles, or to the Healer when no friend near is hurt or the Healer is the worst off (Kyle: "I like
+  that healer mend can self heal too"); **12 s** wait, **20 stamina**. A friend is a hero on their feet or an
+  Npc with health (Hew in the wood). Never a goblin: it never looks at them (Divine Savior unchanged). It's
+  the Healer's hands, not the censer, so a cold censer doesn't stop it; the Cleaver and the Keeping Mace still
+  have their say on a hero. A gold line to them, a ring, motes rising, a warm flash, the heal number.
+  Words: in the code it's `heal` (Kyle's word; the town works own "mend"); **MEND is the Healer's button
+  word**. If the lore pass objects, it becomes HEAL (`SIGNS.heal.name` and `lesson.ts`).
+- **SMOKE BOMB (Rogue's third skill)**: the Rogue's three are now Vanish (level 3, the first lesson),
+  Knife Fan (5), Smoke Bomb (7, 400 gold). Thrown up to **6** tiles (the pointer, else the goblin faced, else
+  3.5 ahead), lands in 0.45 s, smokes **2.4** round for **5 s**, **16 s** wait, no cost. The smoke rules
+  (`sim/smokebomb.ts`, on top of `flasks.ts`): anyone in smoke is hidden from goblins unless close (1.2
+  tiles, POTION.seen); a goblin standing in smoke sees nobody further than that (`smokedUntil`); a blow
+  wound up across the edge is dropped, an archer's shot included. These hold for every smoke (Vanish's too).
+- **Save**: a Rogue who carried Shadow Step (picked, or the first by default once taught; old heroes know
+  everything) gets **Smoke Bomb, taught and carried**: the kinder choice over an empty slot. What was
+  fitted to Shadow Step goes on it. Done once (`Profile.signs`, `shared/oldskills.ts`, called from
+  `save.ts`). Knowing the first lesson now means knowing Vanish. A Rogue never taught gets nothing.
+- **The wood**: each a single step in Hew's clearing after its lesson, as the Mage's element step.
+  - Rogue: two goblins (24 health, looters' short sight) put across the clearing from you, five tiles off,
+    backs turned, picking at Hew's things. The card (a tap goes on: a step pressed there would find nobody
+    in reach) gives SHADOW STEP. Done when a stab in the back of one lands within 3 s of a step; in the wood
+    the step is back in 2 s so a miss can be tried again. The way opens once both are down.
+  - Ranger: two from the trees on the far side; the card gives MARK and its press marks as the world
+    restarts. Done when one dies marked.
+  - Healer: a goblin archer at the clearing's west edge looses at Hew (the real telegraph: anyone in its line
+    takes it). He takes it in the leg (down to 20 of 100), goes down on one knee with the arrow showing
+    (flat and 2.5D), and calls out; two more come. He can't die of it: the shot is scripted, and if the
+    archer's killed first he's hit all the same. Once all three are down the card gives MEND, naming the
+    self-heal, and a MEND that reaches him finishes it: he's up, the arrow out. Worse off than him, the MEND
+    is yours and the step waits (the archer's scratches show it). Hew is put at his spot if he's somehow
+    not there yet.
+  - Warrior and Mage: unchanged.
+- **Lines** (not yet through the lore keeper or the line editor; for that pass):
+  - Hew, Rogue card: "See those two at the back, going through my sacks with their backs to us? You'll not
+    get across to them without one turning round, so go through the *dark* instead and come out behind one."
+  - Hew, Ranger card: "Two more out of the trees, and that hound of yours keeps looking at me for orders.
+    Pick one out for it, and put your arrows where it's looking."
+  - Hew, shot: "Aah! In the _leg_, the little sod! Never mind me, stray, see to them first!"
+  - Hew, Healer card: "That's the last of them, and I'll not get far on this leg. Come and see to it, would
+    you, and pull it out ~straight~."
+  - Hew, mended: "Oh, that's ^better^. I'll not ask what you did, I'll just thank you for it."
+  - Card how-lines: "SHADOW STEP puts you behind the goblin you face, and it's stunned for a second. Stab it
+    from there." / "MARK the goblin you aim at. It takes 15% more damage from everyone, your arrows bend
+    toward it, and your hound goes for it." / "MEND heals the nearest hurt friend for 25. If nobody near you
+    is hurt, or you're worse off than they are, it heals you."
+  - Goals: "SHADOW STEP: TAP SHADOW STEP" / "SHADOW STEP: V", "STEP BEHIND ONE, STAB IT 0 / 1"; "MARK: TAP
+    MARK" / "MARK: V", "MARKED KILL 0 / 1"; "HEW IS HIT", "Kill them", "MEND: TAP MEND" / "MEND: V",
+    "MEND HEW"; "Clear them" after the count.
+  - Unlocks: "SHADOW STEP: V", "MARK: V", "MEND: V". Over the hero: NOTHING TO MARK, NOBODY HURT, NOT ENOUGH
+    STAMINA, MARKED.
+  - BUTTONS rows: "Step out of the dark behind the goblin you face. It's stunned for a second." / "Mark the
+    goblin you aim at for 8 s. It takes 15% more damage from everyone, your arrows bend toward it, and your
+    hound goes for it." / "Heal the nearest hurt friend for 25, or yourself if nobody near is hurt or you're
+    the worst off. Costs 20 stamina."
+  - Class card: SHADOW STEP "Enter the shadows and appear behind an enemy, stunning them briefly."; MARK
+    "Mark a goblin. It takes more damage from everyone, your arrows bend toward it, and your hound goes for
+    it."; MEND "Heal the nearest hurt friend, or yourself."; the Rogue's SKILL "Vanish: Smoke at your feet.
+    Goblins lose you until you attack."
+  - Smoke Bomb's skill line: "Throw smoke on the ground for 5 s. Goblins can't see anyone in it, or out of it
+    from inside, unless they're close."
+
+Tests: `tests/signature.test.ts` (each move works, its wait, a guest's press; Mark's 15% and its ticks, the
+bend toward one's own mark only and within the cone, one mark a Ranger, the hound; Mend's friend, self when
+none is hurt or when worst off, nobody hurt and no breath cost nothing, never a goblin, Hew healed; the
+smoke bomb's throw, size and time, a goblin in smoke blind past arm's reach, an archer's shot dropped),
+`tests/woodsign.test.ts` (hidden and its press ignored before its step; each step completing, the Rogue's
+with a real step and stab; the Healer's shot, kneel and card; the wood end to end to Wickhold for all five;
+old Rogues brought over once). Updated: `magic.test.ts`, `trainer.test.ts`, `wood.test.ts`,
+`woodelement.test.ts` (Shadow Step off the trainer, the extra step). Shots: `node scripts/signlook.cjs`.
+
 ## 2026-11-05: the staff's fire hold is a fire pit dropped on a goblin (Kyle; Claude Opus 5.5)
 
 Kyle: "The wall of fire from staff is still not great. I don't know what to do with it, it's just super
