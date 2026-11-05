@@ -17,6 +17,10 @@
 #panel .job .jhead .t-dawn { color: #2a4a6a; }
 #panel .job .jhead .t-dusk { color: #8a4a14; }
 #panel .job .jhead .t-night { color: #3a3a7a; }
+#panel .job .jhead .wx { display: inline-flex; align-items: center; gap: 2px; font-size: var(--fs-s); color: var(--ink-soft); text-transform: uppercase; white-space: nowrap; }
+#panel .job .jhead .wx img { width: 11px; height: 11px; image-rendering: pixelated; }
+#panel .job .jhead .s-rain, #panel .job .jhead .s-fog { color: #3a4a5a; }
+#panel .job .jhead .s-storm { color: #5a3a7a; }
 #panel .job .jhead em { color: #6a4208; }
 #panel .job .pips i { background: #a48c62; }
 #panel .job .pips i.on { background: #9a2414; }

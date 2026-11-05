@@ -2,9 +2,10 @@
  * An expedition on screen (main.ts calls it each frame): MAP in the corner while you're on one (M on a
  * laptop), the map screen drawn while it's open (expedmapui.ts), and a word over your hero as things
  * happen: dropped in, a job done, a war-horn, more of them coming, the jobs all done, the beacon lit,
- * the watch come. The words are shared/expedjob.ts's.
+ * the watch come, the weather turning. The words are shared/expedjob.ts's (the weather's shared/sky.ts's).
  */
 import { EXPED_SAYS, GOAL_WORDS, MAP_WORDS } from '../shared/expedjob';
+import { SKY_TURN } from '../shared/sky';
 import type { ArenaRoom } from '../sim/room';
 import type { FightEvent } from '../sim/types';
 import { ExpedMap } from './expedmapui';
@@ -45,6 +46,8 @@ export class ExpedUi {
       else if (e.what === 'open') say(EXPED_SAYS.open, '#ffd27a');
       else if (e.what === 'lit') say(EXPED_SAYS.lit, '#ffd27a');
       else if (e.what === 'watch') say(EXPED_SAYS.watch, '#ffd27a');
+      // The weather turned (shared/expedsky.ts): one line, what it does now.
+      else if (e.what === 'weather' && x.wx?.to && SKY_TURN[x.wx.to]) say(SKY_TURN[x.wx.to]!, '#c8d8f0');
     }
     this.map.draw(room, me, now);
   }

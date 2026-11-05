@@ -146,6 +146,8 @@ describe('layout 3: seeds', () => {
       for (let i = 0; i < 5; i++) all = fnv(all + ':' + fnv(JSON.stringify(planRoom(j, i, i === 4 ? 'low' : undefined))));
     }
     // Taken before layout 3 (2026-11-04).
-    expect(all).toBe(3233500746); // (re-pinned 2026-11-04: nests send 2 spiders a wave, not 3)
+    // (Re-pinned 2026-11-04: nests send 2 spiders a wave, not 3; and again for weather as a rule, the theme
+    // only: `sky` on it and the new odds, everything but the theme checked unchanged.)
+    expect(all).toBe(3813929807);
   }, 120000);
 });

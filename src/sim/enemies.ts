@@ -15,6 +15,7 @@ import { shatter } from './elements';
 import { has } from './traits';
 import { hunt } from './spiders';
 import { glowIn, sightIn } from '../shared/timeofday';
+import { noticeFor, reachFor } from '../shared/sky';
 import type { Enemy, EnemyAttack, FightEvent, Hero } from './types';
 import { isRound } from './types';
 import { vanished } from './rogue';
@@ -241,9 +242,11 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   // The newer sorts (sim/ownfoes.ts): each its own way.
   if (stepOwn(e, { t, d, level, via: !!via, ux, uy, facing, speed: spec.speed * slow, slow }, heroes, others, rng, now, dt, ev, OWN_KIT)) return;
   if (e.bow) {
-    if (d <= ARCHER.reach && e.cooldown <= 0 && facing > 0.9) return begin(e, 'shot', ARCHER.shot, t, ev);
+    // In fog it shoots, keeps off and comes in at a shorter reach, its telegraph as short (shared/sky.ts).
+    const fr = reachFor(currentMap().theme), reach = ARCHER.reach * fr;
+    if (d <= reach && e.cooldown <= 0 && facing > 0.9) return begin(e, 'shot', fr < 1 ? { ...ARCHER.shot, range: (ARCHER.shot.range ?? ARCHER.reach) * fr } : ARCHER.shot, t, ev);
     // Runs from you when you get close on its level (along its perch, up high); comes in if you're far on the ground.
-    const back = level && d < ARCHER.keep, on = !e.z && d > ARCHER.reach;
+    const back = level && d < ARCHER.keep * fr, on = !e.z && d > reach;
     if (back) {
       // Away, and a little to the side, so it doesn't back itself into a corner.
       const side = Math.sin(now * 0.7 + e.id) > 0 ? 1 : -1;
@@ -301,7 +304,8 @@ function notice(e: Enemy, heroes: Hero[], others: Enemy[], now: number, ev: Figh
     // Darker hours, less far (shared/timeofday.ts); a censer's glow carries less by day.
     const far = (e.kind === 'spider' ? SPIDER.sight : ALERT.sight) * sightIn(theme);
     const sight = e.variant === 'looter' ? 1.6 : e.feeding ? far * 0.5 : ahead ? far : ALERT.behind;
-    if (d < sight * (h.sneaking && h.act !== 'roll' ? sneakSight(h) : 1) + seenFrom(h) * glowIn(theme)) seen = true;
+    // Rain covers your feet and fog hides you: noticed from less far (shared/sky.ts).
+    if (d < sight * noticeFor(theme) * (h.sneaking && h.act !== 'roll' ? sneakSight(h) : 1) + seenFrom(h) * glowIn(theme)) seen = true;
   }
   for (const o of noisy(others, now)) if (o !== e && o.alert && (isDead(o) || o.hitAt > now - 0.2) && Math.hypot(o.x - e.x, o.y - e.y) < hearFrom(e, o)) seen = true;
   if (!seen) return false;

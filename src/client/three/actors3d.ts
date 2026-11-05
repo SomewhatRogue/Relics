@@ -19,6 +19,7 @@ import { poseFoe } from './foepose3d';
 import { makeFolk, makeHound, poseFolk, poseHound } from './folk3d';
 import { Pool, type Held } from './pool3d';
 import { makeTele, shapeTele } from './teleg3d';
+import { strikeShape } from '../../sim/stormshape';
 import { shakeProp } from './prophit3d';
 import { makeChest, makeCoal, makeDrop, makePickup, makeProp, poseChest, type ChestFig } from './props3d';
 import { boltLook, makeBolt, makeExit, makeJavelin, makeRing, makeSmoke, placeBolt, placeJavelin } from './shots3d';
@@ -69,6 +70,13 @@ export class Actors {
         const pw = me ? WEAPONS[me.weapon].parryWindow + me.lenience : 0.3;
         m.visible = shapeTele(m, e.attack, pw, now, lift(e.z));
       }
+    }
+    // A storm's lightning coming: its circle, the striped edge (sim/stormshape.ts, the shape the room judges).
+    for (const s of room.strikes ?? []) {
+      const a = strikeShape(s, t);
+      if (!a) continue;
+      const m = this.teles.get('k' + s.id, '', () => ({ root: makeTele() })).root;
+      m.visible = shapeTele(m, a, 0, now, 0);
     }
     if (BOXFIGS) for (const s of room.survivors ?? []) {
       if (s.gone) continue;

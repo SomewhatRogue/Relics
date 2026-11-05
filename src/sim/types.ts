@@ -541,6 +541,8 @@ export type FightEvent =
   /** A teammate downed you once too often this job. */
   | { k: 'grudge'; x: number; y: number; id: string; by: string }
   /** The newer sorts (sim/ownfoes.ts): a banner down and the goblins it routs; a net (who's in it, a struggle, cut out, free); a thief's grab, its loot back, gone. */
+  /** A storm (sim/storm.ts): a strike's circle shown (the crackle), and the strike landing (the flash, the thunder after). */
+  | { k: 'strikewarn' | 'strike'; x: number; y: number }
   | { k: 'bannerfall' | 'routed' | 'struggle' | 'recovered' | 'escaped' | 'rooffall' | 'whip' | 'scatter' | 'howl' | 'dig' | 'surface' | 'unearthed' | 'slick' | 'oilwarn' | 'oilup' | 'crows' | 'listen'; x: number; y: number }
   | { k: 'netted' | 'netfree'; x: number; y: number; id: string }
   | { k: 'cutfree'; x: number; y: number; id: string; by: string }
@@ -737,6 +739,13 @@ export interface Bolt {
   state: 'fly' | 'stuck' | 'well';
   life: number;
 }
+
+/**
+ * A storm's lightning strike (sim/storm.ts): its circle at (x, y), radius `r`, landing at room time `at`
+ * (shown from STRIKE.warn before), on what it picked (`on`, for drawing a tree or pole lit up). One shape,
+ * drawn and judged (shared/storm.ts strikeShape, inStrike).
+ */
+export interface Strike { id: number; x: number; y: number; r: number; at: number; on: 'tree' | 'banner' | 'engine' | 'goblin' | 'hero' | 'ground'; done?: boolean }
 
 /** A poison puddle where the brood mother's glob landed (sim/puddles.ts). */
 export interface Puddle { id: number; x: number; y: number; r: number; until: number }

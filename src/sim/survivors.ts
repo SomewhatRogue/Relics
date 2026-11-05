@@ -7,7 +7,8 @@
  * party's blows, shots, blasts and fire hurt them like anything else (survivorhits.ts); a dead one
  * stays where they fell. Goblins leave them be for now.
  */
-import { collide } from '../shared/arena';
+import { collide, currentMap } from '../shared/arena';
+import { burnFor } from '../shared/sky';
 import { BURN, FALSE_CAGE, HERO, SURVIVOR } from '../shared/tuning';
 import { slide } from './bodies';
 import type { World } from './elements';
@@ -51,7 +52,7 @@ export function hurtSurvivor(s: Survivor, n: number, by: string, now: number, ev
 export function igniteSurvivor(s: Survivor, by: string, now: number, ev: FightEvent[]): void {
   if (s.dead || s.home >= 0 || s.at === now) return;
   if (s.burnUntil <= now) (s.burnNext = now + BURN.every), ev.push({ k: 'ignite', x: s.x, y: s.y });
-  s.burnUntil = now + BURN.time;
+  s.burnUntil = now + BURN.time * burnFor(currentMap().theme);
   if (by) s.burnBy = by;
 }
 

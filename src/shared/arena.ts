@@ -175,11 +175,13 @@ export interface Theme {
    *  dusk), or a job's lamps at its hour (0 out, 1 lit). Neither: lit (indoors, the yard, the wood). */
   dayAt?: number;
   lamps?: number;
-  /** A routed job's weather (shared/weather.ts), paint only: rain (0 to 1) and a storm's lightning (0 to 1). */
+  /** A job's weather (shared/weather.ts) for drawing: how hard it rains (0 to 1), how stormy (0 to 1). */
   rain?: number;
   storm?: number;
-  /** How thick the fog lies (0 to 1), a veil over everything as well as the mist's bands. */
+  /** How thick the fog lies (0 to 1), drawn thickening away from your hero. */
   fog?: number;
+  /** The weather as a rule (shared/sky.ts): what it changes in the fight. None: clear, indoors or underground. */
+  sky?: import('./sky.js').Sky;
 }
 
 export interface GameMap {

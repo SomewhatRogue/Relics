@@ -1,10 +1,12 @@
 /**
  * The 3D look's shading, shared by every material: light banded into steps with a little ordered
  * dither (the 2D lighting pass's look, light.ts), the 2D pass's falloff for point lights, and the post
- * pass that outlines silhouettes one pixel dark from depth and lets glowing things bleed a little.
+ * pass that outlines silhouettes one pixel dark from depth, lets glowing things bleed a little, and lays
+ * the fog over in bands (as light.ts does in the flat view).
  * Every material writes alpha as "how ordinary": 1 a lit surface, below 1 glowing (0 glows fully).
  */
 import * as THREE from 'three';
+import { FOG_BANDS } from '../light';
 
 export const BAYER = `
 float bay2(vec2 a){ a = floor(a); return fract(dot(a, vec2(0.5, a.y * 0.75))); }
@@ -50,10 +52,11 @@ export const QUAD_VS = 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = v
 /** Outlines from depth, creases, and a little bloom from the glowing; drawn straight to the low-res canvas. */
 export function postMaterial(near: number, far: number): THREE.ShaderMaterial {
   return new THREE.ShaderMaterial({
-    uniforms: { tCol: { value: null }, tDep: { value: null }, uRes: { value: new THREE.Vector2(1, 1) }, uGamma: { value: 1 } },
+    uniforms: { tCol: { value: null }, tDep: { value: null }, uRes: { value: new THREE.Vector2(1, 1) }, uGamma: { value: 1 }, uFog: { value: new THREE.Vector4(0, 0, 0, 16) }, uFogC: { value: new THREE.Vector3() }, uFogY: { value: 1 } },
     vertexShader: QUAD_VS,
     fragmentShader: BAYER + `
 uniform sampler2D tCol; uniform sampler2D tDep; uniform vec2 uRes; uniform float uGamma;
+uniform vec4 uFog; uniform vec3 uFogC; uniform float uFogY;
 float D(vec2 p){ return ${near.toFixed(1)} + texture2D(tDep, p).x * ${(far - near).toFixed(1)}; }
 vec3 glowAt(vec2 p){ vec4 s = texture2D(tCol, p); return s.rgb * (1.0 - s.a); }
 void main(){
@@ -70,6 +73,14 @@ void main(){
     if (behind > 0.32) { vec3 o = col * 0.42; col = max(mix(vec3(dot(o, vec3(0.3, 0.55, 0.15))), o, 1.4), 0.0) + vec3(0.006, 0.005, 0.012); }
     else if (lap > 0.04) col *= 1.4;
     else if (lap < -0.04) col *= 0.72;
+  }
+  // Fog (client/skyfx.ts): ordinary surfaces go into its colour in stepped, dithered bands, thicker
+  // further across the ground from your hero (screen rows squashed by the tilt); glowing things show through.
+  if (uFog.z > 0.0) {
+    vec2 fd = px - uFog.xy; fd.y /= uFogY;
+    float ft = clamp((length(fd) / uFog.w - ${FOG_BANDS.near.toFixed(1)}) / ${(FOG_BANDS.far - FOG_BANDS.near).toFixed(1)}, 0.0, 1.0);
+    float fs = floor(ft * ${FOG_BANDS.steps.toFixed(1)} + (bay4(px) - 0.5) * 0.9 + 0.5) / ${FOG_BANDS.steps.toFixed(1)};
+    col = mix(col, uFogC, clamp(fs, 0.0, 1.0) * uFog.z * c.a);
   }
   vec3 g = vec3(0.0);
   g += (glowAt(uv + vec2(t.x, 0.0)) + glowAt(uv - vec2(t.x, 0.0)) + glowAt(uv + vec2(0.0, t.y)) + glowAt(uv - vec2(0.0, t.y))) * 0.2;

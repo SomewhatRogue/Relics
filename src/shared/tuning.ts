@@ -388,3 +388,31 @@ export const PATH = { cell: 0.5, pad: 0.22, shallow: 1.8, reach: 30 };
  * `setback` seconds and you're put back after a dark flicker.
  */
 export const DREAD = { late: 4, take: 8, crush: 1.1, lift: 5, setback: 1.2 };
+
+/**
+ * Weather that changes the fight (Kyle, 2026-11-04: "Let's do some weather and forget about wind
+ * affecting shots for now"; shared/sky.ts). Rain, and a storm's rain: a goblin's burn lasts `burn` as
+ * long (a fire spell still sets it alight), a lit oil slick burns `slick` as long, and fire jumps from a
+ * burning goblin to one `spread` as far off; goblins notice you from `hush` as far (the rain covers your
+ * feet, so creeping up is easier). Fog: goblins see and wake at `sight` of the distance, and archers and
+ * roof archers reach `reach` as far. Never a hero's pace (Kyle: his hero "randomly seems slowed") and
+ * never a shot's flight (no wind, for now).
+ */
+export const WEATHER = { rain: { burn: 0.6, slick: 0.6, spread: 0.35, hush: 0.7 }, fog: { sight: 0.6, reach: 0.6 } };
+
+/**
+ * A storm's lightning (sim/storm.ts). Every `every` seconds (seeded) it picks something tall or metal
+ * out in the open within `near` tiles of a hero: a lone tree (no other tree within `lone`), a banner pole,
+ * a siege engine, or a goblin standing `open` tiles clear of any wall (a hero rarely), by `weights`; with
+ * nothing to pick, bare ground near a hero. Its red circle (radius `r`, the striped edge: no block) shows
+ * `warn` seconds before it lands. Landing: `dmg` to each goblin in it and a `stun` on the small ones (the
+ * storm counts as one stunner under the 6 s cap), `heroDmg` to a hero (a roll gets out of it), `engine`
+ * off a siege engine's health, everyone in it thrown `knock`. Never indoors or underground. On screen the
+ * flash lasts `flash` seconds and the strike is kept `fade` seconds for drawing.
+ */
+export const LIGHTNING = {
+  every: [8, 14] as [number, number], warn: 1, r: 1.3, dmg: 30, heroDmg: 20, stun: 1.2, knock: 5, engine: 60,
+  open: 3, edge: 2.5, near: 14, lone: 2.5,
+  weights: { tree: 3, banner: 3, engine: 3, goblin: 1, hero: 0.15 },
+  flash: 0.25, fade: 0.6,
+};

@@ -9,6 +9,7 @@
 import { expedPlan } from '../shared/expedmap';
 import type { Job } from '../shared/jobs';
 import { EXPED_PACKS } from '../shared/tuning';
+import { expedSky } from '../shared/expedsky';
 import { newExped } from './exped';
 import { scalePacks } from './packs';
 import { scaleBosses } from './party';
@@ -19,6 +20,7 @@ export function expedRoom(job: Job, party = 1): ArenaRoom {
   const room = new ArenaRoom(job.seed, { map: plan.map, foes, furniture: plan.props, chests: plan.chests, danger: 1, sleep: true });
   scaleBosses(room.enemies, party);
   room.exped = newExped(plan, job.seed, party);
+  room.exped.wx = expedSky(job);
   room.dread = { by: 'swarm' };
   return room;
 }

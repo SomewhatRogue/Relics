@@ -36,6 +36,7 @@ import type { DoorMark } from './jobrooms';
 import { BigSend } from './bigsend';
 import { isBig, loud, mergeBlocks } from './interest';
 import { expedPlan } from '../shared/expedmap';
+import { themeUnder } from '../shared/expedsky';
 import type { ExpedState } from '../sim/exped';
 
 const AWAY = 5, REJOIN = 5, BYE_WAIT = 2.5, SEND_EVERY = 0.05, FULL_EVERY = 4, GRACE = 60, LOST = 20, KEEP = 2, SAVE_EVERY = 2, TAKE = 9, TAKE_NEXT = 5;
@@ -339,6 +340,8 @@ export class CoopGuest {
     if (body.names) this.names = body.names;
     for (const h of room.heroes) h.tag = this.names[h.id] ?? h.tag;
     room.time = body.t;
+    // An expedition's weather as it stands (it may have turned): the same call as the leader's (shared/expedsky.ts).
+    if (room.exped?.wx) room.map.theme = themeUnder(room.map.theme, room.exped.wx, room.time);
     room.exitOpen = !!body.x;
     room.indoors = !!body.in;
     if ('hc' in body) this.houses = body.hc ?? [];

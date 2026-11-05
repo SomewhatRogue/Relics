@@ -6,16 +6,20 @@
  * burning goblin walking into it.
  */
 import { HERO, OIL, TORCH, type EnemyAttackSpec } from '../shared/tuning';
+import { currentMap } from '../shared/arena';
+import { slickFor } from '../shared/sky';
 import { isDead } from './damage';
 import { begin, walk } from './enemies';
 import { afflict, type World } from './elements';
 import { downIfDead } from './combat';
 import type { Enemy, FightEvent, Hero, Intent } from './types';
 
-/** A slick of oil on the floor: lit (room time it went up, -1 not yet) and when it's gone. */
-export interface Slick { id: number; x: number; y: number; r: number; until: number; lit: number }
+/** A slick of oil on the floor: lit (room time it went up, -1 not yet), how long it burns once lit (shorter in the rain), and when it's gone. */
+export interface Slick { id: number; x: number; y: number; r: number; until: number; lit: number; burn?: number }
 let nextId = 1;
-const lit = (s: Slick, now: number) => s.lit >= 0 && now - s.lit < TORCH.burn;
+/** How long a lit slick burns (drawn by client/beastdraw.ts from the same). */
+export const slickBurn = (s: Slick) => s.burn ?? TORCH.burn;
+const lit = (s: Slick, now: number) => s.lit >= 0 && now - s.lit < slickBurn(s);
 const on = (s: Slick, b: { x: number; y: number }, pad = 0) => Math.hypot(b.x - s.x, b.y - s.y) <= s.r + pad;
 
 /** The oil thrower: a pot lobbed at where you stand, else its distance kept. */
@@ -81,11 +85,13 @@ export function stepSlicks(slicks: Slick[], w: World, dt: number): Slick[] {
     }
     for (const e of w.enemies) if (!isDead(e) && (e.z ?? 0) === 0 && e.burnUntil <= now && on(s, e)) afflict(w, e, 'fire', TORCH.foeDps);
   }
-  return slicks.filter((s) => s.until > now && !(s.lit >= 0 && now - s.lit >= TORCH.burn));
+  return slicks.filter((s) => s.until > now && !(s.lit >= 0 && now - s.lit >= slickBurn(s)));
 }
 
 function light(s: Slick, now: number, ev: FightEvent[]): void {
   s.lit = now;
+  // In the rain it burns out sooner (shared/sky.ts).
+  s.burn = TORCH.burn * slickFor(currentMap().theme);
   ev.push({ k: 'oilup', x: s.x, y: s.y });
 }
 
