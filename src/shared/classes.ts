@@ -74,7 +74,7 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     line: 'Spark wand. Spells at range.',
     weapon: 'Spark wand',
     skill: 'Round Up: Drags the goblins in front of you into a bunch just ahead.',
-    note: 'Your element is your spellbook: switch it with ELEMENT. Fire burns, and spreads when a burning goblin dies. Frost chills (slows) and freezes. Storm ignores shields. Wet goblins (in water, or out in the rain) take 1.5x from storm, and it jumps between them. Wand far, staff close, spellblade in hand.',
+    note: 'Your element is your spellbook: switch it with ELEMENT. Fire burns, and spreads when a burning goblin dies. Frost chills (slows) and freezes. Storm ignores shields. Wet goblins (in water, or out in the rain) take 1.5x from storm, and it jumps between them. Wand far, staff round you or on a goblin, spellblade up close.',
     noteLabel: 'SPELLS',
     guard: `Blinks away to dodge. ${SHIELD_LINE}`,
     stats: { STRENGTH: 3, GUARD: 0, SPEED: 2, RANGE: 4, SUPPORT: 2 },

@@ -6,8 +6,8 @@
  *
  * Balance (measured in tests/spellbook.test.ts, written into docs/DECISIONS.md): on one goblin each
  * element's tap does about the same a second, fire's burn counted (the wand's storm stream a little more
- * once built). The hold is the big hit: fire burns the most goblins, frost trades damage for freezing
- * them, storm hits one hardest, ignores shields and is best on wet goblins.
+ * kept built). The hold is the big hit: fire burns the most goblins, frost trades damage for freezing
+ * them, storm stuns the small ones, ignores shields and is best on wet goblins.
  */
 import type { Element } from './magic.js';
 
@@ -18,7 +18,7 @@ export const MAGE_KITS: MageKit[] = ['wand', 'staff', 'spellblade'];
  * Each kit's tap in each element: the kit's own blow times `dmg`. Fire sets alight, frost chills (slows
  * feet and wind-ups; a tap never freezes), storm ignores shields and jumps only between wet goblins
  * (shared/magic.ts STORM). The wand's frost tap is ICICLES of them, each `dmg` of the spark; its storm
- * tap feeds the STREAM (its ticks are STREAM.tick of the spark).
+ * tap runs the STREAM (its ticks are STREAM.tick of the spark).
  */
 export const TAPS: Record<MageKit, Record<Element, { dmg: number }>> = {
   wand: { fire: { dmg: 0.9 }, frost: { dmg: 0.45 }, storm: { dmg: 1 } },
@@ -38,23 +38,31 @@ export const FIREBALL = { burst: 1.8, big: 2.6 };
 export const COLD_BLAST = { range: 4, arc: 70, bigRange: 5.2, bigArc: 100, dmg: 0.6, knock: 6 };
 
 /**
- * Wand, storm tap (Kyle, 2026-11-04: "a continuous stream of lightning from the hand that builds the
- * longer it stays on, but you can't move fast while using it"). Each tap (its swing `windup` and
- * `recover` s, quick, so mashing keeps up) keeps the stream on `keep` s more. It latches on the nearest
- * goblin within `reach` tiles and `cone` degrees either side of where you face, and holds it while it
- * stays within `reach` + `slack` and `keepCone` degrees. Every `every` s it deals `tick` of the spark
- * times its build, which climbs from 1 to `top` over `build` s on the same goblin and starts again if
- * the stream breaks off or the goblin dies (it then takes the next one). While it's on, you walk at
- * `pace` of your speed. Wet, it lands STORM.wet harder and jumps on (shared/magic.ts), every tick. The
- * goblin it holds flashes hit once every `flicker` s, not every tick (drawing only).
+ * Wand, storm tap (Kyle, 2026-11-05: "Self-running stream is cool, building to a point if you tap three
+ * times, and it doesn't slow down your walk speed as much as cold and fire quick casts"). One tap (its
+ * swing `windup` and `recover` s) starts a stream that runs by itself for `keep` s; each further tap while
+ * it's on adds a step of build, up to `steps.length`, the build being `steps` (1x, 1.75x, 2.5x), and starts
+ * the `keep` s again. It latches on the nearest goblin within `reach` tiles and `cone` degrees either side
+ * of where you face, and holds it while it stays within `reach` + `slack` and `keepCone` degrees; if that
+ * one dies or breaks off it takes the next, keeping its build. It ends `keep` s after the last tap. Every
+ * `every` s it deals `tick` of the spark times its build. Walking while it's on is your own pace (a tap's
+ * swing walks at the wand's castWalk, as any wand tap). Wet, it lands STORM.wet harder and jumps on
+ * (shared/magic.ts), every tick. The goblin it holds flashes hit once every `flicker` s, not every tick
+ * (drawing only).
  */
-export const STREAM = { reach: 5, slack: 0.5, cone: 20, keepCone: 50, keep: 0.35, every: 0.1, tick: 0.12, build: 2, top: 2.5, pace: 0.4, windup: 0.08, recover: 0.12, flicker: 0.3 };
+export const STREAM = { reach: 5, slack: 0.5, cone: 20, keepCone: 50, keep: 1.5, steps: [1, 1.75, 2.5], every: 0.1, tick: 0.105, windup: 0.08, recover: 0.12, flicker: 0.3 };
 
-/** Wand, storm hold: a lightning bolt thrown from the hand straight along the aim (turned onto a goblin
- *  within `assist` degrees of it), `range` tiles at most (a wall stops it), `width` either side of its line. It hits the first goblin for `dmg` of the hold,
- *  whatever shield it holds. Let go on the flash: it runs through every goblin on the line, and breaks
- *  off whatever they're doing. */
-export const THUNDERBOLT = { range: 9, width: 0.3, assist: 12, dmg: 2.5 };
+/**
+ * Wand, storm hold (Kyle, 2026-11-05: "I want the charge to call down a lightning strike in an AOE after a
+ * brief delay, similar to smite but quicker, and have a thunder crack with it"). Let go, it marks a spot:
+ * the aim turned onto a goblin within `assist` degrees, as far as you aim (to the mouse, else the goblin
+ * faced, else `fallback`; `range` at most), and onto the goblin nearest that spot within `snap` tiles of
+ * its edge. `delay` s later (the Cleric's smite takes 0.35) lightning falls on everything within `r` tiles
+ * (`bigR` on the white flash), friends spared: `dmg` of the hold, shields or no, and small goblins stunned
+ * `stun` s (`bigStun` on the flash; under the stun cap, shared/stuncap.ts). Wet, it lands STORM.wet harder
+ * and jumps on. Kept `show` s after it falls, for the bolt and the flash.
+ */
+export const SKY_STRIKE = { range: 8, fallback: 4.5, assist: 12, snap: 1, delay: 0.3, r: 1.4, bigR: 1.9, dmg: 1.75, stun: 0.8, bigStun: 1.4, show: 0.4 };
 
 /** The staff's frost and storm holds are centred on the Mage (Kyle: "wall of fire seems hard to aim"):
  *  `r` tiles round at the shortest hold, `rFull` at a full one, `rBig` let go on the white flash. */

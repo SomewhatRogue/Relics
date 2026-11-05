@@ -36,10 +36,10 @@ describe('GUARD and DODGE areas, from the numbers', () => {
     // A Mage's kit shows what a hold costs in magic, on the card and in each element.
     for (const w of CLASS_KITS.MAGE) for (const el of ['', 'fire', 'frost', 'storm'] as const) expect(kitRows(w, el).find(([l]) => l === 'COST')?.[1]).toMatch(/magic/);
     for (const w of CLASS_KITS.MAGE) for (const el of ['fire', 'frost', 'storm'] as const) for (const v of Object.values(MAGE_KIT[w as 'wand'][el])) expect(v.split(/\s+/).length, v).toBeLessThanOrEqual(5);
-    expect(kitLine('wand', 'storm')).toBe('TAP: LIGHTNING STREAM, BUILDS UP  HOLD: LIGHTNING BOLT, IGNORES SHIELDS  PERFECT: WHOLE LINE, INTERRUPTS ANY BLOW');
-    // The stream doesn't break blows: the wand's storm says what it does instead.
-    expect(kitRows('wand', 'storm').find(([l]) => l === 'ALSO')?.[1]).toBe("Walk slowly while it's on");
-    expect(KIT.spellblade.also).toBe('Hits drain magic, parry refills');
+    expect(kitLine('wand', 'storm')).toBe('TAP: LIGHTNING STREAM, TAP TO BUILD  HOLD: LIGHTNING STRIKE, STUNS  PERFECT: BIGGER, LONGER STUN');
+    // The stream doesn't break blows: the wand's storm says what's true of it instead.
+    expect(kitRows('wand', 'storm').find(([l]) => l === 'ALSO')?.[1]).toBe('Ignores shields, spares friends');
+    expect(KIT.spellblade.also).toBe('Hits on you drain magic, parry refills');
     expect(kitRows('spellblade', 'fire').find(([l]) => l === 'COST')?.[1]).toBe(`${SPELL.spellblade} magic a hold`);
     // The staff's fire pit (Kyle, 2026-11-05): dropped on a goblin, and the card says once that it burns friends.
     expect(kitLine('staff', 'fire')).toBe('TAP: FLAME SWEEP, BURNS  HOLD: FIRE PIT ON A GOBLIN  PERFECT: BIGGER, BURNS LONGER');

@@ -54,15 +54,17 @@ describe('the wand', () => {
     expect(a.es.slice(1).every((e) => lost(e) === 0)).toBe(true);
   });
 
-  it('storm held: a lightning bolt from the hand, at once, into the first goblin; no mark, no stun', () => {
-    const a = mageArena('wand', [[9, 6], [9, 4]], 'storm');
-    const ev = a.loose(PLAIN.wand, 0.12);
-    expect(spell(ev)).toMatchObject({ what: 'thunderbolt', big: false });
-    expect(spell(ev)!.r).toBeCloseTo(3, 0);
+  it('storm held: lightning called down where you aim, a gold mark first, no bolt loosed', () => {
+    const a = mageArena('wand', [[9, 6], [9, 3]], 'storm');
+    const ev = a.loose(PLAIN.wand, 0.1, { ay: -3 });
+    expect(spell(ev)).toMatchObject({ what: 'strike', big: false, x: 9, y: 6 });
     expect(a.room.bolts.length).toBe(0);
+    expect(zone(a.room.zones, 'skystrike')).toBeDefined();
+    expect(lost(a.e)).toBe(0);
+    a.run(0.4, { ay: -3 });
     expect(lost(a.es[0])).toBeGreaterThan(0);
     expect(lost(a.es[1])).toBe(0);
-    expect(a.e.act).not.toBe('stunned');
+    expect(a.e.act).toBe('stunned');
   });
 });
 

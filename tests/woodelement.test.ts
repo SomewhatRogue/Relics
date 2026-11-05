@@ -134,7 +134,7 @@ describe("the Mage's element step in the wood", () => {
     frame(g, [weakAt(k, 'frost')]);
     expect(w.count).toBe(2);
     // The wand's storm stream held on the wet one counts too, and says WEAK.
-    g.hero.stream = { id: s.id, at: g.room.time, until: g.room.time + 1, next: g.room.time + 9, tick: 1, owe: 0, oweJump: 0 };
+    g.hero.stream = { id: s.id, step: 1, at: g.room.time, until: g.room.time + 1, next: g.room.time + 9, tick: 1, owe: 0, oweJump: 0 };
     const ev: FightEvent[] = [];
     frame(g, ev);
     expect(w.count).toBe(3);

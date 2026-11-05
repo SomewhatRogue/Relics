@@ -210,7 +210,7 @@ export const LINES = {
     heavy: "Three coming up past the kilns, and slow about it, so there's time to draw it all the way back, and you take it, mind. I've seen half a draw go into one of them, and all it did was make it *cross*.",
     charge: "Four of them bunched round my kiln like they're warming their hands. If that thing does what I think it does, you'll let it build a good while first, I'd have thought. Don't tell me how, mind, I'd sooner not know.",
     grab: "Two more out of the trees, and fresh ones. Now, you're the size for it, I'd say, and there's crates come off those carts, so pick one up and throw it at them. Or get round the back of one while it's got its head down and pick *it* up instead. They hate that, I've noticed.",
-    element: "Now these three aren't alike, see, and you'll want to mind which is which. That one's wet through, it's been at my water butt again, and that one's got my old bark apron on, which goes up like *tinder*, I've lost two that way. And the one by the kiln's been sat on it so long it's hot as a hob, you'd not set fire to that one if you stood there all day.",
+    element: "Now mind which is which. That one's wet through from my water butt, that one's in my old apron, which goes up like tinder, and the one off the kiln's that hot you'd hardly singe it.",
     slip: "Now, this big one breaks a guard like kindling, and you've not got much guard to break, so you wait for it, wait, and be gone *just* as it comes down, and then it's yours while it gets over the surprise.",
   },
   /** When you get it right (a short pause in the fight). */
@@ -228,7 +228,7 @@ export const LINES = {
     backstab: 'Hits from behind do far more damage.',
     heavy: 'Hold attack and let go on the white flash. That full shot, a PERFECT, hits much harder.',
     slip: "Dodge just as a blow lands to pass through it. That staggers the attacker (not arrows).",
-    element: 'ELEMENT switches between fire, frost and storm. Some goblins take extra from one (WEAK) and shrug off another (RESIST). Watch for it.',
+    element: "ELEMENT switches between fire, frost and storm. A goblin takes more damage from what it's weak to (WEAK) and less from what it resists (RESIST).",
     /** The dodge lesson's line for a class that can't hold a block. */
     rollLight: "You can't block. Dodge out of any red before it lands.",
   },

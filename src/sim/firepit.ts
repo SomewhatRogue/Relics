@@ -7,6 +7,7 @@
  * goblin loses, so they step out. Rain shortens it (shared/sky.ts). It lives in the room's zones, so a
  * guest sees the same pit that is judged (client/firepitdraw.ts draws it from these numbers).
  */
+import { collide } from '../shared/arena';
 import { currentMap } from '../shared/arena';
 import { burnFor } from '../shared/sky';
 import { BURN, FIRE_PIT } from '../shared/tuning';
@@ -17,7 +18,6 @@ import { afflict, type World } from './elements';
 import { fireproof } from './ladderrogue';
 import { lightNear, type Slick } from './oil';
 import { hurtSurvivor } from './survivors';
-import { reachOf } from './thunderbolt';
 import type { Enemy, Hero, Zone } from './types';
 
 /** In the pit, body and all. */
@@ -88,4 +88,15 @@ export function stepPits(zones: Zone[], w: World, slicks: Slick[] = []): void {
     }
     for (const v of w.survivors ?? []) if (inPit(z, v)) hurtSurvivor(v, friend, z.owner, w.now, w.ev, 0, 0, true);
   }
+}
+
+/** How far the bolt goes along (dx, dy) from (x, y) before a wall, up to `range` (the staff's fire pit
+ *  uses it too, for its spot ahead: sim/firepit.ts). */
+export function reachOf(x: number, y: number, dx: number, dy: number, range: number): number {
+  for (let d = 0.1; d <= range; d += 0.1) {
+    const p = { x: x + dx * d, y: y + dy * d }, q = { ...p };
+    collide(q, 0.05);
+    if (Math.hypot(q.x - p.x, q.y - p.y) > 1e-4) return d;
+  }
+  return range;
 }

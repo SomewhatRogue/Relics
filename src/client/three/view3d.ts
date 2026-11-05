@@ -30,6 +30,7 @@ import { drawExtras, drawMist3 } from './extras3d';
 import { drawTags } from './tags3d';
 import { drawSkills3 } from './skills3d';
 import { drawSpellGround3 } from '../spellground';
+import { skyFlash } from '../skystrikedraw';
 import { drawFound3 } from './found3d';
 import { Perf } from './perf3d';
 import { makeRT, postMaterial } from './post';
@@ -192,7 +193,7 @@ export class View3D {
     this.witch.update(now, ls);
     this.grim.update(now, fires, ls);
     // A lightning flash lifts the sky's light a beat (../skyfx.ts).
-    this.lights.setSky(flashTheme(map.theme, flashOf(room.strikes, room.time)), at.x, at.z);
+    this.lights.setSky(flashTheme(map.theme, Math.max(flashOf(room.strikes, room.time), skyFlash(room))), at.x, at.z);
     this.lights.place(ls, at.x, at.z, now);
     this.fires.draw(fires, now);
     this.actors.update(room, meId, now, lerp);

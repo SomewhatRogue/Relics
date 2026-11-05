@@ -26,7 +26,7 @@ export const KIT: Record<WeaponId, KitRow> = {
   wand: { tap: 'Firebolt, burns', hold: 'Fireball, burns a crowd', perfect: 'Bigger, interrupts any blow', also: 'Tap interrupts a wind-up' },
   // The fire pit burns friends too (sim/firepit.ts): said once on the card: fire's ALSO (MAGE_KIT) and the book card's (BOOK_ALSO).
   staff: { tap: 'Flame sweep, burns', hold: 'Fire pit on a goblin', perfect: 'Bigger, burns longer' },
-  spellblade: { tap: 'Cuts burn', hold: 'Burning lunge', perfect: 'Longer, costs nothing', also: 'Hits drain magic, parry refills' },
+  spellblade: { tap: 'Cuts burn', hold: 'Burning lunge', perfect: 'Longer, costs nothing', also: 'Hits on you drain magic, parry refills' },
   // Cleric (shared/cleric.ts): every perfect shields friends near you.
   mace: { tap: 'Short blows, 3rd heals', hold: 'Smite, stuns', perfect: 'Harder, shields friends' },
   censer: { tap: 'Two cuts, healing swing', hold: 'Whirl, burns', perfect: 'Coals flare, shields friends' },
@@ -35,16 +35,16 @@ export const KIT: Record<WeaponId, KitRow> = {
 
 /** A Mage's kits in each element (the element is the spellbook, shared/spellbook.ts): the weapon sets the
  *  range, the element the spell. The ALSO rows are the kit's own (KIT above) unless the element has its
- *  own (the wand's storm stream slows you; it doesn't break blows). Storm's wet rule is said once, on the
- *  class card's SPELLS note (shared/classes.ts). */
+ *  own (the wand's storm stream doesn't break blows, so it says what's true of storm instead). Storm's
+ *  wet rule is said once, on the class card's SPELLS note (shared/classes.ts). */
 export const MAGE_KIT: Record<MageKit, Record<Element, KitRow>> = {
   wand: {
     fire: KIT.wand,
     frost: { tap: 'Three icicles, chill', hold: 'Cold blast, freezes', perfect: 'Wider, interrupts any blow' },
-    storm: { tap: 'Lightning stream, builds up', hold: 'Lightning bolt, ignores shields', perfect: 'Whole line, interrupts any blow', also: "Walk slowly while it's on" },
+    storm: { tap: 'Lightning stream, tap to build', hold: 'Lightning strike, stuns', perfect: 'Bigger, longer stun', also: 'Ignores shields, spares friends' },
   },
   staff: {
-    fire: { ...KIT.staff, also: 'Burns friends too, keep clear' },
+    fire: { ...KIT.staff, also: 'Burns you and friends, keep clear' },
     frost: { tap: 'Frost sweep, chills', hold: 'Hard frost, freezes all round', perfect: 'Bigger' },
     storm: { tap: 'Crackling sweep, ignores shields', hold: 'Charged ring, jolts', perfect: 'Bigger, jolts stun' },
   },
@@ -57,14 +57,14 @@ export const MAGE_KIT: Record<MageKit, Record<Element, KitRow>> = {
 
 /** A Mage's spellbook by element, for a weapon card that isn't in anyone's hand: "Tap firebolt, hold fireball". */
 const BOOK: Record<MageKit, Record<Element, string>> = {
-  wand: { fire: 'Tap firebolt, hold fireball', frost: 'Tap icicles, hold cold blast', storm: 'Tap lightning stream, hold lightning bolt' },
+  wand: { fire: 'Tap firebolt, hold fireball', frost: 'Tap icicles, hold cold blast', storm: 'Tap lightning stream, hold lightning strike' },
   staff: { fire: 'Tap flame sweep, hold fire pit', frost: 'Tap frost sweep, hold hard frost', storm: 'Tap crackling sweep, hold charged ring' },
   spellblade: { fire: 'Cuts burn, hold burning lunge', frost: 'Cuts chill, hold shatter', storm: 'Cuts ignore shields, hold lightning rush' },
 };
 const COST: Record<MageKit, string> = { wand: `${SPELL.wand} magic a hold`, staff: `${SPELL.staff} magic a hold`, spellblade: `${SPELL.spellblade} magic a hold` };
 /** The ALSO row of a kit's card with no element in hand, where the book needs one: the staff's fire pit
  *  burns friends, so the card says so once. */
-const BOOK_ALSO: Partial<Record<MageKit, string>> = { staff: 'The fire pit burns friends too, so keep clear of it' };
+const BOOK_ALSO: Partial<Record<MageKit, string>> = { staff: 'Fire pit burns you and friends, keep clear' };
 const isMage = (w: WeaponId): w is MageKit => w in MAGE_KIT;
 
 /** The rows in order, labelled, for a card or a legend (ALSO only where there is one). A Mage's kit in

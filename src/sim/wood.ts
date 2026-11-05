@@ -291,7 +291,7 @@ export function woodGoal(w: WoodState, touch: boolean): { title: string; text: s
     : { 'WALK OUT': 'MOVE BEFORE IT LANDS', GRAB: 'G BY A CRATE, G AGAIN TO THROW', ATTACK: 'CLICK', DODGE: 'SPACE', BLOCK: 'HOLD RIGHT CLICK', PARRY: 'TAP RIGHT CLICK WHILE THE RED FLASHES WHITE', SKILL: 'E', BACKSTAB: 'GET BEHIND, CLICK', 'FULL DRAW': 'HOLD LEFT CLICK, LET GO', 'FULL CHARGE': 'HOLD LEFT CLICK, LET GO', 'LAST SECOND': 'SPACE AS IT LANDS' };
   if (w.wake >= 0) return { title: '', text: '' };
   if (!w.entered) return { title: l.name, text: w.stage ? 'Follow Hew' : 'Walk' };
-  if (w.element) return { title: `ELEMENT: ${touch ? 'TAP ELEMENT' : 'X'}`, text: `WEAK HITS ${Math.min(w.count, 3)} / 3` };
+  if (w.element) return { title: `ELEMENT: ${touch ? 'TAP ELEMENT' : 'X'}`, text: `WEAK HIT ON EACH ${Math.min(w.count, 3)} / 3` };
   const what = { kills: '', dodge: 'DODGES', block: 'BLOCKS', parry: 'PARRIES', slip: 'LAST-SECOND DODGES', backstab: 'FROM BEHIND', heavy: 'FULL SHOTS', grab: 'THROWN', none: '' }[l.count];
   // A Warrior's field: hit them first; the throwing comes with the second pair.
   if (l.count === 'grab') return w.more ? { title: `GRAB: ${key.GRAB}`, text: `${what} ${Math.min(w.count, l.need)} / ${l.need}` } : { title: `ATTACK: ${key.ATTACK}`, text: 'Clear them' };
