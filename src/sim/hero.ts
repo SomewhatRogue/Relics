@@ -177,7 +177,8 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   // Wall Brandy halves the most breath you can have while it lasts (sim/brandy.ts).
   const most = breathCap(h, now);
   if (h.stamina > most) h.stamina = most;
-  if (now - h.staminaAt > (h.winded ? HERO.windedDelay * (1 - knack(h, 'winded')) : HERO.regenDelay)) h.stamina = Math.min(most, h.stamina + HERO.staminaRegen * (1 + statsOf(h).breath) * needlesBreath(h, enemies) * dt);
+  const mage = WEAPONS[h.weapon]?.cls === 'MAGE';
+  if (now - h.staminaAt > (h.winded ? HERO.windedDelay * (1 - knack(h, 'winded')) : mage ? HERO.magicDelay : HERO.regenDelay)) h.stamina = Math.min(most, h.stamina + (mage ? HERO.magicRegen : HERO.staminaRegen) * (1 + statsOf(h).breath) * needlesBreath(h, enemies) * dt);
   if (h.winded && h.stamina >= most) (h.winded = false), ev.push({ k: 'breath', x: h.x, y: h.y });
   h.actT += dt;
   h.moving = false;
