@@ -14,7 +14,7 @@ import { decoyTime, dodgeBreath, dodgeReach, releaseWindow } from './knacks';
 import { fedMult, jealousBlocks, jealousCooldown, needlesBreath, wears } from './hungry';
 import { hitEnemy } from './combat';
 import { flashBash, quake } from './warrior';
-import { beginHold, emptyHold, looseBolt, reloadPressed, startWind, stepWind } from './crossbow';
+import { autoWind, beginHold, emptyHold, looseBolt, stepWind } from './crossbow';
 import { brandySpeed, breathCap } from './brandy';
 import { quickMult, relicDark, spendCharge } from './charge';
 import { paySpell, refuseSpell } from './spells';
@@ -233,8 +233,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   }
   if (h.act === 'charge') {
     if (wantsRoll) return startRoll(h, inp, now, ev);
-    // RELOAD held on an empty crossbow winds it (sim/crossbow.ts).
-    if (stepWind(h, inp, dt, ev)) return;
+    if (stepWind(h)) return;
     face(h, inp, enemies, false);
     walk(h, inp, w.chargeSpeed, dt, now, ev);
     collide(h, HERO.radius);
@@ -302,8 +301,8 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   // Idle or walking.
   if (wantsRoll) return startRoll(h, inp, now, ev);
   if (now - h.grabQueuedAt < INPUT_BUFFER && acts.grab(h)) return;
-  // The crossbow's RELOAD, held or tapped, while it's empty and you stand still (sim/crossbow.ts).
-  if (startWind(h, inp, reloadPressed(h, inp))) return;
+  // An empty crossbow winds itself while you're not attacking; standing still the whole time, the bolt glints (sim/crossbow.ts).
+  autoWind(h, Math.hypot(inp.mx, inp.my) >= 0.05, dt, ev);
   // The class skill, not yet taught, does nothing (the press is spent).
   if (now - h.relicQueuedAt < INPUT_BUFFER && h.relic === h.relics[0] && !knows(h, 'skill')) h.relicQueuedAt = -9;
   // A dark relic does nothing (the press is spent): it wants recharging at the church.

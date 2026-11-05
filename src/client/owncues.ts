@@ -16,7 +16,7 @@ export function ownCue(ev: FightEvent, me: string, fx: Fx, now: number): void {
   if ((ev.k !== 'nograb' && ev.k !== 'reloadcue') || ev.id !== me) return;
   const [sx, sy] = toPx(ev.x, ev.y);
   if (ev.k === 'nograb') return fx.say(sx, sy - 34, 'NOTHING TO GRAB', '#c8c4d0', 1.2), sfxTown.dull();
-  fx.say(sx, sy - 34, 'RELOAD', '#ffd27a', 1.2);
+  fx.say(sx, sy - 34, 'WINDING', '#ffd27a', 1.2);
   sfxTown.empty();
   reloadCue = now + 1.6;
 }

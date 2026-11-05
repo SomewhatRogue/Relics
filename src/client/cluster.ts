@@ -28,7 +28,6 @@ import { relicItemIcon } from './relicicons';
 import { skillCanvas } from './skillicons';
 import { icon, type IconId } from './icons';
 import { paintButton, type Face } from './btnart';
-import { reloadCue } from './owncues';
 import { stickVars } from './stickart';
 import type { Game } from './game';
 
@@ -116,11 +115,8 @@ export class Cluster {
     const cost = mage ? Math.round(kit.dodge.stamina * DODGE_RULE.cost * dodgeBreath(me)) : 0, dull = mage && (!!me.winded || st < 1);
     b.roll.show(dodges ? { shape: 'diamond', size: 34, grade: dull ? 'stone' : 'iron', icon: icon(DODGE[dn] ?? 'roll'), ...(mage ? { pips } : {}) } : null, mage && st < cost ? String(cost) : '', dn, dn);
     b.roll.el.classList.toggle('cost', mage);
-    // A crossbow's RELOAD: gilt while it's empty (the dark sweep is what's still to wind), pulsing when ATTACK was held on it empty.
-    const wind = me.xbowEmpty ? me.xbowWind ?? 0 : 0;
-    b.reload.show(kit.reloads ? { shape: 'round', size: 26, grade: me.xbowEmpty ? 'gilt' : 'iron', icon: icon('reload'), cd: wind > 0 ? 1 - wind : 0 } : null, '', 'RELOAD', 'Reload');
-    b.reload.el.classList.toggle('dim', !me.xbowEmpty);
-    b.reload.el.classList.toggle('cue', !!me.xbowEmpty && reloadCue > now);
+    // The crossbow reloads itself now (sim/crossbow.ts): no RELOAD button.
+    b.reload.show(null, '', 'RELOAD', 'Reload');
     // The class skill and the relic carried, each with its cooldown (a dark sweep and the seconds).
     const [skill, relic] = me.relics, left = (r: typeof skill) => Math.max(0, me.relicReady[r] - room.time);
     // A Mage's ELEMENT: the element it's in, its ring that colour, the switch's short cooldown as a sweep.

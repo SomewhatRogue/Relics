@@ -125,64 +125,33 @@ describe('the crossbow', () => {
     expect(ev.some((x) => x.k === 'boltline')).toBe(false);
   });
 
-  /** Hold RELOAD `hold` s (the stick at `mx`), let go and wait `after` s. */
-  let rs = 0;
-  const reload = (a: ReturnType<typeof arena>, hold: number, after: number, mx = 0) => (rs++, [...a.run(hold, { reload: true, reloadSeq: rs, mx }), ...a.run(after, { reloadSeq: rs })]);
-
-  it('empty, ATTACK held winds nothing: the room says RELOAD, and a tap is still the short sword', () => {
+  it('empty, ATTACK held looses nothing (the room says it is winding); a tap is still the short sword', () => {
     const a = arena('crossbow', [7.6]);
-    a.loose(0.4, 0.5);
+    a.loose(0.4, 0.1);
     expect(a.h.xbowEmpty).toBe(true);
-    const ev = a.loose(1.4, 0.2);
-    expect(ev.some((x) => x.k === 'reloadcue' && x.id === 'me')).toBe(true);
-    expect(ev.some((x) => x.k === 'wind' || x.k === 'loaded' || x.k === 'glint')).toBe(false);
+    const ev = a.loose(0.6, 0.05);
     expect(shots(ev)).toBe(0);
-    expect(a.h.xbowWind ?? 0).toBe(0);
-    expect(a.h.xbowEmpty).toBe(true);
     a.e.hp = 400;
-    expect(shots(a.tap())).toBe(0);
+    expect(shots(a.tap(0.3))).toBe(0);
     expect(lost(a.e)).toBeGreaterThan(0);
   });
 
-  it('RELOAD held winds; let go partway and it keeps what is wound, but a reload in pieces never glints', () => {
+  it('it winds itself when you are not attacking, walking or not (Kyle, 2026-11-04); walking spoils the glint', () => {
     const a = arena('crossbow', [4]);
-    a.loose(0.4, 0.5);
+    a.loose(0.4, 0.1);
     expect(a.h.xbowEmpty).toBe(true);
-    // A piece: nothing loosed, the wind kept.
-    expect(shots(reload(a, 0.4, 0.2))).toBe(0);
-    const part = a.h.xbowWind!;
-    expect(part).toBeGreaterThan(0.2);
-    expect(part).toBeLessThan(0.5);
-    // Walk between pieces: nothing lost.
-    a.run(0.3, { mx: 1, reloadSeq: rs });
-    expect(a.h.xbowWind).toBe(part);
-    // The rest of it: loaded, and the hero free again while RELOAD is still held.
-    const ev = reload(a, 1 - part + 0.1, 0.2);
+    // (A run without the last attack press reads as a tap first: the short sword, then it winds.)
+    const ev = a.run(XBOW.reload + 1.2, { mx: 1 });
     expect(ev.some((x) => x.k === 'loaded')).toBe(true);
-    expect(shots(ev)).toBe(0);
     expect(a.h.xbowEmpty).toBe(false);
     expect(a.h.xbowGlint).toBe(false);
-    expect(a.h.act).toBe('idle');
   });
 
-  it('pushing the stick ends a piece of winding, and RELOAD on a loaded crossbow does nothing', () => {
-    const a = arena('crossbow', [4]);
-    reload(a, 0.4, 0.1);
-    expect(a.h.xbowWind ?? 0).toBe(0);
-    a.loose(0.4, 0.5);
-    reload(a, 0.4, 0.1);
-    const was = a.h.xbowWind!;
-    reload(a, 0.8, 0.1, 1);
-    expect(a.h.xbowWind).toBe(was);
-    expect(a.h.xbowEmpty).toBe(true);
-  });
-
-  it('a full reload in one go glints; the glinted bolt is perfect, hits half as hard again, shoves harder and runs through the whole line', () => {
+  it('standing still while it winds, the bolt glints; the glinted bolt is perfect, hits half as hard again, shoves harder and runs through the whole line', () => {
     const a = arena('crossbow', line, false, 14);
-    a.loose(0.4, 0.5);
-    const wound = reload(a, XBOW.reload + 0.1, 0.2);
+    const shot = a.loose(0.4, 0.05);
+    const wound = [...shot, ...a.run(XBOW.reload + 0.6)];
     expect(wound.some((x) => x.k === 'glint')).toBe(true);
-    expect(shots(wound)).toBe(0);
     expect(a.h.xbowGlint).toBe(true);
     a.es.forEach((e) => (e.hp = 400));
     const ev = a.loose(0.5, 0.6);

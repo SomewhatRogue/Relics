@@ -52,7 +52,7 @@ async function rows(g: Game, touch: boolean): Promise<Row[]> {
     const dn = dodgeName(cls);
     out.push({ face: { shape: 'diamond', size: 30, grade: 'iron', icon: icon(({ JUMP: 'jump', DASH: 'dash', BLINK: 'blink' } as Record<string, IconId>)[dn] ?? 'roll') }, name: dn, key: 'SPACE', text: 'Get out of any blow, even a striped one.' });
   }
-  if (kit.reloads) out.push({ face: round(icon('reload'), 'gilt'), name: 'RELOAD', key: 'C', text: 'Hold to wind the crossbow. Wind it in one go, standing still, and the bolt glints (a PERFECT).' });
+  if (kit.reloads) out.push({ face: round(icon('reload'), 'gilt'), name: 'RELOADS ITSELF', key: '', text: 'The crossbow winds itself when you are not attacking. Stand still while it winds and the bolt glints (a PERFECT).' });
   const [skill, relic] = me.relics;
   if (knows(me, 'skill')) out.push({ face: round(skillCanvas(skill, me.augments[skill])), name: 'SKILL', key: 'E', text: `Your class skill, ${RELICS[skill].name}. The dark sweep and the number count down to the next use.` });
   const carried = relic ? carriedItem(me) : undefined;
