@@ -180,7 +180,8 @@ export const ALERT = { sight: 6.5, behind: 2.5, hear: 5, shout: 5.5, wander: 0.9
  * at rest see you at `sneak` of the distance. The first blow on one that hasn't seen you is an AMBUSH:
  * `ambush` times as hard, and it reels for `reel` seconds.
  */
-export const STEALTH = { slow: 0.55, sneak: 0.45, ambush: 2.2, reel: 1.2 };
+/** `creep`: walking pace with the stick inside `slow` (Kyle, 2026-11-04: half-pushed sticks felt randomly slow; now it's full pace or a steady creep). */
+export const STEALTH = { slow: 0.55, creep: 0.5, sneak: 0.45, ambush: 2.2, reel: 1.2 };
 
 /**
  * The prologue wood's goblins (shared/wood.ts), each built for one lesson: looters (slow, weak,
@@ -230,6 +231,9 @@ export const SWING_DUMMY = {
 
 /** How long a light enemy flinches when hit. */
 export const FLINCH = 0.3;
+/** A light goblin's wind-up only breaks to a quick blow in its first `early` share; after that it's
+ *  committed, and only a charged blow, a perfect or a big breaker stops it (Kyle, 2026-11-04: too easy). */
+export const POISE = { early: 0.35 };
 
 /**
  * A house on fire inside (shared/blaze.ts, sim/blaze.ts). A patch smokes `warn` seconds before it

@@ -1,6 +1,6 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, parry, roll). */
 import { litMult } from './charge';
-import { CENSER, BLESSING, DODGE, WARD, FLINCH, HORN, OVERKILL, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing, CLASS_DODGES, RIPOSTE, CRIT, STEALTH, weakOn, SPLAT, BANNER } from '../shared/tuning';
+import { CENSER, BLESSING, DODGE, WARD, FLINCH, POISE, HORN, OVERKILL, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing, CLASS_DODGES, RIPOSTE, CRIT, STEALTH, weakOn, SPLAT, BANNER } from '../shared/tuning';
 import { shove } from './bodies';
 import { knack, statsOf } from './gearstats';
 import { counterWindow, parryWindow, rearCos, slipWindow } from './knacks';
@@ -104,7 +104,9 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   // Nothing stops a charge once it's coming.
   // (A Rogue's head-on blow doesn't knock anything off balance: only from behind.)
   const shakes = !(WEAPONS[h.weapon].front && !rear);
-  if (shakes && e.act !== 'stunned' && e.act !== 'pinned' && e.act !== 'carried' && !ice && e.attack?.kind !== 'charge' && (heavyWind ? big : small(e) || big)) {
+  // A committed wind-up (past its first POISE.early) shrugs off a quick blow: only a charged one, or a perfect, breaks it.
+  const breaks = !a || h.heavy || h.perfect || a.t < a.windup * POISE.early;
+  if (shakes && e.act !== 'stunned' && e.act !== 'pinned' && e.act !== 'carried' && !ice && e.attack?.kind !== 'charge' && (heavyWind ? big : (small(e) && breaks) || big)) {
     Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: big && e.kind === 'butcher' ? 0.6 : FLINCH });
   }
   return n;

@@ -79,7 +79,7 @@ function walk(h: Hero, inp: Intent, k: number, dt: number, now: number, ev: Figh
   // Creeping: harder to see (STEALTH). (Standing in plain sight isn't.)
   h.sneaking = m >= 0.05 && m < STEALTH.slow;
   if (m < 0.05) return;
-  const l = Math.hypot(inp.mx, inp.my), sp = HERO.speed * WEAPONS[h.weapon].speed * statsOf(h).speed * k * m * wadeAt(h.x, h.y) * brandySpeed(h, now) * quickMult(h, now);
+  const l = Math.hypot(inp.mx, inp.my), sp = HERO.speed * WEAPONS[h.weapon].speed * statsOf(h).speed * k * (m >= STEALTH.slow ? 1 : STEALTH.creep) * wadeAt(h.x, h.y) * brandySpeed(h, now) * quickMult(h, now);
   // (Swept, so a hero stops at a gap too narrow for a body rather than being wedged into it.)
   travel(h, (inp.mx / l) * sp * dt, (inp.my / l) * sp * dt, HERO.radius);
   h.moving = true;
