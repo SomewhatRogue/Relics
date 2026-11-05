@@ -53,6 +53,9 @@ export interface Intent {
   /** A Mage's ELEMENT button (X): turn the spellbook to the next element (sim/channel.ts). Optional so an
    *  older guest's intent still reads. */
   elementSeq?: number;
+  /** The class's own button (shared/signs.ts): a Rogue's SHADOW STEP, a Ranger's MARK, a Healer's MEND (V).
+   *  Optional so an older guest's intent still reads. */
+  signSeq?: number;
 }
 
 export const NO_INTENT: Intent = { mx: 0, my: 0, ax: 0, ay: 0, attack: false, block: false, attackSeq: 0, blockSeq: 0, rollSeq: 0, weaponSeq: 0, relicSeq: 0, relicSwapSeq: 0, relicPickSeq: 0, relicPick: 0, augmentSeq: 0, classSeq: 0, grabSeq: 0, takeSeq: 0, take: 0, gearSeq: 0, gearOp: 0, gearArg: 0, potionSeq: 0, beltSeq: 0, openSeq: 0, open: 0, reload: false, reloadSeq: 0 };
@@ -276,6 +279,11 @@ export interface Hero extends Body {
   primed?: boolean;
   /** The ELEMENT button pressed then (waiting out the switch's cooldown, as any press waits). */
   elementQueuedAt?: number;
+  /** The class's own button (sim/signature.ts): pressed then, and ready again then. */
+  signQueuedAt?: number;
+  signReady?: number;
+  /** In a SHADOW STEP's short wind-up and recovery (the act 'throw'). */
+  signing?: boolean;
   /** The spellblade's mana shield (sim/manashield.ts): when a hit last took magic, and when one last
    *  ran it out (the ward cracks, then breaks, on screen). Old snapshots' `bladeCharge` is ignored. */
   wardAt?: number;
@@ -313,7 +321,7 @@ export interface Hero extends Body {
   hitstop: number;
   /** Extra parry and dodge leniency for this player's ping (seconds). */
   lenience: number;
-  seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number; augment: number; cls: number; take: number; grab: number; gear: number; potion: number; belt?: number; open: number; level?: number; reload?: number; element?: number };
+  seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number; augment: number; cls: number; take: number; grab: number; gear: number; potion: number; belt?: number; open: number; level?: number; reload?: number; element?: number; sign?: number };
 }
 
 /** `pounce`: a spider's leap along its line; `bite`: the brood mother's; `spit`: her lobbed glob (a circle). */
@@ -410,6 +418,11 @@ export interface Enemy extends Body {
   /** A relic's marks: the next blow lands harder (MARK) until `markUntil`; hobbled (HOBBLE) until `hobbleUntil`. */
   markUntil?: number;
   hobbleUntil?: number;
+  /** A Ranger's MARK (sim/mark.ts): which Ranger, and until when. Shown over it on every screen. */
+  markedBy?: string;
+  markedUntil?: number;
+  /** Stood in smoke until then (sim/smokebomb.ts): it sees nobody but those close. */
+  smokedUntil?: number;
   /** The movement ladder: taunted by a Warrior (`tauntBy`) until then, its blows `tauntSoft` (STAND FAST);
    *  slowed by caltrops until then; rime built up by an ATTUNED Mage's chilling hits (sim/techmage.ts). */
   tauntBy?: string;
@@ -627,6 +640,13 @@ export type FightEvent =
   | { k: 'down' | 'pickedup' | 'raising' | 'gotup'; x: number; y: number; id?: string; by?: string }
   /** A press that did nothing, said to that hero: GRAB with nothing to take hold of, ATTACK held on an empty crossbow. */
   | { k: 'nograb' | 'reloadcue'; x: number; y: number; id: string }
+  /** The class's own button (sim/signature.ts): a Ranger's MARK on a goblin (`id` the Ranger); a Healer's
+   *  MEND from (x, y) to (x2, y2), `n` given (`self` on themselves); a press that did nothing (`why`). */
+  | { k: 'hunted'; x: number; y: number; id: string }
+  | { k: 'mended'; x: number; y: number; x2: number; y2: number; n: number; self: boolean }
+  | { k: 'nosign'; x: number; y: number; id: string; why: 'mark' | 'hurt' | 'breath' }
+  /** The wood (sim/woodheal.ts): Hew struck by the archer's arrow; a smoke bomb thrown. */
+  | { k: 'hewshot' | 'smokebomb'; x: number; y: number }
   /** Out of bounds (sim/dread.ts): `n` 1 the warning, 2 worse, 3 seized, 4 crushed or pulled down where
    *  they stood (x, y), 5 set back (town), 0 back in bounds. `by`: what came for them. */
   | { k: 'dread'; x: number; y: number; id: string; n: number; by: 'shadow' | 'swarm' | 'setback' }
@@ -783,8 +803,10 @@ export interface Bolt {
   interrupts?: boolean;
   /** A wand's burst loosed on the white flash: it breaks off whatever the goblin it hits is doing. */
   breaks?: boolean;
-  /** A thrown flask's potion. */
+  /** A thrown flask's potion; a smoke bomb's smoke, its size and how long it lasts (sim/smokebomb.ts). */
   potion?: PotionId;
+  smokeR?: number;
+  smokeTime?: number;
   /** The Jealous Rod: this shot jumps to every goblin near what it hits. */
   chain?: boolean;
   x: number;

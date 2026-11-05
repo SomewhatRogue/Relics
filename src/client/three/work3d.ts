@@ -59,6 +59,8 @@ export function poseNpc(f: NpcFig, n: Npc, fx: number, fy: number, x: number, no
     f.aR.rotation.x += Math.sin(walked * 4.5) * 0.35;
     f.aL.rotation.x -= Math.sin(walked * 4.5) * 0.35;
   }
+  // Hew down on one knee with the archer's arrow in him (sim/woodheal.ts): one knee on the ground, a hand to the leg.
+  if (n.kneel) (f.mid.position.y -= 0.24), (f.mid.rotation.x = 0.25), (f.legs[0].rotation.x = -1.3), (f.legs[1].rotation.x = 1.2), (f.aR.rotation.x = -0.9);
   if (n.sneak) (f.mid.rotation.x = 0.4), (f.mid.position.y -= 0.12), (f.legs[0].rotation.x -= 0.5), (f.legs[1].rotation.x -= 0.5);
   if (n.look === 'guard') (k.spear.visible = true), (f.aR.rotation.x = -0.5), (f.aR.rotation.z = -0.2);
   if (digger) {

@@ -24,6 +24,7 @@ import { ARRIVE_SAFE, HOUSEBURN, PARTY, type DrillId, POTION, POTIONS, type Poti
 import { ArenaRoom } from '../sim/room';
 import { lessonOf, newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
 import { elementTaught } from '../sim/woodelement';
+import { signTaught } from '../sim/woodsign';
 import { AREAS, woodMap, WOOD_PROPS } from '../shared/wood';
 import { bagFull, bagSize } from '../shared/bags';
 import { refreshHealth, statsOf } from '../sim/gearstats';
@@ -237,10 +238,11 @@ export class Game {
 
   /** The moves the wood has taught so far (everything outside it). */
   taught(): string[] {
-    if (this.mode !== 'wood' || !this.wood) return ['attack', 'roll', 'block', 'relic', 'potion', 'grab'];
+    if (this.mode !== 'wood' || !this.wood) return ['attack', 'roll', 'block', 'relic', 'potion', 'grab', 'sign'];
     if (this.wood.cut >= 0 || this.wood.wake >= 0) return [];
-    // A Mage's ELEMENT comes with its element step, after the full charge (sim/woodelement.ts).
-    const el = elementTaught(this.wood) ? ['element'] : [];
+    // A Mage's ELEMENT comes with its element step, after the full charge (sim/woodelement.ts); a Rogue's,
+    // Ranger's or Healer's own button with theirs, after the clearing's lesson (sim/woodsign.ts).
+    const el = [...(elementTaught(this.wood) ? ['element'] : []), ...(signTaught(this.wood) ? ['sign'] : [])];
     return this.wood.stage >= 5 ? ['attack', 'roll', 'block', 'relic', 'potion', 'grab', ...el] : [...lessonOf(this.wood).moves.filter((m) => m !== 'grab' || this.wood!.stage > 0 || this.wood!.more), ...el];
   }
   /** Make a hero (class for life); returns its slot, or -1 when all three are taken. */
@@ -508,7 +510,7 @@ export class Game {
     // No fighting in town: no blows, guard, relics or grabs; rolls, dashes and blinks still work.
     // The works' crew walk on Wickhold's wall clock, the same on every screen (townclock.ts).
     if (this.mode === 'town') onClock(this.room.map.npcs, this.room.time);
-    if (this.mode === 'town') intent = { ...intent, attack: false, block: false, attackSeq: h.seen.attack, blockSeq: h.seen.block, relicSeq: h.seen.relic, grabSeq: h.seen.grab, potionSeq: h.seen.potion, reload: false, reloadSeq: h.seen.reload ?? 0, elementSeq: h.seen.element ?? 0 };
+    if (this.mode === 'town') intent = { ...intent, attack: false, block: false, attackSeq: h.seen.attack, blockSeq: h.seen.block, relicSeq: h.seen.relic, grabSeq: h.seen.grab, potionSeq: h.seen.potion, reload: false, reloadSeq: h.seen.reload ?? 0, elementSeq: h.seen.element ?? 0, signSeq: h.seen.sign ?? 0 };
     // The wood: only what Hew has taught you so far; nothing at all during the cutscene.
     if (this.mode === 'wood') {
       const t = this.taught(), cut = (this.wood?.cut ?? -1) >= 0;
@@ -522,6 +524,7 @@ export class Game {
         ...(t.includes('potion') ? {} : { potionSeq: h.seen.potion, beltSeq: h.seen.belt }),
         ...(t.includes('grab') ? {} : { grabSeq: h.seen.grab }),
         ...(t.includes('element') ? {} : { elementSeq: h.seen.element ?? 0 }),
+        ...(t.includes('sign') ? {} : { signSeq: h.seen.sign ?? 0 }),
       };
     }
     this.room.setIntent(ME, intent);
@@ -988,12 +991,12 @@ export class Game {
   private holding(intent: Intent, dt: number): boolean {
     const w = this.wood!, hold = w.hold!, h = this.hero;
     hold.t += dt;
-    const pressed = intent.attackSeq !== h.seen.attack || intent.rollSeq !== h.seen.roll || intent.blockSeq !== h.seen.block || intent.relicSeq !== h.seen.relic || (hold.need === 'element' && (intent.elementSeq ?? 0) !== (h.seen.element ?? 0));
+    const pressed = intent.attackSeq !== h.seen.attack || intent.rollSeq !== h.seen.roll || intent.blockSeq !== h.seen.block || intent.relicSeq !== h.seen.relic || (hold.need === 'element' && (intent.elementSeq ?? 0) !== (h.seen.element ?? 0)) || (hold.need === 'sign' && (intent.signSeq ?? 0) !== (h.seen.sign ?? 0));
     // Still talking: a tap or a key finishes the line first.
-    if ((hold.need === 'continue' || hold.need === 'move' || hold.need === 'element') && (this.continued || pressed) && this.typing()) {
+    if ((hold.need === 'continue' || hold.need === 'move' || hold.need === 'element' || hold.need === 'sign') && (this.continued || pressed) && this.typing()) {
       this.finishTyping();
       this.continued = false;
-      Object.assign(h.seen, { attack: intent.attackSeq, roll: intent.rollSeq, block: intent.blockSeq, relic: intent.relicSeq, element: intent.elementSeq ?? h.seen.element });
+      Object.assign(h.seen, { attack: intent.attackSeq, roll: intent.rollSeq, block: intent.blockSeq, relic: intent.relicSeq, element: intent.elementSeq ?? h.seen.element, sign: intent.signSeq ?? h.seen.sign });
       return true;
     }
     let done = false;
@@ -1005,6 +1008,8 @@ export class Game {
     else if (hold.need === 'attack') done = intent.attackSeq !== h.seen.attack;
     // The element card: a press of ELEMENT goes on and switches as the world restarts (or a tap on the card).
     else if (hold.need === 'element') done = (intent.elementSeq ?? 0) !== (h.seen.element ?? 0) || this.continued;
+    // A MARK or MEND card: the press goes on and goes off as the world restarts.
+    else if (hold.need === 'sign') done = (intent.signSeq ?? 0) !== (h.seen.sign ?? 0) || this.continued;
     this.continued = false;
     if (!done) return true;
     release(w);
@@ -1321,7 +1326,7 @@ export class Game {
 
 /** A friend's hero takes their press counters as already seen (so nothing pressed in town fires). */
 function syncSeen(h: Hero, i: Intent): void {
-  Object.assign(h.seen, { attack: i.attackSeq, block: i.blockSeq, roll: i.rollSeq, weapon: i.weaponSeq, relic: i.relicSeq, relicSwap: i.relicSwapSeq, relicPick: i.relicPickSeq, augment: i.augmentSeq, cls: i.classSeq, take: i.takeSeq, grab: i.grabSeq, gear: i.gearSeq, potion: i.potionSeq, belt: i.beltSeq ?? 0, open: i.openSeq, level: i.levelSeq ?? 0, reload: i.reloadSeq ?? 0, element: i.elementSeq ?? 0 });
+  Object.assign(h.seen, { attack: i.attackSeq, block: i.blockSeq, roll: i.rollSeq, weapon: i.weaponSeq, relic: i.relicSeq, relicSwap: i.relicSwapSeq, relicPick: i.relicPickSeq, augment: i.augmentSeq, cls: i.classSeq, take: i.takeSeq, grab: i.grabSeq, gear: i.gearSeq, potion: i.potionSeq, belt: i.beltSeq ?? 0, open: i.openSeq, level: i.levelSeq ?? 0, reload: i.reloadSeq ?? 0, element: i.elementSeq ?? 0, sign: i.signSeq ?? 0 });
 }
 
 /** This browser, as one voter (all its heroes share it): made once, kept. */

@@ -36,6 +36,9 @@ export interface ClassSheet {
   /** Anything else only this class has (one line), under its own heading. */
   note?: string;
   noteLabel?: string;
+  /** The class's own button (shared/signs.ts), its name and what it does, over the skill. */
+  sign?: string;
+  signLabel?: string;
   /** The class's own rule (the Cleric's), under its own heading. */
   perk?: string;
   perkLabel?: string;
@@ -58,6 +61,8 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     line: 'Blade, bow and a lifelong friend.',
     weapon: 'Short sword (tap) and longbow (hold to draw)',
     skill: "Hunter's Net: Snares or slows.",
+    sign: 'Mark a goblin. It takes more damage from everyone, your arrows bend toward it, and your hound goes for it.',
+    signLabel: 'MARK',
     guard: 'Jumps back to dodge. Perfect parry timing required.',
     note: 'Nips at their heels, smart enough to not go down.',
     noteLabel: 'HOUND',
@@ -66,7 +71,9 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
   ROGUE: {
     line: 'Twin daggers. Weak head on, twice as strong from behind.',
     weapon: 'Twin daggers',
-    skill: 'Shadowstep: Enter the shadows and appear behind an enemy, stunning them briefly.',
+    skill: 'Vanish: Smoke at your feet. Goblins lose you until you attack.',
+    sign: 'Appear behind the goblin you face. Stuns it for a second.',
+    signLabel: 'SHADOW STEP',
     guard: 'Fast and nimble, rapid dodges available.',
     stats: { STRENGTH: 3, GUARD: 1, SPEED: 5, RANGE: 1, SUPPORT: 1 },
   },
@@ -83,6 +90,8 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     line: 'What you lack in speed you make up for in divinity.',
     weapon: 'Mace and censer',
     skill: 'Sanctuary: Bless the ground around you to heal allies and burn foes.',
+    sign: 'Heal the nearest hurt friend, or yourself.',
+    signLabel: 'MEND',
     guard: 'Heavy armor and effective blocking.',
     note: 'Fed by the coals left behind by butchers. Permanent increase to healing, but increases enemy aggression.',
     noteLabel: 'CENSER',

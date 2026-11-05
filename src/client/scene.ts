@@ -66,6 +66,7 @@ import { flashOf } from '../sim/stormshape';
 import { drawPuddles } from './spiders';
 import { drawSkills, skillLights } from './skillsdraw';
 import { drawSpellGround, drawSpellSky, spellLightsFlat } from './spellground';
+import { drawHuntMarks } from './signdraw';
 import { skyFlash } from './skystrikedraw';
 import { drawFound } from './foundsdraw';
 import { witchColour } from './hallsdraw';
@@ -325,7 +326,7 @@ export class Scene {
     }
     for (const s of room.smokes) {
       const x = OX + s.x * PX - cx, y = OY + s.y * PX - cy;
-      items.push({ y: OY + s.y * PX + 30, draw: () => drawSmoke(c, s, x, y, POTION.smokeR * PX, room.time) });
+      items.push({ y: OY + s.y * PX + 30, draw: () => drawSmoke(c, s, x, y, (s.r ?? POTION.smokeR) * PX, room.time) });
     }
     for (const m of room.coals) {
       const x = OX + m.x * PX - cx, y = OY + m.y * PX - cy;
@@ -446,6 +447,8 @@ export class Scene {
     drawBolts(c, room, cx, cy);
     // A wand's lightning strike coming down (skystrikedraw.ts).
     drawSpellSky(c.glow, room, cx, cy);
+    // A Ranger's MARK over its goblin (signdraw.ts).
+    drawHuntMarks(c.glow, room, (x, y, z) => [OX + x * PX - cx, OY + z * PX - cy - y * PX], (k, x, y) => { const [px, py] = lerp(k, x, y); return [(px - OX) / PX, (py - OY) / PX]; }, PX);
 
     const lights: Light[] = [...wayLights, ...markLights];
     blazeLights(room, cx, cy, now, lights);

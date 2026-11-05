@@ -143,6 +143,11 @@ export interface Npc {
   /** Somebody in the background: no mark over them, nobody to talk to. */
   mute?: boolean;
   pose?: 'headless' | 'body' | 'corpse';
+  /** Hurt and healable (Hew in the wood, an arrow in him: sim/woodheal.ts): health, down on one knee, the arrow showing. */
+  hp?: number;
+  maxHp?: number;
+  kneel?: boolean;
+  arrow?: boolean;
   /** Stopped to talk to you (on their round): since when, and how long they've stood about in all. */
   heldAt?: number;
   lag?: number;

@@ -26,6 +26,7 @@ import { mageTapFx } from './fxmagetap';
 import { techFx } from './fxtech';
 import { stormFx } from './fxstorm';
 import { ladderFx } from './fxladder';
+import { signFx } from './fxsign';
 import { Wet } from './wetfx';
 import { iceFx } from './fxice';
 
@@ -105,7 +106,7 @@ export class Fx {
   on(ev: FightEvent): void {
     const [x, y] = toPx(ev.x, ev.y);
     mageTapFx(this, ev, x, y, this.heroes);
-    if (foeFx(this, ev, x, y) || rushFx(this, ev, x, y) || spiderFx(this, ev, x, y) || weakFx(this, ev, x, y) || venomFx(this, ev, x, y) || warriorFx(this, ev, x, y) || rangerFx(this, ev, x, y) || mageFx(this, ev, x, y) || clericFx(this, ev, x, y) || levelFx(this, ev, x, y) || skillFx(this, ev, x, y) || relicFx(this, ev, x, y) || cageFx(this, ev, x, y) || techFx(this, ev, x, y) || stormFx(this, ev, x, y) || ladderFx(this, ev, x, y) || iceFx(this, ev, x, y)) return;
+    if (foeFx(this, ev, x, y) || rushFx(this, ev, x, y) || spiderFx(this, ev, x, y) || weakFx(this, ev, x, y) || venomFx(this, ev, x, y) || warriorFx(this, ev, x, y) || rangerFx(this, ev, x, y) || mageFx(this, ev, x, y) || clericFx(this, ev, x, y) || levelFx(this, ev, x, y) || skillFx(this, ev, x, y) || relicFx(this, ev, x, y) || cageFx(this, ev, x, y) || techFx(this, ev, x, y) || stormFx(this, ev, x, y) || ladderFx(this, ev, x, y) || iceFx(this, ev, x, y) || signFx(this, ev, x, y)) return;
     switch (ev.k) {
       case 'impact':
         if (ev.kind === 'slam') {

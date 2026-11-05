@@ -9,6 +9,7 @@ import { DORMANT_POTIONS, WEAPONS, upgradeOld } from '../shared/tuning';
 import { fitStores } from '../shared/bags';
 import { fitRelics } from '../shared/relicitems';
 import { renameKits } from '../shared/oldkits';
+import { fitOldSkills } from '../shared/oldskills';
 
 const KEY = 'relic.save.v2', OLD = 'relic.save.v1';
 /** `savedAt`: when it was last kept here (it only goes forward), to tell which copy is newer (recovery.ts). */
@@ -27,6 +28,8 @@ const hero = (old: Partial<Profile>): Profile => {
   // The Mage's class skill was the Elemental Channel; switching element has its own button now and the
   // skill a Mage was taught is GRASP (Kyle, 2026-11-04). Taught the one, you know the other.
   if ((out.skill as string) === 'channel') out.skill = 'grasp';
+  // Shadow Step is the Rogue's own button now; a Rogue who carried it gets Smoke Bomb (shared/oldskills.ts).
+  if (!p.signs) fitOldSkills(out);
   if (p.armor === undefined) out.armor = newProfile(cls).armor;
   if (!p.rings) out.rings = [];
   out.steel ??= 0;

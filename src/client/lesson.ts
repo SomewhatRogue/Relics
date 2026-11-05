@@ -8,7 +8,7 @@ import type { Move } from '../sim/wood';
 import { dodgeName } from '../shared/weapons';
 import { finish, speak, typing } from './speech';
 
-const NAME: Record<Move, string> = { move: 'MOVE', step: 'WALK OUT', attack: 'ATTACK', roll: 'DODGE', block: 'BLOCK', parry: 'PARRY', skill: 'SKILL', relic: 'RELIC', grab: 'GRAB AND THROW', backstab: 'BACKSTAB', heavy: 'FULL SHOT', slip: 'LAST SECOND', element: 'ELEMENT' };
+const NAME: Record<Move, string> = { move: 'MOVE', step: 'WALK OUT', attack: 'ATTACK', roll: 'DODGE', block: 'BLOCK', parry: 'PARRY', skill: 'SKILL', relic: 'RELIC', grab: 'GRAB AND THROW', backstab: 'BACKSTAB', heavy: 'FULL SHOT', slip: 'LAST SECOND', element: 'ELEMENT', shadow: 'SHADOW STEP', mark: 'MARK', heal: 'MEND' };
 const KEY: Record<Move, [string, string]> = {
   move: ['W A S D', 'THE LEFT STICK'],
   step: ['W A S D', 'THE LEFT STICK'],
@@ -23,8 +23,12 @@ const KEY: Record<Move, [string, string]> = {
   heavy: ['HOLD LEFT CLICK', 'HOLD ATTACK'],
   slip: ['SPACE, AS IT LANDS', 'ROLL, AS IT LANDS'],
   element: ['X', 'ELEMENT'],
+  // Each class's own button (shared/signs.ts): V on a laptop.
+  shadow: ['V', 'SHADOW STEP'],
+  mark: ['V', 'MARK'],
+  heal: ['V', 'MEND'],
 };
-const BUTTON: Partial<Record<Move, string>> = { attack: '.tb.attack', roll: '.tb.roll', block: '.tb.block', parry: '.tb.block', skill: '.tb.relic', relic: '.tb.relic2', grab: '.tb.grab', backstab: '.tb.attack', heavy: '.tb.attack', slip: '.tb.roll', element: '.tb.element' };
+const BUTTON: Partial<Record<Move, string>> = { attack: '.tb.attack', roll: '.tb.roll', block: '.tb.block', parry: '.tb.block', skill: '.tb.relic', relic: '.tb.relic2', grab: '.tb.grab', backstab: '.tb.attack', heavy: '.tb.attack', slip: '.tb.roll', element: '.tb.element', shadow: '.tb.sign', mark: '.tb.sign', heal: '.tb.sign' };
 
 export class LessonView {
   private el = document.createElement('div');

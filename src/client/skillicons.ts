@@ -5,7 +5,7 @@
 import type { RelicId } from '../shared/tuning';
 import { gridCanvas, type Grid } from './pixgrid';
 
-const SKILLS: Partial<Record<RelicId | 'fire' | 'frost' | 'storm', Grid>> = {
+const SKILLS: Partial<Record<RelicId | 'fire' | 'frost' | 'storm' | 'mark' | 'heal', Grid>> = {
   bash: ['............', '.....gsssss.', '.....suuyus.', '.www.syyyys.', '.....suuyus.', '..www.suyus.', '......suus..', '.www...ss...', '............', '............', '............', '............'],
   horn: ['............', '..........w.', '.........w..', 'yy.....w...w', 'yYyy.....w..', '.yyyyy.....w', '..yyyyyyw...', '...yyyyyy...', '....BBBB....', '............', '............', '............'],
   stamp: ['....gsssss..', '....suuyus..', '....syyyys..', '....suuyus..', '.....suus...', '......ss....', '............', '.y.y.ww.y.y.', '..y.wwww.y..', 'oooooooooooo', '............', '............'],
@@ -14,6 +14,12 @@ const SKILLS: Partial<Record<RelicId | 'fire' | 'frost' | 'storm', Grid>> = {
   sic: ['............', '.oo.........', '.ooo........', '.oooooo.....', 'ooWooooo....', 'oooooooooo..', '..oooooooo..', '...oooooooo.', '...o..o.o.o.', '...o..o.o.o.', '............', '............'],
   shadow: ['.......pp...', '......pPPp..', '.....pP..p..', '.....p......', '..gs..p.....', '...gs..p....', '....gs......', '.....gs.....', '......gs....', '.....b..s...', '....b.......', '............'],
   vanish: ['............', '...oooo.....', '..ogggo.....', '.ogggggoo...', 'ogggggggo...', '.oggggggggo.', '..ooggggggo.', '....oooooo..', '.o......o...', '...o..o.....', '............', '............'],
+  // SMOKE BOMB: a clay pot of the Rogue's powder, smoke curling out of its neck (no fuse: the world has no gunpowder).
+  smoke: ['..g...g.....', '.g.g.g.g....', '..g...g.g...', '....g.g.....', '....OOOO....', '.....oo.....', '...oooooo...', '..oooOoooo..', '..oooooooo..', '...oooooo...', '....oooo....', '............'],
+  // MARK (the Ranger's own button): a gold ring sighted on a red point.
+  mark: ['....yyy.....', '..yy...yy...', '.y...y...y..', '.y...y...y..', 'y.........y.', 'yyy..r..yyy.', 'y.........y.', '.y...y...y..', '.y...y...y..', '..yy...yy...', '....yyy.....', '............'],
+  // MEND (the Healer's own button): a gold cross with light off it.
+  heal: ['.....Y......', '..Y.....Y...', '....yyy.....', '....yFy.....', '.yyyyFyyyy..', '.yFFFWFFFy..', '.yyyyFyyyy..', '....yFy.....', '....yyy.....', '.Y.......Y..', '.....Y......', '............'],
   knives: ['.....g......', '.....s......', '..g..s..g...', '...s.s.s....', '....sss.....', 'gsssssssssg.', '....sss.....', '...s.b.s....', '..b..b..b...', '.....b......', '............', '............'],
   fire: ['.....f......', '....fF......', '...fFf..f...', '...fFFf.ff..', '..fFFFFfFf..', '..fFWWFFFf..', '.fFFWWWFFf..', '.fFFFWFFFf..', '..fFFFFFf...', '...fffff....', '............', '............'],
   frost: ['.....c......', '..c..c..c...', '...c.c.c....', '....cWc.....', 'cccccWccccc.', '....cWc.....', '...c.c.c....', '..c..c..c...', '.....c......', '............', '............', '............'],
@@ -30,7 +36,7 @@ const SKILLS: Partial<Record<RelicId | 'fire' | 'frost' | 'storm', Grid>> = {
 };
 
 /** The class skill's icon (a Mage's ELEMENT, `channel`, in its element), or null for a found relic (relicicons.ts draws those). */
-export function skillCanvas(r: RelicId, el?: string): HTMLCanvasElement | null {
+export function skillCanvas(r: RelicId | 'mark' | 'heal', el?: string): HTMLCanvasElement | null {
   const key = r === 'channel' ? ((el as 'fire' | 'frost' | 'storm') || 'fire') : r;
   const g = SKILLS[key];
   return g ? gridCanvas('s-' + key, g) : null;

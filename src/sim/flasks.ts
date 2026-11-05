@@ -8,7 +8,8 @@ import { blast } from './bolts';
 import type { World } from './elements';
 import type { Bolt, Hero } from './types';
 
-export interface Smoke { x: number; y: number; until: number }
+/** A cloud of smoke; `r` how far it reaches (a smoke bomb's), else POTION.smokeR. */
+export interface Smoke { x: number; y: number; until: number; r?: number }
 
 /**
  * Drink or throw the potion at the front of the belt. A flask flies to (ax, ay) from the hero: where
@@ -46,7 +47,7 @@ export function stepFlask(b: Bolt, w: World, dt: number, smokes: Smoke[]): boole
   b.y = b.sy + (b.ty - b.sy) * k;
   if (k < 1) return true;
   if (b.potion === 'smoke') {
-    smokes.push({ x: b.x, y: b.y, until: w.now + POTION.smokeTime });
+    smokes.push({ x: b.x, y: b.y, until: w.now + (b.smokeTime ?? POTION.smokeTime), ...(b.smokeR ? { r: b.smokeR } : {}) });
     w.ev.push({ k: 'smoke', x: b.x, y: b.y });
   } else blast(w, b, b.x, b.y);
   return false;
@@ -60,7 +61,7 @@ export function stepPotions(heroes: Hero[], smokes: Smoke[], now: number, dt: nu
       h.mendLeft -= n;
       h.hp = Math.min(h.maxHp, h.hp + n);
     }
-    if (smokes.some((s) => Math.hypot(s.x - h.x, s.y - h.y) < POTION.smokeR)) h.hiddenUntil = now + 0.15;
+    if (smokes.some((s) => Math.hypot(s.x - h.x, s.y - h.y) < (s.r ?? POTION.smokeR))) h.hiddenUntil = now + 0.15;
   }
   return smokes.filter((s) => s.until > now);
 }

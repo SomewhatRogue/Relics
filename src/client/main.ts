@@ -1,4 +1,6 @@
 /** Relic: Wickhold, the Training Yard and runs. The rooms run here in the browser (solo is a party of one). */
+import { SIGNS, SIGN_KEY } from '../shared/signs';
+import { signFor, signLeft } from '../sim/signature';
 import { ExpedUi } from './expedui';
 import { GOAL_WORDS, expedition } from '../shared/expedjob';
 import { spellCost } from '../sim/spells';
@@ -280,7 +282,10 @@ function hud(now: number): void {
   const tag = (r: typeof skill) => relicLabel(me, r) + (left(r) > 0 ? ' ' + left(r).toFixed(1) : '');
   // (A skill your trainer hasn't taught you yet has no button.)
   const known = knows(me, 'skill');
-  $('.rlc').textContent = known ? (input.touch ? '' : 'E ') + tag(skill) : '';
+  // A Rogue's, Ranger's or Healer's own button (V) and its wait, first (shared/signs.ts).
+  const sg = signFor(me), sgl = sg ? signLeft(me, room.time) : 0;
+  const own = sg && game.taught().includes('sign') ? (input.touch ? '' : SIGN_KEY + ' ') + SIGNS[sg].name + (sgl > 0 ? ' ' + sgl.toFixed(1) : '') + '   ' : '';
+  $('.rlc').textContent = own + (known ? (input.touch ? '' : 'E ') + tag(skill) : '');
   $('.rlc').dataset.el = me.augments[skill];
   // The relic carried: its charge as a bar (gold, amber, low, or DARK and greyed).
   const it = relic ? carriedItem(me) : undefined, chg = it ? Math.round(relicFill(it) * 100) + '%' : '', chgc = it ? fillCol(it) : '';

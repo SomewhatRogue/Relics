@@ -1,5 +1,5 @@
 /** Relics (rechargeable magic items) and the elements that can be fitted to them. */
-import { CHAIN, FIRE_RING, KNIVES, LIGHT, SIC, STAMP, TETHER, VANISH, VOLLEY } from './skillkit.js';
+import { CHAIN, FIRE_RING, KNIVES, LIGHT, SIC, SMOKEBOMB, STAMP, TETHER, VANISH, VOLLEY } from './skillkit.js';
 import { BELL, BOMB, KNUCKLE, SENTRY } from './relickit.js';
 /**
  * The Warrior's relic: a javelin thrown at range, recharging. It carries anything light enough and
@@ -46,8 +46,9 @@ export const HOOK = {
 /** The Ranger's hunting net: thrown, it opens on the first goblin it reaches. Small ones are snared flat; big ones are slowed. */
 export const NET = { cooldown: 20, windup: 0.15, recover: 0.25, speed: 14, range: 8, radius: 1.3, snare: 2.6, slow: 0.35, dmg: 4 };
 
-/** The Rogue's shadow relic: step out of the dark behind the goblin you face, ready to stab its back.
- *  The goblin you land behind is stunned `stun` seconds (Kyle, 2026-11-03), unless it's mid striped blow or charge. */
+/** The Rogue's SHADOW STEP: step out of the dark behind the goblin you face, ready to stab its back.
+ *  The goblin you land behind is stunned `stun` seconds (Kyle, 2026-11-03), unless it's mid striped blow or charge.
+ *  Built in since 2026-11-05 (shared/signs.ts): its own button, not one of the three skills. */
 export const SHADOWSTEP = { cooldown: 20, windup: 0.06, recover: 0.12, range: 6, stun: 1 };
 
 /** The Mage's lodestone: lobbed, it lands and drags every goblin near it inward (light ones fast), then bursts. */
@@ -114,6 +115,7 @@ export const RELICS = {
   sic: { name: 'SEND THE HOUND', short: 'HOUND', cooldown: SIC.cooldown, windup: SIC.windup, recover: SIC.recover, range: SIC.range },
   vanish: { name: 'VANISH', short: 'VANISH', cooldown: VANISH.cooldown, windup: VANISH.windup, recover: VANISH.recover, range: 0 },
   knives: { name: 'KNIFE FAN', short: 'KNIVES', cooldown: KNIVES.cooldown, windup: KNIVES.windup, recover: KNIVES.recover, range: KNIVES.range },
+  smoke: { name: 'SMOKE BOMB', short: 'SMOKE', cooldown: SMOKEBOMB.cooldown, windup: SMOKEBOMB.windup, recover: SMOKEBOMB.recover, range: SMOKEBOMB.range },
   firering: { name: 'FIRE RING', short: 'RING', cooldown: FIRE_RING.cooldown, windup: FIRE_RING.windup, recover: FIRE_RING.recover, range: FIRE_RING.radius },
   tether: { name: 'STORM TETHER', short: 'TETHER', cooldown: TETHER.cooldown, windup: TETHER.windup, recover: TETHER.recover, range: TETHER.range },
   chain: { name: 'CENSER CHAIN', short: 'CHAIN', cooldown: CHAIN.cooldown, windup: CHAIN.windup, recover: CHAIN.recover, range: CHAIN.range },
@@ -125,14 +127,14 @@ export const RELICS = {
   knuckle: { name: "BUTCHER'S KNUCKLE", short: 'KNUCKLE', cooldown: KNUCKLE.cooldown, windup: KNUCKLE.windup, recover: KNUCKLE.recover, range: KNUCKLE.length },
 };
 export type RelicId = keyof typeof RELICS;
-export const RELIC_ORDER: RelicId[] = ['javelin', 'hook', 'bash', 'horn', 'stamp', 'net', 'volley', 'sic', 'shadow', 'vanish', 'knives', 'grasp', 'lodestone', 'firering', 'tether', 'blessing', 'ward', 'sanctuary', 'chain', 'light', 'bomb', 'sentry', 'bell', 'knuckle'];
+export const RELIC_ORDER: RelicId[] = ['javelin', 'hook', 'bash', 'horn', 'stamp', 'net', 'volley', 'sic', 'shadow', 'vanish', 'knives', 'smoke', 'grasp', 'lodestone', 'firering', 'tether', 'blessing', 'ward', 'sanctuary', 'chain', 'light', 'bomb', 'sentry', 'bell', 'knuckle'];
 /** Two abilities at most: the class's own skill, and one found relic carried with it. */
 export const RELIC_SLOTS = 2;
 /** Each class's skill (on the SKILL button): the first of its choices, until the hero picks another. */
 export const CLASS_SKILL: Record<'WARRIOR' | 'RANGER' | 'ROGUE' | 'MAGE' | 'HEALER', RelicId> = {
   WARRIOR: 'bash',
   RANGER: 'net',
-  ROGUE: 'shadow',
+  ROGUE: 'vanish',
   MAGE: 'grasp',
   HEALER: 'sanctuary',
 };
@@ -149,7 +151,8 @@ export const abilitiesOf = (cls: keyof typeof CLASS_SKILL, carried?: RelicId | '
 export const SKILL_CHOICES: Record<keyof typeof CLASS_SKILL, RelicId[]> = {
   WARRIOR: ['bash', 'horn', 'stamp'],
   RANGER: ['net', 'volley', 'sic'],
-  ROGUE: ['shadow', 'vanish', 'knives'],
+  // (Shadow Step is the Rogue's own button now, shared/signs.ts; Smoke Bomb took its place, third.)
+  ROGUE: ['vanish', 'knives', 'smoke'],
   MAGE: ['grasp', 'firering', 'tether'],
   HEALER: ['sanctuary', 'chain', 'light'],
 };

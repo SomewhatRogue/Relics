@@ -146,6 +146,8 @@ describe('the prologue wood', () => {
     for (let i = 1; i < 4; i++) {
       enter(g, i);
       clear(g, LESSONS[i].need, 'dodge');
+      // (A Ranger's clearing goes on to its MARK step: its two cleared, the way opens.)
+      if (i === 2) expect(g.wood!.sign?.id).toBe('mark'), clear(g, 0, 'dodge');
       expect(g.wood!.stage).toBe(i + 1);
     }
     expect(g.taught()).toContain('block');

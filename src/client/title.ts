@@ -102,7 +102,7 @@ export class Title {
       `<div class="bars">${STATS.map((k) => `<span>${k}</span><i>${'<em class="on"></em>'.repeat(s.stats[k])}${'<em></em>'.repeat(5 - s.stats[k])}</i>`).join('')}</div>` +
       `<div class="csheet">${areas(CLASS_KITS[c][0])}<p class="cguard">${s.guard}</p>` +
       (s.perk ? row(s.perkLabel ?? '', s.perk) : '') + (s.note ? row(s.noteLabel ?? '', s.note) : '') +
-      row('SKILL', s.skill) + `<p class="cnote">${SKILL_NOTE}</p></div>` +
+      (s.sign ? row(s.signLabel ?? '', s.sign) : '') + row('SKILL', s.skill) + `<p class="cnote">${SKILL_NOTE}</p></div>` +
       `<label class="name">NAME <input maxlength="12" value="${NAMES[c]}" autocomplete="off" spellcheck="false"></label>` +
       `<button data-begin class="primary wide">BEGIN</button>${this.g.save.heroes.some((h) => h.prologue) ? '<button data-skipwood class="ghost wide">SKIP THE WOOD</button>' : ''}<button data-pick class="ghost wide">BACK</button></div>`;
     this.preview = new Preview(c, this.look);

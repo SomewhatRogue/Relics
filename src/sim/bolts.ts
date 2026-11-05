@@ -8,6 +8,7 @@ import { HUNGRY_FX } from './hungry';
 import { collide } from '../shared/arena';
 import { CRIT, FLINCH, HERO, LODESTONE, NET, WEAPONS, type Augment, type Swing, type TraitId } from '../shared/tuning';
 import { shove } from './bodies';
+import { bendShot } from './mark';
 import { damage, frozen, isDead, isDummy } from './damage';
 import { backstabOf, fromBehind, rogueShot } from './backshot';
 import { backstabbed } from './techrogue';
@@ -176,6 +177,8 @@ export function stepBolt(b: Bolt, w: World, dt: number): boolean {
     w.ev.push({ k: 'well', x: b.x, y: b.y });
     return true;
   }
+  // A Ranger's arrow or bolt bends a little toward their MARK (sim/mark.ts).
+  bendShot(b, w.enemies, w.now, dt);
   const steps = 4, d = (b.speed * dt) / steps;
   for (let s = 0; s < steps; s++) {
     const want = { x: b.x + b.dx * d, y: b.y + b.dy * d }, p = { ...want };

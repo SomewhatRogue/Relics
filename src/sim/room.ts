@@ -3,6 +3,8 @@
  * sockets or screens. Solo, it runs in this browser; online, it runs in the party leader's browser
  * (the Come Bye host model) and friends send it Intents.
  */
+import { fireSign } from './signature';
+import { stepSmoke } from './smokebomb';
 import { ARENA, useMap, type GameMap } from '../shared/arena';
 import type { Foe } from '../shared/terrain';
 import type { PropKind } from '../shared/props';
@@ -305,6 +307,7 @@ export class ArenaRoom {
       carry: (h, inp, walk) => (h.lifting ? stepLift(h, inp, w, TICK, walk) : stepCarry(h, inp, this.enemies, this.time, TICK, this.events, walk)),
       drop: (h) => (release(h, this.enemies, this.events), dropProp(h, this.props)),
       bash: (h) => (h.rush ? stepRush(h, w, TICK) : stepBash(h, this.enemies, w, TICK)),
+      sign: (h) => fireSign(h, w, this.intents.get(h.id), this.map.npcs ?? []),
     };
     // Houses alight: their goblins driven out into the street before anyone moves (and their loot falls here).
     stepHouseFires(this, this.fireRng);
@@ -320,6 +323,8 @@ export class ArenaRoom {
       if (flask) this.bolts.push(flask);
     }
     this.smokes = stepPotions(this.heroes, this.smokes, this.time, TICK);
+    // Goblins in smoke see nobody but those close; blows across its edge are dropped (sim/smokebomb.ts).
+    stepSmoke(this.enemies, this.heroes, this.smokes, this.time);
     for (const h of this.heroes) {
       const inp = this.intents.get(h.id) ?? NO_INTENT, c = this.chests.find((x) => x.id === inp.open);
       if (inp.openSeq === h.seen.open) continue;

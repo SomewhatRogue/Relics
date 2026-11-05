@@ -14,6 +14,7 @@ export const SKILL_WORDS: Partial<Record<RelicId, string>> = {
   shadow: 'Appear behind the goblin you face. It\'s stunned for a second.',
   vanish: 'Smoke at your feet. Goblins lose you until you attack.',
   knives: 'Throw five knives in a wide spread.',
+  smoke: "Throw a cloud of smoke for 5 s. Goblins can't see anyone in it unless they're close, and goblins inside can't see out.",
   grasp: 'Drags the goblins in front of you into a bunch just ahead. They stagger. A butcher or a goblin with a shield barely moves. Costs 25 magic.',
   firering: 'Fire bursts around you and burns where you stood.',
   tether: 'Lightning ties you to one goblin and jumps to wet ones near it.',
