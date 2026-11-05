@@ -9,7 +9,7 @@ import { STEEL, nextLevel, sellValue } from './gear.js';
 import type { Item } from './loot.js';
 
 /** Pack sizes in order, and the gold to reach each (index matches). */
-export const BAG = { sizes: [8, 12, 16, 20, 24], gold: [0, 100, 250, 500, 900], start: 8 };
+export const BAG = { sizes: [8, 12, 16, 20, 24], gold: [0, 400, 1000, 2000, 3600], start: 8 }; // dear on purpose (Kyle, 2026-11-04): a bigger pack is a long-term goal
 /** The vault's shelves, the same way. */
 export const VAULT = { sizes: [16, 24, 32, 40], gold: [0, 150, 400, 800], start: 16 };
 /** How many sold pieces Tobin keeps aside for you (the oldest goes first). */
