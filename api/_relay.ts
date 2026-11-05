@@ -113,6 +113,8 @@ export class Relay {
     this.staleMs = opts.staleMs ?? STALE_MS;
     const raw = guarded(backend, isLimit, () => this.trip());
     this.meter = opts.meter ?? new Meter(raw.store);
+    // Past the month's cap (_meter.ts): stop as if Upstash had refused, so pay as you go can't run away.
+    this.meter.onOver = () => this.trip();
     if (backend.shared) this.meter.start();
     this.b = metered(raw, this.meter);
     this.outbox = new Outbox(() => this.origin, (room, text, n) => this.publish(room, text, n), opts.batchMs === undefined ? undefined : { ms: opts.batchMs, max: 192_000 });
