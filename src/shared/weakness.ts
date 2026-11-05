@@ -30,6 +30,13 @@ export const WEAK: Record<string, Partial<Record<Hurt, number>>> = {
   boss: { fire: 0.8, frost: 1.25, storm: 0.9 },
   /** The Stoker lives by the kiln: fire hardly touches it; cold is what hurts. */
   stoker: { fire: 0.6, frost: 1.6, storm: 0.9 },
+  /** The wood's element lesson only (shared/wood.ts ELEMENT_FOES), one goblin for each element. Wet through
+   *  from Hew's water butt: storm is the wet rule's (sim/wet.ts), and it won't catch. */
+  soaked: { fire: 0.5 },
+  /** In a bark apron: goes up like tinder, and bundled up against the cold. */
+  aproned: { fire: 1.6, frost: 0.6 },
+  /** Hot off the kiln: fire hardly touches it, cold is what hurts (as the Stoker). */
+  kilnhot: { fire: 0.5, frost: 1.6 },
   spider: { fire: 3, storm: 1.2 }, // 3: a burn's tick (4) still kills one outright, so a pack goes up like tinder
   brood: { fire: 1.8, frost: 1.2, physical: 0.9 },
   nest: { fire: 3.5, frost: 0.5, storm: 0.8, physical: 0.6 },

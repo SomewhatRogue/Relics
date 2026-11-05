@@ -23,6 +23,7 @@ import { knowsSkill, learnSkill } from '../shared/skillteach';
 import { ARRIVE_SAFE, HOUSEBURN, PARTY, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, FOUND_RELICS, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, sellValue, giveValue, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
 import { ArenaRoom } from '../sim/room';
 import { lessonOf, newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
+import { elementTaught } from '../sim/woodelement';
 import { AREAS, woodMap, WOOD_PROPS } from '../shared/wood';
 import { bagFull, bagSize } from '../shared/bags';
 import { refreshHealth, statsOf } from '../sim/gearstats';
@@ -238,7 +239,9 @@ export class Game {
   taught(): string[] {
     if (this.mode !== 'wood' || !this.wood) return ['attack', 'roll', 'block', 'relic', 'potion', 'grab'];
     if (this.wood.cut >= 0 || this.wood.wake >= 0) return [];
-    return this.wood.stage >= 5 ? ['attack', 'roll', 'block', 'relic', 'potion', 'grab'] : lessonOf(this.wood).moves.filter((m) => m !== 'grab' || this.wood!.stage > 0 || this.wood!.more);
+    // A Mage's ELEMENT comes with its element step, after the full charge (sim/woodelement.ts).
+    const el = elementTaught(this.wood) ? ['element'] : [];
+    return this.wood.stage >= 5 ? ['attack', 'roll', 'block', 'relic', 'potion', 'grab', ...el] : [...lessonOf(this.wood).moves.filter((m) => m !== 'grab' || this.wood!.stage > 0 || this.wood!.more), ...el];
   }
   /** Make a hero (class for life); returns its slot, or -1 when all three are taken. */
   create(cls: HeroClass, name: string, look = 0): number {
@@ -518,6 +521,7 @@ export class Game {
         ...(t.includes('relic') ? {} : { relicSeq: h.seen.relic, relicPickSeq: h.seen.relicPick }),
         ...(t.includes('potion') ? {} : { potionSeq: h.seen.potion, beltSeq: h.seen.belt }),
         ...(t.includes('grab') ? {} : { grabSeq: h.seen.grab }),
+        ...(t.includes('element') ? {} : { elementSeq: h.seen.element ?? 0 }),
       };
     }
     this.room.setIntent(ME, intent);
@@ -984,12 +988,12 @@ export class Game {
   private holding(intent: Intent, dt: number): boolean {
     const w = this.wood!, hold = w.hold!, h = this.hero;
     hold.t += dt;
-    const pressed = intent.attackSeq !== h.seen.attack || intent.rollSeq !== h.seen.roll || intent.blockSeq !== h.seen.block || intent.relicSeq !== h.seen.relic;
+    const pressed = intent.attackSeq !== h.seen.attack || intent.rollSeq !== h.seen.roll || intent.blockSeq !== h.seen.block || intent.relicSeq !== h.seen.relic || (hold.need === 'element' && (intent.elementSeq ?? 0) !== (h.seen.element ?? 0));
     // Still talking: a tap or a key finishes the line first.
-    if ((hold.need === 'continue' || hold.need === 'move') && (this.continued || pressed) && this.typing()) {
+    if ((hold.need === 'continue' || hold.need === 'move' || hold.need === 'element') && (this.continued || pressed) && this.typing()) {
       this.finishTyping();
       this.continued = false;
-      Object.assign(h.seen, { attack: intent.attackSeq, roll: intent.rollSeq, block: intent.blockSeq, relic: intent.relicSeq });
+      Object.assign(h.seen, { attack: intent.attackSeq, roll: intent.rollSeq, block: intent.blockSeq, relic: intent.relicSeq, element: intent.elementSeq ?? h.seen.element });
       return true;
     }
     let done = false;
@@ -999,6 +1003,8 @@ export class Game {
     else if (hold.need === 'roll') done = intent.rollSeq !== h.seen.roll;
     else if (hold.need === 'block') done = intent.blockSeq !== h.seen.block || intent.block;
     else if (hold.need === 'attack') done = intent.attackSeq !== h.seen.attack;
+    // The element card: a press of ELEMENT goes on and switches as the world restarts (or a tap on the card).
+    else if (hold.need === 'element') done = (intent.elementSeq ?? 0) !== (h.seen.element ?? 0) || this.continued;
     this.continued = false;
     if (!done) return true;
     release(w);

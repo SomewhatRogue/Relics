@@ -57,6 +57,54 @@ life; the catch, then goblins burned and alight, one outside untouched; a friend
 nothing once out, the Mage in its own pit; rain; a guest's hold and the same pit decoded from the patch),
 `spellbook.test.ts` (the staff's fire hold, the holds' balance), `magekit.test.ts` (the centred-ring tests
 now on storm), `kitwords.test.ts` (the new lines, the friends line once and only on fire).
+## 2026-11-05: the Mage's elements taught in the wood (Kyle; Claude Opus 5.5)
+
+Kyle: "We should have the Mage tutorial explain the elements in the full charge place. Have enemies that are
+weak and resistant to each type, and just explain you can cycle your elements and to watch out for that."
+
+- **Where:** Hew's clearing, after the Mage's FULL CHARGE (its count made and its four looters down). One
+  more step there, the Mage's only (`sim/woodelement.ts`, called from `stepWood`; `wantsElement` is
+  `cls === 'MAGE'` at stage 2). Every other class's wood is as it was.
+- **The card:** Hew's line, the move ELEMENT with its control (X on a laptop, ELEMENT on a phone), the plain
+  how line. On a phone the ELEMENT button is lit gold (`.hint`), as the stick is for the first walk. It
+  waits for a press of ELEMENT (`Hold.need: 'element'`), which goes on and switches as the world restarts; a
+  tap on the card or Enter still goes on. The ELEMENT button is now one of the wood's taught buttons: hidden
+  and its press ignored until this step (`taught()` gains `element`, `elementTaught`), then given with the
+  usual gold pulse and label (`unlockflash.ts`). Before today a Mage could switch from the first field.
+- **The goblins** (`shared/wood.ts ELEMENT_FOES`, close round the middle of the clearing so all three are in
+  sight on a phone): small drilled goblins like the lesson's others (24 health, one comes at a time), each
+  a lesson-only variant with a row in the weakness table (`shared/weakness.ts`, `VARIANTS` in tuning.ts,
+  `FoeVariant` in terrain.ts). Normal goblins' rows are untouched.
+  - `soaked`, wet through from Hew's water butt: wet by the wet rule (`sim/wet.ts`: a soaked goblin is wet
+    wherever it stands, so it's real wet: storm 1.5x and jumps), fire 0.5.
+  - `aproned`, in a bark apron: fire 1.6, frost 0.6.
+  - `kilnhot`, off the kiln: frost 1.6, fire 0.5 (the Stoker's shape).
+  Drawn over the small goblin's body by `client/lessonfoes.ts` (flat, and 2.5D through its cards): the soaked
+  one blue-streaked, dripping, in a puddle with rings spreading; the aproned one in a pale ribbed apron on a
+  strap; the kiln-hot one with embers glowing in its skin, coals at its feet and smoke off its head.
+- **Feedback:** the existing WEAK (bright, in the element's colour, sparks) and RESIST (small, grey) callouts.
+  One change outside the lesson: **storm on a wet goblin now says WEAK** everywhere (`damage()`: the wet 1.5x
+  counts toward the callout, as the table's weaknesses do), so the rule the class card states shows when it
+  happens. A tick still says nothing; the wand's storm stream held on the soaked goblin says WEAK in the lesson
+  (throttled as ever) so the stream counts there too.
+- **Done:** the count is a weak hit on each of the three in its own element (a WEAK over it in that element,
+  or the storm stream held on the wet one): WEAK HITS n / 3, Hew's word on the first. Each needs a different
+  element, so it can't be done without switching. Judgment: the way on opens once the three are down, as in
+  every other lesson ("clear them"); and if they're all killed before the count is made (the fallback), it
+  opens anyway rather than sending them again. A weak hit nearly always kills at 24 health, so the two mostly
+  land together; survivors walking after you to the stream lesson would have been worse.
+- **Words** (for the lore keeper and the line editor; not yet run, no agent to call from here):
+  `LINES.teach.element` (Hew) "Now these three aren't alike, see, and you'll want to mind which is which.
+  That one's wet through, it's been at my water butt again, and that one's got my old bark apron on, which
+  goes up like *tinder*, I've lost two that way. And the one by the kiln's been sat on it so long it's hot as a
+  hob, you'd not set fire to that one if you stood there all day."; `LINES.how.element` "ELEMENT switches
+  between fire, frost and storm. Some goblins take extra from one (WEAK) and shrug off another (RESIST). Watch
+  for it."; the goal "ELEMENT: TAP ELEMENT" / "ELEMENT: X", "WEAK HITS n / 3"; the unlock "ELEMENT: X".
+
+Tests: `tests/woodelement.test.ts` (a Mage gets the step and the ELEMENT button, no other class does; the
+card waits for ELEMENT and the press switches; before the step the press does nothing; each goblin's weakness
+and resistance and the wet storm WEAK; plain goblins unchanged; done by weak hits, done by the fallback; the
+wood end to end to Wickhold for all five classes). `tests/wood.test.ts` unchanged and passing.
 
 ## 2026-11-04: the movement ladder, five classes; the Mage's ATTUNED and SPELLTHIEF (Kyle; Claude Opus 5.5)
 

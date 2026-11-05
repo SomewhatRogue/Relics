@@ -32,7 +32,9 @@ import { edgePt } from './ports.js';
 
 /** `wave`: a nest's spiders a wave (more in a party; shared/nests.ts). */
 export type FoeVariant = 'looter' | 'lunger' | 'heavy' | 'stoker' | 'shield' | 'hexer' | 'drummer'
-  | 'banner' | 'netter' | 'thief' | 'log' | 'roofer' | 'keeper' | 'wolf' | 'oiler' | 'torch' | 'sapper' | 'blind' | 'ironhide';
+  | 'banner' | 'netter' | 'thief' | 'log' | 'roofer' | 'keeper' | 'wolf' | 'oiler' | 'torch' | 'sapper' | 'blind' | 'ironhide'
+  /** The wood's element lesson only (shared/wood.ts ELEMENT_FOES): wet through, in a bark apron, hot off the kiln. */
+  | 'soaked' | 'aproned' | 'kilnhot';
 /**
  * `pack`: the fight it belongs to (shared/encounter.ts; a pack's shout wakes only its own), `role` what
  * it's for in it, `more` (a pack's centrepiece) the special a party of three or more adds.

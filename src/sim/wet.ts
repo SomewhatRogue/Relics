@@ -15,5 +15,5 @@ export const inWater = (x: number, y: number, room: GameMap = currentMap()) => !
  */
 export const raining = (room: GameMap = currentMap()) => skyWet(room.theme) || (room.theme?.rain ?? 0) > 0 || (room.theme?.storm ?? 0) > 0;
 
-/** Wet: standing in water, or out in the rain. */
-export const wet = (e: { x: number; y: number }, room: GameMap = currentMap()) => raining(room) || inWater(e.x, e.y, room);
+/** Wet: standing in water, out in the rain, or wet through already (the wood's soaked goblin, its element lesson). */
+export const wet = (e: { x: number; y: number; variant?: string }, room: GameMap = currentMap()) => e.variant === 'soaked' || raining(room) || inWater(e.x, e.y, room);

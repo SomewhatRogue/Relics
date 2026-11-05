@@ -1,6 +1,7 @@
 /** What the prologue's running order (wood.ts) and Hew's death (woodcut.ts) both use: you, Hew, his words on screen, a goblin put in the wood. */
 import type { Foe } from '../shared/terrain';
 import { newEnemy } from './enemies';
+import { VARIANTS } from '../shared/tuning';
 import type { ArenaRoom } from './room';
 import type { Enemy } from './types';
 import type { WoodState } from './wood';
@@ -14,6 +15,7 @@ export function spawn(room: ArenaRoom, f: Foe & { variant?: Enemy['variant'] }):
   const e = newEnemy(Math.max(0, ...room.enemies.map((o) => o.id)) + 1, f.kind, f.x, f.y);
   if (f.variant === 'looter' || f.variant === 'lunger' || f.variant === 'heavy') e.hp = e.maxHp = { looter: 14, lunger: 30, heavy: 110 }[f.variant];
   if (f.variant === 'stoker') e.hp = e.maxHp = 520;
+  if (f.variant === 'soaked' || f.variant === 'aproned' || f.variant === 'kilnhot') e.hp = e.maxHp = VARIANTS[f.variant].hp;
   // Every goblin in the wood but the Stoker is drilled: slower wind-ups, one at a time.
   Object.assign(e, { respawns: false, name: f.name, bow: f.bow, variant: f.variant, alert: f.awake ?? false, drill: f.variant !== 'stoker' });
   room.enemies.push(e);
