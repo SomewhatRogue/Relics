@@ -2,6 +2,7 @@
  * One frame: camera, the flat (lit) layer in depth order, the glowing layer, then the lighting pass.
  * The scene is painted at a low resolution and scaled up by a whole number so pixels stay crisp.
  */
+import { drawWet } from './wetdraw';
 import { feetBand, upright } from './phoneband';
 import { parryWindow } from '../sim/knacks';
 import { ARENA, npcAt, type GameMap } from '../shared/arena';
@@ -199,6 +200,8 @@ export class Scene {
     lit.fillRect(0, 0, this.vw, this.vh);
     lit.drawImage(this.bg!, -cx, -cy);
     fx.drawDecals(lit, cx, cy);
+    // The water moving, blood clouding in it, rings at feet (wetdraw.ts).
+    drawWet(lit, fx.wet, map, cx, cy, now);
     glow.clearRect(0, 0, this.vw, this.vh);
     // The job's hour: the low sun's shadows; the brood mother's poison on the floor.
     setSun(map.theme);

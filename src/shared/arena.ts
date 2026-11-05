@@ -238,8 +238,8 @@ export interface Grim { kind: 'torn' | 'strewn' | 'pinned' | 'hung' | 'pot' | 'b
 /** Fire in a house: patches that catch at `at` seconds (and burn on), beams that come down at `at`, the roof falling in at `fall`. */
 /** `smoke`: from then on the smoke hurts everyone inside (a house set alight from outside with someone in it). */
 export interface Blaze { patches: (Area & { at: number })[]; beams: { x: number; y: number; at: number }[]; fall: number; smoke?: number }
-/** How fast anyone moves knee-deep in a ford or a bog. */
-export const WADE = 0.55;
+/** How fast anyone moves knee-deep in a ford or a bog: a little slower than dry ground (was 0.55, a crawl). */
+export const WADE = 0.7;
 /** How fast you can move where you stand (slowed in shallow water). */
 export const wadeAt = (x: number, y: number) => (MAP.water?.some((w) => !w.deep && inArea(w, x, y)) ? WADE : 1);
 

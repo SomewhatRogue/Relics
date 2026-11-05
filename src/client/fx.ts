@@ -25,6 +25,7 @@ import { mageTapFx } from './fxmagetap';
 import { techFx } from './fxtech';
 import { stormFx } from './fxstorm';
 import { ladderFx } from './fxladder';
+import { Wet } from './wetfx';
 
 interface Part { x: number; y: number; vx: number; vy: number; life: number; max: number; col: string; glow: boolean; grav: number; stick: boolean }
 interface Text { x: number; y: number; s: string; col: string; life: number; rise?: number }
@@ -45,6 +46,8 @@ export class Fx {
   decals: { x: number; y: number; col: string }[] = [];
   shake = 0;
   gore = new Gore(this);
+  /** The water's own effects: blood clouding in it, rings, things sinking (wetfx.ts). */
+  wet = new Wet();
   /** The room's heroes (set each frame), so an effect can tell whose cast it was. */
   heroes: readonly Hero[] = [];
 
@@ -87,6 +90,8 @@ export class Fx {
   }
 
   decal(x: number, y: number, col: string): void {
+    // Landing in water: it clouds there (or is lost), never a stain on the surface.
+    if (this.wet.take(x, y, col)) return;
     if (this.decals.length > 4000) this.decals.shift();
     this.decals.push({ x: Math.round(x), y: Math.round(y), col });
   }
@@ -306,12 +311,13 @@ export class Fx {
       p.vy *= p.grav ? 0.98 : 0.92;
       p.x += p.vx * dt;
       p.y += p.vy * dt;
-      if (p.life <= 0 && p.stick && this.decals.length < 600) this.decals.push({ x: Math.round(p.x), y: Math.round(p.y), col: p.col });
+      if (p.life <= 0 && p.stick && this.decals.length < 600 && !this.wet.take(p.x, p.y, p.col)) this.decals.push({ x: Math.round(p.x), y: Math.round(p.y), col: p.col });
     }
     this.parts = this.parts.filter((p) => p.life > 0);
     for (const t of this.texts) (t.life -= dt), (t.y -= (t.rise ?? 18) * dt);
     this.texts = this.texts.filter((t) => t.life > 0);
     this.gore.update(dt);
+    this.wet.update(dt);
     for (const a of this.arcs) a.life -= dt;
     this.arcs = this.arcs.filter((a) => a.life > 0);
     for (const r of this.rings) r.life -= dt;

@@ -236,6 +236,73 @@ world every 30 s, 15 commands a look (a sorted set per stat).
 - Open: the two new lines through the lore keeper and line editor (no agents were at hand). A town split
   over two instances still costs about 80 a minute while two players walk about; a town hop (to the
   instance with most of the town) would be next if the meter shows it matters.
+## 2026-11-04: water that reads as water, blood that clouds in it, rings at feet, goblins that cross the shallows (Kyle; Claude Opus 5.5)
+
+Kyle: "Maps with water look kind of weird, especially when it's bloody. Maybe water can be more 3D",
+"I want shallow water to ripple if you walk over it", "Some shallow water seems to really hurt pathing.
+It's weird."
+
+- **Why the shallows hurt pathing** (`npx tsx scripts/water/crossing.ts`, which wakes a small goblin and a
+  butcher on one side of a stretch of shallows with a hero on the other, or standing in it, on the layout 2
+  and 3 river, ford, stream and fen rooms and the Barrowfields). The flow field (`sim/pathing.ts`) was one
+  grid for every goblin, each solid thing padded a fixed 0.22 tiles: about a small goblin's size, but a
+  butcher is 0.62 across the middle. The banks are where the gaps it can't fit gather: reeds along every
+  ford's lip and the river's edge (one a hand from deep water), reed hedges with gaps, the Barrowfields'
+  river stepping bank to bank in two-tile strips. The grid called those gaps open, the butcher was aimed
+  through one, walked in and stood there for good, often at the mouth of the ford. Wading slowness (0.55)
+  didn't wedge anyone but made every crossing a crawl. No goblin went round the shallows (a clear line
+  walks straight through water, as before), and a hero walking over every stretch of shallows bank to
+  bank was never stopped (780 walks, before and after).
+- **Fix** (`sim/pathgrid.ts`, `sim/pathing.ts`): a grid for each size of body (a goblin's radius to the
+  hundredth: a handful a room), a cell open only where a body that size, set down at its middle, would stay
+  put (what `collide()` stops), laid shape by shape (about 1 ms a room, 20 ms the Barrowfields, once). A
+  goal its size can't get to (a hero behind reeds too tight for a butcher) sends it to the nearest spot it
+  can reach rather than into the reeds; one knocked somewhere its size can't stand starts from the nearest
+  open cell. Wading is 0.7 of dry pace for everyone (was 0.55; Kyle's "a little slower than dry ground"),
+  and a wading step costs 1.4 in the field (was 1.8; about what it costs in time). Deep water is still a
+  wall to anything with feet. All of it a pure function of the room, the body's size and the goal's cell:
+  the same on every replay, no Rng. No map changed (no re-pinning).
+- **Measured** (2235 crossings: 1125 from bank to bank, 1110 to a hero in the water):
+
+  | | stuck (never reached the hero in 40 s) | shallows avoided | mean seconds |
+  |---|---|---|---|
+  | layout 2 river and ford | 0 of 576, now 0 | 0, now 0 | 4.0, now 3.8 |
+  | layout 2 stream and fen | 9 of 568, now 0 | 0, now 1 | 3.6, now 3.5 |
+  | layout 3 river and ford | 0 of 447, now 0 | 0, now 0 | 4.1, now 3.8 |
+  | layout 3 stream and fen | 5 of 548, now 3 | 0, now 2 | 3.6, now 3.3 |
+  | the Barrowfields | 13 of 96, now 0 | 7, now 0 | 4.3, now 4.1 |
+
+  27 stuck (26 butchers) now 3, all butchers whose hero stood behind a reed hedge too tight for them: they
+  come to the nearest point now and wait there. "Avoided" is a goblin that kept dry where the quickest way
+  wades: the old 7 were butchers wedged at the Barrowfields' ford; the new 3 took a dry way all but as
+  quick. Walked against the shortest way a body that size can walk: 0.96 mean, under 1.06 for nine in ten.
+- **The look, 2.5D** (`client/three/water3d.ts`; the default view). The floor is cut where the water lies;
+  shallows sit 0.07 under the bank with the painted bed (sand, pebbles, the ford's stones) showing through,
+  cooler as it deepens; deep water 0.22 under, the painting's dark water stepped darker toward the middle
+  in four bands with ordered dither (light.ts's look), boards and a beam painted on it still floating. The
+  far bank's face (earth, or wet stone where shallows drop to deep) is one merged mesh. The surface moves:
+  bands of stepped highlights in two tones, dithered, running with the current (`client/waterfield.ts`: a
+  long thin body of water runs east or down the room, as the broken bridge's wreck is carried; pools barely
+  stir). Two planes and one shader on them; blood and rings go in as uniforms (16 and 24 at most).
+- **The look, flat** (`client/waterpaint.ts`, `client/wetdraw.ts`): the same drop painted, the far bank's
+  face a strip of earth along the top of the water (a step of wet stone where shallows meet deep), deep
+  water stepped darker toward its middle with the dither; each frame the same moving highlights from a
+  tiled 64-pixel sprite clipped to the water, shifted along the current.
+- **Blood on water** (`client/wetfx.ts`, `client/gore.ts`, `client/fx.ts`): a stain that would land on water
+  never does. Blood becomes a red cloud in the water (drops landing close together join one), drifting
+  downstream (0.42 tiles a second in a river, a stir in a pool), spreading and thinning out over 4 to 6.5 s,
+  darker in deep water; anything else (a crack, a scorch, a green bit) is lost in it. A chunk landing in
+  water doesn't bounce: it goes under with a ring, sinking out of sight in under a second; a head clouds
+  more. On the bank stains are as ever (and the rats still only find those).
+- **Rings** (`client/wetwatch.ts`): anyone wading the shallows, hero or goblin, leaves a ring at their feet
+  about every second step (0.7 tiles; a butcher's 1.7 times as wide, further apart); a roll, dash or
+  zip landing in water, a butcher's leap coming down and a body falling in splash: droplets and two rings.
+  Client only, Math.random, capped at 24 rings, both views.
+- Tests: `tests/wading.test.ts` (the butcher across the Barrowfields' ford that used to wedge, never in
+  deep water, the same way every time, wading a little slower; the water's levels and current; blood
+  clouding in water, drifting and fading, staining on the bank). `node scripts/water/look.cjs` shoots a
+  river room, a ford with blood (at once and 3.6 s on) and a hero wading, phone and laptop, flat and 2.5D.
+  No new player-facing lines.
 
 ## 2026-11-04: the element is the Mage's spellbook; switching gets its own button; GRASP (Kyle; Claude Opus 5.5)
 

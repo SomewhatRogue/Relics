@@ -49,6 +49,17 @@ hand into the first goblin (through the whole line on the flash), no red mark; e
 through a shield from the front, jumps nowhere on dry ground, and in water (or the rain) lands harder and
 jumps between the wet goblins. Open: the new lines (DECISIONS) through the lore keeper and line editor;
 wiring `wet` to the weather branch's `sky` at merge (`sim/wet.ts`, WEATHER HOOK).
+**Water that reads as water; goblins through the shallows** (Claude Opus 5.5, 2026-11-04; Kyle: "Maps with
+water look kind of weird, especially when it's bloody. Maybe water can be more 3D", "I want shallow water
+to ripple if you walk over it", "Some shallow water seems to really hurt pathing"). Built; waiting on
+Kyle's play. *Done when* on his phone and laptop, 2.5D first and flat, deep water sits below its bank with
+the far bank's face showing, darker toward the middle, its surface moving with the current in stepped
+bands; shallows just under the bank with the bed showing; blood that lands in water clouds red in it,
+drifts downstream and is gone in a few seconds while stains stay on the bank; chunks in deep water sink;
+anyone wading leaves rings every couple of steps and landings and bodies splash; and goblins, butchers
+too, cross fords and streams straight, a little slower, never wedged on the bank. Wading is now 0.7 of
+dry pace for everyone (was 0.55). `npx tsx scripts/water/crossing.ts` measures the crossings (27 stuck of
+2235, now 3); `node scripts/water/look.cjs` shoots it (DECISIONS 2026-11-04).
 
 **The hero clear of the buttons on a phone** (Claude Opus 5.5, 2026-11-04; Kyle: "Your potion and things can
 cover your character while in game"). Built; waiting on Kyle's play. *Done when* on his phone upright, flat

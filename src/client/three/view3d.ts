@@ -204,6 +204,7 @@ export class View3D {
       this.figs.end();
     }
     this.ground!.decals(fx);
+    this.ground!.wet(fx.wet, now);
     // Everything but the heroes; then the heroes as a silhouette where something nearer hides them;
     // then the heroes themselves over that, so only the hidden parts stay a silhouette.
     const cam = this.view.cam, gl = this.gl;
@@ -264,7 +265,7 @@ export class View3D {
     this.people.clear();
     this.grim.build(map);
     this.witch.build(map);
-    this.ground = buildGround(map, paintMap(map));
+    this.ground = buildGround(map, paintMap(map, false));
     this.scene.add(this.ground.group);
     this.map = map;
     this.view.reset();

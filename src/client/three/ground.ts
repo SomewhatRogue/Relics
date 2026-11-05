@@ -18,12 +18,15 @@ import { addRound, type Spot } from './rounds3d';
 import { addBridge } from './bridge3d';
 import { sideGaps } from '../sidegaps';
 import { waysOut } from '../wayout';
+import { buildWater, SINK } from './water3d';
+import type { Wet } from '../wetfx';
+import { DEEP, levelAt, waterField } from '../waterfield';
 
 /** How high the back wall stands, and a ledge (tiles). */
 export const WALL_H = 2.4;
 export const LEDGE_H = 0.75;
 
-export interface Ground { group: THREE.Group; fires: Spot[]; lights: L3[]; lamps: Lamp3[]; decals(fx: Fx): void; dispose(): void }
+export interface Ground { group: THREE.Group; fires: Spot[]; lights: L3[]; lamps: Lamp3[]; decals(fx: Fx): void; wet(w: Wet, now: number): void; dispose(): void }
 
 const BODY: Record<GameMap['theme']['back'], number> = { stone: 0x2a2733, palisade: 0x2e2016, trees: 0x10160e, rockface: 0x26242c, plaster: 0x2a2018 };
 
@@ -54,6 +57,9 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   under.rotation.x = -Math.PI / 2;
   under.position.set(m.w / 2, -0.02, m.h / 2);
   group.add(under);
+  // The water, below the bank (water3d.ts): the floor is cut where it lies, so what's under goes lower.
+  const water = buildWater(m, floorMat, floorTex);
+  if (water) group.add(...water.meshes), (under.position.y = -0.6);
   // The back wall: its painted face (from the 2D painting) on a wall with thickness, cut for the way out.
   const wc = document.createElement('canvas');
   wc.width = bg.width;
@@ -106,8 +112,11 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   }
   for (const k of m.marks ?? []) if (k.kind === 'bridge') addBridge(B, k);
   // The tended lamps (torches, braziers, lamp posts) give flames and light only while lit (lamps3d.ts).
+  const wf = waterField(m);
   for (const o of m.rounds) {
     const n = fires.length;
+    // A reed or a stump standing in deep water: its foot goes down to the water.
+    if (levelAt(wf, o.x, o.y) === DEEP) B.b(o.x, -SINK[DEEP], o.y, Math.min(0.24, o.r), SINK[DEEP], Math.min(0.24, o.r), 0x2a3424);
     addRound(B, o, fires, r);
     if (o.kind === 'post') lamps.push({ x: o.x, y: o.y, fires: fires.splice(n), light: { x: o.x, y: 1.6, z: o.y, r: 4.5, i: 0.8, c: [1, 0.72, 0.42], f: 9 } });
   }
@@ -157,5 +166,6 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
     const mm = o as THREE.Mesh;
     if (mm.isMesh && mm.geometry !== statics?.geometry) mm.geometry.dispose();
   });
-  return { group, fires, lights, lamps, decals, dispose: () => (dispose(), statics?.geometry.dispose(), floorTex.dispose(), floorMat.dispose(), wallMat.map?.dispose(), wallMat.dispose()) };
+  const wet = (w: Wet, now: number) => water?.update(w, now);
+  return { group, fires, lights, lamps, decals, wet, dispose: () => (dispose(), water?.dispose(), statics?.geometry.dispose(), floorTex.dispose(), floorMat.dispose(), wallMat.map?.dispose(), wallMat.dispose()) };
 }

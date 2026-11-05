@@ -54,6 +54,7 @@ import { Fx } from './fx';
 import { rats } from './rats';
 import { DreadView } from './dreadfx';
 import { watchDust } from './dust';
+import { watchWater } from './wetwatch';
 import { Input } from './input';
 import { LootCard } from './lootcard';
 import { PackView } from './pack';
@@ -429,6 +430,7 @@ function tick(t: number): void {
   if (game.beatenAt !== null && !fade.classList.contains('dark')) fade.classList.remove('up'), fade.classList.add('dark');
   else if (game.beatenAt === null && fade.classList.contains('dark')) fade.classList.add('up'), fade.classList.remove('dark');
   watchDust(game.room, fx);
+  watchWater(game.room, fx);
   // Back in the open in town: see what the world has been up to (at most every minute; not while idle).
   if (game.mode === 'town' && !game.outside && !townfolk?.dozing) void link.refresh();
   if (game.result && !panel.open) showResult(game, panel);
