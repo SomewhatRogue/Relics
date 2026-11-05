@@ -219,7 +219,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     ],
     // Held: a dagger thrown (Kyle), harder the longer it's held; it sticks where it lands.
     heavy: { windup: 0.05, active: 0.04, recover: 0.3, dmg: 14, dmgFull: 30, range: 8, arc: 0, lunge: -0.15, knock: 2, knockFull: 5, shot: 'knife', speed: 24 },
-    chip: 0.45, blockSpeed: 0.6, chargeSpeed: 0.7, backstab: 2.5, front: 0.5, single: true, parryWindow: 0.2, guardArc: 100, guardCost: 1.8, speed: 1.12,
+    chip: 0.45, blockSpeed: 0.6, chargeSpeed: 0.7, backstab: 2.5, front: 0.6, single: true, parryWindow: 0.2, guardArc: 100, guardCost: 1.8, speed: 1.12,
     dodge: { kind: 'dash', distance: 4.3, time: 0.22, iFrom: 0, iTo: 0.22, stamina: 30, cooldown: 0.35 },
   },
   /** A short sword on a tap; held, the longbow draws for 1.4 s, harder the longer, and pierces a line.
