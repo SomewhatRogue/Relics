@@ -20,6 +20,7 @@ import { inArc } from './combat';
 import { isCleric } from './mercy';
 import type { Swing } from '../shared/tuning';
 import type { Enemy, FightEvent, Hero } from './types';
+import { raiseRate } from './techcleric';
 
 export const players = (heroes: Hero[]) => heroes.filter((h) => h.id !== 'squire');
 const inParty = (heroes: Hero[]) => players(heroes).length > 1;
@@ -58,6 +59,8 @@ export function startRaise(h: Hero, heroes: Hero[], ev: FightEvent[]): boolean {
   if (o.raiser !== h.id) Object.assign(o, { raiser: h.id, pickT: 0 });
   h.grabQueuedAt = -9;
   ev.push({ k: 'raising', x: o.x, y: o.y, id: o.id, by: h.id });
+  // MENDING HANDS shows on the friend being got up (sim/techcleric.ts).
+  if (raiseRate(h) > 1) ev.push({ k: 'mending', x: o.x, y: o.y });
   return true;
 }
 
@@ -85,7 +88,7 @@ export function stepParty(heroes: Hero[], dt: number, ev: FightEvent[]): void {
     // A friend kneeling by you: only while they stay close and aren't doing anything else.
     const by = h.raiser ? ps.find((o) => o.id === h.raiser) : undefined;
     if (by && by.act === 'idle' && !by.moving && Math.hypot(by.x - h.x, by.y - h.y) <= PARTY.reach) {
-      h.pickT = (h.pickT ?? 0) + dt * (WEAPONS[by.weapon].cls === 'HEALER' ? 2 : 1);
+      h.pickT = (h.pickT ?? 0) + dt * (WEAPONS[by.weapon].cls === 'HEALER' ? 2 : 1) * raiseRate(by);
       if (h.pickT >= PARTY.pickUp) (up(h), ev.push({ k: 'pickedup', x: h.x, y: h.y, id: h.id, by: by.id }));
       continue;
     }

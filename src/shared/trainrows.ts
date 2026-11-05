@@ -3,7 +3,8 @@
  * name, its ranks as pips, what the next rank adds, and its tag (a price, the level it waits on, or
  * MAX). Built from a profile alone, so the screen and the tests read the same rows.
  */
-import { DRILLS, DRILL_ORDER, LEAVES, TEACHES, TECHNIQUE, drillGain, drillLevel, drillPrice, type DrillId } from './drills.js';
+import { DRILLS, DRILL_ORDER, LEAVES, TEACHES, TECHNIQUE, drillGain, drillLevel, drillPrice, techLevels, type DrillId } from './drills.js';
+import { TECHS, TECH_WORDS, type TechId } from './techniques.js';
 import { RELICS, SKILL_CHOICES, type RelicId } from './magic.js';
 import { knowsSkill, skillState, skillStep } from './skillteach.js';
 import { SKILL_WORDS } from './skillwords.js';
@@ -20,7 +21,9 @@ export interface Rung { rank: number; gain: string; level: number; price: number
  *  the dodge leaves), or the ranks of the base stats. */
 export type TrainGroup = 'skills' | 'craft' | 'ranks';
 export interface TrainRow {
-  id: DrillId | Lesson | RelicId;
+  id: DrillId | Lesson | RelicId | TechId;
+  /** A technique row (one of the class's three): bought as the next rank of the technique drill. */
+  tech?: TechId;
   /** Unique on the screen ('learn:skill', 'learn:horn', 'drill:skill'...): the skill lesson and the
    *  skill drill share an id. */
   key: string;
@@ -79,14 +82,33 @@ function skillRow(p: Profile, r: RelicId): TrainRow {
 function drillRow(p: Profile, id: DrillId): TrainRow {
   const d = DRILLS[id], r = p.drills?.[id] ?? 0, state = drillState(p, id), top = r >= d.max;
   const need = drillNeeds(p, id), needs = need === 'leave' ? LEAVES[p.cls]?.short ?? '' : need ? 'SKILL' : '';
-  const gain = (n: number) => drillGain(id, p.cls, n), price = top ? 0 : drillPrice(id, r), level = top ? 0 : drillLevel(id, r);
+  const gain = (n: number) => drillGain(id, p.cls, n), price = top ? 0 : drillPrice(id, r), level = top ? 0 : drillLevel(id, r, p.cls);
   return {
-    id, key: 'drill:' + id, group: id === 'technique' ? 'craft' : 'ranks', lesson: false, name: id === 'technique' ? TECHNIQUE[p.cls].name : d.name, text: id === 'technique' ? TECHNIQUE[p.cls].text : d.text,
+    id, key: 'drill:' + id, group: id === 'technique' ? 'craft' : 'ranks', lesson: false, name: (id === 'technique' && TECHNIQUE[p.cls]?.name) || d.name, text: (id === 'technique' && TECHNIQUE[p.cls]?.text) || d.text,
     rank: r, max: d.max, pips: d.levels.map((lv, i) => (i < r ? 'on' : lv <= p.level ? 'off' : 'lock')),
     gain: top ? '' : gain(1), now: r ? gain(r) : '', next: top ? '' : gain(r + 1), state, price, level, needs,
     tag: tagFor(state, price, level, needs, false),
     ladder: d.levels.map((lv, i) => ({ rank: i + 1, gain: gain(i + 1), level: lv, price: drillPrice(id, i), have: i < r })),
   };
+}
+
+/**
+ * The class's three techniques as rows, in the order they're taught: learned, the next (its level and
+ * price; a Ranger's first waits on the snare lesson), or still to come (its level, or the one before it).
+ */
+function techRows(p: Profile): TrainRow[] {
+  const r = p.drills?.technique ?? 0, ids = TECHS[p.cls], levels = techLevels(p.cls);
+  return ids.map((t, i) => {
+    const level = levels[i], price = drillPrice('technique', i), have = i < r, words = TECH_WORDS[t];
+    const state: TrainState = have ? 'max' : i === r ? drillState(p, 'technique') : p.level < level ? 'locked' : 'needs';
+    const needs = state !== 'needs' ? '' : i === r ? LEAVES[p.cls]?.short ?? 'SKILL' : TECH_WORDS[ids[i - 1]].name;
+    return {
+      id: t, key: 'tech:' + t, tech: t, group: 'craft', lesson: true, name: words.name, text: words.text, rank: have ? 1 : 0, max: 1,
+      pips: [have ? 'on' : p.level < level ? 'lock' : 'off'], gain: have ? '' : words.text, now: have ? words.text : '', next: have ? '' : words.text,
+      state, price: have ? 0 : price, level: have ? 0 : level, needs, tag: tagFor(state, price, level, needs, true),
+      ladder: [{ rank: 1, gain: words.text, level, price, have }],
+    };
+  });
 }
 
 /** A Mage's row says magic where the others say stamina (shared/barword.ts). */
@@ -100,5 +122,7 @@ const magicRow = (r: TrainRow, cls: HeroClass): TrainRow => cls !== 'MAGE' ? r :
 export function trainerRows(p: Profile): TrainRow[] {
   const skills = [lessonRow(p, 'skill'), ...SKILL_CHOICES[p.cls].slice(1).map((r) => skillRow(p, r))];
   const leave = hasLesson(p, 'leave') ? [lessonRow(p, 'leave')] : [];
-  return [...skills, ...leave, ...DRILL_ORDER.map((id) => drillRow(p, id))].map((r) => magicRow(r, p.cls));
+  // The technique: three rows of moves, or (a Mage, for now) one drill of ranks.
+  const drills = DRILL_ORDER.flatMap((id) => (id === 'technique' && TECHS[p.cls].length ? techRows(p) : [drillRow(p, id)]));
+  return [...skills, ...leave, ...drills].map((r) => magicRow(r, p.cls));
 }

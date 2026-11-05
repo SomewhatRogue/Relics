@@ -3,7 +3,7 @@
  * (shared/cleric.ts HOLY_SHIELD). The shield soaks damage until it's spent or its time is up, and it's
  * on the hero, so a guest's screen draws it from the room's own state.
  */
-import { HOLY_SHIELD, HERO, technique } from '../shared/tuning';
+import { HOLY_SHIELD, HERO } from '../shared/tuning';
 import { heals } from './hungry';
 import { healMult } from './lantern';
 import { cure } from './poison';
@@ -16,7 +16,7 @@ export const friendsNear = (heroes: Hero[], x: number, y: number, r: number) => 
 /** `by` mends `o` by `n` (grown by the censer's coals and the healer's training, as every heal); it draws a stack of poison. */
 export function mend(by: Hero | undefined, o: Hero, n: number, ev: FightEvent[]): void {
   cure(o, false, ev);
-  const got = Math.min(o.maxHp - o.hp, Math.round(heals(o, by, n * healMult(by) * (1 + (by ? technique(by.drills, 'HEALER') : 0)))));
+  const got = Math.min(o.maxHp - o.hp, Math.round(heals(o, by, n * healMult(by))));
   if (got <= 0) return;
   o.hp += got;
   ev.push({ k: 'heal', x: o.x, y: o.y, n: got });

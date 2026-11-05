@@ -20,7 +20,7 @@ export const drillNeeds = (p: Profile, id: DrillId): Lesson | null =>
 export function drillState(p: Profile, id: DrillId): TrainState {
   const r = p.drills?.[id] ?? 0, need = drillNeeds(p, id);
   if (r >= DRILLS[id].max) return 'max';
-  if (p.level < drillLevel(id, r)) return 'locked';
+  if (p.level < drillLevel(id, r, p.cls)) return 'locked';
   if (need && !knowsLesson(p, need)) return 'needs';
   return p.gold < drillPrice(id, r) ? 'poor' : 'buy';
 }

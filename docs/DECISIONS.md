@@ -3740,3 +3740,54 @@ come back later."
   digger gone with the rubble, `stopsAt`), `tests/rats.test.ts` (they come once it's quiet, scatter at
   2.5 and not 3, closer creeping, come back one at a time, the cap, the room untouched, the town's
   spots clear of walls). Pictures: the scratchpad script `town3-look.cjs` (not in the repo).
+
+## 2026-11-04: techniques are moves, three a class (Kyle; Claude Opus 5.5)
+
+Kyle: "I want more techniques", and they should be "pure upgrades, not just choosing". Each class but
+the Mage now learns three techniques at its trainer instead of three ranks of a bump. Each is a move or
+a new rule, always on once learned, with any of the class's weapons. Names are placeholders for the
+lore keeper.
+
+- **Taught in order** (`shared/techniques.ts` TECHS, TECH_WORDS and every number; `drills.ts`
+  TECH_LEVELS): levels 4, 7 and 10, at the technique drill's prices (180, 545, 1045). The save keeps
+  `drills.technique` as the count: a hero with rank n knows the first n of their class
+  (`knowsTech(h, id)`, by the class of the weapon in hand). The old bumps (+25% slam, +25% backstab,
+  +20% snare time, +16% heals) are gone with them. A Ranger's first still waits on the SNARE lesson.
+- **The Mage is untouched**: its one row of ranks (PRIMED SPELLS, levels 5, 8, 10) stays as it was
+  while its spells are rewritten; ATTUNED and SPELLTHIEF come after.
+- **Warrior** (`sim/techwarrior.ts`). SLAM: a slammed goblin bursts up to 4 small goblins within
+  1.3 tiles of it. SHOULDER CHARGE: 1 s on the stick within about 25 degrees of one way readies it (a
+  kick of dust); the next swing, begun within 0.4 s of stopping, knocks the first goblin it hits down
+  1 s (a butcher 0.5 s), shoved on, through the stun cap. IRON FEET: holding an attack, a blow lands but
+  doesn't shove, stagger or (a log) knock you down; IRON FEET over you when it saves you.
+- **Rogue** (`sim/techrogue.ts`), on any backstab by blade, thrown knife or dart. KNIFEWORK: it bleeds
+  3 s (the skewer's ticks). SLIP AWAY (Kyle's VANISH; renamed so it isn't the skill's name): a backstab
+  kill hides you 2 s by the vanish rule, and a blow wound up at you is dropped; GONE over you.
+  CUTPURSE: once a goblin, a 25% chance of 1 to 3 gold on the floor, on its own seeded stream
+  (`purseRng`), never off a training goblin. At most half a coin a goblin, next to the 1.7 an
+  expedition kill leaves now.
+- **Ranger** (`sim/techranger.ts`). TRAPPER: a snare stays set after its first goblin and catches a
+  second. QUICK NOCK: a perfect bow shot ends at once (no recover), and a draw begun within 1.2 s
+  starts 40% drawn; a crossbow's perfect (glinted) bolt loads the next at once, plain. STEADY: a new
+  rule underneath it: an arrow or bolt loosed on the move sways off the aim, up to 0.05 rad (about 3
+  degrees) either way, by the room's clock (no dice); STEADY takes the sway away. `drift(h, moving,
+  now, wind)` is the hook for the weather's wind later. Tune `AIM_DRIFT.most` (0 turns it off).
+- **Cleric** (`sim/techcleric.ts`). MENDING HANDS: a friend comes up 1.5x as fast (on top of a Cleric's
+  2x). SANCTUARY STEP: blessed ground (the SANCTUARY skill and any other) moves with its Cleric for 3 s
+  after the cast, kept where it was cast from them. JUDGEMENT: a Cleric's blow (mace, censer or flail)
+  on a goblin whose blow is aimed at a friend stuns it 1 s (a butcher 0.5 s), through the stun cap; a
+  striped blow or a charge carries on, as with every daze. The mace's smite already stuns everything.
+- **Tells** (`client/fxtech.ts`, sounds in `soundscape.ts`): a ring and stone for SLAM's bursts; dust
+  for the shoulder ready and landing (the stun says STUNNED); IRON FEET; blood for KNIFEWORK; GONE and
+  smoke for SLIP AWAY; a spill of coins for CUTPURSE; a glint on the string for QUICK NOCK; a faint one
+  for STEADY on the move; a gold ring on the friend for MENDING HANDS; gold motes for SANCTUARY STEP; a
+  gold flash for JUDGEMENT (STUNNED from the stun). Words only for IRON FEET and GONE.
+- **The trainer** (`shared/trainrows.ts` techRows, `client/trainerui.ts` techRow): under TECHNIQUE,
+  three rows with EFFECT and, until learned, COST ("545 gold, level 7", "after SNARE"); tagged LEARNED,
+  LEARN, LEVEL n or NEEDS; the header says "1 OF 3 · NEXT AT LEVEL 10". A tap opens the row with one
+  LEARN button (the technique drill's next rank).
+- New words (for the lore keeper and line editor): the twelve names and EFFECT lines in TECH_WORDS;
+  callouts IRON FEET and GONE (reused); labels EFFECT and COST on the trainer's technique rows.
+- Tests: `tests/techniques.test.ts` (levels and prices, save ranks, rows, the Ranger's snare wait, each
+  technique firing and not firing without it, the stun cap on JUDGEMENT, CUTPURSE seeded and once a
+  goblin); `tests/trainer.test.ts` reads the Warrior's three rows.

@@ -8,6 +8,7 @@ import { BURN, FLARE, FROST, SHATTER, SPIDER, STEAM, STORM, type Augment } from 
 import { shove } from './bodies';
 import { clearElements, damage, frozen, isDummy } from './damage';
 import type { Rng } from '../shared/rng';
+import type { Pickup } from './pickups';
 import type { Enemy, FightEvent, Hero, Javelin, Prop, Survivor } from './types';
 import { stun } from './stuns';
 
@@ -25,6 +26,8 @@ export interface World {
   rng?: Rng;
   /** The room's cage stream, only where a cage can hold a false prisoner (sim/falsecage.ts). */
   cages?: Rng;
+  /** The floor's gold and the room's purse stream, for what a technique knocks loose (sim/techrogue.ts). */
+  floor?: { pickups: Pickup[]; rng: Rng };
 }
 
 const dist = (a: { x: number; y: number }, b: { x: number; y: number }) => Math.hypot(a.x - b.x, a.y - b.y);

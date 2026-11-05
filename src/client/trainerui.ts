@@ -2,7 +2,7 @@
  * Your trainer's screen, phone first: where you stand (level, experience to the next, gold), any
  * level-up picks waiting, then the training in sections you open and close (trainsections.ts):
  * SKILLS (the class's three, which you carry, what each does and the level it's taught at),
- * TECHNIQUE (the class's own craft), RANKS (the base stats) and KNACKS (the tree). A row shows its
+ * TECHNIQUE (the class's three techniques, or a Mage's ranks), RANKS (the base stats) and KNACKS (the tree). A row shows its
  * ranks as pips, what the next rank adds, and its price, the level it waits on, or MAX; tap it for
  * the whole ladder and one buy button. The rows come from shared/trainrows.ts.
  */
@@ -39,6 +39,15 @@ function skillRow(r: TrainRow, carried: RelicId, known: boolean): string {
     `<span class="tr-n">${r.name}</span><em class="tr-t">${tag}</em><span class="tr-d">${rows}</span></button>`;
 }
 
+/** A technique: EFFECT, and until it's learned COST (the gold and level it's taught at); learned,
+ *  the next to learn, or still to come. */
+function techRow(r: TrainRow): string {
+  const tag = r.state === 'max' ? 'LEARNED' : r.state === 'buy' ? 'LEARN' : r.tag;
+  const cost = r.state === 'max' ? '' : `${r.price} gold, level ${r.level}${r.state === 'needs' ? `, after ${r.needs}` : ''}`;
+  return `<button class="tr-skill s-${r.state === 'max' ? 'known' : r.state}" data-row="${r.key}">` +
+    `<span class="tr-n">${r.name}</span><em class="tr-t">${tag}</em><span class="tr-d">${labelRows([['EFFECT', r.text], ['COST', cost]])}</span></button>`;
+}
+
 const ready = (rs: TrainRow[]) => rs.filter((r) => r.state === 'buy').length;
 /** The lowest level something in `rs` still waits on (0: none). */
 const nextLevel = (rs: TrainRow[]) => Math.min(...rs.filter((r) => r.state === 'locked').map((r) => r.level), 99) % 99;
@@ -62,8 +71,10 @@ export function openTrainer(g: Game, panel: Panel, title: string, who: string, g
   const skillBody = skills.map((r) => skillRow(r, carried, !!r.skill && knowsSkill(p, r.skill))).join('') +
     (known.length > 1 ? '<p class="tr-note">Tap a skill you know to carry it. One at a time; changing is free.</p>' : '');
   // The class's own craft, and the base stats.
-  const tech = craft.find((r) => r.id === 'technique')!, cNext = nextLevel(craft);
-  const craftSum = `${tech.name} ${tech.rank}/${tech.max}` + (cNext ? ` &middot; NEXT AT LEVEL ${cNext}` : '');
+  // A class's three techniques (rows of their own), or a Mage's one drill of ranks.
+  const techs = craft.filter((r) => r.tech), tech = craft.find((r) => r.id === 'technique'), cNext = nextLevel(craft);
+  const craftSum = (tech ? `${tech.name} ${tech.rank}/${tech.max}` : `${techs.filter((r) => r.state === 'max').length} OF ${techs.length}`) + (cNext ? ` &middot; NEXT AT LEVEL ${cNext}` : '');
+  const craftBody = craft.map((r) => (r.tech ? techRow(r) : row(r))).join('');
   const have = ranks.reduce((n, r) => n + r.rank, 0), all = ranks.reduce((n, r) => n + r.max, 0), rNext = nextLevel(ranks);
   const rankSum = `${have} OF ${all}` + (rNext && !ready(ranks) ? ` &middot; NEXT AT LEVEL ${rNext}` : '');
   // Every knack and where each chain goes: the tree (treeui.ts), picks taken there too.
@@ -71,7 +82,7 @@ export function openTrainer(g: Game, panel: Panel, title: string, who: string, g
     `<span class="tr-g">${p.perks.length ? p.perks.map((k) => PERKS[k].name).join(', ') : 'none yet'}</span><em class="tr-t">&rsaquo;</em></button>`;
   const html = head(g) + (greet ? `<p><b>${who}:</b> ${line(`"${greet}"`, who)}</p>` : '') + picks +
     section('skills', 'SKILLS', skillSum, ready(skills), skillBody, open.skills) +
-    section('craft', 'TECHNIQUE', craftSum, ready(craft), craft.map(row).join(''), open.craft) +
+    section('craft', 'TECHNIQUE', craftSum, ready(craft), craftBody, open.craft) +
     section('ranks', 'RANKS', rankSum, ready(ranks), ranks.map(row).join(''), open.ranks) +
     section('knacks', 'KNACKS', p.perks.length ? `${p.perks.length} TAKEN` : 'NONE YET', p.picks, knackBody, open.knacks || !!picks);
   panel.show(title, html);
@@ -96,6 +107,7 @@ export function openRow(g: Game, panel: Panel, title: string, key: string, back:
     (r.lesson ? '' : `<div class="tr-now"><span>NOW</span><b>${r.now || 'nothing yet'}</b></div>` + (r.next ? `<div class="tr-now"><span>NEXT</span><b>${r.next}</b></div>` : '')) + ladder;
   const label = r.state === 'max' ? '' : r.state === 'locked' ? `LEVEL ${r.level}` : r.state === 'needs' ? `LEARN ${r.needs} FIRST` :
     `${r.lesson ? 'LEARN' : `RANK ${r.rank + 1}`}: ${r.price} GOLD`;
-  const buy = () => (r.skill && r.id !== 'skill' ? g.learnSkill(r.skill) : r.lesson ? g.learn(r.id as 'skill' | 'leave') : g.buyDrill(r.id as DrillId), stay());
+  // (A technique is the technique drill's next rank.)
+  const buy = () => (r.skill && r.id !== 'skill' ? g.learnSkill(r.skill) : r.tech ? g.buyDrill('technique') : r.lesson ? g.learn(r.id as 'skill' | 'leave') : g.buyDrill(r.id as DrillId), stay());
   panel.show(title, html, [...(label ? [{ label, primary: r.state === 'buy', disabled: r.state !== 'buy', act: buy }] : []), { label: 'BACK', act: back }]);
 }

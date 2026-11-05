@@ -28,28 +28,33 @@ export const DRILLS: Record<DrillId, { name: string; text: string; gain: string;
 };
 /** What a crit does to a blow. */
 export const CRIT = 1.5;
-/** Each class's technique, rank by rank. */
-export const TECHNIQUE: Record<HeroClass, { name: string; text: string; gain: string; per: number }> = {
-  WARRIOR: { name: 'SLAM', text: 'Slams do 25% more damage per rank', gain: '+#% slam damage', per: 0.25 },
-  HEALER: { name: "SURGEON'S HANDS", text: 'Heals 16% bigger per rank', gain: '+#% healing', per: 0.16 },
-  ROGUE: { name: 'KNIFEWORK', text: 'Backstabs do 25% more damage per rank', gain: '+#% backstab damage', per: 0.25 },
-  RANGER: { name: 'TRAPPER', text: 'Snares hold 20% longer per rank', gain: 'snares hold #% longer', per: 0.2 },
+/**
+ * A class's technique as a bump a rank: only the Mage's now. Every other class learns three moves
+ * instead, one a rank (shared/techniques.ts, Kyle 2026-11-04: "pure upgrades, not just choosing").
+ */
+export const TECHNIQUE: Partial<Record<HeroClass, { name: string; text: string; gain: string; per: number }>> = {
   MAGE: { name: 'PRIMED SPELLS', text: 'Primed spells do 20% more damage per rank', gain: '+#% primed spell', per: 0.2 },
 };
+/** The levels the three technique moves are taught at (the Mage's ranks keep DRILLS.technique.levels). */
+export const TECH_LEVELS = [4, 7, 10];
+/** The levels a class's technique ranks need. */
+export const techLevels = (cls?: HeroClass) => (cls && !TECHNIQUE[cls] ? TECH_LEVELS : DRILLS.technique.levels);
 
 export type Drills = Partial<Record<DrillId, number>>;
+/** The levels a drill's ranks need (the technique's by class). */
+const levelsOf = (id: DrillId, cls?: HeroClass) => (id === 'technique' ? techLevels(cls) : DRILLS[id].levels);
 /** The level the next rank needs (`rank` is how many you have); 0 once there are no more. */
-export const drillLevel = (id: DrillId, rank: number) => DRILLS[id].levels[rank] ?? 0;
+export const drillLevel = (id: DrillId, rank: number, cls?: HeroClass) => levelsOf(id, cls)[rank] ?? 0;
 /** How many ranks a trainer will take you to at this level. */
-export const drillCap = (id: DrillId, level: number) => DRILLS[id].levels.filter((l) => l <= level).length;
+export const drillCap = (id: DrillId, level: number, cls?: HeroClass) => levelsOf(id, cls).filter((l) => l <= level).length;
 /** The price of the next rank (`rank` is how many you have): rank 1 at the base price, climbing. */
 export const drillPrice = (id: DrillId, rank: number) => Math.round((DRILLS[id].price * Math.pow(rank + 1, 1.6)) / 5) * 5;
 /** A drill's total, at its rank. */
 export const drilled = (d: Drills | undefined, id: DrillId) => (d?.[id] ?? 0) * DRILLS[id].per;
-export const technique = (d: Drills | undefined, cls: HeroClass) => (d?.technique ?? 0) * TECHNIQUE[cls].per;
+export const technique = (d: Drills | undefined, cls: HeroClass) => (d?.technique ?? 0) * (TECHNIQUE[cls]?.per ?? 0);
 /** A few words for what `ranks` ranks of a drill give (one rank: what the next buys). */
 export function drillGain(id: DrillId, cls: HeroClass, ranks: number): string {
-  const d = id === 'technique' ? TECHNIQUE[cls] : DRILLS[id];
+  const d = (id === 'technique' && TECHNIQUE[cls]) || DRILLS[id];
   return d.gain.replace('#', String(d.per < 1 ? Math.round(d.per * ranks * 100) : d.per * ranks));
 }
 

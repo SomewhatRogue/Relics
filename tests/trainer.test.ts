@@ -92,7 +92,9 @@ describe('trainer', () => {
     expect(at('crit').tag).toBe(`${drillPrice('crit', 0)}g`);
     expect(at('power').now).toBe('+10% damage');
     expect(at('power').next).toBe('+15% damage');
-    expect(at('technique').name).toBe('SLAM');
+    // A Warrior's technique is three rows of moves now (shared/techniques.ts): the first at level 4.
+    expect(rows.filter((x) => x.tech).map((x) => x.name)).toEqual(['SLAM', 'SHOULDER CHARGE', 'IRON FEET']);
+    expect(rows.find((x) => x.tech === 'slam')!.state).toBe('buy');
 
     const top = hero(10, 0, 'ROGUE');
     top.drills = { power: 5, technique: 3 };

@@ -76,6 +76,14 @@ export class Soundscape {
     if (ev.k === 'riposte') return sfx.parry(), sfx.backstab();
     if (ev.k === 'quake') return sfx.slam(), sfx.rumble();
     if (ev.k === 'pin') return sfx.javstick();
+    // Techniques (sim/tech*.ts): bursts, a shoulder's thump, iron feet, slipping away, coins, a quick nock, help up, judgement.
+    if (ev.k === 'slamburst' || ev.k === 'shoulder') return sfx.bodyhit();
+    if (ev.k === 'ironfeet') return sfx.block();
+    if (ev.k === 'slipaway') return sfx.shadow();
+    if (ev.k === 'cutpurse') return sfx.gold();
+    if (ev.k === 'quicknock') return sfx.latch();
+    if (ev.k === 'judged') return sfx.smite();
+    if (ev.k === 'mending' || ev.k === 'sanctstep') return sfx.blessed();
     // The Ranger's: a blinding arrow's flash, a clean hit, the crossbow's ratchet and its glint, a glinted bolt through a line.
     if (ev.k === 'blinded') return sfx.perfect(), sfx.flare();
     if (ev.k === 'trueshot') return sfx.perfect();

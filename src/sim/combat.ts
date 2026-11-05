@@ -1,6 +1,6 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, parry, roll). */
 import { litMult } from './charge';
-import { CENSER, BLESSING, DODGE, WARD, FLINCH, HORN, OVERKILL, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing, CLASS_DODGES, RIPOSTE, CRIT, STEALTH, technique, weakOn, SPLAT, BANNER } from '../shared/tuning';
+import { CENSER, BLESSING, DODGE, WARD, FLINCH, HORN, OVERKILL, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing, CLASS_DODGES, RIPOSTE, CRIT, STEALTH, weakOn, SPLAT, BANNER } from '../shared/tuning';
 import { shove } from './bodies';
 import { knack, statsOf } from './gearstats';
 import { counterWindow, parryWindow, rearCos, slipWindow } from './knacks';
@@ -19,6 +19,8 @@ import type { Enemy, EnemyAttack, FightEvent, Hero } from './types';
 import { isRound } from './types';
 import { landed } from './ownfoes';
 import { travelTo } from '../shared/sweep';
+import { knockDown, rooted, takeShoulder } from './techwarrior';
+import { judge } from './techcleric';
 
 export { respawnOf, stunOf } from './damage';
 
@@ -38,7 +40,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   if ((h.z ?? 0) !== (e.z ?? 0) || !inArc(h.x, h.y, h.fx, h.fy, e.x, e.y, s.range, s.arc, e.radius)) return 0;
   h.hitIds.push(e.id);
   e.lastBy = h.id;
-  const wasLunging = lunging(e);
+  const wasLunging = lunging(e), shoulder = takeShoulder(h);
   const heavy = h.counter || h.heavy || s.knock >= 7;
   // From behind: the hero stands where the enemy's facing points away (dummies have no back).
   const tx = h.x - e.x, ty = h.y - e.y, tl = Math.hypot(tx, ty) || 1;
@@ -47,7 +49,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   const ice = frozen(e, now), blessed = h.blessedUntil > now ? BLESSING.dmgMult : 1;
   const heldFast = e.act === 'stunned' || e.act === 'pinned' || ice || snared(e, now);
   // A Rogue's knives are weak head on (unless it's held fast): keep moving and get behind.
-  const rearMult = rear ? (WEAPONS[h.weapon].backstab ?? GUARD.rearMult) * (1 + knack(h, 'rear')) * (1 + (WEAPONS[h.weapon].cls === 'ROGUE' ? technique(h.drills, 'ROGUE') : 0)) : heldFast || mound ? 1 : (WEAPONS[h.weapon].front ?? 1);
+  const rearMult = rear ? (WEAPONS[h.weapon].backstab ?? GUARD.rearMult) * (1 + knack(h, 'rear')) : heldFast || mound ? 1 : (WEAPONS[h.weapon].front ?? 1);
   const counter = GUARD.counterMult * (has(h, 'riposte') ? TRAIT.riposte : 1) * (1 + knack(h, 'counter')), held = GUARD.stunnedMult * (has(h, 'brutal') ? TRAIT.brutal : 1);
   // TEMPO: the first hit after dodging through a blow lands double.
   const tempo = h.tempoUntil > now ? TRAIT.tempo : 1;
@@ -92,7 +94,8 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   }
   // A heavy blow breaks the frozen.
   if (ice && heavy) return shatter(e, now, ev), n;
-  if (warriorHit(h, s, e, wasLunging, now, ev) || clericHit(h, s, e, now, ev)) return n;
+  // (Techniques: SHOULDER CHARGE knocks it down, JUDGEMENT stuns it off a friend: sim/techwarrior.ts, techcleric.ts.)
+  if (warriorHit(h, s, e, wasLunging, now, ev) || (shoulder && knockDown(h, e, now, ev)) || clericHit(h, s, e, now, ev) || judge(h, e, now, ev)) return n;
   // Light goblins flinch out of their wind-up on any hit. A heavy wind-up (a butcher's, a heavy's, a cleave
   // or slam, a striped blow; never a hexer's spell, which any blow breaks) only to a strong charged blow
   // from a big weapon (the greatsword, the flail).
@@ -239,18 +242,20 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     return;
   }
   // A Cleric's holy shield soaks what it can (sim/holy.ts); a blow it takes whole doesn't stagger.
-  const n = soak(h, Math.round(a.dmg * taken), now, ev);
+  // IRON FEET: holding an attack, the blow lands but doesn't shove, stagger or knock down (sim/techwarrior.ts).
+  const n = soak(h, Math.round(a.dmg * taken), now, ev), feet = rooted(h);
   if (n <= 0) return void (h.hitstop = Math.max(h.hitstop, HITSTOP.light));
   h.hp -= n;
   // Heavy armor: a small goblin's blow doesn't stagger you.
-  if (!(g.steady && e.kind === 'scrapper')) Object.assign(h, { act: 'hurt', actT: 0, actDur: HURT_STAGGER + a.knock * 0.012 });
+  if (!(g.steady && e.kind === 'scrapper') && !feet) Object.assign(h, { act: 'hurt', actT: 0, actDur: HURT_STAGGER + a.knock * 0.012 });
   h.hitstop = Math.max(h.hitstop, HITSTOP.heavy);
-  shove(h, sx / sl, sy / sl, a.knock, HERO.weight);
+  if (feet) ev.push({ k: 'ironfeet', x: h.x, y: h.y });
+  else shove(h, sx / sl, sy / sl, a.knock, HERO.weight);
   ev.push({ k: 'hit', x: h.x, y: h.y, n, heavy: n >= 25, on: 'hero', src: a.kind });
   // A spider's bite (or the brood mother's bite or glob) poisons.
   if (e.kind === 'spider' || e.kind === 'brood') poison(h, now, ev);
   // A net holds, a thief takes, a log knocks down (sim/ownfoes.ts).
-  landed(e, a, h, now, ev);
+  if (!(feet && a.kind === 'charge')) landed(e, a, h, now, ev);
   downIfDead(h, ev);
 }
 

@@ -65,6 +65,9 @@ import { NO_INTENT, type Puddle, type Zone, type Bolt, type Drop, type Enemy, ty
 import { stun } from './stuns';
 import { stepDread, type DreadRule } from './dread';
 import { stepExped, type ExpedState } from './exped';
+import { rogueStruck } from './techrogue';
+import { aimed } from './techranger';
+import { followGround, stepGround } from './techcleric';
 
 export class ArenaRoom {
   time = 0;
@@ -119,6 +122,8 @@ export class ArenaRoom {
   private relicRng: Rng;
   /** Whether what's in a broken cage is false (sim/falsecage.ts), on its own stream as well. */
   private cageRng: Rng;
+  /** What a technique knocks loose (CUTPURSE: sim/techrogue.ts), on its own stream too. */
+  private purseRng: Rng;
   /** An outdoor job room: a cage here can hold a false prisoner (never in a house: run.ts sets this). */
   falseCages = false;
   private acc = 0;
@@ -151,6 +156,7 @@ export class ArenaRoom {
     this.fireRng = new Rng(seed * 7351 + 17);
     this.relicRng = new Rng(seed * 31337 + 7);
     this.cageRng = new Rng(seed * 2971 + 41);
+    this.purseRng = new Rng(seed * 6007 + 53);
     this.map = opts.map ?? ARENA;
     this.crows = newFlocks(this.map.flocks);
     useMap(this.map);
@@ -261,7 +267,7 @@ export class ArenaRoom {
     this.events = [];
     this.time += TICK;
     this.tick++;
-    const w: World = { heroes: this.heroes, enemies: this.enemies, javelins: this.javelins, props: this.props, survivors: this.survivors, now: this.time, ev: this.events, rng: this.fireRng };
+    const w: World = { heroes: this.heroes, enemies: this.enemies, javelins: this.javelins, props: this.props, survivors: this.survivors, now: this.time, ev: this.events, rng: this.fireRng, floor: { pickups: this.pickups, rng: this.purseRng } };
     if (this.falseCages && !this.indoors) w.cages = this.cageRng;
     const hit = (e: Enemy, el: Hero['augments']['javelin'], n: number) => afflict(w, e, el, n);
     const acts: HeroActs = {
@@ -336,6 +342,7 @@ export class ArenaRoom {
     stepFalse(this.survivors, this.time, this.events, (x, y) => this.spawn('scrapper', x, y));
     stepSkills(this, w, TICK);
     stepSentries(this.zones, this.bolts, w);
+    followGround(this.zones, this.heroes, this.time);
     this.zones = stepZones(this.zones, w);
     separate(this.heroes, this.enemies, this.props);
     // A staff's walls: frost holds small goblins back, and each burns, chills or shocks (sim/staffwall.ts).
@@ -384,6 +391,8 @@ export class ArenaRoom {
   private struck(h: Hero, e: Enemy, n: number, w: World): void {
     // A Rogue out of a vanish: seen again the moment they strike.
     h.vanishUntil = undefined;
+    // A Rogue's backstab: KNIFEWORK, SLIP AWAY, CUTPURSE (sim/techrogue.ts).
+    rogueStruck(h, e, w);
     // A Mage's blade builds its charge; a wreathed blade or a staff's slash carries the element.
     bladeStruck(h, currentSwing(h), e, n, w);
     // Skarn's Cleaver: every hit heals a fifth of what it dealt.
@@ -419,8 +428,9 @@ export class ArenaRoom {
     else if (h.relic === 'horn') rally(h, this.enemies, w.now, w.ev);
     else if (h.relic === 'bash') startBash(h, w.ev);
     else if (h.relic === 'ward') ward(h, this.heroes, this.intents.get(h.id), w.now, w.ev);
-    else if (h.relic === 'sanctuary') (this.zones.push(hallow(h, this.intents.get(h.id), w.now, el, w.ev)), ward(h, this.heroes, this.intents.get(h.id), w.now, w.ev));
-    else this.zones.push(hallow(h, this.intents.get(h.id), w.now, el, w.ev));
+    // (SANCTUARY STEP: the blessed ground follows its Cleric a while: sim/techcleric.ts.)
+    else if (h.relic === 'sanctuary') (this.zones.push(stepGround(hallow(h, this.intents.get(h.id), w.now, el, w.ev), h, w.now, w.ev)), ward(h, this.heroes, this.intents.get(h.id), w.now, w.ev));
+    else this.zones.push(stepGround(hallow(h, this.intents.get(h.id), w.now, el, w.ev), h, w.now, w.ev));
   }
 
   /** How far to throw or smite: to the mouse on a laptop, else to the goblin the hero faces, else a set distance. */
@@ -468,7 +478,8 @@ export class ArenaRoom {
       const mage = WEAPONS[h.weapon].cls === 'MAGE', primed = mage && !!h.primed;
       const el = s.shot === 'arrow' || s.shot === 'bolt' || s.shot === 'knife' || s.shot === 'dart' ? forged : forged || (mage ? castElement(h) : h.augments[h.relic]);
       if (mage) this.bolts.push(...castSpell(h, s, el, mult * spendPrimed(h), traitsOf(h)));
-      else this.bolts.push(shoot(h, s, el, mult, traitsOf(h)));
+      // A Ranger's arrow or bolt loosed on the move drifts off the aim, unless STEADY (sim/techranger.ts).
+      else this.bolts.push(shoot(aimed(h, s.shot, this.intents.get(h.id), w.now, w.ev), s, el, mult, traitsOf(h)));
       w.ev.push({ k: 'shoot', x: h.x, y: h.y, dx: h.fx, dy: h.fy, kind: s.shot, el, ...(primed ? { primed } : {}) });
     }
     // The Jealous Rod: a charged spell jumps to every goblin near what it hits.

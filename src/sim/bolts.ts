@@ -10,6 +10,7 @@ import { CRIT, FLINCH, HERO, LODESTONE, NET, WEAPONS, type Augment, type Swing, 
 import { shove } from './bodies';
 import { damage, frozen, isDead, isDummy } from './damage';
 import { backstabOf, fromBehind, rogueShot } from './backshot';
+import { backstabbed } from './techrogue';
 import { afflict, shatter, type World } from './elements';
 import { allyHit, players } from './party';
 import { merciful } from './mercy';
@@ -128,6 +129,8 @@ function strike(w: World, b: Bolt, e: Enemy): boolean {
   const dead = damage(e, Math.round(b.dmg * rear * (crit ? CRIT : 1) * boardMult(board)), w.now, w.ev, { heavy: b.knock >= 8 || crit, flinch: FLINCH, mult: true, brutal: b.traits.includes('brutal'), dx: b.dx, dy: b.dy, src: b.kind, el: b.el, backstab: back });
   // (A board tuned to let a little of a plain shot by still stops it there.)
   if (board === 'blocked') w.ev.push({ k: 'deflect', x: e.x, y: e.y });
+  // A Rogue's techniques on a backstab (sim/techrogue.ts).
+  else if (back && by) backstabbed(by, e, w);
   perfectStrike(b, e, w.now, w.ev);
   if (dead || board === 'blocked') return board !== 'blocked';
   if (e.act !== 'pinned') shove(e, b.dx, b.dy, b.knock, e.weight);

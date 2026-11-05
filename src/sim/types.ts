@@ -261,6 +261,15 @@ export interface Hero extends Body {
   wreathed?: boolean;
   /** Primed spells left (TWICE PRIMED: two). */
   primeLeft?: number;
+  /** Techniques (shared/techniques.ts): SHOULDER CHARGE's straight walk (seconds, which way, last walked
+   *  then) and the swing carrying it; QUICK NOCK's last perfect shot and the shot ending at once. */
+  strideT?: number;
+  strideX?: number;
+  strideY?: number;
+  strideAt?: number;
+  shoulder?: boolean;
+  nockAt?: number;
+  nocked?: boolean;
   maxHp: number;
   /** Perks chosen at the trainer (see shared/progress). */
   perks: string[];
@@ -343,6 +352,8 @@ export interface Enemy extends Body {
   /** The Rogue's (sim/venom.ts): bleeding from a skewer until, its next tick; poison stacks, until, next
    *  tick, ticking harder (a perfect dart); retching until. */
   bleedUntil?: number;
+  /** CUTPURSE has shaken this one's purse (once a goblin). */
+  cut?: boolean;
   bleedNext?: number;
   venom?: number;
   venomUntil?: number;
@@ -499,6 +510,10 @@ export interface Zone {
   ax?: number;
   ay?: number;
   at?: number;
+  /** SANCTUARY STEP: blessed ground that moves with its owner until then, kept at (ox, oy) from them. */
+  follow?: number;
+  ox?: number;
+  oy?: number;
 }
 
 /** A weapon lying where a goblin fell. */
@@ -575,7 +590,10 @@ export type FightEvent =
   | { k: 'burst'; x: number; y: number; r: number; el: Augment }
   | { k: 'shock' | 'beam' | 'boltline'; x: number; y: number; x2: number; y2: number }
   | { k: 'heal'; x: number; y: number; n: number }
-  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle' | 'lift' | 'oilfire' | 'freed' | 'exitopen' | 'blaze' | 'chop' | 'denspawn' | 'hallow' | 'ward' | 'warded' | 'reflect' | 'wardbreak' | 'spotted' | 'skewer' | 'envenom' | 'riposte' | 'shieldbash' | 'quake' | 'pin' | 'blinded' | 'wind' | 'loaded' | 'glint' | 'trueshot' | 'holyshield' | 'shieldsoak' | 'shieldgone' | 'coalburst' | 'coalflare' | 'snag' | 'flailstun' | 'holysmite' | 'shrug'; x: number; y: number }
+  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle' | 'lift' | 'oilfire' | 'freed' | 'exitopen' | 'blaze' | 'chop' | 'denspawn' | 'hallow' | 'ward' | 'warded' | 'reflect' | 'wardbreak' | 'spotted' | 'skewer' | 'envenom' | 'riposte' | 'shieldbash' | 'quake' | 'pin' | 'blinded' | 'wind' | 'loaded' | 'glint' | 'trueshot' | 'holyshield' | 'shieldsoak' | 'shieldgone' | 'coalburst' | 'coalflare' | 'snag' | 'flailstun' | 'holysmite' | 'shrug'
+      /** Techniques firing (shared/techniques.ts): SLAM's bursts, SHOULDER CHARGE ready and landing, IRON FEET,
+       *  KNIFEWORK's bleed, SLIP AWAY, CUTPURSE, QUICK NOCK, STEADY, MENDING HANDS, SANCTUARY STEP, JUDGEMENT. */
+      | 'slamburst' | 'shoulderready' | 'shoulder' | 'ironfeet' | 'cutbleed' | 'slipaway' | 'cutpurse' | 'quicknock' | 'steady' | 'mending' | 'sanctstep' | 'judged'; x: number; y: number }
   /** A goblin retching up a perfect dart's poison, facing (dx, dy) (sim/venom.ts). */
   | { k: 'puke'; x: number; y: number; dx: number; dy: number }
   | { k: 'collapse'; x: number; y: number; w: number; h: number }
@@ -710,6 +728,6 @@ export interface Bolt {
 export interface Puddle { id: number; x: number; y: number; r: number; until: number }
 
 /** A Ranger's snare on the ground. */
-export interface Snare { owner: string; x: number; y: number; until: number; /** How long it holds what steps in (a Ranger's TRAPPER drill lengthens it). */ hold?: number }
+export interface Snare { owner: string; x: number; y: number; until: number; /** How long it holds what steps in. */ hold?: number; /** TRAPPER: catches left (one when unset), and who it has caught. */ left?: number; got?: number[] }
 /** A Ranger's hound: at heel, running something down, worrying it, or scared off till `back`. */
 export interface Hound { x: number; y: number; fx: number; fy: number; state: 'heel' | 'run' | 'bite' | 'fled'; target: number; t: number; next: number; back: number; bites: number; moving: boolean; /** Lying down (across you while you're out). */ down?: boolean; /** Sent in by SEND THE HOUND: pins what it reaches. */ pin?: boolean }

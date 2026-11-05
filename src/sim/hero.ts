@@ -18,6 +18,8 @@ import { brandySpeed, breathCap } from './brandy';
 import { quickMult, relicDark, spendCharge } from './charge';
 import { paySpell, refuseSpell } from './spells';
 import { knows, type Enemy, type FightEvent, type Hero, type Intent } from './types';
+import { primeShoulder, stride } from './techwarrior';
+import { nockHead, quickNock } from './techranger';
 
 export function newHero(id: string, x: number, y: number): Hero {
   return {
@@ -71,7 +73,7 @@ function face(h: Hero, inp: Intent, enemies: Enemy[], snap: boolean, reach = 3.2
   if (l > 0.01) (h.fx = x / l), (h.fy = y / l);
 }
 
-function walk(h: Hero, inp: Intent, k: number, dt: number, now: number): void {
+function walk(h: Hero, inp: Intent, k: number, dt: number, now: number, ev: FightEvent[]): void {
   const m = Math.min(1, Math.hypot(inp.mx, inp.my));
   // Creeping: harder to see (STEALTH). (Standing in plain sight isn't.)
   h.sneaking = m >= 0.05 && m < STEALTH.slow;
@@ -80,6 +82,7 @@ function walk(h: Hero, inp: Intent, k: number, dt: number, now: number): void {
   // (Swept, so a hero stops at a gap too narrow for a body rather than being wedged into it.)
   travel(h, (inp.mx / l) * sp * dt, (inp.my / l) * sp * dt, HERO.radius);
   h.moving = true;
+  stride(h, inp.mx / l, inp.my / l, m, dt, now, ev);
 }
 
 /** Room callbacks: `fire` a relic; `loose` a swing's moment of release (a shot, a blessing). */
@@ -210,7 +213,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     if (h.act === 'slam' && h.actT >= GRAB.slamWindup + GRAB.slamRecover) return void Object.assign(h, { act: 'idle', actT: 0 });
     face(h, inp, enemies, false);
     if (wantsRoll) return acts.drop(h), startRoll(h, inp, now, ev);
-    return acts.carry(h, inp, (k) => walk(h, inp, k, dt, now));
+    return acts.carry(h, inp, (k) => walk(h, inp, k, dt, now, ev));
   }
   if (h.act === 'throw') {
     const r = RELICS[h.relic];
@@ -228,7 +231,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     // RELOAD held on an empty crossbow winds it (sim/crossbow.ts).
     if (stepWind(h, inp, dt, ev)) return;
     face(h, inp, enemies, false);
-    walk(h, inp, w.chargeSpeed, dt, now);
+    walk(h, inp, w.chargeSpeed, dt, now, ev);
     collide(h, HERO.radius);
     const full = chargeFull(w, h) - CHARGE.start;
     if (h.actT >= full && h.actT - dt < full) ev.push({ k: 'charged', x: h.x, y: h.y });
@@ -245,6 +248,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
       // A big spell is paid for now; short of magic, it fizzles and nothing is cast (sim/spells.ts).
       if (!paySpell(h, now, ev)) return void Object.assign(h, { act: 'idle', actT: 0, perfect: false });
       if (h.perfect) ev.push({ k: 'perfect', x: h.x, y: h.y });
+      quickNock(h, now, ev);
       startSwing(h, -1, inp, enemies, now, ev);
       ev.push({ k: 'heavy', x: h.x, y: h.y });
     }
@@ -255,7 +259,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     // A wand's quick spell is cast walking, turning to the aim as it comes up.
     if (cast) {
       if (h.actT < s.windup) face(h, inp, enemies, true, (s.range ?? 3.2) * 0.9);
-      walk(h, inp, cast, dt, now);
+      walk(h, inp, cast, dt, now, ev);
       collide(h, HERO.radius);
     }
     if (h.actT < s.windup) {
@@ -278,10 +282,12 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
         acts.sweep(h, s);
       }
     } else {
+      // QUICK NOCK: the perfect shot is off, and the next is on the string already.
+      if (h.heavy && h.nocked) return void Object.assign(h, { act: 'idle', actT: 0, nocked: false });
       const queued = now - h.attackQueuedAt < INPUT_BUFFER && h.attackQueuedAt > now - h.actT;
       if (queued && !h.heavy && h.combo < w.combo.length - 1) {
         if (!inp.attack) return startSwing(h, h.combo + 1, inp, enemies, now, ev);
-        if (now - h.attackQueuedAt >= CHARGE.start && !emptyHold(h, now, ev)) return refuseSpell(h, now, ev) ? undefined : startCharge(h);
+        if (now - h.attackQueuedAt >= CHARGE.start && !emptyHold(h, now, ev)) return refuseSpell(h, now, ev) ? undefined : startCharge(h, now);
       }
       if (wantsRoll) return startRoll(h, inp, now, ev);
       if (h.actT >= swingTime(s)) (h.act = 'idle'), (h.actT = 0);
@@ -308,7 +314,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   if (now - h.attackQueuedAt < CHARGE.start + INPUT_BUFFER && h.attackQueuedAt > -9) {
     // The crossbow looses on the press; everything else waits to see if it's a tap or a hold.
     if (!inp.attack || w.noCharge) return startSwing(h, 0, inp, enemies, now, ev);
-    if (now - h.attackQueuedAt >= CHARGE.start && !emptyHold(h, now, ev)) return refuseSpell(h, now, ev) ? undefined : startCharge(h);
+    if (now - h.attackQueuedAt >= CHARGE.start && !emptyHold(h, now, ev)) return refuseSpell(h, now, ev) ? undefined : startCharge(h, now);
   }
   // Only a Warrior's or Healer's kit holds a block.
   h.blocking = inp.block && h.stamina > 0 && !h.winded && guardOf(w) === 'full';
@@ -316,13 +322,14 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   if (inp.block && guardOf(w) === 'parry' && now - h.lastBlockPress > 0.35 && h.toldAt < h.lastBlockPress) (h.toldAt = now), ev.push({ k: 'noblock', x: h.x, y: h.y });
   // Guarding with no aim (a phone) turns to the nearest threat, so a parry faces the right way.
   face(h, inp, enemies, h.blocking || now - h.lastBlockPress < 0.3);
-  walk(h, inp, h.blocking ? w.blockSpeed : 1, dt, now);
+  walk(h, inp, h.blocking ? w.blockSpeed : 1, dt, now, ev);
   collide(h, HERO.radius);
 }
 
-function startCharge(h: Hero): void {
+function startCharge(h: Hero, now: number): void {
   h.act = 'charge';
-  h.actT = 0;
+  // QUICK NOCK: a draw begun just after a perfect shot starts part drawn (sim/techranger.ts).
+  h.actT = nockHead(h, chargeFull(WEAPONS[h.weapon], h), now);
   h.attackQueuedAt = -9;
   h.heavy = false;
   beginHold(h);
@@ -344,6 +351,8 @@ function startSwing(h: Hero, i: number, inp: Intent, enemies: Enemy[], now: numb
   h.attackQueuedAt = -9;
   h.counter = now < h.counterUntil;
   if (h.counter) h.counterUntil = -9;
+  // SHOULDER CHARGE: straight off a long walk, this blow knocks down the first goblin it hits.
+  primeShoulder(h, now);
   // (A Ranger's tap is the short sword: it sounds like one.)
   ev.push({ k: 'swing', x: h.x, y: h.y, src: !currentSwing(h).shot && WEAPONS[h.weapon].cls === 'RANGER' ? 'sword' : h.weapon, heavy: h.heavy });
 }

@@ -2,6 +2,18 @@
 
 ## Current slice
 
+**Techniques: three moves a class** (Claude Opus 5.5, 2026-11-04; Kyle: "I want more techniques", "pure
+upgrades, not just choosing"). Built; waiting on Kyle's play. *Done when* each class but the Mage has three
+techniques at its trainer, rows under TECHNIQUE that say LEARNED, LEARN (level and price) or the level they
+wait on, taught one at a time in order at levels 4, 7 and 10 for 180, 545 and 1045 gold, always on once
+learned with any of the class's weapons, each with a small tell when it fires: Warrior SLAM, SHOULDER
+CHARGE, IRON FEET; Rogue KNIFEWORK, SLIP AWAY, CUTPURSE; Ranger TRAPPER, QUICK NOCK, STEADY; Cleric MENDING
+HANDS, SANCTUARY STEP, JUDGEMENT (DECISIONS 2026-11-04 has the numbers). An old hero with technique rank n
+knows the first n. The Mage's row is unchanged (its ATTUNED and SPELLTHIEF come after the spell rewrite).
+Open: the names and the twelve lines through the lore keeper and line editor (SLIP AWAY stands in for
+Kyle's VANISH, the Rogue's skill's name); whether STEADY's new aim drift (a Ranger's shot on the move sways
+up to 3 degrees) feels right on the shortbow.
+
 **A recap, quiet drops, a tracker that folds** (Claude Opus 5.5, 2026-11-04; Kyle, from his phone: "it should
 give you a mission recap", drops "shouldn't pop up unless you click on it", the mission "smaller in the top
 left unless you click it to expand"). Built; waiting on Kyle's play. *Done when* a job's end (won, lost or

@@ -8,7 +8,8 @@
  * the nearest small goblin), runs it down and worries it, then comes back. It can't be killed; a
  * butcher winding up near it scares it off for a while, and it comes back when it's ready.
  */
-import { HOUND, SNARE, WEAPONS, technique } from '../shared/tuning';
+import { HOUND, SNARE, WEAPONS } from '../shared/tuning';
+import { catches } from './techranger';
 import { damage, isDead } from './damage';
 import { houndBite, houndBites, houndWait, snareHold, snareMax, snareWait } from './knacks';
 import { knows, type Enemy, type FightEvent, type Hero, type Hound, type Snare } from './types';
@@ -20,21 +21,25 @@ export function laySnare(h: Hero, snares: Snare[], now: number, ev: FightEvent[]
   h.snareReady = now + snareWait(h);
   const mine = snares.filter((s) => s.owner === h.id);
   if (mine.length >= snareMax(h)) snares.splice(snares.indexOf(mine[0]), 1);
-  snares.push({ owner: h.id, x: h.rollX, y: h.rollY, until: now + SNARE.life, hold: snareHold(h) * (1 + technique(h.drills, 'RANGER')) });
+  snares.push({ owner: h.id, x: h.rollX, y: h.rollY, until: now + SNARE.life, hold: snareHold(h), left: catches(h) });
   ev.push({ k: 'snareset', x: h.rollX, y: h.rollY });
 }
 
-/** A goblin steps in: held (or slowed, if big). False once it has gone off or worn out. */
+/** A goblin steps in: held (or slowed, if big). False once it has gone off or worn out. With TRAPPER
+ *  it stays set for a second goblin (not the one it already holds), and shows it's set again. */
 export function stepSnare(s: Snare, enemies: Enemy[], now: number, ev: FightEvent[]): boolean {
   if (now > s.until) return false;
-  const e = enemies.find((o) => !isDead(o) && o.kind !== 'dummy' && o.kind !== 'swingDummy' && (o.z ?? 0) === 0 && Math.hypot(o.x - s.x, o.y - s.y) < SNARE.radius + o.radius);
+  const e = enemies.find((o) => !isDead(o) && o.kind !== 'dummy' && o.kind !== 'swingDummy' && (o.z ?? 0) === 0 && !s.got?.includes(o.id) && Math.hypot(o.x - s.x, o.y - s.y) < SNARE.radius + o.radius);
   if (!e) return true;
-  const hold = s.hold ?? SNARE.hold;
-  // (A small one held is a stun: the same Ranger's snare doesn't hold it twice running. The snare is sprung either way.)
-  if (e.weight <= 1 && !stun(e, s.owner, now, hold, ev)) return false;
+  const hold = s.hold ?? SNARE.hold, more = (s.left ?? 1) > 1;
+  (s.got ??= []).push(e.id);
+  s.left = (s.left ?? 1) - 1;
+  if (more) ev.push({ k: 'snareset', x: s.x, y: s.y });
+  // (A small one held is a stun: the same Ranger's snare doesn't hold it twice running. The catch is spent either way.)
+  if (e.weight <= 1 && !stun(e, s.owner, now, hold, ev)) return more;
   e.snareUntil = now + hold;
   ev.push({ k: 'snared', x: e.x, y: e.y });
-  return false;
+  return more;
 }
 
 const newHound = (h: Hero): Hound => ({ x: h.x - h.fx, y: h.y - h.fy + 0.6, fx: h.fx, fy: h.fy, state: 'heel', target: 0, t: 0, next: 4, back: 0, bites: 0, moving: false });

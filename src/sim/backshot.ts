@@ -2,7 +2,7 @@
  * A Rogue's backstab from range: a poisoner's dart or a thrown knife that takes a goblin in the
  * back lands at that weapon's backstab rate, the same as a blade there would (combat.ts hitEnemy).
  */
-import { GUARD, WEAPONS, technique } from '../shared/tuning';
+import { GUARD, WEAPONS } from '../shared/tuning';
 import { knack } from './gearstats';
 import { rearCos } from './knacks';
 import type { Bolt, Enemy, Hero } from './types';
@@ -17,8 +17,8 @@ export function fromBehind(e: Enemy, dx: number, dy: number, h?: Hero): boolean 
   return (e.fx * -dx + e.fy * -dy) / (l * fl) < (h ? rearCos(h) : -0.3);
 }
 
-/** How much harder a backstab lands for this hero's weapon, knacks and trainer's technique. */
+/** How much harder a backstab lands for this hero's weapon and knacks. */
 export function backstabOf(h: Hero): number {
   const w = WEAPONS[h.weapon];
-  return (w.backstab ?? GUARD.rearMult) * (1 + knack(h, 'rear')) * (1 + (w.cls === 'ROGUE' ? technique(h.drills, 'ROGUE') : 0));
+  return (w.backstab ?? GUARD.rearMult) * (1 + knack(h, 'rear'));
 }
