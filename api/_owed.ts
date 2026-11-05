@@ -5,7 +5,11 @@
  * `relic:owed:<heroId>`, a field per job (the party's room code) holding that player's run as the
  * leader last had it. A week's keeping; a claim reads it, the player's game pays it and marks the job
  * paid in its own save, then drops it. Without Redis it lives in memory (tests, local dev).
+ * A write is one HSET a member (pipelined, no MULTI), and an EXPIRE only for a job new to that hero:
+ * every command is counted (_meter.ts).
  */
+import { Meter } from './_meter.js';
+
 export interface Owed { job: string; run: string }
 export interface OwedStore {
   /** The leader's word for each member: hero id to their run (JSON). */
@@ -51,22 +55,29 @@ export function memoryOwedStore(): OwedStore {
   };
 }
 
-export async function redisOwedStore(url: string): Promise<OwedStore> {
+export async function redisOwedStore(url: string, meter = new Meter()): Promise<OwedStore> {
   const { createClient } = await import('redis');
   const r = createClient({ url });
   r.on('error', (e) => console.log(JSON.stringify({ owed: 1, ev: 'err', msg: String(e?.message ?? e) })));
   await r.connect();
+  meter.attach({ incrBy: (k, n) => r.incrBy(k, n), expire: (k, t) => r.expire(k, t) });
   return {
     async write(job, owed) {
-      const m = r.multi();
-      for (const [hero, run] of Object.entries(owed)) m.hSet(hk(hero), job, run).expire(hk(hero), WEEK_S);
-      await m.exec();
+      const heroes = Object.keys(owed);
+      meter.add('hset', heroes.length);
+      // HSET says 1 for a field it made: a job new to that hero, whose week starts now.
+      const made = await Promise.all(heroes.map((h) => r.hSet(hk(h), job, owed[h])));
+      const fresh = heroes.filter((_, i) => Number(made[i]) > 0);
+      meter.add('expire', fresh.length);
+      await Promise.all(fresh.map((h) => r.expire(hk(h), WEEK_S)));
     },
     async list(hero) {
+      meter.add('hgetall');
       const all = await r.hGetAll(hk(hero));
       return Object.entries(all).slice(0, MAX_JOBS).map(([job, run]) => ({ job, run }));
     },
     async drop(hero, job) {
+      meter.add('hdel');
       await r.hDel(hk(hero), job);
     },
   };

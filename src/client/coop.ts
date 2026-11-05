@@ -10,7 +10,9 @@
  *   patch says who's indoors, over which door. A friend silent a minute is gone (a phone that lost signal has
  *   that long to come back to the same hero).
  * - CoopGuest (a friend): keeps a copy of the leader's room from the patches and draws it; sends
- *   its Intent when it changes (and every 2 s). Its own hero is `me` in its copy, so the rest of the
+ *   its Intent when a button changes (at once, marked urgent so the relay doesn't hold it for its next
+ *   batch), when the stick or aim moves (at most 10 times a second: the leader's room runs on the
+ *   latest, and presses are counted, so none is lost), and every 2 s regardless. Its own hero is `me` in its copy, so the rest of the
  *   game can't tell. The leader quiet 20 s, and the job ends for it as a loss.
  * - Handing on: every 2 s the leader also sends the whole job (the run and the room, saveRoom).
  *   The leader quiet 9 s, the friend first in line (by id) takes the room over from that and leads
@@ -40,6 +42,11 @@ import { themeUnder } from '../shared/expedsky';
 import type { ExpedState } from '../sim/exped';
 
 const AWAY = 5, REJOIN = 5, BYE_WAIT = 2.5, SEND_EVERY = 0.05, FULL_EVERY = 4, GRACE = 60, LOST = 20, KEEP = 2, SAVE_EVERY = 2, TAKE = 9, TAKE_NEXT = 5;
+/** A friend's stick and aim go to the leader at most this often (seconds); a button at once. */
+const STICK_EVERY = 0.1;
+/** An Intent's buttons (everything but the stick and aim), to tell a press from a nudge of the stick. */
+const buttons = (i: Intent) => JSON.stringify({ ...i, mx: 0, my: 0, ax: 0, ay: 0 });
+const r2 = (v: number) => Math.round(v * 100) / 100;
 /**
  * Your own hero, on a friend's screen, moves the moment you press. The leader's word on where you
  * are is a trip there and back old, so the walking you've done here since then is added on top of
@@ -104,6 +111,11 @@ export class CoopHost {
 
   /** Taking a job on, and the relay says its leader is still there after all: follow them again. */
   onRefused: (lead: string) => void = () => {};
+
+  /** Online play went off (the month's budget is used up): the friends are out of reach, so the job goes on here, alone. */
+  cutOff(): void {
+    for (const [id, f] of this.friends) if (!f.gone) (f.gone = true), this.game.dropFriend(id);
+  }
 
   private heard(m: RelayMsg): void {
     if (m.t === 'role' && m.role === 'guest' && m.host && m.host !== this.myId) return this.onRefused(m.host);
@@ -247,7 +259,10 @@ export class CoopGuest {
   private gap = SEND_EVERY;
   private events: FightEvent[] = [];
   private said = '';
+  private saidButtons = '';
   private saidAt = -9;
+  /** Online play went off (the month's budget is used up): take the job on here, alone, from the last whole job heard. */
+  cut = false;
   private names: Record<string, string> = {};
   private helloAt = -9;
   private now = 0;
@@ -359,9 +374,14 @@ export class CoopGuest {
   /** Each frame: send my input (when it changes, and now and then), and draw between patches. */
   frame(now: number, intent: Intent): void {
     this.now = now;
-    const s = JSON.stringify(intent);
-    // Every 0.5 s even unchanged, so the trip there and back stays timed.
-    if (s !== this.said || now - this.saidAt > Math.min(KEEP, 0.5)) (this.sock.send(this.lead, { t: 'in', i: intent, at: now }), (this.said = s), (this.saidAt = now));
+    const i = { ...intent, mx: r2(intent.mx), my: r2(intent.my), ax: r2(intent.ax), ay: r2(intent.ay) }, s = JSON.stringify(i), b = buttons(i);
+    // A button at once (urgent); the stick and aim a few times a second; every KEEP s regardless (the
+    // leader counts me as still here, and the trip there and back stays timed).
+    const press = b !== this.saidButtons;
+    if (press || (s !== this.said && now - this.saidAt >= STICK_EVERY) || now - this.saidAt > KEEP) {
+      this.sock.send(this.lead, { t: 'in', i, at: now }, press);
+      (this.said = s), (this.saidButtons = b), (this.saidAt = now);
+    }
     // No room yet, or no hero of mine in it (away over a minute, a locked phone): keep saying hello
     // (the leader may still be getting there, or let my hero go and will bring it back).
     if ((!this.room || this.missing) && now - this.helloAt > 2) this.hello();
@@ -432,13 +452,14 @@ export class CoopGuest {
    */
   shouldTake(now: number): boolean {
     if (!this.save || !this.room) return false;
+    if (this.cut) return true;
     const line = [this.myId, ...this.room.heroes.map((h) => h.id).filter((id) => id !== 'me' && id !== '@lead' && id !== 'squire')].sort();
     return this.quiet(now) > TAKE + line.indexOf(this.myId) * TAKE_NEXT;
   }
 
   /** The leader has gone quiet too long (or never came): the job is lost. */
   lost(now: number): boolean {
-    return this.quiet(now) > LOST + TAKE_NEXT * 3;
+    return (this.cut && !this.save) || this.quiet(now) > LOST + TAKE_NEXT * 3;
   }
 
   /** The leader's events since last asked (effects and sounds). */

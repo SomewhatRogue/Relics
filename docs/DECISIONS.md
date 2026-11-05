@@ -154,6 +154,88 @@ wall; no jump dry, jumps in water and in the rain, 1.5x, once a cast; the stream
 next goblin, goes off without taps and slows the walk; the stream's balance; the bolt's first goblin and
 the perfect's line), `spellbook.test.ts`, `elements.test.ts`, `magic.test.ts`, `skills.test.ts`,
 `kitwords.test.ts` updated.
+## 2026-11-04: Redis on a budget: the town quiet, parties batched and brought together, a meter, and a clean fallback when the month is used up (Kyle; Claude Opus 5.5)
+
+Kyle's Upstash database showed 345K of the free plan's 500K commands a month after a few sessions, and
+he asked how he'd know if he hit the limit with friends. Every player on the site sits in the shared town
+automatically, so steady costs (a tab left open, a phone in a pocket) count as much as play.
+
+**Measured first** (`scripts/budget-online.cjs`): a real redis-server, the dev server's two relay
+instances on it, `/api/world`, `/api/save` and `/api/owed` on it too, each page pinned to an instance in
+turn (`?relay=.../api/room/i0`, so a party really is split), real Chromium driven for 60 s a scenario, and
+Redis's own `INFO commandstats` as the meter. Commands a minute:
+
+| Scenario | Before | After |
+|---|---|---|
+| One player idle in town | 30 | 2 |
+| An idle tab past 3 minutes | 30 | 0 |
+| A hidden tab | 4 | 0 |
+| Two players walking about town, on two instances | 218 | 81 |
+| Party of 2 on a job, split, the friend hops to the leader | 3,843 | 26 |
+| Party of 2 on a job, split and can't hop (worst case) | 3,843 | 1,162 |
+| Party of 4 on the Barrowfields, split, friends hop | 4,976 | 26 |
+| Party of 4 on the Barrowfields, split and can't hop | 4,976 | 1,216 |
+| A solo job on the site | 0 | 0 (the window's 2 a minute were the instances' meters adding up the scenario before) |
+
+An hour: a tab left in town idle, 1,800 before and about 6 after (3 minutes as an idle player, then
+nothing); a hidden tab, 240 before and about 7 after (a minute, then its goodbye); an hour of 4-player
+Barrowfields, 299K before (1.7 hours of play would spend the month) and 1.6K after when the friends land
+beside the leader (over 300 hours), 73K (about 7 hours) if they can't. (The 4-page runs ran at 13 to 19 fps here;
+real phones at 60 send more, so the real "before" was worse.) What the before was made of: each friend's
+input on every frame the mouse or stick moved, the leader's patches 15 to 20 a second, each one PUBLISH
+once split; a hosted room's touch (SET + EXPIRE every 2 s, 60 a minute); each player in town looking at the
+world every 30 s, 15 commands a look (a sorted set per stat).
+
+- **Batches** (`api/_outbox.ts`): what an instance has for the bus waits up to 0.1 s and goes as one
+  PUBLISH, in order, never over 192K characters; the first after a quiet spell goes at once, and a message
+  marked urgent (`u: 1`: a button pressed) takes the queue with it at once, so a parry is never held. The
+  receiving side unpacks in order. One message alone goes as itself.
+- **A friend far from the leader hops** (`client/relay.ts` HOPS, `far` from the relay): a friend whose
+  socket landed on another instance than the leader's reconnects, up to 3 times, swapped like a rotation,
+  to land beside them; a party together costs Redis only its touch. Found on the way: PUBLISH's count
+  marked the room shared under '?', and the other instance's 'away' didn't clear it, so the room stayed on
+  the bus 40 s after the hop (`api/_presence.ts`). Whether Vercel spreads a reconnect over its instances is
+  for the live logs to show (each join logs its instance).
+- **The touch** (`api/_relay.ts`): liveness is judged only by the seen time, so only it is written, one
+  SET at most every 7/16 of the stale time (3.5 s of 8; a host saying only its 4 s heartbeat is written on
+  each, never more than ~4 s old); the claim keeps 15 minutes and is refreshed by one EXPIRE every 5. A
+  live host is still never taken for gone, a dead one still is after 8 s.
+- **The town** (`client/townfolk.ts`, `client/reckon.ts`): nothing sent with nobody else in town; dead
+  reckoning (each word carries a velocity, the others carry the figure on, a word again only on a start,
+  stop, turn or half a tile of drift, at most 5 a second); still, nothing but a word every 2 minutes (in
+  case a goodbye went missing; gone after 5 silent minutes, else on the relay's `left`); a socket swapped
+  in every 4 minutes doesn't say `hi` again (that drew an answer from everyone). Hidden a minute, or
+  untouched 3 minutes and not in a party, the tab leaves the town's room and comes back at a look or a
+  touch. The world is looked at every minute, not while idle.
+- **A friend's input** (`client/coop.ts`): a button at once and urgent, the stick and aim at most 10 a
+  second, rounded to hundredths, and every 2 s regardless (it was every 0.5 s). Presses are counted, so
+  none is lost.
+- **The world** (`api/_world.ts`): the Roll kept as one value beside the world; a look is one MGET, and an
+  instance answers looks from what it read in the last 30 s. **Owed** (`api/_owed.ts`): one HSET a member,
+  pipelined (no MULTI/EXEC), an EXPIRE only for a job new to that hero, written every 15 s (was 4).
+- **A solo game or the one-file build never touches Redis**: no socket on a job alone (the town's closes);
+  the world is told of a finished run once.
+- **The meter** (`api/_meter.ts`): every instance counts its commands by kind (a counting decorator on the
+  relay's backend, by hand in the world, save and owed stores) and adds them to `rl:meter:YYYY-MM` with one
+  INCRBY that counts itself, at most once a minute and only once 200 have built up or 15 minutes have
+  passed (under 1% of the budget: 1 in 201, or 4 an hour for an almost idle instance). `/api/room?meter=1`
+  answers the month's total and the instance's own; the settings box shows "Online this month: 12,300 of
+  500,000" (`client/netline.ts`).
+- **The month used up**: Upstash's "max requests limit exceeded" (or any "limit exceeded") on any command
+  trips the relay: every player gets `{t:'full'}` and a close with 4429, new sockets are refused without
+  trying Redis for 10 minutes, and a plain GET answers 503 `{full: true}`. The client stops reconnecting,
+  plays on alone (out of the town's room, no parties; leading a job, the friends are let go; following
+  one, it takes the job on from the leader's last whole job), and says once: "Online is full this month.
+  You're playing on your own for now." The world, saves and owed already fall back to this device.
+- **Tests**: `tests/relaybudget.test.ts` (batches in order with nothing lost and under the limit, a tenth
+  as many PUBLISHes; urgent goes at once; `far`; a hop leaves the leader's instance quiet; the slower touch
+  keeps a heartbeat-only host and still lets a frozen one go; the limit refusal, at once and mid-game; the
+  meter's counts and its own INCRBY), `tests/reckon.test.ts`, and a step in `scripts/town-online.cjs` (the
+  dev server's `/__spend` makes Redis refuse as Upstash does: Kyle is told, leaves the town's room, and
+  plays a job alone).
+- Open: the two new lines through the lore keeper and line editor (no agents were at hand). A town split
+  over two instances still costs about 80 a minute while two players walk about; a town hop (to the
+  instance with most of the town) would be next if the meter shows it matters.
 
 ## 2026-11-04: the element is the Mage's spellbook; switching gets its own button; GRASP (Kyle; Claude Opus 5.5)
 

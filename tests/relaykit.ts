@@ -7,13 +7,13 @@ import { Relay, type Backend } from '../api/_relay';
 type Msg = { t: string; role?: string; host?: string; id?: string; from?: string; d?: unknown };
 export const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-export async function instance(backend: Backend, staleMs = 600): Promise<{ port: number; close: () => void }> {
+export async function instance(backend: Backend, staleMs = 600): Promise<{ port: number; close: () => void; relay: Relay }> {
   const relay = new Relay(backend, { staleMs });
   const server = http.createServer();
   const wss = new WebSocketServer({ server });
   wss.on('connection', (ws, req) => void relay.attach(ws, new URL(req.url ?? '/', 'http://x')));
   await new Promise<void>((r) => server.listen(0, '127.0.0.1', r));
-  return { port: (server.address() as AddressInfo).port, close: () => (wss.clients.forEach((c) => c.terminate()), server.close()) };
+  return { port: (server.address() as AddressInfo).port, relay, close: () => (wss.clients.forEach((c) => c.terminate()), server.close()) };
 }
 
 /** A player's socket. Like the game, it says something as soon as it's told it hosts (unless `silent`: a crashed page). */

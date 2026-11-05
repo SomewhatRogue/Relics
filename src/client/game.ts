@@ -42,7 +42,7 @@ import { forgetSession, keepSession, keptJob, type Session } from './session';
 import { bankEnd, bankJob, banked, soloJob, unbank } from './jobbank';
 import { dropOwed, owedTo } from './owed';
 import { dressKit, forgetTaken, keepKit } from './keepkit';
-import { ONLINE } from './relay';
+import { FULL, ONLINE } from './relay';
 import { townLight } from '../shared/daylight';
 import { onClock, townPhase } from './townclock';
 import { Followers } from './followers';
@@ -700,6 +700,20 @@ export class Game {
     if (f) (f.gone = true), this.dropFriend(g.lead);
   }
 
+  /**
+   * Online play went off (the month's Redis budget is used up): no parties gathering, and whatever job
+   * is on goes on in this browser alone, the room running here as in the one-file build. Leading: the
+   * friends are let go. Following: this page takes the job on from the leader's last whole job (or,
+   * with none heard yet, the job is lost, as when a leader never comes).
+   */
+  playAlone(): void {
+    this.parties?.quit();
+    this.parties = null;
+    this.holdUntil = 0;
+    this.coop?.cutOff();
+    if (this.remote) this.remote.cut = true;
+  }
+
   /** Run the party's job here from a whole-job save, and lead it (if the relay agrees: else follow). */
   private leadFrom(code: string, o: JobSave, want: 'host' | 'take'): void {
     this.remote = null;
@@ -723,6 +737,8 @@ export class Game {
     this.coop = new CoopHost(code, this.profile.id, this.profile.name, this, o.members, want);
     keepSession({ code, lead: '', job: o.run.job, hero: this.profile.id });
     this.stepDown(o.run.job);
+    // (Taken on because online play went off: nobody's coming.)
+    if (FULL) this.playAlone();
   }
 
   private stepRemote(): FightEvent[] {

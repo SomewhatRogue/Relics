@@ -37,9 +37,9 @@ export class WorldLink {
     return this.group;
   }
 
-  /** Look at the world (at most every 30 s unless `force`). */
+  /** Look at the world (at most every minute unless `force`: each look may be a Redis command). */
   async refresh(force = false): Promise<void> {
-    if (!force && Date.now() - this.at < 30000) return;
+    if (!force && Date.now() - this.at < 60_000) return;
     this.at = Date.now();
     const got = await this.call(`/api/world?g=${encodeURIComponent(this.group)}`);
     if (got) this.take(got);

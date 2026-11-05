@@ -6,6 +6,7 @@
  */
 import { CLASS_ORDER } from '../src/shared/weapons.js';
 import { HERO_SLOTS } from '../src/shared/progress.js';
+import { Meter } from './_meter.js';
 
 export interface Kept { save: string; token: string; at: number }
 /** A push: done (the new `at`), or why not. */
@@ -76,21 +77,28 @@ redis.call('HSET', KEYS[1], 'save', ARGV[3], 'at', string.format('%d', at))
 redis.call('EXPIRE', KEYS[1], ARGV[5])
 return at`;
 
-export async function redisSaveStore(url: string): Promise<SaveStore> {
+/** Upstash counts a script as one command and one more for each redis.call it makes (at most). */
+const CALLS = { make: 4, pull: 3, push: 4 };
+
+export async function redisSaveStore(url: string, meter = new Meter()): Promise<SaveStore> {
   const { createClient } = await import('redis');
   const r = createClient({ url });
   r.on('error', (e) => console.log(JSON.stringify({ save: 1, ev: 'err', msg: String(e?.message ?? e) })));
   await r.connect();
+  meter.attach({ incrBy: (k, n) => r.incrBy(k, n), expire: (k, t) => r.expire(k, t) });
   const year = String(YEAR_S);
   return {
     async make(code, k) {
+      meter.add('eval', CALLS.make);
       return (await r.eval(MAKE, { keys: [keyOf(code)], arguments: [k.save, k.token, String(k.at), year] })) === 1;
     },
     async pull(code) {
+      meter.add('eval', CALLS.pull);
       const v = (await r.eval(PULL, { keys: [keyOf(code)], arguments: [year] })) as (string | null)[];
       return v?.[0] ? { save: v[0], token: v[1] ?? '', at: Number(v[2]) || 0 } : null;
     },
     async push(code, token, base, save, at) {
+      meter.add('eval', CALLS.push);
       const n = Number(await r.eval(PUSH, { keys: [keyOf(code)], arguments: [token, String(base), save, String(at), year] }));
       return n === -1 ? 'missing' : n === -2 ? 'token' : n === -3 ? 'stale' : n;
     },
