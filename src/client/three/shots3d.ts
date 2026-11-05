@@ -14,7 +14,7 @@ import { part, pivot } from './rig';
 const steel = M(0xd8dce4), shaft = M(0x6b4a2b);
 
 /** A bolt's look, as a key (rebuilt when it changes: an orb landing as a well). */
-export const boltLook = (b: Bolt) => b.kind + ':' + b.el + ':' + (b.kind === 'lodestone' ? b.state : '') + (b.potion ?? '');
+export const boltLook = (b: Bolt) => b.kind + ':' + b.el + ':' + (b.kind === 'lodestone' ? b.state : '') + (b.potion ?? '') + (b.burst ? ':big' : '');
 
 export function makeBolt(b: Bolt): THREE.Group {
   const root = new THREE.Group(), g = pivot(root, 0, 0, 0), el = G(hex(EL_COL[b.el]), 0);
@@ -33,10 +33,15 @@ export function makeBolt(b: Bolt): THREE.Group {
       part(g, 0.025, 0.025, 0.26, M(0xc8b890), 0, 0, 0), part(g, 0.05, 0.05, 0.06, G(0x9be040, 0.4), 0, 0, 0.14);
       break;
     case 'spark': {
-      // A small star of the element round a white-hot core (a held spell's, that bursts, a size up).
-      const s = b.burst ? 1.4 : 1, white = G(0xffffff);
-      part(g, 0.26 * s, 0.1 * s, 0.1 * s, el, 0, 0, 0), part(g, 0.1 * s, 0.26 * s, 0.1 * s, el, 0, 0, 0), part(g, 0.1 * s, 0.1 * s, 0.3 * s, el, 0, 0, 0);
-      part(g, 0.13 * s, 0.13 * s, 0.13 * s, white, 0, 0, 0);
+      const white = G(0xffffff);
+      if (b.burst) {
+        // A held spell: a big ball of the element with smaller ones trailing (placeBolt breathes the stretch).
+        part(g, 0.46, 0.46, 0.5, el, 0, 0, 0), part(g, 0.36, 0.36, 0.36, el, 0, 0, -0.34), part(g, 0.24, 0.24, 0.26, el, 0, 0, -0.6);
+        part(g, 0.24, 0.24, 0.24, white, 0, 0, 0.1);
+      } else {
+        // A quick cast: a bolt, narrow and long, a white spine and a bright point at the front.
+        part(g, 0.07, 0.07, 0.8, el, 0, 0, -0.1), part(g, 0.035, 0.035, 0.66, white, 0, 0, -0.04), part(g, 0.06, 0.06, 0.08, white, 0, 0, 0.3);
+      }
       break;
     }
     case 'orb':
@@ -81,7 +86,8 @@ export function placeBolt(o: THREE.Object3D, b: Bolt, lift: number): void {
   if (b.state === 'stuck') y = 0.25;
   o.position.set(b.x, lift + y, b.y);
   g.rotation.set(b.state === 'stuck' ? 0.5 : 0, Math.atan2(b.dx, b.dy), 0, 'YXZ');
-  if (b.kind === 'spark' || b.kind === 'orb') g.rotation.x = performance.now() / 120;
+  if (b.kind === 'orb') g.rotation.x = performance.now() / 120;
+  if (b.kind === 'spark' && b.burst) g.scale.set(1, 1, 1.15 + 0.2 * Math.sin(performance.now() / 33 + b.id));
 }
 
 export function makeJavelin(): THREE.Group {

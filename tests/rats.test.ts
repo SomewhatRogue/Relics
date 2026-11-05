@@ -38,7 +38,9 @@ describe('rats on the blood', () => {
     expect(rat.state).toBe('flee');
     expect(scattered).toBeGreaterThan(0);
     expect(rat.tx).toBeGreaterThan(me.x);
-    t = run(r, room, stains, 2, t);
+    // Stand on the pool so every rat on it goes (they spread a little), then give the runs time.
+    Object.assign(me, { x: 8.5, y: 7.5 });
+    t = run(r, room, stains, 5, t);
     expect(r.rats.every((x) => x.state === 'gone')).toBe(true);
     // Away again: nothing for 15 s, then the first, then the rest a beat apart.
     Object.assign(me, { x: 1.5, y: 1.5 });
