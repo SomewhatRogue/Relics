@@ -38,12 +38,12 @@ const ALL: Country[] = ['village', 'fields', 'wood', 'fen', 'rock', 'under'];
 const OPEN: Country[] = ['village', 'fields', 'wood', 'fen', 'rock'];
 
 export const WAYS: Record<WayKind, Way> = {
-  smoke: { word: 'SMOKE', tell: 'SMOKE: a house alight, someone inside. +15% pay for each one saved', piece: 'burning', countries: ['village', 'fields', 'wood', 'fen'], more: 0, pay: 0, perSaved: 0.15, treasure: 0 },
-  cries: { word: 'CRIES', tell: "CRIES: prisoners led off. Kill the guards before they're gone. +15% pay for each one saved", piece: 'prisoners', countries: ALL, more: -1, pay: 0, perSaved: 0.15, treasure: 0 },
+  smoke: { word: 'SMOKE', tell: 'SMOKE: a house catching, someone caged inside. +15% pay for each one saved', piece: 'burning', countries: ['village', 'fields', 'wood', 'fen'], more: 0, pay: 0, perSaved: 0.15, treasure: 0 },
+  cries: { word: 'CRIES', tell: 'CRIES: captives being led off. Kill both guards before they reach the way on. +15% pay for each one saved', piece: 'prisoners', countries: ALL, more: -1, pay: 0, perSaved: 0.15, treasure: 0 },
   crows: { word: 'CROWS', tell: 'CROWS: the dead, picked over. A chest and 1 more treasure', piece: 'column', countries: OPEN, more: 0, pay: 0, treasure: 1, chest: true },
   drums: { word: 'DRUMS', tell: 'DRUMS: a war band. More goblins, a chest, +25% pay and 1 more treasure', piece: 'drums', countries: ALL, more: 3, pay: 0.25, treasure: 1, chest: true },
   quiet: { word: 'QUIET', tell: 'QUIET: fewer goblins, 20% less pay', piece: 'asleep', countries: ALL, more: -3, pay: -0.2, treasure: 0 },
-  ford: { word: 'THE FORD', tell: 'THE FORD: wade across under archers. +15% pay', piece: 'wading', nodes: ['ford', 'fenford', 'flooded'], countries: ['fields', 'wood', 'fen', 'rock', 'under'], more: -1, pay: 0.15, treasure: 0 },
+  ford: { word: 'WATER', tell: 'WATER: wade across, archers on the far side. +15% pay', piece: 'wading', nodes: ['ford', 'fenford', 'flooded'], countries: ['fields', 'wood', 'fen', 'rock', 'under'], more: -1, pay: 0.15, treasure: 0 },
   webs: { word: 'WEBS', tell: 'WEBS: spider nests. A chest and 1 more treasure', piece: 'webs', countries: ['wood', 'fen', 'under'], more: -2, pay: 0, treasure: 1, chest: true },
 };
 export const WAY_KINDS = Object.keys(WAYS) as WayKind[];
@@ -52,4 +52,4 @@ export const WAY_KINDS = Object.keys(WAYS) as WayKind[];
 export const pickWay = (ways: WayKind[]) => ['Pick a way, together', ...ways.map((w) => WAYS[w].tell)].join('. ');
 
 /** Said while someone is still in a burning house (layout 4's burning scene): how to get them out. */
-export const HELD_HINT = "Someone's inside the burning house. Stand at its door to pull them out";
+export const HELD_HINT = "Someone's inside the burning house. Stand still at its door to pull them out";

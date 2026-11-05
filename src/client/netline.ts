@@ -7,8 +7,8 @@ import { FULL, ONLINE } from './relay';
 import { toast } from './partytoast';
 
 export const NETW = {
-  full: "Online is full this month. You're playing on your own for now.",
-  meter: (used: number, limit: number) => `Online this month: ${used.toLocaleString('en-US')} of ${limit.toLocaleString('en-US')}`,
+  full: "Online play is used up for this month. You're playing alone for now.",
+  meter: (used: number, limit: number) => `Online use this month: ${used.toLocaleString('en-US')} of ${limit.toLocaleString('en-US')}`,
 };
 
 /** The note, once, as online play goes off. */

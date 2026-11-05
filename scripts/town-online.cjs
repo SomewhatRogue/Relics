@@ -55,7 +55,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     await kyle.page.keyboard.down('d');
     await wait(600);
     await kyle.page.keyboard.up('d');
-    step('budget used up: Kyle is told, and out of the town room', await kyle.page.waitForFunction(() => !window.__town().open && /full this month/.test(document.querySelector('#partytoasts')?.textContent ?? ''), null, { timeout: 8000 }).then(() => true, () => false));
+    step('budget used up: Kyle is told, and out of the town room', await kyle.page.waitForFunction(() => !window.__town().open && /used up for this month/.test(document.querySelector('#partytoasts')?.textContent ?? ''), null, { timeout: 8000 }).then(() => true, () => false));
     await kyle.page.evaluate(() => window.__game.startJob(window.__game.jobs().find((j) => !j.exped)));
     await wait(1500);
     step('and plays a job on his own', await kyle.page.evaluate(() => window.__game.mode === 'run' && window.__game.room.heroes.length >= 1 && !window.__game.coop));
