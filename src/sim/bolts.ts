@@ -6,7 +6,7 @@
  */
 import { HUNGRY_FX } from './hungry';
 import { collide } from '../shared/arena';
-import { CRIT, FLINCH, HERO, LODESTONE, NET, STRIKE, WEAPONS, type Augment, type Swing, type TraitId } from '../shared/tuning';
+import { CRIT, FLINCH, HERO, LODESTONE, NET, WEAPONS, type Augment, type Swing, type TraitId } from '../shared/tuning';
 import { shove } from './bodies';
 import { damage, frozen, isDead, isDummy } from './damage';
 import { backstabOf, fromBehind, rogueShot } from './backshot';
@@ -77,8 +77,7 @@ export function lobLodestone(h: Hero, dist: number, el: Augment): Bolt {
 
 /** Everything within the bolt's burst of (x, y) is hit and thrown outward (and stunned, by a smite). */
 export function blast(w: World, b: Bolt, x: number, y: number): void {
-  // (A Mage's lightning strike says nothing here: its fall is its own event, sim/holds.ts.)
-  if (b.kind !== 'strike') w.ev.push(b.kind === 'smite' ? { k: 'smite', x, y } : { k: 'burst', x, y, r: b.burst, el: b.el });
+  w.ev.push(b.kind === 'smite' ? { k: 'smite', x, y } : { k: 'burst', x, y, r: b.burst, el: b.el });
   blastProps(x, y, b.burst, b.dmg, b.knock, w);
   blastBlocks(w, x, y, b.burst, b.dmg, b.el, b.potion === 'oil');
   // A relic's blast spares the freed and every friend (they're told so).
@@ -91,7 +90,7 @@ export function blast(w: World, b: Bolt, x: number, y: number): void {
     if (damage(e, b.dmg, w.now, w.ev, { heavy: true, flinch: 0.5, mult: true, brutal: b.traits.includes('brutal'), how: 'burst', dx: e.x - x, dy: e.y - y, src: b.kind, el: b.el })) continue;
     if (e.act !== 'pinned') shove(e, d > 0.05 ? (e.x - x) / d : b.dx, d > 0.05 ? (e.y - y) / d : b.dy, b.knock, e.weight);
     interrupt(e, winding, !!b.breaks, b.owner, w.now, w.ev);
-    if (b.stun && e.act !== 'pinned' && !(b.relic && e.weight > 1) && stun(e, b.owner, w.now, b.stun * (b.kind === 'strike' && e.kind === 'butcher' ? STRIKE.big : 1), w.ev) && b.kind === 'strike') w.ev.push({ k: 'stunned', x: e.x, y: e.y });
+    if (b.stun && e.act !== 'pinned' && !(b.relic && e.weight > 1)) stun(e, b.owner, w.now, b.stun, w.ev);
     if (wasFrozen && b.knock >= 8) shatter(e, w.now, w.ev);
     else shotElement(w, b, e);
   }
@@ -157,9 +156,8 @@ function strike(w: World, b: Bolt, e: Enemy): boolean {
 export function stepBolt(b: Bolt, w: World, dt: number): boolean {
   if (b.state === 'stuck') return (b.life -= dt) > 0;
   if (b.state === 'well') return pull(b, w, dt);
-  if (b.kind === 'smite' || b.kind === 'strike') {
+  if (b.kind === 'smite') {
     if ((b.t += dt) < b.flight) return true;
-    if (b.kind === 'strike') w.ev.push({ k: 'spell', x: b.x, y: b.y, dx: 0, dy: 1, el: 'storm', what: 'strike', r: b.burst, big: !!b.perfect });
     blast(w, b, b.x, b.y);
     return false;
   }

@@ -1,39 +1,32 @@
 /**
  * A Mage's held spell, let go (numbers: shared/spellbook.ts). The element decides what it is and the
- * kit where it goes: the wand at range (a fireball, a cold blast, a lightning strike where you aim), the
+ * kit where it goes: the wand at range (a fireball, a cold blast, a lightning bolt from the hand), the
  * staff all round you (a ring of fire, a frost nova, a charged ring), the spellblade in close (a burning
  * lunge, a shatter, a lightning dash). Let go on the white flash, each is its bigger self. Judged here,
  * into the room's own lists (bolts, zones), so a guest sees what was judged.
  */
-import { FIREBALL, STAFF_RING, STRIKE, LUNGE, DASH, type MageKit, type Swing, type TraitId } from '../shared/tuning';
-import { shoot, smite } from './bolts';
+import { FIREBALL, STAFF_RING, LUNGE, DASH, type MageKit, type Swing, type TraitId } from '../shared/tuning';
+import { shoot } from './bolts';
 import { castElement } from './channel';
 import type { World } from './elements';
 import { coldBlast, nova, shatterBlow } from './frostholds';
 import { burstMult } from './knacks';
 import { startRush } from './rush';
 import { flameRing, stormRing } from './staffrings';
+import { thunderbolt } from './thunderbolt';
 import type { Bolt, Hero, Zone } from './types';
 
 /** Where a hold's things go, and how far the hero aims (to the mouse, else the goblin faced, else `fallback`). */
 export interface HoldRoom { zones: Zone[]; bolts: Bolt[]; aim: (range: number, fallback: number) => number }
 
-/** The wand's: a fireball, a cold blast, or lightning called down where you aim. */
+/** The wand's: a fireball, a cold blast, or a lightning bolt from the hand. */
 function wand(h: Hero, s: Swing, mult: number, r: HoldRoom, w: World, traits: TraitId[]): void {
   const el = castElement(h), big = h.perfect;
-  // (WIDE BURST widens the fireball and the strike as it does any burst: sim/room.ts.)
+  // (WIDE BURST widens the fireball as it does any burst: sim/room.ts.)
   if (el === 'frost') return coldBlast(h, s, mult, w, burstMult(h));
-  if (el === 'fire') {
-    r.bolts.push(shoot(h, { ...s, burst: big ? FIREBALL.big : FIREBALL.burst }, 'fire', mult, traits));
-    return void w.ev.push({ k: 'shoot', x: h.x, y: h.y, dx: h.fx, dy: h.fy, kind: 'spark', el });
-  }
-  const at = { ...s, dmg: Math.round(s.dmg * STRIKE.dmg), burst: big ? STRIKE.bigRadius : STRIKE.radius, stun: big ? STRIKE.bigStun : STRIKE.stun };
-  const b = smite(h, at, Math.min(STRIKE.range, r.aim(STRIKE.range, STRIKE.fallback)), mult, traits, STRIKE.delay);
-  // A strike lands where it was marked and goes no further (storm trades reach for the stun). Its stun
-  // breaks off whatever a goblin was doing, striped blows too, so it needs no interrupt of its own (a
-  // second stop from the same hero would only be shrugged off: sim/stuns.ts).
-  r.bolts.push(Object.assign(b, { kind: 'strike' as const, el, jumps: 0, perfect: big, owner: h.id }));
-  w.ev.push({ k: 'shoot', x: h.x, y: h.y, dx: h.fx, dy: h.fy, kind: 'strike', el });
+  if (el === 'storm') return thunderbolt(h, s, mult, w);
+  r.bolts.push(shoot(h, { ...s, burst: big ? FIREBALL.big : FIREBALL.burst }, 'fire', mult, traits));
+  w.ev.push({ k: 'shoot', x: h.x, y: h.y, dx: h.fx, dy: h.fy, kind: 'spark', el });
 }
 
 /** The staff's: round where you stand, its size by the hold (the biggest on the flash). */

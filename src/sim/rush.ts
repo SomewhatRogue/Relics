@@ -1,21 +1,21 @@
 /**
  * The spellblade's held spells that carry the Mage (numbers: shared/spellbook.ts LUNGE, DASH): fire a
  * burning lunge, storm a lightning dash through a line of goblins (untouchable while it lasts:
- * sim/combat.ts). Both run in the hero's act 'bash' (so both views draw the run as the shield charge's),
+ * sim/combat.ts; a wet one it zaps jumps it on, each wet one once a dash). Both run in the hero's act 'bash' (so both views draw the run as the shield charge's),
  * swept so a wall stops them, each goblin within reach of the path struck once. Kept on the hero
  * (`rush`, `rollDx`, `rollDy`, `hitIds`), so a guest sees the same.
  */
 import { DASH, HERO, LUNGE } from '../shared/tuning';
 import { travel } from '../shared/sweep';
 import { damage, isDead } from './damage';
-import { afflict, type World } from './elements';
+import { afflict, newCast, type World } from './elements';
 import { stun } from './stuns';
 import type { Hero } from './types';
 
 /** Off along where the hero faces: `len` tiles, `dmg` to each goblin on the way. */
 export function startRush(h: Hero, el: 'fire' | 'storm', len: number, dmg: number, w: World): void {
   const l = Math.hypot(h.fx, h.fy) || 1;
-  Object.assign(h, { act: 'bash', actT: 0, rollDx: h.fx / l, rollDy: h.fy / l, kvx: 0, kvy: 0, hitIds: [], rush: { el, len, dmg, big: h.perfect } });
+  Object.assign(h, { act: 'bash', actT: 0, rollDx: h.fx / l, rollDy: h.fy / l, kvx: 0, kvy: 0, hitIds: [], rush: { el, len, dmg, big: h.perfect, cast: newCast() } });
   w.ev.push({ k: 'spell', x: h.x, y: h.y, dx: h.rollDx, dy: h.rollDy, el, what: el === 'fire' ? 'lunge' : 'dash', r: len, big: h.perfect });
 }
 
@@ -40,7 +40,7 @@ export function stepRush(h: Hero, w: World, dt: number): void {
     }
     w.ev.push({ k: 'shock', x: h.x, y: h.y, x2: e.x, y2: e.y });
     if (damage(e, r.dmg, w.now, w.ev, { flinch: r.big ? 0 : DASH.flinch, mult: true, el: 'storm', src: 'spark', dx: h.rollDx, dy: h.rollDy })) continue;
-    afflict(w, e, 'storm', r.dmg, 0);
+    afflict(w, e, 'storm', r.dmg, { cast: r.cast });
     if (r.big && e.act !== 'pinned') stun(e, h.id, w.now, DASH.bigStun, w.ev);
   }
   const blocked = Math.hypot(h.x - x0, h.y - y0) < v * dt * 0.3;

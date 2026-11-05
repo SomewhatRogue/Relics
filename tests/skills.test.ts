@@ -130,8 +130,10 @@ describe('three skills a class', () => {
     expect(room.zones.some((z) => z.kind === 'fire')).toBe(false);
   });
 
-  it('STORM TETHER: strikes the goblin faced again and again, and jumps to one beside it; snaps when far', () => {
+  it('STORM TETHER: strikes the goblin faced again and again, and jumps to a wet one beside it; snaps when far', () => {
     const { room, h, s, butcher } = setup('MAGE', 'tether');
+    // (Out in the rain, so the one beside it is wet: storm jumps only between wet goblins.)
+    room.map = { ...room.map, theme: { ...room.map.theme, rain: 0.5 } };
     Object.assign(s, { x: 9, y: 5, act: 'stunned', actDur: 99 });
     Object.assign(butcher, { x: 10.5, y: 5, act: 'stunned', actDur: 99 });
     fire(room, { ay: -1 });

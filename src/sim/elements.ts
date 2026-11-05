@@ -1,10 +1,10 @@
 /**
- * Magic augments on goblins. Fire burns and spreads by touch; frost chills, then freezes solid;
- * storm arcs to the nearest goblins and to javelins stuck in bodies. They play off each other:
- * fire meets frost as a steam burst, storm or a heavy blow shatters the frozen, storm on the
- * burning flares outward.
+ * Magic augments on goblins. Fire burns, and a burning goblin sets those near it alight when it dies;
+ * frost chills, then freezes solid; storm jumps between wet goblins (sim/wet.ts) and arcs to javelins
+ * stuck in bodies. They play off each other: fire meets frost as a steam burst, storm or a heavy blow
+ * shatters the frozen, storm on the burning flares outward.
  */
-import { BURN, FLARE, FROST, SHATTER, SPIDER, STEAM, STORM, type Augment } from '../shared/tuning';
+import { BURN, FLARE, FROST, SHATTER, SPIDER, STEAM, STORM, STREAM, type Augment } from '../shared/tuning';
 import { shove } from './bodies';
 import { clearElements, damage, frozen, isDummy } from './damage';
 import type { Rng } from '../shared/rng';
@@ -14,6 +14,7 @@ import { stun } from './stuns';
 import { currentMap } from '../shared/arena';
 import { burnFor, spreadFor } from '../shared/sky';
 import { burnLonger, rimeUp } from './techmage';
+import { wet } from './wet';
 
 /** Everything an element can reach, for one tick. */
 export interface World {
@@ -44,8 +45,16 @@ function ignite(e: Enemy, now: number, ev: FightEvent[]): void {
   e.burnUntil = now + BURN.time * (tough ? BURN.tough : 1) * burnFor(currentMap().theme);
 }
 
-/** An element lands on a goblin with a blow of `n` damage; storm jumps on to `jumps` more (STORM.chains). */
-export function afflict(w: World, e: Enemy, el: Augment, n: number, jumps: number = STORM.chains): void {
+let casts = 0;
+/** A new storm cast: a wet goblin is jumped to at most once a cast (one tap, one spell, one pulse). */
+export const newCast = () => ++casts;
+
+/** How storm lands: `cast` the spell it belongs to (a new one when left out); `jump` what each jump deals,
+ *  as a tick (the stream's, already counted wet), else STORM.share of the blow. */
+export interface StormHow { cast?: number; jump?: number }
+
+/** An element lands on a goblin with a blow of `n` damage (storm: jumping as `how` says). */
+export function afflict(w: World, e: Enemy, el: Augment, n: number, how: StormHow = {}): void {
   if (!el || e.act === 'dead') return;
   const { now, ev } = w;
   if (el === 'fire') {
@@ -66,7 +75,7 @@ export function afflict(w: World, e: Enemy, el: Augment, n: number, jumps: numbe
       e.chillUntil = now + FROST.chill;
       ev.push({ k: 'chill', x: e.x, y: e.y });
     }
-  } else zap(w, e, n, jumps);
+  } else zap(w, e, n, how.cast ?? newCast(), how.jump);
 }
 
 /** Frost that only slows (a Mage's tap, never a freeze on its own): fire on the chilled is steam, as ever.
@@ -78,25 +87,32 @@ export function chill(w: World, e: Enemy, share = 1): void {
   e.chillUntil = Math.max(e.chillUntil, w.now + FROST.chill);
 }
 
-/** Storm on one goblin: shatters the frozen, flares the burning, and (once) arcs on to `chains` more. */
-function zap(w: World, e: Enemy, n: number, chains: number): void {
+/** Storm on one goblin: shatters the frozen, flares the burning; wet, it jumps to every other wet goblin
+ *  within STORM.reach not yet reached by `cast`. A javelin in a body draws it in (not a tick's). */
+function zap(w: World, e: Enemy, n: number, cast: number, jump?: number): void {
   const { now, ev } = w;
+  e.jolted = cast;
   if (frozen(e, now)) shatter(e, now, ev);
   else if (burning(e, now)) flare(w, e);
-  if (chains <= 0) return;
-  const near = w.enemies
-    .filter((o) => o !== e && o.act !== 'dead' && dist(o, e) <= STORM.reach)
-    .sort((a, b) => dist(a, e) - dist(b, e))
-    .slice(0, chains);
+  const near = wet(e) ? w.enemies.filter((o) => o !== e && o.act !== 'dead' && o.act !== 'carried' && o.jolted !== cast && dist(o, e) <= STORM.reach && wet(o)) : [];
   const rods: Enemy[] = [];
-  for (const j of w.javelins) {
+  if (jump === undefined) for (const j of w.javelins) {
     const o = j.state === 'body' ? w.enemies.find((x) => x.id === j.enemy) : undefined;
-    if (o && o !== e && o.act !== 'dead' && !near.includes(o) && !rods.includes(o) && dist(o, e) <= STORM.rodReach) rods.push(o);
+    if (o && o !== e && o.act !== 'dead' && o.jolted !== cast && !near.includes(o) && !rods.includes(o) && dist(o, e) <= STORM.rodReach) rods.push(o);
   }
   for (const o of [...near, ...rods]) {
+    o.jolted = cast;
+    o.lastBy = e.lastBy;
     ev.push({ k: 'shock', x: e.x, y: e.y, x2: o.x, y2: o.y });
-    const hit = rods.includes(o) ? STORM.rodDmg : Math.max(STORM.min, Math.round(n * STORM.share));
-    if (!damage(o, hit, now, ev, { flinch: STORM.flinch, el: 'storm' })) zap(w, o, 0, 0);
+    const tick = jump !== undefined, hit = rods.includes(o) ? STORM.rodDmg : tick ? jump : Math.max(STORM.min, Math.round(n * STORM.share));
+    if (hit <= 0) continue;
+    // (A jump is storm, so a wet goblin takes it STORM.wet harder: sim/damage.ts; a tick's is counted already.)
+    const was = o.hitAt;
+    if (damage(o, hit, now, ev, { flinch: tick ? 0 : STORM.flinch, el: 'storm', src: 'spark', tick })) continue;
+    // (A stream's tick flickers it white now and then, not every tick: sim/stream.ts.)
+    if (tick && now - was < STREAM.flicker) o.hitAt = was;
+    if (frozen(o, now)) shatter(o, now, ev);
+    else if (burning(o, now)) flare(w, o);
   }
 }
 
@@ -133,21 +149,37 @@ function flare(w: World, e: Enemy): void {
   }
 }
 
-/** Burns tick and spread by touch. */
+/** Burns tick; a burning goblin that dies passes its fire to those within BURN.spread (and no sooner). */
 export function stepElements(w: World): void {
-  const { now, ev } = w, jump = BURN.spread * spreadFor(currentMap().theme);
+  const { now, ev } = w;
   for (const e of w.enemies) {
-    if (e.act === 'dead' || !burning(e, now)) continue;
-    // A nest set alight burns down on its own clock (sim/torch.ts), not by the tick.
-    if (now >= e.burnNext && !e.ashAt) {
+    if (e.act === 'dead') {
+      if (e.embers) passFire(w, e);
+      continue;
+    }
+    if (!burning(e, now)) continue;
+    // A nest set alight is the world's fire, not a goblin's: it burns down on its own clock (sim/torch.ts)
+    // and the spiders on it catch by touch, as ever.
+    if (e.ashAt) spread(w, e);
+    else if (now >= e.burnNext) {
       e.burnNext = now + BURN.every;
-      if (damage(e, BURN.dmg, now, ev, { tick: true, el: 'fire' })) continue;
+      damage(e, BURN.dmg, now, ev, { tick: true, el: 'fire' });
     }
-    for (const o of w.enemies) {
-      if (o === e || o.act === 'dead' || burning(o, now) || frozen(o, now)) continue;
-      // Spiders packed together go up like tinder.
-      // In the rain it jumps only to one nearly touching.
-      if (dist(o, e) <= o.radius + e.radius + jump + (o.kind === 'spider' ? SPIDER.spread : 0)) ignite(o, now, ev);
-    }
+  }
+}
+
+/** A goblin died burning (sim/damage.ts kill): the goblins near its body catch. */
+function passFire(w: World, e: Enemy): void {
+  e.embers = false;
+  spread(w, e);
+}
+
+/** Those within BURN.spread of `e` catch; in the rain it reaches only one nearly touching (shared/sky.ts). */
+function spread(w: World, e: Enemy): void {
+  const jump = BURN.spread * spreadFor(currentMap().theme);
+  for (const o of w.enemies) {
+    if (o === e || o.act === 'dead' || burning(o, w.now) || frozen(o, w.now)) continue;
+    // Spiders packed together go up like tinder.
+    if (dist(o, e) <= o.radius + e.radius + jump + (o.kind === 'spider' ? SPIDER.spread : 0)) ignite(o, w.now, w.ev);
   }
 }

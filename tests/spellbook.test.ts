@@ -1,6 +1,6 @@
 /** The Mage's spellbook (shared/spellbook.ts, sim/holds.ts and friends): each element's tap and hold on each kit, and their balance. */
 import { describe, expect, it } from 'vitest';
-import { COLD_BLAST, DASH, FLAME_RING, HERO, LUNGE, MAGE_KITS, SHATTER_BLOW, STAFF_RING, STRIKE, STORM_RING, TICK, type Element, type MageKit } from '../src/shared/tuning';
+import { COLD_BLAST, DASH, FLAME_RING, HERO, LUNGE, MAGE_KITS, SHATTER_BLOW, STAFF_RING, STORM_RING, TICK, type Element, type MageKit } from '../src/shared/tuning';
 import { frozen } from '../src/sim/damage';
 import { burning, chilled } from '../src/sim/elements';
 import type { FightEvent, Zone } from '../src/sim/types';
@@ -44,27 +44,25 @@ describe('the wand', () => {
     expect(lost(b.e)).toBe(0);
   });
 
-  it('storm: an arc that jumps on to two more goblins', () => {
-    const a = mageArena('wand', [[9, 5], [10, 4.5], [8, 4.5], [9, 3.5]], 'storm');
-    a.tap(0.8);
-    expect(lost(a.es[0])).toBeGreaterThan(0);
-    expect(a.es.slice(1).filter((e) => lost(e) > 0).length).toBe(2);
+  it('storm: a stream on the goblin in front, no bolt; dry, it jumps nowhere', () => {
+    const a = mageArena('wand', [[9, 6], [10, 5.5], [8, 5.5]], 'storm');
+    const ev = a.tap(0.3);
+    expect(a.room.bolts.length).toBe(0);
+    expect(ev.some((x) => x.k === 'shoot')).toBe(false);
+    expect(a.h.stream?.id).toBe(a.e.id);
+    expect(lost(a.e)).toBeGreaterThan(0);
+    expect(a.es.slice(1).every((e) => lost(e) === 0)).toBe(true);
   });
 
-  it('storm held: lightning where you aim, a beat later, in a red mark; it stuns what is in it and goes no further', () => {
-    const a = mageArena('wand', [[9, 4], [9, 4 - STRIKE.radius - 1.2]], 'storm');
-    // Aimed (a laptop's mouse) 5 tiles up, on the goblin.
-    a.run(PLAIN.wand, { attackSeq: 1, attack: true, ay: -5 });
-    a.run(0.12, { attackSeq: 1, attack: false, ay: -5 });
-    const b = a.room.bolts.find((x) => x.kind === 'strike')!;
-    expect(b.burst).toBeCloseTo(STRIKE.radius, 5);
-    expect(lost(a.e)).toBe(0);
-    const ev = a.run(STRIKE.delay);
-    expect(spell(ev)).toMatchObject({ what: 'strike' });
-    expect(lost(a.e)).toBeGreaterThan(0);
-    expect(ev.some((x) => x.k === "stunned")).toBe(true);
-    expect(a.e.act).toBe("stunned");
+  it('storm held: a lightning bolt from the hand, at once, into the first goblin; no mark, no stun', () => {
+    const a = mageArena('wand', [[9, 6], [9, 4]], 'storm');
+    const ev = a.loose(PLAIN.wand, 0.12);
+    expect(spell(ev)).toMatchObject({ what: 'thunderbolt', big: false });
+    expect(spell(ev)!.r).toBeCloseTo(3, 0);
+    expect(a.room.bolts.length).toBe(0);
+    expect(lost(a.es[0])).toBeGreaterThan(0);
     expect(lost(a.es[1])).toBe(0);
+    expect(a.e.act).not.toBe('stunned');
   });
 });
 
@@ -97,11 +95,11 @@ describe('the staff', () => {
     expect(b.es.map((e) => frozen(e, b.room.time))).toEqual([true, true, false]);
   });
 
-  it('storm: a crackling sweep that jumps to one more; held, a charged ring that zaps what is in it', () => {
+  it('storm: a crackling sweep that jumps nowhere dry; held, a charged ring that zaps what is in it', () => {
     const a = mageArena('staff', [[9, 7.6], [11, 7], [7, 7]], 'storm');
     a.tap(0.8);
     expect(lost(a.es[0])).toBeGreaterThan(0);
-    expect(a.es.slice(1).filter((e) => lost(e) > 0).length).toBe(1);
+    expect(a.es.slice(1).filter((e) => lost(e) > 0).length).toBe(0);
     const b = mageArena('staff', [[9, 7.5]], 'storm');
     b.loose(PLAIN.staff, 0.2);
     const was = lost(b.e);
@@ -138,10 +136,11 @@ describe('the spellblade', () => {
     expect(chilled(b.es[2], b.room.time)).toBe(true);
   });
 
-  it('storm: cuts arc to the nearest goblin; held, a dash through a line, zapping each, untouchable', () => {
+  it('storm: cuts jump nowhere dry; held, a dash through a line, zapping each, untouchable', () => {
     const a = mageArena('spellblade', [[9, 7.9], [10.5, 7.5]], 'storm');
     a.tap(0.5);
-    expect(lost(a.es[1])).toBeGreaterThan(0);
+    expect(lost(a.es[0])).toBeGreaterThan(0);
+    expect(lost(a.es[1])).toBe(0);
     const b = mageArena('spellblade', [[9, 7.6], [9.4, 6.4], [9, 5.6]], 'storm');
     b.run(PLAIN.spellblade, { attackSeq: 1, attack: true });
     const ev = b.run(0.12, { attackSeq: 1, attack: false });

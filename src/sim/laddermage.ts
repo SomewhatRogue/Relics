@@ -33,7 +33,7 @@ export function blinkBurst(h: Hero, zones: Zone[], w: World): void {
     if (damage(e, BLINK_BURST.dmg, w.now, w.ev, { el, how: 'burst', dx: e.x - x, dy: e.y - y })) continue;
     // Frost only chills (a burst is a tap's size); storm hits and stops there.
     if (el === 'frost') chill(w, e);
-    else afflict(w, e, el, BLINK_BURST.dmg, 0);
+    else afflict(w, e, el, BLINK_BURST.dmg);
   }
 }
 

@@ -2,6 +2,7 @@
  * What you hear: each event's sound (by the kit that made it and what it landed on), goblins talking
  * as they come, fires crackling, doors, and the music for where you are and how bad it's getting.
  */
+import { streamSound } from './streamsound';
 import { chestSound } from './sfx';
 import { mageTapSound } from './magesfx';
 import { spellSound } from './spellsound';
@@ -181,6 +182,8 @@ export class Soundscape {
   frame(g: Game, now: number): void {
     const room = g.room, me = g.hero;
     this.me = me;
+    // A wand's storm stream crackles on while it's on (streamsound.ts).
+    streamSound(room, me, now);
     if (g.outside !== this.wasInside) {
       if (g.outside || this.wasInside) woodSounds.door();
       this.wasInside = g.outside;

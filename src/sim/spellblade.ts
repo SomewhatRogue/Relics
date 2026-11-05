@@ -7,7 +7,7 @@
 import { WEAPONS, type Swing } from '../shared/tuning';
 import { castElement } from './channel';
 import { isDead } from './damage';
-import type { World } from './elements';
+import { newCast, type World } from './elements';
 import { buildCharge } from './spells';
 import { tapElement } from './spellbook';
 import type { Enemy, FightEvent, Hero } from './types';
@@ -16,6 +16,8 @@ const mageCut = (h: Hero, s: Swing) => !!s.slash || (!!WEAPONS[h.weapon]?.spellb
 
 /** A Mage's melee tap at its moment of release: the staff's slash shows its element. True if it was one. */
 export function looseBlade(h: Hero, s: Swing, w: World): boolean {
+  // Each swing is one storm cast: a wet goblin is jumped to once a swing.
+  if (s.slash || (WEAPONS[h.weapon]?.spellblade && !h.heavy)) h.swingCast = newCast();
   if (s.slash) return w.ev.push({ k: 'slash', x: h.x, y: h.y, dx: h.fx, dy: h.fy, el: castElement(h) }), true;
   return !!WEAPONS[h.weapon]?.spellblade && !h.heavy;
 }

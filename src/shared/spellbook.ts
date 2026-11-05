@@ -5,8 +5,9 @@
  * is here, and the client draws the same shapes from them (client/spellground.ts, fxspells.ts).
  *
  * Balance (measured in tests/spellbook.test.ts, written into docs/DECISIONS.md): on one goblin each
- * element's tap does about the same a second, fire's burn counted. The hold is the big hit: fire burns
- * the most goblins, frost trades damage for freezing them, storm trades area for a stun.
+ * element's tap does about the same a second, fire's burn counted (the wand's storm stream a little more
+ * once built). The hold is the big hit: fire burns the most goblins, frost trades damage for freezing
+ * them, storm hits one hardest, ignores shields and is best on wet goblins.
  */
 import type { Element } from './magic.js';
 
@@ -15,13 +16,14 @@ export const MAGE_KITS: MageKit[] = ['wand', 'staff', 'spellblade'];
 
 /**
  * Each kit's tap in each element: the kit's own blow times `dmg`. Fire sets alight, frost chills (slows
- * feet and wind-ups; a tap never freezes), storm jumps on to `jumps` more goblins (STORM.reach,
- * STORM.share). The wand's frost tap is ICICLES of them, each `dmg` of the spark.
+ * feet and wind-ups; a tap never freezes), storm ignores shields and jumps only between wet goblins
+ * (shared/magic.ts STORM). The wand's frost tap is ICICLES of them, each `dmg` of the spark; its storm
+ * tap feeds the STREAM (its ticks are STREAM.tick of the spark).
  */
-export const TAPS: Record<MageKit, Record<Element, { dmg: number; jumps?: number }>> = {
-  wand: { fire: { dmg: 0.9 }, frost: { dmg: 0.45 }, storm: { dmg: 1.35, jumps: 2 } },
-  staff: { fire: { dmg: 0.65 }, frost: { dmg: 1.05 }, storm: { dmg: 1.05, jumps: 1 } },
-  spellblade: { fire: { dmg: 0.6 }, frost: { dmg: 1 }, storm: { dmg: 1, jumps: 1 } },
+export const TAPS: Record<MageKit, Record<Element, { dmg: number }>> = {
+  wand: { fire: { dmg: 0.9 }, frost: { dmg: 0.45 }, storm: { dmg: 1 } },
+  staff: { fire: { dmg: 0.65 }, frost: { dmg: 1.05 }, storm: { dmg: 1.05 } },
+  spellblade: { fire: { dmg: 0.6 }, frost: { dmg: 1 }, storm: { dmg: 1 } },
 };
 /** The wand's frost tap: `n` icicles fanned `spread` radians apart, flying `speed` times the spark's. */
 export const ICICLES = { n: 3, spread: 0.12, speed: 1.2 };
@@ -35,11 +37,24 @@ export const FIREBALL = { burst: 1.8, big: 2.6 };
  *  breaks blows off. */
 export const COLD_BLAST = { range: 4, arc: 70, bigRange: 5.2, bigArc: 100, dmg: 0.6, knock: 6 };
 
-/** Wand, storm: lightning called down where you aim (the mouse; on a phone the goblin you face, else
- *  `fallback` ahead), `range` at most. It lands `delay` s later in a red circle with a striped edge (it
- *  can't be blocked, and it hurts friends in a party): `radius` round, `dmg` of the hold, a stun of
- *  `stun` s (a butcher `big` as long), and no jumping on. On the flash: `bigRadius`, `bigStun`. */
-export const STRIKE = { range: 8, fallback: 4.5, delay: 0.55, radius: 1.2, bigRadius: 1.6, stun: 1, bigStun: 1.6, big: 0.5, dmg: 1.25 };
+/**
+ * Wand, storm tap (Kyle, 2026-11-04: "a continuous stream of lightning from the hand that builds the
+ * longer it stays on, but you can't move fast while using it"). Each tap (its swing `windup` and
+ * `recover` s, quick, so mashing keeps up) keeps the stream on `keep` s more. It latches on the nearest
+ * goblin within `reach` tiles and `cone` degrees either side of where you face, and holds it while it
+ * stays within `reach` + `slack` and `keepCone` degrees. Every `every` s it deals `tick` of the spark
+ * times its build, which climbs from 1 to `top` over `build` s on the same goblin and starts again if
+ * the stream breaks off or the goblin dies (it then takes the next one). While it's on, you walk at
+ * `pace` of your speed. Wet, it lands STORM.wet harder and jumps on (shared/magic.ts), every tick. The
+ * goblin it holds flashes hit once every `flicker` s, not every tick (drawing only).
+ */
+export const STREAM = { reach: 5, slack: 0.5, cone: 20, keepCone: 50, keep: 0.35, every: 0.1, tick: 0.12, build: 2, top: 2.5, pace: 0.4, windup: 0.08, recover: 0.12, flicker: 0.3 };
+
+/** Wand, storm hold: a lightning bolt thrown from the hand straight along the aim (turned onto a goblin
+ *  within `assist` degrees of it), `range` tiles at most (a wall stops it), `width` either side of its line. It hits the first goblin for `dmg` of the hold,
+ *  whatever shield it holds. Let go on the flash: it runs through every goblin on the line, and breaks
+ *  off whatever they're doing. */
+export const THUNDERBOLT = { range: 9, width: 0.3, assist: 12, dmg: 2.5 };
 
 /** Every staff hold is centred on the Mage (Kyle: "wall of fire seems hard to aim"): `r` tiles round at
  *  the shortest hold, `rFull` at a full one, `rBig` let go on the white flash. */

@@ -33,30 +33,32 @@ export const KIT: Record<WeaponId, KitRow> = {
 };
 
 /** A Mage's kits in each element (the element is the spellbook, shared/spellbook.ts): the weapon sets the
- *  range, the element the spell. The ALSO rows are the kit's own (KIT above). */
+ *  range, the element the spell. The ALSO rows are the kit's own (KIT above) unless the element has its
+ *  own (the wand's storm stream slows you; it doesn't break blows). Storm's wet rule is said once, on the
+ *  class card's SPELLS note (shared/classes.ts). */
 export const MAGE_KIT: Record<MageKit, Record<Element, KitRow>> = {
   wand: {
     fire: KIT.wand,
     frost: { tap: 'Three icicles, chill', hold: 'Cold blast, freezes', perfect: 'Wider, interrupts any blow' },
-    storm: { tap: 'Arc, jumps to two more', hold: 'Lightning strike, stuns', perfect: 'Bigger, longer stun' },
+    storm: { tap: 'Lightning stream, builds up', hold: 'Lightning bolt, ignores shields', perfect: 'Whole line, interrupts any blow', also: "Walk slowly while it's on" },
   },
   staff: {
     fire: KIT.staff,
     frost: { tap: 'Frost sweep, chills', hold: 'Hard frost, freezes all round', perfect: 'Bigger' },
-    storm: { tap: 'Crackling sweep, jumps', hold: 'Charged ring, jolts', perfect: 'Bigger, jolts stun' },
+    storm: { tap: 'Crackling sweep, ignores shields', hold: 'Charged ring, jolts', perfect: 'Bigger, jolts stun' },
   },
   spellblade: {
     fire: KIT.spellblade,
     frost: { tap: 'Cuts chill', hold: 'Shatter the frozen', perfect: 'Wider, costs nothing' },
-    storm: { tap: 'Cuts jump to one more', hold: 'Lightning rush through', perfect: 'Longer, stuns, costs nothing' },
+    storm: { tap: 'Cuts ignore shields', hold: 'Lightning rush through', perfect: 'Longer, stuns, costs nothing' },
   },
 };
 
 /** A Mage's spellbook by element, for a weapon card that isn't in anyone's hand: "Tap firebolt, hold fireball". */
 const BOOK: Record<MageKit, Record<Element, string>> = {
-  wand: { fire: 'Tap firebolt, hold fireball', frost: 'Tap icicles, hold cold blast', storm: 'Tap arc, hold lightning strike' },
+  wand: { fire: 'Tap firebolt, hold fireball', frost: 'Tap icicles, hold cold blast', storm: 'Tap lightning stream, hold lightning bolt' },
   staff: { fire: 'Tap flame sweep, hold circle of fire', frost: 'Tap frost sweep, hold hard frost', storm: 'Tap crackling sweep, hold charged ring' },
-  spellblade: { fire: 'Cuts burn, hold burning lunge', frost: 'Cuts chill, hold shatter', storm: 'Cuts jump, hold lightning rush' },
+  spellblade: { fire: 'Cuts burn, hold burning lunge', frost: 'Cuts chill, hold shatter', storm: 'Cuts ignore shields, hold lightning rush' },
 };
 const COST: Record<MageKit, string> = { wand: `${SPELL.wand} magic a hold`, staff: `${SPELL.staff} magic a hold`, spellblade: `${SPELL.spellblade} magic a hold, less as the blade fills` };
 const isMage = (w: WeaponId): w is MageKit => w in MAGE_KIT;
@@ -68,7 +70,7 @@ export const kitRows = (w: WeaponId, el?: Element | ''): [string, string][] => {
     const k = KIT[w];
     return [...(['fire', 'frost', 'storm'] as Element[]).map((e) => [ELEMENT_NAME[e], BOOK[w][e]] as [string, string]), ['PERFECT', 'The bigger spell'], ['COST', COST[w]], ...(k.also ? [['ALSO', k.also] as [string, string]] : [])];
   }
-  const k = isMage(w) ? { ...MAGE_KIT[w][el as Element], also: KIT[w].also } : KIT[w];
+  const k = isMage(w) ? { ...MAGE_KIT[w][el as Element], also: MAGE_KIT[w][el as Element].also ?? KIT[w].also } : KIT[w];
   return [['TAP', k.tap], ['HOLD', k.hold], ['PERFECT', k.perfect], ...(isMage(w) ? [['COST', COST[w]] as [string, string]] : []), ...(k.also ? [['ALSO', k.also] as [string, string]] : [])];
 };
 

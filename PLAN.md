@@ -30,6 +30,15 @@ STAND FAST, COWING ROAR, working for a guest online; and the Mage learns PRIMED 
 SPELLTHIEF at 4, 7 and 10. Old heroes start with no rungs. Open: the names and lines through the lore
 keeper and line editor; ATTUNED's storm part waits on the wet rule (wt-storm) reading `wetMult`; the
 third rungs wait on the level cap lifting past 10.
+**Storm reworked, fire spreads less** (Claude Opus 5.5, 2026-11-04; Kyle: "Fire is too strong", storm "a
+lightning bolt, not a chain lightning", its tap "a continuous stream of lightning from the hand that builds").
+Built; waiting on Kyle's play. *Done when* on his phone and laptop, flat and 2.5D: a burning goblin sets
+others alight only when it dies; the storm wand's tap mashed is a crackling stream on the goblin in front
+that brightens and rises in pitch as it builds and slows his walk; its hold throws a lightning bolt from the
+hand into the first goblin (through the whole line on the flash), no red mark; every storm spell goes
+through a shield from the front, jumps nowhere on dry ground, and in water (or the rain) lands harder and
+jumps between the wet goblins. Open: the new lines (DECISIONS) through the lore keeper and line editor;
+wiring `wet` to the weather branch's `sky` at merge (`sim/wet.ts`, WEATHER HOOK).
 
 **The hero clear of the buttons on a phone** (Claude Opus 5.5, 2026-11-04; Kyle: "Your potion and things can
 cover your character while in game"). Built; waiting on Kyle's play. *Done when* on his phone upright, flat

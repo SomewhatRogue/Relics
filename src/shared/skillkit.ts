@@ -30,7 +30,7 @@ export const KNIVES = { cooldown: 12, windup: 0.12, recover: 0.25, count: 5, spr
 export const FIRE_RING = { cooldown: 16, windup: 0.2, recover: 0.3, radius: 2.6, dmg: 12, knock: 12, linger: 4, every: 0.5 };
 
 /** The Mage's storm tether: lightning ties you to the goblin you face within `range` for `time`. Every
- *  `every` it strikes for `dmg` (storm, so it jumps on to goblins near it). It snaps past `snap`; when
+ *  `every` it strikes for `dmg` (storm, so it jumps on to wet goblins near it). It snaps past `snap`; when
  *  its goblin dies it takes the nearest other within `range`. */
 export const TETHER = { cooldown: 16, windup: 0.15, recover: 0.2, range: 7, snap: 9, time: 4, every: 0.5, dmg: 6 };
 

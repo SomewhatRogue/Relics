@@ -244,7 +244,7 @@ export class View3D {
     const ex = { room, meId, lerp, P, now, W: this.view.W, H: this.view.H, fanfare: !!marks.fanfare, stains: fx.decals, others, mist: [at.x * this.view.ppu, at.z * this.view.ppu * Math.sin(PITCH)] as [number, number] };
     this.overlay.draw(room, meId, fx, marks, P, lerp, now, this.view.ppu);
     drawSkills3(og, room, P, lerp, this.view.ppu, now);
-    drawSpellGround3(og, room, P, this.view.ppu);
+    drawSpellGround3(og, room, P, this.view.ppu, lerp);
     drawFound3(og, room, P, lerp, this.view.ppu, now);
     drawBolts3(og, room, P, this.view.ppu);
     drawExtras(og, ex);

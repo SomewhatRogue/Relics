@@ -3,13 +3,14 @@
  * raised round where the Mage stands, never aimed (Kyle: "wall of fire seems hard to aim"). The ring of
  * fire is a band: anything in it is scorched and set alight, again whenever its burn has gone out, so a
  * goblin has to cross it to reach you. The charged ring is the whole round: every half second anything
- * inside is zapped and flinches (stunned, let go on the flash). They live in the room's zones, so a
+ * inside is zapped and flinches (stunned, let go on the flash); a wet one zapped jumps it to the wet ones
+ * near, once a pulse. They live in the room's zones, so a
  * guest sees the same ring that is judged (client/spellground.ts draws it from these numbers).
  */
 import { FLAME_RING, STORM_RING, type Augment } from '../shared/tuning';
 import { ringCatch } from './catching';
 import { damage, isDead, isDummy } from './damage';
-import { afflict, burning, type World } from './elements';
+import { afflict, burning, newCast, type World } from './elements';
 import { stun } from './stuns';
 import type { Enemy, Hero, Zone } from './types';
 
@@ -50,14 +51,15 @@ export function stepRings(zones: Zone[], w: World): void {
       }
     } else if (z.kind === 'stormring' && w.now >= z.next) {
       z.next += STORM_RING.every;
+      const cast = newCast();
       for (const e of w.enemies) {
         if (!reached(e) || !inRing(z, e, e.radius)) continue;
         e.lastBy = z.owner;
         const a = Math.atan2(e.y - z.y, e.x - z.x), ex = z.x + Math.cos(a) * z.r, ey = z.y + Math.sin(a) * z.r;
         w.ev.push({ k: 'shock', x: ex, y: ey, x2: e.x, y2: e.y });
         if (damage(e, z.n ?? STORM_RING.zap, w.now, w.ev, { flinch: z.big ? 0 : STORM_RING.flinch, el: 'storm', src: 'spark' })) continue;
-        // Storm on the frozen shatters it, on the burning flares (no jumping on: the ring is its own reach).
-        afflict(w, e, 'storm', z.n ?? STORM_RING.zap, 0);
+        // Storm on the frozen shatters it, on the burning flares; wet, it jumps (each wet one once a pulse).
+        if (e.jolted !== cast) afflict(w, e, 'storm', z.n ?? STORM_RING.zap, { cast });
         if (z.big && e.act !== 'pinned') stun(e, z.owner, w.now, STORM_RING.bigStun, w.ev);
       }
     }

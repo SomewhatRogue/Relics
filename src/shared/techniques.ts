@@ -41,7 +41,7 @@ export const TECH_WORDS: Record<TechId, { name: string; text: string }> = {
   sanctstep: { name: 'WALKING SANCTUARY', text: 'Sanctuary\'s blessed ground moves with you for its first 3 s.' },
   judgement: { name: 'JUDGEMENT', text: 'Hit a goblin that\'s attacking a friend and it\'s stunned for 1 s.' },
   primed: { name: 'PRIMED SPELLS', text: 'Primed spells do 80% more damage, not 50%.' },
-  attuned: { name: 'ATTUNED', text: 'Fire burns 50% longer, and three chills in a row freeze a goblin.' },
+  attuned: { name: 'ATTUNED', text: 'Fire burns 50% longer, three chills in a row freeze a goblin, and storm does 75% more to wet goblins, not 50%.' },
   spellthief: { name: 'MAGIC BACK', text: 'A PERFECT hold gives back half its magic.' },
 };
 
