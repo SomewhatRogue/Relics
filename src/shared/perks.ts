@@ -78,7 +78,7 @@ const LIST = {
   m_clear: { name: 'MAGIC ON CHANGE', text: 'Changing element gives back 15 magic', gain: '+15 magic a change', fx: { clear: 15 } },
   m_twice: { name: 'TWICE PRIMED', text: 'First two spells after a change are primed', gain: 'two primed', fx: { twice: 1 } },
   m_draw: { name: 'QUICK CHARGE', text: 'Held spells charge 12% faster', gain: 'charge 12% faster', fx: { draw: 0.12 } },
-  m_burst: { name: 'WIDE BURST', text: 'Spell bursts 20% wider', gain: 'burst +20%', fx: { burst: 0.2 } },
+  m_burst: { name: 'WIDE BURST', text: 'Spell bursts, blasts and rings 20% wider', gain: 'burst +20%', fx: { burst: 0.2 } },
   m_dmg: { name: 'SPELL DAMAGE', text: 'Spells do 6% more damage', gain: '+6% damage', fx: { damage: 0.06 } },
   m_breath: { name: 'QUICK RECOVERY', text: 'Magic refills 25% faster', gain: 'magic refill +25%', fx: { breath: 0.25 } },
   m_light: { name: 'LIGHT BLINK', text: 'Blink costs 20% less magic', gain: 'blink -20% magic', fx: { light: 0.2 } },

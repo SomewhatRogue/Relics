@@ -33,6 +33,7 @@ function drawn(f: Face): { url: string; w: number } {
   return { url: c.toDataURL(), w: c.width };
 }
 
+const EL_RING: Record<string, string> = { fire: '#ff9a3c', frost: '#bfe8ff', storm: '#fff27a' };
 const round = (ic: CanvasImageSource | null, grade: Face['grade'] = 'iron'): Face => ({ shape: 'round', size: 28, grade, icon: ic });
 
 /** The rows for this hero: what they have now, then every context word. */
@@ -41,7 +42,9 @@ async function rows(g: Game, touch: boolean): Promise<Row[]> {
   const it = me.arms[me.weapon] ?? ({ kit: me.weapon, traits: [] } as unknown as Item);
   // The weapon's own rows (kitlines.ts): what a tap does, a hold, and a hold let go on the flash.
   out.push({ face: round(await pic(safe(() => itemIcon(it)))), name: 'ATTACK', key: 'LEFT CLICK',
-    text: kitRows(me.weapon).map(([l, v]) => `<i>${l}</i> ${v}`).join('<br>') });
+    text: kitRows(me.weapon, cls === 'MAGE' ? castElement(me) : '').map(([l, v]) => `<i>${l}</i> ${v}`).join('<br>') });
+  // A Mage's ELEMENT: the small ring by ATTACK, in the element's colour (cluster.ts).
+  if (cls === 'MAGE') out.push({ face: { shape: 'round', size: 22, grade: 'iron', icon: skillCanvas('channel', castElement(me)), ring: EL_RING[castElement(me)] }, name: 'ELEMENT', key: 'X', text: `Switch element: fire, frost, storm. It changes what your tap and hold do. The first spell after a switch hits 50% harder.` });
   const guard = guardOf(kit);
   if (guard === 'full') out.push({ face: { shape: 'shield', size: 28, grade: 'iron', icon: icon('block') }, name: 'BLOCK', key: 'RIGHT CLICK', text: 'Hold to block. Tap while the red flashes white to parry.' });
   if (guard === 'parry') out.push({ face: { shape: 'shield', size: 28, grade: 'iron', icon: icon('parry') }, name: 'PARRY', key: 'RIGHT CLICK', text: "Tap while the red flashes white to parry. No held block." + (kit.spellblade ? ' A parry fills your blade.' : '') });
@@ -51,7 +54,7 @@ async function rows(g: Game, touch: boolean): Promise<Row[]> {
   }
   if (kit.reloads) out.push({ face: round(icon('reload'), 'gilt'), name: 'RELOAD', key: 'C', text: 'Hold to wind the crossbow. Wind it in one go, standing still, and the bolt glints (a PERFECT).' });
   const [skill, relic] = me.relics;
-  if (knows(me, 'skill')) out.push({ face: round(skillCanvas(skill, skill === 'channel' ? castElement(me) : me.augments[skill])), name: 'SKILL', key: 'E', text: `Your class skill, ${RELICS[skill].name}. The dark sweep and the number count down to the next use.` });
+  if (knows(me, 'skill')) out.push({ face: round(skillCanvas(skill, me.augments[skill])), name: 'SKILL', key: 'E', text: `Your class skill, ${RELICS[skill].name}. The dark sweep and the number count down to the next use.` });
   const carried = relic ? carriedItem(me) : undefined;
   if (relic) out.push({ face: round(await pic(relicItemIcon(carried ?? ({ kind: relic, charge: 1 } as Parameters<typeof relicItemIcon>[0])))), name: 'RELIC', key: 'R', text: 'The relic you carry. The bar along its foot is its charge.' });
   const next = me.belt[0];

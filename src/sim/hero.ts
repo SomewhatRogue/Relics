@@ -18,6 +18,8 @@ import { beginHold, emptyHold, looseBolt, reloadPressed, startWind, stepWind } f
 import { brandySpeed, breathCap } from './brandy';
 import { quickMult, relicDark, spendCharge } from './charge';
 import { paySpell, refuseSpell } from './spells';
+import { stepElement, tapSwing } from './channel';
+import { graspRefused } from './grasp';
 import { knows, type Enemy, type FightEvent, type Hero, type Intent } from './types';
 import { primeShoulder, stride } from './techwarrior';
 import { nockHead, quickNock } from './techranger';
@@ -28,9 +30,9 @@ export function newHero(id: string, x: number, y: number): Hero {
     act: 'idle', actT: 0, actDur: 0, combo: 0, heavy: false, power: 0, counter: false, hitIds: [], blocking: false,
     parryOpenAt: -9, lastBlockPress: -9, rollDx: 0, rollDy: 1, lastRollAt: -9, rollX: -99, rollY: -99, decoyX: 0, decoyY: 0, decoyUntil: -9, toldAt: -9, snareReady: 0, hound: null, counterUntil: -9,
     attackQueuedAt: -9, rollQueuedAt: -9, relic: 'bash', relics: abilitiesOf('WARRIOR'), relicQueuedAt: -9,
-    relicReady: { javelin: 0, hook: 0, horn: 0, bash: 0, net: 0, shadow: 0, channel: 0, lodestone: 0, blessing: 0, ward: 0, sanctuary: 0, stamp: 0, volley: 0, sic: 0, vanish: 0, knives: 0, firering: 0, tether: 0, chain: 0, light: 0, bomb: 0, sentry: 0, bell: 0, knuckle: 0 },
-    augments: { javelin: '', hook: '', horn: '', bash: '', net: '', shadow: '', channel: '', lodestone: '', blessing: '', ward: '', sanctuary: '', stamp: '', volley: '', sic: '', vanish: '', knives: '', firering: '', tether: '', chain: '', light: '', bomb: '', sentry: '', bell: '', knuckle: '' }, blessedUntil: -9, wardUntil: -9, wardHp: 0, rallyUntil: -9, arms: {}, bag: [], bagSize: BAG.start, armor: null, rings: [], baseHp: HERO.hp, purse: 0, fed: 0, lastKill: 0, biteAt: 0, ransomed: false, want: 0, cold: false, found: [], relicItem: '', glow: 0, belt: [], potionReady: 0, mendLeft: 0, brandyUntil: -9, hiddenUntil: -9, perfect: false, tempoUntil: -9, carrying: 0, lifting: 0, grabQueuedAt: -9, z: 0, hitstop: 0, lenience: 0,
-    seen: { attack: 0, block: 0, roll: 0, weapon: 0, relic: 0, relicSwap: 0, relicPick: 0, augment: 0, cls: 0, take: 0, grab: 0, gear: 0, potion: 0, belt: 0, open: 0 },
+    relicReady: { javelin: 0, hook: 0, horn: 0, bash: 0, net: 0, shadow: 0, channel: 0, grasp: 0, lodestone: 0, blessing: 0, ward: 0, sanctuary: 0, stamp: 0, volley: 0, sic: 0, vanish: 0, knives: 0, firering: 0, tether: 0, chain: 0, light: 0, bomb: 0, sentry: 0, bell: 0, knuckle: 0 },
+    augments: { javelin: '', hook: '', horn: '', bash: '', net: '', shadow: '', channel: '', grasp: '', lodestone: '', blessing: '', ward: '', sanctuary: '', stamp: '', volley: '', sic: '', vanish: '', knives: '', firering: '', tether: '', chain: '', light: '', bomb: '', sentry: '', bell: '', knuckle: '' }, blessedUntil: -9, wardUntil: -9, wardHp: 0, rallyUntil: -9, arms: {}, bag: [], bagSize: BAG.start, armor: null, rings: [], baseHp: HERO.hp, purse: 0, fed: 0, lastKill: 0, biteAt: 0, ransomed: false, want: 0, cold: false, found: [], relicItem: '', glow: 0, belt: [], potionReady: 0, mendLeft: 0, brandyUntil: -9, hiddenUntil: -9, perfect: false, tempoUntil: -9, carrying: 0, lifting: 0, grabQueuedAt: -9, z: 0, hitstop: 0, lenience: 0,
+    seen: { attack: 0, block: 0, roll: 0, weapon: 0, relic: 0, relicSwap: 0, relicPick: 0, augment: 0, cls: 0, take: 0, grab: 0, gear: 0, potion: 0, belt: 0, open: 0, element: 0 },
   };
 }
 
@@ -40,7 +42,7 @@ export function currentSwing(h: Hero): Swing {
   const k = h.power, hv = w.heavy;
   // A drawn shot only pierces at a full draw.
   // (The sword's bash let go on the flash takes every goblin in a wider arc: sim/warrior.ts.)
-  const s = !h.heavy ? w.combo[h.combo] : flashBash(h, { ...hv, dmg: Math.round(hv.dmg + (hv.dmgFull * (1 + (g.fx.full ?? 0)) - hv.dmg) * k), knock: hv.knock + (hv.knockFull - hv.knock) * k, pierce: hv.pierce && k >= 1 });
+  const s = !h.heavy ? tapSwing(h, w.combo[h.combo]) : flashBash(h, { ...hv, dmg: Math.round(hv.dmg + (hv.dmgFull * (1 + (g.fx.full ?? 0)) - hv.dmg) * k), knock: hv.knock + (hv.knockFull - hv.knock) * k, pierce: hv.pierce && k >= 1 });
   // Modifiers: how well (shared/gear.ts).
   if (!g.damage && !g.quick && !g.reach && !g.knock && fedMult(h) === 1) return s;
   const fed = fedMult(h);
@@ -141,6 +143,8 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     }
   }
   if (inp.attackSeq !== h.seen.attack) (h.seen.attack = inp.attackSeq), (h.attackQueuedAt = now);
+  // A Mage's ELEMENT button: the spellbook turns (sim/channel.ts).
+  stepElement(h, inp, now, ev);
   if (inp.grabSeq !== h.seen.grab) (h.seen.grab = inp.grabSeq), (h.grabQueuedAt = now);
   // A GRAB press that found nothing to take hold of, throw, help up or burn: say so, at most once a second.
   if (h.grabQueuedAt > -9 && now - h.grabQueuedAt >= INPUT_BUFFER) {
@@ -241,7 +245,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
       const held = h.actT + CHARGE.start, full = chargeFull(w, h), drawn = !!w.heavy.shot;
       h.power = Math.min(1, held / full);
       // Every kit's perfect is its own hold let go on the flash (Kyle, 2026-11-04): the rapier skewers, a
-      // Cleric shields friends, the sword's bash stuns a crowd, the spear pins, the spellblade wreathes free.
+      // Cleric shields friends, the sword's bash stuns a crowd, the spear pins, a Mage's spell is the bigger one.
       h.perfect = held >= full && held <= full + releaseWindow(h);
       if (drawn && held > full + RELEASE.overdraw) h.power = RELEASE.overdrawn;
       // A crossbow's perfect is its glint, not the flash.
@@ -272,7 +276,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
       if (h.actT - dt < s.windup) acts.loose(h, s);
       // The greatsword's overhead loosed on the white flash: a shockwave (sim/warrior.ts).
       if (h.actT - dt < s.windup && h.heavy && h.perfect && s.quake) quake(h, enemies, now, ev);
-      if (!s.shot && !s.wall) {
+      if (!s.shot && !s.spell) {
         // A Rogue's knives find one goblin a blow (the nearest in reach), a rapier's lunge two; everything else cuts through all.
         const most = s.hits ?? (w.single ? 1 : 0), near = most ? [...enemies].sort((a, b) => Math.hypot(a.x - h.x, a.y - h.y) - Math.hypot(b.x - h.x, b.y - h.y)) : enemies;
         for (const e of near) {
@@ -304,6 +308,8 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   if (now - h.relicQueuedAt < INPUT_BUFFER && h.relic === h.relics[0] && !knows(h, 'skill')) h.relicQueuedAt = -9;
   // A dark relic does nothing (the press is spent): it wants recharging at the church.
   if (now - h.relicQueuedAt < INPUT_BUFFER && relicDark(h)) (h.relicQueuedAt = -9), ev.push({ k: 'dark', x: h.x, y: h.y });
+  // GRASP costs magic: short of it, the press fizzles (sim/grasp.ts).
+  if (now - h.relicQueuedAt < INPUT_BUFFER && now >= h.relicReady[h.relic] && graspRefused(h, ev)) return;
   if (now - h.relicQueuedAt < INPUT_BUFFER && now >= h.relicReady[h.relic] && !jealousBlocks(h)) {
     // A blessing turns to nobody: the room picks the ally.
     if (h.relic !== 'blessing' && h.relic !== 'horn' && h.relic !== 'bash') face(h, inp, enemies, true, RELICS[h.relic].range);

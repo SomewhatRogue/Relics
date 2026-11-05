@@ -28,7 +28,7 @@ export function pose(h: Hero, now: number): Pose {
   if (h.act === 'charge') {
     // Held past the flash, the draw starts to shake (and the shot weakens).
     const over = h.actT + CHARGE.start > chargeFull(WEAPONS[h.weapon], h) + RELEASE.overdraw ? Math.sin(now * 70) * 0.09 : 0;
-    // The staff is raised high while its wall gathers.
+    // The staff is raised high while its spell gathers.
     if (ranged(h) || h.weapon === 'staff') return { a: (h.weapon === 'staff' ? -Math.PI / 2 + side * 0.25 : fa) + over, ext: 0, reach: 0, pull: charge };
     // The healer lifts the mace to call down a smite.
     if (h.weapon === 'mace') return { a: -Math.PI / 2 + side * 0.2, ext: 0, reach: 0, pull: charge };

@@ -23,7 +23,7 @@ export const CHAINS = {
   g_knives: { name: 'KNIVES', steps: ['g_quick', 'g_throw', 'g_draw'] },
   g_shadow: { name: 'SHADOW', steps: ['g_foot', 'g_focus', 'g_quiet'] },
   m_blink: { name: 'BLINK', steps: ['m_blink', 'm_leap', 'm_image'] },
-  m_channel: { name: 'CHANNEL', steps: ['m_primed', 'm_clear', 'm_twice'] },
+  m_channel: { name: 'ELEMENT', steps: ['m_primed', 'm_clear', 'm_twice'] },
   m_spells: { name: 'SPELLS', steps: ['m_draw', 'm_burst', 'm_dmg'] },
   m_breath: { name: 'MAGIC', steps: ['m_breath', 'm_light', 'm_quick'] },
   h_guard: { name: 'GUARD', steps: ['h_parry', 'h_block', 'h_counter'] },

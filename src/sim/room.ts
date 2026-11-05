@@ -41,8 +41,12 @@ import { stepBlaze, type BlazeState } from './blaze';
 import { sweepSurvivors } from './survivorhits';
 import { dropFrom, stepDrops, takeLoot } from './loot';
 import { hallow, rally, shadowstep, stepZones, ward } from './relics';
-import { castElement, castSpell, spendPrimed, turnElement } from './channel';
-import { raiseWall, stepWalls } from './staffwall';
+import { castElement, spendPrimed, turnElement } from './channel';
+import { castTap } from './spellbook';
+import { castHold } from './holds';
+import { stepRings } from './staffrings';
+import { stepRush } from './rush';
+import { grasp } from './grasp';
 import { bladeStruck, looseBlade } from './spellblade';
 import { fireSkill, stepSkills } from './skills';
 import { forgedElement, has, traitsOf } from './traits';
@@ -278,7 +282,7 @@ export class ArenaRoom {
       grab: (h) => startRaise(h, this.heroes, this.events) || startTorch(h, this.enemies, this.events) || startKindle(h, this.map, this.events) || tryGrab(h, this.enemies, this.time, this.events) || tryLift(h, this.props, this.events),
       carry: (h, inp, walk) => (h.lifting ? stepLift(h, inp, w, TICK, walk) : stepCarry(h, inp, this.enemies, this.time, TICK, this.events, walk)),
       drop: (h) => (release(h, this.enemies, this.events), dropProp(h, this.props)),
-      bash: (h) => stepBash(h, this.enemies, w, TICK),
+      bash: (h) => (h.rush ? stepRush(h, w, TICK) : stepBash(h, this.enemies, w, TICK)),
     };
     // Houses alight: their goblins driven out into the street before anyone moves (and their loot falls here).
     stepHouseFires(this, this.fireRng);
@@ -345,8 +349,8 @@ export class ArenaRoom {
     followGround(this.zones, this.heroes, this.time);
     this.zones = stepZones(this.zones, w);
     separate(this.heroes, this.enemies, this.props);
-    // A staff's walls: frost holds small goblins back, and each burns, chills or shocks (sim/staffwall.ts).
-    stepWalls(this.zones, w);
+    // A staff's rings: the ring of fire scorches what crosses it, the charged ring zaps what's in it (sim/staffrings.ts).
+    stepRings(this.zones, w);
     this.landings();
     // Out of bounds: the dread, and what comes for anyone who stays out (sim/dread.ts).
     stepDread(this.dread, this.map, this.heroes, this.enemies, TICK, this.events);
@@ -393,7 +397,7 @@ export class ArenaRoom {
     h.vanishUntil = undefined;
     // A Rogue's backstab: KNIFEWORK, SLIP AWAY, CUTPURSE (sim/techrogue.ts).
     rogueStruck(h, e, w);
-    // A Mage's blade builds its charge; a wreathed blade or a staff's slash carries the element.
+    // A Mage's blade builds its charge; its cuts and a staff's slash carry the element.
     bladeStruck(h, currentSwing(h), e, n, w);
     // Skarn's Cleaver: every hit heals a fifth of what it dealt.
     if (wears(h, 'cleaver') && h.hp < h.maxHp) {
@@ -425,6 +429,7 @@ export class ArenaRoom {
     else if (h.relic === 'lodestone') this.bolts.push({ ...lobLodestone(h, this.aimDistance(h, LODESTONE.range, LODESTONE.fallback), el), relic: true });
     else if (h.relic === 'shadow') shadowstep(h, this.enemies, w.ev, w.now);
     else if (h.relic === 'channel') turnElement(h, w.ev);
+    else if (h.relic === 'grasp') grasp(h, w);
     else if (h.relic === 'horn') rally(h, this.enemies, w.now, w.ev);
     else if (h.relic === 'bash') startBash(h, w.ev);
     else if (h.relic === 'ward') ward(h, this.heroes, this.intents.get(h.id), w.now, w.ev);
@@ -448,8 +453,7 @@ export class ArenaRoom {
 
   /** A swing's moment of release: loose its shot (spells cast with the equipped relic's augment), smite, heal. */
   private loose(h: Hero, s: Swing, w: World): void {
-    // A staff raises its wall; its slash and a spellblade's swings go their own way (sim/staffwall.ts, spellblade.ts).
-    if (s.wall) return void this.zones.push(raiseWall(h, w));
+    // A staff's slash and a spellblade's cuts go their own way (sim/spellblade.ts).
     if (looseBlade(h, s, w)) return;
     // A censer snags on a wall, flares and bursts its coals, drops more (sim/censer.ts); a flail let go on the flash shields friends near.
     censerSwing(h, s, w, this.coals);
@@ -472,12 +476,14 @@ export class ArenaRoom {
     if (s.shot === 'smite') s.stun = smiteStun(h, s);
     // A mace's smite mends friends in its light; let go on the flash it lands harder and shields them (sim/holy.ts).
     const holy = !!s.holy && h.heavy && h.perfect;
-    if (s.shot === 'smite') this.bolts.push({ ...smite(h, s, Math.min(s.range, this.aimDistance(h, s.range, 3.5)), mult * (holy ? MACE.perfect : 1), traitsOf(h), s.delay), heal: MACE.heal, holy });
+    // A Mage's hold is the element's spell (sim/holds.ts); the first after a turn of element is primed.
+    if (s.spell) castHold(h, s, mult * spendPrimed(h), { zones: this.zones, bolts: this.bolts, aim: (r, f) => this.aimDistance(h, r, f) }, w, traitsOf(h));
+    else if (s.shot === 'smite') this.bolts.push({ ...smite(h, s, Math.min(s.range, this.aimDistance(h, s.range, 3.5)), mult * (holy ? MACE.perfect : 1), traitsOf(h), s.delay), heal: MACE.heal, holy });
     else if (s.shot) {
       // A Mage's spells take the element it last channelled (fire to start with); the first after a turn is primed.
       const mage = WEAPONS[h.weapon].cls === 'MAGE', primed = mage && !!h.primed;
       const el = s.shot === 'arrow' || s.shot === 'bolt' || s.shot === 'knife' || s.shot === 'dart' ? forged : forged || (mage ? castElement(h) : h.augments[h.relic]);
-      if (mage) this.bolts.push(...castSpell(h, s, el, mult * spendPrimed(h), traitsOf(h)));
+      if (mage) this.bolts.push(...castTap(h, s, el, mult * spendPrimed(h), traitsOf(h)));
       // A Ranger's arrow or bolt loosed on the move drifts off the aim, unless STEADY (sim/techranger.ts).
       else this.bolts.push(shoot(aimed(h, s.shot, this.intents.get(h.id), w.now, w.ev), s, el, mult, traitsOf(h)));
       w.ev.push({ k: 'shoot', x: h.x, y: h.y, dx: h.fx, dy: h.fy, kind: s.shot, el, ...(primed ? { primed } : {}) });

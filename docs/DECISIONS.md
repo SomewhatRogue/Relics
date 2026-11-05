@@ -2,6 +2,77 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-04: the element is the Mage's spellbook; switching gets its own button; GRASP (Kyle; Claude Opus 5.5)
+
+Kyle agreed the design: today every Mage weapon casts the same spell in every element, just tinted, and
+switching element is the Mage's biggest choice. So the element becomes the spellbook: switching changes
+what the tap and the hold are. The weapon decides the range (wand far, staff all round you, spellblade up
+close); the element decides the spell. Numbers in `shared/spellbook.ts` (re-exported by tuning.ts), the
+room's rules in `sim/spellbook.ts` (taps), `sim/holds.ts` (the hold for each kit and element),
+`sim/frostholds.ts`, `sim/staffrings.ts`, `sim/rush.ts` and `sim/grasp.ts`.
+
+| | Wand (aimed, at range) | Staff (centred on you) | Spellblade (melee) |
+|---|---|---|---|
+| Fire | Tap: firebolt that sets alight (0.45 of the spark, 4). Hold: fireball, bursts 1.8 round and sets all of it alight (10 to 24). | Tap: flame sweep, sets alight (0.4 of the slash, 6). Hold: ring of fire 2.2 to 2.8 round you, 0.7 deep, 4 s: anything in it scorched 6 and set alight, again when its burn is out. | Cuts set alight (0.6: 6, 6, 10). Hold: burning lunge 3.2 tiles in 0.22 s, 14 to 22 and alight to each goblin within 0.9 of the path. |
+| Frost | Tap: three icicles 0.12 rad apart (0.45 each, 4), each only chills. Hold: cold blast, a cone 4 tiles by 70 degrees, 0.6 of the hold (6 to 14), a shove, frozen solid. | Tap: frost slash, chills (slows feet and wind-ups; 1.05, 16). Hold: frost nova, 2.2 to 2.8 round you, 0.6 of the hold (7 to 12), frozen solid. | Cuts chill (1.0). Hold: shatter, 2 round you: frozen 40, chilled 24, anything else 0.6 of the hold and chilled. |
+| Storm | Tap: arc (1.35, 11) that jumps on to 2 more (0.7 of it, at least 6). Hold: lightning where you aim (8 at most), lands 0.55 s later in a red circle with a striped edge, 1.2 round, 1.25 of the hold (12 to 30), stuns 1 s (a butcher 0.5), jumps nowhere. | Tap: crackling sweep (1.05, 16), jumps to 1 more. Hold: charged ring 2.2 to 2.8 round, 4 s: everything inside zapped 5 every 0.5 s and flinches. | Cuts arc to the nearest goblin (1.0). Hold: lightning dash 4 tiles in 0.16 s, untouchable, 0.8 of the hold (11 to 18) and a flinch to each within 0.9. |
+
+- **Perfects are still the hold let go on the white flash**, each one its bigger self: the fireball 2.6
+  across, the cold blast 5.2 by 100 degrees, the strike 1.6 round with a 1.6 s stun (all three wand
+  perfects still break off whatever a goblin is doing, striped blows too, INTERRUPTED); the staff's rings
+  and nova 3.4 round, the rings lasting 6 s and the charged ring's zaps stunning 0.6 s (under the stun
+  cap); the spellblade's lunge 4.4, dash 5.5 (its zaps stun 0.8 s), shatter 2.8, and every one free,
+  the blade's charge kept. The wand's tap into a wind-up still breaks the blow (a bonus).
+- **The staff never aims** (Kyle: "wall of fire seems hard to aim and cast"): every staff hold is centred
+  where the Mage stands. The raised wall is gone (`sim/staffwall.ts`, `client/walldraw.ts` deleted).
+- **The spellblade**: wreathing is gone; every cut carries the element. Its charge (0.15 a hit, full on
+  a parry, CAUGHT unchanged) now pays for its holds: 35 magic times what's left to fill, and a hold spends
+  the charge. A full blade casts for nothing.
+- **Costs** (`SPELL`): wand 20, staff 30, spellblade 35 a hold, any element. Taps free. MAGIC as before
+  (14 a second, a 2 s wait after a cast). A hold you can't pay for fizzles, NOT ENOUGH MAGIC.
+- **A tap never freezes**: frost taps only chill (`elements.ts` `chill`, moved there from the wall).
+  Freezing is the frost holds' job. Combos unchanged: fire on frost is steam, storm or a heavy blow
+  shatters the frozen, storm on the burning flares (the strike, the charged ring and the dash all do).
+  Judgment: a sweep or cut that hits a crowd jumps on only from the first goblin it lands on, or storm's
+  melee taps outdid the others three to one on a pack.
+- **Balance, measured** (one goblin, tapping as fast as the kit lets you for 6 s, fire's burn counted;
+  `tests/spellbook.test.ts` holds each kit within 15%): wand fire 18.3, frost 20.0, storm 18.3 a second;
+  staff 19.8, 18.7, 18.7; spellblade 31.2, 30.0, 30.0. On a pack of four, fire spreads and storm jumps:
+  wand 50, 20, 45; staff 78, 72, 85; spellblade 119, 110, 131. The holds on a pack of four over 4 s:
+  fireball 275 (everything alight), cold blast 74 and all four frozen 2.2 s, strike 153 and all stunned 1 s,
+  ring of fire 174 (on those crossing it), nova 48 and all frozen, charged ring 160 and constant flinching,
+  lunge 256 (alight), shatter 82 on the unfrozen (40 each on the frozen), dash 72 and a flinch each.
+  Fire does the most to crowds, frost trades damage for freezing, storm trades area for the stun.
+- **Switching gets its own button** (Kyle): ELEMENT, a small ring next to ATTACK where a guard would be,
+  ringed in the element's colour with FIRE, FROST or STORM over it and the switch's 1 s cooldown as a
+  sweep. Laptop: **X** (free; E, R, Q, G, C, F, I and M were taken). A spellblade's PARRY steps out to the
+  reload spot for it on a phone. The switch, its cooldown and the primed first spell (x1.5, FIRST SPELL
+  on top) are unchanged; a press inside the cooldown now waits for it rather than being lost. It's every
+  Mage's from the start (the element is the spellbook), so FIRST SPELL no longer waits on the skill
+  lesson. Online it's an Intent counter (`elementSeq`), so a guest switches on the leader's room.
+- **GRASP** (placeholder name until the lore pass) takes the class skill slot: every goblin in a cone 5
+  tiles by 70 degrees in front is towed (swept, so not through a wall) at 14 a second to a spot 1.5 tiles
+  ahead, stopped a body short, and staggers 0.6 s (a big one mid a striped blow keeps swinging). A butcher
+  or a shield-bearer comes 0.15 of the way (`GRASP.heavy`). 25 magic, 9 s cooldown; short of magic it
+  fizzles and nothing is spent. Taught by Vell where the channel was: anyone who knew the class skill
+  knows GRASP (save: `skill: 'channel'` becomes `'grasp'`; the element stays in `augments.channel`).
+  The knack chain CHANNEL is called ELEMENT now; WIDE BURST widens every spell's area.
+- **Seen and heard, both views**: `client/spellground.ts` draws the ring of fire, the charged ring and the
+  strike's red mark from the room's own zones and bolts (flat glow layer and the 2.5D overlay), with their
+  light; `client/fxspells.ts` the casts (a fan of frost, a nova ring, lightning out of the sky with forks,
+  rings flaring up, a shard burst, a trail of embers or crackle, violet streaks for GRASP);
+  `client/spellsound.ts` fire's whoosh and crackle, frost's hiss and chime, storm's snap and crack. The
+  blade's edge burns in its element with the charge up its length (`client/blademark.ts`).
+- **Words** (for the lore keeper and the line editor): the TAP / HOLD / PERFECT rows for each element of
+  each kit and the COST row (`client/kitlines.ts`); a weapon card with no element shows a row per element
+  ("Tap firebolt, hold fireball"); the ELEMENT legend line; GRASP's skill line; the class card's skill and
+  SPELLS lines (`shared/classes.ts`); ELEMENT as the knack chain's name; WIDE BURST's text.
+
+Tests: `tests/spellbook.test.ts` (each element's tap and hold on each kit, the perfects that go further,
+the balance), `tests/magebuttons.test.ts` (the ELEMENT button, its wait and priming, GRASP's drag, the
+heavy ones, the fizzle, old saves), `tests/magekit.test.ts` (costs, the staff rooted and centred, the
+blade's charge paying), `elements.test.ts`, `magic.test.ts`, `skills.test.ts`, `kitwords.test.ts` updated.
+
 ## 2026-11-04: the Barrowfields tuned: packs and the new sorts, bigger hold rings, less gold (Kyle; Claude Opus 5.5)
 
 Kyle played the expedition on his phone ("really really fun"): "I didn't see too many enemy types, just

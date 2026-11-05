@@ -50,6 +50,9 @@ export interface Intent {
    *  intent still reads (sim/crossbow.ts). */
   reload?: boolean;
   reloadSeq?: number;
+  /** A Mage's ELEMENT button (X): turn the spellbook to the next element (sim/channel.ts). Optional so an
+   *  older guest's intent still reads. */
+  elementSeq?: number;
 }
 
 export const NO_INTENT: Intent = { mx: 0, my: 0, ax: 0, ay: 0, attack: false, block: false, attackSeq: 0, blockSeq: 0, rollSeq: 0, weaponSeq: 0, relicSeq: 0, relicSwapSeq: 0, relicPickSeq: 0, relicPick: 0, augmentSeq: 0, classSeq: 0, grabSeq: 0, takeSeq: 0, take: 0, gearSeq: 0, gearOp: 0, gearArg: 0, potionSeq: 0, beltSeq: 0, openSeq: 0, open: 0, reload: false, reloadSeq: 0 };
@@ -57,6 +60,9 @@ export const NO_INTENT: Intent = { mx: 0, my: 0, ax: 0, ay: 0, attack: false, bl
 /** What a trainer teaches: the class skill, and the leave-behind on a dodge. */
 export type Learned = 'skill' | 'leave';
 export const knows = (h: { learned?: Learned[] }, l: Learned) => !h.learned || h.learned.includes(l);
+
+/** A Mage's held spells, by kit and element (shared/spellbook.ts). */
+export type SpellWhat = 'fireball' | 'coldblast' | 'strike' | 'flamering' | 'nova' | 'stormring' | 'lunge' | 'shatter' | 'dash';
 
 export type HeroAct = 'idle' | 'charge' | 'attack' | 'throw' | 'zip' | 'bash' | 'roll' | 'hurt' | 'stun' | 'down' | 'carry' | 'slam';
 
@@ -72,8 +78,8 @@ export interface Body {
   z?: number;
   /** Set when it went off a ledge's edge (how fast it was moving); the room deals with the landing. */
   dropped?: number;
-  /** Hauled toward (x, y) by a Cleric's censer chain until there or `until` (sim/chain.ts). */
-  tow?: { x: number; y: number; until: number };
+  /** Hauled toward (x, y) by a Cleric's censer chain (or a Mage's GRASP, at `speed`) until there or `until` (sim/cleric.ts). */
+  tow?: { x: number; y: number; until: number; speed?: number };
 }
 
 export interface Hero extends Body {
@@ -252,13 +258,13 @@ export interface Hero extends Body {
   tempoUntil: number;
   /** A Mage just turned element: its next spell is primed (CHANNEL.primed). */
   primed?: boolean;
-  /** The spellblade (sim/spellblade.ts): its charge (0 to 1); wreathed swings left, until when, in which
-   *  element; whether the swing in hand is a wreathed one. */
+  /** The ELEMENT button pressed then (waiting out the switch's cooldown, as any press waits). */
+  elementQueuedAt?: number;
+  /** The spellblade (sim/spellblade.ts): its charge (0 to 1). */
   bladeCharge?: number;
-  wreathe?: number;
-  wreatheUntil?: number;
-  wreatheEl?: Augment;
-  wreathed?: boolean;
+  /** A spellblade's held spell carrying the hero (sim/rush.ts, in the act 'bash'): a burning lunge or a
+   *  lightning dash, `len` tiles, `dmg` to each goblin on the way, `big` let go on the flash. */
+  rush?: { el: 'fire' | 'storm'; len: number; dmg: number; big: boolean };
   /** Primed spells left (TWICE PRIMED: two). */
   primeLeft?: number;
   /** Techniques (shared/techniques.ts): SHOULDER CHARGE's straight walk (seconds, which way, last walked
@@ -281,7 +287,7 @@ export interface Hero extends Body {
   hitstop: number;
   /** Extra parry and dodge leniency for this player's ping (seconds). */
   lenience: number;
-  seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number; augment: number; cls: number; take: number; grab: number; gear: number; potion: number; belt?: number; open: number; level?: number; reload?: number };
+  seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number; augment: number; cls: number; take: number; grab: number; gear: number; potion: number; belt?: number; open: number; level?: number; reload?: number; element?: number };
 }
 
 /** `pounce`: a spider's leap along its line; `bite`: the brood mother's; `spit`: her lobbed glob (a circle). */
@@ -503,11 +509,11 @@ export interface Zone {
   owner: string;
   el: Augment;
   /** Not blessed ground but a skill's area (sim/areas.ts): a Ranger's volley (falling from `at`), a
-   *  Mage's fire ring burning on, a staff's wall of its element (sim/staffwall.ts). */
-  kind?: 'volley' | 'fire' | 'sentry' | 'wall';
-  /** A wall's half depth (its half length is `r`, its face along (ax, ay)), and raised on the flash. */
-  th?: number;
+   *  Mage's fire ring burning on, a staff's ring of fire or charged ring (sim/staffrings.ts). */
+  kind?: 'volley' | 'fire' | 'sentry' | 'flamering' | 'stormring';
+  /** A staff's ring (sim/staffrings.ts): let go on the flash, and what it deals a touch (`n`). */
   big?: boolean;
+  n?: number;
   /** A wind-up bow's aim (for drawing it turned to what it shoots). */
   ax?: number;
   ay?: number;
@@ -568,14 +574,17 @@ export type FightEvent =
   | { k: 'snareset' | 'bark' | 'yelp'; x: number; y: number }
   /** The Mage's channel: its spells now `el`, the first one primed. */
   | { k: 'channeled'; x: number; y: number; el: string }
-  /** The Mage's kits (sim/spells.ts, staffwall.ts, spellblade.ts): magic spent (`n`), a spell fizzled for
-   *  want of it, a blow broken off by a wand's spark, a staff's slash or a blade's wave (along dx, dy), a
-   *  wall raised (`len` long, `big` on the flash), the blade wreathed, full of charge, a blow caught on it. */
+  /** The Mage's kits (sim/spells.ts, spellblade.ts): magic spent (`n`), a spell fizzled for want of it, a
+   *  blow broken off by a wand's tap, the blade full of charge, a staff's slash (along dx, dy). */
   | { k: 'magic'; x: number; y: number; n: number }
   | { k: 'fizzle' | 'interrupt' | 'bladefull'; x: number; y: number }
-  | { k: 'slash' | 'bladewave'; x: number; y: number; dx: number; dy: number; el: Augment }
-  | { k: 'wallup'; x: number; y: number; dx: number; dy: number; el: Augment; len: number; big: boolean }
-  | { k: 'wreathe'; x: number; y: number; el: Augment }
+  | { k: 'slash'; x: number; y: number; dx: number; dy: number; el: Augment }
+  /** A Mage's held spell going off (sim/holds.ts): `what` it is, from (x, y) along (dx, dy), `r` its size
+   *  (a cone's or ring's radius, a rush's length), `big` let go on the flash. */
+  | { k: 'spell'; x: number; y: number; dx: number; dy: number; el: Augment; what: SpellWhat; r: number; big: boolean }
+  /** GRASP (sim/grasp.ts): cast from (x, y) along (dx, dy), `r` its reach; each goblin dragged, to (x2, y2). */
+  | { k: 'grasp'; x: number; y: number; dx: number; dy: number; r: number }
+  | { k: 'grasped'; x: number; y: number; x2: number; y2: number }
   | { k: 'weapon'; x: number; y: number; name: string }
   | { k: 'throw' | 'pinned' | 'javwall' | 'javstick' | 'hookfire' | 'latch' | 'yank' | 'land'; x: number; y: number; dx: number; dy: number }
   | { k: 'relic' | 'loot'; x: number; y: number; name: string }
@@ -668,7 +677,7 @@ export interface Javelin {
 export interface Bolt {
   id: number;
   owner: string;
-  kind: 'arrow' | 'bolt' | 'knife' | 'dart' | 'spark' | 'orb' | 'lance' | 'smite' | 'net' | 'lodestone' | 'flask' | 'bomb';
+  kind: 'arrow' | 'bolt' | 'knife' | 'dart' | 'spark' | 'orb' | 'lance' | 'smite' | 'net' | 'lodestone' | 'flask' | 'bomb' | 'strike';
   /** A relic's: it never hurts a friend or anyone freed (friends caught in it are told they're spared). */
   relic?: boolean;
   /** A mace's smite: its light mends friends in the burst this much; `holy`: let go on the flash, it shields them (sim/holy.ts). */
@@ -678,6 +687,9 @@ export interface Bolt {
   hobble?: boolean;
   /** A Mage's frost burst: freezes solid at once (frost twice). */
   freeze?: boolean;
+  /** A Mage's tap: frost only chills (never freezes); storm jumps on to this many (STORM.chains if unset). */
+  chills?: boolean;
+  jumps?: number;
   /** A wand's: landing on a goblin mid wind-up, it breaks the blow off (sim/spells.ts). */
   interrupts?: boolean;
   /** A wand's burst loosed on the white flash: it breaks off whatever the goblin it hits is doing. */

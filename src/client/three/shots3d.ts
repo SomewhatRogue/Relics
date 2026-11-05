@@ -51,6 +51,9 @@ export function makeBolt(b: Bolt): THREE.Group {
       // An icicle or a lance: the element along it and a bright white point.
       part(g, 0.1, 0.1, 1.1, el, 0, 0, 0), part(g, 0.13, 0.13, 0.18, G(0xffffff), 0, 0, 0.55);
       break;
+    case 'strike':
+      // Only its mark on the floor until it falls (spellground.ts on the overlay).
+      break;
     case 'smite':
       part(g, 0.22, 3.0, 0.22, G(0xfff1b0, 0), 0, 1.5, 0), part(g, 0.5, 0.04, 0.5, G(0xffd27a, 0.2), 0, -0.48, 0);
       break;

@@ -251,8 +251,9 @@ function hud(now: number): void {
   $('.st').classList.toggle('spell', cost > 0);
   $('.st').classList.toggle('short', cost > 0 && (me.stamina < cost || !!me.winded));
   $('.st').style.setProperty('--cost', Math.min(100, cost) + '%');
-  // TAP, HOLD and PERFECT (kitlines.ts), the crossbow's reload key, and a Mage's element now.
-  const kit = kitLine(me.weapon) + (WEAPONS[me.weapon].reloads ? (input.touch ? '  HOLD RELOAD TO WIND' : '  HOLD C TO RELOAD') : '') + (WEAPONS[me.weapon].cls === 'MAGE' ? '  ' + (me.augments.channel || 'fire').toUpperCase() : '');
+  // A Mage's element now (X switches it), TAP, HOLD and PERFECT in it (kitlines.ts), the crossbow's reload key.
+  const mageEl = WEAPONS[me.weapon].cls === 'MAGE' ? castElement(me) : '';
+  const kit = (mageEl ? (input.touch ? '' : 'X ') + mageEl.toUpperCase() + '  ' : '') + kitLine(me.weapon, mageEl) + (WEAPONS[me.weapon].reloads ? (input.touch ? '  HOLD RELOAD TO WIND' : '  HOLD C TO RELOAD') : '');
   $('.kit').textContent = item ? item.traits.map((t) => TRAITS[t].name).join(' + ') + '  ' + kit : kit;
   card.update(room, me, !input.touch);
   pack.update(me);
@@ -269,9 +270,7 @@ function hud(now: number): void {
   // (A skill your trainer hasn't taught you yet has no button.)
   const known = knows(me, 'skill');
   $('.rlc').textContent = known ? (input.touch ? '' : 'E ') + tag(skill) : '';
-  // (The Mage's channel shows the element its spells are in now, in that colour.)
-  const skillEl = skill === 'channel' ? castElement(me) : me.augments[skill];
-  $('.rlc').dataset.el = skillEl;
+  $('.rlc').dataset.el = me.augments[skill];
   // The relic carried: its charge as a bar (gold, amber, low, or DARK and greyed).
   const it = relic ? carriedItem(me) : undefined, chg = it ? Math.round(relicFill(it) * 100) + '%' : '', chgc = it ? fillCol(it) : '';
   $('.rcd').innerHTML = relic ? (input.touch ? '' : 'R ') + (it && isDark(it) ? RELICS[relic].short + ' ' + RELICW.dark : tag(relic)) + (it ? `<i class="rchgl" style="--chg:${chg};--chgc:${chgc}"></i>` : '') : '';

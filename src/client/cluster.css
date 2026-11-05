@@ -51,16 +51,24 @@ body.touch .stick.on { opacity: 1; }
 .tb.grab, .tb.use { width: 60px; height: 60px; right: calc(82px + env(safe-area-inset-right)); bottom: calc(232px + env(safe-area-inset-bottom)); z-index: 2; }
 body[data-dodge='false'] .tb.grab { width: 62px; height: 62px; right: calc(135px + env(safe-area-inset-right)); bottom: calc(32px + env(safe-area-inset-bottom)); }
 .tb.reload { width: 52px; height: 52px; right: calc(206px + env(safe-area-inset-right)); bottom: calc(92px + env(safe-area-inset-bottom)); }
+/* A Mage's ELEMENT (cluster.ts): a small ring next to ATTACK, where a guard would be (a Mage has none),
+   its name over it in the element's colour. A spellblade's PARRY steps out to the reload spot for it. */
+.tb.element { width: 56px; height: 56px; right: calc(132px + env(safe-area-inset-right)); bottom: calc(112px + env(safe-area-inset-bottom)); }
+.tb.element i { bottom: auto; top: -12px; padding: 0 2px; background: none; text-shadow: var(--px) var(--px) 0 #07080a; }
+.tb.element[data-el='fire'] i { color: #ff9a3c; }
+.tb.element[data-el='frost'] i { color: #bfe8ff; }
+.tb.element[data-el='storm'] i { color: #fff27a; }
+body[data-mage='true'] .tb.block { width: 56px; height: 56px; right: calc(204px + env(safe-area-inset-right)); bottom: calc(90px + env(safe-area-inset-bottom)); }
 /* ATTACK held on an empty crossbow: RELOAD pulses gold for a moment (owncues.ts). */
 .tb.reload.cue { z-index: 11; }
 .tb.reload.cue::before { animation-duration: 0.25s; }
 /* In town the way in or the word with someone takes ATTACK's place, big. */
 .tb.use.big { width: 92px; height: 92px; right: calc(24px + env(safe-area-inset-right)); bottom: calc(46px + env(safe-area-inset-bottom)); }
 .tb.use.big i { bottom: auto; top: -16px; }
-body[data-mode='town'] .tb.reload, body[data-mode='town'] .tb.attack, body[data-mode='town'] .tb.block, body[data-mode='town'] .tb.relic, body[data-mode='town'] .tb.relic2, body[data-mode='town'] .tb.potion, body[data-mode='town'] .tb.grab { display: none; }
+body[data-mode='town'] .tb.reload, body[data-mode='town'] .tb.element, body[data-mode='town'] .tb.attack, body[data-mode='town'] .tb.block, body[data-mode='town'] .tb.relic, body[data-mode='town'] .tb.relic2, body[data-mode='town'] .tb.potion, body[data-mode='town'] .tb.grab { display: none; }
 body[data-mode='run'] .tb.use:not(.chest) { display: none; }
 body[data-guard='none'] .tb.block { display: none; }
-.tb[hidden], .tb.reload[hidden], .tb.relic2[hidden], .tb.grab[hidden], .tb.use[hidden], .tb.potion[hidden] { display: none !important; }
+.tb[hidden], .tb.reload[hidden], .tb.element[hidden], .tb.relic2[hidden], .tb.grab[hidden], .tb.use[hidden], .tb.potion[hidden] { display: none !important; }
 /* The wood's lesson points at the button to press: a gold square stepping in and out round it. */
 .tb.hint { z-index: 11; }
 /* (A square drawn by a child, since the round hit area would round an outline of the button's own.) */

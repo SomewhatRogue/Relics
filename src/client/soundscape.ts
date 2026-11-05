@@ -4,6 +4,7 @@
  */
 import { chestSound } from './sfx';
 import { mageTapSound } from './magesfx';
+import { spellSound } from './spellsound';
 import { isDead } from '../sim/damage';
 import { asleep } from './foes';
 import type { ArenaRoom } from '../sim/room';
@@ -91,14 +92,14 @@ export class Soundscape {
     if (ev.k === 'loaded') return sfx.latch(), sfx.block();
     if (ev.k === 'glint') return sfx.latch(), sfx.perfect();
     if (ev.k === 'boltline') return sfx.javstick();
-    // The Mage's: magic spent hums, a fizzle is a dud, a broken blow rings, a slash and a wave
-    // whoosh in their element, a wall goes up with its element's sound, the blade lit or full chimes.
+    // The Mage's: magic spent hums, a fizzle is a dud, a broken blow rings, a slash whooshes in its
+    // element, the blade full chimes; a held spell and GRASP have their own (spellsound.ts).
     if (ev.k === 'magic') return sfx.channeled();
     if (ev.k === 'fizzle') return sfx.wallhit();
     if (ev.k === 'interrupt') return sfx.perfect(), sfx.shock();
     if (ev.k === 'bladefull') return sfx.channeled();
-    if (ev.k === 'slash' || ev.k === 'bladewave' || ev.k === 'wreathe') return ev.el === 'frost' ? sfx.chill() : ev.el === 'storm' ? sfx.shock() : sfx.ignite();
-    if (ev.k === 'wallup') return ev.big && sfx.rumble(), ev.el === 'frost' ? sfx.freeze() : ev.el === 'storm' ? sfx.shock() : sfx.flare();
+    if (ev.k === 'slash') return ev.el === 'frost' ? sfx.chill() : ev.el === 'storm' ? sfx.shock() : sfx.ignite();
+    if (spellSound(ev)) return;
     // The Cleric's: a shield given hums and blessed, takes a blow with a ward's ring, goes with a break; the
     // perfect smite booms, coals burst warm or flare, the chain clangs on a wall, the flail's stun rings.
     if (ev.k === 'holyshield') return sfx.ward();

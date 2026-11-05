@@ -74,10 +74,16 @@ export const WARD = { cooldown: 14, windup: 0.2, recover: 0.2, range: 7, hp: 50,
 /** The Healer's skill: blessed ground at your feet and a ward on whoever needs it most, at once. */
 export const SANCTUARY = { cooldown: 20, windup: 0.25, recover: 0.25 };
 
-/** The Mage's Elemental Channel: a tap turns its spells to the next element at once (fire, frost,
- *  storm, round again), back in `cooldown` seconds. The first spell after a turn is primed: `primed`
- *  times as hard. Each element has a job (BURN, FROST, STORM below; who is weak to what: weakness.ts). */
+/** The Mage's element, switched on its own button (ELEMENT; X on a laptop): a press turns the spellbook
+ *  to the next element at once (fire, frost, storm, round again), and again in `cooldown` seconds. The
+ *  element decides what every tap and hold is (shared/spellbook.ts). The first spell after a turn is
+ *  primed: `primed` times as hard. (Kept under the old relic id `channel`, for saves.) */
 export const CHANNEL = { cooldown: 1, windup: 0.06, recover: 0.12, primed: 1.5, order: ['fire', 'frost', 'storm'] as const };
+
+/** The Mage's class skill, GRASP (a placeholder name until the lore pass): every goblin in a cone in
+ *  front, `range` tiles and `arc` degrees, is dragged at `speed` toward a spot `to` tiles ahead of you and
+ *  staggers `stagger` s. A butcher or a shield-bearer barely moves: `heavy` of the way. It costs `cost` magic. */
+export const GRASP = { cooldown: 9, windup: 0.2, recover: 0.25, range: 5, arc: 70, to: 1.5, speed: 14, stagger: 0.6, heavy: 0.15, cost: 25 };
 
 /** The war cry (one of the Warrior's two skills): every goblin in earshot, awake or not, comes for you
  *  and nobody else for `time` seconds; small ones right beside you flinch. */
@@ -94,7 +100,8 @@ export const RELICS = {
   hook: { name: 'GRAPPLING HOOK', short: 'HOOK', cooldown: HOOK.cooldown, windup: HOOK.windup, recover: HOOK.recover, range: HOOK.range },
   net: { name: "HUNTER'S NET", short: 'NET', cooldown: NET.cooldown, windup: NET.windup, recover: NET.recover, range: NET.range },
   shadow: { name: 'SHADOWSTEP', short: 'SHADOW', cooldown: SHADOWSTEP.cooldown, windup: SHADOWSTEP.windup, recover: SHADOWSTEP.recover, range: SHADOWSTEP.range },
-  channel: { name: 'ELEMENTAL CHANNEL', short: 'CHANNEL', cooldown: CHANNEL.cooldown, windup: CHANNEL.windup, recover: CHANNEL.recover, range: 0 },
+  channel: { name: 'ELEMENT', short: 'ELEMENT', cooldown: CHANNEL.cooldown, windup: CHANNEL.windup, recover: CHANNEL.recover, range: 0 },
+  grasp: { name: 'GRASP', short: 'GRASP', cooldown: GRASP.cooldown, windup: GRASP.windup, recover: GRASP.recover, range: GRASP.range },
   lodestone: { name: 'LODESTONE', short: 'LODESTONE', cooldown: LODESTONE.cooldown, windup: LODESTONE.windup, recover: LODESTONE.recover, range: LODESTONE.range },
   horn: { name: 'WAR CRY', short: 'WAR CRY', cooldown: HORN.cooldown, windup: HORN.windup, recover: HORN.recover, range: HORN.radius },
   bash: { name: 'SHIELD CHARGE', short: 'SHIELD', cooldown: BASH.cooldown, windup: BASH.windup, recover: BASH.recover, range: BASH.distance },
@@ -118,7 +125,7 @@ export const RELICS = {
   knuckle: { name: "BUTCHER'S KNUCKLE", short: 'KNUCKLE', cooldown: KNUCKLE.cooldown, windup: KNUCKLE.windup, recover: KNUCKLE.recover, range: KNUCKLE.length },
 };
 export type RelicId = keyof typeof RELICS;
-export const RELIC_ORDER: RelicId[] = ['javelin', 'hook', 'bash', 'horn', 'stamp', 'net', 'volley', 'sic', 'shadow', 'vanish', 'knives', 'lodestone', 'firering', 'tether', 'blessing', 'ward', 'sanctuary', 'chain', 'light', 'bomb', 'sentry', 'bell', 'knuckle'];
+export const RELIC_ORDER: RelicId[] = ['javelin', 'hook', 'bash', 'horn', 'stamp', 'net', 'volley', 'sic', 'shadow', 'vanish', 'knives', 'grasp', 'lodestone', 'firering', 'tether', 'blessing', 'ward', 'sanctuary', 'chain', 'light', 'bomb', 'sentry', 'bell', 'knuckle'];
 /** Two abilities at most: the class's own skill, and one found relic carried with it. */
 export const RELIC_SLOTS = 2;
 /** Each class's skill (on the SKILL button): the first of its choices, until the hero picks another. */
@@ -126,7 +133,7 @@ export const CLASS_SKILL: Record<'WARRIOR' | 'RANGER' | 'ROGUE' | 'MAGE' | 'HEAL
   WARRIOR: 'bash',
   RANGER: 'net',
   ROGUE: 'shadow',
-  MAGE: 'channel',
+  MAGE: 'grasp',
   HEALER: 'sanctuary',
 };
 /**
@@ -143,7 +150,7 @@ export const SKILL_CHOICES: Record<keyof typeof CLASS_SKILL, RelicId[]> = {
   WARRIOR: ['bash', 'horn', 'stamp'],
   RANGER: ['net', 'volley', 'sic'],
   ROGUE: ['shadow', 'vanish', 'knives'],
-  MAGE: ['channel', 'firering', 'tether'],
+  MAGE: ['grasp', 'firering', 'tether'],
   HEALER: ['sanctuary', 'chain', 'light'],
 };
 

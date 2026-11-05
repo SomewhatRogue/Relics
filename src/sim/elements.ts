@@ -39,8 +39,8 @@ function ignite(e: Enemy, now: number, ev: FightEvent[]): void {
   e.burnUntil = now + BURN.time;
 }
 
-/** An element lands on a goblin with a blow of `n` damage. */
-export function afflict(w: World, e: Enemy, el: Augment, n: number): void {
+/** An element lands on a goblin with a blow of `n` damage; storm jumps on to `jumps` more (STORM.chains). */
+export function afflict(w: World, e: Enemy, el: Augment, n: number, jumps: number = STORM.chains): void {
   if (!el || e.act === 'dead') return;
   const { now, ev } = w;
   if (el === 'fire') {
@@ -59,19 +59,26 @@ export function afflict(w: World, e: Enemy, el: Augment, n: number): void {
       e.chillUntil = now + FROST.chill;
       ev.push({ k: 'chill', x: e.x, y: e.y });
     }
-  } else zap(w, e, n, true);
+  } else zap(w, e, n, jumps);
 }
 
-/** Storm on one goblin: shatters the frozen, flares the burning, and (once) arcs onward. */
-function zap(w: World, e: Enemy, n: number, chain: boolean): void {
+/** Frost that only slows (a Mage's tap, never a freeze on its own): fire on the chilled is steam, as ever. */
+export function chill(w: World, e: Enemy): void {
+  if (burning(e, w.now)) return afflict(w, e, 'frost', 0);
+  if (e.chillUntil <= w.now) w.ev.push({ k: 'chill', x: e.x, y: e.y });
+  e.chillUntil = Math.max(e.chillUntil, w.now + FROST.chill);
+}
+
+/** Storm on one goblin: shatters the frozen, flares the burning, and (once) arcs on to `chains` more. */
+function zap(w: World, e: Enemy, n: number, chains: number): void {
   const { now, ev } = w;
   if (frozen(e, now)) shatter(e, now, ev);
   else if (burning(e, now)) flare(w, e);
-  if (!chain) return;
+  if (chains <= 0) return;
   const near = w.enemies
     .filter((o) => o !== e && o.act !== 'dead' && dist(o, e) <= STORM.reach)
     .sort((a, b) => dist(a, e) - dist(b, e))
-    .slice(0, STORM.chains);
+    .slice(0, chains);
   const rods: Enemy[] = [];
   for (const j of w.javelins) {
     const o = j.state === 'body' ? w.enemies.find((x) => x.id === j.enemy) : undefined;
@@ -80,7 +87,7 @@ function zap(w: World, e: Enemy, n: number, chain: boolean): void {
   for (const o of [...near, ...rods]) {
     ev.push({ k: 'shock', x: e.x, y: e.y, x2: o.x, y2: o.y });
     const hit = rods.includes(o) ? STORM.rodDmg : Math.max(STORM.min, Math.round(n * STORM.share));
-    if (!damage(o, hit, now, ev, { flinch: STORM.flinch, el: 'storm' })) zap(w, o, 0, false);
+    if (!damage(o, hit, now, ev, { flinch: STORM.flinch, el: 'storm' })) zap(w, o, 0, 0);
   }
 }
 

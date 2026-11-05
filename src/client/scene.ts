@@ -58,7 +58,7 @@ import { dusk } from './streetlife';
 import { drawMist, setSun, torchIn } from './daytime';
 import { drawPuddles } from './spiders';
 import { drawSkills, skillLights } from './skillsdraw';
-import { drawWalls, wallLightsFlat } from './walldraw';
+import { drawSpellGround, spellLightsFlat } from './spellground';
 import { drawFound } from './foundsdraw';
 import { witchColour } from './hallsdraw';
 import { brazierOn, drawBrazier, drawLamps } from './lampsdraw';
@@ -384,8 +384,8 @@ export class Scene {
     }
     // The skills taught after the first: rings wound up, a volley, a fire ring, a tether, a chain (skillsdraw.ts).
     drawSkills(c, room, cx, cy);
-    // A staff's walls of fire, frost or storm (walldraw.ts).
-    drawWalls(c.glow, room, cx, cy);
+    // A staff's ring of fire or charged ring, a lightning strike's mark (spellground.ts).
+    drawSpellGround(c.glow, room, cx, cy);
     drawFound(c, room, cx, cy);
     // At a fork, both ways out glow, each with its name.
     if (room.exitOpen) for (const r of map.roads ?? []) {
@@ -456,7 +456,7 @@ export class Scene {
       const on = b.kind === 'forge' ? 1 : lampAt(map.theme, b.x, b.y);
       if (on > 0) lights.push({ x: bx + (b.w * PX) / 2 - cx, y: by + b.h * PX - cy, r: 34, i: 0.45 * on, c: b.kind === 'forge' ? [1, 0.5, 0.25] : [1, 0.8, 0.5] });
     }
-    lights.push(...skillLights(room, cx, cy, now), ...wallLightsFlat(room, cx, cy));
+    lights.push(...skillLights(room, cx, cy, now), ...spellLightsFlat(room, cx, cy));
     for (const z of room.zones) if (!z.kind) lights.push({ x: OX + z.x * PX - cx, y: OY + z.y * PX - cy - 6, r: z.r * PX * 1.4, i: 0.8 * Math.min(1, (z.until - room.time) / 1.2), c: [1, 0.85, 0.5] });
     for (const h of room.heroes) {
       const [x, y] = lerp('h:' + h.id, h.x, h.y);

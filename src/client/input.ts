@@ -2,7 +2,7 @@
  * Turns keys, mouse and touch into an Intent. Laptop: WASD to move, mouse to aim, left click to
  * attack, hold right click to block (tap it to parry), Space to roll; J / K work too;
  * E the class skill, R the relic carried, G grab (then click to slam, G to throw), Q a potion (held:
- * turn the belt instead), C held winds a crossbow. Phone (upright):
+ * turn the belt instead), C held winds a crossbow, X turns a Mage's element. Phone (upright):
  * a floating stick on the left, Attack, Block and Roll under the right thumb.
  */
 import { NO_INTENT, type Intent } from '../sim/types';
@@ -39,6 +39,7 @@ export class Input {
       if (k === 'g') this.intent.grabSeq++;
       if (k === 'q') this.potion.down();
       if (k === 'c') this.reload(true);
+      if (k === 'x') this.element();
       if (k === 'k') (this.intent.blockSeq++), (this.blockHeld.key = true);
     });
     addEventListener('keyup', (e) => {
@@ -127,6 +128,7 @@ export class Input {
     pb.addEventListener('touchcancel', () => (pb.classList.remove('down'), this.potion.cancel()));
     btn('.roll', () => this.intent.rollSeq++);
     btn('.reload', () => this.reload(false), () => (this.reloadHeld.touch = false));
+    btn('.element', () => this.element());
     btn('.block', () => ((this.intent.blockSeq++), (this.blockHeld.touch = true)), () => (this.blockHeld.touch = false));
   }
 
@@ -135,6 +137,11 @@ export class Input {
     this.intent.relicPick = slot;
     this.intent.relicPickSeq++;
     this.intent.relicSeq++;
+  }
+
+  /** A Mage's ELEMENT (X, or its ring by ATTACK): counted, so a tap is never lost. */
+  element(): void {
+    this.intent.elementSeq = (this.intent.elementSeq ?? 0) + 1;
   }
 
   /** RELOAD pressed (C, or the crossbow's button): counted, and held till it's let go. */

@@ -24,6 +24,9 @@ const hero = (old: Partial<Profile>): Profile => {
   if (!p.belt) out.belt = [];
   // Lamp Oil and the frost and smoke flasks are gone from the game (Kyle, 2026-11-04): any on a belt become Bitter.
   out.belt = out.belt.map((x) => (DORMANT_POTIONS.includes(x) ? 'bitter' : x));
+  // The Mage's class skill was the Elemental Channel; switching element has its own button now and the
+  // skill a Mage was taught is GRASP (Kyle, 2026-11-04). Taught the one, you know the other.
+  if ((out.skill as string) === 'channel') out.skill = 'grasp';
   if (p.armor === undefined) out.armor = newProfile(cls).armor;
   if (!p.rings) out.rings = [];
   out.steel ??= 0;

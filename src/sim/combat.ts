@@ -192,6 +192,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   const w = WEAPONS[h.weapon];
   // A blessed hero takes less from everything.
   const g = statsOf(h), taken = (h.blessedUntil > now ? BLESSING.taken : 1) * g.taken * (wears(h, 'apron') ? HUNGRY_FX.apron : 1);
+  // A spellblade's lightning dash: untouchable while it runs (sim/rush.ts).
+  if (h.act === 'bash' && h.rush?.el === 'storm') return void ev.push({ k: 'dodge', x: h.x, y: h.y });
   if (h.act === 'roll' && h.actT >= w.dodge.iFrom && h.actT <= slipWindow(h)) {
     ev.push({ k: 'dodge', x: h.x, y: h.y });
     slipped(e, a, h, ev);

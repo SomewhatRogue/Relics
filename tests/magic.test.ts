@@ -113,7 +113,7 @@ describe('class relics', () => {
     const { room, h } = onTarget(1);
     const seen: string[] = [];
     for (let i = 1; i <= 5; i++) room.setIntent('me', intent({ classSeq: i })), room.step(), seen.push(h.relics.join(' '));
-    expect(seen).toEqual(['net', 'shadow', 'channel', 'sanctuary', 'bash']);
+    expect(seen).toEqual(['net', 'shadow', 'grasp', 'sanctuary', 'bash']);
   });
 
   it("the ranger's net snares a scrapper flat", () => {
@@ -141,16 +141,16 @@ describe('class relics', () => {
     expect(h.fy).toBeGreaterThan(0.9);
   });
 
-  it("the mage's channel turns its spells from fire to frost at once (no standing): three icicles a tap", () => {
+  it("the mage's ELEMENT button turns its spells from fire to frost at once (no standing): three icicles a tap", () => {
     const { room, h } = onTarget(3);
     asClass(room, 3);
-    room.setIntent('me', intent({ classSeq: 3, relicSeq: 1, ay: -1 }));
+    room.setIntent('me', intent({ classSeq: 3, elementSeq: 1, ay: -1 }));
     const ev = run(room, 0.15);
     expect(ev.find((e) => e.k === 'channeled')).toMatchObject({ el: 'frost' });
     expect(h.primed).toBe(true);
     for (const e of room.enemies) Object.assign(e, { x: 1, y: 15, cooldown: 99 });
     expect(h.augments.channel).toBe('frost');
-    room.setIntent('me', intent({ classSeq: 3, relicSeq: 1, attackSeq: 1, ay: -1 }));
+    room.setIntent('me', intent({ classSeq: 3, elementSeq: 1, attackSeq: 1, ay: -1 }));
     let icicles = 0, shots = 0;
     for (let i = 0; i < ticks(0.4); i++) {
       room.step();
