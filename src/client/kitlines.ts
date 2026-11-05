@@ -44,7 +44,7 @@ export const MAGE_KIT: Record<MageKit, Record<Element, KitRow>> = {
     storm: { tap: 'Lightning stream, tap to build', hold: 'Lightning strike, stuns', perfect: 'Bigger, longer stun', also: 'Ignores shields, spares friends' },
   },
   staff: {
-    fire: { ...KIT.staff, also: 'Burns you and friends, keep clear' },
+    fire: { ...KIT.staff, also: 'Burns you and friends too' },
     frost: { tap: 'Frost sweep, chills', hold: 'Hard frost, freezes all round', perfect: 'Bigger' },
     storm: { tap: 'Crackling sweep, ignores shields', hold: 'Charged ring, jolts', perfect: 'Bigger, jolts stun' },
   },
