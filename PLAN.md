@@ -2,6 +2,15 @@
 
 ## Current slice
 
+**PUBLIC WORKS with Foreman Judd and his crew; rats on the blood** (Claude Opus 5.5, 2026-11-04; Kyle:
+"rename works to public works and have it be a foreman and people working around him tidying", "when
+there's blood and rats I want them to scurry away if you walk near them, then come back later").
+Built; waiting on Kyle's play. *Done when* the square says PUBLIC WORKS, Foreman Judd by the stall opens
+the board with his line, two of his crew sweep and haul round the stall and a third shovels the east
+lane's rubble into a barrow, stopping to work, in the same spot on every screen; and on a job rats
+gather at the blood and the bodies, bolt for the nearest wall when he comes within 2.5 tiles (1.2
+creeping), and creep back one at a time 15 to 25 s after he's gone, flat and 2.5D, phone and laptop.
+
 **Encounters as packs, and ten new sorts of the hungry** (Claude Opus 5.5, 2026-11-04; Kyle: "Too much chaos
 on the screen reads messy. I'd rather have more impactful battles, but splattering little goblins is also
 fun", and of the ten, "I like them all, let's make them"). Built; waiting on Kyle's play. *Done when* a job's

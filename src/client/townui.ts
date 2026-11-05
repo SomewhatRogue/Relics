@@ -172,7 +172,7 @@ const CHAT: Record<number, { name: string; line: string }> = {
   3: { name: 'ALDER BRAM', line: 'Every choice this council makes, somebody pays for it. I\'d sooner it was the hungry.' },
   4: { name: 'GOODWIFE SELL', line: 'Farm or refugees. I have heard both argued till the candles gave out, and the candles were the only ones talking sense.' },
   5: { name: 'GATE GUARD', line: 'Gate opens for a job, and shuts behind you whether you\'re through or not. Board is in the square.' },
-  6: { name: 'SERGEANT DUNN', line: 'Two of us for a whole wall, and boots that let the rain in. Put coin in the town works and I will find you a proper watch. And boots.' },
+  6: { name: 'SERGEANT DUNN', line: 'Two of us for a whole wall, and boots that let the rain in. Put coin in the public works and I will find you a proper watch. And boots.' },
   7: { name: 'WATCHMAN HOB', line: 'Quiet tonight. I said that last night and one of them took the Fosters\' goat off the wall. So, not quiet.' },
   8: { name: 'WATCHMAN PIKE', line: 'New spear and new boots, and the same teeth out there. Still, good boots.' },
   9: { name: 'OLD MERREN', line: 'Father Odric nailed that chapel shut with his own hands, the night the siege broke. I asked him why. He said, so it stays where it is.' },

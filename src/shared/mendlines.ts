@@ -1,5 +1,5 @@
 /**
- * What Wickhold says about itself as it's mended and raided: every new line for the town works, in
+ * What Wickhold says about itself as it's mended and raided: every new line for the public works (internally `works`), in
  * one place, for the lore keeper and the line editor. Picked by shared/townsays.ts.
  */
 import type { WorkId } from './works.js';
@@ -128,10 +128,22 @@ export const RAID_NEWS = {
   line: "You missed it. They came over the north side in the middle watch and didn't take anybody, just pulled down what we'd mended and went.",
 };
 
+/**
+ * Foreman Judd, at the public works stall in the square: he speaks the works board's lines (they were
+ * Reeve Hollis's; Hollis keeps the book and Judd points at it). The town picks what gets done with
+ * its coin and its feet, never Judd. Shown in turn, a line each time the board opens.
+ */
+export const FOREMAN = {
+  name: 'FOREMAN JUDD',
+  lines: [
+    "I don't pick what gets done, mind, the town does that with its coin and whoever turns up with a shovel, and I just point. Hollis writes it all in his book, every coin and every den burned, so don't go telling him you gave more than you did.",
+    "My lot sweep and haul and fill the barrow, or that's the idea, and whoever you catch leaning on a broom will swear they're ~thinking~. They aren't.",
+  ],
+};
+
 /** The game's own voice: the board and the works panel. */
 export const MEND_UI = {
   board: (day: number, loss: string) => `Day ${day}: the hungry came over the north wall in the night. ${loss.charAt(0).toUpperCase() + loss.slice(1)}.`,
-  hollis: "Every coin you give goes in my book, and every den you burn.",
   done: 'Done',
   gear: 'Weapons and armor given here count for 50% more than Tobin pays.',
 };

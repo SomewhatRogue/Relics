@@ -1,7 +1,7 @@
 /**
  * Wickhold, the last walled town: a map you walk around, built from the shared world's state.
  *
- * Lantern Square in the middle (the Last Lantern, the job board, the town works, the Roll of the
+ * Lantern Square in the middle (the Last Lantern, the job board, the public works and its crew, the Roll of the
  * Brave, the well, a bard). Round it: the church and its graves (north-west), the town hall and the
  * forge (north), the mage's tower and the barred keep (north-east), the barracks (west), the hunters'
  * lodge and its archery butts (east), the counting house with its vault (west, roof fallen in), the infirmary (south-west), the Drowned Rat tavern with a sewer
@@ -16,6 +16,7 @@ import { townGround, townSoil } from './ground.js';
 import { mending, WORN } from './mend.js';
 import { siege } from './siege.js';
 import { workDone } from './works.js';
+import { publicWorks } from './publicworks.js';
 
 /** What talking to someone (or using a spot) opens. */
 export type SpotId = 'board' | 'council' | 'church' | 'smith' | 'wright' | 'trainer' | 'market' | 'infirmary' | 'granary' | 'home' | 'chat'
@@ -24,7 +25,7 @@ export interface Spot { id: SpotId; x: number; y: number; label: string; key?: s
 
 export const SPOTS: Spot[] = [
   { id: 'board', x: 24.1, y: 13.8, label: 'JOB BOARD' },
-  { id: 'works', x: 32, y: 13.8, label: 'TOWN WORKS' },
+  { id: 'works', x: 32, y: 13.8, label: 'PUBLIC WORKS' },
   { id: 'roll', x: 28, y: 25.3, label: 'THE ROLL OF THE BRAVE' },
   { id: 'well', x: 22, y: 21.4, label: 'THE WELL' },
   { id: 'market', x: 38.5, y: 14.2, label: 'MARKET ROW' },
@@ -77,7 +78,7 @@ export function townMap(w: WorldState): GameMap {
     // The counting house: the roof came in during the siege and was never put back; the vault under it held (Keeper Edda).
     { x: 2.4, y: 22.4, w: 6, h: 3.2, kind: 'hall', label: 'COUNTING HOUSE', door: 'bank', worn: true },
     { x: 22.9, y: 12.6, w: 2.4, h: 0.6, kind: 'stall', label: 'JOBS' },
-    { x: 30.7, y: 12.6, w: 2.6, h: 0.6, kind: 'stall', label: 'WORKS' },
+    { x: 30.3, y: 12.6, w: 3.4, h: 0.6, kind: 'stall', label: 'PUBLIC WORKS' },
     { x: 27, y: 23.5, w: 2, h: 1, kind: 'monument' },
     { x: 23.5, y: 24, w: 2, h: 0.5, kind: 'bench' },
     { x: 31, y: 24, w: 2, h: 0.5, kind: 'bench' },
@@ -116,6 +117,8 @@ export function townMap(w: WorldState): GameMap {
   // Tobin buys anything at the far stall, and sells it back for a while (client/stores.ts).
   npcs.push(n('TOBIN THE PAWNBROKER', 38.5, 18.1, 'merchant', 'villager'));
   if (quarter) npcs.push(n('OLD MERREN', 57, 18, 'chat', 'elder', 9));
+  // Foreman Judd at the works stall, and his crew sweeping, hauling and shovelling (publicworks.ts).
+  npcs.push(...publicWorks(w));
   const m = mending(w), sg = siege(w), worn = !workDone(w, 'shutters');
   for (const b of blocks) if (worn && b.label && WORN.includes(b.label)) b.worn = true;
   blocks.push(...m.blocks, ...sg.blocks), rounds.push(...m.rounds, ...sg.rounds), npcs.push(...m.npcs, ...sg.npcs);

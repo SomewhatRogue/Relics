@@ -1,5 +1,5 @@
 /**
- * The things to do in and around Lantern Square: the town works, the Roll of the Brave (and which
+ * The things to do in and around Lantern Square: the public works, the Roll of the Brave (and which
  * world you play in), the well, the bard, and down at the Drowned Rat: the barkeep, dice with Moll,
  * the sewer grate (Gannet's bar is shops.ts). Barred doors and rubble say what would open them.
  */
@@ -30,7 +30,7 @@ const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 const LOCKED: Record<string, string> = {
   keep: "Barred from the inside since the siege broke. Eleven years. Some nights there's a light in the high window. Nobody on the watch will say who's carrying it.",
   chapel: 'Planks across the door, nailed from outside, and prayers chalked over the planks. Whatever the church put in there, it was keeping it in.',
-  oldquarter: 'Siege rubble chokes the east lane, roof beams and somebody\'s bed. The Old Quarter is past it. The town can clear it together, coin by coin: TOWN WORKS, in the square.',
+  oldquarter: 'Siege rubble chokes the east lane, roof beams and somebody\'s bed. The Old Quarter is past it. The town can clear it together, coin by coin: PUBLIC WORKS, in the square.',
 };
 
 /** Returns true if it handled the spot. */
@@ -83,7 +83,7 @@ export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key:
   if (id === 'sewer') {
     panel.show('THE SEWER GRATE', workDone(w, 'sewers')
       ? p('The grate is open. Jobs below the town are on the board in the square: The Wickhold Sewers.')
-      : p(`Rusted shut. Something scratches below, and the air that comes up smells of wet fur and old pennies. The town works will open it once enough dens are burned out on jobs (${Math.min(w.dens, WORKS.sewers.need)} of ${WORKS.sewers.need}).`));
+      : p(`Rusted shut. Something scratches below, and the air that comes up smells of wet fur and old pennies. The public works will open it once enough dens are burned out on jobs (${Math.min(w.dens, WORKS.sewers.need)} of ${WORKS.sewers.need}).`));
     return true;
   }
   if (id === 'locked') {

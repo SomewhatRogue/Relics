@@ -25,10 +25,14 @@ import type { Lerp } from './actors3d';
 import type { Proj } from './overlay3d';
 import { BOXFIGS } from './look';
 import { drawFoes3d } from './foes3d';
+import type { Fx } from '../fx';
+import type { Hero } from '../../sim/types';
+import { rats } from '../rats';
+import { drawRat } from '../ratdraw';
 
 const DRUM = '#c8e050';
 
-export interface Extra { room: ArenaRoom; meId: string; lerp: Lerp; P: Proj; now: number; W: number; H: number; fanfare: boolean; mist: [number, number] }
+export interface Extra { room: ArenaRoom; meId: string; lerp: Lerp; P: Proj; now: number; W: number; H: number; fanfare: boolean; mist: [number, number]; stains?: Fx['decals']; others?: Hero[] }
 
 export function drawExtras(g: CanvasRenderingContext2D, x: Extra): void {
   const { room, lerp, P, now } = x, c: Ctx = { lit: g, glow: g, now, t: room.time }, up = (z?: number) => (z ?? 0) * 0.75;
@@ -37,6 +41,12 @@ export function drawExtras(g: CanvasRenderingContext2D, x: Extra): void {
   for (const r of room.map.rounds) if (r.kind === 'crows' || r.kind === 'dog' || r.kind === 'moths' || r.kind === 'smoke') {
     const [sx, sy] = P(r.x, 0, r.y);
     if (sx > -60 && sy > -140 && sx < x.W + 60 && sy < x.H + 60) drawLife(c, r, sx, sy);
+  }
+  // Rats at the blood and in the alleys, on the floor as the flat view draws them (../rats.ts).
+  rats.frame(room, x.stains ?? [], x.others?.length ? [...room.heroes, ...x.others] : room.heroes, x.meId, now);
+  for (const r of rats.rats) if (r.state !== 'gone') {
+    const [sx, sy] = P(r.x, 0.03, r.y);
+    drawRat(c, r, sx, sy);
   }
   // A house's kindling: the glint while you're near, the ring while someone lights it (kindledraw.ts).
   const meH = room.heroes.find((h) => h.id === x.meId);

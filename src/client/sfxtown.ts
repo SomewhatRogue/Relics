@@ -44,4 +44,12 @@ export const sfxTown = {
     burst('bandpass', 2600, 1800, 6, 0.25, 0.03);
     burst('bandpass', 1400, 900, 5, 0.18, 0.03, 0.06);
   },
+  /** Rats scattering (`n` of them, the nearest `dist` tiles off): a thin squeak or two and a patter of feet, quiet. */
+  rats(n: number, dist: number) {
+    if (!ready() || dist > 10) return;
+    const v = Math.max(0.25, 1 - dist / 10);
+    tone('sine', 3300, 4300, 0.03 * v, 0.07);
+    if (n > 1) tone('sine', 3900, 3200, 0.022 * v, 0.06, 0.08);
+    for (let i = 0; i < 5 + Math.min(6, n * 2); i++) burst('bandpass', 2600 + (i % 3) * 500, 1800, 3, 0.035 * v, 0.018, 0.02 + i * (0.035 + (i % 2) * 0.012));
+  },
 };

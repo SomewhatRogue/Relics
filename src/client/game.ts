@@ -44,7 +44,7 @@ import { dropOwed, owedTo } from './owed';
 import { dressKit, forgetTaken, keepKit } from './keepkit';
 import { ONLINE } from './relay';
 import { townLight } from '../shared/daylight';
-import { townPhase } from './townclock';
+import { onClock, townPhase } from './townclock';
 import { Followers } from './followers';
 import { JobRooms, doorPushed, type DoorMark, type SavedHouses } from './jobrooms';
 import { packRoom, unpackRoom } from './bigsave';
@@ -496,6 +496,8 @@ export class Game {
     // Your class and kit are your hero's: changed at the smith and the relic-wright, never mid-fight.
     intent = { ...intent, classSeq: h.seen.cls, weaponSeq: h.seen.weapon, augmentSeq: h.seen.augment };
     // No fighting in town: no blows, guard, relics or grabs; rolls, dashes and blinks still work.
+    // The works' crew walk on Wickhold's wall clock, the same on every screen (townclock.ts).
+    if (this.mode === 'town') onClock(this.room.map.npcs, this.room.time);
     if (this.mode === 'town') intent = { ...intent, attack: false, block: false, attackSeq: h.seen.attack, blockSeq: h.seen.block, relicSeq: h.seen.relic, grabSeq: h.seen.grab, potionSeq: h.seen.potion, reload: false, reloadSeq: h.seen.reload ?? 0 };
     // The wood: only what Hew has taught you so far; nothing at all during the cutscene.
     if (this.mode === 'wood') {

@@ -77,6 +77,8 @@ most Want among the heroes is the one the bells don't spare).
 
 - **Town works** are the town choosing with its gold and its feet: what gets cleared, built and opened
   sets which chapter's door opens first.
+  On screen they're the PUBLIC WORKS (2026-11-04). Foreman Judd, a townsman, stands at the works stall
+  with a crew sweeping, hauling and shovelling; he points at Hollis's book and never picks the work.
 - **Votes** are chapter endings. Nothing is decided by the writers that the council can decide.
 - **Feats** are read at the weekly review: the hero who saved the most at Barrowby gets named in the
   next chapter's opening; a hero who hoarded and turned becomes the next named butcher, with their

@@ -217,7 +217,7 @@ export class View3D {
     this.gl.setRenderTarget(null);
     this.gl.render(this.postScene, this.quad);
     const og = this.overlay.g;
-    const ex = { room, meId, lerp, P, now, W: this.view.W, H: this.view.H, fanfare: !!marks.fanfare, mist: [at.x * this.view.ppu, at.z * this.view.ppu * Math.sin(PITCH)] as [number, number] };
+    const ex = { room, meId, lerp, P, now, W: this.view.W, H: this.view.H, fanfare: !!marks.fanfare, stains: fx.decals, others, mist: [at.x * this.view.ppu, at.z * this.view.ppu * Math.sin(PITCH)] as [number, number] };
     this.overlay.draw(room, meId, fx, marks, P, lerp, now, this.view.ppu);
     drawSkills3(og, room, P, lerp, this.view.ppu, now);
     drawWalls3(og, room, P, this.view.ppu);
