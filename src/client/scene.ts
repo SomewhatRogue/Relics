@@ -13,7 +13,11 @@ import { drawHound, drawSnare } from './hound';
 import type { Hero } from '../sim/types';
 import { blit, type Ctx } from './draw';
 import { asleep, drawEnemy, drawHeld, drawTelegraph } from './foes';
+import type { Enemy } from '../sim/types';
 import { drawDrums } from './backline';
+import { drawBanners } from './foedraw';
+import { drawCrows, drawSlicks } from './beastdraw';
+import { ROOF_UP } from './foedraw';
 import { camKick } from './heropose';
 import { houseOf } from './cottage';
 import { EL_LIGHT, heldEl } from './palette';
@@ -189,15 +193,21 @@ export class Scene {
     setSun(map.theme);
     const tk = torchIn(map.theme);
     if (room.puddles?.length) drawPuddles(c, room.puddles, cx, cy, room.time, now);
+    // Lamp oil on the floor, and crows on the dead (beastdraw.ts).
+    const floor = (x: number, y: number): [number, number] => [OX + x * PX - cx, OY + y * PX - cy];
+    if (room.slicks?.length) drawSlicks(c, room.slicks, floor, room.time);
     const pw = me ? parryWindow(me) : 0.3;
     for (const e of room.enemies) if (e.attack && e.act === 'attack') drawTelegraph(c, e.attack, cx, cy, pw);
     // A house on fire: where it burns, where it's about to, where a beam is coming down (blazedraw.ts).
     drawBlaze(c, room, cx, cy);
     // A drummer's reach and its beat on the floor, and the goblins it has roused (client/backline.ts).
-    drawDrums(c, room.enemies, (e) => {
+    const at = (e: Enemy): [number, number] => {
       const [x, y] = lerp('e:' + e.id, e.x, e.y);
       return [x - cx, y - (e.z ?? 0) * LIFT - cy];
-    }, room.time);
+    };
+    drawDrums(c, room.enemies, at, room.time);
+    // A banner's reach and the goblins that have taken heart in it; a rout (foedraw.ts).
+    drawBanners(c, room.enemies, at);
     // A Rogue's kit in hand: show each goblin's back, the place a backstab lands.
     if (me && WEAPONS[me.weapon].cls === 'ROGUE') for (const e of room.enemies) {
       if (e.act === 'dead' || e.kind === 'dummy' || e.kind === 'swingDummy') continue;
@@ -236,6 +246,8 @@ export class Scene {
         } });
       }
     }
+    // Crows on the dead, over the bodies they're at (beastdraw.ts).
+    for (const f of room.crows ?? []) items.push({ y: OY + (f.y + 0.4) * PX, draw: () => drawCrows(c, [f], (x, y) => [OX + x * PX - cx, OY + y * PX - cy], room.time) });
     for (const e of room.enemies) {
       const carrier = room.heroes.find((h) => h.carrying === e.id);
       if (carrier) {
@@ -244,10 +256,11 @@ export class Scene {
         items.push({ y: hy + 0.5, draw: () => (drawHeld(c, e, hx - cx, hy - cy, carrier.fx, carrier.fy, slam), drawStatus(c, e, hx - cx, hy - cy - 20, room.time)) });
         continue;
       }
-      const [x, y] = lerp('e:' + e.id, e.x, e.y), up = (e.z ?? 0) * LIFT;
+      // Up on a roof: stood on its ridge, drawn after the house it's on.
+      const roof = (e.z ?? 0) >= 2, [x, y] = lerp('e:' + e.id, e.x, e.y), up = roof ? ROOF_UP : Math.max(0, e.z ?? 0) * LIFT;
       // A big map: only what's on screen is drawn (DECISIONS 2026-11-03).
       if (big && off(x - cx, y - cy)) continue;
-      items.push({ y, draw: () => (drawEnemy(c, e, x - cx, y - up - cy, asleep(map, e)), drawStatus(c, e, x - cx, y - up - cy, room.time)) });
+      items.push({ y: roof ? y + 3 * PX : y, draw: () => (drawEnemy(c, e, x - cx, y - up - cy, asleep(map, e)), drawStatus(c, e, x - cx, y - up - cy, room.time)) });
     }
     for (const p of room.props) {
       if (p.broken) continue;

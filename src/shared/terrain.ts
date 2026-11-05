@@ -25,9 +25,17 @@ import { raise3, sideWayIn } from './roomledge.js';
 import { keepReachable } from './roomreach.js';
 import { sideBlock } from './sideway.js';
 import { doorAt } from './arena.js';
+import type { Role } from './encounters.js';
+import { composeRoom, crowsOn } from './encounter.js';
 
 /** `wave`: a nest's spiders a wave (more in a party; shared/nests.ts). */
-export interface Foe { kind: 'scrapper' | 'butcher' | 'spider' | 'brood' | 'nest'; wave?: number; x: number; y: number; hp?: number; name?: string; bow?: boolean; z?: number; awake?: boolean; feeding?: boolean; variant?: 'looter' | 'lunger' | 'heavy' | 'stoker' | 'shield' | 'hexer' | 'drummer' }
+export type FoeVariant = 'looter' | 'lunger' | 'heavy' | 'stoker' | 'shield' | 'hexer' | 'drummer'
+  | 'banner' | 'netter' | 'thief' | 'log' | 'roofer' | 'keeper' | 'wolf' | 'oiler' | 'torch' | 'sapper' | 'blind';
+/**
+ * `pack`: the fight it belongs to (shared/encounter.ts; a pack's shout wakes only its own), `role` what
+ * it's for in it, `more` (a pack's centrepiece) the special a party of three or more adds.
+ */
+export interface Foe { kind: 'scrapper' | 'butcher' | 'spider' | 'brood' | 'nest'; wave?: number; x: number; y: number; hp?: number; name?: string; bow?: boolean; z?: number; awake?: boolean; feeding?: boolean; variant?: FoeVariant; pack?: number; role?: Role; more?: Role }
 /** Which way the party went at a fork. */
 export type RoadId = Road['road'];
 export interface RoomPlan { map: GameMap; foes: Foe[]; props: { kind: PropKind; x: number; y: number }[]; chests: { x: number; y: number; chained?: boolean }[] }
@@ -135,16 +143,17 @@ export function planRoom(job: Job, index: number, road?: RoadId, taken?: Record<
   const fires = spec ? setPiece(lay, spec.piece) : oldBands(lay);
   // Not every small goblin is the same: spear-lungers (roll out of the line), brutes (big, slow blows
   // to parry or dodge) and shield-bearers (hit them from behind, or hard). More of them deeper in.
-  for (const f of foes) {
+  // (A layout-3 room's goblins are laid out as fights instead: composeRoom, below.)
+  for (const f of v3 ? [] : foes) {
     if (f.kind !== 'scrapper' || f.bow || f.feeding || f.name) continue;
     const r = rng.next(), deep = index * 0.05 + ruin * 0.04;
     if (r < 0.14 + deep) f.variant = 'lunger';
     else if (r < 0.26 + deep * 2 && ruin >= 1) f.variant = 'shield';
     else if (r < 0.33 + deep * 2.5 && index >= 1) f.variant = 'heavy';
   }
-  if (final && (obj === 'hunt' || obj === 'story')) foes.push({ kind: 'butcher', x: MID, y: 4.5, hp: obj === 'story' ? 560 : 420, name: job.boss });
-  if (index >= 1 && ruin >= 2) foes.push({ kind: 'butcher', x: fires[0]?.x ?? MID, y: (fires[0]?.y ?? 6) - 1.2 });
-  if (final && ruin >= 2 && obj !== 'hunt' && obj !== 'story') foes.push({ kind: 'butcher', x: fires[1]?.x ?? MID, y: (fires[1]?.y ?? 5) - 1.2 });
+  if (final && (obj === 'hunt' || obj === 'story')) foes.push({ kind: 'butcher', x: MID, y: 4.5, hp: obj === 'story' ? 560 : 420, name: job.boss, ...(v3 ? { pack: 99 } : {}) });
+  if (!v3 && index >= 1 && ruin >= 2) foes.push({ kind: 'butcher', x: fires[0]?.x ?? MID, y: (fires[0]?.y ?? 6) - 1.2 });
+  if (!v3 && final && ruin >= 2 && obj !== 'hunt' && obj !== 'story') foes.push({ kind: 'butcher', x: fires[1]?.x ?? MID, y: (fires[1]?.y ?? 5) - 1.2 });
   // The back of the pack: now and then a hexer or a drummer among them (shared/roster.ts). A routed
   // room rolls it last, after the spiders have thinned the band, so blades are always left to fight.
   if (!spec) rollBackline(foes, job, index);
@@ -157,7 +166,9 @@ export function planRoom(job: Job, index: number, road?: RoadId, taken?: Record<
   if (final && job.deep) chests.push({ x: MID + 2.2, y: 3.2, chained: true });
   // In the wilder places, sometimes spiders: nests that hatch waves, and deep in, a brood mother (shared/nests.ts).
   rollSpiders(foes, job, index, spot, H, W);
-  if (spec) rollBackline(foes, job, index);
+  // A routed room's goblins as fights: packs, each one template, a cap on specials (shared/encounter.ts).
+  if (spec && !v3) rollBackline(foes, job, index);
+  if (v3) composeRoom({ foes, job, index, W, H, spawn: SPAWN, blocks, spot, free, claim: (x, y, r) => void spots.push({ x, y, r }) });
   // Each house's look and fate outside come from the same seed as its inside.
   const spill = settle(job, index, blocks);
   if (side) blocks.push(side);
@@ -176,6 +187,8 @@ export function planRoom(job: Job, index: number, road?: RoadId, taken?: Record<
   // The place's own ground, floor and back wall, and what the set piece left about.
   Object.assign(map, { theme: { ...map.theme, floor: site.floor, back: site.back ?? map.theme.back }, soil: site.soil, marks: [...site.marks, ...marks, ...spill] });
   if (grim.length) map.grim = grim;
+  // Crows on the dead (sim/crows.ts): a layout-3 room's own roll.
+  if (v3 && crowsOn(job, index, dead).length) map.flocks = crowsOn(job, index, dead);
   if (sleepers.length) map.sleepers = sleepers;
   if (spec) map.theme = weatherAt(job, index, map.theme);
   if (v3) keepReachable(map, foes, chests, props, (r) => spot(r, 1.5, H - 2));

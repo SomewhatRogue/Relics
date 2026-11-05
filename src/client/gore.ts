@@ -46,6 +46,14 @@ export class Gore {
     fx.shake = Math.max(fx.shake, 6);
   }
 
+  /** The `n`th small goblin of a bunch cut down together: a wider spray along the blow, a harder shake. */
+  bunch(x: number, y: number, dx: number, dy: number, n: number): void {
+    const l = Math.hypot(dx, dy) || 1;
+    this.fling(x, y, 6, 6 + n * 3, BLOOD, 70 + n * 8, 90, 2, dx / l, dy / l);
+    for (let i = 0; i < 10 + n * 4; i++) this.fx.decal(x + (dx / l) * i * 0.8 + (Math.random() - 0.5) * 5, y + (dy / l) * i * 0.4 + (Math.random() - 0.5) * 3, BLOOD[i % 3]);
+    this.fx.shake = Math.max(this.fx.shake, Math.min(8, 3 + n));
+  }
+
   /** A goblin died (x, y in screen pixels). */
   death(ev: Extract<FightEvent, { k: 'death' }>, x: number, y: number): void {
     const fx = this.fx, big = ev.kind === 'butcher', neck = big ? 18 : 10, l = Math.hypot(ev.dx, ev.dy) || 1, dx = ev.dx / l, dy = ev.dy / l;

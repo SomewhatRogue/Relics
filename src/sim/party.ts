@@ -13,6 +13,7 @@
 import { HERO, HURT_STAGGER, PARTY, WEAPONS } from '../shared/tuning';
 import { Rng } from '../shared/rng';
 import { toughen } from '../shared/roster';
+import { scalePacks } from './packs';
 import { waveFor } from './spiders';
 import type { Foe } from '../shared/terrain';
 import { inArc } from './combat';
@@ -111,6 +112,8 @@ export const allOut = (heroes: Hero[]) => inParty(heroes) && players(heroes).eve
  */
 export function scaleFoes(foes: Foe[], party: number, seed = 1): Foe[] {
   if (party <= 1) return foes;
+  // A routed room's packs: more small ones, a tougher centrepiece, never more specials (sim/packs.ts).
+  if (foes.some((f) => f.pack !== undefined)) return scalePacks(foes, party, seed);
   // Nests aren't copied: their waves grow instead. One brood mother is enough (she gets tougher, scaleBosses).
   for (const f of foes) if (f.kind === 'nest') f.wave = waveFor(party);
   const common = foes.filter((f) => !f.name && f.kind !== 'nest' && f.kind !== 'brood'), more = Math.round(common.length * PARTY.foes * (party - 1)), extra: Foe[] = [];

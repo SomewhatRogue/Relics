@@ -15,6 +15,7 @@ import { dodgeBreath } from '../sim/knacks';
 import { knows } from '../sim/types';
 import { grabbable } from '../sim/grab';
 import { raisable } from '../sim/party';
+import { cuttable } from '../sim/netter';
 import { torchable } from '../sim/torch';
 import { kindleable } from '../sim/kindle';
 import { liftable } from '../sim/props';
@@ -133,12 +134,12 @@ export class Cluster {
     b.potion.el.classList.toggle('low', low);
     // The context slot: help a friend up, set a spider nest or a house's woodpile alight, grab, throw; or what's here to use.
     const can = carrying || (me.act === 'idle' && (room.enemies.some((e) => grabbable(me, e, room.time)) || room.props.some((p) => liftable(me, p))));
-    const raise = me.act === 'idle' && raisable(me, room.heroes);
+    const raise = me.act === 'idle' && raisable(me, room.heroes), cut = cuttable(me, room.heroes, room.time);
     const burn = !raise && (!!torchable(me, room.enemies) || (mode === 'run' && !!kindleable(me, room.map)));
-    const lifter = kit.cls === 'WARRIOR', active = can || raise || burn;
+    const lifter = kit.cls === 'WARRIOR', active = can || raise || burn || cut;
     const use = !!spot && !busy && (mode !== 'run' || !!spot.chest);
-    const what: IconId = raise ? 'help' : burn ? 'burn' : carrying ? 'throw' : 'grab';
-    const word = raise ? 'HELP UP' : burn ? 'BURN' : carrying ? 'THROW' : 'GRAB';
+    const what: IconId = raise || cut ? 'help' : burn ? 'burn' : carrying ? 'throw' : 'grab';
+    const word = cut ? 'CUT FREE' : raise ? 'HELP UP' : burn ? 'BURN' : carrying ? 'THROW' : 'GRAB';
     // (With no dodge the slot has its own place, so a USE or OPEN can show beside it.)
     const showGrab = (active || lifter) && (!dodges || !(use && !active && mode !== 'town'));
     b.grab.show(showGrab ? { shape: 'round', size: 29, grade: active ? 'gilt' : 'stone', icon: icon(what) } : null, '', word, word);

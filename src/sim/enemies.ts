@@ -4,7 +4,7 @@ import { lure, seenFrom } from './lantern';
 import { visible } from './flasks';
 import { HUNGRY_FX, wears } from './hungry';
 import { collide, currentMap, inArea, wadeAt } from '../shared/arena';
-import { FRIENDLY, DECOY, ALERT, ARCHER, BUTCHER, BROOD, NEST, SPIDER, DRUMMER, HEXER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, type EnemyAttackSpec, type EnemySpec, VARIANTS, STEALTH, CLASS_DODGES, WEAPONS, HORN, HOBBLE, STILL } from '../shared/tuning';
+import { FRIENDLY, DECOY, ALERT, ARCHER, BUTCHER, BROOD, NEST, SPIDER, DRUMMER, HEXER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, BANNER, LOGS, NETTER, type EnemyAttackSpec, type EnemySpec, VARIANTS, STEALTH, CLASS_DODGES, WEAPONS, HORN, HOBBLE, STILL } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { hexFriendly, isBackline, stepBackline } from './backline';
 import { shove, slide } from './bodies';
@@ -16,8 +16,17 @@ import { has } from './traits';
 import { hunt } from './spiders';
 import { glowIn, sightIn } from '../shared/timeofday';
 import type { Enemy, EnemyAttack, FightEvent, Hero } from './types';
+import { isRound } from './types';
 import { vanished } from './rogue';
 import { wayTo } from './pathing';
+import { hearFrom, samePack } from './packs';
+import { stepOwn } from './ownfoes';
+import { netted } from './netter';
+import { blindNotice } from './blind';
+import type { Slick } from './oil';
+
+/** The room's oil slicks, for the torch-bearers (the room sets it before its goblins move). */
+export const OWN_KIT: { slicks: Slick[] } = { slicks: [] };
 
 const SPECS: Partial<Record<Enemy['kind'], EnemySpec>> = { butcher: BUTCHER, scrapper: SCRAPPER, spider: SPIDER, brood: BROOD };
 
@@ -45,7 +54,8 @@ function nearest(e: Enemy, heroes: Hero[], now: number): Hero | null {
     if (h.act === 'down') continue;
     // The Butcher's Apron: they come for you first; a named butcher looks at no one else.
     const apron = wears(h, 'apron') ? (e.name ? 999 : HUNGRY_FX.lure) : 0;
-    const raw = Math.hypot(h.x - e.x, h.y - e.y), d = raw - lure(h) - apron;
+    // A netted hero: they all come for them (sim/netter.ts).
+    const raw = Math.hypot(h.x - e.x, h.y - e.y), d = raw - lure(h) - apron - (netted(h, now) ? NETTER.lure : 0);
     if (!visible(h, raw, now) || vanished(h, now)) continue;
     if (d < bd) (bd = d), (best = h);
     // A Mage's blink image draws them off while it lasts: they swing at where you were.
@@ -71,6 +81,8 @@ export function begin(e: Enemy, kind: EnemyAttack['kind'], s: EnemyAttackSpec, t
   if (e.drill) e.attack.windup *= 1.5;
   // Roused by a drum: quicker to the blow, and it lands harder (locked here, so the telegraph holds).
   if (e.roused) (e.attack.windup *= DRUMMER.rouse.windup), (e.attack.dmg = Math.round(e.attack.dmg * DRUMMER.rouse.dmg));
+  // Near a banner: the same, its own way (sim/banner.ts).
+  if (e.heart) (e.attack.windup *= BANNER.heart.windup), (e.attack.dmg = Math.round(e.attack.dmg * BANNER.heart.dmg));
   e.act = 'attack';
   e.actT = 0;
   ev.push({ k: 'windup', x: e.x, y: e.y, kind });
@@ -86,7 +98,7 @@ function runAttack(e: Enemy, heroes: Hero[], now: number, dt: number, ev: FightE
   if (a.kind === 'charge' || a.kind === 'pounce') return runCharge(e, a, heroes, now, ev, others);
   if (!a.done && a.t >= a.windup) {
     a.done = true;
-    const round = a.kind === 'slam' || a.kind === 'hex' || a.kind === 'spit';
+    const round = isRound(a.kind);
     ev.push({ k: 'impact', x: round ? a.cx : e.x, y: round ? a.cy : e.y, kind: a.kind });
     // Blows land on your own level; arrows reach up and down.
     const before = heroes.map((h) => h.hp);
@@ -153,6 +165,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     return;
   }
   if (e.act === 'dead') {
+    // Killed by a blow, a small one slides on a little way (SPLAT).
+    if (e.kvx || e.kvy) slide(e, e.radius, dt);
     if (e.respawns && e.actT >= e.actDur) Object.assign(e, { act: 'chase', hp: e.maxHp, x: e.home.x, y: e.home.y, kvx: 0, kvy: 0, actT: 0, cooldown: 1.5, corpse: '', death: '' });
     return;
   }
@@ -173,7 +187,7 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
       if (e.hp <= 0) return kill(e, ev, 'burst', e.kvx, e.kvy);
       // Charged into a wall or a tree: it stuns itself.
       if (e.attack?.kind === 'charge' && e.attack.t >= e.attack.windup) {
-        Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: VARIANTS.stoker.chargeStun, kvx: 0, kvy: 0 });
+        Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: e.variant === 'log' ? LOGS.stun : VARIANTS.stoker.chargeStun, kvx: 0, kvy: 0 });
         ev.push({ k: 'stunned', x: e.x, y: e.y });
         return;
       }
@@ -220,10 +234,12 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   let diff = want - have;
   diff = Math.atan2(Math.sin(diff), Math.cos(diff));
   const slow = (e.chillUntil > now ? FROST.slow : 1) * (e.snareUntil > now ? NET.slow : 1) * (e.roused ? DRUMMER.rouse.pace : 1) * ((e.hobbleUntil ?? -9) > now ? HOBBLE.slow : 1);
-  const turn = Math.max(-spec.turn * slow * dt, Math.min(spec.turn * slow * dt, diff)), na = have + turn;
+  const rate = e.variant === 'log' ? LOGS.turn : spec.turn, turn = Math.max(-rate * slow * dt, Math.min(rate * slow * dt, diff)), na = have + turn;
   e.fx = Math.cos(na);
   e.fy = Math.sin(na);
   const facing = e.fx * ux + e.fy * uy;
+  // The newer sorts (sim/ownfoes.ts): each its own way.
+  if (stepOwn(e, { t, d, level, via: !!via, ux, uy, facing, speed: spec.speed * slow, slow }, heroes, others, rng, now, dt, ev, OWN_KIT)) return;
   if (e.bow) {
     if (d <= ARCHER.reach && e.cooldown <= 0 && facing > 0.9) return begin(e, 'shot', ARCHER.shot, t, ev);
     // Runs from you when you get close on its level (along its perch, up high); comes in if you're far on the ground.
@@ -272,6 +288,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
  * close by, wakes it, and it shouts the others awake. Returns true when it's awake.
  */
 function notice(e: Enemy, heroes: Hero[], others: Enemy[], now: number, ev: FightEvent[]): boolean {
+  // The blind hunters never see you: they hear (sim/blind.ts).
+  if (e.variant === 'blind') return blindNotice(e, heroes, others, now, ev);
   let seen = false;
   const theme = currentMap().theme;
   for (const h of heroes) {
@@ -285,9 +303,10 @@ function notice(e: Enemy, heroes: Hero[], others: Enemy[], now: number, ev: Figh
     const sight = e.variant === 'looter' ? 1.6 : e.feeding ? far * 0.5 : ahead ? far : ALERT.behind;
     if (d < sight * (h.sneaking && h.act !== 'roll' ? sneakSight(h) : 1) + seenFrom(h) * glowIn(theme)) seen = true;
   }
-  for (const o of noisy(others, now)) if (o !== e && o.alert && (isDead(o) || o.hitAt > now - 0.2) && Math.hypot(o.x - e.x, o.y - e.y) < ALERT.hear) seen = true;
+  for (const o of noisy(others, now)) if (o !== e && o.alert && (isDead(o) || o.hitAt > now - 0.2) && Math.hypot(o.x - e.x, o.y - e.y) < hearFrom(e, o)) seen = true;
   if (!seen) return false;
-  for (const o of others) if (o.alert === false && Math.hypot(o.x - e.x, o.y - e.y) < ALERT.shout) o.alert = true;
+  // The shout wakes its own pack (sim/packs.ts): the next fight waits its turn.
+  for (const o of others) if (o.alert === false && samePack(o, e) && Math.hypot(o.x - e.x, o.y - e.y) < ALERT.shout) o.alert = true;
   e.alert = true;
   e.cooldown = Math.max(e.cooldown, 0.6);
   ev.push({ k: 'spotted', x: e.x, y: e.y });

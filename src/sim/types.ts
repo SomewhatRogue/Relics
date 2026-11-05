@@ -170,6 +170,18 @@ export interface Hero extends Body {
   baseHp: number;
   /** Gold this hero can spend in a fight (Spendthrift, the Ransom Coat): theirs plus the job's so far. */
   purse: number;
+  /** Held in a netter's net until (sim/netter.ts), and the stick's last swing (a wiggle is a big change). */
+  netUntil?: number;
+  netAng?: number;
+  /** Lost in a cloud of crows until (sim/crows.ts); on an oil slick this tick (sim/oil.ts). */
+  crowsUntil?: number;
+  slick?: boolean;
+  /** The way they were going, on oil (it takes hold of the stick slowly). */
+  slipX?: number;
+  slipY?: number;
+  /** Small goblins killed by one swing, and when the last went (SPLAT: the hold grows with each). */
+  splats?: number;
+  splatAt?: number;
   /** Hungry gear's counters (sim/hungry.ts): kills fed to the Larder Pike, the last kill, the next bite, the coat used. */
   fed: number;
   lastKill: number;
@@ -264,7 +276,9 @@ export interface Hero extends Body {
 }
 
 /** `pounce`: a spider's leap along its line; `bite`: the brood mother's; `spit`: her lobbed glob (a circle). */
-export type AttackKind = 'cleave' | 'slam' | 'swing' | 'stab' | 'shot' | 'draw' | 'charge' | 'hex' | 'pounce' | 'bite' | 'spit';
+export type AttackKind = 'cleave' | 'slam' | 'swing' | 'stab' | 'shot' | 'draw' | 'charge' | 'hex' | 'pounce' | 'bite' | 'spit' | 'net' | 'grab' | 'lob' | 'erupt' | 'torch';
+/** Attacks that come down as a circle at (cx, cy) rather than a wedge from the attacker. */
+export const isRound = (k: AttackKind) => k === 'slam' || k === 'hex' || k === 'spit' || k === 'net' || k === 'lob' || k === 'erupt' || k === 'torch';
 
 export interface EnemyAttack {
   kind: AttackKind;
@@ -358,7 +372,10 @@ export interface Enemy extends Body {
   /** Tutorial pacing in the wood: slower wind-ups (sim/wood.ts DRILL). */
   drill?: boolean;
   /** A goblin built for one lesson in the prologue wood (shared/wood.ts VARIANTS). */
-  variant?: 'looter' | 'lunger' | 'heavy' | 'stoker' | 'shield' | 'hexer' | 'drummer';
+  variant?: import('../shared/terrain').FoeVariant;
+  /** The fight it belongs to (shared/encounter.ts): a pack's shout wakes only its own. */
+  pack?: number;
+  role?: import('../shared/encounters').Role;
   /** When it last showed WEAK or RESIST (sim/damage.ts sayWeak). */
   popAt?: number;
   /** A drummer standing and beating its drum this tick (shared/backline.ts DRUMMER). */
@@ -384,6 +401,28 @@ export interface Enemy extends Body {
   ashAt?: number;
   /** Too far from every hero to think or move this tick (sim/sleep.ts, on a big map). */
   dozing?: boolean;
+  /** Near a standing banner this tick (sim/banner.ts); routed until; a fallen banner whose rout is done. */
+  heart?: boolean;
+  routUntil?: number;
+  spent?: boolean;
+  /** A sneak-thief's haul (sim/thief.ts), how long it has lurked, and one that got away (no body). */
+  loot?: { gold?: number; potion?: PotionId };
+  lurkT?: number;
+  escaped?: boolean;
+  /** A wolf's keeper (its id), and scattered until (sim/wolves.ts); its side of the circle. */
+  keeper?: number;
+  scatterUntil?: number;
+  side?: number;
+  /** A sapper under the ground (sim/sapper.ts): where it's making for, how long it's been under, when it last came up. */
+  under?: boolean;
+  digT?: number;
+  goX?: number;
+  goY?: number;
+  upAt?: number;
+  /** A blind hunter (sim/blind.ts): where it last heard something, and when. */
+  heardX?: number;
+  heardY?: number;
+  heardAt?: number;
 }
 
 /** How a goblin died: fell, lost its head, burst apart, burned, or shattered. */
@@ -478,6 +517,11 @@ export type FightEvent =
   | { k: 'exped'; x: number; y: number; what: import('./exped').ExpedWhat; i?: number }
   /** A teammate downed you once too often this job. */
   | { k: 'grudge'; x: number; y: number; id: string; by: string }
+  /** The newer sorts (sim/ownfoes.ts): a banner down and the goblins it routs; a net (who's in it, a struggle, cut out, free); a thief's grab, its loot back, gone. */
+  | { k: 'bannerfall' | 'routed' | 'struggle' | 'recovered' | 'escaped' | 'rooffall' | 'whip' | 'scatter' | 'howl' | 'dig' | 'surface' | 'unearthed' | 'slick' | 'oilwarn' | 'oilup' | 'crows' | 'listen'; x: number; y: number }
+  | { k: 'netted' | 'netfree'; x: number; y: number; id: string }
+  | { k: 'cutfree'; x: number; y: number; id: string; by: string }
+  | { k: 'stolen'; x: number; y: number; id: string; n: number; potion?: PotionId }
   /** A hero down (`by`: the teammate whose blow did it), or picked up (`by`: who picked them up). */
   | { k: 'down' | 'pickedup' | 'raising' | 'gotup'; x: number; y: number; id?: string; by?: string }
   /** A press that did nothing, said to that hero: GRAB with nothing to take hold of, ATTACK held on an empty crossbow. */

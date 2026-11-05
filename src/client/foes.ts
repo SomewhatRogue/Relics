@@ -5,7 +5,12 @@
 import type { GameMap } from '../shared/arena';
 import { GUARD } from '../shared/tuning';
 import type { Enemy, EnemyAttack } from '../sim/types';
+import { isRound } from '../sim/types';
+import { drawRoundSign } from './telegraph2';
 import { drawKit } from './backline';
+import { KITTED, drawFoeKit } from './foekits';
+import { drawLogs, drawLogsDead } from './foedraw';
+import { drawMound, drawWolf } from './beastdraw';
 import { blit, blitBody, ease, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
 import { armOffset, drawFigure, layout } from './figure';
 import { BUTCHER_CUT, SCRAPPER_CUT, jointed } from './joints';
@@ -80,12 +85,12 @@ function scrapper(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
   shadow(c, x, y, 5);
   const bx = x + pz.ox, by = y + pz.oy, up = e.fy < -0.55, fa = Math.atan2(e.fy, e.fx);
   // In parts (figure.ts): the knife (or bow) is in the hand, wherever the arm has gone.
-  const body = jointed(up ? SPRITES.scrapperUp : SPRITES.scrapper, SCRAPPER_CUT);
+  const pale = e.variant === 'blind', body = jointed(up ? (pale ? SPRITES.paleUp : SPRITES.scrapperUp) : pale ? SPRITES.pale : SPRITES.scrapper, SCRAPPER_CUT);
   layout(body, bx, by, e.fx < -0.2, pz);
   const [ax, ay] = armOffset(ARM), kx = bx + ax, ky = by + ay;
   Object.assign(AT, { bx: bx - x, by: by - y, hx: bx + ax - x, hy: by + ay - y });
   // A lunger's weapon is its spear (kit()): no knife besides.
-  const knife = () => (e.bow ? bow(c, e, kx, ky, fa) : e.variant === 'hexer' || e.variant === 'drummer' ? drawKit(c, e, bx, by, ax, ay, t) : e.variant === 'lunger' ? undefined : line(c.lit, kx + Math.cos(fa) * reach, ky - 6 + Math.sin(fa) * reach, fa, 0, 4, '#cfd6dc'));
+  const knife = () => (e.bow ? bow(c, e, kx, ky, fa) : e.variant === 'hexer' || e.variant === 'drummer' ? drawKit(c, e, bx, by, ax, ay, t) : e.variant && KITTED.has(e.variant) ? drawFoeKit(c, e, bx, by, ax, ay, t) : e.variant === 'lunger' ? undefined : line(c.lit, kx + Math.cos(fa) * reach, ky - 6 + Math.sin(fa) * reach, fa, 0, 4, '#cfd6dc'));
   if (up) knife();
   drawFigure(c, body, bx, by, pz);
   if (!up) knife();
@@ -140,6 +145,11 @@ const DUMMY = newPose();
 
 export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number, dozing = false): void {
   if (isSpiderKind(e.kind)) return drawSpiderKind(c, e, x, y, c.t ?? c.now);
+  // A sneak-thief or a wolf that got away: nothing left here.
+  if (e.escaped) return;
+  if (e.variant === 'wolf') return drawWolf(c, e, x, y);
+  if (e.under) return drawMound(c, e, x, y);
+  if (e.variant === 'log' && e.act === 'dead') return drawLogsDead(c, e, x, y);
   if (e.act === 'dead') {
     // Burst or shattered: nothing left but the stains. Otherwise the body, headless or burned.
     if (e.death === 'burst' || e.death === 'shatter') return;
@@ -160,6 +170,7 @@ export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number, dozing = false
   const hurt = e.hp < e.maxHp && (t - e.hitAt < 3 || e.hp < e.maxHp * 0.5);
   if ((e.kind === 'butcher' || e.kind === 'scrapper') && hurt) ring(c, x, y, e.kind === 'butcher' ? 11 : 6, '#e24b4a', e.hp / e.maxHp);
   if (e.kind === 'butcher') return butcher(c, e, x, y, t);
+  if (e.variant === 'log') return drawLogs(c, e, x, y);
   if (e.kind === 'scrapper' && dozing) return sleeping(c, e, x, y, flash);
   if (e.kind === 'scrapper' && e.feeding) {
     // Crouched at the dead: it leans in, worries at it, tears a piece back and chews; red flicks off.
@@ -202,7 +213,7 @@ export function drawTelegraph(c: Ctx, a: EnemyAttack, cx: number, cy: number, pa
   const pulse = 0.85 + 0.15 * Math.sin(c.now * 20);
   const fill = now ? '#ffe8e0' : a.kind === 'slam' ? '#e8501f' : '#e23a30';
   if (a.kind === 'pounce') return drawPounce(c, a, cx, cy, now, pulse);
-  if (a.kind === 'slam' || a.kind === 'hex' || a.kind === 'spit') {
+  if (isRound(a.kind)) {
     const R = a.radius * PX, ox = Math.round(OX + a.cx * PX - cx), oy = Math.round(OY + a.cy * PX - cy), Ri = R - 1.2, Rp = R * prog;
     // Row by row: the filled middle and the faint rest as runs, the striped edge pixel by pixel.
     for (let y = -Math.floor(R); y <= R; y++) {
@@ -219,6 +230,8 @@ export function drawTelegraph(c: Ctx, a: EnemyAttack, cx: number, cy: number, pa
       }
     }
     if (a.kind === 'spit') drawSpitSign(c, a, cx, cy);
+    // The net's mesh, the oil's drops, the ground cracking over a sapper, the torch's flame (telegraph2.ts).
+    drawRoundSign(c, a, ox, oy, R, prog);
     // A hex: the hexer's sign turning slowly in the red, sickly green.
     if (a.kind === 'hex') {
       g.fillStyle = '#9be040';

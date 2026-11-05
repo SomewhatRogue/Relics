@@ -1,6 +1,6 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, parry, roll). */
 import { litMult } from './charge';
-import { CENSER, BLESSING, DODGE, WARD, FLINCH, HORN, OVERKILL, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing, CLASS_DODGES, RIPOSTE, CRIT, STEALTH, technique, weakOn } from '../shared/tuning';
+import { CENSER, BLESSING, DODGE, WARD, FLINCH, HORN, OVERKILL, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing, CLASS_DODGES, RIPOSTE, CRIT, STEALTH, technique, weakOn, SPLAT, BANNER } from '../shared/tuning';
 import { shove } from './bodies';
 import { knack, statsOf } from './gearstats';
 import { counterWindow, parryWindow, rearCos, slipWindow } from './knacks';
@@ -16,6 +16,8 @@ import { soak } from './holy';
 import { clericHit } from './flail';
 import { stun } from './stuns';
 import type { Enemy, EnemyAttack, FightEvent, Hero } from './types';
+import { isRound } from './types';
+import { landed } from './ownfoes';
 import { travelTo } from '../shared/sweep';
 
 export { respawnOf, stunOf } from './damage';
@@ -58,7 +60,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   // The sword's riposte (a counter straight off the parry; a bonus, not its perfect) doubles the counter; the spear's shaft halves a blow up close.
   const riposte = riposteNow(h, now);
   if (riposte && h.hitIds.filter((id) => id > 0).length === 1) ev.push({ k: 'riposte', x: e.x, y: e.y });
-  const mult = weak * (h.counter ? counter * (riposte ? RIPOSTE.mult : 1) : heldFast ? held : 1) * shaftMult(h, s, e) * rearMult * blessed * tempo * (crit ? CRIT : 1) * (ambush ? STEALTH.ambush * (1 + knack(h, 'ambush')) : 1) * (boarded ? VARIANTS.shield.front : 1) * brandyDmg(h, now) * litMult(h) * (h.snagged ? CENSER.snag : 1);
+  const mult = weak * (h.counter ? counter * (riposte ? RIPOSTE.mult : 1) : heldFast ? held : 1) * shaftMult(h, s, e) * rearMult * blessed * tempo * (crit ? CRIT : 1) * (ambush ? STEALTH.ambush * (1 + knack(h, 'ambush')) : 1) * (boarded ? VARIANTS.shield.front : 1) * brandyDmg(h, now) * litMult(h) * (h.snagged ? CENSER.snag : 1) * ((e.routUntil ?? -9) > now ? BANNER.rout.hurt : 1);
   // Mother Rust's Needles: a backstab kills anything short of a butcher.
   const n = rear && e.kind === 'scrapper' && wears(h, 'needles') ? Math.max(e.hp, Math.round(s.dmg * mult)) : Math.round(s.dmg * mult);
   e.hp -= n;
@@ -84,7 +86,9 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
     const roll = (e.id * 7 + Math.floor(now * 30)) % 8;
     const cut = heavy ? (roll < 4 ? 'halve' : roll < 6 ? 'behead' : 'opened') : roll < 4 ? 'opened' : roll < 6 ? 'halve' : 'behead';
     const how = -e.hp >= OVERKILL || WEAPONS[h.weapon].blunt ? 'burst' : s.thrust ? 'fall' : cut;
-    return kill(e, ev, how, h.fx, h.fy), n;
+    kill(e, ev, how, h.fx, h.fy);
+    splat(h, e, now);
+    return n;
   }
   // A heavy blow breaks the frozen.
   if (ice && heavy) return shatter(e, now, ev), n;
@@ -103,9 +107,22 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   return n;
 }
 
+/**
+ * A small goblin killed by a blow (SPLAT): the body slides on along the blow, and the blow holds a beat
+ * longer, longer again for each more the same swing has killed.
+ */
+function splat(h: Hero, e: Enemy, now: number): void {
+  if (!small(e)) return;
+  (e.kvx = h.fx * SPLAT.knock), (e.kvy = h.fy * SPLAT.knock);
+  // Kills a moment apart are one swing's.
+  h.splats = now - (h.splatAt ?? -9) < 0.3 ? (h.splats ?? 0) + 1 : 1;
+  h.splatAt = now;
+  h.hitstop = Math.max(h.hitstop, Math.min(SPLAT.most, SPLAT.stop + SPLAT.more * (h.splats - 1)));
+}
+
 /** Is this hero inside the attack's shape? */
 export function attackCovers(a: EnemyAttack, h: Hero): boolean {
-  if (a.kind === 'slam' || a.kind === 'hex' || a.kind === 'charge' || a.kind === 'pounce' || a.kind === 'spit') return Math.hypot(h.x - a.cx, h.y - a.cy) <= a.radius + HERO.radius;
+  if (isRound(a.kind) || a.kind === 'charge' || a.kind === 'pounce') return Math.hypot(h.x - a.cx, h.y - a.cy) <= a.radius + HERO.radius;
   return inArc(a.ox, a.oy, a.dx, a.dy, h.x, h.y, a.range, a.arc, HERO.radius);
 }
 
@@ -187,7 +204,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   }
   const tx = e.x - h.x, ty = e.y - h.y, tl = Math.hypot(tx, ty) || 1;
   // Pushed away from where the blow came from (the slam's centre for a slam).
-  const round = a.kind === 'slam' || a.kind === 'hex' || a.kind === 'spit';
+  const round = isRound(a.kind);
   const sx = round ? h.x - a.cx : -tx, sy = round ? h.y - a.cy : -ty, sl = Math.hypot(sx, sy) || 1;
   // The kit's guard covers an arc in front: a shield covers nearly everything ahead.
   const facing = (h.fx * tx + h.fy * ty) / tl > Math.cos(((w.guardArc / 2) * Math.PI) / 180);
@@ -232,6 +249,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   ev.push({ k: 'hit', x: h.x, y: h.y, n, heavy: n >= 25, on: 'hero', src: a.kind });
   // A spider's bite (or the brood mother's bite or glob) poisons.
   if (e.kind === 'spider' || e.kind === 'brood') poison(h, now, ev);
+  // A net holds, a thief takes, a log knocks down (sim/ownfoes.ts).
+  landed(e, a, h, now, ev);
   downIfDead(h, ev);
 }
 

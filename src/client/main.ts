@@ -39,6 +39,7 @@ import { raidNews } from './raidnews';
 import { WORK_ORDER } from '../shared/works';
 import { grabbable } from '../sim/grab';
 import { raisable } from '../sim/party';
+import { cuttable } from '../sim/netter';
 import { torchable } from '../sim/torch';
 import { kindleable } from '../sim/kindle';
 import { burningCries, kindleCue } from './kindlecue';
@@ -309,7 +310,8 @@ function hud(now: number): void {
   $('#prompt').hidden = !spot || busy;
   if (spot) $('#prompt').textContent = (input.touch ? '' : spot?.chest ? 'F  ' : game.mode === 'run' ? '' : 'E  ') + (spot.door || !spot.talk ? spot.label : 'TALK: ' + spot.label);
   // A friend down at your feet: the key that gets them up.
-  if (!spot && !busy && !input.touch && game.mode === 'run' && game.hero.act === 'idle' && raisable(game.hero, game.room.heroes)) ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  HELP UP');
+  if (!spot && !busy && !input.touch && game.mode === 'run' && cuttable(game.hero, game.room.heroes, game.room.time)) ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  CUT FREE');
+  else if (!spot && !busy && !input.touch && game.mode === 'run' && game.hero.act === 'idle' && raisable(game.hero, game.room.heroes)) ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  HELP UP');
   else if (!spot && !busy && !input.touch && game.mode === 'run' && (torchable(game.hero, game.room.enemies) || kindleable(game.hero, game.room.map))) ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  BURN');
   // The touch buttons round ATTACK, and the unit frame (cluster.ts, unitframe.ts).
   cluster?.update(game, spot, busy, now);

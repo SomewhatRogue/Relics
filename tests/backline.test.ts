@@ -150,15 +150,16 @@ describe('in jobs', () => {
   const rooms = jobs.flatMap((j) => Array.from({ length: j.rooms }, (_, i) => ({ j, i, foes: planRoom(j, i).foes })));
   const back = (f: Foe) => f.variant === 'hexer' || f.variant === 'drummer';
 
-  it('turn up rarely in a first room and more often deeper, never more than a room may hold', () => {
+  it('turn up deeper in, one to a pack (shared/encounters.ts), never more than a room may hold', () => {
     const share = (i: number) => {
       const at = rooms.filter((r) => r.i === i);
       return at.filter((r) => r.foes.some(back)).length / at.length;
     };
-    expect(share(0)).toBeGreaterThan(0.05);
-    expect(share(0)).toBeLessThan(0.45);
-    expect(share(2)).toBeGreaterThan(share(0));
+    // Since packs (2026-11-04): a hexer or a drummer backs a pack from the second room on.
+    expect(share(0)).toBe(0);
+    expect(share(2)).toBeGreaterThan(0.05);
     for (const r of rooms) expect(r.foes.filter(back).length).toBeLessThanOrEqual(mostIn(r.i));
+    for (const r of rooms) for (const p of new Set(r.foes.filter(back).map((f) => f.pack))) expect(r.foes.filter((f) => back(f) && f.pack === p)).toHaveLength(1);
     expect(rooms.some((r) => r.foes.some((f) => f.variant === 'hexer'))).toBe(true);
     expect(rooms.some((r) => r.foes.some((f) => f.variant === 'drummer'))).toBe(true);
   });

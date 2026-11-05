@@ -5,6 +5,7 @@
  * nests, the freed, the map's people (Wickhold's folk, Hew, the dead), and the scenes past the wood's trees. Positions eased between
  * the room's ticks as everywhere else. Only draws.
  */
+import { ROOF_UP3 } from '../foedraw';
 import type { ArenaRoom } from '../../sim/room';
 import type { Hero } from '../../sim/types';
 import { GRAB } from '../../shared/tuning';
@@ -50,7 +51,7 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
       continue;
     }
     const [x, y] = lerp('e:' + e.id, e.x, e.y), dead = e.act === 'dead', big = e.kind === 'butcher' || e.kind === 'brood';
-    f.put('e' + e.id, x, lift(e.z), y, (c, px, py) => (drawEnemy(c, e, px, py, asleep(map, e)), drawStatus(c, e, px, py, t)), { pool: dead || e.kind === 'nest' ? 0 : big ? 0.55 : 0.28, bias: dead ? -0.3 : 0 });
+    f.put('e' + e.id, x, (e.z ?? 0) >= 2 ? ROOF_UP3 : lift(Math.max(0, e.z ?? 0)), y, (c, px, py) => (drawEnemy(c, e, px, py, asleep(map, e)), drawStatus(c, e, px, py, t)), { pool: dead || e.kind === 'nest' ? 0 : big ? 0.55 : 0.28, bias: dead ? -0.3 : 0 });
   }
   // The freed (the dead lie under everyone; the gone are gone).
   for (const s of room.survivors ?? []) {

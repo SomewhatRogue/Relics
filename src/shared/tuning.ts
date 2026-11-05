@@ -40,6 +40,11 @@ export * from './ranger.js';
 export * from './mage.js';
 export * from './cleric.js';
 export * from './stuncap.js';
+export * from './raiders.js';
+export * from './prowlers.js';
+export * from './encounters.js';
+import { BANNER, NETTER, THIEF, LOGS, ROOF } from './raiders.js';
+import { WOLF, KEEPER, OIL, TORCH, SAPPER, CAVE } from './prowlers.js';
 import { DRUMMER, HEXER } from './backline.js';
 
 /** Holding attack past `start` begins charging; the heavy is strongest at `full`. */
@@ -66,6 +71,12 @@ export const GUARD = {
 
 
 export const HITSTOP = { light: 0.05, heavy: 0.11, parry: 0.18 };
+/**
+ * Splattering the small ones: a small goblin killed by a blow slides on along it (`knock` tiles a
+ * second, sliding to rest), the blow holds a beat longer (`stop`), and each more killed by the same
+ * swing holds `more` again (to `most`).
+ */
+export const SPLAT = { knock: 7, stop: 0.07, more: 0.025, most: 0.14 };
 /** Goblins hit by their own: an arrow that missed you lands on the first goblin in its line (this times
  *  its damage); a butcher's sweep, slam or charge catches small goblins under it. */
 export const FRIENDLY = { shot: 1.5, blow: 0.8 };
@@ -188,6 +199,9 @@ export const VARIANTS = {
   /** The back of the pack (shared/backline.ts): a caster and a drummer. */
   hexer: HEXER,
   drummer: DRUMMER,
+  /** The new sorts (shared/raiders.ts, prowlers.ts): their health here, the rest there. */
+  banner: { hp: BANNER.hp }, netter: { hp: NETTER.hp }, thief: { hp: THIEF.hp }, log: { hp: LOGS.hp }, roofer: { hp: ROOF.hp },
+  wolf: { hp: WOLF.hp }, keeper: { hp: KEEPER.hp }, oiler: { hp: OIL.hp }, torch: { hp: TORCH.hp }, sapper: { hp: SAPPER.hp }, blind: { hp: CAVE.hp },
   heavy: { hp: 110, reach: 1.7, speed: 0.75, swing: { windup: 1.0, active: 0.1, recover: 0.9, dmg: 18, knock: 8, range: 1.9, arc: 100, unblockable: false } as EnemyAttackSpec },
   stoker: {
     hp: 520,

@@ -1,5 +1,7 @@
 /** Drawing a hero: the class's body, the weapon in hand, the dodge, charge and stun. */
-import { CHARGE, WARD, WEAPONS, WANT } from '../shared/tuning';
+import { CHARGE, NETTER, WARD, WEAPONS, WANT } from '../shared/tuning';
+import { drawNetOn } from './foedraw';
+import { drawCrowsOn } from './beastdraw';
 import { chargeFull } from '../sim/hero';
 import { parryWindow, releaseWindow } from '../sim/knacks';
 import { castElement } from '../sim/channel';
@@ -34,7 +36,14 @@ function drip(c: Ctx, x: number, y: number, n: number): void {
 const cutOf = (cls: keyof typeof LOOKS, look = 0) => heroCut((LOOKS[cls][look] ?? LOOKS[cls][0]).tall ?? 0, cls === 'MAGE' || (cls === 'HEALER' && look === 1));
 
 /** `t` is the room's time (blessings and rallies are kept in it). */
+/** A hero, and a netter's net over them while they're held in it (foedraw.ts). */
 export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t: number): void {
+  heroBody(c, h, x, y, me, t);
+  if ((h.netUntil ?? -9) > t) drawNetOn(c, x, y, Math.min(1, (h.netUntil! - t) / NETTER.hold));
+  if ((h.crowsUntil ?? -9) > t) drawCrowsOn(c, x, y);
+}
+
+function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t: number): void {
   const look = heroLook(WEAPONS[h.weapon].cls, h.look);
   if (h.act === 'down') {
     shadow(c, x, y, 6);

@@ -19,7 +19,11 @@ describe('pacing', () => {
     expect(first.map.w).toBe(ROOM.w);
     expect(first.foes.filter((f) => f.kind === 'butcher').length).toBe(0);
     expect(first.foes.length).toBeGreaterThanOrEqual(5);
-    expect(deeper.foes.some((f) => f.kind === 'butcher')).toBe(true);
+    // A butcher at the fire is one of the deeper rooms' fights (shared/encounters.ts), never the first room's.
+    void deeper;
+    const seeds = Array.from({ length: 40 }, (_, s) => ({ ...job('village', 2), seed: s + 1 }));
+    expect(seeds.some((j) => planRoom(j, 1).foes.some((f) => f.kind === 'butcher') || planRoom(j, 2).foes.some((f) => f.kind === 'butcher'))).toBe(true);
+    expect(seeds.every((j) => !planRoom(j, 0).foes.some((f) => f.kind === 'butcher'))).toBe(true);
   });
 
   it("goblins at rest don't come until one sees you, then it shouts the band awake", () => {

@@ -5,6 +5,7 @@
  * spells, burning or frozen goblins, and the flashes of big hits (fx.ts).
  */
 import type { ArenaRoom } from '../../sim/room';
+import { isRound } from '../../sim/types';
 import { nestEmber } from '../nestfire';
 import { burningAt } from '../../shared/blaze';
 import { TIERS, WEAPONS } from '../../shared/tuning';
@@ -47,7 +48,7 @@ export function roomLights(room: ArenaRoom, fx: Fx, lerp: Lerp, out: L3[]): void
   for (const e of room.enemies) {
     const a = e.attack;
     if (a && a.t < a.windup) {
-      const k = a.t / a.windup, round = a.kind === 'slam' || a.kind === 'hex', ax = round ? a.cx : a.ox + a.dx * a.range * 0.5, ay = round ? a.cy : a.oy + a.dy * a.range * 0.5;
+      const k = a.t / a.windup, round = isRound(a.kind), ax = round ? a.cx : a.ox + a.dx * a.range * 0.5, ay = round ? a.cy : a.oy + a.dy * a.range * 0.5;
       add(ax, 0.6, ay, R(40), 0.35 * k, [1, 0.25, 0.15]);
       if (a.kind === 'hex') add(e.x, 1.3, e.y, R(18 + 22 * k), 0.3 + 0.5 * k, [0.55, 1, 0.3]);
     }

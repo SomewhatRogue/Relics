@@ -43,7 +43,8 @@ export function separate(heroes: Hero[], enemies: Enemy[], props: Prop[] = []): 
   const list: { b: Body; r: number; inv: number }[] = [];
   for (const h of heroes) if (h.act !== 'roll' && h.act !== 'down') list.push({ b: h, r: HERO.radius, inv: 1 / HERO.weight });
   for (const e of enemies) {
-    if (e.act === 'dead' || e.act === 'carried') continue;
+    // (Up on a roof it stands inside the house's footprint: left out, or it'd be pushed off.)
+    if (e.act === 'dead' || e.act === 'carried' || (e.z ?? 0) >= 2) continue;
     list.push({ b: e, r: e.radius, inv: isFinite(e.weight) && e.act !== 'pinned' ? 1 / e.weight : 0 });
   }
   for (const p of props) if (!p.broken && !p.lifted) list.push({ b: p, r: p.radius, inv: 1 / p.weight });

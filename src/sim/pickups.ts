@@ -27,6 +27,11 @@ export function dropPickups(e: Enemy, pickups: Pickup[], rng: Rng): void {
   }
 }
 
+/** What a sneak-thief took, dropped where it fell (sim/thief.ts): it waits a good while. */
+export function dropLoot(pickups: Pickup[], x: number, y: number, loot: { gold?: number; potion?: PotionId }): void {
+  pickups.push({ id: nextId++, x, y, life: COINS.life * 2, ...(loot.gold ? { gold: loot.gold } : {}), ...(loot.potion ? { potion: loot.potion } : {}) });
+}
+
 /** A named butcher, now and then, leaves a relic where it fell (its own seeded stream: RELIC_DROP.named). */
 export function dropRelic(e: Enemy, pickups: Pickup[], rng: Rng): void {
   if (!e.name || e.respawns || e.kind !== 'butcher') return;
