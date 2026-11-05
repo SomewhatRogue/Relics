@@ -126,7 +126,8 @@ export function liveOutside(c: Ctx, b: Block, x: number, top: number, w: number,
   }
 }
 
-function smoke(c: Ctx, x: number, y: number, cols: string[], rate: number): void {
+/** Smoke puffing up off a flue at (x, y) on screen (the 2.5D view's flues too: three/smoke3d.ts). */
+export function smoke(c: Ctx, x: number, y: number, cols: string[], rate: number): void {
   const g = c.lit;
   for (let i = 0; i < 7; i++) {
     const k = (c.now * 0.18 * rate + i / 7) % 1, s = 2 + Math.round(k * 6);

@@ -1,7 +1,8 @@
 /**
  * Blocks with no roof: fences (posts and rails), stone and rock walls, a market stall's striped
- * canopy, a tent, a cart, rubble, hurdles, and furniture (a box in its own colours, as high as the 2D
- * one stands). Wooden ones burn and char like the houses (houses3d.ts).
+ * canopy, a tent, a cart (its hoops, and the dead under sacking on the one waiting for a burying),
+ * rubble, hurdles, the cordwood, and furniture (furnish3d.ts and hallfurn3d.ts, each as the flat view
+ * paints it). Wooden ones burn and char like the houses (houses3d.ts).
  */
 import * as THREE from 'three';
 import type { Block } from '../../shared/arena';
@@ -10,6 +11,8 @@ import { Boxes, Seed, jit } from './boxes';
 import { VCOL, hex } from './mats';
 import { tent } from './roofs3d';
 import { siegeBlock } from './siege3d';
+import { furnish3d } from './furnish3d';
+import { hallFurn3d } from './hallfurn3d';
 
 export function flatBlock(b: Block, group: THREE.Group, fires: [number, number, number, number][]): THREE.Group {
   const r = new Seed(Math.round(b.x * 29 + b.y * 13 + 3)), L = LOOK[b.kind], B = new Boxes();
@@ -19,7 +22,7 @@ export function flatBlock(b: Block, group: THREE.Group, fires: [number, number, 
   if (b.ruined) {
     for (let i = 0; i < Math.max(3, b.w * b.h); i++) B.c(x0 + r.next() * b.w, 0.05, z0 + r.next() * b.h, 0.3, 0.1, 0.12, 0x141012, r.next() * 3);
     for (let i = 0; i < 3; i++) fires.push([x0 + r.next() * b.w, 0.06, z0 + r.next() * b.h, 0.25]);
-  } else if (b.kind === 'fence' || b.kind === 'pen') {
+  } else if (b.kind === 'fence') {
     const along = b.w >= b.h, n = Math.max(2, Math.round((along ? b.w : b.h) / 0.8));
     for (let i = 0; i <= n; i++) {
       const f = i / n;
@@ -50,7 +53,7 @@ export function flatBlock(b: Block, group: THREE.Group, fires: [number, number, 
     tent(B, x0, x1, z0, z1, dk(roof), dk(hex(L.ridge)), r);
   } else if (b.kind === 'gallows' || b.kind === 'hurdle') {
     siegeBlock(B, b, r);
-  } else if (b.kind === 'rack') {
+  } else if (b.kind === 'rack' && b.label === 'CORDWOOD') {
     // Split logs stacked along it between two posts: a cordwood pile, not a box.
     const along = b.w >= b.h, len = (along ? b.w : b.h) - 0.2, deep = along ? b.h : b.w;
     for (const e of [-1, 1]) B.b(along ? cx + e * (len / 2 + 0.04) : cx, 0, along ? cz : cz + e * (len / 2 + 0.04), 0.09, 0.95, 0.09, 0x3a2a1a);
@@ -65,6 +68,17 @@ export function flatBlock(b: Block, group: THREE.Group, fires: [number, number, 
     for (const s of [-1, 1]) B.b(cx, 0.66, cz + s * b.h * 0.38, b.w * 0.9, 0.22, 0.07, dk(wall));
     for (const s of [-1, 1]) B.c(cx, 0.28, cz + s * b.h * 0.42, 0.56, 0.56, 0.08, dk(0x3a2a1a), 0, 0, 0.4);
     B.b(x1 + 0.3, 0.3, cz, 0.8, 0.06, 0.06, 0x4a3420);
+    // The bare hoops of its cover; on the one waiting for a burying, long shapes under grey sacking, a boot.
+    for (let x = x0 + 0.25; x < x1 - 0.1; x += Math.max(0.3, b.w / 4)) {
+      for (const s of [-1, 1]) B.b(x, 0.72, cz + s * b.h * 0.38, 0.05, 0.5, 0.05, dk(alight ? 0x3a2e24 : 0x9a8a5a));
+      B.b(x, 1.2, cz, 0.05, 0.05, b.h * 0.8, dk(alight ? 0x3a2e24 : 0x9a8a5a));
+    }
+    if (b.look === 3) {
+      for (let z = cz - b.h * 0.3; z < cz + b.h * 0.31; z += 0.26) B.lump(cx, 0.78, z, b.w * 0.8, 0.2, 0.24, jit(0x6a6670, 0.08, r), 0);
+      B.b(x1 - 0.22, 0.72, cz + 0.1, 0.1, 0.14, 0.12, 0x2a1e14);
+    }
+  } else if (furnish3d(B, b, r, dk, group) || hallFurn3d(B, b, r, dk)) {
+    // Built as the flat view paints it.
   } else {
     // Furniture and the rest: a box as tall as it stands in 2D, its top in its own colour.
     const h = Math.max(0.3, (L.tall / 16) * 0.95);

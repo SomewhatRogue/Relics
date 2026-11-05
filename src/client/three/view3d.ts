@@ -35,6 +35,8 @@ import { Perf } from './perf3d';
 import { makeRT, postMaterial } from './post';
 import { roomLights } from './roomlights';
 import type { Spot } from './rounds3d';
+import { WitchFires } from './witch3d';
+import { drawFlues } from './smoke3d';
 
 /** How much of the flat view's floor the 2.5D view shows: on a phone held upright a little closer in. */
 const ZOOM = { tall: 0.8, wide: 1 };
@@ -56,6 +58,7 @@ export class View3D {
   private buildings = new Buildings();
   private people = new People();
   private grim = new Grim3D();
+  private witch = new WitchFires();
   private ground: Ground | null = null;
   private map: GameMap | null = null;
   private overlay = new Overlay();
@@ -64,6 +67,7 @@ export class View3D {
   private S = 1;
   private heroAt: [number, number] | null = null;
   private calls = 0;
+  private tris = 0;
 
   constructor() {
     this.gl = new THREE.WebGLRenderer({ antialias: false, alpha: false, powerPreference: 'high-performance' });
@@ -80,7 +84,7 @@ export class View3D {
     game?.after(this.canvas, this.overlay.canvas);
     this.overlay.canvas.style.display = 'none';
     this.postScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.post));
-    this.scene.add(this.lights.group, this.fires.group, this.actors.group, this.buildings.group, this.people.group, this.grim.group, this.figs.group);
+    this.scene.add(this.lights.group, this.fires.group, this.actors.group, this.buildings.group, this.people.group, this.grim.group, this.witch.group, this.figs.group);
     this.resize();
     addEventListener('resize', () => this.resize());
   }
@@ -181,6 +185,7 @@ export class View3D {
     // A house on fire inside: flames over every patch alight (shared/blaze.ts), as the flat view draws them.
     if (map.blaze) for (const a of burningAt(map.blaze, room.time)) for (let fx0 = a.x + 0.3; fx0 < a.x + a.w; fx0 += 0.55) fires.push([fx0, 0.05, a.y + a.h / 2, 0.9]);
     roomLights(room, fx, lerp, ls);
+    this.witch.update(now, ls);
     this.grim.update(now, fires, ls);
     this.lights.setSky(map.theme, at.x, at.z);
     this.lights.place(ls, at.x, at.z, now);
@@ -214,6 +219,7 @@ export class View3D {
     calls += gl.info.render.calls * 2;
     tris += gl.info.render.triangles * 2;
     this.calls = calls;
+    this.tris = tris;
     gl.shadowMap.autoUpdate = true;
     gl.autoClear = true;
     cam.layers.set(0);
@@ -228,13 +234,14 @@ export class View3D {
     drawSpellGround3(og, room, P, this.view.ppu);
     drawFound3(og, room, P, lerp, this.view.ppu, now);
     drawExtras(og, ex);
+    drawFlues(og, map, P, now, this.view.W, this.view.H);
     drawTags(og, map, room.time, this.heroAt ? { x: this.heroAt[0], y: this.heroAt[1] } : null, others, P, now);
     drawMist3(og, map.theme, ex);
     this.perf.frame(performance.now() - t0, performance.now(), `${this.view.W}x${this.view.H} x${this.S}` + (BOXFIGS ? '' : `, ${this.figs.count} figs ${this.figs.ms.toFixed(1)} ms`), calls, tris);
   }
 
   get stats() {
-    return { ...this.perf.stats, W: this.view.W, H: this.view.H, S: this.S, calls: this.calls, figs: this.figs.ms, cards: this.figs.count };
+    return { ...this.perf.stats, W: this.view.W, H: this.view.H, S: this.S, calls: this.calls, tris: this.tris, figs: this.figs.ms, cards: this.figs.count };
   }
 
   private setMap(map: GameMap): void {
@@ -242,6 +249,7 @@ export class View3D {
     this.buildings.clear();
     this.people.clear();
     this.grim.build(map);
+    this.witch.build(map);
     this.ground = buildGround(map, paintMap(map));
     this.scene.add(this.ground.group);
     this.map = map;

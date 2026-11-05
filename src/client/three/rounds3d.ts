@@ -66,9 +66,17 @@ export function addRound(B: Boxes, o: Round, fires: Spot[], r: Seed): void {
       B.b(x, 0.35, z, R * 1.0, 0.02, R * 1.0, 0x8a6a3a);
       break;
     case 'post':
+      B.b(x, 0, z, 0.14, 1.4, 0.14, wood);
+      fires.push([x, 1.45, z, 0.6]);
+      break;
     case 'lantern':
-      B.b(x, 0, z, 0.14, o.kind === 'lantern' ? 2.0 : 1.4, 0.14, wood);
-      fires.push([x, o.kind === 'lantern' ? 2.05 : 1.45, z, 0.6]);
+      // The Last Lantern (sprites.ts): an iron post on a foot, a brass housing with a cap, the flame inside.
+      B.b(x, 0, z, 0.4, 0.1, 0.4, 0x2a2630);
+      B.b(x, 0, z, 0.13, 1.95, 0.13, 0x3a3036);
+      B.b(x, 1.95, z, 0.4, 0.05, 0.4, 0x5a4a2a);
+      for (const [dx, dz] of [[-0.17, -0.17], [0.17, -0.17], [-0.17, 0.17], [0.17, 0.17]]) B.b(x + dx, 2.0, z + dz, 0.05, 0.38, 0.05, 0x5a4a2a);
+      B.b(x, 2.38, z, 0.46, 0.06, 0.46, 0x7a6a3a), B.b(x, 2.44, z, 0.2, 0.08, 0.2, 0x5a4a2a);
+      fires.push([x, 2.03, z, 0.6]);
       break;
     case 'cookfire':
       for (let i = 0; i < 7; i++) {
@@ -100,13 +108,27 @@ export function addRound(B: Boxes, o: Round, fires: Spot[], r: Seed): void {
       B.b(x, 0.35, z, R * 1.1, 0.25, R * 1.1, jit(o.kind === 'clamp' ? 0x1e1a18 : 0x34261c, 0.1, r));
       break;
     case 'shrine':
+      // A wayside shrine (sitedraw.ts): a box on a post under a red roof, a candle stub in the dark of it.
+      B.b(x, 0, z, 0.12, 0.9, 0.12, 0x4a3420);
+      B.b(x, 0.9, z, 0.5, 0.42, 0.34, 0x3a2a1a), B.b(x, 0.95, z + 0.12, 0.34, 0.3, 0.12, 0x14100c);
+      B.b(x, 1.0, z + 0.1, 0.08, 0.13, 0.08, 0xd8d0bc), B.b(x, 0.9, z, 0.6, 0.05, 0.4, 0x5a3d22);
+      B.c(x, 1.38, z, 0.7, 0.07, 0.48, 0x6a2a1a, 0, 0.3);
+      fires.push([x, 1.14, z + 0.1, 0.12]);
+      break;
+    case 'fountain':
+      // A stone basin gone green, the water in it, a spout in the middle (sitedraw.ts).
+      for (let i = 0; i < 10; i++) {
+        const a = (i / 10) * Math.PI * 2;
+        B.b(x + Math.cos(a) * R * 1.1, 0, z + Math.sin(a) * R * 0.75, 0.42, 0.34, 0.3, jit(0x57525e, 0.1, r), -a);
+      }
+      B.b(x, 0, z, R * 2, 0.27, R * 1.3, 0x2e4a4a), B.b(x, 0.27, z, R * 1.3, 0.01, R * 0.8, 0x3e5a5e);
+      B.b(x, 0, z, 0.2, 0.85, 0.2, 0x6a6470), B.b(x, 0.8, z, 0.45, 0.07, 0.12, 0x6a6470);
+      break;
     case 'cross':
     case 'statue':
-    case 'fountain':
       B.b(x, 0, z, R * 1.6, 0.25, R * 1.6, stone);
-      B.b(x, 0.25, z, 0.3, o.kind === 'fountain' ? 0.7 : 1.3, 0.3, jit(0x6a6470, 0.08, r));
+      B.b(x, 0.25, z, 0.3, 1.3, 0.3, jit(0x6a6470, 0.08, r));
       if (o.kind === 'cross') B.b(x, 1.2, z, 0.8, 0.14, 0.14, 0x6a6470);
-      if (o.kind === 'shrine') B.c(x, 1.62, z, 0.7, 0.08, 0.5, 0x3a3a4a, 0, 0.3);
       break;
     case 'target':
       B.b(x, 0, z, 0.1, 0.9, 0.1, wood);
@@ -117,9 +139,20 @@ export function addRound(B: Boxes, o: Round, fires: Spot[], r: Seed): void {
       for (let i = -2; i <= 2; i++) B.b(x + i * R * 0.35, 0.0, z, 0.05, 0.03, R * 1.6, 0x2a2733);
       break;
     case 'candles':
+      // An iron stand, three candles of three heights, each with its own small flame (hallsdraw.ts).
+      B.b(x, 0, z, 0.3, 0.04, 0.3, 0x2a2630), B.b(x, 0, z, 0.05, 0.75, 0.05, 0x2a2630), B.b(x, 0.72, z, 0.6, 0.05, 0.06, 0x2a2630);
+      for (const [dx, h] of [[-0.25, 0.31], [0, 0.44], [0.25, 0.25]]) {
+        B.b(x + dx, 0.77, z, 0.06, h, 0.06, 0xe8e0c8);
+        fires.push([x + dx, 0.79 + h, z, 0.22]);
+      }
+      break;
     case 'witchfire':
-      B.b(x, 0, z, 0.3, 0.7, 0.3, 0x3a3640);
-      fires.push([x, 0.72, z, 0.5]);
+      // An iron bowl on three legs; its fire, the wrong colours, is witch3d.ts.
+      for (let i = 0; i < 3; i++) {
+        const a = (i / 3) * Math.PI * 2 + 0.5;
+        B.c(x + Math.cos(a) * 0.2, 0.22, z + Math.sin(a) * 0.2, 0.05, 0.46, 0.05, 0x2a2630, -a, 0, 0.18);
+      }
+      B.b(x, 0.4, z, 0.62, 0.16, 0.5, 0x2a2630), B.b(x, 0.56, z, 0.54, 0.02, 0.42, 0x3a3046);
       break;
     default:
       // Paint only (crows, moths, a dog, smoke): nothing to stand up.

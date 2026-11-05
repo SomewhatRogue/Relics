@@ -2,7 +2,7 @@
  * Each of Wickhold's halls looks like what it is from the street, in 3D (exterior.ts is the flat one),
  * by its door: the mage's tower's crooked slate cone and its slits lit odd colours; shields and a
  * banner on the barracks; antlers, pelts and log ends at the hunters' lodge; the church's empty belfry
- * and round window; casks and a lamp at the Drowned Rat; the forge's chimney stack and its horseshoes;
+ * and round window; casks, a lamp and the rat on its sign at the Drowned Rat; the forge's chimney stack and its horseshoes;
  * notices and a banner at the town hall; herbs drying at the infirmary; the counting house's fallen end.
  */
 import * as THREE from 'three';
@@ -13,6 +13,13 @@ import { G } from './mats';
 
 /** The roof's span (x) left open: the counting house's fallen-in end. */
 export const roofGap = (b: Block): [number, number] | undefined => (b.door === 'bank' ? [b.x + b.w * 0.58, b.x + b.w * 0.94] : undefined);
+
+/** The top of a hall's flue (x, y, z): the tower's on its cone, the forge's stack. Smoke rises off it (smoke3d.ts). */
+export function flueAt(b: Block, h: number): [number, number, number] {
+  if (b.door === 'forge') return [b.x + b.w - 1.0, h + 2.32, b.y + 0.6];
+  const half = Math.max(b.w, b.h) / 2 + 0.25;
+  return [b.x + b.w / 2 + half * 0.66, h + half * 2.4 * 0.5 + 0.1, b.y + b.h / 2];
+}
 
 /** The tower's cone of slates, its tip bent over, a vane on it. Returns its top. */
 export function cone(R: Boxes, x0: number, x1: number, z0: number, z1: number, h: number, r: Seed): number {
@@ -44,6 +51,9 @@ export function dressHall(W: Boxes, b: Block, H: number, group: THREE.Group, r: 
       // Slit windows lit violet, pale blue and the witchfire's green.
       const cols = [0xc9a8ff, 0x9fe8ff, 0x8aff7a, 0xc9a8ff];
       [[0.24, 0.8], [0.7, 0.62], [0.46, 0.45], [0.22, 0.3]].forEach(([fx, fy], i) => glow(x0 + b.w * fx, H * fy, f - 0.02, 0.1, 0.36, 0.06, cols[i], 0.1));
+      // Its flue, out through the slates (exterior.ts), the coloured smoke off it.
+      const [fx, fy, fz] = flueAt(b, H), half = Math.max(b.w, b.h) / 2 + 0.25;
+      W.b(fx, fy - half * 2.4 * 0.2 - 0.1, fz, 0.3, half * 2.4 * 0.2, 0.3, 0x57525e), W.b(fx, fy - 0.06, fz, 0.34, 0.06, 0.34, 0x2a2733);
       return;
     }
     case 'hall':
@@ -82,6 +92,11 @@ export function dressHall(W: Boxes, b: Block, H: number, group: THREE.Group, r: 
       for (const x of [mid - 1.1, mid - 0.7]) W.b(x, 0, f + 0.2, 0.32, 0.44, 0.32, jit(0x6b4a2b, 0.08, r)), W.b(x, 0.14, f + 0.2, 0.34, 0.05, 0.34, 0x2a2630);
       W.b(mid + 0.5, H * 0.75, f + 0.1, 0.3, 0.04, 0.2, 0x2a2630);
       lamp(mid + 0.6, H * 0.62, f + 0.18);
+      // The hanging sign (furnish.ts): a rat on a board, out on a bracket by the corner.
+      W.b(x1 - 0.65, H * 0.9, f + 0.2, 0.05, 0.05, 0.42, 0x2a2630);
+      for (const s of [-0.18, 0.18]) W.b(x1 - 0.65 + s, H * 0.72, f + 0.38, 0.02, H * 0.18, 0.02, 0x2a2630);
+      W.b(x1 - 0.65, H * 0.48, f + 0.38, 0.52, 0.38, 0.05, 0x5a3d22);
+      W.b(x1 - 0.67, H * 0.6, f + 0.41, 0.26, 0.12, 0.02, 0x2a2630), W.b(x1 - 0.48, H * 0.58, f + 0.41, 0.12, 0.05, 0.02, 0x2a2630);
       return;
     case 'forge':
       // A stone chimney stack up through the roof, horseshoes over the door, the quench barrel.

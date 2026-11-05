@@ -14,6 +14,8 @@ export interface RoofOpts {
   holes?: number;
   /** Pitch (radians). */
   angle?: number;
+  /** A share of shingles gone over a whole roof (worn since the breach, or stove in): dark holes with a lath across (wear.ts). */
+  worn?: number;
   /** A span along x with no roof (fallen in). */
   gap?: [number, number];
 }
@@ -41,6 +43,11 @@ export function gable(B: Boxes, x0: number, x1: number, z0: number, z1: number, 
         if (xb - xa < 0.05 || (o.holes && r.next() < o.holes && i > 0 && i < n - 1)) continue;
         if (o.gap && (xa + xb) / 2 > o.gap[0] && (xa + xb) / 2 < o.gap[1]) continue;
         const y = ridgeY - s * Math.sin(a) + th * 0.5 + 0.04, z = zc + side * s * Math.cos(a);
+        if (o.worn && i > 0 && i < n - 1 && r.next() < o.worn) {
+          B.c((xa + xb) / 2, y - 0.02, z, xb - xa, th * 0.5, rowL + 0.06, 0x0d0b10, 0, side * a);
+          B.c((xa + xb) / 2, y + 0.01, z, 0.05, th * 0.6, rowL + 0.04, 0x5a3d22, 0, side * a);
+          continue;
+        }
         B.c((xa + xb) / 2, y, z, xb - xa + (o.thatch ? 0.05 : -0.03), th, rowL + 0.06, jit(i % 2 ? o.col : dim(o.col), o.thatch ? 0.16 : 0.14, r), 0, side * a);
         if (!o.thatch) continue;
         // Thatch: each course's cut edge a shade darker, standing proud of the one below, with loose

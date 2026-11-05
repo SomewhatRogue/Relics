@@ -24,7 +24,7 @@ const THATCH = [['#8a7448', '#6b5a3a'], ['#6e6450', '#544a3a'], ['#5e4e30', '#46
 const WALLS = ['#6a5a48', '#8a8070', '#5a5660'];
 
 /** How wide the lean-to is, in pixels (0 with none). */
-const leanW = (h: House, w: number) => (h.leanTo ? Math.round(w * 0.28) : 0);
+export const leanW = (h: House, w: number) => (h.leanTo ? Math.round(w * 0.28) : 0);
 
 /** The two windows either side of the door, kept on the house proper (not the lean-to). */
 export function windowsOf(h: House, w: number): number[] {
@@ -34,13 +34,22 @@ export function windowsOf(h: House, w: number): number[] {
 /** Where the chimney stands on the roof (a cottage's; barns have none). */
 export const chimneyOf = (h: House, w: number) => (h.leanTo > 0 ? Math.round(w * 0.2) : Math.round(w * 0.7));
 
+/** A job's house as it stands: a better-off street's is stone under slate, no lean-to, shutters on the windows. */
+export const asBuilt = (b: Block, h: House): House => (b.style === 'stone' ? { ...h, thatch: false, roof: 1, leanTo: 0 } : h);
+
+/** Its roof, the lines between its rows, and its walls (the 2.5D view builds from these too: three/houses3d.ts). */
+export function houseColours(b: Block, h: House): { roof: string; line: string; wall: string } {
+  h = asBuilt(b, h);
+  const [roof, line] = (h.thatch ? THATCH : SHINGLE)[h.roof % 4];
+  return { roof, line, wall: b.kind === 'barn' ? '#5a3d22' : b.style === 'stone' ? WALLS[2] : WALLS[(h.roof + (h.thatch ? 1 : 0)) % 3] };
+}
+
 /** Paint the roof and front wall of a job's cottage or barn (the door and scorching come after). */
 export function paintHouse(rect: Rect, b: Block, h: House, w: number, roofH: number, tall: number): void {
-  // A better-off street's: stone under slate, no lean-to, shutters on the windows.
-  if (b.style === 'stone') h = { ...h, thatch: false, roof: 1, leanTo: 0 };
+  h = asBuilt(b, h);
   const lw = leanW(h, w), lx = h.leanTo < 0 ? 0 : w - lw, mx = h.leanTo < 0 ? lw : 0, mw = w - lw, barn = b.kind === 'barn';
   roof(rect, h, mx, 0, mw, roofH);
-  const wall = barn ? '#5a3d22' : b.style === 'stone' ? WALLS[2] : WALLS[(h.roof + (h.thatch ? 1 : 0)) % 3];
+  const wall = houseColours(b, h).wall;
   rect(mx, roofH, mw, tall, wall), rect(mx, roofH, mw, 1, '#14121a');
   if (barn) for (let x = mx + 2; x < mx + mw; x += 4) rect(x, roofH + 1, 1, tall - 1, '#4a3420');
   else if (wall === WALLS[2]) for (let y = roofH + 3; y < roofH + tall; y += 4) for (let x = mx + ((y >> 2) % 2) * 3; x < mx + mw; x += 6) rect(x, y, 5, 1, '#45414c');
