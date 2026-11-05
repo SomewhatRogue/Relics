@@ -34,7 +34,7 @@ export const SIGN_LINES = {
   /** The card's plain line under the move. */
   how: {
     shadow: "SHADOW STEP puts you behind the goblin you face, and it's stunned for a second. Stab it from there.",
-    mark: 'MARK the goblin you aim at. It takes 15% more damage from everyone, your arrows bend toward it, and your hound goes for it.',
+    mark: "MARK the goblin you aim at for 8 s. Anyone's quick hits on it do +5 damage, heavy hits +40%. Your arrows bend toward it, and your hound goes for it.",
     heal: "MEND heals the nearest hurt friend for 25. If nobody near you is hurt, or you're worse off than they are, it heals you.",
   },
   /** Hew, shot (a caption, the fight going on). */

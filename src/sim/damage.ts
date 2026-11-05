@@ -80,8 +80,9 @@ export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: Da
   if (!o.tick) sayWeak(e, weak * (soak ? STORM.wet : 1), now, ev, o.el || 'physical');
   // Marked by a relic: the next real blow lands harder, and the mark is spent.
   if (!o.tick && (e.markUntil ?? -9) > now) (n = Math.round(n * MARK.mult)), (e.markUntil = 0);
-  // A Ranger's MARK: more from everyone, ticks too (sim/mark.ts).
-  if (isMarked(e, now)) n = Math.max(1, Math.round(n * MARK_SIGN.dmg));
+  // A Ranger's MARK: more from everyone (sim/mark.ts): a set amount on a quick blow, a share on a heavy one, a little on a tick.
+  const marked = isMarked(e, now);
+  if (marked) n = o.tick ? Math.max(1, Math.round(n * MARK_SIGN.tick)) : o.heavy ? Math.round(n * MARK_SIGN.heavy) : n + MARK_SIGN.flat;
   if (o.mult && (e.act === 'stunned' || e.act === 'pinned' || frozen(e, now) || snared(e, now))) n = Math.round(n * GUARD.stunnedMult * (o.brutal ? TRAIT.brutal : 1));
   // An ironhide's plates: a heavy hit breaks its guard, anything else barely gets through (sim/ironhide.ts).
   const breaks = !!o.heavy && !o.tick, clank = !o.tick && !breaks && clanks(e, now);
@@ -89,7 +90,7 @@ export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: Da
   e.hp -= n;
   e.hitAt = now;
   dealt(e, e.lastBy, n, o.tick);
-  ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy: !!o.heavy, on: 'enemy', tick: o.tick, src: o.src, big: e.kind === 'butcher', ...(o.backstab ? { backstab: true } : {}), ...(clank ? { plated: true } : {}) });
+  ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy: !!o.heavy, on: 'enemy', tick: o.tick, src: o.src, big: e.kind === 'butcher', ...(o.backstab ? { backstab: true } : {}), ...(clank ? { plated: true } : {}), ...(marked && !o.tick ? { marked: true } : {}) });
   if (isDummy(e)) {
     if (e.hp <= 0) e.hp = e.maxHp;
     return false;

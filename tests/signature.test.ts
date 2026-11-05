@@ -92,15 +92,19 @@ describe('MARK, the Ranger’s own button', () => {
     expect(a.h.signReady ?? 0).toBe(0);
   });
 
-  it('a marked goblin takes 15% more from everyone, ticks too, and only while marked', () => {
+  it('a marked goblin takes 5 more from a quick hit, 40% more from a heavy, a little more from a tick, and only while marked', () => {
     const a = arena('longbow', [[9, 4]]), e = a.es[0];
     damage(e, 20, a.room.time, []);
     expect(e.maxHp - e.hp).toBe(20);
     Object.assign(e, { hp: 400, markedBy: 'friend', markedUntil: a.room.time + 5 });
-    damage(e, 20, a.room.time, []);
-    expect(400 - e.hp).toBe(23);
+    const ev: FightEvent[] = [];
+    damage(e, 20, a.room.time, ev);
+    expect(400 - e.hp).toBe(25);
+    expect(ev.find((x) => x.k === 'hit')).toMatchObject({ marked: true });
+    damage(e, 20, a.room.time, [], { heavy: true });
+    expect(400 - e.hp).toBe(25 + 28);
     damage(e, 4, a.room.time, [], { tick: true });
-    expect(400 - e.hp).toBe(23 + 5);
+    expect(400 - e.hp).toBe(25 + 28 + 5);
     e.markedUntil = a.room.time - 0.1;
     e.hp = 400;
     damage(e, 20, a.room.time, []);

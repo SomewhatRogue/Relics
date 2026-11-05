@@ -657,7 +657,7 @@ export type FightEvent =
   /** A house alight (sim/houseburn.ts): a goblin driven out of its door; a chest inside burned, its charred leavings at the door; the smoke getting to someone inside. */
   | { k: 'flushed' | 'charred' | 'choke'; x: number; y: number }
   /** `src`: what landed it (a kit, or a shot's kind), for its sound; `big`: on the butcher. */
-  | { k: 'hit'; x: number; y: number; n: number; heavy: boolean; on: 'enemy' | 'hero'; counter?: boolean; crit?: boolean; ambush?: boolean; boarded?: boolean; backstab?: boolean; tick?: boolean; src?: string; big?: boolean; plated?: boolean }
+  | { k: 'hit'; x: number; y: number; n: number; heavy: boolean; on: 'enemy' | 'hero'; counter?: boolean; crit?: boolean; ambush?: boolean; boarded?: boolean; backstab?: boolean; tick?: boolean; src?: string; big?: boolean; plated?: boolean; marked?: boolean }
   | { k: 'swing'; x: number; y: number; src: string; heavy: boolean }
   | { k: 'death'; x: number; y: number; how: DeathKind; dx: number; dy: number; kind: EnemyKind }
   /** A shot stopped dead on a shield-bearer's board (sim/board.ts): a thunk, sparks, BLOCKED. */

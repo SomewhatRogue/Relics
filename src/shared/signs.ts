@@ -24,7 +24,13 @@ export const SIGN_KEY = 'V';
  * `bend` radians a second while it's within `cone` radians of their path; the hound goes for it.
  * One mark a Ranger: a new one takes the old one off.
  */
-export const MARK_SIGN = { cooldown: 10, range: 9, time: 8, dmg: 1.15, bend: 0.6, cone: 0.35, face: 0.8 };
+/**
+ * MARK's bite (Kyle, 2026-11-05: "doesn't feel like it really does more... a set increase for small
+ * hits and a percent increase for all heavy attacks"): every quick blow, arrow or bolt on a marked
+ * goblin takes `flat` more on top, every heavy one `heavy` times as much, and a burn or poison tick
+ * `tick` times. Each real hit says so: a gold number, a gold ring, and a little more weight (fx.ts).
+ */
+export const MARK_SIGN = { cooldown: 10, range: 9, time: 8, flat: 5, heavy: 1.4, tick: 1.15, bend: 0.6, cone: 0.35, face: 0.8 };
 
 /**
  * The Healer's MEND (`heal` in the code): `heal` health to the nearest hurt friend within `range` tiles,
@@ -43,7 +49,7 @@ export const SIGNS: Record<SignId, { name: string; cooldown: number }> = {
 /** What each does, in a line (BUTTONS, the class card). Kyle's style; for the lore keeper and line editor. */
 export const SIGN_WORDS: Record<SignId, string> = {
   shadow: "Step out of the dark behind the goblin you face. It's stunned for a second.",
-  mark: 'Mark the goblin you aim at for 8 s. It takes 15% more damage from everyone, your arrows bend toward it, and your hound goes for it.',
+  mark: "Mark the goblin you aim at for 8 s. Anyone's quick hits on it do +5 damage, heavy hits +40%. Your arrows bend toward it, and your hound goes for it.",
   heal: "Heal the nearest hurt friend for 25, or yourself if nobody near is hurt or you're the worst off. Costs 20 stamina.",
 };
 

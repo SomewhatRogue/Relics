@@ -225,7 +225,14 @@ export class Fx {
         }
         this.burst(x, y - 8, ev.heavy ? 12 : 7, ['#ffffff', '#fff1b0', '#ffd27a'], ev.heavy ? 70 : 50, true);
         this.burst(x, y - 6, ev.heavy ? 10 : 5, ['#7a1d1d', '#5a1414', '#9a2a2a'], 45, false, 160, true);
-        this.say(x, y - 22, String(ev.n), ev.on === 'hero' ? '#ff6a5a' : ev.counter ? '#ffa040' : ev.heavy ? '#ffe070' : '#ffffff');
+        this.say(x, y - 22, String(ev.n), ev.on === 'hero' ? '#ff6a5a' : ev.marked ? '#ffc23a' : ev.counter ? '#ffa040' : ev.heavy ? '#ffe070' : '#ffffff');
+        if (ev.marked) {
+          // MARK biting (shared/signs.ts): a gold ring and sparks, bigger on a heavy, and a touch more weight.
+          this.rings.push({ x, y: y - 8, life: 0.22, max: 0.22, col: '#ffc23a', size: ev.heavy ? 18 : 11 });
+          this.burst(x, y - 8, ev.heavy ? 14 : 7, ['#ffc23a', '#fff1b0', '#ffffff'], ev.heavy ? 80 : 60, true);
+          this.flashes.push({ x, y: y - 8, r: ev.heavy ? 48 : 30, i: 0.9, c: [1, 0.78, 0.3], life: 0.1, max: 0.1 });
+          this.shake = Math.max(this.shake, ev.heavy ? 3 : 1.5);
+        }
         if (ev.counter) this.say(x, y - 30, 'COUNTER', '#ffa040');
         if (ev.boarded) this.say(x, y - 30, 'BLOCKED', '#c8b090');
         if (ev.ambush) (this.say(x, y - 30, 'AMBUSH', '#9affc0'), this.burst(x, y - 8, 12, ['#9affc0', '#ffffff'], 70, true));

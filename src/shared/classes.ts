@@ -61,7 +61,7 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     line: 'Blade, bow and a lifelong friend.',
     weapon: 'Short sword (tap) and longbow (hold to draw)',
     skill: "Hunter's Net: Snares or slows.",
-    sign: 'Mark a goblin. It takes more damage from everyone, your arrows bend toward it, and your hound goes for it.',
+    sign: 'Mark a goblin: everyone hits it harder. Your arrows bend toward it, and your hound goes for it.',
     signLabel: 'MARK',
     guard: 'Jumps back to dodge. Perfect parry timing required.',
     note: 'Nips at their heels, smart enough to not go down.',
