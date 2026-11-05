@@ -3,16 +3,18 @@
  * to the next at once, again in CHANNEL.cooldown, and primes the next spell. Kept on the hero
  * (`augments.channel`, as saves have always had it), so a guest's screen has it too.
  */
-import { CHANNEL, HERO, INPUT_BUFFER, TAPS, WEAPONS, technique, type Element, type MageKit, type Swing } from '../shared/tuning';
+import { CHANNEL, HERO, INPUT_BUFFER, STREAM, TAPS, WEAPONS, technique, type Element, type MageKit, type Swing } from '../shared/tuning';
 import { knack } from './gearstats';
 import type { FightEvent, Hero, Intent } from './types';
 
 /** The element a Mage's spells are cast in now: fire to start with. */
 export const castElement = (h: Hero): Element => (h.augments.channel || 'fire') as Element;
 
-/** A Mage's tap, as the element makes it: the kit's blow times its TAPS damage (anyone else's as it is). */
+/** A Mage's tap, as the element makes it: the kit's blow times its TAPS damage (anyone else's as it is).
+ *  The wand's storm tap is quick, so a mash keeps its stream on (sim/stream.ts). */
 export function tapSwing(h: Hero, s: Swing): Swing {
   const row = WEAPONS[h.weapon]?.cls === 'MAGE' ? TAPS[h.weapon as MageKit]?.[castElement(h)] : undefined;
+  if (h.weapon === 'wand' && castElement(h) === 'storm') s = { ...s, windup: STREAM.windup, recover: STREAM.recover, range: STREAM.reach };
   return row && row.dmg !== 1 ? { ...s, dmg: Math.max(1, Math.round(s.dmg * row.dmg)) } : s;
 }
 

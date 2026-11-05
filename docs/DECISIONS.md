@@ -2,6 +2,95 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-04: storm reworked (a stream, a bolt, shields and water); fire passes on only at death (Kyle; Claude Opus 5.5)
+
+Kyle, after playing the spellbooks: "Fire is too strong" (he loves it spreading through the world but
+wonders why anyone would use storm); ice already freezes butchers, so storm needn't; he likes storm
+answering shields and wants it better on water; the storm hold should be "a lightning bolt, not a chain
+lightning"; the storm tap "a continuous stream of lightning from the hand that builds the longer it stays
+on, but you can't move fast while using it". On top of the lead's burn change the same day (BURN.dmg 4,
+BURN.tough 0.5; wand fire tap 0.9, staff fire tap 0.65).
+
+- **Fire spreads less** (`sim/elements.ts`, `sim/damage.ts` `kill`). A burning goblin no longer sets
+  others alight by touch or by the tick: only when it dies, burning, does it pass the fire to every goblin
+  within BURN.spread of its body (spiders further, as before). Fire spells still set alight what they hit.
+  Houses, slicks, the blaze, the freed catching from a burning goblin, and a nest set alight catching
+  the spiders on it by touch (the world's fire, sim/torch.ts): unchanged.
+- **Storm's rules, every storm** (`shared/magic.ts` STORM, `sim/wet.ts`, `sim/elements.ts` `zap`): it
+  ignores shields (a shield-bearer's board from the front, so a shield wall too; shots already went round
+  it, now the staff's sweep and the spellblade's cuts do: `sim/combat.ts`, `stormCut`). Dry, it jumps
+  nowhere. **Wet** is a goblin standing in the room's water (any of the map's `water`: fords, shallows,
+  the fen's pools, what `wadeAt` slows) or any goblin while it rains on the room. On a wet goblin storm
+  lands **1.5x** (`STORM.wet`, in `damage()`, so every storm source counts it) and jumps to every other
+  wet goblin within **3 tiles** (`STORM.reach`), each taking 0.5 of the blow (`STORM.share`, at least 6,
+  then 1.5x as it's wet), **once each a cast** (`Enemy.jolted` holds the cast: a tap, a shot, a swing, a
+  ring's pulse, a dash, one tick of the stream). A javelin in a body is still a lightning rod. The storm
+  tether (a Mage skill) follows the same rule. Judgment: the rule is the element's, not only the Mage
+  weapons', so the card can say it once and it stays true for relics in storm too.
+- **Wet and the weather** (`sim/wet.ts` `raining`): on main the weather is still paint on the room's theme
+  (`theme.rain`, `theme.storm`), so that's what `raining` reads now. It's the one marked WEATHER HOOK:
+  when the room's weather becomes a rule (`theme.sky`, `shared/sky.ts` on the weather branch), it becomes
+  `return wet(room.theme)` and every storm rule follows.
+- **Wand storm tap: the stream** (`sim/stream.ts`, `shared/spellbook.ts` STREAM). Each tap (a quick swing:
+  0.08 s up, 0.12 s back, so a mash keeps up) keeps it on 0.35 s more. It latches on the nearest goblin
+  within 5 tiles and 20 degrees either side of your aim and holds it within 5.5 tiles and 50 degrees (on
+  a phone the Mage stays turned to it). Every 0.1 s it deals 0.12 of the spark (0.96, so 9.6 a second)
+  times its build, which climbs from 1x to 2.5x over 2 s on the same goblin (24 a second), and starts
+  again if it breaks off or the goblin dies (it then takes the next). While it's on you walk at 0.4 of
+  your pace. Wet, every tick lands 1.5x and jumps. It doesn't break blows (the other wand taps still do),
+  so the storm wand's ALSO row says what it does instead. No bolt is loosed and no `shoot` event; the hero
+  carries `stream`, so a guest draws the same line on the same goblin at the same build.
+- **Wand storm hold: a lightning bolt** (`sim/thunderbolt.ts`, THUNDERBOLT). Thrown at the release, at
+  once, straight from the hand along the aim (turned onto a goblin within 12 degrees of it), 9 tiles at
+  most, a wall stops it, 0.3 either side of its line: the first goblin takes 2.5x the hold (10 to 24, so
+  25 to 60), shield or no shield; a bolt into a wind-up breaks that blow. On the flash it runs through
+  every goblin on the line and breaks off whatever each was doing. It no longer falls from the sky after a
+  delay, and doesn't stun: the red striped strike mark is gone (STRIKE and the `strike` bolt retired). The
+  `spell` event carries how far it went (`r`), so both views draw the line that was judged.
+- **Staff and spellblade storm** keep their spells (crackling sweep, charged ring, cuts, lightning rush)
+  under the new rules: shields ignored, jumps only between wet goblins.
+- **Balance, measured** (one goblin held still, tapping as fast as the kit lets you for 6 s, burns
+  counted; `tests/spellbook.test.ts` keeps each kit within 15%, `tests/storm.test.ts` keeps the stream's
+  full build between 1.1x and 1.4x the other wand taps):
+
+  | dmg a second | fire | frost | storm |
+  |---|---|---|---|
+  | wand, one goblin | 18.3 | 20.0 | 21.3 (stream: 15.0 over its first 2 s, 24.0 built) |
+  | staff, one goblin | 19.0 | 18.7 | 18.7 |
+  | spellblade, one goblin | 25.7 | 30.0 | 30.0 |
+  | pack of four, dry (wand, staff, blade) | 18, 76, 101 | 20, 75, 118 | 21, 75, 118 |
+  | storm, pack of four in water (wand, staff, blade) | | | 80, 154, 253 |
+  | storm, one goblin in water | | | 32, 28, 45 |
+
+  (The goblins in these never die, so fire passing on at death isn't in the pack numbers.) Holds, a full
+  hold: the fireball 44 on each of a pack of four (176); the bolt 60 on one, 60 on each of a line on the
+  flash; in water 90 on the first and 45 jumped to each wet one near, 90 then 135 on each of a wet line
+  on the flash. Charged ring over 4 s: 40 each dry, 64 and 136 in water; the dash 18 each dry, 27 and 41
+  in water. Storm now hits one goblin hardest, answers shields and owns the water; dry, it no longer
+  out-damages fire on a pack.
+- **Seen and heard** (both views): `client/streamdraw.ts` draws the stream as a jagged, flickering line
+  from the wand's tip to the goblin, with a halo, a white core once it's built, and more forks as it
+  builds (a short crackle from the hand when nothing's in reach), and its light; `client/streamsound.ts`
+  a sustained crackle and buzz whose pitch and loudness rise with the build, snaps over the top;
+  `client/fxspells.ts` the bolt as a thick jagged line to where it stopped, sparks and a flash; storm
+  ticks show yellow sparks and some of their numbers.
+- **Words** (for the lore keeper and the line editor, `client/kitlines.ts`, `shared/classes.ts`,
+  `shared/skillwords.ts`): wand storm TAP "Lightning stream, builds up", HOLD "Lightning bolt, ignores
+  shields", PERFECT "Whole line, interrupts any blow", ALSO "Walk slowly while it's on"; staff storm TAP
+  "Crackling sweep, ignores shields"; spellblade storm TAP "Cuts ignore shields"; the unheld cards "Tap
+  lightning stream, hold lightning bolt", "Cuts ignore shields, hold lightning rush"; the class card's
+  SPELLS note (where "wet" is said, once): "Your element is your spellbook: switch it with ELEMENT. Fire
+  burns, and spreads when a burning goblin dies. Frost chills (slows) and freezes. Storm ignores shields.
+  Wet goblins (in water, or out in the rain) take 1.5x from storm, and it jumps between them. Wand far,
+  staff round you, spellblade up close."; STORM TETHER "Lightning ties you to one goblin and jumps to wet
+  ones near it."
+
+Tests: `tests/storm.test.ts` (fire passes on only at death; storm through a shield's board and a shield
+wall; no jump dry, jumps in water and in the rain, 1.5x, once a cast; the stream builds, restarts on the
+next goblin, goes off without taps and slows the walk; the stream's balance; the bolt's first goblin and
+the perfect's line), `spellbook.test.ts`, `elements.test.ts`, `magic.test.ts`, `skills.test.ts`,
+`kitwords.test.ts` updated.
+
 ## 2026-11-04: the element is the Mage's spellbook; switching gets its own button; GRASP (Kyle; Claude Opus 5.5)
 
 Kyle agreed the design: today every Mage weapon casts the same spell in every element, just tinted, and

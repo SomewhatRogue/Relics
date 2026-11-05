@@ -2,6 +2,16 @@
 
 ## Current slice
 
+**Storm reworked, fire spreads less** (Claude Opus 5.5, 2026-11-04; Kyle: "Fire is too strong", storm "a
+lightning bolt, not a chain lightning", its tap "a continuous stream of lightning from the hand that builds").
+Built; waiting on Kyle's play. *Done when* on his phone and laptop, flat and 2.5D: a burning goblin sets
+others alight only when it dies; the storm wand's tap mashed is a crackling stream on the goblin in front
+that brightens and rises in pitch as it builds and slows his walk; its hold throws a lightning bolt from the
+hand into the first goblin (through the whole line on the flash), no red mark; every storm spell goes
+through a shield from the front, jumps nowhere on dry ground, and in water (or the rain) lands harder and
+jumps between the wet goblins. Open: the new lines (DECISIONS) through the lore keeper and line editor;
+wiring `wet` to the weather branch's `sky` at merge (`sim/wet.ts`, WEATHER HOOK).
+
 **The hero clear of the buttons on a phone** (Claude Opus 5.5, 2026-11-04; Kyle: "Your potion and things can
 cover your character while in game"). Built; waiting on Kyle's play. *Done when* on his phone upright, flat
 and 2.5D, in town and on a job, the hero is never under a button (walking to the room's foot too), the

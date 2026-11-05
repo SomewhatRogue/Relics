@@ -1,16 +1,16 @@
 /**
  * A Mage's spells on the floor, drawn at the size they're judged at (sim/staffrings.ts, sim/holds.ts):
  * the staff's ring of fire (flames licking up all round its band), its charged ring (crackling posts
- * round the edge, lightning jumping between them, sparks inside), and a lightning strike's mark before it
- * falls (a red circle filling, with the striped edge of a blow that can't be blocked: friends in a party
- * get hurt by it too). Flat view and the 2.5D overlay alike, by a projection of the floor to the screen,
- * and the light each gives off. Cosmetic only: Math.random is fine here.
+ * round the edge, lightning jumping between them, sparks inside), and the wand's storm stream
+ * (streamdraw.ts). Flat view and the 2.5D overlay alike, by a projection of the floor to the screen, and
+ * the light each gives off. Cosmetic only: Math.random is fine here.
  */
 import { FLAME_RING } from '../shared/tuning';
 import type { ArenaRoom } from '../sim/room';
-import type { Bolt, Zone } from '../sim/types';
+import type { Zone } from '../sim/types';
 import type { Light } from './light';
 import { EL_LIGHT } from './palette';
+import { drawStreams, streamLights } from './streamdraw';
 import { OX, OY, PX } from './world';
 
 /** Floor (x, z) at height y (tiles) to the screen. */
@@ -68,31 +68,16 @@ function charged(g: CanvasRenderingContext2D, z: Zone, P: Proj, t: number): void
   }
 }
 
-/** A lightning strike's mark, `k` (0..1) of the way to falling: red filling from the middle, a striped edge. */
-function mark(g: CanvasRenderingContext2D, b: Bolt, P: Proj, ppu: number): void {
-  const k = Math.min(1, b.t / Math.max(0.01, b.flight)), R = b.burst, step = 1 / Math.max(4, ppu);
-  for (let y = -R; y <= R; y += step) for (let x = -R; x <= R; x += step) {
-    const d = Math.hypot(x, y);
-    if (d > R) continue;
-    const [sx, sy] = P(b.x + x, 0.02, b.y + y), sxr = Math.round(sx), syr = Math.round(sy);
-    if (R - d < 0.1) {
-      // The striped edge of a blow that can't be blocked.
-      const stripe = Math.floor((x + y) * 3.2) % 2 === 0;
-      dot(g, sx, sy, stripe ? '#ffd040' : '#2a1408', 1);
-    } else if (d < R * k) {
-      if ((sxr + syr) % 2) dot(g, sx, sy, '#e23a30', 0.6);
-    } else if ((sxr * 3 + syr) % 4 === 0) dot(g, sx, sy, '#b02a22', 0.85);
-  }
-  g.globalAlpha = 1;
-}
+/** Where a body is drawn now (the 2.5D view eases them). */
+type At = (key: string, x: number, y: number) => [number, number];
 
-function draw(g: CanvasRenderingContext2D, room: ArenaRoom, P: Proj, ppu: number): void {
+function draw(g: CanvasRenderingContext2D, room: ArenaRoom, P: Proj, ppu: number, at?: At): void {
   for (const z of room.zones) {
     if (room.time >= z.until) continue;
     if (z.kind === 'flamering') flames(g, z, P, room.time, ppu);
     else if (z.kind === 'stormring') charged(g, z, P, room.time);
   }
-  for (const b of room.bolts) if (b.kind === 'strike') mark(g, b, P, ppu);
+  drawStreams(g, room, P, at);
   g.globalAlpha = 1;
 }
 
@@ -101,10 +86,10 @@ export function drawSpellGround(g: CanvasRenderingContext2D, room: ArenaRoom, cx
   draw(g, room, (x, y, z) => [OX + x * PX - cx, OY + z * PX - cy - y * PX], PX);
 }
 
-/** The 2.5D overlay (`P` the camera's own projection, `ppu` its pixels a tile). */
-export const drawSpellGround3 = (g: CanvasRenderingContext2D, room: ArenaRoom, P: Proj, ppu: number): void => draw(g, room, P, ppu);
+/** The 2.5D overlay (`P` the camera's own projection, `ppu` its pixels a tile, `at` where bodies are drawn). */
+export const drawSpellGround3 = (g: CanvasRenderingContext2D, room: ArenaRoom, P: Proj, ppu: number, at?: At): void => draw(g, room, P, ppu, at);
 
-/** Their light, in tiles (`at` places one for the caller's view): the rings, and a strike as it falls. */
+/** Their light, in tiles (`at` places one for the caller's view): the rings, and a storm stream. */
 export function spellLights<L>(room: ArenaRoom, at: (x: number, y: number, r: number, i: number, c: [number, number, number]) => L): L[] {
   const out: L[] = [];
   for (const z of room.zones) {
@@ -112,8 +97,7 @@ export function spellLights<L>(room: ArenaRoom, at: (x: number, y: number, r: nu
     const k = fade(z, room.time), fire = z.kind === 'flamering';
     out.push(at(z.x, z.y, z.r + 1.2, (fire ? 0.85 + Math.random() * 0.1 : 0.55 + Math.random() * 0.2) * k, EL_LIGHT[z.el]));
   }
-  for (const b of room.bolts) if (b.kind === 'strike') out.push(at(b.x, b.y, b.burst + 0.6, 0.25 + 0.35 * Math.min(1, b.t / Math.max(0.01, b.flight)), [1, 0.4, 0.3]));
-  return out;
+  return out.concat(streamLights(room, at));
 }
 
 /** The flat view's lights for them. */

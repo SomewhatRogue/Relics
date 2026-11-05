@@ -1,6 +1,7 @@
 /** Damage to an enemy from anything (blades, shots, blasts, burning), and what death resets. */
-import { BROOD, BUTCHER, GUARD, OVERKILL, SCRAPPER, SPIDER, SWING_DUMMY, TRAIT, WEAK_POP, weakOn, MARK, type Hurt } from '../shared/tuning';
+import { BROOD, BUTCHER, GUARD, OVERKILL, SCRAPPER, SPIDER, STORM, SWING_DUMMY, TRAIT, WEAK_POP, weakOn, MARK, type Hurt } from '../shared/tuning';
 import type { DeathKind, Enemy, FightEvent } from './types';
+import { wet } from './wet';
 
 const SPEC = { butcher: BUTCHER, scrapper: SCRAPPER, spider: SPIDER, brood: BROOD } as Record<string, { stun: number; respawn: number } | undefined>;
 export const stunOf = (e: Enemy) => SPEC[e.kind]?.stun ?? SWING_DUMMY.stun;
@@ -24,6 +25,8 @@ export function clearElements(e: Enemy): void {
 
 /** Death, and how (the body left behind and the gore depend on it); (dx, dy) is the blow's direction. */
 export function kill(e: Enemy, ev: FightEvent[], how: DeathKind = 'fall', dx = 0, dy = 0): void {
+  // Dying alight (burning past the blow that killed it), it passes the fire on (sim/elements.ts).
+  if (e.kind !== 'nest' && e.burnUntil > (e.hitAt ?? -9)) e.embers = true;
   Object.assign(e, { hp: 0, act: 'dead', actT: 0, actDur: respawnOf(e), attack: null, kvx: 0, kvy: 0, death: how });
   clearElements(e);
   ev.push({ k: 'death', x: e.x, y: e.y, how, dx, dy, kind: e.kind });
@@ -65,6 +68,8 @@ export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: Da
   // A weakness (fire on a spider) lands harder and says so, a resistance softer; a burn's tick says nothing.
   const weak = weakOn(e, o.el || 'physical');
   if (weak !== 1) n = Math.max(1, Math.round(n * weak));
+  // Storm on a wet goblin lands harder (a tick, the stream's, has counted it already).
+  if (o.el === 'storm' && !o.tick && wet(e)) n = Math.round(n * STORM.wet);
   if (!o.tick) sayWeak(e, weak, now, ev, o.el || 'physical');
   // Marked by a relic: the next real blow lands harder, and the mark is spent.
   if (!o.tick && (e.markUntil ?? -9) > now) (n = Math.round(n * MARK.mult)), (e.markUntil = 0);

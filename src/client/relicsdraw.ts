@@ -136,8 +136,6 @@ export function drawBolt(c: Ctx, b: Bolt, x: number, y: number): void {
     for (let i = 0; i < 6; i++) c.lit.fillRect(Math.round(x + Math.cos(spin + i) * 2), Math.round(y - 8 + Math.sin(spin + i) * 2), 1, 1);
     return;
   }
-  // A Mage's lightning strike is only its mark on the floor until it falls (spellground.ts, fxspells.ts).
-  if (b.kind === 'strike') return;
   // A Mage's spark or lance: spelldraw.ts.
   if (b.kind === 'spark' || b.kind === 'lance') return drawSpell(c, b, x, y);
   const ty = y - 8;

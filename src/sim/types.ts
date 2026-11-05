@@ -62,7 +62,7 @@ export type Learned = 'skill' | 'leave';
 export const knows = (h: { learned?: Learned[] }, l: Learned) => !h.learned || h.learned.includes(l);
 
 /** A Mage's held spells, by kit and element (shared/spellbook.ts). */
-export type SpellWhat = 'fireball' | 'coldblast' | 'strike' | 'flamering' | 'nova' | 'stormring' | 'lunge' | 'shatter' | 'dash';
+export type SpellWhat = 'fireball' | 'coldblast' | 'thunderbolt' | 'flamering' | 'nova' | 'stormring' | 'lunge' | 'shatter' | 'dash';
 
 export type HeroAct = 'idle' | 'charge' | 'attack' | 'throw' | 'zip' | 'bash' | 'roll' | 'hurt' | 'stun' | 'down' | 'carry' | 'slam';
 
@@ -264,7 +264,12 @@ export interface Hero extends Body {
   bladeCharge?: number;
   /** A spellblade's held spell carrying the hero (sim/rush.ts, in the act 'bash'): a burning lunge or a
    *  lightning dash, `len` tiles, `dmg` to each goblin on the way, `big` let go on the flash. */
-  rush?: { el: 'fire' | 'storm'; len: number; dmg: number; big: boolean };
+  rush?: { el: 'fire' | 'storm'; len: number; dmg: number; big: boolean; cast?: number };
+  /** The storm cast a Mage's slash or cut belongs to, new each swing (sim/spellblade.ts). */
+  swingCast?: number;
+  /** A wand's storm stream (sim/stream.ts): on until `until`, held on goblin `id` (0 none yet) since
+   *  `at` (its build), its next tick, the spark's share a tick, and what's owed below a whole point. */
+  stream?: { id: number; at: number; until: number; next: number; tick: number; owe: number; oweJump: number };
   /** Primed spells left (TWICE PRIMED: two). */
   primeLeft?: number;
   /** Techniques (shared/techniques.ts): SHOULDER CHARGE's straight walk (seconds, which way, last walked
@@ -416,6 +421,10 @@ export interface Enemy extends Body {
   lightT?: number;
   /** A nest alight: the room time it's ash (0 not alight). */
   ashAt?: number;
+  /** Died burning: its fire passes to those near it on the next tick (sim/elements.ts). */
+  embers?: boolean;
+  /** The last storm cast that reached it (sim/elements.ts): jumped to at most once a cast. */
+  jolted?: number;
   /** Too far from every hero to think or move this tick (sim/sleep.ts, on a big map). */
   dozing?: boolean;
   /** Near a standing banner this tick (sim/banner.ts); routed until; a fallen banner whose rout is done. */
@@ -677,7 +686,7 @@ export interface Javelin {
 export interface Bolt {
   id: number;
   owner: string;
-  kind: 'arrow' | 'bolt' | 'knife' | 'dart' | 'spark' | 'orb' | 'lance' | 'smite' | 'net' | 'lodestone' | 'flask' | 'bomb' | 'strike';
+  kind: 'arrow' | 'bolt' | 'knife' | 'dart' | 'spark' | 'orb' | 'lance' | 'smite' | 'net' | 'lodestone' | 'flask' | 'bomb';
   /** A relic's: it never hurts a friend or anyone freed (friends caught in it are told they're spared). */
   relic?: boolean;
   /** A mace's smite: its light mends friends in the burst this much; `holy`: let go on the flash, it shields them (sim/holy.ts). */
@@ -687,9 +696,10 @@ export interface Bolt {
   hobble?: boolean;
   /** A Mage's frost burst: freezes solid at once (frost twice). */
   freeze?: boolean;
-  /** A Mage's tap: frost only chills (never freezes); storm jumps on to this many (STORM.chains if unset). */
+  /** A Mage's tap: frost only chills (never freezes). */
   chills?: boolean;
-  jumps?: number;
+  /** Its storm cast: a wet goblin is jumped to once a shot (sim/elements.ts). */
+  cast?: number;
   /** A wand's: landing on a goblin mid wind-up, it breaks the blow off (sim/spells.ts). */
   interrupts?: boolean;
   /** A wand's burst loosed on the white flash: it breaks off whatever the goblin it hits is doing. */

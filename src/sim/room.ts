@@ -43,6 +43,7 @@ import { dropFrom, stepDrops, takeLoot } from './loot';
 import { hallow, rally, shadowstep, stepZones, ward } from './relics';
 import { castElement, spendPrimed, turnElement } from './channel';
 import { castTap } from './spellbook';
+import { stepStreams, streams } from './stream';
 import { castHold } from './holds';
 import { stepRings } from './staffrings';
 import { stepRush } from './rush';
@@ -349,8 +350,9 @@ export class ArenaRoom {
     followGround(this.zones, this.heroes, this.time);
     this.zones = stepZones(this.zones, w);
     separate(this.heroes, this.enemies, this.props);
-    // A staff's rings: the ring of fire scorches what crosses it, the charged ring zaps what's in it (sim/staffrings.ts).
-    stepRings(this.zones, w);
+    // A staff's rings: the ring of fire scorches what crosses it, the charged ring zaps what's in it
+    // (sim/staffrings.ts); a wand's storm stream ticks on the goblin it holds (sim/stream.ts).
+    stepRings(this.zones, w), stepStreams(w);
     this.landings();
     // Out of bounds: the dread, and what comes for anyone who stays out (sim/dread.ts).
     stepDread(this.dread, this.map, this.heroes, this.enemies, TICK, this.events);
@@ -483,10 +485,12 @@ export class ArenaRoom {
       // A Mage's spells take the element it last channelled (fire to start with); the first after a turn is primed.
       const mage = WEAPONS[h.weapon].cls === 'MAGE', primed = mage && !!h.primed;
       const el = s.shot === 'arrow' || s.shot === 'bolt' || s.shot === 'knife' || s.shot === 'dart' ? forged : forged || (mage ? castElement(h) : h.augments[h.relic]);
-      if (mage) this.bolts.push(...castTap(h, s, el, mult * spendPrimed(h), traitsOf(h)));
+      // (A wand's storm tap feeds its stream: no shot, so nothing loosed to say.)
+      const fed = mage && el === 'storm' && streams(h);
+      if (mage) this.bolts.push(...castTap(h, s, el, mult * spendPrimed(h), traitsOf(h), w.now));
       // A Ranger's arrow or bolt loosed on the move drifts off the aim, unless STEADY (sim/techranger.ts).
       else this.bolts.push(shoot(aimed(h, s.shot, this.intents.get(h.id), w.now, w.ev), s, el, mult, traitsOf(h)));
-      w.ev.push({ k: 'shoot', x: h.x, y: h.y, dx: h.fx, dy: h.fy, kind: s.shot, el, ...(primed ? { primed } : {}) });
+      if (!fed) w.ev.push({ k: 'shoot', x: h.x, y: h.y, dx: h.fx, dy: h.fy, kind: s.shot, el, ...(primed ? { primed } : {}) });
     }
     // The Jealous Rod: a charged spell jumps to every goblin near what it hits.
     if (full && wears(h, 'jealous')) for (const b of this.bolts.slice(bolts)) b.chain = true;

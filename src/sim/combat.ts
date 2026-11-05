@@ -1,6 +1,6 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, parry, roll). */
 import { litMult } from './charge';
-import { CENSER, BLESSING, DODGE, WARD, FLINCH, POISE, HORN, OVERKILL, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing, CLASS_DODGES, RIPOSTE, CRIT, STEALTH, weakOn, SPLAT, BANNER } from '../shared/tuning';
+import { CENSER, BLESSING, DODGE, WARD, FLINCH, POISE, HORN, OVERKILL, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing, CLASS_DODGES, RIPOSTE, CRIT, STEALTH, weakOn, SPLAT, BANNER, STORM } from '../shared/tuning';
 import { shove } from './bodies';
 import { knack, statsOf } from './gearstats';
 import { counterWindow, parryWindow, rearCos, slipWindow } from './knacks';
@@ -21,6 +21,8 @@ import { landed } from './ownfoes';
 import { travelTo } from '../shared/sweep';
 import { knockDown, rooted, takeShoulder } from './techwarrior';
 import { judge } from './techcleric';
+import { stormCut } from './spellbook';
+import { wet } from './wet';
 
 export { respawnOf, stunOf } from './damage';
 
@@ -55,14 +57,15 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   const tempo = h.tempoUntil > now ? TRAIT.tempo : 1;
   if (tempo > 1) h.tempoUntil = -9;
   const crit = rollCrit(h), ambush = e.alert === false && !isDummy(e);
-  // A shield-bearer takes a blow from the front on its board (unless it's heavy, held fast, or caught unaware).
-  const boarded = e.variant === 'shield' && !rear && !heavy && !heldFast && !ambush;
-  const weak = weakOn(e);
+  // A shield-bearer takes a blow from the front on its board (unless it's heavy, held fast, caught unaware,
+  // or a Mage's storm, which ignores shields and lands harder on the wet: sim/wet.ts).
+  const storm = stormCut(h, s), boarded = e.variant === 'shield' && !rear && !heavy && !heldFast && !ambush && !storm;
+  const weak = weakOn(e), soaked = storm && wet(e) ? STORM.wet : 1;
   sayWeak(e, weak, now, ev, 'physical');
   // The sword's riposte (a counter straight off the parry; a bonus, not its perfect) doubles the counter; the spear's shaft halves a blow up close.
   const riposte = riposteNow(h, now);
   if (riposte && h.hitIds.filter((id) => id > 0).length === 1) ev.push({ k: 'riposte', x: e.x, y: e.y });
-  const mult = weak * (h.counter ? counter * (riposte ? RIPOSTE.mult : 1) : heldFast ? held : 1) * shaftMult(h, s, e) * rearMult * blessed * tempo * (crit ? CRIT : 1) * (ambush ? STEALTH.ambush * (1 + knack(h, 'ambush')) : 1) * (boarded ? VARIANTS.shield.front : 1) * brandyDmg(h, now) * litMult(h) * (h.snagged ? CENSER.snag : 1) * ((e.routUntil ?? -9) > now ? BANNER.rout.hurt : 1);
+  const mult = weak * soaked * (h.counter ? counter * (riposte ? RIPOSTE.mult : 1) : heldFast ? held : 1) * shaftMult(h, s, e) * rearMult * blessed * tempo * (crit ? CRIT : 1) * (ambush ? STEALTH.ambush * (1 + knack(h, 'ambush')) : 1) * (boarded ? VARIANTS.shield.front : 1) * brandyDmg(h, now) * litMult(h) * (h.snagged ? CENSER.snag : 1) * ((e.routUntil ?? -9) > now ? BANNER.rout.hurt : 1);
   // Mother Rust's Needles: a backstab kills anything short of a butcher.
   const n = rear && e.kind === 'scrapper' && wears(h, 'needles') ? Math.max(e.hp, Math.round(s.dmg * mult)) : Math.round(s.dmg * mult);
   e.hp -= n;

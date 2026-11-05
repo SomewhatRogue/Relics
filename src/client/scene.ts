@@ -384,7 +384,7 @@ export class Scene {
     }
     // The skills taught after the first: rings wound up, a volley, a fire ring, a tether, a chain (skillsdraw.ts).
     drawSkills(c, room, cx, cy);
-    // A staff's ring of fire or charged ring, a lightning strike's mark (spellground.ts).
+    // A staff's ring of fire or charged ring, a wand's storm stream (spellground.ts).
     drawSpellGround(c.glow, room, cx, cy);
     drawFound(c, room, cx, cy);
     // At a fork, both ways out glow, each with its name.

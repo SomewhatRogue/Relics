@@ -156,8 +156,9 @@ export const SKILL_CHOICES: Record<keyof typeof CLASS_SKILL, RelicId[]> = {
 
 /**
  * Magic augments: an element fitted to a relic (the Mage's spells cast with the equipped relic's).
- * Each element alone: fire burns and spreads by touch; frost chills, and a second frost freezes
- * solid; storm arcs to nearby goblins and to javelins stuck in bodies. Together: fire meets frost
+ * Each element alone: fire burns, and a burning goblin that dies sets those near it alight; frost
+ * chills, and a second frost freezes solid; storm ignores shields, lands harder on wet goblins and jumps
+ * between them, and arcs to javelins stuck in bodies. Together: fire meets frost
  * as a scalding steam burst; storm or a heavy blow shatters the frozen; storm on the burning flares.
  */
 export type Element = 'fire' | 'frost' | 'storm';
@@ -165,17 +166,19 @@ export type Augment = Element | '';
 export const AUGMENTS: Augment[] = ['', 'fire', 'frost', 'storm'];
 export const ELEMENT_NAME: Record<Element, string> = { fire: 'FIRE', frost: 'FROST', storm: 'STORM' };
 
-/** Fire's job, swarms: it burns on, and jumps to anything within `spread` (beyond both bodies). */
-/** A burn: `dmg` every `every` s for `time` s. Kyle 2026-11-04 ("the fire burns a ton"): 7 a tick to 4, so a burn
- *  alone no longer kills a small goblin outright; big ones and shield-bearers burn `tough` as long. */
+/** Fire's job, swarms: `dmg` every `every` s for `time` s, and a burning goblin passes it on only when it
+ *  dies, to anything within `spread` of it (beyond both bodies; Kyle, 2026-11-04: fire was too strong
+ *  spreading by touch). Kyle 2026-11-04 ("the fire burns a ton"): 7 a tick to 4, so a burn alone no
+ *  longer kills a small goblin outright; big ones and shield-bearers burn `tough` as long. */
 export const BURN = { time: 3, every: 0.5, dmg: 4, spread: 0.7, tough: 0.5 };
 /** Frost's job, control: chilled goblins move and turn at `slow` and wind up at `windup` of their pace;
  *  a second frost freezes them solid for `freeze` (a heavy blow then shatters them: SHATTER). */
 export const FROST = { chill: 3, slow: 0.5, windup: 0.6, freeze: 2.2 };
-/** Storm's job, packs: it jumps to `chains` more within `reach` for `share` of the blow, and goes round
- *  a shield's board; a Mage's storm spell lands only `single` of itself on the first goblin.
- *  A javelin stuck in a body is a lightning rod. */
-export const STORM = { reach: 3.8, chains: 3, share: 0.7, min: 6, single: 0.8, flinch: 0.25, rodReach: 6, rodDmg: 10 };
+/** Storm's job, shields and water (Kyle, 2026-11-04). It ignores a shield-bearer's board, front block
+ *  and all. Dry, it jumps nowhere. On a wet goblin (in water, or out in the rain: sim/wet.ts) it lands
+ *  `wet` times harder and jumps to every other wet goblin within `reach`, each taking `share` of the
+ *  blow (at least `min`), once each a cast. A javelin stuck in a body is a lightning rod. */
+export const STORM = { reach: 3, wet: 1.5, share: 0.5, min: 6, flinch: 0.25, rodReach: 6, rodDmg: 10 };
 export const STEAM = { radius: 1.8, dmg: 10, stun: 0.9 };
 export const SHATTER = { dmg: 30 };
 export const FLARE = { radius: 1.6, dmg: 12, knock: 12 };

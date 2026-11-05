@@ -155,11 +155,15 @@ describe("each element's job", () => {
     expect(sparkAt('storm')).toBe(Math.round(s.dmg * WEAK.shield.storm!));
   });
 
-  it('fire jumps between goblins standing close (not only touching)', () => {
+  it('fire passes, when a burning goblin dies, to goblins standing close (not only touching)', () => {
     const a = foe('scrapper', 1, 5, 5), b = foe('scrapper', 2, 5 + a.radius * 2 + BURN.spread - 0.05, 5);
     const ev: FightEvent[] = [], w: World = { heroes: [], enemies: [a, b], javelins: [], props: [], now: 0, ev };
     Object.assign(a, { burnUntil: BURN.time, burnNext: 0.01 });
     for (let t = 0; t < 0.2; t += TICK) (w.now = t), stepElements(w);
-    expect(b.burnUntil).toBeGreaterThan(0);
+    expect(b.burnUntil).toBe(0);
+    a.hitAt = w.now;
+    damage(a, 99999, w.now, ev);
+    stepElements(w);
+    expect(b.burnUntil).toBeGreaterThan(w.now);
   });
 });

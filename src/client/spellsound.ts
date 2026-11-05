@@ -2,7 +2,7 @@
  * A Mage's held spells and GRASP, heard (sim/holds.ts, sim/grasp.ts decide them). Each element sounds
  * like itself, bigger than its tap (magesfx.ts): fire a deep whoosh with crackle, frost a hiss and a
  * glassy chime, storm a hard snap and a rolling crack. A ring raised hums on; a spell let go on the flash
- * gets a little more on top. Cosmetic, so Math.random.
+ * gets a little more on top. (The wand's storm stream hums on its own: streamsound.ts.) Cosmetic, so Math.random.
  */
 import type { FightEvent } from '../sim/types';
 import { sfx, burst, ready, tone } from './sfx';
@@ -26,18 +26,13 @@ export function spellSound(ev: FightEvent): boolean {
     return true;
   }
   if (ev.k === 'grasped') return true;
-  // Lightning called: it gathers overhead, a rising crackle, before it falls.
-  if (ev.k === 'shoot' && ev.kind === 'strike') {
-    if (ready()) crackle(12, 0.45, 0.12), tone('sawtooth', 90, 180, 0.04, 0.45);
-    return true;
-  }
   if (ev.k !== 'spell') return false;
   if (!ready()) return true;
   const big = ev.big;
   if (ev.what === 'shatter') return sfx.shatter(), frost(big), true;
   if (ev.what === 'nova') return frost(big), sfx.freeze(), true;
   if (ev.what === 'coldblast') return frost(big), true;
-  if (ev.what === 'strike') return storm(big), sfx.rumble(), true;
+  if (ev.what === 'thunderbolt') return storm(big), sfx.rumble(), true;
   if (ev.what === 'dash') return storm(big), true;
   if (ev.what === 'stormring') return storm(big), tone('sawtooth', 110, 110, 0.05, 0.8, 0.1), true;
   if (ev.what === 'flamering') return fire(big), sfx.flare(), true;

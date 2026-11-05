@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { BURN, SHATTER, TICK, WEAPONS } from '../src/shared/tuning';
 import { afflict, type World } from '../src/sim/elements';
+import { currentMap, useMap } from '../src/shared/arena';
+import { damage } from '../src/sim/damage';
 import { ArenaRoom } from '../src/sim/room';
 import { NO_INTENT, type Enemy, type FightEvent, type Intent } from '../src/sim/types';
 
@@ -251,13 +253,17 @@ describe('elements', () => {
     return { room, t, o };
   };
 
-  it('fire burns over time and spreads to a goblin it touches', () => {
+  it('fire burns over time, and passes to a goblin it touches only when it dies', () => {
     const { room, t, o } = pair();
     Object.assign(o, { x: 9.65, y: 8 });
     afflict(world(room), t, 'fire', 10);
     const hp = t.hp;
     run(room, 1.1);
     expect(t.hp).toBeLessThanOrEqual(hp - 2 * BURN.dmg);
+    expect(o.burnUntil).toBeLessThanOrEqual(room.time);
+    Object.assign(t, { respawns: false, hitAt: room.time });
+    damage(t, 99999, room.time, []);
+    run(room, 0.1);
     expect(o.burnUntil).toBeGreaterThan(room.time);
   });
 
@@ -299,16 +305,26 @@ describe('elements', () => {
     expect(o.kvx).toBeGreaterThan(0);
   });
 
-  it('storm arcs to nearby goblins and to a javelin stuck in a far one', () => {
+  it('storm arcs to a javelin stuck in a far one; to goblins near it only when they are wet', () => {
     const { room, t, o } = pair();
     const far: Enemy = room.enemies[0];
     Object.assign(far, { x: 9, y: 3 });
     room.javelins.push({ id: 99, owner: 'me', x: 9, y: 3, dx: 0, dy: -1, state: 'body', travelled: 0, enemy: far.id, ox: 0, oy: 0, hit: [], life: 9, el: '' });
     const ev: FightEvent[] = [];
     afflict(world(room, ev), t, 'storm', 10);
-    const shocks = ev.filter((e) => e.k === 'shock');
-    expect(shocks.some((e) => e.k === 'shock' && e.x2 === o.x)).toBe(true);
-    expect(shocks.some((e) => e.k === 'shock' && e.y2 === far.y)).toBe(true);
+    const shocks = () => ev.filter((e) => e.k === 'shock');
+    expect(shocks().some((e) => e.k === 'shock' && e.x2 === o.x)).toBe(false);
+    expect(shocks().some((e) => e.k === 'shock' && e.y2 === far.y)).toBe(true);
     expect(far.hp).toBeLessThan(far.maxHp);
+    // Out in the rain they're all wet: it jumps.
+    const dry = currentMap();
+    useMap({ ...dry, theme: { ...dry.theme, rain: 0.5 } });
+    try {
+      ev.length = 0;
+      afflict(world(room, ev), t, 'storm', 10);
+      expect(shocks().some((e) => e.k === 'shock' && e.x2 === o.x)).toBe(true);
+    } finally {
+      useMap(dry);
+    }
   });
 });

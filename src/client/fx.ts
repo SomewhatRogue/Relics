@@ -207,9 +207,10 @@ export class Fx {
         break;
       case 'hit':
         if (ev.tick) {
-          const venom = ev.src === 'poison';
-          this.burst(x, y - 10, 3, venom ? ['#9be040', '#6ab82a'] : ['#ffd27a', '#ff9a3c'], 30, true);
-          this.say(x, y - 20, String(ev.n), venom ? '#9be040' : '#ff9a3c');
+          // (A storm stream ticks ten times a second: its sparks, and only some of its numbers.)
+          const venom = ev.src === 'poison', spark = ev.src === 'spark';
+          this.burst(x, y - 10, spark ? 2 : 3, venom ? ['#9be040', '#6ab82a'] : spark ? ['#fff27a', '#ffffff'] : ['#ffd27a', '#ff9a3c'], 30, true);
+          if (!spark || Math.random() < 0.3) this.say(x, y - 20, String(ev.n), venom ? '#9be040' : spark ? '#fff27a' : '#ff9a3c');
           break;
         }
         this.burst(x, y - 8, ev.heavy ? 12 : 7, ['#ffffff', '#fff1b0', '#ffd27a'], ev.heavy ? 70 : 50, true);
