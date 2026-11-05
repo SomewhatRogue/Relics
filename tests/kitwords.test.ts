@@ -40,6 +40,11 @@ describe('GUARD and DODGE areas, from the numbers', () => {
     // The stream doesn't break blows: the wand's storm says what it does instead.
     expect(kitRows('wand', 'storm').find(([l]) => l === 'ALSO')?.[1]).toBe("Walk slowly while it's on");
     expect(KIT.spellblade.also).toBe('Parry fills the blade');
+    // The staff's fire pit (Kyle, 2026-11-05): dropped on a goblin, and the card says once that it burns friends.
+    expect(kitLine('staff', 'fire')).toBe('TAP: FLAME SWEEP, BURNS  HOLD: FIRE PIT ON A GOBLIN  PERFECT: BIGGER, BURNS LONGER');
+    for (const el of ['', 'fire'] as const) expect(kitRows('staff', el).filter(([, v]) => /friends/i.test(v)).length).toBe(1);
+    for (const el of ['frost', 'storm'] as const) expect(kitRows('staff', el).some(([, v]) => /friends/i.test(v))).toBe(false);
+    expect(kitRows('staff').find(([l]) => l === 'FIRE')?.[1]).toBe('Tap flame sweep, hold fire pit');
     expect(barWords('Shorter dodge, costs more stamina', 'MAGE')).toBe('Shorter dodge, costs more magic');
     expect(barWords('STAMINA RECOVERY', 'RANGER')).toBe('STAMINA RECOVERY');
   });

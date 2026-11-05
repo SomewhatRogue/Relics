@@ -13,8 +13,9 @@ import { afflict, newCast, type World } from './elements';
 import { interrupt, windingUp } from './spells';
 import type { Enemy, Hero } from './types';
 
-/** How far the bolt goes along (dx, dy) from (x, y) before a wall, up to `range`. */
-function reachOf(x: number, y: number, dx: number, dy: number, range: number): number {
+/** How far the bolt goes along (dx, dy) from (x, y) before a wall, up to `range` (the staff's fire pit
+ *  uses it too, for its spot ahead: sim/firepit.ts). */
+export function reachOf(x: number, y: number, dx: number, dy: number, range: number): number {
   for (let d = 0.1; d <= range; d += 0.1) {
     const p = { x: x + dx * d, y: y + dy * d }, q = { ...p };
     collide(q, 0.05);

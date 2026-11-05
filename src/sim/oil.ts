@@ -94,6 +94,12 @@ export function stepSlicks(slicks: Slick[], w: World, dt: number): Slick[] {
   return slicks.filter((s) => s.until > now && !(s.lit >= 0 && now - s.lit >= slickBurn(s)));
 }
 
+/** Fire that goes up `reach` round (x, y) from outside the slicks' own step (a staff's fire pit
+ *  flaring, sim/firepit.ts): any unlit slick it reaches goes up. */
+export function lightNear(slicks: Slick[], x: number, y: number, reach: number, now: number, ev: FightEvent[]): void {
+  for (const s of slicks) if (s.lit < 0 && Math.hypot(x - s.x, y - s.y) <= s.r + reach) light(s, now, ev);
+}
+
 function light(s: Slick, now: number, ev: FightEvent[]): void {
   s.lit = now;
   // In the rain it burns out sooner (shared/sky.ts).

@@ -108,7 +108,7 @@ export class Actors {
     for (const b of room.bolts) placeBolt(this.things.get('b' + b.id, boltLook(b), () => ({ root: makeBolt(b) })).root, b, 0);
     for (const j of room.javelins) placeJavelin(this.things.get('j' + j.id, '', () => ({ root: makeJavelin() })).root, j, 0);
     // (A wind-up bow's reach is dotted on the overlay, as in the flat view: found3d.ts.)
-    room.zones.forEach((z, i) => z.kind !== 'sentry' && z.kind !== 'flamering' && z.kind !== 'stormring' && z.kind !== 'caltrops' && z.kind !== 'blinkburst' && z.kind !== 'taunt' && this.things.get('z' + i, String(z.r), () => ({ root: makeRing(z.r, 0xffd27a, true, 0.12) })).root.position.set(z.x, 0.04, z.y));
+    room.zones.forEach((z, i) => z.kind !== 'sentry' && z.kind !== 'firepit' && z.kind !== 'stormring' && z.kind !== 'caltrops' && z.kind !== 'blinkburst' && z.kind !== 'taunt' && this.things.get('z' + i, String(z.r), () => ({ root: makeRing(z.r, 0xffd27a, true, 0.12) })).root.position.set(z.x, 0.04, z.y));
     room.snares.forEach((s, i) => this.things.get('n' + i, '', () => ({ root: makeRing(0.35, 0x8a6a3a, false, 0.06) })).root.position.set(s.x, 0.03, s.y));
     room.smokes.forEach((s, i) => {
       const o = this.things.get('m' + i, '', () => ({ root: makeSmoke(POTION.smokeR) })).root;

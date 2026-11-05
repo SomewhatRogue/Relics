@@ -56,12 +56,21 @@ export const STREAM = { reach: 5, slack: 0.5, cone: 20, keepCone: 50, keep: 0.35
  *  off whatever they're doing. */
 export const THUNDERBOLT = { range: 9, width: 0.3, assist: 12, dmg: 2.5 };
 
-/** Every staff hold is centred on the Mage (Kyle: "wall of fire seems hard to aim"): `r` tiles round at
- *  the shortest hold, `rFull` at a full one, `rBig` let go on the white flash. */
+/** The staff's frost and storm holds are centred on the Mage (Kyle: "wall of fire seems hard to aim"):
+ *  `r` tiles round at the shortest hold, `rFull` at a full one, `rBig` let go on the white flash. */
 export const STAFF_RING = { r: 2.2, rFull: 2.8, rBig: 3.4 };
-/** Staff, fire: a ring of fire round where you stood, `band` deep, for `life` s (`bigLife` on the flash).
- *  Anything in the band is scorched `scorch` and set alight, again whenever its burn has gone out. */
-export const FLAME_RING = { band: 0.7, life: 4, bigLife: 6, scorch: 6 };
+/**
+ * Staff, fire: a fire pit dropped on a goblin (Kyle, 2026-11-05: "Maybe it is a circle on the enemy or
+ * something? Like a filled-in AOE? Allies gotta run from it"). Never aimed: at the release it picks the
+ * nearest goblin within `reach` tiles and `cone` degrees (all told) of where you face, else the nearest
+ * within `reach` anywhere, else a spot `ahead` tiles in front (short of a wall). It catches for `catch` s
+ * (drawn as the circle filling), then burns `r` round (`bigR` on the flash) for `life` s (`bigLife`; rain
+ * shortens it by the weather's burn share, shared/sky.ts burnFor). Every `every` s each goblin in it takes
+ * `dmg` (times the hero's damage) and is set alight; each friend in it, the Mage too, takes `ally` of
+ * what a goblin loses a tick there (the pit's `dmg` and a burn's tick), so they step out.
+ * Balance (tests/spellbook.test.ts): on one goblin, or a pack, it does about what the charged ring does.
+ */
+export const FIRE_PIT = { reach: 6, cone: 90, ahead: 3, catch: 0.35, r: 1.8, bigR: 2.4, life: 4, bigLife: 6, every: 0.5, dmg: 2, ally: 1 / 3 };
 /** Staff, frost: a frost nova all round you, at once: `dmg` of the hold's damage and everything in it frozen. */
 export const NOVA = { dmg: 0.6, knock: 5 };
 /** Staff, storm: a charged ring round where you stood, for `life` s (`bigLife` on the flash). Every

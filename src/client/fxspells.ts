@@ -2,8 +2,8 @@
  * A Mage's held spells going off, seen (sim/holds.ts decides them; each drawn at the size it was
  * judged at, `r` on the event): the cold blast a fan of frost thrown out to its reach, the frost nova
  * a ring of ice opening round the Mage, the lightning bolt a jagged line from the hand as far as it went,
- * the ring of fire and the charged ring flaring up as they're raised (they then burn on the
- * floor: spellground.ts), the shatter a burst of ice shards, the lunge and the dash a trail of their
+ * the fire pit dropped as a fall of embers onto its spot and flaring up once it catches, the charged
+ * ring flaring up as it's raised (they then burn on the floor: spellground.ts, firepitdraw.ts), the shatter a burst of ice shards, the lunge and the dash a trail of their
  * element. And GRASP: violet streaks dragging inward. In the same style as the taps (fxmagetap.ts):
  * motes, rings and short flashes. Cosmetic only (Math.random is fine); the one overlay draws both views.
  */
@@ -60,6 +60,18 @@ export function spellFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
     fx.arcs.push({ x, y: y - 8, x2, y2: y2 - 8, life: 0.2, col: '#c9a8ff', straight: true });
     return true;
   }
+  if (ev.k === 'pitup') {
+    // A staff's fire pit catching: fire thrown up all over it, a ring at its edge, a warm flash.
+    const rad = ev.r * PX, big = ev.big ? 1.4 : 1;
+    for (let i = 0; i < Math.round(40 * big); i++) {
+      const a = Math.random() * Math.PI * 2, d = Math.sqrt(Math.random()) * rad, life = 0.35 + Math.random() * 0.35;
+      fx.parts.push({ x: x + Math.cos(a) * d, y: y + Math.sin(a) * d * 0.8, vx: (Math.random() - 0.5) * 12, vy: -50 - Math.random() * 60, life, max: life, col: COLS.fire[i % 4], glow: true, grav: 0, stick: false });
+    }
+    fx.rings.push({ x, y, life: 0.3, max: 0.3, col: '#ff8c32', size: rad });
+    fx.flashes.push({ x, y: y - 6, r: rad * 1.8, i: 1.2, c: EL_LIGHT.fire, life: 0.25, max: 0.25 });
+    fx.shake = Math.max(fx.shake, ev.big ? 3 : 2);
+    return true;
+  }
   if (ev.k !== 'spell') return false;
   const el = (ev.el || 'fire') as keyof typeof COLS, cols = COLS[el], rad = ev.r * PX, a = Math.atan2(ev.dy, ev.dx), big = ev.big ? 1.4 : 1;
   switch (ev.what) {
@@ -89,7 +101,14 @@ export function spellFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
       fx.shake = Math.max(fx.shake, ev.big ? 4 : 3);
       break;
     }
-    case 'flamering':
+    case 'firepit':
+      // Dropped: embers falling onto the spot (`x`, `y` is the pit's middle), a ring where it will burn.
+      for (let i = 0; i < Math.round(18 * big); i++) {
+        const life = 0.25 + Math.random() * 0.12, sx = x + (Math.random() - 0.5) * rad * 0.6, sy = y - 40 - Math.random() * 20;
+        fx.parts.push({ x: sx, y: sy, vx: (x - sx) / life, vy: (y - sy) / life, life, max: life, col: cols[i % cols.length], glow: true, grav: 0, stick: false });
+      }
+      fx.rings.push({ x, y, life: 0.35, max: 0.35, col: '#ff8c32', size: rad });
+      break;
     case 'stormring':
       // Raised: the ring flares up all the way round (it then burns on the floor: spellground.ts).
       round(fx, x, y - 2, rad, Math.round(32 * big), cols, el === 'fire' ? 8 : 20, el === 'fire' ? -40 : 0);

@@ -1,7 +1,7 @@
 /**
  * GRASP, the Mage's class skill (a placeholder name until the lore pass; numbers: shared/magic.ts GRASP):
  * every goblin in a cone in front is dragged toward a spot just ahead of the Mage and staggers, bunched
- * up for a ring of fire or a fireball. A butcher or a shield-bearer barely moves. It costs magic: short
+ * up for a fire pit or a fireball. A butcher or a shield-bearer barely moves. It costs magic: short
  * of it, the press fizzles and nothing is spent. Judged in the room; the drag is the room's own tow
  * (sim/cleric.ts stepTows), swept so no goblin is pulled through a wall.
  */
