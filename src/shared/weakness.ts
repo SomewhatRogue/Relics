@@ -30,9 +30,9 @@ export const WEAK: Record<string, Partial<Record<Hurt, number>>> = {
   boss: { fire: 0.8, frost: 1.25, storm: 0.9 },
   /** The Stoker lives by the kiln: fire hardly touches it; cold is what hurts. */
   stoker: { fire: 0.6, frost: 1.6, storm: 0.9 },
-  spider: { fire: 2.5, storm: 1.2 },
+  spider: { fire: 3, storm: 1.2 }, // 3: a burn's tick (4) still kills one outright, so a pack goes up like tinder
   brood: { fire: 1.8, frost: 1.2, physical: 0.9 },
-  nest: { fire: 3, frost: 0.5, storm: 0.8, physical: 0.6 },
+  nest: { fire: 3.5, frost: 0.5, storm: 0.8, physical: 0.6 },
 };
 
 export const weakness = (kind: string, by: Hurt | '' = 'physical') => WEAK[kind]?.[by || 'physical'] ?? 1;

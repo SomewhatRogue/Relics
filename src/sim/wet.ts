@@ -13,7 +13,7 @@ export const inWater = (x: number, y: number, room: GameMap = currentMap()) => !
 /**
  * Raining on the room (a storm rains too): the room's sky, a rule since the weather landed (shared/sky.ts).
  */
-export const raining = (room: GameMap = currentMap()) => skyWet(room.theme);
+export const raining = (room: GameMap = currentMap()) => skyWet(room.theme) || (room.theme?.rain ?? 0) > 0 || (room.theme?.storm ?? 0) > 0;
 
 /** Wet: standing in water, or out in the rain. */
 export const wet = (e: { x: number; y: number }, room: GameMap = currentMap()) => raining(room) || inWater(e.x, e.y, room);

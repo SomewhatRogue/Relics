@@ -76,7 +76,9 @@ describe('rain', () => {
       const w = { heroes: [], enemies: [a, b], javelins: [], props: [], now: 2, ev: [] as FightEvent[] };
       afflict(w, a, 'fire', 10);
       expect(a.burnUntil - 2).toBeCloseTo(BURN.time * k);
-      (w.now = 2.01), stepElements(w);
+      // Fire passes on only when a burning goblin dies (storm rework): let its burn kill it, then step.
+      a.hp = 1;
+      for (const t of [2.6, 2.61]) (w.now = t), stepElements(w);
       expect(b.burnUntil > 2, sky).toBe(sky === 'clear');
       const s: Slick = { id: 1, x: 5, y: 5, r: 1, until: 99, lit: -1 };
       stepSlicks([s], { ...w, enemies: [], ev: [{ k: 'oilfire', x: 5, y: 5 }] }, TICK);
