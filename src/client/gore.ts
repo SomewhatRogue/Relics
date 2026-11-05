@@ -1,11 +1,14 @@
 /**
  * Gore: pieces that fly with height and land as stains. A head that comes off, a body that bursts,
- * a blood fountain from the neck, ash from the burned. Cosmetic only (Math.random is fine here).
+ * a blood fountain from the neck, ash from the burned. In water, blood clouds and a chunk sinks
+ * (wetfx.ts). Cosmetic only (Math.random is fine here).
  */
 import type { FightEvent } from '../sim/types';
 import type { Fx } from './fx';
+import { DEEP, DRY } from './waterfield';
+import { OX, OY, PX } from './world';
 
-interface Gib { x: number; y: number; z: number; vx: number; vy: number; vz: number; col: string; size: number; head: boolean; big: boolean; bounced: boolean }
+interface Gib { x: number; y: number; z: number; vx: number; vy: number; vz: number; col: string; size: number; head: boolean; big: boolean; bounced: boolean; gone?: boolean }
 
 const SKIN = ['#5b6b2a', '#4a5a22', '#3a4a1f'], BLOOD = ['#7a1d1d', '#5a1414', '#9a2a2a'], BONE = '#e8e0c8';
 
@@ -109,12 +112,28 @@ export class Gore {
       g.y += g.vy * dt;
       if (g.z > 0) continue;
       g.z = 0;
+      // Into water: no bounce. A chunk goes under with a ring; a drop of blood clouds (wetfx.ts).
+      if (this.water(g)) continue;
       // One bounce, then it rests where it lands.
       if (!g.bounced && g.vz < -60) (g.bounced = true), (g.vz = -g.vz * 0.3), (g.vx *= 0.5), (g.vy *= 0.5);
       else g.vz = g.vx = g.vy = 0;
     }
+    this.gibs = this.gibs.filter((g) => !g.gone);
     for (const g of this.gibs) if (g.z === 0 && g.vz === 0) this.settle(g);
     this.gibs = this.gibs.filter((g) => g.z > 0 || g.vz !== 0);
+  }
+
+  /** A piece landing in water (true): blood clouds in it; a chunk sinks with a ring. Gone either way. */
+  private water(g: Gib): boolean {
+    const wet = this.fx.wet, [x, y] = [(g.x - OX) / PX, (g.y - OY) / PX], lv = wet.at(x, y);
+    if (lv === DRY) return false;
+    g.gone = true;
+    if (g.size >= 2 || g.head || !wet.take(g.x, g.y, g.col)) {
+      wet.sink(g.x, g.y, g.col, g.size);
+      wet.ring(x, y, g.head || g.size >= 3 ? 0.8 : 0.5);
+      if (g.head || BLOOD.includes(g.col) || SKIN.includes(g.col)) wet.bleed(x, y, g.head ? 0.2 : 0.05, lv === DEEP);
+    }
+    return true;
   }
 
   /** A landed piece becomes part of the floor. */

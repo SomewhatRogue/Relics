@@ -373,12 +373,13 @@ export const EXPED_COINS = {
 };
 
 /**
- * How goblins find their way round water and anything long in the way (sim/pathing.ts): a grid of
- * `cell` tiles, each blocked if it's within `pad` of something solid, deep water or a ledge's face;
- * wading a ford costs `shallow` times a dry step, so they take it only when it's the way; a hero more
- * than `reach` tiles off isn't pathed to (they head straight for them, as before).
+ * How goblins find their way round water and anything long in the way (sim/pathing.ts, sim/pathgrid.ts):
+ * a grid of `cell` tiles for each size of body, a cell open only if a body `fit` times that size fits
+ * there (not in something solid, deep water or a ledge's face); wading costs `shallow` times a dry step,
+ * about what it costs in time (1 / WADE), so a ford is taken when it's the quicker way; a hero more than
+ * `reach` tiles off isn't pathed to (they head straight for them, as before).
  */
-export const PATH = { cell: 0.5, pad: 0.22, shallow: 1.8, reach: 30 };
+export const PATH = { cell: 0.5, fit: 1, shallow: 1.4, reach: 30 };
 /**
  * Out of bounds (sim/dread.ts): past a map's edge, inside something solid, or on ground nobody can walk
  * to (shared/reach.ts). Out there the dread builds a second a second: the warning at once, worse at

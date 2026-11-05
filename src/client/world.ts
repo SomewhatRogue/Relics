@@ -36,7 +36,8 @@ const FLOORS: Record<GameMap['theme']['floor'], { tile: [number, number]; base: 
   planks: { tile: [24, 5], base: ['#5a3f28', '#5e432a', '#553b25', '#624630', '#583d27'], line: '#2a1d12', fleck: ['#4a321f', '#6b4e34'] },
 };
 
-export function paintMap(m: GameMap): HTMLCanvasElement {
+/** The room's painting; `flat` for the pixel view (the 2.5D view builds the water's drop itself). */
+export function paintMap(m: GameMap, flat = true): HTMLCanvasElement {
   const W = worldW(m), H = worldH(m), c = document.createElement('canvas');
   c.width = W;
   c.height = H;
@@ -74,7 +75,7 @@ export function paintMap(m: GameMap): HTMLCanvasElement {
   }
   paintSoil(m, g);
   // Water over the ground's paths (a path stops at the bank): client/waterpaint.ts.
-  paintWater(m, rect, rng, toPx, PX);
+  paintWater(m, rect, rng, toPx, PX, flat ? g : undefined);
   paintMarks(m, rect);
   paintGrim(m, rect);
   g.fillStyle = 'rgba(0,0,0,0.35)';
