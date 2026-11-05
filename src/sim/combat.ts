@@ -104,8 +104,8 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   // Nothing stops a charge once it's coming.
   // (A Rogue's head-on blow doesn't knock anything off balance: only from behind.)
   const shakes = !(WEAPONS[h.weapon].front && !rear);
-  // Quick blows never break a wind-up, and knock an idle one off balance only once a while (POISE).
-  const skilled = h.heavy || h.perfect, breaks = skilled || (!a && now - (e.flinchAt ?? -9) > POISE.relock);
+  // Quick blows never break a wind-up (a hexer's spell excepted: any blow breaks it), and knock an idle one off balance only once a while (POISE).
+  const skilled = h.heavy || h.perfect, breaks = skilled || a?.kind === 'hex' || (!a && now - (e.flinchAt ?? -9) > POISE.relock);
   if (shakes && e.act !== 'stunned' && e.act !== 'pinned' && e.act !== 'carried' && !ice && e.attack?.kind !== 'charge' && (heavyWind ? big : (small(e) && breaks) || big)) {
     Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: big && e.kind === 'butcher' ? 0.6 : FLINCH });
     if (!skilled) e.flinchAt = now;
