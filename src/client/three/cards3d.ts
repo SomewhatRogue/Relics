@@ -2,7 +2,7 @@
  * Who stands in the 2.5D view as a flat figure (figs3d.ts), each drawn by the very code the flat view
  * draws them with (scene.ts): heroes and their hounds, a Mage's blink image, other players in town,
  * goblins of every kind and the butcher and the Stoker (with what's on them, status.ts), spiders and
- * nests, the freed, the map's people (Wickhold's folk, Hew, the dead), and the scenes past the wood's trees. Positions eased between
+ * nests, someone caged waving through the bars and calling out, the freed, the map's people (Wickhold's folk, Hew, the dead), and the scenes past the wood's trees. Positions eased between
  * the room's ticks as everywhere else. Only draws.
  */
 import { ROOF_UP3 } from '../foedraw';
@@ -16,7 +16,8 @@ import { asleep, drawEnemy, drawHeld } from '../foes';
 import { drawHound } from '../hound';
 import { drawNpc } from '../npcs';
 import { vignetteFigs } from '../vignettes';
-import { drawSurvivor } from '../captives';
+import { drawCaged, drawSurvivor } from '../captives';
+import { propShake } from '../propshake';
 import { drawStatus } from '../status';
 import type { Lerp } from './actors3d';
 import type { Figs } from './figs3d';
@@ -52,6 +53,11 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
     }
     const [x, y] = lerp('e:' + e.id, e.x, e.y), dead = e.act === 'dead', big = e.kind === 'butcher' || e.kind === 'brood';
     f.put('e' + e.id, x, (e.z ?? 0) >= 2 ? ROOF_UP3 : lift(Math.max(0, e.z ?? 0)), y, (c, px, py) => (drawEnemy(c, e, px, py, asleep(map, e)), drawStatus(c, e, px, py, t)), { pool: dead || e.kind === 'nest' ? 0 : big ? 0.55 : 0.28, bias: dead ? -0.3 : 0 });
+  }
+  // Someone caged: an arm waving out through the bars, and their call when you're close (scene.ts).
+  for (const p of room.props) if (p.kind === 'cage' && !p.broken && !p.lifted) {
+    const near = !!me && Math.hypot(me.x - p.x, me.y - p.y) < 7;
+    f.put('c' + p.id, p.x + propShake(p, t)[0], 0, p.y + 0.05, (c, px, py) => drawCaged(c, px, py, t, near, p.id), { pool: 0 });
   }
   // The freed (the dead lie under everyone; the gone are gone).
   for (const s of room.survivors ?? []) {

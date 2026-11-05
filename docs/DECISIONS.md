@@ -2,6 +2,99 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-04: 2.5D up to FLAT: every hall's furniture, the streets' dressing (Kyle; Claude Opus 5.5)
+
+Kyle: "The flat world is more full in some cases. Like the wizard's tower: in flat it has books and
+stairs; in 2.5D it just doesn't. Let's get to parity at least." The cause was one line: every piece of
+furniture in 2.5D fell through to a plain box in its two colours (`three/walls3d.ts`), whatever the flat
+view painted on it. Floors, marks (rugs, chalk, rushes, soot) and what hangs on the back wall were
+already the flat painting itself, so they matched; the solid pieces didn't.
+
+**The audit** (drawn in FLAT, missing or a blank box in 2.5D before this; all built now):
+
+- **The tower** (Vell): two bookcases (a plain brown box each), the stone stair curling up into the
+  dark (a dark box), the desk of open books and jars (a box), the stand of three candles (a grey post
+  with one orange flame), the coloured fire (an orange flame, no light; FLAT lights the room violet,
+  green and blue), the coloured smoke off its flue outside.
+- **The barracks** (Cole): the weapon racks (drawn as cordwood logs), both bunks, the map table with
+  the river and the pins, the straw dummy.
+- **The church** (Isolde): the altar's cloth and gilt cross, the pews' legs and backs, the cot's
+  pillow and blanket, the four candle stands.
+- **The Drowned Rat** (Whisper): the shelf of bottles, the bar's top and panels, the casks, the dice
+  table (dice, cup, coins), Whisper's curtained booth, the benches; outside, the hanging rat sign.
+- **The forge**: the anvil (face and horn), the bellows, the quench tub with its water, the sacks;
+  outside, the smoke and sparks off the stack.
+- **The hunters' lodge** (Maeve): the bow rack, the skinning bench with its hide and knife, the sacks.
+- **The counting house**: the counter, the shelf, the sacks (the rubble was already built).
+- **The town hall**: the council's long desk of ledgers and jars.
+- **The infirmary**: four beds, the desk, the basin, the candles.
+- **Rescue Row and the granary**: beds, benches, sacks.
+- **Wickhold's streets**: the Roll of the Brave (names cut in rows, a gilt band: a blank box), the
+  benches' legs, the Last Lantern's brass housing (a bare pole), the wagons' bare hoops and the one
+  laden with the dead under sacking, the weapon rack by the barracks (cordwood), the town's lit windows
+  after dark (always dark in 2.5D), the breach still on the worn fronts (soot up the walls, a window
+  boarded, a shutter hanging, holes in the roof), the forge's smoke and the tower's coloured smoke.
+- **Job rooms, every country** (village, fields, wood, fen, rock, under, side rooms and the
+  Barrowfields share these): cottages in their own roof and wall colours from the house's seed (2.5D
+  gave every cottage one thatch or one shingle), the lean-to, every cottage's chimney (thatched ones
+  had none) and its smoke while the fire's going, a roof stove in, a den's dark mouth and the eyes in
+  it (a den was a closed box), the wayside shrine (a stone post) and the fountain's basin and water.
+- **Inside a cottage or barn**: the hearth's mouth, lintel, ash and hearthstone, the fire burning in
+  the mouth (2.5D hung it as a wall torch above the hearth), the embers of a lit one, shelves of pots,
+  the loom with its warp and cloth, beds, sacks, the cottage's inner timbered walls, a barn's stalls of
+  straw (drawn as a fence), the turned-over house's smashed furniture and splinters, someone caged
+  waving through the bars and calling out.
+- Already matching, left alone: floors and everything painted on them, the back wall's hangs, trees,
+  rocks, wells, posts, braziers and torches, tents, stalls, fences, carts, gallows and hurdles, the
+  larder's hung and the cook-pot, chests, drops, the map's people and the goblins (FLAT's own sprites on
+  cards), the expedition's ground marks and beacons.
+
+**How** (drawing only; nothing in the room changes):
+
+- **One source.** Each piece is built from the same block the flat view paints (`shared/townhalls.ts`,
+  `layouts.ts`, `halls.ts`, `town.ts`) and in its colours: `LOOK` (blocks.ts), the book and jar colours
+  now exported from `hallsdraw.ts` (`BOOKS`, `JARS`), the hearth's `mouth`, a cottage's
+  `houseColours`, `leanW` and `chimneyOf` (cottage.ts, shared by both views now), the witchfire's
+  `witchColour`, the flues' `smoke` (exterior.ts). Positions on a piece are the flat painting's pixels
+  (one is 1/16 of a tile), so a desk's books or the map table's river sit where FLAT has them.
+- **Files.** `three/furnish3d.ts` (house furniture: bed, shelf, counter, anvil, altar, pew, bench,
+  hearth, sacks, the Roll, partition, loom, a barn's stall; smashed ones splintered),
+  `three/hallfurn3d.ts` (the halls' own: bookcases, stair, dummy, map and dice tables, skinning bench,
+  desk, tub, bellows, booth, bunk, casks, weapon rack), `three/witch3d.ts` (the coloured fire and its
+  light), `three/smoke3d.ts` (smoke off flues on the flat layer, painted by FLAT's own `smoke`).
+  `walls3d.ts` hands furniture to the two builders (the cordwood rack keeps its logs); `houses3d.ts`
+  takes the cottage colours, lean-to, chimney, worn fronts, den mouths and lamplit town windows;
+  `rounds3d.ts` the candle stand, the witchfire's bowl, the Lantern, the shrine and the fountain;
+  `halls3d.ts` the tower's flue and the Rat's sign; `ground.ts` puts a hearth's fire in its mouth;
+  `cards3d.ts` adds the caged one's wave and call.
+- **Light for a phone.** Everything still merges into each block's one mesh (`Boxes`), as before, so
+  a hall full of furniture costs draw calls only for its glowing bits; the coloured fire's licks are
+  two instanced draws.
+  Measured headless (software GL; `?perf=1` counts both hero passes; laptop / phone, before -> after):
+
+  | scene | draw calls | triangles |
+  | --- | --- | --- |
+  | the tower (busiest hall) | 25 -> 27 / 25 -> 27 | 1,342 -> 4,090 / 1,342 -> 4,090 |
+  | the church | 31 -> 31 / 30 -> 30 | 2,242 -> 4,606 / 2,218 -> 4,558 |
+  | the Drowned Rat | 36 -> 36 / 34 -> 34 | 1,810 -> 3,670 / 1,762 -> 2,782 |
+  | the square at night | 51 -> 51 / 45 -> 45 | 17,110 -> 18,166 / 16,444 -> 17,428 |
+  | by the forge and the tower | 52 -> 50 / 38 -> 37 | 28,012 -> 28,612 / 24,598 -> 25,210 |
+  | the barracks and the counting house (busiest street) | 41 -> 41 / 49 -> 49 | 48,856 -> 50,872 / 43,018 -> 44,902 |
+  | Barrowby (a job street) | 46 -> 46 / 38 -> 38 | 16,182 -> 16,154 / 10,060 -> 9,984 |
+
+  A full hall is a few thousand triangles more and at most two draws more (the tower's coloured fire);
+  streets change by a few percent. Frame times are within the noise of the shared box.
+- **Seen side by side.** `scripts/parity-look.cjs` holds the room still and flips VIEW live, so FLAT
+  and 2.5D are the same moment: each hall inside, the yard, the square by night and day, three
+  streets, a cottage inside, a job room in each country and the Barrowfields, phone and laptop.
+- **Left as they were.** The 2.5D brazier is bigger than FLAT's; the tower's flue and the forge's
+  stack stay up when you walk behind them and the roof lifts (they're part of the walls); the cage
+  still holds a box figure, with FLAT's waving arm and call now on a card in front of it.
+- Tests: `tests/furnish3d.test.ts` (every piece in every hall builds as itself, never the plain box;
+  the tower's bookcases and nine steps; the same every time). `LOOK` moved to `client/blocklook.ts` so
+  the builders load in Node without the sprite sheet. No new player-facing words.
+
+
 ## 2026-11-04: the Barrowfields tuned: packs and the new sorts, bigger hold rings, less gold (Kyle; Claude Opus 5.5)
 
 Kyle played the expedition on his phone ("really really fun"): "I didn't see too many enemy types, just

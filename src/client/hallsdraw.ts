@@ -9,7 +9,9 @@ import type { Ctx } from './draw';
 
 type Rect = (x: number, y: number, w: number, h: number, c: string) => void;
 
-const BOOKS = ['#6a2a2a', '#2a4a6a', '#5a5a2a', '#3a2a5a', '#2e5a3e', '#7a5a2a', '#4a2a3a'];
+/** Book spines and jars (the 2.5D view's bookcases read these too: three/hallfurn3d.ts). */
+export const BOOKS = ['#6a2a2a', '#2a4a6a', '#5a5a2a', '#3a2a5a', '#2e5a3e', '#7a5a2a', '#4a2a3a'];
+export const JARS = ['#3a6a5a', '#4a5a8a', '#7a6a3a'];
 
 /** Returns true if this is one of the halls' pieces (and paints it). */
 export function hallFurniture(g: CanvasRenderingContext2D, b: Block, rect: Rect, w: number, roofH: number, wallY: number, tall: number): boolean {
@@ -24,7 +26,7 @@ export function hallFurniture(g: CanvasRenderingContext2D, b: Block, rect: Rect,
         rect(1, y + 5, w - 2, 1, '#5a3d22');
         for (let x = 2; x < w - 2;) {
           const jar = rnd(6) === 0, bw = jar ? 3 : 1 + rnd(2);
-          if (jar) rect(x, y + 2, 3, 3, ['#3a6a5a', '#4a5a8a', '#7a6a3a'][rnd(3)]), rect(x + 1, y + 1, 1, 1, '#8a8494');
+          if (jar) rect(x, y + 2, 3, 3, JARS[rnd(3)]), rect(x + 1, y + 1, 1, 1, '#8a8494');
           else rect(x, y + 5 - (4 + rnd(2)), bw, 4 + rnd(2), BOOKS[rnd(BOOKS.length)]);
           x += bw + (rnd(4) === 0 ? 1 : 0);
         }
@@ -76,7 +78,7 @@ export function hallFurniture(g: CanvasRenderingContext2D, b: Block, rect: Rect,
       rect(0, 0, w, roofH, '#5a3d22');
       for (let x = 3; x < w - 6; x += 9 + rnd(6)) rect(x, 2 + rnd(3), 6, 4, '#d8d0bc'), rect(x + 3, 2, 1, 6, '#8a8070');
       rect(w - 6, 2, 2, 3, '#14121a'), rect(w - 3, 3, 1, 3, '#e8e0c8');
-      for (let i = 0; i < Math.round(w / 14); i++) rect(2 + rnd(w - 4), roofH - 4, 2, 3, ['#3a6a5a', '#4a5a8a', '#7a6a3a'][rnd(3)]);
+      for (let i = 0; i < Math.round(w / 14); i++) rect(2 + rnd(w - 4), roofH - 4, 2, 3, JARS[rnd(3)]);
       legs(rect, w, wallY, tall);
       return true;
     case 'tub':

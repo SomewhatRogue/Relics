@@ -112,6 +112,12 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
     if (o.kind === 'post') lamps.push({ x: o.x, y: o.y, fires: fires.splice(n), light: { x: o.x, y: 1.6, z: o.y, r: 4.5, i: 0.8, c: [1, 0.72, 0.42], f: 9 } });
   }
   for (const t of m.torches) {
+    // A cottage's fire is a torch in its hearth's mouth (shared/inside.ts): its flames on the hearth's floor.
+    const hearth = m.blocks.find((b) => b.kind === 'hearth' && t.x > b.x && t.x < b.x + b.w && t.y > b.y - 0.1 && t.y < b.y + b.h + 0.1);
+    if (hearth) {
+      lamps.push({ x: t.x, y: t.y, always: true, fires: [[t.x, 0.05, t.y - 0.05, 0.75]], light: { x: t.x, y: 0.7, z: t.y + 0.7, r: 7, i: 1.1, c: [1, 0.62, 0.32], f: 13 } });
+      continue;
+    }
     const onWall = t.y < 0.8, y = onWall ? 1.55 : 1.3, z = onWall ? 0.16 : t.y;
     if (onWall) B.b(t.x, y - 0.3, 0.06, 0.08, 0.32, 0.14, 0x3a2a1a);
     else B.b(t.x, 0, z, 0.1, y, 0.1, 0x3a2a1a);

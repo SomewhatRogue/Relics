@@ -8,7 +8,8 @@
 import * as THREE from 'three';
 import { doorAt, type Block } from '../../shared/arena';
 import { LOOK } from '../blocks';
-import { houseOf } from '../cottage';
+import { asBuilt, chimneyOf, houseColours, houseOf, leanW } from '../cottage';
+import type { House } from '../../shared/houses';
 import { Boxes, Seed, jit } from './boxes';
 import { G, VCOL, hex } from './mats';
 import { gable } from './roofs3d';
@@ -19,7 +20,7 @@ import type { Kindling } from '../../shared/kindling';
 import { asLamp, lampMeshes } from './lamps3d';
 
 /** Eave height (tiles) by kind. */
-const TALL: Partial<Record<Block['kind'], number>> = { house: 1.45, barn: 1.9, hall: 1.6, church: 2.4, forge: 1.8, tavern: 1.7, granary: 1.9, tower: 3.6, shack: 0.95, den: 0.7 };
+export const TALL: Partial<Record<Block['kind'], number>> = { house: 1.45, barn: 1.9, hall: 1.6, church: 2.4, forge: 1.8, tavern: 1.7, granary: 1.9, tower: 3.6, shack: 0.95, den: 0.7 };
 const ROOFED = new Set<Block['kind']>(['house', 'barn', 'hall', 'church', 'forge', 'tavern', 'granary', 'tower', 'shack', 'den']);
 const STONE = new Set<Block['kind']>(['church', 'forge', 'tower', 'hall']);
 
@@ -37,6 +38,16 @@ export interface Built {
 /** 0 standing, 1 charred, 2 burned down; and whether it's alight. */
 export const blockState = (b: Block) => (b.ruined ? 2 : b.maxHp && (b.hp ?? 0) < b.maxHp * 0.5 ? 1 : 0) * 2 + (((b.burning ?? -1) >= 0 || b.fate === 'burning' || b.smoulder) && !b.ruined ? 1 : 0);
 
+/**
+ * Where a cottage's chimney stands (x, its top, z), as the flat view places it (cottage.ts), or a town
+ * house's at its back corner; null for anything but a house. Smoke rises from here (smoke3d.ts).
+ */
+export function chimneyAt(b: Block, home: House | null): [number, number, number] | null {
+  if (b.kind !== 'house') return null;
+  const H = TALL.house!, top = H + (b.h / 2) * Math.tan(0.62) + 0.35;
+  return [home ? b.x + (chimneyOf(asBuilt(b, home), Math.round(b.w * 16)) + 3) / 16 : b.x + b.w - 0.6, top, b.y + 0.5];
+}
+
 const shade = (c: number, k: number) => {
   const col = new THREE.Color(c);
   return col.setRGB(col.r * k, col.g * k, col.b * k).getHex();
@@ -46,9 +57,11 @@ export function buildBlock(b: Block, kin?: Kindling | null): Built {
   const group = new THREE.Group(), fires: Built['fires'] = [];
   if (!ROOFED.has(b.kind)) return { group: flatBlock(b, group, fires), roof: null, fires, top: 1, lamps: [] };
   const st = blockState(b), ruined = st >= 4, alight = st % 2 === 1, charred = st >= 2 || alight;
-  const r = new Seed(Math.round(b.x * 31 + b.y * 17 + 7)), L = LOOK[b.kind], home = houseOf(b);
-  const k = charred ? 0.45 : 1, wallC = shade(hex(L.wall), k), beam = shade(0x3a2a1e, k);
-  const x0 = b.x, x1 = b.x + b.w, z0 = b.y, z1 = b.y + b.h, H = TALL[b.kind] ?? 1.4, t = 0.2;
+  const r = new Seed(Math.round(b.x * 31 + b.y * 17 + 7)), L = LOOK[b.kind], home = houseOf(b), hc = home ? houseColours(b, home) : null;
+  const k = charred ? 0.45 : 1, wallC = shade(hex(hc?.wall ?? L.wall), k), beam = shade(0x3a2a1e, k);
+  // A cottage's lean-to takes one side of its footprint (cottage.ts); the house proper is the rest.
+  const lean = home && b.kind === 'house' ? asBuilt(b, home).leanTo : 0, lw = lean ? leanW(asBuilt(b, home!), Math.round(b.w * 16)) / 16 : 0;
+  const x0 = b.x + (lean < 0 ? lw : 0), x1 = b.x + b.w - (lean > 0 ? lw : 0), z0 = b.y, z1 = b.y + b.h, H = TALL[b.kind] ?? 1.4, t = 0.2;
   const W = new Boxes(), R = new Boxes(), stone = STONE.has(b.kind) || b.style === 'stone';
   const door = !!b.door && b.fate !== 'blocked' ? doorAt(b).x : null, dw = 0.42, dh = Math.min(1.05, H - 0.25);
   // A wall from a0 to a1 along x (front or back) or z (sides), courses of stone or planks.
@@ -68,7 +81,8 @@ export function buildBlock(b: Block, kin?: Kindling | null): Built {
         const len = stone ? 0.45 + r.next() * 0.4 : 0.9 + r.next() * 0.8, sa = Math.max(a, a0), sb = Math.min(a + len, a1);
         a += len;
         if (sb - sa < 0.06) continue;
-        const hh = Math.min(ch, y1 - y) - 0.03, col = ruined ? jit(0x141012, 0.3, r) : jit(wallC, stone ? 0.14 : 0.1, r);
+        const soot = b.worn && y < H * 0.7 && r.next() < 0.7 ? 0.45 + (y / H) * 0.6 : 1;
+        const hh = Math.min(ch, y1 - y) - 0.03, col = ruined ? jit(0x141012, 0.3, r) : jit(shade(wallC, soot), stone ? 0.14 : 0.1, r);
         if (ax === 'x') W.b((sa + sb) / 2, y, c, sb - sa - 0.03, hh, t, col);
         else W.b(c, y, (sa + sb) / 2, t, hh, sb - sa - 0.03, col);
       }
@@ -100,25 +114,48 @@ export function buildBlock(b: Block, kin?: Kindling | null): Built {
         W.c(door, dh * 0.55, z1 + 0.02, dw * 2.1, 0.09, 0.06, 0x2a1e14, 0, 0, 0.2);
       } else W.c(door - dw + 0.06, dh / 2, z1 - t - 0.3, 0.06, dh, 0.62, jit(0x5a3d22, 0.1, r), b.fate === 'wrecked' ? 0.9 : 0.35);
     }
-    // Windows on the front either side of the door: warm when the fire's lit, dark when not.
-    const lit = !!home?.lit && !charred;
-    if (b.w >= 2.6 && H > 1.2) for (const fx of [0.22, 0.78]) {
-      const wx = x0 + b.w * fx;
+    // Windows on the front either side of the door, warm while the lamps are lit (blocks.ts): a cottage's
+    // only when its fire's going, a town building's (not the tower) by the hour. A worn one (wear.ts) has
+    // the right window boarded and the left one's shutter hanging off its hinge.
+    const lit = (home ? home.lit : L.windows && !b.maxHp && b.door !== 'tower') && !charred, bw = x1 - x0;
+    if (bw >= 2.6 && H > 1.2 && b.door !== 'tower') for (const fx of [0.22, 0.78]) {
+      const wx = x0 + bw * fx, boarded = b.worn && fx > 0.5;
       if (door !== null && Math.abs(wx - door) < dw + 0.4) continue;
       W.b(wx, H * 0.42, z1 + 0.01, 0.46, 0.06, 0.06, beam);
       W.b(wx, H * 0.42 + 0.36, z1 + 0.01, 0.46, 0.06, 0.06, beam);
-      const pane = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.3, 0.04), lit ? G(0xffc070, 0.35) : G(0x0a0808, 1));
-      if (lit) asLamp(pane, G(0x0a0808, 1));
+      const pane = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.3, 0.04), lit && !boarded ? G(0xffc070, 0.35) : G(0x0a0808, 1));
+      if (lit && !boarded) asLamp(pane, G(0x0a0808, 1));
       pane.position.set(wx, H * 0.42 + 0.21, z1 + 0.005);
       group.add(pane);
+      if (boarded) for (const [dy, c, rz] of [[0.13, 0x7a5a34, 0.25], [0.27, 0x6b4a2b, -0.2]] as const) W.c(wx, H * 0.42 + dy, z1 + 0.05, 0.56, 0.07, 0.03, c, 0, 0, rz);
+      else if (b.worn) W.c(wx - 0.27, H * 0.42 + 0.12, z1 + 0.08, 0.05, 0.36, 0.2, shade(0x4a3420, k), 0.5, 0, 0.3);
     }
-    const thatch = home?.thatch && b.kind === 'house';
-    const ridge = b.kind === 'tower' ? cone(R, x0, x1, z0, z1, H, r) : gable(R, x0, x1, z0, z1, H, { col: thatch ? shade(0x8a7448, k) : shade(hex(L.roof), k), ridge: shade(hex(L.ridge), k), gable: wallC, thatch: !!thatch, holes: b.fate === 'wrecked' ? 0.25 : alight ? 0.12 : 0, gap: roofGap(b) }, r);
+    // A den has no door, only a dark mouth, and eyes in the dark of it (blocks.ts).
+    if (b.kind === 'den' && door === null) {
+      const mx = (x0 + x1) / 2;
+      W.b(mx, 0, z1 + 0.01, 0.5, Math.min(H - 0.06, 0.62), 0.03, 0x0d0b10);
+      for (const s of [-1, 1]) {
+        const e = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.03), G(0xff4a3a, 0.2));
+        e.position.set(mx + s * 0.09, 0.44, z1 + 0.03);
+        group.add(e);
+      }
+    }
+    const thatch = home && asBuilt(b, home).thatch && b.kind === 'house';
+    const holes = b.fate === 'wrecked' ? 0.25 : alight ? 0.12 : 0, worn = home?.broken || b.worn ? 0.05 : 0;
+    const ridge = b.kind === 'tower' ? cone(R, x0, x1, z0, z1, H, r) : gable(R, x0, x1, z0, z1, H, { col: shade(hex(hc?.roof ?? L.roof), k), ridge: shade(hex(hc?.line ?? L.ridge), k), gable: wallC, thatch: !!thatch, holes, worn, gap: roofGap(b) }, r);
+    if (lw) {
+      // The lean-to: lower, rough boards, a plank roof falling away from the house.
+      const lx0 = lean < 0 ? b.x : x1, lh = H * 0.68, lc = lx0 + lw / 2;
+      W.b(lc, 0, (z0 + z1) / 2, lw - 0.04, lh, b.h - 0.12, shade(0x4a3420, k));
+      for (let x = lx0 + 0.1; x < lx0 + lw - 0.05; x += 0.19) W.b(x, 0.02, z1 - 0.05, 0.03, lh - 0.04, 0.02, shade(0x3a2818, k));
+      R.c(lc, lh + 0.1 + lw * 0.14, (z0 + z1) / 2, lw + 0.2, 0.07, b.h + 0.3, shade(0x4a3a2a, k), 0, 0, lean < 0 ? 0.28 : -0.28);
+    }
     if (b.label && b.door && !charred) dressHall(W, b, H, group, r);
     if (alight) for (let x = x0 + 0.4; x < x1 - 0.2; x += 0.9) fires.push([x, ridge - 0.1, (z0 + z1) / 2 + (r.next() - 0.5) * 0.6, 1.4]);
     if (alight && door !== null) fires.push([door, dh * 0.6, z1 - 0.3, 1]);
-    // A chimney.
-    if (b.kind === 'house' && !thatch) R.b(x1 - 0.6, H, z0 + 0.5, 0.3, ridge - H + 0.35, 0.3, shade(0x4a4652, k));
+    // A chimney (cottage.ts places a cottage's), stone with a dark cap.
+    const ch = chimneyAt(b, home);
+    if (ch) R.b(ch[0], H, ch[2], 0.36, ch[1] - H, 0.32, shade(0x57525e, k)), R.b(ch[0], ch[1] - 0.06, ch[2], 0.38, 0.06, 0.34, shade(0x2a2733, k));
   } else {
     // Burned down: black beams fallen across, embers in the ash.
     for (let i = 0; i < 4; i++) W.c(x0 + r.next() * b.w, 0.1 + r.next() * 0.2, z0 + r.next() * b.h, 0.14, 0.12, b.h * 0.8, 0x141012, r.next() * 3, 0.2);

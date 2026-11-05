@@ -2,6 +2,18 @@
 
 ## Current slice
 
+**2.5D up to FLAT** (Claude Opus 5.5, 2026-11-04; Kyle: "The flat world is more full in some cases. Like
+the wizard's tower: in flat it has books and stairs; in 2.5D it just doesn't. Let's get to parity at
+least"). Built; waiting on Kyle's play. *Done when* every hall inside (the tower, the barracks, the
+lodge, the church, the Drowned Rat, the forge, the counting house, the town hall, the infirmary, Rescue
+Row) shows in 2.5D the furniture FLAT paints, each as its own shape in FLAT's colours (bookcases full of
+books, the stair curling up, bunks, tables with what's on them, casks, the booth's curtain, the anvil,
+the altar's cross, candles on their stands, the coloured fire lighting the tower violet and green);
+Wickhold's street has the Roll of the Brave, the Lantern's housing, lamplit windows after dark, the
+breach on the worn fronts and smoke off the forge and the tower; and on a job the cottages wear their
+own colours, lean-tos, chimneys and smoke, the hearths burn in their mouths, and a turned-over house is
+splintered, phone and laptop. `node scripts/parity-look.cjs` shoots FLAT and 2.5D side by side.
+
 **A recap, quiet drops, a tracker that folds** (Claude Opus 5.5, 2026-11-04; Kyle, from his phone: "it should
 give you a mission recap", drops "shouldn't pop up unless you click on it", the mission "smaller in the top
 left unless you click it to expand"). Built; waiting on Kyle's play. *Done when* a job's end (won, lost or
