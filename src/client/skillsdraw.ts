@@ -99,7 +99,7 @@ function jag(g: CanvasRenderingContext2D, x0: number, y0: number, x1: number, y1
 export function skillLights(room: ArenaRoom, cx: number, cy: number, now: number): Light[] {
   const out: Light[] = [];
   for (const z of room.zones) {
-    if (!z.kind || z.kind === 'firepit' || z.kind === 'stormring' || z.kind === 'caltrops' || z.kind === 'taunt') continue;
+    if (!z.kind || z.kind === 'firewall' || z.kind === 'stormring' || z.kind === 'caltrops' || z.kind === 'taunt') continue;
     const x = OX + z.x * PX - cx, y = OY + z.y * PX - cy, k = Math.min(1, (z.until - room.time) / 0.6);
     if (z.kind === 'fire') out.push({ x, y: y - 4, r: z.r * PX * 1.5 + Math.sin(now * 15) * 3, i: 0.9 * k, c: [1, 0.55, 0.25] });
     else if (room.time >= (z.at ?? 0)) out.push({ x, y, r: z.r * PX, i: 0.3 * k, c: [1, 0.92, 0.7] });

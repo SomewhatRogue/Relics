@@ -30,7 +30,7 @@ function arena(weapon: WeaponId, at: [number, number][] = [[9, 7.6]], el: Elemen
   return { room, h, es, e: es[0], run, tap, loose };
 }
 const lost = (e: Enemy) => e.maxHp - e.hp;
-const rings = (room: ArenaRoom) => room.zones.filter((z): z is Zone => z.kind === 'firepit' || z.kind === 'stormring');
+const rings = (room: ArenaRoom) => room.zones.filter((z): z is Zone => z.kind === 'firewall' || z.kind === 'stormring');
 
 describe('the wand', () => {
   it('casts its quick spark walking at near full pace', () => {
@@ -103,7 +103,7 @@ describe('the staff', () => {
   });
 
   it('a hold is rooted while it gathers, and its ring is centred on the Mage, bigger with the hold', () => {
-    // (The fire hold is a pit dropped on a goblin now: firepit.test.ts. Storm's ring stays round the Mage.)
+    // (The fire hold is a wall rolled at a goblin now: firewall.test.ts. Storm's ring stays round the Mage.)
     const b = arena('staff', [[2, 2]], 'storm');
     b.run(0.25, { attackSeq: 1, attack: true, mx: 1 });
     const x = b.h.x;

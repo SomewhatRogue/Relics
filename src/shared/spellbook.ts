@@ -1,7 +1,7 @@
 /**
  * The Mage's spellbook (Kyle, 2026-11-04): the element is the spellbook and the weapon the range. The
  * element (switched on its own button) decides what the tap and the hold are; the wand casts them at
- * range, the staff close and centred on you, the spellblade in melee. Every number the room judges by
+ * range, the staff close and centred on you (its fire rolls out to range), the spellblade in melee. Every number the room judges by
  * is here, and the client draws the same shapes from them (client/spellground.ts, fxspells.ts).
  *
  * Balance (measured in tests/spellbook.test.ts, written into docs/DECISIONS.md): on one goblin each
@@ -70,17 +70,20 @@ export const SKY_STRIKE = { range: 8, fallback: 4.5, assist: 12, snap: 1, delay:
  *  `r` tiles round at the shortest hold, `rFull` at a full one, `rBig` let go on the white flash. */
 export const STAFF_RING = { r: 2.2, rFull: 2.8, rBig: 3.4 };
 /**
- * Staff, fire: a fire pit dropped on a goblin (Kyle, 2026-11-05: "Maybe it is a circle on the enemy or
- * something? Like a filled-in AOE? Allies gotta run from it"). Never aimed: at the release it picks the
- * nearest goblin within `reach` tiles and `cone` degrees (all told) of where you face, else the nearest
- * within `reach` anywhere, else a spot `ahead` tiles in front (short of a wall). It catches for `catch` s
- * (drawn as the circle filling), then burns `r` round (`bigR` on the flash) for `life` s (`bigLife`; rain
- * shortens it by the weather's burn share, shared/sky.ts burnFor). Every `every` s each goblin in it takes
- * `dmg` (times the hero's damage) and is set alight; each friend in it, the Mage too, takes `ally` of
- * what a goblin loses a tick there (the pit's `dmg` and a burn's tick), so they step out.
+ * Staff, fire: a wall of fire that rolls at a goblin (Kyle, 2026-11-05: "hold down to make a wall of fire
+ * that moves towards the targeted enemy and stays up for a few seconds. That way we have lightning cage for
+ * AOE close, fire for range, and ice for close AOE"). Never aimed: at the release it picks the nearest
+ * goblin within `reach` tiles and `cone` degrees (all told) of where you face, else the nearest within
+ * `reach` anywhere, else a spot `ahead` tiles in front. The wall is a line `len` tiles long (`bigLen` on
+ * the flash; WIDE BURST widens it) and `deep` thick, square to the way it goes. It rises `start` tiles in
+ * front of the Mage and rolls at `speed` tiles a second to where the goblin stood, stopping short at a wall
+ * or at `reach`, and there burns on for `life` s (`bigLife`; rain shortens it by the weather's burn share,
+ * shared/sky.ts burnFor). Each goblin it touches, rolling or standing, takes `dmg` (times the hero's
+ * damage) and is set alight, then again every `every` s while it stays in it; each friend in it, the Mage
+ * too, takes `ally` of what a goblin loses a tick there (the wall's `dmg` and a burn's tick).
  * Balance (tests/spellbook.test.ts): on one goblin, or a pack, it does about what the charged ring does.
  */
-export const FIRE_PIT = { reach: 6, cone: 90, ahead: 3, catch: 0.35, r: 1.8, bigR: 2.4, life: 4, bigLife: 6, every: 0.5, dmg: 2, ally: 1 / 3 };
+export const FIRE_WALL = { reach: 6, cone: 90, ahead: 4, start: 1, speed: 5, len: 3, bigLen: 4, deep: 0.7, life: 3, bigLife: 4.5, every: 0.5, dmg: 3, ally: 1 / 3 };
 /** Staff, frost: a frost nova all round you, at once: `dmg` of the hold's damage and everything in it frozen. */
 export const NOVA = { dmg: 0.6, knock: 5 };
 /** Staff, storm: a charged ring round where you stood, for `life` s (`bigLife` on the flash). Every

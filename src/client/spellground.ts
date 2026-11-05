@@ -1,6 +1,6 @@
 /**
  * A Mage's spells on the floor, drawn at the size they're judged at (sim/staffrings.ts, sim/holds.ts):
- * the staff's fire pit (filled, striped edge: firepitdraw.ts), its charged ring (crackling posts
+ * the staff's wall of fire (filled, striped edge, flames standing up: firewalldraw.ts), its charged ring (crackling posts
  * round the edge, lightning jumping between them, sparks inside), the wand's storm stream
  * (streamdraw.ts) and its lightning strike's gold mark and bolt (skystrikedraw.ts). Flat view and the 2.5D overlay alike, by a projection of the floor to the screen, and
  * the light each gives off. Cosmetic only: Math.random is fine here.
@@ -13,7 +13,7 @@ import { drawStreams, streamLights } from './streamdraw';
 import { drawSkyBolts, drawSkyMarks, skyLights } from './skystrikedraw';
 import { OX, OY, PX } from './world';
 import { drawLadderGround } from './ladderground';
-import { drawPits, drawPits3, pitLights } from './firepitdraw';
+import { drawWalls, drawWalls3, wallLights } from './firewalldraw';
 
 /** Floor (x, z) at height y (tiles) to the screen. */
 type Proj = (x: number, y: number, z: number) => [number, number];
@@ -60,9 +60,9 @@ function charged(g: CanvasRenderingContext2D, z: Zone, P: Proj, t: number): void
 type At = (key: string, x: number, y: number) => [number, number];
 
 function draw(g: CanvasRenderingContext2D, room: ArenaRoom, P: Proj, ppu: number, at?: At, over = false): void {
-  // The staff's fire pit (firepitdraw.ts; over the 3D picture, with the bodies on it cut out), then its charged ring.
-  if (over) drawPits3(g, room, P, ppu, at);
-  else drawPits(g, room, P, ppu);
+  // The staff's wall of fire (firewalldraw.ts; over the 3D picture, with the bodies in it cut out), then its charged ring.
+  if (over) drawWalls3(g, room, P, ppu, at);
+  else drawWalls(g, room, P, ppu);
   for (const z of room.zones) if (z.kind === 'stormring' && room.time < z.until) charged(g, z, P, room.time);
   // The movement ladder's caltrops, burst and roar, the same way (ladderground.ts).
   drawLadderGround(g, room, P, ppu);
@@ -84,9 +84,9 @@ export const drawSpellSky = (g: CanvasRenderingContext2D, room: ArenaRoom, cx: n
  *  drawn), over everything already, so a strike's bolt too. */
 export const drawSpellGround3 = (g: CanvasRenderingContext2D, room: ArenaRoom, P: Proj, ppu: number, at?: At): void => (draw(g, room, P, ppu, at, true), drawSkyBolts(g, room, P));
 
-/** Their light, in tiles (`at` places one for the caller's view): a fire pit, a charged ring, a storm stream, a strike. */
+/** Their light, in tiles (`at` places one for the caller's view): a wall of fire, a charged ring, a storm stream, a strike. */
 export function spellLights<L>(room: ArenaRoom, at: (x: number, y: number, r: number, i: number, c: [number, number, number]) => L): L[] {
-  const out: L[] = pitLights(room, at);
+  const out: L[] = wallLights(room, at);
   for (const z of room.zones) {
     if (z.kind !== 'stormring' || room.time >= z.until) continue;
     out.push(at(z.x, z.y, z.r + 1.2, (0.55 + Math.random() * 0.2) * fade(z, room.time), EL_LIGHT[z.el]));

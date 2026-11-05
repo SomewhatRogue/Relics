@@ -24,8 +24,8 @@ export const KIT: Record<WeaponId, KitRow> = {
   poisoner: { tap: 'Short sword, hits two', hold: 'Poison dart', perfect: 'Stuns, stronger poison' },
   // Mage (shared/mage.ts): what a tap and a hold are, the element decides (MAGE_KIT below); these are fire's.
   wand: { tap: 'Firebolt, burns', hold: 'Fireball, burns a crowd', perfect: 'Bigger, interrupts any blow', also: 'Tap interrupts a wind-up' },
-  // The fire pit burns friends too (sim/firepit.ts): said once on the card: fire's ALSO (MAGE_KIT) and the book card's (BOOK_ALSO).
-  staff: { tap: 'Flame sweep, burns', hold: 'Fire pit on a goblin', perfect: 'Bigger, burns longer' },
+  // The wall of fire burns friends too (sim/firewall.ts): said once on the card: fire's ALSO (MAGE_KIT) and the book card's (BOOK_ALSO).
+  staff: { tap: 'Flame sweep, burns', hold: 'Rolling wall of fire', perfect: 'Wider, burns longer' },
   spellblade: { tap: 'Cuts burn', hold: 'Burning lunge', perfect: 'Longer, costs nothing', also: 'Hits take magic, parry refills' },
   // Cleric (shared/cleric.ts): every perfect shields friends near you.
   mace: { tap: 'Short blows, 3rd heals', hold: 'Smite, stuns', perfect: 'Harder, shields friends' },
@@ -58,13 +58,13 @@ export const MAGE_KIT: Record<MageKit, Record<Element, KitRow>> = {
 /** A Mage's spellbook by element, for a weapon card that isn't in anyone's hand: "Tap firebolt, hold fireball". */
 const BOOK: Record<MageKit, Record<Element, string>> = {
   wand: { fire: 'Tap firebolt, hold fireball', frost: 'Tap icicles, hold cold blast', storm: 'Tap lightning stream, hold lightning strike' },
-  staff: { fire: 'Tap flame sweep, hold fire pit', frost: 'Tap frost sweep, hold hard frost', storm: 'Tap crackling sweep, hold charged ring' },
+  staff: { fire: 'Tap flame sweep, hold wall of fire', frost: 'Tap frost sweep, hold hard frost', storm: 'Tap crackling sweep, hold charged ring' },
   spellblade: { fire: 'Cuts burn, hold burning lunge', frost: 'Cuts chill, hold shatter', storm: 'Cuts ignore shields, hold lightning rush' },
 };
 const COST: Record<MageKit, string> = { wand: `${SPELL.wand} magic a hold`, staff: `${SPELL.staff} magic a hold`, spellblade: `${SPELL.spellblade} magic a hold` };
-/** The ALSO row of a kit's card with no element in hand, where the book needs one: the staff's fire pit
- *  burns friends, so the card says so once. */
-const BOOK_ALSO: Partial<Record<MageKit, string>> = { staff: 'Fire pit burns you and friends, keep clear' };
+/** The ALSO row of a kit's card with no element in hand, where the book needs one: the staff's wall of
+ *  fire burns friends, so the card says so once. */
+const BOOK_ALSO: Partial<Record<MageKit, string>> = { staff: 'Wall of fire burns you and friends too' };
 const isMage = (w: WeaponId): w is MageKit => w in MAGE_KIT;
 
 /** The rows in order, labelled, for a card or a legend (ALSO only where there is one). A Mage's kit in

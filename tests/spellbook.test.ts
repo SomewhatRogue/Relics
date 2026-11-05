@@ -1,6 +1,6 @@
 /** The Mage's spellbook (shared/spellbook.ts, sim/holds.ts and friends): each element's tap and hold on each kit, and their balance. */
 import { describe, expect, it } from 'vitest';
-import { COLD_BLAST, DASH, FIRE_PIT, HERO, LUNGE, MAGE_KITS, SHATTER_BLOW, STAFF_RING, STORM_RING, TICK, type Element, type MageKit } from '../src/shared/tuning';
+import { COLD_BLAST, DASH, FIRE_WALL, HERO, LUNGE, MAGE_KITS, SHATTER_BLOW, STAFF_RING, STORM_RING, TICK, type Element, type MageKit } from '../src/shared/tuning';
 import { frozen } from '../src/sim/damage';
 import { burning, chilled } from '../src/sim/elements';
 import type { FightEvent, Zone } from '../src/sim/types';
@@ -69,18 +69,18 @@ describe('the wand', () => {
 });
 
 describe('the staff', () => {
-  it('fire: a flame sweep; held, a fire pit dropped on the goblin in front that burns it (sim/firepit.ts: firepit.test.ts)', () => {
+  it('fire: a flame sweep; held, a wall of fire rolled at the goblin in front that burns it (sim/firewall.ts: firewall.test.ts)', () => {
     const a = mageArena('staff', [[9, 7.6]], 'fire');
     a.tap(0.8);
     expect(burning(a.e, a.room.time)).toBe(true);
     const b = mageArena('staff', [[9, 5], [9, 10]], 'fire');
-    b.loose(PLAIN.staff, 0.2 + FIRE_PIT.catch);
-    const z = zone(b.room.zones, 'firepit');
-    expect([z.x, z.y, z.r]).toEqual([9, 5, FIRE_PIT.r]);
+    b.loose(PLAIN.staff, 0.2 + (4 - FIRE_WALL.start) / FIRE_WALL.speed);
+    const z = zone(b.room.zones, 'firewall');
+    expect([z.x, z.y, z.r]).toEqual([9, 5, FIRE_WALL.len / 2]);
     expect(burning(b.es[0], b.room.time)).toBe(true);
-    expect(lost(b.es[0])).toBeGreaterThanOrEqual(FIRE_PIT.dmg);
+    expect(lost(b.es[0])).toBeGreaterThanOrEqual(FIRE_WALL.dmg);
     expect(lost(b.es[1])).toBe(0);
-    expect(z.until - z.at!).toBeCloseTo(FIRE_PIT.life, 5);
+    expect(z.until - z.at!).toBeCloseTo(FIRE_WALL.life, 5);
   });
 
   it('frost: a slash that slows wind-ups; held, a frost nova that freezes all round you', () => {
@@ -175,16 +175,17 @@ describe('balance', () => {
     }
   });
 
-  it("the staff's holds, one each (30 magic): the fire pit does about what the charged ring does, frost trades damage for freezing", () => {
+  it("the staff's holds, one each (30 magic): the wall of fire does about what the charged ring does, frost trades damage for freezing", () => {
     // One hold, everything it does over the 4 s after the release (fire's burn counted), on one goblin in
-    // it and on a pack of four: the pit dropped on them, the rings round the Mage.
+    // it and on a pack of four: the wall rolled out at them (three where it stands, one it rolls through),
+    // the rings round the Mage.
     const held = (el: Element, at: [number, number][], secs = 4) => {
       const a = mageArena('staff', at, el);
       a.run(PLAIN.staff, { attackSeq: 1, attack: true });
       a.run(secs, { attackSeq: 1, attack: false });
       return a.es.reduce((n, e) => n + lost(e), 0);
     };
-    const near: [number, number][] = [[9, 7.5], [10.2, 8.2], [7.8, 8.2], [9, 10.4]], far: [number, number][] = [[9, 6], [9.8, 6], [8.2, 6], [9, 5.2]];
+    const near: [number, number][] = [[9, 7.5], [10.2, 8.2], [7.8, 8.2], [9, 10.4]], far: [number, number][] = [[9, 6], [9.9, 6.1], [8.1, 6.1], [10.3, 8]];
     const one = { fire: held('fire', far.slice(0, 1)), frost: held('frost', near.slice(0, 1)), storm: held('storm', near.slice(0, 1)) };
     const pack = { fire: held('fire', far), frost: held('frost', near), storm: held('storm', near) };
     const say = `one ${JSON.stringify(one)} pack ${JSON.stringify(pack)}`;

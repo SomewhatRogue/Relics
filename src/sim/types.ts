@@ -62,7 +62,7 @@ export type Learned = 'skill' | 'leave';
 export const knows = (h: { learned?: Learned[] }, l: Learned) => !h.learned || h.learned.includes(l);
 
 /** A Mage's held spells, by kit and element (shared/spellbook.ts). */
-export type SpellWhat = 'fireball' | 'coldblast' | 'strike' | 'firepit' | 'nova' | 'stormring' | 'lunge' | 'shatter' | 'dash';
+export type SpellWhat = 'fireball' | 'coldblast' | 'strike' | 'firewall' | 'nova' | 'stormring' | 'lunge' | 'shatter' | 'dash';
 
 export type HeroAct = 'idle' | 'charge' | 'attack' | 'throw' | 'zip' | 'bash' | 'roll' | 'hurt' | 'stun' | 'down' | 'carry' | 'slam';
 
@@ -568,15 +568,20 @@ export interface Zone {
   owner: string;
   el: Augment;
   /** Not blessed ground but a skill's area (sim/areas.ts): a Ranger's volley (falling from `at`), a
-   *  Mage's fire ring burning on, a staff's fire pit (sim/firepit.ts: burning from `at`) or charged
-   *  ring (sim/staffrings.ts). */
-  kind?: 'volley' | 'fire' | 'sentry' | 'firepit' | 'stormring' | 'skystrike' | LadderZone;
-  /** A staff's pit or ring: let go on the flash, and what it deals a touch (`n`). */
+   *  Mage's fire ring burning on, a staff's wall of fire (sim/firewall.ts: rolling to (`tx`, `ty`) along
+   *  (`ax`, `ay`), `r` half its length, standing from `at`) or charged ring (sim/staffrings.ts). */
+  kind?: 'volley' | 'fire' | 'sentry' | 'firewall' | 'stormring' | 'skystrike' | LadderZone;
+  /** A staff's wall or ring: let go on the flash, and what it deals a touch (`n`). */
   big?: boolean;
   n?: number;
-  /** A wand's lightning strike (sim/skystrike.ts): it falls at `at`; `fell` once it has. */
+  /** A wall of fire: where it stops, and when each thing it has touched is due to burn again ('e' and a
+   *  goblin's id, 'h' and a hero's, 'v' and a survivor's, 'b' and a block's place: wood is tried once). */
+  tx?: number;
+  ty?: number;
+  hit?: Record<string, number>;
+  /** A wand's lightning strike (sim/skystrike.ts): it falls at `at`; `fell` once it has. A wall of fire: `fell` once it stands. */
   fell?: boolean;
-  /** A wind-up bow's aim (for drawing it turned to what it shoots). */
+  /** A wind-up bow's aim (for drawing it turned to what it shoots); a wall of fire's way of going. */
   ax?: number;
   ay?: number;
   at?: number;
@@ -598,8 +603,8 @@ export interface Drop {
 }
 
 export type FightEvent =
-  /** A staff's fire pit flaring up once it's caught (sim/firepit.ts), `r` round. */
-  | { k: 'pitup'; x: number; y: number; r: number; big: boolean }
+  /** A staff's wall of fire coming to a stop and standing (sim/firewall.ts), `r` half its length, square to (`dx`, `dy`). */
+  | { k: 'wallup'; x: number; y: number; r: number; dx: number; dy: number; big: boolean }
   /** An expedition (sim/exped.ts): a job or side job done (`i` its place in the list), the way out open, lit, the watch come; a horn, worse, a wave. */
   | { k: 'exped'; x: number; y: number; what: import('./exped').ExpedWhat; i?: number }
   /** A teammate downed you once too often this job. */
