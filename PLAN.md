@@ -531,3 +531,13 @@ Kyle loves it; hold until after the network tests on the new map types (usage li
   recruit at the whetstone, hurdles at the gate, smoke past the wall, a dog.
 - Next: barks as you walk past something newly mended; a raid you're in town for (a fight at the
   breach); other world events (a flood, a fire in the lane). The town remembers what it lost.
+
+## Next: the movement ladder, every 5 levels (Kyle 2026-11-04; Claude Opus 5.5)
+
+Pure upgrades, no either-or: each class's trainer teaches the next rung at 5, 10 and 15. Names via the lore keeper.
+- Ranger (the jump): 5 shoot in the air; 10 the jump's snare catches two; 15 landing knocks small goblins over.
+- Mage (Blink): 5 a burst of your element where you vanished; 10 blink through a goblin to its back; 15 half cost right after a perfect.
+- Rogue (the roll; Shadow Step stays its own spell): 5 caltrops that slow and bleed; 10 roll through a goblin's legs, next hit a backstab; 15 a roll shakes off burning and poison.
+- Healer (no dodge; the guard): 5 friends within 2 tiles take less while you block; 10 a parry heals friends near you; 15 block for a friend beside you.
+- Warrior (no dodge; Kyle "maybe a taunt", still thinking): 5 TAUNT on the empty dodge slot, pulls goblins within 5 tiles; 10 taunted goblins hit softer, no knockback while it lasts; 15 the taunt staggers small ones.
+- Techniques become real moves too, all learned ones always on (Kyle: "pure upgrades"), three a class. Shape still to settle.
