@@ -27,9 +27,9 @@ export const SIGN_STEP = { hp: 24, hewHp: 20, hewMax: 100, shotBy: 1.8, stabWith
 export const SIGN_LINES = {
   /** Hew, on the card. */
   teach: {
-    shadow: "See those two at the back, going through my sacks with their backs to us? You'll not get across to them without one turning round, so go through the *dark* instead and come out behind one.",
+    shadow: "See those two at the back, going through my sacks with their backs to us? You'll not get across to them without one turning round, but I'd lay odds your sort have a way of turning up behind folk out of the *dark*, so go on, and I'll not ask how.",
     mark: "Two more out of the trees, and that hound of yours keeps looking at me for orders. Pick one out for it, and put your arrows where it's looking.",
-    heal: "That's the last of them, and I'll not get far on this leg. Come and see to it, would you, and pull it out ~straight~.",
+    heal: "That's the last of them, and I'll not get far on this leg. Come and see to it, would you, and pull it out *straight*.",
   },
   /** The card's plain line under the move. */
   how: {
@@ -40,10 +40,10 @@ export const SIGN_LINES = {
   /** Hew, shot (a caption, the fight going on). */
   hewHit: "Aah! In the _leg_, the little sod! Never mind me, stray, see to them first!",
   /** Hew, mended. */
-  healed: "Oh, that's ^better^. I'll not ask what you did, I'll just thank you for it.",
+  healed: "Oh, that's ^better^, and out straight as you like. They teach you more than praying up at that church, then.",
   /** The goal over the field. */
   goal: {
-    shadow: 'STEP BEHIND ONE, STAB IT', mark: 'MARKED KILL', hit: 'HEW IS HIT', fight: 'Kill them', heal: 'MEND HEW', clear: 'Clear them',
+    shadow: 'STEP BEHIND ONE, STAB IT', mark: 'KILL A MARKED ONE', hit: "HEW'S BEEN SHOT", fight: 'Kill them', heal: 'MEND HEW', clear: 'Clear them',
   },
   /** A press that did nothing, over your hero. */
   nosign: { mark: 'NOTHING TO MARK', hurt: 'NOBODY HURT', breath: 'NOT ENOUGH STAMINA' },

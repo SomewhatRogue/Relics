@@ -14,8 +14,8 @@ const SKILLS: Partial<Record<RelicId | 'fire' | 'frost' | 'storm' | 'mark' | 'he
   sic: ['............', '.oo.........', '.ooo........', '.oooooo.....', 'ooWooooo....', 'oooooooooo..', '..oooooooo..', '...oooooooo.', '...o..o.o.o.', '...o..o.o.o.', '............', '............'],
   shadow: ['.......pp...', '......pPPp..', '.....pP..p..', '.....p......', '..gs..p.....', '...gs..p....', '....gs......', '.....gs.....', '......gs....', '.....b..s...', '....b.......', '............'],
   vanish: ['............', '...oooo.....', '..ogggo.....', '.ogggggoo...', 'ogggggggo...', '.oggggggggo.', '..ooggggggo.', '....oooooo..', '.o......o...', '...o..o.....', '............', '............'],
-  // SMOKE BOMB: a black ball with a lit fuse, smoke curling off it.
-  smoke: ['.........Y..', '..g....yFy..', '.g.g..b.y...', '..g..b......', '....OOOO....', '...OkkkkO...', '..OkdkkkkO..', '..OkkkkkkO..', '..OkkkkkkO..', '...OkkkkO...', '....OOOO....', '............'],
+  // SMOKE BOMB: a clay pot of the Rogue's powder, smoke curling out of its neck (no fuse: the world has no gunpowder).
+  smoke: ['..g...g.....', '.g.g.g.g....', '..g...g.g...', '....g.g.....', '....OOOO....', '.....oo.....', '...oooooo...', '..oooOoooo..', '..oooooooo..', '...oooooo...', '....oooo....', '............'],
   // MARK (the Ranger's own button): a gold ring sighted on a red point.
   mark: ['....yyy.....', '..yy...yy...', '.y...y...y..', '.y...y...y..', 'y.........y.', 'yyy..r..yyy.', 'y.........y.', '.y...y...y..', '.y...y...y..', '..yy...yy...', '....yyy.....', '............'],
   // MEND (the Healer's own button): a gold cross with light off it.

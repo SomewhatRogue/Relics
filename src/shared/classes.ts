@@ -72,7 +72,7 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     line: 'Twin daggers. Weak head on, twice as strong from behind.',
     weapon: 'Twin daggers',
     skill: 'Vanish: Smoke at your feet. Goblins lose you until you attack.',
-    sign: 'Enter the shadows and appear behind an enemy, stunning them briefly.',
+    sign: 'Appear behind the goblin you face. Stuns it for a second.',
     signLabel: 'SHADOW STEP',
     guard: 'Fast and nimble, rapid dodges available.',
     stats: { STRENGTH: 3, GUARD: 1, SPEED: 5, RANGE: 1, SUPPORT: 1 },
