@@ -12,6 +12,8 @@ import type { Game } from './game';
 import type { Music } from './music';
 import { SCORES, type Area } from './scores';
 import { sfx } from './sfx';
+import { sfxTown } from './sfxtown';
+import { rats } from './rats';
 import { SKILL_SOUNDS } from './fxskills';
 import { DRUMMER } from '../shared/tuning';
 import { butcher, goblin } from './voices';
@@ -39,6 +41,8 @@ export class Soundscape {
 
   constructor(private music: Music) {
     addEventListener('relic:tune', (e) => (this.tune = (e as CustomEvent).detail));
+    // Rats scattering from the blood (rats.ts): a squeak and a patter.
+    rats.onScatter = (n, dist) => sfxTown.rats(n, dist);
   }
 
   /** The hero nearest a spot (who swung, shot or blocked). */

@@ -48,7 +48,7 @@ export class People {
   private boxes(room: ArenaRoom, map: GameMap, others: Hero[], now: number): void {
     (map.npcs ?? []).forEach((n, i) => {
       const at = npcAt(n, room.time), key = 'n' + i + n.name, f = this.npcs.get(key, n.look, () => makeNpc(n.look));
-      poseNpc(f, n, at.fx, at.fy, at.x, now, this.stride(key, at.x, at.y));
+      poseNpc(f, { ...n, path: at.still ? undefined : n.path }, at.fx, at.fy, at.x, now, this.stride(key, at.x, at.y));
       f.root.position.set(at.x, f.root.position.y, at.y);
     });
     for (const h of others) {

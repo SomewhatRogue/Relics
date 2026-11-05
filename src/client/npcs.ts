@@ -7,6 +7,7 @@ import { blit, shadow, type Ctx } from './draw';
 import { drawText, textWidth } from './pixfont';
 import { makeSprite, type Sprite } from './sprites';
 import { drawWork } from './siegedraw';
+import { CREW, drawCrew } from './crewdraw';
 
 type Part = Parameters<typeof makeSprite>[2][number];
 export interface Look { body: string; trim: string; skin: string; hair: Part[]; apron?: string }
@@ -38,6 +39,11 @@ export const LOOKS: Record<string, Look> = {
   // The gravedigger: earth-coloured smock, a cap pulled down.
   digger: { body: '#3e3628', trim: '#2a2018', skin: DARK, hair: [['r', 3, 0, 6, 2, '#2e2a24'], ['r', 2, 2, 8, 1, '#2e2a24']] },
   survivor: { body: '#7a6a58', trim: '#5a4a3a', skin: SKIN, hair: [['r', 4, 1, 4, 1, '#3a2a1a'], ['r', 3, 2, 6, 1, '#e8e0c8']] },
+  // Foreman Judd: a leather jerkin over his shirt, a flat cap, a beard going grey.
+  foreman: { body: '#6a4a2e', trim: '#b8a070', skin: DARK, apron: '#4a3420', hair: [['r', 2, 1, 8, 1, '#3a3a40'], ['r', 3, 0, 6, 1, '#3a3a40'], ['r', 4, 5, 4, 2, '#8a8490']] },
+  // His crew: work-worn smocks, a hood or a kerchief, dust to the knees.
+  labourer: { body: '#5a5240', trim: '#3a3428', skin: SKIN, hair: [['r', 3, 0, 6, 2, '#4a4030']] },
+  labourer2: { body: '#4e5a5a', trim: '#3a3a30', skin: DARK, apron: '#7a6e58', hair: [['r', 3, 0, 6, 2, '#8a3a2a'], ['p', 9, 2, '#8a3a2a']] },
 };
 
 function person(l: Look): Sprite {
@@ -121,9 +127,12 @@ export function drawNpc(c: Ctx, n: Npc, x: number, y: number, near: boolean, fx 
   if (n.pose === 'corpse') return drawCorpse(c, s, x, y, n);
   if (n.smear) drawSmear(c, x, y, n.smear, n.lift ?? 0);
   if (n.pose) return drawDead(c, s, x, y, n);
-  blit(c, s, x, y - (n.lift ?? 0) + bob, walking ? fx < 0 : Math.floor(c.now * 0.25 + n.y) % 2 === 0, 0, n.sneak ? 0.78 : 1);
+  // The works' crew face the way they walked in, so what's in their hands faces it too.
+  const crew = !!n.work && CREW.has(n.work);
+  blit(c, s, x, y - (n.lift ?? 0) + bob, walking || crew ? fx < 0 : Math.floor(c.now * 0.25 + n.y) % 2 === 0, 0, n.sneak ? 0.78 : 1);
   // A guard carries a spear upright.
-  if (n.work) drawWork(c, n, x, y + bob, tx, fx);
+  if (crew) drawCrew(c, n, x, y + bob, fx, walking);
+  else if (n.work) drawWork(c, n, x, y + bob, tx, fx);
   if (n.mute) return;
   if (n.look === 'guard') (c.lit.fillStyle = '#6b4a2b'), c.lit.fillRect(Math.round(x + (fx < 0 && walking ? -6 : 5)), Math.round(y - 22 + bob), 1, 20), (c.lit.fillStyle = '#cfd6dc'), c.lit.fillRect(Math.round(x + (fx < 0 && walking ? -6 : 5)), Math.round(y - 24 + bob), 1, 3);
   const top = Math.round(y - s.h - 4 + (Math.floor(c.now * 3) % 2));

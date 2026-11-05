@@ -3616,3 +3616,55 @@ be highlighted if you click your inventory and have knacks to spend?"
 - New lines, waiting on the lore keeper and line editor: ROOMS, JOBS, SIDE JOBS, GOBLINS, DENS, DOWNED,
   TIME, FOUND, TREASURE, RELIC, "2 of 3", NEXT: PICK A KNACK, LOOK, F LOOK, CLOSE (loot card),
   N OF M JOBS LEFT, DONE, WICKHOLD, DAY N, N TO PICK.
+
+## 2026-11-04: PUBLIC WORKS, Foreman Judd and his crew; rats on the blood (Kyle; Claude Opus 5.5)
+
+Kyle: "Should rename works to public works and have it be a foreman and people working around him
+tidying etc." and "when there's blood and rats I want them to scurry away if you walk near them, then
+come back later."
+
+- **PUBLIC WORKS** is the on-screen name everywhere the player sees it: the spot, the stall (widened to
+  3.4 tiles so the label fits), the board's title, the Old Quarter rubble's text, the sewer grate's,
+  Dunn's line. Internal ids stay `works`.
+- **Foreman Judd** (`shared/publicworks.ts`, look `foreman` in `client/npcs.ts`) stands just west of the
+  works stall by its board; talking to him opens the board (`talk: 'works'`), as the spot still does.
+  He takes the board's spoken lines (they were Reeve Hollis's): Hollis keeps the book, and Judd points
+  at it. His two lines (`FOREMAN` in `shared/mendlines.ts`), one each time the board opens, in turn:
+  "I don't pick what gets done, mind, the town does that with its coin and whoever turns up with a
+  shovel, and I just point. Hollis writes it all in his book, every coin and every den burned, so don't
+  go telling him you gave more than you did." and "My lot sweep and haul and fill the barrow, or that's
+  the idea, and whoever you catch leaning on a broom will swear they're ~thinking~. They aren't."
+  He never chooses what gets done (the bible: the town chooses with its gold and its feet).
+- **His crew** (mute, in the background): a sweeper round the front of the stall, a hauler taking planks
+  off the cart in the square up to the stall, and, while the rubble stands, a digger shovelling it into
+  a barrow and tipping it a few steps back (gone once the Old Quarter is cleared). Each walks a short
+  loop and stops at its corners to work: `Npc.stops` (`shared/npcstops.ts`, pure; `npcAt` returns
+  `still` while they stand). Drawn by `client/crewdraw.ts` over their sprite, in the flat view and the
+  2.5D view's cards (box figures, `?figs=3d`, walk and stand but carry no tools).
+- **Same spot on every screen**: the crew carry `clock: true` and walk on Wickhold's wall clock
+  (`townclock.ts` `onClock`, run each step in town), not the room's time (which starts at 0 each time
+  you come into town). Screens agree to within their own clocks. The other townsfolk are unchanged.
+- **Rats** (`client/rats.ts`, `ratspots.ts`, `ratdraw.ts`): on a job they gather at blood stains (the
+  floor's stains read a little at a time and gathered into spots worth a rat) and at bodies left whole;
+  in Wickhold by the sewer grate behind the Drowned Rat, in the alley between it and the infirmary, and
+  behind its barrels. A hero within 2.5 tiles (1.2 creeping, `sneaking`) sends them bolting, long, low
+  and zigzagging, away from that hero to the first wall, edge or solid thing that way (or into the dark
+  a few tiles off), where they're gone. After 15 to 25 s with nobody within 4 tiles of the spot they
+  come back one at a time, 1.5 to 3.5 s apart. At most 8 at once, the nearest spots first, none past 18
+  tiles. A quiet squeak and a patter on scattering (`sfxTown.rats`, set up by the soundscape).
+- **Cosmetic, and each screen's own**: the room never knows about rats, they never wake a goblin (that
+  stays the crows', which are in the room), Math.random is used, and a friend sees their own rats.
+  Drawn on the lit layer (dark body, a pink tail tip, a pale eye glint, never green, never glowing); in
+  the 2.5D view on its flat layer at the floor, as its crows and slicks are (so, like them, not hidden
+  behind a wall in front).
+- Lore: Judd and his lines were checked against the story bible and voice guide in the lore keeper's
+  terms and then the line editor's (this session had no agent tool to hand them to, so the same
+  checklists were applied here). From the drafts: a line about the rubble was dropped so his lines
+  still hold once the Old Quarter is cleared; "if you catch one of them, he'll tell you" became
+  "whoever you catch ... they're" (the crew is anybody); both now run on with commas and a hedge
+  ("mind", "or that's the idea") and end on the joke about a person, with one mark (`~thinking~`).
+  New lore for Kyle to record or reject: the name Judd, and that the works have a foreman at all.
+- Tests: `tests/publicworks.test.ts` (labels, Judd opens the board, the crew's loops and stops, the
+  digger gone with the rubble, `stopsAt`), `tests/rats.test.ts` (they come once it's quiet, scatter at
+  2.5 and not 3, closer creeping, come back one at a time, the cap, the room untouched, the town's
+  spots clear of walls). Pictures: the scratchpad script `town3-look.cjs` (not in the repo).

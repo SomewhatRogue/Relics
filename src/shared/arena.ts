@@ -4,6 +4,7 @@
  * a time (the room that's running sets it), so collision never needs it passed around.
  */
 import { nearby } from './mapgrid.js';
+import { stopsAt, type PathAt } from './npcstops.js';
 
 export type Circle = { x: number; y: number; r: number };
 export type RoundKind = 'pillar' | 'tree' | 'pine' | 'rock' | 'hay' | 'well' | 'lantern' | 'support' | 'stump' | 'target' | 'stone' | 'post' | 'grate' | 'statue' | 'bush' | 'reed' | 'deadtree'
@@ -113,8 +114,13 @@ export interface Npc {
   /** Cutscene puppetry: which way someone without a round faces (Orla walking up the road). */
   fx?: number;
   fy?: number;
-  /** Paint only, what they're busy at: carrying the dead and digging, at the whetstone, at the well. */
-  work?: 'bury' | 'dig' | 'whet' | 'well';
+  /** Paint only, what they're busy at: carrying the dead and digging, at the whetstone, at the well;
+   *  the public works' crew sweeping, hauling planks, shovelling rubble into a barrow. */
+  work?: 'bury' | 'dig' | 'whet' | 'well' | 'sweep' | 'haul' | 'shovel';
+  /** Seconds they stand at each point of their round, working, before walking on (npcstops.ts). */
+  stops?: number[];
+  /** Walks on Wickhold's wall clock, not the room's, so every screen has them in the same spot. */
+  clock?: boolean;
   /** Somebody in the background: no mark over them, nobody to talk to. */
   mute?: boolean;
   pose?: 'headless' | 'body' | 'corpse';
@@ -124,9 +130,10 @@ export interface Npc {
 }
 
 /** Where someone is at time `t` (walking their round, or standing where they stand), and which way they face. */
-export function npcAt(n: Npc, t: number): { x: number; y: number; fx: number; fy: number } {
+export function npcAt(n: Npc, t: number): PathAt {
   const p = n.path;
   if (!p || p.length < 2) return { x: n.x, y: n.y, fx: n.fx ?? 0, fy: n.fy ?? 1 };
+  if (n.stops) return stopsAt(p, n.stops, n.speed ?? 1.1, (n.heldAt ?? t) - (n.lag ?? 0));
   const seg = p.map((a, i) => {
     const b = p[(i + 1) % p.length];
     return { a, b, len: Math.hypot(b[0] - a[0], b[1] - a[1]) };

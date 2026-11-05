@@ -4,6 +4,8 @@
  */
 import { parryWindow } from '../sim/knacks';
 import { ARENA, npcAt, type GameMap } from '../shared/arena';
+import { rats } from './rats';
+import { drawRat } from './ratdraw';
 import { GRAB, GUARD, POTION, TIERS, WEAPONS } from '../shared/tuning';
 import { lightsHolder } from './heldkits';
 import { tapEl, tapGlow } from './magetap';
@@ -248,6 +250,9 @@ export class Scene {
     }
     // Crows on the dead, over the bodies they're at (beastdraw.ts).
     for (const f of room.crows ?? []) items.push({ y: OY + (f.y + 0.4) * PX, draw: () => drawCrows(c, [f], (x, y) => [OX + x * PX - cx, OY + y * PX - cy], room.time) });
+    // Rats at the blood and in the alleys, scattering from anyone who comes near (rats.ts, this screen's own).
+    rats.frame(room, fx.decals, others.length ? [...room.heroes, ...others] : room.heroes, meId, now);
+    for (const r of rats.rats) if (r.state !== 'gone') items.push({ y: OY + r.y * PX - 0.5, draw: () => drawRat(c, r, OX + r.x * PX - cx, OY + r.y * PX - cy) });
     for (const e of room.enemies) {
       const carrier = room.heroes.find((h) => h.carrying === e.id);
       if (carrier) {
@@ -339,7 +344,7 @@ export class Scene {
     }
     for (const n of map.npcs ?? []) {
       const at = npcAt(n, room.time), near = !!me && Math.hypot(me.x - at.x, me.y - at.y) <= SPOT_REACH;
-      items.push({ y: OY + at.y * PX, draw: () => drawNpc(c, n, OX + at.x * PX - cx, OY + at.y * PX - cy, near && !n.mute, at.fx, !!n.path, at.x) });
+      items.push({ y: OY + at.y * PX, draw: () => drawNpc(c, n, OX + at.x * PX - cx, OY + at.y * PX - cy, near && !n.mute, at.fx, !!n.path && !at.still, at.x) });
     }
     // The scenes past the wood's trees (vignettes.ts): drawn like anyone, never in the room.
     for (const f of vignetteFigs(map, room.time, me)) items.push({ y: OY + f.y * PX - (f.floor ? 20 : 0), draw: () => f.draw(c, OX + f.x * PX - cx, OY + f.y * PX - cy) });

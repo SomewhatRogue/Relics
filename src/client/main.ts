@@ -50,6 +50,7 @@ import { relicLabel } from '../sim/hero';
 import { castElement } from '../sim/channel';
 import type { FightEvent } from '../sim/types';
 import { Fx } from './fx';
+import { rats } from './rats';
 import { DreadView } from './dreadfx';
 import { watchDust } from './dust';
 import { Input } from './input';
@@ -534,6 +535,9 @@ w.__views = views;
 w.__chat = chat.hooks();
 w.__works = WORK_ORDER;
 w.__music = music;
+// The floor's stains and the rats at them (scripts: rats on the blood).
+w.__fx = fx;
+w.__rats = rats;
 // Listening: a stretch of any piece rendered offline (scripts/listen.cjs). Loaded only when asked.
 w.__renderMusic = (...a: Parameters<typeof import('./musicrender').renderMusic>) => import('./musicrender').then((m) => m.renderMusic(...a));
 w.__title = title;

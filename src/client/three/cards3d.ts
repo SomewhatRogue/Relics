@@ -63,6 +63,6 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
   for (const g of vignetteFigs(map, t, me)) f.put('w' + g.key, g.x, 0, g.y, g.draw, { pool: g.floor ? 0 : 0.28, bias: g.floor ? -0.3 : 0 });
   (map.npcs ?? []).forEach((n, i) => {
     const at = npcAt(n, t), near = !!me && Math.hypot(me.x - at.x, me.y - at.y) <= SPOT_REACH;
-    f.put('n' + i + n.name, at.x, 0, at.y, (c, px, py) => drawNpc(c, n, px, py, near && !n.mute, at.fx, !!n.path, at.x), { pool: n.pose ? 0 : 0.3, bias: n.pose ? -0.3 : 0 });
+    f.put('n' + i + n.name, at.x, 0, at.y, (c, px, py) => drawNpc(c, n, px, py, near && !n.mute, at.fx, !!n.path && !at.still, at.x), { pool: n.pose ? 0 : 0.3, bias: n.pose ? -0.3 : 0 });
   });
 }
