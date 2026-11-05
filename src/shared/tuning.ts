@@ -47,7 +47,7 @@ export * from './stuncap.js';
 export * from './raiders.js';
 export * from './prowlers.js';
 export * from './encounters.js';
-import { BANNER, NETTER, THIEF, LOGS, ROOF } from './raiders.js';
+import { BANNER, NETTER, THIEF, LOGS, ROOF, IRONHIDE } from './raiders.js';
 import { WOLF, KEEPER, OIL, TORCH, SAPPER, CAVE } from './prowlers.js';
 import { DRUMMER, HEXER } from './backline.js';
 
@@ -206,6 +206,7 @@ export const VARIANTS = {
   drummer: DRUMMER,
   /** The new sorts (shared/raiders.ts, prowlers.ts): their health here, the rest there. */
   banner: { hp: BANNER.hp }, netter: { hp: NETTER.hp }, thief: { hp: THIEF.hp }, log: { hp: LOGS.hp }, roofer: { hp: ROOF.hp },
+  ironhide: { hp: IRONHIDE.hp },
   wolf: { hp: WOLF.hp }, keeper: { hp: KEEPER.hp }, oiler: { hp: OIL.hp }, torch: { hp: TORCH.hp }, sapper: { hp: SAPPER.hp }, blind: { hp: CAVE.hp },
   heavy: { hp: 110, reach: 1.7, speed: 0.75, swing: { windup: 1.0, active: 0.1, recover: 0.9, dmg: 18, knock: 8, range: 1.9, arc: 100, unblockable: false } as EnemyAttackSpec },
   stoker: {
@@ -228,6 +229,31 @@ export const SWING_DUMMY = {
   reach: 2.2,
   stun: 1.8,
   swing: { windup: 0.8, active: 0.08, recover: 0.6, dmg: 8, knock: 3, range: 2.0, arc: 80, unblockable: false } as EnemyAttackSpec,
+};
+
+/**
+ * Pack rushes (Kyle, 2026-11-04: "I want to have to block sometimes and parry"; "as long as the ones that
+ * wind up can all be blocked or parried at once"). The rules: sim/packrush.ts. While a pack fights (an awake
+ * goblin of it within `fight` tiles of a hero), `first` seconds into the fight and then every `every`
+ * (seeded between the two), a free goblin of it calls a rush on a hero it stands in front of, if two more
+ * of the pack are in the fight there too. For `call` seconds packmates within `near` of it join as each
+ * comes free, till `join` more (2 or 3, seeded) have; every one within `seen` tiles of that hero and not
+ * behind them (`side`: the cosine off where they face). They step into a fan before the hero on the
+ * pack's side (`slot` tiles out, `spread` radians apart, in place within `at`, `gather` seconds at most),
+ * and once each is in place and the fan's middle is in front of the hero (`front`, the cosine) they wind up
+ * together for `blow.windup` seconds, so every blow lands in the one instant. Judged from the fan's
+ * middle, so one guard covers it all: one block takes every blow for one blow's stamina, one parry
+ * parries them all and holds each at least `parryStun` seconds, a dodge through it slips them all. A call
+ * that finds too few tries again `retry` seconds later. One rush on a hero at a time. `big`: a brute's or
+ * an ironhide's blow in one.
+ */
+export const RUSH = {
+  first: [0.5, 1.5] as [number, number], every: [6, 10] as [number, number], retry: 1.5, fight: 8,
+  join: [2, 3] as [number, number], near: 4.5, front: 0.55, side: -0.1, seen: 5.5,
+  call: 1.2, slot: 1.55, spread: 0.42, at: 0.6, gather: 2.4,
+  parryStun: 2,
+  blow: { windup: 1.3, active: 0.1, recover: 0.8, dmg: 9, knock: 4, range: 1.9, arc: 50, unblockable: false } as EnemyAttackSpec,
+  big: 14,
 };
 
 /** How long a light enemy flinches when hit. */
@@ -332,17 +358,17 @@ export const EXPED_PACKS = {
   where: {
     open: ['wolves', 'netter', 'swarm', 'brute', 'thief'],
     hamlet: ['roof', 'oil', 'banner', 'thief', 'swarm'],
-    camp: ['banner', 'oil', 'butcher', 'wall', 'drum', 'hexer', 'brute'],
+    camp: ['banner', 'oil', 'butcher', 'wall', 'drum', 'hexer', 'brute', 'iron'],
     road: ['logs'],
     patrol: ['swarm', 'brute', 'netter', 'wolves', 'wall'],
   } as Record<'open' | 'hamlet' | 'camp' | 'road' | 'patrol', string[]>,
   waves: [
     ['swarm', 'brute', 'netter'],
     ['swarm', 'brute', 'netter', 'wolves', 'thief'],
-    ['swarm', 'brute', 'netter', 'wolves', 'banner', 'oil'],
-    ['brute', 'netter', 'wolves', 'banner', 'oil', 'sapper', 'logs'],
-    ['netter', 'wolves', 'banner', 'oil', 'sapper', 'logs', 'butcher', 'wall'],
-    ['wolves', 'banner', 'oil', 'sapper', 'logs', 'butcher', 'wall', 'drum'],
+    ['swarm', 'brute', 'netter', 'wolves', 'banner', 'oil', 'iron'],
+    ['brute', 'netter', 'wolves', 'banner', 'oil', 'sapper', 'logs', 'iron'],
+    ['netter', 'wolves', 'banner', 'oil', 'sapper', 'logs', 'butcher', 'wall', 'iron'],
+    ['wolves', 'banner', 'oil', 'sapper', 'logs', 'butcher', 'wall', 'drum', 'iron'],
   ],
   specials: { camp: 3, scene: 2, patrol: 2, wave: [1, 1, 2, 2, 2, 3] },
   near: 3, nearR: 14,

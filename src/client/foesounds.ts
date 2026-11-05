@@ -2,7 +2,7 @@
  * The newer goblins' sounds, all from the kit we have (sfx.ts, voices.ts, spidersfx.ts): a net
  * whirled and thrown, a thief's grab and its cackle, a banner going down and the rout's shrieks, the
  * log-carriers' roar, wolves, the oil pot and its fire, the sapper's digging, the crows, the blind
- * hunters' clicks. True when it was one of theirs.
+ * hunters' clicks, a pack rush's shriek, an ironhide's plates giving way. True when it was one of theirs.
  */
 import type { FightEvent } from '../sim/types';
 import { sfx } from './sfx';
@@ -44,6 +44,11 @@ export function foeSound(ev: FightEvent): boolean {
     case 'oilup': return sfx.oilfire(), true;
     case 'crows': return sfx.flare(), true;
     case 'listen': return goblin.hiss(), true;
+    // A pack rush winding up: one short shriek from the pack and a rising note (sim/packrush.ts).
+    case 'rush': return goblin.screech(), sfx.charged(), true;
+    case 'rushparried': return sfx.perfect(), true;
+    // An ironhide's guard broken: iron giving way (sim/ironhide.ts).
+    case 'cracked': return sfx.wardbreak(), sfx.propbreak(), true;
     default: return false;
   }
 }

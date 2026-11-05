@@ -11,7 +11,7 @@ import type { PlaceKind } from './jobs.js';
 
 /** What a goblin in a pack is for. `fodder` is the small ones; every other role is a special. */
 export type Role = 'fodder' | 'lunger' | 'shield' | 'heavy' | 'hexer' | 'drummer' | 'butcher' | 'archer'
-  | 'banner' | 'netter' | 'thief' | 'log' | 'roofer' | 'keeper' | 'wolf' | 'oiler' | 'torch' | 'sapper' | 'blind';
+  | 'banner' | 'netter' | 'thief' | 'log' | 'roofer' | 'keeper' | 'wolf' | 'oiler' | 'torch' | 'sapper' | 'blind' | 'ironhide';
 
 export interface Template {
   id: string;
@@ -56,6 +56,8 @@ export const TEMPLATES: Template[] = [
   { id: 'roof', said: 'archers on the roofs', centre: ['roofer'], support: ['roofer'], fodder: [2, 3], roofs: true, weight: 2.5 },
   { id: 'wolves', said: 'a wolf-keeper and its wolves', centre: ['keeper'], fodder: [3, 4], fodderKind: 'wolf', weight: 2, places: OPEN },
   { id: 'sapper', said: 'a brute in front and a sapper under', centre: ['heavy'], support: ['sapper'], fodder: [2, 3], from: 1, weight: 1.5, places: ['farm', 'field', 'forest', 'mine', 'marsh'] },
+  { id: 'iron', said: 'an ironhide and the little ones', centre: ['ironhide'], fodder: [3, 4], from: 1, weight: 1.5, more: 'lunger' },
+  { id: 'ironback', said: 'a brute with an ironhide at its side', centre: ['heavy'], support: ['ironhide'], fodder: [2, 3], from: 1, ruin: 1, weight: 1 },
   { id: 'cave', said: 'blind hunters in the dark', fodder: [3, 4], fodderKind: 'blind', weight: 4, places: ['mine'] },
 ];
 
@@ -83,6 +85,6 @@ export const ENCOUNTER = {
 };
 
 /** Roles that are a kind of small goblin (the rest are something else: a wolf, the log-carriers). */
-export const GOBLIN_ROLES: Role[] = ['fodder', 'lunger', 'shield', 'heavy', 'hexer', 'drummer', 'archer', 'banner', 'netter', 'thief', 'roofer', 'keeper', 'oiler', 'torch', 'sapper', 'blind'];
+export const GOBLIN_ROLES: Role[] = ['fodder', 'lunger', 'shield', 'heavy', 'hexer', 'drummer', 'archer', 'banner', 'netter', 'thief', 'roofer', 'keeper', 'oiler', 'torch', 'sapper', 'blind', 'ironhide'];
 /** Backers that keep to the back of a pack (put furthest from the way in). */
 export const BACK_ROLES: Role[] = ['archer', 'hexer', 'drummer', 'banner', 'netter', 'oiler', 'torch', 'keeper'];

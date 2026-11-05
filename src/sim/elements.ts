@@ -36,8 +36,8 @@ export const chilled = (e: Enemy, now: number) => e.chillUntil > now;
 
 function ignite(e: Enemy, now: number, ev: FightEvent[]): void {
   if (!burning(e, now)) ev.push({ k: 'ignite', x: e.x, y: e.y }), (e.burnNext = now + BURN.every);
-  // Butchers, heavies and shield-bearers catch less: their burn is cut short (BURN.tough).
-  const tough = e.kind === 'butcher' || e.variant === 'heavy' || e.variant === 'shield';
+  // Butchers, heavies, shield-bearers and ironhides catch less: their burn is cut short (BURN.tough).
+  const tough = e.kind === 'butcher' || e.variant === 'heavy' || e.variant === 'shield' || e.variant === 'ironhide';
   e.burnUntil = now + BURN.time * (tough ? BURN.tough : 1);
 }
 

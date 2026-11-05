@@ -1,6 +1,7 @@
 /** Damage to an enemy from anything (blades, shots, blasts, burning), and what death resets. */
 import { BROOD, BUTCHER, GUARD, OVERKILL, SCRAPPER, SPIDER, SWING_DUMMY, TRAIT, WEAK_POP, weakOn, MARK, type Hurt } from '../shared/tuning';
 import type { DeathKind, Enemy, FightEvent } from './types';
+import { clanks, plated } from './ironhide';
 
 const SPEC = { butcher: BUTCHER, scrapper: SCRAPPER, spider: SPIDER, brood: BROOD } as Record<string, { stun: number; respawn: number } | undefined>;
 export const stunOf = (e: Enemy) => SPEC[e.kind]?.stun ?? SWING_DUMMY.stun;
@@ -69,9 +70,12 @@ export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: Da
   // Marked by a relic: the next real blow lands harder, and the mark is spent.
   if (!o.tick && (e.markUntil ?? -9) > now) (n = Math.round(n * MARK.mult)), (e.markUntil = 0);
   if (o.mult && (e.act === 'stunned' || e.act === 'pinned' || frozen(e, now) || snared(e, now))) n = Math.round(n * GUARD.stunnedMult * (o.brutal ? TRAIT.brutal : 1));
+  // An ironhide's plates: a heavy hit breaks its guard, anything else barely gets through (sim/ironhide.ts).
+  const breaks = !!o.heavy && !o.tick, clank = !o.tick && !breaks && clanks(e, now);
+  n = plated(e, n, now, breaks, ev);
   e.hp -= n;
   e.hitAt = now;
-  ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy: !!o.heavy, on: 'enemy', tick: o.tick, src: o.src, big: e.kind === 'butcher', ...(o.backstab ? { backstab: true } : {}) });
+  ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy: !!o.heavy, on: 'enemy', tick: o.tick, src: o.src, big: e.kind === 'butcher', ...(o.backstab ? { backstab: true } : {}), ...(clank ? { plated: true } : {}) });
   if (isDummy(e)) {
     if (e.hp <= 0) e.hp = e.maxHp;
     return false;
@@ -80,6 +84,7 @@ export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: Da
     const how = o.tick ? o.how ?? 'burn' : -e.hp >= OVERKILL ? 'burst' : o.how ?? 'fall';
     return kill(e, ev, how, o.dx ?? 0, o.dy ?? 0), true;
   }
-  if (o.flinch && small(e) && !held(e, now)) Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: o.flinch });
+  // (Quick shots don't break a rush's wind-up, POISE; a heavy one does.)
+  if (o.flinch && small(e) && !held(e, now) && !(e.attack?.rush && !o.heavy)) Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: o.flinch });
   return false;
 }

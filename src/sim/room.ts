@@ -34,6 +34,7 @@ import { stepFalse } from './falsecage';
 import { ambush } from './ambush';
 import { packOnto } from './packs';
 import { afterFoes, beforeFoes, beforeHeroes, shapeFoe } from './ownfoes';
+import { newRushes, stepRushes, type Rushes } from './packrush';
 import { slipIntent, type Slick } from './oil';
 import { newFlocks, type Flock } from './crows';
 import { OWN_KIT } from './enemies';
@@ -128,6 +129,9 @@ export class ArenaRoom {
   private cageRng: Rng;
   /** What a technique knocks loose (CUTPURSE: sim/techrogue.ts), on its own stream too. */
   private purseRng: Rng;
+  /** Pack rushes (sim/packrush.ts): when each pack calls its next, and the ones under way; on a stream of their own. */
+  rushes: Rushes = newRushes();
+  private rushRng: Rng;
   /** An outdoor job room: a cage here can hold a false prisoner (never in a house: run.ts sets this). */
   falseCages = false;
   private acc = 0;
@@ -161,6 +165,7 @@ export class ArenaRoom {
     this.relicRng = new Rng(seed * 31337 + 7);
     this.cageRng = new Rng(seed * 2971 + 41);
     this.purseRng = new Rng(seed * 6007 + 53);
+    this.rushRng = new Rng(seed * 4241 + 59);
     this.map = opts.map ?? ARENA;
     this.crows = newFlocks(this.map.flocks);
     useMap(this.map);
@@ -321,6 +326,7 @@ export class ArenaRoom {
     // Who hears a drum this tick (sim/backline.ts), before anyone moves.
     rouse(this.enemies, this.time);
     beforeFoes(this.enemies, this.time, this.events);
+    stepRushes(this.rushes, this.enemies, this.heroes, this.rushRng, this.time, TICK, this.events);
     OWN_KIT.slicks = this.slicks;
     for (const e of this.enemies) stepEnemy(e, this.heroes, this.rng, this.time, TICK, this.events, this.enemies);
     for (const h of this.heroes) stepHound(h, this.enemies, this.time, TICK, this.events);

@@ -1,7 +1,8 @@
 /**
  * Goblins as low-poly figures: hunched, sickly green, eyes that glow. Size and kit by kind: the little
  * scrapper with its knife, the archer, the lunger's spear, the shield, the hexer's fetish, the
- * drummer, the heavy brute, the butcher with his cleaver (a named one wears a gold torc). Spiders and
+ * drummer, the heavy brute, the ironhide in its iron scraps (askew, cracked gold, once its guard is
+ * broken), the butcher with his cleaver (a named one wears a gold torc). Spiders and
  * the training dummies are in spiders3d.ts.
  */
 import * as THREE from 'three';
@@ -21,7 +22,7 @@ const rag = M(0x4a3a2a), metal = M(0x6e6a68), rust = M(0x6a4632), woodM = M(0x5a
 
 /** What a goblin looks like, as a key (a new figure is built when it changes). */
 export function foeLook(e: Enemy): string {
-  return e.kind + ':' + (e.variant ?? '') + (e.bow ? ':bow' : '') + (e.name ? ':named' : '');
+  return e.kind + ':' + (e.variant ?? '') + (e.bow ? ':bow' : '') + (e.name ? ':named' : '') + (e.cracked ? ':cracked' : '');
 }
 
 export function makeGoblin(e: Enemy): FoeFig {
@@ -71,8 +72,20 @@ export function makeGoblin(e: Enemy): FoeFig {
     for (const s of [-1, 1]) part(off, 0.05, 0.3, 0.05, woodM, 0, s * 0.14, 0.1, s * 0.5);
     part(off, 0.015, 0.5, 0.015, M(0xd8d0bc), 0, 0, -0.03);
   }
+  if (v === 'ironhide') ironhide(tor, head, wpn, !!e.cracked);
   if (v === 'shield') part(off, 0.5, 0.5, 0.07, M(0x5a4228), 0, 0.05, 0.12), part(off, 0.12, 0.12, 0.08, metal, 0, 0.05, 0.16);
   const st = stars(root, 1.2);
-  root.scale.setScalar(big ? (e.name ? 1.75 : e.kind === 'butcher' ? 1.6 : 1.3) : v === 'looter' ? 0.68 : 0.76);
+  root.scale.setScalar(big ? (e.name ? 1.75 : e.kind === 'butcher' ? 1.6 : 1.3) : v === 'looter' ? 0.68 : v === 'ironhide' ? 0.95 : 0.76);
   return { ...collect({ root, mid, body, legs, aR, aL, head, stars: st }), wpn, off, tor, big };
+}
+
+/** The ironhide's scraps of iron and its maul; `cracked`: knocked askew, a gold crack showing through. */
+function ironhide(tor: THREE.Group, head: THREE.Group, wpn: THREE.Group, cracked: boolean): void {
+  const k = cracked ? 1 : 0, plate = M(0x5e5a58), lite = M(0x8a8680);
+  part(tor, 0.46, 0.34, 0.08, plate, k * 0.06, 0.2 - k * 0.04, 0.2, 0, k * 0.3, k * 0.25);
+  part(tor, 0.16, 0.1, 0.22, lite, 0.28, 0.4 - k * 0.12, 0, 0, 0, -0.5 - k * 0.6);
+  part(tor, 0.16, 0.1, 0.22, lite, -0.28, 0.4, 0, 0, 0, 0.5);
+  part(head, 0.46, 0.14, 0.4, plate, k * 0.08, 0.24 - k * 0.03, 0, 0, 0, k * 0.4);
+  if (cracked) part(tor, 0.05, 0.3, 0.03, G(0xffd040), 0, 0.2, 0.25, 0, 0, 0.3).castShadow = false;
+  part(wpn, 0.06, 0.5, 0.06, woodM, 0, -0.2, 0), part(wpn, 0.22, 0.18, 0.18, plate, 0, -0.48, 0);
 }

@@ -16,6 +16,7 @@ import { drawHound, drawSnare } from './hound';
 import type { Hero } from '../sim/types';
 import { blit, type Ctx } from './draw';
 import { asleep, drawEnemy, drawHeld, drawTelegraph } from './foes';
+import { drawRushLinks } from './rushdraw';
 import type { Enemy } from '../sim/types';
 import { drawDrums } from './backline';
 import { drawBanners } from './foedraw';
@@ -216,6 +217,8 @@ export class Scene {
     drawDrums(c, room.enemies, at, room.time);
     // A banner's reach and the goblins that have taken heart in it; a rout (foedraw.ts).
     drawBanners(c, room.enemies, at);
+    // A pack rush winding up: the red line linking its goblins, flashing white with their telegraphs (rushdraw.ts).
+    drawRushLinks(glow, room.enemies, at, pw, now);
     // A Rogue's kit in hand: show each goblin's back, the place a backstab lands.
     if (me && WEAPONS[me.weapon].cls === 'ROGUE') for (const e of room.enemies) {
       if (e.act === 'dead' || e.kind === 'dummy' || e.kind === 'swingDummy') continue;
