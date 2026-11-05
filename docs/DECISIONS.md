@@ -3968,3 +3968,51 @@ Kyle: "Your potion and things can cover your character while in game and it's an
   8 px or more (cluster.css has the numbers).
 - **The fallback** (`client/underbtn.ts`): any touch button the hero or a red telegraph passes under goes
   to 35% (`.tb.under`), so the fight shows through it.
+
+## 2026-11-04: weather changes the fight (Kyle; Claude Opus 5.5)
+
+Kyle: "Let's do some weather and forget about wind affecting shots for now." And, earlier, his hero
+"randomly seems slowed": so no weather ever touches a hero's pace, and nothing touches a shot's flight.
+- **The posting's sky** (`shared/weather.ts` `skyOfJob`): CLEAR, RAIN, FOG or STORM from the job's seed.
+  Odds by country: fen and river fog 0.45, rain 0.2, clear 0.25, storm 0.1; wood rain 0.35, fog 0.2,
+  clear 0.35, storm 0.1; fields, farms, villages, ruins rain 0.3, clear 0.45, fog 0.12, storm 0.13; at
+  night 0.12 more fog out of the clear. The board's row shows an icon and the word (a moon for a clear
+  night); the card has a WEATHER row. Rooms keep the old shape (fog creeping in a step a room, a storm
+  peaking over one room), but a storm job now rains and strikes in every outdoor room (never below 0.3).
+- **A rule on the theme** (`shared/sky.ts`): each outdoor room's theme carries `sky` (none indoors or
+  underground). The room reads it; every screen builds the same rooms from the job, so a party has the
+  same weather. Numbers in `shared/tuning.ts` WEATHER and LIGHTNING.
+- **Rain** (and a storm): a goblin's burn (and a freed person's) lasts 0.6 as long; a lit oil slick
+  burns 0.6 as long (the slick carries its own `burn`, and the flat view draws from it); fire jumps
+  between goblins at 0.35 of its reach; goblins notice you from 0.7 as far. Fire spells still set alight.
+  Houses alight are unchanged.
+- **Fog**: goblins (and spiders) see and wake at 0.6 of the distance; archers shoot from, keep off and
+  come in at 0.6 of their reach and the shot's telegraph is as short; roof archers likewise. Drawn in
+  both views as bands of fog thickening from 3 tiles round your hero to its thickest at 10, 4 steps with
+  the ordered dither, in one shader line each (`client/light.ts`, `three/post.ts`; colour and
+  thickness `client/skyfx.ts`), so it costs a phone nothing. Glowing things (eyes, telegraphs) show
+  through. The old screen-wide veil is gone.
+- **Storm** (`sim/storm.ts`, `sim/stormpick.ts`, `sim/stormshape.ts`): every 8 to 14 s on the room's
+  own sky stream, lightning picks something tall or metal in the open within 14 tiles of a hero: a lone
+  tree (no other within 2.5), a banner pole, a siege engine (weight 3 each), a goblin 3 tiles clear of
+  any wall (1), a hero likewise (0.15); with none, bare open ground 3 to 7 tiles from someone. Its
+  circle (1.3 tiles, red, the striped edge: no block) shows 1 s ahead with a crackle. Landing: 30 to each
+  goblin touching it, small ones stunned 1.2 s (the storm is one stunner under the 6 s cap), 20 to a
+  hero (a roll gets out of it, the grace on coming in holds), 20 to a freed person, 60 off a siege
+  engine, all thrown out. Never indoors or underground. One shape: `strikeShape` is what both views draw
+  and `inStrike` what the room judges, the same (x, y, r) and second. The flash lifts the ambient in the
+  flat lighting pass and the 2.5D sky light for a quarter second, with a bolt down onto the spot and a
+  cold light; the thunder rolls in 0.35 to 0.75 s later (`client/fxstorm.ts`). The old random sky
+  flashes are gone: a flash always means a strike. Strikes go to friends in the patch (`strikes`).
+- **The Barrowfields** (`shared/expedsky.ts`): sets out under its posting's sky and, 6 times in 10, turns
+  once between 4 and 10 minutes in: clear to rain, rain to a storm, or the fog lifting (a storm holds).
+  Seeded from the job; the room makes the turn and says it to everyone; a friend's screen follows from
+  the expedition's state (`wx`). One line over your hero.
+- **Words** (Kyle's style, effect first; open: the lore keeper and line editor, no agents were at hand
+  in this session): CLEAR, RAIN, FOG, STORM; WEATHER; "Clear"; "Rain: burns are shorter, goblins hear you
+  less"; "Fog: goblins and their archers see less far"; "Storm: rain, and lightning strikes things in the
+  open"; turns: "Rain. Burns are shorter, goblins hear you less.", "Storm. Lightning hits things in the
+  open.", "The fog is lifting. Goblins can see further."
+- Tests: `tests/weather.test.ts`. The layout 2 hash in `tests/routeports.test.ts` re-pinned: only the
+  theme changed (checked with the theme stripped, identical). `node scripts/weather-look.cjs` shoots the
+  board, rain, fog, and a strike's circle and flash, FLAT and 2.5D, phone and laptop.

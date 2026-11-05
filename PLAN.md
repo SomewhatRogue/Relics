@@ -2,6 +2,18 @@
 
 ## Current slice
 
+**Weather changes the fight** (Claude Opus 5.5, 2026-11-04; Kyle: "Let's do some weather and forget about wind
+affecting shots for now"). Built; waiting on Kyle's play. *Done when* each job on the board shows its sky
+(CLEAR, RAIN, FOG or STORM, an icon and the word, a WEATHER row on the card) and on the job: in rain burns
+and lit oil are shorter, fire jumps less, and goblins notice him from less far; in fog goblins see and wake
+at about 60% and archers and roof archers reach as far, the fog drawn in bands thickening away from his hero;
+in a storm lightning picks a lone tree, a banner, a siege engine or someone out in the open every 8 to 14 s,
+a red striped circle a second ahead, hurting goblins and heroes in it alike, a flash over everything and
+thunder after; never indoors or underground; and his hero is never slowed. The Barrowfields may turn once
+(clear to rain, rain to storm, the fog lifting) with one line said. Flat and 2.5D, phone and laptop
+(`node scripts/weather-look.cjs`). Open: the new words through the lore keeper and line editor; the numbers
+once he's played (DECISIONS 2026-11-04).
+
 **The hero clear of the buttons on a phone** (Claude Opus 5.5, 2026-11-04; Kyle: "Your potion and things can
 cover your character while in game"). Built; waiting on Kyle's play. *Done when* on his phone upright, flat
 and 2.5D, in town and on a job, the hero is never under a button (walking to the room's foot too), the

@@ -22,6 +22,7 @@ import { Rng } from './rng.js';
 import { THEMES, type Foe, type RoomPlan } from './terrain.js';
 import { lightFor, timeOf } from './timeofday.js';
 import { EXPED, EXPED_PACKS } from './tuning.js';
+import { expedSky, themeUnder } from './expedsky.js';
 
 export type NodeKind = 'in' | 'out' | 'hamlet' | 'camp' | 'barrows' | 'woodedge' | 'fields' | 'bank';
 export const GOALS: GoalKind[] = ['larder', 'engine', 'prisoners', 'dens', 'shrine', 'butcher'];
@@ -157,7 +158,8 @@ function build(job: Job): ExpedPlan {
   const ground: P[] = [];
   for (let y = 3; y < MH - 2; y += 4) for (let x = 3; x < MW - 2; x += 4) if (free(k, x, y, 0.8, 0)) ground.push({ x, y });
   const flocks = flocksOn(open.map((i) => k.dead[i]), job);
-  const theme = { ...lightFor(THEMES.field, 'field', timeOf(job)), floor: 'grass' as const, back: 'trees' as const };
+  // Under the posting's sky (shared/expedsky.ts): it may turn partway (sim/exped.ts).
+  const theme = themeUnder({ ...lightFor(THEMES.field, 'field', timeOf(job)), floor: 'grass' as const, back: 'trees' as const }, { from: expedSky(job).from }, 0);
   const map: GameMap = {
     name: 'THE BARROWFIELDS', w: MW, h: MH, wallFace: 3, rounds: k.rounds, blocks: k.blocks, braziers: k.braziers, torches: [],
     hero: { x: land.ins.x, y: land.ins.y }, exit: { x: land.ext.x - 1.5, y: 0, w: 3, h: 0.9 }, theme, water: k.water, soil: k.soil,

@@ -71,7 +71,7 @@ export function drawMound(c: Ctx, e: Enemy, x: number, y: number): void {
 /** Oil on the floor: a dark, glossy pool with a sheen moving on it; lit, flames all over it. */
 export function drawSlicks(c: Ctx, slicks: Slick[], at: (x: number, y: number) => [number, number], t: number): void {
   for (const s of slicks) {
-    const [x, y] = at(s.x, s.y), R = s.r * PX, burning = s.lit >= 0 && t - s.lit < TORCH.burn;
+    const [x, y] = at(s.x, s.y), R = s.r * PX, burning = s.lit >= 0 && t - s.lit < (s.burn ?? TORCH.burn);
     const g = c.lit;
     for (let dy = -Math.floor(R * 0.55); dy <= R * 0.55; dy++) {
       const w = Math.floor(R * Math.sqrt(Math.max(0, 1 - (dy * dy) / (R * R * 0.3))));

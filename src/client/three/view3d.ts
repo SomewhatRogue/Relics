@@ -37,6 +37,9 @@ import { roomLights } from './roomlights';
 import type { Spot } from './rounds3d';
 import { WitchFires } from './witch3d';
 import { drawFlues } from './smoke3d';
+import { drawBolts3, strikeLights3 } from './storm3d';
+import { flashTheme, fogLook } from '../skyfx';
+import { flashOf } from '../../sim/stormshape';
 
 /** How much of the flat view's floor the 2.5D view shows: on a phone held upright a little closer in. */
 const ZOOM = { tall: 0.8, wide: 1 };
@@ -185,9 +188,11 @@ export class View3D {
     // A house on fire inside: flames over every patch alight (shared/blaze.ts), as the flat view draws them.
     if (map.blaze) for (const a of burningAt(map.blaze, room.time)) for (let fx0 = a.x + 0.3; fx0 < a.x + a.w; fx0 += 0.55) fires.push([fx0, 0.05, a.y + a.h / 2, 0.9]);
     roomLights(room, fx, lerp, ls);
+    strikeLights3(room, ls);
     this.witch.update(now, ls);
     this.grim.update(now, fires, ls);
-    this.lights.setSky(map.theme, at.x, at.z);
+    // A lightning flash lifts the sky's light a beat (../skyfx.ts).
+    this.lights.setSky(flashTheme(map.theme, flashOf(room.strikes, room.time)), at.x, at.z);
     this.lights.place(ls, at.x, at.z, now);
     this.fires.draw(fires, now);
     this.actors.update(room, meId, now, lerp);
@@ -224,6 +229,14 @@ export class View3D {
     gl.autoClear = true;
     cam.layers.set(0);
     this.post.uniforms.tCol.value = this.rt!.texture;
+    // Fog thickening away from your hero, in the post pass (post.ts).
+    const fl = fogLook(map.theme), u = this.post.uniforms;
+    if (fl && this.heroAt) {
+      const [hx, hy] = this.view.px(this.heroAt[0], 0, this.heroAt[1]);
+      u.uFog.value.set(hx, this.view.H - hy, fl.k, this.view.ppu);
+      u.uFogC.value.set(...fl.c);
+      u.uFogY.value = Math.sin(PITCH);
+    } else u.uFog.value.z = 0;
     this.post.uniforms.tDep.value = this.rt!.depthTexture;
     this.gl.setRenderTarget(null);
     this.gl.render(this.postScene, this.quad);
@@ -233,6 +246,7 @@ export class View3D {
     drawSkills3(og, room, P, lerp, this.view.ppu, now);
     drawSpellGround3(og, room, P, this.view.ppu);
     drawFound3(og, room, P, lerp, this.view.ppu, now);
+    drawBolts3(og, room, P, this.view.ppu);
     drawExtras(og, ex);
     drawFlues(og, map, P, now, this.view.W, this.view.H);
     drawTags(og, map, room.time, this.heroAt ? { x: this.heroAt[0], y: this.heroAt[1] } : null, others, P, now);

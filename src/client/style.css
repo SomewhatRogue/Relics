@@ -316,6 +316,8 @@ body[data-guard="none"] .tb.block { display: none; }
 #panel .job .jhead .t-dawn { color: #a8c0d8; }
 #panel .job .jhead .t-dusk { color: #e0a070; }
 #panel .job .jhead .t-night { color: #8a90d0; }
+#panel .job .jhead .wx { display: inline-flex; align-items: center; gap: 3px; font-size: var(--fs-text); color: #c8d0dc; white-space: nowrap; }
+#panel .job .jhead .wx img { width: 11px; height: 11px; image-rendering: pixelated; }
 #panel .job .jhead em { font-style: normal; color: #ffd27a; min-width: 38px; text-align: right; }
 #panel .pips { display: inline-flex; gap: 2px; }
 #panel .pips i { width: 5px; height: 8px; background: #3a3e46; }

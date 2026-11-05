@@ -10,6 +10,7 @@ import type { GoalKind, SideKind } from '../shared/expedcamps';
 import type { ExpedPlan } from '../shared/expedmap';
 import type { P } from '../shared/expedkit';
 import { EXPED } from '../shared/tuning';
+import { themeUnder, type ExpedSky } from '../shared/expedsky';
 import { holding, ringOf } from '../shared/expedrings';
 import { isDead } from './damage';
 import { stepPressure } from './expedpressure';
@@ -28,8 +29,10 @@ export interface ExpedState {
   patrols: { ids: number[]; path: P[]; i: number; dir: number }[];
   /** Ground seen, a bit a cell (EXPED.cell), as hex; and a counter for the room's own rolls. */
   seen: string; n: number; seed: number; party: number;
+  /** The weather and its one turn (shared/expedsky.ts); the room's theme follows it. */
+  wx?: ExpedSky;
 }
-export type ExpedWhat = 'goal' | 'side' | 'open' | 'lit' | 'watch' | 'horn' | 'worse' | 'wave' | 'blessed';
+export type ExpedWhat = 'goal' | 'side' | 'open' | 'lit' | 'watch' | 'horn' | 'worse' | 'wave' | 'blessed' | 'weather';
 
 const W = 16, H = 12;
 const up = (h: Hero) => h.act !== 'down' && !h.out && h.id !== 'squire';
@@ -66,6 +69,15 @@ export function stepExped(room: ArenaRoom, ev: FightEvent[], dt: number): void {
     if (x.held >= EXPED.extract) (x.phase = 'leave'), ev.push({ k: 'exped', x: x.zone.x, y: x.zone.y, what: 'watch' });
   }
   stepPressure(room, x, heroes, ev, dt);
+  // The weather turns once, if it's going to: said to everyone (client/expedui.ts). The theme always
+  // follows it (a room handed to a new leader too).
+  if (!x.wx) return;
+  room.map.theme = themeUnder(room.map.theme, x.wx, t);
+  if (x.wx.to && !x.wx.done && t >= (x.wx.at ?? Infinity)) {
+    x.wx.done = true;
+    const h = heroes[0] ?? room.heroes[0];
+    ev.push({ k: 'exped', x: h?.x ?? x.zone.x, y: h?.y ?? x.zone.y, what: 'weather' });
+  }
 }
 
 /** Is job `g` done (stepping its progress if it's one you stand at)? */
@@ -119,5 +131,5 @@ export const SEEN = { w: W, h: H };
 /** What a friend's screen needs of it (the map screen, the pins, the banner): no patrols or heat. */
 export function expedView(x: ExpedState): Partial<ExpedState> {
   const r = (g: XGoal): XGoal => ({ kind: g.kind, x: Math.round(g.x * 10) / 10, y: Math.round(g.y * 10) / 10, done: g.done, p: Math.round(g.p * 20) / 20, foe: g.foe });
-  return { goals: x.goals.map(r), sides: x.sides.map(r), camps: x.camps.map((c) => ({ ...c, x: Math.round(c.x), y: Math.round(c.y), ids: [] })), zone: { x: x.zone.x, y: x.zone.y, r: x.zone.r }, phase: x.phase, lit: Math.round(x.lit * 2) / 2, held: Math.floor(x.held), level: x.level, seen: x.seen };
+  return { goals: x.goals.map(r), sides: x.sides.map(r), camps: x.camps.map((c) => ({ ...c, x: Math.round(c.x), y: Math.round(c.y), ids: [] })), zone: { x: x.zone.x, y: x.zone.y, r: x.zone.r }, phase: x.phase, lit: Math.round(x.lit * 2) / 2, held: Math.floor(x.held), level: x.level, seen: x.seen, wx: x.wx };
 }

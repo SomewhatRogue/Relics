@@ -56,6 +56,9 @@ import type { Target } from '../sim/targets';
 import { SPOT_REACH } from '../shared/town';
 import { dusk } from './streetlife';
 import { drawMist, setSun, torchIn } from './daytime';
+import { drawBolts, drawStrikeMarks, strikeLights } from './stormdraw';
+import { flashAmb, fogLook } from './skyfx';
+import { flashOf } from '../sim/stormshape';
 import { drawPuddles } from './spiders';
 import { drawSkills, skillLights } from './skillsdraw';
 import { drawSpellGround, spellLightsFlat } from './spellground';
@@ -208,6 +211,8 @@ export class Scene {
     for (const e of room.enemies) if (e.attack && e.act === 'attack') drawTelegraph(c, e.attack, cx, cy, pw);
     // A house on fire: where it burns, where it's about to, where a beam is coming down (blazedraw.ts).
     drawBlaze(c, room, cx, cy);
+    // A storm's lightning: its circle while it's coming (stormdraw.ts).
+    drawStrikeMarks(c, room, cx, cy);
     // A drummer's reach and its beat on the floor, and the goblins it has roused (client/backline.ts).
     const at = (e: Enemy): [number, number] => {
       const [x, y] = lerp('e:' + e.id, e.x, e.y);
@@ -418,9 +423,11 @@ export class Scene {
       friendMarks(c.glow, room, meId, (x, y) => ground(x, y - 1), this.vw, this.vh, view.top, view.bottom);
     }
     drawBlazeAbove(c, room, cx, cy);
+    drawBolts(c, room, cx, cy);
 
     const lights: Light[] = [...wayLights, ...markLights];
     blazeLights(room, cx, cy, now, lights);
+    strikeLights(room, cx, cy, lights);
     for (const b of beacons) lights.push({ x: OX + b.x * PX - cx, y: OY + b.y * PX - cy - 14, r: 150 + Math.sin(now * 9) * 8, i: 1.3, c: [1, 0.62, 0.3] });
     for (const m of room.coals) lights.push({ x: OX + m.x * PX - cx, y: OY + m.y * PX - cy - 4, r: 26 + Math.sin(now * 7 + m.id) * 3, i: 0.6 * Math.min(1, m.life / 4), c: [1, 0.6, 0.28] });
     for (const ch of room.chests) if (ch.state !== 'shut') lights.push({ x: OX + ch.x * PX - cx, y: OY + ch.y * PX - cy - 6, r: ch.state === 'opening' ? 16 + 30 * (ch.t / 1.2) : 26, i: ch.state === 'opening' ? 0.4 + 0.5 * (ch.t / 1.2) : 0.35, c: tint(TIERS[ch.tier].col) });
@@ -514,7 +521,9 @@ export class Scene {
     lights.push(...fx.lights(cx, cy));
     // Only lights that reach the screen (a town has more than the pass can take at once).
     const seen = lights.filter((l) => l.x + l.r > 0 && l.x - l.r < this.vw && l.y + l.r > 0 && l.y - l.r < this.vh);
-    this.lighting.render(this.base, this.glowC, seen, map.theme.ambient);
+    // A lightning flash lifts the whole scene's light a beat; fog thickens away from your hero (skyfx.ts).
+    const fl = fogLook(map.theme), fog = fl && this.heroAt ? { x: this.heroAt[0] - cx, y: this.heroAt[1] - cy - 6, k: fl.k, px: PX, c: fl.c } : null;
+    this.lighting.render(this.base, this.glowC, seen, flashAmb(map.theme.ambient, flashOf(room.strikes, room.time)), fog);
   }
 
   private cage(c: Ctx, x: number, y: number, now: number): void {

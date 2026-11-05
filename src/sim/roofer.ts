@@ -5,6 +5,7 @@
  */
 import { ARCHER, HEIGHT, ROOF } from '../shared/tuning';
 import { currentMap, inArea } from '../shared/arena';
+import { reachFor } from '../shared/sky';
 import { burning } from './catching';
 import { damage, isDead } from './damage';
 import { begin } from './enemies';
@@ -20,7 +21,9 @@ export function shapeRoofer(e: Enemy): void {
 
 /** Its turn up there: shoot when ready, in reach and facing. */
 export function stepRoofer(e: Enemy, t: Hero, d: number, facing: number, ev: FightEvent[]): void {
-  if (d <= ROOF.reach && e.cooldown <= 0 && facing > 0.9) begin(e, 'shot', { ...ARCHER.shot, range: ROOF.reach + 0.5 }, t, ev);
+  // In fog it reaches less far, and its telegraph is as short (shared/sky.ts).
+  const reach = ROOF.reach * reachFor(currentMap().theme);
+  if (d <= reach && e.cooldown <= 0 && facing > 0.9) begin(e, 'shot', { ...ARCHER.shot, range: reach + 0.5 }, t, ev);
 }
 
 /** Once a tick: a roof that's burning or fallen in throws its archer down into the street. */

@@ -65,13 +65,14 @@ import { litMult } from './charge';
 import { fireFound, stepSentries } from './foundrelics';
 import { grow } from './grow';
 import { awake, merge } from './sleep';
-import { NO_INTENT, type Puddle, type Zone, type Bolt, type Drop, type Enemy, type Prop, type FightEvent, type Hero, type Hook, type Intent, type Javelin, type Snare, type Survivor } from './types';
+import { NO_INTENT, type Puddle, type Strike, type Zone, type Bolt, type Drop, type Enemy, type Prop, type FightEvent, type Hero, type Hook, type Intent, type Javelin, type Snare, type Survivor } from './types';
 import { stun } from './stuns';
 import { stepDread, type DreadRule } from './dread';
 import { stepExped, type ExpedState } from './exped';
 import { rogueStruck } from './techrogue';
 import { aimed } from './techranger';
 import { followGround, stepGround } from './techcleric';
+import { stepStorm } from './storm';
 
 export class ArenaRoom {
   time = 0;
@@ -97,6 +98,9 @@ export class ArenaRoom {
   /** Lamp oil spilled by the oil throwers, lit or not (sim/oil.ts); crows on the dead (sim/crows.ts). */
   slicks: Slick[] = [];
   crows: Flock[] = [];
+  /** A storm's lightning coming down or just down (sim/storm.ts), and when the next comes (-1 not set). */
+  strikes: Strike[] = [];
+  nextStrike = -1;
   /** Chests, and how far up the danger shifts what's in them (sim/chests.ts). */
   chests: Chest[] = [];
   danger = 0;
@@ -128,6 +132,8 @@ export class ArenaRoom {
   private cageRng: Rng;
   /** What a technique knocks loose (CUTPURSE: sim/techrogue.ts), on its own stream too. */
   private purseRng: Rng;
+  /** Where a storm's lightning goes, and when (sim/storm.ts), on a stream of its own too. */
+  private skyRng: Rng;
   /** An outdoor job room: a cage here can hold a false prisoner (never in a house: run.ts sets this). */
   falseCages = false;
   private acc = 0;
@@ -161,6 +167,7 @@ export class ArenaRoom {
     this.relicRng = new Rng(seed * 31337 + 7);
     this.cageRng = new Rng(seed * 2971 + 41);
     this.purseRng = new Rng(seed * 6007 + 53);
+    this.skyRng = new Rng(seed * 9173 + 61);
     this.map = opts.map ?? ARENA;
     this.crows = newFlocks(this.map.flocks);
     useMap(this.map);
@@ -367,6 +374,8 @@ export class ArenaRoom {
     this.drops = stepDrops(this.drops, TICK);
     this.coals = stepCoals(this.coals, this.heroes, this.events, TICK);
     if (this.map.blaze) stepBlaze(this, TICK);
+    // A storm's lightning: the circle a second ahead, then everyone under it hurt (sim/storm.ts).
+    stepStorm(this, this.skyRng);
     if (this.exped) stepExped(this, this.events, TICK);
   }
 

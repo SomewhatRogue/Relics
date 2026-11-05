@@ -11,6 +11,8 @@ import type { Rng } from '../shared/rng';
 import type { Pickup } from './pickups';
 import type { Enemy, FightEvent, Hero, Javelin, Prop, Survivor } from './types';
 import { stun } from './stuns';
+import { currentMap } from '../shared/arena';
+import { burnFor, spreadFor } from '../shared/sky';
 
 /** Everything an element can reach, for one tick. */
 export interface World {
@@ -36,7 +38,8 @@ export const chilled = (e: Enemy, now: number) => e.chillUntil > now;
 
 function ignite(e: Enemy, now: number, ev: FightEvent[]): void {
   if (!burning(e, now)) ev.push({ k: 'ignite', x: e.x, y: e.y }), (e.burnNext = now + BURN.every);
-  e.burnUntil = now + BURN.time;
+  // In the rain it burns out sooner (shared/sky.ts).
+  e.burnUntil = now + BURN.time * burnFor(currentMap().theme);
 }
 
 /** An element lands on a goblin with a blow of `n` damage; storm jumps on to `jumps` more (STORM.chains). */
@@ -126,7 +129,7 @@ function flare(w: World, e: Enemy): void {
 
 /** Burns tick and spread by touch. */
 export function stepElements(w: World): void {
-  const { now, ev } = w;
+  const { now, ev } = w, jump = BURN.spread * spreadFor(currentMap().theme);
   for (const e of w.enemies) {
     if (e.act === 'dead' || !burning(e, now)) continue;
     // A nest set alight burns down on its own clock (sim/torch.ts), not by the tick.
@@ -137,7 +140,8 @@ export function stepElements(w: World): void {
     for (const o of w.enemies) {
       if (o === e || o.act === 'dead' || burning(o, now) || frozen(o, now)) continue;
       // Spiders packed together go up like tinder.
-      if (dist(o, e) <= o.radius + e.radius + BURN.spread + (o.kind === 'spider' ? SPIDER.spread : 0)) ignite(o, now, ev);
+      // In the rain it jumps only to one nearly touching.
+      if (dist(o, e) <= o.radius + e.radius + jump + (o.kind === 'spider' ? SPIDER.spread : 0)) ignite(o, now, ev);
     }
   }
 }

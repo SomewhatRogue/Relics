@@ -51,6 +51,12 @@ export const ICONS: Record<string, Grid> = {
   smoke: ['.........', '...oooo..', '..oggggo.', '.ogggggo.', 'ogggggggo', 'ogggggggo', '.ooooooo.', '.........', '.........'],
   tempo: ['.....ee..', '....ee...', '...ee....', '..eeeee..', '....ee...', '...ee....', '..ee.....', '.ee......', '.........'],
   mend: ['...rrr...', '...rWr...', 'rrrrWrrrr', 'rWWWWWWWr', 'rrrrWrrrr', '...rWr...', '...rrr...'],
+  // A job's weather on the board (shared/sky.ts): sun (a moon at night), rain, fog, storm.
+  clear: ['....Y....', '.Y..Y..Y.', '..YYYYY..', '..YeeeY..', 'YYYeeeYYY', '..YeeeY..', '..YYYYY..', '.Y..Y..Y.', '....Y....'],
+  moon: ['...www...', '..wwg....', '.wwg.....', '.wwg.....', '.wwg.....', '.wwg.....', '..wwg....', '...www...', '.........'],
+  rain: ['...ggg...', '.gggggg..', 'gggggggWs', 'sssssssss', '.........', '.c..c..c.', 'c..c..c..', '.........', '.c..c..c.'],
+  fog: ['.........', 'gggggg...', '.........', '..gggggg.', '.........', 'gggggggg.', '.........', '.ggggg...', '.........'],
+  storm: ['...sss...', '.ssssss..', 'ssssssssd', 'ddddddddd', '....e....', '...ee....', '..eeee...', '....e....', '...e.....'],
   lit: ['....F....', '...FfF...', '...FfF...', '....f....', '...www...', '...www...', '...www...', '...www...', '..BBBBB..'],
 };
 
