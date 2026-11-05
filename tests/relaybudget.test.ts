@@ -252,4 +252,20 @@ describe('the meter', () => {
     // The meter's own share: 3 of 213 here; at most 1 in 201 in steady use.
     expect((n.by.incrby + n.by.expire) / n.total).toBeLessThan(0.02);
   });
+
+  it("stops itself at the month's cap (pay as you go never refuses): the INCRBY's answer trips it", async () => {
+    const kv = memoryBackend().store, sink = { incrBy: kv.incrBy, expire: kv.expire };
+    const m = new Meter(sink);
+    let over = 0;
+    m.onOver = () => over++;
+    m.cap = 500;
+    m.add('publish', 300);
+    await m.tick();
+    expect(m.month).toBe(301);
+    expect(over).toBe(0);
+    m.add('publish', 250);
+    await m.tick(Date.now() + 61_000);
+    expect(m.month).toBeGreaterThanOrEqual(500);
+    expect(over).toBe(1);
+  });
 });

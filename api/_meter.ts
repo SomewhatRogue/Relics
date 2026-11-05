@@ -10,7 +10,13 @@
  */
 import type { Backend } from './_backends.js';
 
-export const MONTH_LIMIT = 500_000;
+/**
+ * The month's cap. Upstash's free plan refused past 500K on its own; on pay as you go nothing refuses,
+ * so the relay stops itself here instead (Kyle, 2026-11-05: "pay as you go with a $5 cap"). At $0.20
+ * per 100K commands, 2M is $4 of Relic's own use, leaving room for Come Bye, which shares the database.
+ * RELIC_MONTH_CAP in the environment changes it without a deploy of new code.
+ */
+export const MONTH_LIMIT = Number(globalThis.process?.env?.RELIC_MONTH_CAP) || 2_000_000;
 export const METER = { everyMs: 60_000, min: 200, longestMs: 15 * 60_000, ttl: 40 * 24 * 3600 };
 export const monthKey = (d = new Date()) => `rl:meter:${d.toISOString().slice(0, 7)}`;
 
@@ -31,6 +37,11 @@ export class Meter {
   deliveries = 0;
   /** Counted but not yet added to the month's key. */
   pending = 0;
+  /** The month's count as of this instance's last add (INCRBY answers with it, so it costs nothing). */
+  month = 0;
+  /** Told once the month's count reaches `cap` (the relay stops itself, as if the plan were used up). */
+  onOver: () => void = () => {};
+  cap = MONTH_LIMIT;
   private addedAt = Date.now();
   private timer: ReturnType<typeof setInterval> | null = null;
 
@@ -51,7 +62,10 @@ export class Meter {
     this.pending = 0;
     this.addedAt = now;
     try {
-      if ((await this.sink.incrBy(key, n)) === n) (this.add('expire'), await this.sink.expire(key, this.opts.ttl));
+      const total = await this.sink.incrBy(key, n);
+      this.month = total;
+      if (total === n) (this.add('expire'), await this.sink.expire(key, this.opts.ttl));
+      if (total >= this.cap) this.onOver();
     } catch {
       // Not added (Redis out of reach, or full): kept for next time.
       this.pending += n;
