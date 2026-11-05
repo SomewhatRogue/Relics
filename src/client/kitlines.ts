@@ -26,7 +26,7 @@ export const KIT: Record<WeaponId, KitRow> = {
   wand: { tap: 'Firebolt, burns', hold: 'Fireball, burns a crowd', perfect: 'Bigger, interrupts any blow', also: 'Tap interrupts a wind-up' },
   // The fire pit burns friends too (sim/firepit.ts): said once on the card: fire's ALSO (MAGE_KIT) and the book card's (BOOK_ALSO).
   staff: { tap: 'Flame sweep, burns', hold: 'Fire pit on a goblin', perfect: 'Bigger, burns longer' },
-  spellblade: { tap: 'Cuts burn', hold: 'Burning lunge', perfect: 'Longer, costs nothing', also: 'Hits on you drain magic, parry refills' },
+  spellblade: { tap: 'Cuts burn', hold: 'Burning lunge', perfect: 'Longer, costs nothing', also: 'Hits take magic, parry refills' },
   // Cleric (shared/cleric.ts): every perfect shields friends near you.
   mace: { tap: 'Short blows, 3rd heals', hold: 'Smite, stuns', perfect: 'Harder, shields friends' },
   censer: { tap: 'Two cuts, healing swing', hold: 'Whirl, burns', perfect: 'Coals flare, shields friends' },

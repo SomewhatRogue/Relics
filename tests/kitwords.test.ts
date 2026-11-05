@@ -39,7 +39,7 @@ describe('GUARD and DODGE areas, from the numbers', () => {
     expect(kitLine('wand', 'storm')).toBe('TAP: LIGHTNING STREAM, TAP TO BUILD  HOLD: LIGHTNING STRIKE, STUNS  PERFECT: BIGGER, LONGER STUN');
     // The stream doesn't break blows: the wand's storm says what's true of it instead.
     expect(kitRows('wand', 'storm').find(([l]) => l === 'ALSO')?.[1]).toBe('Ignores shields, spares friends');
-    expect(KIT.spellblade.also).toBe('Hits on you drain magic, parry refills');
+    expect(KIT.spellblade.also).toBe('Hits take magic, parry refills');
     expect(kitRows('spellblade', 'fire').find(([l]) => l === 'COST')?.[1]).toBe(`${SPELL.spellblade} magic a hold`);
     // The staff's fire pit (Kyle, 2026-11-05): dropped on a goblin, and the card says once that it burns friends.
     expect(kitLine('staff', 'fire')).toBe('TAP: FLAME SWEEP, BURNS  HOLD: FIRE PIT ON A GOBLIN  PERFECT: BIGGER, BURNS LONGER');
