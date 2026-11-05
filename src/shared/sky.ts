@@ -16,16 +16,16 @@ export const SKY_WORD: Record<Sky, string> = { clear: 'CLEAR', rain: 'RAIN', fog
 /** The job card's WEATHER row: the word, then what it does. */
 export const SKY_ROW: Record<Sky, string> = {
   clear: 'Clear',
-  rain: 'Rain: burns are shorter, goblins hear you less',
-  fog: 'Fog: goblins and their archers see less far',
-  storm: 'Storm: rain, and lightning strikes things in the open',
+  rain: 'Rain: fire goes out sooner and spreads less, goblins hear you less',
+  fog: 'Fog: goblins see less far, archers shoot shorter',
+  storm: 'Storm: rain, and lightning in the open hits goblins and you alike',
 };
 
 /** Said over your hero when an expedition's weather turns (shared/expedsky.ts): to rain, to a storm, or the fog lifting. */
 export const SKY_TURN: Partial<Record<Sky, string>> = {
   clear: 'The fog is lifting. Goblins can see further.',
-  rain: 'Rain. Burns are shorter, goblins hear you less.',
-  storm: 'Storm. Lightning hits things in the open.',
+  rain: 'Rain. Fire goes out sooner and spreads less, goblins hear you less.',
+  storm: 'Storm. Lightning in the open hits goblins and you alike.',
 };
 
 const skyOf = (t: Theme | undefined) => t?.sky ?? 'clear';
