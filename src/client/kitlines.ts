@@ -24,7 +24,8 @@ export const KIT: Record<WeaponId, KitRow> = {
   poisoner: { tap: 'Short sword, hits two', hold: 'Poison dart', perfect: 'Stuns, stronger poison' },
   // Mage (shared/mage.ts): what a tap and a hold are, the element decides (MAGE_KIT below); these are fire's.
   wand: { tap: 'Firebolt, burns', hold: 'Fireball, burns a crowd', perfect: 'Bigger, interrupts any blow', also: 'Tap interrupts a wind-up' },
-  staff: { tap: 'Flame sweep, burns', hold: 'Circle of fire round you', perfect: 'Bigger, lasts longer' },
+  // The fire pit burns friends too (sim/firepit.ts): said once on the card: fire's ALSO (MAGE_KIT) and the book card's (BOOK_ALSO).
+  staff: { tap: 'Flame sweep, burns', hold: 'Fire pit on a goblin', perfect: 'Bigger, burns longer' },
   spellblade: { tap: 'Cuts burn', hold: 'Burning lunge', perfect: 'Longer, costs nothing', also: 'Hits drain magic, parry refills' },
   // Cleric (shared/cleric.ts): every perfect shields friends near you.
   mace: { tap: 'Short blows, 3rd heals', hold: 'Smite, stuns', perfect: 'Harder, shields friends' },
@@ -43,7 +44,7 @@ export const MAGE_KIT: Record<MageKit, Record<Element, KitRow>> = {
     storm: { tap: 'Lightning stream, builds up', hold: 'Lightning bolt, ignores shields', perfect: 'Whole line, interrupts any blow', also: "Walk slowly while it's on" },
   },
   staff: {
-    fire: KIT.staff,
+    fire: { ...KIT.staff, also: 'Burns friends too, keep clear' },
     frost: { tap: 'Frost sweep, chills', hold: 'Hard frost, freezes all round', perfect: 'Bigger' },
     storm: { tap: 'Crackling sweep, ignores shields', hold: 'Charged ring, jolts', perfect: 'Bigger, jolts stun' },
   },
@@ -57,18 +58,21 @@ export const MAGE_KIT: Record<MageKit, Record<Element, KitRow>> = {
 /** A Mage's spellbook by element, for a weapon card that isn't in anyone's hand: "Tap firebolt, hold fireball". */
 const BOOK: Record<MageKit, Record<Element, string>> = {
   wand: { fire: 'Tap firebolt, hold fireball', frost: 'Tap icicles, hold cold blast', storm: 'Tap lightning stream, hold lightning bolt' },
-  staff: { fire: 'Tap flame sweep, hold circle of fire', frost: 'Tap frost sweep, hold hard frost', storm: 'Tap crackling sweep, hold charged ring' },
+  staff: { fire: 'Tap flame sweep, hold fire pit', frost: 'Tap frost sweep, hold hard frost', storm: 'Tap crackling sweep, hold charged ring' },
   spellblade: { fire: 'Cuts burn, hold burning lunge', frost: 'Cuts chill, hold shatter', storm: 'Cuts ignore shields, hold lightning rush' },
 };
 const COST: Record<MageKit, string> = { wand: `${SPELL.wand} magic a hold`, staff: `${SPELL.staff} magic a hold`, spellblade: `${SPELL.spellblade} magic a hold` };
+/** The ALSO row of a kit's card with no element in hand, where the book needs one: the staff's fire pit
+ *  burns friends, so the card says so once. */
+const BOOK_ALSO: Partial<Record<MageKit, string>> = { staff: 'The fire pit burns friends too, so keep clear of it' };
 const isMage = (w: WeaponId): w is MageKit => w in MAGE_KIT;
 
 /** The rows in order, labelled, for a card or a legend (ALSO only where there is one). A Mage's kit in
  *  element `el` shows that element's spells and what a hold costs; with no element, a row for each. */
 export const kitRows = (w: WeaponId, el?: Element | ''): [string, string][] => {
   if (isMage(w) && !el) {
-    const k = KIT[w];
-    return [...(['fire', 'frost', 'storm'] as Element[]).map((e) => [ELEMENT_NAME[e], BOOK[w][e]] as [string, string]), ['PERFECT', 'The bigger spell'], ['COST', COST[w]], ...(k.also ? [['ALSO', k.also] as [string, string]] : [])];
+    const also = BOOK_ALSO[w] ?? KIT[w].also;
+    return [...(['fire', 'frost', 'storm'] as Element[]).map((e) => [ELEMENT_NAME[e], BOOK[w][e]] as [string, string]), ['PERFECT', 'The bigger spell'], ['COST', COST[w]], ...(also ? [['ALSO', also] as [string, string]] : [])];
   }
   const k = isMage(w) ? { ...MAGE_KIT[w][el as Element], also: MAGE_KIT[w][el as Element].also ?? KIT[w].also } : KIT[w];
   return [['TAP', k.tap], ['HOLD', k.hold], ['PERFECT', k.perfect], ...(isMage(w) ? [['COST', COST[w]] as [string, string]] : []), ...(k.also ? [['ALSO', k.also] as [string, string]] : [])];

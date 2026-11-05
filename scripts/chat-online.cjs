@@ -2,13 +2,13 @@
 // In town: a world line reaches the other; a NEAR line only when they stand close (and then as a
 // bubble, world lines too); typing never moves the hero; a muted player goes unheard. On a job together: the party
 // hears each other's quick lines and typed lines, as bubbles. Screenshots of each into SHOTS.
-// Usage: node scripts/chat-online.cjs   (builds with VITE_ONLINE unless NOBUILD; PORT, default 8795)
+// Usage: node scripts/chat-online.cjs   (builds with VITE_ONLINE unless NOBUILD; ONLINE_PORT or PORT, default 8795)
 const { execSync, spawn } = require('child_process');
 const http = require('http');
 const path = require('path');
 const fs = require('fs');
 const { chromium } = require('playwright');
-const ROOT = path.join(__dirname, '..'), PORT = Number(process.env.PORT) || 8795;
+const ROOT = path.join(__dirname, '..'), PORT = Number(process.env.ONLINE_PORT ?? process.env.PORT) || 8795;
 const SHOTS = process.env.SHOTS || path.join(ROOT, 'shots');
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 (async () => {

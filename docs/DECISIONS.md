@@ -2,6 +2,62 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-05: the staff's fire hold is a fire pit dropped on a goblin (Kyle; Claude Opus 5.5)
+
+Kyle: "The wall of fire from staff is still not great. I don't know what to do with it, it's just super
+hard to aim. Maybe it is a circle on the enemy or something? Like a filled-in AOE? Allies gotta run from
+it but ya." The ring of fire round the Mage (a band you had to make goblins cross, awkward up close) is
+gone; the staff's frost and storm holds (hard frost, the charged ring) stay centred on the Mage. Numbers
+in `shared/spellbook.ts` FIRE_PIT, the room's rules in `sim/firepit.ts`.
+
+- **No aiming.** At the release it drops on the nearest goblin within 6 tiles inside a 90 degree cone
+  (45 either side of where the Mage faces), else the nearest goblin within 6 tiles anywhere, else a spot
+  3 tiles ahead (short of a wall, the bolt's own wall check). The Mage turns to it. It lands where the
+  goblin stood; it doesn't follow it. Judgment: no line-of-sight check, as nothing else on the staff has one.
+- **The pit.** 1.8 tiles round (2.4 on a perfect; WIDE BURST widens it as any area). It catches for
+  0.35 s (drawn as the circle filling), then burns 4 s (6 on a perfect). Every 0.5 s each goblin in it
+  takes 2 (times the hero's damage: primed, blessed) and is set alight (ATTUNED's longer burn counts). Each
+  friend in it takes a third of what a goblin loses a tick there (the pit's 2 and a burn's 4): **2 a tick,
+  4 a second**, so 16 over a whole pit, 24 over a perfect's; the Mage's own pit burns the Mage on the same
+  terms, and the freed too. Heroes have no burning status, so it stops the moment you step out. A roll,
+  the grace on coming in and SHAKE IT OFF keep you out of it, as on a lit slick. When it catches, wood in
+  reach may catch and an oil slick in it goes up (`oil.ts` `lightNear`: the old `firering` event check ran
+  before skills were cast each tick, so the pit lights slicks directly).
+- **Rain** shortens it by the weather's burn share (`shared/sky.ts` `burnFor`, 0.6): 2.4 s, 3.6 on a perfect.
+- **Balance, measured** (`tests/spellbook.test.ts`, one plain hold of 30 magic, everything in the 4 s
+  after the release with fire's burn counted, the convention of the spellbook table): one goblin in it,
+  fire pit **38**, charged ring 40, hard frost 12 (and frozen); a pack of four, **152**, 160, 48. The test
+  holds the pit within 15% of the charged ring on one and on four, and frost under half (it trades damage
+  for freezing). Honest about the tail: a goblin that stood in the pit the whole time keeps burning 3 s
+  after it, so over 8 s it's 64 on one (256 on four) against the ring's 40; the ring pays it back in a
+  flinch every half second. Goblins seldom stand in it that long.
+- **Seen, both views, from the room's zone** (`client/firepitdraw.ts`, called by `spellground.ts` for the
+  flat glow layer and the 2.5D overlay). Filled in a warm orange-red (#f2622a, a hotter #ff8c32 flicker
+  in a shifting dither, dark scorch flecks, a few #ffb050 tongues and embers): not the goblins' red
+  (#e23a30) and not gold. Its edge is the striped telegraph's (#ffd040 / #2a1408) all the way round
+  from the drop, the game's sign for "this hurts you, get out". While it catches the faint whole circle
+  shows and the fill grows from the middle. In 2.5D the overlay lies over the bodies, so the pit is
+  painted on a scratch canvas and each body on it cut out (as the flat view's sprites erase the glow), so a
+  goblin burning in it stays in sight. Its light: a low glow as it catches, then warm. The drop is a fall of
+  embers onto the spot and a ring; the catch (`pitup` event) fire thrown up all over it, a ring, a flash,
+  a shake; sounds a soft whoosh, then fire's whoosh and the flare. The 3D gold blessed-ground ring and the
+  skill lights skip it.
+- **Online**: the pit is a zone (`kind: 'firepit'`, `at` the moment it catches), so it rides the patch;
+  a guest's hold drops it on the leader's room.
+- **Words** (placeholders until the lore keeper and line editor, `client/kitlines.ts`): staff HOLD "Fire
+  pit on a goblin", PERFECT "Bigger, burns longer", the fire ALSO row "Burns friends too, keep clear", the
+  book card's FIRE row "Tap flame sweep, hold fire pit" and its ALSO row "The fire pit burns friends too,
+  so keep clear of it" (said once a card; not on frost or storm). Left for the lore pass: the class card's
+  SPELLS note still ends "Wand far, staff round you, spellblade up close" (`shared/classes.ts`), now true
+  of frost and storm only.
+
+Tests: `tests/firepit.test.ts` (the goblin in front though one behind is nearer, the cone's edge and the
+reach, the fallbacks to the nearest anywhere and to a spot ahead, short of a wall; the perfect's size and
+life; the catch, then goblins burned and alight, one outside untouched; a friend taking about a third and
+nothing once out, the Mage in its own pit; rain; a guest's hold and the same pit decoded from the patch),
+`spellbook.test.ts` (the staff's fire hold, the holds' balance), `magekit.test.ts` (the centred-ring tests
+now on storm), `kitwords.test.ts` (the new lines, the friends line once and only on fire).
+
 ## 2026-11-04: the movement ladder, five classes; the Mage's ATTUNED and SPELLTHIEF (Kyle; Claude Opus 5.5)
 
 Kyle: "pure upgrades, not just choosing". Every class gets every rung of a three-rung ladder on its dodge

@@ -1,11 +1,10 @@
 /**
  * A Mage's spells on the floor, drawn at the size they're judged at (sim/staffrings.ts, sim/holds.ts):
- * the staff's ring of fire (flames licking up all round its band), its charged ring (crackling posts
+ * the staff's fire pit (filled, striped edge: firepitdraw.ts), its charged ring (crackling posts
  * round the edge, lightning jumping between them, sparks inside), and the wand's storm stream
  * (streamdraw.ts). Flat view and the 2.5D overlay alike, by a projection of the floor to the screen, and
  * the light each gives off. Cosmetic only: Math.random is fine here.
  */
-import { FLAME_RING } from '../shared/tuning';
 import type { ArenaRoom } from '../sim/room';
 import type { Zone } from '../sim/types';
 import type { Light } from './light';
@@ -13,11 +12,12 @@ import { EL_LIGHT } from './palette';
 import { drawStreams, streamLights } from './streamdraw';
 import { OX, OY, PX } from './world';
 import { drawLadderGround } from './ladderground';
+import { drawPits, drawPits3, pitLights } from './firepitdraw';
 
 /** Floor (x, z) at height y (tiles) to the screen. */
 type Proj = (x: number, y: number, z: number) => [number, number];
 
-const FIRE = ['#ff6a20', '#ff9a3c', '#ffd27a'], STORM = ['#c8c070', '#fff27a', '#ffffff'];
+const STORM = ['#c8c070', '#fff27a', '#ffffff'];
 const dot = (g: CanvasRenderingContext2D, x: number, y: number, col: string, a: number, h = 1) => {
   g.globalAlpha = a;
   g.fillStyle = col;
@@ -26,20 +26,6 @@ const dot = (g: CanvasRenderingContext2D, x: number, y: number, col: string, a: 
 
 /** How far in it is: rising as it comes up, fading as it goes. */
 const fade = (z: Zone, t: number) => Math.max(0, Math.min(1, (z.until - t) / 0.6, (t - (z.at ?? t) + 0.05) / 0.25));
-
-/** The ring of fire: flames all round its band, each a column of the fire's colours. */
-function flames(g: CanvasRenderingContext2D, z: Zone, P: Proj, t: number, ppu: number): void {
-  const k = fade(z, t), n = Math.max(24, Math.round(z.r * 2 * Math.PI * ppu * 0.6)), half = FLAME_RING.band / 2;
-  for (let i = 0; i < n; i++) {
-    const a = (i / n) * Math.PI * 2, f = Math.random(), off = (((i * 37) % 7) / 7 - 0.5) * half * 2;
-    const x = z.x + Math.cos(a) * (z.r + off), y = z.y + Math.sin(a) * (z.r + off), tall = (z.big ? 0.75 : 0.55) * (0.5 + 0.5 * f) * Math.min(1, k * 1.5);
-    const [bx, by] = P(x, 0, y), [, top] = P(x, tall, y), h = Math.max(1, Math.round(by - top));
-    dot(g, bx, top, FIRE[Math.floor(f * 3)], (0.55 + 0.45 * f) * k, h);
-    dot(g, bx, top, '#fff1b0', 0.8 * k);
-    // Embers off the tops now and then.
-    if (f > 0.85) dot(g, bx + (Math.random() - 0.5) * 3, top - 2 - Math.random() * 4, '#ffd27a', 0.7 * k);
-  }
-}
 
 /** The charged ring: posts round the edge with lightning jumping between them, sparks inside. */
 function charged(g: CanvasRenderingContext2D, z: Zone, P: Proj, t: number): void {
@@ -72,12 +58,11 @@ function charged(g: CanvasRenderingContext2D, z: Zone, P: Proj, t: number): void
 /** Where a body is drawn now (the 2.5D view eases them). */
 type At = (key: string, x: number, y: number) => [number, number];
 
-function draw(g: CanvasRenderingContext2D, room: ArenaRoom, P: Proj, ppu: number, at?: At): void {
-  for (const z of room.zones) {
-    if (room.time >= z.until) continue;
-    if (z.kind === 'flamering') flames(g, z, P, room.time, ppu);
-    else if (z.kind === 'stormring') charged(g, z, P, room.time);
-  }
+function draw(g: CanvasRenderingContext2D, room: ArenaRoom, P: Proj, ppu: number, at?: At, over = false): void {
+  // The staff's fire pit (firepitdraw.ts; over the 3D picture, with the bodies on it cut out), then its charged ring.
+  if (over) drawPits3(g, room, P, ppu, at);
+  else drawPits(g, room, P, ppu);
+  for (const z of room.zones) if (z.kind === 'stormring' && room.time < z.until) charged(g, z, P, room.time);
   // The movement ladder's caltrops, burst and roar, the same way (ladderground.ts).
   drawLadderGround(g, room, P, ppu);
   drawStreams(g, room, P, at);
@@ -90,15 +75,14 @@ export function drawSpellGround(g: CanvasRenderingContext2D, room: ArenaRoom, cx
 }
 
 /** The 2.5D overlay (`P` the camera's own projection, `ppu` its pixels a tile, `at` where bodies are drawn). */
-export const drawSpellGround3 = (g: CanvasRenderingContext2D, room: ArenaRoom, P: Proj, ppu: number, at?: At): void => draw(g, room, P, ppu, at);
+export const drawSpellGround3 = (g: CanvasRenderingContext2D, room: ArenaRoom, P: Proj, ppu: number, at?: At): void => draw(g, room, P, ppu, at, true);
 
-/** Their light, in tiles (`at` places one for the caller's view): the rings, and a storm stream. */
+/** Their light, in tiles (`at` places one for the caller's view): a fire pit, a charged ring, a storm stream. */
 export function spellLights<L>(room: ArenaRoom, at: (x: number, y: number, r: number, i: number, c: [number, number, number]) => L): L[] {
-  const out: L[] = [];
+  const out: L[] = pitLights(room, at);
   for (const z of room.zones) {
-    if ((z.kind !== 'flamering' && z.kind !== 'stormring') || room.time >= z.until) continue;
-    const k = fade(z, room.time), fire = z.kind === 'flamering';
-    out.push(at(z.x, z.y, z.r + 1.2, (fire ? 0.85 + Math.random() * 0.1 : 0.55 + Math.random() * 0.2) * k, EL_LIGHT[z.el]));
+    if (z.kind !== 'stormring' || room.time >= z.until) continue;
+    out.push(at(z.x, z.y, z.r + 1.2, (0.55 + Math.random() * 0.2) * fade(z, room.time), EL_LIGHT[z.el]));
   }
   return out.concat(streamLights(room, at));
 }

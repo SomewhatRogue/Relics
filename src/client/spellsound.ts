@@ -26,6 +26,8 @@ export function spellSound(ev: FightEvent): boolean {
     return true;
   }
   if (ev.k === 'grasped') return true;
+  // A staff's fire pit catching: the big whoosh and the flare.
+  if (ev.k === 'pitup') return ready() && (fire(ev.big), sfx.flare()), true;
   if (ev.k !== 'spell') return false;
   if (!ready()) return true;
   const big = ev.big;
@@ -35,7 +37,8 @@ export function spellSound(ev: FightEvent): boolean {
   if (ev.what === 'thunderbolt') return storm(big), sfx.rumble(), true;
   if (ev.what === 'dash') return storm(big), true;
   if (ev.what === 'stormring') return storm(big), tone('sawtooth', 110, 110, 0.05, 0.8, 0.1), true;
-  if (ev.what === 'flamering') return fire(big), sfx.flare(), true;
+  // The pit dropped: a soft whoosh (it flares on 'pitup').
+  if (ev.what === 'firepit') return burst('bandpass', 900, 400, 0.6, 0.25, 0.25), crackle(5, 0.25, 0.15), true;
   fire(big);
   return true;
 }

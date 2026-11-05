@@ -265,8 +265,8 @@ export const WEAPONS: Record<KitId, Weapon> = {
     chip: 0.5, blockSpeed: 0.4, chargeSpeed: 0.55, parryWindow: 0.2, guardArc: 100, guardCost: 2, speed: 0.86, castWalk: 0.9,
     dodge: BLINK,
   },
-  /** Close and slow: a slash in the Mage's element in front. Held, rooted, the element's spell all round
-   *  you (it costs magic): a ring of fire, a frost nova, a charged ring (shared/spellbook.ts). */
+  /** Close and slow: a slash in the Mage's element in front. Held, rooted, the element's spell (it costs
+   *  magic): a fire pit dropped on a goblin, or all round you a frost nova or a charged ring (shared/spellbook.ts). */
   staff: {
     name: 'FOCUS STAFF',
     cls: 'MAGE',
