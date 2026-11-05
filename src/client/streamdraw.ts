@@ -1,13 +1,12 @@
 /**
  * The wand's storm stream, seen (sim/stream.ts decides it; this only reads the hero's `stream`): a jagged
  * line of lightning from the wand's tip to the goblin it holds, re-jagged every frame, flickering, and
- * brighter, thicker and forking more as it builds. With nothing in reach it crackles a little way out of
- * the hand. Flat view and the 2.5D overlay alike, by a projection of the floor to the screen, and its
+ * brighter, thicker and forking more at each step of build (a flare as each tap adds one). With nothing
+ * in reach it crackles a little way out of the hand, as built as the stream is. Flat view and the 2.5D overlay alike, by a projection of the floor to the screen, and its
  * light. Cosmetic only: Math.random is fine here.
  */
-import { STREAM } from '../shared/tuning';
 import type { ArenaRoom } from '../sim/room';
-import { streamBuild, streaming } from '../sim/stream';
+import { STREAM_TOP, streaming } from '../sim/stream';
 import type { Enemy, Hero } from '../sim/types';
 
 /** Floor (x, z) at height y (tiles) to the screen. */
@@ -16,16 +15,18 @@ type Proj = (x: number, y: number, z: number) => [number, number];
 type At = (key: string, x: number, y: number) => [number, number];
 const here: At = (_k, x, y) => [x, y];
 
-/** How far built, 0 (just on) to 1 (full). */
-const builtK = (h: Hero, now: number) => (streamBuild(h.stream!.at, now) - 1) / (STREAM.top - 1);
+/** How far built, 0 (one step) to 1 (all three). */
+const builtK = (h: Hero) => (Math.min(STREAM_TOP, h.stream!.step ?? 1) - 1) / (STREAM_TOP - 1);
+/** A flare as a tap adds a step: 1 at the tap, gone in a fifth of a second. */
+const flareK = (h: Hero, now: number) => Math.max(0, 1 - (now - h.stream!.at) / 0.2);
 
-/** The streams on now: the hero, the goblin held (if any), and how far built. */
-export function streamsOn(room: ArenaRoom): { h: Hero; e?: Enemy; k: number }[] {
-  const out: { h: Hero; e?: Enemy; k: number }[] = [];
+/** The streams on now: the hero, the goblin held (if any), how far built, and the tap's flare. */
+export function streamsOn(room: ArenaRoom): { h: Hero; e?: Enemy; k: number; f: number }[] {
+  const out: { h: Hero; e?: Enemy; k: number; f: number }[] = [];
   for (const h of room.heroes) {
     if (!streaming(h, room.time)) continue;
     const e = h.stream!.id ? room.enemies.find((o) => o.id === h.stream!.id && o.act !== 'dead') : undefined;
-    out.push({ h, e, k: e ? builtK(h, room.time) : 0 });
+    out.push({ h, e, k: builtK(h), f: flareK(h, room.time) });
   }
   return out;
 }
@@ -46,23 +47,24 @@ function jag(g: CanvasRenderingContext2D, ax: number, ay: number, bx: number, by
 
 /** Every stream, drawn. */
 export function drawStreams(g: CanvasRenderingContext2D, room: ArenaRoom, P: Proj, at: At = here): void {
-  for (const { h, e, k } of streamsOn(room)) {
+  for (const { h, e, k, f } of streamsOn(room)) {
     const [hx, hz] = at('h:' + h.id, h.x, h.y), [ax, ay] = P(hx + h.fx * 0.35, 0.72, hz + h.fy * 0.35);
     if (!e) {
-      // Nothing in reach: a short crackle out of the hand.
-      const [bx, by] = P(hx + h.fx * 1.1, 0.7, hz + h.fy * 1.1);
-      if (Math.random() < 0.7) jag(g, ax, ay, bx, by, '#fff27a', 0.7, 5, 1);
+      // Nothing in reach: a short crackle out of the hand, longer and brighter the more it's built.
+      const [bx, by] = P(hx + h.fx * (1.1 + 0.5 * k), 0.7, hz + h.fy * (1.1 + 0.5 * k));
+      if (Math.random() < 0.7 + 0.2 * k) jag(g, ax, ay, bx, by, k > 0.5 ? '#ffffff' : '#fff27a', 0.7 + 0.3 * Math.max(k, f), 5, k >= 1 ? 2 : 1);
       continue;
     }
     const [ex, ez] = at('e:' + e.id, e.x, e.y), [bx, by] = P(ex, 0.55, ez);
-    // It flickers: now and then a frame dims, less often the more it's built.
-    const flick = Math.random() < 0.25 - 0.15 * k ? 0.45 : 1;
-    // A wide faint halo, the bright line, and a white core once it's built.
-    jag(g, ax, ay, bx, by, '#c8c070', (0.35 + 0.35 * k) * flick, 7, k > 0.5 ? 2 : 1);
-    jag(g, ax, ay, bx, by, '#fff27a', (0.6 + 0.4 * k) * flick, 4 + 3 * k, 1);
-    if (k > 0.3) jag(g, ax, ay, bx, by, '#ffffff', (0.4 + 0.6 * k) * flick, 3, 1);
-    // Forks off the line, more as it builds.
-    for (let i = 0; i < Math.round(1 + 4 * k); i++) {
+    // It flickers: now and then a frame dims, less often the more it's built (never in a tap's flare).
+    const flick = f > 0 ? 1 : Math.random() < 0.25 - 0.15 * k ? 0.45 : 1, hot = Math.min(1, k + 0.5 * f);
+    // Each step thicker: a wide faint halo (two pixels from the second step, three at the third), the
+    // bright line (two pixels at the third), and a white core from the second.
+    jag(g, ax, ay, bx, by, '#c8c070', (0.35 + 0.35 * hot) * flick, 7 + 4 * k, 1 + Math.round(2 * k));
+    jag(g, ax, ay, bx, by, '#fff27a', (0.6 + 0.4 * hot) * flick, 4 + 3 * k, k >= 1 ? 2 : 1);
+    if (k > 0.3 || f > 0) jag(g, ax, ay, bx, by, '#ffffff', (0.4 + 0.6 * hot) * flick, 3, 1);
+    // Forks off the line, more at each step.
+    for (let i = 0; i < Math.round(1 + 5 * k + 2 * f); i++) {
       const t = 0.2 + Math.random() * 0.7, fx = ax + (bx - ax) * t, fy = ay + (by - ay) * t;
       jag(g, fx, fy, fx + (Math.random() - 0.5) * (8 + 10 * k), fy + (Math.random() - 0.5) * (6 + 8 * k), '#fff27a', 0.7 * flick, 3, 1);
     }
@@ -77,9 +79,9 @@ export function drawStreams(g: CanvasRenderingContext2D, room: ArenaRoom, P: Pro
 /** Their light, in tiles (`at` places one for the caller's view): along the line, brighter as it builds. */
 export function streamLights<L>(room: ArenaRoom, at: (x: number, y: number, r: number, i: number, c: [number, number, number]) => L): L[] {
   const out: L[] = [];
-  for (const { h, e, k } of streamsOn(room)) {
+  for (const { h, e, k, f } of streamsOn(room)) {
     const x = e ? (h.x + e.x) / 2 : h.x + h.fx * 0.6, y = e ? (h.y + e.y) / 2 : h.y + h.fy * 0.6;
-    out.push(at(x, y, 1.6 + 1.6 * k, (0.35 + 0.5 * k) * (0.8 + Math.random() * 0.3), [1, 0.95, 0.6]));
+    out.push(at(x, y, 1.6 + 1.8 * k + f, (0.35 + 0.55 * k + 0.3 * f) * (0.8 + Math.random() * 0.3), [1, 0.95, 0.6]));
   }
   return out;
 }

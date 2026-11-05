@@ -20,7 +20,7 @@ import { quickMult, relicDark, spendCharge } from './charge';
 import { paySpell, refuseSpell } from './spells';
 import { stepElement, tapSwing } from './channel';
 import { graspRefused } from './grasp';
-import { streamFace, streamPace } from './stream';
+import { streamFace } from './stream';
 import { knows, type Enemy, type FightEvent, type Hero, type Intent } from './types';
 import { primeShoulder, stride } from './techwarrior';
 import { nockHead, quickNock } from './techranger';
@@ -84,7 +84,7 @@ function walk(h: Hero, inp: Intent, k: number, dt: number, now: number, ev: Figh
   // Creeping: harder to see (STEALTH). (Standing in plain sight isn't.)
   h.sneaking = m >= 0.05 && m < STEALTH.slow;
   if (m < 0.05) return;
-  const l = Math.hypot(inp.mx, inp.my), sp = HERO.speed * WEAPONS[h.weapon].speed * statsOf(h).speed * k * (m >= STEALTH.slow ? 1 : STEALTH.creep) * wadeAt(h.x, h.y) * brandySpeed(h, now) * quickMult(h, now) * streamPace(h, now);
+  const l = Math.hypot(inp.mx, inp.my), sp = HERO.speed * WEAPONS[h.weapon].speed * statsOf(h).speed * k * (m >= STEALTH.slow ? 1 : STEALTH.creep) * wadeAt(h.x, h.y) * brandySpeed(h, now) * quickMult(h, now);
   // (Swept, so a hero stops at a gap too narrow for a body rather than being wedged into it.)
   travel(h, (inp.mx / l) * sp * dt, (inp.my / l) * sp * dt, HERO.radius);
   h.moving = true;
@@ -327,7 +327,11 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   if (wears(h, 'spendthrift') && h.purse <= 0) h.attackQueuedAt = -9;
   if (now - h.attackQueuedAt < CHARGE.start + INPUT_BUFFER && h.attackQueuedAt > -9) {
     // The crossbow looses on the press; everything else waits to see if it's a tap or a hold.
-    if (!inp.attack || w.noCharge) return startSwing(h, 0, inp, enemies, now, ev);
+    if (!inp.attack || w.noCharge) {
+      // (A wand's quick spell is cast walking, so the step doesn't catch as it starts.)
+      if (w.castWalk) walk(h, inp, w.castWalk, dt, now, ev), collide(h, HERO.radius);
+      return startSwing(h, 0, inp, enemies, now, ev);
+    }
     if (now - h.attackQueuedAt >= CHARGE.start && !emptyHold(h, now, ev)) return refuseSpell(h, now, ev) ? undefined : startCharge(h, now);
   }
   // Only a Warrior's or Healer's kit holds a block.

@@ -1,8 +1,8 @@
 /**
  * A Mage's held spells going off, seen (sim/holds.ts decides them; each drawn at the size it was
  * judged at, `r` on the event): the cold blast a fan of frost thrown out to its reach, the frost nova
- * a ring of ice opening round the Mage, the lightning bolt a jagged line from the hand as far as it went,
- * the ring of fire and the charged ring flaring up as they're raised (they then burn on the
+ * a ring of ice opening round the Mage, the lightning strike gold sparks where it's called and, as it
+ * falls, a scorch, earth thrown up, cold sparks out to its edge and the screen shaking, the ring of fire and the charged ring flaring up as they're raised (they then burn on the
  * floor: spellground.ts), the shatter a burst of ice shards, the lunge and the dash a trail of their
  * element. And GRASP: violet streaks dragging inward. In the same style as the taps (fxmagetap.ts):
  * motes, rings and short flashes. Cosmetic only (Math.random is fine); the one overlay draws both views.
@@ -60,6 +60,17 @@ export function spellFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
     fx.arcs.push({ x, y: y - 8, x2, y2: y2 - 8, life: 0.2, col: '#c9a8ff', straight: true });
     return true;
   }
+  if (ev.k === 'skystrike') {
+    const rad = ev.r * PX, cols = ['#ffffff', '#c8dcff', '#9fb8ff'];
+    fx.crater(x, y, ev.big ? 12 : 9);
+    fx.debris(x, y - 2, ev.big ? 20 : 14);
+    fx.burst(x, y - 6, ev.big ? 30 : 22, cols, 90, true);
+    round(fx, x, y - 2, rad * 0.9, ev.big ? 26 : 18, cols, 30);
+    fx.rings.push({ x, y, life: 0.3, max: 0.3, col: '#c8dcff', size: rad });
+    fx.flashes.push({ x, y: y - 10, r: rad * 2 + 40, i: 1.6, c: [0.8, 0.88, 1], life: 0.2, max: 0.2 });
+    fx.shake = Math.max(fx.shake, ev.big ? 7 : 5);
+    return true;
+  }
   if (ev.k !== 'spell') return false;
   const el = (ev.el || 'fire') as keyof typeof COLS, cols = COLS[el], rad = ev.r * PX, a = Math.atan2(ev.dy, ev.dx), big = ev.big ? 1.4 : 1;
   switch (ev.what) {
@@ -74,21 +85,10 @@ export function spellFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
       fx.flashes.push({ x, y: y - 6, r: rad * 1.4, i: 1.2, c: EL_LIGHT.frost, life: 0.22, max: 0.22 });
       fx.shake = Math.max(fx.shake, 3);
       break;
-    case 'thunderbolt': {
-      // A lightning bolt from the hand along its line, as far as it was judged to go: a thick jagged
-      // line laid twice over, sparks along it, a white flash where it stops.
-      const [x0, y0] = toPx(ev.x + ev.dx * 0.4, ev.y + ev.dy * 0.4), [x1, y1] = toPx(ev.x + ev.dx * ev.r, ev.y + ev.dy * ev.r);
-      fx.arcs.push({ x: x0, y: y0, x2: x1, y2: y1, life: 0.2 }, { x: x0, y: y0 + 1, x2: x1, y2: y1 + 1, life: 0.16, col: '#ffffff' }, { x: x0, y: y0, x2: x1, y2: y1, life: 0.12 });
-      for (let i = 0; i < Math.round(ev.r * 3); i++) {
-        const k = Math.random(), px = x0 + (x1 - x0) * k, py = y0 - 10 + (y1 - y0) * k;
-        if (i % 3 === 0) fx.arcs.push({ x: px, y: py + 10, x2: px + (Math.random() - 0.5) * 14, y2: py + 10 + (Math.random() - 0.5) * 10, life: 0.12 });
-        fx.burst(px, py, 1, cols, 40, true);
-      }
-      fx.burst(x1, y1 - 10, Math.round(10 * big), cols, 70, true);
-      fx.flashes.push({ x: x0, y: y0 - 10, r: 40, i: 1.2, c: EL_LIGHT.storm, life: 0.12, max: 0.12 }, { x: x1, y: y1 - 10, r: 50 * big, i: 1.4, c: EL_LIGHT.storm, life: 0.18, max: 0.18 });
-      fx.shake = Math.max(fx.shake, ev.big ? 4 : 3);
+    case 'strike':
+      // Called: a few gold sparks on the spot (its mark and the bolt are the room's: skystrikedraw.ts).
+      round(fx, x, y - 2, rad * 0.5, 10, ['#ffe9a8', '#ffffff', '#c8dcff'], -10, -30);
       break;
-    }
     case 'flamering':
     case 'stormring':
       // Raised: the ring flares up all the way round (it then burns on the floor: spellground.ts).

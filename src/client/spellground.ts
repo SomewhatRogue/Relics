@@ -1,8 +1,8 @@
 /**
  * A Mage's spells on the floor, drawn at the size they're judged at (sim/staffrings.ts, sim/holds.ts):
  * the staff's ring of fire (flames licking up all round its band), its charged ring (crackling posts
- * round the edge, lightning jumping between them, sparks inside), and the wand's storm stream
- * (streamdraw.ts). Flat view and the 2.5D overlay alike, by a projection of the floor to the screen, and
+ * round the edge, lightning jumping between them, sparks inside), the wand's storm stream
+ * (streamdraw.ts) and its lightning strike's gold mark and bolt (skystrikedraw.ts). Flat view and the 2.5D overlay alike, by a projection of the floor to the screen, and
  * the light each gives off. Cosmetic only: Math.random is fine here.
  */
 import { FLAME_RING } from '../shared/tuning';
@@ -11,6 +11,7 @@ import type { Zone } from '../sim/types';
 import type { Light } from './light';
 import { EL_LIGHT } from './palette';
 import { drawStreams, streamLights } from './streamdraw';
+import { drawSkyBolts, drawSkyMarks, skyLights } from './skystrikedraw';
 import { OX, OY, PX } from './world';
 import { drawLadderGround } from './ladderground';
 
@@ -80,6 +81,7 @@ function draw(g: CanvasRenderingContext2D, room: ArenaRoom, P: Proj, ppu: number
   }
   // The movement ladder's caltrops, burst and roar, the same way (ladderground.ts).
   drawLadderGround(g, room, P, ppu);
+  drawSkyMarks(g, room, P, ppu);
   drawStreams(g, room, P, at);
   g.globalAlpha = 1;
 }
@@ -89,10 +91,15 @@ export function drawSpellGround(g: CanvasRenderingContext2D, room: ArenaRoom, cx
   draw(g, room, (x, y, z) => [OX + x * PX - cx, OY + z * PX - cy - y * PX], PX);
 }
 
-/** The 2.5D overlay (`P` the camera's own projection, `ppu` its pixels a tile, `at` where bodies are drawn). */
-export const drawSpellGround3 = (g: CanvasRenderingContext2D, room: ArenaRoom, P: Proj, ppu: number, at?: At): void => draw(g, room, P, ppu, at);
+/** The flat view, over everyone: a lightning strike's bolt (skystrikedraw.ts). */
+export const drawSpellSky = (g: CanvasRenderingContext2D, room: ArenaRoom, cx: number, cy: number): void =>
+  drawSkyBolts(g, room, (x, y, z) => [OX + x * PX - cx, OY + z * PX - cy - y * PX]);
 
-/** Their light, in tiles (`at` places one for the caller's view): the rings, and a storm stream. */
+/** The 2.5D overlay (`P` the camera's own projection, `ppu` its pixels a tile, `at` where bodies are
+ *  drawn), over everything already, so a strike's bolt too. */
+export const drawSpellGround3 = (g: CanvasRenderingContext2D, room: ArenaRoom, P: Proj, ppu: number, at?: At): void => (draw(g, room, P, ppu, at), drawSkyBolts(g, room, P));
+
+/** Their light, in tiles (`at` places one for the caller's view): the rings, a storm stream, a strike. */
 export function spellLights<L>(room: ArenaRoom, at: (x: number, y: number, r: number, i: number, c: [number, number, number]) => L): L[] {
   const out: L[] = [];
   for (const z of room.zones) {
@@ -100,7 +107,7 @@ export function spellLights<L>(room: ArenaRoom, at: (x: number, y: number, r: nu
     const k = fade(z, room.time), fire = z.kind === 'flamering';
     out.push(at(z.x, z.y, z.r + 1.2, (fire ? 0.85 + Math.random() * 0.1 : 0.55 + Math.random() * 0.2) * k, EL_LIGHT[z.el]));
   }
-  return out.concat(streamLights(room, at));
+  return out.concat(streamLights(room, at), skyLights(room, at));
 }
 
 /** The flat view's lights for them. */

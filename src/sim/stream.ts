@@ -1,10 +1,11 @@
 /**
- * The wand's storm tap: a stream of lightning from the hand (numbers: shared/spellbook.ts STREAM; Kyle,
- * 2026-11-04). Each tap keeps it on a little longer; it holds the nearest goblin in front, ticking damage
- * that builds the longer it stays on that goblin, and starts building again when it breaks off or the
- * goblin dies. While it's on, the Mage walks slowly. Storm's rules hold: it ignores shields, and on a wet
- * goblin it lands harder and jumps on to every wet one near, every tick (sim/elements.ts). Kept on the
- * hero (`stream`), so a guest draws the same line from the same goblin at the same build.
+ * The wand's storm tap: a stream of lightning from the hand that runs by itself (numbers: shared/spellbook.ts
+ * STREAM; Kyle, 2026-11-05). One tap starts it for STREAM.keep s; each tap while it's on adds a step of
+ * build (three at most) and starts the time again. It holds the nearest goblin in front and, if that one
+ * dies or gets away, takes the next, keeping its build. Walking while it's on is the Mage's own pace.
+ * Storm's rules hold: it ignores shields, and on a wet goblin it lands harder and jumps on to every wet one
+ * near, every tick (sim/elements.ts). Kept on the hero (`stream`), so a guest draws the same line from the
+ * same goblin at the same build.
  */
 import { wetMult } from './techmage';
 import { STORM, STREAM } from '../shared/tuning';
@@ -20,17 +21,18 @@ export const streams = (h: Hero) => h.weapon === 'wand' && castElement(h) === 's
 /** On now. */
 export const streaming = (h: Hero, now: number) => !!h.stream && now < h.stream.until;
 
-/** How far built (1 to STREAM.top), held on its goblin since `at`. */
-export const streamBuild = (at: number, now: number) => 1 + (STREAM.top - 1) * Math.min(1, Math.max(0, now - at) / STREAM.build);
+/** The most steps of build. */
+export const STREAM_TOP = STREAM.steps.length;
 
-/** Your pace while it's on. */
-export const streamPace = (h: Hero, now: number) => (streaming(h, now) ? STREAM.pace : 1);
+/** How far built at `step` (1 to STREAM_TOP): its damage multiplier. */
+export const streamBuild = (step: number) => STREAM.steps[Math.max(1, Math.min(STREAM_TOP, step)) - 1];
 
-/** A tap let go: the stream comes on, or stays on STREAM.keep longer. `tick`: the spark's damage now (mult counted). */
+/** A tap let go: the stream comes on at the first step, or (on already) a step higher and on STREAM.keep
+ *  from now. `spark`: the tap's damage now (mult counted). */
 export function feedStream(h: Hero, spark: number, now: number): void {
   const tick = spark * STREAM.tick;
-  if (!h.stream || now >= h.stream.until) h.stream = { id: 0, at: now, until: now + STREAM.keep, next: now, tick, owe: 0, oweJump: 0 };
-  else Object.assign(h.stream, { until: now + STREAM.keep, tick });
+  if (!h.stream || now >= h.stream.until) h.stream = { id: 0, step: 1, at: now, until: now + STREAM.keep, next: now, tick, owe: 0, oweJump: 0 };
+  else Object.assign(h.stream, { step: Math.min(STREAM_TOP, h.stream.step + 1), at: now, until: now + STREAM.keep, tick });
 }
 
 const angle = (h: Hero, e: Enemy) => {
@@ -73,11 +75,11 @@ export function stepStreams(w: World): void {
       continue;
     }
     const e = target(h, w.enemies);
-    // Broken off (or a new one): it starts building again.
-    if ((e?.id ?? 0) !== st.id) Object.assign(st, { id: e?.id ?? 0, at: w.now, owe: 0, oweJump: 0 });
+    // Its goblin dead or away (or a first one): it takes the next, keeping its build.
+    if ((e?.id ?? 0) !== st.id) Object.assign(st, { id: e?.id ?? 0, owe: 0, oweJump: 0 });
     if (!e || w.now < st.next) continue;
     st.next = Math.max(st.next + STREAM.every, w.now);
-    const build = streamBuild(st.at, w.now), soaked = wet(e) ? wetMult(h, STORM.wet) : 1;
+    const build = streamBuild(st.step), soaked = wet(e) ? wetMult(h, STORM.wet) : 1;
     st.owe += st.tick * build * soaked;
     if (soaked > 1) st.oweJump += st.tick * build * STORM.share * soaked;
     const n = Math.floor(st.owe), j = Math.floor(st.oweJump);

@@ -34,13 +34,13 @@ export const KIT: Record<WeaponId, KitRow> = {
 
 /** A Mage's kits in each element (the element is the spellbook, shared/spellbook.ts): the weapon sets the
  *  range, the element the spell. The ALSO rows are the kit's own (KIT above) unless the element has its
- *  own (the wand's storm stream slows you; it doesn't break blows). Storm's wet rule is said once, on the
- *  class card's SPELLS note (shared/classes.ts). */
+ *  own (the wand's storm stream doesn't break blows, so it says what's true of storm instead). Storm's
+ *  wet rule is said once, on the class card's SPELLS note (shared/classes.ts). */
 export const MAGE_KIT: Record<MageKit, Record<Element, KitRow>> = {
   wand: {
     fire: KIT.wand,
     frost: { tap: 'Three icicles, chill', hold: 'Cold blast, freezes', perfect: 'Wider, interrupts any blow' },
-    storm: { tap: 'Lightning stream, builds up', hold: 'Lightning bolt, ignores shields', perfect: 'Whole line, interrupts any blow', also: "Walk slowly while it's on" },
+    storm: { tap: 'Lightning stream, tap to build', hold: 'Lightning strike, stuns', perfect: 'Bigger, longer stun', also: 'Ignores shields, spares friends' },
   },
   staff: {
     fire: KIT.staff,
@@ -56,7 +56,7 @@ export const MAGE_KIT: Record<MageKit, Record<Element, KitRow>> = {
 
 /** A Mage's spellbook by element, for a weapon card that isn't in anyone's hand: "Tap firebolt, hold fireball". */
 const BOOK: Record<MageKit, Record<Element, string>> = {
-  wand: { fire: 'Tap firebolt, hold fireball', frost: 'Tap icicles, hold cold blast', storm: 'Tap lightning stream, hold lightning bolt' },
+  wand: { fire: 'Tap firebolt, hold fireball', frost: 'Tap icicles, hold cold blast', storm: 'Tap lightning stream, hold lightning strike' },
   staff: { fire: 'Tap flame sweep, hold circle of fire', frost: 'Tap frost sweep, hold hard frost', storm: 'Tap crackling sweep, hold charged ring' },
   spellblade: { fire: 'Cuts burn, hold burning lunge', frost: 'Cuts chill, hold shatter', storm: 'Cuts ignore shields, hold lightning rush' },
 };

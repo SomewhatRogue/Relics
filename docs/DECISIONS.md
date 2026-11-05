@@ -2,6 +2,71 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-05: the storm wand's stream runs itself and builds by taps; its hold calls lightning down (Kyle; Claude Opus 5.5)
+
+Kyle: "The quick attack of the lightning wand is really bad" (holding attack charges the hold, so a stream
+kept on by mashing felt poor). He picked a self-running stream: "Self-running stream is cool, building to a
+point if you tap three times, and it doesn't slow down your walk speed as much as cold and fire quick
+casts." And the hold: "I want the charge to call down a lightning strike in an AOE after a brief delay,
+similar to smite but quicker, and have a thunder crack with it."
+
+- **The tap: a stream that runs itself** (`sim/stream.ts`, STREAM in `shared/spellbook.ts`). One tap starts
+  it for 1.5 s (`keep`) on the goblin in front, latched and held by the same rules as before (5 tiles and
+  20 degrees to take one, 5.5 and 50 to keep it). Each tap while it's on adds a step of build, three at
+  most: 1x, 1.75x, 2.5x (`steps`), and starts the 1.5 s again. It ends 1.5 s after the last tap. If its
+  goblin dies or gets away it takes the next one in reach, keeping its build; with none in reach it
+  crackles from the hand until it runs out. The build no longer climbs with time on one goblin; the hero
+  carries `stream.step`, so a guest draws the same step.
+- **Walking**: the 0.4 pace while it's on is gone. A wand tap of any element walks at the wand's castWalk
+  (0.9) for its swing, the storm tap's swing is the shortest (0.24 s against 0.54 s), and between taps the
+  stream runs at your own pace. One fix for every wand: the tick a tap's swing started didn't walk at all
+  (`sim/hero.ts`), so a quick tap tripped the step; a kit that casts walking now walks that tick too.
+  Measured, tapping every 0.3 s while walking for 1.5 s: storm 5.11 tiles, fire and frost 5.11, no taps
+  5.68 (storm 0.90 of free walking); with the stream on and no taps, the full pace.
+- **Balance** (one goblin, held still; `tests/storm.test.ts`, `tests/spellbook.test.ts`): `tick` 0.12 to
+  0.105 of the spark (8), so a step is 8.4, 14.7 and 21.0 a second (measured 9.0, 15.0 and 21.0 over a
+  second). Kept at three steps with a tap a second: 21.0 a second, against fire 18.3 and frost 20.0 mashed
+  (1.10x their mean: level with them, plus a little for keeping it built). Mashed for 6 s from cold, as the
+  spellbook test measures every tap: 20.0 (fire 18.3, frost 20.0, within 15%). The storm test keeps the
+  kept stream between 1.02x and 1.25x of the other wand taps.
+- **The hold: lightning from the sky** (`sim/skystrike.ts`, SKY_STRIKE; `sim/thunderbolt.ts` and THUNDERBOLT
+  deleted). Let go, it marks a spot: the aim turned onto a goblin within 12 degrees, as far as you aim (to
+  the mouse, else the goblin faced, else 4.5 tiles; 8 at most), then onto the goblin nearest that spot
+  within 1 tile of its edge, kept inside the room. 0.3 s later (`delay`; the Cleric's smite takes 0.35)
+  lightning falls on a circle 1.4 round (1.9 on the white flash): 1.75 of the hold to everything in it
+  (17 to 42; the bolt was 2.5 of the hold, but on one goblin), shields or no; small goblins stunned 0.8 s
+  (1.4 s on the flash; the stun cap holds); a butcher hurt, not stunned. Wet ones take 1.5x and it jumps
+  on to wet ones outside the circle (every goblin in it counts as reached by the cast, so none is jumped
+  to twice). It spares friends (they're told SPARED, as a relic's do) and the freed. WIDE BURST widens it.
+  It's a zone of kind `skystrike` in the room's own list (x, y, r, the second it falls, `fell`), so a guest
+  is sent the same circle at the same second; `inSkyStrike` is what the room judges and what both views
+  draw. Judgment on the damage: the brief said "the storm hold's damage"; at the bolt's 2.5x on a whole
+  circle with a stun it would out-damage the fireball on a pack (60 a goblin against 44 with its burn), so
+  it lands 1.75x: 42 a goblin at a full hold, level with the fireball's 44, trading the burn for the stun.
+  One number to change if Kyle wants it harder.
+- **Seen and heard** (`client/skystrikedraw.ts`, called from spellground.ts, scene.ts and view3d.ts, both
+  views from one projection): while it's coming, the mark in the friendly gold (never the goblins' red: it
+  spares friends), an unbroken ring at the circle judged, a second ring closing in from it to the middle,
+  a dithered gold wash and sparks gathering; as it falls, a white-blue bolt down out of the sky with two
+  forks (over everyone), the circle flashing white-blue and fading, the whole screen lit a beat (the same
+  lighting lift as a weather strike: `skyFlash`, in the flat lighting pass and the 2.5D sky light), and a
+  crater, earth and cold sparks (`client/fxspells.ts`). Sound (`client/spellsound.ts`): a rising crackle
+  as it's called, then a hard crack with the thunder straight after (louder on the flash). The stream
+  (`client/streamdraw.ts`, `streamsound.ts`) is thicker and brighter at each step (a halo of one, two,
+  three pixels; a white core from the second), with more forks, a flare and a rising zip as a tap adds a
+  step, and its crackle a step higher in pitch and louder each time.
+- **Words** (`client/kitlines.ts`; waiting on the lore keeper and the line editor, no agents were at hand in
+  this session): wand storm TAP "Lightning stream, tap to build", HOLD "Lightning strike, stuns", PERFECT
+  "Bigger, longer stun", ALSO "Ignores shields, spares friends" (was "Walk slowly while it's on", no
+  longer true); the unheld card's storm row "Tap lightning stream, hold lightning strike".
+
+Tests: `tests/storm.test.ts` (one tap runs about 1.5 s alone and stops; three taps reach 2.5x and five go no
+further; the build kept on the next goblin; walking no slower than a fire or frost tap and full pace
+between taps; the kept stream's balance; the strike falls after its delay on just the circle shown, onto
+the aim point with no goblin near; spares a friend and stuns a small goblin, not a butcher; the perfect is
+bigger and stuns longer; a guest is sent the same circle and it's the one judged; shields and the wet rule
+through the strike), `spellbook.test.ts`, `kitwords.test.ts` updated. `node scripts/storm2-look.cjs`
+shoots the stream at one and three steps and the strike's mark and landing, FLAT and 2.5D, on a phone.
 ## 2026-11-04: the movement ladder, five classes; the Mage's ATTUNED and SPELLTHIEF (Kyle; Claude Opus 5.5)
 
 Kyle: "pure upgrades, not just choosing". Every class gets every rung of a three-rung ladder on its dodge

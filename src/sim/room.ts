@@ -45,6 +45,7 @@ import { hallow, rally, shadowstep, stepZones, ward } from './relics';
 import { castElement, spendPrimed, turnElement } from './channel';
 import { castTap } from './spellbook';
 import { stepStreams, streams } from './stream';
+import { stepSkyStrikes } from './skystrike';
 import { castHold } from './holds';
 import { stepRings } from './staffrings';
 import { stepRush } from './rush';
@@ -373,8 +374,9 @@ export class ArenaRoom {
     this.zones = stepZones(this.zones, w);
     separate(this.heroes, this.enemies, this.props);
     // A staff's rings: the ring of fire scorches what crosses it, the charged ring zaps what's in it
-    // (sim/staffrings.ts); a wand's storm stream ticks on the goblin it holds (sim/stream.ts).
-    stepRings(this.zones, w), stepStreams(w);
+    // (sim/staffrings.ts); a wand's storm stream ticks on the goblin it holds (sim/stream.ts), and the
+    // lightning it calls falls when it's due (sim/skystrike.ts).
+    stepRings(this.zones, w), stepStreams(w), stepSkyStrikes(this.zones, w);
     this.landings();
     // Out of bounds: the dread, and what comes for anyone who stays out (sim/dread.ts).
     stepDread(this.dread, this.map, this.heroes, this.enemies, TICK, this.events);

@@ -62,7 +62,7 @@ export type Learned = 'skill' | 'leave';
 export const knows = (h: { learned?: Learned[] }, l: Learned) => !h.learned || h.learned.includes(l);
 
 /** A Mage's held spells, by kit and element (shared/spellbook.ts). */
-export type SpellWhat = 'fireball' | 'coldblast' | 'thunderbolt' | 'flamering' | 'nova' | 'stormring' | 'lunge' | 'shatter' | 'dash';
+export type SpellWhat = 'fireball' | 'coldblast' | 'strike' | 'flamering' | 'nova' | 'stormring' | 'lunge' | 'shatter' | 'dash';
 
 export type HeroAct = 'idle' | 'charge' | 'attack' | 'throw' | 'zip' | 'bash' | 'roll' | 'hurt' | 'stun' | 'down' | 'carry' | 'slam';
 
@@ -283,9 +283,10 @@ export interface Hero extends Body {
   rush?: { el: 'fire' | 'storm'; len: number; dmg: number; big: boolean; cast?: number };
   /** The storm cast a Mage's slash or cut belongs to, new each swing (sim/spellblade.ts). */
   swingCast?: number;
-  /** A wand's storm stream (sim/stream.ts): on until `until`, held on goblin `id` (0 none yet) since
-   *  `at` (its build), its next tick, the spark's share a tick, and what's owed below a whole point. */
-  stream?: { id: number; at: number; until: number; next: number; tick: number; owe: number; oweJump: number };
+  /** A wand's storm stream (sim/stream.ts): on until `until`, held on goblin `id` (0 none yet), built to
+   *  `step` (1 to 3), last tapped at `at`, its next tick, the spark's share a tick, and what's owed below a
+   *  whole point. */
+  stream?: { id: number; step: number; at: number; until: number; next: number; tick: number; owe: number; oweJump: number };
   /** The pack rush (sim/packrush.ts) this hero last met with a guard, the instant it landed, how, and how many blows. */
   rushGuard?: { id: number; at: number; how: 'parry' | 'block'; n: number };
   /** Primed spells left (TWICE PRIMED: two). */
@@ -566,10 +567,12 @@ export interface Zone {
   el: Augment;
   /** Not blessed ground but a skill's area (sim/areas.ts): a Ranger's volley (falling from `at`), a
    *  Mage's fire ring burning on, a staff's ring of fire or charged ring (sim/staffrings.ts). */
-  kind?: 'volley' | 'fire' | 'sentry' | 'flamering' | 'stormring' | LadderZone;
+  kind?: 'volley' | 'fire' | 'sentry' | 'flamering' | 'stormring' | 'skystrike' | LadderZone;
   /** A staff's ring (sim/staffrings.ts): let go on the flash, and what it deals a touch (`n`). */
   big?: boolean;
   n?: number;
+  /** A wand's lightning strike (sim/skystrike.ts): it falls at `at`; `fell` once it has. */
+  fell?: boolean;
   /** A wind-up bow's aim (for drawing it turned to what it shoots). */
   ax?: number;
   ay?: number;
@@ -646,6 +649,8 @@ export type FightEvent =
   /** A Mage's held spell going off (sim/holds.ts): `what` it is, from (x, y) along (dx, dy), `r` its size
    *  (a cone's or ring's radius, a rush's length), `big` let go on the flash. */
   | { k: 'spell'; x: number; y: number; dx: number; dy: number; el: Augment; what: SpellWhat; r: number; big: boolean }
+  /** A wand's lightning strike falling where it was called, `r` round (sim/skystrike.ts). */
+  | { k: 'skystrike'; x: number; y: number; r: number; big: boolean }
   /** GRASP (sim/grasp.ts): cast from (x, y) along (dx, dy), `r` its reach; each goblin dragged, to (x2, y2). */
   | { k: 'grasp'; x: number; y: number; dx: number; dy: number; r: number; arc: number; n: number }
   | { k: 'grasped'; x: number; y: number; x2: number; y2: number }

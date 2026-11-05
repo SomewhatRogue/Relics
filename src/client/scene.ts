@@ -65,7 +65,8 @@ import { flashAmb, fogLook } from './skyfx';
 import { flashOf } from '../sim/stormshape';
 import { drawPuddles } from './spiders';
 import { drawSkills, skillLights } from './skillsdraw';
-import { drawSpellGround, spellLightsFlat } from './spellground';
+import { drawSpellGround, drawSpellSky, spellLightsFlat } from './spellground';
+import { skyFlash } from './skystrikedraw';
 import { drawFound } from './foundsdraw';
 import { witchColour } from './hallsdraw';
 import { brazierOn, drawBrazier, drawLamps } from './lampsdraw';
@@ -443,6 +444,8 @@ export class Scene {
     }
     drawBlazeAbove(c, room, cx, cy);
     drawBolts(c, room, cx, cy);
+    // A wand's lightning strike coming down (skystrikedraw.ts).
+    drawSpellSky(c.glow, room, cx, cy);
 
     const lights: Light[] = [...wayLights, ...markLights];
     blazeLights(room, cx, cy, now, lights);
@@ -542,7 +545,7 @@ export class Scene {
     const seen = lights.filter((l) => l.x + l.r > 0 && l.x - l.r < this.vw && l.y + l.r > 0 && l.y - l.r < this.vh);
     // A lightning flash lifts the whole scene's light a beat; fog thickens away from your hero (skyfx.ts).
     const fl = fogLook(map.theme), fog = fl && this.heroAt ? { x: this.heroAt[0] - cx, y: this.heroAt[1] - cy - 6, k: fl.k, px: PX, c: fl.c } : null;
-    this.lighting.render(this.base, this.glowC, seen, flashAmb(map.theme.ambient, flashOf(room.strikes, room.time)), fog);
+    this.lighting.render(this.base, this.glowC, seen, flashAmb(map.theme.ambient, Math.max(flashOf(room.strikes, room.time), skyFlash(room))), fog);
   }
 
   private cage(c: Ctx, x: number, y: number, now: number): void {

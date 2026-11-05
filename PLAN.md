@@ -53,6 +53,16 @@ STAND FAST, COWING ROAR, working for a guest online; and the Mage learns PRIMED 
 SPELLTHIEF at 4, 7 and 10. Old heroes start with no rungs. Open: the names and lines through the lore
 keeper and line editor; ATTUNED's storm part waits on the wet rule (wt-storm) reading `wetMult`; the
 third rungs wait on the level cap lifting past 10.
+**The storm wand again: a stream that runs itself, lightning from the sky** (Claude Opus 5.5, 2026-11-05;
+Kyle: "The quick attack of the lightning wand is really bad", "Self-running stream is cool, building to a
+point if you tap three times", the hold "a lightning strike in an AOE after a brief delay, similar to smite
+but quicker, and have a thunder crack with it"). Built; waiting on Kyle's play. *Done when* on his phone and
+laptop, flat and 2.5D: one tap runs the stream about 1.5 s on the goblin in front; a second and third tap
+make it thicker, brighter and higher pitched (1x, 1.75x, 2.5x), each starting the 1.5 s again; it moves to
+the next goblin when one dies and keeps its build; he walks at his own pace while it runs; a hold lets go a
+gold circle where he aims and lightning falls on it 0.3 s later with a flash and a thunder crack, small
+goblins stunned, friends spared (bigger and a longer stun on the flash). Open: the new lines through the
+lore keeper and line editor. This replaces the stream and bolt below.
 **Storm reworked, fire spreads less** (Claude Opus 5.5, 2026-11-04; Kyle: "Fire is too strong", storm "a
 lightning bolt, not a chain lightning", its tap "a continuous stream of lightning from the hand that builds").
 Built; waiting on Kyle's play. *Done when* on his phone and laptop, flat and 2.5D: a burning goblin sets
