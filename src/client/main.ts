@@ -28,6 +28,10 @@ import { presence } from './townpresence';
 import { parkOf } from './parked';
 import { openFishing } from './fishmode';
 import { openRange } from './rangemode';
+import { openArm } from './armmode';
+import { openKnives } from './knifemode';
+import { openAnvil } from './anvilmode';
+import { armFoe } from '../shared/armtune';
 import { strawFx } from './strawman';
 import { toPx } from './world';
 import { Parties } from './parties';
@@ -667,7 +671,9 @@ w.__loot = card;
 w.__openTree = () => openTree(game, panel);
 // Idles on demand for screenshots: window.__idles.force('r_fetch') on your own hero (idles.ts).
 // The town's pastimes for the scripts: start one as if you'd talked to Pennock or Abel, and the overlays (fishmode.ts, rangemode.ts).
-w.__pastime = { fish: () => openFishing(game, panel), range: () => openRange(game, panel) };
+w.__pastime = { fish: () => openFishing(game, panel), range: () => openRange(game, panel),
+  arm: (foe = 'drunk', bet = 0) => openArm(game, panel, armFoe(foe), bet), knives: (bet = 0) => openKnives(game, panel, bet),
+  anvil: () => { const it = game.profile.arms[game.profile.weapon] ?? game.profile.armor; const up = it && game.levelUp(it); return up ? openAnvil(game, panel, up) : null; } };
 w.__idles = { force: (id: string) => forceIdle(game.hero, id as never, performance.now() / 1000), pet: (dog: 'own' | 'lodge') => startPet(game.hero, dog, performance.now() / 1000) };
 w.__openSpot = (id: string, arg = 0, key = '') => openSpot(id as never, game, panel, arg, key);
 // A job on a village street (houses to go into), for the party tests to set out on.

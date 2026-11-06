@@ -30,6 +30,7 @@ import { openAdvocate } from './councilui';
 import { openPractice } from './practiceui';
 import { openWatchPost } from './watchpost';
 import { openButts, openPond } from './pastimeui';
+import { openArmTable, openKnifeBoard } from './ratui';
 import { townVoice, voiceClock } from './voiceplay';
 
 
@@ -106,6 +107,11 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     openPond(g, panel);
   } else if (id === 'range') {
     openButts(g, panel);
+  } else if (id === 'arm') {
+    // At the Drowned Rat: the arm-wrestling table and the card sharp's knife board (ratui.ts).
+    openArmTable(g, panel);
+  } else if (id === 'knives') {
+    openKnifeBoard(g, panel);
   } else if (id === 'granary') {
     panel.show('FARMER JOS', say('Farmer Jos', 'Every sack in here is a week nobody starves. Barley doesn\'t care who won the war. That\'s the best thing about barley.'));
   } else if (id === 'home') {

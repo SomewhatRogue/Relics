@@ -69,6 +69,8 @@ export interface Item {
   cost?: { id: 'taken' | 'winded' | 'slow' | 'frail' | 'dull'; v: number };
   /** Halvard's upgrades, +0 to +5. */
   level?: number;
+  /** What striking it yourself at the anvil added on top of its upgrades, in levels (gear.ts `temperOf`). */
+  temper?: number;
   /** A hungry piece's id (hungry.ts). */
   hungry?: string;
 }

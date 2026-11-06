@@ -123,6 +123,14 @@ export interface Profile {
   fishing?: import('./fishing.js').FishRecord;
   /** The archery range at the hunters' lodge: rounds shot (seeds the next) and the best (shared/range.ts). */
   range?: import('./range.js').RangeRecord;
+  /** Arm-wrestling at the Drowned Rat: bouts (seeds the next), wins, who you've put down (shared/armwrestle.ts). */
+  arm?: import('./armwrestle.js').ArmRecord;
+  /** The Rat's knife board: rounds thrown (seeds the next) and the best (shared/knives.ts). */
+  knives?: import('./knives.js').KnifeRecord;
+  /** Strikes made at Halvard's anvil (seeds the next: shared/forgestrike.ts). */
+  strikes?: number;
+  /** A bet down on a bout or a round at the Rat, till it's settled (shared/stakes.ts). */
+  stake?: import('./stakes.js').Stake;
 }
 
 export const newProfile = (cls: HeroClass = 'WARRIOR', name = 'HERO', id = heroId()): Profile =>

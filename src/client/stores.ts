@@ -22,6 +22,7 @@ import { PLACES, SHOPW } from './shopwords';
 import { cell, grid } from './cells';
 import { SMITH } from './copy';
 import { BANK, FORGE, PAWN } from './storewords';
+import { ANVILW } from './pastimewords';
 import { freshLine, stockGoods, syncPack } from './vendorui';
 import { WEAPONS } from '../shared/tuning';
 import './stores.css';
@@ -102,9 +103,16 @@ function forge(g: Game, panel: Panel): void {
     if (!it) return;
     if (it.quality === 'hungry') return piece(g, it, [], again, says('Halvard', SMITH.hungry), s === 'worn');
     if (s === 'bag') return piece(g, it, [{ label: FORGE.melt(STEEL[it.quality]), primary: true, act: () => void (g.melt(it) && sfxTown.anvil()) }], again);
-    const next = nextLevel(it);
-    piece(g, it, next ? [{ label: FORGE.up((it.level ?? 0) + 1, next.gold, next.steel), primary: true, disabled: pr.gold < next.gold || pr.steel < next.steel, act: () => void (g.upgrade(it) && sfxTown.anvil()) }] : [],
-      again, next ? '' : p(FORGE.top), true);
+    const next = nextLevel(it), poor = !next || pr.gold < next.gold || pr.steel < next.steel;
+    // Halvard does it (as it always was), or you take the hammer and strike on the glow (anvilmode.ts):
+    // the same upgrade, paid the same, and a little more on top if you strike it well.
+    const strike = () => {
+      const up = g.levelUp(it);
+      if (up) void import('./anvilmode').then((m) => (panel.hide(), m.openAnvil(g, panel, up, again)));
+    };
+    piece(g, it, next ? [{ label: FORGE.up((it.level ?? 0) + 1, next.gold, next.steel), primary: true, disabled: poor, act: () => void (g.upgrade(it) && sfxTown.anvil()) },
+      { label: ANVILW.strike((it.level ?? 0) + 1), disabled: poor, act: strike }] : [],
+    again, next ? p(`<span class="dim">${ANVILW.offer}</span>`) : p(FORGE.top), true);
   };
   show(panel, PLACES.forge.name, shopHead(PLACES.forge, says('Halvard', SMITH.anvil)) + p(`<span class="dim">${FORGE.purse(pr.gold, pr.steel)}</span>`) +
     h3(FORGE.upHead) + `<div class="cells">${worn.map((x, k) => cell(x, 'worn:' + k)).join('')}</div>` +

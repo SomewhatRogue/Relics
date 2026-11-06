@@ -89,6 +89,14 @@ export function hallFurn3d(B: Boxes, b: Block, r: Seed, dk: Tint): boolean {
       for (let i = 0; i < 5; i++) B.b(x0 + (18 + r.next() * Math.max(1, W * 16 - 24)) * T, h + 0.015, z0 + (3 + r.next() * Math.max(1, D * 16 - 6)) * T, 0.06, 0.02, 0.06, dk(0xd4a537));
       return true;
     }
+    case 'armtable': {
+      // Worn pale where the elbows go, a mug at each end, a candle stub.
+      const h = table(tall, top);
+      for (const px of [0.3, 0.7]) B.b(x0 + W * px, h, cz, 0.24, 0.012, 0.18, dk(0x8a6a46));
+      for (const [px, pz] of [[0.12, 0.25], [0.88, 0.75]]) B.b(x0 + W * px, h, z0 + D * pz, 0.12, 0.14, 0.12, dk(0x7a6a5a));
+      B.b(cx, h, z0 + 0.15, 0.05, 0.1, 0.05, dk(0xe8e0c8));
+      return true;
+    }
     case 'skinbench': {
       // A hide stretched on the bench, a knife laid by it.
       const h = table(tall, top);

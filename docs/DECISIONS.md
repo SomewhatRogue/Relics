@@ -2,6 +2,113 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-06: more town pastimes: arm-wrestling and knives at the Drowned Rat, and striking at Halvard's anvil (Claude Opus 5.5)
+
+The next three from `docs/plans/town-activities.md`, built exactly as the first pastimes (below): a game runs only in
+your browser, two presence words a game, nothing a tick, outcomes from seeded per-hero counters a refresh can't roll
+again. Phone first (one button: a finger anywhere), with the mouse, Space or Enter on a laptop, Escape the way out.
+
+**Parked in a hall** (`shared/pastimes.ts`). The `pastime` mode now takes `arm`, `knives` and `anvil` besides `fish`
+and `range`, each with its place (`placeOf`): `Game.enterPastime` works only in that place (the square, THE DROWNED
+RAT, THE FORGE; not the wrong hall, not the yard), so the parked word's `at` is the hall's and only those in it see
+you. The parked idles (`client/parkedrat.ts`, through `parked.ts`, `idlepose.ts` and `idledraw.ts` as before): at the
+table, sat with an elbow down and your hand locked in the regular's, rocking (3.2 s); at the knife board, side-on,
+knife up, a throw that streaks off up to the board, the next in hand (2.4 s); at the anvil, the hammer up, down on a
+glowing piece in sparks (1.2 s). One-button games share `client/pastimeloop.ts` (`OneButton`: the park, the overlay
+`pastimehud.ts`, presses counted so a tap is never lost, fixed steps, the card, getting up).
+
+**The Rat** (`shared/townhalls.ts`): widened from 15 to 18 tiles, everything that was there where it was. Past
+Whisper's booth, the **knife board** hangs on the back wall (a `knifeboard` hang: a round of elm, painted rings, a few
+knives in it, chalk tallies) with a chalk line under it; **A CARD SHARP** (already in the Rat) now keeps it (talk
+`knives`; his old line about Whisper is gone). By the door, the **arm-wrestling table** (a new `armtable` piece,
+flat and 2.5D), with **A WATCHMAN OFF DUTY** at it (talk `arm`; the watch drink at the Rat, story bible). No new
+names: the regulars are the drunk, the card sharp and Gannet, who are in the Rat already, and one of the watch.
+
+**Bets** (`shared/stakes.ts`): the dice's own (`Game.dice`): 10, 25 or 50, never more than you have, even money. A bout
+takes longer than a throw of the bones, so the stake leaves the purse as the bout starts (saved with the bout's
+count) and comes back doubled only for that bout, once (`settleStake` matches the game and the bout's number, then
+clears it). A refresh mid-bout: the stake's gone and nothing pays; a stake left lying is replaced (lost) when the next
+goes down. Every game also has a way to play for nothing (FOR NOTHING, JUST THROW).
+
+**Arm-wrestling** (`shared/armwrestle.ts`, `armtune.ts`; `client/armmode.ts`, `armview.ts`). The bar up the right
+edge is your grip: hold and it climbs (1.3 a second), let go and it sinks (1.1). The sweet spot is a band that drifts
+on the seed (`wave`, no Math.sin); in it you push their arm over (their `give` a second, half again in its middle
+share), out of it they push yours (`push`). Now and then they heave: 0.6 s of tell (the band goes red, HE'S GOING
+FOR IT), then 0.9 s shoving the band away at 1.8 times the push. From 16 s they tire of it and push 8% harder a
+second, and 45 s is the most a bout goes, so it always ends. The band never moves faster than a grip can follow
+(tested). Four regulars, weakest first, each with the most they'll bet:
+
+| | band (half) | drift, speed | push | give | heaves every | bet up to |
+|---|---|---|---|---|---|---|
+| A DRUNK | 0.15 | 0.22, 0.14 | 0.10 | 0.15 | 5 to 8 s | 10 |
+| A CARD SHARP | 0.12 | 0.26, 0.26 | 0.14 | 0.14 | 3 to 5 s | 25 |
+| A WATCHMAN OFF DUTY | 0.11 | 0.26, 0.20 | 0.20 | 0.13 | 3.2 to 5.5 s | 50 |
+| BARKEEP GANNET | 0.10 | 0.27, 0.23 | 0.24 | 0.12 | 2.6 to 4.4 s | 50 |
+
+A bot that holds under the band and lets go over it, seeing it 0.15 s late, beats all four (Gannet in about 9 s);
+0.23 s late it beats the drunk, the sharp and the watchman and Gannet a quarter of the time; 0.33 s late the
+drunk and the sharp, the watchman half the time, Gannet never. The card: who went down, the money, time in the band,
+bouts and wins (`Profile.arm`: bouts seed the next, wins, who you've beaten).
+
+**Knives** (`shared/knives.ts`, `knifetune.ts`, `knifeboard.ts`; `client/knifemode.ts`, `knifeview.ts`). Nine knives
+at a board of radius 24 (rings 10, 8, 6, 4, 2 from the bull). The knife's point sways with your hand (two `wave`s
+each way, 30 px); the longer you hold a knife the wider (22% a second, up to twice), and each knife of the round a
+little quicker. Throw (a tap) and it lands where the point was, give or take a small seeded wobble; 0.7 s to the next.
+**A Rogue's sway and wobble are 0.62 of anyone else's** (tested: the same thrower scores more as a Rogue), as a
+Ranger's sight is at the butts. With a bet, the card sharp throws first (`houseScore`, 44 to 72, from the round's seed
+on a stream of its own) and you beat it; a tie is his, as Moll's are. A bot that waits for the point to come over the
+middle and lets go 0.1 s off scores about 63 as anyone else and 77 as a Rogue; one that throws on the moment beats
+him more than six times in ten (as anyone else), a careless one less. The best is on the hero (`Profile.knives`). **The town's board**, cheaply, as the butts': at
+the end of a whole round that beats your line, one contribution (`knives: { n, throws: frames[] }`), replayed from
+the hero's seed by `contribute` (`replayKnives`: exactly nine, in order, each when a knife was in hand, within ten
+minutes) onto `WorldState.knives` (each hero once at their best, the top ten); on the server it takes the range's
+short path (`api/_world.ts`: WATCH, GET, MULTI, SET, EXEC). STOP before the ninth posts nothing and loses any bet.
+
+**The anvil** (`shared/forgestrike.ts`; `client/anvilmode.ts`, `anvilview.ts`; the forge as it was in `stores.ts`).
+Kyle said the forge is decent, so it's the same: a worn piece's card has UPGRADE TO +N (Halvard does it) and, beside
+it, STRIKE IT YOURSELF TO +N, the same price. Striking pays and makes the upgrade first (`Game.levelUp`, exactly what
+UPGRADE does), so handing the hammer back early, or a refresh, leaves you with the plain upgrade. Then at the anvil:
+the piece glows up and fades six times (peaks 0.95 to 1.35 s apart, seeded); strike as it's brightest, three times.
+Within 0.08 s of a peak is CLEAN, within 0.17 NEAR ENOUGH (half), else TOO COLD; one strike a glow. What it adds is
+the piece's **temper** (`Item.temper`, in levels, `shared/gear.ts`): quality times `TEMPER.max` (0.2 of a level)
+times a draw from 0.75 to 1 on the strike's seed (the hero and their count of strikes, `Profile.strikes`, counted
+before the first blow). So a perfect set adds 0.15 to 0.2 of a level, a cold one nothing; a piece struck perfectly
+at every level to +5 has at most one level's worth more, and `temperOf` caps any save at 0.2 a level. `gearStats`
+counts it as level (mods, damage, toughness, ring health), so the room fights with it online too, and the card says
+WELL STRUCK: its upgrades count for N% more.
+
+**Art** (in code, lit by the town's hour through `light.ts`: `PastimeCanvas` takes an indoor ambient, a little
+brighter by day): the regular across the table (their own skin, hair, coat; the face screws up as you push), the
+locked forearms tipping, a candle, the bar with the band; the knife board on its planks, the knives stuck in it, the
+sway's little cross, your hand at the foot, the knives left; the forge's mouth and coals, the anvil, the piece in
+Halvard's tongs from the left glowing dull red to near white exactly as `glowAt` says, your hammer, sparks, three
+notches. **Sounds** (the existing kit): coins for a bet and a payout, a growl at a tell, the heavy thud of a heave,
+the slam and fanfare or drop at the end; the throw, a stick, the perfect chime for a bull, a thud
+wide; the anvil's ring, the chime for a clean strike, the dull knock for a cold one, steam at the end.
+
+**Words** (`client/pastimewords.ts`: ARMW, KNIFEW, ANVILW; none through the lore keeper or line editor yet): the
+watchman's offer and his line on each regular, the hints, the tell, the cards, the bets; the card sharp's offer and
+his line to a Rogue, the board, the cards; Halvard's three short lines, the forge's choice and the card's WELL STRUCK.
+
+Tests: `tests/ratgames.test.ts` (letting go or holding on regardless loses; in the band you push; a careful player
+beats all four and each is harder than the last; the tell, the heave, tiring, every bout ends; the band never outruns
+a grip; the same seed the same bout; the rings; nine knives, one in hand at a time; the sway widens held and a Rogue's
+is smaller and scores more; a round replays exactly and made-up ones don't; his round from the seed and in range; the
+board takes only replayed scores, once; the bets' limits, even money, never paid twice or for another bout, a stake
+left by a refresh lost), `tests/forgestrike.test.ts` (glows peak and fade; clean, near enough, too cold, one strike a
+glow; the edge at most a fifth of a level and at least three quarters of that for a clean set, nothing cold, the same
+from the same seed; to the cap still under a level; a save can't claim more; skipping is the old upgrade exactly; the
+worn piece gets it and the hero fights with it), `tests/ratpresence.test.ts` (each of the three: one word to sit,
+none in five minutes of play, one to get up, the friend in the hall sees it drawn; each only in its own hall; the
+table, board and anvil laid out, the spots clear and near who keeps them, everyone who was in the Rat still there).
+Full suite 1402 passed; tsc clean. town-online passes with the new steps (Sam at the table and Ava at the board seen
+by Kyle in the Rat, one word each to sit, none in eight seconds of play, one to get up; Sam at the anvil seen in the
+forge, one word, none while striking, one to hand it back); party-online 28 of 28 (two runs before that each
+flaked one different guest-feel frame check, as noted under "elites"; nothing in the party or fight code changed).
+Shots: `node scripts/ratgames-look.cjs <url> shots/ratgames` (phone and laptop, each game mid-play and its card, the
+panels, the Rat inside, the forge's choice); friends parked at the Rat and the anvil from `scripts/town-online.cjs`
+(`shots/ratgames/rat-parked-phone.png`, `forge-parked-phone.png`).
+
 ## 2026-11-06: elites, and the first new meaty goblins: the Planker, the Swingle, the Forker (Claude Opus 5.5)
 
 Kyle: "things that take a few hits", "a mix of splatting and tactical", "harder kiting", and "I donlike [sic] moments of

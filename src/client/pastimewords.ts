@@ -70,3 +70,112 @@ export const RANGEW = {
 
 /** The names of the fish as said aloud (capitals, as on the card). Kept here so the lore keeper sees them. */
 export const FISH_NAMES = ['ROACH', 'RUDD', 'PERCH', 'EEL', 'TENCH', 'BREAM', 'CARP', 'PIKE'];
+
+/**
+ * The Drowned Rat's arm-wrestling table and knife board, and striking at Halvard's anvil (armmode.ts,
+ * knifemode.ts, anvilmode.ts, ratui.ts). New with them; none through the lore keeper or the line editor
+ * yet. The regulars are people already in the Rat (the drunk, the card sharp, Gannet) and one of the
+ * watch, who drink there; no new names.
+ */
+export const ARMW = {
+  who: 'A WATCHMAN OFF DUTY',
+  /** At the table, offering a bout. */
+  greet: "Sit down, then, if you're sitting. Elbow on the wood, hand in his, and you push when it feels right and ease off when it doesn't, which sounds like nothing until you've done it. Gannet holds the stakes and Gannet doesn't lose them, so nobody runs off with your money but the man who beats you.",
+  /** Their record so far. */
+  record: (bouts: number, wins: number) => `You've sat down here ${bouts === 1 ? 'once' : `${bouts} times`} and won ${wins === 1 ? 'once' : wins === 0 ? 'none of them' : `${wins} of them`}.`,
+  never: "You haven't sat down at the table yet.",
+  pick: 'Who will you take on?',
+  /** One line on each regular, as the watchman sees them. */
+  about: {
+    drunk: "He'll take anybody on and he's had enough tonight that he might even lose. He bets ten and not a copper more, because that's all he's got.",
+    sharp: "Thin arm, quick hands, and he moves about on you so you never know where he is. Twenty-five at the most, he says, but watch him anyway.",
+    watch: "One of ours. Hauls the gate bar every morning, so his arm's as thick as your leg, and he goes for it all at once now and then, so be ready.",
+    gannet: "Gannet comes round the bar for this, and he doesn't do it often. He's not lost at this table since the siege, he says, though he says it at the bar, mind.",
+  } as Record<string, string>,
+  bet: (n: number) => `BET ${n}`,
+  free: 'FOR NOTHING',
+  gold: (n: number) => `You have ${n} gold.`,
+  back: 'BACK',
+  /** At the table. */
+  hintTouch: 'HOLD TO BEAR DOWN, LET GO TO EASE OFF. KEEP YOUR GRIP IN THE BAND',
+  hintMouse: 'HOLD THE MOUSE OR SPACE TO BEAR DOWN, LET GO TO EASE OFF. KEEP YOUR GRIP IN THE BAND',
+  stake: 'BET',
+  none: '-',
+  time: 'TIME',
+  tell: "HE'S GOING FOR IT",
+  leave: 'LET GO',
+  /** The card. */
+  won: (name: string) => `You put ${name.toLowerCase()} down.`,
+  lost: (name: string) => `${name.charAt(0)}${name.slice(1).toLowerCase()} put you down.`,
+  gaveUp: 'You let go, and that counts as losing.',
+  paid: (n: number) => `Gannet pays out ${n} gold.`,
+  kept: (n: number) => `Gannet keeps your ${n} gold.`,
+  first: "That's the first time you've beaten them.",
+  beaten: "You've beaten them before.",
+  rows: { held: 'IN THE BAND', time: 'TIME', bouts: 'BOUTS', wins: 'WINS' },
+  again: 'AGAIN',
+  other: 'SOMEONE ELSE',
+  up: 'GET UP',
+};
+
+export const KNIFEW = {
+  who: 'A CARD SHARP',
+  /** At the board. */
+  greet: "Nine knives, and you throw them from the chalk. The hand moves, everybody's does, so you wait till the point's over the middle and you let it go, and if you wait too long the hand gets worse, not better. If you want something on it, I'll throw a round first and you beat it, and a tie's mine, the same as Moll's are.",
+  /** Said to a Rogue as well. */
+  rogue: "You've got the steady hand, I can see it from here. I'm still taking your money if you miss.",
+  yourBest: (n: number) => `Your best round: ${n}.`,
+  board: 'BEST AT THE BOARD',
+  empty: "Nobody's on the board yet.",
+  offline: 'Only your own rounds show until you play online.',
+  bet: (n: number) => `BET ${n}`,
+  free: 'JUST THROW',
+  gold: (n: number) => `You have ${n} gold.`,
+  /** At the chalk. */
+  hintTouch: 'TAP TO THROW WHEN THE POINT IS OVER THE MIDDLE',
+  hintMouse: 'CLICK OR PRESS SPACE TO THROW WHEN THE POINT IS OVER THE MIDDLE',
+  knives: 'KNIVES',
+  score: 'SCORE',
+  beat: (n: number) => `BEAT ${n}`,
+  bull: 'BULL',
+  wide: 'WIDE',
+  stop: 'STOP',
+  /** The card. */
+  over: 'ROUND DONE',
+  rows: { score: 'SCORE', board: 'ON THE BOARD', bulls: 'BULLS', house: 'HIS ROUND', best: 'YOUR BEST', newBest: 'NEW BEST' },
+  won: (n: number) => `You beat his ${n}, and he pays you with a face on him.`,
+  tie: 'Level with his, and a tie is his.',
+  lost: (n: number) => `His ${n} stands, and he takes your money.`,
+  paid: (n: number) => `He pays out ${n} gold.`,
+  early: 'You stopped before your nine were thrown, so the bet is his.',
+  posted: 'He chalks it up on the board.',
+  again: 'ANOTHER ROUND',
+  leave: 'BACK TO THE BAR',
+};
+
+export const ANVILW = {
+  /** The forge's button beside UPGRADE. */
+  strike: (lv: number) => `STRIKE IT YOURSELF TO +${lv}`,
+  /** Under the piece's card at the forge, saying what the choice is. */
+  offer: 'Pay for an upgrade and Halvard will do it for you, or hand you the hammer. Strike it as the steel glows brightest and it comes out a little better. Either way it goes up a level.',
+  /** Halvard, handing you the hammer. */
+  greet: 'Hit it when it glows.',
+  /** At the anvil. */
+  hintTouch: 'TAP TO STRIKE WHEN THE STEEL GLOWS BRIGHTEST',
+  hintMouse: 'CLICK OR PRESS SPACE TO STRIKE WHEN THE STEEL GLOWS BRIGHTEST',
+  strikes: 'STRIKES',
+  piece: 'PIECE',
+  clean: 'CLEAN',
+  fair: 'NEAR ENOUGH',
+  cold: 'TOO COLD',
+  stop: 'HAND IT BACK',
+  /** The card. */
+  title: 'OFF THE ANVIL',
+  well: (pct: number) => `It came out a little better than he'd have made it: its upgrades count for ${pct}% more.`,
+  plain: "It's as good as he'd have made it, no better and no worse.",
+  halvard: { good: 'Good.', fair: 'Not bad.', none: 'Mine next time.' },
+  done: 'BACK TO THE FORGE',
+  /** On a piece's card, once it's been struck well. */
+  cardRow: 'WELL STRUCK',
+  cardText: (pct: number) => `its upgrades count for ${pct}% more`,
+};

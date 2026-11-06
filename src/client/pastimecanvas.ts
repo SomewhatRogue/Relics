@@ -6,7 +6,7 @@
  * at the foot of the screen with more sky above. It also answers the sight's questions (watchinput.ts).
  */
 import { RANGE } from '../shared/rangetune';
-import { townLight } from '../shared/daylight';
+import { daylight, townLight } from '../shared/daylight';
 import { townPhase } from './townclock';
 import { Lighting, type Light } from './light';
 import type { ShiftView } from './watchscreen';
@@ -26,6 +26,8 @@ export abstract class PastimeCanvas implements Pick<ShiftView, 'out' | 'resize' 
   ox = 0;
   oy = 0;
   private dpr = 1;
+  /** Indoors (the Rat, the forge): the hall's own ambient, a little brighter by day through the door and shutters. */
+  protected indoor: [number, number, number] | null = null;
   /** The scenery painted once a size (fishview's pond, rangeview's butts). */
   protected land: HTMLCanvasElement | null = null;
 
@@ -79,7 +81,12 @@ export abstract class PastimeCanvas implements Pick<ShiftView, 'out' | 'resize' 
   }
   /** End a frame: lit by the town's hour (day, dusk, night) and the given lights (field pixels). */
   protected finish(lights: [number, number, number, number, [number, number, number]][]): void {
-    const phase = townPhase(), th = townLight({ floor: 'cobble', back: 'stone', ambient: [0.27, 0.25, 0.33], moon: 0.5 }, phase), torch = th.torch ?? 1;
+    const phase = townPhase();
+    if (this.indoor) {
+      const k = 0.85 + 0.3 * daylight(phase), amb = this.indoor.map((v) => v * k) as [number, number, number];
+      return this.light.render(this.base, this.glowC, lights.map(([x, y, r, i, c]) => ({ x: x + this.ox, y: y + this.oy, r, i, c })), amb);
+    }
+    const th = townLight({ floor: 'cobble', back: 'stone', ambient: [0.27, 0.25, 0.33], moon: 0.5 }, phase), torch = th.torch ?? 1;
     const ls: Light[] = lights.map(([x, y, r, i, c]) => ({ x: x + this.ox, y: y + this.oy, r, i: i * torch, c }));
     if (th.moon > 0.05) ls.push({ x: this.ox + FW * 0.75, y: this.oy - 40, r: 320, i: 0.3 * th.moon, c: [0.55, 0.6, 0.85] });
     this.light.render(this.base, this.glowC, ls, th.ambient);
