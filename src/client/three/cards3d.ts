@@ -77,7 +77,7 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
   }
   // Maeve's hound by the lodge's fire.
   if (isLodgeMap(map)) {
-    const a = lodgeHoundAt(room.heroes, f.now);
+    const a = lodgeHoundAt(others.length ? [...room.heroes, ...others] : room.heroes, f.now);
     f.put('lodgehound', a.x, 0, a.y, (c, px, py) => drawHound(c, LODGE_HOUND, px, py, { mood: a.mood, fx: a.fx, down: a.down, look: MAEVE_HOUND }), { pool: 0.28 });
   }
   for (const e of room.enemies) {

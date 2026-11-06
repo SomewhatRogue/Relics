@@ -74,7 +74,8 @@ body[data-mage='true'] .tb.block { width: 56px; height: 56px; right: calc(204px 
 .tb.use.big { width: 92px; height: 92px; right: calc(24px + env(safe-area-inset-right)); bottom: calc(46px + env(safe-area-inset-bottom)); }
 .tb.use.big i { bottom: auto; top: -16px; }
 body[data-mode='town'] .tb.reload, body[data-mode='town'] .tb.element, body[data-mode='town'] .tb.sign, body[data-mode='town'] .tb.attack, body[data-mode='town'] .tb.block, body[data-mode='town'] .tb.relic, body[data-mode='town'] .tb.relic2, body[data-mode='town'] .tb.potion, body[data-mode='town'] .tb.grab { display: none; }
-body[data-mode='run'] .tb.use:not(.chest) { display: none; }
+/* On a job the slot shows only to open a chest, look at a drop, or pet your own hound (petting.ts). */
+body[data-mode='run'] .tb.use:not(.chest):not(.pet) { display: none; }
 body[data-guard='none'] .tb.block { display: none; }
 .tb[hidden], .tb.reload[hidden], .tb.element[hidden], .tb.sign[hidden], .tb.relic2[hidden], .tb.grab[hidden], .tb.use[hidden], .tb.potion[hidden] { display: none !important; }
 /* The wood's lesson points at the button to press: a gold square stepping in and out round it. */

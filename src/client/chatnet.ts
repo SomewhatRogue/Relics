@@ -3,11 +3,13 @@
  * everyone in Wickhold over the town's peer room (townfolk.ts): world lines, and local ones that
  * each listener keeps only if the speaker stands near (chat.ts decides). On a job with friends, the
  * party talks in a peer room of its own named from the job's room (code + CH), so the job's socket
- * (coop.ts) is never touched. Every line heard is checked again and paced per sender here.
+ * (coop.ts) is never touched. Every line heard is checked again and paced per sender here. A pet
+ * (petword.ts) rides the same rooms, one word when it starts.
  */
 import { RelaySocket } from './relay';
 import type { Townfolk } from './townfolk';
 import { heard, listenerPace, wire, type Channel, type ChatLine, type Pace } from '../shared/chatrules';
+import { readPet, type PetWord } from './petword';
 
 /** A line heard, and who said it (their player id). */
 export interface Incoming extends ChatLine { from: string }
@@ -17,6 +19,8 @@ export const partyRoom = (code: string): string => code.toUpperCase().replace(/[
 
 export class ChatNet {
   onLine: (l: Incoming) => void = () => {};
+  /** A pet heard (petword.ts), and whether it came over the party's room. */
+  onPet: (from: string, w: PetWord, party: boolean) => void = () => {};
   private town: Townfolk | null = null;
   private party: RelaySocket | null = null;
   private partyCode = '';
@@ -29,7 +33,7 @@ export class ChatNet {
     if (this.town === town) return;
     this.town = town;
     const rest = town.onWord;
-    town.onWord = (from, d) => (d.k === 'chat' ? this.take(from, d, false) : rest(from, d));
+    town.onWord = (from, d) => (d.k === 'chat' ? this.take(from, d, false) : d.k === 'pet' ? this.pet(from, d, false) : rest(from, d));
   }
 
   /** On a job with friends, the party's room is open; anything else (null) closes it. */
@@ -40,7 +44,7 @@ export class ChatNet {
     this.partyCode = code ?? '';
     if (!code) return;
     this.party = new RelaySocket(partyRoom(code), this.myId(), 'peer');
-    this.party.onMessage = (m) => void (m.t === 'msg' && this.take(m.from, m.d, true));
+    this.party.onMessage = (m) => void (m.t === 'msg' && ((m.d as { k?: unknown } | null)?.k === 'pet' ? this.pet(m.from, m.d, true) : this.take(m.from, m.d, true)));
   }
 
   get inParty(): boolean {
@@ -54,6 +58,17 @@ export class ChatNet {
     if (ch === 'party') this.party?.send('*', w);
     else this.town?.say('*', w as unknown as Record<string, unknown>);
     return heard(w);
+  }
+
+  /** A pet to whoever can see it: the party's room on a job, else the town's. */
+  sendPet(w: PetWord, party: boolean): void {
+    if (party) this.party?.send('*', w);
+    else this.town?.say('*', w as unknown as Record<string, unknown>);
+  }
+
+  private pet(from: string, d: unknown, party: boolean): void {
+    const w = readPet(d);
+    if (w) this.onPet(from, w, party);
   }
 
   private take(from: string, d: unknown, party: boolean): void {

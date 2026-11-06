@@ -487,3 +487,9 @@ export const LIGHTNING = {
   weights: { tree: 3, banner: 3, engine: 3, goblin: 1, hero: 0.15 },
   flash: 0.25, fade: 0.6,
 };
+
+/**
+ * Petting your own hound (client/petwhen.ts): PET is offered in a fight only with no goblin awake
+ * within `calm` tiles of the Ranger. Drawing only; the room never hears of a pet.
+ */
+export const PETTING = { calm: 5 };

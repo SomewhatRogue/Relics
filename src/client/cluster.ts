@@ -4,7 +4,7 @@
  * and says which are there: a Mage's ELEMENT (a small ring by ATTACK in the element's colour, its name
  * over it), a Rogue's SHADOW STEP, Ranger's MARK or Healer's MEND in the same spot (shared/signs.ts), the class skill and the relic carried with their cooldowns, the guard
  * (BLOCK for a Warrior or Healer, none for a Ranger, Rogue or Mage), the dodge (JUMP, DASH, BLINK, ROLL), the flask as the health orb,
- * stamina as pips round ATTACK (a Mage's magic round BLINK), one gilt context slot (GRAB, THROW, HELP UP, BURN, OPEN, TALK), and a
+ * stamina as pips round ATTACK (a Mage's magic round BLINK), one gilt context slot (GRAB, THROW, HELP UP, BURN, OPEN, TALK, PET), and a
  * crossbow's RELOAD. A Warrior or Healer has no dodge: the context slot takes the dodge's place, and a
  * Warrior's always shows GRAB (dimmed till there's something to take hold of). (The Warrior's roar, TAUNT,
  * sat in the dodge's place till it became TAUNT GUARD, held on the block: 2026-11-06.)
@@ -163,7 +163,7 @@ export class Cluster {
     const lifter = kit.cls === 'WARRIOR', active = can || raise || rise === 'ready' || burn || cut || shove;
     // A drop at your feet with nothing else here: LOOK opens its card.
     const looking = !!look && !busy && !spot?.chest && !spot?.door;
-    const use = (!!spot && !busy && (mode !== 'run' || !!spot.chest)) || looking;
+    const use = (!!spot && !busy && (mode !== 'run' || !!spot.chest || !!spot.pet)) || looking;
     const what: IconId = raise || cut || rise ? 'help' : burn ? 'burn' : carrying ? 'throw' : 'grab';
     const word = cut ? 'CUT FREE' : shove ? STAITHE_WORDS.shove : raise ? 'HELP UP' : rise ? RAISEW.button : burn ? 'BURN' : carrying ? 'THROW' : 'GRAB';
     // (With no dodge the slot has its own place, so a USE or OPEN can show beside it.)
@@ -172,10 +172,11 @@ export class Cluster {
     b.grab.show(showGrab ? { shape: 'round', size: 29, grade: active ? 'gilt' : 'stone', icon: icon(what), cd: wait / RAISE.cooldown } : null, wait ? String(Math.ceil(wait)) : '', word, word);
     b.grab.el.classList.toggle('dim', !active);
     const uw = looking ? 'LOOK' : spot?.chest ? 'OPEN' : spot?.door ? 'ENTER' : spot?.pet ? 'PET' : spot?.talk && spot.talk !== 'board' && spot.talk !== 'market' && spot.talk !== 'gate' && spot.talk !== 'practice' ? 'TALK' : 'USE';
-    const ui: IconId = uw === 'LOOK' ? 'use' : uw === 'OPEN' ? 'open' : uw === 'ENTER' ? 'enter' : uw === 'TALK' ? 'chat' : 'use';
+    const ui: IconId = uw === 'LOOK' ? 'use' : uw === 'OPEN' ? 'open' : uw === 'ENTER' ? 'enter' : uw === 'TALK' ? 'chat' : uw === 'PET' ? 'pet' : 'use';
     const big = mode === 'town';
     b.use.show(use && !(showGrab && active && dodges) ? { shape: 'round', size: big ? 42 : 29, grade: 'gilt', icon: icon(ui), iconScale: big ? 2 : 1 } : null, '', uw, uw);
     b.use.el.classList.toggle('chest', !!spot?.chest || looking);
+    b.use.el.classList.toggle('pet', uw === 'PET');
     b.use.el.classList.toggle('on', looking && look === 'open');
     b.use.el.classList.toggle('big', big);
   }

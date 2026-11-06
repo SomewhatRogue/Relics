@@ -282,7 +282,7 @@ export class Scene {
     }
     // Maeve's hound by the lodge's fire.
     if (isLodgeMap(map)) {
-      const a = lodgeHoundAt(room.heroes, now);
+      const a = lodgeHoundAt(others.length ? [...room.heroes, ...others] : room.heroes, now);
       items.push({ y: OY + a.y * PX, draw: () => drawHound(c, LODGE_HOUND, OX + a.x * PX - cx, OY + a.y * PX - cy, { mood: a.mood, fx: a.fx, down: a.down, look: MAEVE_HOUND }) });
     }
     for (const h of room.heroes) {

@@ -6,6 +6,7 @@
  */
 import { placeOf, spotOf, type PastimeId } from '../shared/pastimes';
 import { petSpots, type Dog } from './petting';
+import { ownPetOk } from './petwhen';
 import { doorAt, inArea, npcAt, pushingInto, useMap, type Area, type Block, type Npc, type Theme } from '../shared/arena';
 import { travel } from '../shared/sweep';
 import type { DreadRule } from '../sim/dread';
@@ -1085,8 +1086,8 @@ export class Game {
     }
     if (this.mode === 'town' && !this.outside) for (const s of townSpots(this.world)) all.push({ x: s.x, y: s.y, label: s.label, talk: s.id, key: s.key });
     if (this.mode === 'yard') all.push({ x: RACK.post.x, y: RACK.post.y, label: 'THE STRAW MEN', talk: 'practice' });
-    // In the hunters' lodge: Maeve's hound by the fire, and a Ranger's own (petting.ts).
-    const pets = this.mode === 'town' ? petSpots(this.outside?.door.door, h) : [];
+    // Maeve's hound by the lodge's fire, and a Ranger's own wherever it's at heel and all's quiet (petting.ts, petwhen.ts).
+    const pets = petSpots(this.mode === 'town' ? this.outside?.door.door : null, h, ownPetOk(h, this.room, this.mode));
     for (const s of pets) if (!s.last) all.push({ x: s.x, y: s.y, label: s.label, pet: s.pet, reach: s.reach });
     for (const c of this.room.chests) if (c.state === 'shut') all.push({ x: c.x, y: c.y, label: c.chained ? 'A CHAINED CHEST' : 'OPEN THE CHEST', chest: c.id });
     let best: Near | null = null, bd = SPOT_REACH;

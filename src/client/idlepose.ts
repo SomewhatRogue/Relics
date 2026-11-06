@@ -5,7 +5,7 @@
  */
 import type { Hero } from '../sim/types';
 import { idleFrame, type IdleFrame } from './idles';
-import { LODGE_DOG, petFrame } from './petting';
+import { LODGE_DOG, petFrame, type React } from './petting';
 import type { BodyPose } from './motion';
 import type { Pose } from './held';
 import type { PastimeId } from '../shared/pastimes';
@@ -15,8 +15,8 @@ import { kneelOf } from './kneel';
 /** What an idle changes this frame. `flip`/`up`: the way the hero looks (null: as they face); `lying`:
  *  on the floor, the head toward this side (0: standing); `shield`: planted at (dx, dy) from the feet;
  *  `a`, `ext`: the weapon's angle facing right (mirrored when facing left) and how far it's pushed out. */
-export interface IdleOut { f: IdleFrame | null; pet: number; dog: number; flip: boolean | null; up: boolean | null; lying: number; shield: [number, number] | null; a: number | null; ext: number | null; /** The main-hand dagger is in the air (a Rogue's flip). */ hide: boolean; /** The weapon goes behind the body (over the shoulder). */ behind: boolean; /** Parked at a pastime (parked.ts), and how far through its loop (s). */ park: PastimeId | null; parkT: number; /** Kneeling to raise a friend (kneel.ts): how far into the raise (0..1), -1 not. */ kneel: number }
-const O: IdleOut = { f: null, pet: -1, dog: 1, flip: null, up: null, lying: 0, shield: null, a: null, ext: null, hide: false, behind: false, park: null, parkT: 0, kneel: -1 };
+export interface IdleOut { f: IdleFrame | null; pet: number; /** How the hound takes the pet, and how long it lasts (s). */ petR: React; petDur: number; dog: number; flip: boolean | null; up: boolean | null; lying: number; shield: [number, number] | null; a: number | null; ext: number | null; /** The main-hand dagger is in the air (a Rogue's flip). */ hide: boolean; /** The weapon goes behind the body (over the shoulder). */ behind: boolean; /** Parked at a pastime (parked.ts), and how far through its loop (s). */ park: PastimeId | null; parkT: number; /** Kneeling to raise a friend (kneel.ts): how far into the raise (0..1), -1 not. */ kneel: number }
+const O: IdleOut = { f: null, pet: -1, petR: 'lean', petDur: 0, dog: 1, flip: null, up: null, lying: 0, shield: null, a: null, ext: null, hide: false, behind: false, park: null, parkT: 0, kneel: -1 };
 
 /** When a Rogue's flipped knife is out of the hand (s into the idle). */
 export const KNIFE_UP = { g_flip: [[0.3, 1.1], [1.5, 2.3]], g_fumble: [[0.3, 1.45]] } as const;
@@ -54,11 +54,13 @@ export function idlePose(h: Hero, pz: BodyPose, now: number): IdleOut | null {
     return O;
   }
   if (pet) {
-    const dx = (pet.dog === 'own' ? h.hound?.x ?? h.x + 1 : LODGE_DOG.x) - h.x, s = dx >= 0 ? 1 : -1, k = hold(pet.t, 0.1, 2.5, 0.35, 0.35);
-    // Down on a knee by the hound, the hand out to it.
-    Object.assign(O, { pet: pet.t, dog: s, flip: s < 0 });
-    (pz.crouch = 0.35 * k), (pz.lean = Math.round(s * k)), (pz.dx = s), (pz.dy = 0), (pz.reach = k), (pz.raise = -k);
+    const dx = (pet.dog === 'own' ? h.hound?.x ?? h.x + 1 : LODGE_DOG.x) - h.x, s = dx >= 0 ? 1 : -1, t = pet.t, k = hold(t, 0.1, pet.dur - 0.1, 0.35, 0.35);
+    // Down on a knee by the hound, the hand out to it: lower for a belly rub; for a lick, leant back laughing.
+    Object.assign(O, { pet: t, petR: pet.r, petDur: pet.dur, dog: s, flip: s < 0 });
+    const low = pet.r === 'belly' ? 0.45 : 0.35, licked = pet.r === 'lick' && t > 1.05 && t < pet.dur - 0.6;
+    (pz.crouch = low * k), (pz.lean = licked ? -s * (Math.sin(t * 16) > 0 ? 1 : 0) : Math.round(s * k)), (pz.dx = s), (pz.dy = 0), (pz.reach = licked ? 0 : k), (pz.raise = pet.r === 'belly' ? -2 * Math.round(k) : -k);
     O.a = Math.PI / 2 - 0.4;
+    idleHook.fn?.(h, 'pet_' + pet.r, t, now);
     return O;
   }
   if (!f) return null;

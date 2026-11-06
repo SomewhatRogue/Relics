@@ -3,19 +3,19 @@
  * each, their legs worked out from where each foot is in its stride: a walk sets one foot down at a
  * time, a trot moves the diagonals together, a run gathers and stretches with all four off the ground.
  * Its own idles (houndidle.ts): sniffing the ground, scratching an ear, lying with its head on its
- * paws, shaking off. The fight's moves follow the room's hound (sim/ranger.ts): the lunge as it runs in,
+ * paws, shaking off. Petted (petting.ts): over on its back, legs going, for a belly rub. The fight's moves follow the room's hound (sim/ranger.ts): the lunge as it runs in,
  * the bite, and the latch when SEND THE HOUND pins (sim/sic.ts).
  */
 import type { Pose } from './houndbody';
 
 export const GAITS = ['walk', 'trot', 'run'] as const;
 export type Gait = (typeof GAITS)[number];
-export const IDLE_POSES = ['stand', 'sit', 'sniff', 'scratch', 'down', 'downUp', 'shake'] as const;
+export const IDLE_POSES = ['stand', 'sit', 'sniff', 'scratch', 'down', 'downUp', 'shake', 'belly'] as const;
 export const FIGHT_POSES = ['lunge', 'bite', 'latch', 'bow', 'leap'] as const;
 export type PoseName = Gait | (typeof IDLE_POSES)[number] | (typeof FIGHT_POSES)[number];
 
 /** Frames a pose has (the drawing cycles them). */
-export const FRAMES: Record<PoseName, number> = { walk: 4, trot: 4, run: 4, stand: 1, sit: 1, sniff: 2, scratch: 2, down: 1, downUp: 1, shake: 3, lunge: 2, bite: 2, latch: 2, bow: 1, leap: 1 };
+export const FRAMES: Record<PoseName, number> = { walk: 4, trot: 4, run: 4, stand: 1, sit: 1, sniff: 2, scratch: 2, down: 1, downUp: 1, shake: 3, belly: 2, lunge: 2, bite: 2, latch: 2, bow: 1, leap: 1 };
 /** Frames a second for each gait (the others step at their own pace in hound.ts). */
 export const GAIT_FPS: Record<Gait, number> = { walk: 6, trot: 9, run: 13 };
 
@@ -62,6 +62,8 @@ export function poseOf(name: PoseName, f: number, wag = 0, tuck = false): Pose {
     case 'downUp': return { kind: 'down', headUp: true, wag, ears: 'up' };
     // Shaking off: the coat flung one way and the other, then settling.
     case 'shake': return { kind: 'stand', fluff: f < 2 ? f + 1 : 0, head: { dy: f === 1 ? 1 : 0 }, tilt: f === 0 ? 1 : 0, ears: f < 2 ? 'back' : undefined, wag: f === 2 ? 0 : f ? 30 : -30 };
+    // On its back for a rub, the legs paddling in the air, the tail going along the floor.
+    case 'belly': return { kind: 'belly', kick: f, wag };
     // Flying in: front feet reaching, hind ones driving, jaws open.
     case 'lunge': return { kind: 'stand', legs: [[3, 2], [2, 1], [-3, 1], [-2, 0]], stretch: 2, lift: f ? 2 : 1, head: { dx: 1, dy: 1, open: true }, ears: 'back', tail: 'run' };
     // The bite: braced, head in, jaws open then shut on it.

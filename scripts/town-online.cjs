@@ -45,6 +45,30 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     step(`Sam walked (${before?.x.toFixed(2)} to ${after?.x.toFixed(2)}, really at ${samAt.x.toFixed(2)})`, !!after && after.x > before.x + 0.5 && Math.abs(after.x - samAt.x) < 0.3);
     await kyle.page.screenshot({ path: path.join(ROOT, 'shots/town-online-phone.png') });
     await sam.page.screenshot({ path: path.join(ROOT, 'shots/town-online-laptop.png') });
+    // Kyle (a Ranger, on his phone) pets his hound in the square (client/petting.ts): the PET button,
+    // one word to the town, and Sam sees it on his screen.
+    require('fs').mkdirSync(path.join(ROOT, 'shots/pet'), { recursive: true });
+    const clear = await kyle.page.evaluate(() => {
+      const g = window.__game, h = g.hero, x0 = h.x, y0 = h.y;
+      for (let r = 1; r < 12; r++) for (let a = 0; a < 16; a++) {
+        Object.assign(h, { x: x0 + Math.cos(a / 2.5) * r, y: y0 + 2 + Math.sin(a / 2.5) * r * 0.6 });
+        if (h.hound) Object.assign(h.hound, { x: h.x - 1, y: h.y + 0.2, state: 'heel' });
+        if (g.near()?.pet === 'own') return true;
+      }
+      return false;
+    });
+    await wait(2500);
+    step('Kyle has PET on his context button, with the hound at heel', clear && await kyle.page.waitForFunction(() => !document.querySelector('.tb.use').hidden && document.querySelector('.tb.use').textContent.includes('PET'), null, { timeout: 4000 }).then(() => true, () => false));
+    const kyleSent = await kyle.page.evaluate(() => window.__town().sends);
+    await kyle.page.tap('.tb.use');
+    step('Kyle kneels to his hound', await kyle.page.waitForFunction(() => !!window.__idles.petting(), null, { timeout: 2000 }).then(() => true, () => false));
+    step('Sam sees Kyle petting his hound', await sam.page.waitForFunction(() => window.__town().here.some((h) => h.name === 'KYLE' && h.pet), null, { timeout: 3000 }).then(() => true, () => false));
+    await wait(500);
+    await kyle.page.screenshot({ path: path.join(ROOT, 'shots/pet/town-pet-phone.png') });
+    await sam.page.screenshot({ path: path.join(ROOT, 'shots/pet/town-pet-friend-laptop.png') });
+    await wait(2500);
+    const kyleWords = (await kyle.page.evaluate(() => window.__town().sends)) - kyleSent;
+    step(`and that pet was one word from Kyle (${kyleWords})`, kyleWords === 1);
     const ava = await open('AVA', 'MAGE', { viewport: { width: 1280, height: 800 } });
     step('A third arrives: Kyle sees Ava', await sees(kyle, 'AVA'));
     step('Ava sees both', (await sees(ava, 'KYLE')) && (await sees(ava, 'SAM')));

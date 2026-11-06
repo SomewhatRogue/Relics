@@ -15,7 +15,7 @@ import { PX } from './world';
 import type { Hound } from '../sim/types';
 
 /** `idle`: an idle `t` s in (idles.ts); `pet`: petting their hound `t` s in; `hound`: draw a Ranger's hound at heel. */
-export interface ArtSpec { cls: HeroClass; look?: number; now?: number; t?: number; hero?: Partial<Hero> & { dial?: number }; swing?: number; idle?: { id: IdleId; t: number }; pet?: number; hound?: boolean }
+export interface ArtSpec { cls: HeroClass; look?: number; now?: number; t?: number; hero?: Partial<Hero> & { dial?: number }; swing?: number; idle?: { id: IdleId; t: number }; pet?: number; /** The pet's reaction (petting.ts REACTS). */ react?: number; hound?: boolean }
 
 /** The hero as a PNG data URL, `w` by `h` scene pixels, feet at (w/2, h - 8). */
 export function heroArt(s: ArtSpec, w = 40, h = 40): string {
@@ -29,7 +29,7 @@ export function heroArt(s: ArtSpec, w = 40, h = 40): string {
   for (const k of [g.lit, g.glow]) k.imageSmoothingEnabled = false;
   const now = g.now, side = hero.fx >= -0.2 ? 1 : -1;
   if (s.idle) showIdle(hero.id, { ...s.idle, side });
-  if (s.pet !== undefined) showPet(hero.id, 'own', now - s.pet, hero.x, hero.y);
+  if (s.pet !== undefined) showPet(hero.id, 'own', now - s.pet, hero.x, hero.y, s.react ?? 0);
   BARE.on = true;
   try {
     // A Ranger's hound at heel, playing or petted as the game would draw it (idlehound.ts).
