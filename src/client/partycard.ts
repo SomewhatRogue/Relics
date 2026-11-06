@@ -3,6 +3,7 @@
  * in (in their class colours, the leader marked), the slots, and SET OUT (the leader; greyed with the
  * reason when a story job needs more), LEAVE (the rest), CANCEL (the leader). On every town screen,
  * indoors too. A phone shows one line and opens on a tap; a laptop shows it all. Its toasts sit under it.
+ * A panel opening on a phone shuts it to its one line (it can still be opened over the panel on a tap).
  */
 import { KIND, STORY_PARTY } from '../shared/jobs';
 import { PARTY_MAX } from '../shared/lobby';
@@ -22,8 +23,10 @@ export class PartyCard {
   private key = '';
   /** Opened out (a laptop starts open, a phone shut); remembered for the page. */
   open: boolean;
+  /** Whether a panel was up last frame (to shut the card on a phone as one opens). */
+  private wasUp = false;
 
-  constructor(private g: Game, private panel: Panel, touch: boolean, private cls: (id: string) => HeroClass | null) {
+  constructor(private g: Game, private panel: Panel, private touch: boolean, private cls: (id: string) => HeroClass | null) {
     this.open = !touch;
     this.root.id = 'partyhud';
     this.card.id = 'partycard';
@@ -44,7 +47,10 @@ export class PartyCard {
   /** Each frame: shown in town while you're in a party (and nothing covers the whole screen). */
   frame(show: boolean): void {
     const pt = this.g.parties, q = show && this.g.mode === 'town' ? pt?.current() : null;
-    document.body.classList.toggle('panel-up', this.panel.open);
+    const up = this.panel.open;
+    document.body.classList.toggle('panel-up', up);
+    if (up && !this.wasUp && this.touch) this.open = false;
+    this.wasUp = up;
     if (!q || !pt) {
       this.card.hidden = true;
       this.key = '';

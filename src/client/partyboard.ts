@@ -29,11 +29,12 @@ export function partyList(g: Game): { html: string; parties: Party[] } {
   return { parties, html: parties.length ? `<h3>${PW.parties}</h3>` + parties.map((q, i) => entry(g, q, i)).join('') : '' };
 }
 
-/** The party buttons in the open panel; `again` redraws it. */
+/** The party buttons in the open panel; `again` redraws it (after a LEAVE or a CANCEL). */
 export function wireParties(g: Game, panel: Panel, parties: Party[], again: () => void): void {
   const pt = g.parties;
   const on = (sel: string, f: (b: HTMLButtonElement) => void) => document.querySelectorAll<HTMLButtonElement>(`#panel ${sel}`).forEach((b) => b.addEventListener('click', () => f(b)));
-  on('[data-joinparty]', (b) => (pt?.join(parties[Number(b.dataset.joinparty)].lead), again()));
+  // Joined, the panel closes: walk where you like while it gathers, the party on the HUD card (partycard.ts).
+  on('[data-joinparty]', (b) => (pt?.join(parties[Number(b.dataset.joinparty)].lead), panel.hide()));
   on('[data-quit]', () => (pt?.quit(), again()));
   on('[data-setout]', () => setOutNow(g, panel));
 }

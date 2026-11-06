@@ -6189,3 +6189,20 @@ how they and all players did in that mission. Numbers killed, dodges, damage don
   same twice; no board outside a job; a friend's recap reads the same numbers, their column first;
   callouts only for a real lead; one button home, the knack banked and named on the card, PACK carrying
   the count).
+
+## 2026-11-05: queued for a job, the card stays up top (Kyle; Claude Opus 5.5)
+
+Kyle, playing with friends on a phone: "When you queue up for a job it shows it at the bottom, so it's hard
+to exit and walk around while leaving the quest up."
+- **JOIN closes the panel** (`client/partyboard.ts`), on the board and on the parties panel alike, as
+  GATHER A PARTY already did: you're free to walk off at once, the party on the HUD card. LEAVE and
+  CANCEL still redraw the panel. (The board staying up was the trouble: on a phone the card then dropped
+  to the bottom of the screen, right over the board's CLOSE, with the toasts stacked above it.)
+- **With a panel up on a phone the card goes to the top, not the bottom** (`client/partyhud.css`): it
+  rises into the HUD's row (the portrait and health are dimmed under the panel anyway), one line, and
+  the panel starts below it (`body.touch.panel-up.in-party #panel` gets the room), so neither covers the
+  other and the panel's buttons, the stick and the fight buttons stay clear. Its toasts sit under it as
+  in town, for their few seconds.
+- A panel opening on a phone shuts the card to its line (`client/partycard.ts`); a tap still opens it
+  out over the panel with SET OUT or LEAVE, and shuts it again. A laptop is unchanged.
+- No new words.
