@@ -5,6 +5,7 @@
  * nests, someone caged waving through the bars and calling out, the freed, the map's people (Wickhold's folk, Hew, the dead), and the scenes past the wood's trees. Positions eased between
  * the room's ticks as everywhere else. Only draws.
  */
+import { pulledAt } from '../wave2ground';
 import { ROOF_UP3 } from '../foedraw';
 import type { ArenaRoom } from '../../sim/room';
 import type { Hero, Hound } from '../../sim/types';
@@ -81,7 +82,7 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
       f.put('e' + e.id, hx, lift(carrier.z), hy, (c, px, py) => (drawHeld(c, e, px, py, carrier.fx, carrier.fy, slam), drawStatus(c, e, px, py - 20, t)), { bias: 0.05 });
       continue;
     }
-    const [x, y] = lerp('e:' + e.id, e.x, e.y), dead = e.act === 'dead', big = e.kind === 'butcher' || e.kind === 'brood';
+    const pz = pulledAt(room, e), [x, y] = pz ?? lerp('e:' + e.id, e.x, e.y), dead = e.act === 'dead', big = e.kind === 'butcher' || e.kind === 'brood';
     f.put('e' + e.id, x, (e.z ?? 0) >= 2 ? ROOF_UP3 : lift(Math.max(0, e.z ?? 0)), y, (c, px, py) => (drawFoe(c, e, px, py, asleep(map, e), map === ARENA), drawStatus(c, e, px, py, t)), { pool: dead || e.kind === 'nest' ? 0 : big ? 0.55 : 0.28, bias: dead ? -0.3 : 0 });
   }
   // A body being hauled, where they've got it to (../scenedraw.ts).

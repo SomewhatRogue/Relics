@@ -14,7 +14,9 @@ import { TEMPLATES } from './encounters.js';
 import type { Lay } from './vignettes.js';
 import { stageChalker } from './chalkstage.js';
 import { MEATY_ON } from './meaty.js';
+import { MEATY2_ON } from './meaty2.js';
 import { stagePlanker, stageForker, stageSwingle } from './meatystage.js';
+import { stageGorger, stageKegman, stagePouncer } from './meatystage2.js';
 
 export interface Debut {
   /** The fork way whose room stages it first. */
@@ -50,7 +52,7 @@ export const rareRoom = (job: Job) => 1 + (job.seed % Math.max(1, job.rooms - 1)
 /** A template's weight in room `index` of `job` (0: not here). */
 export function weightIn(t: Template, job: Job, index: number): number {
   const d = t.debut;
-  if (!MEATY_ON.on && MEATY_TEMPLATES.has(t.id)) return 0;
+  if (!switchedOn(t.id)) return 0;
   if (!d) return t.weight;
   const s = stageOf(d, jobDay(job));
   if (s === 'common') return t.weight;
@@ -59,11 +61,25 @@ export function weightIn(t: Template, job: Job, index: number): number {
 }
 
 /** How each staged sort is put into its way's scene. */
-const STAGERS: Record<string, (l: Lay) => void> = { chalk: stageChalker, plank: stagePlanker, swing: stageSwingle, fork: stageForker };
-/** The new meaty sorts' templates (shared/meaty.ts), switched off together by MEATY_ON. */
+const STAGERS: Record<string, (l: Lay) => void> = { chalk: stageChalker, plank: stagePlanker, swing: stageSwingle, fork: stageForker, keg: stageKegman, pounce: stagePouncer, gorge: stageGorger };
+/** The new meaty sorts' templates (shared/meaty.ts, meaty2.ts), each three switched off together by MEATY_ON and MEATY2_ON. */
 const MEATY_TEMPLATES = new Set(['plank', 'swing', 'fork']);
+const MEATY2_TEMPLATES = new Set(['keg', 'pounce', 'gorge']);
+const switchedOn = (id: string) => (MEATY_ON.on || !MEATY_TEMPLATES.has(id)) && (MEATY2_ON.on || !MEATY2_TEMPLATES.has(id));
 
-/** A layout-4 room reached by fork way `way`: each sort staged there, in its home region. */
+/**
+ * A layout-4 room reached by fork way `way`: each sort staged there, in its home region. Of the new meaty
+ * sorts a scene shows one at a time (two would crowd a lone hero's screen and the room's caps): the first
+ * three's while it's still bleeding in, then, once it's common, the second three's that shares its scene
+ * (shared/meaty2.ts: the Kegman after the Planker in DRUMS, the Gorger after the Swingle in SMOKE).
+ */
 export function stageDebuts(l: Lay, job: Job, way: WayKind): void {
-  for (const t of TEMPLATES) if (t.debut?.staged === way && t.debut.home === job.place.region && (MEATY_ON.on || !MEATY_TEMPLATES.has(t.id))) STAGERS[t.id]?.(l);
+  const here = TEMPLATES.filter((t) => t.debut?.staged === way && t.debut.home === job.place.region && switchedOn(t.id)), day = jobDay(job);
+  const newer = here.find((t) => MEATY2_TEMPLATES.has(t.id)), older = here.find((t) => MEATY_TEMPLATES.has(t.id));
+  const stillOld = !!older && stageOf(older.debut!, day) !== 'common';
+  for (const t of here) {
+    if (newer && t === older && !stillOld) continue;
+    if (t === newer && stillOld) continue;
+    STAGERS[t.id]?.(l);
+  }
 }

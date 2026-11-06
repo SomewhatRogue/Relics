@@ -20,6 +20,7 @@ import { makeFolk, makeHound, poseFolk, poseHound } from './folk3d';
 import { Pool, type Held } from './pool3d';
 import { makeTele, shapeTele } from './teleg3d';
 import { strikeShape } from '../../sim/stormshape';
+import { blastShape } from '../../sim/blastshape';
 import { shakeProp } from './prophit3d';
 import { makeChest, makeCoal, makeDrop, makePickup, makeProp, poseChest, type ChestFig } from './props3d';
 import { boltLook, makeBolt, makeExit, makeJavelin, makeRing, makeSmoke, placeBolt, placeJavelin } from './shots3d';
@@ -75,6 +76,13 @@ export class Actors {
       const a = strikeShape(s, t);
       if (!a) continue;
       const m = this.teles.get('k' + s.id, '', () => ({ root: makeTele() })).root;
+      m.visible = shapeTele(m, a, now, 0);
+    }
+    // A keg, oil or embers about to go up (sim/blastshape.ts, the circle the room judges).
+    for (const e of room.enemies) {
+      const a = blastShape(e, t);
+      if (!a) continue;
+      const m = this.teles.get('b' + e.id, '', () => ({ root: makeTele() })).root;
       m.visible = shapeTele(m, a, now, 0);
     }
     if (BOXFIGS) for (const s of room.survivors ?? []) {

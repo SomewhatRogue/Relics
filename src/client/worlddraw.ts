@@ -10,6 +10,7 @@ import { MEAL, ROD } from '../shared/tuning';
 import { bodyAt, shallowAt } from '../shared/waterbody';
 import type { ArenaRoom } from '../sim/room';
 import type { FightEvent, Ice } from '../sim/types';
+import { drawWave2Ground } from './wave2ground';
 
 /** Floor (x, z) at height y (tiles) to the screen. */
 type Proj = (x: number, y: number, z: number) => [number, number];
@@ -182,6 +183,8 @@ export function drawWorldGround(g: CanvasRenderingContext2D, room: ArenaRoom, P:
     }
     if (e.rodAt !== undefined && t - e.rodAt < ROD.glow) crackle(g, ex, ey, 1 - (t - e.rodAt) / ROD.glow, P);
   }
+  // A Hornblower's call coming, a Gorger's gaff (wave2ground.ts).
+  drawWave2Ground(g, room, P, ppu);
   g.globalAlpha = 1;
 }
 

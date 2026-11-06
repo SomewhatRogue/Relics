@@ -21,12 +21,13 @@ import { stepChalk, stepChalker } from './chalker';
 import { hoist, stepSnarer, type Noose } from './snares';
 import { stepNoose } from './hempen';
 import { shapeMeaty, stepPlanker, stepForker, stepSwingle } from './meaty';
+import { shapeMeaty2, stepGorger, stepKegman, stepPouncer } from './meaty2';
 import { walk } from './enemies';
 import type { World } from './elements';
 import type { Pickup } from './pickups';
 import type { Enemy, EnemyAttack, FightEvent, Hero, Intent } from './types';
 
-const OWN = new Set(['banner', 'netter', 'thief', 'log', 'wolf', 'keeper', 'oiler', 'torch', 'blind', 'ironhide', 'gaffer', 'skimmer', 'chalker', 'snarer', 'planker', 'swingle', 'forker']);
+const OWN = new Set(['banner', 'netter', 'thief', 'log', 'wolf', 'keeper', 'oiler', 'torch', 'blind', 'ironhide', 'gaffer', 'skimmer', 'chalker', 'snarer', 'planker', 'swingle', 'forker', 'kegman', 'pouncer', 'gorger']);
 
 /** A new goblin of one of these sorts: its body (a small goblin's unless it says). */
 export function shapeFoe(e: Enemy): void {
@@ -34,13 +35,14 @@ export function shapeFoe(e: Enemy): void {
   if (e.variant === 'roofer') shapeRoofer(e);
   if (e.variant === 'wolf') shapeWolf(e);
   shapeMeaty(e);
+  shapeMeaty2(e);
 }
 
 /** `slow`: its chill, net and drum as a multiple; `speed` a small goblin's pace with it. */
 export interface Turn { t: Hero; d: number; level: boolean; via: boolean; ux: number; uy: number; facing: number; speed: number; slow: number }
 
 /** The room's things the newer sorts use. */
-export interface Kit { slicks: Slick[]; foes?: Enemy[]; nooses?: Noose[] }
+export interface Kit { slicks: Slick[]; foes?: Enemy[]; nooses?: Noose[]; freed?: import('./types').Survivor[] }
 
 /** Its own turn, if it has one (true: done). Runs once it's awake and has turned toward its way. */
 export function stepOwn(e: Enemy, q: Turn, heroes: Hero[], others: Enemy[], rng: Rng, now: number, dt: number, ev: FightEvent[], kit: Kit): boolean {
@@ -70,6 +72,9 @@ export function stepOwn(e: Enemy, q: Turn, heroes: Hero[], others: Enemy[], rng:
   else if (e.variant === 'planker') stepPlanker(e, t, d, q.level, ux, uy, facing, speed, dt, ev);
   else if (e.variant === 'swingle') stepSwingle(e, t, d, q.level, ux, uy, facing, speed, now, dt, ev);
   else if (e.variant === 'forker') stepForker(e, t, d, q.level, ux, uy, facing, speed, dt, ev);
+  else if (e.variant === 'kegman') stepKegman(e, t, d, q.level, ux, uy, facing, speed, dt, ev);
+  else if (e.variant === 'pouncer') stepPouncer(e, t, d, q.level, ux, uy, facing, speed, now, dt, ev);
+  else if (e.variant === 'gorger') stepGorger(e, t, d, q.level, ux, uy, facing, speed, heroes, others, kit.freed ?? [], now, dt, ev);
   else if (e.variant === 'chalker') stepChalker(e, t, d, ux, uy, facing, speed, heroes, others, now, dt, ev);
   return true;
 }

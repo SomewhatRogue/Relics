@@ -50,7 +50,8 @@ export function offMeal(e: Enemy, now: number, ev: FightEvent[], cool = true): v
 /** Once a tick, before the goblins move: FED or not, and meals broken off by a stun, a freeze, a net, a grab, or the body gone. */
 export function mealWatch(enemies: Enemy[], freed: Survivor[], now: number, ev: FightEvent[]): void {
   for (const e of enemies) {
-    if (e.kind !== 'butcher' && !gorges(e)) continue;
+    // (A Gorger's pull is a meal too: sim/meaty2.ts.)
+    if (e.kind !== 'butcher' && !gorges(e) && e.variant !== 'gorger') continue;
     const fed = (e.fedUntil ?? -9) > now && !isDead(e);
     if (fed || e.fed) e.fed = fed;
     const m = e.meal;

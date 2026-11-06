@@ -2,6 +2,136 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-06: the second wave: Oil-soaked, Hornblower, Smouldering; the Kegman, the Pouncer, the Gorger (Claude Opus 5.5)
+
+The rest of `docs/plans/bosses.md` section 3 (the elites table and the six meaty units), on the patterns of "elites,
+and the first new meaty goblins" below. Each is behind a switch (`AFFIX2_ON.on`, `MEATY2_ON.on`) for the pins' check.
+
+**Bursts on the floor** (`sim/blast.ts`; one shape both views draw and the room judges, `sim/blastshape.ts`; drawn
+`client/blastdraw.ts` and as a 3D telegraph in `three/actors3d.ts`). A fuse is lit once (`Enemy.blast`: where, how far,
+when, then `done`: set once, so sent once) at the spot it was lit; a goblin still alive stands there, held (stunned),
+till it goes. When it goes, everything in the circle: a hero as by any striped blow (`hitHero`: walked or dodged out of,
+never blocked, a friend's lag waited on), goblins hard and set alight (whoever lit or killed it gets the kills), props,
+the freed, and a fire `burst` (it lights slicks and burns bodies to ash, so a Gorger gets nothing). A hero in the
+middle walks out in under 60% of every fuse at the slowest kit's pace (3.43 tiles a second).
+
+**The three affixes** (numbers `shared/elites.ts`; drawn `client/elitedraw.ts`, the box figures `three/goblins3d.ts`).
+The roll is as before, from all six (`affixPool`: a Kegman is never Oil-soaked or Smouldering, a Gorger never Gorging,
+an ironhide never Plated).
+- *Oil-soaked* (a dark wet sheen, a glint sliding down, a drip): set alight it stands there and bursts 1.0 s later,
+  a striped circle 1.6 round (18 to a hero, 30 and fire to a goblin, itself too). Burn it inside its own pack: the
+  ones standing their ground with it (at rest, held back by pacing, in the wind-ups of their blows) go with it;
+  goblins chasing you walk out of it with you. One that dies alight bursts as well.
+- *Hornblower* (a cow horn at its belt; at its mouth while it blows, the call going out in rings): at half health,
+  with a hero within 7, it stands and blows for 2.0 s (`Enemy.call`, `sim/hornblow.ts`), then 3 small ones run in from
+  the call's spot, awake, in its pack, as tough as the room's party. The spot is picked as it starts and drawn there
+  the whole time (a ring filling with the call's clock, a pair of eyes in the dark for each one coming:
+  `client/wave2ground.ts`, both views): of the four edges of the room as the nearest hero's phone sees it (5 tiles each
+  side, 8 up and down), the room's own wall where it's on that screen, else the screen's edge, nearest the Hornblower,
+  free ground, never within 3 of a hero. Cut off (`sim/hornstate.ts`) by a charged blow, a perfect or a counter that
+  gets through, any heavy hit (a charged or crit shot, a burst, storm), a stun, a freeze, a net, being knocked off
+  balance, or its death: then no one comes, and it never blows again. Burst it down or interrupt it, a blocker with a
+  charged blow or a bash, a dodger with a charged shot or by bursting it down. It costs its sort's points times 1.5,
+  plus 1, plus the 3 small ones' 1.5 (`eliteThreat` takes the list now).
+- *Smouldering* (embers in its hide, drifting up): 1.2 s after it dies, a striped circle 1.8 round its body (14 to a
+  hero, 12 and a little fire to a goblin). Walk out after the kill.
+
+**The three units** (numbers `shared/meaty2.ts`, rules `sim/meaty2.ts`, kits `client/meatydraw2.ts`, sprites
+`client/meatysprites2.ts`; drawn 1.2 times a small goblin in its greens; the box figures in `three/goblins3d.ts`).
+Each 4 threat (meaty), a template with `beats: ['tactic', 'closer']`, quick blows never break its wind-up, as the
+first three.
+- **The Kegman** (proposal): 70 health, a keg of lamp oil upright on its back; a red swing (0.9 s, 10). Killed, the keg
+  falls and bursts where it lies 1.0 s later (striped, 1.6 round, 20 to a hero, 36 and fire to a goblin). Shot (any
+  shot that lands: the keg rides over its shoulders, `sim/bolts.ts` calls `shotKeg`) or set alight, it stands there
+  hissing and bursts with it. Answer: shoot it, or kill it, in among its own, and walk (or dodge) out. Template "a
+  kegman with lamp oil on its back, in among a few small ones" (3 to 4).
+- **The Pouncer** (proposal): 80 health. From 2.4 to 5 tiles (never further: nothing from off screen) it crouches and
+  leaps: a striped circle 1.1 round where you stood as it crouched, locked, landing 1.2 s later (16); it sits low the
+  first 55% and flies the rest (5 tiles in 0.54 s at most, under 12 a second; the room moves it: `flyPounce`; drawn
+  riding up an arc, `hopOf`). Landed, it's stuck 1.0 s (stunned: a punish lands 1.5 times as hard); then a red rake if
+  you're close (0.9 s, 10). Between leaps 3.5 s. Answer: walk out (Warrior, Cleric) or walk or dodge out (Rogue,
+  Ranger, Mage), then hit it while it's stuck; block or dodge the rake. Kyle's kiting note: it closes the gap.
+- **The Gorger** (proposal): 110 health, a long gaff; a red bite (1.0 s, 14). With no hero within 1.5 of it and a small
+  one's whole body (or one of the freed) within 4.5, it stands and pulls the body in for 1.5 s (the butcher's meal and
+  its red ring, `sim/meal.ts`: a heavy hit, a stun, a freeze, a net, a blow of its own or the body burned breaks it
+  off), the body dragged along the floor to it in both views (`pulledAt`), then eats it: 20% more size, health
+  (healed by what it gains) and damage, at most 3 times (1.6 times all told). The dead fade in about 5 s, so it eats
+  what's being killed round it now. Its template is "a gorger and a crowd of small ones for it to eat" (4 to 5 of the
+  flimsy ones, `bunch`): splatting them is fun and feeds it, so which you kill first is the choice. Answer: burn the
+  bodies (ash and a burst body feed nothing), stand by it, or kill it first.
+
+**How they bleed in** (`shared/debut.ts`, after the Forker goes common on day 69; staged with no dice in
+`shared/meatystage2.ts`, each a pack of its own, 87 to 89, that the composer leaves be and counts):
+
+| | staged until | rare | common from | staged in |
+|---|---|---|---|---|
+| Kegman | 68 | 69 to 71 | 72 | Barrowfields DRUMS: by the war band's long fire, two of the band with it |
+| Pouncer | 70 | 71 to 73 | 74 | Barrowfields QUIET: on watch at the edge of the sleepers' ring, two more asleep at its feet |
+| Gorger | 72 | 73 to 75 | 76 | Barrowfields SMOKE: by the burning house's side wall, waiting on whoever's inside |
+
+CROWS was the plan for the Gorger (the column's dead), but in layout 4 that room nearly never lays its dead, and with no
+dead its chest is placed last by the room's own spot finder, so a goblin more would move it; SMOKE has no chest of its
+own (the room's is down before staging). The Kegman stages only where the war band's own chest is down, for the same
+reason. Checked: in every Barrowfields DRUMS, QUIET and SMOKE room of the test's 200 jobs the chest is where it was.
+**One new sort a scene** (`stageDebuts`): DRUMS and SMOKE stage the Planker and the Swingle while those are still
+bleeding in (to day 64 and 66), and the Kegman and the Gorger from the day those go common (65, 67), each through its
+own staged, rare and common days. Two staged in one room broke the room's specials cap (4 of 3) and its threat budget
+(11 of 10.4 for a lone hero: `tests/encounters.test.ts`, `tests/threat.test.ts`). So the Kegman shows in DRUMS from
+day 65 and the Gorger in SMOKE from day 67, a few days before they go rare.
+
+**Online**: nothing new a tick. `blast`, `call`, `leapAt`, `stuckAt` and `grown` change only when that happens; the
+Pouncer's flight is a goblin moving, as any does; the rings, the eyes, the drag and the hop are drawn from the room's
+clock.
+
+**The clear-bot** (`tests/clearbot.ts`) now plays the new answers as a player who knows them would: out of a burst's
+or a Pouncer's circle, straight away from its middle; a Hornblower blowing, or a Gorger within 7, first. It still
+dodges nothing else. `npx tsx scripts/encounters/clear.ts [days] [first day] [off | off2]` (`off2`: the second wave only).
+
+| 48 rooms | daggers: s a room, health lost | staff: s a room, health lost | daggers / staff time, health |
+|---|---|---|---|
+| days 1 to 6, second wave off | 44.0, 306 | 47.1, 280 | 0.93, 1.09 |
+| days 1 to 6, on | 43.4, 304 | 46.6, 277 | 0.93, 1.10 |
+| days 76 to 81, second wave off | 41.4, 310 | 44.2, 313 | 0.94, 0.99 |
+| days 76 to 81, on | 39.3, 280 | 41.6, 301 | 0.94, 0.93 |
+
+"Off" on days 1 to 6 is exactly the elites entry's "on", so nothing else moved; on, the new affixes only (the units are
+still staged then) move it a hair. On days 76 to 81, with all three units common, both kits clear a little faster and
+lose a little less: a Kegman's keg or an Oil-soaked one's burst takes its own pack with it, and the bot walks out of
+every circle. The gap between the kits is unchanged (0.94 either way); the daggers now lose a little less than the
+staff, as on the elites entry's later days. The bot never lets a Gorger feed long (it goes for it first), so a Gorger
+left to grow isn't in these numbers. Kyle's play is the real measure.
+
+**Pins**, checked with the switches (`npx tsx scripts/encounters/pins.ts`): with `AFFIX2_ON.on` and `MEATY2_ON.on`
+false, layout 3 is 2219083919 and layout 4 104248273, main's pins. On, the same: none of the 388 and 280 rooms moved
+(their jobs are day 1, when DRUMS and SMOKE still stage the Planker and Swingle, no pinned room is a Barrowfields QUIET
+room, and the one layout-3 elite there rolls the same). So nothing was re-pinned. (Before one sort a scene, DRUMS
+and SMOKE staged two and layout 4 moved in 5 rooms; that broke the room caps, below.)
+
+Tests: `tests/meaty2.test.ts` (each unit's blow landed, blocked by sword and mace, dodged by daggers, longbow and wand;
+the keg bursting where it fell, no block holding it, walked or dodged out of; shot and set alight in among a pack held
+at its spot, taking it along; a real longbow shot lighting it; the Pouncer's locked circle, its flight under 12 tiles a
+second, walked and dodged out of, stuck after and the punish, the rake, never begun past 5 tiles; the Gorger's pull and
+growth, three at most, burned bodies, a hero by it and a heavy hit stopping it; the floors fair for the slowest kit; 4
+points and the beats; debut days after the Forker; staged in DRUMS, QUIET and SMOKE in the Barrowfields only, one new
+sort a scene, the chest unmoved; none in the packs while staged, some once common; the same fight twice) and
+`tests/elites2.test.ts` (what each costs, the Hornblower's call included; who can be what; the switch; Oil-soaked
+alight, its pack hurt, blocked or walked or dodged out of, never alight never bursting; the Hornblower's channel, its
+spot on the screen's edge and 3 or more from the hero, at a side wall when one's near, three small ones from it, once;
+cut by a charged blow, a stun, a heavy shot or its death, not by a quick blow on a sort that doesn't flinch, never
+begun from past 7 tiles; Smouldering's circle, walked or dodged out of, never in life; a burst and a call sent once
+each; the same fight twice); `tests/elites.test.ts`'s bound on an elite's cost takes the Hornblower's call in. `npx tsc
+--noEmit` clean; the full vitest (`--maxWorkers=1`) 145 files, 1379 tests passed. Online, one at a time: town, party
+(18 of 18 steps), exped and florida (Redis 19 commands a minute, no sockets opened in play) pass. Shots: `node
+scripts/wave2-look.cjs [url] [dir]` (phone: each unit winding up, the Pouncer crouched and in the air, the Gorger
+pulling a body, a keg about to go, each affix, Oil-soaked alight, Smouldering dead; flat, and four in 2.5D).
+
+**New words** (for the lore keeper, then the line editor; code and docs only for now, nothing on screen names a sort or
+an affix): Kegman, Pouncer, Gorger; Oil-soaked, Hornblower, Smouldering; the templates' plain words "a kegman with lamp
+oil on its back, in among a few small ones", "a pouncer and a few small ones", "a gorger and a crowd of small ones for
+it to eat". On screen only what was there: FED (the number healed) over a Gorger as it eats, as over a butcher.
+Open: sounds for the fuse, the horn and the call answered (the events are there: `fuse`, `horn`, `horncut`, `called`,
+`grown`); Kyle's play on every number.
+
 ## 2026-11-06: elites, and the first new meaty goblins: the Planker, the Swingle, the Forker (Claude Opus 5.5)
 
 Kyle: "things that take a few hits", "a mix of splatting and tactical", "harder kiting", and "I donlike [sic] moments of

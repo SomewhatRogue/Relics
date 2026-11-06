@@ -4,13 +4,17 @@
  * nearest awake goblin on the ground (else the nearest one at all), faces it and fights by Intent like a
  * plain player: a Rogue's daggers tap away at whatever is in reach; a Mage's staff taps its slash and,
  * with three or more about it and the magic for it, holds for the element's big spell. It knows the new
- * meaty sorts' answers (to a Planker's side, inside a Forker's tines) but dodges nothing. The room decides
+ * meaty sorts' answers (to a Planker's side, inside a Forker's tines; out of a Pouncer's circle and a
+ * burst's, the Kegman's, Oil-soaked's and Smouldering's; at a Hornblower blowing and a Gorger first, to
+ * burst them down) but dodges nothing else. The room decides
  * the rest. A room is clear when every goblin on the ground is dead or gone (roof archers left out: no
  * blade reaches them), or after `most` seconds.
  */
 import { board, type Job } from '../src/shared/jobs';
 import { PLANKER, FORKER, HERO, SPELL, TICK, WEAPONS, type WeaponId } from '../src/shared/tuning';
 import { isDead } from '../src/sim/damage';
+import { blastShape } from '../src/sim/blastshape';
+import { calling } from '../src/sim/hornstate';
 import { newRun, runRoom } from '../src/sim/run';
 import { NO_INTENT, type Enemy, type Hero } from '../src/sim/types';
 
@@ -41,7 +45,9 @@ export function clearRoom(job: Job, index: number, weapon: WeaponId, most = 180,
       h.hp = h.maxHp;
       const d = (e: Enemy) => Math.hypot(e.x - h.x, e.y - h.y);
       const woke = live.filter((e) => e.alert !== false && !e.under);
-      const foe = (woke.length ? woke : live).reduce((a, b) => (d(b) < d(a) ? b : a));
+      // The second wave's answers: a Hornblower blowing, or a Gorger near, first (burst it down, kill it first).
+      const first = woke.filter((e) => (calling(e, room.time) || e.variant === 'gorger') && d(e) < 7);
+      const foe = (first.length ? first : woke.length ? woke : live).reduce((a, b) => (d(b) < d(a) ? b : a));
       const dist = d(foe), ux = (foe.x - h.x) / (dist || 1), uy = (foe.y - h.y) / (dist || 1);
       let o = on.get(h.id);
       if (!o || o.id !== foe.id) on.set(h.id, (o = { id: foe.id, best: dist, at: room.time, since: room.time, hp: foe.hp }));
@@ -53,6 +59,14 @@ export function clearRoom(job: Job, index: number, weapon: WeaponId, most = 180,
       const reach = foe.variant === 'forker' ? Math.min(1.05, FORKER.inner - 0.2) : weapon === 'staff' ? 1.7 : 1.05;
       const side = foe.variant === 'planker' && ((h.x - foe.x) * foe.fx + (h.y - foe.y) * foe.fy) / (dist || 1) > PLANKER.cone - 0.15;
       const sx = foe.x - foe.fy * 1.1 * (Math.sign(foe.fx * (h.y - foe.y) - foe.fy * (h.x - foe.x)) || 1), sy = foe.y + foe.fx * 1.1 * (Math.sign(foe.fx * (h.y - foe.y) - foe.fy * (h.x - foe.x)) || 1);
+      // Out of a striped circle of the second wave's (a burst's, a Pouncer's landing), straight away from its middle.
+      const out = danger(room.enemies, room.time).find((c) => Math.hypot(h.x - c.x, h.y - c.y) < c.r + HERO.radius + 0.3);
+      if (out) {
+        const ox = h.x - out.x, oy = h.y - out.y, ol = Math.hypot(ox, oy) || 1, step = pace * TICK;
+        (h.x += (ox / ol || 1) * step), (h.y += (oy / ol) * step);
+        room.setIntent(h.id, { ...NO_INTENT, ax: ux, ay: uy, attackSeq: seq.get(h.id) ?? 0 });
+        continue;
+      }
       // Ghosted walking: straight at it, stopping just inside reach.
       if (side && h.act !== 'charge' && h.act !== 'attack') {
         const gx = sx - h.x, gy = sy - h.y, gl = Math.hypot(gx, gy) || 1, step = Math.min(gl, pace * TICK);
@@ -82,6 +96,17 @@ export function clearRoom(job: Job, index: number, weapon: WeaponId, most = 180,
     room.step();
   }
   return { secs: +(t * TICK).toFixed(1), kills: foes.filter((e) => isDead(e)).length, left: foes.filter((e) => !gone(e)).length, skipped, taken };
+}
+
+/** The second wave's striped circles coming: bursts on the floor, and a Pouncer's landing. */
+function danger(es: Enemy[], t: number): { x: number; y: number; r: number }[] {
+  const out: { x: number; y: number; r: number }[] = [];
+  for (const e of es) {
+    const b = blastShape(e, t);
+    if (b) out.push({ x: b.cx, y: b.cy, r: b.radius });
+    if (e.variant === 'pouncer' && e.act === 'attack' && e.attack?.kind === 'slam') out.push({ x: e.attack.cx, y: e.attack.cy, r: e.attack.radius });
+  }
+  return out;
 }
 
 /** The same seeded rooms every time: the board's ordinary jobs (no deep dives), every second room. */

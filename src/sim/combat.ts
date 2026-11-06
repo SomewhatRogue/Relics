@@ -40,6 +40,7 @@ import { addPoise, bracedFor, poiseFromBlow, rebound } from './poise';
 import { doorTake } from './doorwall';
 import { noteHurt } from './bosskit';
 import { graceDefer } from './bossgrace';
+import { cutCall } from './hornstate';
 
 export { respawnOf, stunOf } from './damage';
 
@@ -105,6 +106,8 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   if (e.act !== 'pinned' && e.act !== 'carried' && !door && !(boarded && WEAPONS[h.weapon].shoves)) shove(e, kx, ky, s.knock + (h.counter ? 5 : 0), e.weight);
   if (ambush && e.hp > 0) stun(e, h.id, now, STEALTH.reel, ev);
   ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy, on: 'enemy', counter: h.counter, crit, ambush, boarded: boarded || door, backstab: rear && (rearMult >= 2 || WEAPONS[h.weapon].cls === 'ROGUE'), src: WEAPONS[h.weapon].cls === 'RANGER' ? 'sword' : h.weapon, big: e.kind === 'butcher', ...(plate ? { plated: true } : {}) });
+  // A Hornblower blowing: a charged blow, a perfect or a counter that gets through cuts it off (sim/hornstate.ts).
+  if (n > 0 && (h.heavy || h.perfect || h.counter)) cutCall(e, now, ev);
   if (isDummy(e)) {
     if (e.hp <= 0) e.hp = e.maxHp;
     if (ice && heavy) shatter(e, now, ev);
@@ -197,7 +200,8 @@ function warded(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: FightEvent[]
 
 /** Out from under the blow at the last moment: the attacker staggers (a close one; not an archer or a hexer). */
 function slipped(e: Enemy, a: EnemyAttack, h: Hero, ev: FightEvent[], now = 0): void {
-  if (a.kind === 'shot' || a.kind === 'hex' || a.kind === 'spit' || e.act === 'stunned') return;
+  // (Nothing to stagger in a burst on the floor: a body's, or one standing alight with its fuse lit: sim/blast.ts.)
+  if (a.kind === 'shot' || a.kind === 'hex' || a.kind === 'spit' || e.act === 'stunned' || isDead(e)) return;
   // A boss doesn't reel from it: LAST SECOND fills its POISE instead (sim/poise.ts).
   if (e.boss) return void (h.hitstop = Math.max(h.hitstop, HITSTOP.heavy), ev.push({ k: 'slip', x: h.x, y: h.y }), addPoise(e, 'slip', now, ev));
   h.hitstop = Math.max(h.hitstop, HITSTOP.heavy);

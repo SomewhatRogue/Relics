@@ -14,8 +14,8 @@ import type { EnemyAttackSpec } from './tuning.js';
 /** Switch the three off (the composer lays none and nothing is staged): the pins' switch-off check. */
 export const MEATY_ON = { on: true };
 
-/** The three, by their variant. */
-export const MEATY_SORTS = new Set(['planker', 'swingle', 'forker']);
+/** The six (the second three: shared/meaty2.ts), by their variant. */
+export const MEATY_SORTS = new Set(['planker', 'swingle', 'forker', 'kegman', 'pouncer', 'gorger']);
 export const meatySort = (e: { variant?: string }) => !!e.variant && MEATY_SORTS.has(e.variant);
 /** How much bigger than a small goblin each is drawn (its body in the room is its `radius`). */
 export const MEATY_DRAW = 1.2;

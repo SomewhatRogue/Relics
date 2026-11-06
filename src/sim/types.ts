@@ -603,6 +603,17 @@ export interface Enemy extends Body {
   /** A Swingle's last spin and the reel after it (sim/meaty.ts): room times, each set once a spin. */
   spinAt?: number;
   reelAt?: number;
+  /** A burst on the floor (sim/blast.ts): a Kegman's keg, an Oil-soaked one alight, a Smouldering one's embers.
+   *  Where it lies, how far it reaches, the room time it goes off, and `done` once it has. Set once, so sent once. */
+  blast?: { k: 'keg' | 'oiled' | 'ember'; x: number; y: number; r: number; at: number; done?: boolean };
+  /** A Hornblower's call (sim/hornblow.ts): begun at `at`, blown at `until`, its small ones coming from (x, y)
+   *  at the room's edge; `cut` if it was stopped, `blown` once they're called. Each set once. */
+  call?: { at: number; until: number; x: number; y: number; cut?: boolean; blown?: boolean };
+  /** A Pouncer's last leap and the time it was stuck after it (sim/meaty2.ts): room times, each set once a leap. */
+  leapAt?: number;
+  stuckAt?: number;
+  /** A Gorger: how many bodies it has eaten (sim/meaty2.ts), at most GORGER.most. */
+  grown?: number;
   /** A boss of the kit (sim/bosskit.ts): POISE, its phase, its job, its door. Changes only when one of those does. */
   boss?: import('./bosskit').BossOn;
 }
@@ -871,6 +882,8 @@ export type FightEvent =
   | { k: 'pooljolt'; x: number; y: number; to: [number, number][]; spared: [number, number][]; body: number; wild?: boolean }
   | { k: 'meal' | 'mealbroken' | 'ashed' | 'thaw'; x: number; y: number }
   | { k: 'fed'; x: number; y: number; n: number }
+  /** The second wave (sim/blast.ts, hornblow.ts, meaty2.ts): a burst's fuse lit, a horn raised, cut off, its call answered; a Gorger grown. */
+  | { k: 'fuse' | 'horn' | 'horncut' | 'called' | 'grown'; x: number; y: number }
   | { k: 'iced' | 'steamup'; x: number; y: number; r: number };
 
 /** A grappling hook: flying out, reeling an enemy in, pulling its owner along, or coming back. */
