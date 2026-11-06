@@ -3,8 +3,10 @@
 // whose subscriber connection to Redis is half-open for job rooms (DEAF=1: a SUBSCRIBE never answered,
 // nothing heard, PUBLISH still fine), as the leader's instance was that night; Kyle in with them at
 // first, every later connection of his on instance 0 (`/api/room/f1`), as his 4-minute swap moved him.
-// Kyle's page should get the job, stay on one socket, and see the leader move smoothly; the server log
-// counts his joins.
+// Since 2026-11-06 the room runs on whoever is nearest the relay (shared/hostpick.ts): Kyle, 30 ms from it
+// against the leader's 170, so the leader sets out and Kyle hosts. The guest (now LIACOR) should get the
+// job, stay on one socket, and see the host move smoothly; the server log counts the guest's joins.
+// LEAD_HOSTS=1: the leader hosts whatever the links (`?pick=lead`), the night as it was played.
 // Usage: node scripts/florida-online.cjs   (NOBUILD=1 skips the build; ONLINE_PORT, default 8972;
 // REDIS_PORT, default 6395; SECS of play, default 60; NORESET=1: the relay can't heal the deaf
 // connection, so only the client's backoff keeps it calm; QUIET=1: no deaf connection at all;
@@ -46,7 +48,7 @@ const get = (url) => new Promise((r) => http.get(url, (res) => { let b = ''; res
   process.on('exit', () => (stopSrv(), redis.kill()));
   await up(`http://127.0.0.1:${PORT}/`);
   const browser = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
-  const open = async (name, cls, route) => {
+  const open = async (name, cls, route, extra = '') => {
     const ctx = await browser.newContext({ viewport: { width: 640, height: 400 } });
     const page = await ctx.newPage();
     page.on('pageerror', (e) => report.errors.push(`${name}: ${e}`));
@@ -61,7 +63,7 @@ const get = (url) => new Promise((r) => http.get(url, (res) => { let b = ''; res
         }
       };
     });
-    await page.goto(`http://127.0.0.1:${PORT}/?idle=600&hide=600${process.env.PLAYOUT === '0' ? '&playout=0' : ''}&relay=${encodeURIComponent(`ws://127.0.0.1:${PORT}/api/room/${route}`)}`);
+    await page.goto(`http://127.0.0.1:${PORT}/?idle=600&hide=600${extra}${process.env.PLAYOUT === '0' ? '&playout=0' : ''}&relay=${encodeURIComponent(`ws://127.0.0.1:${PORT}/api/room/${route}`)}`);
     await page.waitForFunction(() => window.__game);
     await page.evaluate(([cls, name]) => { window.__game.create(cls, name); if (window.__game.mode === 'wood') window.__game.skipWood(); document.getElementById('title').hidden = true; window.__title.open = false; }, [cls, name]);
     return { name, ctx, page };
@@ -69,9 +71,10 @@ const get = (url) => new Promise((r) => http.get(url, (res) => { let b = ''; res
   const until = (p, fn, arg, ms = 15000) => p.page.waitForFunction(fn, arg, { timeout: ms, polling: 50 }).then(() => true, () => false);
   let t0 = 0;
   try {
-    const lead = await open('LIACOR', 'WARRIOR', 'i1');
+    const pick = !process.env.LEAD_HOSTS;
+    const lead = await open('LIACOR', 'WARRIOR', 'i1', pick ? '' : '&pick=lead');
     const kyle = await open('ASHE', 'MAGE', process.env.KYLE_ROUTE || 'f1');
-    const kyleId = await kyle.page.evaluate(() => window.__game.profile.id);
+    const kyleId = await kyle.page.evaluate(() => window.__game.profile.id), leadId = await lead.page.evaluate(() => window.__game.profile.id);
     step('they see each other in town', await until(kyle, () => window.__town().count >= 1, null, 20000));
     await lead.page.evaluate(() => window.__openSpot('board'));
     await lead.page.click('#panel [data-open="1"]');
@@ -81,19 +84,26 @@ const get = (url) => new Promise((r) => http.get(url, (res) => { let b = ''; res
     await kyle.page.click('#panel [data-joinparty]');
     await kyle.page.evaluate(() => window.__panel.hide());
     await until(lead, () => (document.querySelector('#partycard ul')?.children.length ?? 0) >= 2);
+    // Both trips to the relay measured (the town socket's heartbeat), and Kyle's said to the leader on his join word.
+    if (pick) step('the leader has heard Kyle\'s link', await until(lead, (id) => window.__town().rtt > 0 && !!window.__game.parties?.heardLinks()[id], kyleId, 30000));
+    report.links = { leader: await lead.page.evaluate(() => Math.round(window.__town().rtt * 1000)), kyle: await kyle.page.evaluate(() => Math.round(window.__town().rtt * 1000)), heard: await lead.page.evaluate(() => window.__game.parties?.heardLinks()) };
     await lead.page.evaluate(() => document.querySelector('#partycard.shut .pc-line')?.click());
     await lead.page.click('#partycard [data-setout]');
     t0 = Date.now();
-    // Join latency: setting out to Kyle standing in the leader's room.
-    const inIt = await until(kyle, () => window.__game.mode === 'run' && window.__game.room.heroes.some((h) => h.id === '@lead') && window.__game.room.heroes.some((h) => h.id === 'me'), null, 45000);
+    // Who runs the room: Kyle (nearer the relay), or LIACOR with LEAD_HOSTS=1. The other is the guest.
+    const [host, guest, hostId] = pick ? [kyle, lead, kyleId] : [lead, kyle, leadId];
+    const hosts = await until(host, () => window.__game.mode === 'run' && !!window.__game.coop && !window.__game.remote, null, 15000);
+    step(pick ? `Kyle hosts, though LIACOR leads the party (trips ${report.links.kyle} and ${report.links.leader} ms)` : 'LIACOR hosts (LEAD_HOSTS=1)', hosts);
+    // Join latency: setting out to the guest standing in the host's room.
+    const inIt = await until(guest, (id) => window.__game.mode === 'run' && window.__game.remote?.lead === id && window.__game.room.heroes.some((h) => h.id === '@lead') && window.__game.room.heroes.some((h) => h.id === 'me'), hostId, 45000);
     report.joinMs = inIt ? Date.now() - t0 : null;
-    step(`Kyle is in the leader's job (${report.joinMs} ms after setting out)`, inIt);
+    step(`${guest.name} is in ${host.name}'s job (${report.joinMs} ms after setting out)`, inIt);
     // Keep everyone up (the test is the wire, not the fight).
     for (const p of [lead, kyle]) await p.page.evaluate(() => setInterval(() => { for (const h of window.__game.room.heroes) (h.hp = h.maxHp ?? h.hp), (h.safeT = 1e9); for (const e of window.__game.room.enemies) e.stun = 9; }, 200));
     const meter0 = await r.info('commandstats');
-    const ws0 = await kyle.page.evaluate(() => ({ ...window.__ws }));
-    // Kyle watches the leader: where the leader's hero is drawn each frame, and each patch applied.
-    await kyle.page.evaluate(() => {
+    const ws0 = await guest.page.evaluate(() => ({ ...window.__ws }));
+    // The guest watches the host: where the host's hero is drawn each frame, and each patch applied.
+    await guest.page.evaluate(() => {
       const s = (window.__look = { frames: 0, moving: 0, still: 0, speeds: [], last: null, at: 0 });
       const f = () => {
         const g = window.__game, room = g.room, h = room?.heroes.find((x) => x.id === '@lead');
@@ -118,21 +128,22 @@ const get = (url) => new Promise((r) => http.get(url, (res) => { let b = ''; res
     const stop = Date.now() + SECS * 1000;
     const walk = async (p, keys) => { for (let i = 0; Date.now() < stop; i++) { const k = keys[i % keys.length]; await p.page.keyboard.down(k); await wait(1400); await p.page.keyboard.up(k); await wait(300); } };
     await Promise.all([walk(lead, ['d', 'a']), walk(kyle, ['w', 's'])]);
-    const look = await kyle.page.evaluate(() => window.__look);
-    const ws1 = await kyle.page.evaluate(() => ({ ...window.__ws }));
-    const g = await kyle.page.evaluate(() => { const x = window.__game.remote; return x ? { trip: x.trip, quiet: x.quiet(performance.now() / 1000) } : null; });
+    const look = await guest.page.evaluate(() => window.__look);
+    const ws1 = await guest.page.evaluate(() => ({ ...window.__ws }));
+    const g = await guest.page.evaluate(() => { const x = window.__game.remote; return x ? { trip: x.trip, quiet: x.quiet(performance.now() / 1000) } : null; });
     const meter1 = await r.info('commandstats');
     const calls = (s) => [...s.matchAll(/cmdstat_(\w+):calls=(\d+)/g)].filter((m) => !/^(config|info)/.test(m[1])).reduce((n, m) => n + Number(m[2]), 0);
     report.redisPerMin = Math.round(((calls(meter1) - calls(meter0)) * 60) / SECS);
-    const mine = log.filter((l) => l.ev === 'join' && /^P[A-Z0-9]{8}$/.test(l.room ?? '') && l.id === kyleId.slice(0, 8));
-    report.kyleJobJoins = mine.length;
+    const guestId = pick ? leadId : kyleId;
+    const mine = log.filter((l) => l.ev === 'join' && /^P[A-Z0-9]{8}$/.test(l.room ?? '') && l.id === guestId.slice(0, 8));
+    report.guestJobJoins = mine.length;
     // The first 30 s after setting out: getting in (where the storm was), a minute's worth.
-    report.kyleJoinsFirst30s = mine.filter((l) => l.at - t0 < 30_000).length;
-    report.kyleJoinsPerMin = +((mine.filter((l) => l.at >= stop - SECS * 1000).length * 60) / SECS).toFixed(1);
+    report.guestJoinsFirst30s = mine.filter((l) => l.at - t0 < 30_000).length;
+    report.guestJoinsPerMin = +((mine.filter((l) => l.at >= stop - SECS * 1000).length * 60) / SECS).toFixed(1);
     report.socketsOpenedInPlay = ws1.opened - ws0.opened;
     report.mostOpenAtOnce = ws1.most;
     report.busResets = log.filter((l) => l.ev === 'busreset').length;
-    report.leaderMovingFrames = look.moving + look.still;
+    report.hostMovingFrames = look.moving + look.still;
     report.stallPct = +((100 * look.still) / Math.max(1, look.moving + look.still)).toFixed(1);
     // Jumps: frames where he's drawn going over twice his usual walking pace (catching up after a stall).
     const sp = [...look.speeds].sort((a, b) => a - b), med = sp[Math.floor(sp.length / 2)] || 0;
@@ -140,9 +151,9 @@ const get = (url) => new Promise((r) => http.get(url, (res) => { let b = ''; res
     report.jumpPct = +((100 * report.jumps) / Math.max(1, sp.length)).toFixed(1);
     report.trip = g && +g.trip.toFixed(3);
     report.playoutMs = look.waits ? Math.round((1000 * look.wait) / look.waits) : null;
-    step(`Kyle hears the leader (quiet ${g?.quiet?.toFixed(2)} s at the end)`, g && g.quiet < 1);
-    step(`no join storm (${report.kyleJoinsFirst30s} job joins in the first 30 s, ${report.kyleJoinsPerMin} a minute in play, ${report.socketsOpenedInPlay} sockets opened, at most ${report.mostOpenAtOnce} open at once)`, report.kyleJoinsPerMin <= 4 && report.kyleJoinsFirst30s <= 6 && report.mostOpenAtOnce <= 4);
-    step(`the leader moves smoothly on Kyle's screen (${report.stallPct}% of frames stalled while he walks, ${report.jumpPct}% drawn at over twice his pace)`, report.leaderMovingFrames > 100 && report.stallPct < 35);
+    step(`${guest.name} hears the host (quiet ${g?.quiet?.toFixed(2)} s at the end)`, g && g.quiet < 1);
+    step(`no join storm (${report.guestJoinsFirst30s} job joins in the first 30 s, ${report.guestJoinsPerMin} a minute in play, ${report.socketsOpenedInPlay} sockets opened, at most ${report.mostOpenAtOnce} open at once)`, report.guestJoinsPerMin <= 4 && report.guestJoinsFirst30s <= 6 && report.mostOpenAtOnce <= 4);
+    step(`the host moves smoothly on ${guest.name}'s screen (${report.stallPct}% of frames stalled while he walks, ${report.jumpPct}% drawn at over twice his pace)`, report.hostMovingFrames > 100 && report.stallPct < 35);
     report.ok = report.steps.every((s) => s.ok) && !report.errors.length;
   } catch (e) {
     report.errors.push(String(e));

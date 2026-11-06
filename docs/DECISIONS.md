@@ -2,6 +2,92 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-06: who hosts: the best connection runs the room, and a hidden host hands it on (Kyle; Claude Opus 5.5)
+
+Kyle approved both today (the two left open in "the join storm" and "the guest feel"): "best connection hosts"
+and "a hidden host hands over". Numbers in `shared/hostpick.ts` (`HOSTPICK`, `HIDE`); the rule there, tested in
+Node (`tests/hostpick.test.ts`).
+
+**1. Who hosts.** Every player's traffic goes through the one relay in `sfo1`, so a friend's delay to the host
+is about half the host's trip to the relay plus half their own. On the Florida night, Kyle hosting would have
+given each Florida friend about 80 ms one way, against LIACOR hosting's 80 for Kyle and 140 for the other
+Florida friend (220 ms between them down to 160).
+- **The pick** (`pickHost`): each member's score is their trip to the relay (`RelaySocket.rtt` on the town
+  socket, the heartbeat's own ping and pong, in ms) plus a small lean for a struggling page: half of each ms of
+  average frame time over 20, at most 10 (`linkScore`: a phone at 40 ms a frame costs 10, a laptop at 16
+  nothing). The lowest score hosts, but only if the leader's is **25 ms or more** worse; else the leader. A trip
+  not yet measured (0, before the first heartbeat answers) never wins, and a leader with none keeps it. The
+  frame lean alone can never move the room (10 is under the 25), so a laptop beats a phone at the same trip
+  among the others, and a phone leader at the same trip as a laptop keeps hosting.
+- **No new traffic.** A member's link rides on the party's own join word (`{k:'join', n, q:[rtt, frame]}`),
+  which they already send asking in; once in, they say it again only when it's first known or has moved (10 ms
+  of trip or 8 of frame time), at most every 5 s and at least every 60 (`sayAgain`): a few words a party. The
+  leader's own comes from its own socket. A report older than 90 s isn't used. The frame time is kept from
+  drawn frames (`client/netq.ts`).
+- **Picked once, at setting out** (`Parties.setOut`): the `go` word carries `h`, the host. The host starts the
+  room as a leader would (`Game.setOut` with the word as told); everyone else, the party's leader included,
+  follows them as a guest through the same paths a friend always took (`startRemote`, `want=join`: joiners
+  never claim). The party leader stays the leader for everything social: the card, invites, the job, and the
+  beat's own line ("X is leading the party out to Y"). Nothing picks again mid-job: the host keeps it unless they
+  leave or the hidden rule fires.
+- `?pick=lead`: the leader always hosts. The stress kit and the party, chat, lobby, exped and budget scripts use
+  it so each knows whose page runs the room (on the local relay everyone's trip is the same, give or take a
+  busy frame); `florida-online.cjs` uses the pick (and `LEAD_HOSTS=1` for the night as it was played).
+
+**2. A hidden host hands it on** (`client/hidehost.ts`, `handNow`). A host with a friend still in the job (heard
+from in the last 5 s) whose page goes out of sight hands the room to the friend first in line: a desktop
+after **2.5 s** out of sight (a timer, and the hidden loop's once-a-second tick), a phone or touch device at
+once (`visibilitychange` hidden; it freezes timers), and any page going away (`pagehide`) at once. Alone,
+nothing changes: the room runs on the hidden loop as before.
+- `CoopHost.handOver(true)`: the whole job to everyone, then `{bye, stay, to}` naming the friend first in line
+  (the one the 2 s save already goes to), and the socket closed at once, not after 1.5 s, so the relay frees
+  the room now (a phone would freeze before the timer fired). The named friend takes it the moment the relay
+  says the host's gone (`left`), or 2.5 s after the goodbye if that word is slow; the rest follow in their
+  order after them. `stay`: the old host's hero stays in the job.
+- Back in sight, the old host opens no socket while hidden and then follows whoever has it as a guest
+  (`Game.backAsGuest`); a reload meanwhile follows them too (the session names the new host).
+- A guest's `heardLead` now uses the clock, not the last frame's time: a page out of sight draws no frames but
+  still hears, and back in sight used to think the leader quiet all that while and try to take the job on.
+
+**Two bugs found on the way, in every takeover since the pacing merge** (the determinism test across a
+handover): the pack rushes' clocks are Maps, which the job's JSON wrote as `{}`, so a friend taking a job on
+mid-fight stopped dead on the next tick (`s.due.has is not a function`); and JSON has no Infinity, so every
+barrel and oil jar (`fadeAt: Infinity`) loaded as `null` and was gone a tick later. `saveRoom` sends the rushes
+as lists, `jobJson` writes Infinity as a word, and `loadRoom` brings both back. A street handed on is now the
+same fight tick for tick with the ids swapped as a takeover swaps them; an expedition's save is to the
+centimetre by design (`bigsave.ts`), and from it the same fight on any page.
+
+**Measured.** `florida-online.cjs` (the leader 70 ms away each way and Kyle near the relay): trips 213 ms and
+29 ms, Kyle hosts with LIACOR leading; LIACOR in Kyle's job 4.5 s after setting out (the dead SUBSCRIBE's 2.5 s
+included), one job join, at most 3 sockets, the host drawn stalled on 9.3% of frames while walking, Redis 19
+commands a minute (the same as before: nothing new on the wire). `LEAD_HOSTS=1`: as before, 4.6 s, 11.1%, 19.
+With two players the guest pays both legs either way (0.31 s against 0.29); the gain is a third and fourth
+player. Stress (`scripts/stress-online.cjs`, local relay, LAG_MS 120): scene 4 now expects the hand-on (Sam
+takes the job 2.9 s after Kyle's page goes out of sight, leads all 25 s, Kyle back follows him, they finish);
+**4m**, the leader muted and hidden: Sam has it in 2.9 s and runs it at 0.99 room seconds a second, every one
+of 50 looks a tenth of a second apart seeing it move (a hidden host sent about a patch a second); **4p**, a
+phone leader: handed on the moment it hides.
+
+**New words, for the lore keeper and the line editor** (`client/partywords.ts`): under the setting-out beat when
+someone other than the leader hosts, "X has the best connection, so the job runs on their device." (to
+everyone else) and "You have the best connection, so the job runs on your device." (to the host); over your hero
+when the job moves mid-way, "X IS HOSTING NOW", and to whoever takes it, "YOU ARE HOSTING NOW" (a takeover of
+any kind now says this).
+
+Tests: `tests/hostpick.test.ts` (the pick: lowest trip, the frame tie-break and its cap, the margin, unmeasured
+trips; when a link is said again; the parties on a fake town: the link on the join word, the `go` word's host,
+the leader on a near tie, a link known late said once, no new pick after setting out; the hidden rule: desktop
+not at 2.4 s and at 2.5, back within it nothing, touch at once, `pagehide` at once, alone never, back in sight a
+guest; the host's goodbye and its closed socket; the named friend first, at once on `left`; LEAVE as it was; a
+guest hidden 20 s not thinking the leader quiet; the room across a handover, a street and an expedition of
+three). Full vitest (1,285) and `tsc` pass. Online, one at a time: town, party, chat, lobby, exped, florida (both
+ways) and the full stress run (31 scenes, in four parts) pass, but for party-online's lag-feel steps: its dodge
+jerk and the stab "within what the cap allows" are on the edge at headless Chromium's 0.47 to 0.49 s lag against
+the 0.35 s cap (the press reaches the host about 7 ms before the cap), and fail on untouched main too (that run:
+the block and the dodge). Stress scene 1's 2 s step failed once and passed on the rerun.
+
+Not built: a host picked again mid-job (Kyle: no ping-pong); a host that comes back taking its room back.
+
 ## 2026-11-06: the guest feel: your own acts at once, one walk rule, and a blow judged by your own screen (Claude Opus 5.5)
 
 Kyle's goal: online lag as low as possible. A friend (a guest) felt their own dodge, block and swing a whole trip

@@ -144,7 +144,7 @@ async function guestFeel(kyle, sam, step) {
     const ctx = await browser.newContext(opts);
     const page = await ctx.newPage();
     page.on('pageerror', (e) => report.errors.push(`${name}: ${e}`));
-    await page.goto(`http://127.0.0.1:${PORT}/${process.env.LOOK ? '?look=' + process.env.LOOK : ''}`);
+    await page.goto(`http://127.0.0.1:${PORT}/?pick=lead${process.env.LOOK ? '&look=' + process.env.LOOK : ''}`);
     await page.waitForFunction(() => window.__game);
     await page.evaluate(([cls, name]) => { window.__game.create(cls, name); if (window.__game.mode === 'wood') window.__game.skipWood(); document.getElementById('title').hidden = true; window.__title.open = false; }, [cls, name]);
     return { name, ctx, page };
@@ -230,7 +230,7 @@ async function guestFeel(kyle, sam, step) {
     const reopen = async (p) => {
       const page = await p.ctx.newPage();
       page.on('pageerror', (e) => report.errors.push(`${p.name}: ${e}`));
-      await page.goto(`http://127.0.0.1:${PORT}/${process.env.LOOK ? '?look=' + process.env.LOOK : ''}`);
+      await page.goto(`http://127.0.0.1:${PORT}/?pick=lead${process.env.LOOK ? '&look=' + process.env.LOOK : ''}`);
       await page.waitForFunction(() => window.__game);
       await page.evaluate(() => { document.getElementById('title').hidden = true; window.__title.open = false; });
       return page;

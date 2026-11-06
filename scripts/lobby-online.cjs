@@ -27,7 +27,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isM
   const load = async (p) => {
     const page = await p.ctx.newPage();
     page.on('pageerror', (e) => report.errors.push(`${p.name}: ${e}`));
-    await page.goto(`http://127.0.0.1:${PORT}/`);
+    await page.goto(`http://127.0.0.1:${PORT}/?pick=lead`);
     await page.waitForFunction(() => window.__game);
     return page;
   };

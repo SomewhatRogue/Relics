@@ -152,6 +152,11 @@ export class Townfolk {
     return !!this.sock;
   }
 
+  /** The town socket's trip to the relay and back (s; 0 until the first heartbeat answers): who'd host best (parties.ts). */
+  get rtt(): number {
+    return this.sock?.rtt ?? 0;
+  }
+
   /** How many others are in Wickhold right now. */
   get count(): number {
     return this.folk.size;
