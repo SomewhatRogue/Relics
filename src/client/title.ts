@@ -13,11 +13,11 @@ import { COPY, RECOVER } from './copy';
 import { RECOVERY, type Recovery } from './recovery';
 import { RecoveryPanel } from './recoveryui';
 import type { Game } from './game';
-import { heroLook } from './sprites';
+import { heroPortrait } from './sprites';
 
 const NAMES: Record<HeroClass, string> = { WARRIOR: 'BRANNOCK', RANGER: 'WREN', ROGUE: 'SILK', MAGE: 'ASHE', HEALER: 'IVY' };
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
-const face = (cls: HeroClass, look = 0) => `<img class="face" alt="" src="${heroLook(cls, look).down.c.toDataURL()}">`;
+const face = (cls: HeroClass, look = 0) => `<img class="face" alt="" src="${heroPortrait(cls, look).toDataURL()}">`;
 
 export class Title {
   private el = document.createElement('div');

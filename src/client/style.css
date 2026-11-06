@@ -97,7 +97,7 @@ body.dicing #banner span { visibility: hidden; }
 #title .cname { margin: 0; text-align: center; color: #ffd27a; font-size: 22px; letter-spacing: 0.14em; }
 #title .looks { display: flex; justify-content: center; gap: 10px; margin: -2px 0 10px; }
 #title .looks button { padding: 4px 10px; }
-#title .looks .face { width: 30px; height: auto; image-rendering: pixelated; display: block; }
+#title .looks .face { width: 36px; height: auto; image-rendering: pixelated; display: block; }
 #title .stage { display: flex; justify-content: center; margin: 4px 0 10px; }
 #title .preview { width: 224px; height: 160px; max-width: 100%; image-rendering: pixelated; background: radial-gradient(ellipse at 50% 80%, #2a2632 0%, #16171b 70%); }
 #title .dhead { display: flex; align-items: center; gap: 14px; }

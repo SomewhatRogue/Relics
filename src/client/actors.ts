@@ -7,7 +7,7 @@ import { parryWindow, releaseWindow } from '../sim/knacks';
 import { castElement } from '../sim/channel';
 import type { Hero } from '../sim/types';
 import { BARE, blit, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
-import { armOffset, drawFigure, layout } from './figure';
+import { LAYOUT, armOffset, drawFigure, layout } from './figure';
 import { heroCut, jointed } from './joints';
 import { heroPose } from './heropose';
 import { drawWeapon, pose } from './held';
@@ -17,7 +17,11 @@ import { drawBladeMark } from './blademark';
 import { drawHolyShield } from './holyshield';
 import { drawText } from './pixfont';
 import { PARTY } from '../shared/tuning';
-import { LOOKS, SPRITES, heroLook } from './sprites';
+import { SPRITES, heroLook, lookDef } from './sprites';
+import type { Cls, LookDef } from './lookkit';
+import { drawLife, idPhase } from './herolife';
+import { dialLook, drawDialAura, drawDialEyes } from './heroeyes';
+import { eyesAt, rim, topRow } from './herodial';
 
 const ARM: [number, number] = [0, 0];
 const POISON_TINT = '#5ad02a';
@@ -32,8 +36,12 @@ function drip(c: Ctx, x: number, y: number, n: number): void {
   }
   c.glow.globalAlpha = 1;
 }
-/** How a class's look is cut into parts: hats make it taller; a robe hides the legs but for the feet. */
-const cutOf = (cls: keyof typeof LOOKS, look = 0) => heroCut((LOOKS[cls][look] ?? LOOKS[cls][0]).tall ?? 0, cls === 'MAGE' || (cls === 'HEALER' && look === 1));
+/** How a class's look is cut into parts: hats and hoods make it taller; a robe hides the legs but for the feet. */
+const cutOf = (d: LookDef) => heroCut(d.tall, !!d.robe);
+/** Breathing at rest: the body rises a pixel for part of a slow breath (Kyle, 2026-11-05: more life). */
+const BREATH = { every: 3.4, up: 1.3, crouch: -0.07 };
+/** Walking: a step every 1/8 s, a foot up a pixel and the body bobbing with it. */
+const STEPS = [-1, 0, 1, 0];
 
 /** `t` is the room's time (blessings and rallies are kept in it). */
 /** A hero, and a netter's net over them while they're held in it (foedraw.ts). */
@@ -63,7 +71,9 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
   // The body's pose (heropose.ts), drawn part by part; walking it bobs a pixel, standing it keeps still.
   const pz = heroPose(h, t, c.now);
   let ox = pz.ox, oy = pz.oy, squash = 1;
-  if (pz.phase === 'rest' && h.moving) oy = Math.floor(c.now * 8) % 2 ? -1 : 0;
+  const ph = idPhase(h.id);
+  if (pz.phase === 'rest' && h.moving) (pz.step = STEPS[Math.floor(c.now * 8 + ph * 4) % 4]), (oy = pz.step ? -1 : 0);
+  else if (pz.phase === 'rest' && h.act === 'idle' && !h.blocking && ((c.now + ph * BREATH.every) % BREATH.every) < BREATH.up) pz.crouch = BREATH.crouch;
   if (h.act === 'zip') (ox = Math.round(h.fx * 2)), (oy = Math.round(h.fy * 2) - 1);
   const dk = WEAPONS[h.weapon].dodge;
   // The mage's blink: gone, a scatter of violet light where they are.
@@ -97,7 +107,7 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
     if (tumble) return blit(c, look.down, bx, by, flip, 0, squash);
   }
   // The body in parts (figure.ts); the weapon is in the weapon hand, wherever that arm has gone.
-  const cls = WEAPONS[h.weapon].cls, body = jointed(up ? look.up : look.down, cutOf(cls, h.look));
+  const cls = WEAPONS[h.weapon].cls as Cls, def = lookDef(cls, h.look), body = jointed(up ? look.up : look.down, cutOf(def));
   const L = layout(body, bx, by, flip, pz), [ax, ay] = armOffset(ARM), mid = Math.round(L.lean / 2), low = L.drop;
   const side = h.fx >= -0.2 ? 1 : -1, px = bx + side * 3 + ax, py = by - 8 + ay, p = pose(h, c.now);
   // The sword and shield's release: the shield flashes as the blow goes out (the blade too, held.ts).
@@ -124,15 +134,22 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
   if (up) drawGear();
   // Poisoned: a green cast over the body, pulsing, stronger with each stack (unless a hit's flash is on it).
   if (h.poison && !pz.flash) (pz.flash = 0.16 + 0.07 * h.poison + 0.06 * Math.sin(c.now * 5)), (pz.tint = POISON_TINT);
+  // The eye dial's light round the body (heroeyes.ts), cloth behind, the body, cloth over it (herolife.ts).
+  const dl = dialLook(h.dial);
+  drawLife(c, h, def, up, 'back', pz.flash, pz.tint, dl.side < 0 ? dl.a : 0);
   drawFigure(c, body, bx, by, pz);
+  drawLife(c, h, def, up, 'front', pz.flash, pz.tint, dl.side < 0 ? dl.a : 0);
+  rim(c, dl, body);
   if (h.poison) drip(c, bx, by, h.poison);
+  const [ey, exl, exr] = eyesAt(def);
+  if (!up) drawDialEyes(c, dl, exl, exr, ey, ph);
+  drawDialAura(c, dl, bx, by, LAYOUT.top + 1 + topRow(def) + LAYOUT.drop, ph);
   // The Want shows in the eyes first: a glint in the dark, like theirs.
   if (!up && h.want >= WANT.eyes) {
     c.glow.globalAlpha = Math.min(1, h.want / 80) * (0.55 + 0.45 * Math.sin(c.now * 2));
     c.glow.fillStyle = '#ff4a3a';
-    const ex = Math.round(bx + L.lean), ey = Math.round(by - 13 + L.drop);
-    c.glow.fillRect(ex - 2, ey, 1, 1);
-    c.glow.fillRect(ex + 1, ey, 1, 1);
+    c.glow.fillRect(exl, ey, 1, 1);
+    c.glow.fillRect(exr, ey, 1, 1);
     c.glow.globalAlpha = 1;
   }
   if (!up) drawGear();

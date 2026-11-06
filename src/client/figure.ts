@@ -10,7 +10,7 @@ import type { Joint, Jointed } from './joints';
 import { WHITE, type BodyPose } from './motion';
 
 /** Where everything goes this frame (scene pixels). */
-export const LAYOUT = { left: 0, top: 0, flip: false, drop: 0, lean: 0, ax: 0, ay: 0 };
+export const LAYOUT = { left: 0, top: 0, flip: false, drop: 0, lean: 0, ax: 0, ay: 0, step: 0 };
 /** Of a crouch, how far the body drops (a share of its height), at most this share of the legs; rising, one pixel at most. */
 const DROP = 0.55, FOLD = 0.6;
 
@@ -23,6 +23,7 @@ export function layout(j: Jointed, x: number, y: number, flip: boolean, p: BodyP
   L.lean = Math.round(p.lean);
   L.ax = Math.round(p.reach * p.dx);
   L.ay = Math.round(p.reach * p.dy * 0.5) - Math.round(p.raise);
+  L.step = p.step;
   return L;
 }
 
@@ -38,8 +39,11 @@ function place(part: Joint, out: number[]): number[] {
   return out;
 }
 
+/** Whether this part is the leg that's up this step (drawn a pixel higher; the body, drawn after, covers its top). */
+const lifted = (part: Joint) => ((part.kind === 'legL' && LAYOUT.step < 0) || (part.kind === 'legR' && LAYOUT.step > 0) ? 1 : 0);
+
 function put(g: CanvasRenderingContext2D, part: Joint, img: HTMLCanvasElement): void {
-  const [x, y, dh] = place(part, AT), w = part.x1 - part.x0, h = part.y1 - part.y0;
+  const [x, y0, dh] = place(part, AT), w = part.x1 - part.x0, h = part.y1 - part.y0, y = y0 - lifted(part);
   if (!LAYOUT.flip) return g.drawImage(img, part.x0, part.y0, w, h, x, y, w, dh);
   g.save();
   g.translate(x + w, y);
@@ -53,7 +57,7 @@ export function drawFigure(c: Ctx, j: Jointed, x: number, y: number, p: BodyPose
   const L = LAYOUT;
   if (p.ghost > 0) ghost(c, j.s, x + p.gx, y + p.gy, L.flip, p.ghost);
   // Nothing moved apart: the parts make exactly the sprite, so draw it whole (one call, not six).
-  if (!L.drop && !L.lean && !L.ax && !L.ay) return blitPose(c, j.s, x, y, L.flip, 1, 1, 0, p.flash, p.tint);
+  if (!L.drop && !L.lean && !L.ax && !L.ay && !L.step) return blitPose(c, j.s, x, y, L.flip, 1, 1, 0, p.flash, p.tint);
   for (const part of j.parts) put(c.lit, part, part.c);
   c.glow.globalCompositeOperation = 'destination-out';
   for (const part of j.parts) put(c.glow, part, part.white);
@@ -63,7 +67,7 @@ export function drawFigure(c: Ctx, j: Jointed, x: number, y: number, p: BodyPose
     const [px, py] = place(part, AT);
     for (const [gx, gy, col] of part.glow) {
       c.glow.fillStyle = col;
-      c.glow.fillRect(px + (L.flip ? part.x1 - 1 - gx : gx - part.x0), py + gy - part.y0, 1, 1);
+      c.glow.fillRect(px + (L.flip ? part.x1 - 1 - gx : gx - part.x0), py + gy - part.y0 - lifted(part), 1, 1);
     }
   }
   if (p.flash > 0) {

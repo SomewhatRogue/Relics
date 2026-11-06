@@ -6,7 +6,7 @@
  * job, small hearts under the health bar: the times you can still get back up (alone, a heart each; in a
  * party, your one get-up). Tapped or hovered, they say what they are.
  */
-import { heroLook } from './sprites';
+import { heroLook, lookDef } from './sprites';
 import { icon, type IconId } from './icons';
 import type { Game } from './game';
 import { MAX_DOWNS } from '../sim/run';
@@ -97,12 +97,13 @@ export class UnitFrame {
 
   /** The head and shoulders of the hero's own sprite, upscaled by whole pixels into the socket. */
   private paintFace(cls: Parameters<typeof heroLook>[0], look: number): void {
-    const s = heroLook(cls, look).down.c, g = this.face.getContext('2d')!;
+    // From a little above the eyes down (a Mage's hat brim, a Ranger's hood, the face, the shoulders).
+    const s = heroLook(cls, look).down.c, g = this.face.getContext('2d')!, top = Math.max(0, lookDef(cls, look).eyes[0] - 3);
     const w = 14, h = 12;
     this.face.width = w;
     this.face.height = h;
     g.clearRect(0, 0, w, h);
     g.imageSmoothingEnabled = false;
-    g.drawImage(s, Math.round((s.width - w) / 2), 0, w, h, 0, 1, w, h);
+    g.drawImage(s, Math.round((s.width - w) / 2), top, w, h, 0, 1, w, h);
   }
 }

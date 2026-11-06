@@ -3,6 +3,7 @@
  * blowpipe, the sword and censer, the flail. Their rest and charge poses, and how each is drawn. Swings,
  * thrusts and shots use held.ts's shared poses, so what sweeps on screen is the arc the room judges.
  */
+import { censerSmoke } from './wisps';
 import { WEAPONS } from '../shared/tuning';
 import { currentSwing } from '../sim/hero';
 import type { Hero } from '../sim/types';
@@ -48,6 +49,7 @@ export function censer(c: Ctx, px: number, py: number, side: number): void {
   g.fillRect(Math.round(cx + sway - 1), Math.round(cy), 3, 2);
   c.glow.fillStyle = Math.floor(c.now * 6) % 2 ? '#ffd27a' : '#ff9a3c';
   c.glow.fillRect(Math.round(cx + sway), Math.round(cy - 1), 1, 1);
+  censerSmoke(c, cx + sway, cy - 1);
 }
 
 /** A censer on a chain swung along `a`, coals spilling from it (bigger as a whirl fills). */

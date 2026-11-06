@@ -575,4 +575,6 @@ w.__openSpot = (id: string, arg = 0, key = '') => openSpot(id as never, game, pa
 w.__kindling = (i: number) => kindling(game.room.map.blocks[i], game.room.map);
 w.__villageJob = (seed = 7) => import('../shared/jobs').then((m) => ({ ...m.board(1)[0], place: m.PLACES.find((p) => p.kind === 'village')!, objective: 'hunt', boss: 'SKARN', rooms: 3, seed, deep: false }));
 // Look sheets for screenshots: every hero, the Warrior's options, and a dark copy with only the glow lit.
+// One hero drawn by the game's own code, for the hero look sheet (scripts/heroes-look.cjs).
+w.__heroArt = (...a: Parameters<typeof import('./heroart').heroArt>) => import('./heroart').then((m) => m.heroArt(...a));
 w.__looks = () => Object.fromEntries(Object.keys(LOOKS).map((k) => [k, [0, 1, 2].map((i) => heroLook(k as HeroClass, i).down.c.toDataURL())]));

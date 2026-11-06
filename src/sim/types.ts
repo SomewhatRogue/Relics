@@ -202,6 +202,11 @@ export interface Hero extends Body {
   poisonNext?: number;
   /** The Want, for the eyes (never shown as a number). */
   want: number;
+  /**
+   * The eye dial, -1 (red) to +1 (gold); unset or 0 is the middle, plain eyes (PLAN.md "red eyes and
+   * gold eyes"). Only drawn for now (client/heroeyes.ts); nothing sets it yet.
+   */
+  dial?: number;
   /** Lying where you fell, before Hew gets you up (the wood's opening). */
   lying?: boolean;
   /**

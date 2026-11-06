@@ -137,6 +137,61 @@ steams and on the bank burns; steam hides you and scalds; two runs agree; ice an
 `tests/storm.test.ts` updated: the far wet goblin in the same pool is jolted now. `node scripts/world-look.cjs
 [url] [outdir]` shoots a jolt across Barrowby's ford, a FED butcher beside one at its meal, iced shallows with
 goblins held, and a steam cloud, on a phone, flat and 2.5D.
+## 2026-11-05: heroes are people: faces, outlines, cloth that moves, and the eye dial drawn (Kyle; Claude Opus 5.5)
+
+Kyle: "They sort of look weirdly like robots and not very unique from one style to the next. I'd prefer
+some more dynamic elements and visualizations for each class." Then, on the eyes: "We were going to have
+eyes glow good or evil depending on what you did in the world, or angelic / demonic qualities as the
+hunger takes you or not." Drawing only; the room is untouched.
+
+- **Faces, not visors.** Every hero shows skin and a face with plain dark eyes (glowing eyes stay the
+  goblins' mark). Skin runs fair to deep across the fifteen looks; hair and beards where they fit.
+  The looks are pixel maps now (`client/herolooks.ts`, `herolooks2.ts`, built by `lookkit.ts`), one
+  letter a colour, so a look can be read and changed by eye. `sprites.ts` builds them as before.
+- **Told apart by outline** (a test holds that the five first looks have five outlines):
+  - **Warrior**: the widest shoulders (pauldrons out to the sprite's edge), a tabard, a cape. Knight:
+    open-faced helm, red plume, blue and gold, red cape. Sellsword: bare-headed, black hair and beard,
+    dented steel, a ragged brown cape. Blackiron: long pale hair, a scar, black plate, a cape like old blood.
+  - **Ranger**: a peaked hood a row taller, a cloak to the calves, the quiver's fletching over the
+    shoulder, a short sword's hilt. Green with an auburn fringe; a brown trapper with a fur edge and a
+    black beard; a grey-blue hill warden.
+  - **Rogue**: lowest and widest-legged (a crouch), a scarf up over the nose with the eyes showing, a
+    sash, knives at the hips. Plum scarf; the red-scarfed cutpurse; Night, all black and a bone mask.
+  - **Mage**: the tallest, a wide-brimmed pointed hat, a robe that flares to the ground. Violet with a
+    grey beard; the ember in red with a black beard; frost in pale blue with long white hair.
+  - **Cleric**: mail and a long tabard with the Lantern on it (gold thread, not light), the censer as
+    before. Mail coif and white; the friar's brown habit, tonsure and rope belt; a red cap and red tabard.
+- **Life, cosmetic** (`client/herolife.ts`): capes hang behind and fly out behind when walking (the
+  sellsword's hem notched); the plume nods and streams; long hair sways; a Ranger's cloak edges
+  flutter; a Rogue's scarf tail streams from the knot and the sash end swings; a robe's hem flares and
+  kicks; a hat's tip nods; the tabard's foot flicks. Each hero sways on a phase from their id, so a party
+  never moves in step and a hero always moves the same way. Walking now steps (a foot up a pixel,
+  `figure.ts` LAYOUT.step) as well as bobbing. **Idle breathing is back** (the 2026-11-01 "no idle
+  breathing" is overruled): a pixel's rise for part of a slow breath, the head and body only, never
+  while blocking or mid-act. Lit layer only: none of it is light.
+- **Living details on what's carried** (`client/wisps.ts`): motes of the element drift up off a Mage's
+  wand or staff (glow, it's light); smoke curls off the Cleric's censer coal (lit layer, it's matter).
+- **The eye dial, drawn, not ruled** (`client/heroeyes.ts`, `herodial.ts`; PLAN.md "red eyes and gold
+  eyes"). `Hero.dial`, -1 red to +1 gold, unset is 0: plain eyes, as every hero today. Near the middle,
+  a faint tint. Toward red the eyes burn and flicker, smoke curls off them at the far end, a red
+  under-glow pools at the feet and lights the figure's lower edges, embers and ash rise, and the cape
+  or cloak darkens and frays. Toward gold a warm glow in the eyes, then the top and left edges catch a
+  gold rim, a halo glints over the head, motes of light rise. Light on the glow layer, smoke and ash on
+  the lit. Drawn by drawHero, so it shows in FLAT and 2.5D and to the whole party. Nothing sets the dial
+  yet: what moves it, and its rewards, are the next job. The Want's old red glint still shows in the
+  eyes at its threshold, now at each look's own eyes.
+- **Kept**: three looks a class and their order (saved heroes keep their look), facing, every pose
+  (attack, charge, roll, block, hurt, down), the gear in hand, flashes and afterimages. Robes now hide
+  all but the feet row. Armor tiers don't show on the body (they never did). 2.5D uses the same
+  drawHero, so it changed with FLAT; the box figures behind `?figs=3d` (`three/heroes3d.ts`) are untouched.
+- **Faces in the UI**: the pick screen and hero slots show each look on one 18 by 24 card at the same
+  scale (`heroPortrait`); the HUD face crops from just above each look's eyes.
+- **Cost**: a hero's cloth is a handful of fillRects a frame (outline, cloth, a glow erase); the dial
+  draws nothing at 0. The rim is a cached canvas per sprite.
+- **Checks**: `tests/herolooks.test.ts` (no glowing pixel on any hero, dark eyes where each look says,
+  five outlines, three looks that differ; no dial draws plain, red and gold draw differently). Sheets by
+  `scripts/heroes-look.cjs` (`window.__heroArt`, `client/heroart.ts`, draws one hero by drawHero).
+
 ## 2026-11-05: the staff's fire hold is a wall of fire rolled at a goblin (Kyle; Claude Opus 5.5)
 
 Kyle: "Wizard staff fire, hold down to make a wall of fire that moves towards the targeted enemy and stays
