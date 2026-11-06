@@ -1,7 +1,7 @@
 /** The movement ladder (shared/ladder.ts): taught in order at the trainer, none on an old save, and each rung firing in the room (and not without it). */
 import { describe, expect, it } from 'vitest';
 import { BLINK, DODGE, HERO, SNARE, TEACHES, TICK, drillLevel, drillPrice, newProfile, type WeaponId } from '../src/shared/tuning';
-import { BLINK_BURST, CALTROPS, COVER, LADDER_LEVELS, LADDER_TITLE, LANDING, BLOCK_MEND, RUNGS, RUNG_WORDS, SHELTER, TAUNT, TWIN_SNARE, knowsRung } from '../src/shared/ladder';
+import { ALLY_WARD, BLINK_BURST, BLOCK_MEND, CALTROPS, IRON_STANCE, LADDER_LEVELS, LADDER_TITLE, LANDING, RUNGS, RUNG_WORDS, SHELTER, STAND_FAST, TAUNT_GUARD, TWIN_SNARE, knowsRung } from '../src/shared/ladder';
 import { buyDrill, drillState, learnLesson } from '../src/shared/training';
 import { trainerRows } from '../src/shared/trainrows';
 import { ArenaRoom } from '../src/sim/room';
@@ -55,7 +55,7 @@ describe('the ladder at the trainer', () => {
   it('rows say learned, next (level and price) or locked; bought one at a time; the third waits on level 15', () => {
     const p = Object.assign(newProfile('WARRIOR'), { level: 10, gold: 5000, drills: { ladder: 1 } });
     const rows = trainerRows(p).filter((r) => r.group === 'ladder');
-    expect(rows.map((r) => r.rung)).toEqual(['taunt', 'standfast', 'cowing']);
+    expect(rows.map((r) => r.rung)).toEqual(['tauntguard', 'ironstance', 'standfast']);
     expect(rows.map((r) => r.tag)).toEqual(['LEARNED', `${drillPrice('ladder', 1)}g`, 'LEVEL 15']);
     expect(rows.map((r) => r.state)).toEqual(['max', 'buy', 'locked']);
     expect(new Set(trainerRows(p).map((r) => r.key)).size).toBe(trainerRows(p).length);
@@ -226,100 +226,121 @@ describe('the Rogue: the dash', () => {
   });
 });
 
-describe('the Healer: the guard', () => {
-  /** A Healer blocking at (9, 9.6) facing up, a friend at (9, 9), a goblin above swinging at the friend. */
+describe('the Cleric: the guard, a holy ward round them (Kyle, 2026-11-05)', () => {
+  /** A Cleric guarding at (9, 9.6) facing up, a friend at (9, 9), a goblin above swinging at the friend. */
   const party = (rungs: number) => {
     const c = Object.assign(hero('mace', rungs, 'cleric', 9, 9.6), { blocking: true }), f = hero('sword', 0, 'friend', 9, 9), e = goblin(1, 9, 7.6);
     return { c, f, e };
   };
 
-  it('SHELTER: a friend near a Healer holding a block takes less', () => {
+  it('the ward holds a blow from behind as well as in front, for stamina', () => {
+    const { c, e } = party(0), ev: FightEvent[] = [];
+    c.fy = 1; // facing away from the goblin
+    hitHero(e, blow(e, 'cleric'), c, 10, ev, [c]);
+    expect(c.hp).toBe(HERO.hp);
+    expect(c.stamina).toBeLessThan(HERO.stamina);
+    expect(ev.some((x) => x.k === 'block')).toBe(true);
+  });
+
+  it('SHELTER: a friend near a Cleric holding the guard takes less', () => {
     for (const rungs of [0, 1]) {
       const { c, f, e } = party(rungs), ev: FightEvent[] = [];
-      c.fy = 1; // facing away, so COVER can't take it
       hitHero(e, blow(e, 'friend'), f, 10, ev, [c, f]);
       expect(HERO.hp - f.hp).toBe(Math.round(20 * (rungs ? SHELTER.taken : 1)));
     }
   });
 
-  it('HEALING BLOCK (was HEALING PARRY): each blow the Healer blocks heals friends near', () => {
-    expect(RUNG_WORDS.blockmend.name).toBe('HEALING BLOCK');
+  it('SHARED WARD: the nearest friend takes nothing from a blow the guard could hold; holding it drains stamina', () => {
     for (const rungs of [1, 2]) {
       const { c, f, e } = party(rungs), ev: FightEvent[] = [];
-      f.hp = 50;
-      Object.assign(c, { blocking: true, fy: -1 });
-      hitHero(e, blow(e, 'cleric'), c, 10, ev, [c, f]);
-      expect(ev.some((x) => x.k === 'block')).toBe(true);
-      expect(ev.some((x) => x.k === 'blockmend')).toBe(rungs === 2);
-      expect(f.hp).toBe(rungs === 2 ? 50 + BLOCK_MEND.heal : 50);
-      expect(c.hp).toBe(HERO.hp);
+      expect(Math.hypot(c.x - f.x, c.y - f.y)).toBeLessThanOrEqual(ALLY_WARD.reach);
+      hitHero(e, blow(e, 'friend'), f, 10, ev, [c, f]);
+      expect(f.hp === HERO.hp).toBe(rungs === 2);
+      expect(ev.some((x) => x.k === 'coverfor')).toBe(rungs === 2);
+      // Not a striped one.
+      const f2 = hero('sword', 0, 'friend', 9, 9);
+      hitHero(e, { ...blow(e, 'friend'), unblockable: true }, f2, 10, [], [c, f2]);
+      expect(f2.hp).toBeLessThan(HERO.hp);
+    }
+    // The drain, in the room, while it covers someone.
+    for (const rungs of [1, 2]) {
+      const { c, f } = party(rungs), { run } = arena([c, f], []);
+      run(1, { block: true }, 'cleric');
+      expect(c.wardFor === 'friend').toBe(rungs === 2);
+      expect(HERO.stamina - c.stamina).toBeCloseTo(rungs === 2 ? ALLY_WARD.drain : 0, 0);
     }
   });
 
-  it('COVER: blocking beside a friend, facing the blow, the Healer takes it on the guard', () => {
+  it('HEALING BLOCK (was HEALING PARRY): each blow the guard stops heals friends near', () => {
+    expect(RUNG_WORDS.blockmend.name).toBe('HEALING BLOCK');
     for (const rungs of [2, 3]) {
       const { c, f, e } = party(rungs), ev: FightEvent[] = [];
-      expect(Math.hypot(c.x - f.x, c.y - f.y)).toBeLessThanOrEqual(COVER.reach);
-      hitHero(e, blow(e, 'friend'), f, 10, ev, [c, f]);
-      expect(f.hp === HERO.hp).toBe(rungs === 3);
-      expect(c.stamina < HERO.stamina).toBe(rungs === 3);
-      expect(ev.some((x) => x.k === 'coverfor')).toBe(rungs === 3);
+      f.hp = 50;
+      hitHero(e, blow(e, 'cleric'), c, 10, ev, [c, f]);
+      expect(ev.some((x) => x.k === 'blockmend')).toBe(rungs === 3);
+      expect(f.hp).toBe(rungs === 3 ? 50 + BLOCK_MEND.heal : 50);
+      expect(c.hp).toBe(HERO.hp);
     }
   });
 });
 
-describe('the Warrior: TAUNT', () => {
-  it('the dodge press roars: goblins within 5 tiles come for you, drawn at that reach; again in 10 s; nothing without it', () => {
+describe('the Warrior: the guard (it took the roar\'s place, 2026-11-06)', () => {
+  it('TAUNT GUARD: holding block turns goblins within 4 tiles on you, drawn at that reach; nothing without it', () => {
     for (const rungs of [0, 1]) {
-      const w = hero('sword', rungs, 'me', 9, 9), friend = hero('wand', 0, 'friend', 12, 6), near = goblin(1, 12, 5.5), far = goblin(2, 9, 9 + TAUNT.reach + 1.5);
+      const w = hero('sword', rungs, 'me', 9, 9), friend = hero('wand', 0, 'friend', 12, 6), near = goblin(1, 11.5, 6.5), far = goblin(2, 9, 9 + TAUNT_GUARD.reach + 1.5);
       const { room, run } = arena([w, friend], [near, far]);
-      const ev = run(TICK * 2, { rollSeq: 1 });
+      const ev = run(TICK * 3, { block: true });
       expect(near.tauntBy === 'me').toBe(rungs === 1);
       expect(far.tauntBy).toBeUndefined();
-      // The goblin beside the friend still comes for the Warrior.
       expect(tauntTarget(near, room.heroes, room.time)?.id).toBe(rungs ? 'me' : undefined);
-      const z = room.zones.find((q) => q.kind === 'taunt');
-      expect(z?.r).toBe(rungs ? TAUNT.reach : undefined);
+      expect(room.zones.find((q) => q.kind === 'taunt')?.r).toBe(rungs ? TAUNT_GUARD.reach : undefined);
       expect(ev.some((x) => x.k === 'taunt')).toBe(rungs === 1);
-      if (!rungs) continue;
-      // Pressed again inside the cooldown: nothing; once it's back: again.
-      const before = w.tauntReady!;
-      run(1, { rollSeq: 2 });
-      expect(w.tauntReady).toBe(before);
-      run(TAUNT.cooldown, { rollSeq: 2 });
-      run(TICK * 2, { rollSeq: 3 });
-      expect(w.tauntReady!).toBeGreaterThan(before);
+      // Let go: it lingers a moment, then lets them go.
+      run(TAUNT_GUARD.linger + 0.2, {});
+      expect(tauntTarget(near, room.heroes, room.time)).toBeNull();
     }
   });
 
-  it("a guest's press reaches the leader's room the same way (the rollSeq counter)", () => {
-    const lead = hero('wand', 0, 'lead', 4, 4), guest = hero('greatsword', 1, 'guest', 9, 9), e = goblin(1, 10, 9);
-    const { run } = arena([lead, guest], [e]);
-    run(TICK * 2, { rollSeq: 7 }, 'guest');
-    expect(e.tauntBy).toBe('guest');
+  it("the dodge press does nothing now (a Warrior's roar is gone)", () => {
+    const w = hero('sword', 3, 'me', 9, 9), e = goblin(1, 10, 9);
+    const { run } = arena([w], [e]);
+    const ev = run(TICK * 2, { rollSeq: 1 });
+    expect(e.tauntBy).toBeUndefined();
+    expect(ev.some((x) => x.k === 'taunt')).toBe(false);
   });
 
-  it('STAND FAST: taunted goblins hit softer, and nothing shoves or staggers you while it lasts', () => {
+  it('IRON STANCE: a blocked blow costs a flat burst, throws the goblin back and leaves you untouchable a moment', () => {
     for (const rungs of [1, 2]) {
-      const w = hero('sword', rungs, 'me', 9, 9), e = goblin(1, 9, 7.8);
-      const { room, run } = arena([w], [e]);
-      run(TICK * 2, { rollSeq: 1 });
-      w.fy = 1; // facing away: the blow lands
+      const w = Object.assign(hero('sword', rungs, 'me', 9, 9), { blocking: true }), e = goblin(1, 9, 7.8);
+      const ev: FightEvent[] = [];
+      hitHero(e, { ...blow(e, 'me'), dmg: 40 }, w, 10, ev, [w]);
+      expect(w.hp).toBe(HERO.hp);
+      if (rungs === 2) {
+        expect(HERO.stamina - w.stamina).toBe(IRON_STANCE.cost);
+        expect(e.act).toBe('flinch');
+        expect(ev.some((x) => x.k === 'ironstance')).toBe(true);
+        // Untouchable a moment, even unguarded and facing away.
+        Object.assign(w, { blocking: false, fy: 1 });
+        hitHero(e, blow(e, 'me'), w, 10 + IRON_STANCE.untouchable / 2, [], [w]);
+        expect(w.hp).toBe(HERO.hp);
+        hitHero(e, blow(e, 'me'), w, 10 + IRON_STANCE.untouchable + 0.05, [], [w]);
+        expect(w.hp).toBeLessThan(HERO.hp);
+      } else {
+        expect(HERO.stamina - w.stamina).toBeGreaterThan(IRON_STANCE.cost);
+        expect(ev.some((x) => x.k === 'ironstance')).toBe(false);
+      }
+    }
+  });
+
+  it('STAND FAST: goblins the guard turned hit softer, and a block shoves you nowhere', () => {
+    for (const rungs of [2, 3]) {
+      const w = hero('sword', rungs, 'me', 9, 9), e = goblin(1, 9, 7.8), side = goblin(2, 10.5, 9);
+      const { room, run } = arena([w], [e, side]);
+      run(TICK * 3, { block: true });
+      w.fy = 1; // facing away from `e`: its blow lands
       const ev: FightEvent[] = [];
       hitHero(e, blow(e, 'me'), w, room.time, ev, [w]);
-      expect(HERO.hp - w.hp).toBe(rungs === 2 ? Math.round(20 * TAUNT.soft) : 20);
-      expect(w.act === 'hurt').toBe(rungs === 1);
-      expect(ev.some((x) => x.k === 'braced')).toBe(rungs === 2);
-    }
-  });
-
-  it('COWING ROAR: the taunt staggers the small ones', () => {
-    for (const rungs of [2, 3]) {
-      const w = hero('sword', rungs), small = goblin(1, 10, 9), big = goblin(2, 8, 9, 'butcher');
-      const { run } = arena([w], [small, big]);
-      run(TICK * 2, { rollSeq: 1 });
-      expect(small.act === 'flinch').toBe(rungs === 3);
-      expect(big.act).not.toBe('flinch');
+      expect(HERO.hp - w.hp).toBe(rungs === 3 ? Math.round(20 * STAND_FAST.soft) : 20);
     }
   });
 });

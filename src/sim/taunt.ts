@@ -1,39 +1,39 @@
 /**
- * The Warrior's TAUNT (numbers: shared/ladder.ts TAUNT), on the dodge button a Warrior has no dodge for:
- * the dodge press (Intent `rollSeq`, a counter, so a guest's press reaches the leader's room) roars when
- * it's ready. Goblins within reach come for the Warrior a while (sim/enemies.ts asks `tauntTarget`);
- * STAND FAST makes their blows softer and the Warrior unshakeable meanwhile; COWING ROAR staggers the
- * small ones. The roar's ring is a zone the client draws at the reach it was judged at.
+ * The Warrior's guard ladder (numbers: shared/ladder.ts TAUNT_GUARD, IRON_STANCE, STAND_FAST; Kyle,
+ * 2026-11-05/06: the guard grows like the dodge does, and it takes the roar's place). TAUNT GUARD:
+ * while the block is held, goblins near come for the Warrior (sim/enemies.ts asks `tauntTarget`), and
+ * stay on them a moment after it drops. IRON STANCE: a blocked blow costs a flat burst of breath, throws
+ * the goblin back and leaves the Warrior untouchable a moment (combat.ts asks `ironStance`, `ironHeld`).
+ * STAND FAST: the goblins the guard turned hit softer, and a block shoves the Warrior nowhere.
+ * The taunt's ring is a zone the client draws at the reach it was judged at.
  */
-import { INPUT_BUFFER, WEAPONS } from '../shared/tuning';
-import { TAUNT, knowsRung } from '../shared/ladder';
-import { held, isDead, isDummy, small } from './damage';
+import { GUARD, WEAPONS } from '../shared/tuning';
+import { IRON_STANCE, STAND_FAST, TAUNT_GUARD, knowsRung } from '../shared/ladder';
+import { shove } from './bodies';
+import { isDead, isDummy } from './damage';
 import { stun } from './stuns';
 import type { Enemy, FightEvent, Hero, Zone } from './types';
 
-/** A Warrior with the TAUNT rung: the dodge button is the taunt. */
-export const taunts = (h: Hero) => WEAPONS[h.weapon]?.cls === 'WARRIOR' && knowsRung(h, 'taunt');
+const warrior = (h: Hero) => WEAPONS[h.weapon]?.cls === 'WARRIOR';
 
-/** Seconds till the taunt is ready again (0: ready). */
-export const tauntLeft = (h: Hero, now: number) => Math.max(0, (h.tauntReady ?? 0) - now);
+/** A Warrior with TAUNT GUARD: holding block turns goblins on them. */
+export const taunts = (h: Hero) => warrior(h) && knowsRung(h, 'tauntguard');
 
-/** The dodge press, each tick: a Warrior on their feet roars when the taunt is ready (a press waits the
- *  input buffer for it, as a dodge's does). */
+/** Each tick: a Warrior holding block with TAUNT GUARD turns the goblins near on themselves. */
 export function stepTaunt(h: Hero, enemies: Enemy[], zones: Zone[], now: number, ev: FightEvent[]): void {
-  if (now - h.rollQueuedAt >= INPUT_BUFFER || !taunts(h)) return;
-  if (h.act === 'down' || h.act === 'hurt' || h.act === 'stun' || tauntLeft(h, now) > 0) return;
-  h.rollQueuedAt = -9;
-  h.tauntReady = now + TAUNT.cooldown;
-  h.tauntUntil = now + TAUNT.time;
-  const soft = knowsRung(h, 'standfast'), cow = knowsRung(h, 'cowing');
-  zones.push({ kind: 'taunt', x: h.x, y: h.y, r: TAUNT.reach, at: now, until: now + TAUNT.show, next: 0, owner: h.id, el: '' });
-  ev.push({ k: 'taunt', x: h.x, y: h.y, r: TAUNT.reach });
+  if (!h.blocking || h.act === 'down' || !taunts(h)) return;
+  const soft = knowsRung(h, 'standfast');
+  // The block just went up: the ring shows (not more than once a second, so a held block isn't a strobe).
+  if (now - (h.tauntRingAt ?? -9) >= TAUNT_GUARD.every && now - (h.blockUpAt ?? -9) < 0.05) {
+    h.tauntRingAt = now;
+    zones.push({ kind: 'taunt', x: h.x, y: h.y, r: TAUNT_GUARD.reach, at: now, until: now + TAUNT_GUARD.show, next: 0, owner: h.id, el: '' });
+    ev.push({ k: 'taunt', x: h.x, y: h.y, r: TAUNT_GUARD.reach });
+  }
   for (const e of enemies) {
-    if (isDead(e) || isDummy(e) || e.kind === 'nest' || Math.hypot(e.x - h.x, e.y - h.y) > TAUNT.reach + e.radius) continue;
-    Object.assign(e, { tauntBy: h.id, tauntUntil: now + TAUNT.time, tauntSoft: soft, alert: true, feeding: false });
-    // COWING ROAR: the small ones stagger (once in the stun cap, as any stagger a hero causes).
-    if (cow && small(e) && !held(e, now)) stun(e, h.id, now, TAUNT.stagger, ev, 'flinch');
-    ev.push({ k: 'taunted', x: e.x, y: e.y });
+    if (isDead(e) || isDummy(e) || e.kind === 'nest' || Math.hypot(e.x - h.x, e.y - h.y) > TAUNT_GUARD.reach + e.radius) continue;
+    // Newly turned: a mark over it.
+    if (e.tauntBy !== h.id || (e.tauntUntil ?? -9) <= now) ev.push({ k: 'taunted', x: e.x, y: e.y });
+    Object.assign(e, { tauntBy: h.id, tauntUntil: now + TAUNT_GUARD.linger, tauntSoft: soft, alert: true, feeding: false });
   }
 }
 
@@ -44,7 +44,33 @@ export function tauntTarget(e: Enemy, heroes: Hero[], now: number): Hero | null 
 }
 
 /** STAND FAST: what a taunted goblin's blow is worth (1: as it is). */
-export const softer = (e: Enemy, now: number) => (e.tauntSoft && (e.tauntUntil ?? -9) > now ? TAUNT.soft : 1);
+export const softer = (e: Enemy, now: number) => (e.tauntSoft && (e.tauntUntil ?? -9) > now ? STAND_FAST.soft : 1);
 
-/** STAND FAST: while the roar lasts, nothing shoves or staggers this Warrior. */
-export const braced = (h: Hero, now: number) => (h.tauntUntil ?? -9) > now && knowsRung(h, 'standfast');
+/** STAND FAST: a Warrior holding block is shoved nowhere by what hits them. */
+export const braced = (h: Hero, _now: number) => h.blocking && warrior(h) && knowsRung(h, 'standfast');
+
+/** IRON STANCE's moment after a block: nothing lands. */
+export const ironHeld = (h: Hero, now: number) => (h.ironUntil ?? -9) > now;
+
+/**
+ * IRON STANCE: `e`'s blow met by this Warrior's block. A flat burst of breath (the guard breaks if
+ * there isn't that much), the goblin thrown back and staggered, the Warrior untouchable a moment.
+ * False if the Warrior doesn't know it (the plain block is judged instead).
+ */
+export function ironStance(h: Hero, e: Enemy, now: number, ev: FightEvent[]): boolean {
+  if (!warrior(h) || !knowsRung(h, 'ironstance')) return false;
+  h.stamina -= IRON_STANCE.cost;
+  h.staminaAt = now;
+  if (h.stamina <= 0) {
+    Object.assign(h, { stamina: 0, winded: true, act: 'stun', actT: 0, actDur: GUARD.guardBreakStun });
+    ev.push({ k: 'guardbreak', x: h.x, y: h.y });
+    return true;
+  }
+  h.ironUntil = now + IRON_STANCE.untouchable;
+  const dx = e.x - h.x, dy = e.y - h.y, l = Math.hypot(dx, dy) || 1;
+  e.attack = null;
+  shove(e, dx / l, dy / l, IRON_STANCE.knock, e.weight);
+  stun(e, h.id, now, IRON_STANCE.stagger, ev, 'flinch');
+  ev.push({ k: 'block', x: h.x, y: h.y }, { k: 'ironstance', x: h.x, y: h.y, x2: e.x, y2: e.y });
+  return true;
+}

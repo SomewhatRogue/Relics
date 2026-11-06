@@ -5,18 +5,22 @@
  * side of a goblin), the Warrior's taunt, and the caltrops on the ground. The press-time pieces (a jump
  * shot, a half-price blink) are in sim/hero.ts; the guard's are in combat.ts.
  */
-import { WEAPONS } from '../shared/tuning';
+import { TICK, WEAPONS } from '../shared/tuning';
 import type { World } from './elements';
 import { hardLanding } from './ladderranger';
 import { blinkBurst, blinkThrough, cameThrough } from './laddermage';
 import { dashStart, dashThrough, stepCaltrops } from './ladderrogue';
 import { stepTaunt } from './taunt';
+import { stepHolyGuard } from './holyguard';
+import type { Coal } from './lantern';
 import type { Hero, Zone } from './types';
 
 export interface LadderRoom {
   zones: Zone[];
   /** Positions before this tick ('h:<id>'), for the stretch a dash covered. */
   prev: Map<string, [number, number]>;
+  /** The censer's coals (a Cleric's guard is fed by their own). */
+  coals: Coal[];
 }
 
 export function stepLadder(heroes: Hero[], r: LadderRoom, w: World): void {
@@ -35,5 +39,6 @@ export function stepLadder(heroes: Hero[], r: LadderRoom, w: World): void {
     }
     if (cls === 'WARRIOR') stepTaunt(h, w.enemies, r.zones, now, w.ev);
   }
+  stepHolyGuard(heroes, r.coals, w.now, TICK);
   stepCaltrops(r.zones, w);
 }

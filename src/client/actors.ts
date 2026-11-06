@@ -15,6 +15,7 @@ import { drawWeapon, pose } from './held';
 import { EL_COL, heldEl } from './palette';
 import { drawLoad } from './xbowmark';
 import { drawBladeMark } from './blademark';
+import { drawHolyGuard } from './holyguardmark';
 import { drawHolyShield } from './holyshield';
 import { drawText } from './pixfont';
 import { PARTY } from '../shared/tuning';
@@ -197,6 +198,7 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
   aura(c, h, bx, by, t);
   drawLoad(c, h, bx, by);
   drawBladeMark(c, h, bx, by, t);
+  drawHolyGuard(c, h, bx, by);
 }
 
 /** Blessed: gold motes rising. Rallied: a red pennant flicker overhead. */

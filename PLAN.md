@@ -752,15 +752,17 @@ Every weapon gets a quick attack, a charged attack, a perfect-timed hit and a re
   max health is lower for the rest of that job.
 - The upgrades UI (knacks and techniques) is confusing: make it screens, visual, easy to understand and pick.
 
-## Next after parry's removal: guard upgrades (Kyle, 2026-11-05)
+## Built: the guard upgrades (Kyle, 2026-11-05/06; Claude Opus 5.5)
 
-Block grows like the dodge does (the Ranger's dodge leaves a trap): techniques at levels 5 and 10.
-- Warrior, one per tier: TAUNT GUARD (holding block turns nearby goblins on you) or IRON STANCE (a block
-  spends a burst of stamina, throws back what hit you and makes you untouchable for a moment; no timing).
-- Cleric's guard is a holy shield, not a block: a ward round you, like the Mage's magic shield, that soaks
-  hits and is fed by the censer's coals. Its upgrade covers you AND an ally at once: the ally is covered
-  for free, but holding it drains stamina (Kyle: "you AND an ally, the ally for free but again stamina drain").
-- Lore keeper on every new name before it lands.
+Built 2026-11-06 on top of parry's removal; waiting on Kyle's play. Everything in DECISIONS 2026-11-06 ("the
+guard grows"). *Done when*, on his phone and laptop, flat and 2.5D: the Warrior's trainer section is GUARD:
+TAUNT GUARD (5: holding block turns goblins within 4 tiles on you, a red ring as it goes up), IRON STANCE
+(10: a blocked blow costs a flat 22 stamina, throws the goblin back, and nothing hurts you for half a second),
+STAND FAST (15); the roar and its button are gone (GRAB sits in the dodge's place again). A Cleric's block is a
+holy ward round them, a gold ring, that stops blows from any side and gets stamina back from their own censer
+coals; their GUARD is SHELTER (5), SHARED WARD (10: the nearest friend within 3 tiles takes nothing from what the
+guard could stop, for 8 stamina a second while covering them), HEALING BLOCK (15). Open for Kyle: the numbers;
+the lore keeper's notes on "ward" (it's Sanctuary's word in the story bible too).
 
 ## Planned: town activities and the Night Watch (Kyle, 2026-11-05)
 

@@ -108,6 +108,15 @@ export interface Hero extends Body {
   counter: boolean;
   hitIds: number[];
   blocking: boolean;
+  /** Blocking last tick, and when the block last went up (TAUNT GUARD's ring: sim/taunt.ts). */
+  wasBlocking?: boolean;
+  blockUpAt?: number;
+  /** When TAUNT GUARD's ring last showed. */
+  tauntRingAt?: number;
+  /** IRON STANCE: untouchable until then (sim/taunt.ts). */
+  ironUntil?: number;
+  /** SHARED WARD: the friend this Cleric's guard covers now (sim/holyguard.ts). */
+  wardFor?: string;
   lastBlockPress: number;
   rollDx: number;
   rollDy: number;
@@ -783,7 +792,7 @@ export type FightEvent =
       | 'slamburst' | 'shoulderready' | 'shoulder' | 'ironfeet' | 'cutbleed' | 'slipaway' | 'cutpurse' | 'quicknock' | 'steady' | 'mending' | 'sanctstep' | 'judged'; x: number; y: number }
   /** The movement ladder and the Mage's techniques firing (shared/ladder.ts, techniques.ts): `r` a reach,
    *  `el` an element, `n` magic given back, (x2, y2) the friend covered or the goblin gone through. */
-  | { k: 'airshot' | 'twinsnare' | 'landing' | 'blinkburst' | 'blinkthrough' | 'halfblink' | 'caltrops' | 'underlegs' | 'legstab' | 'shakeoff' | 'shelter' | 'blockmend' | 'coverfor' | 'taunt' | 'taunted' | 'braced' | 'attuned' | 'spellthief'; x: number; y: number; r?: number; el?: Augment; n?: number; x2?: number; y2?: number }
+  | { k: 'airshot' | 'twinsnare' | 'landing' | 'blinkburst' | 'blinkthrough' | 'halfblink' | 'caltrops' | 'underlegs' | 'legstab' | 'shakeoff' | 'shelter' | 'blockmend' | 'coverfor' | 'ironstance' | 'taunt' | 'taunted' | 'braced' | 'attuned' | 'spellthief'; x: number; y: number; r?: number; el?: Augment; n?: number; x2?: number; y2?: number }
   /** A goblin retching up a perfect dart's poison, facing (dx, dy) (sim/venom.ts). */
   | { k: 'puke'; x: number; y: number; dx: number; dy: number }
   | { k: 'collapse'; x: number; y: number; w: number; h: number }

@@ -7,8 +7,6 @@ import { guardOf, dodgeName, dodgeOf, RELICS, WEAPONS, type Item } from '../shar
 import { carriedItem } from '../sim/charge';
 import { castElement } from '../sim/channel';
 import { knows } from '../sim/types';
-import { taunts } from '../sim/taunt';
-import { TAUNT_BUTTON } from '../shared/ladder';
 import { SHIELD_LINE } from '../shared/classes';
 import { paintButton, type Face } from './btnart';
 import { icon, type IconId } from './icons';
@@ -54,13 +52,11 @@ async function rows(g: Game, touch: boolean): Promise<Row[]> {
   const sg = signFor(me);
   if (sg && g.taught().includes('sign')) out.push({ face: { shape: 'round', size: 22, grade: 'iron', icon: skillCanvas(sg, '') }, name: SIGNS[sg].name, key: SIGN_KEY, text: SIGN_WORDS[sg] });
   const guard = guardOf(kit);
-  if (guard === 'full') out.push({ face: { shape: 'shield', size: 28, grade: 'iron', icon: icon('block') }, name: 'BLOCK', key: 'RIGHT CLICK', text: 'Hold to block. Strike soon after you block a blow: it\'s a counter and hits harder.' });
+  if (guard === 'full') out.push({ face: { shape: 'shield', size: 28, grade: 'iron', icon: icon('block') }, name: 'BLOCK', key: 'RIGHT CLICK', text: cls === 'HEALER' ? 'Hold to raise a holy ward. It stops blows from any side. Strike soon after it stops a blow: it\'s a counter and hits harder.' : 'Hold to block. Strike soon after you block a blow: it\'s a counter and hits harder.' });
   if (dodgeOf(kit)) {
     const dn = dodgeName(cls);
     out.push({ face: { shape: 'diamond', size: 30, grade: 'iron', icon: icon(({ JUMP: 'jump', DASH: 'dash', BLINK: 'blink' } as Record<string, IconId>)[dn] ?? 'roll') }, name: dn, key: 'SPACE', text: 'Get out of any blow, even a striped one.' + (kit.spellblade ? ` ${SHIELD_LINE}` : '') });
   }
-  // A Warrior's TAUNT, in the dodge's place (sim/taunt.ts).
-  else if (taunts(me)) out.push({ face: { shape: 'diamond', size: 30, grade: 'iron', icon: skillCanvas('horn', '') }, name: 'TAUNT', key: 'SPACE', text: TAUNT_BUTTON });
   if (kit.reloads) out.push({ face: round(icon('reload'), 'gilt'), name: 'RELOADS ITSELF', key: '', text: 'The crossbow winds itself when you are not attacking. Stand still while it winds and the bolt glints (a PERFECT).' });
   const [skill, relic] = me.relics;
   if (knows(me, 'skill')) out.push({ face: round(skillCanvas(skill, me.augments[skill])), name: 'SKILL', key: 'E', text: `Your class skill, ${RELICS[skill].name}. The dark sweep and the number count down to the next use.` });
