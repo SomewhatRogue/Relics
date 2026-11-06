@@ -8,10 +8,13 @@
  * that lay it out are shared/encounter.ts, the party's extra are sim/packs.ts.
  */
 import type { PlaceKind } from './jobs.js';
+import type { Debut } from './debut.js';
+import { CHALKER } from './chalk.js';
 
 /** What a goblin in a pack is for. `fodder` is the small ones; every other role is a special. */
 export type Role = 'fodder' | 'lunger' | 'shield' | 'heavy' | 'hexer' | 'drummer' | 'butcher' | 'archer'
-  | 'banner' | 'netter' | 'thief' | 'log' | 'roofer' | 'keeper' | 'wolf' | 'oiler' | 'torch' | 'sapper' | 'blind' | 'ironhide';
+  | 'banner' | 'netter' | 'thief' | 'log' | 'roofer' | 'keeper' | 'wolf' | 'oiler' | 'torch' | 'sapper' | 'blind' | 'ironhide'
+  | 'chalker';
 
 export interface Template {
   id: string;
@@ -36,6 +39,8 @@ export interface Template {
   weight: number;
   /** One more special in a party of three or more. */
   more?: Role;
+  /** A new sort bleeding in: staged, then rare, then common (shared/debut.ts). */
+  debut?: Debut;
 }
 
 const OPEN: PlaceKind[] = ['field', 'farm', 'forest', 'river', 'marsh'];
@@ -58,6 +63,7 @@ export const TEMPLATES: Template[] = [
   { id: 'sapper', said: 'a brute in front and a sapper under', centre: ['heavy'], support: ['sapper'], fodder: [2, 3], from: 1, weight: 1.5, places: ['farm', 'field', 'forest', 'mine', 'marsh'] },
   { id: 'iron', said: 'an ironhide and the little ones', centre: ['ironhide'], fodder: [3, 4], from: 1, weight: 1.5, more: 'lunger' },
   { id: 'ironback', said: 'a brute with an ironhide at its side', centre: ['heavy'], support: ['ironhide'], fodder: [2, 3], from: 1, ruin: 1, weight: 1 },
+  { id: 'chalk', said: 'a chalker behind a crowd, chalking one of you', support: ['chalker'], fodder: [3, 5], from: 1, weight: 1.5, more: 'lunger', debut: CHALKER.debut },
   { id: 'cave', said: 'blind hunters in the dark', fodder: [3, 4], fodderKind: 'blind', weight: 4, places: ['mine'] },
 ];
 
@@ -85,6 +91,6 @@ export const ENCOUNTER = {
 };
 
 /** Roles that are a kind of small goblin (the rest are something else: a wolf, the log-carriers). */
-export const GOBLIN_ROLES: Role[] = ['fodder', 'lunger', 'shield', 'heavy', 'hexer', 'drummer', 'archer', 'banner', 'netter', 'thief', 'roofer', 'keeper', 'oiler', 'torch', 'sapper', 'blind', 'ironhide'];
+export const GOBLIN_ROLES: Role[] = ['fodder', 'lunger', 'shield', 'heavy', 'hexer', 'drummer', 'archer', 'banner', 'netter', 'thief', 'roofer', 'keeper', 'oiler', 'torch', 'sapper', 'blind', 'ironhide', 'chalker'];
 /** Backers that keep to the back of a pack (put furthest from the way in). */
-export const BACK_ROLES: Role[] = ['archer', 'hexer', 'drummer', 'banner', 'netter', 'oiler', 'torch', 'keeper'];
+export const BACK_ROLES: Role[] = ['archer', 'hexer', 'drummer', 'banner', 'netter', 'oiler', 'torch', 'keeper', 'chalker'];

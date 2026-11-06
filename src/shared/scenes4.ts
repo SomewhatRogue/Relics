@@ -23,7 +23,9 @@ export type FoeTask =
   /** Walking its round, `i` the point it's making for (`stuck`: seconds without getting nearer). */
   | { k: 'patrol'; pts: Pt[]; i: number; stuck?: number; best?: number }
   /** Hauling a body (its `haul`) to their fire at `to`. */
-  | { k: 'haul'; to: Pt; quit?: boolean };
+  | { k: 'haul'; to: Pt; quit?: boolean }
+  /** A chalker at its tally board at (x, y), `n` strokes on it (shared/chalkstage.ts). */
+  | { k: 'tally'; x: number; y: number; n: number; quit?: boolean };
 
 export const SCENES4: Piece[] = ['burning', 'drag', 'prisoners', 'patrol', 'hanging', 'fallen', 'cache', 'drums', 'webs', 'wading'];
 

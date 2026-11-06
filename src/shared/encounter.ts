@@ -11,6 +11,7 @@ import { Rng } from './rng.js';
 import type { Foe, FoeVariant } from './terrain.js';
 import { ROOF } from './raiders.js';
 import { CROWS } from './prowlers.js';
+import { weightIn } from './debut.js';
 
 type P = { x: number; y: number };
 export interface Compose {
@@ -66,12 +67,14 @@ function bands(fs: Foe[], spawn: P, most: number): Foe[][] {
 function fits(c: Compose, left: number, used: Set<string>, first: boolean): Template[] {
   const kind = c.job.place.kind, ruin = c.job.place.ruin, roofs = roofsIn(c.blocks).length > 0;
   return TEMPLATES.filter((t) => (!t.places || t.places.includes(kind)) && c.index >= (t.from ?? 0) && ruin >= (t.ruin ?? 0) && (!t.roofs || roofs) &&
-    cost(t) <= left && (!used.has(t.id) || t.id === 'swarm' || t.id === 'brute' || t.id === 'cave') && (!first || ENCOUNTER.first.includes(t.id)));
+    cost(t) <= left && (!used.has(t.id) || t.id === 'swarm' || t.id === 'brute' || t.id === 'cave') && (!first || ENCOUNTER.first.includes(t.id)) && weightIn(t, c.job, c.index) > 0);
 }
 
-function pick(rng: Rng, ts: Template[]): Template {
-  let r = rng.next() * ts.reduce((s, t) => s + t.weight, 0);
-  for (const t of ts) if ((r -= t.weight) < 0) return t;
+/** One of `ts` by weight (a new sort's by where it is in its debut: shared/debut.ts). */
+function pick(rng: Rng, ts: Template[], c: Compose): Template {
+  const w = (t: Template) => weightIn(t, c.job, c.index);
+  let r = rng.next() * ts.reduce((s, t) => s + w(t), 0);
+  for (const t of ts) if ((r -= w(t)) < 0) return t;
   return ts[ts.length - 1];
 }
 
@@ -153,7 +156,7 @@ export function composeRoom(c: Compose): Template[] {
   bandsOf.forEach((band, i) => {
     let ts = fits(c, Math.max(0, left), used, c.index === 0 && i === 0);
     if (!roofs.length) ts = ts.filter((t) => !t.roofs);
-    const t = ts.length ? pick(rng, ts) : TEMPLATES[0];
+    const t = ts.length ? pick(rng, ts, c) : TEMPLATES[0];
     used.add(t.id), chose.push(t);
     const keepers = new Set(lay(c, band, t, i + 1, rng, roofs));
     for (const f of band) if (!keepers.has(f)) c.foes.splice(c.foes.indexOf(f), 1);

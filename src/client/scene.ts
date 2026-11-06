@@ -79,6 +79,7 @@ import { drawFound } from './foundsdraw';
 import { witchColour } from './hallsdraw';
 import { brazierOn, drawBrazier, drawLamps } from './lampsdraw';
 import { lampAt } from '../shared/lamps';
+import { drawChalkMarks, drawTally } from './chalkdraw';
 
 
 /** The view's jolt this frame (heropose.ts), reused. */
@@ -390,6 +391,7 @@ export class Scene {
       items.push({ y: OY + at.y * PX, draw: () => drawNpc(c, n, OX + at.x * PX - cx, OY + at.y * PX - cy, near && !n.mute, at.fx, !!n.path && !at.still, at.x) });
     }
     // Layout 4's scenes: a body being hauled, the prisoners' rope (scenedraw.ts).
+    for (const e of room.enemies) if (e.task?.k === 'tally') { const k = e.task; items.push({ y: OY + k.y * PX, draw: () => drawTally(c, k.n, OX + k.x * PX - cx, OY + k.y * PX - cy) }); }
     for (const e of room.enemies) if (e.haul) items.push({ y: OY + e.haul.y * PX - 6, draw: () => drawHauled(c, e, OX + e.haul!.x * PX - cx, OY + e.haul!.y * PX - cy) });
     for (const [x1, y1, x2, y2] of ropeOf(room)) items.push({ y: OY + Math.max(y1, y2) * PX + 0.5, draw: () => drawRope(c, OX + x1 * PX - cx, OY + y1 * PX - cy - 6, OX + x2 * PX - cx, OY + y2 * PX - cy - 6) });
     // The scenes past the wood's trees (vignettes.ts): drawn like anyone, never in the room.
@@ -477,6 +479,8 @@ export class Scene {
     drawSpellSky(c.glow, room, cx, cy);
     // A Ranger's MARK over its goblin (signdraw.ts).
     drawHuntMarks(c.glow, room, (x, y, z) => [OX + x * PX - cx, OY + z * PX - cy - y * PX], (k, x, y) => { const [px, py] = lerp(k, x, y); return [(px - OX) / PX, (py - OY) / PX]; }, PX);
+    // A chalker's strokes over the hero it's chalking (chalkdraw.ts).
+    drawChalkMarks(c.glow, room, (x, y, z) => [OX + x * PX - cx, OY + z * PX - cy - y * PX], (k, x, y) => { const [px, py] = lerp(k, x, y); return [(px - OX) / PX, (py - OY) / PX]; }, PX);
 
     const lights: Light[] = [...wayLights, ...markLights];
     blazeLights(room, cx, cy, now, lights);

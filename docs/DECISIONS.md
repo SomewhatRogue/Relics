@@ -2,6 +2,73 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-05: the chalker, and how a new sort bleeds in (Kyle; Claude Opus 5.5)
+
+Item 6 of the biome and enemy rollout Kyle approved today. Numbers in `shared/chalk.ts` (CHALKER, re-exported by
+tuning.ts); the room's rules in `sim/chalker.ts`; the bleed-in in `shared/debut.ts`; its staging in
+`shared/chalkstage.ts`; drawn by `client/chalkdraw.ts`, its moments and sounds in `client/chalkfx.ts`.
+
+- **What it does.** A squad goblin (a backer: `BACK_ROLES`) with a lump of chalk and a tally board on its back,
+  **28** health. It keeps behind its pack (**3** tiles), runs from anyone closer than **4.2**, and jabs with the
+  chalk hand if cornered (4 damage). It picks the nearest hero it sees and keeps them, and chalks a stroke on
+  them **1 s** after it first sees them, then one every **2 s**, its clock running only while it sees them
+  (within **10** tiles, not hidden by smoke or Vanish, not blinded by smoke itself, not stunned, frozen, netted
+  or mid-blow). The strokes are the hero's own field (`chalk`), so every screen draws them over that hero.
+- **At five** every goblin of its pack within **14** tiles of that hero turns on them for **8 s** (`turnedOn`,
+  `turnedUntil`): `nearest()` gives them that hero after a Warrior's taunt and a war cry (so a Warrior can still
+  pull them off), and their blows on that hero land **1.3x** (`hitHero`'s `taken`); on anyone else as ever.
+  Then the chalk is spent: the strokes go and the chalker, having rested its chalk for the turn, starts again on
+  whoever is nearest.
+- **Counters.** Kill it and no new strokes go on (the ones there fade **6 s** after the last, with no chalker at
+  them; the same takes them off a hero who went on into the next room). **Vanish** (and SLIP AWAY, by the vanish
+  rule), **smoke** (a smoke bomb, Vanish's, a flask's, steam: anything that hides you) and **blessed ground**
+  (SANCTUARY, and walking SANCTUARY STEP ground, wherever it has moved to) wipe the strokes and call off a turn
+  already on. It's fragile and keeps to the back: a Rogue's step and stab or a Ranger's arrows, by design.
+- **The stun cap** doesn't come into it: the chalker stuns nobody, and a stun on it (capped as any) stops its
+  clock while it lasts.
+- **Seen.** Red strokes over the hero in a tally (four and the fifth across), outlined so they read in any light;
+  the newest white for a moment, and the chalker's hand up with a fleck of chalk as it goes on. At the fifth a red
+  flash, a burst, a shake, CHALKED, then the five pulse and a red sight turns at the hero's feet, blinking in its
+  last second. Wiped: a puff of chalk dust and CHALK WIPED. Flat and 2.5D alike (the strokes on the 2.5D overlay
+  beside MARK; the body and its kit are the flat figure on the card). Red, the goblins' colour: a blow coming.
+- **Where and when** (`debut` on a template, `shared/debut.ts`, small and general so the gaffer and skimmer can
+  use it): **staged**, **rare**, **common** by the job's board day. The chapter system can't say "a week later"
+  (the chapter is always 1 and nothing in a job carries it), so it's a **job count**: the board's day, which is
+  one finished job on the shared world's clock (`WorldState.day`), read off the job's id (`d12-0` is day 12; the
+  story mission and old saves count as staged). The chalker's: staged from day `from` (**1**), rare from day 8
+  (`rare` 7 days on), common from day 29 (`common` 28 days on, standing in for "a chapter later").
+  - *Staged* (`stageDebuts`, called by `planRoom` for a layout-4 room reached by a fork way, after the chests are
+    down): in the **CRIES** way's room in its home region (**Barrowfields**) it stands at a tally board near where
+    the captives are led off, chalking them up (ten and the ones on the rope), one of the guards' pack (82), so it
+    wakes with them and turns its chalk on you. A task (`tally`, `sim/tasks.ts`) holds it facing the board till
+    it sees you; the board is drawn from the task in both views. Not one of the room's specials (it's the scene's,
+    as the guards are). No dice: the room's stream is untouched. It stays in that scene in every stage.
+  - *Rare*: the `chalk` template (a chalker behind 3 to 5 small ones, room 2 on) at weight **0.5**, in the
+    Barrowfields only, and only in one room of a job (`rareRoom`, from the job's seed), so one a job at most.
+  - *Common*: the template's own weight, **1.5**, anywhere it fits. Kept off the expedition (its packs are listed
+    by id).
+- **For Kyle:** a world already past day 29 meets it common at once. To give the live world a real debut, set
+  `CHALKER.debut.from` to its day when this ships. The numbers above once he's played (2 s a stroke may be quick).
+- **Online.** Nothing new is sent but the fields: the hero's `chalk`, `chalkAt`, `chalkedUntil` and the goblins'
+  `quarry`, `chalkT`, `chalkAt`, `turnedOn`, `turnedUntil`, as changed fields in the usual patch. Cleared values are
+  written as 0, '' or -9 (a patch never removes a key). Hero times ride `rebase` between rooms.
+- **New words** (for the lore keeper, then the line editor): the name **CHALKER** (code and docs only for now:
+  nothing on screen names sorts); callouts **CHALKED** (over the hero at the fifth) and **CHALK WIPED** (when
+  Vanish, smoke or blessed ground takes the strokes off); the template's plain words "a chalker behind a crowd,
+  chalking one of you" (never on screen). Lore to record or reject: the hungry keep tallies of what they take in
+  chalk, in fives, and a chalker marks whoever the pack is to have next.
+
+Tests: `tests/chalker.test.ts` (strokes on cadence while it sees, none while blinded by smoke or once it's dead,
+then they fade; at five its pack turns, the turned goblin comes for that hero past a nearer one, 1.3x on them and
+1x on another, ended after the turn; Vanish, smoke and SANCTUARY each wipe the strokes and call off a turn; a
+guest's decoded room has the strokes, sent as changed fields; the same fight twice; staged in Barrowfields CRIES
+rooms at its tally with the guards' pack and not elsewhere; the stages by day and the weights; in the packs none
+while staged, at most one a job and only in the Barrowfields while rare, more and further afield once common).
+`tests/variety.test.ts` re-pinned: the only change in its 280 rooms is the staged chalker added in five
+Barrowfields CRIES rooms (no other foe, chest or block moved; checked by diffing every plan with and without it).
+Shots: `node scripts/chalk-look.cjs [url] [outdir]` (a Rogue chalked three strokes in, and the pack turning, on a
+phone, flat and 2.5D).
+
 ## 2026-11-05: heroes idle, three ways a class and a rare one; a Ranger plays with the hound, and hounds are petted in the lodge (Kyle; Claude Opus 5.5)
 
 Kyle: "Let's work on custom class-specific idle animations. Three per class, with one extra hidden one with a one

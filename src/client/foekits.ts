@@ -8,10 +8,11 @@ import type { Enemy } from '../sim/types';
 import { line, type Ctx } from './draw';
 import { drawFoeKit2 } from './foekits2';
 import { drawMaul } from './ironhidedraw';
+import { drawChalkKit } from './chalkdraw';
 
 const WOOD = '#7a5a38', HIDE = '#c8a878', HIDE2 = '#9a7a58', ROPE = '#a89a72', IRON = '#8a8a90', GOLD = '#ffd040', CLOTH = '#3a3040';
 
-export const KITTED = new Set(['banner', 'netter', 'thief', 'roofer', 'keeper', 'oiler', 'torch', 'sapper', 'ironhide']);
+export const KITTED = new Set(['banner', 'netter', 'thief', 'roofer', 'keeper', 'oiler', 'torch', 'sapper', 'ironhide', 'chalker']);
 
 export function drawFoeKit(c: Ctx, e: Enemy, bx: number, by: number, ax: number, ay: number, t: number): void {
   const f = e.fx < -0.2 ? -1 : 1, hx = Math.round(bx + f * 3 + ax), hy = Math.round(by - 6 + ay), g = c.lit, a = e.attack;
@@ -72,6 +73,7 @@ export function drawFoeKit(c: Ctx, e: Enemy, bx: number, by: number, ax: number,
     c.glow.globalAlpha = 1;
     return;
   }
+  if (e.variant === 'chalker') return drawChalkKit(c, e, bx, by, hx, hy, f, t);
   void t;
   // An ironhide's maul (its plates go on over the body: ironhidedraw.ts).
   if (e.variant === 'ironhide') return drawMaul(c, e, hx, hy, f, wind);
