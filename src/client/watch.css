@@ -1,0 +1,15 @@
+/* The Night Watch: the field over everything else (the town keeps running under it), the clock, score
+   and streak along the top, a hint at the foot, and END SHIFT. The results card is the usual #panel. */
+#watch { position: fixed; inset: 0; z-index: 7; overflow: hidden; background: #0b0c12; touch-action: none; user-select: none; -webkit-user-select: none; cursor: none; }
+#watch.done { z-index: 5; cursor: default; }
+#watch .watch-canvas { position: absolute; left: 0; top: 0; image-rendering: pixelated; }
+#watch .watch-hud { position: absolute; left: 0; right: 0; top: 0; display: flex; align-items: center; gap: 12px; white-space: nowrap; padding: max(8px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left)); font: 400 var(--fs-text)/1.2 var(--font-body); letter-spacing: 0.06em; color: var(--bone-dim); pointer-events: none; }
+#watch .watch-hud b { font: 400 var(--fs)/1 var(--font-body); color: var(--bone); margin-left: 4px; }
+#watch .watch-hud .low b { color: #ff8a6a; }
+#watch .watch-hud .hot b { color: var(--gilt); }
+#watch .watch-hud .gap { flex: 1; }
+@media (max-width: 420px) { #watch .watch-hud { gap: 9px; letter-spacing: 0.02em; } }
+#watch .watch-end { white-space: nowrap; pointer-events: auto; cursor: pointer; padding: 6px 10px; font: 400 var(--fs-text)/1 var(--font-body); letter-spacing: 0.06em; color: var(--bone); background: #15171bcc; border: var(--px, 1px) solid var(--stone-700, #4b505a); }
+#watch .watch-hint { position: absolute; left: 0; right: 0; bottom: max(18px, env(safe-area-inset-bottom)); text-align: center; font: 400 var(--fs-text)/1.3 var(--font-body); letter-spacing: 0.08em; color: var(--bone-dim); opacity: 0.85; pointer-events: none; transition: opacity 1.2s; }
+#watch .watch-hint.gone { opacity: 0; }
+#watch.done .watch-hud, #watch.done .watch-hint { display: none; }

@@ -28,6 +28,7 @@ import { RELICW } from './relicwords';
 import { openStep } from './churchrelics';
 import { openAdvocate } from './councilui';
 import { openPractice } from './practiceui';
+import { openWatchPost } from './watchpost';
 
 
 const p = (s: string) => `<p>${s}</p>`;
@@ -95,6 +96,9 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
         ...hungry.map((it) => ({ label: `LEAVE ${itemName(it)} ON THE STEP`, act: () => (g.giveUp(it), again()) }))]);
   } else if (id === 'yard') {
     panel.show('SQUIRE PELL', say('Squire Pell', "Yard's out back. Straw men, a butcher made of sacking on a chain, and me. Mostly me, getting hit. If you're the sort that heals, I'd take it kindly."), [{ label: 'TO THE YARD', primary: true, act: () => (panel.hide(), g.enterYard()) }]);
+  } else if (id === 'watch') {
+    // Corporal Brisk, at the stair up to the wall: a shift on the Night Watch, after dark (watchpost.ts).
+    openWatchPost(g, panel, CHAT[13].line);
   } else if (id === 'granary') {
     panel.show('FARMER JOS', say('Farmer Jos', 'Every sack in here is a week nobody starves. Barley doesn\'t care who won the war. That\'s the best thing about barley.'));
   } else if (id === 'home') {

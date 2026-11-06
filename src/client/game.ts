@@ -60,7 +60,8 @@ import { RACK, sortKey } from '../shared/practice';
 /** Seconds the screen takes to go dark after a lost job, before town. */
 export const FADE_OUT = 2.4;
 
-export type Mode = 'town' | 'yard' | 'run' | 'wood';
+/** `watch`: on Wickhold's wall for a shift of the Night Watch (watchmode.ts draws and runs it; the town waits underneath). */
+export type Mode = 'town' | 'yard' | 'run' | 'wood' | 'watch';
 /** A whole job, to lead it from (coop.ts sends it every 2 s): `me` is whoever leads. */
 interface JobSave { run: Run; room: Record<string, unknown>; houses?: SavedHouses; members: [string, string][]; key?: number }
 /**
@@ -457,6 +458,15 @@ export class Game {
       if (k && !(p.met ??= []).includes(k)) p.met.push(k), (grew = true);
     }
     if (grew) store(this.save);
+  }
+
+  /** Up the stair for a shift on the wall: out of the town's room online, as the yard is (watchmode.ts). */
+  enterWatch(): void {
+    this.mode = 'watch';
+  }
+  /** Back down the stair, where you stood. */
+  leaveWatch(): void {
+    if (this.mode === 'watch') this.mode = 'town';
   }
 
   /**

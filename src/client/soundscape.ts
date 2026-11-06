@@ -254,6 +254,8 @@ export class Soundscape {
     const w = g.world;
     if (g.mode !== 'town') this.tune = null;
     if (g.mode === 'yard') return ['yard', w.day];
+    // On the wall for the Night Watch: the town's own music still (watchmode.ts).
+    if (g.mode === 'watch') return ['town', w.day];
     if (g.mode === 'wood') {
       // The Stoker's own music from the moment it comes up out of the ground (The Butcher Comes).
       const s = g.room.enemies.find((e) => e.name && !isDead(e));

@@ -22,7 +22,9 @@ import { publicWorks } from './publicworks.js';
 export type SpotId = 'board' | 'council' | 'church' | 'smith' | 'wright' | 'trainer' | 'market' | 'infirmary' | 'granary' | 'home' | 'chat'
   | 'yard' | 'gate' | 'hew' | 'orla' | 'works' | 'roll' | 'well' | 'bard' | 'dice' | 'tavern' | 'sewer' | 'locked' | 'bank' | 'merchant' | 'advocate' | 'vendor'
   /** The practice board at the training yard's pen (client/practiceui.ts). */
-  | 'practice';
+  | 'practice'
+  /** Brisk's stair up to the night shift on the wall (client/watchpost.ts). */
+  | 'watch';
 export interface Spot { id: SpotId; x: number; y: number; label: string; key?: string }
 
 export const SPOTS: Spot[] = [

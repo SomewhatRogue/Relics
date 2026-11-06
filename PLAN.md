@@ -13,6 +13,17 @@ PACK for a Mage, HOLD FOR A MINUTE), each drill's line on the banner ("PARRIED 8
 like goblins but show straw, painted eyes, straw not blood, a heap of straw when down; GO AGAIN and CLEAR work;
 nothing pays; a fall starts the fight over; the yard stands still while the board is up; a knock into the gate
 doesn't leave. Daily: `node scripts/budget-check.cjs` (and `--live`, `--url`). Open: the line editor's pass.
+**The Night Watch, slices 1 and 2** (Claude Opus 5.5, 2026-11-05; Kyle approved `docs/plans/town-activities.md`).
+Built; waiting on Kyle's play. *Done when*, on his phone and laptop at night (`?day=0` to force it): Corporal
+Brisk in the barracks offers TAKE A SHIFT ON THE WALL (in the day, come back after dark); the wall side-on with
+his own hero on it, the moon, torches, goblins with glowing eyes coming over the fields; the mouse (laptop) or a
+drag anywhere (phone) moves the sight, hold to draw and let go to loose; a tap is quick and wild, a full draw
+flat and hard, arrows drop and stick; head x2, body, legs slow; helmets fly off, shields splinter and break,
+torches drop and burn their bearers, archers shake his aim; cloud takes the moon and fog rolls in; anything
+reaching the ditch is THE WATCH HAVE IT; at 3:00 the card with his best and a little gold. Upright on his phone
+the tall field fills the screen (a goblin's head about 21 CSS px). Open: the rest of the words through the lore
+keeper and all of them through the line editor (`watchwords.ts`); the numbers once he's played
+(`shared/watchtune.ts`); slices 3 and 4.
 **World effects, slices 1 to 3: rods and pools, burn the dead, ice and steam** (Claude Opus 5.5, 2026-11-05;
 Kyle approved the proposal's first three rollout items: "more elemental and world effects" like the blood in
 the water and the lightning). Built; waiting on Kyle's play. *Done when*, on his phone and laptop, flat and

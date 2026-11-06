@@ -35,7 +35,7 @@ export function hall(door: string): GameMap | null {
     { rounds: [rd('witchfire', 2.2, 4.6, 0.4), rd('candles', 7.6, 1.3, 0.2)], marks: [mk('chalk', 3, 4.8, 5, 3.2)], hangs: [hang('stars', 6.8, 1.9)], torches: [{ x: 5.5, y: -1.6 }] });
   if (door === 'hall') return room('THE BARRACKS', 13, 8, STONE,
     [b('rack', 1, 0.2, 3, 0.5), b('rack', 9, 0.2, 3, 0.5), b('counter', 9.4, 1.7, 1.8, 0.5), b('bunk', 0.4, 3, 1.2, 2.4), b('bunk', 11.4, 3, 1.2, 2.4), b('maptable', 4.6, 3.7, 3.2, 1), b('dummy', 10, 5.4, 0.8, 0.6)],
-    [n('MASTER COLE', 4.5, 2.4, 'trainer', 'trainer', 0), n('SQUIRE PELL', 8.8, 3.2, 'yard', 'squire'), n('CORPORAL BRISK', 6.5, 5.4, 'chat', 'guard', 13), n('QUARTERMASTER NELL', 10.3, 1.15, 'vendor', 'squire', 0)],
+    [n('MASTER COLE', 4.5, 2.4, 'trainer', 'trainer', 0), n('SQUIRE PELL', 8.8, 3.2, 'yard', 'squire'), n('CORPORAL BRISK', 6.5, 5.4, 'watch', 'guard', 13), n('QUARTERMASTER NELL', 10.3, 1.15, 'vendor', 'squire', 0)],
     { marks: [mk('rushes', 1.6, 1, 9.8, 6)], hangs: [hang('shields', 4.2, 1.7), hang('banner', 6.1, 0.8), hang('shields', 7.1, 1.7)] });
   if (door === 'lodge') return room("THE HUNTERS' LODGE", 11, 8, HOME,
     [b('rack', 0.8, 0.2, 4, 0.5), b('skinbench', 6.4, 2.8, 2.6, 0.8), b('sacks', 9.2, 4.6, 1.2, 1)],
