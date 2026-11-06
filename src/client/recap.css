@@ -10,6 +10,7 @@
 #panel .pt-grid b { font: 400 var(--fs-text)/1.2 var(--font-body); letter-spacing: 0.04em; color: var(--bone-dim); align-self: center; }
 #panel .pt-grid span { font: 400 var(--fs)/1 var(--font-body); color: var(--bone); text-align: center; align-self: center; }
 #panel .pt-grid span.lead { color: var(--gilt); }
+#panel .pt-grid span.cut { color: #c0605a; }
 /* Each hero's head: the name in their class's colour, the class, and a callout where they led. */
 #panel .pt-who { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; text-align: center; padding-bottom: 4px; }
 #panel .pt-who b { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 var(--fs-text)/1.2 var(--font-body); color: var(--cls); }

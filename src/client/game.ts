@@ -22,7 +22,7 @@ import { wayGot, wayLine } from '../shared/waypay';
 import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
 import { buyDrill, learnLesson } from '../shared/training';
 import { knowsSkill, learnSkill } from '../shared/skillteach';
-import { ARRIVE_SAFE, HOUSEBURN, PARTY, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, sellValue, giveValue, TIER_WANT, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
+import { ARRIVE_SAFE, cutMax, HOUSEBURN, PARTY, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, sellValue, giveValue, TIER_WANT, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
 import { partyLevel } from '../shared/threat';
 import { ArenaRoom } from '../sim/room';
 import { lessonOf, newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
@@ -319,7 +319,9 @@ export class Game {
     h.armor = p.armor;
     h.rings = [...p.rings];
     h.baseHp = HERO.hp + (perkFx(p.perks).health ?? 0);
-    h.maxHp = h.baseHp + statsOf(h).health;
+    // Raised this job (sim/raise.ts): the most health stays cut till it ends, and who raised you stays known.
+    if (keep) Object.assign(h, { hpCut: keep.hpCut, risenBy: keep.risenBy });
+    h.maxHp = cutMax(h.baseHp + statsOf(h).health, h.hpCut);
     h.relics = abilitiesOf(p.cls, carried?.kind, p.skill);
     h.learned = p.learned;
     h.look = p.look ?? 0;
@@ -343,6 +345,8 @@ export class Game {
     const h = room.join(ME);
     if (at) (h.x = at.x), (h.y = at.y);
     this.equip(h, keep);
+    // A Cleric's RAISE cooldown goes on through the door (the room's clock starts again in each room).
+    if (keep?.riseReadyAt !== undefined && from) h.riseReadyAt = room.time + Math.max(0, keep.riseReadyAt - from.time);
     // A fresh hero in the new room: every press made so far counts as seen (so the last swing or
     // roll doesn't fire again on the doorstep), and it starts standing still.
     syncSeen(h, this.lastIntent);

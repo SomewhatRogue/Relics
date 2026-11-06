@@ -35,3 +35,19 @@ export const CENSER = { drop: 3, at: 0.8, life: 6, radius: 0.5, max: 6, arm: 0.4
  *  Quick blows shove a goblin a little; a shield-bearer's board stops the shove. Let the spin go on the
  *  white flash and what it hits is stunned `stun` s (a butcher `big` as long), and friends near you are shielded. */
 export const FLAIL = { stun: 1, big: 0.5 };
+
+/**
+ * RAISE (Kyle, 2026-11-05: "Clerics should be able to res someone multiplayer even if they're fully
+ * down ... less max health for who they res for that instance"; sim/raise.ts). In a party, a Cleric on
+ * their feet presses GRAB by a friend who is out for the job and kneels there `time` s, the light going
+ * into them; goblins within `draw` tiles come for the Cleric meanwhile (and `linger` s after), and a red
+ * ring that wide shows round the Cleric for `show` s as it begins. A hit, a
+ * swing, a block or walking off breaks it, and it starts again from nothing. Each Cleric raises a given
+ * friend once a job, and then waits `cooldown` s before raising anyone. The friend gets up with `hp` of
+ * their new most, and `grace` s with nothing landing on them. Each raise takes `cut` of their full most
+ * health off for the rest of the job (two Clerics: twice), never below `floor` of it.
+ */
+export const RAISE = { time: 4, reach: 1.4, hp: 0.35, cut: 0.25, floor: 0.5, cooldown: 45, draw: 5, linger: 1, grace: 1.5, /** The red ring round the Cleric as it begins (s). */ show: 0.6 };
+
+/** The most health a hero has with `cut` of it taken off by being raised (shared by the room and the HUD). */
+export const cutMax = (full: number, cut = 0): number => Math.max(1, Math.round(full * (1 - cut)));

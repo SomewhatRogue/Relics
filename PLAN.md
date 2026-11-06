@@ -2,6 +2,14 @@
 
 ## Current slice
 
+**RAISE, and the guest's dodge** (Claude Opus 5.5, 2026-11-06; Kyle: "Clerics should be able to res someone
+multiplayer even if they're fully down ... less max health for who they res for that instance"). Built; waiting on
+Kyle's play. *Done when*, online with friends: a Cleric by a friend who is out sees RAISE, taps it and stands still
+4 s while a column of light stands out of the body and the goblins near come for them; a hit, a swing, a block or
+walking off breaks it; done, the friend is up with a third of their health and a bar cut off at the far end (25% a
+raise, never past half) till the job ends, and the recap shows it; each Cleric raises each friend once a job, 45 s
+apart; and a guest's own dodge stops where it lands, without running on and easing back. Everything in DECISIONS
+2026-11-06 ("RAISE"). Open: the new lines through the lore keeper and line editor; the numbers once he's played.
 **Who hosts** (Claude Opus 5.5, 2026-11-06; Kyle approved "best connection hosts" and "a hidden host hands
 over"). Built; waiting on Kyle's play. *Done when*, online with friends: setting out, the player nearest the relay
 runs the job's room (the beat says so when it isn't the party's leader; the leader still leads the party), and

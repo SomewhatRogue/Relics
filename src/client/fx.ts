@@ -2,6 +2,7 @@
  * Effects that only decorate: sparks, blood (that stays on the floor), floating calls ("BLOCK"),
  * rings, screen shake and short flashes of light. Cosmetic, so Math.random is fine here.
  */
+import { RAISEW } from './raisewords';
 import { foeFx } from './fxfoes';
 import { staitheFx } from './fxstaithe';
 import { woodFx } from './fxwood';
@@ -293,6 +294,17 @@ export class Fx {
         break;
       case 'gotup':
         this.say(x, y - 26, 'UP', '#ffd27a');
+        break;
+      // RAISE (sim/raise.ts): a Cleric raising a friend who is out, broken off, done.
+      case 'rising':
+        this.say(x, y - 26, RAISEW.rising, '#ffd27a', 1.6);
+        break;
+      case 'risebroke':
+        this.say(x, y - 26, RAISEW.broke, '#c0605a', 1.6);
+        break;
+      case 'risen':
+        this.burst(x, y - 4, 14, ['#fff0b0', '#ffd27a', '#e0a040'], 40, true, -60);
+        this.say(x, y - 26, RAISEW.risen, '#ffd27a', 2);
         break;
       case 'survivorhit':
         // Someone you freed, hurt by the party: blood, the number, and a cry (not for every burn).

@@ -21,6 +21,10 @@ export interface Score {
   downs: number;
   raised: number;
   healed: number;
+  /** RAISE (sim/raise.ts): friends a Cleric raised when they were out; and the most health this hero lost
+   *  to being raised, in % of their full most (optional: a board from before reads 0). */
+  rose?: number;
+  cut?: number;
   /** The biggest single blow on a goblin. */
   best: number;
   /** Who it is: the hero's name (as the party knows it) and class. */
@@ -30,8 +34,8 @@ export interface Score {
 export type Board = Record<string, Score>;
 export type Count = Exclude<keyof Score, 'name' | 'cls'>;
 
-export const COUNTS: readonly Count[] = ['kills', 'dealt', 'taken', 'dodges', 'blocks', 'downs', 'raised', 'healed', 'best'];
-export const blankScore = (): Score => ({ kills: 0, dealt: 0, taken: 0, dodges: 0, blocks: 0, downs: 0, raised: 0, healed: 0, best: 0 });
+export const COUNTS: readonly Count[] = ['kills', 'dealt', 'taken', 'dodges', 'blocks', 'downs', 'raised', 'healed', 'best', 'rose', 'cut'];
+export const blankScore = (): Score => ({ kills: 0, dealt: 0, taken: 0, dodges: 0, blocks: 0, downs: 0, raised: 0, healed: 0, best: 0, rose: 0, cut: 0 });
 
 /** The board of the room stepping now (null between steps: nothing outside a step counts). */
 let on: Board | null = null;
@@ -42,7 +46,7 @@ export function count(id: string | undefined, k: Count, n = 1): void {
   if (!on || !id || id === 'squire' || !(n > 0)) return;
   const s = (on[id] ??= blankScore());
   if (k === 'best') s.best = Math.max(s.best, n);
-  else s[k] += n;
+  else s[k] = (s[k] ?? 0) + n;
 }
 
 /** A blow of `n` on a goblin, by `id`: what went into its health (`hp` is after the blow), and the
@@ -60,6 +64,6 @@ export const gave = (id: string | undefined, to: string, n: number): void => (id
 export function foldBoard(into: Board, from: Board): void {
   for (const [id, s] of Object.entries(from)) {
     const t = (into[id] ??= blankScore());
-    for (const k of COUNTS) t[k] = k === 'best' ? Math.max(t.best, s.best) : t[k] + s[k];
+    for (const k of COUNTS) t[k] = k === 'best' ? Math.max(t.best, s.best) : (t[k] ?? 0) + (s[k] ?? 0);
   }
 }

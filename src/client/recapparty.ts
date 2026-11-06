@@ -18,13 +18,17 @@ export const MORE: readonly Count[] = ['raised', 'healed', 'best'];
 /** Rows where leading is something to light up (not damage taken, not downs). */
 const GOOD = new Set<Count>(['kills', 'dealt', 'dodges', 'blocks', 'raised', 'healed', 'best']);
 const led = (l: PartyLine, all: PartyLine[], k: Count) => GOOD.has(k) && leads(l.s, all.map((o) => o.s), k as CallId);
+/** RAISE's rows (sim/raise.ts), shown with the rest only on a job where someone was raised: friends a
+ *  Cleric raised, and the most health each hero lost to it, in %. */
+const RAISED: readonly Count[] = ['rose', 'cut'];
+const cell = (k: Count, v: number) => (k === 'cut' ? (v > 0 ? `<span class="cut">${v}%</span>` : '<span>0</span>') : null);
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 /** Big numbers stay narrow enough for four columns on a phone. */
 export const num = (v: number) => (v >= 10000 ? `${(v / 1000).toFixed(v >= 100000 ? 0 : 1)}k` : String(Math.round(v)));
 
 function rows(ks: readonly Count[], party: PartyLine[]): string {
-  return ks.map((k) => `<div><b>${RECAPW.stat[k]}</b>${party.map((l) => `<span${led(l, party, k) ? ' class="lead"' : ''}>${num(l.s[k])}</span>`).join('')}</div>`).join('');
+  return ks.map((k) => `<div><b>${RECAPW.stat[k]}</b>${party.map((l) => cell(k, l.s[k] ?? 0) ?? `<span${led(l, party, k) ? ' class="lead"' : ''}>${num(l.s[k] ?? 0)}</span>`).join('')}</div>`).join('');
 }
 
 export function partyTable(party: PartyLine[]): string {
@@ -34,6 +38,7 @@ export function partyTable(party: PartyLine[]): string {
     return `<div class="pt-who${l.me ? ' me' : ''}" style="--cls:${col}"><b>${esc(l.name.toUpperCase())}</b><em>${l.cls ? CLASS_NAME[l.cls] : ''}</em>${l.call ? `<i>${RECAPW.call[l.call]}</i>` : ''}</div>`;
   }).join('');
   const grid = (body: string) => `<div class="pt-grid">${body}</div>`;
-  return `<div class="party${party.length > 2 ? ' many' : ''}" style="--n:${party.length}">${grid(`<div><span></span>${who}</div>${rows(SHOWN, party)}`)}` +
+  const shown = party.some((l) => (l.s.rose ?? 0) > 0) ? [...SHOWN, ...RAISED] : SHOWN;
+  return `<div class="party${party.length > 2 ? ' many' : ''}" style="--n:${party.length}">${grid(`<div><span></span>${who}</div>${rows(shown, party)}`)}` +
     `<details class="pt-more"><summary><span class="m">${RECAPW.more}</span><span class="l">${RECAPW.less}</span></summary>${grid(rows(MORE, party))}</details></div>`;
 }

@@ -76,8 +76,8 @@ export class OwnHero {
   private server: { x: number; y: number } | null = null;
   private prevServer: { x: number; y: number } | null = null;
   private p: Body | null = null;
-  /** [this page's clock, dx, dy, the act it was part of (0: walking), how far into that act]. */
-  private walked: [number, number, number, number, number][] = [];
+  /** [this page's clock, dx, dy, the act it was part of (0: walking), the stretch of that act it covers (from, to)]. */
+  private walked: [number, number, number, number, number, number][] = [];
   /** The stick last frame. */
   private was: Intent | null = null;
   /** When the latest patch was applied here (its word stands till the next: walking since is on top). */
@@ -172,15 +172,15 @@ export class OwnHero {
       const pv = this.prevServer ?? sv, tx = pv.x + (sv.x - pv.x) * alpha, ty = pv.y + (sv.y - pv.y) * alpha;
       const k = Math.hypot(tx - p.x, ty - p.y) > PREDICT.snap ? 1 : Math.min(1, dt * PREDICT.follow);
       (p.x += (tx - p.x) * k), (p.y += (ty - p.y) * k), (p.z = (s.z as number) ?? 0);
-      this.walked.push([now, 0, 0, 0, 0]);
+      this.walked.push([now, 0, 0, 0, 0, 0]);
       return this.put(room, h, p);
     }
     let cur = this.acts.find((o) => !o.done);
     // Past a dodge or blow of mine the leader's still showing: on my clock it's over.
     if (!cur && (s.act === 'roll' || s.act === 'attack') && this.acts.some((o) => o.done && o.confirmed && o.kind === s.act && o.prog !== Infinity)) (h.act = 'idle'), (h.actT = 0), (h.heavy = false);
     cur = this.startRoll(h, cur, intent, now, sent, p, ev) ?? this.startSwing(room, h, cur, intent, now, sent, p, ev);
-    let mx = 0, my = 0;
-    if (cur) [mx, my] = this.run(h, cur, p, dt);
+    let mx = 0, my = 0, from = 0, to = 0;
+    if (cur) [mx, my, from, to] = this.run(h, cur, p, dt);
     // Walking, at the pace of what I'm doing (none mid-dodge, or mid-blow but for a wand's cast).
     h.blocking = h.act === 'idle' && guardUp(h, intent);
     if (h.act === 'idle') face(h, intent, room.enemies, h.blocking);
@@ -192,16 +192,19 @@ export class OwnHero {
     const [ux, uy] = walkStep(h, p, intent, this.slip, split > 0 && split < dt ? dt - split : dt, lead, actPace(h, intent));
     (wx += ux), (wy += uy);
     h.moving = !!(wx || wy);
-    if (cur) this.walked.push([now, mx, my, cur.id, cur.t]);
-    this.walked.push([now, wx, wy, 0, 0]);
+    if (cur) this.walked.push([now, mx, my, cur.id, from, to]);
+    this.walked.push([now, wx, wy, 0, 0, 0]);
     // Where the leader will have me once what I've done since it last looked reaches it: my walking since
     // the trip before its latest patch, and of each act of mine what its room has yet to go through (all
-    // of one it hasn't begun yet, however long ago it began here).
+    // of one it hasn't begun yet, however long ago it began here). A frame's step of an act counts only
+    // for the part of it past where the leader's room is with it: counted whole, a frame half done there
+    // put the target up to a frame's dodge past the end, and the hero ran on and eased back (2026-11-06).
     let tx = sv.x, ty = sv.y;
     const edge = this.appliedAt - this.trip, acts = new Map(this.acts.map((o) => [o.id, o]));
-    for (const [t, dx, dy, id, into] of this.walked) {
+    for (const [t, dx, dy, id, from, to] of this.walked) {
       const o = id ? acts.get(id) : undefined;
-      if (id ? !!o && (!o.confirmed || into > o.prog) : t > edge) (tx += dx), (ty += dy);
+      const k = !id ? (t > edge ? 1 : 0) : !o ? 0 : !o.confirmed ? 1 : to > from ? Math.min(1, Math.max(0, (to - o.prog) / (to - from))) : to > o.prog ? 1 : 0;
+      if (k) (tx += dx * k), (ty += dy * k);
     }
     const far = now < this.settleUntil || this.acts.length ? PREDICT.far : PREDICT.snap;
     if (Math.hypot(tx - p.x, ty - p.y) > far) (p.x = tx), (p.y = ty), (p.z = (s.z as number) ?? 0);
@@ -269,12 +272,14 @@ export class OwnHero {
     return n;
   }
 
-  /** My act this frame: drawn, and its own move (a dodge's reach, a blow's lunge). */
-  private run(h: Hero, o: Own, p: Body, dt: number): [number, number] {
-    const x0 = p.x, y0 = p.y;
+  /** My act this frame: drawn, and its own move (a dodge's reach, a blow's lunge), with the stretch of the act's time it moved through. */
+  private run(h: Hero, o: Own, p: Body, dt: number): [number, number, number, number] {
+    const x0 = p.x, y0 = p.y, from = o.t;
+    let to = o.t;
     (h.fx = o.fx), (h.fy = o.fy);
     if (o.kind === 'roll') {
       const step = Math.max(0, Math.min(dt, o.time - o.t));
+      to = o.t + step;
       travel(p, o.dx * o.speed * step, o.dy * o.speed * step, HERO.radius);
       o.t += dt;
       Object.assign(h, { act: 'roll', actT: Math.min(o.t, o.time), rollDx: o.dx, rollDy: o.dy });
@@ -282,11 +287,12 @@ export class OwnHero {
     } else {
       Object.assign(h, { act: 'attack', heavy: false, combo: o.combo });
       const sw = currentSwing(h), step = Math.max(0, Math.min(dt, sw.windup - o.t));
+      to = o.t + step;
       if (step > 0) (p.x += o.fx * (sw.lunge / sw.windup) * step), (p.y += o.fy * (sw.lunge / sw.windup) * step), collide(p, HERO.radius);
       o.t += dt;
       h.actT = o.t;
       if (o.t >= sw.windup + sw.active + sw.recover) (o.done = true), (h.act = 'idle'), (h.actT = 0);
     }
-    return [p.x - x0, p.y - y0];
+    return [p.x - x0, p.y - y0, from, to];
   }
 }

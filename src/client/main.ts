@@ -34,7 +34,8 @@ import { MAX_DOWNS } from '../sim/run';
 import { WayWatch, wayTarget } from './wayfind';
 import { targets } from '../sim/targets';
 import type { Npc } from '../shared/arena';
-import { knows, type Intent } from '../sim/types';
+import { knows, type Hero, type Intent } from '../sim/types';
+import { isCleric } from '../sim/mercy';
 import { Game, ME } from './game';
 import { Panel } from './panels';
 import { openSpot } from './townui';
@@ -53,6 +54,8 @@ import { raidNews } from './raidnews';
 import { WORK_ORDER } from '../shared/works';
 import { grabbable } from '../sim/grab';
 import { raisable } from '../sim/party';
+import { risable, riseWait } from '../sim/raise';
+import { RAISEW } from './raisewords';
 import { cuttable } from '../sim/netter';
 import { torchable } from '../sim/torch';
 import { kindleable } from '../sim/kindle';
@@ -282,7 +285,8 @@ let tipAt = -99, tipI = 0;
 function hud(now: number): void {
   const me = game.hero, room = game.room, pr = game.profile;
   document.body.dataset.mode = game.mode;
-  $('.hp i').style.width = (100 * me.hp) / me.maxHp + '%';
+  // (Raised this job: the bar's far end is cut off, darkened, and the health fills what's left: unitframe.ts.)
+  $('.hp i').style.width = (100 * me.hp * (1 - (me.hpCut ?? 0))) / me.maxHp + '%';
   $('.hp').classList.toggle('poisoned', !!me.poison);
   $('.st i').style.width = me.stamina + '%';
   // A Mage's bar is MAGIC: the word on its tooltip and a soft violet (shared/barword.ts).
@@ -363,7 +367,7 @@ function hud(now: number): void {
     fold.render(objFlash.show(`<b>${g.title}</b> <div class="obj">${g.text}</div><span>GREYHOLLOW, THE DAY AFTER</span>`, now), null, g.title + g.text, now);
     showPlate($('#boss'), wood.cut >= 0 ? null : plateOf(room.enemies, room.time));
   } else if (game.mode === 'run' && run) {
-    const g = { text: me.out ? OUT_TEXT : game.goalText() };
+    const g = { text: me.out ? outText(me, room.heroes) : game.goalText() };
     // (The hearts, the get-ups left, are under the health bar: unitframe.ts.)
     // Folded: the objective and the room diamonds; an expedition's, how many jobs are left. Open: the lot,
     // and on an expedition every pinned job and side job, done or what to do (bannerfold.ts, tracker.ts).
@@ -398,6 +402,11 @@ function hud(now: number): void {
   if (!spot && !busy && !input.touch && game.mode === 'run' && (cuttable(game.hero, game.room.heroes, game.room.time) || stg === 'cut')) ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  CUT FREE');
   else if (!spot && !busy && !input.touch && stg === 'shove') ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  ' + STAITHE_WORDS.shove);
   else if (!spot && !busy && !input.touch && game.mode === 'run' && game.hero.act === 'idle' && raisable(game.hero, game.room.heroes)) ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  HELP UP');
+  // A Cleric by a friend who is out (sim/raise.ts): the key, or the seconds till it's ready.
+  else if (!spot && !busy && !input.touch && game.mode === 'run' && risable(game.hero, game.room.heroes, game.room.time)) {
+    const wait = riseWait(game.hero, game.room.time);
+    ($('#prompt').hidden = false), ($('#prompt').textContent = wait > 0 ? `${RAISEW.button}  ${Math.ceil(wait)}` : `G  ${RAISEW.button}`);
+  }
   else if (!spot && !busy && !input.touch && game.mode === 'run' && (torchable(game.hero, game.room.enemies) || kindleable(game.hero, game.room.map))) ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  BURN');
   // The touch buttons round ATTACK, and the unit frame (cluster.ts, unitframe.ts).
   cluster?.update(game, spot, busy, now, game.mode === 'run' && card.near >= 0 ? (card.current >= 0 ? 'open' : 'shut') : '');
@@ -422,6 +431,13 @@ const LEAVE_PARTY = "Your party carries on. You keep the gold you've picked up, 
 
 /** On the banner once you're out of a job (your party carries on without you). */
 const OUT_TEXT = "You're out till the job's done. Your party carries on";
+/** Out for the job: who's raising you, or that a Cleric in the party still could (sim/raise.ts), or the old line. */
+function outText(me: Hero, heroes: Hero[]): string {
+  const by = me.riseBy ? heroes.find((h) => h.id === me.riseBy) : undefined;
+  if (by) return RAISEW.outRising(by.tag ?? by.id);
+  const can = heroes.some((h) => h !== me && h.id !== 'squire' && isCleric(h) && !h.out && !me.risenBy?.includes(h.id));
+  return can ? RAISEW.out : OUT_TEXT;
+}
 
 const dread = new DreadView();
 let last = performance.now();
@@ -476,6 +492,11 @@ function tick(t: number): void {
     if (party && game.mode === 'run' && (ev.k === 'down' || ev.k === 'gotup' || ev.k === 'pickedup') && (ev as { id?: string }).id === game.hero.id) {
       const [sx, sy] = toPx(ev.x, ev.y);
       fx.say(sx, sy - 34, game.hero.selfUp ? 'NO GET-UPS LEFT' : '1 GET-UP LEFT', game.hero.selfUp ? '#ff6a7a' : '#ffd27a', 2.6);
+    }
+    // Raised by a Cleric (sim/raise.ts): the max health you have for the rest of the job.
+    if (ev.k === 'risen' && ev.id === game.hero.id) {
+      const [sx, sy] = toPx(ev.x, ev.y);
+      fx.say(sx, sy - 36, RAISEW.mine(game.hero.maxHp), '#ffd27a', 3.2);
     }
     // Down alone on a job: how many more times you'll get up.
     if (ev.k === 'down' && game.mode === 'run' && game.run && game.room.heroes.filter((x) => x.id !== 'squire').length < 2 && Math.abs(ev.x - game.hero.x) < 0.01) {

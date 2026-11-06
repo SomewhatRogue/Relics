@@ -31,6 +31,9 @@ export const RECAPW = {
     raised: 'HELPED UP',
     healed: 'HEALING GIVEN',
     best: 'BIGGEST HIT',
+    /** RAISE (sim/raise.ts): friends a Cleric raised when they were out; the most health lost to being raised, in %. */
+    rose: 'RAISED',
+    cut: 'MAX HEALTH LOST',
   } as Record<string, string>,
   more: 'MORE',
   less: 'LESS',

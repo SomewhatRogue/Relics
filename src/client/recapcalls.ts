@@ -7,7 +7,8 @@
 import type { Count, Score } from '../sim/score';
 
 /** What a callout can be for: a count to lead, or `standing` (the only one never downed when the rest were). */
-export type CallId = Exclude<Count, 'taken' | 'downs'> | 'standing';
+// (RAISE's counts, `rose` and `cut`, are rows, not callouts.)
+export type CallId = Exclude<Count, 'taken' | 'downs' | 'rose' | 'cut'> | 'standing';
 export const CALL_ORDER: readonly CallId[] = ['kills', 'dealt', 'healed', 'raised', 'dodges', 'blocks', 'best', 'standing'];
 
 /** Does `s` lead everyone in `all` at `c`? */
