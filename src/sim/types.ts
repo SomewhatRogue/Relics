@@ -164,6 +164,10 @@ export interface Hero extends Body {
   brandyUntil: number;
   /** In smoke: goblins can't see you (unless close) until then. */
   hiddenUntil: number;
+  /** A chalker's strokes on this hero (sim/chalker.ts), when the last went on, and the pack turned on them until then. Drawn over them on every screen. */
+  chalk?: number;
+  chalkAt?: number;
+  chalkedUntil?: number;
   /** A Rogue's vanish: no goblin sees them, even close, until then (or till they strike). */
   vanishUntil?: number;
   /** A Mage's storm tether: the goblin it holds, until when, and its next strike (sim/tether.ts). */
@@ -437,6 +441,13 @@ export interface Enemy extends Body {
   tauntSoft?: boolean;
   caltropUntil?: number;
   rime?: number;
+  /** A chalker (sim/chalker.ts): the hero it's chalking, seconds of seeing them toward the next stroke, when it last
+   *  chalked one. Any goblin of its pack at the fifth: the hero it's turned on, until then (blows on them harder). */
+  quarry?: string;
+  chalkT?: number;
+  chalkAt?: number;
+  turnedOn?: string;
+  turnedUntil?: number;
   /** The hero who last hit it (who threw it into the wall). */
   lastBy: string;
   /** How it died, for the body left behind. */
@@ -652,6 +663,9 @@ export interface Drop {
 }
 
 export type FightEvent =
+  /** A chalker's stroke on hero `on` (`n` now), the fifth turning its pack on them, the strokes wiped (sim/chalker.ts). */
+  | { k: 'chalk'; x: number; y: number; n: number; on: string }
+  | { k: 'chalked' | 'chalkwipe'; x: number; y: number; on: string }
   /** A staff's wall of fire coming to a stop and standing (sim/firewall.ts), `r` half its length, square to (`dx`, `dy`). */
   | { k: 'wallup'; x: number; y: number; r: number; dx: number; dy: number; big: boolean }
   /** An expedition (sim/exped.ts): a job or side job done (`i` its place in the list), the way out open, lit, the watch come; a horn, worse, a wave. */

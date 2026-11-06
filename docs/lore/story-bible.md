@@ -328,6 +328,8 @@ most Want among the heroes is the one the bells don't spare).
 - The watch pays heroes by the head for a night shift with a bow, capped per night. It's wages, never touching the Want.
 - Anyone is handed a bow for the shift.
 - Brisk hands out the watch's pay but isn't one of the watch.
+- Maeve keeps a hound of her own, lying by the hunters' lodge fire; anyone may pet it (Kyle, 2026-11-05). It's unnamed for now.
+- The chalker (2026-11-05): a goblin that hangs back behind its pack and chalks strokes over one hero's head, in fives; at the fifth the pack goes for that hero. The hungry keep counts in fives of what they take, and a chalker chalks the next one over their head. Its staged board counts heads only: no prices, no names, no buyers, nothing about where anyone went (that is the Tally Man's ledger, chapter 4). No tally board in a Fenmere CRIES room before chapter 4, and never call a chalker a tallyman.
 
 ## Withy Staithe and the eel-catchers (recorded 2026-11-05; Kyle's call, lore keeper)
 - **Withy Staithe** is an eel landing on the Barrowfields river: a jetty over deep water, a smokehouse, drying racks and punts.

@@ -10,7 +10,7 @@ import { bladeEdge } from './blademark';
 import { flourish, tapPose, tapSmearCol } from './castflourish';
 import { focusMotes } from './wisps';
 
-export interface Pose { a: number; ext: number; from?: number; thrust?: boolean; reach: number; pull: number }
+export interface Pose { a: number; ext: number; from?: number; thrust?: boolean; reach: number; pull: number; /** The main-hand blade isn't in the hand (flipped in an idle: idlepose.ts). */ hide?: boolean }
 
 // (A Ranger draws the bow on a hold, though their tap is the short sword.)
 const ranged = (h: Hero) => !!WEAPONS[h.weapon].combo[0].shot || WEAPONS[h.weapon].cls === 'RANGER';
@@ -182,7 +182,7 @@ export function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): vo
   } else {
     // Twin daggers: one in each hand, the off hand trailing the swing.
     const lx = ox - side * 6, ly = oy + 1, la = p.a - side * 0.6;
-    for (const [x0, y0, a] of [[ox, oy, p.a], [lx, ly, la]] as const) {
+    for (const [x0, y0, a] of (p.hide ? [[lx, ly, la]] : [[ox, oy, p.a], [lx, ly, la]]) as [number, number, number][]) {
       line(g, x0, y0, a, 0, 2, '#2a2420');
       line(g, x0, y0, a, 2, 7, '#e6ecf0');
     }

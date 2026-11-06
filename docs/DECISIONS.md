@@ -126,6 +126,147 @@ smokehouse finds ground in about 92% of NETS rooms (the rest go without it, neve
 or skimmer); the gaffer and skimmer debut only at the Staithe (no encounter template yet, as the proposal's
 bleed-in says).
 
+## 2026-11-05: the chalker, and how a new sort bleeds in (Kyle; Claude Opus 5.5)
+
+Item 6 of the biome and enemy rollout Kyle approved today. Numbers in `shared/chalk.ts` (CHALKER, re-exported by
+tuning.ts); the room's rules in `sim/chalker.ts`; the bleed-in in `shared/debut.ts`; its staging in
+`shared/chalkstage.ts`; drawn by `client/chalkdraw.ts`, its moments and sounds in `client/chalkfx.ts`.
+
+- **What it does.** A squad goblin (a backer: `BACK_ROLES`) with a lump of chalk and a tally board on its back,
+  **28** health. It keeps behind its pack (**3** tiles), runs from anyone closer than **4.2**, and jabs with the
+  chalk hand if cornered (4 damage). It picks the nearest hero it sees and keeps them, and chalks a stroke on
+  them **1 s** after it first sees them, then one every **2 s**, its clock running only while it sees them
+  (within **10** tiles, not hidden by smoke or Vanish, not blinded by smoke itself, not stunned, frozen, netted
+  or mid-blow). The strokes are the hero's own field (`chalk`), so every screen draws them over that hero.
+- **At five** every goblin of its pack within **14** tiles of that hero turns on them for **8 s** (`turnedOn`,
+  `turnedUntil`): `nearest()` gives them that hero after a Warrior's taunt and a war cry (so a Warrior can still
+  pull them off), and their blows on that hero land **1.3x** (`hitHero`'s `taken`); on anyone else as ever.
+  Then the chalk is spent: the strokes go and the chalker, having rested its chalk for the turn, starts again on
+  whoever is nearest.
+- **Counters.** Kill it and no new strokes go on (the ones there fade **6 s** after the last, with no chalker at
+  them; the same takes them off a hero who went on into the next room). **Vanish** (and SLIP AWAY, by the vanish
+  rule), **smoke** (a smoke bomb, Vanish's, a flask's, steam: anything that hides you) and **blessed ground**
+  (SANCTUARY, and walking SANCTUARY STEP ground, wherever it has moved to) wipe the strokes and call off a turn
+  already on. It's fragile and keeps to the back: a Rogue's step and stab or a Ranger's arrows, by design.
+- **The stun cap** doesn't come into it: the chalker stuns nobody, and a stun on it (capped as any) stops its
+  clock while it lasts.
+- **Seen.** Red strokes over the hero in a tally (four and the fifth across), outlined so they read in any light;
+  the newest white for a moment, and the chalker's hand up with a fleck of chalk as it goes on. At the fifth a red
+  flash, a burst, a shake, CHALKED, then the five pulse and a red sight turns at the hero's feet, blinking in its
+  last second. Wiped: a puff of chalk dust and CHALK WIPED. Flat and 2.5D alike (the strokes on the 2.5D overlay
+  beside MARK; the body and its kit are the flat figure on the card). Red, the goblins' colour: a blow coming.
+- **Where and when** (`debut` on a template, `shared/debut.ts`, small and general so the gaffer and skimmer can
+  use it): **staged**, **rare**, **common** by the job's board day. The chapter system can't say "a week later"
+  (the chapter is always 1 and nothing in a job carries it), so it's a **job count**: the board's day, which is
+  one finished job on the shared world's clock (`WorldState.day`), read off the job's id (`d12-0` is day 12; the
+  story mission and old saves count as staged). The chalker's: staged from day `from` (**1**), rare from day 8
+  (`rare` 7 days on), common from day 29 (`common` 28 days on, standing in for "a chapter later").
+  - *Staged* (`stageDebuts`, called by `planRoom` for a layout-4 room reached by a fork way, after the chests are
+    down): in the **CRIES** way's room in its home region (**Barrowfields**) it stands at a tally board near where
+    the captives are led off, chalking them up (ten and the ones on the rope), one of the guards' pack (82), so it
+    wakes with them and turns its chalk on you. A task (`tally`, `sim/tasks.ts`) holds it facing the board till
+    it sees you; the board is drawn from the task in both views. Not one of the room's specials (it's the scene's,
+    as the guards are). No dice: the room's stream is untouched. It stays in that scene in every stage.
+  - *Rare*: the `chalk` template (a chalker behind 3 to 5 small ones, room 2 on) at weight **0.5**, in the
+    Barrowfields only, and only in one room of a job (`rareRoom`, from the job's seed), so one a job at most.
+  - *Common*: the template's own weight, **1.5**, anywhere it fits. Kept off the expedition (its packs are listed
+    by id).
+- **For Kyle:** a world already past day 29 meets it common at once. To give the live world a real debut, set
+  `CHALKER.debut.from` to its day when this ships. The numbers above once he's played (2 s a stroke may be quick).
+- **Online.** Nothing new is sent but the fields: the hero's `chalk`, `chalkAt`, `chalkedUntil` and the goblins'
+  `quarry`, `chalkT`, `chalkAt`, `turnedOn`, `turnedUntil`, as changed fields in the usual patch. Cleared values are
+  written as 0, '' or -9 (a patch never removes a key). Hero times ride `rebase` between rooms.
+- **New words** (for the lore keeper, then the line editor): the name **CHALKER** (code and docs only for now:
+  nothing on screen names sorts); callouts **CHALKED** (over the hero at the fifth) and **CHALK WIPED** (when
+  Vanish, smoke or blessed ground takes the strokes off); the template's plain words "a chalker behind a crowd,
+  chalking one of you" (never on screen). Lore to record or reject: the hungry keep tallies of what they take in
+  chalk, in fives, and a chalker marks whoever the pack is to have next.
+
+Tests: `tests/chalker.test.ts` (strokes on cadence while it sees, none while blinded by smoke or once it's dead,
+then they fade; at five its pack turns, the turned goblin comes for that hero past a nearer one, 1.3x on them and
+1x on another, ended after the turn; Vanish, smoke and SANCTUARY each wipe the strokes and call off a turn; a
+guest's decoded room has the strokes, sent as changed fields; the same fight twice; staged in Barrowfields CRIES
+rooms at its tally with the guards' pack and not elsewhere; the stages by day and the weights; in the packs none
+while staged, at most one a job and only in the Barrowfields while rare, more and further afield once common).
+`tests/variety.test.ts` re-pinned: the only change in its 280 rooms is the staged chalker added in five
+Barrowfields CRIES rooms (no other foe, chest or block moved; checked by diffing every plan with and without it).
+Shots: `node scripts/chalk-look.cjs [url] [outdir]` (a Rogue chalked three strokes in, and the pack turning, on a
+phone, flat and 2.5D).
+
+## 2026-11-05: heroes idle, three ways a class and a rare one; a Ranger plays with the hound, and hounds are petted in the lodge (Kyle; Claude Opus 5.5)
+
+Kyle: "Let's work on custom class-specific idle animations. Three per class, with one extra hidden one with a one
+in fifty chance of playing. I want Ranger to play with his dog a lot. Also can pet his dog in the hunter lodge."
+Then: "Keep in mind different weapon types change the sprites if they're touching a blade etc." Drawing only.
+
+**When** (`client/idles.ts`). Stood still 4 to 6 s (a range, per hero), an idle; then one every 6 to 10 s start to
+start, with at least 1.5 s between. Only standing still out of a fight: not moving, turning, blocking, carrying,
+stooped or mid-act, and no goblin awake (`alert !== false`, not dead) within 8 tiles. Any of those, a hit (health
+dropping), or any input from this player (the stick, the aim, any press: `client/idlepoke.ts`, called from
+`main.ts`) stops it at once and the wait starts over. Each hero's rolls come from a seed of their id and the clock,
+so a party never idles in step. Each screen decides from what it sees, so other players' heroes idle too
+(townfolk's heroes and a party's), with nothing new sent: tested against the real Game and Townfolk on a counting
+socket, an hour of idling and petting sends exactly what standing still does.
+
+**What, fitted to the weapon in hand.** Three a kit, and the rare one at 1 pick in 50 (tested over 50,000 seeded
+picks a kit). An idle that needs something the hero isn't holding is never picked (`IdleDef.kits`, tested for
+every class and kit).
+- **Warrior**: rolls the neck and shoulders (any); thumb along the edge (sword, greatsword only: a blade); the
+  shield planted on its rim and leaned on (sword only: the shield); the greatsword planted point down or the
+  spear's butt grounded and leaned on (greatsword, spear); the spear rested back over the shoulder, drawn behind
+  the body, a foot tapping (spear). Sword: stretch, edge, shield. Greatsword: stretch, edge, plant. Spear:
+  stretch, plant, shoulder. Rare: a huge yawn, arms up, then a flex with a glint off the arm.
+- **Ranger** (any bow or the crossbow, let hang for the throw): fetch (weight 3: a stick thrown out 2.4 tiles to
+  whichever side has open ground, else the other, else a ruffle; the hound sits watching, runs it down, picks it
+  up, brings it back, sits with it; the Ranger kneels to take it); a ruffle (weight 2: the hound comes to lean in,
+  the Ranger kneels and rubs its head, a heart); a hand over the brow one way then the other, then over the
+  shoulder to settle the fletching (weight 1). The hound five picks in six. Rare: the hound play-bows, runs and
+  leaps, the Ranger goes flat on their back laughing with the hound standing on them licking, then up, still
+  laughing. Without a hound free at heel, only the scan.
+- **Rogue**: a knife flipped twice and caught (twin daggers: the one in the weapon hand goes up and held.ts leaves
+  it out meanwhile, `Pose.hide`; a rapier or the poisoner's short sword stays in hand and a spare comes off the
+  belt into the other); a coin thumbed up twice; over one shoulder, then turned right round to look behind. Rare:
+  the flip comes off the fingers, bounces and is snatched low, a look round to see who saw, red in the cheeks.
+- **Mage**: a small book held open in front, a page turned (the wand or spellblade lowered, the staff kept upright);
+  sparks of the element in hand flicked off the wand's tip, the staff's head or the spellblade three times; a hand
+  at the hat brim, tugging it. Rare: the brim flops down over the eyes, a blind wobble, pushed back up.
+- **Cleric** (every Cleric kit carries the censer, heldkits.ts): the censer swung gently, its smoke thicker and
+  curling; a prayer, eyes shut, hands together, a little light going up; a cloth on the mace's head, the flail's
+  hanging head, or along the censer-bearer's sword, then a shine. Rare: the smoke drifts into the face, a squint,
+  and a sneeze.
+- The weapon is always drawn at the posed hand (`held.ts` with the idle's angle; `idlepose.ts`), never floating.
+  Looking the other way for a moment draws the weapon as if facing it.
+
+**The hound** (`client/idlehound.ts`, `hound.ts`). Where the hound is drawn during an idle or a pet is worked out
+in tiles from where the room has it, so FLAT and 2.5D put it in the same place; the room's hound never moves for
+it. `drawHound` takes a mood: tail wagging, sitting up, a stick in its jaws, head down to the ground, tongue out,
+leaning in, up off the ground. Another player's Ranger in town now has a hound at heel too (this screen walks it,
+nothing sent: the town only says where players stand), so their fetches show.
+
+**Petting** (`client/petting.ts`). Only in the hunters' lodge. The lodge had no dog of its own, but Maeve already
+says she has "a dog with better manners waiting", so **Maeve's hound now lies by the lodge's fire** (9.5, 2.25,
+beside the brazier), and anyone can pet it: walk up and USE (E on a laptop). A Ranger can also pet their own;
+being always at heel, it's offered only when nothing else is in reach, so it never gets in the way of talking to
+Maeve or Tems. The hero kneels and reaches; the hound gets up (Maeve's from lying), comes to lean on them, wags
+with its tongue out, and two hearts float up; then it goes back (Maeve's lies down again). 2.6 s, again after 1 s
+more, ends at a step. Cosmetic and this screen's own (other players in the lodge see you standing, not petting).
+
+**Words** (for the lore keeper, then the line editor): **PET** on the touch button; **PET YOUR HOUND** and
+**PET MAEVE'S HOUND** on the prompt. Maeve's hound is unnamed.
+
+**Cost.** One small record a hero (positions, a seed), checked once a frame; the goblin scan only for heroes
+already standing still. A few fillRects for what's in hand. Nothing at all while walking or fighting.
+
+Tests: `tests/idles.test.ts` (an idle only after standing still and again now and then; none while walking or
+swinging; none with a goblin awake within 8 tiles, one waking ends it; a poke, a hit, a step or a turn ends it;
+three a kit and the rare one about 1 in 50; every pick fits the weapon in hand, all three of each kit come up; a
+Ranger's picks mostly the hound and none without it; drawing an idle leaves the hero and the room's hound as they
+were; petting offered in the lodge for Maeve's hound and a Ranger's own, not for a Warrior's, nowhere in the other
+halls, the yard or the square; the wait; a step ends it; Maeve's hound gets up and lies down again; an hour of
+idles and petting sends nothing a still hero wouldn't). Sheet and phone shots: `node scripts/idles-look.cjs <url>
+<outdir>` (every idle and rare at 4x, eight frames each, with the weapon variants; fetch in the square; petting
+your own hound and Maeve's in the lodge).
+
 ## 2026-11-05: the budget checked again; the yard is this browser's alone, with straw men to practise on (Kyle; Claude Opus 5.5)
 
 Kyle: "We should always double check, or at least once a day after big working days and pushes, to make sure

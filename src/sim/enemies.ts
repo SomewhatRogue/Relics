@@ -32,6 +32,7 @@ import { CALTROPS } from '../shared/ladder';
 import type { Slick } from './oil';
 import { gather, rushClock, rushLocked } from './rushguard';
 import { count, dealt } from './score';
+import { chalkTarget } from './chalker';
 
 /** The room's oil slicks, for the torch-bearers (the room sets it before its goblins move). */
 export const OWN_KIT: { slicks: Slick[]; freed: Survivor[]; foes: Enemy[] } = { slicks: [], freed: [], foes: [] };
@@ -60,6 +61,9 @@ function nearest(e: Enemy, heroes: Hero[], now: number): Hero | null {
   // A war cry it heard: it comes for whoever gave it, and nobody else, until it wears off.
   const cried = heroes.find((h) => h.rallyUntil > now && h.act !== 'down' && Math.hypot(h.x - e.x, h.y - e.y) <= HORN.radius * 1.5);
   if (cried) return cried;
+  // Turned on a hero by a chalker's fifth stroke: that hero, while it lasts (sim/chalker.ts).
+  const chalked = chalkTarget(e, heroes, now);
+  if (chalked) return chalked;
   let best: Hero | null = null, bd = Infinity;
   for (const h of heroes) {
     if (h.act === 'down') continue;

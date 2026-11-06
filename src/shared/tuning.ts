@@ -53,7 +53,9 @@ export * from './prowlers.js';
 export * from './encounters.js';
 export * from './worldfx.js';
 export * from './staithetune.js';
+export * from './chalk.js';
 import { BANNER, NETTER, THIEF, LOGS, ROOF, IRONHIDE } from './raiders.js';
+import { CHALKER } from './chalk.js';
 import { WOLF, KEEPER, OIL, TORCH, SAPPER, CAVE } from './prowlers.js';
 import { DRUMMER, HEXER } from './backline.js';
 import { GAFFER, SKIMMER } from './staithetune.js';
@@ -213,7 +215,7 @@ export const VARIANTS = {
   drummer: DRUMMER,
   /** The new sorts (shared/raiders.ts, prowlers.ts): their health here, the rest there. */
   banner: { hp: BANNER.hp }, netter: { hp: NETTER.hp }, thief: { hp: THIEF.hp }, log: { hp: LOGS.hp }, roofer: { hp: ROOF.hp },
-  ironhide: { hp: IRONHIDE.hp },
+  ironhide: { hp: IRONHIDE.hp }, chalker: { hp: CHALKER.hp },
   /** The Staithe's sorts (shared/staithetune.ts). */
   gaffer: { hp: GAFFER.hp }, skimmer: { hp: SKIMMER.hp },
   wolf: { hp: WOLF.hp }, keeper: { hp: KEEPER.hp }, oiler: { hp: OIL.hp }, torch: { hp: TORCH.hp }, sapper: { hp: SAPPER.hp }, blind: { hp: CAVE.hp },

@@ -76,6 +76,11 @@ export class Figs {
     this.c.t = t;
   }
 
+  /** The wall clock the figures are drawn by this frame. */
+  get now(): number {
+    return this.c.now;
+  }
+
   /** A figure with its feet at (x, z) on the floor, `h` up (a ledge), drawn by `draw` at (x, y) in its cell. */
   put(key: string, x: number, h: number, z: number, draw: Draw, o: Opts = {}): void {
     const [sx, sy] = this.P(x, h, z), k = this.k, mx = CELL.w * k, my = CELL.h * k;

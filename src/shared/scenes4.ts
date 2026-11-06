@@ -30,7 +30,9 @@ export type FoeTask =
   /** The gaffer hooking folk off the jetty's end (the next at room time `next`). */
   | { k: 'gaff'; next: number; quit?: boolean }
   /** Over the laid log and onto the jetty, to take folk off it. */
-  | { k: 'board'; at?: number };
+  | { k: 'board'; at?: number }
+  /** A chalker at its tally board at (x, y), `n` strokes on it (shared/chalkstage.ts). */
+  | { k: 'tally'; x: number; y: number; n: number; quit?: boolean };
 
 export const SCENES4: Piece[] = ['burning', 'drag', 'prisoners', 'patrol', 'hanging', 'fallen', 'cache', 'drums', 'webs', 'wading', 'staithe'];
 

@@ -7,7 +7,7 @@
  */
 import { ROOF_UP3 } from '../foedraw';
 import type { ArenaRoom } from '../../sim/room';
-import type { Hero } from '../../sim/types';
+import type { Hero, Hound } from '../../sim/types';
 import { GRAB } from '../../shared/tuning';
 import { npcAt } from '../../shared/arena';
 import { SPOT_REACH } from '../../shared/town';
@@ -20,6 +20,8 @@ import { ARENA } from '../../shared/arena';
 import { RACK } from '../../shared/practice';
 import { waiting } from '../../sim/practice';
 import { drawHound } from '../hound';
+import { companion, houndAt, lodgeHoundAt } from '../idlehound';
+import { LODGE_HOUND, isLodgeMap } from '../petting';
 import { drawNpc } from '../npcs';
 import { vignetteFigs } from '../vignettes';
 import { drawCaged, drawSurvivor } from '../captives';
@@ -29,8 +31,15 @@ import { drawStatus } from '../status';
 import type { Lerp } from './actors3d';
 import type { Figs } from './figs3d';
 import { LEDGE_H } from './ground';
+import { drawTally } from '../chalkdraw';
 
 const lift = (z?: number) => (z ?? 0) * LEDGE_H;
+
+/** A hero's hound, where it plays if it's playing (idlehound.ts). */
+function hound(f: Figs, h: Hero, d: Hound, ax: number, ay: number, hx: number, hy: number): void {
+  const a = houndAt(h, ax, ay, hx, hy, f.now), x = a ? a.x : ax, y = a ? a.y : ay;
+  f.put('d' + h.id, x, 0, y, (c, px, py) => (a ? drawHound(c, d, px, py, a.mood, a.fx, a.down) : drawHound(c, d, px, py)), { pool: d.state === 'fled' && d.t > 2 ? 0 : 0.28 });
+}
 
 /** Every figure this frame, onto its card. */
 export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[], lerp: Lerp): void {
@@ -40,7 +49,7 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
     f.put('h' + h.id, x, lift(h.z), y, (c, px, py) => drawHero(c, h, px, py, h.id === meId, t), { xray: true, pool: h.act === 'roll' || h.act === 'down' ? 0.22 : 0.3 });
     if (h.hound) {
       const d = h.hound, [dx, dy] = lerp('d:' + h.id, d.x, d.y);
-      f.put('d' + h.id, dx, 0, dy, (c, px, py) => drawHound(c, d, px, py), { pool: d.state === 'fled' && d.t > 2 ? 0 : 0.28 });
+      hound(f, h, d, dx, dy, x, y);
     }
     // A Mage's blink image, flickering where they stood until it goes.
     if (h.decoyUntil > t) f.put('v' + h.id, h.decoyX, 0, h.decoyY, (c, px, py) => {
@@ -49,7 +58,17 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
       drawHero(c, { ...h, act: 'idle', actT: 0 }, px, py, false, t);
     });
   }
-  for (const h of others) f.put('o' + h.id, h.x, 0, h.y, (c, px, py) => drawHero(c, h, px, py, false, t), { pool: 0.3 });
+  for (const h of others) {
+    f.put('o' + h.id, h.x, 0, h.y, (c, px, py) => drawHero(c, h, px, py, false, t), { pool: 0.3 });
+    // Another player's Ranger: their hound at heel, as this screen walks it (idlehound.ts).
+    const d = companion(h, f.now);
+    if (d) hound(f, h, d, d.x, d.y, h.x, h.y);
+  }
+  // Maeve's hound by the lodge's fire.
+  if (isLodgeMap(map)) {
+    const a = lodgeHoundAt(room.heroes, f.now);
+    f.put('lodgehound', a.x, 0, a.y, (c, px, py) => drawHound(c, LODGE_HOUND, px, py, a.mood, a.fx, a.down), { pool: 0.28 });
+  }
   for (const e of room.enemies) {
     const carrier = room.heroes.find((h) => h.carrying === e.id);
     if (carrier) {
@@ -62,6 +81,8 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
     f.put('e' + e.id, x, (e.z ?? 0) >= 2 ? ROOF_UP3 : lift(Math.max(0, e.z ?? 0)), y, (c, px, py) => (drawFoe(c, e, px, py, asleep(map, e), map === ARENA), drawStatus(c, e, px, py, t)), { pool: dead || e.kind === 'nest' ? 0 : big ? 0.55 : 0.28, bias: dead ? -0.3 : 0 });
   }
   // A body being hauled, where they've got it to (../scenedraw.ts).
+  // A chalker's tally board in the CRIES room (../chalkdraw.ts).
+  for (const e of room.enemies) if (e.task?.k === 'tally') { const k = e.task; f.put('tb' + e.id, k.x, 0, k.y, (c, px, py) => drawTally(c, k.n, px, py), { pool: 0 }); }
   for (const e of room.enemies) if (e.haul) f.put('b' + e.id, e.haul.x, 0, e.haul.y, (c, px, py) => drawHauled(c, e, px, py), { pool: 0, bias: -0.3 });
   // Someone caged: an arm waving out through the bars, and their call when you're close (scene.ts).
   for (const p of room.props) if (p.kind === 'cage' && !p.broken && !p.lifted) {

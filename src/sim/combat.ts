@@ -33,6 +33,7 @@ import { wet } from './wet';
 import { clanks, crack, plated } from './ironhide';
 import { guardFrom, rushBlocked, rushParried, noteRush, rushStun } from './rushguard';
 import { count, dealt } from './score';
+import { chalkTaken } from './chalker';
 
 export { respawnOf, stunOf } from './damage';
 
@@ -214,7 +215,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   // STAND FAST: a taunted goblin's blow is worth less (sim/taunt.ts).
   const soft = softer(e, now);
   // A blessed hero takes less from everything.
-  const g = statsOf(h), taken = (h.blessedUntil > now ? BLESSING.taken : 1) * g.taken * (wears(h, 'apron') ? HUNGRY_FX.apron : 1) * soft;
+  const g = statsOf(h), taken = (h.blessedUntil > now ? BLESSING.taken : 1) * g.taken * (wears(h, 'apron') ? HUNGRY_FX.apron : 1) * soft * chalkTaken(e, h, now);
   // A spellblade's lightning dash: untouchable while it runs (sim/rush.ts).
   if (h.act === 'bash' && h.rush?.el === 'storm') return void (ev.push({ k: 'dodge', x: h.x, y: h.y }), count(h.id, 'dodges'));
   if (h.act === 'roll' && h.actT >= w.dodge.iFrom && h.actT <= slipWindow(h)) {

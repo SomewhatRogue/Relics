@@ -17,6 +17,14 @@ in three the Staithe is between the fords (pinned as a job or a side job), and l
 ALARM 3 and they're lost at ALARM 5. Everything in DECISIONS 2026-11-05 ("the Staithe"); shots: `node
 scripts/staithe-look.cjs`. Open: every new name and line through the lore keeper and line editor; the numbers once
 he's played.
+**The chalker** (Claude Opus 5.5, 2026-11-05; item 6 of the biome and enemy rollout Kyle approved). Built; waiting on
+Kyle's play. *Done when*, on his phone and laptop, flat and 2.5D: taking the CRIES way in the Barrowfields, a
+goblin at a tally board by the captives turns its chalk on him when it sees him; red strokes go on over his head
+every 2 s while it can see him, everyone's screen showing them; at five a red flash, CHALKED, and its pack comes
+for him for 8 s hitting 1.3x as hard; killing it stops the strokes; Vanish, a smoke or Sanctuary's ground wipes
+them (CHALK WIPED) and calls the pack off. Later in the board's days it turns up rare (Barrowfields, one a job)
+then common. Numbers in `shared/chalk.ts`, everything in DECISIONS 2026-11-05. Open: CHALKER, CHALKED, CHALK
+WIPED through the lore keeper and line editor; set `CHALKER.debut.from` to the live world's day; the numbers.
 **The yard is this browser's alone, and its straw men** (Claude Opus 5.5, 2026-11-05; Kyle: "maybe we make the
 training room local to just one person", then "always set up, lets you try different scenarios including
 spawning different enemy types to fight"; the lore keeper: no live goblins in Wickhold, so straw men in hungry kit

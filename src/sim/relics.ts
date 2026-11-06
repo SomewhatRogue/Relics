@@ -14,6 +14,7 @@ import { daze } from './venom';
 import type { Enemy, FightEvent, Hero, Intent, Zone } from './types';
 import { stun } from './stuns';
 import { gave } from './score';
+import { wipeChalk } from './chalker';
 
 /** Step behind the goblin you face (or the nearest one in reach), facing its back. */
 export function shadowstep(h: Hero, enemies: Enemy[], ev: FightEvent[], now: number): void {
@@ -84,6 +85,8 @@ export function stepZones(zones: Zone[], w: World): Zone[] {
     for (const o of w.heroes) {
       if (o.act === 'down' || Math.hypot(o.x - z.x, o.y - z.y) > z.r) continue;
       o.blessedUntil = Math.max(o.blessedUntil, w.now + BLESSING.linger);
+      // Blessed ground wipes a chalker's strokes (sim/chalker.ts).
+      wipeChalk(o, w.enemies, w.now, w.ev);
       const by = w.heroes.find((x) => x.id === z.owner), n = Math.min(o.maxHp - o.hp, Math.round(heals(o, by, BLESSING.heal * healMult(by))));
       if (n > 0) (o.hp += n), gave(z.owner, o.id, n), w.ev.push({ k: 'heal', x: o.x, y: o.y, n });
     }

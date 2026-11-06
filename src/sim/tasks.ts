@@ -1,7 +1,7 @@
 /**
  * What a layout-4 goblin is busy at when you come in (shared/scenes4.ts sets it): a torch-bearer holds
  * its torch to a house's wall, a guard walks the prisoners' rope for the far way out, a patrol walks its
- * round, two haul a body to their fire. The torch-bearers and the guards keep at it even once they've
+ * round, two haul a body to their fire, a chalker chalks the captives up on its tally board. The torch-bearers and the guards keep at it even once they've
  * seen you (it's the race you're in) until you come close or hit them; a patrol and the haulers look
  * about as any goblin at rest does, and drop what they're doing when they see you. Rolls nothing.
  */
@@ -66,6 +66,11 @@ export function stepTask(e: Enemy, heroes: Hero[], now: number, dt: number, ev: 
   if (notice()) {
     if (t.k === 'haul') t.quit = true;
     return false;
+  }
+  // A chalker at its tally board, chalking up the captives till it sees you (shared/chalkstage.ts).
+  if (t.k === 'tally') {
+    const dx = t.x - e.x, dy = t.y - e.y, l = Math.hypot(dx, dy) || 1;
+    return (e.fx = dx / l), (e.fy = dy / l), true;
   }
   if (t.k === 'patrol') {
     // Its round: on to the next point, and past one it can't get nearer to.

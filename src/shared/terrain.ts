@@ -29,10 +29,11 @@ import type { Role } from './encounters.js';
 import { composeRoom, crowsOn } from './encounter.js';
 import { clearGrowth, ensure4, finish4, light4, name4, plotter, torches4, wayMore } from './room4.js';
 import { edgePt } from './ports.js';
+import { stageDebuts } from './debut.js';
 
 /** `wave`: a nest's spiders a wave (more in a party; shared/nests.ts). */
 export type FoeVariant = 'looter' | 'lunger' | 'heavy' | 'stoker' | 'shield' | 'hexer' | 'drummer'
-  | 'banner' | 'netter' | 'thief' | 'log' | 'roofer' | 'keeper' | 'wolf' | 'oiler' | 'torch' | 'sapper' | 'blind' | 'ironhide'
+  | 'banner' | 'netter' | 'thief' | 'log' | 'roofer' | 'keeper' | 'wolf' | 'oiler' | 'torch' | 'sapper' | 'blind' | 'ironhide' | 'chalker'
   /** The Staithe's (shared/staithetune.ts): the gaffer and its hook, the skimmer and its oil. */
   | 'gaffer' | 'skimmer'
   /** The wood's element lesson only (shared/wood.ts ELEMENT_FOES): wet through, in a bark apron, hot off the kiln. */
@@ -182,6 +183,8 @@ export function planRoom(job: Job, index: number, road?: RoadId, taken?: Record<
   rollSpiders(foes, job, index, spot, H, W);
   // A routed room's goblins as fights: packs, each one template, a cap on specials (shared/encounter.ts).
   if (spec && !v3) rollBackline(foes, job, index);
+  // A new sort staged in its fork way's room first (shared/debut.ts), once the chests are down: the chalker at the CRIES captives' tally.
+  if (v4 && spec?.way) stageDebuts(lay, job, spec.way);
   if (v3) composeRoom({ foes, job, index, W, H, spawn: SPAWN, blocks, spot, free, claim: (x, y, r) => void spots.push({ x, y, r }) });
   // Each house's look and fate outside come from the same seed as its inside.
   const spill = settle(job, index, blocks);
