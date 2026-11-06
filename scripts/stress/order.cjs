@@ -19,14 +19,17 @@ const route = (k, p, extra) => k.ev(p, (extra) => {
 async function together(k, lead, p) {
   const t0 = await k.ev(p, () => window.__game.room.time);
   const x0 = (await k.hero(lead, p.id)).x;
-  await p.page.keyboard.down('d');
+  // Toward the middle of the room: always east, the walkers ended up against the atlas maps' east
+  // wall at x 27.7 after the first round and stood still for the rest.
+  const key = x0 < (await k.ev(lead, () => window.__game.room.map.w / 2)) ? 'd' : 'a';
+  await p.page.keyboard.down(key);
   await k.wait(1500);
-  await p.page.keyboard.up('d');
+  await p.page.keyboard.up(key);
   await k.wait(500);
   const t1 = await k.ev(p, () => window.__game.room.time);
   const x1 = (await k.hero(lead, p.id)).x;
   k.step(`${p.name}'s screen keeps up with the fight (${t0.toFixed(1)} to ${t1.toFixed(1)})`, t1 - t0 > 1.5);
-  k.step(`${p.name}'s walking reaches the leader (${x0.toFixed(1)} to ${x1.toFixed(1)})`, x1 - x0 > 1);
+  k.step(`${p.name}'s walking reaches the leader (${x0.toFixed(1)} to ${x1.toFixed(1)})`, Math.abs(x1 - x0) > 1);
 }
 
 /**

@@ -51,8 +51,15 @@ async function closedAway(k) {
   if (!(await k.party(kyle, sam))) return;
   await calm(k, kyle);
   k.step('Sam picks up coins and a ring', await pickUp(k, kyle, sam, sam.id, 'ring23'));
+  // The leader writes what each is owed at most every 15 s since the Redis budget (client/owed.ts EVERY,
+  // was 4 when this was written): wait for the write that has Sam's coins and experience in it.
+  const wrote = kyle.page.waitForRequest((r) => {
+    if (!r.url().includes('/api/owed') || r.method() !== 'POST') return false;
+    const s = JSON.parse(r.postData() || '{}').owed?.[sam.id];
+    return !!s && s.gold >= 25 && s.xp >= 300;
+  }, { timeout: 25000 }).then(() => true, () => false);
   await k.ev(kyle, () => (window.__game.run.xp += 300));
-  await k.wait(5000); // (the leader writes what each is owed every few seconds)
+  k.step("the leader writes Sam's share with them in it", await wrote);
   const pot = await k.ev(kyle, () => window.__game.run.gold), [g0, x0] = [await gold(sam), await xp(sam)];
   await k.crash(sam);
   await k.wait(7000); // (gone from the job once the leader hasn't heard from him in 5 s)

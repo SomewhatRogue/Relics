@@ -2,11 +2,14 @@
 // with G (the room decides, through the grab press), the friend's screen shows it alight and the smoke,
 // and as the roof comes in he's out in the street on both screens, the house a shell nobody can enter.
 
-/** The party on a village street (seed 7), its goblins gone. */
+/**
+ * The party on a village street, its goblins gone. Seed 207, as split.cjs: since the atlas's doors rule
+ * seed 7's one door is on the burnt farm's fallen-in house (`ruined`), which nobody can go into.
+ */
 async function onVillage(k, lead, rest) {
   await k.ev(lead, async () => {
     const g = window.__game;
-    g.startJob(await window.__villageJob(7), g.run.party);
+    g.startJob(await window.__villageJob(207), g.run.party);
     for (const e of g.room.enemies) Object.assign(e, { hp: 0, act: 'dead', actT: 0, actDur: 99, respawns: false });
   });
   let ok = await k.until(lead, (n) => window.__game.room.heroes.length === n, rest.length + 1);
@@ -18,8 +21,9 @@ async function onVillage(k, lead, rest) {
 async function burnWithFriendIn(k) {
   const kyle = await k.open('KYLE26', 'MAGE'), sam = await k.open('SAM26', 'RANGER', true);
   if (!(await k.party(kyle, sam)) || !(await onVillage(k, kyle, [sam]))) return;
-  const i = await k.ev(kyle, () => window.__game.room.map.blocks.findIndex((b, i) => window.__kindling(i)));
-  k.step('a house with a kindling spot', i >= 0, i);
+  // (One you can go into: kindling() offers a ruined house too.)
+  const i = await k.ev(kyle, () => window.__game.room.map.blocks.findIndex((b, i) => !!b.door && !b.ruined && window.__kindling(i)));
+  k.step('a house to go into with a kindling spot', i >= 0, i);
   // Sam walks up into its door.
   await k.ev(kyle, ([id, i]) => {
     const g = window.__game, b = g.rooms.street.map.blocks[i];

@@ -85,8 +85,20 @@ function kit(browser, port, report) {
   const clear = (p) => ev(p, () => { for (const e of window.__game.room.enemies) Object.assign(e, { hp: 0, act: 'dead', actT: 0, actDur: 99, respawns: false }); });
   /** Put a hero (`id` as the leader's room has it) somewhere, on the leader's page. */
   const put = (lead, id, x, y) => ev(lead, ([id, x, y]) => Object.assign(window.__game.room.heroes.find((h) => h.id === id), { x, y, kvx: 0, kvy: 0 }), [id, x, y]);
-  /** The way on in the leader's room. */
-  const exitAt = (lead) => ev(lead, () => { const m = window.__game.room.map, a = m.exit ?? m.roads[0].area; return { x: a.x + a.w / 2, y: a.y + 0.4 }; });
+  /** The way on in the leader's room (an Area). */
+  const wayOn = (lead) => ev(lead, () => { const m = window.__game.room.map; return m.exit ?? m.roads[0].area; });
+  /**
+   * The `i`th place to stand in way-on area `a`, spread 0.6 apart along its long side (the middle, then
+   * either side), so heroes pushing each other apart stay in it. The atlas maps have narrow side exits
+   * (0.9 by 2 on a west wall): three heroes at one spot there got shoved out of it.
+   */
+  const slot = (a, i) => {
+    const long = a.w >= a.h ? 'x' : 'y', len = long === 'x' ? a.w : a.h, off = [0, 0.6, -0.6, 1.2, -1.2][i] ?? 0;
+    const along = Math.min(len - 0.25, Math.max(0.25, len / 2 + off));
+    return long === 'x' ? { x: a.x + along, y: a.y + Math.min(0.4, a.h / 2) } : { x: a.x + a.w / 2, y: a.y + along };
+  };
+  /** A place to stand in the way on in the leader's room (`i`: the `i`th of several standing there together). */
+  const exitAt = async (lead, i = 0) => slot(await wayOn(lead), i);
   /** Down (on the leader's page), as if just hit to nothing; `bled`: already lain there that long. */
   const down = (lead, id, bled = 0, selfUp) => ev(lead, ([id, bled, selfUp]) => {
     const h = window.__game.room.heroes.find((x) => x.id === id);
@@ -94,9 +106,10 @@ function kit(browser, port, report) {
   }, [id, bled, selfUp]);
   const hero = (p, id) => ev(p, (id) => { const h = window.__game.room.heroes.find((x) => x.id === id); return h && { act: h.act, out: !!h.out, selfUp: !!h.selfUp, bleeding: !!h.bleeding, x: h.x, y: h.y }; }, id);
 
-  /** The LEAVE button, then LEAVE in the panel it asks with. */
+  /** The gear (`#opts`) opens its box, LEAVE in it, then LEAVE in the panel it asks with. */
   async function leave(p) {
-    await p.page.click('#leave');
+    if (!(await ev(p, () => !document.getElementById('options').hidden))) await p.page.click('#opts');
+    await p.page.click('#options #leave');
     await p.page.click('#panel button[data-i="0"]');
   }
   /** Back in town with the job's result up. */
@@ -137,8 +150,18 @@ function kit(browser, port, report) {
       const key = await ev(lead, () => window.__game.roomKey);
       await clear(lead);
       if (r === rooms - 1) return ev(lead, () => (window.__game.endForTest(true), true));
-      // (Only the players still at their screens walk there: anyone else's hero stays where it is.)
-      await ev(lead, (ids) => { const g = window.__game, x = g.room.map.exit ?? g.room.map.roads[0].area; for (const h of g.room.heroes) if (h.act !== 'down' && ids.includes(h.id)) Object.assign(h, { x: x.x + x.w / 2, y: x.y + 0.4 }); }, ['me', ...rest.map((p) => p.id)]);
+      // (Only the players still at their screens walk there: anyone else's hero stays where it is. A
+      // scene that waits with nobody at the keys can see them put down by the goblins, which since the
+      // pacing merge hit harder: those not out are stood up first, as scene 4 always did.)
+      const ids = ['me', ...rest.map((p) => p.id)], a = await wayOn(lead);
+      await ev(lead, ([ids, spots]) => {
+        for (const h of window.__game.room.heroes) {
+          const i = ids.indexOf(h.id);
+          if (i < 0 || h.out) continue;
+          if (h.act === 'down') Object.assign(h, { act: 'idle', actT: 0, actDur: 0, hp: h.maxHp, bleeding: false });
+          Object.assign(h, { ...spots[i], kvx: 0, kvy: 0 });
+        }
+      }, [ids, ids.map((_, i) => slot(a, i))]);
       if (!(await until(lead, (key) => window.__game.roomKey > key, key))) return console.error('STUCK', JSON.stringify(await ev(lead, () => { const g = window.__game; return { r: g.run.index, open: g.room.exitOpen, goal: g.goalText(), exit: g.room.map.exit, heroes: g.room.heroes.map((h) => [h.id, h.x.toFixed(1), h.y.toFixed(1), h.act]), foes: g.room.enemies.filter((e) => e.hp > 0).length }; }))), false;
       for (const p of rest) if (!(await until(p, (i) => window.__game.run?.index === i, r + 1))) return false;
     }
