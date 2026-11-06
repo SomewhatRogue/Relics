@@ -119,6 +119,10 @@ export interface Profile {
   signs?: boolean;
   /** The Night Watch: best score on the wall, and the pay taken tonight (shared/watchpay.ts). */
   watch?: WatchRecord;
+  /** Fishing at the millpond: casts made (seeds the next), fish landed, the biggest of each kind (shared/fishing.ts). Just for fun. */
+  fishing?: import('./fishing.js').FishRecord;
+  /** The archery range at the hunters' lodge: rounds shot (seeds the next) and the best (shared/range.ts). */
+  range?: import('./range.js').RangeRecord;
 }
 
 export const newProfile = (cls: HeroClass = 'WARRIOR', name = 'HERO', id = heroId()): Profile =>

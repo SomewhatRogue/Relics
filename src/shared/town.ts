@@ -17,6 +17,7 @@ import { mending, WORN } from './mend.js';
 import { siege } from './siege.js';
 import { workDone } from './works.js';
 import { publicWorks } from './publicworks.js';
+import { BUTTS, MILLPOND } from './pastimes.js';
 
 /** What talking to someone (or using a spot) opens. */
 export type SpotId = 'board' | 'council' | 'church' | 'smith' | 'wright' | 'trainer' | 'market' | 'infirmary' | 'granary' | 'home' | 'chat'
@@ -24,7 +25,9 @@ export type SpotId = 'board' | 'council' | 'church' | 'smith' | 'wright' | 'trai
   /** The practice board at the training yard's pen (client/practiceui.ts). */
   | 'practice'
   /** Brisk's stair up to the night shift on the wall (client/watchpost.ts). */
-  | 'watch';
+  | 'watch'
+  /** Old Pennock at the millpond, and Corin at the archery butts: the town's pastimes (client/pastimeui.ts). */
+  | 'fish' | 'range';
 export interface Spot { id: SpotId; x: number; y: number; label: string; key?: string }
 
 export const SPOTS: Spot[] = [
@@ -106,6 +109,8 @@ export function townMap(w: WorldState): GameMap {
     ...[[60, 5], [1.5, 37], [10, 38], [59.5, 37], [27, 38.5], [41, 8.5], [1.5, 24]].map(([x, y]) => r('tree', x, y, 0.6)),
     ...[[12.5, 7], [41, 24], [19, 37], [55.5, 9], [60.5, 21]].map(([x, y]) => r('bush', x, y, 0.35)),
     r('grate', 23.5, 36, 0.05), r('statue', 58.5, 19.5, 0.5),
+    // Reeds round the millpond's edges.
+    ...MILLPOND.reeds.map(([x, y]) => r('reed', x, y, 0.2)),
   ];
   const n = (name: string, x: number, y: number, talk: string, look: string, arg?: number, path?: [number, number][], speed?: number): Npc => ({ name, x, y, talk, look, arg, path, speed });
   const npcs: Npc[] = [
@@ -120,6 +125,8 @@ export function townMap(w: WorldState): GameMap {
   if (marketIn(w)) npcs.push(n('DESSA THE TRADER', 38.5, 13.9, 'market', 'trader'));
   // Tobin buys anything at the far stall, and sells it back for a while (client/stores.ts).
   npcs.push(n('TOBIN THE PAWNBROKER', 38.5, 18.1, 'merchant', 'villager'));
+  // The town's pastimes (shared/pastimes.ts): Old Pennock lends rods at the millpond, Corin keeps the butts.
+  npcs.push(n('OLD PENNOCK', MILLPOND.npc[0], MILLPOND.npc[1], 'fish', 'elder'), n('CORIN', BUTTS.npc[0], BUTTS.npc[1], 'range', 'ranger'));
   if (quarter) npcs.push(n('OLD MERREN', 57, 18, 'chat', 'elder', 9));
   // Foreman Judd at the works stall, and his crew sweeping, hauling and shovelling (publicworks.ts).
   npcs.push(...publicWorks(w));
@@ -130,6 +137,8 @@ export function townMap(w: WorldState): GameMap {
     name: 'WICKHOLD', w: W, h: H, wallFace: 3, rounds, blocks, npcs, soil: townSoil(w), marks: [...townGround(w), ...m.marks], breach: m.breach,
     braziers: [{ x: 25, y: 15, r: 0.35 }, { x: 31, y: 15, r: 0.35 }, { x: 28, y: 21.6, r: 0.35 }, ...sg.braziers],
     torches: [6, 14, 22, 34, 40, 46, 58].map((x) => ({ x, y: -1.6 })),
+    // The millpond under the east wall, where the mill stream comes in (shared/pastimes.ts).
+    water: [{ ...MILLPOND.water, deep: true }],
     hero: { x: 28, y: 20 }, exit: null,
     theme: { floor: 'cobble', back: 'stone', ambient: [0.27, 0.25, 0.33], moon: 0.5 },
   };

@@ -12,6 +12,8 @@ import { renameKits } from '../shared/oldkits';
 import { fitOldSkills } from '../shared/oldskills';
 import { fitHound } from '../shared/houndlook';
 import { fitNoParry } from '../shared/oldparry';
+import { fitFishRecord } from '../shared/fishing';
+import { fitRangeRecord } from '../shared/range';
 
 const KEY = 'relic.save.v2', OLD = 'relic.save.v1';
 /** `savedAt`: when it was last kept here (it only goes forward), to tell which copy is newer (recovery.ts). */
@@ -56,6 +58,9 @@ const hero = (old: Partial<Profile>): Profile => {
   fitStores(out);
   // PARRY is gone (2026-11-05): any piece with it has BLOCK or DODGE instead, worth the same (shared/oldparry.ts).
   fitNoParry(out);
+  // The town's pastimes (shared/fishing.ts, shared/range.ts): only once played, and made sound.
+  if (p.fishing) out.fishing = fitFishRecord(p.fishing);
+  if (p.range) out.range = fitRangeRecord(p.range);
   // Knacks onto the tree: one the class can't use comes back as a pick (shared/chains.ts).
   out.perks = [...(out.perks ?? [])];
   fitPerks(out);

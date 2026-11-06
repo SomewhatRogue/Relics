@@ -13,6 +13,7 @@ import { CHAPTER_1, newWorld, settle, type WorldState } from '../src/shared/stor
 import { BOARD_SIZE, contribute, type Board, type Contribution } from '../src/shared/worldsync.js';
 import { WORK_ORDER } from '../src/shared/works.js';
 import { Meter } from './_meter.js';
+import { cleanClaim } from '../src/shared/rangeboard.js';
 
 export interface WorldView { world: WorldState; board: Board }
 export interface WorldStore {
@@ -42,6 +43,9 @@ export function clean(raw: unknown): Contribution | null {
   out.lantern = num(c.lantern, 5000);
   out.days = num(c.days, 1);
   if (c.story === CHAPTER_1.mission.id) out.story = c.story;
+  // A round at the archery range: its arrows, scored again as it's applied (shared/rangeboard.ts).
+  const range = cleanClaim(c.range);
+  if (range) out.range = range;
   if (CHAPTER_1.decision.choices.some((x) => x.id === c.vote)) out.vote = c.vote as string;
   if (typeof c.voter === 'string' && /^[\w-]{6,40}$/.test(c.voter)) out.voter = c.voter;
   const d = c.deed as Record<string, unknown> | undefined, words = (v: unknown, n: number) => String(v ?? '').replace(/[^A-Za-z0-9 ',.-]/g, '').slice(0, n);
@@ -140,6 +144,18 @@ export async function redisWorldStore(url: string, meter = new Meter()): Promise
         } catch (e) {
           if (tries === 4) throw e;
         }
+      }
+      // A round at the range (nothing for the Roll): the world's write is all (5 commands); the Roll
+      // as it was, from what this instance last read (or once from its own key).
+      if (c.range && !STAT_ORDER.some((k) => c.stats?.[k])) {
+        let b = seen.get(g)?.board;
+        if (!b) {
+          meter.add('get');
+          const roll = await r.get(rk(g));
+          b = roll ? JSON.parse(roll) as Board : await board(g);
+        }
+        seen.set(g, { at: Date.now(), raw: JSON.stringify(world), board: b });
+        return { world, board: structuredClone(b) };
       }
       // (A pipeline, not a transaction: MULTI and EXEC are commands too.)
       const m = r.multi().hSet(nk(g), c.hero.id, JSON.stringify({ name: c.hero.name, cls: c.hero.cls }));

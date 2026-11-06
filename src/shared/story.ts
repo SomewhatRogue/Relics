@@ -39,6 +39,8 @@ export interface WorldState {
   mended?: { id: string; day: number }[];
   /** Raids on the town (newest first), and what each pulled down (shared/raids.ts). */
   raids?: { day: number; lost: import('./works.js').WorkId[] }[];
+  /** The archery range's board at the hunters' lodge: each hero's best round, the top ten (shared/rangeboard.ts). */
+  range?: import('./rangeboard.js').RangeLine[];
 }
 
 export const newWorld = (): WorldState => ({ chapter: 1, day: 1, rescued: 0, storyDone: [], flags: {}, votes: [], lantern: 0, works: {}, dens: 0, ballots: {} });

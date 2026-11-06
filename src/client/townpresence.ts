@@ -18,8 +18,12 @@ export const sharedPlace = (g: Game): boolean => g.mode === 'town';
 
 /** Where I stand (and how I look, my hound with it), for the town's room; null (out of Wickhold, or no hero yet): the socket closes. */
 export function presence(g: Game, name: string): Me | null {
-  const h = sharedPlace(g) ? g.hero : null;
+  // Fishing or at the butts (shared/pastimes.ts): the socket stays open and says so once, with where
+  // you sit; the game runs here alone and nothing more goes out till you're up again.
+  const parked = g.mode === 'pastime' && g.pastime ? g.pastime : null;
+  const h = sharedPlace(g) || parked ? g.hero : null;
   if (!h) return null;
+  if (parked) return { n: name, w: h.weapon, l: h.look ?? 0, ...(h.houndLook ? { d: packHound(h.houndLook) } : {}), at: g.room.map.name, p: [h.x, h.y, h.fx, h.fy, 0], g: parked };
   // A Ranger's hound goes with the look, packed small (shared/houndlook.ts); it's in what others heard
   // last (townfolk.ts `gist`), so it goes again only when it's changed, never with each step.
   return { n: name, w: h.weapon, l: h.look ?? 0, ...(h.houndLook ? { d: packHound(h.houndLook) } : {}), at: g.room.map.name, p: [h.x, h.y, h.fx, h.fy, h.moving ? 1 : 0] };

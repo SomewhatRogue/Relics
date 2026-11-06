@@ -2,6 +2,99 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-06: the first town pastimes: fishing at the millpond, and the archery butts (Kyle; Claude Opus 5.5)
+
+Kyle: "All mini games will happen locally on their own computer, not in town too, but in town you can see their
+character sitting and fishing or something, even if they're not moving beyond an idle animation, till they rejoin
+the town and then it checks again." Plan: `docs/plans/town-activities.md` (fishing; the lodge's archery range).
+
+**Parked in the shared town** (`shared/pastimes.ts`, `client/townpresence.ts`, `townfolk.ts`, `parked.ts`). A new
+Game mode, `pastime` (`Game.enterPastime`, `leavePastime`): only from the open town, the hero goes to the pastime's
+spot facing its water or targets. The town socket stays open (closing it would make the relay say `left` and you'd
+vanish), and the `me` word carries `g: 'fish' | 'range'`: it's in what the others last heard (`gist`), so it goes
+once; while parked the 2-minute keep-alive beat is off too, so nothing more goes out however long you play. A
+newcomer's `hi` still gets its one answer (with `g`), so they see you parked. Getting up clears `g`: one more word.
+So a game costs two words. Others mark a parked hero (`setPark`, a WeakMap, nothing on the Hero type) and keep them
+an hour without a word (`PARKED`, not the usual 5 minutes); a real goodbye from the relay still takes them at once.
+Drawn by `idlepose.ts` and `idledraw.ts` through `parked.ts`: fishing, sat on the bank (crouched as low as the legs
+fold), the rod out over the pond, a sagging line to a red and white float that bobs and every 5.5 s dips with rings,
+a creel beside them, the weapon laid down behind; at the butts, side-on with the range's bow up toward the targets,
+draw, hold, loose (an arrow streaks off), nock, every 3 s, staggered by id. Only this screen's clock; tested against
+a counting socket: ten minutes of fishing sends nothing, a newcomer gets one answer, getting up one word. Online
+(town-online.cjs): Kyle saw Sam parked fishing and Ava parked at the butts; one word each to sit down, none in eight
+seconds of play, one each to get up.
+
+**Where** (`shared/town.ts`). There was no water in Wickhold: a **millpond under the east wall** where the mill
+stream comes in (deep water 49.6 to 53 across, 30.4 to 36.8 down, reeds round it), between Rescue Row and the wall.
+**Old Pennock** (elder) stands on its bank and lends rods (talk `fish`). The **archery butts** are the three targets
+already in front of the hunters' lodge; **Corin** (ranger look, Maeve's) keeps them (talk `range`). Both open a
+panel with the way in; CLOSE or walking off is the way out, and each game has its own button back to town (PUT THE
+ROD BACK, STOP then BACK TO TOWN; Escape on a laptop).
+
+**Fishing** (`shared/fishing.ts`, `fishtune.ts`; `client/fishmode.ts`, `fishview.ts`, `fishart.ts`). Just for fun:
+no pay, no board. One button (a finger anywhere, the mouse, Space). Hold to swing the cast meter (empty to full and
+back in 1.4 s), let go: the cast goes as far as it showed. The float flies 0.6 s and lands; the bite comes 2.5 to 7 s
+later, plus up to 4 s on a long cast, with up to three nibbles (0.35 s twitches) first. Tap while it's under (1 s):
+on. Tap on a nibble or on nothing: too soon. Miss the second: it's gone. Then hold to reel and let go when it runs:
+tension moves at 1.1 a second toward 0.5 reeling or 0.08 not, plus 0.65 times the fish's pull while it runs; 1 snaps
+the line, under 0.2 for 2.2 s and it throws the hook. Reeling brings it in 2.2 m/s at rest, 0.3 of that while it
+runs; let run, it takes line. Runs and rests come on the fish's own clock, with a 0.45 s warning (IT'S ABOUT TO RUN).
+A small fish can be reeled straight in; a big pike can't. The tension gauge across the top shows SLACK, green and
+SNAP. Eight kinds (ROACH, RUDD, PERCH, EEL, TENCH, BREAM, CARP, PIKE), each with a size range in ounces and where it
+bites: close in mostly roach, rudd and perch; far out bream, carp, pike. Sizes skew small. A landed fish shows on a
+card with its picture, and goes back in. **The biggest catch** is kept on the hero (`Profile.fishing`: casts, fish
+landed, the biggest of each kind and of all), said on the card (first of a kind, biggest of a kind, biggest ever) and
+by Pennock's panel.
+
+**The archery butts** (`shared/range.ts`, `rangetune.ts`, `rangeboard.ts`; `client/rangemode.ts`, `rangeview.ts`).
+Any class. A 60 s round in fixed 1/60 s steps. Targets come up in three lanes (far, mid, near: rings x3, x2, x1),
+three at once at most, each up 4.5 to 9 s or until hit, then another in 0.5 to 1.1 s; posts from the start, slides
+on a rail from 6 s, swings on a rope from a beam from 18 s, the far lane from 10 s. Rings 10, 8, 6, 4, 2 from the
+gold out. An arrow flies 0.28 s and is judged where it lands, the nearest lane first, so moving targets need leading;
+0.4 s to nock. The sight wanders 2.6 px; **a Ranger's 0.55 of that**, the steadiness edge (tested: a careless archer
+scores more as a Ranger). Aimed as on the wall (`watchinput.ts`): drag and lift on a phone, the mouse and a click on a
+laptop. The card: score, arrows, hits, golds, most in a row, your best. The best is on the hero (`Profile.range`).
+
+**Seeded, and not forged by a refresh.** A cast's seed is the hero's id and their cast count (`seedOf`), the count
+saved as the cast goes out; a round's is the id and the round count, saved as the round starts. Everything about the
+fish is drawn when the cast lands, so a refresh can't roll it again; the next cast is just the next one. The range's
+rules use no Math.sin or Math.random (`wave` is sine from plain arithmetic, within 0.0012), so every engine agrees.
+
+**The town's board, synced once** (`shared/rangeboard.ts`, `worldsync.ts`, `api/_world.ts`). At the bell, if the
+round beats your line on the board, the round goes to the shared world as one contribution: its number and its
+arrows (`range: { n, shots: [frame, x tenths, y tenths][] }`), not a score. `contribute` replays it from the seed
+(`replayRange`; arrows between nocks, out of order, after the bell or too many make it no round) and puts the score it
+really makes on `WorldState.range`: each hero once at their best, the top ten. It rides the world's usual look, so
+no new read. On the server a range-only write skips the Roll's pipeline and recompute: WATCH, GET, MULTI, SET, EXEC,
+5 commands (a job's is about two dozen). Ending early with STOP posts nothing. Corin's panel shows the board (offline,
+only your own rounds).
+
+**Sounds** (the existing kit): the cast swish, a plop for the float and the bite, the strike's yank, a guard-break for a
+snapped line, a drop for a lost fish, loot or a fanfare for a catch; at the butts the arrow, an arrow sticking, the
+perfect chime for a gold, a thud for a miss, loot or a fanfare at the end.
+
+**Art** (in code, the game's style): the pond from the bank (far bank and the wall's culvert, stepped water with
+dither, reeds, a lantern) and the range from the line (the lodge's thatch and planks, turf banks and beams, mown
+stripes, chalk lines), both lit by the town's hour through `light.ts`; the eight fish a pixel at a time; straw bosses
+with painted rings that rise, slide, swing and drop with the arrows stuck in; the rod, line and float; the bow.
+
+**Words** (`client/pastimewords.ts`; none through the lore keeper or line editor yet). Pennock's offer, his record
+lines, the fish names, every hint and cue, the lost-fish lines, the catch card; Corin's offer and his line to a
+Ranger, the board, the hints, the card. Names new to the town: OLD PENNOCK, CORIN, the millpond.
+
+Tests: `tests/fishing.test.ts` (the bite on the seed's time with nibbles before it; too soon, too slow, in time; the
+cast as far as the meter showed and one seed a cast; a careful reeler lands over 95% near and far; holding through a
+big run snaps, a small one reels straight in, slack throws the hook; runs with a warning; every kind and size in range,
+small near and big far, every kind somewhere, big ones rarer; the same cast the same fish; the biggest kept and fitted
+from a save), `tests/range.test.ts` (wave; posts, slides and swings move as the numbers say; lanes and kinds open up on
+time; rings and lanes score; leading beats aiming where it is; the Ranger's wander is 0.55 and scores more; a round
+replays exactly and a made-up one doesn't; the board takes the replayed score, once, the best, the top ten; the server
+cleans a claim, and a score with no arrows doesn't get on), `tests/pastimes.test.ts` (sitting down one word, ten
+minutes nothing, getting up one; the friend sees the hero parked at the spot and drawn at it, the hero unchanged; at the
+butts the same, and a newcomer told once; the pond, Pennock and Corin on the map, the spots dry and walkable; only from
+the open town). Shots: `node scripts/pastime-look.cjs <url> shots/pastimes`; the town with friends parked from
+`scripts/town-online.cjs` (`shots/pastimes/town-parked-phone.png`).
+
 ## 2026-11-06: who hosts: the best connection runs the room, and a hidden host hands it on (Kyle; Claude Opus 5.5)
 
 Kyle approved both today (the two left open in "the join storm" and "the guest feel"): "best connection hosts"

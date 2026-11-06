@@ -4,6 +4,7 @@
  * to go in; taking a job starts a run (room after room until the job is done or you're driven back);
  * the results come home to the hero and the shared world, and the town changes with them.
  */
+import { spotOf, type PastimeId } from '../shared/pastimes';
 import { petSpots, type Dog } from './petting';
 import { doorAt, inArea, npcAt, pushingInto, useMap, type Area, type Block, type Npc, type Theme } from '../shared/arena';
 import { travel } from '../shared/sweep';
@@ -69,7 +70,8 @@ const houndOf = (p: Profile): HoundLook | undefined => (p.cls === 'RANGER' ? fit
 export const FADE_OUT = 2.4;
 
 /** `watch`: on Wickhold's wall for a shift of the Night Watch (watchmode.ts draws and runs it; the town waits underneath). */
-export type Mode = 'town' | 'yard' | 'run' | 'wood' | 'watch';
+/** `pastime`: fishing at the millpond or at the archery butts (fishmode.ts, rangemode.ts): played here alone, parked in town for everyone else. */
+export type Mode = 'town' | 'yard' | 'run' | 'wood' | 'watch' | 'pastime';
 /** A whole job, to lead it from (coop.ts sends it every 2 s): `me` is whoever leads. */
 interface JobSave { run: Run; room: Record<string, unknown>; houses?: SavedHouses; members: [string, string][]; key?: number }
 /**
@@ -495,6 +497,22 @@ export class Game {
   /** Back down the stair, where you stood. */
   leaveWatch(): void {
     if (this.mode === 'watch') this.mode = 'town';
+  }
+
+  /** The pastime being played (shared/pastimes.ts), or null. */
+  pastime: PastimeId | null = null;
+  /** Sit down at the millpond or step up to the butts: the hero goes to its spot, and the town hears it once (townpresence.ts). */
+  enterPastime(id: PastimeId): void {
+    if (this.mode !== 'town' || this.outside) return;
+    const h = this.hero, sp = spotOf(id);
+    Object.assign(h, { x: sp.seat[0], y: sp.seat[1], fx: sp.face[0], fy: sp.face[1], moving: false });
+    this.pastime = id;
+    this.mode = 'pastime';
+  }
+  /** Up from the bank or off the line: back in town where you sat, and the town hears that once too. */
+  leavePastime(): void {
+    if (this.mode === 'pastime') this.mode = 'town';
+    this.pastime = null;
   }
 
   /**

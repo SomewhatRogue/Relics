@@ -29,6 +29,7 @@ import { openStep } from './churchrelics';
 import { openAdvocate } from './councilui';
 import { openPractice } from './practiceui';
 import { openWatchPost } from './watchpost';
+import { openButts, openPond } from './pastimeui';
 import { townVoice, voiceClock } from './voiceplay';
 
 
@@ -100,6 +101,11 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
   } else if (id === 'watch') {
     // Corporal Brisk, at the stair up to the wall: a shift on the Night Watch, after dark (watchpost.ts).
     openWatchPost(g, panel, CHAT[13].line);
+  } else if (id === 'fish') {
+    // Old Pennock at the millpond, and Corin at the butts: the town's pastimes (pastimeui.ts).
+    openPond(g, panel);
+  } else if (id === 'range') {
+    openButts(g, panel);
   } else if (id === 'granary') {
     panel.show('FARMER JOS', say('Farmer Jos', 'Every sack in here is a week nobody starves. Barley doesn\'t care who won the war. That\'s the best thing about barley.'));
   } else if (id === 'home') {

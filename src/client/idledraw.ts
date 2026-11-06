@@ -8,10 +8,12 @@ import { PX } from './world';
 import { FETCH } from './idlehound';
 import { colAt, dot, headPx, heart, skinOf, span, stick, type PropAt } from './idlekit';
 import { cleric, mage, rogue } from './idledraw2';
+import { parkProps } from './parked';
 
 /** Draw the idle's or pet's things for the hero at `at` (after the body and its gear). */
 export function idleProps(c: Ctx, at: PropAt): void {
   const o = at.o;
+  if (o.park) return parkProps(c, at, o.park, o.parkT);
   if (o.pet >= 0) return pet(c, at, o.pet, o.dog);
   const f = o.f;
   if (!f) return;

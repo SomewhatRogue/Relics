@@ -47,6 +47,38 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     const ava = await open('AVA', 'MAGE', { viewport: { width: 1280, height: 800 } });
     step('A third arrives: Kyle sees Ava', await sees(kyle, 'AVA'));
     step('Ava sees both', (await sees(ava, 'KYLE')) && (await sees(ava, 'SAM')));
+    // The town's pastimes (shared/pastimes.ts): Sam sits down to fish and Ava steps up to the butts.
+    // Each says so once and then nothing while they play; Kyle sees them parked there at it.
+    const sends = (p) => p.page.evaluate(() => window.__town().sends);
+    const parked = (p, who, park) => p.page.waitForFunction(([who, park]) => window.__town().here.some((h) => h.name === who && h.park === park), [who, park], { timeout: 8000 }).then(() => true, () => false);
+    const samBefore = await sends(sam), avaBefore = await sends(ava);
+    await sam.page.evaluate(() => window.__pastime.fish());
+    await ava.page.evaluate(() => window.__pastime.range());
+    step('Kyle sees Sam parked fishing at the millpond', await parked(kyle, 'SAM', 'fish'));
+    step('Kyle sees Ava parked at the butts', await parked(kyle, 'AVA', 'range'));
+    const samStart = await sends(sam), avaStart = await sends(ava);
+    // Sam casts and waits; Ava shoots: eight seconds of play, not a word to the town from either.
+    await sam.page.mouse.move(640, 500);
+    await sam.page.mouse.down();
+    await wait(600);
+    await sam.page.mouse.up();
+    for (let i = 0; i < 8; i++) {
+      await ava.page.mouse.move(640, 300 + i * 10);
+      await ava.page.mouse.down();
+      await ava.page.mouse.up();
+      await wait(1000);
+    }
+    const samMid = await sends(sam), avaMid = await sends(ava);
+    step(`one word each to sit down (Sam ${samStart - samBefore}, Ava ${avaStart - avaBefore}), none while playing (Sam ${samMid - samStart}, Ava ${avaMid - avaStart})`, samStart - samBefore <= 1 && avaStart - avaBefore <= 1 && samMid === samStart && avaMid === avaStart);
+    // Kyle walks over between the pond and the butts: both parked in one phone screen.
+    await kyle.page.evaluate(() => Object.assign(window.__game.hero, { x: 46.6, y: 28.6 }));
+    await wait(1500);
+    await kyle.page.screenshot({ path: path.join(ROOT, 'shots/pastimes/town-parked-phone.png') });
+    await sam.page.screenshot({ path: path.join(ROOT, 'shots/pastimes/town-online-fishing-laptop.png') });
+    await sam.page.evaluate(() => window.__fish.close());
+    await ava.page.evaluate(() => (window.__range.end(), window.__range.close()));
+    step('Sam and Ava get up: Kyle sees both back in town', (await parked(kyle, 'SAM', null)) && (await parked(kyle, 'AVA', null)));
+    step(`and that was one more word each (Sam ${(await sends(sam)) - samMid}, Ava ${(await sends(ava)) - avaMid})`, (await sends(sam)) - samMid <= 2 && (await sends(ava)) - avaMid <= 2);
     await sam.ctx.close();
     step('Sam closes the tab: gone for Kyle', await kyle.page.waitForFunction(() => !window.__town().here.some((h) => h.name === 'SAM'), null, { timeout: 15000 }).then(() => true, () => false));
     // The month's Redis budget used up: Kyle's next step is refused; he's told, leaves the town's
