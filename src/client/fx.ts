@@ -10,7 +10,7 @@ import type { FightEvent, Hero } from '../sim/types';
 import { magicFx } from './fxmagic';
 import { Gore } from './gore';
 import type { Light } from './light';
-import { drawText, textWidth } from './pixfont';
+import { clearTop, drawBlock, READ_LIFE, READ_RISE, wrapLine } from './saylines';
 import { toPx } from './world';
 import { CRY } from './captives';
 import { spiderFx } from './fxspiders';
@@ -37,7 +37,7 @@ import { worldFx } from './fxworld';
 import { chalkFx } from './chalkfx';
 
 interface Part { x: number; y: number; vx: number; vy: number; life: number; max: number; col: string; glow: boolean; grav: number; stick: boolean }
-interface Text { x: number; y: number; s: string; col: string; life: number; rise?: number }
+interface Text { x: number; y: number; s: string; col: string; life: number; rise?: number; /** `s` as drawn, broken to fit a phone (saylines.ts). */ lines: string[]; /** Up this long at the start (seconds). */ max: number }
 interface Ring { x: number; y: number; life: number; max: number; col: string; size?: number }
 /** A lightning arc between two points, in world pixels. */
 interface Arc { x: number; y: number; x2: number; y2: number; life: number; col?: string; /** A straight line (a glinted bolt's path), not lightning. */ straight?: boolean }
@@ -67,9 +67,13 @@ export class Fx {
     }
   }
 
-  /** Words that rise and fade over (x, y); `life` seconds (rising slower the longer they stay). */
+  /** Words that rise and fade over (x, y); `life` seconds (rising slower the longer they stay). A long
+   *  one is broken into lines, and one meant to be read goes above any other still up (saylines.ts). */
   say(x: number, y: number, s: string, col: string, life = 0.8): void {
-    this.texts.push({ x, y, s, col, life, rise: 18 * Math.min(1, 0.8 / life) });
+    const lines = wrapLine(s), read = life >= READ_LIFE;
+    const top = read ? clearTop({ x, y, lines }, this.texts.filter((t) => t.max >= READ_LIFE)) : y;
+    // Words to be read all rise at one pace, so one stacked under another never catches it up.
+    this.texts.push({ x, y: top, s, col, life, max: life, lines, rise: read ? READ_RISE : 18 * Math.min(1, 0.8 / life) });
   }
 
   /** A jagged crack in the stone, left for good (javelins, slams into walls). */
@@ -387,7 +391,7 @@ export class Fx {
     }
     for (const t of this.texts) {
       g.globalAlpha = Math.min(1, t.life * 3);
-      drawText(g, t.s, Math.round(t.x - cx - textWidth(t.s) / 2), Math.round(t.y - cy), t.col);
+      drawBlock(g, t.lines, t.x - cx, t.y - cy, t.col, g.canvas.width);
     }
     g.globalAlpha = 1;
   }

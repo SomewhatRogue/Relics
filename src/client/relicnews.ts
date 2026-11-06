@@ -50,6 +50,9 @@ export const gainedSince = (before: readonly string[], p: Pick<Profile, 'relics'
  */
 export function keepKitNoting(p: Profile, h: Hero, copy: boolean): { changed: boolean; news: RelicMoment[] } {
   const before = relicIds(p);
-  if (!keepKit(p, h, copy)) return { changed: false, news: [] };
+  // The first named butcher's sure relic had (sim/namedrelic.ts): kept in the save, so it's once a hero.
+  const named = !!h.namedRelic && !p.namedRelic;
+  if (named) p.namedRelic = true;
+  if (!keepKit(p, h, copy)) return { changed: named, news: [] };
   return { changed: true, news: gainRelics(p, gainedSince(before, p), false) };
 }

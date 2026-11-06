@@ -95,6 +95,8 @@ export interface Profile {
   relic: string;
   /** Relics gained but not looked at yet (ids; the pack marks them NEW), and whether the first relic's tip has been shown. */
   relicNew?: string[];
+  /** The first named butcher this hero killed gave its sure relic (sim/namedrelic.ts): once a hero. */
+  namedRelic?: boolean;
   relicTip?: boolean;
   /** Jobs left carrying the church's light (shared/church.ts), and relics forged two for one so far (seeds the next). */
   lit?: number;

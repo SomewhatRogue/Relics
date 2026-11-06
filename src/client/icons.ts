@@ -38,11 +38,13 @@ export const ICONS: Record<string, Grid> = {
   open: ['............', '..BBBBBBBB..', '.BbbbbbbbbB.', '.BbbbbbbbbB.', '.yyyyyyyyyy.', '.BbbbyybbbB.', '.BbbbYybbbB.', '.BbbbbbbbbB.', '.BbbbbbbbbB.', '.BBBBBBBBBB.', '............', '............'],
   enter: ['...BBBBBB...', '..BbbbbbbB..', '.BbbbBbbbbB.', '.BbbbBbbbbB.', '.BbbbBbbbbB.', '.BbbbBbbybB.', '.BbbbBbbbbB.', '.BbbbBbbbbB.', '.BbbbBbbbbB.', '.BBBBBBBBBB.', 'oooooooooooo', '............'],
   use: ['....h.......', '....h.......', '....h.......', '....hhh.h...', '..h.hhhhhh..', '..hhhhhhhh..', '..hhhhhhhh..', '...hhhhhhh..', '...hhhhhh...', '....hhhhh...', '....HHHH....', '............'],
-  // Small marks: hearts, coin, skull, and the statuses.
+  // Small marks: hearts, coin, a friend fallen, and the statuses.
   heart: ['.rr.rr.', 'rWrrrrr', 'rrrrrrr', '.rrrrr.', '..rrr..', '...r...'],
   hollow: ['.oo.oo.', 'o..o..o', 'o.....o', '.o...o.', '..o.o..', '...o...'],
   coin: ['..yyy..', '.yYYyy.', 'yYyyyyB', 'yYyyyyB', 'yyyyyyB', '.yyyyB.', '..BBB..'],
-  skull: ['.wwwww.', 'wwwwwww', 'wkkwkkw', 'wkkwkkw', 'wwwkwww', '.wwwww.', '.w.w.w.'],
+  // A friend down or out (never dead in this world: they can be helped up or raised): their shield
+  // fallen flat on the ground, and a gold mark over it pointing up.
+  fallen: ['....Y....', '...YYY...', '..sssss..', '.suuyyus.', 'suyyyyyus', '.suuyyus.', '.OOOOOOO.'],
   room: ['..o..', '.ooo.', 'ooooo', '.ooo.', '..o..'],
   roomon: ['..Y..', '.YyY.', 'YyyyY', '.YyY.', '..Y..'],
   poison: ['....n....', '....n....', '...nnn...', '..nnnnn..', '..nWnnn..', '.nWnnnnN.', '.nnnnnnN.', '..nnnnN..', '...NNN...'],
@@ -69,5 +71,5 @@ export const iconUrl = (id: IconId, tint?: string) => gridUrl('i-' + id, ICONS[i
 export function iconVars(): void {
   if (typeof document === 'undefined') return;
   const root = document.documentElement.style;
-  for (const id of ['pack', 'cog', 'chat', 'leave', 'heroes', 'sound', 'music', 'voices', 'tips', 'view', 'heart', 'hollow', 'coin', 'skull', 'room', 'roomon', 'lit', 'buttons', 'map']) root.setProperty('--ic-' + id, `url(${iconUrl(id)})`);
+  for (const id of ['pack', 'cog', 'chat', 'leave', 'heroes', 'sound', 'music', 'voices', 'tips', 'view', 'heart', 'hollow', 'coin', 'fallen', 'room', 'roomon', 'lit', 'buttons', 'map']) root.setProperty('--ic-' + id, `url(${iconUrl(id)})`);
 }

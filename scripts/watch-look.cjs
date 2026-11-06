@@ -4,7 +4,8 @@
 // Run against `npx vite preview --port 4419` (the port is the first argument's, or 4419).
 const { chromium } = require('playwright');
 const base = process.argv[2] || 'http://localhost:4419';
-const url = `${base}/?hero=WARRIOR&day=0`;
+// (The Night Watch is closed behind shared/tuning.ts NIGHT_WATCH; `watch=1` opens it for this look.)
+const url = `${base}/?hero=WARRIOR&day=0&watch=1`;
 const wait = (p, ms) => p.waitForTimeout(ms);
 
 async function onWall(page) {

@@ -3,7 +3,8 @@
  * with each of this hero's buttons drawn by the same code as the cluster (btnart.ts with icons.ts,
  * skillicons.ts and the item and relic icons), each with one plain line, and on a laptop its key.
  */
-import { guardOf, dodgeName, dodgeOf, RELICS, WEAPONS, type Item } from '../shared/tuning';
+import { guardOf, dodgeName, dodgeOf, RAISE, RELICS, WEAPONS, type Item } from '../shared/tuning';
+import { RAISEW } from './raisewords';
 import { carriedItem } from '../sim/charge';
 import { castElement } from '../sim/channel';
 import { knows } from '../sim/types';
@@ -68,6 +69,8 @@ async function rows(g: Game, touch: boolean): Promise<Row[]> {
   const ctx: [IconId, string, string, string][] = [
     ['grab', 'GRAB', 'G', cls === 'WARRIOR' ? 'Pick up any small goblin, crate or barrel. Press again to throw.' : me.weapon === 'spellblade' ? 'Pick up a crate, a barrel, or a stunned goblin. Press again to throw.' : 'Pick up a crate or barrel. Press again to throw.'],
     ['help', 'HELP UP', 'G', 'Get a downed friend back up.'],
+    // A Cleric's RAISE, by a friend who is out (sim/raise.ts): the same slot, the same hand.
+    ...(cls === 'HEALER' ? [['help', RAISEW.button, 'G', RAISEW.legend(RAISE.time)] as [IconId, string, string, string]] : []),
     ['burn', 'BURN', 'G', 'Set fire to a spider nest, or an oiled woodpile by a house.'],
     ['open', 'OPEN', 'F', 'Open a chest.'],
     ['chat', 'TALK', 'E', "Talk to whoever you're by."],

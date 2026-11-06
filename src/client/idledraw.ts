@@ -14,6 +14,7 @@ import { parkProps } from './parked';
 export function idleProps(c: Ctx, at: PropAt): void {
   const o = at.o;
   if (o.park) return parkProps(c, at, o.park, o.parkT);
+  if (o.kneel >= 0) return kneel(c, at, o.kneel, o.dog);
   if (o.pet >= 0) return pet(c, at, o.pet, o.dog);
   const f = o.f;
   if (!f) return;
@@ -23,6 +24,21 @@ export function idleProps(c: Ctx, at: PropAt): void {
   else if (id[0] === 'g') rogue(c, at, id, t);
   else if (id[0] === 'm') mage(c, at, id, t);
   else cleric(c, at, id, t);
+}
+
+/** Kneeling by a friend who is out, raising them (kneel.ts): both hands out over them, the light in them
+ *  brighter as the raise goes on, a mote now and then going down from the hands into them. */
+function kneel(c: Ctx, at: PropAt, share: number, s: number): void {
+  const sleeve = colAt(at.def, 1, at.def.tall + 7), sk = skinOf(at.def), hx = at.bx + s * 7, hy = at.by - 6;
+  dot(c.lit, at.bx + s * 4, hy, 3, 1, sleeve), dot(c.lit, at.bx + s * 4, hy + 2, 3, 1, sleeve);
+  dot(c.lit, hx, hy, 2, 1, sk), dot(c.lit, hx, hy + 2, 2, 1, sk);
+  const glow = 0.35 + 0.55 * share + 0.1 * Math.sin(at.now * 8);
+  c.glow.globalAlpha = Math.max(0, Math.min(1, glow));
+  dot(c.glow, hx + s, hy - 1, 2, 1, '#ffe9a8'), dot(c.glow, hx + s, hy + 1, 2, 1, '#ffffff'), dot(c.glow, hx + s * 2, hy + 3, 1, 1, '#e0a040');
+  const p = (at.now * 1.6) % 1;
+  c.glow.globalAlpha = (1 - p) * (0.4 + 0.5 * share);
+  dot(c.glow, hx + s * 2, hy + 2 + p * 5, 1, 1, '#ffe9a8');
+  c.glow.globalAlpha = 1;
 }
 
 /** Kneeling at a hound: a hand on its head, rubbing; hearts going up between them. */

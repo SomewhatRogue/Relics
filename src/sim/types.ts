@@ -296,6 +296,8 @@ export interface Hero extends Body {
   /** Relics this hero owns, each with its charge (one at a time is carried: `relicItem`, its kind in relics[1]). */
   found: RelicItem[];
   relicItem: string;
+  /** Has had the sure relic of their first named butcher (sim/namedrelic.ts; Profile.namedRelic). Set once. */
+  namedRelic?: boolean;
   /** Carrying the church's light this job (shared/church.ts LIT). */
   lit?: boolean;
   /** Quickened by a bone bell until then (BELL.quick). */

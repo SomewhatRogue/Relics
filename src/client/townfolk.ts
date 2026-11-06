@@ -12,7 +12,8 @@
  * player who goes is announced by the relay (`left`), and anyone silent 5 minutes is let go too.
  *
  * A tab out of sight a minute (another tab, a phone in a pocket) leaves the town's room, and so does
- * a player who hasn't touched anything in 3 minutes (unless they're in a party); either comes back
+ * a player who hasn't touched anything in 3 minutes (unless they're in a party; parked at a pastime,
+ * 20 minutes, since waiting for a bite is playing); either comes back
  * the moment they're looked at or touched, and says `hi` again.
  *
  * Only the place you're in sees you walk (the square, or a hall), so where you stand goes out only
@@ -34,8 +35,14 @@ export const TOWN_ROOM = 'WICKHOLD1';
 /** `PARKED`: someone fishing or at the butts says nothing till they're done, so they're kept this long (a goodbye still takes them at once). */
 const KEEP = 120, GONE = 300, PARKED = 3600;
 const hook = (k: string, d: number) => Number(typeof location === 'undefined' ? NaN : new URLSearchParams(location.search).get(k)) || d;
-/** Out of sight this long (seconds), and untouched this long, and the town's room is left. (`?hide=`, `?idle=`: tests.) */
-export const AWAY = { hidden: hook('hide', 60), idle: hook('idle', 180) };
+/**
+ * Out of sight this long (seconds), and untouched this long, and the town's room is left. Parked at a
+ * pastime, waiting is the game (a float that hasn't dipped yet), so untouched only counts
+ * after `parked`: 20 minutes, so a tab forgotten at the pond still goes. (`?hide=`, `?idle=`, `?parkidle=`: tests.)
+ */
+export const AWAY = { hidden: hook('hide', 60), idle: hook('idle', 180), parked: hook('parkidle', 1200) };
+/** How long untouched before the town's room is left: longer while parked (`g`), and never in a party. */
+export const idleLimit = (parked: boolean, party: boolean) => (party ? Infinity : parked ? AWAY.parked : AWAY.idle);
 
 /** One player about themselves: name, weapon, the place they're in, and x, y, facing, moving. */
 export interface Me { n: string; w: string; l?: number; /** A Ranger's hound: breed, coat, white, name (shared/houndlook.ts). */ d?: PackedHound; at: string; p: [number, number, number, number, number]; pt?: unknown; /** Velocity, tiles a second. */ v?: [number, number]; /** Parked at a pastime (fishing, the butts): said once, then nothing till it's over (shared/pastimes.ts). */ g?: PastimeId }
@@ -89,8 +96,8 @@ export class Townfolk {
     this.now = now;
     if (!me) return this.leave();
     const pt = this.offer();
-    // Idle a while, and not in a party: out of the room till touched.
-    if (!pt && now - this.touchedAt > AWAY.idle) this.dozing = true;
+    // Idle a while, and not in a party: out of the room till touched (parked, a good while longer).
+    if (now - this.touchedAt > idleLimit(!!me.g, !!pt)) this.dozing = true;
     if (this.dozing) return this.leave();
     const [x, y, fx, fy, moving] = me.p, v = moving ? this.pace.at(now, x, y, [fx * HERO.speed, fy * HERO.speed]) : (this.pace.stop(), [0, 0]);
     this.me = { ...me, p: [r2(x), r2(y), r2(me.p[2]), r2(me.p[3]), me.p[4]], v: [r2(v[0]), r2(v[1])], pt };

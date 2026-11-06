@@ -315,6 +315,8 @@ export class Game {
     h.found = p.relics.map((r) => ({ ...r }));
     const carried = p.relics.find((r) => r.id === p.relic);
     h.relicItem = carried?.id ?? '';
+    // Their first named butcher's sure relic, had already (sim/namedrelic.ts): from the save, or this run.
+    h.namedRelic = !!p.namedRelic || !!keep?.namedRelic || undefined;
     h.lit = (p.lit ?? 0) > 0;
     h.perks = [...p.perks];
     h.drills = p.drills;

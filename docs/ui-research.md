@@ -195,7 +195,7 @@ Button anatomy (all buttons):
 
 **Relic**
 - Under the top-left unit frame, **stacked mini frames**: a 16px face, the name, and a 4px HP bar.
-- A downed ally's frame turns grey with a skull glyph and a gold "help" pulse. Gold, because raising them is an action you can take, and the context slot shows HELP UP.
+- A downed ally's frame turns grey with a fallen-shield mark (`icons.ts` `fallen`: their shield flat on the ground, a gold mark over it pointing up; never a skull, since in this world "out" is never dead) and a gold "help" pulse. Gold, because raising them is an action you can take, and the context slot shows HELP UP.
 - In-world: the name tag over the ally (it exists) plus a tiny HP bar under their feet ring.
 - The **gathering party card** (`partyhud.css`) gets the same unit-frame style. The pastel kind chips become small icon tags (sword for hunt, key for rescue, flame for burn).
 
@@ -282,7 +282,7 @@ The rule: **colour only for meaning.** Neutral stone and bone carry about 90% of
 
 ### 3.4 Icon style
 - 16x16 or 20x20 sources, 1px dark outline, 3 to 4 colour ramps per icon pulled from the scene palette, top-left light. Shown at 3x on a phone. The same hand as `itemicons.ts`, `relicicons.ts` and `skillIcon()`, which already exist and look right in the pack shots. **Use them everywhere words are now.**
-- A minimum set for the HUD: attack (from the held weapon), shield or parry, roll, step, jump, dash and blink (one per `dodgeName`), each class skill, relic, flask, grab hand, burn torch, help-up hand, open chest, door, talk (speech mark), satchel, bubble, book, coin, heart, skull, goblin head, flame, drop, stars, and up and down chevrons.
+- A minimum set for the HUD: attack (from the held weapon), shield or parry, roll, step, jump, dash and blink (one per `dodgeName`), each class skill, relic, flask, grab hand, burn torch, help-up hand, open chest, door, talk (speech mark), satchel, bubble, book, coin, heart, fallen shield (a friend down), goblin head, flame, drop, stars, and up and down chevrons.
 - Words survive only in tooltips and as optional 2-letter key hints on a laptop (`E`, `R`, `Q`).
 
 ### 3.5 Touch-cluster shapes (shape carries meaning, so colour doesn't have to)

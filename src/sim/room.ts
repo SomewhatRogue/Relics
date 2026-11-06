@@ -25,6 +25,7 @@ import { HUNGRY_FX, onKill, stepHungry, wears } from './hungry';
 import { newChest, startChest, stepChests, type Chest } from './chests';
 import { stepFlask, stepPotions, usePotion, type Smoke } from './flasks';
 import { dropPickups, dropRelic, stepPickups, type Pickup } from './pickups';
+import { firstNamedRelic } from './namedrelic';
 import { dropCoal, stepCoals, type Coal } from './lantern';
 import { censerSwing, stepEmbers } from './censer';
 import { mend, shieldNear } from './holy';
@@ -164,6 +165,8 @@ export class ArenaRoom {
   private fireRng: Rng;
   /** Relics off named butchers on their own stream too. */
   private relicRng: Rng;
+  /** A hero's first named butcher's sure relic (sim/namedrelic.ts), on its own, so the floor's stream is as it was. */
+  private firstRng: Rng;
   /** Whether what's in a broken cage is false (sim/falsecage.ts), on its own stream as well. */
   private cageRng: Rng;
   /** What a technique knocks loose (CUTPURSE: sim/techrogue.ts), on its own stream too. */
@@ -213,6 +216,7 @@ export class ArenaRoom {
     this.doorRng = new Rng(seed * 104729 + 31);
     this.fireRng = new Rng(seed * 7351 + 17);
     this.relicRng = new Rng(seed * 31337 + 7);
+    this.firstRng = new Rng(seed * 5011 + 67);
     this.cageRng = new Rng(seed * 2971 + 41);
     this.purseRng = new Rng(seed * 6007 + 53);
     this.skyRng = new Rng(seed * 9173 + 61);
@@ -491,6 +495,7 @@ export class ArenaRoom {
       dropCoal(e, this.coals);
       dropPickups(e, this.pickups, this.lootRng, this.exped ? EXPED_COINS : undefined);
       dropRelic(e, this.pickups, this.relicRng);
+      firstNamedRelic(e, this.heroes, this.firstRng, this.events);
       const by = this.heroes.find((x) => x.id === e.lastBy);
       if (by) onKill(by, this.time, this.events);
     }
