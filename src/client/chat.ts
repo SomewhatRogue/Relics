@@ -23,6 +23,8 @@ import './chat.css';
 /** How near a NEAR line carries in town, in tiles. */
 export const NEAR = 8;
 type Where = 'off' | 'town' | 'party';
+/** How long after a sworn line the bolt lands on the swearer: time for the chat and a phone's keyboard to close. */
+const STRIKE_AFTER_MS = 400;
 const clock = () => performance.now() / 1000;
 const at = (h: Hero | undefined | null) => (h ? { x: h.x, y: h.y } : null);
 
@@ -86,7 +88,12 @@ export class Chat {
     this.add({ from: this.game.profile.id, name: line.name, ch, text: line.text, mine: true });
     // Every line you say floats over you for a bit (world ones too, Kyle 2026-11-03), and stays in the log.
     this.bubbles.say('me', line.text, now, () => at(this.game.hero));
-    if (line.struck) this.strike(this.game.profile.id, line.name);
+    // Swore: the chat closes (and a phone's keyboard drops) first, so you see the bolt land on you (Kyle, 2026-11-05).
+    if (line.struck) {
+      this.box.set('shut');
+      const id = this.game.profile.id, name = line.name;
+      setTimeout(() => this.strike(id, name), STRIKE_AFTER_MS);
+    }
   }
 
   private heard(l: Incoming): void {
