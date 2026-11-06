@@ -15,7 +15,7 @@ export function idleProps(c: Ctx, at: PropAt): void {
   const o = at.o;
   if (o.park) return parkProps(c, at, o.park, o.parkT);
   if (o.kneel >= 0) return kneel(c, at, o.kneel, o.dog);
-  if (o.pet >= 0) return pet(c, at, o.pet, o.dog);
+  if (o.pet >= 0) return pet(c, at, o.pet, o.dog, o.petR, o.petDur);
   const f = o.f;
   if (!f) return;
   const id = f.def.id, t = f.t;
@@ -41,14 +41,19 @@ function kneel(c: Ctx, at: PropAt, share: number, s: number): void {
   c.glow.globalAlpha = 1;
 }
 
-/** Kneeling at a hound: a hand on its head, rubbing; hearts going up between them. */
-function pet(c: Ctx, at: PropAt, t: number, s: number): void {
-  if (t < 0.45 || t > 2.2) return;
-  const hx = at.x + s * 8 + Math.round(Math.sin(t * 14)), hy = at.y - 8;
-  dot(c.lit, at.bx + s * 6, at.by - 6, 2, 1, colAt(at.def, 1, at.def.tall + 7));
+/** Kneeling at a hound: a hand on its head rubbing (low on its belly when it's rolled over); hearts going
+ *  up between them. Licked, no hand: a heart over the two of them. */
+function pet(c: Ctx, at: PropAt, t: number, s: number, r: string, dur: number): void {
+  if (t < 0.45 || t > dur - 0.4) return;
+  if (r === 'lick') {
+    heart(c, at.x + s * 5, at.y - 20, span(t, 1.1, 2.3));
+    return;
+  }
+  const lowK = r === 'belly' && t > 0.8 ? 1 : 0, hx = at.x + s * 8 + Math.round(Math.sin(t * 14)) * (lowK ? 2 : 1), hy = at.y - 8 + lowK * 4;
+  dot(c.lit, at.bx + s * 6, at.by - 6 + lowK * 2, 2, 1, colAt(at.def, 1, at.def.tall + 7));
   dot(c.lit, hx, hy, 2, 1, skinOf(at.def));
-  heart(c, at.x + s * 10, at.y - 15, span(t, 0.7, 1.9));
-  heart(c, at.x + s * 7, at.y - 17, span(t, 1.2, 2.2));
+  heart(c, at.x + s * 10, at.y - 15 + lowK * 3, span(t, 0.7, 1.9));
+  heart(c, at.x + s * 7, at.y - 17 + lowK * 3, span(t, 1.2, Math.min(dur - 0.4, 2.2 + lowK)));
 }
 
 function warrior(c: Ctx, at: PropAt, id: string, t: number): void {

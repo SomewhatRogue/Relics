@@ -4,16 +4,17 @@
  * them (sprites.ts shades and outlines them like a hero) and caches each one.
  *
  * Kinds: `stand` (every gait, sniffing, shaking, the fight's lunge, bite and latch, a play bow, a
- * leap), `sit`, `down` (lying, head on its paws or up) and `scratch` (sat, a hind foot at its ear).
+ * leap), `sit`, `down` (lying, head on its paws or up), `scratch` (sat, a hind foot at its ear) and
+ * `belly` (rolled on its back, legs in the air).
  */
 import type { HoundLook } from '../shared/houndlook';
-import { PATTERN, hasBlaze, palOf } from './houndcoats';
+import { PATTERN, hasBlaze, hasSocks, palOf } from './houndcoats';
 import { Grid, head, leg, tail, type HeadAt } from './houndgrid';
 import { HOUND_BOX as BOX, SHAPES, type Shape } from './houndshapes';
 import type { Part } from './sprites';
 
 export interface Pose {
-  kind: 'stand' | 'sit' | 'down' | 'scratch';
+  kind: 'stand' | 'sit' | 'down' | 'scratch' | 'belly';
   /** Feet: near front, far front, near hind, far hind; each [shift toward the head, lift], pixels. */
   legs?: [number, number][];
   /** Body longer (a gallop's reach), rump up (`tilt`, a bow's), all off the ground, crouched, chest down. */
@@ -25,7 +26,7 @@ export interface Pose {
   fluff?: number;
   /** Lying with its head up, not on its paws. */
   headUp?: boolean;
-  /** Scratching: where the hind foot is (0 or 1). */
+  /** Scratching: where the hind foot is (0 or 1); on its back, which pair of legs is up higher. */
   kick?: number;
 }
 
@@ -88,6 +89,24 @@ function down(gr: Grid, s: Shape, look: HoundLook, p: Pose): HeadAt {
   return head(gr, s, look, [shX, top + 1], shX + 1, hy, p.ears, false);
 }
 
+/** Over on its back: the back along the floor, the pale belly up, four legs bent in the air and going, the head laid back. */
+function belly(gr: Grid, s: Shape, look: HoundLook, p: Pose): HeadAt {
+  const G = BOX.ground, len = s.body, hipX = BOX.x - Math.round(len / 2) - 1, shX = hipX + len, top = G - Math.max(2, s.depth - 1) + 1, sh = s.skull[1], k = p.kick ?? 0;
+  tail(gr, s, hipX - 1, G, 'ground', p.wag ?? 0);
+  const up = (x: number, far: boolean, hi: number, bend: number) => {
+    const ch = far ? 'D' : 'B', y1 = top - 1 - (s.leg - 2) - hi;
+    gr.line(x, top - 1, x, y1, ch, 1);
+    // Bent at the wrist or hock, the paw flopped over.
+    gr.set(x + bend, y1, hasSocks(look.mark) ? 'W' : ch);
+  };
+  up(hipX + 3, true, k, -1), up(shX - 1, true, 1 - k, 1);
+  gr.rect(hipX, top, len + 1, G - top + 1, 'B'), gr.rect(hipX - 1, top + 1, 1, G - top, 'B');
+  for (let x = hipX + 1; x < shX; x++) gr.set(x, top, 'L');
+  up(hipX + 1, false, 1 - k, -1), up(shX - 3, false, k, 1);
+  // The head laid back along the floor past the shoulder, mouth open in a grin (a beard keeps it a pixel up).
+  return head(gr, s, look, [shX, top + 1], shX + 1, G - sh - (s.rough ? 1 : 0), 'back', true);
+}
+
 /** Brindle stripes or merle patches over the coat. */
 function pattern(gr: Grid, look: HoundLook): void {
   const kind = PATTERN[look.breed]?.[look.coat];
@@ -102,7 +121,7 @@ function pattern(gr: Grid, look: HoundLook): void {
 /** The pixel map for one hound in one pose. */
 export function houndMap(look: HoundLook, p: Pose): HoundMap {
   const gr = new Grid(), s = SHAPES[look.breed], pal = palOf(look.breed, look.coat);
-  const at = p.kind === 'sit' || p.kind === 'scratch' ? sit(gr, s, look, p) : p.kind === 'down' ? down(gr, s, look, p) : stand(gr, s, look, p);
+  const at = p.kind === 'sit' || p.kind === 'scratch' ? sit(gr, s, look, p) : p.kind === 'down' ? down(gr, s, look, p) : p.kind === 'belly' ? belly(gr, s, look, p) : stand(gr, s, look, p);
   pattern(gr, look);
   const parts: Part[] = [];
   gr.g.forEach((row, y) => row.forEach((ch, x) => ch && parts.push(['p', x, y, pal[ch as keyof typeof pal]])));

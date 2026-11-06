@@ -7,7 +7,7 @@
 import { WEAPONS } from '../shared/tuning';
 import type { Hero, Hound } from '../sim/types';
 import { IDLE, idleFrame } from './idles';
-import { LODGE_HOUND, PET, pettedBy, type Dog } from './petting';
+import { LODGE_HOUND, pettedBy, type Dog, type React } from './petting';
 import type { Mood } from './hound';
 
 /** A hound's place this frame (tiles), the way it faces, how it looks; `down`: lying. */
@@ -35,7 +35,7 @@ export const FETCH = { land: (s: number) => [s * IDLE.toss, 0.15], back: (s: num
  */
 export function houndAt(h: Hero, ax: number, ay: number, hx: number, hy: number, now: number): HoundAt | null {
   const p = pettedBy([], 'own', h, now);
-  if (p) return petted(p.t, ax, ay, hx, hy, false, now);
+  if (p) return petted(p.t, p.r, p.dur, ax, ay, hx, hy, false, now);
   const f = idleFrame(h, now);
   if (!f || !f.def.hound) return null;
   const t = f.t, s = f.side, wag = wagOf(now), [lx, ly] = FETCH.land(s), [rx, ry] = f.def.id === 'r_fetch' ? FETCH.back(s) : FETCH.ruffle(s);
@@ -65,13 +65,28 @@ export function houndAt(h: Hero, ax: number, ay: number, hx: number, hy: number,
   return run(t, 5.4, 6, R[0], R[1], ax, ay, {});
 }
 
-/** A hound being petted: up (if lying), in to lean on the hero, wagging; back where it was after. */
-function petted(t: number, ax: number, ay: number, hx: number, hy: number, lies: boolean, now: number): HoundAt {
-  const s = ax >= hx ? 1 : -1, tx = hx + s * 1, ty = hy + 0.05, wag = wagOf(now);
+/**
+ * A hound being petted, `t` s into `dur`: up (if lying) and in beside the hero, then as it takes it:
+ * `lean`, leaning on them wagging, tongue out; `belly`, flopped over on its back, legs going, for a
+ * rub; `lick`, a play bow, a hop up and at their face licking. Back where it was after.
+ */
+function petted(t: number, r: React, dur: number, ax: number, ay: number, hx: number, hy: number, lies: boolean, now: number): HoundAt {
+  const s = ax >= hx ? 1 : -1, near = r === 'lick' ? 0.55 : 1, tx = hx + s * near, ty = hy + 0.05, wag = wagOf(now), back = dur - 0.4;
   if (t < 0.15 && lies) return at(ax, ay, -s, { wag }, true);
   if (t < 0.45) return run(t, lies ? 0.15 : 0, 0.45, ax, ay, tx, ty, {});
-  if (t < PET.time - 0.4) return at(tx, ty, -s, { wag, happy: true, lean: 1 });
-  return run(t, PET.time - 0.4, PET.time, tx, ty, ax, ay, { wag });
+  if (t >= back) return run(t, back, dur, tx, ty, ax, ay, { wag });
+  if (r === 'belly') {
+    // A moment stood, then over on its back; up again just before it goes.
+    if (t < 0.7 || t > back - 0.25) return at(tx, ty, -s, { wag, happy: true });
+    return at(tx, ty, -s, { wag, happy: true, belly: true });
+  }
+  if (r === 'lick') {
+    if (t < 0.8) return at(tx, ty, -s, { bow: true, wag });
+    if (t < 1.05) return at(tx, ty, -s, { lift: Math.round(Math.sin(((t - 0.8) / 0.25) * Math.PI) * 4) });
+    if (t < back - 0.2) return at(tx - s * 0.05, ty, -s, { lift: 2, wag, happy: true, lick: Math.floor(now * 5) % 2 === 0, lean: 1 });
+    return at(tx, ty, -s, { wag, happy: true });
+  }
+  return at(tx, ty, -s, { wag, happy: true, lean: 1 });
 }
 
 /** Maeve's hound in the lodge: lying by the fire, or up and leaning on whoever's petting it. */
@@ -79,7 +94,7 @@ export function lodgeHoundAt(heroes: readonly Hero[], now: number): HoundAt {
   const p = pettedBy(heroes, 'lodge' as Dog, null, now), d = LODGE_HOUND;
   // Lying by the fire, the tail thumping now and then.
   if (!p) return at(d.x, d.y, -1, { wag: Math.floor(now * 0.4) % 4 === 0 && wagOf(now) }, true);
-  return petted(p.t, d.x, d.y, p.h.x, p.h.y, true, now);
+  return petted(p.t, p.r, p.dur, d.x, d.y, p.h.x, p.h.y, true, now);
 }
 
 /** The hound that walks with another player's Ranger in town (this screen's own, at their heel). */

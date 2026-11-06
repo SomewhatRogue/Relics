@@ -5,6 +5,7 @@
  */
 import { guardOf, dodgeName, dodgeOf, RAISE, RELICS, WEAPONS, type Item } from '../shared/tuning';
 import { RAISEW } from './raisewords';
+import { PET_LEGEND } from './petwhen';
 import { carriedItem } from '../sim/charge';
 import { castElement } from '../sim/channel';
 import { knows } from '../sim/types';
@@ -76,6 +77,8 @@ async function rows(g: Game, touch: boolean): Promise<Row[]> {
     ['chat', 'TALK', 'E', "Talk to whoever you're by."],
     ['enter', 'ENTER', 'E', 'Go through the door.'],
     ['use', 'USE', 'E', "Use the job board, market or gate you're by."],
+    // A Ranger's own hound, at heel with nothing awake near (petting.ts, petwhen.ts).
+    ...(cls === 'RANGER' ? [['pet', 'PET', 'F', PET_LEGEND] as [IconId, string, string, string]] : []),
   ];
   for (const [ic, name, key, text] of ctx) out.push({ face: round(icon(ic), 'gilt'), name, key, text });
   return out.map((r) => ({ ...r, key: touch ? '' : r.key, ...drawn(r.face) }));

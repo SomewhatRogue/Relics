@@ -18,6 +18,8 @@ import { ChatBox } from './chatbox';
 import { Bubbles } from './bubbles';
 import { Mutes } from './chatmute';
 import { Pace, STRUCK_STUN, cleanText, type Channel } from '../shared/chatrules';
+import { petWord, type PetWord } from './petword';
+import type { Dog } from './petting';
 import './chat.css';
 
 /** How near a NEAR line carries in town, in tiles. */
@@ -46,6 +48,7 @@ export class Chat {
     this.box.onChannel = () => this.where === 'town' && this.box.setChannel((this.ch = this.ch === 'world' ? 'local' : 'world'));
     this.box.setChannel(this.ch);
     this.net.onLine = (l) => this.heard(l);
+    this.net.onPet = (from, w, party) => this.petHeard(from, w, party);
     this.log.onName = (id, name) => this.mute(id, name);
   }
 
@@ -113,6 +116,27 @@ export class Chat {
     this.add({ from: l.from, name: l.name, ch: l.ch, text: l.text });
     this.box.ping();
     if (l.struck) this.strike(l.from, l.name);
+  }
+
+  /** A friend's hero to pet a hound on this screen (main.ts: petting.ts startPet). */
+  onPet: (h: Hero, w: PetWord) => void = () => {};
+
+  /**
+   * You've started a pet: one word to whoever can see it (petword.ts). On a job, the party's room,
+   * and only with friends along; in town, the town's room, and only with someone in the same place.
+   */
+  pet(dog: Dog, r: number): boolean {
+    const g = this.game, w = petWord(dog, r, g.profile.name);
+    if (this.where === 'party') return (g.remote || (g.coop?.friends.size ?? 0) > 0) && (this.net.sendPet(w, true), true);
+    if (this.where === 'town' && this.town?.here(g.room.map.name).length) return this.net.sendPet(w, false), true;
+    return false;
+  }
+
+  private petHeard(from: string, w: PetWord, party: boolean): void {
+    const g = this.game;
+    if (party !== (this.where === 'party') || this.where === 'off' || from === g.profile.id) return;
+    const h = party ? this.partyHero(from, w.n || '\u0001') : this.town?.where(from)?.at === g.room.map.name ? this.town.where(from)?.hero : undefined;
+    if (h) this.onPet(h, w);
   }
 
   /** Where the lightning lands (world tiles): the effect is drawn there, wherever the speaker is. */

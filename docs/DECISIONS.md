@@ -2,6 +2,69 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-06: pet your hound whenever: PET on the context button anywhere it's at heel, three ways it takes it, and friends see it (Kyle; Claude Opus 5.5)
+
+Kyle: "hunter should be able to pet their hound whenever lol." Builds on the idles and petting entry
+(2026-11-05), which kept petting to the hunters' lodge. Drawing only: the room and its hound never hear of it.
+
+**Where** (`client/petwhen.ts`, `game.ts` `near`, `petting.ts` `petSpots`). A Ranger can pet their own hound
+in Wickhold's square, every hall, the yard, a job and an expedition (not the prologue wood, which has no
+hound, the Night Watch or a pastime). It's offered when the hound is at heel, not down, within reach (the
+usual 1.6 tiles plus 0.4), the Ranger is standing about (not mid-swing, blocking, lifting or stooped), no
+goblin is awake within **PETTING.calm = 5 tiles** (`shared/tuning.ts`; asleep ones don't count), and nothing
+more urgent wants the slot. Maeve's hound by the lodge fire is as before.
+
+**The slot's order.** TALK, OPEN, ENTER and the job board's USE come first (`near` offers your own hound
+only when nothing else is in reach, as in the lodge). HELP UP, RAISE, CUT FREE, BURN, the Staithe's shove,
+a crate or a goblin to GRAB, and carrying something (THROW) all claim it first too (`slotClaimed`), so the
+phone's button and the laptop's prompt never disagree. A drop at your feet comes before it as well: LOOK.
+On a phone it's the gilt use button with a paw (`icons.ts` `pet`): big in town, the small one on a job
+(`cluster.css` lets it show in a run, as a chest does). On a laptop: E in town as before, F on a job
+(the prompt says `F  PET YOUR HOUND`; E is the class skill there). The BUTTONS box has a PET row for a
+Ranger. The prompt steps aside while you pet, so it doesn't sit over the two of you.
+
+**What it looks like** (`idlepose.ts`, `idlehound.ts`, `idledraw.ts`, `houndposes.ts`, `houndbody.ts`).
+The same kneel as the lodge's, and the hound comes in beside you. Pet again within 6 s of the last
+ending (`PET.again`) and it takes it another way, in turn: **lean** (2.6 s: leans on you wagging, tongue
+out, two hearts, the old one), **belly** (3.4 s: flops over on its back with its legs going, a new
+`belly` pose for every breed inside the one box; the hand goes lower to rub it, the hearts with it),
+**lick** (3 s: a play bow, a hop up at you and licks; you lean back laughing, the Ranger's laugh from the
+tackle idle through `herovoice.ts`; one heart over the two of you). Left a while, it starts at lean again.
+FLAT and 2.5D both draw it through these, as all idles. No new sounds: the laugh is the only one.
+
+**The rules.** Cosmetic, no stats. Never started on the move or mid-swing, so a dodge is never waited on.
+Any input stops it at once (`stopPet` beside the idles' poke in `main.ts`: the stick, the aim, any press);
+the press that started it isn't counted as input (the poke's baseline is taken again). A step, a turn, a
+dodge, a blow or being hit end it on every screen (`petFrame`). (Found on the online run: the drawing's clock
+is the frame's, a hair behind the press, which read as a pet already over; a pet a moment early is now
+at its start. And a friend's copy of a hero settles by a hair as the leader's word comes in, so only a
+real step, a quarter tile, or a real turn ends it.)
+
+**Seen online** (`client/petword.ts`, `chatnet.ts`, `chat.ts`). One word when a pet starts,
+`{ k: 'pet', d, r, n }` (which hound, which reaction, the name), over a room already open: the town's
+peer room in Wickhold, sent only with someone in the same place, and the party's chat room on a job,
+only with friends along. Nothing per frame: each screen starts the pet on that player's hero and ends it
+as above. A pet comes at most once every few seconds (`PET.wait` after each). A Warrior's word to pet
+"their own" is ignored. Maeve's hound gets up for anyone petting it in the lodge, on others' screens too.
+
+**Words** (for the lore keeper, then the line editor): **PET** (the button, as before) and **PET YOUR
+HOUND** (the prompt, as before) are now seen everywhere; one new line in the BUTTONS box: "Pet your hound
+while it's at your side and nothing nearby is awake." (`petwhen.ts` `PET_LEGEND`).
+
+Tests: `tests/petting.test.ts` (PET in the square, three halls, the yard, a job and an expedition; gone
+with a goblin awake inside 5 tiles, back past it or with it asleep; never a Warrior's, mid-swing or with
+the hound off; talk, a chest and a door first; help up and carrying first; any input, a dodge, a step and a
+turn stop it; never started on the move; the frame's clock a hair early; lean, belly, lick, lean in turn,
+lean again after a while, each drawn with the hound beside you; the room and its hound untouched; in town
+one word, read back on a friend's screen as a pet of your hero with the hound walked at heel; on a job over
+the party's chat room; a bad word is no pet), `tests/idles.test.ts` (Maeve's hound still only in the lodge),
+`tests/hound.test.ts` (the belly pose inside the box for every breed, coat and white). Online:
+`scripts/town-online.cjs` (Kyle has PET with the hound at heel, taps it, kneels; Sam sees it; one word)
+and `scripts/party-online.cjs` (Sam, a guest Ranger on his phone, has PET on the job with the goblins
+dead, taps it, kneels; Kyle, leading, sees it). Shots: `shots/pet/town-pet-phone.png`,
+`shots/pet/job-pet-phone.png`, and the friends' views `shots/pet/town-pet-friend-laptop.png`,
+`shots/pet/job-pet-friend-laptop.png`.
+
 ## 2026-11-06: Fenmere, the second curated zone: the carr, the causeway, the ford, the reeds that hide goblins, the mist, the Peat Cuts (Kyle; Claude Opus 5.5)
 
 Kyle, 2026-11-05: "more raid biomes, fewer but bigger and lovingly curated", "the river in the middle should have

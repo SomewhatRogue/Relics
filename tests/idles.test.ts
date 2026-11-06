@@ -1,8 +1,8 @@
 /**
  * Idles and petting (docs/DECISIONS.md 2026-11-05, client/idles.ts, petting.ts): an idle only after
  * standing still, never with a goblin awake near, cut off by any input; three a class and a rare one
- * about one pick in fifty; the Ranger's mostly with the hound; a hound to pet in the hunters' lodge and
- * nowhere else; and none of it sends a word to the relay or changes the room.
+ * about one pick in fifty; the Ranger's mostly with the hound; Maeve's hound to pet in the hunters' lodge
+ * and nowhere else (your own anywhere: tests/petting.test.ts); and none of it sends a word to the relay or changes the room.
  */
 import { describe, expect, it, vi } from 'vitest';
 import { Rng } from '../src/shared/rng';
@@ -209,11 +209,7 @@ describe('petting', () => {
   it("is in the hunters' lodge, Maeve's hound for anyone and a Ranger's own", () => {
     const g = page('RANGER');
     steps(g, 10);
-    // Out in the square: none, wherever the hound is.
-    for (const s of [g.hero, ...(g.hero.hound ? [g.hero.hound] : [])]) {
-      Object.assign(g.hero, { x: s.x + 0.3, y: s.y });
-      expect(g.near()?.pet).toBeUndefined();
-    }
+    // (Your own anywhere, now: tests/petting.test.ts.)
     into(g, 'lodge');
     expect(g.room.map.name).toBe("THE HUNTERS' LODGE");
     // By the fire: Maeve's hound.
@@ -258,7 +254,7 @@ describe('petting', () => {
     expect(lodgeHoundAt(g.room.heroes, 5000 + PET.time + 0.2).down).toBe(true);
   });
 
-  it('nowhere else: the other halls, the yard, the square', () => {
+  it("Maeve's hound nowhere else: the other halls, the yard, the square", () => {
     const g = page('RANGER');
     for (const door of ['hall', 'tower', 'church', 'tavern', 'forge']) {
       g.enterTown();
@@ -266,12 +262,12 @@ describe('petting', () => {
       into(g, door);
       for (let x = 0.5; x < g.room.map.w; x += 0.5) for (let y = 0.5; y < g.room.map.h; y += 0.5) {
         Object.assign(g.hero, { x, y });
-        expect(g.near()?.pet).toBeUndefined();
+        expect(g.near()?.pet).not.toBe('lodge');
       }
     }
     g.enterYard();
     steps(g, 20);
-    expect(g.near()?.pet).toBeUndefined();
+    expect(g.near()?.pet).not.toBe('lodge');
   });
 });
 

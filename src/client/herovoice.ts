@@ -43,9 +43,10 @@ export function createHeroVoice(say: HeroSay) {
       // I'd rather it sounds more like the smite coming down"): the smite is heard as light striking (soundscape.ts).
       return 0;
     },
-    /** An idle playing on `h`, `t` s in: the Ranger laughs on the floor when the hound bowls them over. */
+    /** An idle or pet playing on `h`, `t` s in: the Ranger laughs on the floor when the hound bowls them over, or licks their face. */
     idle(h: Hero, id: string, t: number, now: number): number {
-      return id === 'r_tackle' && t > 1.4 && t < 2.2 ? speak(h, 'laugh', now) : 0;
+      // (And when it hops up at a pet to lick their face: petting.ts.)
+      return (id === 'r_tackle' && t > 1.4 && t < 2.2) || (id === 'pet_lick' && t > 1.1 && t < 1.8) ? speak(h, 'laugh', now) : 0;
     },
   };
 }

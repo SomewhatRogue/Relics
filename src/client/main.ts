@@ -1,6 +1,6 @@
 /** Relic: Wickhold, the Training Yard and runs. The rooms run here in the browser (solo is a party of one). */
 import { forceIdle, pokeIdle } from './idles';
-import { startPet } from './petting';
+import { petFrame, petReact, startPet, stopPet } from './petting';
 import { pointAt } from './houndname';
 import { touchedIdle } from './idlepoke';
 import { SIGNS, SIGN_KEY } from '../shared/signs';
@@ -192,6 +192,8 @@ const title = new Title(game, () => undefined, recovery);
 /** Chat (online): world and near in town, the party on a job. */
 const chat = new Chat(game, views, input.touch, () => panel.open || title.open);
 // Swore in chat: lightning out of the sky onto them (chat.ts stuns them).
+// A friend petting their hound (or Maeve's), as they told it (petword.ts): drawn here too.
+chat.onPet = (h, w) => void ((w.d === 'lodge' || WEAPONS[h.weapon].cls === 'RANGER') && startPet(h, w.d, performance.now() / 1000, w.r));
 chat.onStrike = (x, y) => {
   for (const dx of [-0.15, 0.1]) {
     const ev = { k: 'shock' as const, x: x + dx, y: y - 7, x2: x, y2: y };
@@ -236,8 +238,11 @@ const use = () => {
   pack.toggle(false);
   if (n.chest) input.open(n.chest);
   else if (n.door) game.enter(n.door);
-  // A hound in the lodge: kneel and pet it (petting.ts; this screen's own, nothing sent).
-  else if (n.pet) startPet(game.hero, n.pet, performance.now() / 1000);
+  // A hound to pet (petting.ts): kneel to it. The press that did it isn't "any input" to stop it, and
+  // whoever can see it is told once (petword.ts).
+  else if (n.pet) {
+    if (startPet(game.hero, n.pet, performance.now() / 1000)) touchedIdle(input.read()), chat.pet(n.pet, petReact(ME));
+  }
   else if (n.talk) {
     if (n.npc?.path) (talking = n.npc), (n.npc.heldAt = game.room.time);
     // Their greeting in the tongue (Tobin's panic if you carry hungry gear): townvoice.ts.
@@ -262,7 +267,7 @@ addEventListener('keydown', (e) => {
   // F at a drop: its card first, then F again takes it.
   if (k === 'f' && card.current >= 0) input.take(card.current);
   else if (k === 'f' && card.near >= 0 && game.mode === 'run' && !panel.open) card.open(card.near);
-  else if (k === 'f' && game.near()?.chest) use();
+  else if (k === 'f' && (game.near()?.chest || (game.mode === 'run' && game.near()?.pet))) use();
   else if ((k === 'e' || k === 'f') && (game.mode === 'town' || game.mode === 'yard')) use();
   if (k === 'escape' && panel.open && !game.result) panel.hide();
 });
@@ -404,11 +409,13 @@ function hud(now: number): void {
     const where = game.outside ? room.map.name.toUpperCase() : game.mode === 'town' ? TRACKW.town(game.world.day) : (game.drill?.line ?? 'TRAINING YARD');
     fold.render(full, smallLine(where), game.mode + where, now);
   }
-  const spot = game.near(), busy = panel.open || title.open;
+  // (A drop of yours at your feet comes before petting the hound: LOOK.)
+  const near = game.near(), spot = near?.pet && game.mode === 'run' && card.near >= 0 ? null : near, busy = panel.open || title.open;
   // Whoever you're near: their lines load before you talk to them (voiceplay.ts).
   if (spot?.talk) primeSpot(spot.talk, spot.arg ?? 0, CLASS_ORDER[spot.arg ?? 0]);
-  $('#prompt').hidden = !spot || busy;
-  if (spot) $('#prompt').textContent = (input.touch ? '' : spot?.chest ? 'F  ' : game.mode === 'run' ? '' : 'E  ') + (spot.door || spot.pet || !spot.talk || spot.talk === 'practice' ? spot.label : 'TALK: ' + spot.label);
+  // (While you're petting the hound, its prompt steps aside so you can see it.)
+  $('#prompt').hidden = !spot || busy || (!!spot.pet && !!petFrame(game.hero, now));
+  if (spot) $('#prompt').textContent = (input.touch ? '' : spot?.chest || (spot?.pet && game.mode === 'run') ? 'F  ' : game.mode === 'run' ? '' : 'E  ') + (spot.door || spot.pet || !spot.talk || spot.talk === 'practice' ? spot.label : 'TALK: ' + spot.label);
   // A drop at your feet, its card shut: the key that opens it (a phone has LOOK in the context slot).
   else if (!busy && !input.touch && game.mode === 'run' && card.near >= 0 && card.current < 0) ($('#prompt').hidden = false), ($('#prompt').textContent = 'F  LOOK');
   // A friend down at your feet: the key that gets them up.
@@ -471,7 +478,7 @@ function tick(t: number): void {
   // With a panel up, the hero stands still (and no press is spent).
   const live = input.read();
   // Any input stops your hero's idle at once (idles.ts): the stick, the aim, any press.
-  if (touchedIdle(live)) pokeIdle(ME);
+  if (touchedIdle(live)) pokeIdle(ME), stopPet(ME, performance.now() / 1000);
   // The mouse over a hound shows its name (houndname.ts).
   pointAt(!input.touch && (live.ax || live.ay) && game.hero ? [game.hero.x + live.ax, game.hero.y + live.ay] : null);
   if (panel.open || title.open || chat.typing || pack.open || away()) still ??= { ...live, mx: 0, my: 0, attack: false, block: false };
@@ -672,7 +679,7 @@ if (input.touch) document.body.classList.add('touch');
 // Test hooks: read the fight as data, never as pixels.
 const w = window as unknown as Record<string, unknown>;
 w.__fullForTest = fullForTest;
-w.__town = () => ({ dozing: !!townfolk?.dozing, open: !!townfolk?.open, count: townfolk?.count ?? 0, rtt: townfolk?.rtt ?? 0, here: townfolk?.here(game.room.map.name).map((h) => ({ name: h.tag, x: h.x, y: h.y, park: parkOf(h) })) ?? [], sends: townfolk?.sends ?? 0 });
+w.__town = () => ({ dozing: !!townfolk?.dozing, open: !!townfolk?.open, count: townfolk?.count ?? 0, rtt: townfolk?.rtt ?? 0, here: townfolk?.here(game.room.map.name).map((h) => ({ name: h.tag, x: h.x, y: h.y, park: parkOf(h), pet: petFrame(h, performance.now() / 1000)?.r ?? null })) ?? [], sends: townfolk?.sends ?? 0 });
 w.__GAME_STATE__ = () => ({ mode: game.mode, wood: game.wood ? { wake: game.wood.wake, said: game.wood.said, stage: game.wood.stage, hold: game.wood.hold } : null, inside: game.outside ? game.room.map.name : null, title: title.open, time: game.room.time, hero: { ...game.hero }, enemies: game.room.enemies.map((e) => ({ ...e })), guards, run: game.run, profile: game.profile, world: game.world });
 w.render_game_to_text = () => `${game.mode} t=${game.room.time.toFixed(1)} hero ${game.hero.act} hp ${game.hero.hp} st ${Math.round(game.hero.stamina)} | ` + game.room.enemies.map((e) => `${e.kind} ${e.act} hp ${e.hp}${e.attack ? ' ' + e.attack.kind + ' ' + e.attack.t.toFixed(2) : ''}`).join(' | ');
 Object.defineProperty(w, '__room', { get: () => game.room });
@@ -700,7 +707,9 @@ w.__openTree = () => openTree(game, panel);
 w.__pastime = { fish: () => openFishing(game, panel), range: () => openRange(game, panel),
   arm: (foe = 'drunk', bet = 0) => openArm(game, panel, armFoe(foe), bet), knives: (bet = 0) => openKnives(game, panel, bet),
   anvil: () => { const it = game.profile.arms[game.profile.weapon] ?? game.profile.armor; const up = it && game.levelUp(it); return up ? openAnvil(game, panel, up) : null; } };
-w.__idles = { force: (id: string) => forceIdle(game.hero, id as never, performance.now() / 1000), pet: (dog: 'own' | 'lodge') => startPet(game.hero, dog, performance.now() / 1000) };
+w.__idles = { force: (id: string) => forceIdle(game.hero, id as never, performance.now() / 1000), pet: (dog: 'own' | 'lodge') => startPet(game.hero, dog, performance.now() / 1000) && (chat.pet(dog, petReact(ME)), true), petting: () => petFrame(game.hero, performance.now() / 1000) };
+// Whoever's petting a hound on this screen now, and how it's taking it (petting.ts; the online scripts).
+w.__pets = () => game.room.heroes.map((h) => ({ id: h.id, name: h.tag ?? h.id, pet: petFrame(h, performance.now() / 1000)?.r ?? null })).filter((x) => x.pet);
 w.__openSpot = (id: string, arg = 0, key = '') => openSpot(id as never, game, panel, arg, key);
 // A job on a village street (houses to go into), for the party tests to set out on.
 // A job house's kindling spot (scripts/houseburn.cjs).

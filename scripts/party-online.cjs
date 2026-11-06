@@ -204,6 +204,29 @@ async function guestFeel(kyle, sam, step) {
     report.feel = await guestFeel(kyle, sam, step);
     await kyle.page.screenshot({ path: path.join(ROOT, 'shots/party-run-laptop.png') });
     await sam.page.screenshot({ path: path.join(ROOT, 'shots/party-run-phone.png') });
+    // Sam (a Ranger, on his phone) pets his hound on the job (client/petting.ts): with nothing awake
+    // near, PET on his context button; one word over the party's chat room; Kyle sees it.
+    require('fs').mkdirSync(path.join(ROOT, 'shots/pet'), { recursive: true });
+    await kyle.page.evaluate(() => { for (const e of window.__game.room.enemies) Object.assign(e, { hp: 0, act: 'dead', actT: 0, actDur: 99, respawns: false }); });
+    // (A few steps up off the way in, so the shot shows him clear of the buttons.)
+    await sam.page.keyboard.down('w');
+    await wait(700);
+    await sam.page.keyboard.up('w');
+    await wait(2500);
+    step('Sam has PET on his context button on the job', await sam.page.waitForFunction(() => window.__game.near()?.pet === 'own' && !document.querySelector('.tb.use').hidden && document.querySelector('.tb.use').textContent.includes('PET'), null, { timeout: 6000 }).then(() => true, () => false));
+    await sam.page.tap('.tb.use');
+    const knelt = await until(sam, () => !!window.__idles.petting(), null, 2000);
+    const why = knelt ? '' : await sam.page.evaluate(async () => {
+      const h = window.__game.hero, out = { near: window.__game.near(), act: h.act, moving: h.moving, look: window.__loot.near, again: window.__idles.pet('own'), seen: [] };
+      for (let i = 0; i < 6; i++) out.seen.push([!!window.__idles.petting(), h.x.toFixed(3), h.y.toFixed(3), h.fx.toFixed(2), h.act, h.moving]), await new Promise((r) => setTimeout(r, 60));
+      return JSON.stringify(out);
+    });
+    step(`Sam kneels to his hound${why}`, knelt);
+    step("Kyle sees Sam petting his hound", await until(kyle, () => window.__pets().some((p) => p.name === 'SAM'), null, 3000));
+    await wait(600);
+    await sam.page.screenshot({ path: path.join(ROOT, 'shots/pet/job-pet-phone.png') });
+    await kyle.page.screenshot({ path: path.join(ROOT, 'shots/pet/job-pet-friend-laptop.png') });
+    await wait(3000);
     // Through the job: each room cleared, the whole party in the way out, on to the next; Sam follows.
     const rooms = await kyle.page.evaluate(() => window.__game.run.job.rooms);
     const samGold = await sam.page.evaluate(() => window.__game.profile.gold);

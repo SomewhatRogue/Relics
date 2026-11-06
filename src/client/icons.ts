@@ -39,6 +39,8 @@ export const ICONS: Record<string, Grid> = {
   enter: ['...BBBBBB...', '..BbbbbbbB..', '.BbbbBbbbbB.', '.BbbbBbbbbB.', '.BbbbBbbbbB.', '.BbbbBbbybB.', '.BbbbBbbbbB.', '.BbbbBbbbbB.', '.BbbbBbbbbB.', '.BBBBBBBBBB.', 'oooooooooooo', '............'],
   use: ['....h.......', '....h.......', '....h.......', '....hhh.h...', '..h.hhhhhh..', '..hhhhhhhh..', '..hhhhhhhh..', '...hhhhhhh..', '...hhhhhh...', '....hhhhh...', '....HHHH....', '............'],
   // Small marks: hearts, coin, a friend fallen, and the statuses.
+  // A paw: PET, a Ranger's own hound (petting.ts).
+  pet: ['............', '...hh..hh...', '...hh..hh...', 'hh........hh', 'hh..hhhh..hh', '...hhhhhh...', '..hhhhhhhh..', '..hhhhhhhh..', '..hhhhhhhh..', '...hhhhhh...', '....HHHH....', '............'],
   heart: ['.rr.rr.', 'rWrrrrr', 'rrrrrrr', '.rrrrr.', '..rrr..', '...r...'],
   hollow: ['.oo.oo.', 'o..o..o', 'o.....o', '.o...o.', '..o.o..', '...o...'],
   coin: ['..yyy..', '.yYYyy.', 'yYyyyyB', 'yYyyyyB', 'yyyyyyB', '.yyyyB.', '..BBB..'],

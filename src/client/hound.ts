@@ -22,9 +22,9 @@ import { makeSprite, type Sprite } from './sprites';
 /**
  * How a hound looks while it plays or is petted (idlehound.ts): its tail going, sitting, a stick in its
  * mouth, its head down to the ground, its tongue out, leaning in a pixel, up off the ground (pixels),
- * running (and how), a play bow.
+ * running (and how), a play bow, rolled over on its back for a belly rub.
  */
-export interface Mood { wag?: boolean; sit?: boolean; stick?: boolean; headDown?: boolean; happy?: boolean; lick?: boolean; lean?: number; lift?: number; moving?: boolean; gait?: Gait; bow?: boolean }
+export interface Mood { belly?: boolean; wag?: boolean; sit?: boolean; stick?: boolean; headDown?: boolean; happy?: boolean; lick?: boolean; lean?: number; lift?: number; moving?: boolean; gait?: Gait; bow?: boolean }
 
 /** How to draw one: its mood, facing, lying, which hound it is, the name over it (or none), a fixed pose (look sheets). */
 export interface HoundDraw { mood?: Mood; fx?: number; down?: boolean; look?: HoundLook; name?: string; pose?: [PoseName, number]; seed?: number }
@@ -51,6 +51,7 @@ function choose(c: Ctx, d: Hound, o: HoundDraw, down: boolean): Pose {
   if (m) houndBusy(d, now, seed);
   if (o.pose) return poseOf(o.pose[0], o.pose[1], wag);
   if (down) return poseOf('down', 0, m?.wag !== undefined ? wag : 0);
+  if (m?.belly) return poseOf('belly', Math.floor(now * 3), wag);
   if (d.state === 'fled') return gaitPose('run', true);
   if (d.state === 'bite') {
     if (d.pin) return poseOf('latch', Math.floor(now * 8));
