@@ -2,6 +2,148 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-05: the join storm on the Florida night, a deaf instance healed, and smoother friends (Kyle; Claude Opus 5.5)
+
+Kyle (San Francisco) joined two friends in Florida (LIACOR led): "I kept losing connection, and lag was kinda
+rough in general." The production logs (05:20 to 05:31 UTC on Nov 6, the evening of Nov 5 in California):
+
+- **The leader's instance was deaf to the job's room all night.** At 05:20:57.128 Kyle's first socket to
+  `PICWGD6HX` landed on instance `69845e` and logged `join` but never `decide`: the relay was waiting on its
+  SUBSCRIBE, which Redis never answered (the instance's subscriber connection had gone half-open; GET and
+  PUBLISH on the other connection still worked: the leader's `decide` 4 ms after its `join`). The room's set
+  was already made, so the leader and the third friend joined it without subscribing. Everyone was on
+  `69845e`, so it played; but that instance never heard the room's channel again. Its meter line at 05:27:56:
+  `pub 20, kept 11,216`: every message stayed home for five minutes.
+- **Then Kyle's 4-minute swap moved him** (05:25:02.199, to `6n38a3`). Nothing from the leader could reach him
+  now. Five seconds of silence and his page rejoined (`coop.ts` REJOIN); each rejoin reset the hops, and each
+  socket landing away from the leader hopped again at once, so every 5 s came four joins within 0.3 s (one on
+  `6n38a3`, three on `6o09e6`), each socket closed 10 s later (`gone newest:false`), so eight or more open at once,
+  for 80 s until the job was lost, plus one try at taking the job on (05:25:16, refused: the leader was fine). No errors were logged.
+- **A third bug on the way:** a player's last socket leaving a room as another arrives could leave the room
+  unsubscribed (the UNSUBSCRIBE landing after the newcomer's SUBSCRIBE), or subscribed twice (each message
+  delivered twice).
+
+**The fix, server** (`api/_subs.ts`, `api/_relay.ts`, `api/_backends.ts`):
+- A SUBSCRIBE not answered in 2.5 s means the subscriber connection is dead: the relay opens a fresh one
+  (`bus.reset`) and subscribes again to every room it has players in, then says `here` in each so the
+  others answer. A player never waits on it longer than that.
+- Each instance hears its own `here` come back on the room's channel (free: it goes out anyway). Not back
+  in 5 s, and the connection is reset the same way. At most one reset in 10 s.
+- Subscribing and unsubscribing a room go one at a time, in order; a room is only unsubscribed (and `away`
+  said) if nobody's in it by then; one listener per room, so a double subscription can't deliver twice.
+
+**The fix, client** (`src/client/relay.ts`, `backoff.ts`, `coop.ts`, `game.ts`):
+- One socket per room and player: a second RelaySocket for the same room closes the first; a page holds its
+  current connection and, during a swap, the one it replaces, never more; the old one closes the moment the
+  new one talks (it used to wait for its own next message, or 10 s).
+- Never more than one connection opening: a rejoin while one is opening is dropped; one asked for a moment
+  after the last opened waits out a backoff. Failures back off 0.25 to 15 s, doubling, half of each wait
+  jittered; a connection that stayed up 30 s starts the count over.
+- Hops (to land beside the leader): one at a time, about 1.5 s apart, three in each 4-minute rotation; a
+  rejoin no longer hands out fresh ones.
+- Rejoin when the leader's quiet: 10 s before the first whole room (a leader across the country, a slow
+  page), 5 s after; each rejoin in a row waits twice as long, to 30 s, jittered; hearing the leader starts it over.
+- Starting a job (leading or following) closes any job socket still open from before.
+- The Come Bye rules stand: heartbeat every 4 s (it now also times the trip to the relay, `rtt`), a swap
+  every 4 minutes (new socket first), only the newest connection says goodbye, joiners never claim.
+
+**Lag** (`src/client/playout.ts`). The path for a split party: Kyle to `sfo1` (about 10 ms), Redis (1 ms), the
+leader's instance, out to Florida (about 70 to 85 ms through the `iad1` edge), and back the same way, plus up to
+0.1 s at each relay waiting for its batch (a button skips it), plus the leader's send every 0.05 s. Kyle's own
+hero is already predicted (walks at once); others and goblins came in pairs a tenth apart when split, so each
+pair drew its second patch at once and then stood still. Now a friend's page plays the leader's patches at the
+pace they were made: each waits only as much as it came early against the last two seconds, never over 0.1 s.
+Hits and sounds in a patch don't wait. Inputs: a button at once (urgent), the stick at most 10 a second; left as
+they were. The split batch stays 0.1 s (Kyle wants low lag).
+
+**Measured** (`scripts/florida-online.cjs`: real redis-server, the two local relay instances, the leader 70 ms
+away each way on instance 1, whose subscriber connection is half-open for job rooms as `69845e`'s was, Kyle in
+with them at first and every later connection on instance 0; 60 s of both walking; headless Chromium, so
+low frame rates):
+
+| | Before | After |
+|---|---|---|
+| Kyle's job joins, first 30 s after setting out | 25 (at most 9 sockets open; never got in; job lost at 35 s) | 1 (at most 3 open: town, chat, job) |
+| Setting out to Kyle in the leader's room | never | 4.4 s (2.5 of it the dead SUBSCRIBE) |
+| The connection unhealable (`NORESET=1`) and Kyle always on the other instance: client alone | (as above) | 6 joins in 35 s, 3 open at once; can't get in, as expected |
+| Redis commands a minute | 18 (the leader's instance kept everything home) | 19 with the party together; 1,173 split, as Nov 5's 1,165: nothing new per message |
+| Leader drawn standing still while walking, on Kyle's screen, split (`PLAYOUT=0` is the old way) | 27.5% of frames | 11.3% |
+| Same, together on one instance | 13.4% | 9.3% |
+| Input to leader and back (Kyle's `trip`), split | 0.29 s | 0.37 s (the playout's ~50 ms included; hits and sounds don't wait) |
+
+The online scripts all pass (town, party, chat, lobby, exped, florida). `npm run test:stress` fails 17 of
+29 scenes, the same 17 on the untouched base commit (the LEAVE button not clickable, heroes stopped at 27.7 on
+the new maps: the atlas and UI merges, not the wire), so nothing here changed it.
+
+Unit tests: `tests/relaysocket.test.ts` (one socket per room; a deaf instance rejoined every 5 s for a minute
+opens at most 16 sockets, 2 at once: the old client opened 51; no second socket while one opens; backoff;
+the swap), `tests/relaysubs.test.ts` (a SUBSCRIBE never answered; a connection that answers but delivers
+nothing; a leaving player and an arriving one with a slow UNSUBSCRIBE: the old relay fails all three),
+`tests/playout.test.ts`. The local server (`scripts/online-server.ts`) gained `BUS_LAG_MS`, `DEAF`/`NORESET`,
+`FAR_MS` and the `/api/room/f1` route.
+
+**The swarm on the wire** (Kyle: the lag was worst on the big expedition map, with lots of goblins on screen).
+Measured in Node (`scripts/bigmap/swarm.ts`: the Barrowfields, a leader and three friends together, N goblins
+awake on them and kept up, each friend's messages exactly as `bigsend.ts` makes them, at the leader's pace of
+about 17 a second here). What filled them: a goblin's blow in progress, 56 to 61% of every byte. Its own clock
+`t` ticked every tick, so the whole blow (twenty fields) went again in every patch for every goblin swinging,
+and again when `done` flipped as it landed. Now (`client/interest.ts`, for every room, not only big ones):
+
+- the blow goes with `t0`, when it began, and a friend works `t` out (`loud`), as a goblin's act clock already did;
+- what a blow does when it lands (damage, knockback, recovery, its target, `done`) stays the leader's;
+- `smokedUntil` (refreshed every tick in smoke, read only by the leader's room) stays home;
+- facing to a tenth; knockback to a tenth and none under 1 (the long tail of a slide; dust and tumbles look at 1.5 up);
+- friends' periodic whole rooms go at least a second apart (they'd all started together, so every 4 s three
+  40 KB fulls left the leader at once), and a friend who needs one now still gets it at once;
+- the whole-job save (37 to 80 KB on an expedition, in parts) goes to the friend first in line to take the job
+  on every 2 s and to everyone every 8 (it went to everyone every 2 s, and sat ahead of their next patch), and
+  never in a frame that sends a patch (it waits up to 0.2 s for a frame without one; on a slow page, where every
+  frame has one, the patch waits a frame instead: the first version waited forever there, and stress scene 7,
+  a leader reloading, came back to no save of the job).
+
+| Awake on the party (in a friend's ring; on a phone screen) | Bytes a message, mean / p95: before | after | KB/s to each friend: before | after |
+|---|---|---|---|---|
+| 40 (66; 36) | 7,260 / 10,175 | 3,836 / 7,660 | 122.5 | 64.6 |
+| 50 (69; 42) | 8,571 / 12,180 | 4,669 / 8,899 | 146.9 | 79.7 |
+| 60 (72; 55) | 9,786 / 14,982 | 5,617 / 11,461 | 167.7 | 96.3 |
+
+All three friends together, the leader's upload at 60 awake went from 503 to 289 KB/s (about 4 to 2.3 Mbit/s),
+before the saves (now about a third of what they were for friends second and third in line). Not done, as the
+numbers didn't call for it: a narrower ring or a byte budget dropping far idle goblins (the 17 or so in the ring
+but off a phone screen are mostly still, and a still goblin costs nothing in a patch); the send rate is as it was
+(every 0.05 s from the leader, 0.1 s batches between split instances). The next big cut, if it's needed: friends
+standing together share one message (now each gets their own from the same goblins, three times the upload).
+Tests: `tests/swarmsend.test.ts`.
+
+**Redis is beside the functions.** The live logs show a guest's `join` to `decide` (one GET) in 2 ms and a
+host's (two or three commands) in 4 ms: Redis is in `sfo1` with them (across the country is 60 ms or more a
+trip). Each instance now logs `{ev: 'inst', redisMs, region}` from its first command, so it's on record every
+deploy, and `decide` lines carry `far: 1` when a friend lands away from the leader (that night: every one of
+Kyle's joins after his swap, about 65 between 05:25:02 and 05:26:23, when the job was lost and he was back
+in town). Upstash is billed pay as you go now (4 cents this month so far).
+The Outbox still holds a split party's ordinary messages up to 0.1 s (`api/_outbox.ts`), by Kyle's choice; a
+button press, a join, a leave, a new host and `here` go at once.
+
+**Not built: a leader whose tab is hidden.** Out of sight, the leader's room runs on `setInterval(100)`
+(`main.ts`), which Chrome holds to about once a second for a hidden tab (and once a minute after five minutes),
+so friends get about a patch a second; a phone that freezes the page stops it outright. Proposed: hidden over
+2 to 3 s with friends in the job, the leader hands the job to the friend first in line (`handOver`: the whole
+job to everyone, then goodbye) and follows them when back (`stepDown` already does that half). Smaller, for
+desktop only: drive the hidden ticks from a Worker's timer, which Chrome doesn't hold back the same way. Either
+changes what stress scene 4 ("the leader's page hidden 30 s": the room runs on, nobody takes over) expects, so
+it's Kyle's call.
+
+**Regions: leave `vercel.json` at `sfo1`.** Redis is in `sfo1` and can't move. Functions in `iad1` (or `cle1`)
+would put every Redis command across the country (about 65 ms each way), so a split party's every patch would
+cross it twice more, and the coast-to-coast trip between Kyle and a Florida leader is about the same either
+way (the relay sits between them wherever it is). Both regions would put every coast-to-coast party on two
+instances by design: split, about 70K commands an hour, and each Florida message through Redis in `sfo1` anyway.
+**Who should lead:** with the relay in `sfo1`, every friend's trip is their way to `sfo1` plus the leader's. On
+the Florida night Kyle leading would have given each Florida friend about 80 ms one way and Kyle none; LIACOR
+leading gave Kyle about 80 and the other Florida friend about 140 (Florida to San Francisco and back). So the
+best leader is the player nearest the relay (smallest `rtt`). Not built: it changes who leads the party (the
+party card), so it's Kyle's call; `RelaySocket.rtt` is there for it.
+
 ## 2026-11-05: the atlas, slices 0 and 1: fewer doors with bigger insides, and Hangman's Wood as the first curated zone (Kyle; Claude Opus 5.5)
 
 Kyle approved `docs/plans/atlas.md` today, with notes on top: "each place has a story, and it should have smaller

@@ -9,6 +9,12 @@
  * Quiet clocks: a goblin's `cooldown` is never drawn, so it isn't sent; its `actT` ticks every tick, so
  * it goes as `a0`, the room time its act began, which only changes when the act does (the friend works
  * actT out as t - a0: `loud`). Measured, these two were half of every patch (DECISIONS 2026-11-03).
+ * A blow in progress (`attack`) the same: its own clock `t` ticked every tick, and the whole blow (some
+ * twenty fields) went again in every patch for every goblin swinging; it goes with `t0`, when it began,
+ * instead. Measured with 40 to 60 goblins on a party, the blow alone was 56 to 61% of every patch
+ * (scripts/bigmap/swarm.ts, DECISIONS 2026-11-05), and of the blow only what's drawn goes (its damage,
+ * knockback, recovery, target and `done` are the leader's). Facing and knockback go to a tenth (and a
+ * knockback under 1, the long tail of a slide, as none): they're drawn, never judged here.
  */
 import type { ArenaRoom } from '../sim/room';
 import type { FightEvent } from '../sim/types';
@@ -42,19 +48,39 @@ export function stateFor(room: ArenaRoom, id: string, radius = INTEREST.radius):
   return out as State;
 }
 
-/** Goblins' clocks as `a0` (see above). */
+const tenth = (v: unknown) => (typeof v === 'number' ? Math.round(v * 10) / 10 : v);
+/** Knockback: a tenth, and nothing under 1 (a slide's dust and a tumble look at 1.5 and up: dust.ts, foepose.ts). */
+const shove = (v: unknown) => (typeof v === 'number' && Math.abs(v) < 1 ? 0 : tenth(v));
+const when = (t: number, ago: number) => Math.round((t - ago) * 30) / 30;
+
+/** Goblins' clocks as `a0` and their blows' as `t0`, facing and knockback to a tenth (see above). */
 export function quiet(s: State, t: number): State {
   const enemies = (s.enemies ?? []).map((e) => {
     // (Where it was put, `home`, is the room's alone: a patrol moves it as it walks.)
-    const { cooldown: _c, home: _h, actT, ...rest } = e as Ent & { actT: number; cooldown: number };
-    return { ...rest, a0: Math.round((t - actT) * 30) / 30 };
+    // (`smokedUntil` is refreshed every tick a goblin stands in smoke, and only the leader's room reads it.)
+    const { cooldown: _c, home: _h, smokedUntil: _s, actT, attack, ...rest } = e as Ent & { actT: number; cooldown: number; attack?: (Ent & { t: number }) | null };
+    const out: Ent = { ...rest, a0: when(t, actT), fx: tenth(e.fx), fy: tenth(e.fy), kvx: shove(e.kvx), kvy: shove(e.kvy) };
+    if (attack !== undefined) {
+      if (!attack) out.attack = attack;
+      else {
+        // (What the blow does when it lands, and to whom, is the leader's alone: never drawn. `done` flips
+        // as it lands, which sent the whole blow again: a friend reads t against windup instead.)
+        const { t: at, dmg: _d, knock: _k, recover: _r, aimed: _a, missed: _m, hit: _h, done: _n, ...blow } = attack;
+        out.attack = { ...blow, t0: when(t, at) };
+      }
+    }
+    return out;
   });
   return { ...s, enemies };
 }
 
-/** A friend's end: each goblin's actT back from its a0. */
+/** A friend's end: each goblin's actT back from its a0, and its blow's clock from its t0. */
 export function loud(enemies: Ent[], t: number): void {
-  for (const e of enemies) if (typeof e.a0 === 'number') e.actT = Math.max(0, t - e.a0);
+  for (const e of enemies) {
+    if (typeof e.a0 === 'number') e.actT = Math.max(0, t - e.a0);
+    const a = e.attack as (Ent & { t0?: number }) | null | undefined;
+    if (a && typeof a.t0 === 'number') a.t = Math.max(0, t - a.t0);
+  }
 }
 
 /** The events a friend would see or hear: near them (a wider ring, for sounds a little off screen), and the ones everyone hears. */

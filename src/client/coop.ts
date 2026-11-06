@@ -36,13 +36,20 @@ import { keepJob } from './session';
 import { OwedBook } from './owed';
 import type { DoorMark } from './jobrooms';
 import { BigSend } from './bigsend';
-import { isBig, loud, mergeBlocks } from './interest';
+import { isBig, loud, mergeBlocks, quiet } from './interest';
 import { expedPlan } from '../shared/expedmap';
 import { themeUnder } from '../shared/expedsky';
 import type { ExpedState } from '../sim/exped';
 import { asGuest } from './asguest';
+import { rejoinAfter } from './backoff';
+import { Playout } from './playout';
 
-const AWAY = 5, REJOIN = 5, BYE_WAIT = 2.5, SEND_EVERY = 0.05, FULL_EVERY = 4, GRACE = 60, LOST = 20, KEEP = 2, SAVE_EVERY = 2, TAKE = 9, TAKE_NEXT = 5;
+/** Everyone gets the whole job this often; the friend first in line every SAVE_EVERY. */
+const SAVE_ALL = 8;
+/** A save due waits at most this long (s) for a frame without a patch. */
+const SAVE_WAIT = 0.2;
+const AWAY = 5, BYE_WAIT = 2.5, SEND_EVERY = 0.05, FULL_EVERY = 4, GRACE = 60, LOST = 20, KEEP = 2, SAVE_EVERY = 2, TAKE = 9, TAKE_NEXT = 5;
+const NO_PLAYOUT = typeof location !== 'undefined' && new URLSearchParams(location.search).get('playout') === '0';
 /** A friend's stick and aim go to the leader at most this often (seconds); a button at once. */
 const STICK_EVERY = 0.1;
 /** An Intent's buttons (everything but the stick and aim), to tell a press from a nudge of the stick. */
@@ -101,6 +108,7 @@ export class CoopHost {
   private big = new BigSend();
 
   private savedAt = -99;
+  private savedAllAt = -99;
   /** What the job owes each of us, kept on the server as it goes (owed.ts). */
   private book: OwedBook;
 
@@ -153,13 +161,25 @@ export class CoopHost {
     this.game.stepped = new Map();
     for (const [id, f] of this.friends) if (!f.gone && now - f.heard > GRACE) (f.gone = true), this.game.dropFriend(id);
     this.book.frame(now, this.game.run, this.still());
-    // The whole job, now and then, for a friend to take on if this browser goes.
+    // The whole job, now and then, for a friend to take on if this browser goes: every SAVE_EVERY to the
+    // friend first in line (the one who'd take it on: CoopGuest.shouldTake's order), everyone every
+    // SAVE_ALL. An expedition's is 37 to 80 KB in parts, and every friend getting it every 2 s held their
+    // next patch behind it. Never in the same frame as a patch: it waits for a frame without one, and a
+    // slow page (a patch every frame) sends it and holds that frame's patch to the next.
     if (now - this.savedAt > SAVE_EVERY && this.company) {
-      this.savedAt = now;
-      const save = this.saved();
-      this.sock.send('*', { save });
-      // (Kept here too, for this page to lead again after a reload.)
-      keepJob(save);
+      const patchDue = now - this.sentAt >= SEND_EVERY;
+      if (!patchDue || now - this.savedAt > SAVE_EVERY + SAVE_WAIT) {
+        this.savedAt = now;
+        const save = this.saved(), all = now - this.savedAllAt > SAVE_ALL;
+        if (all) (this.savedAllAt = now), this.sock.send('*', { save });
+        else {
+          const first = [...this.friends.keys()].filter((id) => !this.away(id)).sort()[0];
+          if (first) this.sock.send(first, { save });
+        }
+        // (Kept here too, for this page to lead again after a reload.)
+        keepJob(save);
+        if (patchDue) return;
+      }
     }
     if (now - this.sentAt < SEND_EVERY) return;
     const g = this.game, groups = new Map<ArenaRoom, string[]>();
@@ -184,7 +204,8 @@ export class CoopHost {
       const k = g.keyOf(room), st = this.sending.get(room) ?? { enc: new Encoder(), fullAt: -99, said: {} };
       this.sending.set(room, st);
       const full = now - st.fullAt > FULL_EVERY || ids.some((id) => this.friends.get(id)!.fresh || this.sentKey.get(id) !== k);
-      const p = st.enc.encode(stateOf(room), full), out = !room.indoors;
+      // (Quiet clocks, as a big room's: a goblin's act and its blow go as when they began, interest.ts.)
+      const p = st.enc.encode(quiet(stateOf(room), room.time), full), out = !room.indoors;
       // The run, the banner, names and the houses only when they change (or with a whole room), as a
       // big room sends them (bigsend.ts): a friend keeps what it last heard.
       const slow: Record<string, unknown> = {};
@@ -245,6 +266,9 @@ export class CoopHost {
     setTimeout(() => s.close(), 1500);
   }
 }
+
+/** A patch from the leader, as a friend reads it (ids swapped: theirs `@lead`, mine `me`). */
+type Body = { p: Patch; f: number; k: number; map?: ArenaRoom['map']; ms?: number; blaze?: ArenaRoom['map']['blaze']; xs?: ExpedState; t: number; x: number; in?: number; hc?: CoopGuest['houses']; dm?: DoorMark[]; run: Run | null; goal: string; ev: FightEvent[]; names: Record<string, string>; acks?: Record<string, number> };
 
 export class CoopGuest {
   room: ArenaRoom | null = null;
@@ -307,6 +331,8 @@ export class CoopGuest {
     if (m.t === 'hosted' && m.id !== this.myId) return this.follow(m.id), this.hello();
     if (m.t !== 'msg' || m.from !== this.lead) return;
     this.heardLead = this.now;
+    // (Heard: the next time the leader goes quiet, a rejoin starts from the first wait again.)
+    if (this.rejoins) (this.rejoins = 0), (this.rejoinWait = -1);
     const d = m.d as { s?: string; end?: { won: boolean; run: Run }; save?: string; bye?: number };
     // The leader's headed home and left the job to us: as good as gone, so whoever's first takes it
     // on in a moment (once their goodbye has freed the room).
@@ -316,12 +342,23 @@ export class CoopGuest {
     if (typeof d.save === 'string') return void (this.save = d.save);
     if (typeof d.s !== 'string') return;
     // The leader's own hero is `me` in their room; in mine, I am. (Ids are quoted whole, so only ids change.)
-    let body: { p: Patch; f: number; k: number; map?: ArenaRoom['map']; ms?: number; blaze?: ArenaRoom['map']['blaze']; xs?: ExpedState; t: number; x: number; in?: number; hc?: CoopGuest['houses']; dm?: DoorMark[]; run: Run | null; goal: string; ev: FightEvent[]; names: Record<string, string>; acks?: Record<string, number> };
+    let body: Body;
     try {
       body = JSON.parse(d.s.split('"me"').join('"@lead"').split(`"${this.myId}"`).join('"me"'));
     } catch {
       return;
     }
+    // Played at the pace the leader made it, not the pace it came (playout.ts): applied in frame().
+    // (`?playout=0`: applied as it comes, as before: the lag harness compares the two.)
+    if (NO_PLAYOUT) return this.apply(body);
+    // (Its events, hits and sounds, don't wait: a blow lands on my screen as soon as it's heard.)
+    // (Only for the room I have: a patch of another goes whole, in its turn.)
+    if (body.ev?.length && this.room && body.k === this.key) this.events.push(...body.ev), (body.ev = []);
+    this.playout.push(body, Number(body.t) || 0, body.k, performance.now() / 1000);
+  }
+
+  /** A patch from the leader, its turn come: into my copy of their room. */
+  private apply(body: Body): void {
     // (Only a whole room to start from: a new leader's changes mean nothing without it.)
     if (!body.f && (!this.room || this.key < 0 || body.k !== this.key)) return;
     if (body.f && (body.k !== this.key || !this.room) && (body.map || (body.ms && body.run))) {
@@ -352,8 +389,8 @@ export class CoopGuest {
     const r = room as unknown as Record<string, unknown>;
     for (const [c, list] of Object.entries(s)) if (c === 'blocks') room.map.blocks = this.base ? mergeBlocks(this.base, list as Record<string, unknown>[], this.known) : (list as typeof room.map.blocks);
     else r[c] = list;
-    // Quiet clocks: each goblin's act timer from when its act began (interest.ts).
-    if (this.base) loud(room.enemies as unknown as Record<string, unknown>[], body.t);
+    // Quiet clocks: each goblin's act timer, and its blow's, from when they began (interest.ts).
+    loud(room.enemies as unknown as Record<string, unknown>[], body.t);
     // My hero let go (I was away over a minute): it stays drawn where it was, and I say hello till
     // the leader brings it back (this copy is only drawn; the fight is the leader's).
     const mineNow = room.heroes.find((h) => h.id === 'me');
@@ -384,6 +421,7 @@ export class CoopGuest {
   /** Each frame: send my input (when it changes, and now and then), and draw between patches. */
   frame(now: number, intent: Intent): void {
     this.now = now;
+    for (const b of this.playout.due(now)) this.apply(b);
     const i = { ...intent, mx: r2(intent.mx), my: r2(intent.my), ax: r2(intent.ax), ay: r2(intent.ay) }, s = JSON.stringify(i), b = buttons(i);
     // A button at once (urgent); the stick and aim a few times a second; every KEEP s regardless (the
     // leader counts me as still here, and the trip there and back stays timed).
@@ -398,7 +436,14 @@ export class CoopGuest {
     // The leader quiet a while, though my own socket answers: connect afresh (the relay says again who
     // leads, maybe from another instance) before anyone thinks of taking the job on. (Seen live: a
     // friend whose socket got there before the leader's claim heard nothing, ever, on the one he had.)
-    if (this.quiet(now) > REJOIN && now - this.rejoinAt > REJOIN) (this.rejoinAt = now), this.sock.reconnect();
+    // Waiting for the first whole room, a leader across the country gets longer (REJOIN.welcome); then
+    // each rejoin in a row waits twice as long, jittered (backoff.ts): a relay instance gone deaf was
+    // rejoined every 5 s until the job was lost on 2026-11-05.
+    if (this.rejoinWait < 0) this.rejoinWait = rejoinAfter(this.rejoins, !!this.room);
+    if (this.quiet(now) > this.rejoinWait && now - this.rejoinAt > this.rejoinWait) {
+      (this.rejoinAt = now), this.rejoins++, (this.rejoinWait = -1);
+      this.sock.reconnect();
+    }
     if (this.room) (this.room as unknown as { acc: number }).acc = TICK * Math.min(1, (now - this.lastAt) / this.gap);
     this.predict(intent, now - (this.frameAt < 0 ? now : this.frameAt));
     this.frameAt = now;
@@ -406,6 +451,11 @@ export class CoopGuest {
 
   private frameAt = -1;
   private rejoinAt = -99;
+  /** The leader's patches, waiting their turn (playout.ts). */
+  private playout = new Playout<Body>();
+  /** Rejoins in a row without hearing the leader, and the wait before the next (-1: work it out). */
+  private rejoins = 0;
+  private rejoinWait = -1;
   private ack = -1;
   private trip = PREDICT.trip;
   /** My walking here, frame by frame, for the last second. */
@@ -441,6 +491,7 @@ export class CoopGuest {
 
   private follow(id: string): void {
     this.lead = id;
+    this.playout.clear();
     this.dec = new Decoder();
     this.key = -1;
     this.pred = this.server = null;

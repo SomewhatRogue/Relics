@@ -11,12 +11,19 @@ import { eventsFor, quiet, stateFor } from './interest';
 import { Encoder } from './snap';
 
 const FULL_EVERY = 4;
+/**
+ * Friends' periodic whole rooms (40 KB or so with a swarm about) go at least this far apart, so they
+ * don't all leave the leader in one moment (they'd all started together, as the job did). A friend
+ * who needs the room whole now (new, or just come in) gets it at once all the same.
+ */
+const FULL_GAP = 1;
 /** What's sent only when it changes. */
 const SLOW = new Set(['run', 'goal', 'names', 'hc', 'dm']);
 interface Per { enc: Encoder; fullAt: number; room: ArenaRoom | null; xs: string; said: Record<string, string> }
 
 export class BigSend {
   private per = new Map<string, Per>();
+  private fullAt = -99;
 
   /**
    * Friend `id`'s message for `room` (a JSON string, as CoopHost sends it) and whether it's whole.
@@ -25,7 +32,8 @@ export class BigSend {
   body(room: ArenaRoom, id: string, now: number, whole: boolean, common: Record<string, unknown>, ev: FightEvent[]): { s: string; full: boolean } {
     let st = this.per.get(id);
     if (!st || st.room !== room) this.per.set(id, (st = { enc: new Encoder(), fullAt: -99, room, xs: '', said: {} }));
-    const full = whole || now - st.fullAt > FULL_EVERY;
+    const full = whole || (now - st.fullAt > FULL_EVERY && now - this.fullAt >= FULL_GAP);
+    if (full && !whole) this.fullAt = now;
     const p = st.enc.encode(quiet(stateFor(room, id), room.time), full);
     const view = room.exped ? JSON.stringify(expedView(room.exped)) : '';
     const xs = full || view !== st.xs ? view : '';

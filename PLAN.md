@@ -119,6 +119,14 @@ in a puddle, in a bark apron, embers and smoke off the kiln-hot one); storm on t
 aproned one and frost on the hot one say WEAK and count (WEAK HITS n / 3), the wrong element says RESIST, and
 the way to the stream opens once they're down. Other classes' woods unchanged. Open: Hew's line and the how
 line through the lore keeper and line editor (DECISIONS 2026-11-05).
+**Joining across the country** (Claude Opus 5.5, 2026-11-05; Kyle in San Francisco joining two friends in
+Florida: "I kept losing connection, and lag was kinda rough"). Built; waiting on Kyle's play. *Done when*, with
+a friend leading from the other coast, Kyle sets out, is in the leader's room within a few seconds and stays
+in it (the relay logs show one `join` of his per job room, plus a swap every 4 minutes and at most three hops),
+and the leader and the goblins move smoothly on his screen. The cause, the fixes and the numbers in DECISIONS
+2026-11-05 ("the join storm"). Open: who should lead (the player nearest the relay, `RelaySocket.rtt`) is
+Kyle's call; functions stay in `sfo1` beside Redis. Answered from the Nov 4 entry below: on Vercel a hop from
+San Francisco didn't land beside a Florida leader that night (every try went to one of two other instances).
 **Online on a budget** (Claude Opus 5.5, 2026-11-04; Kyle's Upstash showed 345K of its 500K commands a month
 after a few sessions, and "How do I know if I hit the limit with friends?"). Built; waiting on Kyle's play.
 *Done when* a tab left in town costs next to nothing (silent alone and while still, out of the room after a

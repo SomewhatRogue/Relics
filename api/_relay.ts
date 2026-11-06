@@ -27,6 +27,7 @@ import { randomUUID } from 'node:crypto';
 import { guarded, type Backend } from './_backends.js';
 import { HERE_MS, Presence } from './_presence.js';
 import { Outbox, unbatch } from './_outbox.js';
+import { Subs } from './_subs.js';
 import { MONTH_LIMIT, Meter, isLimit, metered, monthKey, monthUsed } from './_meter.js';
 export { memoryBackend, redisBackend, type Backend, type Bus, type Store } from './_backends.js';
 
@@ -108,6 +109,8 @@ export class Relay {
   private outbox: Outbox;
   /** Until when the plan is used up (Upstash refused a command for its limit). */
   private fullUntil = 0;
+  /** The rooms' channels, kept subscribed through a dead subscriber connection (_subs.ts). */
+  readonly subs: Subs;
 
   constructor(backend: Backend, opts: { staleMs?: number; meter?: Meter; batchMs?: number } = {}) {
     this.staleMs = opts.staleMs ?? STALE_MS;
@@ -117,9 +120,13 @@ export class Relay {
     this.meter.onOver = () => this.trip();
     if (backend.shared) this.meter.start();
     this.b = metered(raw, this.meter);
+    this.subs = new Subs(this.b.bus, chan, (room) => this.rooms.has(room), (room, raw) => this.fromBus(room, raw), (room) => safe(this.send(room, { k: 'here', o: this.origin }), 'here'), log);
     this.outbox = new Outbox(() => this.origin, (room, text, n) => this.publish(room, text, n), opts.batchMs === undefined ? undefined : { ms: opts.batchMs, max: 192_000 });
+    // (Timed: the instance's first trip to Redis says how far away it is. Same region is a millisecond
+    // or two; across the country, 60 or more. The functions and Redis must sit together, REALTIME-REDIS-BUDGET.md 3f.)
+    const asked = Date.now();
     this.ready = this.b.store.incr('rl:inst').then(
-      (n) => void (this.origin = n.toString(36) + randomUUID().slice(0, 4)),
+      (n) => void ((this.origin = n.toString(36) + randomUUID().slice(0, 4)), log({ ev: 'inst', inst: this.origin, redisMs: Date.now() - asked, region: process.env.VERCEL_REGION ?? null })),
       () => void (this.origin = randomUUID().slice(0, 6) + process.hrtime.bigint().toString(36).slice(-4)),
     );
     // Each room this instance has players in says 'here' when it has said nothing else for a while.
@@ -127,10 +134,11 @@ export class Relay {
       const now = Date.now();
       if (this.full) return;
       for (const room of this.presence.due(now)) safe(this.send(room, { k: 'here', o: this.origin }), 'here');
+      this.subs.check(now);
     }, Math.min(1000, HERE_MS / 4));
     (beat as { unref?: () => void }).unref?.();
     const meter = setInterval(() => {
-      if (this.sent.pub || this.sent.kept) log({ ev: 'meter', inst: this.origin, rooms: this.rooms.size, ...this.sent, cmds: this.meter.total });
+      if (this.sent.pub || this.sent.kept) log({ ev: 'meter', inst: this.origin, rooms: this.rooms.size, ...this.sent, cmds: this.meter.total, resets: this.subs.resets });
       this.sent = { pub: 0, msgs: 0, kept: 0 };
     }, 5 * 60_000);
     (meter as { unref?: () => void }).unref?.();
@@ -170,14 +178,17 @@ export class Relay {
       await this.b.store.set(connKey(room, id), c.nonce, 3600);
       log({ ev: 'join', room, id: id.slice(0, 8), want, inst: this.origin });
       let set = this.rooms.get(room);
+      const first = !set;
       if (!set) {
         this.rooms.set(room, (set = new Set()));
         this.presence.joined(room, Date.now());
-        await this.b.bus.subscribe(chan(room), (raw) => this.fromBus(room, raw));
-        // Any other instance with players here answers, and from then on this room's messages reach them.
-        safe(this.send(room, { k: 'here', o: this.origin }), 'here');
       }
       set.add(c);
+      // (Never waits long: a subscriber connection that doesn't answer is reset, _subs.ts. Whoever comes
+      // next to a room still being subscribed waits for the same one.)
+      await this.subs.ensure(room);
+      // Any other instance with players here answers, and from then on this room's messages reach them.
+      if (first) safe(this.send(room, { k: 'here', o: this.origin }), 'here');
       this.tell(c, { t: 'info', shared: this.b.shared });
       await this.decide(c, want);
     } catch (e) {
@@ -236,11 +247,13 @@ export class Relay {
         holder = id;
       }
     } else if (holder && holder !== id && (await this.stale(room))) holder = null;
-    log({ ev: 'decide', room, id: id.slice(0, 8), want, holder: holder ? holder.slice(0, 8) : null });
-    if (holder === id) return this.becomeHost(c, !had);
     // `far`: the host is on another instance, so everything between them crosses Redis; the friend
-    // may connect again to try to land with them (relay.ts HOPS).
-    if (holder) return this.tell(c, { t: 'role', role: 'guest', host: holder, ...(this.hostHere(room, holder) ? {} : { far: 1 }) });
+    // may connect again to try to land with them (relay.ts HOPS). Logged, so the logs say how often a
+    // friend ends up apart from the leader after the hops.
+    const far = !!holder && holder !== id && !this.hostHere(room, holder);
+    log({ ev: 'decide', room, id: id.slice(0, 8), want, holder: holder ? holder.slice(0, 8) : null, ...(far ? { far: 1 } : {}) });
+    if (holder === id) return this.becomeHost(c, !had);
+    if (holder) return this.tell(c, { t: 'role', role: 'guest', host: holder, ...(far ? { far: 1 } : {}) });
     this.tell(c, { t: 'nohost' });
   }
 
@@ -318,6 +331,8 @@ export class Relay {
     // Hosts, leaves and the instances' own word always go out; messages only when someone elsewhere is here.
     if (env.k === 'msg' && !this.presence.shared(room, now)) return void this.sent.kept++;
     this.presence.sent(room, now, -1);
+    // Our own 'here' comes back to us on the room's channel: proof we still hear it (_subs.ts).
+    if (env.k === 'here' && env.o === this.origin) this.subs.expect(room, now);
     await this.outbox.push(room, JSON.stringify(env), urgent || env.k !== 'msg');
   }
 
@@ -330,7 +345,11 @@ export class Relay {
   }
 
   private fromBus(room: string, raw: string): void {
-    for (const env of unbatch(raw) as Envelope[]) this.fromOther(room, env);
+    for (const env of unbatch(raw) as Envelope[]) {
+      // (Anything of our own back on the channel proves we still hear it.)
+      if (env.o === this.origin) this.subs.heard(room);
+      this.fromOther(room, env);
+    }
   }
 
   private fromOther(room: string, env: Envelope): void {
@@ -376,13 +395,14 @@ export class Relay {
     if (set && !set.size && this.rooms.get(c.room) === set) {
       this.rooms.delete(c.room);
       this.presence.left(c.room);
-      // What still waited for the bus goes first, then nothing more for this room.
+      // What still waited for the bus goes first, then nothing more for this room (unless a player
+      // arrived meanwhile and it's theirs now).
       if (!this.full) await this.outbox.flush(c.room);
-      this.outbox.drop(c.room);
+      if (!this.rooms.has(c.room)) this.outbox.drop(c.room);
       if (this.full) return;
-      await this.b.bus.unsubscribe(chan(c.room));
-      // The others needn't send this instance anything more.
-      await this.b.bus.publish(chan(c.room), JSON.stringify({ k: 'away', o: this.origin }));
+      // Unsubscribed only if still nobody's here (a newcomer's subscription must stand), and only then
+      // do the others hear they needn't send this instance anything more.
+      if (await this.subs.release(c.room)) await this.b.bus.publish(chan(c.room), JSON.stringify({ k: 'away', o: this.origin }));
     }
   }
 }
