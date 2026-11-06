@@ -25,6 +25,18 @@ show the moment he presses, with their dust and whoosh, and never pull back; wal
 or wading never rubber-bands; a goblin's red fill and its body move as one; a dodge or block on time by his own
 screen saves him from a blow (within LAGCOMP.cap). Everything in DECISIONS 2026-11-06 ("the guest feel"). Open:
 the cap (0.15 s as planned; about 0.35 s makes every on-time press count at a real 150 ms each way), Kyle's call.
+**The second wave: three more affixes, and the Kegman, Pouncer and Gorger** (Claude Opus 5.5, 2026-11-06; the rest of
+`docs/plans/bosses.md` section 3's elites and meaty units). Built; waiting on Kyle's play. *Done when*, on his phone and
+laptop: an elite now and then comes Oil-soaked (a dark sheen; set alight it stands, flailing, and bursts a second later in
+a striped circle, its own pack in it), a Hornblower (a horn at its belt; at half health it stands and blows for 2 s, a ring
+filling and eyes showing at the room's edge on his screen where three small ones then run in from, unless he cuts it off
+with a charged blow, a perfect, a stun or by killing it) or Smouldering (embers; 1.2 s after it dies a striped circle
+round its body). From day 69 of the board, two days apart, the Kegman (its keg bursts where it falls, or where it stands
+once shot or set alight: shoot it in among its own and walk out), the Pouncer (a striped circle where he stood, then it
+lands and is stuck a second, then a red rake) and the Gorger (pulls the dead in and grows, three times at most: burn
+them, stand by it, or kill it first) are staged in their Barrowfields rooms (DRUMS, QUIET, SMOKE), then rare, then common.
+Everything in DECISIONS 2026-11-06 ("the second wave"); shots `node scripts/wave2-look.cjs`. Open: every new name through
+the lore keeper and line editor; the numbers once he's played; sounds for the fuse and the horn.
 **Elites, and the first new meaty goblins** (Claude Opus 5.5, 2026-11-06; Kyle: "things that take a few hits", "a mix
 of splatting and tactical", "harder kiting", "sometimes you just get swarmed"; `docs/plans/bosses.md` section 3 and
 rollout items 3 and 4). Built; waiting on Kyle's play. *Done when*, on his phone and laptop: from a job's second room
@@ -36,8 +48,8 @@ nothing, so he gets round it after its bash), the Swingle (a striped flail ring,
 the Forker (a long red jab that pushes him off; inside its tines it can't touch him) are staged in their Barrowfields
 rooms (DRUMS, SMOKE, CRIES), then rare there, then common anywhere as a fight or a room's closer. Everything in
 DECISIONS 2026-11-06 ("elites"); shots `node scripts/elites-look.cjs`. Open: every name through the lore keeper and
-line editor; Oil-soaked, Hornblower, Smouldering and the other three sorts (Kegman, Pouncer, Gorger); the numbers once
-he's played.
+line editor; the numbers once he's played. (Oil-soaked, Hornblower, Smouldering and the Kegman, Pouncer and Gorger: the
+second wave, above.)
 **Pacing, the first slice** (Claude Opus 5.5, 2026-11-05; Kyle: "swarms over other things, so AoE abilities are
 over-necessary", "mini bosses also work", "not necessarily more enemies if lots of players, but more health on
 enemies, and they hit harder", "a bit too easy to kite"; `docs/plans/bosses.md` section 3). Built; waiting on Kyle's

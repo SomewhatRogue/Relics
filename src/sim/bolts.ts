@@ -5,6 +5,7 @@
  * lands, takes every goblin near and draws them in, then bursts. A relic's blast throws every goblin
  * as hard whatever it weighs and knocks it down (sim/stuns.ts relicStun), and never touches a friend.
  */
+import { shotKeg } from './blast';
 import { shotAtDoor } from './doorwall';
 import { addPoise } from './poise';
 import { HUNGRY_FX } from './hungry';
@@ -147,6 +148,8 @@ function strike(w: World, b: Bolt, e: Enemy): boolean {
   // A Rogue's techniques on a backstab (sim/techrogue.ts).
   else if (back && by) backstabbed(by, e, w);
   perfectStrike(b, e, w.now, w.ev);
+  // A shot into a Kegman lights its keg (sim/blast.ts), killed by it or not.
+  if (board !== 'blocked') shotKeg(e, w.now, w.ev);
   if (dead || board === 'blocked') return board !== 'blocked';
   if (e.act !== 'pinned') shove(e, b.dx, b.dy, b.knock, e.weight);
   interrupt(e, winding, !!b.breaks, b.owner, w.now, w.ev);

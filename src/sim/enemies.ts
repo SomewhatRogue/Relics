@@ -41,6 +41,8 @@ import { standHeld } from './pacing';
 import { LEAP } from '../shared/threat';
 import { PLANKER } from '../shared/meaty';
 import { gorges, quicken, quickPace } from './elite';
+import { flyPounce } from './meaty2';
+import { calling, standCall } from './hornblow';
 import { DOORKEEPERS } from '../shared/bosstune';
 import { clockHolds, trackAim } from './bosskit';
 import { stepKeeper } from './doorkeepers';
@@ -248,12 +250,17 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     if (e.actT >= e.actDur) Object.assign(e, { act: after(e), actT: 0, cooldown: e.act === 'stunned' ? 0.6 : 0.3 });
     return;
   }
+  // A Hornblower blowing its horn: it stands, turned to you, and does nothing else (sim/hornblow.ts).
+  if (calling(e, now)) return standCall(e, heroes);
   // Blinded by a longbow's perfect arrow: it gropes about and goes for nobody (sim/rangershots.ts).
   if (blinded(e, now)) return void (spec && stumble(e, spec.speed, now, dt));
   if (e.act === 'attack') {
     // A boss's blow turns with its hero for the first part of its wind-up (sim/bosskit.ts).
     if (e.boss) trackAim(e, heroes);
-    if (runAttack(e, heroes, now, dt, ev, others) && e.act === 'attack') {
+    const over = runAttack(e, heroes, now, dt, ev, others);
+    // A Pouncer through the air, landing as its blow does (sim/meaty2.ts).
+    if (e.variant === 'pouncer') flyPounce(e);
+    if (over && e.act === 'attack') {
       Object.assign(e, { attack: null, act: after(e), actT: 0, cooldown: e.variant === 'hexer' ? HEXER.pause : e.attack?.kind === 'spit' ? BROOD.spitPause : spec ? spec.pauseBetween : SWING_DUMMY.every });
     }
     return;

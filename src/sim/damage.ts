@@ -8,6 +8,7 @@ import { count, dealt } from './score';
 import { meatySort } from '../shared/meaty';
 import { doorTake } from './doorwall';
 import { noteHurt } from './bosskit';
+import { cutCall } from './hornstate';
 
 const SPEC = { butcher: BUTCHER, scrapper: SCRAPPER, spider: SPIDER, brood: BROOD } as Record<string, { stun: number; respawn: number } | undefined>;
 export const stunOf = (e: Enemy) => SPEC[e.kind]?.stun ?? SWING_DUMMY.stun;
@@ -97,6 +98,8 @@ export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: Da
   n = plated(e, n, now, breaks, ev);
   // A butcher at a body: a heavy hit takes it off the meal (sim/meal.ts).
   if (e.meal && breaks) (e.meal = null), (e.mealCool = now + MEAL.again), ev.push({ k: 'mealbroken', x: e.x, y: e.y });
+  // A Hornblower blowing: a heavy hit cuts it off (sim/hornstate.ts).
+  if (breaks && e.call) cutCall(e, now, ev);
   if (e.boss) noteHurt(e, e.lastBy, n, now);
   e.hp -= n;
   e.hitAt = now;

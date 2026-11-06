@@ -9,7 +9,8 @@ import * as THREE from 'three';
 import type { Enemy } from '../../sim/types';
 import { G, M } from './mats';
 import { blob, collect, middle, part, pivot, stars, type Figure } from './rig';
-import { MEATY_DRAW } from '../../shared/meaty';
+import { MEATY_DRAW, meatySort } from '../../shared/meaty';
+import { grownBy } from '../../shared/meaty2';
 
 export interface FoeFig extends Figure {
   wpn: THREE.Group;
@@ -23,7 +24,7 @@ const rag = M(0x4a3a2a), metal = M(0x6e6a68), rust = M(0x6a4632), woodM = M(0x5a
 
 /** What a goblin looks like, as a key (a new figure is built when it changes). */
 export function foeLook(e: Enemy): string {
-  return e.kind + ':' + (e.variant ?? '') + (e.bow ? ':bow' : '') + (e.name ? ':named' : '') + (e.cracked ? ':cracked' : '') + (e.elite?.length ? ':' + e.elite.join('+') : '');
+  return e.kind + ':' + (e.variant ?? '') + (e.bow ? ':bow' : '') + (e.name ? ':named' : '') + (e.cracked ? ':cracked' : '') + (e.grown ? ':g' + e.grown : '') + (e.elite?.length ? ':' + e.elite.join('+') : '');
 }
 
 export function makeGoblin(e: Enemy): FoeFig {
@@ -75,10 +76,10 @@ export function makeGoblin(e: Enemy): FoeFig {
   }
   if (v === 'ironhide') ironhide(tor, head, wpn, !!e.cracked);
   // The new meaty sorts' kit (shared/meaty.ts), and an elite's affixes (shared/elites.ts).
-  meatyKit(e, tor, head, wpn, off);
+  meatyKit(e, tor, head, wpn, off, body);
   if (v === 'shield') part(off, 0.5, 0.5, 0.07, M(0x5a4228), 0, 0.05, 0.12), part(off, 0.12, 0.12, 0.08, metal, 0, 0.05, 0.16);
   const st = stars(root, 1.2);
-  root.scale.setScalar(big ? (e.name ? 1.75 : e.kind === 'butcher' ? 1.6 : 1.3) : v === 'looter' ? 0.68 : v === 'ironhide' ? 0.95 : v === 'planker' || v === 'swingle' || v === 'forker' ? 0.76 * MEATY_DRAW : 0.76);
+  root.scale.setScalar(big ? (e.name ? 1.75 : e.kind === 'butcher' ? 1.6 : 1.3) : v === 'looter' ? 0.68 : v === 'ironhide' ? 0.95 : meatySort(e) ? 0.76 * MEATY_DRAW * grownBy(e.grown ?? 0) : 0.76);
   return { ...collect({ root, mid, body, legs, aR, aL, head, stars: st }), wpn, off, tor, big };
 }
 
@@ -93,8 +94,12 @@ function ironhide(tor: THREE.Group, head: THREE.Group, wpn: THREE.Group, cracked
   part(wpn, 0.06, 0.5, 0.06, woodM, 0, -0.2, 0), part(wpn, 0.22, 0.18, 0.18, plate, 0, -0.48, 0);
 }
 
-/** The Planker's barn door, the Swingle's flail, the Forker's pitchfork; Plated's iron, Gorging's bloody jaw. */
-function meatyKit(e: Enemy, tor: THREE.Group, head: THREE.Group, wpn: THREE.Group, off: THREE.Group): void {
+/**
+ * The Planker's barn door, the Swingle's flail, the Forker's pitchfork; the Kegman's keg on its back, the
+ * Pouncer's claws, the Gorger's gaff and slack jaw; Plated's iron, Gorging's bloody jaw, Oil-soaked's dark
+ * sheen, the Hornblower's horn at its belt, Smouldering's embers.
+ */
+function meatyKit(e: Enemy, tor: THREE.Group, head: THREE.Group, wpn: THREE.Group, off: THREE.Group, body: THREE.Group): void {
   const v = e.variant, plank = M(0x6a4a2c), tine = M(0x8a7a6a);
   if (v === 'planker') part(off, 0.8, 0.7, 0.08, plank, 0, 0.1, 0.16), part(off, 0.8, 0.07, 0.1, metal, 0, 0.36, 0.17), part(off, 0.8, 0.07, 0.1, metal, 0, -0.16, 0.17);
   else if (v === 'swingle') part(wpn, 0.05, 0.6, 0.05, woodM, 0, -0.2, 0), part(wpn, 0.08, 0.36, 0.08, woodM, 0, -0.62, 0.12, 0.6);
@@ -104,4 +109,16 @@ function meatyKit(e: Enemy, tor: THREE.Group, head: THREE.Group, wpn: THREE.Grou
   }
   if (e.elite?.includes('plated') && v !== 'ironhide') ironhide(tor, head, new THREE.Group(), !!e.cracked);
   if (e.elite?.includes('gorging')) part(head, 0.3, 0.08, 0.06, M(0x7a1010), 0, -0.13, 0.2);
+  if (v === 'kegman') {
+    const stave = M(0x6e4a28), hoop = M(0x5a5a60);
+    part(tor, 0.36, 0.46, 0.36, stave, 0, 0.32, -0.3), part(tor, 0.38, 0.05, 0.38, hoop, 0, 0.18, -0.3), part(tor, 0.38, 0.05, 0.38, hoop, 0, 0.46, -0.3);
+    part(wpn, 0.06, 0.4, 0.06, woodM, 0, -0.2, 0);
+  } else if (v === 'pouncer') for (const g of [wpn, off]) for (const x of [-0.05, 0, 0.05]) part(g, 0.025, 0.14, 0.025, bone, x, -0.1, 0.06, 0.5);
+  else if (v === 'gorger') {
+    part(wpn, 0.05, 1.0, 0.05, woodM, 0, -0.1, 0.2, 1.0), part(wpn, 0.04, 0.16, 0.04, rust, 0, -0.5, 0.62, 2.2);
+    part(head, 0.34, 0.12, 0.1, M(0x5a1010), 0, -0.16, 0.18);
+  }
+  if (e.elite?.includes('oiled')) part(tor, 0.46, 0.42, 0.34, M(0x1a1410), 0, 0.2, 0.01);
+  if (e.elite?.includes('horn')) part(body, 0.1, 0.1, 0.26, M(0xd8c8a0), 0.2, 0.36, 0.18, 0.4);
+  if (e.elite?.includes('ember')) for (const [x, y] of [[0.12, 0.1], [-0.1, 0.28], [0.04, 0.38]]) part(tor, 0.05, 0.05, 0.05, G(0xff7a2a), x, y, 0.17).castShadow = false;
 }

@@ -30,6 +30,9 @@ describe('layout 3: seeds', () => {
     // taken out are 713718104 before and after, so only the goblins moved (counts, roles, health, placements).
     // Re-pinned 2026-11-06 for elites and the new meaty sorts (shared/eliteroll.ts, shared/meaty.ts): with both switched off
     // (ELITE.on, MEATY_ON.on) it is still 2459865809; 15 of the 388 rooms moved, and hashed with their goblins taken out they are 1177230441 either way.
+    // The second wave (2026-11-06: the Kegman, Pouncer, Gorger; Oil-soaked, Hornblower, Smouldering) moved none of these rooms:
+    // with AFFIX2_ON.on and MEATY2_ON.on false it is 2219083919, and on the same (scripts/encounters/pins.ts). Layout 4's
+    // pin (tests/variety.test.ts) is unmoved too.
     expect(all).toBe(2219083919 /* 2026-11-06 elites. Before: 2459865809 (a fallen-in house is never the kept door, shared/doors.ts), and before that 1139809545 */);
   }, 240000);
 });

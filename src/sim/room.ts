@@ -17,6 +17,8 @@ import { skewer, stepVenom } from './venom';
 import { stepBuildings, sweepBlocks } from './buildings';
 import { rouse } from './backline';
 import { newEnemy, stepEnemy } from './enemies';
+import { stepBlasts } from './blast';
+import { stepCalls } from './hornblow';
 import { currentSwing, newHero, stepHero, type HeroActs } from './hero';
 import { damage, isDead } from './damage';
 import { HUNGRY_FX, onKill, stepHungry, wears } from './hungry';
@@ -430,6 +432,9 @@ export class ArenaRoom {
     stepSleds(w);
     for (const h of this.heroes) stepHound(h, this.enemies, this.time, TICK, this.events);
     impacts(this.enemies, this.time, this.events);
+    // The second wave's (sim/blast.ts, hornblow.ts): kegs, oil and embers going up; Hornblowers' calls.
+    stepBlasts(w);
+    stepCalls(w, (x, y) => this.spawn('scrapper', x, y));
     this.slicks = afterFoes(w, this.pickups, this.slicks, this.crows, TICK);
     propImpacts(w);
     this.props = w.props = stepProps(w, TICK);

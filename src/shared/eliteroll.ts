@@ -3,7 +3,7 @@
  * room's templates are chosen and before its small ones are shared out, so an elite's extra threat comes
  * off the room's chaff. On a stream of its own: with elites off nothing else in the room moves.
  */
-import { AFFIXES, ELITE, eliteThreat, type Affix } from './elites.js';
+import { ELITE, affixPool, eliteThreat, type Affix } from './elites.js';
 import type { Role, Template } from './encounters.js';
 import type { Job } from './jobs.js';
 import { Rng } from './rng.js';
@@ -39,9 +39,9 @@ export function eliteRoller(job: Job, index: number): (t: Template, band: number
       if (!can(role) || (t.big && k === 0) || made >= most || rng.next() >= p) return;
       let n = rng.next() < ELITE.two + ELITE.twoRuin * job.place.ruin ? 2 : 1;
       if (n === 2 && job.deep && rng.next() < ELITE.three) n = 3;
-      // (An ironhide is plated already.)
-      const pool = AFFIXES.filter((a) => !(a === 'plated' && role === 'ironhide')), affixes = rng.shuffle([...pool]).slice(0, n);
-      const extra = eliteThreat(threatOf(role), affixes.length) - threatOf(role);
+      // (An ironhide is plated already; a Kegman has its keg, a Gorger eats already: shared/elites.ts affixPool.)
+      const affixes = rng.shuffle(affixPool(role)).slice(0, n);
+      const extra = eliteThreat(threatOf(role), affixes) - threatOf(role);
       if (extra > room) return;
       room -= extra;
       made++;
@@ -52,4 +52,4 @@ export function eliteRoller(job: Job, index: number): (t: Template, band: number
 }
 
 /** What the room's elites cost on top of their sorts: taken off the budget for the small ones. */
-export const eliteExtra = (rolls: EliteRoll[]) => rolls.reduce((s, r) => s + eliteThreat(threatOf(r.role), r.affixes.length) - threatOf(r.role), 0);
+export const eliteExtra = (rolls: EliteRoll[]) => rolls.reduce((s, r) => s + eliteThreat(threatOf(r.role), r.affixes) - threatOf(r.role), 0);

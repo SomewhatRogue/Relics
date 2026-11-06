@@ -15,6 +15,8 @@ import { drawPerchRope } from './wooddraw';
 import { drawPaceDust, drawPaceOver, paceOffset } from './pacedraw';
 import { drawElite } from './elitedraw';
 import { MEATY_DRAW, meatySort } from '../shared/meaty';
+import { grownBy } from '../shared/meaty2';
+import { hopOf } from './meatydraw2';
 import { drawKeeper } from './doordraw';
 
 /** A goblin, or (in the yard: `straw`) a straw man playing one. The plain dummies are themselves either way. */
@@ -43,7 +45,8 @@ function paced(c: Ctx, e: Enemy, x: number, y: number, sleeping: boolean): void 
   if (e.boss) return drawKeeper(c, e, x, y, sleeping);
   const meat = meatySort(e);
   if (!e.held && !e.big && !e.sprintAt && !e.elite && !meat) return drawEnemy(c, e, x, y, sleeping);
-  const o = paceOffset(c, e), bx = x + o.dx, by = y + o.dy, k = o.k * (meat ? MEATY_DRAW : 1);
+  // A Pouncer in the air rides up an arc (its leap's own clock); a Gorger is as big as it has grown (shared/meaty2.ts).
+  const o = paceOffset(c, e), bx = x + o.dx, by = y + o.dy - hopOf(e), k = o.k * (meat ? MEATY_DRAW * grownBy(e.grown ?? 0) : 1);
   if (k === 1) drawEnemy(c, e, bx, by, sleeping), drawElite(c, e, bx, by);
   else {
     // Bigger from its feet up, on both layers.

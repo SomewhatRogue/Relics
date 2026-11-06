@@ -84,7 +84,8 @@ describe('threat', () => {
       // Planned in as its template is picked: the room spends the same budget, the elite's share coming off what follows.
       const packs = (fs: Foe[]) => threatIn(fs.filter((f) => f.pack !== undefined && f.pack < 80 && (f.kind === 'scrapper' || f.kind === 'butcher')));
       expect(packs(on)).toBeLessThanOrEqual(roomBudget(j, i) + 1e-9);
-      expect(Math.abs(packs(on) - packs(off))).toBeLessThanOrEqual(ELITE.mult * THREAT.meaty);
+      // (A Hornblower pays for the small ones it may call too: shared/elites.ts.)
+      expect(Math.abs(packs(on) - packs(off))).toBeLessThanOrEqual(ELITE.mult * THREAT.meaty + ELITE.horn.call * THREAT.chaff);
     }
     expect(rooms).toBeGreaterThan(5);
   });

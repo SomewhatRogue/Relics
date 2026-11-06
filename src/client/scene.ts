@@ -2,6 +2,8 @@
  * One frame: camera, the flat (lit) layer in depth order, the glowing layer, then the lighting pass.
  * The scene is painted at a low resolution and scaled up by a whole number so pixels stay crisp.
  */
+import { drawBlasts } from './blastdraw';
+import { pulledAt } from './wave2ground';
 import { drawWet } from './wetdraw';
 import { feetBand, upright } from './phoneband';
 import { ARENA, doorAt, npcAt, type GameMap } from '../shared/arena';
@@ -240,6 +242,8 @@ export class Scene {
     drawBlaze(c, room, cx, cy);
     // A storm's lightning: its circle while it's coming (stormdraw.ts).
     drawStrikeMarks(c, room, cx, cy);
+    // A keg, oil or embers about to go up: its circle, the keg, the embers (blastdraw.ts).
+    drawBlasts(c, room, cx, cy);
     // A drummer's reach and its beat on the floor, and the goblins it has roused (client/backline.ts).
     const at = (e: Enemy): [number, number] => {
       const [x, y] = lerp('e:' + e.id, e.x, e.y);
@@ -310,7 +314,8 @@ export class Scene {
         continue;
       }
       // Up on a roof: stood on its ridge, drawn after the house it's on.
-      const roof = (e.z ?? 0) >= 2, [x, y] = lerp('e:' + e.id, e.x, e.y), up = roof ? ROOF_UP : Math.max(0, e.z ?? 0) * LIFT;
+      // (A body a Gorger is pulling in: dragged along to it: wave2ground.ts.)
+      const pz = pulledAt(room, e), roof = (e.z ?? 0) >= 2, [x, y] = pz ? [OX + pz[0] * PX, OY + pz[1] * PX] : lerp('e:' + e.id, e.x, e.y), up = roof ? ROOF_UP : Math.max(0, e.z ?? 0) * LIFT;
       // A big map: only what's on screen is drawn (DECISIONS 2026-11-03).
       if (big && off(x - cx, y - cy)) continue;
       items.push({ y: roof ? y + 3 * PX : y, draw: () => (drawFoe(c, e, x - cx, y - up - cy, asleep(map, e), map === ARENA), drawStatus(c, e, x - cx, y - up - cy, room.time)) });

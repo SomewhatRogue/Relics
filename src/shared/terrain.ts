@@ -40,6 +40,8 @@ export type FoeVariant = 'looter' | 'lunger' | 'heavy' | 'stoker' | 'shield' | '
   | 'snarer'
   /** The new meaty sorts (shared/meaty.ts): the barn door, the flail, the pitchfork. */
   | 'planker' | 'swingle' | 'forker'
+  /** The second three (shared/meaty2.ts): the oil keg, the leap, the eater of the dead. */
+  | 'kegman' | 'pouncer' | 'gorger'
   /** The wood's element lesson only (shared/wood.ts ELEMENT_FOES): wet through, in a bark apron, hot off the kiln. */
   | 'soaked' | 'aproned' | 'kilnhot';
 /**

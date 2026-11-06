@@ -6,16 +6,18 @@
  * ones (they wake on their own, and the room's budget and its specials count them first). No dice: the room's stream is left as it was, so everything else lands where it did.
  */
 import { atArc } from './scenes4.js';
+import { PACK2 } from './meatystage2.js';
 import type { Foe, FoeVariant } from './terrain.js';
 import type { Lay } from './vignettes.js';
 
 type P = { x: number; y: number };
 /** The Forker joins the captives' guards (shared/scenes4.ts), as the chalker does; the other two bring two small ones. */
 const PACK = { planker: 83, swingle: 84, forker: 82 } as const;
-/** The staged packs (the composer leaves them be: shared/encounter.ts). */
-export const STAGED = new Set<number>([PACK.planker, PACK.swingle]);
+/** The staged packs (the composer leaves them be: shared/encounter.ts), the second three's too (shared/meatystage2.ts). */
+export const STAGED = new Set<number>([PACK.planker, PACK.swingle, ...Object.values(PACK2)]);
+const ALL: Record<string, number> = { ...PACK, ...PACK2 };
 /** One of the new sorts, staged in this room (not one of the composer's packs). */
-export const stagedSort = (f: Foe) => !!f.variant && f.variant in PACK && f.pack === PACK[f.variant as keyof typeof PACK];
+export const stagedSort = (f: Foe) => !!f.variant && f.variant in ALL && f.pack === ALL[f.variant];
 
 /** The free ground nearest `at` (on a half-tile grid, off the walls and the way in), or null. */
 function near(l: Lay, at: P): P | null {

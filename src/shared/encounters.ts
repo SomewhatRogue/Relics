@@ -12,11 +12,12 @@ import type { Debut } from './debut.js';
 import { CHALKER } from './chalk.js';
 import { SNARE_DEBUT } from './hangwords.js';
 import { PLANKER, FORKER, SWINGLE } from './meaty.js';
+import { GORGER, KEGMAN, POUNCER } from './meaty2.js';
 
 /** What a goblin in a pack is for. `fodder` is the small ones; every other role is a special. */
 export type Role = 'fodder' | 'lunger' | 'shield' | 'heavy' | 'hexer' | 'drummer' | 'butcher' | 'archer'
   | 'banner' | 'netter' | 'thief' | 'log' | 'roofer' | 'keeper' | 'wolf' | 'oiler' | 'torch' | 'sapper' | 'blind' | 'ironhide'
-  | 'chalker' | 'snarer' | 'planker' | 'swingle' | 'forker';
+  | 'chalker' | 'snarer' | 'planker' | 'swingle' | 'forker' | 'kegman' | 'pouncer' | 'gorger';
 
 export interface Template {
   id: string;
@@ -78,6 +79,11 @@ export const TEMPLATES: Template[] = [
   { id: 'plank', said: 'a planker behind its barn door, and a few small ones', centre: ['planker'], fodder: [2, 3], from: 1, weight: 1.5, debut: PLANKER.debut, beats: ['tactic', 'closer'] },
   { id: 'swing', said: 'a swingle with its flail, and a few small ones', centre: ['swingle'], fodder: [2, 4], from: 1, weight: 1.5, debut: SWINGLE.debut, beats: ['tactic', 'closer'] },
   { id: 'fork', said: 'a forker with its pitchfork, and a few small ones', centre: ['forker'], fodder: [2, 3], from: 1, weight: 1.5, more: 'lunger', debut: FORKER.debut, beats: ['tactic', 'closer'] },
+  // The second three (shared/meaty2.ts), bleeding in after the Forker. A Gorger comes with a crowd of the
+  // flimsy small ones: every one splatted near it feeds it, so which you splat first is the choice.
+  { id: 'keg', said: 'a kegman with lamp oil on its back, in among a few small ones', centre: ['kegman'], fodder: [3, 4], from: 1, weight: 1.5, debut: KEGMAN.debut, beats: ['tactic', 'closer'] },
+  { id: 'pounce', said: 'a pouncer and a few small ones', centre: ['pouncer'], fodder: [2, 3], from: 1, weight: 1.5, more: 'lunger', debut: POUNCER.debut, beats: ['tactic', 'closer'] },
+  { id: 'gorge', said: 'a gorger and a crowd of small ones for it to eat', centre: ['gorger'], fodder: [4, 5], bunch: true, from: 1, weight: 1.5, debut: GORGER.debut, beats: ['tactic', 'closer'] },
   { id: 'bigbrute', said: 'a BIG ONE of a brute and a few small ones', centre: ['heavy'], fodder: [2, 3], weight: 0, beats: ['closer'], big: true },
   { id: 'bigiron', said: 'a BIG ONE in iron and a few small ones', centre: ['ironhide'], fodder: [2, 3], ruin: 2, weight: 0, beats: ['closer'], big: true },
   { id: 'cave', said: 'blind hunters in the dark', fodder: [3, 4], fodderKind: 'blind', weight: 4, places: ['mine'], beats: ['splat', 'tactic'] },
@@ -106,6 +112,6 @@ export const ENCOUNTER = {
 };
 
 /** Roles that are a kind of small goblin (the rest are something else: a wolf, the log-carriers). */
-export const GOBLIN_ROLES: Role[] = ['fodder', 'lunger', 'shield', 'heavy', 'hexer', 'drummer', 'archer', 'banner', 'netter', 'thief', 'roofer', 'keeper', 'oiler', 'torch', 'sapper', 'blind', 'ironhide', 'chalker', 'snarer', 'planker', 'swingle', 'forker'];
+export const GOBLIN_ROLES: Role[] = ['fodder', 'lunger', 'shield', 'heavy', 'hexer', 'drummer', 'archer', 'banner', 'netter', 'thief', 'roofer', 'keeper', 'oiler', 'torch', 'sapper', 'blind', 'ironhide', 'chalker', 'snarer', 'planker', 'swingle', 'forker', 'kegman', 'pouncer', 'gorger'];
 /** Backers that keep to the back of a pack (put furthest from the way in). */
 export const BACK_ROLES: Role[] = ['archer', 'hexer', 'drummer', 'banner', 'netter', 'oiler', 'torch', 'keeper', 'chalker', 'snarer'];
