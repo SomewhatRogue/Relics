@@ -1,9 +1,9 @@
 /**
  * The ironhide (numbers: shared/raiders.ts IRONHIDE): a goblin in scraps of iron. Until its guard is
- * broken anything that lands on it does IRONHIDE.armour of itself. A parry of its blow, a charged blow
- * or a perfect (or any heavy hit: a burst, a crit) breaks it, and for IRONHIDE.broken seconds it takes
+ * broken anything that lands on it does IRONHIDE.armour of itself. A charged blow or a perfect (or any
+ * heavy hit: a burst, a crit) breaks it, and for IRONHIDE.broken seconds it takes
  * full damage, its plates knocked askew (both views draw `cracked`). It walks at a middling pace and
- * swings one heavy, readable blow that a guard can block or parry.
+ * swings one heavy, readable blow to block or dodge.
  */
 import { IRONHIDE } from '../shared/tuning';
 import { begin, walk } from './enemies';

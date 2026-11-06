@@ -21,12 +21,11 @@ import { wayGot, wayLine } from '../shared/waypay';
 import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
 import { buyDrill, learnLesson } from '../shared/training';
 import { knowsSkill, learnSkill } from '../shared/skillteach';
-import { ARRIVE_SAFE, HOUSEBURN, PARTY, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, sellValue, giveValue, TIER_WANT, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
+import { ARRIVE_SAFE, HOUSEBURN, PARTY, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, sellValue, giveValue, TIER_WANT, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId } from '../shared/tuning';
 import { ArenaRoom } from '../sim/room';
 import { lessonOf, newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
 import { elementTaught } from '../sim/woodelement';
 import { signTaught } from '../sim/woodsign';
-import { guardTaught } from '../sim/woodsteps';
 import { AREAS, woodMap, WOOD_PROPS } from '../shared/wood';
 import { bagFull, bagSize } from '../shared/bags';
 import { refreshHealth, statsOf } from '../sim/gearstats';
@@ -247,8 +246,7 @@ export class Game {
     if (this.wood.cut >= 0 || this.wood.wake >= 0) return [];
     // A Mage's ELEMENT comes with its element step, after the full charge (sim/woodelement.ts); a Rogue's,
     // Ranger's or Healer's own button with theirs, after the clearing's lesson (sim/woodsign.ts).
-    // A Ranger's PARRY comes after the path's two dodges (sim/woodsteps.ts).
-    const el = [...(elementTaught(this.wood) ? ['element'] : []), ...(signTaught(this.wood) ? ['sign'] : []), ...(guardTaught(this.wood) ? ['block'] : [])];
+    const el = [...(elementTaught(this.wood) ? ['element'] : []), ...(signTaught(this.wood) ? ['sign'] : [])];
     return this.wood.stage >= 5 ? ['attack', 'roll', 'block', 'relic', 'potion', 'grab', ...el] : [...lessonOf(this.wood).moves.filter((m) => m !== 'grab' || this.wood!.stage > 0 || this.wood!.more), ...el];
   }
   /** Make a hero (class for life); returns its slot, or -1 when all three are taken. */
@@ -441,7 +439,7 @@ export class Game {
   practiceAgain(): boolean {
     return this.mode === 'yard' && !!practiceAgain(this.room);
   }
-  /** The practice going on, and its small line ("PARRIED 8 OF 10"). */
+  /** The practice going on, and its small line ("BLOCKED 8 OF 10"). */
   get drill() {
     return this.mode === 'yard' ? practiceOf(this.room) : null;
   }
@@ -1093,7 +1091,7 @@ export class Game {
   /** The wood's own rules after the room's: the lessons, the cutscene, the relic, the road. */
   private stepWoodFrame(h: Hero, ev: FightEvent[], dt: number): FightEvent[] {
     const w = this.wood!, cut = w.cut;
-    stepWood(w, this.room, ev, dt, WEAPONS[h.weapon].parryWindow + h.lenience);
+    stepWood(w, this.room, ev, dt);
     if (cut >= 0 && w.cut < 0 && !this.woodReplay) (this.profile.cutSeen = true), store(this.save);
     // Out of the Stoker: the javelin, on the RELIC button at once.
     if (w.relic && !h.found.some((r) => r.kind === 'javelin')) {

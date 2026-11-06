@@ -45,13 +45,13 @@ export const STAITHE = {
 
 /**
  * The gaffer (a squad goblin; Kyle's proposal: "hooks a hero 4 tiles to its brute"). A fishing gaff taken off
- * the eel-catchers (never a billhook): a long pole, its iron hook on the end. From up to `reach` it throws the hook down a thin red lane: blocked, nothing; parried, the hook
- * snaps (no more hooking for `snapped` seconds, and it's stunned as any parried goblin); landed, the hero
+ * the eel-catchers (never a billhook): a long pole, its iron hook on the end. From up to `reach` it throws the hook down a thin red lane: blocked or dodged
+ * out of, nothing (it snapped on a parry until parry went, 2026-11-05); landed, the hero
  * is hauled to the nearest brute within `toBrute` (its own feet if none) and held `pullStun`. Keeps its
  * distance (`keep`). At the Staithe, before it sees you, it hooks folk off the jetty's end every `gaff` s.
  */
 export const GAFFER = {
-  hp: 34, reach: 4, keep: 2.4, flee: 0.8, toBrute: 8, pullStun: 0.6, snapped: 8, gaff: 7,
+  hp: 34, reach: 4, keep: 2.4, flee: 0.8, toBrute: 8, pullStun: 0.6, gaff: 7,
   hook: { windup: 0.9, active: 0.1, recover: 0.9, dmg: 6, knock: 0, range: 4, arc: 6, unblockable: false } as EnemyAttackSpec,
 };
 

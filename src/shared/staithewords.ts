@@ -28,7 +28,6 @@ export const STAITHE_WORDS = {
     trip: 'PUNT ACROSS',
     lost: 'TAKEN',
     pinned: 'FROZEN',
-    snapped: 'SNAPPED',
   },
   /** The recap's LOST row. */
   lost: (n: number) => `${n} taken from the jetty`,

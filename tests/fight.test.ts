@@ -83,24 +83,39 @@ describe('guarding against the butcher', () => {
     expect(h.stamina).toBeLessThan(HERO.stamina * 0.5);
   });
 
-  it('a tap of block in the window is a parry: no damage, butcher stunned, counter ready', () => {
+  it('a tap of block just before the blow is no parry: it is taken, nothing is stunned, no counter (parry is gone)', () => {
     const { room, h, b } = setup();
-    until(room, 0.25);
+    until(room, 0.2);
     room.setIntent('me', intent({ blockSeq: 1 }));
     run(room, ticks(0.35));
-    expect(h.hp).toBe(HERO.hp);
-    expect(b.act).toBe('stunned');
-    expect(b.actDur).toBe(BUTCHER.stun);
-    expect(h.counterUntil).toBeGreaterThan(room.time);
+    expect(h.hp).toBe(HERO.hp - BUTCHER.cleave.dmg);
+    expect(b.act).not.toBe('stunned');
+    expect(h.counterUntil).toBeLessThan(room.time);
   });
 
-  it('each class guards its own way: a Ranger parries but never holds a block; a Mage does neither', () => {
+  it('a held block opens the counter; no timing makes it better (no perfect block)', () => {
+    const early = setup(), late = setup();
+    early.room.setIntent('me', intent({ block: true, blockSeq: 1 }));
+    run(early.room, ticks(BUTCHER.cleave.windup) + 2);
+    until(late.room, 0.05);
+    late.room.setIntent('me', intent({ block: true, blockSeq: 1 }));
+    run(late.room, ticks(0.15));
+    for (const x of [early, late]) {
+      expect(x.h.hp).toBe(HERO.hp);
+      expect(x.b.act).not.toBe('stunned');
+      expect(x.h.counterUntil).toBeGreaterThan(x.room.time);
+    }
+    expect(Math.round(early.h.stamina)).toBe(Math.round(late.h.stamina));
+  });
+
+  it('each class guards its own way: a Ranger and a Mage can neither hold a block nor parry', () => {
     const ranger = setup();
     ranger.h.weapon = 'longbow';
     until(ranger.room, 0.18);
     ranger.room.setIntent('me', intent({ blockSeq: 1 }));
     run(ranger.room, ticks(0.35));
-    expect(ranger.b.act).toBe('stunned');
+    expect(ranger.b.act).not.toBe('stunned');
+    expect(ranger.h.hp).toBe(HERO.hp - BUTCHER.cleave.dmg);
     const held = setup();
     held.h.weapon = 'longbow';
     held.room.setIntent('me', intent({ block: true, blockSeq: 1 }));
@@ -138,7 +153,7 @@ describe('guarding against the butcher', () => {
     expect(h.hp).toBe(HERO.hp);
   });
 
-  it('mashing block does not keep the parry window open', () => {
+  it('mashing block (taps, never held) guards nothing', () => {
     const { room, h } = setup();
     let seq = 0;
     for (let i = 0; i < ticks(BUTCHER.cleave.windup) + 4; i++) {
@@ -148,12 +163,12 @@ describe('guarding against the butcher', () => {
     expect(h.hp).toBeLessThan(HERO.hp);
   });
 
-  it('a counter after a parry hits for the counter multiplier (a greatsword: no riposte)', () => {
+  it('a counter after a block hits for the counter multiplier (the greatsword blocks now)', () => {
     const { room, h, b } = setup();
     h.weapon = 'greatsword';
-    until(room, 0.1);
-    room.setIntent('me', intent({ blockSeq: 1 }));
-    run(room, ticks(0.2));
+    room.setIntent('me', intent({ block: true, blockSeq: 1 }));
+    run(room, ticks(BUTCHER.cleave.windup) + 2);
+    expect(h.hp).toBe(HERO.hp);
     const before = b.hp;
     room.setIntent('me', intent({ blockSeq: 1, attackSeq: 1, ay: -1 }));
     run(room, ticks(0.8));
@@ -436,17 +451,18 @@ describe('corpses and backstabs', () => {
 });
 
 describe('kits block and dodge differently', () => {
-  it('a parry 0.3 s early works with sword and shield but only blocks with a greatsword', () => {
-    const parryWith = (weapon: 'sword' | 'greatsword') => {
+  it('sword and shield and the greatsword both hold a block; the greatsword pays more for it', () => {
+    const blockWith = (weapon: 'sword' | 'greatsword') => {
       const { room, h, b } = setup();
       h.weapon = weapon;
-      until(room, 0.3);
       room.setIntent('me', intent({ blockSeq: 1, block: true }));
-      run(room, ticks(0.4));
-      return b.act === 'stunned';
+      run(room, ticks(BUTCHER.cleave.windup) + 2);
+      return { hp: h.hp, stamina: h.stamina, stunned: b.act === 'stunned' };
     };
-    expect(parryWith('sword')).toBe(true);
-    expect(parryWith('greatsword')).toBe(false);
+    const sword = blockWith('sword'), great = blockWith('greatsword');
+    expect([sword.hp, great.hp]).toEqual([HERO.hp, HERO.hp]);
+    expect([sword.stunned, great.stunned]).toEqual([false, false]);
+    expect(great.stamina).toBeLessThan(sword.stamina);
   });
 
   it("a shield guards a blow from the side that a greatsword's guard misses", () => {

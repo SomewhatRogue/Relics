@@ -63,13 +63,13 @@ function nest(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
 
 /**
  * A spider's pounce: a short narrow lane the length of its leap, filling as it gathers itself. It can
- * be blocked, so no stripes; white while a parry would land.
+ * be blocked, so no stripes.
  */
-export function drawPounce(c: Ctx, a: EnemyAttack, cx: number, cy: number, now: boolean, pulse: number): void {
+export function drawPounce(c: Ctx, a: EnemyAttack, cx: number, cy: number, pulse: number): void {
   const g = c.glow, prog = Math.min(1, a.t / a.windup), R = a.range * PX, W = Math.max(2, Math.round(a.radius * PX * 0.5));
   const ox = OX + a.ox * PX - cx, oy = OY + a.oy * PX - cy, nx = -a.dy, ny = a.dx, dot = (d: number, w: number) => g.fillRect(Math.round(ox + a.dx * d + nx * w), Math.round(oy + a.dy * d + ny * w), 1, 1);
   // One colour and one alpha a pass (few state changes: a pack of these is on screen at once).
-  g.fillStyle = now ? '#ffe8e0' : '#e23a30';
+  g.fillStyle = '#e23a30';
   g.globalAlpha = 0.9;
   for (let d = 3; d <= R; d++) dot(d, -W), dot(d, W);
   for (let w = -W; w <= W; w++) dot(R, w);

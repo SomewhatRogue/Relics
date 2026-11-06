@@ -23,12 +23,13 @@ describe("Kyle's weapon words: TAP, HOLD, PERFECT", () => {
 
 describe('GUARD and DODGE areas, from the numbers', () => {
   it('rates the guards as the kits are built', () => {
-    expect([guardRating('sword'), guardKind('sword')]).toEqual(['HIGH', 'BLOCK AND PARRY']);
+    expect([guardRating('sword'), guardKind('sword')]).toEqual(['HIGH', 'BLOCK']);
     expect([guardRating('mace'), guardRating('censer')]).toEqual(['HIGH', 'HIGH']);
     expect([guardRating('spear'), guardRating('flail')]).toEqual(['MED', 'MED']);
-    expect([guardRating('greatsword'), guardKind('greatsword')]).toEqual(['LOW', 'PARRY ONLY']);
-    expect(guardKind('longbow')).toBe('PARRY ONLY');
-    expect(guardKind('spellblade')).toBe('PARRY ONLY');
+    // No parry anywhere (2026-11-05): the greatsword holds a slow, dear block; the bows and the spellblade none.
+    expect([guardRating('greatsword'), guardKind('greatsword')]).toEqual(['LOW', 'BLOCK']);
+    expect(guardKind('longbow')).toBe('NONE');
+    expect(guardKind('spellblade')).toBe('NONE');
     expect([guardKind('daggers'), guardKind('wand')]).toEqual(['NONE', 'NONE']);
   });
   it("a Mage's bar is MAGIC on screen; everyone else's is STAMINA", () => {
@@ -40,7 +41,8 @@ describe('GUARD and DODGE areas, from the numbers', () => {
     expect(kitLine('wand', 'storm')).toBe('TAP: LIGHTNING STREAM, TAP TO BUILD  HOLD: LIGHTNING STRIKE, STUNS  PERFECT: BIGGER, LONGER STUN');
     // The stream doesn't break blows: the wand's storm says what's true of it instead.
     expect(kitRows('wand', 'storm').find(([l]) => l === 'ALSO')?.[1]).toBe('Ignores shields, spares friends');
-    expect(KIT.spellblade.also).toBe('Hits take magic, parry refills');
+    expect(KIT.spellblade.also).toBe('Hits drain, blink through refills');
+    for (const w of Object.keys(KIT)) expect(Object.values(KIT[w as keyof typeof KIT]).join(' '), w).not.toMatch(/parry|riposte/i);
     expect(kitRows('spellblade', 'fire').find(([l]) => l === 'COST')?.[1]).toBe(`${SPELL.spellblade} magic a hold`);
     // The staff's wall of fire (Kyle, 2026-11-05): rolled at a goblin, and the card says once that it burns friends.
     expect(kitLine('staff', 'fire')).toBe('TAP: FLAME SWEEP, BURNS  HOLD: ROLLING WALL OF FIRE  PERFECT: WIDER, BURNS LONGER');

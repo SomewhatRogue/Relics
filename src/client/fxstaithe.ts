@@ -1,8 +1,7 @@
 /**
  * The Staithe's moments (sim/staithe.ts, staithebits.ts, gaffer.ts, skimmer.ts): the gaffer's hook out
  * over the water (or across to you), the log going across and shoved in, a net catching a foot, the
- * jetty's boards giving, the punt over, someone taken off the jetty, the skimmer rimed in place, a hook
- * snapped. Words only where they tell you something (shared/staithewords.ts). Drawing only.
+ * jetty's boards giving, the punt over, someone taken off the jetty, the skimmer rimed in place. Words only where they tell you something (shared/staithewords.ts). Drawing only.
  */
 import { STAITHE_WORDS as W } from '../shared/staithewords';
 import type { FightEvent } from '../sim/types';
@@ -50,10 +49,6 @@ export function staitheFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean
     case 'skimpin':
       fx.burst(x, y - 10, 10, ['#cfe8ff', '#ffffff'], 40, true);
       fx.say(x, y - 30, W.says.pinned, '#cfe8ff');
-      return true;
-    case 'hooksnap':
-      fx.burst(x, y - 12, 8, ['#9a9aa4', '#6a5038'], 70, false, 200, true);
-      fx.say(x, y - 32, W.says.snapped, '#ffffff');
       return true;
     case 'smokehouse':
       fx.burst(x, y - 10, 14, ['#6a6470', '#8a8490'], 30, false, -40);

@@ -123,23 +123,23 @@ describe("Tobin's stall", () => {
 });
 
 describe('modifiers that make sense', () => {
-  const parriers = (k: string) => guardOf(WEAPONS[k as keyof typeof WEAPONS]) !== 'none';
-  it('a weapon only rolls what its own kit uses: no PARRY on a kit that cannot parry, no BLOCK without a held block, no flat DAMAGE', () => {
+  it('a weapon only rolls what its own kit uses: no PARRY at all (it is gone), no BLOCK without a held block, no flat DAMAGE', () => {
     const rng = new Rng(11);
     for (const kit of WEAPON_ORDER) for (const t of TIER_ORDER) for (let i = 0; i < 20; i++) {
       const it = t === 'hungry' ? null : rollGear(rng, null, t, 'weapon', kit);
       for (const m of it?.mods ?? []) {
         expect(weaponMods(kit)).toContain(m.id);
-        if (m.id === 'parry') expect(parriers(kit), kit).toBe(true);
+        expect(m.id as string).not.toBe('parry');
         if (m.id === 'guard') expect(guardOf(WEAPONS[kit])).toBe('full');
         expect(m.id).not.toBe('damage');
       }
     }
-    // Each kit's list is its job: knives backstab, a Mage casts, a Healer heals; a Rogue never parries.
+    // Each kit's list is its job: knives backstab, a Mage casts, a Healer heals; nobody parries.
     for (const k of CLASS_KITS.ROGUE) expect(weaponMods(k)).toEqual(expect.arrayContaining(['backstab', 'crit']));
-    for (const k of CLASS_KITS.ROGUE) expect(weaponMods(k)).not.toContain('parry');
-    for (const k of ['wand', 'staff'] as const) expect(weaponMods(k)).not.toContain('parry');
-    expect(weaponMods('spellblade')).toEqual(expect.arrayContaining(['parry', 'spell', 'thrift']));
+    for (const k of WEAPON_ORDER) expect(weaponMods(k) as string[]).not.toContain('parry');
+    expect(weaponMods('spellblade')).toEqual(expect.arrayContaining(['spell', 'thrift']));
+    expect(weaponMods('greatsword')).toContain('guard');
+    expect(weaponMods('spellblade')).not.toContain('guard');
     for (const k of CLASS_KITS.HEALER) expect(weaponMods(k)).toContain('mending');
   });
 
@@ -148,7 +148,7 @@ describe('modifiers that make sense', () => {
     for (const t of TIER_ORDER.slice(1, 6)) for (let i = 0; i < 200; i++) {
       const kind = (['light', 'medium', 'heavy'] as const)[i % 3], free = rollGear(rng, null, t, 'armor', undefined, kind);
       for (const m of free.mods!) expect(ARMOR_MODS[kind]).toContain(m.id);
-      expect(free.mods!.some((m) => m.id === 'parry')).toBe(false);
+      expect(free.mods!.some((m) => (m.id as string) === 'parry')).toBe(false);
       for (const c of CLASS_ORDER) for (const m of rollGear(rng, c, t, 'armor', undefined, kind).mods!) expect(modFits(m.id, c), `${c} ${kind} ${m.id}`).toBe(true);
       for (const m of rollGear(rng, null, t, 'ring').mods!) expect(RING_MODS).toContain(m.id);
     }

@@ -10,6 +10,7 @@ import { fitStores } from '../shared/bags';
 import { fitRelics } from '../shared/relicitems';
 import { renameKits } from '../shared/oldkits';
 import { fitOldSkills } from '../shared/oldskills';
+import { fitNoParry } from '../shared/oldparry';
 
 const KEY = 'relic.save.v2', OLD = 'relic.save.v1';
 /** `savedAt`: when it was last kept here (it only goes forward), to tell which copy is newer (recovery.ts). */
@@ -49,6 +50,8 @@ const hero = (old: Partial<Profile>): Profile => {
   out.bag = (out.bag ?? []).map(upgradeOld);
   // The pack, the vault and the buyback (shared/bags.ts): older heroes keep every piece.
   fitStores(out);
+  // PARRY is gone (2026-11-05): any piece with it has BLOCK or DODGE instead, worth the same (shared/oldparry.ts).
+  fitNoParry(out);
   // Knacks onto the tree: one the class can't use comes back as a pick (shared/chains.ts).
   out.perks = [...(out.perks ?? [])];
   fitPerks(out);

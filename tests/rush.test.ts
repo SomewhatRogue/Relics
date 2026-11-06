@@ -62,16 +62,16 @@ describe('pack rushes', () => {
     expect(st - h.stamina).toBeCloseTo(RUSH.blow.dmg * GUARD.staminaPerDmg * WEAPONS.sword.guardCost, 0);
   });
 
-  it('one parry in the window parries them all, each held into the counter window', () => {
+  it('a block raised at the last moment is just the one block (no parry): none stunned, the counter open', () => {
     const { room, h } = setup();
     const { members, land } = windup(room);
     const ticks = until(room, h.id, land, land - 0.12, { ...NO_INTENT, ay: -1, block: true, blockSeq: 1 });
     const all = ticks.flat();
-    expect(all.filter((e) => e.k === 'parry').length).toBe(members.length);
-    expect(all).toContainEqual(expect.objectContaining({ k: 'rushparried', n: members.length }));
+    expect(all.filter((e) => e.k === 'block').length).toBe(members.length);
+    expect(all.some((e) => (e.k as string) === 'parry' || (e.k as string) === 'rushparried')).toBe(false);
     expect(h.hp).toBe(100);
     expect(h.counterUntil).toBeGreaterThan(room.time);
-    for (const e of members) expect(e.act).toBe('stunned'), expect(e.actDur).toBeGreaterThanOrEqual(RUSH.parryStun);
+    for (const e of members) expect(e.act).not.toBe('stunned');
   });
 
   it('a dodge through it gets out of all of it: a Rogue\'s dash, a Mage\'s blink', () => {
@@ -141,7 +141,7 @@ describe('pack rushes', () => {
         f.room.setIntent(f.h.id, { ...NO_INTENT, ay: -1, block: i % 50 > 30, blockSeq: Math.floor(i / 50), attackSeq: Math.floor(i / 90) });
         f.h.hp = 100;
         f.room.step();
-        for (const e of f.room.events) if (e.k === 'rush' || e.k === 'parry' || e.k === 'impact') log.push(`${i}:${e.k}`);
+        for (const e of f.room.events) if (e.k === 'rush' || e.k === 'block' || e.k === 'impact') log.push(`${i}:${e.k}`);
       }
       return { log, foes: JSON.stringify(f.room.enemies.map((e) => [e.x, e.y, e.hp, e.act])) };
     };

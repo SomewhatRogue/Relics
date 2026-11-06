@@ -155,6 +155,7 @@ export const sfx = {
     tone('triangle', 180, 120, 0.5, 0.12);
     burst('bandpass', 1400, 700, 3, 0.4, 0.1);
   },
+  /** Unused since parry went (2026-11-05): kept with its recorded ring (sfxroutes.ts). */
   parry() {
     if (!ready()) return;
     for (const [f, p, d] of [[1320, 0.3, 0.6], [1980, 0.22, 0.45], [2640, 0.14, 0.35], [3520, 0.08, 0.25]]) tone('sine', f, f * 0.98, p, d);

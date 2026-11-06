@@ -28,7 +28,7 @@ export const MORE_KITS: Record<MoreKitId, Weapon> = {
     ],
     heavy: { windup: 0.08, active: 0.1, recover: 0.42, dmg: 16, dmgFull: 36, range: 2.4, arc: 40, lunge: 2.6, knock: 3, knockFull: 7, thrust: true, hits: 2, skewer: true },
     draw: 0.7,
-    chip: 0.45, blockSpeed: 0.6, chargeSpeed: 0.6, backstab: 1.75, front: 0.8, single: true, parryWindow: 0.2, guardArc: 100, guardCost: 1.8, speed: 1.08,
+    chip: 0.45, blockSpeed: 0.6, chargeSpeed: 0.6, backstab: 1.75, front: 0.8, single: true, guardArc: 100, guardCost: 1.8, speed: 1.08,
     dodge: { ...DASH, distance: 3.8, cooldown: 0.45 },
   },
   /**
@@ -48,7 +48,7 @@ export const MORE_KITS: Record<MoreKitId, Weapon> = {
     ],
     heavy: { windup: 0.05, active: 0.04, recover: 0.3, dmg: 2, dmgFull: 4, range: 9, arc: 0, lunge: -0.1, knock: 0, knockFull: 1, shot: 'dart', speed: 22, venom: true },
     draw: 0.6,
-    chip: 0.45, blockSpeed: 0.6, chargeSpeed: 0.75, backstab: 1.75, front: 0.8, parryWindow: 0.2, guardArc: 100, guardCost: 1.8, speed: 1.08,
+    chip: 0.45, blockSpeed: 0.6, chargeSpeed: 0.75, backstab: 1.75, front: 0.8, guardArc: 100, guardCost: 1.8, speed: 1.08,
     dodge: DASH,
   },
   /**
@@ -69,7 +69,7 @@ export const MORE_KITS: Record<MoreKitId, Weapon> = {
     ],
     heavy: { windup: 0.12, active: 0.14, recover: 0.5, dmg: 16, dmgFull: 36, range: 1.9, arc: 360, lunge: 0, knock: 5, knockFull: 10, heal: 8, burn: true, holy: true },
     draw: 1.1,
-    chip: 0.12, blockSpeed: 0.45, chargeSpeed: 0.35, parryWindow: 0.34, guardArc: 165, guardCost: 1, speed: 0.86,
+    chip: 0.12, blockSpeed: 0.45, chargeSpeed: 0.35, guardArc: 165, guardCost: 1, speed: 0.86,
     dodge: CLERIC_ROLL,
   },
   /**
@@ -88,7 +88,7 @@ export const MORE_KITS: Record<MoreKitId, Weapon> = {
     ],
     heavy: { windup: 0.1, active: 0.14, recover: 0.5, dmg: 22, dmgFull: 54, range: 2.6, arc: 240, lunge: 0, knock: 8, knockFull: 14, holy: true, dazes: true },
     draw: 1,
-    chip: 0.25, blockSpeed: 0.4, chargeSpeed: 0, parryWindow: 0.24, guardArc: 130, guardCost: 1.3, speed: 0.8, blunt: true, shoves: true,
+    chip: 0.25, blockSpeed: 0.4, chargeSpeed: 0, guardArc: 130, guardCost: 1.3, speed: 0.8, blunt: true, shoves: true,
     dodge: CLERIC_ROLL,
   },
 };

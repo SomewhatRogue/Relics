@@ -30,7 +30,7 @@ const blow = (h: Hero, e: { x: number; y: number }): EnemyAttack => ({ kind: 'cl
 
 /** What each knack moves, measured; +1 it should go up, -1 down. */
 const PROBES: Partial<Record<FxKey, [(c: HeroClass, perks: string[]) => number, 1 | -1]>> = {
-  parry: [(c, p) => K.parryWindow(scene(c, p).h), 1],
+  guardArc: [(c, p) => K.guardArc(scene(c, p).h), 1],
   block: [(c, p) => {
     const { h, e, ev } = scene(c, p);
     Object.assign(h, { blocking: true, stamina: 100 });

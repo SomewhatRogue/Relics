@@ -2,9 +2,9 @@
  * A pack rush (sim/packrush.ts) as each goblin in it and the hero it's on see it: walking to its place
  * in the fan, the one clock every blow of it keeps (so they all land in the same instant, whatever
  * hitstop or frost does to one of them), and the hero's one guard answering every blow: judged from the
- * fan's middle, one parry parrying them all, one block taking them all for one blow's stamina.
+ * fan's middle, one block taking them all for one blow's stamina.
  */
-import { RUSH, SCRAPPER, VARIANTS, IRONHIDE } from '../shared/tuning';
+import { SCRAPPER, VARIANTS, IRONHIDE } from '../shared/tuning';
 import { walk } from './enemies';
 import type { Enemy, EnemyAttack, Hero } from './types';
 
@@ -13,25 +13,19 @@ export function guardFrom(e: Enemy, a: EnemyAttack, h: Hero): [number, number] {
   return a.rush !== undefined && a.rcx !== undefined && a.rcy !== undefined ? [a.rcx - h.x, a.rcy - h.y] : [e.x - h.x, e.y - h.y];
 }
 
-/** This hero has parried another blow of the same rush in this same instant: this one is parried too. */
-export const rushParried = (h: Hero, a: EnemyAttack, now: number) => a.rush !== undefined && h.rushGuard?.id === a.rush && h.rushGuard.at === now && h.rushGuard.how === 'parry';
-
 /** Blocked another blow of this rush this instant: this one is taken by the same block, for nothing. */
 export function rushBlocked(h: Hero, a: EnemyAttack, now: number): boolean {
-  if (a.rush === undefined || h.rushGuard?.id !== a.rush || h.rushGuard.at !== now || h.rushGuard.how !== 'block') return false;
+  if (a.rush === undefined || h.rushGuard?.id !== a.rush || h.rushGuard.at !== now) return false;
   h.rushGuard.n++;
   return true;
 }
 
 /** Note a rush's blow met by this hero's guard. */
-export function noteRush(h: Hero, a: EnemyAttack, now: number, how: 'parry' | 'block'): void {
+export function noteRush(h: Hero, a: EnemyAttack, now: number): void {
   if (a.rush === undefined) return;
-  if (h.rushGuard?.id === a.rush && h.rushGuard.at === now && h.rushGuard.how === how) h.rushGuard.n++;
-  else h.rushGuard = { id: a.rush, at: now, how, n: 1 };
+  if (h.rushGuard?.id === a.rush && h.rushGuard.at === now) h.rushGuard.n++;
+  else h.rushGuard = { id: a.rush, at: now, n: 1 };
 }
-
-/** How long a parried goblin is held: a rush's long enough for the counter to land on each. */
-export const rushStun = (a: EnemyAttack, stun: number) => (a.rush !== undefined ? Math.max(stun, RUSH.parryStun) : stun);
 
 /** A rush's blow keeps the room's clock: it lands at `land` exactly, alongside the rest. Else null. */
 export const rushClock = (a: EnemyAttack, now: number): number | null => (a.land === undefined ? null : Math.max(0, a.windup - (a.land - now)) + 1e-6);

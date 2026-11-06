@@ -84,7 +84,7 @@ export function stepHound(h: Hero, enemies: Enemy[], now: number, dt: number, ev
     to(h.x - h.fx * 1.1 - h.fy * side * 0.8, h.y - h.fy * 1.1 + h.fx * side * 0.8 + 0.2, HOUND.speed, 0.3);
     if (now < d.next) return;
     // Now and then: what you've been hitting, or the nearest small goblin near you.
-    // Training: never one that's swinging at you (that's yours to dodge or parry).
+    // Training: never one that's swinging at you (that's yours to dodge).
     const awake = enemies.filter((e) => !isDead(e) && e.alert !== false && e.kind === 'scrapper' && Math.hypot(e.x - h.x, e.y - h.y) < HOUND.reach && !(h.calmHound && e.attack));
     // Your MARK first, wherever it is in reach (sim/mark.ts); then what you've been hitting.
     const pick = markOf(h.id, enemies, now) ?? awake.find((e) => e.lastBy === h.id && e.hitAt > now - 2) ?? awake.sort((a, b) => Math.hypot(a.x - h.x, a.y - h.y) - Math.hypot(b.x - h.x, b.y - h.y))[0];

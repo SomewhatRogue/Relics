@@ -2,6 +2,17 @@
 
 ## Current slice
 
+**No parry: the Warrior and Healer block, the Ranger, Rogue and Mage dodge** (Claude Opus 5.5, 2026-11-05; Kyle,
+after playing with friends: "Parry in general is getting pushback as noisy, confusing, and hard to land with a lot
+of enemies at once and latency", and he chose to remove it entirely). Built; waiting on Kyle's play. *Done when*, on
+his phone and laptop, alone and online: a Warrior or Healer holds BLOCK and a blow lands on the guard with a thud,
+sparks and a small push, stamina spent, nothing better for timing it, and the next blow is a COUNTER; a Ranger,
+Rogue or Mage has no guard button at all and JUMPs, DASHes or BLINKs instead; the greatsword blocks (slowly); a
+spellblade's blink through a blow gives MAGIC back; no telegraph flashes white; the wood has two dodges for everyone,
+a block lesson for the heavy classes, and no PARRY anywhere; the yard has BLOCK THE HEAVY or DODGE THE HEAVY; the
+recap shows BLOCKS beside DODGES; old saves load with BLOCK or DODGE where PARRY was. Everything in DECISIONS
+2026-11-05 ("no parry"). Open: the new and changed lines through the lore keeper and line editor; the counter's
+1.5x and HEALING BLOCK's 5 once he's played.
 **The atlas, slices 0 and 1: the doors rule, and Hangman's Wood** (Claude Opus 5.5, 2026-11-05; Kyle approved
 `docs/plans/atlas.md`). Built; waiting on Kyle's play. *Done when*, on his phone and laptop, flat and 2.5D: a
 village, farm or town street has one house to go into, big, with firelight in its doorway, its woodpile and the
@@ -32,7 +43,7 @@ he kills the carriers or SHOVES the laid log in, CUTS FREE the netted, holds the
 punt goes over and back three times, and the recap's WAY says what NETS paid (+10% each) and LOST "n taken from the
 jetty"; hung nets catch his foot a second and burn; a lamp broken or the skimmer's pour puts oil on the water that
 drifts down and, lit, sets the jetty going (burnt through, it throws him to the bank); the gaffer's thin red lane
-is blocked, or parried (SNAPPED), or hauls him to its brute; frost FREEZES the skimmer in place (FROZEN). On about one Barrowfields map
+is blocked or dodged out of (it snapped on a parry until parry went, 2026-11-05), or hauls him to its brute; frost FREEZES the skimmer in place (FROZEN). On about one Barrowfields map
 in three the Staithe is between the fords (pinned as a job or a side job), and left alone its smokehouse catches at
 ALARM 3 and they're lost at ALARM 5. Everything in DECISIONS 2026-11-05 ("the Staithe"); shots: `node
 scripts/staithe-look.cjs`. Open: every new name and line through the lore keeper and line editor; the numbers once
@@ -51,8 +62,8 @@ spawning different enemy types to fight"; the lore keeper: no live goblins in Wi
 worked by Corporal Brisk's watch). Built; waiting on Kyle's play. *Done when*, on his phone and laptop, online: in
 the yard nothing goes to the relay (the town's room leaves on the way in and comes back with one `hi` on the way
 out); at the post by the rack of straw men in the yard's top left corner (USE / E: THE STRAW MEN) Pell has any
-sort he's met set going (13 sorts), four small packs and the drills (PARRY THE HEAVY, BREAK A SHIELD LINE, BURN A
-PACK for a Mage, HOLD FOR A MINUTE), each drill's line on the banner ("PARRIED 8 OF 10", "HELD 60 S"); they fight
+sort he's met set going (13 sorts), four small packs and the drills (BLOCK THE HEAVY or DODGE THE HEAVY since parry went, BREAK A SHIELD LINE, BURN A
+PACK for a Mage, HOLD FOR A MINUTE), each drill's line on the banner ("BLOCKED 8 OF 10", "HELD 60 S"); they fight
 like goblins but show straw, painted eyes, straw not blood, a heap of straw when down; GO AGAIN and CLEAR work;
 nothing pays; a fall starts the fight over; the yard stands still while the board is up; a knock into the gate
 doesn't leave. Daily: `node scripts/budget-check.cjs` (and `--live`, `--url`). Open: the line editor's pass.
@@ -96,7 +107,7 @@ picking after a mission, just let them return home and show them a recap of how 
 that mission. Numbers killed, dodges, damage done etc."). Built; waiting on Kyle's play. *Done when* at any
 job's end, on his phone and laptop, alone or with friends, the recap has one button, BACK TO WICKHOLD; a
 column per hero (name, class, a callout only where they led) with KILLS, DAMAGE, DAMAGE TAKEN, DODGES,
-PARRIES and DOWNED, and + MORE for BLOCKS, PERFECT PARRIES, HELPED UP, HEALING GIVEN and BIGGEST HIT; every
+BLOCKS (PARRIES until parry went, 2026-11-05) and DOWNED, and + MORE for HELPED UP, HEALING GIVEN and BIGGEST HIT; every
 friend sees the same numbers; and a knack earned waits in the PACK (gold count on PACK, KNACKS N TO PICK
 inside). Open: the new words through the lore keeper and line editor (DECISIONS 2026-11-05).
 **The shops reworked, seven tiers, modifiers that fit** (Claude Opus 5.5, 2026-11-05; Kyle: "Pawn should sell random
@@ -165,7 +176,7 @@ section named for its dodge (JUMP, BLINK, DASH, GUARD, TAUNT) with three rungs t
 5, 10 and 15 for 250, 760 and 1450 gold, rows saying LEARNED, LEARN (level and price) or LEVEL n; each
 rung fires with a small tell (DECISIONS 2026-11-04 has the numbers): Ranger JUMP SHOT, TWO SNARES, HARD
 LANDING; Mage BLINK BURST, BLINK THROUGH, PERFECT BLINK; Rogue CALTROPS, THROUGH THE LEGS, SHAKE IT OFF;
-Healer SHELTER, MENDING PARRY, COVER; Warrior TAUNT on the dodge's slot (phone) and SPACE (laptop),
+Healer SHELTER, HEALING BLOCK (was the parry's), COVER; Warrior TAUNT on the dodge's slot (phone) and SPACE (laptop),
 STAND FAST, COWING ROAR, working for a guest online; and the Mage learns PRIMED SPELLS, ATTUNED and
 SPELLTHIEF at 4, 7 and 10. Old heroes start with no rungs. Open: the names and lines through the lore
 keeper and line editor; ATTUNED's storm part waits on the wet rule (wt-storm) reading `wetMult`; the

@@ -1,4 +1,4 @@
-// Stages the big moments and screenshots each: parry flash, slam leap and crater, javelin pin, hook, charge.
+// Stages the big moments and screenshots each: a cleave winding up, slam leap and crater, javelin pin, hook, charge.
 const { chromium } = require('playwright');
 const url = process.argv[2] || 'http://localhost:4173/';
 (async () => {
@@ -13,7 +13,7 @@ const url = process.argv[2] || 'http://localhost:4173/';
   await page.evaluate(() => Object.assign(window.__room.heroes[0], { x: 9, y: 7.4 }));
   await park();
   await page.waitForFunction(() => { const a = window.__room.enemies[0].attack; window.__room.heroes[0].hp = 100; return a && a.kind === 'cleave' && a.windup - a.t < 0.25 && a.t < a.windup; }, null, { timeout: 30000 }).catch(() => console.log('no cleave'));
-  await shot('parry-window');
+  await shot('cleave-windup');
   await page.waitForFunction(() => { const r = window.__room, a = r.enemies[0].attack; r.heroes[0].hp = 100; Object.assign(r.heroes[0], { x: 9, y: 7.4 }); for (const e of r.enemies) if (e.kind !== 'butcher') e.cooldown = 99; return a && a.kind === 'slam' && a.t > a.windup * 0.75; }, null, { timeout: 60000 }).catch(() => console.log('no slam'));
   await shot('slam-leap');
   await page.waitForTimeout(500);

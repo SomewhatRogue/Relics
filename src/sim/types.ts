@@ -94,7 +94,7 @@ export interface Hero extends Body {
   hp: number;
   stamina: number;
   staminaAt: number;
-  /** Out of breath: no dodge, block or parry until stamina is full again. */
+  /** Out of breath: no dodge or block until stamina is full again. */
   winded?: boolean;
   weapon: WeaponId;
   act: HeroAct;
@@ -104,11 +104,10 @@ export interface Hero extends Body {
   /** The swing in progress is the charged heavy, at this power (0..1). */
   heavy: boolean;
   power: number;
-  /** This swing is a counter (started inside the counter window after a parry). */
+  /** This swing is a counter (started inside the counter window after a block took a blow). */
   counter: boolean;
   hitIds: number[];
   blocking: boolean;
-  parryOpenAt: number;
   lastBlockPress: number;
   rollDx: number;
   rollDy: number;
@@ -126,9 +125,10 @@ export interface Hero extends Body {
   noHound?: boolean;
   /** The block press we last told this hero their class can't hold a block on (told once a press). */
   toldAt: number;
+  /** When a spellblade's dodge through a blow last gave magic back (sim/manashield.ts slipRefills). */
+  slipFillAt?: number;
+  /** A blow started before this is a counter (a block took a blow just before: sim/combat.ts). */
   counterUntil: number;
-  /** When this hero last parried (a sword's riposte: shared/warrior.ts). */
-  parriedAt?: number;
   attackQueuedAt: number;
   rollQueuedAt: number;
   relic: RelicId;
@@ -311,7 +311,7 @@ export interface Hero extends Body {
    *  whole point. */
   stream?: { id: number; step: number; at: number; until: number; next: number; tick: number; owe: number; oweJump: number; hop?: number; oweHop?: number };
   /** The pack rush (sim/packrush.ts) this hero last met with a guard, the instant it landed, how, and how many blows. */
-  rushGuard?: { id: number; at: number; how: 'parry' | 'block'; n: number };
+  rushGuard?: { id: number; at: number; n: number };
   /** Primed spells left (TWICE PRIMED: two). */
   primeLeft?: number;
   /** Techniques (shared/techniques.ts): SHOULDER CHARGE's straight walk (seconds, which way, last walked
@@ -332,7 +332,7 @@ export interface Hero extends Body {
   lifting: number;
   grabQueuedAt: number;
   hitstop: number;
-  /** Extra parry and dodge leniency for this player's ping (seconds). */
+  /** Extra dodge leniency for this player's ping (seconds). */
   lenience: number;
   seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number; augment: number; cls: number; take: number; grab: number; gear: number; potion: number; belt?: number; open: number; level?: number; reload?: number; element?: number; sign?: number };
 }
@@ -369,7 +369,7 @@ export interface EnemyAttack {
   done: boolean;
   /** A charge: who it has already run through. */
   hit?: string[];
-  /** Too heavy to block: a guard that meets it breaks (parry it instead). */
+  /** A crushing blow (the heavy's): a block that meets it costs GUARD.crushCost the stamina and shoves harder. */
   crush?: boolean;
   /** One blow of a pack rush (sim/packrush.ts): the rush, the room time every blow of it lands, and the
    *  fan's middle (a guard facing it covers every blow). */
@@ -532,8 +532,7 @@ export interface Enemy extends Body {
   noose?: boolean;
   zoned?: boolean;
   snareAt?: number;
-  /** The Staithe's sorts (sim/gaffer.ts, skimmer.ts): when its hook was snapped by a parry; pinned by frost until; a hung net last caught it. */
-  snapAt?: number;
+  /** The Staithe's sorts (sim/skimmer.ts): pinned by frost until; a hung net last caught it. */
   pinUntil?: number;
   snagAt?: number;
   pourAt?: number;
@@ -685,14 +684,13 @@ export type FightEvent =
   | { k: 'strikewarn' | 'strike'; x: number; y: number }
   | { k: 'bannerfall' | 'routed' | 'struggle' | 'recovered' | 'escaped' | 'rooffall' | 'whip' | 'scatter' | 'howl' | 'dig' | 'surface' | 'unearthed' | 'slick' | 'oilwarn' | 'oilup' | 'crows' | 'listen' | 'ledoff' | 'pulled'
     /** The Staithe (sim/staithe.ts): the log across, shoved in, a net caught someone, a jetty burnt through, the punt over, someone lost off it, a skimmer pinned, a hook snapped. */
-    | 'logacross' | 'logshoved' | 'snagged' | 'thrown' | 'puntover' | 'trip' | 'folklost' | 'skimpin' | 'hooksnap' | 'smokehouse'; x: number; y: number }
+    | 'logacross' | 'logshoved' | 'snagged' | 'thrown' | 'puntover' | 'trip' | 'folklost' | 'skimpin' | 'smokehouse'; x: number; y: number }
   /** A hook flung from (x, y) to (x2, y2): the gaffer taking someone off the jetty, or a hero hauled to its brute. */
   | { k: 'gaffed' | 'hooked'; x: number; y: number; x2: number; y2: number }
   | { k: 'netted' | 'netfree'; x: number; y: number; id: string }
-  /** A pack rush winding up (`n` goblins, `id` the hero it's on), and one parry that answered `n` of its blows
-   *  (both at the fan's middle);
+  /** A pack rush winding up (`n` goblins, `id` the hero it's on, at the fan's middle);
    *  an ironhide's guard broken (sim/packrush.ts, sim/ironhide.ts). */
-  | { k: 'rush' | 'rushparried'; x: number; y: number; n: number; id: string }
+  | { k: 'rush'; x: number; y: number; n: number; id: string }
   | { k: 'cracked'; x: number; y: number }
   | { k: 'cutfree'; x: number; y: number; id: string; by: string }
   | { k: 'stolen'; x: number; y: number; id: string; n: number; potion?: PotionId }
@@ -723,24 +721,24 @@ export type FightEvent =
   /** A shot stopped dead on a shield-bearer's board (sim/board.ts): a thunk, sparks, BLOCKED. */
   | { k: 'deflect'; x: number; y: number }
   /** `more`: another blow of a pack rush met by the same guard in the same instant (its words said once). */
-  | { k: 'block' | 'parry' | 'guardbreak' | 'winded' | 'breath' | 'bash' | 'dodge' | 'slip' | 'out' | 'roll' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number; more?: boolean }
+  | { k: 'block' | 'guardbreak' | 'winded' | 'breath' | 'bash' | 'dodge' | 'slip' | 'out' | 'roll' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number; more?: boolean }
   | { k: 'windup' | 'impact'; x: number; y: number; kind: AttackKind }
   /** The prologue's cutscene: the ground shaking, the bite, a body landing, the Stoker's bellow. */
   | { k: 'rumble' | 'bite' | 'thud' | 'bellow' | 'fanfare'; x: number; y: number }
   /** A wood objective done (sim/woodsteps.ts): the tracker's gold flash. */
   | { k: 'passed'; x: number; y: number }
   /** A Ranger or Rogue holding block (it does nothing), or a Mage pressing it at all. */
-  | { k: 'noblock' | 'noguard'; x: number; y: number; dodge?: string }
+  | { k: 'noguard'; x: number; y: number; dodge?: string }
   /** The Ranger's snare laid; the hound barking or yelping off. */
   | { k: 'snareset' | 'bark' | 'yelp'; x: number; y: number }
   /** The Mage's channel: its spells now `el`, the first one primed. */
   | { k: 'channeled'; x: number; y: number; el: string }
   /** The Mage's kits (sim/spells.ts, manashield.ts): magic spent (`n`), a spell fizzled for want of it, a
    *  blow broken off by a wand's tap, a staff's slash (along dx, dy). The spellblade's shield: a hit took
-   *  `n` magic, the shield ran out, a parry gave `n` back (`big`: a perfect one). */
+   *  `n` magic, the shield ran out, a dodge through a blow gave `n` back. */
   | { k: 'magic' | 'manaward'; x: number; y: number; n: number }
   | { k: 'fizzle' | 'interrupt' | 'manabreak'; x: number; y: number }
-  | { k: 'manaup'; x: number; y: number; n: number; big?: boolean }
+  | { k: 'manaup'; x: number; y: number; n: number }
   | { k: 'slash'; x: number; y: number; dx: number; dy: number; el: Augment }
   /** A Mage's held spell going off (sim/holds.ts): `what` it is, from (x, y) along (dx, dy), `r` its size
    *  (a cone's or ring's radius, a rush's length), `big` let go on the flash. */
@@ -766,13 +764,13 @@ export type FightEvent =
   | { k: 'burst'; x: number; y: number; r: number; el: Augment }
   | { k: 'shock' | 'beam' | 'boltline'; x: number; y: number; x2: number; y2: number }
   | { k: 'heal'; x: number; y: number; n: number }
-  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle' | 'lift' | 'oilfire' | 'freed' | 'exitopen' | 'blaze' | 'chop' | 'denspawn' | 'hallow' | 'ward' | 'warded' | 'reflect' | 'wardbreak' | 'spotted' | 'skewer' | 'envenom' | 'riposte' | 'shieldbash' | 'quake' | 'pin' | 'blinded' | 'wind' | 'loaded' | 'glint' | 'trueshot' | 'holyshield' | 'shieldsoak' | 'shieldgone' | 'coalburst' | 'coalflare' | 'snag' | 'flailstun' | 'holysmite' | 'shrug'
+  | { k: 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle' | 'lift' | 'oilfire' | 'freed' | 'exitopen' | 'blaze' | 'chop' | 'denspawn' | 'hallow' | 'ward' | 'warded' | 'reflect' | 'wardbreak' | 'spotted' | 'skewer' | 'envenom' | 'shieldbash' | 'quake' | 'pin' | 'blinded' | 'wind' | 'loaded' | 'glint' | 'trueshot' | 'holyshield' | 'shieldsoak' | 'shieldgone' | 'coalburst' | 'coalflare' | 'snag' | 'flailstun' | 'holysmite' | 'shrug'
       /** Techniques firing (shared/techniques.ts): SLAM's bursts, SHOULDER CHARGE ready and landing, IRON FEET,
        *  KNIFEWORK's bleed, SLIP AWAY, CUTPURSE, QUICK NOCK, STEADY, MENDING HANDS, SANCTUARY STEP, JUDGEMENT. */
       | 'slamburst' | 'shoulderready' | 'shoulder' | 'ironfeet' | 'cutbleed' | 'slipaway' | 'cutpurse' | 'quicknock' | 'steady' | 'mending' | 'sanctstep' | 'judged'; x: number; y: number }
   /** The movement ladder and the Mage's techniques firing (shared/ladder.ts, techniques.ts): `r` a reach,
    *  `el` an element, `n` magic given back, (x2, y2) the friend covered or the goblin gone through. */
-  | { k: 'airshot' | 'twinsnare' | 'landing' | 'blinkburst' | 'blinkthrough' | 'halfblink' | 'caltrops' | 'underlegs' | 'legstab' | 'shakeoff' | 'shelter' | 'parrymend' | 'coverfor' | 'taunt' | 'taunted' | 'braced' | 'attuned' | 'spellthief'; x: number; y: number; r?: number; el?: Augment; n?: number; x2?: number; y2?: number }
+  | { k: 'airshot' | 'twinsnare' | 'landing' | 'blinkburst' | 'blinkthrough' | 'halfblink' | 'caltrops' | 'underlegs' | 'legstab' | 'shakeoff' | 'shelter' | 'blockmend' | 'coverfor' | 'taunt' | 'taunted' | 'braced' | 'attuned' | 'spellthief'; x: number; y: number; r?: number; el?: Augment; n?: number; x2?: number; y2?: number }
   /** A goblin retching up a perfect dart's poison, facing (dx, dy) (sim/venom.ts). */
   | { k: 'puke'; x: number; y: number; dx: number; dy: number }
   | { k: 'collapse'; x: number; y: number; w: number; h: number }

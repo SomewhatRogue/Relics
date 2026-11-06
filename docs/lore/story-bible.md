@@ -276,8 +276,8 @@ most Want among the heroes is the one the bells don't spare).
 
 ## The Warrior's weapons (recorded 2026-11-03; Kyle's call, lore keeper)
 - Sword and shield, greatsword, spear. Warriors don't roll and have no dodge button at all: they walk out of a blow (the WALK OUT the wood teaches; updated 2026-11-04).
-- The greatsword can't hold a block, only parry: a greatsword Warrior's whole defence is the parry and walking out (an exception to "they block").
-- On-screen terms: RIPOSTE, PINNED, SHOCKWAVE. A Warrior's shockwave knocks goblins flat, never friends.
+- No parry anywhere (Kyle, 2026-11-05): the greatsword holds a block like the Warrior's other kits, a slow and dear one, so there's no exception to "they block" any more.
+- On-screen terms: PINNED, SHOCKWAVE (RIPOSTE went with parry, 2026-11-05; COUNTER stays, for the blow straight after a block). A Warrior's shockwave knocks goblins flat, never friends.
 - Open for Kyle: can the spear pin a butcher, or only small goblins (as the Hound does)?
 
 ## The Ranger's weapons (recorded 2026-11-03; Kyle's call, lore keeper)
@@ -288,10 +288,10 @@ most Want among the heroes is the one the bells don't spare).
 
 ## The Mage's weapons (recorded 2026-11-04; Kyle's call, lore keeper)
 - The focus is the wand, the staff or the spellblade; the lance rod is gone. The spellblade's steel is Halvard's remelted or a pre-war piece, never from outside; the Channel works through it as through any focus.
-- The blade's charge is not a stored spell. Nothing on screen ever says a spell is caught, kept or stored in a blade or focus for later (that's the Blacktongue idea). A parry fills the blade; nothing is ever kept in it.
+- The blade's charge is not a stored spell. Nothing on screen ever says a spell is caught, kept or stored in a blade or focus for later (that's the Blacktongue idea). Its magic is a shield, and a blink through a blow gives some back; nothing is ever kept in it (updated 2026-11-05: parry is gone).
 - A Mage's bar is MAGIC on screen (Kyle, 2026-11-04); every other class's is STAMINA. It's the same bar underneath: a Mage's spells and blink spend it, and it shows a soft violet. (Before: STAMINA for everyone, never "magic", one bar, one name.)
-- The spellblade parries like any parry-only weapon (Kyle, 2026-11-04: "Spellblade can perfect parry"): block pressed while the red flashes white is a PARRY, with the stagger and counter window any parry gives, and its parry fills the blade. CATCH and CAUGHT are retired.
-- On-screen terms: PARRY (the spellblade's, as anyone's), INTERRUPTED (a wand spark landing on a wind-up, a bonus; the wand's perfect is the burst let go on the white flash), WREATHE. The spellblade's perfect is the wreathe released on the white flash (updated 2026-11-04).
+- The spellblade doesn't block or parry (2026-11-05: parry is gone; it had parried since 2026-11-04). It blinks like any Mage kit, and a blink through a blow refills its magic. CATCH and CAUGHT stay retired.
+- On-screen terms: INTERRUPTED (a wand spark landing on a wind-up, a bonus; the wand's perfect is the burst let go on the white flash), WREATHE. The spellblade's perfect is the wreathe released on the white flash (updated 2026-11-04).
 - THE JEALOUS ROD is now THE JEALOUS WAND. Open for Kyle: hungry gear is "plain steel that sat in a butcher's fist", and a wand is wood; is it steel-shod, or does the line widen to "gear that sat in a butcher's fist"?
 
 ## The Cleric's weapons (recorded 2026-11-04; Kyle's call, lore keeper)

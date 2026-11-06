@@ -149,13 +149,13 @@ callouts, the job board, party and lobby text, and the church, council and relic
   be clear about anything the player needs to act on. Game text (cards, knacks, buttons, tips,
   stats) is plain, second-person and direct: "you", "your", "friends near you".
 - **Use the same word for the same thing everywhere.** Stamina (not breath or wind), and MAGIC for
-  a Mage's same bar (Kyle, 2026-11-04: a Mage reads MAGIC everywhere the bar is named), PERFECT (the
-  well-timed block), health, damage, friends, foes. If a word means a mechanic on one screen, it
+  a Mage's same bar (Kyle, 2026-11-04: a Mage reads MAGIC everywhere the bar is named), PERFECT (a hold
+  let go on the white flash; there's no perfect block), health, damage, friends, foes. If a word means a mechanic on one screen, it
   means the same mechanic on every screen.
-- **Two white flashes, two phrasings.** "The white flash" is a hold's cue: let go on it (a bow's
-  draw, the spellblade's enchant, every "ON THE FLASH" in the kit lines). The parry's cue is always
-  "the red flashes white" (or "while the red is flashing white"): the red telegraph on the floor
-  turning white. Never call the parry cue "the white flash", so the two never blur.
+- **One white flash.** "The white flash" is a hold's cue: let go on it (a bow's draw, the
+  spellblade's enchant, every "ON THE FLASH" in the kit lines). The telegraph on the floor never
+  flashes white now (parry went on 2026-11-05), so "the red flashes white" is retired, and no line
+  says PARRY, RIPOSTE or PERFECT PARRY.
 - **Mercy stays off screen.** The word is reserved for the Unmaking in the story bible.
 
 ### Kyle's style (the model for game text; Kyle, 2026-11-04)

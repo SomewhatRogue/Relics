@@ -2,7 +2,7 @@
  * What the room counts for each hero on a job, for the recap (Kyle, 2026-11-05: "show them a recap of
  * how they and all players did in that mission. Numbers killed, dodges, damage done etc."). The room
  * hands its board in while it steps (room.ts), each count is made where the thing happens (a blow, a
- * parry, a heal), and the run folds the board in after every step (run.ts tally). Keyed by hero id, so
+ * block, a heal), and the run folds the board in after every step (run.ts tally). Keyed by hero id, so
  * a friend's game reads the leader's numbers with its own under `me` (coop.ts swaps the ids).
  */
 import type { HeroClass } from '../shared/weapons';
@@ -15,10 +15,8 @@ export interface Score {
   taken: number;
   /** Blows dodged: rolled, jumped or blinked out of, or stepped out of a striped one. */
   dodges: number;
-  /** Blows held on a block, parried, and parried on the very press (MANA_SHIELD.perfectIn). */
+  /** Blows held on a block (parry and the perfect parry went on 2026-11-05: an old board's are ignored). */
   blocks: number;
-  parries: number;
-  perfect: number;
   /** Times downed; friends got back up; health given to friends (never yourself). */
   downs: number;
   raised: number;
@@ -32,8 +30,8 @@ export interface Score {
 export type Board = Record<string, Score>;
 export type Count = Exclude<keyof Score, 'name' | 'cls'>;
 
-export const COUNTS: readonly Count[] = ['kills', 'dealt', 'taken', 'dodges', 'blocks', 'parries', 'perfect', 'downs', 'raised', 'healed', 'best'];
-export const blankScore = (): Score => ({ kills: 0, dealt: 0, taken: 0, dodges: 0, blocks: 0, parries: 0, perfect: 0, downs: 0, raised: 0, healed: 0, best: 0 });
+export const COUNTS: readonly Count[] = ['kills', 'dealt', 'taken', 'dodges', 'blocks', 'downs', 'raised', 'healed', 'best'];
+export const blankScore = (): Score => ({ kills: 0, dealt: 0, taken: 0, dodges: 0, blocks: 0, downs: 0, raised: 0, healed: 0, best: 0 });
 
 /** The board of the room stepping now (null between steps: nothing outside a step counts). */
 let on: Board | null = null;

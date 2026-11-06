@@ -1,5 +1,5 @@
 /**
- * Effects that only decorate: sparks, blood (that stays on the floor), floating calls ("PARRY"),
+ * Effects that only decorate: sparks, blood (that stays on the floor), floating calls ("BLOCK"),
  * rings, screen shake and short flashes of light. Cosmetic, so Math.random is fine here.
  */
 import { foeFx } from './fxfoes';
@@ -145,9 +145,6 @@ export class Fx {
       case 'snareset':
         this.burst(x, y - 1, 6, ['#8a6a3a', '#5a3d22'], 25, false, 120, true);
         break;
-      case 'noblock':
-        this.say(x, y - 30, "CAN'T BLOCK: TAP TO PARRY", '#c8c4d0');
-        break;
       case 'noguard':
         this.say(x, y - 30, "CAN'T BLOCK: " + ({ roll: 'ROLL', backstep: 'JUMP', dash: 'DASH', blink: 'BLINK' } as Record<string, string>)[(ev as { dodge?: string }).dodge ?? 'roll'], '#c8c4d0');
         break;
@@ -252,19 +249,14 @@ export class Fx {
         this.flashes.push({ x, y: y - 8, r: 34, i: 0.7, c: [1, 0.8, 0.5], life: 0.08, max: 0.08 });
         break;
       case 'block':
-        this.burst(x, y - 8, 7, ['#ffd27a', '#ff9a40', '#ffffff'], 55, true);
+        // A solid block: sparks off the guard, a short ring where the blow met it, a jolt.
+        this.burst(x, y - 8, 10, ['#ffd27a', '#ff9a40', '#ffffff'], 60, true);
+        this.rings.push({ x, y: y - 8, life: 0.18, max: 0.18, col: '#ffe0a8' });
         this.say(x, y - 24, 'BLOCK', '#c8c4d0');
-        this.shake = Math.max(this.shake, 1);
+        this.shake = Math.max(this.shake, 2);
         break;
       case 'spotted':
         this.say(x, y - 22, '!', '#ff6a5a');
-        break;
-      case 'parry':
-        this.burst(x, y - 8, 18, ['#ffffff', '#cfe8ff', '#9fd0ff'], 90, true);
-        this.rings.push({ x, y: y - 8, life: 0.3, max: 0.3, col: '#e8f4ff' });
-        this.say(x, y - 26, 'PARRY', '#bfe4ff');
-        this.shake = Math.max(this.shake, 3);
-        this.flashes.push({ x, y: y - 8, r: 80, i: 1.4, c: [0.8, 0.9, 1], life: 0.18, max: 0.18 });
         break;
       case 'guardbreak':
         this.say(x, y - 26, 'GUARD BREAK', '#ff5a4a');

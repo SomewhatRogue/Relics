@@ -1,10 +1,10 @@
-/** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, parry, roll). */
+/** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, roll, or taken). */
 import { wetMult } from './techmage';
 import { litMult } from './charge';
-import { CENSER, BLESSING, DODGE, WARD, FLINCH, POISE, HORN, OVERKILL, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing, CLASS_DODGES, RIPOSTE, CRIT, STEALTH, weakOn, SPLAT, BANNER, STORM, MANA_SHIELD } from '../shared/tuning';
+import { CENSER, BLESSING, DODGE, WARD, FLINCH, POISE, HORN, OVERKILL, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing, CLASS_DODGES, CRIT, STEALTH, weakOn, SPLAT, BANNER, STORM } from '../shared/tuning';
 import { shove } from './bodies';
 import { knack, statsOf } from './gearstats';
-import { counterWindow, parryWindow, rearCos, slipWindow } from './knacks';
+import { counterWindow, guardArc, rearCos, slipWindow } from './knacks';
 import { HUNGRY_FX, wears } from './hungry';
 import { damage, frozen, isDummy, kill, sayWeak, small, snared, stunOf } from './damage';
 import { poison } from './poison';
@@ -12,26 +12,25 @@ import { shatter } from './elements';
 import { fling, hardHit, heavyHit } from './iceslide';
 import { has } from './traits';
 import { brandyDmg } from './brandy';
-import { lunging, riposteNow, shaftMult, warriorHit } from './warrior';
-import { manaShield, parryRefills } from './manashield';
+import { lunging, shaftMult, warriorHit } from './warrior';
+import { manaShield, slipRefills } from './manashield';
 import { soak } from './holy';
 import { clericHit } from './flail';
 import { stun } from './stuns';
 import type { Enemy, EnemyAttack, FightEvent, Hero } from './types';
 import { isRound } from './types';
 import { landed } from './ownfoes';
-import { snapHook } from './gaffer';
 import { OWN_KIT } from './enemies';
 import { travelTo } from '../shared/sweep';
 import { knockDown, rooted, takeShoulder } from './techwarrior';
 import { judge } from './techcleric';
 import { legStab } from './ladderrogue';
-import { cover, parryMend, shelter } from './ladderhealer';
+import { blockMend, cover, shelter } from './ladderhealer';
 import { braced, softer } from './taunt';
 import { stormCut } from './spellbook';
 import { wet } from './wet';
-import { clanks, crack, plated } from './ironhide';
-import { guardFrom, rushBlocked, rushParried, noteRush, rushStun } from './rushguard';
+import { clanks, plated } from './ironhide';
+import { guardFrom, rushBlocked, noteRush } from './rushguard';
 import { count, dealt } from './score';
 import { chalkTaken } from './chalker';
 
@@ -74,10 +73,9 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   const storm = stormCut(h, s), boarded = e.variant === 'shield' && !rear && !heavy && !heldFast && !ambush && !storm;
   const weak = weakOn(e), soaked = storm && wet(e) ? wetMult(h, STORM.wet) : 1;
   sayWeak(e, weak, now, ev, 'physical');
-  // The sword's riposte (a counter straight off the parry; a bonus, not its perfect) doubles the counter; the spear's shaft halves a blow up close.
-  const riposte = riposteNow(h, now);
-  if (riposte && h.hitIds.filter((id) => id > 0).length === 1) ev.push({ k: 'riposte', x: e.x, y: e.y });
-  const mult = weak * soaked * (h.counter ? counter * (riposte ? RIPOSTE.mult : 1) : heldFast ? held : 1) * shaftMult(h, s, e) * rearMult * blessed * tempo * (crit ? CRIT : 1) * (ambush ? STEALTH.ambush * (1 + knack(h, 'ambush')) : 1) * (boarded ? VARIANTS.shield.front : 1) * brandyDmg(h, now) * litMult(h) * (h.snagged ? CENSER.snag : 1) * ((e.routUntil ?? -9) > now ? BANNER.rout.hurt : 1);
+  // STAMINA ON COUNTER: a counter's first hit fills your stamina. (The spear's shaft halves a blow up close.)
+  if (h.counter && has(h, 'bulwark') && h.hitIds.filter((id) => id > 0).length === 1) h.stamina = Math.max(h.stamina, HERO.stamina);
+  const mult = weak * soaked * (h.counter ? counter : heldFast ? held : 1) * shaftMult(h, s, e) * rearMult * blessed * tempo * (crit ? CRIT : 1) * (ambush ? STEALTH.ambush * (1 + knack(h, 'ambush')) : 1) * (boarded ? VARIANTS.shield.front : 1) * brandyDmg(h, now) * litMult(h) * (h.snagged ? CENSER.snag : 1) * ((e.routUntil ?? -9) > now ? BANNER.rout.hurt : 1);
   // An ironhide's plates (sim/ironhide.ts): a charged blow or a perfect breaks its guard; else a fifth gets through.
   const plate = clanks(e, now) && !(h.heavy || h.perfect), raw = plated(e, Math.round(s.dmg * mult), now, h.heavy || h.perfect, ev);
   // Mother Rust's Needles: a backstab kills anything short of a butcher.
@@ -85,7 +83,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   e.hp -= n;
   e.hitAt = now;
   dealt(e, h.id, n);
-  const stop = h.counter ? HITSTOP.parry : heavy || WEAPONS[h.weapon]?.ponderous ? HITSTOP.heavy : HITSTOP.light;
+  const stop = h.counter ? HITSTOP.counter : heavy || WEAPONS[h.weapon]?.ponderous ? HITSTOP.heavy : HITSTOP.light;
   h.hitstop = Math.max(h.hitstop, stop);
   e.hitstop = Math.max(e.hitstop, stop);
   // A blow sweeping all round (the healer's blessing) throws outward; anything else, along the swing.
@@ -193,7 +191,7 @@ export function rollCrit(h: Hero): boolean {
   return x / 4294967296 < chance;
 }
 
-/** An enemy's attack lands on a hero: rolled through, parried, blocked, or taken. `heroes`: the room's,
+/** An enemy's attack lands on a hero: rolled through, blocked, or taken. `heroes`: the room's,
  *  for the Healer's guard rungs (sim/ladderhealer.ts). */
 export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: FightEvent[], heroes: Hero[] = []): void {
   // Just come into the room: nothing lands yet.
@@ -204,7 +202,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     // so the blow lands where you were a breath ago, it staggers the attacker just as rolling through does.
     if (h.lastRollAt >= now - a.windup && attackCovers(a, { ...h, x: h.rollX, y: h.rollY })) {
       ev.push({ k: 'dodge', x: h.x, y: h.y }), count(h.id, 'dodges');
-      if (CLASS_DODGES[WEAPONS[h.weapon].cls] && now - h.lastRollAt <= slipWindow(h)) slipped(e, a, h, ev);
+      if (CLASS_DODGES[WEAPONS[h.weapon].cls] && now - h.lastRollAt <= slipWindow(h)) slipped(e, a, h, ev), slipRefills(h, now, ev);
     }
     // No dodge (a Warrior, a Healer): walked out of a striped blow meant for you. That's the dodge.
     else if (!CLASS_DODGES[WEAPONS[h.weapon].cls] && a.unblockable && a.aimed === h.id) ev.push({ k: 'dodge', x: h.x, y: h.y }), count(h.id, 'dodges');
@@ -221,6 +219,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   if (h.act === 'roll' && h.actT >= w.dodge.iFrom && h.actT <= slipWindow(h)) {
     ev.push({ k: 'dodge', x: h.x, y: h.y }), count(h.id, 'dodges');
     slipped(e, a, h, ev);
+    // A spellblade's dodge through a blow refills its magic, its shield (sim/manashield.ts).
+    slipRefills(h, now, ev);
     if (has(h, 'tempo')) (h.tempoUntil = now + TRAIT.tempoTime), ev.push({ k: 'tempo', x: h.x, y: h.y });
     return;
   }
@@ -237,57 +237,40 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     ev.push({ k: 'hit', x: h.x, y: h.y, n: a.dmg, heavy: true, on: 'hero', src: 'draw' });
     return downIfDead(h, ev);
   }
-  const tx = e.x - h.x, ty = e.y - h.y, tl = Math.hypot(tx, ty) || 1;
+  const tx = e.x - h.x, ty = e.y - h.y;
   // Pushed away from where the blow came from (the slam's centre for a slam).
   const round = isRound(a.kind);
   const sx = round ? h.x - a.cx : -tx, sy = round ? h.y - a.cy : -ty, sl = Math.hypot(sx, sy) || 1;
   // The kit's guard covers an arc in front: a shield covers nearly everything ahead. (A pack rush is
   // judged from the middle of its fan, so one guard facing it covers every blow: sim/rushguard.ts.)
   const [gx, gy] = guardFrom(e, a, h), gl = Math.hypot(gx, gy) || 1;
-  const facing = (h.fx * gx + h.fy * gy) / gl > Math.cos(((w.guardArc / 2) * Math.PI) / 180);
+  const facing = (h.fx * gx + h.fy * gy) / gl > Math.cos(((guardArc(h) / 2) * Math.PI) / 180);
   const canGuard = !a.unblockable && facing && (h.act === 'idle' || h.act === 'attack' || h.act === 'charge');
-  const again = rushParried(h, a, now);
-  if (canGuard && (now - h.parryOpenAt <= parryWindow(h) || again)) {
-    // A spellblade's perfect parry: the blow lands just after the press (one rush's later blows aren't).
-    const tight = !again && now - h.parryOpenAt <= MANA_SHIELD.perfectIn;
-    h.counterUntil = now + counterWindow(h);
-    h.parriedAt = now;
-    h.parryOpenAt = -9;
-    if (has(h, 'bulwark')) h.stamina = HERO.stamina;
-    h.hitstop = Math.max(h.hitstop, HITSTOP.parry);
-    e.hitstop = HITSTOP.parry;
-    // A parried ironhide's guard is broken; every goblin in a parried rush is held through the counter.
-    crack(e, now, ev);
-    // A gaffer's hook parried: it snaps (sim/gaffer.ts).
-    if (a.kind === 'hook') snapHook(e, now, ev);
-    noteRush(h, a, now, 'parry');
-    Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: rushStun(a, stunOf(e)) });
-    shove(e, tx / tl, ty / tl, 4, e.weight);
-    ev.push({ k: 'parry', x: (h.x + e.x) / 2, y: (h.y + e.y) / 2, ...(again ? { more: true } : {}) });
-    // (The recap's: one parry a blow, a rush's later blows not again; perfect on the very press.)
-    if (!again) count(h.id, 'parries'), tight && count(h.id, 'perfect');
-    ev.push({ k: 'stunned', x: e.x, y: e.y, ...(again ? { more: true } : {}) });
-    // A spellblade's parry refills its magic, its shield (sim/manashield.ts; once a rush); MENDING PARRY heals friends near (sim/ladderhealer.ts).
-    if (!again) parryRefills(h, tight, ev);
-    parryMend(h, heroes, ev);
-    return;
-  }
+  // Held block, no timing to it (Kyle, 2026-11-05: parry is gone, and no perfect block either).
   if (canGuard && h.blocking) {
     // A pack rush: the one block takes every blow in it (its first blow's stamina paid for all).
     if (rushBlocked(h, a, now)) return void ev.push({ k: 'block', x: h.x, y: h.y, more: true });
-    noteRush(h, a, now, 'block');
-    // Too heavy to block: the guard breaks (it should have been parried).
-    if (a.crush) h.stamina = 0;
-    // A held block takes nothing off your health; it costs breath instead, and plenty of it.
-    h.stamina -= a.dmg * soft * GUARD.staminaPerDmg * w.guardCost * (1 - g.guard) * (1 - knack(h, 'block'));
+    noteRush(h, a, now);
+    // A held block takes nothing off your health; it costs breath instead, and plenty of it (a heavy's
+    // crushing blow more, and it shoves you further).
+    const crush = a.crush ? GUARD.crushCost : 1;
+    h.stamina -= a.dmg * soft * GUARD.staminaPerDmg * w.guardCost * crush * (1 - g.guard) * (1 - knack(h, 'block'));
     h.staminaAt = now;
-    h.hitstop = Math.max(h.hitstop, HITSTOP.light);
-    if (!braced(h, now)) shove(h, sx / sl, sy / sl, a.knock * 0.4, HERO.weight);
+    // The blow meets the guard: a solid thud, held a beat, and a small push back.
+    h.hitstop = Math.max(h.hitstop, a.crush ? HITSTOP.heavy : HITSTOP.light);
+    e.hitstop = Math.max(e.hitstop, HITSTOP.light);
+    if (!braced(h, now)) shove(h, sx / sl, sy / sl, a.knock * (a.crush ? GUARD.crushShove : 0.4), HERO.weight);
     count(h.id, 'blocks');
     if (h.stamina <= 0) {
       Object.assign(h, { stamina: 0, winded: true, act: 'stun', actT: 0, actDur: GUARD.guardBreakStun });
       ev.push({ k: 'guardbreak', x: h.x, y: h.y });
-    } else ev.push({ k: 'block', x: h.x, y: h.y });
+      return;
+    }
+    ev.push({ k: 'block', x: h.x, y: h.y });
+    // A block that holds opens the counter: the next blow started soon after lands harder (GUARD.counterMult).
+    h.counterUntil = now + counterWindow(h);
+    // HEALING BLOCK heals friends near (sim/ladderhealer.ts).
+    blockMend(h, heroes, ev);
     return;
   }
   // A Cleric's holy shield soaks what it can (sim/holy.ts), then a spellblade's magic, unless the blow is

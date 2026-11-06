@@ -34,7 +34,7 @@ export const DROPPER = { sense: 3.4, fall: 1.0, r: 1.0, dmg: 12, knock: 5, stun:
 /**
  * Hempen, the wood's named butcher (the climax): tougher than a named one on a job, and every `every`
  * seconds, with a hero between `min` and `noose.range` tiles, it throws its noose down a thin red lane
- * (block it; a parry snaps the rope, as a gaffer's hook) that hoists whoever it lands on.
+ * (block it, or dodge out of the lane, as a gaffer's hook) that hoists whoever it lands on.
  */
 export const HEMPEN = {
   hp: 600, every: 8, min: 2.2,

@@ -289,12 +289,15 @@ describe('the Staithe: the gaffer and the skimmer', () => {
     expect(room.events.some((e) => e.k === 'block')).toBe(true);
     expect(h.x).toBeCloseTo(x0, 0);
   });
-  it('parried, the hook snaps (no more hooking for a while)', () => {
+  it('dodged (a Ranger jumping through it), nothing comes of it either; nothing snaps the hook now (no parry)', () => {
     const { room, g, h } = hookRoom();
-    h.parryOpenAt = room.time;
+    Object.assign(h, { weapon: 'longbow', act: 'roll', actT: 0.1 });
+    const x0 = h.x;
     hitHero(g, g.attack ?? { ...GAFFER.hook, kind: 'hook', aimed: h.id, t: 0.9, dx: 1, dy: 0, ox: g.x, oy: g.y, cx: g.x, cy: g.y, radius: 0, done: false, range: 4, arc: 6 } as never, h, room.time, room.events, room.heroes);
-    expect(room.events.some((e) => e.k === 'hooksnap')).toBe(true);
-    expect(g.snapAt).toBe(room.time);
+    expect(room.events.some((e) => e.k === 'dodge')).toBe(true);
+    expect(room.events.some((e) => e.k === 'hooked')).toBe(false);
+    expect(h.x).toBeCloseTo(x0, 0);
+    expect('snapped' in GAFFER).toBe(false);
   });
   it('landed, it hauls you across to its brute', () => {
     const { room, g, h } = hookRoom(), brute = room.enemies.find((e) => e.variant === 'heavy')!, st = room.map.staithe!;

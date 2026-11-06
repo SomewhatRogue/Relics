@@ -44,7 +44,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     await page.evaluate(() => { const g = window.__game, d = g.drill, h = g.hero, e = g.room.enemies.filter((x) => d.ids.includes(x.id) && x.act !== 'dead').sort((a, b) => Math.hypot(b.x - h.x, b.y - h.y) - Math.hypot(a.x - h.x, a.y - h.y))[0]; if (e) Object.assign(e, { act: 'dead', actT: 9, hp: 0, attack: null }); g.hero.safeT = 99; });
     await wait(1200);
     await page.screenshot({ path: `${out}/straw-${look}-fight.png` });
-    await page.evaluate(() => (window.__openSpot('practice'), document.querySelector('#panel [data-pk="drill:parry"]').click()));
+    await page.evaluate(() => (window.__openSpot('practice'), document.querySelector('#panel [data-pk="drill:block"], #panel [data-pk="drill:dodge"]').click()));
     await page.evaluate(() => { const g = window.__game; Object.assign(g.hero, { x: 9, y: 8.2, fx: 0, fy: -1 }); g.hero.safeT = 99; });
     await wait(3500);
     await page.screenshot({ path: `${out}/straw-${look}-drill.png` });

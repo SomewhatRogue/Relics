@@ -212,16 +212,15 @@ export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number, dozing = false
 }
 
 /**
- * The telegraph on the floor: a red shape that fills before the attack lands. While a parry
- * would land (the last `parryWindow` of the wind-up, from the player's kit), its edge and fill flash white.
+ * The telegraph on the floor: a red shape that fills before the attack lands, with a striped edge for a
+ * blow that can't be blocked. (It flashed white for a parry until parry went, 2026-11-05.)
  */
-export function drawTelegraph(c: Ctx, a: EnemyAttack, cx: number, cy: number, parryWindow: number): void {
+export function drawTelegraph(c: Ctx, a: EnemyAttack, cx: number, cy: number): void {
   if (a.t >= a.windup + a.active) return;
   const prog = Math.min(1, a.t / a.windup), g = c.glow;
-  const now = !a.unblockable && a.windup - a.t <= parryWindow && a.t < a.windup;
   const pulse = 0.85 + 0.15 * Math.sin(c.now * 20);
-  const fill = now ? '#ffe8e0' : a.kind === 'slam' ? '#e8501f' : '#e23a30';
-  if (a.kind === 'pounce') return drawPounce(c, a, cx, cy, now, pulse);
+  const fill = a.kind === 'slam' ? '#e8501f' : '#e23a30';
+  if (a.kind === 'pounce') return drawPounce(c, a, cx, cy, pulse);
   if (isRound(a.kind)) {
     const R = a.radius * PX, ox = Math.round(OX + a.cx * PX - cx), oy = Math.round(OY + a.cy * PX - cy), Ri = R - 1.2, Rp = R * prog;
     // Row by row: the filled middle and the faint rest as runs, the striped edge pixel by pixel.
@@ -252,11 +251,11 @@ export function drawTelegraph(c: Ctx, a: EnemyAttack, cx: number, cy: number, pa
     }
   } else if (a.kind === 'shot') {
     // An arrow's line: a thin dotted sightline that fills in from the archer as it draws.
-    const R = a.range * PX, ox = OX + a.ox * PX - cx, oy = OY + a.oy * PX - cy, wide = prog > 0.6 || now ? 1 : 0;
+    const R = a.range * PX, ox = OX + a.ox * PX - cx, oy = OY + a.oy * PX - cy, wide = prog > 0.6 ? 1 : 0;
     for (let d = 6; d <= R; d += 1) {
       const on = d < R * prog, px = Math.round(ox + a.dx * d), py = Math.round(oy + a.dy * d);
       if (!on && d % 3) continue;
-      g.fillStyle = now ? '#ffffff' : fill;
+      g.fillStyle = fill;
       g.globalAlpha = on ? 0.85 * pulse : 0.35;
       g.fillRect(px, py, 1 + wide, 1 + wide);
     }
@@ -271,11 +270,11 @@ export function drawTelegraph(c: Ctx, a: EnemyAttack, cx: number, cy: number, pa
       g.fillRect(Math.round(ox + a.dx * d + nx * w), Math.round(oy + a.dy * d + ny * w), 1, 1);
     }
   } else if (a.kind === 'hook') {
-    // The gaffer's hook: a thin red lane its length (it can be blocked), white while a parry would land.
+    // The gaffer's hook: a thin red lane its length (block it, or get out of the lane).
     const R = a.range * PX, ox = OX + a.ox * PX - cx, oy = OY + a.oy * PX - cy, nx = -a.dy, ny = a.dx;
     for (let d = 5; d <= R; d += 1) {
       const on = d < R * prog, px = Math.round(ox + a.dx * d), py = Math.round(oy + a.dy * d);
-      g.fillStyle = now ? '#ffffff' : fill;
+      g.fillStyle = fill;
       g.globalAlpha = on ? 0.9 * pulse : 0.35;
       g.fillRect(px, py, 1, 1);
       if (d % 4 === 0) g.fillRect(Math.round(px + nx), Math.round(py + ny), 1, 1), g.fillRect(Math.round(px - nx), Math.round(py - ny), 1, 1);
@@ -301,8 +300,8 @@ export function drawTelegraph(c: Ctx, a: EnemyAttack, cx: number, cy: number, pa
       const k = (x * a.dx + y * a.dy) / d;
       if (k < cos) continue;
       const edge = d > R - 1.2 || k < cos + 0.012;
-      g.fillStyle = edge && now ? '#ffffff' : edge && a.unblockable ? (Math.floor(d / 2) % 2 ? '#ffd040' : '#2a1408') : edge ? '#e23a30' : fill;
-      g.globalAlpha = edge ? 0.95 : now ? 0.55 : d < R * prog ? 0.48 * pulse : 0.16;
+      g.fillStyle = edge && a.unblockable ? (Math.floor(d / 2) % 2 ? '#ffd040' : '#2a1408') : edge ? '#e23a30' : fill;
+      g.globalAlpha = edge ? 0.95 : d < R * prog ? 0.48 * pulse : 0.16;
       g.fillRect(Math.round(ox + x), Math.round(oy + y), 1, 1);
     }
   }

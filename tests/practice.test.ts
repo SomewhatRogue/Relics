@@ -67,12 +67,17 @@ describe('the practice board', () => {
     const o = offers(fresh, 'WARRIOR');
     expect(o.singles.map((s) => s.key)).toEqual(['scrapper', 'looter', 'lunger', 'heavy']);
     expect(o.packs).toHaveLength(0);
-    expect(o.drills.map((d) => d.key)).toEqual(['parry', 'shields', 'hold']);
-    expect(offers(fresh, 'MAGE').drills.map((d) => d.key)).toContain('burn');
+    // The heavy's ten swings: to block for a class that holds a block, to dodge for one that dodges.
+    expect(o.drills.map((d) => d.key)).toEqual(['block', 'shields', 'hold']);
+    expect(offers(fresh, 'HEALER').drills.map((d) => d.key)).toEqual(['block', 'shields', 'hold']);
+    for (const c of ['RANGER', 'ROGUE'] as const) expect(offers(fresh, c).drills.map((d) => d.key)).toEqual(['dodge', 'shields', 'hold']);
+    expect(offers(fresh, 'MAGE').drills.map((d) => d.key)).toEqual(['dodge', 'shields', 'burn', 'hold']);
+    expect(o.drills[0].name).toBe('BLOCK THE HEAVY');
+    expect(offers(fresh, 'RANGER').drills[0].name).toBe('DODGE THE HEAVY');
     const all = offers(new Set(SINGLES.map((s) => s.key)), 'MAGE');
     expect(all.singles).toHaveLength(SINGLES.length);
     expect(all.packs).toHaveLength(PACKS.length);
-    expect(all.drills).toHaveLength(DRILLS.length);
+    expect(all.drills).toHaveLength(DRILLS.length - 1);
   });
 
   it('keeps the sorts met on a job, for the board', () => {
@@ -88,19 +93,31 @@ describe('the practice board', () => {
 });
 
 describe('the drills count', () => {
-  it('parries against the heavy: PARRIED n OF 10, then done', () => {
-    const g = yard();
-    g.practice({ k: 'drill', key: 'parry' });
-    const room = g.room, heavy = practised(g)[0], p = practiceOf(room)!;
-    expect(heavy.variant).toBe('heavy');
-    for (let i = 0; i < PRACTICE.swings; i++) {
-      heavy.attack = { kind: 'swing', t: 0 } as never;
-      stepPractice(room, i % 5 === 4 ? [] : [{ k: 'parry', x: 0, y: 0 }], ME);
-      heavy.attack = null;
-      stepPractice(room, [], ME);
+  it('blocks against the heavy: BLOCKED n OF 10; dodges: DODGED n OF 10 (a guard break or a rush block is not one more)', () => {
+    for (const [key, word] of [['block', 'BLOCKED'], ['dodge', 'DODGED']] as const) {
+      const g = yard();
+      g.practice({ k: 'drill', key });
+      const room = g.room, heavy = practised(g)[0], p = practiceOf(room)!;
+      expect(heavy.variant).toBe('heavy');
+      for (let i = 0; i < PRACTICE.swings; i++) {
+        heavy.attack = { kind: 'swing', t: 0 } as never;
+        stepPractice(room, i % 5 === 4 ? [{ k: 'guardbreak', x: 0, y: 0 }] : [{ k: key, x: 0, y: 0 }, { k: 'block', x: 0, y: 0, more: true }], ME);
+        heavy.attack = null;
+        stepPractice(room, [], ME);
+      }
+      expect(p.done).toBe(true);
+      expect(p.line).toBe(`${word} 8 OF 10`);
     }
-    expect(p.done).toBe(true);
-    expect(p.line).toBe('PARRIED 8 OF 10');
+  });
+
+  it('BLOCK THE HEAVY for real: a Warrior holding block against the heavy blocks its swings, and the count goes up', () => {
+    const g = yard();
+    g.practice({ k: 'drill', key: 'block' });
+    const room = g.room, heavy = practised(g)[0], h = g.hero;
+    Object.assign(h, { x: heavy.x, y: heavy.y + 1.4, fx: 0, fy: -1 });
+    for (let i = 0; i < 200; i++) g.step(0.05, { ...NO_INTENT, block: true, ay: -1 }), (h.stamina = 100);
+    expect(practiceOf(room)!.met).toBeGreaterThan(0);
+    expect(practiceOf(room)!.line).toMatch(/^BLOCKED \d+ OF 10$/);
   });
 
   it('a shield line broken, a pack burned, a minute held', () => {

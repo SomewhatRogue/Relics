@@ -30,10 +30,10 @@ export const armorHow = (a: keyof typeof ARMOR_HOW, cls?: HeroClass): string => 
   const [name, ...rows] = (cls && !CLASS_DODGES[cls] ? ARMOR_FEET : ARMOR_HOW)[a];
   return `<div class="kitrows armor"><div><b>${name.toUpperCase()}</b><span>${rows.map((r) => barWords(r, cls)).join('<br>')}</span></div></div>`;
 };
-/** Rows a kit has no use for: a parry it can't make, a block it can't hold, a dodge it hasn't got, heals it doesn't give. */
+/** Rows a kit has no use for: a block it can't hold, a dodge it hasn't got, heals it doesn't give. */
 export const shown = (r: Row, w: WeaponId) => {
   const k = WEAPONS[w], cls = k.cls, guard = guardOf(k);
-  return !(r.label === 'PARRY WINDOW' && guard === 'none') && !(r.label === 'THROUGH A BLOCK' && guard !== 'full') &&
+  return !(r.label === 'THROUGH A BLOCK' && guard !== 'full') &&
     !(r.label === 'DODGE EVERY' && !CLASS_DODGES[cls]) && !(r.label === 'HEALING GIVEN' && cls !== 'HEALER') &&
     !(r.label === 'LAST BLOW' && k.combo.length < 2) && !(r.label === 'SWING ARC' && !k.combo.some((s) => !s.thrust && !s.shot && s.arc >= 100)) &&
     !(r.label === 'BACKSTAB' && !k.backstab) && !((r.label === 'SPELL POWER' || r.label === 'SPELL COST') && cls !== 'MAGE');
@@ -51,7 +51,6 @@ export function sheet(w: Worn): Row[] {
     { label: 'SWING', v: (first.windup + first.active + first.recover * 1) * q, unit: 's', low: true },
     { label: 'TO FULL CHARGE', v: (k.draw ?? CHARGE.full) * (1 - g.draw), unit: 's', low: true },
     { label: 'REACH', v: k.heavy.range * (1 + g.reach), unit: '' },
-    { label: 'PARRY WINDOW', v: k.parryWindow + g.parry, unit: 's' },
     { label: 'THROUGH A BLOCK', v: k.chip * (1 - g.guard), unit: '%', low: true },
     { label: 'HEALTH', v: w.baseHp + g.health, unit: '' },
     { label: 'DAMAGE TAKEN', v: g.taken, unit: '%', low: true },
@@ -95,7 +94,7 @@ export function compare(h: Hero, it: Item): string {
 /** A modifier's value as shown: "+12%", "+0.04 s", "+9"; CHEAPER SPELLS reads as the cut it is ("-12%"). */
 const modValue = (m: Mod) => {
   const neg = m.id === 'thrift', v = neg ? -m.v : m.v, sign = v > 0 ? '+' : '';
-  return MODS[m.id].unit === '%' ? sign + Math.round(v * 100) + '%' : MODS[m.id].unit === 's' ? sign + v + ' s' : sign + v;
+  return MODS[m.id]?.unit === '%' ? sign + Math.round(v * 100) + '%' : MODS[m.id]?.unit === 's' ? sign + v + ' s' : sign + v;
 };
 
 /** The card: tier, name, how it fights, what's on it. `brief` leaves out the guard and dodge pictures (a shop's card).
@@ -105,7 +104,7 @@ export function card(it: Item, h?: Hero, brief = false): string {
   const how = s === 'weapon' ? (brief ? labelRows(kitRows(it.kit!)) : weaponHow(it.kit!)) : s === 'armor' ? armorHow(it.armor ?? 'light', cls) : '';
   // Whose hands it's judged in: the weapon itself, or what the wearer holds.
   const kit = s === 'weapon' ? it.kit : h?.weapon;
-  // "NAME +10%: what it does" and "NAME: what it does" (Kyle: "STAMINA ON PARRY: parry refills stamina").
+  // "NAME +10%: what it does" and "NAME: what it does" (Kyle's example, before parry went: "STAMINA ON PARRY: parry refills stamina").
   const mods = (it.mods ?? []).map((m) => {
     const use = !cls || !(m.id in MODS) || modFits(m.id, cls, kit);
     return `<div class="tr${use ? '' : ' nouse'}"><b>${barWords(MODS[m.id]?.name ?? m.id, cls)} ${modValue(m)}${MOD_TEXT[m.id] ? ':' : ''}</b> ${barWords(MOD_TEXT[m.id] ?? '', cls)}${use ? '' : ` <i>${CARDW.noUse}</i>`}</div>`;

@@ -1,5 +1,6 @@
 /** The spellblade's mana shield (sim/manashield.ts, Kyle 2026-11-05): hits drain magic before health, a
- *  parry refills it, holds cost their magic, and a guest's screen gets the same ward. */
+ *  blink through a blow refills it (parry went the same day), holds cost their magic, and a guest's screen
+ *  gets the same ward. */
 import { describe, expect, it } from 'vitest';
 import { HERO, HOUSEFIRE, MANA_SHIELD, SPELL, TICK, type WeaponId } from '../src/shared/tuning';
 import { hitHero } from '../src/sim/combat';
@@ -19,7 +20,7 @@ const blow = (dmg: number, more: Partial<EnemyAttack> = {}): EnemyAttack => ({ k
 
 function hit(weapon: WeaponId, dmg: number, more: Partial<EnemyAttack> = {}, magic = HERO.stamina) {
   const a = mageArena(weapon);
-  Object.assign(a.h, { stamina: magic, parryOpenAt: -9 });
+  Object.assign(a.h, { stamina: magic });
   const ev: FightEvent[] = [], now = a.room.time;
   hitHero(a.e, blow(dmg, more), a.h, now, ev);
   return { ...a, ev, now };
@@ -88,25 +89,46 @@ describe('hits drain magic first', () => {
   });
 });
 
-describe('a parry refills it', () => {
-  it('a parry gives back MAGIC.parry, a perfect one (late, tight) more', () => {
-    for (const [since, n] of [[0.18, MANA_SHIELD.parry], [0.05, MANA_SHIELD.perfect]] as const) {
+describe('a blink through a blow refills it', () => {
+  it('a dodge through a blow (in the blink) gives back MANA_SHIELD.slip, the same however it was timed', () => {
+    for (const at of [0, 0.06, 0.12]) {
       const a = mageArena('spellblade');
-      Object.assign(a.h, { stamina: 30, parryOpenAt: a.room.time - since });
+      Object.assign(a.h, { stamina: 30, act: 'roll', actT: at });
       const ev: FightEvent[] = [];
       hitHero(a.e, blow(15), a.h, a.room.time, ev);
-      expect(ev.some((x) => x.k === 'parry')).toBe(true);
+      expect(ev.some((x) => x.k === 'slip')).toBe(true);
       expect(a.h.hp).toBe(HERO.hp);
-      expect(a.h.stamina).toBe(30 + n);
-      expect(ev.find((x) => x.k === 'manaup')).toMatchObject({ n, ...(n === MANA_SHIELD.perfect ? { big: true } : {}) });
+      expect(a.h.stamina).toBe(30 + MANA_SHIELD.slip);
+      expect(ev.find((x) => x.k === 'manaup')).toMatchObject({ n: MANA_SHIELD.slip });
     }
   });
 
-  it('never past a full bar', () => {
+  it('never past a full bar, and once an instant (a rush blinked through is one refill)', () => {
     const a = mageArena('spellblade');
-    Object.assign(a.h, { stamina: 90, parryOpenAt: a.room.time - 0.05 });
+    Object.assign(a.h, { stamina: 90, act: 'roll', actT: 0.05 });
     hitHero(a.e, blow(15), a.h, a.room.time, []);
     expect(a.h.stamina).toBe(HERO.stamina);
+    Object.assign(a.h, { stamina: 30, act: 'roll', actT: 0.05 });
+    hitHero(a.e, blow(15), a.h, a.room.time, []);
+    expect(a.h.stamina).toBe(30);
+  });
+
+  it('a tap of block is no parry: the blow comes off magic, nothing back', () => {
+    const a = mageArena('spellblade');
+    a.run(TICK, { blockSeq: 1 });
+    const before = a.h.stamina, ev: FightEvent[] = [];
+    hitHero(a.e, blow(10), a.h, a.room.time, ev);
+    expect(ev.some((x) => x.k === 'manaup')).toBe(false);
+    expect(a.h.stamina).toBeLessThan(before);
+  });
+
+  it('only the spellblade gets magic back from a blink through a blow', () => {
+    const a = mageArena('wand');
+    Object.assign(a.h, { stamina: 30, act: 'roll', actT: 0.05 });
+    const ev: FightEvent[] = [];
+    hitHero(a.e, blow(15), a.h, a.room.time, ev);
+    expect(ev.some((x) => x.k === 'manaup')).toBe(false);
+    expect(a.h.stamina).toBe(30);
   });
 });
 
@@ -135,7 +157,7 @@ describe('online', () => {
   it("a guest's screen gets the leader's shield: the magic, the crack and the break", () => {
     const room = new ArenaRoom(1, { scrappers: false, props: false });
     room.join('me');
-    const f = Object.assign(room.join('h2friend000'), { weapon: 'spellblade' as WeaponId, x: 9, y: 9, fx: 0, fy: -1, stamina: 8, parryOpenAt: -9 });
+    const f = Object.assign(room.join('h2friend000'), { weapon: 'spellblade' as WeaponId, x: 9, y: 9, fx: 0, fy: -1, stamina: 8 });
     const e = Object.assign(newEnemy(10, 'scrapper', 9, 7.6), { cooldown: 99, alert: true });
     room.enemies = [e];
     const enc = new Encoder(), dec = new Decoder();

@@ -9,7 +9,8 @@ import type { HeroClass } from './weapons.js';
 
 /**
  * What a knack adds. Gear keys add like gear does. The others, by where the fight reads them:
- * `block` off a block's breath, `counter` to a counter, `counterTime` s on the counter window,
+ * `block` off a block's breath, `guardArc` degrees on the block's arc, `counter` to a counter (the blow
+ * just after a block), `counterTime` s on the counter window,
  * `full` to a full held blow, `skillFar` to the shield charge's run and the war cry's reach,
  * `skillHold` to the charge's stun and the cry's hold, `perfect` to a shot loosed on the white flash,
  * `flash` s on that window, `leap` to the dodge's distance, `light` off its breath, `snareCd` off the
@@ -22,7 +23,7 @@ import type { HeroClass } from './weapons.js';
  * `bless` to blessed ground and the ward, `blessTime` s on both. (`down` and `winded` belong to old
  * saves' knacks, read still but on no chain.)
  */
-export type FxKey = ModId | 'crit' | 'down' | 'winded' | 'block' | 'counter' | 'counterTime' | 'full' | 'skillFar' | 'skillHold'
+export type FxKey = ModId | 'crit' | 'down' | 'winded' | 'block' | 'guardArc' | 'counter' | 'counterTime' | 'full' | 'skillFar' | 'skillHold'
   | 'perfect' | 'flash' | 'leap' | 'light' | 'snareCd' | 'snareHold' | 'snares' | 'houndEvery' | 'houndBite' | 'houndBites'
   | 'slip' | 'angle' | 'rear' | 'ambush' | 'quiet' | 'image' | 'primed' | 'clear' | 'twice' | 'burst'
   | 'mercyReach' | 'mercy' | 'smiteStun' | 'bless' | 'blessTime';
@@ -32,9 +33,9 @@ export interface Knack { name: string; text: string; gain: string; fx: Fx }
 /** `text` says what it does, in full; `gain` is the few words on the tree. */
 const LIST = {
   // The Warrior: guard, plate, the held blow, the skill (shield charge or war cry).
-  w_parry: { name: 'WIDE PARRY', text: 'Parry window 0.04 s longer', gain: 'parry +0.04 s', fx: { parry: 0.04 } },
+  w_wide: { name: 'WIDE GUARD', text: 'Your block covers 20 degrees more', gain: 'block +20 degrees', fx: { guardArc: 20 } },
   w_block: { name: 'EASY BLOCK', text: 'Blocking costs 25% less stamina', gain: 'block -25% stamina', fx: { block: 0.25 } },
-  w_counter: { name: 'HARD COUNTER', text: 'Counters after a parry do 25% more damage', gain: 'counter +25%', fx: { counter: 0.25 } },
+  w_counter: { name: 'HARD COUNTER', text: 'Counters after a block do 25% more damage', gain: 'counter +25%', fx: { counter: 0.25 } },
   w_health: { name: 'EXTRA HEALTH', text: '+20 health', gain: '+20 health', fx: { health: 20 } },
   w_tough: { name: 'THICK SKIN', text: 'Take 8% less damage', gain: '8% less damage taken', fx: { tough: 0.08 } },
   w_foot: { name: 'QUICK FEET', text: 'Move 6% faster', gain: '+6% speed', fx: { foot: 0.06 } },
@@ -84,9 +85,9 @@ const LIST = {
   m_light: { name: 'LIGHT BLINK', text: 'Blink costs 20% less magic', gain: 'blink -20% magic', fx: { light: 0.2 } },
   m_quick: { name: 'QUICK CASTS', text: 'Cast 6% faster', gain: '+6% quicker', fx: { quick: 0.06 } },
   // The Healer: guard, healing (the healing blow), the smite, the sanctuary.
-  h_parry: { name: 'WIDE PARRY', text: 'Parry window 0.04 s longer', gain: 'parry +0.04 s', fx: { parry: 0.04 } },
+  h_wide: { name: 'WIDE GUARD', text: 'Your block covers 20 degrees more', gain: 'block +20 degrees', fx: { guardArc: 20 } },
   h_block: { name: 'EASY BLOCK', text: 'Blocking costs 25% less stamina', gain: 'block -25% stamina', fx: { block: 0.25 } },
-  h_counter: { name: 'LONG COUNTER', text: 'Counter window after a parry 0.6 s longer', gain: 'counter +0.6 s', fx: { counterTime: 0.6 } },
+  h_counter: { name: 'LONG COUNTER', text: 'Counter window after a block 0.6 s longer', gain: 'counter +0.6 s', fx: { counterTime: 0.6 } },
   h_mend: { name: 'STRONG HEALS', text: 'Heals you give are 12% bigger', gain: 'heals +12%', fx: { mending: 0.12 } },
   h_reach: { name: 'WIDE HEAL', text: 'Healing blow reaches 20% further', gain: 'heal reach +20%', fx: { mercyReach: 0.2 } },
   h_mercy: { name: 'EARLY HEAL', text: 'The blow before your healing blow heals too, for half', gain: 'blow before heals', fx: { mercy: 0.5 } },

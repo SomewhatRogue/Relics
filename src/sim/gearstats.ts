@@ -26,7 +26,7 @@ export function refreshHealth(h: Hero): void {
 
 /** Knacks on top (shared/perks.ts): gear-named ones add as gear does; health stays in the hero's own (baseHp). */
 function withKnacks(s: GearStats & { crit: number }, f: Fx): void {
-  for (const k of ['damage', 'quick', 'reach', 'draw', 'parry', 'knock', 'breath', 'dodge', 'focus', 'mending', 'crit'] as const) s[k] += f[k] ?? 0;
+  for (const k of ['damage', 'quick', 'reach', 'draw', 'knock', 'breath', 'dodge', 'focus', 'mending', 'crit'] as const) s[k] += f[k] ?? 0;
   s.speed *= 1 + (f.foot ?? 0);
   s.taken *= 1 - (f.tough ?? 0);
 }

@@ -64,7 +64,7 @@ export function ladderFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean 
     case 'shelter':
       fx.burst(x, y - 10, 5, GOLD, 25, true);
       return true;
-    case 'parrymend':
+    case 'blockmend':
       fx.rings.push({ x, y, life: 0.4, max: 0.4, col: '#ffe9a8', size: (ev.r ?? 3) * PX });
       fx.burst(x, y - 8, 10, GOLD, 40, true);
       return true;

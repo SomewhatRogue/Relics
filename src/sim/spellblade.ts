@@ -1,7 +1,7 @@
 /**
  * The spellblade's cuts and the staff's slash, in the room (numbers: shared/mage.ts, shared/spellbook.ts).
- * Every blow that lands carries the element (sim/spellbook.ts tapElement). Block is a parry, like any
- * parry-only weapon's (sim/combat.ts); its magic is a shield and a parry refills it (sim/manashield.ts).
+ * Every blow that lands carries the element (sim/spellbook.ts tapElement). No block: its magic is a
+ * shield, and a blink through a blow refills it (sim/manashield.ts).
  */
 import { WEAPONS, type Swing } from '../shared/tuning';
 import { castElement } from './channel';

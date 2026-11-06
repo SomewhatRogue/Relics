@@ -146,12 +146,8 @@ describe('the prologue wood', () => {
     for (let i = 1; i < 4; i++) {
       enter(g, i);
       clear(g, LESSONS[i].need, 'dodge');
-      // (A Ranger's path goes on to PARRY after its two dodges: Hew's card after a beat, then one parry.)
-      if (g.wood!.after?.phase === 'parry') {
-        for (let j = 0; j < 40 && !g.wood!.after.carded; j++) g.step(0.05, NO_INTENT);
-        g.wood!.hold = null;
-        clear(g, 1, 'parry');
-      }
+      // (No PARRY step on the Ranger's path any more: two dodges, then straight to the goblins.)
+      expect(g.wood!.hold?.move).not.toBe('parry');
       // (A Ranger's clearing goes on to its MARK step: its two cleared, the way opens.)
       if (i === 2) expect(g.wood!.sign?.id).toBe('mark'), clear(g, 0, 'dodge');
       expect(g.wood!.stage).toBe(i + 1);
@@ -159,7 +155,7 @@ describe('the prologue wood', () => {
     expect(g.taught()).toContain('block');
   });
 
-  it('each class has its own way through: guard and parry for the heavy kits, behind and full shots and the last second for the light', () => {
+  it('each class has its own way through: a block for the heavy kits, behind and full shots and the last second for the light', () => {
     for (const c of ['ROGUE', 'RANGER', 'MAGE'] as const) {
       const ls = lessonsFor(c);
       expect(ls.slice(0, 4).every((l) => !l.moves.includes('block'))).toBe(true);
@@ -168,7 +164,8 @@ describe('the prologue wood', () => {
     expect(lessonsFor('ROGUE')[2].count).toBe('backstab');
     expect(lessonsFor('RANGER')[2].count).toBe('heavy');
     expect(lessonsFor('WARRIOR')[2].count).toBe('block');
-    expect(lessonsFor('HEALER')[3].count).toBe('parry');
+    // The stream's PARRY lesson is gone: a Warrior or Healer walks on by (no goblins, no card).
+    for (const c of ['WARRIOR', 'HEALER'] as const) expect([lessonsFor(c)[3].count, lessonsFor(c)[3].foes.length]).toEqual(['none', 0]);
     // The rogue's third lesson counts blows from behind, and nothing else.
     const g = new Game();
     g.create('ROGUE', 'stray');

@@ -86,9 +86,8 @@ export class Soundscape {
     if (ev.k === 'shoot' && ev.kind === 'dart') return spiderSounds.hiss();
     if (ev.k === 'skewer') return spiderSounds.wetbite();
     if (ev.k === 'puke') return spiderSounds.spit(), spiderSounds.splat();
-    // The Warrior's: the shield's thump, a riposte's ring, the shockwave, the pin.
+    // The Warrior's: the shield's thump, the shockwave, the pin.
     if (ev.k === 'shieldbash') return sfx.block(), sfx.bodyhit();
-    if (ev.k === 'riposte') return sfx.parry(), sfx.backstab();
     if (ev.k === 'quake') return sfx.slam(), sfx.rumble();
     if (ev.k === 'pin') return sfx.javstick();
     // Techniques (sim/tech*.ts): bursts, a shoulder's thump, iron feet, slipping away, coins, a quick nock, help up, judgement.
@@ -105,7 +104,7 @@ export class Soundscape {
     if (ev.k === 'blinkthrough' || ev.k === 'halfblink' || ev.k === 'spellthief') return sfx.channeled();
     if (ev.k === 'caltrops' && ev.r) return sfx.gold();
     if (ev.k === 'legstab') return sfx.backstab();
-    if (ev.k === 'parrymend' || ev.k === 'coverfor') return sfx.blessed();
+    if (ev.k === 'blockmend' || ev.k === 'coverfor') return sfx.blessed();
     if (ev.k === 'taunt') return sfx.rally();
     // Each class's own button (shared/signs.ts): a MARK set, a MEND given; Hew struck; a smoke bomb thrown.
     if (ev.k === 'hunted') return sfx.latch(), sfx.perfect();
@@ -120,7 +119,7 @@ export class Soundscape {
     if (ev.k === 'glint') return sfx.latch(), sfx.perfect();
     if (ev.k === 'boltline') return sfx.javstick();
     // The Mage's: magic spent hums, a fizzle is a dud, a broken blow rings, a slash whooshes in its
-    // element; the spellblade's shield rings off a hit, breaks, and hums back on a parry; a held spell and GRASP have their own (spellsound.ts).
+    // element; the spellblade's shield rings off a hit, breaks, and hums back on a dodge through a blow; a held spell and GRASP have their own (spellsound.ts).
     if (ev.k === 'magic') return sfx.channeled();
     if (ev.k === 'fizzle') return sfx.wallhit();
     if (ev.k === 'interrupt') return sfx.perfect(), sfx.shock();

@@ -4,7 +4,6 @@
  */
 import { drawWet } from './wetdraw';
 import { feetBand, upright } from './phoneband';
-import { parryWindow } from '../sim/knacks';
 import { ARENA, doorAt, npcAt, type GameMap } from '../shared/arena';
 import { rats } from './rats';
 import { drawRat } from './ratdraw';
@@ -233,8 +232,7 @@ export class Scene {
     // Lamp oil on the floor, and crows on the dead (beastdraw.ts).
     const floor = (x: number, y: number): [number, number] => [OX + x * PX - cx, OY + y * PX - cy];
     if (room.slicks?.length) drawSlicks(c, room.slicks, floor, room.time);
-    const pw = me ? parryWindow(me) : 0.3;
-    for (const e of room.enemies) if (e.attack && e.act === 'attack') drawTelegraph(c, e.attack, cx, cy, pw);
+    for (const e of room.enemies) if (e.attack && e.act === 'attack') drawTelegraph(c, e.attack, cx, cy);
     // A house on fire: where it burns, where it's about to, where a beam is coming down (blazedraw.ts).
     drawBlaze(c, room, cx, cy);
     // A storm's lightning: its circle while it's coming (stormdraw.ts).
@@ -248,7 +246,7 @@ export class Scene {
     // A banner's reach and the goblins that have taken heart in it; a rout (foedraw.ts).
     drawBanners(c, room.enemies, at);
     // A pack rush winding up: the red line linking its goblins, flashing white with their telegraphs (rushdraw.ts).
-    drawRushLinks(glow, room.enemies, at, pw, now);
+    drawRushLinks(glow, room.enemies, at, now);
     // A Rogue's kit in hand: show each goblin's back, the place a backstab lands.
     if (me && WEAPONS[me.weapon].cls === 'ROGUE') for (const e of room.enemies) {
       if (e.act === 'dead' || e.kind === 'dummy' || e.kind === 'swingDummy') continue;

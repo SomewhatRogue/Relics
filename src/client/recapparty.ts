@@ -12,11 +12,11 @@ import { RECAPW } from './recapwords';
 import type { PartyLine } from './recaptally';
 
 /** The rows shown; the rest open under MORE. */
-export const SHOWN: readonly Count[] = ['kills', 'dealt', 'taken', 'dodges', 'parries', 'downs'];
-// (A perfect parry is counted, but the fight never names one on screen: it isn't shown, lore keeper 2026-11-05.)
-export const MORE: readonly Count[] = ['blocks', 'raised', 'healed', 'best'];
+// (PARRIES was here until parry went, 2026-11-05: BLOCKS took its place beside DODGES.)
+export const SHOWN: readonly Count[] = ['kills', 'dealt', 'taken', 'dodges', 'blocks', 'downs'];
+export const MORE: readonly Count[] = ['raised', 'healed', 'best'];
 /** Rows where leading is something to light up (not damage taken, not downs). */
-const GOOD = new Set<Count>(['kills', 'dealt', 'dodges', 'parries', 'blocks', 'perfect', 'raised', 'healed', 'best']);
+const GOOD = new Set<Count>(['kills', 'dealt', 'dodges', 'blocks', 'raised', 'healed', 'best']);
 const led = (l: PartyLine, all: PartyLine[], k: Count) => GOOD.has(k) && leads(l.s, all.map((o) => o.s), k as CallId);
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);

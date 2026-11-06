@@ -1,6 +1,6 @@
-/** The Warrior's rework (shared/warrior.ts, sim/warrior.ts): no dodge, the shield bash, the riposte, the greatsword, the spear. */
+/** The Warrior's rework (shared/warrior.ts, sim/warrior.ts): no dodge, the shield bash, the counter after a block, the greatsword, the spear. */
 import { describe, expect, it } from 'vitest';
-import { GUARD, PIN, QUAKE, RIPOSTE, SHAFT, SHIELD_BASH, TICK, WEAPONS, type WeaponId } from '../src/shared/tuning';
+import { GUARD, PIN, QUAKE, SHAFT, SHIELD_BASH, TICK, WEAPONS, type WeaponId } from '../src/shared/tuning';
 import { ArenaRoom } from '../src/sim/room';
 import { newEnemy } from '../src/sim/enemies';
 import { hitHero } from '../src/sim/combat';
@@ -82,43 +82,42 @@ describe('the sword and shield', () => {
     expect(ev.some((x) => x.k === 'perfect')).toBe(true);
     for (const e of es) expect(e.act).toBe('stunned'), expect(e.actDur).toBe(SHIELD_BASH.perfect);
   });
-  it('a counter straight off the parry is a riposte: twice the counter; later, a plain counter', () => {
+  it('a blow after a held block is a plain counter, however soon (no riposte: it went with parry)', () => {
     const counterHit = (wait: number) => {
       const { room, h, e, tap, run } = arena('sword');
-      // A blow lands with the parry open: parried.
-      h.parryOpenAt = room.time;
+      run(TICK, { block: true });
       hitHero(e, blow(h.x, h.y), h, room.time, []);
-      expect(e.act).toBe('stunned');
+      expect(h.hp).toBe(h.maxHp);
+      expect(e.act).not.toBe('stunned');
       run(wait);
       const before = e.hp;
       const ev = tap();
       return { n: before - e.hp, ev };
     };
-    const quick = counterHit(0.1), late = counterHit(RIPOSTE.window + 0.2);
-    const base = WEAPONS.sword.combo[0].dmg * GUARD.counterMult;
-    expect(quick.n).toBe(Math.round(base * RIPOSTE.mult));
-    expect(quick.ev.some((x) => x.k === 'riposte')).toBe(true);
-    // A bonus, not the sword's perfect: no PERFECT.
+    const quick = counterHit(0.1), late = counterHit(GUARD.counterWindow - 0.4);
+    const base = Math.round(WEAPONS.sword.combo[0].dmg * GUARD.counterMult);
+    expect([quick.n, late.n]).toEqual([base, base]);
     expect(quick.ev.some((x) => x.k === 'perfect')).toBe(false);
-    expect(late.n).toBe(Math.round(base));
-    expect(late.ev.some((x) => x.k === 'riposte')).toBe(false);
   });
 });
 
 describe('the greatsword', () => {
-  it('holding block gives no guard; a tap in the window still parries', () => {
+  it('holding block is a plain block now (slow and dear); a tap guards nothing', () => {
     const held = arena('greatsword', [2]);
     held.run(0.2, { block: true, blockSeq: 0 });
-    expect(held.h.blocking).toBe(false);
-    const hp = held.h.hp;
+    expect(held.h.blocking).toBe(true);
     hitHero(held.e, blow(held.h.x, held.h.y), held.h, held.room.time, []);
-    expect(held.h.hp).toBeLessThan(hp);
+    expect(held.h.hp).toBe(held.h.maxHp);
+    expect(held.h.stamina).toBeLessThan(100);
+    expect(WEAPONS.greatsword.guardCost).toBeGreaterThan(WEAPONS.sword.guardCost);
+    expect(WEAPONS.greatsword.blockSpeed).toBeLessThan(WEAPONS.sword.blockSpeed);
+    expect(WEAPONS.greatsword.ponderous).toBe(true);
 
     const tapped = arena('greatsword', [7.6]);
     tapped.run(TICK, { blockSeq: 1 });
     hitHero(tapped.e, blow(tapped.h.x, tapped.h.y), tapped.h, tapped.room.time, []);
-    expect(tapped.h.hp).toBe(tapped.h.maxHp);
-    expect(tapped.e.act).toBe('stunned');
+    expect(tapped.h.hp).toBeLessThan(tapped.h.maxHp);
+    expect(tapped.e.act).not.toBe('stunned');
   });
   it('the overhead loosed on the white flash sends out a shockwave that knocks nearby goblins down', () => {
     // One in front of the blade, one off to the side the overhead doesn't reach.

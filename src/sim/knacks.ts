@@ -1,15 +1,15 @@
 /**
  * The fight's numbers as a hero's knacks move them (shared/perks.ts). Each is the one the room judges
- * and the one the client draws: the parry flash on a telegraph, the white flash at full draw.
+ * and the one the client draws: the white flash at full draw.
  */
 import { BASH, BLESSING, DECOY, GUARD, HEAL_RADIUS, HORN, HOUND, RELEASE, SNARE, STEALTH, WARD, WEAPONS, type Swing } from '../shared/tuning';
 import { knack, statsOf } from './gearstats';
 import type { Hero } from './types';
 
-/** How long before a blow lands a tap of block still parries it (the kit's, gear's, knacks', and the easy setting's). */
-export const parryWindow = (h: Hero) => WEAPONS[h.weapon].parryWindow + statsOf(h).parry + (h.lenience ?? 0);
-/** After a parry, how long the next blow started is a counter. */
+/** After a block takes a blow, how long the next blow started is a counter. */
 export const counterWindow = (h: Hero) => GUARD.counterWindow + knack(h, 'counterTime');
+/** How wide the block covers, in degrees: the kit's, and WIDE GUARD's. */
+export const guardArc = (h: Hero) => WEAPONS[h.weapon].guardArc + knack(h, 'guardArc');
 /** How long after a full draw a release is perfect (the white flash). */
 export const releaseWindow = (h: Hero) => RELEASE.perfect + knack(h, 'flash');
 /** A shot loosed on the white flash: this times as hard (DEADEYE on top). */

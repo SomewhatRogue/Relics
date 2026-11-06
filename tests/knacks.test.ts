@@ -9,8 +9,10 @@ import { Rng } from '../src/shared/rng';
 
 const guard = (c: HeroClass) => CLASS_GUARD[c], dodges = (c: HeroClass) => CLASS_DODGES[c];
 /** Words that name a move: a class without it must never read them on anything offered. */
-const PARRY = /parry|counter|riposte/i, BLOCK = /block/i, DODGE = /dodge|sidestep/i;
+const PARRY = /parry|counter|riposte/i, BLOCK = /block|counterstroke/i, DODGE = /dodge|sidestep/i;
 function wordsFit(text: string, c: HeroClass): void {
+  // No class can parry now (2026-11-05): nothing offered says it.
+  expect(text, `${c}: ${text}`).not.toMatch(/parry|riposte/i);
   if (guard(c) === 'none') expect(text, `${c}: ${text}`).not.toMatch(PARRY);
   if (guard(c) !== 'full') expect(text, `${c}: ${text}`).not.toMatch(BLOCK);
   if (!dodges(c)) expect(text, `${c}: ${text}`).not.toMatch(DODGE);
@@ -18,7 +20,7 @@ function wordsFit(text: string, c: HeroClass): void {
 /** What each knack asks of the hero, by what it moves. */
 function perkFits(id: PerkId, c: HeroClass): boolean {
   const fx = PERKS[id].fx;
-  if (fx.parry || fx.counter || fx.counterTime) return guard(c) === 'full';
+  if (fx.guardArc || fx.counter || fx.counterTime) return guard(c) === 'full';
   if (fx.block) return guard(c) === 'full';
   if (fx.dodge || fx.leap || fx.light || fx.slip) return dodges(c);
   if (fx.bless || fx.blessTime || fx.mending || fx.mercy || fx.mercyReach || fx.smiteStun) return c === 'HEALER';
@@ -92,12 +94,12 @@ describe('the knacks tree', () => {
     expect([m.perks, m.picks]).toEqual([['m_blink'], 1]);
     // A save that somehow lost picks: taken plus waiting covers every level up.
     const lost = newProfile('HEALER');
-    Object.assign(lost, { level: 6, perks: ['h_parry'], picks: 1 });
+    Object.assign(lost, { level: 6, perks: ['h_wide'], picks: 1 });
     fitPerks(lost);
     expect(lost.picks).toBe(4);
     // New knacks of the class stay as they are.
     fitPerks(lost);
-    expect([lost.perks, lost.picks]).toEqual([['h_parry'], 4]);
+    expect([lost.perks, lost.picks]).toEqual([['h_wide'], 4]);
   });
 });
 

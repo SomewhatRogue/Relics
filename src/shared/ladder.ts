@@ -13,7 +13,7 @@ export type RungId =
   | 'airshot' | 'twinsnare' | 'landing'
   | 'blinkburst' | 'blinkthrough' | 'halfblink'
   | 'caltrops' | 'underlegs' | 'shakeoff'
-  | 'shelter' | 'parrymend' | 'cover'
+  | 'shelter' | 'blockmend' | 'cover'
   | 'taunt' | 'standfast' | 'cowing';
 
 /** The levels the three rungs are taught at (the chapter's level cap holds the third back for now). */
@@ -24,7 +24,7 @@ export const RUNGS: Record<HeroClass, RungId[]> = {
   RANGER: ['airshot', 'twinsnare', 'landing'],
   MAGE: ['blinkburst', 'blinkthrough', 'halfblink'],
   ROGUE: ['caltrops', 'underlegs', 'shakeoff'],
-  HEALER: ['shelter', 'parrymend', 'cover'],
+  HEALER: ['shelter', 'blockmend', 'cover'],
   WARRIOR: ['taunt', 'standfast', 'cowing'],
 };
 
@@ -43,7 +43,7 @@ export const RUNG_WORDS: Record<RungId, { name: string; text: string }> = {
   underlegs: { name: 'DASH THROUGH', text: 'Dash through a goblin and your next hit within 2 s is a backstab.' },
   shakeoff: { name: 'SHAKE OFF', text: 'Dashing clears your poison, and fire on the floor can\'t burn you for 1 s.' },
   shelter: { name: 'SHELTER', text: 'While you block, friends within 2 tiles take 30% less damage.' },
-  parrymend: { name: 'HEALING PARRY', text: 'A parry heals friends within 3 tiles for 8.' },
+  blockmend: { name: 'HEALING BLOCK', text: 'Each blow you block heals friends within 3 tiles for 5.' },
   cover: { name: 'COVER', text: 'Block beside a friend and your guard takes blows meant for them. Not striped ones.' },
   taunt: { name: 'TAUNT', text: 'Roar: goblins within 5 tiles come for you for 4 s. Once every 10 s.' },
   standfast: { name: 'STAND FAST', text: 'While your taunt lasts, taunted goblins do 30% less damage, and no blow knocks you back or staggers you.' },
@@ -76,8 +76,9 @@ export const LEGS = { within: 2 };
 export const SHAKE_OFF = { fireproof: 1 };
 /** SHELTER: friends within `reach` tiles of a Healer holding a block take `taken` of a blow. */
 export const SHELTER = { reach: 2, taken: 0.7 };
-/** MENDING PARRY: a Healer's parry heals friends within `reach` tiles for `heal`. */
-export const PARRY_MEND = { reach: 3, heal: 8 };
+/** HEALING BLOCK: each blow a Healer blocks heals friends within `reach` tiles for `heal` (was HEALING
+ *  PARRY, 8 a parry; less now, since a block is far easier to make than a parry was: 2026-11-05). */
+export const BLOCK_MEND = { reach: 3, heal: 5 };
 /** COVER: a Healer blocking within `reach` tiles of a friend, facing the blow, takes it on the guard instead. */
 export const COVER = { reach: 1.3 };
 /**

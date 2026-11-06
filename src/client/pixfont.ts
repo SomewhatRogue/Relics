@@ -1,4 +1,4 @@
-/** A 3x5 pixel font for numbers, short calls ("PARRY") and a few words of speech (in capitals), drawn crisp at any zoom. */
+/** A 3x5 pixel font for numbers, short calls ("BLOCK") and a few words of speech (in capitals), drawn crisp at any zoom. */
 const G: Record<string, string> = {
   '0': '111101101101111', '1': '010110010010111', '2': '111001111100111', '3': '111001111001111', '4': '101101111001001',
   '5': '111100111001111', '6': '111100111101111', '7': '111001001010010', '8': '111101111101111', '9': '111101111001111',

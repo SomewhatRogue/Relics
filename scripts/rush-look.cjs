@@ -1,5 +1,5 @@
 // A pack rush and the ironhide, staged by a Warrior on a job, flat and 2.5D, phone and laptop: the rush
-// winding up in front of him (the link and the three telegraphs), the parry landing on all of them, an
+// winding up in front of him (the link and the three telegraphs), one block taking all of them, an
 // ironhide whole and one with its guard broken. Usage: node scripts/rush-look.cjs [url] [outdir]
 const { chromium } = require('playwright');
 const url = process.argv[2] || 'http://localhost:4402/';
@@ -60,18 +60,19 @@ async function stage(page, foes) {
 
       // The rush: three of a pack a few tiles off; the pack calls it now.
       await stage(page, [[undefined, -1.6, -3.2], [undefined, 0.2, -3.6], [undefined, 1.8, -3]]);
-      // The guard pressed just before the blows land (as the red flashes white), in the room's own tick.
+      // The block held as the blows land, in the room's own tick (no timing to it: parry went 2026-11-05).
       await page.evaluate(() => {
         const g = window.__game, r = g.room, step = r.step.bind(r);
-        r.step = () => { if (window.__pause) return; const a = r.enemies.find((e) => e.attack?.rush)?.attack; if (a && a.land - r.time < 0.14 && a.land > r.time) g.hero.parryOpenAt = r.time; step(); };
+        Object.defineProperty(g.hero, 'blocking', { get: () => !!r.enemies.find((e) => e.attack?.rush), set() {}, configurable: true });
+        r.step = () => { if (window.__pause) return; step(); };
         r.rushes.due.set(1, 0);
       });
       await page.waitForFunction(() => window.__game.room.enemies.some((e) => e.attack?.rush && e.attack.t > 0.6), null, { timeout: 15000 });
       await shot('rush-windup');
-      // The parry landing on all of them.
-      await page.waitForFunction(() => window.__game.room.enemies.filter((e) => e.act === 'stunned').length >= 2, null, { timeout: 10000 });
-      await page.waitForTimeout(160);
-      await shot('rush-parried');
+      // The one block taking all of them.
+      await page.waitForFunction(() => !window.__game.room.enemies.some((e) => e.attack?.rush && e.attack.t < e.attack.windup), null, { timeout: 10000 });
+      await page.waitForTimeout(60);
+      await shot('rush-blocked');
       const st = await page.evaluate(() => window.__game.room.enemies.filter((e) => !e.escaped).map((e) => e.act + ':' + e.actDur.toFixed(1)).join(' '));
 
       // The ironhide, whole, then with its guard broken (ARMOR BROKEN, the plates askew, the crack).

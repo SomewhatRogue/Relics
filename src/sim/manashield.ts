@@ -2,8 +2,8 @@
  * The spellblade's mana shield, in the room (numbers: shared/mage.ts MANA_SHIELD; Kyle, 2026-11-05:
  * "Magic is your shield"). With the spellblade in hand, a blow, a shot or fire underfoot comes off MAGIC
  * first; only what magic can't cover reaches health. Striped blows (unblockable) skip it: the caller
- * doesn't ask. A shield hit starts the refill wait over, as a cast does. A parry gives magic back, a
- * perfect one more. All of it lives on the hero (`stamina`, `wardAt`, `wardBrokeAt`), so a guest's screen
+ * doesn't ask. A shield hit starts the refill wait over, as a cast does. A dodge through a blow (a
+ * last-second blink) gives magic back (Kyle, 2026-11-05: parry is gone). All of it lives on the hero (`stamina`, `wardAt`, `wardBrokeAt`), so a guest's screen
  * draws the ward the leader's room decided (client/blademark.ts).
  */
 import { HERO, MANA_SHIELD as M, WEAPONS } from '../shared/tuning';
@@ -18,7 +18,7 @@ const cover = (h: Hero) => Math.floor(Math.max(0, h.stamina) / M.perDmg + 1e-9);
 /**
  * `n` damage would reach `h` now: its magic takes what it can, `perDmg` a point. Returns what's left for
  * health (all of `n` without a ward, or with an empty one). Run dry, a sliver is left (`keep`), so an
- * empty shield doesn't wind you and the parry that refills it is still there.
+ * empty shield doesn't wind you and the blink that refills it is still there.
  */
 export function manaShield(h: Hero, n: number, now: number, ev: FightEvent[]): number {
   if (n <= 0 || !manaWard(h)) return n;
@@ -35,10 +35,12 @@ export function manaShield(h: Hero, n: number, now: number, ev: FightEvent[]): n
   return n - took;
 }
 
-/** A spellblade's parry: magic back, more for a perfect one (the blow landing just after the press). */
-export function parryRefills(h: Hero, perfect: boolean, ev: FightEvent[]): void {
-  if (!WEAPONS[h.weapon]?.spellblade) return;
-  const n = Math.round(Math.max(0, Math.min(perfect ? M.perfect : M.parry, HERO.stamina - h.stamina)));
+/** A spellblade's dodge through a blow (sim/combat.ts slipped): magic back, once an instant (a pack
+ *  rush's blows all land together, and one blink through them is one refill). */
+export function slipRefills(h: Hero, now: number, ev: FightEvent[]): void {
+  if (!WEAPONS[h.weapon]?.spellblade || h.slipFillAt === now) return;
+  h.slipFillAt = now;
+  const n = Math.round(Math.max(0, Math.min(M.slip, HERO.stamina - h.stamina)));
   h.stamina += n;
-  ev.push({ k: 'manaup', x: h.x, y: h.y, n, ...(perfect ? { big: true } : {}) });
+  ev.push({ k: 'manaup', x: h.x, y: h.y, n });
 }

@@ -7,7 +7,7 @@
 import type { EnemyAttackSpec, EnemySpec } from './tuning.js';
 
 /**
- * A small spider. `pounce`: a short leap along a line it shows you (blockable, parryable).
+ * A small spider. `pounce`: a short leap along a line it shows you (blockable, dodgeable).
  * Kyle, 2026-11-04: still over-tuned and too fast. Now slower than a hero on foot (HERO.speed 4.4), a
  * shorter leap with a longer wind-up to read, a longer breather between pounces, a little less bite.
  */

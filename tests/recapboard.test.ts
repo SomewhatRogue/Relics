@@ -1,6 +1,6 @@
 /**
- * The recap's side by side (Kyle, 2026-11-05): the room counts each hero's kills, damage, parries,
- * dodges and downs (sim/score.ts, folded by run.ts tally); a friend's game reads the same numbers from
+ * The recap's side by side (Kyle, 2026-11-05): the room counts each hero's kills, damage, blocks,
+ * dodges and downs (PARRIES went with parry, 2026-11-05: BLOCKS shows in its place) (sim/score.ts, folded by run.ts tally); a friend's game reads the same numbers from
  * the end message; callouts only for a real lead; and no knack screen at a job's end.
  */
 import { describe, expect, it } from 'vitest';
@@ -45,11 +45,12 @@ function fight(run: Run, id: string, kind: 'cleave' | 'slam' = 'cleave') {
   return { room, h, b, step, until, press: (o: Partial<Intent>) => room.setIntent(id, intent(o)) };
 }
 
-/** The same scripted job: `me` (a Warrior) parries, parries on the press, blocks and kills; `friend` (a Ranger) dodges and goes down. */
+/** The same scripted job: `me` (a Warrior) blocks, taps block too late to matter (no parry: the blow lands),
+ *  blocks again and kills; `friend` (a Ranger) dodges and goes down. */
 function scripted(): Run {
   const run = newRun(board(3)[0]);
   const a = fight(run, 'me');
-  a.until(0.25), a.press({ blockSeq: 1 }), a.step(ticks(0.4));
+  a.press({ block: true, blockSeq: 1 }), a.step(ticks(BUTCHER.cleave.windup) + 2);
   const p = fight(run, 'me');
   p.until(0.03), p.press({ blockSeq: 1 }), p.step(ticks(0.3));
   const k = fight(run, 'me');
@@ -72,21 +73,20 @@ function scripted(): Run {
 describe('the room counts each hero', () => {
   const run = scripted(), me = run.board!.me, friend = run.board!.friend;
 
-  it('parries, a perfect parry on the press, a block, a kill and the damage that went in', () => {
-    expect(me.parries).toBe(2);
-    expect(me.perfect).toBe(1);
-    expect(me.blocks).toBe(1);
+  it('two blocks (a tap of block is no parry: that blow is taken), a kill and the damage that went in', () => {
+    expect(me.blocks).toBe(2);
+    expect('parries' in me || 'perfect' in me).toBe(false);
     expect(me.kills).toBe(1);
     expect(me.dealt).toBe(3);
     expect(me.best).toBeGreaterThanOrEqual(3);
-    expect([me.taken, me.downs, me.dodges]).toEqual([0, 0, 0]);
+    expect([me.taken, me.downs, me.dodges]).toEqual([BUTCHER.cleave.dmg, 0, 0]);
   });
 
   it("a friend's own: the dodge, the blow taken and the down", () => {
     expect(friend.dodges).toBe(1);
     expect(friend.taken).toBe(BUTCHER.cleave.dmg);
     expect(friend.downs).toBe(1);
-    expect([friend.kills, friend.parries, friend.dealt]).toEqual([0, 0, 0]);
+    expect([friend.kills, friend.blocks, friend.dealt]).toEqual([0, 0, 0]);
     expect(friend.cls).toBe('RANGER');
     expect(me.cls).toBe('WARRIOR');
   });
@@ -134,7 +134,7 @@ describe('callouts', () => {
   });
 
   it('one each, the first thing they led at; a Cleric who healed most is MOST HEALING', () => {
-    const c = callouts([s({ kills: 9, dealt: 800, parries: 5 }), s({ kills: 3, dealt: 200, healed: 140 }), s({ kills: 1, dodges: 6, downs: 1 })]);
+    const c = callouts([s({ kills: 9, dealt: 800, blocks: 5 }), s({ kills: 3, dealt: 200, healed: 140 }), s({ kills: 1, dodges: 6, downs: 1 })]);
     expect(c).toEqual(['kills', 'healed', 'dodges']);
     expect(RECAPW.call[c[1]!]).toBe('MOST HEALING');
   });
@@ -183,7 +183,8 @@ describe("no knack screen at a job's end", () => {
     expect(html).toContain('class="party" style="--n:2"');
     expect(html).toContain('KYLE');
     expect(html).toContain('KYLE');
-    for (const k of ['kills', 'dealt', 'taken', 'dodges', 'parries', 'downs', 'blocks', 'raised', 'healed', 'best']) expect(html).toContain(RECAPW.stat[k]);
+    for (const k of ['kills', 'dealt', 'taken', 'dodges', 'downs', 'blocks', 'raised', 'healed', 'best']) expect(html).toContain(RECAPW.stat[k]);
+    expect(html).not.toMatch(/PARR/);
   });
 
   it('back in town the PACK button carries the count', () => {

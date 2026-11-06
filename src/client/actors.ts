@@ -4,10 +4,10 @@ import { drawNetOn } from './foedraw';
 import { drawHoistRope } from './wooddraw';
 import { drawCrowsOn } from './beastdraw';
 import { chargeFull } from '../sim/hero';
-import { parryWindow, releaseWindow } from '../sim/knacks';
+import { releaseWindow } from '../sim/knacks';
 import { castElement } from '../sim/channel';
 import type { Hero } from '../sim/types';
-import { BARE, blit, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
+import { BARE, blit, line, ring, shadow, spin, stars, type Ctx } from './draw';
 import { LAYOUT, armOffset, drawFigure, layout } from './figure';
 import { heroCut, jointed } from './joints';
 import { heroPose } from './heropose';
@@ -129,10 +129,9 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
   if (idl?.hide) p.hide = true;
   // The sword and shield's release: the shield flashes as the blow goes out (the blade too, held.ts).
   const snap = h.weapon === 'sword' && (pz.phase === 'release' || pz.phase === 'contact');
-  const fresh = t - h.parryOpenAt < parryWindow(h);
-  const shieldAt: [number, number] = idl?.shield ? [bx + idl.shield[0], by + idl.shield[1]] : h.blocking || fresh ? [bx + mid + h.fx * 6, by - 7 + low + h.fy * 4] : [bx + mid - side * 4, by - 6 + low];
+  const shieldAt: [number, number] = idl?.shield ? [bx + idl.shield[0], by + idl.shield[1]] : h.blocking ? [bx + mid + h.fx * 6, by - 7 + low + h.fy * 4] : [bx + mid - side * 4, by - 6 + low];
   const drawGear = () => {
-    if (h.weapon === 'sword') blit(c, SPRITES.shield, shieldAt[0], shieldAt[1] + 4, false, fresh || snap ? 0.85 : 0);
+    if (h.weapon === 'sword') blit(c, SPRITES.shield, shieldAt[0], shieldAt[1] + 4, false, snap ? 0.85 : 0);
     drawWeapon(c, hw, px, py, p);
     if (h.act === 'throw' && h.actT < 0.2) {
       const a = Math.atan2(h.fy, h.fx) + Math.PI;
@@ -173,7 +172,6 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
   }
   if (!behind) drawGear();
   if (idl) idleProps(c, { x, y, bx, by, px, py, side, ey, exl, exr, def, p, el: EL_COL[heldEl(h)], now: c.now, o: idl, w: h.weapon });
-  if (fresh && h.weapon !== 'sword') smear(c.glow, bx, by - 8, Math.atan2(h.fy, h.fx) - 0.7, Math.atan2(h.fy, h.fx) + 0.7, 7, 9, '#cfe8ff');
   // A blade's charge gathers at the hand (a caster's draws into the tip instead, held.ts).
   if (h.act === 'charge' && cls !== 'MAGE' && !h.winding) {
     const held = h.actT + CHARGE.start, full = chargeFull(WEAPONS[h.weapon], h), k = Math.min(1, held / full);

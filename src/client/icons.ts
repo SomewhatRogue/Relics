@@ -18,9 +18,8 @@ export const ICONS: Record<string, Grid> = {
   view: ['............', '............', '....wwww....', '..ww....ww..', '.w...UU...w.', 'w...UkkU...w', '.w...UU...w.', '..ww....ww..', '....wwww....', '............', '............', '............'],
   // An expedition's MAP: a folded sheet, the way marked on it.
   map: ['............', '.BBBBBBBBBB.', '.ByyyBwwwwB.', '.ByyyBwwrwB.', '.ByrrBwwrwB.', '.ByyrBwrwwB.', '.ByyrBrwwwB.', '.ByyyBwwwwB.', '.ByyyBwwwwB.', '.BBBBBBBBBB.', '............', '............'],
-  // The guard: a heater shield to block, a buckler with a white spark to parry.
+  // The guard: a heater shield to block.
   block: ['gggggggggggg', 'suuuuyyuuuus', 'suuuuyyuuuus', 'suuuuyyuuuus', 'syyyyyyyyyys', 'suuuuyyuuuus', 'suuuuyyuuuus', '.suuuyyuuus.', '.suuuyyuuus.', '..suuyyuus..', '...suyyus...', '....ssss....'],
-  parry: ['.........W..', '........WWW.', '.........W..', '..gggggg....', '.gsuuuuss...', 'gsuuyyuuss..', 'gsuyyyyuss..', 'gsuuyyuuss..', '.sssuusss...', '..ssssss....', '............', '............'],
   // The dodges, one each (dodgeName): JUMP, DASH, BLINK, ROLL.
   jump: ['.....ww.....', '....wwww....', '...ww..ww...', '..ww....ww..', '.ww......ww.', '............', '.....ww.....', '....wwww....', '...ww..ww...', '..ww....ww..', '............', '.o.o....o.o.'],
   dash: ['............', '.ww...ww....', '..ww...ww...', '...ww...ww..', '....ww...ww.', '.....ww...ww', '....ww...ww.', '...ww...ww..', '..ww...ww...', '.ww...ww....', '............', '............'],
