@@ -13,6 +13,7 @@ import type { Enemy, Hero } from '../sim/types';
 import type { Ctx } from './draw';
 import type { Ground } from './expeddraw';
 import { PX } from './world';
+import { drawRopes } from './hempendraw';
 
 /** A circle on the ground: a dark fill (`fill` how dark), its edge in stripes of two colours. */
 function striped(g: CanvasRenderingContext2D, P: Ground, x: number, y: number, r: number, a: string, b: string, alpha: number, fill: number): void {
@@ -55,6 +56,8 @@ export function drawWoodGround(g: CanvasRenderingContext2D, room: ArenaRoom, P: 
     const k = Math.max(0, Math.min(1, 1 - (at - t) / OAK.warn));
     striped(g, P, x, y, OAK.fall, '#ff4a3a', '#ffd27a', 0.75 + 0.25 * Math.sin(now * 14), 0.1 + 0.35 * k);
   }
+  // Hempen's ropes coming down on a second hero (hempendraw.ts).
+  drawRopes(g, room.enemies, P, t, now);
   // The mid-point's fire, still to light: a ring of gold dots filling as you stand there.
   const c = room.exped?.wood?.check;
   if (c && !c.lit) for (let i = 0, n = 26; i < n; i++) {

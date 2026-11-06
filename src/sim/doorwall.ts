@@ -14,7 +14,7 @@ import type { Bolt, Enemy, FightEvent } from './types';
 /** Its door is up and covering its front. */
 export function doorShut(e: Enemy, now: number): boolean {
   const b = e.boss;
-  if (!b || isDead(e) || b.downUntil > now || b.openUntil > now || e.act === 'stunned' || e.act === 'flinch') return false;
+  if (!b || b.who === 'hempen' || isDead(e) || b.downUntil > now || b.openUntil > now || e.act === 'stunned' || e.act === 'flinch') return false;
   const a = e.attack;
   return !(a && a.t >= a.windup);
 }

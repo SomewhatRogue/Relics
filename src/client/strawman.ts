@@ -39,8 +39,8 @@ export function drawFoe(c: Ctx, e: Enemy, x: number, y: number, sleeping: boolea
  * bigger; the new meaty sorts bigger too (MEATY_DRAW), and an elite's affixes on its body (elitedraw.ts).
  */
 function paced(c: Ctx, e: Enemy, x: number, y: number, sleeping: boolean): void {
-  // A boss of the kit: a Doorkeeper behind its door (doordraw.ts).
-  if (e.boss) return drawKeeper(c, e, x, y, sleeping);
+  // A boss of the kit: a Doorkeeper behind its door (doordraw.ts). (Hempen is drawn as the butcher it is.)
+  if (e.boss && e.boss.who !== 'hempen') return drawKeeper(c, e, x, y, sleeping);
   const meat = meatySort(e);
   if (!e.held && !e.big && !e.sprintAt && !e.elite && !meat) return drawEnemy(c, e, x, y, sleeping);
   const o = paceOffset(c, e), bx = x + o.dx, by = y + o.dy, k = o.k * (meat ? MEATY_DRAW : 1);

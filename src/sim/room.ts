@@ -99,7 +99,7 @@ import { initStaithe, stepStaithe } from './staithe';
 import { cutNetted, playOut, shoveLog, stepHungNets, stepStaitheFire } from './staithebits';
 import { stepDrift } from './drift';
 import { newBoss, useBook, type BossBook } from './bosskit';
-import { stepPair } from './doorpair';
+import { stepBosses } from './bossrooms';
 
 export class ArenaRoom {
   time = 0;
@@ -421,9 +421,9 @@ export class ArenaRoom {
     OWN_KIT.slicks = this.slicks;
     OWN_KIT.foes = this.enemies;
     OWN_KIT.nooses = this.nooses;
-    // A boss's arena: the pair's rules before they move (sim/doorpair.ts); one clock a hero holds the hungry near them.
+    // A boss's arena: its rules before they move (sim/bossrooms.ts); one clock a hero holds the hungry near them.
     OWN_KIT.bosses = !!this.bosses;
-    if (this.bosses) stepPair(this.bosses, w, (x, y) => this.spawn('scrapper', x, y));
+    if (this.bosses) stepBosses(this.bosses, w, (x, y) => this.spawn('scrapper', x, y));
     // Pacing (sim/pacing.ts, chase.ts): who flanks, who's asleep before they move; after, packs held back or let go.
     OWN_KIT.pace = !!this.pace;
     if (this.pace) flankers(this.enemies, this.heroes);

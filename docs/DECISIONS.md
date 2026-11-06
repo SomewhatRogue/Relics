@@ -2,6 +2,115 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-06: Hempen in the boss format (Claude Opus 5.5)
+
+`docs/plans/bosses.md` rollout item 5 ("Hempen, brought into the format"). Hempen, the climax of Hangman's Wood,
+now fights on the boss kit the Doorkeepers brought (POISE, the plate with pips, a phase roar, the pose before every
+blow, aim locked at 70%, one clock a hero, BRACED and the grace by `BOSS_FLAGS`, the sure chest through the `boss`
+relic source, party scaling), and keeps what's its own: the wood, its ground under the hanging tree, its noose, the
+snarers, the gibbet and its winch, the Gospel Oak and the fire (none of those three touched). Every number in
+`shared/hangtune.ts` `HEMPEN_BOSS` (re-exported through tuning), with one switch, `HEMPEN_BOSS.on`.
+
+**Its ground is the arena** (`shared/hangscenes.ts`): four trunks (r 0.5) round the middle of its ground, its hoard
+chained under the hanging tree (the sure chest), the two snarers, and no band any more (it's rolled and let go, so the seed's stream and every tree are as they were; the
+wood's knots take up the goblins it held, 40 as before; small ones come in along the paths from three players). No doors shut: it's a wood.
+It fights within 9 tiles of where it stands, or after a hero who hurt it in the last 4 s out to 13; anyone else off
+its ground isn't chased, and it walks back (so a Ranger can't stand off and shoot it for free, and the fight stays
+on the ground with the trunks). A rope (the noose, the haul) ends at the first trunk across its lane, and at the
+first friend standing in it short of its hero: the plan's "stand between Hempen and whoever is furthest".
+
+**Its moves** (each with the kit's 0.2 s pose first; red is blocked or dodged, striped walked out of or dodged):
+
+| Move | Floor | Answer | Punish |
+|---|---|---|---|
+| Noose, every 8 s at whoever's furthest from a friend, 2.2 to 6 off | thin red lane, 0.9 s, 4 | block (BRACED), dodge, or out of the lane; a friend in front takes it | 0.8 s |
+| Haul, at a hoisted hero up to 6 off | red lane down the rope, 1.2 s, 12, dragged to its feet and held 0.6 s | CUT FREE first (the rope comes back empty: open 1.0 s), a friend in front blocks it, a trunk between | 1.0 s |
+| Cleave (the butcher's) | red 70 degrees, 2.6, 1.0 s, 30 | block (BRACED), dodge | 0.9 s |
+| Slam (the butcher's) | striped circle 1.7 ahead, 1.3 s, 40 | walk out, dodge | 1.1 s |
+| Rope Rain (phase 2) | striped circle 1.2 where its hero stood, 1.2 s, 20 | walk out, dodge | 1.5 s |
+
+- **Rotation** (one seeded swap a phase; a party of four one more cleave): phase 1 cleave, cleave, slam, cleave,
+  slam; phase 2 cleave, rain, slam, rain, cleave. The noose runs on its own 8 s clock and the haul whenever someone's
+  hoisted (a snare's too). A move it can't get to in 3 s is passed over.
+- **Aim**: the lanes and the cleave turn with their hero until 70% of the wind-up, then hold. The slam and Rope
+  Rain are placed as they begin and never move (a circle that followed you till 70% couldn't be walked out of).
+- **Phase 2** below half its health: the 2 s roar (nothing lands either way), a pip goes out on the plate. Never
+  during a stagger (the party's payoff) or as a blow lands.
+- **On a phone**: every red wind-up at least 0.9 s, every striped one at least 1.1 s and walked out of from the
+  middle in 60% of it by the slowest kit (greatsword, 3.43 tiles a second); no rope or rain begun at a hero further
+  across than 5.5 tiles (an upright phone shows about 6 either side); the rope lanes are drawn and judged 0.64
+  wide (a hero's middle within `HERO.radius` of the rope), in both views.
+
+**The kit, as the Doorkeepers have it:** POISE 100 (1.3, 1.6, 1.9 times for two to four), filled by charged blows,
+perfects, ambushes, backstabs, BRACED and a last-second dodge through its blow; full, STAGGERED 2.5 s; ordinary stuns
+shrugged, a relic's in full and half the bar. Health by `PARTY.boss` (600, 840, 1080, 1320). **A party of two or
+more**: 0.6 s after any blow of its begins, a rope comes down out of the branches on a second hero (the nearest
+not already clocked: a striped circle 1.2 on their spot, 1.2 s after the pose, 16), judged as any boss blow through
+`hitHero` (lag compensation and the grace with it), and counted on one clock a hero (the hungry near them hold).
+Three players: 3 small ones in along the paths at the start and at the roar; four: 4. The plate (`#boss`) reads
+HEMPEN, one bar, its POISE under it, two pips, once you're within 14 (as before for an expedition's named one).
+
+**The sure chest** (`sim/bosschest.ts`, `sure: 'hempen'`): its hoard opens once it's dead (chained, as any), each
+hero their own roll on their own seed, at a named butcher's odds from the plan: Forged or better, PRE-WAR 20%,
+TOUCHED 4%, TURNING 1.5%, a hungry piece 5% (its own if it has one), plate or a weapon half and half; no gold; and
+20% a relic through `awardRelic(.., 'boss')`, never the grappling hook, so the wood's own relic stays the hook at
+the job's end (`wonRelics`, unchanged). Its body still drops the butcher's coal (the censer crumb). Nothing on the
+floor: a boss of the kit leaves no gear, and it's `zoned` as before. The plan's "sure on a hero's first named kill"
+is still Kyle's open call, not built.
+
+**How it's wired, and the shared files** (small edits only; wt-wave2 is in enemies.ts, combat.ts, the composer):
+new `sim/hempenboss.ts` (its turn, the begin, the aim and the rope's reach, the landing, the haul lost),
+`sim/hempenbook.ts` (the room's tick: start, phase 2, the split rope, ropes landing, the adds; `hempenOnto`),
+`sim/bossrooms.ts` (which book's rules run), `client/hempendraw.ts` (the ropes on the ground, both views). Edited:
+`sim/bosskit.ts` (BossOn `who: 'hempen'`, `ropes`; BossBook `of`; `clocked` counts a rope; `trackAim` hands Hempen
+on), `sim/doorkeepers.ts` (2 lines: Hempen's turn), `sim/doorwall.ts` (1: Hempen has no door), `sim/ownfoes.ts`
+(1: a rope's landing goes through `noosed`), `sim/room.ts` (2: `stepBosses` for `stepPair`), `sim/expedroom.ts`
+(2: `hempenOnto`), `sim/types.ts` (1: `EnemyAttack.boss` takes Hempen's moves), `sim/bossplate.ts`,
+`sim/bosschest.ts`, `sim/chests.ts` (1: `Chest.sure`), `shared/hangscenes.ts`, `shared/hangtune.ts`,
+`shared/relicaward.ts` (a comment), `client/strawman.ts` (1: Hempen drawn as itself, not behind a door),
+`client/foes.ts` and `client/three/teleg3d.ts` (a boss's rope lane drawn 0.64 wide), `client/wooddraw.ts` (1 call).
+Not touched: `enemies.ts`, `combat.ts`, the composer, the elite and meaty files. **Online**: nothing new a tick; the
+boss field goes when POISE, the phase or a rope changes (tested), the ropes in it.
+
+**Measured** (`tests/bossbot.ts hempenClear`: Hempen and its two snarers, the rest of the wood gone; the bot now
+reads Hempen's ropes as floors and cuts a hoisted friend down):
+
+| Hempen's ground, days 3 / 4 / 5 | seconds | health lost | staggers |
+|---|---|---|---|
+| twin daggers (Rogue) | 27.0 / 92.4 / 37.7 | 34 / 226 / 20 | 2 / 1 / 2 |
+| focus staff (Mage) | 71.3 / 68.2 / 130.8 | 160 / 146 / 378 | 2 / 2 / 2 |
+| sword (Warrior) | 71.5 / 49.7 / 51.7 | 200 / 76 / 80 | 2 / 2 / 3 |
+
+Two (sword, daggers) 25.5 s; three (sword, staff, daggers) 30.9 s. All won. The bot hugs it, so the noose (for
+whoever stands off) comes rarely; the snarers' snares hoist the bot often (it doesn't look for them), and the staff,
+which stands in to slash and can't block, takes the most, as in the barn.
+
+**Pins**: none moved (no hash test reaches the wood). A first cut dropped the band without rolling it, which
+reshuffled the wood's trees and broke the winch test (a wave knocked the hero off the winch); with the band rolled
+and let go the layout is the old one again. `tests/hangwood.test.ts`'s "dead, no relic on the floor" puts its
+1-health Hempen in phase 2 first (woken at 1 it now roars before it can die).
+
+**New words**: none. On screen it's HEMPEN on the plate (its name, as before), STAGGERED and BRACED (the kit's).
+
+Tests: `tests/hempen.test.ts` (26: the cleave, noose, slam and Rope Rain landed, blocked or not, dodged and walked
+out of as their colour says; BRACED's rebound and POISE; the rain placed where its hero stood; the haul left alone,
+cut free first, and blocked by a friend in front; a trunk ending the noose; the four trunks; the rope on a second
+hero landed, not saved by a block, walked out of and dodged, and on one clock a hero, none solo; POISE, the stagger,
+a shrugged stun, a relic's; phase 2, the roar taking nothing, the pips; the plate near and not; the hoard chained,
+opened at the kill, per hero, no gold, nothing on the floor; the hoard's odds over 4000 seeds and never the hook;
+the hook still the wood's at the job's end; party scaling one to four; the floors' times and walking out in 60%,
+the lanes' width, the pose and the aim lock, nothing begun past `across`; its ground; the switch off; the same
+fight twice; no boss field a tick, the ropes across to a friend; clear times for daggers, staff and sword and a
+party of three). Full vitest 149 files, 1413 tests; tsc; online town 14 of 14, party 28 of 28, expedition 13 of 13
+on the Barrowfields and 13 of 13 in Hangman's Wood (`ZONE=hangmans`: Sam 19.6 KB/s, biggest 17.4 KB), Florida 8 of
+8. Shots: `node scripts/hempen-look.cjs [url] [outdir]` (phone: the plate on its ground, the noose's lane held part
+way, STAGGERED after a BRACED block): `shots/hempen-plate-phone.png`, `hempen-noose-phone.png`,
+`hempen-stagger-phone.png`.
+
+Open: Kyle's play on every number and the switch; whether its ground should shut like the barn's doors (a wood has
+none, so it keeps you by chasing whoever hurt it and nobody else); a Blender pass on Hempen and the trunks; a sound
+of its own for a rope coming down (the slam's wind-up now).
+
 ## 2026-11-06: elites, and the first new meaty goblins: the Planker, the Swingle, the Forker (Claude Opus 5.5)
 
 Kyle: "things that take a few hits", "a mix of splatting and tactical", "harder kiting", and "I donlike [sic] moments of

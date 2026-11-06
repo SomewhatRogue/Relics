@@ -11,6 +11,7 @@ import { DOORKEEPERS } from '../shared/tuning';
 import { walk } from './enemies';
 import { isDead } from './damage';
 import { bossBegin, bossTarget, clocked, rotation, theBook, turnTo, type BossOn } from './bosskit';
+import { stepHempen } from './hempenboss';
 import type { Enemy, FightEvent, Hero } from './types';
 
 const D = DOORKEEPERS;
@@ -19,6 +20,8 @@ export const partnerOf = (e: Enemy, foes: Enemy[]) => foes.find((o) => o !== e &
 /** Its turn (`notice`: the room's own look about, while it hasn't seen you). */
 export function stepKeeper(e: Enemy, heroes: Hero[], now: number, dt: number, ev: FightEvent[], foes: Enemy[], notice: () => boolean): void {
   const b = e.boss!, bk = theBook();
+  // Hempen, the wood's boss, takes its own turn (sim/hempenboss.ts).
+  if (b.who === 'hempen') return stepHempen(e, heroes, now, dt, ev, notice);
   // At its post facing the back wall until it sees you, or hears you come within DOORKEEPERS.hear (creeping, only
   // what it sees: an ambush to open with). sim/doorpair.ts wakes its partner and starts the fight.
   if (e.alert === false && !heard(e, heroes) && !notice()) return;
