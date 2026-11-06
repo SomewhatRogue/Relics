@@ -727,6 +727,10 @@ export class Game {
     if (!told && mine && job && !this.canTake(job, mine.members.length)) return;
     const go = told ?? this.parties?.setOut();
     if (!go) return;
+    // (One job's socket at a time: anything still open from before goes.)
+    this.coop?.close();
+    this.remote?.close();
+    this.remote = null;
     this.coop = new CoopHost(go.room, this.profile.id, this.profile.name, this, go.members);
     this.startJob(go.job, go.members.length);
     this.jobKey = go.room;
@@ -757,6 +761,10 @@ export class Game {
 
   /** Follow a friend's job (they lead): their room is drawn here as it comes. */
   startRemote(g: CoopGuest): void {
+    // (One job's socket at a time: a follower before this one, or a job led here, closes.)
+    if (this.remote && this.remote !== g) this.remote.close();
+    this.coop?.close();
+    this.coop = null;
     this.mode = 'run';
     this.outside = null;
     this.rooms.reset(null);

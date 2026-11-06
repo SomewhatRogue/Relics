@@ -115,6 +115,8 @@ export function metered(b: Backend, m: Meter): Backend {
       },
       subscribe: (ch, fn) => c('subscribe', 1, bus.subscribe(ch, fn)),
       unsubscribe: (ch) => c('unsubscribe', 1, bus.unsubscribe(ch)),
+      // (A new connection: no command of its own; the SUBSCRIBEs after it are counted as they go.)
+      reset: () => bus.reset(),
     },
   };
 }

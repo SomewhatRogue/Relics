@@ -24,6 +24,12 @@ export interface Bus {
   publish(channel: string, msg: string): Promise<number>;
   subscribe(channel: string, fn: (msg: string) => void): Promise<void>;
   unsubscribe(channel: string): Promise<void>;
+  /**
+   * A fresh subscriber connection, with no subscriptions: the relay subscribes again to what it wants
+   * (_subs.ts). For a connection gone half-open, where a SUBSCRIBE is never answered and nothing comes
+   * in, while commands on the other connection still work (seen live 2026-11-05).
+   */
+  reset(): Promise<void>;
 }
 export interface Backend { store: Store; bus: Bus; shared: boolean }
 
@@ -76,6 +82,10 @@ export function memoryBackend(shared?: Shared): Backend {
         if (fn) subs.get(ch)?.delete(fn);
         mine.delete(ch);
       },
+      reset: async () => {
+        for (const [ch, fn] of mine) subs.get(ch)?.delete(fn);
+        mine.clear();
+      },
     },
   };
 }
@@ -87,10 +97,12 @@ export function memoryBackend(shared?: Shared): Backend {
 export async function redisBackend(url: string, onError: (e: unknown) => void = () => {}): Promise<Backend> {
   const { createClient } = await import('redis');
   const cmd = createClient({ url });
-  const sub = cmd.duplicate();
+  let sub = cmd.duplicate();
   cmd.on('error', onError);
   sub.on('error', onError);
   await Promise.all([cmd.connect(), sub.connect()]);
+  /** The old subscriber connection, let go without waiting on it (a half-open one may never answer a QUIT). */
+  const drop = (c: typeof sub) => void Promise.race([c.disconnect(), new Promise((r) => setTimeout(r, 1000))]).catch(() => {});
   return {
     shared: true,
     store: {
@@ -112,6 +124,13 @@ export async function redisBackend(url: string, onError: (e: unknown) => void = 
       },
       subscribe: (ch, fn) => sub.subscribe(ch, fn),
       unsubscribe: (ch) => sub.unsubscribe(ch),
+      reset: async () => {
+        const old = sub, fresh = cmd.duplicate();
+        fresh.on('error', onError);
+        await fresh.connect();
+        sub = fresh;
+        drop(old);
+      },
     },
   };
 }
@@ -133,6 +152,6 @@ export function guarded(b: Backend, isLimit: (e: unknown) => boolean, onLimit: (
   return {
     shared: b.shared,
     store: { get: g(s.get), setNx: g(s.setNx), set: g(s.set), expire: g(s.expire), del: g(s.del), incr: g(s.incr), incrBy: g(s.incrBy) },
-    bus: { publish: g(bus.publish), subscribe: g(bus.subscribe), unsubscribe: g(bus.unsubscribe) },
+    bus: { publish: g(bus.publish), subscribe: g(bus.subscribe), unsubscribe: g(bus.unsubscribe), reset: g(bus.reset) },
   };
 }

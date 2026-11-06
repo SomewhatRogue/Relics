@@ -52,3 +52,32 @@ Roll of the Brave. POST `{g, c}`: a contribution (`shared/worldsync.ts`), cleane
 server. Redis per world: `rl:world:CODE` (the world as JSON, changed under WATCH), `rl:b:CODE:STAT`
 (sorted sets), `rl:n:CODE` (hero names). About a dozen commands per finished run and a few per look
 (the client looks at most every 30 s in town). No Redis: worlds live in the function's memory (dev).
+
+## Staying on one socket, and a relay that hears itself (2026-11-05)
+
+What the Florida night taught (docs/DECISIONS.md 2026-11-05, "the join storm"):
+
+- **A subscriber connection can go half-open** and say nothing: no error, a SUBSCRIBE never answered, no
+  messages in, while commands on the other connection work. The relay never waits on a SUBSCRIBE more than
+  2.5 s, listens for its own `here` coming back (5 s), and on either opens a fresh subscriber connection and
+  subscribes again to every room it has players in (`api/_subs.ts`). Subscribe and unsubscribe go in order per
+  room, and a room is only unsubscribed if it's still empty.
+- **One socket per room per page** (`src/client/relay.ts`): the current one and, while swapping, the one it
+  replaces. Never two opening. Retries back off with jitter (`backoff.ts`). Hops to the leader's instance:
+  three per 4-minute rotation, one at a time, 1.5 s apart, never renewed by a rejoin.
+- **A friend's rejoin when the leader is quiet**: 10 s before the first whole room, 5 s after, doubling to
+  30 s while it keeps happening (`coop.ts`). A far leader's slow welcome is not a reason to reconnect.
+- **Patches are played at the pace they were made** (`src/client/playout.ts`), at most 0.1 s late; hits and
+  sounds don't wait.
+- **Nothing that ticks goes in a patch.** A goblin's act and its blow go as when they began (`a0`, `t0`:
+  `client/interest.ts`), what only the leader's room reads stays home, facing and knockback go to a tenth.
+  A swarm's blows were over half of every patch. Measure with `npx tsx scripts/bigmap/swarm.ts`.
+- **The whole-job save** goes to the friend first in line every 2 s, everyone every 8 s, never with a patch;
+  friends' periodic whole rooms are at least a second apart.
+- **Who should lead:** the relay is in `sfo1`; every friend's trip is their way there plus the leader's. The
+  player nearest the relay (smallest `RelaySocket.rtt`) makes the best leader. Functions stay in `sfo1`, next
+  to Redis.
+- **Redis must sit with the functions** (`sfo1`): each instance logs `redisMs` from its first command.
+- **Reproduce it:** `node scripts/florida-online.cjs` (a deaf leader's instance, a far leader, Kyle moved off;
+  `KYLE_ROUTE=i0` for a split party's lag, `PLAYOUT=0` for the old way of applying patches, `NORESET=1` for a
+  connection the relay can't heal).
