@@ -12,10 +12,10 @@ async function openPack(k, p) {
 const shut = (k, p) => k.ev(p, () => window.__pack.toggle(false));
 /** Where a tagged piece is in this page's pack (-1: not there). */
 const at = (k, p, tag) => k.ev(p, (tag) => window.__game.hero.bag.findIndex((it) => it.tag === tag), tag);
-/** Tap a piece in the pack (`src`, as its square's data-src), then the card's button for gear change `op`. */
-async function tapThen(k, p, src, op) {
+/** Tap a piece in the pack (`src`, as its square's data-src), then the card's button for gear change `op` (and `arg`, if given). */
+async function tapThen(k, p, src, op, arg) {
   await k.ev(p, (src) => window.__pack.pick(src), src);
-  const sel = `#pack .detail button[data-op="${op}"]`;
+  const sel = `#pack .detail button[data-op="${op}"]` + (arg === undefined ? '' : `[data-arg="${arg}"]`);
   if (!(await k.until(p, (sel) => !!document.querySelector(sel), sel, 3000))) return false;
   await k.ev(p, (sel) => document.querySelector(sel).click(), sel);
   return true;
@@ -45,11 +45,15 @@ async function guestPack(k) {
   k.step("in town: the leader's pack opens", await openPack(k, kyle));
   await shut(k, kyle);
   if (!(await k.party(kyle, sam))) return;
-  // The village street (seed 7: door 0 a house with goblins in it), every goblin dead.
-  await k.ev(kyle, async () => {
+  // A village street with two houses to go into (seed 207, as split.cjs: since the atlas's doors rule
+  // seed 7 has one): a barn with goblins in it, and the torch-bearers' house. Every goblin dead.
+  const d = await k.ev(kyle, async () => {
     const g = window.__game;
-    g.startJob(await window.__villageJob(7), g.run.party);
+    g.startJob(await window.__villageJob(207), g.run.party);
+    const bs = g.room.map.blocks, at = (held) => bs.findIndex((b) => !!b.door && !b.door.startsWith('side:') && b.door.endsWith(':held') === held);
+    return { plain: at(false), caged: at(true) };
   });
+  k.step('a village street with two doors', d.plain >= 0 && d.caged >= 0, d);
   await k.until(sam, () => window.__game.run?.job.place.kind === 'village' && window.__game.room.heroes.some((h) => h.id === 'me'), null, 10000);
   await k.clear(kyle);
   k.step('on the job, following: the pack opens', await openPack(k, sam));
@@ -57,22 +61,22 @@ async function guestPack(k) {
   k.step('armor swapped for the packed one', (await tapThen(k, sam, 'bag:' + (await at(k, sam, 'b27')), GEAR.equip)) && (await holds(k, kyle, sam, "h.armor?.tag === 'b27' && h.bag.some((it) => it.tag === 'a27')")));
   k.step('a piece dropped from the pack', (await tapThen(k, sam, 'bag:' + (await at(k, sam, 'junk27')), GEAR.drop)) && (await holds(k, kyle, sam, "!h.bag.some((it) => it.tag === 'junk27')")));
   k.step('the second potion to the front of the belt', (await tapThen(k, sam, 'belt:1', GEAR.front)) && (await holds(k, kyle, sam, "h.belt[0] === 'oil'")));
-  // The relic shelf (nothing chosen): carry the bomb; then from the relic's own card, the bell.
-  await k.ev(sam, () => window.__pack.pick(null));
-  const shelf = '#pack .detail button[data-op="3"][data-arg="1"]';
-  k.step('a relic he owns carried from the shelf', (await k.until(sam, (s) => !!document.querySelector(s), shelf)) &&
-    (await k.ev(sam, (s) => (document.querySelector(s).click(), true), shelf)) && (await holds(k, kyle, sam, "h.relicItem === 'r27b'")));
-  k.step('the other carried from the relic card', (await tapThen(k, sam, 'relic', GEAR.carry)) && (await holds(k, kyle, sam, "h.relicItem === 'r27a'")));
+  // The relics' own row (relicshelf.ts, since the upgradeui merge; the card with nothing chosen lists
+  // them no more): the empty RELIC slot tapped, CARRY the bomb; then the bell's square on the shelf
+  // tapped, CARRY on its card (the bomb goes back on the shelf).
+  const found = (id) => k.ev(sam, (id) => window.__game.hero.found.findIndex((r) => r.id === id), id);
+  k.step('a relic he owns carried from the empty slot', (await tapThen(k, sam, 'relic', GEAR.carry, await found('r27b'))) && (await holds(k, kyle, sam, "h.relicItem === 'r27b'")));
+  k.step('the other carried from its card on the shelf', (await tapThen(k, sam, 'found:' + (await found('r27a')), GEAR.carry)) && (await holds(k, kyle, sam, "h.relicItem === 'r27a'")));
   await shut(k, sam);
   await k.wait(1500);
   k.step('everything holds on his page', await k.ev(sam, () => { const h = window.__game.hero; return h.armor?.tag === 'b27' && h.rings.some((r) => r.tag === 'ring27') && !h.bag.some((it) => it.tag === 'junk27') && h.belt[0] === 'oil'; }));
   k.step('and in his save', await k.until(sam, () => { const q = window.__game.profile; return q.armor?.tag === 'b27' && q.rings.some((r) => r.tag === 'ring27') && q.relic === 'r27a' && q.belt[0] === 'oil'; }, null, 4000));
-  // Into the house behind door 0 (its goblins dead), then the pack again: a ring off.
-  await k.ev(kyle, () => {
-    const g = window.__game, b = g.rooms.street.map.blocks[0], r = g.rooms.houses.get(b);
+  // Into the barn (its goblins dead), then the pack again: a ring off.
+  await k.ev(kyle, (i) => {
+    const g = window.__game, b = g.rooms.street.map.blocks[i], r = g.rooms.houses.get(b);
     for (const e of r?.enemies ?? []) Object.assign(e, { hp: 0, act: 'dead', actT: 0, actDur: 99, respawns: false });
     Object.assign(g.rooms.street.heroes.find((h) => h.id !== 'me'), { x: b.x + b.w / 2, y: b.y + b.h + 0.45, kvx: 0, kvy: 0 });
-  });
+  }, d.plain);
   await k.until(sam, () => !!window.__game.near()?.door);
   await sam.page.keyboard.down('ArrowUp');
   const inside = await k.until(sam, () => window.__game.room.indoors, null, 6000);
@@ -82,8 +86,8 @@ async function guestPack(k) {
   const ring = await k.ev(sam, () => window.__game.hero.rings.findIndex((r) => r.tag === 'ring27'));
   k.step('inside: the ring comes off', (await tapThen(k, sam, 'ring:' + ring, GEAR.off)) && (await holds(k, kyle, sam, "!h.rings.some((r) => r.tag === 'ring27') && h.bag.some((it) => it.tag === 'ring27')")));
   await shut(k, sam);
-  // The leader goes in too (door 6), and opens his own.
-  await k.ev(kyle, () => { const g = window.__game, b = g.rooms.street.map.blocks[6]; Object.assign(g.hero, { x: b.x + b.w / 2, y: b.y + b.h + 0.45 }); g.enter(b); });
+  // The leader goes into the other house, and opens his own.
+  await k.ev(kyle, (i) => { const g = window.__game, b = g.rooms.street.map.blocks[i]; Object.assign(g.hero, { x: b.x + b.w / 2, y: b.y + b.h + 0.45 }); g.enter(b); }, d.caged);
   k.step("inside: the leader's pack opens", (await k.until(kyle, () => window.__game.room.indoors)) && (await openPack(k, kyle)));
   await shut(k, kyle);
 }
