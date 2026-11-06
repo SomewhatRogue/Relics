@@ -28,7 +28,7 @@ export const FEN_GOALS = {
 export const FEN_EXIT = {
   open: 'Jobs done. Out by the causeway to the north',
   leave: 'Jobs done. Out by the causeway to the north',
-  check: 'Light the fire on the rise',
+  check: "Light the fire on the hummock",
   lit: "The fire's lit. Anyone who goes down gets up by it now",
   drop: 'Your jobs are on the MAP. Keep to the causeways and the boards.',
 };
@@ -44,12 +44,12 @@ export const FEN_MAP = { title: 'FENMERE', check: 'FIRE', start: 'WAY IN' };
 export const FEN_BEATS: Record<string, string> = {
   edge: "Two of them are dragging somebody through the stile, back to their fire in the coppice.",
   coppice: "They're asleep among the cut stools. Go quietly and they might not wake.",
-  carr: 'Webs strung between the willows. Something has been nesting in the carr.',
-  causeway: "They've shut the causeway with shields, and there's one out on that islet with a pot of oil.",
+  carr: "There's a nest down among the willows, and two of the spiders are already out of it.",
+  causeway: "They've shut the causeway on us, and there's one out on that islet with a pot of oil.",
   ford: "Mind the ford. There's one on the far bank with a hook on a pole.",
   island: "Cages on the island, and there's still somebody in them.",
-  reeds: 'Something moved in the reeds. Watch the water as you go.',
-  cuts: "The Peat Cuts. They've hung their larder up on the old drying ground.",
+  reeds: "Mind the reeds. You'll see their eyes at the water before you see the rest of them.",
+  cuts: "They've hung their larder on the old peat racks, and that's their pot on the fire. This was the Peat Cuts' drying ground.",
   butcher: '{boss} is down among the cuts, with hooks on poles all round it.',
   chest: "A chest out on the bog, and a dead man by it who didn't get it open.",
 };
