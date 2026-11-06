@@ -10,6 +10,7 @@
  * - it won't start (no WebGL on this phone) or breaks while drawing: the flat view carries on, the
  *   switch says 2.5D FAILED, and flipping it again tries afresh.
  */
+import { idleSweep, idleWorld } from '../idles';
 import type { ArenaRoom } from '../../sim/room';
 import type { Hero } from '../../sim/types';
 import type { Fx } from '../fx';
@@ -76,6 +77,9 @@ export class Views {
   }
 
   render(room: ArenaRoom, meId: string, fx: Fx, now: number, dt: number, others: Hero[], job: boolean): void {
+    // What the heroes' idles see this frame: who's awake near them, the ground for the hound's stick (idles.ts).
+    idleWorld(room.enemies, room.map);
+    if (Math.floor(now) % 30 === 0) idleSweep(now);
     const want = this.switch.look === '3d' && !this.failed;
     if (want && !this.v3 && !this.loading) this.load();
     const use = want && !!this.v3;

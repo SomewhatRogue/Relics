@@ -4,6 +4,7 @@
  * to go in; taking a job starts a run (room after room until the job is done or you're driven back);
  * the results come home to the hero and the shared world, and the town changes with them.
  */
+import { petSpots, type Dog } from './petting';
 import { doorAt, inArea, npcAt, pushingInto, useMap, type Area, type Block, type Npc, type Theme } from '../shared/arena';
 import { travel } from '../shared/sweep';
 import type { DreadRule } from '../sim/dread';
@@ -71,7 +72,7 @@ export interface Result { won: boolean; how: How; half: boolean; job: Job; gold:
 /** A leader back after a reload waits this long (the room held) for a friend to answer before the job's given up. */
 const HOLD = 10;
 /** Something you can use where you stand: a spot, a person, or a door. */
-export interface Near { label: string; talk?: SpotId; arg?: number; key?: string; door?: Block; chest?: number; npc?: Npc }
+export interface Near { label: string; talk?: SpotId; arg?: number; key?: string; door?: Block; chest?: number; npc?: Npc; /** A hound to pet (the lodge: petting.ts). */ pet?: Dog }
 
 export const ME = 'me';
 /** Wickhold, its halls and the yard: out of bounds, you're only put back (sim/dread.ts). */
@@ -966,12 +967,17 @@ export class Game {
     }
     if (this.mode === 'town' && !this.outside) for (const s of townSpots(this.world)) all.push({ x: s.x, y: s.y, label: s.label, talk: s.id, key: s.key });
     if (this.mode === 'yard') all.push({ x: RACK.post.x, y: RACK.post.y, label: 'THE STRAW MEN', talk: 'practice' });
+    // In the hunters' lodge: Maeve's hound by the fire, and a Ranger's own (petting.ts).
+    const pets = this.mode === 'town' ? petSpots(this.outside?.door.door, h) : [];
+    for (const s of pets) if (!s.last) all.push({ x: s.x, y: s.y, label: s.label, pet: s.pet, reach: s.reach });
     for (const c of this.room.chests) if (c.state === 'shut') all.push({ x: c.x, y: c.y, label: c.chained ? 'A CHAINED CHEST' : 'OPEN THE CHEST', chest: c.id });
     let best: Near | null = null, bd = SPOT_REACH;
     for (const n of all) {
       const d = Math.hypot(n.x - h.x, n.y - h.y) * (n.door ? 1.4 : 1) - (n.reach ?? 0);
       if (d <= bd) (bd = d), (best = n);
     }
+    // Your own hound, at heel: only when there's nothing else here to use.
+    for (const s of pets) if (!best && s.last && Math.hypot(s.x - h.x, s.y - h.y) - s.reach <= SPOT_REACH) best = { label: s.label, pet: s.pet };
     return best;
   }
 

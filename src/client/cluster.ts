@@ -166,7 +166,7 @@ export class Cluster {
     const showGrab = (active || lifter) && (!dodges || !(use && !active && mode !== 'town'));
     b.grab.show(showGrab ? { shape: 'round', size: 29, grade: active ? 'gilt' : 'stone', icon: icon(what) } : null, '', word, word);
     b.grab.el.classList.toggle('dim', !active);
-    const uw = looking ? 'LOOK' : spot?.chest ? 'OPEN' : spot?.door ? 'ENTER' : spot?.talk && spot.talk !== 'board' && spot.talk !== 'market' && spot.talk !== 'gate' && spot.talk !== 'practice' ? 'TALK' : 'USE';
+    const uw = looking ? 'LOOK' : spot?.chest ? 'OPEN' : spot?.door ? 'ENTER' : spot?.pet ? 'PET' : spot?.talk && spot.talk !== 'board' && spot.talk !== 'market' && spot.talk !== 'gate' && spot.talk !== 'practice' ? 'TALK' : 'USE';
     const ui: IconId = uw === 'LOOK' ? 'use' : uw === 'OPEN' ? 'open' : uw === 'ENTER' ? 'enter' : uw === 'TALK' ? 'chat' : 'use';
     const big = mode === 'town';
     b.use.show(use && !(showGrab && active && dodges) ? { shape: 'round', size: big ? 42 : 29, grade: 'gilt', icon: icon(ui), iconScale: big ? 2 : 1 } : null, '', uw, uw);
