@@ -95,7 +95,6 @@ describe('the sword and censer', () => {
   it("guards better than the mace", () => {
     const [c, m] = [WEAPONS.censer, WEAPONS.mace];
     expect(c.chip).toBeLessThan(m.chip);
-    expect(c.parryWindow).toBeGreaterThan(m.parryWindow);
     expect(c.guardArc).toBeGreaterThan(m.guardArc);
   });
 });

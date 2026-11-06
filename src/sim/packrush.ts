@@ -1,6 +1,7 @@
 /**
  * Pack rushes (Kyle, 2026-11-04: "I love blasting through waves but I also want to have to block
- * sometimes and parry"; "as long as the ones that wind up can all be blocked or parried at once").
+ * sometimes and parry"; "as long as the ones that wind up can all be blocked or parried at once"; parry went
+ * on 2026-11-05: one block or one dodge answers it now).
  * A fighting pack's first rush comes as it closes in (RUSH.first), then every RUSH.every seconds of
  * fighting (seeded): a free goblin of it calls one on a hero it isn't behind; two or three packmates join
  * as they come free, step into a fan before that hero on the pack's side, and once the fan's middle is in
@@ -117,9 +118,6 @@ function keep(r: Rush, s: Rushes, enemies: Enemy[], byId: Map<number, Enemy>, he
       if (e && a?.rush === r.id && a.t < a.windup && (frozen(e, now) || snared(e, now) || e.act !== 'attack')) e.attack = null;
     }
     if (now < r.land + 0.05) return true;
-    // Landed: one parry that answered two or more blows says so.
-    const g = h?.rushGuard;
-    if (h && g?.id === r.id && g.how === 'parry' && g.n >= 2) ev.push({ k: 'rushparried', x: r.cx ?? h.x, y: r.cy ?? h.y, n: g.n, id: h.id });
     return done(r, s, byId, rng);
   }
   // Gathering: one stunned, pinned, carried, frozen or netted is out (a flinch only holds it up a moment).

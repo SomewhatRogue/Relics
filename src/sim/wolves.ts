@@ -1,7 +1,7 @@
 /**
  * Wolves and their keeper (numbers: shared/prowlers.ts WOLF, KEEPER). Wolves circle whoever they're
  * after, working round to the side or the back, and dart in from there (a short red lane: block it,
- * parry it, get out of it). They keep near their keeper; the keeper keeps behind them and cracks its
+ * get out of it). They keep near their keeper; the keeper keeps behind them and cracks its
  * whip. Kill the keeper and they scatter: they run, and any that get far enough from everyone are gone.
  */
 import { KEEPER, SCRAPPER, WOLF } from '../shared/tuning';

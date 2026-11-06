@@ -1,7 +1,7 @@
 /** The movement ladder (shared/ladder.ts): taught in order at the trainer, none on an old save, and each rung firing in the room (and not without it). */
 import { describe, expect, it } from 'vitest';
 import { BLINK, DODGE, HERO, SNARE, TEACHES, TICK, drillLevel, drillPrice, newProfile, type WeaponId } from '../src/shared/tuning';
-import { BLINK_BURST, CALTROPS, COVER, LADDER_LEVELS, LADDER_TITLE, LANDING, PARRY_MEND, RUNGS, RUNG_WORDS, SHELTER, TAUNT, TWIN_SNARE, knowsRung } from '../src/shared/ladder';
+import { BLINK_BURST, CALTROPS, COVER, LADDER_LEVELS, LADDER_TITLE, LANDING, BLOCK_MEND, RUNGS, RUNG_WORDS, SHELTER, TAUNT, TWIN_SNARE, knowsRung } from '../src/shared/ladder';
 import { buyDrill, drillState, learnLesson } from '../src/shared/training';
 import { trainerRows } from '../src/shared/trainrows';
 import { ArenaRoom } from '../src/sim/room';
@@ -242,14 +242,16 @@ describe('the Healer: the guard', () => {
     }
   });
 
-  it('MENDING PARRY: a parry heals friends near', () => {
+  it('HEALING BLOCK (was HEALING PARRY): each blow the Healer blocks heals friends near', () => {
+    expect(RUNG_WORDS.blockmend.name).toBe('HEALING BLOCK');
     for (const rungs of [1, 2]) {
       const { c, f, e } = party(rungs), ev: FightEvent[] = [];
       f.hp = 50;
-      Object.assign(c, { blocking: false, parryOpenAt: 10, fy: -1 });
+      Object.assign(c, { blocking: true, fy: -1 });
       hitHero(e, blow(e, 'cleric'), c, 10, ev, [c, f]);
-      expect(ev.some((x) => x.k === 'parry')).toBe(true);
-      expect(f.hp).toBe(rungs === 2 ? 50 + PARRY_MEND.heal : 50);
+      expect(ev.some((x) => x.k === 'block')).toBe(true);
+      expect(ev.some((x) => x.k === 'blockmend')).toBe(rungs === 2);
+      expect(f.hp).toBe(rungs === 2 ? 50 + BLOCK_MEND.heal : 50);
       expect(c.hp).toBe(HERO.hp);
     }
   });

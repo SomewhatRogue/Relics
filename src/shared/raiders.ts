@@ -45,7 +45,7 @@ export const NETTER = {
 
 /**
  * The sneak-thief: small, quick (`speed` of a small goblin's pace), keeps `lurk` tiles off until the
- * fight's on, then darts in and grabs (a short red wedge: block it, parry it, or get out of it). It
+ * fight's on, then darts in and grabs (a short red wedge: block it, or get out of it). It
  * takes `take` gold off you (half what you carry at most), or the potion at the front of your belt if
  * you're carrying less than `least`, and bolts for the room's edge at `run`. Kill it and what it took
  * drops where it falls; let it get `escape` tiles from everyone, or to the edge, and it's gone.
@@ -94,10 +94,10 @@ export const ROOF = { z: 2, hp: 30, reach: 9 };
 
 /**
  * The ironhide (a placeholder name for the lore pass): a goblin in scraps of iron. Until its guard is
- * broken it takes `armour` of anything that lands (at least 1). A parry of its blow, a charged blow or
+ * broken it takes `armour` of anything that lands (at least 1). A charged blow or
  * a perfect (or any heavy hit: a burst, a crit) breaks it: for `broken` seconds it takes full damage,
  * more from behind as anything does, its plates knocked askew. Medium pace (`speed` of a small goblin's),
- * one heavy, readable blow that can be blocked and parried. It burns half as long, as a brute does.
+ * one heavy, readable blow that can be blocked or dodged. It burns half as long, as a brute does.
  */
 export const IRONHIDE = {
   hp: 90,

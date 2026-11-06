@@ -1,6 +1,6 @@
 /**
  * Turns keys, mouse and touch into an Intent. Laptop: WASD to move, mouse to aim, left click to
- * attack, hold right click to block (tap it to parry), Space to roll; J / K work too;
+ * attack, hold right click to block, Space to roll; J / K work too;
  * E the class skill, R the relic carried, G grab (then click to slam, G to throw), Q a potion (held:
  * turn the belt instead), C held winds a crossbow, X turns a Mage's element, V a Rogue's SHADOW STEP,
  * a Ranger's MARK or a Healer's MEND (shared/signs.ts). Phone (upright):

@@ -10,8 +10,8 @@ import { ELEMENT_NAME, SPELL, type Element, type MageKit, type WeaponId } from '
 export interface KitRow { tap: string; hold: string; perfect: string; also?: string }
 
 export const KIT: Record<WeaponId, KitRow> = {
-  // Warrior (shared/warrior.ts): the bash stuns every goblin in front on the flash; the riposte and the charge pin are bonuses.
-  sword: { tap: 'Three quick cuts', hold: 'Shield bash', perfect: 'Stuns all in front', also: 'Riposte after a parry' },
+  // Warrior (shared/warrior.ts): the bash stuns every goblin in front on the flash; the charge pin is a bonus (the sword's riposte went with parry).
+  sword: { tap: 'Three quick cuts', hold: 'Shield bash', perfect: 'Stuns all in front' },
   greatsword: { tap: 'Wide, slow sweeps', hold: 'Overhead', perfect: 'Shockwave, knocks flat' },
   spear: { tap: 'Long thrusts', hold: 'Lunge through three', perfect: 'Pins all it runs through', also: 'Pins a charging goblin' },
   // Ranger (shared/ranger.ts): the short sword on a tap, the bow on a hold.
@@ -26,7 +26,7 @@ export const KIT: Record<WeaponId, KitRow> = {
   wand: { tap: 'Firebolt, burns', hold: 'Fireball, burns a crowd', perfect: 'Bigger, interrupts any blow', also: 'Tap interrupts a wind-up' },
   // The wall of fire burns friends too (sim/firewall.ts): said once on the card: fire's ALSO (MAGE_KIT) and the book card's (BOOK_ALSO).
   staff: { tap: 'Flame sweep, burns', hold: 'Rolling wall of fire', perfect: 'Wider, burns longer' },
-  spellblade: { tap: 'Cuts burn', hold: 'Burning lunge', perfect: 'Longer, costs nothing', also: 'Hits take magic, parry refills' },
+  spellblade: { tap: 'Cuts burn', hold: 'Burning lunge', perfect: 'Longer, costs nothing', also: 'Hits drain, blink through refills' },
   // Cleric (shared/cleric.ts): every perfect shields friends near you.
   mace: { tap: 'Short blows, 3rd heals', hold: 'Smite, stuns', perfect: 'Harder, shields friends' },
   censer: { tap: 'Two cuts, healing swing', hold: 'Whirl, burns', perfect: 'Coals flare, shields friends' },

@@ -10,7 +10,7 @@ import { Rng } from './rng.js';
 import type { HeroClass } from './weapons.js';
 
 export const CHAINS = {
-  w_guard: { name: 'GUARD', steps: ['w_parry', 'w_block', 'w_counter'] },
+  w_guard: { name: 'GUARD', steps: ['w_wide', 'w_block', 'w_counter'] },
   w_plate: { name: 'PLATE', steps: ['w_health', 'w_tough', 'w_foot'] },
   w_heavy: { name: 'HEAVY BLOW', steps: ['w_charge', 'w_full', 'w_knock'] },
   w_skill: { name: 'CHARGE OR CRY', steps: ['w_focus', 'w_far', 'w_hold'] },
@@ -26,7 +26,7 @@ export const CHAINS = {
   m_channel: { name: 'ELEMENT', steps: ['m_primed', 'm_clear', 'm_twice'] },
   m_spells: { name: 'SPELLS', steps: ['m_draw', 'm_burst', 'm_dmg'] },
   m_breath: { name: 'MAGIC', steps: ['m_breath', 'm_light', 'm_quick'] },
-  h_guard: { name: 'GUARD', steps: ['h_parry', 'h_block', 'h_counter'] },
+  h_guard: { name: 'GUARD', steps: ['h_wide', 'h_block', 'h_counter'] },
   h_mercy: { name: 'HEALING', steps: ['h_mend', 'h_reach', 'h_mercy'] },
   h_smite: { name: 'SMITE', steps: ['h_draw', 'h_stun', 'h_full'] },
   h_sanct: { name: 'SANCTUARY', steps: ['h_focus', 'h_bless', 'h_long'] },
@@ -78,13 +78,14 @@ export function resetPerks(p: Profile): void {
 /**
  * Old knacks (before each class had its own chains) onto the new ones, by class: each lands on the step
  * that moves the same number. One with no home (or a second on the same step) comes back as a pick.
+ * WIDE PARRY (`w_parry`, `h_parry`) became WIDE GUARD on the same step when parry went (2026-11-05).
  */
 const OLD: Record<HeroClass, Record<string, PerkId>> = {
-  WARRIOR: { guard: 'w_parry', ironhide: 'w_block', counter: 'w_counter', tough: 'w_health', scarred: 'w_tough', fleet: 'w_foot', heft: 'w_knock', heavy: 'w_full', relicsworn: 'w_focus' },
+  WARRIOR: { w_parry: 'w_wide', guard: 'w_wide', ironhide: 'w_block', counter: 'w_counter', tough: 'w_health', scarred: 'w_tough', fleet: 'w_foot', heft: 'w_knock', heavy: 'w_full', relicsworn: 'w_focus' },
   RANGER: { steadyhand: 'r_draw', footwork: 'r_jump', fleet: 'r_foot' },
   ROGUE: { shadowed: 'g_rear', quick: 'g_quick', fleet: 'g_foot', relicsworn: 'g_focus' },
   MAGE: { focus: 'm_blink', footwork: 'm_blink', charge: 'm_draw', potent: 'm_dmg', endurance: 'm_breath' },
-  HEALER: { guard: 'h_parry', ironhide: 'h_block', devotion: 'h_bless', mender: 'h_mend', relicsworn: 'h_focus' },
+  HEALER: { h_parry: 'h_wide', guard: 'h_wide', ironhide: 'h_block', devotion: 'h_bless', mender: 'h_mend', relicsworn: 'h_focus' },
 };
 
 /** A loaded hero onto its class's tree; never a level's pick lost (taken plus waiting covers every level up). */

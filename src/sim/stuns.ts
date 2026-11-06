@@ -4,7 +4,7 @@
  * one hero can take the same goblin's turn once every STUN_CAP.every seconds, and inside that the
  * goblin shrugs it off (the blow's damage still lands). Another hero still can, so a party chains
  * them. A turn taken by nobody in particular (a fall, a goblin's own charge into a wall) is never capped.
- * Plain hit flinches (the short jolt any blow gives a small goblin), a parry's stun and a slip's are
+ * Plain hit flinches (the short jolt any blow gives a small goblin) and a slip's stun are
  * not turns taken here: they answer the goblin's own blow.
  */
 import { STUN_CAP } from '../shared/tuning';

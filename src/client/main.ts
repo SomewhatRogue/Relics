@@ -258,12 +258,12 @@ $('#skipcut').addEventListener('touchstart', (e) => (e.preventDefault(), game.sk
 $('.tb.use').addEventListener('touchstart', (e) => (e.preventDefault(), use()), { passive: false });
 
 
-let parries = 0;
+let guards = 0;
 const townTips = input.touch
   ? ['JOB BOARD: tap USE to take a job', 'Walk into a door to go in', 'FORGE: Halvard upgrades gear or melts it for steel', 'TRAINING HALL: knacks, and the practice yard', 'TOWN HALL: vote on what Wickhold does next']
   : ['JOB BOARD: press E to take a job', 'Walk into a door to go in. E by anyone to talk', 'FORGE: Halvard upgrades gear or melts it for steel', 'TRAINING HALL: knacks, and the practice yard', 'TOWN HALL: vote on what Wickhold does next'];
 const tips = input.touch
-  ? ['Stun or get behind a small goblin, then GRAB it', 'Warriors: GRAB any small goblin, or barrels and tables, and throw them', 'Break an oil barrel near goblins to set them on fire', 'Holding a goblin? SLAM it down, or THROW it at another', 'POTION drinks your front potion', 'Most item traits pay off when you parry, dodge or hit a PERFECT', 'Cottages and barns hold goblins, and sometimes someone in a cage', 'Oil and fire burn wooden buildings down. Burn out the dens', 'Two frost hits freeze a goblin. A heavy blow then shatters it', 'Fire on a chilled goblin: STEAM, which stuns. Storm on a burning one: FLARE, which knocks back', 'SKILL: your class skill, taught by your trainer from level 3', 'Red with a striped edge can\'t be blocked: dodge or walk out of it', 'DEEP jobs end at a named butcher, who always carries a RELIC', 'TWIN DAGGERS: dash behind a goblin and BACKSTAB', 'Push the stick part way to creep. Hit a goblin that hasn\'t seen you for an AMBUSH']
+  ? ['Stun or get behind a small goblin, then GRAB it', 'Warriors: GRAB any small goblin, or barrels and tables, and throw them', 'Break an oil barrel near goblins to set them on fire', 'Holding a goblin? SLAM it down, or THROW it at another', 'POTION drinks your front potion', 'Most item traits pay off when you counter after a block, dodge or hit a PERFECT', 'Cottages and barns hold goblins, and sometimes someone in a cage', 'Oil and fire burn wooden buildings down. Burn out the dens', 'Two frost hits freeze a goblin. A heavy blow then shatters it', 'Fire on a chilled goblin: STEAM, which stuns. Storm on a burning one: FLARE, which knocks back', 'SKILL: your class skill, taught by your trainer from level 3', 'Red with a striped edge can\'t be blocked: dodge or walk out of it', 'DEEP jobs end at a named butcher, who always carries a RELIC', 'TWIN DAGGERS: dash behind a goblin and BACKSTAB', 'Push the stick part way to creep. Hit a goblin that hasn\'t seen you for an AMBUSH']
   : ['G grabs a stunned goblin (or one you got behind). Click to slam, G to throw', 'Warriors: G lifts any small goblin, barrel or table. Throw it, or slam it down', 'Break an oil barrel near goblins to set them on fire', 'Q drinks your front potion. Hold Q to bring the next forward', 'Bows: let go on the white flash for a PERFECT. Hold too long and the shot weakens', 'Walk into a cottage door to go in. Fire burns buildings down', 'Two frost hits freeze a goblin. A heavy blow then shatters it', 'Fire on a chilled goblin: STEAM, which stuns. Storm on a burning one: FLARE, which knocks back', 'E: your class skill. R: a relic, once you have won one on a DEEP job', 'Red with a striped edge can\'t be blocked: SPACE to dodge, or walk out of it', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or spellblade', 'Daggers: dash behind a goblin and BACKSTAB', 'Hold Shift to creep. Hit a goblin that hasn\'t seen you for an AMBUSH'];
 let tipAt = -99, tipI = 0;
 
@@ -284,7 +284,7 @@ function hud(now: number): void {
   $('.who').title = `${CLASS_NAME[pr.cls]}, level ${pr.level}`;
   const item = me.arms[me.weapon];
   $('.wpn').textContent = item ? itemName(item) : WEAPONS[me.weapon].name;
-  // (The block button, a spellblade's PARRY on it too, is the touch cluster's: cluster.ts.)
+  // (The block button is the touch cluster's: cluster.ts.)
   // A Mage's big spell: a mark on the bar at what it costs, red while you're short of it (sim/spells.ts).
   const cost = spellCost(me);
   $('.st').classList.toggle('spell', cost > 0);
@@ -404,7 +404,7 @@ function hud(now: number): void {
     tipAt = now;
     $('#tip').textContent = list[tipI++ % list.length];
   }
-  $('#tip').classList.toggle('gone', game.mode === 'run' || (game.mode === 'yard' && parries >= 3));
+  $('#tip').classList.toggle('gone', game.mode === 'run' || (game.mode === 'yard' && guards >= 3));
 }
 
 /** The LEAVE button's question, alone and in a party. */
@@ -468,7 +468,7 @@ function tick(t: number): void {
       fx.say(sx, sy - 34, left > 0 ? `${'\u2665'.repeat(left)} LEFT` : 'DRIVEN BACK', '#ff6a7a');
     }
     sounds.event(ev, game.room, t / 1000);
-    if (ev.k === 'parry') parries++;
+    if (ev.k === 'block' || ev.k === 'dodge') guards++;
   }
   sounds.frame(game, t / 1000);
   // Lost the job: fade out where you fell; back in town, fade up out of the dark.
@@ -600,7 +600,7 @@ if (input.touch) document.body.classList.add('touch');
 const w = window as unknown as Record<string, unknown>;
 w.__fullForTest = fullForTest;
 w.__town = () => ({ dozing: !!townfolk?.dozing, open: !!townfolk?.open, count: townfolk?.count ?? 0, here: townfolk?.here(game.room.map.name).map((h) => ({ name: h.tag, x: h.x, y: h.y })) ?? [] });
-w.__GAME_STATE__ = () => ({ mode: game.mode, wood: game.wood ? { wake: game.wood.wake, said: game.wood.said, stage: game.wood.stage, hold: game.wood.hold } : null, inside: game.outside ? game.room.map.name : null, title: title.open, time: game.room.time, hero: { ...game.hero }, enemies: game.room.enemies.map((e) => ({ ...e })), parries, run: game.run, profile: game.profile, world: game.world });
+w.__GAME_STATE__ = () => ({ mode: game.mode, wood: game.wood ? { wake: game.wood.wake, said: game.wood.said, stage: game.wood.stage, hold: game.wood.hold } : null, inside: game.outside ? game.room.map.name : null, title: title.open, time: game.room.time, hero: { ...game.hero }, enemies: game.room.enemies.map((e) => ({ ...e })), guards, run: game.run, profile: game.profile, world: game.world });
 w.render_game_to_text = () => `${game.mode} t=${game.room.time.toFixed(1)} hero ${game.hero.act} hp ${game.hero.hp} st ${Math.round(game.hero.stamina)} | ` + game.room.enemies.map((e) => `${e.kind} ${e.act} hp ${e.hp}${e.attack ? ' ' + e.attack.kind + ' ' + e.attack.t.toFixed(2) : ''}`).join(' | ');
 Object.defineProperty(w, '__room', { get: () => game.room });
 w.__game = game;

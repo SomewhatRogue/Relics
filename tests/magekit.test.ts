@@ -1,4 +1,4 @@
-/** The Mage's kits (shared/mage.ts, sim/spells.ts, sim/spellblade.ts): magic costs, the wand, the staff's slash and rooted hold, the spellblade's charge and parry. Each element's spells: spellbook.test.ts. */
+/** The Mage's kits (shared/mage.ts, sim/spells.ts, sim/spellblade.ts): magic costs, the wand, the staff's slash and rooted hold, the spellblade's charge and its blink through a blow. Each element's spells: spellbook.test.ts. */
 import { describe, expect, it } from 'vitest';
 import { BUTCHER, HERO, MANA_SHIELD, SPELL, STAFF_RING, TICK, WAND, WEAPONS, type WeaponId, type Element } from '../src/shared/tuning';
 import { ArenaRoom } from '../src/sim/room';
@@ -149,7 +149,7 @@ describe('the spellblade', () => {
     expect(a.h.stamina).toBe(HERO.stamina);
   });
 
-  it('block in the parry window is a real parry (stagger, counter window), and it refills magic', () => {
+  it('no parry: a blink through the blow as it lands staggers it (LAST SECOND) and refills magic', () => {
     const room = new ArenaRoom(3, { scrappers: false });
     const h = room.join('me');
     const b = room.enemies[0];
@@ -164,18 +164,15 @@ describe('the spellblade', () => {
     }
     expect(b.attack?.kind).toBe('cleave');
     const a = b.attack!;
-    const wait = Math.round((a.windup - a.t - 0.12) / TICK);
+    const wait = Math.round((a.windup - a.t - 0.05) / TICK);
     for (let i = 0; i < wait; i++) room.step();
-    room.setIntent('me', { ...NO_INTENT, blockSeq: 1 });
+    room.setIntent('me', { ...NO_INTENT, rollSeq: 1, mx: 1 });
     const ev: FightEvent[] = [];
     for (let i = 0; i < Math.round(0.35 / TICK); i++) room.step(), ev.push(...room.events);
     expect(h.hp).toBe(HERO.hp);
-    expect(h.stamina).toBeGreaterThanOrEqual(40 + MANA_SHIELD.parry);
-    expect(ev.some((x) => x.k === 'parry')).toBe(true);
-    expect(ev.some((x) => x.k === 'stunned')).toBe(true);
-    expect(ev.some((x) => x.k === 'manaup')).toBe(true);
-    expect(h.parriedAt ?? 0).toBeGreaterThan(0);
-    expect(h.counterUntil).toBeGreaterThan(h.parriedAt ?? 0);
+    expect(ev.some((x) => x.k === 'parry' as string)).toBe(false);
+    expect(ev.some((x) => x.k === 'slip')).toBe(true);
+    expect(ev.find((x) => x.k === 'manaup')).toMatchObject({ n: MANA_SHIELD.slip });
     expect(BUTCHER.cleave.dmg).toBeGreaterThan(0);
   });
 });

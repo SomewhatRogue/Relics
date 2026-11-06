@@ -13,13 +13,13 @@ import { drawRushLinks } from '../rushdraw';
 
 const HEART = '#e8a040';
 
-export function drawFoes3d(g: CanvasRenderingContext2D, c: Ctx, room: ArenaRoom, P: Proj, lerp: Lerp, pw: number): void {
+export function drawFoes3d(g: CanvasRenderingContext2D, c: Ctx, room: ArenaRoom, P: Proj, lerp: Lerp): void {
   const floor = (x: number, y: number) => P(x, 0.03, y) as [number, number];
   // A pack rush winding up: the red line linking them (../rushdraw.ts).
   drawRushLinks(g, room.enemies, (e) => {
     const [ex, ey] = lerp('e:' + e.id, e.x, e.y);
     return P(ex, 0.05, ey) as [number, number];
-  }, pw, c.now);
+  }, c.now);
   if (room.slicks?.length) drawSlicks(c, room.slicks, floor, room.time);
   if (room.crows?.length) drawCrows(c, room.crows, floor, room.time);
   for (const e of room.enemies) {

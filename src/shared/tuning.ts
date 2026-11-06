@@ -17,7 +17,7 @@ export const HERO = {
   magicRegen: 14,
   magicDelay: 2,
   /** Run your breath all the way out and you're winded: nothing comes back for this long, and you can't
-   *  dodge, block or parry again until the bar is full (Kyle, 2026-11-01). */
+   *  dodge or block again until the bar is full (Kyle, 2026-11-01). */
   windedDelay: 1,
   /** Downed heroes stand back up after this (no revive yet). */
   respawn: 3,
@@ -70,12 +70,14 @@ export const INPUT_BUFFER = 0.25;
 export const GUARD = {
   /** Stamina spent per point of damage blocked (a block costs no health: Kyle, 2026-11-01). */
   staminaPerDmg: 2.4,
-  /** A re-press this soon after the last one doesn't reopen the window (no mashing). */
-  parryRepress: 0.25,
   guardBreakStun: 0.9,
-  /** After a parry, the next attack started within this window is a counter. */
+  /** After a block takes a blow, the next attack started within this window is a counter, `counterMult` as
+   *  hard (no timing to it: Kyle, 2026-11-05, parry is gone; was 2.5 when only a parry earned it). */
   counterWindow: 1.6,
-  counterMult: 2.5,
+  counterMult: 1.5,
+  /** A crushing blow (a heavy's) blocked: `crushCost` times the stamina and the full shove (`crushShove` of its knock). */
+  crushCost: 1.25,
+  crushShove: 0.8,
   /** Hits on a stunned enemy (other than the counter) do this much more. */
   stunnedMult: 1.5,
   /** Any blow from behind does this much more (daggers do more, see WEAPONS). No extra knockback. */
@@ -85,7 +87,7 @@ export const GUARD = {
 };
 
 
-export const HITSTOP = { light: 0.05, heavy: 0.11, parry: 0.18 };
+export const HITSTOP = { light: 0.05, heavy: 0.11, counter: 0.18 };
 /**
  * Splattering the small ones: a small goblin killed by a blow slides on along it (`knock` tiles a
  * second, sliding to rest), the blow holds a beat longer (`stop`), and each more killed by the same
@@ -96,7 +98,7 @@ export const SPLAT = { knock: 7, stop: 0.07, more: 0.025, most: 0.14 };
  *  its damage); a butcher's sweep, slam or charge catches small goblins under it. */
 export const FRIENDLY = { shot: 1.5, blow: 0.8 };
 /** Dodging: rolled clear before it landed counts (no bonus); a roll through the blow as it lands (in the
- *  roll's i-frames) staggers a close attacker for this share of a parry's stun. `cost`: every dodge's
+ *  roll's i-frames) staggers a close attacker for this share of its stun (EnemySpec.stun). `cost`: every dodge's
  *  stamina is multiplied by this for now (Kyle: dear at first, so there's something to grow into; perks,
  *  gear and levels bring it down). */
 export const DODGE = { stun: 0.6, cost: 1.5 };
@@ -147,7 +149,7 @@ export interface EnemySpec {
   speed: number;
   reach: number;
   respawn: number;
-  /** Stunned this long after a parry. */
+  /** Its full stun (a dodge through its blow staggers it DODGE.stun of this). */
   stun: number;
   pauseBetween: number;
   /** Ordinary hits interrupt its wind-up (light enemies); heavy ones need a charged hit. */
@@ -170,7 +172,7 @@ export const SCRAPPER: EnemySpec & { stab: EnemyAttackSpec } = {
 
 /**
  * A scrapper with a bow: keeps its distance (up on a ledge if it can), draws on you for a second with
- * a long thin telegraph, and looses. Blockable, parryable (it's stunned where it stands), rollable.
+ * a long thin telegraph, and looses. Blockable, rollable.
  */
 export const ARCHER = {
   reach: 7.5,
@@ -197,8 +199,8 @@ export const STEALTH = { slow: 0.55, creep: 0.5, sneak: 0.45, ambush: 2.2, reel:
 
 /**
  * The prologue wood's goblins (shared/wood.ts), each built for one lesson: looters (slow, weak,
- * picking the dead), lungers (a striped stab from further off: dodge it), the heavy (a blow that breaks
- * a guard: parry it) and the Stoker (a one-off butcher: rake sweep, kiln drop, and the draw, a rake
+ * picking the dead), lungers (a striped stab from further off: dodge it), the heavy (a crushing blow:
+ * dear to block, GUARD.crushCost, or dodge it) and the Stoker (a one-off butcher: rake sweep, kiln drop, and the draw, a rake
  * flung along a line and hauled back).
  */
 export const VARIANTS = {
@@ -250,7 +252,7 @@ export const SWING_DUMMY = {
 
 /**
  * Pack rushes (Kyle, 2026-11-04: "I want to have to block sometimes and parry"; "as long as the ones that
- * wind up can all be blocked or parried at once"). The rules: sim/packrush.ts. While a pack fights (an awake
+ * wind up can all be blocked or parried at once"; parry went on 2026-11-05, so block or dodge). The rules: sim/packrush.ts. While a pack fights (an awake
  * goblin of it within `fight` tiles of a hero), `first` seconds into the fight and then every `every`
  * (seeded between the two), a free goblin of it calls a rush on a hero it stands in front of, if two more
  * of the pack are in the fight there too. For `call` seconds packmates within `near` of it join as each
@@ -259,8 +261,8 @@ export const SWING_DUMMY = {
  * pack's side (`slot` tiles out, `spread` radians apart, in place within `at`, `gather` seconds at most),
  * and once each is in place and the fan's middle is in front of the hero (`front`, the cosine) they wind up
  * together for `blow.windup` seconds, so every blow lands in the one instant. Judged from the fan's
- * middle, so one guard covers it all: one block takes every blow for one blow's stamina, one parry
- * parries them all and holds each at least `parryStun` seconds, a dodge through it slips them all. A call
+ * middle, so one guard covers it all: one block takes every blow for one blow's stamina (and opens
+ * the counter), a dodge through it slips them all. A call
  * that finds too few tries again `retry` seconds later. One rush on a hero at a time. `big`: a brute's or
  * an ironhide's blow in one.
  */
@@ -268,7 +270,6 @@ export const RUSH = {
   first: [0.5, 1.5] as [number, number], every: [6, 10] as [number, number], retry: 1.5, fight: 8,
   join: [2, 3] as [number, number], near: 4.5, front: 0.55, side: -0.1, seen: 5.5,
   call: 1.2, slot: 1.55, spread: 0.42, at: 0.6, gather: 2.4,
-  parryStun: 2,
   blow: { windup: 1.3, active: 0.1, recover: 0.8, dmg: 9, knock: 4, range: 1.9, arc: 50, unblockable: false } as EnemyAttackSpec,
   big: 14,
 };

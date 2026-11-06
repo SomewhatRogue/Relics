@@ -52,15 +52,15 @@ body.touch .stick.on { opacity: 1; }
 body[data-dodge='false'] .tb.grab { width: 62px; height: 62px; right: calc(135px + env(safe-area-inset-right)); bottom: calc(32px + env(safe-area-inset-bottom)); }
 .tb.reload { width: 52px; height: 52px; right: calc(206px + env(safe-area-inset-right)); bottom: calc(92px + env(safe-area-inset-bottom)); }
 /* A Mage's ELEMENT (cluster.ts): a small ring next to ATTACK, where a guard would be (a Mage has none),
-   its name over it in the element's colour. A spellblade's PARRY steps out to the reload spot for it. */
+   its name over it in the element's colour. */
 .tb.element { width: 56px; height: 56px; right: calc(132px + env(safe-area-inset-right)); bottom: calc(112px + env(safe-area-inset-bottom)); }
 .tb.element i { bottom: auto; top: -12px; padding: 0 2px; background: none; text-shadow: var(--px) var(--px) 0 #07080a; }
 .tb.element[data-el='fire'] i { color: #ff9a3c; }
 .tb.element[data-el='frost'] i { color: #bfe8ff; }
 .tb.element[data-el='storm'] i { color: #fff27a; }
 /* A Rogue's, Ranger's or Healer's own button (SHADOW STEP, MARK, MEND: cluster.ts) takes the same spot,
-   its name over it; a Ranger's PARRY and a Healer's BLOCK step out to the reload spot for it, as a
-   spellblade's PARRY does for ELEMENT. */
+   its name over it; a Healer's BLOCK steps out to the reload spot for it. (A Ranger, Rogue or Mage has
+   no guard button at all.) */
 .tb.sign { width: 56px; height: 56px; right: calc(132px + env(safe-area-inset-right)); bottom: calc(112px + env(safe-area-inset-bottom)); }
 /* (While the wood's gold label names it, its own name over it steps aside.) */
 .tb.sign.unlock i, .tb.element.unlock i { visibility: hidden; }

@@ -27,6 +27,7 @@ export const SFX_ROUTES: Routes = {
   hit: (heavy: boolean) => (heavy ? 'hit_cleave' : 'hit_slice'),
   hurt: () => 'hero_hurt',
   block: () => 'block_shield',
+  // The parry's ring: parry went on 2026-11-05; nothing plays it now, kept with its sample for later.
   parry: () => 'parry_ring',
   guardbreak: () => 'guard_break',
   roll: () => 'roll',

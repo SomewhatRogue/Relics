@@ -12,13 +12,15 @@
  */
 import type { Foe } from './terrain.js';
 import type { HeroClass } from './tuning.js';
+import type { GuardKind } from './weapons.js';
 
 /** A sort of goblin, as a straw man plays it: what makes one (a Foe without where it stands). */
 export type Sort = Pick<Foe, 'kind' | 'variant' | 'bow'>;
 export interface Single { key: string; name: string; sort: Sort }
 export interface Pack { key: string; name: string; of: string[] }
-export type DrillId = 'parry' | 'shields' | 'burn' | 'hold';
-export interface Drill { key: DrillId; name: string; how: string; cls?: HeroClass }
+export type DrillId = 'block' | 'dodge' | 'shields' | 'burn' | 'hold';
+/** `cls`: one class's only; `guard`: only a class that guards that way (CLASS_GUARD: a block, or none and a dodge). */
+export interface Drill { key: DrillId; name: string; how: string; cls?: HeroClass; guard?: GuardKind }
 
 /** Every sort the watch can play, by the key a met goblin is filed under (`sortKey`). */
 export const SINGLES: Single[] = [
@@ -46,13 +48,15 @@ export const PACKS: Pack[] = [
 ];
 
 export const DRILLS: Drill[] = [
-  { key: 'parry', name: 'PARRY THE HEAVY', how: 'Ten swings from a heavy. Parry as many as you can.' },
+  // The heavy's ten swings (was PARRY THE HEAVY, for everyone, until parry went on 2026-11-05).
+  { key: 'block', name: 'BLOCK THE HEAVY', how: 'Ten swings from a heavy. Block as many as you can.', guard: 'full' },
+  { key: 'dodge', name: 'DODGE THE HEAVY', how: 'Ten swings from a heavy. Dodge as many as you can.', guard: 'none' },
   { key: 'shields', name: 'BREAK A SHIELD LINE', how: 'Three shields side by side. Put all three down.' },
   { key: 'burn', name: 'BURN A PACK', how: 'Five scrappers bunched up. Set every one of them alight.', cls: 'MAGE' },
   { key: 'hold', name: 'HOLD FOR A MINUTE', how: 'They come a few at a time. Stay on your feet for 60 seconds.' },
 ];
 
-/** Numbers: the parry drill's swings, the hold's length and waves, how many can be out at once. */
+/** Numbers: the heavy drill's swings, the hold's length and waves, how many can be out at once. */
 export const PRACTICE = { swings: 10, hold: 60, waveEvery: 10, firstWave: 3, wave: 2, most: 8, burnFor: 60 };
 
 /**

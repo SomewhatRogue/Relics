@@ -7,7 +7,7 @@ import type { EnemyAttackSpec } from './tuning.js';
 /**
  * Wolves: lean grey wolves the hungry keep chained and starved, so they hunt. Fast (`speed` of a small
  * goblin's), light, `hp`. They circle whoever they're after at `orbit` tiles, working round to the side
- * or the back, and dart in from there: a short red lane (`dart`: blockable, parryable, a dodge takes you
+ * or the back, and dart in from there: a short red lane (`dart`: blockable, and a dodge takes you
  * out of it). They stay within `leash` of their keeper. Kill the keeper and they scatter: they run for
  * `scatter` seconds and are gone if they get `gone` tiles from everyone; any left come back without
  * their circling, one at a time.

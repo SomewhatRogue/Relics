@@ -1,19 +1,16 @@
 /**
  * The Warrior's weapons in the room (numbers: shared/warrior.ts). Every perfect is a hold let go on the
  * white flash: the sword's shield bash stuns every goblin in its arc, the greatsword's overhead sends out
- * a shockwave, the spear's lunge pins what it runs through. Bonuses on top: a quick counter after a
- * parry is a riposte, and the spear pins a goblin it catches charging or lunging. The shaft does little
+ * a shockwave, the spear's lunge pins what it runs through. A bonus on top: the spear pins a goblin it
+ * catches charging or lunging. The shaft does little
  * up close. All judged here, so a guest's goblins fall the way the leader's do.
  */
-import { SHIELD_BASH, PIN, QUAKE, RIPOSTE, SHAFT, WEAPONS, type Swing } from '../shared/tuning';
+import { SHIELD_BASH, PIN, QUAKE, SHAFT, WEAPONS, type Swing } from '../shared/tuning';
 import { shove } from './bodies';
 import { damage, isDead } from './damage';
 import { daze } from './venom';
 import { stun } from './stuns';
 import type { Enemy, FightEvent, Hero } from './types';
-
-/** A counter started this soon after the parry, with a kit that ripostes. */
-export const riposteNow = (h: Hero, now: number) => h.counter && !!WEAPONS[h.weapon].ripostes && now - (h.parriedAt ?? -9) <= RIPOSTE.window;
 
 /** The spear's shaft: a goblin inside half its reach takes the shaft, not the point (a quick thrust;
  *  the held lunge drives the point home, since it carries you in among them). */

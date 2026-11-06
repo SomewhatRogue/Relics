@@ -87,6 +87,109 @@ wolfhound and with a collie is identical, the hound having joined in; the name s
 unnamed). Sheet and phone shots: `node scripts/hound-look.cjs <url> <outdir>` (the four breeds, every coat and one
 row each with blaze and socks, in each gait, idle and fight move at 4x; Maeve's panel with the preview; fetch in
 the square with the new hound).
+## 2026-11-05: no parry: the Warrior and Healer block, the Ranger, Rogue and Mage dodge (Kyle; Claude Opus 5.5)
+
+Kyle, after playing with friends: "Parry in general is getting pushback as noisy, confusing, and hard to land with
+a lot of enemies at once and latency." Asked which way, he chose to **remove parry entirely**: the Warrior and
+Cleric (Healer) BLOCK only; the Rogue, Mage and Ranger DODGE only. No perfect-block window either: there was none
+to remove (the only "perfect" on a guard was the spellblade's perfect parry, gone with the rest).
+
+**The guard** (`shared/weapons.ts`):
+- `CLASS_GUARD`: WARRIOR 'full', HEALER 'full', RANGER 'none', ROGUE 'none', MAGE 'none'; the kind is `'full' | 'none'`
+  (`GuardKind`) and `guardOf(kit)` is simply its class's. `parryWindow`, `parryOnly` and `ripostes` are gone from every
+  kit; `GUARD.parryRepress`, `HITSTOP.parry` (now `HITSTOP.counter`, the same 0.18), `RUSH.parryStun`, `RIPOSTE`,
+  `MANA_SHIELD.parry/perfect/perfectIn` and `GAFFER.snapped` too. The hero has no `parryOpenAt` or `parriedAt`.
+- **The greatsword** holds a plain block like the sword and spear, kept ponderous: the narrowest Warrior arc (110),
+  the slowest walk while blocking (0.35), the most through a block (0.3), and dear on stamina (`guardCost` 1.3, the
+  spear's; 1.5 broke the guard on every butcher cleave). GUARD on its card: LOW, BLOCK.
+- **The spellblade** is dodge-only like the rest of the Mage. A near-miss dodge does exist (the last-second dodge:
+  `slipped`, LAST SECOND), so I chose **"a dodge through a blow refills magic"**: a blink through a blow (in its
+  i-frames, or out from under it at the last moment) gives back `MANA_SHIELD.slip` (25), once an instant (a pack
+  rush blinked through is one refill) (`sim/manashield.ts slipRefills`). "Hits take magic" stays as it was.
+- **The guard button** shows only for a Warrior or Healer (`cluster.ts`); a Ranger, Rogue or Mage has none, and
+  the phone cluster closes up as it did for a Rogue (shot below).
+
+**Block stays simple** (`sim/combat.ts hitHero`): hold to block in the kit's arc, no health lost, stamina spent
+(`GUARD.staminaPerDmg` x the kit's cost), guard break when it runs out, as before. No timing bonus at all. Feel: the
+blow holds a beat on both (the goblin `HITSTOP.light` too now), a short ring and more sparks where it met the guard,
+a jolt of 2 (was 1), and the small push back as ever (`fx.ts block`). The heavy's crushing blow (`crush`), which used
+to break any guard outright ("parry it instead"), is now blockable: `GUARD.crushCost` 1.25 the stamina, the heavy
+hitstop, and `GUARD.crushShove` 0.8 of its knock. The parry ring sample is kept, unplayed (`sfxroutes.ts`, `sfx.parry`).
+
+**Every feature that used parry, old and new:**
+- **The counter**: was the first blow within 1.6 s of a parry, x2.5. Now the first blow within 1.6 s of a **block
+  that holds** (no timing), **x1.5** (`GUARD.counterMult`; easier to earn, so less). Kept because HARD COUNTER, LONG
+  COUNTER, COUNTERSTROKE, STAMINA ON COUNTER, REAPER and the forged elements all ride it. COUNTER shows as before.
+- **RIPOSTE** (the sword's bonus: a counter within 0.5 s of the parry, x2): **removed**, with its event, callout,
+  gold flash and sound, and the sword's ALSO row ("Riposte after a parry").
+- **Knack WIDE PARRY** (Warrior and Healer, "Parry window 0.04 s longer") -> **WIDE GUARD** ("Your block covers 20
+  degrees more", fx `guardArc`), ids `w_wide`, `h_wide` on the same step; old `w_parry`/`h_parry` map onto them.
+- **Knack HARD COUNTER** (Warrior): "Counters after a parry do 25% more damage" -> "Counters after a block do 25% more damage".
+- **Knack LONG COUNTER** (Healer): "Counter window after a parry 0.6 s longer" -> "Counter window after a block 0.6 s longer".
+- **Ladder rung HEALING PARRY** (Healer, "A parry heals friends within 3 tiles for 8") -> **HEALING BLOCK** ("Each
+  blow you block heals friends within 3 tiles for 5"; 5, since a block is far easier than a parry was; once a rush).
+  Rung id `blockmend` (rungs are saved as a count, so nothing to convert).
+- **Trait RIPOSTE** ("Counters after a parry do 40% more damage") -> **COUNTERSTROKE** ("Counters after a block do
+  40% more damage"); id `riposte` kept so saves keep it.
+- **Trait STAMINA ON PARRY** ("Parry refills stamina") -> **STAMINA ON COUNTER** ("A counter after a block refills
+  stamina"); id `bulwark` kept. Both now roll only for a class that blocks (they rolled for the Ranger before).
+- **Mod PARRY** (weapons that parried, rings): **gone**. Old pieces load with BLOCK (a Warrior's or Healer's) or
+  DODGE (a Ranger's, Rogue's or Mage's), worth the same points, merged into one of that kind already there; a weapon
+  goes by its kit's class, armor and rings by the hero (`shared/oldparry.ts`, run in `save.ts`). The card's PARRY
+  WINDOW row is gone. An unknown mod id now can't break a card or a price.
+- **The Ranger's wood PARRY step** (after the path's dodges, Hew's card, one swinger): **removed**: the Ranger goes
+  from its two dodges straight to KILL THE GOBLINS, as everyone does (`sim/woodsteps.ts`; `PARRY_FOE`, `PARRY_BEAT`,
+  `guardTaught` gone). Hew's Ranger parry line and the PARRY how-lines and freeze prompts are gone.
+- **The stream's PARRY lesson** (Warrior and Healer, three parries on a heavy): **removed**; they already have the
+  clearing's block lesson, so the stream is walked straight past (`shared/wood.ts onBy`: no goblins, no card, its gate
+  opens as you get there). Everyone keeps two dodges on the path. The light classes' stream (LAST SECOND) is unchanged.
+- **Drill PARRY THE HEAVY** -> **BLOCK THE HEAVY** (Warrior, Healer: "BLOCKED 8 OF 10") or **DODGE THE HEAVY**
+  (Ranger, Rogue, Mage: "DODGED 8 OF 10"); a guard break or a rush's later blows don't count.
+- **The gaffer's hook** ("block it; a parry snaps the hook") -> block it, or dodge out of the lane; nothing snaps it
+  now (SNAPPED, `hooksnap`, the stub of pole and its jab gone). **Hempen's noose**: the same.
+- **The ironhide**: a parry of its blow no longer breaks its guard; a charged blow or a perfect still does.
+- **Pack rushes**: one block still takes every blow; ALL PARRIED and `rushparried` gone; nothing is stunned by a block.
+- **Telegraphs**: the "red flashes white" parry cue is gone from the 2D floor, the 2.5D shader, the spider's pounce
+  lane, the gaffer's lane and the rush link. The red telegraph and the striped unblockable edge stay.
+- **Recap**: PARRIES and PERFECT PARRIES (and MOST PARRIES, MOST PERFECT PARRIES) gone; BLOCKS moves up beside DODGES
+  in the six rows shown. An old board's parries are ignored.
+- **Words**: class cards (Warrior "Holds a block over a large area. Blocking a blow sets up a counter."; Ranger
+  "Jumps back to dodge. No block."; spellblade "Blink through a blow to refill it."), GUARD areas (BLOCK or NONE; was
+  BLOCK AND PARRY / PARRY ONLY), the class picker's GUARD bars (Ranger 1 -> 0), BUTTONS (the BLOCK row; the PARRY
+  row gone; the spellblade's line moves to its BLINK row), the unlock flash (always BLOCK), the kit rows, the "CAN'T
+  BLOCK: TAP TO PARRY" call gone (a dodge class hears the old "CAN'T BLOCK: JUMP/DASH/BLINK"), a town tip, the
+  BLOCK icon kept and the buckler PARRY icon gone. The yard tip now waits for three blocks or dodges.
+- **Voice and effort**: there were no parry-specific voice hooks; the riposte's ring and MENDING PARRY's chime went
+  to HEALING BLOCK. The MARK test needed nothing (no parry in it).
+- **Online**: the Intent never had a parry field (a parry was a `blockSeq` tap; `blockSeq` stays for the netter's
+  mash and the block press); an old guest's extra fields are ignored. Events `parry`, `rushparried`, `riposte`,
+  `hooksnap`, `noblock` and `parrymend` are gone; an old guest's are simply not drawn.
+
+**Lore**: the story bible's lines on the parry-only greatsword, RIPOSTE and the parrying spellblade are rewritten;
+prose-notes' "the red flashes white" is retired.
+
+Tests: `tests/noparry.test.ts` (no class can parry, every kit; no parry fields anywhere; each class's guard; a held
+block for the blockers only, the counter opened; the crushing blow; old saves' PARRY to BLOCK or DODGE in every place
+a piece can be, worth the same, WIDE PARRY to WIDE GUARD; the gaffer's hook and Hempen's noose, landed, blocked and
+dodged; every striped attack spec in the tuning dodged by each dodge class and walked out of by the blockers; the
+heavy's and butcher's blows dodgeable by every dodge class; an old guest's intent; a determinism run), and the parry
+tests rewritten as block and dodge tests in `fight`, `warrior`, `manashield`, `magekit`, `rush`, `ironhide`,
+`staithe`, `ladder`, `recapboard`, `practice` (both drills, and a real block on the yard's heavy), `woodfix` (the
+wood per class: the Ranger straight to the goblins, the heavy classes past the stream), `wood`, `woodsign`,
+`woodelement`, `knacks`, `knackfx`, `kitwords`, `shops`, `kits`. Shots: `shots/noparry-*.png`
+(`node scripts/noparry-look.cjs`: a Warrior blocking the yard's heavy, a Ranger's controls, the Ranger's card).
+Look scripts updated: `rush-look.cjs` (the block, not the parry), `moments.cjs`, `straw-look.cjs`, `shops.cjs`.
+
+New and changed lines (for the lore keeper, then the line editor): WIDE GUARD / "Your block covers 20 degrees more" /
+"block +20 degrees"; "Counters after a block do 25% more damage"; "Counter window after a block 0.6 s longer";
+HEALING BLOCK / "Each blow you block heals friends within 3 tiles for 5."; COUNTERSTROKE / "Counters after a block do
+40% more damage"; STAMINA ON COUNTER / "A counter after a block refills stamina"; BLOCK THE HEAVY / "Ten swings from a
+heavy. Block as many as you can." / "BLOCKED n OF 10"; DODGE THE HEAVY / "Ten swings from a heavy. Dodge as many as
+you can." / "DODGED n OF 10"; "Holds a block over a large area. Blocking a blow sets up a counter."; "Jumps back to
+dodge. No block."; "Spellblade: hits drain your magic before your health. Blink through a blow to refill it."; BUTTONS
+BLOCK "Hold to block. Your next blow after a block is a counter and hits harder."; spellblade ALSO "Hits drain, blink
+through refills"; GUARD area "BLOCK"; tip "Most item traits pay off when you counter after a block, dodge or hit a
+PERFECT". Not changed (records, not shown): `docs/copy-inventory.csv` and the copy-pass notes still list the old lines.
 
 ## 2026-11-05: the atlas, slices 0 and 1: fewer doors with bigger insides, and Hangman's Wood as the first curated zone (Kyle; Claude Opus 5.5)
 

@@ -8,7 +8,7 @@ import { makeExitMat } from './exitmat3d';
 import * as THREE from 'three';
 import type { ArenaRoom } from '../../sim/room';
 import type { Hero } from '../../sim/types';
-import { POTION, WEAPONS } from '../../shared/tuning';
+import { POTION } from '../../shared/tuning';
 import { asleep } from '../foes';
 import { LEDGE_H } from './ground';
 import { clsOf, heroKey, makeHero, type HeroFig } from './heroes3d';
@@ -59,7 +59,7 @@ export class Actors {
   }
 
   update(room: ArenaRoom, meId: string, now: number, lerp: Lerp): void {
-    const t = room.time, lift = (z?: number) => (z ?? 0) * LEDGE_H, me = room.heroes.find((h) => h.id === meId);
+    const t = room.time, lift = (z?: number) => (z ?? 0) * LEDGE_H;
     for (const p of [this.heroes, this.foes, this.folk, this.hounds, this.teles, this.things, this.chests]) p.begin();
     // The figures are flat cards (cards3d.ts) unless ?figs=3d: then these, built from boxes.
     if (BOXFIGS) for (const h of room.heroes) this.hero(h, lerp, now, lift(h.z));
@@ -67,8 +67,7 @@ export class Actors {
       if (BOXFIGS) this.foe(room, e, now, lerp);
       if (e.attack && e.act === 'attack') {
         const m = this.teles.get('t' + e.id, '', () => ({ root: makeTele() })).root;
-        const pw = me ? WEAPONS[me.weapon].parryWindow + me.lenience : 0.3;
-        m.visible = shapeTele(m, e.attack, pw, now, lift(e.z));
+        m.visible = shapeTele(m, e.attack, now, lift(e.z));
       }
     }
     // A storm's lightning coming: its circle, the striped edge (sim/stormshape.ts, the shape the room judges).
@@ -76,7 +75,7 @@ export class Actors {
       const a = strikeShape(s, t);
       if (!a) continue;
       const m = this.teles.get('k' + s.id, '', () => ({ root: makeTele() })).root;
-      m.visible = shapeTele(m, a, 0, now, 0);
+      m.visible = shapeTele(m, a, now, 0);
     }
     if (BOXFIGS) for (const s of room.survivors ?? []) {
       if (s.gone) continue;

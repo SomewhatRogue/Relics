@@ -5,7 +5,7 @@
  * Plain data, stepped after the room each frame by whoever runs the room.
  */
 import { attackCovers } from './combat';
-import { AREAS, FEEDING, GATES, GOBLIN_DEAD, LINES, PARRY_FOE, STOKER, STOKER_CALLS, areaAt, lessonsFor, type Lesson, type Teach } from '../shared/wood';
+import { AREAS, FEEDING, GATES, GOBLIN_DEAD, LINES, STOKER, STOKER_CALLS, areaAt, lessonsFor, type Lesson, type Teach } from '../shared/wood';
 import { dodgeName, type HeroClass } from '../shared/weapons';
 import { isDead } from './damage';
 import { HERO_ID, hew, say, spawn } from './woodkit';
@@ -13,7 +13,7 @@ import { stepCut } from './woodcut';
 import { outOfWood, stepGuard, type Guard } from './woodguard';
 import { startElement, stepElementLesson, wantsElement, type ElementStep } from './woodelement';
 import { signGoal, startSign, stepSignLesson, wantsSign, type SignStep } from './woodsign';
-import { afterGoal, countNow, needNow, parryOnly, preferred, stepAfter, type After } from './woodsteps';
+import { afterGoal, countNow, needNow, stepAfter, type After } from './woodsteps';
 import { walkHew } from './hewwalk';
 export { CUT, skipCut } from './woodcut';
 import type { ArenaRoom } from './room';
@@ -61,9 +61,9 @@ export interface WoodState {
   element?: ElementStep;
   /** A Rogue's, Ranger's or Healer's own button's step, after the clearing's lesson (sim/woodsign.ts). */
   sign?: SignStep;
-  /** Objectives done so far (a lesson's count, the Ranger's parry, a lesson passed: the gold flash). */
+  /** Objectives done so far (a lesson's count, a lesson passed: the gold flash). */
   passed?: number;
-  /** A lesson's count done: the Ranger's parry, then the goblins left (sim/woodsteps.ts). */
+  /** A lesson's count done: then the goblins left (sim/woodsteps.ts). */
   after?: After;
 }
 /** What the world is held for, and what lets it go on. */
@@ -138,27 +138,26 @@ export function release(w: WoodState): void {
 function oneAtATime(w: WoodState, room: ArenaRoom, hx: number, hy: number): Enemy | null {
   const up = room.enemies.filter((e) => w.ids.includes(e.id) && !isDead(e) && e.drill && e.alert !== false);
   if (!up.length) return null;
-  // (The Ranger's parry: the one that swings comes, not a lunger.)
-  const near = up.find((e) => e.id === preferred(w)) ?? up.reduce((a, b) => (Math.hypot(a.x - hx, a.y - hy) <= Math.hypot(b.x - hx, b.y - hy) ? a : b));
+  const near = up.reduce((a, b) => (Math.hypot(a.x - hx, a.y - hy) <= Math.hypot(b.x - hx, b.y - hy) ? a : b));
   for (const e of up) if (e !== near && e.act !== 'attack') e.cooldown = Math.max(e.cooldown, 0.8);
   if (near.act !== 'attack' && near.cooldown > 1.2) near.cooldown = 1.2;
   return near;
 }
 
 /** The first blows of a lesson stop just before they land: the moment to answer, and what to press. */
-function drill(w: WoodState, e: Enemy | null, parryWindow: number, h: Hero): void {
+function drill(w: WoodState, e: Enemy | null, h: Hero): void {
   const a = e?.attack, kind = countNow(w, lessonOf(w));
   if (!a || a.t >= a.windup || w.drilled >= DRILL.wheels || w.drillAt === e!.id * 1000 + Math.round(a.windup * 100) + Math.round(a.ox * 10)) return;
   // Already answered it (rolling, or moved out of where it'll land): no need to stop the world.
   if (h.act === 'roll' || !attackCovers(a, h)) return;
   const left = a.windup - a.t;
   const walk = lessonOf(w).card === 'step';
-  const ready = kind === 'dodge' ? a.unblockable && left <= (walk ? 0.45 : 0.16) : kind === 'block' ? left <= 0.4 : kind === 'parry' ? !a.unblockable && left <= parryWindow * 0.6 : kind === 'slip' ? a.kind !== 'shot' && left <= 0.08 : false;
+  const ready = kind === 'dodge' ? a.unblockable && left <= (walk ? 0.45 : 0.16) : kind === 'block' ? left <= 0.4 : kind === 'slip' ? a.kind !== 'shot' && left <= 0.08 : false;
   if (!ready) return;
   w.drilled++;
   w.drillAt = e!.id * 1000 + Math.round(a.windup * 100) + Math.round(a.ox * 10);
-  const move: Move = kind === 'dodge' ? (walk ? 'step' : 'roll') : kind === 'block' ? 'block' : kind === 'slip' ? 'slip' : 'parry';
-  const now = move === 'parry' && parryOnly(w) ? LINES.now.parryOnly : LINES.now[move as 'step' | 'roll' | 'block' | 'parry' | 'slip'];
+  const move: Move = kind === 'dodge' ? (walk ? 'step' : 'roll') : kind === 'block' ? 'block' : 'slip';
+  const now = LINES.now[move as 'step' | 'roll' | 'block' | 'slip'];
   w.hold = { kind: 'act', who: '', text: now, move, need: move === 'step' ? 'move' : move === 'roll' || move === 'slip' ? 'roll' : 'block', t: 0, until: 0 };
 }
 
@@ -185,7 +184,7 @@ function fallen(w: WoodState, room: ArenaRoom): void {
 }
 
 /** After each frame of the room: the prologue's own rules. */
-export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: number, parryWindow = 0.3): void {
+export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: number): void {
   if (w.done || w.hold) return;
   if (w.wake >= 0) return stepWake(w, room, dt);
   if (w.cut >= 0) return stepCut(w, room, ev, dt);
@@ -212,12 +211,14 @@ export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: nu
       say(w, room, 'HEW', LINES.hut, 2);
       return;
     }
+    // Nothing to learn here (a Warrior's or Healer's stream, shared/wood.ts onBy): straight on.
+    if (lesson.count === 'none' && !lesson.foes.length) return onward(w, room);
     // (The field's looters are already there, at the dead: they look up now.)
     if (w.stage === 0 && w.ids.length) {
       for (const e of room.enemies) if (w.ids.includes(e.id)) Object.assign(e, { feeding: false, alert: true });
     } else w.ids = lesson.foes.map((f) => spawn(room, f).id);
-    const move: Teach = lesson.card ?? (['attack', 'roll', 'block', 'parry'] as const)[w.stage];
-    const said = move === 'backstab' ? LINES.teach.backstab : move === 'slip' ? LINES.teach.slip : move === 'heavy' ? (w.cls === 'MAGE' ? LINES.teach.charge : LINES.teach.heavy) : [LINES.attack, LINES.dodge, LINES.block, LINES.parry][w.stage];
+    const move: Teach = lesson.card ?? (['attack', 'roll', 'block'] as const)[w.stage];
+    const said = move === 'backstab' ? LINES.teach.backstab : move === 'slip' ? LINES.teach.slip : move === 'heavy' ? (w.cls === 'MAGE' ? LINES.teach.charge : LINES.teach.heavy) : [LINES.attack, LINES.dodge, LINES.block][w.stage];
     const light = lessonsFor(w.cls)[3].count === 'slip';
     w.hold = card('HEW', said, move, 'continue', move === 'roll' && light ? LINES.how.rollLight : LINES.how[move as keyof typeof LINES.how]);
     return;
@@ -244,7 +245,7 @@ export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: nu
     w.praised++;
     say(w, room, 'HEW', LINES.praise[w.stage % LINES.praise.length], 1.8);
   }
-  drill(w, oneAtATime(w, room, h.x, h.y), parryWindow, h);
+  drill(w, oneAtATime(w, room, h.x, h.y), h);
   if (w.hold) return;
   const left = room.enemies.filter((e) => w.ids.includes(e.id) && !isDead(e));
   // The Stoker: two more come at half its health; the relic comes out of it.
@@ -275,11 +276,10 @@ export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: nu
     if (lesson.count === 'grab') w.hold = card('HEW', LINES.teach.grab, 'grab', 'continue', LINES.how.grab);
     return;
   }
-  // A count done: flash it, then the Ranger's parry or the goblins left.
+  // A count done: flash it, then the goblins left.
   if (stepAfter(w, room, ev, lesson)) return;
-  // Cleared them before the lesson took: they come again (the Ranger's parry: just the one that swings).
+  // Cleared them before the lesson took: they come again.
   if (!left.length && w.count < needNow(w, lesson)) {
-    if (w.after?.phase === 'parry') return void (w.after.foe = (w.ids = [spawn(room, PARRY_FOE).id])[0]);
     w.ids = lesson.foes.map((f) => spawn(room, { ...f, awake: true }).id);
     if (!w.moreSaid) (w.moreSaid = true), say(w, room, 'HEW', LINES.more, 3);
     return;
@@ -307,15 +307,15 @@ export function woodGoal(w: WoodState, touch: boolean): { title: string; text: s
   // On the way to the hut, and while Hew's there: no skill to teach a hero who has none yet.
   if (w.stage === 4) return { title: "HEW'S HUT", text: w.entered ? 'Wait for Hew' : 'Follow Hew' };
   const l = lessonOf(w), key: Record<string, string> = touch
-    ? { 'WALK OUT': 'MOVE BEFORE IT LANDS', GRAB: 'TAP GRAB BY A CRATE, AGAIN TO THROW', ATTACK: 'TAP ATTACK', DODGE: 'TAP ' + dodgeName(w.cls), BLOCK: 'HOLD BLOCK', PARRY: 'TAP BLOCK WHILE THE RED FLASHES WHITE', SKILL: 'TAP SKILL', BACKSTAB: 'GET BEHIND, TAP ATTACK', 'FULL DRAW': 'HOLD ATTACK, LET GO', 'FULL CHARGE': 'HOLD ATTACK, LET GO', 'LAST SECOND': 'TAP ' + dodgeName(w.cls) + ' AS IT LANDS' }
-    : { 'WALK OUT': 'MOVE BEFORE IT LANDS', GRAB: 'G BY A CRATE, G AGAIN TO THROW', ATTACK: 'CLICK', DODGE: 'SPACE', BLOCK: 'HOLD RIGHT CLICK', PARRY: 'RIGHT CLICK WHILE THE RED FLASHES WHITE', SKILL: 'E', BACKSTAB: 'GET BEHIND, CLICK', 'FULL DRAW': 'HOLD LEFT CLICK, LET GO', 'FULL CHARGE': 'HOLD LEFT CLICK, LET GO', 'LAST SECOND': 'SPACE AS IT LANDS' };
+    ? { 'WALK OUT': 'MOVE BEFORE IT LANDS', GRAB: 'TAP GRAB BY A CRATE, AGAIN TO THROW', ATTACK: 'TAP ATTACK', DODGE: 'TAP ' + dodgeName(w.cls), BLOCK: 'HOLD BLOCK', SKILL: 'TAP SKILL', BACKSTAB: 'GET BEHIND, TAP ATTACK', 'FULL DRAW': 'HOLD ATTACK, LET GO', 'FULL CHARGE': 'HOLD ATTACK, LET GO', 'LAST SECOND': 'TAP ' + dodgeName(w.cls) + ' AS IT LANDS' }
+    : { 'WALK OUT': 'MOVE BEFORE IT LANDS', GRAB: 'G BY A CRATE, G AGAIN TO THROW', ATTACK: 'CLICK', DODGE: 'SPACE', BLOCK: 'HOLD RIGHT CLICK', SKILL: 'E', BACKSTAB: 'GET BEHIND, CLICK', 'FULL DRAW': 'HOLD LEFT CLICK, LET GO', 'FULL CHARGE': 'HOLD LEFT CLICK, LET GO', 'LAST SECOND': 'SPACE AS IT LANDS' };
   if (w.wake >= 0) return { title: '', text: '' };
   if (!w.entered) return { title: l.name, text: w.stage ? 'Follow Hew' : 'Walk' };
   if (w.sign) return signGoal(w, touch);
   const then = afterGoal(w, touch);
   if (then) return then;
   if (w.element) return { title: `ELEMENT: ${touch ? 'TAP ELEMENT' : 'X'}`, text: `WEAK HIT ON EACH ${Math.min(w.count, 3)} / 3` };
-  const what = { kills: '', dodge: 'DODGES', block: 'BLOCKS', parry: 'PARRIES', slip: 'LAST-SECOND DODGES', backstab: 'FROM BEHIND', heavy: 'FULL SHOTS', grab: 'THROWN', none: '' }[l.count];
+  const what = { kills: '', dodge: 'DODGES', block: 'BLOCKS', slip: 'LAST-SECOND DODGES', backstab: 'FROM BEHIND', heavy: 'FULL SHOTS', grab: 'THROWN', none: '' }[l.count];
   // A Warrior's field: hit them first; the throwing comes with the second pair.
   if (l.count === 'grab') return w.more ? { title: `GRAB: ${key.GRAB}`, text: `${what} ${Math.min(w.count, l.need)} / ${l.need}` } : { title: `ATTACK: ${key.ATTACK}`, text: 'Clear them' };
   return { title: `${l.teach}: ${key[l.teach]}`, text: what ? `${what} ${Math.min(w.count, l.need)} / ${l.need}` : w.stage === 4 ? 'Kill it' : 'Clear them' };

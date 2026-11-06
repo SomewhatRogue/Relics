@@ -99,7 +99,7 @@ export const ROLL: Dodge = { kind: 'roll', distance: 2.4, time: 0.32, iFrom: 0.0
 
 /**
  * A weapon kit. Until classes exist each weapon stands in for one, so it carries how its holder
- * blocks, parries, moves and dodges; these move to the class once there are classes.
+ * blocks, moves and dodges; these move to the class once there are classes.
  */
 export type HeroClass = 'WARRIOR' | 'RANGER' | 'ROGUE' | 'MAGE' | 'HEALER';
 
@@ -122,11 +122,9 @@ export interface Weapon {
   /** Each blow finds one goblin (the nearest in reach), never a crowd. */
   single?: boolean;
   /** Heavy enough that a charged blow knocks a goblin out of a heavy wind-up (a butcher's, a heavy's, a
-   *  cleave or slam). Only the big weapons, and they pay for it with a narrow parry (Kyle, 2026-11-03). */
+   *  cleave or slam). Only the big weapons, and they pay for it with a narrow, dear block (Kyle, 2026-11-03). */
   breaker?: boolean;
-  /** A tap of block this close before a hit lands is a parry. */
-  parryWindow: number;
-  /** Blows within this arc (degrees, centred on where you face) can be blocked or parried. */
+  /** Blows within this arc (degrees, centred on where you face) can be blocked. */
   guardArc: number;
   /** Stamina per point of damage blocked, times GUARD.staminaPerDmg. */
   guardCost: number;
@@ -141,12 +139,8 @@ export interface Weapon {
   /** Its blows shove a goblin a little, but a shield-bearer's board stops the shove (a flail). */
   shoves?: boolean;
   dodge: Dodge;
-  /** No held block: block is only ever a parry (the greatsword, the spellblade). */
-  parryOnly?: boolean;
   /** Every blow lands with the heavy hitstop: a slow, weighty weapon (the greatsword). */
   ponderous?: boolean;
-  /** A counter soon after the parry is a riposte (the sword; shared/warrior.ts RIPOSTE). */
-  ripostes?: boolean;
   /** Stops a charging or lunging goblin dead, pinned (the spear; shared/warrior.ts PIN). */
   pins?: boolean;
   /** Goblins too close take the shaft, not the point (the spear; shared/warrior.ts SHAFT). */
@@ -155,7 +149,7 @@ export interface Weapon {
   reloads?: boolean;
   /** The quick attack is cast on the move, at this share of your pace (the wand). */
   castWalk?: number;
-  /** The spellblade (shared/mage.ts): its magic is a shield hits drain before health, and a parry refills it. */
+  /** The spellblade (shared/mage.ts): its magic is a shield hits drain before health, and a dodge through a blow refills it. */
   spellblade?: boolean;
 }
 
@@ -172,7 +166,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     ],
     // Held: a shield bash that stuns the goblin in front (Kyle's rework): short, little damage, a solid stagger.
     heavy: { windup: 0.06, active: 0.1, recover: 0.32, dmg: 6, dmgFull: 12, range: 1.35, arc: 80, lunge: 0.5, knock: 5, knockFull: 9, hits: 1, shieldBash: true },
-    chip: 0.12, blockSpeed: 0.45, chargeSpeed: 0.4, parryWindow: 0.36, guardArc: 170, guardCost: 1, speed: 0.9, ripostes: true,
+    chip: 0.12, blockSpeed: 0.45, chargeSpeed: 0.4, guardArc: 170, guardCost: 1, speed: 0.9,
     dodge: ROLL,
   },
   greatsword: {
@@ -187,8 +181,8 @@ export const WEAPONS: Record<KitId, Weapon> = {
     ],
     // Held: the overhead (it breaks heavy wind-ups); let go on the white flash and it sends out a shockwave.
     heavy: { windup: 0.1, active: 0.16, recover: 0.6, dmg: 38, dmgFull: 75, range: 2.4, arc: 110, lunge: 0.9, knock: 10, knockFull: 20, quake: true },
-    // No held block at all: block is a parry in its narrow window, or nothing.
-    chip: 0.3, blockSpeed: 0.35, chargeSpeed: 0.25, parryWindow: 0.2, guardArc: 110, guardCost: 1.5, speed: 0.78, parryOnly: true, ponderous: true,
+    // A plain block like the Warrior's other kits, but a slow one: a narrow arc, dear on stamina, a crawl while held.
+    chip: 0.3, blockSpeed: 0.35, chargeSpeed: 0.25, guardArc: 110, guardCost: 1.3, speed: 0.78, ponderous: true,
     dodge: { kind: 'roll', distance: 1.9, time: 0.4, iFrom: 0.06, iTo: 0.28, stamina: 34, cooldown: 1.4 },
   },
   spear: {
@@ -203,7 +197,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     ],
     // Held: a lunge that runs through up to three in a line.
     heavy: { windup: 0.06, active: 0.14, recover: 0.4, dmg: 22, dmgFull: 42, range: 3.0, arc: 34, lunge: 2.4, knock: 9, knockFull: 16, thrust: true, hits: 3 },
-    chip: 0.22, blockSpeed: 0.4, chargeSpeed: 0.35, parryWindow: 0.24, guardArc: 120, guardCost: 1.3, speed: 0.86, pins: true, shaft: true,
+    chip: 0.22, blockSpeed: 0.4, chargeSpeed: 0.35, guardArc: 120, guardCost: 1.3, speed: 0.86, pins: true, shaft: true,
     dodge: { kind: 'backstep', distance: 2, time: 0.26, iFrom: 0.02, iTo: 0.18, stamina: 22, cooldown: 1.0 },
   },
   /** The Rogue's kit: weak from the front, brutal from behind, and the only one quick on its feet. */
@@ -218,7 +212,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     ],
     // Held: a dagger thrown (Kyle), harder the longer it's held; it sticks where it lands.
     heavy: { windup: 0.05, active: 0.04, recover: 0.3, dmg: 14, dmgFull: 30, range: 8, arc: 0, lunge: -0.15, knock: 2, knockFull: 5, shot: 'knife', speed: 24 },
-    chip: 0.45, blockSpeed: 0.6, chargeSpeed: 0.7, backstab: 2.5, front: 0.6, single: true, parryWindow: 0.2, guardArc: 100, guardCost: 1.8, speed: 1.12,
+    chip: 0.45, blockSpeed: 0.6, chargeSpeed: 0.7, backstab: 2.5, front: 0.6, single: true, guardArc: 100, guardCost: 1.8, speed: 1.12,
     dodge: { kind: 'dash', distance: 4.3, time: 0.22, iFrom: 0, iTo: 0.22, stamina: 30, cooldown: 0.35 },
   },
   /** A short sword on a tap; held, the longbow draws for 1.4 s, harder the longer, and pierces a line.
@@ -229,7 +223,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     combo: RANGER_BLADE,
     heavy: { windup: 0.04, active: 0.05, recover: 0.45, dmg: 18, dmgFull: 55, range: 15, arc: 0, lunge: -0.3, knock: 4, knockFull: 15, shot: 'arrow', speed: 34, pierce: true, blinds: true },
     draw: 1.4,
-    chip: 0.4, blockSpeed: 0.4, chargeSpeed: 0.3, parryWindow: 0.22, guardArc: 100, guardCost: 1.6, speed: 0.85,
+    chip: 0.4, blockSpeed: 0.4, chargeSpeed: 0.3, guardArc: 100, guardCost: 1.6, speed: 0.85,
     dodge: RANGER_JUMP,
   },
   /** Quick draws, light arrows, and you can walk while drawing: the kiting bow. */
@@ -239,7 +233,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     combo: RANGER_BLADE,
     heavy: { windup: 0.03, active: 0.04, recover: 0.22, dmg: 10, dmgFull: 22, range: 9, arc: 0, lunge: 0, knock: 2, knockFull: 6, shot: 'arrow', speed: 26 },
     draw: 0.55,
-    chip: 0.45, blockSpeed: 0.45, chargeSpeed: 0.7, parryWindow: 0.22, guardArc: 100, guardCost: 1.7, speed: 0.92,
+    chip: 0.45, blockSpeed: 0.45, chargeSpeed: 0.7, guardArc: 100, guardCost: 1.7, speed: 0.92,
     dodge: RANGER_JUMP,
   },
   /** A short sword on a tap. Held with a bolt on it, the crossbow comes up to aim and lets go on release:
@@ -250,7 +244,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     combo: RANGER_BLADE,
     heavy: { windup: 0.06, active: 0.04, recover: 0.35, dmg: 60, dmgFull: 60, range: 13, arc: 0, lunge: -0.2, knock: 12, knockFull: 12, shot: 'bolt', speed: 36, pierce: true },
     draw: 0.3,
-    chip: 0.35, blockSpeed: 0.4, chargeSpeed: 0.4, parryWindow: 0.22, guardArc: 110, guardCost: 1.5, speed: 0.82, reloads: true,
+    chip: 0.35, blockSpeed: 0.4, chargeSpeed: 0.4, guardArc: 110, guardCost: 1.5, speed: 0.82, reloads: true,
     dodge: RANGER_JUMP,
   },
   /** The Mage at range: a quick bolt of the element cast on the move, or a short 0.6 s cast for the
@@ -262,7 +256,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     combo: [{ windup: 0.3, active: 0.04, recover: 0.2, dmg: 8, range: 8, arc: 0, lunge: 0, knock: 2, shot: 'spark', speed: 17, interrupts: true }],
     heavy: { windup: 0.06, active: 0.04, recover: 0.3, dmg: 10, dmgFull: 24, range: 9, arc: 0, lunge: 0, knock: 3, knockFull: 7, shot: 'spark', speed: 19, burst: 0.8, interrupts: true, spell: true },
     draw: 0.6,
-    chip: 0.5, blockSpeed: 0.4, chargeSpeed: 0.55, parryWindow: 0.2, guardArc: 100, guardCost: 2, speed: 0.86, castWalk: 0.9,
+    chip: 0.5, blockSpeed: 0.4, chargeSpeed: 0.55, guardArc: 100, guardCost: 2, speed: 0.86, castWalk: 0.9,
     dodge: BLINK,
   },
   /** Close and slow: a slash in the Mage's element in front. Held, rooted, the element's spell (it costs
@@ -273,7 +267,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     combo: [{ windup: 0.3, active: 0.1, recover: 0.42, dmg: 15, range: 1.9, arc: 150, lunge: 0.15, knock: 5, slash: true }],
     heavy: { windup: 0.12, active: 0.05, recover: 0.45, dmg: 12, dmgFull: 20, range: 0, arc: 0, lunge: 0, knock: 0, knockFull: 0, spell: true },
     draw: 1,
-    chip: 0.5, blockSpeed: 0.35, chargeSpeed: 0, parryWindow: 0.2, guardArc: 100, guardCost: 2, speed: 0.8,
+    chip: 0.5, blockSpeed: 0.35, chargeSpeed: 0, guardArc: 100, guardCost: 2, speed: 0.8,
     dodge: BLINK,
   },
   /** The combat Mage: a sword in three cuts in the element, and the element's blade spell on a hold (shared/mage.ts). */
@@ -291,7 +285,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     ],
     heavy: { windup: 0.15, active: 0.05, recover: 0.55, dmg: 24, dmgFull: 70, range: 6, arc: 0, lunge: 0, knock: 4, knockFull: 10, shot: 'smite', burst: 1.3, stun: 1.2, holy: true },
     draw: 1.2,
-    chip: 0.18, blockSpeed: 0.45, chargeSpeed: 0.35, parryWindow: 0.3, guardArc: 150, guardCost: 1.1, speed: 0.84, blunt: true,
+    chip: 0.18, blockSpeed: 0.45, chargeSpeed: 0.35, guardArc: 150, guardCost: 1.1, speed: 0.84, blunt: true,
     dodge: { kind: 'roll', distance: 2, time: 0.36, iFrom: 0.05, iTo: 0.28, stamina: 28, cooldown: 1.3 },
   },
   // The Rogue's and Cleric's other kits (kits.ts).
@@ -301,8 +295,6 @@ export type WeaponId = KitId;
 export const WEAPON_ORDER: WeaponId[] = ['sword', 'greatsword', 'spear', 'longbow', 'shortbow', 'crossbow', 'daggers', 'rapier', 'poisoner', 'wand', 'staff', 'spellblade', 'mace', 'censer', 'flail'];
 /** The demo's class button cycles these; the weapon button swaps between a class's own kits. */
 export const CLASS_ORDER: HeroClass[] = ['WARRIOR', 'RANGER', 'ROGUE', 'MAGE', 'HEALER'];
-/** How each class guards: `full` holds a block and parries; `parry` can tap a parry but never holds a
- *  block; `none` can do neither (a Mage blinks out instead, and leaves an image behind: DECOY). */
 /**
  * Who can dodge. The Warrior and Healer stand behind a guard instead (no dodge button at all): a striped,
  * unblockable blow they step out of on their feet. The light classes dodge and can't hold a guard.
@@ -312,9 +304,15 @@ export const dodgeName = (cls: HeroClass): string => ({ ROGUE: 'DASH', RANGER: '
 export const CLASS_DODGES: Record<HeroClass, boolean> = { WARRIOR: false, HEALER: false, ROGUE: true, RANGER: true, MAGE: true };
 /** What the dodge button does for this kit: its own dodge, or nothing (a Warrior or Healer has none). */
 export const dodgeOf = (w: Weapon): Dodge | undefined => (CLASS_DODGES[w.cls] ? w.dodge : undefined);
-export const CLASS_GUARD: Record<HeroClass, 'full' | 'parry' | 'none'> = { WARRIOR: 'full', HEALER: 'full', ROGUE: 'none', RANGER: 'parry', MAGE: 'none' };
-/** What a kit's block button does: a parry-only kit parries whatever its class (the greatsword, the spellblade). */
-export const guardOf = (k: Weapon): 'full' | 'parry' | 'none' => (k.parryOnly ? 'parry' : CLASS_GUARD[k.cls]);
+/**
+ * How each class guards (Kyle, 2026-11-05: no parry anywhere). `full` holds a block; `none` has no guard
+ * at all and dodges instead (a Mage blinks out, and leaves an image behind: DECOY). Every kit guards as
+ * its class does.
+ */
+export type GuardKind = 'full' | 'none';
+export const CLASS_GUARD: Record<HeroClass, GuardKind> = { WARRIOR: 'full', HEALER: 'full', ROGUE: 'none', RANGER: 'none', MAGE: 'none' };
+/** What a kit's block button does: hold a block (a Warrior's or Healer's kit), or nothing. */
+export const guardOf = (k: Weapon): GuardKind => CLASS_GUARD[k.cls];
 /** The Mage's blink leaves an image of them where they stood: goblins near it go for it instead. */
 export const DECOY = { time: 2.5, lure: 5 };
 export const CLASS_KITS: Record<HeroClass, WeaponId[]> = {

@@ -1,6 +1,6 @@
 /**
  * Loot: weapons with traits. A trait is a word with one rule, and every rule pays off only when you
- * execute something well (a parry, a dodge through a blow, a perfect release, a backstab, a throw
+ * execute something well (a counter after a block, a dodge through a blow, a perfect release, a backstab, a throw
  * into a wall, a fully charged hit). No stat sheets: at most two traits, one weapon per kit.
  */
 import { CLASS_DODGES, CLASS_GUARD, WEAPONS, type HeroClass, type WeaponId } from './weapons.js';
@@ -10,9 +10,9 @@ import { HUNGRY, type HungryId } from './hungry.js';
 export type TraitId = 'riposte' | 'tempo' | 'bulwark' | 'deadeye' | 'crushing' | 'brutal' | 'reaper' | 'ember' | 'rime' | 'storm';
 
 export const TRAITS: Record<TraitId, { name: string; text: string }> = {
-  riposte: { name: 'RIPOSTE', text: 'Counters after a parry do 40% more damage' },
+  riposte: { name: 'COUNTERSTROKE', text: 'Counters after a block do 40% more damage' },
   tempo: { name: 'SIDESTEP', text: 'Dodge through a blow: your next hit within 1.5 s does double damage' },
-  bulwark: { name: 'STAMINA ON PARRY', text: 'Parry refills stamina' },
+  bulwark: { name: 'STAMINA ON COUNTER', text: 'A counter after a block refills stamina' },
   deadeye: { name: 'DEADEYE', text: 'PERFECT shots do 60% more damage' },
   crushing: { name: 'CRUSHING', text: 'Goblins knocked into a wall take triple damage' },
   brutal: { name: 'BRUTAL', text: '50% more damage to stunned, pinned, netted or frozen goblins' },
@@ -33,19 +33,20 @@ const MELEE: WeaponId[] = ['sword', 'greatsword', 'spear', 'daggers', 'mace', 'r
 
 /**
  * The skill traits a kit can roll: the ones that make sense for how it fights, and only what its class
- * can do (Kyle, 2026-11-02): RIPOSTE and BULWARK need a parry, SIDESTEP a dodge.
+ * can do (Kyle, 2026-11-02): COUNTERSTROKE and STAMINA ON COUNTER need a held block (ids `riposte` and
+ * `bulwark` kept from when they were parry traits, so saves keep them), SIDESTEP a dodge.
  */
 export function traitsFor(kit: WeaponId): TraitId[] {
   const cls = WEAPONS[kit].cls, out: TraitId[] = ['crushing', 'brutal'];
   if (CLASS_DODGES[cls]) out.push('tempo');
-  if (CLASS_GUARD[cls] !== 'none') out.push('bulwark');
+  if (CLASS_GUARD[cls] === 'full') out.push('bulwark');
   if (MELEE.includes(kit)) out.push('reaper');
-  if (MELEE.includes(kit) && CLASS_GUARD[cls] !== 'none') out.push('riposte');
+  if (MELEE.includes(kit) && CLASS_GUARD[cls] === 'full') out.push('riposte');
   if (DRAWN.includes(kit)) out.push('deadeye');
   return out;
 }
 
-/** A trait's words for a class: REAPER without a parry is a backstab's alone. */
+/** A trait's words for a class: REAPER without a block (so no counters) is a backstab's alone. */
 export const traitText = (t: TraitId, cls?: HeroClass) => barWords(t === 'reaper' && cls && CLASS_GUARD[cls] === 'none' ? 'A backstab kill heals you 10' : TRAITS[t].text, cls);
 
 /** Gear tiers, white to red (gear.ts): white, green, blue, purple (id 'tolmouth', shown PRE-WAR), then the
@@ -62,7 +63,7 @@ export interface Item {
   quality: Tier;
   traits: TraitId[];
   /** Modifiers on base stats (gear.ts). */
-  mods?: { id: 'damage' | 'quick' | 'reach' | 'draw' | 'parry' | 'guard' | 'knock' | 'health' | 'tough' | 'breath' | 'foot' | 'dodge' | 'focus' | 'mending'
+  mods?: { id: 'damage' | 'quick' | 'reach' | 'draw' | 'guard' | 'knock' | 'health' | 'tough' | 'breath' | 'foot' | 'dodge' | 'focus' | 'mending'
     | 'arc' | 'crit' | 'backstab' | 'finisher' | 'spell' | 'thrift'; v: number }[];
   /** What a touched or turning piece costs you (costs.ts), as hungry gear has its own. */
   cost?: { id: 'taken' | 'winded' | 'slow' | 'frail' | 'dull'; v: number };

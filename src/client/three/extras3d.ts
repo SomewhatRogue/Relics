@@ -27,7 +27,6 @@ import type { Lerp } from './actors3d';
 import type { Proj } from './overlay3d';
 import { BOXFIGS } from './look';
 import { drawFoes3d } from './foes3d';
-import { parryWindow } from '../../sim/knacks';
 import type { Fx } from '../fx';
 import type { Hero } from '../../sim/types';
 import { rats } from '../rats';
@@ -90,7 +89,7 @@ export function drawExtras(g: CanvasRenderingContext2D, x: Extra): void {
     ring(g, P, ex, ey, e.kind === 'butcher' ? 0.65 : 0.4, beat < 0.25 ? 0.85 : 0.45, 0.15);
   }
   // The newer goblins' marks: a banner's reach, oil on the floor, crows on the dead (foes3d.ts).
-  drawFoes3d(g, c, room, P, lerp, meH ? parryWindow(meH) : 0.3);
+  drawFoes3d(g, c, room, P, lerp);
   // What's on a goblin: drawn at its feet as the flat view draws it (a flat figure carries its own).
   if (BOXFIGS) for (const e of room.enemies) {
     const carrier = room.heroes.find((h) => h.carrying === e.id), [ex, ey] = carrier ? lerp('h:' + carrier.id, carrier.x, carrier.y) : lerp('e:' + e.id, e.x, e.y);

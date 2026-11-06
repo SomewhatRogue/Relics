@@ -5,7 +5,7 @@ const { chromium } = require('playwright');
 const url = process.argv[2] || 'http://localhost:4173/';
 const out = process.argv[3] || 'shots';
 const LONG = { slot: 'weapon', kit: 'sword', quality: 'turning', traits: ['riposte'], level: 1,
-  mods: [{ id: 'arc', v: 0.31 }, { id: 'finisher', v: 0.42 }, { id: 'parry', v: 0.09 }], cost: { id: 'taken', v: 0.14 } };
+  mods: [{ id: 'arc', v: 0.31 }, { id: 'finisher', v: 0.42 }, { id: 'guard', v: 0.27 }], cost: { id: 'taken', v: 0.14 } };
 const PLATE = { slot: 'armor', armor: 'heavy', quality: 'touched', traits: [], level: 0,
   mods: [{ id: 'guard', v: 0.22 }, { id: 'tough', v: 0.15 }, { id: 'health', v: 24 }], cost: { id: 'winded', v: 0.16 } };
 (async () => {

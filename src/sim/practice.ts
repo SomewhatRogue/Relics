@@ -6,11 +6,11 @@
  * own seeded Rng and are made as a job makes them (newEnemy, VARIANTS), so the fight is the real one.
  *
  * A hero put down here doesn't count (the yard keeps no tally): once they're up, the same fight starts
- * over. A drill says how it's going in one small line ("PARRIED 8 OF 10", "HELD 60 S").
+ * over. A drill says how it's going in one small line ("BLOCKED 8 OF 10", "DODGED 8 OF 10", "HELD 60 S").
  */
 import { ARENA } from '../shared/arena';
 import { DRILLS, PACKS, RACK, PRACTICE, SINGLES, sortOf, type DrillId, type Sort } from '../shared/practice';
-import { VARIANTS } from '../shared/tuning';
+import { CLASS_GUARD, VARIANTS, type HeroClass } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { isDead } from './damage';
 import { newEnemy } from './enemies';
@@ -26,9 +26,9 @@ export interface Practice {
   began: number;
   /** Over: its line is the result. */
   done: boolean;
-  /** The parry drill: the heavy's swings so far (the last one, to tell a new one), and parries. */
+  /** The heavy drills: the heavy's swings so far (the last one, to tell a new one), and those blocked or dodged. */
   swings: number;
-  parried: number;
+  met: number;
   swing: unknown;
   /** The burn drill: each goblin seen alight. */
   burned: number[];
@@ -79,11 +79,11 @@ export function letOut(room: ArenaRoom, pick: Pick): Practice | null {
   emptyYard(room);
   room.drops.length = 0;
   room.pickups.length = 0;
-  const p: Practice = { pick, ids: [], began: room.time, done: false, swings: 0, parried: 0, swing: null, burned: [], waveAt: room.time + PRACTICE.waveEvery, downed: false, line: '', note: '', noteUntil: -1 };
+  const p: Practice = { pick, ids: [], began: room.time, done: false, swings: 0, met: 0, swing: null, burned: [], waveAt: room.time + PRACTICE.waveEvery, downed: false, line: '', note: '', noteUntil: -1 };
   const add = (s: Sort, x: number, y: number) => p.ids.push(letOne(room, s, x, y).id);
   const r = rngOf(room);
   if (pick.k !== 'drill') sorts.forEach((s, i) => add(s!, ...atGate(room, i)));
-  else if (pick.key === 'parry') add(sortOf('heavy')!, 9, 6.5);
+  else if (pick.key === 'block' || pick.key === 'dodge') add(sortOf('heavy')!, 9, 6.5);
   else if (pick.key === 'shields') {
     // Side by side across the yard, boards to the hero.
     for (const dx of [-1.2, 0, 1.2]) add(sortOf('shield')!, 9 + dx, 6);
@@ -139,10 +139,11 @@ export function stepPractice(room: ArenaRoom, ev: FightEvent[], me: string): voi
 }
 
 function drill(room: ArenaRoom, p: Practice, key: DrillId, out: Enemy[], alive: Enemy[], ev: FightEvent[]): void {
-  if (key === 'parry') {
+  if (key === 'block' || key === 'dodge') {
     const heavy = alive[0];
     if (heavy?.attack && heavy.attack !== p.swing) p.swings++;
-    for (const e of ev) if (e.k === 'parry') p.parried = Math.min(p.swings, p.parried + 1);
+    // A block that held (a guard break isn't one), or a dodge (rolled through or out from under it).
+    for (const e of ev) if (e.k === key && !(e as { more?: boolean }).more) p.met = Math.min(p.swings, p.met + 1);
     p.swing = heavy?.attack ?? null;
     // Ten swings done (the last one played out), or the heavy put down first.
     if (!heavy || (p.swings >= PRACTICE.swings && !heavy.attack)) p.done = true;
@@ -173,7 +174,8 @@ function lineOf(room: ArenaRoom, p: Practice): string {
   const s = secs(p, room), out = p.ids.map((id) => room.enemies.find((e) => e.id === id)), left = out.filter((e) => e && !isDead(e)).length;
   if (p.pick.k !== 'drill') return p.done ? `ALL DOWN IN ${s} S` : `${left} LEFT`;
   switch (p.pick.key) {
-    case 'parry': return `PARRIED ${p.parried} OF ${p.done ? p.swings : PRACTICE.swings}`;
+    case 'block': return `BLOCKED ${p.met} OF ${p.done ? p.swings : PRACTICE.swings}`;
+    case 'dodge': return `DODGED ${p.met} OF ${p.done ? p.swings : PRACTICE.swings}`;
     case 'shields': return p.done ? `BROKE THE LINE IN ${s} S` : `SHIELDS DOWN ${3 - left} OF 3`;
     case 'burn': return `BURNED ${p.burned.length} OF 5` + (p.done ? ` IN ${s} S` : '');
     default: return p.done ? `HELD ${PRACTICE.hold} S` : `HOLDING ${s} S`;
@@ -188,11 +190,13 @@ export function waiting(room: ArenaRoom): number {
   return Math.max(1, RACK.holds - out);
 }
 
-/** What the board offers this hero: each single and pack they've met every sort of, and the drills for their class. */
+/** What the board offers this hero: each single and pack they've met every sort of, and the drills for their class
+ *  (the heavy's to block for a class that holds a block, to dodge for one that can't). */
 export function offers(met: Set<string>, cls: string): { singles: typeof SINGLES; packs: typeof PACKS; drills: typeof DRILLS } {
+  const guard = CLASS_GUARD[cls as HeroClass];
   return {
     singles: SINGLES.filter((s) => met.has(s.key)),
     packs: PACKS.filter((q) => q.of.every((k) => met.has(k))),
-    drills: DRILLS.filter((d) => !d.cls || d.cls === cls),
+    drills: DRILLS.filter((d) => (!d.cls || d.cls === cls) && (!d.guard || d.guard === guard)),
   };
 }

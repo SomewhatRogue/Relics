@@ -1,20 +1,20 @@
 /**
  * GUARD and DODGE as rated areas (Kyle: "If a thing gives guard we say low / med / high (high = less
  * stamina loss on hit, bigger area covered). Guard can be Block and Parry, or just Parry. Dodge can be
- * (none) if it's none."). Worked out from the kit's own numbers, so a card never says more than the room
+ * (none) if it's none."). Parry went on 2026-11-05, so the kind is BLOCK or NONE. Worked out from the kit's own numbers, so a card never says more than the room
  * does. Shown on the weapon card (card.ts) and the class card (title.ts), one small line each.
  */
 import { guardOf, WEAPONS, dodgeName, dodgeOf, type WeaponId } from '../shared/tuning';
 
 export type GuardRating = 'LOW' | 'MED' | 'HIGH';
-export type GuardKind = 'BLOCK AND PARRY' | 'PARRY ONLY' | 'NONE';
+export type GuardKind = 'BLOCK' | 'NONE';
 
 /**
  * The rating, from where the guard reaches (`guardArc`, degrees in front), what a blocked blow costs in
  * stamina (`guardCost`) and what gets through a block (`chip`):
  *   HIGH  arc 150 or more, cost 1.1 or less, chip 0.2 or less   (sword and shield, mace, censer)
  *   MED   arc 120 or more, cost 1.5 or less, chip 0.3 or less   (spear, flail)
- *   LOW   anything less                                         (greatsword, the bows, the spellblade)
+ *   LOW   anything less                                         (the greatsword)
  */
 export function guardRating(w: WeaponId): GuardRating {
   const k = WEAPONS[w];
@@ -23,10 +23,9 @@ export function guardRating(w: WeaponId): GuardRating {
   return 'LOW';
 }
 
-/** What the block button does with this kit: hold a block and parry, parry only (the spellblade too), or nothing. */
+/** What the block button does with this kit: hold a block, or nothing. */
 export function guardKind(w: WeaponId): GuardKind {
-  const g = guardOf(WEAPONS[w]);
-  return g === 'none' ? 'NONE' : g === 'parry' ? 'PARRY ONLY' : 'BLOCK AND PARRY';
+  return guardOf(WEAPONS[w]) === 'none' ? 'NONE' : 'BLOCK';
 }
 
 /** The dodge button's name for this kit (ROLL, JUMP, DASH, BLINK), or NONE. */

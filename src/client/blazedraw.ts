@@ -67,7 +67,7 @@ export function drawBlaze(c: Ctx, room: ArenaRoom, cx: number, cy: number): void
     if (lead > 0 && lead <= HOUSEFIRE.beamWarn) {
       // A falling beam's circle: the striped edge of a blow you can't block, filling as it comes.
       const a = { kind: 'slam', cx: m.x, cy: m.y, radius: HOUSEFIRE.beamR, t: HOUSEFIRE.beamWarn - lead, windup: HOUSEFIRE.beamWarn, active: 0.1, unblockable: true } as EnemyAttack;
-      drawTelegraph(c, a, cx, cy, 0);
+      drawTelegraph(c, a, cx, cy);
     } else if (lead <= 0) {
       const a = beamArea(m.x, m.y), x = Math.round(OX + a.x * PX - cx), y = Math.round(OY + a.y * PX - cy), hot = -lead < HOUSEFIRE.beamBurn && !fallen;
       c.lit.fillStyle = hot ? '#2a1a10' : '#1a1410';

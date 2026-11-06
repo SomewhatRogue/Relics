@@ -1,11 +1,11 @@
 /**
  * The Healer's movement ladder, the guard (the Healer has no dodge; numbers: shared/ladder.ts). SHELTER:
- * friends near a Healer holding a block take less. MENDING PARRY: a parry heals friends near. COVER: a
+ * friends near a Healer holding a block take less. HEALING BLOCK: each blow blocked heals friends near. COVER: a
  * Healer blocking right beside a friend, facing the blow, takes it on the guard for them. All judged in
  * combat.ts hitHero, which hands over the room's heroes.
  */
 import { GUARD, HITSTOP, WEAPONS } from '../shared/tuning';
-import { COVER, PARRY_MEND, SHELTER, knowsRung, type RungId } from '../shared/ladder';
+import { BLOCK_MEND, COVER, SHELTER, knowsRung, type RungId } from '../shared/ladder';
 import { shove } from './bodies';
 import { knack, statsOf } from './gearstats';
 import { mend } from './holy';
@@ -24,13 +24,13 @@ export function shelter(h: Hero, heroes: Hero[], ev: FightEvent[]): number {
   return SHELTER.taken;
 }
 
-/** MENDING PARRY: a Healer's parry heals the friends near them. */
-export function parryMend(h: Hero, heroes: Hero[], ev: FightEvent[]): void {
-  if (WEAPONS[h.weapon]?.cls !== 'HEALER' || !knowsRung(h, 'parrymend')) return;
-  const near = heroes.filter((o) => o !== h && o.act !== 'down' && Math.hypot(o.x - h.x, o.y - h.y) <= PARRY_MEND.reach);
+/** HEALING BLOCK: a blow a Healer blocks heals the friends near them. */
+export function blockMend(h: Hero, heroes: Hero[], ev: FightEvent[]): void {
+  if (WEAPONS[h.weapon]?.cls !== 'HEALER' || !knowsRung(h, 'blockmend')) return;
+  const near = heroes.filter((o) => o !== h && o.act !== 'down' && Math.hypot(o.x - h.x, o.y - h.y) <= BLOCK_MEND.reach);
   if (!near.length) return;
-  ev.push({ k: 'parrymend', x: h.x, y: h.y, r: PARRY_MEND.reach });
-  for (const o of near) mend(h, o, PARRY_MEND.heal, ev);
+  ev.push({ k: 'blockmend', x: h.x, y: h.y, r: BLOCK_MEND.reach });
+  for (const o of near) mend(h, o, BLOCK_MEND.heal, ev);
 }
 
 /**
@@ -44,8 +44,7 @@ export function cover(e: Enemy, a: EnemyAttack, h: Hero, heroes: Hero[], soft: n
   if (!c || c.winded || (c.act !== 'idle' && c.act !== 'attack' && c.act !== 'charge')) return false;
   const w = WEAPONS[c.weapon], tx = e.x - c.x, ty = e.y - c.y, tl = Math.hypot(tx, ty) || 1;
   if ((c.fx * tx + c.fy * ty) / tl <= Math.cos(((w.guardArc / 2) * Math.PI) / 180)) return false;
-  if (a.crush) c.stamina = 0;
-  c.stamina -= a.dmg * soft * GUARD.staminaPerDmg * w.guardCost * (1 - statsOf(c).guard) * (1 - knack(c, 'block'));
+  c.stamina -= a.dmg * soft * GUARD.staminaPerDmg * w.guardCost * (a.crush ? GUARD.crushCost : 1) * (1 - statsOf(c).guard) * (1 - knack(c, 'block'));
   c.staminaAt = now;
   c.hitstop = Math.max(c.hitstop, HITSTOP.light);
   shove(c, -tx / tl, -ty / tl, a.knock * 0.4, 1);

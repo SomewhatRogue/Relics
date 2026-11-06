@@ -1,11 +1,10 @@
-/** The wood's dodge lesson, the goal after a count, the Ranger's parry, and Hew kept out of the trees
- *  (Kyle, 2026-11-05; sim/woodsteps.ts, sim/hewwalk.ts). */
+/** The wood's dodge lesson, the goal after a count, no parry anywhere in it (the Ranger's PARRY step and
+ *  the stream's PARRY lesson went on 2026-11-05), and Hew kept out of the trees (sim/woodsteps.ts, sim/hewwalk.ts). */
 import { beforeEach, describe, expect, it } from 'vitest';
-import { GATES, LESSONS, LINES, PARRY_FOE, lessonsFor, HEW_START } from '../src/shared/wood';
+import { GATES, LESSONS, LINES, lessonsFor, HEW_START } from '../src/shared/wood';
 import { HEW_AT } from '../src/shared/woodsigns';
 import { kill } from '../src/sim/damage';
 import { woodGoal } from '../src/sim/wood';
-import { PARRY_BEAT } from '../src/sim/woodsteps';
 import { HEW_R } from '../src/sim/hewwalk';
 import { NO_INTENT, type FightEvent } from '../src/sim/types';
 import { Game } from '../src/client/game';
@@ -55,7 +54,6 @@ describe('the dodge lesson', () => {
       expect(ev.some((e) => e.k === 'passed')).toBe(true);
       expect(w.passed).toBe(1);
       expect(w.stage).toBe(1);
-      if (cls === 'RANGER') continue;
       const n = mine(g).length;
       expect(n).toBeGreaterThan(0);
       expect(w.after?.phase).toBe('kill');
@@ -76,69 +74,56 @@ describe('the dodge lesson', () => {
   });
 });
 
-describe("the Ranger's parry", () => {
-  it('after the two dodges PARRY is given with a card, one parry completes it, then the goblins', () => {
+describe('no parry in the wood (2026-11-05)', () => {
+  it("the Ranger goes from its two dodges straight to the goblins: no PARRY card, no guard button given", () => {
     const g = onPath('RANGER'), w = g.wood!;
     expect(g.taught()).not.toContain('block');
-    dodge(g), dodge(g);
-    expect(w.after?.phase).toBe('parry');
-    // A beat for the gold flash first.
-    expect(w.hold).toBeNull();
-    expect(g.taught()).not.toContain('block');
-    g.room.time += PARRY_BEAT + 0.05;
-    frame(g);
-    expect(w.hold).toMatchObject({ kind: 'card', who: 'HEW', move: 'parry', text: LINES.teach.parry, how: LINES.how.parryOnly });
-    expect(g.taught()).toContain('block');
-    const foe = mine(g).find((e) => e.id === w.after!.foe)!;
-    expect(foe).toBeDefined();
-    expect(foe.variant).toBeUndefined();
-    expect(woodGoal(w, true)).toEqual({ title: 'PARRY: TAP PARRY WHILE THE RED FLASHES WHITE', text: 'PARRIES 0 / 1' });
-    w.hold = null;
-    // A dodge counts for nothing now.
-    dodge(g);
-    expect(w.count).toBe(0);
-    const ev = frame(g, [{ k: 'parry', x: 0, y: 0 }]);
-    expect(ev.some((e) => e.k === 'passed')).toBe(true);
-    expect(w.passed).toBe(2);
+    dodge(g), w.hold = null, dodge(g);
+    expect(w.passed).toBe(1);
     expect(w.after?.phase).toBe('kill');
     expect(woodGoal(w, true).title).toBe('KILL THE GOBLINS');
+    // However long it waits, no card comes, and the guard is never given on the path.
+    for (let i = 0; i < 40; i++) frame(g);
+    expect((w.hold as { move?: string } | null)?.move).not.toBe('parry');
+    expect(g.taught()).not.toContain('block');
     for (const e of mine(g)) kill(e, [], 'burst', 0, 1);
     w.hold = null;
     frame(g);
     expect(w.stage).toBe(2);
-    // PARRY stays given after the path.
-    expect(g.taught()).toContain('block');
+    expect(g.taught()).not.toContain('block');
   });
 
-  it('a real parry in the room counts: the swing freezes, a tap of PARRY meets it', () => {
-    const g = onPath('RANGER'), w = g.wood!;
-    dodge(g), dodge(g);
-    // The path's own goblins out of it.
-    for (const e of mine(g)) kill(e, [], 'burst', 0, 1);
-    w.ids = [];
-    g.room.time += PARRY_BEAT + 0.05;
-    frame(g);
-    g.continueHold();
-    g.step(0.05, NO_INTENT);
-    expect(w.hold).toBeNull();
-    const foe = mine(g).find((e) => e.id === w.after!.foe)!;
-    Object.assign(foe, { x: g.hero.x + 1.0, y: g.hero.y, cooldown: 0, alert: true });
-    let seq = 0;
-    for (let i = 0; i < 200 && w.after?.phase === 'parry'; i++) {
-      const h = w.hold;
-      if (h?.kind === 'act') {
-        expect(h.text).toBe('NOW: TAP PARRY');
-        g.step(0.05, { ...NO_INTENT, blockSeq: ++seq });
-      } else g.step(0.05, NO_INTENT);
+  it('each class: two dodges on the path; a block lesson only for a Warrior or Healer; nothing counts or teaches a parry', () => {
+    for (const cls of CLASSES) {
+      const ls = lessonsFor(cls);
+      expect([ls[1].count, ls[1].need], cls).toEqual(['dodge', 2]);
+      expect(ls.some((l) => (l.count as string) === 'parry' || (l.card as string) === 'parry'), cls).toBe(false);
+      expect(ls.filter((l) => l.count === 'block').length, cls).toBe(cls === 'WARRIOR' || cls === 'HEALER' ? 1 : 0);
+      expect('then' in ls[1], cls).toBe(false);
     }
-    expect(w.after?.phase).toBe('kill');
-    expect(w.passed).toBe(2);
+    expect(JSON.stringify(LINES)).not.toMatch(/parry/i);
   });
 
-  it('no other class goes to it: Warrior and Healer are taught block and parry; Rogue and Mage have no guard', () => {
-    for (const cls of CLASSES) expect(lessonsFor(cls)[1].then).toBe(cls === 'RANGER' ? 'parry' : undefined);
-    expect(lessonsFor('WARRIOR').map((l) => l.count)).toContain('parry');
-    expect(lessonsFor('HEALER').map((l) => l.count)).toContain('parry');
+  it("a Warrior's or Healer's stream: walked into, its gate opens at once, no card, no goblins, on to the hut", () => {
+    for (const cls of ['WARRIOR', 'HEALER'] as const) {
+      store.clear();
+      const g = new Game();
+      g.create(cls, 'stray');
+      wake(g);
+      Object.assign(g.wood!, { stage: 3, entered: false });
+      const before = g.room.enemies.length;
+      Object.assign(g.hero, { x: 53, y: 20 });
+      g.step(0.05, NO_INTENT);
+      const w = g.wood!;
+      expect(w.stage, cls).toBe(4);
+      expect(w.hold).toBeNull();
+      expect(g.room.enemies.length).toBe(before);
+      expect(g.room.map.blocks.some((b) => b.x === GATES[3].block.x && b.y === GATES[3].block.y)).toBe(false);
+    }
+  });
+
+  it("the light classes' stream is the last-second dodge under the heavy, as before", () => {
+    for (const cls of ['ROGUE', 'RANGER', 'MAGE'] as const) expect([lessonsFor(cls)[3].count, lessonsFor(cls)[3].foes[0].variant]).toEqual(['slip', 'heavy']);
   });
 });
 
@@ -185,7 +170,6 @@ describe('Hew keeps out of the trees', () => {
     }
     // Where the Healer's arrow puts him, and where he walks from at the hut, are clear.
     expect(sunk(m(), { x: HEW_AT[0], y: HEW_AT[1] } as Npc)).toBeLessThanOrEqual(0);
-    expect(sunk(m(), { x: PARRY_FOE.x, y: PARRY_FOE.y } as Npc)).toBeLessThanOrEqual(0);
     // Round the side of the hut to the cordwood (until the Stoker has him).
     Object.assign(g.wood!, { stage: 4, entered: false, hold: null });
     Object.assign(g.hero, { x: 52, y: 10 });

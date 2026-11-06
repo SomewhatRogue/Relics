@@ -47,7 +47,7 @@ describe('the ironhide', () => {
     expect(e.cracked).toBe(true);
   });
 
-  it('a parry of its blow breaks its guard', () => {
+  it('a block of its blow holds, but does not break its guard (no parry: only a charged blow or a perfect does)', () => {
     const { room, h, e } = iron(15, 11);
     room.setIntent(h.id, { ...NO_INTENT, ay: -1 });
     run(room, 6, () => e.attack?.kind === 'cleave');
@@ -56,9 +56,8 @@ describe('the ironhide', () => {
     run(room, a.windup - a.t - 0.12);
     room.setIntent(h.id, { ...NO_INTENT, ay: -1, block: true, blockSeq: 1 });
     const ev = run(room, 0.3);
-    expect(ev.some((x) => x.k === 'parry')).toBe(true);
-    expect(e.cracked).toBe(true);
-    expect(e.crackUntil).toBeGreaterThan(room.time + IRONHIDE.broken - 0.5);
+    expect(ev.some((x) => x.k === 'block')).toBe(true);
+    expect(e.cracked).toBeFalsy();
     expect(h.hp).toBe(100);
   });
 

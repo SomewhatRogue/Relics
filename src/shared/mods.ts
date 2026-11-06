@@ -7,20 +7,21 @@
  *
  * Where each rolls (the rule, said once):
  * - A weapon rolls only what improves its own job, for its own class: a sweep widens, a thrust reaches,
- *   a bow draws, knives stab in the back, a Mage's focus casts stronger and cheaper. PARRY only on a kit
- *   that parries, BLOCK only on one that holds a block. No flat DAMAGE on a weapon.
+ *   a bow draws, knives stab in the back, a Mage's focus casts stronger and cheaper. BLOCK only on a kit
+ *   that holds a block. No flat DAMAGE on a weapon.
  * - Armor rolls its weight's list: heavy is BLOCK, TOUGHNESS and HEALTH; light is DODGE, STAMINA, SPEED
- *   and CRIT; medium a bit of both. Never PARRY.
- * - Rings roll what any class can use, and, rolled for a class, that class's own (PARRY, DODGE...).
+ *   and CRIT; medium a bit of both.
+ * - Rings roll what any class can use, and, rolled for a class, that class's own (BLOCK, DODGE...).
+ * - PARRY is gone (Kyle, 2026-11-05: no parry anywhere); old pieces with it: shared/oldparry.ts.
  * - Rolled for a class (your drops, your class's vendor), nothing that class can't use. Rolled for nobody
  *   (the pawn's stall), armor keeps its weight's whole list; on the card a modifier the wearer can't use
  *   shows dim, "no use to you", and changes nothing.
  */
 import type { Rng } from './rng.js';
 import type { Tier } from './loot.js';
-import { CLASS_DODGES, CLASS_GUARD, CLASS_KITS, WEAPONS, guardOf, type HeroClass, type WeaponId } from './weapons.js';
+import { CLASS_DODGES, CLASS_KITS, WEAPONS, guardOf, type HeroClass, type WeaponId } from './weapons.js';
 
-export type ModId = 'damage' | 'quick' | 'reach' | 'draw' | 'parry' | 'guard' | 'knock' | 'health' | 'tough' | 'breath' | 'foot' | 'dodge' | 'focus' | 'mending'
+export type ModId = 'damage' | 'quick' | 'reach' | 'draw' | 'guard' | 'knock' | 'health' | 'tough' | 'breath' | 'foot' | 'dodge' | 'focus' | 'mending'
   | 'arc' | 'crit' | 'backstab' | 'finisher' | 'spell' | 'thrift';
 export interface Mod { id: ModId; v: number }
 export type Slot = 'weapon' | 'armor' | 'ring';
@@ -37,7 +38,6 @@ export const MODS: Record<ModId, { name: string; unit: '%' | 's' | ''; per: numb
   knock: { name: 'KNOCKBACK', unit: '%', per: 0.4 },
   backstab: { name: 'BACKSTAB', unit: '%', per: 0.4 },
   crit: { name: 'CRIT', unit: '%', per: 1.5 },
-  parry: { name: 'PARRY', unit: 's', per: 2 },
   guard: { name: 'BLOCK', unit: '%', per: 0.67 },
   mending: { name: 'HEALING', unit: '%', per: 0.8 },
   spell: { name: 'SPELL POWER', unit: '%', per: 0.8 },
@@ -53,7 +53,7 @@ export const MODS: Record<ModId, { name: string; unit: '%' | 's' | ''; per: numb
 export const MOD_TEXT: Record<ModId, string> = {
   damage: 'all hits, shots and spells', quick: 'faster swings and casts', reach: 'longer reach and range', arc: 'wider swings',
   draw: 'held attacks and bow draws build faster', finisher: 'the last blow of a combo hits harder', knock: 'knocks goblins further',
-  backstab: 'more damage from behind', crit: 'chance a hit does 50% more damage', parry: 'longer parry window',
+  backstab: 'more damage from behind', crit: 'chance a hit does 50% more damage',
   guard: 'less damage through a block, cheaper blocks', mending: 'bigger heals', spell: 'held spells hit harder',
   thrift: 'held spells cost less magic', health: '', tough: 'less damage taken', breath: 'refills faster', foot: 'move faster',
   dodge: 'dodge recharges faster', focus: 'skill and relic recharge faster',
@@ -76,7 +76,6 @@ export function weaponMods(kit: WeaponId): ModId[] {
   if (cls === 'WARRIOR' || cls === 'HEALER' || k.breaker || kit === 'crossbow') out.push('knock');
   if (k.backstab) out.push('backstab');
   if (cls === 'RANGER' || cls === 'ROGUE') out.push('crit');
-  if (g !== 'none') out.push('parry');
   if (g === 'full') out.push('guard');
   if (cls === 'HEALER') out.push('mending');
   if (cls === 'MAGE') out.push('spell', 'thrift');
@@ -89,16 +88,15 @@ export const ARMOR_MODS: Record<ArmorKind, ModId[]> = {
 };
 /** Rings: anyone's, then (rolled for a class) the class's own. */
 export const RING_MODS: ModId[] = ['damage', 'health', 'breath', 'focus', 'crit', 'foot'];
-const RING_OWN: ModId[] = ['parry', 'guard', 'dodge', 'mending', 'spell', 'thrift'];
+const RING_OWN: ModId[] = ['guard', 'dodge', 'mending', 'spell', 'thrift'];
 
 /**
  * Whether a modifier does anything for `cls` (holding `kit`, if known). Without a kit: whether any of
- * the class's kits could use it (a Mage's spellblade parries).
+ * the class's kits could use it.
  */
 export function modFits(id: ModId, cls: HeroClass, kit?: WeaponId): boolean {
   if (!kit) return CLASS_KITS[cls].some((k) => modFits(id, cls, k));
   const k = WEAPONS[kit];
-  if (id === 'parry') return guardOf(k) !== 'none';
   if (id === 'guard') return guardOf(k) === 'full';
   if (id === 'dodge') return CLASS_DODGES[cls];
   if (id === 'mending') return cls === 'HEALER';
@@ -119,7 +117,7 @@ export function modValue(id: ModId, pts: number): number {
   return m.unit === '' ? Math.max(1, Math.round(units)) : Math.round(units) / 100;
 }
 /** The points a rolled modifier is worth. */
-export const modPoints = (m: Mod) => (MODS[m.id].unit === '' ? m.v : m.v * 100) * MODS[m.id].per;
+export const modPoints = (m: Mod) => (MODS[m.id] ? (MODS[m.id].unit === '' ? m.v : m.v * 100) * MODS[m.id].per : 0);
 
 /** A roll in its band: a fifth either side of the middle; `lean` (0 to 1) pushes it toward the top. */
 export const band = (rng: Rng, lean = 0) => 0.8 + 0.4 * (lean + (1 - lean) * rng.next());

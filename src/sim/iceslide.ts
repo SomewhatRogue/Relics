@@ -38,7 +38,7 @@ export function fling(e: Enemy, by: string, dx: number, dy: number, hard: boolea
   e.sled = { by, vx: ux * v, vy: uy * v, decel, hard };
   Object.assign(e, { kvx: 0, kvy: 0, air: 0, attack: null, lastBy: by });
   // (Frozen for the whole slide and the hitstop before it, so it never thaws mid-flight.)
-  e.frozenUntil = Math.max(e.frozenUntil, now + v / decel + HITSTOP.parry + 0.2);
+  e.frozenUntil = Math.max(e.frozenUntil, now + v / decel + HITSTOP.counter + 0.2);
   ev.push({ k: 'fling', x: e.x, y: e.y, dx: ux, dy: uy, r: len, big: hard });
   return true;
 }

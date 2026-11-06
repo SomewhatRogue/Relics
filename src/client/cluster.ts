@@ -3,7 +3,7 @@
  * it looks this frame. The buttons and their presses are input.ts's; this only draws them (btnart.ts)
  * and says which are there: a Mage's ELEMENT (a small ring by ATTACK in the element's colour, its name
  * over it), a Rogue's SHADOW STEP, Ranger's MARK or Healer's MEND in the same spot (shared/signs.ts), the class skill and the relic carried with their cooldowns, the guard
- * (BLOCK or PARRY, none for a Mage), the dodge (JUMP, DASH, BLINK, ROLL), the flask as the health orb,
+ * (BLOCK for a Warrior or Healer, none for a Ranger, Rogue or Mage), the dodge (JUMP, DASH, BLINK, ROLL), the flask as the health orb,
  * stamina as pips round ATTACK (a Mage's magic round BLINK), one gilt context slot (GRAB, THROW, HELP UP, BURN, OPEN, TALK), and a
  * crossbow's RELOAD. A Warrior or Healer has no dodge: the context slot takes the dodge's place, and a
  * Warrior's always shows GRAB (dimmed till there's something to take hold of). A Warrior who has learned
@@ -104,7 +104,7 @@ export class Cluster {
     const on = this.stick.classList.contains('on');
     if (on && !this.stickOn && ++this.moves === 3) document.body.classList.add('stick-known');
     this.stickOn = on;
-    // A Rogue and a Mage have no guard; a spellblade parries, like any parry-only kit.
+    // Only a Warrior or Healer has a guard: the button is gone for a Ranger, Rogue or Mage (they dodge).
     const kit = WEAPONS[me.weapon], guard = guardOf(kit);
     if (document.body.dataset.guard !== guard) document.body.dataset.guard = guard;
     const carrying = me.act === 'carry';
@@ -115,7 +115,7 @@ export class Cluster {
     const flick = me.winded && room.time - me.staminaAt < HERO.windedDelay ? Math.floor(now * 11) % 2 === 0 : false;
     const pips = { lit: flick ? 0 : Math.ceil(st / 10), of: 10, col: me.winded ? '#d84a3a' : mage ? (st < 25 ? '#8f86a8' : '#cdbdf0') : st < 25 ? '#a8a090' : '#ddd5c4' };
     b.attack.show({ shape: 'round', size: 42, grade: 'iron', icon: atk, iconScale: carrying ? 1 : 2, ...(mage ? {} : { pips }) }, '', '', carrying ? 'Slam' : 'Attack');
-    b.block.show(guard === 'none' ? null : { shape: 'shield', size: 30, grade: 'iron', icon: icon(guard === 'full' ? 'block' : 'parry') }, '', kit.spellblade ? 'PARRY' : '', guard === 'full' ? 'Block' : 'Parry');
+    b.block.show(guard === 'none' ? null : { shape: 'shield', size: 30, grade: 'iron', icon: icon('block') }, '', '', 'Block');
     // A Warrior's TAUNT sits in the dodge's place (sim/taunt.ts): the press is the dodge press.
     const taunt = taunts(me), tl = taunt ? tauntLeft(me, room.time) : 0;
     const dn = taunt ? 'TAUNT' : dodgeName(kit.cls), dodges = !!dodgeOf(kit) || taunt;

@@ -5,17 +5,16 @@
  */
 import type { Game } from './game';
 import type { Move } from '../sim/wood';
-import { dodgeName, guardOf, WEAPONS } from '../shared/weapons';
+import { dodgeName } from '../shared/weapons';
 import { finish, speak, typing } from './speech';
 
-const NAME: Record<Move, string> = { move: 'MOVE', step: 'WALK OUT', attack: 'ATTACK', roll: 'DODGE', block: 'BLOCK', parry: 'PARRY', skill: 'SKILL', relic: 'RELIC', grab: 'GRAB AND THROW', backstab: 'BACKSTAB', heavy: 'FULL SHOT', slip: 'LAST SECOND', element: 'ELEMENT', shadow: 'SHADOW STEP', mark: 'MARK', heal: 'MEND' };
+const NAME: Record<Move, string> = { move: 'MOVE', step: 'WALK OUT', attack: 'ATTACK', roll: 'DODGE', block: 'BLOCK', skill: 'SKILL', relic: 'RELIC', grab: 'GRAB AND THROW', backstab: 'BACKSTAB', heavy: 'FULL SHOT', slip: 'LAST SECOND', element: 'ELEMENT', shadow: 'SHADOW STEP', mark: 'MARK', heal: 'MEND' };
 const KEY: Record<Move, [string, string]> = {
   move: ['W A S D', 'THE LEFT STICK'],
   step: ['W A S D', 'THE LEFT STICK'],
   attack: ['LEFT CLICK', 'ATTACK'],
   roll: ['SPACE', 'ROLL'],
   block: ['HOLD RIGHT CLICK', 'HOLD BLOCK'],
-  parry: ['RIGHT CLICK', 'BLOCK'],
   skill: ['E', 'SKILL'],
   relic: ['R', 'RELIC'],
   grab: ['G', 'GRAB'],
@@ -28,7 +27,7 @@ const KEY: Record<Move, [string, string]> = {
   mark: ['V', 'MARK'],
   heal: ['V', 'MEND'],
 };
-const BUTTON: Partial<Record<Move, string>> = { attack: '.tb.attack', roll: '.tb.roll', block: '.tb.block', parry: '.tb.block', skill: '.tb.relic', relic: '.tb.relic2', grab: '.tb.grab', backstab: '.tb.attack', heavy: '.tb.attack', slip: '.tb.roll', element: '.tb.element', shadow: '.tb.sign', mark: '.tb.sign', heal: '.tb.sign' };
+const BUTTON: Partial<Record<Move, string>> = { attack: '.tb.attack', roll: '.tb.roll', block: '.tb.block', skill: '.tb.relic', relic: '.tb.relic2', grab: '.tb.grab', backstab: '.tb.attack', heavy: '.tb.attack', slip: '.tb.roll', element: '.tb.element', shadow: '.tb.sign', mark: '.tb.sign', heal: '.tb.sign' };
 
 export class LessonView {
   private el = document.createElement('div');
@@ -75,9 +74,7 @@ export class LessonView {
     this.key = key;
     this.el.hidden = !show;
     if (!show) return;
-    // (A Ranger's guard button is PARRY: it has no held block.)
-    const parryBtn = hold!.move === 'parry' && this.touch && guardOf(WEAPONS[this.g.hero.weapon]) === 'parry';
-    const h = hold!, k = parryBtn ? 'PARRY' : KEY[h.move ?? 'attack'][this.touch ? 1 : 0].replace('ROLL', this.touch && w ? dodgeName(w.cls) : 'ROLL');
+    const h = hold!, k = KEY[h.move ?? 'attack'][this.touch ? 1 : 0].replace('ROLL', this.touch && w ? dodgeName(w.cls) : 'ROLL');
     this.el.className = h.kind === 'talk' ? 'card talk' : h.kind;
     const hint = `<p class="go-hint">${this.touch ? 'TAP TO GO ON' : 'CLICK OR PRESS ENTER TO GO ON'}</p>`;
     if (h.kind === 'relic') {

@@ -161,7 +161,7 @@ export function planRoom(job: Job, index: number, road?: RoadId, taken?: Record<
   if (v4 && spec && !spec.heart) ensure4(spec, blocks, lay.plot);
   const fires = spec ? setPiece(lay, spec.piece) : oldBands(lay);
   // Not every small goblin is the same: spear-lungers (roll out of the line), brutes (big, slow blows
-  // to parry or dodge) and shield-bearers (hit them from behind, or hard). More of them deeper in.
+  // to block or dodge) and shield-bearers (hit them from behind, or hard). More of them deeper in.
   // (A layout-3 room's goblins are laid out as fights instead: composeRoom, below.)
   for (const f of v3 ? [] : foes) {
     if (f.kind !== 'scrapper' || f.bow || f.feeding || f.name) continue;

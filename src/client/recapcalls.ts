@@ -8,7 +8,7 @@ import type { Count, Score } from '../sim/score';
 
 /** What a callout can be for: a count to lead, or `standing` (the only one never downed when the rest were). */
 export type CallId = Exclude<Count, 'taken' | 'downs'> | 'standing';
-export const CALL_ORDER: readonly CallId[] = ['kills', 'dealt', 'healed', 'raised', 'parries', 'dodges', 'blocks', 'best', 'standing'];
+export const CALL_ORDER: readonly CallId[] = ['kills', 'dealt', 'healed', 'raised', 'dodges', 'blocks', 'best', 'standing'];
 
 /** Does `s` lead everyone in `all` at `c`? */
 export function leads(s: Score, all: Score[], c: CallId): boolean {

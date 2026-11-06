@@ -35,7 +35,7 @@ export const boltOn = (s: Strike, t: number) => t >= s.at && t - s.at < BOLT.sho
 export function drawStrikeMarks(c: Ctx, room: ArenaRoom, cx: number, cy: number): void {
   for (const s of room.strikes ?? []) {
     const a = strikeShape(s, room.time);
-    if (a) drawTelegraph(c, a, cx, cy, 0);
+    if (a) drawTelegraph(c, a, cx, cy);
   }
 }
 
