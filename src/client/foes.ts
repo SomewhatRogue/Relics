@@ -10,6 +10,7 @@ import { drawRoundSign } from './telegraph2';
 import { drawKit } from './backline';
 import { KITTED, drawFoeKit } from './foekits';
 import { drawIronhide } from './ironhidedraw';
+import { boardOut } from '../sim/board';
 import { drawLessonMark } from './lessonfoes';
 import { drawLogs, drawLogsDead } from './foedraw';
 import { drawMound, drawWolf } from './beastdraw';
@@ -341,7 +342,16 @@ export function drawHeld(c: Ctx, e: Enemy, x: number, y: number, fx: number, fy:
 function kit(c: Ctx, e: Enemy, x0: number, y0: number): void {
   const f = e.fx >= 0 ? 1 : -1, g = c.lit, held = e.variant === 'lunger' || e.variant === 'heavy';
   const x = x0 + (held ? AT.hx : AT.bx), y = y0 + (held ? AT.hy : AT.by);
-  if (e.variant === 'shield') {
+  if (e.variant === 'shield' && boardOut(e, c.t ?? c.now)) {
+    // Knocked aside (sim/board.ts): the plank swung wide off its arm, flat out behind it, shaking.
+    const bx = Math.round(x - f * 6 - (f < 0 ? 0 : 7)), by = Math.round(y - 7 + (Math.floor(c.now * 14) % 2));
+    g.fillStyle = '#5a3f28';
+    g.fillRect(bx, by, 8, 3);
+    g.fillStyle = '#7a5a38';
+    g.fillRect(bx, by, 8, 1);
+    g.fillStyle = '#8a8a90';
+    g.fillRect(bx + 3, by + 1, 1, 1);
+  } else if (e.variant === 'shield') {
     // A door-plank shield, held toward whatever it faces.
     g.fillStyle = '#5a3f28';
     g.fillRect(Math.round(x + f * 4 - (f < 0 ? 3 : 0)), Math.round(y - 11), 3, 8);

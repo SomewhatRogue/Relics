@@ -605,6 +605,8 @@ export interface Enemy extends Body {
   /** A Swingle's last spin and the reel after it (sim/meaty.ts): room times, each set once a spin. */
   spinAt?: number;
   reelAt?: number;
+  /** A shield-bearer's board knocked aside (sim/board.ts): the room time it went, open VARIANTS.shield.out after. Set once a knock, so sent once. */
+  boardOutAt?: number;
   /** A burst on the floor (sim/blast.ts): a Kegman's keg, an Oil-soaked one alight, a Smouldering one's embers.
    *  Where it lies, how far it reaches, the room time it goes off, and `done` once it has. Set once, so sent once. */
   blast?: { k: 'keg' | 'oiled' | 'ember'; x: number; y: number; r: number; at: number; done?: boolean };
@@ -792,6 +794,7 @@ export type FightEvent =
   | { k: 'death'; x: number; y: number; how: DeathKind; dx: number; dy: number; kind: EnemyKind }
   /** A shot stopped dead on a shield-bearer's board (sim/board.ts): a thunk, sparks, BLOCKED. */
   | { k: 'deflect'; x: number; y: number }
+  | { k: 'boardout'; x: number; y: number }
   /** `more`: another blow of a pack rush met by the same guard in the same instant (its words said once). */
   | { k: 'block' | 'guardbreak' | 'winded' | 'breath' | 'bash' | 'dodge' | 'slip' | 'out' | 'roll' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number; more?: boolean }
   | { k: 'windup' | 'impact'; x: number; y: number; kind: AttackKind }

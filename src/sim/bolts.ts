@@ -34,7 +34,7 @@ import { envenom } from './venom';
 import { markShot, perfectStrike, spent } from './rangershots';
 import { interrupt, windingUp } from './spells';
 import { mayStun, relicStun, stun } from './stuns';
-import { boardFor, boardMult } from './board';
+import { boardMult, meetBoard } from './board';
 
 let nextId = 1;
 
@@ -132,8 +132,9 @@ function openNet(w: World, b: Bolt): void {
 function strike(w: World, b: Bolt, e: Enemy): boolean {
   const wasFrozen = frozen(e, w.now), winding = !!b.interrupts && windingUp(e);
   e.lastBy = b.owner;
-  // Into a shield-bearer's board: a plain shot stops dead, a charged, perfect or piercing one gets through for less.
-  const board = boardFor(e, b, w.now);
+  // Into a shield-bearer's board: a plain shot stops dead, a full draw or a perfect one gets through for a
+  // quarter and knocks the board aside (sim/board.ts).
+  const board = meetBoard(e, b, w.now, w.ev);
   if (board === 'blocked' && boardMult(board) <= 0) return w.ev.push({ k: 'deflect', x: e.x, y: e.y }), false;
   const by = w.heroes.find((h) => h.id === b.owner), crit = !!by && (!!b.blind || rollCrit(by));
   // A Rogue's bolt or knife in a goblin's back is a backstab too, at that weapon's rate.

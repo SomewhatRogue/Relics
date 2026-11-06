@@ -36,6 +36,7 @@ import { guardFrom, rushBlocked, noteRush } from './rushguard';
 import { count, dealt } from './score';
 import { chalkTaken } from './chalker';
 import { plankFaces } from './meaty';
+import { blowMult, knockAside, knocksBoard, shieldFaces } from './board';
 import { addPoise, bracedFor, poiseFromBlow, rebound } from './poise';
 import { doorTake } from './doorwall';
 import { noteHurt } from './bosskit';
@@ -76,16 +77,17 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   const tempo = h.tempoUntil > now ? TRAIT.tempo : 1;
   if (tempo > 1) h.tempoUntil = -9;
   const crit = rollCrit(h), ambush = e.alert === false && !isDummy(e);
-  // A shield-bearer takes a blow from the front on its board (unless it's heavy, held fast, caught unaware,
-  // or a Mage's storm, which ignores shields and lands harder on the wet: sim/wet.ts).
-  const storm = stormCut(h, s), boarded = e.variant === 'shield' && !rear && !heavy && !heldFast && !ambush && !storm;
+  // A shield-bearer takes a blow from the front on its board: a tenth, a heavy one a quarter (unless it's held
+  // fast, caught unaware, knocked aside, or it's a Mage's storm, which ignores shields and lands harder on the
+  // wet: sim/wet.ts). A full charge, a perfect or a counter knocks the board aside (sim/board.ts).
+  const storm = stormCut(h, s), boarded = !rear && !storm && shieldFaces(e, tx, ty, now), knocks = boarded && knocksBoard(h);
   // A Planker's barn door takes everything from the front, heavy or not (sim/meaty.ts): get round it.
   const door = plankFaces(e, tx, ty, now);
   const weak = weakOn(e), soaked = storm && wet(e) ? wetMult(h, STORM.wet) : 1;
   sayWeak(e, weak, now, ev, 'physical');
   // STAMINA ON COUNTER: a counter's first hit fills your stamina. (The spear's shaft halves a blow up close.)
   if (h.counter && has(h, 'bulwark') && h.hitIds.filter((id) => id > 0).length === 1) h.stamina = Math.max(h.stamina, HERO.stamina);
-  const mult = weak * soaked * (h.counter ? counter : heldFast ? held : 1) * shaftMult(h, s, e) * rearMult * blessed * tempo * (crit ? CRIT : 1) * (ambush ? STEALTH.ambush * (1 + knack(h, 'ambush')) : 1) * (boarded ? VARIANTS.shield.front : 1) * (door ? 0 : 1) * brandyDmg(h, now) * litMult(h) * (h.snagged ? CENSER.snag : 1) * ((e.routUntil ?? -9) > now ? BANNER.rout.hurt : 1);
+  const mult = weak * soaked * (h.counter ? counter : heldFast ? held : 1) * shaftMult(h, s, e) * rearMult * blessed * tempo * (crit ? CRIT : 1) * (ambush ? STEALTH.ambush * (1 + knack(h, 'ambush')) : 1) * (boarded ? blowMult(heavy) : 1) * (door ? 0 : 1) * brandyDmg(h, now) * litMult(h) * (h.snagged ? CENSER.snag : 1) * ((e.routUntil ?? -9) > now ? BANNER.rout.hurt : 1);
   // An ironhide's plates (sim/ironhide.ts): a charged blow or a perfect breaks its guard; else a fifth gets through.
   const plate = clanks(e, now) && !(h.heavy || h.perfect), raw = plated(e, Math.round(s.dmg * mult), now, h.heavy || h.perfect, ev);
   // Mother Rust's Needles: a backstab kills anything short of a butcher.
@@ -93,6 +95,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   // A boss of the kit: what in the blow fills its POISE (door or no door), then its door (sim/poise.ts, doorwall.ts).
   const n = e.boss ? bossBlow(h, e, n0, rear, ambush, now, ev) : n0;
   if (n < 0) return 0;
+  if (knocks) knockAside(e, now, ev);
   e.hp -= n;
   e.hitAt = now;
   dealt(e, h.id, n);
@@ -105,7 +108,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   // (A shield-bearer's board stops a flail's shove: sim/flail.ts.)
   if (e.act !== 'pinned' && e.act !== 'carried' && !door && !(boarded && WEAPONS[h.weapon].shoves)) shove(e, kx, ky, s.knock + (h.counter ? 5 : 0), e.weight);
   if (ambush && e.hp > 0) stun(e, h.id, now, STEALTH.reel, ev);
-  ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy, on: 'enemy', counter: h.counter, crit, ambush, boarded: boarded || door, backstab: rear && (rearMult >= 2 || WEAPONS[h.weapon].cls === 'ROGUE'), src: WEAPONS[h.weapon].cls === 'RANGER' ? 'sword' : h.weapon, big: e.kind === 'butcher', ...(plate ? { plated: true } : {}) });
+  ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy, on: 'enemy', counter: h.counter, crit, ambush, boarded: (boarded && !knocks) || door, backstab: rear && (rearMult >= 2 || WEAPONS[h.weapon].cls === 'ROGUE'), src: WEAPONS[h.weapon].cls === 'RANGER' ? 'sword' : h.weapon, big: e.kind === 'butcher', ...(plate ? { plated: true } : {}) });
   // A Hornblower blowing: a charged blow, a perfect or a counter that gets through cuts it off (sim/hornstate.ts).
   if (n > 0 && (h.heavy || h.perfect || h.counter)) cutCall(e, now, ev);
   if (isDummy(e)) {

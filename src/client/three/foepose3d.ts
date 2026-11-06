@@ -7,6 +7,7 @@ import type { Enemy } from '../../sim/types';
 import type { FoeFig } from './goblins3d';
 import { CHAR, FLASH, ICE } from './mats';
 import { flash, rest, walk } from './rig';
+import { boardOut } from '../../sim/board';
 
 const ease = (k: number) => 1 - (1 - Math.min(1, Math.max(0, k))) ** 2;
 
@@ -63,6 +64,8 @@ export function poseFoe(f: FoeFig, e: Enemy, t: number, now: number, walked: num
     }
     if (winding && wk > 0.75) f.mid.position.x += Math.sin(now * 50) * 0.015;
   }
+  // A shield-bearer's board knocked aside (sim/board.ts): the arm flung out wide, the board off its front, shaking.
+  if (e.variant === 'shield' && boardOut(e, t)) (f.aL.rotation.z = 1.5 + Math.sin(now * 30) * 0.08), (f.aL.rotation.x = 0.5), (f.mid.rotation.y = -0.35);
   if (e.act === 'stunned') (f.stars.visible = true), (f.stars.rotation.y = now * 3), (f.mid.rotation.z = Math.sin(now * 4) * 0.2), (f.aR.rotation.x = 0.3);
   if (e.act === 'flinch') f.mid.rotation.x = -0.35;
   if (e.act === 'pinned') (f.mid.rotation.x = -Math.PI / 2), (f.mid.position.y = 0.15), (f.legs[0].rotation.x = Math.sin(now * 14) * 0.5);

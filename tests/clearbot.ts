@@ -4,7 +4,8 @@
  * nearest awake goblin on the ground (else the nearest one at all), faces it and fights by Intent like a
  * plain player: a Rogue's daggers tap away at whatever is in reach; a Mage's staff taps its slash and,
  * with three or more about it and the magic for it, holds for the element's big spell. It knows the new
- * meaty sorts' answers (to a Planker's side, inside a Forker's tines; out of a Pouncer's circle and a
+ * meaty sorts' answers (to a Planker's side, inside a Forker's tines; round a shield-bearer's board, or, with
+ * a kit whose hold is a blow (the sword's bash), a full charge into it to knock it aside; out of a Pouncer's circle and a
  * burst's, the Kegman's, Oil-soaked's and Smouldering's; at a Hornblower blowing and a Gorger first, to
  * burst them down) but dodges nothing else. The room decides
  * the rest. A room is clear when every goblin on the ground is dead or gone (roof archers left out: no
@@ -13,12 +14,15 @@
 import { board, type Job } from '../src/shared/jobs';
 import { PLANKER, FORKER, HERO, SPELL, TICK, WEAPONS, type WeaponId } from '../src/shared/tuning';
 import { isDead } from '../src/sim/damage';
+import { shieldFaces } from '../src/sim/board';
+import { chargeFull } from '../src/sim/hero';
 import { blastShape } from '../src/sim/blastshape';
 import { calling } from '../src/sim/hornstate';
 import { newRun, runRoom } from '../src/sim/run';
 import { NO_INTENT, type Enemy, type Hero } from '../src/sim/types';
 
-export interface Clear { secs: number; kills: number; left: number; skipped: number; taken: number }
+/** `shields`: how many shield-bearers the room had (scripts/encounters/clear.ts reports those rooms apart). */
+export interface Clear { secs: number; kills: number; left: number; skipped: number; taken: number; shields: number; knocks: number }
 
 const fighter = (e: Enemy) => (e.kind === 'scrapper' || e.kind === 'butcher') && !((e.z ?? 0) > 0) && e.variant !== 'roofer';
 const gone = (e: Enemy) => isDead(e) || !!e.escaped;
@@ -30,11 +34,18 @@ export function clearRoom(job: Job, index: number, weapon: WeaponId, most = 180,
   room.dread = null;
   const hs: Hero[] = Array.from({ length: party }, (_, k) => Object.assign(room.join('p' + k), { weapon, safeT: 0 }));
   let foes = room.enemies.filter(fighter);
+  const shields = foes.filter((e) => e.variant === 'shield').length;
   // Stuck on something (a wall, the water) or at one it can't get at (in a house): hop on, then give it up.
   const on = new Map<string, { id: number; best: number; at: number; since: number; hp: number }>();
   let skipped = 0, taken = 0;
   const pace = HERO.speed * (WEAPONS[weapon].speed ?? 1);
-  const seq = new Map<string, number>(), next = new Map<string, number>(), holdT = new Map<string, number>();
+  const seq = new Map<string, number>(), next = new Map<string, number>(), holdT = new Map<string, number>(), holdFor = new Map<string, number>();
+  // The knock-aside, as a player plays it: a Warrior or Healer blocks a shield-bearer's stab, and the counter after
+  // knocks the board aside (sim/board.ts); a kit whose hold is a blow (not a shot or a spell) and can't block
+  // charges it full. Between stabs, and with any other kit, it goes round the board.
+  const blocker = WEAPONS[weapon].cls === 'WARRIOR' || WEAPONS[weapon].cls === 'HEALER';
+  const knockKit = !blocker && !WEAPONS[weapon].heavy.shot && !WEAPONS[weapon].heavy.spell;
+  let knocks = 0;
   let t = 0;
   for (; t < most / TICK; t++) {
     const live = foes.filter((e) => !gone(e));
@@ -57,7 +68,10 @@ export function clearRoom(job: Job, index: number, weapon: WeaponId, most = 180,
       // Each new meaty sort's answer, as a player who knows it plays it (shared/meaty.ts): inside a Forker's
       // tines; to a Planker's side, round its door (aimed at a spot beside it, then at it once there).
       const reach = foe.variant === 'forker' ? Math.min(1.05, FORKER.inner - 0.2) : weapon === 'staff' ? 1.7 : 1.05;
-      const side = foe.variant === 'planker' && ((h.x - foe.x) * foe.fx + (h.y - foe.y) * foe.fy) / (dist || 1) > PLANKER.cone - 0.15;
+      // A shield-bearer's board up at it: round it too, or (a kit that can) knock it aside.
+      const boardUp = foe.variant === 'shield' && shieldFaces(foe, h.x - foe.x, h.y - foe.y, room.time);
+      const stab = boardUp && blocker && !!foe.attack && foe.act === 'attack' && foe.attack.t < foe.attack.windup && dist < 2.4;
+      const side = (foe.variant === 'planker' && ((h.x - foe.x) * foe.fx + (h.y - foe.y) * foe.fy) / (dist || 1) > PLANKER.cone - 0.15) || (boardUp && !knockKit && !stab);
       const sx = foe.x - foe.fy * 1.1 * (Math.sign(foe.fx * (h.y - foe.y) - foe.fy * (h.x - foe.x)) || 1), sy = foe.y + foe.fx * 1.1 * (Math.sign(foe.fx * (h.y - foe.y) - foe.fy * (h.x - foe.x)) || 1);
       // Out of a striped circle of the second wave's (a burst's, a Pouncer's landing), straight away from its middle.
       const out = danger(room.enemies, room.time).find((c) => Math.hypot(h.x - c.x, h.y - c.y) < c.r + HERO.radius + 0.3);
@@ -75,27 +89,29 @@ export function clearRoom(job: Job, index: number, weapon: WeaponId, most = 180,
         const step = Math.min(dist - reach * 0.8, pace * TICK);
         (h.x += ux * step), (h.y += uy * step);
       }
-      const i = { ...NO_INTENT, ax: ux, ay: uy };
+      const i = { ...NO_INTENT, ax: ux, ay: uy, block: stab };
       const crowd = live.filter((e) => e.alert !== false && d(e) < 2.6).length;
       const held = holdT.get(h.id);
       if (held !== undefined) {
-        // Holding for the staff's spell: let go once it's drawn.
-        if (room.time - held < (WEAPONS.staff.draw ?? 1) + 0.05) Object.assign(i, { attack: true, attackSeq: seq.get(h.id) ?? 0 });
+        // Holding for the staff's spell, or a full charge: let go once it's drawn.
+        if (room.time - held < (holdFor.get(h.id) ?? 0)) Object.assign(i, { attack: true, attackSeq: seq.get(h.id) ?? 0 });
         else holdT.delete(h.id);
       } else if (h.act === 'stun' && room.time >= (next.get(h.id) ?? 0)) {
         // Netted (or held): struggle, as a player mashes.
         seq.set(h.id, (seq.get(h.id) ?? 0) + 1), next.set(h.id, room.time + 0.12);
-      } else if (dist < reach + 0.4 && room.time >= (next.get(h.id) ?? 0)) {
+      } else if (!stab && dist < reach + 0.4 && room.time >= (next.get(h.id) ?? 0)) {
         seq.set(h.id, (seq.get(h.id) ?? 0) + 1);
         const spell = weapon === 'staff' && crowd >= 3 && !h.winded && h.stamina >= SPELL.staff;
-        if (spell) holdT.set(h.id, room.time), Object.assign(i, { attack: true });
+        const knock = !spell && boardUp && knockKit && !h.winded;
+        if (spell || knock) holdT.set(h.id, room.time), holdFor.set(h.id, spell ? (WEAPONS.staff.draw ?? 1) + 0.05 : chargeFull(WEAPONS[weapon], h) + 0.03), Object.assign(i, { attack: true });
         next.set(h.id, room.time + (weapon === 'staff' ? 0.5 : 0.22));
       }
       room.setIntent(h.id, { ...i, attackSeq: seq.get(h.id) ?? 0 });
     }
     room.step();
+    knocks += room.events.filter((x) => x.k === 'boardout').length;
   }
-  return { secs: +(t * TICK).toFixed(1), kills: foes.filter((e) => isDead(e)).length, left: foes.filter((e) => !gone(e)).length, skipped, taken };
+  return { knocks, secs: +(t * TICK).toFixed(1), kills: foes.filter((e) => isDead(e)).length, left: foes.filter((e) => !gone(e)).length, skipped, taken, shields };
 }
 
 /** The second wave's striped circles coming: bursts on the floor, and a Pouncer's landing. */
@@ -116,12 +132,22 @@ export function sampleRooms(days: number, step = 2, from = 1): { job: Job; index
   return out;
 }
 
-/** Mean seconds to clear the sample with each kit. */
-export function clearTimes(rooms: { job: Job; index: number }[], kits: WeaponId[], most = 180): Record<string, { mean: number; worst: number; unclear: number; skipped: number; taken: number }> {
-  const out: Record<string, { mean: number; worst: number; unclear: number; skipped: number; taken: number }> = {};
+export interface Times { mean: number; worst: number; unclear: number; skipped: number; taken: number; rooms: number; knocks: number }
+
+const sum = (r: Clear[]): Times => ({ rooms: r.length, knocks: r.reduce((s, x) => s + x.knocks, 0), taken: Math.round(r.reduce((s, x) => s + x.taken, 0) / Math.max(1, r.length)), skipped: r.reduce((s, x) => s + x.skipped, 0), mean: +(r.reduce((s, x) => s + x.secs, 0) / Math.max(1, r.length)).toFixed(1), worst: Math.max(0, ...r.map((x) => x.secs)), unclear: r.filter((x) => x.left > 0).length });
+
+/** Every room of the board's ordinary jobs over those days that has a shield-bearer in it (they're rare: about one room in fifty). */
+export function shieldRooms(days: number, from = 1): { job: Job; index: number }[] {
+  return sampleRooms(days, 1, from).filter(({ job, index }) => runRoom({ ...newRun(job), index, party: 1 }).enemies.some((e) => e.variant === 'shield'));
+}
+
+/** Mean seconds to clear the sample with each kit; `shields` the same over only the rooms with a shield-bearer. */
+export function clearTimes(rooms: { job: Job; index: number }[], kits: WeaponId[], most = 180, shields?: Record<string, Times>): Record<string, Times> {
+  const out: Record<string, Times> = {};
   for (const k of kits) {
     const r = rooms.map(({ job, index }) => clearRoom(job, index, k, most));
-    out[k] = { taken: Math.round(r.reduce((s, x) => s + x.taken, 0) / r.length), skipped: r.reduce((s, x) => s + x.skipped, 0), mean: +(r.reduce((s, x) => s + x.secs, 0) / r.length).toFixed(1), worst: Math.max(...r.map((x) => x.secs)), unclear: r.filter((x) => x.left > 0).length };
+    out[k] = sum(r);
+    if (shields) shields[k] = sum(r.filter((x) => x.shields > 0));
   }
   return out;
 }

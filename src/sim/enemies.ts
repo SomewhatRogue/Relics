@@ -305,7 +305,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   let diff = want - have;
   diff = Math.atan2(Math.sin(diff), Math.cos(diff));
   const slow = (e.chillUntil > now ? FROST.slow : 1) * (e.snareUntil > now ? NET.slow : 1) * (e.roused ? DRUMMER.rouse.pace : 1) * ((e.hobbleUntil ?? -9) > now ? HOBBLE.slow : 1) * ((e.caltropUntil ?? -9) > now ? CALTROPS.slow : 1) * (e.fed ? MEAL.fed.pace : 1) * quickPace(e);
-  const rate = e.variant === 'log' ? LOGS.turn : e.variant === 'planker' ? PLANKER.turn : spec.turn, turn = Math.max(-rate * slow * dt, Math.min(rate * slow * dt, diff)), na = have + turn;
+  // (A Planker and a shield-bearer turn their boards slowly: get round them.)
+  const rate = e.variant === 'log' ? LOGS.turn : e.variant === 'planker' ? PLANKER.turn : e.variant === 'shield' ? VARIANTS.shield.turn : spec.turn, turn = Math.max(-rate * slow * dt, Math.min(rate * slow * dt, diff)), na = have + turn;
   e.fx = Math.cos(na);
   e.fy = Math.sin(na);
   const facing = e.fx * ux + e.fy * uy;
