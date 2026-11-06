@@ -711,6 +711,12 @@ Every weapon gets a quick attack, a charged attack, a perfect-timed hit and a re
 - Mage: big spells cost stamina ("magic"), like the blink. Make them impactful.
 - Flail: spin it up and release for a bit more reach, standing still. Standard hits shove goblins a little, never over a shield. Perfect hits stun.
 
+## Queued (Kyle, 2026-11-05)
+
+- Clerics can raise a friend who is fully down (out of the job) in multiplayer. The cost: the raised hero's
+  max health is lower for the rest of that job.
+- The upgrades UI (knacks and techniques) is confusing: make it screens, visual, easy to understand and pick.
+
 ## Next after parry's removal: guard upgrades (Kyle, 2026-11-05)
 
 Block grows like the dodge does (the Ranger's dodge leaves a trap): techniques at levels 5 and 10.
