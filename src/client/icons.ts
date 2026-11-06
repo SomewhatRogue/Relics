@@ -12,6 +12,8 @@ export const ICONS: Record<string, Grid> = {
   heroes: ['.....rr.....', '....ssss....', '...sggggs...', '..sggggsss..', '..sgsssssd..', '..kkkkkkkk..', '..sgsssssd..', '..sgs.s.sd..', '..sgssssd...', '...sssssd...', '....dddd....', '............'],
   sound: ['.....yy.....', '....yYYy....', '...yYYyyy...', '...yYyyyy...', '...yYyyyy...', '..yYyyyyyy..', '..yyyyyyyy..', '.yyyyyyyyyy.', '.BBBBBBBBBB.', '.....yy.....', '............', '............'],
   music: ['......wwwww.', '......wwwww.', '......w...w.', '......w...w.', '......w...w.', '......w...w.', '......w...w.', '....www.www.', '...wwww.www.', '...wwww.ww..', '....ww......', '............'],
+  // VOICES: a head in profile, speaking.
+  voices: ['....www.....', '...wwwww....', '..wwwwwww.y.', '..wwwwww..y.', '..wwwww.y..y', '..wwwwww...y', '...wwwww.y.y', '...wwww..y..', '....www.....', '...wwwww....', '..wwwwwww...', '............'],
   tips: ['............', '....wwww....', '...ww..ww...', '.......ww...', '......ww....', '.....ww.....', '.....ww.....', '............', '.....ww.....', '.....ww.....', '............', '............'],
   view: ['............', '............', '....wwww....', '..ww....ww..', '.w...UU...w.', 'w...UkkU...w', '.w...UU...w.', '..ww....ww..', '....wwww....', '............', '............', '............'],
   // An expedition's MAP: a folded sheet, the way marked on it.
@@ -68,5 +70,5 @@ export const iconUrl = (id: IconId, tint?: string) => gridUrl('i-' + id, ICONS[i
 export function iconVars(): void {
   if (typeof document === 'undefined') return;
   const root = document.documentElement.style;
-  for (const id of ['pack', 'cog', 'chat', 'leave', 'heroes', 'sound', 'music', 'tips', 'view', 'heart', 'hollow', 'coin', 'skull', 'room', 'roomon', 'lit', 'buttons', 'map']) root.setProperty('--ic-' + id, `url(${iconUrl(id)})`);
+  for (const id of ['pack', 'cog', 'chat', 'leave', 'heroes', 'sound', 'music', 'voices', 'tips', 'view', 'heart', 'hollow', 'coin', 'skull', 'room', 'roomon', 'lit', 'buttons', 'map']) root.setProperty('--ic-' + id, `url(${iconUrl(id)})`);
 }

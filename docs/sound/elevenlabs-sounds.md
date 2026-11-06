@@ -204,6 +204,8 @@ Nothing plays a bed today: the world is silent between events apart from fire cr
 
 ## 4. Voices (5 townsfolk, 19 lines)
 
+Made 2026-11-05 as batch 2, not with these English lines: Kyle chose a made-up Germanic tongue with real voices instead. The tongue, the ten townsfolk and their lines are in `voice-tongue.md`; the voice descriptions below were the starting point.
+
 The bible doesn't set accents. My suggestion is one country with different valleys: rural northern and western English, tired farmers and soldiers, no posh voices and no fantasy flourish. Change any of them. Each description puts the language and accent first (ElevenLabs works best that way) and imitates no one.
 
 The lines are the game's own words, from `src/shared/` (Hew, Orla, Judd) and `src/client/copy.ts` and `townui.ts` (Odric, Isolde). The emphasis marks are taken out. **Leans on** is the word the game marks for weight.

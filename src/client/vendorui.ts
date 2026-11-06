@@ -14,6 +14,7 @@ import { card, compare } from './card';
 import { itemIcon } from './itemicons';
 import { goodsList, says, shopHead, wireGoods, type Good } from './shopui';
 import { SHOPW } from './shopwords';
+import { townVoice, voiceClock } from './voiceplay';
 import { VENDOR_PLACES } from './vendorwords';
 import { fenceBody, fenceTabs, wireFence, type Tab } from './fenceui';
 
@@ -71,6 +72,7 @@ export function openVendor(g: Game, panel: Panel, arg: number, tab: Tab = 'sale'
   const head = shopHead(pl, says(pl.who, pl.greet)) + (fence ? fenceTabs(tab) : '');
   if (fence && tab === 'fence') {
     clearInterval(ticking);
+    townVoice.hush(voiceClock());
     panel.show(pl.name, head + fenceBody(g));
     wireFence(g, again, () => syncPack(g));
   } else {

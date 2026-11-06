@@ -509,6 +509,9 @@ and burns out a goblin den on a job.
 
 ## Done
 
+- [x] Voices, batch 2 (Kyle, 2026-11-05): the townsfolk greet and say goodbye in a made-up Germanic
+      tongue (docs/sound/voice-tongue.md), heroes grunt, gasp, cry and breathe by their look, Clerics pray
+      on heals and smites; a VOICES switch (DECISIONS 2026-11-05)
 - [x] Slice 1, foundations: repo, Vite + TypeScript, Vercel config, Come Bye's relay and its tests
 - [x] Slice 2: the Warrior (3-hit combo, hold to block, tap to parry, counter, dodge roll, stamina,
       guard break), a goblin butcher (telegraphed cleave you can parry, striped slam you must roll),

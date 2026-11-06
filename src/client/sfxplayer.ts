@@ -7,6 +7,14 @@
  */
 import { SFX_BANK, sfxFiles, sfxGain, type SfxName } from './sfxbank';
 
+/** A bank of recorded sounds: their names, each one's files in take order, and its level. */
+export interface Bank<N extends string> {
+  names: readonly N[];
+  files: (name: N) => string[];
+  gain: (name: N) => number;
+}
+const SFX: Bank<SfxName> = { names: Object.keys(SFX_BANK) as SfxName[], files: sfxFiles, gain: sfxGain };
+
 export interface SfxIO {
   ac: BaseAudioContext;
   /** The effects bus (the master gain: mute and volume live there). */
@@ -33,16 +41,24 @@ interface Entry {
 }
 
 export function createSfxPlayer(io: () => SfxIO | null, bytes: (file: string) => Promise<ArrayBuffer>, rand: () => number = Math.random) {
-  const bank = new Map<SfxName, Entry>(), last = new Map<SfxName, number>();
+  return createSamplePlayer(SFX, io, bytes, rand, true);
+}
+
+/**
+ * A player for any bank. `warmAll`: after the first sound, load the whole bank behind it (the sound
+ * effects); otherwise each sound loads only when asked for (the voices, too many to hold decoded).
+ */
+export function createSamplePlayer<N extends string>(def: Bank<N>, io: () => SfxIO | null, bytes: (file: string) => Promise<ArrayBuffer>, rand: () => number = Math.random, warmAll = false) {
+  const bank = new Map<N, Entry>(), last = new Map<N, number>();
   let warming = false;
 
   /** Fetch and decode one sound's takes (once). Takes that fail are dropped; none at all and it stays synthesized. */
-  function load(name: SfxName, ac: BaseAudioContext): Promise<void> {
+  function load(name: N, ac: BaseAudioContext): Promise<void> {
     const have = bank.get(name);
     if (have) return have.done;
     const e: Entry = { state: 'loading', bufs: [], done: Promise.resolve() };
     const decode = (f: string) => bytes(f).then((b) => ac.decodeAudioData(b));
-    e.done = Promise.allSettled(sfxFiles(name).map(decode)).then((rs) => {
+    e.done = Promise.allSettled(def.files(name).map(decode)).then((rs) => {
       e.bufs = rs.flatMap((r) => (r.status === 'fulfilled' ? [r.value] : []));
       e.state = e.bufs.length ? 'ready' : 'failed';
     });
@@ -52,9 +68,9 @@ export function createSfxPlayer(io: () => SfxIO | null, bytes: (file: string) =>
 
   /** After the first sound asked for, load the rest quietly so they're ready when they come up. */
   function warm(ac: BaseAudioContext): void {
-    if (warming) return;
+    if (warming || !warmAll) return;
     warming = true;
-    const queue = Object.keys(SFX_BANK) as SfxName[];
+    const queue = [...def.names];
     const next = (): Promise<void> => {
       const n = queue.shift();
       return n ? load(n, ac).then(next) : Promise.resolve();
@@ -64,7 +80,7 @@ export function createSfxPlayer(io: () => SfxIO | null, bytes: (file: string) =>
   }
 
   /** A loaded take of `name`, or null (and its loading started). */
-  function buffer(name: SfxName, take?: number): AudioBuffer | null {
+  function buffer(name: N, take?: number): AudioBuffer | null {
     const x = io();
     if (!x) return null;
     const e = bank.get(name);
@@ -79,19 +95,22 @@ export function createSfxPlayer(io: () => SfxIO | null, bytes: (file: string) =>
     return e.bufs[i];
   }
 
-  /** Play one take now. False if it isn't ready (the caller plays its synth sound instead). */
-  function play(name: SfxName, o: PlayOpts = {}): boolean {
+  /** Play one take now: its length in seconds, or 0 if it isn't ready (the caller falls back). */
+  function start(name: N, o: PlayOpts = {}, out?: AudioNode): number {
     const buf = buffer(name, o.take), x = io();
-    if (!buf || !x) return false;
-    const { ac, out } = x, src = ac.createBufferSource(), g = ac.createGain(), vary = o.vary !== false;
+    if (!buf || !x) return 0;
+    const { ac, out: bus } = x, src = ac.createBufferSource(), g = ac.createGain(), vary = o.vary !== false;
     src.buffer = buf;
     src.playbackRate.value = (o.rate ?? 1) * (vary ? 0.96 + rand() * 0.08 : 1);
-    g.gain.value = sfxGain(name) * (o.vol ?? 1) * (vary ? 0.88 + rand() * 0.12 : 1);
-    src.connect(g).connect(out);
-    src.start(ac.currentTime, o.tail ? Math.max(0, buf.duration - o.tail) : 0);
-    return true;
+    g.gain.value = def.gain(name) * (o.vol ?? 1) * (vary ? 0.88 + rand() * 0.12 : 1);
+    src.connect(g).connect(out ?? bus);
+    const from = o.tail ? Math.max(0, buf.duration - o.tail) : 0;
+    src.start(ac.currentTime, from);
+    return (buf.duration - from) / src.playbackRate.value;
   }
+  /** Play one take now. False if it isn't ready (the caller plays its synth sound instead). */
+  const play = (name: N, o: PlayOpts = {}) => start(name, o) > 0;
 
-  const state = (name: SfxName) => bank.get(name)?.state ?? 'unloaded';
-  return { play, buffer, load: (name: SfxName) => (io() ? load(name, io()!.ac) : Promise.resolve()), state };
+  const state = (name: N) => bank.get(name)?.state ?? 'unloaded';
+  return { play, start, buffer, load: (name: N) => (io() ? load(name, io()!.ac) : Promise.resolve()), state };
 }

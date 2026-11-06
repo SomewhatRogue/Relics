@@ -98,6 +98,10 @@ function run(root: HTMLElement, beats: Beat[], done: () => void = () => {}): voi
   if (!ticking) (ticking = true), (last = performance.now()), requestAnimationFrame(tick);
 }
 
+/** A recorded voice is speaking (voiceplay.ts): the typed letters stay quiet until it's done. */
+let hushUntil = 0;
+export const hushBlips = (seconds: number) => void (hushUntil = Math.max(hushUntil, performance.now() + seconds * 1000));
+
 /** Lay out a line's letters in `el`, all hidden; the beat that types them. */
 function letters(el: HTMLElement, text: string, who: string): Beat {
   el.innerHTML = markup(text);
@@ -107,7 +111,7 @@ function letters(el: HTMLElement, text: string, who: string): Beat {
   const letter = (i: number, loud: boolean) => {
     const c = chars[i], t = c.textContent ?? '';
     c.classList.add('in');
-    if (loud && voice && /[a-z0-9]/i.test(t) && i % 2 === 0) blip(voice[0], voice[1]);
+    if (loud && voice && /[a-z0-9]/i.test(t) && i % 2 === 0 && performance.now() >= hushUntil) blip(voice[0], voice[1]);
   };
   return { show: () => {}, waits, letter, after: GAP };
 }

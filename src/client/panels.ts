@@ -39,7 +39,11 @@ export class Panel {
     typeIn(this.el.querySelector<HTMLElement>('.body')!);
   }
 
+  /** Told when the panel closes (the townsfolk's goodbye: townvoice.ts). */
+  onHide: (() => void) | null = null;
+
   hide(): void {
+    if (this.open) this.onHide?.();
     finish(this.el);
     forget();
     this.el.hidden = true;

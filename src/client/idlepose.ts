@@ -24,6 +24,9 @@ const ease = (k: number) => (k <= 0 ? 0 : k >= 1 ? 1 : k * k * (3 - 2 * k));
 const hold = (t: number, t0: number, t1: number, inT = 0.3, outT = 0.3) => ease((t - t0) / inT) * ease((t1 - t) / outT);
 const pulse = (t: number, hz: number) => (Math.sin(t * Math.PI * 2 * hz) > 0 ? 1 : 0);
 
+/** Told of each idle frame posed (herovoice.ts laughs on the floor); kept a hook so posing stays sound-free. */
+export const idleHook: { fn: ((h: Hero, id: string, t: number, now: number) => void) | null } = { fn: null };
+
 /** The idle or pet this hero is in now, posed onto `pz` (null: neither). */
 export function idlePose(h: Hero, pz: BodyPose, now: number): IdleOut | null {
   // (Both watched every frame, so a blow or a step ends them even where nothing idle is drawn.)
@@ -40,6 +43,7 @@ export function idlePose(h: Hero, pz: BodyPose, now: number): IdleOut | null {
   }
   if (!f) return null;
   O.f = f;
+  idleHook.fn?.(h, f.def.id, f.t, now);
   body(f, h, pz, f.t, f.side);
   return O;
 }
