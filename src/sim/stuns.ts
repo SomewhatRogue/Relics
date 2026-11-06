@@ -31,3 +31,10 @@ export function stun(e: Enemy, by: string | undefined, now: number, time: number
   if (still) e.kvx = e.kvy = 0;
   return true;
 }
+
+/** A relic's blow takes the goblin's turn whatever (2026-11-05: few uses, each one sure): never capped,
+ *  never shrugged off, a striped blow lost with the rest. Marks nobody's turn, so the hero's own stuns
+ *  after it aren't held back either. */
+export function relicStun(e: Enemy, now: number, time: number, ev?: FightEvent[], act: 'stunned' | 'flinch' | 'pinned' = 'stunned', still = false): void {
+  stun(e, undefined, now, time, ev, act, still);
+}

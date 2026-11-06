@@ -21,7 +21,7 @@ import { wayGot, wayLine } from '../shared/waypay';
 import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
 import { buyDrill, learnLesson } from '../shared/training';
 import { knowsSkill, learnSkill } from '../shared/skillteach';
-import { ARRIVE_SAFE, HOUSEBURN, PARTY, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, FOUND_RELICS, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, sellValue, giveValue, TIER_WANT, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
+import { ARRIVE_SAFE, HOUSEBURN, PARTY, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, sellValue, giveValue, TIER_WANT, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
 import { ArenaRoom } from '../sim/room';
 import { lessonOf, newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
 import { elementTaught } from '../sim/woodelement';
@@ -37,8 +37,8 @@ import { NO_INTENT, knows, type FightEvent, type Hero, type Intent, type Learned
 import { players } from '../sim/party';
 import { load, store, type Save } from './save';
 import { treasure } from '../shared/treasure';
-import { makeRelic, type RelicItem } from '../shared/relicitems';
-import { deepRelic } from '../shared/church';
+import { makeRelic, relicMax, type RelicItem } from '../shared/relicitems';
+import { wonRelics } from '../shared/relicaward';
 /** What a piece of treasure that won't fit in the pack fetches. */
 const TREASURE_SOLD = 20;
 import { rebase } from '../sim/rebase';
@@ -70,7 +70,7 @@ interface JobSave { run: Run; room: Record<string, unknown>; houses?: SavedHouse
  * gold); or gone early from a party, by LEAVE or cut off from it (the gold picked up while with them).
  */
 export type How = 'won' | 'beaten' | 'left' | 'dropped';
-export interface Result { won: boolean; how: How; half: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number; relic?: RelicItem; treasure: Item[]; sold: Item[]; lost?: number; /** Prisoners led off out of reach (layout 4). */ ledoff?: number; /** The Staithe's folk lost off the jetty (sim/staithe.ts). */ netlost?: number; /** The way taken at a fork and what it paid (shared/waypay.ts). */ way?: string; /** Jobs of the church's light left, if it went on this one. */ lit?: number; /** What happened, for the recap (recaptally.ts). */ recap?: Recap }
+export interface Result { won: boolean; how: How; half: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number; relic?: RelicItem; /** Every relic won at the job's end (recap's RELICS row). */ relics?: RelicItem[]; treasure: Item[]; sold: Item[]; lost?: number; /** Prisoners led off out of reach (layout 4). */ ledoff?: number; /** The Staithe's folk lost off the jetty (sim/staithe.ts). */ netlost?: number; /** The way taken at a fork and what it paid (shared/waypay.ts). */ way?: string; /** Jobs of the church's light left, if it went on this one. */ lit?: number; /** What happened, for the recap (recaptally.ts). */ recap?: Recap }
 /** A leader back after a reload waits this long (the room held) for a friend to answer before the job's given up. */
 const HOLD = 10;
 /** Something you can use where you stand: a spot, a person, or a door. */
@@ -941,9 +941,11 @@ export class Game {
     // Grown on the way home (the job's pay): lit up back in Wickhold.
     if (levels > this.grown) this.levelSeq += levels - this.grown;
     this.grown = 0;
-    // The bottom of a deep dive: a relic pried out of the butcher (a kind you don't have, else any; the first is carried at once).
-    const relic = won && run.job.deep ? deepRelic(p.relics, FOUND_RELICS, run.job.seed * 977 + p.runs * 31 + p.xp) : undefined;
-    if (relic) (p.relics.push(relic), (p.relic ||= relic.id));
+    // The sure relics (shared/relicaward.ts): a curated zone's climax (already noted on the run), else a
+    // story mission, the expedition's beacon or a deep dive's butcher; each player's own roll. The first
+    // is carried at once if nothing is.
+    const relics = won ? wonRelics(run, run.job.seed * 977 + p.runs * 31 + p.xp, p.relics) : [], relic = relics[0];
+    for (const r of relics) (p.relics.push(r), (p.relic ||= r.id));
     // The church's light: one job less (any job, won or not).
     const lit = p.lit ?? 0;
     if (lit > 0) p.lit = lit - 1;
@@ -951,7 +953,7 @@ export class Game {
     const found = won ? treasure(run.job, p.cls, p.id, p.runs, crowd, (run.sides ?? 0) + (way?.treasure ?? 0)) : [], kept = found.slice(0, Math.max(0, bagSize(p) - p.bag.length)), sold = found.slice(kept.length);
     p.bag.push(...kept);
     p.gold += sold.length * TREASURE_SOLD;
-    this.result = { won, how, half, job: run.job, gold, xp, rescued, levels, relic, treasure: kept, sold, lost: run.lost ?? 0, ledoff: run.ledoff ?? 0, netlost: run.netlost ?? 0, way: way ? wayLine(way) : undefined, lit: lit > 0 ? p.lit : undefined, recap };
+    this.result = { won, how, half, job: run.job, gold, xp, rescued, levels, relic, relics, treasure: kept, sold, lost: run.lost ?? 0, ledoff: run.ledoff ?? 0, netlost: run.netlost ?? 0, way: way ? wayLine(way) : undefined, lit: lit > 0 ? p.lit : undefined, recap };
     this.run = null;
     // Paid: marked so in the same store as the pay (the give below), then the tallies let go.
     if (key) p.paid = [...(p.paid ?? []), key].slice(-12);
@@ -1101,6 +1103,9 @@ export class Game {
       h.relics = abilitiesOf(this.profile.cls, 'javelin', this.profile.skill);
       if (!knows(h, 'skill')) h.relic = 'javelin';
     }
+    // Practice throws in the wood are free: the javelin is topped up after every step, so it never fades
+    // here and every hero reaches Wickhold with it full (the lore keeper, 2026-11-05).
+    for (const r of h.found) r.charge = relicMax(r);
     if (w.done) this.finishWood();
     return ev;
   }

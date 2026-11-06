@@ -31,7 +31,7 @@ export function hangmansWood(day: number): Job {
   const rng = new Rng(day * 2311 + 29), seed = day * 433 + 151, night = rng.next() < 0.5;
   const place = { ...PLACES.find((p) => p.name === "Hangman's Wood")!, ruin: 2 };
   return {
-    id: `d${day}-wood`, place, objective: 'hunt', twist: night ? 'night' : 'none', time: rollTime(seed, night), rooms: 1, size: 'medium', boss: 'HEMPEN', seed, exped: 'hangmans',
+    id: `d${day}-wood`, place, objective: 'hunt', twist: night ? 'night' : 'none', time: rollTime(seed, night), rooms: 1, size: 'medium', boss: 'HEMPEN', seed, exped: 'hangmans', zone: 'hangman',
     reward: payFor(4, 2, night, 'medium') + 40, title: WOOD_POST.title, text: WOOD_POST.text,
   };
 }

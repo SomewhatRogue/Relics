@@ -2,7 +2,8 @@
  * Shots and thrown things. Arrows stop in the first body (a full longbow draw pierces them all) and
  * stick in walls; crossbow bolts hurl; sparks, orbs and lances are spells. A smite waits over its
  * spot, then falls. The hunter's net opens on the first goblin it reaches. The lodestone is lobbed,
- * lands, drags goblins inward for a while, then bursts.
+ * lands, takes every goblin near and draws them in, then bursts. A relic's blast throws every goblin
+ * as hard whatever it weighs and knocks it down (sim/stuns.ts relicStun), and never touches a friend.
  */
 import { HUNGRY_FX } from './hungry';
 import { collide } from '../shared/arena';
@@ -25,11 +26,11 @@ import { blastBlocks } from './buildings';
 import { sparkCatch } from './catching';
 import { blastSurvivors, shotSurvivor, survivorIn } from './survivorhits';
 import type { Bolt, Enemy, Hero } from './types';
-import { hobble, spare } from './foundrelics';
+import { hobble, seekShot, spare } from './foundrelics';
 import { envenom } from './venom';
 import { markShot, perfectStrike, spent } from './rangershots';
 import { interrupt, windingUp } from './spells';
-import { mayStun, stun } from './stuns';
+import { mayStun, relicStun, stun } from './stuns';
 import { boardFor, boardMult } from './board';
 
 let nextId = 1;
@@ -74,7 +75,7 @@ export function throwNet(h: Hero, el: Augment): Bolt {
 
 export function lobLodestone(h: Hero, dist: number, el: Augment): Bolt {
   const t = spot(h, dist);
-  return { ...base(h, 'lodestone', el), x: h.x, y: h.y, tx: t.x, ty: t.y, flight: LODESTONE.flight, dmg: LODESTONE.dmg, knock: 6, burst: LODESTONE.burst };
+  return { ...base(h, 'lodestone', el), x: h.x, y: h.y, tx: t.x, ty: t.y, flight: LODESTONE.flight, dmg: LODESTONE.dmg, knock: 6, burst: LODESTONE.burst, stun: LODESTONE.stun };
 }
 
 /** Everything within the bolt's burst of (x, y) is hit and thrown outward (and stunned, by a smite). */
@@ -92,9 +93,12 @@ export function blast(w: World, b: Bolt, x: number, y: number): void {
     if (damage(e, b.dmg, w.now, w.ev, { heavy: true, flinch: 0.5, mult: true, brutal: b.traits.includes('brutal'), how: 'burst', dx: e.x - x, dy: e.y - y, src: b.kind, el: b.el })) continue;
     // A smite on a frozen small one sends it skidding off from where it fell (sim/iceslide.ts).
     if (wasFrozen && b.kind === 'smite' && fling(e, b.owner, d > 0.05 ? e.x - x : b.dx, d > 0.05 ? e.y - y : b.dy, true, w.now, w.ev)) continue;
-    if (e.act !== 'pinned') shove(e, d > 0.05 ? (e.x - x) / d : b.dx, d > 0.05 ? (e.y - y) / d : b.dy, b.knock, e.weight);
+    // A relic's blast throws a butcher as far as a scrapper (one that can't be moved stays put).
+    const heft = b.relic && Number.isFinite(e.weight) ? 1 : e.weight;
+    if (e.act !== 'pinned') shove(e, d > 0.05 ? (e.x - x) / d : b.dx, d > 0.05 ? (e.y - y) / d : b.dy, b.knock, heft);
     interrupt(e, winding, !!b.breaks, b.owner, w.now, w.ev);
-    if (b.stun && e.act !== 'pinned' && !(b.relic && e.weight > 1)) stun(e, b.owner, w.now, b.stun, w.ev);
+    if (b.relic && b.stun && e.act !== 'pinned' && !isDummy(e)) relicStun(e, w.now, b.stun, w.ev);
+    else if (b.stun && e.act !== 'pinned') stun(e, b.owner, w.now, b.stun, w.ev);
     if (wasFrozen && b.knock >= 8) shatter(e, w.now, w.ev);
     else shotElement(w, b, e);
   }
@@ -177,8 +181,9 @@ export function stepBolt(b: Bolt, w: World, dt: number): boolean {
     w.ev.push({ k: 'well', x: b.x, y: b.y });
     return true;
   }
-  // A Ranger's arrow or bolt bends a little toward their MARK (sim/mark.ts).
-  bendShot(b, w.enemies, w.now, dt);
+  // A Ranger's arrow or bolt bends a little toward their MARK (sim/mark.ts); a wind-up bow's flies at its goblin.
+  if (b.seek) seekShot(b, w.enemies);
+  else bendShot(b, w.enemies, w.now, dt);
   const steps = 4, d = (b.speed * dt) / steps;
   for (let s = 0; s < steps; s++) {
     const want = { x: b.x + b.dx * d, y: b.y + b.dy * d }, p = { ...want };
@@ -226,15 +231,21 @@ export function stepBolt(b: Bolt, w: World, dt: number): boolean {
   return true;
 }
 
-/** The landed lodestone drags goblins toward it (the lighter, the faster), then bursts. */
+/** The landed lodestone takes every goblin in reach, whatever it weighs: held helpless and drawn in
+ *  at a steady pace (none slips out), then it bursts and knocks them all down. */
 function pull(b: Bolt, w: World, dt: number): boolean {
   b.life -= dt;
   for (const e of w.enemies) {
-    if (isDead(e) || e.act === 'carried' || e.act === 'pinned' || !isFinite(e.weight)) continue;
+    if (isDead(e) || isDummy(e) || e.act === 'carried' || e.act === 'pinned' || !isFinite(e.weight)) continue;
     const dx = b.x - e.x, dy = b.y - e.y, d = Math.hypot(dx, dy);
-    if (d > LODESTONE.radius || d < 0.35) continue;
-    e.kvx += ((dx / d) * LODESTONE.pull * dt) / e.weight;
-    e.kvy += ((dy / d) * LODESTONE.pull * dt) / e.weight;
+    if (d > LODESTONE.radius + e.radius) continue;
+    // Taken: its turn is the stone's until the burst (once each; the burst knocks it down after).
+    if (!b.hit.includes(e.id)) b.hit.push(e.id), (e.lastBy = b.owner), relicStun(e, w.now, b.life + 0.1, w.ev, 'stunned', true);
+    if (d < 0.35) continue;
+    const step = Math.min(d - 0.3, LODESTONE.draw * dt);
+    e.x += (dx / d) * step;
+    e.y += (dy / d) * step;
+    collide(e, e.radius);
   }
   if (b.life > 0) return true;
   blast(w, b, b.x, b.y);

@@ -8,8 +8,8 @@ import { ExpedUi } from './expedui';
 import { expedition, goalWords, hangmansWood } from '../shared/expedjob';
 import { spellCost } from '../sim/spells';
 import { carriedItem } from '../sim/charge';
-import { isDark, relicFill } from '../shared/relicitems';
-import { fillCol } from './reliccard';
+import { isDark } from '../shared/relicitems';
+import { chargePips } from './reliccard';
 import { RELICW } from './relicwords';
 import { hookLitBadge } from './litbadge';
 import { setVotes } from './voteboards';
@@ -314,9 +314,9 @@ function hud(now: number): void {
   const own = sg && game.taught().includes('sign') ? (input.touch ? '' : SIGN_KEY + ' ') + SIGNS[sg].name + (sgl > 0 ? ' ' + sgl.toFixed(1) : '') + '   ' : '';
   $('.rlc').textContent = own + (known ? (input.touch ? '' : 'E ') + tag(skill) : '');
   $('.rlc').dataset.el = me.augments[skill];
-  // The relic carried: its charge as a bar (gold, amber, low, or DARK and greyed).
-  const it = relic ? carriedItem(me) : undefined, chg = it ? Math.round(relicFill(it) * 100) + '%' : '', chgc = it ? fillCol(it) : '';
-  $('.rcd').innerHTML = relic ? (input.touch ? '' : 'R ') + (it && isDark(it) ? RELICS[relic].short + ' ' + RELICW.dark : tag(relic)) + (it ? `<i class="rchgl" style="--chg:${chg};--chgc:${chgc}"></i>` : '') : '';
+  // The relic carried: its uses as pips (gold, amber, the last one red-brown, or DARK and greyed).
+  const it = relic ? carriedItem(me) : undefined;
+  $('.rcd').innerHTML = relic ? (input.touch ? '' : 'R ') + (it && isDark(it) ? RELICS[relic].short + ' ' + RELICW.dark : tag(relic)) + (it ? chargePips(it) : '') : '';
   $('.rcd').classList.toggle('wait', !!relic && (left(relic) > 0 || (!!it && isDark(it))));
   $('.litbadge').hidden = !me.lit;
   game.settleCouncil();

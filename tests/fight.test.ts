@@ -338,14 +338,17 @@ describe('relics', () => {
     expect(h.relicReady.javelin).toBeGreaterThan(room.time);
   });
 
-  it('the javelin sticks in the butcher instead', () => {
+  // (Since 2026-11-05 the javelin skewers a butcher like anything else: it used to stick in one.)
+  it('the javelin carries the butcher too, and pins it to the wall', () => {
     const { room, h, t } = onTarget(0);
     Object.assign(t, { x: 9, y: 5 });
     Object.assign(h, { x: 9, y: 9 });
     arm(h, 'javelin');
     room.setIntent('me', intent({ relicSeq: 1, ay: -1 }));
-    run(room, ticks(0.8));
-    expect(room.javelins[0]?.state).toBe('body');
+    run(room, ticks(1.2));
+    expect(room.javelins[0]?.state).toBe('wall');
+    expect(room.javelins[0]?.held).toContain(t.id);
+    expect(t.act).toBe('pinned');
     expect(t.hp).toBeLessThan(t.maxHp);
   });
 

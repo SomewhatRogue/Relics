@@ -78,7 +78,7 @@ export function layScenes(k: Kit, S: Spine, job: Job): Laid {
   mark(k, 'blood', tree.x + 0.3, tree.y + 0.15, 1.6, 0.7);
   flocks.push({ x: tree.x + 1.1, y: tree.y + 0.8 });
   const bp = pack++;
-  const hempen = add(k, { kind: 'butcher', x: hm.x + 0.6, y: hm.y - 0.4, hp: HEMPEN.hp, name: 'HEMPEN', noose: true, sure: true, pack: bp });
+  const hempen = add(k, { kind: 'butcher', x: hm.x + 0.6, y: hm.y - 0.4, hp: HEMPEN.hp, name: 'HEMPEN', noose: true, zoned: true, pack: bp });
   for (const s of [-1, 1]) add(k, { kind: 'scrapper', variant: 'snarer', role: 'snarer', pack: bp, x: hm.x + s * 3, y: hm.y - 2.2 });
   band(k, hm, 3 + rng.int(2), 1.6, 3.2).forEach((i) => (k.foes[i].pack = bp));
   add(k, { kind: 'scrapper', x: hm.x - 4.5, y: hm.y + 3.6, z: 1, pack: pack++, role: 'fodder', task: { k: 'perch' } });

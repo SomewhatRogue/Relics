@@ -218,7 +218,7 @@ export class ArenaRoom {
         shapeFoe(e);
         Object.assign(e, { respawns: false, name: f.name, bow: f.bow, z: f.z ?? 0, alert: f.awake ?? false, feeding: f.feeding });
         if (f.noose) e.noose = true;
-        if (f.sure) e.sure = true;
+        if (f.zoned) e.zoned = true;
         if (f.task) e.task = structuredClone(f.task);
         if (f.haul) e.haul = { ...f.haul };
         if (f.wave) e.wave = f.wave;
@@ -382,7 +382,7 @@ export class ArenaRoom {
     this.snares = this.snares.filter((s) => stepSnare(s, this.enemies, this.time, this.events));
     // The movement ladder: what a dodge (or a Warrior's taunt) does now, and caltrops on the floor (sim/ladder.ts).
     stepLadder(this.heroes, this, w);
-    this.javelins = this.javelins.filter((j) => stepJavelin(j, this.enemies, this.time, TICK, this.events, hit));
+    this.javelins = this.javelins.filter((j) => stepJavelin(j, this.enemies, this.time, TICK, this.events, hit, this.heroes));
     this.hooks = this.hooks.filter((k) => stepHook(k, this.heroes, this.enemies, this.time, TICK, this.events, hit, w));
     this.bolts = this.bolts.filter((b) => (b.kind === 'flask' ? stepFlask(b, w, TICK, this.smokes) : stepBolt(b, w, TICK)));
     // Who hears a drum this tick (sim/backline.ts), before anyone moves.

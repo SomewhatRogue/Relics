@@ -17,6 +17,7 @@ import { dreadFor } from './dreadplace';
 import { expedRoom } from './expedroom';
 import { EXPED, WEAPONS } from '../shared/tuning';
 import { blankScore, foldBoard, type Board, type Score } from './score';
+import type { RelicWon } from '../shared/relicaward';
 
 export interface Run {
   job: Job;
@@ -58,6 +59,8 @@ export interface Run {
   netlost?: number;
   /** What each hero in the party did, by hero id (sim/score.ts): the recap's side by side. */
   board?: Board;
+  /** Relics awarded on the run so far (shared/relicaward.ts awardRelic, e.g. at a zone's climax). */
+  relicsWon?: RelicWon[];
 }
 
 export const MAX_DOWNS = 3;

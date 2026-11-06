@@ -75,6 +75,8 @@ export interface Job {
   layout?: 2 | 3 | 4;
   /** An expedition (shared/expedjob.ts): one big map of the Barrowfields instead of rooms. */
   exped?: 'barrowfields' | 'hangmans';
+  /** A curated zone (docs/plans/atlas.md): its climax's relic, awarded once at the job's end (shared/relicaward.ts ZONE_RELICS). */
+  zone?: 'hangman';
 }
 
 const BOSSES = ['MAWL', 'SKARN', 'OLD KNUCKLES', 'OLD SPOON', 'GUTCHAIN', 'MOTHER RUST'];

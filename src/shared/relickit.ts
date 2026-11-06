@@ -6,26 +6,28 @@
  */
 
 /** The gall bomb: lobbed to a spot (`range`, else `fallback` ahead) over `flight`, it bursts `radius`
- *  across: `dmg`, everything thrown out (`knock`, the heavy sliding less), barrels and crates burst,
- *  small goblins dazed `stun`. */
-export const BOMB = { cooldown: 14, windup: 0.2, recover: 0.3, range: 7, fallback: 4.5, flight: 0.55, radius: 2.2, dmg: 16, knock: 15, stun: 1.0 };
+ *  across: `dmg`, every goblin thrown out (`knock`, as hard whatever it weighs) and knocked down `stun`,
+ *  barrels and crates burst. Since 2026-11-05 nothing in it shrugs it off: few uses, each one sure. */
+export const BOMB = { cooldown: 5, windup: 0.2, recover: 0.3, range: 7, fallback: 4.5, flight: 0.55, radius: 2.6, dmg: 22, knock: 18, stun: 1.3 };
 
 /** The wind-up bow: set down where you stand, it shoots the nearest goblin within `radius` every
- *  `every` for `time`, then winds down. Each bolt `dmg` and `knock`, and hobbles (`slow` pace) for `hobble`. */
-export const SENTRY = { cooldown: 18, windup: 0.3, recover: 0.2, radius: 5.5, time: 7, every: 0.55, dmg: 6, knock: 5, speed: 18 };
+ *  `every` for `time`, then winds down. Each bolt flies at its goblin whatever it does (it never
+ *  misses), `dmg` and `knock`, and hobbles it. */
+export const SENTRY = { cooldown: 6, windup: 0.3, recover: 0.2, radius: 6, time: 9, every: 0.45, dmg: 8, knock: 5, speed: 24 };
 
 /** Hobbled by a relic: moves and turns at `slow` of its pace for `time`. */
-export const HOBBLE = { slow: 0.6, time: 1.6 };
+export const HOBBLE = { slow: 0.35, time: 2 };
 
-/** The bone bell: rung at your feet. Every goblin within `radius` flinches (small ones `small`
- *  seconds, big ones `big`) and drops a wound-up blow unless it's a striped one; small ones are pushed
+/** The bone bell: rung at your feet. Every goblin within `radius` drops whatever blow it had wound up,
+ *  striped ones too, and reels (small ones `small` seconds, big ones `big`); small ones are pushed
  *  back `push`. Friends within reach are quickened: `quick` times the pace for `quickTime`. */
-export const BELL = { cooldown: 14, windup: 0.15, recover: 0.3, radius: 3.4, small: 1.4, big: 0.6, dmg: 4, push: 7, quick: 1.25, quickTime: 4 };
+export const BELL = { cooldown: 5, windup: 0.15, recover: 0.3, radius: 4, small: 1.6, big: 1.0, dmg: 6, push: 8, quick: 1.25, quickTime: 4 };
 
 /** The butcher's knuckle: a blow of force down a line `length` long and `width` wide from your front.
- *  Everything in it takes `dmg` and is thrown back `knock` (small ones off their feet, stunned `stun`);
- *  barrels and crates in it fly; and every goblin it hit is marked (MARK). */
-export const KNUCKLE = { cooldown: 12, windup: 0.25, recover: 0.3, length: 5, width: 0.9, dmg: 12, knock: 16, stun: 0.9, propDmg: 20 };
+ *  Every goblin in it, whatever it weighs, takes `dmg`, is knocked off its feet for `stun` and thrown
+ *  back `knock` (a butcher as far as a scrapper); barrels and crates in it fly; and every goblin it
+ *  hit is marked (MARK). */
+export const KNUCKLE = { cooldown: 5, windup: 0.25, recover: 0.3, length: 6, width: 1.1, dmg: 18, knock: 20, stun: 1.4, propDmg: 30 };
 
 /** Marked by a relic: the next blow from anyone lands `mult` times as hard (within `time`). */
 export const MARK = { mult: 1.5, time: 4 };

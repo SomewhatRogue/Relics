@@ -235,7 +235,7 @@ export const LINES = {
     step: "Red with a striped edge can't be blocked. Walk out before it lands.",
     block: 'Hold block while the red fills. Each block costs stamina (the yellow bar).',
     parry: 'Tap block while the red flashes white. A parry staggers the goblin, and your next blow does extra damage.',
-    relic: 'Press RELIC to throw it. It pins a small goblin to the nearest wall, then comes back to your hand.',
+    relic: 'Press RELIC to throw it. It skewers every goblin in its line and pins them all to the first wall it hits. It only has a few throws in it: the pips on the button are what\'s left.',
     grab: "Grab a crate or barrel, grab again to throw. Small goblins too: from behind, or while they reel, feed or swing. What you throw hurts what it hits.",
     backstab: 'Hits from behind do far more damage.',
     heavy: 'Hold attack and let go on the white flash. That full shot, a PERFECT, hits much harder.',

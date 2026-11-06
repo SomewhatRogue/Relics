@@ -262,6 +262,10 @@ most Want among the heroes is the one the bells don't spare).
 - The bone whistle: goblins stop to listen, since it sounds like one of theirs. Nothing on screen says why. Its callout is WHISTLE, never BELL. Bells stay the town's, kept for chapter 5.
 - Every relic spares friends (SPARES FRIENDS, SPARED), and relic telegraphs are gold, never the goblins' red.
 - Open for Kyle: does leaving a relic on the step lower the Want, as giving up hungry gear does? Does carrying or using relics grow it?
+- A relic holds only a few uses now, each one sure (recorded 2026-11-05; Kyle's call, lore keeper). A spent relic stays dark in the pack until the church recharges it, or Odric takes it on the step. It is never simply gone.
+- Relics that come from story jobs or the beacon are found where a butcher or a dead hero left them. Nothing grows them anywhere else.
+- Hempen: a named butcher of Hangman's Wood, the grappling hook grown in it (pending Kyle; the zone isn't merged, so no line names it yet).
+- Open for Kyle: does carrying a dark relic count toward the Want?
 
 ## Houses alight (recorded 2026-11-03; Kyle's call, lore keeper)
 - A woodpile, dark with oil, stacked against a side wall of a job house. Crouch at it (BURN) and the house goes up; the hungry inside come out burning. Nobody can go in once it's alight.

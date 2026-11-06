@@ -17,6 +17,7 @@ import { newRun, tally } from '../src/sim/run';
 import type { ArenaRoom } from '../src/sim/room';
 import { NO_INTENT, type FightEvent, type Hero } from '../src/sim/types';
 import { walkable } from './walk';
+import { ZONE_RELICS, jobRelic, wonRelics } from '../src/shared/relicaward';
 
 const job = (d = 3) => hangmansWood(d);
 /** A wood with its heroes (who can't be hurt unless `soft`), every goblin but the ones `keep` says gone. */
@@ -48,7 +49,7 @@ describe("Hangman's Wood", () => {
     expect(JSON.stringify(b.map.rounds)).not.toBe(JSON.stringify(a.map.rounds));
     expect(JSON.stringify(b.foes)).not.toBe(JSON.stringify(a.foes));
     expect(JSON.stringify(expedPlan(job(3)))).toBe(JSON.stringify(a));
-    expect(a.foes[a.goals[1].foe!]).toMatchObject({ kind: 'butcher', name: 'HEMPEN', noose: true, sure: true });
+    expect(a.foes[a.goals[1].foe!]).toMatchObject({ kind: 'butcher', name: 'HEMPEN', noose: true, zoned: true });
     expect(a.foes[a.sides[0].foe!].kind).toBe('brood');
     expect(a.foes.filter((f) => f.variant === 'snarer').length).toBe(3);
     expect(a.foes.filter((f) => f.task?.k === 'perch').length).toBe(3);
@@ -209,15 +210,30 @@ describe("Hangman's Wood", () => {
       const ev = step(room, 1.4);
       expect(ev.some((e) => e.k === 'hoisted')).toBe(true);
       expect(h.hoisted).toBe(true);
-      // Brought down (one blow off it at the last), it leaves a relic where it fell, whatever the dice.
+      // Brought down (one blow off it at the last): no relic dropped on the floor; it's the zone's, at the job's end.
       const r2 = wood(d, ['me'], (e) => e.name === 'HEMPEN'), b = r2.enemies[0], me = r2.heroes[0];
       Object.assign(b, { hp: 1, alert: false, feeding: true });
       Object.assign(put(me, b.x + 0.9, b.y), { fx: -1, fy: 0 });
       r2.setIntent('me', { ...NO_INTENT, ax: -1, ay: 0, attackSeq: 1 });
       step(r2, 1.2);
       expect(isDead(b)).toBe(true);
-      expect(r2.pickups.some((p) => p.relic)).toBe(true);
+      expect(r2.pickups.some((p) => p.relic)).toBe(false);
     }
+  });
+
+  it("the wood won gives its relic once, at the job's end: the grappling hook first, then the wood's pool", () => {
+    const run = newRun(job(3));
+    expect(run.job.zone).toBe('hangman');
+    const first = wonRelics(run, 77, []);
+    expect(first.map((r) => r.kind)).toEqual(['hook']);
+    expect(run.relicsWon).toHaveLength(1);
+    // Asked again for the same run: nothing more.
+    expect(jobRelic(run, 78, first)).toBeUndefined();
+    // Another run, the hook already owned: one from the wood's pool instead, still just the one.
+    const again = wonRelics(newRun(job(4)), 79, first);
+    expect(again).toHaveLength(1);
+    expect(ZONE_RELICS.hangman.pool).toContain(again[0].kind);
+    expect(again[0].kind).not.toBe('hook');
   });
 
   it('the same fight twice is the same, and a friend sees it from the patches with nothing new each tick', () => {

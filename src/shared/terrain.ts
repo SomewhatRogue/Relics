@@ -48,8 +48,8 @@ export interface Foe {
   kind: 'scrapper' | 'butcher' | 'spider' | 'brood' | 'nest'; wave?: number; x: number; y: number; hp?: number; name?: string; bow?: boolean; z?: number; awake?: boolean; feeding?: boolean; variant?: FoeVariant; pack?: number; role?: Role; more?: Role;
   /** Layout 4: what it's busy at when you come in (sim/tasks.ts), and a body it's hauling. */
   task?: import('./scenes4.js').FoeTask; haul?: { x: number; y: number; sack?: boolean };
-  /** Hangman's Wood: Hempen throws its noose (sim/hempen.ts), and leaves a relic where it falls, every time. */
-  noose?: boolean; sure?: boolean;
+  /** Hangman's Wood: Hempen throws its noose (sim/hempen.ts); its relic is the zone's, awarded at the job's end (shared/relicaward.ts), never a drop. */
+  noose?: boolean; zoned?: boolean;
 }
 /** Which way the party went at a fork. */
 export type RoadId = Road['road'];

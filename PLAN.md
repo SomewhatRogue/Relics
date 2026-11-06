@@ -12,6 +12,16 @@ off, the Gospel Oak burning like a chimney if he puts fire in it, the fire at th
 marks, and Hempen with its noose, a relic where it falls, then out by the north path, in about 6 to 7 minutes.
 Everything in DECISIONS 2026-11-05 ("the atlas"); shots `node scripts/atlas-look.cjs`. Open: every new name and line
 through the lore keeper and line editor; the numbers; Coldscar's Outer Ward is the next slice.
+**Relics made sure, with few uses** (Claude Opus 5.5, 2026-11-05; Kyle: "increase the power of those items (e.g.
+always skewers and shoves etc) but limited uses", relics from bigger quests). Built; waiting on Kyle's play. *Done
+when*, on his phone and laptop: the javelin skewers a whole line, butchers included, and pins them all to the wall;
+the hook drags any goblin to him knocked down, whatever his class; the knuckle and the bomb knock everything down and
+throw it, big ones as far; the lodestone takes everything near and the wind-up bow never misses; each relic holds 3 to
+6 uses, shown as pips on the RELIC button and the card, dimming a stage a use to LAST USE and then DARK (kept; the
+church relights plain ones); old saves' relics keep their share; named butchers drop them rarely (4 in 100) and the
+big jobs give one each (a zone's climax, a story job, the beacon, a deep dive), Hangman's Wood the grappling hook; the
+recap's RELICS row says "GRAPPLING HOOK (4 USES)". Everything in DECISIONS 2026-11-05 ("relics made sure"). Open: the
+new lines through the lore keeper and line editor; the uses and numbers once he's played.
 **The Staithe: NETS on layout 4, the gaffer and the skimmer, the Staithe on the Barrowfields** (Claude Opus 5.5,
 2026-11-05; Kyle approved the biomes proposal, rollout items 4 and 5: "the river in the middle should have maybe a
 fishing village in the center sometimes"). Built; waiting on Kyle's play. *Done when*, on his phone and laptop,
@@ -54,7 +64,8 @@ drag anywhere (phone) moves the sight, hold to draw and let go to loose; a tap i
 flat and hard, arrows drop and stick; head x2, body, legs slow; helmets fly off, shields splinter and break,
 torches drop and burn their bearers, archers shake his aim; cloud takes the moon and fog rolls in; anything
 reaching the ditch is THE WATCH HAVE IT; at 3:00 the card with his best and a little gold. Upright on his phone
-the tall field fills the screen (a goblin's head about 21 CSS px). Open: the rest of the words through the lore
+he looks out over the parapet and the goblins run at him from the horizon, growing as they come (a head
+28 CSS px at the wall, 9 at 20 m, 4 at the far edge); long shots need holding over and leading. Open: the rest of the words through the lore
 keeper and all of them through the line editor (`watchwords.ts`); the numbers once he's played
 (`shared/watchtune.ts`); slices 3 and 4.
 **World effects, slices 1 to 3: rods and pools, burn the dead, ice and steam** (Claude Opus 5.5, 2026-11-05;

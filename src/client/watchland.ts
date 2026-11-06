@@ -4,7 +4,7 @@
  * low parapet. Painted once per size (it never moves), flat; the lighting pass shades it. The moon,
  * its clouds and the stars are drawn on the glowing layer each frame (they light themselves).
  */
-import { FIELDS, WATCH, groundY, type FieldName } from '../shared/watchtune';
+import { SIDE, WATCH, groundY } from '../shared/watchtune';
 
 export const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
 /** Ordered dither: whether pixel (x, y) takes the second colour at mix `k` (0..1). */
@@ -35,15 +35,15 @@ function wallPx(x: number, y: number): [number, number, number] | null {
   return (row * 7 + Math.floor((x + (row % 2) * 4) / 8) * 3) % 5 === 0 ? STONE_DARK : STONE;
 }
 
-/** The whole backdrop for a canvas `lw` by `lh` with the field's corner at (ox, oy), for field `f`. */
-export function paintLand(lw: number, lh: number, ox: number, oy: number, f: FieldName): HTMLCanvasElement {
-  const rise = FIELDS[f].hills;
+/** The whole side-on backdrop for a canvas `lw` by `lh` with the field's corner at (ox, oy). */
+export function paintLand(lw: number, lh: number, ox: number, oy: number): HTMLCanvasElement {
+  const rise = SIDE.hills;
   const c = document.createElement('canvas');
   (c.width = lw), (c.height = lh);
   const g = c.getContext('2d')!, img = g.createImageData(lw, lh), d = img.data;
   for (let cy = 0; cy < lh; cy++) {
     for (let cx = 0; cx < lw; cx++) {
-      const x = cx - ox, y = cy - oy, gy = Math.round(groundY(Math.min(x, WATCH.wallX), f));
+      const x = cx - ox, y = cy - oy, gy = Math.round(groundY(Math.min(x, WATCH.wallX)));
       let col = wallPx(x, y);
       if (!col && y >= gy && x < WATCH.wallX) {
         const deep = y - gy;
