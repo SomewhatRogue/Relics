@@ -16,6 +16,7 @@ import type { Game } from './game';
 import type { Music } from './music';
 import { SCORES, type Area } from './scores';
 import { sfx } from './sfx';
+import { playSfx } from './sfxplay';
 import { sfxTown } from './sfxtown';
 import { rats } from './rats';
 import { SKILL_SOUNDS } from './fxskills';
@@ -138,6 +139,8 @@ export class Soundscape {
     if (ev.k === 'shieldsoak') return sfx.warded();
     if (ev.k === 'shieldgone') return sfx.wardbreak();
     if (ev.k === 'holysmite') return sfx.smite(), sfx.blessed();
+    // The smite coming down: the struck light, with a low crack of thunder under it (no prayer: herovoice.ts).
+    if (ev.k === 'smite') return sfx.smite(), void playSfx('thunder_strike', { vol: 0.45, rate: 1.15 });
     if (ev.k === 'coalburst') return sfx.heal();
     if (ev.k === 'coalflare') return sfx.flare(), sfx.ignite();
     if (ev.k === 'snag') return sfx.wallhit(), sfx.block();

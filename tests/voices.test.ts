@@ -98,7 +98,7 @@ describe('heroes in a fight', () => {
     expect(said).toEqual(['hero_a_grunt', 'hero_b_grunt', 'hero_a_grunt']);
   });
 
-  it('gasps, cries, breathes and prays by the hero the event belongs to', () => {
+  it('gasps, cries and breathes by the hero the event belongs to; a Cleric no longer prays on a heal or a smite', () => {
     const said: string[] = [];
     const v = createHeroVoice((n) => (said.push(n), 1));
     const w = hero('w', kit('WARRIOR'), 2, 0), c = hero('c', kit('HEALER'), 1, 3);
@@ -109,10 +109,10 @@ describe('heroes in a fight', () => {
     v.event({ k: 'heal', x: 0, y: 0, n: 12 }, [w, c], 5);
     v.event({ k: 'heal', x: 0, y: 0, n: 12 }, [w, c], 6);
     v.event({ k: 'smite', x: 4, y: 0 }, [w, c], 7);
-    expect(said).toEqual(['hero_c_hurt', 'hero_c_down', 'hero_c_up', 'hero_g_heal', 'hero_g_smite']);
+    expect(said).toEqual(['hero_c_hurt', 'hero_c_down', 'hero_c_up']);
   });
 
-  it("prays only with a Cleric near; a Warrior's heal is silent", () => {
+  it("a heal is silent, a Warrior's or a Cleric's", () => {
     const said: string[] = [];
     const v = createHeroVoice((n) => (said.push(n), 1));
     v.event({ k: 'heal', x: 0, y: 0, n: 12 }, [hero('w', kit('WARRIOR'), 0)], 0);

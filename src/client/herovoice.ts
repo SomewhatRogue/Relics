@@ -1,13 +1,13 @@
 /**
  * Heroes' voices in a fight: a grunt on a heavy swing, a gasp when hurt, a cry when downed, a breath on
- * getting up, a laugh when the hound knocks a Ranger flat; a Cleric murmurs a prayer on a heal and says
- * one hard on a smite. Each hero's voice follows its look (voicebank.ts LOOK_VOICE), so a party sounds
+ * getting up, a laugh when the hound knocks a Ranger flat. (A Cleric no longer prays aloud on a heal or a
+ * smite: Kyle, 2026-11-06; the smite is the sound of it striking instead.) Each hero's voice follows its look (voicebank.ts LOOK_VOICE), so a party sounds
  * different, and each kind is rate-limited per hero (GAPS) so a combo doesn't stack grunts. `say` plays
  * a line and answers its length (0: not ready; efforts are dropped, never late). Cosmetic only.
  */
 import { WEAPONS } from '../shared/tuning';
 import type { FightEvent, Hero } from '../sim/types';
-import { PRAYING, heroVoice, makeGate, type HeroVoice } from './voicebank';
+import { heroVoice, makeGate, type HeroVoice } from './voicebank';
 
 export type HeroSay = (name: string, vol: number) => number;
 
@@ -21,7 +21,6 @@ const near = (heroes: readonly Hero[], x: number, y: number, max: number, only?:
   }
   return best;
 };
-const cleric = (h: Hero) => WEAPONS[h.weapon].cls === 'HEALER' && PRAYING.includes(voiceOf(h));
 
 export function createHeroVoice(say: HeroSay) {
   const gate = makeGate();
@@ -40,8 +39,8 @@ export function createHeroVoice(say: HeroSay) {
       if (ev.k === 'hit' && ev.on === 'hero' && !ev.tick && ev.n > 0) return speak(near(heroes, ev.x, ev.y, 1.5), 'hurt', now);
       if (ev.k === 'down') return speak(heroes.find((h) => h.id === ev.id) ?? near(heroes, ev.x, ev.y, 1.5), 'down', now);
       if (ev.k === 'gotup') return speak(heroes.find((h) => h.id === ev.id) ?? near(heroes, ev.x, ev.y, 1.5), 'up', now);
-      if (ev.k === 'heal' || ev.k === 'mended') return speak(near(heroes, ev.x, ev.y, 10, cleric), 'heal', now);
-      if (ev.k === 'smite' || ev.k === 'holysmite') return speak(near(heroes, ev.x, ev.y, 12, cleric), 'smite', now);
+      // No spoken prayer on a heal or a smite (Kyle, 2026-11-06: "his bark when he smites is SO annoying ... a full prayer sucks;
+      // I'd rather it sounds more like the smite coming down"): the smite is heard as light striking (soundscape.ts).
       return 0;
     },
     /** An idle playing on `h`, `t` s in: the Ranger laughs on the floor when the hound bowls them over. */
