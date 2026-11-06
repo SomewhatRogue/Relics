@@ -711,6 +711,16 @@ Every weapon gets a quick attack, a charged attack, a perfect-timed hit and a re
 - Mage: big spells cost stamina ("magic"), like the blink. Make them impactful.
 - Flail: spin it up and release for a bit more reach, standing still. Standard hits shove goblins a little, never over a shield. Perfect hits stun.
 
+## Next after parry's removal: guard upgrades (Kyle, 2026-11-05)
+
+Block grows like the dodge does (the Ranger's dodge leaves a trap): techniques at levels 5 and 10.
+- Warrior, one per tier: TAUNT GUARD (holding block turns nearby goblins on you) or IRON STANCE (a block
+  spends a burst of stamina, throws back what hit you and makes you untouchable for a moment; no timing).
+- Cleric's guard is a holy shield, not a block: a ward round you, like the Mage's magic shield, that soaks
+  hits and is fed by the censer's coals. Its upgrade covers you AND an ally at once: the ally is covered
+  for free, but holding it drains stamina (Kyle: "you AND an ally, the ally for free but again stamina drain").
+- Lore keeper on every new name before it lands.
+
 ## Planned: town activities and the Night Watch (Kyle, 2026-11-05)
 
 Approved: arm-wrestling and knife-throwing at the Drowned Rat, the lodge's archery range, pelts and hound
