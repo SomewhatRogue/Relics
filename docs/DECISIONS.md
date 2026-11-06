@@ -171,6 +171,45 @@ The words on screen stay the game's own English; the recorded voice only carries
 - **The one-file build** inlines `public/sfx/voice` too (`voicesrc.solo.ts`): 9.36 MB, under the 16 MB
   cap, so the solo page keeps its voices.
 - Not voiced yet: Cole, Whisper, Vell and the other trainers and vendors, Hew in the wood's cutscenes.
+## 2026-11-05: the Night Watch upright on a phone: they run at you (Kyle; Claude Opus 5.5)
+
+Kyle, having played it: "Left to right on mobile sucks. Let's do top to bottom defence and they run
+towards you. Can't get headshots as easily, but more accuracy and range is required." This replaces the
+`tall` field (the steep side-on hill) of the earlier entry. Laptops and phones on their side keep side-on.
+
+- **The view** (`client/deepview.ts`, `deepland.ts`, `deepgobs.ts`, `deepfx.ts`): from behind and above
+  the hero on the wall walk, the parapet with its merlons and two torches across the bottom, the hero
+  from behind at twice size, the fields running up the screen in perspective (furrows meeting at the
+  horizon, darker in steps the further out) to hills and pines near the top, the sky a strip with the
+  moon. Chosen when a shift starts if the screen is taller than 1.2x its width.
+- **The geometry** (`shared/deeptune.ts`), in metres: goblins come in 55 m out (`DEEP.far`), anywhere
+  14 m either side, and run for a spot on the wall within 1.5 m of you; 1 m out (`reach`) they're in under
+  the parapet: THE WATCH HAVE IT. The eye is 8 m back from the wall's foot and 6.7 m up; a thing d m out is
+  drawn at f / (d + 8) pixels a metre, f set so the ground 1 m out meets the parapet. On a 390-wide phone
+  (6x): a goblin's head is 28 CSS px across at the wall, 20 at 5 m, 14 at 10 m, 9 at 20 m, 5 at 40 m,
+  4 at the far edge. (With the eye 2.3 m back, as first tried, half the screen was the last 4 m and far
+  goblins were dots in a strip at the top; 8 m spreads the depth down the screen.)
+- **Pace:** 0.27 m/s for each px/s of side-on pace: a plain goblin runs 3.5 m/s (about 15 s to the wall),
+  a runner 8 m/s and zigs 0.6 m either way every 5 m.
+- **The bow** (`DEEP_BOW`): the arrow leaves the eye along the sight at 22 m/s (tap) to 45 m/s (full draw)
+  and drops at 2.5 m/s2: a full draw takes about 1.1 s to 40 m and drops about 1.4 m, so far goblins need
+  holding over and leading (a crossing goblin can move a metre in that time); a tap barely reaches.
+  Spread 2.5 degrees either way on a tap, 0.25 at a full draw: at 30 m that's over a metre against under
+  0.2 m. The draw, nock and damage numbers are the side-on ones (`BOW`).
+- **Hit zones** (`DEEP_SHAPES`, `sim/deepzones.ts`): head, body and legs in metres facing you, plus the
+  shield (it faces you, so it's hit first; the head over the rim is still a target) and the torch held up
+  at the side. An arrow is judged where it crosses a goblin's plane; the drawing fills every pixel whose
+  middle falls in a zone projected at that distance, the same test, so the pixels you aim at are the
+  pixels judged (tested near and far). A goblin too far to fill a pixel is drawn as one dot.
+- **Everything else is shared** with side-on: the clock, spawning, kinds, helmets, shield breaking, torches,
+  archers (they stop 18 to 28 m out and shoot up at the wall; a near miss shakes the sight 0.03 for
+  0.7 s), cloud over the moon, scoring, streaks, the card and the pay. What an arrow does when it lands is
+  now one file for both (`sim/watchhit.ts`). Fog: distance dims goblins (none to 18 m, up to 70% at the far
+  edge), and the night's banks roll in from 62 m out at 1.2 to 2.2 m/s, 8 to 14 m deep, 2.2 m high.
+- **The best** is kept apart: `Profile.watch.deep` upright, `best` side-on (`bestOf` in
+  `shared/watchpay.ts`); one pay cap a night across both. Brisk tells you the best for the view your
+  screen gets.
+- **Laptops** stay side-on: the mouse's sight is exact there and the wide screen suits the long field.
 
 ## 2026-11-05: the chalker, and how a new sort bleeds in (Kyle; Claude Opus 5.5)
 

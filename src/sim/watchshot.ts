@@ -1,12 +1,14 @@
 /**
- * The watch bow: the draw, the loose, the arrow's flight (it drops a little over distance) and what it
- * hits. Head x2, body x1, legs slow; a helmet comes off at the first head hit; a shield splinters and
- * breaks; a torch hit drops it and sets its bearer alight. A miss, or nothing hit, breaks the streak.
+ * The watch bow side-on: the draw, the loose, the arrow's flight (it drops a little over distance) and
+ * where it lands (what that does: watchhit.ts). A miss, or nothing hit, breaks the streak. The upright
+ * view's flight is deepshot.ts.
  */
-import { BOW, FIELDS, FOES, WATCH, groundY } from '../shared/watchtune';
-import { firstHit, feet, type Hit } from './watchzones';
-import { breakStreak, scoreHit, scoreKill } from './watchscore';
-import type { Arrow, Gob, Part, WatchState } from './watchtypes';
+import { BOW, FOES, SIDE, WATCH, groundY } from '../shared/watchtune';
+import { DEEP } from '../shared/deeptune';
+import { firstHit, feet } from './watchzones';
+import { breakStreak } from './watchscore';
+import { land, type HitView } from './watchhit';
+import type { WatchState } from './watchtypes';
 
 /** How far along the draw is (0 a tap .. 1 full). */
 export const drawOf = (s: WatchState) => Math.min(1, s.draw / BOW.full);
@@ -14,11 +16,11 @@ export const drawOf = (s: WatchState) => Math.min(1, s.draw / BOW.full);
 export function aimOf(s: WatchState): [number, number] {
   const left = s.shakeUntil - s.t;
   if (left <= 0) return [s.ax, s.ay];
-  const a = FOES.shakePx * (left / FOES.shake);
+  const a = (s.field === 'deep' ? DEEP.shake : FOES.shakePx) * (left / FOES.shake);
   return [s.ax + Math.sin(s.t * 37) * a, s.ay + Math.cos(s.t * 29) * a];
 }
 
-/** Loose an arrow at the sight, as hard as the draw (a tap flies slower and a little wild). */
+/** Loose an arrow at the sight side-on, as hard as the draw (a tap flies slower and a little wild). */
 export function loose(s: WatchState): void {
   const p = drawOf(s), [ax, ay] = aimOf(s);
   const wob = ((1 - p) * BOW.wobble * Math.PI) / 180, ang = Math.atan2(ay - WATCH.bowY, ax - WATCH.bowX) + s.rng.range(-wob, wob);
@@ -35,68 +37,37 @@ export function flyArrows(s: WatchState, dt: number): void {
     a.vy += BOW.gravity * dt;
     const dx = a.vx * dt, dy = a.vy * dt;
     const hit = firstHit(s.gobs, x0, y0, dx, dy);
-    if (hit) return land(s, a, hit, x0 + dx * hit.at, y0 + dy * hit.at), false;
+    if (hit) return land(s, SIDE_HITS, a, hit.gob, hit.part, x0 + dx * hit.at, y0 + dy * hit.at), false;
     a.x += dx, a.y += dy;
-    const gy = groundY(a.x, s.field);
+    const gy = groundY(a.x);
     if (a.y >= gy) {
       s.pins.push({ x: a.x, y: gy, ang: Math.atan2(a.vy, a.vx), t: s.t });
       return miss(s, a.x, a.y), false;
     }
-    if (a.x < FIELDS[s.field].from - 40 || a.x > WATCH.w + 20 || a.y > FIELDS[s.field].h + 20) return miss(s, a.x, a.y), false;
+    if (a.x < SIDE.from - 40 || a.x > WATCH.w + 20 || a.y > SIDE.h + 20) return miss(s, a.x, a.y), false;
     return true;
   });
 }
 
-function miss(s: WatchState, x: number, y: number): void {
+export function miss(s: WatchState, x: number, y: number, d?: number): void {
   breakStreak(s);
-  s.events.push({ k: 'miss', x, y });
+  s.events.push({ k: 'miss', x, y, d });
 }
 
-/** An arrow lands on a goblin's `part` at (x, y). */
-function land(s: WatchState, a: Arrow, h: Hit, x: number, y: number): void {
-  const g = h.gob, [fx, fy] = feet(g), ang = Math.atan2(a.vy, a.vx), ev = { x, y, gob: g.id };
-  scoreHit(s);
-  const glance = () => s.bits.push({ kind: 'arrow', x, y, vx: -a.vx * 0.15, vy: -30, rot: ang, spin: 9, t: s.t, rest: false });
-  if (h.part === 'shield') {
-    g.shieldHp--;
-    g.stuck.push({ dx: x - fx, dy: y - fy, ang, on: 'shield' });
-    if (g.shieldHp > 0) return void s.events.push({ k: 'splinter', ...ev });
-    // Broken: its planks fall, and the arrows in it with them.
-    for (let i = 0; i < 3; i++) s.bits.push({ kind: 'plank', x: fx + 5, y: fy - 12 + i * 4, vx: 10 + i * 8, vy: -25 - i * 10, rot: 0, spin: (i - 1) * 6, t: s.t, rest: false });
-    for (const k of g.stuck.filter((q) => q.on === 'shield')) s.bits.push({ kind: 'arrow', x: fx + k.dx, y: fy + k.dy, vx: 6, vy: -10, rot: k.ang, spin: 4, t: s.t, rest: false });
-    g.stuck = g.stuck.filter((q) => q.on !== 'shield');
-    return void s.events.push({ k: 'shieldbreak', ...ev });
-  }
-  if (h.part === 'torch') {
-    g.torch = false;
-    g.burning = s.t;
-    g.at = s.t;
-    s.bits.push({ kind: 'torch', x, y, vx: -8, vy: -20, rot: 0, spin: -5, t: s.t, rest: false });
-    return void s.events.push({ k: 'torch', ...ev });
-  }
-  if (h.part === 'head' && g.helmet) {
-    // The first head hit takes the helmet, spinning off the way the arrow was going; the arrow glances.
-    g.helmet = false;
-    s.bits.push({ kind: 'helmet', x, y, vx: a.vx * 0.12 - 12, vy: -45, rot: 0, spin: -14, t: s.t, rest: false });
-    glance();
-    return void s.events.push({ k: 'helmet', ...ev });
-  }
-  g.stuck.push({ dx: x - fx, dy: y - fy, ang, on: 'gob' });
-  s.events.push({ k: 'hit', part: h.part, ...ev });
-  const hard = a.power >= BOW.hard ? 2 : 1;
-  const dmg = h.part === 'head' ? hard * 2 : h.part === 'legs' ? BOW.legDmg : hard;
-  if (h.part === 'legs') g.limp = true;
-  g.hp -= dmg;
-  if (g.hp <= 0) kill(s, g, h.part);
-}
-
-/** A goblin falls: points (the streak as it stands), and it lies there a while with the arrows in it. */
-export function kill(s: WatchState, g: Gob, how: Part | 'fire'): void {
-  const [fx, fy] = feet(g);
-  g.state = 'dead';
-  g.at = s.t;
-  g.how = how;
-  const pts = scoreKill(s, g, how);
-  if (g.torch) (g.torch = false), s.bits.push({ kind: 'torch', x: fx + 5, y: fy - 20, vx: 6, vy: -10, rot: 0, spin: 4, t: s.t, rest: false });
-  s.events.push({ k: 'kill', x: fx, y: fy - 16, gob: g.id, pts, head: how === 'head', how });
-}
+/** Side-on: where goblins stand and how loose things fly (field pixels, y down). */
+export const SIDE_HITS: HitView = {
+  feet: (g) => {
+    const [x, y] = feet(g);
+    return { x, y };
+  },
+  ang: (a) => Math.atan2(a.vy, a.vx),
+  bit: (what, g, x, y, i, a) => {
+    const [fx, fy] = feet(g), ang = a ? Math.atan2(a.vy, a.vx) : 0;
+    if (what === 'glance') return { kind: 'arrow', x, y, vx: -(a?.vx ?? 0) * 0.15, vy: -30, rot: ang, spin: 9 };
+    if (what === 'plank') return { kind: 'plank', x: fx + 5, y: fy - 12 + i * 4, vx: 10 + i * 8, vy: -25 - i * 10, rot: 0, spin: (i - 1) * 6 };
+    if (what === 'shed') return { kind: 'arrow', x, y, vx: 6, vy: -10, rot: ang, spin: 4 };
+    if (what === 'torch') return { kind: 'torch', x, y, vx: -8, vy: -20, rot: 0, spin: -5 };
+    if (what === 'helmet') return { kind: 'helmet', x, y, vx: (a?.vx ?? 0) * 0.12 - 12, vy: -45, rot: 0, spin: -14 };
+    return { kind: 'torch', x: fx + 5, y: fy - 20, vx: 6, vy: -10, rot: 0, spin: 4 };
+  },
+};

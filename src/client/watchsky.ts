@@ -3,22 +3,28 @@
  * on the field too: watchview.ts turns the light down with it), and fog banks rolling in low over the
  * fields, painted in dithered steps on the lit layer so the lighting shades them like everything else.
  */
-import { FIELDS, NIGHT, WATCH, groundY } from '../shared/watchtune';
+import { NIGHT, WATCH, groundY } from '../shared/watchtune';
 import { cover, fogAt } from '../sim/watchnight';
 import type { WatchState } from '../sim/watchtypes';
 import { dith, farHill } from './watchland';
 
+/** Side-on: whether a canvas pixel is open sky (not hill, field or wall), with the field's corner at (ox, oy). */
+export const sideSky = (ox: number, oy: number) => (cx: number, cy: number) => {
+  const x = cx - ox, y = cy - oy;
+  return y <= farHill(x) - 3 && groundY(Math.min(x, WATCH.wallX)) >= y + 2 && !(x > WATCH.wallX - 4 && y > WATCH.parapetTop - 30);
+};
+
 type G2 = CanvasRenderingContext2D;
-/** The moon's size (where it hangs is the field's: FIELDS). */
+/** The moon's size (where it hangs is the view's). */
 export const MOON = { r: 6 };
 const STARS = Array.from({ length: 46 }, (_, i) => [((i * 97) % 300) - 34, ((i * 53) % 110) - 40, i % 3] as const);
 
-/** The moon (craters and all), its halo, the stars, and cloud across them: (ox, oy) is the field's corner. */
-export function drawSky(glow: G2, s: WatchState, ox: number, oy: number, now: number): void {
-  const F = FIELDS[s.field], c = cover(s.clouds, s.t), mx = ox + F.moon[0], my = oy + F.moon[1];
+/** The moon (craters and all) at (mx, my) on the canvas, its halo, the stars where `sky` says there's sky, and cloud across them. (ox, oy): where the stars' pattern is pinned. */
+export function drawSky(glow: G2, s: WatchState, ox: number, oy: number, mx: number, my: number, now: number, sky: (x: number, y: number) => boolean): void {
+  const c = cover(s.clouds, s.t);
   for (const [x, y, k] of STARS) {
     // (None up under the clock and score.)
-    if (oy + y < 16 || y > farHill(x) + F.hills - 3 || groundY(Math.min(x, WATCH.wallX), s.field) < y + 2 || (x > WATCH.wallX - 4 && y > WATCH.parapetTop - 30)) continue;
+    if (oy + y < 16 || !sky(ox + x, oy + y)) continue;
     const tw = (Math.sin(now * (1.3 + k) + x) + 1) / 2;
     glow.globalAlpha = (0.25 + 0.45 * tw) * (1 - c * 0.85);
     glow.fillStyle = k === 0 ? '#e8e4ff' : '#9aa4c8';
@@ -59,7 +65,7 @@ export function drawFog(lit: G2, s: WatchState, ox: number, oy: number, lw: numb
   if (!s.fogs.some((f) => s.t >= f.at)) return;
   lit.fillStyle = '#aab2c4';
   for (let cx = 0; cx < lw; cx++) {
-    const x = cx - ox, gy = groundY(Math.min(x, WATCH.wallX - 1), s.field);
+    const x = cx - ox, gy = groundY(Math.min(x, WATCH.wallX - 1));
     if (x >= WATCH.wallX) continue;
     // Its top rolls: higher here, lower there, moving with the bank.
     const top = NIGHT.fogHigh * (0.65 + 0.35 * Math.sin(x / 11 - s.t * 0.4) * Math.sin(x / 5 + 1));

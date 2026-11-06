@@ -9,7 +9,7 @@ import type { Gob, Part } from './watchtypes';
 export const bobOf = (g: Gob) => (g.state === 'walk' && Math.floor(g.walked / 4) % 2 === 1 ? -1 : 0);
 /** A goblin's feet: its x, on the ground, up its lane, with the step's bob. */
 export function feet(g: Gob): [number, number] {
-  return [Math.round(g.x), Math.round(groundY(g.x, g.f) - g.lane) + bobOf(g)];
+  return [Math.round(g.x), Math.round(groundY(g.x) - g.lane) + bobOf(g)];
 }
 
 export interface Zone { part: Part; box?: Box; disc?: Disc }

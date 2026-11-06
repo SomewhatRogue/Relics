@@ -1,6 +1,6 @@
 /**
  * The Night Watch's numbers, in one place (Kyle 2026-11-05, docs/plans/town-activities.md). The field is
- * a side-on picture WATCH.w pixels across (two fields: FIELDS): the wall on the right, the hero on its walk, the fields
+ * a side-on picture WATCH.w pixels across: the wall on the right, the hero on its walk, the fields
  * rolling away to the left. Each goblin's hit zones are given here in the same pixels its sprite is
  * drawn in (client/watchgobs.ts paints from `SHAPES`), so what you see is what's judged.
  */
@@ -23,32 +23,28 @@ export const WATCH = {
 };
 
 /**
- * Two fields, chosen when a shift starts. `wide` (a laptop, a phone on its side): the whole long field,
- * rolling gently down to the ditch. `tall` (a phone held upright): a shorter field over the brow of a
- * steep hill, so it fills the screen and the goblins are big enough to aim at (Kyle's phone, 2026-11-05).
- * The same wall, bow, goblins and numbers; only where they come from and the ground they walk on differ.
+ * Two views of the shift, chosen when it starts by the screen's shape. `wide` (a laptop, a phone on its
+ * side): side-on, the field rolling away to the left (this file). `deep` (a phone held upright, Kyle
+ * 2026-11-05: "top to bottom defence and they run towards you"): from behind the hero, the fields running
+ * up the screen to the horizon (shared/deeptune.ts). The same goblins, bow, scoring and clock.
  */
-export type FieldName = 'wide' | 'tall';
+export type FieldName = 'wide' | 'deep';
 export interface Field {
   /** The field's left edge (goblins come in at from + WATCH.spawnX); its height; the far hills' rise. */
   from: number; h: number; hills: number;
-  /** Where the moon hangs; how fast goblins walk here (the tall field's slope is steeper); where archers stop. */
+  /** Where the moon hangs; how fast goblins walk (a factor on GOBS); where archers stop. */
   moon: [number, number]; pace: number; archerStop: [number, number];
 }
-export const FIELDS: Record<FieldName, Field> = {
-  wide: { from: 0, h: 174, hills: 0, moon: [46, 22], pace: 1, archerStop: [55, 110] },
-  tall: { from: 90, h: 210, hills: -26, moon: [112, 22], pace: 0.8, archerStop: [100, 128] },
-};
+export const SIDE: Field = { from: 0, h: 174, hills: 0, moon: [46, 22], pace: 1, archerStop: [55, 110] };
 
-/** The ground's height at `x` on a field (its rolling ground, then the ditch under the wall). Works off either edge too. */
-export function groundY(x: number, f: FieldName = 'wide'): number {
-  const tall = f === 'tall', k = Math.max(0, Math.min(1, tall ? (x - 90) / 82 : x / 176));
-  const field = tall ? 84 + Math.pow(k, 1.1) * 86 + 2.5 * Math.sin(x / 11) + 1.5 * Math.sin(x / 5 + 1)
-    : 116 + Math.pow(k, 1.3) * 32 + 3 * Math.sin(x / 23) + 2 * Math.sin(x / 9 + 1.3);
+/** The side-on ground's height at `x` (rolling fields, then the ditch under the wall). Works off either edge too. */
+export function groundY(x: number): number {
+  const k = Math.max(0, Math.min(1, x / 176));
+  const field = 116 + Math.pow(k, 1.3) * 32 + 3 * Math.sin(x / 23) + 2 * Math.sin(x / 9 + 1.3);
   if (x < 172) return field;
   // The lip of the ditch, then down to the wall's foot.
   if (x < 179) return field - 3 * Math.sin(((x - 172) / 7) * Math.PI);
-  return tall ? Math.min(196, field + (x - 179) * 1.5) : Math.min(166, field + (x - 179) * 1.1);
+  return Math.min(166, field + (x - 179) * 1.1);
 }
 
 export const BOW = {
@@ -107,7 +103,7 @@ export const FOES = {
   shieldHits: 3,
   /** A goblin set alight by its own torch: runs this much faster and burns out after this long. */
   burnRun: 1.7, burn: 1.6, burnBonus: 10,
-  /** Archers stop somewhere in their field's band (FIELDS), loose this many times this far apart, then walk on. */
+  /** Archers stop somewhere in their view's band (SIDE, DEEP), loose this many times this far apart, then walk on. */
   archerShots: 3, archerEvery: 3.2,
   /** Their arrows take this long to reach the wall; the near miss shakes your aim this long, this many pixels. */
   arrowFlight: 1.1, shake: 0.7, shakePx: 5,

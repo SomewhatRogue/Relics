@@ -29,27 +29,31 @@ async function onWall(page) {
     await wait(page, 2500);
     await page.screenshot({ path: 'shots/watch-phone-brisk.png' });
     await onWall(page);
-    await page.evaluate(() => { const w = window.__watch; w.input.ax = 140; w.input.ay = 118; });
-    console.log('phone view', await page.evaluate(() => { const v = window.__watch.view; return JSON.stringify({ field: v.field, k: v.k, lw: v.lw, lh: v.lh, cssPerPx: v.k / devicePixelRatio, headCss: (v.k / devicePixelRatio) * 7 }); }));
+    console.log('phone view', await page.evaluate(() => {
+      const w = window.__watch, l = w.view.lens, css = w.view.k / devicePixelRatio, head = (d) => +((0.34 * l.f / (d + 8)) * css).toFixed(1);
+      return JSON.stringify({ field: w.s.field, k: w.view.k, lens: l, headCss: { at1m: head(1), at5m: head(5), at10m: head(10), at20m: head(20), at40m: head(40), at55m: head(55) } });
+    }));
+    await page.evaluate(() => { const w = window.__watch; w.input.ax = 0.02; w.input.ay = 0.16; });
     await wait(page, 2600);
     await page.screenshot({ path: 'shots/watch-phone-1-start.png' });
-    // Mid-run: a helmet knocked off and spinning, a shield with an arrow in it, a torch-bearer, an archer.
+    // Mid-run: far and near goblins, a helmet knocked spinning off, an arrow in a shield, a torch, an archer.
     await page.evaluate(() => {
       const w = window.__watch, s = w.s;
-      s.t = 104; s.nextSpawn = 999; s.gobs = []; s.score = 340; s.streak = 7; s.shots = 22; s.hits = 17; s.kills = 9;
-      const h = w.put('helmet', 150), sh = w.put('shield', 128); w.put('torch', 110); w.put('plain', 166); w.put('archer', 95);
+      s.t = 104; s.nextSpawn = 999; s.gobs = []; s.fogs = []; s.score = 340; s.streak = 7; s.shots = 22; s.hits = 17; s.kills = 9;
+      w.put('plain', 44, -7); w.put('runner', 30, 6); w.put('archer', 22, 3.5); w.put('torch', 15, -2.2);
+      const sh = w.put('shield', 8, 1.1), h = w.put('helmet', 4, -0.7);
       w.shootAt(sh, 'shield'); w.shootAt(h, 'head');
-      w.input.ax = 170; w.input.ay = 142; w.input.held = true;
+      w.input.ax = 0.11; w.input.ay = 0.42; w.input.held = true;
     });
-    await wait(page, 180);
+    await wait(page, 220);
     await page.screenshot({ path: 'shots/watch-phone-2-mid.png' });
-    // Fog and the moon behind cloud.
+    // Fog and the moon behind cloud (a look for us; not one of the three asked for).
     await page.evaluate(() => {
       const w = window.__watch, s = w.s;
       w.input.held = false;
       s.t = 140; s.clouds = [{ at: 132, len: 20 }];
-      s.fogs = [{ at: 100, x0: 50, v: 1, w: 90 }];
-      s.gobs = []; w.put('plain', 122); w.put('torch', 142); w.put('runner', 100); w.put('helmet', 162);
+      s.fogs = [{ at: 120, x0: 40, v: 1, w: 12 }];
+      s.gobs = []; w.put('plain', 30, -3); w.put('torch', 24, 2); w.put('runner', 12, -1); w.put('helmet', 6, 0.8);
     });
     await wait(page, 500);
     await page.screenshot({ path: 'shots/watch-phone-3-fog.png' });
