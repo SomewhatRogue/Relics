@@ -20,11 +20,12 @@ import { NO_INTENT, type FightEvent } from '../src/sim/types';
 const ALL = [...PLACES, SEWERS];
 const job = (place: (typeof ALL)[number], seed: number): Job => ({ ...board(1)[1], place, rooms: 5, seed, objective: 'hunt', layout: 4 });
 
-/** The first room (down the high road) of some job with this scene, and its run. */
-function find(piece: Piece): { j: Job; i: number; taken: Record<number, RoadId> } {
+/** The first room (down the high road) of some job with this scene, and its run (`ok`: one where the scene found room to lay itself). */
+function find(piece: Piece, ok?: (p: ReturnType<typeof planRoom>) => boolean): { j: Job; i: number; taken: Record<number, RoadId> } {
   for (let s = 1; s < 400; s++) for (const place of ALL) {
     const j = job(place, s * 17 + 3), r = routeOf(j, 'h'), f = r.findIndex((x) => x.outs!.length === 2), i = r.findIndex((x) => !x.heart && x.piece === piece);
-    if (i >= 0) return { j, i, taken: f >= 0 && i > f ? { [f + 1]: 'high' } : {} };
+    const taken: Record<number, RoadId> = f >= 0 && i > f ? { [f + 1]: 'high' } : {};
+    if (i >= 0 && (!ok || ok(planRoom(j, i, taken[i], taken)))) return { j, i, taken };
   }
   throw new Error('no ' + piece);
 }
@@ -52,7 +53,7 @@ const only = (room: ArenaRoom) => (room.enemies = room.enemies.filter((e) => e.t
 
 describe('layout 4: each scene sets up its scene', () => {
   it('burning, dragging, prisoners, a patrol, the hanging tree, a fallen tree, the well, drums, webs, the ford', () => {
-    const plan = (p: Piece) => { const { j, i, taken } = find(p); return planRoom(j, i, taken[i], taken); };
+    const plan = (p: Piece, ok?: (q: ReturnType<typeof planRoom>) => boolean) => { const { j, i, taken } = find(p, ok); return planRoom(j, i, taken[i], taken); };
     let p = plan('burning');
     const house = p.map.blocks.find((b) => b.held)!;
     expect(house.door).toBe('cottage:held');
@@ -75,7 +76,8 @@ describe('layout 4: each scene sets up its scene', () => {
     expect(p.map.flocks?.length).toBeGreaterThan(0);
     p = plan('fallen');
     expect(p.map.blocks.some((b) => b.kind === 'log')).toBe(true);
-    p = plan('cache');
+    // (A room too crowded for the well falls back to a fire: shared/scenes4b.ts.)
+    p = plan('cache', (q) => q.map.rounds.some((r) => r.kind === 'well'));
     const well = p.map.rounds.find((r) => r.kind === 'well')!;
     expect(p.chests.some((c) => Math.hypot(c.x - well.x, c.y - well.y) < 1.4)).toBe(true);
     p = plan('drums');

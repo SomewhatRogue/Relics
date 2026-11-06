@@ -17,6 +17,7 @@ import { burnLonger, rimeUp } from './techmage';
 import { wet } from './wet';
 import { iceOn, type WorldFx } from './ice';
 import { douse } from './steam';
+import { pinSkimmer } from './skimmer';
 import { poolOf, sayPool, waterOf } from './pools';
 import { jolt } from './rods';
 import { toAsh } from './meal';
@@ -73,6 +74,8 @@ export function afflict(w: World, e: Enemy, el: Augment, n: number, how: StormHo
     burnLonger(w, e);
   } else if (el === 'frost') {
     if (burning(e, now)) return steam(w, e);
+    // A skimmer: pinned where it stands (sim/skimmer.ts).
+    pinSkimmer(e, now, ev);
     // Wading: the shallows round it ice over (sim/ice.ts).
     iceOn(w.fx, e, now, ev);
     if (frozen(e, now)) return;
@@ -94,6 +97,7 @@ export function afflict(w: World, e: Enemy, el: Augment, n: number, how: StormHo
  *  With ATTUNED, chilling hits (`share` of one each) build up and the third freezes (sim/techmage.ts). */
 export function chill(w: World, e: Enemy, share = 1): void {
   if (burning(e, w.now)) return afflict(w, e, 'frost', 0);
+  pinSkimmer(e, w.now, w.ev);
   if (rimeUp(w, e, share)) return afflict(w, e, 'frost', 0);
   iceOn(w.fx, e, w.now, w.ev);
   if (e.chillUntil <= w.now) w.ev.push({ k: 'chill', x: e.x, y: e.y });

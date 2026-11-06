@@ -27,9 +27,11 @@ export interface Lay {
   blocks: Block[]; rounds: Round[]; marks: Mark[]; grim: Grim[]; sleepers: P[];
   spine?: Pt[][]; river?: River;
   /** Layout 4's scenes: the way on's point at the edge (prisoners make for it), and what they add to the room. */
-  out?: Pt; chests?: P[]; flocks?: P[]; led?: GameMap['led']; oil?: NonNullable<GameMap['oil']>;
+  out?: Pt; chests?: P[]; flocks?: P[]; led?: GameMap['led']; oil?: NonNullable<GameMap['oil']>; staithe?: GameMap['staithe'];
   /** Ground for a scene beside the track (shared/room4.ts plotter): a w by h box, cleared of growth. */
   plot?(w: number, h: number, near?: number): { x: number; y: number; w: number; h: number } | null;
+  /** Clear growth off a box (shared/room4.ts clearGrowth): the Staithe's bank. */
+  clear?(a: { x: number; y: number; w: number; h: number }): void;
 }
 
 /** `k` goblins round a point, at rest, `d0` to `d1` from it. */

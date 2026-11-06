@@ -58,6 +58,12 @@ export const LOOK: Record<Block['kind'], Look> = {
   log: { tall: 12, roof: '#4a3a2a', ridge: '#3e3022', wall: '#4a3a2a', windows: false },
   mill: { tall: 44, roof: '#3a3036', ridge: '#4a3e44', wall: '#6a6470', windows: false },
   stakes: { tall: 18, roof: '#5a4a30', ridge: '#9a8a62', wall: '#4a3c26', windows: false },
+  // The Staithe (client/pieces.ts draws them; these are for fire and rubble).
+  jetty: { tall: 4, roof: '#5a4028', ridge: '#3a2a1a', wall: '#4a3420', windows: false },
+  gangway: { tall: 8, roof: '#4a3a2a', ridge: '#3e3022', wall: '#4a3a2a', windows: false },
+  smokehouse: { tall: 34, roof: '#3a3036', ridge: '#2a2026', wall: '#4a3a2a', windows: false },
+  dryrack: { tall: 22, roof: '#5a4a30', ridge: '#3a2a1a', wall: '#4a3c26', windows: false },
+  hungnet: { tall: 22, roof: '#a89a72', ridge: '#3a2a1a', wall: '#3a2a1a', windows: false },
   // A side way is a gap, painted with the room's ways out (wayout.ts), never drawn as a block.
   sideway: { tall: 0, roof: '#000', ridge: '#000', wall: '#000', windows: false },
 };

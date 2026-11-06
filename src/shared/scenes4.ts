@@ -11,6 +11,7 @@ import { SCENE } from './scenetune.js';
 import { along, type Pt } from './spine.js';
 import { band, fire, type Lay } from './vignettes.js';
 import { cache, drums, fallen, hanging, wading, webs } from './scenes4b.js';
+import { layStaithe } from './staithe.js';
 
 type P = { x: number; y: number };
 
@@ -23,9 +24,15 @@ export type FoeTask =
   /** Walking its round, `i` the point it's making for (`stuck`: seconds without getting nearer). */
   | { k: 'patrol'; pts: Pt[]; i: number; stuck?: number; best?: number }
   /** Hauling a body (its `haul`) to their fire at `to`. */
-  | { k: 'haul'; to: Pt; quit?: boolean };
+  | { k: 'haul'; to: Pt; quit?: boolean }
+  /** The Staithe (sim/staithe.ts): log-carriers laying their log across the gap from (x, y), toward (dx, dy). */
+  | { k: 'lay'; x: number; y: number; dx: number; dy: number; quit?: boolean }
+  /** The gaffer hooking folk off the jetty's end (the next at room time `next`). */
+  | { k: 'gaff'; next: number; quit?: boolean }
+  /** Over the laid log and onto the jetty, to take folk off it. */
+  | { k: 'board'; at?: number };
 
-export const SCENES4: Piece[] = ['burning', 'drag', 'prisoners', 'patrol', 'hanging', 'fallen', 'cache', 'drums', 'webs', 'wading'];
+export const SCENES4: Piece[] = ['burning', 'drag', 'prisoners', 'patrol', 'hanging', 'fallen', 'cache', 'drums', 'webs', 'wading', 'staithe'];
 
 /** A point `s` tiles along a path (and which way it runs there); past its end, its end. */
 export function atArc(pts: Pt[], s: number): { x: number; y: number; dx: number; dy: number; end: boolean } {
@@ -52,7 +59,21 @@ export function scene4(l: Lay, piece: Piece): P[] {
   if (piece === 'cache') return cache(l);
   if (piece === 'drums') return drums(l);
   if (piece === 'webs') return webs(l);
+  if (piece === 'staithe') return staitheScene(l);
   return wading(l);
+}
+
+/** NETS: the Staithe (shared/staithe.ts) in this room's river, the rest of the band at a fire up the bank. */
+function staitheScene(l: Lay): P[] {
+  const r = l.river, main = l.spine?.[0];
+  if (!r || !main) return plainFire(l);
+  const down = !!r.down, a = down ? main[0][0] : main[0][1];
+  const got = layStaithe({ w: l.W, h: l.H, len: down ? l.H : l.W, river: r, nearLow: a < r.y, water: r.water, blocks: l.blocks, foes: l.foes, props: l.props, free: l.free, claim: l.claim, pack: 86, clear: l.clear, plot: l.plot });
+  if (!got) return plainFire(l);
+  l.staithe = got.map;
+  const f = l.free(got.fire.x, got.fire.y, 0.6) ? (l.braziers.push({ ...got.fire, r: 0.35, wild: true }), l.claim(got.fire.x, got.fire.y, 0.6), got.fire) : fire(l);
+  if (f) band(l, f, Math.max(1, l.n - 5));
+  return f ? [f] : [];
 }
 
 /** Just a band at their fire (a scene that found no room for itself). */

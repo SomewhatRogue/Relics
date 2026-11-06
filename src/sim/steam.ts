@@ -13,6 +13,11 @@ import { damage, isDead } from './damage';
 import type { World } from './elements';
 import { meltAt, type WorldFx } from './ice';
 import { waterOf } from './pools';
+import { OWN_KIT } from './enemies';
+import { slickBurn } from './oil';
+
+/** Standing in burning oil on the water. */
+export const onOil = (b: { x: number; y: number }, now: number) => OWN_KIT.slicks.some((s) => s.drift && s.lit >= 0 && now - s.lit < slickBurn(s) && Math.hypot(b.x - s.x, b.y - s.y) <= s.r);
 import type { Enemy, FightEvent } from './types';
 
 /** A cloud rises at (x, y), `r` round (`by` whose fire): one near keeps going instead. */
@@ -28,7 +33,8 @@ export function steamAt(fx: WorldFx | undefined, x: number, y: number, r: number
 
 /** Fire landing on a goblin standing in water: it goes out as it lands, in a cloud. True if it did. */
 export function douse(w: World, e: Enemy): boolean {
-  if (!w.fx || waterOf(e) < 0) return false;
+  // (Burning oil on the water isn't put out by it: sim/drift.ts.)
+  if (!w.fx || waterOf(e) < 0 || onOil(e, w.now)) return false;
   e.burnUntil = 0;
   // (On ice, the ice under it goes too.)
   meltAt(w.fx, e.x, e.y, 0, w.now, w.ev);

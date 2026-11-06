@@ -119,7 +119,8 @@ export function edgeMark(g: CanvasRenderingContext2D, sx: number, sy: number, v:
 export function behindMarks(c: Ctx, list: Survivor[], cx: number, cy: number, v: View, now: number): void {
   const g = c.glow;
   for (const s of list) {
-    if (s.gone || !waiting(s)) continue;
+    // (The Staithe's folk on their jetty or in a net aren't following anyone yet.)
+    if (s.gone || !waiting(s) || s.stay || s.netted) continue;
     const at = edgeMark(g, OX + s.x * PX - cx, OY + s.y * PX - cy - 8, v, Math.sin(now * 6 + s.id) * 1.5, '#c8f0c0');
     if (!at) continue;
     // A head and shoulders.

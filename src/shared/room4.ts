@@ -51,7 +51,16 @@ export function finish4(l: Lay, spec: RoomSpec, map: GameMap, chests: P[], dead:
     }
   }
   if (l.led) map.led = l.led;
+  if (l.staithe) map.staithe = l.staithe;
   if (l.oil?.length) map.oil = l.oil;
+}
+
+/** Clear growth and small things (never a landmark or a building) off box `a` and `pad` round it, from each list. */
+export function clearGrowth(lists: Round[][], a: Area, pad = 0.6): void {
+  for (const list of lists) for (let i = list.length - 1; i >= 0; i--) {
+    const q = list[i];
+    if (CLEARABLE.has(q.kind) && q.x + q.r > a.x - pad && q.x - q.r < a.x + a.w + pad && q.y + q.r > a.y - pad && q.y - q.r < a.y + a.h + pad) list.splice(i, 1);
+  }
 }
 
 /** What a scene can clear to make room for itself: growth and small things, never a landmark or a building. */

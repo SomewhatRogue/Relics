@@ -29,7 +29,7 @@ export class Buildings {
   update(map: GameMap, me: [number, number] | null, fires: Spot[]): void {
     map.blocks.forEach((blk, i) => {
       if (blk.kind === 'sideway') return;
-      const key = `${blk.kind}:${blk.x}:${blk.y}:${blk.w}:${blk.h}:${blk.door ?? ''}:${blk.locked ? 1 : 0}:${blockState(blk)}`;
+      const key = `${blk.kind}:${blk.x}:${blk.y}:${blk.w}:${blk.h}:${blk.door ?? ''}:${blk.locked ? 1 : 0}:${blockState(blk)}:${blk.deck ? 1 : 0}`;
       let e = this.built.get(i);
       if (!e || e.key !== key) {
         if (e) this.drop(e.b);

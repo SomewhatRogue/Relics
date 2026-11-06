@@ -18,7 +18,7 @@ import { dressOutside, liveOutside } from './exterior';
 import { drawHallRound } from './hallsdraw';
 import { wear, windowsLit } from './wear';
 import { OX, OY, PX } from './world';
-import { PIECE_BLOCKS, PIECE_ROUNDS } from './pieces';
+import { DECKS, PIECE_BLOCKS, PIECE_ROUNDS } from './pieces';
 import { drawPieceBlock, drawPieceRound } from './piecedraw';
 
 export { LOOK };
@@ -110,7 +110,7 @@ function door(b: Block, rect: Rect, w: number, wallY: number, l: Look): void {
 export function drawBlock(c: Ctx, b: Block, x: number, y: number, lit: boolean): void {
   const st = state(b);
   // Layout 4's pieces: their boxes (pieces.ts), the same the 2.5D view builds; on fire like any wood.
-  if (PIECE_BLOCKS.has(b.kind) && st !== 2) {
+  if (PIECE_BLOCKS.has(b.kind) && (st !== 2 || DECKS.has(b.kind))) {
     drawPieceBlock(c, b, x, y);
     if ((b.burning ?? -1) >= 0 || b.smoulder) flames(c, b, x, Math.round(y - LOOK[b.kind].tall), Math.round(b.w * PX), Math.round(b.h * PX), LOOK[b.kind].tall);
     return;

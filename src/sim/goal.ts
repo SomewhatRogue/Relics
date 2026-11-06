@@ -17,6 +17,8 @@ import { bossOf, densLeft, racksLeft } from './targets';
 import { waiting } from './survivors';
 import { expedGoal } from './expedgoal';
 import { HELD_HINT, pickWay, type WayKind } from '../shared/ways';
+import { STAITHE_WORDS } from '../shared/staithewords';
+import { staitheGoal } from './staithegoal';
 
 export interface Captives { caged: number; waiting: number }
 
@@ -39,7 +41,8 @@ export function captivesLeft(c: Captives): string {
 export function inRoom(room: ArenaRoom): Captives {
   return {
     caged: room.props.filter((p) => p.kind === 'cage' && !p.broken).length,
-    waiting: room.survivors.filter(waiting).length,
+    // (Not the Staithe's folk on their jetty or in a net: they're its own line, sim/staithegoal.ts.)
+    waiting: room.survivors.filter((s) => waiting(s) && !s.stay && !s.netted).length,
   };
 }
 
@@ -86,9 +89,13 @@ export function goal(run: Run, room: ArenaRoom, houses: Captives = { caged: 0, w
     // Layout 4: each way says what it is and what it pays (shared/ways.ts); a house alight with someone in it says so.
     const ways = room.map.roads?.map((r) => r.way).filter((w): w is WayKind => !!w) ?? [];
     const pick = ways.length ? pickWay(ways) : 'Pick a road, together. HIGH: archers up top, fewer below. LOW: more goblins, someone caged';
-    const held = room.map.blocks.some((b) => (b.held ?? 0) > (b.pulled ?? 0) && (b.burning ?? -1) >= 0 && !b.ruined && b.cry !== false);
-    const text = also(goblins ? `Clear ${what} (${goblins} left)` : fork ? pick : way(false));
-    return { text: held ? `${HELD_HINT}. ${text}` : text, done: goblins === 0 };
+    const held = room.map.blocks.find((b) => (b.held ?? 0) > (b.pulled ?? 0) && (b.burning ?? -1) >= 0 && !b.ruined && b.cry !== false);
+    const hint = held?.kind === 'smokehouse' ? STAITHE_WORDS.smoke : HELD_HINT;
+    // The Staithe (sim/staithegoal.ts): its own line first, and done only once it's done with.
+    const st = staitheGoal(room);
+    const rest = goblins ? `Clear ${what} (${goblins} left)` : st && !st.done ? '' : fork ? pick : way(false);
+    const text = also([st?.text, rest].filter(Boolean).join('. '));
+    return { text: held ? `${hint}. ${text}` : text, done: goblins === 0 && (!st || st.done) };
   }
   const freed = !need.caged && !need.waiting;
   if (o === 'rescue') return { text: freed ? also(`Everyone's out. ${way(true)}`) : people, done: freed };

@@ -54,6 +54,8 @@ export interface Run {
   /** Layout 4: the freed brought out of each room (a way's pay counts its room's: shared/waypay.ts), and prisoners led off. */
   saved?: Record<number, number>;
   ledoff?: number;
+  /** The Staithe's folk lost (taken off the jetty, or left too long on the big map): the recap's LOST. */
+  netlost?: number;
   /** What each hero in the party did, by hero id (sim/score.ts): the recap's side by side. */
   board?: Board;
 }
@@ -126,6 +128,9 @@ export function tally(run: Run, room: ArenaRoom, events: FightEvent[], me: strin
       if (ev.by) (run.rescueKills ??= {})[ev.by] = (run.rescueKills[ev.by] ?? 0) + 1;
     } else if (ev.k === 'ledoff') {
       run.ledoff = (run.ledoff ?? 0) + 1;
+    } else if (ev.k === 'folklost') {
+      // The Staithe: taken off the jetty, or (the big map) left too long (sim/staithe.ts).
+      run.netlost = (run.netlost ?? 0) + 1;
     } else if (ev.k === 'cagelost') {
       run.lost = (run.lost ?? 0) + 1;
     } else if (ev.k === 'exped' && (ev.what === 'goal' || ev.what === 'side')) {

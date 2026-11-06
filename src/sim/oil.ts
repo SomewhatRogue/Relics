@@ -5,7 +5,7 @@
  * burning whoever's in it. Any fire of yours lights a slick too: a fire burst, a flask of Lamp Oil, a
  * burning goblin walking into it.
  */
-import { HERO, OIL, TORCH, type EnemyAttackSpec } from '../shared/tuning';
+import { HERO, OIL, STAITHE, TORCH, type EnemyAttackSpec } from '../shared/tuning';
 import { currentMap } from '../shared/arena';
 import { slickFor } from '../shared/sky';
 import { isDead } from './damage';
@@ -18,8 +18,14 @@ import { manaShield } from './manashield';
 import { count } from './score';
 
 /** A slick of oil on the floor: lit (room time it went up, -1 not yet), how long it burns once lit (shorter in the rain), and when it's gone. */
-export interface Slick { id: number; x: number; y: number; r: number; until: number; lit: number; burn?: number }
+export interface Slick {
+  id: number; x: number; y: number; r: number; until: number; lit: number; burn?: number;
+  /** On water (sim/drift.ts): which way it's carried, in tiles a second. */
+  drift?: [number, number];
+}
 let nextId = 1;
+/** A new slick's number (sim/drift.ts makes them too). */
+export const slickId = () => nextId++;
 /** How long a lit slick burns (drawn by client/beastdraw.ts from the same). */
 export const slickBurn = (s: Slick) => s.burn ?? TORCH.burn;
 const lit = (s: Slick, now: number) => s.lit >= 0 && now - s.lit < slickBurn(s);
@@ -105,10 +111,10 @@ export function lightNear(slicks: Slick[], x: number, y: number, reach: number, 
   for (const s of slicks) if (s.lit < 0 && Math.hypot(x - s.x, y - s.y) <= s.r + reach) light(s, now, ev);
 }
 
-function light(s: Slick, now: number, ev: FightEvent[]): void {
+export function light(s: Slick, now: number, ev: FightEvent[]): void {
   s.lit = now;
-  // In the rain it burns out sooner (shared/sky.ts).
-  s.burn = TORCH.burn * slickFor(currentMap().theme);
+  // In the rain it burns out sooner (shared/sky.ts); on water it burns on as it drifts (sim/drift.ts).
+  s.burn = (s.drift ? STAITHE.waterBurn : TORCH.burn) * slickFor(currentMap().theme);
   ev.push({ k: 'oilup', x: s.x, y: s.y });
 }
 

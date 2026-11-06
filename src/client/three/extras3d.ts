@@ -58,6 +58,12 @@ export function drawExtras(g: CanvasRenderingContext2D, x: Extra): void {
       const [hx, hy] = P(b.x + b.w / 2, 2.3, b.y + b.h / 2);
       drawHouseSmoke(c, hx, hy, 1 - (b.hp ?? 0) / (b.maxHp || 1), b.x);
     }
+    // The Staithe's smokehouse: how far it's caught, at its wall; the pull at its door once it's alight.
+    if (b.kind === 'smokehouse') {
+      const [sx, sy] = P(b.x - 0.3, 0, b.y + b.h * 0.55), door = doorAt(b), [dx, dy] = P(door.x, 0, door.y);
+      drawSceneRings(c, b, sx, sy, dx, dy);
+      continue;
+    }
     const k = kindling(b, room.map);
     if (!k) continue;
     const [sx, sy] = P(k.x, 0, k.y), d = meH && !b.ruined && (b.burning ?? -1) < 0 ? Math.hypot(meH.x - k.x, meH.y - k.y) : 99;

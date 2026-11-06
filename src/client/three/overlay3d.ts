@@ -13,6 +13,7 @@ import { GUARD, PARTY, WEAPONS } from '../../shared/tuning';
 import { drawText, textWidth } from '../pixfont';
 import { CHASE, chaseLabel, chasePoint, chasers } from '../chasers';
 import { drawExpedGround, friendMarks } from '../expeddraw';
+import { drawPunt, drawStaitheGround, puntAt } from '../staithedraw';
 import { OX, OY, PX } from '../world';
 import type { Lerp } from './actors3d';
 import { BOXFIGS } from './look';
@@ -119,6 +120,13 @@ export class Overlay {
     }
     // An expedition: the rings on the ground and friends off screen (../expeddraw.ts); the beacon stands in 3D (beacon3d.ts).
     drawExpedGround(g, room, (x, y) => P(x, 0, y), now);
+    // The Staithe: its log's clock, the jetty's ring and the punt on the water (../staithedraw.ts).
+    drawStaitheGround(g, room, (x, y) => P(x, 0, y), now);
+    const punt = puntAt(room);
+    if (punt) {
+      const [px, py] = P(punt.x, -0.1, punt.y), [qx] = P(punt.x + 1, -0.1, punt.y);
+      drawPunt(g, px, py, Math.abs(qx - px), punt.full, now);
+    }
     friendMarks(g, room, meId, (x, y) => P(x, 1, y), this.W, this.H, 16, 16);
     this.marks(room, meId, m, P, lerp, now);
     for (const t of fx.texts) {

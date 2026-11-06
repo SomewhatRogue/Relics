@@ -48,6 +48,9 @@ import { raisable } from '../sim/party';
 import { cuttable } from '../sim/netter';
 import { torchable } from '../sim/torch';
 import { kindleable } from '../sim/kindle';
+import { staitheCalls } from './staithecalls';
+import { staitheGrabbable } from '../sim/staithebits';
+import { STAITHE_WORDS } from '../shared/staithewords';
 import { burningCries, kindleCue } from './kindlecue';
 import { kindling } from '../shared/kindling';
 import { liftable } from '../sim/props';
@@ -281,6 +284,8 @@ function hud(now: number): void {
   if (game.mode === 'run') kindleCue(room.map, me, (x, y, s) => fx.say(toPx(x, y)[0], toPx(x, y)[1] - 18, s, '#e8dcc8', 2.6));
   // A house alight with someone still caged inside: shouts from it until the roof comes in.
   if (game.mode === 'run') burningCries(room.map, room.time, (x, y, s) => fx.say(toPx(x, y)[0], toPx(x, y)[1] - 24, s, '#ffb08a', 1.8));
+  // The Staithe's folk calling out from the jetty and the nets (staithecalls.ts).
+  if (game.mode === 'run') staitheCalls(room, (x, y, s) => fx.say(toPx(x, y)[0], toPx(x, y)[1] - 24, s, '#c8e0f0', 1.8));
   // The class skill (E, SKILL) and the relic carried, if any (R, RELIC), each with its cooldown.
   const [skill, relic] = me.relics, left = (r: typeof skill) => Math.max(0, me.relicReady[r] - room.time);
   const tag = (r: typeof skill) => relicLabel(me, r) + (left(r) > 0 ? ' ' + left(r).toFixed(1) : '');
@@ -359,7 +364,9 @@ function hud(now: number): void {
   // A drop at your feet, its card shut: the key that opens it (a phone has LOOK in the context slot).
   else if (!busy && !input.touch && game.mode === 'run' && card.near >= 0 && card.current < 0) ($('#prompt').hidden = false), ($('#prompt').textContent = 'F  LOOK');
   // A friend down at your feet: the key that gets them up.
-  if (!spot && !busy && !input.touch && game.mode === 'run' && cuttable(game.hero, game.room.heroes, game.room.time)) ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  CUT FREE');
+  const stg = game.mode === 'run' ? staitheGrabbable(game.hero, game.room.survivors, game.room.map) : null;
+  if (!spot && !busy && !input.touch && game.mode === 'run' && (cuttable(game.hero, game.room.heroes, game.room.time) || stg === 'cut')) ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  CUT FREE');
+  else if (!spot && !busy && !input.touch && stg === 'shove') ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  ' + STAITHE_WORDS.shove);
   else if (!spot && !busy && !input.touch && game.mode === 'run' && game.hero.act === 'idle' && raisable(game.hero, game.room.heroes)) ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  HELP UP');
   else if (!spot && !busy && !input.touch && game.mode === 'run' && (torchable(game.hero, game.room.enemies) || kindleable(game.hero, game.room.map))) ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  BURN');
   // The touch buttons round ATTACK, and the unit frame (cluster.ts, unitframe.ts).

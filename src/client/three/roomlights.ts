@@ -19,6 +19,7 @@ import type { Lerp } from './actors3d';
 import type { L3 } from './lights3d';
 import { skillLights3 } from './skills3d';
 import { spellLights } from '../spellground';
+import { staitheLights } from '../staithedraw';
 
 const tint = (h: string): [number, number, number] => [parseInt(h.slice(1, 3), 16) / 255, parseInt(h.slice(3, 5), 16) / 255, parseInt(h.slice(5, 7), 16) / 255];
 /** A 2D light's reach (pixels) as tiles in 3D (a little further, since 3D lights sit up off the floor). */
@@ -34,6 +35,8 @@ export function roomLights(room: ArenaRoom, fx: Fx, lerp: Lerp, out: L3[]): void
   // A house on fire inside: each patch alight (shared/blaze.ts).
   if (map.blaze) for (const a of burningAt(map.blaze, room.time)) add(a.x + a.w / 2, 0.9, a.y + a.h / 2, R(50), 0.9, [1, 0.55, 0.25], 11);
   for (const c of room.chests) if (c.state !== 'shut') add(c.x, 0.8, c.y + 0.2, c.state === 'opening' ? R(16 + 30 * (c.t / 1.2)) : R(26), c.state === 'opening' ? 0.4 + 0.5 * (c.t / 1.2) : 0.35, tint(TIERS[c.tier].col));
+  // The Staithe's lamps, and oil burning on the water (../staithedraw.ts).
+  for (const l of staitheLights(room)) add(l.x, 1.1, l.y, l.r * 1.15 + 0.6, l.i, l.c, 9);
   for (const m of room.coals) add(m.x, 0.6, m.y, R(26), 0.6 * Math.min(1, m.life / 4), [1, 0.6, 0.28], 7);
   for (const z of room.zones) if (!z.kind) add(z.x, 0.8, z.y, z.r * 1.5 + 0.5, 0.8 * Math.min(1, (z.until - room.time) / 1.2), [1, 0.85, 0.5]);
   for (const h of room.heroes) {

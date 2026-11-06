@@ -11,7 +11,7 @@ import type { Ctx } from './draw';
 import { drawText, textWidth } from './pixfont';
 
 /** Each way's word colour. */
-export const WAY_COL: Record<WayKind, string> = { smoke: '#d8ccc0', cries: '#f0c8b8', crows: '#c0b8d0', drums: '#ffa060', quiet: '#a8e0b0', ford: '#9fe8ff', webs: '#e8e8f4' };
+export const WAY_COL: Record<WayKind, string> = { smoke: '#d8ccc0', cries: '#f0c8b8', crows: '#c0b8d0', drums: '#ffa060', quiet: '#a8e0b0', ford: '#9fe8ff', webs: '#e8e8f4', nets: '#ffd890' };
 
 /** Where a way's cue is, in tiles: in its gap (behind the back wall for a gap in it), and how high. */
 export function cueAt(r: Road, map: GameMap): { x: number; y: number; z: number } {
@@ -84,6 +84,25 @@ export function drawCue(c: Ctx, way: WayKind, x: number, y: number, seed: number
     }
     for (const r of [6, 11]) for (let k = 0; k < 9; k++) c.lit.fillRect(Math.round(x + Math.cos(-Math.PI / 2 + (k - 4) * 0.24) * r), Math.round(y - 4 - Math.sin(Math.PI / 2 + (k - 4) * 0.24) * r * 0.8), 1, 1);
     c.lit.globalAlpha = 1;
+    return;
+  }
+  if (way === 'nets') {
+    // The Staithe past the gap: two lamps on their posts over water, a net hung between them, stirring.
+    const l = c.lit, sway = Math.sin(t * 1.3 + seed);
+    l.fillStyle = '#3a2a1a';
+    l.fillRect(Math.round(x - 10), Math.round(y - 18), 1, 18), l.fillRect(Math.round(x + 9), Math.round(y - 18), 1, 18);
+    l.fillStyle = '#a89a72';
+    for (let j = 0; j < 9; j++) for (let i = 0; i < 18; i++) if ((i + j) % 3 === 0) l.fillRect(Math.round(x - 9 + i + sway * (j / 9) * 2), Math.round(y - 16 + j + Math.sin(i / 3) * 0.6), 1, 1);
+    g.globalAlpha = 0.65 + 0.2 * Math.sin(t * 7 + seed);
+    g.fillStyle = '#ffd27a';
+    g.fillRect(Math.round(x - 11), Math.round(y - 21), 3, 3), g.fillRect(Math.round(x + 8), Math.round(y - 21), 3, 3);
+    for (let i = 0; i < 4; i++) {
+      const k = (t * 0.5 + i * 0.29) % 1;
+      g.globalAlpha = 0.6 * Math.sin(k * Math.PI);
+      g.fillStyle = i % 2 ? '#ffd27a' : '#9fe8ff';
+      g.fillRect(Math.round(x - 8 + ((i * 5) % 16)), Math.round(y - 2 + (i % 2) * 2), 3, 1);
+    }
+    g.globalAlpha = 1;
     return;
   }
   if (way === 'quiet') {

@@ -34,7 +34,7 @@ import { gather, rushClock, rushLocked } from './rushguard';
 import { count, dealt } from './score';
 
 /** The room's oil slicks, for the torch-bearers (the room sets it before its goblins move). */
-export const OWN_KIT: { slicks: Slick[]; freed: Survivor[] } = { slicks: [], freed: [] };
+export const OWN_KIT: { slicks: Slick[]; freed: Survivor[]; foes: Enemy[] } = { slicks: [], freed: [], foes: [] };
 
 const SPECS: Partial<Record<Enemy['kind'], EnemySpec>> = { butcher: BUTCHER, scrapper: SCRAPPER, spider: SPIDER, brood: BROOD };
 
@@ -116,7 +116,8 @@ function runAttack(e: Enemy, heroes: Hero[], now: number, dt: number, ev: FightE
     ev.push({ k: 'impact', x: round ? a.cx : e.x, y: round ? a.cy : e.y, kind: a.kind });
     // Blows land on your own level; arrows reach up and down.
     const before = heroes.map((h) => h.hp);
-    for (const h of heroes) if (a.kind === 'shot' || (h.z ?? 0) === (e.z ?? 0)) hitHero(e, a, h, now, ev, heroes);
+    // (A skimmer's pour lands on the water, on nobody: sim/drift.ts.)
+    for (const h of heroes) if (a.kind !== 'pour' && (a.kind === 'shot' || (h.z ?? 0) === (e.z ?? 0))) hitHero(e, a, h, now, ev, heroes);
     if (e.attack === null) return true;
     // Their own get in the way: a missed arrow takes the first goblin in its line; a butcher's blow
     // lands on any small goblin under it.

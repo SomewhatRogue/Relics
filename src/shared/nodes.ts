@@ -88,7 +88,9 @@ export type Piece = 'fire' | 'dead' | 'feast' | 'asleep' | 'cart' | 'wreck' | 'c
   // Layout 4's scenes (shared/scenes4.ts, scenes4b.ts): goblins burning a house, dragging a body,
   // prisoners led off, a patrol, the hanging tree, a fallen tree, the well's cache, and the forks' ways
   // (a war band's drums, spider nests, the ford under archers).
-  | 'burning' | 'drag' | 'prisoners' | 'patrol' | 'hanging' | 'fallen' | 'cache' | 'drums' | 'webs' | 'wading';
+  | 'burning' | 'drag' | 'prisoners' | 'patrol' | 'hanging' | 'fallen' | 'cache' | 'drums' | 'webs' | 'wading'
+  // The NETS way's room: the eel-catchers's staithe under attack (shared/staithe.ts).
+  | 'staithe';
 export const PIECES: Piece[] = ['fire', 'dead', 'feast', 'asleep', 'cart', 'wreck', 'column'];
 /** Which set pieces each skin can hold (no carts underground). */
 export const PIECES_IN: Record<Skin, Piece[]> = {

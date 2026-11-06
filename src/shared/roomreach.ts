@@ -5,7 +5,7 @@
  * landed on ground cut off by water or a line of trees moves to ground that isn't, or (a goblin, if
  * nowhere will do) isn't there at all. Pure: same seed, same moves.
  */
-import type { GameMap } from './arena.js';
+import { solid, type GameMap } from './arena.js';
 import type { PropKind } from './props.js';
 import type { Foe } from './terrain.js';
 import { HERO } from './tuning.js';
@@ -32,7 +32,7 @@ function flood(m: GameMap): (p: P, d: number) => boolean {
     const x = (i + 0.5) * C, y = (j + 0.5) * C;
     open[j * cols + i] = x < r || y < r || x > m.w - r || y > m.h - r ? 0 : 1;
   }
-  for (const b of m.blocks) if (!b.ruined) box(b, r, 0);
+  for (const b of m.blocks) if (solid(b)) box(b, r, 0);
   for (const q of m.rounds) if (q.r > 0.15) disc(q.x, q.y, q.r);
   for (const q of m.braziers) disc(q.x, q.y, q.r);
   for (const q of m.water ?? []) if (q.deep) box(q, r, 0);

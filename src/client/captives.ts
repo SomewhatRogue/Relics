@@ -5,6 +5,7 @@
  * Hurt, they flash; burning, they smoulder; killed, they fall and stay down; home, they walk off and fade.
  * Drawing only.
  */
+import { drawNetOver } from './staithedraw';
 import { drawAsh, drawEaten } from './remainsdraw';
 import { SPRITES } from './sprites';
 import { blit, shadow, type Ctx } from './draw';
@@ -43,6 +44,9 @@ export function drawSurvivor(c: Ctx, s: Survivor, sx: number, sy: number, now: n
   const up = t < 1.5 && Math.floor(t * 6) % 2 === 0 ? -1 : 0, step = s.moving && Math.floor(now * 7 + s.id) % 2 ? -1 : 0;
   const flash = now - s.hitAt < 0.12 ? 1 : 0;
   blit(c, spr, sx, sy + 2 + up + step, s.fx < 0, flash);
+  // The Staithe's: netted on the bank (a net over them, weights on its edge), or waiting on the jetty (no thanks yet).
+  if (s.netted) return void (drawNetOver(c, sx, sy, now), (c.lit.globalAlpha = c.glow.globalAlpha = 1));
+  if (s.stay) return void (c.lit.globalAlpha = c.glow.globalAlpha = 1);
   // On a rope (layout 4): hands bound in front, the rope round the waist; no thanks yet.
   if (s.led) return void ((c.lit.fillStyle = '#8a7a5a'), c.lit.fillRect(Math.round(sx - 3), Math.round(sy - 5 + step), 7, 1), c.lit.fillRect(Math.round(sx - 1), Math.round(sy - 7 + step), 3, 2), (c.lit.globalAlpha = c.glow.globalAlpha = 1));
   if (t < 1.2) (c.lit.fillStyle = '#c79c78'), c.lit.fillRect(Math.round(sx - 4), Math.round(sy - 11 + up), 1, 3), c.lit.fillRect(Math.round(sx + 3), Math.round(sy - 11 + up), 1, 3);

@@ -27,12 +27,14 @@ import { sideBlock } from './sideway.js';
 import { doorAt } from './arena.js';
 import type { Role } from './encounters.js';
 import { composeRoom, crowsOn } from './encounter.js';
-import { ensure4, finish4, light4, name4, plotter, torches4, wayMore } from './room4.js';
+import { clearGrowth, ensure4, finish4, light4, name4, plotter, torches4, wayMore } from './room4.js';
 import { edgePt } from './ports.js';
 
 /** `wave`: a nest's spiders a wave (more in a party; shared/nests.ts). */
 export type FoeVariant = 'looter' | 'lunger' | 'heavy' | 'stoker' | 'shield' | 'hexer' | 'drummer'
   | 'banner' | 'netter' | 'thief' | 'log' | 'roofer' | 'keeper' | 'wolf' | 'oiler' | 'torch' | 'sapper' | 'blind' | 'ironhide'
+  /** The Staithe's (shared/staithetune.ts): the gaffer and its hook, the skimmer and its oil. */
+  | 'gaffer' | 'skimmer'
   /** The wood's element lesson only (shared/wood.ts ELEMENT_FOES): wet through, in a bark apron, hot off the kiln. */
   | 'soaked' | 'aproned' | 'kilnhot';
 /**
@@ -150,7 +152,7 @@ export function planRoom(job: Job, index: number, road?: RoadId, taken?: Record<
   const ruin = job.place.ruin, dead: Npc[] = [], braziers: GameMap['braziers'] = [], grim: Grim[] = [], sleepers: { x: number; y: number }[] = [], marks: GameMap['marks'] = [];
   const n = Math.max(v4 ? 1 : 2, Math.min(v4 ? 13 : 10, 4 + ruin + index + (fight === 'low' ? 2 : fight === 'high' ? -2 : 0) + wayMore(spec)));
   const lay: Lay = { rng, W, H, kind, n, spot, free, claim: (x, y, r) => void spots.push({ x, y, r }), foes, dead, braziers, props, blocks, rounds, marks, grim, sleepers, spine: fr.spine, river: fr.river };
-  if (v4 && spec) Object.assign(lay, { out: spec.heart ? undefined : edgePt(spec.outs![0], W, H), chests: [], flocks: [], oil: [], plot: fr.spine && plotter({ rng, W, H, spine: fr.spine, keepOff: [SPAWN, ...ways], blocks, rounds: [rounds, site.rounds], water: fr.water, spots }) });
+  if (v4 && spec) Object.assign(lay, { out: spec.heart ? undefined : edgePt(spec.outs![0], W, H), chests: [], flocks: [], oil: [], plot: fr.spine && plotter({ rng, W, H, spine: fr.spine, keepOff: [SPAWN, ...ways], blocks, rounds: [rounds, site.rounds], water: fr.water, spots }), clear: (a: { x: number; y: number; w: number; h: number }) => clearGrowth([rounds, site!.rounds], a) });
   if (v4 && spec && !spec.heart) ensure4(spec, blocks, lay.plot);
   const fires = spec ? setPiece(lay, spec.piece) : oldBands(lay);
   // Not every small goblin is the same: spear-lungers (roll out of the line), brutes (big, slow blows

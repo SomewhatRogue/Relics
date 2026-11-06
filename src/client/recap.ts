@@ -7,6 +7,7 @@
  * A knack waiting is never picked here: it's banked, and the PACK says so (knackcues.ts). Each player's
  * own (game.ts finish).
  */
+import { STAITHE_WORDS } from '../shared/staithewords';
 import { TRAINERS } from '../shared/town';
 import { itemName } from '../shared/tuning';
 import { relicName } from '../shared/relicitems';
@@ -47,7 +48,7 @@ export function showResult(g: Game, panel: Panel): void {
   // What you came home with.
   const got = labelRows([
     ['GOLD', String(r.gold)], ['XP', String(r.xp)], ['SAVED', r.won ? String(r.rescued) : ''],
-    ['LOST', [r.lost ? `${r.lost} to the fire` : '', r.ledoff ? RECAPW.ledoff(r.ledoff) : ''].filter(Boolean).join(', ')],
+    ['LOST', [r.lost ? `${r.lost} to the fire` : '', r.ledoff ? RECAPW.ledoff(r.ledoff) : '', r.netlost ? STAITHE_WORDS.lost(r.netlost) : ''].filter(Boolean).join(', ')],
     [RECAPW.way, r.won ? r.way ?? '' : ''],
     [RECAPW.found, c?.found.join(', ') ?? ''],
     [RECAPW.treasure, r.treasure.map(itemName).join(', ')],

@@ -328,3 +328,10 @@ most Want among the heroes is the one the bells don't spare).
 - The watch pays heroes by the head for a night shift with a bow, capped per night. It's wages, never touching the Want.
 - Anyone is handed a bow for the shift.
 - Brisk hands out the watch's pay but isn't one of the watch.
+
+## Withy Staithe and the eel-catchers (recorded 2026-11-05; Kyle's call, lore keeper)
+- **Withy Staithe** is an eel landing on the Barrowfields river: a jetty over deep water, a smokehouse, drying racks and punts.
+- **The eel-catchers** are a few families holding out there, unwalled. They pull the gangway boards up at night, never trade with Wickhold, and those saved go to Wickhold. Maud is one of them.
+- **The hungry don't cross deep water.** They have no boats; they lay a log across instead. Nothing on screen says why, and it's never framed as a weakness the town can use.
+- **The gaffer** uses a fishing gaff taken off the eel-catchers (never a billhook). **The skimmer** pours lamp oil from the hoard.
+- On-screen words: **HOOKED** (a hung net catching your foot) and **FROZEN** (frost holding the skimmer; PINNED stays the spear's word).

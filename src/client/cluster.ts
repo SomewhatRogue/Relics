@@ -9,6 +9,8 @@
  * Warrior's always shows GRAB (dimmed till there's something to take hold of). A Warrior who has learned
  * TAUNT (shared/ladder.ts) has it in the dodge's place instead, with its cooldown.
  */
+import { staitheGrabbable } from '../sim/staithebits';
+import { STAITHE_WORDS } from '../shared/staithewords';
 import { carriedItem } from '../sim/charge';
 import { isDark, relicFill } from '../shared/relicitems';
 import { fillCol } from './reliccard';
@@ -154,14 +156,16 @@ export class Cluster {
     b.potion.el.classList.toggle('low', low);
     // The context slot: help a friend up, set a spider nest or a house's woodpile alight, grab, throw; or what's here to use.
     const can = carrying || (me.act === 'idle' && (room.enemies.some((e) => grabbable(me, e, room.time)) || room.props.some((p) => liftable(me, p))));
-    const raise = me.act === 'idle' && raisable(me, room.heroes), cut = cuttable(me, room.heroes, room.time);
+    // (At the Staithe GRAB cuts one of the netted free, or shoves the laid log in: sim/staithebits.ts.)
+    const stg = mode === 'run' ? staitheGrabbable(me, room.survivors, room.map) : null, shove = stg === 'shove';
+    const raise = me.act === 'idle' && raisable(me, room.heroes), cut = cuttable(me, room.heroes, room.time) || stg === 'cut';
     const burn = !raise && (!!torchable(me, room.enemies) || (mode === 'run' && !!kindleable(me, room.map)));
-    const lifter = kit.cls === 'WARRIOR', active = can || raise || burn || cut;
+    const lifter = kit.cls === 'WARRIOR', active = can || raise || burn || cut || shove;
     // A drop at your feet with nothing else here: LOOK opens its card.
     const looking = !!look && !busy && !spot?.chest && !spot?.door;
     const use = (!!spot && !busy && (mode !== 'run' || !!spot.chest)) || looking;
     const what: IconId = raise || cut ? 'help' : burn ? 'burn' : carrying ? 'throw' : 'grab';
-    const word = cut ? 'CUT FREE' : raise ? 'HELP UP' : burn ? 'BURN' : carrying ? 'THROW' : 'GRAB';
+    const word = cut ? 'CUT FREE' : shove ? STAITHE_WORDS.shove : raise ? 'HELP UP' : burn ? 'BURN' : carrying ? 'THROW' : 'GRAB';
     // (With no dodge the slot has its own place, so a USE or OPEN can show beside it.)
     const showGrab = (active || lifter) && (!dodges || !(use && !active && mode !== 'town'));
     b.grab.show(showGrab ? { shape: 'round', size: 29, grade: active ? 'gilt' : 'stone', icon: icon(what) } : null, '', word, word);

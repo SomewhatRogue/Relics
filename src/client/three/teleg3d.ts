@@ -69,7 +69,7 @@ export function makeTele(): THREE.Mesh {
 export function shapeTele(m: THREE.Mesh, a: EnemyAttack, pw: number, now: number, lift: number): boolean {
   if (a.t >= a.windup + a.active) return false;
   const u = (m.material as THREE.ShaderMaterial).uniforms, prog = Math.min(1, a.t / a.windup);
-  const round = isRound(a.kind), lane = a.kind === 'charge' || a.kind === 'draw' || a.kind === 'pounce', shot = a.kind === 'shot';
+  const round = isRound(a.kind), lane = a.kind === 'charge' || a.kind === 'draw' || a.kind === 'pounce' || a.kind === 'hook', shot = a.kind === 'shot';
   u.uProg.value = prog;
   u.uT.value = now;
   u.uNow.value = !a.unblockable && a.windup - a.t <= pw && a.t < a.windup ? 1 : 0;
@@ -87,7 +87,7 @@ export function shapeTele(m: THREE.Mesh, a: EnemyAttack, pw: number, now: number
     return true;
   }
   if (lane || shot) {
-    const W = shot ? 0.07 : a.kind === 'pounce' ? Math.max(0.15, a.radius * 0.5) : a.kind === 'draw' ? 0.12 : a.radius;
+    const W = shot ? 0.07 : a.kind === 'pounce' ? Math.max(0.15, a.radius * 0.5) : a.kind === 'draw' ? 0.12 : a.kind === 'hook' ? 0.07 : a.radius;
     u.uKind.value = shot ? 3 : 2;
     u.uR.value = a.range;
     u.uW.value = W;

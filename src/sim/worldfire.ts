@@ -15,7 +15,7 @@ import { inWall } from './firewall';
 import { edible, edibleFreed, toAsh } from './meal';
 import { slickBurn, type Slick } from './oil';
 import { waterOf } from './pools';
-import { steamAt } from './steam';
+import { onOil, steamAt } from './steam';
 import type { Survivor, Zone } from './types';
 
 type Spot = { x: number; y: number; r: number; by?: string };
@@ -48,7 +48,7 @@ function inFire(list: Spot[], walls: Zone[], b: { x: number; y: number }, pad: n
 export function stepWorldFire(w: World, r: FireRoom): void {
   const fx = w.fx, list = spots(w, r), walls = r.zones.filter((z) => z.kind === 'firewall' && w.now < z.until);
   // A burning goblin wading in is put out, steaming.
-  for (const e of w.enemies) if (fx && !isDead(e) && e.burnUntil > w.now && waterOf(e) >= 0) (e.burnUntil = 0), steamAt(fx, e.x, e.y, STEAM_CLOUD.r, e.lastBy, w.now, w.ev);
+  for (const e of w.enemies) if (fx && !isDead(e) && e.burnUntil > w.now && waterOf(e) >= 0 && !onOil(e, w.now)) (e.burnUntil = 0), steamAt(fx, e.x, e.y, STEAM_CLOUD.r, e.lastBy, w.now, w.ev);
   if (!list.length && !walls.length) return;
   for (const e of w.enemies) if (edible(e) && inFire(list, walls, e, 0.3)) toAsh(e, w.ev);
   for (const v of r.survivors) if (edibleFreed(v) && inFire(list, walls, v, 0.3)) toAsh(v, w.ev);

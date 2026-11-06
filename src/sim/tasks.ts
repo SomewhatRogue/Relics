@@ -9,7 +9,8 @@ import { currentMap } from '../shared/arena';
 import { SCENE } from '../shared/tuning';
 import { atArc } from '../shared/scenes4';
 import { isDead } from './damage';
-import { walk } from './enemies';
+import { OWN_KIT, walk } from './enemies';
+import { staitheTask } from './staithebits';
 import { players } from './party';
 import { wayTo } from './pathing';
 import type { Enemy, FightEvent, Hero } from './types';
@@ -34,6 +35,8 @@ function goTo(e: Enemy, x: number, y: number, speed: number, dt: number): boolea
 export function stepTask(e: Enemy, heroes: Hero[], now: number, dt: number, ev: FightEvent[], notice: () => boolean): boolean {
   const t = e.task;
   if (!t || isDead(e)) return false;
+  // The Staithe's (sim/staithebits.ts): the carriers at their log, the gaffer at the jetty, goblins going over.
+  if (t.k === 'lay' || t.k === 'gaff' || t.k === 'board') return staitheTask(e, heroes, OWN_KIT.freed, currentMap(), now, dt, ev);
   if (t.k === 'kindle' || t.k === 'escort') {
     if (t.quit) return false;
     if (pulledOff(e, heroes, now)) return (t.quit = true), (e.alert = true), (e.feeding = false), false;
@@ -73,7 +76,7 @@ export function stepTask(e: Enemy, heroes: Hero[], now: number, dt: number, ev: 
     return true;
   }
   // Hauling: the body comes along behind; at their fire it's dropped and they crouch at it.
-  if (t.quit) return false;
+  if (t.k !== 'haul' || t.quit) return false;
   if (goTo(e, t.to[0], t.to[1], SCENE.haul, dt)) {
     t.quit = true;
     e.feeding = true;

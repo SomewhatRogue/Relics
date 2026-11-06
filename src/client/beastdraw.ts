@@ -4,6 +4,7 @@
  * oil on the floor (and burning), and carrion crows on the dead and up in a cloud. Drawing only; the
  * crows and dust that scatter are cosmetic.
  */
+import { driftAt } from './staithedraw';
 import type { Enemy } from '../sim/types';
 import type { Slick } from '../sim/oil';
 import type { Flock } from '../sim/crows';
@@ -71,7 +72,8 @@ export function drawMound(c: Ctx, e: Enemy, x: number, y: number): void {
 /** Oil on the floor: a dark, glossy pool with a sheen moving on it; lit, flames all over it. */
 export function drawSlicks(c: Ctx, slicks: Slick[], at: (x: number, y: number) => [number, number], t: number): void {
   for (const s of slicks) {
-    const [x, y] = at(s.x, s.y), R = s.r * PX, burning = s.lit >= 0 && t - s.lit < (s.burn ?? TORCH.burn);
+    // (Oil drifting on water: eased along between the steps its place comes in: staithedraw.ts.)
+    const d = driftAt(s, c.now), [x, y] = at(d.x, d.y), R = s.r * PX, burning = s.lit >= 0 && t - s.lit < (s.burn ?? TORCH.burn);
     const g = c.lit;
     for (let dy = -Math.floor(R * 0.55); dy <= R * 0.55; dy++) {
       const w = Math.floor(R * Math.sqrt(Math.max(0, 1 - (dy * dy) / (R * R * 0.3))));

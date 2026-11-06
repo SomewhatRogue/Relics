@@ -2,6 +2,21 @@
 
 ## Current slice
 
+**The Staithe: NETS on layout 4, the gaffer and the skimmer, the Staithe on the Barrowfields** (Claude Opus 5.5,
+2026-11-05; Kyle approved the biomes proposal, rollout items 4 and 5: "the river in the middle should have maybe a
+fishing village in the center sometimes"). Built; waiting on Kyle's play. *Done when*, on his phone and laptop,
+flat and 2.5D: a fork shows NETS (two lamps and a net past its gap) and leads to a broad river with the eel-catchers
+on their jetty, the log-carriers laying their log across (a red clock at their feet), a gaffer hooking folk off
+the jetty's end into nets by its brute, torch-bearers at a smokehouse with someone shut in, a skimmer up the bank;
+he kills the carriers or SHOVES the laid log in, CUTS FREE the netted, holds the ring by the jetty 45 s while the
+punt goes over and back three times, and the recap's WAY says what NETS paid (+10% each) and LOST "n taken from the
+jetty"; hung nets catch his foot a second and burn; a lamp broken or the skimmer's pour puts oil on the water that
+drifts down and, lit, sets the jetty going (burnt through, it throws him to the bank); the gaffer's thin red lane
+is blocked, or parried (SNAPPED), or hauls him to its brute; frost FREEZES the skimmer in place (FROZEN). On about one Barrowfields map
+in three the Staithe is between the fords (pinned as a job or a side job), and left alone its smokehouse catches at
+ALARM 3 and they're lost at ALARM 5. Everything in DECISIONS 2026-11-05 ("the Staithe"); shots: `node
+scripts/staithe-look.cjs`. Open: every new name and line through the lore keeper and line editor; the numbers once
+he's played.
 **The yard is this browser's alone, and its straw men** (Claude Opus 5.5, 2026-11-05; Kyle: "maybe we make the
 training room local to just one person", then "always set up, lets you try different scenarios including
 spawning different enemy types to fight"; the lore keeper: no live goblins in Wickhold, so straw men in hungry kit
@@ -562,7 +577,9 @@ and burns out a goblin den on a job.
       flooded, collapse, chamber, cave, stackyard, mill, orchard, churchyard, barrows) with their light; the
       headframe, logs, mill and wheel, stakes, hanging tree, headstones and apple trees in both views from one
       list; no room kind, layout, landmark or scene twice on a job; the next day's approach never the same.
-- [ ] Next: a side room with two ways back; a punt; the building engine and the wreck side task; the side way names,
+- [x] NETS (2026-11-05, Claude Opus 5.5; DECISIONS "the Staithe"): the eel-catchers's staithe as a fork way, with the
+      gaffer, the skimmer, hung nets, lamps and oil drifting on the water, punts, racks and a smokehouse.
+- [ ] Next: a side room with two ways back; the building engine and the wreck side task; the side way names,
       "1 more in the houses" and layout 4's words through the lore keeper and line editor.
 - [ ] Layout 4's scenes on the big map (expeditions still use layout 3's seven).
 
@@ -587,6 +604,9 @@ pay grows with each job done and side job. DECISIONS 2026-11-04 has the build an
 - [ ] Vignettes with new behaviour (goblins burning a house, dragging a body, prisoners led off) on the map.
 - [ ] Frame times on a real phone host (headless SwiftShader numbers only so far); 2.5D on the big map.
 - [ ] More expeditions (Greyhollow, Fenmere, Copperdeep) from the same pieces; the war map that picks them.
+- [x] The Staithe on about one map in three, between the fords, pinned or a side job, played out at ALARM 3 and 5
+      (2026-11-05, Claude Opus 5.5; DECISIONS "the Staithe").
+- [ ] Biomes rollout next (the proposal's items 6 on): the chalker with the CRIES captives; the Fen expedition.
 
 ## Next up: the big map as a real job (Kyle played ?bigmap=1, 2026-11-03: "VERY fun")
 

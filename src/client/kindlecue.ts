@@ -9,6 +9,7 @@ import { kindling } from '../shared/kindling';
 import { HOUSEBURN } from '../shared/tuning';
 import type { Hero } from '../sim/types';
 import { sfxOut } from './sfx';
+import { EELFOLK_CALLS } from '../shared/staithewords';
 
 /** The words over the pile (for the lore keeper and line editor). */
 export const CRY_CUE = "SOMEONE'S IN THERE";
@@ -42,8 +43,8 @@ export function burningCries(map: GameMap, now: number, say: (x: number, y: numb
     const at = lastCry.get(i);
     if (at !== undefined && now - at < 2.2) return;
     lastCry.set(i, now);
-    const n = Math.floor(now / 2.2) + i;
-    say(b.x + b.w / 2 + ((n % 3) - 1) * 0.8, b.y + b.h * 0.3, BURN_CRIES[n % BURN_CRIES.length]);
+    const n = Math.floor(now / 2.2) + i, lines = b.kind === 'smokehouse' ? EELFOLK_CALLS.smoke : BURN_CRIES;
+    say(b.x + b.w / 2 + ((n % 3) - 1) * 0.8, b.y + b.h * 0.3, lines[n % lines.length]);
     muffledCry(1900, 0.9);
   });
 }

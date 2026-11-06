@@ -84,6 +84,8 @@ export function stepSurvivors(w: World, dt: number, entrance: { x: number; y: nu
       hurtSurvivor(s, BURN.dmg, s.burnBy, w.now, w.ev, 0, 0, true);
       if (s.dead) continue;
     }
+    // The Staithe's: standing on the jetty for the punt, or netted on the bank till someone cuts them free (sim/staithe.ts).
+    if (s.stay || s.netted) continue;
     if (s.out || (entrance && Math.hypot(s.x - entrance.x, s.y - entrance.y) <= SURVIVOR.homeReach)) {
       if (s.out) door ??= { x: s.x, y: s.y };
       Object.assign(s, { home: w.now, out: false, burnUntil: 0 });

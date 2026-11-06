@@ -14,6 +14,7 @@ import { boxOff, off, type Pt } from './spine.js';
 import { wetBeside } from './wetland.js';
 import { isNode4 } from './nodes4.js';
 import { water4 } from './water4.js';
+import { STAITHE } from './staithetune.js';
 
 export interface Frame3 {
   spec: RoomSpec; rng: Rng; seed: number; w: number; h: number;
@@ -83,9 +84,10 @@ function water(f: Frame3, geo: Rng): void {
   if (isNode4(n)) return water4(f, geo);
   if (n === 'ford' || n === 'fenford' || n === 'outfall') {
     // A river across the way: fords to wade (two, one wide one, or a broken bridge and one), the track through the nearest.
-    const len = down ? h : w, at = geo.range((down ? w : h) * 0.38, (down ? w : h) * 0.5), rw = n === 'fenford' ? 3.2 : 2.6;
-    const fords = l === 'wide' || l === 'spread' ? [{ x: geo.range(4, len - 9), w: 5 }] : l === 'twofords' || l === 'islands' ? [{ x: geo.range(3, len / 2 - 5), w: 3.2 }, { x: geo.range(len / 2 + 2, len - 6.4), w: 3.2 }] : [{ x: geo.range(4, len - 7.4), w: 3.4 }];
-    f.river = down ? riverDown(h, at, rw, fords) : river(w, at, rw, fords, n === 'ford' && l === 'broken' ? w / 2 + geo.range(-1.5, 1.5) : undefined);
+    // The Staithe (the NETS way): a broad deep river for the jetty to stand in, one ford near an end (shared/staithe.ts).
+    const st = spec.piece === 'staithe', len = down ? h : w, at = geo.range((down ? w : h) * 0.38, (down ? w : h) * 0.5), rw = st ? STAITHE.river : n === 'fenford' ? 3.2 : 2.6;
+    const fords = st ? [{ x: geo.next() < 0.5 ? geo.range(2.2, 3.6) : len - 3.4 - geo.range(2.2, 3.6), w: 3.4 }] : l === 'wide' || l === 'spread' ? [{ x: geo.range(4, len - 9), w: 5 }] : l === 'twofords' || l === 'islands' ? [{ x: geo.range(3, len / 2 - 5), w: 3.2 }, { x: geo.range(len / 2 + 2, len - 6.4), w: 3.2 }] : [{ x: geo.range(4, len - 7.4), w: 3.4 }];
+    f.river = down ? riverDown(h, at, rw, fords) : river(w, at, rw, fords, n === 'ford' && l === 'broken' && !st ? w / 2 + geo.range(-1.5, 1.5) : undefined);
     f.water = f.river.water;
     const c = (q: { x: number; w: number }) => q.x + q.w / 2, mid = down ? (main[1][1] + main[main.length - 2][1]) / 2 : (main[1][0] + main[main.length - 2][0]) / 2;
     const near = [...fords].sort((a, b) => Math.abs(c(a) - mid) - Math.abs(c(b) - mid))[0], fc = c(near);

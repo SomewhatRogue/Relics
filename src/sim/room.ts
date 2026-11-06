@@ -88,6 +88,9 @@ import { stepIce } from './ice';
 import { mealWatch } from './meal';
 import { stepSteam } from './steam';
 import { stepWorldFire } from './worldfire';
+import { initStaithe, stepStaithe } from './staithe';
+import { cutNetted, playOut, shoveLog, stepHungNets, stepStaitheFire } from './staithebits';
+import { stepDrift } from './drift';
 
 export class ArenaRoom {
   time = 0;
@@ -197,6 +200,8 @@ export class ArenaRoom {
     useMap(this.map);
     // Layout 4's scenes: prisoners on their rope, a wrecked cart's oil (sim/scenes.ts).
     if (this.map.led || this.map.oil) this.slicks = initScenes(this.map, this.survivors, this.time);
+    // The Staithe: its folk on the jetty and in the nets (sim/staithe.ts).
+    initStaithe(this.map, this.survivors, this.time);
     this.squire = !!opts.squire;
     if (opts.foes) {
       opts.foes.forEach((f, i) => {
@@ -324,7 +329,7 @@ export class ArenaRoom {
       loose: (h, s) => this.loose(h, s, w),
       struck: (h, e, n) => this.struck(h, e, n, w),
       sweep: (h, s) => (sweepProps(h, s, w), sweepBlocks(h, s, this.events), sweepAllies(h, s, this.heroes, this.events), sweepSurvivors(h, s, w)),
-      grab: (h) => startRaise(h, this.heroes, this.events) || startTorch(h, this.enemies, this.events) || startKindle(h, this.map, this.events) || tryGrab(h, this.enemies, this.time, this.events) || tryLift(h, this.props, this.events),
+      grab: (h) => startRaise(h, this.heroes, this.events) || startTorch(h, this.enemies, this.events) || startKindle(h, this.map, this.events) || this.staitheGrab(h, w) || tryGrab(h, this.enemies, this.time, this.events) || tryLift(h, this.props, this.events),
       carry: (h, inp, walk) => (h.lifting ? stepLift(h, inp, w, TICK, walk) : stepCarry(h, inp, this.enemies, this.time, TICK, this.events, walk)),
       drop: (h) => (release(h, this.enemies, this.events), dropProp(h, this.props)),
       bash: (h) => (h.rush ? stepRush(h, w, TICK) : stepBash(h, this.enemies, w, TICK)),
@@ -377,6 +382,7 @@ export class ArenaRoom {
     beforeFoes(this.enemies, this.time, this.events);
     stepRushes(this.rushes, this.enemies, this.heroes, this.rushRng, this.time, TICK, this.events);
     OWN_KIT.slicks = this.slicks;
+    OWN_KIT.foes = this.enemies;
     for (const e of this.enemies) stepEnemy(e, this.heroes, this.rng, this.time, TICK, this.events, this.enemies);
     stepSleds(w);
     for (const h of this.heroes) stepHound(h, this.enemies, this.time, TICK, this.events);
@@ -390,6 +396,14 @@ export class ArenaRoom {
     stepTorch(this.enemies, this.heroes, this.time, TICK, this.events);
     stepKindle(this.map, this.heroes, this.time, TICK, this.events);
     stepScenes(this.map, w, TICK);
+    // The Staithe: the log and the hold, its nets and fires, oil drifting on the water (sim/staithe.ts, staithebits.ts, drift.ts).
+    if (this.map.staithe) {
+      stepStaithe(w, this.map, (x, y) => this.spawn('scrapper', x, y));
+      stepHungNets(w, this.map);
+      stepStaitheFire(w, this.map, this.smokes);
+      if (this.exped) playOut(w, this.map, this.exped.level);
+    }
+    stepDrift(this.slicks, w);
     stepNests(this.enemies, this.heroes, this.time, this.events, (x, y) => this.spawn('spider', x, y));
     this.puddles = stepPuddles(this.puddles, this.heroes, this.time, TICK, this.events);
     stepPoison(this.heroes, this.time, this.events);
@@ -440,6 +454,11 @@ export class ArenaRoom {
     e.respawns = false;
     this.enemies.push(e);
     return e;
+  }
+
+  /** GRAB at the Staithe: cut one of the netted free, or shove the laid log in (sim/staithebits.ts). */
+  private staitheGrab(h: Hero, w: World): boolean {
+    return !!this.map.staithe && (cutNetted(h, this.survivors, this.time, this.events) || shoveLog(h, w, this.map));
   }
 
   /** Off a ledge: a goblin knocked off (thrown, hooked, blasted) takes the fall; anyone who steps off just lands. */

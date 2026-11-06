@@ -10,7 +10,7 @@
  * shallow water seems to really hurt pathing"). Now there is a grid for each size of body, built the
  * first time one of that size needs it and again when the room changes (a house knocked down).
  */
-import { inArea, type GameMap } from '../shared/arena';
+import { inArea, solid, type GameMap } from '../shared/arena';
 import { PATH } from '../shared/tuning';
 
 export interface Grid { cols: number; rows: number; cost: Uint8Array; sig: string; fields: Map<number, Float32Array>; part?: Int32Array; nearest: Map<string, number> }
@@ -40,8 +40,10 @@ function build(m: GameMap, size: number, sig: string): Grid {
     const R = cr + r, [i0, i1] = span(cx - R, cx + R, cols), [j0, j1] = span(cy - R, cy + R, rows);
     for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) if (Math.hypot((i + 0.5) * C - cx, (j + 0.5) * C - cy) < R) cost[j * cols + i] = 0;
   };
-  for (const w of m.water ?? []) if (w.deep) box(w);
-  for (const b of m.blocks) if (!b.ruined) box(b);
+  // (A gap with a log laid across it is crossed by the log: sim/staithe.ts.)
+  const laid = m.blocks.filter((b) => b.kind === 'gangway' && b.deck && !b.ruined);
+  for (const w of m.water ?? []) if (w.deep && !(w.span && laid.length)) box(w);
+  for (const b of m.blocks) if (solid(b)) box(b);
   for (const c of m.rounds) disc(c.x, c.y, c.r);
   for (const b of m.braziers) disc(b.x, b.y, b.r);
   // (Not Hew: he walks about the wood, so where he stood when the grid was built would block his own way.)
@@ -69,7 +71,7 @@ function build(m: GameMap, size: number, sig: string): Grid {
 
 /** The grid for a body of radius r on this map (collide() works on the current map, which this is). */
 export function gridOf(m: GameMap, r: number): Grid {
-  const sig = `${m.blocks.filter((b) => b.ruined).length}.${m.blocks.length}.${m.rounds.length}.${m.water?.length ?? 0}.${m.npcs?.length ?? 0}`;
+  const sig = `${m.blocks.filter((b) => b.ruined || b.deck).length}.${m.blocks.length}.${m.rounds.length}.${m.water?.length ?? 0}.${m.npcs?.length ?? 0}`;
   const size = sizeOf(r);
   let mine = grids.get(m);
   if (!mine) grids.set(m, (mine = new Map()));

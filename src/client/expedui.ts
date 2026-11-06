@@ -46,6 +46,7 @@ export class ExpedUi {
       else if (e.what === 'open') say(EXPED_SAYS.open, '#ffd27a');
       else if (e.what === 'lit') say(EXPED_SAYS.lit, '#ffd27a');
       else if (e.what === 'watch') say(EXPED_SAYS.watch, '#ffd27a');
+      else if (e.what === 'staithelost') say(EXPED_SAYS.staithelost, '#ff9a6a');
       // The weather turned (shared/expedsky.ts): one line, what it does now.
       else if (e.what === 'weather' && x.wx?.to && SKY_TURN[x.wx.to]) say(SKY_TURN[x.wx.to]!, '#c8d8f0');
     }

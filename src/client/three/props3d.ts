@@ -45,6 +45,17 @@ function propGeo(kind: PropKind): THREE.BufferGeometry {
     B.b(0, 0.08, 0, 0.36, 0.42, 0.26, 0x6a5a48);
     B.b(0, 0.5, 0.02, 0.24, 0.24, 0.24, 0xb88a6a);
     B.b(0, 0.64, -0.02, 0.26, 0.08, 0.26, 0x3a2a1e);
+  } else if (kind === 'punt') {
+    // The Staithe's punt drawn up on the bank: a flat-bottomed boat, square at its ends, its pole laid in it.
+    B.b(0, 0, 0, 1.3, 0.12, 0.62, 0x3e2c1a);
+    for (const s of [-1, 1]) B.b(0, 0.1, s * 0.28, 1.3, 0.2, 0.06, 0x4a3420), B.b(s * 0.66, 0.06, 0, 0.06, 0.2, 0.62, 0x4a3420);
+    B.b(0.1, 0.16, 0.04, 1.5, 0.04, 0.04, 0x8a7a5a);
+  } else if (kind === 'lamp') {
+    // An oil lamp on a short post at the water's edge (lit: lights3d.ts gives it its light).
+    B.b(0, 0, 0, 0.08, 0.8, 0.08, 0x3a2a1a);
+    B.b(0, 0.8, 0, 0.2, 0.2, 0.2, 0x2a2228);
+    B.b(0, 0.84, 0, 0.12, 0.12, 0.21, 0xffd27a);
+    B.b(0, 1.0, 0, 0.24, 0.04, 0.24, 0x5a5060);
   } else {
     // The larder: a rack, joints of meat hung from it.
     for (const s of [-1, 1]) B.b(s * 0.55, 0, 0, 0.1, 1.5, 0.1, 0x4a3420);

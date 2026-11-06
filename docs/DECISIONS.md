@@ -2,6 +2,130 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-05: the Staithe: NETS on layout 4, the gaffer and the skimmer, and the Staithe on the Barrowfields (Kyle; Claude Opus 5.5)
+
+Kyle approved the biomes proposal ("continue all approved"), section 2 and rollout items 4 and 5, and asked
+for "the river in the middle should have maybe a fishing village in the center sometimes" and more scenarios.
+Every number in `shared/staithetune.ts` (STAITHE, GAFFER, SKIMMER; re-exported by tuning.ts); every word in
+`shared/staithewords.ts` and `shared/ways.ts` (NETS).
+
+**The Staithe** (`shared/staithe.ts` lays it; `sim/staithe.ts`, `staithebits.ts` the rules). Eel-catchers on their
+jetty over deep water, the hungry at it as you come in. Laid in the river's own terms (along it, across it from
+the near bank), so a river across the room and one down it are the same scene.
+- **The ground.** A NETS room is a ford room whose river is **5.8** wide with **one** ford near an end
+  (`frame3.ts`). The jetty (**5.2** long, **2.3** deep) stands **1.3** off the near bank: its footprint is cut
+  out of the water (you stand on it), the gap to it is a deep `span` box only a laid log crosses (`arena.ts`
+  `solid`, `spanned`; `pathgrid.ts`, `roomreach.ts` read the same). Blocks: `jetty` and `gangway` (boards: `deck`),
+  `smokehouse`, `dryrack`, `hungnet` (`soft`: never collided); props `punt` (cover; a Warrior lifts it) and
+  `lamp`. Growth is cleared off the bank first; the smokehouse is never put behind the landing.
+- **1. The log.** Log-carriers at the bank are laying their log across, **35%** of the way as you come in, across
+  in **14 s** more while they keep at it (a red ring of dots at their feet filling: a clock, not a blow). A hero
+  within **2.6** or a blow takes them off it. Across, they set it down, become two goblins and go over it, the band
+  after them; a goblin on the jetty takes someone off it every **4 s** (LOST). **Kill the carriers first, or SHOVE
+  it**: GRAB within **1.3** of its bank end (the button says SHOVE) and it's in the river, goblins on it with it.
+  Its clock is two times on the gangway block (`layAt` while it's laid, `layLeft` while it isn't), set when the
+  carriers start or stop, never ticked: a friend's screen works it out.
+- **2. The netted.** One in a net on the bank as you come in, and the gaffer hooks another off the jetty's end
+  every **7 s** until it's pulled off its work. GRAB within **1.25** (the button says CUT FREE): they stand and follow.
+- **3. The hold.** With the log dealt with, stand in the ring on the bank by the gap (**2.6** round) and hold it
+  **45 s** while the punt goes over and back in **3** trips; **1.5 s** of grace stepping out, then it pauses. Each
+  trip takes its share of the folk on the jetty and everyone you've freed standing by the ring over the water:
+  saved (`survivorhome`, counted to the room). **2** goblins come along the bank from each side at each trip's
+  turn; with nobody left standing the punt goes **4x** quicker. Over when the last trip lands, or nobody's left
+  on the jetty, in a net or by the ring. The way on opens once the goblins are down and the Staithe's over.
+- **Pay**: NETS pays **+10%** of the job's pay for each one saved (`waypay.ts` reads the room's count, as SMOKE
+  and CRIES). The recap's LOST row says "**n taken from the jetty**" (taken, killed where they waited, or left too
+  long); someone left in the smokehouse is "to the fire" as any house's.
+- **Hung nets**: walk into one and you're held **1 s** (a netter's net: struggle, or a friend's CUT FREE), not
+  again for **2.5 s**; a goblin is held the same. Wood with **12** health: fire takes them in half a second.
+- **A broken lamp** spills its oil on the water a step from its post, unlit; it drifts downstream (below).
+- **The smokehouse**: two torch-bearers get it going as a house in layout 4's SMOKE scene (the same machinery);
+  alight it **smokes 40 s** (one of the room's smokes: goblins can't see through it) while its timbers burn away
+  (**960** health at the usual 24 a second), and the one inside cries out (their own lines) until pulled out of
+  its door (stand still **1.6 s**, as ever) or it falls in on them.
+- **Racks** are wood (**40**): fire takes them. **Punts** are props (**70**, weight **5**): cover, and a Warrior
+  lifts and throws one.
+- **A jetty burnt through** (**300** health) throws everyone on it to the bank by the ring, hurt **6** and held
+  **0.8 s**; the folk on it land there too (then follow), goblins on it go in the river.
+
+**Oil on water** (`sim/drift.ts`; the newest world effects entry's "oil on water"). A slick on a river drifts
+downstream at **0.42** tiles a second (`shared/waterbody.ts flowAt`: the same rule the painted water runs by),
+on under the jetty's boards. Lit, it burns **12 s** as it goes (rain shortens it as any oil), and lights wood
+it passes (the jetty, its nets, racks) and any oil it touches. A goblin standing in burning oil on the water
+isn't put out by the water (`steam.ts onOil`). Its place goes to friends in **0.3**-tile steps, not every tick;
+both views ease it along between them (`staithedraw.ts driftAt`).
+
+**The gaffer** (`sim/gaffer.ts`; a squad goblin, only at the Staithe for now). A pole with an iron hook. From up
+to **4** tiles it throws the hook down a **thin red lane** (blockable; white while a parry would land, as every
+telegraph): **blocked**, nothing; **parried**, the hook snaps (**8 s** of only a jab) and it's stunned as any
+parried goblin; **landed** (**6**), you're hauled across to the nearest brute within **8** (its own feet if none),
+held **0.6 s**, the brute ready to swing. Keeps **2.4** off. **34** health.
+
+**The skimmer** (`sim/skimmer.ts`; a world-effect goblin). It stands at the water up the bank, and every **9 s**
+while it's awake pours its pot on the water and puts a light to it: a **striped** circle (**1.1** round, nothing
+to block) on the water, then burning oil drifting down onto the jetty. Back to its post if moved, off if you
+come within **3.5**. **Frost pins it** (any chill or freeze): **4 s** of nothing, its pour spilt. **22** health.
+
+**The Staithe on the Barrowfields** (`shared/expedstaithe.ts`). Rolled on **45%** of maps from the map's seed on
+its own stream; laid where it fits (between the fords, at least **9.5** clear of each, off any camp, chest, cage,
+job or building, **16** from the way in), so **about 1 map in 3** has it (30 of the first 90 days). Laid **last**:
+the river broadened to **5.8** for **13** tiles round it, its ground cleared of growth, fences and carts there
+knocked flat, anyone standing there moved down the bank, and its goblins taking the place of as many scattered
+knots (the map holds 150). So **a map without it is byte for byte what it was, and a map with it is the same
+everywhere else** (a test builds both). **Half** pin it in the last job's place (2 or 3 jobs still); else it's a
+side job. It's done when the punt's over (paid as any job); **left alone it plays out**: at **ALARM 3** the
+smokehouse catches, at **ALARM 5** everyone on the jetty, netted or shut in is lost and it's over (done, so the
+beacon can open, but nothing paid: "Too late for the folk at the Staithe.").
+
+**Online.** The room decides everything; nothing new rolls (the Staithe's place and the folk come from the
+seed and the map; the gaffer's and skimmer's clocks are the room's time). What a friend needs is on the blocks
+(sent as patches when they change: the log's and the hold's clocks as times, never deleted, so a stop reaches
+them too), the survivors (`stay`, `netted`) and the slicks; no new collection and **nothing sent every tick**
+(a test encodes two seconds of laying and finds no change to the log's block).
+
+**Drawn, flat and 2.5D, one source** (`client/staithebox.ts` boxes through `pieces.ts`, as the braziers and fences
+parity work): the jetty on its piles (charred stumps once burnt through), the log with planks lashed over it,
+the smokehouse with its louvre, racks of eels, nets on poles; punts and lamps as props in both. Boards are painted
+under everyone standing on them in the flat view. The log's clock, the jetty's ring, the punt going over and back
+with its punter and folk, a net over the netted (`staithedraw.ts`); the gaffer's pole and hook, the skimmer's pot
+and taper, rimed while pinned (`staithekit.ts`); the hook lane (flat `foes.ts`, 2.5D `teleg3d.ts` as a 0.07 lane),
+the pour's oil and catching flames (`telegraph2.ts`); lamp and burning-oil light in both (`roomlights.ts`); the
+NETS cue past its gap (two lamps on posts, a net between them, water). The smokehouse's catching ring at its wall
+and its pull ring at the door in both.
+
+**Tests** (`tests/staithe.test.ts`, 21): the NETS way appears at a fork and leads into the Staithe (and pays 10%
+each); the folk; the carriers lay it unless killed, and across, goblins board and take folk; killed first, it's
+never laid; SHOVE; CUT FREE; the hold's trips, saved and pay; the pause after grace; nets catch and burn; a lamp's
+oil and the skimmer's drift downstream (not across) and light the jetty; a jetty burnt through; the smokehouse's
+40 s, cries and loss; the hook blocked, snapped by a parry, and hauling to the brute; frost pins the skimmer; the
+Barrowfields' placement (1 in 3, middle row between the fords, deterministic, foes capped), the rest of the map
+unchanged, and ALARM 3 and 5; a friend's patches carry it and two runs agree; the log's clock sends nothing while
+it ticks. `tests/scenes4.test.ts`: the well's test now takes a room where the well found ground (the reshuffle met
+one too crowded, which falls back to a fire as designed). **The layout-4 pin re-pinned** to 2866841078: with NETS
+left out of `waysFor` it was still 47426855, so NETS joining the ways is all that moved. Layout 2 and 3 pins
+unchanged. Shots: `node scripts/staithe-look.cjs [url] [outdir]` (targets: `npx tsx scripts/staithe/find.ts`).
+
+**Lore keeper's pass (applied the same day; the line editor's still to come):** eel-folk is **eel-catchers**
+everywhere on screen. The way: "NETS: eel-catchers holding out on their jetty, the hungry laying a log across. +10%
+pay for each one you save". Banners: "The hungry are laying a log across to the jetty. Kill the carriers, or shove
+the log in the river once it's across"; "The log's across. GRAB at its end to shove it in the river before they take
+everyone on the jetty". Callouts **IN THE RIVER**, **HOOKED** (the hung net), **PUNT ACROSS**, **FROZEN** (the
+skimmer; PINNED is the spear's). Recap "n taken from the jetty". Calls: "Get a knife to it, please!", "The racks have
+caught, it's on my arm!", "That's the last of them, push off". Big map: "Get the eel-catchers off the Staithe: deal
+with the log, cut the netted free, hold the ring for the punt". The rest stand as written (shared/staithewords.ts):
+the Staithe, Withy Staithe, NETS, the gaffer, the skimmer, STAITHE, SHOVE, CUT FREE, "The log's across!", TAKEN,
+SNAPPED, the other banner and call lines. The gaffer's pole is a fishing gaff taken off the eel-catchers, never a
+billhook (drawn as a pole with a plain hook). Recorded in docs/lore/story-bible.md: Withy Staithe, the eel-catchers
+(unwalled, boards up at night, never trade with Wickhold, the saved go to Wickhold, Maud), the hungry don't cross deep
+water (never said why, never a weakness the town uses), the gaff and the hoard's lamp oil, HOOKED and FROZEN. Pay
+stays 10% each; the gaffer and skimmer stay at the Staithe only for now.
+
+**Open for Kyle**: the numbers once he's played (14 s for the log, 45 s and 3 trips for the hold, the gaffer's 4
+tiles, the skimmer's 9 s); the NETS pay is 10% each as asked (the proposal's layout-4 line said 15%); the
+smokehouse finds ground in about 92% of NETS rooms (the rest go without it, never without the jetty, log, gaffer
+or skimmer); the gaffer and skimmer debut only at the Staithe (no encounter template yet, as the proposal's
+bleed-in says).
+
 ## 2026-11-05: the budget checked again; the yard is this browser's alone, with straw men to practise on (Kyle; Claude Opus 5.5)
 
 Kyle: "We should always double check, or at least once a day after big working days and pushes, to make sure

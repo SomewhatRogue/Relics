@@ -270,6 +270,20 @@ export function drawTelegraph(c: Ctx, a: EnemyAttack, cx: number, cy: number, pa
       g.globalAlpha = (on ? 0.85 : 0.25) * (edge ? 1 : 0.6) * pulse;
       g.fillRect(Math.round(ox + a.dx * d + nx * w), Math.round(oy + a.dy * d + ny * w), 1, 1);
     }
+  } else if (a.kind === 'hook') {
+    // The gaffer's hook: a thin red lane its length (it can be blocked), white while a parry would land.
+    const R = a.range * PX, ox = OX + a.ox * PX - cx, oy = OY + a.oy * PX - cy, nx = -a.dy, ny = a.dx;
+    for (let d = 5; d <= R; d += 1) {
+      const on = d < R * prog, px = Math.round(ox + a.dx * d), py = Math.round(oy + a.dy * d);
+      g.fillStyle = now ? '#ffffff' : fill;
+      g.globalAlpha = on ? 0.9 * pulse : 0.35;
+      g.fillRect(px, py, 1, 1);
+      if (d % 4 === 0) g.fillRect(Math.round(px + nx), Math.round(py + ny), 1, 1), g.fillRect(Math.round(px - nx), Math.round(py - ny), 1, 1);
+    }
+    // The hook's iron at its far end.
+    g.globalAlpha = 0.9;
+    g.fillStyle = '#c8c8d0';
+    g.fillRect(Math.round(ox + a.dx * R * prog), Math.round(oy + a.dy * R * prog) - 1, 2, 2);
   } else if (a.kind === 'draw') {
     // The Stoker's rake: a striped line (can't be blocked) that fills as it winds up. Get off it.
     const R = a.range * PX, ox = OX + a.ox * PX - cx, oy = OY + a.oy * PX - cy, nx = -a.dy, ny = a.dx;

@@ -9,7 +9,9 @@
 import { block, claim, free, mark, patch, prop, round, spotIn, type Kit, type P } from './expedkit.js';
 import type { Foe } from './terrain.js';
 
-export type GoalKind = 'larder' | 'engine' | 'prisoners' | 'dens' | 'shrine' | 'butcher';
+export type GoalKind = 'larder' | 'engine' | 'prisoners' | 'dens' | 'shrine' | 'butcher'
+  /** The Staithe (shared/expedstaithe.ts): never rolled with the six; pinned on its own roll, else a side job. */
+  | 'staithe';
 export type SideKind = 'cache' | 'pray';
 /** A job on the map: where, and its parts (blocks by index, cages by place, a goblin by its foe index). */
 export interface GoalSpot { kind: GoalKind | SideKind; x: number; y: number; camp?: number; blocks?: number[]; cages?: P[]; foe?: number; chest?: number }

@@ -4,7 +4,7 @@
  */
 import type { HeroClass } from './weapons.js';
 
-export type PropKind = 'barrel' | 'oil' | 'crate' | 'table' | 'plank' | 'stave' | 'cage' | 'larder';
+export type PropKind = 'barrel' | 'oil' | 'crate' | 'table' | 'plank' | 'stave' | 'cage' | 'larder' | 'punt' | 'lamp';
 
 export interface PropSpec {
   radius: number;
@@ -25,6 +25,9 @@ export const PROPS: Record<PropKind, PropSpec> = {
   cage: { radius: 0.55, weight: 99, hp: 40, pieces: { kind: 'plank', n: 2 } },
   /** The goblins' larder: a rack of stolen stores and worse. Smash it. */
   larder: { radius: 0.45, weight: 99, hp: 25, pieces: null },
+  /** The Staithe's: a punt drawn up on the bank (cover; a Warrior can lift it), an oil lamp on its post (broken, its oil spills on the water). */
+  punt: { radius: 0.62, weight: 5, hp: 70, pieces: { kind: 'plank', n: 3 } },
+  lamp: { radius: 0.2, weight: 0.6, hp: 6, pieces: null },
 };
 
 /** Classes big enough to lift and throw them (a Barbarian joins when the Warrior forks). */
@@ -99,6 +102,13 @@ export const WOOD: Partial<Record<import('./arena').BlockKind, { hp: number; doo
   // Layout 4: a fallen trunk across the way, a fence of sharpened stakes round a war band's fire.
   log: { hp: 90 },
   stakes: { hp: 50 },
+  // The Staithe (shared/staithe.ts): the jetty burns through in a while; the smokehouse takes STAITHE.smoke
+  // seconds of burning (BLAZE.dps a second); racks and hung nets go quickly. The log only ever falls in.
+  jetty: { hp: 300 },
+  gangway: { hp: 9999 },
+  smokehouse: { hp: 960 },
+  dryrack: { hp: 40 },
+  hungnet: { hp: 12 },
 };
 export const BLAZE = {
   /** Health a burning building loses a second. */

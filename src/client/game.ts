@@ -69,7 +69,7 @@ interface JobSave { run: Run; room: Record<string, unknown>; houses?: SavedHouse
  * gold); or gone early from a party, by LEAVE or cut off from it (the gold picked up while with them).
  */
 export type How = 'won' | 'beaten' | 'left' | 'dropped';
-export interface Result { won: boolean; how: How; half: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number; relic?: RelicItem; treasure: Item[]; sold: Item[]; lost?: number; /** Prisoners led off out of reach (layout 4). */ ledoff?: number; /** The way taken at a fork and what it paid (shared/waypay.ts). */ way?: string; /** Jobs of the church's light left, if it went on this one. */ lit?: number; /** What happened, for the recap (recaptally.ts). */ recap?: Recap }
+export interface Result { won: boolean; how: How; half: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number; relic?: RelicItem; treasure: Item[]; sold: Item[]; lost?: number; /** Prisoners led off out of reach (layout 4). */ ledoff?: number; /** The Staithe's folk lost off the jetty (sim/staithe.ts). */ netlost?: number; /** The way taken at a fork and what it paid (shared/waypay.ts). */ way?: string; /** Jobs of the church's light left, if it went on this one. */ lit?: number; /** What happened, for the recap (recaptally.ts). */ recap?: Recap }
 /** A leader back after a reload waits this long (the room held) for a friend to answer before the job's given up. */
 const HOLD = 10;
 /** Something you can use where you stand: a spot, a person, or a door. */
@@ -949,7 +949,7 @@ export class Game {
     const found = won ? treasure(run.job, p.cls, p.id, p.runs, crowd, (run.sides ?? 0) + (way?.treasure ?? 0)) : [], kept = found.slice(0, Math.max(0, bagSize(p) - p.bag.length)), sold = found.slice(kept.length);
     p.bag.push(...kept);
     p.gold += sold.length * TREASURE_SOLD;
-    this.result = { won, how, half, job: run.job, gold, xp, rescued, levels, relic, treasure: kept, sold, lost: run.lost ?? 0, ledoff: run.ledoff ?? 0, way: way ? wayLine(way) : undefined, lit: lit > 0 ? p.lit : undefined, recap };
+    this.result = { won, how, half, job: run.job, gold, xp, rescued, levels, relic, treasure: kept, sold, lost: run.lost ?? 0, ledoff: run.ledoff ?? 0, netlost: run.netlost ?? 0, way: way ? wayLine(way) : undefined, lit: lit > 0 ? p.lit : undefined, recap };
     this.run = null;
     // Paid: marked so in the same store as the pay (the give below), then the tallies let go.
     if (key) p.paid = [...(p.paid ?? []), key].slice(-12);

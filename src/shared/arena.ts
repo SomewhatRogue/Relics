@@ -36,7 +36,10 @@ export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall'
   // Inside the halls, each its own (client/hallsdraw.ts).
   | 'books' | 'stair' | 'dummy' | 'maptable' | 'dicetable' | 'skinbench' | 'desk' | 'tub' | 'bellows' | 'booth' | 'bunk' | 'casks'
   // Layout 4's pieces (client/pieces.ts): a mine's headframe, a fallen trunk, a watermill and its wheel, a fence of sharpened stakes.
-  | 'headframe' | 'log' | 'mill' | 'stakes';
+  | 'headframe' | 'log' | 'mill' | 'stakes'
+  // The Staithe (shared/staithe.ts): the eel-catchers's jetty over deep water, the log laid across to it, a
+  // smokehouse, drying racks, nets hung up to dry.
+  | 'jetty' | 'gangway' | 'smokehouse' | 'dryrack' | 'hungnet';
 export interface Round extends Circle { kind: RoundKind }
 export interface Block {
   x: number; y: number; w: number; h: number; kind: BlockKind; label?: string;
@@ -80,6 +83,31 @@ export interface Block {
   held?: number;
   pulled?: number;
   pullT?: number;
+  /**
+   * Boards you stand on over water (the Staithe's jetty, a log laid across a gap): never collided with,
+   * and the water under them doesn't stop you; a jetty burnt through stops you like a wall. `soft`: never
+   * collided with at all (a hung net, a log not laid yet).
+   */
+  deck?: boolean;
+  soft?: boolean;
+  /**
+   * The Staithe's state, on its blocks so a friend's screen has it from the patches (sim/staithe.ts): the
+   * log's laying (when it'll be across if the carriers keep at it, or what's left while they don't), and
+   * the hold (when the punt will be done if the ring's held, or what's left while it isn't).
+   */
+  layAt?: number;
+  layLeft?: number;
+  holdAt?: number;
+  holdLeft?: number;
+  /** The jetty: how many brought over and how many lost, and whether it's played out (the big map's ALARM 5). */
+  saved?: number;
+  lost?: number;
+  over?: boolean;
+  /** The jetty: the punt's trips made, when the ring was left (its grace), held quicker with the bank cleared, and burnt through (everyone thrown off). */
+  trips?: number;
+  outAt?: number;
+  quick?: boolean;
+  thrown?: boolean;
 }
 /** Paint only, on the floor: never collided against or decided on. */
 export type MarkKind = 'blood' | 'drag' | 'debris' | 'scorch' | 'trample' | 'planks' | 'beds' | 'flowers' | 'mound' | 'fallenpost' | 'green'
@@ -253,8 +281,20 @@ export interface GameMap {
   led?: { pts: [number, number][]; n: number };
   /** Lamp oil spilled where the room begins (a wrecked cart's: a fire trap), as sim/oil.ts slicks. */
   oil?: { x: number; y: number; r: number }[];
+  /** The Staithe (shared/staithe.ts): where its ring, folk and punt are; its jetty, log and smokehouse are blocks. */
+  staithe?: StaitheMap;
 }
-export interface Water { x: number; y: number; w: number; h: number; deep?: boolean }
+/** `span`: a gap a laid log crosses (deep water stops you there unless you're on the log). */
+export interface Water { x: number; y: number; w: number; h: number; deep?: boolean; span?: boolean }
+/**
+ * The Staithe as laid (shared/staithe.ts): the ring on the bank at the gap, the folk's places on the jetty
+ * and the netted's on the bank, the skimmer's post and where it pours, the punt's landings (jetty, far
+ * bank), and which way is across (near bank to far) and downstream.
+ */
+export interface StaitheMap {
+  ring: { x: number; y: number }; folk: [number, number][]; netted: [number, number][];
+  pour: [number, number]; punt: [number, number][]; across: [number, number]; down: [number, number];
+}
 /**
  * Paint only, what the goblins did: a body torn apart (`torn`), the pieces strewn about one they're at
  * (`strewn`), one tied up on the back wall and opened (`pinned`, x along the wall), one hung from a
@@ -293,8 +333,6 @@ export const doorOut = (b: Block, k: number) => {
   const [dx, dy] = pushDir(b), d = doorAt(b);
   return { x: d.x - dx * k, y: d.y - dy * k };
 };
-/** A block that still stands in the way (burned-down ones are rubble you walk over). */
-export const solid = (b: Block) => !b.ruined;
 
 /** The training room (the Training Yard in town). */
 export const ARENA = {
@@ -344,6 +382,11 @@ export const currentMap = () => MAP;
 
 export const inArea = (a: Area | null, x: number, y: number) => !!a && x >= a.x && x <= a.x + a.w && y >= a.y && y <= a.y + a.h;
 
+/** What stops a body: a block standing (burned-down ones are rubble you walk over); boards you walk on only once burnt through; a hung net never. */
+export const solid = (b: Block) => (b.deck ? !!b.ruined && b.kind === 'jetty' : !b.ruined && !b.soft);
+/** On a log laid across a gap (the gap's deep water doesn't stop you there). */
+export const spanned = (m: GameMap, x: number, y: number) => m.blocks.some((b) => b.kind === 'gangway' && b.deck && !b.ruined && inArea(b, x, y));
+
 /** Keep a circle inside the map and out of round things and blocks. */
 export function collide(p: { x: number; y: number }, r: number): void {
   const m = MAP;
@@ -355,11 +398,11 @@ export function collide(p: { x: number; y: number }, r: number): void {
   for (const c of near.braziers) push(p, r, c);
   for (const n of m.npcs ?? []) if (!n.path && !n.pose) push(p, r, { x: n.x, y: n.y, r: 0.32 });
   for (const b of near.blocks) {
-    if (!b.ruined) box(p, r, b);
+    if (solid(b)) box(p, r, b);
   }
   if (m.ledges) levels(m, p as { x: number; y: number; z?: number; dropped?: number; kvx?: number; kvy?: number }, r);
   // Deep water stops bodies (things with a footing), never a shot over it.
-  if (m.water && 'z' in p) for (const w of m.water) if (w.deep) box(p, r, w);
+  if (m.water && 'z' in p) for (const w of m.water) if (w.deep && !(w.span && spanned(m, p.x, p.y))) box(p, r, w);
   // Pushed out of something standing near the edge (a bed against a wall): never out past the edge.
   p.x = Math.max(r, Math.min(m.w - r, p.x));
   p.y = Math.max(r * 0.6, Math.min(m.h - r, p.y));

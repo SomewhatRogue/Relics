@@ -23,8 +23,10 @@ import { THEMES, type Foe, type RoomPlan } from './terrain.js';
 import { lightFor, timeOf } from './timeofday.js';
 import { EXPED, EXPED_PACKS } from './tuning.js';
 import { expedSky, themeUnder } from './expedsky.js';
+import { layExpedStaithe, staitheRoll } from './expedstaithe.js';
+import { inArea } from './arena.js';
 
-export type NodeKind = 'in' | 'out' | 'hamlet' | 'camp' | 'barrows' | 'woodedge' | 'fields' | 'bank';
+export type NodeKind = 'in' | 'out' | 'hamlet' | 'camp' | 'barrows' | 'woodedge' | 'fields' | 'bank' | 'staithe';
 export const GOALS: GoalKind[] = ['larder', 'engine', 'prisoners', 'dens', 'shrine', 'butcher'];
 export interface Patrol { foes: number[]; path: P[] }
 export interface ExpedPlan extends RoomPlan {
@@ -45,7 +47,8 @@ export function expedPlan(job: Job): ExpedPlan {
   return JSON.parse(JSON.stringify(p)) as ExpedPlan;
 }
 
-function build(job: Job): ExpedPlan {
+/** Built from scratch (`staithe` false: as if the seed never rolled it; tests compare the two). */
+export function build(job: Job, staithe = true): ExpedPlan {
   const rng = new Rng(job.seed * 7919 + 33), k = newKit(rng), land = layLand(k);
   const inI = land.ins.r * COLS + land.ins.c, outI = land.ext.c;
   // (Far enough down the drove road that the whole of the beacon's ring is on the map.)
@@ -157,6 +160,15 @@ function build(job: Job): ExpedPlan {
   const spill = settle(job, 0, k.blocks);
   const ground: P[] = [];
   for (let y = 3; y < MH - 2; y += 4) for (let x = 3; x < MW - 2; x += 4) if (free(k, x, y, 0.8, 0)) ground.push({ x, y });
+  // The Staithe on one map in three, laid last over a bank node between the fords, so the rest of the map
+  // is exactly as it would be without it (shared/expedstaithe.ts). Pinned, it takes the last job's place.
+  const sr = staithe ? staitheRoll(job.seed) : null, st = sr ? layExpedStaithe(k, land, nodes, [...mains, ...sides], camps) : null;
+  if (st) {
+    nodes[st.node] = 'staithe';
+    for (let n = ground.length - 1; n >= 0; n--) if (inArea(st.area, ground[n].x, ground[n].y)) ground.splice(n, 1);
+    if (sr?.pinned) mains.pop(), mains.push({ kind: 'staithe', x: st.x, y: st.y });
+    else sides.push({ kind: 'staithe', x: st.x, y: st.y });
+  }
   const flocks = flocksOn(open.map((i) => k.dead[i]), job);
   // Under the posting's sky (shared/expedsky.ts): it may turn partway (sim/exped.ts).
   const theme = themeUnder({ ...lightFor(THEMES.field, 'field', timeOf(job)), floor: 'grass' as const, back: 'trees' as const }, { from: expedSky(job).from }, 0);
@@ -164,7 +176,7 @@ function build(job: Job): ExpedPlan {
     name: 'THE BARROWFIELDS', w: MW, h: MH, wallFace: 3, rounds: k.rounds, blocks: k.blocks, braziers: k.braziers, torches: [],
     hero: { x: land.ins.x, y: land.ins.y }, exit: { x: land.ext.x - 1.5, y: 0, w: 3, h: 0.9 }, theme, water: k.water, soil: k.soil,
     marks: [...k.marks, ...spill], npcs: k.dead.length ? k.dead : undefined, grim: k.grim.length ? k.grim : undefined, sleepers: k.sleepers.length ? k.sleepers : undefined,
-    flocks: flocks.length ? flocks : undefined,
+    flocks: flocks.length ? flocks : undefined, ...(st ? { staithe: st.map } : {}),
   };
   return { map, foes: k.foes, props: k.props, chests: k.chests, nodes, land, camps, goals: mains, sides, patrols, zone, open: ground };
 }

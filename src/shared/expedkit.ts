@@ -47,6 +47,12 @@ export function claim(k: Kit, x: number, y: number, r: number): void {
   }
 }
 
+/** Clear of every claim (nothing else checked: the Staithe lays its own things at the water's edge). */
+export function unclaimed(k: Kit, x: number, y: number, r: number): boolean {
+  for (const c of k.claims.get(cellOf(x, y)) ?? []) if (Math.hypot(c.x - x, c.y - y) < c.r + r + 0.5) return false;
+  return true;
+}
+
 /** Clear of everything laid so far, the roads (`road` tiles off), the water and the map's edge. */
 export function free(k: Kit, x: number, y: number, r: number, road = 1.6): boolean {
   if (x < r + 1.2 || y < r + 1.4 || x > MW - r - 1.2 || y > MH - r - 1.2) return false;

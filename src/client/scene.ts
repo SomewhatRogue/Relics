@@ -43,6 +43,8 @@ import { waiting } from '../sim/practice';
 import { LIFT, OX, OY, PX, paintMap, worldH, worldW } from './world';
 import { drawText, textWidth } from './pixfont';
 import { blockAt, blockFoot, drawBlock, drawRound } from './blocks';
+import { DECKS } from './pieces';
+import { drawPunt, drawStaitheGround, puntAt, staitheLights } from './staithedraw';
 import { blazeLights, drawBlaze, drawBlazeAbove } from './blazedraw';
 import { kindling } from '../shared/kindling';
 import { drawGlint, drawKindling, drawWoodpile } from './kindledraw';
@@ -358,8 +360,19 @@ export class Scene {
     for (const b of map.blocks) {
       if (b.kind === 'sideway') continue;
       const [bx, by] = blockAt(b);
+      // Boards you walk on (the Staithe's jetty, a log laid across): under everyone standing on them.
+      if (DECKS.has(b.kind)) {
+        items.push({ y: -1e6 + b.y, draw: () => drawBlock(c, b, bx - cx, by - cy, false) });
+        continue;
+      }
       items.push({ y: blockFoot(b), draw: () => drawBlock(c, b, bx - cx, by - cy, lampAt(map.theme, b.x, b.y) > 0.5) });
       // A house's kindling: its woodpile, glinting while you're near, the ring while someone lights it (kindledraw.ts).
+      // The Staithe's smokehouse: how far it's caught, at its wall; the pull at its door once it's alight.
+      if (b.kind === 'smokehouse') {
+        const door = doorAt(b), sx = OX + (b.x - 0.3) * PX - cx, sy = OY + (b.y + b.h * 0.55) * PX - cy;
+        items.push({ y: blockFoot(b) + 0.1, draw: () => drawSceneRings(c, b, sx, sy, OX + door.x * PX - cx, OY + door.y * PX - cy) });
+        continue;
+      }
       const k = kindling(b, map);
       if (!k) continue;
       const kx = OX + k.x * PX - cx, ky = OY + k.y * PX - cy, d = me && !b.ruined && (b.burning ?? -1) < 0 ? Math.hypot(me.x - k.x, me.y - k.y) : 99;
@@ -429,6 +442,10 @@ export class Scene {
     // An expedition: the rings where a job is done by standing there, and the beacon (expeddraw.ts).
     const ground = (x: number, y: number): [number, number] => [OX + x * PX - cx, OY + y * PX - cy];
     drawExpedGround(glow, room, ground, now);
+    // The Staithe: its log's clock and the jetty's ring on the ground, the punt on the water (staithedraw.ts).
+    drawStaitheGround(glow, room, ground, now);
+    const punt = puntAt(room);
+    if (punt) items.push({ y: OY + punt.y * PX - 4, draw: () => drawPunt(c.lit, OX + punt.x * PX - cx, OY + punt.y * PX - cy, PX, punt.full, now) });
     items.sort((p, q) => p.y - q.y);
     for (const it of items) it.draw();
     // What you can tell of each way at a fork (waycues.ts), over everything near its gap.
@@ -465,6 +482,7 @@ export class Scene {
     blazeLights(room, cx, cy, now, lights);
     strikeLights(room, cx, cy, lights);
     for (const b of beacons) lights.push({ x: OX + b.x * PX - cx, y: OY + b.y * PX - cy - 14, r: 150 + Math.sin(now * 9) * 8, i: 1.3, c: [1, 0.62, 0.3] });
+    for (const l of staitheLights(room)) lights.push({ x: OX + l.x * PX - cx, y: OY + l.y * PX - cy - 10, r: l.r * PX + Math.sin(now * 9 + l.x) * 3, i: l.i, c: l.c });
     for (const m of room.coals) lights.push({ x: OX + m.x * PX - cx, y: OY + m.y * PX - cy - 4, r: 26 + Math.sin(now * 7 + m.id) * 3, i: 0.6 * Math.min(1, m.life / 4), c: [1, 0.6, 0.28] });
     for (const ch of room.chests) if (ch.state !== 'shut') lights.push({ x: OX + ch.x * PX - cx, y: OY + ch.y * PX - cy - 6, r: ch.state === 'opening' ? 16 + 30 * (ch.t / 1.2) : 26, i: ch.state === 'opening' ? 0.4 + 0.5 * (ch.t / 1.2) : 0.35, c: tint(TIERS[ch.tier].col) });
     for (const d of room.drops) {

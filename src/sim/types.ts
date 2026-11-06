@@ -185,6 +185,8 @@ export interface Hero extends Body {
   /** Lost in a cloud of crows until (sim/crows.ts); on an oil slick this tick (sim/oil.ts). */
   crowsUntil?: number;
   slick?: boolean;
+  /** The Staithe (sim/staithe.ts): when a hung net last caught them (not again for a moment). */
+  snagAt?: number;
   /** The way they were going, on oil (it takes hold of the stick slowly). */
   slipX?: number;
   slipY?: number;
@@ -330,9 +332,9 @@ export interface Hero extends Body {
 }
 
 /** `pounce`: a spider's leap along its line; `bite`: the brood mother's; `spit`: her lobbed glob (a circle). */
-export type AttackKind = 'cleave' | 'slam' | 'swing' | 'stab' | 'shot' | 'draw' | 'charge' | 'hex' | 'pounce' | 'bite' | 'spit' | 'net' | 'grab' | 'lob' | 'erupt' | 'torch';
+export type AttackKind = 'cleave' | 'slam' | 'swing' | 'stab' | 'shot' | 'draw' | 'charge' | 'hex' | 'pounce' | 'bite' | 'spit' | 'net' | 'grab' | 'lob' | 'erupt' | 'torch' | 'hook' | 'pour';
 /** Attacks that come down as a circle at (cx, cy) rather than a wedge from the attacker. */
-export const isRound = (k: AttackKind) => k === 'slam' || k === 'hex' || k === 'spit' || k === 'net' || k === 'lob' || k === 'erupt' || k === 'torch';
+export const isRound = (k: AttackKind) => k === 'slam' || k === 'hex' || k === 'spit' || k === 'net' || k === 'lob' || k === 'erupt' || k === 'torch' || k === 'pour';
 
 export interface EnemyAttack {
   kind: AttackKind;
@@ -513,6 +515,11 @@ export interface Enemy extends Body {
   /** Layout 4 (sim/tasks.ts): what it's busy at till it sees you, and the body it's hauling (where that lies). */
   task?: import('../shared/scenes4').FoeTask;
   haul?: { x: number; y: number };
+  /** The Staithe's sorts (sim/gaffer.ts, skimmer.ts): when its hook was snapped by a parry; pinned by frost until; a hung net last caught it. */
+  snapAt?: number;
+  pinUntil?: number;
+  snagAt?: number;
+  pourAt?: number;
   /** Frozen and skidding off a heavy hit (sim/iceslide.ts): who sent it, its velocity, how fast it slows, charged. */
   sled?: { by: string; vx: number; vy: number; decel: number; hard: boolean } | null;
   /** World effects (shared/worldfx.ts). A butcher at a body (sim/meal.ts): the body (`b` a goblin's id, or
@@ -567,6 +574,9 @@ export interface Survivor extends Body {
   /** Their body eaten by a butcher, or burned to ash first (sim/meal.ts, worldfire.ts). */
   eaten?: boolean;
   ashed?: boolean;
+  /** The Staithe (sim/staithe.ts): on the jetty, standing (the punt takes them over); netted on the bank (GRAB, as CUT FREE). */
+  stay?: boolean;
+  netted?: boolean;
 }
 
 /** A barrel, crate, table or broken piece: a body that can be smashed, pushed, lifted and thrown. */
@@ -651,7 +661,11 @@ export type FightEvent =
   /** The newer sorts (sim/ownfoes.ts): a banner down and the goblins it routs; a net (who's in it, a struggle, cut out, free); a thief's grab, its loot back, gone. */
   /** A storm (sim/storm.ts): a strike's circle shown (the crackle), and the strike landing (the flash, the thunder after). */
   | { k: 'strikewarn' | 'strike'; x: number; y: number }
-  | { k: 'bannerfall' | 'routed' | 'struggle' | 'recovered' | 'escaped' | 'rooffall' | 'whip' | 'scatter' | 'howl' | 'dig' | 'surface' | 'unearthed' | 'slick' | 'oilwarn' | 'oilup' | 'crows' | 'listen' | 'ledoff' | 'pulled'; x: number; y: number }
+  | { k: 'bannerfall' | 'routed' | 'struggle' | 'recovered' | 'escaped' | 'rooffall' | 'whip' | 'scatter' | 'howl' | 'dig' | 'surface' | 'unearthed' | 'slick' | 'oilwarn' | 'oilup' | 'crows' | 'listen' | 'ledoff' | 'pulled'
+    /** The Staithe (sim/staithe.ts): the log across, shoved in, a net caught someone, a jetty burnt through, the punt over, someone lost off it, a skimmer pinned, a hook snapped. */
+    | 'logacross' | 'logshoved' | 'snagged' | 'thrown' | 'puntover' | 'trip' | 'folklost' | 'skimpin' | 'hooksnap' | 'smokehouse'; x: number; y: number }
+  /** A hook flung from (x, y) to (x2, y2): the gaffer taking someone off the jetty, or a hero hauled to its brute. */
+  | { k: 'gaffed' | 'hooked'; x: number; y: number; x2: number; y2: number }
   | { k: 'netted' | 'netfree'; x: number; y: number; id: string }
   /** A pack rush winding up (`n` goblins, `id` the hero it's on), and one parry that answered `n` of its blows
    *  (both at the fan's middle);

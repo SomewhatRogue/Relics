@@ -8,8 +8,9 @@
  */
 import type { Country, RouteNode } from './nodeports.js';
 import type { Piece } from './nodes.js';
+import { STAITHE } from './staithetune.js';
 
-export type WayKind = 'smoke' | 'cries' | 'crows' | 'drums' | 'quiet' | 'ford' | 'webs';
+export type WayKind = 'smoke' | 'cries' | 'crows' | 'drums' | 'quiet' | 'ford' | 'webs' | 'nets';
 
 export interface Way {
   /** Over the gap. */
@@ -45,6 +46,8 @@ export const WAYS: Record<WayKind, Way> = {
   quiet: { word: 'QUIET', tell: 'QUIET: fewer goblins, 20% less pay', piece: 'asleep', countries: ALL, more: -3, pay: -0.2, treasure: 0 },
   ford: { word: 'WATER', tell: 'WATER: wade across, archers on the far side. +15% pay', piece: 'wading', nodes: ['ford', 'fenford', 'flooded'], countries: ['fields', 'wood', 'fen', 'rock', 'under'], more: -1, pay: 0.15, treasure: 0 },
   webs: { word: 'WEBS', tell: 'WEBS: spider nests. A chest and 1 more treasure', piece: 'webs', countries: ['wood', 'fen', 'under'], more: -2, pay: 0, treasure: 1, chest: true },
+  // The Staithe (shared/staithe.ts): eel-catchers on their jetty, the hungry laying a log across to it.
+  nets: { word: 'NETS', tell: `NETS: eel-catchers holding out on their jetty, the hungry laying a log across. +${Math.round(STAITHE.perSaved * 100)}% pay for each one you save`, piece: 'staithe', nodes: ['ford', 'fenford'], countries: ['fields', 'wood', 'fen'], more: -1, pay: 0, perSaved: STAITHE.perSaved, treasure: 0 },
 };
 export const WAY_KINDS = Object.keys(WAYS) as WayKind[];
 

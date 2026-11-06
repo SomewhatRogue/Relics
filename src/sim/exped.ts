@@ -14,6 +14,7 @@ import { themeUnder, type ExpedSky } from '../shared/expedsky';
 import { holding, ringOf } from '../shared/expedrings';
 import { isDead } from './damage';
 import { stepPressure } from './expedpressure';
+import { jettyOf } from './staithe';
 import type { ArenaRoom } from './room';
 import type { Enemy, FightEvent, Hero } from './types';
 
@@ -32,7 +33,7 @@ export interface ExpedState {
   /** The weather and its one turn (shared/expedsky.ts); the room's theme follows it. */
   wx?: ExpedSky;
 }
-export type ExpedWhat = 'goal' | 'side' | 'open' | 'lit' | 'watch' | 'horn' | 'worse' | 'wave' | 'blessed' | 'weather';
+export type ExpedWhat = 'goal' | 'side' | 'open' | 'lit' | 'watch' | 'horn' | 'worse' | 'wave' | 'blessed' | 'weather' | 'staithelost';
 
 const W = 16, H = 12;
 const up = (h: Hero) => h.act !== 'down' && !h.out && h.id !== 'squire';
@@ -91,6 +92,8 @@ function check(room: ArenaRoom, g: XGoal, heroes: Hero[], dt: number): boolean {
   }
   if (g.kind === 'engine' || g.kind === 'dens') return (g.blocks ?? []).every((i) => room.map.blocks[i]?.ruined);
   if (g.kind === 'prisoners') return (g.cages ?? []).every((c) => !room.props.some((p) => p.kind === 'cage' && !p.broken && Math.hypot(p.x - c.x, p.y - c.y) < 0.6));
+  // The Staithe: done with once the punt's made its last trip, or it's played out (sim/staithe.ts).
+  if (g.kind === 'staithe') return !!jettyOf(room.map)?.over;
   if (g.kind === 'butcher') {
     const b = everyone(room).find((e) => e.id === g.foe);
     return !b || isDead(b);
@@ -102,6 +105,9 @@ function done(room: ArenaRoom, g: XGoal, side: boolean, ev: FightEvent[]): void 
   g.done = true;
   g.p = 1;
   const i = (side ? room.exped!.sides : room.exped!.goals).indexOf(g);
+  // The Staithe played out with nobody got over: done with (the beacon can open), but nothing paid.
+  const j = g.kind === 'staithe' ? jettyOf(room.map) : undefined;
+  if (j && !j.saved) return void ev.push({ k: 'exped', x: g.x, y: g.y, what: 'staithelost', i });
   ev.push({ k: 'exped', x: g.x, y: g.y, what: side ? 'side' : 'goal', i });
   // A wayside shrine prayed at: the whole party blessed a while.
   if (g.kind === 'pray') for (const h of room.heroes) (h.blessedUntil = room.time + EXPED.blessed), ev.push({ k: 'exped', x: h.x, y: h.y, what: 'blessed' });

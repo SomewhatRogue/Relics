@@ -1,0 +1,14 @@
+{
+ "nets": {
+  "place": {
+   "name": "Fennick Ford",
+   "kind": "village",
+   "region": "Fenmere",
+   "ruin": 2
+  },
+  "seed": 1,
+  "took": "h",
+  "room": 2
+ },
+ "day": 3
+}

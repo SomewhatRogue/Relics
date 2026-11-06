@@ -9,9 +9,12 @@
  * rounded crown, a `cone` a point. Paint only.
  */
 import type { Block, Round } from '../shared/arena';
+import { STAITHE_KINDS, staitheBoxes } from './staithebox';
 
 export type Bx = [number, number, number, number, number, number, number, ('lump' | 'cone')?];
-export const PIECE_BLOCKS = new Set<Block['kind']>(['headframe', 'log', 'mill', 'stakes']);
+export const PIECE_BLOCKS = new Set<Block['kind']>(['headframe', 'log', 'mill', 'stakes', 'jetty', 'gangway', 'smokehouse', 'dryrack', 'hungnet']);
+/** Boards you walk on (the Staithe's jetty and a log laid across): the flat view paints them under everyone (staithedraw.ts). */
+export const DECKS = new Set<Block['kind']>(['jetty', 'gangway']);
 export const PIECE_ROUNDS = new Set<Round['kind']>(['hangtree', 'headstone', 'apple']);
 
 const TIMBER = 0x4a3420, DARK = 0x2e2016, STONE = 0x6a6470, IRON = 0x55505e, ROPE = 0x8a7a5a, BARK = 0x4a3a2a, LEAF = 0x2f4a28;
@@ -19,8 +22,9 @@ const TIMBER = 0x4a3420, DARK = 0x2e2016, STONE = 0x6a6470, IRON = 0x55505e, ROP
 const shuffle = (n: number) => () => ((n = (n * 1103515245 + 12345) & 0x7fffffff), n / 0x7fffffff);
 
 /** A block's boxes, by its kind and footprint (`look`: which way a mill's wheel faces). */
-export function blockBoxes(b: Pick<Block, 'kind' | 'w' | 'h' | 'look' | 'ruined'>): Bx[] {
+export function blockBoxes(b: Pick<Block, 'kind' | 'w' | 'h' | 'look' | 'ruined' | 'deck'>): Bx[] {
   const w = b.w, d = b.h, cx = w / 2, cz = d / 2, out: Bx[] = [], r = shuffle(Math.round(w * 37 + d * 11));
+  if (STAITHE_KINDS.has(b.kind)) return staitheBoxes(b, r);
   if (b.kind === 'headframe') {
     // Four legs leaning in to a head, cross braces, the sheave wheel on top and the rope down the shaft.
     for (const [x, z] of [[0.25, 0.25], [w - 0.25, 0.25], [0.25, d - 0.25], [w - 0.25, d - 0.25]]) out.push([x + (cx - x) * 0.15, 0, z + (cz - z) * 0.15, 0.18, 2.9, 0.18, TIMBER]);

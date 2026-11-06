@@ -20,6 +20,8 @@ import { stun } from './stuns';
 import type { Enemy, EnemyAttack, FightEvent, Hero } from './types';
 import { isRound } from './types';
 import { landed } from './ownfoes';
+import { snapHook } from './gaffer';
+import { OWN_KIT } from './enemies';
 import { travelTo } from '../shared/sweep';
 import { knockDown, rooted, takeShoulder } from './techwarrior';
 import { judge } from './techcleric';
@@ -255,6 +257,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     e.hitstop = HITSTOP.parry;
     // A parried ironhide's guard is broken; every goblin in a parried rush is held through the counter.
     crack(e, now, ev);
+    // A gaffer's hook parried: it snaps (sim/gaffer.ts).
+    if (a.kind === 'hook') snapHook(e, now, ev);
     noteRush(h, a, now, 'parry');
     Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: rushStun(a, stunOf(e)) });
     shove(e, tx / tl, ty / tl, 4, e.weight);
@@ -305,7 +309,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   // A spider's bite (or the brood mother's bite or glob) poisons.
   if (e.kind === 'spider' || e.kind === 'brood') poison(h, now, ev);
   // A net holds, a thief takes, a log knocks down (sim/ownfoes.ts).
-  if (!(feet && a.kind === 'charge')) landed(e, a, h, now, ev);
+  if (!(feet && a.kind === 'charge')) landed(e, a, h, now, ev, OWN_KIT.foes);
   downIfDead(h, ev);
 }
 

@@ -33,6 +33,7 @@ export const GOAL_WORDS: Record<GoalKind | SideKind, { pin: string; todo: string
   dens: { pin: 'DENS', todo: "Burn the dens (there's oil by each)", done: 'Dens burned' },
   shrine: { pin: 'SHRINE', todo: 'Hold the barrow shrine: stand in its ring', done: 'Shrine held' },
   butcher: { pin: 'BUTCHER', todo: 'Kill {boss}', done: '{boss} is dead' },
+  staithe: { pin: 'STAITHE', todo: 'Get the eel-catchers off the Staithe: deal with the log, cut the netted free, hold the ring for the punt', done: 'The punt got them over' },
   cache: { pin: 'CHEST', todo: 'Side job: open the chained chest', done: 'Chest opened' },
   pray: { pin: 'PRAY', todo: 'Side job: pray at the shrine (stand at it)', done: 'Lucky: +30% damage, 25% less damage taken for 90 s' },
 };
@@ -56,6 +57,8 @@ export const EXPED_SAYS = {
   open: 'Jobs done. Get to the beacon.',
   lit: 'Beacon lit. Hold it.',
   watch: 'The watch is here.',
+  /** The Staithe left too long (sim/staithebits.ts playOut). */
+  staithelost: 'Too late for the folk at the Staithe.',
 };
 
 /** The map screen's own words. */

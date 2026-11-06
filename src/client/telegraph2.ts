@@ -27,6 +27,20 @@ export function drawRoundSign(c: Ctx, a: EnemyAttack, ox: number, oy: number, R:
       const q = i * 1.26 + 0.3;
       for (let d = 1; d < R * prog; d++) g.fillRect(Math.round(ox + Math.cos(q + Math.sin(d) * 0.3) * d), Math.round(oy + Math.sin(q + Math.sin(d) * 0.3) * d), 1, 1);
     }
+  } else if (a.kind === 'pour') {
+    // The skimmer's pot: oil spreading on the water, flames catching at its edge as it comes due.
+    g.fillStyle = '#3a2e1a';
+    g.globalAlpha = 0.6;
+    for (let i = 0; i < 14; i++) {
+      const q = i * 2.4, r = R * (0.2 + ((i * 37) % 10) / 14) * prog;
+      g.fillRect(Math.round(ox + Math.cos(q) * r), Math.round(oy + Math.sin(q) * r * 0.5), 2, 1);
+    }
+    if (prog > 0.6) for (let i = 0; i < 10; i++) {
+      const q = (i / 10) * Math.PI * 2 + c.now * 2, fl = Math.floor(c.now * 12 + i) % 3;
+      g.fillStyle = fl ? '#ff9a3c' : '#ffd27a';
+      g.globalAlpha = (prog - 0.6) * 2.5;
+      g.fillRect(Math.round(ox + Math.cos(q) * R * 0.8), Math.round(oy + Math.sin(q) * R * 0.8 - fl), 1, 1 + fl);
+    }
   } else if (a.kind === 'torch') {
     for (let i = 0; i < 14; i++) {
       const q = (i / 14) * Math.PI * 2 + c.now, fl = Math.floor(c.now * 12 + i) % 3;
