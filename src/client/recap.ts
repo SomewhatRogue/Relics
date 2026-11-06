@@ -15,6 +15,8 @@ import type { Game } from './game';
 import type { Panel } from './panels';
 import { labelRows } from './card';
 import { RELICW } from './relicwords';
+import { chargePips } from './reliccard';
+import { relicCol, relicItemIcon } from './relicicons';
 import { RECAPW } from './recapwords';
 import { partyTable } from './recapparty';
 import './recap.css';
@@ -55,6 +57,9 @@ export function showResult(g: Game, panel: Panel): void {
     // Picked up on the way, then the sure one at the end, each with the uses it holds.
     [RECAPW.relic, [...(c?.relics ?? []), ...(r.relics ?? (r.relic ? [r.relic] : [])).map((x) => RELICW.withUses(relicName(x), x.charge))].join(', ')],
   ], 'recap');
+  // Every relic that came home, drawn: its picture, name, uses and NEW (relicshelf.ts's squares, bigger).
+  const won = [...g.profile.relics.filter((x) => c?.relicIds?.includes(x.id)), ...(r.relics ?? (r.relic ? [r.relic] : []))];
+  const strip = won.length ? `<div class="rwon">${won.map((x) => `<div class="rwon1"><img src="${relicItemIcon(x)}" alt=""><div><i>${RELICW.newRelic}</i><b style="color:${relicCol(x)}">${relicName(x)}</b>${chargePips(x)}</div></div>`).join('')}</div>` : '';
   const lines = r.won ? [] : [ENDED[r.half ? (r.how === 'dropped' ? 'lostCut' : 'half') : r.how === 'dropped' ? 'cut' : 'left']];
   if (r.levels) lines.push(`<b>Level ${g.profile.level}.</b> ${title(TRAINERS[g.profile.cls].name)} trains you, at ${TRAINERS[g.profile.cls].where}.`);
   for (const i of r.sold) lines.push(`No room for the ${itemName(i)}: sold for 20 gold.`);
@@ -63,7 +68,7 @@ export function showResult(g: Game, panel: Panel): void {
   if (r.won && r.job.objective === 'story') lines.push(`<b>Barrowby's bell rings across the valley.</b> The council sits once enough people are home.`);
   // A knack waiting: banked, picked from the pack whenever you like.
   if (g.profile.picks) lines.push(RECAPW.knack(g.profile.picks));
-  const html = `<div class="recapcard">${p(`<b>${r.job.title}</b>`)}${did}${c ? partyTable(c.party) : ''}<hr>${got}${lines.map(p).join('')}</div>`;
+  const html = `<div class="recapcard">${p(`<b>${r.job.title}</b>`)}${did}${c ? partyTable(c.party) : ''}<hr>${got}${strip}${lines.map(p).join('')}</div>`;
   // One button, home. Never the knacks screen (Kyle, 2026-11-05).
   panel.show(r.won ? 'JOB DONE' : r.half ? 'DRIVEN BACK' : 'HOME EARLY', html, [{ label: RECAPW.home, primary: true, act: () => panel.hide() }], true);
 }

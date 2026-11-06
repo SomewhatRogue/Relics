@@ -29,6 +29,8 @@ export interface Recap {
   /** Gear picked up off the floor, and relics found, by name (a relic with the uses it holds). */
   found: string[];
   relics: string[];
+  /** The same relics' ids (the recap draws each one: recap.ts). */
+  relicIds?: string[];
   /** Every hero in the party, this player first, with what they did and their callout (none for an old run). */
   party: PartyLine[];
 }
@@ -56,7 +58,7 @@ export function recapOf(run: Run, room: ArenaRoom | null, p: Profile, start: Kit
     else found.push(itemName(it));
   }
   const had = new Set(start?.relics ?? []);
-  const relics = start ? p.relics.filter((r) => !had.has(r.id)).map((r) => RELICW.withUses(relicName(r), r.charge)) : [];
+  const gotRelics = start ? p.relics.filter((r) => !had.has(r.id)) : [], relics = gotRelics.map((r) => RELICW.withUses(relicName(r), r.charge));
   const secs = run.began ? Math.round((Date.now() - run.began) / 1000) : 0;
   return {
     rooms: run.job.exped ? undefined : [won ? run.job.rooms : run.index, run.job.rooms],
@@ -65,7 +67,7 @@ export function recapOf(run: Run, room: ArenaRoom | null, p: Profile, start: Kit
     kills: run.kills, dens: run.dens, downs: mine(run.falls, me),
     // (A job paid long after it ended, on a later visit, has no honest time.)
     secs: secs > 0 && secs < 3 * 3600 ? secs : undefined,
-    found, relics,
+    found, relics, relicIds: gotRelics.map((r) => r.id),
     party: partyOf(run, p, me),
   };
 }

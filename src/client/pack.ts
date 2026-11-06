@@ -22,8 +22,9 @@ import { fits, moveOf } from './packmoves';
 export { moveOf };
 import './pack.css';
 import { relicName } from '../shared/relicitems';
-import { fillCol, relicCard } from './reliccard';
-import { relicItemIcon } from './relicicons';
+import { relicCard } from './reliccard';
+import { carriedRelic, relicRow } from './relicshelf';
+import { RELICW } from './relicwords';
 
 /** Where a piece is: in the pack (`bag:i`), in hand, worn (`armor`, `ring:k`), the relic carried, the skill, or on the belt (`belt:i`). */
 export type Spot = string;
@@ -43,7 +44,8 @@ export class PackView {
   private parts: HTMLElement[];
 
   /** `tree`: open the knacks tree (treeui.ts), how many level-up picks wait, and whether you're in town. */
-  constructor(private gear: (op: number, arg: number) => void, private blocked: () => boolean, private tree: { open: () => void; picks: () => number; town?: () => boolean }) {
+  /** `tree`: the knacks screen, picks waiting, in town; `relics`: which relics are still NEW, and one looked at. */
+  constructor(private gear: (op: number, arg: number) => void, private blocked: () => boolean, private tree: { open: () => void; picks: () => number; town?: () => boolean; fresh?: () => string[]; seen?: (id: string) => void }) {
     this.el.id = 'pack';
     this.el.hidden = true;
     this.el.innerHTML = '<div class="head"></div><div class="top"></div><div class="detail"></div><div class="foot"></div>';
@@ -96,16 +98,20 @@ export class PackView {
   pick(src: Spot | null): void {
     this.sel = src;
     this.keys = ['', '', ''];
+    // A relic looked at is no longer NEW.
+    const [s, i] = (src ?? '').split(':'), r = s === 'found' ? this.h?.found[Number(i)] : s === 'relic' && this.h ? carriedRelic(this.h) : undefined;
+    if (r) this.tree.seen?.(r.id);
   }
 
   /** Your hero, with a square on each part that wears something. */
   private doll(h: Hero): string {
-    const [, carried] = h.relics, it = carried ? h.found.find((r) => r.id === h.relicItem) : undefined, held = h.arms[h.weapon], sel = this.sel, look = figure(WEAPONS[h.weapon].cls, h.look ?? 0);
+    const held = h.arms[h.weapon], sel = this.sel, look = figure(WEAPONS[h.weapon].cls, h.look ?? 0);
     const slot = (name: string, inner: string) => `<div class="slot ${name}">${inner}</div>`;
     const hand = cell(held ?? null, 'hand', { dst: 'hand', sel, label: held ? PACKW.hand : WEAPONS[h.weapon].name, icon: held ? undefined : itemIcon({ kit: h.weapon, quality: 'plain', traits: [] }), col: held ? undefined : '#e8e4ee' });
     const belt = Array.from({ length: POTION.belt }, (_, i) => cell(null, h.belt[i] ? 'belt:' + i : null, { dst: i === 0 ? 'belt' : undefined, sel, icon: h.belt[i] ? potionIcon(h.belt[i]) : undefined, col: h.belt[i] ? POTIONS[h.belt[i]].col : undefined, tag: i === 0 && h.belt[i] ? '1ST' : undefined })).join('');
     return '<div class="doll">' +
-      slot('s-relic', cell(null, carried ? 'relic' : null, { dst: 'relic', sel, label: PACKW.relic, icon: it ? relicItemIcon(it) : carried ? relicIcon() : undefined, col: it ? fillCol(it) : carried ? '#ffd27a' : undefined })) +
+      // (A relic kind carried with no item, from before relics were items: the old square.)
+      (h.relics[1] && !carriedRelic(h) ? slot('s-relic', cell(null, 'relic', { dst: 'relic', sel, label: PACKW.relic, icon: relicIcon(), col: '#ffd27a' })) : '') +
       slot('s-skill', cell(null, 'skill', { sel, label: PACKW.skill, icon: skillIcon(), col: '#5a8ac8', dim: true })) +
       slot('s-hand', hand) +
       slot('s-body', cell(h.armor, h.armor ? 'armor' : null, { dst: 'armor', sel, label: PACKW.body })) +
@@ -130,15 +136,17 @@ export class PackView {
     if (s === 'armor' && h.armor) return row(sideBySide(h, h.armor, true), btn(COPY.takeOff, GEAR.unarm, 0, 'ghost'));
     if (s === 'ring' && h.rings[i]) return row(sideBySide(h, h.rings[i], true), h.rings[i].hungry === 'wedding' ? '' : btn(COPY.takeOff, GEAR.off, i, 'ghost'));
     if (s === 'relic' && h.relics[1]) {
-      const it = h.found.find((r) => r.id === h.relicItem);
-      const others = h.found.map((r, k) => (r.id === h.relicItem ? '' : btn(`${COPY.carry} ${relicName(r)}`, GEAR.carry, k, 'go'))).join('');
-      return row(it ? relicCard(it) : `<b>${RELICS[h.relics[1]].name}</b>${el(h.relics[1], h)}`, others + btn(COPY.putAway, GEAR.carry, -1, 'ghost'));
+      const it = carriedRelic(h);
+      return row(it ? relicCard(it) : `<b>${RELICS[h.relics[1]].name}</b>${el(h.relics[1], h)}`, btn(COPY.putAway, GEAR.carry, -1, 'ghost'), h.found.length > 1 ? RELICW.shelfHow : '');
     }
+    // Nothing carried: each relic owned, to carry.
+    if (s === 'relic') return row('', h.found.map((r, k) => btn(`${COPY.carry} ${relicName(r)}`, GEAR.carry, k, 'go')).join(''), RELICW.emptySlot);
+    // One on the shelf: its card, and CARRY (the one carried now goes back on the shelf).
+    if (s === 'found' && h.found[i] && h.found[i] !== carriedRelic(h)) return row(relicCard(h.found[i]), btn(COPY.carry, GEAR.carry, i, 'go'));
     if (s === 'skill') return row(`<b>${RELICS[h.relics[0]].name}</b>${el(h.relics[0], h)}`, '', PACKW.skillLine);
     if (s === 'belt' && h.belt[i]) return row(`<b>${POTIONS[h.belt[i]].name}</b>${potionRows(h.belt[i], WEAPONS[h.weapon].cls)}`, (i ? btn(COPY.next, GEAR.front, i, 'go') : '') + btn(COPY.pour, GEAR.pour, i, 'ghost'));
-    // Nothing chosen: relics found but not carried can still be picked up here.
-    const shelf = h.found.filter((r) => r.id !== h.relicItem).map((r) => btn(`${COPY.carry} ${relicName(r)}`, GEAR.carry, h.found.indexOf(r), 'go')).join('');
-    return row(`<div class="none">${matchMedia('(hover: hover)').matches ? PACKW.hover : PACKW.hint}</div>`, shelf);
+    // Nothing chosen (the relics have their own row above, relicshelf.ts).
+    return row(`<div class="none">${matchMedia('(hover: hover)').matches ? PACKW.hover : PACKW.hint}</div>`);
   }
 
   /** Each frame: redraw only the parts whose contents have changed (and never mid-drag). */
@@ -147,14 +155,15 @@ export class PackView {
     const h: Hero = { ...hero, found: hero.found ?? [], bag: hero.bag ?? [], belt: hero.belt ?? [], rings: hero.rings ?? [], arms: hero.arms ?? {}, augments: hero.augments ?? {} };
     this.h = h;
     if (!this.open || this.el.querySelector('.dragging')) return;
-    const town = this.town(), gear = JSON.stringify([h.weapon, h.arms[h.weapon], h.bag, h.bagSize, h.relics, h.found, h.augments, h.belt, h.armor, h.rings, town]);
+    const town = this.town(), fresh = this.tree.fresh?.() ?? [], gear = JSON.stringify([h.weapon, h.arms[h.weapon], h.bag, h.bagSize, h.relics, h.relicItem, h.found, h.augments, h.belt, h.armor, h.rings, town, fresh]);
     const keys = [gear + this.sel + this.tree.picks(), gear + this.sel + this.hover, JSON.stringify([h.glow, h.weapon, h.armor, h.rings, h.arms[h.weapon]])];
     const [head, top, detail, foot] = this.parts;
     if (keys[0] !== this.keys[0]) {
       const size = h.bagSize || 8, isFull = full(h);
       head.innerHTML = `<h2>${COPY.pack}</h2><span>${town ? '' : COPY.stillGoing}</span><button data-tree class="kn${this.tree.picks() ? ' pick' : ''}">${COPY.knacks}${this.tree.picks() ? `<em>${KNW.packPick(this.tree.picks())}</em>` : ''}</button><button data-close class="x" aria-label="Close">&times;</button>`;
       top.innerHTML = this.doll(h) + `<div class="bag"><h3>${PACKW.bag} <i class="${isFull ? 'full' : ''}">${h.bag.length} / ${size}</i></h3>` + grid(h.bag, size, 'bag', this.sel, 'bag') +
-        (town ? '' : `<div class="tile drop" data-dst="drop"><i>${COPY.drop}</i></div>`) + (isFull && !town ? `<div class="note warn">${PACKW.fullJob}</div>` : '') + '</div>';
+        (town ? '' : `<div class="tile drop" data-dst="drop"><i>${COPY.drop}</i></div>`) + (isFull && !town ? `<div class="note warn">${PACKW.fullJob}</div>` : '') + '</div>' +
+        relicRow(h, this.sel, fresh);
     }
     if (keys[1] !== this.keys[1]) detail.innerHTML = this.detail(h);
     if (keys[2] !== this.keys[2]) {

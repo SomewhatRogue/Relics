@@ -93,6 +93,9 @@ export interface Profile {
   /** Relics owned, each with its charge (shared/relicitems.ts), and the id of the one carried ('' none). */
   relics: RelicItem[];
   relic: string;
+  /** Relics gained but not looked at yet (ids; the pack marks them NEW), and whether the first relic's tip has been shown. */
+  relicNew?: string[];
+  relicTip?: boolean;
   /** Jobs left carrying the church's light (shared/church.ts), and relics forged two for one so far (seeds the next). */
   lit?: number;
   forges?: number;

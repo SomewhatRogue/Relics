@@ -1,0 +1,98 @@
+/* The upgrade screens (upgradeview.ts): a head held at the top, tabs, tracks of tiles, forks, a tile opened. Phone first. */
+#panel .card:has(.up-top) { padding-top: 0; }
+#panel .up-top { position: sticky; top: 0; z-index: 2; margin: 0 -16px 8px; padding: 8px 16px 6px; background: var(--stone-800); border-bottom: var(--px) solid var(--stone-700); }
+#panel .up-stats { display: flex; align-items: center; gap: 10px; }
+#panel .up-stats b { font-size: var(--fs); color: var(--gilt); letter-spacing: 0.06em; }
+#panel .up-gold { color: var(--gold); padding-left: 16px; background: var(--ic-coin) 0 50% / 12px no-repeat; image-rendering: pixelated; }
+#panel .up-picks { margin-left: auto; min-height: 44px; padding: 0 8px; font-size: var(--fs-s); letter-spacing: 0.1em; color: var(--stone-300); }
+#panel .up-picks.on { border-image-source: var(--f-gilt); color: var(--gilt); animation: kn-pick 1.2s steps(2) infinite; }
+#panel .up-top .tr-bar { margin: 4px 0 2px; }
+#panel .up-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 4px; }
+#panel .up-tabs button { position: relative; min-height: 44px; padding: 0 2px; font-size: var(--fs-text); color: var(--bone-dim); }
+#panel .up-tabs button.on { border-image-source: var(--f-gilt); color: var(--gilt); }
+#panel .up-tabs em { position: absolute; top: -5px; right: -3px; min-width: 15px; height: 15px; padding: 0 3px; box-sizing: border-box; color: #1a1408; background: var(--gilt); font-size: var(--fs-s); line-height: 15px; text-align: center; }
+#panel .up-greet { margin: 0 0 8px; }
+
+/* A track: its title and where you stand; steps joined by a line, gold where you've come. */
+#panel .up-track { margin: 0 0 12px; }
+#panel .up-th { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 0 5px; }
+#panel .up-th b { color: #b8a47c; font-size: var(--fs-text); letter-spacing: 0.15em; font-weight: 400; }
+#panel .up-th span { color: #8d929c; font-size: var(--fs-s); letter-spacing: 0.08em; text-align: right; }
+#panel .up-steps { display: flex; flex-direction: column; }
+#panel .up-link { display: block; width: 2px; height: 10px; margin-left: 25px; background: #3a3e46; }
+#panel .up-link.on { background: var(--gilt); }
+#panel .k-row .up-steps { display: grid; grid-template-columns: 1fr 8px 1fr 8px 1fr; align-items: center; }
+#panel .k-row .up-link { width: 8px; height: 2px; margin: 0; }
+#panel .k-grid .up-steps > .up-tile { margin: 0; }
+#panel .k-grid .up-ft, #panel .k-grid .up-steps { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+#panel .up-note { margin: 5px 2px 0; color: #8d929c; }
+
+/* A tile: picture, name, one line, ranks and its cost or state. */
+#panel .up-tile { display: grid; grid-template-columns: 34px 1fr; grid-template-areas: 'ic n' 'ic l' 'f f'; column-gap: 8px; row-gap: 2px; align-items: start;
+  width: 100%; min-width: 0; min-height: 56px; margin: 0; padding: 6px 8px; text-align: left; text-transform: none; letter-spacing: 0;
+  border: 2px solid #3a3e46; border-image: none; background: #202328; box-shadow: inset 0 -3px 0 #0e0f12; color: var(--bone); }
+#panel .up-tile:active:not(:disabled) { transform: translateY(var(--px)); }
+#panel .up-ic { grid-area: ic; width: 34px; height: 34px; image-rendering: pixelated; background: #100e14; border: 1px solid #33373e; padding: 3px; box-sizing: border-box; }
+#panel .up-n { grid-area: n; font-size: var(--fs-text); letter-spacing: 0.04em; text-transform: uppercase; line-height: 1.15; overflow-wrap: anywhere; }
+#panel .up-l { grid-area: l; color: #a9b4c2; font-size: var(--fs-text); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+#panel .up-f { grid-area: f; display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 12px; }
+#panel .up-b { margin-left: auto; font-size: var(--fs-s); letter-spacing: 0.1em; color: #8d929c; text-align: right; line-height: 1.25; }
+/* States: yours (gold), can buy (green), short of gold, locked (dashed, dim), on offer, next. */
+#panel .up-tile.s-owned, #panel .up-tile.s-max { border-color: #8a7240; background: #26221a; }
+#panel .s-owned .up-b, #panel .s-max .up-b { color: var(--gilt); }
+#panel .up-tile.s-buy { border-color: #9cc95a; background: #1c2218; }
+#panel .s-buy .up-b { color: #9cc95a; }
+#panel .up-tile.s-poor { border-color: #5a4440; }
+#panel .s-poor .up-b { color: #c07a6a; }
+#panel .up-tile.s-locked { border-style: dashed; background: #17181c; box-shadow: none; }
+#panel .up-tile.s-locked .up-ic { filter: grayscale(1) brightness(0.6); }
+#panel .up-tile.s-locked .up-n, #panel .up-tile.s-locked .up-l { opacity: 0.6; }
+#panel .s-locked .up-b { color: #b8a47c; }
+#panel .up-tile.s-pick { border-color: #9cc95a; background: #1c2218; animation: up-pick 1.4s steps(2) infinite; }
+#panel .s-pick .up-b { color: #9cc95a; }
+#panel .up-tile.s-next { border-color: #5a606b; }
+#panel .s-next .up-b { color: #a9b4c2; }
+/* The current pick of a fork: the skill carried, the branch chosen. */
+#panel .up-tile.cur { border-color: var(--gilt); background: #2e2618; box-shadow: 0 0 0 1px #ffd27a55, inset 0 -3px 0 #0e0f12; }
+#panel .up-tile.cur .up-b { color: #1a1408; background: var(--gilt); padding: 1px 4px; }
+@keyframes up-pick { 50% { background: #26331c; } }
+@media (prefers-reduced-motion: reduce) { #panel .up-tile.s-pick, #panel .up-picks.on { animation: none; } }
+
+/* Narrow tiles (a chain across, a fork): the picture over the words. */
+#panel .k-row .up-tile, #panel .up-fork .up-tile { grid-template-columns: 1fr; grid-template-areas: 'ic' 'n' 'l' 'f'; padding: 5px; min-height: 96px; }
+#panel .k-row .up-ic, #panel .up-fork .up-ic { width: 28px; height: 28px; }
+#panel .k-row .up-l, #panel .up-fork .up-l { font-size: var(--fs-s); line-height: 1.3; -webkit-line-clamp: 3; }
+#panel .k-row .up-b, #panel .up-fork .up-b { margin-left: 0; text-align: left; }
+
+/* A fork: the choices side by side under a bracket and the words that say you choose one. */
+#panel .up-fork { margin: 0; }
+#panel .up-fl { display: block; text-align: center; color: var(--gilt); font-size: var(--fs-s); letter-spacing: 0.15em; }
+#panel .up-ft { position: relative; display: grid; gap: 6px; padding-top: 10px; }
+#panel .up-fork.n2 .up-ft { grid-template-columns: 1fr 1fr; }
+#panel .up-fork.n3 .up-ft { grid-template-columns: 1fr 1fr 1fr; }
+#panel .up-ft::before { content: ''; position: absolute; top: 2px; height: 8px; border: 2px solid #b8a47c; border-bottom: 0; }
+#panel .up-fork.n2 .up-ft::before { left: 25%; right: 25%; }
+#panel .up-fork.n3 .up-ft::before { left: 16.6%; right: 16.6%; }
+#panel .up-ft::after { content: ''; position: absolute; top: -2px; left: calc(50% - 1px); width: 2px; height: 4px; background: #b8a47c; }
+
+/* A tile opened. */
+#panel .up-det .up-dh { display: flex; gap: 10px; align-items: center; margin: 0 0 8px; }
+#panel .up-det .up-dh .up-ic { width: 52px; height: 52px; padding: 4px; border: 2px solid #3a3e46; }
+#panel .up-det.s-owned .up-dh .up-ic, #panel .up-det.s-max .up-dh .up-ic, #panel .up-det.cur .up-dh .up-ic { border-color: var(--gilt); }
+#panel .up-det.s-buy .up-dh .up-ic, #panel .up-det.s-pick .up-dh .up-ic { border-color: #9cc95a; }
+#panel .up-det.s-locked .up-dh .up-ic { filter: grayscale(1) brightness(0.6); }
+#panel .up-det .up-dh > div { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+#panel .up-det .up-dh b { font: 400 21px/1.05 var(--font-display); color: var(--gilt); }
+#panel .up-det .up-f .up-b { margin-left: 0; font-size: var(--fs-text); }
+#panel .up-det.s-buy .up-b { color: #9cc95a; }
+#panel .up-dt { margin: 0 0 6px; color: var(--bone); line-height: 1.4; }
+#panel .up-na { display: grid; grid-template-columns: 1fr 12px 1fr; align-items: stretch; gap: 4px; margin: 6px 0; }
+#panel .up-na > div { display: flex; flex-direction: column; gap: 3px; padding: 6px 7px; background: #18191d; border: 1px solid #33373e; }
+#panel .up-na > div:only-child { grid-column: 1 / -1; }
+#panel .up-na > div.after { border-color: #9cc95a; background: #1c2218; }
+#panel .up-na span { color: #8d929c; font-size: var(--fs-s); letter-spacing: 0.15em; }
+#panel .up-na b { color: var(--bone); font-weight: 400; line-height: 1.3; }
+#panel .up-na .after b { color: #c8e89a; }
+#panel .up-arrow { align-self: center; width: 0; height: 0; border-left: 7px solid #9cc95a; border-top: 6px solid transparent; border-bottom: 6px solid transparent; }
+/* The panel's own buttons on these screens: big enough for a thumb. */
+#panel .card:has(.up-top) .buttons button { min-height: 44px; }

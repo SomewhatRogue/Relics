@@ -91,6 +91,18 @@ export const RELICW = {
   /** A relic from a job with no butcher to cut it out of (a story job, the beacon). */
   broughtHome: (name: string) => `<b>You bring the ${name} home.</b>`,
   carryHint: 'It\'s on your RELIC button.',
+  /** The moment a relic is gained (relicmoment.ts), its pop's small heading and how to use it. */
+  newRelic: 'NEW RELIC',
+  momentShelf: "It's in your pack. Tap it there, then CARRY.",
+  /** The first relic a hero ever gets: how the button works. */
+  firstTip: (el: boolean) => `Press RELIC to use it, or R on a laptop. Each press spends a use${el ? ", and the church won't recharge this one." : ', and the church can recharge it.'}`,
+  tapClose: 'TAP TO CLOSE',
+  /** The pack's row of relics: its heading, the NEW mark, the empty RELIC slot's word, and what to do. */
+  shelf: 'RELICS',
+  newMark: 'NEW',
+  tapSlot: 'TAP',
+  emptySlot: 'Nothing carried. Tap a relic to carry it, or drag it onto RELIC.',
+  shelfHow: 'Tap a relic to see it, or drag it onto RELIC to carry it.',
   shelfHint: 'It\'s with your other relics, in your pack.',
   /** Ivo at his bench, of a fading relic (the lore keeper's draft). */
   ivoFading: "Hear that? No, you *don't*, and that's the trouble. It hummed like a hive a week ago. It's running down.",
