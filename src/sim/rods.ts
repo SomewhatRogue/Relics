@@ -8,11 +8,11 @@
  */
 import { ROD } from '../shared/tuning';
 import { isDead } from './damage';
-import { crack } from './ironhide';
+import { armoured, crack } from './ironhide';
 import type { Enemy, FightEvent } from './types';
 
 /** Iron that can draw lightning: an ironhide on its feet, on the ground, not carried or under. */
-export const isRod = (e: Enemy) => e.variant === 'ironhide' && !isDead(e) && !e.under && !e.dozing && (e.z ?? 0) === 0 && e.act !== 'carried';
+export const isRod = (e: Enemy) => armoured(e) && !isDead(e) && !e.under && !e.dozing && (e.z ?? 0) === 0 && e.act !== 'carried';
 
 /** The rod nearest (x, y) within `reach` (the edge of its body), if any. */
 export function rodNear(enemies: Enemy[], x: number, y: number, reach = ROD.reach, ok: (e: Enemy) => boolean = () => true): Enemy | undefined {
@@ -35,7 +35,7 @@ export function rodHit(e: Enemy, x: number, y: number, now: number, ev: FightEve
 
 /** Storm jolted it (a jump, a pool): its guard breaks, crackling, no bolt drawn. */
 export function jolt(e: Enemy, now: number, ev: FightEvent[]): void {
-  if (e.variant !== 'ironhide' || isDead(e)) return;
+  if (!armoured(e) || isDead(e)) return;
   crack(e, now, ev);
   e.rodAt = now;
 }

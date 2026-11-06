@@ -56,12 +56,15 @@ export * from './staithetune.js';
 export * from './hangtune.js';
 export * from './chalk.js';
 export * from './threat.js';
+export * from './meaty.js';
+export * from './elites.js';
 import { BANNER, NETTER, THIEF, LOGS, ROOF, IRONHIDE } from './raiders.js';
 import { CHALKER } from './chalk.js';
 import { WOLF, KEEPER, OIL, TORCH, SAPPER, CAVE } from './prowlers.js';
 import { DRUMMER, HEXER } from './backline.js';
 import { GAFFER, SKIMMER } from './staithetune.js';
 import { SNARER } from './hangtune.js';
+import { PLANKER, SWINGLE, FORKER } from './meaty.js';
 
 /** Holding attack past `start` begins charging; the heavy is strongest at `full`. */
 export const CHARGE = { start: 0.18, full: 0.9 };
@@ -231,6 +234,8 @@ export const VARIANTS = {
   gaffer: { hp: GAFFER.hp }, skimmer: { hp: SKIMMER.hp },
   /** Hangman's Wood's (shared/hangtune.ts). */
   snarer: { hp: SNARER.hp },
+  /** The new meaty sorts (shared/meaty.ts). */
+  planker: { hp: PLANKER.hp }, swingle: { hp: SWINGLE.hp }, forker: { hp: FORKER.hp },
   wolf: { hp: WOLF.hp }, keeper: { hp: KEEPER.hp }, oiler: { hp: OIL.hp }, torch: { hp: TORCH.hp }, sapper: { hp: SAPPER.hp }, blind: { hp: CAVE.hp },
   /** The Mage's element lesson (shared/wood.ts ELEMENT_FOES): plain small goblins but for what they're weak to. */
   soaked: { hp: 24 }, aproned: { hp: 24 }, kilnhot: { hp: 24 },

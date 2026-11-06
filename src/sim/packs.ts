@@ -60,6 +60,7 @@ export function packOnto(e: Enemy, f: Foe): void {
   if (f.role) e.role = f.role;
   if (f.harm && f.harm !== 1) e.harm = f.harm;
   if (f.big) (e.big = true), shapeBig(e);
+  if (f.elite?.length) e.elite = [...f.elite];
 }
 
 /**

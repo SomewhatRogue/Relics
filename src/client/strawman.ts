@@ -13,6 +13,8 @@ import { STRAW, drawStrawHeap } from './rackdraw';
 import { toPx } from './world';
 import { drawPerchRope } from './wooddraw';
 import { drawPaceDust, drawPaceOver, paceOffset } from './pacedraw';
+import { drawElite } from './elitedraw';
+import { MEATY_DRAW, meatySort } from '../shared/meaty';
 
 /** A goblin, or (in the yard: `straw`) a straw man playing one. The plain dummies are themselves either way. */
 export function drawFoe(c: Ctx, e: Enemy, x: number, y: number, sleeping: boolean, straw: boolean): void {
@@ -31,15 +33,20 @@ export function drawFoe(c: Ctx, e: Enemy, x: number, y: number, sleeping: boolea
   r(-3, -1, 1, 1, STRAW.pale), r(3, -1, 1, 1, STRAW.pale);
 }
 
-/** A goblin as the pacing rules show it (pacedraw.ts): hopping while held, leaning into a sprint, a BIG ONE bigger. */
+/**
+ * A goblin as the pacing rules show it (pacedraw.ts): hopping while held, leaning into a sprint, a BIG ONE
+ * bigger; the new meaty sorts bigger too (MEATY_DRAW), and an elite's affixes on its body (elitedraw.ts).
+ */
 function paced(c: Ctx, e: Enemy, x: number, y: number, sleeping: boolean): void {
-  if (!e.held && !e.big && !e.sprintAt) return drawEnemy(c, e, x, y, sleeping);
-  const o = paceOffset(c, e), bx = x + o.dx, by = y + o.dy;
-  if (o.k === 1) drawEnemy(c, e, bx, by, sleeping);
+  const meat = meatySort(e);
+  if (!e.held && !e.big && !e.sprintAt && !e.elite && !meat) return drawEnemy(c, e, x, y, sleeping);
+  const o = paceOffset(c, e), bx = x + o.dx, by = y + o.dy, k = o.k * (meat ? MEATY_DRAW : 1);
+  if (k === 1) drawEnemy(c, e, bx, by, sleeping), drawElite(c, e, bx, by);
   else {
     // Bigger from its feet up, on both layers.
-    for (const g of [c.lit, c.glow]) g.save(), g.translate(bx, by), g.scale(o.k, o.k), g.translate(-bx, -by);
+    for (const g of [c.lit, c.glow]) g.save(), g.translate(bx, by), g.scale(k, k), g.translate(-bx, -by);
     drawEnemy(c, e, bx, by, sleeping);
+    drawElite(c, e, bx, by);
     for (const g of [c.lit, c.glow]) g.restore();
   }
   drawPaceDust(c, e, x, y);

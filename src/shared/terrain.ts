@@ -38,6 +38,8 @@ export type FoeVariant = 'looter' | 'lunger' | 'heavy' | 'stoker' | 'shield' | '
   | 'gaffer' | 'skimmer'
   /** Hangman's Wood's (shared/hangtune.ts): the snarer and its ankle snares. */
   | 'snarer'
+  /** The new meaty sorts (shared/meaty.ts): the barn door, the flail, the pitchfork. */
+  | 'planker' | 'swingle' | 'forker'
   /** The wood's element lesson only (shared/wood.ts ELEMENT_FOES): wet through, in a bark apron, hot off the kiln. */
   | 'soaked' | 'aproned' | 'kilnhot';
 /**
@@ -52,6 +54,8 @@ export interface Foe {
   noose?: boolean; zoned?: boolean;
   /** Pacing (shared/threat.ts): its pack's beat, a BIG ONE, and how much harder it hits (a bigger party). */
   beat?: import('./encounters.js').Beat; big?: boolean; harm?: number;
+  /** An elite's affixes (shared/elites.ts). */
+  elite?: import('./elites.js').Affix[];
 }
 /** Which way the party went at a fork. */
 export type RoadId = Road['road'];

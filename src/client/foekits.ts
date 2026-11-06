@@ -11,10 +11,11 @@ import { drawFoeKit2 } from './foekits2';
 import { drawMaul } from './ironhidedraw';
 import { drawStaitheKit } from './staithekit';
 import { drawChalkKit } from './chalkdraw';
+import { drawMeatyKit } from './meatydraw';
 
 const WOOD = '#7a5a38', HIDE = '#c8a878', HIDE2 = '#9a7a58', ROPE = '#a89a72', IRON = '#8a8a90', GOLD = '#ffd040', CLOTH = '#3a3040';
 
-export const KITTED = new Set(['banner', 'netter', 'thief', 'roofer', 'keeper', 'oiler', 'torch', 'sapper', 'ironhide', 'gaffer', 'skimmer', 'chalker', 'snarer']);
+export const KITTED = new Set(['banner', 'netter', 'thief', 'roofer', 'keeper', 'oiler', 'torch', 'sapper', 'ironhide', 'gaffer', 'skimmer', 'chalker', 'snarer', 'planker', 'swingle', 'forker']);
 
 export function drawFoeKit(c: Ctx, e: Enemy, bx: number, by: number, ax: number, ay: number, t: number): void {
   const f = e.fx < -0.2 ? -1 : 1, hx = Math.round(bx + f * 3 + ax), hy = Math.round(by - 6 + ay), g = c.lit, a = e.attack;
@@ -77,6 +78,8 @@ export function drawFoeKit(c: Ctx, e: Enemy, bx: number, by: number, ax: number,
   }
   // The Staithe's gaffer and skimmer (staithekit.ts).
   if (e.variant === 'gaffer' || e.variant === 'skimmer') return drawStaitheKit(c, e, bx, by, hx, hy, f, wind, c.t ?? t);
+  // The new meaty sorts' door, flail and pitchfork (meatydraw.ts).
+  if (e.variant === 'planker' || e.variant === 'swingle' || e.variant === 'forker') return drawMeatyKit(c, e, bx, by, hx, hy, f, wind);
   if (e.variant === 'chalker') return drawChalkKit(c, e, bx, by, hx, hy, f, t);
   // Hangman's Wood's snarer (wooddraw.ts).
   if (e.variant === 'snarer') return drawSnarerKit(c, e, bx, by, hx, hy, f);

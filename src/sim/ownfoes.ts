@@ -20,18 +20,20 @@ import { stepSkimmer } from './skimmer';
 import { stepChalk, stepChalker } from './chalker';
 import { hoist, stepSnarer, type Noose } from './snares';
 import { stepNoose } from './hempen';
+import { shapeMeaty, stepPlanker, stepForker, stepSwingle } from './meaty';
 import { walk } from './enemies';
 import type { World } from './elements';
 import type { Pickup } from './pickups';
 import type { Enemy, EnemyAttack, FightEvent, Hero, Intent } from './types';
 
-const OWN = new Set(['banner', 'netter', 'thief', 'log', 'wolf', 'keeper', 'oiler', 'torch', 'blind', 'ironhide', 'gaffer', 'skimmer', 'chalker', 'snarer']);
+const OWN = new Set(['banner', 'netter', 'thief', 'log', 'wolf', 'keeper', 'oiler', 'torch', 'blind', 'ironhide', 'gaffer', 'skimmer', 'chalker', 'snarer', 'planker', 'swingle', 'forker']);
 
 /** A new goblin of one of these sorts: its body (a small goblin's unless it says). */
 export function shapeFoe(e: Enemy): void {
   if (e.variant === 'log') shapeLogs(e);
   if (e.variant === 'roofer') shapeRoofer(e);
   if (e.variant === 'wolf') shapeWolf(e);
+  shapeMeaty(e);
 }
 
 /** `slow`: its chill, net and drum as a multiple; `speed` a small goblin's pace with it. */
@@ -65,6 +67,9 @@ export function stepOwn(e: Enemy, q: Turn, heroes: Hero[], others: Enemy[], rng:
   else if (e.variant === 'gaffer') stepGaffer(e, t, d, ux, uy, facing, speed, now, dt, ev);
   else if (e.variant === 'skimmer') stepSkimmer(e, t, d, ux, uy, speed, now, dt, ev);
   else if (e.variant === 'snarer') stepSnarer(e, t, d, ux, uy, facing, speed, now, dt, ev, kit.nooses ?? []);
+  else if (e.variant === 'planker') stepPlanker(e, t, d, q.level, ux, uy, facing, speed, dt, ev);
+  else if (e.variant === 'swingle') stepSwingle(e, t, d, q.level, ux, uy, facing, speed, now, dt, ev);
+  else if (e.variant === 'forker') stepForker(e, t, d, q.level, ux, uy, facing, speed, dt, ev);
   else if (e.variant === 'chalker') stepChalker(e, t, d, ux, uy, facing, speed, heroes, others, now, dt, ev);
   return true;
 }

@@ -11,11 +11,12 @@ import type { PlaceKind } from './jobs.js';
 import type { Debut } from './debut.js';
 import { CHALKER } from './chalk.js';
 import { SNARE_DEBUT } from './hangwords.js';
+import { PLANKER, FORKER, SWINGLE } from './meaty.js';
 
 /** What a goblin in a pack is for. `fodder` is the small ones; every other role is a special. */
 export type Role = 'fodder' | 'lunger' | 'shield' | 'heavy' | 'hexer' | 'drummer' | 'butcher' | 'archer'
   | 'banner' | 'netter' | 'thief' | 'log' | 'roofer' | 'keeper' | 'wolf' | 'oiler' | 'torch' | 'sapper' | 'blind' | 'ironhide'
-  | 'chalker' | 'snarer';
+  | 'chalker' | 'snarer' | 'planker' | 'swingle' | 'forker';
 
 export interface Template {
   id: string;
@@ -73,6 +74,10 @@ export const TEMPLATES: Template[] = [
   { id: 'ironback', said: 'a brute with an ironhide at its side', centre: ['heavy'], support: ['ironhide'], fodder: [2, 3], from: 1, ruin: 1, weight: 1, beats: ['closer'] },
   { id: 'chalk', said: 'a chalker behind a crowd, chalking one of you', support: ['chalker'], fodder: [3, 5], from: 1, weight: 1.5, more: 'lunger', debut: CHALKER.debut, beats: ['splat', 'tactic'] },
   { id: 'snare', said: 'a snarer behind a few small ones, snaring the ground in front of you', support: ['snarer'], fodder: [3, 4], from: 1, weight: 1.2, debut: SNARE_DEBUT, beats: ['tactic'] },
+  // The new meaty sorts (shared/meaty.ts), each bleeding in (shared/debut.ts): a fight to think about, or a room's closer.
+  { id: 'plank', said: 'a planker behind its barn door, and a few small ones', centre: ['planker'], fodder: [2, 3], from: 1, weight: 1.5, debut: PLANKER.debut, beats: ['tactic', 'closer'] },
+  { id: 'swing', said: 'a swingle with its flail, and a few small ones', centre: ['swingle'], fodder: [2, 4], from: 1, weight: 1.5, debut: SWINGLE.debut, beats: ['tactic', 'closer'] },
+  { id: 'fork', said: 'a forker with its pitchfork, and a few small ones', centre: ['forker'], fodder: [2, 3], from: 1, weight: 1.5, more: 'lunger', debut: FORKER.debut, beats: ['tactic', 'closer'] },
   { id: 'bigbrute', said: 'a BIG ONE of a brute and a few small ones', centre: ['heavy'], fodder: [2, 3], weight: 0, beats: ['closer'], big: true },
   { id: 'bigiron', said: 'a BIG ONE in iron and a few small ones', centre: ['ironhide'], fodder: [2, 3], ruin: 2, weight: 0, beats: ['closer'], big: true },
   { id: 'cave', said: 'blind hunters in the dark', fodder: [3, 4], fodderKind: 'blind', weight: 4, places: ['mine'], beats: ['splat', 'tactic'] },
@@ -101,6 +106,6 @@ export const ENCOUNTER = {
 };
 
 /** Roles that are a kind of small goblin (the rest are something else: a wolf, the log-carriers). */
-export const GOBLIN_ROLES: Role[] = ['fodder', 'lunger', 'shield', 'heavy', 'hexer', 'drummer', 'archer', 'banner', 'netter', 'thief', 'roofer', 'keeper', 'oiler', 'torch', 'sapper', 'blind', 'ironhide', 'chalker', 'snarer'];
+export const GOBLIN_ROLES: Role[] = ['fodder', 'lunger', 'shield', 'heavy', 'hexer', 'drummer', 'archer', 'banner', 'netter', 'thief', 'roofer', 'keeper', 'oiler', 'torch', 'sapper', 'blind', 'ironhide', 'chalker', 'snarer', 'planker', 'swingle', 'forker'];
 /** Backers that keep to the back of a pack (put furthest from the way in). */
 export const BACK_ROLES: Role[] = ['archer', 'hexer', 'drummer', 'banner', 'netter', 'oiler', 'torch', 'keeper', 'chalker', 'snarer'];

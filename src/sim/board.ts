@@ -10,11 +10,14 @@
 import { VARIANTS } from '../shared/tuning';
 import { held } from './damage';
 import type { Bolt, Enemy } from './types';
+import { plankFaces } from './meaty';
 
 export type Board = 'open' | 'through' | 'blocked';
 
 /** How shot `b` meets goblin `e`'s board. */
 export function boardFor(e: Enemy, b: Bolt, now: number): Board {
+  // A Planker's barn door stops anything at its front, a charged or perfect shot and lightning too (sim/meaty.ts).
+  if (e.variant === 'planker') return plankFaces(e, -b.dx, -b.dy, now) ? 'blocked' : 'open';
   if (e.variant !== 'shield' || b.el === 'storm' || e.alert === false || held(e, now)) return 'open';
   // Facing the shot: its facing points back along the shot's line.
   if (e.fx * -b.dx + e.fy * -b.dy <= VARIANTS.shield.cone) return 'open';

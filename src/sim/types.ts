@@ -585,6 +585,11 @@ export interface Enemy extends Body {
   chaseAt?: number;
   sprintAt?: number;
   stompAt?: number;
+  /** An elite's affixes (shared/elites.ts, sim/elite.ts), set as it's made and never again. */
+  elite?: import('../shared/elites').Affix[];
+  /** A Swingle's last spin and the reel after it (sim/meaty.ts): room times, each set once a spin. */
+  spinAt?: number;
+  reelAt?: number;
 }
 
 /** How a goblin died: fell, lost its head, burst apart, burned, or shattered. */

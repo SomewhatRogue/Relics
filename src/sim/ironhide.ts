@@ -8,8 +8,11 @@
 import { IRONHIDE } from '../shared/tuning';
 import { begin, walk } from './enemies';
 import type { Enemy, FightEvent, Hero } from './types';
+import { hasAffix } from './elite';
 
-const iron = (e: Enemy) => e.variant === 'ironhide';
+/** In plates: an ironhide, or a Plated elite (shared/elites.ts: the ironhide rule). */
+export const armoured = (e: Enemy) => e.variant === 'ironhide' || hasAffix(e, 'plated');
+const iron = armoured;
 export const broken = (e: Enemy, now: number) => (e.crackUntil ?? -9) > now;
 
 /** Its guard breaks (or the window starts over). */
