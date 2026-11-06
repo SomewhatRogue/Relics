@@ -25,6 +25,19 @@ show the moment he presses, with their dust and whoosh, and never pull back; wal
 or wading never rubber-bands; a goblin's red fill and its body move as one; a dodge or block on time by his own
 screen saves him from a blow (within LAGCOMP.cap). Everything in DECISIONS 2026-11-06 ("the guest feel"). Open:
 the cap (0.15 s as planned; about 0.35 s makes every on-time press count at a real 150 ms each way), Kyle's call.
+**Elites, and the first new meaty goblins** (Claude Opus 5.5, 2026-11-06; Kyle: "things that take a few hits", "a mix
+of splatting and tactical", "harder kiting", "sometimes you just get swarmed"; `docs/plans/bosses.md` section 3 and
+rollout items 3 and 4). Built; waiting on Kyle's play. *Done when*, on his phone and laptop: from a job's second room
+now and then a brute, ironhide, shield or one of the new three comes as an elite (one a room, two on a deep job), its
+affix on its body: grey plates that only a charged blow, a perfect or storm cracks; dust at its heels and quicker
+wind-ups; blood to the chin, and it eats a dead small one to heal unless he burns the bodies; it drops a piece more
+often. From day 60 of the board, one after another over about a week, the Planker (a barn door: its front takes
+nothing, so he gets round it after its bash), the Swingle (a striped flail ring, then it reels and he punishes it) and
+the Forker (a long red jab that pushes him off; inside its tines it can't touch him) are staged in their Barrowfields
+rooms (DRUMS, SMOKE, CRIES), then rare there, then common anywhere as a fight or a room's closer. Everything in
+DECISIONS 2026-11-06 ("elites"); shots `node scripts/elites-look.cjs`. Open: every name through the lore keeper and
+line editor; Oil-soaked, Hornblower, Smouldering and the other three sorts (Kegman, Pouncer, Gorger); the numbers once
+he's played.
 **Pacing, the first slice** (Claude Opus 5.5, 2026-11-05; Kyle: "swarms over other things, so AoE abilities are
 over-necessary", "mini bosses also work", "not necessarily more enemies if lots of players, but more health on
 enemies, and they hit harder", "a bit too easy to kite"; `docs/plans/bosses.md` section 3). Built; waiting on Kyle's

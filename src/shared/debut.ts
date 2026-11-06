@@ -13,6 +13,8 @@ import type { Template } from './encounters.js';
 import { TEMPLATES } from './encounters.js';
 import type { Lay } from './vignettes.js';
 import { stageChalker } from './chalkstage.js';
+import { MEATY_ON } from './meaty.js';
+import { stagePlanker, stageForker, stageSwingle } from './meatystage.js';
 
 export interface Debut {
   /** The fork way whose room stages it first. */
@@ -48,6 +50,7 @@ export const rareRoom = (job: Job) => 1 + (job.seed % Math.max(1, job.rooms - 1)
 /** A template's weight in room `index` of `job` (0: not here). */
 export function weightIn(t: Template, job: Job, index: number): number {
   const d = t.debut;
+  if (!MEATY_ON.on && MEATY_TEMPLATES.has(t.id)) return 0;
   if (!d) return t.weight;
   const s = stageOf(d, jobDay(job));
   if (s === 'common') return t.weight;
@@ -56,9 +59,11 @@ export function weightIn(t: Template, job: Job, index: number): number {
 }
 
 /** How each staged sort is put into its way's scene. */
-const STAGERS: Record<string, (l: Lay) => void> = { chalk: stageChalker };
+const STAGERS: Record<string, (l: Lay) => void> = { chalk: stageChalker, plank: stagePlanker, swing: stageSwingle, fork: stageForker };
+/** The new meaty sorts' templates (shared/meaty.ts), switched off together by MEATY_ON. */
+const MEATY_TEMPLATES = new Set(['plank', 'swing', 'fork']);
 
 /** A layout-4 room reached by fork way `way`: each sort staged there, in its home region. */
 export function stageDebuts(l: Lay, job: Job, way: WayKind): void {
-  for (const t of TEMPLATES) if (t.debut?.staged === way && t.debut.home === job.place.region) STAGERS[t.id]?.(l);
+  for (const t of TEMPLATES) if (t.debut?.staged === way && t.debut.home === job.place.region && (MEATY_ON.on || !MEATY_TEMPLATES.has(t.id))) STAGERS[t.id]?.(l);
 }

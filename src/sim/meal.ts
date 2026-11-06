@@ -6,7 +6,8 @@
  * heavy hit takes it off the body (sim/damage.ts), as a stun, a freeze, a net or a grab does here; fire
  * on the body turns it to ash first (sim/worldfire.ts), and ash, a burned body or a burst one feeds nothing.
  */
-import { MEAL } from '../shared/tuning';
+import { ELITE, MEAL } from '../shared/tuning';
+import { gorges } from './elite';
 import { held, isDead } from './damage';
 import { walk } from './enemies';
 import { wayTo } from './pathing';
@@ -49,7 +50,7 @@ export function offMeal(e: Enemy, now: number, ev: FightEvent[], cool = true): v
 /** Once a tick, before the goblins move: FED or not, and meals broken off by a stun, a freeze, a net, a grab, or the body gone. */
 export function mealWatch(enemies: Enemy[], freed: Survivor[], now: number, ev: FightEvent[]): void {
   for (const e of enemies) {
-    if (e.kind !== 'butcher') continue;
+    if (e.kind !== 'butcher' && !gorges(e)) continue;
     const fed = (e.fedUntil ?? -9) > now && !isDead(e);
     if (fed || e.fed) e.fed = fed;
     const m = e.meal;
@@ -68,10 +69,10 @@ export function stepMeal(e: Enemy, heroes: Hero[], others: Enemy[], freed: Survi
     const l = Math.hypot(m.x - e.x, m.y - e.y);
     if (l > 0.01) (e.fx = (m.x - e.x) / l), (e.fy = (m.y - e.y) / l);
     if (now < m.until) return true;
-    // Eaten: it heals, and comes up FED.
-    const n = Math.min(e.maxHp - e.hp, Math.round(e.maxHp * MEAL.heal));
+    // Eaten: it heals, and a butcher comes up FED (a Gorging elite heals more, and that's all: sim/elite.ts).
+    const gorger = e.kind !== 'butcher', n = Math.min(e.maxHp - e.hp, Math.round(e.maxHp * (gorger ? ELITE.gorging.heal : MEAL.heal)));
     e.hp += n;
-    Object.assign(e, { meal: null, mealCool: now + MEAL.again, fedUntil: now + MEAL.fedTime, fed: true });
+    Object.assign(e, gorger ? { meal: null, mealCool: now + MEAL.again } : { meal: null, mealCool: now + MEAL.again, fedUntil: now + MEAL.fedTime, fed: true });
     const body = m.s ? freed.find((v) => v.id === m.b) : others.find((o) => o.id === m.b);
     if (body) body.eaten = true;
     ev.push({ k: 'fed', x: e.x, y: e.y, n });
@@ -87,7 +88,7 @@ export function stepMeal(e: Enemy, heroes: Hero[], others: Enemy[], freed: Survi
   }
   if (!best) return false;
   if (bd <= MEAL.reach + e.radius) {
-    e.meal = { b: best.id, ...(best.s ? { s: true } : {}), x: best.x, y: best.y, at: now, until: now + MEAL.time };
+    e.meal = { b: best.id, ...(best.s ? { s: true } : {}), x: best.x, y: best.y, at: now, until: now + (e.kind === 'butcher' ? MEAL.time : ELITE.gorging.time) };
     ev.push({ k: 'meal', x: best.x, y: best.y });
     return true;
   }

@@ -60,6 +60,8 @@ export function packOnto(e: Enemy, f: Foe): void {
   if (f.role) e.role = f.role;
   if (f.harm && f.harm !== 1) e.harm = f.harm;
   if (f.big) (e.big = true), shapeBig(e);
+  // (A boss of the kit is never an elite: it has its own kit, sim/bosskit.ts.)
+  if (f.elite?.length && !f.boss) e.elite = [...f.elite];
 }
 
 /**

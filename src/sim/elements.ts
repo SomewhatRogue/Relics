@@ -4,6 +4,7 @@
  * stuck in bodies. They play off each other: fire meets frost as a steam burst, storm or a heavy blow
  * shatters the frozen, storm on the burning flares outward.
  */
+import { meatySort } from '../shared/meaty';
 import { BURN, FLARE, FROST, SHATTER, SPIDER, STEAM, STORM, STREAM, type Augment } from '../shared/tuning';
 import { shove } from './bodies';
 import { clearElements, damage, frozen, isDummy } from './damage';
@@ -49,7 +50,7 @@ export const chilled = (e: Enemy, now: number) => e.chillUntil > now;
 function ignite(e: Enemy, now: number, ev: FightEvent[]): void {
   if (!burning(e, now)) ev.push({ k: 'ignite', x: e.x, y: e.y }), (e.burnNext = now + BURN.every);
   // Butchers, heavies, shield-bearers and ironhides catch less (BURN.tough); in the rain it burns out sooner (shared/sky.ts).
-  const tough = e.kind === 'butcher' || e.variant === 'heavy' || e.variant === 'shield' || e.variant === 'ironhide';
+  const tough = e.kind === 'butcher' || e.variant === 'heavy' || e.variant === 'shield' || e.variant === 'ironhide' || meatySort(e);
   e.burnUntil = now + BURN.time * (tough ? BURN.tough : 1) * burnFor(currentMap().theme);
 }
 

@@ -39,6 +39,8 @@ import { chaseOn, flankTo, fleeing, rangedPull, sprintPace } from './chase';
 import { stomp } from './bigone';
 import { standHeld } from './pacing';
 import { LEAP } from '../shared/threat';
+import { PLANKER } from '../shared/meaty';
+import { gorges, quicken, quickPace } from './elite';
 import { DOORKEEPERS } from '../shared/bosstune';
 import { clockHolds, trackAim } from './bosskit';
 import { stepKeeper } from './doorkeepers';
@@ -117,6 +119,8 @@ export function begin(e: Enemy, kind: EnemyAttack['kind'], s: EnemyAttackSpec, t
   if (e.fed) (e.attack.windup *= MEAL.fed.windup), (e.attack.dmg = Math.round(e.attack.dmg * MEAL.fed.dmg));
   // A bigger or stronger party, or a BIG ONE: it hits harder (sim/packs.ts, shared/threat.ts), locked in here too.
   if (e.harm) e.attack.dmg = Math.round(e.attack.dmg * e.harm);
+  // An elite that's Quick: a shorter wind-up, never under the floors (sim/elite.ts).
+  if (e.elite) quicken(e, e.attack);
   e.act = 'attack';
   e.actT = 0;
   ev.push({ k: 'windup', x: e.x, y: e.y, kind });
@@ -268,7 +272,7 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   // Called into a pack rush: to its place in the fan (sim/packrush.ts).
   if (e.rushTo && gather(e, (e.chillUntil > now ? FROST.slow : 1) * (e.roused ? DRUMMER.rouse.pace : 1), dt)) return;
   // A butcher at the dead, or making for a body (sim/meal.ts).
-  if (e.kind === 'butcher' && spec && stepMeal(e, heroes, others, OWN_KIT.freed, spec.speed * (e.chillUntil > now ? FROST.slow : 1), now, dt, ev)) return;
+  if ((e.kind === 'butcher' || gorges(e)) && spec && stepMeal(e, heroes, others, OWN_KIT.freed, spec.speed * (e.chillUntil > now ? FROST.slow : 1), now, dt, ev)) return;
   const t = nearest(e, heroes, now);
   if (!t || e.kind === 'dummy') return;
   const d = Math.hypot(t.x - e.x, t.y - e.y);
@@ -287,8 +291,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   const want = Math.atan2(uy, ux), have = Math.atan2(e.fy, e.fx);
   let diff = want - have;
   diff = Math.atan2(Math.sin(diff), Math.cos(diff));
-  const slow = (e.chillUntil > now ? FROST.slow : 1) * (e.snareUntil > now ? NET.slow : 1) * (e.roused ? DRUMMER.rouse.pace : 1) * ((e.hobbleUntil ?? -9) > now ? HOBBLE.slow : 1) * ((e.caltropUntil ?? -9) > now ? CALTROPS.slow : 1) * (e.fed ? MEAL.fed.pace : 1);
-  const rate = e.variant === 'log' ? LOGS.turn : spec.turn, turn = Math.max(-rate * slow * dt, Math.min(rate * slow * dt, diff)), na = have + turn;
+  const slow = (e.chillUntil > now ? FROST.slow : 1) * (e.snareUntil > now ? NET.slow : 1) * (e.roused ? DRUMMER.rouse.pace : 1) * ((e.hobbleUntil ?? -9) > now ? HOBBLE.slow : 1) * ((e.caltropUntil ?? -9) > now ? CALTROPS.slow : 1) * (e.fed ? MEAL.fed.pace : 1) * quickPace(e);
+  const rate = e.variant === 'log' ? LOGS.turn : e.variant === 'planker' ? PLANKER.turn : spec.turn, turn = Math.max(-rate * slow * dt, Math.min(rate * slow * dt, diff)), na = have + turn;
   e.fx = Math.cos(na);
   e.fy = Math.sin(na);
   const facing = e.fx * ux + e.fy * uy;

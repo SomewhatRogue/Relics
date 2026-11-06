@@ -15,7 +15,7 @@ export const THREAT_TIER: Record<Role, ThreatTier> = {
   fodder: 'chaff', wolf: 'chaff', blind: 'chaff',
   lunger: 'special', archer: 'special', roofer: 'special', hexer: 'special', drummer: 'special', netter: 'special', thief: 'special', chalker: 'special',
   snarer: 'special', oiler: 'special', torch: 'special', sapper: 'special', keeper: 'special', banner: 'special',
-  heavy: 'meaty', ironhide: 'meaty', shield: 'meaty', log: 'meaty',
+  heavy: 'meaty', ironhide: 'meaty', shield: 'meaty', log: 'meaty', planker: 'meaty', swingle: 'meaty', forker: 'meaty',
   butcher: 'heavy',
 };
 /**

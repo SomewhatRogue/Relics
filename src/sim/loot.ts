@@ -3,7 +3,7 @@
  * kind in their hand). Standing on it they can take it into their pack, if there's room; they equip
  * it from the pack.
  */
-import { DROPS, WEAPONS, itemName, rollAny, rollTier, type Item } from '../shared/tuning';
+import { DROPS, ELITE, WEAPONS, itemName, rollAny, rollTier, type Item } from '../shared/tuning';
 import { itemLevel } from '../shared/lootlevel';
 import type { Rng } from '../shared/rng';
 import { full } from './pack';
@@ -16,11 +16,15 @@ export const REACH = 1.4;
 /** A drop at the party's level (shared/lootlevel.ts): a level or two up for a strong party (never down, never a hungry piece). */
 export const lift = (i: Item, lv: number): Item => (i.hungry || (i.level ?? 0) >= itemLevel(lv) ? i : { ...i, level: itemLevel(lv) });
 
-/** Maybe drop a weapon where this goblin fell (a BIG ONE always drops one). `lv`: the party's level. */
+/**
+ * Maybe drop a weapon where this goblin fell (a BIG ONE always drops one). `lv`: the party's level. An
+ * elite drops one more often, rolled ELITE.loot.levels up the level curve (shared/elites.ts).
+ */
 export function dropFrom(e: Enemy, heroes: Hero[], drops: Drop[], rng: Rng, ev: FightEvent[], lv = 1): void {
   // (A boss of the kit leaves nothing on the floor: its sure chest is the loot, sim/bosschest.ts.)
   if ((e.kind !== 'scrapper' && e.kind !== 'butcher') || e.boss) return;
-  if (rng.next() >= DROPS[e.kind] && !e.big) return;
+  const elite = !!e.elite?.length;
+  if (rng.next() >= (elite ? ELITE.loot.chance : DROPS[e.kind]) && !e.big) return;
   let near: Hero | null = null, bd = Infinity;
   for (const h of heroes) {
     const d = Math.hypot(h.x - e.x, h.y - e.y);
@@ -28,7 +32,7 @@ export function dropFrom(e: Enemy, heroes: Hero[], drops: Drop[], rng: Rng, ev: 
   }
   if (!near) return;
   // Tier by who fell; butchers sometimes leave armor or a ring instead of a weapon.
-  const tier = rollTier(rng, e.name ? 'named' : e.big ? 'butcher' : e.kind, 0, lv), cls = WEAPONS[near.weapon].cls;
+  const tier = rollTier(rng, e.name ? 'named' : e.big ? 'butcher' : e.kind, 0, lv + (elite ? ELITE.loot.levels : 0)), cls = WEAPONS[near.weapon].cls;
   const slot = e.kind === 'butcher' && rng.next() < 0.3 ? (rng.next() < 0.5 ? 'armor' : 'ring') : 'weapon';
   const item = lift(rollAny(rng, cls, tier, slot, slot === 'weapon' && rng.next() < 0.5 ? near.weapon : undefined, e.name), lv);
   drops.push({ id: nextId++, x: e.x, y: e.y, item, life: DROPS.life });

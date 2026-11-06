@@ -590,6 +590,11 @@ export interface Enemy extends Body {
   chaseAt?: number;
   sprintAt?: number;
   stompAt?: number;
+  /** An elite's affixes (shared/elites.ts, sim/elite.ts), set as it's made and never again. */
+  elite?: import('../shared/elites').Affix[];
+  /** A Swingle's last spin and the reel after it (sim/meaty.ts): room times, each set once a spin. */
+  spinAt?: number;
+  reelAt?: number;
   /** A boss of the kit (sim/bosskit.ts): POISE, its phase, its job, its door. Changes only when one of those does. */
   boss?: import('./bosskit').BossOn;
 }

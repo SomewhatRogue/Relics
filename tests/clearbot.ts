@@ -3,12 +3,13 @@
  * One hero who can't be hurt clears a job's room: it walks (ghosted, so walls never stick it) to the
  * nearest awake goblin on the ground (else the nearest one at all), faces it and fights by Intent like a
  * plain player: a Rogue's daggers tap away at whatever is in reach; a Mage's staff taps its slash and,
- * with three or more about it and the magic for it, holds for the element's big spell. The room decides
+ * with three or more about it and the magic for it, holds for the element's big spell. It knows the new
+ * meaty sorts' answers (to a Planker's side, inside a Forker's tines) but dodges nothing. The room decides
  * the rest. A room is clear when every goblin on the ground is dead or gone (roof archers left out: no
  * blade reaches them), or after `most` seconds.
  */
 import { board, type Job } from '../src/shared/jobs';
-import { HERO, SPELL, TICK, WEAPONS, type WeaponId } from '../src/shared/tuning';
+import { PLANKER, FORKER, HERO, SPELL, TICK, WEAPONS, type WeaponId } from '../src/shared/tuning';
 import { isDead } from '../src/sim/damage';
 import { newRun, runRoom } from '../src/sim/run';
 import { NO_INTENT, type Enemy, type Hero } from '../src/sim/types';
@@ -47,9 +48,16 @@ export function clearRoom(job: Job, index: number, weapon: WeaponId, most = 180,
       if (dist < o.best - 0.3 || foe.hp < o.hp) (o.best = Math.min(o.best, dist)), (o.at = room.time), (o.hp = foe.hp);
       else if (room.time - o.at > 2.5 && dist > 2) (h.x += ux * Math.min(dist - 1, 2.5)), (h.y += uy * Math.min(dist - 1, 2.5)), (o.at = room.time);
       if (room.time - o.since > 12 && foe.hp >= foe.maxHp) (foes = foes.filter((e) => e !== foe)), skipped++, on.delete(h.id);
-      const reach = weapon === 'staff' ? 1.7 : 1.05;
+      // Each new meaty sort's answer, as a player who knows it plays it (shared/meaty.ts): inside a Forker's
+      // tines; to a Planker's side, round its door (aimed at a spot beside it, then at it once there).
+      const reach = foe.variant === 'forker' ? Math.min(1.05, FORKER.inner - 0.2) : weapon === 'staff' ? 1.7 : 1.05;
+      const side = foe.variant === 'planker' && ((h.x - foe.x) * foe.fx + (h.y - foe.y) * foe.fy) / (dist || 1) > PLANKER.cone - 0.15;
+      const sx = foe.x - foe.fy * 1.1 * (Math.sign(foe.fx * (h.y - foe.y) - foe.fy * (h.x - foe.x)) || 1), sy = foe.y + foe.fx * 1.1 * (Math.sign(foe.fx * (h.y - foe.y) - foe.fy * (h.x - foe.x)) || 1);
       // Ghosted walking: straight at it, stopping just inside reach.
-      if (dist > reach && h.act !== 'charge' && h.act !== 'attack') {
+      if (side && h.act !== 'charge' && h.act !== 'attack') {
+        const gx = sx - h.x, gy = sy - h.y, gl = Math.hypot(gx, gy) || 1, step = Math.min(gl, pace * TICK);
+        (h.x += (gx / gl) * step), (h.y += (gy / gl) * step);
+      } else if (dist > reach && h.act !== 'charge' && h.act !== 'attack') {
         const step = Math.min(dist - reach * 0.8, pace * TICK);
         (h.x += ux * step), (h.y += uy * step);
       }
@@ -77,9 +85,9 @@ export function clearRoom(job: Job, index: number, weapon: WeaponId, most = 180,
 }
 
 /** The same seeded rooms every time: the board's ordinary jobs (no deep dives), every second room. */
-export function sampleRooms(days: number, step = 2): { job: Job; index: number }[] {
+export function sampleRooms(days: number, step = 2, from = 1): { job: Job; index: number }[] {
   const out: { job: Job; index: number }[] = [];
-  for (let day = 1; day <= days; day++) for (const job of board(day).filter((j) => !j.deep)) for (let i = 0; i < job.rooms; i += step) out.push({ job, index: i });
+  for (let day = from; day < from + days; day++) for (const job of board(day).filter((j) => !j.deep)) for (let i = 0; i < job.rooms; i += step) out.push({ job, index: i });
   return out;
 }
 

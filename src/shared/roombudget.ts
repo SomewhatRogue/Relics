@@ -8,6 +8,7 @@ import type { Job } from './jobs.js';
 import { Rng } from './rng.js';
 import type { Foe } from './terrain.js';
 import { BUDGET, SCREEN, THREAT_TIER, threatOf } from './threat.js';
+import { eliteThreat } from './elites.js';
 
 export const difficultyOf = (job: Job): keyof typeof BUDGET.difficulty =>
   job.deep ? 'deep' : job.place.ruin >= 3 ? 'hard' : job.place.ruin >= 2 ? 'normal' : 'easy';
@@ -24,9 +25,9 @@ export const capsFor = (n: number, index = 0) => ({
   heavy: SCREEN.heavy[party(n)],
 });
 
-/** A goblin's weight on the fight: its role's points (a named one counts as a heavy, a plain butcher as one). */
-export const foeThreat = (f: { role?: Role; kind?: string; big?: boolean; name?: string; bow?: boolean }) =>
-  threatOf(f.role ?? (f.kind === 'butcher' ? 'butcher' : f.bow ? 'archer' : 'fodder'), !!f.big);
+/** A goblin's weight on the fight: its role's points (a named one counts as a heavy, a plain butcher as one); an elite's more (shared/elites.ts). */
+export const foeThreat = (f: { role?: Role; kind?: string; big?: boolean; name?: string; bow?: boolean; elite?: unknown[] }) =>
+  eliteThreat(threatOf(f.role ?? (f.kind === 'butcher' ? 'butcher' : f.bow ? 'archer' : 'fodder'), !!f.big), f.elite?.length ?? 0);
 export const tierOf = (f: { role?: Role; kind?: string; big?: boolean; bow?: boolean }) =>
   f.big ? 'heavy' : THREAT_TIER[f.role ?? (f.kind === 'butcher' ? 'butcher' : f.bow ? 'archer' : 'fodder')];
 export const meaty = (f: Parameters<typeof tierOf>[0]) => tierOf(f) === 'meaty' || tierOf(f) === 'heavy';

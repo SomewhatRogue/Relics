@@ -2,6 +2,118 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-06: elites, and the first new meaty goblins: the Planker, the Swingle, the Forker (Claude Opus 5.5)
+
+Kyle: "things that take a few hits", "a mix of splatting and tactical", "harder kiting", and "I donlike [sic] moments of
+being able to plan attacks and strategic elements but also sometimes you just get swarmed". Items 3 and 4 of the
+rollout in `docs/plans/bosses.md` (section 3: elites, the six new meaty units, the composer). Built: three affixes
+and three units. **Not built:** Oil-soaked, Hornblower and Smouldering (each wants a new delayed hazard or a spawn
+in the room; left for the next pass), and the Kegman, Pouncer and Gorger.
+
+**Elites** (numbers `shared/elites.ts`, rolled `shared/eliteroll.ts`, played `sim/elite.ts`, drawn `client/elitedraw.ts`):
+- *Chance and caps*: each meaty goblin of a pack (brute, ironhide, shield, and the three new sorts; never the
+  log-carriers or a BIG ONE) from a job's second room, 10% plus 5% a point of ruin; one a room, two on a deep job.
+  One or two affixes (a second 15% plus 5% a point of ruin), a third only on a deep job (25% of those with two).
+  Rolled on a stream of its own as the composer picks each band's template, so the room plans for it.
+- *Threat*: its sort's points times 1.5, plus 1 an affix (`foeThreat` reads `elite`, so the on-screen caps count it
+  too). An elite is laid only if the room can still pay for it (a small one kept for every band) and its pack stays
+  within a lone hero's screen; what's spent on it comes off what the room lays after it. Over days 1 to 40 of the
+  board about 70% of the rolls that hit land (a shield wall, or a brute with an ironhide, already fills the screen):
+  31 elites in 520 rooms past the first, about one room in seventeen.
+- *Plated* (grey plates, the ironhide's own, askew and cracked gold once broken): the ironhide rule (`armoured` in
+  `sim/ironhide.ts`): a fifth of anything until a charged blow, a perfect, or storm (a jolt, a rod: a Plated elite
+  draws lightning as an ironhide does) breaks the plates for 3 s.
+- *Quick* (dust at its heels, unlit): 1.25 times its pace; wind-ups 0.85 as long but never under 0.9 s (red) or
+  1.1 s (striped), and never longer than they were; locked in `begin`, so the telegraph is the one judged. A pack
+  rush keeps the rush's own clock.
+- *Gorging* (blood to the chin, dripping): eats a small one's body as a butcher does (`sim/meal.ts`, the same red
+  ring round the body, GORGED), in 2 s, healing 30% (no FED). A hero within 1.5 tiles keeps it off; burn the dead
+  (ash feeds nothing) or hit it hard off its meal.
+- *Loot*: drops a piece 35% of the time (a small goblin 2%), rolled 2 levels up the party's level curve
+  (`leanOdds`), the item's own level as the party's.
+
+**The three units** (numbers `shared/meaty.ts`, rules `sim/meaty.ts`, kits `client/meatydraw.ts`, sprites
+`client/meatysprites.ts`; drawn 1.2 times a small goblin, in its greens with the glowing eyes; the 2.5D box figures
+in `three/goblins3d.ts`). Each 4 threat (meaty), a template of its own with `beats: ['tactic', 'closer']`, never in
+a rush (its own trick), burns half as long, and no quick blow breaks its wind-up (`small` leaves them out).
+- **The Planker** (proposal; was "the Doorman", renamed at the lore keeper's flag so it doesn't crowd the
+  Doorkeepers and Turnkey): 120 health, a barn door on its arm. Its front (within about 70 degrees either side)
+  takes nothing at all: blades, a charged blow, a perfect, any shot (lightning too). Bursts and fire go round it,
+  and it's open when stunned, frozen, netted or caught unaware. It turns at 1.6 radians a second (a small goblin's
+  7) and not at all through its bash (a red 110-degree wedge, 1.0 s, 14, knock 9) and the 1.3 s after it.
+  Answer: block it or dodge it, then step to its side and hit it in full.
+- **The Swingle** (proposal): 100 health, a threshing flail. A hero within 2.1: it spins (a striped ring of 2.3
+  round itself, 1.3 s, 16, knock 10), then reels, stunned for 1.5 s, so blows land 1.5 times as hard (the stunned
+  rule). Answer: walk out (Warrior, Healer) or dodge out (Ranger, Rogue, Mage), then punish.
+- **The Forker** (proposal): 90 health, a pitchfork. From 3.2 tiles it jabs a red lane (0.9 s, 12, knock 13: it
+  pushes you well off). The lane starts at its tines (1.2 tiles plus your body's width out), so inside 1.2 tiles it
+  can't touch you; it backs off at 0.6 of its pace, slower than you walk. Answer: block the jab and walk in, or
+  dodge in through it.
+- *Fair*: every blow telegraphed (red for the bash and the jab, striped edge for the spin) and begun only within
+  3.7 tiles of its hero, so never from off screen.
+
+**How they bleed in** (`shared/debut.ts`; board days, the live world about day 60): staged, then rare (home region
+only, one room a job, weight 0.6), then common (weight 1.5, anywhere a fight or a closer fits):
+
+| | staged until | rare | common from | staged in |
+|---|---|---|---|---|
+| Planker | 61 | 62 to 64 | 65 | Barrowfields DRUMS: before the war band, two small ones with it |
+| Swingle | 63 | 64 to 66 | 67 | Barrowfields SMOKE: before the house that's catching, two small ones with it |
+| Forker | 65 | 66 to 68 | 69 | Barrowfields CRIES: along the captives' track, one of their guards (as the chalker) |
+
+The staged ones are placed with no dice (`shared/meatystage.ts`); the composer leaves their packs be, counts them
+in the room's specials and budget, and in such a room keeps back a small one for every band.
+
+**Online**: nothing new a tick. `elite` is set once as the goblin is made; a Swingle's `spinAt` and `reelAt` once a
+spin. The door, the tines and the quick wind-ups are worked out in the room; the client reads the attack it's sent.
+
+**Measured** (`npx tsx scripts/encounters/clear.ts [days] [first day] [off]`, now with a first day and a switch; the
+bot now plays the Planker's and the Forker's answers, as a player who knows them would, and still dodges nothing):
+
+| 48 rooms | daggers: s a room, health lost | staff: s a room, health lost | daggers / staff time, health |
+|---|---|---|---|
+| days 1 to 6, off | 43.4, 304 | 46.4, 275 | 0.94, 1.11 |
+| days 1 to 6, on | 44.0, 306 | 47.1, 280 | 0.93, 1.09 |
+| days 70 to 75, off | 38.0, 267 | 48.9, 361 | 0.78, 0.74 |
+| days 70 to 75, on | 38.3, 243 | 50.1, 371 | 0.76, 0.65 |
+
+"Off" on days 1 to 6 is exactly the pacing entry's "after", so nothing else moved. The gap that pacing closed (the
+daggers losing more than the staff) stays closed; on the later days the staff now loses a little more (it stands at
+1.7 tiles, on the Forker's lane, and in the Swingle's ring: it doesn't walk out). Kyle's play is the real measure.
+
+**Pins**, re-pinned only after the switch-off check: with `ELITE.on` and `MEATY_ON.on` false the layout-3 pin is
+still 2459865809 and the layout-4 pin 1775586545. On: layout 3 is 2219083919 (15 of 388 rooms moved, goblins only:
+hashed without goblins 1177230441 either way); layout 4 is 104248273 (17 of 280 moved: 15 in goblins only, 2 with
+an elite where the chest moved too, the composer's goblins falling back on the room's own spot finder a different
+number of times, as with pacing).
+
+Tests: `tests/elites.test.ts` (none in the first room, the chance against what lands, one a room and two deep, the
+switch, threat and the budget, Plated's fifth and its three breakers, Quick's wind-ups and floors and pace and a
+block of it, Gorging's meal and heal and the burned body that feeds nothing, the loot bump, `elite` sent once, the
+same rooms and fight twice); `tests/meaty.test.ts` (each unit's blow landed, blocked by sword and mace, dodged by
+daggers, longbow and wand; the Planker's front and side, shots, the flank after a block and after a dodge, the slow
+turn; the Swingle's ring, walked out of, the reel and its punish; the Forker's lane, the push, inside the tines, it
+never jabs there; 4 points and the beats; debut days one after another; staged in DRUMS, SMOKE, CRIES in the
+Barrowfields only; none in the packs while staged, some once common; nothing begun from off screen; determinism).
+`noparry.test.ts` picks up the spin as a striped blow every dodge class slips. Full suite 1288 passed; town, party
+and expedition online scripts pass. Shots: `node scripts/elites-look.cjs [url] [dir]` (phone: each unit winding up,
+each affix, all of them; flat and 2.5D).
+
+**Beside the boss kit** (merged with main after the Doorkeepers): a boss is never an elite (its arena is planned
+on its own, with no composer and no pacing; `packOnto` and the composer drop an elite on anything with `boss`; Quick
+never touches a boss's wind-up, so its tell pose is always added in full). The Planker's barn door
+(`sim/meaty.ts plankFaces`, keyed on the variant, its door shut through its own bash) and a Doorkeeper's
+(`sim/doorwall.ts`, keyed on `boss`, swung aside while its blow lands) share no code and never read each other: one
+is a goblin to get round, the other a boss's job with straps and POISE (tests in `tests/elites.test.ts`). The
+threat budget doesn't reach the barn. Pins after the merge: unchanged (switched off, main's 2459865809 and
+1775586545). Full suite 1347 passed; town, party (one guest-feel frame check flaked once, then 28 of 28), expedition
+and Florida online pass.
+
+**New words** (for the lore keeper, then the line editor; code and docs only for now, nothing on screen names a sort
+or an affix): Planker, Swingle, Forker; Plated, Quick, Gorging; the templates' plain words "a planker behind its barn
+door, and a few small ones", "a swingle with its flail, and a few small ones", "a forker with its pitchfork, and a
+few small ones". On screen only what was there: BLOCKED over a blow the barn door takes, GORGED when an elite eats.
+
 ## 2026-11-06: who hosts: the best connection runs the room, and a hidden host hands it on (Kyle; Claude Opus 5.5)
 
 Kyle approved both today (the two left open in "the join storm" and "the guest feel"): "best connection hosts"
