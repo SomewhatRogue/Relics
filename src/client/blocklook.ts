@@ -68,6 +68,9 @@ export const LOOK: Record<Block['kind'], Look> = {
   oak: { tall: 70, roof: '#3a2e24', ridge: '#24391f', wall: '#3a2e24', windows: false },
   // The great barn's hay stacks (pieces.ts draws them; this is for fire and the ash heap).
   haystack: { tall: 22, roof: '#b8a060', ridge: '#d8c47a', wall: '#8a7440', windows: false },
+  // Fenmere: boards over the water (a deck), reeds standing in the shallows.
+  boards: { tall: 4, roof: '#5a4028', ridge: '#3a2a1a', wall: '#4a3420', windows: false },
+  reeds: { tall: 20, roof: '#8a8a52', ridge: '#5a6a3a', wall: '#4a5a32', windows: false },
   // A side way is a gap, painted with the room's ways out (wayout.ts), never drawn as a block.
   sideway: { tall: 0, roof: '#000', ridge: '#000', wall: '#000', windows: false },
 };

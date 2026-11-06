@@ -2,6 +2,103 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-06: Fenmere, the second curated zone: the carr, the causeway, the ford, the reeds that hide goblins, the mist, the Peat Cuts (Kyle; Claude Opus 5.5)
+
+Kyle, 2026-11-05: "more raid biomes, fewer but bigger and lovingly curated", "the river in the middle should have
+maybe a fishing village", "better and more dynamic enemies that bleed in slowly", "scripted scenes". The Fen of
+`docs/plans/atlas.md` section 7 item 7, without Sallow Priory (it needs Kyle's story calls) and without the Corpse
+Road. Numbers in `shared/fentune.ts` (FEN, LURK, MIST, BOARDS; re-exported by tuning.ts); every word in
+`shared/fenwords.ts`. On the expedition kit as Hangman's Wood is (`job.exped: 'fen'`, `zone: 'fen'`), posted on the
+board every day after HANGMAN'S WOOD (`expedjob.ts fenmere`; `?hero=WARRIOR&fen=1`, or `?fen=70` for day 70's).
+
+**The ground, fixed by hand** (`shared/fenland.ts`): 76 by 60, painted on a 0.2-tile grid in layers (deep, shallow,
+dry, the channels, the boards) and merged into 70 water boxes, so every edge is a straight box edge (no stair-step
+collision) and the same every visit. In from the fields at the foot (furrows, a hedge, the wood's edge at its
+stile), the coppice (rows of cut stools, the wood thick at the west edge), **the carr** (willows standing at the
+edges of its pools, the river's wet edge), **the causeway** east over deep bog (2.6 wide, a shallow wet edge each side,
+a dog-leg north), **the ford** where the river spreads into the fen (4.8 wide, all shallows), **the reed beds** north
+of it (shallows, two deep channels with **boards** over them and a way round one's end, two deep pools, two dry
+hummocks), the fire on **the rise** (the mid-point, Hangman's machinery), a causeway north-east to **the Peat Cuts**
+(four deep cuts in a row, baulks between, **boards across each**), and out by the causeway to the north. Off the way:
+the island in the river with its cages (a ford from the carr), the skimmer's islet (short boards off the causeway),
+and a long boardwalk out over the bog to an island with a chained chest. Everything else is water.
+- **Boards** are a new block, `boards`, a deck (`deck: true`): never collided with, the water cut out under them, drawn
+  as planks on piles in both views (`client/fenpieces.ts` through `pieces.ts`). Unlike a jetty they never wipe the
+  glowing layer in the flat view, so a telegraph on the boards shows (the Staithe's jetty still does: left as is).
+- **Reeds** are a new block, `reeds`, `soft`: clumps of stems and seed heads standing in the reed beds' shallows (36 on a
+  map, seeded, lanes left along every way through), walked through, drawn in both views; no glow wiped either.
+- **The seed** places the trees, the reeds, which goblins are where and which sorts, the mist and the sky; never the
+  ground, the boards or a scene's place.
+- **Water near, on a big map** (`shared/mapgrid.ts`): the water boxes go in the big map's buckets with the rest, so
+  `collide` and `wadeAt` look at the few near a body instead of all of them. The same boxes in the same order, so the
+  pushes are exactly as before (no map, room or pin moved).
+
+**The scenes, in order** (`shared/fenscenes.ts`), each said once over the first to come to it (Hangman's beats,
+`sim/woodzone.ts`, now for either zone): two dragging somebody through the stile to their fire; asleep among the
+coppice stools round it; a nest and its spiders in the carr; **the causeway shut** with two shields (a Planker once it's
+common) and an archer behind, the skimmer on its islet pouring burning oil on the causeway's north edge (its pour point
+is now its task's, `sim/skimmer.ts`; the Staithe's still the map's); **the ford** with a gaffer and its brute (an elite
+half the time) on the far side, so a hook hauls you out of the water to the brute; **the island**, three cages, a netter
+and guards; **the reeds**, four knots lying in the water either side of both ways through; **the Peat Cuts**' larder on
+the old drying ground (racks, someone hung, the pot on its fire; a Forker on the first cut's boards once it's common);
+**the butcher's ground** on the north strip among the cuts, a brute by it and **gaffers out on two baulks** hooking you
+across the water; the chest out on the bog, a dead man by it and three dozing over it. Then knots on the dry ground of
+the trail (lungers, shields, brutes, archers among them). About 62 goblins, plus the expedition's waves.
+- **Jobs**: CAPTIVES (the island's cages), LARDER (the pot at the Peat Cuts), BUTCHER (the day's named one, one of the
+  board's six, 520 health, `zoned`: its relic is the zone's); side job CHEST. Every pinned job done: straight out by
+  the north causeway (no beacon, as Hangman's). The fire on the rise is offered once the captives are out.
+- **The relic**: `ZONE_RELICS.fen` is a pool, hook, lodestone, javelin (Kyle's call which).
+
+**Goblins lying in the reeds** (`sim/lurk.ts`, `LURK`). A task, `lurk`, on any goblin: lying in the water with only
+its eyes showing (blinking, brighter within **5.5** tiles, the reeds over it shivering), never faced by a hero's aim,
+nothing drawn over it, no shadow. Sprung by a hero within **2.6**, a blow, or its pack waking: **the whole knot**
+stands up together over **0.75 s** (one room time on each task, set once: a friend draws the same rise), doing nothing
+that lands until it's up, then fights. Netters, lungers and (once common) a Pouncer lie among them.
+
+**Mist** (`shared/fenmist.ts`, `MIST`). Nine banks, homes over the reeds, the carr's river edge, the rise and the cuts,
+each drifting about its home and thickening and thinning by the room's clock alone (nothing sent). As a rule: stood in
+it, a goblin notices you from up to **45%** less far and an archer reaches you up to **35%** less far (its telegraph as
+short: the shot is what's judged). As a look (`client/fenmistdraw.ts`): up to eight banks nearest the camera handed to
+the flat lighting pass and the 2.5D post pass as ellipses, stepped and dithered, mixed into **the lit layer only** and
+**only where nothing glows within 2 pixels**, so a red or striped telegraph's whole footprint, dithered or not, shows
+through it whole; eyes and fire show; your own hero's ground stays clear for 1.3 tiles, thickening out to 2.8 (so you always read your hero). On
+Fenmere the dawn's mist bands (drawn over the glowing layer) are off: the banks are the fen's mist.
+
+**Online.** The map is built from the seed on every screen; the room decides everything on its streams. New on the wire:
+nothing a tick. A lurker's rise is one field set once; the mist is the clock; the boards and reeds are the map.
+
+**Fairness and phone.** Walkable by every class: a flood as a body with feet (deep water stops it: `tests/walk.ts`
+`feet`) from the way in reaches every scene, job, the fire, the way out, every trail point and every boardwalk's
+middle on three days; every class's hero walks the whole way by Intent, dodging every 1.5 s, and is never in deep
+water; knocked hard four ways off the causeway, the dog-leg, the long boards, the reeds' boards, a cut's boards, the
+ford and the islet's boards, you never land in deep water and can always walk back.
+
+**Tests** (`tests/fen.test.ts`, 12): the posting and the fixed ground, the seeded rest; walkable as a body with feet
+(three days); every class walks it end to end dodging; knocked off causeways, boards and the ford; deep either side of
+the causeway, the ford and reeds shallow, boards decks; goblins over the ford and both boards; the mist by the clock,
+noticing and reach; the mist's two shader guards; the lurkers; what's placed where and its threat, and the new sorts
+only once common; the beats, the fire and the way out; the same fight twice and a friend's patches. `tests/walk.ts`
+takes `feet`. Full suite 1431 passed, no pin moved (none re-pinned). Online (`ZONE=fen node scripts/exped-online.cjs`,
+120 ms lag): the same map on both screens, Sam got 32.7 KB/s, 14.6 messages a second, biggest 25.6 KB, saw 18 goblins
+of 63, had the mist, the fire and the cages from the leader; both pages about 21 fps headless (the Barrowfields 28 on
+the same run): to measure on a real phone. Shots: `node scripts/fen-look.cjs [url] [outdir]` (causeway, ambush, ford,
+mist with and without, the board and its card; phone, flat and 2.5D).
+
+**New names**: none. Fenmere, the Peat Cuts and the named butchers are the bible's. **New player-facing lines**, for
+the lore keeper and then the line editor (all in `shared/fenwords.ts`): the posting ("The hungry are keeping a larder
+at the Peat Cuts, and they're bringing people across the fen to fill it. Get the ones on the island out, poison their
+pot, and kill {boss}."; "One fen, about 8 minutes"; "{n} gold and a relic off {boss}, more for each job done. Half if
+you don't get out"); the pins' jobs ("Break the cages open on the island in the river", "Poison the cookpot at the
+Peat Cuts (stand at it)", "Side job: open the chained chest out on the bog"); the banner ("Jobs done. Out by the
+causeway to the north", "Light the fire on the rise", "The fire's lit. Anyone who goes down gets up by it now", "Your
+jobs are on the MAP. Keep to the causeways and the boards."); the map's FENMERE; the ten beats (the file). Lore to
+record or reject: the hungry keep a larder on the Peat Cuts' old drying ground (the bible has larders in its
+cellars), they bring people across the fen to it, goblins lie hidden in the reeds.
+
+**Open for Kyle**: every number once he's played (the spring's 2.6, the mist's 45% and 35%, 62 goblins); the relic's
+pool; whether the Staithe's jetty should stop wiping telegraphs too (it does today, an older bug the boards avoid);
+Sallow Priory and the Corpse Road (his story calls) come next on this ground.
+
 ## 2026-11-06: the second wave: Oil-soaked, Hornblower, Smouldering; the Kegman, the Pouncer, the Gorger (Claude Opus 5.5)
 
 The rest of `docs/plans/bosses.md` section 3 (the elites table and the six meaty units), on the patterns of "elites,

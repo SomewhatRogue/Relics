@@ -11,7 +11,7 @@ import { travel } from '../shared/sweep';
 import type { DreadRule } from '../sim/dread';
 import { townInterior } from '../shared/interiors';
 import { board, STORY_PARTY, type Job } from '../shared/jobs';
-import { expedition, hangmansWood } from '../shared/expedjob';
+import { expedition, fenmere, hangmansWood } from '../shared/expedjob';
 import { barnHunt, barnPosted } from '../shared/bossjobs';
 import { WORKS, workDone, workOpen, workProgress, WORK_ORDER, type WorkId } from '../shared/works';
 import { contribute, type Contribution } from '../shared/worldsync';
@@ -572,9 +572,10 @@ export class Game {
   jobs(): Job[] {
     // The day's expedition (THE BARROWFIELDS) at the foot of the board, its own posting.
     // Then Hangman's Wood, the first of the atlas's curated places (docs/plans/atlas.md), posted the same way in Greyhollow.
-    const list = [...board(this.world.day, workDone(this.world, 'sewers')), expedition(this.world.day), hangmansWood(this.world.day)];
+    // Then Fenmere, the second (shared/fen.ts).
+    const list = [...board(this.world.day, workDone(this.world, 'sewers')), expedition(this.world.day), hangmansWood(this.world.day), fenmere(this.world.day)];
     // The Doorkeepers in the great barn, a boss hunt, from late in chapter 1 (shared/bossjobs.ts).
-    if (barnPosted(this.world)) list.splice(list.length - 2, 0, barnHunt(this.world.day));
+    if (barnPosted(this.world)) list.splice(list.length - 3, 0, barnHunt(this.world.day));
     return this.world.storyDone.includes(CHAPTER_1.mission.id) ? list : [CHAPTER_1.mission, ...list];
   }
 

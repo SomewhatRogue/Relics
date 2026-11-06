@@ -54,6 +54,7 @@ export * from './encounters.js';
 export * from './worldfx.js';
 export * from './staithetune.js';
 export * from './hangtune.js';
+export * from './fentune.js';
 export * from './chalk.js';
 export * from './threat.js';
 export * from './meaty.js';

@@ -35,6 +35,10 @@ export type FoeTask =
   | { k: 'tally'; x: number; y: number; n: number; quit?: boolean }
   /** Hangman's Wood (sim/dropper.ts, shared/hangwood.ts): up in the branches till someone's under it (`at` it lands at tx, ty); at work on something at (x, y) till it sees you. */
   | { k: 'perch'; at?: number; tx?: number; ty?: number }
+  /** Fenmere (sim/lurk.ts): lying in the reeds, eyes only, till it's sprung; then standing up out of them until room time `up` (-1 once up). */
+  | { k: 'lurk'; up?: number }
+  /** Fenmere's skimmer (sim/skimmer.ts): where it pours its pot (the Staithe's pours where the map says). */
+  | { k: 'pour'; x: number; y: number }
   | { k: 'busy'; x: number; y: number; what: 'winch' | 'snare'; quit?: boolean };
 
 export const SCENES4: Piece[] = ['burning', 'drag', 'prisoners', 'patrol', 'hanging', 'fallen', 'cache', 'drums', 'webs', 'wading', 'staithe'];

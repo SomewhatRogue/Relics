@@ -38,6 +38,8 @@ import { chalkTarget } from './chalker';
 import { chaseOn, flankTo, fleeing, rangedPull, sprintPace } from './chase';
 import { stomp } from './bigone';
 import { standHeld } from './pacing';
+import { stepLurk } from './lurk';
+import { mistReach, mistSight } from '../shared/fenmist';
 import { LEAP } from '../shared/threat';
 import { PLANKER } from '../shared/meaty';
 import { gorges, quicken, quickPace } from './elite';
@@ -198,6 +200,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   if (e.act === 'dead' && !e.respawns && e.actT >= STILL) return;
   if (e.hitstop > 0 && !rushLocked(e)) return void (e.hitstop -= dt);
   if (e.hitstop > 0) e.hitstop -= dt;
+  // Lying hidden in Fenmere's reeds: its clocks stop till it's sprung (nothing changes, so nothing is sent: sim/lurk.ts).
+  if (e.task?.k === 'lurk' && e.task.up === undefined && stepLurk(e, heroes, others, now, ev)) return;
   e.actT += dt;
   e.moving = false;
   e.cooldown -= dt;
@@ -268,6 +272,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   // A boss of the kit takes its own turn (sim/doorkeepers.ts).
   if (e.boss) return stepKeeper(e, heroes, now, dt, ev, others, () => notice(e, heroes, others, now, ev));
   // Busy at something when you came in (layout 4: sim/tasks.ts): a torch to a wall, the prisoners' rope, a round, a body.
+  // Lying in Fenmere's reeds till it's sprung, then standing up out of them (sim/lurk.ts).
+  if (e.task?.k === 'lurk' && stepLurk(e, heroes, others, now, ev)) return;
   if (e.task && stepTask(e, heroes, now, dt, ev, () => notice(e, heroes, others, now, ev))) return;
   if (e.alert === false && e.feeding) {
     if (!notice(e, heroes, others, now, ev)) return;
@@ -309,7 +315,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   if (stepOwn(e, { t, d, level, via: !!via, ux, uy, facing, speed: spec.speed * slow, slow }, heroes, others, rng, now, dt, ev, OWN_KIT)) return;
   if (e.bow) {
     // In fog it shoots, keeps off and comes in at a shorter reach, its telegraph as short (shared/sky.ts).
-    const fr = reachFor(currentMap().theme), reach = ARCHER.reach * fr;
+    // And in Fenmere's mist, the thicker it lies where you stand (shared/fenmist.ts).
+    const cm = currentMap(), fr = reachFor(cm.theme) * (cm.fen ? mistReach(cm, t.x, t.y, now) : 1), reach = ARCHER.reach * fr;
     if (d <= reach && e.cooldown <= 0 && facing > 0.9) return begin(e, 'shot', fr < 1 ? { ...ARCHER.shot, range: (ARCHER.shot.range ?? ARCHER.reach) * fr } : ARCHER.shot, t, ev);
     // Runs from you when you get close on its level (along its perch, up high); comes in if you're far on the ground.
     const back = level && d < ARCHER.keep * fr, on = !e.z && d > reach;
@@ -365,7 +372,7 @@ function notice(e: Enemy, heroes: Hero[], others: Enemy[], now: number, ev: Figh
   // The blind hunters never see you: they hear (sim/blind.ts).
   if (e.variant === 'blind') return blindNotice(e, heroes, others, now, ev);
   let seen = false;
-  const theme = currentMap().theme;
+  const m = currentMap(), theme = m.theme;
   for (const h of heroes) {
     if (h.act === 'down' || h.id === 'squire') continue;
     const dx = h.x - e.x, dy = h.y - e.y, d = Math.hypot(dx, dy);
@@ -376,7 +383,9 @@ function notice(e: Enemy, heroes: Hero[], others: Enemy[], now: number, ev: Figh
     const far = (e.kind === 'spider' ? SPIDER.sight : ALERT.sight) * sightIn(theme);
     const sight = e.variant === 'looter' ? 1.6 : e.feeding ? far * 0.5 : ahead ? far : ALERT.behind;
     // Rain covers your feet and fog hides you: noticed from less far (shared/sky.ts).
-    if (d < sight * noticeFor(theme) * (h.sneaking && h.act !== 'roll' ? sneakSight(h) : 1) + seenFrom(h) * glowIn(theme)) seen = true;
+    // Fenmere's mist hides you too, the thicker it lies where you stand (shared/fenmist.ts).
+    const mist = m.fen ? mistSight(m, h.x, h.y, now) : 1;
+    if (d < sight * noticeFor(theme) * mist * (h.sneaking && h.act !== 'roll' ? sneakSight(h) : 1) + seenFrom(h) * glowIn(theme)) seen = true;
   }
   for (const o of noisy(others, now)) if (o !== e && o.alert && (isDead(o) || o.hitAt > now - 0.2) && Math.hypot(o.x - e.x, o.y - e.y) < hearFrom(e, o)) seen = true;
   if (!seen) return false;

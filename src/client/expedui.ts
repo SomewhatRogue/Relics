@@ -7,6 +7,7 @@
 import { EXPED_SAYS, GOAL_WORDS, MAP_WORDS } from '../shared/expedjob';
 import { SKY_TURN } from '../shared/sky';
 import { WOOD_BEATS, WOOD_EXIT, WOOD_GOALS } from '../shared/hangwords';
+import { FEN_BEATS, FEN_EXIT, FEN_GOALS } from '../shared/fenwords';
 import type { ArenaRoom } from '../sim/room';
 import type { FightEvent } from '../sim/types';
 import { ExpedMap } from './expedmapui';
@@ -36,21 +37,23 @@ export class ExpedUi {
     document.body.classList.toggle('exped', on);
     if (!on) return void (this.map.open && this.map.toggle(false));
     const x = room.exped;
-    if (x && this.dropped !== room) (this.dropped = room), say(room.map.hang ? WOOD_EXIT.drop : EXPED_SAYS.drop, '#ffd27a');
+    if (x && this.dropped !== room) (this.dropped = room), say(room.map.hang ? WOOD_EXIT.drop : room.map.fen ? FEN_EXIT.drop : EXPED_SAYS.drop, '#ffd27a');
     for (const e of evs) {
       if (e.k !== 'exped' || !x) continue;
-      const wood = !!room.map.hang;
+      const wood = !!room.map.hang, fen = !!room.map.fen;
       if (e.what === 'goal' || e.what === 'side') {
         const q = (e.what === 'goal' ? x.goals : x.sides)[e.i ?? -1];
-        const words = wood && q?.kind === 'butcher' ? WOOD_GOALS.hempen : q && GOAL_WORDS[q.kind];
+        const words = wood && q?.kind === 'butcher' ? WOOD_GOALS.hempen : fen && q && q.kind in FEN_GOALS ? FEN_GOALS[q.kind as keyof typeof FEN_GOALS] : q && GOAL_WORDS[q.kind];
         if (words) say(words.done.split('{boss}').join(boss), e.what === 'goal' ? '#ffd27a' : '#c8d0dc');
       }
       // Hangman's Wood (sim/woodzone.ts): a scene on the way said as you come to it, the fire lit.
       else if (e.what === 'beat') {
-        const b = room.map.hang?.beats[e.i ?? -1];
+        const b = room.map.hang?.beats[e.i ?? -1], f = room.map.fen?.beats[e.i ?? -1];
         if (b) say(WOOD_BEATS[b.kind], '#e8dcc0');
-      } else if (e.what === 'check') say(WOOD_EXIT.lit, '#ffd27a');
-      else if (e.what === 'open' && wood) say(WOOD_EXIT.open, '#ffd27a');
+        // Fenmere's (shared/fenwords.ts), the butcher by name.
+        else if (f) say(FEN_BEATS[f.kind].split('{boss}').join(boss), '#e8dcc0');
+      } else if (e.what === 'check') say(fen ? FEN_EXIT.lit : WOOD_EXIT.lit, '#ffd27a');
+      else if (e.what === 'open' && (wood || fen)) say(fen ? FEN_EXIT.open : WOOD_EXIT.open, '#ffd27a');
       else if (e.what === 'horn') say(EXPED_SAYS.horn, '#ff6a5a');
       else if (e.what === 'worse') say(EXPED_SAYS.worse, '#ff9a6a');
       else if (e.what === 'open') say(EXPED_SAYS.open, '#ffd27a');

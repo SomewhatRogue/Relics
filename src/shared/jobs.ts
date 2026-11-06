@@ -74,14 +74,14 @@ export interface Job {
    */
   layout?: 2 | 3 | 4;
   /** An expedition (shared/expedjob.ts): one big map of the Barrowfields instead of rooms. */
-  exped?: 'barrowfields' | 'hangmans';
+  exped?: 'barrowfields' | 'hangmans' | 'fen';
   /** A curated zone (docs/plans/atlas.md): its climax's relic, awarded once at the job's end (shared/relicaward.ts ZONE_RELICS). */
-  zone?: 'hangman';
+  zone?: 'hangman' | 'fen';
   /** A boss's arena as the last room (shared/barnarena.ts): the Doorkeepers in the great barn. */
   arena?: 'doorkeepers';
 }
 
-const BOSSES = ['MAWL', 'SKARN', 'OLD KNUCKLES', 'OLD SPOON', 'GUTCHAIN', 'MOTHER RUST'];
+export const BOSSES = ['MAWL', 'SKARN', 'OLD KNUCKLES', 'OLD SPOON', 'GUTCHAIN', 'MOTHER RUST'];
 
 function describe(o: Objective, p: Place, boss: string): { title: string; text: string } {
   if (o === 'rescue') return { title: `Rescue at ${p.name}`, text: `There were folk alive in cages at ${p.name} three days ago, and some may be yet. Break the cages open and bring them home.` };

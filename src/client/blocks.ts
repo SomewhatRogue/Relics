@@ -18,8 +18,9 @@ import { dressOutside, liveOutside } from './exterior';
 import { drawHallRound } from './hallsdraw';
 import { wear, windowsLit } from './wear';
 import { OX, OY, PX } from './world';
-import { DECKS, PIECE_BLOCKS, PIECE_ROUNDS } from './pieces';
-import { drawPieceBlock, drawPieceRound } from './piecedraw';
+import { blockBoxes, DECKS, PIECE_BLOCKS, PIECE_ROUNDS } from './pieces';
+import { FEN_KINDS } from './fenpieces';
+import { drawPieceBlock, drawPieceRound, paintBoxes } from './piecedraw';
 import { drawDoorGlow, paintShut } from './shutdraw';
 
 export { LOOK };
@@ -111,6 +112,14 @@ function door(b: Block, rect: Rect, w: number, wallY: number, l: Look): void {
 /** (x, y) is the block's top-left on screen (the footprint's corner). */
 export function drawBlock(c: Ctx, b: Block, x: number, y: number, lit: boolean): void {
   const st = state(b);
+  // Fenmere's boards and reeds (fenpieces.ts): their boxes on the lit layer only, so a telegraph on the
+  // boards or under the reeds still shows.
+  if (FEN_KINDS.has(b.kind)) {
+    // (Only those on screen: a big map's reeds are many.)
+    const cv = c.lit.canvas;
+    if (x > cv.width + 40 || y > cv.height + 60 || x + b.w * PX < -40 || y + b.h * PX < -60) return;
+    return paintBoxes(c.lit, blockBoxes(b), x, y);
+  }
   // Layout 4's pieces: their boxes (pieces.ts), the same the 2.5D view builds; on fire like any wood.
   if (PIECE_BLOCKS.has(b.kind) && (st !== 2 || DECKS.has(b.kind))) {
     drawPieceBlock(c, b, x, y);

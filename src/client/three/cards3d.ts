@@ -5,6 +5,8 @@
  * nests, someone caged waving through the bars and calling out, the freed, the map's people (Wickhold's folk, Hew, the dead), and the scenes past the wood's trees. Positions eased between
  * the room's ticks as everywhere else. Only draws.
  */
+import { lurking } from '../../sim/lurk';
+import { lurkFrame } from '../fenlurk';
 import { pulledAt } from '../wave2ground';
 import { ROOF_UP3 } from '../foedraw';
 import type { ArenaRoom } from '../../sim/room';
@@ -49,6 +51,7 @@ function hound(f: Figs, h: Hero, d: Hound, ax: number, ay: number, hx: number, h
 /** Every figure this frame, onto its card. */
 export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[], lerp: Lerp): void {
   const t = room.time, map = room.map, me = room.heroes.find((h) => h.id === meId);
+  lurkFrame(room.heroes);
   for (const h of room.heroes) {
     const [x, y] = lerp('h:' + h.id, h.x, h.y);
     f.put('h' + h.id, x, lift(h.z), y, (c, px, py) => drawHero(c, h, px, py, h.id === meId, t), { xray: true, pool: h.act === 'roll' || h.act === 'down' ? 0.22 : 0.3 });
@@ -83,7 +86,7 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
       continue;
     }
     const pz = pulledAt(room, e), [x, y] = pz ?? lerp('e:' + e.id, e.x, e.y), dead = e.act === 'dead', big = e.kind === 'butcher' || e.kind === 'brood';
-    f.put('e' + e.id, x, (e.z ?? 0) >= 2 ? ROOF_UP3 : lift(Math.max(0, e.z ?? 0)), y, (c, px, py) => (drawFoe(c, e, px, py, asleep(map, e), map === ARENA), drawStatus(c, e, px, py, t)), { pool: dead || e.kind === 'nest' ? 0 : big ? 0.55 : 0.28, bias: dead ? -0.3 : 0 });
+    f.put('e' + e.id, x, (e.z ?? 0) >= 2 ? ROOF_UP3 : lift(Math.max(0, e.z ?? 0)), y, (c, px, py) => (drawFoe(c, e, px, py, asleep(map, e), map === ARENA), drawStatus(c, e, px, py, t)), { pool: dead || e.kind === 'nest' || lurking(e) ? 0 : big ? 0.55 : 0.28, bias: dead ? -0.3 : 0 });
   }
   // A body being hauled, where they've got it to (../scenedraw.ts).
   // A chalker's tally board in the CRIES room (../chalkdraw.ts).

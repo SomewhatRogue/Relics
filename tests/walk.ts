@@ -7,13 +7,14 @@ import { HERO } from '../src/shared/tuning';
 /**
  * Where a hero can walk from the door: a flood over a fine grid, a cell open if the map's own collision
  * leaves a hero standing there untouched and no heavy furniture (a table, a barrel, a cage) is in the way.
+ * `feet`: judged as a body with a footing (deep water stops it, as it stops a hero), not a bare point.
  */
-export function walkable(plan: RoomPlan, avoid: { x: number; y: number; w: number; h: number }[] = []) {
+export function walkable(plan: RoomPlan, avoid: { x: number; y: number; w: number; h: number }[] = [], feet = false) {
   const m: GameMap = plan.map, r = HERO.radius, step = 0.2;
   useMap(m);
   const heavy = plan.props.filter((q) => q.kind !== 'plank' && q.kind !== 'stave');
   const open = (x: number, y: number) => {
-    const q = { x, y };
+    const q = feet ? { x, y, z: 0 } : { x, y };
     collide(q, r);
     return Math.hypot(q.x - x, q.y - y) < 1e-6 && heavy.every((h) => Math.hypot(h.x - x, h.y - y) >= PROPS[h.kind].radius + r) &&
       avoid.every((a) => x < a.x - r || x > a.x + a.w + r || y < a.y - r || y > a.y + a.h + r);

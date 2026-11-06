@@ -141,7 +141,7 @@ export function drawExtras(g: CanvasRenderingContext2D, x: Extra): void {
 
 /** Dawn's mist, anchored to the ground as the camera moves. */
 export function drawMist3(g: CanvasRenderingContext2D, theme: Theme, x: Extra): void {
-  drawMist(g, theme, x.W, x.H, x.mist[0], x.mist[1], x.now);
+  drawMist(g, x.room.map.fen ? { ...theme, mist: 0 } : theme, x.W, x.H, x.mist[0], x.mist[1], x.now);
 }
 
 /** A dotted ring on the floor, `r` tiles round (x, y). */

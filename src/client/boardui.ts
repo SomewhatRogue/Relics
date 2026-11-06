@@ -8,9 +8,10 @@
 import { KIND, SIZES, STORY_PARTY, danger, type Job } from '../shared/jobs';
 import { EXPED_BOARD } from '../shared/expedjob';
 import { WOOD_POST } from '../shared/hangwords';
+import { FEN_POST } from '../shared/fenwords';
 
 /** An expedition's board words: the Barrowfields', or Hangman's Wood's (shared/hangwords.ts). */
-const boardWords = (j: Job) => (j.exped === 'hangmans' ? WOOD_POST : EXPED_BOARD);
+const boardWords = (j: Job) => (j.exped === 'hangmans' ? WOOD_POST : j.exped === 'fen' ? { ...FEN_POST, pays: (n: number) => FEN_POST.pays(n, j.boss) } : EXPED_BOARD);
 import { TIME_WORD, timeOf } from '../shared/timeofday';
 import { treasureWord } from '../shared/treasure';
 import { skyOfJob } from '../shared/weather';

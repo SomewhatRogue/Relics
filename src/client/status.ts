@@ -1,5 +1,6 @@
 /** Elements on a goblin: flames while it burns, drifting frost while chilled, a block of ice when frozen;
  *  the Rogue's green poison, retching and bleeding (sim/venom.ts); blinded by a longbow (sim/rangershots.ts). */
+import { lurking } from '../sim/lurk';
 import type { Enemy } from '../sim/types';
 import type { Ctx } from './draw';
 
@@ -7,7 +8,8 @@ const TALL: Record<Enemy['kind'], number> = { butcher: 24, scrapper: 14, dummy: 
 
 /** `t` is the room's time (the statuses are kept in it); (x, y) the feet on screen. */
 export function drawStatus(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
-  if (e.act === 'dead') return;
+  // (Nothing over a goblin still lying in Fenmere's reeds: sim/lurk.ts.)
+  if (e.act === 'dead' || lurking(e)) return;
   const tall = TALL[e.kind], w = Math.round(e.radius * 16) + 2, g = c.glow;
   if (e.frozenUntil > t) {
     const left = Math.round(x - w), top = Math.round(y - tall - 1), fade = Math.min(1, (e.frozenUntil - t) / 0.4);

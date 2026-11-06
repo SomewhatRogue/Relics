@@ -36,7 +36,7 @@ export interface ExpedState {
   seen: string; n: number; seed: number; party: number;
   /** The weather and its one turn (shared/expedsky.ts); the room's theme follows it. */
   wx?: ExpedSky;
-  /** Hangman's Wood (sim/woodzone.ts): its mid-point's fire and the beats said so far. */
+  /** Hangman's Wood or Fenmere (sim/woodzone.ts): its mid-point's fire and the beats said so far. */
   wood?: WoodState;
 }
 export type ExpedWhat = 'goal' | 'side' | 'open' | 'lit' | 'watch' | 'horn' | 'worse' | 'wave' | 'blessed' | 'weather' | 'staithelost' | 'beat' | 'check';
@@ -53,7 +53,7 @@ export function newExped(plan: ExpedPlan, seed: number, party: number): ExpedSta
     level: 0, heat: 0, hx: plan.map.hero.x, hy: plan.map.hero.y, nextWave: 60, nextPatrol: EXPED.patrolEvery, nextHold: 0,
     patrols: plan.patrols.map((p) => ({ ids: p.foes.map((i) => i + 1), path: p.path, i: 1, dir: 1 })),
     seen: '0'.repeat((W * H) / 4), n: 0, seed, party,
-    ...(plan.map.hang ? { wood: newWood(plan) } : {}),
+    ...(plan.map.hang || plan.map.fen ? { wood: newWood(plan) } : {}),
   };
 }
 
@@ -67,8 +67,8 @@ export function stepExped(room: ArenaRoom, ev: FightEvent[], dt: number): void {
   for (const g of x.goals) if (!g.done && check(room, g, heroes, dt)) done(room, g, false, ev);
   for (const g of x.sides) if (!g.done && check(room, g, heroes, dt)) done(room, g, true, ev);
   const at = (r: number) => heroes.some((h) => Math.hypot(h.x - x.zone.x, h.y - x.zone.y) <= r);
-  // (Hangman's Wood has no beacon to hold: once Hempen's dead it's out by the north path.)
-  if (x.phase === 'shut' && x.goals.every((g) => g.done)) (x.phase = room.map.hang ? 'leave' : 'open'), ev.push({ k: 'exped', x: x.zone.x, y: x.zone.y, what: 'open' });
+  // (Hangman's Wood and Fenmere have no beacon to hold: once the jobs are done it's straight out.)
+  if (x.phase === 'shut' && x.goals.every((g) => g.done)) (x.phase = room.map.hang || room.map.fen ? 'leave' : 'open'), ev.push({ k: 'exped', x: x.zone.x, y: x.zone.y, what: 'open' });
   else if (x.phase === 'open' && at(x.zone.r)) {
     x.lit += dt;
     if (x.lit >= EXPED.call) (x.phase = 'hold'), (x.nextHold = t), ev.push({ k: 'exped', x: x.zone.x, y: x.zone.y, what: 'lit' });
