@@ -36,6 +36,7 @@ import type { Figs } from './figs3d';
 import { LEDGE_H } from './ground';
 import { drawTally } from '../chalkdraw';
 import { woodFigs } from '../wooddraw';
+import { noteKneels } from '../kneel';
 
 const lift = (z?: number) => (z ?? 0) * LEDGE_H;
 
@@ -49,6 +50,8 @@ function hound(f: Figs, h: Hero, d: Hound, ax: number, ay: number, hx: number, h
 /** Every figure this frame, onto its card. */
 export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[], lerp: Lerp): void {
   const t = room.time, map = room.map, me = room.heroes.find((h) => h.id === meId);
+  // A Cleric raising a friend kneels by them (../kneel.ts).
+  noteKneels(room.heroes, t);
   for (const h of room.heroes) {
     const [x, y] = lerp('h:' + h.id, h.x, h.y);
     f.put('h' + h.id, x, lift(h.z), y, (c, px, py) => drawHero(c, h, px, py, h.id === meId, t), { xray: true, pool: h.act === 'roll' || h.act === 'down' ? 0.22 : 0.3 });

@@ -34,7 +34,7 @@ const store = new Map<string, string>();
 vi.stubGlobal('localStorage', { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => void store.set(k, v), removeItem: (k: string) => void store.delete(k) });
 
 const { Game } = await import('../src/client/game');
-const { Townfolk } = await import('../src/client/townfolk');
+const { Townfolk, AWAY } = await import('../src/client/townfolk');
 const { presence } = await import('../src/client/townpresence');
 const { parkOf } = await import('../src/client/parked');
 const { idlePose } = await import('../src/client/idlepose');
@@ -45,12 +45,14 @@ const { collide, useMap, inArea } = await import('../src/shared/arena');
 
 type Folk = InstanceType<typeof Townfolk>;
 /** Two players in Wickhold on a pretend relay: `me` (a real Game) and a friend standing in the square. */
-function town(cls: 'WARRIOR' | 'RANGER' = 'WARRIOR') {
+function town(cls: 'WARRIOR' | 'RANGER' = 'WARRIOR', touching = true) {
   socks.length = 0;
   const g = new Game();
   g.create(cls, 'WREN');
   if (g.mode === 'wood') g.skipWood();
   const me = new Townfolk(g.profile.id), friend = new Townfolk('hfriend001');
+  // (Last touched as the test starts, on its clock.)
+  for (const f of [me, friend]) (f as unknown as { touchedAt: number }).touchedAt = 1000;
   const at = new Map<Folk, Fake>(), read = new Map<Fake, number>();
   let now = 1000;
   const fMe = () => ({ n: 'SAM', w: 'longbow', l: 0, at: 'WICKHOLD', p: [30, 22, 0, 1, 0] as [number, number, number, number, number] });
@@ -66,8 +68,8 @@ function town(cls: 'WARRIOR' | 'RANGER' = 'WARRIOR') {
     now += dt;
     g.step(dt, NO_INTENT);
     for (const [f, me_] of [[me, presence(g, 'WREN')], [friend, fMe()]] as const) {
-      // (Playing a pastime is tapping all the time: nobody dozes off.)
-      (f as unknown as { touchedAt: number }).touchedAt = now;
+      // (Playing a pastime is tapping all the time: nobody dozes off. Unless `touching` is off: then I don't.)
+      if (touching || f === friend) (f as unknown as { touchedAt: number }).touchedAt = now;
       const n = socks.length;
       f.step(me_, now, dt);
       if (socks.length > n) at.set(f, socks[socks.length - 1]), socks[socks.length - 1].onMessage({ t: 'role', role: 'peer' });
@@ -130,6 +132,30 @@ describe('parked at a pastime, for everyone else', () => {
     t.g.leavePastime();
     t.frame(0.3);
     expect(t.said() - before).toBe(3);
+  });
+});
+
+describe('parked, the 3-minute idle rule waits', () => {
+  it("fishing untouched 10 minutes (waiting for a bite) stays in the town's room; 20 minutes and it goes", () => {
+    const t = town('WARRIOR', false);
+    for (let i = 0; i < 20; i++) t.frame(0.1);
+    t.g.enterPastime('fish');
+    for (let i = 0; i < 2 * 600; i++) t.frame(0.5);
+    expect([t.me.dozing, t.me.open]).toEqual([false, true]);
+    expect(parkOf(seen(t.friend, t.g.profile.id)!)).toBe('fish');
+    for (let i = 0; i < 2 * (AWAY.parked - 600 + 5); i++) t.frame(0.5);
+    expect([t.me.dozing, t.me.open]).toEqual([true, false]);
+  });
+
+  it('stood in the square, untouched 3 minutes still drops you, as before; at the butts the 20 minutes hold', () => {
+    const t = town('WARRIOR', false);
+    for (let i = 0; i < 2 * (AWAY.idle + 5); i++) t.frame(0.5);
+    expect(t.me.dozing).toBe(true);
+    const w = town('RANGER', false);
+    for (let i = 0; i < 20; i++) w.frame(0.1);
+    w.g.enterPastime('range');
+    for (let i = 0; i < 2 * (AWAY.idle + 60); i++) w.frame(0.5);
+    expect([w.me.dozing, w.me.open]).toEqual([false, true]);
   });
 });
 

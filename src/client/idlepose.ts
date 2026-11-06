@@ -10,12 +10,13 @@ import type { BodyPose } from './motion';
 import type { Pose } from './held';
 import type { PastimeId } from '../shared/pastimes';
 import { parkOf, parkPose, parkT } from './parked';
+import { kneelOf } from './kneel';
 
 /** What an idle changes this frame. `flip`/`up`: the way the hero looks (null: as they face); `lying`:
  *  on the floor, the head toward this side (0: standing); `shield`: planted at (dx, dy) from the feet;
  *  `a`, `ext`: the weapon's angle facing right (mirrored when facing left) and how far it's pushed out. */
-export interface IdleOut { f: IdleFrame | null; pet: number; dog: number; flip: boolean | null; up: boolean | null; lying: number; shield: [number, number] | null; a: number | null; ext: number | null; /** The main-hand dagger is in the air (a Rogue's flip). */ hide: boolean; /** The weapon goes behind the body (over the shoulder). */ behind: boolean; /** Parked at a pastime (parked.ts), and how far through its loop (s). */ park: PastimeId | null; parkT: number }
-const O: IdleOut = { f: null, pet: -1, dog: 1, flip: null, up: null, lying: 0, shield: null, a: null, ext: null, hide: false, behind: false, park: null, parkT: 0 };
+export interface IdleOut { f: IdleFrame | null; pet: number; dog: number; flip: boolean | null; up: boolean | null; lying: number; shield: [number, number] | null; a: number | null; ext: number | null; /** The main-hand dagger is in the air (a Rogue's flip). */ hide: boolean; /** The weapon goes behind the body (over the shoulder). */ behind: boolean; /** Parked at a pastime (parked.ts), and how far through its loop (s). */ park: PastimeId | null; parkT: number; /** Kneeling to raise a friend (kneel.ts): how far into the raise (0..1), -1 not. */ kneel: number }
+const O: IdleOut = { f: null, pet: -1, dog: 1, flip: null, up: null, lying: 0, shield: null, a: null, ext: null, hide: false, behind: false, park: null, parkT: 0, kneel: -1 };
 
 /** When a Rogue's flipped knife is out of the hand (s into the idle). */
 export const KNIFE_UP = { g_flip: [[0.3, 1.1], [1.5, 2.3]], g_fumble: [[0.3, 1.45]] } as const;
@@ -34,12 +35,22 @@ export function idlePose(h: Hero, pz: BodyPose, now: number): IdleOut | null {
   // (Both watched every frame, so a blow or a step ends them even where nothing idle is drawn.)
   const pet = petFrame(h, now), f = idleFrame(h, now);
   if (h.act !== 'idle' || pz.phase !== 'rest' || h.moving) return null;
-  Object.assign(O, { f: null, pet: -1, flip: null, up: null, lying: 0, shield: null, a: null, ext: null, hide: false, behind: false, park: null, parkT: 0 });
+  Object.assign(O, { f: null, pet: -1, flip: null, up: null, lying: 0, shield: null, a: null, ext: null, hide: false, behind: false, park: null, parkT: 0, kneel: -1 });
   // Someone else fishing or at the butts (shared/pastimes.ts): their loop there, till they're back.
   const pk = parkOf(h);
   if (pk) {
     const pt = parkT(h, now, pk), r = parkPose(h, pk, pz, pt);
     Object.assign(O, { park: pk, parkT: pt, flip: r.flip, up: false, a: r.a, ext: r.ext, behind: true });
+    return O;
+  }
+  // A Cleric raising a friend who is out (kneel.ts): down on a knee by them, both hands out over them,
+  // the mace set back over the shoulder.
+  const kn = kneelOf(h);
+  if (kn) {
+    const s = kn.side, k = ease(kn.down);
+    Object.assign(O, { kneel: kn.share, dog: s, flip: s < 0, up: false, behind: true });
+    (pz.crouch = 0.7 * k), (pz.lean = Math.round(s * k)), (pz.dx = s), (pz.dy = 0), (pz.reach = k), (pz.raise = -k);
+    O.a = Math.PI / 2 + 0.5;
     return O;
   }
   if (pet) {

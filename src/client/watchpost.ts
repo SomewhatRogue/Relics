@@ -1,9 +1,11 @@
 /**
  * Corporal Brisk, by the stair up to the wall at the back of the barracks: at night (Wickhold's shared
  * clock, townclock.ts) he offers a shift on the wall; in the day, his usual grumble and come back after
- * dark. Your best on the wall, if you've stood a shift.
+ * dark. Your best on the wall, if you've stood a shift. While the Night Watch is closed (shared/tuning.ts
+ * NIGHT_WATCH), just his grumble: no shift, day or night.
  */
 import { bestOf, watchOpen } from '../shared/watchpay';
+import { NIGHT_WATCH } from '../shared/tuning';
 import type { Game } from './game';
 import type { Panel } from './panels';
 import { line } from './speech';
@@ -16,6 +18,7 @@ const say = (s: string) => p(`<b>Brisk:</b> ${line(`"${s}"`, 'Brisk')}`);
 
 /** `usual`: what he says when there's no shift to offer (his chat line). */
 export function openWatchPost(g: Game, panel: Panel, usual: string): void {
+  if (!NIGHT_WATCH.on) return panel.show(WATCHW.who, say(usual));
   // Your best in the view this screen gets (upright on a phone, or side-on): the two are kept apart.
   const n = bestOf(g.profile.watch, innerHeight > innerWidth * 1.2 ? 'deep' : 'wide'), best = n ? p(WATCHW.best(n)) : '';
   if (!watchOpen(townPhase())) return panel.show(WATCHW.who, say(usual) + say(WATCHW.day) + best);

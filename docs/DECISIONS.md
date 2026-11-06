@@ -2,6 +2,85 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-06: a polish pass: scene lines that fit, waiting at the pond, RAISE finished, no skull, a first named butcher's relic, gambling stays trade, and the Night Watch closed (Kyle; Claude Opus 5.5)
+
+Small things, each on its own.
+
+**1. Scene lines no longer run through each other** (`client/saylines.ts`, used by `Fx.say` and both views' drawing).
+Hempen's line ("There's rope on every branch, and most of it's in use. This is where Hempen keeps them.") is 92
+letters: 367 pixels in the pixel font on a phone scene 195 across (a laptop's is about 360), so it ran off both
+sides; and said in the same frame as other lines over the hero (clearing the wood says HEMPEN DONE and the oak's line
+with it), all of them were drawn on one spot, letters over letters. Now a line is broken at spaces into lines of 34
+letters at most (135 pixels), and a line meant to be read (up 1.5 s or longer) goes above any other still up instead
+of on top of it; those all rise at one pace (4.8 pixels a second, what a 3 s line rose at), so none catches up the
+one over it. A block is kept inside the view's width. Quick calls and numbers (BLOCK, damage) are untouched. Shots:
+the line alone on arrival, and three said in one frame (flat and 2.5D phone, a laptop). Seen but not changed: with
+three at once and the objective card expanded, the top of the stack can sit under the card.
+
+**2. The Night Watch parking on the wall: dropped.** Built, then taken out the same day when Kyle closed the Night
+Watch (below). Nothing of it is left in the code.
+
+**3. RAISE, finished** (the three "not built" in the RAISE entry below).
+- *Kneeling* (`client/kneel.ts`, `idlepose.ts`, `idledraw.ts`): each frame, before the heroes are drawn (the flat
+  scene and the 2.5D cards, which draw the same figure), the room's heroes are looked at once and each Cleric a
+  friend's `riseBy` names is noted, with the friend's side and how far into the raise. The Cleric goes down on a knee
+  toward them over 0.3 s, both hands out over them, the mace back over the shoulder, gold light in the hands
+  brightening as the raise goes on and a mote now and then going down into the friend. Drawing only; nothing new
+  on the wire (it's read from `riseBy` and `riseAt`, which already go).
+- *The BUTTONS box* (`client/legend.ts`): a Cleric gets a RAISE row among the context words, with the help hand.
+- *The recap*: a callout, RAISED FRIENDS, for the one who raised the most friends (`recapcalls.ts`, a real lead only
+  as the rest), ahead of MOST HEALING since it's the rarer thing. A board from before RAISE reads 0.
+
+**4. Waiting at the pond doesn't drop you** (`client/townfolk.ts` `idleLimit`). Untouched 3 minutes still takes a
+player out of the town's room, but parked at a pastime (the `me` word's `g`) it's 20 minutes (`AWAY.parked`,
+`?parkidle=` for tests), so a forgotten tab at the pond still goes. In a party, never, as before. No new words on
+the wire.
+
+**5. No skull on a friend** (`client/icons.ts`). The HUD's `skull` mark (meant for a downed friend's frame,
+`docs/ui-research.md` 2.10; not drawn anywhere yet) is now `fallen`: their shield flat on the ground with a gold
+mark over it pointing up, since "out" is never dead and they can still be helped up or raised. `--ic-skull` is
+`--ic-fallen`; the research doc says so. Nothing else put a skull on a hero (the goblins' skulls, the hexer's
+fetish and a BIG ONE's stake, are theirs).
+
+**6. A hero's first named butcher: a relic for sure** (`sim/namedrelic.ts`; the plan's "sure on a hero's first
+kill", Kyle's open call in the Hempen entry, approved now). Whoever kills a named butcher (one the floor's chance
+counts: not a boss of the kit, not a zone's climax, not straw) and has never had this relic gets one through
+`awardRelic` (source `named`, a kind they lack first), into their relics with the found moment, on a stream of the
+room's own (`firstRng`), so the floor's 4% stream is as it was and the pins don't move. The flag is
+`Profile.namedRelic`, carried onto the hero by `Game.equip` (`Hero.namedRelic`, and over from room to room on the
+hero) and back into the save by `keepKitNoting`, so a guest in someone else's room gets it in their save and their
+NEW RELIC moment as with any pickup. Later kills keep the floor's chance. On the wire: the hero's flag and its
+relics once, when it's won.
+
+**7. Gambling stays trade.** Checked: the Want is written only at a job's end (hungry gear and the tiers worn),
+when gear is given up, and when gold goes to the Lantern; Moll's dice (`Game.dice`) and the Rat's stakes
+(`shared/stakes.ts`) move gold and nothing else. The story bible says so now, by the dice.
+
+**The Night Watch is closed for now** (Kyle: "the wall defense is weird right now and you don't drag it back to shoot
+etc. also not super fun in general unfortunately, not certain how to fix, let's close for now"). One switch,
+`NIGHT_WATCH.on` in `shared/tuning.ts`, off: Brisk gives only his grumble, no shift, day or night (the only way up
+the stair; no tip, legend row or board points at it). The code and its tests stay; `?watch=1` turns it on for a look
+(`scripts/watch-look.cjs` uses it). In PLAN as closed, with Kyle's notes for a redo: the shot should be a drag back
+and release, like a bow; it isn't fun yet.
+
+**New words, for the lore keeper and then the line editor**: RAISED FRIENDS (the recap callout, `raisewords.ts`
+`call`); the BUTTONS row's line, "By a friend who is out: kneel and raise them. Keep still for 4 seconds; goblins
+nearby come for you while you do. They come back with less max health for the rest of the job." (`raisewords.ts`
+`legend`, its label RAISE as before); the story bible line "Gambling is trade, like selling: a bet at Moll's dice
+or at the Rat's arm-wrestling table and knife board, won or lost, never touches the Want." No other new words (the
+first named relic says NEW RELIC and the relic's name, as any).
+
+Tests: `tests/saylines.test.ts` (Hempen's line broken to fit a phone with nothing lost, every scene line and
+expedition call fits, a long word left whole, three said at one spot stack without crossing), `tests/pastimes.test.ts`
+(fishing untouched 10 minutes stays in, 20 goes; stood in the square 3 minutes still drops, at the butts it holds),
+`tests/raisepolish.test.ts` (kneeling toward the friend, either side, easing down, the share; none without a raise
+or once it ends; nothing on the heroes changed; the callout, ties, an old board), `tests/fallenmark.test.ts`,
+`tests/namedrelic.test.ts` (sure for the killer only, once, with the found moment and carried; not a boss, a zone's
+climax, straw or the squire; seeded; through the room with a blow; into the save from a guest's copy with its NEW
+RELIC moment, and back on the hero so not twice), `tests/gamblingwant.test.ts` (a hundred throws of the dice, forty
+stakes won and lost, the Want unmoved), `tests/watchclosed.test.ts` (Brisk at midnight: no shift off, the shift on).
+Full vitest 160 files, 1497 tests; tsc; online town 23 of 23, party 27 of 27.
+
 ## 2026-11-06: the second wave: Oil-soaked, Hornblower, Smouldering; the Kegman, the Pouncer, the Gorger (Claude Opus 5.5)
 
 The rest of `docs/plans/bosses.md` section 3 (the elites table and the six meaty units), on the patterns of "elites,

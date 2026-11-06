@@ -11,6 +11,7 @@ import type { DoorMark } from '../jobrooms';
 import type { Fx } from '../fx';
 import { GUARD, PARTY, WEAPONS } from '../../shared/tuning';
 import { drawText, textWidth } from '../pixfont';
+import { drawBlock } from '../saylines';
 import { CHASE, chaseLabel, chasePoint, chasers } from '../chasers';
 import { drawExpedGround, friendMarks } from '../expeddraw';
 import { drawPunt, drawStaitheGround, puntAt } from '../staithedraw';
@@ -135,7 +136,7 @@ export class Overlay {
     for (const t of fx.texts) {
       const [x, y] = at(t.x, t.y);
       g.globalAlpha = Math.min(1, t.life * 3);
-      drawText(g, t.s, Math.round(x - textWidth(t.s) / 2), Math.round(y), t.col);
+      drawBlock(g, t.lines, x, y, t.col, this.W);
     }
     g.globalAlpha = 1;
   }

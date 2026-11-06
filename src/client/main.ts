@@ -17,7 +17,7 @@ import { chargePips } from './reliccard';
 import { RELICW } from './relicwords';
 import { hookLitBadge } from './litbadge';
 import { setVotes } from './voteboards';
-import { HERO, LAGCOMP, dodgeName, dodgeOf, POTIONS, CLASS_ORDER, RELICS, TRAITS, WEAPONS, itemName, type HeroClass } from '../shared/tuning';
+import { HERO, NIGHT_WATCH, LAGCOMP, dodgeName, dodgeOf, POTIONS, CLASS_ORDER, RELICS, TRAITS, WEAPONS, itemName, type HeroClass } from '../shared/tuning';
 import { CLASS_NAME } from '../shared/classes';
 import { barWord } from '../shared/barword';
 import { LOOKS, heroLook } from './sprites';
@@ -202,6 +202,8 @@ chat.onStrike = (x, y) => {
 };
 // Test hook: ?hero=MAGE skips the start screen with a hero of that class.
 const quick = new URLSearchParams(location.search).get('hero') as HeroClass | null;
+// The Night Watch is closed (shared/tuning.ts NIGHT_WATCH); `?watch=1` opens Brisk's stair for a look.
+if (new URLSearchParams(location.search).get('watch') === '1') NIGHT_WATCH.on = true;
 // ...and ?wood=1 starts it in the prologue wood instead of town.
 if (quick && CLASS_ORDER.includes(quick)) {
   if (game.create(quick, quick) < 0) game.choose(0);
