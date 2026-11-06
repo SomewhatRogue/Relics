@@ -15,7 +15,7 @@ export const RAISEW = {
   out: "You're out. A Cleric in your party can still raise you",
   outRising: (name: string) => `${name} is raising you`,
   /** The laptop's BUTTONS box (legend.ts), a Cleric's row for the context slot. `secs`: how long the raise takes. */
-  legend: (secs: number) => `By a friend who is out: kneel and raise them. Keep still for ${secs} seconds; goblins nearby come for you while you do. They come back with less max health for the rest of the job.`,
+  legend: (secs: number) => `By a friend who is out: kneel and raise them. Keep still for ${secs} seconds; goblins nearby come for you while you do. Your friend gets up with less max health for the rest of the job.`,
   /** The recap's callout for the one in the party who raised the most friends (recapcalls.ts). */
   call: 'RAISED FRIENDS',
   /** On a hover over the health bar's cut-off end. */
