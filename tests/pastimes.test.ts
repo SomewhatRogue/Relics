@@ -3,7 +3,7 @@
  * 2026-11-06): sitting down to fish or stepping up to the butts sends one word and then nothing, however
  * long you play; everyone else sees your hero parked at the spot doing it (and keeps you, silent, past the
  * usual five minutes); a newcomer is told once; getting up sends one more word and you're back. The
- * millpond, Old Pennock and Corin are on the town map, and the spots are on dry ground.
+ * millpond, Old Pennock and Abel are on the town map, and the spots are on dry ground.
  */
 import { describe, expect, it, vi } from 'vitest';
 import { NO_INTENT } from '../src/sim/types';
@@ -134,12 +134,12 @@ describe('parked at a pastime, for everyone else', () => {
 });
 
 describe('the pond and the butts in Wickhold', () => {
-  it('the millpond is deep water by the east wall, Pennock and Corin stand by, and the spots are dry ground', () => {
+  it('the millpond is deep water by the east wall, Pennock and Abel stand by, and the spots are dry ground', () => {
     const m = townMap((new Game()).world);
     expect(m.water?.some((w) => w.deep && inArea(w, 51, 33))).toBe(true);
     const npc = (name: string) => m.npcs!.find((n) => n.name === name)!;
     expect(npc('OLD PENNOCK').talk).toBe('fish');
-    expect(npc('CORIN').talk).toBe('range');
+    expect(npc('ABEL').talk).toBe('range');
     useMap(m);
     for (const sp of [MILLPOND, BUTTS]) {
       const p = { x: sp.seat[0], y: sp.seat[1] };

@@ -26,7 +26,7 @@ export const MILLPOND = {
   face: [1, 0] as const,
 };
 
-/** The archery butts in front of the hunters' lodge: Corin, and the line you shoot from (facing the targets). */
+/** The archery butts in front of the hunters' lodge: Abel, and the line you shoot from (facing the targets). */
 export const BUTTS = {
   npc: [42.1, 23.5] as const,
   seat: [45.4, 23.6] as const,

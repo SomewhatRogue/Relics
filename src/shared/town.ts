@@ -26,7 +26,7 @@ export type SpotId = 'board' | 'council' | 'church' | 'smith' | 'wright' | 'trai
   | 'practice'
   /** Brisk's stair up to the night shift on the wall (client/watchpost.ts). */
   | 'watch'
-  /** Old Pennock at the millpond, and Corin at the archery butts: the town's pastimes (client/pastimeui.ts). */
+  /** Old Pennock at the millpond, and Abel at the archery butts: the town's pastimes (client/pastimeui.ts). */
   | 'fish' | 'range';
 export interface Spot { id: SpotId; x: number; y: number; label: string; key?: string }
 
@@ -125,8 +125,8 @@ export function townMap(w: WorldState): GameMap {
   if (marketIn(w)) npcs.push(n('DESSA THE TRADER', 38.5, 13.9, 'market', 'trader'));
   // Tobin buys anything at the far stall, and sells it back for a while (client/stores.ts).
   npcs.push(n('TOBIN THE PAWNBROKER', 38.5, 18.1, 'merchant', 'villager'));
-  // The town's pastimes (shared/pastimes.ts): Old Pennock lends rods at the millpond, Corin keeps the butts.
-  npcs.push(n('OLD PENNOCK', MILLPOND.npc[0], MILLPOND.npc[1], 'fish', 'elder'), n('CORIN', BUTTS.npc[0], BUTTS.npc[1], 'range', 'ranger'));
+  // The town's pastimes (shared/pastimes.ts): Old Pennock lends rods at the millpond, Abel keeps the butts.
+  npcs.push(n('OLD PENNOCK', MILLPOND.npc[0], MILLPOND.npc[1], 'fish', 'elder'), n('ABEL', BUTTS.npc[0], BUTTS.npc[1], 'range', 'ranger'));
   if (quarter) npcs.push(n('OLD MERREN', 57, 18, 'chat', 'elder', 9));
   // Foreman Judd at the works stall, and his crew sweeping, hauling and shovelling (publicworks.ts).
   npcs.push(...publicWorks(w));

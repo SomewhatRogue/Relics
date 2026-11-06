@@ -15,7 +15,7 @@ export const FISHW = {
   take: 'TAKE A ROD',
   /** At the water. */
   hintCast: { touch: 'HOLD TO SWING THE CAST, LET GO TO CAST', mouse: 'HOLD THE MOUSE OR SPACE TO SWING THE CAST, LET GO TO CAST' },
-  hintWait: 'WATCH THE FLOAT. TAP WHEN IT GOES RIGHT UNDER',
+  hintWait: 'WATCH THE FLOAT. STRIKE WHEN IT GOES RIGHT UNDER',
   hintReel: 'HOLD TO REEL IN. LET GO WHEN IT RUNS',
   strike: 'STRIKE NOW',
   willRun: "IT'S ABOUT TO RUN",
@@ -43,11 +43,11 @@ export const FISHW = {
 };
 
 export const RANGEW = {
-  who: 'CORIN',
+  who: 'ABEL',
   /** At the butts. */
-  greet: "Maeve has me keep the butts. Anyone can have a go, you don't have to be one of hers. A round's a minute. The targets come up near, in the middle and far back, and the far ones count three times over. Some slide and some swing, so aim for where they'll be when the arrow gets there.",
+  greet: "Maeve has me mind the butts. Anyone can have a go, you don't have to be one of hers. A round's a minute. The targets come up near, in the middle and far back, and the far ones count three times over. Some slide and some swing, so aim for where they'll be when the arrow gets there.",
   /** Said to a Ranger as well. */
-  ranger: "Your hands will be steadier than most. That's Maeve's shouting doing some good for once.",
+  ranger: "You'll shoot straighter than most who come up here, being what you are. Maeve will still find something wrong with it, mind, so I wouldn't go telling her your score.",
   yourBest: (n: number) => `Your best round: ${n}.`,
   board: 'BEST AT THE BUTTS',
   empty: "Nobody's on the board yet.",
@@ -59,11 +59,11 @@ export const RANGEW = {
   time: 'TIME',
   score: 'SCORE',
   stop: 'STOP',
-  gold: 'GOLD',
+  gold: 'BULL',
   /** The card when the round's over. */
   over: 'ROUND OVER',
-  rows: { score: 'SCORE', arrows: 'ARROWS', hits: 'HITS', golds: 'GOLDS', streak: 'MOST IN A ROW', best: 'YOUR BEST', newBest: 'NEW BEST' },
-  posted: 'Corin chalks it up on the board.',
+  rows: { score: 'SCORE', arrows: 'ARROWS', hits: 'HITS', golds: 'BULLS', streak: 'MOST IN A ROW', best: 'YOUR BEST', newBest: 'NEW BEST' },
+  posted: 'Abel chalks it up on the board.',
   again: 'ANOTHER ROUND',
   leave: 'BACK TO TOWN',
 };

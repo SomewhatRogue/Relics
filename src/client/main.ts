@@ -666,7 +666,7 @@ w.__relicPop = relicPop;
 w.__loot = card;
 w.__openTree = () => openTree(game, panel);
 // Idles on demand for screenshots: window.__idles.force('r_fetch') on your own hero (idles.ts).
-// The town's pastimes for the scripts: start one as if you'd talked to Pennock or Corin, and the overlays (fishmode.ts, rangemode.ts).
+// The town's pastimes for the scripts: start one as if you'd talked to Pennock or Abel, and the overlays (fishmode.ts, rangemode.ts).
 w.__pastime = { fish: () => openFishing(game, panel), range: () => openRange(game, panel) };
 w.__idles = { force: (id: string) => forceIdle(game.hero, id as never, performance.now() / 1000), pet: (dog: 'own' | 'lodge') => startPet(game.hero, dog, performance.now() / 1000) };
 w.__openSpot = (id: string, arg = 0, key = '') => openSpot(id as never, game, panel, arg, key);

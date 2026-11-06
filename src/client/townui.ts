@@ -102,7 +102,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     // Corporal Brisk, at the stair up to the wall: a shift on the Night Watch, after dark (watchpost.ts).
     openWatchPost(g, panel, CHAT[13].line);
   } else if (id === 'fish') {
-    // Old Pennock at the millpond, and Corin at the butts: the town's pastimes (pastimeui.ts).
+    // Old Pennock at the millpond, and Abel at the butts: the town's pastimes (pastimeui.ts).
     openPond(g, panel);
   } else if (id === 'range') {
     openButts(g, panel);

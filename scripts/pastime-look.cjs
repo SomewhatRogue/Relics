@@ -1,6 +1,6 @@
 // The town's pastimes, to look at on a phone (390x844 at 3x, touch): fishing at the millpond (cast,
 // the bite, mid-reel) and a round at the archery butts (arrows in, targets sliding and swinging), plus
-// Pennock's and Corin's panels and the cards at the end. The town view with friends parked at both is
+// Pennock's and Abel's panels and the cards at the end. The town view with friends parked at both is
 // taken by scripts/town-online.cjs (it needs the relay).
 // Usage: node scripts/pastime-look.cjs <url> <outdir>
 const fs = require('fs');
@@ -59,7 +59,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   report.fish = await page.evaluate(() => ({ phase: window.__fish.s.phase, why: window.__fish.s.why, fish: window.__fish.s.fish, record: window.__game.profile.fishing }));
   await page.screenshot({ path: `${out}/fish-card-phone.png` });
   await page.evaluate(() => window.__fish.close());
-  // Corin's panel, then a round at the butts.
+  // Abel's panel, then a round at the butts.
   await page.evaluate(() => window.__openSpot('range'));
   await wait(2500);
   await page.screenshot({ path: `${out}/butts-corin-phone.png` });
