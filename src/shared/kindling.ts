@@ -14,7 +14,7 @@ export interface Kindling { x: number; y: number; side: -1 | 1 }
 
 /** A house on a job that fire can take: one you could walk into, standing (or half fallen in). */
 export const burnable = (b: Block) =>
-  !!b.door && (b.kind === 'house' || b.kind === 'barn') && b.look !== undefined && !!b.maxHp && b.fate !== 'burning' && b.fate !== 'blocked';
+  !!b.door && !b.ruined && (b.kind === 'house' || b.kind === 'barn') && b.look !== undefined && !!b.maxHp && b.fate !== 'burning' && b.fate !== 'blocked';
 /** Alight now (catching or burning), and not yet fallen in. */
 export const houseAlight = (b: Block) => burnable(b) && (b.burning ?? -1) >= 0 && !b.ruined;
 
@@ -27,7 +27,7 @@ export interface Room { blocks: Block[]; rounds?: Round[]; w: number; h: number 
 
 /** Where this house's kindling is (null: it has none): never inside a wall or a bush, with room to stand by it. */
 export function kindling(b: Block, m: Room): Kindling | null {
-  if (!b.door || (b.kind !== 'house' && b.kind !== 'barn') || b.look === undefined || !b.maxHp || b.fate === 'burning' || b.fate === 'blocked') return null;
+  if (!b.door || b.ruined || (b.kind !== 'house' && b.kind !== 'barn') || b.look === undefined || !b.maxHp || b.fate === 'burning' || b.fate === 'blocked') return null;
   const had = cache.get(b);
   if (had !== undefined) return had;
   const rng = new Rng(b.look * 37 + 11), first: -1 | 1 = rng.next() < 0.5 ? -1 : 1, up = rng.range(0.72, 0.9);

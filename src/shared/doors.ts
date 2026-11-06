@@ -30,9 +30,12 @@ export function doorsRule(blocks: Block[], limit = 1): void {
   const doors = blocks.map((b, i) => ({ b, i })).filter(({ b }) => !!b.door && (b.kind === 'house' || b.kind === 'barn') && b.look !== undefined && !b.door.startsWith('side:'));
   // The house being burned with someone in it is the scene's (always kept); the rest share `limit`.
   const rest = doors.filter(({ b }) => !b.door!.endsWith(':held'));
-  if (rest.length <= limit) return;
+  // A fallen-in house (`ruined`, the burnt farm) can't be gone into, so it's never the one kept: it's shut like
+  // the rest and its captives and chests move to a house you can enter (stress scene 26, seed 7, 2026-11-06).
+  const able = rest.filter(({ b }) => !b.ruined);
+  if (rest.length <= limit && able.length === rest.length) return;
   // Kept: standing before half fallen in before smouldering, a cottage (rooms to its big house) before a barn, the bigger first.
-  const keep = [...rest].sort((p, q) => (FATE_RANK[p.b.fate ?? 'standing'] ?? 3) - (FATE_RANK[q.b.fate ?? 'standing'] ?? 3) ||
+  const keep = [...(able.length ? able : rest)].sort((p, q) => (FATE_RANK[p.b.fate ?? 'standing'] ?? 3) - (FATE_RANK[q.b.fate ?? 'standing'] ?? 3) ||
     (p.b.kind === 'house' ? 0 : 1) - (q.b.kind === 'house' ? 0 : 1) || q.b.w * q.b.h - p.b.w * p.b.h || p.i - q.i).slice(0, limit);
   const shut = rest.filter((d) => !keep.includes(d));
   // Each shut house's things go to the nearest kept one.

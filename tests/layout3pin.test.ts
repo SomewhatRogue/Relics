@@ -28,6 +28,6 @@ describe('layout 3: seeds', () => {
     // Re-pinned 2026-11-05 for the doors rule (shared/doors.ts): with it switched off it is still 2578152521, so houses shut and a door that took others in are all that moved.
     // Re-pinned 2026-11-05 for pacing (shared/threat.ts: the threat budget, beats, BIG ONEs): the same 388 rooms hashed with their goblins
     // taken out are 713718104 before and after, so only the goblins moved (counts, roles, health, placements).
-    expect(all).toBe(1139809545);
+    expect(all).toBe(2459865809 /* 2026-11-06: a fallen-in house is never the kept door (shared/doors.ts). Before: 1139809545 */);
   }, 240000);
 });
