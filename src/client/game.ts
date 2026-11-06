@@ -46,7 +46,8 @@ import { CoopGuest, CoopHost, loadRoom, saveRoom, type Friend } from './coop';
 import { forgetSession, keepSession, keptJob, type Session } from './session';
 import { bankEnd, bankJob, banked, soloJob, unbank } from './jobbank';
 import { dropOwed, owedTo } from './owed';
-import { dressKit, forgetTaken, keepKit } from './keepkit';
+import { dressKit, forgetTaken } from './keepkit';
+import { gainRelics, keepKitNoting, seeRelic, type RelicMoment } from './relicnews';
 import { FULL, ONLINE } from './relay';
 import { townLight } from '../shared/daylight';
 import { onClock, townPhase } from './townclock';
@@ -88,6 +89,8 @@ export class Game {
   mode: Mode = 'town';
   /** Grown on the last job: say so over the hero once, back in town (main.ts). */
   levelPop = 0;
+  /** Relics just gained, each waiting to be shown (relicmoment.ts; main.ts takes them when nothing's in the way). */
+  relicNews: RelicMoment[] = [];
   room!: ArenaRoom;
   run: Run | null = null;
   save: Save = load();
@@ -961,6 +964,8 @@ export class Game {
     // is carried at once if nothing is.
     const relics = won ? wonRelics(run, run.job.seed * 977 + p.runs * 31 + p.xp, p.relics) : [], relic = relics[0];
     for (const r of relics) (p.relics.push(r), (p.relic ||= r.id));
+    // Each one NEW in the pack, and its moment once the recap is closed (relicnews.ts).
+    this.relicNews.push(...gainRelics(p, relics, true));
     // The church's light: one job less (any job, won or not).
     const lit = p.lit ?? 0;
     if (lit > 0) p.lit = lit - 1;
@@ -1199,11 +1204,24 @@ export class Game {
   /** Following a friend's job: what my hero picks up, drinks or puts on there is mine to keep. */
   /** (Kit as keepkit.ts keeps it: a weapon swapped from the pack, a relic carried, the Mage's element too.) */
   private keepRemoteGear(h: Hero): void {
-    if (keepKit(this.profile, h, true)) store(this.save);
+    this.keepNoting(h, true);
   }
 
   private keepGear(h: Hero): void {
-    if (keepKit(this.profile, h, false)) store(this.save);
+    this.keepNoting(h, false);
+  }
+
+  /** The room's word on my kit into my save; a relic it brought (a pickup, mine or in the leader's room) gets its moment. */
+  private keepNoting(h: Hero, copy: boolean): void {
+    const k = keepKitNoting(this.profile, h, copy);
+    if (!k.changed) return;
+    this.relicNews.push(...k.news);
+    store(this.save);
+  }
+
+  /** A relic looked at in the pack: no longer NEW. */
+  seeRelic(id: string): void {
+    if (seeRelic(this.profile, id)) store(this.save);
   }
 
   /** Carry a relic you own into your next job (by its id; '' none). */

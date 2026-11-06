@@ -2,6 +2,79 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-05: relics you can see, and the trainer and knacks as one screen of tiles (Kyle; Claude Opus 5.5)
+
+Kyle: "Jesus the UX/UI of the upgrades is really confusing, we should have it be screens and more visual",
+"Forge is actually decent. I mean knacks and buying upgrades from the trainer", and "it's not clear when you
+get a relic right now, or how to equip it, since it's not in your inventory pack".
+
+- **The moment a relic is yours** (`client/relicnews.ts`, `client/relicmoment.ts`). Every relic a hero gains
+  is marked NEW on their save (`Profile.relicNew`, ids) and makes one moment: a gold-framed pop at the top of
+  the screen with its picture, NEW RELIC, its name, its uses as pips, and one line: "It's on your RELIC
+  button." or "It's in your pack. Open the pack and tap it to carry it." The first relic a hero ever gets
+  (`Profile.relicTip`) adds the tip on the RELIC button (R on a laptop), that each use spends one, and that
+  the church recharges it (or won't, for an elemental one). A tap closes it; it goes by itself after 6 s (9
+  with the tip); several wait their turn; it waits while a panel is up, so at a job's end it comes after the
+  recap. The fanfare (`sfx.fanfare`) plays with it, unless the room's pickup rang it already.
+  - **How it's caught, for every source and every player.** Two paths, both on the player's own game: a
+    job's end (`finish`: a zone's climax, a story job, the beacon, a deep dive, `wonRelics`, each player's
+    own), and the room's word on the hero's kit reaching their save (`keepKitNoting`, which wraps
+    `keepKit`): a named butcher's drop picked up in your own room, or, for a guest, in the leader's (the
+    `found` field already comes in the hero's patch, so no new traffic, per tick or otherwise). The wood's
+    javelin doesn't make one (the wood stages its own). The church's two for one doesn't either (the forge
+    is its moment).
+  - **The recap** draws every relic that came home under the RELICS row: picture, NEW RELIC, name, pips
+    (`Recap.relicIds` for those picked up on the way).
+- **Relics in the pack** (`client/relicshelf.ts`). A row of their own under the doll and the pack: RELICS
+  and a count, the RELIC slot with the one carried, then a shelf of every other relic owned, each a square
+  with its picture, its uses as pips, and NEW (gold, blinking) until it's looked at. Tap one for its card and
+  CARRY (the old one goes back on the shelf); drag one onto RELIC to carry it, or the carried one onto the
+  shelf to put it away (`packmoves.ts`, the same GEAR.carry the room already judged). Nothing carried and a
+  relic owned: the empty slot glows gold, pulsing, and says TAP; tapped, it lists CARRY for each. Looking at
+  one (a tap on it, or on RELIC) clears its NEW. The RELIC slot moved out of the doll into this row (the doll
+  is SKILL, HAND, BODY, the rings and the belt now); a relic kind carried with no item (very old) keeps its
+  square in the doll.
+- **The trainer and the knacks as one screen** (`client/upgrades.ts` what's on it, `upgradeview.ts` drawn,
+  `upgradeui.ts` wired, `upicons.ts` / `upiconkeys.ts` pictures, `upgradewords.ts` words). Your level, a bar
+  to the next, your gold and "N KNACKS TO PICK" stay at the top while the rest scrolls, with four tabs, each
+  with a gold count of what's ready in it:
+  - **SKILLS**: the class's three skills as a fork, CARRY ONE (a bracket over three tiles side by side), the
+    one carried in gold with CARRYING; then the skill's recharge ranks.
+  - **MOVES**: TECHNIQUE (what the dodge leaves, for a Ranger or Mage, then the three techniques) and the
+    movement ladder (titled JUMP, BLINK, DASH, GUARD or TAUNT), each a track down the screen, steps joined by
+    a line that turns gold once the step above is yours.
+  - **RANKS**: the five base stats side by side, each with its pips.
+  - **KNACKS**: the two on offer as a fork, PICK ONE, then each chain across in three.
+  - Every tile: a picture (the HUD's and skills' icons, and eight new ones drawn in the same pixel letters:
+    sword, boot, star, breath, hourglass, plate, crossed blades, a drop of blood; a knack's picture is by what
+    it moves), the name, one line, and a state you can read at a glance: LEARNED or TAKEN (gold), its cost
+    (green, can buy), its cost and NOT ENOUGH (red), NEEDS LEVEL N or NEEDS X FIRST (dashed and dim), MAX,
+    ON OFFER (green, pulsing), NEXT LEVEL UP. Tapping a tile opens it: the whole effect, NOW and AFTER side by
+    side (for a knack, what its chain gives now and with it), every rank with its level and price, and one
+    button (RANK N: X GOLD, LEARN, TAKE, CARRY, or why not). From the pack's KNACKS it's the same screen,
+    titled TRAINING: knacks are taken there in Wickhold as before; the trainer's tabs are a look, with
+    "Master Cole teaches this, at ...". The tab last open is remembered on this device. Phone first: every
+    tile, tab and button at least 44 px, nothing on hover.
+  - **Presentation only**: every state, price and gain comes from `trainrows.ts` and `chains.ts` as before;
+    the buttons call the same `Game` methods. `trainsections.ts` is gone.
+  - **Room for the guard upgrades**: a track is a list of steps; a step of two or more tiles is a fork.
+    `markFork(tiles, chosen, permanent)` marks the choice CHOSEN and, for a once-only choice, the others NOT
+    CHOSEN. Warrior TAUNT GUARD or IRON STANCE is one more step on the TAUNT track; the Cleric's holy shield
+    and its upgrade to cover an ally are steps on GUARD. Not built yet.
+- New words for the lore keeper and line editor: in `relicwords.ts` NEW RELIC, "It's in your pack. Open the
+  pack and tap it to carry it.", the first-relic tip (two forms), TAP TO CLOSE, RELICS, NEW, TAP, "Nothing
+  carried. Tap a relic to carry it, or drag it onto RELIC.", "Tap a relic to see it, or drag it onto RELIC to
+  carry it."; all of `upgradewords.ts` (TRAINING, SKILLS, MOVES, RANKS, KNACKS, N GOLD, N KNACKS TO PICK, NO
+  KNACKS TO PICK, CARRY ONE, PICK ONE, CHOOSE ONE, LEARNED, CARRYING, CHOSEN, MAX, TAKEN, ON OFFER, NEXT
+  LEVEL UP, NEEDS LEVEL N, NEEDS X FIRST, NOT CHOSEN, N GOLD, NOT ENOUGH, NOW, AFTER, "Not learned yet.",
+  "Nothing yet.", RANKS, CARRY, TAKE, BACK, "X teaches this, at Y.", the next-knack line, the carry note).
+- Tests: `tests/relicnews.test.ts` (an award is NEW and makes a moment, the tip once; a pickup reaches the
+  save as NEW with a moment queued; the pack's row has every relic with pips and NEW, the empty slot pulses;
+  CARRY or a drag from the shelf swaps; a guest's pickup in the leader's room, through the encoder, is NEW in
+  their save with its moment), `tests/upgrades.test.ts` (each state per tile, technique and snare locks, the
+  skills fork, the knack fork taken only out of a fight, a permanent fork drawn as one, the detail's now and
+  after and button, reading changes nothing). Shots: `node scripts/upgradeui-look.cjs` (phone).
+
 ## 2026-11-05: your hound: a real dog drawn, four breeds to choose with Maeve, and its name (Kyle; Claude Opus 5.5)
 
 Kyle: "The hound of Ranger could use work, and maybe let people choose which dog is theirs." "Doesn't affect

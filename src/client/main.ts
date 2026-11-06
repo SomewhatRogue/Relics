@@ -36,6 +36,7 @@ import { Game, ME } from './game';
 import { Panel } from './panels';
 import { openSpot } from './townui';
 import { showResult } from './recap';
+import { RelicPop } from './relicmoment';
 import { Title } from './title';
 import { Recovery } from './recovery';
 import { woodGoal } from '../sim/wood';
@@ -155,7 +156,7 @@ const lobby = new Lobby(game, panel, input.touch, () => pack.toggle(false));
 const $ = (s: string) => document.querySelector(s) as HTMLElement;
 const card = new LootCard((id) => input.take(id));
 const lesson = new LessonView(game, input.touch);
-const pack = new PackView((op, arg) => input.gear(op, arg), () => title.open, { open: () => openTree(game, panel), picks: () => game.profile.picks, town: () => game.mode === 'town' });
+const pack = new PackView((op, arg) => input.gear(op, arg), () => title.open, { open: () => openTree(game, panel), picks: () => game.profile.picks, town: () => game.mode === 'town', fresh: () => game.profile.relicNew ?? [], seen: (id) => game.seeRelic(id) });
 const music = new Music();
 const link = new WorldLink((w) => game.syncWorld(w));
 game.link = link;
@@ -165,6 +166,7 @@ const sounds = new Soundscape(music);
 const recovery = new Recovery(() => game.save);
 const unit = new UnitFrame();
 const fold = new BannerFold($('#banner'));
+const relicPop = new RelicPop();
 const objFlash = new ObjFlash(), unlocks = new UnlockFlash(), purse = new Purse();
 const cluster = input.touch ? new Cluster() : null;
 /** A phone's buttons go faint over the hero or a telegraph (underbtn.ts). */
@@ -482,6 +484,8 @@ function tick(t: number): void {
   // Back in the open in town: see what the world has been up to (at most every minute; not while idle).
   if (game.mode === 'town' && !game.outside && !townfolk?.dozing) void link.refresh();
   if (game.result && !panel.open) showResult(game, panel);
+  // A relic just gained: its moment, once nothing's in the way (the recap first, at a job's end).
+  relicPop.frame(game.relicNews, t / 1000, panel.open || title.open || !!game.result);
   // Out of the wood: the road to Wickhold (Orla walked you here; she met you in the wood).
   if (game.greeting === 'road' && !panel.open) (game.greeting = null), panel.show('WICKHOLD', `<p class="dim">${line(WOOD_ROAD)}</p>`, [{ label: 'INTO WICKHOLD', primary: true, act: () => panel.hide() }], true);
   // Back to a town the hungry raided while you were away: Dunn tells you, the first time you see it.
@@ -618,6 +622,7 @@ w.__renderMusic = (...a: Parameters<typeof import('./musicrender').renderMusic>)
 w.__title = title;
 w.__panel = panel;
 w.__pack = pack;
+w.__relicPop = relicPop;
 w.__loot = card;
 w.__openTree = () => openTree(game, panel);
 // Idles on demand for screenshots: window.__idles.force('r_fetch') on your own hero (idles.ts).

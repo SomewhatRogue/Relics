@@ -24,6 +24,10 @@ export function moveOf(h: Hero, src: string, dst: string, town = false): [number
     if (s === 'ring' && h.rings[i] && h.rings[i].hungry !== 'wedding') return [GEAR.off, i];
   }
   if (s === 'belt' && d === 'belt' && i > 0) return [GEAR.front, i];
+  // Relics (relicshelf.ts): one off the shelf onto RELIC is carried (the one carried goes back on the
+  // shelf); the carried one onto the shelf is put away.
+  if (s === 'found' && d === 'relic' && h.found?.[i] && h.found[i].id !== h.relicItem) return [GEAR.carry, i];
+  if (s === 'relic' && d === 'shelf' && h.relics[1]) return [GEAR.carry, -1];
   return null;
 }
 

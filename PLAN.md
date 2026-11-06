@@ -2,6 +2,18 @@
 
 ## Current slice
 
+**Relics you can see, and the upgrades as screens** (Claude Opus 5.5, 2026-11-05; Kyle: "the UX/UI of the
+upgrades is really confusing, we should have it be screens and more visual", "knacks and buying upgrades from
+the trainer", "it's not clear when you get a relic right now, or how to equip it"). Built; waiting on Kyle's
+play. *Done when*, on his phone and laptop, alone and online: a relic gained (a named butcher's, a zone's
+climax, a story job, the beacon, a deep dive) pops at the top with its picture, name, pips and how to use it,
+the first one with the RELIC tip, after the recap at a job's end, for a guest too; the pack has a RELICS row
+with the carried one and a shelf of the rest, NEW on the unseen, tap for CARRY or drag onto RELIC, the empty
+slot pulsing TAP; the trainer (and the pack's KNACKS) is one screen with level, gold and knack picks on top and
+SKILLS, MOVES, RANKS, KNACKS tabs of tiles with pictures and states, forks for CARRY ONE and PICK ONE, a tile
+opened with NOW and AFTER and one button. Everything in DECISIONS 2026-11-05 ("relics you can see"); shots
+`node scripts/upgradeui-look.cjs`. Open: the new lines through the lore keeper and line editor; the guard forks
+next.
 **Your hound, with Maeve** (Claude Opus 5.5, 2026-11-05; Kyle: "the hound of Ranger could use work, and maybe let
 people choose which dog is theirs", "doesn't affect stats"; approved: the choice lives with Maeve at the hunters'
 lodge, pick and name your dog). Built; waiting on Kyle's play. *Done when*, on his phone and laptop, flat and 2.5D:
