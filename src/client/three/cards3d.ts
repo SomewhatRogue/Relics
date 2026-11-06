@@ -31,6 +31,7 @@ import { drawStatus } from '../status';
 import type { Lerp } from './actors3d';
 import type { Figs } from './figs3d';
 import { LEDGE_H } from './ground';
+import { drawTally } from '../chalkdraw';
 
 const lift = (z?: number) => (z ?? 0) * LEDGE_H;
 
@@ -80,6 +81,8 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
     f.put('e' + e.id, x, (e.z ?? 0) >= 2 ? ROOF_UP3 : lift(Math.max(0, e.z ?? 0)), y, (c, px, py) => (drawFoe(c, e, px, py, asleep(map, e), map === ARENA), drawStatus(c, e, px, py, t)), { pool: dead || e.kind === 'nest' ? 0 : big ? 0.55 : 0.28, bias: dead ? -0.3 : 0 });
   }
   // A body being hauled, where they've got it to (../scenedraw.ts).
+  // A chalker's tally board in the CRIES room (../chalkdraw.ts).
+  for (const e of room.enemies) if (e.task?.k === 'tally') { const k = e.task; f.put('tb' + e.id, k.x, 0, k.y, (c, px, py) => drawTally(c, k.n, px, py), { pool: 0 }); }
   for (const e of room.enemies) if (e.haul) f.put('b' + e.id, e.haul.x, 0, e.haul.y, (c, px, py) => drawHauled(c, e, px, py), { pool: 0, bias: -0.3 });
   // Someone caged: an arm waving out through the bars, and their call when you're close (scene.ts).
   for (const p of room.props) if (p.kind === 'cage' && !p.broken && !p.lifted) {

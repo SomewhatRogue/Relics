@@ -43,6 +43,7 @@ import { drawFlues } from './smoke3d';
 import { drawBolts3, strikeLights3 } from './storm3d';
 import { flashTheme, fogLook } from '../skyfx';
 import { flashOf } from '../../sim/stormshape';
+import { drawChalkMarks } from '../chalkdraw';
 
 /** How much of the flat view's floor the 2.5D view shows: on a phone held upright a little closer in. */
 const ZOOM = { tall: 0.8, wide: 1 };
@@ -252,6 +253,7 @@ export class View3D {
     drawSkills3(og, room, P, lerp, this.view.ppu, now);
     drawSpellGround3(og, room, P, this.view.ppu, lerp);
     drawHuntMarks(og, room, P, lerp, this.view.ppu);
+    drawChalkMarks(og, room, P, lerp, this.view.ppu);
     drawFound3(og, room, P, lerp, this.view.ppu, now);
     drawBolts3(og, room, P, this.view.ppu);
     drawExtras(og, ex);

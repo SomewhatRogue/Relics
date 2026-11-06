@@ -15,12 +15,13 @@ import { maybeDig, stepSappers } from './sapper';
 import { stepCrows, type Flock } from './crows';
 import { stepBlind } from './blind';
 import { crackWatch, stepIronhide } from './ironhide';
+import { stepChalk, stepChalker } from './chalker';
 import { walk } from './enemies';
 import type { World } from './elements';
 import type { Pickup } from './pickups';
 import type { Enemy, EnemyAttack, FightEvent, Hero, Intent } from './types';
 
-const OWN = new Set(['banner', 'netter', 'thief', 'log', 'wolf', 'keeper', 'oiler', 'torch', 'blind', 'ironhide']);
+const OWN = new Set(['banner', 'netter', 'thief', 'log', 'wolf', 'keeper', 'oiler', 'torch', 'blind', 'ironhide', 'chalker']);
 
 /** A new goblin of one of these sorts: its body (a small goblin's unless it says). */
 export function shapeFoe(e: Enemy): void {
@@ -55,6 +56,7 @@ export function stepOwn(e: Enemy, q: Turn, heroes: Hero[], others: Enemy[], rng:
   else if (e.variant === 'torch') stepTorch(e, t, d, ux, uy, facing, speed, kit.slicks, heroes, now, dt, ev);
   else if (e.variant === 'blind') stepBlind(e, heroes, others, now, dt, ev);
   else if (e.variant === 'ironhide') stepIronhide(e, t, d, q.level, ux, uy, facing, speed, dt, ev);
+  else if (e.variant === 'chalker') stepChalker(e, t, d, ux, uy, facing, speed, heroes, others, now, dt, ev);
   return true;
 }
 
@@ -84,6 +86,7 @@ export function afterFoes(w: World, pickups: Pickup[], slicks: Slick[], flocks: 
   stepPacks(w.enemies, w.heroes, w.now, w.ev);
   stepSappers(w, dt);
   stepCrows(flocks, w.heroes, w.enemies, w.now, w.ev);
+  stepChalk(w.heroes, w.enemies, w.now, w.ev);
   const left = stepSlicks(slicks, w, dt);
   markSlick(left, w.heroes);
   return left;

@@ -134,7 +134,7 @@ describe('layout 4: seeds', () => {
     let all = 0;
     for (const p of ALL) for (const seed of [7, 707]) for (const took of ['h', 'l'] as const) for (const { plan } of rooms(job(p, seed), took)) all = fnv(all + ':' + fnv(JSON.stringify(plan)));
     // Taken 2026-11-04 when layout 4 came in.
-    expect(all).toBe(47426855 /* re-pinned 2026-11-05: the ironhide and rush templates, and WATER for THE FORD */);
+    expect(all).toBe(1004130954 /* re-pinned 2026-11-05: the ironhide and rush templates, and WATER for THE FORD; then the chalker staged at the CRIES tally (foes only, checked) */);
   }, 240000);
 });
 

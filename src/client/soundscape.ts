@@ -28,6 +28,7 @@ import { cueAt } from './waycues';
 import { muffledCry } from './kindlecue';
 import { eventSample } from './sfxevents';
 import { worldSound } from './worldsound';
+import { chalkSound } from './chalkfx';
 
 /** How far off a fight can still be heard, in tiles: a little past a screen. */
 const EARSHOT = 16;
@@ -75,7 +76,7 @@ export class Soundscape {
     mageTapSound(ev, room);
     // A recording of its own where the list gives one (sfxevents.ts); else the usual sound below.
     if (eventSample(ev)) return;
-    if (foeSound(ev)) return;
+    if (foeSound(ev) || chalkSound(ev)) return;
     if (ev.k === 'swing') return swingSound(ev.src, ev.heavy);
     if (ev.k === 'chest') return chestSound(ev.state, ev.tier);
     // The poisoner's: the blowpipe's puff, a skewer's wet stab, a goblin retching (the spiders' own wet sounds).
