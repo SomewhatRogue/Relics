@@ -1,4 +1,7 @@
 /** Relic: Wickhold, the Training Yard and runs. The rooms run here in the browser (solo is a party of one). */
+import { forceIdle, pokeIdle } from './idles';
+import { startPet } from './petting';
+import { touchedIdle } from './idlepoke';
 import { SIGNS, SIGN_KEY } from '../shared/signs';
 import { signFor, signLeft } from '../sim/signature';
 import { ExpedUi } from './expedui';
@@ -191,6 +194,8 @@ const use = () => {
   pack.toggle(false);
   if (n.chest) input.open(n.chest);
   else if (n.door) game.enter(n.door);
+  // A hound in the lodge: kneel and pet it (petting.ts; this screen's own, nothing sent).
+  else if (n.pet) startPet(game.hero, n.pet, performance.now() / 1000);
   else if (n.talk) {
     if (n.npc?.path) (talking = n.npc), (n.npc.heldAt = game.room.time);
     openSpot(n.talk, game, panel, n.arg, n.key);
@@ -355,7 +360,7 @@ function hud(now: number): void {
   }
   const spot = game.near(), busy = panel.open || title.open;
   $('#prompt').hidden = !spot || busy;
-  if (spot) $('#prompt').textContent = (input.touch ? '' : spot?.chest ? 'F  ' : game.mode === 'run' ? '' : 'E  ') + (spot.door || !spot.talk || spot.talk === 'practice' ? spot.label : 'TALK: ' + spot.label);
+  if (spot) $('#prompt').textContent = (input.touch ? '' : spot?.chest ? 'F  ' : game.mode === 'run' ? '' : 'E  ') + (spot.door || spot.pet || !spot.talk || spot.talk === 'practice' ? spot.label : 'TALK: ' + spot.label);
   // A drop at your feet, its card shut: the key that opens it (a phone has LOOK in the context slot).
   else if (!busy && !input.touch && game.mode === 'run' && card.near >= 0 && card.current < 0) ($('#prompt').hidden = false), ($('#prompt').textContent = 'F  LOOK');
   // A friend down at your feet: the key that gets them up.
@@ -396,6 +401,8 @@ function tick(t: number): void {
   last = t;
   // With a panel up, the hero stands still (and no press is spent).
   const live = input.read();
+  // Any input stops your hero's idle at once (idles.ts): the stick, the aim, any press.
+  if (touchedIdle(live)) pokeIdle(ME);
   if (panel.open || title.open || chat.typing || pack.open || game.mode === 'watch') still ??= { ...live, mx: 0, my: 0, attack: false, block: false };
   else still = null;
   // With the pack open the hero stands still too, but what you change in it still goes to the room.
@@ -577,6 +584,8 @@ w.__panel = panel;
 w.__pack = pack;
 w.__loot = card;
 w.__openTree = () => openTree(game, panel);
+// Idles on demand for screenshots: window.__idles.force('r_fetch') on your own hero (idles.ts).
+w.__idles = { force: (id: string) => forceIdle(game.hero, id as never, performance.now() / 1000), pet: (dog: 'own' | 'lodge') => startPet(game.hero, dog, performance.now() / 1000) };
 w.__openSpot = (id: string, arg = 0, key = '') => openSpot(id as never, game, panel, arg, key);
 // A job on a village street (houses to go into), for the party tests to set out on.
 // A job house's kindling spot (scripts/houseburn.cjs).

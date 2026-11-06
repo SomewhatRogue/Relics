@@ -2,6 +2,80 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-05: heroes idle, three ways a class and a rare one; a Ranger plays with the hound, and hounds are petted in the lodge (Kyle; Claude Opus 5.5)
+
+Kyle: "Let's work on custom class-specific idle animations. Three per class, with one extra hidden one with a one
+in fifty chance of playing. I want Ranger to play with his dog a lot. Also can pet his dog in the hunter lodge."
+Then: "Keep in mind different weapon types change the sprites if they're touching a blade etc." Drawing only.
+
+**When** (`client/idles.ts`). Stood still 4 to 6 s (a range, per hero), an idle; then one every 6 to 10 s start to
+start, with at least 1.5 s between. Only standing still out of a fight: not moving, turning, blocking, carrying,
+stooped or mid-act, and no goblin awake (`alert !== false`, not dead) within 8 tiles. Any of those, a hit (health
+dropping), or any input from this player (the stick, the aim, any press: `client/idlepoke.ts`, called from
+`main.ts`) stops it at once and the wait starts over. Each hero's rolls come from a seed of their id and the clock,
+so a party never idles in step. Each screen decides from what it sees, so other players' heroes idle too
+(townfolk's heroes and a party's), with nothing new sent: tested against the real Game and Townfolk on a counting
+socket, an hour of idling and petting sends exactly what standing still does.
+
+**What, fitted to the weapon in hand.** Three a kit, and the rare one at 1 pick in 50 (tested over 50,000 seeded
+picks a kit). An idle that needs something the hero isn't holding is never picked (`IdleDef.kits`, tested for
+every class and kit).
+- **Warrior**: rolls the neck and shoulders (any); thumb along the edge (sword, greatsword only: a blade); the
+  shield planted on its rim and leaned on (sword only: the shield); the greatsword planted point down or the
+  spear's butt grounded and leaned on (greatsword, spear); the spear rested back over the shoulder, drawn behind
+  the body, a foot tapping (spear). Sword: stretch, edge, shield. Greatsword: stretch, edge, plant. Spear:
+  stretch, plant, shoulder. Rare: a huge yawn, arms up, then a flex with a glint off the arm.
+- **Ranger** (any bow or the crossbow, let hang for the throw): fetch (weight 3: a stick thrown out 2.4 tiles to
+  whichever side has open ground, else the other, else a ruffle; the hound sits watching, runs it down, picks it
+  up, brings it back, sits with it; the Ranger kneels to take it); a ruffle (weight 2: the hound comes to lean in,
+  the Ranger kneels and rubs its head, a heart); a hand over the brow one way then the other, then over the
+  shoulder to settle the fletching (weight 1). The hound five picks in six. Rare: the hound play-bows, runs and
+  leaps, the Ranger goes flat on their back laughing with the hound standing on them licking, then up, still
+  laughing. Without a hound free at heel, only the scan.
+- **Rogue**: a knife flipped twice and caught (twin daggers: the one in the weapon hand goes up and held.ts leaves
+  it out meanwhile, `Pose.hide`; a rapier or the poisoner's short sword stays in hand and a spare comes off the
+  belt into the other); a coin thumbed up twice; over one shoulder, then turned right round to look behind. Rare:
+  the flip comes off the fingers, bounces and is snatched low, a look round to see who saw, red in the cheeks.
+- **Mage**: a small book held open in front, a page turned (the wand or spellblade lowered, the staff kept upright);
+  sparks of the element in hand flicked off the wand's tip, the staff's head or the spellblade three times; a hand
+  at the hat brim, tugging it. Rare: the brim flops down over the eyes, a blind wobble, pushed back up.
+- **Cleric** (every Cleric kit carries the censer, heldkits.ts): the censer swung gently, its smoke thicker and
+  curling; a prayer, eyes shut, hands together, a little light going up; a cloth on the mace's head, the flail's
+  hanging head, or along the censer-bearer's sword, then a shine. Rare: the smoke drifts into the face, a squint,
+  and a sneeze.
+- The weapon is always drawn at the posed hand (`held.ts` with the idle's angle; `idlepose.ts`), never floating.
+  Looking the other way for a moment draws the weapon as if facing it.
+
+**The hound** (`client/idlehound.ts`, `hound.ts`). Where the hound is drawn during an idle or a pet is worked out
+in tiles from where the room has it, so FLAT and 2.5D put it in the same place; the room's hound never moves for
+it. `drawHound` takes a mood: tail wagging, sitting up, a stick in its jaws, head down to the ground, tongue out,
+leaning in, up off the ground. Another player's Ranger in town now has a hound at heel too (this screen walks it,
+nothing sent: the town only says where players stand), so their fetches show.
+
+**Petting** (`client/petting.ts`). Only in the hunters' lodge. The lodge had no dog of its own, but Maeve already
+says she has "a dog with better manners waiting", so **Maeve's hound now lies by the lodge's fire** (9.5, 2.25,
+beside the brazier), and anyone can pet it: walk up and USE (E on a laptop). A Ranger can also pet their own;
+being always at heel, it's offered only when nothing else is in reach, so it never gets in the way of talking to
+Maeve or Tems. The hero kneels and reaches; the hound gets up (Maeve's from lying), comes to lean on them, wags
+with its tongue out, and two hearts float up; then it goes back (Maeve's lies down again). 2.6 s, again after 1 s
+more, ends at a step. Cosmetic and this screen's own (other players in the lodge see you standing, not petting).
+
+**Words** (for the lore keeper, then the line editor): **PET** on the touch button; **PET YOUR HOUND** and
+**PET MAEVE'S HOUND** on the prompt. Maeve's hound is unnamed.
+
+**Cost.** One small record a hero (positions, a seed), checked once a frame; the goblin scan only for heroes
+already standing still. A few fillRects for what's in hand. Nothing at all while walking or fighting.
+
+Tests: `tests/idles.test.ts` (an idle only after standing still and again now and then; none while walking or
+swinging; none with a goblin awake within 8 tiles, one waking ends it; a poke, a hit, a step or a turn ends it;
+three a kit and the rare one about 1 in 50; every pick fits the weapon in hand, all three of each kit come up; a
+Ranger's picks mostly the hound and none without it; drawing an idle leaves the hero and the room's hound as they
+were; petting offered in the lodge for Maeve's hound and a Ranger's own, not for a Warrior's, nowhere in the other
+halls, the yard or the square; the wait; a step ends it; Maeve's hound gets up and lies down again; an hour of
+idles and petting sends nothing a still hero wouldn't). Sheet and phone shots: `node scripts/idles-look.cjs <url>
+<outdir>` (every idle and rare at 4x, eight frames each, with the weapon variants; fetch in the square; petting
+your own hound and Maeve's in the lodge).
+
 ## 2026-11-05: the budget checked again; the yard is this browser's alone, with straw men to practise on (Kyle; Claude Opus 5.5)
 
 Kyle: "We should always double check, or at least once a day after big working days and pushes, to make sure

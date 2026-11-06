@@ -328,3 +328,4 @@ most Want among the heroes is the one the bells don't spare).
 - The watch pays heroes by the head for a night shift with a bow, capped per night. It's wages, never touching the Want.
 - Anyone is handed a bow for the shift.
 - Brisk hands out the watch's pay but isn't one of the watch.
+- Maeve keeps a hound of her own, lying by the hunters' lodge fire; anyone may pet it (Kyle, 2026-11-05). It's unnamed for now.

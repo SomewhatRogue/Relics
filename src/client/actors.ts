@@ -11,7 +11,7 @@ import { LAYOUT, armOffset, drawFigure, layout } from './figure';
 import { heroCut, jointed } from './joints';
 import { heroPose } from './heropose';
 import { drawWeapon, pose } from './held';
-import { EL_COL } from './palette';
+import { EL_COL, heldEl } from './palette';
 import { drawLoad } from './xbowmark';
 import { drawBladeMark } from './blademark';
 import { drawHolyShield } from './holyshield';
@@ -22,6 +22,8 @@ import type { Cls, LookDef } from './lookkit';
 import { drawLife, idPhase } from './herolife';
 import { dialLook, drawDialAura, drawDialEyes } from './heroeyes';
 import { eyesAt, rim, topRow } from './herodial';
+import { idlePose } from './idlepose';
+import { idleProps } from './idledraw';
 
 const ARM: [number, number] = [0, 0];
 const POISON_TINT = '#5ad02a';
@@ -66,14 +68,18 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
   }
   // Just come into the room: flickering, so everyone can see nothing lands on you yet.
   if (h.safeT && Math.floor(c.now * 14) % 3 === 0) return;
-  const up = h.fy < -0.55 && Math.abs(h.fy) > Math.abs(h.fx) * 0.8;
-  const flip = h.fx < -0.2;
   // The body's pose (heropose.ts), drawn part by part; walking it bobs a pixel, standing it keeps still.
   const pz = heroPose(h, t, c.now);
+  // Stood still a while out of a fight: an idle of their class, or petting a hound (idlepose.ts).
+  const idl = idlePose(h, pz, c.now);
+  const up = idl?.up ?? (h.fy < -0.55 && Math.abs(h.fy) > Math.abs(h.fx) * 0.8);
+  const flip = idl?.flip ?? h.fx < -0.2;
+  // Looking the other way for a moment: the weapon's drawn as if they faced it (held.ts reads the facing).
+  const hw = flip !== h.fx < -0.2 ? { ...h, fx: -h.fx } : h;
   let ox = pz.ox, oy = pz.oy, squash = 1;
   const ph = idPhase(h.id);
   if (pz.phase === 'rest' && h.moving) (pz.step = STEPS[Math.floor(c.now * 8 + ph * 4) % 4]), (oy = pz.step ? -1 : 0);
-  else if (pz.phase === 'rest' && h.act === 'idle' && !h.blocking && ((c.now + ph * BREATH.every) % BREATH.every) < BREATH.up) pz.crouch = BREATH.crouch;
+  else if (!idl && pz.phase === 'rest' && h.act === 'idle' && !h.blocking && ((c.now + ph * BREATH.every) % BREATH.every) < BREATH.up) pz.crouch = BREATH.crouch;
   if (h.act === 'zip') (ox = Math.round(h.fx * 2)), (oy = Math.round(h.fy * 2) - 1);
   const dk = WEAPONS[h.weapon].dodge;
   // The mage's blink: gone, a scatter of violet light where they are.
@@ -98,6 +104,11 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
     const name = (h.tag ?? h.id).toUpperCase();
     if (!BARE.on) drawText(c.glow, name, Math.round(x - name.length * 2), Math.round(y + 6), '#9ad8a8');
   }
+  // Knocked flat by the hound (the Ranger's rare idle): lying there laughing, the gear set down.
+  if (idl?.lying) {
+    spin(c, look.down, bx, by - 5 + (Math.floor(c.now * 7) % 2), (idl.lying * Math.PI) / 2);
+    return idleProps(c, { x, y, bx, by, px: bx, py: by, side: flip ? -1 : 1, ey: 0, exl: 0, exr: 0, def: lookDef(WEAPONS[h.weapon].cls as Cls, h.look), p: { a: 0, ext: 0, reach: 0, pull: 0 }, el: '', now: c.now, o: idl, w: h.weapon });
+  }
   if (h.act === 'roll' || h.act === 'zip' || h.act === 'bash') {
     const dx = h.act === 'zip' ? h.fx : h.rollDx, dy = h.act === 'zip' ? h.fy : h.rollDy;
     c.glow.globalAlpha = 0.25;
@@ -109,14 +120,17 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
   // The body in parts (figure.ts); the weapon is in the weapon hand, wherever that arm has gone.
   const cls = WEAPONS[h.weapon].cls as Cls, def = lookDef(cls, h.look), body = jointed(up ? look.up : look.down, cutOf(def));
   const L = layout(body, bx, by, flip, pz), [ax, ay] = armOffset(ARM), mid = Math.round(L.lean / 2), low = L.drop;
-  const side = h.fx >= -0.2 ? 1 : -1, px = bx + side * 3 + ax, py = by - 8 + ay, p = pose(h, c.now);
+  const side = flip ? -1 : 1, px = bx + side * 3 + ax, py = by - 8 + ay, p = pose(hw, c.now);
+  if (idl?.a != null) p.a = side > 0 ? idl.a : Math.PI - idl.a;
+  if (idl?.ext != null) p.ext = idl.ext;
+  if (idl?.hide) p.hide = true;
   // The sword and shield's release: the shield flashes as the blow goes out (the blade too, held.ts).
   const snap = h.weapon === 'sword' && (pz.phase === 'release' || pz.phase === 'contact');
   const fresh = t - h.parryOpenAt < parryWindow(h);
-  const shieldAt: [number, number] = h.blocking || fresh ? [bx + mid + h.fx * 6, by - 7 + low + h.fy * 4] : [bx + mid - side * 4, by - 6 + low];
+  const shieldAt: [number, number] = idl?.shield ? [bx + idl.shield[0], by + idl.shield[1]] : h.blocking || fresh ? [bx + mid + h.fx * 6, by - 7 + low + h.fy * 4] : [bx + mid - side * 4, by - 6 + low];
   const drawGear = () => {
     if (h.weapon === 'sword') blit(c, SPRITES.shield, shieldAt[0], shieldAt[1] + 4, false, fresh || snap ? 0.85 : 0);
-    drawWeapon(c, h, px, py, p);
+    drawWeapon(c, hw, px, py, p);
     if (h.act === 'throw' && h.actT < 0.2) {
       const a = Math.atan2(h.fy, h.fx) + Math.PI;
       if (h.relic === 'javelin') line(c.lit, bx - side * 2, by - 10, a, -4, 10, '#d8c48a');
@@ -131,7 +145,9 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
       if (el) (c.glow.fillStyle = EL_COL[el]), c.glow.fillRect(Math.round(bx - side * 3), Math.round(by - 12), 1, 1);
     }
   };
-  if (up) drawGear();
+  // (Behind the body walking away, or rested back over the shoulder in an idle.)
+  const behind = up || !!idl?.behind;
+  if (behind) drawGear();
   // Poisoned: a green cast over the body, pulsing, stronger with each stack (unless a hit's flash is on it).
   if (h.poison && !pz.flash) (pz.flash = 0.16 + 0.07 * h.poison + 0.06 * Math.sin(c.now * 5)), (pz.tint = POISON_TINT);
   // The eye dial's light round the body (heroeyes.ts), cloth behind, the body, cloth over it (herolife.ts).
@@ -152,7 +168,8 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
     c.glow.fillRect(exr, ey, 1, 1);
     c.glow.globalAlpha = 1;
   }
-  if (!up) drawGear();
+  if (!behind) drawGear();
+  if (idl) idleProps(c, { x, y, bx, by, px, py, side, ey, exl, exr, def, p, el: EL_COL[heldEl(h)], now: c.now, o: idl, w: h.weapon });
   if (fresh && h.weapon !== 'sword') smear(c.glow, bx, by - 8, Math.atan2(h.fy, h.fx) - 0.7, Math.atan2(h.fy, h.fx) + 0.7, 7, 9, '#cfe8ff');
   // A blade's charge gathers at the hand (a caster's draws into the tip instead, held.ts).
   if (h.act === 'charge' && cls !== 'MAGE' && !h.winding) {
