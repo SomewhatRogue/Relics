@@ -217,7 +217,10 @@ export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number, dozing = false
  */
 export function drawTelegraph(c: Ctx, a: EnemyAttack, cx: number, cy: number): void {
   if (a.t >= a.windup + a.active) return;
-  const prog = Math.min(1, a.t / a.windup), g = c.glow;
+  // A boss's pose comes first, then its floor (sim/bosskit.ts BOSS.tell): nothing on the ground yet.
+  const tell = a.tell ?? 0;
+  if (a.t < tell) return;
+  const prog = Math.min(1, (a.t - tell) / (a.windup - tell)), g = c.glow;
   const pulse = 0.85 + 0.15 * Math.sin(c.now * 20);
   const fill = a.kind === 'slam' ? '#e8501f' : '#e23a30';
   if (a.kind === 'pounce') return drawPounce(c, a, cx, cy, pulse);

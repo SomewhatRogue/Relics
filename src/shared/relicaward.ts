@@ -25,12 +25,13 @@ export const ZONE_RELICS: Record<string, ZoneRelic> = {
 };
 
 /** What gave it. A zone's climax names the zone. */
-export type RelicSource = 'deep' | 'story' | 'beacon' | 'named' | { zone: string };
+/** `boss`: a boss of the kit that isn't a butcher (docs/plans/bosses.md): its sure chest, 15% (BOSS.chest.relic), found in its hoard. */
+export type RelicSource = 'deep' | 'story' | 'beacon' | 'named' | 'boss' | { zone: string };
 export const sourceKey = (s: RelicSource) => (typeof s === 'string' ? s : 'zone:' + s.zone);
 
 /** The odds a sure relic comes elemental (and LOUD of those), by source: the bigger the job, the better. */
 const ODDS: Record<string, { elemental: number; loud: number }> = {
-  named: RELIC_DROP, deep: RELIC_DROP,
+  named: RELIC_DROP, deep: RELIC_DROP, boss: RELIC_DROP,
   story: { elemental: 0.25, loud: 0.3 },
   beacon: { elemental: 0.25, loud: 0.35 },
   zone: { elemental: 0.2, loud: 0.3 },

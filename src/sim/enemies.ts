@@ -39,10 +39,15 @@ import { chaseOn, flankTo, fleeing, rangedPull, sprintPace } from './chase';
 import { stomp } from './bigone';
 import { standHeld } from './pacing';
 import { LEAP } from '../shared/threat';
+import { DOORKEEPERS } from '../shared/bosstune';
+import { clockHolds, trackAim } from './bosskit';
+import { stepKeeper } from './doorkeepers';
+import { bossStun } from './poise';
 
 /** The room's oil slicks, for the torch-bearers (the room sets it before its goblins move). */
 /** `pace`: this room plays the pacing rules (sim/pacing.ts, chase.ts): a job's or an expedition's, not the wood or the yard. */
-export const OWN_KIT: { slicks: Slick[]; freed: Survivor[]; foes: Enemy[]; nooses: Noose[]; pace: boolean } = { slicks: [], freed: [], foes: [], nooses: [], pace: false };
+/** `bosses`: this room has bosses of the kit (sim/bosskit.ts): one clock a hero holds the hungry near them. */
+export const OWN_KIT: { slicks: Slick[]; freed: Survivor[]; foes: Enemy[]; nooses: Noose[]; pace: boolean; bosses: boolean } = { slicks: [], freed: [], foes: [], nooses: [], pace: false, bosses: false };
 
 const SPECS: Partial<Record<Enemy['kind'], EnemySpec>> = { butcher: BUTCHER, scrapper: SCRAPPER, spider: SPIDER, brood: BROOD };
 
@@ -91,6 +96,8 @@ function nearest(e: Enemy, heroes: Hero[], now: number): Hero | null {
 }
 
 export function begin(e: Enemy, kind: EnemyAttack['kind'], s: EnemyAttackSpec, target: Hero, ev: FightEvent[]): void {
+  // One clock a hero: a boss winding up at them, and the hungry near them hold their blows (sim/bosskit.ts).
+  if (OWN_KIT.bosses && clockHolds(e, target, OWN_KIT.foes)) return;
   const dx = target.x - e.x, dy = target.y - e.y, l = Math.hypot(dx, dy) || 1;
   e.fx = dx / l;
   e.fy = dy / l;
@@ -149,8 +156,8 @@ function runCharge(e: Enemy, a: EnemyAttack, heroes: Hero[], now: number, ev: Fi
   e.kvy = going ? a.dy * speed : 0;
   e.moving = going;
   if (going) {
-    a.cx = e.x + a.dx * 0.4;
-    a.cy = e.y + a.dy * 0.4;
+    a.cx = e.x + a.dx * 0.4 + (a.mid?.[0] ?? 0);
+    a.cy = e.y + a.dy * 0.4 + (a.mid?.[1] ?? 0);
     for (const h of heroes) if (!(a.hit ??= []).includes(h.id) && (h.z ?? 0) === (e.z ?? 0) && attackCovers(a, h)) (a.hit.push(h.id), hitHero(e, a, h, now, ev, heroes));
     // Its own in the way go flying.
     if (a.kind === 'charge') for (const o of others) if (o !== e && o.kind === 'scrapper' && !isDead(o) && !a.hit!.includes('g' + o.id) && attackCovers(a, o as unknown as Hero)) a.hit!.push('g' + o.id), damage(o, Math.round(a.dmg * FRIENDLY.blow), now, ev, { heavy: true, how: 'burst' }), shove(o, a.dx, a.dy, a.knock, o.weight);
@@ -206,6 +213,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     const hit = slide(e, e.radius, dt);
     // A spider's pounce into a wall just stops it.
     if (hit && e.attack?.kind === 'pounce') e.kvx = e.kvy = 0;
+    // (A boss carried along in its partner's lock, or shoved, just stops at the wall: only its own charge is stopped hard.)
+    else if (hit && e.boss && !(e.attack?.kind === 'charge' && e.attack.t >= e.attack.windup)) e.kvx = e.kvy = 0;
     else if (hit) {
       const ice = frozen(e, now), by = heroes.find((h) => h.id === e.lastBy);
       // CRUSHING: whoever threw it there makes the wall hurt more.
@@ -217,6 +226,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
       ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy: n > KNOCK.wallDmg, on: 'enemy' });
       if (e.hp <= 0) return kill(e, ev, 'burst', e.kvx, e.kvy);
       // Charged into a wall or a tree: it stuns itself.
+      // (A boss's charge: stuck DOORKEEPERS.stuck, the punish; its lock stops as its shove would.)
+      if (e.boss && e.attack?.kind === 'charge' && e.attack.t >= e.attack.windup) return void (bossStun(e, e.attack.boss === 'lock' ? DOORKEEPERS.lock.recover : DOORKEEPERS.stuck), ev.push({ k: 'stunned', x: e.x, y: e.y }));
       if (e.attack?.kind === 'charge' && e.attack.t >= e.attack.windup) {
         Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: e.variant === 'log' ? LOGS.stun : VARIANTS.stoker.chargeStun, kvx: 0, kvy: 0 });
         ev.push({ k: 'stunned', x: e.x, y: e.y });
@@ -236,11 +247,15 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   // Blinded by a longbow's perfect arrow: it gropes about and goes for nobody (sim/rangershots.ts).
   if (blinded(e, now)) return void (spec && stumble(e, spec.speed, now, dt));
   if (e.act === 'attack') {
+    // A boss's blow turns with its hero for the first part of its wind-up (sim/bosskit.ts).
+    if (e.boss) trackAim(e, heroes);
     if (runAttack(e, heroes, now, dt, ev, others) && e.act === 'attack') {
       Object.assign(e, { attack: null, act: after(e), actT: 0, cooldown: e.variant === 'hexer' ? HEXER.pause : e.attack?.kind === 'spit' ? BROOD.spitPause : spec ? spec.pauseBetween : SWING_DUMMY.every });
     }
     return;
   }
+  // A boss of the kit takes its own turn (sim/doorkeepers.ts).
+  if (e.boss) return stepKeeper(e, heroes, now, dt, ev, others, () => notice(e, heroes, others, now, ev));
   // Busy at something when you came in (layout 4: sim/tasks.ts): a torch to a wall, the prisoners' rope, a round, a body.
   if (e.task && stepTask(e, heroes, now, dt, ev, () => notice(e, heroes, others, now, ev))) return;
   if (e.alert === false && e.feeding) {

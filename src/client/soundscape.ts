@@ -2,6 +2,7 @@
  * What you hear: each event's sound (by the kit that made it and what it landed on), goblins talking
  * as they come, fires crackling, doors, and the music for where you are and how bad it's getting.
  */
+import { bossSound } from './fxboss';
 import { streamSound } from './streamsound';
 import { chestSound } from './sfx';
 import { mageTapSound } from './magesfx';
@@ -79,7 +80,7 @@ export class Soundscape {
     mageTapSound(ev, room);
     // A recording of its own where the list gives one (sfxevents.ts); else the usual sound below.
     if (eventSample(ev)) return;
-    if (foeSound(ev) || chalkSound(ev)) return;
+    if (foeSound(ev) || chalkSound(ev) || bossSound(ev)) return;
     if (ev.k === 'swing') return swingSound(ev.src, ev.heavy);
     if (ev.k === 'chest') return chestSound(ev.state, ev.tier);
     // The poisoner's: the blowpipe's puff, a skewer's wet stab, a goblin retching (the spiders' own wet sounds).

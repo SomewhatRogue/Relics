@@ -16,6 +16,7 @@ import { CLASS_DODGES, WEAPONS, guardOf } from '../shared/tuning';
 import { attackCovers, hitHero, type Verdict } from './combat';
 import { dodgeReach, slipWindow } from './knacks';
 import type { LateBlow } from './latelist';
+import { graceVerdict } from './bossgrace';
 import type { Enemy, FightEvent, Hero, Intent } from './types';
 
 /** What a friend's own screen says of a blow that landed at `p.at`. */
@@ -42,6 +43,14 @@ export function stepLate(late: LateBlow[], heroes: Hero[], foes: Enemy[], intent
     const h = heroes.find((x) => x.id === p.hero);
     // (Gone through a door, or out of the job: nothing to land on.)
     if (!h) continue;
+    // A boss's blow, with its grace (sim/bossgrace.ts): judged once it can't change, or at its due.
+    if (p.grace !== undefined) {
+      const v = graceVerdict(p, h, intents.get(h.id)?.vt, now);
+      if (!v) keep.push(p);
+      const e = v && foes.find((x) => x.id === p.foe);
+      if (v && e) hitHero(e, p.a, h, now, ev, heroes, { verdict: v, sx: p.sx, sy: p.sy, gx: p.gx, gy: p.gy });
+      continue;
+    }
     if ((intents.get(h.id)?.vt ?? -Infinity) < p.at && now < p.due - 1e-6) {
       keep.push(p);
       continue;

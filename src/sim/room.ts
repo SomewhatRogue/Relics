@@ -97,6 +97,8 @@ import { stepWorldFire } from './worldfire';
 import { initStaithe, stepStaithe } from './staithe';
 import { cutNetted, playOut, shoveLog, stepHungNets, stepStaitheFire } from './staithebits';
 import { stepDrift } from './drift';
+import { newBoss, useBook, type BossBook } from './bosskit';
+import { stepPair } from './doorpair';
 
 export class ArenaRoom {
   time = 0;
@@ -191,15 +193,17 @@ export class ArenaRoom {
   pace: { index: number } | null = null;
   /** The party's average level when the job began (shared/threat.ts LEVEL_SCALE): every goblin tougher by it, loot a little better. */
   level = 1;
+  /** A boss's arena (sim/arenaroom.ts): the room's notes on its bosses (sim/bosskit.ts BossBook), never sent; null, none here. */
+  bosses: BossBook | null = null;
 
   /**
    * The training room by default. A run room passes its `map`, `foes` and `props` (its goblins stay
    * dead and its furniture doesn't come back). `squire`: a training partner to heal and bless.
    */
-  constructor(seed = 1, opts: { scrappers?: boolean; squire?: boolean; props?: boolean; map?: GameMap; foes?: Foe[]; furniture?: { kind: PropKind; x: number; y: number }[]; chests?: { x: number; y: number; chained?: boolean }[]; danger?: number; sleep?: boolean; level?: number } = {}) {
+  constructor(seed = 1, opts: { scrappers?: boolean; squire?: boolean; props?: boolean; map?: GameMap; foes?: Foe[]; furniture?: { kind: PropKind; x: number; y: number }[]; chests?: { x: number; y: number; chained?: boolean; boss?: number }[]; danger?: number; sleep?: boolean; level?: number } = {}) {
     this.sleepFar = !!opts.sleep;
     this.level = opts.level ?? 1;
-    this.chests = (opts.chests ?? []).map((c) => newChest(c.x, c.y, c.chained));
+    this.chests = (opts.chests ?? []).map((c) => newChest(c.x, c.y, c.chained, c.boss));
     this.danger = opts.danger ?? 0;
     this.rng = new Rng(seed);
     this.lootRng = new Rng(seed * 7919 + 13);
@@ -231,6 +235,7 @@ export class ArenaRoom {
         Object.assign(e, { respawns: false, name: f.name, bow: f.bow, z: f.z ?? 0, alert: f.awake ?? false, feeding: f.feeding });
         if (f.noose) e.noose = true;
         if (f.zoned) e.zoned = true;
+        if (f.boss) e.boss = newBoss(f.boss, 1);
         if (f.task) e.task = structuredClone(f.task);
         if (f.haul) e.haul = { ...f.haul };
         if (f.wave) e.wave = f.wave;
@@ -315,11 +320,13 @@ export class ArenaRoom {
     // What each hero does is counted on this room's board while it steps (sim/score.ts), on a job only.
     useBoard(this.board);
     useLate(this.late);
+    useBook(this.bosses);
     try {
       this.stepOnce();
     } finally {
       useBoard(null);
       useLate(null);
+      useBook(null);
     }
   }
 
@@ -411,6 +418,9 @@ export class ArenaRoom {
     OWN_KIT.slicks = this.slicks;
     OWN_KIT.foes = this.enemies;
     OWN_KIT.nooses = this.nooses;
+    // A boss's arena: the pair's rules before they move (sim/doorpair.ts); one clock a hero holds the hungry near them.
+    OWN_KIT.bosses = !!this.bosses;
+    if (this.bosses) stepPair(this.bosses, w, (x, y) => this.spawn('scrapper', x, y));
     // Pacing (sim/pacing.ts, chase.ts): who flanks, who's asleep before they move; after, packs held back or let go.
     OWN_KIT.pace = !!this.pace;
     if (this.pace) flankers(this.enemies, this.heroes);

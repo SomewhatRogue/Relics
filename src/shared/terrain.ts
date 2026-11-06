@@ -52,6 +52,8 @@ export interface Foe {
   noose?: boolean; zoned?: boolean;
   /** Pacing (shared/threat.ts): its pack's beat, a BIG ONE, and how much harder it hits (a bigger party). */
   beat?: import('./encounters.js').Beat; big?: boolean; harm?: number;
+  /** A boss of the kit (sim/bosskit.ts): which one (the Doorkeepers' Latch or Hasp). */
+  boss?: 'latch' | 'hasp';
 }
 /** Which way the party went at a fork. */
 export type RoadId = Road['road'];

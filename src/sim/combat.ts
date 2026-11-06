@@ -35,6 +35,10 @@ import { clanks, plated } from './ironhide';
 import { guardFrom, rushBlocked, noteRush } from './rushguard';
 import { count, dealt } from './score';
 import { chalkTaken } from './chalker';
+import { addPoise, bracedFor, poiseFromBlow, rebound } from './poise';
+import { doorTake } from './doorwall';
+import { noteHurt } from './bosskit';
+import { graceDefer } from './bossgrace';
 
 export { respawnOf, stunOf } from './damage';
 
@@ -81,7 +85,10 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   // An ironhide's plates (sim/ironhide.ts): a charged blow or a perfect breaks its guard; else a fifth gets through.
   const plate = clanks(e, now) && !(h.heavy || h.perfect), raw = plated(e, Math.round(s.dmg * mult), now, h.heavy || h.perfect, ev);
   // Mother Rust's Needles: a backstab kills anything short of a butcher.
-  const n = rear && e.kind === 'scrapper' && wears(h, 'needles') ? Math.max(e.hp, raw) : raw;
+  const n0 = rear && e.kind === 'scrapper' && wears(h, 'needles') ? Math.max(e.hp, raw) : raw;
+  // A boss of the kit: what in the blow fills its POISE (door or no door), then its door (sim/poise.ts, doorwall.ts).
+  const n = e.boss ? bossBlow(h, e, n0, rear, ambush, now, ev) : n0;
+  if (n < 0) return 0;
   e.hp -= n;
   e.hitAt = now;
   dealt(e, h.id, n);
@@ -127,11 +134,25 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   // Quick blows never break a wind-up (a hexer's spell excepted: any blow breaks it), and knock an idle one off balance only once a while (POISE).
   // In a pack rush, a charged blow or a perfect breaks the one it hits, whatever it is; the rest still come.
   const skilled = h.heavy || h.perfect, breaks = skilled || a?.kind === 'hex' || (!a && now - (e.flinchAt ?? -9) > POISE.relock);
-  if (shakes && e.act !== 'stunned' && e.act !== 'pinned' && e.act !== 'carried' && !ice && e.attack?.kind !== 'charge' && (a?.rush ? skilled : heavyWind ? big : (small(e) && breaks) || big)) {
+  if (!e.boss && shakes && e.act !== 'stunned' && e.act !== 'pinned' && e.act !== 'carried' && !ice && e.attack?.kind !== 'charge' && (a?.rush ? skilled : heavyWind ? big : (small(e) && breaks) || big)) {
     Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: big && e.kind === 'butcher' ? 0.6 : FLINCH });
     if (!skilled) e.flinchAt = now;
   }
   return n;
+}
+
+/** A blow on a boss: its POISE filled, then what its door lets by (-1: stopped dead, sparks and a jolt). */
+function bossBlow(h: Hero, e: Enemy, n: number, rear: boolean, ambush: boolean, now: number, ev: FightEvent[]): number {
+  poiseFromBlow(e, h, rear, ambush, now, ev);
+  const got = doorTake(e, n, e.x - h.x, e.y - h.y, now);
+  if (got <= 0) {
+    h.hitstop = Math.max(h.hitstop, HITSTOP.light);
+    e.hitAt = now;
+    ev.push({ k: 'deflect', x: e.x, y: e.y });
+    return -1;
+  }
+  noteHurt(e, h.id, got, now);
+  return got;
 }
 
 /**
@@ -172,8 +193,10 @@ function warded(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: FightEvent[]
 }
 
 /** Out from under the blow at the last moment: the attacker staggers (a close one; not an archer or a hexer). */
-function slipped(e: Enemy, a: EnemyAttack, h: Hero, ev: FightEvent[]): void {
+function slipped(e: Enemy, a: EnemyAttack, h: Hero, ev: FightEvent[], now = 0): void {
   if (a.kind === 'shot' || a.kind === 'hex' || a.kind === 'spit' || e.act === 'stunned') return;
+  // A boss doesn't reel from it: LAST SECOND fills its POISE instead (sim/poise.ts).
+  if (e.boss) return void (h.hitstop = Math.max(h.hitstop, HITSTOP.heavy), ev.push({ k: 'slip', x: h.x, y: h.y }), addPoise(e, 'slip', now, ev));
   h.hitstop = Math.max(h.hitstop, HITSTOP.heavy);
   e.hitstop = HITSTOP.heavy;
   Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: stunOf(e) * DODGE.stun });
@@ -205,7 +228,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   // Just come into the room: nothing lands yet.
   if (h.safeT) return;
   if (h.act === 'down') return;
-  if (!late && attackCovers(a, h) && defer(e, a, h, now)) return;
+  // A boss's blow: a press a moment late still counts (sim/bossgrace.ts); else a friend's lag (sim/latelist.ts).
+  if (!late && attackCovers(a, h) && (graceDefer(e, a, h, heroes, now) || defer(e, a, h, now))) return;
   // Dodged by their own screen: through it (the goblin reels, as below), or out from under it.
   if (late?.verdict === 'dodge') return void dodgedThrough(e, a, h, now, ev, true);
   if (late?.verdict === 'out') return void (ev.push({ k: 'dodge', x: h.x, y: h.y }), count(h.id, 'dodges'));
@@ -214,7 +238,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     // so the blow lands where you were a breath ago, it staggers the attacker just as rolling through does.
     if (h.lastRollAt >= now - a.windup && attackCovers(a, { ...h, x: h.rollX, y: h.rollY })) {
       ev.push({ k: 'dodge', x: h.x, y: h.y }), count(h.id, 'dodges');
-      if (CLASS_DODGES[WEAPONS[h.weapon].cls] && now - h.lastRollAt <= slipWindow(h)) slipped(e, a, h, ev), slipRefills(h, now, ev);
+      if (CLASS_DODGES[WEAPONS[h.weapon].cls] && now - h.lastRollAt <= slipWindow(h)) slipped(e, a, h, ev, now), slipRefills(h, now, ev);
     }
     // No dodge (a Warrior, a Healer): walked out of a striped blow meant for you. That's the dodge.
     else if (!CLASS_DODGES[WEAPONS[h.weapon].cls] && a.unblockable && a.aimed === h.id) ev.push({ k: 'dodge', x: h.x, y: h.y }), count(h.id, 'dodges');
@@ -263,7 +287,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     if (rushBlocked(h, a, now)) return void ev.push({ k: 'block', x: h.x, y: h.y, more: true });
     noteRush(h, a, now);
     // IRON STANCE: a flat burst of stamina, the goblin thrown back, untouchable a moment (sim/taunt.ts).
-    if (ironStance(h, e, now, ev)) {
+    // (A boss's blow is BRACED instead, below.)
+    if (!a.boss && ironStance(h, e, now, ev)) {
       count(h.id, 'blocks');
       if (h.act !== 'stun') h.counterUntil = now + counterWindow(h);
       return;
@@ -276,7 +301,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     // The blow meets the guard: a solid thud, held a beat, and a small push back.
     h.hitstop = Math.max(h.hitstop, a.crush ? HITSTOP.heavy : HITSTOP.light);
     e.hitstop = Math.max(e.hitstop, HITSTOP.light);
-    if (!braced(h, now)) shove(h, sx / sl, sy / sl, a.knock * (a.crush ? GUARD.crushShove : 0.4), HERO.weight);
+    if (!braced(h, now) && !bracedFor(a)) shove(h, sx / sl, sy / sl, a.knock * (a.crush ? GUARD.crushShove : 0.4), HERO.weight);
     count(h.id, 'blocks');
     if (h.stamina <= 0) {
       Object.assign(h, { stamina: 0, winded: true, act: 'stun', actT: 0, actDur: GUARD.guardBreakStun });
@@ -284,6 +309,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
       return;
     }
     ev.push({ k: 'block', x: h.x, y: h.y });
+    // BRACED: a boss's red blow held off rebounds it, and fills its POISE (sim/poise.ts).
+    rebound(e, a, h, now, ev);
     // A block that holds opens the counter: the next blow started soon after lands harder (GUARD.counterMult).
     h.counterUntil = now + counterWindow(h);
     // HEALING BLOCK heals friends near (sim/ladderhealer.ts).
@@ -318,7 +345,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
 function dodgedThrough(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: FightEvent[], late: boolean): void {
   ev.push({ k: 'dodge', x: h.x, y: h.y }), count(h.id, 'dodges');
   // (Judged late, the goblin may have fallen or begun another blow since: only one still on the blow that landed reels.)
-  if (!late || (!isDead(e) && (!e.attack || e.attack.done))) slipped(e, a, h, ev);
+  if (!late || (!isDead(e) && (!e.attack || e.attack.done))) slipped(e, a, h, ev, now);
   // A spellblade's dodge through a blow refills its magic, its shield (sim/manashield.ts).
   slipRefills(h, now, ev);
   if (has(h, 'tempo')) (h.tempoUntil = now + TRAIT.tempoTime), ev.push({ k: 'tempo', x: h.x, y: h.y });

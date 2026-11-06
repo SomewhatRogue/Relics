@@ -13,7 +13,7 @@ import { isDead } from './damage';
 import { isSpiderKind } from '../shared/spiders';
 import type { ArenaRoom } from './room';
 import type { Run } from './run';
-import { bossOf, densLeft, racksLeft } from './targets';
+import { densLeft, racksLeft } from './targets';
 import { waiting } from './survivors';
 import { expedGoal } from './expedgoal';
 import { HELD_HINT, pickWay, type WayKind } from '../shared/ways';
@@ -109,9 +109,11 @@ export function goal(run: Run, room: ArenaRoom, houses: Captives = { caged: 0, w
     const dens = densLeft(room.map).length;
     return { text: also(dens ? `Burn out the dens (${dens} ${dens === 1 ? 'hut' : 'huts'} left)` : `The dens are ash. ${way(true)}`), done: dens === 0 };
   }
-  const boss = bossOf(room);
-  const bossDead = !boss || isDead(boss);
-  if (o === 'hunt') return { text: also(bossDead ? `${run.job.boss} is dead. ${way(true)}` : `Kill ${run.job.boss}`), done: bossDead };
+  // (Every named one: a pair of bosses is dead only when both are.)
+  const bossDead = room.enemies.filter((e) => e.name).every(isDead);
+  // (A pair, the Doorkeepers: "are dead".)
+  const are = room.enemies.filter((e) => e.name).length > 1 ? 'are' : 'is';
+  if (o === 'hunt') return { text: also(bossDead ? `${run.job.boss} ${are} dead. ${way(true)}` : `Kill ${run.job.boss}`), done: bossDead };
   // The story mission: the boss, every cage out here, and everyone freed brought out.
   if (!bossDead) return { text: also(`Kill ${run.job.boss}`), done: false };
   return { text: freed ? also(`Ring the bell. ${way(true)}`) : people, done: freed };

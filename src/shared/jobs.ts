@@ -77,6 +77,8 @@ export interface Job {
   exped?: 'barrowfields' | 'hangmans';
   /** A curated zone (docs/plans/atlas.md): its climax's relic, awarded once at the job's end (shared/relicaward.ts ZONE_RELICS). */
   zone?: 'hangman';
+  /** A boss's arena as the last room (shared/barnarena.ts): the Doorkeepers in the great barn. */
+  arena?: 'doorkeepers';
 }
 
 const BOSSES = ['MAWL', 'SKARN', 'OLD KNUCKLES', 'OLD SPOON', 'GUTCHAIN', 'MOTHER RUST'];

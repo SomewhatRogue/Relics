@@ -13,6 +13,7 @@ import { STRAW, drawStrawHeap } from './rackdraw';
 import { toPx } from './world';
 import { drawPerchRope } from './wooddraw';
 import { drawPaceDust, drawPaceOver, paceOffset } from './pacedraw';
+import { drawKeeper } from './doordraw';
 
 /** A goblin, or (in the yard: `straw`) a straw man playing one. The plain dummies are themselves either way. */
 export function drawFoe(c: Ctx, e: Enemy, x: number, y: number, sleeping: boolean, straw: boolean): void {
@@ -33,6 +34,8 @@ export function drawFoe(c: Ctx, e: Enemy, x: number, y: number, sleeping: boolea
 
 /** A goblin as the pacing rules show it (pacedraw.ts): hopping while held, leaning into a sprint, a BIG ONE bigger. */
 function paced(c: Ctx, e: Enemy, x: number, y: number, sleeping: boolean): void {
+  // A boss of the kit: a Doorkeeper behind its door (doordraw.ts).
+  if (e.boss) return drawKeeper(c, e, x, y, sleeping);
   if (!e.held && !e.big && !e.sprintAt) return drawEnemy(c, e, x, y, sleeping);
   const o = paceOffset(c, e), bx = x + o.dx, by = y + o.dy;
   if (o.k === 1) drawEnemy(c, e, bx, by, sleeping);

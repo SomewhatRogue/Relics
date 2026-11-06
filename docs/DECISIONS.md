@@ -87,6 +87,119 @@ the 0.35 s cap (the press reaches the host about 7 ms before the cap), and fail 
 the block and the dodge). Stress scene 1's 2 s step failed once and passed on the rerun.
 
 Not built: a host picked again mid-job (Kyle: no ping-pong); a host that comes back taking its room back.
+## 2026-11-06: the boss kit, and the Doorkeepers in the great barn (Kyle; Claude Opus 5.5)
+
+Kyle (2026-11-05): "shield goblins or a pair ... arena ... good loot ... mix between splatting and tactical", moments
+to plan an attack, bosses that hit hard and aren't easy to kite. `docs/plans/bosses.md` rollout item 2. Every number
+in `shared/bosstune.ts` (exported through tuning); every word in `shared/bosswords.ts`.
+
+**The kit, for every later boss** (`sim/bosskit.ts`, `poise.ts`, `bossgrace.ts`, `bosschest.ts`, `bossplate.ts`):
+- **A boss's state** on the goblin (`Enemy.boss`: POISE, phase, job, door, its rotation) goes out only when one of
+  those changes; the room's own notes (`ArenaRoom.bosses`: who hurt it lately, the pair's clocks, each phase's seeded
+  swap) are saved with the room and never sent. Measured: at their post nothing about them goes out; in 10 s of
+  fighting the boss field is in under a tenth of the patches.
+- **POISE**: bosses shrug every ordinary stun (`stuns.ts mayStun`, and no flinch, no LAST SECOND reel). Charged
+  blows 18, perfects 22, ambushes 30, backstabs 14, BRACED 30, a last-second dodge through its blow 18 (the dodge
+  classes' perfect) fill a 100-point bar (1, 1.3, 1.6, 1.9 times for one to four players). Full: STAGGERED 2.5 s,
+  held fast (the stunned bonus), its door aside, the bar empty. A relic's stun lands in full and fills half the bar.
+  A blow its door stops still fills POISE: a holder's charged blows into the door are their part.
+- **Patterns**: a 0.2 s pose before the floor shows (the floor's own time is the plan's; telegraphs in both views
+  wait for it), aim turning with its hero until 70% of the wind-up, then locked. A move it can't get to within 3 s
+  is passed over, so hugging it can't stall a charge.
+- **Whom it faces**: a taunt, else a block held within 2.5 tiles of its face, else whoever hurt it most in the last
+  4 s, else the nearest.
+- **One clock a hero**: one boss wind-up aimed at a hero at a time (the other boss picks another hero or waits), and
+  the hungry within 3 tiles of that hero hold their blows while it winds up (`enemies.ts begin`, only in a boss's room).
+- **Phases**: a 2 s roar with nothing landing either way (it strikes nothing and takes nothing), pips on the plate.
+- **Scaling**: health by PARTY.boss as every named one (1, 1.4, 1.8, 2.2); POISE as above; two players, the other
+  boss swings at the second hero 0.6 s after the first blow begins; three, 3 small ones in at the side doors each
+  phase (four: 4); four, one more sweep in the rotation. Wind-ups never shorten.
+- **The plate** (`#boss`, `client/bossplate.ts`): the name with its phase pips, a bar each (the pair side by side,
+  LATCH and HASP under), a thin POISE bar under each that flashes while STAGGERED. Any other named goblin: as before.
+- **The sure chest**: the arena's chained chest opens at the kill (both dead). Each hero in the room rolls on their
+  own seed (the chest's and their id): one Forged piece, PRE-WAR 15% (plate half the time), and 15% a relic through
+  `awardRelic(.., 'boss')`, the new source, straight into their found relics, so the relic moment comes as it does
+  for a pickup (a guest's too, through their hero's patch). 80 to 120 gold in one pile, the party's pot. Bosses
+  leave nothing on the floor (no hungry gear: there's no butcher in them).
+- **The arena rule**: the way in is shut until the kill (the goal needs every named one dead now; "are dead" for a pair).
+
+**Open with Kyle, each behind one flag (`BOSS_FLAGS`):**
+- **BRACED**, default `'boss'`: a blocked boss blow doesn't shove the blocker back, and a boss's blocked red blow
+  rebounds it 0.8 s (shoved back a little) and fills POISE 30; IRON STANCE gives way to it on a boss's blow.
+  `'all'`: no shove from any blocked blow (the rebound stays a boss's). `'off'`: as before.
+- **The grace**, default on, boss blows only: a guard or dodge pressed up to 0.15 s after the blow lands, by the
+  hero's own screen, counts (a plain dodge, or a block). How it sits with lag compensation (LAGCOMP.cap 0.35):
+  the leader's own hero is judged at once when its room would save it anyway; a blow that would land waits 0.15 s
+  for a late press. A lagged friend is judged by their own screen as before, and a press up to 0.15 s late by that
+  screen counts too, but the room never holds a boss blow more than min(lag + 0.15, max(0.35, 0.15)): for lag up to
+  0.2 s the whole grace is theirs, then it shrinks to 0.35 - lag, and from 0.35 s it's only the lag compensation.
+  The two never add up past the cap, on anyone's screen.
+- **A hero's first named-butcher kill always dropping a relic**: not touched.
+
+**The Doorkeepers** (`shared/barnarena.ts`, `bossjobs.ts`, `sim/doorkeepers.ts`, `doorpair.ts`, `doorwall.ts`,
+`arenaroom.ts`): **Latch** and **Hasp**, two big goblins (the butcher's body a size up) with the barn's doors, 320
+health each, in the great barn at Lowfurrow Fields: a 12 by 14 threshing floor that fits an upright phone, two hay
+stacks (stop a charge; burn down in 6 s: `haystack`, a new wooden block), four roof posts, a barrel of lamp oil, the
+chained chest at the back. They stand at their post facing the back wall until they see you or hear you within 4.5
+(creeping, only sight: an ambush to open with). Posted as a hunt (`barnHunt`) from 3 brought home or the bell rung:
+two rooms, the fields then the barn (`Job.arena`; `?hero=WARRIOR&barn=1`, or `barn=arena` straight into the barn).
+- **The door**: shut, a blade or shot from within 70 degrees of its facing is stopped dead (BLOCKED, sparks).
+  Swung aside during its own blow and recovery, stunned, staggered, rebounding, after a lock, and while DOWN.
+  Bursts, burning and storm go round it. A shot into a shut door cuts a strap (a charged or perfect one two): three
+  and it's DOOR DOWN 4 s (lying beside it).
+- **Jobs**: one is the WALL (walks its hero down at 1.5, stands 1.5 off, turns at 1.4 radians a second, so a
+  flanker gets round it; no blow of its own but the split and the lock), the other the MOVER (2.4 pace, rotation
+  sweep, charge, sweep, sweep, charge with one seeded swap). They swap every 20 s. Drawn: the wall's door square in
+  front, the mover's carried at its side (the read), swung out flat while open.
+- **Moves**: Door Sweep, red 120 degrees, range 2.6, 1.1 s, 24, punish 1.0 s. Door Charge, a striped lane 8 long
+  1.6 wide, 1.3 s, 30 (it backs off to 3 to get it; 11.4 tiles a second); into a stack, post or wall it's stuck 2.5 s.
+  Locked Doors (within 2.5 of each other, every 9 s at most): a striped shove 3 wide from between them, 1.4 s, 22,
+  the partner carried along; both stand open 1.5 s after. Door Spin (phase 2): a striped ring 2.4 round itself,
+  1.5 s, 26, then dizzy 2 s. A hero at the middle of any striped one walks out in 60% of it at the slowest kit's pace.
+- **Together**: more than 7 apart for 4 s, the mover walks back to its partner, back to you, 3 s (or till it's
+  there). One down: phase 2, the roar, the survivor the mover for good, carrying both doors.
+- Their charge meets their own small goblins as a butcher's does; they never hurt each other, and a carried partner
+  stopped by a wall isn't hurt by it.
+
+**Measured** (`tests/bossbot.ts`: a hero who can't go down, walking on its own feet by Intent, reading each floor:
+walks out of striped, a blocker blocks red, a dodger dodges at the last moment; goes for a back or an open front):
+
+| The barn alone, days 3 / 4 / 5 | seconds | health lost | staggers |
+|---|---|---|---|
+| twin daggers (Rogue) | 45.9 / 96.6 / 82.4 | 30 / 0 / 0 | 2 / 3 / 3 |
+| focus staff (Mage) | 47.6 / 104.5 / 69.1 | 190 / 276 / 146 | 0 / 2 / 1 |
+| sword (Warrior) | 54.3 / 54.5 / 46.1 | 30 / 60 / 22 | 5 / 5 / 4 |
+
+Two (sword, daggers) 25.9 s; three (sword, staff, daggers) 31.7 s. All won. The staff bot takes the most because it
+can't block and stands in to slash; its spells go round the doors.
+
+**Shared files, small edits**: `tuning.ts` (re-export), `types.ts` (`Enemy.boss`; `EnemyAttack.boss`, `tell`, `mid`;
+five events), `enemies.ts` (`OWN_KIT.bosses`, the clock in `begin`, the hook to `stepKeeper`, aim tracking, a boss's
+charge stuck), `terrain.ts` (`Foe.boss`), `jobs.ts` (`Job.arena`), `arena.ts` + `props.ts` (`haystack`), `combat.ts`
+(the door, POISE, BRACED, the grace), `damage.ts`, `bolts.ts`, `stuns.ts`, `impacts.ts`, `latelist.ts`, `lagcomp.ts`,
+`chests.ts`, `pickups.ts`, `loot.ts`, `goal.ts`, `targets.ts`, `room.ts`, `run.ts`; client `main.ts` (the plate, `?barn`),
+`game.ts` (the posting), `foes.ts` + `three/teleg3d.ts` (the pose before the floor), `strawman.ts`, `fx.ts`,
+`soundscape.ts`, `blocklook.ts`, `pieces.ts`, `hud.css`. No pin moved.
+
+**New words** (lore keeper, then line editor): THE DOORKEEPERS, LATCH, HASP (plan proposals, kept); STAGGERED;
+BRACED; DOOR DOWN; the posting "Hunt the Doorkeepers" / "Two of the hungry have taken the doors off the great barn
+at Lowfurrow Fields and carry them about like shields. They've shut themselves in there with whatever was stored. Go
+in and put them down."; THE GREAT BARN (exists); "Kill THE DOORKEEPERS" / "THE DOORKEEPERS are dead. Way home: ..."
+(built from the job's boss, "are" for a pair). Reused: BLOCKED (a door stops it), SHRUGS IT OFF, A CHAINED CHEST.
+
+Tests: `tests/boss.test.ts` (POISE by party, what fills it, the stagger, shrugged stuns and a relic's; the plate for
+the pair and for any named one; BRACED on, off and 'all'; the grace for the leader and for a friend at 0.15 and 0.3 s
+of lag, and never past the cap at lags to 0.9; the sure chest chained, per hero, its odds, the gold, a relic and its
+moment; no traffic a tick) and `tests/doorkeepers.test.ts` (each move landed, blocked or not, dodged and walked out
+of; Locked Doors; the door, the straps, a charge stuck in a stack and the stack burning; the swap, walking back,
+phase 2, the split; one clock a hero; the floors' times, the pose, the aim lock, the barn on a phone; the posting;
+clear times for daggers, staff and sword; the same fight twice). Full vitest 140 files, 1298 tests; tsc; town and
+exped online pass; party online 25 to 27 of 28 over three runs, only the guest-feel frame and lag-stab checks
+(a clean main checkout passed once and then failed one of the same checks: flaky under the container's load, and
+the party script never meets a boss). Shots: `node scripts/boss-look.cjs [url] [outdir]` (phone: the barn with the plate, Locked Doors'
+lane held part way, the sure chest open with the PRE-WAR piece).
+Open: Kyle's play on every number and both flags; a Blender pass on the pair (they're the butcher's body with a door
+drawn on); real sounds for the rebound and the roar (from the kit we have now); the hay stacks are box lumps.
 
 ## 2026-11-06: the guest feel: your own acts at once, one walk rule, and a blow judged by your own screen (Claude Opus 5.5)
 
