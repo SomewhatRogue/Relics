@@ -36,9 +36,9 @@ export const VENDOR_PLACES: Record<HeroClass, Place & { who: string; greet: stri
  * of his table where he buys touched and turning gear, cheap, and no buying back (shared/fence.ts).
  */
 export const FENCE = {
-  tab: 'UNDER THE CLOTH',
+  tab: 'SELL QUIETLY',
   about: "Nettle buys touched and turning gear, for less than it's worth. No buying back.",
-  sold: "Keep your voice down, there's one of the watch two tables over. It's under the cloth with the rest now, and as far as I'm concerned it always was.",
+  sold: "Keep your voice down, there's one of the watch two tables over. It's in the sack with the rest now, and as far as I'm concerned it always was.",
   wont: 'Nettle only buys touched and turning gear.',
   hungry: "Nettle won't buy hungry gear. Give it up at the church.",
 };

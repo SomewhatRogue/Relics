@@ -64,7 +64,7 @@ export function stockGoods(g: Game, v: VendorId, again: () => void): Good[] {
 
 /**
  * A class's vendor, by the class's place in CLASS_ORDER (the Npc's arg). Anyone may look; weapons only fit
- * their class. Nettle's table (the Rogue's) has a second tab, UNDER THE CLOTH, where he buys (fenceui.ts).
+ * their class. Nettle's table (the Rogue's) has a second tab, SELL QUIETLY, where he buys (fenceui.ts).
  */
 export function openVendor(g: Game, panel: Panel, arg: number, tab: Tab = 'sale'): void {
   const cls = CLASS_ORDER[arg] ?? 'WARRIOR', pl = VENDOR_PLACES[cls], again = () => openVendor(g, panel, arg, tab), fence = cls === 'ROGUE';
