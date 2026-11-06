@@ -25,6 +25,7 @@ import { ArenaRoom } from '../sim/room';
 import { lessonOf, newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
 import { elementTaught } from '../sim/woodelement';
 import { signTaught } from '../sim/woodsign';
+import { guardTaught } from '../sim/woodsteps';
 import { AREAS, woodMap, WOOD_PROPS } from '../shared/wood';
 import { bagFull, bagSize } from '../shared/bags';
 import { refreshHealth, statsOf } from '../sim/gearstats';
@@ -244,7 +245,8 @@ export class Game {
     if (this.wood.cut >= 0 || this.wood.wake >= 0) return [];
     // A Mage's ELEMENT comes with its element step, after the full charge (sim/woodelement.ts); a Rogue's,
     // Ranger's or Healer's own button with theirs, after the clearing's lesson (sim/woodsign.ts).
-    const el = [...(elementTaught(this.wood) ? ['element'] : []), ...(signTaught(this.wood) ? ['sign'] : [])];
+    // A Ranger's PARRY comes after the path's two dodges (sim/woodsteps.ts).
+    const el = [...(elementTaught(this.wood) ? ['element'] : []), ...(signTaught(this.wood) ? ['sign'] : []), ...(guardTaught(this.wood) ? ['block'] : [])];
     return this.wood.stage >= 5 ? ['attack', 'roll', 'block', 'relic', 'potion', 'grab', ...el] : [...lessonOf(this.wood).moves.filter((m) => m !== 'grab' || this.wood!.stage > 0 || this.wood!.more), ...el];
   }
   /** Make a hero (class for life); returns its slot, or -1 when all three are taken. */

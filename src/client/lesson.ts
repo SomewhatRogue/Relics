@@ -5,7 +5,7 @@
  */
 import type { Game } from './game';
 import type { Move } from '../sim/wood';
-import { dodgeName } from '../shared/weapons';
+import { dodgeName, guardOf, WEAPONS } from '../shared/weapons';
 import { finish, speak, typing } from './speech';
 
 const NAME: Record<Move, string> = { move: 'MOVE', step: 'WALK OUT', attack: 'ATTACK', roll: 'DODGE', block: 'BLOCK', parry: 'PARRY', skill: 'SKILL', relic: 'RELIC', grab: 'GRAB AND THROW', backstab: 'BACKSTAB', heavy: 'FULL SHOT', slip: 'LAST SECOND', element: 'ELEMENT', shadow: 'SHADOW STEP', mark: 'MARK', heal: 'MEND' };
@@ -75,7 +75,9 @@ export class LessonView {
     this.key = key;
     this.el.hidden = !show;
     if (!show) return;
-    const h = hold!, k = KEY[h.move ?? 'attack'][this.touch ? 1 : 0].replace('ROLL', this.touch && w ? dodgeName(w.cls) : 'ROLL');
+    // (A Ranger's guard button is PARRY: it has no held block.)
+    const parryBtn = hold!.move === 'parry' && this.touch && guardOf(WEAPONS[this.g.hero.weapon]) === 'parry';
+    const h = hold!, k = parryBtn ? 'PARRY' : KEY[h.move ?? 'attack'][this.touch ? 1 : 0].replace('ROLL', this.touch && w ? dodgeName(w.cls) : 'ROLL');
     this.el.className = h.kind === 'talk' ? 'card talk' : h.kind;
     const hint = `<p class="go-hint">${this.touch ? 'TAP TO GO ON' : 'CLICK OR PRESS ENTER TO GO ON'}</p>`;
     if (h.kind === 'relic') {

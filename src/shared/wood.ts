@@ -68,9 +68,13 @@ export function woodMap(): GameMap {
     name: 'GREYHOLLOW', w: WOOD.w, h: WOOD.h, wallFace: 3, rounds: trees(), blocks, soil: WOOD_PATH, marks: VIGNETTE_MARKS, vignettes: VIGNETTES,
     braziers: [{ x: 5.2, y: 30.6, r: 0.5 }, { x: 16.2, y: 26.6, r: 0.5 }, { x: 32.5, y: 17.5, r: 0.5 }, { x: 52.5, y: 8.5, r: 0.4 }],
     torches: [], hero: { x: 8, y: 34 }, exit: null, theme: { ...THEMES.forest, ambient: [0.86, 0.84, 0.74], moon: 0, day: true },
-    npcs: [{ x: 0.6, y: 35.2, name: 'HEW', talk: 'hew', look: 'burner' }, ...FIELD_DEAD.map(([x, y], i) => ({ x, y, name: '', talk: 'dead', look: i % 3 ? 'soldier' : 'soldier2', pose: 'corpse' as const }))],
+    npcs: [{ x: HEW_START[0], y: HEW_START[1], name: 'HEW', talk: 'hew', look: 'burner' }, ...FIELD_DEAD.map(([x, y], i) => ({ x, y, name: '', talk: 'dead', look: i % 3 ? 'soldier' : 'soldier2', pose: 'corpse' as const }))],
   };
 }
+
+/** Where Hew waits at the waking: just inside the field's west edge, clear of the trees (he used to
+ *  start in the edge's trunks and walk out through them). */
+export const HEW_START: [number, number] = [1.6, 35.2];
 
 /** The battlefield the day after: the column's dead in heaps where the looters are at them, and more
  *  lying where they fell; dead goblins among them; the wagons still burning. */
@@ -88,12 +92,14 @@ export const FEEDING: [number, number][] = [[7.8, 29.7], [13.0, 32.0], [15.9, 35
 export type Count = 'kills' | 'dodge' | 'block' | 'parry' | 'slip' | 'backstab' | 'heavy' | 'grab' | 'none';
 /** The move a lesson's card shows (its control comes from the device). */
 export type Teach = 'attack' | 'roll' | 'step' | 'block' | 'parry' | 'slip' | 'backstab' | 'heavy' | 'grab' | 'skill' | 'relic' | 'element' | 'shadow' | 'mark' | 'heal';
-export interface Lesson { area: number; name: string; teach: string; card?: Teach; moves: ('attack' | 'roll' | 'block' | 'relic' | 'potion' | 'grab' | 'element')[]; count: Count; need: number; hew: [number, number]; foes: (Foe & { variant?: 'looter' | 'lunger' | 'heavy' | 'stoker' })[]; more?: Lesson['foes'] }
+export interface Lesson { area: number; name: string; teach: string; card?: Teach;
+  /** Once the count's done, a guard to learn before the goblins (the Ranger's PARRY, sim/woodsteps.ts). */
+  then?: 'parry'; moves: ('attack' | 'roll' | 'block' | 'relic' | 'potion' | 'grab' | 'element')[]; count: Count; need: number; hew: [number, number]; foes: (Foe & { variant?: 'looter' | 'lunger' | 'heavy' | 'stoker' })[]; more?: Lesson['foes'] }
 export const LESSONS: Lesson[] = [
   { area: 0, name: 'THE FIELD', teach: 'ATTACK', moves: ['attack'], count: 'kills', need: 0, hew: [5, 33],
     foes: [{ kind: 'scrapper', variant: 'looter', x: 8, y: 29 }, { kind: 'scrapper', variant: 'looter', x: 13, y: 31 }, { kind: 'scrapper', variant: 'looter', x: 16, y: 35 }],
     more: [{ kind: 'scrapper', variant: 'looter', x: 19, y: 27, awake: true }, { kind: 'scrapper', variant: 'looter', x: 18, y: 37, awake: true }] },
-  { area: 1, name: 'THE PATH', teach: 'DODGE', moves: ['attack', 'roll'], count: 'dodge', need: 3, hew: [25, 37],
+  { area: 1, name: 'THE PATH', teach: 'DODGE', moves: ['attack', 'roll'], count: 'dodge', need: 2, hew: [25, 37],
     foes: [{ kind: 'scrapper', variant: 'lunger', x: 31, y: 31, awake: true }, { kind: 'scrapper', variant: 'lunger', x: 36, y: 35, awake: true }, { kind: 'scrapper', bow: true, x: 39, y: 29, awake: true }] },
   { area: 2, name: "HEW'S CLEARING", teach: 'BLOCK', moves: ['attack', 'roll', 'block'], count: 'block', need: 5, hew: [25, 23],
     foes: [{ kind: 'scrapper', x: 29, y: 15, awake: true }, { kind: 'scrapper', x: 33, y: 14, awake: true }, { kind: 'scrapper', x: 35, y: 18, awake: true }] },
@@ -128,7 +134,8 @@ const BY_CLASS: Record<HeroClass, Lesson[]> = {
   ],
   RANGER: [
     { ...L[0], foes: [{ kind: 'scrapper', variant: 'looter', x: 12, y: 29 }, { kind: 'scrapper', variant: 'looter', x: 17, y: 32 }, { kind: 'scrapper', variant: 'looter', x: 18, y: 36 }] },
-    L[1],
+    // A Ranger can't hold a block but can parry: after the two dodges the path teaches it (Kyle, 2026-11-05).
+    { ...L[1], then: 'parry' },
     { ...L[2], teach: 'FULL DRAW', card: 'heavy', moves: light, count: 'heavy', need: 3, foes: [scr(30, 12), scr(35, 12), scr(38, 15)] },
     slip(),
     L[4],
@@ -156,6 +163,9 @@ export const ELEMENT_FOES: (Foe & { variant: 'soaked' | 'aproned' | 'kilnhot' })
 ];
 /** What each of them is weak to. */
 export const WEAK_TO = { soaked: 'storm', aproned: 'fire', kilnhot: 'frost' } as const;
+
+/** The Ranger's parry on the path: a plain goblin that swings (a lunger's stab can't be parried). */
+export const PARRY_FOE: Foe = { kind: 'scrapper', x: 36, y: 34, awake: true };
 
 /** The Stoker, and the two that come out of the trees at half its health. */
 export const STOKER: Foe & { variant: 'stoker' } = { kind: 'butcher', variant: 'stoker', x: 59, y: 4.5, name: 'THE STOKER', awake: false };
@@ -212,6 +222,8 @@ export const LINES = {
     grab: "Two more out of the trees, and fresh ones. Now, you're the size for it, I'd say, and there's crates come off those carts, so pick one up and throw it at them. Or get round the back of one while it's got its head down and pick *it* up instead. They hate that, I've noticed.",
     element: "Now mind which is which. That one's wet through from my water butt, that one's in my old apron, which goes up like tinder, and the one off the kiln's that hot you'd hardly singe it.",
     slip: "Now, this big one breaks a guard like kindling, and you've not got much guard to break, so you wait for it, wait, and be gone *just* as it comes down, and then it's yours while it gets over the surprise.",
+    /** A Ranger's PARRY, after the path's two dodges (not yet through the lore keeper or the line editor). */
+    parry: "Now, this one only swings, it's not one of your crouching ones. You've that short blade on you as well as the bow, so knock its swing aside with that, *just* as it comes. Go too early and it'll only wait you out, they're patient like that, I've watched one sit under my woodpile a whole morning.",
   },
   /** When you get it right (a short pause in the fight). */
   praise: ["That's it, that's the way.", "Oh, that's good, do it like that.", "Done this before, ~haven't you~?", "Hah, you'll ^keep^, stray, I think."],
@@ -229,9 +241,13 @@ export const LINES = {
     heavy: 'Hold attack and let go on the white flash. That full shot, a PERFECT, hits much harder.',
     slip: "Dodge just as a blow lands to pass through it. That staggers the attacker (not arrows).",
     element: "ELEMENT switches between fire, frost and storm. A goblin takes more damage from what it's weak to (WEAK) and less from what it resists (RESIST).",
+    /** The parry for a kit that can't hold a block (the Ranger's). */
+    parryOnly: "You can't hold a block. Tap PARRY while the red flashes white. A parry staggers the goblin, and your next blow does extra damage.",
     /** The dodge lesson's line for a class that can't hold a block. */
     rollLight: "You can't block. Dodge out of any red before it lands.",
   },
   /** The freeze-frame prompts, the first times a lesson's blow comes. */
-  now: { step: 'NOW: WALK OUT', roll: 'NOW: DODGE OUT', block: 'NOW: HOLD BLOCK', parry: 'NOW: TAP BLOCK', slip: 'NOW: DODGE THROUGH', attack: 'HIT IT' },
+  now: { step: 'NOW: WALK OUT', roll: 'NOW: DODGE OUT', block: 'NOW: HOLD BLOCK', parry: 'NOW: TAP BLOCK', parryOnly: 'NOW: TAP PARRY', slip: 'NOW: DODGE THROUGH', attack: 'HIT IT' },
+  /** The goal once a lesson's count is done and goblins are still up (sim/woodsteps.ts). */
+  kill: { title: 'KILL THE GOBLINS', text: 'KILLED' },
 };

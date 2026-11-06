@@ -11,6 +11,7 @@ import { LINES, STOKER } from '../shared/wood';
 import type { ArenaRoom } from './room';
 import type { FightEvent } from './types';
 import { HERO_ID, hew, say, spawn } from './woodkit';
+import { walkHew } from './hewwalk';
 import type { WoodState } from './wood';
 
 export const CUT = { walk: 0.4, rumble: 2.6, rise: 3.4, run: 4.3, grab: 5.0, scream: 5.3, cutoff: 6.6, burst: 7.05, toss: 7.3, wall: 7.65, slid: 8.45, bellow: 8.7, end: 9.35 };
@@ -34,9 +35,8 @@ export function stepCut(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: num
   // He goes round the side of the hut to the cordwood, at an old man's pace.
   if (at(CUT.walk)) say(w, room, 'HEW', LINES.round, 2.2);
   if (n && t < CUT.rise) {
-    const dx = BACK.x - n.x, dy = BACK.y - n.y, d = Math.hypot(dx, dy);
-    n.walking = d > 0.05;
-    if (d > 0.05) (n.x += (dx / d) * Math.min(d, 1.6 * dt)), (n.y += (dy / d) * Math.min(d, 1.6 * dt));
+    // (Round the side of the hut, never through it or the trees: sim/hewwalk.ts.)
+    n.walking = walkHew(n, BACK.x, BACK.y, 1.6, dt) > 0.05;
   }
   if (at(CUT.rumble)) ev.push({ k: 'rumble', x: STOKER.x, y: STOKER.y });
   if (at(CUT.rise)) {

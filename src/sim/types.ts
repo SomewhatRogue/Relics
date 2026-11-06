@@ -691,6 +691,8 @@ export type FightEvent =
   | { k: 'windup' | 'impact'; x: number; y: number; kind: AttackKind }
   /** The prologue's cutscene: the ground shaking, the bite, a body landing, the Stoker's bellow. */
   | { k: 'rumble' | 'bite' | 'thud' | 'bellow' | 'fanfare'; x: number; y: number }
+  /** A wood objective done (sim/woodsteps.ts): the tracker's gold flash. */
+  | { k: 'passed'; x: number; y: number }
   /** A Ranger or Rogue holding block (it does nothing), or a Mage pressing it at all. */
   | { k: 'noblock' | 'noguard'; x: number; y: number; dodge?: string }
   /** The Ranger's snare laid; the hound barking or yelping off. */

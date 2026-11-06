@@ -2,7 +2,8 @@
  * An objective done (Kyle: "the bar should flash and turn gold and shiny, so you know it's complete and
  * you did it"): the tracker holds the objective it had, counted out ("3 / 3", "(1 left)" dropped), flashes
  * it, turns it gold with a shine sweeping across (hud.css .obj.done) and keeps it a moment before the next
- * one shows, with a small chime. Done is a wood lesson passed or a job's way on opening (wayfind.ts).
+ * one shows, with a small chime. Done is a wood lesson passed or its count done (sim/woodsteps.ts), or a
+ * job's way on opening (wayfind.ts).
  */
 import { sfxTown } from './sfxtown';
 
@@ -26,7 +27,7 @@ export class ObjFlash {
     return now < this.until;
   }
 
-  /** The wood's lesson number this frame (-1 out of it): a step on is a lesson passed. */
+  /** The wood's progress this frame (its stage plus objectives passed; -1 out of it): a step on is one done. */
   watchWood(stage: number, now: number): void {
     if (stage > this.stage && this.stage >= 0) this.done(now);
     this.stage = stage;
