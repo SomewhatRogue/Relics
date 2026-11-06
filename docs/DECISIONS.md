@@ -2,6 +2,75 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-05: the Night Watch, slices 1 and 2: a shift on the wall (Kyle; Claude Opus 5.5)
+
+Kyle: "A minigame only available at night. You run around the walls and have a ranged weapon ... see how
+many you can get in a time limit of 3 minutes, with high scores. Head shots are double damage, but some
+goblins have head protection that has to come off first, or shields you have to try to break ... like the
+flash game The Last Stand." Plan: `docs/plans/town-activities.md` (approved 2026-11-05).
+
+- **Lore** (lore keeper, 2026-11-05; in the bible under "The Night Watch"): the barracks has a stair out
+  the back up onto the north wall; the watch pays heroes by the head for a night shift with a bow, capped
+  per night, wages that never touch the Want; anyone is handed a bow; Brisk hands out the watch's pay but
+  isn't one of the watch. Brisk's two lines and the lost line are the lore keeper's wording.
+- **Where.** Corporal Brisk in the barracks now stands at "the stair out the back" up to the wall
+  (`townhalls.ts`: his talk is `watch`, not `chat`). At night he offers TAKE A SHIFT ON THE WALL; in the
+  day he says his usual line and to come back after dark. Night is Wickhold's shared clock
+  (`townclock.ts`): daylight under 0.15 (`WATCH_DARK`), about 45% of each 40-minute day. A shift begun
+  before dawn runs to its end. There's no outdoor wall stair in the town map yet; Brisk is the stair.
+- **Leaving town.** `Game.enterWatch` sets the mode to `watch`, so the town's room drops you exactly as
+  the yard does (`main.ts` sends no presence when the mode isn't `town`), the hero holds still, and the
+  town isn't drawn under the overlay. DOWN THE STAIR puts the mode back; you're where you stood, by Brisk.
+  Later (slice 4 and the shared-town plan): your hero shows parked on the wall for everyone else.
+- **Local only.** The shift runs in this browser in fixed 1/60 s steps from its own seed (`sim/watch.ts`,
+  seeded per run from the clock); no watch file imports the relay, and a test runs a whole shift with
+  `fetch` and `WebSocket` stubbed and counts no calls.
+- **The view** (`watchview.ts`), two fields (`FIELDS`), chosen when the shift starts by the screen's
+  shape. `wide` (laptops, a phone on its side): the whole field, 232 by 174 pixels, scaled by the biggest
+  whole number that fits, the sky and fields carried on round it. `tall` (a phone held upright, taller than
+  1.2x its width): the whole-field picture left the goblins tiny in a thin band between empty sky and dirt,
+  so upright the field starts at x 90 over the brow of a steep hill (ground from about y 84 down to the
+  ditch at 170, the ditch to the wall's foot at 196), goblins walk it at 0.8x pace, archers stop 100 to 128
+  out. The view runs from the field's edge to just past the hero (130 px) and is scaled to that width: 9x
+  on a 390-wide phone at 3x, 3 CSS px a pixel, a goblin's head (7 px) 21 CSS px across. The sky is a strip
+  with the moon, and the slope runs through the middle of the screen. Same wall, bow, goblins and numbers;
+  scores on the two fields aren't quite alike, so the town board (slice 4) should keep them apart. Painted flat, then the game's own lighting pass (`light.ts`):
+  three wall torches, goblins' torches, the moon as a wide soft light. The hero is `drawHero` in their own
+  class look, facing the fields, with the watch bow drawn over them turned to the sight.
+- **The bow** (`BOW` in `shared/watchtune.ts`). Everyone's the same. Full draw 0.5 s; 0.22 s to nock.
+  A tap flies at 170 px/s with up to 2.4 degrees of wobble; a full draw at 330 px/s, dead straight.
+  Gravity 70 px/s2, so at the far edge a full draw drops about 15 px and a tap a great deal more. At 85%
+  draw or more a body hit does 2, else 1; a head hit doubles it; a leg hit does 1 and the goblin limps at
+  45% pace for good. Arrows stick where they land (in goblins, shields and the ground) and fall with them.
+- **Hit zones** (`SHAPES`): a head disc, a body box and a legs box from the goblin's feet, plus a shield
+  box in front or a torch box held up. `watchgobs.ts` paints every goblin from those numbers (the disc in
+  the same whole pixels the arrow test uses, the bob of a step in both), so what you see is what's judged.
+  The first zone along the arrow's path wins: a shield in front takes the arrow before the body behind it.
+- **Goblins**, bled in (`GOBS`; each kind's first comes the moment it's due, then by weight): plain
+  (2 hp, 13 px/s, 10 pts, from 0 s), helmeted (15 pts, from 14 s: the first head hit knocks the helmet off
+  spinning and the arrow glances, then the head counts), runners (1 hp, 30 px/s, low and small, 15 pts,
+  from 38 s), shield-bearers (9 px/s, 20 pts, from 58 s: 3 arrows splinter then break the shield; the head
+  over the rim and the legs under it can still be hit), torch-bearers (15 pts, from 80 s: hit the torch and
+  it drops and they burn, running 1.7x, dead in 1.6 s, +10 pts), archers (20 pts, from 100 s: they stop
+  55 to 110 px out, loose 3 arrows at the wall 3.2 s apart, then walk on; each one lands near you and shakes
+  the sight 5 px for 0.7 s, the shake added in the sim so the shot follows what you see). A goblin every
+  3 s at the start, every 1 s by the end, a third either way; none in the last 4 s.
+- **The night** (`NIGHT`): three passes of cloud over the moon, 12 to 20 s each, darkening the field's
+  light by up to 75% (stars and moon go too; eyes and torches still show); fog banks drift in at 30, 75 and
+  120 s, 50 to 90 px wide, hugging the ground up to 24 px, dimming goblin eyes inside them.
+- **At the wall.** Past x 177 (both fields) a goblin drops into the ditch out of sight: THE WATCH HAVE IT. Its points
+  are never yours and the streak breaks. No fail state but the clock: 180 s.
+- **Score** (`SCORE`): a kill is its points, x2 if the killing hit was the head, times the streak (+0.5 every
+  3 hits in a row, up to x3). Every arrow that finds a goblin, helmet, shield or torch adds to the streak; a
+  miss breaks it. At the end an accuracy bonus: 5 points a hit, scaled by the share that hit.
+- **The card** (`watchcard.ts`, the usual panel): kills, headshots, best streak, accuracy, the bonus, the
+  score, and your best (NEW BEST when it is). The best and tonight's pay live on the hero
+  (`Profile.watch`, `shared/watchpay.ts`). Pay: a gold piece a 50 points, at most 30 gold a night (a night
+  counts from noon to noon on the town clock). No server board yet (slice 4).
+- **Not in this slice:** the three posts and the run between them (slice 3), the boards (slice 4),
+  sappers with ladders and rams. Brisk's lines and the lost line are through the lore keeper; the rest of
+  `watchwords.ts` isn't yet, and none of it through the line editor.
+
 ## 2026-11-05: the first recorded sound effects: combat, spells, goblins and beasts (Kyle; Claude Opus 5.5)
 
 Kyle approved batch 1 of `docs/sound/elevenlabs-sounds.md`: sections 1 and 2 (45 + 33 sounds). Ambience,

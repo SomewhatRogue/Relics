@@ -14,6 +14,7 @@ import { CLASS_KITS, type HeroClass, type WeaponId } from './weapons.js';
 export { PERKS, perkFx, perkText, type Fx, type FxKey, type Knack, type PerkId } from './perks.js';
 export { CHAINS, CLASS_CHAINS, chainOf, classPerks, fitPerks, nextStep, perkOffer, resetPerks, takePerk, type ChainId } from './chains.js';
 import type { PerkId } from './perks.js';
+import type { WatchRecord } from './watchpay.js';
 
 /** Chapter 1's level cap (it lifts when the council moves the story on). */
 export const LEVEL_CAP = 10;
@@ -108,6 +109,8 @@ export interface Profile {
   paid?: string[];
   /** Made, or brought over, since each class's own button (shared/signs.ts, shared/oldskills.ts). */
   signs?: boolean;
+  /** The Night Watch: best score on the wall, and the pay taken tonight (shared/watchpay.ts). */
+  watch?: WatchRecord;
 }
 
 export const newProfile = (cls: HeroClass = 'WARRIOR', name = 'HERO'): Profile =>

@@ -318,3 +318,9 @@ most Want among the heroes is the one the bells don't spare).
 - Every vendor's stock is the same for everyone at a time; why the goods change is never said.
 
 - Butchers eat their own dead as well as ours, and come up GORGED for a while (Kyle and the lore keeper, 2026-11-05). Eating only heals and gorges one; it never grows a butcher, which only slivers do. Burn the body and the ash gives it nothing, which is Hew's reason for burning the column's dead.
+
+## The Night Watch (recorded 2026-11-05; Kyle's call, lore keeper)
+- The barracks has a stair out the back up onto the north wall.
+- The watch pays heroes by the head for a night shift with a bow, capped per night. It's wages, never touching the Want.
+- Anyone is handed a bow for the shift.
+- Brisk hands out the watch's pay but isn't one of the watch.

@@ -393,7 +393,7 @@ function tick(t: number): void {
   last = t;
   // With a panel up, the hero stands still (and no press is spent).
   const live = input.read();
-  if (panel.open || title.open || chat.typing || pack.open) still ??= { ...live, mx: 0, my: 0, attack: false, block: false };
+  if (panel.open || title.open || chat.typing || pack.open || game.mode === 'watch') still ??= { ...live, mx: 0, my: 0, attack: false, block: false };
   else still = null;
   // With the pack open the hero stands still too, but what you change in it still goes to the room.
   if (still && pack.open && !panel.open) still = { ...still, gearOp: live.gearOp, gearArg: live.gearArg, gearSeq: live.gearSeq };
@@ -476,7 +476,8 @@ function tick(t: number): void {
   lobby.frame(inTown, t / 1000, !title.open);
   town?.step(inTown && h ? { n: game.profile.name, w: h.weapon, l: h.look ?? 0, at: game.room.map.name, p: [h.x, h.y, h.fx, h.fy, h.moving ? 1 : 0] } : null, t / 1000, dt);
   // (Off screen, leading a job in the background: nothing to draw.)
-  if (document.hidden) return;
+  // (On the wall for the Night Watch: it paints itself over all this, watchmode.ts.)
+  if (document.hidden || game.mode === 'watch') return;
   views.render(game.room, ME, fx, t / 1000, dt, inTown ? (townfolk?.here(game.room.map.name) ?? []) : [], game.mode === 'run');
   under?.frame(views, game.room, game.room.heroes.find((x) => x.id === ME), t / 1000);
   // Out of bounds: the dark closing in, what comes for you, and anyone taken (dreadfx.ts).
