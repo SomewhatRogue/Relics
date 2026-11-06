@@ -10,6 +10,7 @@ import type { Rng } from '../shared/rng';
 import { hexFriendly, isBackline, stepBackline } from './backline';
 import { shove, slide } from './bodies';
 import { attackCovers, hitHero } from './combat';
+import { lateCount } from './latelist';
 import { sneakSight } from './knacks';
 import { damage, frozen, isDead, kill, snared } from './damage';
 import { shatter } from './elements';
@@ -128,14 +129,14 @@ function runAttack(e: Enemy, heroes: Hero[], now: number, dt: number, ev: FightE
     const round = isRound(a.kind);
     ev.push({ k: 'impact', x: round ? a.cx : e.x, y: round ? a.cy : e.y, kind: a.kind });
     // Blows land on your own level; arrows reach up and down.
-    const before = heroes.map((h) => h.hp);
+    const before = heroes.map((h) => h.hp), waiting = lateCount();
     // (A skimmer's pour lands on the water, on nobody: sim/drift.ts.)
     for (const h of heroes) if (a.kind !== 'pour' && (a.kind === 'shot' || (h.z ?? 0) === (e.z ?? 0))) hitHero(e, a, h, now, ev, heroes);
     if (e.attack === null) return true;
     // Their own get in the way: a missed arrow takes the first goblin in its line; a butcher's blow
-    // lands on any small goblin under it.
+    // lands on any small goblin under it. (An arrow waiting on a friend's word went to them: sim/latelist.ts.)
     if (a.kind === 'hex') hexFriendly(e, a, others, now, ev);
-    else friendly(e, a, others, heroes.some((h, i) => h.hp < before[i]), now, ev);
+    else friendly(e, a, others, heroes.some((h, i) => h.hp < before[i]) || lateCount() > waiting, now, ev);
   }
   return a.t >= a.windup + a.active + a.recover;
 }

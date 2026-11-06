@@ -104,6 +104,12 @@ export const FRIENDLY = { shot: 1.5, blow: 0.8 };
  *  gear and levels bring it down). */
 export const DODGE = { stun: 0.6, cost: 1.5 };
 /**
+ * Lag on a friend's screen (sim/lagcomp.ts): a blow on a friend's hero waits for their word on it (a
+ * dodge or a block by what their screen showed) until `cap` seconds after it lands at most, however far
+ * behind their screen is. `most`: a lag reading above this is a hiccup, not a lag (not kept).
+ */
+export const LAGCOMP = { cap: 0.15, most: 1 };
+/**
  * A party (more than one player in a fight). `bleed`: seconds down before you get yourself up (once a job) or are out;
  * `pickUp`: seconds a teammate kneels by you (GRAB) to get you up (a hit on them stops it), from
  * within `reach` tiles, and you come up with `upHp` of your health. `friendly`: what your own side's

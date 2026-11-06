@@ -2,6 +2,12 @@
 
 ## Current slice
 
+**The guest feel** (Claude Opus 5.5, 2026-11-06; Kyle's goal: online lag as low as possible). Built; waiting on
+Kyle's play. *Done when*, on his phone and laptop, following a friend's job online: his own dodge, block and swing
+show the moment he presses, with their dust and whoosh, and never pull back; walking with a block held, creeping
+or wading never rubber-bands; a goblin's red fill and its body move as one; a dodge or block on time by his own
+screen saves him from a blow (within LAGCOMP.cap). Everything in DECISIONS 2026-11-06 ("the guest feel"). Open:
+the cap (0.15 s as planned; about 0.35 s makes every on-time press count at a real 150 ms each way), Kyle's call.
 **Pacing, the first slice** (Claude Opus 5.5, 2026-11-05; Kyle: "swarms over other things, so AoE abilities are
 over-necessary", "mini bosses also work", "not necessarily more enemies if lots of players, but more health on
 enemies, and they hit harder", "a bit too easy to kite"; `docs/plans/bosses.md` section 3). Built; waiting on Kyle's

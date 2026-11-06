@@ -6,7 +6,8 @@ import { shove } from './bodies';
 import { knack, statsOf } from './gearstats';
 import { counterWindow, guardArc, rearCos, slipWindow } from './knacks';
 import { HUNGRY_FX, wears } from './hungry';
-import { damage, frozen, isDummy, kill, sayWeak, small, snared, stunOf } from './damage';
+import { damage, frozen, isDead, isDummy, kill, sayWeak, small, snared, stunOf } from './damage';
+import { defer } from './latelist';
 import { poison } from './poison';
 import { shatter } from './elements';
 import { fling, hardHit, heavyHit } from './iceslide';
@@ -192,13 +193,23 @@ export function rollCrit(h: Hero): boolean {
   return x / 4294967296 < chance;
 }
 
+/** A blow judged late, by a friend's own screen (sim/lagcomp.ts). */
+export type Verdict = 'dodge' | 'out' | 'block' | 'land';
+/** A late blow's verdict, and the shove's way and the guard's as it landed (sim/latelist.ts). */
+export interface Late { verdict: Verdict; sx: number; sy: number; gx: number; gy: number }
+
 /** An enemy's attack lands on a hero: rolled through, blocked, or taken. `heroes`: the room's,
- *  for the Healer's guard rungs (sim/ladderhealer.ts). */
-export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: FightEvent[], heroes: Hero[] = []): void {
+ *  for the Healer's guard rungs (sim/ladderhealer.ts). `late`: judged now, after waiting on a friend's
+ *  word (sim/lagcomp.ts); a blow covering a friend with lag waits for it (sim/latelist.ts). */
+export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: FightEvent[], heroes: Hero[] = [], late?: Late): void {
   // Just come into the room: nothing lands yet.
   if (h.safeT) return;
   if (h.act === 'down') return;
-  if (!attackCovers(a, h)) {
+  if (!late && attackCovers(a, h) && defer(e, a, h, now)) return;
+  // Dodged by their own screen: through it (the goblin reels, as below), or out from under it.
+  if (late?.verdict === 'dodge') return void dodgedThrough(e, a, h, now, ev, true);
+  if (late?.verdict === 'out') return void (ev.push({ k: 'dodge', x: h.x, y: h.y }), count(h.id, 'dodges'));
+  if (!late && !attackCovers(a, h)) {
     // Rolled (or jumped) out of it during the wind-up: a dodge all the same. Left to the last moment,
     // so the blow lands where you were a breath ago, it staggers the attacker just as rolling through does.
     if (h.lastRollAt >= now - a.windup && attackCovers(a, { ...h, x: h.rollX, y: h.rollY })) {
@@ -219,14 +230,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   const g = statsOf(h), taken = (h.blessedUntil > now ? BLESSING.taken : 1) * g.taken * (wears(h, 'apron') ? HUNGRY_FX.apron : 1) * soft * chalkTaken(e, h, now);
   // A spellblade's lightning dash: untouchable while it runs (sim/rush.ts).
   if (h.act === 'bash' && h.rush?.el === 'storm') return void (ev.push({ k: 'dodge', x: h.x, y: h.y }), count(h.id, 'dodges'));
-  if (h.act === 'roll' && h.actT >= w.dodge.iFrom && h.actT <= slipWindow(h)) {
-    ev.push({ k: 'dodge', x: h.x, y: h.y }), count(h.id, 'dodges');
-    slipped(e, a, h, ev);
-    // A spellblade's dodge through a blow refills its magic, its shield (sim/manashield.ts).
-    slipRefills(h, now, ev);
-    if (has(h, 'tempo')) (h.tempoUntil = now + TRAIT.tempoTime), ev.push({ k: 'tempo', x: h.x, y: h.y });
-    return;
-  }
+  // (Judged late, the dodge was their screen's: a roll the leader's room began after the blow doesn't count.)
+  if (!late && h.act === 'roll' && h.actT >= w.dodge.iFrom && h.actT <= slipWindow(h)) return dodgedThrough(e, a, h, now, ev, false);
   // COVER: a Healer blocking beside you takes it on the guard for you (sim/ladderhealer.ts).
   // SHARED WARD: a Cleric guarding beside you covers you (sim/ladderhealer.ts).
   if (cover(a, h, heroes, ev)) return;
@@ -242,17 +247,18 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     return downIfDead(h, ev);
   }
   const tx = e.x - h.x, ty = e.y - h.y;
-  // Pushed away from where the blow came from (the slam's centre for a slam).
+  // Pushed away from where the blow came from (the slam's centre for a slam). (Judged late: as it landed.)
   const round = isRound(a.kind);
-  const sx = round ? h.x - a.cx : -tx, sy = round ? h.y - a.cy : -ty, sl = Math.hypot(sx, sy) || 1;
+  const sx = late ? late.sx : round ? h.x - a.cx : -tx, sy = late ? late.sy : round ? h.y - a.cy : -ty, sl = Math.hypot(sx, sy) || 1;
   // The kit's guard covers an arc in front: a shield covers nearly everything ahead. (A pack rush is
   // judged from the middle of its fan, so one guard facing it covers every blow: sim/rushguard.ts.)
-  const [gx, gy] = guardFrom(e, a, h), gl = Math.hypot(gx, gy) || 1;
+  const [gx, gy] = late ? [late.gx, late.gy] : guardFrom(e, a, h), gl = Math.hypot(gx, gy) || 1;
   // A Cleric's guard is a holy ward round them (sim/holyguard.ts): it meets a blow from any side.
   const facing = roundGuard(h) || (h.fx * gx + h.fy * gy) / gl > Math.cos(((guardArc(h) / 2) * Math.PI) / 180);
   const canGuard = !a.unblockable && facing && (h.act === 'idle' || h.act === 'attack' || h.act === 'charge');
   // Held block, no timing to it (Kyle, 2026-11-05: parry is gone, and no perfect block either).
-  if (canGuard && h.blocking) {
+  // (Judged late: held by their own screen as it landed, sim/lagcomp.ts.)
+  if (canGuard && (late ? late.verdict === 'block' : h.blocking)) {
     // A pack rush: the one block takes every blow in it (its first blow's stamina paid for all).
     if (rushBlocked(h, a, now)) return void ev.push({ k: 'block', x: h.x, y: h.y, more: true });
     noteRush(h, a, now);
@@ -306,6 +312,16 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   // A net holds, a thief takes, a log knocks down (sim/ownfoes.ts).
   if (!(feet && a.kind === 'charge')) landed(e, a, h, now, ev, OWN_KIT.foes);
   downIfDead(h, ev);
+}
+
+/** Through the blow in the dodge's i-frames: the goblin reels (sim/combat.ts slipped). */
+function dodgedThrough(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: FightEvent[], late: boolean): void {
+  ev.push({ k: 'dodge', x: h.x, y: h.y }), count(h.id, 'dodges');
+  // (Judged late, the goblin may have fallen or begun another blow since: only one still on the blow that landed reels.)
+  if (!late || (!isDead(e) && (!e.attack || e.attack.done))) slipped(e, a, h, ev);
+  // A spellblade's dodge through a blow refills its magic, its shield (sim/manashield.ts).
+  slipRefills(h, now, ev);
+  if (has(h, 'tempo')) (h.tempoUntil = now + TRAIT.tempoTime), ev.push({ k: 'tempo', x: h.x, y: h.y });
 }
 
 /** Down at no health (the Ransom Coat may buy you off once a room). */

@@ -10,6 +10,7 @@ import { BAG } from '../shared/bags';
 import { applyGear, turnBelt } from './pack';
 import { knack, statsOf } from './gearstats';
 import { travel } from '../shared/sweep';
+import { guardUp, walkSpeed } from './walkspeed';
 import { decoyTime, dodgeBreath, dodgeReach, releaseWindow } from './knacks';
 import { fedMult, jealousBlocks, jealousCooldown, needlesBreath, wears } from './hungry';
 import { hitEnemy } from './combat';
@@ -64,7 +65,7 @@ export function spend(h: Hero, n: number, now: number): void {
 }
 
 /** Point the hero: aim if given, else toward the nearest enemy in reach (snap), else where they move. */
-function face(h: Hero, inp: Intent, enemies: Enemy[], snap: boolean, reach = 3.2): void {
+export function face(h: Hero, inp: Intent, enemies: Enemy[], snap: boolean, reach = 3.2): void {
   let x = inp.ax, y = inp.ay;
   if (!x && !y && snap) {
     let best: Enemy | null = null, bd = reach;
@@ -87,7 +88,8 @@ function walk(h: Hero, inp: Intent, k: number, dt: number, now: number, ev: Figh
   // Creeping: harder to see (STEALTH). (Standing in plain sight isn't.)
   h.sneaking = m >= 0.05 && m < STEALTH.slow;
   if (m < 0.05) return;
-  const l = Math.hypot(inp.mx, inp.my), sp = HERO.speed * WEAPONS[h.weapon].speed * statsOf(h).speed * k * (m >= STEALTH.slow ? 1 : STEALTH.creep) * wadeAt(h.x, h.y) * brandySpeed(h, now) * quickMult(h, now);
+  // (One rule for the pace, here and on a friend's own screen: sim/walkspeed.ts.)
+  const l = Math.hypot(inp.mx, inp.my), sp = walkSpeed(h, inp, now, k);
   // (Swept, so a hero stops at a gap too narrow for a body rather than being wedged into it.)
   travel(h, (inp.mx / l) * sp * dt, (inp.my / l) * sp * dt, HERO.radius);
   h.moving = true;
@@ -167,7 +169,8 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   }
   // Hit, stunned or downed while carrying: you drop it.
   if ((h.carrying || h.lifting) && h.act !== 'carry' && h.act !== 'slam') acts.drop(h);
-  if (inp.rollSeq !== h.seen.roll) (h.seen.roll = inp.rollSeq), (h.rollQueuedAt = now);
+  // (A friend's press carries the leader's time they were looking at, `vt`: sim/lagcomp.ts judges by it.)
+  if (inp.rollSeq !== h.seen.roll) (h.seen.roll = inp.rollSeq), (h.rollQueuedAt = now), (h.rollPressVt = inp.vt);
   if (inp.blockSeq !== h.seen.block) {
     h.seen.block = inp.blockSeq;
     // A Ranger, Rogue and Mage have no guard (they dodge): a press says so, at most every 2 s.
@@ -217,7 +220,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   const w = WEAPONS[h.weapon];
   // A Warrior's or Healer's dodge press does nothing (they have no dodge).
   const dodge = w.dodge;
-  const wantsRoll = !!dodgeOf(w) && now - h.rollQueuedAt < INPUT_BUFFER && now - h.lastRollAt >= dodge.cooldown * (1 - statsOf(h).dodge) && h.stamina >= 1 && !h.winded;
+  const wantsRoll = now - h.rollQueuedAt < INPUT_BUFFER && canRoll(h, now);
   if (h.act === 'roll') {
     // (BLINK THROUGH sets a blink's own reach, to just past a goblin's back: sim/laddermage.ts.)
     const k = (h.rollReach ?? dodgeReach(h)) / dodge.time;
@@ -356,7 +359,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     if (now - h.attackQueuedAt >= CHARGE.start && !emptyHold(h, now, ev)) return refuseSpell(h, now, ev) ? undefined : startCharge(h, now);
   }
   // Only a Warrior's or Healer's kit holds a block.
-  h.blocking = inp.block && h.stamina > 0 && !h.winded && guardOf(w) === 'full';
+  h.blocking = guardUp(h, inp);
   // When it went up (TAUNT GUARD's ring: sim/taunt.ts).
   if (h.blocking && !h.wasBlocking) h.blockUpAt = now;
   h.wasBlocking = h.blocking;
@@ -411,16 +414,29 @@ function lungeOnto(h: Hero, enemies: Enemy[], reach: number): void {
   if (best) (h.fx = (best.x - h.x) / bd), (h.fy = (best.y - h.y) / bd);
 }
 
-function startRoll(h: Hero, inp: Intent, now: number, ev: FightEvent[]): void {
-  const dodge = WEAPONS[h.weapon].dodge, kind = dodge.kind;
+/** A dodge is ready: the kit has one, it's off its cooldown, and there's breath for it. */
+export function canRoll(h: Hero, now: number): boolean {
+  const w = WEAPONS[h.weapon];
+  return !!dodgeOf(w) && now - h.lastRollAt >= w.dodge.cooldown * (1 - statsOf(h).dodge) && h.stamina >= 1 && !h.winded;
+}
+
+/** Which way a dodge goes: along the stick, else where you face; a backstep always away from where you face. */
+export function rollDir(h: Hero, inp: Intent): [number, number] {
+  const kind = WEAPONS[h.weapon].dodge.kind;
   let x = inp.mx, y = inp.my;
   // A backstep always hops away from where you face, and you keep facing the threat.
   if (kind === 'backstep') (x = -h.fx), (y = -h.fy);
   if (Math.hypot(x, y) < 0.1) (x = h.fx), (y = h.fy);
-  const l = Math.hypot(x, y);
-  h.rollDx = x / l;
-  h.rollDy = y / l;
+  const l = Math.hypot(x, y) || 1;
+  return [x / l, y / l];
+}
+
+function startRoll(h: Hero, inp: Intent, now: number, ev: FightEvent[]): void {
+  const dodge = WEAPONS[h.weapon].dodge, kind = dodge.kind;
+  [h.rollDx, h.rollDy] = rollDir(h, inp);
   if (kind !== 'backstep') (h.fx = h.rollDx), (h.fy = h.rollDy);
+  // The press's own moment on a friend's screen (sim/lagcomp.ts).
+  h.rollVt = h.rollPressVt;
   h.act = 'roll';
   h.actT = 0;
   h.kvx = h.kvy = 0;

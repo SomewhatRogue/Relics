@@ -598,12 +598,15 @@ export class Game {
     }
     this.room.setIntent(ME, intent);
     this.lastIntent = intent;
+    // (The leader's own hero has no lag: its blows are judged at once. A friend's is theirs: sim/lagcomp.ts.)
+    if (h.lag) h.lag = 0;
     // Leading a party: each friend's latest input, in whichever room they're in (their old presses matched first, so none fires).
     for (const [id, f] of this.coop?.friends ?? []) {
       const r = this.roomOf(id) ?? this.room, fh = r.heroes.find((x) => x.id === id);
       if (!fh) continue;
       if (!this.synced.has(id) && f.intent !== null) (this.synced.add(id), syncSeen(fh, f.intent));
       r.setIntent(id, { ...f.intent, classSeq: fh.seen.cls, weaponSeq: fh.seen.weapon, augmentSeq: fh.seen.augment });
+      fh.lag = f.lag ?? 0;
     }
     // The other rooms run on beside yours (the street while you're in, any house a friend's in; their kills still pay); then yours.
     const here = this.room, stepped = new Map<ArenaRoom, FightEvent[]>();

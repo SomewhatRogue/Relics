@@ -56,6 +56,9 @@ export interface Intent {
   /** The class's own button (shared/signs.ts): a Rogue's SHADOW STEP, a Ranger's MARK, a Healer's MEND (V).
    *  Optional so an older guest's intent still reads. */
   signSeq?: number;
+  /** A friend's Intent: the leader's room time their screen was showing when they sent it (sim/lagcomp.ts
+   *  judges a blow on them by it). The leader's own, and an older guest's, have none. */
+  vt?: number;
 }
 
 export const NO_INTENT: Intent = { mx: 0, my: 0, ax: 0, ay: 0, attack: false, block: false, attackSeq: 0, blockSeq: 0, rollSeq: 0, weaponSeq: 0, relicSeq: 0, relicSwapSeq: 0, relicPickSeq: 0, relicPick: 0, augmentSeq: 0, classSeq: 0, grabSeq: 0, takeSeq: 0, take: 0, gearSeq: 0, gearOp: 0, gearArg: 0, potionSeq: 0, beltSeq: 0, openSeq: 0, open: 0, reload: false, reloadSeq: 0 };
@@ -346,6 +349,16 @@ export interface Hero extends Body {
   hitstop: number;
   /** Extra dodge leniency for this player's ping (seconds). */
   lenience: number;
+  /** A friend's lag (seconds): how far behind the leader's room their screen is when their input gets
+   *  here (the trip there and back and the playout). The leader's own hero has none. A blow on a hero
+   *  with lag waits for their word on it (sim/lagcomp.ts). */
+  lag?: number;
+  /** The `vt` of the latest dodge press, and of the one the dodge under way began from. */
+  rollPressVt?: number;
+  rollVt?: number;
+  /** The `vt` the guard went up at, and came down at (undefined: held, or never). */
+  guardVt?: number;
+  guardOffVt?: number;
   seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number; augment: number; cls: number; take: number; grab: number; gear: number; potion: number; belt?: number; open: number; level?: number; reload?: number; element?: number; sign?: number };
 }
 

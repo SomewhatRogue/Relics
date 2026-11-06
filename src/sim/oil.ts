@@ -5,7 +5,7 @@
  * burning whoever's in it. Any fire of yours lights a slick too: a fire burst, a flask of Lamp Oil, a
  * burning goblin walking into it.
  */
-import { HERO, OIL, STAITHE, TORCH, type EnemyAttackSpec } from '../shared/tuning';
+import { HERO, OIL, STAITHE, TICK, TORCH, type EnemyAttackSpec } from '../shared/tuning';
 import { currentMap } from '../shared/arena';
 import { slickFor } from '../shared/sky';
 import { isDead } from './damage';
@@ -127,13 +127,15 @@ export function markSlick(slicks: Slick[], heroes: Hero[]): void {
  * On a slick the stick takes hold slowly: what the hero gets is their last way of going drawn toward
  * the stick at OIL.grip of the usual (so they turn wide, and slide on when they let go).
  */
-export function slipIntent(h: Hero, inp: Intent, dt: number): Intent {
+export function slipIntent(h: Pick<Hero, 'slick' | 'slipX' | 'slipY'>, inp: Intent, dt: number): Intent {
   if (!h.slick) return (h.slipX = inp.mx), (h.slipY = inp.my), inp;
-  const k = Math.min(1, OIL.grip * 8 * dt), was = Math.hypot(h.slipX ?? 0, h.slipY ?? 0);
+  // (Per tick as it always was; a friend's screen steps it each frame, so it's put as a rate: at dt = TICK
+  // these are the tick's own numbers exactly, client/ownwalk.ts.)
+  const n = dt / TICK, grip = Math.min(1, OIL.grip * 8 * TICK), k = n === 1 ? grip : 1 - Math.pow(1 - grip, n), was = Math.hypot(h.slipX ?? 0, h.slipY ?? 0);
   h.slipX = (h.slipX ?? 0) + (inp.mx - (h.slipX ?? 0)) * k;
   h.slipY = (h.slipY ?? 0) + (inp.my - (h.slipY ?? 0)) * k;
   // Let go on oil and you slide on a while.
-  if (!inp.mx && !inp.my && was > 0.2) (h.slipX *= 0.97), (h.slipY *= 0.97);
+  if (!inp.mx && !inp.my && was > 0.2) (h.slipX *= Math.pow(0.97, n)), (h.slipY *= Math.pow(0.97, n));
   return { ...inp, mx: h.slipX, my: h.slipY };
 }
 

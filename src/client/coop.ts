@@ -10,22 +10,24 @@
  *   patch says who's indoors, over which door. A friend silent a minute is gone (a phone that lost signal has
  *   that long to come back to the same hero).
  * - CoopGuest (a friend): keeps a copy of the leader's room from the patches and draws it; sends
- *   its Intent when a button changes (at once, marked urgent so the relay doesn't hold it for its next
- *   batch), when the stick or aim moves (at most 10 times a second: the leader's room runs on the
- *   latest, and presses are counted, so none is lost), and every 2 s regardless. Its own hero is `me` in its copy, so the rest of the
- *   game can't tell. The leader quiet 20 s, and the job ends for it as a loss.
+ *   its Intent when a button changes (from the press itself, input.ts, marked urgent so the relay
+ *   doesn't hold it for its next batch), when the stick sets off or stops (at once), when it or the aim
+ *   moves (at most 10 times a second: the leader's room runs on the latest, and presses are counted, so
+ *   none is lost), and every 2 s regardless. Each carries `vt`, the leader's time its screen is showing
+ *   (sim/lagcomp.ts judges a blow on it by that). Its own hero is `me` in its copy, so the rest of the
+ *   game can't tell, and it's drawn ahead of the leader's word (ownhero.ts: walking, a dodge, a blow, a
+ *   guard). The leader quiet 20 s, and the job ends for it as a loss.
+ * - The leader keeps each friend's lag (its room's time less their `vt` as their input comes), and a
+ *   press of theirs a tick has used sends their patch at once.
  * - Handing on: every 2 s the leader also sends the whole job (the run and the room, saveRoom).
  *   The leader quiet 9 s, the friend first in line (by id) takes the room over from that and leads
  *   (Game.takeOver); the others hear who leads now and follow them. The old leader, back, follows
  *   them; a leader whose page only reloaded leads again from the job as it kept it (Game.resume).
  */
-import { brandySpeed } from '../sim/brandy';
 import type { Job } from '../shared/jobs';
 import type { Profile } from '../shared/progress';
-import { HERO, TICK, WEAPONS } from '../shared/tuning';
+import { LAGCOMP, TICK } from '../shared/tuning';
 import { Rng } from '../shared/rng';
-import { collide, useMap } from '../shared/arena';
-import { statsOf } from '../sim/gearstats';
 import type { Hero } from '../sim/types';
 import { ArenaRoom } from '../sim/room';
 import type { Run } from '../sim/run';
@@ -43,6 +45,7 @@ import type { ExpedState } from '../sim/exped';
 import { asGuest } from './asguest';
 import { rejoinAfter } from './backoff';
 import { Playout } from './playout';
+import { OwnHero } from './ownhero';
 
 /** Everyone gets the whole job this often; the friend first in line every SAVE_EVERY. */
 const SAVE_ALL = 8;
@@ -52,23 +55,23 @@ const AWAY = 5, BYE_WAIT = 2.5, SEND_EVERY = 0.05, FULL_EVERY = 4, GRACE = 60, L
 const NO_PLAYOUT = typeof location !== 'undefined' && new URLSearchParams(location.search).get('playout') === '0';
 /** A friend's stick and aim go to the leader at most this often (seconds); a button at once. */
 const STICK_EVERY = 0.1;
-/** An Intent's buttons (everything but the stick and aim), to tell a press from a nudge of the stick. */
-const buttons = (i: Intent) => JSON.stringify({ ...i, mx: 0, my: 0, ax: 0, ay: 0 });
+/** An Intent's buttons (everything but the stick, the aim and its moment), to tell a press from a nudge of the stick. */
+const buttons = (i: Intent) => JSON.stringify({ ...i, mx: 0, my: 0, ax: 0, ay: 0, vt: 0 });
 const r2 = (v: number) => Math.round(v * 100) / 100;
 /** The run as a patch carries it: without the heroes' board, which rides whole in the end and the saves (sim/score.ts). */
 const lean = (r: Run | null): Run | null => (r?.board ? { ...r, board: undefined } : r);
-/**
- * Your own hero, on a friend's screen, moves the moment you press. The leader's word on where you
- * are is a trip there and back old, so the walking you've done here since then is added on top of
- * it (the trip is timed: each input carries this browser's clock, and the leader hands back the
- * newest it has used). Your hero eases toward that (`ease` a second) and snaps if it's more than
- * `snap` tiles off (a knockback, a pull). Rolls, swings and hits are the leader's alone.
- */
-const PREDICT = { ease: 12, snap: 1.5, trip: 0.15 };
 /** A hero's fields that are their kit (client/keepkit.ts). */
 const KIT = ['weapon', 'arms', 'bag', 'armor', 'rings', 'belt', 'glow', 'relics', 'augments', 'found', 'relicItem'];
 /** A friend in the leader's room. */
-export interface Friend { name: string; profile: Profile | null; intent: Intent; heard: number; fresh: boolean; gone: boolean; /** Their clock on the newest input used (handed back, so they can time the trip). */ at?: number }
+export interface Friend {
+  name: string; profile: Profile | null; intent: Intent; heard: number; fresh: boolean; gone: boolean;
+  /** Their clock on the newest input used (handed back, so they can time the trip). */
+  at?: number;
+  /** How far behind this room their screen is when their input gets here (sim/lagcomp.ts): this room's time less their `vt`, smoothed. */
+  lag?: number;
+  /** A press of theirs came at this tick of their room: once a tick has used it, their patch goes at once. */
+  pressTick?: number;
+}
 /** What the leader's game tells the host to send, and is told by it. */
 export interface HostGame {
   /** The leader's own room. */
@@ -140,7 +143,14 @@ export class CoopHost {
       const first = !f.profile || f.gone;
       Object.assign(f, { profile: d.profile, fresh: true, gone: false });
       if (first) this.game.addFriend(m.from, f);
-    } else if (d.t === 'in' && d.i && typeof d.i === 'object') (f.intent = { ...NO_INTENT, ...d.i }), (f.at = typeof (d as { at?: unknown }).at === 'number' ? (d as { at: number }).at : f.at);
+    } else if (d.t === 'in' && d.i && typeof d.i === 'object') {
+      const i: Intent = { ...NO_INTENT, ...d.i }, r = this.game.roomOf(m.from) ?? this.game.room;
+      // Their lag: this room's time now less the time their screen was showing as they sent it.
+      const lag = typeof i.vt === 'number' ? r.time - i.vt : NaN;
+      if (lag >= 0 && lag < LAGCOMP.most) f.lag = f.lag === undefined ? lag : f.lag * 0.8 + lag * 0.2;
+      if (buttons(i) !== buttons(f.intent)) f.pressTick = r.tick;
+      (f.intent = i), (f.at = typeof (d as { at?: unknown }).at === 'number' ? (d as { at: number }).at : f.at);
+    }
   }
 
   /** Send this room whole next time (its map changed under it: a house set alight with someone inside). */
@@ -166,8 +176,11 @@ export class CoopHost {
     // SAVE_ALL. An expedition's is 37 to 80 KB in parts, and every friend getting it every 2 s held their
     // next patch behind it. Never in the same frame as a patch: it waits for a frame without one, and a
     // slow page (a patch every frame) sends it and holds that frame's patch to the next.
+    // A friend's press that a tick has used: their patch goes now, not at the next send (it isn't marked
+    // urgent, so a split party's relay still batches it: the Redis budget, docs/REALTIME-REDIS-BUDGET.md).
+    const used = [...this.friends].filter(([id, f]) => f.pressTick !== undefined && (this.game.roomOf(id) ?? this.game.room).tick > f.pressTick);
     if (now - this.savedAt > SAVE_EVERY && this.company) {
-      const patchDue = now - this.sentAt >= SEND_EVERY;
+      const patchDue = now - this.sentAt >= SEND_EVERY || used.length > 0;
       if (!patchDue || now - this.savedAt > SAVE_EVERY + SAVE_WAIT) {
         this.savedAt = now;
         const save = this.saved(), all = now - this.savedAllAt > SAVE_ALL;
@@ -181,7 +194,8 @@ export class CoopHost {
         if (patchDue) return;
       }
     }
-    if (now - this.sentAt < SEND_EVERY) return;
+    if (now - this.sentAt < SEND_EVERY && !used.length) return;
+    for (const [, f] of used) f.pressTick = undefined;
     const g = this.game, groups = new Map<ArenaRoom, string[]>();
     // Each friend's own room (one not in any yet, the leader's: they're brought to it).
     for (const [id, f] of this.friends) if (!f.gone) groups.set(g.roomOf(id) ?? g.room, [...(groups.get(g.roomOf(id) ?? g.room) ?? []), id]);
@@ -294,6 +308,9 @@ export class CoopGuest {
   private events: FightEvent[] = [];
   private said = '';
   private saidButtons = '';
+  private saidMoving = false;
+  private stick = '0,0';
+  private stickAt = 0;
   private saidAt = -9;
   /** Online play went off (the month's budget is used up): take the job on here, alone, from the last whole job heard. */
   cut = false;
@@ -301,9 +318,11 @@ export class CoopGuest {
   private helloAt = -9;
   private now = 0;
   private firstAt = -1;
-  /** My hero where I've walked it, and where the leader's game last said it was. */
-  private pred: { x: number; y: number } | null = null;
-  private server: { x: number; y: number } | null = null;
+  /** My hero, drawn ahead of the leader's word (ownhero.ts). */
+  private own = new OwnHero();
+  /** The leader's times on the last two patches applied (what's drawn is between them: `vt`). */
+  private prevT = 0;
+  private curT = 0;
 
   /** The newest whole job from the leader (to take it on), and when the leader was last heard. */
   save: string | null = null;
@@ -353,7 +372,8 @@ export class CoopGuest {
     if (NO_PLAYOUT) return this.apply(body);
     // (Its events, hits and sounds, don't wait: a blow lands on my screen as soon as it's heard.)
     // (Only for the room I have: a patch of another goes whole, in its turn.)
-    if (body.ev?.length && this.room && body.k === this.key) this.events.push(...body.ev), (body.ev = []);
+    // (A dodge or blow of mine already shown here isn't shown again: ownhero.ts.)
+    if (body.ev?.length && this.room && body.k === this.key) this.events.push(...this.notMine(body.ev)), (body.ev = []);
     this.playout.push(body, Number(body.t) || 0, body.k, performance.now() / 1000);
   }
 
@@ -368,7 +388,8 @@ export class CoopGuest {
       this.base = body.ms ? map.blocks : null;
       this.known = new Map();
       this.key = body.k;
-      this.pred = this.server = null;
+      this.own.reset();
+      this.prevT = this.curT = body.t;
     } else if (body.f && body.map && this.room) this.room.map.blaze = body.map.blaze;
     else if (body.f && body.ms && this.room) this.room.map.blaze = body.blaze;
     if (body.xs && this.room) this.room.exped = body.xs;
@@ -383,9 +404,8 @@ export class CoopGuest {
     if (body.f || (mine && KIT.some((f) => f in mine))) this.kitSeq++;
     const s = this.dec.apply(body.p, !!body.f) as unknown as Record<string, unknown[]>;
     const meNow = (s.heroes as Hero[] | undefined)?.find((h) => h.id === 'me');
-    if (meNow && (body.f || mine?.x !== undefined || mine?.y !== undefined || !this.server)) this.server = { x: mine?.x ?? meNow.x, y: mine?.y ?? meNow.y };
-    // Between frames too, my hero stays where I've walked it (the leader's word is in `server`).
-    if (meNow && this.pred && meNow.act === 'idle') (meNow.x = this.pred.x), (meNow.y = this.pred.y);
+    // The leader's word on my hero (and the trip, from the newest input of mine it has used): ownhero.ts.
+    this.own.patch(mine as Record<string, unknown> | undefined, meNow, !!body.f, body.t, body.acks?.me, this.now);
     const r = room as unknown as Record<string, unknown>;
     for (const [c, list] of Object.entries(s)) if (c === 'blocks') room.map.blocks = this.base ? mergeBlocks(this.base, list as Record<string, unknown>[], this.known) : (list as typeof room.map.blocks);
     else r[c] = list;
@@ -402,6 +422,7 @@ export class CoopGuest {
     if (body.names) this.names = body.names;
     for (const h of room.heroes) h.tag = this.names[h.id] ?? h.tag;
     room.time = body.t;
+    (this.prevT = this.curT), (this.curT = body.t);
     // An expedition's weather as it stands (it may have turned): the same call as the leader's (shared/expedsky.ts).
     if (room.exped?.wx) room.map.theme = themeUnder(room.map.theme, room.exped.wx, room.time);
     room.exitOpen = !!body.x;
@@ -410,10 +431,7 @@ export class CoopGuest {
     if ('dm' in body) this.doorMarks = body.dm ?? [];
     if ('run' in body) this.run = body.run;
     if ('goal' in body) this.goal = body.goal;
-    // The trip there and back, from the newest input of mine the leader has used.
-    const ack = body.acks?.me;
-    if (ack !== undefined && ack !== this.ack) (this.ack = ack), (this.trip = this.trip * 0.7 + Math.min(1, Math.max(0, this.now - ack)) * 0.3);
-    this.events.push(...body.ev);
+    this.events.push(...this.notMine(body.ev));
     this.gap = Math.min(0.3, Math.max(SEND_EVERY, this.now - this.lastAt));
     this.lastAt = this.now;
   }
@@ -422,14 +440,7 @@ export class CoopGuest {
   frame(now: number, intent: Intent): void {
     this.now = now;
     for (const b of this.playout.due(now)) this.apply(b);
-    const i = { ...intent, mx: r2(intent.mx), my: r2(intent.my), ax: r2(intent.ax), ay: r2(intent.ay) }, s = JSON.stringify(i), b = buttons(i);
-    // A button at once (urgent); the stick and aim a few times a second; every KEEP s regardless (the
-    // leader counts me as still here, and the trip there and back stays timed).
-    const press = b !== this.saidButtons;
-    if (press || (s !== this.said && now - this.saidAt >= STICK_EVERY) || now - this.saidAt > KEEP) {
-      this.sock.send(this.lead, { t: 'in', i, at: now }, press);
-      (this.said = s), (this.saidButtons = b), (this.saidAt = now);
-    }
+    this.send(intent, now);
     // No room yet, or no hero of mine in it (away over a minute, a locked phone): keep saying hello
     // (the leader may still be getting there, or let my hero go and will bring it back).
     if ((!this.room || this.missing) && now - this.helloAt > 2) this.hello();
@@ -444,9 +455,51 @@ export class CoopGuest {
       (this.rejoinAt = now), this.rejoins++, (this.rejoinWait = -1);
       this.sock.reconnect();
     }
-    if (this.room) (this.room as unknown as { acc: number }).acc = TICK * Math.min(1, (now - this.lastAt) / this.gap);
-    this.predict(intent, now - (this.frameAt < 0 ? now : this.frameAt));
+    const dt = now - (this.frameAt < 0 ? now : this.frameAt);
     this.frameAt = now;
+    const room = this.room;
+    if (!room) return;
+    const a = this.alpha(now);
+    (room as unknown as { acc: number }).acc = TICK * a;
+    // One time for everything drawn of the leader's room: the bodies are between its last two patches,
+    // and so are the goblins' clocks (a telegraph's fill, a wind-up's pose), not at the newest.
+    const vt = this.prevT + (this.curT - this.prevT) * a;
+    loud(room.enemies as unknown as Record<string, unknown>[], vt);
+    this.own.frame(room, intent, now, dt, a, this.saidAt, this.curT + (now - this.lastAt), this.events, this.stickAt);
+  }
+
+  /** How far from the leader's second-last patch to its last the drawing is now (0 to 1). */
+  private alpha(now: number): number {
+    return Math.min(1, Math.max(0, (now - this.lastAt) / this.gap));
+  }
+
+  /** The trip there and back (ownhero.ts times it; the lag scripts read it here). */
+  get trip(): number {
+    return this.own.trip;
+  }
+
+  /** The leader's time my screen is showing now (sent with each input: sim/lagcomp.ts judges by it). */
+  viewTime(now: number): number | undefined {
+    return this.room ? this.prevT + (this.curT - this.prevT) * this.alpha(now) : undefined;
+  }
+
+  /**
+   * My input to the leader: a button at once (urgent), the stick and aim a few times a second, and every
+   * KEEP s regardless (the leader counts me as still here, and the trip there and back stays timed).
+   * Called each frame, and from the press itself (input.ts), so a press never waits for the next frame.
+   */
+  send(intent: Intent, now: number): void {
+    const i = { ...intent, mx: r2(intent.mx), my: r2(intent.my), ax: r2(intent.ax), ay: r2(intent.ay) }, s = JSON.stringify(i), b = buttons(i);
+    // (Setting off and stopping go at once too, not at the stick's pace: the leader walks you as long as
+    // it thinks the stick is held, and the difference is a pull back on your screen.)
+    const press = b !== this.saidButtons, moving = !!(i.mx || i.my), turn = moving !== this.saidMoving, stick = `${i.mx},${i.my}`;
+    // (When the stick last changed: my hero walks the old way till then, ownhero.ts.)
+    if (stick !== this.stick) (this.stick = stick), (this.stickAt = now);
+    if (!press && !turn && !(s !== this.said && now - this.saidAt >= STICK_EVERY) && now - this.saidAt <= KEEP) return;
+    this.saidMoving = moving;
+    const vt = this.viewTime(now);
+    this.sock.send(this.lead, { t: 'in', i: vt === undefined ? i : { ...i, vt: Math.round(vt * 1000) / 1000 }, at: now }, press);
+    (this.said = s), (this.saidButtons = b), (this.saidAt = now);
   }
 
   private frameAt = -1;
@@ -456,37 +509,10 @@ export class CoopGuest {
   /** Rejoins in a row without hearing the leader, and the wait before the next (-1: work it out). */
   private rejoins = 0;
   private rejoinWait = -1;
-  private ack = -1;
-  private trip = PREDICT.trip;
-  /** My walking here, frame by frame, for the last second. */
-  private walked: [number, number, number][] = [];
 
-  /** Walk my own hero here, now, and ease it toward the leader's word (see PREDICT). */
-  private predict(intent: Intent, dt: number): void {
-    const room = this.room, h = room?.heroes.find((x) => x.id === 'me'), s = this.server;
-    if (!room || !h || !s) return;
-    const free = h.act === 'idle' && !h.carrying && !h.lifting;
-    const m = Math.min(1, Math.hypot(intent.mx, intent.my)), l = Math.hypot(intent.mx, intent.my) || 1;
-    const sp = free && m >= 0.05 ? HERO.speed * WEAPONS[h.weapon].speed * statsOf(h).speed * m * brandySpeed(h, room.time) : 0, vx = (intent.mx / l) * sp, vy = (intent.my / l) * sp;
-    const p = (this.pred ??= { ...s });
-    // Busy (rolling, swinging, hit, down): exactly where the leader has me.
-    const now = this.now;
-    this.walked.push([now, free ? vx * dt : 0, free ? vy * dt : 0]);
-    while (this.walked.length && this.walked[0][0] < now - 1) this.walked.shift();
-    // Where the leader will have me once my walking since it last looked reaches it.
-    let tx = s.x, ty = s.y;
-    for (const [t, dx, dy] of this.walked) if (t > now - this.trip) (tx += dx), (ty += dy);
-    if (!free || Math.hypot(tx - p.x, ty - p.y) > PREDICT.snap) (p.x = free ? tx : s.x), (p.y = free ? ty : s.y);
-    else {
-      useMap(room.map);
-      (p.x += vx * dt), (p.y += vy * dt);
-      const k = Math.min(1, dt * PREDICT.ease);
-      (p.x += (tx - p.x) * k), (p.y += (ty - p.y) * k);
-      collide(p, HERO.radius);
-      if (sp) (h.fx = vx / sp), (h.fy = vy / sp), (h.moving = true);
-    }
-    (h.x = p.x), (h.y = p.y);
-    room.prev.set('h:me', [p.x, p.y]);
+  /** The leader's events, less those for a dodge or blow of mine already shown here. */
+  private notMine(ev: FightEvent[]): FightEvent[] {
+    return ev.filter((e) => !this.own.owes(e, this.now));
   }
 
   private follow(id: string): void {
@@ -494,7 +520,7 @@ export class CoopGuest {
     this.playout.clear();
     this.dec = new Decoder();
     this.key = -1;
-    this.pred = this.server = null;
+    this.own.reset();
     // A new leader: give them their own time before anyone thinks them gone too.
     this.heardLead = this.now;
     this.left = false;

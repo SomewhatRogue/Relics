@@ -9,6 +9,127 @@ const path = require('path');
 const { chromium } = require('playwright');
 const ROOT = path.join(__dirname, '..'), PORT = Number(process.env.ONLINE_PORT) || 8791;
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+/** Frames (and ms) on `p`'s page from running `act` in the page until `seen` holds; with what `look` saw each frame. */
+const frames = (p, act, seen, look, ms = 900) => p.page.evaluate(([act, seen, look, ms]) => new Promise((res) => {
+  const g = window.__game, t0 = performance.now(), saw = [];
+  let n = 0, first = -1, firstMs = -1;
+  new Function('g', act)(g);
+  const f = () => {
+    n++;
+    saw.push(new Function('g', 'return ' + look)(g));
+    if (first < 0 && new Function('g', 'return ' + seen)(g)) (first = n), (firstMs = Math.round(performance.now() - t0));
+    if (performance.now() - t0 > ms) return res({ first, firstMs, frames: n, saw });
+    requestAnimationFrame(f);
+  };
+  requestAnimationFrame(f);
+}), [act, seen, look, ms]);
+const key = (k, type) => `document.body.dispatchEvent(new KeyboardEvent('${type}', { key: '${k}', bubbles: true }));`;
+/** Looks that go back against the way of going by more than `by` (a jerk back). */
+const jerks = (ps, dx, dy, by = 0.04) => ps.slice(1).reduce((n, p, i) => n + (((p[0] - ps[i][0]) * dx + (p[1] - ps[i][1]) * dy) < -by ? 1 : 0), 0);
+
+/**
+ * Sam's own block, walk with a block held, creep, dodge, and a goblin's stab dodged by his own screen,
+ * with LAG_MS of lag each way. Each in numbers, for DECISIONS (run against the old build for the before).
+ */
+async function guestFeel(kyle, sam, step) {
+  const out = {}, until = (p, fn, arg, ms = 8000) => p.page.waitForFunction(fn, arg, { timeout: ms }).then(() => true, () => false);
+  const samOnKyle = (js) => kyle.page.evaluate(`(() => { const g = window.__game, s = g.room.heroes.find((h) => h.id !== 'me'); ${js} })()`);
+  // Nothing else in the way: every goblin but one down, no snares; Sam back at the way in, on his feet.
+  await kyle.page.evaluate(() => {
+    const g = window.__game, keep = g.room.enemies.find((e) => e.hp > 0);
+    for (const k of ['nooses', 'slicks', 'snares', 'puddles', 'zones']) g.room[k] = [];
+    Object.assign(g.room.heroes.find((h) => h.id !== 'me'), { x: g.room.map.hero.x, y: g.room.map.hero.y, act: 'idle', actT: 0, kvx: 0, kvy: 0, z: 0 });
+    // (Kyle out of the stab's way: only Sam's dodge or hit is counted below.)
+    Object.assign(g.hero, { x: g.room.map.hero.x + 4, y: g.room.map.hero.y, safeT: 1e9 });
+    window.__keep = keep?.id;
+    for (const e of g.room.enemies) if (e !== keep) Object.assign(e, { hp: 0, act: 'dead', actT: 0, actDur: 99, respawns: false });
+    // (Held still till its stab: a stunned goblin does nothing, nets and pots included.)
+    if (keep) Object.assign(keep, { x: 2, y: 2, hp: 999, maxHp: 999, cooldown: 99, act: 'stunned', actT: 0, actDur: 999, attack: null });
+    const s = g.room.heroes.find((h) => h.id !== 'me');
+    Object.assign(s, { hp: 999, maxHp: 999, stamina: 100 });
+  });
+  // A held block (a sword for it: a Ranger has no guard), and walking with it held.
+  await samOnKyle(`s.weapon = 'sword';`);
+  await until(sam, () => window.__game.hero.weapon === 'sword');
+  await wait(400);
+  const pre = await sam.page.evaluate(() => { const h = window.__game.hero; return { act: h.act, weapon: h.weapon, stamina: Math.round(h.stamina), winded: !!h.winded, panel: window.__game.mode }; });
+  const block = await frames(sam, key('k', 'keydown'), 'g.hero.blocking', '0', 700);
+  const bw = await frames(sam, key('w', 'keydown'), 'false', '[g.hero.x, g.hero.y]', 1200);
+  const bwAfter = await frames(sam, key('w', 'keyup') + key('k', 'keyup'), 'false', '[g.hero.x, g.hero.y]', 600);
+  out.block = { frames: block.first, ms: block.firstMs, walkJerks: jerks([...bw.saw, ...bwAfter.saw], 0, -1, 0.04), pre };
+  step(`Sam's block shows the moment he holds it (frame ${block.first}, ${block.firstMs} ms; walking with it held, ${out.block.walkJerks} jerks back)`, block.first >= 1 && block.first <= 2 && out.block.walkJerks === 0);
+  await samOnKyle(`s.weapon = 'longbow'; s.stamina = 100;`);
+  await until(sam, () => window.__game.hero.weapon === 'longbow');
+  await wait(600);
+  // Creeping (Shift held): steady on his screen, and no pull back when he stops.
+  const cr = await frames(sam, key('Shift', 'keydown') + key('w', 'keydown'), 'false', '[g.hero.x, g.hero.y]', 1200);
+  const crAfter = await frames(sam, key('w', 'keyup') + key('Shift', 'keyup'), 'false', '[g.hero.x, g.hero.y]', 600);
+  out.creep = { jerks: jerks([...cr.saw, ...crAfter.saw], 0, -1, 0.04), looks: cr.saw.length + crAfter.saw.length };
+  step(`Sam's creep is smooth on his screen (${out.creep.jerks} jerks back in ${out.creep.looks} frames, the stop included)`, out.creep.jerks === 0);
+  await wait(500);
+  // A dodge: on his screen within two frames, and never pulled back over it.
+  const roll = await frames(sam, key(' ', 'keydown') + key(' ', 'keyup'), "g.hero.act === 'roll'", '[g.hero.x, g.hero.y, g.hero.act, g.hero.rollDx, g.hero.rollDy]', 900);
+  const r0 = roll.saw.find((p) => p[2] === 'roll') ?? [0, 0, '', 0, 1];
+  out.roll = { frames: roll.first, ms: roll.firstMs, jerks: jerks(roll.saw, r0[3], r0[4], 0.04), steps: roll.saw.length };
+  step(`Sam's dodge shows at once (frame ${roll.first}, ${roll.firstMs} ms) with no jerk back (${out.roll.jerks} in ${out.roll.steps} frames)`, roll.first >= 1 && roll.first <= 2 && out.roll.jerks === 0);
+  await wait(1200);
+  // What the lag is made of here (headless pages draw slowly): the trip, the playout's wait, the time between patches, frames.
+  out.parts = await sam.page.evaluate(() => { const r = window.__game.remote; return { trip: Math.round((r.own?.trip ?? r.trip) * 1000), playout: Math.round(r.playout.delay * 1000), gap: Math.round(r.gap * 1000) }; });
+  const frameMs = async (p) => { const t = (await frames(p, '', 'false', 'performance.now()', 500)).saw; return Math.round((t[t.length - 1] - t[0]) / (t.length - 1)); };
+  out.parts.kyleFrameMs = await frameMs(kyle);
+  out.parts.samFrameMs = await frameMs(sam);
+  if (process.env.FEEL_SAW) Object.assign(out, { saw: { roll: roll.saw, creep: [...cr.saw, ...crAfter.saw], bw: [...bw.saw, ...bwAfter.saw] } });
+  // A goblin's stab at Sam, dodged by his own screen: he jumps back when it's `X` s from landing there.
+  // The leader waits for his word on it LAGCOMP.cap (0.15 s) at most: with his lag, a jump counts if it
+  // came at least his lag less the cap before the blow on his screen, and in the jump's i-frames
+  // (RANGER_JUMP: 0.02 to 0.2 s). Tried at the cap as it is, then with the cap at his lag (the same
+  // mechanism, no cap in the way), so both are on record.
+  const stab = async (cap) => {
+    const lag = await samOnKyle('return s.lag ?? 0;'), was = await kyle.page.evaluate(() => window.__lagcomp?.cap ?? null);
+    const use = cap === 'lag' ? lag + 0.05 : was ?? 0;
+    if (was !== null) await kyle.page.evaluate((c) => (window.__lagcomp.cap = c), use);
+    const X = Math.max(0.1, Math.min(0.15, lag - use + 0.04)), reach = was !== null && lag - use <= 0.17;
+    await kyle.page.evaluate(() => {
+      const g = window.__game, r = g.room, s = r.heroes.find((h) => h.id !== 'me'), e = r.enemies.find((x) => x.id === window.__keep);
+      window.__evs = [];
+      if (!r.__watched) {
+        const adv = r.advance.bind(r);
+        r.advance = (dt) => { const ev = adv(dt); window.__evs.push(...ev); return ev; };
+        r.__watched = true;
+      }
+      Object.assign(s, { hp: 999, stamina: 100, fx: 0, fy: -1 });
+      Object.assign(e, { x: s.x, y: s.y - 1.3, fx: 0, fy: 1, hp: 999, cooldown: 99, act: 'attack', actT: 0, actDur: 0, kvx: 0, kvy: 0, alert: true,
+        attack: { kind: 'stab', aimed: s.id, t: 0, windup: 0.9, active: 0.1, recover: 0.6, dmg: 7, knock: 2, unblockable: false, dx: 0, dy: 1, ox: s.x, oy: s.y - 1.3, range: 2.4, arc: 70, cx: s.x, cy: s.y - 1.3, radius: 0, done: false } });
+    });
+    const pressed = await sam.page.evaluate(([id, X]) => new Promise((res) => {
+      const g = window.__game, t0 = performance.now();
+      const f = () => {
+        const a = g.room.enemies.find((e) => e.id === id)?.attack;
+        if (a && a.t >= a.windup - X) {
+          document.body.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+          document.body.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true }));
+          return res({ left: Math.round((a.windup - a.t) * 1000) });
+        }
+        if (performance.now() - t0 > 5000) return res(null);
+        requestAnimationFrame(f);
+      };
+      requestAnimationFrame(f);
+    }), [await kyle.page.evaluate(() => window.__keep), X]);
+    await wait(1500);
+    const got = await kyle.page.evaluate(() => ({ evs: window.__evs.filter((e) => e.k === 'dodge' || (e.k === 'hit' && e.on === 'hero')).map((e) => e.k), hp: window.__game.room.heroes.find((h) => h.id !== 'me').hp }));
+    if (was !== null) await kyle.page.evaluate((c) => (window.__lagcomp.cap = c), was);
+    await samOnKyle('s.hp = 999; s.stamina = 100;');
+    await kyle.page.evaluate(() => Object.assign(window.__game.room.enemies.find((x) => x.id === window.__keep), { act: 'stunned', actT: 0, actDur: 999, attack: null }));
+    await wait(1200);
+    return { lag: Math.round(lag * 1000), cap: Math.round(use * 1000), aimedMs: Math.round(X * 1000), pressedMs: pressed?.left ?? null, reach, dodged: got.evs.includes('dodge') && got.hp === 999, ...got };
+  };
+  out.stab = await stab('as is');
+  step(`a goblin's stab at Sam, jumped ${out.stab.pressedMs} ms before it lands on his screen, his lag ${out.stab.lag} ms, the cap ${out.stab.cap} ms: ${out.stab.evs.join(', ') || 'nothing'} (${out.stab.reach ? 'within what the cap allows: should be dodged' : 'past what the cap allows: lands, as designed'})`, out.stab.dodged === out.stab.reach);
+  out.stabAtLag = await stab('lag');
+  step(`the same stab with the cap at his lag (${out.stabAtLag.cap} ms), jumped ${out.stabAtLag.pressedMs} ms before it lands on his screen: ${out.stabAtLag.evs.join(', ') || 'nothing'}`, out.stabAtLag.dodged);
+  return out;
+}
+
 (async () => {
   const report = { ok: false, steps: [], errors: [] };
   if (!process.env.NOBUILD) execSync('npx vite build', { cwd: ROOT, env: { ...process.env, VITE_ONLINE: '1' }, stdio: 'ignore' });
@@ -79,6 +200,8 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     await kyle.page.evaluate(() => { const e = window.__game.room.enemies.find((x) => x.hp > 0); e.hp -= 5; window.__hurt = [e.id, e.hp]; });
     const [id, hp] = await kyle.page.evaluate(() => window.__hurt);
     step('a hurt goblin is hurt for Sam too', await until(sam, ([id, hp]) => window.__game.room.enemies.find((e) => e.id === id)?.hp <= hp, [id, hp]));
+    // The guest feel (DECISIONS 2026-11-06): Sam's own acts on his own screen at once, LAG_MS each way.
+    report.feel = await guestFeel(kyle, sam, step);
     await kyle.page.screenshot({ path: path.join(ROOT, 'shots/party-run-laptop.png') });
     await sam.page.screenshot({ path: path.join(ROOT, 'shots/party-run-phone.png') });
     // Through the job: each room cleared, the whole party in the way out, on to the next; Sam follows.

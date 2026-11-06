@@ -2,6 +2,95 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-06: the guest feel: your own acts at once, one walk rule, and a blow judged by your own screen (Claude Opus 5.5)
+
+Kyle's goal: online lag as low as possible. A friend (a guest) felt their own dodge, block and swing a whole trip
+late (to the leader and back, plus the playout's wait), walking with a block held or creeping rubber-banded, and
+they were hit after dodging on time by their own screen. Five pieces, each tested before the next:
+
+**1. One walk-speed rule** (`sim/walkspeed.ts`, `client/ownwalk.ts`). `walkSpeed(hero, intent, now, pace)` is the
+room's pace (the kit, gear, creeping under STEALTH.slow, the shallows, Wall Brandy, the bell's QUICK) and `actPace`
+the act's own (a block held: the kit's blockSpeed; drawing: chargeSpeed; a wand's cast walk). The room's walk and
+the guest's own hero both use them, with the same swept `travel`, the oil's slip (`slipIntent` now a rate:
+identical to the tick's numbers at dt = TICK) and a body with a footing (the old guess was a bare point: it walked
+through deep water and up ledges, and ignored creeping, the block's pace, wading and QUICK, and scaled by the
+stick's length, which the room doesn't). Lockstep in Node, tick by tick: no difference at all, in every case.
+The guest's own hero no longer moves in 20 Hz steps when the leader's room is moving it (`prev` was set to the
+same point every frame): it follows the leader's word between patches.
+
+**2. Your own acts at once** (`client/ownhero.ts`). A dodge press starts the dodge on your screen the same frame
+(the room's reach, pace and whole ticks, its dust and sound), gated by the last word on your breath, being winded
+and the dodge's cooldown, and only when the room would let it go (free, drawing, or a blow's recovery). A held
+block raises the guard at once (a kit with a full guard). A tap let go (a crossbow on the press) starts the blow's
+swing, lunge and whoosh, and a press during it goes on the combo as the room's would. When the leader's patch shows
+the act it's carried on from: its steps here count on top of the leader's word for as far as the leader's room has
+still to go with it, by its own progress in the patch (`lastRollAt`, `actT`), so a dodge never wobbles. If the
+leader has had the press a while (an ack past it, plus INPUT_BUFFER) and the act never came, it's taken back and
+your hero eases back. The leader's own event for an act shown here (`roll`, `blink`, `swing`) isn't shown twice.
+Hits, damage, kills and the slip's stagger stay the leader's: the guest only draws. Walking: the stick setting off
+and stopping goes to the leader at once (not at the stick's 10 a second), the frame's walk is split at the moment
+the stick changed, the leader's word plus your walking since the trip before its latest patch is the target (it
+used to slide every frame between patches), and standing still the last of it settles gently.
+
+**3. A blow judged by your own screen** (`sim/latelist.ts`, `sim/lagcomp.ts`, `combat.ts hitHero`). Each Intent
+carries `vt`, the leader's room time the guest's screen was showing (the drawing is between the last two patches,
+so that's exact). The leader keeps each friend's `lag` on their hero (its room's time less their `vt` as their
+input comes, smoothed); the leader's own hero has none. A blow that covers a hero with lag goes on the room's
+`late` list (plain data: hero, goblin, when, the blow, the shove's way and the guard's) and is judged once an Intent
+of theirs with `vt >= at` has come, or at `at + min(lag, LAGCOMP.cap)`: a dodge whose i-frames covered `at` by its
+press's `vt` is a dodge through it (the goblin reels); one begun in the wind-up that had carried them out of it by
+`at` is a dodge; a block up by `at` and not yet down, facing it, holds; anything else lands (a dodge pressed too
+late by their own screen doesn't count, though the leader's room has them rolling by then). Room state stepped on
+ticks: the same Intents, the same fight; it saves and loads with the room (a takeover mid-wait judges the same).
+
+**4. Small timing cuts.** A press goes from the input event itself (`input.ts onPress`), not the next frame. On
+the leader, a friend's press that a tick has used sends their patch at once (not marked urgent, so a split
+party's relay still batches it: no new Redis traffic; Florida harness 19 commands a minute before and after).
+
+**5. Telegraph timing.** netfix's playout paced patches but left a goblin's `actT` and its blow's `t` at the newest
+patch while bodies were drawn between the last two. Now every frame the guest works both out from `a0` and `t0` at
+the drawn time (`vt`), so the red fill and the goblin's body share one time, and it's the time sent as `vt`.
+
+**Measured**, `scripts/party-online.cjs` (LAG_MS=150 each way; headless Chromium at 25 to 45 ms a frame, so the
+trip is about 0.40 to 0.43 s and the leader's lag reading for Sam 0.44 to 0.46 s), before (8ee93cc) and after:
+
+| On Sam's own screen | Before | After |
+|---|---|---|
+| His dodge shows after the press | 17 frames, 456 ms, then in 20 Hz steps | 1 frame, 6 ms; 0 jerks back in 38 frames |
+| His block's pose | 17 frames, 516 ms | 1 frame, 13 ms |
+| Walking with a block held: frames pulled back over 0.04 tiles (the stop included) | 13 (about 0.9 tiles back after stopping) | 0 |
+| Creeping (Shift) | 0 | 0 |
+| A stab, jumped 0.1 to 0.15 s before it lands on his screen | hit | hit (at his 0.46 s lag the 0.15 s cap needs the jump 0.31 s ahead) |
+| The same with the cap at his lag | hit | dodged |
+
+How early before a blow lands on your own screen a press must come to save you (Node, the room itself, a stab
+with a 0.9 s wind-up, `vt` sent as the guest would):
+
+| | No lag | 0.31 s lag (150 ms each way, a quick page): before / after / cap at the lag | 0.46 s (the headless run) |
+|---|---|---|---|
+| Ranger's jump | 70 ms | 380 / 180 / 20 ms | 530 / 330 / 30 ms |
+| Mage's blink (wand) | 40 ms | 350 / 180 / 10 ms | 500 / 330 / 30 ms |
+| Warrior's block | 40 ms | 350 / 180 / 10 ms | 500 / 330 / 30 ms |
+
+**Kyle's call: the cap.** `LAGCOMP.cap` is 0.15 s as planned: a blow on a laggy friend never hangs more than 0.15 s
+past its telegraph, on anyone's screen. At a real 150 ms each way that halves how early you must press (380 to 180
+ms) but doesn't make "on time by my screen" true; a cap near the lag (0.35) does, for a blow on that friend landing
+up to 0.35 s late everywhere. One number in `shared/tuning.ts`.
+
+Not built (waiting on Kyle, or not asked): who leads by latency; handing a hidden leader's room on; regions and
+transport; a drawn charge (a hold shows a trip late, and the heavy it lets go); skills and relics drawn ahead; the
+room's push out of props and other bodies (`separate`) on your own walk (eased in); walking out of a blow by your
+own screen (only a dodge or a block is judged by `vt`). `Hero.lenience` is still never set; lag compensation is
+what it was for.
+
+No new player-facing words. Tests: `tests/feel.test.ts` (walk parity tick by tick: plain, creeping, half a stick,
+blocking with two kits, in and out of the shallows, QUICK, brandy, oil, and frame by frame on oil; the block and
+creep paces; a dodge on time by their screen saved and not without it; too late; a block in time and too late;
+the leader's own hero judged at once; the cap, and an Intent past the blow judging it sooner; determinism, and a
+waiting blow through saveRoom and loadRoom). `scripts/party-online.cjs` gained the block, block-walk, creep, dodge
+and stab steps (LAG_MS=150), with what the lag is made of in `report.feel`. All online scripts pass (town, party,
+chat, lobby, exped, florida); the full vitest run and `tsc` too.
+
 ## 2026-11-05: pacing: a threat budget, beats, packs held back, toughness for a party, no easy kiting, BIG ONEs (Kyle; Claude Opus 5.5)
 
 Kyle: "sometimes you just get swarmed. Now it feels more like swarms over other things, so AoE abilities are

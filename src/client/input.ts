@@ -21,6 +21,8 @@ export class Input {
   private stick = { id: '', ox: 0, oy: 0, x: 0, y: 0 };
   private stickEl!: HTMLElement;
   private knobEl!: HTMLElement;
+  /** A button pressed or let go: told at once (a friend's page sends it now, not on the next frame: coop.ts). */
+  onPress: (() => void) | null = null;
   /** A quick tap on the stick's side of the screen that never moved (a phone's tap on a drop: lootcard.ts). */
   onTap: ((x: number, y: number) => void) | null = null;
   private tapAt = { t: 0, x: 0, y: 0 };
@@ -43,6 +45,7 @@ export class Input {
       if (k === 'x') this.element();
       if (k === 'v') this.sign();
       if (k === 'k') (this.intent.blockSeq++), (this.blockHeld.key = true);
+      this.pressed();
     });
     addEventListener('keyup', (e) => {
       const k = e.key.toLowerCase();
@@ -51,6 +54,7 @@ export class Input {
       if (k === 'j') this.attackHeld.key = false;
       if (k === 'q') this.potion.up();
       if (k === 'c') this.reloadHeld.key = false;
+      this.pressed();
     });
     addEventListener('blur', () => {
       this.keys.clear();
@@ -65,10 +69,12 @@ export class Input {
       this.mouse = [e.clientX, e.clientY];
       if (e.button === 0) (this.intent.attackSeq++), (this.attackHeld.mouse = true);
       if (e.button === 2) (this.intent.blockSeq++), (this.blockHeld.mouse = true);
+      this.pressed();
     });
     addEventListener('mouseup', (e) => {
       if (e.button === 2) this.blockHeld.mouse = false;
       if (e.button === 0) this.attackHeld.mouse = false;
+      this.pressed();
     });
     addEventListener('contextmenu', (e) => e.preventDefault());
     if (this.touch) this.buildTouch();
@@ -99,6 +105,8 @@ export class Input {
         this.stick.x = dx / max;
         this.stick.y = dy / max;
         this.knobEl.style.transform = `translate(${dx}px, ${dy}px)`;
+        // (Off and away, and stopped, go at once: coop.ts. The stick's own moves go at its pace.)
+        this.pressed();
       }
     };
     const end = (e: TouchEvent) => {
@@ -107,6 +115,7 @@ export class Input {
         Object.assign(this.stick, { id: '', x: 0, y: 0 });
         this.knobEl.style.transform = '';
         this.stickEl.classList.remove('on');
+        this.pressed();
       }
     };
     zone.addEventListener('touchmove', move, { passive: false });
@@ -114,8 +123,8 @@ export class Input {
     zone.addEventListener('touchcancel', end);
     const btn = (sel: string, down: () => void, up?: () => void) => {
       const el = ui.querySelector(sel) as HTMLElement;
-      el.addEventListener('touchstart', (e) => (e.preventDefault(), el.classList.add('down'), down()), { passive: false });
-      const release = (e: TouchEvent) => (e.preventDefault(), el.classList.remove('down'), up?.());
+      el.addEventListener('touchstart', (e) => (e.preventDefault(), el.classList.add('down'), down(), this.pressed()), { passive: false });
+      const release = (e: TouchEvent) => (e.preventDefault(), el.classList.remove('down'), up?.(), this.pressed());
       el.addEventListener('touchend', release, { passive: false });
       el.addEventListener('touchcancel', release, { passive: false });
     };
@@ -133,6 +142,15 @@ export class Input {
     btn('.element', () => this.element());
     btn('.sign', () => this.sign());
     btn('.block', () => ((this.intent.blockSeq++), (this.blockHeld.touch = true)), () => (this.blockHeld.touch = false));
+  }
+
+  /** A press or a let-go, for whoever wants it at once (only a key that does something gets this far). */
+  private pressed(): void {
+    try {
+      this.onPress?.();
+    } catch {
+      // (The frame sends it anyway.)
+    }
   }
 
   /** Use an ability: 0 the class's skill, 1 the relic carried. */
