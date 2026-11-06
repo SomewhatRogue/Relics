@@ -625,6 +625,7 @@ Kyle loves it; hold until after the network tests on the new map types (usage li
 - Red should tempt, never just be bad. Giving pulls a red hero back.
 - Relics stay out of it: fading is their price.
 - Build in three steps: (1) the dial and the eyes, (2) gold prices and red damage, (3) town trouble (after the big maps).
+- Drawn (2026-11-05, Claude Opus 5.5): `Hero.dial` drives the eyes and the red or gold touches (client/heroeyes.ts). Still to build in step 1: what moves the dial.
 
 ## Next (in order)
 

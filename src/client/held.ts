@@ -8,6 +8,7 @@ import { PX } from './world';
 import { bladeLength, censer, drawKit, kitPose } from './heldkits';
 import { bladeEdge } from './blademark';
 import { flourish, tapPose, tapSmearCol } from './castflourish';
+import { focusMotes } from './wisps';
 
 export interface Pose { a: number; ext: number; from?: number; thrust?: boolean; reach: number; pull: number }
 
@@ -153,6 +154,7 @@ export function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): vo
     c.glow.fillStyle = el;
     c.glow.fillRect(Math.round(tx - r / 2), Math.round(ty - r / 2), r + 1, r + 1);
     tip(c, h, tx, ty, el);
+    if (h.act !== 'charge') focusMotes(c, tx, ty, el);
     flourish(c, h, tx, ty, p.a);
   } else if (h.weapon === 'staff') {
     line(g, ox, oy, p.a, -6, 12, '#6b4a2b');
@@ -164,6 +166,7 @@ export function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): vo
     c.glow.fillStyle = '#ffffff';
     c.glow.fillRect(Math.round(tx), Math.round(ty), 1, 1);
     tip(c, h, tx, ty, el);
+    if (h.act !== 'charge') focusMotes(c, tx, ty, el);
     flourish(c, h, tx, ty, p.a);
   } else if (h.weapon === 'mace') {
     if (p.pull > 0) {

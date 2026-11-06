@@ -90,6 +90,8 @@ export interface BodyPose {
   ghost: number;
   gx: number;
   gy: number;
+  /** A walking step: -1 the left foot is up a pixel, 1 the right, 0 both down (figure.ts). */
+  step: number;
 }
 
 export const WHITE = '#ffffff', HURT_RED = '#ff3a2a';
@@ -97,7 +99,7 @@ export const WHITE = '#ffffff', HURT_RED = '#ff3a2a';
 /** Back to standing still (pose objects are reused every frame, so nothing is allocated). */
 export function rest(p: BodyPose): BodyPose {
   p.phase = 'rest';
-  p.k = p.lean = p.crouch = p.stretch = p.ox = p.oy = p.reach = p.raise = p.lift = p.flash = p.ghost = p.gx = p.gy = 0;
+  p.k = p.lean = p.crouch = p.stretch = p.ox = p.oy = p.reach = p.raise = p.lift = p.flash = p.ghost = p.gx = p.gy = p.step = 0;
   p.dx = 1;
   p.dy = 0;
   p.tint = WHITE;
