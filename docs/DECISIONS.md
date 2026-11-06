@@ -64,6 +64,76 @@ and `scripts/party-online.cjs` (Sam, a guest Ranger on his phone, has PET on the
 dead, taps it, kneels; Kyle, leading, sees it). Shots: `shots/pet/town-pet-phone.png`,
 `shots/pet/job-pet-phone.png`, and the friends' views `shots/pet/town-pet-friend-laptop.png`,
 `shots/pet/job-pet-friend-laptop.png`.
+## 2026-11-06: shield-bearers block from the front, so going round them matters (Kyle; Claude Opus 5.5)
+
+Kyle: "I feel like shields aren't blocking ranged attacks? Like no reason to get behind. Shielded enemies should block
+most attacks so you want to go around." Before this, a blow from the front did a quarter, but any heavy blow (and a
+combo finisher with knock 7 or more, so every greatsword swing and the sword's third cut) did it all; the board
+covered anything short of the Rogue's rear for blows, but only 60 degrees either side for shots; a full draw or a
+perfect shot got through for half; and it turned at a small goblin's 7 radians a second, so you couldn't get behind it.
+Now it is a lighter Planker: a wall from the front, soft behind (numbers `VARIANTS.shield`, rules `sim/board.ts`).
+
+- **Front.** Within the cone, a plain blow does a tenth (`front` 0.1; a Rogue's knives, already weak head on, about
+  6%); a plain shot is stopped dead (`shot` 0); a heavy blow (any held blow, a counter, a finisher) does a quarter
+  (`heavy` 0.25), and a full draw or a perfect shot a quarter (`through` 0.25). Each marked as it was: BLOCKED over
+  it, and now a melee blow on the board throws sparks and splinters (no blood) and thunks like a shot on it does.
+- **The knock-aside.** A full charge (power 1), a perfect or a counter into the board knocks it aside: BOARD OUT,
+  the board swung wide off its arm (both views), a crack and a flash, and for `out` 1.2 s anything lands in full from
+  anywhere, a plain shot too, for you or a friend. It can't be knocked again while it's out. A full draw or a
+  perfect shot knocks it too. The counter is in on purpose: a Warrior or Healer blocks its stab, and the counter
+  after it is the timed answer from the front. One field, `boardOutAt`, set once a knock, so it goes out once.
+- **The cone.** `cone` 0.34: about 70 degrees either side, the same for blows and shots (the Planker's is 0.35).
+  Between that and its back a hit lands plain and full; its back is a backstab as before.
+- **Turning.** `turn` 1.6 radians a second (the Planker's; was 7). A hero walking round it at a tile and a half moves
+  round it about twice as fast as it turns; a Rogue's dash past it ends off its board and it takes over a second to
+  come round. It still only stabs once it faces you.
+- **What stays open:** stunned, pinned, frozen, netted or snared, carried, or unaware: all of it. Bursts and fire
+  bursts go round it (`blast` never asks), and lightning does (storm cuts, storm shots, the strike); it's still weak to
+  storm. The hound now runs round to its back and worries it from there (`sim/ranger.ts worryAt`; its bites never met
+  the board).
+- **Every class's answer** (each in `tests/shieldwall.test.ts`): Warrior: block its stab and counter (BOARD OUT), a
+  full shield bash (BOARD OUT and the bash's stun), the shield charge, or TAUNT GUARD turning it round while a friend
+  takes its back. Healer: block and counter, or the smite's stun. Rogue: dash past it or SHADOWSTEP (behind it and
+  stunned). Ranger: the jump back leaves a snare it walks into, the net, the hound from behind, a full draw (BOARD
+  OUT) for the blade or a friend. Mage: storm, any burst (the wand's held burst, the staff's spells), the frost that
+  freezes; or walk round it.
+
+The Planker's door (front takes nothing, never knocked aside) and the Doorkeepers' (`sim/doorwall.ts`) are untouched;
+`boardFor` still asks the Planker first. A boss is never a shield-bearer.
+
+**Measured** (`npx tsx scripts/encounters/shields.ts`: the 21 rooms with a shield-bearer in them over board days 1 to
+100, every room of the ordinary jobs; they are rare, about one room in fifty. The bot, a hero who can't be hurt,
+now knows the shield answers as it knew the Planker's: round the board, and a Warrior or Healer blocks its stab and
+counters. "Head on" is the new rules with the bot not knowing them):
+
+| 21 rooms | before: s, health lost | after, head on | after, answers known |
+|---|---|---|---|
+| daggers | 49.5, 394 | 93.8, 744 (3 of 21 not cleared in 180 s) | 52.2, 329 |
+| staff | 45.7, 291 | 51.3, 400 | 44.9, 269 |
+| longbow | 35.0, 171 | 38.5, 205 | 37.0, 173 |
+| sword | 26.4, 122 | 33.2, 164 | 28.1, 115 (33 boards knocked aside) |
+
+So head on they take longer (the daggers far longer: a Rogue's knives into a board do almost nothing, which is the
+point), and once the answers are played every kit is back within a few seconds of before and none is stuck. The
+general samples (`clear.ts 6 1` and `6 70`, 48 rooms each, now with `[kits]` and the shield rooms apart) have no
+shield-bearer and are the same before and after: days 1 to 6 daggers 43.4, staff 46.6, longbow 34.6, sword 27.0;
+days 70 to 75 daggers 38.1, staff 49.2, longbow 31.7, sword 24.7. Not measured: Fenmere's causeway pair and
+Hangman's Wood's shields (curated, not in the bot's sample). Kyle's play is the real measure.
+
+**Pins**: no hash test moved (the room layouts don't change; only how a shield-bearer fights), so nothing re-pinned.
+
+Tests: `tests/shieldwall.test.ts` (20: plain and heavy blows and shots from the front, side and back; a Rogue's knives
+head on and in its back; bursts, and stunned, frozen, netted and unaware; the knock-aside by a full charge, a perfect,
+a counter and a full draw, once, its window for blows and a plain shot, then up again, the field set once; the cone
+for blows and shots; the turn rate, a dash ending off its board, a circling hero staying off it; each class's
+answer; the same fight twice). The older board tests read the numbers and pass as they were. Full suite 162 files,
+1529 tests passed; tsc clean; town and expedition online pass; party passed on its second run (the first failed only
+the guest-feel check of a block's first frame while walking, the one that flaked before; 28 of 28 after). Shots:
+`node scripts/shield-look.cjs [url] [dir]` (phone, flat and 2.5D: a plain arrow BLOCKED on the board, a Warrior's
+full bash with BOARD OUT and the board swung wide, a Rogue's BACKSTAB at its back).
+
+**New words** (for the lore keeper, then the line editor): **BOARD OUT** (over a shield-bearer whose board is knocked
+aside). BLOCKED is as it was.
 
 ## 2026-11-06: Fenmere, the second curated zone: the carr, the causeway, the ford, the reeds that hide goblins, the mist, the Peat Cuts (Kyle; Claude Opus 5.5)
 

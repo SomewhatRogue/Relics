@@ -2,6 +2,14 @@
 
 ## Current slice
 
+**Shield-bearers block from the front** (Claude Opus 5.5, 2026-11-06; Kyle: "Shielded enemies should block most
+attacks so you want to go around"). Built; waiting on Kyle's play and the lore keeper and line editor on BOARD OUT.
+*Done when*, on his phone and laptop: an arrow, bolt or spark into a shield-bearer's front stops with BLOCKED and a
+thunk, a plain blow there does next to nothing, and a heavy one little; a full charge, a perfect or a counter after a
+block knocks the board aside (BOARD OUT, the board swung wide) and for a moment anything lands in full; it turns
+slowly enough that walking or dodging round it gets him to its side or back, where it takes it all; storm, bursts,
+stuns, nets, snares and freezes still go round it. Everything in DECISIONS 2026-11-06 ("shield-bearers block from the
+front"); shots `node scripts/shield-look.cjs`. Open: every number (a tenth, a quarter, 1.2 s, 70 degrees, 1.6 a second).
 **Fenmere, the second curated zone** (Claude Opus 5.5, 2026-11-06; Kyle, 2026-11-05: "more raid biomes, fewer but
 bigger and lovingly curated", "better and more dynamic enemies that bleed in slowly", "scripted scenes"; the Fen of
 `docs/plans/atlas.md` section 7 item 7, Sallow Priory and the Corpse Road left for Kyle's story calls). Built; waiting

@@ -5,7 +5,7 @@
  * SNARE.cooldown, two down at once at most.
  *
  * The hound runs at your heel and joins in now and then: it picks out what you've been hitting (or
- * the nearest small goblin), runs it down and worries it, then comes back. It can't be killed; a
+ * the nearest small goblin), runs it down and worries it (a shield-bearer from behind), then comes back. It can't be killed; a
  * butcher winding up near it scares it off for a while, and it comes back when it's ready.
  */
 import { HOUND, SNARE, WEAPONS } from '../shared/tuning';
@@ -48,6 +48,9 @@ export function stepSnare(s: Snare, enemies: Enemy[], now: number, ev: FightEven
   ev.push({ k: 'snared', x: e.x, y: e.y });
   return more;
 }
+
+/** Where the hound worries `e` from: at it, or behind a shield-bearer, off its board (sim/board.ts). */
+const worryAt = (e: Enemy) => (e.variant === 'shield' ? { x: e.x - e.fx * (e.radius + 0.35), y: e.y - e.fy * (e.radius + 0.35), stop: 0.1 } : { x: e.x, y: e.y, stop: 0.6 });
 
 const newHound = (h: Hero): Hound => ({ x: h.x - h.fx, y: h.y - h.fy + 0.6, fx: h.fx, fy: h.fy, state: 'heel', target: 0, t: 0, next: 4, back: 0, bites: 0, moving: false });
 
@@ -94,12 +97,14 @@ export function stepHound(h: Hero, enemies: Enemy[], now: number, dt: number, ev
   }
   const every = houndWait(h) * (h.calmHound ? 1.5 : 1);
   if (!prey || d.t > 6) return void Object.assign(d, { state: 'heel', target: 0, next: now + every + (h.id.length % 3) });
+  // (A shield-bearer it goes round, and worries from behind, off its board.)
+  const at = worryAt(prey);
   if (d.state === 'run') {
-    if (to(prey.x, prey.y, HOUND.speed * 1.3, 0.6) <= 0.65) Object.assign(d, { state: 'bite', t: HOUND.biteEvery });
+    if (to(at.x, at.y, HOUND.speed * 1.3, at.stop) <= at.stop + 0.05) Object.assign(d, { state: 'bite', t: HOUND.biteEvery });
     return;
   }
   // Worrying it: a bite every so often, the small ones knocked off their feet, then back to you.
-  to(prey.x, prey.y, HOUND.speed, 0.6);
+  to(at.x, at.y, HOUND.speed, at.stop);
   if (d.t < HOUND.biteEvery) return;
   d.t = 0;
   d.target = prey.id;

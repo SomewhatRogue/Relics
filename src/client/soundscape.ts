@@ -149,6 +149,8 @@ export class Soundscape {
     if (ev.k === 'charged') return chargedSound(this.heroAt(room, ev.x, ev.y)?.weapon ?? '');
     // A shot stopped on a shield-bearer's board: the dull thunk of wood.
     if (ev.k === 'deflect') return blockSound('board');
+    // The board knocked aside: the thunk, and the crack of it going wide.
+    if (ev.k === 'boardout') return blockSound('board'), sfx.wardbreak();
     if (ev.k === 'block') return blockSound(this.heroAt(room, ev.x, ev.y)?.weapon ?? '');
     // Someone you freed, hurt by the party, cries out (a burn's tick doesn't).
     if (ev.k === 'survivorhit') return ev.tick ? undefined : sfx.hurt();
@@ -158,6 +160,8 @@ export class Soundscape {
       if (ev.on === 'hero' && (ev.src === 'pounce' || ev.src === 'bite' || ev.src === 'spit')) return spiderSounds.wetbite(), sfx.hurt();
       if (ev.on === 'hero') return sfx.hurt();
       if (ev.backstab) sfx.backstab();
+      // A blow taken on a board: the thunk of wood, not flesh.
+      else if (ev.boarded) blockSound('board');
       else hitSound(ev.src, ev.heavy, !!ev.big);
       // The one hit cries out (not every scratch).
       if (now - this.yelpAt > 0.22) {

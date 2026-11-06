@@ -2,7 +2,8 @@
  * WEAK and RESIST over a foe (shared/weakness.ts): WEAK bright in the colour of what landed it, with a
  * spray of sparks; RESIST small and grey, a short dull blip. SHRUGS IT OFF, as quiet: a goblin the same
  * hero stunned too lately to stun again (sim/stuns.ts). BLOCKED with sparks off the wood: a shot stopped
- * on a shield-bearer's board (sim/board.ts). Cosmetic only.
+ * on a shield-bearer's board (sim/board.ts); BOARD OUT, splinters and a flash when a heavy blow or shot
+ * knocks that board aside. Cosmetic only.
  */
 import type { FightEvent } from '../sim/types';
 import type { Fx } from './fx';
@@ -20,6 +21,14 @@ export function weakFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
     fx.say(x, y - 30, 'BLOCKED', '#c8b090');
     fx.burst(x, y - 10, 9, ['#ffffff', '#ffd27a', '#c8b090'], 65, true);
     fx.burst(x, y - 8, 4, ['#8a6a40', '#6a5030'], 35, false);
+    return true;
+  }
+  if (ev.k === 'boardout') {
+    fx.say(x, y - 46, 'BOARD OUT', '#ffd27a');
+    fx.burst(x, y - 10, 14, ['#ffffff', '#ffd27a', '#c8b090'], 85, true);
+    fx.burst(x, y - 8, 8, ['#8a6a40', '#6a5030', '#5a3f28'], 55, false);
+    fx.flashes.push({ x, y: y - 8, r: 36, i: 0.8, c: [1, 0.85, 0.5], life: 0.1, max: 0.1 });
+    fx.shake = Math.max(fx.shake, 2);
     return true;
   }
   if (ev.k === 'shrug') {

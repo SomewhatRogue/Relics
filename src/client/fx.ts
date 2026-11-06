@@ -232,7 +232,9 @@ export class Fx {
           break;
         }
         this.burst(x, y - 8, ev.heavy ? 12 : 7, ['#ffffff', '#fff1b0', '#ffd27a'], ev.heavy ? 70 : 50, true);
-        this.burst(x, y - 6, ev.heavy ? 10 : 5, ['#7a1d1d', '#5a1414', '#9a2a2a'], 45, false, 160, true);
+        // On a board (a shield-bearer's, the Planker's door): sparks and splinters off the wood, no blood.
+        if (ev.boarded) this.burst(x, y - 10, 6, ['#ffffff', '#ffd27a', '#c8b090'], 60, true), this.burst(x, y - 8, 3, ['#8a6a40', '#6a5030'], 35, false);
+        else this.burst(x, y - 6, ev.heavy ? 10 : 5, ['#7a1d1d', '#5a1414', '#9a2a2a'], 45, false, 160, true);
         this.say(x, y - 22, String(ev.n), ev.on === 'hero' ? '#ff6a5a' : ev.marked ? '#ffc23a' : ev.counter ? '#ffa040' : ev.heavy ? '#ffe070' : '#ffffff');
         if (ev.marked) {
           // MARK biting (shared/signs.ts): a gold ring and sparks, bigger on a heavy, and a touch more weight.
