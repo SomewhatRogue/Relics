@@ -38,7 +38,7 @@ function knackIcon(id: PerkId): string {
   return (k && FX[k]) ?? 'u:star';
 }
 
-/** The picture key for a tile's key ('drill:power', 'tech:slam', 'rung:taunt', 'learn:horn', 'knack:w_wide'). */
+/** The picture key for a tile's key ('drill:power', 'tech:slam', 'rung:tauntguard', 'learn:horn', 'knack:w_wide'). */
 export function tileIcon(key: string, cls?: string): string {
   const [kind, id] = key.split(':');
   if (kind === 'drill') return DRILL[id as DrillId] ?? 'u:star';

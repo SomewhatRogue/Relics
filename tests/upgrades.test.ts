@@ -85,7 +85,7 @@ describe('tiles', () => {
     const made = markFork([a, b], a.key, true);
     expect(made[0]).toMatchObject({ current: true, badge: 'CHOSEN' });
     expect(made[1]).toMatchObject({ state: 'locked', badge: 'NOT CHOSEN', act: '' });
-    const track: UpTrack = { id: 'guard', title: 'GUARD', sum: '', kind: 'track', steps: [{ tiles: [tile(p, 'rung:taunt')] }, { tiles: made, fork: 'CHOOSE ONE' }] };
+    const track: UpTrack = { id: 'guard', title: 'GUARD', sum: '', kind: 'track', steps: [{ tiles: [tile(p, 'rung:tauntguard')] }, { tiles: made, fork: 'CHOOSE ONE' }] };
     const html = upTrack(track);
     expect(html).toContain('up-fork n2');
     expect(html).toContain('CHOOSE ONE');
