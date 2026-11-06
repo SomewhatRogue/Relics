@@ -6,7 +6,7 @@ import { touchedIdle } from './idlepoke';
 import { SIGNS, SIGN_KEY } from '../shared/signs';
 import { signFor, signLeft } from '../sim/signature';
 import { ExpedUi } from './expedui';
-import { expedition, goalWords, hangmansWood } from '../shared/expedjob';
+import { expedition, fenmere, goalWords, hangmansWood } from '../shared/expedjob';
 import { barnHunt } from '../shared/bossjobs';
 import { plateOf } from '../sim/bossplate';
 import { showPlate } from './bossplate';
@@ -217,6 +217,9 @@ if (quick && xday) game.startJob(expedition(xday > 1 ? xday : game.world.day));
 // ?hero=WARRIOR&wood=1: straight into today's Hangman's Wood (?wood=4: the one posted on day 4).
 const wday = Number(new URLSearchParams(location.search).get('wood') ?? 0);
 if (quick && wday) game.startJob(hangmansWood(wday > 1 ? wday : game.world.day));
+// ?hero=WARRIOR&fen=1: straight into today's Fenmere (?fen=70: the one posted on day 70).
+const fday = Number(new URLSearchParams(location.search).get('fen') ?? 0);
+if (quick && fday) game.startJob(fenmere(fday > 1 ? fday : game.world.day));
 // ?hero=WARRIOR&barn=1: straight onto today's Doorkeepers hunt; ?barn=arena: straight into the great barn.
 const barn = new URLSearchParams(location.search).get('barn');
 if (quick && barn) game.startJob(barnHunt(game.world.day, barn === 'arena'));

@@ -22,6 +22,8 @@ export interface ZoneRelic { kind?: RelicId; pool?: RelicId[] }
 export const ZONE_RELICS: Record<string, ZoneRelic> = {
   hangman: { kind: 'hook', pool: ['hook', 'sentry', 'javelin'] },
   coldscar: { pool: ['knuckle', 'bomb', 'bell'] },
+  // Fenmere: the hook first (the fen's gaffers), then what fits a fight on causeways and boards (Kyle's call).
+  fen: { pool: ['hook', 'lodestone', 'javelin'] },
 };
 
 /** What gave it. A zone's climax names the zone. */

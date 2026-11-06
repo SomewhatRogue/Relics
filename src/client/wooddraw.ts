@@ -42,7 +42,10 @@ const dropping = (e: Enemy, t: number) => e.task?.k === 'perch' && e.task.at !==
 
 export function drawWoodGround(g: CanvasRenderingContext2D, room: ArenaRoom, P: Ground, now: number): void {
   const hang = room.map.hang, t = room.time;
-  if (!hang || room.indoors) return;
+  if (room.indoors) return;
+  // (Fenmere has the fire and nothing else of the wood's: shared/fen.ts.)
+  if (room.map.fen) return fireRing(g, room, P, now);
+  if (!hang) return;
   // Snares: faint, a rope's pale and a dull red (you have to look for them).
   for (const n of room.nooses ?? []) striped(g, P, n.x, n.y, SNARER.r, '#a8946a', '#6a2a20', t - n.at < SNARER.arm ? 0.25 : 0.55, 0);
   // A dropper coming down: its shadow darkening on the spot, a striped red edge (walk out of it).
@@ -58,7 +61,11 @@ export function drawWoodGround(g: CanvasRenderingContext2D, room: ArenaRoom, P: 
   }
   // Hempen's ropes coming down on a second hero (hempendraw.ts).
   drawRopes(g, room.enemies, P, t, now);
-  // The mid-point's fire, still to light: a ring of gold dots filling as you stand there.
+  fireRing(g, room, P, now);
+}
+
+/** The mid-point's fire, still to light: a ring of gold dots filling as you stand there. */
+function fireRing(g: CanvasRenderingContext2D, room: ArenaRoom, P: Ground, now: number): void {
   const c = room.exped?.wood?.check;
   if (c && !c.lit) for (let i = 0, n = 26; i < n; i++) {
     const a = (i / n) * Math.PI * 2 - Math.PI / 2, [px, py] = P(c.x + Math.cos(a) * CHECK.r, c.y + Math.sin(a) * CHECK.r), lit = i / n < c.p;
@@ -72,7 +79,12 @@ export interface WoodFig { key: string; x: number; y: number; draw: (c: Ctx, px:
 
 /** The things that stand up: the cage on its chain, Hew's marks, the fire. */
 export function woodFigs(room: ArenaRoom, t: number): WoodFig[] {
-  const hang = room.map.hang, out: WoodFig[] = [];
+  const hang = room.map.hang, out: WoodFig[] = [], fen = room.map.fen;
+  if (fen && !room.indoors) {
+    // Fenmere's fire on the rise (shared/fen.ts).
+    const check = room.exped?.wood?.check ?? { ...fen.check, lit: false };
+    return [{ key: 'fire', x: fen.check.x, y: fen.check.y, draw: (c, px, py) => drawFirePit(c, px, py, check.lit, t) }];
+  }
   if (!hang || room.indoors) return out;
   const winch = room.exped?.goals.find((g) => g.kind === 'winch');
   if (winch && !winch.done) out.push({ key: 'cage', x: hang.cage.x, y: hang.cage.y, draw: (c, px, py) => drawGibbetCage(c, px, py, winch.p, t) });

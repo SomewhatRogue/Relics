@@ -4,6 +4,7 @@
  * whole number with nearest-pixel sampling; the flat layer of words and marks goes over it at the same
  * size. Only draws; the room decides everything. Built the first time it's wanted (main.ts).
  */
+import { mistFrame } from '../fenmistdraw';
 import { feetBand } from '../phoneband';
 import * as THREE from 'three';
 import type { ArenaRoom } from '../../sim/room';
@@ -244,6 +245,14 @@ export class View3D {
       u.uFogC.value.set(...fl.c);
       u.uFogY.value = Math.sin(PITCH);
     } else u.uFog.value.z = 0;
+    // Fenmere's mist banks (../fenmistdraw.ts), in the post pass's pixels (y up).
+    const V = this.view, mat = (x: number, y: number): [number, number] => { const [sx, sy] = V.px(x, 0, y); return [sx, V.H - sy]; };
+    const mist = map.fen ? mistFrame(map, room.time, mat, V.ppu, Math.sin(PITCH), this.heroAt ? mat(this.heroAt[0], this.heroAt[1]) : null, [V.W, V.H]) : null;
+    u.uMN.value = mist?.n ?? 0;
+    if (mist) {
+      (u.uMist.value as THREE.Vector4[]).forEach((v, i) => v.fromArray(mist.banks, i * 4));
+      u.uMY.value = mist.yr, u.uMH.value.set(...mist.hero), u.uMC.value.set(...mist.c);
+    }
     this.post.uniforms.tDep.value = this.rt!.depthTexture;
     this.gl.setRenderTarget(null);
     this.gl.render(this.postScene, this.quad);

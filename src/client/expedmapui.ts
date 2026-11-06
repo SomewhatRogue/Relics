@@ -9,6 +9,7 @@
 import type { GameMap } from '../shared/arena';
 import { goalWords, MAP_WORDS, EXTRACT_WORDS } from '../shared/expedjob';
 import { WOOD_MAP } from '../shared/hangwords';
+import { FEN_MAP } from '../shared/fenwords';
 import type { Job } from '../shared/jobs';
 import { seenAt } from '../sim/exped';
 import type { ArenaRoom } from '../sim/room';
@@ -104,7 +105,7 @@ export class ExpedMap {
     label(MAP_WORDS.start, X(m.hero.x), X(m.hero.y) - r * 1.8, '#c8d0dc');
     // Hangman's Wood's fire, the mid-point (sim/woodzone.ts): lit or still to light.
     if (x.wood) (pin(X(x.wood.check.x), X(x.wood.check.y), x.wood.check.lit ? '#ff9a3c' : '#a0782a', r * 0.7), label(WOOD_MAP.check, X(x.wood.check.x), X(x.wood.check.y) + r * 1.7, x.wood.check.lit ? '#ffb070' : '#c8b088'));
-    const words = goalWords(room.map.hang ? ({ exped: 'hangmans' } as Job) : ({} as Job));
+    const words = goalWords(room.map.hang ? ({ exped: 'hangmans' } as Job) : room.map.fen ? ({ exped: 'fen' } as Job) : ({} as Job));
     for (const s of x.sides) (pin(X(s.x), X(s.y), s.done ? '#6a6e78' : '#c8d0dc', r * 0.8), label(words[s.kind].pin, X(s.x), X(s.y) - r * 1.7, s.done ? '#8a8e98' : '#e8dcc0'));
     for (const q of x.goals) {
       pin(X(q.x), X(q.y) + (q.done ? 0 : bob), q.done ? '#6a6e78' : '#ffd27a', r);
@@ -127,7 +128,8 @@ export class ExpedMap {
     }
     // The title is the map's own (THE BARROWFIELDS, HANGMAN'S WOOD).
     const h2 = this.el.querySelector('h2');
-    if (h2 && h2.textContent !== (x.wood ? WOOD_MAP.title : MAP_WORDS.title)) h2.textContent = x.wood ? WOOD_MAP.title : MAP_WORDS.title;
+    const title = room.map.fen ? FEN_MAP.title : x.wood ? WOOD_MAP.title : MAP_WORDS.title;
+    if (h2 && h2.textContent !== title) h2.textContent = title;
     const key = this.el.querySelector('.em-key')!, left = x.goals.filter((q) => !q.done).length;
     key.textContent = `${left ? `${left} OF ${x.goals.length} JOBS LEFT` : EXTRACT_WORDS.open.toUpperCase()}   ${MAP_WORDS.level(x.level)}`;
   }

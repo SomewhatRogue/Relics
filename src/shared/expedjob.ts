@@ -5,10 +5,11 @@
  * map screen and the pins (every line here goes through the lore keeper and the line editor).
  */
 import type { GoalKind, SideKind } from './expedcamps.js';
-import { payFor, PLACES, type Job } from './jobs.js';
+import { BOSSES, payFor, PLACES, type Job } from './jobs.js';
 import { Rng } from './rng.js';
 import { rollTime } from './timeofday.js';
 import { WOOD_GOALS, WOOD_POST } from './hangwords.js';
+import { FEN_GOALS, FEN_POST } from './fenwords.js';
 
 export const EXPED_BOSSES = ['GRISTLE', 'OLD HOOK', 'SPLITNAIL', 'THE DROVER'];
 
@@ -36,6 +37,20 @@ export function hangmansWood(day: number): Job {
   };
 }
 
+/**
+ * The day's Fenmere (docs/plans/atlas.md: the Fen, posted like THE BARROWFIELDS): one curated fen, about 8
+ * minutes, out of the fields over the causeway to the Peat Cuts, a named butcher of the board's at the end
+ * with a relic in it. A new seed and butcher each day, the ground the same.
+ */
+export function fenmere(day: number): Job {
+  const rng = new Rng(day * 2729 + 41), seed = day * 457 + 163, night = rng.next() < 0.45, boss = rng.pick(BOSSES);
+  const place = { ...PLACES.find((p) => p.name === 'The Peat Cuts')!, name: 'Fenmere', ruin: 2 };
+  return {
+    id: `d${day}-fen`, place, objective: 'hunt', twist: night ? 'night' : 'none', time: rollTime(seed, night), rooms: 1, size: 'long', boss, seed, exped: 'fen', zone: 'fen',
+    reward: payFor(5, 2, night, 'long') + 50, title: FEN_POST.title, text: FEN_POST.text.split('{boss}').join(boss),
+  };
+}
+
 /** The board's label and what the job's rows say. */
 export const EXPED_BOARD = { kind: 'EXPEDITION', where: 'THE BARROWFIELDS', rooms: 'One big map, about 20 minutes', pays: (n: number) => `${n} gold and treasure, more for each job done. Half if you don't get out` };
 
@@ -55,8 +70,8 @@ export const GOAL_WORDS: Record<GoalKind | SideKind, { pin: string; todo: string
   oak: WOOD_GOALS.oak,
 };
 
-/** A job's words for its pins: Hangman's Wood names its butcher's (Hempen). */
-export const goalWords = (job: Job): typeof GOAL_WORDS => (job.exped === 'hangmans' ? { ...GOAL_WORDS, butcher: WOOD_GOALS.hempen } : GOAL_WORDS);
+/** A job's words for its pins: Hangman's Wood names its butcher's (Hempen); Fenmere says where each job is. */
+export const goalWords = (job: Job): typeof GOAL_WORDS => (job.exped === 'hangmans' ? { ...GOAL_WORDS, butcher: WOOD_GOALS.hempen } : job.exped === 'fen' ? { ...GOAL_WORDS, ...FEN_GOALS } : GOAL_WORDS);
 
 /** What the banner and the map screen say about the way out, by its state. */
 export const EXTRACT_WORDS = {

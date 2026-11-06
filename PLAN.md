@@ -2,6 +2,21 @@
 
 ## Current slice
 
+**Fenmere, the second curated zone** (Claude Opus 5.5, 2026-11-06; Kyle, 2026-11-05: "more raid biomes, fewer but
+bigger and lovingly curated", "better and more dynamic enemies that bleed in slowly", "scripted scenes"; the Fen of
+`docs/plans/atlas.md` section 7 item 7, Sallow Priory and the Corpse Road left for Kyle's story calls). Built; waiting
+on Kyle's play and the lore keeper and line editor on `shared/fenwords.ts`. *Done when*, on his phone and laptop, flat
+and 2.5D: FENMERE is on the board after HANGMAN'S WOOD; in from the fields he goes through the stile (two dragging
+somebody to their fire), the coppice (asleep among the stools), the carr (a nest among the willows), along the causeway
+over deep bog, shut by shields and an archer, a skimmer's burning oil on its edge from the islet, over the ford with a
+gaffer's hook hauling him out of the water to its brute, through the reed beds where knots of goblins lie with only
+their eyes showing and stand up together when he comes close, over the boards on their channels, past the fire on the
+rise (lit, it saves the run), to the Peat Cuts' larder and the named butcher among the cuts with gaffers on the baulks,
+and out by the causeway north, with the captives off the island and the chest out on the bog as he likes; mist drifts
+over the reeds and the cuts, goblins see him less in it, and the red and striped telegraphs show through it whole. No
+spot any class can't walk to or out of. Everything in DECISIONS 2026-11-06 ("Fenmere"); shots `node scripts/fen-look.cjs`;
+online `ZONE=fen node scripts/exped-online.cjs`. Open: every number; the relic's pool; the Staithe's jetty still wipes
+a telegraph on it in the flat view.
 **A polish pass** (Claude Opus 5.5, 2026-11-06). Built; waiting on Kyle's play and the lore keeper and line editor on
 the new words. *Done when*, on his phone: a scene's line over his hero (Hempen's "There's rope on every branch...")
 comes up in lines that fit the screen, and lines said together stack instead of running through each other; parked
@@ -793,7 +808,9 @@ pay grows with each job done and side job. DECISIONS 2026-11-04 has the build an
 - [ ] More expeditions (Greyhollow, Fenmere, Copperdeep) from the same pieces; the war map that picks them.
 - [x] The Staithe on about one map in three, between the fords, pinned or a side job, played out at ALARM 3 and 5
       (2026-11-05, Claude Opus 5.5; DECISIONS "the Staithe").
-- [ ] Biomes rollout next (the proposal's items 6 on): the chalker with the CRIES captives; the Fen expedition.
+- [x] Biomes rollout (the proposal's items 6 on): the chalker with the CRIES captives (2026-11-05); the Fen as Fenmere,
+      a curated zone (2026-11-06, Claude Opus 5.5; DECISIONS "Fenmere").
+- [ ] Sallow Priory at the fen's edge and the Corpse Road (atlas items 4 and 7): Kyle's story calls first.
 
 ## Next up: the big map as a real job (Kyle played ?bigmap=1, 2026-11-03: "VERY fun")
 

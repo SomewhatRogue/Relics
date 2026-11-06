@@ -5,6 +5,8 @@
  * In fog (client/fog.ts) the lit layer goes into the fog's colour in the same stepped, dithered bands,
  * thicker the further from your hero; the glowing layer (eyes, telegraphs) still shows through it.
  */
+import { MIST_GLSL, MIST_KEEP, type MistU } from './fenmistdraw';
+
 /** Fog for one frame: your hero on screen (x, y), how thick at its thickest (0: none), pixels a tile, its colour. */
 export interface Fog { x: number; y: number; k: number; px: number; c: [number, number, number] }
 /** Clear for this many tiles round your hero, thickest from `far` out, in `steps` bands. */
@@ -27,6 +29,7 @@ uniform sampler2D uBase; uniform sampler2D uEmis; uniform vec2 uRes;
 uniform vec4 uL[${MAX}]; uniform vec3 uC[${MAX}]; uniform int uN; uniform vec3 uAmb;
 uniform vec4 uFog; uniform vec3 uFogC;
 in vec2 uv; out vec4 o;
+${MIST_GLSL}
 const float B[16] = float[16](0.,8.,2.,10.,12.,4.,14.,6.,3.,11.,1.,9.,15.,7.,13.,5.);
 void main(){
   vec2 px = vec2(gl_FragCoord.x, uRes.y - gl_FragCoord.y);
@@ -47,6 +50,13 @@ void main(){
     float ft = clamp((length(px - uFog.xy) / uFog.w - ${FOG_BANDS.near.toFixed(1)}) / ${(FOG_BANDS.far - FOG_BANDS.near).toFixed(1)}, 0.0, 1.0);
     float fs = floor(ft * ${FOG_BANDS.steps.toFixed(1)} + bz * 0.9 + 0.5) / ${FOG_BANDS.steps.toFixed(1)};
     c = mix(c, uFogC, clamp(fs, 0.0, 1.0) * uFog.z);
+  }
+  // Fenmere's mist (fenmistdraw.ts): over the lit layer only, never where anything glows (a telegraph shows whole).
+  float mk = mistK(px, bz);
+  if (mk > 0.0) {
+    float near = 0.0;
+    for (int j = -${MIST_KEEP}; j <= ${MIST_KEEP}; j++) for (int i = -${MIST_KEEP}; i <= ${MIST_KEEP}; i++) near = max(near, texture(uEmis, t + vec2(float(i), float(-j)) / uRes).a);
+    if (near < 0.1) c = mix(c, uMC, mk);
   }
   o = vec4(mix(c, e.rgb, e.a), 1.0);
 }`;
@@ -88,7 +98,7 @@ export class Lighting {
     const loc = gl.getAttribLocation(p, 'p');
     gl.enableVertexAttribArray(loc);
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-    for (const n of ['uBase', 'uEmis', 'uRes', 'uL', 'uC', 'uN', 'uAmb', 'uFog', 'uFogC']) this.u[n] = gl.getUniformLocation(p, n);
+    for (const n of ['uBase', 'uEmis', 'uRes', 'uL', 'uC', 'uN', 'uAmb', 'uFog', 'uFogC', 'uMist', 'uMN', 'uMY', 'uMH', 'uMC']) this.u[n] = gl.getUniformLocation(p, n);
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
     for (let i = 0; i < 2; i++) {
       const t = gl.createTexture()!;
@@ -105,7 +115,7 @@ export class Lighting {
     return true;
   }
 
-  render(base: HTMLCanvasElement, emis: HTMLCanvasElement, lights: Light[], amb: [number, number, number], fog: Fog | null = null): void {
+  render(base: HTMLCanvasElement, emis: HTMLCanvasElement, lights: Light[], amb: [number, number, number], fog: Fog | null = null, mist: MistU | null = null): void {
     const w = this.canvas.width, h = this.canvas.height;
     if (!this.ok) {
       const g = this.g2!;
@@ -135,6 +145,8 @@ export class Lighting {
     gl.uniform3f(this.u.uAmb, amb[0], amb[1], amb[2]);
     gl.uniform4f(this.u.uFog, fog?.x ?? 0, fog?.y ?? 0, fog?.k ?? 0, fog?.px ?? 16);
     gl.uniform3f(this.u.uFogC, ...(fog?.c ?? [0, 0, 0]));
+    gl.uniform1i(this.u.uMN, mist?.n ?? 0);
+    if (mist) gl.uniform4fv(this.u.uMist, mist.banks), gl.uniform1f(this.u.uMY, mist.yr), gl.uniform4f(this.u.uMH, ...mist.hero), gl.uniform3f(this.u.uMC, ...mist.c);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
 }

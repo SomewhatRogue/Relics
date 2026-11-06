@@ -744,7 +744,7 @@ export type FightEvent =
   /** An expedition (sim/exped.ts): a job or side job done (`i` its place in the list), the way out open, lit, the watch come; a horn, worse, a wave. */
   | { k: 'exped'; x: number; y: number; what: import('./exped').ExpedWhat; i?: number }
   /** Hangman's Wood: a hero hoisted in a snare or cut down, a dropper coming down and landing, burning wood off the oak, the fire lit, a snare laid. */
-  | { k: 'hoisted' | 'cutdown' | 'perchdrop' | 'perchland' | 'oakfall' | 'checklit' | 'noosed' | 'snarelaid'; x: number; y: number; id?: string }
+  | { k: 'hoisted' | 'cutdown' | 'perchdrop' | 'perchland' | 'oakfall' | 'checklit' | 'noosed' | 'snarelaid' | 'lurkrise'; x: number; y: number; id?: string }
   /** The boss kit (sim/poise.ts, doorwall.ts, doorpair.ts): STAGGERED, BRACED's rebound (at the blocker), a door cut down, a phase's roar, the pair swapping jobs. */
   | { k: 'staggered' | 'rebound' | 'doordown' | 'roar' | 'doorswap'; x: number; y: number }
   /** A teammate downed you once too often this job. */

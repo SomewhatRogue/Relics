@@ -11,11 +11,12 @@
 import type { Block, Round } from '../shared/arena';
 import { STAITHE_KINDS, staitheBoxes } from './staithebox';
 import { gibbetBoxes, oakBoxes, waymarkBoxes } from './woodpieces';
+import { FEN_KINDS, fenBoxes } from './fenpieces';
 
 export type Bx = [number, number, number, number, number, number, number, ('lump' | 'cone')?];
-export const PIECE_BLOCKS = new Set<Block['kind']>(['headframe', 'log', 'mill', 'stakes', 'jetty', 'gangway', 'smokehouse', 'dryrack', 'hungnet', 'oak', 'haystack']);
+export const PIECE_BLOCKS = new Set<Block['kind']>(['headframe', 'log', 'mill', 'stakes', 'jetty', 'gangway', 'smokehouse', 'dryrack', 'hungnet', 'oak', 'haystack', 'boards', 'reeds']);
 /** Boards you walk on (the Staithe's jetty and a log laid across): the flat view paints them under everyone (staithedraw.ts). */
-export const DECKS = new Set<Block['kind']>(['jetty', 'gangway']);
+export const DECKS = new Set<Block['kind']>(['jetty', 'gangway', 'boards']);
 export const PIECE_ROUNDS = new Set<Round['kind']>(['hangtree', 'headstone', 'apple', 'gibbet', 'waymark']);
 
 const TIMBER = 0x4a3420, DARK = 0x2e2016, STONE = 0x6a6470, IRON = 0x55505e, ROPE = 0x8a7a5a, BARK = 0x4a3a2a, LEAF = 0x2f4a28;
@@ -26,6 +27,7 @@ const shuffle = (n: number) => () => ((n = (n * 1103515245 + 12345) & 0x7fffffff
 export function blockBoxes(b: Pick<Block, 'kind' | 'w' | 'h' | 'look' | 'ruined' | 'deck'>): Bx[] {
   const w = b.w, d = b.h, cx = w / 2, cz = d / 2, out: Bx[] = [], r = shuffle(Math.round(w * 37 + d * 11));
   if (STAITHE_KINDS.has(b.kind)) return staitheBoxes(b, r);
+  if (FEN_KINDS.has(b.kind)) return fenBoxes(b, r);
   if (b.kind === 'oak') return oakBoxes(b, r);
   if (b.kind === 'haystack') {
     // A stack of hay on the threshing floor: a heaped base, a rounded top, loose wisps, a fork left in it.

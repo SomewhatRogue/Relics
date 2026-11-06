@@ -45,7 +45,9 @@ export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall'
   // Hangman's Wood: the Gospel Oak, hollow, wooden (it burns from inside: sim/hangfire.ts).
   | 'oak'
   // The great barn's hay stacks (shared/barnarena.ts): they stop a charge, and burn.
-  | 'haystack';
+  | 'haystack'
+  // Fenmere (shared/fen.ts): boards over deep water you walk on (a deck), reeds standing in the shallows you walk through (soft).
+  | 'boards' | 'reeds';
 export interface Round extends Circle { kind: RoundKind }
 export interface Block {
   x: number; y: number; w: number; h: number; kind: BlockKind; label?: string;
@@ -299,6 +301,8 @@ export interface GameMap {
   staithe?: StaitheMap;
   /** Hangman's Wood (shared/hangwood.ts): its fixed spine, what a friend's screen draws from the map alone. */
   hang?: import('./hangwood.js').HangMap;
+  /** Fenmere (shared/fen.ts): its fire, the beats and the mist's banks, what a friend's screen draws from the map alone. */
+  fen?: import('./fen.js').FenMap;
 }
 /** `span`: a gap a laid log crosses (deep water stops you there unless you're on the log). */
 export interface Water { x: number; y: number; w: number; h: number; deep?: boolean; span?: boolean }
@@ -325,7 +329,7 @@ export interface Blaze { patches: (Area & { at: number })[]; beams: { x: number;
 /** How fast anyone moves knee-deep in a ford or a bog: a little slower than dry ground (was 0.55, a crawl). */
 export const WADE = 0.7;
 /** How fast you can move where you stand (slowed in shallow water). */
-export const wadeAt = (x: number, y: number) => (MAP.water?.some((w) => !w.deep && inArea(w, x, y)) ? WADE : 1);
+export const wadeAt = (x: number, y: number) => ((nearby(MAP, x, y)?.water ?? MAP.water)?.some((w) => !w.deep && inArea(w, x, y)) ? WADE : 1);
 
 export const onLedge = (m: GameMap, x: number, y: number) => !!m.ledges?.some((l) => x > l.x && x < l.x + l.w && y > l.y && y < l.y + l.h);
 export const inRamp = (m: GameMap, x: number, y: number) => !!m.ledges?.some((l) => l.ramps.some((r) => inArea(r, x, y)));
@@ -418,7 +422,7 @@ export function collide(p: { x: number; y: number }, r: number): void {
   }
   if (m.ledges) levels(m, p as { x: number; y: number; z?: number; dropped?: number; kvx?: number; kvy?: number }, r);
   // Deep water stops bodies (things with a footing), never a shot over it.
-  if (m.water && 'z' in p) for (const w of m.water) if (w.deep && !(w.span && spanned(m, p.x, p.y))) box(p, r, w);
+  if (m.water && 'z' in p) for (const w of near.water ?? m.water) if (w.deep && !(w.span && spanned(m, p.x, p.y))) box(p, r, w);
   // Pushed out of something standing near the edge (a bed against a wall): never out past the edge.
   p.x = Math.max(r, Math.min(m.w - r, p.x));
   p.y = Math.max(r * 0.6, Math.min(m.h - r, p.y));

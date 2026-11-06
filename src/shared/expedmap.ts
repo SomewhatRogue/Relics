@@ -26,6 +26,7 @@ import { expedSky, themeUnder } from './expedsky.js';
 import { layExpedStaithe, staitheRoll } from './expedstaithe.js';
 import { inArea } from './arena.js';
 import { woodPlan } from './hangwood.js';
+import { fenPlan } from './fen.js';
 
 export type NodeKind = 'in' | 'out' | 'hamlet' | 'camp' | 'barrows' | 'woodedge' | 'fields' | 'bank' | 'staithe';
 export const GOALS: GoalKind[] = ['larder', 'engine', 'prisoners', 'dens', 'shrine', 'butcher'];
@@ -44,8 +45,8 @@ const kept = new Map<string, ExpedPlan>();
 export function expedPlan(job: Job): ExpedPlan {
   const key = `${job.exped}:${job.seed}`;
   let p = kept.get(key);
-  // (Hangman's Wood is a curated zone on the same kit: shared/hangwood.ts.)
-  if (!p) (kept.size > 4 && kept.clear()), kept.set(key, (p = job.exped === 'hangmans' ? woodPlan(job) : build(job)));
+  // (Hangman's Wood and Fenmere are curated zones on the same kit: shared/hangwood.ts, shared/fen.ts.)
+  if (!p) (kept.size > 4 && kept.clear()), kept.set(key, (p = job.exped === 'hangmans' ? woodPlan(job) : job.exped === 'fen' ? fenPlan(job) : build(job)));
   // (A fresh copy each time: a room changes its map as it's played.)
   return JSON.parse(JSON.stringify(p)) as ExpedPlan;
 }

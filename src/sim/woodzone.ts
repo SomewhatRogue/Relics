@@ -14,15 +14,18 @@ import type { FightEvent, Hero } from './types';
 
 export interface WoodState { check: { x: number; y: number; p: number; lit: boolean }; beats: boolean[] }
 
+/** Hangman's Wood's or Fenmere's (shared/fen.ts): the same fire at the mid-point and beats on the way. */
+const zoneOf = (m: ArenaRoom['map']) => m.hang ?? m.fen;
+
 export function newWood(room: { map: ArenaRoom['map'] }): WoodState | undefined {
-  const h = room.map.hang;
+  const h = zoneOf(room.map);
   return h && { check: { ...h.check, p: 0, lit: false }, beats: h.beats.map(() => false) };
 }
 
 const players = (hs: Hero[]) => hs.filter((h) => h.id !== 'squire');
 
 export function stepWood(room: ArenaRoom, x: ExpedState, heroes: Hero[], ev: FightEvent[], dt: number): void {
-  const w = x.wood, hang = room.map.hang;
+  const w = x.wood, hang = zoneOf(room.map);
   if (!w || !hang) return;
   // The beats, in whatever order you come to them.
   hang.beats.forEach((b, i) => {

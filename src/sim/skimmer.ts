@@ -12,7 +12,8 @@ import type { Enemy, FightEvent, Hero } from './types';
 
 /** Its turn once it's seen you. */
 export function stepSkimmer(e: Enemy, t: Hero, d: number, ux: number, uy: number, speed: number, now: number, dt: number, ev: FightEvent[]): void {
-  const at = currentMap().staithe?.pour, post = e.home, dp = Math.hypot(post.x - e.x, post.y - e.y);
+  // (Fenmere's pours where its task says: on the causeway's edge.)
+  const at: [number, number] | undefined = e.task?.k === 'pour' ? [e.task.x, e.task.y] : currentMap().staithe?.pour, post = e.home, dp = Math.hypot(post.x - e.x, post.y - e.y);
   if (d < SKIMMER.keep) {
     const side = e.id % 2 ? 1 : -1;
     return walk(e, -ux - uy * side * 0.6, -uy + ux * side * 0.6, speed * SKIMMER.flee, dt);

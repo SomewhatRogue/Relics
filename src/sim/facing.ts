@@ -4,13 +4,15 @@
  */
 import { collide } from '../shared/arena';
 import { isDead, isDummy } from './damage';
+import { lurking } from './lurk';
 import type { Enemy, Hero, Intent } from './types';
 
 /** The goblin the hero faces within `range` (a narrow cone first, then anything in reach). Dummies last. */
 export function faced(h: Hero, enemies: Enemy[], range: number): Enemy | null {
   let best: Enemy | null = null, bd = Infinity;
   for (const e of enemies) {
-    if (isDead(e) || e.act === 'carried' || (e.z ?? 0) !== (h.z ?? 0)) continue;
+    // (A goblin still lying in Fenmere's reeds isn't one you've seen: sim/lurk.ts.)
+    if (isDead(e) || e.act === 'carried' || (e.z ?? 0) !== (h.z ?? 0) || lurking(e)) continue;
     const dx = e.x - h.x, dy = e.y - h.y, d = Math.hypot(dx, dy);
     if (d > range + e.radius) continue;
     const dot = (dx * h.fx + dy * h.fy) / (d || 1), score = d + (1 - dot) * 6 + (isDummy(e) ? 20 : 0);

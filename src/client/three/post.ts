@@ -7,6 +7,7 @@
  */
 import * as THREE from 'three';
 import { FOG_BANDS } from '../light';
+import { MIST_GLSL, MIST_KEEP, MIST_MAX } from '../fenmistdraw';
 
 export const BAYER = `
 float bay2(vec2 a){ a = floor(a); return fract(dot(a, vec2(0.5, a.y * 0.75))); }
@@ -52,11 +53,16 @@ export const QUAD_VS = 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = v
 /** Outlines from depth, creases, and a little bloom from the glowing; drawn straight to the low-res canvas. */
 export function postMaterial(near: number, far: number): THREE.ShaderMaterial {
   return new THREE.ShaderMaterial({
-    uniforms: { tCol: { value: null }, tDep: { value: null }, uRes: { value: new THREE.Vector2(1, 1) }, uGamma: { value: 1 }, uFog: { value: new THREE.Vector4(0, 0, 0, 16) }, uFogC: { value: new THREE.Vector3() }, uFogY: { value: 1 } },
+    uniforms: {
+      tCol: { value: null }, tDep: { value: null }, uRes: { value: new THREE.Vector2(1, 1) }, uGamma: { value: 1 }, uFog: { value: new THREE.Vector4(0, 0, 0, 16) }, uFogC: { value: new THREE.Vector3() }, uFogY: { value: 1 },
+      // Fenmere's mist (../fenmistdraw.ts).
+      uMist: { value: Array.from({ length: MIST_MAX }, () => new THREE.Vector4()) }, uMN: { value: 0 }, uMY: { value: 1 }, uMH: { value: new THREE.Vector4(-1e5, -1e5, 0, 1) }, uMC: { value: new THREE.Vector3() },
+    },
     vertexShader: QUAD_VS,
     fragmentShader: BAYER + `
 uniform sampler2D tCol; uniform sampler2D tDep; uniform vec2 uRes; uniform float uGamma;
 uniform vec4 uFog; uniform vec3 uFogC; uniform float uFogY;
+${MIST_GLSL}
 float D(vec2 p){ return ${near.toFixed(1)} + texture2D(tDep, p).x * ${(far - near).toFixed(1)}; }
 vec3 glowAt(vec2 p){ vec4 s = texture2D(tCol, p); return s.rgb * (1.0 - s.a); }
 void main(){
@@ -81,6 +87,13 @@ void main(){
     float ft = clamp((length(fd) / uFog.w - ${FOG_BANDS.near.toFixed(1)}) / ${(FOG_BANDS.far - FOG_BANDS.near).toFixed(1)}, 0.0, 1.0);
     float fs = floor(ft * ${FOG_BANDS.steps.toFixed(1)} + (bay4(px) - 0.5) * 0.9 + 0.5) / ${FOG_BANDS.steps.toFixed(1)};
     col = mix(col, uFogC, clamp(fs, 0.0, 1.0) * uFog.z * c.a);
+  }
+  // Fenmere's mist: over ordinary surfaces only, and nowhere near anything glowing (a telegraph's whole footprint stays clear).
+  float mk = c.a > 0.995 ? mistK(px, bay4(px) - 0.5) : 0.0;
+  if (mk > 0.0) {
+    float near = 1.0;
+    for (int j = -${MIST_KEEP}; j <= ${MIST_KEEP}; j++) for (int i = -${MIST_KEEP}; i <= ${MIST_KEEP}; i++) near = min(near, texture2D(tCol, uv + vec2(float(i), float(j)) * t).a);
+    if (near > 0.99) col = mix(col, uMC, mk);
   }
   vec3 g = vec3(0.0);
   g += (glowAt(uv + vec2(t.x, 0.0)) + glowAt(uv - vec2(t.x, 0.0)) + glowAt(uv + vec2(0.0, t.y)) + glowAt(uv - vec2(0.0, t.y))) * 0.2;

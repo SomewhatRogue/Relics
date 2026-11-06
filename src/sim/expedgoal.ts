@@ -5,6 +5,7 @@
  */
 import { EXTRACT_WORDS, goalWords } from '../shared/expedjob';
 import { WOOD_EXIT } from '../shared/hangwords';
+import { FEN_EXIT } from '../shared/fenwords';
 import { EXPED } from '../shared/tuning';
 import type { ArenaRoom } from './room';
 import type { Run } from './run';
@@ -15,12 +16,14 @@ const say = (s: string, run: Run) => s.split('{boss}').join(run.job.boss ?? '');
 export function expedGoal(run: Run, room: ArenaRoom): { text: string; done: boolean } {
   const x = room.exped!;
   // Hangman's Wood: out by the north path once Hempen's dead; the fire to light while it's still cold and you're past the gibbet.
-  if (x.phase === 'leave') return { text: room.map.hang ? WOOD_EXIT.leave : EXTRACT_WORDS.leave, done: true };
+  if (x.phase === 'leave') return { text: room.map.hang ? WOOD_EXIT.leave : room.map.fen ? FEN_EXIT.leave : EXTRACT_WORDS.leave, done: true };
   if (x.phase === 'hold') return { text: EXTRACT_WORDS.hold(Math.max(0, Math.ceil(EXPED.extract - x.held))), done: false };
   if (x.phase === 'open') return { text: EXTRACT_WORDS.open, done: false };
   const left = x.goals.filter((g) => !g.done), busy = left.find((g) => g.p > 0) ?? left[0];
   const n = left.length > 1 ? ` (${left.length} jobs left)` : '';
-  const words = goalWords(run.job), fire = x.wood && !x.wood.check.lit && x.goals.some((g) => g.kind === 'winch' && g.done) ? `. ${WOOD_EXIT.check}` : '';
+  // Fenmere: the fire on the rise once you're over the ford and the captives are out.
+  const fen = !!room.map.fen, due = x.goals.some((g) => (fen ? g.kind === 'prisoners' : g.kind === 'winch') && g.done);
+  const words = goalWords(run.job), fire = x.wood && !x.wood.check.lit && due ? `. ${fen ? FEN_EXIT.check : WOOD_EXIT.check}` : '';
   return { text: busy ? say(words[busy.kind].todo, run) + n + fire : EXTRACT_WORDS.shut, done: false };
 }
 

@@ -5,6 +5,7 @@
  * down it slumps into a heap of straw rather than a body. Its hits throw straw, not blood (`strawFx`).
  * Drawn the same in both views: the flat scene and the 2.5D view's cards call `drawFoe`.
  */
+import { lurkAfter, lurkPose } from './fenlurk';
 import type { Enemy, FightEvent } from '../sim/types';
 import type { Ctx } from './draw';
 import { drawEnemy } from './foes';
@@ -21,6 +22,12 @@ import { drawKeeper } from './doordraw';
 
 /** A goblin, or (in the yard: `straw`) a straw man playing one. The plain dummies are themselves either way. */
 export function drawFoe(c: Ctx, e: Enemy, x: number, y: number, sleeping: boolean, straw: boolean): void {
+  // Lying in Fenmere's reeds: eyes only; standing up out of the water (fenlurk.ts).
+  if (e.task?.k === 'lurk') {
+    const q = lurkPose(c, e, x, y);
+    if (q.hide) return;
+    if (q.k < 1) return paced(c, e, x, y + q.dy, sleeping), lurkAfter(c, x, y, q.k);
+  }
   // A dropper up a tree in Hangman's Wood: its rope up into the branches (wooddraw.ts).
   if (e.task?.k === 'perch') drawPerchRope(c, e, x, y);
   if (!straw || e.kind === 'dummy' || e.kind === 'swingDummy') return paced(c, e, x, y, sleeping);

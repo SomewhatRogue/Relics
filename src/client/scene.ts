@@ -2,6 +2,8 @@
  * One frame: camera, the flat (lit) layer in depth order, the glowing layer, then the lighting pass.
  * The scene is painted at a low resolution and scaled up by a whole number so pixels stay crisp.
  */
+import { mistFrame } from './fenmistdraw';
+import { lurkFrame } from './fenlurk';
 import { drawBlasts } from './blastdraw';
 import { pulledAt } from './wave2ground';
 import { drawWet } from './wetdraw';
@@ -224,6 +226,7 @@ export class Scene {
     const big = map.w * map.h > 3000, off = (sx: number, sy: number) => sx < -48 || sy < -64 || sx > this.vw + 48 || sy > this.vh + 48;
 
     const lit = this.lit, glow = this.glow, c: Ctx = { lit, glow, now, t: room.time };
+    lurkFrame(room.heroes);
     lit.fillStyle = '#0d0b10';
     lit.fillRect(0, 0, this.vw, this.vh);
     lit.drawImage(this.bg!, -cx, -cy);
@@ -607,14 +610,17 @@ export class Scene {
       // A primed Mage (just channelled) burns brighter till the spell goes.
       lights.push({ x: x - cx, y: y - cy - 14, r: h.primed ? 30 : 22, i: h.primed ? 0.55 : 0.4, c: WEAPONS[h.weapon].cls === 'HEALER' ? [1, 0.75, 0.4] : EL_LIGHT[heldEl(h)] });
     }
-    drawMist(glow, map.theme, this.vw, this.vh, cx, cy, now);
+    // (Fenmere's mist is its banks, below: no dawn bands over the glowing layer there.)
+    drawMist(glow, map.fen ? { ...map.theme, mist: 0 } : map.theme, this.vw, this.vh, cx, cy, now);
     fx.drawGlow(glow, lit, cx, cy);
     lights.push(...fx.lights(cx, cy));
     // Only lights that reach the screen (a town has more than the pass can take at once).
     const seen = lights.filter((l) => l.x + l.r > 0 && l.x - l.r < this.vw && l.y + l.r > 0 && l.y - l.r < this.vh);
     // A lightning flash lifts the whole scene's light a beat; fog thickens away from your hero (skyfx.ts).
     const fl = fogLook(map.theme), fog = fl && this.heroAt ? { x: this.heroAt[0] - cx, y: this.heroAt[1] - cy - 6, k: fl.k, px: PX, c: fl.c } : null;
-    this.lighting.render(this.base, this.glowC, seen, flashAmb(map.theme.ambient, Math.max(flashOf(room.strikes, room.time), skyFlash(room))), fog);
+    // Fenmere's mist banks, over the lit layer only (fenmistdraw.ts).
+    const mist = map.fen ? mistFrame(map, room.time, (x, y) => [OX + x * PX - cx, OY + y * PX - cy], PX, 1, this.heroAt ? [this.heroAt[0] - cx, this.heroAt[1] - cy - 6] : null, [this.vw, this.vh]) : null;
+    this.lighting.render(this.base, this.glowC, seen, flashAmb(map.theme.ambient, Math.max(flashOf(room.strikes, room.time), skyFlash(room))), fog, mist);
   }
 
   private cage(c: Ctx, x: number, y: number, now: number): void {
