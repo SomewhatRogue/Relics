@@ -4,6 +4,20 @@ Kyle: "I like everything except the wizard tower for now." All of these run in t
 (no relay traffic). A shared high-score board costs one write per finished game and one read when the
 board is opened. Nothing sends every frame.
 
+## How every mini-game sits in the shared town (Kyle 2026-11-05)
+
+"All mini games will happen locally on their own computer, not in town too, but in town you can see their
+character sitting and fishing or something, even if they're not moving beyond an idle animation, till
+they rejoin the town and then it checks again."
+
+- Starting one sends a single presence word to the town ("fishing at the millpond", "on the wall",
+  "arm-wrestling at the Rat") and drops your live town traffic. Everyone else sees your hero parked at
+  that spot doing an idle loop (rod out, bow on the parapet, elbow on the table).
+- The game itself runs only in your browser. Nothing goes out until you finish, when you rejoin the town
+  and it syncs once (your spot, any score for a board).
+- So a player in a mini-game costs about two messages, however long they play.
+- Fishing is just for fun: no pay, maybe a fish to show off.
+
 ## Approved, to build after the current slices
 
 | Place | What | Ties back |
