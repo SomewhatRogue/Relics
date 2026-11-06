@@ -9,7 +9,8 @@
  * same slide and crash.
  */
 import { travel } from '../shared/sweep';
-import { FLING, HERO, TICK, HITSTOP, type Swing, type WeaponId } from '../shared/tuning';
+import { FLING, HERO, ICE, TICK, HITSTOP, type Swing, type WeaponId } from '../shared/tuning';
+import { iceUnder } from './ice';
 import { shove } from './bodies';
 import { damage, frozen, isDead, isDummy, kill } from './damage';
 import { chill, shatter, type World } from './elements';
@@ -76,7 +77,8 @@ export function stepSleds(w: World, dt = TICK): void {
       continue;
     }
     // Ice: it slows evenly, and at the end of its run it shatters where it stops.
-    const next = sp - s.decel * dt;
+    // Over iced shallows it slows ICE.slip as fast, so it goes further (sim/ice.ts).
+    const next = sp - s.decel * (w.fx && iceUnder(w.fx.ices, e.x, e.y, w.now) ? ICE.slip : 1) * dt;
     if (next <= 0.05) {
       burst(w, e, ux, uy, FLING.endR, FLING.endDmg, false);
       continue;

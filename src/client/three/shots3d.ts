@@ -112,9 +112,14 @@ export function makeRing(r: number, col: number, glow: boolean, w = 0.1): THREE.
 }
 
 /** A cloud of smoke: grey lumps turning slowly. */
-export function makeSmoke(r: number): THREE.Group {
+export function makeSmoke(r: number, steam = false): THREE.Group {
   const root = new THREE.Group();
-  for (let i = 0; i < 9; i++) {
+  // Steam (sim/steam.ts): small white wisps spread through it, gaps between, so whoever's inside still shows.
+  if (steam) for (let i = 0; i < 16; i++) {
+    const a = i * 2.4, d = r * (0.25 + (i % 4) * 0.2), s = 0.28 + (i % 3) * 0.1;
+    part(root, s, s * 0.7, s, M(i % 3 ? 0xf0f4f6 : 0xc8d2da), Math.cos(a) * d, 0.2 + ((i * 7) % 5) * 0.22, Math.sin(a) * d, 0, a);
+  }
+  else for (let i = 0; i < 9; i++) {
     const a = i * 2.4, d = r * (0.3 + (i % 3) * 0.25);
     part(root, 0.7, 0.5, 0.7, M(i % 2 ? 0x6a6470 : 0x57525e), Math.cos(a) * d, 0.4 + (i % 4) * 0.25, Math.sin(a) * d, 0, a);
   }

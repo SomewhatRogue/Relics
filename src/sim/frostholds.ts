@@ -11,6 +11,7 @@ import { damage, frozen, isDead } from './damage';
 import { afflict, chill, chilled, type World } from './elements';
 import { interrupt } from './spells';
 import type { Enemy, Hero } from './types';
+import { iceAt } from './ice';
 
 /** Goblins this spell can reach: alive, not carried, on the hero's level. */
 const open = (h: Hero, e: Enemy) => !isDead(e) && e.act !== 'carried' && (e.z ?? 0) === (h.z ?? 0);
@@ -36,6 +37,8 @@ export function coldBlast(h: Hero, s: Swing, mult: number, w: World, wide: numbe
   const big = h.perfect, range = (big ? COLD_BLAST.bigRange : COLD_BLAST.range) * wide, arc = big ? COLD_BLAST.bigArc : COLD_BLAST.arc;
   const n = Math.max(1, Math.round(s.dmg * COLD_BLAST.dmg * mult));
   w.ev.push({ k: 'spell', x: h.x, y: h.y, dx: h.fx, dy: h.fy, el: 'frost', what: 'coldblast', r: range, big });
+  // Shallows in the cone ice over (sim/ice.ts): two patches along it, near and far.
+  if ((h.z ?? 0) === 0) for (const [d, r] of [[0.35, 0.3], [0.72, 0.38]]) iceAt(w.fx, h.x + h.fx * range * d, h.y + h.fy * range * d, range * r, w.now, w.ev);
   for (const e of w.enemies) if (open(h, e) && inArc(h.x, h.y, h.fx, h.fy, e.x, e.y, range, arc, e.radius)) freezeHit(w, h, e, n, COLD_BLAST.knock, h.x, h.y, big);
 }
 
@@ -43,6 +46,8 @@ export function coldBlast(h: Hero, s: Swing, mult: number, w: World, wide: numbe
 export function nova(h: Hero, s: Swing, mult: number, w: World, r: number): void {
   const n = Math.max(1, Math.round(s.dmg * NOVA.dmg * mult));
   w.ev.push({ k: 'spell', x: h.x, y: h.y, dx: h.fx, dy: h.fy, el: 'frost', what: 'nova', r, big: h.perfect });
+  // The hard frost ices the shallows all round (sim/ice.ts).
+  if ((h.z ?? 0) === 0) iceAt(w.fx, h.x, h.y, r, w.now, w.ev);
   for (const e of w.enemies) if (open(h, e) && Math.hypot(e.x - h.x, e.y - h.y) <= r + e.radius) freezeHit(w, h, e, n, NOVA.knock, h.x, h.y, false);
 }
 

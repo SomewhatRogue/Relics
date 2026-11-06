@@ -2,6 +2,19 @@
 
 ## Current slice
 
+**World effects, slices 1 to 3: rods and pools, burn the dead, ice and steam** (Claude Opus 5.5, 2026-11-05;
+Kyle approved the proposal's first three rollout items: "more elemental and world effects" like the blood in
+the water and the lightning). Built; waiting on Kyle's play. *Done when*, on his phone and laptop, flat and
+2.5D: a storm strike (his wand's hold, or the sky's) aimed near an ironhide bends into it, ARMOR BROKEN, and
+the storm stream takes an ironhide near the goblin it was going for; storm on a goblin wading a ford crackles
+across the whole of that water and hurts every goblin in it (8 bodies at most), friends in it untouched (the
+sky's own lightning nips them); a butcher goes to a small goblin's body, a red ring fills round it for 2 s,
+it heals and comes up FED (red eyes, a red pulse at its feet, harder and quicker), a heavy hit takes it off
+the body, and fire on the body first leaves ash it won't touch; frost on a ford ices the shallows 6 s,
+goblins on it crawl and a frozen one hit across it skids much further; fire on that ice (or on a goblin
+standing in water, which no longer catches) raises a white steam cloud for 4 s that hides whoever's in it
+from goblins and scalds a little. Numbers in `shared/worldfx.ts`, everything in DECISIONS 2026-11-05. Open:
+FED and the rest through the lore keeper and line editor; whether fire going out in water is too hard on fire.
 **Every class has its own button** (Claude Opus 5.5, 2026-11-05; Kyle: the Rogue, Ranger and Healer get a
 built-in move like GRAB and ELEMENT, taught in the tutorial). Built; waiting on Kyle's play. *Done when*, on his
 phone and laptop: a Rogue's SHADOW STEP, a Ranger's MARK and a Healer's MEND each sit by ATTACK where a Mage's

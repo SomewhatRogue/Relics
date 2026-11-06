@@ -96,11 +96,12 @@ describe('storm jumps only between wet goblins', () => {
     expect(rest).toEqual([0, 0, 0]);
   });
 
-  it('in water, it lands 1.5x and jumps to every wet goblin within reach, never the dry one', () => {
+  it('in water, it lands 1.5x and jolts every goblin in that water, near or far (sim/pools.ts), never the dry one', () => {
     const dry = bolt()[0], [hit, near, far, onDry] = bolt(POOL);
     expect(hit).toBe(Math.round(dry * STORM.wet));
     expect(near).toBeGreaterThan(0);
-    expect(far).toBe(0);
+    // (Beyond STORM.reach, but in the same pool: the water carries it, 2026-11-05.)
+    expect(far).toBe(near);
     expect(onDry).toBe(0);
   });
 
@@ -115,8 +116,9 @@ describe('storm jumps only between wet goblins', () => {
   it('a wet goblin is jumped to once a cast, and never one the strike itself reached', () => {
     const a = mageArena('wand', [[9, 6], [9, 5.2], [11, 6], [11, 5.2]], 'storm', false, 'scrapper', POOL);
     const ev = a.loose(0.9, 0.5, AIM);
-    // Two struck in the circle; each of the two wet ones outside it jumped to once.
-    expect(ev.filter((x) => x.k === 'shock').map((x) => Math.round((x as { x2: number }).x2))).toEqual([11, 11]);
+    // Two struck in the circle; each of the two in the water outside it jolted once (through the pool now).
+    const to = ev.flatMap((x) => (x.k === 'pooljolt' ? x.to : x.k === 'shock' ? [[x.x2, x.y2] as [number, number]] : []));
+    expect(to.map(([x]) => Math.round(x))).toEqual([11, 11]);
     expect(a.es.every((e) => lost(e) > 0)).toBe(true);
   });
 });

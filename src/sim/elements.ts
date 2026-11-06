@@ -15,6 +15,11 @@ import { currentMap } from '../shared/arena';
 import { burnFor, spreadFor } from '../shared/sky';
 import { burnLonger, rimeUp } from './techmage';
 import { wet } from './wet';
+import { iceOn, type WorldFx } from './ice';
+import { douse } from './steam';
+import { poolOf, sayPool, waterOf } from './pools';
+import { jolt } from './rods';
+import { toAsh } from './meal';
 
 /** Everything an element can reach, for one tick. */
 export interface World {
@@ -32,6 +37,8 @@ export interface World {
   cages?: Rng;
   /** The floor's gold and the room's purse stream, for what a technique knocks loose (sim/techrogue.ts). */
   floor?: { pickups: Pickup[]; rng: Rng };
+  /** What the world keeps of an element (sim/ice.ts, steam.ts): ice on the shallows, steam clouds. */
+  fx?: WorldFx;
 }
 
 const dist = (a: { x: number; y: number }, b: { x: number; y: number }) => Math.hypot(a.x - b.x, a.y - b.y);
@@ -59,11 +66,15 @@ export function afflict(w: World, e: Enemy, el: Augment, n: number, how: StormHo
   const { now, ev } = w;
   if (el === 'fire') {
     if (frozen(e, now) || chilled(e, now)) return steam(w, e);
+    // Standing in water it goes out as it lands: a cloud of steam instead (sim/steam.ts).
+    if (douse(w, e)) return;
     ignite(e, now, ev);
     // ATTUNED: a Mage's fire burns longer (sim/techmage.ts).
     burnLonger(w, e);
   } else if (el === 'frost') {
     if (burning(e, now)) return steam(w, e);
+    // Wading: the shallows round it ice over (sim/ice.ts).
+    iceOn(w.fx, e, now, ev);
     if (frozen(e, now)) return;
     if (chilled(e, now)) {
       e.chillUntil = 0;
@@ -84,6 +95,7 @@ export function afflict(w: World, e: Enemy, el: Augment, n: number, how: StormHo
 export function chill(w: World, e: Enemy, share = 1): void {
   if (burning(e, w.now)) return afflict(w, e, 'frost', 0);
   if (rimeUp(w, e, share)) return afflict(w, e, 'frost', 0);
+  iceOn(w.fx, e, w.now, w.ev);
   if (e.chillUntil <= w.now) w.ev.push({ k: 'chill', x: e.x, y: e.y });
   e.chillUntil = Math.max(e.chillUntil, w.now + FROST.chill);
 }
@@ -95,16 +107,22 @@ function zap(w: World, e: Enemy, n: number, cast: number, jump?: number): void {
   e.jolted = cast;
   if (frozen(e, now)) shatter(e, now, ev);
   else if (burning(e, now)) flare(w, e);
-  const near = wet(e) ? w.enemies.filter((o) => o !== e && o.act !== 'dead' && o.act !== 'carried' && o.jolted !== cast && dist(o, e) <= STORM.reach && wet(o)) : [];
+  // Standing in water: everyone in that water is jolted, friends spared (sim/pools.ts).
+  const body = waterOf(e), pool = body >= 0 ? poolOf(body, e.x, e.y, w.enemies, w.heroes, w.survivors ?? [], (o) => o === e || o.jolted === cast) : null;
+  if (pool) sayPool(pool, e.x, e.y, ev);
+  const near = wet(e) ? w.enemies.filter((o) => o !== e && o.act !== 'dead' && o.act !== 'carried' && o.jolted !== cast && dist(o, e) <= STORM.reach && wet(o) && !pool?.foes.includes(o)) : [];
   const rods: Enemy[] = [];
   if (jump === undefined) for (const j of w.javelins) {
     const o = j.state === 'body' ? w.enemies.find((x) => x.id === j.enemy) : undefined;
     if (o && o !== e && o.act !== 'dead' && o.jolted !== cast && !near.includes(o) && !rods.includes(o) && dist(o, e) <= STORM.rodReach) rods.push(o);
   }
-  for (const o of [...near, ...rods]) {
+  for (const o of [...(pool?.foes ?? []), ...near, ...rods]) {
     o.jolted = cast;
     o.lastBy = e.lastBy;
-    ev.push({ k: 'shock', x: e.x, y: e.y, x2: o.x, y2: o.y });
+    // (Through the water it's the crackle across it that's drawn, not an arc through the air.)
+    if (!pool?.foes.includes(o)) ev.push({ k: 'shock', x: e.x, y: e.y, x2: o.x, y2: o.y });
+    // An ironhide jolted: its guard breaks (sim/rods.ts).
+    jolt(o, now, ev);
     const tick = jump !== undefined, hit = rods.includes(o) ? STORM.rodDmg : tick ? jump : Math.max(STORM.min, Math.round(n * STORM.share));
     if (hit <= 0) continue;
     // (A jump is storm, so a wet goblin takes it STORM.wet harder: sim/damage.ts; a tick's is counted already.)
@@ -172,6 +190,8 @@ export function stepElements(w: World): void {
 /** A goblin died burning (sim/damage.ts kill): the goblins near its body catch. */
 function passFire(w: World, e: Enemy): void {
   e.embers = false;
+  // A small goblin's body goes to ash: nothing for a butcher (sim/meal.ts).
+  if (e.kind === 'scrapper') toAsh(e, w.ev);
   spread(w, e);
 }
 

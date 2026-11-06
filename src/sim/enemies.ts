@@ -5,7 +5,7 @@ import { lure, seenFrom } from './lantern';
 import { visible } from './flasks';
 import { HUNGRY_FX, wears } from './hungry';
 import { collide, currentMap, inArea, wadeAt } from '../shared/arena';
-import { FRIENDLY, DECOY, ALERT, ARCHER, BUTCHER, BROOD, NEST, SPIDER, DRUMMER, HEXER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, BANNER, LOGS, NETTER, type EnemyAttackSpec, type EnemySpec, VARIANTS, STEALTH, CLASS_DODGES, WEAPONS, HORN, HOBBLE, STILL } from '../shared/tuning';
+import { FRIENDLY, DECOY, ALERT, ARCHER, BUTCHER, BROOD, NEST, SPIDER, DRUMMER, HEXER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, BANNER, LOGS, NETTER, type EnemyAttackSpec, type EnemySpec, VARIANTS, STEALTH, CLASS_DODGES, WEAPONS, HORN, HOBBLE, STILL, MEAL, ICE } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { hexFriendly, isBackline, stepBackline } from './backline';
 import { shove, slide } from './bodies';
@@ -17,7 +17,8 @@ import { has } from './traits';
 import { hunt } from './spiders';
 import { glowIn, sightIn } from '../shared/timeofday';
 import { noticeFor, reachFor } from '../shared/sky';
-import type { Enemy, EnemyAttack, FightEvent, Hero } from './types';
+import type { Enemy, EnemyAttack, FightEvent, Hero, Survivor } from './types';
+import { stepMeal } from './meal';
 import { isRound } from './types';
 import { vanished } from './rogue';
 import { smokeBlind } from './smokebomb';
@@ -32,7 +33,7 @@ import type { Slick } from './oil';
 import { gather, rushClock, rushLocked } from './rushguard';
 
 /** The room's oil slicks, for the torch-bearers (the room sets it before its goblins move). */
-export const OWN_KIT: { slicks: Slick[] } = { slicks: [] };
+export const OWN_KIT: { slicks: Slick[]; freed: Survivor[] } = { slicks: [], freed: [] };
 
 const SPECS: Partial<Record<Enemy['kind'], EnemySpec>> = { butcher: BUTCHER, scrapper: SCRAPPER, spider: SPIDER, brood: BROOD };
 
@@ -92,6 +93,8 @@ export function begin(e: Enemy, kind: EnemyAttack['kind'], s: EnemyAttackSpec, t
   if (e.roused) (e.attack.windup *= DRUMMER.rouse.windup), (e.attack.dmg = Math.round(e.attack.dmg * DRUMMER.rouse.dmg));
   // Near a banner: the same, its own way (sim/banner.ts).
   if (e.heart) (e.attack.windup *= BANNER.heart.windup), (e.attack.dmg = Math.round(e.attack.dmg * BANNER.heart.dmg));
+  // FED off a body: the same again (sim/meal.ts).
+  if (e.fed) (e.attack.windup *= MEAL.fed.windup), (e.attack.dmg = Math.round(e.attack.dmg * MEAL.fed.dmg));
   e.act = 'attack';
   e.actT = 0;
   ev.push({ k: 'windup', x: e.x, y: e.y, kind });
@@ -230,6 +233,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   if (e.alert === false && !notice(e, heroes, others, now, ev)) return wander(e, rng, now, dt);
   // Called into a pack rush: to its place in the fan (sim/packrush.ts).
   if (e.rushTo && gather(e, (e.chillUntil > now ? FROST.slow : 1) * (e.roused ? DRUMMER.rouse.pace : 1), dt)) return;
+  // A butcher at the dead, or making for a body (sim/meal.ts).
+  if (e.kind === 'butcher' && spec && stepMeal(e, heroes, others, OWN_KIT.freed, spec.speed * (e.chillUntil > now ? FROST.slow : 1), now, dt, ev)) return;
   const t = nearest(e, heroes, now);
   if (!t || e.kind === 'dummy') return;
   const d = Math.hypot(t.x - e.x, t.y - e.y);
@@ -248,7 +253,7 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   const want = Math.atan2(uy, ux), have = Math.atan2(e.fy, e.fx);
   let diff = want - have;
   diff = Math.atan2(Math.sin(diff), Math.cos(diff));
-  const slow = (e.chillUntil > now ? FROST.slow : 1) * (e.snareUntil > now ? NET.slow : 1) * (e.roused ? DRUMMER.rouse.pace : 1) * ((e.hobbleUntil ?? -9) > now ? HOBBLE.slow : 1) * ((e.caltropUntil ?? -9) > now ? CALTROPS.slow : 1);
+  const slow = (e.chillUntil > now ? FROST.slow : 1) * (e.snareUntil > now ? NET.slow : 1) * (e.roused ? DRUMMER.rouse.pace : 1) * ((e.hobbleUntil ?? -9) > now ? HOBBLE.slow : 1) * ((e.caltropUntil ?? -9) > now ? CALTROPS.slow : 1) * (e.fed ? MEAL.fed.pace : 1);
   const rate = e.variant === 'log' ? LOGS.turn : spec.turn, turn = Math.max(-rate * slow * dt, Math.min(rate * slow * dt, diff)), na = have + turn;
   e.fx = Math.cos(na);
   e.fy = Math.sin(na);
@@ -356,7 +361,8 @@ function wander(e: Enemy, rng: Rng, now: number, dt: number): void {
 }
 
 export function walk(e: Enemy, mx: number, my: number, k: number, dt: number): void {
-  const ml = Math.hypot(mx, my) || 1, wade = wadeAt(e.x, e.y);
+  // Held on iced shallows (sim/ice.ts).
+  const ml = Math.hypot(mx, my) || 1, wade = wadeAt(e.x, e.y) * (e.onIce ? ICE.held : 1);
   e.x += (mx / ml) * k * wade * dt;
   e.y += (my / ml) * k * wade * dt;
   e.moving = true;

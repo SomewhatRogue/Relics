@@ -510,6 +510,18 @@ export interface Enemy extends Body {
   haul?: { x: number; y: number };
   /** Frozen and skidding off a heavy hit (sim/iceslide.ts): who sent it, its velocity, how fast it slows, charged. */
   sled?: { by: string; vx: number; vy: number; decel: number; hard: boolean } | null;
+  /** World effects (shared/worldfx.ts). A butcher at a body (sim/meal.ts): the body (`b` a goblin's id, or
+   *  `s` a freed one's), where it lies, when it began and when it's eaten; not before `mealCool`; FED until
+   *  `fedUntil` (`fed` this tick). A body eaten, or burned to ash (sim/worldfire.ts). Held on ice this tick
+   *  (sim/ice.ts). Lightning drawn to it as a rod at `rodAt` (sim/rods.ts). */
+  meal?: { b: number; s?: boolean; x: number; y: number; at: number; until: number } | null;
+  mealCool?: number;
+  fedUntil?: number;
+  fed?: boolean;
+  eaten?: boolean;
+  ashed?: boolean;
+  onIce?: boolean;
+  rodAt?: number;
 }
 
 /** How a goblin died: fell, lost its head, burst apart, burned, or shattered. */
@@ -547,6 +559,9 @@ export interface Survivor extends Body {
   /** Led off on a rope (layout 4, sim/scenes.ts): how far along the room's led path; taken off out of the room for good. */
   led?: { s: number };
   taken?: boolean;
+  /** Their body eaten by a butcher, or burned to ash first (sim/meal.ts, worldfire.ts). */
+  eaten?: boolean;
+  ashed?: boolean;
 }
 
 /** A barrel, crate, table or broken piece: a body that can be smashed, pushed, lifted and thrown. */
@@ -596,6 +611,10 @@ export interface Zone {
   hit?: Record<string, number>;
   /** A wand's lightning strike (sim/skystrike.ts): it falls at `at`; `fell` once it has. A wall of fire: `fell` once it stands. */
   fell?: boolean;
+  /** A wand's lightning strike drawn to an ironhide (sim/rods.ts): the rod's id, and where it was aimed. */
+  rod?: number;
+  rx?: number;
+  ry?: number;
   /** A wind-up bow's aim (for drawing it turned to what it shoots); a wall of fire's way of going. */
   ax?: number;
   ay?: number;
@@ -741,7 +760,16 @@ export type FightEvent =
   /** A frozen goblin sent skidding along (dx, dy) for `r` tiles, and its crash (`r` the burst; sim/iceslide.ts). */
   | { k: 'fling' | 'icecrash'; x: number; y: number; dx: number; dy: number; r: number; big: boolean }
   /** A hero grew a level: full health, and a flash in the class's colour (sim/grow.ts). */
-  | { k: 'levelup'; x: number; y: number; id: string; cls: HeroClass };
+  | { k: 'levelup'; x: number; y: number; id: string; cls: HeroClass }
+  /** World effects (shared/worldfx.ts): lightning drawn from (x, y) into an ironhide at (x2, y2); a jolt through
+   *  a body of water from (x, y) to the goblins at `to` and passing the friends at `spared` (`body` which water,
+   *  `wild` the sky's own); a butcher sitting down to a body, taken off it, FED (`n` healed); a body burned to
+   *  ash; shallows iced `r` round, ice melted; a steam cloud rising `r` round. */
+  | { k: 'rodhit'; x: number; y: number; x2: number; y2: number }
+  | { k: 'pooljolt'; x: number; y: number; to: [number, number][]; spared: [number, number][]; body: number; wild?: boolean }
+  | { k: 'meal' | 'mealbroken' | 'ashed' | 'thaw'; x: number; y: number }
+  | { k: 'fed'; x: number; y: number; n: number }
+  | { k: 'iced' | 'steamup'; x: number; y: number; r: number };
 
 /** A grappling hook: flying out, reeling an enemy in, pulling its owner along, or coming back. */
 export interface Hook {
@@ -854,7 +882,10 @@ export interface Bolt {
  * (shown from STRIKE.warn before), on what it picked (`on`, for drawing a tree or pole lit up). One shape,
  * drawn and judged (shared/storm.ts strikeShape, inStrike).
  */
-export interface Strike { id: number; x: number; y: number; r: number; at: number; on: 'tree' | 'banner' | 'engine' | 'goblin' | 'hero' | 'ground'; done?: boolean }
+export interface Strike { id: number; x: number; y: number; r: number; at: number; on: 'tree' | 'banner' | 'engine' | 'goblin' | 'hero' | 'ground' | 'rod'; done?: boolean; /** Drawn to an ironhide (sim/rods.ts): where it would have fallen, and the rod's id. */ ox?: number; oy?: number; rod?: number }
+
+/** Shallows iced over by frost (sim/ice.ts, ICE): a circle, iced only where the water is shallow. */
+export interface Ice { id: number; x: number; y: number; r: number; at: number; until: number }
 
 /** A poison puddle where the brood mother's glob landed (sim/puddles.ts). */
 export interface Puddle { id: number; x: number; y: number; r: number; until: number }

@@ -9,7 +9,8 @@
  * same goblin at the same build.
  */
 import { wetMult } from './techmage';
-import { STORM, STREAM } from '../shared/tuning';
+import { ROD, STORM, STREAM } from '../shared/tuning';
+import { isRod, jolt, rodHit, rodNear } from './rods';
 import { castElement } from './channel';
 import { damage, isDead, isDummy } from './damage';
 import { afflict, newCast, type World } from './elements';
@@ -43,8 +44,15 @@ const angle = (h: Hero, e: Enemy) => {
 const reachable = (h: Hero, e: Enemy, reach: number, cone: number) =>
   !isDead(e) && e.act !== 'carried' && (e.z ?? 0) === (h.z ?? 0) && Math.hypot(e.x - h.x, e.y - h.y) - e.radius <= reach && angle(h, e) <= cone;
 
-/** The goblin it's on: the one it holds while it can, else the nearest in front (goblins before dummies). */
+/** The goblin it's on: the one it holds while it can, else the nearest in front (goblins before dummies), or
+ *  an ironhide within ROD.reach of that one and in the stream's reach, which draws it (sim/rods.ts). */
 function target(h: Hero, enemies: Enemy[]): Enemy | undefined {
+  const st = h.stream!, e = nearest(h, enemies);
+  if (!e || e.id === st.id) return e;
+  return rodNear(enemies, e.x, e.y, ROD.reach, (o) => reachable(h, o, STREAM.reach + STREAM.slack, 180)) ?? e;
+}
+
+function nearest(h: Hero, enemies: Enemy[]): Enemy | undefined {
   const st = h.stream!, held = st.id ? enemies.find((e) => e.id === st.id) : undefined;
   if (held && reachable(h, held, STREAM.reach + STREAM.slack, STREAM.keepCone)) return held;
   let best: Enemy | undefined, bd = Infinity;
@@ -76,8 +84,13 @@ export function stepStreams(w: World): void {
       continue;
     }
     const e = target(h, w.enemies);
-    // Its goblin dead or away (or a first one): it takes the next, keeping its build.
-    if ((e?.id ?? 0) !== st.id) Object.assign(st, { id: e?.id ?? 0, owe: 0, oweJump: 0 });
+    // Its goblin dead or away (or a first one): it takes the next, keeping its build. Drawn into iron, the guard breaks.
+    if ((e?.id ?? 0) !== st.id) {
+      const was = nearest(h, w.enemies);
+      if (e && isRod(e) && was && was !== e) rodHit(e, was.x, was.y, w.now, w.ev);
+      else if (e && isRod(e)) jolt(e, w.now, w.ev);
+      Object.assign(st, { id: e?.id ?? 0, owe: 0, oweJump: 0 });
+    }
     if (!e || w.now < st.next) continue;
     st.next = Math.max(st.next + STREAM.every, w.now);
     const build = streamBuild(st.step), soaked = wet(e) ? wetMult(h, STORM.wet) : 1;

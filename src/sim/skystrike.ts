@@ -6,7 +6,8 @@
  * on everything in the circle: the hold's damage, shields or no; small goblins stunned (the stun cap
  * holds); wet ones 1.5x and it jumps on (sim/elements.ts). It spares friends, so its mark is drawn in the
  * friendly gold (client/skystrikedraw.ts), never the goblins' red. One shape: `inSkyStrike` is what the
- * room judges and the circle both views draw.
+ * room judges and the circle both views draw. An ironhide within ROD.reach of where it's aimed draws it
+ * onto itself (sim/rods.ts), and the mark is called there.
  */
 import { collide } from '../shared/arena';
 import { SKY_STRIKE, type Swing } from '../shared/tuning';
@@ -15,6 +16,7 @@ import { afflict, newCast, type World } from './elements';
 import { spare } from './foundrelics';
 import { burstMult } from './knacks';
 import { stun } from './stuns';
+import { rodHit, rodNear } from './rods';
 import type { Enemy, Hero, Zone } from './types';
 
 /** Whether a body at (x, y), `rad` round, is caught: its edge inside the circle. */
@@ -55,11 +57,13 @@ function spotOf(h: Hero, enemies: Enemy[], dx: number, dy: number, dist: number)
 export function callStrike(h: Hero, s: Swing, mult: number, aim: (range: number, fallback: number) => number, zones: Zone[], w: World): void {
   const [dx, dy] = aimOf(h, w.enemies), big = h.perfect;
   (h.fx = dx), (h.fy = dy);
-  const { x, y } = spotOf(h, w.enemies, dx, dy, Math.min(SKY_STRIKE.range, aim(SKY_STRIKE.range, SKY_STRIKE.fallback)));
+  const aimed = spotOf(h, w.enemies, dx, dy, Math.min(SKY_STRIKE.range, aim(SKY_STRIKE.range, SKY_STRIKE.fallback)));
+  // An ironhide near where it would fall draws it (sim/rods.ts): it falls on the iron instead.
+  const rod = rodNear(w.enemies, aimed.x, aimed.y), { x, y } = rod ? { x: rod.x, y: rod.y } : aimed;
   // (WIDE BURST widens it as it does any burst.)
   const r = (big ? SKY_STRIKE.bigR : SKY_STRIKE.r) * burstMult(h), at = w.now + SKY_STRIKE.delay;
   const n = Math.max(1, Math.round(s.dmg * SKY_STRIKE.dmg * mult));
-  zones.push({ kind: 'skystrike', x, y, r, at, until: at + SKY_STRIKE.show, next: at, owner: h.id, el: 'storm', big, n });
+  zones.push({ kind: 'skystrike', x, y, r, at, until: at + SKY_STRIKE.show, next: at, owner: h.id, el: 'storm', big, n, ...(rod ? { rod: rod.id, rx: aimed.x, ry: aimed.y } : {}) });
   w.ev.push({ k: 'spell', x, y, dx, dy, el: 'storm', what: 'strike', r, big });
 }
 
@@ -69,6 +73,12 @@ function fall(z: Zone, w: World): void {
   w.ev.push({ k: 'skystrike', x: z.x, y: z.y, r: z.r, big: !!z.big });
   const by = w.heroes.find((o) => o.id === z.owner), n = z.n ?? 1, cast = newCast();
   const hit = w.enemies.filter((e) => !isDead(e) && e.act !== 'carried' && !e.under && inSkyStrike(z, e, e.radius));
+  // Drawn into a rod: the bolt bends into it (its guard broken, wherever it has stepped to).
+  const rod = z.rod ? w.enemies.find((e) => e.id === z.rod) : undefined;
+  if (rod && !isDead(rod)) {
+    rodHit(rod, z.rx ?? z.x, z.ry ?? z.y, w.now, w.ev);
+    if (!hit.includes(rod)) hit.push(rod);
+  }
   // (All of them reached by this cast already, so a jump from one never lands twice on another in it.)
   for (const e of hit) e.jolted = cast;
   for (const e of hit) {

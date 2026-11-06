@@ -49,6 +49,7 @@ export * from './stuncap.js';
 export * from './raiders.js';
 export * from './prowlers.js';
 export * from './encounters.js';
+export * from './worldfx.js';
 import { BANNER, NETTER, THIEF, LOGS, ROOF, IRONHIDE } from './raiders.js';
 import { WOLF, KEEPER, OIL, TORCH, SAPPER, CAVE } from './prowlers.js';
 import { DRUMMER, HEXER } from './backline.js';

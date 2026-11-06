@@ -303,3 +303,4 @@ most Want among the heroes is the one the bells don't spare).
 - A Warrior is "strong enough to throw men" (the grab and throw). The Rogue is "weak head on, twice as strong from behind".
 - The Mage's storm spells on the card are Spark (tap) and Lightning Bolt (hold).
 - The pitch lines and the "can't" lines are gone from the card (Kyle cut both).
+- Butchers eat their own dead as well as ours, and come up GORGED for a while (Kyle and the lore keeper, 2026-11-05). Eating only heals and gorges one; it never grows a butcher, which only slivers do. Burn the body and the ash gives it nothing, which is Hew's reason for burning the column's dead.

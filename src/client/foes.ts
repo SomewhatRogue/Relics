@@ -13,6 +13,7 @@ import { drawIronhide } from './ironhidedraw';
 import { drawLessonMark } from './lessonfoes';
 import { drawLogs, drawLogsDead } from './foedraw';
 import { drawMound, drawWolf } from './beastdraw';
+import { drawAsh, drawEaten, drawFed, drawMealing } from './remainsdraw';
 import { blit, blitBody, ease, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
 import { armOffset, drawFigure, layout } from './figure';
 import { BUTCHER_CUT, SCRAPPER_CUT, jointed } from './joints';
@@ -157,6 +158,9 @@ export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number, dozing = false
   if (e.act === 'dead') {
     // Burst or shattered: nothing left but the stains. Otherwise the body, headless or burned.
     if (e.death === 'burst' || e.death === 'shatter') return;
+    // Eaten by a butcher, or burned to ash first (sim/meal.ts, worldfire.ts).
+    if (e.eaten) return drawEaten(c, x, y, e.kind === 'butcher');
+    if (e.ashed) return drawAsh(c, x, y, c.t ?? c.now, e.id, e.kind === 'butcher');
     const big = e.kind === 'butcher';
     const s = e.death === 'behead' ? (big ? SPRITES.butcherHeadless : SPRITES.scrapperHeadless) : e.death === 'burn' ? (big ? SPRITES.butcherBurnt : SPRITES.scrapperBurnt) : big ? SPRITES.butcherDown : SPRITES.scrapper;
     // A corpse on a javelin hangs where it was pinned until it fades, just before the respawn.
@@ -173,7 +177,8 @@ export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number, dozing = false
   const t = c.t ?? c.now, flash = t - e.hitAt < 0.09 ? 0.9 : 0;
   const hurt = e.hp < e.maxHp && (t - e.hitAt < 3 || e.hp < e.maxHp * 0.5);
   if ((e.kind === 'butcher' || e.kind === 'scrapper') && hurt) ring(c, x, y, e.kind === 'butcher' ? 11 : 6, '#e24b4a', e.hp / e.maxHp);
-  if (e.kind === 'butcher') return butcher(c, e, x, y, t);
+  // At a body, tearing at it; FED, eyes burning (remainsdraw.ts).
+  if (e.kind === 'butcher') return butcher(c, e, x, y, t), drawMealing(c, e, x, y, t), drawFed(c, e, x, y, t);
   if (e.variant === 'log') return drawLogs(c, e, x, y);
   if (e.kind === 'scrapper' && dozing) return sleeping(c, e, x, y, flash);
   if (e.kind === 'scrapper' && e.feeding) {

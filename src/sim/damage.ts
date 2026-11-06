@@ -1,5 +1,5 @@
 /** Damage to an enemy from anything (blades, shots, blasts, burning), and what death resets. */
-import { BROOD, BUTCHER, GUARD, OVERKILL, SCRAPPER, SPIDER, STORM, SWING_DUMMY, TRAIT, WEAK_POP, weakOn, MARK, type Hurt } from '../shared/tuning';
+import { BROOD, BUTCHER, GUARD, OVERKILL, SCRAPPER, SPIDER, STORM, SWING_DUMMY, TRAIT, WEAK_POP, weakOn, MARK, MEAL, type Hurt } from '../shared/tuning';
 import type { DeathKind, Enemy, FightEvent } from './types';
 import { wet } from './wet';
 import { clanks, plated } from './ironhide';
@@ -83,6 +83,8 @@ export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: Da
   // An ironhide's plates: a heavy hit breaks its guard, anything else barely gets through (sim/ironhide.ts).
   const breaks = !!o.heavy && !o.tick, clank = !o.tick && !breaks && clanks(e, now);
   n = plated(e, n, now, breaks, ev);
+  // A butcher at a body: a heavy hit takes it off the meal (sim/meal.ts).
+  if (e.meal && breaks) (e.meal = null), (e.mealCool = now + MEAL.again), ev.push({ k: 'mealbroken', x: e.x, y: e.y });
   e.hp -= n;
   e.hitAt = now;
   ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy: !!o.heavy, on: 'enemy', tick: o.tick, src: o.src, big: e.kind === 'butcher', ...(o.backstab ? { backstab: true } : {}), ...(clank ? { plated: true } : {}) });

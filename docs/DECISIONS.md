@@ -2,6 +2,105 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-05: world effects, slices 1 to 3: rods and pools, burn the dead, ice and steam (Kyle; Claude Opus 5.5)
+
+Kyle approved the world effects proposal's first three rollout items: he loves the blood clouding in water
+and the lightning, and wants more elemental and world effects like them. Every number in
+`shared/worldfx.ts` (ROD, POOL, MEAL, ICE, STEAM_CLOUD, re-exported by tuning.ts); bodies of water in
+`shared/waterbody.ts`; the room's rules in `sim/rods.ts`, `pools.ts`, `meal.ts`, `ice.ts`, `steam.ts`,
+`worldfire.ts`; drawn by `client/worlddraw.ts`, `fxworld.ts`, `remainsdraw.ts`, heard in `worldsound.ts`.
+
+**1. Rods and pools.**
+- **Rods** (`sim/rods.ts`). An ironhide's iron draws lightning from **4 tiles** (`ROD.reach`, to the edge of its
+  body). The wand's lightning strike aimed within 4 of one is called onto it instead (the gold mark is drawn
+  on it, so you see it move before it falls); the sky's own strike looks for ironhides as for a banner pole
+  (weight 3) and anything it picks within 4 of one goes to the iron; the storm stream, taking a new goblin,
+  takes an ironhide within 4 of that one and in the stream's reach. Lightning drawn in bends into it from where
+  it was going (a bolt from above through a midpoint, a flash), it's struck wherever it has stepped to, and
+  its **guard breaks** (`crack`, the usual 3 s, ARMOR BROKEN). A storm **jolt** (a wet jump or a pool jolt,
+  even a stream tick's) breaks it too. While lightning is in it, it crackles for 1.6 s (`rodAt`).
+- **Pools** (`sim/pools.ts`). Storm landing on a goblin standing in water jolts everyone in that same body of
+  water: water boxes touching or overlapping are one body (`bodyAt`), shallow and deep together. Nearest
+  first, **8 bodies at most** (`POOL.cap`, friends counted), within **12 tiles** (`POOL.reach`, so the
+  Barrowfields' river doesn't jolt goblins dozing at the far end of the map). Goblins take what a wet jump
+  takes (half the blow, at least 6, then 1.5x as they're wet), once a cast. This replaces the 3-tile wet jump
+  inside water; the 3-tile jump still runs for goblins wet from the rain.
+- **The friend rule: none from a friend's storm.** The wand's strike already spares friends (SPARED), the iced
+  skid spares them, and on a phone you can't see who's wading the far end of a ford; a jolt that cost a
+  friend health for standing in water would make storm a thing you hold back from. They're drawn passed by (a
+  gold ring at their feet). **The sky's own lightning is on nobody's side**: landing in water (its middle, or a
+  goblin it struck standing in it) it jolts goblins **12** and friends **4** (a roll gets you out, the grace on
+  coming in holds), the freed too.
+- **Seen.** The crackle runs across the water's surface along the body of water the room judged: forks over the
+  water round the strike (never over a body standing in it), a bright line to each goblin it reached, flashes
+  and sparks on them, a cold light over the water, a fizzing crackle (`pooljolt` event: from where, to whom,
+  who was passed by, which body). In 2.5D the crackle and ice are painted on a scratch layer with the bodies
+  standing in them cut out, as the wall of fire does.
+- `sim/elements.ts` `zap` takes the pool; `sim/skystrike.ts`, `storm.ts`, `stormpick.ts`, `stream.ts` the rods.
+
+**2. Burn the dead** (`sim/meal.ts`).
+- **What's a body.** A small goblin's (any scrapper sort) lying whole: not burst, shattered, burned, eaten, ash,
+  pinned on a javelin, or faded (a body fades over its sort's 5 s, so it's edible while you can see it); or one
+  of the freed killed. The lore says the hungry eat people and their own (sold their mothers and ate the
+  proceeds); for the lore keeper: does a butcher eating a fallen goblin hold?
+- **The meal.** A butcher (not the Stoker, not the wood's drilled ones) with a body within 4 tiles and no hero
+  within 1.5 of it walks to the body; within reach it eats for **2 s** (`MEAL.time`): a red ring round the body
+  filling clockwise, a clock and not a blow, so no striped edge and nothing to block. Done: it heals **a
+  quarter of its health** (65 of 260), the body is gone (a stain and bones), and it's **FED for 15 s**: blows
+  **1.25x**, wind-ups **0.85x**, walking **1.2x** (as a drum's rouse, its own numbers). A FED butcher's eyes
+  burn red, it drips, a red pulse beats at its feet, and FED rises over it as it comes up.
+- **Taken off it.** A heavy hit (anything that would break an ironhide's guard: a charged blow, a perfect, a
+  burst, a strike) takes it off, as a stun, a freeze, a net or a grab does; then it waits 5 s before trying
+  again. Quick hits don't. A body that goes to ash mid-meal ends it.
+- **Fire on the dead** (`sim/worldfire.ts`). Each tick the room gathers where fire is: a goblin set alight or
+  burning, a fireball's burst, a flame sweep, the fire ring, a wall of fire rolling or standing, a lit oil
+  slick, a flare. A body in it goes to **ash** (a grey heap with embers winking; ASHED event: a puff of ash and
+  embers, a fire whoosh) and feeds nothing. A small goblin that dies alight leaves ash too (its death pass,
+  `elements.ts` `passFire`). So fire answers the butcher: Hew burned the eleven.
+
+**3. Ice and steam.**
+- **Ice** (`sim/ice.ts`). Frost on shallows ices them **6 s**: the cold blast over two circles along its cone,
+  the hard frost (the staff's nova) over its own ring, and any freeze or chill landing on a goblin standing in
+  shallows (the wand's icicles, the staff's frost sweep, the spellblade's frost cuts, a flask, ATTUNED) a patch
+  0.9 round it. Only where the water is shallow: deep water and the bank inside the same circle stay as they
+  were (judged by `iceUnder`, drawn clipped to the shallows the same way). 12 patches at most; a patch inside
+  one already there keeps that one going. Goblins wading it are **held: 0.35 of their wading pace** (`walk`
+  reads `onIce`). A frozen goblin skidding across it slows at **0.4** of the rate (`ICE.slip`), so it goes about
+  2.5 times as far (tests: past 8 tiles where plain water gives 5.5). Friends walk it as plain shallows: the
+  frost is theirs. Drawn pale and stepped with a dither, white at its edge, two cracks; in 2.5D the held ones
+  get a rim of ice in front of their feet.
+- **Steam** (`sim/steam.ts`). Fire on ice melts that patch to a **steam cloud 4 s** (1.4 round, or the patch's
+  size). **Fire on a goblin standing in water goes out as it lands**: no burn, a cloud instead (and the ice
+  under it melts); a burning goblin wading in is put out the same way. Judgment: the water's answer to fire,
+  as storm owns the water; fire on a ford now buys cover instead of a burn. Open for Kyle: if it's too hard on
+  fire, the douse is one call in `afflict`. The cloud is one of the room's smokes with `steam` set, so the
+  smoke's rules hide whoever's in it from goblins (they see nobody beyond arm's reach, and blows across its
+  edge are dropped), and it **scalds every 1 s: goblins 3, friends 1**. A cloud near another keeps that one
+  going; 6 at most. The old STEAM burst (fire meeting frost on a goblin) is unchanged. Drawn white and a little
+  thicker than smoke in flat; small white wisps in 2.5D (gaps between, so you still see whoever's inside).
+- `sim/frostholds.ts` (the blast and nova ice), `sim/iceslide.ts` (one line: the slip), `sim/enemies.ts` (the
+  meal hook, FED, the held pace), `sim/damage.ts` (a heavy hit off the meal).
+
+**Determinism and online.** All of it is the room's: ice is a list on the room (`ices`, sent to guests as a
+collection), steam is in `smokes`, the meal, FED, ash and eaten are fields on the goblins and the freed, and
+every event is the room's. Nothing new uses Math.random in the sim. A guest sees the same.
+
+**New player-facing words** (for the lore keeper, then the line editor): **FED** (the callout over a butcher
+that has eaten). No other new words: ARMOR BROKEN, SPARED and STEAM's look are as before. Placeholders the lore
+keeper may want to name later: rods, pools, ash, steam (code and docs only, nothing on screen).
+
+Tests: `tests/worldfx.test.ts` (the wand's strike falls on an ironhide within reach and breaks its guard, and
+where it was aimed with none near; the sky's strike drawn onto an ironhide; the stream drawn onto one; the
+pool jolt reaches near and far in the same water, never the pond apart or the bank; friends in it take
+nothing and are drawn passed by; the cap, nearest first, friends counted; an ironhide jolted through water
+broken; the sky's lightning in water nips a friend; the butcher eats, heals and is FED, its blows quicker and
+harder; fire leaves ash it can't eat; a goblin dying alight leaves ash; a heavy hit interrupts and a light one
+doesn't; a hero right on it gets the blow; frost ices shallows only, never deep water or dry ground; a tap and
+the nova ice; waders held; the skid goes further on ice; fire on ice makes steam; fire on a goblin in water
+steams and on the bank burns; steam hides you and scalds; two runs agree; ice and FED ride the patch).
+`tests/storm.test.ts` updated: the far wet goblin in the same pool is jolted now. `node scripts/world-look.cjs
+[url] [outdir]` shoots a jolt across Barrowby's ford, a FED butcher beside one at its meal, iced shallows with
+goblins held, and a steam cloud, on a phone, flat and 2.5D.
 ## 2026-11-05: the staff's fire hold is a wall of fire rolled at a goblin (Kyle; Claude Opus 5.5)
 
 Kyle: "Wizard staff fire, hold down to make a wall of fire that moves towards the targeted enemy and stays
