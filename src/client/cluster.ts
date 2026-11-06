@@ -14,12 +14,14 @@ import { STAITHE_WORDS } from '../shared/staithewords';
 import { carriedItem } from '../sim/charge';
 import { isDark, relicMax } from '../shared/relicitems';
 import { fillCol } from './reliccard';
-import { DODGE as DODGE_RULE, guardOf, dodgeName, dodgeOf, HERO, RELICS, WEAPONS, type Item } from '../shared/tuning';
+import { DODGE as DODGE_RULE, guardOf, dodgeName, dodgeOf, HERO, RAISE, RELICS, WEAPONS, type Item } from '../shared/tuning';
 import { dodgeBreath } from '../sim/knacks';
 import { blinkCost } from '../sim/laddermage';
 import { knows } from '../sim/types';
 import { grabbable } from '../sim/grab';
 import { raisable } from '../sim/party';
+import { risable, riseWait } from '../sim/raise';
+import { RAISEW } from './raisewords';
 import { cuttable } from '../sim/netter';
 import { torchable } from '../sim/torch';
 import { kindleable } from '../sim/kindle';
@@ -154,16 +156,20 @@ export class Cluster {
     // (At the Staithe GRAB cuts one of the netted free, or shoves the laid log in: sim/staithebits.ts.)
     const stg = mode === 'run' ? staitheGrabbable(me, room.survivors, room.map) : null, shove = stg === 'shove';
     const raise = me.act === 'idle' && raisable(me, room.heroes), cut = cuttable(me, room.heroes, room.time) || stg === 'cut';
+    // A Cleric by a friend who is out: RAISE (sim/raise.ts), dim with the seconds left while its cooldown runs.
+    // (Kneeling at it, the button stays lit: the raise is going on.)
+    const rise = mode === 'run' && !raise && !cut ? (risable(me, room.heroes, room.time) ?? (room.heroes.some((o) => o.out && o.riseBy === me.id) ? 'ready' : null)) : null;
     const burn = !raise && (!!torchable(me, room.enemies) || (mode === 'run' && !!kindleable(me, room.map)));
-    const lifter = kit.cls === 'WARRIOR', active = can || raise || burn || cut || shove;
+    const lifter = kit.cls === 'WARRIOR', active = can || raise || rise === 'ready' || burn || cut || shove;
     // A drop at your feet with nothing else here: LOOK opens its card.
     const looking = !!look && !busy && !spot?.chest && !spot?.door;
     const use = (!!spot && !busy && (mode !== 'run' || !!spot.chest)) || looking;
-    const what: IconId = raise || cut ? 'help' : burn ? 'burn' : carrying ? 'throw' : 'grab';
-    const word = cut ? 'CUT FREE' : shove ? STAITHE_WORDS.shove : raise ? 'HELP UP' : burn ? 'BURN' : carrying ? 'THROW' : 'GRAB';
+    const what: IconId = raise || cut || rise ? 'help' : burn ? 'burn' : carrying ? 'throw' : 'grab';
+    const word = cut ? 'CUT FREE' : shove ? STAITHE_WORDS.shove : raise ? 'HELP UP' : rise ? RAISEW.button : burn ? 'BURN' : carrying ? 'THROW' : 'GRAB';
     // (With no dodge the slot has its own place, so a USE or OPEN can show beside it.)
-    const showGrab = (active || lifter) && (!dodges || !(use && !active && mode !== 'town'));
-    b.grab.show(showGrab ? { shape: 'round', size: 29, grade: active ? 'gilt' : 'stone', icon: icon(what) } : null, '', word, word);
+    const showGrab = (active || lifter || !!rise) && (!dodges || !(use && !active && mode !== 'town'));
+    const wait = rise === 'wait' ? riseWait(me, room.time) : 0;
+    b.grab.show(showGrab ? { shape: 'round', size: 29, grade: active ? 'gilt' : 'stone', icon: icon(what), cd: wait / RAISE.cooldown } : null, wait ? String(Math.ceil(wait)) : '', word, word);
     b.grab.el.classList.toggle('dim', !active);
     const uw = looking ? 'LOOK' : spot?.chest ? 'OPEN' : spot?.door ? 'ENTER' : spot?.pet ? 'PET' : spot?.talk && spot.talk !== 'board' && spot.talk !== 'market' && spot.talk !== 'gate' && spot.talk !== 'practice' ? 'TALK' : 'USE';
     const ui: IconId = uw === 'LOOK' ? 'use' : uw === 'OPEN' ? 'open' : uw === 'ENTER' ? 'enter' : uw === 'TALK' ? 'chat' : 'use';

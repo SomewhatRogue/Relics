@@ -16,6 +16,9 @@
 #hud .bar i, #hud .bar .trail { position: absolute; left: 0; top: 0; height: 100%; display: block; }
 #hud .hp i { background: linear-gradient(to bottom, #e86a50 0 var(--px), var(--blood-hi) var(--px) calc(3 * var(--px)), var(--blood) calc(3 * var(--px)) calc(5 * var(--px)), #7a1a12 calc(5 * var(--px))); transition: width 0.08s steps(2); }
 #hud .hp .trail { background: #d8b080; }
+/* Raised this job (sim/raise.ts): the far end cut off, dark stone with a red seam and a little hatching. */
+#hud .hp .cut { position: absolute; right: 0; top: 0; height: 100%; display: block; text-decoration: none; background: repeating-linear-gradient(135deg, #1a1416 0 calc(2 * var(--px)), #2a1c1e calc(2 * var(--px)) calc(4 * var(--px))); box-shadow: inset var(--px) 0 0 #8a2a22; }
+#hud .hp .cut[hidden] { display: none; }
 #hud .hp.poisoned i { background: linear-gradient(to bottom, var(--rot-glow) 0 var(--px), #8aac3a var(--px) calc(3 * var(--px)), var(--rot) calc(3 * var(--px)) calc(5 * var(--px)), #4a5a1a calc(5 * var(--px))); }
 #hud .hp.low i { animation: hp-low 0.5s steps(1) infinite; }
 @keyframes hp-low { 50% { filter: saturate(1.6) contrast(1.3); } }

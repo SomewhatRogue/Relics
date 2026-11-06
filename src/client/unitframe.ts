@@ -4,15 +4,19 @@
  * a phone's is the pips round ATTACK, a Mage's magic round BLINK), and a row of small marks for what's on you now (blessed, warded,
  * poisoned, brandy, smoke, the church's light). A tap on the face shows the weapon and kit lines. On a
  * job, small hearts under the health bar: the times you can still get back up (alone, a heart each; in a
- * party, your one get-up). Tapped or hovered, they say what they are.
+ * party, your one get-up). Tapped or hovered, they say what they are. Raised by a Cleric this job, the
+ * bar's far end is cut off and darkened: the max health lost till the job ends (sim/raise.ts).
  */
 import { heroLook, lookDef } from './sprites';
 import { icon, type IconId } from './icons';
 import type { Game } from './game';
 import { MAX_DOWNS } from '../sim/run';
+import { RAISEW } from './raisewords';
 
 /** What the hearts are, on a tap or a hover (Kyle: keep the words plain). */
 const UPS_SAY = 'How many more times you can get back up on this job';
+/** The health bar's cut-off end, on a hover (RAISE: sim/raise.ts). */
+const CUT_SAY = RAISEW.cut;
 
 const $ = (s: string) => document.querySelector(s) as HTMLElement;
 
@@ -47,7 +51,11 @@ export class UnitFrame {
     if (hp > this.trail) this.trail = hp;
     else if (now > this.trailAt) this.trail = Math.max(hp, this.trail - 0.9 * (1 / 60));
     this.hpWas = hp;
-    ($('#hud .hp .trail') as HTMLElement).style.width = this.trail * 100 + '%';
+    // Raised this job (sim/raise.ts): the bar's far end cut off and darkened, the rest the health there is.
+    const keep = 1 - (me.hpCut ?? 0), cut = $('#hud .hp .cut');
+    ($('#hud .hp .trail') as HTMLElement).style.width = this.trail * keep * 100 + '%';
+    if (cut.hidden !== keep >= 1) cut.hidden = keep >= 1;
+    if (keep < 1 && cut.style.width !== (1 - keep) * 100 + '%') (cut.style.width = (1 - keep) * 100 + '%'), (cut.title = CUT_SAY);
     const low = hp < 0.3 && hp > 0 && game.mode !== 'town';
     $('#hud .hp').classList.toggle('low', low);
     // (The screen's edge darkens red in steps while you're low: hud.css.)

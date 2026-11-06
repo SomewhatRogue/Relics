@@ -16,6 +16,7 @@ import { EL_COL, heldEl } from './palette';
 import { drawLoad } from './xbowmark';
 import { drawBladeMark } from './blademark';
 import { drawHolyGuard } from './holyguardmark';
+import { drawRaise } from './raisemark';
 import { drawHolyShield } from './holyshield';
 import { drawText } from './pixfont';
 import { PARTY } from '../shared/tuning';
@@ -62,6 +63,8 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
   if (h.act === 'down') {
     shadow(c, x, y, 6);
     spin(c, look.down, x, y - 4, Math.PI / 2, 0.85);
+    // Out, and a Cleric raising them: the light going in (raisemark.ts).
+    drawRaise(c, h, x, y, t);
     // Alone: up in a moment. In a party: the seconds left to be picked up, and how far along it is.
     if (h.out || h.lying) return;
     // In a party: gold while your own get-up is still to come, red once it's spent (then it's out).

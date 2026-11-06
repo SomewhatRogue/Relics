@@ -24,7 +24,7 @@ export const INTEREST = { radius: 20, blocks: 26, hear: 30 };
 type State = ReturnType<typeof stateOf>;
 type Ent = Record<string, unknown>;
 /** Events every friend gets, wherever they happened. */
-const EVERYONE = new Set(['exped', 'down', 'pickedup', 'gotup', 'raising', 'grudge', 'dread']);
+const EVERYONE = new Set(['exped', 'down', 'pickedup', 'gotup', 'raising', 'rising', 'risebroke', 'risen', 'grudge', 'dread']);
 
 const near = (e: Ent, x: number, y: number, r2: number) => {
   if (typeof e.x !== 'number' || typeof e.y !== 'number') return true;

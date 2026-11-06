@@ -1,5 +1,5 @@
 /** What a hero's worn gear adds up to (shared/gear.ts), read wherever the fight uses a number. */
-import { drilled, gearStats, perkFx, type Fx, type GearStats } from '../shared/tuning';
+import { cutMax, drilled, gearStats, perkFx, type Fx, type GearStats } from '../shared/tuning';
 import type { Hero } from './types';
 
 type Stats = GearStats & { crit: number; fx: Fx };
@@ -17,9 +17,9 @@ export function statsOf(h: Hero): Stats {
   return s;
 }
 
-/** Health from gear on top of the hero's own; keeps the hurt the same when it changes. */
+/** Health from gear on top of the hero's own, less what being raised took this job (sim/raise.ts); keeps the hurt the same when it changes. */
 export function refreshHealth(h: Hero): void {
-  const max = h.baseHp + statsOf(h).health, lost = h.maxHp - h.hp;
+  const max = cutMax(h.baseHp + statsOf(h).health, h.hpCut), lost = h.maxHp - h.hp;
   h.maxHp = max;
   h.hp = Math.max(1, Math.min(max, max - lost));
 }

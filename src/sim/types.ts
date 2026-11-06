@@ -275,6 +275,14 @@ export interface Hero extends Body {
   /** Seconds left of the grace on coming into a new room: nothing hurts this hero till it's gone. */
   safeT?: number;
   selfUp?: boolean;
+  /** RAISE (sim/raise.ts): out, the Cleric kneeling to raise this hero and the room time they began
+   *  ('' and -9 when none; the progress is worked out from it, so nothing goes out a tick); the share of the most health taken
+   *  off by being raised this job, and the Clerics who have raised them; on a Cleric, when they may again. */
+  riseBy?: string;
+  riseAt?: number;
+  hpCut?: number;
+  risenBy?: string[];
+  riseReadyAt?: number;
   /** Out of bounds (sim/dread.ts): seconds of dread built up (0 in bounds), what comes for them here,
    *  and seconds since they were seized (-1 not). Sent to every screen: the dread is drawn from these. */
   dread?: number;
@@ -745,6 +753,8 @@ export type FightEvent =
   | { k: 'stolen'; x: number; y: number; id: string; n: number; potion?: PotionId }
   /** A hero down (`by`: the teammate whose blow did it), or picked up (`by`: who picked them up). */
   | { k: 'down' | 'pickedup' | 'raising' | 'gotup'; x: number; y: number; id?: string; by?: string }
+  /** RAISE (sim/raise.ts): a Cleric (`by`) begins raising a friend who is out (`id`), is broken off, or has raised them (`n`: the cut, in %). */
+  | { k: 'rising' | 'risebroke' | 'risen'; x: number; y: number; id: string; by: string; n?: number }
   /** A press that did nothing, said to that hero: GRAB with nothing to take hold of, ATTACK held on an empty crossbow. */
   | { k: 'nograb' | 'reloadcue'; x: number; y: number; id: string }
   /** The class's own button (sim/signature.ts): a Ranger's MARK on a goblin (`id` the Ranger); a Healer's

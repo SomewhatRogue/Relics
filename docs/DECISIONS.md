@@ -205,6 +205,75 @@ minutes nothing, getting up one; the friend sees the hero parked at the spot and
 butts the same, and a newcomer told once; the pond, Pennock and Corin on the map, the spots dry and walkable; only from
 the open town). Shots: `node scripts/pastime-look.cjs <url> shots/pastimes`; the town with friends parked from
 `scripts/town-online.cjs` (`shots/pastimes/town-parked-phone.png`).
+## 2026-11-06: RAISE: a Cleric brings back a friend who is out; and the guest's dodge no longer runs past (Kyle; Claude Opus 5.5)
+
+Kyle (2026-11-05): "Clerics should be able to res someone multiplayer even if they're fully down ... less max
+health for who they res for that instance." Built on "Going down in a party" (HELP UP, the one get-up, out till the
+job ends) and the Cleric's kit. Every number in `shared/cleric.ts` (`RAISE`, through tuning); the rule in
+`sim/raise.ts`; every word in `client/raisewords.ts`.
+
+**1. RAISE.**
+- **Who**: a Cleric on their feet, in a party (two players or more; the squire doesn't count). A lone Cleric is never
+  out (alone it's the old three downs), so it can't raise itself. Out means what it did: down, the one get-up spent,
+  nobody came. A friend still bleeding is HELP UP as before; RAISE is only for out.
+- **How**: GRAB (G; the context button says RAISE) by the body, within 1.4 tiles. The Cleric kneels there **4 s**; it
+  holds while they stand still and do nothing else: walking off, a swing, a block or a hit breaks it (BROKEN OFF over
+  the body), and a new press starts it again from nothing. Not a held button (a phone's context button is a tap,
+  like HELP UP); the Cleric holds still instead.
+- **Telegraphed**: to players, RAISING over the body, a column of gold light standing out of it and a ring at its
+  feet filling as it goes (`client/raisemark.ts`, both views), the button lit, and to the one being raised "X is
+  raising you" in the job's line (out, with a Cleric who still could: "You're out. A Cleric in your party can still
+  raise you"). To goblins: the taunt's red ring (5 tiles) round the Cleric as it begins, and every goblin within 5
+  tiles comes for the Cleric while it lasts (1 s after), as TAUNT GUARD does; a goblin a Warrior's TAUNT GUARD has is
+  left to the Warrior, so a Warrior can cover the Cleric.
+- **Not spammy**: each Cleric raises a given friend **once a job**, and after a raise waits **45 s** before raising
+  anyone (the button dims with the seconds; a laptop's prompt says RAISE and the seconds). The cooldown goes through a
+  door with the hero (`riseReadyAt`, rebased like every other clock).
+- **The cost**: up with **35%** of their new most health and 1.5 s of grace. Each raise takes **25% of their full
+  most health** off for the rest of the job, stacking (two Clerics raising the same friend: 50%), never below
+  **50%** (a third: no more off). Heals, potions, a level up and new gear all stop at the cut most (`cutMax`, used by
+  the room, `refreshHealth` and `Game.equip`; `hpCut` carried room to room and house to street). Their own get-up
+  stays spent, so next time nobody comes they're out again. A new job starts whole.
+- **Shown**: the health bar's far end is cut off, dark hatched stone with a red seam (`#hud .hp .cut`; the health
+  fills what's left; hovered, it says what it is). Over the raised hero, RAISED and "MAX HEALTH 75 THIS JOB" (the
+  number, since the pixel font has no %). The recap: on a job where someone was raised, two rows join the six shown,
+  RAISED (friends a Cleric raised, `Score.rose`) and MAX HEALTH LOST (`Score.cut`, in %, in red). A board from
+  before reads 0.
+- **The room decides**, with no RNG. On the wire: the friend's `riseBy` and `riseAt` when it begins and when it ends
+  (progress is worked out from `riseAt` on every screen), then `hpCut` and `risenBy` once, the Cleric's
+  `riseReadyAt` once; nothing a tick (tested on the encoder). A raise ending sets `''` and `-9`, not undefined: a
+  patch drops an undefined field, so a friend's screen would never hear it end. Ids in `riseBy` and `risenBy` are
+  quoted whole, so a guest's swap and a takeover's swap carry them.
+- **A guest Cleric**: the press is the GRAB counter it already sends; its own screen reads `risable` from the
+  leader's patches (tested through the encoder and the id swap: RAISE offered, the progress, the cut, the cooldown).
+- **A takeover**: everything is plain hero data, so `saveRoom`/`loadRoom` carry it; a raise handed on mid-channel
+  finishes the same, tick for tick, ids swapped.
+
+**2. The guest's dodge ran past and eased back** (`client/ownhero.ts`). The target the guest's own hero eases to is
+the leader's word plus whatever of my acts its room has still to go through. Each frame's step of a dodge (or a
+blow's lunge) was kept with how far into the act the frame *ended*, and counted whole while that was past where the
+leader's room was. So the frame the leader's progress fell inside counted all of its step, though part of it the
+leader had already moved: up to a frame's dodge (a Ranger's jump is 10 tiles a second, 0.1 to 0.3 tiles a frame)
+added on top, and the hero ran on toward it, then eased back when the next patch said the dodge was done. Now each
+frame's step keeps the stretch of the act it covered (`from`, `to`) and counts only the share past the leader's
+progress. A Node harness (`tests/ownroll.test.ts`: the leader's room at 30 Hz sending at 20 Hz, uneven headless frame
+paces, 80 to 220 ms each way, three tick phases, four dodge kits) ran 0.28 tiles past before and under 0.02 after,
+with no jerk back; walking on through a dodge, none either. `party-online.cjs`'s dodge jerk threshold is back to 0.04.
+
+**New words, for the lore keeper and the line editor** (`client/raisewords.ts`, `recapwords.ts`): RAISE (button and
+`G  RAISE` prompt); RAISING, BROKEN OFF, RAISED (over the friend); "MAX HEALTH {n} THIS JOB" (over your own hero);
+"You're out. A Cleric in your party can still raise you" and "{NAME} is raising you" (the job's line while out);
+"Max health lost to being raised, till the job ends" (the bar's hover); recap rows RAISED and MAX HEALTH LOST. The
+story bible has the Cleric's light as giving, and "out" never as dead, so nothing says revive, death or soul; RAISE
+was already the code's word for getting someone up.
+
+Tests: `tests/raise.test.ts` (the channel and the cut; broken off by walking, a swing, a block and a hit, and
+starting over; once per friend per Cleric, the cooldown, two Clerics stacking and a third at the floor; a Warrior
+can't, a lone Cleric is never out; goblins drawn and the ring; nothing new a tick on the wire; determinism; a guest
+Cleric through the encoder and the id swap; a raise handed on mid-channel; the recap rows). `tests/ownroll.test.ts`
+(the dodge). Shots: `node scripts/raise-look.cjs` (phone: RAISE ready, a raise under way, being raised, the cut bar).
+
+Not built: a kneeling pose for the Cleric (it stands still); RAISE in the laptop legend; a callout for raising most.
 
 ## 2026-11-06: who hosts: the best connection runs the room, and a hidden host hands it on (Kyle; Claude Opus 5.5)
 

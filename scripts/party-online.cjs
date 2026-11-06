@@ -70,7 +70,7 @@ async function guestFeel(kyle, sam, step) {
   // A dodge: on his screen within two frames, and never pulled back over it.
   const roll = await frames(sam, key(' ', 'keydown') + key(' ', 'keyup'), "g.hero.act === 'roll'", '[g.hero.x, g.hero.y, g.hero.act, g.hero.rollDx, g.hero.rollDy]', 900);
   const r0 = roll.saw.find((p) => p[2] === 'roll') ?? [0, 0, '', 0, 1];
-  out.roll = { frames: roll.first, ms: roll.firstMs, jerks: jerks(roll.saw, r0[3], r0[4], 0.08) /* a settle of a few hundredths after the roll, as the host's copy lands, isn't a jerk back over it (2026-11-06) */, steps: roll.saw.length };
+  out.roll = { frames: roll.first, ms: roll.firstMs, jerks: jerks(roll.saw, r0[3], r0[4], 0.04), steps: roll.saw.length };
   step(`Sam's dodge shows at once (frame ${roll.first}, ${roll.firstMs} ms) with no jerk back (${out.roll.jerks} in ${out.roll.steps} frames)`, roll.first >= 1 && roll.first <= 2 && out.roll.jerks === 0);
   await wait(1200);
   // What the lag is made of here (headless pages draw slowly): the trip, the playout's wait, the time between patches, frames.
