@@ -195,8 +195,15 @@ most Want among the heroes is the one the bells don't spare).
   busy at the dead, not because they fear dogs. It is at the Ranger's heel from the waking on, through the wood and
   against the Stoker. At the lodge, Maeve knows her own breeding on sight and has opinions about how it's been fed.
   An ordinary dog, no shard and no magic. On screen it never dies: it bolts when a butcher swings close, the Stoker
-  included, and comes back when it's ready. Nothing ever jokes about a dead dog. No name on screen yet, and no he or
-  she yet. Dogs are not a goblin weakness; bells stay the town's one hope.
+  included, and comes back when it's ready. Nothing ever jokes about a dead dog. No name on screen yet (superseded
+  2026-11-05: the player names it, below), and no he or she yet. Dogs are not a goblin weakness; bells stay the town's one hope.
+  Changed by Kyle 2026-11-05: each Ranger says which dog is theirs, with Maeve at the lodge,
+  and names it. The rough grey wolfhound stays the one a Ranger starts with; Maeve's lodge also breeds lean lurchers
+  and black and tan hill hounds, and a scruffy collie sort is a farm dog she'll own to having had a hand in. Coats:
+  wolfhound grey, wheaten or brindle; lurcher blue, fawn or brindle; hill hound black and tan, liver and tan or red;
+  collie black and white, red and white or merle; any of them with a white blaze or socks. Looks only: every one
+  fights the same and bolts the same. Its name is the player's (a new one is given an old plain dog name: Bran, Fly,
+  Moss, Jess, Bracken, Russ, Sorrel, Meg, Tess, Sloe, Corrie, Tipper); still no he or she.
 
 - **Hew at the waking** (recorded 2026-11-01): he comes in low out of the trees west of the hero and round the
   back of the goblins feeding on the dead, keeping to the far side of the field from them, and stays crouched until
@@ -332,7 +339,7 @@ most Want among the heroes is the one the bells don't spare).
 - The watch pays heroes by the head for a night shift with a bow, capped per night. It's wages, never touching the Want.
 - Anyone is handed a bow for the shift.
 - Brisk hands out the watch's pay but isn't one of the watch.
-- Maeve keeps a hound of her own, lying by the hunters' lodge fire; anyone may pet it (Kyle, 2026-11-05). It's unnamed for now.
+- Maeve keeps a hound of her own, lying by the hunters' lodge fire; anyone may pet it (Kyle, 2026-11-05). It's unnamed for now. Drawn as one of her wolfhounds, brindled, with a white blaze (2026-11-05).
 - The chalker (2026-11-05): a goblin that hangs back behind its pack and chalks strokes over one hero's head, in fives; at the fifth the pack goes for that hero. The hungry keep counts in fives of what they take, and a chalker chalks the next one over their head. Its staged board counts heads only: no prices, no names, no buyers, nothing about where anyone went (that is the Tally Man's ledger, chapter 4). No tally board in a Fenmere CRIES room before chapter 4, and never call a chalker a tallyman.
 
 ## Withy Staithe and the eel-catchers (recorded 2026-11-05; Kyle's call, lore keeper)

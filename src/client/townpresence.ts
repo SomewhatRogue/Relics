@@ -11,12 +11,16 @@
  */
 import type { Game } from './game';
 import type { Me } from './townfolk';
+import { packHound } from '../shared/houndlook';
 
 /** Is this a place others can be in with you? */
 export const sharedPlace = (g: Game): boolean => g.mode === 'town';
 
-/** Where I stand, for the town's room; null (out of Wickhold, or no hero yet): the socket closes. */
+/** Where I stand (and how I look, my hound with it), for the town's room; null (out of Wickhold, or no hero yet): the socket closes. */
 export function presence(g: Game, name: string): Me | null {
   const h = sharedPlace(g) ? g.hero : null;
-  return h ? { n: name, w: h.weapon, l: h.look ?? 0, at: g.room.map.name, p: [h.x, h.y, h.fx, h.fy, h.moving ? 1 : 0] } : null;
+  if (!h) return null;
+  // A Ranger's hound goes with the look, packed small (shared/houndlook.ts); it's in what others heard
+  // last (townfolk.ts `gist`), so it goes again only when it's changed, never with each step.
+  return { n: name, w: h.weapon, l: h.look ?? 0, ...(h.houndLook ? { d: packHound(h.houndLook) } : {}), at: g.room.map.name, p: [h.x, h.y, h.fx, h.fy, h.moving ? 1 : 0] };
 }

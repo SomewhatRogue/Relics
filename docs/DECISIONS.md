@@ -2,6 +2,92 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-05: your hound: a real dog drawn, four breeds to choose with Maeve, and its name (Kyle; Claude Opus 5.5)
+
+Kyle: "The hound of Ranger could use work, and maybe let people choose which dog is theirs." "Doesn't affect
+stats." Approved plan: the choice lives with Maeve at the hunters' lodge, and you can pick and name your dog.
+Drawing and saving only; the room's hound (`sim/ranger.ts`, `sim/sic.ts`) is untouched.
+
+**The art** (`client/houndbody.ts`, `houndgrid.ts`, `houndshapes.ts`, `houndposes.ts`, `hound.ts`). The old
+fillRect dog is gone. A hound is now a pixel map built from its breed's build (leg, body length, chest depth, tuck at
+the loin, skull and muzzle, ears, tail and how it's carried, a wiry coat or a ruff) and a pose, then shaded and
+outlined by `sprites.ts` exactly as the heroes are, and cached per breed, coat, white and pose. Facing right, flipped
+for left. Everything sits in one 26 by 16 box with its feet on the same row (`HOUND_BOX`), whatever the breed.
+- **Gaits**, four frames each, legs from where each foot is in its stride: a walk (one foot at a time), a trot
+  (diagonals together, a bob), a run (gather and stretch, a moment off the ground, tail streaming, ears back).
+  Which one comes from how fast it's actually going (`houndidle.ts`: under 2.8 tiles a second a walk, under 5.4
+  a trot, past that a run), so it walks beside a creeping Ranger, trots at heel and runs when it goes in. An idle's
+  runs pick theirs from their own distance (out after the stick at a run, back to heel at a trot).
+- **Its own idles** (`houndidle.ts`): stood at heel 3 to 5 s with nothing else on, one every 5 to 9 s: nose down
+  working the ground, a hind foot at its ear, a shake from nose to tail with a few drops flung, or lying down with
+  its head on its paws (lifting it now and then) until its Ranger moves. Seeded from the Ranger's id, so a party's
+  hounds never idle in step. A Ranger's own idle with it (fetch, ruffle, the tackle, now with a proper play bow) or
+  a pet takes over and the wait starts again.
+- **The fight**, from the room's hound: a lunge as it sets off and as it strikes, the bite (jaws open, then shut,
+  a tooth showing), the latch when SEND THE HOUND pins (sat back, front feet braced, shaking its head), bolting
+  from a butcher at a run with its tail tucked and ears back.
+- Sitting, lying, the stick, the tongue, the happy blink and the lean all carry on as before, now hung off the
+  head wherever the pose puts it. Flat and 2.5D both draw through `drawHound`, so they always agree.
+
+**Breeds and coats, looks only** (`shared/houndlook.ts`, `client/houndcoats.ts`). WOLFHOUND (the rough grey one of
+the story bible: grey, wheaten, brindle), LURCHER (blue, fawn, brindle), HILL HOUND (black and tan, liver and tan,
+red), COLLIE (black and white, red and white, merle). Markings: NONE, BLAZE, SOCKS, BLAZE AND SOCKS. Brindle is
+striped and merle patched over the coat. Maeve's own by the fire is drawn as one of her wolfhounds, brindled with a
+blaze, and still has no name.
+
+**Choosing** (`client/houndui.ts`, `houndpreview.ts`, `hound.css`). Maeve's trainer panel has a YOUR HOUND button
+for a Ranger. Her line, then a live look at the dog (trotting, sitting with the tail going, nose down, a shake, a run,
+lying down, its name over it), a row of buttons each for BREED, COAT and MARKINGS that change the look in place, and a
+NAME field (10 letters, the pixel font's letters, a space, an apostrophe or a hyphen). DONE saves it
+(`Game.chooseHound`) and Maeve says her second line; BACK goes back to her training. A name the chat filter would
+star (`shared/chatfilter.ts`, word by word and with the letters run together), or a slur on travellers that chat
+lets by (gyp, gyppo, gypsy, pikey and spellings: the hound's filter only), is refused with "Not that name.
+Choose another." A new Ranger starts with the wolfhound and an old plain dog name picked from their hero id (BRAN,
+FLY, MOSS, JESS, BRACKEN, RUSS, SORREL, MEG, TESS, SLOE, CORRIE, TIPPER: none a Wickhold person's name or anything
+from the books we keep clear of; MEG and TESS replaced GYP, from a slur, and FENN, too near Fenmere, on the lore
+keeper's pass, and a hound still carrying GYP or FENN as the auto name it was given gets the new one, while one its
+player typed stays), and can change it any time at the lodge.
+
+**Saved and sent** (`Profile.hound`, `Hero.houndLook`). On the hero's profile; `save.ts` gives an old Ranger the
+default and drops one from anyone else; anything odd in a save or off the relay goes through `fitHound`. In town it
+rides the `me` word packed small (`[breed, coat, white, name]`) and goes once: to everyone when it's new or
+changed, to each newcomer in their answer, and never in the words after (the others keep what they heard). In a
+party the hero's `houndLook` goes in the first full patch and then only if it changes (`snap.ts` sends a field
+when it changes). Nothing per tick.
+
+**The name shows** (`client/houndname.ts`) over the hound, in warm letters on the glow layer: when you're stood
+within reach of it and it's at heel, when the mouse is over it (main.ts passes where it points), and all through
+fetch, a ruffle, the tackle and a pet. Another player's hound shows its name the same way.
+
+**Words** (`client/houndwords.ts`; through the lore keeper, whose fixes are in: "that name" in Maeve's second line,
+MARKINGS for WHITE, DONE for KEEP since "keep" is a loaded word here, a shorter looks-only line; the line editor's
+pass is still to do).
+- Maeve, offering: "Let me see the dog. Not you, I've seen you. One of mine, that, or out of one of mine, I'd know
+  those feet anywhere, and somebody's been feeding it off their own plate. Go on, what is it, and what do you call
+  it?"
+- Maeve, once it's chosen: "There. It'll come to that name if you say it like you mean it, which you won't, not at
+  first."
+- Labels: YOUR HOUND, BREED, COAT, MARKINGS, NAME, DONE, BACK; "Up to 10 letters."; "Not that name. Choose
+  another."; "Give it a name."; "Looks only. Every hound fights the same."
+- Breeds and coats as above.
+- Lore recorded (story bible, hound entry): Maeve's lodge breeds lurchers and hill hounds as well as the
+  wolfhound, and the collie sort is a farm dog; a Ranger's dog has their own name now (the old "no name on screen
+  yet" marked superseded).
+
+**Cost.** One sprite per breed, coat, white and pose seen, made once; a hound a frame is one blit and a few pixels.
+Nothing new in the room.
+
+Tests: `tests/hound.test.ts` (every breed, coat and white in every gait, idle and fight frame inside the one box,
+no glowing pixel, standing ones on the ground row; four outlines, three coats a breed, the white shows; names tidied
+and filtered (the traveller slurs too, not Pike); old saves default and odd ones are fitted, GYP and FENN given as
+auto names become MEG and TESS and typed ones stay, a chosen hound saves and loads and the hero shows it, a
+Warrior has none; in town a friend hears breed, coat and name once and not in ten seconds of walking, a new choice
+once more; in a party the friend's copy has it and no patch after the first carries it; the same seeded fight with a
+wolfhound and with a collie is identical, the hound having joined in; the name shows near, while playing, never
+unnamed). Sheet and phone shots: `node scripts/hound-look.cjs <url> <outdir>` (the four breeds, every coat and one
+row each with blaze and socks, in each gait, idle and fight move at 4x; Maeve's panel with the preview; fetch in
+the square with the new hound).
+
 ## 2026-11-05: the atlas, slices 0 and 1: fewer doors with bigger insides, and Hangman's Wood as the first curated zone (Kyle; Claude Opus 5.5)
 
 Kyle approved `docs/plans/atlas.md` today, with notes on top: "each place has a story, and it should have smaller

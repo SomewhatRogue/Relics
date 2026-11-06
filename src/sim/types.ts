@@ -249,6 +249,9 @@ export interface Hero extends Body {
   tag?: string;
   /** Which of its class's three looks it wears (drawing only). */
   look?: number;
+  /** A Ranger's hound as its player chose it with Maeve (shared/houndlook.ts): breed, coat, white, name.
+   *  Drawing only; the room never reads it, so every hound fights the same. */
+  houndLook?: import('../shared/houndlook').HoundLook;
   /** In a party: down and waiting to be picked up (`pickT` so far), or out until the job ends. */
   bleeding?: boolean;
   out?: boolean;

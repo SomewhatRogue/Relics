@@ -38,7 +38,7 @@ export function heroArt(s: ArtSpec, w = 40, h = 40): string {
     const a = s.hound ? houndAt(hero, dog.x, dog.y, hero.x, hero.y, now) : null, at = a ?? dog;
     const put = (x: number, y: number) => [Math.round(w / 2 + (x - hero.x) * PX), h - 8 + Math.round((y - hero.y) * PX)];
     const [dx, dy] = put(at.x, at.y);
-    const drawDog = () => (a ? drawHound(g, dog, dx, dy, a.mood, a.fx, a.down) : drawHound(g, dog, dx, dy));
+    const drawDog = () => drawHound(g, dog, dx, dy, { ...(a ? { mood: a.mood, fx: a.fx, down: a.down } : {}), look: hero.houndLook });
     if (s.hound && at.y < hero.y) drawDog();
     drawHero(g, hero, Math.round(w / 2), h - 8, 'bare', s.t ?? 1);
     if (s.hound && at.y >= hero.y) drawDog();

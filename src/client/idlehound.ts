@@ -21,8 +21,9 @@ function at(x: number, y: number, fx: number, mood: Mood, down = false): HoundAt
 }
 /** Running from (x0, y0) to (x1, y1) over [t0, t1]: where it is at `t`, facing the way it runs. */
 function run(t: number, t0: number, t1: number, x0: number, y0: number, x1: number, y1: number, mood: Mood): HoundAt {
-  const k = (t - t0) / (t1 - t0);
-  return at(mix(x0, x1, k), mix(y0, y1, k), x1 - x0, { ...mood, moving: k > 0 && k < 1 });
+  const k = (t - t0) / (t1 - t0), v = Math.hypot(x1 - x0, y1 - y0) / (t1 - t0);
+  // Out after a stick or in to the tackle it runs; back to heel it trots; a step or two, a walk.
+  return at(mix(x0, x1, k), mix(y0, y1, k), x1 - x0, { ...mood, moving: k > 0 && k < 1, gait: v >= 2 ? 'run' : v >= 1 ? 'trot' : 'walk' });
 }
 
 /** The stick's way in a fetch (tiles from the hero): where it lands, and where the hound brings it. */
@@ -55,7 +56,7 @@ export function houndAt(h: Hero, ax: number, ay: number, hx: number, hy: number,
   }
   // The rare one: a play bow, a run, a leap, and the Ranger on the floor with the hound standing on them.
   const C = [hx + s * 0.3, hy + 0.05];
-  if (t < 0.5) return at(ax, ay, hx - ax, { headDown: true, wag });
+  if (t < 0.5) return at(ax, ay, hx - ax, { bow: true, wag });
   if (t < 0.95) return run(t, 0.5, 0.95, ax, ay, C[0], C[1], {});
   if (t < 1.25) return at(mix(C[0], hx, (t - 0.95) / 0.3), C[1], hx - ax, { lift: Math.round(Math.sin(((t - 0.95) / 0.3) * Math.PI) * 6) });
   if (t < 3.6) return at(hx + s * 0.1, hy + 0.08, -s, { lift: 2, wag, lick: Math.floor(now * 4) % 3 === 0, happy: true });

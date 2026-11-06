@@ -21,7 +21,9 @@ import { RACK } from '../../shared/practice';
 import { waiting } from '../../sim/practice';
 import { drawHound } from '../hound';
 import { companion, houndAt, lodgeHoundAt } from '../idlehound';
-import { LODGE_HOUND, isLodgeMap } from '../petting';
+import { LODGE_HOUND, MAEVE_HOUND, isLodgeMap } from '../petting';
+import { houndTag } from '../houndname';
+import { seedOf } from '../houndidle';
 import { drawNpc } from '../npcs';
 import { vignetteFigs } from '../vignettes';
 import { drawCaged, drawSurvivor } from '../captives';
@@ -37,9 +39,10 @@ import { woodFigs } from '../wooddraw';
 const lift = (z?: number) => (z ?? 0) * LEDGE_H;
 
 /** A hero's hound, where it plays if it's playing (idlehound.ts). */
-function hound(f: Figs, h: Hero, d: Hound, ax: number, ay: number, hx: number, hy: number): void {
+function hound(f: Figs, h: Hero, d: Hound, ax: number, ay: number, hx: number, hy: number, me?: Hero): void {
   const a = houndAt(h, ax, ay, hx, hy, f.now), x = a ? a.x : ax, y = a ? a.y : ay;
-  f.put('d' + h.id, x, 0, y, (c, px, py) => (a ? drawHound(c, d, px, py, a.mood, a.fx, a.down) : drawHound(c, d, px, py)), { pool: d.state === 'fled' && d.t > 2 ? 0 : 0.28 });
+  const o = { ...(a ? { mood: a.mood, fx: a.fx, down: a.down } : {}), look: h.houndLook, name: houndTag(h, d, x, y, me, !!a), seed: seedOf(h.id) };
+  f.put('d' + h.id, x, 0, y, (c, px, py) => drawHound(c, d, px, py, o), { pool: d.state === 'fled' && d.t > 2 ? 0 : 0.28 });
 }
 
 /** Every figure this frame, onto its card. */
@@ -50,7 +53,7 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
     f.put('h' + h.id, x, lift(h.z), y, (c, px, py) => drawHero(c, h, px, py, h.id === meId, t), { xray: true, pool: h.act === 'roll' || h.act === 'down' ? 0.22 : 0.3 });
     if (h.hound) {
       const d = h.hound, [dx, dy] = lerp('d:' + h.id, d.x, d.y);
-      hound(f, h, d, dx, dy, x, y);
+      hound(f, h, d, dx, dy, x, y, me);
     }
     // A Mage's blink image, flickering where they stood until it goes.
     if (h.decoyUntil > t) f.put('v' + h.id, h.decoyX, 0, h.decoyY, (c, px, py) => {
@@ -63,12 +66,12 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
     f.put('o' + h.id, h.x, 0, h.y, (c, px, py) => drawHero(c, h, px, py, false, t), { pool: 0.3 });
     // Another player's Ranger: their hound at heel, as this screen walks it (idlehound.ts).
     const d = companion(h, f.now);
-    if (d) hound(f, h, d, d.x, d.y, h.x, h.y);
+    if (d) hound(f, h, d, d.x, d.y, h.x, h.y, me);
   }
   // Maeve's hound by the lodge's fire.
   if (isLodgeMap(map)) {
     const a = lodgeHoundAt(room.heroes, f.now);
-    f.put('lodgehound', a.x, 0, a.y, (c, px, py) => drawHound(c, LODGE_HOUND, px, py, a.mood, a.fx, a.down), { pool: 0.28 });
+    f.put('lodgehound', a.x, 0, a.y, (c, px, py) => drawHound(c, LODGE_HOUND, px, py, { mood: a.mood, fx: a.fx, down: a.down, look: MAEVE_HOUND }), { pool: 0.28 });
   }
   for (const e of room.enemies) {
     const carrier = room.heroes.find((h) => h.carrying === e.id);

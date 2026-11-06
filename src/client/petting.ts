@@ -7,6 +7,7 @@
  */
 import { WEAPONS } from '../shared/tuning';
 import type { Hero, Hound } from '../sim/types';
+import type { HoundLook } from '../shared/houndlook';
 
 /** The lodge's own hound, lying by the fire (tiles in the lodge: shared/townhalls.ts). */
 export const LODGE_DOG = { x: 9.5, y: 2.25 };
@@ -68,6 +69,9 @@ export function pettedBy(heroes: readonly Hero[], dog: Dog, owner: Hero | null, 
 
 /** The lodge's hound as the drawing wants it (lying by the fire unless it's being petted). */
 export const LODGE_HOUND: Hound = { x: LODGE_DOG.x, y: LODGE_DOG.y, fx: -1, fy: 0, state: 'heel', target: 0, t: 0, next: 0, back: 0, bites: 0, moving: false, down: true };
+
+/** Maeve's own: one of her rough wolfhounds, brindled, a white blaze; unnamed (docs/lore/story-bible.md). */
+export const MAEVE_HOUND: HoundLook = { breed: 'wolfhound', coat: 2, mark: 'blaze', name: '' };
 
 /** The lodge's inside (by its name: the drawing has the map, not the door). */
 export const isLodgeMap = (m: { name: string }) => m.name === "THE HUNTERS' LODGE";

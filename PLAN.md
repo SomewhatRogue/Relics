@@ -2,6 +2,16 @@
 
 ## Current slice
 
+**Your hound, with Maeve** (Claude Opus 5.5, 2026-11-05; Kyle: "the hound of Ranger could use work, and maybe let
+people choose which dog is theirs", "doesn't affect stats"; approved: the choice lives with Maeve at the hunters'
+lodge, pick and name your dog). Built; waiting on Kyle's play. *Done when*, on his phone and laptop, flat and 2.5D:
+the hound looks like a dog (head, muzzle, ears, back line, chest, legs in a walk, trot or run, a tail that wags and
+carries), sniffs, scratches, lies with its head on its paws and shakes off on its own while he stands about, and
+lunges, bites and latches in a fight; Maeve's panel has YOUR HOUND (wolfhound, lurcher, hill hound, collie; three
+coats each; markings: a blaze, socks, both or none; a live look; a name the filter passes) and DONE saves it; the name
+shows over the hound near it, under the mouse, and in fetch and petting; a friend in town or a party sees the same
+dog and name. Everything in DECISIONS 2026-11-05 ("your hound"); shots `node scripts/hound-look.cjs`. Open: the line
+editor's pass on Maeve's two lines and the labels (the lore keeper's fixes are in).
 **The atlas, slices 0 and 1: the doors rule, and Hangman's Wood** (Claude Opus 5.5, 2026-11-05; Kyle approved
 `docs/plans/atlas.md`). Built; waiting on Kyle's play. *Done when*, on his phone and laptop, flat and 2.5D: a
 village, farm or town street has one house to go into, big, with firelight in its doorway, its woodpile and the

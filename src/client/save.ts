@@ -10,6 +10,7 @@ import { fitStores } from '../shared/bags';
 import { fitRelics } from '../shared/relicitems';
 import { renameKits } from '../shared/oldkits';
 import { fitOldSkills } from '../shared/oldskills';
+import { fitHound } from '../shared/houndlook';
 
 const KEY = 'relic.save.v2', OLD = 'relic.save.v1';
 /** `savedAt`: when it was last kept here (it only goes forward), to tell which copy is newer (recovery.ts). */
@@ -36,6 +37,9 @@ const hero = (old: Partial<Profile>): Profile => {
   // Heroes from before the longer Roll start the new tallies at nothing.
   out.stats = { ...newStats(), ...(p.stats ?? {}) };
   out.want ??= 0;
+  // A Ranger's hound (shared/houndlook.ts): heroes from before the choice get the wolfhound and a name.
+  if (cls === 'RANGER') out.hound = fitHound(p.hound, out.id);
+  else delete out.hound;
   // Relics before they had charge: each kind owned becomes a full plain relic (shared/relicitems.ts).
   Object.assign(out, fitRelics(p as never, out.xp * 31 + out.runs + 7));
   // Heroes made before the prologue existed don't have to play it.
