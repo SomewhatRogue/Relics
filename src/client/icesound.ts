@@ -1,11 +1,13 @@
 /** A frozen goblin sent skidding (a whoosh and a hiss of ice) and its crash (a thud, a big crack, glass). */
 import type { FightEvent } from '../sim/types';
 import { burst, ready, tone } from './sfx';
+import { playSfx } from './sfxplay';
 
 /** True if it was one of these (the crash's SHATTER rings on its own, as ever). */
 export function iceSound(ev: FightEvent): boolean {
   if (ev.k !== 'fling' && ev.k !== 'icecrash') return false;
   if (!ready()) return true;
+  if (playSfx(ev.k === 'fling' ? 'frost_burst' : 'ice_shatter', { vol: ev.big ? 1 : 0.85 })) return true;
   if (ev.k === 'fling') {
     burst('bandpass', 300, 1600, 0.7, ev.big ? 0.7 : 0.5, 0.32);
     burst('highpass', 3500, 6500, 1, 0.25, 0.5, 0.05);

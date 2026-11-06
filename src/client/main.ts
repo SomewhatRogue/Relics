@@ -69,6 +69,8 @@ import { options } from './options';
 import { setMusic, setMuted } from './sfx';
 import { Music } from './music';
 import { Soundscape } from './soundscape';
+// The recorded sound effects in place of the synthesized ones as they load (sfxroutes.ts).
+import './sfxroutes';
 import { line, speak } from './speech';
 import { Chat } from './chat';
 import './style.css';

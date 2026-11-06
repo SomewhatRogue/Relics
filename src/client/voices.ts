@@ -45,7 +45,7 @@ function syllable(at: number, dur: number, f0: number, f1: number, v1: number, v
 }
 
 const VOWELS: [number, number][] = [[700, 1200], [400, 2200], [550, 1800], [300, 900], [650, 1600]];
-const pitchOf = (id: number) => 1 + ((id * 37) % 11) / 22;
+export const pitchOf = (id: number) => 1 + ((id * 37) % 11) / 22;
 const ok = () => {
   const o = sfxOut();
   if (o) (ctx = o.ac), (out = o.out);

@@ -6,6 +6,20 @@
  */
 import type { FightEvent } from '../sim/types';
 import { sfx, burst, ready, tone } from './sfx';
+import { playSfx } from './sfxplay';
+import type { SfxName } from './sfxbank';
+
+/** The recording for a held spell, GRASP, a wall or a strike (null: it stays synthesized). */
+function recordingOf(ev: FightEvent): SfxName | null {
+  if (ev.k === 'grasp') return 'spell_hum';
+  if (ev.k === 'wallup') return 'fire_burst';
+  if (ev.k === 'skystrike') return 'thunder_strike';
+  if (ev.k !== 'spell' || ev.what === 'strike') return null;
+  if (ev.what === 'shatter') return 'ice_shatter';
+  if (ev.what === 'nova' || ev.what === 'coldblast') return 'frost_burst';
+  if (ev.what === 'dash' || ev.what === 'stormring') return 'storm_cast';
+  return 'fire_burst';
+}
 
 /** Snaps and pops strung over `spread` seconds. */
 function crackle(n: number, spread: number, peak: number, delay = 0): void {
@@ -31,6 +45,8 @@ function thunder(big: boolean): void {
 
 /** True if it was one of these (and has been played). */
 export function spellSound(ev: FightEvent): boolean {
+  const rec = recordingOf(ev), loud = 'big' in ev && !!ev.big;
+  if (rec && ready() && playSfx(rec, { vol: loud ? 1 : ev.k === 'spell' && ev.what === 'firewall' ? 0.7 : 0.9 })) return true;
   if (ev.k === 'grasp') {
     if (ready()) burst('bandpass', 300, 1400, 1.5, 0.3, 0.35), tone('sine', 220, 440, 0.12, 0.3), tone('sine', 330, 660, 0.06, 0.3, 0.04);
     return true;

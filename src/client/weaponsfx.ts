@@ -5,6 +5,8 @@
  * lands on matters too: a big body thuds, wood chops, a shield or the butcher's iron clanks.
  */
 import { burst, ready, tone } from './sfx';
+import { playSfx } from './sfxplay';
+import type { SfxName } from './sfxbank';
 
 type Kit = 'sword' | 'greatsword' | 'spear' | 'daggers' | 'mace' | 'rapier' | 'flail' | 'blade' | 'shot';
 const kitOf = (src?: string): Kit =>
@@ -17,6 +19,12 @@ export function swingSound(src: string, heavy: boolean): void {
   if (!ready()) return;
   const k = kitOf(src), h = heavy ? 1.3 : 1;
   if (k === 'shot' || (src === 'poisoner' && heavy)) return;
+  // The recording for the kit (sfxbank.ts), the censer's chain rattling under it on a heavy; the synth below while it loads.
+  const rec: SfxName = k === 'rapier' || k === 'daggers' ? 'swing_light' : k === 'mace' || k === 'flail' ? 'swing_blunt' : k === 'greatsword' ? 'swing_heavy' : k === 'spear' ? 'thrust_spear' : 'swing_sword';
+  if (playSfx(rec, { vol: heavy ? 1 : 0.85, rate: heavy ? 0.93 : 1 })) {
+    if (src === 'censer' && heavy) playSfx('swing_blunt', { vol: 0.5 });
+    return;
+  }
   // The censer's chain rattles as it comes round.
   if (src === 'censer' && heavy) burst('highpass', 4000, 7000, 2, 0.18, 0.2), burst('highpass', 5000, 8000, 2, 0.12, 0.12, 0.12);
   if (k === 'rapier') return burst('highpass', 3500, 7000, 2, 0.28 * h, 0.06), tone('sine', 3200, 3000, 0.02, 0.06);
@@ -33,6 +41,14 @@ export function swingSound(src: string, heavy: boolean): void {
 export function hitSound(src: string | undefined, heavy: boolean, big: boolean): void {
   if (!ready()) return;
   const k = kitOf(src), body = big ? 0.75 : 1;
+  // The recording for what struck (a butcher's big body thuds under it); the synth below while it loads.
+  const rec: SfxName | null = k === 'mace' || k === 'flail' ? 'hit_crunch' : k === 'greatsword' ? 'hit_cleave'
+    : k === 'spear' || k === 'rapier' || k === 'daggers' || src === 'arrow' || src === 'bolt' || src === 'knife' ? 'hit_pierce'
+    : src === 'spark' ? 'fire_cast' : src === 'smite' ? 'smite' : src === 'orb' || src === 'lance' ? null : heavy ? 'hit_cleave' : 'hit_slice';
+  if (rec && playSfx(rec, { vol: heavy ? 1 : 0.85 })) {
+    if (big) playSfx('hit_bigbody', { vol: 0.8 });
+    return;
+  }
   // The body under it: a dull thud, deeper on the butcher.
   tone('sine', (heavy ? 110 : 150) * body, 45, heavy ? 0.85 : 0.55, heavy ? 0.22 : 0.14);
   if (big) burst('bandpass', 600, 300, 3, 0.25, 0.12), tone('square', 330, 300, 0.05, 0.12);
@@ -52,6 +68,8 @@ export function hitSound(src: string | undefined, heavy: boolean, big: boolean):
 /** A ranged kit or spell looses. */
 export function shotSound(kind: string, src?: string): void {
   if (!ready()) return;
+  const rec: SfxName | null = kind === 'arrow' ? (src === 'longbow' ? 'bow_loose_long' : 'bow_loose_short') : kind === 'bolt' ? 'crossbow_shot' : kind === 'spark' ? 'fire_cast' : kind === 'orb' || kind === 'lance' ? 'spell_hum' : null;
+  if (rec && playSfx(rec)) return;
   if (kind === 'arrow') {
     // The string: deep on the longbow, high and quick on the shortbow; then the arrow's hiss.
     const f = src === 'longbow' ? 130 : 210;
@@ -69,6 +87,9 @@ export function shotSound(kind: string, src?: string): void {
 /** A bow drawn to full, a spell gathered: a creak or a rising hum. */
 export function chargedSound(src: string): void {
   if (!ready()) return;
+  // The bow's creak and the gathered spell are recordings; any other kit keeps the bright tone (a UI cue).
+  const rec: SfxName | null = src === 'longbow' || src === 'shortbow' ? 'bow_draw' : src === 'staff' || src === 'spellblade' || src === 'wand' ? 'spell_hum' : null;
+  if (rec && playSfx(rec)) return;
   if (src === 'longbow' || src === 'shortbow') return burst('bandpass', 400, 900, 8, 0.25, 0.2), tone('triangle', 1320, 1760, 0.12, 0.15);
   if (src === 'staff' || src === 'spellblade' || src === 'wand') return tone('sine', 440, 880, 0.15, 0.3), tone('sine', 660, 1320, 0.08, 0.3);
   tone('triangle', 1320, 1760, 0.2, 0.2);
@@ -77,6 +98,8 @@ export function chargedSound(src: string): void {
 /** Hit on your guard: a shield clangs, a blade rings, a staff knocks. */
 export function blockSound(src: string): void {
   if (!ready()) return;
+  const blade = src === 'sword' || src === 'greatsword' || src === 'spear' || src === 'daggers' || src === 'rapier' || src === 'poisoner' || src === 'censer' || src === 'spellblade';
+  if (playSfx(blade ? 'block_blade' : 'block_shield')) return;
   if (src === 'sword') return tone('triangle', 520, 480, 0.35, 0.25), burst('bandpass', 1800, 900, 4, 0.4, 0.1), tone('sine', 1560, 1500, 0.08, 0.4);
   if (src === 'greatsword' || src === 'spear' || src === 'daggers' || src === 'rapier' || src === 'poisoner' || src === 'censer' || src === 'spellblade') return tone('sine', 2200, 2150, 0.12, 0.35), burst('bandpass', 3000, 1500, 5, 0.35, 0.06);
   tone('triangle', 180, 120, 0.5, 0.12), burst('bandpass', 1400, 700, 3, 0.4, 0.1);
