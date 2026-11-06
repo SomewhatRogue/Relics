@@ -87,7 +87,7 @@ export const ARMW = {
   pick: 'Who will you take on?',
   /** One line on each regular, as the watchman sees them. */
   about: {
-    drunk: "He'll take anybody on and he's had enough tonight that he might even lose. He bets ten and not a copper more, because that's all he's got.",
+    drunk: "He'll take anybody on, and he's had enough tonight that he might even lose. He bets ten and not a coin more, because that's all he's got.",
     sharp: "Thin arm, quick hands, and he moves about on you so you never know where he is. Twenty-five at the most, he says, but watch him anyway.",
     watch: "One of ours. Hauls the gate bar every morning, so his arm's as thick as your leg, and he goes for it all at once now and then, so be ready.",
     gannet: "Gannet comes round the bar for this, and he doesn't do it often. He's not lost at this table since the siege, he says, though he says it at the bar, mind.",
@@ -109,7 +109,7 @@ export const ARMW = {
   lost: (name: string) => `${name.charAt(0)}${name.slice(1).toLowerCase()} put you down.`,
   gaveUp: 'You let go, and that counts as losing.',
   paid: (n: number) => `Gannet pays out ${n} gold.`,
-  kept: (n: number) => `Gannet keeps your ${n} gold.`,
+  kept: (n: number) => `Your ${n} gold goes across the table.`,
   first: "That's the first time you've beaten them.",
   beaten: "You've beaten them before.",
   rows: { held: 'IN THE BAND', time: 'TIME', bouts: 'BOUTS', wins: 'WINS' },
@@ -121,9 +121,9 @@ export const ARMW = {
 export const KNIFEW = {
   who: 'A CARD SHARP',
   /** At the board. */
-  greet: "Nine knives, and you throw them from the chalk. The hand moves, everybody's does, so you wait till the point's over the middle and you let it go, and if you wait too long the hand gets worse, not better. If you want something on it, I'll throw a round first and you beat it, and a tie's mine, the same as Moll's are.",
+  greet: "Nine knives, and you throw them from the chalk. The hand moves, everybody's does, so you wait till the point's over the middle and you let it go, and if you wait too long the hand gets worse, not better. If you want something on it, I'll throw a round first and you beat it, and a tie's mine, same as it is at Moll's table.",
   /** Said to a Rogue as well. */
-  rogue: "You've got the steady hand, I can see it from here. I'm still taking your money if you miss.",
+  rogue: "You've got the steady hand, I can see it from here, and I'd guess Whisper's had a look at you already. I'm still taking your money if you miss.",
   yourBest: (n: number) => `Your best round: ${n}.`,
   board: 'BEST AT THE BOARD',
   empty: "Nobody's on the board yet.",
@@ -141,7 +141,7 @@ export const KNIFEW = {
   wide: 'WIDE',
   stop: 'STOP',
   /** The card. */
-  over: 'ROUND DONE',
+  over: 'ROUND OVER',
   rows: { score: 'SCORE', board: 'ON THE BOARD', bulls: 'BULLS', house: 'HIS ROUND', best: 'YOUR BEST', newBest: 'NEW BEST' },
   won: (n: number) => `You beat his ${n}, and he pays you with a face on him.`,
   tie: 'Level with his, and a tie is his.',
@@ -173,7 +173,7 @@ export const ANVILW = {
   title: 'OFF THE ANVIL',
   well: (pct: number) => `It came out a little better than he'd have made it: its upgrades count for ${pct}% more.`,
   plain: "It's as good as he'd have made it, no better and no worse.",
-  halvard: { good: 'Good.', fair: 'Not bad.', none: 'Mine next time.' },
+  halvard: { good: 'Good.', fair: 'Not bad.', none: "I'll do it next time." },
   done: 'BACK TO THE FORGE',
   /** On a piece's card, once it's been struck well. */
   cardRow: 'WELL STRUCK',
