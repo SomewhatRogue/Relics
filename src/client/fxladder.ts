@@ -4,7 +4,7 @@
  * sized from the same numbers the room judged with (shared/ladder.ts), and the ground itself is drawn by
  * ladderground.ts. Words only where a number helps: +N MAGIC for SPELLTHIEF. Cosmetic only.
  */
-import { BLINK_BURST, TAUNT } from '../shared/ladder';
+import { BLINK_BURST, TAUNT_GUARD } from '../shared/ladder';
 import type { FightEvent } from '../sim/types';
 import type { Fx } from './fx';
 import { EL_COL, EL_LIGHT } from './palette';
@@ -76,7 +76,7 @@ export function ladderFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean 
       return true;
     }
     case 'taunt':
-      fx.rings.push({ x, y: y - 6, life: 0.3, max: 0.3, col: '#e23a30', size: (ev.r ?? TAUNT.reach) * PX * 0.35 });
+      fx.rings.push({ x, y: y - 6, life: 0.3, max: 0.3, col: '#e23a30', size: (ev.r ?? TAUNT_GUARD.reach) * PX * 0.35 });
       fx.burst(x, y - 14, 10, RED, 60, true);
       fx.shake = Math.max(fx.shake, 3);
       return true;
@@ -84,6 +84,14 @@ export function ladderFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean 
       // A red mote over each goblin it pulled.
       fx.burst(x, y - 18, 3, RED, 20, true);
       return true;
+    case 'ironstance': {
+      // IRON STANCE: the goblin thrown back off the guard, a hard ring of iron.
+      const [x2, y2] = toPx(ev.x2 ?? ev.x, ev.y2 ?? ev.y);
+      fx.burst((x + x2) / 2, (y + y2) / 2 - 8, 12, ['#ffffff', '#d8d4cc', '#ffd27a'], 90, true);
+      fx.rings.push({ x, y: y - 8, life: 0.25, max: 0.25, col: '#d8d4cc', size: 14 });
+      fx.shake = Math.max(fx.shake, 3);
+      return true;
+    }
     case 'braced':
       fx.burst(x, y, 8, DUST, 35, false, 200, true);
       fx.rings.push({ x, y, life: 0.2, max: 0.2, col: '#e23a30', size: 10 });

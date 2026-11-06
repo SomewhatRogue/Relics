@@ -26,7 +26,8 @@ import { knockDown, rooted, takeShoulder } from './techwarrior';
 import { judge } from './techcleric';
 import { legStab } from './ladderrogue';
 import { blockMend, cover, shelter } from './ladderhealer';
-import { braced, softer } from './taunt';
+import { braced, ironHeld, ironStance, softer } from './taunt';
+import { roundGuard } from './holyguard';
 import { stormCut } from './spellbook';
 import { wet } from './wet';
 import { clanks, plated } from './ironhide';
@@ -209,6 +210,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     return;
   }
   if (h.wardUntil > now && warded(e, a, h, now, ev)) return;
+  // IRON STANCE's moment after a block: nothing lands (sim/taunt.ts).
+  if (ironHeld(h, now) && !a.unblockable) return void ev.push({ k: 'block', x: h.x, y: h.y, more: true });
   const w = WEAPONS[h.weapon];
   // STAND FAST: a taunted goblin's blow is worth less (sim/taunt.ts).
   const soft = softer(e, now);
@@ -225,7 +228,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     return;
   }
   // COVER: a Healer blocking beside you takes it on the guard for you (sim/ladderhealer.ts).
-  if (cover(e, a, h, heroes, soft, now, ev)) return;
+  // SHARED WARD: a Cleric guarding beside you covers you (sim/ladderhealer.ts).
+  if (cover(a, h, heroes, ev)) return;
   // The Stoker's draw: hooked along the line and hauled to its feet, stunned for a free sweep.
   if (a.kind === 'draw') {
     const l = Math.hypot(e.x - h.x, e.y - h.y) || 1, to = VARIANTS.stoker.pullTo;
@@ -244,13 +248,20 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   // The kit's guard covers an arc in front: a shield covers nearly everything ahead. (A pack rush is
   // judged from the middle of its fan, so one guard facing it covers every blow: sim/rushguard.ts.)
   const [gx, gy] = guardFrom(e, a, h), gl = Math.hypot(gx, gy) || 1;
-  const facing = (h.fx * gx + h.fy * gy) / gl > Math.cos(((guardArc(h) / 2) * Math.PI) / 180);
+  // A Cleric's guard is a holy ward round them (sim/holyguard.ts): it meets a blow from any side.
+  const facing = roundGuard(h) || (h.fx * gx + h.fy * gy) / gl > Math.cos(((guardArc(h) / 2) * Math.PI) / 180);
   const canGuard = !a.unblockable && facing && (h.act === 'idle' || h.act === 'attack' || h.act === 'charge');
   // Held block, no timing to it (Kyle, 2026-11-05: parry is gone, and no perfect block either).
   if (canGuard && h.blocking) {
     // A pack rush: the one block takes every blow in it (its first blow's stamina paid for all).
     if (rushBlocked(h, a, now)) return void ev.push({ k: 'block', x: h.x, y: h.y, more: true });
     noteRush(h, a, now);
+    // IRON STANCE: a flat burst of stamina, the goblin thrown back, untouchable a moment (sim/taunt.ts).
+    if (ironStance(h, e, now, ev)) {
+      count(h.id, 'blocks');
+      if (h.act !== 'stun') h.counterUntil = now + counterWindow(h);
+      return;
+    }
     // A held block takes nothing off your health; it costs breath instead, and plenty of it (a heavy's
     // crushing blow more, and it shoves you further).
     const crush = a.crush ? GUARD.crushCost : 1;

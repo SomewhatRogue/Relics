@@ -59,12 +59,17 @@ const freeze = (page) => page.evaluate(() => { window.__game.step = () => []; })
     await ctx.close();
   }
 
-  // The Warrior's TAUNT on a phone: the button in the dodge's place, then pressed (the roar's ring at its reach).
+  // The Warrior's TAUNT GUARD on a phone (it was the roar till 2026-11-06): BLOCK held, the ring at its reach.
   {
     const { ctx, page, errors } = await start(browser, PHONE, 'WARRIOR', { ladder: 3 });
     await yard(page, [[11.5, 7.5], [6.5, 10.5], [12.5, 11.5], [9, 13.6]]);
     await page.screenshot({ path: `${out}/phone-taunt-button.png` });
-    await page.tap('.tb.roll');
+    // Hold BLOCK: a touch that starts on it and stays down.
+    await page.evaluate(() => {
+      const el = document.querySelector('.tb.block'), r = el.getBoundingClientRect();
+      const t = new Touch({ identifier: 7, target: el, clientX: r.x + r.width / 2, clientY: r.y + r.height / 2 });
+      el.dispatchEvent(new TouchEvent('touchstart', { touches: [t], targetTouches: [t], changedTouches: [t], bubbles: true, cancelable: true }));
+    });
     await page.waitForTimeout(120);
     await freeze(page);
     await page.waitForTimeout(150);

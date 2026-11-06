@@ -6,8 +6,8 @@
  * (BLOCK for a Warrior or Healer, none for a Ranger, Rogue or Mage), the dodge (JUMP, DASH, BLINK, ROLL), the flask as the health orb,
  * stamina as pips round ATTACK (a Mage's magic round BLINK), one gilt context slot (GRAB, THROW, HELP UP, BURN, OPEN, TALK), and a
  * crossbow's RELOAD. A Warrior or Healer has no dodge: the context slot takes the dodge's place, and a
- * Warrior's always shows GRAB (dimmed till there's something to take hold of). A Warrior who has learned
- * TAUNT (shared/ladder.ts) has it in the dodge's place instead, with its cooldown.
+ * Warrior's always shows GRAB (dimmed till there's something to take hold of). (The Warrior's roar, TAUNT,
+ * sat in the dodge's place till it became TAUNT GUARD, held on the block: 2026-11-06.)
  */
 import { staitheGrabbable } from '../sim/staithebits';
 import { STAITHE_WORDS } from '../shared/staithewords';
@@ -17,8 +17,6 @@ import { fillCol } from './reliccard';
 import { DODGE as DODGE_RULE, guardOf, dodgeName, dodgeOf, HERO, RELICS, WEAPONS, type Item } from '../shared/tuning';
 import { dodgeBreath } from '../sim/knacks';
 import { blinkCost } from '../sim/laddermage';
-import { tauntLeft, taunts } from '../sim/taunt';
-import { TAUNT } from '../shared/ladder';
 import { knows } from '../sim/types';
 import { grabbable } from '../sim/grab';
 import { raisable } from '../sim/party';
@@ -116,16 +114,13 @@ export class Cluster {
     const pips = { lit: flick ? 0 : Math.ceil(st / 10), of: 10, col: me.winded ? '#d84a3a' : mage ? (st < 25 ? '#8f86a8' : '#cdbdf0') : st < 25 ? '#a8a090' : '#ddd5c4' };
     b.attack.show({ shape: 'round', size: 42, grade: 'iron', icon: atk, iconScale: carrying ? 1 : 2, ...(mage ? {} : { pips }) }, '', '', carrying ? 'Slam' : 'Attack');
     b.block.show(guard === 'none' ? null : { shape: 'shield', size: 30, grade: 'iron', icon: icon('block') }, '', '', 'Block');
-    // A Warrior's TAUNT sits in the dodge's place (sim/taunt.ts): the press is the dodge press.
-    const taunt = taunts(me), tl = taunt ? tauntLeft(me, room.time) : 0;
-    const dn = taunt ? 'TAUNT' : dodgeName(kit.cls), dodges = !!dodgeOf(kit) || taunt;
+    const dn = dodgeName(kit.cls), dodges = !!dodgeOf(kit);
     if (document.body.dataset.dodge !== String(dodges)) document.body.dataset.dodge = String(dodges);
     // A Mage's BLINK wears the magic pips, filling as it comes back. Winded it can't fire, so it goes dull;
     // with less magic than it costs it still fires but leaves you winded, so the cost shows in red.
     // (PERFECT BLINK halves it just after a PERFECT: sim/laddermage.ts.)
     const cost = mage ? Math.round(kit.dodge.stamina * DODGE_RULE.cost * dodgeBreath(me) * blinkCost(me, room.time)) : 0, dull = mage && (!!me.winded || st < 1);
-    if (taunt) b.roll.show({ shape: 'diamond', size: 34, grade: tl > 0 ? 'stone' : 'iron', icon: skillCanvas('horn', ''), cd: tl / TAUNT.cooldown, flash: this.flash('taunt', tl, room.time) }, tl > 0 ? String(Math.ceil(tl)) : '', dn, 'Taunt');
-    else b.roll.show(dodges ? { shape: 'diamond', size: 34, grade: dull ? 'stone' : 'iron', icon: icon(DODGE[dn] ?? 'roll'), ...(mage ? { pips } : {}) } : null, mage && st < cost ? String(cost) : '', dn, dn);
+    b.roll.show(dodges ? { shape: 'diamond', size: 34, grade: dull ? 'stone' : 'iron', icon: icon(DODGE[dn] ?? 'roll'), ...(mage ? { pips } : {}) } : null, mage && st < cost ? String(cost) : '', dn, dn);
     b.roll.el.classList.toggle('cost', mage);
     // The crossbow reloads itself now (sim/crossbow.ts): no RELOAD button.
     b.reload.show(null, '', 'RELOAD', 'Reload');

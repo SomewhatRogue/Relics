@@ -8,6 +8,12 @@
 /** The shield a Cleric's perfect gives: it soaks up to `hp` of damage and lingers `time` s, the Cleric's
  *  own included. A fresh one tops an old one up; it never stacks past `hp`. */
 export const HOLY_SHIELD = { hp: 20, time: 5 };
+/**
+ * The Cleric's guard: a holy ward round them, held on the block button (Kyle, 2026-11-05; sim/holyguard.ts).
+ * It meets blows from every side and costs stamina for what it stops, as a block does. Standing within
+ * `coalReach` tiles of one of your own censer coals while you hold it gives back `coals` stamina a second.
+ */
+export const HOLY_GUARD = { coals: 25, coalReach: 1 };
 
 /** The mace. Its quick blows are short (reach 1.2 to 1.35, the sword's is 1.45). Held, the smite: its holy
  *  light mends every friend in the burst `heal` (as every heal, grown by the censer's coals). Let go on

@@ -357,6 +357,9 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   }
   // Only a Warrior's or Healer's kit holds a block.
   h.blocking = inp.block && h.stamina > 0 && !h.winded && guardOf(w) === 'full';
+  // When it went up (TAUNT GUARD's ring: sim/taunt.ts).
+  if (h.blocking && !h.wasBlocking) h.blockUpAt = now;
+  h.wasBlocking = h.blocking;
   // Guarding with no aim (a phone) turns to the nearest threat, so a block faces the right way.
   if (!streamFace(h, inp, enemies, now)) face(h, inp, enemies, h.blocking || now - h.lastBlockPress < 0.3);
   walk(h, inp, h.blocking ? w.blockSpeed : 1, dt, now, ev);

@@ -6395,3 +6395,34 @@ to exit and walk around while leaving the quest up."
 - A panel opening on a phone shuts the card to its line (`client/partycard.ts`); a tap still opens it
   out over the panel with SET OUT or LEAVE, and shuts it again. A laptop is unchanged.
 - No new words.
+
+## 2026-11-06: the guard grows (Kyle; Claude Opus 5.5)
+
+Kyle chose guard upgrades next, and for the Warrior "Replace the roar ladder" (TAUNT GUARD at 5 and IRON STANCE
+at 10 take the roar rungs' places). Built on top of parry's removal (the entry above; this session first built
+its own parry removal in parallel, saw the other land on main, and dropped it for that one).
+- **The Warrior's ladder** (GUARD, was TAUNT; `sim/taunt.ts`, `shared/ladder.ts` TAUNT_GUARD, IRON_STANCE,
+  STAND_FAST): TAUNT GUARD (5): while the block is held, goblins within 4 tiles come for you, and stay on you
+  1 s after; its red ring shows as the block goes up (at most once a second). IRON STANCE (10): a blocked blow
+  costs a flat 22 stamina however hard it hits, the goblin is thrown back and flinches 0.5 s (inside the stun
+  cap), and nothing lands on you for 0.5 s; no timing; the counter opens as from any block. STAND FAST (15,
+  moved from 10): goblins your TAUNT GUARD draws hit 30% softer, and a block shoves you nowhere. The roar, its
+  button, its cooldown and COWING ROAR are gone; a Warrior's dodge slot is GRAB again. A save's ladder count
+  carries over rung for rung (a Warrior with one rung knows TAUNT GUARD now).
+- **The Cleric's guard is a holy ward** (`sim/holyguard.ts`; Kyle: "a ward round you, like the Mage's magic
+  shield, that soaks hits and is fed by the censer's coals"): the same block, stamina for what it stops, but it
+  meets a blow from any side. Standing within a tile of one of your own censer coals while holding it gives back
+  25 stamina a second (`HOLY_GUARD`). Drawn as a gold shell and a circle at the feet (`client/holyguardmark.ts`).
+  The BUTTONS row says so for a Cleric.
+- **The Cleric's ladder**: SHELTER (5, kept), SHARED WARD (10, took COVER's place; Kyle: "you AND an ally, the
+  ally for free but again stamina drain"): the nearest friend within 3 tiles takes nothing from a blow the guard
+  could stop (not a striped one), and the Cleric drains 8 stamina a second while covering someone (`wardFor` on
+  the Cleric, so a guest sees the same); HEALING BLOCK (moved to 15).
+- **Words**: through the lore keeper and the line editor (this session had both agents), on the earlier draft
+  that also removed parry; their changes for these lines are in (IRON STANCE's "The goblin is thrown back",
+  STAND FAST naming TAUNT GUARD, SHARED WARD's "Covering them drains your stamina"). The lore keeper's note for
+  the story bible: "ward" now means the Cleric's guard too (the bible gives it to Sanctuary); Kyle's call.
+- Tests: `tests/ladder.test.ts` (the ward from behind; SHELTER; SHARED WARD covering, not a striped blow, and its
+  drain in the room; HEALING BLOCK at 15; TAUNT GUARD's pull, ring and linger; the dodge press does nothing; IRON
+  STANCE's flat cost, throw and untouchable moment; STAND FAST); `scripts/ladder-look.cjs` holds BLOCK for the
+  ring.

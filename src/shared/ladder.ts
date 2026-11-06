@@ -1,10 +1,10 @@
 /**
  * The movement ladder (Kyle, 2026-11-04: "pure upgrades, not just choosing"): three rungs a class, each
  * a step up on the class's dodge or, with no dodge, what stands in for it (the Healer's guard, the
- * Warrior's TAUNT). Every class gets every rung, taught by its own trainer one at a time, in order, at
+ * Warrior's block). Every class gets every rung, taught by its own trainer one at a time, in order, at
  * LADDER_LEVELS for the `ladder` drill's next rank (drills.ts). The save keeps `drills.ladder` as the
  * count, so an old hero starts with none. Every number the room judges them by is here (re-exported by
- * tuning.ts); the rules are sim/ladder*.ts and sim/taunt.ts, the tells client/fxladder.ts.
+ * tuning.ts); the rules are sim/ladder*.ts, sim/taunt.ts and sim/holyguard.ts, the tells client/fxladder.ts.
  */
 import { WEAPONS, type HeroClass, type WeaponId } from './weapons.js';
 import type { Drills } from './drills.js';
@@ -13,8 +13,8 @@ export type RungId =
   | 'airshot' | 'twinsnare' | 'landing'
   | 'blinkburst' | 'blinkthrough' | 'halfblink'
   | 'caltrops' | 'underlegs' | 'shakeoff'
-  | 'shelter' | 'blockmend' | 'cover'
-  | 'taunt' | 'standfast' | 'cowing';
+  | 'shelter' | 'allyward' | 'blockmend'
+  | 'tauntguard' | 'ironstance' | 'standfast';
 
 /** The levels the three rungs are taught at (the chapter's level cap holds the third back for now). */
 export const LADDER_LEVELS = [5, 10, 15];
@@ -24,12 +24,12 @@ export const RUNGS: Record<HeroClass, RungId[]> = {
   RANGER: ['airshot', 'twinsnare', 'landing'],
   MAGE: ['blinkburst', 'blinkthrough', 'halfblink'],
   ROGUE: ['caltrops', 'underlegs', 'shakeoff'],
-  HEALER: ['shelter', 'blockmend', 'cover'],
-  WARRIOR: ['taunt', 'standfast', 'cowing'],
+  HEALER: ['shelter', 'allyward', 'blockmend'],
+  WARRIOR: ['tauntguard', 'ironstance', 'standfast'],
 };
 
 /** The trainer's section for it: the dodge it climbs, by the name the button wears. */
-export const LADDER_TITLE: Record<HeroClass, string> = { RANGER: 'JUMP', MAGE: 'BLINK', ROGUE: 'DASH', HEALER: 'GUARD', WARRIOR: 'TAUNT' };
+export const LADDER_TITLE: Record<HeroClass, string> = { RANGER: 'JUMP', MAGE: 'BLINK', ROGUE: 'DASH', HEALER: 'GUARD', WARRIOR: 'GUARD' };
 
 /** The name on the trainer's row and what it does (Kyle's style: the effect first, plainly). */
 export const RUNG_WORDS: Record<RungId, { name: string; text: string }> = {
@@ -43,15 +43,15 @@ export const RUNG_WORDS: Record<RungId, { name: string; text: string }> = {
   underlegs: { name: 'DASH THROUGH', text: 'Dash through a goblin and your next hit within 2 s is a backstab.' },
   shakeoff: { name: 'SHAKE OFF', text: 'Dashing clears your poison, and fire on the floor can\'t burn you for 1 s.' },
   shelter: { name: 'SHELTER', text: 'While you block, friends within 2 tiles take 30% less damage.' },
+  // (Kyle, 2026-11-05: "you AND an ally, the ally for free but again stamina drain"; it took COVER's place.)
+  allyward: { name: 'SHARED WARD', text: 'Your guard also covers the nearest friend within 3 tiles, and they take no damage. Covering them drains your stamina.' },
   blockmend: { name: 'HEALING BLOCK', text: 'Each blow you block heals friends within 3 tiles for 5.' },
-  cover: { name: 'COVER', text: 'Block beside a friend and your guard takes blows meant for them. Not striped ones.' },
-  taunt: { name: 'TAUNT', text: 'Roar: goblins within 5 tiles come for you for 4 s. Once every 10 s.' },
-  standfast: { name: 'STAND FAST', text: 'While your taunt lasts, taunted goblins do 30% less damage, and no blow knocks you back or staggers you.' },
-  cowing: { name: 'COWING ROAR', text: 'Your taunt staggers small goblins for 0.7 s.' },
+  // The Warrior's guard took the roar's place (Kyle, 2026-11-06).
+  tauntguard: { name: 'TAUNT GUARD', text: 'While you hold block, goblins within 4 tiles come for you.' },
+  ironstance: { name: 'IRON STANCE', text: 'A blocked blow costs 22 stamina, however hard it hits. The goblin is thrown back, and nothing can hurt you for half a second.' },
+  standfast: { name: 'STAND FAST', text: 'Goblins your TAUNT GUARD draws to you do 30% less damage, and no blow knocks you back while you block.' },
 };
 
-/** The TAUNT button's line in BUTTONS (client/legend.ts). */
-export const TAUNT_BUTTON = 'Roar: goblins within 5 tiles come for you for 4 s. Once every 10 s.';
 
 /** JUMP SHOT: an attack press mid-jump looses the bow at once, `draw` of a full draw (a crossbow its bolt), once a jump. */
 export const AIR_SHOT = { draw: 0.6 };
@@ -79,15 +79,20 @@ export const SHELTER = { reach: 2, taken: 0.7 };
 /** HEALING BLOCK: each blow a Healer blocks heals friends within `reach` tiles for `heal` (was HEALING
  *  PARRY, 8 a parry; less now, since a block is far easier to make than a parry was: 2026-11-05). */
 export const BLOCK_MEND = { reach: 3, heal: 5 };
-/** COVER: a Healer blocking within `reach` tiles of a friend, facing the blow, takes it on the guard instead. */
-export const COVER = { reach: 1.3 };
+/** SHARED WARD: the nearest friend within `reach` tiles of a Cleric holding their guard takes nothing from
+ *  a blow the guard could stop (not a striped one); while it covers someone it drains `drain` stamina a second. */
+export const ALLY_WARD = { reach: 3, drain: 8 };
 /**
- * TAUNT: a roar on the dodge button (a Warrior has no dodge). Goblins within `reach` tiles come for you
- * for `time` s; again in `cooldown` s. STAND FAST: taunted goblins' blows land `soft` as hard, and no blow
- * shoves or staggers you while it lasts. COWING ROAR: small goblins in reach stagger `stagger` s. The
- * roar's ring is drawn `show` s at its reach.
+ * The Warrior's guard (Kyle, 2026-11-05/06: the guard grows like the dodge does, and replaces the roar).
+ * TAUNT GUARD: while the block is held, goblins within `reach` tiles come for the Warrior, and stay on
+ * them `linger` s after it drops; its ring is drawn `show` s each time the block goes up (at most every
+ * `every` s). IRON STANCE: a blocked blow costs a flat `cost` stamina, the goblin is thrown back `knock`
+ * and staggers `stagger` s, and nothing lands on the Warrior for `untouchable` s. No timing. STAND FAST:
+ * goblins the guard has drawn hit `soft` as hard, and a block shoves you nowhere.
  */
-export const TAUNT = { reach: 5, time: 4, cooldown: 10, soft: 0.7, stagger: 0.7, show: 0.45 };
+export const TAUNT_GUARD = { reach: 4, linger: 1, show: 0.45, every: 1 };
+export const IRON_STANCE = { cost: 22, knock: 8, stagger: 0.5, untouchable: 0.5 };
+export const STAND_FAST = { soft: 0.7 };
 
 /** The rungs known at this rank: the first `rank` of the class's. */
 export const rungsAt = (cls: HeroClass, rank: number) => RUNGS[cls].slice(0, Math.max(0, rank));

@@ -106,6 +106,7 @@ export class Soundscape {
     if (ev.k === 'legstab') return sfx.backstab();
     if (ev.k === 'blockmend' || ev.k === 'coverfor') return sfx.blessed();
     if (ev.k === 'taunt') return sfx.rally();
+    if (ev.k === 'ironstance') return sfx.wardbreak();
     // Each class's own button (shared/signs.ts): a MARK set, a MEND given; Hew struck; a smoke bomb thrown.
     if (ev.k === 'hunted') return sfx.latch(), sfx.perfect();
     if (ev.k === 'mended') return sfx.heal(), sfx.blessed();
