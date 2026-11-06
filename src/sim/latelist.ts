@@ -24,6 +24,8 @@ export interface LateBlow {
   sy: number;
   gx: number;
   gy: number;
+  /** A boss's blow (sim/bossgrace.ts): a guard or dodge pressed up to this late still counts. */
+  grace?: number;
 }
 
 let list: LateBlow[] | null = null;
@@ -37,8 +39,14 @@ export const lagOf = (h: Hero) => Math.max(0, h.lag ?? 0);
 export function defer(e: Enemy, a: EnemyAttack, h: Hero, now: number): boolean {
   const lag = lagOf(h);
   if (!list || lag <= 0) return false;
+  return putOff(e, a, h, now, Math.min(lag, LAGCOMP.cap));
+}
+
+/** Put a blow on the list, judged `wait` seconds from now at the latest (`grace`: a boss's, sim/bossgrace.ts). */
+export function putOff(e: Enemy, a: EnemyAttack, h: Hero, now: number, wait: number, grace?: number): boolean {
+  if (!list) return false;
   const round = isRound(a.kind), [gx, gy] = guardFrom(e, a, h);
-  list.push({ hero: h.id, foe: e.id, at: now, due: now + Math.min(lag, LAGCOMP.cap), a: { ...a, hit: a.hit ? [...a.hit] : undefined }, sx: round ? h.x - a.cx : h.x - e.x, sy: round ? h.y - a.cy : h.y - e.y, gx, gy });
+  list.push({ hero: h.id, foe: e.id, at: now, due: now + wait, a: { ...a, hit: a.hit ? [...a.hit] : undefined }, sx: round ? h.x - a.cx : h.x - e.x, sy: round ? h.y - a.cy : h.y - e.y, gx, gy, ...(grace !== undefined ? { grace } : {}) });
   return true;
 }
 

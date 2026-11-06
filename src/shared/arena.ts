@@ -43,7 +43,9 @@ export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall'
   // smokehouse, drying racks, nets hung up to dry.
   | 'jetty' | 'gangway' | 'smokehouse' | 'dryrack' | 'hungnet'
   // Hangman's Wood: the Gospel Oak, hollow, wooden (it burns from inside: sim/hangfire.ts).
-  | 'oak';
+  | 'oak'
+  // The great barn's hay stacks (shared/barnarena.ts): they stop a charge, and burn.
+  | 'haystack';
 export interface Round extends Circle { kind: RoundKind }
 export interface Block {
   x: number; y: number; w: number; h: number; kind: BlockKind; label?: string;

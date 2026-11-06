@@ -5,6 +5,8 @@
  * lands, takes every goblin near and draws them in, then bursts. A relic's blast throws every goblin
  * as hard whatever it weighs and knocks it down (sim/stuns.ts relicStun), and never touches a friend.
  */
+import { shotAtDoor } from './doorwall';
+import { addPoise } from './poise';
 import { HUNGRY_FX } from './hungry';
 import { collide } from '../shared/arena';
 import { CRIT, FLINCH, HERO, LODESTONE, NET, WEAPONS, type Augment, type Swing, type TraitId } from '../shared/tuning';
@@ -137,6 +139,8 @@ function strike(w: World, b: Bolt, e: Enemy): boolean {
   // (THROUGH THE LEGS: the next hit after dashing through a goblin's legs is a backstab: sim/ladderrogue.ts.)
   const back = !!by && rogueShot(b) && WEAPONS[by.weapon].cls === 'ROGUE' && !isDummy(e) && (fromBehind(e, b.dx, b.dy, by) || legStab(by, e, w.now, w.ev, false));
   const rear = back && by ? backstabOf(by) : 1;
+  // A boss of the kit: a shot into a shut door cuts its straps; a perfect, a full draw or one in its back fills its POISE (sim/doorwall.ts, poise.ts).
+  if (e.boss) bossShot(e, b, back, w);
   const dead = damage(e, Math.round(b.dmg * rear * (crit ? CRIT : 1) * boardMult(board)), w.now, w.ev, { heavy: b.knock >= 8 || crit, flinch: FLINCH, mult: true, brutal: b.traits.includes('brutal'), dx: b.dx, dy: b.dy, src: b.kind, el: b.el, backstab: back });
   // (A board tuned to let a little of a plain shot by still stops it there.)
   if (board === 'blocked') w.ev.push({ k: 'deflect', x: e.x, y: e.y });
@@ -262,4 +266,12 @@ function end(b: Bolt, w: World, wall: boolean): boolean {
   b.state = 'stuck';
   b.life = wall ? 2.5 : 1.5;
   return true;
+}
+
+/** A shot at a boss: its door's straps, then what in it fills POISE (the door itself is judged in damage()). */
+function bossShot(e: Enemy, b: Bolt, back: boolean, w: World): void {
+  shotAtDoor(e, b, w.now, w.ev);
+  if (b.perfect) addPoise(e, 'perfect', w.now, w.ev);
+  else if (b.charged) addPoise(e, 'charged', w.now, w.ev);
+  if (back) addPoise(e, 'backstab', w.now, w.ev);
 }

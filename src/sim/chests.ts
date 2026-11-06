@@ -10,19 +10,22 @@ import { isDead } from './damage';
 import type { Drop, Enemy, FightEvent, Hero } from './types';
 import type { Pickup } from './pickups';
 
-export interface Chest { id: number; x: number; y: number; state: 'shut' | 'opening' | 'open'; t: number; by: string; tier: Tier; chained: boolean; rolls: Record<string, Item[]> }
+/** `boss`: a boss's sure chest, its seed (sim/bosschest.ts), and the relics in it, by hero. */
+export interface Chest { id: number; x: number; y: number; state: 'shut' | 'opening' | 'open'; t: number; by: string; tier: Tier; chained: boolean; rolls: Record<string, Item[]>; boss?: number; relics?: Record<string, import('../shared/relicitems').RelicItem> }
 export const CHEST = { open: 1.2, reach: 1.3, leave: 1.8, alert: 6 };
 import { lift } from './loot';
+import { openBossChest, rollBossChest } from './bosschest';
 let nextId = 1, dropId = 50000;
 
-export const newChest = (x: number, y: number, chained = false): Chest => ({ id: nextId++, x, y, state: 'shut', t: 0, by: '', tier: 'plain', chained, rolls: {} });
+export const newChest = (x: number, y: number, chained = false, boss?: number): Chest => ({ id: nextId++, x, y, state: 'shut', t: 0, by: '', tier: 'plain', chained, rolls: {}, ...(boss !== undefined ? { boss } : {}) });
 const players = (heroes: Hero[]) => heroes.filter((h) => h.id !== 'squire');
 
 /** Start opening: roll for every player now (so the light is true), best of the opener's sets the colour. */
 export function startChest(c: Chest, h: Hero, heroes: Hero[], enemies: Enemy[], rng: Rng, shift: number, ev: FightEvent[], lv = 1): void {
   if (c.state !== 'shut' || Math.hypot(h.x - c.x, h.y - c.y) > CHEST.reach || h.act === 'down') return;
   if (c.chained && enemies.some((e) => e.name && !isDead(e))) return void ev.push({ k: 'chained', x: c.x, y: c.y });
-  for (const p of players(heroes)) {
+  if (c.boss !== undefined) rollBossChest(c, players(heroes), lv);
+  else for (const p of players(heroes)) {
     if (c.rolls[p.id]) continue;
     const n = rng.next() < 0.4 || c.chained ? 2 : 1, cls = WEAPONS[p.weapon].cls;
     c.rolls[p.id] = Array.from({ length: n }, () => {
@@ -51,6 +54,11 @@ export function stepChests(chests: Chest[], heroes: Hero[], drops: Drop[], picku
     ev.push({ k: 'chest', x: c.x, y: c.y, tier: c.tier, state: 'open' });
     for (const [id, items] of Object.entries(c.rolls))
       items.forEach((item, i) => drops.push({ id: dropId++, x: c.x - 0.6 + i * 1.2, y: c.y + 0.9, item, life: 120, owner: id }));
+    // A boss's sure chest: each hero's relic, and its pile of gold (nothing left to chance on the room's dice).
+    if (c.boss !== undefined) {
+      openBossChest(c, heroes, pickups, () => dropId++, ev);
+      continue;
+    }
     if (rng.next() < 0.5) pickups.push({ id: dropId++, x: c.x + 0.9, y: c.y + 0.4, life: COINS.life, gold: 10 + Math.floor(rng.next() * 21) });
     if (rng.next() < 0.3) pickups.push({ id: dropId++, x: c.x - 0.9, y: c.y + 0.4, life: COINS.life, potion: rng.pick(POTION_ORDER) });
   }

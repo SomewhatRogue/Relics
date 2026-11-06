@@ -56,6 +56,7 @@ export * from './staithetune.js';
 export * from './hangtune.js';
 export * from './chalk.js';
 export * from './threat.js';
+export * from './bosstune.js';
 import { BANNER, NETTER, THIEF, LOGS, ROOF, IRONHIDE } from './raiders.js';
 import { CHALKER } from './chalk.js';
 import { WOLF, KEEPER, OIL, TORCH, SAPPER, CAVE } from './prowlers.js';

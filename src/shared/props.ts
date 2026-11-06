@@ -111,6 +111,8 @@ export const WOOD: Partial<Record<import('./arena').BlockKind, { hp: number; doo
   hungnet: { hp: 12 },
   // Hangman's Wood's Gospel Oak (shared/hangtune.ts OAK): a long burn, from inside.
   oak: { hp: 480 },
+  // The Doorkeepers' barn (shared/barnarena.ts): a hay stack burns down in 6 s.
+  haystack: { hp: 144 },
 };
 export const BLAZE = {
   /** Health a burning building loses a second. */

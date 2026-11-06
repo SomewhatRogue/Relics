@@ -5,6 +5,8 @@ import { wet } from './wet';
 import { clanks, plated } from './ironhide';
 import { MARK_SIGN, isMarked } from '../shared/signs';
 import { count, dealt } from './score';
+import { doorTake } from './doorwall';
+import { noteHurt } from './bosskit';
 
 const SPEC = { butcher: BUTCHER, scrapper: SCRAPPER, spider: SPIDER, brood: BROOD } as Record<string, { stun: number; respawn: number } | undefined>;
 export const stunOf = (e: Enemy) => SPEC[e.kind]?.stun ?? SWING_DUMMY.stun;
@@ -70,6 +72,11 @@ export function sayWeak(e: Enemy, m: number, now: number, ev: FightEvent[], el: 
 export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: DamageOpts = {}): boolean {
   e.alert = true;
   if (e.act === 'dead') return false;
+  // A boss's door stops what comes at its front (a burst, a tick or storm goes round it), and a roar takes nothing (sim/doorwall.ts).
+  if (e.boss && n > 0) {
+    const round = o.tick || o.how === 'burst' || o.el === 'storm', got = doorTake(e, n, round ? 0 : o.dx ?? 0, round ? 0 : o.dy ?? 0, now);
+    if (got <= 0) return o.tick || ev.push({ k: 'deflect', x: e.x, y: e.y }), false;
+  }
   // A weakness (fire on a spider) lands harder and says so, a resistance softer; a burn's tick says nothing.
   const weak = weakOn(e, o.el || 'physical');
   if (weak !== 1) n = Math.max(1, Math.round(n * weak));
@@ -89,6 +96,7 @@ export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: Da
   n = plated(e, n, now, breaks, ev);
   // A butcher at a body: a heavy hit takes it off the meal (sim/meal.ts).
   if (e.meal && breaks) (e.meal = null), (e.mealCool = now + MEAL.again), ev.push({ k: 'mealbroken', x: e.x, y: e.y });
+  if (e.boss) noteHurt(e, e.lastBy, n, now);
   e.hp -= n;
   e.hitAt = now;
   dealt(e, e.lastBy, n, o.tick);

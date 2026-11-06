@@ -2,6 +2,16 @@
 
 ## Current slice
 
+**The boss kit and the Doorkeepers** (Claude Opus 5.5, 2026-11-06; `docs/plans/bosses.md` rollout item 2; Kyle:
+"shield goblins or a pair ... arena ... good loot ... mix between splatting and tactical"). Built; waiting on Kyle's
+play and the lore keeper and line editor on the new words. *Done when*, on his phone and laptop: the Doorkeepers
+hunt is on the board (from 3 brought home, or the bell rung), two rooms, the great barn last; the plate shows THE
+DOORKEEPERS with a bar each, POISE under each and two phase pips; the wall turns too slowly to stop a flanker, the
+mover's sweep and charge each leave a punish, a charge stuck in a hay stack is the big one; prised apart, the mover
+walks back with its back open; side by side they lock doors and shove; one down, the other roars and spins; a block
+of a boss's red blow isn't shoved and rebounds it (BRACED); POISE fills to STAGGERED; the chained chest gives each
+hero a Forged or better piece, the gold, and now and then a relic with its moment. Everything in DECISIONS
+2026-11-06 ("the boss kit"). Open: BOSS_FLAGS.braced ('boss') and BOSS_FLAGS.grace (on), Kyle's calls; every number.
 **The guest feel** (Claude Opus 5.5, 2026-11-06; Kyle's goal: online lag as low as possible). Built; waiting on
 Kyle's play. *Done when*, on his phone and laptop, following a friend's job online: his own dodge, block and swing
 show the moment he presses, with their dust and whoosh, and never pull back; walking with a block held, creeping

@@ -13,7 +13,7 @@ import { STAITHE_KINDS, staitheBoxes } from './staithebox';
 import { gibbetBoxes, oakBoxes, waymarkBoxes } from './woodpieces';
 
 export type Bx = [number, number, number, number, number, number, number, ('lump' | 'cone')?];
-export const PIECE_BLOCKS = new Set<Block['kind']>(['headframe', 'log', 'mill', 'stakes', 'jetty', 'gangway', 'smokehouse', 'dryrack', 'hungnet', 'oak']);
+export const PIECE_BLOCKS = new Set<Block['kind']>(['headframe', 'log', 'mill', 'stakes', 'jetty', 'gangway', 'smokehouse', 'dryrack', 'hungnet', 'oak', 'haystack']);
 /** Boards you walk on (the Staithe's jetty and a log laid across): the flat view paints them under everyone (staithedraw.ts). */
 export const DECKS = new Set<Block['kind']>(['jetty', 'gangway']);
 export const PIECE_ROUNDS = new Set<Round['kind']>(['hangtree', 'headstone', 'apple', 'gibbet', 'waymark']);
@@ -27,6 +27,13 @@ export function blockBoxes(b: Pick<Block, 'kind' | 'w' | 'h' | 'look' | 'ruined'
   const w = b.w, d = b.h, cx = w / 2, cz = d / 2, out: Bx[] = [], r = shuffle(Math.round(w * 37 + d * 11));
   if (STAITHE_KINDS.has(b.kind)) return staitheBoxes(b, r);
   if (b.kind === 'oak') return oakBoxes(b, r);
+  if (b.kind === 'haystack') {
+    // A stack of hay on the threshing floor: a heaped base, a rounded top, loose wisps, a fork left in it.
+    out.push([cx, 0, cz, w, 0.55, d, 0xb8a060], [cx, 0.45, cz, w * 0.9, 0.55, d * 0.85, 0xc8b06a, 'lump'], [cx, 0.85, cz, w * 0.6, 0.45, d * 0.6, 0xd8c47a, 'lump']);
+    for (let i = 0; i < 6; i++) out.push([0.15 + r() * (w - 0.3), 0, 0.15 + r() * (d - 0.3), 0.12, 0.1, 0.12, 0x9a8448]);
+    out.push([w * 0.7, 0.6, cz, 0.05, 0.9, 0.05, 0x5a3d22]);
+    return out;
+  }
   if (b.kind === 'headframe') {
     // Four legs leaning in to a head, cross braces, the sheave wheel on top and the rope down the shaft.
     for (const [x, z] of [[0.25, 0.25], [w - 0.25, 0.25], [0.25, d - 0.25], [w - 0.25, d - 0.25]]) out.push([x + (cx - x) * 0.15, 0, z + (cz - z) * 0.15, 0.18, 2.9, 0.18, TIMBER]);

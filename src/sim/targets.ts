@@ -57,7 +57,7 @@ export function targets(run: Run | null, room: ArenaRoom, houses: HouseAt[] = []
   const o = run.job.objective;
   if (o === 'larder') for (const p of racksLeft(room)) out.push({ kind: 'larder', x: p.x, y: p.y });
   if (o === 'burn') for (const b of densLeft(room.map)) out.push({ kind: 'den', x: b.x + b.w / 2, y: b.y + b.h / 2 });
-  const boss = bossOf(room);
-  if ((o === 'hunt' || o === 'story') && boss && !isDead(boss)) out.push({ kind: 'boss', x: boss.x, y: boss.y, id: boss.id });
+  // (Each named one still standing: a pair has two marks.)
+  if (o === 'hunt' || o === 'story') for (const boss of room.enemies) if (boss.name && !isDead(boss)) out.push({ kind: 'boss', x: boss.x, y: boss.y, id: boss.id });
   return out;
 }

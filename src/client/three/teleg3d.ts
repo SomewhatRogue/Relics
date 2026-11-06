@@ -67,7 +67,10 @@ export function makeTele(): THREE.Mesh {
 /** Shape the mesh to this attack. `lift`: the floor's height there. */
 export function shapeTele(m: THREE.Mesh, a: EnemyAttack, now: number, lift: number): boolean {
   if (a.t >= a.windup + a.active) return false;
-  const u = (m.material as THREE.ShaderMaterial).uniforms, prog = Math.min(1, a.t / a.windup);
+  // (A boss's pose first, then its floor: sim/bosskit.ts BOSS.tell.)
+  const tell = a.tell ?? 0;
+  if (a.t < tell) return false;
+  const u = (m.material as THREE.ShaderMaterial).uniforms, prog = Math.min(1, (a.t - tell) / (a.windup - tell));
   const round = isRound(a.kind), lane = a.kind === 'charge' || a.kind === 'draw' || a.kind === 'pounce' || a.kind === 'hook', shot = a.kind === 'shot';
   u.uProg.value = prog;
   u.uT.value = now;

@@ -7,6 +7,9 @@ import { SIGNS, SIGN_KEY } from '../shared/signs';
 import { signFor, signLeft } from '../sim/signature';
 import { ExpedUi } from './expedui';
 import { expedition, goalWords, hangmansWood } from '../shared/expedjob';
+import { barnHunt } from '../shared/bossjobs';
+import { plateOf } from '../sim/bossplate';
+import { showPlate } from './bossplate';
 import { spellCost } from '../sim/spells';
 import { carriedItem } from '../sim/charge';
 import { isDark } from '../shared/relicitems';
@@ -198,6 +201,9 @@ if (quick && xday) game.startJob(expedition(xday > 1 ? xday : game.world.day));
 // ?hero=WARRIOR&wood=1: straight into today's Hangman's Wood (?wood=4: the one posted on day 4).
 const wday = Number(new URLSearchParams(location.search).get('wood') ?? 0);
 if (quick && wday) game.startJob(hangmansWood(wday > 1 ? wday : game.world.day));
+// ?hero=WARRIOR&barn=1: straight onto today's Doorkeepers hunt; ?barn=arena: straight into the great barn.
+const barn = new URLSearchParams(location.search).get('barn');
+if (quick && barn) game.startJob(barnHunt(game.world.day, barn === 'arena'));
 // The big map's load test (?hero=WARRIOR&bigmap=1: bigmode.ts), loaded only when asked.
 if (quick && new URLSearchParams(location.search).get('bigmap') === '1') void import('./bigmode').then((m) => m.startBig(game, new URLSearchParams(location.search)));
 // A recovery code here: if another device sent these heroes on since, take that copy (only before play).
@@ -353,9 +359,7 @@ function hud(now: number): void {
     objFlash.watchWood(wood.stage + (wood.passed ?? 0), now);
     // (The wood's lessons never fold: the control to learn is on it.)
     fold.render(objFlash.show(`<b>${g.title}</b> <div class="obj">${g.text}</div><span>GREYHOLLOW, THE DAY AFTER</span>`, now), null, g.title + g.text, now);
-    const boss = room.enemies.find((e) => e.name && e.act !== 'dead');
-    $('#boss').hidden = !boss || wood.cut >= 0;
-    if (boss) ($('#boss b').textContent = boss.name!), ($('#boss i').style.width = (100 * boss.hp) / boss.maxHp + '%');
+    showPlate($('#boss'), wood.cut >= 0 ? null : plateOf(room.enemies, room.time));
   } else if (game.mode === 'run' && run) {
     const g = { text: me.out ? OUT_TEXT : game.goalText() };
     // (The hearts, the get-ups left, are under the health bar: unitframe.ts.)
@@ -366,9 +370,8 @@ function hud(now: number): void {
     const small = smallLine(x && !me.out && x.phase === 'shut' ? TRACKW.jobsLeft(left, x.goals.length) : g.text, rooms);
     fold.render(full, small, run.job.place.name + run.index + ':' + (x && !me.out && x.phase === 'shut' ? 'jobs' + left : calm(g.text)), now, objFlash.holding(now));
     // (On an expedition the named butcher's bar shows only once you're near it.)
-    const boss = room.enemies.find((e) => e.name && e.act !== 'dead' && (!room.exped || Math.hypot(e.x - me.x, e.y - me.y) < 14));
-    $('#boss').hidden = !boss;
-    if (boss) ($('#boss b').textContent = boss.name!), ($('#boss i').style.width = (100 * boss.hp) / boss.maxHp + '%');
+    // (A boss of the kit: its plate, sim/bossplate.ts.)
+    showPlate($('#boss'), plateOf(room.enemies, room.time, (e) => !room.exped || Math.hypot(e.x - me.x, e.y - me.y) < 14));
   } else {
     $('#boss').hidden = true;
     objFlash.watchWood(-1, now);
