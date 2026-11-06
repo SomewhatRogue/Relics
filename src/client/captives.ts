@@ -5,6 +5,7 @@
  * Hurt, they flash; burning, they smoulder; killed, they fall and stay down; home, they walk off and fade.
  * Drawing only.
  */
+import { drawAsh, drawEaten } from './remainsdraw';
 import { SPRITES } from './sprites';
 import { blit, shadow, type Ctx } from './draw';
 import { drawText, textWidth } from './pixfont';
@@ -59,6 +60,9 @@ export function drawSurvivor(c: Ctx, s: Survivor, sx: number, sy: number, now: n
 
 /** Killed: they go over in a moment and stay down, a dark pool under them. */
 function drawFallen(c: Ctx, s: Survivor, x: number, y: number, now: number): void {
+  // Eaten by a butcher, or burned to ash first (sim/meal.ts, worldfire.ts).
+  if (s.eaten) return drawEaten(c, x, y, true);
+  if (s.ashed) return drawAsh(c, x, y, now, s.id, true);
   const spr = SPRITES.survivor, k = Math.min(1, (now - s.deadAt) / 0.3), side = s.fx < 0 ? -1 : 1;
   if (k >= 1) {
     c.lit.fillStyle = '#5a0c0c';

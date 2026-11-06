@@ -1,17 +1,19 @@
 /**
  * Where a storm's lightning goes (sim/storm.ts): something tall or metal out in the open near the
- * party, a lone tree, a banner pole, a siege engine, or a goblin standing well clear of any wall (a hero
+ * party, a lone tree, a banner pole, an ironhide's iron (sim/rods.ts: one near any other spot draws it
+ * there too), a siege engine, or a goblin standing well clear of any wall (a hero
  * now and then, rarely); with nothing like that about, bare open ground near someone. Weighted by
  * LIGHTNING.weights, chosen on the room's own sky stream, so every screen sees the same.
  */
 import type { Block, GameMap, Round } from '../shared/arena';
 import { ENGINE } from '../shared/expedcamps';
 import type { Rng } from '../shared/rng';
-import { LIGHTNING } from '../shared/tuning';
+import { LIGHTNING, ROD } from '../shared/tuning';
+import { isRod, rodNear } from './rods';
 import { isDead } from './damage';
 import type { Enemy, Hero, Strike } from './types';
 
-type Pick = { x: number; y: number; on: Strike['on'] };
+type Pick = { x: number; y: number; on: Strike['on']; ox?: number; oy?: number; rod?: number };
 const TALL = new Set(['tree', 'pine', 'deadtree']);
 const up = (h: Hero) => h.act !== 'down' && !h.out && h.id !== 'squire';
 
@@ -36,8 +38,15 @@ function loneTrees(map: GameMap): Round[] {
   return l;
 }
 
-/** What this strike goes for, or null (nobody about, nowhere open). */
+/** What this strike goes for, or null (nobody about, nowhere open): drawn onto an ironhide near it. */
 export function pickStrike(map: GameMap, heroes: Hero[], enemies: Enemy[], rng: Rng): Pick | null {
+  const p = pickSpot(map, heroes, enemies, rng);
+  if (!p || p.on === 'rod') return p;
+  const rod = rodNear(enemies, p.x, p.y);
+  return rod ? { x: rod.x, y: rod.y, on: 'rod', ox: p.x, oy: p.y, rod: rod.id } : p;
+}
+
+function pickSpot(map: GameMap, heroes: Hero[], enemies: Enemy[], rng: Rng): Pick | null {
   const party = heroes.filter(up);
   if (!party.length) return null;
   const near = (x: number, y: number) => party.some((h) => Math.hypot(h.x - x, h.y - y) <= LIGHTNING.near);
@@ -50,13 +59,15 @@ export function pickStrike(map: GameMap, heroes: Hero[], enemies: Enemy[], rng: 
   for (const e of enemies) {
     if (isDead(e) || e.under || (e.z ?? 0) !== 0 || e.dozing || !near(e.x, e.y)) continue;
     if (e.variant === 'banner') all.push({ x: e.x, y: e.y, on: 'banner', w: W.banner });
+    // An ironhide's iron draws it as a banner pole does (sim/rods.ts).
+    else if (isRod(e)) all.push({ x: e.x, y: e.y, on: 'rod', rod: e.id, w: ROD.weight });
     else if (inOpen(map, e.x, e.y)) all.push({ x: e.x, y: e.y, on: 'goblin', w: W.goblin });
   }
   for (const h of party) if ((h.z ?? 0) === 0 && inOpen(map, h.x, h.y)) all.push({ x: h.x, y: h.y, on: 'hero', w: W.hero });
   const total = all.reduce((n, p) => n + p.w, 0);
   if (total > 0) {
     let r = rng.next() * total;
-    for (const p of all) if ((r -= p.w) < 0) return { x: p.x, y: p.y, on: p.on };
+    for (const p of all) if ((r -= p.w) < 0) return { x: p.x, y: p.y, on: p.on, ...(p.rod ? { rod: p.rod } : {}) };
     return all[all.length - 1];
   }
   // Nothing tall about: open ground a few steps from someone.

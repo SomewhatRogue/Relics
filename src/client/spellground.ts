@@ -14,6 +14,7 @@ import { drawSkyBolts, drawSkyMarks, skyLights } from './skystrikedraw';
 import { OX, OY, PX } from './world';
 import { drawLadderGround } from './ladderground';
 import { drawWalls, drawWalls3, wallLights } from './firewalldraw';
+import { drawWorldGround, worldLights } from './worlddraw';
 
 /** Floor (x, z) at height y (tiles) to the screen. */
 type Proj = (x: number, y: number, z: number) => [number, number];
@@ -60,6 +61,8 @@ function charged(g: CanvasRenderingContext2D, z: Zone, P: Proj, t: number): void
 type At = (key: string, x: number, y: number) => [number, number];
 
 function draw(g: CanvasRenderingContext2D, room: ArenaRoom, P: Proj, ppu: number, at?: At, over = false): void {
+  // The world's effects under the spells: ice, a meal's clock, FED, a jolt across water (worlddraw.ts).
+  drawWorldGround(g, room, P, ppu, at);
   // The staff's wall of fire (firewalldraw.ts; over the 3D picture, with the bodies in it cut out), then its charged ring.
   if (over) drawWalls3(g, room, P, ppu, at);
   else drawWalls(g, room, P, ppu);
@@ -91,7 +94,7 @@ export function spellLights<L>(room: ArenaRoom, at: (x: number, y: number, r: nu
     if (z.kind !== 'stormring' || room.time >= z.until) continue;
     out.push(at(z.x, z.y, z.r + 1.2, (0.55 + Math.random() * 0.2) * fade(z, room.time), EL_LIGHT[z.el]));
   }
-  return out.concat(streamLights(room, at), skyLights(room, at));
+  return out.concat(streamLights(room, at), skyLights(room, at), worldLights(room, at));
 }
 
 /** The flat view's lights for them. */

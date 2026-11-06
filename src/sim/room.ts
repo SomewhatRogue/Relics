@@ -74,7 +74,7 @@ import { litMult } from './charge';
 import { fireFound, stepSentries } from './foundrelics';
 import { grow } from './grow';
 import { awake, merge } from './sleep';
-import { NO_INTENT, type Puddle, type Strike, type Zone, type Bolt, type Drop, type Enemy, type Prop, type FightEvent, type Hero, type Hook, type Intent, type Javelin, type Snare, type Survivor } from './types';
+import { NO_INTENT, type Ice, type Puddle, type Strike, type Zone, type Bolt, type Drop, type Enemy, type Prop, type FightEvent, type Hero, type Hook, type Intent, type Javelin, type Snare, type Survivor } from './types';
 import { stun } from './stuns';
 import { stepDread, type DreadRule } from './dread';
 import { stepExped, type ExpedState } from './exped';
@@ -84,6 +84,10 @@ import { followGround, stepGround } from './techcleric';
 import { stepStorm } from './storm';
 import { stepLadder } from './ladder';
 import { useBoard, type Board } from './score';
+import { stepIce } from './ice';
+import { mealWatch } from './meal';
+import { stepSteam } from './steam';
+import { stepWorldFire } from './worldfire';
 
 export class ArenaRoom {
   time = 0;
@@ -104,6 +108,9 @@ export class ArenaRoom {
   pickups: Pickup[] = [];
   /** Smoke from thrown flasks. */
   smokes: Smoke[] = [];
+  /** Shallows iced over by frost (sim/ice.ts), and the last one's number. */
+  ices: Ice[] = [];
+  iceSeq = 0;
   /** Poison where the brood mother's globs landed (sim/puddles.ts). */
   puddles: Puddle[] = [];
   /** Lamp oil spilled by the oil throwers, lit or not (sim/oil.ts); crows on the dead (sim/crows.ts). */
@@ -309,7 +316,7 @@ export class ArenaRoom {
     this.events = [];
     this.time += TICK;
     this.tick++;
-    const w: World = { heroes: this.heroes, enemies: this.enemies, javelins: this.javelins, props: this.props, survivors: this.survivors, now: this.time, ev: this.events, rng: this.fireRng, floor: { pickups: this.pickups, rng: this.purseRng } };
+    const w: World = { heroes: this.heroes, enemies: this.enemies, javelins: this.javelins, props: this.props, survivors: this.survivors, now: this.time, ev: this.events, rng: this.fireRng, floor: { pickups: this.pickups, rng: this.purseRng }, fx: this };
     if (this.falseCages && !this.indoors) w.cages = this.cageRng;
     const hit = (e: Enemy, el: Hero['augments']['javelin'], n: number) => afflict(w, e, el, n);
     const acts: HeroActs = {
@@ -339,6 +346,10 @@ export class ArenaRoom {
     this.smokes = stepPotions(this.heroes, this.smokes, this.time, TICK);
     // Goblins in smoke see nobody but those close; blows across its edge are dropped (sim/smokebomb.ts).
     stepSmoke(this.enemies, this.heroes, this.smokes, this.time);
+    // The world's effects before anyone moves: who's held on ice, butchers FED or taken off a meal (sim/ice.ts, meal.ts).
+    stepIce(this, this.enemies, this.time);
+    mealWatch(this.enemies, this.survivors, this.time, this.events);
+    OWN_KIT.freed = this.survivors;
     for (const h of this.heroes) {
       const inp = this.intents.get(h.id) ?? NO_INTENT, c = this.chests.find((x) => x.id === inp.open);
       if (inp.openSeq === h.seen.open) continue;
@@ -400,6 +411,9 @@ export class ArenaRoom {
     // lightning it calls falls when it's due (sim/skystrike.ts).
     stepWalls(this.zones, w, this.slicks), stepRings(this.zones, w), stepStreams(w), stepSkyStrikes(this.zones, w);
     this.landings();
+    // Steam scalds; fire turns bodies to ash and ice to steam (sim/steam.ts, worldfire.ts).
+    stepSteam(w);
+    stepWorldFire(w, this);
     // Out of bounds: the dread, and what comes for anyone who stays out (sim/dread.ts).
     stepDread(this.dread, this.map, this.heroes, this.enemies, TICK, this.events);
     for (const e of this.enemies) if (alive.has(e.id) && isDead(e) && !e.escaped) dropFrom(e, this.heroes, this.drops, this.lootRng, this.events);

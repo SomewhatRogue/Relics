@@ -8,8 +8,17 @@ import { blast } from './bolts';
 import type { World } from './elements';
 import type { Bolt, Hero } from './types';
 
-/** A cloud of smoke; `r` how far it reaches (a smoke bomb's), else POTION.smokeR. */
-export interface Smoke { x: number; y: number; until: number; r?: number }
+/** A cloud of smoke (or steam); `r` how far it reaches (a smoke bomb's), else POTION.smokeR. */
+export interface Smoke {
+  x: number;
+  y: number;
+  until: number;
+  r?: number;
+  /** Steam (sim/steam.ts): white, and it scalds every so often (`next`); whose fire raised it. */
+  steam?: boolean;
+  next?: number;
+  by?: string;
+}
 
 /**
  * Drink or throw the potion at the front of the belt. A flask flies to (ax, ay) from the hero: where

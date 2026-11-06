@@ -317,3 +317,4 @@ most Want among the heroes is the one the bells don't spare).
   - The watch drink at the Drowned Rat (Wall Brandy is theirs), which is why Nettle keeps his voice down.
 - Every vendor's stock is the same for everyone at a time; why the goods change is never said.
 
+- Butchers eat their own dead as well as ours, and come up GORGED for a while (Kyle and the lore keeper, 2026-11-05). Eating only heals and gorges one; it never grows a butcher, which only slivers do. Burn the body and the ash gives it nothing, which is Hew's reason for burning the column's dead.

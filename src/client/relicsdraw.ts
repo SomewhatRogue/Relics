@@ -207,8 +207,9 @@ export function drawSmoke(c: Ctx, s: Smoke, x: number, y: number, r: number, now
   for (let i = 0; i < 12; i++) {
     const a = i * 2.4 + now * 0.35, d = r * (0.15 + ((i * 37) % 10) / 14), size = 4 + ((i * 7) % 4);
     const px = Math.round(x + Math.cos(a) * d), py = Math.round(y + Math.sin(a) * d * 0.55 - 6 - ((now * 3 + i) % 4));
-    c.lit.globalAlpha = 0.35 * left;
-    c.lit.fillStyle = i % 2 ? '#c8c2d4' : '#a8a2b4';
+    // Steam (sim/steam.ts) is white and a little thicker; smoke grey.
+    c.lit.globalAlpha = (s.steam ? 0.5 : 0.35) * left;
+    c.lit.fillStyle = s.steam ? (i % 2 ? '#f4f8fa' : '#dce4ea') : i % 2 ? '#c8c2d4' : '#a8a2b4';
     c.lit.beginPath();
     c.lit.arc(px, py, size, 0, Math.PI * 2);
     c.lit.fill();

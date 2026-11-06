@@ -18,6 +18,8 @@ import { damage, isDead, small } from './damage';
 import { pickStrike } from './stormpick';
 import { inStrike } from './stormshape';
 import { stun } from './stuns';
+import { rodHit } from './rods';
+import { wildJolt } from './pools';
 import { hurtSurvivor } from './survivors';
 import type { Enemy, FightEvent, Hero, Strike, Survivor } from './types';
 import { count } from './score';
@@ -49,7 +51,7 @@ export function stepStorm(r: StormRoom, rng: Rng): void {
   r.nextStrike = t + rng.range(...LIGHTNING.every);
   const p = pickStrike(r.map, r.heroes, r.enemies, rng);
   if (!p) return;
-  r.strikes.push({ id: Math.round(t / TICK), x: p.x, y: p.y, r: LIGHTNING.r, at: t + LIGHTNING.warn, on: p.on });
+  r.strikes.push({ id: Math.round(t / TICK), x: p.x, y: p.y, r: LIGHTNING.r, at: t + LIGHTNING.warn, on: p.on, ...(p.rod ? { rod: p.rod, ox: p.ox ?? p.x, oy: p.oy ?? p.y } : {}) });
   r.events.push({ k: 'strikewarn', x: p.x, y: p.y });
 }
 
@@ -63,8 +65,13 @@ function land(r: StormRoom, s: Strike): void {
   const t = r.time, ev = r.events;
   s.done = true;
   ev.push({ k: 'strike', x: s.x, y: s.y });
+  // Drawn into an ironhide: the bolt bends into it, its guard broken, struck wherever it has stepped to (sim/rods.ts).
+  const rod = s.rod ? r.enemies.find((e) => e.id === s.rod && !isDead(e)) : undefined;
+  if (rod) rodHit(rod, s.ox ?? s.x, s.oy ?? s.y, t, ev);
+  const struck: Enemy[] = [];
   for (const e of r.enemies) {
-    if (isDead(e) || e.under || (e.z ?? 0) !== 0 || !inStrike(s, e, e.radius)) continue;
+    if (isDead(e) || e.under || (e.z ?? 0) !== 0 || (e !== rod && !inStrike(s, e, e.radius))) continue;
+    struck.push(e);
     const [dx, dy] = away(s, e);
     if (damage(e, LIGHTNING.dmg, t, ev, { heavy: true, how: 'burst', dx, dy, el: 'storm' })) continue;
     if (small(e) && e.act !== 'carried') stun(e, STORM_ID, t, LIGHTNING.stun, ev);
@@ -81,6 +88,8 @@ function land(r: StormRoom, s: Strike): void {
     downIfDead(h, ev);
   }
   for (const v of r.survivors) if (inStrike(s, v)) hurtSurvivor(v, LIGHTNING.heroDmg, '', t, ev, ...away(s, v));
+  // Into water: the whole of it jolts, friends too (sim/pools.ts).
+  wildJolt(r, s, struck);
   // A siege engine struck is cracked.
   if (s.on === 'engine') for (const b of r.map.blocks) if (b.kind === 'cart' && b.look === ENGINE.look && !b.ruined && Math.hypot(b.x + b.w / 2 - s.x, b.y + b.h / 2 - s.y) < 0.5) hurtBlock(b, LIGHTNING.engine, ev);
 }

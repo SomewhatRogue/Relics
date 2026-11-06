@@ -27,6 +27,7 @@ import { blockSound, chargedSound, hitSound, shotSound, swingSound, woodSounds }
 import { cueAt } from './waycues';
 import { muffledCry } from './kindlecue';
 import { eventSample } from './sfxevents';
+import { worldSound } from './worldsound';
 
 /** How far off a fight can still be heard, in tiles: a little past a screen. */
 const EARSHOT = 16;
@@ -124,6 +125,7 @@ export class Soundscape {
     if (ev.k === 'manaup') return sfx.channeled();
     if (ev.k === 'slash') return ev.el === 'frost' ? sfx.chill() : ev.el === 'storm' ? sfx.shock() : sfx.ignite();
     if (iceSound(ev)) return;
+    if (worldSound(ev)) return;
     if (spellSound(ev)) return;
     // The Cleric's: a shield given hums and blessed, takes a blow with a ward's ring, goes with a break; the
     // perfect smite booms, coals burst warm or flare, the chain clangs on a wall, the flail's stun rings.
