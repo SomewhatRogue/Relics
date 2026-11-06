@@ -27,6 +27,7 @@ import { dusk } from './streetlife';
 import { RELICW } from './relicwords';
 import { openStep } from './churchrelics';
 import { openAdvocate } from './councilui';
+import { openPractice } from './practiceui';
 
 
 const p = (s: string) => `<p>${s}</p>`;
@@ -40,7 +41,9 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
   if (openStore(id, g, panel) || openShop(id, g, panel)) return;
   // A class's vendor, at a counter in its place (vendorui.ts); `arg` is the class.
   if (id === 'vendor') return openVendor(g, panel, arg);
-  if (id === 'board') {
+  if (id === 'practice') {
+    openPractice(g, panel);
+  } else if (id === 'board') {
     openBoard(g, panel);
   } else if (id === 'council') {
     const goals = chapterGoals(w), d = CHAPTER_1.decision, done = w.flags[d.id];

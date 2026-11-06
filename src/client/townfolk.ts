@@ -14,6 +14,11 @@
  * A tab out of sight a minute (another tab, a phone in a pocket) leaves the town's room, and so does
  * a player who hasn't touched anything in 3 minutes (unless they're in a party); either comes back
  * the moment they're looked at or touched, and says `hi` again.
+ *
+ * Only the place you're in sees you walk (the square, or a hall), so where you stand goes out only
+ * while someone else is in that place: alone in a shop, the vault or the street, you say only that
+ * you came or went (and what you offer), and the moment someone walks in you tell everyone where you
+ * stand. Out of Wickhold altogether (the yard, the wood: townpresence.ts) the socket isn't open.
  */
 import { newHero } from '../sim/hero';
 import type { Hero } from '../sim/types';
@@ -42,7 +47,12 @@ export class Townfolk {
   private sentAt = -99;
   /** What everyone heard last: all but the position and facing, and where and how fast. */
   private said = '';
+  /** The same, as those in other places see it (no walking). */
+  private saidPlace = '';
+  private hadCompany = false;
   private sent: Sent | null = null;
+  /** Words sent to the relay (tests and the budget check: townpresence.ts). */
+  sends = 0;
   private pace = new Pace();
   private me: Me | null = null;
   private now = 0;
@@ -84,8 +94,13 @@ export class Townfolk {
     }
     // Only with someone to tell: when something they see changed (not the facing of someone standing
     // still), or they'd have me half a tile off, at most every RECKON.gap s; and now and then.
+    // Alone where I am: only a change of place or party goes out (nobody here sees me walk), and when
+    // someone comes in, where I stand goes out at once (what they last heard may be long out of date).
+    const company = this.company();
+    if (company && !this.hadCompany) this.said = '';
+    this.hadCompany = company;
     const at = this.sent && reckoned(this.sent, now), off = at ? Math.hypot(at[0] - x, at[1] - y) : Infinity;
-    const due = this.gist() !== this.said || off > RECKON.err;
+    const due = company ? this.gist() !== this.said || off > RECKON.err : this.gist(true) !== this.saidPlace;
     if (this.folk.size && ((due && now - this.sentAt >= RECKON.gap) || now - this.sentAt >= KEEP)) this.tell('*', 'me');
     for (const [id, f] of this.folk) {
       if (now - f.heard > GONE) {
@@ -121,7 +136,7 @@ export class Townfolk {
 
   /** A word to one player (or everyone). */
   say(to: string, d: Record<string, unknown>): void {
-    if (this.sock?.open_) this.sock.send(to, d);
+    if (this.sock?.open_) this.sock.send(to, d), this.sends++;
   }
 
   /** Send where you are now, not at the next beat (your party changed). */
@@ -142,18 +157,27 @@ export class Townfolk {
   private tell(to: string, k: Said['k']): void {
     if (!this.me || !this.sock?.open_) return;
     this.sock.send(to, { k, ...this.me });
+    this.sends++;
     // (What everyone has heard: the last `me` or `hi` to all.)
     if (to !== '*') return;
     const [x, y] = this.me.p, [vx, vy] = this.me.v ?? [0, 0];
     this.sentAt = this.now;
     this.said = this.gist();
+    this.saidPlace = this.gist(true);
     this.sent = { x, y, vx, vy, t: this.now };
   }
 
-  /** All that others see of me but where I am and which way I face. */
-  private gist(): string {
+  /** All that others see of me but where I am and which way I face (`place`: only what those elsewhere need). */
+  private gist(place = false): string {
     const m = this.me;
-    return m ? JSON.stringify([m.n, m.w, m.l, m.at, m.p[4], m.pt]) : '';
+    return m ? JSON.stringify([m.n, m.w, m.l, m.at, place ? 0 : m.p[4], m.pt]) : '';
+  }
+
+  /** Anyone else in the place I'm in (only they see me walk). */
+  private company(): boolean {
+    const at = this.me?.at;
+    for (const f of this.folk.values()) if (f.at === at) return true;
+    return false;
   }
 
   private heard(m: RelayMsg): void {
@@ -182,7 +206,8 @@ export class Townfolk {
     this.sock.close();
     this.sock = null;
     this.folk.clear();
-    this.said = '';
+    this.said = this.saidPlace = '';
+    this.hadCompany = false;
     this.sent = null;
     this.sentAt = -99;
   }

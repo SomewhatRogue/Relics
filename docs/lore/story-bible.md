@@ -101,6 +101,10 @@ most Want among the heroes is the one the bells don't spare).
 - **Where new goblins come from.** Not breeding. Captives kept in the pens and fed on what the butchers
   leave turn, slowly, over a season: the Want takes them from the inside. The pens are for that as
   much as for the larder, which is why every rescue matters twice.
+- **No live goblin is ever kept inside Wickhold** (lore keeper, 2026-11-05). The training yard's practice
+  foes are straw men in hungry kit, worked on ropes and poles by Corporal Brisk's watch, with Squire Pell
+  running the board. They fight as the real thing so a hero learns it, but they're straw: they don't bleed,
+  their eyes are painted on, and a downed one is a heap of straw.
 - **Habits.** The hungry hoard lamp oil, the way they hoard everything: more than they can use. It's
   greed, not stupidity, and it burns.
 - **The valley.** Barrowfields (Barrowby, Tollan's Farm, Lowfurrow Fields), Greyhollow (the Charcoal

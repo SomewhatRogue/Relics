@@ -53,6 +53,8 @@ import { kitOf, nameBoard, recapOf, type Kit, type Recap } from './recaptally';
 import { JobRooms, doorPushed, type DoorMark, type SavedHouses } from './jobrooms';
 import { packRoom, unpackRoom } from './bigsave';
 import type { Parties } from './parties';
+import { again as practiceAgain, clearPractice, letOut, practiceOf, stepPractice, type Pick } from '../sim/practice';
+import { RACK, sortKey } from '../shared/practice';
 
 /** Seconds the screen takes to go dark after a lost job, before town. */
 export const FADE_OUT = 2.4;
@@ -423,6 +425,38 @@ export class Game {
     this.hero.calmHound = true;
   }
 
+  /** The yard's straw men (sim/practice.ts): set going `pick` (and the yard's own go back on the rack). */
+  practice(pick: Pick): boolean {
+    return this.mode === 'yard' && !!letOut(this.room, pick);
+  }
+  /** Everything back on the rack. */
+  clearPractice(): void {
+    if (this.mode === 'yard') clearPractice(this.room);
+  }
+  /** The same practice again, from the start. */
+  practiceAgain(): boolean {
+    return this.mode === 'yard' && !!practiceAgain(this.room);
+  }
+  /** The practice going on, and its small line ("PARRIED 8 OF 10"). */
+  get drill() {
+    return this.mode === 'yard' ? practiceOf(this.room) : null;
+  }
+
+  /** Sorts of goblin met on a job or in the wood (within sight), kept on the hero for the yard's straw men. */
+  private metAt = -1;
+  private noteMet(): void {
+    if ((this.mode !== 'run' && this.mode !== 'wood') || Math.abs(this.room.time - this.metAt) < 1 || !this.room.heroes.length) return;
+    this.metAt = this.room.time;
+    const h = this.room.heroes.find((x) => x.id === ME), p = this.profile;
+    if (!h || p === this.scratch) return;
+    let grew = false;
+    for (const e of this.room.enemies) {
+      const k = e.act === 'dead' || Math.hypot(e.x - h.x, e.y - h.y) > 9 ? null : sortKey(e);
+      if (k && !(p.met ??= []).includes(k)) p.met.push(k), (grew = true);
+    }
+    if (grew) store(this.save);
+  }
+
   /**
    * Go in through a door: a Wickhold building, or a cottage or barn on a job. On a job only you go in
    * (your friends go in and out on their own: jobrooms.ts); following a friend's job, their game decides.
@@ -498,7 +532,7 @@ export class Game {
   step(dt: number, intent: Intent): FightEvent[] {
     // Following a friend's job: their room is drawn here; nothing runs in this browser.
     if (this.mode === 'run' && !this.startKit) this.startKit = kitOf(this.profile);
-    if (this.remote) return this.stepRemote();
+    if (this.remote) return this.noteMet(), this.stepRemote();
     intent = this.own(intent);
     // Back to lead after a reload: the room waits for a friend to answer (nobody does: the job's gone).
     if (this.holdUntil && this.waiting()) return [];
@@ -555,6 +589,9 @@ export class Game {
     this.growing();
     // Wickhold keeps the shared day: the light turns with the clock, the same on every screen.
     if (this.mode === 'town' && !this.outside) this.room.map.theme = townLight(this.townTheme ??= this.room.map.theme, townPhase());
+    // The yard's straw men: drills counted, a fall started over, nothing to pick up (sim/practice.ts).
+    if (this.mode === 'yard') stepPractice(here, ev, ME);
+    this.noteMet();
     if (this.mode === 'wood' && this.wood) return this.stepWoodFrame(h, ev, dt);
     this.keepGear(h);
     for (const e of ev) if (e.k === 'spend' && e.id === ME) this.spend(e.n);
@@ -562,7 +599,8 @@ export class Game {
     const door = this.near()?.door;
     if (door && pushingInto(door, h, intent)) this.enter(door);
     else if (this.outside && inArea(this.room.map.exit, h.x, h.y)) this.leave();
-    else if (this.mode === 'yard' && inArea(this.room.map.exit, h.x, h.y)) this.enterTown(this.doorOf('hall'));
+    // Out of the yard by walking out of its gate (pushing down into it), never by being knocked into it.
+    else if (this.mode === 'yard' && inArea(this.room.map.exit, h.x, h.y) && intent.my > 0.3 && h.act !== 'hurt' && h.act !== 'stun' && h.act !== 'down') this.enterTown(this.doorOf('hall'));
     // Your friends go in and out on their own; a house set alight with anyone in throws them out as it falls.
     if (this.mode === 'run') (this.friendDoors(), this.outOfTheFire(), this.indoors.cries());
     if (this.mode === 'run' && this.run) {
@@ -927,6 +965,7 @@ export class Game {
       all.push(b.locked ? { x: d.x, y: d.y, label: name + ' (BARRED)', talk: 'locked', key: b.door } : { x: d.x, y: d.y, label: 'ENTER ' + name, door: b });
     }
     if (this.mode === 'town' && !this.outside) for (const s of townSpots(this.world)) all.push({ x: s.x, y: s.y, label: s.label, talk: s.id, key: s.key });
+    if (this.mode === 'yard') all.push({ x: RACK.post.x, y: RACK.post.y, label: 'THE STRAW MEN', talk: 'practice' });
     for (const c of this.room.chests) if (c.state === 'shut') all.push({ x: c.x, y: c.y, label: c.chained ? 'A CHAINED CHEST' : 'OPEN THE CHEST', chest: c.id });
     let best: Near | null = null, bd = SPOT_REACH;
     for (const n of all) {

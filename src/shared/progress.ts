@@ -79,6 +79,8 @@ export interface Profile {
   tally: boolean;
   cold: boolean;
   cutSeen: boolean;
+  /** Sorts of goblin this hero has met (shared/practice.ts sortKey): the yard's pens offer those. */
+  met?: string[];
   /** The Want: hidden, never shown as a number (shared/hungry.ts, docs/lore/story-bible.md). */
   want: number;
   /** Steel from melting gear down (Halvard's upgrades). */

@@ -36,6 +36,10 @@ import { drawLifted, drawProp } from './propsdraw';
 import type { Fx } from './fx';
 import { Lighting, type Light } from './light';
 import { SPRITES } from './sprites';
+import { drawPost, drawRack, drawWatch } from './rackdraw';
+import { drawFoe } from './strawman';
+import { RACK } from '../shared/practice';
+import { waiting } from '../sim/practice';
 import { LIFT, OX, OY, PX, paintMap, worldH, worldW } from './world';
 import { drawText, textWidth } from './pixfont';
 import { blockAt, blockFoot, drawBlock, drawRound } from './blocks';
@@ -286,7 +290,7 @@ export class Scene {
       const roof = (e.z ?? 0) >= 2, [x, y] = lerp('e:' + e.id, e.x, e.y), up = roof ? ROOF_UP : Math.max(0, e.z ?? 0) * LIFT;
       // A big map: only what's on screen is drawn (DECISIONS 2026-11-03).
       if (big && off(x - cx, y - cy)) continue;
-      items.push({ y: roof ? y + 3 * PX : y, draw: () => (drawEnemy(c, e, x - cx, y - up - cy, asleep(map, e)), drawStatus(c, e, x - cx, y - up - cy, room.time)) });
+      items.push({ y: roof ? y + 3 * PX : y, draw: () => (drawFoe(c, e, x - cx, y - up - cy, asleep(map, e), map === ARENA), drawStatus(c, e, x - cx, y - up - cy, room.time)) });
     }
     for (const p of room.props) {
       if (p.broken) continue;
@@ -381,6 +385,13 @@ export class Scene {
       if (q.kind === 'pot') items.push({ y: OY + q.y * PX + 0.5, draw: () => drawPot(c, q, x, y + 2) });
     }
     if (map === ARENA) items.push({ y: OY + ARENA.cage.y * PX, draw: () => this.cage(c, OX + ARENA.cage.x * PX - cx, OY + ARENA.cage.y * PX - cy, now) });
+    // The yard's straw men on their rack, the watch on the ropes, Pell's board (rackdraw.ts): fewer wait while some are out.
+    if (map === ARENA) {
+      const rx = OX + RACK.x * PX - cx, ry = OY + RACK.y * PX - cy, barY = ry + RACK.h * PX - 30;
+      items.push({ y: OY + (RACK.y + RACK.h) * PX, draw: () => drawRack(c, rx, ry, now, waiting(room)) });
+      items.push({ y: OY + RACK.post.y * PX, draw: () => drawPost(c, OX + RACK.post.x * PX - cx, OY + RACK.post.y * PX - cy) });
+      RACK.watch.forEach((w, i) => items.push({ y: OY + w.y * PX, draw: () => drawWatch(c, OX + w.x * PX - cx, OY + w.y * PX - cy, i, i ? rx + RACK.w * PX - 2 : rx + 1, barY + 1, now) }));
+    }
     // The way out: stakes across the gap while it's shut; lit, torches and chevrons once it's open (wayout.ts).
     const wayLights = drawWays(c, map, room.exitOpen, cx, cy, now);
     // The town hall's vote boards: who voted for what, and when it closes (voteboards.ts).

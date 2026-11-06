@@ -17,6 +17,8 @@ import { LOOKS, heroLook } from './sprites';
 import { ONLINE, fullForTest, onFull } from './relay';
 import { sayFull } from './netline';
 import { Townfolk } from './townfolk';
+import { presence } from './townpresence';
+import { strawFx } from './strawman';
 import { toPx } from './world';
 import { Parties } from './parties';
 import { Lobby } from './lobby';
@@ -211,7 +213,7 @@ addEventListener('keydown', (e) => {
   if (k === 'f' && card.current >= 0) input.take(card.current);
   else if (k === 'f' && card.near >= 0 && game.mode === 'run' && !panel.open) card.open(card.near);
   else if (k === 'f' && game.near()?.chest) use();
-  else if ((k === 'e' || k === 'f') && game.mode === 'town') use();
+  else if ((k === 'e' || k === 'f') && (game.mode === 'town' || game.mode === 'yard')) use();
   if (k === 'escape' && panel.open && !game.result) panel.hide();
 });
 $('#heroes').addEventListener('click', () => {
@@ -345,14 +347,14 @@ function hud(now: number): void {
       ? `<b>${titleCase(room.map.name)}</b> Walk out at the bottom<span><i class="coin"></i>${pr.gold}</span>`
       : game.mode === 'town'
       ? `<b>Wickhold</b> DAY ${game.world.day}<span><i class="coin"></i>${pr.gold}${pr.picks ? '<em>(A KNACK TO PICK)</em>' : ''}<em>${game.world.rescued} HOME</em>${link.online ? '<em>WORLD ' + link.group.toUpperCase() + '</em>' : ''}</span>`
-      : `<b>Training Yard</b> Walk out at the bottom for town`;
+      : `<b>Training Yard</b> ${game.drill?.line ?? 'Walk out at the bottom for town'}`;
     // Folded: the place in one line (town: the day too).
-    const where = game.outside ? room.map.name.toUpperCase() : game.mode === 'town' ? TRACKW.town(game.world.day) : 'TRAINING YARD';
+    const where = game.outside ? room.map.name.toUpperCase() : game.mode === 'town' ? TRACKW.town(game.world.day) : (game.drill?.line ?? 'TRAINING YARD');
     fold.render(full, smallLine(where), game.mode + where, now);
   }
   const spot = game.near(), busy = panel.open || title.open;
   $('#prompt').hidden = !spot || busy;
-  if (spot) $('#prompt').textContent = (input.touch ? '' : spot?.chest ? 'F  ' : game.mode === 'run' ? '' : 'E  ') + (spot.door || !spot.talk ? spot.label : 'TALK: ' + spot.label);
+  if (spot) $('#prompt').textContent = (input.touch ? '' : spot?.chest ? 'F  ' : game.mode === 'run' ? '' : 'E  ') + (spot.door || !spot.talk || spot.talk === 'practice' ? spot.label : 'TALK: ' + spot.label);
   // A drop at your feet, its card shut: the key that opens it (a phone has LOOK in the context slot).
   else if (!busy && !input.touch && game.mode === 'run' && card.near >= 0 && card.current < 0) ($('#prompt').hidden = false), ($('#prompt').textContent = 'F  LOOK');
   // A friend down at your feet: the key that gets them up.
@@ -410,12 +412,15 @@ function tick(t: number): void {
   if ((game.coop || game.remote) && t - touchedAt > 20000) (touchedAt = t), touchSession();
   // Following a friend's job: my input goes to them.
   game.remote?.frame(t / 1000, game.own(still ?? live));
-  const evs = game.step(dt, still ?? live);
+  // The yard is this browser's alone: it stands still while Pell's board or the title is up, so nothing
+  // hits you while you choose (a job or the town, shared or not, runs on).
+  const evs = game.mode === 'yard' && (panel.open || title.open) ? [] : game.step(dt, still ?? live);
   // Leading one: the room goes out to the party.
   game.coop?.frame(t / 1000);
   fx.heroes = game.room.heroes;
   for (const ev of evs) {
-    fx.on(ev);
+    // (In the yard they're straw men: a hit throws straw, not blood: strawman.ts.)
+    if (!(game.mode === 'yard' && strawFx(fx, ev))) fx.on(ev);
     ownCue(ev, game.hero.id, fx, t / 1000);
     // My own get-ups in a party: how many are left, when I go down and when I get up.
     const party = game.room.heroes.filter((x) => x.id !== 'squire').length > 1;
@@ -474,7 +479,8 @@ function tick(t: number): void {
   const inTown = game.mode === 'town', h = game.hero;
   const town = online();
   lobby.frame(inTown, t / 1000, !title.open);
-  town?.step(inTown && h ? { n: game.profile.name, w: h.weapon, l: h.look ?? 0, at: game.room.map.name, p: [h.x, h.y, h.fx, h.fy, h.moving ? 1 : 0] } : null, t / 1000, dt);
+  // (Out of Wickhold, in the yard or the wood, nothing goes to the relay: townpresence.ts.)
+  town?.step(h ? presence(game, game.profile.name) : null, t / 1000, dt);
   // (Off screen, leading a job in the background: nothing to draw.)
   if (document.hidden) return;
   views.render(game.room, ME, fx, t / 1000, dt, inTown ? (townfolk?.here(game.room.map.name) ?? []) : [], game.mode === 'run');

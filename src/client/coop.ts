@@ -90,7 +90,7 @@ export class CoopHost {
   readonly friends = new Map<string, Friend>();
   private sock: RelaySocket;
   /** Each room being sent: its own encoder (patches are against what was last sent of it) and last full. */
-  private sending = new Map<ArenaRoom, { enc: Encoder; fullAt: number }>();
+  private sending = new Map<ArenaRoom, { enc: Encoder; fullAt: number; said: Record<string, string> }>();
   /** Events since the last send, by room. */
   private evs = new Map<ArenaRoom, FightEvent[]>();
   /** The room each friend was last sent whole (a different one now: they get the whole of it). */
@@ -181,11 +181,18 @@ export class CoopHost {
         }
         continue;
       }
-      const k = g.keyOf(room), st = this.sending.get(room) ?? { enc: new Encoder(), fullAt: -99 };
+      const k = g.keyOf(room), st = this.sending.get(room) ?? { enc: new Encoder(), fullAt: -99, said: {} };
       this.sending.set(room, st);
       const full = now - st.fullAt > FULL_EVERY || ids.some((id) => this.friends.get(id)!.fresh || this.sentKey.get(id) !== k);
       const p = st.enc.encode(stateOf(room), full), out = !room.indoors;
-      const body = { p, f: full ? 1 : 0, k, map: full ? { ...room.map, blocks: [] } : undefined, t: room.time, x: room.exitOpen ? 1 : 0, in: room.indoors ? 1 : 0, hc: out ? hc : [], dm: out ? dm : [], run: lean(g.run), goal, ev: this.evs.get(room) ?? [], names, acks };
+      // The run, the banner, names and the houses only when they change (or with a whole room), as a
+      // big room sends them (bigsend.ts): a friend keeps what it last heard.
+      const slow: Record<string, unknown> = {};
+      for (const [key, v] of Object.entries({ hc: out ? hc : [], dm: out ? dm : [], run: lean(g.run), goal, names })) {
+        const j = JSON.stringify(v);
+        if (full || st.said[key] !== j) (slow[key] = v), (st.said[key] = j);
+      }
+      const body = { p, f: full ? 1 : 0, k, map: full ? { ...room.map, blocks: [] } : undefined, t: room.time, x: room.exitOpen ? 1 : 0, in: room.indoors ? 1 : 0, ...slow, ev: this.evs.get(room) ?? [], acks };
       const s = JSON.stringify(body);
       // Everyone in the one room: one message for them all; else each their own.
       if (groups.size === 1) this.sock.send('*', { s });

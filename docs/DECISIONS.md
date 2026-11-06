@@ -2,6 +2,117 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-05: the budget checked again; the yard is this browser's alone, with straw men to practise on (Kyle; Claude Opus 5.5)
+
+Kyle: "We should always double check, or at least once a day after big working days and pushes, to make sure
+there's not more ways to save budget. Right now only town runs commands and you can't spam attacks etc except
+in the training room. Maybe we make the training room local to just one person and it runs in their computer
+to save inputs?" Then: "Should add to the training area then. Always set up, lets you try different scenarios
+including spawning different enemy types to fight. Can say they're captive or something."
+
+**What was sending traffic.** The yard sent nothing already: `main.ts` told the town where you stood only in
+`town` mode, so walking into the yard closed the town's socket, and its fights ran in this browser. Measured
+(real Chromium, a real redis-server, `scripts/budget-online.cjs`, which now also counts the page's own
+WebSocket frames): 40 s of swinging nonstop in the yard, 0 frames and 0 commands. The wood and a job alone are
+the same. What did cost was inside the town: every hall (a shop, the vault, the barracks, a house) is a place
+in Wickhold, and your walking there went to everyone in town, though only someone in the same hall can see it.
+And every patch of a job carried the run, the banner, the names and the houses' counts whole, 20 times a
+second (bandwidth, not commands: a patch is one message either way).
+
+Today's merges, audited: the recap board rides only in the end message and the saves (`lean` in `coop.ts`
+holds); `signSeq` is a button, so it goes once a press, marked urgent, like every other press (the stick and
+aim at most 10 a second); the fire wall is plain data (its middle is worked out from where it stops and when),
+so a rolling wall is no delta at all; frozen goblins skidding are positions, as before; the vendors' 10-minute
+stock is rolled from the clock on each device (`shared/vendors.ts` `stockWindow`), and their countdown is a
+local timer, no request; the world effects (in progress on its own branch) add one collection, `ices`, to the
+delta patch. Nothing new polls or sends per tick.
+
+**Changed.**
+- **The yard and its straw men are named as local** (`client/townpresence.ts`): only Wickhold is shared; out of it
+  (the yard, the wood) the town's socket closes, and coming back opens it and says `hi` once. Closing beats
+  idling: a close and an open cost the relay about 8 commands (close 5, open 3, measured on the real relay), an
+  open quiet socket about 90 an hour (a presence beat a minute and a rejoin each 4-minute swap). So any stay
+  over about 5 minutes is cheaper closed, and the Come Bye rules (newest connection says goodbye, swaps,
+  tokens) are untouched. Going to the yard still lets go of a party you're gathering, as before.
+- **In town, only the place you're in hears you walk** (`client/townfolk.ts`): alone in a hall you say only
+  that you came or went (and your party, if you post one); the moment someone else is in the same place, you
+  tell them where you stand at once. Two players on two instances, one in a hall: 87 commands a minute became 34.
+- **Patches carry the slow parts only when they change** (`client/coop.ts`), as big rooms already did
+  (`bigsend.ts`); a whole room (every 4 s, or for anyone new) carries all of it.
+- **The daily check** (`scripts/budget-check.cjs`): `tests/townbudget.test.ts` in seconds (the page's real
+  Game and Townfolk on a counting socket, the relay's real open, close and swap costs), `--live` for the
+  browser runs, `--url` for the month's meter and its pace, each run kept in `docs/budget-history.jsonl` and
+  compared with the last.
+
+| Commands (budget-online.cjs, 40 s a scenario; parties pinned to two instances, so split and unable to hop) | Before | After |
+|---|---|---|
+| One idle tab in town (alone on its instance, inside the 1-minute beat) | 0 a minute | 0 |
+| An idle tab past 3 minutes (out of the room) | 0 | 0 |
+| A tab in the yard swinging nonstop (frames the page sent) | 0 (0 frames) | 0 (0 frames, with practice too) |
+| Two players walking the square, two instances | 78 a minute (4.7K an hour) | 77 (4.6K) |
+| Two players in town, one in a hall, two instances | 87 (5.2K) | 34 (2.0K) |
+| A 2-player job, split, can't hop (worst case) | 1,115 (67K) | 1,165 (70K; ran at 54 fps against 23) |
+| A 4-player Barrowfields job, split, can't hop | 1,210 (73K) | 1,216 (73K) |
+
+An hour, from the test (one player alone on their instance): an idle town tab 12 commands (3 minutes in the
+room, then it leaves), a tab in the yard 5 (the town room left on the way in), limits 30 and 12 that fail the
+test if passed. A party that lands together (the hop) costs about 26 a minute, as on Nov 4. A split party that
+can't hop is still the one big cost: about 70K an hour, at most 10 PUBLISHes a second each way. Halving it
+would mean batching every 0.2 s instead of 0.1 s for split parties only (50 ms more lag for them); not done
+without Kyle.
+
+**The straw men** (`shared/practice.ts`, `sim/practice.ts`, `client/practiceui.ts`, drawn by `client/rackdraw.ts`,
+`client/strawman.ts` and `client/three/rack3d.ts`). First built as live goblins penned at the yard; the lore
+keeper said no to live goblins inside Wickhold (now in the bible), so they're straw men in hungry kit, worked on
+ropes and poles by Corporal Brisk's watch, with Squire Pell on the board. In the yard's top left corner a frame of
+poles with a bar across, straw men in scraps of hungry kit hanging from it on ropes or propped against it, two of
+the watch with ropes run out to it, and a post with the board beside it (USE, or E: THE STRAW MEN). Pell has
+them set going whatever the hero has met: thirteen sorts one at a time (scrapper, archer, looter, lunger, shield,
+heavy, hexer, drummer, netter, ironhide, blind hunter, spider, butcher), four small packs (a shield and two
+archers, a pack of five, a hexer behind three, a butcher and two scrappers), and drills: PARRY THE HEAVY (ten
+swings, "PARRIED 8 OF 10"), BREAK A SHIELD LINE ("SHIELDS DOWN 1 OF 3", "BROKE THE LINE IN 23 S"), BURN A PACK
+for a Mage ("BURNED 4 OF 5 IN 14 S") and HOLD FOR A MINUTE (two more every 10 s, an archer every other wave,
+never more than 8 up: "HOLDING 31 S", "HELD 60 S"). The line shows on the banner. GO AGAIN starts the last one
+over, CLEAR puts it all back on the rack and the yard's own sacking butcher and straw men out again. Fewer wait
+on the rack while some are out.
+- Each fights by the same specs as the goblin it plays (`newEnemy`, `VARIANTS`, `shapeFoe`), placed off the room's
+  own seeded Rng and run by the room, and keeps that goblin's silhouette, so practice reads as a real fight. Only
+  the drawing says straw (`strawman.ts`, both views: the flat scene and the 2.5D cards call `drawFoe`): straw out
+  of the head, the hands and the feet; painted eyes, never glowing (the glow over the head is cleared); a downed
+  one a slumped heap of straw with its rag and hood on top. A hit throws straw that lies on the floor a while,
+  never blood (`strawFx`, in the yard only). Every goblin-shaped thing in the yard is straw now, the standing
+  sacking butcher and the two straw men included.
+- All in this browser: nothing goes to the relay (tested).
+- Met: each hero keeps the sorts they've seen within 9 tiles on a job or in the wood (`Profile.met`, checked once a
+  second); everyone has the scrapper, the wood gives looter, lunger and heavy, and a hero with a job behind them
+  already has archer, shield and butcher. Sorts that need a job's ground (logs, roofers, torch throwers, oilers,
+  sappers, wolves, banners, keepers) aren't played; a thief would take real gold.
+- Nothing pays: anything dropped in the yard is gone before it can be taken (`stepPractice` clears drops and
+  pickups; before this the yard's respawning goblins could leave a weapon), no XP or gold, and the board says so
+  once. A fall doesn't count: once you're up the same fight starts over ("YOU'RE DOWN. STARTING OVER"; the hold
+  says how long you lasted).
+- Two fixes found on the way: the yard stands still while Pell's board (or the title) is up, so the sacking butcher
+  can't hit you while you choose (`main.ts`; the yard is this browser's alone, so pausing it touches no one); and
+  you leave the yard only by walking out of its gate (pushing down into it, not hurt or stunned), never by being
+  knocked into it (`game.ts`).
+
+**Words** (the lore keeper's, `client/practicewords.ts`; names in `shared/practice.ts`): Pell, "Them? Straw, the lot,
+in hungry kit, with Corporal Brisk's watch on the ropes behind. Pick what you want and they'll set it going. Only
+what you've met out there, mind, since there's no sense learning a thing off straw you've never seen move, and
+anyway Brisk does a heavy better than I'd say to his face."; "Nothing here pays: no gold, no XP, nothing they
+drop. If you go down, you get up and it starts over."; "Fight a new kind on a job and it's added here."; THE
+STRAW MEN, ONE AT A TIME, A FEW TOGETHER, DRILLS, GO AGAIN, CLEAR; the sort, pack and drill names and the drills'
+how-lines (BREAK A SHIELD LINE: "Three shields side by side. Put all three down."); the result lines above and
+"YOU'RE DOWN. STARTING OVER". Pell's old yard line ("Straw men, a butcher made of sacking on a chain, and me")
+still stands and now fits.
+
+Tests: `tests/townbudget.test.ts` (an hour in the yard swinging, drills and heavies set going, sends nothing and
+opens nothing; knocked into the gate you stay, walking out of it opens the town and says `hi` once; alone in a hall walking says
+nothing, someone walking in is told at once; an idle tab and the yard under their limits), `tests/practice.test.ts`
+(every sort from the board as a job makes it, packs whole, CLEAR, GO AGAIN, what's offered by what's met, met
+kept from a job, each drill's count, a fall starting it over, nothing paid). Phone screenshots of the board, the
+rack and a fight, flat and 2.5D: `scripts/straw-look.cjs`.
+
 ## 2026-11-05: the first recorded sound effects: combat, spells, goblins and beasts (Kyle; Claude Opus 5.5)
 
 Kyle approved batch 1 of `docs/sound/elevenlabs-sounds.md`: sections 1 and 2 (45 + 33 sounds). Ambience,

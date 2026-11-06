@@ -2,6 +2,17 @@
 
 ## Current slice
 
+**The yard is this browser's alone, and its straw men** (Claude Opus 5.5, 2026-11-05; Kyle: "maybe we make the
+training room local to just one person", then "always set up, lets you try different scenarios including
+spawning different enemy types to fight"; the lore keeper: no live goblins in Wickhold, so straw men in hungry kit
+worked by Corporal Brisk's watch). Built; waiting on Kyle's play. *Done when*, on his phone and laptop, online: in
+the yard nothing goes to the relay (the town's room leaves on the way in and comes back with one `hi` on the way
+out); at the post by the rack of straw men in the yard's top left corner (USE / E: THE STRAW MEN) Pell has any
+sort he's met set going (13 sorts), four small packs and the drills (PARRY THE HEAVY, BREAK A SHIELD LINE, BURN A
+PACK for a Mage, HOLD FOR A MINUTE), each drill's line on the banner ("PARRIED 8 OF 10", "HELD 60 S"); they fight
+like goblins but show straw, painted eyes, straw not blood, a heap of straw when down; GO AGAIN and CLEAR work;
+nothing pays; a fall starts the fight over; the yard stands still while the board is up; a knock into the gate
+doesn't leave. Daily: `node scripts/budget-check.cjs` (and `--live`, `--url`). Open: the line editor's pass.
 **World effects, slices 1 to 3: rods and pools, burn the dead, ice and steam** (Claude Opus 5.5, 2026-11-05;
 Kyle approved the proposal's first three rollout items: "more elemental and world effects" like the blood in
 the water and the lightning). Built; waiting on Kyle's play. *Done when*, on his phone and laptop, flat and

@@ -16,6 +16,8 @@ import { Pool } from './pool3d';
 import { flash, part } from './rig';
 import { poseNpc } from './work3d';
 import { BOXFIGS } from './look';
+import { makeRack, showRack, type RackFig } from './rack3d';
+import { waiting } from '../../sim/practice';
 
 export class People {
   readonly group = new THREE.Group();
@@ -25,6 +27,8 @@ export class People {
   private walked = new Map<string, [number, number, number]>();
   /** The yard's cage, someone in it swaying (the flat scene's cage). */
   private cage: THREE.Group | null = null;
+  /** The yard's straw-man rack and Pell's board (rack3d.ts). */
+  private rack: RackFig | null = null;
 
   private stride(key: string, x: number, y: number): number {
     const w = this.walked.get(key);
@@ -43,6 +47,9 @@ export class People {
     if (map === ARENA && !this.cage) this.group.add((this.cage = cage()));
     if (map !== ARENA && this.cage) this.group.remove(this.cage), (this.cage = null);
     if (this.cage) this.cage.children[0].position.x = Math.floor(now * 0.7) % 4 === 0 ? 0.06 : 0;
+    if (map === ARENA && !this.rack) this.group.add((this.rack = makeRack()).root);
+    if (map !== ARENA && this.rack) this.group.remove(this.rack.root), (this.rack = null);
+    if (this.rack) showRack(this.rack, waiting(room));
   }
 
   private boxes(room: ArenaRoom, map: GameMap, others: Hero[], now: number): void {
@@ -71,6 +78,7 @@ export class People {
   clear(): void {
     for (const p of [this.npcs, this.others, this.decoys]) p.clear();
     if (this.cage) this.group.remove(this.cage), (this.cage = null);
+    if (this.rack) this.group.remove(this.rack.root), (this.rack = null);
     this.walked.clear();
   }
 }

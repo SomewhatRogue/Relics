@@ -12,7 +12,13 @@ import { GRAB } from '../../shared/tuning';
 import { npcAt } from '../../shared/arena';
 import { SPOT_REACH } from '../../shared/town';
 import { drawHero } from '../actors';
-import { asleep, drawEnemy, drawHeld } from '../foes';
+import { asleep, drawHeld } from '../foes';
+import { drawFoe } from '../strawman';
+import { drawWaiting, drawWatch, rackMen } from '../rackdraw';
+import { HUNG3 } from './rack3d';
+import { ARENA } from '../../shared/arena';
+import { RACK } from '../../shared/practice';
+import { waiting } from '../../sim/practice';
 import { drawHound } from '../hound';
 import { drawNpc } from '../npcs';
 import { vignetteFigs } from '../vignettes';
@@ -53,7 +59,7 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
       continue;
     }
     const [x, y] = lerp('e:' + e.id, e.x, e.y), dead = e.act === 'dead', big = e.kind === 'butcher' || e.kind === 'brood';
-    f.put('e' + e.id, x, (e.z ?? 0) >= 2 ? ROOF_UP3 : lift(Math.max(0, e.z ?? 0)), y, (c, px, py) => (drawEnemy(c, e, px, py, asleep(map, e)), drawStatus(c, e, px, py, t)), { pool: dead || e.kind === 'nest' ? 0 : big ? 0.55 : 0.28, bias: dead ? -0.3 : 0 });
+    f.put('e' + e.id, x, (e.z ?? 0) >= 2 ? ROOF_UP3 : lift(Math.max(0, e.z ?? 0)), y, (c, px, py) => (drawFoe(c, e, px, py, asleep(map, e), map === ARENA), drawStatus(c, e, px, py, t)), { pool: dead || e.kind === 'nest' ? 0 : big ? 0.55 : 0.28, bias: dead ? -0.3 : 0 });
   }
   // A body being hauled, where they've got it to (../scenedraw.ts).
   for (const e of room.enemies) if (e.haul) f.put('b' + e.id, e.haul.x, 0, e.haul.y, (c, px, py) => drawHauled(c, e, px, py), { pool: 0, bias: -0.3 });
@@ -70,6 +76,11 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
   }
   // The scenes past the wood's trees (../vignettes.ts).
   for (const g of vignetteFigs(map, t, me)) f.put('w' + g.key, g.x, 0, g.y, g.draw, { pool: g.floor ? 0 : 0.28, bias: g.floor ? -0.3 : 0 });
+  // The yard's straw men waiting on their rack (its poles: rack3d.ts), and the watch with their ropes.
+  if (map === ARENA) {
+    for (const m of rackMen(waiting(room))) f.put('rk' + m.i, m.x, m.hung ? HUNG3 : 0, m.y, (c, px, py) => drawWaiting(c.lit, px, py, false, m.i, t), { pool: 0 });
+    RACK.watch.forEach((w, i) => f.put('rw' + i, w.x, 0, w.y, (c, px, py) => drawWatch(c, px, py, i, px + (i ? -14 : 14), py - 24, t), { pool: 0.3 }));
+  }
   (map.npcs ?? []).forEach((n, i) => {
     const at = npcAt(n, t), near = !!me && Math.hypot(me.x - at.x, me.y - at.y) <= SPOT_REACH;
     f.put('n' + i + n.name, at.x, 0, at.y, (c, px, py) => drawNpc(c, n, px, py, near && !n.mute, at.fx, !!n.path && !at.still, at.x), { pool: n.pose ? 0 : 0.3, bias: n.pose ? -0.3 : 0 });

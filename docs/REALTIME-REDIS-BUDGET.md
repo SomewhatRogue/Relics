@@ -160,6 +160,28 @@ Pick the Upstash region to match the Vercel Functions region (Vercel's default i
   HTTP endpoints count too: a "look at the world" every 30 s per player was 15 commands each
   (a sorted set per stat); keep the answer as one value and cache it per instance.
 
+### h. Keep solo places off the relay, and speak only to the place you're in
+Relic (Nov 5 2026): only Wickhold is shared (its square and the halls anyone can walk into). Everywhere
+a player is alone by design (the training yard and its practice pens, the prologue wood, a job alone)
+runs in that browser and says nothing to the relay: the town's socket closes on the way out and opens
+on the way back (`client/townpresence.ts`). Closing and reopening costs about 8 commands (close 5, open 3);
+an open but quiet socket costs its instance about 90 an hour (a presence beat a minute and a rejoin
+each 4 minute swap), so for anything longer than about 5 minutes away, closing wins. Inside the town,
+where you stand goes out only while someone else is in the same place: alone in a shop or the vault you
+say only that you came or went, and the moment someone walks in you tell them where you stand.
+
+Patches: the room state is a delta (`snap.ts`), and since Nov 5 the slow parts that rode whole in every
+patch (the run, the banner, names, the houses' counts) go only when they change, as big rooms already did.
+That's bandwidth, not commands (a patch is one message either way), but Upstash counts bandwidth too.
+
+### i. Check it every day
+`node scripts/budget-check.cjs` (seconds): the page's real code on a counting socket and the relay's real
+costs (`tests/townbudget.test.ts`) give commands an hour for an idle town tab and a tab in the yard, and the
+test fails past a set limit. `--live` adds real Chromium on a real redis-server for town, yard and 2 and 4
+player jobs (`scripts/budget-online.cjs`, about 10 minutes); `--url https://the-site` adds the month's meter
+and its pace. Each run is kept in `docs/budget-history.jsonl` and compared with the last. Run it after any
+big day of merges: new per-tick or per-input traffic shows there first.
+
 ## 4. Things that save commands but cost latency (avoid for realtime)
 
 - **Polling** Redis lists or keys as mailboxes: commands on every poll, plus up to one poll
