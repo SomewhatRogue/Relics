@@ -65,6 +65,12 @@ export function relicFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
       fx.say(x, y - 32, RELICW.pressedDark, '#8a8494', 0.6);
       fx.burst(x, y - 12, 4, ['#4a4852', '#6a6872'], 20, false, 120);
       return true;
+    case 'faded':
+      // The last use gone: it goes dark in your hand, a grey puff and its name with the word (JAVELIN DARK).
+      fx.say(x, y - 40, RELICW.wentDark(ev.name), '#8a8494', 1.1);
+      fx.burst(x, y - 14, 10, ['#6a6872', '#4a4852', '#ffd27a'], 40, false, 260);
+      fx.rings.push({ x, y: y - 8, life: 0.4, max: 0.4, col: '#6a6872', size: 16 });
+      return true;
     case 'relicfound':
       fx.say(x, y - 40, RELICW.found, GOLD, 1.4);
       fx.burst(x, y - 12, 30, [GOLD, WARM, '#ffffff'], 90, true);

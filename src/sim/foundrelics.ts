@@ -4,17 +4,19 @@
  * bell (goblins flinch, friends quicken) and the butcher's knuckle (a line of force that marks what it
  * hits). Every one acts on goblins and the room's barrels and crates, and never on a friend: friends in
  * reach are spared (and told so) or helped. What they leave is in lists a friend's screen gets already.
+ * Since 2026-11-05 (Kyle: "always skewers and shoves etc, but limited uses") each is sure: weight,
+ * striped blows and the stun cap don't save a goblin from one (sim/stuns.ts relicStun).
  */
 import { BELL, BOMB, HOBBLE, KNUCKLE, MARK, SENTRY, type Augment, type Swing } from '../shared/tuning';
 import { shove } from './bodies';
 import { lobLodestone, shoot } from './bolts';
-import { damage, held, isDead, isDummy } from './damage';
+import { damage, isDead, isDummy } from './damage';
 import { afflict, type World } from './elements';
 import { spotFor } from './facing';
 import { damageProp } from './props';
 import type { SkillRoom } from './skills';
 import type { Bolt, Enemy, Hero, Zone } from './types';
-import { stun } from './stuns';
+import { relicStun } from './stuns';
 
 const live = (e: Enemy, h: { z?: number }) => !isDead(e) && e.act !== 'carried' && (e.z ?? 0) === (h.z ?? 0);
 const friends = (w: World) => w.heroes.filter((o) => o.id !== 'squire' && o.act !== 'down');
@@ -64,8 +66,16 @@ export function stepSentries(zones: Zone[], bolts: Bolt[], w: World): void {
     const dx = best.x - z.x, dy = best.y - z.y, l = Math.hypot(dx, dy) || 1;
     (z.ax = dx / l), (z.ay = dy / l);
     const by = { id: z.owner, x: z.x - z.ax * 0.5, y: z.y - z.ay * 0.5, fx: z.ax, fy: z.ay } as Hero;
-    bolts.push({ ...shoot(by, BOLT, z.el), relic: true, hobble: true, charged: false });
+    bolts.push({ ...shoot(by, BOLT, z.el), relic: true, hobble: true, charged: false, seek: best.id, range: SENTRY.radius * 2 });
   }
+}
+
+/** A wind-up bow's bolt turns straight at its goblin every tick, so it lands wherever the goblin goes. */
+export function seekShot(b: Bolt, enemies: Enemy[]): void {
+  const e = enemies.find((x) => x.id === b.seek);
+  if (!e || isDead(e)) return void (b.seek = undefined);
+  const dx = e.x - b.x, dy = e.y - b.y, d = Math.hypot(dx, dy);
+  if (d > 0.05) (b.dx = dx / d), (b.dy = dy / d);
 }
 
 /** Hobbled by a relic's bolt. */
@@ -75,7 +85,7 @@ export function hobble(e: Enemy, w: World): void {
   e.hobbleUntil = w.now + HOBBLE.time;
 }
 
-/** The bone bell: goblins near flinch and drop their blows, small ones pushed back; friends near quicken. */
+/** The bone bell: every goblin near drops its blow (striped ones too) and reels, small ones pushed back; friends near quicken. */
 export function ringBell(h: Hero, w: World, el: Augment): void {
   w.ev.push({ k: 'bell', x: h.x, y: h.y });
   for (const e of w.enemies) {
@@ -85,10 +95,9 @@ export function ringBell(h: Hero, w: World, el: Augment): void {
     e.lastBy = h.id;
     if (damage(e, BELL.dmg, w.now, w.ev, { tick: true, el: el || undefined })) continue;
     afflict(w, e, el, BELL.dmg);
-    if (held(e, w.now) || isDummy(e)) continue;
+    if (isDummy(e) || e.act === 'pinned') continue;
     if (e.weight <= 1) shove(e, d > 0.05 ? dx / d : h.fx, d > 0.05 ? dy / d : h.fy, BELL.push, e.weight);
-    if (e.weight <= 1) stun(e, h.id, w.now, BELL.small, w.ev, 'flinch');
-    else if (!e.attack?.unblockable) stun(e, h.id, w.now, BELL.big, w.ev, 'flinch');
+    relicStun(e, w.now, e.weight <= 1 ? BELL.small : BELL.big, w.ev, 'flinch');
   }
   for (const o of friends(w)) {
     if (Math.hypot(o.x - h.x, o.y - h.y) > BELL.radius) continue;
@@ -103,7 +112,8 @@ const along = (h: Hero, px: number, py: number) => {
   return { t: dx * h.fx + dy * h.fy, off: Math.abs(dx * -h.fy + dy * h.fx) };
 };
 
-/** The butcher's knuckle: a line of force from your front. Goblins and barrels in it fly; goblins are marked. */
+/** The butcher's knuckle: a line of force from your front. Every goblin in it is knocked down and sent
+ *  flying, as far whatever it weighs, and marked; barrels in it fly. */
 export function knuckle(h: Hero, w: World, el: Augment): void {
   const L = KNUCKLE.length;
   w.ev.push({ k: 'knuckle', x: h.x, y: h.y, x2: h.x + h.fx * L, y2: h.y + h.fy * L });
@@ -113,10 +123,11 @@ export function knuckle(h: Hero, w: World, el: Augment): void {
     if (a.t < 0 || a.t > L + e.radius || a.off > KNUCKLE.width + e.radius) continue;
     e.lastBy = h.id;
     if (damage(e, KNUCKLE.dmg, w.now, w.ev, { heavy: true, dx: h.fx, dy: h.fy, el: el || undefined })) continue;
-    if (e.act !== 'pinned') shove(e, h.fx, h.fy, KNUCKLE.knock, e.weight);
+    if (e.act !== 'pinned') shove(e, h.fx, h.fy, KNUCKLE.knock, Number.isFinite(e.weight) ? 1 : e.weight);
     afflict(w, e, el, KNUCKLE.dmg);
-    if (!isDummy(e)) (e.markUntil = w.now + MARK.time), w.ev.push({ k: 'marked', x: e.x, y: e.y });
-    if (!held(e, w.now) && !isDummy(e) && e.weight <= 1) stun(e, h.id, w.now, KNUCKLE.stun, w.ev);
+    if (isDummy(e)) continue;
+    (e.markUntil = w.now + MARK.time), w.ev.push({ k: 'marked', x: e.x, y: e.y });
+    if (e.act !== 'pinned') relicStun(e, w.now, KNUCKLE.stun, w.ev);
   }
   for (const p of w.props) {
     if (p.broken || p.lifted) continue;

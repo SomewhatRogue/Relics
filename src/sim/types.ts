@@ -775,6 +775,8 @@ export type FightEvent =
   /** Found relics (sim/foundrelics.ts): a bell rung, a friend quickened, a bomb thrown, a wind-up bow set
    *  down or winding down, a goblin marked or hobbled, a friend in a relic's reach spared, a dark relic pressed. */
   | { k: 'bell' | 'quick' | 'bombthrow' | 'sentry' | 'sentryend' | 'marked' | 'hobbled' | 'spared' | 'dark' | 'relicfound'; x: number; y: number }
+  /** A relic's last use gone: its short name (JAVELIN), said over the hero with DARK. */
+  | { k: 'faded'; x: number; y: number; name: string }
   | { k: 'knuckle' | 'hookprop'; x: number; y: number; x2: number; y2: number }
   /** A house on fire (sim/blaze.ts): a beam down, the roof in, someone caged lost with it. */
   | { k: 'rafter' | 'housefall' | 'cagelost'; x: number; y: number }
@@ -833,6 +835,8 @@ export interface Javelin {
   travelled: number;
   /** Enemy carried (flying) or pinned / stuck in (stuck), or 0. */
   enemy: number;
+  /** Every goblin skewered on the shaft, tip first (2026-11-05: it carries them all). */
+  held?: number[];
   /** Offset from the enemy's centre while stuck in a body. */
   ox: number;
   oy: number;
@@ -856,6 +860,8 @@ export interface Bolt {
   holy?: boolean;
   /** Hobbles what it hits (a wind-up bow's bolt). */
   hobble?: boolean;
+  /** A wind-up bow's bolt: the goblin (id) it flies at, turning as it goes, so it never misses. */
+  seek?: number;
   /** A Mage's frost burst: freezes solid at once (frost twice). */
   freeze?: boolean;
   /** A Mage's tap: frost only chills (never freezes). */

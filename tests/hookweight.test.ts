@@ -12,9 +12,10 @@ const hookAt = (weapon: 'sword' | 'longbow') => {
   return k.state;
 };
 
-describe('the hook pulls by weight', () => {
-  it('a Warrior hauls a butcher in; a Ranger is pulled to it instead', () => {
+// (Since 2026-11-05 the hook is sure: a butcher comes, whoever throws it. Before, only a Warrior or Healer could haul one.)
+describe('the hook pulls a butcher in, whatever the class', () => {
+  it('a Warrior and a Ranger both haul a butcher in', () => {
     expect(hookAt('sword')).toBe('yank');
-    expect(hookAt('longbow')).toBe('zip');
+    expect(hookAt('longbow')).toBe('yank');
   });
 });

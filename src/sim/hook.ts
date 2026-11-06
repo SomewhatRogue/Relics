@@ -1,17 +1,19 @@
 /**
- * The grappling hook relic. Out it flies; the first thing it reaches decides what happens:
- * a light enemy is reeled in to its owner and arrives reeling; a heavy enemy, a wall or a pillar
- * pulls the owner across instead. A miss reels the hook back.
+ * The grappling hook relic. Out it flies; the first thing it reaches decides what happens (2026-11-05,
+ * Kyle: "always yanks a goblin to you, or you to a ledge or goblin"): any goblin, whatever it weighs
+ * and whoever throws, is reeled in to its owner and lands knocked down, a butcher too; one that can't
+ * be moved, or is pinned, pulls the owner across to it instead, as does a wall, a pillar or a heavy
+ * prop. It catches a goblin a little off its line (HOOK.catch). A miss reels the hook back.
  */
 import { travel, travelTo } from '../shared/sweep';
 import { collide } from '../shared/arena';
-import { CLASS_GUARD, HERO, HOOK, HOOK_PROP, WEAPONS } from '../shared/tuning';
+import { HERO, HOOK, HOOK_PROP } from '../shared/tuning';
 import { shove } from './bodies';
 import type { World } from './elements';
 import { isDead } from './damage';
 import type { Afflict } from './javelin';
 import type { Enemy, FightEvent, Hero, Hook } from './types';
-import { stun } from './stuns';
+import { relicStun } from './stuns';
 
 let nextId = 1;
 
@@ -26,7 +28,8 @@ function release(h: Hero | undefined): void {
 /** Advance one hook a tick; false when it is done. */
 export function stepHook(k: Hook, heroes: Hero[], enemies: Enemy[], now: number, dt: number, ev: FightEvent[], afflict: Afflict = () => {}, w?: World): boolean {
   const h = heroes.find((x) => x.id === k.owner);
-  if (!h || h.act === 'down' || h.act === 'hurt' || h.act === 'stun') {
+  // A goblin on the line keeps coming unless its hero goes down; a hero flying to the hook is stopped by a blow.
+  if (!h || h.act === 'down' || (k.state !== 'yank' && (h.act === 'hurt' || h.act === 'stun'))) {
     release(h);
     const e = enemies.find((x) => x.id === k.enemy);
     if (e && e.act === 'carried') Object.assign(e, { act: 'flinch', actT: 0, actDur: 0.3 });
@@ -62,15 +65,15 @@ export function stepHook(k: Hook, heroes: Hero[], enemies: Enemy[], now: number,
         return true;
       }
       for (const t of enemies) {
-        if (t.act === 'dead' || t.act === 'carried' || Math.hypot(t.x - k.x, t.y - k.y) > t.radius + 0.15) continue;
+        if (t.act === 'dead' || t.act === 'carried' || Math.hypot(t.x - k.x, t.y - k.y) > t.radius + HOOK.catch) continue;
         k.enemy = t.id;
         t.hp -= t.kind === 'dummy' || t.kind === 'swingDummy' ? 0 : HOOK.dmg;
         t.hitAt = now;
         ev.push({ k: 'latch', x: k.x, y: k.y, dx: k.dx, dy: k.dy });
         afflict(t, k.el, HOOK.dmg);
         if (isDead(t)) return false;
-        const heavy = CLASS_GUARD[WEAPONS[h.weapon].cls] === 'full';
-        if (t.weight <= (heavy ? HOOK.heavyYank : HOOK.yankWeight) && t.act !== 'pinned') {
+        t.lastBy = h.id;
+        if (Number.isFinite(t.weight) && t.act !== 'pinned') {
           k.state = 'yank';
           Object.assign(t, { act: 'carried', attack: null, kvx: 0, kvy: 0 });
           ev.push({ k: 'yank', x: t.x, y: t.y, dx: -k.dx, dy: -k.dy });
@@ -98,9 +101,8 @@ export function stepHook(k: Hook, heroes: Hero[], enemies: Enemy[], now: number,
       e.x = h.x - (dx / d) * stop;
       e.y = h.y - (dy / d) * stop;
       collide(e, e.radius);
-      // Small ones arrive reeling; a butcher hauled in just arrives, angry.
-      if (e.kind === 'butcher') Object.assign(e, { act: 'chase', cooldown: Math.max(e.cooldown, 0.4) });
-      else if (!stun(e, k.owner, now, HOOK.yankStun, ev)) Object.assign(e, { act: 'chase', cooldown: Math.max(e.cooldown, 0.4) });
+      // Whatever it is, it lands at your feet knocked down (never shrugged off: sim/stuns.ts relicStun).
+      relicStun(e, now, HOOK.yankStun, ev, 'stunned', true);
       ev.push({ k: 'land', x: e.x, y: e.y, dx: dx / d, dy: dy / d });
       return false;
     }

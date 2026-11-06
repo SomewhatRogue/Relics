@@ -1,8 +1,9 @@
 /**
  * A picture for each kind of found relic, 12 by 12 like the pack's (itemicons.ts): what it is at a
- * glance. An elemental one gets a fleck of its colour; a dark one is drawn in dead grey.
+ * glance. An elemental one gets a fleck of its colour; each use dims it a stage toward grey (relicStage),
+ * and a dark one is drawn in dead grey.
  */
-import type { RelicItem } from '../shared/relicitems';
+import { relicStage, type RelicItem } from '../shared/relicitems';
 import type { RelicId } from '../shared/tuning';
 import { draw, relicIcon, type Paint } from './itemicons';
 
@@ -22,18 +23,25 @@ const grey = (c: string) => {
   const n = parseInt(c.slice(1, 7), 16), v = Math.round((((n >> 16) & 255) + ((n >> 8) & 255) + (n & 255)) / 3 * 0.45 + 20);
   return `rgb(${v},${v},${v + 4})`;
 };
+/** A fading stage's colour: toward a cold grey, a little more each stage (relicStage: 0 full to 3 the last use). */
+const DIM = [0, 0.22, 0.42, 0.6];
+const dim = (c: string, k: number) => {
+  if (!k) return c;
+  const n = parseInt(c.slice(1, 7), 16), r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255, v = (r + g + b) / 3;
+  const f = (x: number) => Math.round((x + (v - x) * k) * (1 - 0.45 * k));
+  return `rgb(${f(r)},${f(g)},${Math.min(255, f(b) + Math.round(k * 8))})`;
+};
 const EL: Record<string, string> = { fire: '#ff6a2a', frost: '#9fe8ff', storm: '#e8e07a' };
 
-/** The picture for this relic (its kind, its element, lit or dark). */
-export function relicItemIcon(r: Pick<RelicItem, 'kind' | 'el' | 'charge'>): string {
+/** The picture for this relic (its kind, its element, how faded: lit, dimming through its stages, dark). */
+export function relicItemIcon(r: Pick<RelicItem, 'kind' | 'el' | 'charge'> & { tier?: RelicItem['tier'] }): string {
   const paint = KINDS[r.kind];
   if (!paint) return relicIcon();
-  const dark = r.charge <= 0;
-  return draw(`relic-${r.kind}-${r.el}-${dark ? 'd' : 'l'}`, (px, line) => {
-    const p = dark ? (x: number, y: number, c: string) => px(x, y, grey(c)) : px;
-    const l = dark ? (a: number, b: number, c: number, d: number, col: string) => line(a, b, c, d, grey(col)) : line;
-    paint(p, l);
-    if (r.el && !dark) px(0, 0, EL[r.el]), px(1, 0, EL[r.el]), px(0, 1, EL[r.el]);
+  const stage = relicStage(r), dark = stage === 4, k = DIM[Math.min(3, stage)];
+  return draw(`relic-${r.kind}-${r.el}-${stage}`, (px, line) => {
+    const col = (c: string) => (dark ? grey(c) : dim(c, k));
+    paint((x, y, c) => px(x, y, col(c)), (a, b, c, d, cl) => line(a, b, c, d, col(cl)));
+    if (r.el && !dark) px(0, 0, dim(EL[r.el], k)), px(1, 0, dim(EL[r.el], k)), px(0, 1, dim(EL[r.el], k));
   });
 }
 

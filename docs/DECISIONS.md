@@ -2,6 +2,74 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-05: relics made sure, with few uses; the big jobs give them (Kyle; Claude Opus 5.5)
+
+Kyle: "Doing bigger quests like this can get you relics, which right now don't drop often, like the spear or
+the grappling hook. We should also increase the power of those items (e.g. always skewers and shoves etc) but
+limited uses."
+
+- **Every relic is sure.** Nothing a relic does is left to weight, a goblin's striped blow or the stun cap:
+  its stuns go through `relicStun` (`sim/stuns.ts`), never capped or shrugged off. Every relic still spares
+  friends (gold telegraphs, SPARED, the existing tests plus new ones).
+  - **Relic Javelin** (4 uses): skewers every goblin in its line, a butcher as much as a scrapper, carries
+    them all on the shaft (`Javelin.held`, tip first), and pins the lot to the first wall for 3 s (+12 each);
+    at the end of its range it comes down and pins them to the ground. One that can't be moved (a dummy, one
+    on a roof) is pinned where it stands and the javelin goes through. A friend it passes is SPARED. Cooldown 4 s.
+  - **Grappling hook** (4 uses): any goblin it reaches, whatever it weighs and whoever throws it, is dragged
+    to your feet and lands knocked down 1.3 s (it used to be a Warrior's or Healer's job to haul a big one,
+    and a butcher arrived angry, not reeling). It catches a goblin 0.45 off its line. A pinned or immovable
+    goblin, a wall, a pillar or a heavy prop pulls you to it. A blow to you no longer drops a goblin mid-yank.
+  - **Butcher's knuckle**, the shove relic (4 uses): a line 6 long, 1.1 wide; every goblin in it knocked
+    down 1.4 s and thrown 20 as if it weighed what a scrapper does, 18 damage, MARKED.
+  - **Gall bomb** (4 uses): bursts 2.6 across, 22, every goblin knocked down 1.3 s and thrown as hard.
+  - **Lodestone** (3 uses): every goblin within 3.6 of where it lands is taken (held, drawn in at 3.5 tiles a
+    second, not by weight) for 1.2 s, then the burst (1.8, 18) knocks them all down 1.2 s.
+  - **Wind-up bow** (3 uses): 9 s, a bolt every 0.45 s that flies at its goblin all the way (`Bolt.seek`), so
+    it never misses; 8 damage, slowed to 35% for 2 s.
+  - **Bone whistle** (4 uses): every goblin within 4 drops its blow, striped ones too, and reels (1.6 s small,
+    1 s big); friends quickened as before.
+- **Few uses, and fading.** Uses by kind (`RELIC_USES`, 3 to 4); an elemental one holds one more, a LOUD one
+  two (so 3 to 6). Every use spends one. The relic fades by stages (`relicStage`): full, used, half or less,
+  LAST USE, dark. The icon is drawn a step greyer each stage (`client/relicicons.ts`) and the card dims with it
+  (`.rcard.fade1..3`), tagged FADING then LAST USE. The RELIC button carries the uses as 2x2 pips along its foot
+  (lit for each left, hollow for each spent: gold, amber below half, red-brown at the last); the card shows pips
+  and "3 USES LEFT"; the laptop line shows pips too. The last use says its short name and DARK over the hero
+  ("JAVELIN DARK", the `faded` event). The wood's practice throws are free (the javelin is topped up every step
+  there), so every hero reaches Wickhold with it full.
+- **Spent: kept as a dull keepsake, not gone.** The lore already decides it: relics "fade with use and go dark",
+  Isolde relights plain ones for gold, Odric takes any of them on the step, Ivo hears a dark one as silence. So a
+  spent relic stays in the pack, DARK, grey on the button (a press says DARK), and the church is where it goes
+  next: recharged (plain), given up for the light, or two for one. Its price per use is now 18 gold, so a dark
+  javelin still costs 72 to relight.
+- **Old saves**: an item without `v: 2` was counted out of 24 / 36 / 48; `fitRelic` keeps the same share in
+  uses, rounded, never below one unless it was dark (12 of 24 on a javelin is 2 of 4; full stays full, dark stays
+  dark), then marks it `v: 2` so it's never scaled twice.
+- **Where relics come from** (`shared/relicaward.ts`): `awardRelic(run, rng, source, owned?, kinds?)` is the one
+  path. It rolls on the caller's seeded stream, notes `{ item, from }` on `run.relicsWon` (new on `Run`) and
+  returns the item. Sources: a curated zone's climax (`{ zone: 'hangman' }`), a story job, the expedition's beacon
+  held, a deep dive's butcher, a named butcher's drop. A zone names a relic or a pool (`ZONE_RELICS`): Hangman's
+  Wood gives the **grappling hook** (a hook on a rope out of Hempen at the gibbet; the bible already says the hook
+  is the next relic found after the javelin), then one of hook, wind-up bow, javelin; Coldscar's pool (later) is
+  knuckle, bomb, whistle. Each source prefers a kind you lack (plain, full), then rolls; story jobs, the beacon and
+  zones roll elemental more often than a drop. At a job's end (`game.ts finish`) each player takes home what the run
+  already holds (a zone's climax, copied) and the job's own sure relic (`wonRelics`: one a job, zone over beacon
+  over story over deep), seeded per player so each gets their own. `deepRelic` keeps its signature and goes through
+  `awardRelic`. A named butcher's drop is now 4 in 100 (was 12).
+- **The recap**: the RELICS row lists every relic gained, picked up or awarded, with its uses: "GRAPPLING HOOK (4
+  USES)". A relic from a job with no butcher to cut it out of says "You bring the X home." instead.
+- The lore keeper's pass is applied (javelin and bomb USE, the elemental lines, the empty step, the legend, the
+  wood, "uses" for "charge" throughout, the bible's notes on spent relics, where sure relics are found, and
+  Hempen pending Kyle). Words for the line editor still: the seven USE lines in `relicwords.ts`;
+  "3 USES LEFT" / "1 USE LEFT"; USES (row); FADING; LAST USE; "4 uses, and it dims a little with each one. The
+  church can recharge it."; "... It holds more, but it can't be recharged."; "Nothing left in it. The church can
+  recharge it." (and the can't-be-recharged one); "GRAPPLING HOOK (4 USES)"; "You bring the X home."; the empty
+  step's line; the legend's RELIC line; the wood's RELIC lesson line (it said the javelin comes back to your hand).
+- Tests: `tests/relicpower.test.ts` (each relic sure against weight and the stun cap; friends spared; a use spends
+  one; stages and dark; old saves; drop rate; the zone award; awards seeded; a guest sees the skewer, the pins and
+  the charge through deltas; determinism), and the older relic, hook, fight, wood and deep dive tests moved to the
+  new numbers. Shots: `node scripts/relics3-look.cjs` (phone: the button's pips as the javelin skewers a line; a
+  card at its last use).
+
 ## 2026-11-05: the Staithe: NETS on layout 4, the gaffer and the skimmer, and the Staithe on the Barrowfields (Kyle; Claude Opus 5.5)
 
 Kyle approved the biomes proposal ("continue all approved"), section 2 and rollout items 4 and 5, and asked

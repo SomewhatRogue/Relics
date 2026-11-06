@@ -246,7 +246,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     }
     if (h.actT >= r.windup && h.actT - dt < r.windup) {
       acts.fire(h);
-      spendCharge(h);
+      spendCharge(h, ev);
       h.relicReady[h.relic] = now + r.cooldown * jealousCooldown(h) * (1 - statsOf(h).focus) * (h.relic === h.relics[0] ? 1 - drilled(h.drills, 'skill') : 1);
       if (h.relic === 'hook' || h.relic === 'javelin' || h.relic === 'net' || h.relic === 'lodestone') ev.push({ k: h.relic === 'hook' ? 'hookfire' : 'throw', x: h.x, y: h.y, dx: h.fx, dy: h.fy });
     }

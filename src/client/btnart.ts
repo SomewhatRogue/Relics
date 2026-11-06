@@ -3,7 +3,7 @@
  * the shape says what kind of button it is (round to strike or cast, a heater shield to guard, a
  * diamond to dodge, a glass orb for the flask), lit from the top left, iron or gilt or dull stone. Over
  * the face: the icon, a cooldown swept in 16 steps, a one-frame flash when it comes ready, a relic's
- * charge, the potion's liquid at your health, and the stamina pips round ATTACK.
+ * uses as pips along its foot, the potion's liquid at your health, and the stamina pips round ATTACK.
  */
 export type Shape = 'round' | 'shield' | 'diamond' | 'orb';
 export interface Face {
@@ -23,9 +23,8 @@ export interface Face {
   fill?: number;
   liquid?: string;
   pulse?: boolean;
-  /** A relic's charge along the foot. */
-  charge?: number;
-  chargeCol?: string;
+  /** A relic's uses as pips along the foot: `left` lit of `of`, in `col`. */
+  uses?: { left: number; of: number; col: string };
   /** Stamina pips round the button: how many lit of `of`, and their colour. */
   pips?: { lit: number; of: number; col: string };
 }
@@ -106,10 +105,14 @@ export function paintButton(c: HTMLCanvasElement, f: Face): void {
       if (a < q) g.fillRect(x, y, 1, 1);
     }
   }
-  if (f.charge !== undefined) {
-    const w = Math.round(f.size * 0.44), x0 = Math.round(cx - w / 2), y0 = Math.round(cy + r - 6);
-    g.fillStyle = '#07080a', g.fillRect(x0 - 1, y0 - 1, w + 2, 3);
-    g.fillStyle = f.chargeCol ?? '#ffd27a', g.fillRect(x0, y0, Math.round(w * f.charge), 1);
+  if (f.uses) {
+    // One 2x2 pip a use, a pixel apart, centred along the foot: lit for each left, hollow for each spent.
+    const n = f.uses.of, w = n * 3 - 1, x0 = Math.round(cx - w / 2), y0 = Math.round(cy + r - 6);
+    g.fillStyle = '#07080a', g.fillRect(x0 - 1, y0 - 1, w + 2, 4);
+    for (let i = 0; i < n; i++) {
+      g.fillStyle = i < f.uses.left ? f.uses.col : '#2a2d33', g.fillRect(x0 + i * 3, y0, 2, 2);
+      if (i < f.uses.left) (g.fillStyle = 'rgba(255,255,255,0.4)'), g.fillRect(x0 + i * 3, y0, 1, 1);
+    }
   }
   if (f.pips) {
     // Along the top left of the button, from straight up round to the left.

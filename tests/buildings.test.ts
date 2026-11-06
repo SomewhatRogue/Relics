@@ -128,7 +128,7 @@ describe('relics come from deep dives', () => {
     g.startJob(deepDive(1));
     win(g);
     // A kind you don't have: the first found, plain and full, carried at once.
-    expect(g.result?.relic).toMatchObject({ kind: 'javelin', tier: 1, el: '', charge: 24 });
+    expect(g.result?.relic).toMatchObject({ kind: 'javelin', tier: 1, el: '', charge: 4 });
     expect(g.hero.relics).toEqual(['grasp', 'javelin']);
     const jav = g.profile.relic;
     g.startJob(deepDive(2));

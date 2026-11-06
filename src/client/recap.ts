@@ -52,12 +52,13 @@ export function showResult(g: Game, panel: Panel): void {
     [RECAPW.way, r.won ? r.way ?? '' : ''],
     [RECAPW.found, c?.found.join(', ') ?? ''],
     [RECAPW.treasure, r.treasure.map(itemName).join(', ')],
-    [RECAPW.relic, c?.relics.join(', ') ?? ''],
+    // Picked up on the way, then the sure one at the end, each with the uses it holds.
+    [RECAPW.relic, [...(c?.relics ?? []), ...(r.relics ?? (r.relic ? [r.relic] : [])).map((x) => RELICW.withUses(relicName(x), x.charge))].join(', ')],
   ], 'recap');
   const lines = r.won ? [] : [ENDED[r.half ? (r.how === 'dropped' ? 'lostCut' : 'half') : r.how === 'dropped' ? 'cut' : 'left']];
   if (r.levels) lines.push(`<b>Level ${g.profile.level}.</b> ${title(TRAINERS[g.profile.cls].name)} trains you, at ${TRAINERS[g.profile.cls].where}.`);
   for (const i of r.sold) lines.push(`No room for the ${itemName(i)}: sold for 20 gold.`);
-  if (r.relic) lines.push(RELICW.cutOut(r.job.boss ?? '', relicName(r.relic)) + ' ' + (g.profile.relic === r.relic.id ? RELICW.carryHint : RELICW.shelfHint));
+  if (r.relic) lines.push((r.job.boss && !r.job.exped && r.job.objective !== 'story' ? RELICW.cutOut(r.job.boss, relicName(r.relic)) : RELICW.broughtHome(relicName(r.relic))) + ' ' + (g.profile.relic === r.relic.id ? RELICW.carryHint : RELICW.shelfHint));
   if (r.lit !== undefined) lines.push(RELICW.litLeft(r.lit));
   if (r.won && r.job.objective === 'story') lines.push(`<b>Barrowby's bell rings across the valley.</b> The council sits once enough people are home.`);
   // A knack waiting: banked, picked from the pack whenever you like.

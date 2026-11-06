@@ -66,7 +66,7 @@ async function rows(g: Game, touch: boolean): Promise<Row[]> {
   const [skill, relic] = me.relics;
   if (knows(me, 'skill')) out.push({ face: round(skillCanvas(skill, me.augments[skill])), name: 'SKILL', key: 'E', text: `Your class skill, ${RELICS[skill].name}. The dark sweep and the number count down to the next use.` });
   const carried = relic ? carriedItem(me) : undefined;
-  if (relic) out.push({ face: round(await pic(relicItemIcon(carried ?? ({ kind: relic, charge: 1 } as Parameters<typeof relicItemIcon>[0])))), name: 'RELIC', key: 'R', text: 'The relic you carry. The bar along its foot is its charge.' });
+  if (relic) out.push({ face: round(await pic(relicItemIcon(carried ?? ({ kind: relic, charge: 1 } as Parameters<typeof relicItemIcon>[0])))), name: 'RELIC', key: 'R', text: 'The relic you carry. The pips under it are the uses it has left.' });
   const next = me.belt[0];
   out.push({ face: { shape: 'orb', size: 30, grade: 'iron', fill: 0.7, liquid: '#a8261c', icon: next ? await pic(potionIcon(next)) : null }, name: 'HEALTH', key: 'Q', text: 'Your health. Tap to drink the front potion, hold to bring the next forward. The number is how many you have.' });
   // The gilt slot: what it can say.

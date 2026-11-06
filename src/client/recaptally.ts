@@ -6,6 +6,7 @@
  */
 import { itemName, type Item } from '../shared/tuning';
 import { relicName } from '../shared/relicitems';
+import { RELICW } from './relicwords';
 import type { Profile } from '../shared/progress';
 import { mine, type Run } from '../sim/run';
 import type { ArenaRoom } from '../sim/room';
@@ -25,7 +26,7 @@ export interface Recap {
   downs: number;
   /** Seconds out on the job, when known. */
   secs?: number;
-  /** Gear picked up off the floor, and relics found, by name. */
+  /** Gear picked up off the floor, and relics found, by name (a relic with the uses it holds). */
   found: string[];
   relics: string[];
   /** Every hero in the party, this player first, with what they did and their callout (none for an old run). */
@@ -55,7 +56,7 @@ export function recapOf(run: Run, room: ArenaRoom | null, p: Profile, start: Kit
     else found.push(itemName(it));
   }
   const had = new Set(start?.relics ?? []);
-  const relics = start ? p.relics.filter((r) => !had.has(r.id)).map(relicName) : [];
+  const relics = start ? p.relics.filter((r) => !had.has(r.id)).map((r) => RELICW.withUses(relicName(r), r.charge)) : [];
   const secs = run.began ? Math.round((Date.now() - run.began) / 1000) : 0;
   return {
     rooms: run.job.exped ? undefined : [won ? run.job.rooms : run.index, run.job.rooms],

@@ -2,45 +2,45 @@
 import { CHAIN, FIRE_RING, KNIVES, LIGHT, SIC, SMOKEBOMB, STAMP, TETHER, VANISH, VOLLEY } from './skillkit.js';
 import { BELL, BOMB, KNUCKLE, SENTRY } from './relickit.js';
 /**
- * The Warrior's relic: a javelin thrown at range, recharging. It carries anything light enough and
- * pins it to the first wall or pillar it reaches; it sticks into anything heavier.
+ * The relic javelin, thrown. It skewers every goblin in its line, whatever it weighs, carries them on
+ * the shaft and pins them all to the first wall or pillar it reaches (or to the ground where it comes
+ * down, at the end of its range). One that can't be moved is pinned where it stands and the javelin
+ * goes on through. Since 2026-11-05 nothing shrugs it off: few uses, each one sure.
  */
 export const JAVELIN = {
-  cooldown: 10,
+  cooldown: 4,
   windup: 0.2,
   recover: 0.28,
   speed: 16,
   range: 10,
   dmg: 20,
   knock: 9,
-  /** Enemies this light or lighter are carried and pinned. */
+  /** (Before 2026-11-05 only goblins this light were carried; the rest stopped it. Kept for old tests' sake.) */
   pinWeight: 1,
-  pinTime: 2.6,
+  pinTime: 3,
   pinDmg: 12,
   /** Javelins stay stuck in walls, floors and bodies this long. */
   stuckLife: 9,
 };
 
 /**
- * The grappling hook relic. It latches the first thing it reaches: a light enemy is yanked to you;
- * a heavy one, a wall or a pillar pulls you to it.
+ * The grappling hook relic. It latches the first thing it reaches: any goblin is yanked to you and
+ * lands knocked down (one that can't be moved, or is pinned, pulls you to it instead); a wall, a
+ * pillar or a heavy prop pulls you to it. Since 2026-11-05 it catches a goblin `catch` off its line too.
  */
 export const HOOK = {
-  cooldown: 10,
+  cooldown: 4,
   windup: 0.12,
   recover: 0.15,
-  speed: 20,
-  range: 8,
-  /** Enemies this light or lighter are yanked to you; anything heavier (or a wall) pulls you to it instead.
-   *  Only a Warrior or a Healer is heavy enough to haul big things in (`heavyYank`): the rest pull small
-   *  goblins and otherwise go flying to whatever they hooked, which makes the hook a second dodge. */
-  yankWeight: 1,
-  heavyYank: 4,
+  speed: 22,
+  range: 9,
+  /** How far off the line a goblin can be and still be caught. */
+  catch: 0.45,
   yankSpeed: 15,
   zipSpeed: 15,
-  /** A yanked enemy arrives reeling for this long. */
-  yankStun: 0.9,
-  dmg: 5,
+  /** A yanked enemy arrives knocked down for this long. */
+  yankStun: 1.3,
+  dmg: 8,
 };
 
 /** The Ranger's hunting net: thrown, it opens on the first goblin it reaches. Small ones are snared flat; big ones are slowed. */
@@ -51,8 +51,10 @@ export const NET = { cooldown: 20, windup: 0.15, recover: 0.25, speed: 14, range
  *  Built in since 2026-11-05 (shared/signs.ts): its own button, not one of the three skills. */
 export const SHADOWSTEP = { cooldown: 20, windup: 0.06, recover: 0.12, range: 6, stun: 1 };
 
-/** The Mage's lodestone: lobbed, it lands and drags every goblin near it inward (light ones fast), then bursts. */
-export const LODESTONE = { cooldown: 20, windup: 0.2, recover: 0.3, range: 7, fallback: 4.5, flight: 0.5, radius: 3.6, pull: 34, time: 1.8, burst: 1.4, dmg: 12 };
+/** The lodestone: lobbed, it lands and takes every goblin within `radius`, whatever it weighs: held
+ *  helpless and drawn in at `draw` tiles a second for `time`, then it bursts `burst` across, `dmg`, and
+ *  they're knocked down `stun`. */
+export const LODESTONE = { cooldown: 6, windup: 0.2, recover: 0.3, range: 7, fallback: 4.5, flight: 0.5, radius: 3.6, draw: 3.5, time: 1.2, burst: 1.8, dmg: 18, stun: 1.2 };
 
 /**
  * The Healer's blessed ground: a circle of light at the Healer's feet (or where they point, on a

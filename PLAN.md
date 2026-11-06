@@ -2,6 +2,16 @@
 
 ## Current slice
 
+**Relics made sure, with few uses** (Claude Opus 5.5, 2026-11-05; Kyle: "increase the power of those items (e.g.
+always skewers and shoves etc) but limited uses", relics from bigger quests). Built; waiting on Kyle's play. *Done
+when*, on his phone and laptop: the javelin skewers a whole line, butchers included, and pins them all to the wall;
+the hook drags any goblin to him knocked down, whatever his class; the knuckle and the bomb knock everything down and
+throw it, big ones as far; the lodestone takes everything near and the wind-up bow never misses; each relic holds 3 to
+6 uses, shown as pips on the RELIC button and the card, dimming a stage a use to LAST USE and then DARK (kept; the
+church relights plain ones); old saves' relics keep their share; named butchers drop them rarely (4 in 100) and the
+big jobs give one each (a zone's climax, a story job, the beacon, a deep dive), Hangman's Wood the grappling hook; the
+recap's RELICS row says "GRAPPLING HOOK (4 USES)". Everything in DECISIONS 2026-11-05 ("relics made sure"). Open: the
+new lines through the lore keeper and line editor; the uses and numbers once he's played.
 **The Staithe: NETS on layout 4, the gaffer and the skimmer, the Staithe on the Barrowfields** (Claude Opus 5.5,
 2026-11-05; Kyle approved the biomes proposal, rollout items 4 and 5: "the river in the middle should have maybe a
 fishing village in the center sometimes"). Built; waiting on Kyle's play. *Done when*, on his phone and laptop,

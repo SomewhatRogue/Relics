@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { BELL, BOMB, KNUCKLE, MARK, SENTRY, TICK, type RelicId } from '../src/shared/tuning';
 import { Rng } from '../src/shared/rng';
-import { makeRelic, RELIC_MAX } from '../src/shared/relicitems';
+import { makeRelic, relicMax } from '../src/shared/relicitems';
 import { ArenaRoom } from '../src/sim/room';
 import { damage } from '../src/sim/damage';
 import { newProp } from '../src/sim/props';
@@ -40,10 +40,10 @@ const untouched = (ally: Hero, ev: FightEvent[]) => {
 describe('charge', () => {
   it('every use spends one charge; at nothing the RELIC button refuses and says DARK', () => {
     const { room, h, it } = setup('javelin');
-    expect(it.charge).toBe(RELIC_MAX[1]);
+    expect(it.charge).toBe(relicMax(it));
     press(room, 1);
     run(room, 0.5);
-    expect(it.charge).toBe(RELIC_MAX[1] - 1);
+    expect(it.charge).toBe(relicMax(it) - 1);
     it.charge = 0;
     h.relicReady.javelin = 0;
     press(room, 2);
@@ -59,7 +59,7 @@ describe('charge', () => {
     h.learned = undefined;
     press(room, 1);
     run(room, 0.6);
-    expect(it.charge).toBe(RELIC_MAX[1]);
+    expect(it.charge).toBe(relicMax(it));
   });
 });
 
