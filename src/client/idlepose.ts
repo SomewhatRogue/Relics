@@ -38,8 +38,8 @@ export function idlePose(h: Hero, pz: BodyPose, now: number): IdleOut | null {
   // Someone else fishing or at the butts (shared/pastimes.ts): their loop there, till they're back.
   const pk = parkOf(h);
   if (pk) {
-    const r = parkPose(h, pk, pz);
-    Object.assign(O, { park: pk, parkT: parkT(h, now, pk), flip: r.flip, up: false, a: r.a, ext: r.ext, behind: true });
+    const pt = parkT(h, now, pk), r = parkPose(h, pk, pz, pt);
+    Object.assign(O, { park: pk, parkT: pt, flip: r.flip, up: false, a: r.a, ext: r.ext, behind: true });
     return O;
   }
   if (pet) {

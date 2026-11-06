@@ -4,7 +4,7 @@
  * to go in; taking a job starts a run (room after room until the job is done or you're driven back);
  * the results come home to the hero and the shared world, and the town changes with them.
  */
-import { spotOf, type PastimeId } from '../shared/pastimes';
+import { placeOf, spotOf, type PastimeId } from '../shared/pastimes';
 import { petSpots, type Dog } from './petting';
 import { doorAt, inArea, npcAt, pushingInto, useMap, type Area, type Block, type Npc, type Theme } from '../shared/arena';
 import { travel } from '../shared/sweep';
@@ -505,9 +505,9 @@ export class Game {
 
   /** The pastime being played (shared/pastimes.ts), or null. */
   pastime: PastimeId | null = null;
-  /** Sit down at the millpond or step up to the butts: the hero goes to its spot, and the town hears it once (townpresence.ts). */
+  /** Sit down at the millpond, step up to the butts, sit at the Rat's table or its knife line, take the hammer at the anvil: the hero goes to its spot, and the town hears it once (townpresence.ts). Only in the pastime's own place. */
   enterPastime(id: PastimeId): void {
-    if (this.mode !== 'town' || this.outside) return;
+    if (this.mode !== 'town' || this.room.map.name !== placeOf(id)) return;
     const h = this.hero, sp = spotOf(id);
     Object.assign(h, { x: sp.seat[0], y: sp.seat[1], fx: sp.face[0], fy: sp.face[1], moving: false });
     this.pastime = id;
@@ -1231,12 +1231,24 @@ export class Game {
 
   /** Halvard: one level up, for gold and steel. */
   upgrade(it: Item): boolean {
+    return !!this.levelUp(it);
+  }
+  /** The same, and the piece as it is now (to strike it yourself after: anvilmode.ts). */
+  levelUp(it: Item): Item | null {
     const p = this.profile, cost = nextLevel(it);
-    if (!cost || p.gold < cost.gold || p.steel < cost.steel) return false;
+    if (!cost || p.gold < cost.gold || p.steel < cost.steel) return null;
     p.gold -= cost.gold;
     p.steel -= cost.steel;
-    this.replace(it, { ...it, level: (it.level ?? 0) + 1 });
-    return true;
+    const next = { ...it, level: (it.level ?? 0) + 1 };
+    this.replace(it, next);
+    return next;
+  }
+  /** Struck well at the anvil (shared/forgestrike.ts): a little more on top of the upgrade just paid for. */
+  temper(it: Item, add: number): Item {
+    if (add <= 0 || !this.gearList().includes(it)) return it;
+    const next = { ...it, temper: Math.round(((it.temper ?? 0) + add) * 1000) / 1000 };
+    this.replace(it, next);
+    return next;
   }
 
   /** Halvard: melt a packed piece down for steel (never a hungry one). */

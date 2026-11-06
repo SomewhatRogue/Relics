@@ -6,6 +6,7 @@ const { execSync, spawn } = require('child_process');
 const http = require('http');
 const path = require('path');
 const { chromium } = require('playwright');
+require('fs').mkdirSync(path.join(__dirname, '../shots/ratgames'), { recursive: true });
 const ROOT = path.join(__dirname, '..'), PORT = Number(process.env.ONLINE_PORT) || 8790;
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 (async () => {
@@ -79,6 +80,49 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     await ava.page.evaluate(() => (window.__range.end(), window.__range.close()));
     step('Sam and Ava get up: Kyle sees both back in town', (await parked(kyle, 'SAM', null)) && (await parked(kyle, 'AVA', null)));
     step(`and that was one more word each (Sam ${(await sends(sam)) - samMid}, Ava ${(await sends(ava)) - avaMid})`, (await sends(sam)) - samMid <= 2 && (await sends(ava)) - avaMid <= 2);
+    // The Drowned Rat's table and knife board, and Halvard's anvil (shared/pastimes.ts): parked in the hall,
+    // seen by whoever's in it, one word each to sit and one to get up.
+    const goIn = (p, door) => p.page.evaluate((door) => { const g = window.__game; if (g.outside) g.leave(); g.enter(g.room.map.blocks.find((b) => b.door === door)); return g.room.map.name; }, door);
+    const rat = await Promise.all([kyle, sam, ava].map((p) => goIn(p, 'tavern')));
+    step(`all three in the Rat (${rat.join(', ')})`, rat.every((n) => n === 'THE DROWNED RAT'));
+    await kyle.page.evaluate(() => Object.assign(window.__game.hero, { x: 14.2, y: 5.6 }));
+    await wait(1500);
+    const samR = await sends(sam), avaR = await sends(ava);
+    await sam.page.evaluate(() => window.__pastime.arm('watch', 0));
+    await ava.page.evaluate(() => window.__pastime.knives(0));
+    step('Kyle sees Sam parked at the arm-wrestling table', await parked(kyle, 'SAM', 'arm'));
+    step('Kyle sees Ava parked at the knife board', await parked(kyle, 'AVA', 'knives'));
+    const samR1 = await sends(sam), avaR1 = await sends(ava);
+    await sam.page.mouse.move(640, 500);
+    for (let i = 0; i < 8; i++) {
+      await sam.page.mouse.down();
+      await ava.page.mouse.click(640, 400);
+      await wait(400);
+      await sam.page.mouse.up();
+      await wait(500);
+    }
+    await sam.page.screenshot({ path: path.join(ROOT, 'shots/ratgames/online-arm-laptop.png') });
+    const samR2 = await sends(sam), avaR2 = await sends(ava);
+    step(`at the Rat: one word each to sit (Sam ${samR1 - samR}, Ava ${avaR1 - avaR}), none while playing (Sam ${samR2 - samR1}, Ava ${avaR2 - avaR1})`, samR1 - samR <= 1 && avaR1 - avaR <= 1 && samR2 === samR1 && avaR2 === avaR1);
+    await kyle.page.screenshot({ path: path.join(ROOT, 'shots/ratgames/rat-parked-phone.png') });
+    await sam.page.evaluate(() => (window.__arm.quit(), window.__arm.close()));
+    await ava.page.evaluate(() => (window.__knives.quit(), window.__knives.close()));
+    step('Sam and Ava get up: Kyle sees both stood in the Rat', (await parked(kyle, 'SAM', null)) && (await parked(kyle, 'AVA', null)));
+    step(`and one more word each (Sam ${(await sends(sam)) - samR2}, Ava ${(await sends(ava)) - avaR2})`, (await sends(sam)) - samR2 <= 2 && (await sends(ava)) - avaR2 <= 2);
+    // Out of the Rat and into the forge: Sam strikes at the anvil, Kyle watches.
+    const forge = await Promise.all([kyle, sam].map((p) => goIn(p, 'forge')));
+    step(`Kyle and Sam in the forge (${forge.join(', ')})`, forge.every((n) => n === 'THE FORGE'));
+    await kyle.page.evaluate(() => Object.assign(window.__game.hero, { x: 6.2, y: 4.6 }));
+    await wait(1500);
+    const samF = await sends(sam);
+    await sam.page.evaluate(() => { Object.assign(window.__game.profile, { gold: 500, steel: 50 }); window.__pastime.anvil(); });
+    step('Kyle sees Sam parked at the anvil', await parked(kyle, 'SAM', 'anvil'));
+    const samF1 = await sends(sam);
+    for (let i = 0; i < 3; i++) await sam.page.mouse.click(640, 400), await wait(900);
+    step(`at the anvil: one word to take the hammer (${samF1 - samF}), none while striking (${(await sends(sam)) - samF1})`, samF1 - samF <= 1 && (await sends(sam)) === samF1);
+    await kyle.page.screenshot({ path: path.join(ROOT, 'shots/ratgames/forge-parked-phone.png') });
+    await sam.page.evaluate(() => (window.__anvil.quit(), window.__anvil.close()));
+    step('Sam hands the hammer back: Kyle sees him stood in the forge', await parked(kyle, 'SAM', null));
     await sam.ctx.close();
     step('Sam closes the tab: gone for Kyle', await kyle.page.waitForFunction(() => !window.__town().here.some((h) => h.name === 'SAM'), null, { timeout: 15000 }).then(() => true, () => false));
     // The month's Redis budget used up: Kyle's next step is refused; he's told, leaves the town's

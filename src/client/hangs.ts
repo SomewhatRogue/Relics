@@ -1,7 +1,7 @@
 /**
  * What hangs on a hall's back wall, painted once into the room's still layer (world.ts): the tower's
  * star chart, shields and a banner in the barracks, the town hall's vote boards, antlers, pelts and bows at the lodge, the church's
- * windows, the smith's tools, herbs drying, notices, the Drowned Rat's sign, the valley's map.
+ * windows, the smith's tools, herbs drying, notices, the Drowned Rat's sign and its knife board, the valley's map.
  */
 import type { GameMap } from '../shared/arena';
 import { Rng } from '../shared/rng';
@@ -120,6 +120,23 @@ const HANG: Record<Hang['kind'], (rect: Rect, rng: Rng, x: number, w: number, h:
     // The rat on its board, as crooked as the one outside.
     for (let i = 0; i < w; i++) rect(x + i, TOP + 6 + Math.round(i / 12), 1, 14, '#5a3d22');
     rect(x + 6, TOP + 11, 12, 5, '#2a2630'), rect(x + 18, TOP + 13, 6, 1, '#2a2630'), rect(x + 6, TOP + 10, 3, 2, '#2a2630');
+  },
+  knifeboard(rect, rng, x, w) {
+    // A round of elm on a peg, its rings painted on and chipped, a few knives left in it, chalk tallies beside.
+    const r = Math.floor(Math.min(w, LOW - TOP - 8) / 2) - 1, cx = x + Math.round(w / 2), cy = TOP + 4 + r;
+    const RINGS = ['#c8a03a', '#8a2a22', '#d8d0bc', '#3a2a1c', '#d8d0bc'];
+    rect(cx - 1, TOP + 1, 2, 3, '#2a1d12');
+    for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d > r + 0.4) continue;
+      const ring = Math.min(4, Math.floor((d / (r + 0.4)) * 5)), chip = rng.next() < 0.08;
+      rect(cx + dx, cy + dy, 1, 1, d > r - 0.6 ? '#2a1d12' : chip ? '#6a5034' : RINGS[ring]);
+    }
+    for (let i = 0; i < 3; i++) {
+      const a = rng.next() * 6.28, k = rng.next() * r * 0.8, kx = cx + Math.round(Math.cos(a) * k), ky = cy + Math.round(Math.sin(a) * k);
+      rect(kx, ky, 1, 1, '#9aa3ad'), rect(kx, ky + 1, 1, 3, '#3a2818');
+    }
+    for (let i = 0; i < 4; i++) rect(x + w - 2, cy - 4 + i * 2, 2, 1, '#c8c0b0');
   },
   shelves(rect, rng, x, w) {
     for (let y = TOP + 6; y < LOW - 4; y += 10) {

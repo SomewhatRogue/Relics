@@ -9,6 +9,7 @@ import { CHAPTER_1, settle, vote, type WorldState } from './story.js';
 import { nights } from './raids.js';
 import { WORK_ORDER, workDone, type WorkId } from './works.js';
 import { addRangeLine, claimScore, type RangeClaim } from './rangeboard.js';
+import { knifeClaimScore, type KnifeClaim } from './knifeboard.js';
 
 /** Works finished lately, kept for the town's talk. */
 export const MENDED_KEPT = 6;
@@ -38,6 +39,8 @@ export interface Contribution {
   days?: number;
   /** A finished round at the archery range: worked out again from the hero's seed and arrows before it goes on the board (shared/rangeboard.ts). */
   range?: RangeClaim;
+  /** A finished round at the Rat's knife board, played again the same way (shared/knifeboard.ts). */
+  knives?: KnifeClaim;
 }
 
 /**
@@ -63,6 +66,10 @@ export function contribute(w: WorldState, c: Contribution, now = Date.now(), rai
   if (c.range) {
     const n = claimScore(c.hero.id, c.hero.cls, c.range);
     if (n > 0) w.range = addRangeLine(w.range, { id: c.hero.id, name: c.hero.name, cls: c.hero.cls, n });
+  }
+  if (c.knives) {
+    const n = knifeClaimScore(c.hero.id, c.hero.cls, c.knives);
+    if (n > 0) w.knives = addRangeLine(w.knives, { id: c.hero.id, name: c.hero.name, cls: c.hero.cls, n });
   }
 }
 

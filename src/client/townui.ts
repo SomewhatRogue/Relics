@@ -30,6 +30,7 @@ import { openAdvocate } from './councilui';
 import { openPractice } from './practiceui';
 import { openWatchPost } from './watchpost';
 import { openButts, openPond } from './pastimeui';
+import { openArmTable, openKnifeBoard } from './ratui';
 import { townVoice, voiceClock } from './voiceplay';
 
 
@@ -106,6 +107,11 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     openPond(g, panel);
   } else if (id === 'range') {
     openButts(g, panel);
+  } else if (id === 'arm') {
+    // At the Drowned Rat: the arm-wrestling table and the card sharp's knife board (ratui.ts).
+    openArmTable(g, panel);
+  } else if (id === 'knives') {
+    openKnifeBoard(g, panel);
   } else if (id === 'granary') {
     panel.show('FARMER JOS', say('Farmer Jos', 'Every sack in here is a week nobody starves. Barley doesn\'t care who won the war. That\'s the best thing about barley.'));
   } else if (id === 'home') {
@@ -158,7 +164,6 @@ const CHAT: Record<number, { name: string; line: string }> = {
   19: { name: 'RECRUIT WAT', line: "Master Cole says a dull blade's a gift to the other fellow, so they get *nothing* from me." },
   14: { name: 'ORLA OF THE WATCH', line: "Third night on the east wall. Something out there whistles when I whistle. I've stopped whistling." },
   11: { name: 'A DRUNK', line: 'Moll cheats. Everyone knows Moll cheats. I keep playing her. What does that make me? Don\'t answer that. Buy me one.' },
-  12: { name: 'A CARD SHARP', line: 'Whisper, round the back, trains rogues and nobody else. If you have to ask, you\'re not one.' },
 };
 const CHILD = ['We have a door now. A real one, with a latch. I open it all the time.', 'Did you kill the big one? The one with the chains? Was it heavy?', 'I saw one once, through the wall. It had a spoon. Why did it have a spoon?', "Mam says I can't come with you. Yet."];
 const SURVIVOR = ['They kept us in the dark so long I forgot what my hands looked like. Thank you for the candle.', 'My brother is still out at the Copperdeep. They took the ones who could dig. If you go down there...', 'I can hold a pitchfork. When my legs hold me, I will.'];

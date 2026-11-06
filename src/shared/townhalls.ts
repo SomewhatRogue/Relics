@@ -3,12 +3,13 @@
  * stair, a chalked circle, coloured fire), the barracks (racks, shields, bunks, a map table, a
  * dummy), the hunters' lodge (bows, antlers, pelts, a skinning bench, the hounds' bowls), the church
  * (candles, a runner up the aisle, a surgeon's cot), the Drowned Rat (the bar, casks, the dice table,
- * Whisper's curtained booth), the forge (bellows, quench tub, soot), the town hall (the council table,
+ * Whisper's curtained booth, the knife board and the arm-wrestling table), the forge (bellows, quench tub, soot), the town hall (the council table,
  * the valley map, notices), the counting house (open to the sky at one end, a counter, the vault
  * stair behind it) and the infirmary (herbs drying, a basin). Paint-only touches are marks on
  * the floor and hangs on the back wall; furniture is solid. Same layout every time.
  */
 import type { Block, GameMap, Mark, Npc, Round, Theme } from './arena.js';
+import { ARM_TABLE, KNIFE_LINE } from './pastimes.js';
 
 export const HOME: Theme = { floor: 'planks', back: 'plaster', ambient: [0.24, 0.2, 0.22], moon: 0 };
 export const STONE: Theme = { floor: 'flagstone', back: 'stone', ambient: [0.22, 0.2, 0.28], moon: 0 };
@@ -46,12 +47,16 @@ export function hall(door: string): GameMap | null {
     [n('FATHER ODRIC', 7, 2.2, 'church', 'priest'), n('MOTHER ISOLDE', 11.6, 2.4, 'trainer', 'healer', 4), n('MARTA', 3.2, 4.6, 'chat', 'villager', 2), n('VERGER OSWIN', 2.3, 1.6, 'vendor', 'priest', 4)],
     { rounds: [rd('candles', 5.3, 1, 0.2), rd('candles', 8.7, 1, 0.2), rd('candles', 0.8, 2.6, 0.2), rd('candles', 13.2, 2.6, 0.2)],
       marks: [mk('rug', 6.2, 1.6, 1.6, 7)], hangs: [hang('window', 2.4, 1.2), hang('window', 6.4, 1.2), hang('window', 10.4, 1.2)], torches: [{ x: 4.6, y: -1.6 }, { x: 9.4, y: -1.6 }] });
-  if (door === 'tavern') return room('THE DROWNED RAT', 15, 9, { ...HOME, ambient: [0.26, 0.19, 0.16] },
+  // The Rat runs on past Whisper's booth to the knife board on the back wall and, by the door, the
+  // arm-wrestling table (shared/pastimes.ts: the card sharp keeps the board, one of the watch the table).
+  if (door === 'tavern') return room('THE DROWNED RAT', 18, 9, { ...HOME, ambient: [0.26, 0.19, 0.16] },
     [b('counter', 1, 1.4, 5, 0.8), b('shelf', 1, 0.1, 5, 0.5), b('casks', 0.2, 3, 0.9, 1.8), b('dicetable', 8.1, 2.7, 2.2, 0.8), b('booth', 12.2, 0.2, 2.6, 1.3),
-      b('bench', 11.6, 5, 2.4, 0.9), b('bench', 6, 5.4, 2.4, 0.9)],
+      b('bench', 11.6, 5, 2.4, 0.9), b('bench', 6, 5.4, 2.4, 0.9), b('armtable', ARM_TABLE.table.x, ARM_TABLE.table.y, ARM_TABLE.table.w, ARM_TABLE.table.h)],
     [n('BARKEEP GANNET', 3.5, 1.1, 'tavern', 'villager'), n('DICER MOLL', 9.2, 3.9, 'dice', 'rogue'), n('WHISPER', 13.6, 2, 'trainer', 'rogue', 2), n('NETTLE', 11.1, 1.5, 'vendor', 'rogue', 2),
-      n('A DRUNK', 6.6, 6.7, 'chat', 'villager', 11), n('A CARD SHARP', 12.4, 6.3, 'chat', 'rogue', 12)],
-    { braziers: [{ x: 7.4, y: 1.1, r: 0.4 }], marks: [mk('sawdust', 0.4, 2.6, 14, 6)], hangs: [hang('sign', 9.2, 1.6), hang('notices', 6.1, 0.9)] });
+      n('A DRUNK', 6.6, 6.7, 'chat', 'villager', 11), n('A CARD SHARP', KNIFE_LINE.npc[0], KNIFE_LINE.npc[1], 'knives', 'rogue', 12),
+      n('A WATCHMAN OFF DUTY', ARM_TABLE.npc[0], ARM_TABLE.npc[1], 'arm', 'guard')],
+    { braziers: [{ x: 7.4, y: 1.1, r: 0.4 }], marks: [mk('sawdust', 0.4, 2.6, 17, 6)], hangs: [hang('sign', 9.2, 1.6), hang('notices', 6.1, 0.9), hang('knifeboard', KNIFE_LINE.board.x, KNIFE_LINE.board.w)],
+      torches: [{ x: 2.5, y: -1.6 }, { x: 11.6, y: -1.6 }, { x: 17.5, y: -1.6 }] });
   if (door === 'forge') return room('THE FORGE', 13, 8, { ...STONE, ambient: [0.28, 0.2, 0.2] },
     [b('anvil', 3.4, 2.7, 1.2, 0.6), b('bench', 8.5, 0.6, 3.5, 0.8), b('sacks', 11.2, 4.6, 1.2, 1), b('bellows', 0.2, 1.1, 0.9, 0.6), b('tub', 1, 4.6, 1.3, 0.8)],
     [n('HALVARD THE SMITH', 4.1, 1.9, 'smith', 'smith'), n('IVO THE RELIC-WRIGHT', 10.2, 2.2, 'wright', 'wright')],

@@ -2,6 +2,16 @@
 
 ## Current slice
 
+**More town pastimes: arm-wrestling and knives at the Drowned Rat, striking at Halvard's anvil** (Claude Opus 5.5,
+2026-11-06). Built; waiting on Kyle's play and the lore keeper and line editor on the new words (`client/pastimewords.ts`:
+ARMW, KNIFEW, ANVILW). *Done when*, on his phone: in the Rat, the watchman off duty at the table by the door offers
+the drunk, the card sharp, a watchman and Gannet; he bets 10 to 50 (or nothing) and holds to keep his grip in the
+drifting band till their hand goes down, Gannet hardest; the card sharp's knife board takes nine throws timed as the
+point comes over the bull, a Rogue's hand steadier, a bet to beat the sharp's own round, his best on the town's board;
+at the forge, STRIKE IT YOURSELF beside UPGRADE gives the same upgrade and a little more for strikes on the glow; and
+a friend in the Rat or the forge sees him at the table, the board or the anvil till he gets up. Everything in
+DECISIONS 2026-11-06 ("more town pastimes"); shots `node scripts/ratgames-look.cjs`, town-online.cjs for the parked
+friends. Open: every number once he's played.
 **The first town pastimes: fishing at the millpond and the archery butts** (Claude Opus 5.5, 2026-11-06; Kyle's
 rule 2026-11-05: "all mini games will happen locally on their own computer ... but in town you can see their
 character sitting and fishing or something"). Built; waiting on Kyle's play and the lore keeper and line editor on
@@ -859,8 +869,9 @@ naming, hammer timing at the smithy, candles and the giving-up rite at the churc
 quick haggle at the market, fishing. Nothing at Vell's tower for now. The Night Watch is its own feature
 (a Last Stand style skill shooter on the walls at night, 3 minutes, headshots, high scores). Herbs and
 potions are planned for later. Full plan: docs/plans/town-activities.md.
-Built so far: the Night Watch (slices 1 and 2, upright on a phone), fishing at the millpond and the archery butts
-(2026-11-06). Next from the table: arm-wrestling and knife-throwing at the Rat, the smithy's hammer, the rest.
+Built so far: the Night Watch (slices 1 and 2, upright on a phone), fishing at the millpond and the archery butts,
+arm-wrestling and knives at the Rat and the smithy's hammer (2026-11-06). Next from the table: the lodge's pelts and
+hound, the church's candles, hauling for Judd, the haggle.
 
 ## Open, soon but not yet: red eyes and gold eyes (Kyle, 2026-11-03)
 

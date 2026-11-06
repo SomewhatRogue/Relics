@@ -3,8 +3,9 @@
  * and what it would change against what you wear now, in the numbers the room uses. Green better, red
  * worse. Used by the loot card, chests and the pack.
  */
-import { CLASS_DODGES, CLASS_GUARD, guardOf, HUNGRY, type HungryId, LASTS, POTIONS, type PotionId, MODS, MOD_TEXT, TIERS, TRAITS, WEAPONS, CHARGE, GUARD, RARE, SPELL, costText, gearStats, itemName, modFits, slotOf, traitText, type HeroClass, type Item, type Mod, type MageKit, type WeaponId } from '../shared/tuning';
+import { CLASS_DODGES, CLASS_GUARD, guardOf, HUNGRY, type HungryId, LASTS, POTIONS, type PotionId, MODS, MOD_TEXT, TIERS, TRAITS, WEAPONS, CHARGE, GUARD, RARE, SPELL, costText, gearStats, itemName, temperOf, modFits, slotOf, traitText, type HeroClass, type Item, type Mod, type MageKit, type WeaponId } from '../shared/tuning';
 import { CARDW } from './shopwords';
+import { ANVILW } from './pastimewords';
 import type { Hero } from '../sim/types';
 import { kitRows } from './kitlines';
 import { areas } from './guardarea';
@@ -111,6 +112,9 @@ export function card(it: Item, h?: Hero, brief = false): string {
     return `<div class="tr${use ? '' : ' nouse'}"><b>${barWords(MODS[m.id]?.name ?? m.id, cls)} ${modValue(m)}${MOD_TEXT[m.id] ? ':' : ''}</b> ${barWords(MOD_TEXT[m.id] ?? '', cls)}${use ? '' : ` <i>${CARDW.noUse}</i>`}</div>`;
   });
   const traits = it.traits.map((k) => `<div class="tr"><b>${barWords(TRAITS[k].name, cls)}:</b> ${traitText(k, cls)}</div>`);
+  // Struck well at the anvil (shared/forgestrike.ts): how much more its upgrades count for.
+  const tp = it.level ? Math.round((temperOf(it) / it.level) * 100) : 0;
+  if (tp > 0) traits.push(`<div class="tr"><b>${ANVILW.cardRow}:</b> ${ANVILW.cardText(tp)}</div>`);
   // The rare three wear their chip filled in; HUNGRY's darkest of all (ui.css).
   const chip = RARE.includes(it.quality) ? ` rare ${it.quality}` : '';
   return `<div class="card-head" style="--t:${t.col}"><span class="chip${chip}">${t.name}</span><b>${itemName(it)}</b></div>` +
