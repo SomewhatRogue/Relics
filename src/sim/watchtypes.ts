@@ -8,9 +8,12 @@ export interface Stuck { dx: number; dy: number; ang: number; on: 'gob' | 'shiel
 export interface Gob {
   id: number;
   kind: GobKind;
-  /** The field it walks (the ground under it). */
-  f: FieldName;
+  /** Side-on, pixels along the field; upright (deep), metres run from the far edge. */
   x: number;
+  /** Upright only: where across it came in and where on the wall it's running for, and a runner's zig (0 none). */
+  u0: number;
+  u1: number;
+  zig: number;
   /** Pixels further up the field than the near line (drawn behind, a little higher). */
   lane: number;
   hp: number;
@@ -33,25 +36,28 @@ export interface Gob {
   /** How it died: head, body, legs, or fire. */
   how?: Part | 'fire';
 }
-export interface Arrow { x: number; y: number; vx: number; vy: number; power: number }
+/** Side-on: x along and y down the field, in pixels. Upright (deep): x across, y up, d out, in metres. */
+export interface Arrow { x: number; y: number; vx: number; vy: number; power: number; d?: number; vd?: number }
 /** An arrow in the ground, where it missed. */
-export interface Pin { x: number; y: number; ang: number; t: number }
+export interface Pin { x: number; y: number; ang: number; t: number; d?: number }
 /** Things knocked loose and falling: a helmet spinning off, a shield's pieces, a dropped torch, a glanced arrow. */
-export interface Bit { kind: 'helmet' | 'plank' | 'torch' | 'arrow'; x: number; y: number; vx: number; vy: number; rot: number; spin: number; t: number; rest: boolean }
+export interface Bit { kind: 'helmet' | 'plank' | 'torch' | 'arrow'; x: number; y: number; vx: number; vy: number; rot: number; spin: number; t: number; rest: boolean; d?: number; vd?: number }
 /** A goblin archer's arrow on its way up to the wall. */
-export interface Dart { x0: number; y0: number; x1: number; y1: number; t0: number }
+export interface Dart { x0: number; y0: number; x1: number; y1: number; t0: number; d0?: number }
 /** One pass of cloud over the moon; one fog bank. */
 export interface Cloud { at: number; len: number }
 export interface FogBank { at: number; x0: number; v: number; w: number }
 
+/** Where a happening was: side-on, field pixels; upright, x across, y up and d out, in metres. */
+export interface At { x: number; y: number; d?: number }
 export type WatchEvent =
-  | { k: 'loose'; x: number; y: number; power: number }
-  | { k: 'hit'; part: Part; x: number; y: number; gob: number }
-  | { k: 'helmet' | 'splinter' | 'shieldbreak' | 'torch'; x: number; y: number; gob: number }
-  | { k: 'kill'; x: number; y: number; gob: number; pts: number; head: boolean; how: Part | 'fire' }
-  | { k: 'miss'; x: number; y: number }
-  | { k: 'wall'; x: number; y: number; gob: number }
-  | { k: 'dart' | 'nearmiss'; x: number; y: number }
+  | ({ k: 'loose'; power: number } & At)
+  | ({ k: 'hit'; part: Part; gob: number } & At)
+  | ({ k: 'helmet' | 'splinter' | 'shieldbreak' | 'torch'; gob: number } & At)
+  | ({ k: 'kill'; gob: number; pts: number; head: boolean; how: Part | 'fire' } & At)
+  | ({ k: 'miss' } & At)
+  | ({ k: 'wall'; gob: number } & At)
+  | ({ k: 'dart' | 'nearmiss' } & At)
   | { k: 'end' };
 
 /** What the player does: where the sight is, the string held, and a count of releases (never lost). */
@@ -59,7 +65,7 @@ export interface WatchIntent { ax: number; ay: number; held: boolean; looses: nu
 
 export interface WatchState {
   seed: number;
-  /** Which field this shift is on (watchtune.ts FIELDS): chosen at the start, by the screen's shape. */
+  /** Which view this shift is played in (side-on or upright): chosen at the start, by the screen's shape. */
   field: FieldName;
   rng: Rng;
   t: number;

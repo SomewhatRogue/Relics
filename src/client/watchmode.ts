@@ -11,10 +11,14 @@ import type { Part, WatchEvent, WatchState } from '../sim/watchtypes';
 import type { GobKind } from '../shared/watchtune';
 import { newGob } from '../sim/watchnight';
 import { zones } from '../sim/watchzones';
+import { deepAt, deepZones } from '../sim/deepzones';
+import { DEEP } from '../shared/deeptune';
 import type { Game } from './game';
 import type { Panel } from './panels';
 import { sfx } from './sfx';
 import { WatchView } from './watchview';
+import { DeepView } from './deepview';
+import type { ShiftView } from './watchscreen';
 import { WatchInput } from './watchinput';
 import { WatchHud } from './watchhud';
 import { bankShift, showShift } from './watchcard';
@@ -26,7 +30,7 @@ const seedNow = () => (Date.now() ^ (performance.now() * 1000)) >>> 0;
 
 export class WatchShift {
   s: WatchState;
-  private view: WatchView;
+  private view: ShiftView;
   private hud: WatchHud;
   private input: WatchInput;
   private says: Say[] = [];
@@ -35,9 +39,10 @@ export class WatchShift {
   private ended = false;
 
   constructor(private g: Game, private panel: Panel, seed = seedNow()) {
-    // Held upright, a phone gets the tall field (shorter, steeper, bigger on screen); otherwise the wide one.
-    this.s = newWatch(seed, innerHeight > innerWidth * 1.2 ? 'tall' : 'wide');
-    this.view = new WatchView(g.hero, this.s.field);
+    // Held upright, a phone looks out over the parapet with the goblins running at it (deepview.ts);
+    // otherwise side-on (watchview.ts). Kyle 2026-11-05: "Left to right on mobile sucks."
+    this.s = newWatch(seed, innerHeight > innerWidth * 1.2 ? 'deep' : 'wide');
+    this.view = this.s.field === 'deep' ? new DeepView(g.hero) : new WatchView(g.hero);
     this.hud = new WatchHud(this.view.out, matchMedia('(pointer: coarse)').matches, () => this.end());
     this.input = new WatchInput(this.hud.el, this.view);
     [this.input.ax, this.input.ay] = [this.s.ax, this.s.ay];
@@ -71,7 +76,11 @@ export class WatchShift {
 
   /** What a happening says over the field, and how it sounds. */
   private heard(e: WatchEvent, now: number): void {
-    const say = (s: string, x: number, y: number, col: string, dur = 1.1) => this.says.push({ s, x: x + this.view.ox, y: y + this.view.oy, col, t0: now, dur });
+    const deep = this.s.field === 'deep';
+    const say = (s: string, x: number, y: number, col: string, dur = 1.1, d?: number) => {
+      const [sx, sy] = this.view.sayAt(x, y, d);
+      this.says.push({ s, x: sx, y: sy, col, t0: now, dur });
+    };
     if (e.k === 'loose') sfx.arrow();
     else if (e.k === 'hit') e.part === 'head' ? sfx.hit(true) : sfx.bodyhit();
     else if (e.k === 'helmet') sfx.block();
@@ -80,9 +89,10 @@ export class WatchShift {
     else if (e.k === 'torch') sfx.oilfire();
     else if (e.k === 'nearmiss') sfx.wallhit();
     else if (e.k === 'kill') {
-      if (e.head) say(WATCHW.headshot, e.x, e.y - 8, '#ffd27a', 1.2);
-      say(`+${e.pts}`, e.x, e.y, e.head ? '#ffd27a' : '#e8e0d0');
-    } else if (e.k === 'wall') say(WATCHW.atWall, Math.min(e.x, 160), e.y - 6, '#ff8a6a', 1.8);
+      // (Upright the words go in metres; a headline over the points, the same few pixels up.)
+      if (e.head) say(WATCHW.headshot, e.x, e.y, '#ffd27a', 1.2, e.d), this.says[this.says.length - 1].y -= 8;
+      say(`+${e.pts}`, e.x, e.y, e.head ? '#ffd27a' : '#e8e0d0', 1.1, e.d);
+    } else if (e.k === 'wall') say(WATCHW.atWall, deep ? 0 : Math.min(e.x, 160), deep ? e.y : e.y - 6, '#ff8a6a', 1.8, e.d);
   }
 
   /** The bell (or END SHIFT): bank the score and the pay, and show the card. */
@@ -92,20 +102,23 @@ export class WatchShift {
     this.s.over = true;
     this.input.held = false;
     this.hud.done();
-    const r = results(this.s), st = bankShift(this.g, r);
+    const r = results(this.s), st = bankShift(this.g, r, this.s.field);
     showShift(this.panel, r, st, () => this.again(), () => this.close());
   }
 
-  /** For the look scripts: a goblin of `kind` at x on the near line, and an arrow put just short of one of its parts. */
-  put(kind: GobKind, x: number): number {
-    const g = newGob(this.s, kind, x, 0);
+  /** For the look scripts: a goblin of `kind` at `at` (side-on, x on the near line; upright, `at` metres out and `u` across). */
+  put(kind: GobKind, at: number, u = 0): number {
+    const deep = this.s.field === 'deep', g = newGob(this.s, kind, deep ? DEEP.far - at : at, 0);
+    if (deep) (g.u0 = g.u1 = u), (g.zig = 0);
     this.s.gobs.push(g);
     return g.id;
   }
+  /** An arrow put just short of one of a goblin's parts, flying straight into it. */
   shootAt(id: number, part: Part, power = 1): void {
-    const z = zones(this.s.gobs.find((g) => g.id === id)!).find((q) => q.part === part)!;
+    const g = this.s.gobs.find((q) => q.id === id)!, deep = this.s.field === 'deep';
+    const z = (deep ? deepZones(g) : zones(g)).find((q) => q.part === part)!;
     const [x, y] = z.disc ? [z.disc.x, z.disc.y] : [(z.box!.x0 + z.box!.x1) / 2, (z.box!.y0 + z.box!.y1) / 2];
-    this.s.arrows.push({ x: x + 8, y, vx: -400, vy: 0, power });
+    this.s.arrows.push(deep ? { x, y, d: deepAt(g).d - 0.3, vx: 0, vy: 0, vd: 40, power } : { x: x + 8, y, vx: -400, vy: 0, power });
   }
 
   private again(): void {

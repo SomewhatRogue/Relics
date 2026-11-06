@@ -8,7 +8,7 @@ import { flyArrows } from '../src/sim/watchshot';
 import { feet, zones } from '../src/sim/watchzones';
 import { streakMult } from '../src/sim/watchscore';
 import type { Gob, WatchIntent, WatchState } from '../src/sim/watchtypes';
-import { BOW, FIELDS, FOES, GOBS, SCORE, SHAPES, WATCH, WATCH_PAY, groundY } from '../src/shared/watchtune';
+import { BOW, FOES, GOBS, SCORE, SHAPES, WATCH, WATCH_PAY } from '../src/shared/watchtune';
 import { nightOf, settleWatch, watchOpen } from '../src/shared/watchpay';
 
 const IDLE: WatchIntent = { ax: 100, ay: 100, held: false, looses: 0 };
@@ -210,39 +210,5 @@ describe('the night watch: entry, pay, the relay, the seed', () => {
     expect(a.shots).toBeGreaterThan(50);
     expect(a).toEqual(b);
     expect(c.log).not.toEqual(a.log);
-  });
-});
-
-describe('the night watch: the tall field (a phone held upright)', () => {
-  it('goblins come in at its own edge, walk down its slope at its pace, and the watch have them at the same ditch', () => {
-    const s = newWatch(5, 'tall');
-    s.nextSpawn = 0;
-    stepWatch(s, IDLE, 1 / 60);
-    const g = s.gobs[0];
-    expect(g.f).toBe('tall');
-    expect(g.x).toBeCloseTo(FIELDS.tall.from + WATCH.spawnX, 0);
-    expect(feet(g)[1]).toBe(Math.round(groundY(g.x, 'tall') - g.lane));
-    const x = g.x;
-    stepWatch(s, IDLE, 1);
-    expect(g.x - x).toBeCloseTo(GOBS[g.kind].speed * FIELDS.tall.pace, 5);
-    g.x = WATCH.reachX - 0.01;
-    stepWatch(s, IDLE, 1 / 60);
-    expect(g.state).toBe('gone');
-  });
-  it('a head shot on the slope lands where the head is drawn', () => {
-    const s = newWatch(1, 'tall');
-    s.nextSpawn = 1e9;
-    const g = newGob(s, 'plain', 140, 0);
-    s.gobs.push(g);
-    shoot(s, g, headY(g));
-    expect(g.how).toBe('head');
-  });
-  it('plays the same from the same seed', () => {
-    const play = () => {
-      const s = newWatch(11, 'tall');
-      for (let i = 0; i < 1800; i++) advance(s, { ax: 120 + ((i * 5) % 60), ay: 100 + ((i * 3) % 70), held: i % 20 < 12, looses: Math.floor(i / 20) }, 0.1);
-      return [s.score, s.kills, s.shots, s.hits, s.lost, s.nextId];
-    };
-    expect(play()).toEqual(play());
   });
 });

@@ -69,7 +69,7 @@ export function drawGob(lit: G2, glow: G2, s: WatchState, g: Gob, now: number): 
   for (const k of g.stuck) stuckArrow(lit, fx + k.dx, fy + k.dy, k.ang);
   if (g.burning >= 0) for (let i = 0; i < 3; i++) flame(glow, bx0 + 1 + i * 2, by0 + 2 - (i % 2) * 3, now + i * 0.3, 1);
   // The eye, glowing; fog swallows it the way it swallows the rest.
-  const fog = fogAt(s.fogs, s.t, fx, groundY(fx, g.f) - (fy - 15));
+  const fog = fogAt(s.fogs, s.t, fx, groundY(fx) - (fy - 15));
   glow.globalAlpha = 1 - fog * 0.85;
   px(glow, hd.x + 1, hd.y - 1, EYE);
   if (g.kind === 'runner' || g.burning >= 0) px(glow, hd.x + 2, hd.y - 1, EYE);
@@ -84,7 +84,7 @@ export function flame(glow: G2, x: number, y: number, now: number, w: number): v
 
 /** On its back where it fell, head to the field, the arrows still in it; it fades in its last second. */
 function drawFallen(lit: G2, s: WatchState, g: Gob): void {
-  const x = Math.round(g.x), y = Math.round(groundY(g.x, g.f) - g.lane), sh = SHAPES[g.kind], fade = Math.max(0, Math.min(1, 6 - (s.t - g.at)));
+  const x = Math.round(g.x), y = Math.round(groundY(g.x) - g.lane), sh = SHAPES[g.kind], fade = Math.max(0, Math.min(1, 6 - (s.t - g.at)));
   lit.globalAlpha = fade;
   // Turned a quarter: (dx, dy) standing becomes (dy, -dx) lying, so a head at -16 lies 16 to the left.
   const turn = (dx: number, dy: number): [number, number] => [x + dy, y - 1 - dx * 0.3];

@@ -4,9 +4,8 @@
  * finger, not to it, so the finger never covers what you're aiming at), lift to loose. Releases are
  * counted, so a quick tap between two frames still looses.
  */
-import { FIELDS, WATCH } from '../shared/watchtune';
 import type { WatchIntent } from '../sim/watchtypes';
-import type { WatchView } from './watchview';
+import type { ShiftView } from './watchscreen';
 
 /** How far the sight moves for a finger's drag (1: as far as the finger, on the screen). */
 const DRAG = 1;
@@ -20,7 +19,7 @@ export class WatchInput {
   private finger: { id: number; x: number; y: number; ax: number; ay: number } | null = null;
   private off: (() => void)[] = [];
 
-  constructor(private el: HTMLElement, private view: WatchView) {
+  constructor(private el: HTMLElement, private view: ShiftView) {
     const on = <K extends keyof HTMLElementEventMap>(t: K, f: (e: HTMLElementEventMap[K]) => void, o: AddEventListenerOptions = { passive: false }) => {
       el.addEventListener(t, f as EventListener, o);
       this.off.push(() => el.removeEventListener(t, f as EventListener));
@@ -59,12 +58,10 @@ export class WatchInput {
 
   private mouse(e: MouseEvent): void {
     const r = this.el.getBoundingClientRect();
-    this.aim(...this.view.toField(e.clientX - r.left, e.clientY - r.top));
+    this.aim(...this.view.toAim(e.clientX - r.left, e.clientY - r.top));
   }
   private aim(x: number, y: number): void {
-    const F = FIELDS[this.view.field];
-    this.ax = Math.max(F.from - 20, Math.min(WATCH.w, x));
-    this.ay = Math.max(0, Math.min(F.h, y));
+    [this.ax, this.ay] = this.view.clampAim(x, y);
   }
   private release(): void {
     if (!this.held) return;

@@ -4,17 +4,21 @@
  * fog banks drifting in. All from the shift's own seed.
  */
 import type { Rng } from '../shared/rng';
-import { FIELDS, FOES, GOBS, NIGHT, WATCH, type FieldName, type GobKind } from '../shared/watchtune';
+import { FOES, GOBS, NIGHT, SIDE, WATCH, type FieldName, type GobKind } from '../shared/watchtune';
+import { DEEP } from '../shared/deeptune';
 import type { Cloud, FogBank, Gob, WatchState } from './watchtypes';
 
 const KINDS = Object.keys(GOBS) as GobKind[];
 
-export function newGob(s: WatchState, kind: GobKind, x = FIELDS[s.field].from + WATCH.spawnX, lane = s.rng.range(0, FOES.lane)): Gob {
-  const d = GOBS[kind];
+/** A goblin of `kind` coming in: side-on at the field's left edge on a lane; upright, at the far edge somewhere across, running for a spot on the wall. */
+export function newGob(s: WatchState, kind: GobKind, x = s.field === 'deep' ? 0 : SIDE.from + WATCH.spawnX, lane = s.field === 'deep' ? 0 : s.rng.range(0, FOES.lane)): Gob {
+  const d = GOBS[kind], deep = s.field === 'deep';
+  const u0 = deep ? s.rng.range(-DEEP.spawnU, DEEP.spawnU) : 0, u1 = deep ? s.rng.range(-DEEP.wallU, DEEP.wallU) : 0;
+  const zig = deep && kind === 'runner' ? 1 + s.rng.range(0, 5) : 0;
   return {
-    id: s.nextId++, kind, f: s.field, x, lane: Math.round(lane), hp: d.hp, walked: 0, limp: false, helmet: kind === 'helmet',
+    id: s.nextId++, kind, x, u0, u1, zig, lane: Math.round(lane), hp: d.hp, walked: 0, limp: false, helmet: kind === 'helmet',
     shieldHp: kind === 'shield' ? FOES.shieldHits : 0, torch: kind === 'torch', burning: -1, state: 'walk', at: s.t,
-    stopX: kind === 'archer' ? s.rng.range(...FIELDS[s.field].archerStop) : Infinity, shots: 0, nextShot: 0, stuck: [],
+    stopX: kind !== 'archer' ? Infinity : deep ? DEEP.far - s.rng.range(...DEEP.archerStop) : s.rng.range(...SIDE.archerStop), shots: 0, nextShot: 0, stuck: [],
   };
 }
 
@@ -42,8 +46,10 @@ export function rollNight(rng: Rng, field: FieldName = 'wide'): { clouds: Cloud[
   const span = WATCH.duration / NIGHT.clouds, clouds: Cloud[] = [];
   for (let i = 0; i < NIGHT.clouds; i++) clouds.push({ at: span * i + rng.range(span * 0.2, span * 0.6), len: rng.range(...NIGHT.cloudLen) });
   const fogs = NIGHT.fogs.map((at) => {
+    // Upright, a bank is metres deep and rolls in from out past the far edge (deepFogAt).
+    if (field === 'deep') return { at, w: rng.range(...DEEP.fogDeep), x0: DEEP.fogFrom, v: rng.range(...DEEP.fogSpeed) };
     const w = rng.range(...NIGHT.fogWide);
-    return { at, w, x0: FIELDS[field].from - w - 20, v: rng.range(...NIGHT.fogSpeed) };
+    return { at, w, x0: SIDE.from - w - 20, v: rng.range(...NIGHT.fogSpeed) };
   });
   return { clouds, fogs };
 }
@@ -77,4 +83,16 @@ export function fogAt(fogs: FogBank[], t: number, x: number, up: number): number
     f = Math.max(f, Math.sin(k * Math.PI));
   }
   return f * NIGHT.fogThick * (1 - Math.max(0, up) / NIGHT.fogHigh);
+}
+
+/** Upright: how thick the fog is `d` metres out and `up` metres up (banks rolling in, and the dark far off). */
+export function deepFogAt(fogs: FogBank[], t: number, d: number, up: number): number {
+  let f = Math.max(0, Math.min(1, (d - DEEP.clear) / (DEEP.far - DEEP.clear))) * DEEP.thick;
+  if (up > DEEP.fogHigh) return f;
+  for (const b of fogs) {
+    if (t < b.at) continue;
+    const near = b.x0 - b.v * (t - b.at), k = (d - near) / b.w;
+    if (k > 0 && k < 1) f = Math.max(f, Math.sin(k * Math.PI) * NIGHT.fogThick * (1 - Math.max(0, up) / DEEP.fogHigh));
+  }
+  return f;
 }
