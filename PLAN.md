@@ -624,6 +624,14 @@ Every weapon gets a quick attack, a charged attack, a perfect-timed hit and a re
 - Mage: big spells cost stamina ("magic"), like the blink. Make them impactful.
 - Flail: spin it up and release for a bit more reach, standing still. Standard hits shove goblins a little, never over a shield. Perfect hits stun.
 
+## Planned: town activities and the Night Watch (Kyle, 2026-11-05)
+
+Approved: arm-wrestling and knife-throwing at the Drowned Rat, the lodge's archery range, pelts and hound
+naming, hammer timing at the smithy, candles and the giving-up rite at the church, hauling for Judd, a
+quick haggle at the market, fishing. Nothing at Vell's tower for now. The Night Watch is its own feature
+(a Last Stand style skill shooter on the walls at night, 3 minutes, headshots, high scores). Herbs and
+potions are planned for later. Full plan: docs/plans/town-activities.md.
+
 ## Open, soon but not yet: red eyes and gold eyes (Kyle, 2026-11-03)
 
 Kyle loves it; hold until after the network tests on the new map types (usage limits). Lore keeper pass before any words land.
