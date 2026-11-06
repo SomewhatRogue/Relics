@@ -4,11 +4,14 @@
  * noise where they happen, and once enough has gathered (and the level's wait is up) a wave comes in
  * from out of sight toward whoever's nearest it. A camp that sees you blows its war-horn: the whole camp
  * comes, and a wave with it. Patrols walk their roads; new hunting parties come in from the edge toward
- * where you were last heard. Holding the shrine or the beacon brings a wave every EXPED.holdWave.
+ * where you were last heard. Holding the shrine or the beacon brings a wave every EXPED.holdWave, once the
+ * screen has room for it (or HOLD.wait after it was due), with a quiet stretch after every third (shared/threat.ts HOLD).
  * Nothing past EXPED.cap goblins alive. Rolls are the expedition's own (a counter on its seed).
  */
 import { collide, inArea, useMap } from '../shared/arena';
-import { EXPED, EXPED_PACKS, SLEEP } from '../shared/tuning';
+import { EXPED, EXPED_PACKS, HOLD, SLEEP } from '../shared/tuning';
+import { capsFor } from '../shared/roombudget';
+import { onScreen } from './pacing';
 import { ringOf } from '../shared/expedrings';
 import { isDead } from './damage';
 import { walk } from './enemies';
@@ -36,7 +39,8 @@ export function stepPressure(room: ArenaRoom, x: ExpedState, heroes: Hero[], ev:
   }
   horns(room, x, all, ev);
   if (!heroes.length) return;
-  const size = EXPED.waveSize[x.level] + Math.max(0, x.party - 1);
+  // A friend more, half a goblin more a wave (a party meets tougher goblins, not many more: sim/expedwave.ts toughen).
+  const size = EXPED.waveSize[x.level] + Math.floor(Math.max(0, x.party - 1) / 2);
   if (t >= x.nextWave && x.heat >= EXPED.wave && alive < EXPED.cap) {
     x.nextWave = t + EXPED.waveEvery[x.level];
     x.heat *= 0.4;
@@ -47,8 +51,11 @@ export function stepPressure(room: ArenaRoom, x: ExpedState, heroes: Hero[], ev:
   const job = x.goals.find((g) => (g.kind === 'shrine' || g.kind === 'winch') && !g.done && g.p > 0);
   const hold = x.phase === 'hold' ? x.zone : job;
   const holdR = ringOf(x.phase === 'hold' ? 'beacon' : job?.kind === 'winch' ? 'winch' : 'shrine') + EXPED.holdNear;
-  if (hold && t >= x.nextHold && alive < EXPED.cap && heroes.some((h) => Math.hypot(h.x - hold.x, h.y - hold.y) < holdR)) {
-    x.nextHold = t + EXPED.holdWave * (x.phase === 'hold' ? 0.8 : 1);
+  if (hold && t >= x.nextHold && alive < EXPED.cap && heroes.some((h) => Math.hypot(h.x - hold.x, h.y - hold.y) < holdR) && holdReady(room, x, heroes, t)) {
+    // After every HOLD.every-th, a quiet stretch with the horn silent (shared/threat.ts HOLD).
+    x.holds = (x.holds ?? 0) + 1;
+    x.nextHold = t + EXPED.holdWave * (x.phase === 'hold' ? 0.8 : 1) + (x.holds % HOLD.every === 0 ? HOLD.quiet : 0);
+    x.holdDue = undefined;
     wave(room, x, heroes, hold.x, hold.y, Math.min(size + (x.phase === 'hold' ? 2 : 0), EXPED.cap - alive));
   }
   // A hunting party in from the edge, toward where you were last heard.
@@ -58,6 +65,12 @@ export function stepPressure(room: ArenaRoom, x: ExpedState, heroes: Hero[], ev:
     if (ids.length) x.patrols.push({ ids, path: [{ x: x.hx, y: x.hy }], i: 0, dir: 1 });
   }
   patrol(room, x, dt);
+}
+
+/** A hold wave that's due comes when the screen is under HOLD.wave of the party's cap, or HOLD.wait seconds after it was due. */
+function holdReady(room: ArenaRoom, x: ExpedState, heroes: Hero[], t: number): boolean {
+  x.holdDue ??= t;
+  return t - x.holdDue >= HOLD.wait || onScreen(room.enemies, heroes).threat < capsFor(heroes.length, 2).threat * HOLD.wave;
 }
 
 function heard(x: ExpedState, px: number, py: number, n: number): void {

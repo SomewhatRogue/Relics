@@ -3,7 +3,7 @@
  * split evenly across the party (the picker keeps the odd coin), so nobody races for coins. A potion
  * goes on the belt of whoever walks over it, if there's room.
  */
-import { COINS, POTION, POTION_DROPS, POTION_ORDER, type PotionId } from '../shared/tuning';
+import { BIG, COINS, POTION, POTION_DROPS, POTION_ORDER, type PotionId } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import type { Enemy, FightEvent, Hero } from './types';
 import { HUNGRY_FX, wears } from './hungry';
@@ -25,6 +25,8 @@ export function dropPickups(e: Enemy, pickups: Pickup[], rng: Rng, coins: Coins 
   if ((e.kind !== 'scrapper' && e.kind !== 'butcher') || e.respawns) return;
   const k = kindOf(e), c = (e.variant === 'wolf' && coins.wolf) || coins[k];
   if (rng.next() < c.chance) pickups.push({ id: nextId++, x: e.x, y: e.y, life: COINS.life, gold: c.min + Math.floor(rng.next() * (c.max - c.min + 1)) });
+  // A BIG ONE's sure handful (shared/threat.ts BIG), on top.
+  if (e.big) pickups.push({ id: nextId++, x: e.x - 0.4, y: e.y - 0.2, life: COINS.life * 2, gold: BIG.gold[0] + Math.floor(rng.next() * (BIG.gold[1] - BIG.gold[0] + 1)) });
   if (rng.next() < POTION_DROPS[k]) {
     const w = POTION_DROPS.weights, total = POTION_ORDER.reduce((s, p) => s + w[p], 0);
     let r = rng.next() * total, pick: PotionId = 'bitter';

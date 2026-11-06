@@ -11,7 +11,7 @@ export const CHASE = { reach: 22, red: '#ff5a48' };
 
 /** Goblins awake and coming (chasing or swinging) near `me`. */
 export function chasers(room: ArenaRoom, me: { x: number; y: number }): Enemy[] {
-  return room.enemies.filter((e) => !isDead(e) && !e.dozing && e.alert !== false && (e.act === 'chase' || e.act === 'attack') && Math.hypot(e.x - me.x, e.y - me.y) < CHASE.reach);
+  return room.enemies.filter((e) => !isDead(e) && !e.dozing && e.alert !== false && !e.held && (e.act === 'chase' || e.act === 'attack') && Math.hypot(e.x - me.x, e.y - me.y) < CHASE.reach);
 }
 
 export const chaseLabel = (n: number) => `${n} CHASING`;

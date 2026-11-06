@@ -6,7 +6,8 @@
  */
 import { KEEPER, SCRAPPER, WOLF } from '../shared/tuning';
 import { isDead } from './damage';
-import { begin, walk } from './enemies';
+import { begin, OWN_KIT, walk } from './enemies';
+import { fleeing } from './chase';
 import type { Enemy, FightEvent, Hero } from './types';
 
 export function shapeWolf(e: Enemy): void {
@@ -28,6 +29,8 @@ export function stepWolf(e: Enemy, t: Hero, d: number, ux: number, uy: number, f
   // Strayed too far from its keeper: back to it.
   if (k && Math.hypot(k.x - e.x, k.y - e.y) > WOLF.leash && d > WOLF.orbit * 1.5) return walk(e, k.x - e.x, k.y - e.y, pace, dt);
   if (e.cooldown <= 0 && d <= WOLF.dart.range! && facing > 0.85) return begin(e, 'pounce', WOLF.dart, t, ev);
+  // Running from it (sim/chase.ts): no circling, it runs them down for the dart.
+  if (OWN_KIT.pace && fleeing(t, e)) return walk(e, ux, uy, pace * Math.max(0.3, facing), dt);
   // Its keeper gone (and back from scattering): straight in, one at a time.
   if (loose) return void (d > WOLF.dart.range! * 0.8 && walk(e, ux, uy, pace * 0.8 * Math.max(0.3, facing), dt));
   // Circling: round the ring at WOLF.orbit toward their side or back (its own side), never through them.

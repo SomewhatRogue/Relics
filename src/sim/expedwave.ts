@@ -3,11 +3,12 @@
  * types"): a template for the ALARM (tuning EXPED_PACKS.waves: wolves, netters and thieves early, banners
  * and oil crews in the middle, sappers and log-carriers late), its centrepiece and backer if the cap
  * allows, and small ones (or wolves) for the rest, `n` in all. No specials past EXPED_PACKS.near already
- * awake round the one it's coming for, so a fight still reads. A party's centrepiece is tougher and from
+ * awake round the one it's coming for, so a fight still reads. A party's wave is tougher and harder hitting and from
  * three players the template's `more` comes too, as on a job (sim/packs.ts). Rolled on the expedition's
  * own counter (expedpressure.ts roll), so a save carries it.
  */
 import { ENCOUNTER, type Role } from '../shared/encounters';
+import { PARTY_TOUGH } from '../shared/threat';
 import { pickTemplate, templatesFor } from '../shared/expedpacks';
 import { EXPED, EXPED_PACKS, VARIANTS } from '../shared/tuning';
 import { isDead } from './damage';
@@ -57,10 +58,11 @@ export function waveFoe(room: ArenaRoom, role: Role, px: number, py: number, pac
   return e;
 }
 
-/** A party's centrepiece: tougher by ENCOUNTER.party.centre a player past the first. */
+/** A party's wave: every goblin of it tougher and harder hitting by the party's size (shared/threat.ts PARTY_TOUGH; its level is the room's). */
 export function toughen(es: Enemy[], party: number): void {
-  const c = es.find((e) => special(e) && !e.bow);
-  if (c && party > 1) c.hp = c.maxHp = Math.round(c.maxHp * (1 + ENCOUNTER.party.centre * (party - 1)));
+  const n = Math.max(1, Math.min(4, party)) - 1;
+  if (!n) return;
+  for (const e of es) (e.hp = e.maxHp = Math.round(e.maxHp * PARTY_TOUGH.hp[n])), (e.harm = +((e.harm ?? 1) * PARTY_TOUGH.harm[n]).toFixed(3));
 }
 
 /** Who a wave at (px, py) comes for: the hero nearest it. */

@@ -34,9 +34,14 @@ import type { Slick } from './oil';
 import { gather, rushClock, rushLocked } from './rushguard';
 import { count, dealt } from './score';
 import { chalkTarget } from './chalker';
+import { chaseOn, flankTo, fleeing, rangedPull, sprintPace } from './chase';
+import { stomp } from './bigone';
+import { standHeld } from './pacing';
+import { LEAP } from '../shared/threat';
 
 /** The room's oil slicks, for the torch-bearers (the room sets it before its goblins move). */
-export const OWN_KIT: { slicks: Slick[]; freed: Survivor[]; foes: Enemy[]; nooses: Noose[] } = { slicks: [], freed: [], foes: [], nooses: [] };
+/** `pace`: this room plays the pacing rules (sim/pacing.ts, chase.ts): a job's or an expedition's, not the wood or the yard. */
+export const OWN_KIT: { slicks: Slick[]; freed: Survivor[]; foes: Enemy[]; nooses: Noose[]; pace: boolean } = { slicks: [], freed: [], foes: [], nooses: [], pace: false };
 
 const SPECS: Partial<Record<Enemy['kind'], EnemySpec>> = { butcher: BUTCHER, scrapper: SCRAPPER, spider: SPIDER, brood: BROOD };
 
@@ -71,7 +76,8 @@ function nearest(e: Enemy, heroes: Hero[], now: number): Hero | null {
     // The Butcher's Apron: they come for you first; a named butcher looks at no one else.
     const apron = wears(h, 'apron') ? (e.name ? 999 : HUNGRY_FX.lure) : 0;
     // A netted hero: they all come for them (sim/netter.ts).
-    const raw = Math.hypot(h.x - e.x, h.y - e.y), d = raw - lure(h) - apron - (netted(h, now) ? NETTER.lure : 0);
+    // Archers and throwers look first for whoever's running in the open (sim/chase.ts).
+    const raw = Math.hypot(h.x - e.x, h.y - e.y), d = raw - lure(h) - apron - (netted(h, now) ? NETTER.lure : 0) - (OWN_KIT.pace ? rangedPull(e, h) : 0);
     if (!visible(h, raw, now) || vanished(h, now) || smokeBlind(e, raw, now)) continue;
     if (d < bd) (bd = d), (best = h);
     // A Mage's blink image draws them off while it lasts: they swing at where you were.
@@ -101,6 +107,8 @@ export function begin(e: Enemy, kind: EnemyAttack['kind'], s: EnemyAttackSpec, t
   if (e.heart) (e.attack.windup *= BANNER.heart.windup), (e.attack.dmg = Math.round(e.attack.dmg * BANNER.heart.dmg));
   // FED off a body: the same again (sim/meal.ts).
   if (e.fed) (e.attack.windup *= MEAL.fed.windup), (e.attack.dmg = Math.round(e.attack.dmg * MEAL.fed.dmg));
+  // A bigger or stronger party, or a BIG ONE: it hits harder (sim/packs.ts, shared/threat.ts), locked in here too.
+  if (e.harm) e.attack.dmg = Math.round(e.attack.dmg * e.harm);
   e.act = 'attack';
   e.actT = 0;
   ev.push({ k: 'windup', x: e.x, y: e.y, kind });
@@ -239,6 +247,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     e.feeding = false;
   }
   if (e.alert === false && !notice(e, heroes, others, now, ev)) return wander(e, rng, now, dt);
+  // Held back while the screen is full (sim/pacing.ts): it stays at its spot, jeering, and strikes nothing.
+  if (e.held) return standHeld(e, heroes);
   // Called into a pack rush: to its place in the fan (sim/packrush.ts).
   if (e.rushTo && gather(e, (e.chillUntil > now ? FROST.slow : 1) * (e.roused ? DRUMMER.rouse.pace : 1), dt)) return;
   // A butcher at the dead, or making for a body (sim/meal.ts).
@@ -266,6 +276,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   e.fx = Math.cos(na);
   e.fy = Math.sin(na);
   const facing = e.fx * ux + e.fy * uy;
+  // A BIG ONE's stomp, when it's due (sim/bigone.ts).
+  if (stomp(e, t, d, level && !via, now, ev)) return;
   // The newer sorts (sim/ownfoes.ts): each its own way.
   if (stepOwn(e, { t, d, level, via: !!via, ux, uy, facing, speed: spec.speed * slow, slow }, heroes, others, rng, now, dt, ev, OWN_KIT)) return;
   if (e.bow) {
@@ -287,7 +299,10 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   if (isBackline(e)) return stepBackline(e, t, d, !!via || !level, ux, uy, facing, spec.speed * slow, others, now, dt, ev);
   // The wood's goblins: each fights the way its lesson needs.
   const v = e.variant, reach = v === 'lunger' ? VARIANTS.lunger.reach : v === 'heavy' ? VARIANTS.heavy.reach : spec.reach;
-  const netted = e.snareUntil > now;
+  const netted = e.snareUntil > now, paced = OWN_KIT.pace && level && !via;
+  // Kiting answered (sim/chase.ts): the chase clock and its sprint; a lunger leaps at a hero running from it.
+  if (paced) chaseOn(e, t, d, reach, true, now);
+  if (paced && v === 'lunger' && !netted && e.cooldown <= 0 && facing > 0.85 && d > LEAP.from && d < LEAP.spec.range! - 0.4 && fleeing(t, e)) return begin(e, 'pounce', LEAP.spec, t, ev);
   if (v === 'stoker' && !netted && level && e.cooldown <= 0 && facing > 0.85 && d > VARIANTS.stoker.chargeFrom && d < VARIANTS.stoker.charge.range! - 1 && rng.next() < VARIANTS.stoker.chargeChance) return begin(e, 'charge', VARIANTS.stoker.charge, t, ev);
   if (v === 'stoker' && !netted && level && e.cooldown <= 0 && facing > 0.8 && d > VARIANTS.stoker.drawFrom && d < VARIANTS.stoker.draw.range! - 0.5 && rng.next() < VARIANTS.stoker.drawEvery) return begin(e, 'draw', VARIANTS.stoker.draw, t, ev);
   if (level && d <= reach && e.cooldown <= 0 && facing > 0.75) {
@@ -309,7 +324,9 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     const side = e.kind === 'scrapper' && !via ? Math.sin(now * 1.3 + e.id * 2) * 0.5 : 0;
     // Walks where it faces: something turning round is slow to come after you.
     const pace = v === 'looter' ? VARIANTS.looter.speed : v === 'heavy' ? VARIANTS.heavy.speed : 1;
-    walk(e, ux - uy * side, uy + ux * side, spec.speed * slow * pace * Math.max(0.2, facing), dt);
+    // A flanker goes wide and ahead to cut them off; a sprint leans, then bursts (sim/chase.ts).
+    const wide = paced ? flankTo(e, t, d) : null, wx = wide ? wide.x - e.x : ux - uy * side, wy = wide ? wide.y - e.y : uy + ux * side;
+    walk(e, wx, wy, spec.speed * slow * pace * (paced ? sprintPace(e, now) : 1) * Math.max(0.2, facing), dt);
   }
 }
 

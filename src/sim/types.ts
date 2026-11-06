@@ -553,6 +553,16 @@ export interface Enemy extends Body {
   ashed?: boolean;
   onIce?: boolean;
   rodAt?: number;
+  /** Pacing (sim/pacing.ts, chase.ts, bigone.ts; numbers shared/threat.ts): how much harder its blows land (a
+   *  bigger or stronger party); a BIG ONE; held back at its spot, jeering, since (0: not held); the hero it's
+   *  chasing and since when; when its sprint's lean began; its last stomp. Each changes only when that happens, so nothing more goes out a tick. */
+  harm?: number;
+  big?: boolean;
+  held?: number;
+  chaseOn?: string;
+  chaseAt?: number;
+  sprintAt?: number;
+  stompAt?: number;
 }
 
 /** How a goblin died: fell, lost its head, burst apart, burned, or shattered. */
