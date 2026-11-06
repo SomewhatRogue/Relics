@@ -54,7 +54,7 @@ async function rows(g: Game, touch: boolean): Promise<Row[]> {
   const sg = signFor(me);
   if (sg && g.taught().includes('sign')) out.push({ face: { shape: 'round', size: 22, grade: 'iron', icon: skillCanvas(sg, '') }, name: SIGNS[sg].name, key: SIGN_KEY, text: SIGN_WORDS[sg] });
   const guard = guardOf(kit);
-  if (guard === 'full') out.push({ face: { shape: 'shield', size: 28, grade: 'iron', icon: icon('block') }, name: 'BLOCK', key: 'RIGHT CLICK', text: 'Hold to block. Your next blow after a block is a counter and hits harder.' });
+  if (guard === 'full') out.push({ face: { shape: 'shield', size: 28, grade: 'iron', icon: icon('block') }, name: 'BLOCK', key: 'RIGHT CLICK', text: 'Hold to block. Strike soon after you block a blow: it\'s a counter and hits harder.' });
   if (dodgeOf(kit)) {
     const dn = dodgeName(cls);
     out.push({ face: { shape: 'diamond', size: 30, grade: 'iron', icon: icon(({ JUMP: 'jump', DASH: 'dash', BLINK: 'blink' } as Record<string, IconId>)[dn] ?? 'roll') }, name: dn, key: 'SPACE', text: 'Get out of any blow, even a striped one.' + (kit.spellblade ? ` ${SHIELD_LINE}` : '') });

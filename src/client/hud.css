@@ -86,6 +86,7 @@ body:not(.touch) #corner button { width: 40px; height: 40px; }
 #options #voices::before { background-image: var(--ic-voices); }
 #options #tips::before { background-image: var(--ic-tips); }
 #options #legendbtn::before { background-image: var(--ic-buttons); }
+#options #kitbtn::before { background-image: var(--ic-buttons); }
 #options #viewbtn::before { background-image: var(--ic-view); }
 #options #leave::before { background-image: var(--ic-leave); }
 #options button.off { color: var(--stone-300); border-image-source: var(--f-dim); }

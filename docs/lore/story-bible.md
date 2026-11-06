@@ -297,7 +297,7 @@ most Want among the heroes is the one the bells don't spare).
 - The focus is the wand, the staff or the spellblade; the lance rod is gone. The spellblade's steel is Halvard's remelted or a pre-war piece, never from outside; the Channel works through it as through any focus.
 - The blade's charge is not a stored spell. Nothing on screen ever says a spell is caught, kept or stored in a blade or focus for later (that's the Blacktongue idea). Its magic is a shield, and a blink through a blow gives some back; nothing is ever kept in it (updated 2026-11-05: parry is gone).
 - A Mage's bar is MAGIC on screen (Kyle, 2026-11-04); every other class's is STAMINA. It's the same bar underneath: a Mage's spells and blink spend it, and it shows a soft violet. (Before: STAMINA for everyone, never "magic", one bar, one name.)
-- The spellblade doesn't block or parry (2026-11-05: parry is gone; it had parried since 2026-11-04). It blinks like any Mage kit, and a blink through a blow refills its magic. CATCH and CAUGHT stay retired.
+- The spellblade doesn't block or parry (2026-11-05: parry is gone; it had parried since 2026-11-04). It blinks like any Mage kit, and a blink through a blow gives some magic back. CATCH and CAUGHT stay retired.
 - On-screen terms: INTERRUPTED (a wand spark landing on a wind-up, a bonus; the wand's perfect is the burst let go on the white flash), WREATHE. The spellblade's perfect is the wreathe released on the white flash (updated 2026-11-04).
 - THE JEALOUS ROD is now THE JEALOUS WAND. Open for Kyle: hungry gear is "plain steel that sat in a butcher's fist", and a wand is wood; is it steel-shod, or does the line widen to "gear that sat in a butcher's fist"?
 

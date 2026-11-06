@@ -41,7 +41,7 @@ describe('GUARD and DODGE areas, from the numbers', () => {
     expect(kitLine('wand', 'storm')).toBe('TAP: LIGHTNING STREAM, TAP TO BUILD  HOLD: LIGHTNING STRIKE, STUNS  PERFECT: BIGGER, LONGER STUN');
     // The stream doesn't break blows: the wand's storm says what's true of it instead.
     expect(kitRows('wand', 'storm').find(([l]) => l === 'ALSO')?.[1]).toBe('Ignores shields, spares friends');
-    expect(KIT.spellblade.also).toBe('Hits drain, blink through refills');
+    expect(KIT.spellblade.also).toBe('Magic shields, blinks top up');
     for (const w of Object.keys(KIT)) expect(Object.values(KIT[w as keyof typeof KIT]).join(' '), w).not.toMatch(/parry|riposte/i);
     expect(kitRows('spellblade', 'fire').find(([l]) => l === 'COST')?.[1]).toBe(`${SPELL.spellblade} magic a hold`);
     // The staff's wall of fire (Kyle, 2026-11-05): rolled at a goblin, and the card says once that it burns friends.

@@ -97,11 +97,12 @@ const modValue = (m: Mod) => {
   return MODS[m.id]?.unit === '%' ? sign + Math.round(v * 100) + '%' : MODS[m.id]?.unit === 's' ? sign + v + ' s' : sign + v;
 };
 
-/** The card: tier, name, how it fights, what's on it. `brief` leaves out the guard and dodge pictures (a shop's card).
+/** The card: tier, name, how armor wears, what's on it. How a weapon fights is in the gear's WEAPONS panel. `brief` is kept for callers.
  *  A modifier the wearer can't use shows dim, "no use to you" (shared/mods.ts); a touched or turning piece's COST is in red. */
 export function card(it: Item, h?: Hero, brief = false): string {
   const t = TIERS[it.quality], s = slotOf(it), cls = h ? WEAPONS[h.weapon].cls : it.kit ? WEAPONS[it.kit].cls : undefined;
-  const how = s === 'weapon' ? (brief ? labelRows(kitRows(it.kit!)) : weaponHow(it.kit!)) : s === 'armor' ? armorHow(it.armor ?? 'light', cls) : '';
+  // A weapon's TAP / HOLD / PERFECT rows live in the gear's WEAPONS panel now (weaponsabout.ts; Kyle, 2026-11-05: "too cluttered").
+  const how = s === 'armor' ? armorHow(it.armor ?? 'light', cls) : '';
   // Whose hands it's judged in: the weapon itself, or what the wearer holds.
   const kit = s === 'weapon' ? it.kit : h?.weapon;
   // "NAME +10%: what it does" and "NAME: what it does" (Kyle's example, before parry went: "STAMINA ON PARRY: parry refills stamina").

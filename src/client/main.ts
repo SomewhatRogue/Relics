@@ -106,6 +106,7 @@ import { kitLine } from './kitlines';
 import { ownCue } from './owncues';
 import { Purse } from './purse';
 import { legend } from './legend';
+import { weaponsAbout } from './weaponsabout';
 import { mageTrails } from './fxmagetap';
 import { iceTrails } from './fxice';
 
@@ -244,6 +245,7 @@ $('#heroes').addEventListener('click', () => {
 $('#packbtn').addEventListener('click', () => pack.toggle());
 // What each button means (legend.ts), from the gear's box.
 $('#legendbtn').addEventListener('click', () => (pack.toggle(false), void legend(game, panel, input.touch)));
+$('#kitbtn').addEventListener('click', () => (pack.toggle(false), weaponsAbout(game, panel)));
 // Leave the job early, for town (game.leaveJob says what that means alone, following or leading).
 $('#leave').addEventListener('click', () => {
   if (game.mode !== 'run' || panel.open) return;
@@ -263,7 +265,7 @@ const townTips = input.touch
   ? ['JOB BOARD: tap USE to take a job', 'Walk into a door to go in', 'FORGE: Halvard upgrades gear or melts it for steel', 'TRAINING HALL: knacks, and the practice yard', 'TOWN HALL: vote on what Wickhold does next']
   : ['JOB BOARD: press E to take a job', 'Walk into a door to go in. E by anyone to talk', 'FORGE: Halvard upgrades gear or melts it for steel', 'TRAINING HALL: knacks, and the practice yard', 'TOWN HALL: vote on what Wickhold does next'];
 const tips = input.touch
-  ? ['Stun or get behind a small goblin, then GRAB it', 'Warriors: GRAB any small goblin, or barrels and tables, and throw them', 'Break an oil barrel near goblins to set them on fire', 'Holding a goblin? SLAM it down, or THROW it at another', 'POTION drinks your front potion', 'Most item traits pay off when you counter after a block, dodge or hit a PERFECT', 'Cottages and barns hold goblins, and sometimes someone in a cage', 'Oil and fire burn wooden buildings down. Burn out the dens', 'Two frost hits freeze a goblin. A heavy blow then shatters it', 'Fire on a chilled goblin: STEAM, which stuns. Storm on a burning one: FLARE, which knocks back', 'SKILL: your class skill, taught by your trainer from level 3', 'Red with a striped edge can\'t be blocked: dodge or walk out of it', 'DEEP jobs end at a named butcher, who always carries a RELIC', 'TWIN DAGGERS: dash behind a goblin and BACKSTAB', 'Push the stick part way to creep. Hit a goblin that hasn\'t seen you for an AMBUSH']
+  ? ['Stun or get behind a small goblin, then GRAB it', 'Warriors: GRAB any small goblin, or barrels and tables, and throw them', 'Break an oil barrel near goblins to set them on fire', 'Holding a goblin? SLAM it down, or THROW it at another', 'POTION drinks your front potion', 'Most item traits pay off on a counter, a dodge through a blow, or a PERFECT', 'Cottages and barns hold goblins, and sometimes someone in a cage', 'Oil and fire burn wooden buildings down. Burn out the dens', 'Two frost hits freeze a goblin. A heavy blow then shatters it', 'Fire on a chilled goblin: STEAM, which stuns. Storm on a burning one: FLARE, which knocks back', 'SKILL: your class skill, taught by your trainer from level 3', 'Red with a striped edge can\'t be blocked: dodge or walk out of it', 'DEEP jobs end at a named butcher, who always carries a RELIC', 'TWIN DAGGERS: dash behind a goblin and BACKSTAB', 'Push the stick part way to creep. Hit a goblin that hasn\'t seen you for an AMBUSH']
   : ['G grabs a stunned goblin (or one you got behind). Click to slam, G to throw', 'Warriors: G lifts any small goblin, barrel or table. Throw it, or slam it down', 'Break an oil barrel near goblins to set them on fire', 'Q drinks your front potion. Hold Q to bring the next forward', 'Bows: let go on the white flash for a PERFECT. Hold too long and the shot weakens', 'Walk into a cottage door to go in. Fire burns buildings down', 'Two frost hits freeze a goblin. A heavy blow then shatters it', 'Fire on a chilled goblin: STEAM, which stuns. Storm on a burning one: FLARE, which knocks back', 'E: your class skill. R: a relic, once you have won one on a DEEP job', 'Red with a striped edge can\'t be blocked: SPACE to dodge, or walk out of it', 'Ranger: longbow, shortbow or crossbow. Mage: wand, staff or spellblade', 'Daggers: dash behind a goblin and BACKSTAB', 'Hold Shift to creep. Hit a goblin that hasn\'t seen you for an AMBUSH'];
 let tipAt = -99, tipI = 0;
 

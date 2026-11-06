@@ -47,14 +47,14 @@ export interface ClassSheet {
 }
 
 /** The spellblade's mana shield in a line (sim/manashield.ts), on the class card and in BUTTONS. */
-export const SHIELD_LINE = 'Spellblade: hits drain your magic before your health. Blink through a blow to refill it.';
+export const SHIELD_LINE = 'Spellblade: hits take your magic before your health. Blink through a blow to get some magic back.';
 
 export const CLASSES: Record<HeroClass, ClassSheet> = {
   WARRIOR: {
     line: 'Bulwark and blade. Surprisingly effective.',
     weapon: 'Sword and shield',
     skill: 'Shield Charge: a quick charge in a straight line, stunning and displacing foes.',
-    guard: 'Holds a block over a large area. Blocking a blow sets up a counter.',
+    guard: 'Blocks a wide arc in front. Blocking a blow sets up a counter.',
     stats: { STRENGTH: 4, GUARD: 5, SPEED: 2, RANGE: 1, SUPPORT: 3 },
   },
   RANGER: {
@@ -63,7 +63,7 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     skill: "Hunter's Net: Snares or slows.",
     sign: 'Mark a goblin: everyone hits it harder. Your arrows bend toward it, and your hound goes for it.',
     signLabel: 'MARK',
-    guard: 'Jumps back to dodge. No block.',
+    guard: 'Jumps back to dodge.',
     note: 'Nips at their heels, smart enough to not go down.',
     noteLabel: 'HOUND',
     stats: { STRENGTH: 4, GUARD: 0, SPEED: 2, RANGE: 5, SUPPORT: 2 },

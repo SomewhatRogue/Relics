@@ -105,3 +105,11 @@ body[data-guard='none'] .tb.block { display: none; }
 
 /* A button the hero or a red telegraph is under goes faint, so you see through it (underbtn.ts). */
 .tb.under { opacity: 0.35; }
+
+/* WEAPONS in the gear's box (weaponsabout.ts): each kit of your class, the one in hand first. */
+.kitabout { display: flex; flex-direction: column; gap: 10px; text-align: left; }
+.kitabout .kab { padding: 6px 8px; border: 1px solid var(--stone-500); }
+.kitabout .kab.mine { border-color: var(--gilt); }
+.kitabout h4 { display: flex; align-items: center; gap: 6px; margin: 0 0 4px; font: 400 var(--fs-text)/1.2 var(--font-body); letter-spacing: 0.04em; color: var(--gilt); }
+.kitabout h4 img { width: calc(14 * var(--px)); height: auto; image-rendering: pixelated; }
+.kitabout h4 i { margin-left: auto; font-style: normal; color: var(--bone-dim); }
