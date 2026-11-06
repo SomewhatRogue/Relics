@@ -29,6 +29,7 @@ import { muffledCry } from './kindlecue';
 import { eventSample } from './sfxevents';
 import { worldSound } from './worldsound';
 import { chalkSound } from './chalkfx';
+import { heroVoices, primeHeroes } from './voiceplay';
 
 /** How far off a fight can still be heard, in tiles: a little past a screen. */
 const EARSHOT = 16;
@@ -72,6 +73,8 @@ export class Soundscape {
     // Out of earshot: a fight two screens away on a big map makes no sound here.
     const at = ev as { x?: number; y?: number }, me = this.me;
     if (me && typeof at.x === 'number' && typeof at.y === 'number' && Math.hypot(at.x - me.x, at.y - me.y) > EARSHOT) return;
+    // The heroes' own voices, over whatever the event sounds like (herovoice.ts).
+    heroVoices.event(ev, room.heroes, now);
     // A Mage's quick cast: its flick, and its element as it lands (laid over the kit's own: magesfx.ts).
     mageTapSound(ev, room);
     // A recording of its own where the list gives one (sfxevents.ts); else the usual sound below.
@@ -201,6 +204,8 @@ export class Soundscape {
   frame(g: Game, now: number): void {
     const room = g.room, me = g.hero;
     this.me = me;
+    heroVoices.setMe(me.id);
+    primeHeroes(room.heroes);
     // A wand's storm stream crackles on while it's on (streamsound.ts).
     streamSound(room, me, now);
     if (g.outside !== this.wasInside) {

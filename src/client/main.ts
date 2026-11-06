@@ -73,6 +73,11 @@ import { Views } from './three/views';
 import { options } from './options';
 import { setMusic, setMuted } from './sfx';
 import { Music } from './music';
+import { heroVoices, primeSpot, townVoice, voiceClock } from './voiceplay';
+import { setVoices, voicesOn } from './voicebus';
+import { personAt } from './voicebank';
+import { idleHook } from './idlepose';
+import { carriesHungry } from '../shared/fence';
 import { Soundscape } from './soundscape';
 // The recorded sound effects in place of the synthesized ones as they load (sfxroutes.ts).
 import './sfxroutes';
@@ -138,6 +143,8 @@ const views = new Views(scene);
 const fx = new Fx();
 const ways = new WayWatch();
 const panel = new Panel();
+// The townsfolk's goodbye as their panel closes (townvoice.ts).
+panel.onHide = () => void townVoice.close(voiceClock());
 const input = new Input(() => views.heroScreen());
 const lobby = new Lobby(game, panel, input.touch, () => pack.toggle(false));
 const $ = (s: string) => document.querySelector(s) as HTMLElement;
@@ -198,6 +205,9 @@ const use = () => {
   else if (n.pet) startPet(game.hero, n.pet, performance.now() / 1000);
   else if (n.talk) {
     if (n.npc?.path) (talking = n.npc), (n.npc.heldAt = game.room.time);
+    // Their greeting in the tongue (Tobin's panic if you carry hungry gear): townvoice.ts.
+    const who = personAt(n.talk, n.arg ?? 0, CLASS_ORDER[n.arg ?? 0]);
+    townVoice.open(who, voiceClock(), who === 'tobin' && carriesHungry(game.profile));
     openSpot(n.talk, game, panel, n.arg, n.key);
   }
 };
@@ -359,6 +369,8 @@ function hud(now: number): void {
     fold.render(full, smallLine(where), game.mode + where, now);
   }
   const spot = game.near(), busy = panel.open || title.open;
+  // Whoever you're near: their lines load before you talk to them (voiceplay.ts).
+  if (spot?.talk) primeSpot(spot.talk, spot.arg ?? 0, CLASS_ORDER[spot.arg ?? 0]);
   $('#prompt').hidden = !spot || busy;
   if (spot) $('#prompt').textContent = (input.touch ? '' : spot?.chest ? 'F  ' : game.mode === 'run' ? '' : 'E  ') + (spot.door || spot.pet || !spot.talk || spot.talk === 'practice' ? spot.label : 'TALK: ' + spot.label);
   // A drop at your feet, its card shut: the key that opens it (a phone has LOOK in the context slot).
@@ -541,6 +553,15 @@ const musicSwitch = (on: boolean) => {
 };
 musicSwitch(musicOn);
 $('#music').addEventListener('click', () => musicSwitch(!musicOn));
+// Voices have their own switch too, remembered on this device (voicebus.ts).
+const voicesSwitch = (on: boolean) => (setVoices(on), $('#voices').classList.toggle('off', !on));
+voicesSwitch(voicesOn());
+$('#voices').addEventListener('click', () => voicesSwitch(!voicesOn()));
+// A Ranger bowled over by the hound laughs on the floor, if they're close enough to hear (herovoice.ts).
+idleHook.fn = (h, id, t, now) => {
+  const me = game.hero;
+  if (me && Math.hypot(h.x - me.x, h.y - me.y) < 12) heroVoices.idle(h, id, t, now);
+};
 // Tips are off unless switched on; the choice is remembered on this device.
 const tipsOn = (on: boolean) => {
   document.body.classList.toggle('tips', on);

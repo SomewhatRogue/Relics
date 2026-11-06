@@ -2,6 +2,53 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-05: the first recorded voices: the townsfolk in a made-up tongue, heroes' grunts, Clerics' prayers (Kyle; Claude Opus 5.5)
+
+Kyle approved batch 2 today: "I like it being a Germanic inspired but fake language with real voices."
+The words on screen stay the game's own English; the recorded voice only carries the tone.
+
+- **The tongue** is `docs/sound/voice-tongue.md`: hard consonants, round vowels, -en/-och/-ach/-eth
+  endings, a small word bank (häldan hello, tovach goodbye, drölle stray, saivren mercy, ölmeth holy,
+  kraudt strike, ämmek coin, ötti no) and each person's lines. Real German, Dutch, English and
+  Scandinavian words were kept out, and anything near heil, sieg or kampf; tummen, orren, rukke and
+  trakk turned out to be real Swedish or Norwegian words and were changed. It never shows on screen.
+- **Made** in ElevenLabs on one flow, "Relic voices batch 2". Ten townsfolk were designed with Voice
+  Design (eleven_ttv_v3) from section 4 of the sounds list and new descriptions for Tobin, Edda, Maeve,
+  Nettle and Brisk (English regional accents speaking the tongue), and saved as "Relic Hew" and so on.
+  That filled the workspace's ten custom-voice slots, so the eight hero voices use ElevenLabs' built-in
+  voices instead (they only grunt, gasp and pray): Harry, Callum, Matilda, Sarah, Liam, Lily, Bill,
+  George. Eight hero voices were designed too but couldn't be saved; their preview ids are kept in
+  `Relic Sounds/batch2/tools/` if Kyle frees slots. Lines are Eleven v4 speech, two takes each: 86
+  lines, 172 takes. The preview to keep for each designed voice was picked by measured pitch and pace
+  (nobody listened), so Kyle should audition them on the flow.
+- **Processed** on Kyle's machine like batch 1 (`Relic Sounds/batch2/`: `raw/`, `game/`, `tools/` with
+  qc.txt and measure.txt): silence trimmed, levelled by RMS to about -19 dBFS with the peak under -3 dB,
+  mono 44.1 kHz MP3 at 64 kbps. Efforts came back as two or three bursts per take ("Hhrah!" grunted
+  more than once), so each keeps only its strongest burst: grunts, gasps, cries and breaths are 0.4 to
+  1.3 s. The townsfolk's lines are longer than asked (1.3 to 4.4 s, most 2.5 to 3.5 s); nothing was
+  cut mid-word. In the game at `public/sfx/voice/` (2.7 MB).
+- **Played** through the sample player, made bank-agnostic (`sfxplayer.ts` createSamplePlayer; the
+  effects keep warming their whole bank, voices load only when wanted: a person's lines as you come up
+  to them, a hero's set when first seen). Voices have their own bus under the effects bus
+  (`voicebus.ts`), so SOUND silences them and the new VOICES switch in the options box mutes only
+  them, remembered on this device.
+- **Townsfolk** (`townvoice.ts`, wired in main.ts): a greeting when their panel opens and a goodbye
+  when it closes, each at most once every 20 s per person. Hew, Orla, Odric, Judd, Tobin, Edda, Brisk
+  at their spots; Maeve and Isolde at their trainer's spot; Nettle at his table. Tobin panics instead
+  of greeting while you carry hungry gear; Nettle says his hushed line on SELL QUIETLY; Odric prays
+  quietly when you give to the Lantern and whispers when hungry gear is left on the step. While a
+  recorded line plays the typed letters don't blip; with VOICES off, a file missing or not loaded,
+  the blip types on as before. A greeting still loading plays as soon as it lands if the panel is open.
+- **Heroes** (`herovoice.ts`, from the soundscape's events): a grunt on a heavy swing (at most every
+  1.2 s per hero), a gasp when hurt (0.9 s), a cry when downed, a breath on getting up, a laugh when
+  the hound bowls a Ranger over (r_tackle, through a hook in idlepose.ts so posing stays sound-free).
+  A Cleric near a heal murmurs a prayer (3 s), and says one hard on a smite (2 s). Voices follow the
+  look (`voicebank.ts` LOOK_VOICE): every class has three looks on three voices, and the three Cleric
+  looks have the three praying voices. Your own hero is heard full, the others a little back.
+- **The one-file build** inlines `public/sfx/voice` too (`voicesrc.solo.ts`): 9.36 MB, under the 16 MB
+  cap, so the solo page keeps its voices.
+- Not voiced yet: Cole, Whisper, Vell and the other trainers and vendors, Hew in the wood's cutscenes.
+
 ## 2026-11-05: the chalker, and how a new sort bleeds in (Kyle; Claude Opus 5.5)
 
 Item 6 of the biome and enemy rollout Kyle approved today. Numbers in `shared/chalk.ts` (CHALKER, re-exported by

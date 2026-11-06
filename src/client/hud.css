@@ -83,6 +83,7 @@ body:not(.touch) #corner button { width: 40px; height: 40px; }
 #options #heroes::before { background-image: var(--ic-heroes); }
 #options #mute::before { background-image: var(--ic-sound); }
 #options #music::before { background-image: var(--ic-music); }
+#options #voices::before { background-image: var(--ic-voices); }
 #options #tips::before { background-image: var(--ic-tips); }
 #options #legendbtn::before { background-image: var(--ic-buttons); }
 #options #viewbtn::before { background-image: var(--ic-view); }
