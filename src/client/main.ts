@@ -68,6 +68,8 @@ import { DreadView } from './dreadfx';
 import { watchDust } from './dust';
 import { watchWater } from './wetwatch';
 import { Input } from './input';
+import { HideWatch } from './hidehost';
+import { noteFrame } from './netq';
 import { LootCard } from './lootcard';
 import { PackView } from './pack';
 import { openTree } from './treeui';
@@ -430,6 +432,8 @@ input.onPress = () => {
 function tick(t: number): void {
   // (The first frame can stamp a hair before the page clock: never step backwards.)
   const dt = Math.max(0, Math.min(0.1, (t - last) / 1000));
+  // (How healthy this page's frames are: who'd host a party's job best, netq.ts. Drawn frames only.)
+  if (!document.hidden) noteFrame(t - last);
   last = t;
   // With a panel up, the hero stands still (and no press is spent).
   const live = input.read();
@@ -530,6 +534,12 @@ function tick(t: number): void {
   if (document.hidden || game.mode === 'watch') return;
   views.render(game.room, ME, fx, t / 1000, dt, inTown ? (townfolk?.here(game.room.map.name) ?? []) : [], game.mode === 'run');
   under?.frame(views, game.room, game.room.heroes.find((x) => x.id === ME), t / 1000);
+  // The job moved to another device (a host's page went out of sight): said once, over me.
+  if (game.hostNote && game.hero) {
+    const [sx, sy] = toPx(game.hero.x, game.hero.y);
+    fx.say(sx, sy - 46, game.hostNote, '#ffd27a', 3);
+    game.hostNote = null;
+  }
   // Out of bounds: the dark closing in, what comes for you, and anyone taken (dreadfx.ts).
   dread.frame(game.room.heroes.find((x) => x.id === ME), game.room.heroes, evs, views, fx, t / 1000, dt);
   hud(t / 1000);
@@ -545,7 +555,21 @@ requestAnimationFrame(frame);
 // Leading a job with this page out of sight (another tab, another app): the browser stops drawing
 // frames, but your friends' room still has to run, so it runs here on a timer, catching up in
 // tenth-of-a-second steps however late the browser lets the timer fire.
+// With friends, though, a hidden host hands the job on (hidehost.ts): a desktop after 2.5 s out of
+// sight, a phone or touch device at once; back in sight it follows whoever took it. Alone, it runs here.
+const hide = new HideWatch({
+  touch: input.touch,
+  now: () => performance.now() / 1000,
+  hosting: () => game.mode === 'run' && !!game.coop,
+  friends: () => (game.coop ? game.coop.still().length - 1 : 0),
+  hand: () => game.handOn(),
+  back: () => game.backAsGuest(),
+  later: (fn, ms) => setTimeout(fn, ms),
+  cancel: (t) => clearTimeout(t as number),
+});
+hide.attach(document, window);
 setInterval(() => {
+  if (document.hidden) hide.tick();
   if (!document.hidden || !game.coop) return;
   const now = performance.now();
   for (let n = 0; now - last > 120 && n < 40; n++) tick(last + 100);
@@ -610,11 +634,12 @@ if (input.touch) document.body.classList.add('touch');
 // Test hooks: read the fight as data, never as pixels.
 const w = window as unknown as Record<string, unknown>;
 w.__fullForTest = fullForTest;
-w.__town = () => ({ dozing: !!townfolk?.dozing, open: !!townfolk?.open, count: townfolk?.count ?? 0, here: townfolk?.here(game.room.map.name).map((h) => ({ name: h.tag, x: h.x, y: h.y })) ?? [] });
+w.__town = () => ({ dozing: !!townfolk?.dozing, open: !!townfolk?.open, count: townfolk?.count ?? 0, rtt: townfolk?.rtt ?? 0, here: townfolk?.here(game.room.map.name).map((h) => ({ name: h.tag, x: h.x, y: h.y })) ?? [] });
 w.__GAME_STATE__ = () => ({ mode: game.mode, wood: game.wood ? { wake: game.wood.wake, said: game.wood.said, stage: game.wood.stage, hold: game.wood.hold } : null, inside: game.outside ? game.room.map.name : null, title: title.open, time: game.room.time, hero: { ...game.hero }, enemies: game.room.enemies.map((e) => ({ ...e })), guards, run: game.run, profile: game.profile, world: game.world });
 w.render_game_to_text = () => `${game.mode} t=${game.room.time.toFixed(1)} hero ${game.hero.act} hp ${game.hero.hp} st ${Math.round(game.hero.stamina)} | ` + game.room.enemies.map((e) => `${e.kind} ${e.act} hp ${e.hp}${e.attack ? ' ' + e.attack.kind + ' ' + e.attack.t.toFixed(2) : ''}`).join(' | ');
 Object.defineProperty(w, '__room', { get: () => game.room });
 w.__game = game;
+w.__hide = hide;
 // (The online scripts try the lag compensation's cap: party-online.cjs.)
 w.__lagcomp = LAGCOMP;
 w.__views = views;

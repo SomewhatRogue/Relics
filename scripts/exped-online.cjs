@@ -42,7 +42,7 @@ const COUNT = () => {
     await ctx.addInitScript(COUNT);
     const page = await ctx.newPage();
     page.on('pageerror', (e) => report.errors.push(`${name}: ${e}`));
-    await page.goto(`http://127.0.0.1:${PORT}/`);
+    await page.goto(`http://127.0.0.1:${PORT}/?pick=lead`);
     await page.waitForFunction(() => window.__game);
     await page.evaluate(([cls, name]) => { window.__game.create(cls, name); if (window.__game.mode === 'wood') window.__game.skipWood(); document.getElementById('title').hidden = true; window.__title.open = false; }, [cls, name]);
     return { name, ctx, page };

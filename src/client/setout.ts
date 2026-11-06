@@ -23,18 +23,24 @@ export function setOutNow(g: Game, panel: Panel): void {
   // Everyone's told now, so the whole party's beat runs together and they arrive about as the leader does.
   const go = pt.setOut();
   if (!go) return;
-  beat(panel, PW.beatLead(job.place.name), () => g.setOut(go));
+  beat(panel, PW.beatLead(job.place.name), () => g.setOut(go), hostLine(go.host, go.members, g.profile.id));
 }
 
-/** Pulled into the leader's job: the beat, then `go`. */
-export function followOut(panel: Panel, job: Job, lead: string, go: () => void): void {
-  beat(panel, PW.beatFollow(lead, job.place?.name ?? job.title), go);
+/** Pulled into the leader's job: the beat, then `go`. `host`: who runs its room (the best link: shared/hostpick.ts). */
+export function followOut(panel: Panel, job: Job, lead: string, go: () => void, host?: { id: string; members: [string, string][]; me: string }): void {
+  beat(panel, PW.beatFollow(lead, job.place?.name ?? job.title), go, host && hostLine(host.id, host.members, host.me));
 }
 
-function beat(panel: Panel, text: string, then: () => void): void {
+/** A word on who hosts, only when it isn't the leader (the first member). */
+function hostLine(host: string, members: [string, string][], me: string): string | undefined {
+  if (!host || host === members[0]?.[0]) return undefined;
+  return host === me ? PW.youHost : PW.hosting(members.find(([id]) => id === host)?.[1] ?? '');
+}
+
+function beat(panel: Panel, text: string, then: () => void, note?: string): void {
   closeAll();
   going = true;
-  panel.show(PW.beat, `<p>${esc(text)}</p>`, [], true);
+  panel.show(PW.beat, `<p>${esc(text)}</p>${note ? `<p>${esc(note)}</p>` : ''}`, [], true);
   setTimeout(() => {
     going = false;
     if (panel.open && document.querySelector('#panel h2')?.textContent?.toUpperCase() === PW.beat) panel.hide();

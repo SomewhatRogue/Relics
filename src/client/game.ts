@@ -45,6 +45,7 @@ const TREASURE_SOLD = 20;
 import { rebase } from '../sim/rebase';
 import { CoopGuest, CoopHost, loadRoom, saveRoom, type Friend } from './coop';
 import { forgetSession, keepSession, keptJob, type Session } from './session';
+import { PW } from './partywords';
 import { bankEnd, bankJob, banked, soloJob, unbank } from './jobbank';
 import { dropOwed, owedTo } from './owed';
 import { dressKit, forgetTaken } from './keepkit';
@@ -116,6 +117,12 @@ export class Game {
   /** Online with friends: leading (this browser runs the job: coop.ts) or following a leader's. */
   coop: CoopHost | null = null;
   remote: CoopGuest | null = null;
+  /** Handed the job on while out of sight (hidehost.ts): back in sight, follow whoever has it. */
+  private handed: { code: string; lead: string; job: Job } | null = null;
+  /** Who this page last knew to host its job (a change mid-job is said over my hero: hostNote). */
+  private hostSeen: string | null = null;
+  /** A word over my hero when the job moves to another device (main.ts shows it once). */
+  hostNote: string | null = null;
   /** Parties at the board (online only). */
   parties: Parties | null = null;
   /** Counts up each time the room changes (friends rebuild their copy when it does). */
@@ -567,6 +574,8 @@ export class Game {
   step(dt: number, intent: Intent): FightEvent[] {
     // Following a friend's job: their room is drawn here; nothing runs in this browser.
     if (this.mode === 'run' && !this.startKit) this.startKit = kitOf(this.profile);
+    // (Handed the job on while out of sight, and a frame came before the page said it's back.)
+    if (this.handed) return this.backAsGuest(), [];
     if (this.remote) return this.noteMet(), this.stepRemote();
     intent = this.own(intent);
     // Back to lead after a reload: the room waits for a friend to answer (nobody does: the job's gone).
@@ -734,6 +743,10 @@ export class Game {
     this.coop?.close();
     this.remote?.close();
     this.remote = null;
+    // The room runs on whoever has the best link (shared/hostpick.ts): not me, so I follow them, still
+    // the party's leader, as any friend would.
+    if (go.host && go.host !== this.profile.id) return this.startRemote(new CoopGuest(go.room, this.profile.id, go.host, () => this.profile, go.job));
+    this.hostSeen = this.profile.id;
     this.coop = new CoopHost(go.room, this.profile.id, this.profile.name, this, go.members);
     this.startJob(go.job, go.members.length);
     this.jobKey = go.room;
@@ -762,8 +775,33 @@ export class Game {
     this.startRemote(new CoopGuest(s.code, this.profile.id, s.lead, () => this.profile, s.job));
   }
 
-  /** Follow a friend's job (they lead): their room is drawn here as it comes. */
-  startRemote(g: CoopGuest): void {
+  /**
+   * Hosting with friends and this page out of sight (hidehost.ts): the job to the friend first in line,
+   * my hero left in it, and back in sight I follow them. Whether it went.
+   */
+  handOn(): boolean {
+    const c = this.coop;
+    if (this.mode !== 'run' || !c?.company || !this.run || this.result || !c.firstInLine()) return false;
+    const to = c.handOver(true)!, job = this.run.job;
+    this.coop = null;
+    this.handed = { code: c.room, lead: to, job };
+    // (A reload meanwhile follows them too, rather than leading again from this page's own save.)
+    keepSession({ code: c.room, lead: to, job, hero: this.profile.id });
+    return true;
+  }
+
+  /** Back in sight after handing the job on: a guest of whoever has it now. */
+  backAsGuest(): void {
+    const h = this.handed;
+    if (!h) return;
+    this.handed = null;
+    this.startRemote(new CoopGuest(h.code, this.profile.id, h.lead, () => this.profile, h.job), true);
+  }
+
+  /** Follow a friend's job (they lead): their room is drawn here as it comes. `told`: say who hosts once known. */
+  startRemote(g: CoopGuest, told = false): void {
+    this.handed = null;
+    this.hostSeen = told ? null : g.lead;
     // (One job's socket at a time: a follower before this one, or a job led here, closes.)
     if (this.remote && this.remote !== g) this.remote.close();
     this.coop?.close();
@@ -790,6 +828,7 @@ export class Game {
     // They went home (LEAVE): their hero goes with them, not left standing in the way.
     const f = g.left ? this.coop?.friends.get(g.lead) : undefined;
     if (f) (f.gone = true), this.dropFriend(g.lead);
+    if (this.coop) (this.hostSeen = this.profile.id), (this.hostNote = PW.youHostNow);
   }
 
   /**
@@ -844,6 +883,8 @@ export class Game {
     if (g.run && g.run !== this.bankedRun) this.bankIt((this.bankedRun = g.run));
     const ev = g.take();
     this.growing();
+    // Someone else hosts now (a takeover, a hidden host's hand-on): said once over my hero, by name.
+    if (g.lead !== this.hostSeen && g.leadName) (this.hostSeen = g.lead), (this.hostNote = PW.hostMoved(g.leadName));
     if (g.shouldTake(now)) return this.takeOver(g), ev;
     if (g.ended) {
       g.close();

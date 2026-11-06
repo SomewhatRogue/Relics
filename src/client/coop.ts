@@ -23,6 +23,10 @@
  *   The leader quiet 9 s, the friend first in line (by id) takes the room over from that and leads
  *   (Game.takeOver); the others hear who leads now and follow them. The old leader, back, follows
  *   them; a leader whose page only reloaded leads again from the job as it kept it (Game.resume).
+ * - Out of sight with friends (hidehost.ts), the leader hands the job on at once: the whole job to
+ *   everyone, a goodbye naming the friend first in line (who takes it the moment the relay says the
+ *   leader's gone), and back in sight it follows them. "The leader" here is whoever hosts the room: the
+ *   member with the best link at setting out (shared/hostpick.ts), the party's leader unless beaten.
  */
 import type { Job } from '../shared/jobs';
 import type { Profile } from '../shared/progress';
@@ -58,6 +62,8 @@ const STICK_EVERY = 0.1;
 /** An Intent's buttons (everything but the stick, the aim and its moment), to tell a press from a nudge of the stick. */
 const buttons = (i: Intent) => JSON.stringify({ ...i, mx: 0, my: 0, ax: 0, ay: 0, vt: 0 });
 const r2 = (v: number) => Math.round(v * 100) / 100;
+/** The page's clock (s), the one frames are given. */
+const clock = () => performance.now() / 1000;
 /** The run as a patch carries it: without the heroes' board, which rides whole in the end and the saves (sim/score.ts). */
 const lean = (r: Run | null): Run | null => (r?.board ? { ...r, board: undefined } : r);
 /** A hero's fields that are their kit (client/keepkit.ts). */
@@ -186,7 +192,7 @@ export class CoopHost {
         const save = this.saved(), all = now - this.savedAllAt > SAVE_ALL;
         if (all) (this.savedAllAt = now), this.sock.send('*', { save });
         else {
-          const first = [...this.friends.keys()].filter((id) => !this.away(id)).sort()[0];
+          const first = this.firstInLine();
           if (first) this.sock.send(first, { save });
         }
         // (Kept here too, for this page to lead again after a reload.)
@@ -240,16 +246,29 @@ export class CoopHost {
     this.sentAt = now;
   }
 
-  /** Leaving the job to the friends still in it: the whole job as it stands, then goodbye. */
-  handOver(): void {
+  /** The friend first in line to take the job on (the one the save goes to: CoopGuest.shouldTake's order). */
+  firstInLine(): string | undefined {
+    return [...this.friends.keys()].filter((id) => !this.away(id)).sort()[0];
+  }
+
+  /**
+   * Leaving the job to the friends still in it: the whole job as it stands, then goodbye. `stay`: this
+   * page is only going out of sight (hidehost.ts): the friend first in line takes it on, my hero stays
+   * in the job, and back in sight I follow them; the socket closes at once, so the room is free for them
+   * now (a phone freezes the page before a timer could close it). Returns who takes it on.
+   */
+  handOver(stay = false): string | undefined {
+    const to = this.firstInLine();
     this.sock.send('*', { save: this.saved() });
-    this.sock.send('*', { bye: 1 });
-    this.close();
+    this.sock.send('*', stay ? { bye: 1, stay: 1, to } : { bye: 1 });
+    if (stay) this.sock.close();
+    else this.close();
+    return to;
   }
 
   /** The whole job as it stands. */
   private saved(): string {
-    return JSON.stringify({ run: this.game.run, ...this.game.jobSave(), members: this.members, key: this.game.roomKey });
+    return jobJson({ run: this.game.run, ...this.game.jobSave(), members: this.members, key: this.game.roomKey });
   }
 
   /** A friend gone, or not heard from in AWAY seconds (a closed tab, a locked phone): the party won't wait for them. */
@@ -331,6 +350,10 @@ export class CoopGuest {
   private missing = false;
   /** The leader said goodbye (went home): whoever takes it on lets their hero go. */
   left = false;
+  /** The leader handed the job to this friend by name (their page went out of sight): they take it first. */
+  private named: string | undefined;
+  /** The relay said the leader's last connection went (`left`): the room is free to take at once. */
+  private leadLeft = false;
   private heardLead = -1;
 
   constructor(readonly code: string, readonly myId: string, public lead: string, private profile: () => Profile, readonly job: Job) {
@@ -348,14 +371,23 @@ export class CoopGuest {
     if (m.t === 'role' && m.role === 'guest') return void (m.host && m.host !== this.lead && this.follow(m.host)), this.hello();
     // Someone else leads now (a friend took the job on): follow them.
     if (m.t === 'hosted' && m.id !== this.myId) return this.follow(m.id), this.hello();
+    // The leader's gone from the room: after a goodbye naming whoever takes it on, they needn't wait.
+    if (m.t === 'left' && m.id === this.lead) return void ((this.leadLeft = true), this.named && (this.heardLead = Math.min(this.heardLead, clock() - TAKE)));
     if (m.t !== 'msg' || m.from !== this.lead) return;
-    this.heardLead = this.now;
+    // (The clock now, not the last frame's: a page out of sight draws no frames but still hears, and back
+    // in sight it mustn't think the leader quiet all that while and take the job on.)
+    const now = clock();
+    this.heardLead = now;
     // (Heard: the next time the leader goes quiet, a rejoin starts from the first wait again.)
     if (this.rejoins) (this.rejoins = 0), (this.rejoinWait = -1);
-    const d = m.d as { s?: string; end?: { won: boolean; run: Run }; save?: string; bye?: number };
+    const d = m.d as { s?: string; end?: { won: boolean; run: Run }; save?: string; bye?: number; stay?: number; to?: unknown };
     // The leader's headed home and left the job to us: as good as gone, so whoever's first takes it
     // on in a moment (once their goodbye has freed the room).
-    if (d.bye) return void ((this.left = true), (this.heardLead = this.now - TAKE + BYE_WAIT));
+    // (`stay`: their page only went out of sight. They hand it to the friend they name, keep their hero
+    // in it, and follow whoever takes it when they're back: hidehost.ts.)
+    // (Its socket closes with it, so the relay frees the room at once: whoever's named takes it the moment
+    // the relay says they've gone, or BYE_WAIT after the goodbye if that word is slow.)
+    if (d.bye) return void ((this.left = !d.stay), (this.named = d.stay && typeof d.to === 'string' ? d.to : undefined), (this.heardLead = now - TAKE + (this.named && this.leadLeft ? 0 : BYE_WAIT)));
     // (The end's run swaps ids like a patch does, so my own tallies are under `me`.)
     if (d.end) return void ((this.ended = asGuest(d.end, this.myId)), this.onEnd(this.ended!));
     if (typeof d.save === 'string') return void (this.save = d.save);
@@ -473,6 +505,11 @@ export class CoopGuest {
     return Math.min(1, Math.max(0, (now - this.lastAt) / this.gap));
   }
 
+  /** The name of whoever hosts, as their patches say it ('' till then). */
+  get leadName(): string {
+    return this.names['@lead'] ?? '';
+  }
+
   /** The trip there and back (ownhero.ts times it; the lag scripts read it here). */
   get trip(): number {
     return this.own.trip;
@@ -522,9 +559,13 @@ export class CoopGuest {
     this.key = -1;
     this.own.reset();
     // A new leader: give them their own time before anyone thinks them gone too.
-    this.heardLead = this.now;
+    this.heardLead = clock();
     this.left = false;
+    this.named = undefined;
+    this.leadLeft = false;
     this.mine = null;
+    // (Their names come with their first whole room: not the old leader's under '@lead' meanwhile.)
+    this.names = {};
   }
 
   /** How long the leader has been quiet. */
@@ -541,7 +582,9 @@ export class CoopGuest {
     if (!this.save || !this.room) return false;
     if (this.cut) return true;
     const line = [this.myId, ...this.room.heroes.map((h) => h.id).filter((id) => id !== 'me' && id !== '@lead' && id !== 'squire')].sort();
-    return this.quiet(now) > TAKE + line.indexOf(this.myId) * TAKE_NEXT;
+    // (Named by a leader handing on: them first, the rest in their order after.)
+    const at = this.named ? (this.named === this.myId ? 0 : 1 + line.indexOf(this.myId)) : line.indexOf(this.myId);
+    return this.quiet(now) > TAKE + at * TAKE_NEXT;
   }
 
   /** The leader has gone quiet too long (or never came): the job is lost. */
@@ -568,18 +611,51 @@ export class CoopGuest {
   }
 }
 
-/** The whole room as plain data, to hand the job on (its maps of positions and inputs start fresh). */
+/**
+ * The whole room as plain data, to hand the job on (its maps of positions and inputs start fresh). The
+ * pack rushes' clocks are Maps, which JSON would empty: they go as lists (a friend taking the job on in a
+ * fight used to load `{}` there and stop dead on its first tick: tests/hostpick.test.ts).
+ */
 export function saveRoom(room: ArenaRoom): Record<string, unknown> {
-  return Object.fromEntries(Object.entries(room).filter(([k]) => k !== 'prev' && k !== 'intents' && k !== 'events' && k !== 'houseIn'));
+  const o = Object.fromEntries(Object.entries(room).filter(([k]) => k !== 'prev' && k !== 'intents' && k !== 'events' && k !== 'houseIn'));
+  const r = room.rushes;
+  if (r) o.rushes = { ...r, fought: [...r.fought], due: [...r.due] };
+  return o;
 }
+
+/**
+ * The whole job as JSON. JSON has no Infinity (a barrel that never fades, a hero down for good), and wrote
+ * it as null, so a friend taking a street on found every barrel and oil jar gone a tick later
+ * (`now >= null`): it goes as a word, and loadRoom brings it back.
+ */
+export const jobJson = (v: unknown): string => JSON.stringify(v, (_k, x) => (x === Infinity ? INF : x === -Infinity ? NEG_INF : x));
+const INF = '+Inf', NEG_INF = '-Inf';
+/** Infinity back where jobJson wrote it as a word (in place). */
+function revive(o: unknown): void {
+  if (!o || typeof o !== 'object') return;
+  const r = o as Record<string, unknown>;
+  for (const k of Object.keys(r)) {
+    const v = r[k];
+    if (v === INF) r[k] = Infinity;
+    else if (v === NEG_INF) r[k] = -Infinity;
+    else if (v && typeof v === 'object') revive(v);
+  }
+}
+
+/** The rushes' clocks back as Maps (an old save's emptied `{}` as none). */
+const asMap = (v: unknown) => new Map<number, number>(Array.isArray(v) ? (v as [number, number][]) : []);
 
 /** A room back from saveRoom: the same goblins, props, chests and dice where they were. */
 export function loadRoom(o: Record<string, unknown>): ArenaRoom {
+  revive(o);
   const room = new ArenaRoom(1, { map: o.map as ArenaRoom['map'] }), r = room as unknown as Record<string, unknown>;
   for (const [k, v] of Object.entries(o)) {
     if (k === 'map') continue;
     if (r[k] instanceof Rng) Object.assign(r[k] as object, v);
-    else r[k] = v;
+    else if (k === 'rushes' && v && typeof v === 'object') {
+      const x = v as Record<string, unknown>;
+      room.rushes = { ...(x as unknown as ArenaRoom['rushes']), fought: asMap(x.fought), due: asMap(x.due) };
+    } else r[k] = v;
   }
   return room;
 }

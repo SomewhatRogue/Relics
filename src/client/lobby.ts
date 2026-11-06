@@ -27,7 +27,12 @@ export class Lobby {
     const { game, panel } = this;
     this.town = town;
     // Called to a friend's job, wherever you are in town: the beat, then off you go with them.
-    parties.onGo = (room, job, lead, m) => followOut(panel, job, m[0]?.[1] ?? '', () => game.startRemote(new CoopGuest(room, game.profile.id, lead, () => game.profile, job)));
+    // (The room runs on whoever has the best link, the leader unless someone beats them: shared/hostpick.ts.
+    // Hosting it myself, I start it, as a leader would; else I follow whoever does.)
+    parties.onGo = (room, job, _lead, m, host) => {
+      const me = game.profile.id;
+      followOut(panel, job, m[0]?.[1] ?? '', () => (host === me ? game.setOut({ room, job, members: m, host }) : game.startRemote(new CoopGuest(room, me, host, () => game.profile, job))), { id: host, members: m, me });
+    };
     parties.onNews = (n) => newsToast(n, parties.leading || parties.joined ? null : (lead) => parties.join(lead), () => openParties(game, panel));
   }
 

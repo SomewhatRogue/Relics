@@ -33,4 +33,10 @@ export const PW = {
   beat: 'SETTING OUT',
   beatLead: (place: string) => `You lead the party out to ${place}.`,
   beatFollow: (lead: string, place: string) => `${lead} is leading the party out to ${place}.`,
+  /** Under the beat, when the room runs on someone other than the leader (the best connection: shared/hostpick.ts). */
+  hosting: (host: string) => `${host} has the best connection, so the job runs on their device.`,
+  youHost: 'You have the best connection, so the job runs on your device.',
+  /** Over your hero mid-job, when the job moves to another device (a host's page went out of sight). */
+  hostMoved: (host: string) => `${host} IS HOSTING NOW`,
+  youHostNow: 'YOU ARE HOSTING NOW',
 };
