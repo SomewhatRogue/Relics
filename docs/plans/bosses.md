@@ -294,3 +294,13 @@ The Gorger makes splatting chaff a choice.
 8. **Antlers** with the Old Park, then **the Mourner** with the Corpse Road.
 
 *For Kyle:* BRACED; the 0.15 s grace; a sure relic on a hero's first kill of a named butcher; the Gnawer's bell; every † name.
+
+## Kyle's notes on pacing (2026-11-05, after reading this)
+
+- Mini-bosses work too: tougher goblins that take a few good hits, between the chaff and a full boss.
+- Scale a bigger party mostly with more health and harder hits on the goblins, not more goblins. Mobs to
+  splat are still fun sometimes, so keep some swarm beats.
+- Kiting is too easy right now. Answer it in the pacing slice: goblins that close gaps (lunges, leaps,
+  thrown nets, a sprint after the first few seconds of a chase), flankers that cut you off, archers and
+  throwers that punish running in the open, and packs that spread to surround rather than file after you.
+
