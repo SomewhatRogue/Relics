@@ -41,6 +41,8 @@ import { flankers } from './chase';
 import { afterFoes, beforeFoes, beforeHeroes, shapeFoe } from './ownfoes';
 import { newRushes, stepRushes, type Rushes } from './packrush';
 import { slipIntent, type Slick } from './oil';
+import { noteGuard, useLate, type LateBlow } from './latelist';
+import { stepLate } from './lagcomp';
 import { newFlocks, type Flock } from './crows';
 import { OWN_KIT } from './enemies';
 import { stepNooses, type Noose } from './snares';
@@ -142,6 +144,8 @@ export class ArenaRoom {
   houseFires: HouseFire[] = [];
   houseIn?: Indoors;
   intents = new Map<string, Intent>();
+  /** Blows on friends with lag, waiting for their word (sim/latelist.ts, lagcomp.ts). */
+  late: LateBlow[] = [];
   /** Events from the latest tick (drawn as hits, sparks and sounds). */
   events: FightEvent[] = [];
   /** Positions before the latest tick, keyed 'h:<id>' or 'e:<id>', for drawing between ticks. */
@@ -310,10 +314,12 @@ export class ArenaRoom {
   step(): void {
     // What each hero does is counted on this room's board while it steps (sim/score.ts), on a job only.
     useBoard(this.board);
+    useLate(this.late);
     try {
       this.stepOnce();
     } finally {
       useBoard(null);
+      useLate(null);
     }
   }
 
@@ -381,8 +387,13 @@ export class ArenaRoom {
     for (const h of this.heroes) if (h.safeT) h.safeT = Math.max(0, h.safeT - TICK);
     // The netted struggle (their presses go on it) and friends cut them out (sim/netter.ts).
     beforeHeroes(this.heroes, this.intents, NO_INTENT, this.time, this.events);
+    // A friend's guard by their own screen (sim/latelist.ts).
+    for (const h of this.heroes) noteGuard(h, this.intents.get(h.id) ?? NO_INTENT);
     // On an oil slick the stick takes hold slowly (sim/oil.ts).
     for (const h of this.heroes) stepHero(h, slipIntent(h, this.intents.get(h.id) ?? NO_INTENT, TICK), this.enemies, this.time, TICK, this.events, acts);
+    // Blows on friends with lag whose time has come, judged by what their screen showed (sim/lagcomp.ts).
+    this.late = stepLate(this.late, this.heroes, this.allEnemies, this.intents, this.time, this.events);
+    useLate(this.late);
     // A party: bleeding, picking each other up, going out.
     stepParty(this.heroes, TICK, this.events);
     // A Ranger who has just jumped back leaves a snare where they stood.

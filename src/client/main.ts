@@ -14,7 +14,7 @@ import { chargePips } from './reliccard';
 import { RELICW } from './relicwords';
 import { hookLitBadge } from './litbadge';
 import { setVotes } from './voteboards';
-import { HERO, dodgeName, dodgeOf, POTIONS, CLASS_ORDER, RELICS, TRAITS, WEAPONS, itemName, type HeroClass } from '../shared/tuning';
+import { HERO, LAGCOMP, dodgeName, dodgeOf, POTIONS, CLASS_ORDER, RELICS, TRAITS, WEAPONS, itemName, type HeroClass } from '../shared/tuning';
 import { CLASS_NAME } from '../shared/classes';
 import { barWord } from '../shared/barword';
 import { LOOKS, heroLook } from './sprites';
@@ -422,6 +422,11 @@ const dread = new DreadView();
 let last = performance.now();
 let still: Intent | null = null;
 let resumed = '', touchedAt = 0;
+// Following a friend's job: a press goes to the leader from the press itself, not the next frame (coop.ts).
+input.onPress = () => {
+  if (!game.remote || panel.open || title.open || chat.typing || pack.open || game.mode === 'watch') return;
+  game.remote.send(game.own(input.read()), performance.now() / 1000);
+};
 function tick(t: number): void {
   // (The first frame can stamp a hair before the page clock: never step backwards.)
   const dt = Math.max(0, Math.min(0.1, (t - last) / 1000));
@@ -610,6 +615,8 @@ w.__GAME_STATE__ = () => ({ mode: game.mode, wood: game.wood ? { wake: game.wood
 w.render_game_to_text = () => `${game.mode} t=${game.room.time.toFixed(1)} hero ${game.hero.act} hp ${game.hero.hp} st ${Math.round(game.hero.stamina)} | ` + game.room.enemies.map((e) => `${e.kind} ${e.act} hp ${e.hp}${e.attack ? ' ' + e.attack.kind + ' ' + e.attack.t.toFixed(2) : ''}`).join(' | ');
 Object.defineProperty(w, '__room', { get: () => game.room });
 w.__game = game;
+// (The online scripts try the lag compensation's cap: party-online.cjs.)
+w.__lagcomp = LAGCOMP;
 w.__views = views;
 w.__chat = chat.hooks();
 w.__works = WORK_ORDER;

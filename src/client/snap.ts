@@ -16,9 +16,10 @@ export type Patch = Partial<Record<Coll, { o?: string[]; u: [string, Ent][] }>>;
 /**
  * Hero fields a friend's screen never needs (counters). The pack goes: what a friend picks up comes
  * home with them. So do the relics they own (`found`): their pack lists them and carries one by its
- * place in the list, and a charge spent or a relic won on the job is theirs to keep.
+ * place in the list, and a charge spent or a relic won on the job is theirs to keep. A friend's lag and
+ * the moments their presses carried (sim/lagcomp.ts) are the leader's room's alone.
  */
-const SKIP = new Set(['seen', 'hitIds', 'hitAllies', 'grudges', 'stats']);
+const SKIP = new Set(['seen', 'hitIds', 'hitAllies', 'grudges', 'stats', 'lag', 'rollPressVt', 'rollVt', 'guardVt', 'guardOffVt']);
 
 const round = (v: unknown): unknown =>
   typeof v === 'number' ? (Number.isFinite(v) ? Math.round(v * 100) / 100 : v > 0 ? 1e9 : -1e9) : Array.isArray(v) ? v.map(round) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, round(x)])) : v;
