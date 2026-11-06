@@ -48,6 +48,8 @@ import { drawText, textWidth } from './pixfont';
 import { blockAt, blockFoot, drawBlock, drawRound } from './blocks';
 import { DECKS } from './pieces';
 import { drawPunt, drawStaitheGround, puntAt, staitheLights } from './staithedraw';
+import { doorLights } from './shutdraw';
+import { drawWoodGround, woodFigs, zoneLights } from './wooddraw';
 import { blazeLights, drawBlaze, drawBlazeAbove } from './blazedraw';
 import { kindling } from '../shared/kindling';
 import { drawGlint, drawKindling, drawWoodpile } from './kindledraw';
@@ -408,6 +410,8 @@ export class Scene {
     for (const e of room.enemies) if (e.haul) items.push({ y: OY + e.haul.y * PX - 6, draw: () => drawHauled(c, e, OX + e.haul!.x * PX - cx, OY + e.haul!.y * PX - cy) });
     for (const [x1, y1, x2, y2] of ropeOf(room)) items.push({ y: OY + Math.max(y1, y2) * PX + 0.5, draw: () => drawRope(c, OX + x1 * PX - cx, OY + y1 * PX - cy - 6, OX + x2 * PX - cx, OY + y2 * PX - cy - 6) });
     // The scenes past the wood's trees (vignettes.ts): drawn like anyone, never in the room.
+    // Hangman's Wood: the cage on its chain, Hew's marks, the mid-point's fire (wooddraw.ts).
+    for (const f of woodFigs(room, room.time)) items.push({ y: OY + f.y * PX, draw: () => f.draw(c, OX + f.x * PX - cx, OY + f.y * PX - cy) });
     for (const f of vignetteFigs(map, room.time, me)) items.push({ y: OY + f.y * PX - (f.floor ? 20 : 0), draw: () => f.draw(c, OX + f.x * PX - cx, OY + f.y * PX - cy) });
     for (const b of map.braziers) items.push({ y: OY + b.y * PX, draw: () => drawBrazier(c, OX + b.x * PX - cx, OY + b.y * PX + 2 - cy, now, brazierOn(map, b)) });
     // What the goblins left that moves: one hung from a hook, the pot on their fire (grimdraw.ts).
@@ -463,6 +467,8 @@ export class Scene {
     drawExpedGround(glow, room, ground, now);
     // The Staithe: its log's clock and the jetty's ring on the ground, the punt on the water (staithedraw.ts).
     drawStaitheGround(glow, room, ground, now);
+    // Hangman's Wood: snares, a dropper's shadow, the oak's burning wood, the fire's ring (wooddraw.ts).
+    drawWoodGround(glow, room, ground, now);
     const punt = puntAt(room);
     if (punt) items.push({ y: OY + punt.y * PX - 4, draw: () => drawPunt(c.lit, OX + punt.x * PX - cx, OY + punt.y * PX - cy, PX, punt.full, now) });
     items.sort((p, q) => p.y - q.y);
@@ -504,6 +510,7 @@ export class Scene {
     strikeLights(room, cx, cy, lights);
     for (const b of beacons) lights.push({ x: OX + b.x * PX - cx, y: OY + b.y * PX - cy - 14, r: 150 + Math.sin(now * 9) * 8, i: 1.3, c: [1, 0.62, 0.3] });
     for (const l of staitheLights(room)) lights.push({ x: OX + l.x * PX - cx, y: OY + l.y * PX - cy - 10, r: l.r * PX + Math.sin(now * 9 + l.x) * 3, i: l.i, c: l.c });
+    for (const l of [...doorLights(room), ...zoneLights(room, now)]) lights.push({ x: OX + l.x * PX - cx, y: OY + l.y * PX - cy - 10, r: l.r * PX + Math.sin(now * 9 + l.x) * 3, i: l.i, c: l.c });
     for (const m of room.coals) lights.push({ x: OX + m.x * PX - cx, y: OY + m.y * PX - cy - 4, r: 26 + Math.sin(now * 7 + m.id) * 3, i: 0.6 * Math.min(1, m.life / 4), c: [1, 0.6, 0.28] });
     for (const ch of room.chests) if (ch.state !== 'shut') lights.push({ x: OX + ch.x * PX - cx, y: OY + ch.y * PX - cy - 6, r: ch.state === 'opening' ? 16 + 30 * (ch.t / 1.2) : 26, i: ch.state === 'opening' ? 0.4 + 0.5 * (ch.t / 1.2) : 0.35, c: tint(TIERS[ch.tier].col) });
     for (const d of room.drops) {

@@ -25,6 +25,7 @@ import { smokeBlind } from './smokebomb';
 import { wayTo } from './pathing';
 import { hearFrom, samePack } from './packs';
 import { stepOwn } from './ownfoes';
+import type { Noose } from './snares';
 import { netted } from './netter';
 import { blindNotice } from './blind';
 import { tauntTarget } from './taunt';
@@ -35,7 +36,7 @@ import { count, dealt } from './score';
 import { chalkTarget } from './chalker';
 
 /** The room's oil slicks, for the torch-bearers (the room sets it before its goblins move). */
-export const OWN_KIT: { slicks: Slick[]; freed: Survivor[]; foes: Enemy[] } = { slicks: [], freed: [], foes: [] };
+export const OWN_KIT: { slicks: Slick[]; freed: Survivor[]; foes: Enemy[]; nooses: Noose[] } = { slicks: [], freed: [], foes: [], nooses: [] };
 
 const SPECS: Partial<Record<Enemy['kind'], EnemySpec>> = { butcher: BUTCHER, scrapper: SCRAPPER, spider: SPIDER, brood: BROOD };
 

@@ -6,6 +6,7 @@
 import type { Block, Mark } from './arena.js';
 import type { Job } from './jobs.js';
 import { Rng } from './rng.js';
+import { doorsRule } from './doors.js';
 
 export type HouseKind = 'cottage' | 'backroom' | 'weaver' | 'smith' | 'looted' | 'store' | 'stalls' | 'haybarn'
   // The big ones, on long and deep jobs.
@@ -35,7 +36,7 @@ const LIT: Partial<Record<HouseKind, number>> = { cottage: 0.5, backroom: 0.5, w
 
 /** The house a seed makes, behind a cottage's door or a barn's. */
 export function house(seed: number, door: string): House {
-  const rng = new Rng(seed * 7 + 101), list = door === 'barn' ? BARNS : COTTAGES;
+  const rng = new Rng(seed * 7 + 101), list = door.startsWith('barn') ? BARNS : COTTAGES;
   let r = rng.next() * list.reduce((s, [, w]) => s + w, 0), kind = list[0][0];
   for (const [k, w] of list) if ((r -= w) < 0) {
     kind = k;
@@ -64,14 +65,14 @@ export function big(job: Job, roomIndex: number, seed: number): boolean {
 }
 
 /** The big sort a house becomes, by its door. */
-export const bigKind = (seed: number, door: string): HouseKind => (door === 'barn' ? 'tithebarn' : new Rng(seed * 5 + 9).next() < 0.5 ? 'longhouse' : 'manor');
+export const bigKind = (seed: number, door: string): HouseKind => (door.startsWith('barn') ? 'tithebarn' : new Rng(seed * 5 + 9).next() < 0.5 ? 'longhouse' : 'manor');
 
 /**
  * Tag a run room's houses: each its seed (`look`), its fate and whether it's big. A blocked house loses
  * its door (no way in, no prompt); a burning one smoulders (drawn on fire, never spreading). Returns the
  * rubble spilled in the street in front of the wrecked ones.
  */
-export function settle(job: Job, roomIndex: number, blocks: Block[]): Mark[] {
+export function settle(job: Job, roomIndex: number, blocks: Block[], limit = 1): Mark[] {
   const spill: Mark[] = [];
   blocks.forEach((b, i) => {
     if (!b.door) return;
@@ -82,5 +83,7 @@ export function settle(job: Job, roomIndex: number, blocks: Block[]): Mark[] {
     if (end === 'blocked') delete b.door;
     if (end === 'wrecked' || end === 'blocked') spill.push({ kind: 'debris', x: b.x + (seed % 2 ? -0.6 : b.w - 1.6), y: b.y + b.h - 0.2, w: 2.2, h: 1.2 });
   });
+  // Fewer doors, bigger insides: one house to go into (shared/doors.ts), the rest shut, their things moved into it.
+  doorsRule(blocks, limit);
   return spill;
 }

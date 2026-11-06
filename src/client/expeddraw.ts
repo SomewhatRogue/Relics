@@ -31,7 +31,7 @@ export function drawExpedGround(g: CanvasRenderingContext2D, room: ArenaRoom, P:
   const x = room.exped;
   if (!x || room.indoors) return;
   for (const q of [...x.goals, ...x.sides]) {
-    if (q.done || (q.kind !== 'larder' && q.kind !== 'shrine' && q.kind !== 'pray')) continue;
+    if (q.done || (q.kind !== 'larder' && q.kind !== 'shrine' && q.kind !== 'pray' && q.kind !== 'winch')) continue;
     ring(g, P, q.x, q.y, ringOf(q.kind), q.p, now);
   }
   if (x.phase === 'open') ring(g, P, x.zone.x, x.zone.y, x.zone.r, x.lit / EXPED.call, now);

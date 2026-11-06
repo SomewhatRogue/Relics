@@ -2,6 +2,136 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-05: the atlas, slices 0 and 1: fewer doors with bigger insides, and Hangman's Wood as the first curated zone (Kyle; Claude Opus 5.5)
+
+Kyle approved `docs/plans/atlas.md` today, with notes on top: "each place has a story, and it should have smaller
+paths and scenes as you approach all the bigger areas, so it's not just one big hall to the next big scene"; "doing
+bigger quests like this can get you relics, which right now don't drop often"; earlier, "bigger insides and houses,
+but less of them". Numbers in `shared/hangtune.ts` (HANGWOOD, SNARER, HOIST, DROPPER, HEMPEN, WINCH, OAK, CHECK;
+re-exported by tuning.ts); every word in `shared/hangwords.ts`.
+
+**Slice 0, the doors rule** (`shared/doors.ts`, run at the end of `houses.ts settle`):
+- **One house to go into a street.** Of a room's houses with a door, one is kept: standing before half fallen in
+  before smouldering, a cottage before a barn, the bigger first. Layout 4's SMOKE house (`cottage:held`) is the
+  room's objective and is kept besides (the plan's "a heart room may have two if one is the objective"). Over 30
+  board days, both roads, every room: at most one ordinary door a room and **three a job** (the most found; a job
+  with a SMOKE house can show four doors, the fourth being that scene's). The Barrowfields' hamlet keeps **two**.
+- **The rest are shut**: `shut: 'boarded'` (pale planks over the door and both windows) or `'burnt'` (soot, the roof
+  open, a black doorway), 60/40 by the house's seed, a smouldering one always burnt. No door, so no woodpile
+  (`kindling` needs one), no lit window, no chimney smoke. They still burn as scenery. Fallen-in (blocked) houses
+  are as they were.
+- **Merge, don't delete.** The kept house's door names the houses it took in (`cottage:big:0c.3c.9c`): it becomes
+  one of the big ones (longhouse or hall house for a cottage, the great barn for a barn: `big` on the block too, so
+  it burns slower), and its inside (`inside.ts movedIn`) lays out the cages and chests that **each** of those
+  houses, itself included, had in its own plan, on a stream of its own (the first cage in the layout's tucked-away
+  spot). So a room's captives and chests are exactly what they were: checked over 60 days, both roads, 461 house
+  rooms, against main: every room's cage and chest counts equal, and with door, shut and big stripped every plan
+  byte for byte the same.
+- **Seen from a distance**: firelight moving in the kept house's doorway (flat glow, a warm pane in 2.5D, a light
+  in both views: `client/shutdraw.ts doorLights`), its woodpile, and the gold diamond over it whenever its plan has
+  someone caged (`sim/goal.ts houseCaptives` now counts every unvisited house from its plan, not only on a
+  rescue's last room; the banner says "1 more in the houses").
+- **Pins re-pinned** only after checking: with the rule switched off (an env switch, since removed) the variety,
+  layout-3, layout-2 and old-job pins were exactly their old values. New: variety 3136210020, layout 3 3987024697,
+  route (old jobs) 1304300190, layout 2 356891114. Tests that are about going in and out of houses, not about
+  which open, put the doors back first (`tests/undoors.ts`: split, runux, grim's fire test).
+
+**Slice 1, Hangman's Wood** (`shared/hangwood.ts` the spine, `hangscenes.ts` the scenes; `sim/woodzone.ts`,
+`snares.ts`, `dropper.ts`, `hempen.ts`, `hangfire.ts`; drawn by `client/wooddraw.ts`, `woodpieces.ts`, `fxwood.ts`,
+`shutdraw.ts`). An expedition (`job.exped: 'hangmans'`) on the expedition kit, 72 by 48, posted on the board every
+day after THE BARROWFIELDS, in Greyhollow (`expedjob.ts hangmansWood`; `?hero=WARRIOR&wood=1` to go straight in).
+- **The fixed spine.** Way in (5, 44); the snare line (13, 39); the body by the waymark (21, 33); the gibbet
+  crossroads (31, 26), its dead roads west and south; the pair with the sack (40, 31); the fork up the oak's own
+  path to the Gospel Oak (43, 12), a side pocket; the fire, the mid-point (50, 23); Hew's blaze marks (56, 16);
+  Hempen's ground (62, 9); out by the north path (66, 0). The seed only bends the trails between scenes (up to 1.6
+  tiles), and places the trees (about 500, walling the trails to 2 to 3 tiles wide), the knots of goblins along
+  the trails (about 40 goblins placed in all, plus the expedition's waves), one or two chests from four spots, and
+  the sky. Every scene, job, the fire and the way out are walkable from the way in (tested on three days).
+- **The approach, small paths and little scenes.** Each a few seconds of story or a small fight, said once over
+  the first hero to reach it (a beat): the snarer kneeling at the last of its three snares, two dozing by; a body
+  at a waymark with crows and a dropper in the branches over him; at the gibbet two winding someone up into the
+  cage and the rest at their fire; two dragging a sack of charcoal up the path (their drag mark behind); Hew's axe
+  marks on the trunks by the path (four trees nearest it); Hempen's hanging tree with its stock. Knots of 2 to 4
+  between.
+- **The gibbet's winch** (`winch`, a pinned job): stand in its ring (1.8) **24 s**, with any hold's grace and
+  waves (`expedpressure.ts` treats it as the shrine). The cage comes down on its chain as you go (drawn from the
+  job's progress, which a friend already gets); at the bottom it's a cage on the ground to break open like any.
+- **The Gospel Oak** (`oak`, a side job: the brood mother dead): a wooden block (480), lamp oil by the path up to
+  it. Any fire that reaches its wood lights it (`catching.ts`, unchanged). Alight, every **1.2 s** burning wood comes
+  down 1.6 to 3.6 from the trunk on a striped circle (0.85 round, **1.1 s** warning): **14** to heroes, goblins hurt
+  and set alight. The brood mother in the hollow burns **30 a second** and wakes. Falls are on the block
+  (`falls`, `nextFall`), rolled on the room's fire stream.
+- **The mid-point's fire** (`CHECK`): stand by it **1.5 s** to light it. Then the run is saved there: alone, your
+  three downs start again from nothing (`run.ts`), and you get up by the fire; in a party, anyone down **8 s** with
+  nobody at them, or out, gets up by it at half health, so a party that all goes down after the fire hasn't lost.
+- **The snarer** (variant `snarer`, **30** health, a backer): keeps **3.4** off, every **6 s** kneels and lays a
+  snare **1.4** in front of whoever it's after, between you and it; at most 5 out; each lives **45 s**, live after
+  **0.6 s**, catches within **0.42**. The room's `nooses` (a new patch collection: a snare goes when it's laid or
+  sprung, never per tick). Caught: **hoisted** by the ankle (the net's hold, `hoisted` on the hero, no struggling
+  out) **2.5 s**, or a friend's GRAB within 1.3 (CUT FREE) cuts you down at once; left to drop, **4** damage.
+- **The dropper** (a perch task at level 1, out of a blade's reach): a hero within **3.4** and it lets go onto
+  where they stood, a shadow circle with a striped edge (**1.0** round, **1.0 s**); landing **12** and a knock to
+  whoever stayed in it, then it's down **0.6 s** and fights. All on its task (`at`, `tx`, `ty`), so a friend draws
+  the same circle. Three: at the waymark, by Hew's marks, over the way into Hempen's ground.
+- **Hempen** (named butcher, **600** health): a butcher as any, and every **8 s**, with you **2.2** to **6** off,
+  its noose down a thin red lane (the gaffer's hook's lane: block it, or parry and the rope's SNAPPED for a while);
+  landed, you're hoisted as in a snare. With two snarers and a band.
+- **The relic.** Hempen leaves a relic where it falls **every time** (`sure` on the foe: `pickups.ts dropRelic`
+  skips the roll), through the existing relic system (which kind is `rollRelic`'s, unchanged). The posting says so.
+- **The way out.** No beacon to hold (the plan's "where it fits": it didn't, at 6 to 7 minutes): once the winch
+  is done and Hempen is dead it's straight out by the north path. Pays as the Barrowfields does (15% of the posting a
+  job, 10% a side job; posting `payFor(4, 2, night, 'medium') + 40`).
+- **How the cast bleeds in** (`shared/debut.ts`, a new `zone` on Debut): the snarer's template `snare` (a snarer
+  behind 3 or 4 small ones) is staged in the wood until day 67, then rare in Greyhollow, then common from day 88
+  (`from` 60, as the chalker's); the dropper has its Debut for the record but no pack yet, so it's the wood's only.
+  The template at weight 0 while staged moved no pin (checked).
+- **Drawn, flat and 2.5D, one source.** Pieces (`pieces.ts` hands to `woodpieces.ts`): the gibbet (post, arm,
+  winch drum), the waymark stone, the Gospel Oak (trunk, hollow, ribbons, crown; a black stump once burnt). On the
+  ground (flat glow, the 2.5D overlay): snares faint striped, the dropper's shadow darkening, the oak's falls
+  striped red, the fire's ring of gold dots. Stood up (flat items, 2.5D cards): the cage on its chain with someone
+  waving in it, the axe marks, the fire pit. With the body: a dropper's rope, the snarer's coil and stake, a hoisted
+  hero lifted on a rope, the sack. The fire's light in both. The map screen titles itself by the map and pins the
+  fire (FIRE).
+
+**Online.** The room decides everything with its seeded streams; nothing new rolls on a guest (the map is built
+from the seed on every screen). Deltas only: the snares come and go in `nooses`, perches and the oak's falls are
+fields on the goblin and the block, the fire and beats in the expedition's view. A test encodes ticks with snares
+lying still and droppers waiting: no snare, block or task field goes. `scripts/exped-online.cjs` takes `ZONE=hangmans`:
+Kyle on a laptop and Sam on a phone in the wood, 120 ms lag: same map on both screens, Sam got 20.4 KB/s (16.7
+messages a second, biggest 17.7 KB), saw 9 goblins of 43, had the snare line and the winch from the leader.
+
+**Tests**: `tests/doors.test.ts` (5: one door a room, three a job; the rest shut, no door, no woodpile, both looks;
+the kept house big and holding every cage and chest; a rescue's captives all in it; the hamlet's two),
+`tests/hangwood.test.ts` (12: the spine fixed and the details seeded; walkable; the beats in order and once; the
+fire alone and in a party; the winch, its grace and the cage; the oak's ring and the brood mother; snares hoist,
+no mashing out, cut down, the drop; the snarer lays them; the dropper's circle; Hempen's noose and the relic on
+three days; the same fight twice; a friend's patches). Shots: `node scripts/atlas-look.cjs [url] [outdir]`
+(targets `npx tsx scripts/atlas/find.ts`).
+
+**New names and lines, lore keeper's pass applied** (`shared/hangwords.ts`; the line editor's still to come):
+Hangman's Wood (exists), the Gospel Oak, the snarer, the dropper, Hempen (as `HEMPEN`), the north path. Posting:
+"The hungry have put the old gibbet at the crossroads in Hangman's Wood back to use, and there's somebody alive in
+the cage. Get them down, and kill the one they call Hempen."; "One wood, about 7 minutes"; "{n} gold and a relic off
+Hempen, more for each job done. Half if you don't get out". Pins and jobs: GIBBET "Wind the gibbet cage down: stand
+at the winch" / "The cage is down"; OAK "Side job: burn the brood mother out of the Gospel Oak" / "The Gospel Oak is
+burnt out"; HEMPEN "Kill Hempen" / "Hempen is dead"; FIRE (map). Banner: "Light the fire in the clearing"; "Hempen is
+dead. Out by the north path"; "The fire's lit. Anyone who goes down gets up by it now"; "Your jobs are on the MAP.
+Keep to the paths." Beats: "Snares on the path, and they're hard to see. Watch your feet."; "The crows got to him
+first. Mind the branches over him."; "They're winching the cage up, and there's somebody in it."; "That's a sack of
+charcoal they're dragging, and they're taking it out of the wood."; "Old axe marks on the trees. Hew's, I'd bet,
+nobody else worked this deep."; "The Gospel Oak. Something's living in the hollow."; "There's rope on every branch,
+and most of it's in use. This is where Hempen keeps them." Callouts: SNARED, CUT FREE (the net's word: one word for
+one thing), LOOK UP (SNAPPED as the gaffer's). Recorded in docs/lore/story-bible.md ("Hangman's Wood"): the pre-war
+gibbet (who hanged anyone there never said), Hew's old blazes running north, the Gospel Oak (the bounds, faded
+ribbons, no god named), spiders in Greyhollow, charcoal carried out (where to, unsaid), ankle-hoisting, the snarer
+and the dropper, Hempen among the named butchers (called "it"), the north path coming round to the Wickhold road.
+
+**Open for Kyle**: the numbers once he's played (24 s at the winch, 8 s for the fire's get-up, 6 s a snare, 2.5 s
+hoisted, the oak's 1.2 s, Hempen's 600 and 8 s); the Gospel Oak and gibbet are box pieces, and the oak reads as a
+wide brown trunk more than a tree, worth a Blender pass; the hanging-tree scene is still also a random roll in
+Greyhollow (taking it out of the roll would move the layout-4 pin, so it's left for its own slice); the wood is
+fewer goblins than asked of the knots (about 40 placed) since the scenes leave little trail between them.
+
 ## 2026-11-05: the Staithe: NETS on layout 4, the gaffer and the skimmer, and the Staithe on the Barrowfields (Kyle; Claude Opus 5.5)
 
 Kyle approved the biomes proposal ("continue all approved"), section 2 and rollout items 4 and 5, and asked

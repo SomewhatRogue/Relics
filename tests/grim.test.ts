@@ -1,3 +1,4 @@
+import { undoDoors } from './undoors';
 import { describe, expect, it } from 'vitest';
 import { inArea, type Block } from '../src/shared/arena';
 import { burningAt, reaches } from '../src/shared/blaze';
@@ -24,10 +25,12 @@ const job = (seed: number, o: Partial<Job> & { ruin?: number; kind?: Job['place'
 const BIG = ['THE LONGHOUSE', 'THE HALL HOUSE', 'THE GREAT BARN'];
 
 /** A run room's houses with their fates, and the job they came from. */
-function streets(n: number, o: Parameters<typeof job>[1]) {
+function streets(n: number, o: Parameters<typeof job>[1], undo = false) {
   const out: { j: Job; b: Block; i: number; room: number }[] = [];
   for (let s = 1; s <= n; s++) for (const room of [0, 1, 2]) {
     const j = job(s * 31 + 7, o), plan = planRoom(j, room);
+    // (Every house's own inside, as before the doors rule shut most of them: undoors.ts.)
+    if (undo) undoDoors(plan.map.blocks);
     plan.map.blocks.forEach((b, i) => b.look !== undefined && out.push({ j, b, i, room }));
   }
   return out;
@@ -88,7 +91,8 @@ describe('wrecked and burning houses', () => {
       for (const { b } of streets(60, { ruin, kind: 'village' })) {
         c[b.fate!]++;
         expect([b.w, b.h]).toEqual([3.5, 2]);
-        expect(!!b.door).toBe(b.fate !== 'blocked');
+        // (A house the doors rule shut has no door either: shared/doors.ts.)
+        expect(!!b.door).toBe(b.fate !== 'blocked' && !b.shut);
         expect(!!b.smoulder).toBe(b.fate === 'burning');
       }
       return c;
@@ -100,8 +104,8 @@ describe('wrecked and burning houses', () => {
 
   it('a burning house always leaves a way from the door to the cage that no fire crosses before the roof comes in', () => {
     let seen = 0;
-    for (const { j, b, i, room } of streets(120, { ruin: 3, kind: 'village', objective: 'rescue' })) {
-      if (b.fate !== 'burning') continue;
+    for (const { j, b, i, room } of streets(120, { ruin: 3, kind: 'village', objective: 'rescue' }, true)) {
+      if (b.fate !== 'burning' || !b.door) continue;
       const p = runInterior(j, room, i, b.door!), z = p.map.blaze!, cage = p.props.find((q) => q.kind === 'cage')!;
       seen++;
       expect(z.fall).toBeGreaterThanOrEqual(HOUSEFIRE.fallMin);
@@ -174,13 +178,14 @@ describe('wrecked and burning houses', () => {
 
   it('in the game: a blocked house has no door to use, a burning one can be gone into, and once it falls in it is ash outside', () => {
     let j: Job | undefined;
-    for (let s = 1; s < 400 && !j; s++) {
+    for (let s = 1; s < 4000 && !j; s++) {
       const c = job(s, { ruin: 3, kind: 'village', rooms: 2 }), bs = planRoom(c, 0).map.blocks;
-      if (bs.some((b) => b.fate === 'burning') && bs.some((b) => b.fate === 'blocked')) j = c;
+      // (The burning one the street's one door: shared/doors.ts.)
+      if (bs.some((b) => b.fate === 'burning' && b.door) && bs.some((b) => b.fate === 'blocked')) j = c;
     }
     const g = new Game();
     g.startJob(j!);
-    const blocked = g.room.map.blocks.find((b) => b.fate === 'blocked')!, burning = g.room.map.blocks.find((b) => b.fate === 'burning')!;
+    const blocked = g.room.map.blocks.find((b) => b.fate === 'blocked')!, burning = g.room.map.blocks.find((b) => b.fate === 'burning' && b.door)!;
     Object.assign(g.hero, { x: blocked.x + blocked.w / 2, y: blocked.y + blocked.h + 0.45 });
     expect(g.near()?.door).not.toBe(blocked);
     g.enter(blocked);

@@ -11,9 +11,12 @@ import { drawEnemy } from './foes';
 import type { Fx } from './fx';
 import { STRAW, drawStrawHeap } from './rackdraw';
 import { toPx } from './world';
+import { drawPerchRope } from './wooddraw';
 
 /** A goblin, or (in the yard: `straw`) a straw man playing one. The plain dummies are themselves either way. */
 export function drawFoe(c: Ctx, e: Enemy, x: number, y: number, sleeping: boolean, straw: boolean): void {
+  // A dropper up a tree in Hangman's Wood: its rope up into the branches (wooddraw.ts).
+  if (e.task?.k === 'perch') drawPerchRope(c, e, x, y);
   if (!straw || e.kind === 'dummy' || e.kind === 'swingDummy') return drawEnemy(c, e, x, y, sleeping);
   if (e.act === 'dead') return drawStrawHeap(c.lit, x, y, e.id);
   drawEnemy(c, e, x, y, sleeping);

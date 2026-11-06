@@ -19,7 +19,9 @@ export type RoundKind = 'pillar' | 'tree' | 'pine' | 'rock' | 'hay' | 'well' | '
   | 'candles' | 'witchfire'
   // Layout 4's pieces (client/pieces.ts draws both views from one list): the hungry's hanging tree, a
   // headstone, an orchard's apple tree.
-  | 'hangtree' | 'headstone' | 'apple';
+  | 'hangtree' | 'headstone' | 'apple'
+  // Hangman's Wood (shared/hangwood.ts): the crossroads gibbet's post and arm, a waymark stone.
+  | 'gibbet' | 'waymark';
 export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall' | 'tent' | 'rockwall' | 'fence' | 'granary' | 'wall' | 'den'
   // Furniture, inside buildings.
   | 'counter' | 'bed' | 'shelf' | 'anvil' | 'altar' | 'pew' | 'bench' | 'hearth' | 'sacks'
@@ -39,7 +41,9 @@ export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall'
   | 'headframe' | 'log' | 'mill' | 'stakes'
   // The Staithe (shared/staithe.ts): the eel-catchers's jetty over deep water, the log laid across to it, a
   // smokehouse, drying racks, nets hung up to dry.
-  | 'jetty' | 'gangway' | 'smokehouse' | 'dryrack' | 'hungnet';
+  | 'jetty' | 'gangway' | 'smokehouse' | 'dryrack' | 'hungnet'
+  // Hangman's Wood: the Gospel Oak, hollow, wooden (it burns from inside: sim/hangfire.ts).
+  | 'oak';
 export interface Round extends Circle { kind: RoundKind }
 export interface Block {
   x: number; y: number; w: number; h: number; kind: BlockKind; label?: string;
@@ -66,6 +70,11 @@ export interface Block {
    */
   fate?: 'standing' | 'wrecked' | 'blocked' | 'burning';
   big?: boolean;
+  /**
+   * Fewer doors, bigger insides (docs/plans/atlas.md section 6, shared/doors.ts): a job's house that's
+   * shut for good, boarded up or burnt out, with no door, no lit window and no woodpile. Paint only.
+   */
+  shut?: 'boarded' | 'burnt';
   /** Paint only: a house of stone with a slate roof (a better-off street). */
   style?: 'stone';
   /** Someone crouched at its kindling spot setting it alight (sim/kindle.ts): who, and how long so far. */
@@ -95,6 +104,9 @@ export interface Block {
    * log's laying (when it'll be across if the carriers keep at it, or what's left while they don't), and
    * the hold (when the punt will be done if the ring's held, or what's left while it isn't).
    */
+  /** The Gospel Oak alight (sim/hangfire.ts): burning wood coming down (x, y, when it lands), and when the next comes. */
+  falls?: [number, number, number][];
+  nextFall?: number;
   layAt?: number;
   layLeft?: number;
   holdAt?: number;
@@ -283,6 +295,8 @@ export interface GameMap {
   oil?: { x: number; y: number; r: number }[];
   /** The Staithe (shared/staithe.ts): where its ring, folk and punt are; its jetty, log and smokehouse are blocks. */
   staithe?: StaitheMap;
+  /** Hangman's Wood (shared/hangwood.ts): its fixed spine, what a friend's screen draws from the map alone. */
+  hang?: import('./hangwood.js').HangMap;
 }
 /** `span`: a gap a laid log crosses (deep water stops you there unless you're on the log). */
 export interface Water { x: number; y: number; w: number; h: number; deep?: boolean; span?: boolean }

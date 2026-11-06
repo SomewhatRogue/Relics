@@ -4,7 +4,8 @@
  * presses of attack, dodge and guard and swings of the stick work them loose, and a friend's GRAB close
  * by cuts them out at once. Any blow taken while netted keeps them netted.
  */
-import { NETTER } from '../shared/tuning';
+import { HOIST, NETTER } from '../shared/tuning';
+import { downIfDead } from './combat';
 import { begin, walk } from './enemies';
 import type { Enemy, FightEvent, Hero, Intent } from './types';
 
@@ -65,7 +66,8 @@ export function stepNets(heroes: Hero[], intents: Map<string, Intent>, none: Int
       const a = Math.atan2(inp.my, inp.mx), was = h.netAng;
       if (was === undefined || Math.abs(Math.atan2(Math.sin(a - was), Math.cos(a - was))) > 1) (h.netAng = a), (off += was === undefined ? 0 : NETTER.wiggle);
     }
-    if (off) (h.netUntil -= off), ev.push({ k: 'struggle', x: h.x, y: h.y });
+    // (Hoisted in a snare there's no struggling out of it: sim/snares.ts.)
+    if (off && !h.hoisted) (h.netUntil -= off), ev.push({ k: 'struggle', x: h.x, y: h.y });
     // A friend close by with GRAB: cut loose.
     for (const o of players(heroes)) {
       if (o === h || netted(o, now) || Math.hypot(o.x - h.x, o.y - h.y) > NETTER.cut) continue;
@@ -74,6 +76,7 @@ export function stepNets(heroes: Hero[], intents: Map<string, Intent>, none: Int
       o.seen.grab = oi.grabSeq;
       h.netUntil = now;
       ev.push({ k: 'cutfree', x: h.x, y: h.y, id: h.id, by: o.id });
+      if (h.hoisted) (h.hoisted = undefined), ev.push({ k: 'cutdown', x: h.x, y: h.y, id: h.id });
       break;
     }
     if (h.netUntil > now) {
@@ -84,6 +87,8 @@ export function stepNets(heroes: Hero[], intents: Map<string, Intent>, none: Int
     }
     h.netUntil = h.netAng = undefined;
     if (h.act === 'stun') Object.assign(h, { act: 'idle', actT: 0 });
+    // Left to drop out of a snare: down hard on the ground.
+    if (h.hoisted) (h.hoisted = undefined), (h.hp -= HOIST.drop), ev.push({ k: 'hit', x: h.x, y: h.y, n: HOIST.drop, heavy: false, on: 'hero', src: 'fall' }), downIfDead(h, ev);
     ev.push({ k: 'netfree', x: h.x, y: h.y, id: h.id });
   }
 }

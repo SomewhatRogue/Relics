@@ -13,6 +13,7 @@ import { JobRooms } from '../src/client/jobrooms';
 import { Followers } from '../src/client/followers';
 import { newEnemy } from '../src/sim/enemies';
 import { damageProp } from '../src/sim/props';
+import { undoDoors } from './undoors';
 import { NO_INTENT, type Intent } from '../src/sim/types';
 import type { ArenaRoom } from '../src/sim/room';
 
@@ -29,6 +30,8 @@ function party(...ids: string[]) {
   const street = g.room;
   street.enemies.length = 0;
   for (const id of ids) Object.assign(street.join(id), { x: street.map.hero.x + 1, y: street.map.hero.y });
+  // (These are about each player's own house, so the street gets back the doors the doors rule shut: shared/doors.ts.)
+  undoDoors(street.map.blocks);
   const doors = street.map.blocks.filter((b) => b.door && !b.ruined && !b.locked);
   const say = (id: string, i: Partial<Intent>) => Object.assign(friends.get(id)!.intent, i);
   return { g, street, doors, say, friends };

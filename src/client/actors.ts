@@ -1,6 +1,7 @@
 /** Drawing a hero: the class's body, the weapon in hand, the dodge, charge and stun. */
 import { CHARGE, NETTER, WARD, WEAPONS, WANT } from '../shared/tuning';
 import { drawNetOn } from './foedraw';
+import { drawHoistRope } from './wooddraw';
 import { drawCrowsOn } from './beastdraw';
 import { chargeFull } from '../sim/hero';
 import { parryWindow, releaseWindow } from '../sim/knacks';
@@ -48,6 +49,8 @@ const STEPS = [-1, 0, 1, 0];
 /** `t` is the room's time (blessings and rallies are kept in it). */
 /** A hero, and a netter's net over them while they're held in it (foedraw.ts). */
 export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t: number): void {
+  // Hoisted by the ankle in Hangman's Wood (sim/snares.ts): off the ground on the rope, no net over them.
+  if (h.hoisted && (h.netUntil ?? -9) > t) return void (drawHoistRope(c, h, x, y), heroBody(c, h, x, y - 10, me, t));
   heroBody(c, h, x, y, me, t);
   if ((h.netUntil ?? -9) > t) drawNetOn(c, x, y, Math.min(1, (h.netUntil! - t) / NETTER.hold));
   if ((h.crowsUntil ?? -9) > t) drawCrowsOn(c, x, y);

@@ -8,6 +8,7 @@ import type { GoalKind, SideKind } from './expedcamps.js';
 import { payFor, PLACES, type Job } from './jobs.js';
 import { Rng } from './rng.js';
 import { rollTime } from './timeofday.js';
+import { WOOD_GOALS, WOOD_POST } from './hangwords.js';
 
 export const EXPED_BOSSES = ['GRISTLE', 'OLD HOOK', 'SPLITNAIL', 'THE DROVER'];
 
@@ -19,6 +20,19 @@ export function expedition(day: number): Job {
     id: `d${day}-exped`, place, objective: 'hunt', twist: night ? 'night' : 'none', time: rollTime(seed, night), rooms: 1, size: 'long', boss, seed, exped: 'barrowfields',
     reward: payFor(6, 2, night, 'long') + 60, title: 'Expedition: the Barrowfields',
     text: 'The hungry have camps all over the Barrowfields. Do the jobs pinned on your map, then light the beacon on the drove road and hold it till the watch comes out for you.',
+  };
+}
+
+/**
+ * The day's Hangman's Wood (docs/plans/atlas.md: posted like THE BARROWFIELDS, in Greyhollow): one curated
+ * wood, about 7 minutes, Hempen at the end of it with a relic in it. A new seed each day, the spine the same.
+ */
+export function hangmansWood(day: number): Job {
+  const rng = new Rng(day * 2311 + 29), seed = day * 433 + 151, night = rng.next() < 0.5;
+  const place = { ...PLACES.find((p) => p.name === "Hangman's Wood")!, ruin: 2 };
+  return {
+    id: `d${day}-wood`, place, objective: 'hunt', twist: night ? 'night' : 'none', time: rollTime(seed, night), rooms: 1, size: 'medium', boss: 'HEMPEN', seed, exped: 'hangmans',
+    reward: payFor(4, 2, night, 'medium') + 40, title: WOOD_POST.title, text: WOOD_POST.text,
   };
 }
 
@@ -36,7 +50,13 @@ export const GOAL_WORDS: Record<GoalKind | SideKind, { pin: string; todo: string
   staithe: { pin: 'STAITHE', todo: 'Get the eel-catchers off the Staithe: deal with the log, cut the netted free, hold the ring for the punt', done: 'The punt got them over' },
   cache: { pin: 'CHEST', todo: 'Side job: open the chained chest', done: 'Chest opened' },
   pray: { pin: 'PRAY', todo: 'Side job: pray at the shrine (stand at it)', done: 'Lucky: +30% damage, 25% less damage taken for 90 s' },
+  // Hangman's Wood's (shared/hangwords.ts).
+  winch: WOOD_GOALS.winch,
+  oak: WOOD_GOALS.oak,
 };
+
+/** A job's words for its pins: Hangman's Wood names its butcher's (Hempen). */
+export const goalWords = (job: Job): typeof GOAL_WORDS => (job.exped === 'hangmans' ? { ...GOAL_WORDS, butcher: WOOD_GOALS.hempen } : GOAL_WORDS);
 
 /** What the banner and the map screen say about the way out, by its state. */
 export const EXTRACT_WORDS = {

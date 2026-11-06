@@ -18,6 +18,7 @@ import { flatBlock } from './walls3d';
 import { woodpile } from './woodpile3d';
 import type { Kindling } from '../../shared/kindling';
 import { asLamp, lampMeshes } from './lamps3d';
+import { doorGlow, shutDoor } from './shut3d';
 
 /** Eave height (tiles) by kind. */
 export const TALL: Partial<Record<Block['kind'], number>> = { house: 1.45, barn: 1.9, hall: 1.6, church: 2.4, forge: 1.8, tavern: 1.7, granary: 1.9, tower: 3.6, shack: 0.95, den: 0.7 };
@@ -56,7 +57,7 @@ const shade = (c: number, k: number) => {
 export function buildBlock(b: Block, kin?: Kindling | null): Built {
   const group = new THREE.Group(), fires: Built['fires'] = [];
   if (!ROOFED.has(b.kind)) return { group: flatBlock(b, group, fires), roof: null, fires, top: 1, lamps: [] };
-  const st = blockState(b), ruined = st >= 4, alight = st % 2 === 1, charred = st >= 2 || alight;
+  const st = blockState(b), ruined = st >= 4, alight = st % 2 === 1, charred = st >= 2 || alight || b.shut === 'burnt';
   const r = new Seed(Math.round(b.x * 31 + b.y * 17 + 7)), L = LOOK[b.kind], home = houseOf(b), hc = home ? houseColours(b, home) : null;
   const k = charred ? 0.45 : 1, wallC = shade(hex(hc?.wall ?? L.wall), k), beam = shade(0x3a2a1e, k);
   // A cottage's lean-to takes one side of its footprint (cottage.ts); the house proper is the rest.
@@ -117,9 +118,9 @@ export function buildBlock(b: Block, kin?: Kindling | null): Built {
     // Windows on the front either side of the door, warm while the lamps are lit (blocks.ts): a cottage's
     // only when its fire's going, a town building's (not the tower) by the hour. A worn one (wear.ts) has
     // the right window boarded and the left one's shutter hanging off its hinge.
-    const lit = (home ? home.lit : L.windows && !b.maxHp && b.door !== 'tower') && !charred, bw = x1 - x0;
+    const lit = (home ? home.lit && !b.shut : L.windows && !b.maxHp && b.door !== 'tower') && !charred, bw = x1 - x0;
     if (bw >= 2.6 && H > 1.2 && b.door !== 'tower') for (const fx of [0.22, 0.78]) {
-      const wx = x0 + bw * fx, boarded = b.worn && fx > 0.5;
+      const wx = x0 + bw * fx, boarded = (b.worn && fx > 0.5) || b.shut === 'boarded';
       if (door !== null && Math.abs(wx - door) < dw + 0.4) continue;
       W.b(wx, H * 0.42, z1 + 0.01, 0.46, 0.06, 0.06, beam);
       W.b(wx, H * 0.42 + 0.36, z1 + 0.01, 0.46, 0.06, 0.06, beam);
@@ -130,6 +131,10 @@ export function buildBlock(b: Block, kin?: Kindling | null): Built {
       if (boarded) for (const [dy, c, rz] of [[0.13, 0x7a5a34, 0.25], [0.27, 0x6b4a2b, -0.2]] as const) W.c(wx, H * 0.42 + dy, z1 + 0.05, 0.56, 0.07, 0.03, c, 0, 0, rz);
       else if (b.worn) W.c(wx - 0.27, H * 0.42 + 0.12, z1 + 0.08, 0.05, 0.36, 0.2, shade(0x4a3420, k), 0.5, 0, 0.3);
     }
+    // Shut for good (../shutdraw.ts): planks over where the door was, or a black hole burnt through.
+    if (home && b.shut) shutDoor(W, b, z1, dh, r, group);
+    // Enterable: firelight moving in the doorway, seen from down the street.
+    if (home && door !== null && !b.shut && !alight && b.fate !== 'burning') doorGlow(group, door, dh, z1, dw);
     // A den has no door, only a dark mouth, and eyes in the dark of it (blocks.ts).
     if (b.kind === 'den' && door === null) {
       const mx = (x0 + x1) / 2;

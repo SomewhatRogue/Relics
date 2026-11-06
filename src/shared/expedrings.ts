@@ -4,11 +4,11 @@
  * at a cookpot or a wayside shrine. Numbers in shared/tuning.ts EXPED.
  */
 import type { GoalKind, SideKind } from './expedcamps.js';
-import { EXPED } from './tuning.js';
+import { EXPED, WINCH } from './tuning.js';
 
 /** The ring's radius for a job, or for the beacon. */
 export function ringOf(kind: GoalKind | SideKind | 'beacon'): number {
-  return kind === 'shrine' ? EXPED.holdR : kind === 'beacon' ? EXPED.extractR : EXPED.standR;
+  return kind === 'shrine' ? EXPED.holdR : kind === 'beacon' ? EXPED.extractR : kind === 'winch' ? WINCH.r : EXPED.standR;
 }
 
 /** A hold with its grace: `away` is the seconds since anyone was in the ring (undefined: nobody yet). */

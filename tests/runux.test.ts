@@ -1,4 +1,6 @@
 /** Finding your way on a job: the freed come out of houses with you, the goal counts them, the way out is plain. */
+// (These are about the freed coming out of a house with you, so the street keeps every door: undoors.ts.)
+import { undoDoors } from './undoors';
 import { describe, expect, it } from 'vitest';
 import { collide, doorAt, inArea, useMap, type Area, type GameMap } from '../src/shared/arena';
 import { PLACES, board, type Job } from '../src/shared/jobs';
@@ -29,6 +31,7 @@ function walkTo(g: Game, p: { x: number; y: number }, max = 8, stop = () => fals
 /** On a job, into the first house with someone caged in it, the goblins in it dead, the cage broken. */
 function freedInAHouse(g: Game): { door: { x: number; y: number } } {
   g.startJob(job('village', 'hunt', 7));
+  undoDoors(g.room.map.blocks);
   for (const b of g.room.map.blocks.filter((x) => x.door && !x.ruined)) {
     Object.assign(g.hero, doorAt(b));
     g.enter(b);
@@ -80,6 +83,7 @@ describe('the freed come out of houses with you', () => {
   it("the arrow points at the cage, then out of the door once they're freed", () => {
     const g = new Game();
     g.startJob(job('village', 'hunt', 7));
+    undoDoors(g.room.map.blocks);
     for (const b of g.room.map.blocks.filter((x) => x.door && !x.ruined)) {
       Object.assign(g.hero, doorAt(b));
       g.enter(b);

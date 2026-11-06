@@ -32,6 +32,7 @@ import type { Lerp } from './actors3d';
 import type { Figs } from './figs3d';
 import { LEDGE_H } from './ground';
 import { drawTally } from '../chalkdraw';
+import { woodFigs } from '../wooddraw';
 
 const lift = (z?: number) => (z ?? 0) * LEDGE_H;
 
@@ -95,6 +96,8 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
     const [x, y] = lerp('s:' + s.id, s.x, s.y);
     f.put('s' + s.id, x, lift(s.z), y, (c, px, py) => drawSurvivor(c, s, px, py, t), { pool: s.dead ? 0 : 0.2, bias: s.dead ? -0.3 : 0 });
   }
+  // Hangman's Wood: the cage on its chain, Hew's marks, the fire (../wooddraw.ts).
+  for (const g of woodFigs(room, t)) f.put('hw' + g.key, g.x, 0, g.y, g.draw, { pool: 0 });
   // The scenes past the wood's trees (../vignettes.ts).
   for (const g of vignetteFigs(map, t, me)) f.put('w' + g.key, g.x, 0, g.y, g.draw, { pool: g.floor ? 0 : 0.28, bias: g.floor ? -0.3 : 0 });
   // The yard's straw men waiting on their rack (its poles: rack3d.ts), and the watch with their ropes.

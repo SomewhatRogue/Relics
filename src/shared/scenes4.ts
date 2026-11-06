@@ -32,7 +32,10 @@ export type FoeTask =
   /** Over the laid log and onto the jetty, to take folk off it. */
   | { k: 'board'; at?: number }
   /** A chalker at its tally board at (x, y), `n` strokes on it (shared/chalkstage.ts). */
-  | { k: 'tally'; x: number; y: number; n: number; quit?: boolean };
+  | { k: 'tally'; x: number; y: number; n: number; quit?: boolean }
+  /** Hangman's Wood (sim/dropper.ts, shared/hangwood.ts): up in the branches till someone's under it (`at` it lands at tx, ty); at work on something at (x, y) till it sees you. */
+  | { k: 'perch'; at?: number; tx?: number; ty?: number }
+  | { k: 'busy'; x: number; y: number; what: 'winch' | 'snare'; quit?: boolean };
 
 export const SCENES4: Piece[] = ['burning', 'drag', 'prisoners', 'patrol', 'hanging', 'fallen', 'cache', 'drums', 'webs', 'wading', 'staithe'];
 

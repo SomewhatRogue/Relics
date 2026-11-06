@@ -10,7 +10,7 @@ import { travel } from '../shared/sweep';
 import type { DreadRule } from '../sim/dread';
 import { townInterior } from '../shared/interiors';
 import { board, STORY_PARTY, type Job } from '../shared/jobs';
-import { expedition } from '../shared/expedjob';
+import { expedition, hangmansWood } from '../shared/expedjob';
 import { WORKS, workDone, workOpen, workProgress, WORK_ORDER, type WorkId } from '../shared/works';
 import { contribute, type Contribution } from '../shared/worldsync';
 import { HERO_SLOTS, SHOP, gainXp, newProfile, perkFx, perkOffer, resetPerks, takePerk, type PerkId, type Profile } from '../shared/progress';
@@ -522,7 +522,8 @@ export class Game {
   /** Today's board, with the chapter's story mission on it until it's done. */
   jobs(): Job[] {
     // The day's expedition (THE BARROWFIELDS) at the foot of the board, its own posting.
-    const list = [...board(this.world.day, workDone(this.world, 'sewers')), expedition(this.world.day)];
+    // Then Hangman's Wood, the first of the atlas's curated places (docs/plans/atlas.md), posted the same way in Greyhollow.
+    const list = [...board(this.world.day, workDone(this.world, 'sewers')), expedition(this.world.day), hangmansWood(this.world.day)];
     return this.world.storyDone.includes(CHAPTER_1.mission.id) ? list : [CHAPTER_1.mission, ...list];
   }
 

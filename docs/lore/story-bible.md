@@ -142,7 +142,7 @@ most Want among the heroes is the one the bells don't spare).
   family's house on the one dry rise in the fen, razed; no Heskeths left). Hesketh Hall is not a second
   Wick: no heirloom, no barred lord, the statues are just statues.
 - **Named butchers on the board:** the Gnawer (Barrowby), Mawl, Skarn, Old Knuckles, Old Spoon,
-  Gutchain, Mother Rust. The Tally Man is chapter 4's and never appears on the board before then.
+  Gutchain, Mother Rust; Hempen (Hangman's Wood, called "it"). The Tally Man is chapter 4's and never appears on the board before then.
 - **People.** Corporal Brisk and Squire Pell (barracks), Farmer Jos, Old Merren (the Old Quarter),
   Alder Bram ("Alder" is a council seat) and Goodwife Sell, Dessa, Pike and Orla of the watch, the
   eight Rescue Row families, the patients Amos, Letty and Corin. Whisper is "he".
@@ -337,3 +337,14 @@ most Want among the heroes is the one the bells don't spare).
 - **The hungry don't cross deep water.** They have no boats; they lay a log across instead. Nothing on screen says why, and it's never framed as a weakness the town can use.
 - **The gaffer** uses a fishing gaff taken off the eel-catchers (never a billhook). **The skimmer** pours lamp oil from the hoard.
 - On-screen words: **HOOKED** (a hung net catching your foot) and **FROZEN** (frost holding the skimmer; PINNED stays the spear's word).
+
+## Hangman's Wood (recorded 2026-11-05; Kyle's call, lore keeper)
+- **Hangman's Wood** in Greyhollow has a gibbet at its crossroads from before the war. Who hanged anyone there is never said. The hungry have put it back to use.
+- **Hew's old blazes**, axe marks cut in the trees, run north through the wood: he worked deeper in than anyone.
+- **The Gospel Oak** is the old boundary oak where the valley walked its bounds. Its ribbons are faded, and no god is named for it.
+- **Spiders** have spread into Greyhollow (a brood mother nests in the oak's hollow).
+- **Charcoal** is carried out of the wood by the sack. Where it goes is never said on screen.
+- **The hungry hoist the living by the ankle.** The **snarer** sets ankle snares; the **dropper** waits in the branches and drops on you.
+- **Hempen** is among the named butchers, and is always called "it".
+- **The north path** out of the wood comes round to the Wickhold road.
+- On-screen words: **SNARED** (hoisted by the ankle), **CUT FREE** (a friend cuts you down: the same word as for a net), **LOOK UP** (a dropper letting go).

@@ -148,6 +148,7 @@ describe('layout 3: seeds', () => {
     // Taken before layout 3 (2026-11-04).
     // (Re-pinned 2026-11-04: nests send 2 spiders a wave, not 3; and again for weather as a rule, the theme
     // only: `sky` on it and the new odds, everything but the theme checked unchanged.)
-    expect(all).toBe(3813929807);
+    // Re-pinned 2026-11-05 for the doors rule (shared/doors.ts): with it switched off still 3813929807.
+    expect(all).toBe(356891114);
   }, 120000);
 });

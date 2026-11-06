@@ -48,8 +48,9 @@ export function inRoom(room: ArenaRoom): Captives {
 
 /**
  * Who's caged or freed-not-yet-out in each of the room's houses, by its door. Houses you've been in
- * count from their room as it is now; on a rescue, the ones you haven't count from their plan (the job
- * says folk are caged in them); otherwise an unvisited house isn't known. A burned-down house is gone.
+ * count from their room as it is now; the ones you haven't count from their plan (the job says folk are
+ * caged in them; and with one house to go into a street, its diamond shows from down the street). A
+ * burned-down house is gone.
  */
 const planned = new Map<string, number>();
 export function houseCaptives(run: Run, room: ArenaRoom, insides: Map<Block, ArenaRoom>): (Captives & { x: number; y: number })[] {
@@ -58,7 +59,7 @@ export function houseCaptives(run: Run, room: ArenaRoom, insides: Map<Block, Are
     if (!b.door || b.ruined) return;
     const inside = insides.get(b), at = doorAt(b);
     if (inside) return void out.push({ ...inRoom(inside), ...at });
-    if (run.job.objective !== 'rescue' || !isFinal(run)) return;
+    // (With one house to go into a street, it shows from a distance whether someone's caged in it: shared/doors.ts.)
     const k = `${run.job.id}:${run.job.seed}:${run.index}:${i}`;
     if (!planned.has(k)) (planned.size > 200 && planned.clear()), planned.set(k, runInterior(run.job, run.index, i, b.door).props.filter((p) => p.kind === 'cage').length);
     out.push({ caged: planned.get(k)!, waiting: 0, ...at });

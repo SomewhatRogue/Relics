@@ -25,6 +25,7 @@ describe('layout 3: seeds', () => {
     for (const day of [1, 2, 3]) for (const j0 of board(day)) one({ ...j0, layout: 3 });
     for (const p of [...PLACES, SEWERS]) for (const seed of [7, 707]) one({ ...board(1)[2], place: p, rooms: 5, seed, layout: 3 });
     // Taken 2026-11-04, before layout 4; re-pinned 2026-11-05 for the ironhide and rush templates (maps, props and chests checked unchanged).
-    expect(all).toBe(2578152521);
+    // Re-pinned 2026-11-05 for the doors rule (shared/doors.ts): with it switched off it is still 2578152521, so houses shut and a door that took others in are all that moved.
+    expect(all).toBe(3987024697);
   }, 240000);
 });

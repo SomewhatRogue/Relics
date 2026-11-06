@@ -10,11 +10,12 @@
 import type { PlaceKind } from './jobs.js';
 import type { Debut } from './debut.js';
 import { CHALKER } from './chalk.js';
+import { SNARE_DEBUT } from './hangwords.js';
 
 /** What a goblin in a pack is for. `fodder` is the small ones; every other role is a special. */
 export type Role = 'fodder' | 'lunger' | 'shield' | 'heavy' | 'hexer' | 'drummer' | 'butcher' | 'archer'
   | 'banner' | 'netter' | 'thief' | 'log' | 'roofer' | 'keeper' | 'wolf' | 'oiler' | 'torch' | 'sapper' | 'blind' | 'ironhide'
-  | 'chalker';
+  | 'chalker' | 'snarer';
 
 export interface Template {
   id: string;
@@ -64,6 +65,7 @@ export const TEMPLATES: Template[] = [
   { id: 'iron', said: 'an ironhide and the little ones', centre: ['ironhide'], fodder: [3, 4], from: 1, weight: 1.5, more: 'lunger' },
   { id: 'ironback', said: 'a brute with an ironhide at its side', centre: ['heavy'], support: ['ironhide'], fodder: [2, 3], from: 1, ruin: 1, weight: 1 },
   { id: 'chalk', said: 'a chalker behind a crowd, chalking one of you', support: ['chalker'], fodder: [3, 5], from: 1, weight: 1.5, more: 'lunger', debut: CHALKER.debut },
+  { id: 'snare', said: 'a snarer behind a few small ones, snaring the ground in front of you', support: ['snarer'], fodder: [3, 4], from: 1, weight: 1.2, debut: SNARE_DEBUT },
   { id: 'cave', said: 'blind hunters in the dark', fodder: [3, 4], fodderKind: 'blind', weight: 4, places: ['mine'] },
 ];
 
@@ -91,6 +93,6 @@ export const ENCOUNTER = {
 };
 
 /** Roles that are a kind of small goblin (the rest are something else: a wolf, the log-carriers). */
-export const GOBLIN_ROLES: Role[] = ['fodder', 'lunger', 'shield', 'heavy', 'hexer', 'drummer', 'archer', 'banner', 'netter', 'thief', 'roofer', 'keeper', 'oiler', 'torch', 'sapper', 'blind', 'ironhide', 'chalker'];
+export const GOBLIN_ROLES: Role[] = ['fodder', 'lunger', 'shield', 'heavy', 'hexer', 'drummer', 'archer', 'banner', 'netter', 'thief', 'roofer', 'keeper', 'oiler', 'torch', 'sapper', 'blind', 'ironhide', 'chalker', 'snarer'];
 /** Backers that keep to the back of a pack (put furthest from the way in). */
-export const BACK_ROLES: Role[] = ['archer', 'hexer', 'drummer', 'banner', 'netter', 'oiler', 'torch', 'keeper', 'chalker'];
+export const BACK_ROLES: Role[] = ['archer', 'hexer', 'drummer', 'banner', 'netter', 'oiler', 'torch', 'keeper', 'chalker', 'snarer'];

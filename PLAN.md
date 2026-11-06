@@ -2,6 +2,16 @@
 
 ## Current slice
 
+**The atlas, slices 0 and 1: the doors rule, and Hangman's Wood** (Claude Opus 5.5, 2026-11-05; Kyle approved
+`docs/plans/atlas.md`). Built; waiting on Kyle's play. *Done when*, on his phone and laptop, flat and 2.5D: a
+village, farm or town street has one house to go into, big, with firelight in its doorway, its woodpile and the
+gold diamond if someone's caged in it, and the rest boarded up or burnt out, and inside it the captives and chests
+the street had; and HANGMAN'S WOOD is on the board after THE BARROWFIELDS: narrow trails with a snare line, a body
+by a waymark with a dropper over it, the gibbet's cage wound down while the others hold, a sack of charcoal dragged
+off, the Gospel Oak burning like a chimney if he puts fire in it, the fire at the mid-point that saves the run, Hew's
+marks, and Hempen with its noose, a relic where it falls, then out by the north path, in about 6 to 7 minutes.
+Everything in DECISIONS 2026-11-05 ("the atlas"); shots `node scripts/atlas-look.cjs`. Open: every new name and line
+through the lore keeper and line editor; the numbers; Coldscar's Outer Ward is the next slice.
 **The Staithe: NETS on layout 4, the gaffer and the skimmer, the Staithe on the Barrowfields** (Claude Opus 5.5,
 2026-11-05; Kyle approved the biomes proposal, rollout items 4 and 5: "the river in the middle should have maybe a
 fishing village in the center sometimes"). Built; waiting on Kyle's play. *Done when*, on his phone and laptop,

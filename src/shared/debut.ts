@@ -25,6 +25,8 @@ export interface Debut {
   common: number;
   /** Its weight while rare. */
   weight: number;
+  /** Staged in a zone of its own instead of a fork way's room (shared/hangwood.ts: 'hangmans'). */
+  zone?: string;
 }
 
 export type Stage = 'staged' | 'rare' | 'common';

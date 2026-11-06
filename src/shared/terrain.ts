@@ -36,6 +36,8 @@ export type FoeVariant = 'looter' | 'lunger' | 'heavy' | 'stoker' | 'shield' | '
   | 'banner' | 'netter' | 'thief' | 'log' | 'roofer' | 'keeper' | 'wolf' | 'oiler' | 'torch' | 'sapper' | 'blind' | 'ironhide' | 'chalker'
   /** The Staithe's (shared/staithetune.ts): the gaffer and its hook, the skimmer and its oil. */
   | 'gaffer' | 'skimmer'
+  /** Hangman's Wood's (shared/hangtune.ts): the snarer and its ankle snares. */
+  | 'snarer'
   /** The wood's element lesson only (shared/wood.ts ELEMENT_FOES): wet through, in a bark apron, hot off the kiln. */
   | 'soaked' | 'aproned' | 'kilnhot';
 /**
@@ -45,7 +47,9 @@ export type FoeVariant = 'looter' | 'lunger' | 'heavy' | 'stoker' | 'shield' | '
 export interface Foe {
   kind: 'scrapper' | 'butcher' | 'spider' | 'brood' | 'nest'; wave?: number; x: number; y: number; hp?: number; name?: string; bow?: boolean; z?: number; awake?: boolean; feeding?: boolean; variant?: FoeVariant; pack?: number; role?: Role; more?: Role;
   /** Layout 4: what it's busy at when you come in (sim/tasks.ts), and a body it's hauling. */
-  task?: import('./scenes4.js').FoeTask; haul?: { x: number; y: number };
+  task?: import('./scenes4.js').FoeTask; haul?: { x: number; y: number; sack?: boolean };
+  /** Hangman's Wood: Hempen throws its noose (sim/hempen.ts), and leaves a relic where it falls, every time. */
+  noose?: boolean; sure?: boolean;
 }
 /** Which way the party went at a fork. */
 export type RoadId = Road['road'];

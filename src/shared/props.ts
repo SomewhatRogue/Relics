@@ -109,6 +109,8 @@ export const WOOD: Partial<Record<import('./arena').BlockKind, { hp: number; doo
   smokehouse: { hp: 960 },
   dryrack: { hp: 40 },
   hungnet: { hp: 12 },
+  // Hangman's Wood's Gospel Oak (shared/hangtune.ts OAK): a long burn, from inside.
+  oak: { hp: 480 },
 };
 export const BLAZE = {
   /** Health a burning building loses a second. */

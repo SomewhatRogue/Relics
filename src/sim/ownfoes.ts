@@ -18,12 +18,14 @@ import { crackWatch, stepIronhide } from './ironhide';
 import { hooked, stepGaffer } from './gaffer';
 import { stepSkimmer } from './skimmer';
 import { stepChalk, stepChalker } from './chalker';
+import { hoist, stepSnarer, type Noose } from './snares';
+import { stepNoose } from './hempen';
 import { walk } from './enemies';
 import type { World } from './elements';
 import type { Pickup } from './pickups';
 import type { Enemy, EnemyAttack, FightEvent, Hero, Intent } from './types';
 
-const OWN = new Set(['banner', 'netter', 'thief', 'log', 'wolf', 'keeper', 'oiler', 'torch', 'blind', 'ironhide', 'gaffer', 'skimmer', 'chalker']);
+const OWN = new Set(['banner', 'netter', 'thief', 'log', 'wolf', 'keeper', 'oiler', 'torch', 'blind', 'ironhide', 'gaffer', 'skimmer', 'chalker', 'snarer']);
 
 /** A new goblin of one of these sorts: its body (a small goblin's unless it says). */
 export function shapeFoe(e: Enemy): void {
@@ -36,7 +38,7 @@ export function shapeFoe(e: Enemy): void {
 export interface Turn { t: Hero; d: number; level: boolean; via: boolean; ux: number; uy: number; facing: number; speed: number; slow: number }
 
 /** The room's things the newer sorts use. */
-export interface Kit { slicks: Slick[]; foes?: Enemy[] }
+export interface Kit { slicks: Slick[]; foes?: Enemy[]; nooses?: Noose[] }
 
 /** Its own turn, if it has one (true: done). Runs once it's awake and has turned toward its way. */
 export function stepOwn(e: Enemy, q: Turn, heroes: Hero[], others: Enemy[], rng: Rng, now: number, dt: number, ev: FightEvent[], kit: Kit): boolean {
@@ -44,6 +46,8 @@ export function stepOwn(e: Enemy, q: Turn, heroes: Hero[], others: Enemy[], rng:
   if (stepRouted(e, heroes, now, dt)) return true;
   // A sapper above ground fights as a small goblin with a pick, till it digs in.
   if (e.variant === 'sapper') return q.level && !q.via && maybeDig(e, q.t, q.d, now, ev);
+  // Hempen's noose, when it's time (sim/hempen.ts); otherwise a butcher like any.
+  if (e.noose && !q.via && stepNoose(e, q.t, q.d, q.facing, now, ev)) return true;
   if (!e.variant || !OWN.has(e.variant)) return false;
   // Making for a ramp to another level: just go.
   if (q.via) return walk(e, q.ux, q.uy, q.speed * Math.max(0.2, q.facing), dt), true;
@@ -60,6 +64,7 @@ export function stepOwn(e: Enemy, q: Turn, heroes: Hero[], others: Enemy[], rng:
   else if (e.variant === 'ironhide') stepIronhide(e, t, d, q.level, ux, uy, facing, speed, dt, ev);
   else if (e.variant === 'gaffer') stepGaffer(e, t, d, ux, uy, facing, speed, now, dt, ev);
   else if (e.variant === 'skimmer') stepSkimmer(e, t, d, ux, uy, speed, now, dt, ev);
+  else if (e.variant === 'snarer') stepSnarer(e, t, d, ux, uy, facing, speed, now, dt, ev, kit.nooses ?? []);
   else if (e.variant === 'chalker') stepChalker(e, t, d, ux, uy, facing, speed, heroes, others, now, dt, ev);
   return true;
 }
@@ -67,7 +72,7 @@ export function stepOwn(e: Enemy, q: Turn, heroes: Hero[], others: Enemy[], rng:
 /** Its blow landed on `h` (after the damage): a net holds, a thief takes, the log knocks down. */
 export function landed(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: FightEvent[], foes: Enemy[] = []): void {
   if (a.kind === 'net') catchIn(h, now, ev);
-  else if (a.kind === 'hook') hooked(e, h, foes, ev);
+  else if (a.kind === 'hook') e.noose ? hoist(h, now, ev) : hooked(e, h, foes, ev);
   else if (a.kind === 'grab' && e.variant === 'thief') rob(e, h, ev);
   else if (a.kind === 'charge' && e.variant === 'log' && h.act !== 'down') knockDown(h);
 }

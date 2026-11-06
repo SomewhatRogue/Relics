@@ -9,7 +9,7 @@ import { ARENA, useMap, type GameMap } from '../shared/arena';
 import type { Foe } from '../shared/terrain';
 import type { PropKind } from '../shared/props';
 import { Rng } from '../shared/rng';
-import { BLESSING, GUARD, SLEEP, HEAL_RADIUS, HEIGHT, HERO, EXPED_COINS, LODESTONE, MACE, TICK, TRAIT, WEAPONS, type Swing, VARIANTS } from '../shared/tuning';
+import { BLESSING, GUARD, SLEEP, HEAL_RADIUS, HEIGHT, HERO, EXPED_COINS, LODESTONE, MACE, TICK, TRAIT, WEAPONS, type Swing, VARIANTS, SNARER } from '../shared/tuning';
 import { separate } from './bodies';
 import { lobLodestone, shoot, smite, stepBolt, throwNet } from './bolts';
 import { afflict, stepElements, type World } from './elements';
@@ -41,6 +41,8 @@ import { newRushes, stepRushes, type Rushes } from './packrush';
 import { slipIntent, type Slick } from './oil';
 import { newFlocks, type Flock } from './crows';
 import { OWN_KIT } from './enemies';
+import { stepNooses, type Noose } from './snares';
+import { stepOak } from './hangfire';
 import { stepBlaze, type BlazeState } from './blaze';
 import { sweepSurvivors } from './survivorhits';
 import { dropFrom, stepDrops, takeLoot } from './loot';
@@ -100,6 +102,8 @@ export class ArenaRoom {
   javelins: Javelin[] = [];
   /** Rangers' snares on the ground. */
   snares: Snare[] = [];
+  /** The hungry's ankle snares (Hangman's Wood's snarers: sim/snares.ts). */
+  nooses: Noose[] = [];
   hooks: Hook[] = [];
   bolts: Bolt[] = [];
   drops: Drop[] = [];
@@ -202,6 +206,8 @@ export class ArenaRoom {
     if (this.map.led || this.map.oil) this.slicks = initScenes(this.map, this.survivors, this.time);
     // The Staithe: its folk on the jetty and in the nets (sim/staithe.ts).
     initStaithe(this.map, this.survivors, this.time);
+    // Hangman's Wood: the snare line laid before you came (shared/hangscenes.ts), live from the start.
+    if (this.map.hang) this.nooses = this.map.hang.snares.map((q, i) => ({ id: i + 1, x: q.x, y: q.y, at: -SNARER.arm, by: 0, keep: true }));
     this.squire = !!opts.squire;
     if (opts.foes) {
       opts.foes.forEach((f, i) => {
@@ -211,6 +217,8 @@ export class ArenaRoom {
         packOnto(e, f);
         shapeFoe(e);
         Object.assign(e, { respawns: false, name: f.name, bow: f.bow, z: f.z ?? 0, alert: f.awake ?? false, feeding: f.feeding });
+        if (f.noose) e.noose = true;
+        if (f.sure) e.sure = true;
         if (f.task) e.task = structuredClone(f.task);
         if (f.haul) e.haul = { ...f.haul };
         if (f.wave) e.wave = f.wave;
@@ -383,6 +391,7 @@ export class ArenaRoom {
     stepRushes(this.rushes, this.enemies, this.heroes, this.rushRng, this.time, TICK, this.events);
     OWN_KIT.slicks = this.slicks;
     OWN_KIT.foes = this.enemies;
+    OWN_KIT.nooses = this.nooses;
     for (const e of this.enemies) stepEnemy(e, this.heroes, this.rng, this.time, TICK, this.events, this.enemies);
     stepSleds(w);
     for (const h of this.heroes) stepHound(h, this.enemies, this.time, TICK, this.events);
@@ -396,6 +405,11 @@ export class ArenaRoom {
     stepTorch(this.enemies, this.heroes, this.time, TICK, this.events);
     stepKindle(this.map, this.heroes, this.time, TICK, this.events);
     stepScenes(this.map, w, TICK);
+    // Hangman's Wood: snares hoisting whoever steps in them, the Gospel Oak burning (sim/snares.ts, hangfire.ts).
+    if (this.map.hang) {
+      this.nooses = stepNooses(this.nooses, this.heroes, this.time, this.events);
+      stepOak(this.map.blocks[this.map.hang.oak], { ...w, rng: this.fireRng }, this.fireRng, TICK);
+    }
     // The Staithe: the log and the hold, its nets and fires, oil drifting on the water (sim/staithe.ts, staithebits.ts, drift.ts).
     if (this.map.staithe) {
       stepStaithe(w, this.map, (x, y) => this.spawn('scrapper', x, y));

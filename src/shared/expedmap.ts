@@ -25,6 +25,7 @@ import { EXPED, EXPED_PACKS } from './tuning.js';
 import { expedSky, themeUnder } from './expedsky.js';
 import { layExpedStaithe, staitheRoll } from './expedstaithe.js';
 import { inArea } from './arena.js';
+import { woodPlan } from './hangwood.js';
 
 export type NodeKind = 'in' | 'out' | 'hamlet' | 'camp' | 'barrows' | 'woodedge' | 'fields' | 'bank' | 'staithe';
 export const GOALS: GoalKind[] = ['larder', 'engine', 'prisoners', 'dens', 'shrine', 'butcher'];
@@ -39,10 +40,12 @@ const dist = (a: number, b: number) => Math.abs((a % COLS) - (b % COLS)) + Math.
 const mid = (i: number): P => ({ x: (i % COLS) * NODE + NODE / 2, y: Math.floor(i / COLS) * NODE + NODE / 2 });
 
 /** The map and all on it, from the job's seed. Kept by seed: every screen and the sim ask for it. */
-const kept = new Map<number, ExpedPlan>();
+const kept = new Map<string, ExpedPlan>();
 export function expedPlan(job: Job): ExpedPlan {
-  let p = kept.get(job.seed);
-  if (!p) (kept.size > 4 && kept.clear()), kept.set(job.seed, (p = build(job)));
+  const key = `${job.exped}:${job.seed}`;
+  let p = kept.get(key);
+  // (Hangman's Wood is a curated zone on the same kit: shared/hangwood.ts.)
+  if (!p) (kept.size > 4 && kept.clear()), kept.set(key, (p = job.exped === 'hangmans' ? woodPlan(job) : build(job)));
   // (A fresh copy each time: a room changes its map as it's played.)
   return JSON.parse(JSON.stringify(p)) as ExpedPlan;
 }
@@ -157,7 +160,8 @@ export function build(job: Job, staithe = true): ExpedPlan {
   for (const c of camps) c.foes = re(c.foes);
   for (const p of patrols) p.foes = re(p.foes);
   for (const g of goals) if (g.foe !== undefined) g.foe = remap.get(g.foe);
-  const spill = settle(job, 0, k.blocks);
+  // (The hamlet keeps two houses to go into: shared/doors.ts.)
+  const spill = settle(job, 0, k.blocks, 2);
   const ground: P[] = [];
   for (let y = 3; y < MH - 2; y += 4) for (let x = 3; x < MW - 2; x += 4) if (free(k, x, y, 0.8, 0)) ground.push({ x, y });
   // The Staithe on one map in three, laid last over a bank node between the fords, so the rest of the map

@@ -138,6 +138,9 @@ export function tally(run: Run, room: ArenaRoom, events: FightEvent[], me: strin
       run.gold += Math.round(run.job.reward * (ev.what === 'goal' ? EXPED.goalPay : EXPED.sidePay));
       if (ev.what === 'side') run.sides = (run.sides ?? 0) + 1;
       else run.goals = (run.goals ?? 0) + 1;
+    } else if (ev.k === 'exped' && ev.what === 'check') {
+      // Hangman's Wood's fire lit: the run's saved there; alone, the three downs start again (sim/woodzone.ts).
+      run.downs = 0;
     } else if (ev.k === 'pickedup') {
       if (ev.id) bump(run.carried ??= {}, ev.id);
       if (ev.by) bump(run.raised ??= {}, ev.by);

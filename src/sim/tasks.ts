@@ -5,6 +5,7 @@
  * seen you (it's the race you're in) until you come close or hit them; a patrol and the haulers look
  * about as any goblin at rest does, and drop what they're doing when they see you. Rolls nothing.
  */
+import { stepPerch } from './dropper';
 import { currentMap } from '../shared/arena';
 import { SCENE } from '../shared/tuning';
 import { atArc } from '../shared/scenes4';
@@ -37,6 +38,8 @@ export function stepTask(e: Enemy, heroes: Hero[], now: number, dt: number, ev: 
   if (!t || isDead(e)) return false;
   // The Staithe's (sim/staithebits.ts): the carriers at their log, the gaffer at the jetty, goblins going over.
   if (t.k === 'lay' || t.k === 'gaff' || t.k === 'board') return staitheTask(e, heroes, OWN_KIT.freed, currentMap(), now, dt, ev);
+  // Hangman's Wood: a dropper up in the branches (sim/dropper.ts), whatever it's heard, till it comes down.
+  if (t.k === 'perch') return stepPerch(e, heroes, now, ev);
   if (t.k === 'kindle' || t.k === 'escort') {
     if (t.quit) return false;
     if (pulledOff(e, heroes, now)) return (t.quit = true), (e.alert = true), (e.feeding = false), false;
@@ -64,11 +67,12 @@ export function stepTask(e: Enemy, heroes: Hero[], now: number, dt: number, ev: 
   }
   if (e.alert !== false) return false;
   if (notice()) {
-    if (t.k === 'haul') t.quit = true;
+    if (t.k === 'haul' || t.k === 'busy') t.quit = true;
     return false;
   }
-  // A chalker at its tally board, chalking up the captives till it sees you (shared/chalkstage.ts).
-  if (t.k === 'tally') {
+  // A chalker at its tally board, chalking up the captives till it sees you (shared/chalkstage.ts); Hangman's Wood's
+  // winchers at the gibbet and the snarer at its snares, the same.
+  if (t.k === 'tally' || t.k === 'busy') {
     const dx = t.x - e.x, dy = t.y - e.y, l = Math.hypot(dx, dy) || 1;
     return (e.fx = dx / l), (e.fy = dy / l), true;
   }

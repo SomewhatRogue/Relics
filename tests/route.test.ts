@@ -113,7 +113,8 @@ describe('seeds', () => {
     }
     // Taken from the rooms as they were before routed jobs (2026-11-04); retaken when a nest's wave went
     // from three spiders to two (the count rides on the nest in the plan; the layout is unchanged).
-    expect(all).toBe(1134690767);
+    // Re-pinned 2026-11-05 for the doors rule (shared/doors.ts): with it switched off still 1134690767.
+    expect(all).toBe(1304300190);
   });
 
   it('weather: one pattern a job; fog only ever creeps in, never more than a step a room; none underground', () => {

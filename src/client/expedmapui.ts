@@ -7,7 +7,9 @@
  * Drawing only: it reads the room (the leader's, or a friend's copy of it).
  */
 import type { GameMap } from '../shared/arena';
-import { GOAL_WORDS, MAP_WORDS, EXTRACT_WORDS } from '../shared/expedjob';
+import { goalWords, MAP_WORDS, EXTRACT_WORDS } from '../shared/expedjob';
+import { WOOD_MAP } from '../shared/hangwords';
+import type { Job } from '../shared/jobs';
 import { seenAt } from '../sim/exped';
 import type { ArenaRoom } from '../sim/room';
 
@@ -70,10 +72,11 @@ export class ExpedMap {
     g.imageSmoothingEnabled = false;
     g.drawImage(groundOf(m), 0, 0, this.cv.width, this.cv.height);
     // Not yet seen: the ground darkened over.
-    const cs = this.cv.width / 16;
+    // (Seen ground is kept in cells of 6 tiles over a 96 by 72 grid; a smaller map, Hangman's Wood, uses the top-left of it.)
+    const cs = k * 6;
     g.fillStyle = 'rgba(28, 22, 16, 0.62)';
     const at = (i: number) => Math.round(i * cs);
-    for (let j = 0; j < 12; j++) for (let i = 0; i < 16; i++) if (!seenAt(x.seen, (i + 0.5) * 6, (j + 0.5) * 6)) g.fillRect(at(i), at(j), at(i + 1) - at(i), at(j + 1) - at(j));
+    for (let j = 0; j < Math.ceil(m.h / 6); j++) for (let i = 0; i < Math.ceil(m.w / 6); i++) if (!seenAt(x.seen, (i + 0.5) * 6, (j + 0.5) * 6)) g.fillRect(at(i), at(j), at(i + 1) - at(i), at(j + 1) - at(j));
     const font = Math.round(8 * Math.max(1, Math.round(dpr * 1.25)));
     g.font = `${font}px Tiny5, monospace`;
     g.textBaseline = 'middle';
@@ -99,12 +102,15 @@ export class ExpedMap {
     }
     pin(X(m.hero.x), X(m.hero.y), '#c8d0dc', r * 0.8);
     label(MAP_WORDS.start, X(m.hero.x), X(m.hero.y) - r * 1.8, '#c8d0dc');
-    for (const s of x.sides) (pin(X(s.x), X(s.y), s.done ? '#6a6e78' : '#c8d0dc', r * 0.8), label(GOAL_WORDS[s.kind].pin, X(s.x), X(s.y) - r * 1.7, s.done ? '#8a8e98' : '#e8dcc0'));
+    // Hangman's Wood's fire, the mid-point (sim/woodzone.ts): lit or still to light.
+    if (x.wood) (pin(X(x.wood.check.x), X(x.wood.check.y), x.wood.check.lit ? '#ff9a3c' : '#a0782a', r * 0.7), label(WOOD_MAP.check, X(x.wood.check.x), X(x.wood.check.y) + r * 1.7, x.wood.check.lit ? '#ffb070' : '#c8b088'));
+    const words = goalWords(room.map.hang ? ({ exped: 'hangmans' } as Job) : ({} as Job));
+    for (const s of x.sides) (pin(X(s.x), X(s.y), s.done ? '#6a6e78' : '#c8d0dc', r * 0.8), label(words[s.kind].pin, X(s.x), X(s.y) - r * 1.7, s.done ? '#8a8e98' : '#e8dcc0'));
     for (const q of x.goals) {
       pin(X(q.x), X(q.y) + (q.done ? 0 : bob), q.done ? '#6a6e78' : '#ffd27a', r);
-      label((q.done ? 'DONE: ' : '') + GOAL_WORDS[q.kind].pin, X(q.x), X(q.y) - r * 2, q.done ? '#a8a090' : '#ffd27a');
+      label((q.done ? 'DONE: ' : '') + words[q.kind].pin, X(q.x), X(q.y) - r * 2, q.done ? '#a8a090' : '#ffd27a');
     }
-    if (x.phase !== 'shut') {
+    if (x.phase !== 'shut' && !x.wood) {
       g.strokeStyle = '#ffd27a';
       g.lineWidth = Math.max(2, k * 0.4);
       g.beginPath(), g.arc(X(x.zone.x), X(x.zone.y), X(x.zone.r), 0, 7), g.stroke();
@@ -119,6 +125,9 @@ export class ExpedMap {
       g.fillRect(X(hh.x) - r * 0.5, X(hh.y) - r * 0.5, r, r);
       if (!mine && hh.tag) label(hh.tag.toUpperCase(), X(hh.x), X(hh.y) + r * 1.6, col);
     }
+    // The title is the map's own (THE BARROWFIELDS, HANGMAN'S WOOD).
+    const h2 = this.el.querySelector('h2');
+    if (h2 && h2.textContent !== (x.wood ? WOOD_MAP.title : MAP_WORDS.title)) h2.textContent = x.wood ? WOOD_MAP.title : MAP_WORDS.title;
     const key = this.el.querySelector('.em-key')!, left = x.goals.filter((q) => !q.done).length;
     key.textContent = `${left ? `${left} OF ${x.goals.length} JOBS LEFT` : EXTRACT_WORDS.open.toUpperCase()}   ${MAP_WORDS.level(x.level)}`;
   }

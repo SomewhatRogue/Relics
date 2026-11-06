@@ -17,6 +17,7 @@ import type { Job } from './jobs.js';
 import { Rng } from './rng.js';
 import type { Foe, RoomPlan } from './terrain.js';
 import { sideRoom } from './sideroom.js';
+import { baseDoor, mergedOf, promoted } from './doors.js';
 
 const LAYOUTS: Record<HouseKind, (rng: Rng) => Layout> = { cottage, backroom, weaver, smith, looted, store, stalls, haybarn, longhouse, manor, tithebarn };
 /** Who the dead were, by the place. */
@@ -29,8 +30,9 @@ export function runInterior(job: Job, roomIndex: number, blockIndex: number, doo
   const seed = houseSeed(job, roomIndex, blockIndex), home = house(seed, door), rng = new Rng(seed);
   // A house being burned with someone in it (layout 4, shared/scenes4.ts): standing, and they're in there.
   const held = door.endsWith(':held');
-  const ruin = job.place.ruin, barn = door === 'barn', end = held ? 'standing' : fate(job, roomIndex, seed), g = grimness(job, roomIndex);
-  let l = LAYOUTS[big(job, roomIndex, seed) ? bigKind(seed, door) : home.kind](rng);
+  // A house that took in the shut ones round it (shared/doors.ts) is one of the big ones, and their cages and chests are in it.
+  const ruin = job.place.ruin, barn = baseDoor(door) === 'barn', end = held ? 'standing' : fate(job, roomIndex, seed), g = grimness(job, roomIndex), more = promoted(door);
+  let l = LAYOUTS[more || big(job, roomIndex, seed) ? bigKind(seed, door) : home.kind](rng);
   if (rng.next() < 0.5) l = mirror(l);
   const { w, h } = l, props = [...l.props], foes: Foe[] = [], npcs: Npc[] = [], sleepers: P[] = [], marks: Mark[] = [];
   const open = (q: P) => isFree(l, q.x, q.y, 0.35, 0.1), fire = end === 'burning';
@@ -40,8 +42,12 @@ export function runInterior(job: Job, roomIndex: number, blockIndex: number, doo
     if (s) l.blocks.push({ kind: 'rubble', x: s.x - 0.9, y: s.y - 0.5, w: 1.8, h: 1 }), marks.push({ kind: 'debris', x: s.x - 1.6, y: s.y + 0.4, w: 3.2, h: 1.4 });
   }
   // Someone caged, tucked away: always on a rescue, sometimes otherwise.
-  const cage = held || job.objective === 'rescue' || rng.next() < (barn ? 0.4 : 0.3) ? l.hide : undefined;
+  // (A house that took others in has what each of them had, its own small self too: movedIn below.)
+  const cage = !more && (held || job.objective === 'rescue' || rng.next() < (barn ? 0.4 : 0.3)) ? l.hide : undefined;
   if (cage) props.push({ kind: 'cage', ...cage });
+  // The shut houses' folk and chests, moved in (each house's own plan says what it had: counts and pay unchanged).
+  const moved = more ? movedIn(job, roomIndex, [[blockIndex, baseDoor(door)], ...mergedOf(door)], { ...l, props }, new Rng(seed * 61 + 23)) : { cages: [], chests: [] };
+  props.push(...moved.cages.map((q) => ({ kind: 'cage' as const, ...q })));
   // Who's in (nobody, in a house on fire). A looted house often has its dead still in it, and goblins at them.
   const roll = fire ? 0.3 : rng.next(), body = !fire && (home.kind === 'looted' ? rng.next() < 0.7 : rng.next() < 0.2 + g * 0.05);
   if (body) npcs.push({ ...l.body, name: '', talk: 'dead', look: DEAD[job.place.kind] ?? 'villager', pose: 'corpse' });
@@ -81,6 +87,29 @@ export function runInterior(job: Job, roomIndex: number, blockIndex: number, doo
   };
   // Now and then a chest worth the trip in (on a stream of its own, so nothing else about the house moves).
   const cr = new Rng(seed * 43 + 19), want = big(job, roomIndex, seed) ? 0.4 : barn ? 0.15 : home.kind === 'looted' ? 0.06 : 0.2;
-  const spot = !fire && cr.next() < want ? freeSpot({ ...l, props }, cr, 0.45, 1, h - 2.6) : null;
-  return { map, foes, props, chests: spot ? [spot] : [] };
+  const spot = !more && !fire && cr.next() < want ? freeSpot({ ...l, props }, cr, 0.45, 1, h - 2.6) : null;
+  return { map, foes, props, chests: [...(spot ? [spot] : []), ...moved.chests] };
+}
+
+/** The cages and chests of the houses this one took in, laid out in it on a stream of their own. */
+function movedIn(job: Job, roomIndex: number, houses: [number, string][], l: Pick<Layout, 'w' | 'h' | 'blocks' | 'rounds' | 'props' | 'hide'>, rng: Rng): { cages: P[]; chests: P[] } {
+  const cages: P[] = [], chests: P[] = [], props = [...l.props];
+  for (const [i, kind] of houses) {
+    const had = runInterior(job, roomIndex, i, kind);
+    for (const want of [...had.props.filter((q) => q.kind === 'cage').map(() => 'cage'), ...had.chests.map(() => 'chest')]) {
+      // The first cage in the tucked-away spot the layout keeps for one; the rest wherever there's room.
+      const hide = want === 'cage' && !cages.length && isFree({ ...l, props }, l.hide.x, l.hide.y, 0.35, 0.1) ? l.hide : null;
+      const s = hide ?? freeSpot({ ...l, props }, rng, 0.45, 1, l.h - 2.6) ?? freeSpot({ ...l, props }, rng, 0.35, 0.8, l.h - 2) ?? tight({ ...l, props });
+      if (!s) continue;
+      props.push({ kind: 'crate', ...s });
+      (want === 'cage' ? cages : chests).push(s);
+    }
+  }
+  return { cages, chests };
+}
+
+/** A full house: the first spot along its back half with a little room round it (a crowded hall still takes everyone). */
+function tight(l: Pick<Layout, 'w' | 'h' | 'blocks' | 'rounds' | 'props'>): P | null {
+  for (let y = 1; y < l.h - 2; y += 0.5) for (let x = 0.9; x < l.w - 0.9; x += 0.5) if (isFree(l, x, y, 0.3, 0.15)) return { x, y };
+  return null;
 }

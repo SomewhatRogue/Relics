@@ -64,6 +64,8 @@ export const LOOK: Record<Block['kind'], Look> = {
   smokehouse: { tall: 34, roof: '#3a3036', ridge: '#2a2026', wall: '#4a3a2a', windows: false },
   dryrack: { tall: 22, roof: '#5a4a30', ridge: '#3a2a1a', wall: '#4a3c26', windows: false },
   hungnet: { tall: 22, roof: '#a89a72', ridge: '#3a2a1a', wall: '#3a2a1a', windows: false },
+  // Hangman's Wood's Gospel Oak (pieces.ts draws it; this is for fire and its burnt stump).
+  oak: { tall: 70, roof: '#3a2e24', ridge: '#24391f', wall: '#3a2e24', windows: false },
   // A side way is a gap, painted with the room's ways out (wayout.ts), never drawn as a block.
   sideway: { tall: 0, roof: '#000', ridge: '#000', wall: '#000', windows: false },
 };

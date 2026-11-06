@@ -10,12 +10,13 @@
  */
 import type { Block, Round } from '../shared/arena';
 import { STAITHE_KINDS, staitheBoxes } from './staithebox';
+import { gibbetBoxes, oakBoxes, waymarkBoxes } from './woodpieces';
 
 export type Bx = [number, number, number, number, number, number, number, ('lump' | 'cone')?];
-export const PIECE_BLOCKS = new Set<Block['kind']>(['headframe', 'log', 'mill', 'stakes', 'jetty', 'gangway', 'smokehouse', 'dryrack', 'hungnet']);
+export const PIECE_BLOCKS = new Set<Block['kind']>(['headframe', 'log', 'mill', 'stakes', 'jetty', 'gangway', 'smokehouse', 'dryrack', 'hungnet', 'oak']);
 /** Boards you walk on (the Staithe's jetty and a log laid across): the flat view paints them under everyone (staithedraw.ts). */
 export const DECKS = new Set<Block['kind']>(['jetty', 'gangway']);
-export const PIECE_ROUNDS = new Set<Round['kind']>(['hangtree', 'headstone', 'apple']);
+export const PIECE_ROUNDS = new Set<Round['kind']>(['hangtree', 'headstone', 'apple', 'gibbet', 'waymark']);
 
 const TIMBER = 0x4a3420, DARK = 0x2e2016, STONE = 0x6a6470, IRON = 0x55505e, ROPE = 0x8a7a5a, BARK = 0x4a3a2a, LEAF = 0x2f4a28;
 /** A tiny repeatable shuffle for looks. */
@@ -25,6 +26,7 @@ const shuffle = (n: number) => () => ((n = (n * 1103515245 + 12345) & 0x7fffffff
 export function blockBoxes(b: Pick<Block, 'kind' | 'w' | 'h' | 'look' | 'ruined' | 'deck'>): Bx[] {
   const w = b.w, d = b.h, cx = w / 2, cz = d / 2, out: Bx[] = [], r = shuffle(Math.round(w * 37 + d * 11));
   if (STAITHE_KINDS.has(b.kind)) return staitheBoxes(b, r);
+  if (b.kind === 'oak') return oakBoxes(b, r);
   if (b.kind === 'headframe') {
     // Four legs leaning in to a head, cross braces, the sheave wheel on top and the rope down the shaft.
     for (const [x, z] of [[0.25, 0.25], [w - 0.25, 0.25], [0.25, d - 0.25], [w - 0.25, d - 0.25]]) out.push([x + (cx - x) * 0.15, 0, z + (cz - z) * 0.15, 0.18, 2.9, 0.18, TIMBER]);
@@ -82,6 +84,8 @@ export function roundBoxes(o: Pick<Round, 'kind' | 'r' | 'x' | 'y'>): Bx[] {
     out.push([1.75, 3.05, 0, 0.16, 0.12, 0.2, 0x16141c], [1.83, 3.17, 0.06, 0.1, 0.08, 0.1, 0x16141c]);
     return out;
   }
+  if (o.kind === 'gibbet') return gibbetBoxes();
+  if (o.kind === 'waymark') return waymarkBoxes();
   if (o.kind === 'headstone') {
     // A slab, its top rounded, leaning a little; moss at its foot.
     const lean = (r() - 0.5) * 0.12;

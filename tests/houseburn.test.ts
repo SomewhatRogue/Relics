@@ -43,7 +43,7 @@ const indoors = (foes: ReturnType<typeof goblin>[], caged = 0, chests = 0): Indo
 describe('a house kindling spot', () => {
   it('is one fixed spot per small house, by a side wall, never at the door, the same every time', () => {
     let n = 0;
-    for (const s of [3, 7, 41, 97, 120]) {
+    for (const s of [3, 7, 41, 97, 120, 5, 11, 23, 59, 77, 131, 150]) {
       const a = runRoom(newRun(job(s))).map, b = runRoom(newRun(job(s))).map;
       a.blocks.forEach((q, i) => {
         const k = kindling(q, a);
@@ -55,7 +55,8 @@ describe('a house kindling spot', () => {
         for (const o of a.blocks) if (o !== q && !o.ruined) expect(k.x > o.x && k.x < o.x + o.w && k.y > o.y && k.y < o.y + o.h).toBe(false);
       });
     }
-    expect(n).toBeGreaterThan(10);
+    // (One house to go into a street now: shared/doors.ts.)
+    expect(n).toBeGreaterThan(8);
   });
 });
 

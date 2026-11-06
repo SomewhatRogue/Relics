@@ -8,6 +8,8 @@ const http = require('http');
 const path = require('path');
 const { chromium } = require('playwright');
 const ROOT = path.join(__dirname, '..'), PORT = Number(process.env.EXPED_PORT || process.env.ONLINE_PORT) || 8922;
+// ZONE=hangmans: the same run in Hangman's Wood (shared/hangwood.ts) instead of the Barrowfields.
+const ZONE = process.env.ZONE || 'barrowfields', WOOD = ZONE === 'hangmans';
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 // Every page counts what comes in over its sockets and how big each message is, and its frame gaps.
 const COUNT = () => {
@@ -53,8 +55,8 @@ const COUNT = () => {
     const sam = await open('SAM', 'RANGER', { viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true });
     step('they see each other in town', await until(sam, () => window.__town().here.some((h) => h.name === 'KYLE')));
     await kyle.page.evaluate(() => window.__openSpot('board'));
-    const at = await kyle.page.evaluate(() => window.__game.jobs().findIndex((j) => j.exped));
-    step(`THE BARROWFIELDS is on the board (posting ${at})`, at >= 0);
+    const at = await kyle.page.evaluate((z) => window.__game.jobs().findIndex((j) => j.exped === z), ZONE);
+    step(`${WOOD ? "HANGMAN'S WOOD" : 'THE BARROWFIELDS'} is on the board (posting ${at})`, at >= 0);
     await kyle.page.click(`#panel [data-open="${at}"]`);
     await kyle.page.screenshot({ path: path.join(ROOT, 'shots/exped-board-laptop.png') });
     await kyle.page.click(`#panel [data-gather="${at}"]`);
@@ -66,7 +68,7 @@ const COUNT = () => {
     await kyle.page.evaluate(() => document.querySelector('#partycard.shut .pc-line')?.click());
     await kyle.page.click('#partycard [data-setout]');
     step('Kyle sets out on the expedition', await until(kyle, () => window.__game.mode === 'run' && !!window.__game.room.exped));
-    step("Sam is pulled into it, the map built from its seed", await until(sam, () => window.__game.mode === 'run' && window.__game.room.map.w === 96 && window.__game.room.heroes.some((h) => h.id === '@lead'), null, 20000));
+    step("Sam is pulled into it, the map built from its seed", await until(sam, (w) => window.__game.mode === 'run' && window.__game.room.map.w === w && window.__game.room.heroes.some((h) => h.id === '@lead'), WOOD ? 72 : 96, 20000));
     const same = await Promise.all([kyle, sam].map((p) => p.page.evaluate(() => { const m = window.__game.room.map; return [m.rounds.length, m.blocks.length, m.water.length, m.hero.x.toFixed(2)].join(','); })));
     step(`the same map on both screens (${same[0]})`, same[0] === same[1]);
     step("Sam's map screen has the jobs", await until(sam, () => (window.__game.room.exped?.goals?.length ?? 0) >= 2));
@@ -75,7 +77,7 @@ const COUNT = () => {
     await sam.page.screenshot({ path: path.join(ROOT, 'shots/exped-online-map-phone.png') });
     await sam.page.click('#expedmap [data-close]');
     // Measured play: Kyle across the map at a camp (fighting, his horn), Sam walking near the way in.
-    await kyle.page.evaluate(() => { const g = window.__game, c = g.room.exped.camps[0]; Object.assign(g.hero, { x: c.x, y: c.y + 5, safeT: 1e9 }); g.room.prev.set('h:me', [g.hero.x, g.hero.y]); });
+    await kyle.page.evaluate(() => { const g = window.__game, c = g.room.exped.camps[0] ?? g.room.map.hang.beats.find((b) => b.kind === 'gibbet'); Object.assign(g.hero, { x: c.x, y: c.y + 5, safeT: 1e9 }); g.room.prev.set('h:me', [g.hero.x, g.hero.y]); });
     await Promise.all([kyle, sam].map((p) => p.page.evaluate(() => { window.__net.bytes = window.__net.msgs = window.__net.biggest = window.__net.sent = window.__net.sentBiggest = 0; window.__gaps.length = 0; window.__t0 = performance.now(); })));
     await sam.page.keyboard.down('w');
     await wait(4000);
@@ -96,11 +98,12 @@ const COUNT = () => {
     };
     step(`no message over the relay's limit (Kyle's biggest ${report.numbers.kyleBiggestSentKB} KB)`, k.net.sentBiggest < 64000 && s.net.biggest < 65536);
     step(`Sam gets only what's near him (${s.mine} goblins of ${k.all})`, s.mine < k.all / 2);
-    step("Kyle's camp heard its horn, and Sam's map shows it", await until(sam, () => window.__game.room.exped.camps.some((c) => c.alerted), null, 15000));
+    if (WOOD) step("Sam's screen has the snare line and the gibbet's winch from the leader", await until(sam, () => window.__game.room.nooses.length > 0 && window.__game.room.exped.goals.some((g) => g.kind === 'winch'), null, 15000));
+    else step("Kyle's camp heard its horn, and Sam's map shows it", await until(sam, () => window.__game.room.exped.camps.some((c) => c.alerted), null, 15000));
     const kx = await kyle.page.evaluate(() => [window.__game.hero.x, window.__game.hero.y]);
     step('Sam sees where Kyle is, across the map', await until(sam, (kx) => { const h = window.__game.room.heroes.find((x) => x.id === '@lead'); return h && Math.hypot(h.x - kx[0], h.y - kx[1]) < 3; }, kx));
-    await kyle.page.screenshot({ path: path.join(ROOT, 'shots/exped-online-laptop.png') });
-    await sam.page.screenshot({ path: path.join(ROOT, 'shots/exped-online-phone.png') });
+    await kyle.page.screenshot({ path: path.join(ROOT, `shots/${WOOD ? 'wood' : 'exped'}-online-laptop.png`) });
+    await sam.page.screenshot({ path: path.join(ROOT, `shots/${WOOD ? 'wood' : 'exped'}-online-phone.png`) });
     report.ok = report.steps.every((x) => x.ok) && !report.errors.length;
   } catch (e) {
     report.errors.push(String(e));

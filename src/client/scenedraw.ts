@@ -15,6 +15,14 @@ import { drawNpc } from './npcs';
 
 /** The body being hauled: one of the dead, by whoever it was (a soldier off the road, else a villager). */
 export function drawHauled(c: Ctx, e: Enemy, x: number, y: number): void {
+  // Hangman's Wood's pair drag a sack of charcoal, black dust spilling from its neck.
+  if (e.haul?.sack) {
+    const g = c.lit;
+    g.fillStyle = '#6a5a3a', g.fillRect(Math.round(x - 5), Math.round(y - 6), 10, 6);
+    g.fillStyle = '#4a3a22', g.fillRect(Math.round(x - 5), Math.round(y - 1), 10, 1), g.fillRect(Math.round(x + 4), Math.round(y - 7), 3, 2);
+    g.fillStyle = '#1a1614', g.fillRect(Math.round(x + 6), Math.round(y - 3), 2, 1), g.fillRect(Math.round(x + 8), Math.round(y - 1), 1, 1);
+    return;
+  }
   const body: Npc = { x: e.haul!.x, y: e.haul!.y, name: '', talk: '', look: e.id % 2 ? 'soldier2' : 'villager', pose: 'corpse', mute: true };
   drawNpc(c, body, x, y, false);
 }

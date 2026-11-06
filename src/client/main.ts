@@ -5,7 +5,7 @@ import { touchedIdle } from './idlepoke';
 import { SIGNS, SIGN_KEY } from '../shared/signs';
 import { signFor, signLeft } from '../sim/signature';
 import { ExpedUi } from './expedui';
-import { GOAL_WORDS, expedition } from '../shared/expedjob';
+import { expedition, goalWords, hangmansWood } from '../shared/expedjob';
 import { spellCost } from '../sim/spells';
 import { carriedItem } from '../sim/charge';
 import { isDark, relicFill } from '../shared/relicitems';
@@ -191,6 +191,9 @@ else title.show();
 // (?exped=4: the expedition posted on day 4, for a given map.)
 const xday = Number(new URLSearchParams(location.search).get('exped') ?? 0);
 if (quick && xday) game.startJob(expedition(xday > 1 ? xday : game.world.day));
+// ?hero=WARRIOR&wood=1: straight into today's Hangman's Wood (?wood=4: the one posted on day 4).
+const wday = Number(new URLSearchParams(location.search).get('wood') ?? 0);
+if (quick && wday) game.startJob(hangmansWood(wday > 1 ? wday : game.world.day));
 // The big map's load test (?hero=WARRIOR&bigmap=1: bigmode.ts), loaded only when asked.
 if (quick && new URLSearchParams(location.search).get('bigmap') === '1') void import('./bigmode').then((m) => m.startBig(game, new URLSearchParams(location.search)));
 // A recovery code here: if another device sent these heroes on since, take that copy (only before play).
@@ -354,7 +357,7 @@ function hud(now: number): void {
     // Folded: the objective and the room diamonds; an expedition's, how many jobs are left. Open: the lot,
     // and on an expedition every pinned job and side job, done or what to do (bannerfold.ts, tracker.ts).
     const x = game.fightRoom.exped, rooms = x ? '' : roomsHtml(run.index, run.job.rooms), left = x ? x.goals.filter((q) => !q.done).length : 0;
-    const full = objFlash.show(`<b>${titleCase(run.job.place.name)}${rooms}</b> ${x && !me.out && x.phase === 'shut' ? expedRows(x, GOAL_WORDS, run.job.boss ?? '') : `<div class="obj">${g.text}</div>`}<span><i class="coin"></i>+${run.gold}${run.rescued ? `<em>SAVED ${run.rescued}</em>` : ''}</span>`, now);
+    const full = objFlash.show(`<b>${titleCase(run.job.place.name)}${rooms}</b> ${x && !me.out && x.phase === 'shut' ? expedRows(x, goalWords(run.job), run.job.boss ?? '') : `<div class="obj">${g.text}</div>`}<span><i class="coin"></i>+${run.gold}${run.rescued ? `<em>SAVED ${run.rescued}</em>` : ''}</span>`, now);
     const small = smallLine(x && !me.out && x.phase === 'shut' ? TRACKW.jobsLeft(left, x.goals.length) : g.text, rooms);
     fold.render(full, small, run.job.place.name + run.index + ':' + (x && !me.out && x.phase === 'shut' ? 'jobs' + left : calm(g.text)), now, objFlash.holding(now));
     // (On an expedition the named butcher's bar shows only once you're near it.)

@@ -11,8 +11,11 @@ import type { Foe } from './terrain.js';
 
 export type GoalKind = 'larder' | 'engine' | 'prisoners' | 'dens' | 'shrine' | 'butcher'
   /** The Staithe (shared/expedstaithe.ts): never rolled with the six; pinned on its own roll, else a side job. */
-  | 'staithe';
-export type SideKind = 'cache' | 'pray';
+  | 'staithe'
+  /** Hangman's Wood (shared/hangwood.ts): wind the gibbet's cage down (a hold at its winch). */
+  | 'winch';
+/** `oak`: Hangman's Wood's side pocket, the brood mother in the Gospel Oak. */
+export type SideKind = 'cache' | 'pray' | 'oak';
 /** A job on the map: where, and its parts (blocks by index, cages by place, a goblin by its foe index). */
 export interface GoalSpot { kind: GoalKind | SideKind; x: number; y: number; camp?: number; blocks?: number[]; cages?: P[]; foe?: number; chest?: number }
 export interface Camp { x: number; y: number; foes: number[] }

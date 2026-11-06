@@ -43,8 +43,10 @@ export function stepPressure(room: ArenaRoom, x: ExpedState, heroes: Hero[], ev:
     if (wave(room, x, heroes, x.hx, x.hy, Math.min(size, EXPED.cap - alive))) ev.push({ k: 'exped', x: x.hx, y: x.hy, what: 'wave' });
   }
   // Holding the shrine or the beacon: they keep coming while you're there.
-  const hold = x.phase === 'hold' ? x.zone : x.goals.find((g) => g.kind === 'shrine' && !g.done && g.p > 0);
-  const holdR = ringOf(x.phase === 'hold' ? 'beacon' : 'shrine') + EXPED.holdNear;
+  // (The gibbet's winch in Hangman's Wood is a hold too.)
+  const job = x.goals.find((g) => (g.kind === 'shrine' || g.kind === 'winch') && !g.done && g.p > 0);
+  const hold = x.phase === 'hold' ? x.zone : job;
+  const holdR = ringOf(x.phase === 'hold' ? 'beacon' : job?.kind === 'winch' ? 'winch' : 'shrine') + EXPED.holdNear;
   if (hold && t >= x.nextHold && alive < EXPED.cap && heroes.some((h) => Math.hypot(h.x - hold.x, h.y - hold.y) < holdR)) {
     x.nextHold = t + EXPED.holdWave * (x.phase === 'hold' ? 0.8 : 1);
     wave(room, x, heroes, hold.x, hold.y, Math.min(size + (x.phase === 'hold' ? 2 : 0), EXPED.cap - alive));

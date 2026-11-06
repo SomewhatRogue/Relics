@@ -186,6 +186,8 @@ export interface Hero extends Body {
   /** Held in a netter's net until (sim/netter.ts), and the stick's last swing (a wiggle is a big change). */
   netUntil?: number;
   netAng?: number;
+  /** Hoisted by the ankle in a snare or Hempen's noose (sim/snares.ts): held as in a net (netUntil), no struggling out of it. */
+  hoisted?: boolean;
   /** Lost in a cloud of crows until (sim/crows.ts); on an oil slick this tick (sim/oil.ts). */
   crowsUntil?: number;
   slick?: boolean;
@@ -525,7 +527,11 @@ export interface Enemy extends Body {
   cracked?: boolean;
   /** Layout 4 (sim/tasks.ts): what it's busy at till it sees you, and the body it's hauling (where that lies). */
   task?: import('../shared/scenes4').FoeTask;
-  haul?: { x: number; y: number };
+  haul?: { x: number; y: number; sack?: boolean };
+  /** Hangman's Wood (sim/hempen.ts, sim/snares.ts): throws a noose (Hempen); a relic where it falls, every time; a snarer's last snare laid at. */
+  noose?: boolean;
+  sure?: boolean;
+  snareAt?: number;
   /** The Staithe's sorts (sim/gaffer.ts, skimmer.ts): when its hook was snapped by a parry; pinned by frost until; a hung net last caught it. */
   snapAt?: number;
   pinUntil?: number;
@@ -670,6 +676,8 @@ export type FightEvent =
   | { k: 'wallup'; x: number; y: number; r: number; dx: number; dy: number; big: boolean }
   /** An expedition (sim/exped.ts): a job or side job done (`i` its place in the list), the way out open, lit, the watch come; a horn, worse, a wave. */
   | { k: 'exped'; x: number; y: number; what: import('./exped').ExpedWhat; i?: number }
+  /** Hangman's Wood: a hero hoisted in a snare or cut down, a dropper coming down and landing, burning wood off the oak, the fire lit, a snare laid. */
+  | { k: 'hoisted' | 'cutdown' | 'perchdrop' | 'perchland' | 'oakfall' | 'checklit' | 'noosed' | 'snarelaid'; x: number; y: number; id?: string }
   /** A teammate downed you once too often this job. */
   | { k: 'grudge'; x: number; y: number; id: string; by: string }
   /** The newer sorts (sim/ownfoes.ts): a banner down and the goblins it routs; a net (who's in it, a struggle, cut out, free); a thief's grab, its loot back, gone. */

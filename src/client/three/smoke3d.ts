@@ -28,7 +28,7 @@ export function drawFlues(g: CanvasRenderingContext2D, map: GameMap, P: Proj, no
       }
       continue;
     }
-    const home = houseOf(b), ch = home?.lit && b.fate !== 'blocked' ? chimneyAt(b, home) : null;
+    const home = houseOf(b), ch = home?.lit && b.fate !== 'blocked' && !b.shut ? chimneyAt(b, home) : null;
     if (!ch) continue;
     const [x, y] = P(ch[0], ch[1], ch[2]);
     if (on(x, y)) smoke(c, x, y, ['#3a3438', '#5a5458'], 1);

@@ -74,7 +74,7 @@ export interface Job {
    */
   layout?: 2 | 3 | 4;
   /** An expedition (shared/expedjob.ts): one big map of the Barrowfields instead of rooms. */
-  exped?: 'barrowfields';
+  exped?: 'barrowfields' | 'hangmans';
 }
 
 const BOSSES = ['MAWL', 'SKARN', 'OLD KNUCKLES', 'OLD SPOON', 'GUTCHAIN', 'MOTHER RUST'];

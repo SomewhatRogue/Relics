@@ -20,6 +20,7 @@ import { wear, windowsLit } from './wear';
 import { OX, OY, PX } from './world';
 import { DECKS, PIECE_BLOCKS, PIECE_ROUNDS } from './pieces';
 import { drawPieceBlock, drawPieceRound } from './piecedraw';
+import { drawDoorGlow, paintShut } from './shutdraw';
 
 export { LOOK };
 
@@ -57,6 +58,7 @@ function paint(b: Block, st: number): HTMLCanvasElement {
   if (b.label && b.door) dressOutside(g, b, rect, w, roofH, wallY, l.tall);
   door(b, rect, w, wallY, l);
   if (home) paintFate(g, rect, b, w, roofH, l.tall);
+  if (home && b.shut) paintShut(rect, b, home, w, roofH, l.tall);
   if (b.kind === 'church') {
     // The bell tower over the door, empty: the bell went for arrowheads in the siege.
     rect(Math.round(w / 2 - 5), 0, 10, 6, '#4e4e60');
@@ -140,7 +142,11 @@ export function drawBlock(c: Ctx, b: Block, x: number, y: number, lit: boolean):
   if ((b.burning ?? -1) >= 0 || b.smoulder) return flames(c, b, x, top, w, Math.round(b.h * PX), l.tall);
   if (b.kind === 'hearth' && b.look === 2) embers(c, x, top, w, Math.round(b.h * PX), l.tall);
   const home = houseOf(b);
-  if (home) return void (home.lit && b.kind === 'house' && b.fate !== 'blocked' && drawLit(c, home, x, top, w, Math.round(b.h * PX), l.tall, lit));
+  if (home) {
+    // An enterable house shows it from a distance: firelight in its doorway (shutdraw.ts).
+    drawDoorGlow(c, b, x, top, w, Math.round(b.h * PX), l.tall);
+    return void (home.lit && b.kind === 'house' && b.fate !== 'blocked' && !b.shut && drawLit(c, home, x, top, w, Math.round(b.h * PX), l.tall, lit));
+  }
   if (b.label && b.door) liveOutside(c, b, x, top, w, Math.round(b.h * PX), l.tall);
   // The forge's fire is worked all day; lamplit windows only while the lamps are (`lit`, shared/lamps.ts).
   if (b.kind === 'forge' && !b.maxHp) (c.glow.fillStyle = Math.floor(c.now * 8) % 2 ? '#ff9a3c' : '#ff6a20'), c.glow.fillRect(Math.round(x + w / 2 - 2), Math.round(y + b.h * PX - 5), 4, 3);

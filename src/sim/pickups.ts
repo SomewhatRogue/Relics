@@ -41,7 +41,8 @@ export function dropLoot(pickups: Pickup[], x: number, y: number, loot: { gold?:
 /** A named butcher, now and then, leaves a relic where it fell (its own seeded stream: RELIC_DROP.named). */
 export function dropRelic(e: Enemy, pickups: Pickup[], rng: Rng): void {
   if (!e.name || e.respawns || e.kind !== 'butcher') return;
-  if (rng.next() >= RELIC_DROP.named) return;
+  // (Hempen at the end of Hangman's Wood leaves one every time: shared/hangscenes.ts `sure`.)
+  if (!e.sure && rng.next() >= RELIC_DROP.named) return;
   pickups.push({ id: nextId++, x: e.x - 0.3, y: e.y + 0.3, life: RELIC_LIFE, relic: rollRelic(rng) });
 }
 /** A relic on the floor waits a long while (it's worth walking back for). */

@@ -53,12 +53,14 @@ export * from './prowlers.js';
 export * from './encounters.js';
 export * from './worldfx.js';
 export * from './staithetune.js';
+export * from './hangtune.js';
 export * from './chalk.js';
 import { BANNER, NETTER, THIEF, LOGS, ROOF, IRONHIDE } from './raiders.js';
 import { CHALKER } from './chalk.js';
 import { WOLF, KEEPER, OIL, TORCH, SAPPER, CAVE } from './prowlers.js';
 import { DRUMMER, HEXER } from './backline.js';
 import { GAFFER, SKIMMER } from './staithetune.js';
+import { SNARER } from './hangtune.js';
 
 /** Holding attack past `start` begins charging; the heavy is strongest at `full`. */
 export const CHARGE = { start: 0.18, full: 0.9 };
@@ -218,6 +220,8 @@ export const VARIANTS = {
   ironhide: { hp: IRONHIDE.hp }, chalker: { hp: CHALKER.hp },
   /** The Staithe's sorts (shared/staithetune.ts). */
   gaffer: { hp: GAFFER.hp }, skimmer: { hp: SKIMMER.hp },
+  /** Hangman's Wood's (shared/hangtune.ts). */
+  snarer: { hp: SNARER.hp },
   wolf: { hp: WOLF.hp }, keeper: { hp: KEEPER.hp }, oiler: { hp: OIL.hp }, torch: { hp: TORCH.hp }, sapper: { hp: SAPPER.hp }, blind: { hp: CAVE.hp },
   /** The Mage's element lesson (shared/wood.ts ELEMENT_FOES): plain small goblins but for what they're weak to. */
   soaked: { hp: 24 }, aproned: { hp: 24 }, kilnhot: { hp: 24 },

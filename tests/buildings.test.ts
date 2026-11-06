@@ -203,10 +203,11 @@ describe('buildings on a job', () => {
     const g = new Game();
     g.startJob(job('village', 'rescue'));
     // Houses differ: some stand empty, so go into one with goblins in it.
-    const blocks = g.room.map.blocks, house = blocks.find((b, i) => b.door === 'cottage' && runInterior(g.run!.job, 0, i, 'cottage').foes.length)!;
+    // (One house to go into a street, a big one if it took the others in: shared/doors.ts.)
+    const blocks = g.room.map.blocks, house = blocks.find((b, i) => b.door?.startsWith('cottage') && runInterior(g.run!.job, 0, i, b.door).foes.length)!;
     expect(house).toBeTruthy();
     g.enter(house);
-    expect(['THE COTTAGE', "THE WEAVER'S COTTAGE", 'THE SMITHY', 'THE STOREHOUSE']).toContain(g.room.map.name);
+    expect(['THE COTTAGE', "THE WEAVER'S COTTAGE", 'THE SMITHY', 'THE STOREHOUSE', 'THE LONGHOUSE', 'THE HALL HOUSE']).toContain(g.room.map.name);
     expect(g.room.enemies.length).toBeGreaterThan(0);
     for (const e of g.room.enemies) kill(e, g.room.events);
     g.step(0.05, NO_INTENT);

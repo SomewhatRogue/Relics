@@ -3,7 +3,8 @@
  * job nearest done or the first not done, how many are left, and the way out once they're done. The
  * way out counts as the goal met (the room's exit opens) once the watch has come.
  */
-import { EXTRACT_WORDS, GOAL_WORDS } from '../shared/expedjob';
+import { EXTRACT_WORDS, goalWords } from '../shared/expedjob';
+import { WOOD_EXIT } from '../shared/hangwords';
 import { EXPED } from '../shared/tuning';
 import type { ArenaRoom } from './room';
 import type { Run } from './run';
@@ -13,12 +14,14 @@ const say = (s: string, run: Run) => s.split('{boss}').join(run.job.boss ?? '');
 
 export function expedGoal(run: Run, room: ArenaRoom): { text: string; done: boolean } {
   const x = room.exped!;
-  if (x.phase === 'leave') return { text: EXTRACT_WORDS.leave, done: true };
+  // Hangman's Wood: out by the north path once Hempen's dead; the fire to light while it's still cold and you're past the gibbet.
+  if (x.phase === 'leave') return { text: room.map.hang ? WOOD_EXIT.leave : EXTRACT_WORDS.leave, done: true };
   if (x.phase === 'hold') return { text: EXTRACT_WORDS.hold(Math.max(0, Math.ceil(EXPED.extract - x.held))), done: false };
   if (x.phase === 'open') return { text: EXTRACT_WORDS.open, done: false };
   const left = x.goals.filter((g) => !g.done), busy = left.find((g) => g.p > 0) ?? left[0];
   const n = left.length > 1 ? ` (${left.length} jobs left)` : '';
-  return { text: busy ? say(GOAL_WORDS[busy.kind].todo, run) + n : EXTRACT_WORDS.shut, done: false };
+  const words = goalWords(run.job), fire = x.wood && !x.wood.check.lit && x.goals.some((g) => g.kind === 'winch' && g.done) ? `. ${WOOD_EXIT.check}` : '';
+  return { text: busy ? say(words[busy.kind].todo, run) + n + fire : EXTRACT_WORDS.shut, done: false };
 }
 
 /** Where each job not yet done is, or the beacon once they are; a prisoner camp marks its cages. */

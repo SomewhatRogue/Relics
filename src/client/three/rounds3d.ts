@@ -150,6 +150,8 @@ export function addRound(B: Boxes, o: Round, fires: Spot[], r: Seed): void {
     case 'hangtree':
     case 'headstone':
     case 'apple':
+    case 'gibbet':
+    case 'waymark':
       // Layout 4's pieces: the boxes the flat view paints (../pieces.ts).
       putBoxes(B, roundBoxes(o), x, z);
       break;

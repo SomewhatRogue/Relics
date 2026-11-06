@@ -20,6 +20,8 @@ export interface Kit {
   foes: Foe[]; dead: Npc[]; grim: Grim[]; sleepers: P[];
   /** Roads (kept clear), and what's been claimed (cells of 4 tiles, so a check looks only near). */
   roads: Line[]; claims: Map<number, (P & { r: number })[]>;
+  /** The map's size when it isn't the Barrowfields' (Hangman's Wood: shared/hangwood.ts). */
+  mw?: number; mh?: number;
 }
 
 export function newKit(rng: Rng): Kit {
@@ -55,7 +57,7 @@ export function unclaimed(k: Kit, x: number, y: number, r: number): boolean {
 
 /** Clear of everything laid so far, the roads (`road` tiles off), the water and the map's edge. */
 export function free(k: Kit, x: number, y: number, r: number, road = 1.6): boolean {
-  if (x < r + 1.2 || y < r + 1.4 || x > MW - r - 1.2 || y > MH - r - 1.2) return false;
+  if (x < r + 1.2 || y < r + 1.4 || x > (k.mw ?? MW) - r - 1.2 || y > (k.mh ?? MH) - r - 1.2) return false;
   for (const c of k.claims.get(cellOf(x, y)) ?? []) if (Math.hypot(c.x - x, c.y - y) < c.r + r + 0.5) return false;
   // (A claim bigger than a cell is in every cell it touches, so looking in this one is enough.)
   if (k.roads.some((l) => offLine(l, x, y) < r + road)) return false;
