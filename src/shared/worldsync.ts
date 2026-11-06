@@ -8,6 +8,7 @@ import type { Stats } from './progress.js';
 import { CHAPTER_1, settle, vote, type WorldState } from './story.js';
 import { nights } from './raids.js';
 import { WORK_ORDER, workDone, type WorkId } from './works.js';
+import { addRangeLine, claimScore, type RangeClaim } from './rangeboard.js';
 
 /** Works finished lately, kept for the town's talk. */
 export const MENDED_KEPT = 6;
@@ -35,6 +36,8 @@ export interface Contribution {
   deed?: { title: string; place: string; party: string[] };
   /** Days that pass (a finished run). */
   days?: number;
+  /** A finished round at the archery range: worked out again from the hero's seed and arrows before it goes on the board (shared/rangeboard.ts). */
+  range?: RangeClaim;
 }
 
 /**
@@ -56,6 +59,11 @@ export function contribute(w: WorldState, c: Contribution, now = Date.now(), rai
   // The council may have just opened (its close is set) or closed (decided): checked after every change.
   settle(w, now);
   if (c.deed) (w.deeds ??= []).unshift({ ...c.deed, day: w.day }), (w.deeds.length = Math.min(w.deeds.length, DEEDS));
+  // The range's board: only what the arrows really score (a round replayed from its seed).
+  if (c.range) {
+    const n = claimScore(c.hero.id, c.hero.cls, c.range);
+    if (n > 0) w.range = addRangeLine(w.range, { id: c.hero.id, name: c.hero.name, cls: c.hero.cls, n });
+  }
 }
 
 /** The Roll of the Brave: per stat, the top heroes. */

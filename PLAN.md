@@ -2,6 +2,18 @@
 
 ## Current slice
 
+**The first town pastimes: fishing at the millpond and the archery butts** (Claude Opus 5.5, 2026-11-06; Kyle's
+rule 2026-11-05: "all mini games will happen locally on their own computer ... but in town you can see their
+character sitting and fishing or something"). Built; waiting on Kyle's play and the lore keeper and line editor on
+the new words (`client/pastimewords.ts`). *Done when*, on his phone: Old Pennock by the new millpond under the east
+wall lends a rod; hold to swing the cast, let go, the float bobs and twitches, he taps when it goes under, holds to
+reel and lets go when it runs, and lands a roach close in or a pike far out, its size on a card and his biggest kept;
+Corin at the butts runs a minute's round of standing, sliding and swinging targets in three lanes, the far ones worth
+three times, a Ranger's sight steadier; the best goes on the town's board at the end, scored again by the server; and
+a friend in town sees him sat on the bank with the rod out, or at the butts drawing and loosing, till he gets up.
+Everything in DECISIONS 2026-11-06 ("the first town pastimes"); shots `node scripts/pastime-look.cjs`,
+town-online.cjs for the parked friends. Open: every number once he's played; the Night Watch could park on the wall
+the same way.
 **Who hosts** (Claude Opus 5.5, 2026-11-06; Kyle approved "best connection hosts" and "a hidden host hands
 over"). Built; waiting on Kyle's play. *Done when*, online with friends: setting out, the player nearest the relay
 runs the job's room (the beat says so when it isn't the party's leader; the leader still leads the party), and
@@ -827,6 +839,8 @@ naming, hammer timing at the smithy, candles and the giving-up rite at the churc
 quick haggle at the market, fishing. Nothing at Vell's tower for now. The Night Watch is its own feature
 (a Last Stand style skill shooter on the walls at night, 3 minutes, headshots, high scores). Herbs and
 potions are planned for later. Full plan: docs/plans/town-activities.md.
+Built so far: the Night Watch (slices 1 and 2, upright on a phone), fishing at the millpond and the archery butts
+(2026-11-06). Next from the table: arm-wrestling and knife-throwing at the Rat, the smithy's hammer, the rest.
 
 ## Open, soon but not yet: red eyes and gold eyes (Kyle, 2026-11-03)
 

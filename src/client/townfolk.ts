@@ -26,16 +26,19 @@ import { HERO, WEAPONS, type WeaponId } from '../shared/tuning';
 import { RelaySocket, type RelayMsg } from './relay';
 import { Pace, RECKON, heardV, reckoned, type Sent } from './reckon';
 import { unpackHound, type PackedHound } from '../shared/houndlook';
+import { isPastime, type PastimeId } from '../shared/pastimes';
+import { parkOf, setPark } from './parked';
 
 /** The town's peer room. (Busy one day, it splits into WICKHOLD2 and on, like a channel.) */
 export const TOWN_ROOM = 'WICKHOLD1';
-const KEEP = 120, GONE = 300;
+/** `PARKED`: someone fishing or at the butts says nothing till they're done, so they're kept this long (a goodbye still takes them at once). */
+const KEEP = 120, GONE = 300, PARKED = 3600;
 const hook = (k: string, d: number) => Number(typeof location === 'undefined' ? NaN : new URLSearchParams(location.search).get(k)) || d;
 /** Out of sight this long (seconds), and untouched this long, and the town's room is left. (`?hide=`, `?idle=`: tests.) */
 export const AWAY = { hidden: hook('hide', 60), idle: hook('idle', 180) };
 
 /** One player about themselves: name, weapon, the place they're in, and x, y, facing, moving. */
-export interface Me { n: string; w: string; l?: number; /** A Ranger's hound: breed, coat, white, name (shared/houndlook.ts). */ d?: PackedHound; at: string; p: [number, number, number, number, number]; pt?: unknown; /** Velocity, tiles a second. */ v?: [number, number] }
+export interface Me { n: string; w: string; l?: number; /** A Ranger's hound: breed, coat, white, name (shared/houndlook.ts). */ d?: PackedHound; at: string; p: [number, number, number, number, number]; pt?: unknown; /** Velocity, tiles a second. */ v?: [number, number]; /** Parked at a pastime (fishing, the butts): said once, then nothing till it's over (shared/pastimes.ts). */ g?: PastimeId }
 type Said = Me & { k: 'me' | 'hi' };
 interface Folk { hero: Hero; to: [number, number]; v: [number, number]; at: string; heard: number; pt?: unknown }
 
@@ -104,9 +107,10 @@ export class Townfolk {
     this.hadCompany = company;
     const at = this.sent && reckoned(this.sent, now), off = at ? Math.hypot(at[0] - x, at[1] - y) : Infinity;
     const due = company ? this.gist() !== this.said || off > RECKON.err : this.gist(true) !== this.saidPlace;
-    if (this.folk.size && ((due && now - this.sentAt >= RECKON.gap) || now - this.sentAt >= KEEP)) this.tell('*', 'me');
+    // Parked at a pastime: the word that says so, and then nothing (not even the beat) till it's over.
+    if (this.folk.size && ((due && now - this.sentAt >= RECKON.gap) || (!me.g && now - this.sentAt >= KEEP))) this.tell('*', 'me');
     for (const [id, f] of this.folk) {
-      if (now - f.heard > GONE) {
+      if (now - f.heard > (parkOf(f.hero) ? PARKED : GONE)) {
         this.folk.delete(id);
         if (f.pt) this.onOffers();
         continue;
@@ -183,7 +187,7 @@ export class Townfolk {
   /** All that others see of me but where I am and which way I face (`place`: only what those elsewhere need). */
   private gist(place = false): string {
     const m = this.me;
-    return m ? JSON.stringify([m.n, m.w, m.l, m.d, m.at, place ? 0 : m.p[4], m.pt]) : '';
+    return m ? JSON.stringify([m.n, m.w, m.l, m.d, m.at, place ? 0 : m.p[4], m.pt, m.g ?? 0]) : '';
   }
 
   /** Anyone else in the place I'm in (only they see me walk). */
@@ -208,6 +212,8 @@ export class Townfolk {
     const had = JSON.stringify(f.pt ?? null), has = JSON.stringify(d.pt ?? null);
     Object.assign(f, { to: [x, y], v: moving ? heardV(d.v) : [0, 0], at: String(d.at ?? '').slice(0, 40), heard: this.now, pt: d.pt });
     if (had !== has) this.onOffers();
+    // Parked at a pastime, drawn there at it (parked.ts); a word without it, back.
+    setPark(f.hero, isPastime(d.g) ? d.g : null);
     Object.assign(f.hero, { weapon, look: typeof d.l === 'number' ? Math.max(0, Math.min(2, Math.floor(d.l))) : 0, fx, fy, moving: !!moving, tag: String(d.n ?? '').toUpperCase().replace(NAME, '').slice(0, 14) || 'STRANGER', houndLook: d.d === undefined ? f.hero.houndLook : unpackHound(d.d, m.from) });
     // Someone new: tell them where you are, just them.
     if (d.k === 'hi') this.tell(m.from, 'me');

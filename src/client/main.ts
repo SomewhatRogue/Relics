@@ -25,6 +25,9 @@ import { ONLINE, fullForTest, onFull } from './relay';
 import { sayFull } from './netline';
 import { Townfolk } from './townfolk';
 import { presence } from './townpresence';
+import { parkOf } from './parked';
+import { openFishing } from './fishmode';
+import { openRange } from './rangemode';
 import { strawFx } from './strawman';
 import { toPx } from './world';
 import { Parties } from './parties';
@@ -121,6 +124,8 @@ paintFrames();
 iconVars();
 
 const game = new Game();
+/** On the wall for the Night Watch, or at a pastime (fishing, the butts): those paint themselves over the town. */
+const away = () => game.mode === 'watch' || game.mode === 'pastime';
 hookLitBadge(() => game.profile.lit ?? 0);
 /** Online (the Vercel site): the others in town. Made once there's a hero, keyed by the hero's id. */
 let townfolk: Townfolk | null = null;
@@ -429,7 +434,7 @@ let still: Intent | null = null;
 let resumed = '', touchedAt = 0;
 // Following a friend's job: a press goes to the leader from the press itself, not the next frame (coop.ts).
 input.onPress = () => {
-  if (!game.remote || panel.open || title.open || chat.typing || pack.open || game.mode === 'watch') return;
+  if (!game.remote || panel.open || title.open || chat.typing || pack.open || away()) return;
   game.remote.send(game.own(input.read()), performance.now() / 1000);
 };
 function tick(t: number): void {
@@ -444,7 +449,7 @@ function tick(t: number): void {
   if (touchedIdle(live)) pokeIdle(ME);
   // The mouse over a hound shows its name (houndname.ts).
   pointAt(!input.touch && (live.ax || live.ay) && game.hero ? [game.hero.x + live.ax, game.hero.y + live.ay] : null);
-  if (panel.open || title.open || chat.typing || pack.open || game.mode === 'watch') still ??= { ...live, mx: 0, my: 0, attack: false, block: false };
+  if (panel.open || title.open || chat.typing || pack.open || away()) still ??= { ...live, mx: 0, my: 0, attack: false, block: false };
   else still = null;
   // With the pack open the hero stands still too, but what you change in it still goes to the room.
   if (still && pack.open && !panel.open) still = { ...still, gearOp: live.gearOp, gearArg: live.gearArg, gearSeq: live.gearSeq };
@@ -534,7 +539,7 @@ function tick(t: number): void {
   town?.step(h ? presence(game, game.profile.name) : null, t / 1000, dt);
   // (Off screen, leading a job in the background: nothing to draw.)
   // (On the wall for the Night Watch: it paints itself over all this, watchmode.ts.)
-  if (document.hidden || game.mode === 'watch') return;
+  if (document.hidden || away()) return;
   views.render(game.room, ME, fx, t / 1000, dt, inTown ? (townfolk?.here(game.room.map.name) ?? []) : [], game.mode === 'run');
   under?.frame(views, game.room, game.room.heroes.find((x) => x.id === ME), t / 1000);
   // The job moved to another device (a host's page went out of sight): said once, over me.
@@ -637,7 +642,7 @@ if (input.touch) document.body.classList.add('touch');
 // Test hooks: read the fight as data, never as pixels.
 const w = window as unknown as Record<string, unknown>;
 w.__fullForTest = fullForTest;
-w.__town = () => ({ dozing: !!townfolk?.dozing, open: !!townfolk?.open, count: townfolk?.count ?? 0, rtt: townfolk?.rtt ?? 0, here: townfolk?.here(game.room.map.name).map((h) => ({ name: h.tag, x: h.x, y: h.y })) ?? [] });
+w.__town = () => ({ dozing: !!townfolk?.dozing, open: !!townfolk?.open, count: townfolk?.count ?? 0, rtt: townfolk?.rtt ?? 0, here: townfolk?.here(game.room.map.name).map((h) => ({ name: h.tag, x: h.x, y: h.y, park: parkOf(h) })) ?? [], sends: townfolk?.sends ?? 0 });
 w.__GAME_STATE__ = () => ({ mode: game.mode, wood: game.wood ? { wake: game.wood.wake, said: game.wood.said, stage: game.wood.stage, hold: game.wood.hold } : null, inside: game.outside ? game.room.map.name : null, title: title.open, time: game.room.time, hero: { ...game.hero }, enemies: game.room.enemies.map((e) => ({ ...e })), guards, run: game.run, profile: game.profile, world: game.world });
 w.render_game_to_text = () => `${game.mode} t=${game.room.time.toFixed(1)} hero ${game.hero.act} hp ${game.hero.hp} st ${Math.round(game.hero.stamina)} | ` + game.room.enemies.map((e) => `${e.kind} ${e.act} hp ${e.hp}${e.attack ? ' ' + e.attack.kind + ' ' + e.attack.t.toFixed(2) : ''}`).join(' | ');
 Object.defineProperty(w, '__room', { get: () => game.room });
@@ -661,6 +666,8 @@ w.__relicPop = relicPop;
 w.__loot = card;
 w.__openTree = () => openTree(game, panel);
 // Idles on demand for screenshots: window.__idles.force('r_fetch') on your own hero (idles.ts).
+// The town's pastimes for the scripts: start one as if you'd talked to Pennock or Abel, and the overlays (fishmode.ts, rangemode.ts).
+w.__pastime = { fish: () => openFishing(game, panel), range: () => openRange(game, panel) };
 w.__idles = { force: (id: string) => forceIdle(game.hero, id as never, performance.now() / 1000), pet: (dog: 'own' | 'lodge') => startPet(game.hero, dog, performance.now() / 1000) };
 w.__openSpot = (id: string, arg = 0, key = '') => openSpot(id as never, game, panel, arg, key);
 // A job on a village street (houses to go into), for the party tests to set out on.
