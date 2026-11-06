@@ -36,6 +36,7 @@ import { goal, isFinal, mine, newRun, runRoom, tally, type Run } from '../sim/ru
 import { NO_INTENT, knows, type FightEvent, type Hero, type Intent, type Learned } from '../sim/types';
 import { players } from '../sim/party';
 import { load, store, type Save } from './save';
+import { fitHound, nameTrouble, type HoundLook } from '../shared/houndlook';
 import { treasure } from '../shared/treasure';
 import { makeRelic, relicMax, type RelicItem } from '../shared/relicitems';
 import { wonRelics } from '../shared/relicaward';
@@ -57,6 +58,9 @@ import { packRoom, unpackRoom } from './bigsave';
 import type { Parties } from './parties';
 import { again as practiceAgain, clearPractice, letOut, practiceOf, stepPractice, type Pick } from '../sim/practice';
 import { RACK, sortKey } from '../shared/practice';
+
+/** A hero's hound as the profile has it (a Ranger's; nobody else has one). */
+const houndOf = (p: Profile): HoundLook | undefined => (p.cls === 'RANGER' ? fitHound(p.hound, p.id) : undefined);
 
 /** Seconds the screen takes to go dark after a lost job, before town. */
 export const FADE_OUT = 2.4;
@@ -184,7 +188,7 @@ export class Game {
     const h = this.hero, cls = this.profile.cls;
     // You come round with nothing but your class's weapon (your skill is your trainer's to teach); a
     // Healer's censer has gone cold. (A Ranger's hound is with them: it lay by them all night.)
-    Object.assign(h, { relics: abilitiesOf(cls), found: [], cold: cls === 'HEALER', belt: [], learned: this.profile.learned ?? [], calmHound: true, look: this.profile.look ?? 0 });
+    Object.assign(h, { relics: abilitiesOf(cls), found: [], cold: cls === 'HEALER', belt: [], learned: this.profile.learned ?? [], calmHound: true, look: this.profile.look ?? 0, houndLook: houndOf(this.profile) });
     h.relic = h.relics[0];
     this.wood = newWood(this.room, cls);
   }
@@ -251,6 +255,18 @@ export class Game {
     const el = [...(elementTaught(this.wood) ? ['element'] : []), ...(signTaught(this.wood) ? ['sign'] : []), ...(guardTaught(this.wood) ? ['block'] : [])];
     return this.wood.stage >= 5 ? ['attack', 'roll', 'block', 'relic', 'potion', 'grab', ...el] : [...lessonOf(this.wood).moves.filter((m) => m !== 'grab' || this.wood!.stage > 0 || this.wood!.more), ...el];
   }
+  /** Your hound as chosen with Maeve (houndui.ts): kept on the hero, and your hero shows it at once
+   *  (friends hear it with your look: townpresence.ts, and a party's hero). Its name must pass the chat
+   *  filter; false (nothing changed) if it doesn't, or this hero has no hound. */
+  chooseHound(look: HoundLook): boolean {
+    const p = this.profile;
+    if (p.cls !== 'RANGER' || nameTrouble(look.name)) return false;
+    p.hound = fitHound(look, p.id);
+    if (this.hero) this.hero.houndLook = { ...p.hound };
+    store(this.save);
+    return true;
+  }
+
   /** Make a hero (class for life); returns its slot, or -1 when all three are taken. */
   create(cls: HeroClass, name: string, look = 0): number {
     if (this.save.heroes.length >= HERO_SLOTS) return -1;
@@ -297,6 +313,7 @@ export class Game {
     h.relics = abilitiesOf(p.cls, carried?.kind, p.skill);
     h.learned = p.learned;
     h.look = p.look ?? 0;
+    h.houndLook = houndOf(p);
     // Your skill in hand, or (not yet taught it) the relic you carry.
     h.relic = knows(h, 'skill') ? h.relics[0] : (h.relics[1] ?? h.relics[0]);
     for (const r of h.relics) h.augments[r] = p.augments[r] ?? '';

@@ -21,6 +21,8 @@ import { line } from './speech';
 import { labelRows } from './card';
 import { openSecs, section, wireSections } from './trainsections';
 import './trainer.css';
+import { openHound } from './houndui';
+import { HOUNDW } from './houndwords';
 
 const pips = (ps: Pip[]) => `<span class="tr-pips">${ps.map((x) => `<i class="${x}"></i>`).join('')}</span>`;
 
@@ -90,7 +92,8 @@ export function openTrainer(g: Game, panel: Panel, title: string, who: string, g
     section('ladder', LADDER_TITLE[p.cls], ladderSum, ready(rungs), rungs.map(techRow).join(''), open.ladder) +
     section('ranks', 'RANKS', rankSum, ready(ranks), ranks.map(row).join(''), open.ranks) +
     section('knacks', 'KNACKS', p.perks.length ? `${p.perks.length} TAKEN` : 'NONE YET', p.picks, knackBody, open.knacks || !!picks);
-  panel.show(title, html);
+  // Maeve also looks over a Ranger's hound (houndui.ts).
+  panel.show(title, html, p.cls === 'RANGER' ? [{ label: HOUNDW.button, act: () => openHound(g, panel, again) }] : []);
   const on = (sel: string, f: (b: HTMLElement) => void) => document.querySelectorAll<HTMLElement>(`#panel ${sel}`).forEach((b) => b.addEventListener('click', () => f(b)));
   wireSections(document.getElementById('panel')!);
   on('[data-pick]', (b) => (g.pickPerk(b.dataset.pick as never), again()));

@@ -15,6 +15,7 @@ export { PERKS, perkFx, perkText, type Fx, type FxKey, type Knack, type PerkId }
 export { CHAINS, CLASS_CHAINS, chainOf, classPerks, fitPerks, nextStep, perkOffer, resetPerks, takePerk, type ChainId } from './chains.js';
 import type { PerkId } from './perks.js';
 import type { WatchRecord } from './watchpay.js';
+import { defaultHound, type HoundLook } from './houndlook.js';
 
 /** Chapter 1's level cap (it lifts when the council moves the story on). */
 export const LEVEL_CAP = 10;
@@ -99,6 +100,8 @@ export interface Profile {
   skill?: RelicId;
   /** Which of its class's three looks (chosen when made). */
   look?: number;
+  /** A Ranger's hound: breed, coat, white and name, chosen with Maeve at the lodge (shared/houndlook.ts). Cosmetic. */
+  hound?: HoundLook;
   /** Elements the relic-wright has fitted to this hero's skill and relics. */
   augments: Partial<Record<RelicId, Augment>>;
   runs: number;
@@ -115,8 +118,8 @@ export interface Profile {
   watch?: WatchRecord;
 }
 
-export const newProfile = (cls: HeroClass = 'WARRIOR', name = 'HERO'): Profile =>
-  ({ id: heroId(), name, cls, gold: 0, xp: 0, level: 1, perks: [], learned: [], picks: 0, arms: {}, weapon: CLASS_KITS[cls][0], bag: [], glow: 0, belt: ['bitter'], armor: { slot: 'armor', armor: CLASS_ARMOR[cls], quality: 'plain', traits: [], mods: [], level: 0 }, rings: [], steel: 0, want: 0, prologue: false, tally: false, cold: false, cutSeen: false, relics: [], relic: '', augments: {}, runs: 0, stats: newStats(), wish: false, dice: 0, signs: true });
+export const newProfile = (cls: HeroClass = 'WARRIOR', name = 'HERO', id = heroId()): Profile =>
+  ({ id, ...(cls === 'RANGER' ? { hound: defaultHound(id) } : {}), name, cls, gold: 0, xp: 0, level: 1, perks: [], learned: [], picks: 0, arms: {}, weapon: CLASS_KITS[cls][0], bag: [], glow: 0, belt: ['bitter'], armor: { slot: 'armor', armor: CLASS_ARMOR[cls], quality: 'plain', traits: [], mods: [], level: 0 }, rings: [], steel: 0, want: 0, prologue: false, tally: false, cold: false, cutSeen: false, relics: [], relic: '', augments: {}, runs: 0, stats: newStats(), wish: false, dice: 0, signs: true });
 
 function heroId(): string {
   const c = 'abcdefghijkmnpqrstuvwxyz23456789';

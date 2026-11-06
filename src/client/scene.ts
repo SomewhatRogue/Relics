@@ -15,7 +15,9 @@ import type { ArenaRoom } from '../sim/room';
 import { drawHero } from './actors';
 import { drawHound, drawSnare } from './hound';
 import { companion, houndAt, lodgeHoundAt } from './idlehound';
-import { LODGE_HOUND, isLodgeMap } from './petting';
+import { LODGE_HOUND, MAEVE_HOUND, isLodgeMap } from './petting';
+import { houndTag } from './houndname';
+import { seedOf } from './houndidle';
 import type { Hound } from '../sim/types';
 import type { Hero } from '../sim/types';
 import { blit, type Ctx } from './draw';
@@ -121,9 +123,10 @@ export class Scene {
 
   /** The relic (the javelin) held over your head in a turning ring of light. */
   /** A hero's hound (tiles: the hound at `ax, ay`, its hero at `hx, hy`), where it plays if it's playing (idlehound.ts). */
-  private hound(items: { y: number; draw: () => void }[], c: Ctx, h: Hero, d: Hound, ax: number, ay: number, hx: number, hy: number, cx: number, cy: number, now: number): void {
-    const a = houndAt(h, ax, ay, hx, hy, now), x = OX + (a ? a.x : ax) * PX, y = OY + (a ? a.y : ay) * PX;
-    items.push({ y, draw: () => (a ? drawHound(c, d, x - cx, y - cy, a.mood, a.fx, a.down) : drawHound(c, d, x - cx, y - cy)) });
+  private hound(items: { y: number; draw: () => void }[], c: Ctx, h: Hero, d: Hound, ax: number, ay: number, hx: number, hy: number, cx: number, cy: number, now: number, me?: Hero): void {
+    const a = houndAt(h, ax, ay, hx, hy, now), tx = a ? a.x : ax, ty = a ? a.y : ay, x = OX + tx * PX, y = OY + ty * PX;
+    const o = { ...(a ? { mood: a.mood, fx: a.fx, down: a.down } : {}), look: h.houndLook, name: houndTag(h, d, tx, ty, me, !!a), seed: seedOf(h.id) };
+    items.push({ y, draw: () => drawHound(c, d, x - cx, y - cy, o) });
   }
 
   private heldUp(c: Ctx, x: number, y: number, t: number): void {
@@ -267,12 +270,12 @@ export class Scene {
       items.push({ y, draw: () => drawHero(c, h, x - cx, y - cy, false, room.time) });
       // Another player's Ranger: their hound at heel, as this screen walks it (idlehound.ts).
       const d = companion(h, now);
-      if (d) this.hound(items, c, h, d, d.x, d.y, h.x, h.y, cx, cy, now);
+      if (d) this.hound(items, c, h, d, d.x, d.y, h.x, h.y, cx, cy, now, me);
     }
     // Maeve's hound by the lodge's fire.
     if (isLodgeMap(map)) {
       const a = lodgeHoundAt(room.heroes, now);
-      items.push({ y: OY + a.y * PX, draw: () => drawHound(c, LODGE_HOUND, OX + a.x * PX - cx, OY + a.y * PX - cy, a.mood, a.fx, a.down) });
+      items.push({ y: OY + a.y * PX, draw: () => drawHound(c, LODGE_HOUND, OX + a.x * PX - cx, OY + a.y * PX - cy, { mood: a.mood, fx: a.fx, down: a.down, look: MAEVE_HOUND }) });
     }
     for (const h of room.heroes) {
       const [x, y] = lerp('h:' + h.id, h.x, h.y), up = (h.z ?? 0) * LIFT;
@@ -280,7 +283,7 @@ export class Scene {
       // A Ranger's hound, wherever it is.
       if (h.hound) {
         const d = h.hound, [dx, dy] = lerp('d:' + h.id, d.x, d.y);
-        this.hound(items, c, h, d, (dx - OX) / PX, (dy - OY) / PX, (x - OX) / PX, (y - OY) / PX, cx, cy, now);
+        this.hound(items, c, h, d, (dx - OX) / PX, (dy - OY) / PX, (x - OX) / PX, (y - OY) / PX, cx, cy, now, me);
       }
       if (h.id === meId && this.fanfare) items.push({ y: y + 0.5, draw: () => this.heldUp(c, x - cx, y - up - cy, room.time) });
       if (h.id === meId && this.pointTo) items.push({ y: y + 0.5, draw: () => this.arrow(c, h, x - cx, y - up - cy, room.time) });

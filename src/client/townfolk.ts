@@ -25,6 +25,7 @@ import type { Hero } from '../sim/types';
 import { HERO, WEAPONS, type WeaponId } from '../shared/tuning';
 import { RelaySocket, type RelayMsg } from './relay';
 import { Pace, RECKON, heardV, reckoned, type Sent } from './reckon';
+import { unpackHound, type PackedHound } from '../shared/houndlook';
 
 /** The town's peer room. (Busy one day, it splits into WICKHOLD2 and on, like a channel.) */
 export const TOWN_ROOM = 'WICKHOLD1';
@@ -34,7 +35,7 @@ const hook = (k: string, d: number) => Number(typeof location === 'undefined' ? 
 export const AWAY = { hidden: hook('hide', 60), idle: hook('idle', 180) };
 
 /** One player about themselves: name, weapon, the place they're in, and x, y, facing, moving. */
-export interface Me { n: string; w: string; l?: number; at: string; p: [number, number, number, number, number]; pt?: unknown; /** Velocity, tiles a second. */ v?: [number, number] }
+export interface Me { n: string; w: string; l?: number; /** A Ranger's hound: breed, coat, white, name (shared/houndlook.ts). */ d?: PackedHound; at: string; p: [number, number, number, number, number]; pt?: unknown; /** Velocity, tiles a second. */ v?: [number, number] }
 type Said = Me & { k: 'me' | 'hi' };
 interface Folk { hero: Hero; to: [number, number]; v: [number, number]; at: string; heard: number; pt?: unknown }
 
@@ -47,6 +48,8 @@ export class Townfolk {
   private sentAt = -99;
   /** What everyone heard last: all but the position and facing, and where and how fast. */
   private said = '';
+  /** The hound everyone last heard about (packed, as JSON). */
+  private dogSaid = '';
   /** The same, as those in other places see it (no walking). */
   private saidPlace = '';
   private hadCompany = false;
@@ -156,7 +159,12 @@ export class Townfolk {
 
   private tell(to: string, k: Said['k']): void {
     if (!this.me || !this.sock?.open_) return;
-    this.sock.send(to, { k, ...this.me });
+    // A Ranger's hound goes once: to everyone when it's new or changed, and to each newcomer in their
+    // answer; the words after leave it out and the others keep what they heard.
+    const said: Said = { k, ...this.me }, dog = JSON.stringify(this.me.d ?? null);
+    if (to === '*' && k === 'me' && dog === this.dogSaid) delete said.d;
+    if (to === '*') this.dogSaid = dog;
+    this.sock.send(to, said);
     this.sends++;
     // (What everyone has heard: the last `me` or `hi` to all.)
     if (to !== '*') return;
@@ -170,7 +178,7 @@ export class Townfolk {
   /** All that others see of me but where I am and which way I face (`place`: only what those elsewhere need). */
   private gist(place = false): string {
     const m = this.me;
-    return m ? JSON.stringify([m.n, m.w, m.l, m.at, place ? 0 : m.p[4], m.pt]) : '';
+    return m ? JSON.stringify([m.n, m.w, m.l, m.d, m.at, place ? 0 : m.p[4], m.pt]) : '';
   }
 
   /** Anyone else in the place I'm in (only they see me walk). */
@@ -195,7 +203,7 @@ export class Townfolk {
     const had = JSON.stringify(f.pt ?? null), has = JSON.stringify(d.pt ?? null);
     Object.assign(f, { to: [x, y], v: moving ? heardV(d.v) : [0, 0], at: String(d.at ?? '').slice(0, 40), heard: this.now, pt: d.pt });
     if (had !== has) this.onOffers();
-    Object.assign(f.hero, { weapon, look: typeof d.l === 'number' ? Math.max(0, Math.min(2, Math.floor(d.l))) : 0, fx, fy, moving: !!moving, tag: String(d.n ?? '').toUpperCase().replace(NAME, '').slice(0, 14) || 'STRANGER' });
+    Object.assign(f.hero, { weapon, look: typeof d.l === 'number' ? Math.max(0, Math.min(2, Math.floor(d.l))) : 0, fx, fy, moving: !!moving, tag: String(d.n ?? '').toUpperCase().replace(NAME, '').slice(0, 14) || 'STRANGER', houndLook: d.d === undefined ? f.hero.houndLook : unpackHound(d.d, m.from) });
     // Someone new: tell them where you are, just them.
     if (d.k === 'hi') this.tell(m.from, 'me');
   }
@@ -206,7 +214,7 @@ export class Townfolk {
     this.sock.close();
     this.sock = null;
     this.folk.clear();
-    this.said = this.saidPlace = '';
+    this.said = this.saidPlace = this.dogSaid = '';
     this.hadCompany = false;
     this.sent = null;
     this.sentAt = -99;

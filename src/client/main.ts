@@ -1,6 +1,7 @@
 /** Relic: Wickhold, the Training Yard and runs. The rooms run here in the browser (solo is a party of one). */
 import { forceIdle, pokeIdle } from './idles';
 import { startPet } from './petting';
+import { pointAt } from './houndname';
 import { touchedIdle } from './idlepoke';
 import { SIGNS, SIGN_KEY } from '../shared/signs';
 import { signFor, signLeft } from '../sim/signature';
@@ -425,6 +426,8 @@ function tick(t: number): void {
   const live = input.read();
   // Any input stops your hero's idle at once (idles.ts): the stick, the aim, any press.
   if (touchedIdle(live)) pokeIdle(ME);
+  // The mouse over a hound shows its name (houndname.ts).
+  pointAt(!input.touch && (live.ax || live.ay) && game.hero ? [game.hero.x + live.ax, game.hero.y + live.ay] : null);
   if (panel.open || title.open || chat.typing || pack.open || game.mode === 'watch') still ??= { ...live, mx: 0, my: 0, attack: false, block: false };
   else still = null;
   // With the pack open the hero stands still too, but what you change in it still goes to the room.
@@ -625,4 +628,5 @@ w.__villageJob = (seed = 7) => import('../shared/jobs').then((m) => ({ ...m.boar
 // Look sheets for screenshots: every hero, the Warrior's options, and a dark copy with only the glow lit.
 // One hero drawn by the game's own code, for the hero look sheet (scripts/heroes-look.cjs).
 w.__heroArt = (...a: Parameters<typeof import('./heroart').heroArt>) => import('./heroart').then((m) => m.heroArt(...a));
+w.__houndArt = (...a: Parameters<typeof import('./houndart').houndArt>) => import('./houndart').then((m) => m.houndArt(...a));
 w.__looks = () => Object.fromEntries(Object.keys(LOOKS).map((k) => [k, [0, 1, 2].map((i) => heroLook(k as HeroClass, i).down.c.toDataURL())]));
