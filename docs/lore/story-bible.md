@@ -255,6 +255,7 @@ most Want among the heroes is the one the bells don't spare).
 
 ## Who sells what (recorded 2026-11-02; Kyle's call, lore keeper)
 - Only two potions (Kyle, 2026-11-04: "just have Bitter (healing) and Brandy"). Agne sells the Bitter; Gannet sells Wall Brandy over the bar at the Drowned Rat. Goblins and chests drop both. The smoke and frost flasks and Lamp Oil in a flask are gone (Lamp Oil to be confirmed with Kyle; oil barrels on jobs stay). Dicer Moll plays knucklebones and sells nothing.
+- Gambling is trade, like selling: a bet at Moll's dice or at the Rat's arm-wrestling table and knife board, won or lost, never touches the Want (recorded 2026-11-06, Kyle).
 - Ivo's bench rerolls a modifier even while he isn't setting elements, and sells nothing else.
 - (Before: Gannet also sold Lamp Oil and smoke flasks, Ivo frost flasks.)
 - Dessa is one of the traders camped outside the north gate; her Market Row stall opens only once the council lets the traders in. Tobin's stall is there either way.

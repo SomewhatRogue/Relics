@@ -17,7 +17,7 @@ import { chargePips } from './reliccard';
 import { RELICW } from './relicwords';
 import { hookLitBadge } from './litbadge';
 import { setVotes } from './voteboards';
-import { HERO, LAGCOMP, dodgeName, dodgeOf, POTIONS, CLASS_ORDER, RELICS, TRAITS, WEAPONS, itemName, type HeroClass } from '../shared/tuning';
+import { HERO, NIGHT_WATCH, LAGCOMP, dodgeName, dodgeOf, POTIONS, CLASS_ORDER, RELICS, TRAITS, WEAPONS, itemName, type HeroClass } from '../shared/tuning';
 import { CLASS_NAME } from '../shared/classes';
 import { barWord } from '../shared/barword';
 import { LOOKS, heroLook } from './sprites';
@@ -28,6 +28,10 @@ import { presence } from './townpresence';
 import { parkOf } from './parked';
 import { openFishing } from './fishmode';
 import { openRange } from './rangemode';
+import { openArm } from './armmode';
+import { openKnives } from './knifemode';
+import { openAnvil } from './anvilmode';
+import { armFoe } from '../shared/armtune';
 import { strawFx } from './strawman';
 import { toPx } from './world';
 import { Parties } from './parties';
@@ -198,6 +202,8 @@ chat.onStrike = (x, y) => {
 };
 // Test hook: ?hero=MAGE skips the start screen with a hero of that class.
 const quick = new URLSearchParams(location.search).get('hero') as HeroClass | null;
+// The Night Watch is closed (shared/tuning.ts NIGHT_WATCH); `?watch=1` opens Brisk's stair for a look.
+if (new URLSearchParams(location.search).get('watch') === '1') NIGHT_WATCH.on = true;
 // ...and ?wood=1 starts it in the prologue wood instead of town.
 if (quick && CLASS_ORDER.includes(quick)) {
   if (game.create(quick, quick) < 0) game.choose(0);
@@ -691,7 +697,9 @@ w.__loot = card;
 w.__openTree = () => openTree(game, panel);
 // Idles on demand for screenshots: window.__idles.force('r_fetch') on your own hero (idles.ts).
 // The town's pastimes for the scripts: start one as if you'd talked to Pennock or Abel, and the overlays (fishmode.ts, rangemode.ts).
-w.__pastime = { fish: () => openFishing(game, panel), range: () => openRange(game, panel) };
+w.__pastime = { fish: () => openFishing(game, panel), range: () => openRange(game, panel),
+  arm: (foe = 'drunk', bet = 0) => openArm(game, panel, armFoe(foe), bet), knives: (bet = 0) => openKnives(game, panel, bet),
+  anvil: () => { const it = game.profile.arms[game.profile.weapon] ?? game.profile.armor; const up = it && game.levelUp(it); return up ? openAnvil(game, panel, up) : null; } };
 w.__idles = { force: (id: string) => forceIdle(game.hero, id as never, performance.now() / 1000), pet: (dog: 'own' | 'lodge') => startPet(game.hero, dog, performance.now() / 1000) };
 w.__openSpot = (id: string, arg = 0, key = '') => openSpot(id as never, game, panel, arg, key);
 // A job on a village street (houses to go into), for the party tests to set out on.

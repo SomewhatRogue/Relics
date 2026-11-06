@@ -14,6 +14,7 @@ import { BOARD_SIZE, contribute, type Board, type Contribution } from '../src/sh
 import { WORK_ORDER } from '../src/shared/works.js';
 import { Meter } from './_meter.js';
 import { cleanClaim } from '../src/shared/rangeboard.js';
+import { cleanKnifeClaim } from '../src/shared/knifeboard.js';
 
 export interface WorldView { world: WorldState; board: Board }
 export interface WorldStore {
@@ -46,6 +47,9 @@ export function clean(raw: unknown): Contribution | null {
   // A round at the archery range: its arrows, scored again as it's applied (shared/rangeboard.ts).
   const range = cleanClaim(c.range);
   if (range) out.range = range;
+  // A round at the Rat's knife board: the moments thrown, played again as it's applied (shared/knifeboard.ts).
+  const knives = cleanKnifeClaim(c.knives);
+  if (knives) out.knives = knives;
   if (CHAPTER_1.decision.choices.some((x) => x.id === c.vote)) out.vote = c.vote as string;
   if (typeof c.voter === 'string' && /^[\w-]{6,40}$/.test(c.voter)) out.voter = c.voter;
   const d = c.deed as Record<string, unknown> | undefined, words = (v: unknown, n: number) => String(v ?? '').replace(/[^A-Za-z0-9 ',.-]/g, '').slice(0, n);
@@ -145,9 +149,9 @@ export async function redisWorldStore(url: string, meter = new Meter()): Promise
           if (tries === 4) throw e;
         }
       }
-      // A round at the range (nothing for the Roll): the world's write is all (5 commands); the Roll
+      // A round at the range or the knife board (nothing for the Roll): the world's write is all (5 commands); the Roll
       // as it was, from what this instance last read (or once from its own key).
-      if (c.range && !STAT_ORDER.some((k) => c.stats?.[k])) {
+      if ((c.range || c.knives) && !STAT_ORDER.some((k) => c.stats?.[k])) {
         let b = seen.get(g)?.board;
         if (!b) {
           meter.add('get');

@@ -36,7 +36,7 @@ export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall'
   // A side way out of a job's room to a dead end (shared/sideway.ts): a gap at the edge, drawn as one.
   | 'sideway'
   // Inside the halls, each its own (client/hallsdraw.ts).
-  | 'books' | 'stair' | 'dummy' | 'maptable' | 'dicetable' | 'skinbench' | 'desk' | 'tub' | 'bellows' | 'booth' | 'bunk' | 'casks'
+  | 'books' | 'stair' | 'dummy' | 'maptable' | 'dicetable' | 'armtable' | 'skinbench' | 'desk' | 'tub' | 'bellows' | 'booth' | 'bunk' | 'casks'
   // Layout 4's pieces (client/pieces.ts): a mine's headframe, a fallen trunk, a watermill and its wheel, a fence of sharpened stakes.
   | 'headframe' | 'log' | 'mill' | 'stakes'
   // The Staithe (shared/staithe.ts): the eel-catchers's jetty over deep water, the log laid across to it, a
@@ -140,7 +140,7 @@ export type MarkKind = 'blood' | 'drag' | 'debris' | 'scorch' | 'trample' | 'pla
  * line from (x, y) to (x + w, y + h) `line` tiles either side. Paint only.
  */
 /** What hangs on a hall's back wall. */
-export type HangKind = 'vote' | 'stars' | 'shields' | 'banner' | 'map' | 'antlers' | 'pelts' | 'bows' | 'window' | 'tools' | 'herbs' | 'notices' | 'sign' | 'shelves';
+export type HangKind = 'vote' | 'stars' | 'shields' | 'banner' | 'map' | 'antlers' | 'pelts' | 'bows' | 'window' | 'tools' | 'herbs' | 'notices' | 'sign' | 'shelves' | 'knifeboard';
 export type SoilMat = 'cobble' | 'earth' | 'mud' | 'swept' | 'straw' | 'ash' | 'wet'
   // Out on a job: grass over another floor, a ploughed field in rows, grain standing.
   | 'grass' | 'furrow' | 'crop';

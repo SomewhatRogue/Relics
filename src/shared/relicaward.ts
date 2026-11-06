@@ -27,7 +27,8 @@ export const ZONE_RELICS: Record<string, ZoneRelic> = {
 };
 
 /** What gave it. A zone's climax names the zone. */
-/** `boss`: a boss of the kit that isn't a butcher (docs/plans/bosses.md): its sure chest, 15% (BOSS.chest.relic), found in its hoard. */
+/** `boss`: a boss of the kit's sure chest, found in its hoard (docs/plans/bosses.md): the Doorkeepers' 15% (BOSS.chest.relic),
+ *  Hempen's 20% (HEMPEN_BOSS.chest.relic, never the hook: Hangman's Wood gives that one at the job's end). */
 export type RelicSource = 'deep' | 'story' | 'beacon' | 'named' | 'boss' | { zone: string };
 export const sourceKey = (s: RelicSource) => (typeof s === 'string' ? s : 'zone:' + s.zone);
 

@@ -89,6 +89,7 @@ import { witchColour } from './hallsdraw';
 import { brazierOn, drawBrazier, drawLamps } from './lampsdraw';
 import { lampAt } from '../shared/lamps';
 import { drawChalkMarks, drawTally } from './chalkdraw';
+import { noteKneels } from './kneel';
 
 
 /** The view's jolt this frame (heropose.ts), reused. */
@@ -270,6 +271,8 @@ export class Scene {
     }
 
     const items: { y: number; draw: () => void }[] = [];
+    // A Cleric raising a friend kneels by them (kneel.ts).
+    noteKneels(room.heroes, room.time);
     for (const h of others) {
       const x = OX + h.x * PX, y = OY + h.y * PX;
       items.push({ y, draw: () => drawHero(c, h, x - cx, y - cy, false, room.time) });

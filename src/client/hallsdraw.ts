@@ -1,7 +1,7 @@
 /**
  * The halls' own furniture, painted into each block's canvas (blocks.ts via furnish.ts): bookcases
  * and a curling stair for the tower, bunks, a map table and a dummy for the barracks, the skinning
- * bench, the dice table, casks and a curtained booth for the Drowned Rat, a desk of books and jars,
+ * bench, the dice table, the arm-wrestling table, casks and a curtained booth for the Drowned Rat, a desk of books and jars,
  * the forge's bellows and quench tub. And their two live things: a stand of candles, coloured fire.
  */
 import type { Block, Round } from '../shared/arena';
@@ -64,6 +64,13 @@ export function hallFurniture(g: CanvasRenderingContext2D, b: Block, rect: Rect,
       rect(0, 0, w, roofH, '#4a3420'), rect(2, 2, w - 4, roofH - 4, '#3a2a1a');
       rect(5, 4, 2, 2, '#e8e0c8'), rect(9, 5, 2, 2, '#e8e0c8'), rect(14, 3, 3, 3, '#5a3d22');
       for (let i = 0; i < 5; i++) rect(18 + rnd(Math.max(1, w - 24)), 3 + rnd(Math.max(1, roofH - 6)), 1, 1, '#d4a537');
+      legs(rect, w, wallY, tall);
+      return true;
+    case 'armtable':
+      // The arm-wrestling table: worn bare in two rounds where the elbows go, a mug each end, a candle stub.
+      rect(0, 0, w, roofH, '#5a3d22'), rect(1, 1, w - 2, roofH - 2, '#6a4a2a');
+      rect(Math.round(w * 0.3) - 2, Math.round(roofH / 2) - 1, 4, 3, '#8a6a46'), rect(Math.round(w * 0.7) - 2, Math.round(roofH / 2) - 1, 4, 3, '#8a6a46');
+      rect(2, 2, 3, 3, '#7a6a5a'), rect(w - 5, roofH - 5, 3, 3, '#7a6a5a'), rect(Math.round(w / 2), 2, 1, 2, '#e8e0c8');
       legs(rect, w, wallY, tall);
       return true;
     case 'skinbench':

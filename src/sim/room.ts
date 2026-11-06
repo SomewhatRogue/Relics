@@ -25,6 +25,7 @@ import { HUNGRY_FX, onKill, stepHungry, wears } from './hungry';
 import { newChest, startChest, stepChests, type Chest } from './chests';
 import { stepFlask, stepPotions, usePotion, type Smoke } from './flasks';
 import { dropPickups, dropRelic, stepPickups, type Pickup } from './pickups';
+import { firstNamedRelic } from './namedrelic';
 import { dropCoal, stepCoals, type Coal } from './lantern';
 import { censerSwing, stepEmbers } from './censer';
 import { mend, shieldNear } from './holy';
@@ -101,7 +102,7 @@ import { initStaithe, stepStaithe } from './staithe';
 import { cutNetted, playOut, shoveLog, stepHungNets, stepStaitheFire } from './staithebits';
 import { stepDrift } from './drift';
 import { newBoss, useBook, type BossBook } from './bosskit';
-import { stepPair } from './doorpair';
+import { stepBosses } from './bossrooms';
 
 export class ArenaRoom {
   time = 0;
@@ -164,6 +165,8 @@ export class ArenaRoom {
   private fireRng: Rng;
   /** Relics off named butchers on their own stream too. */
   private relicRng: Rng;
+  /** A hero's first named butcher's sure relic (sim/namedrelic.ts), on its own, so the floor's stream is as it was. */
+  private firstRng: Rng;
   /** Whether what's in a broken cage is false (sim/falsecage.ts), on its own stream as well. */
   private cageRng: Rng;
   /** What a technique knocks loose (CUTPURSE: sim/techrogue.ts), on its own stream too. */
@@ -213,6 +216,7 @@ export class ArenaRoom {
     this.doorRng = new Rng(seed * 104729 + 31);
     this.fireRng = new Rng(seed * 7351 + 17);
     this.relicRng = new Rng(seed * 31337 + 7);
+    this.firstRng = new Rng(seed * 5011 + 67);
     this.cageRng = new Rng(seed * 2971 + 41);
     this.purseRng = new Rng(seed * 6007 + 53);
     this.skyRng = new Rng(seed * 9173 + 61);
@@ -423,9 +427,9 @@ export class ArenaRoom {
     OWN_KIT.slicks = this.slicks;
     OWN_KIT.foes = this.enemies;
     OWN_KIT.nooses = this.nooses;
-    // A boss's arena: the pair's rules before they move (sim/doorpair.ts); one clock a hero holds the hungry near them.
+    // A boss's arena: its rules before they move (sim/bossrooms.ts); one clock a hero holds the hungry near them.
     OWN_KIT.bosses = !!this.bosses;
-    if (this.bosses) stepPair(this.bosses, w, (x, y) => this.spawn('scrapper', x, y));
+    if (this.bosses) stepBosses(this.bosses, w, (x, y) => this.spawn('scrapper', x, y));
     // Pacing (sim/pacing.ts, chase.ts): who flanks, who's asleep before they move; after, packs held back or let go.
     OWN_KIT.pace = !!this.pace;
     if (this.pace) flankers(this.enemies, this.heroes);
@@ -491,6 +495,7 @@ export class ArenaRoom {
       dropCoal(e, this.coals);
       dropPickups(e, this.pickups, this.lootRng, this.exped ? EXPED_COINS : undefined);
       dropRelic(e, this.pickups, this.relicRng);
+      firstNamedRelic(e, this.heroes, this.firstRng, this.events);
       const by = this.heroes.find((x) => x.id === e.lastBy);
       if (by) onKill(by, this.time, this.events);
     }

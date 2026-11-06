@@ -11,7 +11,7 @@ import type { Drop, Enemy, FightEvent, Hero } from './types';
 import type { Pickup } from './pickups';
 
 /** `boss`: a boss's sure chest, its seed (sim/bosschest.ts), and the relics in it, by hero. */
-export interface Chest { id: number; x: number; y: number; state: 'shut' | 'opening' | 'open'; t: number; by: string; tier: Tier; chained: boolean; rolls: Record<string, Item[]>; boss?: number; relics?: Record<string, import('../shared/relicitems').RelicItem> }
+export interface Chest { id: number; x: number; y: number; state: 'shut' | 'opening' | 'open'; t: number; by: string; tier: Tier; chained: boolean; rolls: Record<string, Item[]>; boss?: number; relics?: Record<string, import('../shared/relicitems').RelicItem>; sure?: 'hempen' }
 export const CHEST = { open: 1.2, reach: 1.3, leave: 1.8, alert: 6 };
 import { lift } from './loot';
 import { openBossChest, rollBossChest } from './bosschest';

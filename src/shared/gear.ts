@@ -34,6 +34,13 @@ export const tierAtLeast = (t: Tier, floor: Tier) => TIER_ORDER.indexOf(t) >= TI
 
 /** Upgrades: per level, mods grow by a sixth; a weapon +3% damage, armor 1% less taken, a ring +2 health. */
 export const LEVEL = { mods: 1 / 6, damage: 0.03, tough: 0.01, health: 2 };
+/**
+ * Striking it yourself at the anvil (forgestrike.ts): a well struck upgrade counts for a little more than
+ * a level, at most `max` of a level more (from `floor` to all of that, by the strike's seed). Never more
+ * than `max` for every level a piece has, whatever a save says.
+ */
+export const TEMPER = { max: 0.2, floor: 0.75 };
+export const temperOf = (i: Item) => Math.max(0, Math.min((i.level ?? 0) * TEMPER.max, Number(i.temper) || 0));
 
 export const slotOf = (i: Item): Slot => i.slot ?? 'weapon';
 
@@ -115,7 +122,7 @@ export function gearStats(weapon: Item | undefined, armor: Item | null | undefin
   const costs: Item['cost'][] = [];
   for (const it of [weapon, armor, ...rings]) {
     if (!it) continue;
-    const lv = it.level ?? 0, grow = 1 + lv * LEVEL.mods;
+    const lv = (it.level ?? 0) + temperOf(it), grow = 1 + lv * LEVEL.mods;
     for (const m of it.mods ?? []) if (m.id in s) s[m.id] += m.v * grow;
     if (slotOf(it) === 'weapon') s.damage += lv * LEVEL.damage;
     if (slotOf(it) === 'armor') s.tough += lv * LEVEL.tough;

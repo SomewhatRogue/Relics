@@ -27,7 +27,9 @@ export type SpotId = 'board' | 'council' | 'church' | 'smith' | 'wright' | 'trai
   /** Brisk's stair up to the night shift on the wall (client/watchpost.ts). */
   | 'watch'
   /** Old Pennock at the millpond, and Abel at the archery butts: the town's pastimes (client/pastimeui.ts). */
-  | 'fish' | 'range';
+  | 'fish' | 'range'
+  /** At the Drowned Rat: the arm-wrestling table and the card sharp's knife board (client/ratui.ts). */
+  | 'arm' | 'knives';
 export interface Spot { id: SpotId; x: number; y: number; label: string; key?: string }
 
 export const SPOTS: Spot[] = [

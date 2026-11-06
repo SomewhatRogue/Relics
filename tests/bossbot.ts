@@ -6,9 +6,14 @@
  * Rogue, Ranger or Mage), and otherwise go for a back or an open front: behind the wall, into the mover's
  * recovery, anything staggered or with its door down. Daggers tap; a sword taps, and lets a charged blow go
  * now and then; a staff slashes, and holds for its spell with both of the pair close. The room decides
- * everything else.
+ * everything else. On Hempen's ground (`hempenClear`) its ropes coming down on a friend are floors too,
+ * and a friend hoisted close by is cut down (GRAB), as a plain player would.
  */
 import { barnHunt } from '../src/shared/bossjobs';
+import { hangmansWood } from '../src/shared/expedjob';
+import { SPINE } from '../src/shared/hangwood';
+import { expedRoom } from '../src/sim/expedroom';
+import { ropeBlow } from '../src/sim/hempenbook';
 import { HERO, SPELL, TICK, WEAPONS, CLASS_DODGES, guardOf, type WeaponId } from '../src/shared/tuning';
 import { isDead } from '../src/sim/damage';
 import { attackCovers } from '../src/sim/combat';
@@ -41,14 +46,14 @@ function outOf(a: EnemyAttack, h: Hero): [number, number] {
 const fighter = (e: Enemy) => (e.kind === 'scrapper' || e.kind === 'butcher') && !isDead(e) && !e.escaped;
 
 /** Fight `room` with these heroes (ids p0..) until every goblin's down or `most` seconds. */
-export function fightBoss(room: ArenaRoom, kits: WeaponId[], most = 240): BossClear {
+export function fightBoss(room: ArenaRoom, kits: WeaponId[], most = 240, at = { x: room.map.hero.x, y: room.map.hero.y - 4 }): BossClear {
   room.dread = null;
   const hs = kits.map((k, i) => {
     const h = room.join('p' + i);
-    Object.assign(h, { weapon: k, safeT: 0, x: room.map.hero.x + (i - (kits.length - 1) / 2) * 1.2, y: room.map.hero.y - 4 });
+    Object.assign(h, { weapon: k, safeT: 0, x: at.x + (i - (kits.length - 1) / 2) * 1.2, y: at.y });
     return h;
   });
-  const seq = new Map<string, { a: number; r: number; next: number; hold: number }>();
+  const seq = new Map<string, Seq>();
   let taken = 0, staggers = 0, blocks = 0, dodges = 0, t = 0;
   for (; t < most / TICK; t++) {
     const foes = room.enemies.filter(fighter);
@@ -57,7 +62,7 @@ export function fightBoss(room: ArenaRoom, kits: WeaponId[], most = 240): BossCl
       taken += h.maxHp - h.hp;
       h.hp = h.maxHp;
       if (h.act === 'down') Object.assign(h, { act: 'idle', actT: 0 });
-      room.setIntent(h.id, think(room, h, foes, seq.get(h.id) ?? (seq.set(h.id, { a: 0, r: 0, next: 0, hold: -1 }), seq.get(h.id)!)));
+      room.setIntent(h.id, think(room, h, foes, seq.get(h.id) ?? (seq.set(h.id, { a: 0, r: 0, g: 0, next: 0, hold: -1 }), seq.get(h.id)!)));
     }
     room.step();
     for (const ev of room.events) {
@@ -69,20 +74,42 @@ export function fightBoss(room: ArenaRoom, kits: WeaponId[], most = 240): BossCl
   return { secs: +(t * TICK).toFixed(1), won: !room.enemies.some(fighter), taken, staggers, blocks, dodges };
 }
 
+type Seq = { a: number; r: number; g: number; next: number; hold: number };
+
+/** Every boss floor showing now: its blows, and Hempen's ropes coming down (as the blows they'll be). */
+function floors(foes: Enemy[], now: number): { e: Enemy; a: EnemyAttack }[] {
+  const out: { e: Enemy; a: EnemyAttack }[] = [];
+  for (const e of foes) {
+    if (e.attack && e.attack.t >= (e.attack.tell ?? 0) && e.attack.t < e.attack.windup + 0.02) out.push({ e, a: e.attack });
+    for (const r of e.boss?.ropes ?? []) {
+      const a = ropeBlow(e, r);
+      a.t = a.windup - (r.at - now);
+      if (a.t >= (a.tell ?? 0)) out.push({ e, a });
+    }
+  }
+  return out;
+}
+
 /** One hero's Intent this tick. */
-function think(room: ArenaRoom, h: Hero, foes: Enemy[], s: { a: number; r: number; next: number; hold: number }): Intent {
+function think(room: ArenaRoom, h: Hero, foes: Enemy[], s: Seq): Intent {
   const now = room.time, w = WEAPONS[h.weapon], dodger = CLASS_DODGES[w.cls], blocker = guardOf(w) === 'full';
   const d = (e: Enemy) => Math.hypot(e.x - h.x, e.y - h.y);
   const i: Intent = { ...NO_INTENT, attackSeq: s.a, rollSeq: s.r };
   // The floor first: any boss blow showing under me.
-  const threats = foes.filter((e) => e.attack && e.attack.t >= (e.attack.tell ?? 0) && e.attack.t < e.attack.windup + 0.02 && onFloor(e.attack, h));
-  for (const e of threats) {
-    const a = e.attack!, left = a.windup - a.t, [ox, oy] = outOf(a, h);
+  const threats = floors(foes, now).filter((q) => onFloor(q.a, h));
+  for (const { e, a } of threats) {
+    const left = a.windup - a.t, [ox, oy] = outOf(a, h);
     (i.ax = e.x - h.x), (i.ay = e.y - h.y);
     if (!a.unblockable && blocker) return { ...i, block: true };
     // A dodger left it to the last moment: through it.
     if (dodger && left < w.dodge.iTo * 0.8 && h.act !== 'roll' && h.stamina >= w.dodge.stamina && !h.winded) return { ...i, mx: ox, my: oy, rollSeq: ++s.r };
     return { ...i, mx: ox, my: oy };
+  }
+  // A friend hoisted close by: cut them down.
+  const hung = room.heroes.find((o) => o !== h && o.hoisted && Math.hypot(o.x - h.x, o.y - h.y) < 4);
+  if (hung) {
+    const dx = hung.x - h.x, dy = hung.y - h.y;
+    return Math.hypot(dx, dy) <= 1.1 ? { ...i, grabSeq: ++s.g } : { ...i, mx: dx, my: dy };
   }
   // A target: anything open (staggered, its door down or swung aside), else the nearest from behind.
   const open = foes.filter((e) => !e.boss || !doorShut(e, now));
@@ -110,6 +137,13 @@ function think(room: ArenaRoom, h: Hero, foes: Enemy[], s: { a: number; r: numbe
     s.next = now + (h.weapon === 'staff' ? 0.5 : h.weapon === 'sword' ? 0.4 : 0.22);
   }
   return i;
+}
+
+/** Hempen's ground in Hangman's Wood on day `day` with these kits: Hempen and its two snarers, the rest of the wood gone. */
+export function hempenClear(day: number, kits: WeaponId[], most = 240): BossClear {
+  const room = expedRoom(hangmansWood(day), kits.length), hm = room.enemies.find((e) => e.boss)!;
+  room.enemies = room.enemies.filter((e) => e.pack === hm.pack);
+  return fightBoss(room, kits, most, { x: SPINE.hempen.x - 1, y: SPINE.hempen.y + 4.5 });
 }
 
 /** The Doorkeepers' barn alone, on day `day`, with these kits. */

@@ -99,6 +99,85 @@ cellars), they bring people across the fen to it, goblins lie hidden in the reed
 pool; whether the Staithe's jetty should stop wiping telegraphs too (it does today, an older bug the boards avoid);
 Sallow Priory and the Corpse Road (his story calls) come next on this ground.
 
+## 2026-11-06: a polish pass: scene lines that fit, waiting at the pond, RAISE finished, no skull, a first named butcher's relic, gambling stays trade, and the Night Watch closed (Kyle; Claude Opus 5.5)
+
+Small things, each on its own.
+
+**1. Scene lines no longer run through each other** (`client/saylines.ts`, used by `Fx.say` and both views' drawing).
+Hempen's line ("There's rope on every branch, and most of it's in use. This is where Hempen keeps them.") is 92
+letters: 367 pixels in the pixel font on a phone scene 195 across (a laptop's is about 360), so it ran off both
+sides; and said in the same frame as other lines over the hero (clearing the wood says HEMPEN DONE and the oak's line
+with it), all of them were drawn on one spot, letters over letters. Now a line is broken at spaces into lines of 34
+letters at most (135 pixels), and a line meant to be read (up 1.5 s or longer) goes above any other still up instead
+of on top of it; those all rise at one pace (4.8 pixels a second, what a 3 s line rose at), so none catches up the
+one over it. A block is kept inside the view's width. Quick calls and numbers (BLOCK, damage) are untouched. Shots:
+the line alone on arrival, and three said in one frame (flat and 2.5D phone, a laptop). Seen but not changed: with
+three at once and the objective card expanded, the top of the stack can sit under the card.
+
+**2. The Night Watch parking on the wall: dropped.** Built, then taken out the same day when Kyle closed the Night
+Watch (below). Nothing of it is left in the code.
+
+**3. RAISE, finished** (the three "not built" in the RAISE entry below).
+- *Kneeling* (`client/kneel.ts`, `idlepose.ts`, `idledraw.ts`): each frame, before the heroes are drawn (the flat
+  scene and the 2.5D cards, which draw the same figure), the room's heroes are looked at once and each Cleric a
+  friend's `riseBy` names is noted, with the friend's side and how far into the raise. The Cleric goes down on a knee
+  toward them over 0.3 s, both hands out over them, the mace back over the shoulder, gold light in the hands
+  brightening as the raise goes on and a mote now and then going down into the friend. Drawing only; nothing new
+  on the wire (it's read from `riseBy` and `riseAt`, which already go).
+- *The BUTTONS box* (`client/legend.ts`): a Cleric gets a RAISE row among the context words, with the help hand.
+- *The recap*: a callout, RAISED FRIENDS, for the one who raised the most friends (`recapcalls.ts`, a real lead only
+  as the rest), ahead of MOST HEALING since it's the rarer thing. A board from before RAISE reads 0.
+
+**4. Waiting at the pond doesn't drop you** (`client/townfolk.ts` `idleLimit`). Untouched 3 minutes still takes a
+player out of the town's room, but parked at a pastime (the `me` word's `g`) it's 20 minutes (`AWAY.parked`,
+`?parkidle=` for tests), so a forgotten tab at the pond still goes. In a party, never, as before. No new words on
+the wire.
+
+**5. No skull on a friend** (`client/icons.ts`). The HUD's `skull` mark (meant for a downed friend's frame,
+`docs/ui-research.md` 2.10; not drawn anywhere yet) is now `fallen`: their shield flat on the ground with a gold
+mark over it pointing up, since "out" is never dead and they can still be helped up or raised. `--ic-skull` is
+`--ic-fallen`; the research doc says so. Nothing else put a skull on a hero (the goblins' skulls, the hexer's
+fetish and a BIG ONE's stake, are theirs).
+
+**6. A hero's first named butcher: a relic for sure** (`sim/namedrelic.ts`; the plan's "sure on a hero's first
+kill", Kyle's open call in the Hempen entry, approved now). Whoever kills a named butcher (one the floor's chance
+counts: not a boss of the kit, not a zone's climax, not straw) and has never had this relic gets one through
+`awardRelic` (source `named`, a kind they lack first), into their relics with the found moment, on a stream of the
+room's own (`firstRng`), so the floor's 4% stream is as it was and the pins don't move. The flag is
+`Profile.namedRelic`, carried onto the hero by `Game.equip` (`Hero.namedRelic`, and over from room to room on the
+hero) and back into the save by `keepKitNoting`, so a guest in someone else's room gets it in their save and their
+NEW RELIC moment as with any pickup. Later kills keep the floor's chance. On the wire: the hero's flag and its
+relics once, when it's won.
+
+**7. Gambling stays trade.** Checked: the Want is written only at a job's end (hungry gear and the tiers worn),
+when gear is given up, and when gold goes to the Lantern; Moll's dice (`Game.dice`) and the Rat's stakes
+(`shared/stakes.ts`) move gold and nothing else. The story bible says so now, by the dice.
+
+**The Night Watch is closed for now** (Kyle: "the wall defense is weird right now and you don't drag it back to shoot
+etc. also not super fun in general unfortunately, not certain how to fix, let's close for now"). One switch,
+`NIGHT_WATCH.on` in `shared/tuning.ts`, off: Brisk gives only his grumble, no shift, day or night (the only way up
+the stair; no tip, legend row or board points at it). The code and its tests stay; `?watch=1` turns it on for a look
+(`scripts/watch-look.cjs` uses it). In PLAN as closed, with Kyle's notes for a redo: the shot should be a drag back
+and release, like a bow; it isn't fun yet.
+
+**New words, for the lore keeper and then the line editor**: RAISED FRIENDS (the recap callout, `raisewords.ts`
+`call`); the BUTTONS row's line, "By a friend who is out: kneel and raise them. Keep still for 4 seconds; goblins
+nearby come for you while you do. They come back with less max health for the rest of the job." (`raisewords.ts`
+`legend`, its label RAISE as before); the story bible line "Gambling is trade, like selling: a bet at Moll's dice
+or at the Rat's arm-wrestling table and knife board, won or lost, never touches the Want." No other new words (the
+first named relic says NEW RELIC and the relic's name, as any).
+
+Tests: `tests/saylines.test.ts` (Hempen's line broken to fit a phone with nothing lost, every scene line and
+expedition call fits, a long word left whole, three said at one spot stack without crossing), `tests/pastimes.test.ts`
+(fishing untouched 10 minutes stays in, 20 goes; stood in the square 3 minutes still drops, at the butts it holds),
+`tests/raisepolish.test.ts` (kneeling toward the friend, either side, easing down, the share; none without a raise
+or once it ends; nothing on the heroes changed; the callout, ties, an old board), `tests/fallenmark.test.ts`,
+`tests/namedrelic.test.ts` (sure for the killer only, once, with the found moment and carried; not a boss, a zone's
+climax, straw or the squire; seeded; through the room with a blow; into the save from a guest's copy with its NEW
+RELIC moment, and back on the hero so not twice), `tests/gamblingwant.test.ts` (a hundred throws of the dice, forty
+stakes won and lost, the Want unmoved), `tests/watchclosed.test.ts` (Brisk at midnight: no shift off, the shift on).
+Full vitest 160 files, 1497 tests; tsc; online town 23 of 23, party 27 of 27.
+
 ## 2026-11-06: the second wave: Oil-soaked, Hornblower, Smouldering; the Kegman, the Pouncer, the Gorger (Claude Opus 5.5)
 
 The rest of `docs/plans/bosses.md` section 3 (the elites table and the six meaty units), on the patterns of "elites,
@@ -228,6 +307,220 @@ oil on its back, in among a few small ones", "a pouncer and a few small ones", "
 it to eat". On screen only what was there: FED (the number healed) over a Gorger as it eats, as over a butcher.
 Open: sounds for the fuse, the horn and the call answered (the events are there: `fuse`, `horn`, `horncut`, `called`,
 `grown`); Kyle's play on every number.
+## 2026-11-06: more town pastimes: arm-wrestling and knives at the Drowned Rat, and striking at Halvard's anvil (Claude Opus 5.5)
+
+The next three from `docs/plans/town-activities.md`, built exactly as the first pastimes (below): a game runs only in
+your browser, two presence words a game, nothing a tick, outcomes from seeded per-hero counters a refresh can't roll
+again. Phone first (one button: a finger anywhere), with the mouse, Space or Enter on a laptop, Escape the way out.
+
+**Parked in a hall** (`shared/pastimes.ts`). The `pastime` mode now takes `arm`, `knives` and `anvil` besides `fish`
+and `range`, each with its place (`placeOf`): `Game.enterPastime` works only in that place (the square, THE DROWNED
+RAT, THE FORGE; not the wrong hall, not the yard), so the parked word's `at` is the hall's and only those in it see
+you. The parked idles (`client/parkedrat.ts`, through `parked.ts`, `idlepose.ts` and `idledraw.ts` as before): at the
+table, sat with an elbow down and your hand locked in the regular's, rocking (3.2 s); at the knife board, side-on,
+knife up, a throw that streaks off up to the board, the next in hand (2.4 s); at the anvil, the hammer up, down on a
+glowing piece in sparks (1.2 s). One-button games share `client/pastimeloop.ts` (`OneButton`: the park, the overlay
+`pastimehud.ts`, presses counted so a tap is never lost, fixed steps, the card, getting up).
+
+**The Rat** (`shared/townhalls.ts`): widened from 15 to 18 tiles, everything that was there where it was. Past
+Whisper's booth, the **knife board** hangs on the back wall (a `knifeboard` hang: a round of elm, painted rings, a few
+knives in it, chalk tallies) with a chalk line under it; **A CARD SHARP** (already in the Rat) now keeps it (talk
+`knives`; his old line about Whisper is gone). By the door, the **arm-wrestling table** (a new `armtable` piece,
+flat and 2.5D), with **A WATCHMAN OFF DUTY** at it (talk `arm`; the watch drink at the Rat, story bible). No new
+names: the regulars are the drunk, the card sharp and Gannet, who are in the Rat already, and one of the watch.
+
+**Bets** (`shared/stakes.ts`): the dice's own (`Game.dice`): 10, 25 or 50, never more than you have, even money. A bout
+takes longer than a throw of the bones, so the stake leaves the purse as the bout starts (saved with the bout's
+count) and comes back doubled only for that bout, once (`settleStake` matches the game and the bout's number, then
+clears it). A refresh mid-bout: the stake's gone and nothing pays; a stake left lying is replaced (lost) when the next
+goes down. Every game also has a way to play for nothing (FOR NOTHING, JUST THROW).
+
+**Arm-wrestling** (`shared/armwrestle.ts`, `armtune.ts`; `client/armmode.ts`, `armview.ts`). The bar up the right
+edge is your grip: hold and it climbs (1.3 a second), let go and it sinks (1.1). The sweet spot is a band that drifts
+on the seed (`wave`, no Math.sin); in it you push their arm over (their `give` a second, half again in its middle
+share), out of it they push yours (`push`). Now and then they heave: 0.6 s of tell (the band goes red, HE'S GOING
+FOR IT), then 0.9 s shoving the band away at 1.8 times the push. From 16 s they tire of it and push 8% harder a
+second, and 45 s is the most a bout goes, so it always ends. The band never moves faster than a grip can follow
+(tested). Four regulars, weakest first, each with the most they'll bet:
+
+| | band (half) | drift, speed | push | give | heaves every | bet up to |
+|---|---|---|---|---|---|---|
+| A DRUNK | 0.15 | 0.22, 0.14 | 0.10 | 0.15 | 5 to 8 s | 10 |
+| A CARD SHARP | 0.12 | 0.26, 0.26 | 0.14 | 0.14 | 3 to 5 s | 25 |
+| A WATCHMAN OFF DUTY | 0.11 | 0.26, 0.20 | 0.20 | 0.13 | 3.2 to 5.5 s | 50 |
+| BARKEEP GANNET | 0.10 | 0.27, 0.23 | 0.24 | 0.12 | 2.6 to 4.4 s | 50 |
+
+A bot that holds under the band and lets go over it, seeing it 0.15 s late, beats all four (Gannet in about 9 s);
+0.23 s late it beats the drunk, the sharp and the watchman and Gannet a quarter of the time; 0.33 s late the
+drunk and the sharp, the watchman half the time, Gannet never. The card: who went down, the money, time in the band,
+bouts and wins (`Profile.arm`: bouts seed the next, wins, who you've beaten).
+
+**Knives** (`shared/knives.ts`, `knifetune.ts`, `knifeboard.ts`; `client/knifemode.ts`, `knifeview.ts`). Nine knives
+at a board of radius 24 (rings 10, 8, 6, 4, 2 from the bull). The knife's point sways with your hand (two `wave`s
+each way, 30 px); the longer you hold a knife the wider (22% a second, up to twice), and each knife of the round a
+little quicker. Throw (a tap) and it lands where the point was, give or take a small seeded wobble; 0.7 s to the next.
+**A Rogue's sway and wobble are 0.62 of anyone else's** (tested: the same thrower scores more as a Rogue), as a
+Ranger's sight is at the butts. With a bet, the card sharp throws first (`houseScore`, 44 to 72, from the round's seed
+on a stream of its own) and you beat it; a tie is his, as Moll's are. A bot that waits for the point to come over the
+middle and lets go 0.1 s off scores about 63 as anyone else and 77 as a Rogue; one that throws on the moment beats
+him more than six times in ten (as anyone else), a careless one less. The best is on the hero (`Profile.knives`). **The town's board**, cheaply, as the butts': at
+the end of a whole round that beats your line, one contribution (`knives: { n, throws: frames[] }`), replayed from
+the hero's seed by `contribute` (`replayKnives`: exactly nine, in order, each when a knife was in hand, within ten
+minutes) onto `WorldState.knives` (each hero once at their best, the top ten); on the server it takes the range's
+short path (`api/_world.ts`: WATCH, GET, MULTI, SET, EXEC). STOP before the ninth posts nothing and loses any bet.
+
+**The anvil** (`shared/forgestrike.ts`; `client/anvilmode.ts`, `anvilview.ts`; the forge as it was in `stores.ts`).
+Kyle said the forge is decent, so it's the same: a worn piece's card has UPGRADE TO +N (Halvard does it) and, beside
+it, STRIKE IT YOURSELF TO +N, the same price. Striking pays and makes the upgrade first (`Game.levelUp`, exactly what
+UPGRADE does), so handing the hammer back early, or a refresh, leaves you with the plain upgrade. Then at the anvil:
+the piece glows up and fades six times (peaks 0.95 to 1.35 s apart, seeded); strike as it's brightest, three times.
+Within 0.08 s of a peak is CLEAN, within 0.17 NEAR ENOUGH (half), else TOO COLD; one strike a glow. What it adds is
+the piece's **temper** (`Item.temper`, in levels, `shared/gear.ts`): quality times `TEMPER.max` (0.2 of a level)
+times a draw from 0.75 to 1 on the strike's seed (the hero and their count of strikes, `Profile.strikes`, counted
+before the first blow). So a perfect set adds 0.15 to 0.2 of a level, a cold one nothing; a piece struck perfectly
+at every level to +5 has at most one level's worth more, and `temperOf` caps any save at 0.2 a level. `gearStats`
+counts it as level (mods, damage, toughness, ring health), so the room fights with it online too, and the card says
+WELL STRUCK: its upgrades count for N% more.
+
+**Art** (in code, lit by the town's hour through `light.ts`: `PastimeCanvas` takes an indoor ambient, a little
+brighter by day): the regular across the table (their own skin, hair, coat; the face screws up as you push), the
+locked forearms tipping, a candle, the bar with the band; the knife board on its planks, the knives stuck in it, the
+sway's little cross, your hand at the foot, the knives left; the forge's mouth and coals, the anvil, the piece in
+Halvard's tongs from the left glowing dull red to near white exactly as `glowAt` says, your hammer, sparks, three
+notches. **Sounds** (the existing kit): coins for a bet and a payout, a growl at a tell, the heavy thud of a heave,
+the slam and fanfare or drop at the end; the throw, a stick, the perfect chime for a bull, a thud
+wide; the anvil's ring, the chime for a clean strike, the dull knock for a cold one, steam at the end.
+
+**Words** (`client/pastimewords.ts`: ARMW, KNIFEW, ANVILW; none through the lore keeper or line editor yet): the
+watchman's offer and his line on each regular, the hints, the tell, the cards, the bets; the card sharp's offer and
+his line to a Rogue, the board, the cards; Halvard's three short lines, the forge's choice and the card's WELL STRUCK.
+
+Tests: `tests/ratgames.test.ts` (letting go or holding on regardless loses; in the band you push; a careful player
+beats all four and each is harder than the last; the tell, the heave, tiring, every bout ends; the band never outruns
+a grip; the same seed the same bout; the rings; nine knives, one in hand at a time; the sway widens held and a Rogue's
+is smaller and scores more; a round replays exactly and made-up ones don't; his round from the seed and in range; the
+board takes only replayed scores, once; the bets' limits, even money, never paid twice or for another bout, a stake
+left by a refresh lost), `tests/forgestrike.test.ts` (glows peak and fade; clean, near enough, too cold, one strike a
+glow; the edge at most a fifth of a level and at least three quarters of that for a clean set, nothing cold, the same
+from the same seed; to the cap still under a level; a save can't claim more; skipping is the old upgrade exactly; the
+worn piece gets it and the hero fights with it), `tests/ratpresence.test.ts` (each of the three: one word to sit,
+none in five minutes of play, one to get up, the friend in the hall sees it drawn; each only in its own hall; the
+table, board and anvil laid out, the spots clear and near who keeps them, everyone who was in the Rat still there).
+Full suite 1402 passed; tsc clean. town-online passes with the new steps (Sam at the table and Ava at the board seen
+by Kyle in the Rat, one word each to sit, none in eight seconds of play, one to get up; Sam at the anvil seen in the
+forge, one word, none while striking, one to hand it back); party-online 28 of 28 (two runs before that each
+flaked one different guest-feel frame check, as noted under "elites"; nothing in the party or fight code changed).
+Shots: `node scripts/ratgames-look.cjs <url> shots/ratgames` (phone and laptop, each game mid-play and its card, the
+panels, the Rat inside, the forge's choice); friends parked at the Rat and the anvil from `scripts/town-online.cjs`
+(`shots/ratgames/rat-parked-phone.png`, `forge-parked-phone.png`).
+## 2026-11-06: Hempen in the boss format (Claude Opus 5.5)
+
+`docs/plans/bosses.md` rollout item 5 ("Hempen, brought into the format"). Hempen, the climax of Hangman's Wood,
+now fights on the boss kit the Doorkeepers brought (POISE, the plate with pips, a phase roar, the pose before every
+blow, aim locked at 70%, one clock a hero, BRACED and the grace by `BOSS_FLAGS`, the sure chest through the `boss`
+relic source, party scaling), and keeps what's its own: the wood, its ground under the hanging tree, its noose, the
+snarers, the gibbet and its winch, the Gospel Oak and the fire (none of those three touched). Every number in
+`shared/hangtune.ts` `HEMPEN_BOSS` (re-exported through tuning), with one switch, `HEMPEN_BOSS.on`.
+
+**Its ground is the arena** (`shared/hangscenes.ts`): four trunks (r 0.5) round the middle of its ground, its hoard
+chained under the hanging tree (the sure chest), the two snarers, and no band any more (it's rolled and let go, so the seed's stream and every tree are as they were; the
+wood's knots take up the goblins it held, 40 as before; small ones come in along the paths from three players). No doors shut: it's a wood.
+It fights within 9 tiles of where it stands, or after a hero who hurt it in the last 4 s out to 13; anyone else off
+its ground isn't chased, and it walks back (so a Ranger can't stand off and shoot it for free, and the fight stays
+on the ground with the trunks). A rope (the noose, the haul) ends at the first trunk across its lane, and at the
+first friend standing in it short of its hero: the plan's "stand between Hempen and whoever is furthest".
+
+**Its moves** (each with the kit's 0.2 s pose first; red is blocked or dodged, striped walked out of or dodged):
+
+| Move | Floor | Answer | Punish |
+|---|---|---|---|
+| Noose, every 8 s at whoever's furthest from a friend, 2.2 to 6 off | thin red lane, 0.9 s, 4 | block (BRACED), dodge, or out of the lane; a friend in front takes it | 0.8 s |
+| Haul, at a hoisted hero up to 6 off | red lane down the rope, 1.2 s, 12, dragged to its feet and held 0.6 s | CUT FREE first (the rope comes back empty: open 1.0 s), a friend in front blocks it, a trunk between | 1.0 s |
+| Cleave (the butcher's) | red 70 degrees, 2.6, 1.0 s, 30 | block (BRACED), dodge | 0.9 s |
+| Slam (the butcher's) | striped circle 1.7 ahead, 1.3 s, 40 | walk out, dodge | 1.1 s |
+| Rope Rain (phase 2) | striped circle 1.2 where its hero stood, 1.2 s, 20 | walk out, dodge | 1.5 s |
+
+- **Rotation** (one seeded swap a phase; a party of four one more cleave): phase 1 cleave, cleave, slam, cleave,
+  slam; phase 2 cleave, rain, slam, rain, cleave. The noose runs on its own 8 s clock and the haul whenever someone's
+  hoisted (a snare's too). A move it can't get to in 3 s is passed over.
+- **Aim**: the lanes and the cleave turn with their hero until 70% of the wind-up, then hold. The slam and Rope
+  Rain are placed as they begin and never move (a circle that followed you till 70% couldn't be walked out of).
+- **Phase 2** below half its health: the 2 s roar (nothing lands either way), a pip goes out on the plate. Never
+  during a stagger (the party's payoff) or as a blow lands.
+- **On a phone**: every red wind-up at least 0.9 s, every striped one at least 1.1 s and walked out of from the
+  middle in 60% of it by the slowest kit (greatsword, 3.43 tiles a second); no rope or rain begun at a hero further
+  across than 5.5 tiles (an upright phone shows about 6 either side); the rope lanes are drawn and judged 0.64
+  wide (a hero's middle within `HERO.radius` of the rope), in both views.
+
+**The kit, as the Doorkeepers have it:** POISE 100 (1.3, 1.6, 1.9 times for two to four), filled by charged blows,
+perfects, ambushes, backstabs, BRACED and a last-second dodge through its blow; full, STAGGERED 2.5 s; ordinary stuns
+shrugged, a relic's in full and half the bar. Health by `PARTY.boss` (600, 840, 1080, 1320). **A party of two or
+more**: 0.6 s after any blow of its begins, a rope comes down out of the branches on a second hero (the nearest
+not already clocked: a striped circle 1.2 on their spot, 1.2 s after the pose, 16), judged as any boss blow through
+`hitHero` (lag compensation and the grace with it), and counted on one clock a hero (the hungry near them hold).
+Three players: 3 small ones in along the paths at the start and at the roar; four: 4. The plate (`#boss`) reads
+HEMPEN, one bar, its POISE under it, two pips, once you're within 14 (as before for an expedition's named one).
+
+**The sure chest** (`sim/bosschest.ts`, `sure: 'hempen'`): its hoard opens once it's dead (chained, as any), each
+hero their own roll on their own seed, at a named butcher's odds from the plan: Forged or better, PRE-WAR 20%,
+TOUCHED 4%, TURNING 1.5%, a hungry piece 5% (its own if it has one), plate or a weapon half and half; no gold; and
+20% a relic through `awardRelic(.., 'boss')`, never the grappling hook, so the wood's own relic stays the hook at
+the job's end (`wonRelics`, unchanged). Its body still drops the butcher's coal (the censer crumb). Nothing on the
+floor: a boss of the kit leaves no gear, and it's `zoned` as before. The plan's "sure on a hero's first named kill"
+is still Kyle's open call, not built.
+
+**How it's wired, and the shared files** (small edits only; wt-wave2 is in enemies.ts, combat.ts, the composer):
+new `sim/hempenboss.ts` (its turn, the begin, the aim and the rope's reach, the landing, the haul lost),
+`sim/hempenbook.ts` (the room's tick: start, phase 2, the split rope, ropes landing, the adds; `hempenOnto`),
+`sim/bossrooms.ts` (which book's rules run), `client/hempendraw.ts` (the ropes on the ground, both views). Edited:
+`sim/bosskit.ts` (BossOn `who: 'hempen'`, `ropes`; BossBook `of`; `clocked` counts a rope; `trackAim` hands Hempen
+on), `sim/doorkeepers.ts` (2 lines: Hempen's turn), `sim/doorwall.ts` (1: Hempen has no door), `sim/ownfoes.ts`
+(1: a rope's landing goes through `noosed`), `sim/room.ts` (2: `stepBosses` for `stepPair`), `sim/expedroom.ts`
+(2: `hempenOnto`), `sim/types.ts` (1: `EnemyAttack.boss` takes Hempen's moves), `sim/bossplate.ts`,
+`sim/bosschest.ts`, `sim/chests.ts` (1: `Chest.sure`), `shared/hangscenes.ts`, `shared/hangtune.ts`,
+`shared/relicaward.ts` (a comment), `client/strawman.ts` (1: Hempen drawn as itself, not behind a door),
+`client/foes.ts` and `client/three/teleg3d.ts` (a boss's rope lane drawn 0.64 wide), `client/wooddraw.ts` (1 call).
+Not touched: `enemies.ts`, `combat.ts`, the composer, the elite and meaty files. **Online**: nothing new a tick; the
+boss field goes when POISE, the phase or a rope changes (tested), the ropes in it.
+
+**Measured** (`tests/bossbot.ts hempenClear`: Hempen and its two snarers, the rest of the wood gone; the bot now
+reads Hempen's ropes as floors and cuts a hoisted friend down):
+
+| Hempen's ground, days 3 / 4 / 5 | seconds | health lost | staggers |
+|---|---|---|---|
+| twin daggers (Rogue) | 27.0 / 92.4 / 37.7 | 34 / 226 / 20 | 2 / 1 / 2 |
+| focus staff (Mage) | 71.3 / 68.2 / 130.8 | 160 / 146 / 378 | 2 / 2 / 2 |
+| sword (Warrior) | 71.5 / 49.7 / 51.7 | 200 / 76 / 80 | 2 / 2 / 3 |
+
+Two (sword, daggers) 25.5 s; three (sword, staff, daggers) 30.9 s. All won. The bot hugs it, so the noose (for
+whoever stands off) comes rarely; the snarers' snares hoist the bot often (it doesn't look for them), and the staff,
+which stands in to slash and can't block, takes the most, as in the barn.
+
+**Pins**: none moved (no hash test reaches the wood). A first cut dropped the band without rolling it, which
+reshuffled the wood's trees and broke the winch test (a wave knocked the hero off the winch); with the band rolled
+and let go the layout is the old one again. `tests/hangwood.test.ts`'s "dead, no relic on the floor" puts its
+1-health Hempen in phase 2 first (woken at 1 it now roars before it can die).
+
+**New words**: none. On screen it's HEMPEN on the plate (its name, as before), STAGGERED and BRACED (the kit's).
+
+Tests: `tests/hempen.test.ts` (26: the cleave, noose, slam and Rope Rain landed, blocked or not, dodged and walked
+out of as their colour says; BRACED's rebound and POISE; the rain placed where its hero stood; the haul left alone,
+cut free first, and blocked by a friend in front; a trunk ending the noose; the four trunks; the rope on a second
+hero landed, not saved by a block, walked out of and dodged, and on one clock a hero, none solo; POISE, the stagger,
+a shrugged stun, a relic's; phase 2, the roar taking nothing, the pips; the plate near and not; the hoard chained,
+opened at the kill, per hero, no gold, nothing on the floor; the hoard's odds over 4000 seeds and never the hook;
+the hook still the wood's at the job's end; party scaling one to four; the floors' times and walking out in 60%,
+the lanes' width, the pose and the aim lock, nothing begun past `across`; its ground; the switch off; the same
+fight twice; no boss field a tick, the ropes across to a friend; clear times for daggers, staff and sword and a
+party of three). Full vitest 149 files, 1413 tests; tsc; online town 14 of 14, party 28 of 28, expedition 13 of 13
+on the Barrowfields and 13 of 13 in Hangman's Wood (`ZONE=hangmans`: Sam 19.6 KB/s, biggest 17.4 KB), Florida 8 of
+8. Shots: `node scripts/hempen-look.cjs [url] [outdir]` (phone: the plate on its ground, the noose's lane held part
+way, STAGGERED after a BRACED block): `shots/hempen-plate-phone.png`, `hempen-noose-phone.png`,
+`hempen-stagger-phone.png`.
+
+Open: Kyle's play on every number and the switch; whether its ground should shut like the barn's doors (a wood has
+none, so it keeps you by chasing whoever hurt it and nobody else); a Blender pass on Hempen and the trunks; a sound
+of its own for a rope coming down (the slam's wind-up now).
 
 ## 2026-11-06: elites, and the first new meaty goblins: the Planker, the Swingle, the Forker (Claude Opus 5.5)
 

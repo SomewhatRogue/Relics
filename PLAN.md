@@ -17,6 +17,24 @@ over the reeds and the cuts, goblins see him less in it, and the red and striped
 spot any class can't walk to or out of. Everything in DECISIONS 2026-11-06 ("Fenmere"); shots `node scripts/fen-look.cjs`;
 online `ZONE=fen node scripts/exped-online.cjs`. Open: every number; the relic's pool; the Staithe's jetty still wipes
 a telegraph on it in the flat view.
+**A polish pass** (Claude Opus 5.5, 2026-11-06). Built; waiting on Kyle's play and the lore keeper and line editor on
+the new words. *Done when*, on his phone: a scene's line over his hero (Hempen's "There's rope on every branch...")
+comes up in lines that fit the screen, and lines said together stack instead of running through each other; parked
+fishing he can wait for a bite past 3 minutes without dropping out of town (20 minutes untouched still lets a
+forgotten tab go); a Cleric raising a friend kneels by them with the light in their hands, the laptop's BUTTONS box
+has a RAISE row, and the recap calls out RAISED FRIENDS for whoever raised the most; a friend's down mark is a fallen
+shield, never a skull; his first named butcher gives him a relic for sure (once a hero, a guest too); and Brisk
+offers no shift on the wall. Everything in DECISIONS 2026-11-06 ("a polish pass").
+**More town pastimes: arm-wrestling and knives at the Drowned Rat, striking at Halvard's anvil** (Claude Opus 5.5,
+2026-11-06). Built; waiting on Kyle's play and the lore keeper and line editor on the new words (`client/pastimewords.ts`:
+ARMW, KNIFEW, ANVILW). *Done when*, on his phone: in the Rat, the watchman off duty at the table by the door offers
+the drunk, the card sharp, a watchman and Gannet; he bets 10 to 50 (or nothing) and holds to keep his grip in the
+drifting band till their hand goes down, Gannet hardest; the card sharp's knife board takes nine throws timed as the
+point comes over the bull, a Rogue's hand steadier, a bet to beat the sharp's own round, his best on the town's board;
+at the forge, STRIKE IT YOURSELF beside UPGRADE gives the same upgrade and a little more for strikes on the glow; and
+a friend in the Rat or the forge sees him at the table, the board or the anvil till he gets up. Everything in
+DECISIONS 2026-11-06 ("more town pastimes"); shots `node scripts/ratgames-look.cjs`, town-online.cjs for the parked
+friends. Open: every number once he's played.
 **The first town pastimes: fishing at the millpond and the archery butts** (Claude Opus 5.5, 2026-11-06; Kyle's
 rule 2026-11-05: "all mini games will happen locally on their own computer ... but in town you can see their
 character sitting and fishing or something"). Built; waiting on Kyle's play and the lore keeper and line editor on
@@ -27,8 +45,8 @@ Corin at the butts runs a minute's round of standing, sliding and swinging targe
 three times, a Ranger's sight steadier; the best goes on the town's board at the end, scored again by the server; and
 a friend in town sees him sat on the bank with the rod out, or at the butts drawing and loosing, till he gets up.
 Everything in DECISIONS 2026-11-06 ("the first town pastimes"); shots `node scripts/pastime-look.cjs`,
-town-online.cjs for the parked friends. Open: every number once he's played; the Night Watch could park on the wall
-the same way.
+town-online.cjs for the parked friends. Open: every number once he's played. (The Night Watch parking on the wall
+the same way was dropped with the Night Watch itself, closed 2026-11-06.)
 **RAISE, and the guest's dodge** (Claude Opus 5.5, 2026-11-06; Kyle: "Clerics should be able to res someone
 multiplayer even if they're fully down ... less max health for who they res for that instance"). Built; waiting on
 Kyle's play. *Done when*, online with friends: a Cleric by a friend who is out sees RAISE, taps it and stands still
@@ -44,6 +62,16 @@ it stays with them for the job; a host who switches tabs (2.5 s) or locks their 
 to a friend, who carries on without a stall worth the name, and back in sight the old host plays on as a
 guest. Everything in DECISIONS 2026-11-06 ("who hosts"). Open: the four new lines through the lore keeper and
 line editor.
+**Hempen in the boss format** (Claude Opus 5.5, 2026-11-06; `docs/plans/bosses.md` rollout item 5). Built; waiting
+on Kyle's play. *Done when*, on his phone and laptop in Hangman's Wood: near Hempen the plate shows HEMPEN with its
+POISE bar and two pips; every blow has its pose first, red ones (the cleave, the noose's thin lane, the haul down the
+rope at a hoisted friend) blocked (BRACED) or dodged, striped ones (the slam, phase 2's Rope Rain) walked out of or
+dodged; a trunk or a friend standing in front stops a rope; cutting a hoisted friend down loses it the haul; with a
+friend, a rope comes down out of the branches on the second one a moment after each blow; charged blows and BRACED
+fill POISE to STAGGERED; below half it roars and a pip goes out; dead, its hoard under the hanging tree gives each
+hero a Forged or better piece and now and then a relic, and the wood still gives the grappling hook at the end.
+Everything in DECISIONS 2026-11-06 ("Hempen in the boss format"); shots `node scripts/hempen-look.cjs`. Open: every
+number; no new words on screen.
 **The boss kit and the Doorkeepers** (Claude Opus 5.5, 2026-11-06; `docs/plans/bosses.md` rollout item 2; Kyle:
 "shield goblins or a pair ... arena ... good loot ... mix between splatting and tactical"). Built; waiting on Kyle's
 play and the lore keeper and line editor on the new words. *Done when*, on his phone and laptop: the Doorkeepers
@@ -186,8 +214,12 @@ PACK for a Mage, HOLD FOR A MINUTE), each drill's line on the banner ("BLOCKED 8
 like goblins but show straw, painted eyes, straw not blood, a heap of straw when down; GO AGAIN and CLEAR work;
 nothing pays; a fall starts the fight over; the yard stands still while the board is up; a knock into the gate
 doesn't leave. Daily: `node scripts/budget-check.cjs` (and `--live`, `--url`). Open: the line editor's pass.
-**The Night Watch, slices 1 and 2** (Claude Opus 5.5, 2026-11-05; Kyle approved `docs/plans/town-activities.md`).
-Built; waiting on Kyle's play. *Done when*, on his phone and laptop at night (`?day=0` to force it): Corporal
+**The Night Watch, slices 1 and 2: CLOSED for now** (Kyle, 2026-11-06: "the wall defense is weird right now and you
+don't drag it back to shoot etc. also not super fun in general unfortunately, not certain how to fix, let's close
+for now"). Behind `NIGHT_WATCH.on` in `shared/tuning.ts`, off: Brisk only grumbles, no shift, day or night; the code
+and its tests stay (`?watch=1` opens it for `scripts/watch-look.cjs`). Kyle's notes for a redo: **the shot should be
+a drag back and release, like a bow**; **it isn't fun yet**. What was built (Claude Opus 5.5, 2026-11-05; Kyle
+approved `docs/plans/town-activities.md`), kept for the redo: *Done when*, on his phone and laptop at night (`?day=0` to force it): Corporal
 Brisk in the barracks offers TAKE A SHIFT ON THE WALL (in the day, come back after dark); the wall side-on with
 his own hero on it, the moon, torches, goblins with glowing eyes coming over the fields; the mouse (laptop) or a
 drag anywhere (phone) moves the sight, hold to draw and let go to loose; a tap is quick and wild, a full draw
@@ -876,8 +908,9 @@ naming, hammer timing at the smithy, candles and the giving-up rite at the churc
 quick haggle at the market, fishing. Nothing at Vell's tower for now. The Night Watch is its own feature
 (a Last Stand style skill shooter on the walls at night, 3 minutes, headshots, high scores). Herbs and
 potions are planned for later. Full plan: docs/plans/town-activities.md.
-Built so far: the Night Watch (slices 1 and 2, upright on a phone), fishing at the millpond and the archery butts
-(2026-11-06). Next from the table: arm-wrestling and knife-throwing at the Rat, the smithy's hammer, the rest.
+Built so far: the Night Watch (slices 1 and 2, upright on a phone; closed 2026-11-06, see above), fishing at the millpond and the archery butts,
+arm-wrestling and knives at the Rat and the smithy's hammer (2026-11-06). Next from the table: the lodge's pelts and
+hound, the church's candles, hauling for Judd, the haggle.
 
 ## Open, soon but not yet: red eyes and gold eyes (Kyle, 2026-11-03)
 

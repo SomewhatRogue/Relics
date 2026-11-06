@@ -44,6 +44,7 @@ export const LOOK: Record<Block['kind'], Look> = {
   dummy: { tall: 18, roof: '#5a3d22', ridge: '#5a3d22', wall: '#4a3420', windows: false, furniture: true },
   maptable: { tall: 9, roof: '#5a3d22', ridge: '#7a5a34', wall: '#3a2818', windows: false, furniture: true },
   dicetable: { tall: 8, roof: '#4a3420', ridge: '#5a3d22', wall: '#3a2818', windows: false, furniture: true },
+  armtable: { tall: 8, roof: '#5a3d22', ridge: '#6a4a2a', wall: '#3a2818', windows: false, furniture: true },
   skinbench: { tall: 9, roof: '#5a3d22', ridge: '#7a5a34', wall: '#3a2818', windows: false, furniture: true },
   desk: { tall: 9, roof: '#5a3d22', ridge: '#7a5a34', wall: '#3a2818', windows: false, furniture: true },
   tub: { tall: 7, roof: '#4a3420', ridge: '#4a3420', wall: '#5a3d22', windows: false, furniture: true },

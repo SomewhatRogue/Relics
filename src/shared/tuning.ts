@@ -5,6 +5,14 @@
  */
 export const TICK = 1 / 30;
 
+/**
+ * The Night Watch (client/watchmode.ts, sim/watch.ts): closed for now (Kyle, 2026-11-06: "the wall defense
+ * is weird right now and you don't drag it back to shoot etc. also not super fun in general"). Off, Brisk
+ * offers no shift and nothing in town leads up the stair; the code and its tests stay for the redo.
+ * `?watch=1` in the address turns it on for a look (scripts/watch-look.cjs).
+ */
+export const NIGHT_WATCH = { on: false };
+
 export const HERO = {
   hp: 100,
   radius: 0.32,

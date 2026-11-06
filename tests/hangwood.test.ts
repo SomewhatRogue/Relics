@@ -213,6 +213,8 @@ describe("Hangman's Wood", () => {
       // Brought down (one blow off it at the last): no relic dropped on the floor; it's the zone's, at the job's end.
       const r2 = wood(d, ['me'], (e) => e.name === 'HEMPEN'), b = r2.enemies[0], me = r2.heroes[0];
       Object.assign(b, { hp: 1, alert: false, feeding: true });
+      // (In the boss format a Hempen this low is in its phase 2 already: woken at 1 it would roar first, tests/hempen.test.ts.)
+      if (b.boss) b.boss.phase = 2;
       Object.assign(put(me, b.x + 0.9, b.y), { fx: -1, fy: 0 });
       r2.setIntent('me', { ...NO_INTENT, ax: -1, ay: 0, attackSeq: 1 });
       step(r2, 1.2);

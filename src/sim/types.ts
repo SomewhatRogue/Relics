@@ -296,6 +296,8 @@ export interface Hero extends Body {
   /** Relics this hero owns, each with its charge (one at a time is carried: `relicItem`, its kind in relics[1]). */
   found: RelicItem[];
   relicItem: string;
+  /** Has had the sure relic of their first named butcher (sim/namedrelic.ts; Profile.namedRelic). Set once. */
+  namedRelic?: boolean;
   /** Carrying the church's light this job (shared/church.ts LIT). */
   lit?: boolean;
   /** Quickened by a bone bell until then (BELL.quick). */
@@ -411,7 +413,7 @@ export interface EnemyAttack {
   rcx?: number;
   rcy?: number;
   /** A boss's blow (sim/bosskit.ts): its move, and the pose before the floor shows (`tell` s, inside the wind-up). */
-  boss?: import('../shared/bosstune').DoorMove;
+  boss?: import('../shared/bosstune').DoorMove | import('../shared/hangtune').HempenMove;
   tell?: number;
   /** A charge run from beside its body (Locked Doors: the middle of the pair), as an offset from it. */
   mid?: [number, number];

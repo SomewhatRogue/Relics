@@ -11,6 +11,7 @@ import type { PastimeId } from '../shared/pastimes';
 import type { BodyPose } from './motion';
 import type { Ctx } from './draw';
 import { dot, skinOf, type PropAt } from './idlekit';
+import { RAT_LOOP, ratPose, ratProps } from './parkedrat';
 
 const parks = new WeakMap<Hero, PastimeId>();
 /** Where in its loop each hero starts (from their id), so two at the butts don't loose together. */
@@ -33,10 +34,12 @@ const CYCLE = SHOOT.draw + SHOOT.hold + SHOOT.loose + SHOOT.nock;
 const DIP = 5.5;
 
 /** How far through its loop a parked hero is (s). */
-export const parkT = (h: Hero, now: number, id: PastimeId) => (now + phase(h.id) * 7) % (id === 'fish' ? DIP : CYCLE);
+export const parkT = (h: Hero, now: number, id: PastimeId) => (now + phase(h.id) * 7) % PARK_LOOP[id];
 
 /** The body: sat down on the bank facing the water, or stood side-on to the butts with the bow up. */
-export function parkPose(h: Hero, id: PastimeId, pz: BodyPose): { flip: boolean; a: number; ext: number } {
+export function parkPose(h: Hero, id: PastimeId, pz: BodyPose, t = 0): { flip: boolean; a: number; ext: number } {
+  // At the Rat's table or its knife board, or at the anvil (parkedrat.ts).
+  if (id === 'arm' || id === 'knives' || id === 'anvil') return ratPose(id, pz, t);
   if (id === 'fish') {
     // Sat on the bank (as low as the legs fold), the hands forward on the rod; the weapon laid down behind.
     (pz.crouch = 1), (pz.reach = 1), (pz.raise = 1), (pz.lean = 0);
@@ -50,7 +53,8 @@ export function parkPose(h: Hero, id: PastimeId, pz: BodyPose): { flip: boolean;
 /** What's in hand: the rod, its line and the float on the water; or the range's bow, string and arrow. */
 export function parkProps(c: Ctx, at: PropAt, id: PastimeId, t: number): void {
   if (id === 'fish') return rod(c, at, t);
-  bow(c, at, t);
+  if (id === 'range') return bow(c, at, t);
+  ratProps(c, at, id, t);
 }
 
 function rod(c: Ctx, at: PropAt, t: number): void {
@@ -103,4 +107,4 @@ function bow(c: Ctx, at: PropAt, t: number): void {
 }
 
 /** For tests and the look scripts: a parked hero's loop is drawing-only (nothing on the hero changes). */
-export const PARK_LOOP = { fish: DIP, range: CYCLE };
+export const PARK_LOOP: Record<PastimeId, number> = { fish: DIP, range: CYCLE, ...RAT_LOOP };

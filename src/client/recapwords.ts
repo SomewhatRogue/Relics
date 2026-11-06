@@ -1,3 +1,5 @@
+import { RAISEW } from './raisewords';
+
 /** The job's recap (recap.ts, recapparty.ts): its row labels and its one button. Game text, Kyle's style (prose-notes.md section 4). */
 export const RECAPW = {
   rooms: 'ROOMS',
@@ -43,6 +45,8 @@ export const RECAPW = {
     dealt: 'MOST DAMAGE',
     healed: 'MOST HEALING',
     raised: 'HELPED FRIENDS UP',
+    /** RAISE (raisewords.ts): raised the most friends who were out. */
+    rose: RAISEW.call,
     dodges: 'MOST DODGES',
     blocks: 'MOST BLOCKS',
     best: 'BIGGEST HIT',
