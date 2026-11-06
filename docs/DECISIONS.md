@@ -2,6 +2,42 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-05: the first recorded sound effects: combat, spells, goblins and beasts (Kyle; Claude Opus 5.5)
+
+Kyle approved batch 1 of `docs/sound/elevenlabs-sounds.md`: sections 1 and 2 (45 + 33 sounds). Ambience,
+voices and music wait for later batches.
+
+- **Made.** ElevenLabs Sound Effects v2 (`eleven_text_to_sound_v2`) on one flow, "Relic sounds batch 1",
+  with each row's own Sec (duration) and Inf (prompt influence) and the take count it gives (gob_jabber
+  has 4). The parry reuses the earlier test run (3 of its 4 takes; the 5 s one is left out). 78 sounds,
+  164 takes in the game. Raw takes and the processed set are on Kyle's machine in `Relic Sounds/batch1/`
+  (`raw/`, `game/`, and `tools/qc.txt` with every file's length and levels).
+- **Processed** (ffmpeg): silence trimmed from both ends, cut to the row's length with a short fade
+  out, mono 44.1 kHz MP3 at 64 kbps (plays on iPhone Safari). Levels are set per take to about -18 dBFS
+  RMS with the peak held under -2 dB, not loudnorm: loudnorm needs about 3 s to measure and most of
+  these are half a second. Sharp transient sounds (gnawing, ice, spider legs, a splat) stop at the peak
+  limit and sit a few dB quieter; `sfxbank.ts` carries a level per sound for the rest of the balancing.
+  The storm stream loop is cut but not faded, and the code loops it from 0.06 s in from each end to skip
+  the MP3 padding.
+- **Played.** `public/sfx/*.mp3`, served from our own site. `sfxbank.ts` lists the sounds and takes,
+  `sfxplayer.ts` decodes a sound's takes the first time it is wanted and then warms up the rest two at
+  a time, picks a take at random (never the one just heard), and wobbles pitch (4%) and level a little.
+  It plays on the effects bus, so the sound switch mutes it. Until a sound has loaded, or if it fails,
+  `play` says no and the synthesized sound plays as before; nothing is ever silent.
+- **Routed.** `sfxroutes.ts` wraps the named sounds of `sfx`, `goblin`, `butcher`, `spiderSounds` and
+  `sfxTown` (sample first, synth if not ready); `weaponsfx.ts`, `magesfx.ts`, `spellsound.ts`,
+  `icesound.ts` and `streamsound.ts` pick their sample by kit and element; `sfxevents.ts` gives the
+  events the list names their own recording (wolf howl, crows, the Stoker's bellow, the blowpipe, the
+  retch, and a goblin's grunt on its own blow, which was silent). A goblin's sample keeps its voice
+  pitch from its id, narrowed.
+- **Stays synthesized.** The UI and tuned notes (level up, relic fanfare, loot, drop, perfect, tempo,
+  charged, stunned, well, rally, the speech blip, weak and resist, the stall chime and dull knock, the
+  chest's tier notes), and everything section 3 will cover (coins, anvil, chests, dice, drink, land,
+  prop breaks, wood, doors, fire catching, the dread). The Mage's fire landing keeps its synth crackle.
+  `gob_whistle` and `crow_caw` are made but not played: nothing in the game calls for them yet.
+- **The one-file build** inlines `public/sfx` the way it inlines the music (`sfxsrc.solo.ts`, aliased
+  in `vite.solo.config.ts`), so the solo page has the recordings too.
+
 ## 2026-11-05: the staff's fire hold is a wall of fire rolled at a goblin (Kyle; Claude Opus 5.5)
 
 Kyle: "Wizard staff fire, hold down to make a wall of fire that moves towards the targeted enemy and stays

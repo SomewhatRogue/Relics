@@ -26,6 +26,7 @@ import { isSpiderKind } from '../shared/spiders';
 import { blockSound, chargedSound, hitSound, shotSound, swingSound, woodSounds } from './weaponsfx';
 import { cueAt } from './waycues';
 import { muffledCry } from './kindlecue';
+import { eventSample } from './sfxevents';
 
 /** How far off a fight can still be heard, in tiles: a little past a screen. */
 const EARSHOT = 16;
@@ -71,6 +72,8 @@ export class Soundscape {
     if (me && typeof at.x === 'number' && typeof at.y === 'number' && Math.hypot(at.x - me.x, at.y - me.y) > EARSHOT) return;
     // A Mage's quick cast: its flick, and its element as it lands (laid over the kit's own: magesfx.ts).
     mageTapSound(ev, room);
+    // A recording of its own where the list gives one (sfxevents.ts); else the usual sound below.
+    if (eventSample(ev)) return;
     if (foeSound(ev)) return;
     if (ev.k === 'swing') return swingSound(ev.src, ev.heavy);
     if (ev.k === 'chest') return chestSound(ev.state, ev.tier);
