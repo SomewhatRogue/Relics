@@ -113,7 +113,7 @@ export function knackTile(p: Profile, id: PerkId, offer: PerkId[], open: boolean
 /** The two on offer as a fork (PICK ONE), then each chain across. */
 function knacksTab(p: Profile, open: boolean): UpTrack[] {
   const offer = p.picks > 0 ? perkOffer(p) : [];
-  const fork: UpTrack[] = offer.length ? [{ id: 'offer', title: KNW.waiting(p.picks), sum: '', kind: 'track', steps: [{ tiles: offer.map((id) => knackTile(p, id, offer, open)), fork: UPW.pickOne }], note: open ? undefined : KNW.notHere }] : [];
+  const fork: UpTrack[] = offer.length ? [{ id: 'offer', title: KNW.waiting(p.picks), sum: '', kind: 'track', steps: [{ tiles: offer.map((id) => knackTile(p, id, offer, open)), fork: undefined }], note: open ? undefined : KNW.notHere }] : [];
   return [...fork, ...CLASS_CHAINS[p.cls].map((c) => {
     const steps = CHAINS[c].steps as PerkId[];
     return { id: c, title: CHAINS[c].name, sum: `${steps.filter((s) => p.perks.includes(s)).length} / ${steps.length}`, kind: 'row' as const, steps: single(steps.map((id) => knackTile(p, id, offer, open))) };

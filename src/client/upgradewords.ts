@@ -23,7 +23,7 @@ export const UPW = {
   max: 'MAX',
   taken: 'TAKEN',
   onOffer: 'ON OFFER',
-  next: 'NEXT LEVEL UP',
+  next: 'NEXT IN LINE',
   level: (n: number) => `NEEDS LEVEL ${n}`,
   first: (name: string) => `NEEDS ${name} FIRST`,
   notChosen: 'NOT CHOSEN',
@@ -39,7 +39,7 @@ export const UPW = {
   take: 'TAKE',
   back: 'BACK',
   /** Looked at away from the trainer (from the pack): where to buy it. */
-  away: (who: string, where: string) => `${who} teaches this, at ${where}.`,
+  away: (who: string, where: string) => `${who} teaches this at ${where}.`,
   /** A knack that's next on its chain but not on offer. */
   nextKnack: 'Each level up offers the next knack from two of your chains. This one can come up then.',
   /** The skills tab's note: changing the one you carry is free. */

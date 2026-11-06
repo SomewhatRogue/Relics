@@ -63,7 +63,7 @@ describe('tiles', () => {
   it('knacks: the two on offer are a fork, PICK ONE, taken only out of a fight; later steps say what they need', () => {
     const p = Object.assign(hero('MAGE', 3, 0), { picks: 1 });
     const offer = perkOffer(p), tabs = upgradeTabs(p, at), knacks = tabs.find((t) => t.id === 'knacks')!;
-    expect(knacks.tracks[0].steps[0].fork).toBe('PICK ONE');
+    expect(knacks.tracks[0].steps[0].fork).toBeUndefined();
     expect(knacks.tracks[0].steps[0].tiles.map((t) => t.key)).toEqual(offer.map((id) => 'knack:' + id));
     for (const t of knacks.tracks[0].steps[0].tiles) expect(t).toMatchObject({ state: 'pick', act: 'pick' });
     expect(knacks.ready).toBe(1);
@@ -105,7 +105,7 @@ describe('a tile opened', () => {
     expect(d.button).toEqual({ label: `RANK 2: ${drillPrice('power', 1)} GOLD`, act: 'buy', on: true });
     const away = tileDetail(p, 'drill:power', { atTrainer: false, knacksOpen: true }, { who: 'Master Cole', where: 'the barracks' })!;
     expect(away.button?.on).toBe(false);
-    expect(away.note).toBe('Master Cole teaches this, at the barracks.');
+    expect(away.note).toBe('Master Cole teaches this at the barracks.');
     const locked = tileDetail(hero('WARRIOR', 1, 0), 'drill:power', at)!;
     expect(locked.button).toMatchObject({ label: 'NEEDS LEVEL 2', on: false });
     const k = tileDetail(Object.assign(hero('WARRIOR', 3, 0), { perks: ['w_wide'] }), 'knack:w_block', at)!;

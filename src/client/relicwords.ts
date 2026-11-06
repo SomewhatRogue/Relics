@@ -93,9 +93,9 @@ export const RELICW = {
   carryHint: 'It\'s on your RELIC button.',
   /** The moment a relic is gained (relicmoment.ts), its pop's small heading and how to use it. */
   newRelic: 'NEW RELIC',
-  momentShelf: "It's in your pack. Open the pack and tap it to carry it.",
+  momentShelf: "It's in your pack. Tap it there, then CARRY.",
   /** The first relic a hero ever gets: how the button works. */
-  firstTip: (el: boolean) => `Press RELIC to use it, or R on a laptop. Each use spends one${el ? ", and the church can't recharge this one." : ', and the church can recharge it.'}`,
+  firstTip: (el: boolean) => `Press RELIC to use it, or R on a laptop. Each press spends a use${el ? ", and the church won't recharge this one." : ', and the church can recharge it.'}`,
   tapClose: 'TAP TO CLOSE',
   /** The pack's row of relics: its heading, the NEW mark, the empty RELIC slot's word, and what to do. */
   shelf: 'RELICS',
