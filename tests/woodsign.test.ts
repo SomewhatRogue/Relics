@@ -213,6 +213,8 @@ describe('the wood end to end, each step played its own way', () => {
           w().praised = 99;
           g.step(0.05, NO_INTENT);
           if (w().hold) g.continueHold(), g.step(0.05, NO_INTENT);
+          // (A Ranger's path: the PARRY card after a beat; the next pass counts the parry.)
+          for (let j = 0; j < 40 && w().after?.phase === 'parry' && !w().after!.carded; j++) g.step(0.05, NO_INTENT);
           // The Healer's: wait for the shot, then MEND Hew at the card.
           if (w().sign?.id === 'heal' && w().sign!.phase === 'aim') for (let j = 0; j < 60 && w().sign!.phase === 'aim'; j++) g.step(0.05, NO_INTENT);
           if (w().sign?.id === 'heal' && w().sign!.phase === 'card') {

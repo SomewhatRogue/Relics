@@ -174,7 +174,12 @@ describe("the Mage's element step in the wood", () => {
       const w = () => g.wood!;
       for (let i = 0; i < 4; i++) {
         enter(g, i);
-        for (let k = 0; k < 4 && w().stage === i; k++) clear(g, lessonsFor(c)[i].need), mendHew(g);
+        for (let k = 0; k < 4 && w().stage === i; k++) {
+          clear(g, lessonsFor(c)[i].need), mendHew(g);
+          // (A Ranger's path: the PARRY card after a beat; the next clear counts the parry.)
+          for (let j = 0; j < 40 && w().after?.phase === 'parry' && !w().after!.carded; j++) g.step(0.05, NO_INTENT);
+          if (w().after?.phase === 'parry') w().hold = null;
+        }
         expect(w().stage, c + ' lesson ' + i).toBe(i + 1);
       }
       enter(g, 4);

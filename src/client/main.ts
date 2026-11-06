@@ -319,7 +319,8 @@ function hud(now: number): void {
   $('#banner').classList.toggle('faint', game.mode === 'run' && game.hero.y < 7);
   if (game.mode === 'wood' && wood) {
     const g = woodGoal(wood, input.touch);
-    objFlash.watchWood(wood.stage, now);
+    // (A lesson's count done flashes too, before its goblins are down: sim/woodsteps.ts.)
+    objFlash.watchWood(wood.stage + (wood.passed ?? 0), now);
     // (The wood's lessons never fold: the control to learn is on it.)
     fold.render(objFlash.show(`<b>${g.title}</b> <div class="obj">${g.text}</div><span>GREYHOLLOW, THE DAY AFTER</span>`, now), null, g.title + g.text, now);
     const boss = room.enemies.find((e) => e.name && e.act !== 'dead');

@@ -44,7 +44,8 @@ function build(m: GameMap, size: number, sig: string): Grid {
   for (const b of m.blocks) if (!b.ruined) box(b);
   for (const c of m.rounds) disc(c.x, c.y, c.r);
   for (const b of m.braziers) disc(b.x, b.y, b.r);
-  for (const n of m.npcs ?? []) if (!n.path && !n.pose) disc(n.x, n.y, 0.32);
+  // (Not Hew: he walks about the wood, so where he stood when the grid was built would block his own way.)
+  for (const n of m.npcs ?? []) if (!n.path && !n.pose && n.talk !== 'hew') disc(n.x, n.y, 0.32);
   // A ledge's face stops anyone on the ground; its ramp is the way up.
   for (const l of m.ledges ?? []) {
     box(l);

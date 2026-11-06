@@ -2,6 +2,58 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-05: the wood: two dodges, a done count flashes gold, the Ranger learns PARRY, Hew keeps out of the trees (Kyle; Claude Opus 5.5)
+
+Kyle: "In training the Ranger is never taught how to parry. They should learn the parry after they dodge
+perfectly timed twice, then they can parry once and kill the enemies. Also only have them train dodging
+twice for the earlier part, for all characters. Once dodging is done, highlight it as a quest complete and
+update the quest to kill the goblins. Also Hew walks through trees."
+
+- **Two dodges** on the path for every class (`LESSONS[1].need` 3 to 2; the Warrior's and Healer's WALK OUT
+  inherits it). A dodge counts as it did: the `dodge` event (out of the striped blow in time).
+- **A count done is a quest done** (`sim/woodsteps.ts`). On the path, the clearing and the stream, once the
+  lesson's count is made: `WoodState.passed` goes up and a `passed` event fires; the tracker's gold flash
+  (`client/objflash.ts`, as for a lesson passed) now watches stage plus `passed`, so "DODGES 2 / 2" flashes
+  gold and holds. Then the goal is **KILL THE GOBLINS, KILLED n / m** (the lesson's goblins, dead of all)
+  until they're down and the way opens (which flashes again). This holds for every counted lesson there
+  (blocks, parries, full shots, backstabs, last-second dodges), since each had the same stale "5 / 5" goal
+  while goblins were still up. The field (stage 0) and the hut are unchanged. Once a count is made the
+  lesson's freeze-frames stop.
+- **The Ranger's PARRY.** The Ranger's kits are parry-only (`CLASS_GUARD.RANGER` 'parry': no held block,
+  a tap of the guard button parries with the short blade), and its wood taught FULL DRAW, MARK and the last
+  second dodge but never the guard; the button stayed hidden all through the wood. Now the Ranger's path
+  (`lesson.then: 'parry'`) goes on after its two dodges: a 1 s beat for the gold flash, then Hew's card with
+  PARRY (the `.tb.block` button is given and pulses gold, labelled PARRY by `unlockflash.ts`; `Game.taught()`
+  gains `block` from then on, via `guardTaught`), and one plain goblin that swings (`PARRY_FOE`; a lunger's
+  stab is unblockable). It comes at you first (one at a time prefers it); the first swings freeze on
+  NOW: TAP PARRY. One parry: flashes done, then KILL THE GOBLINS. Cleared without a parry, the swinger
+  comes again. The card's key on a phone says PARRY for a parry-only kit.
+- **Other classes**: none has the same gap. Warrior and Healer (full guard) are taught BLOCK in the clearing
+  and PARRY at the stream. Rogue and Mage have no guard at all (`'none'`; a spellblade Mage parries, but the
+  wood doesn't vary by kit, so a spellblade's parry is untaught in the wood as before: worth a look).
+- **Hew walks round things** (`sim/hewwalk.ts`). Every walk of his (the waking, lesson to lesson, round the
+  hut to the cordwood) uses the goblins' way-finding (`sim/pathing.ts` `wayTo`, a grid for his 0.3 body)
+  and then `collide`, the hero's own blocking: trees, the thicket, kilns, carts, the hut, closed gates.
+  Before, he slid in a straight line, so lesson 1 to 2 went through the thicket between the path and the
+  clearing. He started the waking inside the edge trees at (0.6, 35.2); now at `HEW_START` (1.6, 35.2),
+  just clear of them. The goblins' path grid no longer marks Hew as a fixed obstacle (`pathgrid.ts`): it was
+  built once with him wherever he stood then, which blocked his own way afterward. The spots he's put at
+  (the Healer's arrow scene, `HEW_AT`; the hut's door) were checked clear.
+- **Tests** (`tests/woodfix.test.ts`): two dodges complete the lesson for every class; the goal turns to
+  KILL THE GOBLINS with the `passed` event and count; the Ranger gets PARRY after the dodges and one parry
+  (fed, and a real one in the room off the freeze) completes it; Hew sampled every step of the waking, all
+  four walks lesson to lesson and round the hut is never sunk into a tree, brazier or block, and arrives.
+  The three end-to-end runs (`wood`, `woodsign`, `woodelement`) wait out the Ranger's parry card.
+
+New lines, not yet through the lore keeper or the line editor:
+- Hew, the Ranger's PARRY card: "Here's one that only swings, not like those crouching ones. You've that
+  short blade on you as well as the bow, so knock its swing aside with it, *just* as it comes, and it'll
+  stagger."
+- Card how-line: "You can't hold a block. Tap PARRY while the red flashes white. A parry staggers the goblin,
+  and your next blow does extra damage."
+- Freeze: "NOW: TAP PARRY". Goal: "PARRY: TAP PARRY WHILE THE RED FLASHES WHITE" (phone) / "PARRY: TAP RIGHT
+  CLICK WHILE THE RED FLASHES WHITE" (laptop), "PARRIES 0 / 1"; "KILL THE GOBLINS", "KILLED 0 / 3".
+
 ## 2026-11-05: the first recorded sound effects: combat, spells, goblins and beasts (Kyle; Claude Opus 5.5)
 
 Kyle approved batch 1 of `docs/sound/elevenlabs-sounds.md`: sections 1 and 2 (45 + 33 sounds). Ambience,
