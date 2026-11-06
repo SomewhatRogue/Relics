@@ -39,6 +39,16 @@ it stays with them for the job; a host who switches tabs (2.5 s) or locks their 
 to a friend, who carries on without a stall worth the name, and back in sight the old host plays on as a
 guest. Everything in DECISIONS 2026-11-06 ("who hosts"). Open: the four new lines through the lore keeper and
 line editor.
+**Hempen in the boss format** (Claude Opus 5.5, 2026-11-06; `docs/plans/bosses.md` rollout item 5). Built; waiting
+on Kyle's play. *Done when*, on his phone and laptop in Hangman's Wood: near Hempen the plate shows HEMPEN with its
+POISE bar and two pips; every blow has its pose first, red ones (the cleave, the noose's thin lane, the haul down the
+rope at a hoisted friend) blocked (BRACED) or dodged, striped ones (the slam, phase 2's Rope Rain) walked out of or
+dodged; a trunk or a friend standing in front stops a rope; cutting a hoisted friend down loses it the haul; with a
+friend, a rope comes down out of the branches on the second one a moment after each blow; charged blows and BRACED
+fill POISE to STAGGERED; below half it roars and a pip goes out; dead, its hoard under the hanging tree gives each
+hero a Forged or better piece and now and then a relic, and the wood still gives the grappling hook at the end.
+Everything in DECISIONS 2026-11-06 ("Hempen in the boss format"); shots `node scripts/hempen-look.cjs`. Open: every
+number; no new words on screen.
 **The boss kit and the Doorkeepers** (Claude Opus 5.5, 2026-11-06; `docs/plans/bosses.md` rollout item 2; Kyle:
 "shield goblins or a pair ... arena ... good loot ... mix between splatting and tactical"). Built; waiting on Kyle's
 play and the lore keeper and line editor on the new words. *Done when*, on his phone and laptop: the Doorkeepers

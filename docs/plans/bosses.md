@@ -288,7 +288,7 @@ The Gorger makes splatting chaff a choice.
    - the barn, as a hunt.
 3. **Elites:** Plated, Quick and Gorging, then the rest.
 4. **Meaty units:** the Doorman, Swingle and Forker, then the Kegman, Pouncer and Gorger, each through `debut.ts`.
-5. **Hempen into the format** (cheap: the zone exists).
+5. **Hempen into the format** (cheap: the zone exists). Built 2026-11-06: DECISIONS "Hempen in the boss format".
 6. **The Haulier**, with the Open Cut.
 7. **Turnkey**, with Coldscar's Inner Ward.
 8. **Antlers** with the Old Park, then **the Mourner** with the Corpse Road.

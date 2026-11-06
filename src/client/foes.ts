@@ -3,7 +3,7 @@
  * cleaver back and chops, or leaps and comes down on the slam; scrappers pull the knife back and stab.
  */
 import type { GameMap } from '../shared/arena';
-import { GUARD } from '../shared/tuning';
+import { GUARD, HERO } from '../shared/tuning';
 import type { Enemy, EnemyAttack } from '../sim/types';
 import { isRound } from '../sim/types';
 import { drawRoundSign } from './telegraph2';
@@ -211,6 +211,9 @@ export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number, dozing = false
   if (e.act === 'stunned') stars(c, x, y - 18);
 }
 
+/** A boss's rope lane, each side of its line: as far as a hero's middle can be and still be caught (sim/combat.ts inArc). */
+const BOSS_LANE = HERO.radius;
+
 /**
  * The telegraph on the floor: a red shape that fills before the attack lands, with a striped edge for a
  * blow that can't be blocked. (It flashed white for a parry until parry went, 2026-11-05.)
@@ -281,6 +284,12 @@ export function drawTelegraph(c: Ctx, a: EnemyAttack, cx: number, cy: number): v
       g.globalAlpha = on ? 0.9 * pulse : 0.35;
       g.fillRect(px, py, 1, 1);
       if (d % 4 === 0) g.fillRect(Math.round(px + nx), Math.round(py + ny), 1, 1), g.fillRect(Math.round(px - nx), Math.round(py - ny), 1, 1);
+      // A boss's rope (Hempen's noose and haul): the lane as wide as it's judged, its edges dotted.
+      if (a.boss) for (const s of [-1, 1]) for (let w = 2; w <= BOSS_LANE * PX; w++) {
+        if (w < BOSS_LANE * PX - 0.5 && (d + w) % 3) continue;
+        g.globalAlpha = (on ? 0.6 : 0.22) * pulse;
+        g.fillRect(Math.round(px + nx * w * s), Math.round(py + ny * w * s), 1, 1);
+      }
     }
     // The hook's iron at its far end.
     g.globalAlpha = 0.9;

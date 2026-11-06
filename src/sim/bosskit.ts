@@ -14,11 +14,13 @@ import { BOSS, DOORKEEPERS, POISE_KIT, type DoorMove } from '../shared/tuning';
 import { begin } from './enemies';
 import { isDead } from './damage';
 import { tauntTarget } from './taunt';
+import { hempenAim } from './hempenboss';
 import type { AttackKind, Enemy, FightEvent, Hero } from './types';
 
 /** On a boss goblin (drawn: the plate, its door, the stagger). Room times; -9 for "not". */
 export interface BossOn {
-  who: 'latch' | 'hasp';
+  /** The Doorkeepers' Latch or Hasp, or Hempen (sim/hempenboss.ts). */
+  who: 'latch' | 'hasp' | 'hempen';
   job: 'wall' | 'move';
   phase: 1 | 2;
   poise: number;
@@ -35,7 +37,12 @@ export interface BossOn {
   straps: number;
   /** Players in the room when it was made (the plan's scaling table). */
   party: number;
+  /** Hempen's ropes coming down out of the branches (sim/hempenbook.ts): where, when they land, on whom. Sent as they come and go. */
+  ropes?: Rope[];
 }
+
+/** A rope dropped on a hero's spot: a striped circle (HEMPEN_BOSS.rope), landing at `at`, aimed at `on`. */
+export interface Rope { x: number; y: number; at: number; on: string }
 
 /** The room's own notes on its bosses (never drawn, so never sent; saved with the room). */
 export interface BossBook {
@@ -56,14 +63,16 @@ export interface BossBook {
   /** The phase the pair is in (for the adds). */
   phase: number;
   party: number;
+  /** Whose book: the Doorkeepers' (none said) or Hempen's (sim/hempenbook.ts). */
+  of?: 'hempen';
 }
 
 let book: BossBook | null = null;
 export const useBook = (b: BossBook | null): void => void (book = b);
 export const theBook = () => book;
 
-export function newBook(party: number, swaps: number[]): BossBook {
-  return { hurt: [], started: -1, swapAt: -1, apartAt: -1, lockBy: -1, lockUntil: -9, lockCool: -9, split: null, swaps, phase: 1, party };
+export function newBook(party: number, swaps: number[], of?: 'hempen'): BossBook {
+  return { hurt: [], started: -1, swapAt: -1, apartAt: -1, lockBy: -1, lockUntil: -9, lockCool: -9, split: null, swaps, phase: 1, party, ...(of ? { of } : {}) };
 }
 
 /** A boss's own state as it's made (`party` players). */
@@ -93,8 +102,8 @@ export function bossBegin(e: Enemy, move: DoorMove, t: Hero, ev: FightEvent[]): 
   return true;
 }
 
-/** A boss wind-up aimed at `id` by anyone but `not` (one clock a hero). */
-export const clocked = (id: string, foes: Enemy[], not?: Enemy) => foes.some((o) => o !== not && !!o.boss && !!o.attack?.boss && o.attack.aimed === id && o.attack.t < o.attack.windup && !isDead(o));
+/** A boss wind-up aimed at `id` by anyone but `not`, or a rope of Hempen's coming down on them (one clock a hero). */
+export const clocked = (id: string, foes: Enemy[], not?: Enemy) => foes.some((o) => o !== not && !!o.boss && !isDead(o) && ((!!o.attack?.boss && o.attack.aimed === id && o.attack.t < o.attack.windup) || !!o.boss.ropes?.some((r) => r.on === id)));
 
 /** The hungry near a hero a boss is winding up at hold their blows (sim/enemies.ts begin asks). */
 export const clockHolds = (e: Enemy, t: Hero, foes: Enemy[]) => !e.boss && Math.hypot(e.x - t.x, e.y - t.y) <= BOSS.clock && clocked(t.id, foes);
@@ -130,6 +139,7 @@ export function bossTarget(e: Enemy, heroes: Hero[], now: number): Hero | null {
 
 /** In the wind-up: its blow turns with its hero until BOSS.aimLock of it, then holds (a spin is round itself; a lock is braced, aimed once). */
 export function trackAim(e: Enemy, heroes: Hero[]): void {
+  if (e.boss?.who === 'hempen') return hempenAim(e, heroes);
   const a = e.attack;
   if (!a?.boss || a.boss === 'spin' || a.boss === 'lock' || a.t >= a.windup * BOSS.aimLock) return;
   const h = heroes.find((x) => x.id === a.aimed);

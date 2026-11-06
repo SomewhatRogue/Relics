@@ -5,12 +5,14 @@
  * crossroads two of them at the winch, winding someone up into the iron cage, the rest at their fire; a
  * pair dragging a sack of charcoal up the path; the brood mother in the Gospel Oak's hollow; a dropper over
  * the path by Hew's marks; and Hempen's ground, its hanging tree with the stock under it, Hempen with two
- * snarers and its band. Then the rest of the wood's goblins in knots along the trails.
+ * snarers. In the boss format (HEMPEN_BOSS.on) the ground is its arena: four trunks that stop a rope, its
+ * hoard chained under the hanging tree (the sure chest), and no band (small ones come in from three
+ * players, sim/hempenbook.ts); off, its band as before. Then the rest of the wood's goblins in knots.
  */
 import { claim, free, mark, offLine, prop, round, type Kit, type Line, type P } from './expedkit.js';
 import { PACK0 } from './expedpacks.js';
 import type { Job } from './jobs.js';
-import { HANGWOOD, HEMPEN, OAK } from './tuning.js';
+import { HANGWOOD, HEMPEN, HEMPEN_BOSS, OAK } from './tuning.js';
 import type { Foe } from './terrain.js';
 import type { SPINE } from './hangwood.js';
 
@@ -80,7 +82,14 @@ export function layScenes(k: Kit, S: Spine, job: Job): Laid {
   const bp = pack++;
   const hempen = add(k, { kind: 'butcher', x: hm.x + 0.6, y: hm.y - 0.4, hp: HEMPEN.hp, name: 'HEMPEN', noose: true, zoned: true, pack: bp });
   for (const s of [-1, 1]) add(k, { kind: 'scrapper', variant: 'snarer', role: 'snarer', pack: bp, x: hm.x + s * 3, y: hm.y - 2.2 });
-  band(k, hm, 3 + rng.int(2), 1.6, 3.2).forEach((i) => (k.foes[i].pack = bp));
+  const ring = band(k, hm, 3 + rng.int(2), 1.6, 3.2);
+  ring.forEach((i) => (k.foes[i].pack = bp));
+  if (HEMPEN_BOSS.on) {
+    // (Its band rolled and let go, so the seed's stream, and every tree after it, is as it was.)
+    k.foes.splice(ring[0], ring.length);
+    for (const [dx, dy] of HEMPEN_BOSS.trunks) round(k, 'tree', hm.x + dx, hm.y + dy, HEMPEN_BOSS.trunk);
+    k.chests.push({ x: hm.x + HEMPEN_BOSS.hoard[0], y: hm.y + HEMPEN_BOSS.hoard[1], chained: true });
+  }
   add(k, { kind: 'scrapper', x: hm.x - 4.5, y: hm.y + 3.6, z: 1, pack: pack++, role: 'fodder', task: { k: 'perch' } });
   // A chest or two off the path for whoever goes looking (which, by the seed).
   for (const at of rng.shuffle([{ x: cr.x + 1.8, y: cr.y + 1.6 }, { x: ok.x - 2.6, y: ok.y + 2.4 }, { x: S.check.x + 2, y: S.check.y - 2 }, { x: gb.x - 4.2, y: gb.y + 2.6 }]).slice(0, 1 + rng.int(2))) k.chests.push(at);

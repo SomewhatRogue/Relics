@@ -15,6 +15,7 @@ import { newExped } from './exped';
 import { scalePacks } from './packs';
 import { scaleBosses } from './party';
 import { ArenaRoom } from './room';
+import { hempenOnto } from './hempenbook';
 
 export function expedRoom(job: Job, party = 1, level = 1): ArenaRoom {
   const plan = expedPlan(job), foes = scalePacks(plan.foes, party, job.seed * 17 + 2, EXPED_PACKS.party);
@@ -22,6 +23,8 @@ export function expedRoom(job: Job, party = 1, level = 1): ArenaRoom {
   // The pacing rules as a job's later rooms (sim/pacing.ts): packs held back over the caps, waves at the holds too.
   room.pace = { index: 2 };
   scaleBosses(room.enemies, party);
+  // Hangman's Wood: Hempen in the boss format, its hoard the sure chest (sim/hempenbook.ts).
+  if (job.exped === 'hangmans') hempenOnto(room, party, job.seed);
   room.exped = newExped(plan, job.seed, party);
   room.exped.wx = expedSky(job);
   room.dread = { by: 'swarm' };

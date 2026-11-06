@@ -411,7 +411,7 @@ export interface EnemyAttack {
   rcx?: number;
   rcy?: number;
   /** A boss's blow (sim/bosskit.ts): its move, and the pose before the floor shows (`tell` s, inside the wind-up). */
-  boss?: import('../shared/bosstune').DoorMove;
+  boss?: import('../shared/bosstune').DoorMove | import('../shared/hangtune').HempenMove;
   tell?: number;
   /** A charge run from beside its body (Locked Doors: the middle of the pair), as an offset from it. */
   mid?: [number, number];

@@ -18,8 +18,9 @@ import { crackWatch, stepIronhide } from './ironhide';
 import { hooked, stepGaffer } from './gaffer';
 import { stepSkimmer } from './skimmer';
 import { stepChalk, stepChalker } from './chalker';
-import { hoist, stepSnarer, type Noose } from './snares';
+import { stepSnarer, type Noose } from './snares';
 import { stepNoose } from './hempen';
+import { noosed } from './hempenboss';
 import { shapeMeaty, stepPlanker, stepForker, stepSwingle } from './meaty';
 import { shapeMeaty2, stepGorger, stepKegman, stepPouncer } from './meaty2';
 import { walk } from './enemies';
@@ -82,7 +83,7 @@ export function stepOwn(e: Enemy, q: Turn, heroes: Hero[], others: Enemy[], rng:
 /** Its blow landed on `h` (after the damage): a net holds, a thief takes, the log knocks down. */
 export function landed(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: FightEvent[], foes: Enemy[] = []): void {
   if (a.kind === 'net') catchIn(h, now, ev);
-  else if (a.kind === 'hook') e.noose ? hoist(h, now, ev) : hooked(e, h, foes, ev);
+  else if (a.kind === 'hook') e.noose ? noosed(e, a, h, now, ev) : hooked(e, h, foes, ev);
   else if (a.kind === 'grab' && e.variant === 'thief') rob(e, h, ev);
   else if (a.kind === 'charge' && e.variant === 'log' && h.act !== 'down') knockDown(h);
 }

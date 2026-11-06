@@ -8,6 +8,7 @@ import * as THREE from 'three';
 import type { EnemyAttack } from '../../sim/types';
 import { isRound } from '../../sim/types';
 import { BAYER } from './post';
+import { HERO } from '../../shared/tuning';
 
 const FS = BAYER + `
 uniform float uKind, uR, uW, uCos, uProg, uUnb, uT, uSlam, uChev; uniform vec2 uSize; varying vec2 vP;
@@ -88,7 +89,7 @@ export function shapeTele(m: THREE.Mesh, a: EnemyAttack, now: number, lift: numb
     return true;
   }
   if (lane || shot) {
-    const W = shot ? 0.07 : a.kind === 'pounce' ? Math.max(0.15, a.radius * 0.5) : a.kind === 'draw' ? 0.12 : a.kind === 'hook' ? 0.07 : a.radius;
+    const W = shot ? 0.07 : a.kind === 'pounce' ? Math.max(0.15, a.radius * 0.5) : a.kind === 'draw' ? 0.12 : a.kind === 'hook' ? (a.boss ? HERO.radius : 0.07) : a.radius;
     u.uKind.value = shot ? 3 : 2;
     u.uR.value = a.range;
     u.uW.value = W;
