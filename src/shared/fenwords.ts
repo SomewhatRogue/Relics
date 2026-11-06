@@ -9,7 +9,7 @@ export const FEN_NAME = 'Fenmere';
 /** The posting on the board (`{boss}`: the day's named butcher). */
 export const FEN_POST = {
   title: 'Fenmere',
-  text: "The hungry are keeping a larder at the Peat Cuts, and they're bringing people across the fen to fill it. Get the ones on the island out, poison their pot, and kill {boss}.",
+  text: "The hungry are keeping a larder at the Peat Cuts, and they're bringing people across the fen to fill it. There's still some caged on the island, so get them out, and while you're down there poison their pot and kill {boss}.",
   kind: 'EXPEDITION',
   where: 'FENMERE',
   rooms: 'One fen, about 8 minutes',
@@ -43,13 +43,13 @@ export const FEN_MAP = { title: 'FENMERE', check: 'FIRE', start: 'WAY IN' };
  */
 export const FEN_BEATS: Record<string, string> = {
   edge: "Two of them are dragging somebody through the stile, back to their fire in the coppice.",
-  coppice: "They're asleep among the cut stools. Go quietly and they might not wake.",
+  coppice: "They're asleep among the cut stools, and if you go quietly they might not wake.",
   carr: "There's a nest down among the willows, and two of the spiders are already out of it.",
   causeway: "They've shut the causeway on us, and there's one out on that islet with a pot of oil.",
-  ford: "Mind the ford. There's one on the far bank with a hook on a pole.",
+  ford: "Careful at the ford, there's one on the far bank with a hook on a pole.",
   island: "Cages on the island, and there's still somebody in them.",
   reeds: "Mind the reeds. You'll see their eyes at the water before you see the rest of them.",
-  cuts: "They've hung their larder on the old peat racks, and that's their pot on the fire. This was the Peat Cuts' drying ground.",
+  cuts: "This used to be the Peat Cuts' drying ground, and now they've hung their larder on the old racks, and that's their pot on the fire.",
   butcher: '{boss} is down among the cuts, with hooks on poles all round it.',
   chest: "A chest out on the bog, and a dead man by it who didn't get it open.",
 };
