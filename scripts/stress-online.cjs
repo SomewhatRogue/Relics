@@ -10,7 +10,7 @@ const { kit, wait } = require('./stress/kit.cjs');
 const ROOT = path.join(__dirname, '..'), PORT = Number(process.env.STRESS_PORT) || 8792;
 const SCENES = { ...require('./stress/leave.cjs'), ...require('./stress/drop.cjs'), ...require('./stress/falls.cjs'), ...require('./stress/order.cjs'), ...require('./stress/split.cjs'), ...require('./stress/keep.cjs'), ...require('./stress/burn.cjs'), ...require('./stress/pack.cjs') };
 const NAMES = {
-  1: 'friend leaves', 2: 'leader leaves', 3: 'leader of three leaves', 4: "leader's page hidden 30 s", '4f': "leader's page frozen",
+  1: 'friend leaves', 2: 'leader leaves', 3: 'leader of three leaves', 4: "leader's page hidden 30 s: Sam takes over", '4m': 'leader hidden while muted: full rate on Sam', '4p': "a phone leader's page hidden: hands on at once", '4f': "leader's page frozen",
   5: "leader's tab closed", 6: 'friend reloads', '6b': "friend's phone locked over a minute", 7: 'leader reloads', 8: 'friend down, leader helps', 9: 'friend down alone, then out',
   10: 'leader out, friend goes on', 11: 'everyone out', 12: 'HELP UP on the phone', 13: 'solo leave', 14: 'friend in before the leader',
   15: 'friend goes into a house alone', 16: 'leader goes in alone', 17: 'two houses at once', 18: 'small goblins follow, big ones not', 19: 'friend brings a captive out',

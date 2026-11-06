@@ -12,10 +12,11 @@ export function impacts(enemies: Enemy[], now: number, ev: FightEvent[]): void {
   for (const a of enemies) {
     const speed = Math.hypot(a.kvx, a.kvy);
     // (A spider's pounce is its own legs, not a blow: it doesn't bowl anything over.)
-    if (speed < KNOCK.bodySpeed || isDead(a) || a.act === 'carried' || a.attack?.kind === 'pounce') continue;
+    // (A boss's charge meets its own goblins as a charge does, sim/enemies.ts; nor do a boss pair hurt each other.)
+    if (speed < KNOCK.bodySpeed || isDead(a) || a.act === 'carried' || a.attack?.kind === 'pounce' || (a.boss && a.attack?.kind === 'charge')) continue;
     for (const b of enemies) {
       const d = Math.hypot(b.x - a.x, b.y - a.y);
-      if (b === a || isDead(b) || b.act === 'carried' || d > a.radius + b.radius + 0.05) continue;
+      if (b === a || isDead(b) || b.act === 'carried' || d > a.radius + b.radius + 0.05 || (a.boss && b.boss)) continue;
       // Only a body actually driving into the other counts (not two already flying apart).
       const nx = (b.x - a.x) / (d || 1), ny = (b.y - a.y) / (d || 1), rel = (a.kvx - b.kvx) * nx + (a.kvy - b.kvy) * ny;
       if (rel < KNOCK.bodySpeed) continue;

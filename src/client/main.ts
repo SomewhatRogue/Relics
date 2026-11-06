@@ -7,6 +7,9 @@ import { SIGNS, SIGN_KEY } from '../shared/signs';
 import { signFor, signLeft } from '../sim/signature';
 import { ExpedUi } from './expedui';
 import { expedition, goalWords, hangmansWood } from '../shared/expedjob';
+import { barnHunt } from '../shared/bossjobs';
+import { plateOf } from '../sim/bossplate';
+import { showPlate } from './bossplate';
 import { spellCost } from '../sim/spells';
 import { carriedItem } from '../sim/charge';
 import { isDark } from '../shared/relicitems';
@@ -68,6 +71,8 @@ import { DreadView } from './dreadfx';
 import { watchDust } from './dust';
 import { watchWater } from './wetwatch';
 import { Input } from './input';
+import { HideWatch } from './hidehost';
+import { noteFrame } from './netq';
 import { LootCard } from './lootcard';
 import { PackView } from './pack';
 import { openTree } from './treeui';
@@ -198,6 +203,9 @@ if (quick && xday) game.startJob(expedition(xday > 1 ? xday : game.world.day));
 // ?hero=WARRIOR&wood=1: straight into today's Hangman's Wood (?wood=4: the one posted on day 4).
 const wday = Number(new URLSearchParams(location.search).get('wood') ?? 0);
 if (quick && wday) game.startJob(hangmansWood(wday > 1 ? wday : game.world.day));
+// ?hero=WARRIOR&barn=1: straight onto today's Doorkeepers hunt; ?barn=arena: straight into the great barn.
+const barn = new URLSearchParams(location.search).get('barn');
+if (quick && barn) game.startJob(barnHunt(game.world.day, barn === 'arena'));
 // The big map's load test (?hero=WARRIOR&bigmap=1: bigmode.ts), loaded only when asked.
 if (quick && new URLSearchParams(location.search).get('bigmap') === '1') void import('./bigmode').then((m) => m.startBig(game, new URLSearchParams(location.search)));
 // A recovery code here: if another device sent these heroes on since, take that copy (only before play).
@@ -353,9 +361,7 @@ function hud(now: number): void {
     objFlash.watchWood(wood.stage + (wood.passed ?? 0), now);
     // (The wood's lessons never fold: the control to learn is on it.)
     fold.render(objFlash.show(`<b>${g.title}</b> <div class="obj">${g.text}</div><span>GREYHOLLOW, THE DAY AFTER</span>`, now), null, g.title + g.text, now);
-    const boss = room.enemies.find((e) => e.name && e.act !== 'dead');
-    $('#boss').hidden = !boss || wood.cut >= 0;
-    if (boss) ($('#boss b').textContent = boss.name!), ($('#boss i').style.width = (100 * boss.hp) / boss.maxHp + '%');
+    showPlate($('#boss'), wood.cut >= 0 ? null : plateOf(room.enemies, room.time));
   } else if (game.mode === 'run' && run) {
     const g = { text: me.out ? OUT_TEXT : game.goalText() };
     // (The hearts, the get-ups left, are under the health bar: unitframe.ts.)
@@ -366,9 +372,8 @@ function hud(now: number): void {
     const small = smallLine(x && !me.out && x.phase === 'shut' ? TRACKW.jobsLeft(left, x.goals.length) : g.text, rooms);
     fold.render(full, small, run.job.place.name + run.index + ':' + (x && !me.out && x.phase === 'shut' ? 'jobs' + left : calm(g.text)), now, objFlash.holding(now));
     // (On an expedition the named butcher's bar shows only once you're near it.)
-    const boss = room.enemies.find((e) => e.name && e.act !== 'dead' && (!room.exped || Math.hypot(e.x - me.x, e.y - me.y) < 14));
-    $('#boss').hidden = !boss;
-    if (boss) ($('#boss b').textContent = boss.name!), ($('#boss i').style.width = (100 * boss.hp) / boss.maxHp + '%');
+    // (A boss of the kit: its plate, sim/bossplate.ts.)
+    showPlate($('#boss'), plateOf(room.enemies, room.time, (e) => !room.exped || Math.hypot(e.x - me.x, e.y - me.y) < 14));
   } else {
     $('#boss').hidden = true;
     objFlash.watchWood(-1, now);
@@ -430,6 +435,8 @@ input.onPress = () => {
 function tick(t: number): void {
   // (The first frame can stamp a hair before the page clock: never step backwards.)
   const dt = Math.max(0, Math.min(0.1, (t - last) / 1000));
+  // (How healthy this page's frames are: who'd host a party's job best, netq.ts. Drawn frames only.)
+  if (!document.hidden) noteFrame(t - last);
   last = t;
   // With a panel up, the hero stands still (and no press is spent).
   const live = input.read();
@@ -530,6 +537,12 @@ function tick(t: number): void {
   if (document.hidden || game.mode === 'watch') return;
   views.render(game.room, ME, fx, t / 1000, dt, inTown ? (townfolk?.here(game.room.map.name) ?? []) : [], game.mode === 'run');
   under?.frame(views, game.room, game.room.heroes.find((x) => x.id === ME), t / 1000);
+  // The job moved to another device (a host's page went out of sight): said once, over me.
+  if (game.hostNote && game.hero) {
+    const [sx, sy] = toPx(game.hero.x, game.hero.y);
+    fx.say(sx, sy - 46, game.hostNote, '#ffd27a', 3);
+    game.hostNote = null;
+  }
   // Out of bounds: the dark closing in, what comes for you, and anyone taken (dreadfx.ts).
   dread.frame(game.room.heroes.find((x) => x.id === ME), game.room.heroes, evs, views, fx, t / 1000, dt);
   hud(t / 1000);
@@ -545,7 +558,21 @@ requestAnimationFrame(frame);
 // Leading a job with this page out of sight (another tab, another app): the browser stops drawing
 // frames, but your friends' room still has to run, so it runs here on a timer, catching up in
 // tenth-of-a-second steps however late the browser lets the timer fire.
+// With friends, though, a hidden host hands the job on (hidehost.ts): a desktop after 2.5 s out of
+// sight, a phone or touch device at once; back in sight it follows whoever took it. Alone, it runs here.
+const hide = new HideWatch({
+  touch: input.touch,
+  now: () => performance.now() / 1000,
+  hosting: () => game.mode === 'run' && !!game.coop,
+  friends: () => (game.coop ? game.coop.still().length - 1 : 0),
+  hand: () => game.handOn(),
+  back: () => game.backAsGuest(),
+  later: (fn, ms) => setTimeout(fn, ms),
+  cancel: (t) => clearTimeout(t as number),
+});
+hide.attach(document, window);
 setInterval(() => {
+  if (document.hidden) hide.tick();
   if (!document.hidden || !game.coop) return;
   const now = performance.now();
   for (let n = 0; now - last > 120 && n < 40; n++) tick(last + 100);
@@ -610,11 +637,12 @@ if (input.touch) document.body.classList.add('touch');
 // Test hooks: read the fight as data, never as pixels.
 const w = window as unknown as Record<string, unknown>;
 w.__fullForTest = fullForTest;
-w.__town = () => ({ dozing: !!townfolk?.dozing, open: !!townfolk?.open, count: townfolk?.count ?? 0, here: townfolk?.here(game.room.map.name).map((h) => ({ name: h.tag, x: h.x, y: h.y })) ?? [] });
+w.__town = () => ({ dozing: !!townfolk?.dozing, open: !!townfolk?.open, count: townfolk?.count ?? 0, rtt: townfolk?.rtt ?? 0, here: townfolk?.here(game.room.map.name).map((h) => ({ name: h.tag, x: h.x, y: h.y })) ?? [] });
 w.__GAME_STATE__ = () => ({ mode: game.mode, wood: game.wood ? { wake: game.wood.wake, said: game.wood.said, stage: game.wood.stage, hold: game.wood.hold } : null, inside: game.outside ? game.room.map.name : null, title: title.open, time: game.room.time, hero: { ...game.hero }, enemies: game.room.enemies.map((e) => ({ ...e })), guards, run: game.run, profile: game.profile, world: game.world });
 w.render_game_to_text = () => `${game.mode} t=${game.room.time.toFixed(1)} hero ${game.hero.act} hp ${game.hero.hp} st ${Math.round(game.hero.stamina)} | ` + game.room.enemies.map((e) => `${e.kind} ${e.act} hp ${e.hp}${e.attack ? ' ' + e.attack.kind + ' ' + e.attack.t.toFixed(2) : ''}`).join(' | ');
 Object.defineProperty(w, '__room', { get: () => game.room });
 w.__game = game;
+w.__hide = hide;
 // (The online scripts try the lag compensation's cap: party-online.cjs.)
 w.__lagcomp = LAGCOMP;
 w.__views = views;

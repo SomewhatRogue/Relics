@@ -213,3 +213,36 @@ describe('online and determinism', () => {
     expect(play()).toBe(play());
   });
 });
+
+describe('beside the boss kit (sim/bosskit.ts)', () => {
+  it('a boss is never an elite: not from its plan, not if one were marked, and a Quick wind-up never shortens its tell', async () => {
+    const { barn, blow } = await import('./bossarena');
+    const b = barn(['sword']);
+    expect(b.latch.elite).toBeUndefined();
+    expect(b.hasp.elite).toBeUndefined();
+    // Marked by hand, a boss still winds up exactly as the kit says.
+    const base = blow(b.hasp, 'sweep', b.heroes[0]) && b.hasp.attack!.windup;
+    Object.assign(b.hasp, { attack: null, act: 'chase', elite: ['quick'] });
+    blow(b.hasp, 'sweep', b.heroes[0]);
+    expect(b.hasp.attack!.windup).toBe(base);
+    // And a Foe with a boss and an elite comes into the room without the elite.
+    const { packOnto } = await import('../src/sim/packs');
+    const e = { ...b.latch, elite: undefined } as Enemy;
+    packOnto(e, { kind: 'butcher', x: 0, y: 0, boss: 'latch', elite: ['plated'] });
+    expect(e.elite).toBeUndefined();
+  });
+
+  it("the Planker's door and a Doorkeeper's door don't touch: each stops only its own", async () => {
+    const { plankFaces } = await import('../src/sim/meaty');
+    const { doorTake } = await import('../src/sim/doorwall');
+    const { barn, place } = await import('./bossarena');
+    const b = barn(['sword']);
+    place(b.latch, 6, 4, 0, 1);
+    // The Planker's rule never reads a boss; the boss's rule never reads a Planker.
+    expect(plankFaces(b.latch, 0, 1, b.room.time)).toBe(false);
+    const f = field([{ kind: 'scrapper', variant: 'planker', x: 15, y: 10 }]), p = f.room.enemies[0];
+    Object.assign(p, { fx: 0, fy: 1 });
+    expect(plankFaces(p, 0, 1, f.room.time)).toBe(true);
+    expect(doorTake(p, 10, 0, -1, f.room.time)).toBe(10);
+  });
+});

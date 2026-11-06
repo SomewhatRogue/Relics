@@ -15,6 +15,7 @@ import { drawPerchRope } from './wooddraw';
 import { drawPaceDust, drawPaceOver, paceOffset } from './pacedraw';
 import { drawElite } from './elitedraw';
 import { MEATY_DRAW, meatySort } from '../shared/meaty';
+import { drawKeeper } from './doordraw';
 
 /** A goblin, or (in the yard: `straw`) a straw man playing one. The plain dummies are themselves either way. */
 export function drawFoe(c: Ctx, e: Enemy, x: number, y: number, sleeping: boolean, straw: boolean): void {
@@ -38,6 +39,8 @@ export function drawFoe(c: Ctx, e: Enemy, x: number, y: number, sleeping: boolea
  * bigger; the new meaty sorts bigger too (MEATY_DRAW), and an elite's affixes on its body (elitedraw.ts).
  */
 function paced(c: Ctx, e: Enemy, x: number, y: number, sleeping: boolean): void {
+  // A boss of the kit: a Doorkeeper behind its door (doordraw.ts).
+  if (e.boss) return drawKeeper(c, e, x, y, sleeping);
   const meat = meatySort(e);
   if (!e.held && !e.big && !e.sprintAt && !e.elite && !meat) return drawEnemy(c, e, x, y, sleeping);
   const o = paceOffset(c, e), bx = x + o.dx, by = y + o.dy, k = o.k * (meat ? MEATY_DRAW : 1);

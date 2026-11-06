@@ -48,7 +48,7 @@ const up = async (url) => { for (let i = 0; i < 150; i++) { if (await new Promis
       WebSocket.prototype.send = function (d) { String(d) === '{"ping":1}' ? n.pings++ : n.sent++; return send.call(this, d); };
       window.WebSocket = class extends W { constructor(...a) { super(...a); n.opened++; } };
     });
-    await page.goto(`http://127.0.0.1:${PORT}/?${qs}&relay=${encodeURIComponent(`ws://127.0.0.1:${PORT}/api/room/i${inst}`)}`);
+    await page.goto(`http://127.0.0.1:${PORT}/?${qs}&pick=lead&relay=${encodeURIComponent(`ws://127.0.0.1:${PORT}/api/room/i${inst}`)}`);
     await page.waitForFunction(() => window.__game);
     await page.evaluate(([cls, name]) => { window.__game.create(cls, name); if (window.__game.mode === 'wood') window.__game.skipWood(); document.getElementById('title').hidden = true; window.__title.open = false; }, [cls, name]);
     return { name, ctx, page, inst };

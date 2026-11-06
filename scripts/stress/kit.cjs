@@ -50,7 +50,9 @@ function kit(browser, port, report) {
     await ctx.addInitScript(PHONE_OS);
     const p = { name, ctx, page: await ctx.newPage(), phone };
     watch(p);
-    await p.page.goto(`http://127.0.0.1:${port}/`);
+    // (`pick=lead`: the party's leader always hosts, so each scene knows whose page runs the room; who
+    // hosts by link is scripts/florida-online.cjs's.)
+    await p.page.goto(`http://127.0.0.1:${port}/?pick=lead`);
     await p.page.waitForFunction(() => window.__game);
     await ev(p, ([cls, name]) => { window.__game.create(cls, name); if (window.__game.mode === 'wood') window.__game.skipWood(); document.getElementById('title').hidden = true; window.__title.open = false; }, [cls, name]);
     p.id = await ev(p, () => window.__game.profile.id);
@@ -130,7 +132,7 @@ function kit(browser, port, report) {
     if (!p.page.isClosed()) await p.page.close();
     p.page = await p.ctx.newPage();
     watch(p);
-    await p.page.goto(`http://127.0.0.1:${port}/`);
+    await p.page.goto(`http://127.0.0.1:${port}/?pick=lead`);
     await p.page.waitForFunction(() => window.__game);
     await ev(p, () => { document.getElementById('title').hidden = true; window.__title.open = false; });
   }

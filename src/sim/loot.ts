@@ -21,7 +21,8 @@ export const lift = (i: Item, lv: number): Item => (i.hungry || (i.level ?? 0) >
  * elite drops one more often, rolled ELITE.loot.levels up the level curve (shared/elites.ts).
  */
 export function dropFrom(e: Enemy, heroes: Hero[], drops: Drop[], rng: Rng, ev: FightEvent[], lv = 1): void {
-  if (e.kind !== 'scrapper' && e.kind !== 'butcher') return;
+  // (A boss of the kit leaves nothing on the floor: its sure chest is the loot, sim/bosschest.ts.)
+  if ((e.kind !== 'scrapper' && e.kind !== 'butcher') || e.boss) return;
   const elite = !!e.elite?.length;
   if (rng.next() >= (elite ? ELITE.loot.chance : DROPS[e.kind]) && !e.big) return;
   let near: Hero | null = null, bd = Infinity;

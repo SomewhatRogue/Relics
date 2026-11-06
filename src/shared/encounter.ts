@@ -227,7 +227,7 @@ export function composeRoom(c: Compose): Template[] {
     for (const f of keepers) f.beat = beats[i];
     for (const r of elites) if (r.band === i) {
       const f = laid.filter((g) => g.role === r.role)[r.nth];
-      if (f) f.elite = [...r.affixes];
+      if (f && !f.boss) f.elite = [...r.affixes];
     }
   });
   return chose;

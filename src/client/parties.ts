@@ -12,6 +12,8 @@ import type { Job } from '../shared/jobs';
 import { PARTY_GRACE, PARTY_MAX, admit, changes, cleanName, drop, isOffer, post, quiet, standing, type JobTag, type Member, type Offer } from '../shared/lobby';
 import { keepParty, keptParty } from './partykeep';
 import type { Townfolk } from './townfolk';
+import { HOSTPICK, pickHost, sayAgain, type Link } from '../shared/hostpick';
+import { myLink } from './netq';
 
 export { PARTY_MAX };
 export interface Party { lead: string; job: JobTag; members: Member[]; mine: boolean; in: boolean; asked: boolean }
@@ -20,6 +22,9 @@ export type News = { k: 'posted'; lead: string; name: string; job: JobTag } | { 
 
 const code = () => 'P' + Math.random().toString(36).slice(2, 10).toUpperCase();
 const ASK_EVERY = 3, OFF_AFTER = 2;
+/** `?pick=lead`: the leader always hosts (the Florida replay, scripts/florida-online.cjs LEAD_HOSTS=1). */
+const PICK_OFF = typeof location !== 'undefined' && new URLSearchParams(location.search).get('pick') === 'lead';
+const isLink = (q: unknown): q is [number, number] => Array.isArray(q) && q.length === 2 && q.every((v) => typeof v === 'number' && isFinite(v));
 
 export class Parties {
   /** The party I lead, and its whole job. */
@@ -38,7 +43,14 @@ export class Parties {
   private offSince = -1;
   private keptAt = -99;
   private now = 0;
-  onGo: (room: string, job: Job, lead: string, members: Member[]) => void = () => {};
+  /** Leading: each member's link as they last said it (riding on their join word), and when. */
+  private links = new Map<string, { l: Link; at: number }>();
+  /** A member: my link as I last said it to the leader. */
+  private saidLink: { l: Link; at: number } | null = null;
+  /** My link now (the town socket's trip, my frame time: netq.ts). */
+  link: () => Link = () => myLink(this.town.rtt);
+  /** `host`: who runs the job's room (the one with the best link: shared/hostpick.ts), maybe not the leader. */
+  onGo: (room: string, job: Job, lead: string, members: Member[], host: string) => void = () => {};
   onChange: () => void = () => {};
   onNews: (n: News) => void = () => {};
 
@@ -92,6 +104,7 @@ export class Parties {
   join(lead: string): void {
     this.quit();
     this.joined = lead;
+    this.saidLink = null;
     this.leadName = this.town.where(lead)?.hero.tag ?? '';
     this.heard.set(lead, this.now);
     this.ask();
@@ -107,15 +120,34 @@ export class Parties {
     this.changed();
   }
 
-  /** The leader sets out: everyone in is told where to go, with the whole job. */
-  setOut(): { room: string; job: Job; members: Member[] } | null {
+  /**
+   * The leader sets out: everyone in is told where to go, with the whole job, and who hosts its room:
+   * the member with the best link, if they beat mine by enough (shared/hostpick.ts). Picked once, here.
+   */
+  setOut(): { room: string; job: Job; members: Member[]; host: string } | null {
     if (!this.mine || !this.job) return null;
-    const room = code(), job = this.job, m = this.mine.m;
-    for (const [id] of m.slice(1)) this.town.say(id, { k: 'go', room, j: job, m });
+    const room = code(), job = this.job, m = this.mine.m, host = this.pick(m);
+    for (const [id] of m.slice(1)) this.town.say(id, { k: 'go', room, j: job, m, h: host });
     this.mine = this.job = null;
     this.hold = false;
+    this.links.clear();
     this.changed();
-    return { room, job, members: m };
+    return { room, job, members: m, host };
+  }
+
+  /** Who'd host this party best, by the links the members said (fresh ones only) and mine. */
+  private pick(m: Member[]): string {
+    const links: Record<string, Link | undefined> = { [m[0][0]]: this.link() };
+    for (const [id] of m.slice(1)) {
+      const s = this.links.get(id);
+      if (s && this.now - s.at <= HOSTPICK.stale) links[id] = s.l;
+    }
+    return PICK_OFF ? m[0][0] : pickHost(m.map(([id]) => id), links);
+  }
+
+  /** Leading: the links my members have said (tests and the online scripts). */
+  heardLinks(): Record<string, Link> {
+    return Object.fromEntries([...this.links].map(([id, s]) => [id, s.l]));
   }
 
   /** Each frame: out of town lets the party go; in town, who's quiet, who came and went, what's new. */
@@ -143,6 +175,8 @@ export class Parties {
     if (s === 'off' && this.offSince < 0) this.offSince = now;
     if (s !== 'off') this.offSince = -1;
     if (s === 'asked' && now - this.askedAt > ASK_EVERY) this.ask();
+    // In: my link said again only when it's first known or has moved (a few words a party, not a tick's).
+    else if (s === 'in' && sayAgain(this.link(), this.saidLink, now)) this.ask();
     if (s === 'quiet' || s === 'full' || (s === 'off' && now - this.offSince > OFF_AFTER)) {
       this.joined = null;
       this.offSince = -1;
@@ -168,14 +202,22 @@ export class Parties {
     this.was = is;
   }
 
+  /** Ask the leader to take me (again), with my link if I know it (who hosts: shared/hostpick.ts). */
   private ask(): void {
     this.askedAt = this.now;
-    if (this.joined) this.town.say(this.joined, { k: 'join', n: this.me().name });
+    if (!this.joined) return;
+    const l = this.link(), q = l.r > 0 ? { q: [l.r, l.f] } : {};
+    if (l.r > 0) this.saidLink = { l, at: this.now };
+    this.town.say(this.joined, { k: 'join', n: this.me().name, ...q });
   }
 
   private word(from: string, d: Record<string, unknown>): void {
     const m = this.mine;
-    if (d.k === 'join' && m && !this.hold && admit(m, from, d.n)) return this.heard.set(from, this.now), this.changed();
+    if (d.k === 'join' && m) {
+      const took = !this.hold && admit(m, from, d.n);
+      if (isLink(d.q) && m.m.some(([id]) => id === from)) this.links.set(from, { l: { r: d.q[0], f: d.q[1] }, at: this.now });
+      return void (took && (this.heard.set(from, this.now), this.changed()));
+    }
     if (d.k === 'quit' && m && !this.hold) return void (drop(m, from) && this.changed());
     if (d.k === 'disband' && this.joined === from) {
       this.joined = null;
@@ -186,7 +228,8 @@ export class Parties {
       this.joined = null;
       this.was = null;
       keepParty(null);
-      this.onGo(d.room, d.j as Job, from, d.m as Member[]);
+      const m = d.m as Member[], host = typeof d.h === 'string' && m.some((x) => Array.isArray(x) && x[0] === d.h) ? d.h : from;
+      this.onGo(d.room, d.j as Job, from, m, host);
     }
   }
 

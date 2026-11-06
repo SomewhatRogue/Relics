@@ -99,10 +99,219 @@ Barrowfields only; none in the packs while staged, some once common; nothing beg
 and expedition online scripts pass. Shots: `node scripts/elites-look.cjs [url] [dir]` (phone: each unit winding up,
 each affix, all of them; flat and 2.5D).
 
+**Beside the boss kit** (merged with main after the Doorkeepers): a boss is never an elite (its arena is planned
+on its own, with no composer and no pacing; `packOnto` and the composer drop an elite on anything with `boss`; Quick
+never touches a boss's wind-up, so its tell pose is always added in full). The Planker's barn door
+(`sim/meaty.ts plankFaces`, keyed on the variant, its door shut through its own bash) and a Doorkeeper's
+(`sim/doorwall.ts`, keyed on `boss`, swung aside while its blow lands) share no code and never read each other: one
+is a goblin to get round, the other a boss's job with straps and POISE (tests in `tests/elites.test.ts`). The
+threat budget doesn't reach the barn. Pins after the merge: unchanged (switched off, main's 2459865809 and
+1775586545). Full suite 1347 passed; town, party (one guest-feel frame check flaked once, then 28 of 28), expedition
+and Florida online pass.
+
 **New words** (for the lore keeper, then the line editor; code and docs only for now, nothing on screen names a sort
 or an affix): Planker, Swingle, Forker; Plated, Quick, Gorging; the templates' plain words "a planker behind its barn
 door, and a few small ones", "a swingle with its flail, and a few small ones", "a forker with its pitchfork, and a
 few small ones". On screen only what was there: BLOCKED over a blow the barn door takes, GORGED when an elite eats.
+
+## 2026-11-06: who hosts: the best connection runs the room, and a hidden host hands it on (Kyle; Claude Opus 5.5)
+
+Kyle approved both today (the two left open in "the join storm" and "the guest feel"): "best connection hosts"
+and "a hidden host hands over". Numbers in `shared/hostpick.ts` (`HOSTPICK`, `HIDE`); the rule there, tested in
+Node (`tests/hostpick.test.ts`).
+
+**1. Who hosts.** Every player's traffic goes through the one relay in `sfo1`, so a friend's delay to the host
+is about half the host's trip to the relay plus half their own. On the Florida night, Kyle hosting would have
+given each Florida friend about 80 ms one way, against LIACOR hosting's 80 for Kyle and 140 for the other
+Florida friend (220 ms between them down to 160).
+- **The pick** (`pickHost`): each member's score is their trip to the relay (`RelaySocket.rtt` on the town
+  socket, the heartbeat's own ping and pong, in ms) plus a small lean for a struggling page: half of each ms of
+  average frame time over 20, at most 10 (`linkScore`: a phone at 40 ms a frame costs 10, a laptop at 16
+  nothing). The lowest score hosts, but only if the leader's is **25 ms or more** worse; else the leader. A trip
+  not yet measured (0, before the first heartbeat answers) never wins, and a leader with none keeps it. The
+  frame lean alone can never move the room (10 is under the 25), so a laptop beats a phone at the same trip
+  among the others, and a phone leader at the same trip as a laptop keeps hosting.
+- **No new traffic.** A member's link rides on the party's own join word (`{k:'join', n, q:[rtt, frame]}`),
+  which they already send asking in; once in, they say it again only when it's first known or has moved (10 ms
+  of trip or 8 of frame time), at most every 5 s and at least every 60 (`sayAgain`): a few words a party. The
+  leader's own comes from its own socket. A report older than 90 s isn't used. The frame time is kept from
+  drawn frames (`client/netq.ts`).
+- **Picked once, at setting out** (`Parties.setOut`): the `go` word carries `h`, the host. The host starts the
+  room as a leader would (`Game.setOut` with the word as told); everyone else, the party's leader included,
+  follows them as a guest through the same paths a friend always took (`startRemote`, `want=join`: joiners
+  never claim). The party leader stays the leader for everything social: the card, invites, the job, and the
+  beat's own line ("X is leading the party out to Y"). Nothing picks again mid-job: the host keeps it unless they
+  leave or the hidden rule fires.
+- `?pick=lead`: the leader always hosts. The stress kit and the party, chat, lobby, exped and budget scripts use
+  it so each knows whose page runs the room (on the local relay everyone's trip is the same, give or take a
+  busy frame); `florida-online.cjs` uses the pick (and `LEAD_HOSTS=1` for the night as it was played).
+
+**2. A hidden host hands it on** (`client/hidehost.ts`, `handNow`). A host with a friend still in the job (heard
+from in the last 5 s) whose page goes out of sight hands the room to the friend first in line: a desktop
+after **2.5 s** out of sight (a timer, and the hidden loop's once-a-second tick), a phone or touch device at
+once (`visibilitychange` hidden; it freezes timers), and any page going away (`pagehide`) at once. Alone,
+nothing changes: the room runs on the hidden loop as before.
+- `CoopHost.handOver(true)`: the whole job to everyone, then `{bye, stay, to}` naming the friend first in line
+  (the one the 2 s save already goes to), and the socket closed at once, not after 1.5 s, so the relay frees
+  the room now (a phone would freeze before the timer fired). The named friend takes it the moment the relay
+  says the host's gone (`left`), or 2.5 s after the goodbye if that word is slow; the rest follow in their
+  order after them. `stay`: the old host's hero stays in the job.
+- Back in sight, the old host opens no socket while hidden and then follows whoever has it as a guest
+  (`Game.backAsGuest`); a reload meanwhile follows them too (the session names the new host).
+- A guest's `heardLead` now uses the clock, not the last frame's time: a page out of sight draws no frames but
+  still hears, and back in sight used to think the leader quiet all that while and try to take the job on.
+
+**Two bugs found on the way, in every takeover since the pacing merge** (the determinism test across a
+handover): the pack rushes' clocks are Maps, which the job's JSON wrote as `{}`, so a friend taking a job on
+mid-fight stopped dead on the next tick (`s.due.has is not a function`); and JSON has no Infinity, so every
+barrel and oil jar (`fadeAt: Infinity`) loaded as `null` and was gone a tick later. `saveRoom` sends the rushes
+as lists, `jobJson` writes Infinity as a word, and `loadRoom` brings both back. A street handed on is now the
+same fight tick for tick with the ids swapped as a takeover swaps them; an expedition's save is to the
+centimetre by design (`bigsave.ts`), and from it the same fight on any page.
+
+**Measured.** `florida-online.cjs` (the leader 70 ms away each way and Kyle near the relay): trips 213 ms and
+29 ms, Kyle hosts with LIACOR leading; LIACOR in Kyle's job 4.5 s after setting out (the dead SUBSCRIBE's 2.5 s
+included), one job join, at most 3 sockets, the host drawn stalled on 9.3% of frames while walking, Redis 19
+commands a minute (the same as before: nothing new on the wire). `LEAD_HOSTS=1`: as before, 4.6 s, 11.1%, 19.
+With two players the guest pays both legs either way (0.31 s against 0.29); the gain is a third and fourth
+player. Stress (`scripts/stress-online.cjs`, local relay, LAG_MS 120): scene 4 now expects the hand-on (Sam
+takes the job 2.9 s after Kyle's page goes out of sight, leads all 25 s, Kyle back follows him, they finish);
+**4m**, the leader muted and hidden: Sam has it in 2.9 s and runs it at 0.99 room seconds a second, every one
+of 50 looks a tenth of a second apart seeing it move (a hidden host sent about a patch a second); **4p**, a
+phone leader: handed on the moment it hides.
+
+**New words, for the lore keeper and the line editor** (`client/partywords.ts`): under the setting-out beat when
+someone other than the leader hosts, "X has the best connection, so the job runs on their device." (to
+everyone else) and "You have the best connection, so the job runs on your device." (to the host); over your hero
+when the job moves mid-way, "X IS HOSTING NOW", and to whoever takes it, "YOU ARE HOSTING NOW" (a takeover of
+any kind now says this).
+
+Tests: `tests/hostpick.test.ts` (the pick: lowest trip, the frame tie-break and its cap, the margin, unmeasured
+trips; when a link is said again; the parties on a fake town: the link on the join word, the `go` word's host,
+the leader on a near tie, a link known late said once, no new pick after setting out; the hidden rule: desktop
+not at 2.4 s and at 2.5, back within it nothing, touch at once, `pagehide` at once, alone never, back in sight a
+guest; the host's goodbye and its closed socket; the named friend first, at once on `left`; LEAVE as it was; a
+guest hidden 20 s not thinking the leader quiet; the room across a handover, a street and an expedition of
+three). Full vitest (1,285) and `tsc` pass. Online, one at a time: town, party, chat, lobby, exped, florida (both
+ways) and the full stress run (31 scenes, in four parts) pass, but for party-online's lag-feel steps: its dodge
+jerk and the stab "within what the cap allows" are on the edge at headless Chromium's 0.47 to 0.49 s lag against
+the 0.35 s cap (the press reaches the host about 7 ms before the cap), and fail on untouched main too (that run:
+the block and the dodge). Stress scene 1's 2 s step failed once and passed on the rerun.
+
+Not built: a host picked again mid-job (Kyle: no ping-pong); a host that comes back taking its room back.
+## 2026-11-06: the boss kit, and the Doorkeepers in the great barn (Kyle; Claude Opus 5.5)
+
+Kyle (2026-11-05): "shield goblins or a pair ... arena ... good loot ... mix between splatting and tactical", moments
+to plan an attack, bosses that hit hard and aren't easy to kite. `docs/plans/bosses.md` rollout item 2. Every number
+in `shared/bosstune.ts` (exported through tuning); every word in `shared/bosswords.ts`.
+
+**The kit, for every later boss** (`sim/bosskit.ts`, `poise.ts`, `bossgrace.ts`, `bosschest.ts`, `bossplate.ts`):
+- **A boss's state** on the goblin (`Enemy.boss`: POISE, phase, job, door, its rotation) goes out only when one of
+  those changes; the room's own notes (`ArenaRoom.bosses`: who hurt it lately, the pair's clocks, each phase's seeded
+  swap) are saved with the room and never sent. Measured: at their post nothing about them goes out; in 10 s of
+  fighting the boss field is in under a tenth of the patches.
+- **POISE**: bosses shrug every ordinary stun (`stuns.ts mayStun`, and no flinch, no LAST SECOND reel). Charged
+  blows 18, perfects 22, ambushes 30, backstabs 14, BRACED 30, a last-second dodge through its blow 18 (the dodge
+  classes' perfect) fill a 100-point bar (1, 1.3, 1.6, 1.9 times for one to four players). Full: STAGGERED 2.5 s,
+  held fast (the stunned bonus), its door aside, the bar empty. A relic's stun lands in full and fills half the bar.
+  A blow its door stops still fills POISE: a holder's charged blows into the door are their part.
+- **Patterns**: a 0.2 s pose before the floor shows (the floor's own time is the plan's; telegraphs in both views
+  wait for it), aim turning with its hero until 70% of the wind-up, then locked. A move it can't get to within 3 s
+  is passed over, so hugging it can't stall a charge.
+- **Whom it faces**: a taunt, else a block held within 2.5 tiles of its face, else whoever hurt it most in the last
+  4 s, else the nearest.
+- **One clock a hero**: one boss wind-up aimed at a hero at a time (the other boss picks another hero or waits), and
+  the hungry within 3 tiles of that hero hold their blows while it winds up (`enemies.ts begin`, only in a boss's room).
+- **Phases**: a 2 s roar with nothing landing either way (it strikes nothing and takes nothing), pips on the plate.
+- **Scaling**: health by PARTY.boss as every named one (1, 1.4, 1.8, 2.2); POISE as above; two players, the other
+  boss swings at the second hero 0.6 s after the first blow begins; three, 3 small ones in at the side doors each
+  phase (four: 4); four, one more sweep in the rotation. Wind-ups never shorten.
+- **The plate** (`#boss`, `client/bossplate.ts`): the name with its phase pips, a bar each (the pair side by side,
+  LATCH and HASP under), a thin POISE bar under each that flashes while STAGGERED. Any other named goblin: as before.
+- **The sure chest**: the arena's chained chest opens at the kill (both dead). Each hero in the room rolls on their
+  own seed (the chest's and their id): one Forged piece, PRE-WAR 15% (plate half the time), and 15% a relic through
+  `awardRelic(.., 'boss')`, the new source, straight into their found relics, so the relic moment comes as it does
+  for a pickup (a guest's too, through their hero's patch). 80 to 120 gold in one pile, the party's pot. Bosses
+  leave nothing on the floor (no hungry gear: there's no butcher in them).
+- **The arena rule**: the way in is shut until the kill (the goal needs every named one dead now; "are dead" for a pair).
+
+**Open with Kyle, each behind one flag (`BOSS_FLAGS`):**
+- **BRACED**, default `'boss'`: a blocked boss blow doesn't shove the blocker back, and a boss's blocked red blow
+  rebounds it 0.8 s (shoved back a little) and fills POISE 30; IRON STANCE gives way to it on a boss's blow.
+  `'all'`: no shove from any blocked blow (the rebound stays a boss's). `'off'`: as before.
+- **The grace**, default on, boss blows only: a guard or dodge pressed up to 0.15 s after the blow lands, by the
+  hero's own screen, counts (a plain dodge, or a block). How it sits with lag compensation (LAGCOMP.cap 0.35):
+  the leader's own hero is judged at once when its room would save it anyway; a blow that would land waits 0.15 s
+  for a late press. A lagged friend is judged by their own screen as before, and a press up to 0.15 s late by that
+  screen counts too, but the room never holds a boss blow more than min(lag + 0.15, max(0.35, 0.15)): for lag up to
+  0.2 s the whole grace is theirs, then it shrinks to 0.35 - lag, and from 0.35 s it's only the lag compensation.
+  The two never add up past the cap, on anyone's screen.
+- **A hero's first named-butcher kill always dropping a relic**: not touched.
+
+**The Doorkeepers** (`shared/barnarena.ts`, `bossjobs.ts`, `sim/doorkeepers.ts`, `doorpair.ts`, `doorwall.ts`,
+`arenaroom.ts`): **Latch** and **Hasp**, two big goblins (the butcher's body a size up) with the barn's doors, 320
+health each, in the great barn at Lowfurrow Fields: a 12 by 14 threshing floor that fits an upright phone, two hay
+stacks (stop a charge; burn down in 6 s: `haystack`, a new wooden block), four roof posts, a barrel of lamp oil, the
+chained chest at the back. They stand at their post facing the back wall until they see you or hear you within 4.5
+(creeping, only sight: an ambush to open with). Posted as a hunt (`barnHunt`) from 3 brought home or the bell rung:
+two rooms, the fields then the barn (`Job.arena`; `?hero=WARRIOR&barn=1`, or `barn=arena` straight into the barn).
+- **The door**: shut, a blade or shot from within 70 degrees of its facing is stopped dead (BLOCKED, sparks).
+  Swung aside during its own blow and recovery, stunned, staggered, rebounding, after a lock, and while DOWN.
+  Bursts, burning and storm go round it. A shot into a shut door cuts a strap (a charged or perfect one two): three
+  and it's DOOR DOWN 4 s (lying beside it).
+- **Jobs**: one is the WALL (walks its hero down at 1.5, stands 1.5 off, turns at 1.4 radians a second, so a
+  flanker gets round it; no blow of its own but the split and the lock), the other the MOVER (2.4 pace, rotation
+  sweep, charge, sweep, sweep, charge with one seeded swap). They swap every 20 s. Drawn: the wall's door square in
+  front, the mover's carried at its side (the read), swung out flat while open.
+- **Moves**: Door Sweep, red 120 degrees, range 2.6, 1.1 s, 24, punish 1.0 s. Door Charge, a striped lane 8 long
+  1.6 wide, 1.3 s, 30 (it backs off to 3 to get it; 11.4 tiles a second); into a stack, post or wall it's stuck 2.5 s.
+  Locked Doors (within 2.5 of each other, every 9 s at most): a striped shove 3 wide from between them, 1.4 s, 22,
+  the partner carried along; both stand open 1.5 s after. Door Spin (phase 2): a striped ring 2.4 round itself,
+  1.5 s, 26, then dizzy 2 s. A hero at the middle of any striped one walks out in 60% of it at the slowest kit's pace.
+- **Together**: more than 7 apart for 4 s, the mover walks back to its partner, back to you, 3 s (or till it's
+  there). One down: phase 2, the roar, the survivor the mover for good, carrying both doors.
+- Their charge meets their own small goblins as a butcher's does; they never hurt each other, and a carried partner
+  stopped by a wall isn't hurt by it.
+
+**Measured** (`tests/bossbot.ts`: a hero who can't go down, walking on its own feet by Intent, reading each floor:
+walks out of striped, a blocker blocks red, a dodger dodges at the last moment; goes for a back or an open front):
+
+| The barn alone, days 3 / 4 / 5 | seconds | health lost | staggers |
+|---|---|---|---|
+| twin daggers (Rogue) | 45.9 / 96.6 / 82.4 | 30 / 0 / 0 | 2 / 3 / 3 |
+| focus staff (Mage) | 47.6 / 104.5 / 69.1 | 190 / 276 / 146 | 0 / 2 / 1 |
+| sword (Warrior) | 54.3 / 54.5 / 46.1 | 30 / 60 / 22 | 5 / 5 / 4 |
+
+Two (sword, daggers) 25.9 s; three (sword, staff, daggers) 31.7 s. All won. The staff bot takes the most because it
+can't block and stands in to slash; its spells go round the doors.
+
+**Shared files, small edits**: `tuning.ts` (re-export), `types.ts` (`Enemy.boss`; `EnemyAttack.boss`, `tell`, `mid`;
+five events), `enemies.ts` (`OWN_KIT.bosses`, the clock in `begin`, the hook to `stepKeeper`, aim tracking, a boss's
+charge stuck), `terrain.ts` (`Foe.boss`), `jobs.ts` (`Job.arena`), `arena.ts` + `props.ts` (`haystack`), `combat.ts`
+(the door, POISE, BRACED, the grace), `damage.ts`, `bolts.ts`, `stuns.ts`, `impacts.ts`, `latelist.ts`, `lagcomp.ts`,
+`chests.ts`, `pickups.ts`, `loot.ts`, `goal.ts`, `targets.ts`, `room.ts`, `run.ts`; client `main.ts` (the plate, `?barn`),
+`game.ts` (the posting), `foes.ts` + `three/teleg3d.ts` (the pose before the floor), `strawman.ts`, `fx.ts`,
+`soundscape.ts`, `blocklook.ts`, `pieces.ts`, `hud.css`. No pin moved.
+
+**New words** (lore keeper, then line editor): THE DOORKEEPERS, LATCH, HASP (plan proposals, kept); STAGGERED;
+BRACED; DOOR DOWN; the posting "Hunt the Doorkeepers" / "Two of the hungry have taken the doors off the great barn
+at Lowfurrow Fields and carry them about like shields. They've shut themselves in there with whatever was stored. Go
+in and put them down."; THE GREAT BARN (exists); "Kill THE DOORKEEPERS" / "THE DOORKEEPERS are dead. Way home: ..."
+(built from the job's boss, "are" for a pair). Reused: BLOCKED (a door stops it), SHRUGS IT OFF, A CHAINED CHEST.
+
+Tests: `tests/boss.test.ts` (POISE by party, what fills it, the stagger, shrugged stuns and a relic's; the plate for
+the pair and for any named one; BRACED on, off and 'all'; the grace for the leader and for a friend at 0.15 and 0.3 s
+of lag, and never past the cap at lags to 0.9; the sure chest chained, per hero, its odds, the gold, a relic and its
+moment; no traffic a tick) and `tests/doorkeepers.test.ts` (each move landed, blocked or not, dodged and walked out
+of; Locked Doors; the door, the straps, a charge stuck in a stack and the stack burning; the swap, walking back,
+phase 2, the split; one clock a hero; the floors' times, the pose, the aim lock, the barn on a phone; the posting;
+clear times for daggers, staff and sword; the same fight twice). Full vitest 140 files, 1298 tests; tsc; town and
+exped online pass; party online 25 to 27 of 28 over three runs, only the guest-feel frame and lag-stab checks
+(a clean main checkout passed once and then failed one of the same checks: flaky under the container's load, and
+the party script never meets a boss). Shots: `node scripts/boss-look.cjs [url] [outdir]` (phone: the barn with the plate, Locked Doors'
+lane held part way, the sure chest open with the PRE-WAR piece).
+Open: Kyle's play on every number and both flags; a Blender pass on the pair (they're the butcher's body with a door
+drawn on); real sounds for the rebound and the roar (from the kit we have now); the hay stacks are box lumps.
 
 ## 2026-11-06: the guest feel: your own acts at once, one walk rule, and a blow judged by your own screen (Claude Opus 5.5)
 

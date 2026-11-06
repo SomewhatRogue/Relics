@@ -42,7 +42,8 @@ export function dropLoot(pickups: Pickup[], x: number, y: number, loot: { gold?:
 
 /** A named butcher, now and then, leaves a relic where it fell (its own seeded stream: RELIC_DROP.named). */
 export function dropRelic(e: Enemy, pickups: Pickup[], rng: Rng): void {
-  if (!e.name || e.respawns || e.kind !== 'butcher') return;
+  // (A boss of the kit's loot is its sure chest: sim/bosschest.ts.)
+  if (!e.name || e.respawns || e.kind !== 'butcher' || e.boss) return;
   // (Hempen's relic is Hangman's Wood's own, awarded once at the job's end: shared/relicaward.ts. Never a drop too.)
   if (e.zoned) return;
   if (rng.next() >= RELIC_DROP.named) return;
@@ -52,7 +53,7 @@ export function dropRelic(e: Enemy, pickups: Pickup[], rng: Rng): void {
 const RELIC_LIFE = 90;
 
 /** A relic picked up: kept, and carried at once if nothing is. */
-function takeRelic(h: Hero, r: RelicItem, ev: FightEvent[]): void {
+export function takeRelic(h: Hero, r: RelicItem, ev: FightEvent[]): void {
   h.found = [...(h.found ?? []), r];
   if (!h.relics[1]) {
     h.relics = [h.relics[0], r.kind];

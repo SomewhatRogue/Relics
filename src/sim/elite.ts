@@ -16,7 +16,8 @@ export const quickPace = (e: Enemy) => (hasAffix(e, 'quick') ? ELITE.quick.pace 
 
 /** A Quick one's wind-up, shortened as it begins (a pack rush keeps the rush's own clock). */
 export function quicken(e: Enemy, a: EnemyAttack): void {
-  if (hasAffix(e, 'quick') && a.rush === undefined) a.windup = +quickWind(a.windup, a.unblockable).toFixed(3);
+  // (Never a boss's: its tell pose is added after, sim/bosskit.ts, and a boss is never an elite anyway.)
+  if (hasAffix(e, 'quick') && a.rush === undefined && !e.boss) a.windup = +quickWind(a.windup, a.unblockable).toFixed(3);
 }
 
 /** A small goblin that eats the dead (Gorging). */
