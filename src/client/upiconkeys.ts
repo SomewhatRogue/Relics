@@ -17,8 +17,8 @@ const TECH: Record<TechId, string> = {
 };
 const RUNG: Record<RungId, string> = {
   airshot: 's:volley', twinsnare: 's:net', landing: 'i:jump', blinkburst: 's:firering', blinkthrough: 'i:blink', halfblink: 's:tether',
-  caltrops: 's:knives', underlegs: 'i:dash', shakeoff: 'i:poison', shelter: 's:ward', blockmend: 's:heal', cover: 'i:block',
-  taunt: 's:horn', standfast: 'u:plate', cowing: 's:stamp',
+  caltrops: 's:knives', underlegs: 'i:dash', shakeoff: 'i:poison', shelter: 's:ward', allyward: 'i:help', blockmend: 's:heal',
+  tauntguard: 's:horn', ironstance: 'u:plate', standfast: 's:stamp',
 };
 /** A knack by what it moves. (`dodge`, `leap` and `light` are the class's own dodge: by the knack's letter.) */
 const FX: Partial<Record<FxKey, string>> = {
