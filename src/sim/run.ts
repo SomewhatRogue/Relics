@@ -52,6 +52,8 @@ export interface Run {
   began?: number;
   /** Players in the party when each room is built (it scales the goblins; the ones left, if some went home). */
   party?: number;
+  /** The party's average level when the job began (shared/threat.ts partyLevel), kept for the whole job: goblins and loot by it. */
+  level?: number;
   /** Layout 4: the freed brought out of each room (a way's pay counts its room's: shared/waypay.ts), and prisoners led off. */
   saved?: Record<number, number>;
   ledoff?: number;
@@ -69,11 +71,13 @@ export const newRun = (job: Job): Run => ({ job, index: 0, gold: 0, xp: 0, rescu
 /** Build the room for the run's current index. */
 export function runRoom(run: Run): ArenaRoom {
   // An expedition: one big map, not rooms (sim/expedroom.ts).
-  if (run.job.exped) return expedRoom(run.job, run.party ?? 1);
+  if (run.job.exped) return expedRoom(run.job, run.party ?? 1, run.level ?? 1);
   const plan = planRoom(run.job, run.index, run.roads[run.index], run.roads), n = run.party ?? 1;
   // Worse places and deep jobs shift every chest roll a tier up.
   const danger = (run.job.place.ruin >= 3 ? 1 : 0) + (run.job.deep ? 1 : 0);
-  const room = new ArenaRoom(run.job.seed + run.index, { map: plan.map, foes: scaleFoes(plan.foes, n, run.job.seed * 17 + run.index * 5 + 2), furniture: plan.props, chests: plan.chests, danger });
+  const room = new ArenaRoom(run.job.seed + run.index, { map: plan.map, foes: scaleFoes(plan.foes, n, run.job.seed * 17 + run.index * 5 + 2), furniture: plan.props, chests: plan.chests, danger, level: run.level ?? 1 });
+  // A routed room plays the pacing rules (sim/pacing.ts, chase.ts): what's on screen held to the party's caps, and no easy kiting.
+  if (run.job.layout && run.job.layout >= 3) room.pace = { index: run.index };
   scaleBosses(room.enemies, n);
   room.board = {};
   room.dread = { by: dreadFor(run.job) };

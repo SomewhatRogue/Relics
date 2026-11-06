@@ -12,12 +12,13 @@ import type { Fx } from './fx';
 import { STRAW, drawStrawHeap } from './rackdraw';
 import { toPx } from './world';
 import { drawPerchRope } from './wooddraw';
+import { drawPaceDust, drawPaceOver, paceOffset } from './pacedraw';
 
 /** A goblin, or (in the yard: `straw`) a straw man playing one. The plain dummies are themselves either way. */
 export function drawFoe(c: Ctx, e: Enemy, x: number, y: number, sleeping: boolean, straw: boolean): void {
   // A dropper up a tree in Hangman's Wood: its rope up into the branches (wooddraw.ts).
   if (e.task?.k === 'perch') drawPerchRope(c, e, x, y);
-  if (!straw || e.kind === 'dummy' || e.kind === 'swingDummy') return drawEnemy(c, e, x, y, sleeping);
+  if (!straw || e.kind === 'dummy' || e.kind === 'swingDummy') return paced(c, e, x, y, sleeping);
   if (e.act === 'dead') return drawStrawHeap(c.lit, x, y, e.id);
   drawEnemy(c, e, x, y, sleeping);
   const big = e.kind === 'butcher' || e.variant === 'heavy' || e.variant === 'ironhide', h = big ? 24 : e.kind === 'spider' ? 9 : 14, w = big ? 11 : 7;
@@ -28,6 +29,21 @@ export function drawFoe(c: Ctx, e: Enemy, x: number, y: number, sleeping: boolea
   r(-2, -h - 1, 1, 2, STRAW.pale), r(0, -h - 2, 1, 2, STRAW.body), r(2, -h - 1, 1, 2, STRAW.pale);
   r(-w + 1, -Math.round(h * 0.45), 1, 2, STRAW.pale), r(w - 2, -Math.round(h * 0.45), 1, 2, STRAW.pale);
   r(-3, -1, 1, 1, STRAW.pale), r(3, -1, 1, 1, STRAW.pale);
+}
+
+/** A goblin as the pacing rules show it (pacedraw.ts): hopping while held, leaning into a sprint, a BIG ONE bigger. */
+function paced(c: Ctx, e: Enemy, x: number, y: number, sleeping: boolean): void {
+  if (!e.held && !e.big && !e.sprintAt) return drawEnemy(c, e, x, y, sleeping);
+  const o = paceOffset(c, e), bx = x + o.dx, by = y + o.dy;
+  if (o.k === 1) drawEnemy(c, e, bx, by, sleeping);
+  else {
+    // Bigger from its feet up, on both layers.
+    for (const g of [c.lit, c.glow]) g.save(), g.translate(bx, by), g.scale(o.k, o.k), g.translate(-bx, -by);
+    drawEnemy(c, e, bx, by, sleeping);
+    for (const g of [c.lit, c.glow]) g.restore();
+  }
+  drawPaceDust(c, e, x, y);
+  drawPaceOver(c, e, bx, by);
 }
 
 const BITS = [STRAW.body, STRAW.pale, STRAW.shade, STRAW.rag];

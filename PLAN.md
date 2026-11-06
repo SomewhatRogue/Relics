@@ -2,6 +2,20 @@
 
 ## Current slice
 
+**Pacing, the first slice** (Claude Opus 5.5, 2026-11-05; Kyle: "swarms over other things, so AoE abilities are
+over-necessary", "mini bosses also work", "not necessarily more enemies if lots of players, but more health on
+enemies, and they hit harder", "a bit too easy to kite"; `docs/plans/bosses.md` section 3). Built; waiting on Kyle's
+play. *Done when*, on his phone and laptop, alone and in a party: a job's rooms open on a swarm to splat now and then,
+then a fight with a brute, a shield wall or an oil crew he has to think about, and later rooms end on a closer (a
+butcher, an ironhide, or one or two a job a BIG ONE: bigger, a skull on a stake, BIG ONE over its head, a stomp ring,
+a sure piece and a handful of gold); a pack that sees him while the screen is full holds at its spot, hopping and
+banging, and comes when the fight thins, after 12 s, or the moment he walks up or hits it; a party of four meets
+about 12 goblins a room, not 20, each tougher and harder hitting, and a stronger party meets tougher goblins and
+better loot; running off, a goblin that's chased him 3 s leans and kicks up dust and then sprints, lungers leap,
+wolves run him down, half a pack goes wide to cut him off, and archers pick on whoever runs in the open; twin daggers
+clear a room about as quickly as a staff. Everything in DECISIONS 2026-11-05 ("pacing"); shots
+`node scripts/pacing-look.cjs`. Open: BIG ONE through the lore keeper and line editor; the numbers once he's played;
+sounds for the jeer, the lean and the stomp.
 **Your hound, with Maeve** (Claude Opus 5.5, 2026-11-05; Kyle: "the hound of Ranger could use work, and maybe let
 people choose which dog is theirs", "doesn't affect stats"; approved: the choice lives with Maeve at the hunters'
 lodge, pick and name your dog). Built; waiting on Kyle's play. *Done when*, on his phone and laptop, flat and 2.5D:

@@ -22,6 +22,7 @@ import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } fr
 import { buyDrill, learnLesson } from '../shared/training';
 import { knowsSkill, learnSkill } from '../shared/skillteach';
 import { ARRIVE_SAFE, HOUSEBURN, PARTY, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, sellValue, giveValue, TIER_WANT, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
+import { partyLevel } from '../shared/threat';
 import { ArenaRoom } from '../sim/room';
 import { lessonOf, newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
 import { elementTaught } from '../sim/woodelement';
@@ -551,6 +552,8 @@ export class Game {
     this.rooms.reset(null);
     this.run = newRun(job);
     this.run.party = party;
+    // The party's average level, fixed for the job: the goblins and the loot go by it (shared/threat.ts LEVEL_SCALE).
+    this.run.level = partyLevel([this.profile.level, ...[...(this.coop?.friends.values() ?? [])].filter((f) => f.profile && !f.gone).map((f) => f.profile!.level)]);
     this.run.began = Date.now();
     this.jobKey = soloJob();
     this.place(runRoom(this.run));
@@ -967,7 +970,7 @@ export class Game {
     const lit = p.lit ?? 0;
     if (lit > 0) p.lit = lit - 1;
     // The treasure at the end: yours alone. What won't fit in the pack is sold on the spot.
-    const found = won ? treasure(run.job, p.cls, p.id, p.runs, crowd, (run.sides ?? 0) + (way?.treasure ?? 0)) : [], kept = found.slice(0, Math.max(0, bagSize(p) - p.bag.length)), sold = found.slice(kept.length);
+    const found = won ? treasure(run.job, p.cls, p.id, p.runs, crowd, (run.sides ?? 0) + (way?.treasure ?? 0), run.level ?? 1) : [], kept = found.slice(0, Math.max(0, bagSize(p) - p.bag.length)), sold = found.slice(kept.length);
     p.bag.push(...kept);
     p.gold += sold.length * TREASURE_SOLD;
     this.result = { won, how, half, job: run.job, gold, xp, rescued, levels, relic, relics, treasure: kept, sold, lost: run.lost ?? 0, ledoff: run.ledoff ?? 0, netlost: run.netlost ?? 0, way: way ? wayLine(way) : undefined, lit: lit > 0 ? p.lit : undefined, recap };

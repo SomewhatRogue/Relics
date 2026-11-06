@@ -55,6 +55,7 @@ export * from './worldfx.js';
 export * from './staithetune.js';
 export * from './hangtune.js';
 export * from './chalk.js';
+export * from './threat.js';
 import { BANNER, NETTER, THIEF, LOGS, ROOF, IRONHIDE } from './raiders.js';
 import { CHALKER } from './chalk.js';
 import { WOLF, KEEPER, OIL, TORCH, SAPPER, CAVE } from './prowlers.js';
@@ -391,7 +392,8 @@ export const EXPED_PACKS = {
   near: 3, nearR: 14,
   /** A wave's pack number: this plus the expedition's roll counter when it came (never one of the map's). */
   wave0: 1000,
-  party: 0.3,
+  /** More small ones a pack a player past the first (was 0.3; 2026-11-05 a party meets tougher goblins, not many more: shared/threat.ts PARTY_TOUGH). */
+  party: 0.12,
   crows: 3, crowChance: 0.75,
 };
 

@@ -26,6 +26,8 @@ describe('layout 3: seeds', () => {
     for (const p of [...PLACES, SEWERS]) for (const seed of [7, 707]) one({ ...board(1)[2], place: p, rooms: 5, seed, layout: 3 });
     // Taken 2026-11-04, before layout 4; re-pinned 2026-11-05 for the ironhide and rush templates (maps, props and chests checked unchanged).
     // Re-pinned 2026-11-05 for the doors rule (shared/doors.ts): with it switched off it is still 2578152521, so houses shut and a door that took others in are all that moved.
-    expect(all).toBe(3987024697);
+    // Re-pinned 2026-11-05 for pacing (shared/threat.ts: the threat budget, beats, BIG ONEs): the same 388 rooms hashed with their goblins
+    // taken out are 713718104 before and after, so only the goblins moved (counts, roles, health, placements).
+    expect(all).toBe(1139809545);
   }, 240000);
 });

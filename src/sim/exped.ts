@@ -29,6 +29,8 @@ export interface ExpedState {
   zone: P & { r: number; away?: number }; phase: Phase; lit: number; held: number;
   /** Pressure: the level, the noise's heat and where it is, when the next wave, patrol and hold-wave may come. */
   level: number; heat: number; hx: number; hy: number; nextWave: number; nextPatrol: number; nextHold: number;
+  /** Hold waves so far, and the one now due since (shared/threat.ts HOLD: it waits for room on screen, then comes anyway); old saves have none. */
+  holds?: number; holdDue?: number;
   patrols: { ids: number[]; path: P[]; i: number; dir: number }[];
   /** Ground seen, a bit a cell (EXPED.cell), as hex; and a counter for the room's own rolls. */
   seen: string; n: number; seed: number; party: number;

@@ -6,6 +6,7 @@
  * (costs.ts; HUNGRY's are its own, hungry.ts). Ids are as saved; only the names show.
  * Everything here moves a number the fight already uses (gearStats), so the card shows the truth.
  */
+import { leanOdds } from './lootlevel.js';
 import type { Rng } from './rng.js';
 import { ELEMENT_TRAITS, traitsFor, type Item, type Tier } from './loot.js';
 import { CLASS_KITS, type HeroClass, type WeaponId } from './weapons.js';
@@ -93,8 +94,9 @@ export function pickTier(rng: Rng, odds: [Tier, number][]): Tier {
   for (const [tier, p] of odds) if ((r -= p) < 0) return tier;
   return odds[odds.length - 1][0];
 }
-export function rollTier(rng: Rng, from: keyof typeof ODDS, shift = 0): Tier {
-  const t = pickTier(rng, ODDS[from]), i = TIER_ORDER.indexOf(t), top = TIER_ORDER.indexOf(LIFT_TO);
+/** `lv`: the party's average level (shared/lootlevel.ts): the odds lean up a little a level. */
+export function rollTier(rng: Rng, from: keyof typeof ODDS, shift = 0, lv = 1): Tier {
+  const t = pickTier(rng, leanOdds(ODDS[from], lv)), i = TIER_ORDER.indexOf(t), top = TIER_ORDER.indexOf(LIFT_TO);
   return i >= top ? t : TIER_ORDER[Math.min(top, i + shift)];
 }
 

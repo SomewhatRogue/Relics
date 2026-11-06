@@ -2,6 +2,7 @@
 /** What the board says a job's treasure is. */
 export const treasureWord = (job: Job) => (job.rooms >= 5 ? 'two pieces of treasure, better than most' : job.rooms >= 3 ? 'one piece of treasure, maybe two' : 'one piece of treasure');
 import { rollTier } from './gear';
+import { itemLevel } from './lootlevel';
 import { rollAny } from './hungry';
 import type { Job } from './jobs';
 import { TREASURE } from './loot';
@@ -9,7 +10,8 @@ import { Rng } from './rng';
 import type { HeroClass, Item } from './tuning';
 
 /** `party`: players on the job; two or more find one piece more, three or more a cut above. */
-export function treasure(job: Job, cls: HeroClass, who: string, runs: number, party = 1, more = 0): Item[] {
+/** `lv`: the party's average level (shared/lootlevel.ts): a little better, and a level up from level 5. */
+export function treasure(job: Job, cls: HeroClass, who: string, runs: number, party = 1, more = 0, lv = 1): Item[] {
   let seed = job.seed * 31 + runs * 7;
   for (const c of who) seed = (seed * 33 + c.charCodeAt(0)) >>> 0;
   // An expedition counts as long, and pays a piece more for each side job done (`more`).
@@ -19,7 +21,8 @@ export function treasure(job: Job, cls: HeroClass, who: string, runs: number, pa
   for (let i = 0; i < n; i++) {
     let r = rng.next(), slot: 'weapon' | 'armor' | 'ring' = 'weapon';
     for (const [s, p] of TREASURE.slots) if ((r -= p) < 0) { slot = s; break; }
-    out.push(rollAny(rng, cls, rollTier(rng, worse ? 'named' : 'butcher', (worse ? 1 : 0) + (party >= 3 ? 1 : 0)), slot, undefined, job.boss));
+    const it = rollAny(rng, cls, rollTier(rng, worse ? 'named' : 'butcher', (worse ? 1 : 0) + (party >= 3 ? 1 : 0), lv), slot, undefined, job.boss);
+    out.push(it.hungry || (it.level ?? 0) >= itemLevel(lv) ? it : { ...it, level: itemLevel(lv) });
   }
   return out;
 }

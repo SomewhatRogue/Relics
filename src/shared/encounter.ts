@@ -2,10 +2,16 @@
  * Laying a routed room's goblins out as fights (the table: shared/encounters.ts). The set piece has
  * put its small goblins down in bands; here each band becomes a pack with one template, picked by the
  * room's place in the job, the place, its ruin and what the room has (roofs, a ledge), under a cap on
- * specials for the room. On its own seeded stream, after everything else in the room is placed.
+ * specials for the room and its threat budget (shared/roombudget.ts, numbers shared/threat.ts). The bands
+ * take the room's beats in order from the way in: a swarm to splat, a fight to think about, a closer;
+ * each spends its share of the budget, its small ones filling what its specials leave. One or two rooms a
+ * job keep a BIG ONE for their closer. On its own seeded stream, after everything else in the room is placed.
  */
 import type { Block } from './arena.js';
-import { ENCOUNTER, TEMPLATES, BACK_ROLES, type Role, type Template } from './encounters.js';
+import { ENCOUNTER, TEMPLATES, BACK_ROLES, type Beat, type Role, type Template } from './encounters.js';
+import { BIG, BUDGET, SCREEN, THREAT } from './threat.js';
+import { VARIANTS } from './tuning.js';
+import { beatsFor, bigRooms, capsFor, roomBudget, threatIn, weighOf } from './roombudget.js';
 import type { Job } from './jobs.js';
 import { Rng } from './rng.js';
 import type { Foe, FoeVariant } from './terrain.js';
@@ -63,11 +69,33 @@ function bands(fs: Foe[], spawn: P, most: number): Foe[][] {
   return live.sort((a, b) => d(mid(a), spawn) - d(mid(b), spawn));
 }
 
-/** The templates a band may be, given the room and what's left of its cap. */
-function fits(c: Compose, left: number, used: Set<string>, first: boolean): Template[] {
-  const kind = c.job.place.kind, ruin = c.job.place.ruin, roofs = roofsIn(c.blocks).length > 0;
-  return TEMPLATES.filter((t) => (!t.places || t.places.includes(kind)) && c.index >= (t.from ?? 0) && ruin >= (t.ruin ?? 0) && (!t.roofs || roofs) &&
-    cost(t) <= left && (!used.has(t.id) || t.id === 'swarm' || t.id === 'brute' || t.id === 'cave') && (!first || ENCOUNTER.first.includes(t.id)) && weightIn(t, c.job, c.index) > 0);
+/** The templates a band may be, given the room, its beat, what's left of its caps and its budget. */
+function fits(c: Compose, left: number, used: Set<string>, first: boolean, beat: Beat, budget: number, big: boolean, most = Infinity): Template[] {
+  const kind = c.job.place.kind, ruin = c.job.place.ruin, roofs = roofsIn(c.blocks).length > 0, cap = capsFor(1, c.index);
+  const base = (t: Template) => (!t.places || t.places.includes(kind)) && c.index >= (t.from ?? 0) && ruin >= (t.ruin ?? 0) && (!t.roofs || roofs) &&
+    cost(t) <= left && (!used.has(t.id) || t.id === 'swarm' || t.id === 'brute' || t.id === 'cave') && (!first || ENCOUNTER.first.includes(t.id));
+  // A room keeping a BIG ONE: its closer is one.
+  if (big) return TEMPLATES.filter((t) => t.big && base(t));
+  return TEMPLATES.filter((t) => {
+    const w = weighOf(t);
+    return !t.big && base(t) && t.beats.includes(beat) && w.meaty <= cap.meaty && w.heavy <= cap.heavy && w.threat <= Math.min(most, Math.max(budget, THREAT.meaty)) && weightIn(t, c.job, c.index) > 0;
+  });
+}
+
+/**
+ * How many small ones each band gets: what the budget leaves after the specials, shared by beat (a swarm
+ * the most), each within what its template allows (a swarm may run one over); then, if still over
+ * budget, the biggest crowds lose one at a time down to one small one each.
+ */
+function fill(ts: Template[], beats: Beat[], budget: number): number[] {
+  const spare = Math.max(0, budget - ts.reduce((s, t) => s + weighOf(t).threat, 0)), sum = beats.reduce((s, b) => s + BUDGET.share[b] * (b === 'splat' ? 2 : 1), 0) || 1;
+  const want = ts.map((t, i) => {
+    // (No pack alone more than a lone hero's screen: shared/threat.ts SCREEN.)
+    const b = beats[i], lo = b === 'splat' ? t.fodder[0] : Math.max(1, t.fodder[0] - 1), hi = Math.min(t.fodder[1] + (b === 'splat' ? 1 : 0), Math.floor((SCREEN.threat[0] - weighOf(t).threat) / THREAT.chaff));
+    return Math.max(Math.min(lo, hi), Math.min(hi, Math.round((spare * BUDGET.share[b] * (b === 'splat' ? 2 : 1)) / sum / THREAT.chaff)));
+  });
+  while (want.reduce((s, n) => s + n, 0) * THREAT.chaff > spare + 1e-9 && want.some((n) => n > 1)) want[want.indexOf(Math.max(...want))]--;
+  return want;
 }
 
 /** One of `ts` by weight (a new sort's by where it is in its debut: shared/debut.ts). */
@@ -96,7 +124,7 @@ function perch(f: Foe, b: Block): void {
 }
 
 /** One band as template `t`: pack `id`. Returns the pack. (An expedition lays its packs with it too: shared/expedpacks.ts.) */
-export function lay(c: Compose, band: Foe[], t: Template, id: number, rng: Rng, roofs: Block[]): Foe[] {
+export function lay(c: Compose, band: Foe[], t: Template, id: number, rng: Rng, roofs: Block[], fodder?: number): Foe[] {
   const m = mid(band), out: Foe[] = [], pool = [...band].sort((a, b) => d(a, m) - d(b, m));
   const take = (back: boolean) => {
     if (!pool.length) return addNear(c, m, back, rng);
@@ -115,7 +143,7 @@ export function lay(c: Compose, band: Foe[], t: Template, id: number, rng: Rng, 
     }
     out.push(f);
   }
-  const want = t.fodder[0] + rng.int(t.fodder[1] - t.fodder[0] + 1);
+  const roll = t.fodder[0] + rng.int(t.fodder[1] - t.fodder[0] + 1), want = fodder ?? roll;
   // Too many: the ones furthest out go.
   if (pool.length > want) pool.length = want;
   while (pool.length < want) {
@@ -133,6 +161,8 @@ export function lay(c: Compose, band: Foe[], t: Template, id: number, rng: Rng, 
   if (lone) out.push(cast(lone, 'fodder'));
   const centre = out[0];
   if (centre && t.more) centre.more = t.more;
+  // A BIG ONE: its own sort's health BIG.hp times over, and harder blows (shared/threat.ts).
+  if (centre && t.big && centre.role === t.centre?.[0]) Object.assign(centre, { big: true, hp: Math.round(VARIANTS[centre.role as 'heavy' | 'ironhide'].hp * BIG.hp), harm: BIG.harm });
   for (const f of out) f.pack = id;
   return out;
 }
@@ -151,17 +181,36 @@ export function composeRoom(c: Compose): Template[] {
   for (const f of ledge.slice(keep)) c.foes.splice(c.foes.indexOf(f), 1);
   for (const f of ledge.slice(0, keep)) (f.pack = 90), (f.role = 'archer');
   left -= Math.min(keep, ledge.length);
+  // The budget: less the ledge's archers and anyone the room already has at something (a scene's, a debut's).
+  const busy = c.foes.filter((f) => (f.kind === 'scrapper' || f.kind === 'butcher') && !f.name && !plain(f));
+  const budget = roomBudget(job, c.index) - threatIn(busy);
   const bandsOf = bands(c.foes.filter(plain), c.spawn, ENCOUNTER.fights[at]);
+  // The beats from the way in (on a stream of their own: shared/roombudget.ts).
+  // A room keeping a BIG ONE sets its price aside first (and keeps none if it can't afford one).
+  const reserve = THREAT.meaty * THREAT.big + THREAT.chaff, big = bigRooms(job).includes(c.index) && budget >= reserve + THREAT.chaff * (bandsOf.length - 1);
+  const beats = beatsFor(bandsOf.length, c.index, new Rng(job.seed * 53 + c.index * 7 + 5), big);
   const roofs = rng.shuffle(roofsIn(c.blocks).sort((a, b) => a.x - b.x || a.y - b.y)), used = new Set<string>(), chose: Template[] = [];
-  bandsOf.forEach((band, i) => {
-    let ts = fits(c, Math.max(0, left), used, c.index === 0 && i === 0);
+  // First each band's template, by its beat and its share of what's left; then the small ones to the budget.
+  let spend = budget - (big ? reserve : 0);
+  bandsOf.forEach((_, i) => {
+    const beat = beats[i], wantBig = big && beat === 'closer' && i === beats.length - 1;
+    const rest = beats.slice(i).reduce((s, b, k) => s + (big && i + k === beats.length - 1 ? 0 : BUDGET.share[b]), 0) || 1;
+    const share = wantBig ? Math.max(0, spend) + reserve : Math.max(0, spend) * (BUDGET.share[beat] / rest);
+    // (Leaving room for a small one in each band still to come, this one's too.)
+    let ts = fits(c, Math.max(0, left), used, c.index === 0 && i === 0, beat, share, wantBig, spend - THREAT.chaff * (beats.length - i));
+    if (wantBig && !ts.length) ts = fits(c, Math.max(0, left), used, false, beat, share, false, spend + reserve);
     if (!roofs.length) ts = ts.filter((t) => !t.roofs);
     const t = ts.length ? pick(rng, ts, c) : TEMPLATES[0];
     used.add(t.id), chose.push(t);
-    const keepers = new Set(lay(c, band, t, i + 1, rng, roofs));
+    left -= cost(t);
+    spend -= weighOf(t).threat - (wantBig && t.big ? reserve : 0);
+  });
+  const counts = fill(chose, beats, budget);
+  bandsOf.forEach((band, i) => {
+    const keepers = new Set(lay(c, band, chose[i], i + 1, rng, roofs, counts[i]));
     for (const f of band) if (!keepers.has(f)) c.foes.splice(c.foes.indexOf(f), 1);
     for (const f of keepers) if (!c.foes.includes(f)) c.foes.push(f);
-    left -= cost(t);
+    for (const f of keepers) f.beat = beats[i];
   });
   return chose;
 }

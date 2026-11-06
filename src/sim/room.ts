@@ -35,7 +35,9 @@ import { startRaise, stepParty, sweepAllies } from './party';
 import { stepSurvivors } from './survivors';
 import { stepFalse } from './falsecage';
 import { ambush } from './ambush';
-import { packOnto } from './packs';
+import { levelOn, packOnto } from './packs';
+import { asleep, stepPacing } from './pacing';
+import { flankers } from './chase';
 import { afterFoes, beforeFoes, beforeHeroes, shapeFoe } from './ownfoes';
 import { newRushes, stepRushes, type Rushes } from './packrush';
 import { slipIntent, type Slick } from './oil';
@@ -181,13 +183,18 @@ export class ArenaRoom {
   exped?: ExpedState;
   /** A job's room: each hero's counts since the run last took them (sim/score.ts, run.ts tally); null, none kept. */
   board: Board | null = null;
+  /** A job's or an expedition's room plays the pacing rules (sim/pacing.ts, chase.ts): which room of the job it is (null: the wood, the yard). */
+  pace: { index: number } | null = null;
+  /** The party's average level when the job began (shared/threat.ts LEVEL_SCALE): every goblin tougher by it, loot a little better. */
+  level = 1;
 
   /**
    * The training room by default. A run room passes its `map`, `foes` and `props` (its goblins stay
    * dead and its furniture doesn't come back). `squire`: a training partner to heal and bless.
    */
-  constructor(seed = 1, opts: { scrappers?: boolean; squire?: boolean; props?: boolean; map?: GameMap; foes?: Foe[]; furniture?: { kind: PropKind; x: number; y: number }[]; chests?: { x: number; y: number; chained?: boolean }[]; danger?: number; sleep?: boolean } = {}) {
+  constructor(seed = 1, opts: { scrappers?: boolean; squire?: boolean; props?: boolean; map?: GameMap; foes?: Foe[]; furniture?: { kind: PropKind; x: number; y: number }[]; chests?: { x: number; y: number; chained?: boolean }[]; danger?: number; sleep?: boolean; level?: number } = {}) {
     this.sleepFar = !!opts.sleep;
+    this.level = opts.level ?? 1;
     this.chests = (opts.chests ?? []).map((c) => newChest(c.x, c.y, c.chained));
     this.danger = opts.danger ?? 0;
     this.rng = new Rng(seed);
@@ -216,6 +223,7 @@ export class ArenaRoom {
         if (f.hp) e.hp = e.maxHp = f.hp;
         packOnto(e, f);
         shapeFoe(e);
+        levelOn(e, this.level);
         Object.assign(e, { respawns: false, name: f.name, bow: f.bow, z: f.z ?? 0, alert: f.awake ?? false, feeding: f.feeding });
         if (f.noose) e.noose = true;
         if (f.zoned) e.zoned = true;
@@ -367,7 +375,7 @@ export class ArenaRoom {
       const inp = this.intents.get(h.id) ?? NO_INTENT, c = this.chests.find((x) => x.id === inp.open);
       if (inp.openSeq === h.seen.open) continue;
       h.seen.open = inp.openSeq;
-      if (c) startChest(c, h, this.heroes, this.enemies, this.lootRng, this.danger, this.events);
+      if (c) startChest(c, h, this.heroes, this.enemies, this.lootRng, this.danger, this.events, this.level);
     }
     stepChests(this.chests, this.heroes, this.drops, this.pickups, this.lootRng, this.events, TICK);
     for (const h of this.heroes) if (h.safeT) h.safeT = Math.max(0, h.safeT - TICK);
@@ -392,7 +400,12 @@ export class ArenaRoom {
     OWN_KIT.slicks = this.slicks;
     OWN_KIT.foes = this.enemies;
     OWN_KIT.nooses = this.nooses;
+    // Pacing (sim/pacing.ts, chase.ts): who flanks, who's asleep before they move; after, packs held back or let go.
+    OWN_KIT.pace = !!this.pace;
+    if (this.pace) flankers(this.enemies, this.heroes);
+    const dozing = this.pace ? asleep(this.enemies) : null;
     for (const e of this.enemies) stepEnemy(e, this.heroes, this.rng, this.time, TICK, this.events, this.enemies);
+    if (dozing) stepPacing(this.enemies, this.heroes, dozing, this.pace!.index, this.time);
     stepSleds(w);
     for (const h of this.heroes) stepHound(h, this.enemies, this.time, TICK, this.events);
     impacts(this.enemies, this.time, this.events);
@@ -444,7 +457,7 @@ export class ArenaRoom {
     stepWorldFire(w, this);
     // Out of bounds: the dread, and what comes for anyone who stays out (sim/dread.ts).
     stepDread(this.dread, this.map, this.heroes, this.enemies, TICK, this.events);
-    for (const e of this.enemies) if (alive.has(e.id) && isDead(e) && !e.escaped) dropFrom(e, this.heroes, this.drops, this.lootRng, this.events);
+    for (const e of this.enemies) if (alive.has(e.id) && isDead(e) && !e.escaped) dropFrom(e, this.heroes, this.drops, this.lootRng, this.events, this.level);
     for (const e of this.enemies) if (alive.has(e.id) && isDead(e) && !e.escaped) {
       dropCoal(e, this.coals);
       dropPickups(e, this.pickups, this.lootRng, this.exped ? EXPED_COINS : undefined);
@@ -466,6 +479,7 @@ export class ArenaRoom {
   private spawn(kind: 'scrapper' | 'spider' | 'butcher', x: number, y: number): Enemy {
     const e = newEnemy(Math.max(0, ...(this.whole ?? this.enemies).map((o) => o.id), ...this.enemies.map((o) => o.id)) + 1, kind, x, y);
     e.respawns = false;
+    levelOn(e, this.level);
     this.enemies.push(e);
     return e;
   }

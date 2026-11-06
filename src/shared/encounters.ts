@@ -42,31 +42,40 @@ export interface Template {
   more?: Role;
   /** A new sort bleeding in: staged, then rare, then common (shared/debut.ts). */
   debut?: Debut;
+  /** Which beats of a room it can be (shared/encounter.ts): a swarm to splat, a fight to think about, the closer. */
+  beats: Beat[];
+  /** Its centrepiece is a BIG ONE (shared/threat.ts BIG): laid only in the room a job keeps one for. */
+  big?: boolean;
 }
+
+/** A room's fights from the way in: `splat` a swarm, `tactic` fewer, meatier and readable, `closer` a heavy or a BIG ONE. */
+export type Beat = 'splat' | 'tactic' | 'closer';
 
 const OPEN: PlaceKind[] = ['field', 'farm', 'forest', 'river', 'marsh'];
 const ABOVE: PlaceKind[] = ['village', 'farm', 'field', 'forest', 'river', 'marsh', 'ruins'];
 
 export const TEMPLATES: Template[] = [
-  { id: 'swarm', said: 'a swarm of small ones', fodder: [4, 6], bunch: true, weight: 3, more: 'lunger' },
-  { id: 'brute', said: 'a brute and the little ones', centre: ['heavy'], fodder: [3, 4], weight: 3, more: 'lunger' },
-  { id: 'banner', said: 'a banner-bearer and its pack', centre: ['banner'], fodder: [3, 5], from: 1, weight: 2.5, more: 'lunger', places: ABOVE },
-  { id: 'butcher', said: 'a butcher at the fire', centre: ['butcher'], fodder: [2, 4], from: 1, ruin: 2, weight: 2 },
-  { id: 'wall', said: 'two shields and an archer', centre: ['shield', 'shield'], support: ['archer'], fodder: [1, 2], ruin: 1, weight: 2 },
-  { id: 'netter', said: 'a swarm of small ones and a netter', support: ['netter'], fodder: [4, 5], bunch: true, weight: 2.5 },
-  { id: 'logs', said: 'log-carriers through the hedge', centre: ['log'], fodder: [2, 3], from: 1, weight: 2, places: ['farm', 'field', 'village', 'river'] },
-  { id: 'drum', said: 'a brute with a drum behind it', centre: ['heavy'], support: ['drummer'], fodder: [3, 4], from: 1, weight: 1 },
-  { id: 'hexer', said: 'a hexer behind a shield', centre: ['shield'], support: ['hexer'], fodder: [2, 4], from: 1, weight: 1 },
-  { id: 'thief', said: 'a crowd, and a sneak-thief in it', support: ['thief'], fodder: [3, 5], bunch: true, weight: 1.5, places: ['village', 'farm', 'ruins', 'river', 'field'] },
-  { id: 'oil', said: 'an oil thrower and its torch', centre: ['oiler'], support: ['torch'], fodder: [2, 3], from: 1, ruin: 1, weight: 1.5, places: ['village', 'farm', 'mine', 'ruins', 'field'] },
-  { id: 'roof', said: 'archers on the roofs', centre: ['roofer'], support: ['roofer'], fodder: [2, 3], roofs: true, weight: 2.5 },
-  { id: 'wolves', said: 'a wolf-keeper and its wolves', centre: ['keeper'], fodder: [3, 4], fodderKind: 'wolf', weight: 2, places: OPEN },
-  { id: 'sapper', said: 'a brute in front and a sapper under', centre: ['heavy'], support: ['sapper'], fodder: [2, 3], from: 1, weight: 1.5, places: ['farm', 'field', 'forest', 'mine', 'marsh'] },
-  { id: 'iron', said: 'an ironhide and the little ones', centre: ['ironhide'], fodder: [3, 4], from: 1, weight: 1.5, more: 'lunger' },
-  { id: 'ironback', said: 'a brute with an ironhide at its side', centre: ['heavy'], support: ['ironhide'], fodder: [2, 3], from: 1, ruin: 1, weight: 1 },
-  { id: 'chalk', said: 'a chalker behind a crowd, chalking one of you', support: ['chalker'], fodder: [3, 5], from: 1, weight: 1.5, more: 'lunger', debut: CHALKER.debut },
-  { id: 'snare', said: 'a snarer behind a few small ones, snaring the ground in front of you', support: ['snarer'], fodder: [3, 4], from: 1, weight: 1.2, debut: SNARE_DEBUT },
-  { id: 'cave', said: 'blind hunters in the dark', fodder: [3, 4], fodderKind: 'blind', weight: 4, places: ['mine'] },
+  { id: 'swarm', said: 'a swarm of small ones', fodder: [4, 6], bunch: true, weight: 3, more: 'lunger', beats: ['splat'] },
+  { id: 'brute', said: 'a brute and the little ones', centre: ['heavy'], fodder: [3, 4], weight: 3, more: 'lunger', beats: ['tactic', 'closer'] },
+  { id: 'banner', said: 'a banner-bearer and its pack', centre: ['banner'], fodder: [3, 5], from: 1, weight: 2.5, more: 'lunger', places: ABOVE, beats: ['tactic'] },
+  { id: 'butcher', said: 'a butcher at the fire', centre: ['butcher'], fodder: [2, 4], from: 1, ruin: 2, weight: 2, beats: ['closer'] },
+  { id: 'wall', said: 'two shields and an archer', centre: ['shield', 'shield'], support: ['archer'], fodder: [1, 2], ruin: 1, weight: 2, beats: ['tactic'] },
+  { id: 'netter', said: 'a swarm of small ones and a netter', support: ['netter'], fodder: [4, 5], bunch: true, weight: 2.5, beats: ['splat', 'tactic'] },
+  { id: 'logs', said: 'log-carriers through the hedge', centre: ['log'], fodder: [2, 3], from: 1, weight: 2, places: ['farm', 'field', 'village', 'river'], beats: ['tactic', 'closer'] },
+  { id: 'drum', said: 'a brute with a drum behind it', centre: ['heavy'], support: ['drummer'], fodder: [3, 4], from: 1, weight: 1, beats: ['tactic', 'closer'] },
+  { id: 'hexer', said: 'a hexer behind a shield', centre: ['shield'], support: ['hexer'], fodder: [2, 4], from: 1, weight: 1, beats: ['tactic'] },
+  { id: 'thief', said: 'a crowd, and a sneak-thief in it', support: ['thief'], fodder: [3, 5], bunch: true, weight: 1.5, places: ['village', 'farm', 'ruins', 'river', 'field'], beats: ['splat'] },
+  { id: 'oil', said: 'an oil thrower and its torch', centre: ['oiler'], support: ['torch'], fodder: [2, 3], from: 1, ruin: 1, weight: 1.5, places: ['village', 'farm', 'mine', 'ruins', 'field'], beats: ['tactic'] },
+  { id: 'roof', said: 'archers on the roofs', centre: ['roofer'], support: ['roofer'], fodder: [2, 3], roofs: true, weight: 2.5, beats: ['tactic'] },
+  { id: 'wolves', said: 'a wolf-keeper and its wolves', centre: ['keeper'], fodder: [3, 4], fodderKind: 'wolf', weight: 2, places: OPEN, beats: ['tactic'] },
+  { id: 'sapper', said: 'a brute in front and a sapper under', centre: ['heavy'], support: ['sapper'], fodder: [2, 3], from: 1, weight: 1.5, places: ['farm', 'field', 'forest', 'mine', 'marsh'], beats: ['tactic', 'closer'] },
+  { id: 'iron', said: 'an ironhide and the little ones', centre: ['ironhide'], fodder: [3, 4], from: 1, weight: 1.5, more: 'lunger', beats: ['tactic', 'closer'] },
+  { id: 'ironback', said: 'a brute with an ironhide at its side', centre: ['heavy'], support: ['ironhide'], fodder: [2, 3], from: 1, ruin: 1, weight: 1, beats: ['closer'] },
+  { id: 'chalk', said: 'a chalker behind a crowd, chalking one of you', support: ['chalker'], fodder: [3, 5], from: 1, weight: 1.5, more: 'lunger', debut: CHALKER.debut, beats: ['splat', 'tactic'] },
+  { id: 'snare', said: 'a snarer behind a few small ones, snaring the ground in front of you', support: ['snarer'], fodder: [3, 4], from: 1, weight: 1.2, debut: SNARE_DEBUT, beats: ['tactic'] },
+  { id: 'bigbrute', said: 'a BIG ONE of a brute and a few small ones', centre: ['heavy'], fodder: [2, 3], weight: 0, beats: ['closer'], big: true },
+  { id: 'bigiron', said: 'a BIG ONE in iron and a few small ones', centre: ['ironhide'], fodder: [2, 3], ruin: 2, weight: 0, beats: ['closer'], big: true },
+  { id: 'cave', said: 'blind hunters in the dark', fodder: [3, 4], fodderKind: 'blind', weight: 4, places: ['mine'], beats: ['splat', 'tactic'] },
 ];
 
 /**
@@ -77,7 +86,7 @@ export const TEMPLATES: Template[] = [
  * - `bunchHp`: the small ones of a swarm. `band`: how near goblins stand to be one pack.
  * - `first`: the first room's first fight is one of these.
  * - `hearOther`: a fight in another pack is heard only this close (ALERT.hear in your own).
- * - Party: `fodder` more small ones a player past the first; the centrepiece `centre` tougher.
+ * - A party: shared/threat.ts PARTY_TOUGH (tougher, not many more).
  */
 export const ENCOUNTER = {
   fights: [2, 2, 3, 3],
@@ -89,7 +98,6 @@ export const ENCOUNTER = {
   band: 3.4,
   first: ['swarm', 'brute', 'netter', 'wolves', 'cave', 'thief'],
   hearOther: 2.2,
-  party: { fodder: 0.5, centre: 0.35 },
 };
 
 /** Roles that are a kind of small goblin (the rest are something else: a wolf, the log-carriers). */

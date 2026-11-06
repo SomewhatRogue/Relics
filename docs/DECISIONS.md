@@ -2,6 +2,106 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-05: pacing: a threat budget, beats, packs held back, toughness for a party, no easy kiting, BIG ONEs (Kyle; Claude Opus 5.5)
+
+Kyle: "sometimes you just get swarmed. Now it feels more like swarms over other things, so AoE abilities are
+over-necessary"; "Mini bosses also work. Things that require a few hits. Not necessarily more enemies if lots of
+players, but more health on enemies, and they hit harder etc. Sometimes mobs are still fun for splatting though";
+"it's a bit too easy to kite right now". Then: small fry cost half a point, and goblins (and loot) go by the
+party's average level too. The first pacing slice of `docs/plans/bosses.md` section 3. Every number is in
+`shared/threat.ts` (exported through tuning).
+
+- **Threat** (`THREAT`, `THREAT_TIER`): chaff (small goblins, wolves, blind hunters) **0.5**, specials 2 (banner 3),
+  meaty 4 (brute, ironhide, shield; logs 5), a butcher 8, a BIG ONE twice its sort.
+- **A room's budget** (`BUDGET`, rules `shared/roombudget.ts`): 8, 13, 17, 20 by room, times easy 0.8 (ruin 1),
+  normal 1, hard 1.2 (ruin 3), deep 1.35. Sized for chaff at half a point so a room has about the goblins it had
+  (9.0 alone before, 9.4 now), as fewer swarms and more fights. Anyone a scene already has at something, and the
+  ledge archers, come off it first. A party's budget is 1, 1.15, 1.3, 1.45 times it (the few more small ones).
+- **On screen** (`SCREEN`: awake within 10 tiles of a hero, not held): threat 10, 12, 14, 16 by party size; meaty
+  1, 2, 2, 3 (a lone hero 2 from the third room); one heavy. No pack alone is laid over a lone hero's screen.
+- **Beats** (`Template.beats`, `beatsFor`): the bands take beats in order from the way in. The first room: a swarm,
+  then a fight. Later rooms end on a **closer** (a butcher, a brute and ironhide, a drum, the logs, a sapper, an
+  ironhide, or a BIG ONE); a room of two opens on a swarm half the time, a room of three three times in five, so
+  the splatting stays but no longer fills every room. The templates are picked first (each by its beat and its
+  share), then the small ones are shared out by beat (a swarm gets twice its share, and may run one over its
+  template), trimmed if the room is over, never under one a pack. The swarm's own template is still the splat:
+  its small ones have 22 health.
+- **Held back** (`sim/pacing.ts`, `HOLD`): a pack that wakes while the screen would go over a cap holds at its spot
+  (`Enemy.held`, the room time, sent once each way), jeering: it faces the nearest hero and strikes nothing; drawn
+  hopping, its blade banging a spark on the beat (`client/pacedraw.ts`), and not counted in N CHASING. It comes when the screen drops under 60%
+  of the cap (the oldest first, one pack a tick), after 12 s, or at once if a hero comes within 3 tiles or hits
+  one of it. A pack is never held from an empty screen. On an expedition the hold-point waves wait until the
+  screen near you is under 40% of the cap (12 s at most), and after every third, 6 s of quiet.
+- **A party by toughness** (`PARTY_TOUGH`, `sim/packs.ts scalePacks`): by party size every goblin of a pack has
+  1, 1.35, 1.65, 1.95 times its health and hits 1, 1.15, 1.25, 1.35 times as hard (`Enemy.harm`, locked into the
+  blow in `begin`, so the telegraph and the hurt agree); 0.12 more small ones a pack a player past the first (was
+  0.5), and the pack's one `more` special from three players, all within the party's budget and the meaty cap.
+  The old flat +35% centrepiece is folded into the table. An expedition's packs the same (`EXPED_PACKS.party`
+  0.3 to 0.12), its waves tougher by the same table and half a goblin more a friend (was one). Goblins a room,
+  20 days of the board: alone 9.0 to 9.4; two 12.7 to 9.9; four 19.6 to 12.1.
+- **The party's level** (`LEVEL_SCALE`, `levelHp`, `levelHarm`): the host takes the heroes' average level when the
+  job starts (`Run.level`, `partyLevel`, kept for the whole job, sent with the run) and every goblin, butchers,
+  named ones and BIG ONEs too, the room's spawns and an expedition's waves, gets +6% health and +4% damage a
+  level past the first, on top of the party's size, capped at +45% and +30% (level 8 to 9): L3 1.12 / 1.08, L5
+  1.24 / 1.16, L7 1.36 / 1.24, L9 and up 1.45 / 1.30. Counts never change.
+- **Loot by level** (`shared/lootlevel.ts leanOdds`, through `rollTier(.., lv)`): a level past the first, plain
+  6% less likely, Forged and PRE-WAR 4% more, the rare three 3% more, Fine takes up the rest (to level 10). A
+  named butcher's: Fine 36 / 26 / 13%, Forged 50 / 58 / 68%, PRE-WAR 9 / 10.4 / 12.2%, the rare three 5 / 5.6 /
+  6.4% at levels 1, 5 and 10. A chest's plain 45 / 34 / 21%. A piece dropped, from a chest, a BIG ONE or the
+  treasure comes +1 from level 5 and +2 from level 9 (never a hungry piece). A level-1 party rolls exactly as before.
+- **Kiting** (`sim/chase.ts`, only in a job's or an expedition's rooms: `ArenaRoom.pace`):
+  - *The sprint* (`SPRINT`): chasing the same hero 3 s without getting into reach, a goblin leans for 0.4 s at
+    0.3 of its pace with dust kicked out at its feet (the tell, drawn unlit so it reads at night), then bursts at twice its pace for 1.3 s, from within
+    7 tiles; then it's winded 3 s more. Clocks are room times set when they change (`chaseAt`, `sprintAt`).
+  - *Gap-closers*: a lunger on a hero running from it (moving, facing away) leaps 4.6 tiles from past 2.6 (a red
+    lane, blockable, `LEAP`); wolves stop circling a hero who runs and run them down for the dart.
+  - *Flankers* (`FLANK`): in a pack chasing one hero with three or more, every second goblin by id goes wide, 1.1
+    radians round from the pack's line and 2.2 tiles ahead of a running hero, till it's within 2.2 of them.
+  - *Ranged pressure* (`RANGED`): archers, netters and oil throwers count a hero running in the open (nothing solid
+    within 1.6 tiles) 3 tiles nearer when they choose whom to aim at. Nothing new reaches past what it did.
+- **BIG ONEs** (`BIG`, `sim/bigone.ts`): one a job of three rooms or fewer, two in a longer one (`bigRooms`, never
+  the first room, nor a last room with a named butcher), the closer of its room when the budget affords it: a
+  brute (or from ruin 2 an ironhide) with 2.5 times the health, 1.3 times the size, 1.2 times the blow, its own
+  moves and the stomp (a striped ring 1.8 round itself, 1.25 s, every 7 s with a hero within 2.2). Drawn bigger,
+  a goblin skull on a stake over its shoulder, BIG ONE over its head. It always drops a piece (rolled as a
+  butcher's, at the party's level) and 15 to 25 gold.
+- **Online**: nothing new a tick. New goblin fields go out once or when they change (`harm`, `big`, `held`,
+  `chaseOn`, `chaseAt`, `sprintAt`, `stompAt`); the flankers are worked out each tick from what's sent.
+
+**Measured.** `npx tsx scripts/encounters/clear.ts 6` (48 rooms of the board's ordinary jobs, one hero who can't be
+hurt but whose every lost point is counted, walking at the nearest awake goblin and fighting by Intent: twin
+daggers tapping; a focus staff slashing, and holding for its spell with three or more about):
+
+| 48 rooms | daggers: s a room (worst) | staff: s a room (worst) | daggers / staff time | health lost a room, daggers / staff | ratio |
+|---|---|---|---|---|---|
+| before | 38.6 (97.5) | 39.1 (89.6) | 0.99 | 274 / 216 | 1.27 |
+| after | 43.4 (132.6) | 46.4 (180, one room not cleared) | 0.94 | 304 / 275 | 1.11 |
+
+On the ten rooms the test runs (`tests/threat.test.ts`): before, the daggers lost 2.13 times what the staff did
+(370 / 174) and took 1.08 times as long; after, 0.92 (421 / 456) and 0.89. So the gap between a single-target kit
+and an area kit, which was in how much the swarms hurt the one that can't sweep, has mostly closed; rooms take a few
+seconds longer for both (the BIG ONEs, the tougher closers), and both lose a bit more health (harder blows, sprints).
+The staff's uncleared room (d6-2, room 0, a swarm and a brute) is the bot standing in a crowd it never blinks out
+of (it doesn't dodge); the daggers clear it.
+
+`npx tsx scripts/encounters/measure.ts 20`: goblins a room above; the biggest group to wake at once alone 3.9 to
+4.1, at four 9.5 to 5.6; wake groups with three or more specials 5% to 2%.
+
+**Pins**: the layout-3 pin re-pinned to 1139809545 after checking: the same 388 rooms hashed with their goblins taken
+out are 713718104 before and after, so only goblins (counts, roles, health, placements, beats) moved. The layout-4
+pin (`tests/variety.test.ts`) to 3805258017: in 268 of its 280 rooms only goblins moved; in 12 the chest did too,
+because the composer's goblins fall back on the room's own spot finder (which shares its stream with the chests)
+a different number of times: placed elsewhere in 10, and in 2 a room's one chest is there or isn't (one each way).
+
+Tests: `tests/threat.test.ts` (chaff at half a point; budgets and caps for one to four; swarms still worth
+splatting; beats in order; held, freed by a step near, a hit, the wait, never from an empty screen; toughness
+and the set count; harder blows in the room; the level curve, its cap, the loot leaning up; the sprint's time and
+tell; flankers spread; BIG ONEs placed, sized and dropping; the same fight twice; daggers against the staff).
+Shots: `node scripts/pacing-look.cjs` (phone: a swarm with one leaning into a sprint, a brute and a BIG ONE
+winding up its stomp, a held pack jeering at the top of the screen). New words for the lore keeper: **BIG ONE**.
+Open: Kyle's play on all the numbers; a sound for the jeer, the lean and the stomp; elites and the six new meaty
+sorts (the plan's next steps).
+
 ## 2026-11-05: your hound: a real dog drawn, four breeds to choose with Maeve, and its name (Kyle; Claude Opus 5.5)
 
 Kyle: "The hound of Ranger could use work, and maybe let people choose which dog is theirs." "Doesn't affect
