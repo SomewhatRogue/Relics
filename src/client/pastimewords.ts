@@ -7,7 +7,7 @@ import { weighs } from '../shared/fishtune';
 export const FISHW = {
   who: 'OLD PENNOCK',
   /** At the millpond, offering a rod. */
-  greet: "There's a spare rod leaning on the wall there, if you want a go. I don't charge for the loan and the fish don't pay either, so nobody's out of pocket. Roach and perch stay in close by the reeds. Cast further out and you'll get bream and tench, and there's a pike in the deep end I've been after since before the siege.",
+  greet: "There's a spare rod leaning on the wall there, if you want a go, and I don't charge for the loan. The fish don't pay either, so nobody's out of pocket. Roach and perch keep in close by the reeds, and if you cast further out it's bream and tench, mostly, and there's a *pike* in the deep end I've been after since before the siege.",
   /** What you've had out of it so far. */
   best: (name: string, oz: number) => `The biggest you've had out of here is a ${name.toLowerCase()} of ${weighs(oz)}.`,
   none: "You haven't had anything out of here yet.",
@@ -45,7 +45,7 @@ export const FISHW = {
 export const RANGEW = {
   who: 'ABEL',
   /** At the butts. */
-  greet: "Maeve has me mind the butts. Anyone can have a go, you don't have to be one of hers. A round's a minute. The targets come up near, in the middle and far back, and the far ones count three times over. Some slide and some swing, so aim for where they'll be when the arrow gets there.",
+  greet: "Maeve has me mind the butts, and anyone can have a go, you needn't be one of hers. You get a minute a round. They come up near, in the middle and far back, and the far ones count three times over, so everybody aims at those and misses. As for the ones that slide and swing, you shoot where they'll be when the arrow gets there, not where they are. I watched a lad spend a whole round on where they'd been, very steady about it, and he hit the wall every time.",
   /** Said to a Ranger as well. */
   ranger: "You'll shoot straighter than most who come up here, being what you are. Maeve will still find something wrong with it, mind, so I wouldn't go telling her your score.",
   yourBest: (n: number) => `Your best round: ${n}.`,
