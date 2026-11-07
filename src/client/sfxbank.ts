@@ -21,7 +21,7 @@ export const SFX_BANK = {
   // Cleric and Rogue
   smite: { takes: 2 }, heal: { takes: 2, gain: 0.8 }, ward_ring: { takes: 2 }, ward_break: { takes: 1 }, smoke_puff: { takes: 2 },
   // Goblins
-  gob_jabber: { takes: 4, gain: 0.6 }, gob_cackle: { takes: 3, gain: 0.8 }, gob_snarl: { takes: 3, gain: 0.8 }, gob_grunt: { takes: 3, gain: 0.7 },
+  gob_jabber: { takes: 4, gain: 0.4 }, gob_cackle: { takes: 3, gain: 0.55 }, gob_snarl: { takes: 3, gain: 0.8 }, gob_grunt: { takes: 3, gain: 0.7 },
   gob_hurt: { takes: 3, gain: 0.8 }, gob_death: { takes: 3, gain: 0.8 }, gob_screech: { takes: 2, gain: 0.8 }, gob_chant: { takes: 2, gain: 0.8 },
   gob_hex_burst: { takes: 1 }, gob_retch: { takes: 2 }, gob_gnaw: { takes: 3 }, gob_drum: { takes: 2, gain: 0.9 }, gob_whistle: { takes: 2, gain: 0.6 },
   gob_blowpipe: { takes: 1 }, gob_net: { takes: 1 },

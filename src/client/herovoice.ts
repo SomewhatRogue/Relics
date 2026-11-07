@@ -35,7 +35,8 @@ export function createHeroVoice(say: HeroSay) {
     setMe: (id: string) => void (me = id),
     /** A fight event: the hero it belongs to says their piece, if it's their turn. */
     event(ev: FightEvent, heroes: readonly Hero[], now: number): number {
-      if (ev.k === 'swing' && ev.heavy) return speak(near(heroes, ev.x, ev.y, 1.5), 'grunt', now);
+      // No grunt on a swing or a shot (Kyle, 2026-11-06: "let's limit human sounds outside talking or grunts of pain, for all
+      // weapons"): a weapon is heard by its own sound (weaponsfx.ts). Hurt, down, up and the laugh stay.
       if (ev.k === 'hit' && ev.on === 'hero' && !ev.tick && ev.n > 0) return speak(near(heroes, ev.x, ev.y, 1.5), 'hurt', now);
       if (ev.k === 'down') return speak(heroes.find((h) => h.id === ev.id) ?? near(heroes, ev.x, ev.y, 1.5), 'down', now);
       if (ev.k === 'gotup') return speak(heroes.find((h) => h.id === ev.id) ?? near(heroes, ev.x, ev.y, 1.5), 'up', now);

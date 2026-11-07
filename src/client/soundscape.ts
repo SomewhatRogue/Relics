@@ -248,7 +248,8 @@ export class Soundscape {
     if (coming.length && now > this.chatterAt) {
       const e = coming[Math.floor(Math.random() * coming.length)];
       Math.random() < 0.25 ? goblin.cackle(e.id) : goblin.chatter(e.id);
-      this.chatterAt = now + 2 + Math.random() * 4 / Math.min(3, coming.length);
+      // Toned down (Kyle, 2026-11-06): a line every 4 to 9 s, not every 2 to 6.
+      this.chatterAt = now + 4 + Math.random() * 5 / Math.min(3, coming.length);
     }
     // A building on fire crackles, louder the closer you are.
     let near = 0;

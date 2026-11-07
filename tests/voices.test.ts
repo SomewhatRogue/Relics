@@ -87,7 +87,7 @@ describe('townsfolk greetings', () => {
 describe('heroes in a fight', () => {
   const swing = (x: number): FightEvent => ({ k: 'swing', x, y: 0, src: 'sword', heavy: true });
 
-  it('grunts on a heavy swing at most every 1.2 s per hero', () => {
+  it('says nothing on a swing, heavy or light: weapons are heard by their own sounds (Kyle, 2026-11-06)', () => {
     const said: string[] = [];
     const v = createHeroVoice((n) => (said.push(n), 0.7));
     const a = hero('a', kit('WARRIOR'), 0, 0), b = hero('b', kit('WARRIOR'), 1, 5);
@@ -95,7 +95,7 @@ describe('heroes in a fight', () => {
     v.event(swing(5), [a, b], 0.5);
     v.event(swing(0), [a, b], GAPS.grunt + 0.01);
     v.event({ k: 'swing', x: 0, y: 0, src: 'sword', heavy: false }, [a, b], 9);
-    expect(said).toEqual(['hero_a_grunt', 'hero_b_grunt', 'hero_a_grunt']);
+    expect(said).toEqual([]);
   });
 
   it('gasps, cries and breathes by the hero the event belongs to; a Cleric no longer prays on a heal or a smite', () => {

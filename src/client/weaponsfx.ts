@@ -68,7 +68,7 @@ export function hitSound(src: string | undefined, heavy: boolean, big: boolean):
 /** A ranged kit or spell looses. */
 export function shotSound(kind: string, src?: string): void {
   if (!ready()) return;
-  const rec: SfxName | null = kind === 'arrow' ? (src === 'longbow' ? 'bow_loose_long' : 'bow_loose_short') : kind === 'bolt' ? 'crossbow_shot' : kind === 'spark' ? 'fire_cast' : kind === 'orb' || kind === 'lance' ? 'spell_hum' : null;
+  const rec: SfxName | null = kind === 'arrow' ? (src === 'longbow' ? 'bow_loose_long' : 'bow_loose_short') : kind === 'bolt' ? 'crossbow_shot' : kind === 'spark' ? 'fire_cast' : kind === 'orb' || kind === 'lance' ? 'spell_hum' : kind === 'knife' ? 'throw_whoosh' : null;
   if (rec && playSfx(rec)) return;
   if (kind === 'arrow') {
     // The string: deep on the longbow, high and quick on the shortbow; then the arrow's hiss.
@@ -82,6 +82,10 @@ export function shotSound(kind: string, src?: string): void {
   if (kind === 'spark') return burst('bandpass', 5200, 1300, 1.1, 0.42, 0.17), burst('lowpass', 1100, 260, 0.7, 0.32, 0.1), burst('highpass', 7000, 4200, 0.8, 0.16, 0.08);
   if (kind === 'orb') return tone('sine', 180, 520, 0.3, 0.4), tone('triangle', 270, 780, 0.12, 0.4), burst('lowpass', 600, 2000, 0.7, 0.2, 0.4);
   if (kind === 'lance') return tone('sawtooth', 300, 1800, 0.18, 0.22), burst('highpass', 2000, 5000, 1, 0.3, 0.18);
+  // The blow dart: a short puff of breath through the pipe, then the dart's thin whistle away (no voice).
+  if (kind === 'dart') return burst('bandpass', 900, 1400, 1.4, 0.32, 0.05), tone('sine', 2600, 1900, 0.06, 0.16, 0.03), burst('highpass', 4200, 6500, 1.2, 0.12, 0.14, 0.03);
+  // A thrown knife: a quick whirring hiss through the air.
+  if (kind === 'knife') return burst('bandpass', 3200, 1800, 2.5, 0.3, 0.16), burst('bandpass', 3400, 2000, 2.5, 0.22, 0.12, 0.05);
 }
 
 /** A bow drawn to full, a spell gathered: a creak or a rising hum. */

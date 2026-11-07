@@ -60,7 +60,7 @@ export const goblin = {
     let at = t;
     for (let i = 0; i < n; i++) {
       const [v1, v2] = VOWELS[Math.floor(Math.random() * VOWELS.length)], d = 0.05 + Math.random() * 0.07, f = (260 + Math.random() * 140) * p;
-      syllable(at, d, f, f * (0.8 + Math.random() * 0.5), v1 * 1.3, v2 * 1.3, 0.22, 0.4);
+      syllable(at, d, f, f * (0.8 + Math.random() * 0.5), v1 * 1.3, v2 * 1.3, 0.15, 0.4);
       at += d + Math.random() * 0.04;
     }
   },
