@@ -83,6 +83,7 @@ import { drawPuddles } from './spiders';
 import { drawSkills, skillLights } from './skillsdraw';
 import { drawSpellGround, drawSpellSky, spellLightsFlat } from './spellground';
 import { drawHuntMarks } from './signdraw';
+import { drawMendMark } from './mendmark';
 import { skyFlash } from './skystrikedraw';
 import { drawFound } from './foundsdraw';
 import { witchColour } from './hallsdraw';
@@ -514,6 +515,8 @@ export class Scene {
     drawSpellSky(c.glow, room, cx, cy);
     // A Ranger's MARK over its goblin (signdraw.ts).
     drawHuntMarks(c.glow, room, (x, y, z) => [OX + x * PX - cx, OY + z * PX - cy - y * PX], (k, x, y) => { const [px, py] = lerp(k, x, y); return [(px - OX) / PX, (py - OY) / PX]; }, PX);
+    // Who a Cleric's MEND would reach (mendmark.ts).
+    drawMendMark(c.glow, room, meId, (x, y, z) => [OX + x * PX - cx, OY + z * PX - cy - y * PX], (k, x, y) => { const [px, py] = lerp(k, x, y); return [(px - OX) / PX, (py - OY) / PX]; }, PX);
     // A chalker's strokes over the hero it's chalking (chalkdraw.ts).
     drawChalkMarks(c.glow, room, (x, y, z) => [OX + x * PX - cx, OY + z * PX - cy - y * PX], (k, x, y) => { const [px, py] = lerp(k, x, y); return [(px - OX) / PX, (py - OY) / PX]; }, PX);
 

@@ -107,6 +107,7 @@ import './style.css';
 import './ui.css';
 import './hud.css';
 import './cluster.css';
+import './keybar.css';
 import './skins.css';
 import './exped.css';
 import { paintFrames } from './frames';
@@ -117,6 +118,9 @@ import { UnitFrame } from './unitframe';
 import { expedRows, roomsHtml, smallLine, titleCase, TRACKW } from './tracker';
 import { BannerFold, calm } from './bannerfold';
 import { ObjFlash } from './objflash';
+import { GoalPulse, goalHtml } from './goalpulse';
+import { GearHint } from './gearhint';
+import './goal.css';
 import { UnlockFlash } from './unlockflash';
 import { kitLine } from './kitlines';
 import { ownCue } from './owncues';
@@ -184,8 +188,10 @@ const recovery = new Recovery(() => game.save);
 const unit = new UnitFrame();
 const fold = new BannerFold($('#banner'));
 const relicPop = new RelicPop();
-const objFlash = new ObjFlash(), unlocks = new UnlockFlash(), purse = new Purse();
-const cluster = input.touch ? new Cluster() : null;
+const objFlash = new ObjFlash(), unlocks = new UnlockFlash(), purse = new Purse(), goalPulse = new GoalPulse(), gearHint = new GearHint();
+// (A laptop has the same buttons, in a row at the bottom with their keys: they don't take clicks. keybar.css.)
+if (!input.touch) document.getElementById('touch')!.hidden = false;
+const cluster = new Cluster();
 /** A phone's buttons go faint over the hero or a telegraph (underbtn.ts). */
 const under = input.touch ? new UnderButtons() : null;
 const title = new Title(game, () => undefined, recovery);
@@ -383,9 +389,12 @@ function hud(now: number): void {
     // (A lesson's count done flashes too, before its goblins are down: sim/woodsteps.ts.)
     objFlash.watchWood(wood.stage + (wood.passed ?? 0), now);
     // (The wood's lessons never fold: the control to learn is on it.)
-    fold.render(objFlash.show(`<b>${g.title}</b> <div class="obj">${g.text}</div><span>GREYHOLLOW, THE DAY AFTER</span>`, now), null, g.title + g.text, now);
+    fold.render(objFlash.show(`<b>${g.title}</b> <div class="obj">${goalHtml(g.text)}</div><span>GREYHOLLOW, THE DAY AFTER</span>`, now), null, g.title + g.text, now);
+    // Big, with its count as pips, and called out when it changes (goalpulse.ts, goal.css).
+    goalPulse.frame($('#banner'), g.title + '|' + g.text, now, objFlash.holding(now));
     showPlate($('#boss'), wood.cut >= 0 ? null : plateOf(room.enemies, room.time));
   } else if (game.mode === 'run' && run) {
+    goalPulse.clear($('#banner'));
     const g = { text: me.out ? outText(me, room.heroes) : game.goalText() };
     // (The hearts, the get-ups left, are under the health bar: unitframe.ts.)
     // Folded: the objective and the room diamonds; an expedition's, how many jobs are left. Open: the lot,
@@ -399,6 +408,7 @@ function hud(now: number): void {
     showPlate($('#boss'), plateOf(room.enemies, room.time, (e) => !room.exped || Math.hypot(e.x - me.x, e.y - me.y) < 14));
   } else {
     $('#boss').hidden = true;
+    goalPulse.clear($('#banner'));
     objFlash.watchWood(-1, now);
     const full = game.outside
       ? `<b>${titleCase(room.map.name)}</b> Walk out at the bottom<span><i class="coin"></i>${pr.gold}</span>`
@@ -430,11 +440,13 @@ function hud(now: number): void {
   }
   else if (!spot && !busy && !input.touch && game.mode === 'run' && (torchable(game.hero, game.room.enemies) || kindleable(game.hero, game.room.map))) ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  BURN');
   // The touch buttons round ATTACK, and the unit frame (cluster.ts, unitframe.ts).
-  cluster?.update(game, spot, busy, now, game.mode === 'run' && card.near >= 0 ? (card.current >= 0 ? 'open' : 'shut') : '');
+  cluster.update(game, spot, busy, now, game.mode === 'run' && card.near >= 0 ? (card.current >= 0 ? 'open' : 'shut') : '');
   unit.update(game, now);
   // The wood's buttons, flashed gold as each is given (unlockflash.ts); coins and the anvil in town (purse.ts).
   const moving = game.mode === 'wood' && (game.wood?.hold?.move === 'move' || game.wood?.hold?.move === 'step');
-  unlocks.update(game.mode === 'wood' ? game.taught() : null, me, input.touch, now, (s) => fx.say(toPx(me.x, me.y)[0], toPx(me.x, me.y)[1] - 40, s, '#ffd27a', 2.6), moving);
+  unlocks.update(game.mode === 'wood' ? game.taught() : null, me, input.touch, input.intent, game.mode, (s) => fx.say(toPx(me.x, me.y)[0], toPx(me.x, me.y)[1] - 40, s, '#ffd27a', 2.6), moving);
+  // Once, in the wood, with a second button given: where BUTTONS is (gearhint.ts).
+  gearHint.update(game.mode === 'wood' && !!game.wood && !game.wood.hold && game.wood.cut < 0 && game.taught().length >= 2, now);
   purse.update(game);
   // A laptop's empty crossbow: the key to wind it, on the prompt line.
   if (!input.touch && $('#prompt').hidden && !busy && game.mode !== 'town' && WEAPONS[me.weapon].reloads && me.xbowEmpty) ($('#prompt').hidden = false), ($('#prompt').textContent = 'RELOAD: C');

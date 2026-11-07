@@ -8018,3 +8018,66 @@ its own parry removal in parallel, saw the other land on main, and dropped it fo
   drain in the room; HEALING BLOCK at 15; TAUNT GUARD's pull, ring and linger; the dodge press does nothing; IRON
   STANCE's flat cost, throw and untouchable moment; STAND FAST); `scripts/ladder-look.cjs` holds BLOCK for the
   ring.
+
+## 2026-11-06: the wood's goal and your buttons, hard to miss; MEND reaches your friends (Kyle; Claude Opus 5.5)
+
+Kyle, playing: "Urgent: in the tutorial the 'mission' isn't obvious when you're going through, especially on
+desktop, it's too small. Ditto what your other buttons and abilities are." And: "Cleric could heal friends
+only self with V."
+
+**What was wrong with MEND** (`sim/healtap.ts`). Nothing online: the leader's room picks the target for a guest's
+press and a leader's alike, and both the press and the heal travel fine (tests below, and `scripts/mend-online.cjs`
+with a guest Cleric and a leading one). The rule itself was the trouble. It went to you whenever you were hurt and
+every hurt friend in reach was even slightly better off than you (you 60%, a friend 70%: you), and in a fight the
+Cleric standing in the press is nearly always the most hurt by a little; and it reached only 4 tiles, so a friend
+fighting a few steps off didn't count at all. So in play it looked as if it only ever healed yourself.
+- **The rule now** (`shared/signs.ts` HEAL_SIGN): the worst-hurt friend within **6** tiles (was 4; of two within
+  2% of each other, the nearer). It goes to you only when nobody near is hurt or you're worse off than them by more
+  than **25%** of your health (`selfFirst`). A friend wearing the Cleaver (nobody else can heal them) is passed
+  over, so a press isn't spent for nothing. The yard's squire only when nobody else is hurt. Hew in the wood is a
+  friend as before. (Worst-hurt, not nearest: Kyle's call if he'd rather nearest; the mark below shows either.)
+- **Who it will heal** (`client/mendmark.ts`): while your MEND is ready and you have the breath, a small gold
+  cross bobs over the friend it would reach, with a dotted gold ring at their feet, on your screen only, flat and
+  2.5D. It asks the room's own `healTarget`, so the mark is who the press heals. No mark: it would mend you, or
+  nobody near is hurt.
+
+**The wood's goal** (`client/goalpulse.ts`, `client/goal.css`; the tracker in the wood, `main.ts`). It was the
+tracker's normal size: 21px blackletter over a 12px line at the top centre, small on a laptop and smaller still
+on a big screen.
+- In the wood the control to learn ("BLOCK: HOLD RIGHT CLICK") is in gilt and the goal ("BLOCKS 2 / 4") in bone
+  under it, both in the body font at 24px on a laptop, 36px on a big screen (1600 by 900 and up), 16px on a
+  phone; the count also shows as a row of gold pips, one lit for each done. Hew's cards, his freeze-frame calls
+  and his words in passing go half as big again on a big screen.
+- A new goal is called out: the frame goes gilt and the box flashes gold a few times as it comes up, the words
+  flashing white; each one counted gives it a short kick. (The objective-done flash, `objflash.ts`, is as it
+  was, and the new goal's flash waits for it.) A phone drops the place name in the wood so Hew's words stay clear
+  under it; the tips stay off in the wood.
+- A small bug on the way: a stage stepped past with an empty goal (the moment you get up) could hold an empty
+  "done" box on the tracker for its 1.8 s (`objflash.ts` now holds only a goal with words in it).
+
+**Your buttons** (Kyle: "Ditto what your other buttons and abilities are").
+- **A laptop shows its buttons** (`client/keybar.css`, `client/keycaps.ts`): the phone's cluster, drawn by the same
+  code at the same size (cooldowns, the relic's charges, the flask as the health orb, MEND's wait), in one row at
+  the bottom centre,
+  each with its key on its corner in a small iron keycap (CLICK, R-CLICK, SPACE, E, R, V, X, G, Q). It takes no
+  clicks; mouse and keys play as before. In the wood it grows a button at a time as Hew gives them, as a phone's
+  does. A laptop's prompt and a boss's plate moved up over it; USE stays off it (the prompt line says F).
+- **A button just given is ringed till you've used it once** (`client/unlockflash.ts`, `client/firstuse.ts`): the
+  gold square and its name over it, and on a laptop its key ("BLOCK: R-CLICK", "MEND: V"; the keycap steps aside
+  for it, and the move and its key in full are still said over your hero as before). It was 4 seconds, and a
+  laptop had no button to ring. The wood's lesson card still points at its button as before
+  (now on a laptop too). Out of the wood, a button that turns up for the first time (a relic picked up, a skill
+  learned) is ringed the same way, unless it's been pressed before on this device (kept in the browser; the
+  buttons on screen when you load in never ring).
+- **Where BUTTONS is, said once** (`client/gearhint.ts`): in the wood, the first time Hew has given you a second
+  button and his card is shut, the gear in the corner is ringed in gold for 9 s with a word under it, and BUTTONS
+  inside its box too. Once a device.
+- New words, for the lore keeper and the line editor: the gear's word "WHAT EVERY BUTTON DOES: BUTTONS, IN HERE"
+  (`client/hintwords.ts`); MEND's BUTTONS line (`shared/signs.ts` SIGN_WORDS.heal), its wood card line
+  (`shared/woodsigns.ts` SIGN_LINES.how.heal) and its class card line (`shared/classes.ts`); the ring labels are
+  the game's own button names and keys.
+- Tests: `tests/signature.test.ts` (MEND: the worst-hurt friend; a friend over yourself when you're a little worse
+  off, yourself when much worse; 6 tiles reached, not 6.5; the nearer of two alike; a real friend before the
+  squire; the Cleaver passed over; a guest Cleric mends the leader and the leader a guest, on the leader's room);
+  `tests/firstuse.test.ts` (a ring clears on the first press and only that one; a skill told from a relic; a press
+  before the gift doesn't count; the laptop keys are input.ts's). Online: `scripts/mend-online.cjs`.
