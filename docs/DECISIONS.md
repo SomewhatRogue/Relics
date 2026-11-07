@@ -2,6 +2,64 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-06: the Doorkeepers harder and livelier, and the boss plate at the top (Kyle; Claude Opus 5.5)
+
+Kyle, after fighting them: "too easy. They don't chase a ton and attack too slow. Need a faster attack along with
+big ones", "shields in front didn't do a ton", "when one's dead it should enrage the other", and of the plate,
+"they should be up top". Every number in `shared/bosstune.ts` DOORKEEPERS.
+
+- **Chase**: pace 2.4 to 3.1 (mover), 1.5 to 2.0 (wall); turn 2.6 to 4.6 (mover), 1.4 to 2.0 (wall: the slowest
+  kit, greatsword at 3.43 tiles a second, still out-turns it at its 1.5 stand-off, so flanking it stays the answer).
+- **The Door Jab** (new, red): 0.6 s floor after the 0.2 s pose, 8 damage, range 2.2, 50 degrees, recover 0.35.
+  The rotations are now about half jabs (phase 1: jab, sweep, jab, charge, jab, jab, sweep, jab, charge). The wall
+  jabs at whoever stands in its face too (2.2 s apart at most). A blocked jab doesn't rebound the boss and a
+  slipped one fills no POISE: the big blows pay, the jab just keeps you busy. In a party of two, only a big blow
+  sets off the wall's split swing.
+- **Shorter gaps**: 0.2 s between blows (was the butcher's 0.5; `keeperPause`, set in `enemies.ts` as an attack
+  ends); Locked Doors every 7 s at most (was 9); both stand open 1.0 s after a lock (was 1.5).
+- **The door from the front**: the cone was already 70 degrees either side (cosine 0.34, the Planker's), so why it
+  "didn't do a ton" was uptime: the mover's door was aside for every blow's whole active and recover, and the mover
+  was nearly always in one. Now it stays shut through a jab and is aside only `aside` seconds after a big blow lands
+  (sweep 0.7 of its 1.0 recover, charge 0.8, lock 1.0, spin its whole 2.0 dizzy). Measured in the bot's fights the
+  pair's door is shut about 77% of the time. The answers stand: flank, bursts, storm, straps for DOOR DOWN, the
+  POISE stagger, a charge stuck in a stack, and the big blows' recovery.
+- **ENRAGED** (phase 2, one dead): pace and turn 1.25 times, wind-ups and the gap 0.8 times, never under the floors
+  (red 0.9, striped 1.1 and walked out of from the middle in 60% at the slowest kit's pace, so the spin's floor is
+  1.32; the jab's own 0.55), damage 1.25 times. Its rotation is jab, spin, jab, sweep, spin, jab, charge, jab, spin
+  (three spins in five big blows, was two in five). The tell: its eyes burn red over its own and red heat rises
+  off it (`client/doordraw.ts`), and it growls into each big blow (a new `growl` event: a red puff, a low snarl).
+- **The plate** (`#boss`): at the top on every screen. A laptop's in the top band, centred between the unit frame
+  and the corner (it was at the bottom over the key bar; `keybar.css` no longer moves it); a phone's just under the
+  top row (76 px), where the tracker was. While it's up, `--boss-push` (its height and 10 px) steps the tracker, the
+  tip and the phone's party card down under it, the tracker stays folded to its line unless tapped
+  (`BannerFold.render` `tucked`), and both cameras look that much higher and let the room's top come down past the
+  room's edge (`phoneband.ts topPush`: `scene.ts`, `three/camera3d.ts`), so the plate never covers the back of the
+  barn where the pair stand. Checked for the pair and Hempen, font C, flat and 2.5D, at 390x844, 1280x800 and
+  1920x1080 (`node scripts/plate-look.cjs [url] [outdir] [flat|3d]`): no overlap with the unit frame, the corner or
+  the tracker.
+
+**Measured** (`tests/bossbot.ts`, mean of days 3 to 8, solo; before, then after):
+
+| Kit | seconds | health lost | staggers |
+|---|---|---|---|
+| twin daggers | 68.5 to 70.5 | 10 to 9 | 2.5 to 2.3 |
+| focus staff | 68.7 to 119.1 | 204 to 462 | 1.0 to 0.7 |
+| sword | 51.0 to 78.5 | 42 to 181 | 4.7 to 4.5 |
+
+Two (sword, daggers) 25.9 to 37.8 s, 92 to 220 health; three 31.7 to 33.2 s, 290 to 239. Every kit wins every
+day. The daggers bot barely moves: it dodges every blow at the last frame and lives at backs, which the bot's
+perfect timing makes free; a player won't be that clean. The staff bot stands in to slash with spells it can't
+always afford to dodge with, so it takes the most; a Mage keeping range does far better.
+
+Files: `shared/bosstune.ts`, `sim/bosskit.ts` (`enraged`, `doorWindup`, the jab, ENRAGED in `bossBegin`, `jabAt`),
+`sim/doorkeepers.ts`, `sim/doorwall.ts`, `sim/poise.ts`, `sim/enemies.ts` (1 line), `sim/types.ts` (1), client
+`bossplate.ts`, `hud.css`, `keybar.css` (1), `bannerfold.ts`, `main.ts`, `phoneband.ts`, `scene.ts`,
+`three/camera3d.ts`, `three/view3d.ts`, `doordraw.ts`, `fxboss.ts`, `voices.ts`. Tests: `tests/doorrage.test.ts`
+(the jab landed, blocked and dodged; the door from the front and through a jab; ENRAGED's numbers and floors; the
+plate's CSS), `tests/doorkeepers.test.ts` (the jab in the floors check; the split test holds the wall's jab). No new
+player-facing words. Open: Kyle's play on the numbers; the 2.5D tracker now sits over the chest at the back of
+the barn on a laptop while the plate's up.
+
 ## 2026-11-06: 2.5D effects that were blocks or missing: smoke and steam, oil and fire on water, poison, snares, kegs, round telegraphs' signs (Kyle; Claude Opus 5.5)
 
 Kyle: "Rogue smoke and some other things like fire on water make weird floating blocks on 2.5D, maybe

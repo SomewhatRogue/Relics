@@ -182,8 +182,9 @@ describe('the pair together', () => {
     wake(b);
     place(b.hasp, 7.6, 4.6, 0, 1);
     place(b.latch, 4.4, 4.6, 0, 1);
-    // Far enough apart not to lock, and the mover's next is a sweep.
+    // Far enough apart not to lock, the wall's own jab held off, and the mover's next is a sweep.
     b.room.bosses!.lockCool = 1e9;
+    b.room.bosses!.jabAt = 1e9;
     b.hasp.cooldown = b.latch.cooldown = 0;
     const rot = b.hasp.boss!, list = rotation(1, 2, b.room.bosses!.swaps[0]);
     rot.rot = list.indexOf('sweep');
@@ -222,9 +223,11 @@ describe('one clock a hero', () => {
 describe('fair on a phone', () => {
   const slowest = Math.min(...Object.values(WEAPONS).map((w) => HERO.speed * (w.speed ?? 1)));
   it('every blow telegraphed: red at least 0.9 s, striped at least 1.1 s, a hero at the middle walks out in 60%', () => {
-    for (const m of ['sweep', 'charge', 'lock', 'spin'] as DoorMove[]) {
+    for (const m of ['jab', 'sweep', 'charge', 'lock', 'spin'] as DoorMove[]) {
       const s = DOORKEEPERS[m];
-      if (!s.unblockable) expect(s.windup).toBeGreaterThanOrEqual(0.9);
+      // (The Door Jab: its own floor, 0.55 s, light and red: tests/doorrage.test.ts.)
+      if (m === 'jab') expect(s.windup).toBeGreaterThanOrEqual(0.55);
+      else if (!s.unblockable) expect(s.windup).toBeGreaterThanOrEqual(0.9);
       else {
         expect(s.windup).toBeGreaterThanOrEqual(1.1);
         const out = (m === 'spin' ? s.radius! : s.radius!) + HERO.radius;

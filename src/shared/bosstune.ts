@@ -62,25 +62,34 @@ const spec = (s: EnemyAttackSpec) => s;
 
 /**
  * The Doorkeepers (Latch and Hasp): two big shield goblins with the barn's own doors, 320 health each.
- * One is the WALL (its front takes nothing; it walks its hero down and turns slowly, so get behind it),
- * the other the MOVER (the sweep and the charge, its door swung aside while it recovers). They swap jobs
- * every `swap` seconds. Within `lockIn` tiles they lock doors and shove. Over `apart` tiles apart for
- * `apartFor` seconds, the mover walks back to its partner, its back open `back` seconds. Phase 2: the
- * survivor carries both doors and spins. Ranged shots into a shut door cut its straps: `straps` cuts and
- * the door is DOWN `down` seconds (its front takes blows). Every wind-up below is the floor's time; the
- * pose (BOSS.tell) comes first.
+ * One is the WALL (its front takes nothing; it walks its hero down, jabs round its door at whoever's in its
+ * face, and turns slowly, so get behind it), the other the MOVER (quick jabs between the big sweep and the
+ * charge, its door swung aside only for the big ones). They swap jobs every `swap` seconds. Within `lockIn`
+ * tiles they lock doors and shove. Over `apart` tiles apart for `apartFor` seconds, the mover walks back to
+ * its partner, its back open `back` seconds. Phase 2 (one dead): the survivor ENRAGED (`enrage`), carries
+ * both doors and spins. Ranged shots into a shut door cut its straps: `straps` cuts and the door is DOWN
+ * `down` seconds (its front takes blows). Every wind-up below is the floor's time; the pose (BOSS.tell)
+ * comes first.
  */
 export const DOORKEEPERS = {
   hp: 320,
   radius: 0.72,
   weight: 6,
-  walk: { move: 2.4, wall: 1.5 },
-  turn: { move: 2.6, wall: 1.4 },
-  /** The door covers its front: a blow or shot from within this of its facing (cosine) is stopped dead. */
+  /** Its pace (Kyle, 2026-11-06: "they don't chase a ton": both close on you, the mover hardest). */
+  walk: { move: 3.1, wall: 2.0 },
+  turn: { move: 4.6, wall: 2.0 },
+  /** The door covers its front: a blow or shot from within this of its facing (cosine; 0.34 is 70 degrees either side, as the Planker's) is stopped dead. */
   cone: 0.34,
+  /**
+   * How long after a blow lands its door stays swung aside (the punish), at most its recover: the big ones
+   * only. A jab goes round the door's edge and the door stays shut.
+   */
+  aside: { jab: 0, sweep: 0.7, charge: 0.8, lock: 1.0, spin: 2.0 } as Record<DoorMove, number>,
+  /** The gap between one blow and the next (in place of the butcher's own). */
+  pause: 0.2,
   swap: 20,
   lockIn: 2.5,
-  lockCool: 9,
+  lockCool: 7,
   apart: 7,
   apartFor: 4,
   back: 3,
@@ -92,22 +101,37 @@ export const DOORKEEPERS = {
   hear: 4.5,
   /** The wall stands this far off its hero (in its face, not on top of it). */
   stand: 1.5,
+  /** The wall jabs at whoever's in its face, this long apart at most (after the jab's own time). */
+  wallJab: 2.2,
   /** A rotation entry it can't get to for this long is skipped (so a hero hugging it can't stall it). */
   skip: 3,
   /** A party of two: the wall swings at a second hero this long after the mover's blow begins. */
   split: 0.6,
+  /** The Door Jab: a quick red blow round the door's edge, mixed in between the big ones (keeps you on your toes). */
+  jab: spec({ windup: 0.6, active: 0.1, recover: 0.35, dmg: 8, knock: 5, range: 2.2, arc: 50, unblockable: false }),
   sweep: spec({ windup: 1.1, active: 0.12, recover: 1.0, dmg: 24, knock: 9, range: 2.6, arc: 120, unblockable: false }),
   charge: spec({ windup: 1.3, active: 0.7, recover: 0.8, dmg: 30, knock: 16, range: 8, radius: 0.8, unblockable: true }),
-  /** Locked Doors: both together, a shove 3 wide (on the mover, the partner carried with it). */
-  lock: spec({ windup: 1.4, active: 0.45, recover: 1.5, dmg: 22, knock: 20, range: 3.5, radius: 1.5, unblockable: true }),
+  /** Locked Doors: both together, a shove 3 wide (on the mover, the partner carried with it); both stand open its recover after. */
+  lock: spec({ windup: 1.4, active: 0.45, recover: 1.0, dmg: 22, knock: 20, range: 3.5, radius: 1.5, unblockable: true }),
   /** Phase 2's Door Spin: a ring round itself, then dizzy (the recover). */
   spin: spec({ windup: 1.5, active: 0.15, recover: 2.0, dmg: 26, knock: 14, radius: 2.4, unblockable: true }),
+  /**
+   * ENRAGED (phase 2, its partner dead; Kyle: "when one's dead it should enrage the other"): its pace and
+   * turn `pace` times, its wind-ups and the gap between blows `windup` times (never under `floor`: red,
+   * striped, and the jab's own; a striped one also never so short a hero at its middle can't walk out in 60%
+   * of it at the slowest kit's pace), its blows `dmg` times as hard. Drawn with burning eyes; it growls as
+   * each big blow begins.
+   */
+  enrage: { pace: 1.25, windup: 0.8, dmg: 1.25, floor: { red: 0.9, striped: 1.1, jab: 0.55 } },
   /** From where it charges (it backs off to get it), and the rotations by phase (one seeded swap each; a party of four one more). */
   chargeFrom: 3,
-  rotation: { 1: ['sweep', 'charge', 'sweep', 'sweep', 'charge'], 2: ['sweep', 'spin', 'charge', 'sweep', 'spin'] } as Record<1 | 2, DoorMove[]>,
+  rotation: {
+    1: ['jab', 'sweep', 'jab', 'charge', 'jab', 'jab', 'sweep', 'jab', 'charge'],
+    2: ['jab', 'spin', 'jab', 'sweep', 'spin', 'jab', 'charge', 'jab', 'spin'],
+  } as Record<1 | 2, DoorMove[]>,
   more: 'sweep' as DoorMove,
 };
-export type DoorMove = 'sweep' | 'charge' | 'lock' | 'spin';
+export type DoorMove = 'jab' | 'sweep' | 'charge' | 'lock' | 'spin';
 
 /** The barn hunt on the board (shared/bossjobs.ts): posted once the chapter's well on (this many brought home), or the bell rung. */
 export const BARN_HUNT = { from: 3 };

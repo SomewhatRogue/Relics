@@ -13,10 +13,19 @@ export const HUD_H = 150;
 export const upright = (w: number, h: number) => h > w * 1.2;
 
 /**
+ * CSS pixels a boss's plate adds under the top HUD while it's up (client/bossplate.ts sets it): the
+ * tracker steps down by it, the feet band's top too, and both cameras let the room's top come down by it,
+ * so the plate never sits over the floor where a boss stands at the back (Kyle, 2026-11-06).
+ */
+let push = 0;
+export const setTopPush = (px: number): void => void (push = px);
+export const topPush = () => push;
+
+/**
  * The band for the hero's feet in a view `h` units tall, `css` CSS pixels per unit: [top, bottom], in
  * the view's units. A screen too short for both gets the middle of what's left.
  */
 export function feetBand(h: number, css: number): [number, number] {
-  const top = HUD_H / css, bottom = h - CLUSTER_H / css;
+  const top = (HUD_H + push) / css, bottom = h - CLUSTER_H / css;
   return top <= bottom ? [top, bottom] : [(top + bottom) / 2, (top + bottom) / 2];
 }

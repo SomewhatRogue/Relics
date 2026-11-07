@@ -21,10 +21,12 @@ export function bossStun(e: Enemy, time: number): void {
   Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: time, kvx: 0, kvy: 0 });
 }
 
-/** Fill its POISE; full, STAGGERED. Nothing fills while it's staggered or roaring. */
+/** Fill its POISE; full, STAGGERED. Nothing fills while it's staggered or roaring, nor from slipping a jab. */
 export function addPoise(e: Enemy, by: PoiseBy, now: number, ev: FightEvent[]): void {
   const b = e.boss;
   if (!b || isDead(e) || b.stagUntil > now || b.roarUntil > now) return;
+  // (A last-second dodge through a Doorkeeper's jab fills nothing, as a held block of one doesn't: it's the big blows that pay.)
+  if (by === 'slip' && e.attack?.boss === 'jab') return;
   b.poise = Math.min(b.poiseMax, b.poise + (by === 'relic' ? Math.round(b.poiseMax * POISE_KIT.relic) : POISE_KIT.fill[by]));
   if (b.poise >= b.poiseMax) stagger(e, now, ev);
 }
@@ -52,10 +54,11 @@ export const bracedFor = (a: EnemyAttack) => BOSS_FLAGS.braced === 'all' || (BOS
 
 /**
  * BRACED: a boss's red blow met by a held block. It rebounds (its blow lost, staggered back a beat) and
- * fills its POISE. True if it did (BOSS_FLAGS.braced off: never).
+ * fills its POISE. True if it did (BOSS_FLAGS.braced off: never). A Doorkeeper's jab is too quick and light to
+ * rebound: it's simply blocked.
  */
 export function rebound(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: FightEvent[]): boolean {
-  if (!e.boss || !a.boss || a.unblockable || BOSS_FLAGS.braced === 'off' || isDead(e)) return false;
+  if (!e.boss || !a.boss || a.unblockable || a.boss === 'jab' || BOSS_FLAGS.braced === 'off' || isDead(e)) return false;
   const dx = e.x - h.x, dy = e.y - h.y, l = Math.hypot(dx, dy) || 1;
   bossStun(e, BRACED_KIT.rebound);
   shove(e, dx / l, dy / l, BRACED_KIT.knock, e.weight);

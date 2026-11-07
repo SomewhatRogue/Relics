@@ -1,7 +1,8 @@
 /**
  * The boss kit as effects and sounds (sim/poise.ts, doorwall.ts, doorpair.ts): STAGGERED in gold with a
  * flash and a shake, BRACED over the blocker as the boss rebounds, DOOR DOWN with splinters, a phase's
- * roar shaking the screen, a dull knock as the pair swap their doors. The words are shared/bosswords.ts's.
+ * roar shaking the screen, a dull knock as the pair swap their doors, an ENRAGED one's growl into each big
+ * blow. The words are shared/bosswords.ts's.
  * Cosmetic only.
  */
 import { BOSS_CALLS } from '../shared/bosswords';
@@ -36,6 +37,7 @@ export function bossFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
     fx.shake = Math.max(fx.shake, 6);
     return true;
   }
+  if (ev.k === 'growl') return fx.burst(x, y - 30, 5, ['#e8401f', '#a01810'], 40, true), true;
   return ev.k === 'doorswap';
 }
 
@@ -47,6 +49,7 @@ export function bossSound(ev: FightEvent): boolean {
     case 'doordown': return sfx.propbreak(), sfx.thud(), true;
     case 'roar': return butcher.roar(true), true;
     case 'doorswap': return sfx.thud(), true;
+    case 'growl': return butcher.growl(), true;
     default: return false;
   }
 }

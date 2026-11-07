@@ -47,7 +47,7 @@ import { flyPounce } from './meaty2';
 import { calling, standCall } from './hornblow';
 import { DOORKEEPERS } from '../shared/bosstune';
 import { clockHolds, trackAim } from './bosskit';
-import { stepKeeper } from './doorkeepers';
+import { keeperPause, stepKeeper } from './doorkeepers';
 import { bossStun } from './poise';
 
 /** The room's oil slicks, for the torch-bearers (the room sets it before its goblins move). */
@@ -265,7 +265,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     // A Pouncer through the air, landing as its blow does (sim/meaty2.ts).
     if (e.variant === 'pouncer') flyPounce(e);
     if (over && e.act === 'attack') {
-      Object.assign(e, { attack: null, act: after(e), actT: 0, cooldown: e.variant === 'hexer' ? HEXER.pause : e.attack?.kind === 'spit' ? BROOD.spitPause : spec ? spec.pauseBetween : SWING_DUMMY.every });
+      // (A Doorkeeper rests less between its blows: sim/doorkeepers.ts keeperPause.)
+      Object.assign(e, { attack: null, act: after(e), actT: 0, cooldown: e.variant === 'hexer' ? HEXER.pause : e.attack?.kind === 'spit' ? BROOD.spitPause : e.boss && e.boss.who !== 'hempen' ? keeperPause(e) : spec ? spec.pauseBetween : SWING_DUMMY.every });
     }
     return;
   }

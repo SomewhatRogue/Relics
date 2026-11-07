@@ -2,15 +2,16 @@
  * A Doorkeeper's turn (docs/plans/bosses.md, the Doorkeepers; numbers shared/bosstune.ts DOORKEEPERS).
  * stepEnemy hands a boss over here once its blow (if any) has run. One of the pair is the WALL: it walks its
  * hero down and stands in their face, turning slowly (its front takes nothing: get behind it). The other is
- * the MOVER: its rotation of blows, each with its punish (the sweep's recover, the charge stuck in a hay
- * stack, the dizzy after a spin), always at whoever it faces (sim/bosskit.ts bossTarget), and never at a
- * hero another boss is already winding up at. The pair's own rules (the swap, the lock, walking back,
+ * the MOVER: its rotation of quick jabs and big blows, each big one with its punish (the sweep's recover, the
+ * charge stuck in a hay stack, the dizzy after a spin), always at whoever it faces (sim/bosskit.ts bossTarget), and never at a
+ * hero another boss is already winding up at. The wall jabs round its door at whoever's in its face. ENRAGED
+ * (phase 2), it closes on you and turns DOORKEEPERS.enrage.pace times as fast, and pauses less between blows. The pair's own rules (the swap, the lock, walking back,
  * phase 2) are once a tick in sim/doorpair.ts.
  */
 import { DOORKEEPERS } from '../shared/tuning';
 import { walk } from './enemies';
 import { isDead } from './damage';
-import { bossBegin, bossTarget, clocked, rotation, theBook, turnTo, type BossOn } from './bosskit';
+import { bossBegin, bossTarget, clocked, enraged, rotation, theBook, turnTo, type BossOn } from './bosskit';
 import { stepHempen } from './hempenboss';
 import type { Enemy, FightEvent, Hero } from './types';
 
@@ -41,8 +42,12 @@ export function stepKeeper(e: Enemy, heroes: Hero[], now: number, dt: number, ev
   if (!t) return;
   const d = Math.hypot(t.x - e.x, t.y - e.y) || 1, ux = (t.x - e.x) / d, uy = (t.y - e.y) / d;
   if (b.job === 'wall') {
-    // Slow to turn: a flanker gets round it.
+    // Slow to turn: a flanker gets round it. In its face, a jab round the door's edge now and then.
     const facing = turnTo(e, ux, uy, D.turn.wall, dt);
+    if (bk && now >= (bk.jabAt ?? -9) && d <= D.jab.range! && facing > 0.85 && !clocked(t.id, foes, e) && bossBegin(e, 'jab', t, ev)) {
+      bk.jabAt = now + e.attack!.windup + e.attack!.active + e.attack!.recover + D.wallJab;
+      return;
+    }
     if (d > D.stand) walk(e, ux, uy, D.walk.wall * Math.max(0.2, facing), dt);
     return;
   }
@@ -58,11 +63,12 @@ function mover(e: Enemy, b: BossOn, t0: Hero, d0: number, ux0: number, uy0: numb
   const t = clocked(t0.id, foes, e) ? heroes.find((h) => h.act !== 'down' && !h.out && h.id !== 'squire' && !clocked(h.id, foes, e)) : t0;
   if (!t) return;
   const d = t === t0 ? d0 : Math.hypot(t.x - e.x, t.y - e.y) || 1, ux = t === t0 ? ux0 : (t.x - e.x) / d, uy = t === t0 ? uy0 : (t.y - e.y) / d;
-  const facing = turnTo(e, ux, uy, D.turn.move, dt), pace = D.walk.move;
-  if (e.cooldown > 0) return void (d > D.sweep.range! * 0.8 && walk(e, ux, uy, pace * Math.max(0.2, facing), dt));
+  const k = enraged(e) ? D.enrage.pace : 1, facing = turnTo(e, ux, uy, D.turn.move * k, dt), pace = D.walk.move * k;
+  if (e.cooldown > 0) return void (d > D.jab.range! * 0.8 && walk(e, ux, uy, pace * Math.max(0.2, facing), dt));
   const go = (ok: boolean) => ok && bossBegin(e, next, t, ev) && advance(b, now, e.attack!.windup + e.attack!.active + e.attack!.recover);
-  if (next === 'sweep') {
-    if (go(d <= D.sweep.range! + 0.1 && facing > 0.8)) return split(b, t, now);
+  if (next === 'jab' || next === 'sweep') {
+    const reach = next === 'jab' ? D.jab.range! : D.sweep.range!;
+    if (go(d <= reach + 0.1 && facing > (next === 'jab' ? 0.85 : 0.8))) return split(e, b, t, now);
     return walk(e, ux, uy, pace * Math.max(0.2, facing), dt);
   }
   if (next === 'spin') {
@@ -70,10 +76,13 @@ function mover(e: Enemy, b: BossOn, t0: Hero, d0: number, ux0: number, uy0: numb
     return walk(e, ux, uy, pace * Math.max(0.2, facing), dt);
   }
   // The charge: from far enough off (it backs away to get it), along the lane it shows.
-  if (go(d >= D.chargeFrom && d <= D.charge.range! - 0.6 && facing > 0.92)) return split(b, t, now);
+  if (go(d >= D.chargeFrom && d <= D.charge.range! - 0.6 && facing > 0.92)) return split(e, b, t, now);
   if (d < D.chargeFrom) walk(e, -ux, -uy, pace * 0.8, dt);
   else if (d > D.charge.range! - 0.6) walk(e, ux, uy, pace * Math.max(0.2, facing), dt);
 }
+
+/** The rest between one of its blows and the next (sim/enemies.ts asks): DOORKEEPERS.pause, less again ENRAGED. */
+export const keeperPause = (e: Enemy) => D.pause * (enraged(e) ? D.enrage.windup : 1);
 
 const heard = (e: Enemy, heroes: Hero[]) => heroes.some((h) => h.act !== 'down' && h.id !== 'squire' && !h.sneaking && Math.hypot(h.x - e.x, h.y - e.y) <= D.hear);
 
@@ -84,8 +93,8 @@ function advance(b: BossOn, now: number, busy: number): true {
   return true;
 }
 
-/** A party of two: the wall swings at a second hero a moment after the mover's blow begins (sim/doorpair.ts). */
-function split(b: BossOn, t: Hero, now: number): void {
+/** A party of two: the wall swings at a second hero a moment after the mover's big blow begins (sim/doorpair.ts). */
+function split(e: Enemy, b: BossOn, t: Hero, now: number): void {
   const bk = theBook();
-  if (bk && b.party >= 2 && b.phase === 1) bk.split = { at: now + D.split, not: t.id };
+  if (bk && b.party >= 2 && b.phase === 1 && e.attack?.boss !== 'jab') bk.split = { at: now + D.split, not: t.id };
 }

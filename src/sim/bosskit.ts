@@ -10,7 +10,7 @@
  *   blows while it winds up;
  * - whom it faces: a taunt, a block held in its face, else whoever hurt it most in the last BOSS.aggro s.
  */
-import { BOSS, DOORKEEPERS, POISE_KIT, type DoorMove } from '../shared/tuning';
+import { BOSS, DOORKEEPERS, HERO, POISE_KIT, WEAPONS, type DoorMove, type EnemyAttackSpec } from '../shared/tuning';
 import { begin } from './enemies';
 import { isDead } from './damage';
 import { tauntTarget } from './taunt';
@@ -58,6 +58,8 @@ export interface BossBook {
   lockCool: number;
   /** A party of two: the wall's swing at a second hero, when, and the hero it isn't for. */
   split: { at: number; not: string } | null;
+  /** The wall's next jab, not before (sim/doorkeepers.ts). */
+  jabAt?: number;
   /** The seeded swap in each phase's rotation (the entry swapped with the next). */
   swaps: number[];
   /** The phase the pair is in (for the adds). */
@@ -90,13 +92,34 @@ export function rotation(phase: 1 | 2, party: number, swap: number): DoorMove[] 
   return r;
 }
 
-const KIND: Record<DoorMove, AttackKind> = { sweep: 'cleave', charge: 'charge', lock: 'charge', spin: 'slam' };
+const KIND: Record<DoorMove, AttackKind> = { jab: 'stab', sweep: 'cleave', charge: 'charge', lock: 'charge', spin: 'slam' };
+const E = DOORKEEPERS.enrage;
 
-/** Begin one of its moves at `t`: the pose first, its floor after; a spin round itself. */
+/** ENRAGED: a Doorkeeper whose partner is dead (phase 2). */
+export const enraged = (e: Enemy) => !!e.boss && e.boss.who !== 'hempen' && e.boss.phase === 2;
+
+/** The slowest kit's pace (a striped floor is always walked out of from its middle in 60% of it at this). */
+const slowest = Math.min(...Object.values(WEAPONS).map((w) => HERO.speed * (w.speed ?? 1)));
+
+/** A move's floor time, enraged or not: quicker by DOORKEEPERS.enrage.windup, never under its floors. */
+export function doorWindup(move: DoorMove, mad: boolean): number {
+  const s: EnemyAttackSpec = DOORKEEPERS[move];
+  if (!mad) return s.windup;
+  const floor = move === 'jab' ? E.floor.jab : s.unblockable ? Math.max(E.floor.striped, (s.radius! + HERO.radius) / slowest / 0.6) : E.floor.red;
+  return Math.max(floor, s.windup * E.windup);
+}
+
+/** Begin one of its moves at `t`: the pose first, its floor after; a spin round itself. ENRAGED, quicker and harder, with a growl. */
 export function bossBegin(e: Enemy, move: DoorMove, t: Hero, ev: FightEvent[]): boolean {
   begin(e, KIND[move], DOORKEEPERS[move], t, ev);
   const a = e.attack;
   if (!a) return false;
+  const mad = enraged(e);
+  if (mad) {
+    a.windup = doorWindup(move, true) * (a.windup / DOORKEEPERS[move].windup);
+    a.dmg = Math.round(a.dmg * E.dmg);
+    if (move !== 'jab') ev.push({ k: 'growl', x: e.x, y: e.y });
+  }
   Object.assign(a, { boss: move, tell: BOSS.tell, windup: a.windup + BOSS.tell });
   if (move === 'spin') (a.cx = e.x), (a.cy = e.y);
   return true;
