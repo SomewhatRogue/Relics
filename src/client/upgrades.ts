@@ -2,7 +2,7 @@
  * What a hero can buy from their trainer and pick as knacks, as screens of tiles (Kyle, 2026-11-05:
  * "the UX/UI of the upgrades is really confusing, we should have it be screens and more visual"). Four
  * tabs: SKILLS (the class's three as a fork, CARRY ONE, and the skill's recharge ranks), MOVES (the
- * technique track and the movement ladder), RANKS (the base stats) and KNACKS (the two on offer as a
+ * technique track and the movement ladder), STATS (the base stats) and KNACKS (the two on offer as a
  * fork, PICK ONE, then the four chains). Each tile: an icon, a name, one line, its cost, and a state
  * (learned, can buy, short of gold, locked with why, maxed, on offer). A track is a list of steps; a
  * step of two or more tiles is a fork (choices that exclude each other), so a new fork is one more step
@@ -96,7 +96,7 @@ function movesTab(p: Profile, rows: TrainRow[]): UpTrack[] {
 function ranksTab(rows: TrainRow[]): UpTrack[] {
   const ranks = rows.filter((r) => r.group === 'ranks' && r.key !== 'drill:skill');
   const have = ranks.reduce((n, r) => n + r.rank, 0), all = ranks.reduce((n, r) => n + r.max, 0);
-  return [{ id: 'ranks', title: 'RANKS', sum: `${have} OF ${all}` + (nextAt(ranks) ? ` &middot; NEXT AT LEVEL ${nextAt(ranks)}` : ''), kind: 'grid', steps: [{ tiles: ranks.map((r) => rowTile(r)) }] }];
+  return [{ id: 'ranks', title: UPW.tabs.ranks, sum: `${have} OF ${all}` + (nextAt(ranks) ? ` &middot; NEXT AT LEVEL ${nextAt(ranks)}` : ''), kind: 'grid', steps: [{ tiles: ranks.map((r) => rowTile(r)) }] }];
 }
 
 /** A knack as a tile: taken, on offer, next on its chain, or waiting on the one before. */
@@ -113,7 +113,7 @@ export function knackTile(p: Profile, id: PerkId, offer: PerkId[], open: boolean
 /** The two on offer as a fork (PICK ONE), then each chain across. */
 function knacksTab(p: Profile, open: boolean): UpTrack[] {
   const offer = p.picks > 0 ? perkOffer(p) : [];
-  const fork: UpTrack[] = offer.length ? [{ id: 'offer', title: KNW.waiting(p.picks), sum: '', kind: 'track', steps: [{ tiles: offer.map((id) => knackTile(p, id, offer, open)), fork: undefined }], note: open ? undefined : KNW.notHere }] : [];
+  const fork: UpTrack[] = offer.length ? [{ id: 'offer', title: KNW.waiting(p.picks), sum: '', kind: 'track', steps: [{ tiles: offer.map((id) => knackTile(p, id, offer, open)), fork: '' }], note: open ? undefined : KNW.notHere }] : [];
   return [...fork, ...CLASS_CHAINS[p.cls].map((c) => {
     const steps = CHAINS[c].steps as PerkId[];
     return { id: c, title: CHAINS[c].name, sum: `${steps.filter((s) => p.perks.includes(s)).length} / ${steps.length}`, kind: 'row' as const, steps: single(steps.map((id) => knackTile(p, id, offer, open))) };

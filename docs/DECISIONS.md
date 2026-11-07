@@ -8081,3 +8081,18 @@ on a big screen.
   squire; the Cleaver passed over; a guest Cleric mends the leader and the leader a guest, on the leader's room);
   `tests/firstuse.test.ts` (a ring clears on the first press and only that one; a skill told from a relic; a press
   before the gift doesn't count; the laptop keys are input.ts's). Online: `scripts/mend-online.cjs`.
+
+## 2026-11-06: the trainer's RANKS tab is STATS, and every tab fits (Kyle; Claude Opus 5.5)
+
+- Kyle: "RANKS doesn't mean anything... none of the stuff fits well on the page. SKILLS looks cool though."
+  The tab and its track are STATS (the label only; the tab's id stays `ranks`, so a remembered tab still opens).
+  A tile opened keeps RANKS over its list of ranks, where the word means each one you can buy.
+- STATS was drawn as a five-way fork ("CHOOSE ONE" and a bracket over tiles you buy all of), two across with the
+  wide tile squeezed into half a phone, so names, costs and lines spilled out. A grid is never a fork now: the
+  stats are three across in SKILLS' narrow tile (picture over words), pips then cost at the foot.
+- Narrow tiles (forks, knack chains, stats) are one height per row with the cost held at the foot; columns are
+  `minmax(0, 1fr)` so a long word can't push a tile wider. A lone grid tile (the skill drill) runs full width
+  like MOVES. The knack offer drops its "CHOOSE ONE": the title over it already says take one. Level and gold
+  never wrap.
+- Shots: `node scripts/trainfit-look.cjs [url] [outdir] [tag]` (every tab and a tile opened on a phone,
+  1280x800 and 1920x1080, printing anything that spills).
