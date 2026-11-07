@@ -15,7 +15,9 @@
   --font-display: 'Jacquard 12', 'Tiny5', serif;
   /* Tiny5 is drawn 8 pixels to the em: 8px and 16px are crisp on every screen, the text size is too
      (12px is 3 device pixels a font pixel at 2x; 13.33px is 5 at 3x). */
-  --fs-s: 8px; --fs-text: 12px; --fs: 16px;
+  --fs-s: 8px; --fs-text: 12px; --fs: 16px; --fs-m: 14px;
+  /* The display face's sizes: a small plate line, a heading, a card's title, the title screen. */
+  --fd-s: 11px; --fd: 21px; --fd-l: 26px; --fd-xl: 63px;
   --edge: calc(4 * var(--px));
   --edge-s: calc(3 * var(--px));
 }
@@ -36,8 +38,8 @@ em, i { font-style: normal; }
 .parch { border: var(--edge) solid transparent; border-image: var(--f-parch) 4 fill / var(--edge) stretch; background: none; color: var(--ink); }
 
 /* Headings: the blackletter for titles and name plates, at its own grid size; small caps labels in the body face. */
-#panel h2, #pack h2, #title h1, #title .cname, #title .dhead h2, #lesson .relic-name { font: 400 21px/1.05 var(--font-display); letter-spacing: 0; color: var(--gilt); text-shadow: 0 var(--px) 0 var(--stone-900); }
-#title h1 { font-size: 63px; text-shadow: 0 calc(2 * var(--px)) 0 #3a2410; }
+#panel h2, #pack h2, #title h1, #title .cname, #title .dhead h2, #lesson .relic-name { font: 400 var(--fd)/1.05 var(--font-display); letter-spacing: 0; color: var(--gilt); text-shadow: 0 var(--px) 0 var(--stone-900); }
+#title h1 { font-size: var(--fd-xl); text-shadow: 0 calc(2 * var(--px)) 0 #3a2410; }
 #panel h3, #pack h3, .rsec, #panel .tr-h, #panel .shop h3.gh, #panel .store h3.sh { font: 400 var(--fs-text)/1.2 var(--font-body); letter-spacing: 0.04em; color: var(--bone-dim); }
 
 /* The one button. Iron, pushed in when pressed (down a pixel, its bevel turned over), gilt for the way on, dull stone when it can't be used. */

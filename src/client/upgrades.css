@@ -82,7 +82,7 @@
 #panel .up-det.s-buy .up-dh .up-ic, #panel .up-det.s-pick .up-dh .up-ic { border-color: #9cc95a; }
 #panel .up-det.s-locked .up-dh .up-ic { filter: grayscale(1) brightness(0.6); }
 #panel .up-det .up-dh > div { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-#panel .up-det .up-dh b { font: 400 21px/1.05 var(--font-display); color: var(--gilt); }
+#panel .up-det .up-dh b { font: 400 var(--fd)/1.05 var(--font-display); color: var(--gilt); }
 #panel .up-det .up-f .up-b { margin-left: 0; font-size: var(--fs-text); }
 #panel .up-det.s-buy .up-b { color: #9cc95a; }
 #panel .up-dt { margin: 0 0 6px; color: var(--bone); line-height: 1.4; }

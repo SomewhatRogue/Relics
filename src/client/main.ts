@@ -109,6 +109,8 @@ import './hud.css';
 import './cluster.css';
 import './skins.css';
 import './exped.css';
+// The pair of faces the words wear (?font=a|b|c to try one), after the sheets it overrides.
+import './fontchoice';
 import { paintFrames } from './frames';
 import { iconVars } from './icons';
 import { Cluster } from './cluster';

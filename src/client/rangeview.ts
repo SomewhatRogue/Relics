@@ -10,7 +10,7 @@ import { LANES, RANGE } from '../shared/rangetune';
 import { sway, targetAt, upness, type RangeState, type Target } from '../shared/range';
 import type { Hero } from '../sim/types';
 import { drawHero } from './actors';
-import { drawText } from './pixfont';
+import { drawText, textWidth } from './pixfont';
 import { FW, PastimeCanvas, dith, dot } from './pastimecanvas';
 
 export interface RangeSay { s: string; x: number; y: number; col: string; t0: number }
@@ -72,7 +72,7 @@ export class RangeView extends PastimeCanvas {
     this.sight(s, aim, big);
     for (const w of says) {
       const k = now - w.t0;
-      drawText(glow, w.s, Math.round(w.x - w.s.length * 2), Math.round(w.y - 8 - k * 10), w.col);
+      drawText(glow, w.s, Math.round(w.x - (textWidth(w.s) + 1) / 2), Math.round(w.y - 8 - k * 10), w.col);
     }
     this.finish([...TORCHES.map(([x, y]): [number, number, number, number, [number, number, number]] => [x, y - 2, 90, 0.9 * (1 + Math.sin(now * 8 + x) * 0.05), [1, 0.62, 0.3]]), [AX, AY - 30, 80, 0.5, [1, 0.7, 0.4]]]);
   }

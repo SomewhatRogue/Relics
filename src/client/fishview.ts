@@ -10,7 +10,7 @@ import { FISH, speciesOf } from '../shared/fishtune';
 import { nibbling, type FishState } from '../shared/fishing';
 import type { Hero } from '../sim/types';
 import { drawHero } from './actors';
-import { drawText } from './pixfont';
+import { drawText, textWidth } from './pixfont';
 import { drawFish } from './fishart';
 import { FISHW } from './pastimewords';
 import { FW, PastimeCanvas, dith, dot } from './pastimecanvas';
@@ -161,7 +161,7 @@ export class FishView extends PastimeCanvas {
     const at = x0 + Math.round(Math.min(1, s.tension) * (w - 1)), hot = s.tension > 0.8 && Math.floor(now * 8) % 2;
     dot(glow, at - 1, y - 2, 3, 9, hot ? '#ff6a5a' : '#ffffff');
     drawText(glow, FISHW.slack, x0, y + 8, '#9ab0c8');
-    drawText(glow, FISHW.snap, x0 + w - FISHW.snap.length * 4, y + 8, '#ff8a6a');
+    drawText(glow, FISHW.snap, x0 + w - textWidth(FISHW.snap) - 1, y + 8, '#ff8a6a');
   }
 
   private lantern(now: number): void {

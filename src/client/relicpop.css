@@ -8,7 +8,7 @@
 #relicpop .rp-icon { width: 48px; height: 48px; flex: none; image-rendering: pixelated; background: #100e14; border: 2px solid #ffd27a; padding: 3px; }
 #relicpop .rp-body { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
 #relicpop .rp-k { color: var(--gold); font-size: var(--fs-s); letter-spacing: 0.15em; }
-#relicpop .rp-body b { font: 400 21px/1.05 var(--font-display); text-shadow: 0 var(--px) 0 var(--stone-900); }
+#relicpop .rp-body b { font: 400 var(--fd)/1.05 var(--font-display); text-shadow: 0 var(--px) 0 var(--stone-900); }
 #relicpop .rp-uses { display: flex; align-items: center; gap: 6px; color: #b8a47c; font-size: var(--fs-s); }
 #relicpop .rp-how { margin: 6px 0 0; line-height: 1.35; }
 #relicpop .rp-tip { margin: 5px 0 0; padding: 4px 6px; line-height: 1.35; color: #fff1d0; background: #1b1d22cc; border-left: 2px solid #ffd27a; }

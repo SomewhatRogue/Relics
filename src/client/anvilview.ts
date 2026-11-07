@@ -6,7 +6,7 @@
  * judged. Sparks off a strike; notches up top for the strikes made. Lit by the forge's fire.
  */
 import { glowAt, STRIKE, type StrikeMark, type StrikeState } from '../shared/forgestrike';
-import { drawText } from './pixfont';
+import { drawText, textWidth } from './pixfont';
 import { ANVILW } from './pastimewords';
 import { PastimeCanvas, dith, dot } from './pastimecanvas';
 
@@ -56,7 +56,7 @@ export class AnvilView extends PastimeCanvas {
     dot(lit, hx + 4, hy + 2, 30, 3, '#6a4a2a'), dot(lit, hx - 4, hy - 3, 10, 9, '#5a5660'), dot(lit, hx - 4, hy - 3, 10, 2, '#9a94a0');
     dot(lit, hx + 20, hy, 6, 6, this.skin), dot(lit, hx + 22, hy + 6, 10, 20, '#4a4048');
     if (last && now - last.t0 < 0.45) this.sparks(PIECE.x + PIECE.w / 2, PIECE.y, now - last.t0, last.mark);
-    if (last && now - last.t0 < 1) drawText(glow, MARK[last.mark], 60 - MARK[last.mark].length * 2, 90 - Math.round((now - last.t0) * 8), MARK_COL[last.mark]);
+    if (last && now - last.t0 < 1) drawText(glow, MARK[last.mark], Math.round(60 - (textWidth(MARK[last.mark]) + 1) / 2), 90 - Math.round((now - last.t0) * 8), MARK_COL[last.mark]);
     for (let i = 0; i < STRIKE.strikes; i++) {
       const m = s.struck[i]?.mark;
       dot(glow, 48 + i * 9, 14, 6, 3, m ? MARK_COL[m] : '#3a3238');

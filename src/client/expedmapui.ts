@@ -79,7 +79,7 @@ export class ExpedMap {
     const at = (i: number) => Math.round(i * cs);
     for (let j = 0; j < Math.ceil(m.h / 6); j++) for (let i = 0; i < Math.ceil(m.w / 6); i++) if (!seenAt(x.seen, (i + 0.5) * 6, (j + 0.5) * 6)) g.fillRect(at(i), at(j), at(i + 1) - at(i), at(j + 1) - at(j));
     const font = Math.round(8 * Math.max(1, Math.round(dpr * 1.25)));
-    g.font = `${font}px Tiny5, monospace`;
+    g.font = `${font}px ${getComputedStyle(document.documentElement).getPropertyValue('--font-body') || 'Tiny5, monospace'}`;
     g.textBaseline = 'middle';
     const label = (s: string, px: number, py: number, col: string) => {
       const tw = g.measureText(s).width, lx = Math.max(2, Math.min(this.cv.width - tw - 2, px - tw / 2));
