@@ -31,6 +31,7 @@ import { openRange } from './rangemode';
 import { openArm } from './armmode';
 import { openKnives } from './knifemode';
 import { openAnvil } from './anvilmode';
+import { openShift } from './shiftmode';
 import { armFoe } from '../shared/armtune';
 import { strawFx } from './strawman';
 import { toPx } from './world';
@@ -736,6 +737,7 @@ w.__openTree = () => openTree(game, panel);
 // The town's pastimes for the scripts: start one as if you'd talked to Pennock or Abel, and the overlays (fishmode.ts, rangemode.ts).
 w.__pastime = { fish: () => openFishing(game, panel), range: () => openRange(game, panel),
   arm: (foe = 'drunk', bet = 0) => openArm(game, panel, armFoe(foe), bet), knives: (bet = 0) => openKnives(game, panel, bet),
+  shift: () => openShift(game, panel),
   anvil: () => { const it = game.profile.arms[game.profile.weapon] ?? game.profile.armor; const up = it && game.levelUp(it); return up ? openAnvil(game, panel, up) : null; } };
 w.__idles = { force: (id: string) => forceIdle(game.hero, id as never, performance.now() / 1000), pet: (dog: 'own' | 'lodge') => startPet(game.hero, dog, performance.now() / 1000) && (chat.pet(dog, petReact(ME)), true), petting: () => petFrame(game.hero, performance.now() / 1000) };
 // Whoever's petting a hound on this screen now, and how it's taking it (petting.ts; the online scripts).

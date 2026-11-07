@@ -13,7 +13,7 @@ import { bagSize, growBag, growVault, nextBag, nextVault, pawn, pawns, redeem, s
 import { STEEL, TIERS, itemName, nextLevel, plusOf, sellValue, type Item } from '../shared/tuning';
 import type { SpotId } from '../shared/town';
 import type { Game } from './game';
-import type { Panel } from './panels';
+import type { Button, Panel } from './panels';
 import { card, compare } from './card';
 import { itemIcon } from './itemicons';
 import { goodsList, itemPop, says, shopHead, wireGoods, type Act, type Good } from './shopui';
@@ -25,15 +25,17 @@ import { BANK, FORGE, PAWN } from './storewords';
 import { forgeBody } from './forgeview';
 import { freshLine, stockGoods, syncPack } from './vendorui';
 import { WEAPONS } from '../shared/tuning';
+import { openShiftDesk } from './shiftui';
+import { SHIFTW } from './shiftwords';
 import './stores.css';
 
 const p = (s: string) => `<p>${s}</p>`;
 const h3 = (s: string, n?: string) => `<h3 class="sh">${s}${n ? ` <i>${n}</i>` : ''}</h3>`;
 
 /** Show a store; tapping a square brings up its card (`tap`), a good brings up its own. */
-function show(panel: Panel, title: string, html: string, tap: (src: string, i: number) => void, again: () => void, goods: Good[] = []): void {
+function show(panel: Panel, title: string, html: string, tap: (src: string, i: number) => void, again: () => void, goods: Good[] = [], buttons: Button[] = []): void {
   const scroll = document.querySelector('#panel .card')?.scrollTop ?? 0;
-  panel.show(title, `<div class="store">${html}</div>`);
+  panel.show(title, `<div class="store">${html}</div>`, buttons);
   const box = document.querySelector('#panel .card');
   if (box) box.scrollTop = scroll;
   document.querySelectorAll<HTMLElement>('#panel [data-src]').forEach((t) => t.addEventListener('click', (e) => {
@@ -100,7 +102,7 @@ function forgePop(g: Game, it: Item, acts: Act[], again: () => void): void {
   itemPop({ icon: itemIcon(it), name: itemName(it), col: TIERS[it.quality].col, body: forgeBody(it, WEAPONS[g.hero.weapon].cls) + card(it, g.hero, true), acts, again });
 }
 
-/** Halvard's forge: UPGRADE what you wear, or MELT DOWN what's in your pack. One choice per piece. */
+/** Halvard's forge: UPGRADE what you wear, or MELT DOWN what's in your pack. One choice per piece. Or WORK A SHIFT (shiftui.ts). */
 function forge(g: Game, panel: Panel): void {
   const pr = g.profile, held = pr.arms[pr.weapon], worn = [held, pr.armor, ...pr.rings].filter((x): x is Item => !!x), again = () => forge(g, panel);
   const tap = (s: string, i: number) => {
@@ -120,7 +122,7 @@ function forge(g: Game, panel: Panel): void {
   show(panel, PLACES.forge.name, shopHead(PLACES.forge, says('Halvard', SMITH.anvil)) + p(`<span class="dim">${FORGE.purse(pr.gold, pr.steel)}</span>`) +
     h3(FORGE.upHead) + `<div class="cells">${worn.map((x, k) => cell(x, 'worn:' + k)).join('')}</div>` +
     h3(FORGE.meltHead, `${pr.bag.length} / ${bagSize(pr)}`) + grid(pr.bag, bagSize(pr), 'bag', null, undefined, (it) => (it.quality === 'hungry' ? '' : '+' + STEEL[it.quality])),
-  tap, again);
+  tap, again, [], [{ label: SHIFTW.work, act: () => openShiftDesk(g, panel, again) }]);
 }
 
 /** Open one of these if `id` is one; false otherwise (townui.ts handles the rest). */

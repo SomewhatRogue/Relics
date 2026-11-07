@@ -131,6 +131,8 @@ export interface Profile {
   arm?: import('./armwrestle.js').ArmRecord;
   /** The Rat's knife board: rounds thrown (seeds the next) and the best (shared/knives.ts). */
   knives?: import('./knives.js').KnifeRecord;
+  /** Shifts at Halvard's forge: how many (seeds the next), the best, the rest before the next paid one (shared/shiftpay.ts). */
+  shift?: import('./shiftpay.js').ShiftRecord;
   /** Strikes made at Halvard's anvil (seeds the next: shared/forgestrike.ts). */
   strikes?: number;
   /** A bet down on a bout or a round at the Rat, till it's settled (shared/stakes.ts). */

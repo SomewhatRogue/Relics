@@ -16,6 +16,7 @@ import { fitFishRecord } from '../shared/fishing';
 import { fitRangeRecord } from '../shared/range';
 import { fitArmRecord } from '../shared/armwrestle';
 import { fitKnifeRecord } from '../shared/knives';
+import { fitShiftRecord } from '../shared/shiftpay';
 
 const KEY = 'relic.save.v2', OLD = 'relic.save.v1';
 /** `savedAt`: when it was last kept here (it only goes forward), to tell which copy is newer (recovery.ts). */
@@ -67,6 +68,7 @@ const hero = (old: Partial<Profile>): Profile => {
   if (p.range) out.range = fitRangeRecord(p.range);
   if (p.arm) out.arm = fitArmRecord(p.arm);
   if (p.knives) out.knives = fitKnifeRecord(p.knives);
+  if (p.shift) out.shift = fitShiftRecord(p.shift);
   if (p.strikes !== undefined) out.strikes = Math.max(0, Math.floor(Number(p.strikes) || 0));
   // Knacks onto the tree: one the class can't use comes back as a pick (shared/chains.ts).
   out.perks = [...(out.perks ?? [])];

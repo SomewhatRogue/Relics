@@ -44,6 +44,9 @@ const { collide, useMap } = await import('../src/shared/arena');
 const { SPOT_REACH } = await import('../src/shared/town');
 const { newArm, stepArm } = await import('../src/shared/armwrestle');
 const { ARM_FOES } = await import('../src/shared/armtune');
+const { newShift, stepShift } = await import('../src/shared/forgeshift');
+const { shiftSeed } = await import('../src/shared/shiftboard');
+const { settleShift, startShift } = await import('../src/shared/shiftpay');
 
 type Folk = InstanceType<typeof Townfolk>;
 type G = InstanceType<typeof Game>;
@@ -135,6 +138,41 @@ describe('parked at the Rat and the anvil, for everyone in the hall', () => {
     g.enterYard();
     g.enterPastime('knives');
     expect(g.mode).toBe('yard');
+  });
+});
+
+describe('a shift at the forge, for everyone in the forge', () => {
+  it('one word to take the hammer, none through two whole shifts (and ANOTHER SHIFT), one to hand it back', () => {
+    const t = hall('forge');
+    for (let i = 0; i < 20; i++) t.frame(0.1);
+    const before = t.said(), rec = (t.g.profile.shift ??= { shifts: 0, best: 0, restUntil: 0 });
+    // As shiftmode.ts does: parked at the anvil, the shift counted and saved as it starts.
+    t.g.enterPastime('anvil');
+    startShift(rec, Date.now());
+    t.g.keep();
+    for (let i = 0; i < 10; i++) t.frame(0.1);
+    expect(t.said() - before).toBe(1);
+    expect(t.sock().sent[t.said() - 1].d.g).toBe('anvil');
+    const mid = t.said();
+    for (let k = 0; k < 2; k++) {
+      const s = newShift(shiftSeed(t.g.profile.id, k));
+      while (!s.over) {
+        for (let j = 0; j < 15 && !s.over; j++) stepShift(s, j % 7 === 0);
+        t.frame(0.25);
+      }
+      settleShift(rec, k, s.score, true);
+      // ANOTHER SHIFT: still parked, so nothing new is said.
+      t.g.enterPastime('anvil');
+      startShift(rec, Date.now());
+      t.g.keep();
+    }
+    expect(t.said() - mid).toBe(0);
+    expect(parkOf(seen(t.friend, t.g.profile.id)!)).toBe('anvil');
+    t.g.leavePastime();
+    for (let i = 0; i < 10; i++) t.frame(0.1);
+    expect(t.said() - mid).toBe(1);
+    expect(t.sock().sent[t.said() - 1].d.g).toBeUndefined();
+    expect(parkOf(seen(t.friend, t.g.profile.id)!)).toBeNull();
   });
 });
 

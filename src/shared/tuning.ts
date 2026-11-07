@@ -63,6 +63,7 @@ export * from './prowlers.js';
 export * from './encounters.js';
 export * from './worldfx.js';
 export * from './staithetune.js';
+export * from './shifttune.js';
 export * from './hangtune.js';
 export * from './fentune.js';
 export * from './chalk.js';

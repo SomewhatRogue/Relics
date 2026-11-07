@@ -10,14 +10,14 @@ import { drawText, textWidth } from './pixfont';
 import { ANVILW } from './pastimewords';
 import { PastimeCanvas, dith, dot } from './pastimecanvas';
 
-const FACE = { x: 34, y: 112, w: 50 } as const, PIECE = { x: 44, y: 108, w: 30 } as const;
+export const FACE = { x: 34, y: 112, w: 50 } as const, PIECE = { x: 44, y: 108, w: 30 } as const;
 /** The steel's colour by how bright it is. */
 const HEAT = ['#3a1a14', '#6a2418', '#a83a1e', '#d8602a', '#f0a040', '#ffd27a', '#fff4d0'];
 const MARK: Record<StrikeMark, string> = { clean: ANVILW.clean, fair: ANVILW.fair, cold: ANVILW.cold };
 const MARK_COL: Record<StrikeMark, string> = { clean: '#ffd27a', fair: '#e8e0d0', cold: '#8a8478' };
 
 export class AnvilView extends PastimeCanvas {
-  constructor(private skin: string) {
+  constructor(protected skin: string) {
     super();
     this.indoor = [0.36, 0.27, 0.25];
   }
@@ -43,24 +43,41 @@ export class AnvilView extends PastimeCanvas {
   }
 
   render(s: StrikeState, now: number, swing: number, last: { mark: StrikeMark; t0: number } | null): void {
+    this.paint(glowAt(s), now, swing, last, Array.from({ length: STRIKE.strikes }, (_, i) => s.struck[i]?.mark));
+    this.finishScene(glowAt(s), now);
+  }
+
+  /**
+   * The scene for a glow `b` (0 to 1): the coals, the tongs and the piece in them (`shape`: drawn into the
+   * glow layer at the piece's spot in `heat`; a plain bar if none), the hammer, the last strike's sparks
+   * and word, and `notches` up top, one a strike wanted. The caller then calls `finishScene`, after any of
+   * its own drawing.
+   */
+  protected paint(b: number, now: number, swing: number, last: { mark: StrikeMark; t0: number } | null, notches: (StrikeMark | undefined)[], shape?: (g: CanvasRenderingContext2D, x: number, y: number, heat: string, hot: boolean) => void): void {
     this.begin();
-    const { lit, glow } = this, b = glowAt(s), heat = HEAT[Math.min(HEAT.length - 1, Math.round(b * (HEAT.length - 1)))];
+    const { lit, glow } = this, heat = HEAT[Math.min(HEAT.length - 1, Math.round(b * (HEAT.length - 1)))];
     // The coals in the forge's mouth, breathing.
     for (let i = 0; i < 18; i++) dot(glow, 26 + i * 4, 58 - (i * 7) % 5, 3, 2, (Math.floor(now * 3 + i) % 3) ? '#a83a1e' : '#f0a040');
     // Halvard's tongs and the piece in them.
     dot(lit, 2, PIECE.y - 6, 22, 7, '#3a3440'), dot(lit, 20, PIECE.y - 4, 5, 4, '#c89070');
     dot(lit, 24, PIECE.y - 2, PIECE.x - 22, 1, '#2a2630'), dot(lit, 24, PIECE.y + 1, PIECE.x - 22, 1, '#2a2630');
-    dot(glow, PIECE.x, PIECE.y, PIECE.w, 3, heat), dot(glow, PIECE.x + 2, PIECE.y, PIECE.w - 6, 1, b > 0.7 ? '#ffffff' : heat);
+    if (shape) shape(glow, PIECE.x, PIECE.y, heat, b > 0.7);
+    else dot(glow, PIECE.x, PIECE.y, PIECE.w, 3, heat), dot(glow, PIECE.x + 2, PIECE.y, PIECE.w - 6, 1, b > 0.7 ? '#ffffff' : heat);
     // Your hammer: up and waiting, or coming down (swing 1 just struck, easing back up).
     const hy = PIECE.y - 6 - Math.round((1 - swing) * 34), hx = PIECE.x + PIECE.w / 2 + 6;
     dot(lit, hx + 4, hy + 2, 30, 3, '#6a4a2a'), dot(lit, hx - 4, hy - 3, 10, 9, '#5a5660'), dot(lit, hx - 4, hy - 3, 10, 2, '#9a94a0');
     dot(lit, hx + 20, hy, 6, 6, this.skin), dot(lit, hx + 22, hy + 6, 10, 20, '#4a4048');
     if (last && now - last.t0 < 0.45) this.sparks(PIECE.x + PIECE.w / 2, PIECE.y, now - last.t0, last.mark);
     if (last && now - last.t0 < 1) drawText(glow, MARK[last.mark], Math.round(60 - (textWidth(MARK[last.mark]) + 1) / 2), 90 - Math.round((now - last.t0) * 8), MARK_COL[last.mark]);
-    for (let i = 0; i < STRIKE.strikes; i++) {
-      const m = s.struck[i]?.mark;
-      dot(glow, 48 + i * 9, 14, 6, 3, m ? MARK_COL[m] : '#3a3238');
+    const x0 = Math.round(60 - (notches.length * 9 - 3) / 2);
+    for (let i = 0; i < notches.length; i++) {
+      const m = notches[i];
+      dot(glow, x0 + i * 9, 14, 6, 3, m ? MARK_COL[m] : '#3a3238');
     }
+  }
+
+  /** The forge's light and the piece's, then the frame out. */
+  protected finishScene(b: number, now: number): void {
     this.finish([[60, 50, 140, 1.2 + Math.sin(now * 5) * 0.05, [1, 0.5, 0.25]], [PIECE.x + PIECE.w / 2, PIECE.y, 30 + b * 50, 0.3 + b * 0.9, [1, 0.6 + b * 0.3, 0.3 + b * 0.3]]]);
   }
 

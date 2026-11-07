@@ -168,6 +168,15 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     await kyle.page.screenshot({ path: path.join(ROOT, 'shots/ratgames/forge-parked-phone.png') });
     await sam.page.evaluate(() => (window.__anvil.quit(), window.__anvil.close()));
     step('Sam hands the hammer back: Kyle sees him stood in the forge', await parked(kyle, 'SAM', null));
+    // A shift at the forge: parked at the anvil the same way, two words however long it runs.
+    const samS = await sends(sam);
+    await sam.page.evaluate(() => window.__pastime.shift());
+    step('Kyle sees Sam parked at the anvil for a shift', await parked(kyle, 'SAM', 'anvil'));
+    const samS1 = await sends(sam);
+    for (let i = 0; i < 4; i++) await sam.page.mouse.click(640, 400), await wait(700);
+    step(`a shift: one word to start (${samS1 - samS}), none while working (${(await sends(sam)) - samS1})`, samS1 - samS <= 1 && (await sends(sam)) === samS1);
+    await sam.page.evaluate(() => (window.__shift.quit(), window.__shift.close()));
+    step(`Sam stops the shift: Kyle sees him stood (and one word: ${(await sends(sam)) - samS1})`, (await parked(kyle, 'SAM', null)) && (await sends(sam)) - samS1 <= 2);
     await sam.ctx.close();
     step('Sam closes the tab: gone for Kyle', await kyle.page.waitForFunction(() => !window.__town().here.some((h) => h.name === 'SAM'), null, { timeout: 15000 }).then(() => true, () => false));
     // The month's Redis budget used up: Kyle's next step is refused; he's told, leaves the town's

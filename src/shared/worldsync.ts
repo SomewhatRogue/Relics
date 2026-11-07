@@ -10,6 +10,7 @@ import { nights } from './raids.js';
 import { WORK_ORDER, workDone, type WorkId } from './works.js';
 import { addRangeLine, claimScore, type RangeClaim } from './rangeboard.js';
 import { knifeClaimScore, type KnifeClaim } from './knifeboard.js';
+import { shiftClaimScore, type ShiftClaim } from './shiftboard.js';
 import { placeBid, type StatueBid } from './statue.js';
 
 /** Works finished lately, kept for the town's talk. */
@@ -42,6 +43,8 @@ export interface Contribution {
   range?: RangeClaim;
   /** A finished round at the Rat's knife board, played again the same way (shared/knifeboard.ts). */
   knives?: KnifeClaim;
+  /** A finished shift at Halvard's forge, played again the same way (shared/shiftboard.ts). */
+  shift?: ShiftClaim;
   /** A bid for the statue in the square: taken only over the price as it stands now (shared/statue.ts). */
   statue?: StatueBid;
 }
@@ -73,6 +76,10 @@ export function contribute(w: WorldState, c: Contribution, now = Date.now(), rai
   if (c.knives) {
     const n = knifeClaimScore(c.hero.id, c.hero.cls, c.knives);
     if (n > 0) w.knives = addRangeLine(w.knives, { id: c.hero.id, name: c.hero.name, cls: c.hero.cls, n });
+  }
+  if (c.shift) {
+    const n = shiftClaimScore(c.hero.id, c.shift);
+    if (n > 0) w.shift = addRangeLine(w.shift, { id: c.hero.id, name: c.hero.name, cls: c.hero.cls, n });
   }
   if (c.statue) placeBid(w, c.hero, c.statue);
 }
