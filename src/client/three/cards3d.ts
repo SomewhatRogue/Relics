@@ -39,6 +39,7 @@ import { LEDGE_H } from './ground';
 import { drawTally } from '../chalkdraw';
 import { woodFigs } from '../wooddraw';
 import { noteKneels } from '../kneel';
+import { putStatue } from './statue3d';
 
 const lift = (z?: number) => (z ?? 0) * LEDGE_H;
 
@@ -115,6 +116,7 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
     for (const m of rackMen(waiting(room))) f.put('rk' + m.i, m.x, m.hung ? HUNG3 : 0, m.y, (c, px, py) => drawWaiting(c.lit, px, py, false, m.i, t), { pool: 0 });
     RACK.watch.forEach((w, i) => f.put('rw' + i, w.x, 0, w.y, (c, px, py) => drawWatch(c, px, py, i, px + (i ? -14 : 14), py - 24, t), { pool: 0.3 }));
   }
+  putStatue(f, map);
   (map.npcs ?? []).forEach((n, i) => {
     const at = npcAt(n, t), near = !!me && Math.hypot(me.x - at.x, me.y - at.y) <= SPOT_REACH;
     f.put('n' + i + n.name, at.x, 0, at.y, (c, px, py) => drawNpc(c, n, px, py, near && !n.mute, at.fx, !!n.path && !at.still, at.x), { pool: n.pose ? 0 : 0.3, bias: n.pose ? -0.3 : 0 });

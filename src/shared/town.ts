@@ -18,6 +18,7 @@ import { siege } from './siege.js';
 import { workDone } from './works.js';
 import { publicWorks } from './publicworks.js';
 import { BUTTS, MILLPOND } from './pastimes.js';
+import { PLINTH } from './statue.js';
 
 /** What talking to someone (or using a spot) opens. */
 export type SpotId = 'board' | 'council' | 'church' | 'smith' | 'wright' | 'trainer' | 'market' | 'infirmary' | 'granary' | 'home' | 'chat'
@@ -111,6 +112,8 @@ export function townMap(w: WorldState): GameMap {
     ...[[60, 5], [1.5, 37], [10, 38], [59.5, 37], [27, 38.5], [41, 8.5], [1.5, 24]].map(([x, y]) => r('tree', x, y, 0.6)),
     ...[[12.5, 7], [41, 24], [19, 37], [55.5, 9], [60.5, 21]].map(([x, y]) => r('bush', x, y, 0.35)),
     r('grate', 23.5, 36, 0.05), r('statue', 58.5, 19.5, 0.5),
+    // The plinth in the square, and whoever paid for the statue on it (shared/statue.ts).
+    { kind: 'plinth', x: PLINTH.x, y: PLINTH.y, r: PLINTH.r, ...(w.statue ? { hero: w.statue.by } : {}) },
     // Reeds round the millpond's edges.
     ...MILLPOND.reeds.map(([x, y]) => r('reed', x, y, 0.2)),
   ];

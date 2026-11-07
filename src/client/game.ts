@@ -63,6 +63,7 @@ import { packRoom, unpackRoom } from './bigsave';
 import type { Parties } from './parties';
 import { again as practiceAgain, clearPractice, letOut, practiceOf, stepPractice, type Pick } from '../sim/practice';
 import { RACK, sortKey } from '../shared/practice';
+import { settleBids } from './statuebuy';
 
 /** A hero's hound as the profile has it (a Ranger's; nobody else has one). */
 const houndOf = (p: Profile): HoundLook | undefined => (p.cls === 'RANGER' ? fitHound(p.hound, p.id) : undefined);
@@ -115,7 +116,7 @@ export class Game {
    */
   outside: { room: ArenaRoom; door: Block; hero: Hero } | null = null;
   /** The line to the shared world (set by the page; none in tests). */
-  link: { online: boolean; send(c: Contribution): void } | null = null;
+  link: { online: boolean; send(c: Contribution): Promise<'ok' | 'bad' | 'off'> | void; refresh?(force?: boolean): Promise<void> } | null = null;
   /** Played before a hero is chosen (the title screen's backdrop, and the tests). */
   private scratch = newProfile();
   /** Online with friends: leading (this browser runs the job: coop.ts) or following a leader's. */
@@ -1357,7 +1358,15 @@ export class Game {
     contribute(this.world, full, Date.now(), !this.link?.online);
     for (const [k, n] of Object.entries(c.stats ?? {})) p.stats[k as keyof typeof p.stats] += n ?? 0;
     store(this.save);
-    this.link?.send(full);
+    void this.link?.send(full);
+    if (this.townKey() !== before) this.rebuildTown();
+  }
+
+  /** A change to the world made here (a statue bid: statuebuy.ts), kept, and the town rebuilt if it shows. */
+  changeWorld(change: () => void): void {
+    const before = this.townKey();
+    change();
+    store(this.save);
     if (this.townKey() !== before) this.rebuildTown();
   }
 
@@ -1372,7 +1381,10 @@ export class Game {
   /** The world as the server has it now (another player's gift, a vote, the next day). */
   syncWorld(w: WorldState): void {
     const before = this.townKey();
-    this.save.world = { ...this.world, ...w };
+    // (The statue as the world has it, or none: never a bid this screen put up and the world turned away.)
+    this.save.world = { ...this.world, ...w, statue: w.statue };
+    // A statue bid out with the world: won, or paid back (statuebuy.ts).
+    settleBids(this, w);
     store(this.save);
     if (this.townKey() !== before) this.rebuildTown();
   }
@@ -1380,7 +1392,7 @@ export class Game {
   /** What shapes the town: houses lit, the council's choices, the works finished. */
   private townKey(): string {
     const w = this.world;
-    return JSON.stringify([housesFor(w.rescued), w.flags, WORK_ORDER.map((k) => workDone(w, k))]);
+    return JSON.stringify([housesFor(w.rescued), w.flags, WORK_ORDER.map((k) => workDone(w, k)), w.statue?.n ?? 0]);
   }
 
   /** The town rebuilt around you (outside, or the street you'll step back out into). */

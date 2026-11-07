@@ -11,6 +11,8 @@ import { MENDS, WORKS, WORK_ORDER, workDone, workOpen, workProgress, type WorkId
 import type { Game } from './game';
 import type { Panel } from './panels';
 import { line } from './speech';
+import { openStatue } from './statueui';
+import { STATUE_WORDS } from './statuewords';
 
 const p = (s: string) => `<p>${s}</p>`;
 const say = (who: string, s: string) => p(`<b>${who}:</b> ${line(`"${s}"`, who)}`);
@@ -29,10 +31,10 @@ export function openWorks(g: Game, panel: Panel, fresh = true): void {
     (raid && w.day - raid.day <= RAID_FRESH ? p(MEND_UI.board(raid.day, lossText(raid))) : '') +
     (done.length ? p(`<span class="dim">${MEND_UI.done}: ${done.map((k) => WORKS[k].name).join(', ')}.</span>`) : '') +
     p(`You have ${pr.gold} gold.`);
-  panel.show(TITLE, html, open.map((k) => ({
+  panel.show(TITLE, html, [...open.map((k) => ({
     label: `${WORKS[k].name.toUpperCase()} ${Math.min(workProgress(w, k), WORKS[k].need)}/${WORKS[k].need}`,
     act: () => detail(g, panel, k, again),
-  })));
+  })), { label: STATUE_WORDS.open, act: () => openStatue(g, panel, again) }]);
 }
 
 /** One work: what it is and what it changes, how far along, and the ways to give. */

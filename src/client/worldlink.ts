@@ -42,14 +42,16 @@ export class WorldLink {
     if (!force && Date.now() - this.at < 60_000) return;
     this.at = Date.now();
     const got = await this.call(`/api/world?g=${encodeURIComponent(this.group)}`);
-    if (got) this.take(got);
+    if (got && got !== 'bad') this.take(got);
   }
 
-  /** Send a contribution (the town has already changed here). */
-  async send(c: Contribution): Promise<void> {
-    if (!this.online) return;
+  /** Send a contribution (the town has already changed here): 'ok' with the world's answer taken, 'bad' if it turned it away, 'off' out of reach. */
+  async send(c: Contribution): Promise<'ok' | 'bad' | 'off'> {
+    if (!this.online) return 'off';
     const got = await this.call('/api/world', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ g: this.group, c }) });
+    if (got === 'bad') return 'bad';
     if (got) this.take(got);
+    return got ? 'ok' : 'off';
   }
 
   /** The Roll of the Brave offline: your own heroes. */
@@ -63,11 +65,13 @@ export class WorldLink {
     this.onWorld(v.world);
   }
 
-  private async call(url: string, init?: RequestInit): Promise<{ world: WorldState; board: Board } | null> {
+  private async call(url: string, init?: RequestInit): Promise<{ world: WorldState; board: Board } | 'bad' | null> {
     try {
       const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), TIMEOUT);
       const r = await fetch(url, { ...init, signal: ctl.signal });
       clearTimeout(t);
+      // Reached, and turned away (a contribution it won't take): still online.
+      if (r.status === 400) return 'bad';
       if (!r.ok || !(r.headers.get('content-type') ?? '').includes('json')) throw new Error(String(r.status));
       return await r.json();
     } catch {

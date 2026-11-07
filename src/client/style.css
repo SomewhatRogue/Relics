@@ -275,36 +275,48 @@ body[data-guard="none"] .tb.block { display: none; }
 #title .about p { margin: 0 0 6px; }
 #title .about p:last-child { margin: 0; }
 
-/* The Roll of the Brave: a card per tally, a podium for the top three. */
-#panel .rcards { display: flex; flex-direction: column; gap: 10px; margin: 6px 0 10px; }
-#panel .rcard { background: #1e1b24; border: 1px solid #3a3e46; padding: 8px 10px 6px; }
-#panel .rcard h4 { margin: 0 0 6px; color: #ffd27a; font-size: var(--fs-text); letter-spacing: 0.1em; text-align: center; }
+/* The Roll of the Brave: a card per tally, a podium for the top three. Fits a phone and a laptop in any
+   face (2026-11-06, after font C): the podium three even columns, every row of the list one height, a name cut
+   short with an ellipsis rather than pushing the number out, the headers on one line, 44px to tap. */
+#panel .card:has(.rcards) h2 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#panel .card:has(.rcards) .buttons button { min-height: 44px; }
+#panel .card:has(.rcards) .code input { height: 44px; }
+#panel .rcards { display: flex; flex-direction: column; gap: 10px; margin: 6px 0 10px; min-width: 0; }
+/* (relics.css has its own .rcard, a relic's card, a flex row: the Roll's cards are blocks whatever loads after.) */
+#panel .rcards > .rcard { display: block; min-width: 0; margin: 0; padding: 8px 10px 6px; text-align: left; }
+#panel .rcard { background: #1e1b24; border: 1px solid #3a3e46; }
+#panel .rcard h4 { margin: 0 0 6px; color: #ffd27a; font-size: var(--fs-text); line-height: 1.25; letter-spacing: 0.06em; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #panel .rcard.shame { background: #24181a; border-color: #4a2a2e; }
 #panel .rcard.shame h4 { color: #d86a50; }
-#panel .podium { display: flex; align-items: flex-end; justify-content: center; gap: 6px; }
-#panel .step { display: flex; flex-direction: column; align-items: center; width: 31%; min-width: 0; }
-#panel .step .rface { width: 26px; image-rendering: pixelated; }
-#panel .step b { font-size: var(--fs-text); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #ddd5c4; }
-#panel .step em { font-style: normal; color: #ffd27a; font-size: var(--fs-text); }
+#panel .podium { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: 6px; }
+#panel .step { display: grid; grid-template-rows: 30px 1.3em 1.3em auto; justify-items: center; align-items: center; min-width: 0; }
+#panel .step .rface { width: 26px; image-rendering: pixelated; align-self: end; }
+#panel .step b, #panel .step em { width: 100%; min-width: 0; text-align: center; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: var(--fs-text); }
+#panel .step b { color: #ddd5c4; }
+#panel .step em { font-style: normal; color: #ffd27a; font-variant-numeric: tabular-nums; }
 #panel .step > span { display: block; width: 100%; margin-top: 3px; text-align: center; font-weight: 400; color: #16171b; }
 #panel .step.s1 > span { background: #d9b13a; height: 30px; line-height: 30px; }
 #panel .step.s2 > span { background: #a39e94; height: 20px; line-height: 20px; }
-#panel .step.s3 > span { background: #a0683a; height: 13px; line-height: 13px; font-size: var(--fs-text); }
+#panel .step.s3 > span { background: #a0683a; height: 13px; line-height: 13px; font-size: var(--fs-s); }
 #panel .shame .step.s1 > span { background: #c84a3a; }
 #panel .step.me b { color: #f0e6cc; }
-#panel .step i { color: #5a5f69; font-style: normal; }
+#panel .step i { grid-row: 1 / 4; color: #5a5f69; font-style: normal; }
 #panel .rcard ol { list-style: none; margin: 6px 0 0; padding: 0; font-size: var(--fs-text); }
-#panel .rcard li { display: flex; gap: 6px; padding: 2px 0; border-top: 1px solid #2a2d33; }
-#panel .rcard li span { color: #8d929c; width: 16px; }
-#panel .rcard li small { color: #8d929c; }
-#panel .rcard li em { margin-left: auto; color: #ffd27a; font-style: normal; }
+/* A row: place, name (cut short if it must), class, number, each in its own column, every row one height. */
+#panel .rcard li { display: grid; grid-template-columns: 2.2ch minmax(0, 1fr) auto minmax(5ch, auto); column-gap: 8px; align-items: center; height: 26px; border-top: 1px solid #2a2d33; }
+#panel .rcard li span { color: #8d929c; text-align: right; font-variant-numeric: tabular-nums; }
+#panel .rcard li b { min-width: 0; font-weight: inherit; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#panel .rcard li small { color: #8d929c; font-size: var(--fs-s); white-space: nowrap; }
+#panel .rcard li em { color: #ffd27a; font-style: normal; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 #panel .rcard li.me { color: #f0e6cc; }
 #panel .rcard .you { margin: 6px 0 0; font-size: var(--fs-text); color: #f0e6cc; text-align: right; }
 #panel .rcard .you em { font-style: normal; color: #ffd27a; }
-#panel .rtabs { display: flex; gap: 6px; margin: 0 0 8px; }
-#panel .rtabs button { flex: 1; padding: 8px 0; background: #1d1f24; border: 1px solid #3a3e46; color: #b8b2a4; letter-spacing: 0.08em; }
+#panel .rtabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin: 0 0 8px; }
+#panel .rtabs button { min-width: 0; min-height: 44px; padding: 0 6px; background: #1d1f24; border: 1px solid #3a3e46; color: #b8b2a4; letter-spacing: 0.06em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #panel .rtabs button.on { background: #2e2618; border-color: #ffd27a; color: #ffd27a; }
 #panel .rtabs button[data-side="unlucky"].on { background: #2a1a1c; border-color: #d86a50; color: #d86a50; }
+/* A phone: the class goes under nothing and out of the way, so the name keeps its room. */
+@media (max-width: 420px) { #panel .rcard li { grid-template-columns: 2.2ch minmax(0, 1fr) minmax(5ch, auto); } #panel .rcard li small { display: none; } }
 
 /* The job board: a line a job; tap one for the rest. */
 #panel .job .jhead { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 6px; background: none; border: 0; color: #ddd5c4; text-align: left; font-size: var(--fs-text); }

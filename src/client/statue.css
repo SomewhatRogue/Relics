@@ -1,0 +1,12 @@
+/* The statue at the public works (statueui.ts): who's on the plinth, the quick bids, the amount typed. */
+#panel .st-who { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 10px; align-items: center; margin: 6px 0; }
+#panel .st-who p { margin: 0 0 4px; overflow-wrap: anywhere; }
+#panel .st-fig { display: block; width: 48px; height: 72px; padding: 4px; box-sizing: border-box; object-fit: contain; image-rendering: pixelated; background: #15171b; border: 1px solid #3a3e46; }
+#panel .st-none { background: repeating-linear-gradient(45deg, #15171b 0 6px, #1b1d22 6px 12px); }
+#panel .st-quick { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 8px 0 4px; }
+#panel .st-quick button { min-height: 44px; padding: 0 4px; white-space: nowrap; }
+#panel .st-quick button.on { border-color: #ffd27a; color: #ffd27a; }
+#panel .st-custom { white-space: nowrap; }
+#panel .st-custom input { height: 44px; text-transform: none; }
+#panel .st-gold { color: #ffd27a; }
+#panel .card:has(.st-who) .buttons button { min-height: 44px; }

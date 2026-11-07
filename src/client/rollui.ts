@@ -23,7 +23,7 @@ function card(k: keyof Stats, board: Board, me: Profile): string {
     const r = rows[i];
     return `<div class="step s${i + 1}${r && r.id === me.id ? ' me' : ''}">${r ? `${face(r.cls)}<b>${esc(r.name)}</b><em>${r.n}</em>` : '<i>-</i>'}<span>${i + 1}</span></div>`;
   }).join('');
-  const rest = rows.slice(3).map((r, i) => `<li${r.id === me.id ? ' class="me"' : ''}><span>${i + 4}</span>${esc(r.name)} <small>${CLASS_NAME[r.cls]}</small><em>${r.n}</em></li>`).join('');
+  const rest = rows.slice(3).map((r, i) => `<li${r.id === me.id ? ' class="me"' : ''}><span>${i + 4}</span><b>${esc(r.name)}</b><small>${CLASS_NAME[r.cls]}</small><em>${r.n}</em></li>`).join('');
   const you = mine < 0 && me.stats[k] > 0 ? `<p class="you">You: <em>${me.stats[k]}</em></p>` : '';
   return `<div class="rcard${SHAME.includes(k) ? ' shame' : ''}"><h4>${STAT_NAME[k]}</h4>${rows.length ? `<div class="podium">${podium}</div>${rest ? `<ol>${rest}</ol>` : ''}` : '<p class="dim">Nobody yet.</p>'}${you}</div>`;
 }

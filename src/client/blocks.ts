@@ -19,6 +19,7 @@ import { drawHallRound } from './hallsdraw';
 import { wear, windowsLit } from './wear';
 import { OX, OY, PX } from './world';
 import { blockBoxes, DECKS, PIECE_BLOCKS, PIECE_ROUNDS } from './pieces';
+import { drawPlinth } from './statuedraw';
 import { FEN_KINDS } from './fenpieces';
 import { drawPieceBlock, drawPieceRound, paintBoxes } from './piecedraw';
 import { drawDoorGlow, paintShut } from './shutdraw';
@@ -231,6 +232,7 @@ export const blockAt = (b: Block): [number, number] => [OX + b.x * PX, OY + b.y 
 /** A round thing at its foot (x, y on screen). */
 export function drawRound(c: Ctx, r: Round, x: number, y: number): void {
   if (r.kind === 'pillar') return blit(c, SPRITES.pillar, x, y + 5);
+  if (r.kind === 'plinth') return drawPlinth(c, r, x, y);
   if (PIECE_ROUNDS.has(r.kind)) return drawPieceRound(c, r, x, y);
   if (r.kind === 'crows' || r.kind === 'moths' || r.kind === 'dog' || r.kind === 'smoke') return void drawLife(c, r, x, y);
   if (r.kind === 'candles' || r.kind === 'witchfire') return void drawHallRound(c, r, x, y);

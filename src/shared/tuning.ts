@@ -496,3 +496,10 @@ export const LIGHTNING = {
  * within `calm` tiles of the Ranger. Drawing only; the room never hears of a pet.
  */
 export const PETTING = { calm: 5 };
+
+/**
+ * The statue in Lantern Square (shared/statue.ts): a hero may pay for one only once they've given this much
+ * gold to the town, all told (their GOLD GIVEN on the Roll: the Lantern, the public works, gear for the walls).
+ * Kyle, 2026-11-06: "You can only make a statue of yourself after you donate enough to the town."
+ */
+export const STATUE_GIVEN = 1000;

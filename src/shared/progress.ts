@@ -49,6 +49,8 @@ export interface Profile {
   name: string;
   cls: HeroClass;
   gold: number;
+  /** A bid for the statue in the square, paid and waiting on the world's answer (shared/statue.ts). */
+  statueBid?: import('./statue.js').BidNote;
   xp: number;
   level: number;
   perks: PerkId[];

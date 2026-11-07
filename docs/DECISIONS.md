@@ -2,6 +2,56 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-06: a statue in Lantern Square, bought at the public works; the Roll's walls fit (Kyle; Claude Opus 5.5)
+
+Kyle: "I want people to be able to make a statue of themselves at the public works that shows in the town
+square with their hero's name on it. Starting price is 1000 gold. Another hero can pay more (1 gold more, up to
+1000 more) to replace it with their character and their name." Then: "You can only make a statue of yourself
+after you donate enough to the town." And of the Roll after the training screen: "Ditto on the wall of fame,
+wall of shame."
+
+- **The rules** (`shared/statue.ts`, pure): the first statue is 1000 exactly; after that a bid is from the price
+  + 1 to the price + 1000, and what was paid is the new price (it ratchets). A hero may bid only once they've
+  given the town `STATUE_GIVEN` gold all told (`shared/tuning.ts`, 1000; their GOLD GIVEN on the Roll: the
+  Lantern, the works, gear for the walls). `WorldState.statue` holds who (id, name, weapon, look), the price,
+  which statue it is (`n`) and the last eight before it.
+- **The world decides** (`api/_world.ts`, `shared/worldsync.ts`): a bid is a contribution `statue: { over, pay,
+  w, l, given }`. `clean` refuses anything not whole, a made-up weapon or look, or `given` under the threshold
+  (400). `contribute` puts it up only if `over` is the price as it stands now and `pay` is in range, so two
+  heroes bidding over the same price can't both win: the first write takes it and the second is over a price
+  that's gone. A bid carries no stats, so it takes the 5-command path (WATCH, GET, MULTI, SET, EXEC), one write
+  a bid. The statue comes with the world's existing read; nothing new polls. (`given` is the hero's own word,
+  as the rest of a contribution is; checking it against the Roll's `given` set would be one ZSCORE more.)
+- **Gold, safely** (`client/statuebuy.ts`): the gold comes out of the hero's save and the bid is noted on the
+  hero (`Profile.statueBid`), stored, before anything goes out; one bid at a time. Every world the server sends
+  settles it (`game.ts` syncWorld): won (the statue `n + 1` is theirs) or lost (someone else's: the gold back, and
+  a note, "Someone paid for the statue just before NAME did..."). Refused outright (400), or answered with the
+  world just written and the bid not in it, the gold comes back too. Lost on the way, the same bid goes again
+  with the next world seen; a second copy is over a price that's gone, so it's never taken twice, and a bid
+  gone out of what's kept counts as won, never paid back twice. An online build with the world out of reach
+  takes no bid. A solo build (no server) puts the statue up in this browser's world, kept in the save.
+- **At the public works** (`client/statueui.ts`, a THE STATUE button on Judd's board): the stone figure, who's
+  on the plinth and what they paid, the range, +1, +100 and +1000, a box to type it, PAY n GOLD. Short of the
+  giving, Judd says how much more and there's nothing to bid with.
+- **In the square** (`client/statuepieces.ts`, `statuedraw.ts`, `three/statue3d.ts`): a three-part plinth
+  (boxes, the same list both views build) at (31.8, 21.5), east of the brazier, clear of the bard, the cart,
+  the bench and Dunn's round (`tests/statue.test.ts` checks it). On it the hero's own figure (drawHero, their
+  weapon and look), turned to the plinth's greys in six stepped bands; their name cut in a bronze plate on the
+  front in the 3x5 capitals (two lines past seven letters). Empty, a small board on top: SEE / JUDD. In 2.5D the
+  plinth is in the map's mesh (one `case 'plinth'` in rounds3d.ts) and the figure and the plate are cards
+  (figs3d.ts), lit by the scene (one `putStatue` line in cards3d.ts).
+- **The Roll's walls** (`style.css`, `rollui.ts`): relics.css's own `.rcard` (a relic's card, a flex row) was
+  laying the Roll's cards out as a row, which is what broke under font C. The Roll's cards are blocks now, the
+  podium three even columns with each name and number on one line (ellipsis), the list a grid (place, name cut
+  short, class, number), every row 26px, the class dropped under 420px so the name keeps its room, the tabs and
+  the card headers on one line, the tabs, buttons and world code 44px.
+- New words (for the lore keeper and the line editor; none have been through them): everything in
+  `client/statuewords.ts`. New lore to record or reject: the masons who work for Judd, and the plinth itself.
+- Tests: `tests/statue.test.ts` (price rules, gold taken once and one at a time, a race with one paid back, a
+  forged or low bid refused, the giving threshold on both sides, the plinth shows the right hero, the spot is
+  clear, solo, two Game screens racing). `scripts/town-online.cjs`: Sam buys, Kyle sees it, then both bid over
+  1000 at once. Pictures: `node scripts/statue-look.cjs [url] [out] [tag] [walls|statue|all]`.
+
 ## 2026-11-06: pet your hound whenever: PET on the context button anywhere it's at heel, three ways it takes it, and friends see it (Kyle; Claude Opus 5.5)
 
 Kyle: "hunter should be able to pet their hound whenever lol." Builds on the idles and petting entry
