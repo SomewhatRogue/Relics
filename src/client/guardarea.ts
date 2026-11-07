@@ -10,16 +10,17 @@ export type GuardRating = 'LOW' | 'MED' | 'HIGH';
 export type GuardKind = 'BLOCK' | 'NONE';
 
 /**
- * The rating, from where the guard reaches (`guardArc`, degrees in front), what a blocked blow costs in
- * stamina (`guardCost`) and what gets through a block (`chip`):
- *   HIGH  arc 150 or more, cost 1.1 or less, chip 0.2 or less   (sword and shield, mace, censer)
- *   MED   arc 120 or more, cost 1.5 or less, chip 0.3 or less   (spear, flail)
- *   LOW   anything less                                         (the greatsword)
+ * The rating, from where the guard reaches (`guardArc`, degrees in front) and what a blocked blow costs in
+ * stamina (`guardCost`). (Nothing of a red blow gets through any block; a striped one's share is the class's,
+ * GUARD.striped: it was a kit's `chip`, shown but never taken, until 2026-11-06.)
+ *   HIGH  arc 150 or more, cost 1.1 or less   (sword and shield, mace, censer)
+ *   MED   arc 120 or more, cost 1.5 or less   (spear, flail)
+ *   LOW   anything less                       (the greatsword)
  */
 export function guardRating(w: WeaponId): GuardRating {
   const k = WEAPONS[w];
-  if (k.guardArc >= 150 && k.guardCost <= 1.1 && k.chip <= 0.2) return 'HIGH';
-  if (k.guardArc >= 120 && k.guardCost <= 1.5 && k.chip <= 0.3) return 'MED';
+  if (k.guardArc >= 150 && k.guardCost <= 1.1) return 'HIGH';
+  if (k.guardArc >= 120 && k.guardCost <= 1.5) return 'MED';
   return 'LOW';
 }
 

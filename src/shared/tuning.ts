@@ -3,6 +3,8 @@
  * so a wind-up you see is the wind-up that is judged. Distances are in tiles (1 tile = 16 px),
  * times in seconds, knockback in tiles per second of push (divided by the target's weight).
  */
+import type { HeroClass } from './weapons.js';
+
 export const TICK = 1 / 30;
 
 /**
@@ -91,9 +93,24 @@ export const GUARD = {
    *  hard (no timing to it: Kyle, 2026-11-05, parry is gone; was 2.5 when only a parry earned it). */
   counterWindow: 1.6,
   counterMult: 1.5,
-  /** A crushing blow (a heavy's) blocked: `crushCost` times the stamina and the full shove (`crushShove` of its knock). */
+  /** A blow's damage counts in full toward a block's stamina up to `knee`, and only `past` of each point above
+   *  it, so one big blow (a butcher's cleave) doesn't take the whole bar (Kyle, 2026-11-06: "Warrior block isn't
+   *  great against butcher"). A butcher's cleave of 30 costs a sword 46 stamina (was 72); a scrapper's 8, 19 as before. */
+  knee: 12,
+  past: 0.4,
+  /** And no one red blow costs more than `most` of it: a full bar always holds one (a striped one costs more, below). */
+  most: 70,
+  /** A crushing blow (a heavy's) blocked: `crushCost` times the stamina and more shove (`crushShove` of its knock). */
   crushCost: 1.25,
   crushShove: 0.8,
+  /** A red blow blocked shoves you this share of its knock. */
+  shove: 0.4,
+  /**
+   * A striped blow blocked facing it (Kyle, 2026-11-06: "Should mitigate all damage, even unblockable"): only
+   * `through` of it reaches your health (a Warrior's 25%, a Healer's 40%), it costs `cost` times a red blow's
+   * stamina, shoves you `shove` of its knock and opens no counter. Still worse than getting out of it.
+   */
+  striped: { through: { WARRIOR: 0.25, HEALER: 0.4 } as Partial<Record<HeroClass, number>>, cost: 1.3, shove: 0.75 },
   /** Hits on a stunned enemy (other than the counter) do this much more. */
   stunnedMult: 1.5,
   /** Any blow from behind does this much more (daggers do more, see WEAPONS). No extra knockback. */
@@ -256,18 +273,30 @@ export const VARIANTS = {
   /** The Mage's element lesson (shared/wood.ts ELEMENT_FOES): plain small goblins but for what they're weak to. */
   soaked: { hp: 24 }, aproned: { hp: 24 }, kilnhot: { hp: 24 },
   heavy: { hp: 110, reach: 1.7, speed: 0.75, swing: { windup: 1.0, active: 0.1, recover: 0.9, dmg: 18, knock: 8, range: 1.9, arc: 100, unblockable: false } as EnemyAttackSpec },
+  /** The Stoker, the wood's last fight and a new hero's first big one (Kyle, 2026-11-06: "tutorial is too hard"):
+   *  was 520 health, 26 a sweep, 34 a drop, 30 a charge, each wind-up as written; now softer, its wind-ups
+   *  WOOD_EASE.stoker as long. */
   stoker: {
-    hp: 520,
-    sweep: { windup: 1.0, active: 0.1, recover: 0.9, dmg: 26, knock: 8, range: 3.0, arc: 150, unblockable: false } as EnemyAttackSpec,
-    drop: { windup: 1.2, active: 0.12, recover: 1.0, dmg: 34, knock: 14, radius: 2.0, ahead: 1.0, unblockable: true } as EnemyAttackSpec,
+    hp: 380,
+    sweep: { windup: 1.0, active: 0.1, recover: 0.9, dmg: 18, knock: 8, range: 3.0, arc: 150, unblockable: false } as EnemyAttackSpec,
+    drop: { windup: 1.2, active: 0.12, recover: 1.0, dmg: 24, knock: 14, radius: 2.0, ahead: 1.0, unblockable: true } as EnemyAttackSpec,
     draw: { windup: 1.0, active: 0.1, recover: 0.6, dmg: 6, knock: 0, range: 8, arc: 8, unblockable: true } as EnemyAttackSpec,
     drawFrom: 3.2, drawEvery: 0.45, pullTo: 1.2, pullStun: 0.7,
-    /** The charge: a long striped run straight at you. It can't be blocked, and no blow stops it once it's
-     *  coming; get out of its line. Run into a wall or a tree and it stuns itself. */
-    charge: { windup: 1.15, active: 0.55, recover: 1.0, dmg: 30, knock: 14, range: 8, arc: 0, radius: 0.95, unblockable: true } as EnemyAttackSpec,
+    /** The charge: a long striped run straight at you. A block only takes the edge off, and no blow stops it
+     *  once it's coming; get out of its line. Run into a wall or a tree and it stuns itself. */
+    charge: { windup: 1.15, active: 0.55, recover: 1.0, dmg: 20, knock: 14, range: 8, arc: 0, radius: 0.95, unblockable: true } as EnemyAttackSpec,
     chargeFrom: 3.5, chargeChance: 0.3, chargeStun: 1.8,
   },
 };
+
+/**
+ * The wood is a first run (Kyle, 2026-11-06: "Right now tutorial is too hard unfortunately"). Its drilled
+ * goblins (every one but the Stoker) wind up `windup` times as slow and hit `dmg` as hard; the Stoker winds up
+ * `stoker` times as slow; you start each lesson at full health and breath (`heal`); and falling to the Stoker
+ * gives it back only `mends` of the health you'd taken off it (it used to start again whole), with the friends
+ * it called gone and not called again.
+ */
+export const WOOD_EASE = { windup: 1.5, dmg: 0.7, stoker: 1.25, heal: true, mends: 0.25 };
 
 export const HEIGHT = { shot: 1.25, fallSpeed: 3, fallDmg: 12, fallStun: 0.8 };
 

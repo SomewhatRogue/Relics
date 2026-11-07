@@ -31,7 +31,8 @@ function savedNow(e: Enemy, a: EnemyAttack, h: Hero, now: number): boolean {
   const w = WEAPONS[h.weapon];
   if (h.wardUntil > now || (ironHeld(h, now) && !a.unblockable) || (h.act === 'bash' && h.rush?.el === 'storm')) return true;
   if (CLASS_DODGES[w.cls] && h.act === 'roll' && h.actT >= w.dodge.iFrom && h.actT <= slipWindow(h)) return true;
-  if (a.unblockable || !h.blocking || guardOf(w) !== 'full' || !(h.act === 'idle' || h.act === 'attack' || h.act === 'charge')) return false;
+  // (A striped blow on a held guard is met by it too: most of it stopped, sim/blockhold.ts.)
+  if (!h.blocking || guardOf(w) !== 'full' || !(h.act === 'idle' || h.act === 'attack' || h.act === 'charge')) return false;
   const [gx, gy] = guardFrom(e, a, h), gl = Math.hypot(gx, gy) || 1;
   return roundGuard(h) || (h.fx * gx + h.fy * gy) / gl > Math.cos(((guardArc(h) / 2) * Math.PI) / 180);
 }
@@ -48,7 +49,7 @@ export function graceDefer(e: Enemy, a: EnemyAttack, h: Hero, _heroes: Hero[], n
 function lateSave(p: LateBlow, h: Hero, rollAt: number | undefined, guardUp: number | undefined, guardDown: number | undefined): Verdict | null {
   const g = p.grace ?? 0, w = WEAPONS[h.weapon], inside = (t: number | undefined) => t !== undefined && t > p.at - E && t <= p.at + g + E;
   if (CLASS_DODGES[w.cls] && inside(rollAt)) return 'out';
-  if (!p.a.unblockable && guardOf(w) === 'full' && h.stamina > 0 && !h.winded && inside(guardUp) && (guardDown === undefined || guardDown > guardUp!)) return 'block';
+  if (guardOf(w) === 'full' && h.stamina > 0 && !h.winded && inside(guardUp) && (guardDown === undefined || guardDown > guardUp!)) return 'block';
   return null;
 }
 

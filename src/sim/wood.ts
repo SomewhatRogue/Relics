@@ -7,6 +7,7 @@
 import { attackCovers } from './combat';
 import { AREAS, FEEDING, GATES, GOBLIN_DEAD, LINES, STOKER, STOKER_CALLS, areaAt, lessonsFor, type Lesson, type Teach } from '../shared/wood';
 import { dodgeName, type HeroClass } from '../shared/weapons';
+import { HERO, WOOD_EASE } from '../shared/tuning';
 import { isDead } from './damage';
 import { HERO_ID, hew, say, spawn } from './woodkit';
 import { stepCut } from './woodcut';
@@ -75,7 +76,7 @@ export const WAKE = { fade: 2.5, arrive: 5.2, standing: 0.8 };
 /** Hew's way in at the waking: out of the trees west of you, round under the cart, slow and low. */
 const SNEAK = { round: [4.2, 36.4] as [number, number], speed: 1.45 };
 /** Tutorial pacing: drilled goblins wind up this much slower; one at a time comes at you. */
-export const DRILL = { windup: 1.5, wheels: 2, praise: 1, praiseFor: 1.1 };
+export const DRILL = { windup: WOOD_EASE.windup, wheels: 2, praise: 1, praiseFor: 1.1 };
 
 export function newWood(room: ArenaRoom, cls: HeroClass = 'WARRIOR'): WoodState {
   const w: WoodState = { stage: 0, entered: false, count: 0, ids: [], more: false, cut: -1, caption: null, stoker: 0, helped: 0, hewAlive: true, relic: false, done: false, wake: 0, hold: null, drilled: 0, praised: 0, drillAt: -1, from: null, said: 0, upAt: -1, cls };
@@ -171,10 +172,11 @@ function fallen(w: WoodState, room: ArenaRoom): void {
   const h = room.heroes.find((x) => x.id === HERO_ID)!, n = hew(room);
   Object.assign(h, { hp: h.maxHp, act: 'idle', actT: 0, stamina: 100, kvx: 0, kvy: 0 });
   if (w.stage === 4 && w.stoker) {
+    // It gets back only a share of what you'd taken off it (a first run: WOOD_EASE.mends), and the friends
+    // it called are gone and not called again.
     const s = room.enemies.find((e) => e.id === w.stoker)!;
-    Object.assign(s, { hp: s.maxHp, x: STOKER.x, y: STOKER.y, attack: null, act: 'chase', cooldown: 2 });
+    Object.assign(s, { hp: Math.min(s.maxHp, Math.round(s.hp + (s.maxHp - s.hp) * WOOD_EASE.mends)), x: STOKER.x, y: STOKER.y, attack: null, act: 'chase', cooldown: 2 });
     room.enemies = room.enemies.filter((e) => e === s || !w.ids.includes(e.id) || e.kind === 'butcher');
-    w.helped = 0;
     Object.assign(h, { x: 52, y: 10 });
     say(w, room, '', LINES.cometo, 4);
     return;
@@ -206,6 +208,8 @@ export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: nu
   const walked = !w.from || Math.hypot(h.x - w.from.x, h.y - w.from.y) > 2.5;
   if (!w.entered && areaAt(h.x, h.y) === lesson.area && (w.stage > 0 || walked)) {
     Object.assign(w, { entered: true, count: 0, drilled: 0, praised: 0, moreSaid: false });
+    // Each lesson starts you at full health and breath (a first run: WOOD_EASE.heal).
+    if (WOOD_EASE.heal) Object.assign(h, { hp: h.maxHp, stamina: HERO.stamina, winded: false });
     if (w.stage === 4) {
       w.cut = 0;
       say(w, room, 'HEW', LINES.hut, 2);
