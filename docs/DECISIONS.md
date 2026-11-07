@@ -8497,3 +8497,9 @@ on a big screen.
   (shared/fishboard.ts); the world rolls the fish again from the hero's seed for that cast, so no weight can be
   typed in. The fight on the line isn't replayed, only what took the hook. The board shows each hero's biggest
   fish by weight, with its kind, first on Best in Wickhold.
+- Kyle (2026-11-07): the Cleric's shield of light was too strong, their stamina came back too fast. A Cleric's
+  stamina now waits 1.5 s after it was last spent (others 0.6 s) and refills at 0.55x (`HOLY_GUARD.regenDelay`,
+  `.regen`; sim/hero.ts). Standing in your own coals still gives 25 a second while guarding.
+- Kyle: "the flail, you should be able to move while swinging it". The flail's quick swings walk at half pace
+  (`castWalk: 0.5`, as the wand's casts do) and its spin-up at 0.55 (`chargeSpeed`, was 0, rooted). The release
+  itself still doesn't carry you.

@@ -74,7 +74,8 @@ export const MORE_KITS: Record<MoreKitId, Weapon> = {
   },
   /**
    * Slow, wide sweeps that shove a goblin a little (never over a shield-bearer's board); the second blow
-   * heals. Held, rooted: the flail spun up, and let go it's a long sweep that doesn't carry you with it.
+   * heals. Held, the flail spun up while you walk at `chargeSpeed` (Kyle, 2026-11-07: "you should be able to
+   * move while swinging it"), and let go it's a long sweep that doesn't carry you with it.
    * Let go on the white flash and what it hits is stunned, and friends near you are shielded (shared/
    * cleric.ts FLAIL). A strong spun blow knocks a goblin out of a heavy wind-up (`breaker`).
    */
@@ -88,7 +89,7 @@ export const MORE_KITS: Record<MoreKitId, Weapon> = {
     ],
     heavy: { windup: 0.1, active: 0.14, recover: 0.5, dmg: 22, dmgFull: 54, range: 2.6, arc: 240, lunge: 0, knock: 8, knockFull: 14, holy: true, dazes: true },
     draw: 1,
-    blockSpeed: 0.4, chargeSpeed: 0, guardArc: 130, guardCost: 1.3, speed: 0.8, blunt: true, shoves: true,
+    blockSpeed: 0.4, chargeSpeed: 0.55, guardArc: 130, guardCost: 1.3, speed: 0.8, blunt: true, shoves: true, castWalk: 0.5,
     dodge: CLERIC_ROLL,
   },
 };

@@ -2,6 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { ArenaRoom } from '../src/sim/room';
 import { HERO, HOLY_GUARD, TICK, type WeaponId } from '../src/shared/tuning';
+import { NO_INTENT } from '../src/sim/types';
 
 /** One hero with `w` in an empty yard, half their stamina spent just now; their stamina after `s` seconds. */
 function after(w: WeaponId, s: number): number {
@@ -25,5 +26,23 @@ describe("a Cleric's breath", () => {
     const cleric = after('mace', t) - 50, warrior = after('sword', HERO.regenDelay + 1) - 50;
     expect(cleric).toBeLessThan(warrior * 0.7);
     expect(cleric).toBeGreaterThan(warrior * 0.4);
+  });
+});
+
+describe('the flail on the move (Kyle, 2026-11-07)', () => {
+  it('a Cleric walks while swinging it and while spinning it up, slower than walking', () => {
+    for (const hold of [false, true]) {
+      const room = new ArenaRoom(3, { scrappers: false, props: false });
+      const h = room.join('me');
+      room.enemies.length = 0;
+      h.weapon = 'flail';
+      const x0 = h.x;
+      for (let i = 0; i < Math.round(0.6 / TICK); i++) {
+        room.setIntent('me', { ...NO_INTENT, mx: 1, my: 0, attack: hold || i < 3, attackSeq: 1 });
+        room.step();
+      }
+      expect(hold ? h.act : 'x').toBe(hold ? 'charge' : 'x');
+      expect(h.x - x0).toBeGreaterThan(0.6);
+    }
   });
 });

@@ -145,7 +145,7 @@ export interface Weapon {
   shaft?: boolean;
   /** A bolt has to be wound on: a hold aims a loaded crossbow and winds an empty one (shared/ranger.ts XBOW). */
   reloads?: boolean;
-  /** The quick attack is cast on the move, at this share of your pace (the wand). */
+  /** The quick attack is cast on the move, at this share of your pace (the wand; the flail, swung as you walk). */
   castWalk?: number;
   /** The spellblade (shared/mage.ts): its magic is a shield hits drain before health, and a dodge through a blow refills it. */
   spellblade?: boolean;

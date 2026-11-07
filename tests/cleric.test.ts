@@ -183,16 +183,16 @@ describe('the censer', () => {
 });
 
 describe('the flail', () => {
-  it('spins up rooted, and the release reaches further than a quick blow without carrying you', () => {
+  it('spins up still, and the release reaches further than a quick blow without carrying you', () => {
     const far = 9 - (2.4 + 0.32), quick = arena('flail', [far]), spin = arena('flail', [far]);
     quick.tap();
     expect(lost(quick.e)).toBe(0);
-    // Pushing the stick once the spin has begun: you stay put, through the release too.
+    // Spun up without the stick, then let go: the release doesn't carry you (you may walk while spinning: 2026-11-07).
     spin.run(CHARGE.start + 0.05, { attackSeq: 1, attack: true });
     expect(spin.h.act).toBe('charge');
     const at = [spin.h.x, spin.h.y];
-    spin.run(late('flail'), { attackSeq: 1, attack: true, mx: 1, my: 0.3 });
-    spin.run(WEAPONS.flail.heavy.windup + WEAPONS.flail.heavy.active + 0.05, { attackSeq: 1, attack: false, mx: 1, my: 0.3 });
+    spin.run(late('flail'), { attackSeq: 1, attack: true });
+    spin.run(WEAPONS.flail.heavy.windup + WEAPONS.flail.heavy.active + 0.05, { attackSeq: 1, attack: false });
     expect(spin.h.act).not.toBe('charge');
     expect(lost(spin.e)).toBeGreaterThan(0);
     expect(Math.hypot(spin.h.x - at[0], spin.h.y - at[1])).toBeLessThan(0.01);

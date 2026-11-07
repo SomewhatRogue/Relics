@@ -34,7 +34,7 @@ export const MACE = { heal: 10, perfect: 1.5 };
  */
 export const CENSER = { drop: 3, at: 0.8, life: 6, radius: 0.5, max: 6, arm: 0.4, burst: 1.8, heal: 6, reach: 5, flare: 1.3, flareDmg: 14, snag: 0.5, jar: 0.18 };
 
-/** The flail. Held, rooted, it spins up; the release is a long sweep (reach 2.6, the quick blows 1.85).
+/** The flail. Held, it spins up as you walk (slower); the release is a long sweep (reach 2.6, the quick blows 1.85).
  *  Quick blows shove a goblin a little; a shield-bearer's board stops the shove. Let the spin go on the
  *  white flash and what it hits is stunned `stun` s (a butcher `big` as long), and friends near you are shielded. */
 export const FLAIL = { stun: 1, big: 0.5 };
