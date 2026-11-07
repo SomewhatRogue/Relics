@@ -33,11 +33,14 @@ export const SIGN_KEY = 'V';
 export const MARK_SIGN = { cooldown: 10, range: 9, time: 8, flat: 5, heavy: 1.4, tick: 1.15, bend: 0.6, cone: 0.35, face: 0.8 };
 
 /**
- * The Healer's MEND (`heal` in the code): `heal` health to the nearest hurt friend within `range` tiles,
- * or to yourself if nobody near is hurt or you're the most hurt of all; `cooldown` s apart, `cost`
- * stamina. Never a goblin. Nobody hurt, or short of breath: the press does nothing and costs nothing.
+ * The Healer's MEND (`heal` in the code): `heal` health to the worst-off hurt friend within `range` tiles
+ * (the nearer of two within `tie` of each other), or to yourself if nobody near is hurt or you're worse
+ * off than them by more than `selfFirst` of your health (Kyle, 2026-11-06: "Cleric could heal friends
+ * only self with V": it went to you whenever you were the least bit worse off, and reached only 4 tiles).
+ * `cooldown` s apart, `cost` stamina. Never a goblin. Nobody hurt, or short of breath: the press does
+ * nothing and costs nothing. Who it would reach now wears a gold mark while it's ready (client/signdraw.ts).
  */
-export const HEAL_SIGN = { cooldown: 12, range: 4, heal: 25, cost: 20 };
+export const HEAL_SIGN = { cooldown: 12, range: 6, heal: 25, cost: 20, selfFirst: 0.25, tie: 0.02 };
 
 /** Each one's button word and its wait. */
 export const SIGNS: Record<SignId, { name: string; cooldown: number }> = {
@@ -50,7 +53,7 @@ export const SIGNS: Record<SignId, { name: string; cooldown: number }> = {
 export const SIGN_WORDS: Record<SignId, string> = {
   shadow: "Step out of the dark behind the goblin you face. It's stunned for a second.",
   mark: "Mark the goblin you aim at for 8 s. Anyone's quick hits on it do +5 damage, heavy hits +40%. Your arrows bend toward it, and your hound goes for it.",
-  heal: "Heal the nearest hurt friend for 25, or yourself if nobody near is hurt or you're the worst off. Costs 20 stamina.",
+  heal: "Heal whichever friend near you is worst hurt for 25. If nobody near is hurt, or you're in a much worse way than they are, it heals you. Costs 20 stamina. The gold mark shows who it'll reach.",
 };
 
 /** Marked by a Ranger now (for the room, and to draw it on every screen). */

@@ -35,7 +35,8 @@ export class ObjFlash {
 
   /** The objective just shown is done. */
   done(now: number): void {
-    if (now < this.until || !this.last.includes('class="obj"')) return;
+    // (Nothing to hold: an empty goal, as the wood's while you lie there, or a stage skipped past.)
+    if (now < this.until || !/<div class="obj">[^<\s]/.test(this.last)) return;
     this.held = this.last.replace(/<div class="obj">([\s\S]*?)<\/div>/, (_, t: string) => `<div class="obj done">${finished(t)}</div>`);
     this.until = now + HOLD;
     sfxTown.chime();
@@ -44,5 +45,5 @@ export class ObjFlash {
 
 /** "DODGES 2 / 3" as "DODGES 3 / 3"; "Clear the goblins (1 left)" as "Clear the goblins". */
 function finished(t: string): string {
-  return t.replace(/(\d+) \/ (\d+)/, '$2 / $2').replace(/\s*\(\d+ [a-z]+ left\)|\s*\(\d+ left\)/, '');
+  return t.replace(/<u>/g, '<u class="on">').replace(/(\d+) \/ (\d+)/, '$2 / $2').replace(/\s*\(\d+ [a-z]+ left\)|\s*\(\d+ left\)/, '');
 }

@@ -177,18 +177,13 @@ describe("the Healer's MEND step", () => {
     expect(w.hold).toMatchObject({ kind: 'card', move: 'heal', need: 'sign' });
     expect(w.hold!.how).toContain('heals you');
     expect(g.taught()).toContain('sign');
-    // Worse off than Hew: the MEND is yours, and the step waits.
+    // A bit worse off than Hew yourself, it still goes to him (2026-11-06: only much worse off keeps it for
+    // you, and he's at a fifth): he's up, the arrow out, the way open.
     const n = hew(g);
     Object.assign(g.hero, { x: n.x + 1.2, y: n.y, hp: 10, stamina: 100, winded: false });
     press(g);
     g.step(0.05, NO_INTENT);
-    expect(g.hero.hp).toBe(35);
-    expect(n.hp).toBe(SIGN_STEP.hewHp);
-    expect(w.stage).toBe(2);
-    // Back on your feet, and the MEND goes to him: he's up, the arrow out, the way open.
-    Object.assign(g.hero, { hp: g.hero.maxHp, signReady: 0 });
-    press(g);
-    g.step(0.05, NO_INTENT);
+    expect(g.hero.hp).toBe(10);
     expect(w.stage).toBe(3);
     expect(n.kneel).toBe(false);
     expect(n.arrow).toBe(false);

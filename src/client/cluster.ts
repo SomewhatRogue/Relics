@@ -1,6 +1,7 @@
 /**
  * The touch buttons as one cluster round ATTACK (bottom right, upright phone): what each shows and how
- * it looks this frame. The buttons and their presses are input.ts's; this only draws them (btnart.ts)
+ * it looks this frame. A laptop shows the same buttons in a row at the bottom, each with its key on its
+ * corner, to show what you have and what to press (keybar.css; Kyle, 2026-11-06). The buttons and their presses are input.ts's; this only draws them (btnart.ts)
  * and says which are there: a Mage's ELEMENT (a small ring by ATTACK in the element's colour, its name
  * over it), a Rogue's SHADOW STEP, Ranger's MARK or Healer's MEND in the same spot (shared/signs.ts), the class skill and the relic carried with their cooldowns, the guard
  * (BLOCK for a Warrior or Healer, none for a Ranger, Rogue or Mage), the dodge (JUMP, DASH, BLINK, ROLL), the flask as the health orb,
@@ -37,6 +38,7 @@ import { skillCanvas } from './skillicons';
 import { icon, type IconId } from './icons';
 import { paintButton, type Face } from './btnart';
 import { stickVars } from './stickart';
+import { BTN_SEL, KEYCAP, type BtnId } from './keycaps';
 import type { Game } from './game';
 
 const EL: Record<string, string> = { fire: '#ff9a3c', frost: '#bfe8ff', storm: '#fff27a' };
@@ -62,16 +64,19 @@ class Btn {
   private art = document.createElement('canvas');
   private cd = document.createElement('b');
   private lbl = document.createElement('i');
+  /** Its laptop key, on its corner (keycaps.ts; hidden on a phone: keybar.css). */
+  private cap = document.createElement('kbd');
   private key = '';
-  constructor(sel: string, private extra = '') {
-    this.el = document.querySelector(sel) as HTMLElement;
+  constructor(id: BtnId, private extra = '') {
+    this.el = document.querySelector(BTN_SEL[id]) as HTMLElement;
+    this.cap.textContent = KEYCAP[id];
   }
   /** Draw `f` (only when it changed), with `secs` on the face and `label` under it. */
   show(f: Face | null, secs = '', label = '', aria = ''): void {
     this.el.hidden = !f;
     if (!f) return;
     // (Someone else set the button's words: put the picture back.)
-    if (this.art.parentNode !== this.el) this.el.replaceChildren(this.art, this.cd, this.lbl), this.el.classList.add('art');
+    if (this.art.parentNode !== this.el) this.el.replaceChildren(this.art, this.cd, this.lbl, this.cap), this.el.classList.add('art');
     f.down = this.el.classList.contains('down');
     const key = JSON.stringify(f, (k, v) => (k === 'icon' ? idOf(v) : v)) + this.extra;
     if (key !== this.key) (this.key = key), paintButton(this.art, f), this.el.style.setProperty('--w', String(this.art.width));
@@ -83,9 +88,9 @@ class Btn {
 
 export class Cluster {
   private b = {
-    attack: new Btn('.tb.attack'), block: new Btn('.tb.block'), roll: new Btn('.tb.roll'), skill: new Btn('.tb.relic'),
-    relic: new Btn('.tb.relic2'), potion: new Btn('.tb.potion'), grab: new Btn('.tb.grab'), use: new Btn('.tb.use'),
-    reload: new Btn('.tb.reload'), element: new Btn('.tb.element'), sign: new Btn('.tb.sign'),
+    attack: new Btn('attack'), block: new Btn('block'), roll: new Btn('roll'), skill: new Btn('skill'),
+    relic: new Btn('relic'), potion: new Btn('potion'), grab: new Btn('grab'), use: new Btn('use'),
+    reload: new Btn('reload'), element: new Btn('element'), sign: new Btn('sign'),
   };
   private ready: Record<string, boolean> = {};
   private stick = document.querySelector('#touch .stick') as HTMLElement;

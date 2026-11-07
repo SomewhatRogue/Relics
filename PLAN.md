@@ -2,6 +2,17 @@
 
 ## Current slice
 
+**The wood's goal and your buttons, hard to miss; MEND reaches your friends** (Claude Opus 5.5, 2026-11-06; Kyle:
+"in the tutorial the 'mission' isn't obvious ... especially on desktop, it's too small. Ditto what your other
+buttons and abilities are", "Cleric could heal friends only self with V"). Built; waiting on Kyle's play and the
+lore keeper and line editor on the new words. *Done when*, on his phone and laptop: in the wood the goal reads at
+a glance (the control in gilt, the goal under it, the count as pips, big on a laptop and bigger on a big screen),
+a new goal flashes gold as it comes up; a laptop shows its buttons in a row at the bottom with each key on it; a
+button just given is ringed with its name (and key on a laptop) till he's pressed it once; once in the wood the
+gear and BUTTONS are ringed to say where every button is explained; and online, a Cleric's MEND (V) goes to the
+worst-hurt friend within 6 tiles unless he's much worse off himself, a gold cross over whoever it would reach.
+Everything in DECISIONS 2026-11-06 ("the wood's goal and your buttons"); online `node scripts/mend-online.cjs`.
+Open: worst-hurt or nearest (Kyle's call); the 25% and the 6 tiles once he's played.
 **Fenmere, the second curated zone** (Claude Opus 5.5, 2026-11-06; Kyle, 2026-11-05: "more raid biomes, fewer but
 bigger and lovingly curated", "better and more dynamic enemies that bleed in slowly", "scripted scenes"; the Fen of
 `docs/plans/atlas.md` section 7 item 7, Sallow Priory and the Corpse Road left for Kyle's story calls). Built; waiting

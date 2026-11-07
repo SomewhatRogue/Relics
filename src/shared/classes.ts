@@ -90,7 +90,7 @@ export const CLASSES: Record<HeroClass, ClassSheet> = {
     line: 'What you lack in speed you make up for in divinity.',
     weapon: 'Mace and censer',
     skill: 'Sanctuary: Bless the ground around you to heal allies and burn foes.',
-    sign: 'Heal the nearest hurt friend, or yourself.',
+    sign: 'Heal the worst-hurt friend near you, or yourself.',
     signLabel: 'MEND',
     guard: 'Heavy armor and effective blocking.',
     note: 'Fed by the coals left behind by butchers. Permanent increase to healing, but increases enemy aggression.',

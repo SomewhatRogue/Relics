@@ -32,6 +32,7 @@ import { drawTags } from './tags3d';
 import { drawSkills3 } from './skills3d';
 import { drawSpellGround3 } from '../spellground';
 import { drawHuntMarks } from '../signdraw';
+import { drawMendMark } from '../mendmark';
 import { skyFlash } from '../skystrikedraw';
 import { drawFound3 } from './found3d';
 import { Perf } from './perf3d';
@@ -262,6 +263,7 @@ export class View3D {
     drawSkills3(og, room, P, lerp, this.view.ppu, now);
     drawSpellGround3(og, room, P, this.view.ppu, lerp);
     drawHuntMarks(og, room, P, lerp, this.view.ppu);
+    drawMendMark(og, room, meId, P, lerp, this.view.ppu);
     drawChalkMarks(og, room, P, lerp, this.view.ppu);
     drawFound3(og, room, P, lerp, this.view.ppu, now);
     drawBolts3(og, room, P, this.view.ppu);

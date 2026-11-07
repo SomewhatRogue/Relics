@@ -35,7 +35,7 @@ export const SIGN_LINES = {
   how: {
     shadow: "SHADOW STEP puts you behind the goblin you face, and it's stunned for a second. Stab it from there.",
     mark: "MARK the goblin you aim at for 8 s. Anyone's quick hits on it do +5 damage, heavy hits +40%. Your arrows bend toward it, and your hound goes for it.",
-    heal: "MEND heals the nearest hurt friend for 25. If nobody near you is hurt, or you're worse off than they are, it heals you.",
+    heal: "MEND heals whichever friend near you is worst hurt, for 25. The gold mark shows who that is. If nobody near is hurt, or you're in a much worse way than they are, it heals you.",
   },
   /** Hew, shot (a caption, the fight going on). */
   hewHit: "Aah! In the _leg_, the little sod! Never mind me, stray, see to them first!",

@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { HEAL_SIGN, MARK_SIGN, SIGNS } from '../src/shared/signs';
 import { ARCHER, POTION, SHADOWSTEP, SMOKEBOMB, TICK, WEAPONS, type WeaponId } from '../src/shared/tuning';
 import { ArenaRoom } from '../src/sim/room';
+import { healTarget } from '../src/sim/healtap';
 import { begin, newEnemy } from '../src/sim/enemies';
 import { damage } from '../src/sim/damage';
 import { shoot } from '../src/sim/bolts';
@@ -146,16 +147,75 @@ describe('MEND, the Healer’s own button', () => {
     return { ...a, fs };
   };
 
-  it('heals the nearest hurt friend 25 for 20 stamina, on a 12 s wait, with a gold line', () => {
+  it('heals the worst-hurt friend in reach 25 for 20 stamina, on a 12 s wait, with a gold line', () => {
     const a = healer([[10, 9, 50], [12, 9, 40]]);
     const ev = a.run(0.1, { signSeq: 1 });
-    expect(a.fs[0].hp).toBe(50 + HEAL_SIGN.heal);
-    expect(a.fs[1].hp).toBe(40);
+    expect(a.fs[1].hp).toBe(40 + HEAL_SIGN.heal);
+    expect(a.fs[0].hp).toBe(50);
     expect(ev.find((e) => e.k === 'mended')).toMatchObject({ self: false, n: HEAL_SIGN.heal });
     expect(a.h.stamina).toBeLessThanOrEqual(100 - HEAL_SIGN.cost + 1);
     expect(a.h.signReady).toBeCloseTo(a.room.time - 0.1 + HEAL_SIGN.cooldown, 0);
     a.run(0.1, { signSeq: 2 });
+    expect(a.fs[1].hp).toBe(65);
+  });
+
+  // Kyle, 2026-11-06: "Cleric could heal friends only self with V". In a fight the Cleric is nearly
+  // always a little hurt too, and the old rule gave it to them whenever they were the least bit worse off.
+  it('goes to a hurt friend even when you are a little worse off; to you only when you are much worse off', () => {
+    let a = healer([[11, 9, 70]]);
+    a.h.hp = 60;
+    let ev = a.run(0.1, { signSeq: 1 });
+    expect(a.fs[0].hp).toBe(95);
+    expect(a.h.hp).toBe(60);
+    expect(ev.find((e) => e.k === 'mended')).toMatchObject({ self: false });
+    a = healer([[11, 9, 90]]);
+    a.h.hp = 90 - (HEAL_SIGN.selfFirst * 100 + 5);
+    ev = a.run(0.1, { signSeq: 1 });
+    expect(ev.find((e) => e.k === 'mended')).toMatchObject({ self: true });
+    expect(a.fs[0].hp).toBe(90);
+  });
+
+  it('reaches 6 tiles (it was 4), not past; a nearer friend of the same hurt first', () => {
+    expect(HEAL_SIGN.range).toBe(6);
+    let a = healer([[9 + 5.5, 9, 50]]);
+    a.h.hp = 80;
+    a.run(0.1, { signSeq: 1 });
     expect(a.fs[0].hp).toBe(75);
+    a = healer([[9 + 6.5, 9, 50]]);
+    a.h.hp = 80;
+    a.run(0.1, { signSeq: 1 });
+    expect(a.fs[0].hp).toBe(50);
+    expect(a.h.hp).toBe(100);
+    a = healer([[13, 9, 50], [10, 9, 51]]);
+    a.run(0.1, { signSeq: 1 });
+    expect(a.fs[1].hp).toBe(76);
+    expect(a.fs[0].hp).toBe(50);
+  });
+
+  it('a real friend before the yard squire, and never a friend nobody else can heal (the Cleaver)', () => {
+    const a = healer([[11, 9, 70]]);
+    const sq = Object.assign(a.room.join('squire'), { x: 10, y: 9, hp: 20, safeT: 0 });
+    a.run(0.1, { signSeq: 1 });
+    expect(a.fs[0].hp).toBe(95);
+    expect(sq.hp).toBe(20);
+    expect(healTarget(a.h, [a.h, sq], [])?.hero).toBe(sq);
+    const b = healer([[10, 9, 30], [12, 9, 60]]);
+    b.fs[0].armor = { ...(b.fs[0].armor ?? {}), hungry: 'cleaver' } as never;
+    expect(healTarget(b.h, b.room.heroes, [])?.hero).toBe(b.fs[1]);
+  });
+
+  it('a guest Cleric mends the leader, and the leader mends a guest, on the leader\'s room', () => {
+    // The leader's room decides both (the guest only sends the press): Kyle played a guest Cleric.
+    const a = arena('mace', [[2, 2]], 'lead');
+    const g = Object.assign(a.room.join('guest'), { weapon: 'censer', x: 13, y: 9, safeT: 0 });
+    Object.assign(a.h, { hp: 60 });
+    g.hp = 55;
+    a.run(0.1, { signSeq: 1 }, 'guest');
+    expect(a.h.hp).toBe(85);
+    expect(g.hp).toBe(55);
+    g.hp = 40;
+    a.run(0.1, { signSeq: 1 }, 'lead');
+    expect(g.hp).toBe(65);
   });
 
   it('heals yourself when no friend near is hurt, or when you are the worst off', () => {

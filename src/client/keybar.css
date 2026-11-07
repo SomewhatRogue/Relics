@@ -1,0 +1,35 @@
+/* A laptop's buttons (Kyle, 2026-11-06: "Ditto what your other buttons and abilities are"): the phone's
+   cluster (cluster.ts draws it) in one row at the bottom centre, a little smaller, each with its key on
+   its corner (keycaps.ts). It takes no clicks: the mouse and keys play as before. In the wood it grows a
+   button at a time as Hew gives them, like the phone's. A phone shows no keys. The buttons are drawn at
+   the phone's size: smaller, they didn't read on a big screen. */
+.tb kbd { display: none; }
+body:not(.touch) #touch:not([hidden]) { position: fixed; z-index: 1; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+  display: flex; align-items: center; gap: 36px; pointer-events: none; }
+body:not(.touch) #touch .stick-zone, body:not(.touch) #touch .stick, body:not(.touch) .tb.use { display: none !important; }
+body:not(.touch) .tb { position: relative; flex: none; left: auto; top: auto; right: auto !important; bottom: auto !important; width: 60px !important; height: 60px !important; pointer-events: none; }
+body:not(.touch) .tb.attack { width: 84px !important; height: 84px !important; }
+/* The order of the hand on the keys: dodge, guard, attack, then the letters. */
+body:not(.touch) .tb.roll { order: 1; }
+body:not(.touch) .tb.block { order: 2; }
+body:not(.touch) .tb.attack { order: 3; }
+body:not(.touch) .tb.relic { order: 4; }
+body:not(.touch) .tb.relic2 { order: 5; }
+body:not(.touch) .tb.sign { order: 6; }
+body:not(.touch) .tb.element { order: 6; }
+body:not(.touch) .tb.grab { order: 7; }
+body:not(.touch) .tb.potion { order: 8; }
+body:not(.touch) .tb.reload { order: 9; }
+/* The labels a phone floats over a small button sit under it here, all the same way. */
+body:not(.touch) .tb:is(.sign, .element) i { top: auto; bottom: -15px; }
+/* The key, on the button's top corner: an iron keycap. */
+body:not(.touch) .tb kbd { display: block; position: absolute; right: -10px; top: -8px; min-width: 18px; padding: 1px 3px; pointer-events: none; text-align: center; white-space: nowrap;
+  font: 400 var(--fs-text)/1.1 var(--font-body); letter-spacing: 0.04em; color: var(--bone); text-shadow: var(--px) var(--px) 0 var(--stone-900);
+  border: calc(2 * var(--px)) solid transparent; border-image: var(--f-sunk) 2 fill / calc(2 * var(--px)) stretch; }
+body:not(.touch) .tb.attack kbd { right: -14px; top: -4px; }
+/* (Its ring, when it's new, says its name and key over it: unlockflash.ts.) */
+body:not(.touch) .tb.unlock kbd { display: none; }
+/* What sat at the bottom centre of a laptop goes up over the row: the prompt and a boss's plate. (A loot
+   card comes up over it for its moment.) */
+body:not(.touch) #prompt { bottom: calc(142px + env(safe-area-inset-bottom)); }
+body:not(.touch) #boss { bottom: calc(134px + env(safe-area-inset-bottom)); }

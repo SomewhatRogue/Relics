@@ -1,7 +1,7 @@
 /**
  * The wood's lessons on screen: a card when a lesson starts (Hew's words, the move, its control for this
  * device, what it's for), a freeze-frame prompt on the blow to answer, praise when you get it right,
- * the fade in at the start, and a pulse on the phone button to press.
+ * the fade in at the start, and a pulse on the button to press (a phone's, or the laptop's row).
  */
 import type { Game } from './game';
 import type { Move } from '../sim/wood';
@@ -67,7 +67,8 @@ export class LessonView {
     for (const b of document.querySelectorAll('.hint')) b.classList.remove('hint');
     // Moving points at the stick (bottom left), never a button.
     const at = hold?.move === 'move' || hold?.move === 'step' ? '#touch .stick' : hold?.move ? BUTTON[hold.move] : undefined;
-    if (at && this.touch) document.querySelector(at)?.classList.add('hint');
+    // (A laptop has no stick, but its buttons sit in a row at the bottom: keybar.css.)
+    if (at && (this.touch || at !== '#touch .stick')) document.querySelector(at)?.classList.add('hint');
     const show = !!hold && hold.kind !== 'praise';
     const key = show ? hold!.kind + hold!.text + hold!.move : '';
     if (key === this.key) return;

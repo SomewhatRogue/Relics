@@ -1,0 +1,46 @@
+/* The wood's goal, hard to miss (goalpulse.ts; Kyle, 2026-11-06: "the 'mission' isn't obvious ...
+   especially on desktop, it's too small"): the control to learn in gilt, the goal under it in bone, both
+   big and in the body font, its count as pips; on a new goal the box flashes gold a few times, and each
+   one counted kicks it. A laptop's is bigger, bigger again on a big screen; a phone's stays clear of
+   Hew's words under it. The same frames, fonts and colours as the tracker (hud.css). */
+body[data-mode='wood'] #banner { padding: 6px 18px 8px; max-width: min(720px, 70vw); background: #15171be8; }
+body[data-mode='wood'] #banner b { font: 400 24px/1.15 var(--font-body); letter-spacing: 0.04em; color: var(--gilt); margin: 0 0 4px; }
+body[data-mode='wood'] #banner .obj { display: block; font: 400 24px/1.2 var(--font-body); letter-spacing: 0.04em; color: var(--bone); }
+body[data-mode='wood'] #banner b:empty, body[data-mode='wood'] #banner .obj:empty { display: none; }
+body[data-mode='wood'] #banner span { margin-top: 4px; }
+#banner .pips { display: flex; justify-content: center; gap: calc(4 * var(--px)); margin: 6px 0 2px; }
+#banner .pips u { display: block; width: calc(5 * var(--px)); height: calc(5 * var(--px)); transform: rotate(45deg); text-decoration: none;
+  background: #0e0f12; box-shadow: inset 0 0 0 var(--px) var(--gold); }
+#banner .pips u.on { background: var(--gilt); box-shadow: inset 0 0 0 var(--px) #fff6d0; }
+/* A big laptop screen: half as big again. */
+@media (min-width: 1600px) and (min-height: 900px) {
+  body[data-mode='wood']:not(.touch) #banner { padding: 8px 24px 10px; }
+  body[data-mode='wood']:not(.touch) #banner b, body[data-mode='wood']:not(.touch) #banner .obj { font-size: 36px; }
+  body[data-mode='wood']:not(.touch) #banner span { font-size: 16px; }
+  body[data-mode='wood']:not(.touch) #banner .pips u { width: calc(7 * var(--px)); height: calc(7 * var(--px)); }
+  body[data-mode='wood']:not(.touch) #banner .pips { gap: calc(6 * var(--px)); margin-top: 10px; }
+  /* Hew's cards, his freeze-frame calls and his words in passing, the same. */
+  body:not(.touch) #lesson > .card, body:not(.touch) #lesson.act > *, body:not(.touch) #caption { zoom: 1.5; }
+}
+/* A phone: the body font's big size, the place name dropped, so Hew's words under it stay clear. */
+body.touch[data-mode='wood'] #banner { padding: 4px 10px 6px; max-width: min(330px, calc(100vw - 16px)); }
+body.touch[data-mode='wood'] #banner b, body.touch[data-mode='wood'] #banner .obj { font-size: var(--fs); }
+body.touch[data-mode='wood'] #banner span { display: none; }
+body.touch[data-mode='wood'] #banner .pips { justify-content: flex-start; margin-top: 4px; }
+/* (The wood teaches itself: no tips over its goal.) */
+body[data-mode='wood'] #tip { display: none; }
+
+/* A new goal: the frame goes gilt and the box flashes gold, a few times; the words flash white. */
+#banner.fresh { border-image-source: var(--f-gilt); animation: goal-fresh 0.3s steps(1) 8; }
+#banner.fresh :is(b, .obj) { animation: goal-words 0.3s steps(1) 8; }
+@keyframes goal-fresh { 50% { background-color: #4a3410f0; box-shadow: 0 0 0 calc(2 * var(--px)) var(--gilt), 0 0 0 calc(4 * var(--px)) #e0a64060; } }
+@keyframes goal-words { 50% { color: #ffffff; } }
+/* One more counted: a short kick. */
+#banner.bump { border-image-source: var(--f-gilt); }
+#banner.bump .obj { animation: goal-words 0.12s steps(1) 4; }
+@media (prefers-reduced-motion: reduce) { #banner.fresh, #banner.fresh :is(b, .obj), #banner.bump .obj { animation: none; } }
+
+/* Where BUTTONS is, once (gearhint.ts): the gear ringed in gold, a word under it, and BUTTONS ringed in its box. */
+#corner #opts.hintme, #options #legendbtn.hintme { outline: calc(2 * var(--px)) solid var(--gilt); outline-offset: calc(2 * var(--px)); animation: hint 0.5s steps(1) infinite; z-index: 1; }
+#corner #opts.hintme::after { content: attr(data-hint); position: absolute; right: 0; top: calc(100% + 10px); padding: 1px 4px; white-space: nowrap; pointer-events: none;
+  font: 400 var(--fs-text)/1.1 var(--font-body); letter-spacing: 0.04em; color: var(--stone-900); background: var(--gilt); animation: unlock 0.5s steps(1) infinite; }
