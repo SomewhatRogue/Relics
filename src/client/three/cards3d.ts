@@ -33,6 +33,8 @@ import { drawCaged, drawSurvivor } from '../captives';
 import { drawHauled } from '../scenedraw';
 import { propShake } from '../propshake';
 import { drawStatus } from '../status';
+import { blastShape } from '../../sim/blastshape';
+import { drawBlastBits } from '../blastdraw';
 import type { Lerp } from './actors3d';
 import type { Figs } from './figs3d';
 import { LEDGE_H } from './ground';
@@ -90,6 +92,11 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
     }
     const pz = pulledAt(room, e), [x, y] = pz ?? lerp('e:' + e.id, e.x, e.y), dead = e.act === 'dead', big = e.kind === 'butcher' || e.kind === 'brood';
     f.put('e' + e.id, x, (e.z ?? 0) >= 2 ? ROOF_UP3 : lift(Math.max(0, e.z ?? 0)), y, (c, px, py) => (drawFoe(c, e, px, py, asleep(map, e), map === ARENA), drawStatus(c, e, px, py, t)), { pool: dead || e.kind === 'nest' || lurking(e) ? 0 : big ? 0.55 : 0.28, bias: dead ? -0.3 : 0 });
+  }
+  // A keg about to go, its fuse spitting; a Smouldering one's embers coming up through it (../blastdraw.ts).
+  for (const e of room.enemies) {
+    const a = blastShape(e, t);
+    if (a && (e.blast!.k === 'ember' || (e.blast!.k === 'keg' && e.act === 'dead'))) f.put('bl' + e.id, a.cx, 0, a.cy, (c, px, py) => drawBlastBits(c, e, a, px, py), { pool: 0, bias: 0.05 });
   }
   // A body being hauled, where they've got it to (../scenedraw.ts).
   // A chalker's tally board in the CRIES room (../chalkdraw.ts).

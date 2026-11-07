@@ -1,12 +1,12 @@
 /**
  * The newer goblins' marks in the 2.5D view's flat layer, placed where the room says: a pack rush's
- * link, a banner's reach and the goblins that have taken heart in it, lamp oil on the floor (burning or
- * not) and carrion crows on the dead. The bodies are the flat view's own (cards3d.ts draws them).
+ * link, a banner's reach and the goblins that have taken heart in it, and carrion crows on the dead (lamp
+ * oil on the floor lies in the 3D floor itself: hazards3d.ts). The bodies are the flat view's own (cards3d.ts draws them).
  */
 import { BANNER } from '../../shared/tuning';
 import type { ArenaRoom } from '../../sim/room';
 import type { Ctx } from '../draw';
-import { drawCrows, drawSlicks } from '../beastdraw';
+import { drawCrows } from '../beastdraw';
 import type { Lerp } from './actors3d';
 import type { Proj } from './overlay3d';
 import { drawRushLinks } from '../rushdraw';
@@ -20,7 +20,6 @@ export function drawFoes3d(g: CanvasRenderingContext2D, c: Ctx, room: ArenaRoom,
     const [ex, ey] = lerp('e:' + e.id, e.x, e.y);
     return P(ex, 0.05, ey) as [number, number];
   }, c.now);
-  if (room.slicks?.length) drawSlicks(c, room.slicks, floor, room.time);
   if (room.crows?.length) drawCrows(c, room.crows, floor, room.time);
   for (const e of room.enemies) {
     if (e.act === 'dead') continue;
