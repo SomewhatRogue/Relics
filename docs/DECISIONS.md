@@ -134,6 +134,71 @@ full bash with BOARD OUT and the board swung wide, a Rogue's BACKSTAB at its bac
 
 **New words** (for the lore keeper, then the line editor): **BOARD OUT** (over a shield-bearer whose board is knocked
 aside). BLOCKED is as it was.
+## 2026-11-06: a West Coast pair, still laggy: a hidden host's tab, the host's swap, a swap that split them (Kyle; Claude Opus 5.5)
+
+Kyle and a friend, both on the West Coast on desktops, played small maps 23:00 to 23:12 UTC; it felt laggy
+with the friend hosting and Kyle the guest. Both players' sockets came in at `sfo1` (the relay and Redis are
+there), so it wasn't distance. Job room `PEKI23R4I` in the relay logs:
+
+- **23:00:47** `hp7jbxhg` (Kyle) hosts, `hd3223v7` (the friend) joins, both on `7ld265`.
+- **23:04:18 the room moved to the friend** (`want: take`). Kyle came back a guest at 23:04:27, so his page
+  had been out of sight from about 23:04:13 to 23:04:27: a desktop tab hidden 2.5 s hands the room on
+  (`hidehost.ts`), the friend took it 2.5 s after the goodbye. A look at another tab, and both screens
+  reloaded the job, and Kyle was a guest from then on.
+- **23:04:27** Kyle's guest socket landed on `7mbaa8` (`far`), hopped at 23:04:29 to `7ld265`: together again.
+- **23:08:19 the friend's 4-minute swap.** The relay says `hosted` for every host socket; Kyle's page took the
+  same leader for a new one and started over: its copy of the room dropped till the next whole one, its own
+  hero's prediction reset, and a hello that had the friend send the whole room again. A freeze every 4 minutes.
+- **23:08:29 Kyle's own 4-minute swap** (his socket was from 23:04:29) landed on `7od3af`, away from the
+  friend; the three hops 1.5 s apart all came back to `7od3af`. The swap closed the socket beside the friend
+  as soon as the new one spoke, so the pair was split by its own housekeeping: through Redis, 0.1 s batches,
+  patches in pairs. Kyle left at 23:09:02.
+- **23:11:52** `deaf` in the same millisecond as the friend's socket closing: the instance had stalled, and
+  ran its timers before reading the echo waiting for it. A reset, harmless, but not deafness.
+
+Where the time goes on one instance (23:04:29 to 23:08:19), West Coast, live code: to the relay about 10 to
+30 ms, the host's next tick up to 33 ms, its next patch: the pacing sent at whole frames past 0.05 s, so at
+60 frames a second it slipped a frame about one in three (16 a second, 50 or 66 ms apart, in Node), back
+10 to 30 ms, the playout's wait about 31 ms, then interpolation. About 130 to 150 ms for the world to answer
+a press; your own walk, roll, block and swing show at once (prediction). Not bad; the hitches above were
+what was felt. The relay doesn't see a player's trip yet (the heartbeat times it in the page only).
+
+**Fixes:**
+- **A hidden desktop host waits 15 s before handing on, not 2.5** (`shared/hostpick.ts` `HIDE.desk`), and
+  meanwhile runs the room from a worker's timer (`main.ts`), which Chrome doesn't hold to once a second the
+  way it holds a hidden page's own timers, so the friends' room keeps its pace while it waits. Phones and
+  touch devices hand on at once, as before; a page going away still does. Stress scenes 4 and 4m now expect
+  the takeover after 15 s. (Kyle chose 2.5 s on Nov 6; the cost of a hand-over is a reload for everyone and
+  the host coming back a guest, so a glance at another tab shouldn't do it. Say if you want it shorter.)
+- **The same leader again is nothing to start over** (`coop.ts`): `hosted` for the leader a guest already
+  follows is only their swap (or a hop); a swapped-in socket of the guest's own, told the same leader with
+  the room already here, says no hello.
+- **A swap never splits a party that was together** (`client/relay.ts`): the relay says its instance in
+  `info`; a 4-minute swap's new socket that lands away from the leader while the old one is beside them is
+  closed, the old one kept, and the swap tried again 15 s later, until the old one is 285 s old (Vercel ends
+  it at 300), then taken wherever it lands. The old socket is closed when the new one is placed (`role`), not
+  when it first speaks (`info`).
+- **Hops settle**: a hop that lands on the instance it left (Vercel kept this page's sockets there, as on
+  23:08:29 to 34 and on Nov 5) ends hopping for that rotation: settled as far, not churning.
+- **Patches every 0.05 s, steadily** (`coop.ts`, 4 ms of slack): 20 a second, as meant, not 16; and they
+  carry the leader's clock as sent (`w`), which the friend's playout paces by: the room's clock moves in whole
+  ticks and made every patch look up to a tick late. The playout's "latest" is now the 90th percentile of the
+  last two seconds, so one patch held up (behind the save, a collection) doesn't set the wait for two seconds.
+  Simulated (60 fps host, 15 ms on the way, one patch in 40 late): 16 patches a second and 31 ms of playout
+  wait on live code, 20 and 18 now.
+- **The relay's echo check** reads what's waiting before it calls an instance deaf (`setImmediate`).
+- **The trip in the logs**: a page's next connection carries its last timed trip (`&rtt=`), and the relay's
+  `join` line logs it (no message, no command).
+
+Not changed: the split-party batch stays 0.1 s; it wasn't the main cause tonight (33 s of the 11 minutes were
+split, and the swap fix keeps a together pair together). A host's own swap landing away from its guests still
+makes them `far`; they hop, and now settle if they can't.
+
+Tests: `tests/hostswap.test.ts` (the host's swap on a guest's screen: the room kept, no hello; fails on the
+old code, the leader drawn 1.3 tiles behind), `tests/relaysocket.test.ts` (a swap landing away kept back and
+retried; taken anyway by 285 s; a hop back to the same instance settles; the trip on the URL),
+`tests/hostpick.test.ts` (a desktop 14 s on another tab keeps the room; hands on at 15), `tests/playout.test.ts` (one late patch in
+40 doesn't set the wait).
 
 ## 2026-11-06: Fenmere, the second curated zone: the carr, the causeway, the ford, the reeds that hide goblins, the mist, the Peat Cuts (Kyle; Claude Opus 5.5)
 

@@ -43,6 +43,16 @@ describe('the playout', () => {
     for (const [v, t] of play(q, wild, 6)) expect(t - wild.find((w) => w[0] === v)![2]).toBeLessThanOrEqual(MAX_DELAY + 1 / 60 + 1e-9);
   });
 
+  it('one patch held up every 2 s (behind the whole-job save) no longer sets the wait for the rest', () => {
+    // Steady every 0.05 s, but each 40th comes 0.09 s late.
+    const arr: [number, number, number][] = [...Array(200).keys()].map((n) => [n, n * 0.05, n * 0.05 + 0.03 + (n % 40 === 20 ? 0.09 : 0)]);
+    arr.sort((a, b) => a[2] - b[2]);
+    const p = new Playout<number>(), waits: number[] = [];
+    for (const [v, t] of play(p, arr, 11)) if (v > 60 && v % 40 !== 20) waits.push(t - arr.find((x) => x[0] === v)![2]);
+    // Next to nothing (a frame), not 0.09 s for two seconds after each.
+    expect(Math.max(...waits)).toBeLessThan(1 / 60 + 0.005);
+  });
+
   it('a new room goes at once, and forgets the old room clock', () => {
     const p = new Playout<string>();
     p.push('a', 10, 1, 0);

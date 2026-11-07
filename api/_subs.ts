@@ -92,17 +92,23 @@ export class Subs {
     this.echo.delete(room);
   }
 
-  /** Now and then: an echo overdue means the connection is dead. */
+  /**
+   * Now and then: an echo overdue means the connection is dead. Looked at again once what's waiting on
+   * the sockets has been read (setImmediate runs after that): an instance that stalled a few seconds
+   * runs its timers before it reads, and took its own echo, there all along, for missing (seen live
+   * 2026-11-06, `deaf` in the same millisecond as a socket's close).
+   */
   check(now = Date.now()): void {
-    for (const [room, at] of this.echo) {
-      if (!this.wanted(room)) this.echo.delete(room);
-      else if (now - at > ECHO_MS) {
-        this.echo.clear();
-        this.log({ ev: 'deaf', room });
-        void this.reset('echo');
-        return;
-      }
-    }
+    const late = [...this.echo].find(([room, at]) => this.wanted(room) && now - at > ECHO_MS);
+    for (const [room] of this.echo) if (!this.wanted(room)) this.echo.delete(room);
+    if (!late) return;
+    const [room, at] = late;
+    setImmediate(() => {
+      if (this.echo.get(room) !== at || !this.wanted(room)) return;
+      this.echo.clear();
+      this.log({ ev: 'deaf', room });
+      void this.reset('echo');
+    });
   }
 
   /** A fresh subscriber connection, and every room with players here subscribed on it again. */

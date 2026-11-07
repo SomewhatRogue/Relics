@@ -6,7 +6,9 @@
  * goblins moved in hitches (measured: Kyle's view of a walking leader stood still on about one frame in
  * seven). Here each patch waits only as long as it came early, against the latest of the last couple of
  * seconds: a steady link waits next to nothing, a batched one about half a batch, and never more than
- * MAX_DELAY (freshness wins past that). A patch's events (hits, sounds) don't wait (coop.ts): only the
+ * MAX_DELAY (freshness wins past that). "The latest" is the 90th percentile, not the very latest: one
+ * patch held up now and then (behind the whole-job save every 2 s, a garbage collection) no longer sets
+ * the wait for everything after it, two seconds at a time (2026-11-06). A patch's events (hits, sounds) don't wait (coop.ts): only the
  * movement does.
  *
  * `t` is the leader's room clock on the patch; `k` the room it's of (a new room starts the clock over,
@@ -17,6 +19,8 @@ export const MAX_DELAY = 0.1;
 const WINDOW = 40;
 /** Never more than this many waiting: past it they go, oldest first. */
 const MOST = 8;
+/** How late a patch counts as "late" in the window: past this share of the recent ones. */
+const SPREAD = 0.9;
 
 type Item<T> = { v: T; t: number; at: number; k: number };
 
@@ -35,12 +39,18 @@ export class Playout<T> {
     this.offs.push(at - t);
     if (this.offs.length > WINDOW) this.offs.shift();
     this.q.push({ v, t, k, at });
+    const s = [...this.offs].sort((a, b) => a - b);
+    this.lo = s[0];
+    this.target = Math.min(MAX_DELAY, s[Math.ceil((s.length - 1) * SPREAD)] - this.lo);
   }
+
+  private lo = 0;
+  private target = 0;
 
   /** The patches due now, in the order they were made. */
   due(now: number): T[] {
     const out: T[] = [];
-    const lo = Math.min(...this.offs), hi = Math.max(...this.offs), target = Math.min(MAX_DELAY, hi - lo);
+    const lo = this.lo, target = this.target;
     while (this.q.length) {
       const p = this.q[0];
       // How long this one should have waited: as much as it came early.
@@ -69,5 +79,6 @@ export class Playout<T> {
     this.offs = [];
     this.k = NaN;
     this.lastT = -Infinity;
+    this.lo = this.target = 0;
   }
 }

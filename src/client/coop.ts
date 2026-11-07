@@ -53,6 +53,10 @@ import { OwnHero } from './ownhero';
 
 /** Everyone gets the whole job this often; the friend first in line every SAVE_EVERY. */
 const SAVE_ALL = 8;
+/** The leader's patches go every SEND_EVERY, less this (s): see CoopHost.frame. */
+const SEND_SLACK = 0.004;
+/** The leader's clock on a patch (s, to the ms): what a friend's playout paces it by (playout.ts). */
+const sentClock = (now: number) => Math.round(now * 1000) / 1000;
 /** A save due waits at most this long (s) for a frame without a patch. */
 const SAVE_WAIT = 0.2;
 const AWAY = 5, BYE_WAIT = 2.5, SEND_EVERY = 0.05, FULL_EVERY = 4, GRACE = 60, LOST = 20, KEEP = 2, SAVE_EVERY = 2, TAKE = 9, TAKE_NEXT = 5;
@@ -186,7 +190,7 @@ export class CoopHost {
     // urgent, so a split party's relay still batches it: the Redis budget, docs/REALTIME-REDIS-BUDGET.md).
     const used = [...this.friends].filter(([id, f]) => f.pressTick !== undefined && (this.game.roomOf(id) ?? this.game.room).tick > f.pressTick);
     if (now - this.savedAt > SAVE_EVERY && this.company) {
-      const patchDue = now - this.sentAt >= SEND_EVERY || used.length > 0;
+      const patchDue = now - this.sentAt >= SEND_EVERY - SEND_SLACK || used.length > 0;
       if (!patchDue || now - this.savedAt > SAVE_EVERY + SAVE_WAIT) {
         this.savedAt = now;
         const save = this.saved(), all = now - this.savedAllAt > SAVE_ALL;
@@ -200,7 +204,9 @@ export class CoopHost {
         if (patchDue) return;
       }
     }
-    if (now - this.sentAt < SEND_EVERY && !used.length) return;
+    // (A few ms of slack: at 60 frames a second three frames come to 49.99 ms now and then, and the patch
+    // went a frame late, 66 ms, about one in three: 17 a second, not 20, and unevenly.)
+    if (now - this.sentAt < SEND_EVERY - SEND_SLACK && !used.length) return;
     for (const [, f] of used) f.pressTick = undefined;
     const g = this.game, groups = new Map<ArenaRoom, string[]>();
     // Each friend's own room (one not in any yet, the leader's: they're brought to it).
@@ -213,7 +219,7 @@ export class CoopHost {
       if (isBig(room)) {
         // A big room: each friend only what's near them, the map from its seed (bigsend.ts).
         const k = g.keyOf(room), out = !room.indoors;
-        const common = { k, t: room.time, x: room.exitOpen ? 1 : 0, in: room.indoors ? 1 : 0, hc: out ? hc : [], dm: out ? dm : [], run: lean(g.run), goal, names, acks };
+        const common = { k, t: room.time, w: sentClock(now), x: room.exitOpen ? 1 : 0, in: room.indoors ? 1 : 0, hc: out ? hc : [], dm: out ? dm : [], run: lean(g.run), goal, names, acks };
         for (const id of ids) {
           const f = this.friends.get(id)!, m = this.big.body(room, id, now, f.fresh || this.sentKey.get(id) !== k, common, this.evs.get(room) ?? []);
           this.sock.send(id, { s: m.s });
@@ -233,7 +239,7 @@ export class CoopHost {
         const j = JSON.stringify(v);
         if (full || st.said[key] !== j) (slow[key] = v), (st.said[key] = j);
       }
-      const body = { p, f: full ? 1 : 0, k, map: full ? { ...room.map, blocks: [] } : undefined, t: room.time, x: room.exitOpen ? 1 : 0, in: room.indoors ? 1 : 0, ...slow, ev: this.evs.get(room) ?? [], acks };
+      const body = { p, f: full ? 1 : 0, k, map: full ? { ...room.map, blocks: [] } : undefined, t: room.time, w: sentClock(now), x: room.exitOpen ? 1 : 0, in: room.indoors ? 1 : 0, ...slow, ev: this.evs.get(room) ?? [], acks };
       const s = JSON.stringify(body);
       // Everyone in the one room: one message for them all; else each their own.
       if (groups.size === 1) this.sock.send('*', { s });
@@ -301,7 +307,7 @@ export class CoopHost {
 }
 
 /** A patch from the leader, as a friend reads it (ids swapped: theirs `@lead`, mine `me`). */
-type Body = { p: Patch; f: number; k: number; map?: ArenaRoom['map']; ms?: number; blaze?: ArenaRoom['map']['blaze']; xs?: ExpedState; t: number; x: number; in?: number; hc?: CoopGuest['houses']; dm?: DoorMark[]; run: Run | null; goal: string; ev: FightEvent[]; names: Record<string, string>; acks?: Record<string, number> };
+type Body = { p: Patch; f: number; k: number; map?: ArenaRoom['map']; ms?: number; blaze?: ArenaRoom['map']['blaze']; xs?: ExpedState; t: number; /** The leader's clock as it sent this (s). */ w?: number; x: number; in?: number; hc?: CoopGuest['houses']; dm?: DoorMark[]; run: Run | null; goal: string; ev: FightEvent[]; names: Record<string, string>; acks?: Record<string, number> };
 
 export class CoopGuest {
   room: ArenaRoom | null = null;
@@ -368,9 +374,16 @@ export class CoopGuest {
 
   private heard(m: RelayMsg): void {
     // Whoever hosts is who I follow (a page coming back after a reload may not know yet).
-    if (m.t === 'role' && m.role === 'guest') return void (m.host && m.host !== this.lead && this.follow(m.host)), this.hello();
+    // (A swapped-in socket of mine told the same leader, with their room already here: no hello, which
+    // would have them send the whole room again.)
+    if (m.t === 'role' && m.role === 'guest') {
+      if (m.swap && m.host === this.lead && this.room) return;
+      return void (m.host && m.host !== this.lead && this.follow(m.host)), this.hello();
+    }
     // Someone else leads now (a friend took the job on): follow them.
-    if (m.t === 'hosted' && m.id !== this.myId) return this.follow(m.id), this.hello();
+    // (The same leader again is only their socket swapped, every 4 minutes, or a hop: nothing to start over.
+    // Following them afresh dropped my copy of the room till their next whole one, a hitch each swap.)
+    if (m.t === 'hosted' && m.id !== this.myId) return void (m.id !== this.lead && (this.follow(m.id), this.hello()));
     // The leader's gone from the room: after a goodbye naming whoever takes it on, they needn't wait.
     if (m.t === 'left' && m.id === this.lead) return void ((this.leadLeft = true), this.named && (this.heardLead = Math.min(this.heardLead, clock() - TAKE)));
     if (m.t !== 'msg' || m.from !== this.lead) return;
@@ -406,7 +419,10 @@ export class CoopGuest {
     // (Only for the room I have: a patch of another goes whole, in its turn.)
     // (A dodge or blow of mine already shown here isn't shown again: ownhero.ts.)
     if (body.ev?.length && this.room && body.k === this.key) this.events.push(...this.notMine(body.ev)), (body.ev = []);
-    this.playout.push(body, Number(body.t) || 0, body.k, performance.now() / 1000);
+    // (Paced by the leader's own clock as it sent, `w`: the room's clock moves in whole ticks, a 30th of a
+    // second, so it made every patch look up to a tick late or early and the playout waited about a tick
+    // for it, always. A leader of an older page sends none: the room's clock, as before.)
+    this.playout.push(body, Number(body.w ?? body.t) || 0, body.k, performance.now() / 1000);
   }
 
   /** A patch from the leader, its turn come: into my copy of their room. */

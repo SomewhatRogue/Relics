@@ -17,7 +17,7 @@ const rate = (p, ms = 5000) => p.page.evaluate((ms) => new Promise((done) => {
 }), ms);
 
 /** Kyle (out of sight) hands on to Sam: Sam takes the job, and how long it took (ms), or null. */
-async function handsOn(k, kyle, sam, ms = 12000) {
+async function handsOn(k, kyle, sam, ms = 25000) {
   const t0 = Date.now();
   await k.hide(kyle);
   const ok = await k.until(sam, () => !!window.__game.coop && !window.__game.remote, null, ms);
@@ -38,7 +38,7 @@ async function backAsGuest(k, kyle, sam) {
 const standUp = (p) => p.page.evaluate(() => { for (const h of window.__game.room.heroes) if (h.act === 'down') Object.assign(h, { act: 'idle', actT: 0, actDur: 0, hp: h.maxHp, bleeding: false, out: false }); });
 
 /**
- * 4. The leader's page hidden 30 s mid-fight, with a friend in the job: after 2.5 s it hands the job to
+ * 4. The leader's page hidden 30 s mid-fight, with a friend in the job: after 15 s (HIDE.desk) it hands the job to
  * Sam (hidehost.ts), who runs it at full rate; Kyle's hero stays in it; back in sight Kyle follows Sam.
  * (Before 2026-11-06 the hidden page ran the room on a once-a-second timer and nobody took over.)
  */
@@ -48,7 +48,7 @@ async function hidden(k) {
   await engage(k, kyle, sam);
   const goblins = await k.alive(kyle);
   const took = await handsOn(k, kyle, sam);
-  k.step(`Kyle out of sight: Sam takes the job on (${took} ms), not before 2.5 s`, took !== null && took >= 2500 && took < 9000, took);
+  k.step(`Kyle out of sight: Sam takes the job on (${took} ms), not before 15 s (HIDE.desk)`, took !== null && took >= 15000 && took < 22000, took);
   const now = await k.alive(sam);
   k.step('the same goblins in it', now.split(',').length <= goblins.split(',').length && now.length > 0, [now.split(',').length, goblins.split(',').length]);
   k.step("Kyle's hero stays in the job", await k.until(sam, (id) => window.__game.room.heroes.some((h) => h.id === id), kyle.id));
@@ -78,7 +78,7 @@ async function hiddenMuted(k) {
   await k.ev(kyle, () => document.getElementById('mute').click());
   k.step('Kyle is muted', await k.ev(kyle, () => document.getElementById('mute').classList.contains('off')));
   const took = await handsOn(k, kyle, sam);
-  k.step(`out of sight and muted: Sam takes the job on (${took} ms)`, took !== null && took < 9000, took);
+  k.step(`out of sight and muted: Sam takes the job on (${took} ms)`, took !== null && took < 22000, took);
   const r = await rate(sam);
   k.step(`the room runs at full rate on Sam (${r.pace.toFixed(2)} room seconds a second, ${r.steps} of ${r.of} looks saw it move)`, r.pace > 0.9 && r.steps >= r.of * 0.7, r);
   await backAsGuest(k, kyle, sam);
