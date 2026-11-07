@@ -109,7 +109,7 @@ body:not([data-mode='run']) #leave, body[data-mode='run'] #heroes, body[data-mod
   font-size: var(--fs-text); line-height: 1.25; color: var(--bone); text-shadow: var(--px) var(--px) 0 var(--stone-900);
   border: var(--edge) solid transparent; border-image: var(--f-stone) 4 / var(--edge) stretch; background: #15171bd8; background-clip: padding-box; }
 #banner:empty { display: none; }
-#banner b { display: block; font: 400 21px/1 var(--font-display); color: #f0e6cc; margin: 0 0 1px; }
+#banner b { display: block; font: 400 var(--fd)/1 var(--font-display); color: #f0e6cc; margin: 0 0 1px; }
 #banner span { display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 2px; font-size: var(--fs-text); color: var(--bone-dim); }
 #banner span em { margin-left: 8px; }
 #banner .coin { display: inline-block; width: calc(9 * var(--px)); height: calc(9 * var(--px)); background: var(--ic-coin) center / 100% 100% no-repeat; image-rendering: pixelated; }
@@ -130,13 +130,13 @@ body.touch #banner { left: calc(8px + env(safe-area-inset-left)); transform: non
 body.touch #banner span { justify-content: flex-start; }
 
 #boss { position: fixed; z-index: 2; left: 50%; transform: translateX(-50%); bottom: calc(14px + env(safe-area-inset-bottom)); width: min(360px, 60vw); text-align: center; pointer-events: none; }
-#boss b { display: block; font: 400 21px/1 var(--font-display); color: #e8a090; text-shadow: var(--px) var(--px) 0 var(--stone-900); }
+#boss b { display: block; font: 400 var(--fd)/1 var(--font-display); color: #e8a090; text-shadow: var(--px) var(--px) 0 var(--stone-900); }
 #boss .bar { position: relative; height: calc(4 * var(--px) + 4 * var(--px)); margin-top: 2px; border: calc(2 * var(--px)) solid transparent; border-image: var(--f-sunk) 2 fill / calc(2 * var(--px)) stretch; }
 #boss .bar i { display: block; height: 100%; background: linear-gradient(to bottom, #e86a50 0 var(--px), var(--blood) var(--px)); }
 /* The boss plate (client/bossplate.ts): a pair's bars side by side, their names under, POISE under each, phase pips. */
 #boss .bars { display: flex; gap: calc(3 * var(--px)); }
 #boss .pb { flex: 1; min-width: 0; }
-#boss .pb em { display: block; font: 400 11px/1 var(--font-display); font-style: normal; color: #c8a898; margin-top: 2px; text-shadow: var(--px) var(--px) 0 var(--stone-900); }
+#boss .pb em { display: block; font: 400 var(--fd-s)/1 var(--font-display); font-style: normal; color: #c8a898; margin-top: 2px; text-shadow: var(--px) var(--px) 0 var(--stone-900); }
 #boss .pb.dead { opacity: 0.4; }
 #boss .poise { height: calc(2 * var(--px)); margin-top: 1px; background: rgba(20, 14, 10, 0.7); }
 #boss .poise i { display: block; height: 100%; background: #e8c060; }

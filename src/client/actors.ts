@@ -18,7 +18,7 @@ import { drawBladeMark } from './blademark';
 import { drawHolyGuard } from './holyguardmark';
 import { drawRaise } from './raisemark';
 import { drawHolyShield } from './holyshield';
-import { drawText } from './pixfont';
+import { drawText, textWidth } from './pixfont';
 import { PARTY } from '../shared/tuning';
 import { SPRITES, heroLook, lookDef } from './sprites';
 import type { Cls, LookDef } from './lookkit';
@@ -109,7 +109,7 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
     ring(c, x, y, 7, '#5ad07a', h.hp / 100, '#1a3a22');
     // (On a 2.5D card the name goes over the head instead, three/overlay3d.ts.)
     const name = (h.tag ?? h.id).toUpperCase();
-    if (!BARE.on) drawText(c.glow, name, Math.round(x - name.length * 2), Math.round(y + 6), '#9ad8a8');
+    if (!BARE.on) drawText(c.glow, name, Math.round(x - (textWidth(name) + 1) / 2), Math.round(y + 6), '#9ad8a8');
   }
   // Knocked flat by the hound (the Ranger's rare idle): lying there laughing, the gear set down.
   if (idl?.lying) {

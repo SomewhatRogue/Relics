@@ -1,3 +1,5 @@
+import { faceSprite, faceWidth, pixFace } from './pixface';
+
 /** A 3x5 pixel font for numbers, short calls ("BLOCK") and a few words of speech (in capitals), drawn crisp at any zoom. */
 const G: Record<string, string> = {
   '0': '111101101101111', '1': '010110010010111', '2': '111001111100111', '3': '111001111001111', '4': '101101111001001',
@@ -12,11 +14,20 @@ const G: Record<string, string> = {
 };
 
 export function textWidth(s: string): number {
-  return s.length * 4 - 1;
+  const f = pixFace();
+  return f ? faceWidth(f, s) : s.length * 4 - 1;
 }
+
+/** Pixels from one line's top to the next (5 tall letters and their outline; more in a taller face: fontchoice.ts). */
+export const lineHeight = (): number => (pixFace()?.capH ?? 5) + 2;
+/** Pixels an average capital takes across, with its gap. */
+export const charAdvance = (): number => pixFace()?.avg ?? 4;
 
 /** Draw text with a one-pixel dark outline so it reads on any floor. */
 export function drawText(g: CanvasRenderingContext2D, s: string, x: number, y: number, col: string): void {
+  const f = pixFace();
+  // A taller face sits on the same baseline, so words over a head grow up, not into it.
+  if (f) return void g.drawImage(faceSprite(f, s, col), Math.round(x) - 1, Math.round(y) - 1 - (f.capH - 5));
   const px = (ox: number, oy: number, c: string) => {
     g.fillStyle = c;
     for (let i = 0; i < s.length; i++) {

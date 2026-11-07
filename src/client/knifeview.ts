@@ -8,7 +8,7 @@
  */
 import { KNIVES } from '../shared/knifetune';
 import { aimAt, ready, type KnifeState } from '../shared/knives';
-import { drawText } from './pixfont';
+import { drawText, textWidth } from './pixfont';
 import { PastimeCanvas, dith, dot } from './pastimecanvas';
 
 export interface KnifeSay { s: string; x: number; y: number; col: string; t0: number }
@@ -62,7 +62,7 @@ export class KnifeView extends PastimeCanvas {
     this.hand(s, now);
     if (ready(s)) this.sight(s, big);
     for (let i = 0; i < KNIVES.knives - s.thrown - (ready(s) ? 1 : 0); i++) dot(lit, 6 + i * 4, 170, 1, 6, '#9aa3ad'), dot(lit, 6 + i * 4, 174, 1, 3, '#3a2818');
-    for (const w of says) drawText(glow, w.s, Math.round(w.x - w.s.length * 2), Math.round(w.y - 10 - (now - w.t0) * 10), w.col);
+    for (const w of says) drawText(glow, w.s, Math.round(w.x - (textWidth(w.s) + 1) / 2), Math.round(w.y - 10 - (now - w.t0) * 10), w.col);
     this.finish([...LAMPS.map(([x, y]): [number, number, number, number, [number, number, number]] => [x, y - 2, 80, 0.9 * (1 + Math.sin(now * 8 + x) * 0.05), [1, 0.62, 0.3]]), [HX, HY - 10, 70, 0.75, [1, 0.7, 0.45]]]);
   }
 

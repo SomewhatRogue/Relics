@@ -1,0 +1,48 @@
+/* The three pairings on trial (fontchoice.ts sets data-font on <html> from ?font=a|b|c). Each sets only the
+   faces and their sizes; without one, ui.css's Tiny5 and Jacquard 12 hold. Nothing is under 12px on a
+   phone, and the words are a size up on a laptop. All bundled, all OFL (the licences beside them). */
+@font-face { font-family: 'DotGothic16'; src: url('./fonts/dotgothic16-400.woff2') format('woff2'); font-weight: 400 900; font-display: block; }
+@font-face { font-family: 'Silkscreen'; src: url('./fonts/silkscreen-400.woff2') format('woff2'); font-weight: 400; font-display: block; }
+@font-face { font-family: 'Jacquarda Bastarda 9'; src: url('./fonts/jacquarda-bastarda-9.woff2') format('woff2'); font-weight: 400; font-display: block; }
+@font-face { font-family: 'Cinzel'; src: url('./fonts/cinzel-700.woff2') format('woff2'); font-weight: 400 900; font-display: block; }
+/* Alegreya Sans's medium is its everyday weight here (the regular is thin on dark stone). */
+@font-face { font-family: 'Alegreya Sans'; src: url('./fonts/alegreya-sans-500.woff2') format('woff2'); font-weight: 400 600; font-display: block; }
+@font-face { font-family: 'Alegreya Sans'; src: url('./fonts/alegreya-sans-700.woff2') format('woff2'); font-weight: 700 900; font-display: block; }
+@font-face { font-family: 'Grenze Gotisch'; src: url('./fonts/grenze-gotisch-600.woff2') format('woff2'); font-weight: 400 900; font-display: block; }
+@font-face { font-family: 'Source Sans 3'; src: url('./fonts/source-sans-3-400.woff2') format('woff2'); font-weight: 400 600; font-display: block; }
+@font-face { font-family: 'Source Sans 3'; src: url('./fonts/source-sans-3-700.woff2') format('woff2'); font-weight: 700 900; font-display: block; }
+
+/* A, readable pixel: DotGothic16 (the old console RPG's pixel face: real lower case, plain figures, drawn on
+   a 16 pixel em, so 16px is crisp everywhere), Jacquarda Bastarda 9 for titles (a pixel bastarda: the
+   blackletter's mood, far plainer; drawn on a 13 pixel em, so 13, 26 and 39) and Silkscreen's capitals for
+   the boss plate, whose names come in capitals (no blackletter reads in capitals). Pixelify Sans was tried
+   first: its 5 reads as an S and its fi as an A. */
+:root[data-font='a'] {
+  --font-body: 'DotGothic16', 'Trebuchet MS', sans-serif;
+  --font-display: 'Jacquarda Bastarda 9', 'DotGothic16', serif;
+  --fs-s: 12px; --fs-text: 16px; --fs-m: 16px; --fs: 18px;
+  --fd-s: 13px; --fd: 26px; --fd-l: 26px; --fd-xl: 52px;
+}
+:root[data-font='a'] #boss b { font-family: 'Silkscreen', var(--font-body); font-size: 16px; letter-spacing: 0.04em; }
+:root[data-font='a'] #boss .pb em { font-family: var(--font-body); font-size: 12px; }
+/* B, clean book: Alegreya Sans (a humanist sans with a pen's bones), Cinzel for titles (Roman inscription capitals). */
+:root[data-font='b'] {
+  --font-body: 'Alegreya Sans', 'Trebuchet MS', sans-serif;
+  --font-display: 'Cinzel', Georgia, serif;
+  --fs-s: 12.5px; --fs-text: 15px; --fs-m: 16px; --fs: 18px;
+  --fd-s: 12px; --fd: 19px; --fd-l: 23px; --fd-xl: 44px;
+}
+/* C, hybrid: Source Sans 3 for every word you read, Grenze Gotisch (a blackletter drawn to be read) for titles. */
+:root[data-font='c'] {
+  --font-body: 'Source Sans 3', 'Trebuchet MS', sans-serif;
+  --font-display: 'Grenze Gotisch', Georgia, serif;
+  --fs-s: 12px; --fs-text: 14px; --fs-m: 15px; --fs: 17px;
+  --fd-s: 13px; --fd: 24px; --fd-l: 28px; --fd-xl: 56px;
+}
+@media (min-width: 900px) {
+  :root[data-font='a'] { --fs-s: 13px; --fs-text: 16px; --fs-m: 16px; --fs: 20px; --fd-s: 13px; --fd: 26px; --fd-l: 39px; --fd-xl: 65px; }
+  :root[data-font='b'] { --fs-s: 13.5px; --fs-text: 17px; --fs-m: 18px; --fs: 20px; --fd-s: 13px; --fd: 22px; --fd-l: 27px; --fd-xl: 52px; }
+  :root[data-font='c'] { --fs-s: 13px; --fs-text: 16px; --fs-m: 17px; --fs: 19px; --fd-s: 14px; --fd: 28px; --fd-l: 32px; --fd-xl: 63px; }
+}
+/* The book faces are smooth type, so let them be smoothed. */
+:root[data-font='b'] body, :root[data-font='c'] body { -webkit-font-smoothing: antialiased; }
