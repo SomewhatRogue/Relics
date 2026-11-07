@@ -63,7 +63,7 @@ describe('tiles', () => {
   it('knacks: the two on offer are a fork, PICK ONE, taken only out of a fight; later steps say what they need', () => {
     const p = Object.assign(hero('MAGE', 3, 0), { picks: 1 });
     const offer = perkOffer(p), tabs = upgradeTabs(p, at), knacks = tabs.find((t) => t.id === 'knacks')!;
-    expect(knacks.tracks[0].steps[0].fork).toBeUndefined();
+    expect(knacks.tracks[0].steps[0].fork).toBe(''); // No words over it: the track's title already says take one.
     expect(knacks.tracks[0].steps[0].tiles.map((t) => t.key)).toEqual(offer.map((id) => 'knack:' + id));
     for (const t of knacks.tracks[0].steps[0].tiles) expect(t).toMatchObject({ state: 'pick', act: 'pick' });
     expect(knacks.ready).toBe(1);

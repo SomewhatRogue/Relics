@@ -6,8 +6,8 @@
 export const UPW = {
   /** The screen's heading opened from the pack (at a trainer it's the trainer's name). */
   title: 'TRAINING',
-  /** The four tabs. */
-  tabs: { skills: 'SKILLS', moves: 'MOVES', ranks: 'RANKS', knacks: 'KNACKS' } as Record<string, string>,
+  /** The four tabs (RANKS became STATS, Kyle 2026-11-06: "RANKS doesn't mean anything"). */
+  tabs: { skills: 'SKILLS', moves: 'MOVES', ranks: 'STATS', knacks: 'KNACKS' } as Record<string, string>,
   /** The head, always on top: gold and knack picks. */
   gold: (n: number) => `${n} GOLD`,
   picks: (n: number) => (n === 1 ? '1 KNACK TO PICK' : `${n} KNACKS TO PICK`),

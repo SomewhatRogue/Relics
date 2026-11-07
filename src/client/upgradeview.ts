@@ -33,15 +33,17 @@ export function upTile(t: UpTile): string {
     `<span class="up-f">${pips(t.pips)}<em class="up-b">${t.badge}</em></span></button>`;
 }
 
-/** A step: one tile, or a fork (the words over it, the tiles side by side). */
-function upStep(s: UpStep): string {
-  if (s.tiles.length < 2) return s.tiles.map(upTile).join('');
-  return `<div class="up-fork n${s.tiles.length}"><i class="up-fl">${s.fork ?? UPW.chooseOne}</i><div class="up-ft">${s.tiles.map(upTile).join('')}</div></div>`;
+/** A step: one tile, a grid's tiles side by side (each its own buy), or a fork (the words over it,
+ *  none when the track's title already says choose; the tiles side by side under a bracket). */
+function upStep(s: UpStep, kind: UpTrack['kind']): string {
+  if (s.tiles.length < 2 || kind === 'grid') return s.tiles.map(upTile).join('');
+  const words = s.fork ?? UPW.chooseOne;
+  return `<div class="up-fork n${s.tiles.length}">${words ? `<i class="up-fl">${words}</i>` : ''}<div class="up-ft">${s.tiles.map(upTile).join('')}</div></div>`;
 }
 
 /** A track: its title and where you stand, then its steps joined (gold once the step before is yours). */
 export function upTrack(k: UpTrack): string {
-  const steps = k.steps.map((s, i) => (i && k.kind !== 'grid' ? `<i class="up-link${k.steps[i - 1].tiles.some(lit) ? ' on' : ''}"></i>` : '') + upStep(s)).join('');
+  const steps = k.steps.map((s, i) => (i && k.kind !== 'grid' ? `<i class="up-link${k.steps[i - 1].tiles.some(lit) ? ' on' : ''}"></i>` : '') + upStep(s, k.kind)).join('');
   return `<section class="up-track k-${k.kind}" data-track="${k.id}"><div class="up-th"><b>${k.title}</b><span>${k.sum}</span></div>` +
     `<div class="up-steps">${steps}</div>${k.note ? `<p class="up-note">${k.note}</p>` : ''}</section>`;
 }
