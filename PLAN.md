@@ -51,6 +51,14 @@ forgotten tab go); a Cleric raising a friend kneels by them with the light in th
 has a RAISE row, and the recap calls out RAISED FRIENDS for whoever raised the most; a friend's down mark is a fallen
 shield, never a skull; his first named butcher gives him a relic for sure (once a hero, a guest too); and Brisk
 offers no shift on the wall. Everything in DECISIONS 2026-11-06 ("a polish pass").
+**WORK A SHIFT at Halvard's forge** (Claude Opus 5.5, 2026-11-06; Kyle: "work in the forge for gold, and high scores
+also, as a mini-game"). Built; waiting on Kyle's play and the lore keeper and line editor on the new words
+(`client/shiftwords.ts`). *Done when*, on his phone: the forge's panel has WORK A SHIFT; Halvard's offer, his best and
+the town's board of best shifts; 75 s of nails, horseshoes, hinges and blade blanks struck on the glow, faster as it
+goes, a streak counting up; at the bell a card with the score, up to 25 gold, NEW BEST, and the board updated; the
+next paid shift 4 minutes off (an unpaid one still counts for the board); a friend in the forge sees him at the anvil.
+Everything in DECISIONS 2026-11-06 ("WORK A SHIFT"); shots `node scripts/shift-look.cjs <url> shots/shift`.
+
 **More town pastimes: arm-wrestling and knives at the Drowned Rat, striking at Halvard's anvil** (Claude Opus 5.5,
 2026-11-06). Built; waiting on Kyle's play and the lore keeper and line editor on the new words (`client/pastimewords.ts`:
 ARMW, KNIFEW, ANVILW). *Done when*, on his phone: in the Rat, the watchman off duty at the table by the door offers

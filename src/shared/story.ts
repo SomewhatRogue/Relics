@@ -43,6 +43,8 @@ export interface WorldState {
   range?: import('./rangeboard.js').RangeLine[];
   /** The Drowned Rat's knife board: each hero's best round, the top ten (shared/knifeboard.ts). */
   knives?: import('./rangeboard.js').RangeLine[];
+  /** Halvard's forge: each hero's best shift, the top ten (shared/shiftboard.ts). */
+  shift?: import('./rangeboard.js').RangeLine[];
   /** Who's on the plinth in Lantern Square, and what they paid (shared/statue.ts). */
   statue?: import('./statue.js').Statue;
 }

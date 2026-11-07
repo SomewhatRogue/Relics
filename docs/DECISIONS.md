@@ -2,6 +2,92 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-06: WORK A SHIFT at Halvard's forge, for gold and the town's board (Kyle; Claude Opus 5.5)
+
+Kyle: "I'd like you to be able to work in the forge for gold, and high scores also, as a mini-game." Built as the
+other pastimes are: the shift runs only in your browser, two presence words a shift, outcomes from seeded per-hero
+counters, and a replay-checked town board.
+
+**The shift** (`shared/forgeshift.ts`, numbers `shared/shifttune.ts`, re-exported through tuning). The anvil's game
+(`forgestrike.ts`) piece after piece: Halvard lays on town work, a NAIL (1 good strike, 4 points done), a HORSESHOE
+(2, 8), a HINGE (3, 14) or a BLADE BLANK (4, 20). Each glows up and fades its strikes plus 2 times; a strike within
+0.08 s of a peak is CLEAN, within 0.17 NEAR ENOUGH, else TOO COLD (the anvil's own windows), one a glow, 0.22 s
+between strikes. Finish it and he swaps in the next (0.45 s); let its glows all go and it's SPOILED. 75 s, the first
+piece at 0.6 s. The pace rises in a straight line: peaks 1.2 s apart at the start, 0.62 at the bell (each jittered
+12% on the seed), a fresh piece's first peak 0.9 s after it's laid on down to 0.55, glows rising and fading in at most
+0.42 s or 0.6 of the gap. The mix moves from nails and horseshoes (3, 3, 1, 0.3) to hinges and blanks (1, 3, 3, 2.5).
+
+**Score**: clean 10, near 4, cold 0; each good strike in a row after the first adds 2, up to +10 (a cold strike, a
+glow let by, or a spoiled piece ends the run); each piece done its points. Measured (`tests/forgeshift.test.ts` bot,
+40 seeds): every strike on the peak about 1770 (74 strikes, 31 pieces); 0.03 s late give or take 0.05 about 1610;
+0.08 late give or take 0.15 about 840 (22 pieces, 3 spoiled); 0.1 give or take 0.25 about 610.
+
+**Pay** (`shared/shiftpay.ts`, `SHIFT_PAY`): a gold for every 50 points, at most **25 a shift**, and one paid shift
+every **4 minutes** after the last one ends (the rest runs from the shift's start: 75 + 240 s). So at the very most
+under 5 gold a minute (4.8), against a short job at the gentlest place paying 36 for about five minutes before its
+kill gold (7.2 a minute) and 100 or more with it (tested: under 0.7 of the bare short job). A good shift (about 1250)
+reaches the cap; a middling one about 16. In the rest you can still work a shift for the board and your best; it pays
+nothing and doesn't restart the rest. The pay is promised as a paid shift starts (`startShift`: the count, `owed` and
+the rest saved then) and handed over once, only for that shift, only at the bell (`settleShift`); STOP or a refresh
+mid-shift pays nothing and the rest still runs; a later shift never pays an earlier one's. Gold is the hero's as at
+the dice and the stakes (client-kept, as all gold is).
+
+**Seeded**: a shift's seed is the hero and their count of shifts (`shiftSeed`, its own stream, `:shift`), counted as it
+starts, so a refresh starts the next shift, never the same one again.
+
+**The board** (`shared/shiftboard.ts`, `worldsync.ts`, `api/_world.ts`): the best is on the hero (`Profile.shift`:
+shifts, best, restUntil, owed; fitted from a save by `fitShiftRecord`, the best capped at `SHIFT_MOST`, a rest never
+past one shift and rest from now). At the bell, a whole shift that beats your line goes to the shared world once as
+`shift: { n, hits: frames[] }`; `contribute` replays it from the hero's seed (`replayShift`: in order, under 400, every
+strike one the rules would take, nothing at or after the bell) onto `WorldState.shift` (each hero once at their best,
+the top ten, `addRangeLine`). Someone else's strikes under your name are scored on your seed, so they don't carry. On
+the server it takes the range's and knives' short path (WATCH, GET, MULTI, SET, EXEC). STOP posts nothing.
+
+**Parked**: the shift parks you with the anvil's own pastime id (`Game.enterPastime('anvil')`, the hammer-at-the-anvil
+idle in `parkedrat.ts`), so a friend in the forge sees you at the anvil: one word to start, none while working,
+ANOTHER SHIFT says nothing (already parked), one to get up.
+
+**Screens** (`client/shiftui.ts`, `shiftmode.ts`, `shiftview.ts`): the forge's panel gets a WORK A SHIFT button
+(`stores.ts` `show` takes buttons); its panel has Halvard's offer and what a good shift pays, or in the rest how long
+till the next paid one and that you can still work for the board; your best; the board (offline only your own). In
+play, `OneButton` (a finger anywhere, the mouse, Space or Enter; Escape or STOP the way out); SCORE and TIME along the
+top (TIME red for the last ten, with a cue). The anvil's scene (`anvilview.ts` now paints from a glow and notches, with
+an optional piece shape, the anvil's own look unchanged) with each piece drawn as itself, glowing as `shiftGlow` says;
+a notch a strike the piece wants, its name, the run (N IN A ROW), DONE +N or SPOILED rising off the anvil. The card
+puts the numbers first (a spoken line holds back what follows it until typed) and Halvard last. **Sounds** (the
+existing kit): the anvil's ring, the perfect chime on clean, the dull knock cold, steam on a piece done, coins for pay,
+fanfare for a new best.
+
+**New player-facing words** (`client/shiftwords.ts`; not through the lore keeper or line editor: no agent tool in this
+session): WORK A SHIFT; Halvard's offer "There's town work waiting. Nails, horseshoes, hinges, a blade blank now and
+then. I heat them and hold them, you hit them when they glow brightest. I pay for what comes out right."; in the rest
+"Nothing more to pay for yet. Come back in N minute(s)." and "You can still work a shift for the board. It just won't
+pay."; "A good shift pays up to 25 gold."; "Your best shift: N."; BEST SHIFTS AT THE FORGE; "Nobody's on the board
+yet."; "Only your own shifts show until you play online."; BACK; at the anvil "Here."; TAP TO STRIKE WHEN THE PIECE
+GLOWS BRIGHTEST / CLICK OR PRESS SPACE TO STRIKE WHEN THE PIECE GLOWS BRIGHTEST; SCORE, TIME, STOP; NAIL, HORSESHOE,
+HINGE, BLADE BLANK; N IN A ROW; DONE +N; SPOILED; LAST TEN SECONDS; the card SHIFT DONE / SHIFT CUT SHORT, Halvard's
+"Good work." (at the cap) / "That'll do." / "Half of that goes back in the fire."; rows SCORE, PIECES DONE, SPOILED,
+CLEAN STRIKES, BEST RUN, YOUR BEST / NEW BEST; "Halvard pays you N gold."; "That wasn't enough to pay for."; "This one
+was for the board, so there's no pay."; "You stopped before the shift was out, so there's no pay."; "The next paid
+shift is in N minute(s)."; "He chalks it on the board."; "You have N gold."; ANOTHER SHIFT; BACK TO THE FORGE. The
+anvil's CLEAN, NEAR ENOUGH, TOO COLD are reused.
+
+Tests: `tests/forgeshift.test.ts` (11: a shift runs to the bell with every kind and the pace rising, the glow on its
+peaks; clean 10, near 4 plus the run, cold nothing; a careful smith beats a sloppy one, a good shift reaches the cap;
+a glow let by ends the run; same seed same shift, the count as the seed; a gold a 50 to 25; paid once at the bell, the
+rest, a shift in the rest unpaid but best kept, STOP pays nothing and the rest runs, a later shift never pays an
+earlier one's; under 5 a minute and under 0.7 of a bare short job; the record fitted; a shift replays exactly and a
+strike the rules wouldn't take makes none; the board takes the replayed score once, a forged record and a borrowed
+one don't carry through the server's store, the top ten best first), `tests/ratpresence.test.ts` (a shift: one word
+to take the hammer, none through two whole shifts and ANOTHER SHIFT, one to hand it back). Full vitest 170 files,
+1611 tests; tsc clean; town-online all steps (new: Kyle sees Sam parked at the anvil for a shift, one word to start,
+none while working, one as he stops). Shots (phone): `node scripts/shift-look.cjs <url> shots/shift`:
+`shift-forge-phone.png`, `shift-desk-phone.png`, `shift-play-phone.png` (mid-shift, a hinge, 25 in a row),
+`shift-card-phone.png` (1786, 30 pieces, paid 25, chalked up).
+
+Open: Kyle's play on the pace, the pay and the rest; whether the Warrior (or anyone) should have an edge here as the
+Ranger has at the butts and the Rogue at the knives; Blender art for the pieces.
+
 ## 2026-11-06: forge pluses to +5, steeply priced, always struck yourself, NOW and AFTER on screen (Kyle; Claude Opus 5.5)
 
 Kyle: "It's not really clear what forge upgrades give you, and prices should be more for each plus. I want
