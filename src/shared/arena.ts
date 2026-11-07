@@ -8,6 +8,8 @@ import { stopsAt, type PathAt } from './npcstops.js';
 
 export type Circle = { x: number; y: number; r: number };
 export type RoundKind = 'pillar' | 'tree' | 'pine' | 'rock' | 'hay' | 'well' | 'lantern' | 'support' | 'stump' | 'target' | 'stone' | 'post' | 'grate' | 'statue' | 'bush' | 'reed' | 'deadtree'
+  // Lantern Square's plinth, with whoever paid for the statue on it (shared/statue.ts).
+  | 'plinth'
   // Paint only, a speck to bump: crows at the blood, moths round a garden lamp.
   | 'crows' | 'moths'
   // A place's things (shared/sites.ts): a wayside shrine, a fountain, a market cross, a washing line, a scarecrow,
@@ -48,7 +50,11 @@ export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall'
   | 'haystack'
   // Fenmere (shared/fen.ts): boards over deep water you walk on (a deck), reeds standing in the shallows you walk through (soft).
   | 'boards' | 'reeds';
-export interface Round extends Circle { kind: RoundKind }
+export interface Round extends Circle {
+  kind: RoundKind;
+  /** Paint only: the plinth's statue (none yet: an empty plinth and a sign). */
+  hero?: import('./statue.js').StatueHero;
+}
 export interface Block {
   x: number; y: number; w: number; h: number; kind: BlockKind; label?: string;
   /** Walk up into the door (bottom middle) to go in: the interior's id. */

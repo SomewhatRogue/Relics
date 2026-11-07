@@ -55,6 +55,7 @@ import { LINES, ROAD_OUT } from '../shared/wood';
 import { spoken } from '../sim/woodguard';
 const WOOD_ROAD = LINES.road;
 let shownCap = '';
+import { commission } from './statuebuy';
 import { WorldLink } from './worldlink';
 import { setLink } from './squareui';
 import { raidNews } from './raidnews';
@@ -739,6 +740,8 @@ w.__idles = { force: (id: string) => forceIdle(game.hero, id as never, performan
 // Whoever's petting a hound on this screen now, and how it's taking it (petting.ts; the online scripts).
 w.__pets = () => game.room.heroes.map((h) => ({ id: h.id, name: h.tag ?? h.id, pet: petFrame(h, performance.now() / 1000)?.r ?? null })).filter((x) => x.pet);
 w.__openSpot = (id: string, arg = 0, key = '') => openSpot(id as never, game, panel, arg, key);
+// Paying for the statue in the square as the works' panel does (statuebuy.ts; scripts/town-online.cjs).
+w.__statue = { commission: (n: number) => commission(game, n) };
 // A job on a village street (houses to go into), for the party tests to set out on.
 // A job house's kindling spot (scripts/houseburn.cjs).
 w.__kindling = (i: number) => kindling(game.room.map.blocks[i], game.room.map);

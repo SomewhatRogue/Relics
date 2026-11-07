@@ -15,6 +15,8 @@ import { WORK_ORDER } from '../src/shared/works.js';
 import { Meter } from './_meter.js';
 import { cleanClaim } from '../src/shared/rangeboard.js';
 import { cleanKnifeClaim } from '../src/shared/knifeboard.js';
+import { WEAPONS, type WeaponId } from '../src/shared/weapons.js';
+import { giveMore } from '../src/shared/statue.js';
 
 export interface WorldView { world: WorldState; board: Board }
 export interface WorldStore {
@@ -50,6 +52,14 @@ export function clean(raw: unknown): Contribution | null {
   // A round at the Rat's knife board: the moments thrown, played again as it's applied (shared/knifeboard.ts).
   const knives = cleanKnifeClaim(c.knives);
   if (knives) out.knives = knives;
+  // A bid for the statue: whole numbers and a real weapon; whether it beats the price is the world's to say (shared/statue.ts).
+  const st = c.statue as Record<string, unknown> | undefined, whole = (v: unknown) => typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= 1e9;
+  if (st && typeof st === 'object') {
+    if (!whole(st.over) || !whole(st.pay) || !whole(st.given) || typeof st.w !== 'string' || !(st.w in WEAPONS) || ![0, 1, 2].includes(st.l as number)) return null;
+    // Not given the town enough yet (tuning.ts STATUE_GIVEN): no bid at all (placeBid says the same).
+    if (giveMore(st.given as number) > 0) return null;
+    out.statue = { over: st.over as number, pay: st.pay as number, w: st.w as WeaponId, l: st.l as number, given: st.given as number };
+  }
   if (CHAPTER_1.decision.choices.some((x) => x.id === c.vote)) out.vote = c.vote as string;
   if (typeof c.voter === 'string' && /^[\w-]{6,40}$/.test(c.voter)) out.voter = c.voter;
   const d = c.deed as Record<string, unknown> | undefined, words = (v: unknown, n: number) => String(v ?? '').replace(/[^A-Za-z0-9 ',.-]/g, '').slice(0, n);
@@ -149,9 +159,9 @@ export async function redisWorldStore(url: string, meter = new Meter()): Promise
           if (tries === 4) throw e;
         }
       }
-      // A round at the range or the knife board (nothing for the Roll): the world's write is all (5 commands); the Roll
-      // as it was, from what this instance last read (or once from its own key).
-      if ((c.range || c.knives) && !STAT_ORDER.some((k) => c.stats?.[k])) {
+      // A round at the range or the knife board, or a bid for the statue (nothing for the Roll): the world's write is
+      // all (5 commands); the Roll as it was, from what this instance last read (or once from its own key).
+      if ((c.range || c.knives || c.statue) && !STAT_ORDER.some((k) => c.stats?.[k])) {
         let b = seen.get(g)?.board;
         if (!b) {
           meter.add('get');

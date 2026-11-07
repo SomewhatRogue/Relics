@@ -13,6 +13,9 @@ const G: Record<string, string> = {
   '-': '000000111000000', '/': '001001010100100', '♥': '101111111010000',
 };
 
+/** One letter of the 3x5 capitals (15 cells, row by row), whatever face the words wear (cut in stone: statuedraw.ts). */
+export const glyph = (ch: string): string => G[ch] ?? G[ch.toUpperCase()] ?? G[' '];
+
 export function textWidth(s: string): number {
   const f = pixFace();
   return f ? faceWidth(f, s) : s.length * 4 - 1;

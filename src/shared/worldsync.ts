@@ -10,6 +10,7 @@ import { nights } from './raids.js';
 import { WORK_ORDER, workDone, type WorkId } from './works.js';
 import { addRangeLine, claimScore, type RangeClaim } from './rangeboard.js';
 import { knifeClaimScore, type KnifeClaim } from './knifeboard.js';
+import { placeBid, type StatueBid } from './statue.js';
 
 /** Works finished lately, kept for the town's talk. */
 export const MENDED_KEPT = 6;
@@ -41,6 +42,8 @@ export interface Contribution {
   range?: RangeClaim;
   /** A finished round at the Rat's knife board, played again the same way (shared/knifeboard.ts). */
   knives?: KnifeClaim;
+  /** A bid for the statue in the square: taken only over the price as it stands now (shared/statue.ts). */
+  statue?: StatueBid;
 }
 
 /**
@@ -71,6 +74,7 @@ export function contribute(w: WorldState, c: Contribution, now = Date.now(), rai
     const n = knifeClaimScore(c.hero.id, c.hero.cls, c.knives);
     if (n > 0) w.knives = addRangeLine(w.knives, { id: c.hero.id, name: c.hero.name, cls: c.hero.cls, n });
   }
+  if (c.statue) placeBid(w, c.hero, c.statue);
 }
 
 /** The Roll of the Brave: per stat, the top heroes. */

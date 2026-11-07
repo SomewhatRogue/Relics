@@ -45,6 +45,27 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     step(`Sam walked (${before?.x.toFixed(2)} to ${after?.x.toFixed(2)}, really at ${samAt.x.toFixed(2)})`, !!after && after.x > before.x + 0.5 && Math.abs(after.x - samAt.x) < 0.3);
     await kyle.page.screenshot({ path: path.join(ROOT, 'shots/town-online-phone.png') });
     await sam.page.screenshot({ path: path.join(ROOT, 'shots/town-online-laptop.png') });
+    // The statue in the square (shared/statue.ts): Sam pays for it at the works, the world takes it, and
+    // Kyle's next look at the world has Sam on the plinth. Then both bid over the same price at once: the
+    // world takes one, and the other gets the gold back.
+    require('fs').mkdirSync(path.join(ROOT, 'shots/statue'), { recursive: true });
+    await sam.page.evaluate(() => Object.assign(window.__game.profile, { gold: 1500 }, { stats: { ...window.__game.profile.stats, given: 1000 } }));
+    step('Sam pays 1000 gold for the statue', await sam.page.evaluate(() => window.__statue.commission(1000)));
+    step('the world takes it: Sam on the plinth, 500 gold left, nothing out', await sam.page.waitForFunction(() => { const g = window.__game; return g.world.statue?.by.name === 'SAM' && !g.profile.statueBid && g.profile.gold === 500; }, null, { timeout: 6000 }).then(() => true, () => false));
+    await kyle.page.evaluate(() => { window.__game.link.refresh(true); Object.assign(window.__game.hero, { x: 31.8, y: 23.8, fx: 0, fy: -1 }); });
+    step("Kyle sees Sam's statue in the square", await kyle.page.waitForFunction(() => window.__game.room.map.rounds.find((r) => r.kind === 'plinth')?.hero?.name === 'SAM', null, { timeout: 6000 }).then(() => true, () => false));
+    await wait(1200);
+    await kyle.page.screenshot({ path: path.join(ROOT, 'shots/statue/online-kyle-sees-sam-phone.png') });
+    for (const p of [kyle, sam]) await p.page.evaluate(() => Object.assign(window.__game.profile, { gold: 3000 }, { stats: { ...window.__game.profile.stats, given: 1000 } }));
+    const [kBid, sBid] = await Promise.all([kyle.page.evaluate(() => window.__statue.commission(1001)), sam.page.evaluate(() => window.__statue.commission(1500))]);
+    const settled = (p) => p.page.waitForFunction(() => !window.__game.profile.statueBid, null, { timeout: 8000 }).then(() => true, () => false);
+    const both = (await settled(kyle)) && (await settled(sam));
+    const kEnd = await kyle.page.evaluate(() => ({ gold: window.__game.profile.gold, on: window.__game.world.statue?.by.name })), sEnd = await sam.page.evaluate(() => ({ gold: window.__game.profile.gold, on: window.__game.world.statue?.by.name }));
+    const won = kEnd.gold === 1999 ? 'KYLE' : sEnd.gold === 1500 ? 'SAM' : null;
+    step(`a race over 1000: both sent (${kBid}, ${sBid}), one won (${won}), the other paid back (Kyle ${kEnd.gold}, Sam ${sEnd.gold}), both see the winner (${kEnd.on}, ${sEnd.on})`, kBid && sBid && both && !!won && (won === 'KYLE' ? sEnd.gold === 3000 : kEnd.gold === 3000) && sEnd.on === won);
+    await kyle.page.evaluate(() => window.__game.link.refresh(true));
+    await wait(800);
+    step('and Kyle sees the winner on the plinth', await kyle.page.evaluate((won) => window.__game.room.map.rounds.find((r) => r.kind === 'plinth')?.hero?.name === won, won));
     // Kyle (a Ranger, on his phone) pets his hound in the square (client/petting.ts): the PET button,
     // one word to the town, and Sam sees it on his screen.
     require('fs').mkdirSync(path.join(ROOT, 'shots/pet'), { recursive: true });
