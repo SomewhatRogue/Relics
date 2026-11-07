@@ -33,8 +33,13 @@ export const HOSTPICK = {
 
 /** How hiding a host's page hands the room on. */
 export const HIDE = {
-  /** A desktop page out of sight this long (s) hands the room to a friend. */
-  desk: 2.5,
+  /**
+   * A desktop page out of sight this long (s) hands the room to a friend. It was 2.5: on 2026-11-06 the
+   * host looked at another tab about 14 s, the room went to the friend, both reloaded the job, and the host
+   * came back a guest. Out of sight, a desktop runs its room from a worker's timer at full pace (main.ts),
+   * so waiting costs the friends nothing.
+   */
+  desk: 15,
 };
 
 /** A player's link, as they measure it: the trip to the relay and back (ms), and their average frame time (ms). */

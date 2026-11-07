@@ -46,7 +46,7 @@ export type RelayMsg =
   | { t: 'nohost' }
   | { t: 'hosted' | 'left'; id: string; cn?: string; far?: number }
   | { t: 'msg'; from: string; d: unknown; cn?: string }
-  | { t: 'info'; shared: boolean }
+  | { t: 'info'; shared: boolean; inst?: string }
   | { t: 'pong' }
   | { t: 'full' };
 
@@ -67,6 +67,13 @@ const ROTATE_MS = Number(params().get('rotate')) || 4 * 60_000;
 const HOPS = 3, HOP_MS = 1500;
 /** A swap whose new socket hasn't talked in this long: the old one goes anyway (the heartbeat recovers). */
 const SWAP_MS = 10_000;
+/**
+ * A 4-minute swap whose new socket lands away from the leader while the old one is beside them keeps the
+ * old one and tries again SWAP_RETRY later, until the old one is LAST_SWAP old (Vercel ends it at 300 s);
+ * then the new one is taken wherever it is. Seen live 2026-11-06: a friend beside the leader swapped,
+ * landed on another instance, and three hops all came back to that same one.
+ */
+const SWAP_RETRY = Math.min(15_000, ROTATE_MS / 16), LAST_SWAP = ROTATE_MS + Math.min(45_000, ROTATE_MS / 4);
 /** Connected this long without trouble: the next failure starts the backoff over. */
 const STEADY_MS = 30_000;
 /** Every socket alive in this page, by room and player (one each). */
@@ -77,6 +84,9 @@ export class RelaySocket {
   /** Lost the connection (it reconnects by itself); `tries` counts failures in a row. */
   onDown: (tries: number) => void = () => {};
   private ws: WebSocket | null = null;
+  /** Each connection: when it opened, the instance it's on, whether that's away from the leader, and whether it's a hop. */
+  private meta = new WeakMap<WebSocket, { at: number; inst?: string; far?: boolean; hop?: boolean }>();
+  private hopping = false;
   /** During a swap: the connection being replaced (closed once the new one talks). */
   private old: WebSocket | null = null;
   private closed = false;
@@ -139,7 +149,9 @@ export class RelaySocket {
 
   private url(): string {
     const base = new URLSearchParams(location.search).get('relay') ?? `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/api/room`;
-    return `${base}?room=${encodeURIComponent(this.room)}&id=${encodeURIComponent(this.id)}&want=${this.want}`;
+    // (The trip to the relay as last timed, for the relay's join line: how far away each player is.)
+    const rtt = this.rtt > 0 ? `&rtt=${Math.round(this.rtt * 1000)}` : '';
+    return `${base}?room=${encodeURIComponent(this.room)}&id=${encodeURIComponent(this.id)}&want=${this.want}${rtt}`;
   }
 
   private open(): void {
@@ -150,7 +162,8 @@ export class RelaySocket {
     this.opened++;
     this.openedAt = performance.now();
     const swap = this.swapping;
-    this.swapping = false;
+    this.meta.set(ws, { at: performance.now(), hop: swap && this.hopping });
+    this.swapping = this.hopping = false;
     this.ws = ws;
     clearTimeout(this.rotateTimer);
     this.rotateTimer = window.setTimeout(() => this.rotate(), ROTATE_MS);
@@ -158,13 +171,24 @@ export class RelaySocket {
       this.heardAt = performance.now();
     };
     ws.onmessage = (e) => {
-      // A connection being replaced: still deliver (nothing is lost) until the new one talks.
+      // A connection being replaced: still deliver (nothing is lost) until the new one is placed.
       if (this.ws !== ws && this.old !== ws) return void ws.close();
-      if (this.ws === ws && this.old) this.dropOld();
       this.heardAt = performance.now();
       try {
         let m = JSON.parse(String(e.data)) as RelayMsg;
         if (m.t === 'full') return goFull();
+        const me = this.meta.get(ws)!;
+        if (m.t === 'info' && m.inst) me.inst = m.inst;
+        if (m.t === 'role' || m.t === 'hosted') me.far = !!m.far;
+        // A swap's new socket is placed: keep it, or (landed away from the leader, the old one beside
+        // them) go back to the old one and try again later. A hop that landed on the very instance it
+        // left: Vercel keeps this page's sockets there, so hopping is over for this rotation.
+        if (this.ws === ws && this.old && (m.t === 'role' || m.t === 'nohost')) {
+          const was = this.meta.get(this.old);
+          if (m.t === 'role' && m.far && !me.hop && was?.far === false && performance.now() - was.at < LAST_SWAP) return this.keepOld(ws);
+          if (me.hop && was?.inst && was.inst === me.inst) this.hopsLeft = 0;
+          this.dropOld();
+        }
         if (m.t === 'role' && swap) m = { ...m, swap: true };
         // Far from the leader: try again, in a moment, to land with them (this one goes on meanwhile).
         if ((m.t === 'role' || m.t === 'hosted') && m.far && this.ws === ws) this.hopSoon();
@@ -202,6 +226,18 @@ export class RelaySocket {
     this.timer = window.setTimeout(() => this.open(), ms);
   }
 
+  /** The swap's new socket is worse than the old one: close it, carry on with the old, try again later. */
+  private keepOld(fresh: WebSocket): void {
+    const o = this.old!;
+    this.old = null;
+    this.ws = o;
+    this.openedAt = this.meta.get(o)?.at ?? this.openedAt;
+    fresh.onmessage = null;
+    fresh.close();
+    clearTimeout(this.rotateTimer);
+    this.rotateTimer = window.setTimeout(() => this.rotate(), SWAP_RETRY);
+  }
+
   private dropOld(): void {
     const o = this.old;
     this.old = null;
@@ -225,6 +261,7 @@ export class RelaySocket {
     if (!hop) this.hopsLeft = HOPS;
     this.old = cur;
     this.swapping = true;
+    this.hopping = hop;
     this.open();
     window.setTimeout(() => this.old === cur && this.dropOld(), SWAP_MS);
   }

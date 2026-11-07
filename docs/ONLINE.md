@@ -81,3 +81,12 @@ What the Florida night taught (docs/DECISIONS.md 2026-11-05, "the join storm"):
 - **Reproduce it:** `node scripts/florida-online.cjs` (a deaf leader's instance, a far leader, Kyle moved off;
   `KYLE_ROUTE=i0` for a split party's lag, `PLAYOUT=0` for the old way of applying patches, `NORESET=1` for a
   connection the relay can't heal).
+
+## Swaps that keep a party together, and a hidden desktop host (2026-11-06)
+
+- A guest's 4-minute swap that lands away from the leader, while the old socket is beside them, keeps the
+  old one and tries again 15 s on (taken anyway at 285 s). A hop that lands where it left stops hopping.
+- `hosted` for the leader a guest already follows is a swap, not a new leader: nothing starts over.
+- A hidden desktop host runs its room from a worker's timer at full pace, and hands on after 15 s (phones at once).
+- Patches go 20 a second steadily and carry the leader's send clock (`w`) for the playout.
+- The relay's `join` line has the page's last timed trip (`rtt`, ms).

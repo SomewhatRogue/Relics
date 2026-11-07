@@ -132,7 +132,7 @@ describe('the relay socket', () => {
     s.close();
   });
 
-  it('a swap: the new socket opens first, and the old one closes the moment the new one talks', () => {
+  it('a swap: the new socket opens first, and the old one closes the moment the new one is placed', () => {
     const s = new RelaySocket('PJOBROOM5', 'kyle-0005', 'join');
     alive()[0].accept({ t: 'role', role: 'guest', host: 'lead-0005' });
     const heard: string[] = [];
@@ -145,8 +145,81 @@ describe('the relay socket', () => {
     expect(alive()).toHaveLength(2);
     const fresh = alive().find((w) => w.readyState === 0)!;
     fresh.accept({ t: 'info', shared: true });
+    // (Told where it is, not yet who leads: the old one still delivers.)
+    expect(alive()).toHaveLength(2);
+    fresh.onmessage?.({ data: JSON.stringify({ t: 'role', role: 'guest', host: 'lead-0005' }) });
     expect(alive()).toHaveLength(1);
     expect(s.opened).toBe(2);
+    s.close();
+  });
+
+  /** Pongs to every open socket for `ms`, so heartbeats keep them all. */
+  const keep = (ms: number) => {
+    for (let t = 0; t < ms; t += 2000) {
+      for (const w of alive()) if (w.readyState === 1) w.onmessage?.({ data: '{"t":"pong"}' });
+      vi.advanceTimersByTime(2000);
+    }
+  };
+
+  it("a friend beside the leader whose 4-minute swap lands elsewhere keeps the old socket and tries again (2026-11-06)", () => {
+    const s = new RelaySocket('PJOBROOM6', 'kyle-0006', 'join');
+    const heard: unknown[] = [];
+    s.onMessage = (m) => heard.push(m);
+    alive()[0].accept({ t: 'info', shared: true, inst: 'near' }, { t: 'role', role: 'guest', host: 'lead-0006' });
+    const first = alive()[0];
+    keep(240_500);
+    // The swap lands on another instance, away from the leader: it's closed, the old one kept.
+    let fresh = alive().find((w) => w.readyState === 0)!;
+    fresh.accept({ t: 'info', shared: true, inst: 'far' }, { t: 'role', role: 'guest', host: 'lead-0006', far: 1 });
+    expect(alive()).toEqual([first]);
+    expect(heard.some((m) => (m as { far?: number }).far)).toBe(false);
+    // 15 s on it tries again, and this time lands beside the leader: that one's kept, the old one goes.
+    keep(16_000);
+    fresh = alive().find((w) => w.readyState === 0)!;
+    fresh.accept({ t: 'info', shared: true, inst: 'near' }, { t: 'role', role: 'guest', host: 'lead-0006' });
+    expect(alive()).toEqual([fresh]);
+    s.close();
+  });
+
+  it('a swap that keeps landing away from the leader is taken anyway before Vercel ends the old one', () => {
+    const s = new RelaySocket('PJOBROOM7', 'kyle-0007', 'join');
+    alive()[0].accept({ t: 'info', shared: true, inst: 'near' }, { t: 'role', role: 'guest', host: 'lead-0007' });
+    let at = 0;
+    for (let t = 0; t < 300_000; t += 1000) {
+      for (const w of alive()) if (w.readyState === 0) (w.accept({ t: 'info', shared: true, inst: 'far' }, { t: 'role', role: 'guest', host: 'lead-0007', far: 1 }), (at = t));
+      for (const w of alive()) if (w.readyState === 1) w.onmessage?.({ data: '{"t":"pong"}' });
+      vi.advanceTimersByTime(1000);
+      if (alive().length === 1 && alive()[0].url && at && FakeWS.all.indexOf(alive()[0]) > 0) break;
+    }
+    // Taken by the 4 3/4 minute mark (the old one's 285 s), never past Vercel's 300.
+    expect(FakeWS.all.indexOf(alive()[0])).toBeGreaterThan(0);
+    expect(at).toBeLessThanOrEqual(285_000);
+    s.close();
+  });
+
+  it('a hop that lands on the instance it left: no more hops this rotation (Vercel keeps the page there)', () => {
+    const s = new RelaySocket('PJOBROOM8', 'kyle-0008', 'join');
+    alive()[0].accept({ t: 'info', shared: true, inst: 'other' }, { t: 'role', role: 'guest', host: 'lead-0008', far: 1 });
+    for (let t = 0; t < 60_000; t += 500) {
+      for (const w of alive()) if (w.readyState === 0) w.accept({ t: 'info', shared: true, inst: 'other' }, { t: 'role', role: 'guest', host: 'lead-0008', far: 1 });
+      for (const w of alive()) if (w.readyState === 1) w.onmessage?.({ data: '{"t":"pong"}' });
+      vi.advanceTimersByTime(500);
+    }
+    // The first socket and one hop (it came back to 'other'), not three.
+    expect(FakeWS.all.filter((w) => w.url.includes('PJOBROOM8'))).toHaveLength(2);
+    expect(alive()).toHaveLength(1);
+    s.close();
+  });
+
+  it("tells the relay its trip on the next connection, for the logs", () => {
+    const s = new RelaySocket('PJOBROOM9', 'kyle-0009', 'join');
+    alive()[0].accept({ t: 'info', shared: true, inst: 'a' }, { t: 'role', role: 'guest', host: 'lead-0009' });
+    vi.advanceTimersByTime(4000);
+    vi.advanceTimersByTime(80);
+    alive()[0].onmessage?.({ data: '{"t":"pong"}' });
+    s.reconnect();
+    vi.advanceTimersByTime(5000);
+    expect(FakeWS.all.filter((w) => w.url.includes('PJOBROOM9')).pop()!.url).toMatch(/&rtt=\d+/);
     s.close();
   });
 

@@ -1,7 +1,7 @@
 /**
  * Who hosts a party's job, and a hidden host handing it on (docs/DECISIONS.md 2026-11-06, "who hosts").
  * The pick (lowest trip to the relay, a small lean to a healthy frame time, the leader kept on a near
- * tie, picked once at setting out); the hidden rule (a desktop after 2.5 s, a phone at once, alone
+ * tie, picked once at setting out); the hidden rule (a desktop after HIDE.desk s, a phone at once, alone
  * nothing, back in sight as a guest); the goodbye that names who takes it on; and the room the same
  * fight after it's handed on, tick for tick.
  */
@@ -159,7 +159,7 @@ describe('setting out: the pick, once', () => {
 
 describe('a hidden host hands on', () => {
   afterEach(() => vi.restoreAllMocks());
-  it('the rule: desktop after 2.5 s, touch at once, a page going away at once, alone never', () => {
+  it('the rule: desktop after HIDE.desk (15 s), touch at once, a page going away at once, alone never', () => {
     const base = { hosting: true, friends: 1, touch: false };
     expect(handNow({ ...base, hiddenFor: -1 })).toBe(false);
     expect(handNow({ ...base, hiddenFor: HIDE.desk - 0.1 })).toBe(false);
@@ -188,21 +188,23 @@ describe('a hidden host hands on', () => {
     };
     return { w, log, to };
   }
-  it('desktop: not at 2.4 s out of sight, at 2.5; back in sight, a guest', () => {
+  it('desktop: not at 14.9 s out of sight, at 15; back in sight, a guest', () => {
+    expect(HIDE.desk).toBe(15);
     const { w, log, to } = watch(false);
     w.hidden();
-    to(2.4), w.tick();
+    to(2.6), w.tick();
+    to(14.9), w.tick();
     expect(log).toEqual([]);
-    to(2.6);
+    to(15.1);
     expect(log).toEqual(['hand']);
     w.visible();
     expect(log).toEqual(['hand', 'back']);
   });
-  it('desktop: back within 2.5 s, nothing happens', () => {
+  it('desktop: another tab 14 s (2026-11-06), back: nothing happens', () => {
     const { w, log, to } = watch(false);
     w.hidden();
-    to(1.5), w.visible();
-    to(5), w.tick();
+    to(14), w.visible();
+    to(30), w.tick();
     expect(log).toEqual([]);
   });
   it('touch: at once', () => {

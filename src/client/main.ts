@@ -593,8 +593,11 @@ requestAnimationFrame(frame);
 // Leading a job with this page out of sight (another tab, another app): the browser stops drawing
 // frames, but your friends' room still has to run, so it runs here on a timer, catching up in
 // tenth-of-a-second steps however late the browser lets the timer fire.
-// With friends, though, a hidden host hands the job on (hidehost.ts): a desktop after 2.5 s out of
-// sight, a phone or touch device at once; back in sight it follows whoever took it. Alone, it runs here.
+// The timer is a worker's when one can be made: a hidden tab's own timers are held to about once a second
+// (once a minute after five), a worker's aren't. The page's own interval stays as the fallback.
+// With friends, a hidden host hands the job on (hidehost.ts): a phone or touch device at once, a desktop
+// after 15 s out of sight; back in sight it follows whoever took it. Alone, it runs here.
+let hiddenAt = 0;
 const hide = new HideWatch({
   touch: input.touch,
   now: () => performance.now() / 1000,
@@ -606,13 +609,24 @@ const hide = new HideWatch({
   cancel: (t) => clearTimeout(t as number),
 });
 hide.attach(document, window);
-setInterval(() => {
-  if (document.hidden) hide.tick();
-  if (!document.hidden || !game.coop) return;
+function hiddenTick(): void {
   const now = performance.now();
+  if (!document.hidden) return void (hiddenAt = 0);
+  // (Two timers drive this, a worker's and the page's: one run a tenth at most.)
+  if (hiddenAt && now - hiddenAt < 80) return;
+  hiddenAt = now;
+  hide.tick();
+  if (!game.coop) return;
   for (let n = 0; now - last > 120 && n < 40; n++) tick(last + 100);
   tick(now);
-}, 100);
+}
+setInterval(hiddenTick, 100);
+try {
+  const w = new Worker(URL.createObjectURL(new Blob(['setInterval(() => postMessage(0), 100)'], { type: 'text/javascript' })));
+  w.onmessage = () => document.hidden && hiddenTick();
+} catch {
+  /* no workers here: the page's own timer does it */
+}
 
 let muted = false;
 $('#mute').addEventListener('click', () => {

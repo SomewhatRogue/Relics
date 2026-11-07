@@ -13,7 +13,7 @@
  *   peer: a room with no host at all, where everyone just tells everyone (the shared town: each
  *   browser runs Wickhold itself, and only says where its own hero is).
  * To the player: {t:'role', role:'host'} | {t:'role', role:'guest', host, far?} | {t:'role', role:'peer'} | {t:'nohost'} |
- *   {t:'hosted', id, far?} | {t:'left', id} | {t:'msg', from, d} | {t:'info', shared}
+ *   {t:'hosted', id, far?} | {t:'left', id} | {t:'msg', from, d} | {t:'info', shared, inst}
  *   (`far: 1`: the host is on another instance)
  *   | {t:'full'} (Redis's plan is used up for the month: the socket closes with 4429; play on alone)
  * From the player: {to: '*' | id, d, u?: 1} (`u`: urgent, a button pressed: what waits for the bus goes now)
@@ -176,7 +176,10 @@ export class Relay {
       await this.ready;
       c.nonce = `${this.origin}.${++this.seq}`;
       await this.b.store.set(connKey(room, id), c.nonce, 3600);
-      log({ ev: 'join', room, id: id.slice(0, 8), want, inst: this.origin });
+      // (`rtt`: the trip to the relay and back as the page last timed it, ms, so the logs say how far
+      // away each player is; nothing is sent for it.)
+      const rtt = Math.round(Number(url.searchParams.get('rtt')) || 0);
+      log({ ev: 'join', room, id: id.slice(0, 8), want, inst: this.origin, ...(rtt > 0 && rtt < 10_000 ? { rtt } : {}) });
       let set = this.rooms.get(room);
       const first = !set;
       if (!set) {
@@ -189,7 +192,8 @@ export class Relay {
       await this.subs.ensure(room);
       // Any other instance with players here answers, and from then on this room's messages reach them.
       if (first) safe(this.send(room, { k: 'here', o: this.origin }), 'here');
-      this.tell(c, { t: 'info', shared: this.b.shared });
+      // (`inst`: which instance this is, so a friend's page can tell a hop that landed where it was.)
+      this.tell(c, { t: 'info', shared: this.b.shared, inst: this.origin });
       await this.decide(c, want);
     } catch (e) {
       // Over the plan's limit (trip() has told everyone here): this one too, and no error to log.
