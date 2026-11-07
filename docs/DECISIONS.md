@@ -34,6 +34,86 @@ or a bard, even a long cloak etc." Drawing only; the room is untouched.
 - **Shots**: `node scripts/rogue-look.cjs <url> shots/rogue <tag>` (phone, FLAT and 2.5D: idle, walk,
   dash, daggers, blowpipe, beside a Warrior and a Ranger; and a 5x contact sheet of every pose), then
   `python3 scripts/rogue-crop.py shots/rogue` and `scripts/rogue-strip.py` for crops and a strip.
+## 2026-11-06: a block holds, striped blows half-blocked, and an easier wood (Kyle; Claude Opus 5.5)
+
+Kyle: "Warrior block isn't great against butcher. Should mitigate all damage, even unblockable. Right now tutorial
+is too hard unfortunately."
+
+**What was wrong with blocking a butcher** (measured, `tests/butcherbot.ts`: a hero holding block in front of a
+butcher for 40 s, never swinging): no red blow ever got through a block (no chip damage in the room; the kits'
+`chip`, shown on the card as THROUGH A BLOCK 12% to 30%, was never taken: the card was wrong). The trouble was:
+- **The slam**: striped, 30% of a butcher's blows, 40 a time through any guard. A sword holding block lost 200
+  health and went down twice in 40 s, all of it from slams.
+- **Stamina**: a cleave cost 30 x 2.4 x the kit's guardCost: 72 for a sword, 94 for a greatsword or spear, so the
+  dear guards broke on the second cleave; a harder butcher (a bigger party, a BIG ONE: x1.35) broke every guard
+  on every block (sword, greatsword, spear, mace: guard broken at 1.5 s, 6 breaks, 3 downs in 40 s). A guard break
+  winds you (no block until the bar is full, about 4 s), so the next cleave lands whole. The crushing blow (a
+  heavy's, 18 x 2.4 x 1.25 = 54) was dear but not the cause; the shove (0.4 of the knock) was small and is unchanged.
+
+**The rules now** (`sim/blockhold.ts`, `sim/combat.ts hitHero`; numbers in `GUARD`):
+- **Red blows**: a block in the arc takes no health, as before. Its stamina is the blow's damage up to
+  `GUARD.knee` (12) and `GUARD.past` (0.4) of each point above, x 2.4 x guardCost, and never more than `GUARD.most`
+  (70): a full bar always holds one blow, the guard breaks only once stamina runs out. A scrapper's 8 costs 19 as
+  before; a cleave of 30 costs a sword 46 (was 72), a greatsword 60 (was 94); the heavy's crushing 18 costs 43.
+- **Striped blows**, blocked facing them (a Healer's holy ward from any side): `GUARD.striped.through` reaches your
+  health, a Warrior's 25%, a Healer's 40%; it costs `GUARD.striped.cost` (1.3) x a red blow's stamina; it shoves
+  `GUARD.striped.shove` (0.75) of its knock (a red block 0.4); no counter, no IRON STANCE, no BRACED rebound, no
+  HEALING BLOCK. The BLOCK call is duller and shakes harder (`fx.ts`). From behind a Warrior takes it whole.
+  This holds for every striped blow that reaches `hitHero` (slam, charge, pounce, lunger, the Stoker's drop, the
+  hexer's circle, a boss's striped moves); the Stoker's draw and floor hazards (bursts, fire, nooses) are their
+  own and unchanged. A friend's late verdict (`sim/lagcomp.ts`) and a boss's grace (`sim/bossgrace.ts`) count a
+  held guard against a striped blow too. The dodge classes are unchanged.
+- The kits' unused `chip` is gone; the card's row is now STRIPED THROUGH BLOCK (25% or 40%), and the guard
+  rating (`guardarea.ts`) goes by arc and cost alone (no rating changed).
+
+**The butcher matchup now** (40 s holding block; lost / downs / guard breaks): sword 60 / 0 / 0 (was 200 / 2 / 0);
+greatsword and spear 60 / 0 / 0 (were 240 / 2 / 2); mace 96 / 0 / 0 (was 200 / 2 / 1). A harder butcher (x1.35):
+sword 84 / 0 / 0 (was 300 / 3 / 2), greatsword and spear 114 / 1 / 1 (were 341 / 3 / 6), mace 122 / 1 / 0. Walking
+out of the slam instead: 0 lost in every case, so the striped edge still says get out.
+
+**The wood** (Kyle: "too hard"). Measured with `tests/woodbot.ts`, a first run per class played by Intent: cards
+read, freeze-frames answered, then up to the nearest goblin with quick blows, answering a blow coming at it (block,
+walk out, or dodge) only a share of the time. Before, answering half the blows, the early lessons cost 0 to 66
+health and no class went down there, but **the Stoker** beat every class: 10 to 11 downs in 4 minutes and never
+killed (520 health, a fall put it back whole). Answering every blow, a Rogue and a Mage still couldn't kill it.
+Changes (`WOOD_EASE` and `VARIANTS.stoker` in tuning, `sim/wood.ts`, `sim/enemies.ts begin`, `shared/wood.ts`):
+- The Stoker: 520 health to 380; sweep 26 to 18, drop 34 to 24, charge 30 to 20; its wind-ups 1.25 x as long.
+  Falling to it now gives it back only a quarter of what you'd taken off it (`WOOD_EASE.mends`), and the friends it
+  called are gone and not called again. It calls one friend, then two (were two, then three).
+- The drilled goblins (all but the Stoker) hit 70% as hard (`WOOD_EASE.dmg`), on top of their 1.5 x wind-ups
+  (now `WOOD_EASE.windup`, which `DRILL.windup` and `begin` both read).
+- Every lesson starts you at full health and breath (`WOOD_EASE.heal`).
+- The teaching is untouched: the same lessons, counts, cards and freeze-frames. Hew's dodge line ("shield or no
+  shield, and there's no stopping them") is kept: it still hurts through a shield.
+
+Per class, health lost per lesson (field / path / clearing / stream / hut) and times down, before -> after:
+| class | answering every blow | answering half | answering none |
+| --- | --- | --- | --- |
+| Warrior | 8/0/0/0/89, 0 down -> 6/0/0/0/51, 0 | 8/0/6/0/965, 10 down (Stoker not killed) -> 6/0/5/0/71, 0 | 0/0/12/0/1403, 15 (not killed) -> 0/0/10/0/122, 1 |
+| Ranger | 5/0/0/0/34, 0 -> 4/0/0/0/12, 0 | 0/10/24/18/754, 9 (not killed) -> 0/7/18/13/73, 0 | 0/60/16/0/1622, 19 (not killed) -> 0/42/12/0/259, 2 |
+| Rogue | 15/0/0/0/472, 5 (not killed) -> 12/0/0/0/84, 1 | 15/10/66/18/852, 11 (not killed) -> 12/7/50/26/132, 1 | 10/0/85/0/1650, 19 (not killed) -> 4/7/70/0/619, 6 |
+| Mage | 0/0/0/0/830, 9 (not killed) -> 0/0/0/0/172, 1 | 0/0/0/0/908, 10 (not killed) -> 0/0/0/0/250, 2 | 0/0/5/0/1402, 16 (not killed) -> 0/0/4/0/328, 3 |
+| Healer | 4/9/0/0/100, 1 -> 4/6/0/0/67, 0 | 0/9/14/0/973, 11 (not killed) -> 0/6/10/0/60, 0 | 0/9/14/0/1530, 17 (not killed) -> 0/6/10/0/134, 1 |
+(The "before" figures were taken with the hut and the clearing reached the same way; a lesson whose count the bot
+can't make itself, a grab, a backstab, a full draw, an element or a class button, has its count made for it.)
+
+**Words changed** (not yet through the lore keeper and line editor: this session had no agents):
+- BUTTONS, BLOCK (Warrior): "Hold to block. Strike soon after you block a blow: it's a counter and hits harder.
+  It stops most of a striped blow too, but 25% still gets through, and it costs more stamina." The Healer's the same
+  after its ward line, with 40%.
+- Tips (phone): "Red with a striped edge hurts even through a block: dodge or walk out of it"; (laptop): "... hurts
+  even through a block: SPACE to dodge, or walk out of it" (were "can't be blocked").
+- The wood's lines under the path lesson: "Red with a striped edge hurts even through a block. Dodge out before it
+  lands." and "... Walk out before it lands." (were "can't be blocked").
+- The card's row THROUGH A BLOCK is now STRIPED THROUGH BLOCK. The class cards never said striped can't be blocked.
+
+Tests: `tests/blockholds.test.ts` (a red blow blocked does 0 for every Warrior and Healer kit at 8, 30 and 60; the
+stamina curve and cap; a full bar holds one blow and the guard breaks only when it runs out; a striped blow blocked
+does 25% or 40%, more stamina, a harder shove and no counter; facing only for a Warrior, any side for a Healer; dodge
+classes unchanged; the butcher matchup; the wood per class at half the blows answered: the Stoker killed, down twice
+at most, never before the hut). Changed to the new rules: `fight.test.ts` (a cleave block costs 40% to 60%; the slam
+blocked takes 25%), `noparry.test.ts`, `backline.test.ts` (the hex blocked takes 25%), `kits.test.ts` (the censer
+guards better than the mace by cost and arc, `chip` being gone).
 
 ## 2026-11-06: the Doorkeepers harder and livelier, and the boss plate at the top (Kyle; Claude Opus 5.5)
 

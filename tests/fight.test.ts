@@ -75,12 +75,13 @@ describe('guarding against the butcher', () => {
     expect(h.y - y0).toBeGreaterThan(0.3);
   });
 
-  it('a block costs no health, and a good deal of stamina', () => {
+  it('a block costs no health, and a good deal of stamina (not the whole bar: 2026-11-06)', () => {
     const { room, h } = setup();
     room.setIntent('me', intent({ block: true, blockSeq: 1 }));
     run(room, ticks(BUTCHER.cleave.windup) + 2);
     expect(h.hp).toBe(HERO.hp);
-    expect(h.stamina).toBeLessThan(HERO.stamina * 0.5);
+    expect(h.stamina).toBeLessThan(HERO.stamina * 0.6);
+    expect(h.stamina).toBeGreaterThan(HERO.stamina * 0.4);
   });
 
   it('a tap of block just before the blow is no parry: it is taken, nothing is stunned, no counter (parry is gone)', () => {
@@ -185,11 +186,11 @@ describe('guarding against the butcher', () => {
 });
 
 describe('the slam', () => {
-  it('cannot be blocked', () => {
+  it('a block takes most of it, not all (Kyle, 2026-11-06: it was a full hit through any guard)', () => {
     const { room, h } = setup('slam');
     room.setIntent('me', intent({ block: true, blockSeq: 1 }));
     run(room, ticks(BUTCHER.slam.windup) + 2);
-    expect(h.hp).toBe(HERO.hp - BUTCHER.slam.dmg);
+    expect(h.hp).toBe(HERO.hp - Math.round(BUTCHER.slam.dmg * GUARD.striped.through.WARRIOR!));
   });
 
   it('can be rolled through', () => {

@@ -5,7 +5,7 @@ import { lure, seenFrom } from './lantern';
 import { visible } from './flasks';
 import { HUNGRY_FX, wears } from './hungry';
 import { collide, currentMap, inArea, wadeAt } from '../shared/arena';
-import { FRIENDLY, DECOY, ALERT, ARCHER, BUTCHER, BROOD, NEST, SPIDER, DRUMMER, HEXER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, BANNER, LOGS, NETTER, type EnemyAttackSpec, type EnemySpec, VARIANTS, STEALTH, CLASS_DODGES, WEAPONS, HORN, HOBBLE, STILL, MEAL, ICE } from '../shared/tuning';
+import { FRIENDLY, DECOY, ALERT, ARCHER, BUTCHER, BROOD, NEST, SPIDER, DRUMMER, HEXER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, BANNER, LOGS, NETTER, type EnemyAttackSpec, type EnemySpec, VARIANTS, STEALTH, CLASS_DODGES, WEAPONS, HORN, HOBBLE, STILL, MEAL, ICE, WOOD_EASE } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { hexFriendly, isBackline, stepBackline } from './backline';
 import { shove, slide } from './bodies';
@@ -113,8 +113,10 @@ export function begin(e: Enemy, kind: EnemyAttack['kind'], s: EnemyAttackSpec, t
     dx: e.fx, dy: e.fy, ox: e.x, oy: e.y, range: s.range ?? 0, arc: s.arc ?? 0,
     cx: e.x + e.fx * ahead, cy: e.y + e.fy * ahead, radius: s.radius ?? 0, done: false,
   };
-  // The wood's drilled goblins wind up slower, so there's time to read the blow.
-  if (e.drill) e.attack.windup *= 1.5;
+  // The wood's drilled goblins wind up slower and hit softer, so there's time to read the blow; the Stoker
+  // slower too (a first run: WOOD_EASE).
+  if (e.drill) (e.attack.windup *= WOOD_EASE.windup), (e.attack.dmg = Math.max(1, Math.round(e.attack.dmg * WOOD_EASE.dmg)));
+  if (e.variant === 'stoker') e.attack.windup *= WOOD_EASE.stoker;
   // Roused by a drum: quicker to the blow, and it lands harder (locked here, so the telegraph holds).
   if (e.roused) (e.attack.windup *= DRUMMER.rouse.windup), (e.attack.dmg = Math.round(e.attack.dmg * DRUMMER.rouse.dmg));
   // Near a banner: the same, its own way (sim/banner.ts).

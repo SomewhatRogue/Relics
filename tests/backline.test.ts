@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { board, type Job } from '../src/shared/jobs';
 import { planRoom, type Foe } from '../src/shared/terrain';
-import { DRUMMER, HERO, HEXER, ROSTER, SCRAPPER, TICK, VARIANTS } from '../src/shared/tuning';
+import { DRUMMER, GUARD, HERO, HEXER, ROSTER, SCRAPPER, TICK, VARIANTS } from '../src/shared/tuning';
 import { mostIn } from '../src/shared/roster';
 import { rouse } from '../src/sim/backline';
 import { kill } from '../src/sim/damage';
@@ -42,10 +42,10 @@ describe('the hexer', () => {
     expect([a.cx, a.cy]).toEqual([h.x, h.y]);
     expect(a.radius).toBe(HEXER.hex.radius);
     expect(a.unblockable).toBe(true);
-    // Standing in it, even holding a block, it lands.
+    // Standing in it, even holding a block, it lands (a Warrior's block takes most of a striped blow: 2026-11-06).
     room.setIntent('me', { ...NO_INTENT, block: true, blockSeq: 1 });
     const ev = run(room, a.windup + 0.2);
-    expect(h.hp).toBe(HERO.hp - HEXER.hex.dmg);
+    expect(h.hp).toBe(HERO.hp - Math.round(HEXER.hex.dmg * GUARD.striped.through.WARRIOR!));
     expect(ev).toContainEqual(expect.objectContaining({ k: 'impact', kind: 'hex', x: a.cx, y: a.cy }));
   });
 

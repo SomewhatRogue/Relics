@@ -796,7 +796,7 @@ export type FightEvent =
   | { k: 'deflect'; x: number; y: number }
   | { k: 'boardout'; x: number; y: number }
   /** `more`: another blow of a pack rush met by the same guard in the same instant (its words said once). */
-  | { k: 'block' | 'guardbreak' | 'winded' | 'breath' | 'bash' | 'dodge' | 'slip' | 'out' | 'roll' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number; more?: boolean }
+  | { k: 'block' | 'guardbreak' | 'winded' | 'breath' | 'bash' | 'dodge' | 'slip' | 'out' | 'roll' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number; more?: boolean; striped?: boolean }
   | { k: 'windup' | 'impact'; x: number; y: number; kind: AttackKind }
   /** The prologue's cutscene: the ground shaking, the bite, a body landing, the Stoker's bellow. */
   | { k: 'rumble' | 'bite' | 'thud' | 'bellow' | 'fanfare'; x: number; y: number }

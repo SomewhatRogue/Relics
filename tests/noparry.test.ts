@@ -218,7 +218,7 @@ describe('every striped blow in the roster can be dodged', () => {
     }
   });
 
-  it("the heavy's and the butcher's blows are dodgeable by every dodge class, and blockable unless striped", () => {
+  it("the heavy's and the butcher's blows are dodgeable by every dodge class, and blockable (a striped one in part)", () => {
     for (const s of [T.VARIANTS.heavy.swing, T.BUTCHER.cleave, T.BUTCHER.slam]) {
       for (const w of ['longbow', 'daggers', 'wand'] as const) {
         const { room, h, e } = duel(w);
@@ -230,7 +230,7 @@ describe('every striped blow in the roster can be dodged', () => {
       run(0.1, { block: true, blockSeq: 1 });
       const ev: FightEvent[] = [];
       hitHero(e, blowOf(s), h, room.time, ev);
-      expect(ev.some((x) => x.k === 'block')).toBe(!s.unblockable);
+      expect(ev.some((x) => x.k === 'block' && !!x.striped === s.unblockable)).toBe(true);
     }
   });
 });

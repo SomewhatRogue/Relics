@@ -34,7 +34,7 @@ export const armorHow = (a: keyof typeof ARMOR_HOW, cls?: HeroClass): string => 
 /** Rows a kit has no use for: a block it can't hold, a dodge it hasn't got, heals it doesn't give. */
 export const shown = (r: Row, w: WeaponId) => {
   const k = WEAPONS[w], cls = k.cls, guard = guardOf(k);
-  return !(r.label === 'THROUGH A BLOCK' && guard !== 'full') &&
+  return !(r.label === 'STRIPED THROUGH BLOCK' && guard !== 'full') &&
     !(r.label === 'DODGE EVERY' && !CLASS_DODGES[cls]) && !(r.label === 'HEALING GIVEN' && cls !== 'HEALER') &&
     !(r.label === 'LAST BLOW' && k.combo.length < 2) && !(r.label === 'SWING ARC' && !k.combo.some((s) => !s.thrust && !s.shot && s.arc >= 100)) &&
     !(r.label === 'BACKSTAB' && !k.backstab) && !((r.label === 'SPELL POWER' || r.label === 'SPELL COST') && cls !== 'MAGE');
@@ -52,7 +52,8 @@ export function sheet(w: Worn): Row[] {
     { label: 'SWING', v: (first.windup + first.active + first.recover * 1) * q, unit: 's', low: true },
     { label: 'TO FULL CHARGE', v: (k.draw ?? CHARGE.full) * (1 - g.draw), unit: 's', low: true },
     { label: 'REACH', v: k.heavy.range * (1 + g.reach), unit: '' },
-    { label: 'THROUGH A BLOCK', v: k.chip * (1 - g.guard), unit: '%', low: true },
+    // A red blow blocked takes no health; a striped one blocked, the class's share (GUARD.striped).
+    { label: 'STRIPED THROUGH BLOCK', v: GUARD.striped.through[k.cls] ?? 1, unit: '%', low: true },
     { label: 'HEALTH', v: w.baseHp + g.health, unit: '' },
     { label: 'DAMAGE TAKEN', v: g.taken, unit: '%', low: true },
     { label: 'WALK', v: k.speed * g.speed, unit: '%' },

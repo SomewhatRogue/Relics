@@ -13,8 +13,7 @@ export const say = (w: WoodState, room: ArenaRoom, who: string, text: string, s 
 
 export function spawn(room: ArenaRoom, f: Foe & { variant?: Enemy['variant'] }): Enemy {
   const e = newEnemy(Math.max(0, ...room.enemies.map((o) => o.id)) + 1, f.kind, f.x, f.y);
-  if (f.variant === 'looter' || f.variant === 'lunger' || f.variant === 'heavy') e.hp = e.maxHp = { looter: 14, lunger: 30, heavy: 110 }[f.variant];
-  if (f.variant === 'stoker') e.hp = e.maxHp = 520;
+  if (f.variant === 'looter' || f.variant === 'lunger' || f.variant === 'heavy' || f.variant === 'stoker') e.hp = e.maxHp = VARIANTS[f.variant].hp;
   if (f.variant === 'soaked' || f.variant === 'aproned' || f.variant === 'kilnhot') e.hp = e.maxHp = VARIANTS[f.variant].hp;
   // Every goblin in the wood but the Stoker is drilled: slower wind-ups, one at a time.
   Object.assign(e, { respawns: false, name: f.name, bow: f.bow, variant: f.variant, alert: f.awake ?? false, drill: f.variant !== 'stoker' });

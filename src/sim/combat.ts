@@ -42,6 +42,7 @@ import { doorTake } from './doorwall';
 import { noteHurt } from './bosskit';
 import { graceDefer } from './bossgrace';
 import { cutCall } from './hornstate';
+import { blockBreath, blockStriped, guardBreak } from './blockhold';
 
 export { respawnOf, stunOf } from './damage';
 
@@ -289,10 +290,13 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   const [gx, gy] = late ? [late.gx, late.gy] : guardFrom(e, a, h), gl = Math.hypot(gx, gy) || 1;
   // A Cleric's guard is a holy ward round them (sim/holyguard.ts): it meets a blow from any side.
   const facing = roundGuard(h) || (h.fx * gx + h.fy * gy) / gl > Math.cos(((guardArc(h) / 2) * Math.PI) / 180);
-  const canGuard = !a.unblockable && facing && (h.act === 'idle' || h.act === 'attack' || h.act === 'charge');
+  const canGuard = facing && (h.act === 'idle' || h.act === 'attack' || h.act === 'charge');
   // Held block, no timing to it (Kyle, 2026-11-05: parry is gone, and no perfect block either).
   // (Judged late: held by their own screen as it landed, sim/lagcomp.ts.)
-  if (canGuard && (late ? late.verdict === 'block' : h.blocking)) {
+  const held = canGuard && (late ? late.verdict === 'block' : h.blocking);
+  // A striped blow on the guard: most of it stopped, dear on stamina, a hard shove (sim/blockhold.ts).
+  if (held && a.unblockable) return void (blockStriped(e, a, h, now, ev, taken, soft, sx / sl, sy / sl), downIfDead(h, ev));
+  if (held) {
     // A pack rush: the one block takes every blow in it (its first blow's stamina paid for all).
     if (rushBlocked(h, a, now)) return void ev.push({ k: 'block', x: h.x, y: h.y, more: true });
     noteRush(h, a, now);
@@ -303,21 +307,16 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
       if (h.act !== 'stun') h.counterUntil = now + counterWindow(h);
       return;
     }
-    // A held block takes nothing off your health; it costs breath instead, and plenty of it (a heavy's
-    // crushing blow more, and it shoves you further).
-    const crush = a.crush ? GUARD.crushCost : 1;
-    h.stamina -= a.dmg * soft * GUARD.staminaPerDmg * w.guardCost * crush * (1 - g.guard) * (1 - knack(h, 'block'));
+    // A held block takes nothing off your health; it costs breath instead (a heavy's crushing blow more,
+    // and it shoves you further), a big blow less for each point past GUARD.knee (sim/blockhold.ts).
+    h.stamina -= blockBreath(h, a.dmg * soft, !!a.crush);
     h.staminaAt = now;
     // The blow meets the guard: a solid thud, held a beat, and a small push back.
     h.hitstop = Math.max(h.hitstop, a.crush ? HITSTOP.heavy : HITSTOP.light);
     e.hitstop = Math.max(e.hitstop, HITSTOP.light);
-    if (!braced(h, now) && !bracedFor(a)) shove(h, sx / sl, sy / sl, a.knock * (a.crush ? GUARD.crushShove : 0.4), HERO.weight);
+    if (!braced(h, now) && !bracedFor(a)) shove(h, sx / sl, sy / sl, a.knock * (a.crush ? GUARD.crushShove : GUARD.shove), HERO.weight);
     count(h.id, 'blocks');
-    if (h.stamina <= 0) {
-      Object.assign(h, { stamina: 0, winded: true, act: 'stun', actT: 0, actDur: GUARD.guardBreakStun });
-      ev.push({ k: 'guardbreak', x: h.x, y: h.y });
-      return;
-    }
+    if (h.stamina <= 0) return guardBreak(h, ev);
     ev.push({ k: 'block', x: h.x, y: h.y });
     // BRACED: a boss's red blow held off rebounds it, and fills its POISE (sim/poise.ts).
     rebound(e, a, h, now, ev);

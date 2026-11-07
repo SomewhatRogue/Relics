@@ -170,10 +170,11 @@ export const WEAK_TO = { soaked: 'storm', aproned: 'fire', kilnhot: 'frost' } as
 
 /** The Stoker, and the two that come out of the trees at half its health. */
 export const STOKER: Foe & { variant: 'stoker' } = { kind: 'butcher', variant: 'stoker', x: 59, y: 4.5, name: 'THE STOKER', awake: false };
-/** The Stoker bellows for help twice: at two thirds of its health, and at one third (a bigger wave). */
+/** The Stoker bellows for help twice: at two thirds of its health, and at one third (a bigger wave). One,
+ *  then two (were two, then three: Kyle, 2026-11-06, "tutorial is too hard"). */
 export const STOKER_CALLS: { at: number; foes: (Foe & { variant?: 'looter' | 'lunger' | 'heavy' })[] }[] = [
-  { at: 2 / 3, foes: [{ kind: 'scrapper', x: 46, y: 9, awake: true }, { kind: 'scrapper', x: 61, y: 10, awake: true }] },
-  { at: 1 / 3, foes: [{ kind: 'scrapper', x: 45, y: 4, awake: true }, { kind: 'scrapper', variant: 'lunger', x: 61, y: 2, awake: true }, { kind: 'scrapper', x: 55, y: 11, awake: true }] },
+  { at: 2 / 3, foes: [{ kind: 'scrapper', x: 46, y: 9, awake: true }] },
+  { at: 1 / 3, foes: [{ kind: 'scrapper', x: 45, y: 4, awake: true }, { kind: 'scrapper', variant: 'lunger', x: 61, y: 2, awake: true }] },
 ];
 
 /** Hew's lines (lore keeper). The Stoker never speaks: it bellows. */
@@ -229,8 +230,8 @@ export const LINES = {
   how: {
     move: 'Walk a few steps.',
     attack: 'Tap for quick blows. Hold for a heavy one.',
-    roll: "Red with a striped edge can't be blocked. Dodge out before it lands.",
-    step: "Red with a striped edge can't be blocked. Walk out before it lands.",
+    roll: "Red with a striped edge hurts even through a block. Dodge out before it lands.",
+    step: "Red with a striped edge hurts even through a block. Walk out before it lands.",
     block: 'Hold block while the red fills. Each block costs stamina (the yellow bar).',
     relic: 'Press RELIC to throw it. It skewers every goblin in its line and pins them all to the first wall it hits. It only has a few throws in it: the pips on the button are what\'s left.',
     grab: "Grab a crate or barrel, grab again to throw. Small goblins too: from behind, or while they reel, feed or swing. What you throw hurts what it hits.",

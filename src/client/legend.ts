@@ -3,7 +3,7 @@
  * with each of this hero's buttons drawn by the same code as the cluster (btnart.ts with icons.ts,
  * skillicons.ts and the item and relic icons), each with one plain line, and on a laptop its key.
  */
-import { guardOf, dodgeName, dodgeOf, RAISE, RELICS, WEAPONS, type Item } from '../shared/tuning';
+import { guardOf, dodgeName, dodgeOf, GUARD, RAISE, RELICS, WEAPONS, type HeroClass, type Item } from '../shared/tuning';
 import { RAISEW } from './raisewords';
 import { PET_LEGEND } from './petwhen';
 import { carriedItem } from '../sim/charge';
@@ -20,6 +20,9 @@ import { SIGNS, SIGN_KEY, SIGN_WORDS } from '../shared/signs';
 import { signFor } from '../sim/signature';
 import type { Panel } from './panels';
 import type { Game } from './game';
+
+/** What a block does to a striped blow (Kyle, 2026-11-06: a block takes most of it, GUARD.striped). */
+const STRIPED_BLOCK = (cls: HeroClass) => `It stops most of a striped blow too, but ${Math.round((GUARD.striped.through[cls] ?? 1) * 100)}% still gets through, and it costs more stamina.`;
 
 interface Row { face: Face; url?: string; w?: number; name: string; text: string; key: string }
 
@@ -54,7 +57,7 @@ async function rows(g: Game, touch: boolean): Promise<Row[]> {
   const sg = signFor(me);
   if (sg && g.taught().includes('sign')) out.push({ face: { shape: 'round', size: 22, grade: 'iron', icon: skillCanvas(sg, '') }, name: SIGNS[sg].name, key: SIGN_KEY, text: SIGN_WORDS[sg] });
   const guard = guardOf(kit);
-  if (guard === 'full') out.push({ face: { shape: 'shield', size: 28, grade: 'iron', icon: icon('block') }, name: 'BLOCK', key: 'RIGHT CLICK', text: cls === 'HEALER' ? 'Hold to raise a holy ward. It stops blows from any side. Strike soon after it stops a blow: it\'s a counter and hits harder.' : 'Hold to block. Strike soon after you block a blow: it\'s a counter and hits harder.' });
+  if (guard === 'full') out.push({ face: { shape: 'shield', size: 28, grade: 'iron', icon: icon('block') }, name: 'BLOCK', key: 'RIGHT CLICK', text: cls === 'HEALER' ? `Hold to raise a holy ward. It stops blows from any side. Strike soon after it stops a blow: it's a counter and hits harder. ${STRIPED_BLOCK(cls)}` : `Hold to block. Strike soon after you block a blow: it's a counter and hits harder. ${STRIPED_BLOCK(cls)}` });
   if (dodgeOf(kit)) {
     const dn = dodgeName(cls);
     out.push({ face: { shape: 'diamond', size: 30, grade: 'iron', icon: icon(({ JUMP: 'jump', DASH: 'dash', BLINK: 'blink' } as Record<string, IconId>)[dn] ?? 'roll') }, name: dn, key: 'SPACE', text: 'Get out of any blow, even a striped one.' + (kit.spellblade ? ` ${SHIELD_LINE}` : '') });

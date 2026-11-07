@@ -2,6 +2,13 @@
 
 ## Current slice
 
+**A block holds, striped blows half-blocked, an easier wood** (Claude Opus 5.5, 2026-11-06; Kyle: "Warrior block
+isn't great against butcher ... tutorial is too hard"). Built; waiting on Kyle's play and the lore keeper and line
+editor on the changed lines. *Done when*, on his phone and laptop: a Warrior holding block in front of a butcher loses
+no health to its cleaves and only a quarter of a slam (a Healer 40%), runs low on stamina but doesn't break on every
+blow; walking out of a slam is still clearly better; a new player gets through the wood and kills the Stoker without
+going down more than once or twice. DECISIONS 2026-11-06 ("a block holds"). Open: every number (knee 12, past 0.4,
+most 70; striped 25% / 40%, 1.3 x stamina, 0.75 shove; the Stoker 380, 18 / 24 / 20, 1.25 x wind-ups; 70% in the wood).
 **Shield-bearers block from the front** (Claude Opus 5.5, 2026-11-06; Kyle: "Shielded enemies should block most
 attacks so you want to go around"). Built; waiting on Kyle's play and the lore keeper and line editor on BOARD OUT.
 *Done when*, on his phone and laptop: an arrow, bolt or spark into a shield-bearer's front stops with BLOCKED and a

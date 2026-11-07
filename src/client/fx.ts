@@ -260,8 +260,9 @@ export class Fx {
         // A solid block: sparks off the guard, a short ring where the blow met it, a jolt.
         this.burst(x, y - 8, 10, ['#ffd27a', '#ff9a40', '#ffffff'], 60, true);
         this.rings.push({ x, y: y - 8, life: 0.18, max: 0.18, col: '#ffe0a8' });
-        this.say(x, y - 24, 'BLOCK', '#c8c4d0');
-        this.shake = Math.max(this.shake, 2);
+        // A striped blow met on the guard: duller, and it shakes harder (some of it got through).
+        this.say(x, y - 24, 'BLOCK', ev.striped ? '#d08070' : '#c8c4d0');
+        this.shake = Math.max(this.shake, ev.striped ? 3 : 2);
         break;
       case 'spotted':
         this.say(x, y - 22, '!', '#ff6a5a');
