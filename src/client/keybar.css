@@ -29,7 +29,6 @@ body:not(.touch) .tb kbd { display: block; position: absolute; right: -10px; top
 body:not(.touch) .tb.attack kbd { right: -14px; top: -4px; }
 /* (Its ring, when it's new, says its name and key over it: unlockflash.ts.) */
 body:not(.touch) .tb.unlock kbd { display: none; }
-/* What sat at the bottom centre of a laptop goes up over the row: the prompt and a boss's plate. (A loot
+/* What sat at the bottom centre of a laptop goes up over the row: the prompt (a boss's plate is at the top now: hud.css). (A loot
    card comes up over it for its moment.) */
 body:not(.touch) #prompt { bottom: calc(142px + env(safe-area-inset-bottom)); }
-body:not(.touch) #boss { bottom: calc(134px + env(safe-area-inset-bottom)); }

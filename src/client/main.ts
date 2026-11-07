@@ -405,12 +405,13 @@ function hud(now: number): void {
     const x = game.fightRoom.exped, rooms = x ? '' : roomsHtml(run.index, run.job.rooms), left = x ? x.goals.filter((q) => !q.done).length : 0;
     const full = objFlash.show(`<b>${titleCase(run.job.place.name)}${rooms}</b> ${x && !me.out && x.phase === 'shut' ? expedRows(x, goalWords(run.job), run.job.boss ?? '') : `<div class="obj">${g.text}</div>`}<span><i class="coin"></i>+${run.gold}${run.rescued ? `<em>SAVED ${run.rescued}</em>` : ''}</span>`, now);
     const small = smallLine(x && !me.out && x.phase === 'shut' ? TRACKW.jobsLeft(left, x.goals.length) : g.text, rooms);
-    fold.render(full, small, run.job.place.name + run.index + ':' + (x && !me.out && x.phase === 'shut' ? 'jobs' + left : calm(g.text)), now, objFlash.holding(now));
     // (On an expedition the named butcher's bar shows only once you're near it.)
-    // (A boss of the kit: its plate, sim/bossplate.ts.)
-    showPlate($('#boss'), plateOf(room.enemies, room.time, (e) => !room.exped || Math.hypot(e.x - me.x, e.y - me.y) < 14));
+    // (A boss of the kit: its plate, sim/bossplate.ts. While it's up the tracker stays tucked to its line under it.)
+    const plate = plateOf(room.enemies, room.time, (e) => !room.exped || Math.hypot(e.x - me.x, e.y - me.y) < 14);
+    fold.render(full, small, run.job.place.name + run.index + ':' + (x && !me.out && x.phase === 'shut' ? 'jobs' + left : calm(g.text)), now, objFlash.holding(now), !!plate);
+    showPlate($('#boss'), plate);
   } else {
-    $('#boss').hidden = true;
+    showPlate($('#boss'), null);
     goalPulse.clear($('#banner'));
     objFlash.watchWood(-1, now);
     const full = game.outside

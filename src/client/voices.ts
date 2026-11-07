@@ -118,6 +118,12 @@ export const butcher = {
     syllable(t, slam ? 1.1 : 0.7, slam ? 120 : 100, slam ? 60 : 75, 450, 1100, 0.45, 0.8);
     syllable(t, slam ? 1.1 : 0.7, slam ? 61 : 51, slam ? 31 : 38, 300, 700, 0.35, 0.3);
   },
+  /** ENRAGED, into a big blow: a short low snarl. */
+  growl() {
+    if (!ok()) return;
+    const t = ctx!.currentTime;
+    syllable(t, 0.45, 70, 52, 260, 600, 0.4, 0.9);
+  },
   groan() {
     if (!ok()) return;
     const t = ctx!.currentTime;

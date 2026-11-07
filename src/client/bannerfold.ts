@@ -32,12 +32,12 @@ export class BannerFold {
   /**
    * This frame's tracker: `full` the whole box, `small` its folded line (null: never folds, as in the
    * wood's lessons), `key` what it's about (a change opens it a moment; see calm), `hold` keeps it open (an
-   * objective's done flash: objflash.ts).
+   * objective's done flash: objflash.ts), `tucked` keeps it to its line unless tapped open (a boss's plate is up).
    */
-  render(full: string, small: string | null, key: string, now: number, hold = false): void {
+  render(full: string, small: string | null, key: string, now: number, hold = false, tucked = false): void {
     if (this.key !== null && key !== this.key) this.until = now + FLASH;
     this.key = key;
-    const big = small === null || this.open || hold || now < this.until;
+    const big = small === null || this.open || (!tucked && (hold || now < this.until));
     const html = big ? full : small;
     this.el.classList.toggle('small', !big);
     this.el.classList.toggle('fold', small !== null);

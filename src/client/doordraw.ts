@@ -4,7 +4,7 @@
  * carries its door to one side, ready to swing (the way to read which is which). While the door's open (its
  * blow and recovery, stunned or staggered, after a lock) it's swung out flat to the side; DOWN, it lies on
  * the floor beside it. Cut straps show bare. In phase 2 the survivor carries both doors, one behind the
- * other. Drawn in both views (the flat scene and the 2.5D cards call drawFoe). Only draws.
+ * other, ENRAGED: its eyes burn red and a red heat comes off it. Drawn in both views (the flat scene and the 2.5D cards call drawFoe). Only draws.
  */
 import { doorShut } from '../sim/doorwall';
 import type { Enemy } from '../sim/types';
@@ -26,6 +26,7 @@ export function drawKeeper(c: Ctx, e: Enemy, x: number, y: number, sleeping: boo
   if (down) floorDoor(c, x + side * 10, y + 2, b.straps);
   if (!front && !down) for (let k = 0; k < doors; k++) door(c, x + dx - k * side * 2, y + dy - k * 2, sx && shut ? 5 : W, H, b.straps);
   big(c, e, x, y, sleeping);
+  if (b.phase === 2) mad(c, e, x, y, t);
   if (front) for (let k = doors - 1; k >= 0; k--) door(c, x + dx + k * side * 2, y + dy + k, sx && shut ? 5 : W, H, b.straps);
 }
 
@@ -34,6 +35,20 @@ function big(c: Ctx, e: Enemy, x: number, y: number, sleeping: boolean): void {
   for (const g of [c.lit, c.glow]) g.save(), g.translate(x, y), g.scale(SIZE, SIZE), g.translate(-x, -y);
   drawEnemy(c, e, x, y, sleeping);
   for (const g of [c.lit, c.glow]) g.restore();
+}
+
+/** ENRAGED (its partner dead): eyes burning red, beating, and red heat rising off its shoulders (glow, unlit). */
+function mad(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
+  const g = c.glow, f = e.fx >= -0.2 ? 1 : -1, beat = Math.floor(t * 8) % 2, hy = Math.round(y - 20 * SIZE);
+  // Over its own eyes, bigger and burning.
+  g.fillStyle = beat ? '#ff2a1a' : '#ff6a4a';
+  g.fillRect(Math.round(x + f - 3), hy, 2, 2);
+  g.fillRect(Math.round(x + f + 2), hy, 2, 2);
+  g.fillStyle = '#c0281a';
+  for (let i = 0; i < 4; i++) {
+    const k = (t * 0.9 + i * 0.25) % 1;
+    g.fillRect(Math.round(x + (i - 1.5) * 6), Math.round(y - 30 * SIZE - k * 10), 1, 2 - Math.floor(k * 2));
+  }
 }
 
 /** A door stood on its edge, its foot at (cx, fy): planks, two iron straps (bare where cut), a dark edge. */

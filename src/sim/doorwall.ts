@@ -1,8 +1,9 @@
 /**
  * A Doorkeeper's door (numbers shared/bosstune.ts DOORKEEPERS). Shut, it covers its front: a blade or a
  * shot coming at it from within DOORKEEPERS.cone of its facing is stopped dead (sparks, a thunk). From the
- * side or behind it lands in full. The door is swung aside while its own blow lands and it recovers, while
- * it's stunned, staggered or rebounding, for a moment after a lock, and while it's DOWN. Bursts and fire
+ * side or behind it lands in full. The door is swung aside while one of its big blows lands and for
+ * DOORKEEPERS.aside of its recover (a jab goes round the door's edge: it stays shut), while it's stunned,
+ * staggered or rebounding, for a moment after a lock, and while it's DOWN. Bursts and fire
  * go round a door; storm too. A shot stopped by a shut door cuts at its straps (a charged or perfect shot
  * twice): DOORKEEPERS.straps cuts and the door is DOWN for DOORKEEPERS.down seconds. While a boss roars
  * (a phase change) nothing lands on it at all.
@@ -16,7 +17,9 @@ export function doorShut(e: Enemy, now: number): boolean {
   const b = e.boss;
   if (!b || b.who === 'hempen' || isDead(e) || b.downUntil > now || b.openUntil > now || e.act === 'stunned' || e.act === 'flinch') return false;
   const a = e.attack;
-  return !(a && a.t >= a.windup);
+  if (!a || a.t < a.windup) return true;
+  const aside = a.boss && a.boss in DOORKEEPERS.aside ? DOORKEEPERS.aside[a.boss as keyof typeof DOORKEEPERS.aside] : a.recover;
+  return aside <= 0 || a.t >= a.windup + a.active + Math.min(a.recover, aside);
 }
 
 /** Something travelling (dx, dy) comes at its front. */

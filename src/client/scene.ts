@@ -7,7 +7,7 @@ import { lurkFrame } from './fenlurk';
 import { drawBlasts } from './blastdraw';
 import { pulledAt } from './wave2ground';
 import { drawWet } from './wetdraw';
-import { feetBand, upright } from './phoneband';
+import { feetBand, topPush, upright } from './phoneband';
 import { ARENA, doorAt, npcAt, type GameMap } from '../shared/arena';
 import { rats } from './rats';
 import { drawRat } from './ratdraw';
@@ -201,7 +201,8 @@ export class Scene {
       this.heroAt = [hx, hy];
       const portrait = this.vh > this.vw * 1.2;
       const f = this.focus;
-      const tx = f ? OX + f.x * PX - this.vw / 2 : hx + me.fx * 10 - this.vw / 2, ty = f ? OY + f.y * PX - 8 - this.vh / 2 : hy - 8 + me.fy * 8 - this.vh / 2 + (portrait ? this.vh * 0.12 : 0);
+      // (A boss's plate up: the view looks that much higher, so the room's top comes down under it.)
+      const tx = f ? OX + f.x * PX - this.vw / 2 : hx + me.fx * 10 - this.vw / 2, ty = f ? OY + f.y * PX - 8 - this.vh / 2 : hy - 8 + me.fy * 8 - this.vh / 2 + (portrait ? this.vh * 0.12 : 0) - topPush() / (this.scale / this.dpr);
       const k = this.cam.ready ? Math.min(1, dt * (f ? 2.5 : 7)) : 1;
       this.cam.x += (tx - this.cam.x) * k;
       this.cam.y += (ty - this.cam.y) * k;
@@ -213,8 +214,9 @@ export class Scene {
     this.cam.x = clamp(this.cam.x, this.vw, worldW(map));
     // On an upright phone the camera may run past the room's foot (a short room needn't sit centred), so
     // the hero is never under the touch buttons.
-    const foot = upright(this.vw, this.vh) ? Math.round(this.vh * 0.22) : 0, lo = clamp(-1e9, this.vh, worldH(map));
-    this.cam.y = foot ? Math.max(lo, Math.min(Math.max(lo, worldH(map) - this.vh) + foot, this.cam.y)) : clamp(this.cam.y, this.vh, worldH(map));
+    // (A boss's plate up: the room's top may come down under it: phoneband.ts topPush.)
+    const ins = topPush() / (this.scale / this.dpr), foot = upright(this.vw, this.vh) ? Math.round(this.vh * 0.22) : 0, lo = Math.min(clamp(-1e9, this.vh, worldH(map)), -ins);
+    this.cam.y = foot ? Math.max(lo, Math.min(Math.max(lo, worldH(map) - this.vh) + foot, this.cam.y)) : Math.max(lo, Math.min(Math.max(lo, clamp(1e9, this.vh, worldH(map))), this.cam.y));
     // ...and wherever the room's edge is, the hero's feet stay between the top HUD and the cluster (phoneband.ts).
     if (foot && me && this.heroAt && !this.focus) {
       const [top, bottom] = feetBand(this.vh, this.scale / this.dpr), hy = this.heroAt[1];

@@ -748,7 +748,7 @@ export type FightEvent =
   /** Hangman's Wood: a hero hoisted in a snare or cut down, a dropper coming down and landing, burning wood off the oak, the fire lit, a snare laid. */
   | { k: 'hoisted' | 'cutdown' | 'perchdrop' | 'perchland' | 'oakfall' | 'checklit' | 'noosed' | 'snarelaid' | 'lurkrise'; x: number; y: number; id?: string }
   /** The boss kit (sim/poise.ts, doorwall.ts, doorpair.ts): STAGGERED, BRACED's rebound (at the blocker), a door cut down, a phase's roar, the pair swapping jobs. */
-  | { k: 'staggered' | 'rebound' | 'doordown' | 'roar' | 'doorswap'; x: number; y: number }
+  | { k: 'staggered' | 'rebound' | 'doordown' | 'roar' | 'doorswap' | 'growl'; x: number; y: number }
   /** A teammate downed you once too often this job. */
   | { k: 'grudge'; x: number; y: number; id: string; by: string }
   /** The newer sorts (sim/ownfoes.ts): a banner down and the goblins it routs; a net (who's in it, a struggle, cut out, free); a thief's grab, its loot back, gone. */
