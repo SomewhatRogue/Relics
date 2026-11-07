@@ -4,7 +4,7 @@
  */
 import { isDead } from './damage';
 import { collide, wadeAt } from '../shared/arena';
-import { DODGE, CLASS_DODGES, DECOY, AUGMENTS, CHARGE, GRAB, HORN, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, HERO, INPUT_BUFFER, RELICS, WEAPONS, type Swing, type Weapon, drilled, STEALTH, dodgeOf, guardOf } from '../shared/tuning';
+import { DODGE, CLASS_DODGES, DECOY, AUGMENTS, CHARGE, GRAB, HORN, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, HERO, INPUT_BUFFER, RELICS, WEAPONS, HOLY_GUARD, type Swing, type Weapon, drilled, STEALTH, dodgeOf, guardOf } from '../shared/tuning';
 import { slide } from './bodies';
 import { BAG } from '../shared/bags';
 import { applyGear, turnBelt } from './pack';
@@ -202,7 +202,10 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   const most = breathCap(h, now);
   if (h.stamina > most) h.stamina = most;
   const mage = WEAPONS[h.weapon]?.cls === 'MAGE';
-  if (now - h.staminaAt > (h.winded ? HERO.windedDelay * (1 - knack(h, 'winded')) : mage ? HERO.magicDelay : HERO.regenDelay)) h.stamina = Math.min(most, h.stamina + (mage ? HERO.magicRegen : HERO.staminaRegen) * (1 + statsOf(h).breath) * needlesBreath(h, enemies) * dt);
+  // A Cleric's breath waits longer and comes back slower (shared/cleric.ts HOLY_GUARD), so the shield of light can't be held up forever.
+  const cleric = WEAPONS[h.weapon]?.cls === 'HEALER';
+  const wait = h.winded ? Math.max(HERO.windedDelay * (1 - knack(h, 'winded')), cleric ? HOLY_GUARD.regenDelay : 0) : mage ? HERO.magicDelay : cleric ? HOLY_GUARD.regenDelay : HERO.regenDelay;
+  if (now - h.staminaAt > wait) h.stamina = Math.min(most, h.stamina + (mage ? HERO.magicRegen : HERO.staminaRegen * (cleric ? HOLY_GUARD.regen : 1)) * (1 + statsOf(h).breath) * needlesBreath(h, enemies) * dt);
   if (h.winded && h.stamina >= most) (h.winded = false), ev.push({ k: 'breath', x: h.x, y: h.y });
   h.actT += dt;
   h.moving = false;
