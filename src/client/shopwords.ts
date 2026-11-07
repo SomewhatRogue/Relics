@@ -45,4 +45,6 @@ export const CARDW = {
   /** After a modifier the wearer can't use (a BLOCK on a Mage's plate). */
   noUse: 'no use to you',
   cost: 'COST',
+  /** A piece's plus on its card, before its pips (shared/forgeplus.ts). */
+  plus: (lv: number) => `+${lv} OF 5`,
 };

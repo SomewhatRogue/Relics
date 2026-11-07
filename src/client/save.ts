@@ -5,7 +5,7 @@
  */
 import { HERO_SLOTS, fitPerks, newProfile, newStats, type Profile } from '../shared/progress';
 import { newWorld, type WorldState } from '../shared/story';
-import { DORMANT_POTIONS, WEAPONS, upgradeOld } from '../shared/tuning';
+import { DORMANT_POTIONS, WEAPONS, fitPlus, upgradeOld } from '../shared/tuning';
 import { fitStores } from '../shared/bags';
 import { fitRelics } from '../shared/relicitems';
 import { renameKits } from '../shared/oldkits';
@@ -58,6 +58,8 @@ const hero = (old: Partial<Profile>): Profile => {
   out.bag = (out.bag ?? []).map(upgradeOld);
   // The pack, the vault and the buyback (shared/bags.ts): older heroes keep every piece.
   fitStores(out);
+  // Pluses stop at +5 (shared/forgeplus.ts, 2026-11-06): anything over comes down to +5, its temper kept.
+  fitAllPlus(out);
   // PARRY is gone (2026-11-05): any piece with it has BLOCK or DODGE instead, worth the same (shared/oldparry.ts).
   fitNoParry(out);
   // The town's pastimes (shared/fishing.ts, shared/range.ts): only once played, and made sound.
@@ -114,4 +116,14 @@ export function wipe(): void {
   } catch {
     /* nothing to wipe */
   }
+}
+
+/** Every piece a hero has (in hand, worn, packed, in the vault, at Tobin's) at +5 at most. */
+export function fitAllPlus(p: Pick<Profile, 'arms' | 'armor' | 'rings' | 'bag' | 'stash' | 'buyback'>): void {
+  p.arms = Object.fromEntries(Object.entries(p.arms ?? {}).map(([k, it]) => [k, it && fitPlus(it)]));
+  if (p.armor) p.armor = fitPlus(p.armor);
+  p.rings = (p.rings ?? []).map(fitPlus);
+  p.bag = (p.bag ?? []).map(fitPlus);
+  if (p.stash) p.stash = p.stash.map(fitPlus);
+  if (p.buyback) p.buyback = p.buyback.map((b) => ({ ...b, item: fitPlus(b.item) }));
 }

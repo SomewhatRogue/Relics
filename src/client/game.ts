@@ -1234,11 +1234,11 @@ export class Game {
     store(this.save);
   }
 
-  /** Halvard: one level up, for gold and steel. */
-  upgrade(it: Item): boolean {
-    return !!this.levelUp(it);
-  }
-  /** The same, and the piece as it is now (to strike it yourself after: anvilmode.ts). */
+  /**
+   * Halvard's forge: the next plus, paid in gold and steel and saved before the hammer comes down, so a
+   * quit or a refresh at the anvil keeps the plain plus. There's no other way to it: every plus is
+   * struck by the hero (anvilmode.ts adds the temper after). Returns the piece as it is now.
+   */
   levelUp(it: Item): Item | null {
     const p = this.profile, cost = nextLevel(it);
     if (!cost || p.gold < cost.gold || p.steel < cost.steel) return null;

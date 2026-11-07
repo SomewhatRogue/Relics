@@ -56,9 +56,9 @@ describe('loot', () => {
     const g = gearStats(sword, plate, [ring]);
     expect(g.damage).toBe(0.5);
     expect(g.quick).toBeCloseTo(0.08);
-    expect(g.taken).toBeCloseTo(0.75 * (1 - 0.02));
+    expect(g.taken).toBeCloseTo(0.75 * (1 - 2 * 0.02));
     expect(g.speed).toBeCloseTo(0.88);
-    expect(gearStats({ ...sword, level: 3 }, null).damage).toBeCloseTo(0.1 * 1.5 + 0.09);
+    expect(gearStats({ ...sword, level: 3 }, null).damage).toBeCloseTo(0.1 * 1.3 + 0.3);
   });
 
   it('a butcher sometimes drops a weapon, always for the nearest player\'s class; weapons are rare', () => {

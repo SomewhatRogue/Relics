@@ -87,7 +87,7 @@ describe("Halvard's anvil", () => {
     const p = hero(1), it = p.bag[0];
     expect(melt(p, 0)).toBe(STEEL[it.quality]);
     expect(p.bag.length).toBe(0);
-    Object.assign(p, { gold: 30, steel: 2 });
+    Object.assign(p, { gold: 45, steel: 2 });
     const up = upgraded(p, piece())!;
     expect(up.level).toBe(1);
     expect([p.gold, p.steel]).toEqual([0, 0]);

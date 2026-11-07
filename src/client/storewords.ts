@@ -61,8 +61,17 @@ export const FORGE = {
   upHead: 'UPGRADE WHAT YOU WEAR',
   meltHead: 'MELT DOWN FROM YOUR PACK',
   purse: (gold: number, steel: number) => `You have ${gold} gold and ${steel} steel.`,
-  up: (lv: number, gold: number, steel: number) => `UPGRADE TO +${lv} (${gold} GOLD, ${steel} STEEL)`,
-  top: 'As good as he can make it.',
+  /** The forge's only way up a plus: you strike it yourself (Kyle, 2026-11-06). The price is on the button. */
+  strike: (lv: number, gold: number, steel: number) => `STRIKE IT TO +${lv} (${gold} GOLD, ${steel} STEEL)`,
+  /** Under them: the price, and how a clean strike helps. */
+  price: (lv: number, gold: number, steel: number) => `+${lv} costs ${gold} gold and ${steel} steel.`,
+  offer: "You pay Halvard, then he hands you the hammer. Strike when the steel glows brightest. A cold strike still gets you the plus, and a clean one makes it come out up to a fifth better.",
+  top: "It's at +5. That's as good as he can make it.",
+  /** What a plus adds, on the card. */
+  adds: (main: string, mods: number) => main + (mods ? `, and each modifier on it is ${mods}% stronger` : ''),
+  damage: (pct: number) => `${pct}% more damage`,
+  tough: (pct: number) => `${pct}% less damage taken`,
+  health: (n: number) => `${n} more health`,
   melt: (steel: number) => `MELT DOWN (+${steel} STEEL)`,
   ivo: "No elements for a while, I'm sorry, and please don't ask me why. Whatever's set in yours stays set, it's happy where it is.",
   shut: 'Ivo is not setting elements for now.',

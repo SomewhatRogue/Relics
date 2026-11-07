@@ -1,0 +1,14 @@
+/* Halvard's forge and a piece's plus (forgeview.ts): five pips, NOW and AFTER rows, the price. */
+.fp-pips { display: inline-flex; gap: 3px; vertical-align: middle; margin: 0 4px; }
+.fp-pips i { width: 9px; height: 9px; border: 1px solid #8d929c; }
+.fp-pips i.on { background: #ffd27a; border-color: #ffd27a; }
+.fp-head { display: flex; align-items: center; gap: 6px; margin: 2px 0 4px; }
+.fp-head b { color: #ffd27a; font-weight: 400; letter-spacing: 0.08em; }
+#panel .up-na.fp > div { gap: 4px; }
+.fp-rows { margin: 0; display: flex; flex-direction: column; gap: 2px; }
+.fp-rows > div { display: flex; justify-content: space-between; gap: 6px; }
+.fp-rows dt { color: #8d929c; font-size: var(--fs-s); }
+.fp-rows dd { margin: 0; color: var(--bone); }
+.fp-rows > div.up dd { color: #c8e89a; }
+.fp-price { color: #ffd27a; margin: 6px 0 2px; }
+.tr.plus b { color: #ffd27a; }

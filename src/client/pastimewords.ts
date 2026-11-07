@@ -154,10 +154,6 @@ export const KNIFEW = {
 };
 
 export const ANVILW = {
-  /** The forge's button beside UPGRADE. */
-  strike: (lv: number) => `STRIKE IT YOURSELF TO +${lv}`,
-  /** Under the piece's card at the forge, saying what the choice is. */
-  offer: "Halvard does the upgrade for you, or hands you the hammer. Strike when the steel glows brightest and the piece comes out a little better. Either way it goes up a level.",
   /** Halvard, handing you the hammer. */
   greet: "Mind your thumb.",
   /** At the anvil. */
@@ -171,11 +167,11 @@ export const ANVILW = {
   stop: 'HAND IT BACK',
   /** The card. */
   title: 'OFF THE ANVIL',
-  well: (pct: number) => `It came out a little better than he'd have made it: its upgrades count for ${pct}% more.`,
-  plain: "It's as good as he'd have made it, no better and no worse.",
+  well: (pct: number) => `Struck well, this plus came out ${pct}% better than a plain one.`,
+  plain: "It took the plus, a plain one, no better and no worse.",
   halvard: { good: 'Good.', fair: 'Not bad.', none: "I'll do it next time." },
   done: 'BACK TO THE FORGE',
   /** On a piece's card, once it's been struck well. */
   cardRow: 'WELL STRUCK',
-  cardText: (pct: number) => `its upgrades count for ${pct}% more`,
+  cardText: (pct: number) => `its pluses count for ${pct}% more`,
 };
