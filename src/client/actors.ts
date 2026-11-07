@@ -29,7 +29,7 @@ import { idlePose } from './idlepose';
 import { idleProps } from './idledraw';
 
 const ARM: [number, number] = [0, 0];
-const POISON_TINT = '#5ad02a';
+const POISON_TINT = '#5ad02a', SHADOW_TINT = '#0e0b14';
 
 /** Green drops running off a poisoned hero, one more a stack. */
 function drip(c: Ctx, x: number, y: number, n: number): void {
@@ -156,11 +156,14 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
   if (behind) drawGear();
   // Poisoned: a green cast over the body, pulsing, stronger with each stack (unless a hit's flash is on it).
   if (h.poison && !pz.flash) (pz.flash = 0.16 + 0.07 * h.poison + 0.06 * Math.sin(c.now * 5)), (pz.tint = POISON_TINT);
+  // A Rogue vanished, or going through the dark on a SHADOW STEP: gone to shadow (the cloak drawn shut, cloaklife.ts).
+  const dim = (h.vanishUntil ?? -9) > t ? 0.42 + 0.06 * Math.sin(c.now * 3) : h.act === 'throw' && h.signing ? 0.6 : 0;
+  if (dim && !pz.flash) (pz.flash = dim), (pz.tint = SHADOW_TINT);
   // The eye dial's light round the body (heroeyes.ts), cloth behind, the body, cloth over it (herolife.ts).
   const dl = dialLook(h.dial);
-  drawLife(c, h, def, up, 'back', pz.flash, pz.tint, dl.side < 0 ? dl.a : 0);
+  drawLife(c, h, def, up, 'back', pz.flash, pz.tint, dl.side < 0 ? dl.a : 0, t);
   drawFigure(c, body, bx, by, pz);
-  drawLife(c, h, def, up, 'front', pz.flash, pz.tint, dl.side < 0 ? dl.a : 0);
+  drawLife(c, h, def, up, 'front', pz.flash, pz.tint, dl.side < 0 ? dl.a : 0, t);
   rim(c, dl, body);
   if (h.poison) drip(c, bx, by, h.poison);
   const [ey, exl, exr] = eyesAt(def);

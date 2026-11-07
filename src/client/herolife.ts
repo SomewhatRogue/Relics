@@ -1,6 +1,6 @@
 /**
  * What moves on a hero, drawn around the posed body (figure.ts LAYOUT) each frame: a Warrior's cape and
- * plume, a Ranger's cloak edges, a Rogue's scarf tail and sash end, a robe's hem, a hat's tip, a
+ * plume, a Ranger's cloak edges, a Rogue's long cloak (cloaklife.ts), a robe's hem, a hat's tip, a
  * tabard's foot, long hair. Each sways at rest and trails behind when walking. Cloth behind the body
  * goes in the `back` layer (before the body), cloth over it in `front`. Lit layer only: none of it is
  * light. Only draws; timings come from the wall clock and a phase seeded by the hero's id, so a party
@@ -12,6 +12,7 @@ import { LAYOUT } from './figure';
 import type { LookDef } from './lookkit';
 import { OUTLINE } from './sprites';
 import { mix } from './heroeyes';
+import { drawMantle } from './cloaklife';
 
 /** A stable number in [0, 1) from a hero's id (their sway's phase, their step's timing). */
 export function idPhase(id: string): number {
@@ -31,8 +32,9 @@ function trail(h: Hero, now: number): number {
   return s.k;
 }
 
-type Att = 0 | 1 | 2;
-const BUF: number[] = [], COLS: string[] = [];
+/** What a rect moves with: 0 the body, 1 the head, 2 the legs, 3 the body with no outline (a small detail on it). */
+type Att = 0 | 1 | 2 | 3;
+const BUF: number[] = [], COLS: string[] = [], BARE: boolean[] = [];
 let lay: 'back' | 'front' = 'back';
 
 /** A rect in the sprite's own pixels (x across from the facing side's back, y down), on the torso, head or legs. */
@@ -41,15 +43,16 @@ function rect(want: 'back' | 'front', x: number, y: number, w: number, h: number
   const L = LAYOUT, dx = att === 2 ? 0 : att === 1 ? L.lean : Math.round(L.lean / 2), dy = att === 2 ? Math.min(0, L.drop) : L.drop;
   BUF.push((L.flip ? L.left + 13 - x - w : L.left + 1 + x) + dx, L.top + 1 + y + dy, w, h);
   COLS.push(col);
+  BARE.push(att === 3);
 }
 
-/** Outlines first (one pixel round every rect), then the cloth; the glow under it erased; a hit's flash over it. */
+/** Outlines first (one pixel round every rect but a bare detail's), then the cloth; the glow under it erased; a hit's flash over it. */
 function flush(c: Ctx, flash: number, tint: string): void {
   const n = COLS.length;
   if (!n) return;
   const g = c.lit;
   g.fillStyle = OUTLINE;
-  for (let i = 0; i < n; i++) g.fillRect(BUF[i * 4] - 1, BUF[i * 4 + 1] - 1, BUF[i * 4 + 2] + 2, BUF[i * 4 + 3] + 2);
+  for (let i = 0; i < n; i++) if (!BARE[i]) g.fillRect(BUF[i * 4] - 1, BUF[i * 4 + 1] - 1, BUF[i * 4 + 2] + 2, BUF[i * 4 + 3] + 2);
   for (let i = 0; i < n; i++) (g.fillStyle = COLS[i]), g.fillRect(BUF[i * 4], BUF[i * 4 + 1], BUF[i * 4 + 2], BUF[i * 4 + 3]);
   c.glow.globalCompositeOperation = 'destination-out';
   for (let i = 0; i < n; i++) c.glow.fillRect(BUF[i * 4] - 1, BUF[i * 4 + 1] - 1, BUF[i * 4 + 2] + 2, BUF[i * 4 + 3] + 2);
@@ -60,14 +63,15 @@ function flush(c: Ctx, flash: number, tint: string): void {
     for (let i = 0; i < n; i++) c.glow.fillRect(BUF[i * 4], BUF[i * 4 + 1], BUF[i * 4 + 2], BUF[i * 4 + 3]);
     c.glow.globalAlpha = 1;
   }
-  BUF.length = COLS.length = 0;
+  BUF.length = COLS.length = BARE.length = 0;
 }
 
 /**
  * Draw one layer of a hero's moving cloth. `up`: walking away (the back view). `dark`: how far the
  * eye dial has gone to red (0 to 1, heroeyes.ts): a cape or cloak goes darker and its hem ragged.
+ * `t0`: the room's time (a Rogue vanished draws their cloak shut).
  */
-export function drawLife(c: Ctx, h: Hero, d: LookDef, up: boolean, layer: 'back' | 'front', flash: number, tint: string, dark = 0): void {
+export function drawLife(c: Ctx, h: Hero, d: LookDef, up: boolean, layer: 'back' | 'front', flash: number, tint: string, dark = 0, t0 = 0): void {
   lay = layer;
   const now = c.now, ph = idPhase(h.id) * 6.283, k = layer === 'back' ? trail(h, now) : swing.get(h.id)?.k ?? 0;
   const side = Math.abs(h.fx) > 0.35 ? k : 0, rate = 2 + 7 * k;
@@ -105,16 +109,8 @@ export function drawLife(c: Ctx, h: Hero, d: LookDef, up: boolean, layer: 'back'
     if (!up) rect('back', 1 - Math.round(side * 2) + Math.min(0, sw), y, 1 + Math.round(side * 2), 3, L.hair, 1), rect('back', 10, y + Math.max(0, sw), 1, 3 - Math.max(0, sw), L.hair, 1);
     else rect('front', 3 + sw, y + 2, 6, 2, L.hair, 1);
   }
-  // A Rogue's scarf tail from the knot at the neck: it hangs at rest and streams out behind at a run.
-  if (L.scarf) {
-    const ax = up ? 6 : 2, ay = 6 + t;
-    for (let i = 1; i <= 5; i++) {
-      const x = Math.round(ax - i * side * 1.1) + wave(i, 0.4 + k * 0.8), y = Math.round(ay + i * (1 - 0.8 * side));
-      rect(up ? 'front' : 'back', x, y, i < 3 ? 2 : 1, 1, i % 2 ? L.scarf[0] : L.scarf[1]);
-    }
-    // The sash's end at the hip, swinging.
-    if (!up) rect('front', 9 + Math.max(0, wave(7)), 11 + t, 1, 2, L.scarf[0], 2);
-  }
+  // A Rogue's long cloak (cloaklife.ts): its skirts, sway and flare, and what the kit hangs off the belt.
+  if (L.mantle) drawMantle(rect, h, L.mantle, up, layer, k, side, wave, (h.vanishUntil ?? -9) > t0, shade, now);
   // A robe's hem flaring at the foot, the side behind kicking out when walking.
   if (L.hem) {
     const sw = wave(3, 0.6 + k), y = bottom;
