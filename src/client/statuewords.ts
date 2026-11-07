@@ -18,6 +18,10 @@ export const STATUE_WORDS = {
   nobody: 'Nobody on the plinth yet.',
   first: (n: number) => `The first statue costs ${n} gold.`,
   range: (lo: number, hi: number) => `To take the plinth, pay from ${lo} to ${hi} gold.`,
+  /** Not given the town enough yet: plainly, under the price, so it's read without waiting on Judd. */
+  short: (given: number, need: number) => `You've given the town ${given} of ${need} gold. Give the rest first, then you can pay for a statue.`,
+  /** The button that takes you back to the works to give the rest. */
+  giveFirst: (more: number) => `GIVE ${more} MORE FIRST`,
   gold: (n: number) => `You have ${n} gold.`,
   custom: 'OR TYPE IT',
   pay: (n: number) => `PAY ${n} GOLD`,

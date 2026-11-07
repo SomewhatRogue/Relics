@@ -4,6 +4,7 @@
  * last, picked with +1, +100 and +1000 or typed. Paying goes through statuebuy.ts.
  */
 import { bidRange, giveMore, statuePrice } from '../shared/statue';
+import { STATUE_GIVEN } from '../shared/tuning';
 import type { Game } from './game';
 import type { Panel } from './panels';
 import { line } from './speech';
@@ -30,12 +31,15 @@ export function openStatue(g: Game, panel: Panel, back: () => void): void {
     `<div class="st-who">${fig}<div>${p(s ? S.who(esc(s.by.name), s.price) : S.nobody)}${p(s ? S.range(lo, hi) : S.first(lo))}</div></div>` +
     (s && !more && !wait && !blocked ? `<div class="st-quick">${QUICK.map((x) => `<button type="button" data-add="${x}" class="${pick === price + x ? 'on' : ''}">+${x}</button>`).join('')}</div>` +
       `<label class="code st-custom">${S.custom} <input id="st-pay" type="number" inputmode="numeric" min="${lo}" max="${hi}" step="1" value="${pick}"></label>` : '') +
+    (more ? p(`<b class="st-short">${S.short(Math.floor(g.profile.stats.given || 0), STATUE_GIVEN)}</b>`) : '') +
     (wait ? p(`<span class="dim">${S.out}</span>`) : blocked ? p(`<span class="dim">${S.blocked}</span>`) : '') +
     p(`<span class="st-gold">${S.gold(g.profile.gold)}</span>`);
   const can = (n: number) => !wait && !blocked && Number.isInteger(n) && n >= lo && n <= hi && g.profile.gold >= n;
   panel.show(S.title, html, [
-    ...(more ? [] : [{ label: S.pay(pick), primary: true, disabled: !can(pick), act: () => can(pick) && commission(g, pick) && again() }]),
-    { label: S.back, act: back },
+    // Short of what it takes: the way to give it (back to the works list), in place of paying.
+    ...(more ? [{ label: S.giveFirst(more), primary: true, act: back }] : [{ label: S.pay(pick), primary: true, disabled: !can(pick), act: () => can(pick) && commission(g, pick) && again() }]),
+    // (Giving first goes back to the works already.)
+    ...(more ? [] : [{ label: S.back, act: back }]),
   ]);
   const payBtn = document.querySelector<HTMLButtonElement>('#panel .buttons button.primary');
   for (const b of document.querySelectorAll<HTMLButtonElement>('#panel .st-quick button')) b.onclick = () => ((pick = price + Number(b.dataset.add)), again());
