@@ -1,11 +1,10 @@
 /**
- * Striking on the glow at Halvard's anvil (shared/forgestrike.ts): skipping it is exactly the upgrade
- * there always was; striking well adds a little on top, never more than a fifth of a level per upgrade,
+ * Striking on the glow at Halvard's anvil (shared/forgestrike.ts): paying is the plain plus; striking well adds a little on top, never more than a fifth of a level per upgrade,
  * drawn from the strike's own seed; a cold set adds nothing; a save can't claim more than that.
  */
 import { describe, expect, it } from 'vitest';
 import { STRIKE, glowAt, newStrike, stepStrike, strikeQuality, temperFrom, type StrikeState } from '../src/shared/forgestrike';
-import { LEVEL, TEMPER, gearStats, nextLevel, temperOf } from '../src/shared/gear';
+import { PLUS, TEMPER, gearStats, nextLevel, temperOf } from '../src/shared/gear';
 import { seedOf } from '../src/shared/fishing';
 import type { Item } from '../src/shared/loot';
 
@@ -58,7 +57,7 @@ describe('the strike', () => {
     const top = { ...sword, level: 4 }, struck = { ...top, temper: 4 * TEMPER.max }, more = { ...top, level: 5 };
     const d = (a: Item) => gearStats(a, null).damage;
     expect(d(struck) - d(top)).toBeLessThan(d(more) - d(top) + 1e-9);
-    expect(d(struck) - d(top)).toBeCloseTo(0.8 * (LEVEL.damage + 0.1 * LEVEL.mods), 6);
+    expect(d(struck) - d(top)).toBeCloseTo(0.8 * (PLUS.damage + 0.1 * PLUS.mods), 6);
   });
 
   it('a save cannot claim more than a fifth of a level per upgrade', () => {
@@ -78,13 +77,12 @@ describe('at the forge', () => {
     return g;
   };
 
-  it("skipping it is the upgrade there always was: the same price, the same piece, no temper", () => {
-    const a = fresh(), b = fresh(), it = a.profile.armor!, cost = nextLevel(it)!;
-    expect(a.upgrade(it)).toBe(true);
-    const up = b.levelUp(b.profile.armor!)!;
+  it('paying is the plain plus: the price taken, the piece one up, no temper until the strikes land', () => {
+    const a = fresh(), it = a.profile.armor!, cost = nextLevel(it)!;
+    const up = a.levelUp(it)!;
     expect(a.profile.gold).toBe(2000 - cost.gold);
-    expect(b.profile.gold).toBe(a.profile.gold);
     expect(a.profile.armor).toEqual(up);
+    expect(up.level).toBe(1);
     expect(up.temper).toBeUndefined();
   });
 
@@ -95,7 +93,7 @@ describe('at the forge', () => {
     expect(after.temper).toBe(0.18);
     expect(g.profile.armor).toBe(after);
     expect(g.hero.armor).toBe(after);
-    expect(gearStats(undefined, g.hero.armor).tough).toBeCloseTo(before + 0.18 * LEVEL.tough, 9);
+    expect(gearStats(undefined, g.hero.armor).tough).toBeCloseTo(before + 0.18 * PLUS.tough, 9);
     // Nothing for a piece the hero doesn't have, or for a cold set.
     expect(g.temper({ ...up }, 0.2).temper).toBeUndefined();
     expect(g.temper(after, 0)).toBe(after);

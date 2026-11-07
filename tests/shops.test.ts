@@ -243,7 +243,7 @@ describe('old saves', () => {
     expect(h.bag[0].quality).toBe('tolmouth');
     expect(h.bag[1].quality).toBe('hungry');
     const g = gearStats(h.arms.sword, h.armor);
-    expect(g.damage).toBeCloseTo(0.15 * (1 + 2 / 6) + 0.06);
+    expect(g.damage).toBeCloseTo(0.15 * (1 + 2 / 10) + 0.2);
     expect(g.dodge).toBeCloseTo(0.12);
     expect(sellValue(h.arms.sword!)).toBeGreaterThan(0);
     for (const m of [...h.arms.sword!.mods!, ...h.armor!.mods!]) expect(MODS[m.id as ModId]).toBeTruthy();

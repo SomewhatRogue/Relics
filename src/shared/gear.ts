@@ -13,43 +13,44 @@ import { CLASS_KITS, type HeroClass, type WeaponId } from './weapons.js';
 import { CAPS, MODS, MOD_COUNT, PER_MOD, modFits, modPool, modValue, rollMods, type ArmorKind, type ModId, type Slot } from './mods.js';
 import { ARMOR, budget } from './budget.js';
 import { rollCost } from './costs.js';
+import { PLUS, plusCost, plusOf } from './forgeplus.js';
 
 export * from './mods.js';
 export * from './budget.js';
+export * from './forgeplus.js';
 
-/** Each tier: its name, colour, Halvard's level cap, and its step up the ladder. */
-export const TIERS: Record<Tier, { name: string; col: string; mods: number; step: number; cap: number }> = {
-  plain: { name: 'PLAIN', col: '#e8e4ee', mods: 0, step: 0, cap: 2 },
-  fine: { name: 'FINE', col: '#7fd07a', mods: 1, step: 1, cap: 3 },
-  forged: { name: 'FORGED', col: '#6aa8ff', mods: 2, step: 2, cap: 4 },
-  tolmouth: { name: 'PRE-WAR', col: '#b57aff', mods: 2, step: 3, cap: 5 },
-  touched: { name: 'TOUCHED', col: '#f2d54a', mods: 3, step: 4, cap: 5 },
-  turning: { name: 'TURNING', col: '#ff9330', mods: 3, step: 5, cap: 5 },
-  hungry: { name: 'HUNGRY', col: '#ff3a2e', mods: 3, step: 6, cap: 0 },
+/** Each tier: its name, colour and its step up the ladder. Every tier but hungry goes to +5 (forgeplus.ts). */
+export const TIERS: Record<Tier, { name: string; col: string; mods: number; step: number }> = {
+  plain: { name: 'PLAIN', col: '#e8e4ee', mods: 0, step: 0 },
+  fine: { name: 'FINE', col: '#7fd07a', mods: 1, step: 1 },
+  forged: { name: 'FORGED', col: '#6aa8ff', mods: 2, step: 2 },
+  tolmouth: { name: 'PRE-WAR', col: '#b57aff', mods: 2, step: 3 },
+  touched: { name: 'TOUCHED', col: '#f2d54a', mods: 3, step: 4 },
+  turning: { name: 'TURNING', col: '#ff9330', mods: 3, step: 5 },
+  hungry: { name: 'HUNGRY', col: '#ff3a2e', mods: 3, step: 6 },
 };
 export const TIER_ORDER: Tier[] = ['plain', 'fine', 'forged', 'tolmouth', 'touched', 'turning', 'hungry'];
 /** The rare three: strong, dangerous, each with a cost. */
 export const RARE: Tier[] = ['touched', 'turning', 'hungry'];
 export const tierAtLeast = (t: Tier, floor: Tier) => TIER_ORDER.indexOf(t) >= TIER_ORDER.indexOf(floor);
 
-/** Upgrades: per level, mods grow by a sixth; a weapon +3% damage, armor 1% less taken, a ring +2 health. */
-export const LEVEL = { mods: 1 / 6, damage: 0.03, tough: 0.01, health: 2 };
 /**
  * Striking it yourself at the anvil (forgestrike.ts): a well struck upgrade counts for a little more than
  * a level, at most `max` of a level more (from `floor` to all of that, by the strike's seed). Never more
  * than `max` for every level a piece has, whatever a save says.
  */
 export const TEMPER = { max: 0.2, floor: 0.75 };
-export const temperOf = (i: Item) => Math.max(0, Math.min((i.level ?? 0) * TEMPER.max, Number(i.temper) || 0));
+export const temperOf = (i: Item) => Math.max(0, Math.min(plusOf(i) * TEMPER.max, Number(i.temper) || 0));
+/** The levels a piece counts for: its plus and what striking it well added (forgeplus.ts PLUS per level). */
+export const levelOf = (i: Item) => plusOf(i) + temperOf(i);
 
 export const slotOf = (i: Item): Slot => i.slot ?? 'weapon';
 
-/** Halvard's levels: gold and steel for each next level (index = the level reached). Steel from melting by tier. */
-export const UPGRADE = [null, { gold: 30, steel: 2 }, { gold: 60, steel: 5 }, { gold: 120, steel: 10 }, { gold: 200, steel: 20 }, { gold: 320, steel: 35 }];
+/** Steel from melting a piece down, by tier. */
 export const STEEL: Record<Tier, number> = { plain: 1, fine: 3, forged: 8, tolmouth: 20, touched: 30, turning: 45, hungry: 0 };
 export const REROLL = 40;
-/** The next level's price, or null at the tier's cap (and never for hungry gear). */
-export const nextLevel = (i: Item) => ((i.level ?? 0) < TIERS[i.quality].cap ? UPGRADE[(i.level ?? 0) + 1] : null);
+/** The next plus's price, or null at +5 (and never for hungry gear): forgeplus.ts. */
+export const nextLevel = plusCost;
 
 /** Ivo's reroll: modifier `k` becomes a different one this piece can roll, worth what it was worth. */
 export function reroll(rng: Rng, i: Item, k: number, cls: HeroClass): Item {
@@ -115,21 +116,25 @@ export function upgradeOld(i: Item): Item {
 
 export type GearStats = Record<ModId, number> & { speed: number; taken: number; dodgeDist: number; dodgeCost: number; steady: boolean };
 
-/** What everything worn adds up to (with each item's level, the caps, then any costs). */
+/** What everything worn adds up to (each piece's modifiers grown by its plus, the caps, then what the
+ *  pluses add to a weapon's damage, armor's toughness and a ring's health, then any costs). */
 export function gearStats(weapon: Item | undefined, armor: Item | null | undefined, rings: Item[] = []): GearStats {
   const s = Object.fromEntries((Object.keys(MODS) as ModId[]).map((k) => [k, 0])) as Record<ModId, number>;
   let taken = 1;
-  const costs: Item['cost'][] = [];
+  const costs: Item['cost'][] = [], lift = { damage: 0, tough: 0, health: 0 };
   for (const it of [weapon, armor, ...rings]) {
     if (!it) continue;
-    const lv = (it.level ?? 0) + temperOf(it), grow = 1 + lv * LEVEL.mods;
+    const lv = levelOf(it), grow = 1 + lv * PLUS.mods;
     for (const m of it.mods ?? []) if (m.id in s) s[m.id] += m.v * grow;
-    if (slotOf(it) === 'weapon') s.damage += lv * LEVEL.damage;
-    if (slotOf(it) === 'armor') s.tough += lv * LEVEL.tough;
-    if (slotOf(it) === 'ring') s.health += lv * LEVEL.health;
+    if (slotOf(it) === 'weapon') lift.damage += lv * PLUS.damage;
+    if (slotOf(it) === 'armor') lift.tough += lv * PLUS.tough;
+    if (slotOf(it) === 'ring') lift.health += lv * PLUS.health;
     if (it.cost) costs.push(it.cost);
   }
   for (const [k, cap] of Object.entries(CAPS)) s[k as ModId] = Math.min(cap!, s[k as ModId]);
+  s.damage += lift.damage;
+  s.tough += lift.tough;
+  s.health += lift.health;
   // What touched and turning gear costs: taken off after the caps, so a cap never hides it.
   for (const c of costs) {
     if (c!.id === 'taken') taken *= 1 + c!.v;

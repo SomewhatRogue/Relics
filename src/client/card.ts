@@ -3,8 +3,9 @@
  * and what it would change against what you wear now, in the numbers the room uses. Green better, red
  * worse. Used by the loot card, chests and the pack.
  */
-import { CLASS_DODGES, CLASS_GUARD, guardOf, HUNGRY, type HungryId, LASTS, POTIONS, type PotionId, MODS, MOD_TEXT, TIERS, TRAITS, WEAPONS, CHARGE, GUARD, RARE, SPELL, costText, gearStats, itemName, temperOf, modFits, slotOf, traitText, type HeroClass, type Item, type Mod, type MageKit, type WeaponId } from '../shared/tuning';
+import { CLASS_DODGES, CLASS_GUARD, guardOf, HUNGRY, type HungryId, LASTS, POTIONS, type PotionId, MODS, MOD_TEXT, PLUS, TIERS, TRAITS, WEAPONS, CHARGE, GUARD, RARE, SPELL, costText, gearStats, itemName, levelOf, plusOf, temperOf, modFits, slotOf, traitText, type HeroClass, type Item, type Mod, type MageKit, type WeaponId } from '../shared/tuning';
 import { CARDW } from './shopwords';
+import { plusLine, plusPips } from './forgeview';
 import { ANVILW } from './pastimewords';
 import type { Hero } from '../sim/types';
 import { kitRows } from './kitlines';
@@ -93,10 +94,12 @@ export function compare(h: Hero, it: Item): string {
   }).join('') + '</div>';
 }
 
-/** A modifier's value as shown: "+12%", "+0.04 s", "+9"; CHEAPER SPELLS reads as the cut it is ("-12%"). */
-const modValue = (m: Mod) => {
-  const neg = m.id === 'thrift', v = neg ? -m.v : m.v, sign = v > 0 ? '+' : '';
-  return MODS[m.id]?.unit === '%' ? sign + Math.round(v * 100) + '%' : MODS[m.id]?.unit === 's' ? sign + v + ' s' : sign + v;
+/** A modifier's value as shown, grown by the piece's plus (`grow`, shared/forgeplus.ts): "+12%", "+6.6%",
+ *  "+0.04 s", "+9"; CHEAPER SPELLS reads as the cut it is ("-12%"). */
+export const modValue = (m: Mod, grow = 1) => {
+  const neg = m.id === 'thrift', v = (neg ? -m.v : m.v) * grow, sign = v > 0 ? '+' : '';
+  const r1 = (x: number) => Math.round(x * 10) / 10;
+  return MODS[m.id]?.unit === '%' ? sign + r1(v * 100) + '%' : MODS[m.id]?.unit === 's' ? sign + Math.round(v * 100) / 100 + ' s' : sign + r1(v);
 };
 
 /** The card: tier, name, how armor wears, what's on it. How a weapon fights is in the gear's WEAPONS panel. `brief` is kept for callers.
@@ -108,18 +111,22 @@ export function card(it: Item, h?: Hero, brief = false): string {
   // Whose hands it's judged in: the weapon itself, or what the wearer holds.
   const kit = s === 'weapon' ? it.kit : h?.weapon;
   // "NAME +10%: what it does" and "NAME: what it does" (Kyle's example, before parry went: "STAMINA ON PARRY: parry refills stamina").
+  // Each modifier as the piece gives it now, its pluses (and any temper) counted in: what the room uses.
+  const grow = 1 + levelOf(it) * PLUS.mods;
   const mods = (it.mods ?? []).map((m) => {
     const use = !cls || !(m.id in MODS) || modFits(m.id, cls, kit);
-    return `<div class="tr${use ? '' : ' nouse'}"><b>${barWords(MODS[m.id]?.name ?? m.id, cls)} ${modValue(m)}${MOD_TEXT[m.id] ? ':' : ''}</b> ${barWords(MOD_TEXT[m.id] ?? '', cls)}${use ? '' : ` <i>${CARDW.noUse}</i>`}</div>`;
+    return `<div class="tr${use ? '' : ' nouse'}"><b>${barWords(MODS[m.id]?.name ?? m.id, cls)} ${modValue(m, grow)}${MOD_TEXT[m.id] ? ':' : ''}</b> ${barWords(MOD_TEXT[m.id] ?? '', cls)}${use ? '' : ` <i>${CARDW.noUse}</i>`}</div>`;
   });
   const traits = it.traits.map((k) => `<div class="tr"><b>${barWords(TRAITS[k].name, cls)}:</b> ${traitText(k, cls)}</div>`);
+  // Its plus as pips, and what the plus adds (forgeview.ts).
+  const plus = plusOf(it) ? [`<div class="tr plus"><b>${CARDW.plus(plusOf(it))}</b> ${plusPips(plusOf(it))} ${plusLine(it)}</div>`] : [];
   // Struck well at the anvil (shared/forgestrike.ts): how much more its upgrades count for.
   const tp = it.level ? Math.round((temperOf(it) / it.level) * 100) : 0;
   if (tp > 0) traits.push(`<div class="tr"><b>${ANVILW.cardRow}:</b> ${ANVILW.cardText(tp)}</div>`);
   // The rare three wear their chip filled in; HUNGRY's darkest of all (ui.css).
   const chip = RARE.includes(it.quality) ? ` rare ${it.quality}` : '';
   return `<div class="card-head" style="--t:${t.col}"><span class="chip${chip}">${t.name}</span><b>${itemName(it)}</b></div>` +
-    (how ? `<div class="how">${how}</div>` : '') + [...mods, ...traits].join('') +
+    (how ? `<div class="how">${how}</div>` : '') + [...plus, ...mods, ...traits].join('') +
     (it.cost ? labelRows([[CARDW.cost, costText(it.cost, cls)]], 'hungry') : '') +
     (it.hungry ? hungryRows(it.hungry as HungryId, cls) : '') + (mods.length + traits.length || it.hungry ? '' : `<div class="tr">Plain. No modifiers.</div>`);
 }

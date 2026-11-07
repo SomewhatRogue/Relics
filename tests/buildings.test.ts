@@ -84,7 +84,7 @@ describe('heroes', () => {
 });
 
 describe('the forge', () => {
-  it('Halvard melts packed gear for steel and levels gear up to its tier cap; Ivo rerolls a modifier', () => {
+  it('Halvard melts packed gear for steel and levels gear up to +5; Ivo rerolls a modifier', () => {
     const g = new Game();
     g.create('WARRIOR', 'smith');
     g.skipWood();
@@ -92,9 +92,9 @@ describe('the forge', () => {
     const spear = g.buy('fine', 'spear')!, junk = g.buy('fine', 'greatsword')!;
     expect(g.melt(junk)).toBe(true);
     expect(g.profile.steel).toBe(3);
-    g.profile.steel = 100;
-    for (let i = 0; i < 5; i++) g.upgrade(g.profile.bag[0]);
-    expect(g.profile.bag[0].level).toBe(3);
+    Object.assign(g.profile, { gold: 9000, steel: 100 });
+    for (let i = 0; i < 7; i++) g.levelUp(g.profile.bag[0]);
+    expect(g.profile.bag[0].level).toBe(5);
     expect(g.profile.bag[0].kit).toBe('spear');
     // Wear a ring and reroll its modifier: a different one, same piece.
     const ring = g.buy('forged', 'sword', 'ring')!;

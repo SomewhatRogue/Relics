@@ -1,7 +1,7 @@
 /**
- * Striking it yourself at Halvard's anvil (shared/forgestrike.ts has the rules). Chosen at the forge
- * instead of a plain UPGRADE (stores.ts): the upgrade is paid for and made first, exactly as Halvard
- * would make it, so getting up early or a refresh leaves you no worse off. Then you're at the anvil
+ * Striking it yourself at Halvard's anvil (shared/forgestrike.ts has the rules). The forge's only way to
+ * a plus (stores.ts; Kyle, 2026-11-06: "you always have to forge yourself"): the plus is paid for and made
+ * first (Game.levelUp), so getting up early or a refresh leaves you the plain plus. Then you're at the anvil
  * (parked there for those in the forge: Game.enterPastime, said once) with the hammer: tap as the steel
  * glows brightest, three times. The strikes' seed is the hero and their count of strikes, counted before
  * the first comes down. What they add goes on the piece (Game.temper), and the card says so.
@@ -70,7 +70,7 @@ export class AnvilStrike extends OneButton {
     this.item = this.g.temper(this.item, add);
     sfx.steam();
     add > 0 ? sfx.fanfare() : sfx.loot();
-    const lv = this.item.level ?? 1, pct = Math.round((add / lv) * 100), cleans = this.s.struck.filter((x) => x.mark === 'clean').length;
+    const pct = Math.round(add * 100), cleans = this.s.struck.filter((x) => x.mark === 'clean').length;
     const said = cleans >= 2 ? ANVILW.halvard.good : add > 0 ? ANVILW.halvard.fair : ANVILW.halvard.none;
     this.panel.show(ANVILW.title, p(`<b>Halvard:</b> ${line(`"${said}"`, 'Halvard')}`) + p(add > 0 ? ANVILW.well(Math.max(1, pct)) : ANVILW.plain) + card(this.item, this.g.hero, true),
       [{ label: ANVILW.done, primary: true, act: () => this.close() }], true);

@@ -5,12 +5,12 @@
  * the counting house (Keeper Edda: pack to vault and back, more shelves for gold); Tobin's pawn stall on
  * Market Row (his stock, rolled every ten minutes for everyone, shared/vendors.ts; a bigger pack; what
  * you sold him, back at what he paid until you're home from your next job; and he buys anything but
- * the rare three, and won't trade at all with a hero carrying hungry gear, shared/fence.ts); Halvard's forge (UPGRADE what you wear for gold and steel; MELT DOWN what's in your pack).
+ * the rare three, and won't trade at all with a hero carrying hungry gear, shared/fence.ts); Halvard's forge (strike what you wear up a plus for gold and steel, forgeview.ts; MELT DOWN what's in your pack).
  * The rules are shared/bags.ts; syncPack keeps the hero in step with the save after each one.
  */
 import { carriesHungry, tobinWont } from '../shared/fence';
 import { bagSize, growBag, growVault, nextBag, nextVault, pawn, pawns, redeem, stow, unstow, vaultSize } from '../shared/bags';
-import { STEEL, TIERS, itemName, nextLevel, sellValue, type Item } from '../shared/tuning';
+import { STEEL, TIERS, itemName, nextLevel, plusOf, sellValue, type Item } from '../shared/tuning';
 import type { SpotId } from '../shared/town';
 import type { Game } from './game';
 import type { Panel } from './panels';
@@ -22,7 +22,7 @@ import { PLACES, SHOPW } from './shopwords';
 import { cell, grid } from './cells';
 import { SMITH } from './copy';
 import { BANK, FORGE, PAWN } from './storewords';
-import { ANVILW } from './pastimewords';
+import { forgeBody } from './forgeview';
 import { freshLine, stockGoods, syncPack } from './vendorui';
 import { WEAPONS } from '../shared/tuning';
 import './stores.css';
@@ -95,6 +95,11 @@ function merchant(g: Game, panel: Panel): void {
   tap, again, goods);
 }
 
+/** A worn piece at the forge: its plus, NOW and AFTER and the price (forgeview.ts), then its card. */
+function forgePop(g: Game, it: Item, acts: Act[], again: () => void): void {
+  itemPop({ icon: itemIcon(it), name: itemName(it), col: TIERS[it.quality].col, body: forgeBody(it, WEAPONS[g.hero.weapon].cls) + card(it, g.hero, true), acts, again });
+}
+
 /** Halvard's forge: UPGRADE what you wear, or MELT DOWN what's in your pack. One choice per piece. */
 function forge(g: Game, panel: Panel): void {
   const pr = g.profile, held = pr.arms[pr.weapon], worn = [held, pr.armor, ...pr.rings].filter((x): x is Item => !!x), again = () => forge(g, panel);
@@ -103,16 +108,14 @@ function forge(g: Game, panel: Panel): void {
     if (!it) return;
     if (it.quality === 'hungry') return piece(g, it, [], again, says('Halvard', SMITH.hungry), s === 'worn');
     if (s === 'bag') return piece(g, it, [{ label: FORGE.melt(STEEL[it.quality]), primary: true, act: () => void (g.melt(it) && sfxTown.anvil()) }], again);
-    const next = nextLevel(it), poor = !next || pr.gold < next.gold || pr.steel < next.steel;
-    // Halvard does it (as it always was), or you take the hammer and strike on the glow (anvilmode.ts):
-    // the same upgrade, paid the same, and a little more on top if you strike it well.
+    // The only way up a plus is to strike it yourself (Kyle, 2026-11-06): pay, the plus is made and saved
+    // (Game.levelUp), then the anvil (anvilmode.ts) adds a little more for a good strike.
+    const next = nextLevel(it), poor = !next || pr.gold < next.gold || pr.steel < next.steel, to = plusOf(it) + 1;
     const strike = () => {
       const up = g.levelUp(it);
       if (up) void import('./anvilmode').then((m) => (panel.hide(), m.openAnvil(g, panel, up, again)));
     };
-    piece(g, it, next ? [{ label: FORGE.up((it.level ?? 0) + 1, next.gold, next.steel), primary: true, disabled: poor, act: () => void (g.upgrade(it) && sfxTown.anvil()) },
-      { label: ANVILW.strike((it.level ?? 0) + 1), disabled: poor, act: strike }] : [],
-    again, next ? p(`<span class="dim">${ANVILW.offer}</span>`) : p(FORGE.top), true);
+    forgePop(g, it, next ? [{ label: FORGE.strike(to, next.gold, next.steel), primary: true, disabled: poor, act: strike }] : [], again);
   };
   show(panel, PLACES.forge.name, shopHead(PLACES.forge, says('Halvard', SMITH.anvil)) + p(`<span class="dim">${FORGE.purse(pr.gold, pr.steel)}</span>`) +
     h3(FORGE.upHead) + `<div class="cells">${worn.map((x, k) => cell(x, 'worn:' + k)).join('')}</div>` +

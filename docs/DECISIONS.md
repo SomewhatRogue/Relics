@@ -2,6 +2,50 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-06: forge pluses to +5, steeply priced, always struck yourself, NOW and AFTER on screen (Kyle; Claude Opus 5.5)
+
+Kyle: "It's not really clear what forge upgrades give you, and prices should be more for each plus. I want
+to see attributes increase each plus, up to +5, but a lot more expensive, and you always have to forge
+yourself."
+
+- **Up to +5 on every piece** (`shared/forgeplus.ts`, re-exported through `gear.ts` and `tuning.ts`). The
+  per-tier caps (plain 2, fine 3, forged 4) are gone; every tier but hungry goes to +5 (Halvard still won't
+  touch hungry gear). `plusOf` reads any save as 0 to 5, so a save at +9 fights as +5.
+- **What a plus adds** (`PLUS`), flat, of the piece's base, so +5 is half again: each modifier on the piece
+  grows a tenth of itself (was a sixth); a weapon hits 10% harder (was 3%); armor of any weight takes 2%
+  less damage (was 1%); a ring gives 3 health (was 2). The weapon, armor and ring parts go on after the
+  modifier caps (`gearStats`), so a plus always shows even on capped gear. Temper (a good strike) is kept as
+  it was: up to a fifth of a level per plus, counted the same way (`levelOf`).
+- **Price** (`PLUS_GOLD`, `PLUS_TIER`): 60, 150, 350, 800, 1800 gold for a FORGED piece's +1 to +5 (3160
+  all told), times 0.5 plain, 0.75 fine, 1.4 PRE-WAR, 1.8 TOUCHED, 2.2 TURNING, to the nearest 5 (plain to
+  +5 is 1580, turning 6950). Steel as before (2, 5, 10, 20, 35). A medium job pays about 100 gold with its
+  kills, so a Forged +5 is fifteen to twenty-five jobs. Old prices were 30, 60, 120, 200, 320.
+- **Always struck yourself.** The plain UPGRADE button and `Game.upgrade` are gone. The worn piece's card
+  has one button, STRIKE IT TO +N (gold, steel). Paying makes and saves the plus first (`Game.levelUp`, as
+  before), so handing the hammer back or a refresh keeps the plain plus; the anvil then adds the temper.
+- **Clear what you get** (`client/forgeview.ts`, `forge.css`, rows from `shared/plusrows.ts` worked out by
+  `gearStats` so the screen is what the room uses). The forge's card: +N OF 5 with five pips, then NOW and
+  AFTER boxes in the training screen's style (`upgrades.css` `.up-na`): HIT and FULL CHARGE for a weapon,
+  DAMAGE TAKEN for armor, HEALTH for a ring, then each modifier at its grown value, changes lit green; the
+  price under them, then how the strike works. At +5, the numbers alone and Halvard's top line. The item
+  card everywhere shows +N OF 5 with pips and what the plus adds, and its modifiers at their grown values
+  (they showed the base before, which is why the plus seemed to do nothing).
+- **Old saves** (`client/save.ts` `fitAllPlus`): anything over +5 in hand, worn, packed, in the vault or
+  at Tobin's comes down to +5, temper kept. No path could make one before (caps were at most 5, drops at
+  most +2), so none are expected. Pieces at +4 or +5 keep them at the old, lower prices. Upgraded pieces'
+  modifiers grow a little less than before (a tenth a plus, not a sixth); their weapon, armor and ring
+  parts grow more.
+- **Words** (`storewords.ts` FORGE, `shopwords.ts` CARDW, `pastimewords.ts` ANVILW; written plain, not yet
+  through the lore keeper or the line editor: no agent tool here): STRIKE IT TO +N (G GOLD, S STEEL); +N
+  costs G gold and S steel.; the offer; It's at +5. That's as good as he can make it.; +N OF 5; N% more
+  damage / N% less damage taken / N more health, and each modifier on it is N% stronger; Struck well, this
+  plus came out N% better than a plain one.; It took the plus, a plain one, no better and no worse.; its
+  pluses count for N% more. Gone: UPGRADE TO +N, STRIKE IT YOURSELF TO +N and the old offer.
+- Tests: `tests/forgeplus.test.ts` (the curve and tier order, +5 a real goal against a job's pay, each
+  slot's gains a plus, rows match `gearStats`, the cap, no UPGRADE, +5 and no further, a reload after paying
+  keeps the plus, the save cap everywhere with temper kept); `forgestrike`, `buildings`, `bags`, `loot`,
+  `shops` updated to the new numbers. Shots: `node scripts/forge-look.cjs <url> shots/forge` (phone).
+
 ## 2026-11-06: the Rogue redrawn as a hooded assassin in a long cloak (Kyle; Claude Opus 5.5)
 
 Kyle: "Rogue looks terrible. The feet are weirdly stanced. Needs to look more like an assassin or a ninja
