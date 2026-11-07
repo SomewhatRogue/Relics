@@ -17,6 +17,10 @@ import { STATUE_WORDS } from './statuewords';
 import { PX } from './world';
 
 const FW = 40, FH = 48, FOOT = 4;
+/** The statue stands this many times a hero's size (Kyle, 2026-11-06: "Should be much bigger"), each pixel doubled. */
+export const STATUE_SCALE = 2;
+/** How tall the figure stands above its feet on screen, drawn at STATUE_SCALE. */
+export const STATUE_TALL = (FH - FOOT) * STATUE_SCALE;
 /** Stone, darkest to palest: the hero's own shading kept, in the plinth's colours. */
 const BANDS = [[46, 43, 54], [62, 58, 70], [87, 82, 94], [106, 100, 112], [138, 132, 148], [168, 162, 176]];
 const figures = new Map<string, HTMLCanvasElement>();
@@ -90,14 +94,26 @@ export function drawPlate(g: CanvasRenderingContext2D, name: string | undefined,
   lines.forEach((s, i) => cut(g, s, Math.round(x - (s.length * 4 - 1) / 2), top + 2 + i * 6, '#241c14', '#8a7448'));
 }
 
-/** What stands on the cap, its feet at (x, y): the hero in stone, or the board that says where to ask. */
-export function drawStatueTop(c: Ctx, s: StatueHero | undefined, x: number, y: number): void {
+/**
+ * What stands on the cap, its feet at (x, y): the hero in stone, or the board that says where to ask. `from`,
+ * `to`: only the figure's rows that far above its feet (screen pixels), for the 2.5D view, which stands it up
+ * on two cards (three/statue3d.ts) since one card isn't tall enough.
+ */
+export function drawStatueTop(c: Ctx, s: StatueHero | undefined, x: number, y: number, from = 0, to = Infinity): void {
   if (s) {
-    const f = stoneFigure(s), l = Math.round(x - FW / 2), t = Math.round(y - FH + FOOT);
+    const f = stoneFigure(s), S = STATUE_SCALE, l = Math.round(x - (FW * S) / 2), feet = Math.round(y);
+    // Source rows from the top of the figure: those between `to` and `from` above the feet.
+    const top = Math.max(0, FH - FOOT - to / S), bot = from > 0 ? Math.min(FH, FH - FOOT - from / S) : FH;
+    if (bot <= top) return;
+    const dy = feet - (FH - FOOT - top) * S, dh = (bot - top) * S;
     c.glow.globalCompositeOperation = 'destination-out';
-    c.glow.drawImage(f, l, t);
+    c.glow.fillRect(l, dy, FW * S, dh);
     c.glow.globalCompositeOperation = 'source-over';
-    return void c.lit.drawImage(f, l, t);
+    const was = c.lit.imageSmoothingEnabled;
+    c.lit.imageSmoothingEnabled = false;
+    c.lit.drawImage(f, 0, top, FW, bot - top, l, dy, FW * S, dh);
+    c.lit.imageSmoothingEnabled = was;
+    return;
   }
   // A board on two legs: SEE / JUDD.
   const g = c.lit, words = STATUE_WORDS.sign, w = 19, h = words.length * 6 + 3, l = Math.round(x - w / 2), t = Math.round(y - 4 - h);
@@ -109,7 +125,7 @@ export function drawStatueTop(c: Ctx, s: StatueHero | undefined, x: number, y: n
 
 /** The flat view: the whole plinth at its foot (x, y) on screen. */
 export function drawPlinth(c: Ctx, r: Round, x: number, y: number): void {
-  const tall = PLINTH_TOP * PX + FH, half = Math.round((PLINTH_BOX.slab[0] * PX) / 2) + 4;
+  const tall = PLINTH_TOP * PX + STATUE_TALL + FOOT, half = Math.max(Math.round((PLINTH_BOX.slab[0] * PX) / 2) + 4, (FW * STATUE_SCALE) / 2);
   c.glow.globalCompositeOperation = 'destination-out';
   c.glow.fillRect(Math.round(x - half), Math.round(y - tall), half * 2, Math.round(tall + PX));
   c.glow.globalCompositeOperation = 'source-over';

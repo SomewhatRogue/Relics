@@ -8,11 +8,17 @@ import type { GameMap } from '../../shared/arena';
 import { drawPlate, drawStatueTop } from '../statuedraw';
 import { PLATE, PLINTH_TOP } from '../statuepieces';
 import { PX } from '../world';
-import type { Figs } from './figs3d';
+import { CELL, type Figs } from './figs3d';
+
+/** Where the statue's upper card takes over (pixels above its feet): the most one card holds, less a little. */
+const UPPER = CELL.fy - 8;
 
 export function putStatue(f: Figs, map: GameMap): void {
   for (const r of map.rounds) if (r.kind === 'plinth') {
-    f.put('st-top', r.x, PLINTH_TOP, r.y, (c, px, py) => drawStatueTop(c, r.hero, px, py), { pool: 0 });
+    // A card holds CELL.fy pixels above its foot, so the doubled figure stands on two: its lower part on the
+    // cap, and above that a second card raised UPPER pixels, each drawing only its own rows.
+    f.put('st-top', r.x, PLINTH_TOP, r.y, (c, px, py) => drawStatueTop(c, r.hero, px, py, 0, UPPER), { pool: 0 });
+    if (r.hero) f.put('st-top2', r.x, PLINTH_TOP + UPPER / PX, r.y, (c, px, py) => drawStatueTop(c, r.hero, px, py + UPPER, UPPER), { pool: 0 });
     // The plate's card stands at the face, its foot on the floor: the face's foot is the slab's height up it.
     if (r.hero) f.put('st-plate', r.x, 0, r.y + PLATE.z + 0.02, (c, px, py) => drawPlate(c.lit, r.hero!.name, px, Math.round(py - PLATE.y0 * PX)), { pool: 0 });
   }

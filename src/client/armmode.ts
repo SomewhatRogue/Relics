@@ -44,7 +44,7 @@ export class ArmBout extends OneButton {
     if (bet && !takeStake(pr, 'arm', this.n, bet, foe.cap)) this.bet = 0;
     g.keep();
     if (this.bet) sfxTown.coins();
-    this.s = newArm(armSeed(pr.id, this.n), foe);
+    this.s = newArm(armSeed(pr.id, this.n), foe, pr.cls === 'WARRIOR');
     this.hud.hint(this.touch ? ARMW.hintTouch : ARMW.hintMouse);
   }
 

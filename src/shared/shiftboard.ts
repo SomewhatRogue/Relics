@@ -8,6 +8,7 @@
 import { seedOf } from './fishing.js';
 import { replayShift } from './forgeshift.js';
 import { SHIFT } from './shifttune.js';
+import type { HeroClass } from './weapons.js';
 
 /** A finished shift as sent: which of the hero's shifts it was, and the frame of each strike. */
 export interface ShiftClaim { n: number; hits: number[] }
@@ -23,5 +24,5 @@ export function cleanShiftClaim(raw: unknown): ShiftClaim | null {
   return c.hits.every((f, i) => Number.isInteger(f) && f >= 0 && f < last && (i === 0 || f > c.hits![i - 1])) ? { n: c.n, hits: [...c.hits] } : null;
 }
 
-/** What a claim scores, played again from the hero's own seed (0 if the strikes don't add up). */
-export const shiftClaimScore = (heroId: string, c: ShiftClaim): number => replayShift(shiftSeed(heroId, c.n), c.hits)?.score ?? 0;
+/** What a claim scores, played again from the hero's own seed, a Warrior's with their wider windows (0 if the strikes don't add up). */
+export const shiftClaimScore = (heroId: string, cls: HeroClass, c: ShiftClaim): number => replayShift(shiftSeed(heroId, c.n), c.hits, cls === 'WARRIOR')?.score ?? 0;

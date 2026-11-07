@@ -42,7 +42,7 @@ export class ForgeShift extends OneButton {
     this.n = r.n;
     this.paid = r.paid;
     g.keep();
-    this.s = newShift(shiftSeed(g.profile.id, this.n));
+    this.s = newShift(shiftSeed(g.profile.id, this.n), g.profile.cls === 'WARRIOR');
     this.hud.hint(this.touch ? SHIFTW.hintTouch : SHIFTW.hintMouse);
     this.hud.cue(SHIFTW.greet, performance.now() / 1000, 1, 'small');
   }

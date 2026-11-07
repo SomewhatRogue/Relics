@@ -72,6 +72,15 @@ export function clean(raw: unknown): Contribution | null {
   return out;
 }
 
+/**
+ * A statue bid with the gold the hero has really given the town (what the Roll has, and any given in the same
+ * write), in place of the save's own count: a bid from a save that says more than reached the world is turned
+ * away by placeBid (shared/statue.ts), and the hero's gold comes back (client/statuebuy.ts).
+ */
+export function realGiven(c: Contribution, had: number): Contribution {
+  return c.statue ? { ...c, statue: { ...c.statue, given: had + (c.stats?.given ?? 0) } } : c;
+}
+
 const emptyBoard = (): Board => Object.fromEntries(STAT_ORDER.map((k) => [k, []])) as unknown as Board;
 
 /** In memory (tests, local dev). `clock`: real time, unless a test moves it. */
@@ -95,6 +104,8 @@ export function memoryWorldStore(clock = () => Date.now()): WorldStore {
     },
     async apply(g, c) {
       const w = worlds.get(g) ?? newWorld();
+      // A statue bid counts what the Roll has the hero giving, not what the bid says (realGiven).
+      if (c.statue) c = realGiven(c, stats.get(g)?.get(c.hero.id)?.s.given ?? 0);
       contribute(w, c, clock());
       worlds.set(g, w);
       const m = stats.get(g) ?? new Map();
@@ -147,6 +158,11 @@ export async function redisWorldStore(url: string, meter = new Meter()): Promise
     },
     async apply(g, c) {
       let world = newWorld();
+      // A statue bid: what the Roll has the hero giving the town, from its own sorted set (1 command).
+      if (c.statue) {
+        meter.add('zscore');
+        c = realGiven(c, Number((await r.zScore(bk(g, 'given'), c.hero.id)) ?? 0));
+      }
       for (let tries = 0; tries < 5; tries++) {
         try {
           world = await r.executeIsolated(async (iso) => {

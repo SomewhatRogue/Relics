@@ -8477,3 +8477,19 @@ on a big screen.
   never wrap.
 - Shots: `node scripts/trainfit-look.cjs [url] [outdir] [tag]` (every tab and a tile opened on a phone,
   1280x800 and 1920x1080, printing anything that spills).
+
+## 2026-11-06: Warriors at the forge and the table, the statue checked and doubled, Best in Wickhold (Claude Opus 5.5)
+
+- Kyle: "Forge is for knight! Same as arm wrestle." A Warrior's strike windows at Halvard's shift are 1.35x
+  (`SHIFT.knight`), and the board replays a Warrior's claim with them (`shiftClaimScore(id, cls, claim)`). At the
+  Rat's table a Warrior wins 1.3x faster in the spot and is pushed 0.8x as hard out of it (`ARM.knight`). Halvard
+  and the watchman each say so to a Warrior.
+- A statue bid is judged on what the Roll has the hero giving the town (`realGiven` in api/_world.ts: one
+  ZSCORE on the `given` set), not the save's own count. A bid from a save that claims more is turned away and the
+  gold comes back (the client's existing refund).
+- The statue stands at twice a hero's size (`STATUE_SCALE`, pixels doubled). In 2.5D it stands on two cards,
+  since one card holds only 64 px above its foot.
+- A board of the pastimes' bests, apart from the job board: BEST IN WICKHOLD by the Lantern (spot `best`,
+  bestui.ts), the top five at the butts, the Rat's knife board and Halvard's forge, and your own best under
+  each. The lore keeper ruled out "tally" for any town object: the word belongs to the hungry's counts and the
+  count of the dead.

@@ -78,7 +78,7 @@ export function contribute(w: WorldState, c: Contribution, now = Date.now(), rai
     if (n > 0) w.knives = addRangeLine(w.knives, { id: c.hero.id, name: c.hero.name, cls: c.hero.cls, n });
   }
   if (c.shift) {
-    const n = shiftClaimScore(c.hero.id, c.shift);
+    const n = shiftClaimScore(c.hero.id, c.hero.cls, c.shift);
     if (n > 0) w.shift = addRangeLine(w.shift, { id: c.hero.id, name: c.hero.name, cls: c.hero.cls, n });
   }
   if (c.statue) placeBid(w, c.hero, c.statue);

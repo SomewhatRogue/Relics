@@ -16,15 +16,25 @@ import { seedOf } from '../src/shared/fishing';
 import { clean, memoryWorldStore } from '../api/_world';
 
 /** A player at the table who watches the band a little late (`lag` steps) and bears down when under it. */
-function bout(seed: number, foe: ArmFoe, lag = 14, slop = 0.02): ArmState {
-  const s = newArm(seed, foe), seen: number[] = [];
+function bout(seed: number, foe: ArmFoe, lag = 14, slop = 0.02, strong = false): ArmState {
+  const s = newArm(seed, foe, strong), seen: number[] = [];
   while (!s.over) {
     seen.push(zoneAt(s));
     stepArm(s, s.grip < seen[Math.max(0, seen.length - 1 - lag)] - slop);
   }
   return s;
 }
-const wins = (foe: ArmFoe, lag: number, slop: number, n = 120) => Array.from({ length: n }, (_, i) => bout(i * 7919 + 11, foe, lag, slop).won).filter(Boolean).length / n;
+const wins = (foe: ArmFoe, lag: number, slop: number, n = 120, strong = false) => Array.from({ length: n }, (_, i) => bout(i * 7919 + 11, foe, lag, slop, strong).won).filter(Boolean).length / n;
+
+describe("arm-wrestling: a Warrior's arm", () => {
+  it('the same player wins more often as a Warrior, against Gannet most of all, and no bout runs on', () => {
+    const g = armFoe('gannet');
+    expect(wins(g, 14, 0.02, 120, true)).toBeGreaterThan(wins(g, 14, 0.02, 120));
+    const s = bout(99, g, 14, 0.02, true);
+    expect(s.over).toBe(true);
+    expect(s.frame).toBeLessThanOrEqual(ARM.cap * ARM.fps);
+  });
+});
 
 describe('arm-wrestling: the rules', () => {
   it('in the band you push them over, out of it they push you; letting go or holding on regardless loses', () => {

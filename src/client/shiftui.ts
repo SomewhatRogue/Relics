@@ -10,6 +10,7 @@ import type { Game } from './game';
 import type { Panel } from './panels';
 import { line } from './speech';
 import { openShift } from './shiftmode';
+import { BESTW } from './bestwords';
 import { SHIFTW } from './shiftwords';
 import './pastime.css';
 
@@ -20,7 +21,7 @@ const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 export function openShiftDesk(g: Game, panel: Panel, back: () => void): void {
   const pr = g.profile, rec = pr.shift, rest = restLeft(rec, Date.now()), board = g.world.shift ?? [];
   const rows = board.map((l, i) => `<li${l.id === pr.id ? ' class="me"' : ''}><span>${i + 1}</span>${esc(l.name)} <small>${CLASS_NAME[l.cls]}</small><em>${l.n}</em></li>`).join('');
-  const html = (rest ? say(SHIFTW.resting(rest)) + p(`<span class="dim">${SHIFTW.next(rest)}</span>`) + p(`<span class="dim">${SHIFTW.unpaid}</span>`) : say(SHIFTW.offer) + p(SHIFTW.pays(SHIFT_PAY.cap))) +
+  const html = (rest ? say(SHIFTW.resting(rest)) + p(`<span class="dim">${SHIFTW.next(rest)}</span>`) + p(`<span class="dim">${SHIFTW.unpaid}</span>`) : say(SHIFTW.offer) + p(SHIFTW.pays(SHIFT_PAY.cap))) + (pr.cls === 'WARRIOR' ? say(BESTW.forgeWarrior) : '') +
     (rec?.best ? p(SHIFTW.yourBest(rec.best)) : '') + `<h4>${SHIFTW.board}</h4>` + (rows ? `<ol class="rangeboard">${rows}</ol>` : p(SHIFTW.empty)) +
     (g.link?.online ? '' : `<p class="dim">${SHIFTW.offline}</p>`);
   const again = () => openShiftDesk(g, panel, back);

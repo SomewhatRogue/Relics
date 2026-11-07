@@ -40,10 +40,13 @@ export const armFoe = (id: string): ArmFoe => ARM_FOES.find((f) => f.id === id) 
  * - `tell`: the warning before a heave; `heaveFor`: how long it shoves; `heavePush`: how much harder.
  * - `tired`, `tiredBy`: from then, their push grows this share a second.
  * - `cap`: the longest a bout can go (whoever's ahead takes it, the table to them on a dead level).
+ * - `knight`: a Warrior's arm (Kyle, 2026-11-06): they win this much faster in the spot (`give`) and lose this
+ *   share as fast out of it (`push`).
  */
 export const ARM = {
   fps: 60, rise: 1.3, fall: 1.1, start: 0.35,
   near: 0.4, nearBonus: 0.5,
   tell: 0.6, heaveFor: 0.9, heavePush: 1.8, back: 0.9,
   tired: 16, tiredBy: 0.08, cap: 45,
+  knight: { give: 1.3, push: 0.8 },
 } as const;

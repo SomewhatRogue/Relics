@@ -165,20 +165,20 @@ describe('the town board', () => {
   it('a shift replays exactly from its strikes; made-up strikes are no shift', () => {
     const id = 'hboard01', s = play(shiftSeed(id, 0), 0.03, 0.08);
     expect(replayShift(shiftSeed(id, 0), s.record)?.score).toBe(s.score);
-    expect(shiftClaimScore(id, { n: 0, hits: s.record })).toBe(s.score);
+    expect(shiftClaimScore(id, 'MAGE', { n: 0, hits: s.record })).toBe(s.score);
     // A strike the rules wouldn't take (inside the lock, between pieces) makes it no shift.
     expect(replayShift(shiftSeed(id, 0), [s.record[0], s.record[0] + 1])).toBeNull();
     expect(replayShift(shiftSeed(id, 0), [0])).toBeNull();
     // The same strikes under another shift's seed score another (lower) shift, or none.
-    expect(shiftClaimScore(id, { n: 1, hits: s.record })).toBeLessThan(s.score);
+    expect(shiftClaimScore(id, 'MAGE', { n: 1, hits: s.record })).toBeLessThan(s.score);
   });
 
   it('the board takes only what the strikes really score, each hero once at their best; forged ones are refused', async () => {
     const id = 'hboard02', s = play(shiftSeed(id, 0), 0.02, 0.06);
     const w = newWorld();
-    contribute(w, { hero: { id, name: 'WREN', cls: 'WARRIOR' }, shift: { n: 0, hits: s.record } });
-    contribute(w, { hero: { id, name: 'WREN', cls: 'WARRIOR' }, shift: { n: 0, hits: s.record } });
-    expect(w.shift).toEqual([{ id, name: 'WREN', cls: 'WARRIOR', n: s.score }]);
+    contribute(w, { hero: { id, name: 'WREN', cls: 'MAGE' }, shift: { n: 0, hits: s.record } });
+    contribute(w, { hero: { id, name: 'WREN', cls: 'MAGE' }, shift: { n: 0, hits: s.record } });
+    expect(w.shift).toEqual([{ id, name: 'WREN', cls: 'MAGE', n: s.score }]);
     // The wire: a claim that isn't one is dropped.
     expect(cleanShiftClaim({ n: 0, hits: [] })).toBeNull();
     expect(cleanShiftClaim({ n: 0, hits: [5, 3] })).toBeNull();
@@ -186,7 +186,7 @@ describe('the town board', () => {
     expect(cleanShiftClaim({ n: 0, hits: [SHIFT.length * SHIFT.fps] })).toBeNull();
     expect(cleanShiftClaim({ n: 0, hits: Array.from({ length: SHIFT.most + 1 }, (_, i) => i * 10) })).toBeNull();
     // On the server (the fast path's store): a real shift goes up, a forged record doesn't.
-    const store = memoryWorldStore(), c = clean({ hero: { id, name: 'wren', cls: 'WARRIOR' }, shift: { n: 0, hits: s.record } });
+    const store = memoryWorldStore(), c = clean({ hero: { id, name: 'wren', cls: 'MAGE' }, shift: { n: 0, hits: s.record } });
     expect((await store.apply('wickhold', c!)).world.shift?.[0].n).toBe(s.score);
     const forged = clean({ hero: { id: 'hforger03', name: 'CHEAT', cls: 'ROGUE' }, shift: { n: 0, hits: Array.from({ length: 300 }, (_, i) => 30 + i * 14) } });
     expect((await store.apply('wickhold', forged!)).world.shift?.some((l) => l.id === 'hforger03')).toBe(false);
@@ -201,5 +201,19 @@ describe('the town board', () => {
     }
     expect(w.shift!.length).toBe(10);
     expect(w.shift!.map((l) => l.n)).toEqual([...w.shift!.map((l) => l.n)].sort((a, b) => b - a));
+  });
+});
+
+describe("a Warrior's edge at the forge", () => {
+  it('the same strikes, a little late, land cleaner for a Warrior, and the board plays them back that way', () => {
+    const id = 'hknight1', seed = shiftSeed(id, 0);
+    // Strikes timed a touch past the clean window: cold or fair for anyone, clean more often for a Warrior.
+    const s = play(seed, SHIFT.clean * 1.2, 0);
+    const k = replayShift(seed, s.record, true);
+    expect(k).not.toBeNull();
+    expect(k!.clean).toBeGreaterThan(s.clean);
+    expect(k!.score).toBeGreaterThan(s.score);
+    expect(shiftClaimScore(id, 'WARRIOR', { n: 0, hits: s.record })).toBe(k!.score);
+    expect(shiftClaimScore(id, 'MAGE', { n: 0, hits: s.record })).toBe(s.score);
   });
 });

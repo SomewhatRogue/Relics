@@ -14,6 +14,7 @@ import { line } from './speech';
 import { openArm } from './armmode';
 import { openKnives } from './knifemode';
 import { ARMW, KNIFEW } from './pastimewords';
+import { BESTW } from './bestwords';
 
 const p = (s: string) => `<p>${s}</p>`;
 const say = (who: string, s: string) => p(`<b>${who}:</b> ${line(`"${s}"`, who)}`);
@@ -23,7 +24,7 @@ const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 export function openArmTable(g: Game, panel: Panel): void {
   const rec = g.profile.arm, again = () => openArmTable(g, panel);
   const how = rec?.bouts ? p(ARMW.record(rec.bouts, rec.wins)) : p(ARMW.never);
-  panel.show(ARMW.who, say('Watchman', ARMW.greet) + how + p(ARMW.pick),
+  panel.show(ARMW.who, say('Watchman', ARMW.greet) + (g.profile.cls === 'WARRIOR' ? say('Watchman', BESTW.armWarrior) : '') + how + p(ARMW.pick),
     ARM_FOES.map((f) => ({ label: f.name, act: () => openFoe(g, panel, f.id, again) })));
 }
 

@@ -12,6 +12,8 @@
  *   `first`: before the first.
  * - `rise`: how long a glow takes to come up and to fade, at most, and never more than `riseShare` of the gap.
  * - `clean`, `fair`: how near a peak a strike must land (s), the anvil's own. `lock`: after a strike.
+ * - `knight`: a Warrior's windows, as a share of `clean` and `fair` (Kyle, 2026-11-06: "Forge is for knight! Same
+ *   as arm wrestle"), the way a Rogue's hand is steadier at the knives and a Ranger's at the butts.
  * - `points`: a clean and a near strike; `streak`: each good strike in a row after the first adds `per`,
  *   up to `cap` of them. A cold strike, a glow let go by, or a spoiled piece ends the streak.
  * - `mix`: how often each kind comes up, at the start of the shift and at its end.
@@ -35,6 +37,7 @@ export const SHIFT = {
   clean: 0.08,
   fair: 0.17,
   lock: 0.22,
+  knight: 1.35,
   points: { clean: 10, fair: 4 },
   streak: { per: 2, cap: 5 },
   mix: { nail: [3, 1], shoe: [3, 3], hinge: [1, 3], blank: [0.3, 2.5] } as Record<PieceKind, readonly [number, number]>,

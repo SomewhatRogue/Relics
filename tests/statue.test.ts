@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clean, memoryWorldStore } from '../api/_world';
+import { clean, memoryWorldStore, realGiven, type WorldStore } from '../api/_world';
 import { newWorld, type WorldState } from '../src/shared/story';
 import { bidOutcome, bidRange, placeBid, settleBid, startBid, STATUE, statuePrice, type Purse } from '../src/shared/statue';
 import type { Contribution } from '../src/shared/worldsync';
@@ -12,6 +12,8 @@ import type { WorldLink } from '../src/client/worldlink';
 
 const look = { w: 'sword' as const, l: 1 };
 const hero = (id: string, name = 'A') => ({ id, name });
+/** Give the town `n` gold as hero `id`, the way a gift at the works reaches the world. */
+const give = (s: WorldStore, g: string, id: string, n: number) => s.apply(g, { hero: { id, name: 'A', cls: 'WARRIOR' }, stats: { given: n } } as Contribution);
 const bid = (over: number, pay: number, given = STATUE_GIVEN) => ({ over, pay, ...look, given });
 
 describe('the statue: its price', () => {
@@ -49,6 +51,7 @@ describe('the statue: its price', () => {
 describe('the world decides', () => {
   it('two heroes bidding over the same price at once: one wins, the other is paid back', async () => {
     const s = memoryWorldStore(), g = 'race', a: Purse = { id: 'haaaaaaa', gold: 3000, stats: { given: 1200 } }, b: Purse = { id: 'hbbbbbbb', gold: 3000, stats: { given: 5000 } };
+    await give(s, g, a.id, 1200), await give(s, g, b.id, 5000);
     const w0 = (await s.load(g)).world;
     const na = startBid(a, w0, 1000, look)!, nb = startBid(b, w0, 1000, look)!;
     const send = (id: string, n: typeof na) => s.apply(g, clean({ hero: { id, name: id.toUpperCase(), cls: 'WARRIOR' }, statue: { over: n.over, pay: n.pay, w: n.w, l: n.l, given: n.given } })!);
@@ -73,6 +76,7 @@ describe('the world decides', () => {
 
   it('turns away a forged or low bid', async () => {
     const s = memoryWorldStore(), g = 'forge', who = { id: 'hforger1', name: 'X', cls: 'ROGUE' };
+    await give(s, g, who.id, 1000), await give(s, g, 'hhonest1', 1000);
     // Not a bid at all.
     for (const st of [{ over: 0, pay: -5, w: 'sword', l: 0, given: 1000 }, { over: 0, pay: 1000.5, w: 'sword', l: 0, given: 1000 }, { over: 0, pay: 1000, w: 'laser', l: 0, given: 1000 }, { over: 0, pay: 1000, w: 'sword', l: 7, given: 1000 }, { over: '0', pay: 1000, w: 'sword', l: 0, given: 1000 }, { over: 0, pay: 1000, w: 'sword', l: 0 }])
       expect(clean({ hero: who, statue: st })).toBeNull();
@@ -88,6 +92,28 @@ describe('the world decides', () => {
     }
     // A bid carries no stats, so it takes the world's cheap write (api/_world.ts).
     expect(clean({ hero: who, statue: { over: 0, pay: 1000, w: 'sword', l: 0, given: 1000 } })!.stats).toEqual({});
+  });
+});
+
+describe('the town checks the giving', () => {
+  it("a save that says it gave 1000 is taken at the Roll's word, not its own", async () => {
+    const s = memoryWorldStore(), g = 'books', who = { id: 'hboaster', name: 'BOAST', cls: 'ROGUE' as const };
+    const bid1 = () => s.apply(g, clean({ hero: who, statue: { over: 0, pay: 1000, w: 'sword', l: 0, given: 1000 } })!);
+    // Nothing on the Roll: turned away, the plinth empty.
+    expect((await bid1()).world.statue).toBeUndefined();
+    // 600 given in town: still short.
+    await give(s, g, who.id, 600);
+    expect((await bid1()).world.statue).toBeUndefined();
+    // 400 more: now it's taken, even with the save saying less.
+    await give(s, g, who.id, 400);
+    const v = await s.apply(g, clean({ hero: who, statue: { over: 0, pay: 1000, w: 'sword', l: 0, given: 1000 } })!);
+    expect(v.world.statue?.by.id).toBe(who.id);
+  });
+
+  it('realGiven puts the Roll\'s count, and any given in the same write, on the bid', () => {
+    const c = { hero: { id: 'hx', name: 'X', cls: 'MAGE' as const }, statue: { over: 0, pay: 1000, w: 'staff' as const, l: 0, given: 99999 }, stats: { given: 50 } };
+    expect(realGiven(c as never, 900).statue!.given).toBe(950);
+    expect(realGiven({ hero: c.hero } as never, 900)).toEqual({ hero: c.hero });
   });
 });
 
@@ -137,6 +163,8 @@ describe('paying for it', () => {
       return g;
     };
     const a = player('WARRIOR', 'BRAN'), b = player('MAGE', 'ISOLT');
+    // What they gave reached the world (the Roll), as it would have when they gave it.
+    for (const h of [a, b]) await give(s, 'wickhold', h.profile.id, STATUE_GIVEN);
     expect(commission(a, 1000) && commission(b, 1000)).toBe(true);
     expect([a.profile.gold, b.profile.gold]).toEqual([200, 200]);
     await new Promise((r) => setTimeout(r, 10));

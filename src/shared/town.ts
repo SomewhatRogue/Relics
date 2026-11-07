@@ -30,12 +30,15 @@ export type SpotId = 'board' | 'council' | 'church' | 'smith' | 'wright' | 'trai
   /** Old Pennock at the millpond, and Abel at the archery butts: the town's pastimes (client/pastimeui.ts). */
   | 'fish' | 'range'
   /** At the Drowned Rat: the arm-wrestling table and the card sharp's knife board (client/ratui.ts). */
-  | 'arm' | 'knives';
+  | 'arm' | 'knives'
+  /** The board of bests by the Lantern: the town's best at the pastimes (client/bestui.ts). */
+  | 'best';
 export interface Spot { id: SpotId; x: number; y: number; label: string; key?: string }
 
 export const SPOTS: Spot[] = [
   { id: 'board', x: 24.1, y: 13.8, label: 'JOB BOARD' },
   { id: 'works', x: 32, y: 13.8, label: 'PUBLIC WORKS' },
+  { id: 'best', x: 28, y: 13.8, label: 'BEST IN WICKHOLD' },
   { id: 'roll', x: 28, y: 25.3, label: 'THE ROLL OF THE BRAVE' },
   { id: 'well', x: 22, y: 21.4, label: 'THE WELL' },
   { id: 'market', x: 38.5, y: 14.2, label: 'MARKET ROW' },

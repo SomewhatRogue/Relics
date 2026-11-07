@@ -1,9 +1,9 @@
 /**
  * A shift at Halvard's forge: a run of town work, struck on the glow as at the anvil (shared/forgestrike.ts)
  * but piece after piece, faster as the shift goes on (numbers in shared/shifttune.ts). Halvard lays a piece
- * on (a nail, a horseshoe, a hinge, a blade blank), it glows up and fades a few times, and each strike near
+ * on (a nail, a pot hook, a hinge, a blade blank), it glows up and fades a few times, and each strike near
  * a peak counts toward it; finish it and he takes it off and lays the next. Points for clean and near
- * strikes, a streak bonus, and each piece finished. Everything comes from the shift's seed (the hero and
+ * strikes, a streak bonus, and each piece finished. A Warrior's windows are wider (`strong`, SHIFT.knight). Everything comes from the shift's seed (the hero and
  * their count of shifts) and the frames struck, so the world can play it again from the strikes alone
  * (`replayShift`). Pure, fixed steps, no Math.random.
  */
@@ -26,7 +26,7 @@ export type ShiftEvent =
   | { k: 'pass' }
   | { k: 'over' };
 export interface ShiftState {
-  seed: number; rng: Rng; frame: number; t: number; over: boolean;
+  seed: number; strong: boolean; rng: Rng; frame: number; t: number; over: boolean;
   piece: ShiftPiece | null; nextAt: number; lockTo: number;
   score: number; made: number; spoiled: number; streak: number; bestStreak: number;
   clean: number; fair: number; cold: number;
@@ -35,8 +35,8 @@ export interface ShiftState {
   events: ShiftEvent[];
 }
 
-export function newShift(seed: number): ShiftState {
-  return { seed, rng: new Rng(seed), frame: 0, t: 0, over: false, piece: null, nextAt: SHIFT.first, lockTo: 0,
+export function newShift(seed: number, strong = false): ShiftState {
+  return { seed, strong, rng: new Rng(seed), frame: 0, t: 0, over: false, piece: null, nextAt: SHIFT.first, lockTo: 0,
     score: 0, made: 0, spoiled: 0, streak: 0, bestStreak: 0, clean: 0, fair: 0, cold: 0, record: [], events: [] };
 }
 
@@ -94,14 +94,15 @@ export function stepShift(s: ShiftState, hit: boolean): boolean {
   const p = s.piece;
   if (!p) return false;
   // Glows let go by without a strike end the streak.
-  for (let i = 0; i < p.peaks.length; i++) if (!p.used[i] && !p.passed[i] && t > p.peaks[i] + SHIFT.fair) (p.passed[i] = true), (s.streak = 0), s.events.push({ k: 'pass' });
+  const wide = s.strong ? SHIFT.knight : 1, clean = SHIFT.clean * wide, fair = SHIFT.fair * wide;
+  for (let i = 0; i < p.peaks.length; i++) if (!p.used[i] && !p.passed[i] && t > p.peaks[i] + fair) (p.passed[i] = true), (s.streak = 0), s.events.push({ k: 'pass' });
   let took = false;
   if (hit && t >= s.lockTo) {
     // The nearest glow not struck or gone already.
     let best = -1;
     for (let i = 0; i < p.peaks.length; i++) if (!p.used[i] && !p.passed[i] && (best < 0 || Math.abs(p.peaks[i] - t) < Math.abs(p.peaks[best] - t))) best = i;
     if (best >= 0) {
-      const d = Math.abs(t - p.peaks[best]), mark: StrikeMark = d <= SHIFT.clean ? 'clean' : d <= SHIFT.fair ? 'fair' : 'cold';
+      const d = Math.abs(t - p.peaks[best]), mark: StrikeMark = d <= clean ? 'clean' : d <= fair ? 'fair' : 'cold';
       p.used[best] = true, p.marks.push(mark), (s.lockTo = t + SHIFT.lock), s.record.push(s.frame - 1), (took = true);
       let pts = 0;
       if (mark === 'cold') s.cold++, (s.streak = 0);
@@ -121,9 +122,9 @@ export function stepShift(s: ShiftState, hit: boolean): boolean {
 }
 
 /** Strike on a shift as given (frames, in order), to the bell; null if any strike isn't one the rules would take. */
-export function replayShift(seed: number, frames: readonly number[]): ShiftState | null {
+export function replayShift(seed: number, frames: readonly number[], strong = false): ShiftState | null {
   if (frames.length > SHIFT.most) return null;
-  const s = newShift(seed);
+  const s = newShift(seed, strong);
   let i = 0;
   while (!s.over) {
     const want = i < frames.length && frames[i] === s.frame;

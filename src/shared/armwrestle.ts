@@ -13,6 +13,8 @@ export type ArmEvent = { k: 'tell' } | { k: 'heave' } | { k: 'in' } | { k: 'out'
 
 export interface ArmState {
   seed: number; foe: ArmFoe; rng: Rng;
+  /** A Warrior's arm (ARM.knight). */
+  strong: boolean;
   frame: number; t: number;
   /** Your grip on the bar (0..1), and where the arms are: 1 their hand down, -1 yours. */
   grip: number; lean: number;
@@ -28,9 +30,9 @@ export interface ArmState {
   events: ArmEvent[];
 }
 
-export function newArm(seed: number, foe: ArmFoe): ArmState {
+export function newArm(seed: number, foe: ArmFoe, strong = false): ArmState {
   const rng = new Rng(seed), ph: [number, number] = [rng.next(), rng.next()];
-  return { seed, foe, rng, frame: 0, t: 0, grip: ARM.start, lean: 0, over: false, won: false, inZone: false, ph, heaveAt: 2 + rng.range(foe.heave[0], foe.heave[1]) * 0.6, heaveT0: -1, dir: 1, held: 0, events: [] };
+  return { seed, foe, strong, rng, frame: 0, t: 0, grip: ARM.start, lean: 0, over: false, won: false, inZone: false, ph, heaveAt: 2 + rng.range(foe.heave[0], foe.heave[1]) * 0.6, heaveT0: -1, dir: 1, held: 0, events: [] };
 }
 
 const smooth = (k: number) => (k <= 0 ? 0 : k >= 1 ? 1 : k * k * (3 - 2 * k));
@@ -54,7 +56,7 @@ export function zoneAt(s: ArmState, t = s.t): number {
 }
 
 /** Their push this second, grown once they've tired of it. */
-export const pushOf = (s: ArmState, t = s.t) => s.foe.push * (heaving(s, t) ? ARM.heavePush : 1) * (1 + Math.max(0, t - ARM.tired) * ARM.tiredBy);
+export const pushOf = (s: ArmState, t = s.t) => s.foe.push * (s.strong ? ARM.knight.push : 1) * (heaving(s, t) ? ARM.heavePush : 1) * (1 + Math.max(0, t - ARM.tired) * ARM.tiredBy);
 
 /** One fixed step, holding or not. */
 export function stepArm(s: ArmState, held: boolean): void {
@@ -72,7 +74,7 @@ export function stepArm(s: ArmState, held: boolean): void {
   const z = zoneAt(s, t), off = Math.abs(s.grip - z), was = s.inZone;
   s.inZone = off <= f.width;
   if (s.inZone !== was) s.events.push({ k: s.inZone ? 'in' : 'out' });
-  if (s.inZone) (s.lean += f.give * (off <= f.width * ARM.near ? 1 + ARM.nearBonus : 1) * dt), (s.held += dt);
+  if (s.inZone) (s.lean += f.give * (s.strong ? ARM.knight.give : 1) * (off <= f.width * ARM.near ? 1 + ARM.nearBonus : 1) * dt), (s.held += dt);
   else s.lean -= pushOf(s, t) * dt;
   s.frame++;
   if (s.lean >= 1 || s.lean <= -1 || s.frame >= ARM.cap * ARM.fps) {
