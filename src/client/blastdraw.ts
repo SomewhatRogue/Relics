@@ -6,6 +6,7 @@
  */
 import { blastShape } from '../sim/blastshape';
 import type { ArenaRoom } from '../sim/room';
+import type { Enemy, EnemyAttack } from '../sim/types';
 import { blit, type Ctx } from './draw';
 import { drawTelegraph } from './foes';
 import { MEATY2_SPRITES as S } from './meatysprites2';
@@ -18,24 +19,30 @@ export function drawBlasts(c: Ctx, room: ArenaRoom, cx: number, cy: number): voi
     const a = blastShape(e, room.time);
     if (!a) continue;
     drawTelegraph(c, a, cx, cy);
-    const x = Math.round(OX + a.cx * PX - cx), y = Math.round(OY + a.cy * PX - cy), k = a.t / a.windup;
-    if (e.blast!.k === 'keg' && e.act === 'dead') {
-      // The keg where it fell, the fuse spitting faster as it comes due.
-      blit(c, S.kegDown, x + 4, y + 2);
-      for (let i = 0; i < 3 + Math.round(k * 4); i++) {
-        const q = (c.now * (8 + 10 * k) + i * 0.31) % 1;
-        c.glow.fillStyle = SPARK[i % 3];
-        c.glow.fillRect(x + 4 + Math.round(Math.sin(i * 2.3 + c.now * 11) * 3 * q), y - 4 - Math.round(q * 5), 1, 1);
-      }
-    } else if (e.blast!.k === 'ember') {
-      // Its embers coming up through the body, brighter and thicker as they come due.
-      for (let i = 0; i < 4 + Math.round(k * 8); i++) {
-        const q = (c.now * 1.4 + i * 0.13) % 1;
-        c.glow.fillStyle = EMBER[i % 3];
-        c.glow.globalAlpha = (1 - q) * (0.5 + 0.5 * k);
-        c.glow.fillRect(x - 5 + ((i * 7) % 11), y - 1 - Math.round(q * (4 + 8 * k)), 1, 1);
-      }
-      c.glow.globalAlpha = 1;
+    drawBlastBits(c, e, a, Math.round(OX + a.cx * PX - cx), Math.round(OY + a.cy * PX - cy));
+  }
+}
+
+/** The keg and its fuse, or the embers coming up, with (x, y) the burst's middle on screen (the 2.5D view puts
+ *  it on a card: three/cards3d.ts). */
+export function drawBlastBits(c: Ctx, e: Enemy, a: EnemyAttack, x: number, y: number): void {
+  const k = a.t / a.windup;
+  if (e.blast!.k === 'keg' && e.act === 'dead') {
+    // The keg where it fell, the fuse spitting faster as it comes due.
+    blit(c, S.kegDown, x + 4, y + 2);
+    for (let i = 0; i < 3 + Math.round(k * 4); i++) {
+      const q = (c.now * (8 + 10 * k) + i * 0.31) % 1;
+      c.glow.fillStyle = SPARK[i % 3];
+      c.glow.fillRect(x + 4 + Math.round(Math.sin(i * 2.3 + c.now * 11) * 3 * q), y - 4 - Math.round(q * 5), 1, 1);
     }
+  } else if (e.blast!.k === 'ember') {
+    // Its embers coming up through the body, brighter and thicker as they come due.
+    for (let i = 0; i < 4 + Math.round(k * 8); i++) {
+      const q = (c.now * 1.4 + i * 0.13) % 1;
+      c.glow.fillStyle = EMBER[i % 3];
+      c.glow.globalAlpha = (1 - q) * (0.5 + 0.5 * k);
+      c.glow.fillRect(x - 5 + ((i * 7) % 11), y - 1 - Math.round(q * (4 + 8 * k)), 1, 1);
+    }
+    c.glow.globalAlpha = 1;
   }
 }

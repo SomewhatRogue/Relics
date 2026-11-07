@@ -2,6 +2,37 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-06: 2.5D effects that were blocks or missing: smoke and steam, oil and fire on water, poison, snares, kegs, round telegraphs' signs (Kyle; Claude Opus 5.5)
+
+Kyle: "Rogue smoke and some other things like fire on water make weird floating blocks on 2.5D, maybe
+missing effects?" Drawing only; the room is untouched.
+
+- **Smoke and steam** (a Rogue's vanish and smoke bomb, sim/steam.ts) were grey or white boxes
+  (`shots3d.ts makeSmoke`, gone). Now soft round puffs facing the camera (`three/hazards3d.ts`), one
+  instanced draw, lit and banded like the rest, dithered by their own coverage (each puff its own dither,
+  so they add up), drifting and rising as the flat view's circles do. Smoke is a darker grey than the flat
+  colours, since a dithered pixel is all smoke or none.
+- **Oil** (beastdraw.ts slicks, burning or not, the skimmer's oil on the water) was the flat painter on
+  the overlay at flat-view size and floor height: a dark slab over bodies and telegraphs, hanging above
+  the sunk water. Now a decal on the floor or the water's own surface (`surfAt`), ragged edge, a sheen
+  sliding over it; alight, embers glinting in it, a hot rim, and flames standing on it from fire3d.ts.
+- **Poison** (the brood mother's) was a bright green disc; now dark with a glowing rim and bubbles.
+  **Snares** were a plain ring; now the loop of cord, two pegs and the glint.
+- **Kegs and Smouldering embers** (blastdraw.ts): the circle was there, the keg and its fuse sparks and
+  the embers weren't. They go on a card now (cards3d.ts, `drawBlastBits` shared with the flat view).
+- **Round telegraphs' signs** (telegraph2.ts: the net's mesh, the oil pot's drops, a sapper's cracks, a
+  torch's flames, the skimmer's pour catching at its edge, a hex's sign) were missing; they're in the
+  telegraph shader now. A round telegraph over water lies on the water's surface.
+- **Telegraphs stay on top.** Decals sit lower than a telegraph with a weaker depth offset. Smoke and
+  then the telegraphs are drawn in a last pass of their own (layer 2, `FX_LAYER`) after the heroes:
+  smoke writes no depth, so a telegraph under a cloud always shows through it, and bodies in front of a
+  cloud stay in front. (Drawn in the first pass by render order instead, the smoke made your own hero
+  vanish under swiftshader; the last pass doesn't.)
+- Already right in 2.5D and left alone: the fire wall, caltrops, ice, Fenmere's mist, Hempen's ropes,
+  frozen and netted goblins (their cards carry the flat view's own marks), the hound's stick.
+- Shots: `node scripts/fx3d-look.cjs [url] [outdir] [tag]` (smoke, the floor's hazards, the Staithe's
+  oil burning on the water with the pour coming).
+
 ## 2026-11-06: pet your hound whenever: PET on the context button anywhere it's at heel, three ways it takes it, and friends see it (Kyle; Claude Opus 5.5)
 
 Kyle: "hunter should be able to pet their hound whenever lol." Builds on the idles and petting entry

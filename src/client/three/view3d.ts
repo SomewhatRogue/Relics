@@ -40,6 +40,7 @@ import { makeRT, postMaterial } from './post';
 import { roomLights } from './roomlights';
 import type { Spot } from './rounds3d';
 import { WitchFires } from './witch3d';
+import { FX_LAYER, Hazards } from './hazards3d';
 import { Beacon3D } from './beacon3d';
 import { drawFlues } from './smoke3d';
 import { drawBolts3, strikeLights3 } from './storm3d';
@@ -69,6 +70,7 @@ export class View3D {
   private grim = new Grim3D();
   private witch = new WitchFires();
   private beacon = new Beacon3D();
+  private hazards = new Hazards();
   private ground: Ground | null = null;
   private map: GameMap | null = null;
   private overlay = new Overlay();
@@ -94,7 +96,7 @@ export class View3D {
     game?.after(this.canvas, this.overlay.canvas);
     this.overlay.canvas.style.display = 'none';
     this.postScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.post));
-    this.scene.add(this.lights.group, this.fires.group, this.actors.group, this.buildings.group, this.people.group, this.grim.group, this.witch.group, this.beacon.group, this.figs.group);
+    this.scene.add(this.lights.group, this.fires.group, this.actors.group, this.buildings.group, this.people.group, this.grim.group, this.witch.group, this.beacon.group, this.figs.group, this.hazards.group);
     this.resize();
     addEventListener('resize', () => this.resize());
   }
@@ -202,7 +204,10 @@ export class View3D {
     // A lightning flash lifts the sky's light a beat (../skyfx.ts).
     this.lights.setSky(flashTheme(map.theme, Math.max(flashOf(room.strikes, room.time), skyFlash(room))), at.x, at.z);
     this.lights.place(ls, at.x, at.z, now);
+    // Oil alight, on the floor or the water (hazards3d.ts), with the rest of the fires.
+    this.hazards.fires(room, now, fires);
     this.fires.draw(fires, now);
+    this.hazards.update(room, now);
     this.actors.update(room, meId, now, lerp);
     this.people.update(room, map, others, now);
     const P = (x: number, y: number, z: number) => this.view.px(x, y, z);
@@ -232,6 +237,12 @@ export class View3D {
     gl.render(this.scene, cam);
     calls += gl.info.render.calls * 2;
     tris += gl.info.render.triangles * 2;
+    // Last, smoke and steam, then the telegraphs over them (hazards3d.ts): depth-tested against everything,
+    // writing none for the smoke, so a cloud never hides a telegraph and bodies in front of it stay in front.
+    cam.layers.set(FX_LAYER);
+    gl.render(this.scene, cam);
+    calls += gl.info.render.calls;
+    tris += gl.info.render.triangles;
     this.calls = calls;
     this.tris = tris;
     gl.shadowMap.autoUpdate = true;

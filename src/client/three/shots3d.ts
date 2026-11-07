@@ -1,7 +1,7 @@
 /**
  * What flies and what lies on the floor a while: arrows and bolts, thrown knives, a Mage's sparks,
  * orbs and lances (glowing in their element), a smite coming down, the hunter's net, the lodestone,
- * a lobbed flask; the relic javelin; blessed ground, snares, smoke and the brood mother's poison; and
+ * a lobbed flask; the relic javelin; blessed ground (snares, smoke and poison: hazards3d.ts); and
  * the way out (stakes while it's shut, gold chevrons once it's open).
  */
 import * as THREE from 'three';
@@ -104,26 +104,11 @@ export function placeJavelin(o: THREE.Object3D, j: Javelin, lift: number): void 
   g.rotation.set(j.state === 'floor' ? 0.9 : stuck ? 0.15 : 0, Math.atan2(j.dx, j.dy), 0, 'YXZ');
 }
 
-/** A flat ring on the floor (blessed ground, a snare, poison, smoke's edge). */
+/** A flat ring on the floor (blessed ground). */
 export function makeRing(r: number, col: number, glow: boolean, w = 0.1): THREE.Mesh {
   const m = new THREE.Mesh(new THREE.RingGeometry(Math.max(0.01, r - w), r, 40), glow ? G(col, 0.25) : M(col));
   m.rotation.x = -Math.PI / 2;
   return m;
-}
-
-/** A cloud of smoke: grey lumps turning slowly. */
-export function makeSmoke(r: number, steam = false): THREE.Group {
-  const root = new THREE.Group();
-  // Steam (sim/steam.ts): small white wisps spread through it, gaps between, so whoever's inside still shows.
-  if (steam) for (let i = 0; i < 16; i++) {
-    const a = i * 2.4, d = r * (0.25 + (i % 4) * 0.2), s = 0.28 + (i % 3) * 0.1;
-    part(root, s, s * 0.7, s, M(i % 3 ? 0xf0f4f6 : 0xc8d2da), Math.cos(a) * d, 0.2 + ((i * 7) % 5) * 0.22, Math.sin(a) * d, 0, a);
-  }
-  else for (let i = 0; i < 9; i++) {
-    const a = i * 2.4, d = r * (0.3 + (i % 3) * 0.25);
-    part(root, 0.7, 0.5, 0.7, M(i % 2 ? 0x6a6470 : 0x57525e), Math.cos(a) * d, 0.4 + (i % 4) * 0.25, Math.sin(a) * d, 0, a);
-  }
-  return root;
 }
 
 /** The way out: stakes across the gap while it's shut; gold chevrons on the floor once it's open. */

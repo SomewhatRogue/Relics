@@ -8,7 +8,6 @@ import { makeExitMat } from './exitmat3d';
 import * as THREE from 'three';
 import type { ArenaRoom } from '../../sim/room';
 import type { Hero } from '../../sim/types';
-import { POTION } from '../../shared/tuning';
 import { asleep } from '../foes';
 import { LEDGE_H } from './ground';
 import { clsOf, heroKey, makeHero, type HeroFig } from './heroes3d';
@@ -23,7 +22,9 @@ import { strikeShape } from '../../sim/stormshape';
 import { blastShape } from '../../sim/blastshape';
 import { shakeProp } from './prophit3d';
 import { makeChest, makeCoal, makeDrop, makePickup, makeProp, poseChest, type ChestFig } from './props3d';
-import { boltLook, makeBolt, makeExit, makeJavelin, makeRing, makeSmoke, placeBolt, placeJavelin } from './shots3d';
+import { boltLook, makeBolt, makeExit, makeJavelin, makeRing, placeBolt, placeJavelin } from './shots3d';
+import { surfAt } from './hazards3d';
+import { isRound } from '../../sim/types';
 import { TIERS } from '../../shared/gear';
 import { relicCol } from '../relicicons';
 import type { Figure } from './rig';
@@ -67,8 +68,9 @@ export class Actors {
     for (const e of room.enemies) {
       if (BOXFIGS) this.foe(room, e, now, lerp);
       if (e.attack && e.act === 'attack') {
-        const m = this.teles.get('t' + e.id, '', () => ({ root: makeTele() })).root;
-        m.visible = shapeTele(m, e.attack, now, lift(e.z));
+        // A round one on water lies on its surface, with the oil it's about (hazards3d.ts).
+        const m = this.teles.get('t' + e.id, '', () => ({ root: makeTele() })).root, a = e.attack;
+        m.visible = shapeTele(m, a, now, e.z ? lift(e.z) : isRound(a.kind) ? surfAt(room.map, a.cx, a.cy) : 0);
       }
     }
     // A storm's lightning coming: its circle, the striped edge (sim/stormshape.ts, the shape the room judges).
@@ -116,13 +118,7 @@ export class Actors {
     for (const j of room.javelins) placeJavelin(this.things.get('j' + j.id, '', () => ({ root: makeJavelin() })).root, j, 0);
     // (A wind-up bow's reach is dotted on the overlay, as in the flat view: found3d.ts.)
     room.zones.forEach((z, i) => z.kind !== 'sentry' && z.kind !== 'firewall' && z.kind !== 'stormring' && z.kind !== 'caltrops' && z.kind !== 'blinkburst' && z.kind !== 'taunt' && z.kind !== 'skystrike' && this.things.get('z' + i, String(z.r), () => ({ root: makeRing(z.r, 0xffd27a, true, 0.12) })).root.position.set(z.x, 0.04, z.y));
-    room.snares.forEach((s, i) => this.things.get('n' + i, '', () => ({ root: makeRing(0.35, 0x8a6a3a, false, 0.06) })).root.position.set(s.x, 0.03, s.y));
-    room.smokes.forEach((s, i) => {
-      const o = this.things.get('m' + i, String(s.r ?? '') + (s.steam ? 's' : ''), () => ({ root: makeSmoke(s.r ?? POTION.smokeR, s.steam) })).root;
-      o.position.set(s.x, 0, s.y);
-      o.rotation.y = now * 0.2;
-    });
-    (room.puddles ?? []).forEach((p) => this.things.get('u' + p.id, String(p.r), () => ({ root: makeRing(p.r, 0x5a8a20, true, p.r) })).root.position.set(p.x, 0.025, p.y));
+    // (Snares, smoke and steam, poison and oil: hazards3d.ts.)
     const ex = room.map.exit;
     if (ex && ex.y < 1) this.things.get('exit', String(room.exitOpen), () => ({ root: makeExit(ex.w, room.exitOpen) })).root.position.set(ex.x, 0, ex.y - 0.4);
     // A way out through a side wall: the same stakes (or chevrons), turned to face along it.
