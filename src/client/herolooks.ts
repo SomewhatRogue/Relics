@@ -6,7 +6,7 @@
  * each look's `life`. Faces have plain dark eyes: glowing eyes are the goblins' mark (and the eye
  * dial's, heroeyes.ts).
  */
-import { art, skin, type Cls, type LookDef } from './lookkit';
+import { art, glint, skin, type Cls, type LookDef } from './lookkit';
 import { CLERIC, MAGE } from './herolooks2';
 
 export type { Cls, LookDef, Life } from './lookkit';
@@ -38,18 +38,29 @@ const ranger = (face: string[], pal: Record<string, string>, life: LookDef['life
   down: art(['.....CC.....', '....CCCC.q..', '...CCCCCCqq.', ...face, ...R_BODY], pal), up: art([...R_HOOD_BACK, ...R_BACK], pal), h: 17, tall: 1, eyes: [4, 4, 7], life,
 });
 
-// The Rogue: crouched low, legs wide, a scarf up over the nose with the eyes showing, a sash, knives at the hips.
+// The Rogue (Kyle, 2026-11-06: "more like an assassin or a ninja"): a deep hood, a wrap over the nose
+// and mouth with the eyes showing between (a pale glint `G` beside each, the light they catch), a slim
+// jerkin crossed by a strap, a belt, and a long cloak (C, c) that hangs past the knees. The legs are
+// straight under the hips and the boots turn a little out, planted like everyone else's. A row lower
+// than the Warrior: a hunch in the hood, not a splay in the legs. The cloak's skirts behind, its sway, its
+// flare on a dash or a SHADOW STEP, and what the kit hangs off the belt are cloaklife.ts (`mantle`).
+const G_HEAD = ['............', '....cCCc....', '...cCCCCc...', '..cCOOOOCc..', '..CSEGSEGC..', '..CKKKKKKC..'];
 const G_BODY = [
-  '..bBRRRRBb..', '.bBBBRRBBBb.', '.SbBBBBBBbS.', '..bBBBBBBb..', '.WRRRRRRRRW.',
-  '..LLL..LLL..', '..LL....LL..', '.LL......LL.', '.LL......LL.', '.FF......FF.',
+  '.CCCkKKkCCC.', '.CCbBTBBbCC.', '.CcbBBTBbcC.', '.CSbBBBTbSC.', '.C.TTtTTT.C.',
+  '.C.LL..LL.C.', '.C.LL..LL.C.', '.c.Ll..lL.c.', '...FF..FF...', '..FFf..fFF..',
 ];
 const G_BACK = [
-  '..bBRRRRBb..', '.bBBBBBBBBb.', '.SbBBBBBBbS.', '..bBBBBBBb..', '.WRRRRRRRRW.',
-  '..LLL..LLL..', '..LL....LL..', '.LL......LL.', '.LL......LL.', '.FF......FF.',
+  '............', '....cCCc....', '...cCCCCc...', '..cCCCCCCc..', '..CCCCCCCC..', '..cCCCCCCc..',
+  '.CCcCCCCcCC.', '.CCCcCCcCCC.', '.CCCCcCCCCC.', '.CSCCcCCCSC.', '.CCCCcCCCCC.',
+  '.CCCCcCCCCC.', '.CCCCcCCCCC.', '..cCCcCCCc..', '...FF..FF...', '..FFf..fFF..',
 ];
-const rogue = (head: string[], back: string[], pal: Record<string, string>, life: LookDef['life']): LookDef => ({
-  down: art(['............', '............', ...head, ...G_BODY], pal), up: art(['............', '............', ...back, ...G_BACK], pal), h: 16, tall: 0, eyes: [4, 4, 7], life,
-});
+/** A Rogue look from its colours: hood and cloak (C, c), the hood's dark (O), the wrap (K, k), leathers (B, b),
+ *  strap and belt (T), buckle (t), legs (L, l), soft boots (F, f). */
+const rogue = (sk: Parameters<typeof skin>[0], pal: Record<string, string>): LookDef => {
+  const p: Record<string, string> = { ...skin(sk), ...pal };
+  p.G = glint(p.S);
+  return { down: art([...G_HEAD, ...G_BODY], p), up: art(G_BACK, p), h: 16, tall: 0, eyes: [4, 4, 7], life: { mantle: [p.C, p.c] } };
+};
 
 export const LOOK_DEFS: Record<Cls, LookDef[]> = {
   WARRIOR: [
@@ -84,18 +95,12 @@ export const LOOK_DEFS: Record<Cls, LookDef[]> = {
       { cloak: ['#4a5a6a', '#323e4a'] }),
   ],
   ROGUE: [
-    // Black hair, a dark scarf over the nose and a plum sash, violet-black leathers.
-    rogue(['....HHHH....', '...HHHHHHh..', '...SESSES...', '...RRRRRR...'], ['....HHHH....', '...HHHHHHh..', '...HHHHHH...', '...RRRRRR...'],
-      { ...skin('light'), H: '#1e1a20', h: '#1e1a20', R: '#5a2a4a', B: '#3a3346', b: '#24202c', W: '#a8b0b8', L: '#2a2630', F: '#1a161c' },
-      { scarf: ['#5a2a4a', '#3a1a30'] }),
-    // The cutpurse: a red scarf, brown leather, a shock of brown hair.
-    rogue(['...hHHHh....', '..hHHHHHHh..', '...SESSES...', '...RRRRRR...'], ['...hHHHh....', '..hHHHHHHh..', '...HHHHHH...', '...RRRRRR...'],
-      { ...skin('tan'), H: '#6a4220', h: '#4a2c14', R: '#9a2a1a', B: '#5a4030', b: '#3a2a20', W: '#9aa3ad', L: '#3a3028', F: '#241c16' },
-      { scarf: ['#9a2a1a', '#6a1a10'] }),
+    // The shade: a charcoal hood and cloak, a plum wrap, violet-black leathers.
+    rogue('light', { C: '#474258', c: '#2a2634', O: '#120f18', K: '#6e3060', k: '#48203e', B: '#2e2a38', b: '#221e2a', T: '#6a4a2a', t: '#a8b0b8', L: '#3c3848', l: '#2c2836', F: '#5a4636', f: '#3c2e24' }),
+    // The cutpurse: a brown hood and cloak, a red wrap, brown leather.
+    rogue('tan', { C: '#5e4834', c: '#3a2c20', O: '#160f0a', K: '#a82e1c', k: '#701c12', B: '#4a3426', b: '#34241a', T: '#2a1e16', t: '#c8a050', L: '#4a3c30', l: '#362c22', F: '#6a5238', f: '#463624' }),
     // Night: black from hood to boot and a pale bone mask, dark eyes in deep brown skin.
-    rogue(['....HHHH....', '...HHHHHH...', '...HESSEH...', '...RRRRRR...'], ['....HHHH....', '...HHHHHH...', '...HHHHHH...', '...HHHHHH...'],
-      { ...skin('deep'), H: '#1a1820', h: '#1a1820', R: '#d0c8b4', B: '#1e1c24', b: '#141218', W: '#6a7078', L: '#1a1a20', F: '#0d0b10' },
-      { scarf: ['#2a2830', '#1a1820'] }),
+    rogue('deep', { C: '#26242e', c: '#16151c', O: '#08070b', K: '#d0c8b4', k: '#a8a090', B: '#1c1a22', b: '#141218', T: '#3a3640', t: '#7a8088', L: '#22212a', l: '#18171e', F: '#2a2830', f: '#1a1920' }),
   ],
   MAGE,
   HEALER: CLERIC,

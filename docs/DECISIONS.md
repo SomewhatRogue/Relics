@@ -2,6 +2,39 @@
 
 Newest first. Each entry says what was decided and why, signed with the model.
 
+## 2026-11-06: the Rogue redrawn as a hooded assassin in a long cloak (Kyle; Claude Opus 5.5)
+
+Kyle: "Rogue looks terrible. The feet are weirdly stanced. Needs to look more like an assassin or a ninja
+or a bard, even a long cloak etc." Drawing only; the room is untouched.
+
+- **What was wrong.** The old map (`herolooks.ts`) started two rows down, so the Rogue stood 14 rows to
+  everyone else's 16, and its legs ran out in an upside-down V from the hips to the sprite's outer edges,
+  feet as narrow as the shins and six pixels apart under the hands. Every pose is the same map cut into
+  parts (`joints.ts`), and 2.5D cards draw it with the same `drawHero`, so the splay showed in every pose
+  in both views. The scarf tail streamed straight out behind at shoulder height and read as a stick.
+- **The new look.** A deep hood with a dark brim, a wrap over the nose and mouth, and between them the
+  eyes, each with a pale glint beside it (lit, so it only catches real light; `lookkit.ts` `glint`; the
+  eyes stay plain dark, so the dial and the goblins keep glowing eyes to themselves). A slim jerkin with
+  a strap across it, a belt and buckle, soft boots. The legs stand straight under the hips and the feet
+  turn a little out, as the other classes' do. A row shorter than the Warrior, from the hunch of the hood.
+  Same 12 by 16, same cut, so every pose (idles, the throw, the lunge, hurt, down, the crouch, carry)
+  works as before. The three looks keep their colours: the plum wrap, the cutpurse's red, Night's bone mask.
+- **The cloak** (`client/cloaklife.ts`, a `mantle` look, drawn by `herolife.ts` in place of the scarf).
+  Behind the body to below the knees, swaying at rest; trailing on a walk; flaring out behind and lifting
+  off the legs on a dash, a SHADOW STEP or the rapier's lunge, out to both sides on a dash at or away
+  from you or the step's swirl, then settling. Walking away it covers the back. Crouched, it gathers
+  above the floor. Vanished, it's drawn shut round them and the body goes to shadow; a SHADOW STEP's
+  wind-up darkens them too (`actors.ts` `SHADOW_TINT`, as poison tints).
+- **The kit on the body.** Spare knife pommels on the strap with the daggers; an empty scabbard and its
+  chape behind the hip with the rapier; a venom vial and the darts' case at the belt for the poisoner,
+  whose blowpipe still hangs at the off side (`heldkits.ts`). Small details have no outline
+  (`herolife.ts` attachment 3).
+- **Kept.** The box figures behind `?figs=3d` are untouched. Facing, eye dial, poison, flashes, held
+  weapons and idles as before.
+- **Shots**: `node scripts/rogue-look.cjs <url> shots/rogue <tag>` (phone, FLAT and 2.5D: idle, walk,
+  dash, daggers, blowpipe, beside a Warrior and a Ranger; and a 5x contact sheet of every pose), then
+  `python3 scripts/rogue-crop.py shots/rogue` and `scripts/rogue-strip.py` for crops and a strip.
+
 ## 2026-11-06: the Doorkeepers harder and livelier, and the boss plate at the top (Kyle; Claude Opus 5.5)
 
 Kyle, after fighting them: "too easy. They don't chase a ton and attack too slow. Need a faster attack along with
