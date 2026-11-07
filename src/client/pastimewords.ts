@@ -167,9 +167,9 @@ export const ANVILW = {
   stop: 'HAND IT BACK',
   /** The card. */
   title: 'OFF THE ANVIL',
-  well: (pct: number) => `Struck well, this plus came out ${pct}% better than a plain one.`,
+  well: (pct: number) => `Struck well, this plus counts for ${pct}% more.`,
   plain: "It took the plus, a plain one, no better and no worse.",
-  halvard: { good: 'Good.', fair: 'Not bad.', none: "I'll do it next time." },
+  halvard: { good: 'Good.', fair: 'Not bad.', none: "It'll hold." },
   done: 'BACK TO THE FORGE',
   /** On a piece's card, once it's been struck well. */
   cardRow: 'WELL STRUCK',

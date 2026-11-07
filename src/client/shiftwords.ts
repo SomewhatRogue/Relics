@@ -10,9 +10,9 @@ export const SHIFTW = {
   /** On the forge's panel. */
   work: 'WORK A SHIFT',
   /** Halvard, offering the work. */
-  offer: "There's town work waiting. Nails, horseshoes, hinges, a blade blank now and then. I heat them and hold them, you hit them when they glow brightest. I pay for what comes out right.",
+  offer: "Nails, hinges, a blade blank now and then. I'll pay for what comes out right.",
   /** Halvard, in the rest after a paid shift. */
-  resting: (secs: number) => `Nothing more to pay for yet. Come back in ${mins(secs)} minute${mins(secs) === 1 ? '' : 's'}.`,
+  resting: (_secs: number) => "Nothing wants doing yet.",
   unpaid: "You can still work a shift for the board. It just won't pay.",
   pays: (cap: number) => `A good shift pays up to ${cap} gold.`,
   yourBest: (n: number) => `Your best shift: ${n}.`,
@@ -27,7 +27,7 @@ export const SHIFTW = {
   score: 'SCORE',
   time: 'TIME',
   stop: 'STOP',
-  names: { nail: 'NAIL', shoe: 'HORSESHOE', hinge: 'HINGE', blank: 'BLADE BLANK' } as Record<PieceKind, string>,
+  names: { nail: 'NAIL', shoe: 'POT HOOK', hinge: 'HINGE', blank: 'BLADE BLANK' } as Record<PieceKind, string>,
   streak: (n: number) => `${n} IN A ROW`,
   made: (pts: number) => `DONE +${pts}`,
   spoiled: 'SPOILED',

@@ -65,8 +65,8 @@ export const FORGE = {
   strike: (lv: number, gold: number, steel: number) => `STRIKE IT TO +${lv} (${gold} GOLD, ${steel} STEEL)`,
   /** Under them: the price, and how a clean strike helps. */
   price: (lv: number, gold: number, steel: number) => `+${lv} costs ${gold} gold and ${steel} steel.`,
-  offer: "You pay Halvard, then he hands you the hammer. Strike when the steel glows brightest. A cold strike still gets you the plus, and a clean one makes it come out up to a fifth better.",
-  top: "It's at +5. That's as good as he can make it.",
+  offer: "You pay Halvard, then strike it yourself. A cold strike still takes the plus, and clean strikes make it count for up to 20% more.",
+  top: "It's at +5, and that's as far as it goes.",
   /** What a plus adds, on the card. */
   adds: (main: string, mods: number) => main + (mods ? `, and each modifier on it is ${mods}% stronger` : ''),
   damage: (pct: number) => `${pct}% more damage`,

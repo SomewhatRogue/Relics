@@ -230,7 +230,7 @@ export const LINES = {
   how: {
     move: 'Walk a few steps.',
     attack: 'Tap for quick blows. Hold for a heavy one.',
-    roll: "Red with a striped edge hurts even through a block. Dodge out before it lands.",
+    roll: "Dodge out of the red before it lands, striped edge or not.",
     step: "Red with a striped edge hurts even through a block. Walk out before it lands.",
     block: 'Hold block while the red fills. Each block costs stamina (the yellow bar).',
     relic: 'Press RELIC to throw it. It skewers every goblin in its line and pins them all to the first wall it hits. It only has a few throws in it: the pips on the button are what\'s left.',
