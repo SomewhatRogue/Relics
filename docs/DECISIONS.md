@@ -8493,3 +8493,7 @@ on a big screen.
   bestui.ts), the top five at the butts, the Rat's knife board and Halvard's forge, and your own best under
   each. The lore keeper ruled out "tally" for any town object: the word belongs to the hungry's counts and the
   count of the dead.
+- Kyle: "Yes" to fishing on the board. A landed fish goes up as which cast it was and how far out it went
+  (shared/fishboard.ts); the world rolls the fish again from the hero's seed for that cast, so no weight can be
+  typed in. The fight on the line isn't replayed, only what took the hook. The board shows each hero's biggest
+  fish by weight, with its kind, first on Best in Wickhold.

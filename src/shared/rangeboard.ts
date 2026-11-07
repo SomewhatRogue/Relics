@@ -28,7 +28,7 @@ export function claimScore(heroId: string, cls: HeroClass, c: RangeClaim): numbe
 }
 
 /** A score onto the board: each hero once, at their best, the top RANGE_BOARD kept. */
-export function addRangeLine(board: RangeLine[] | undefined, line: RangeLine): RangeLine[] {
+export function addRangeLine<L extends RangeLine>(board: L[] | undefined, line: L): L[] {
   const was = (board ?? []).find((l) => l.id === line.id);
   if (was && was.n >= line.n) return (board ?? []).map((l) => (l.id === line.id ? { ...l, name: line.name } : l));
   return [...(board ?? []).filter((l) => l.id !== line.id), line].sort((a, b) => b.n - a.n).slice(0, RANGE_BOARD);

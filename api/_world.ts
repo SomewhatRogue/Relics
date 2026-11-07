@@ -16,6 +16,7 @@ import { Meter } from './_meter.js';
 import { cleanClaim } from '../src/shared/rangeboard.js';
 import { cleanShiftClaim } from '../src/shared/shiftboard.js';
 import { cleanKnifeClaim } from '../src/shared/knifeboard.js';
+import { cleanFishClaim } from '../src/shared/fishboard.js';
 import { WEAPONS, type WeaponId } from '../src/shared/weapons.js';
 import { giveMore } from '../src/shared/statue.js';
 
@@ -56,6 +57,9 @@ export function clean(raw: unknown): Contribution | null {
   // A shift at the forge: the frames struck, played again as it's applied (shared/shiftboard.ts).
   const shift = cleanShiftClaim(c.shift);
   if (shift) out.shift = shift;
+  // A fish landed at the millpond: which cast and how far out, the fish rolled again as it's applied (shared/fishboard.ts).
+  const fish = cleanFishClaim(c.fish);
+  if (fish) out.fish = fish;
   // A bid for the statue: whole numbers and a real weapon; whether it beats the price is the world's to say (shared/statue.ts).
   const st = c.statue as Record<string, unknown> | undefined, whole = (v: unknown) => typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= 1e9;
   if (st && typeof st === 'object') {
@@ -179,9 +183,9 @@ export async function redisWorldStore(url: string, meter = new Meter()): Promise
           if (tries === 4) throw e;
         }
       }
-      // A round at the range or the knife board, a shift at the forge, or a bid for the statue (nothing for the Roll): the world's write is
+      // A round at the range or the knife board, a shift at the forge, a fish, or a bid for the statue (nothing for the Roll): the world's write is
       // all (5 commands); the Roll as it was, from what this instance last read (or once from its own key).
-      if ((c.range || c.knives || c.shift || c.statue) && !STAT_ORDER.some((k) => c.stats?.[k])) {
+      if ((c.range || c.knives || c.shift || c.fish || c.statue) && !STAT_ORDER.some((k) => c.stats?.[k])) {
         let b = seen.get(g)?.board;
         if (!b) {
           meter.add('get');

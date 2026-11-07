@@ -11,6 +11,7 @@ import { WORK_ORDER, workDone, type WorkId } from './works.js';
 import { addRangeLine, claimScore, type RangeClaim } from './rangeboard.js';
 import { knifeClaimScore, type KnifeClaim } from './knifeboard.js';
 import { shiftClaimScore, type ShiftClaim } from './shiftboard.js';
+import { fishClaimCatch, type FishClaim } from './fishboard.js';
 import { placeBid, type StatueBid } from './statue.js';
 
 /** Works finished lately, kept for the town's talk. */
@@ -45,6 +46,8 @@ export interface Contribution {
   knives?: KnifeClaim;
   /** A finished shift at Halvard's forge, played again the same way (shared/shiftboard.ts). */
   shift?: ShiftClaim;
+  /** A fish landed at the millpond: rolled again from the hero's seed for that cast (shared/fishboard.ts). */
+  fish?: FishClaim;
   /** A bid for the statue in the square: taken only over the price as it stands now (shared/statue.ts). */
   statue?: StatueBid;
 }
@@ -80,6 +83,10 @@ export function contribute(w: WorldState, c: Contribution, now = Date.now(), rai
   if (c.shift) {
     const n = shiftClaimScore(c.hero.id, c.hero.cls, c.shift);
     if (n > 0) w.shift = addRangeLine(w.shift, { id: c.hero.id, name: c.hero.name, cls: c.hero.cls, n });
+  }
+  if (c.fish) {
+    const f = fishClaimCatch(c.hero.id, c.fish);
+    w.fish = addRangeLine(w.fish, { id: c.hero.id, name: c.hero.name, cls: c.hero.cls, n: f.oz, sp: f.sp });
   }
   if (c.statue) placeBid(w, c.hero, c.statue);
 }

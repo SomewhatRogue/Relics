@@ -45,6 +45,8 @@ export interface WorldState {
   knives?: import('./rangeboard.js').RangeLine[];
   /** Halvard's forge: each hero's best shift, the top ten (shared/shiftboard.ts). */
   shift?: import('./rangeboard.js').RangeLine[];
+  /** The millpond: each hero's biggest fish, the top ten (shared/fishboard.ts). */
+  fish?: import('./fishboard.js').FishLine[];
   /** Who's on the plinth in Lantern Square, and what they paid (shared/statue.ts). */
   statue?: import('./statue.js').Statue;
 }

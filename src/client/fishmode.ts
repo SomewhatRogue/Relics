@@ -23,6 +23,8 @@ export class FishSit {
   private hud: PastimeHud;
   private held = false;
   private presses = 0;
+  /** Which of the hero's casts is out (its seed), for the town's board. */
+  private castN = 0;
   private last = performance.now();
   private raf = 0;
   private was: FishPhase = 'ready';
@@ -58,7 +60,7 @@ export class FishSit {
   /** The next cast's seed: the hero and how many casts they've made, saved as it goes (a refresh can't roll it again). */
   private castSeed(): number {
     const pr = this.g.profile, rec = (pr.fishing ??= newFishRecord()), seed = seedOf(pr.id, rec.casts);
-    rec.casts++;
+    this.castN = rec.casts++;
     this.g.keep();
     return seed;
   }
@@ -102,6 +104,8 @@ export class FishSit {
     const s = this.s, f = s.fish!, sp = speciesOf(f.sp), pr = this.g.profile, rec = (pr.fishing ??= newFishRecord());
     const r = recordCatch(rec, f.sp, f.oz);
     this.g.keep();
+    // Onto the town's board (Best in Wickhold), only if it's bigger than this hero's fish already up there.
+    if (f.oz > (this.g.world.fish?.find((l) => l.id === pr.id)?.n ?? 0)) this.g.give({ fish: { n: this.castN, reach: s.reach } });
     this.caught++;
     r.ever && rec.caught > 1 ? sfx.fanfare() : sfx.loot();
     this.held = false;
