@@ -179,7 +179,7 @@ describe('let go before the full draw (Kyle, 2026-11-08)', () => {
     l.loose(0.8, 0.4);
     expect(l.h.power).toBeGreaterThan(0.3);
     expect(l.h.power).toBeLessThan(0.6);
-    for (const w of ['wand', 'staff', 'spellblade', 'mace', 'flail'] as const) expect(WEAPONS[w].early).toBe('fizzle');
+    for (const w of ['wand', 'staff', 'spellblade', 'mace', 'flail', 'censer'] as const) expect(WEAPONS[w].early).toBe('fizzle');
     const f = arena('flail', [7]), fe = f.loose(0.5, 0.4);
     expect(fe.some((e) => e.k === 'early')).toBe(true);
     expect(f.e.hp).toBe(f.e.maxHp);

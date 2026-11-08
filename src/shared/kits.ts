@@ -68,7 +68,7 @@ export const MORE_KITS: Record<MoreKitId, Weapon> = {
       { windup: 0.2, active: 0.12, recover: 0.4, dmg: 12, range: 1.8, arc: 170, lunge: 0.3, knock: 5, heal: 8, burn: true, coals: true },
     ],
     heavy: { windup: 0.12, active: 0.14, recover: 0.5, dmg: 16, dmgFull: 36, range: 1.9, arc: 360, lunge: 0, knock: 5, knockFull: 10, heal: 8, burn: true, holy: true },
-    draw: 1.1,
+    draw: 1.1, early: 'fizzle', // As the flail: the whirl goes only at full (Kyle, 2026-11-08).
     blockSpeed: 0.45, chargeSpeed: 0.35, guardArc: 165, guardCost: 1, speed: 0.86,
     dodge: CLERIC_ROLL,
   },

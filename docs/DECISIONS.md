@@ -8537,3 +8537,4 @@ on a big screen.
   smite is held, so you get it back by walking and quick blows. A hold let go early on a kit that does nothing
   then now shows a plain puff (`early`), not NOT ENOUGH MAGIC.
 - Kyle: the flail's charged spin "shouldn't work without a full charge": let go early, no sweep (`early: 'fizzle'`).
+- Kyle: the censer's whirl too, "no early release, emulate the flail": let go before the full charge, no whirl.
