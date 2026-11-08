@@ -71,9 +71,13 @@ function bank(g: Game, panel: Panel): void {
   tap, again, goods);
 }
 
+/** Which of Tobin's tabs is up: what he has, or your pack to sell from (Kyle, 2026-11-08: "a different tab
+ *  than buying, otherwise it takes too much space"). */
+let pawnTab: 'buy' | 'sell' = 'buy';
+
 /**
- * Tobin's stall: his stock, a bigger pack and what he'll sell you back; then your pack to sell from, the
- * rare three dim. Carrying hungry gear, you get his panic and nothing else (Kyle, 2026-11-05).
+ * Tobin's stall, in two tabs: FOR SALE, his stock, a bigger pack and what he'll sell you back; and SELL, your
+ * pack to sell from, the rare three dim. Carrying hungry gear, you get his panic and nothing else (Kyle, 2026-11-05).
  */
 function merchant(g: Game, panel: Panel): void {
   const pr = g.profile, held = pawns(pr), more = nextBag(pr), room = pr.bag.length < bagSize(pr), again = () => merchant(g, panel);
@@ -91,10 +95,18 @@ function merchant(g: Game, panel: Panel): void {
     ...held.map((x, k) => ({ name: itemName(x.item), price: x.price, icon: itemIcon(x.item), col: TIERS[x.item.quality].col, label: PAWN.back, about: card(x.item, g.hero, true),
       cmp: () => compare(g.hero, x.item), why: !room ? SHOPW.packFull : pr.gold < x.price ? SHOPW.poor : '', buy: () => void (redeem(pr, k) && syncPack(g)) })),
   ];
-  show(panel, PLACES.pawn.name, shopHead(PLACES.pawn, says('Tobin', PAWN.greet)) + goodsList(goods, `${SHOPW.gold(pr.gold)} ${freshLine()}` + (more ? '' : ' ' + PAWN.biggest)) +
-    h3(SHOPW.sell, `${pr.bag.length} / ${bagSize(pr)}`) + grid(pr.bag, bagSize(pr), 'bag', null, undefined, (it) => (wont(it) ? PAWN.no : '+' + sellValue(it) + 'G'), wont) +
-    (pr.bag.some(wont) ? p(`<span class="dim">${PAWN.wont}</span>`) : '') + (held.length ? p(`<span class="dim">${PAWN.rule}</span>`) : ''),
-  tap, again, goods);
+  const tabs = '<div class="tabs">' + ([['buy', SHOPW.forSale], ['sell', PAWN.sellTab]] as const)
+    .map(([t, name]) => `<button data-ptab="${t}"${t === pawnTab ? ' class="on"' : ''}>${name}</button>`).join('') + '</div>';
+  const body = pawnTab === 'buy'
+    ? shopHead(PLACES.pawn, says('Tobin', PAWN.greet)) + goodsList(goods, `${SHOPW.gold(pr.gold)} ${freshLine()}` + (more ? '' : ' ' + PAWN.biggest)) + (held.length ? p(`<span class="dim">${PAWN.rule}</span>`) : '')
+    : h3(SHOPW.sell, `${pr.bag.length} / ${bagSize(pr)}`) + grid(pr.bag, bagSize(pr), 'bag', null, undefined, (it) => (wont(it) ? PAWN.no : '+' + sellValue(it) + 'G'), wont) +
+      (pr.bag.some(wont) ? p(`<span class="dim">${PAWN.wont}</span>`) : '') + p(`<span class="dim">${SHOPW.gold(pr.gold)}</span>`);
+  show(panel, PLACES.pawn.name, tabs + body, tap, again, pawnTab === 'buy' ? goods : []);
+  document.querySelectorAll<HTMLElement>('#panel [data-ptab]').forEach((b) => b.addEventListener('click', (e) => {
+    e.stopPropagation();
+    pawnTab = b.dataset.ptab as 'buy' | 'sell';
+    again();
+  }));
 }
 
 /** A worn piece at the forge: its plus, NOW and AFTER and the price (forgeview.ts), then its card. */

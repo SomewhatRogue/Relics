@@ -8524,3 +8524,9 @@ on a big screen.
   Each hero's card now shows a bigger portrait, the name, then CLASS · LEVEL · GOLD on one line, a full-width
   PLAY under it, and a dots button beside PLAY that opens PLAY THE TUTORIAL AGAIN and DELETE THIS HERO (tap
   twice). Words in client/homewords.ts.
+- Kyle: the prompt over your head ("TALK: MOLL") looked like a button but wasn't. It is now: tapping or
+  clicking it does what USE (E) would, or G's job when that's what it names (help up, cut free, burn). Boards and
+  gates no longer say TALK. A tab or any other button in a panel now works while a line is still typing (it used
+  to only finish the line).
+- Kyle: Tobin's stall is two tabs, FOR SALE (his stock, a bigger pack, what he'll sell you back) and SELL (your
+  pack), so neither crowds the other.

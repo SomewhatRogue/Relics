@@ -262,6 +262,8 @@ const use = () => {
   }
 };
 let talking: Npc | null = null;
+/** Spots you use rather than talk to: the prompt names them without TALK (as the USE button does: cluster.ts). */
+const NOT_PEOPLE = new Set(['practice', 'board', 'best', 'market', 'gate']);
 // A phone's tap on a drop of yours in reach opens its card (lootcard.ts); the stick takes every other tap.
 input.onTap = (x, y) => {
   const hs = views.heroScreen(), me = game.hero, d = me && LootCard.nearest(game.room, me);
@@ -300,6 +302,16 @@ $('#leave').addEventListener('click', () => {
 $('#skipcut').addEventListener('click', () => game.skipCut());
 $('#skipcut').addEventListener('touchstart', (e) => (e.preventDefault(), game.skipCut()), { passive: false });
 $('.tb.use').addEventListener('touchstart', (e) => (e.preventDefault(), use()), { passive: false });
+// The prompt over your head ("TALK: MOLL", "HELP UP") is a button too (Kyle, 2026-11-08: "it's not clear you
+// can't click that ... maybe make both clickable"): what's here to use, else what G would do.
+const promptTap = (e: Event) => {
+  e.preventDefault();
+  if ($('#prompt').hidden || $('#prompt').textContent?.startsWith('RELOAD')) return;
+  if (game.near() || card.near >= 0) use();
+  else input.intent.grabSeq++;
+};
+$('#prompt').addEventListener('touchstart', promptTap, { passive: false });
+$('#prompt').addEventListener('click', promptTap);
 
 
 let guards = 0;
@@ -430,7 +442,7 @@ function hud(now: number): void {
   if (spot?.talk) primeSpot(spot.talk, spot.arg ?? 0, CLASS_ORDER[spot.arg ?? 0]);
   // (While you're petting the hound, its prompt steps aside so you can see it.)
   $('#prompt').hidden = !spot || busy || (!!spot.pet && !!petFrame(game.hero, now));
-  if (spot) $('#prompt').textContent = (input.touch ? '' : spot?.chest || (spot?.pet && game.mode === 'run') ? 'F  ' : game.mode === 'run' ? '' : 'E  ') + (spot.door || spot.pet || !spot.talk || spot.talk === 'practice' ? spot.label : 'TALK: ' + spot.label);
+  if (spot) $('#prompt').textContent = (input.touch ? '' : spot?.chest || (spot?.pet && game.mode === 'run') ? 'F  ' : game.mode === 'run' ? '' : 'E  ') + (spot.door || spot.pet || !spot.talk || NOT_PEOPLE.has(spot.talk) ? spot.label : 'TALK: ' + spot.label);
   // A drop at your feet, its card shut: the key that opens it (a phone has LOOK in the context slot).
   else if (!busy && !input.touch && game.mode === 'run' && card.near >= 0 && card.current < 0) ($('#prompt').hidden = false), ($('#prompt').textContent = 'F  LOOK');
   // A friend down at your feet: the key that gets them up.

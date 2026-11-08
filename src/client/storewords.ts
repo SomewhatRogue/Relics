@@ -35,6 +35,8 @@ export const BANK = {
 
 /** Tobin the pawnbroker, on Market Row (new NPC, for lore review). */
 export const PAWN = {
+  /** The second tab at Tobin's: your pack to sell from. */
+  sellTab: 'SELL',
   name: 'TOBIN THE PAWNBROKER',
   stall: 'PAWN',
   greet: "I'll buy most things, and sell you whatever the last one sold me, and you can have yours back if you're quick about it, because I'm not sentimental. Nothing touched, mind, or worse than touched, so if that's what's in your sack you can keep it wrapped and keep walking.",

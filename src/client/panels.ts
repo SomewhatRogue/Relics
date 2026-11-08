@@ -15,7 +15,8 @@ export class Panel {
       const b = (e.target as HTMLElement).closest('button[data-i]') as HTMLButtonElement | null;
       // A tap on the words while the panel is still revealing finishes the line; another shows the rest.
       // (A touch's own click is held back, or one tap would count twice.)
-      if (!b && typing(this.el)) return e.preventDefault(), skip(this.el);
+      // (Any other button, a tab say, does its own job straight away.)
+      if (!(e.target as HTMLElement).closest('button') && typing(this.el)) return e.preventDefault(), skip(this.el);
       if (!b || b.disabled) return;
       e.preventDefault();
       this.acts[Number(b.dataset.i)]?.();
