@@ -62,7 +62,7 @@ describe('class weapons', () => {
       charged(room, hold);
       return [a.hp < 200, b.hp < 200];
     };
-    expect(line(1.5)).toEqual([true, true]);
+    expect(line(1.8)).toEqual([true, true]);
     expect(line(0.6)).toEqual([true, false]);
   });
 

@@ -81,9 +81,9 @@ describe('the longbow', () => {
 });
 
 describe('the shortbow', () => {
-  it('is as it was: a quick draw, light arrows, walk while drawing', () => {
+  it('a quicker draw (0.4 s, Kyle 2026-11-08), light arrows, walk while drawing', () => {
     const w = WEAPONS.shortbow;
-    expect([w.draw, w.chargeSpeed, w.speed, w.heavy.dmg, w.heavy.dmgFull, w.heavy.range, !!w.heavy.pierce, !!w.heavy.blinds, !!w.reloads]).toEqual([0.55, 0.7, 0.92, 10, 22, 9, false, false, false]);
+    expect([w.draw, w.chargeSpeed, w.speed, w.heavy.dmg, w.heavy.dmgFull, w.heavy.range, !!w.heavy.pierce, !!w.heavy.blinds, !!w.reloads]).toEqual([0.4, 0.7, 0.92, 10, 22, 9, false, false, false]);
   });
 
   it('a perfect arrow strikes clean and does not blind', () => {
@@ -102,7 +102,7 @@ function shoved(glint: boolean): number {
   const a = arena('crossbow', [12], true, 14);
   Object.assign(a.e, { act: 'stunned', actT: 0, actDur: 99 });
   Object.assign(a.h, { xbowGlint: glint });
-  a.loose(0.5, 0.6);
+  a.loose(0.75, 0.6);
   return 12 - a.e.y;
 }
 
@@ -115,7 +115,7 @@ describe('the crossbow', () => {
     expect(shots(a.tap())).toBe(0);
     expect(a.h.xbowEmpty).toBeFalsy();
     a.es.forEach((e) => (e.hp = 400));
-    const ev = a.loose(0.5, 0.6);
+    const ev = a.loose(0.75, 0.6);
     expect(shots(ev)).toBe(1);
     expect(a.h.xbowEmpty).toBe(true);
     expect(a.es.slice(0, XBOW.pierce).every((e) => lost(e) >= WEAPONS.crossbow.heavy.dmg)).toBe(true);
@@ -127,7 +127,7 @@ describe('the crossbow', () => {
 
   it('empty, ATTACK held looses nothing (the room says it is winding); a tap is still the short sword', () => {
     const a = arena('crossbow', [7.6]);
-    a.loose(0.4, 0.1);
+    a.loose(0.75, 0.1);
     expect(a.h.xbowEmpty).toBe(true);
     const ev = a.loose(0.6, 0.05);
     expect(shots(ev)).toBe(0);
@@ -138,7 +138,7 @@ describe('the crossbow', () => {
 
   it('it winds itself when you are not attacking, walking or not (Kyle, 2026-11-04); walking spoils the glint', () => {
     const a = arena('crossbow', [4]);
-    a.loose(0.4, 0.1);
+    a.loose(0.75, 0.1);
     expect(a.h.xbowEmpty).toBe(true);
     // (A run without the last attack press reads as a tap first: the short sword, then it winds.)
     const ev = a.run(XBOW.reload + 1.2, { mx: 1 });
@@ -149,12 +149,12 @@ describe('the crossbow', () => {
 
   it('standing still while it winds, the bolt glints; the glinted bolt is perfect, hits half as hard again, shoves harder and runs through the whole line', () => {
     const a = arena('crossbow', line, false, 14);
-    const shot = a.loose(0.4, 0.05);
+    const shot = a.loose(0.75, 0.05);
     const wound = [...shot, ...a.run(XBOW.reload + 0.6)];
     expect(wound.some((x) => x.k === 'glint')).toBe(true);
     expect(a.h.xbowGlint).toBe(true);
     a.es.forEach((e) => (e.hp = 400));
-    const ev = a.loose(0.5, 0.6);
+    const ev = a.loose(0.75, 0.6);
     expect(ev.some((x) => x.k === 'perfect')).toBe(true);
     expect(ev.filter((x) => x.k === 'boltline').length).toBe(line.length);
     expect(a.es.every((e) => lost(e) >= Math.round(WEAPONS.crossbow.heavy.dmg * XBOW.glint))).toBe(true);
@@ -162,5 +162,23 @@ describe('the crossbow', () => {
     expect(shoved(true)).toBeGreaterThan(shoved(false) * 1.2);
     expect(a.h.xbowGlint).toBe(false);
     expect(a.h.xbowEmpty).toBe(true);
+  });
+});
+
+describe('let go before the full draw (Kyle, 2026-11-08)', () => {
+  it('the crossbow looses no bolt and keeps it on; a Mage fizzles and pays nothing; the smite falls on nothing; the shortbow flies full; the longbow flies weaker', () => {
+    const x = arena('crossbow', [12], true, 14);
+    const ev = x.loose(0.35, 0.3);
+    expect(shots(ev)).toBe(0);
+    expect(ev.some((e) => e.k === 'fizzle')).toBe(true);
+    expect(x.h.xbowEmpty).toBeFalsy();
+    const s = arena('shortbow', [6]);
+    s.loose(0.25, 0.4);
+    expect(s.h.power).toBe(1);
+    const l = arena('longbow', [6]);
+    l.loose(0.8, 0.4);
+    expect(l.h.power).toBeGreaterThan(0.3);
+    expect(l.h.power).toBeLessThan(0.6);
+    for (const w of ['wand', 'staff', 'spellblade', 'mace'] as const) expect(WEAPONS[w].early).toBe('fizzle');
   });
 });

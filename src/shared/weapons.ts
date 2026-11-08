@@ -143,6 +143,13 @@ export interface Weapon {
   pins?: boolean;
   /** Goblins too close take the shaft, not the point (the spear; shared/warrior.ts SHAFT). */
   shaft?: boolean;
+  /**
+   * What a hold let go before its full draw does (Kyle, 2026-11-08: "you start charging, then have a perfect
+   * window, then can hold charged"): 'fizzle', nothing at all (a Mage's spell, the crossbow's aimed bolt, the
+   * holy smite); 'full', it goes at full strength anyway (the shortbow, quick to draw). Left out, it goes
+   * weaker the earlier it's let go (the longbow, the blades). Held past the flash, any kit stays at full.
+   */
+  early?: 'fizzle' | 'full';
   /** A bolt has to be wound on: a hold aims a loaded crossbow and winds an empty one (shared/ranger.ts XBOW). */
   reloads?: boolean;
   /** The quick attack is cast on the move, at this share of your pace (the wand; the flail, swung as you walk). */
@@ -213,14 +220,14 @@ export const WEAPONS: Record<KitId, Weapon> = {
     blockSpeed: 0.6, chargeSpeed: 0.7, backstab: 2.5, front: 0.6, single: true, guardArc: 100, guardCost: 1.8, speed: 1.12,
     dodge: { kind: 'dash', distance: 4.3, time: 0.22, iFrom: 0, iTo: 0.22, stamina: 30, cooldown: 0.35 },
   },
-  /** A short sword on a tap; held, the longbow draws for 1.4 s, harder the longer, and pierces a line.
+  /** A short sword on a tap; held, the longbow draws for 1.7 s, harder the longer, and pierces a line.
    *  Let go on the white flash: a sure crit that blinds (shared/ranger.ts). Slow to walk while drawing. */
   longbow: {
     name: 'LONGBOW',
     cls: 'RANGER',
     combo: RANGER_BLADE,
     heavy: { windup: 0.04, active: 0.05, recover: 0.45, dmg: 18, dmgFull: 55, range: 15, arc: 0, lunge: -0.3, knock: 4, knockFull: 15, shot: 'arrow', speed: 34, pierce: true, blinds: true },
-    draw: 1.4,
+    draw: 1.7, // A longer draw to the flash (Kyle, 2026-11-08), but let go early it still flies, weaker.
     blockSpeed: 0.4, chargeSpeed: 0.3, guardArc: 100, guardCost: 1.6, speed: 0.85,
     dodge: RANGER_JUMP,
   },
@@ -230,7 +237,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     cls: 'RANGER',
     combo: RANGER_BLADE,
     heavy: { windup: 0.03, active: 0.04, recover: 0.22, dmg: 10, dmgFull: 22, range: 9, arc: 0, lunge: 0, knock: 2, knockFull: 6, shot: 'arrow', speed: 26 },
-    draw: 0.55,
+    draw: 0.4, early: 'full', // Quick to full and to the flash; let go early it's still a full shot.
     blockSpeed: 0.45, chargeSpeed: 0.7, guardArc: 100, guardCost: 1.7, speed: 0.92,
     dodge: RANGER_JUMP,
   },
@@ -241,7 +248,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     cls: 'RANGER',
     combo: RANGER_BLADE,
     heavy: { windup: 0.06, active: 0.04, recover: 0.35, dmg: 60, dmgFull: 60, range: 13, arc: 0, lunge: -0.2, knock: 12, knockFull: 12, shot: 'bolt', speed: 36, pierce: true },
-    draw: 0.3,
+    draw: 0.6, early: 'fizzle', // The aim has to settle: let go sooner and no bolt goes.
     blockSpeed: 0.4, chargeSpeed: 0.4, guardArc: 110, guardCost: 1.5, speed: 0.82, reloads: true,
     dodge: RANGER_JUMP,
   },
@@ -253,7 +260,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     // Cast walking (Kyle, 2026-11-04): the left click never stops you.
     combo: [{ windup: 0.3, active: 0.04, recover: 0.2, dmg: 8, range: 8, arc: 0, lunge: 0, knock: 2, shot: 'spark', speed: 17, interrupts: true }],
     heavy: { windup: 0.06, active: 0.04, recover: 0.3, dmg: 10, dmgFull: 24, range: 9, arc: 0, lunge: 0, knock: 3, knockFull: 7, shot: 'spark', speed: 19, burst: 0.8, interrupts: true, spell: true },
-    draw: 0.6,
+    draw: 0.6, early: 'fizzle',
     blockSpeed: 0.4, chargeSpeed: 0.55, guardArc: 100, guardCost: 2, speed: 0.86, castWalk: 0.9,
     dodge: BLINK,
   },
@@ -264,7 +271,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     cls: 'MAGE',
     combo: [{ windup: 0.3, active: 0.1, recover: 0.42, dmg: 15, range: 1.9, arc: 150, lunge: 0.15, knock: 5, slash: true }],
     heavy: { windup: 0.12, active: 0.05, recover: 0.45, dmg: 12, dmgFull: 20, range: 0, arc: 0, lunge: 0, knock: 0, knockFull: 0, spell: true },
-    draw: 1,
+    draw: 1, early: 'fizzle',
     blockSpeed: 0.35, chargeSpeed: 0, guardArc: 100, guardCost: 2, speed: 0.8,
     dodge: BLINK,
   },
@@ -282,7 +289,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
       { windup: 0.2, active: 0.1, recover: 0.4, dmg: 18, range: 1.35, arc: 130, lunge: 0.5, knock: 7, heal: 8 },
     ],
     heavy: { windup: 0.15, active: 0.05, recover: 0.55, dmg: 24, dmgFull: 70, range: 6, arc: 0, lunge: 0, knock: 4, knockFull: 10, shot: 'smite', burst: 1.3, stun: 1.2, holy: true },
-    draw: 1.2,
+    draw: 1.2, early: 'fizzle', // The holy smite falls only on a full charge.
     blockSpeed: 0.45, chargeSpeed: 0.35, guardArc: 150, guardCost: 1.1, speed: 0.84, blunt: true,
     dodge: { kind: 'roll', distance: 2, time: 0.36, iFrom: 0.05, iTo: 0.28, stamina: 28, cooldown: 1.3 },
   },

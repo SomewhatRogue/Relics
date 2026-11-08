@@ -220,13 +220,22 @@ describe('the flail', () => {
     plain.loose(late('flail'), TICK * 6);
     expect(plain.e.act).not.toBe('stunned');
   });
-  it('still a breaker: a strong spun blow knocks a butcher out of its heavy wind-up', () => {
+  it('still a breaker, but only on the flash (Kyle, 2026-11-08): a spun blow let go on it knocks a butcher out of its heavy wind-up', () => {
     const { e, loose } = arena('flail', [7.2], { kind: 'butcher' });
     const wind = (): EnemyAttack => ({ ...blow(9, 9, 30), kind: 'cleave', t: 0, windup: 99 });
     e.attack = wind();
     e.act = 'attack';
-    loose(late('flail') - CHARGE.start, TICK * 4);
+    loose(flash('flail'), TICK * 4);
     expect(e.attack).toBeNull();
-    expect(e.act).toBe('flinch');
+    // (The flail's perfect dazes it: what its flash does, as Kyle wants a big goblin's blow broken.)
+    expect(e.act).toBe('stunned');
+  });
+  it('a charged blow off the flash no longer knocks a butcher out of its wind-up (Kyle, 2026-11-08)', () => {
+    const { e, loose } = arena('flail', [7.2], { kind: 'butcher' });
+    e.attack = { ...blow(9, 9, 30), kind: 'cleave', t: 0, windup: 99 };
+    e.act = 'attack';
+    loose(late('flail') - CHARGE.start, TICK * 4);
+    expect(e.attack).not.toBeNull();
+    expect(e.act).toBe('attack');
   });
 });

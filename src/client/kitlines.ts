@@ -5,7 +5,7 @@
  * line (main.ts). A Mage's TAP, HOLD and PERFECT are its element's (MAGE_KIT). Facts from the sim: every perfect is the hold let go on the white flash
  * (sim/hero.ts), except the crossbow's, which is the glint (sim/crossbow.ts).
  */
-import { ELEMENT_NAME, SPELL, type Element, type MageKit, type WeaponId } from '../shared/tuning';
+import { ELEMENT_NAME, SHORTBOW, SPELL, WEAPONS, type Element, type MageKit, type WeaponId } from '../shared/tuning';
 
 export interface KitRow { tap: string; hold: string; perfect: string; also?: string }
 
@@ -16,7 +16,7 @@ export const KIT: Record<WeaponId, KitRow> = {
   spear: { tap: 'Long thrusts', hold: 'Lunge through three', perfect: 'Pins all it runs through', also: 'Pins a charging goblin' },
   // Ranger (shared/ranger.ts): the short sword on a tap, the bow on a hold.
   longbow: { tap: 'Short sword', hold: 'Draw bow', perfect: 'Blinds, critical hit' },
-  shortbow: { tap: 'Short sword', hold: 'Quick shot, walking', perfect: 'Full-power shot' },
+  shortbow: { tap: 'Short sword', hold: 'Quick shot, walking', perfect: `${SHORTBOW.perfect}x damage` },
   crossbow: { tap: 'Short sword', hold: 'Aim and fire', perfect: 'Glint: 1.5x damage, whole line', also: 'RELOAD winds it' },
   // Rogue (shared/venom.ts): the daggers' thrown knife is a drawn shot, so its flash is simply full power.
   daggers: { tap: 'Fast stabs', hold: 'Throw a dagger', perfect: 'Full-power throw', also: '2.5x damage from behind' },
@@ -72,11 +72,19 @@ const isMage = (w: WeaponId): w is MageKit => w in MAGE_KIT;
 export const kitRows = (w: WeaponId, el?: Element | ''): [string, string][] => {
   if (isMage(w) && !el) {
     const also = BOOK_ALSO[w] ?? KIT[w].also;
-    return [...(['fire', 'frost', 'storm'] as Element[]).map((e) => [ELEMENT_NAME[e], BOOK[w][e]] as [string, string]), ['PERFECT', 'The bigger spell'], ['COST', COST[w]], ...(also ? [['ALSO', also] as [string, string]] : [])];
+    return [...(['fire', 'frost', 'storm'] as Element[]).map((e) => [ELEMENT_NAME[e], BOOK[w][e]] as [string, string]), ['PERFECT', 'The bigger spell'], ['LET GO EARLY', early(w)], ['COST', COST[w]], ...(also ? [['ALSO', also] as [string, string]] : [])];
   }
   const k = isMage(w) ? { ...MAGE_KIT[w][el as Element], also: MAGE_KIT[w][el as Element].also ?? KIT[w].also } : KIT[w];
-  return [['TAP', k.tap], ['HOLD', k.hold], ['PERFECT', k.perfect], ...(isMage(w) ? [['COST', COST[w]] as [string, string]] : []), ...(k.also ? [['ALSO', k.also] as [string, string]] : [])];
+  return [['TAP', k.tap], ['HOLD', k.hold], ['PERFECT', k.perfect], ['LET GO EARLY', early(w)], ...(isMage(w) ? [['COST', COST[w]] as [string, string]] : []), ...(k.also ? [['ALSO', k.also] as [string, string]] : [])];
 };
 
+/** What a hold let go before its full draw does (shared/weapons.ts `early`). */
+const early = (w: WeaponId): string => {
+  const e = WEAPONS[w].early;
+  return e === 'full' ? EARLYW.full : e === 'fizzle' ? (w === 'crossbow' ? EARLYW.bolt : w === 'mace' ? EARLYW.smite : EARLYW.spell) : EARLYW.weaker;
+};
+/** The LET GO EARLY row's words. */
+export const EARLYW = { weaker: 'Still goes, weaker', full: 'Still a full shot', spell: 'Fizzles, costs no magic', bolt: 'No shot', smite: 'No smite' };
+
 /** The laptop's hint line: "TAP: ...  HOLD: ...  PERFECT: ..." (a Mage's in the element it's in). */
-export const kitLine = (w: WeaponId, el: Element | '' = 'fire'): string => kitRows(w, el).filter(([l]) => l !== 'ALSO' && l !== 'COST').map(([l, v]) => `${l}: ${v.toUpperCase()}`).join('  ');
+export const kitLine = (w: WeaponId, el: Element | '' = 'fire'): string => kitRows(w, el).filter(([l]) => l !== 'ALSO' && l !== 'COST' && l !== 'LET GO EARLY').map(([l, v]) => `${l}: ${v.toUpperCase()}`).join('  ');

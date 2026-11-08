@@ -45,7 +45,7 @@ export const SPELLBLADE: Weapon = {
     { windup: 0.15, active: 0.1, recover: 0.34, dmg: 16, range: 1.55, arc: 130, lunge: 0.55, knock: 6 },
   ],
   heavy: { windup: 0.08, active: 0.1, recover: 0.3, dmg: 14, dmgFull: 22, range: 1.55, arc: 150, lunge: 0.4, knock: 5, knockFull: 8, spell: true },
-  draw: 0.5,
+  draw: 0.5, early: 'fizzle',
   blockSpeed: 0.5, chargeSpeed: 0.5, guardArc: 120, guardCost: 2, speed: 0.86, spellblade: true,
   dodge: BLINK,
 };

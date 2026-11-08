@@ -136,7 +136,7 @@ describe('traits pay off on execution', () => {
     expect(tap(room, t, 3)).toBe(plain);
   });
 
-  it('a draw released on the flash is perfect; held too long it weakens', () => {
+  it('a draw released on the flash is perfect; held on past it, it stays full (Kyle, 2026-11-08)', () => {
     const draw = (hold: number) => {
       const { room, h } = onTarget(1);
       h.weapon = 'longbow';
@@ -147,9 +147,9 @@ describe('traits pay off on execution', () => {
       return { perfect: ev.some((e) => e.k === 'perfect'), power: h.power };
     };
     expect(draw(WEAPONS.longbow.draw! + 0.1).perfect).toBe(true);
-    const over = draw(WEAPONS.longbow.draw! + RELEASE.overdraw + 0.3);
+    const over = draw(WEAPONS.longbow.draw! + 1.1);
     expect(over.perfect).toBe(false);
-    expect(over.power).toBe(RELEASE.overdrawn);
+    expect(over.power).toBe(1);
   });
 
   it('CRUSHING: a goblin you threw into a wall takes triple', () => {

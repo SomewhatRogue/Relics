@@ -4,7 +4,7 @@
  */
 import { isDead } from './damage';
 import { collide, wadeAt } from '../shared/arena';
-import { DODGE, CLASS_DODGES, DECOY, AUGMENTS, CHARGE, GRAB, HORN, RELEASE, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, HERO, INPUT_BUFFER, RELICS, WEAPONS, HOLY_GUARD, type Swing, type Weapon, drilled, STEALTH, dodgeOf, guardOf } from '../shared/tuning';
+import { DODGE, CLASS_DODGES, DECOY, AUGMENTS, CHARGE, GRAB, HORN, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, HERO, INPUT_BUFFER, RELICS, WEAPONS, HOLY_GUARD, type Swing, type Weapon, drilled, STEALTH, dodgeOf, guardOf } from '../shared/tuning';
 import { slide } from './bodies';
 import { BAG } from '../shared/bags';
 import { applyGear, turnBelt } from './pack';
@@ -268,12 +268,17 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     if (h.actT >= full && h.actT - dt < full) ev.push({ k: 'charged', x: h.x, y: h.y });
     if (!inp.attack) {
       // A draw (a shot on the hold) wants a clean release: on the white flash is perfect; held too long, it shakes and weakens.
-      const held = h.actT + CHARGE.start, full = chargeFull(w, h), drawn = !!w.heavy.shot;
-      h.power = Math.min(1, held / full);
+      const held = h.actT + CHARGE.start, full = chargeFull(w, h), short = held < full - 1e-9;
+      // Let go before the full draw: a Mage's spell, the crossbow's bolt and the smite come to nothing, the
+      // shortbow flies full anyway, the rest go weaker (shared/weapons.ts `early`). Nothing is spent.
+      if (short && w.early === 'fizzle') {
+        ev.push({ k: 'fizzle', x: h.x, y: h.y });
+        return void Object.assign(h, { act: 'idle', actT: 0, perfect: false, power: 0 });
+      }
+      h.power = short && w.early !== 'full' ? held / full : 1;
       // Every kit's perfect is its own hold let go on the flash (Kyle, 2026-11-04): the rapier skewers, a
       // Cleric shields friends, the sword's bash stuns a crowd, the spear pins, a Mage's spell is the bigger one.
       h.perfect = held >= full && held <= full + releaseWindow(h);
-      if (drawn && held > full + RELEASE.overdraw) h.power = RELEASE.overdrawn;
       // A crossbow's perfect is its glint, not the flash.
       looseBolt(h);
       // A big spell is paid for now; short of magic, it fizzles and nothing is cast (sim/spells.ts).

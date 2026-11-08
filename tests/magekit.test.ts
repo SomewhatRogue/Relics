@@ -102,7 +102,7 @@ describe('the staff', () => {
     expect(front.burnUntil).toBeGreaterThan(a.room.time);
   });
 
-  it('a hold is rooted while it gathers, and its ring is centred on the Mage, bigger with the hold', () => {
+  it('a hold is rooted while it gathers, its ring is centred on the Mage, and let go early it fizzles', () => {
     // (The fire hold is a wall rolled at a goblin now: firewall.test.ts. Storm's ring stays round the Mage.)
     const b = arena('staff', [[2, 2]], 'storm');
     b.run(0.25, { attackSeq: 1, attack: true, mx: 1 });
@@ -111,12 +111,15 @@ describe('the staff', () => {
     expect(b.h.act).toBe('charge');
     expect(b.h.x).toBeCloseTo(x, 3);
     const a = arena('staff', [[2, 2]], 'storm');
-    a.loose(0.5, 0.2);
+    // (Let go before the full gather it fizzles: Kyle, 2026-11-08. So every ring that goes is full; past the flash, not the biggest.)
+    a.loose(WEAPONS.staff.draw! + 0.6, 0.2);
     const z = rings(a.room)[0];
     expect([z.x, z.y]).toEqual([9, 9]);
-    expect(z.r).toBeGreaterThanOrEqual(STAFF_RING.r);
-    expect(z.r).toBeLessThan(STAFF_RING.rFull);
+    expect(z.r).toBeCloseTo(STAFF_RING.rFull, 5);
     expect(z.big).toBe(false);
+    const f = arena('staff', [[2, 2]], 'storm'), ev = f.loose(0.5, 0.2);
+    expect(rings(f.room)).toHaveLength(0);
+    expect(ev.some((x) => x.k === 'fizzle')).toBe(true);
   });
 
   it('let go on the white flash: the biggest ring', () => {

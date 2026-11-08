@@ -15,4 +15,7 @@ export const BLIND = { time: 2, big: 0.5, pace: 0.45, turn: 0.7 };
  * plain bolt runs through `pierce` goblins; a glinted one (wound full in one go) does `glint` times the
  * damage, shoves `shove` times harder and runs through the whole line.
  */
+/** The shortbow (Kyle, 2026-11-08): quick to full, and let go early it's a full shot anyway, so its flash
+ *  has to be worth catching: a shot loosed on it does `perfect` times the damage. */
+export const SHORTBOW = { perfect: 1.4 };
 export const XBOW = { reload: 1, glint: 1.5, shove: 1.6, pierce: 3 };

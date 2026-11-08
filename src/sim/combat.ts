@@ -133,18 +133,19 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   if (ice && heavy) return shatter(e, now, ev), n;
   // (Techniques: SHOULDER CHARGE knocks it down, JUDGEMENT stuns it off a friend: sim/techwarrior.ts, techcleric.ts.)
   if (warriorHit(h, s, e, wasLunging, now, ev) || (shoulder && knockDown(h, e, now, ev)) || clericHit(h, s, e, now, ev) || judge(h, e, now, ev)) return n;
-  // Light goblins flinch out of their wind-up on any hit. A heavy wind-up (a butcher's, a heavy's, a cleave
-  // or slam, a striped blow; never a hexer's spell, which any blow breaks) only to a strong charged blow
-  // from a big weapon (the greatsword, the flail).
-  const big = h.heavy && h.power >= 0.7 && !!WEAPONS[h.weapon].breaker;
+  // Light goblins flinch out of their wind-up on any hit. Anything bigger (Kyle, 2026-11-08: "power attacks
+  // and charged attacks shouldn't knock bigger enemies out of attacks, unless it's part of their perfect")
+  // only to a big weapon's charged blow let go on the flash (the greatsword, the flail), and to what stuns or
+  // freezes it (the perfects' own stuns, a smite, frost: elsewhere). A hexer's spell any blow still breaks.
+  const big = h.heavy && h.perfect && !!WEAPONS[h.weapon].breaker;
   const a = e.attack, heavyWind = !!a && (e.kind === 'butcher' || e.variant === 'heavy' || a.kind === 'cleave' || a.kind === 'slam' || (a.unblockable && a.kind !== 'hex'));
   // Nothing stops a charge once it's coming.
   // (A Rogue's head-on blow doesn't knock anything off balance: only from behind.)
   const shakes = !(WEAPONS[h.weapon].front && !rear);
   // Quick blows never break a wind-up (a hexer's spell excepted: any blow breaks it), and knock an idle one off balance only once a while (POISE).
-  // In a pack rush, a charged blow or a perfect breaks the one it hits, whatever it is; the rest still come.
+  // In a pack rush, a charged blow or a perfect breaks a small one it hits; a bigger one only `big`, as ever.
   const skilled = h.heavy || h.perfect, breaks = skilled || a?.kind === 'hex' || (!a && now - (e.flinchAt ?? -9) > POISE.relock);
-  if (!e.boss && shakes && e.act !== 'stunned' && e.act !== 'pinned' && e.act !== 'carried' && !ice && e.attack?.kind !== 'charge' && (a?.rush ? skilled : heavyWind ? big : (small(e) && breaks) || big)) {
+  if (!e.boss && shakes && e.act !== 'stunned' && e.act !== 'pinned' && e.act !== 'carried' && !ice && e.attack?.kind !== 'charge' && (a?.kind === 'hex' || (small(e) ? (a?.rush ? skilled : heavyWind ? big : breaks || big) : big))) {
     Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: big && e.kind === 'butcher' ? 0.6 : FLINCH });
     if (!skilled) e.flinchAt = now;
   }

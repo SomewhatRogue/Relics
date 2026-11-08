@@ -27,8 +27,8 @@ export function pose(h: Hero, now: number): Pose {
   const kit = kitPose(h, now, fa, side, charge) ?? tapPose(h, fa, side);
   if (kit) return kit;
   if (h.act === 'charge') {
-    // Held past the flash, the draw starts to shake (and the shot weakens).
-    const over = h.actT + CHARGE.start > chargeFull(WEAPONS[h.weapon], h) + RELEASE.overdraw ? Math.sin(now * 70) * 0.09 : 0;
+    // (Held past the flash a draw stays full and steady: Kyle, 2026-11-08.)
+    const over = 0;
     // The staff is raised high while its spell gathers.
     if (ranged(h) || h.weapon === 'staff') return { a: (h.weapon === 'staff' ? -Math.PI / 2 + side * 0.25 : fa) + over, ext: 0, reach: 0, pull: charge };
     // The healer lifts the mace to call down a smite.

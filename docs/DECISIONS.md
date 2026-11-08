@@ -8503,3 +8503,17 @@ on a big screen.
 - Kyle: "the flail, you should be able to move while swinging it". The flail's quick swings walk at half pace
   (`castWalk: 0.5`, as the wand's casts do) and its spin-up at 0.55 (`chargeSpeed`, was 0, rooted). The release
   itself still doesn't carry you.
+
+## 2026-11-08: charging, and what breaks a big goblin's blow (Claude Opus 5.5)
+
+- Kyle: "you start charging, then have a perfect window, then can hold charged". Held past the flash any kit
+  stays at full (the longbow's overdraw weakening and its shake are gone).
+- Let go before the full draw (`Weapon.early`): a Mage's spell (wand, staff, spellblade) fizzles and costs no
+  magic, the crossbow's aimed bolt doesn't go (aim now 0.6 s, was 0.3) and stays on, the holy smite doesn't fall.
+  The shortbow (draw 0.4, was 0.55) goes at full anyway, and its flash shot does 1.4x (`SHORTBOW.perfect`). The
+  longbow (draw 1.7, was 1.4) and the blades go weaker the earlier they're let go. The WEAPONS panel shows a LET GO
+  EARLY row for each kit.
+- Kyle: power and charged attacks shouldn't knock bigger goblins out of their attacks unless it's part of a
+  perfect, or a freeze or stun. Only small goblins flinch out of blows now; anything bigger only to a big
+  weapon's (greatsword, flail) charged blow let go on the flash, and to stuns and frost as before. A hexer's
+  spell is still broken by any blow. The wand's tap still interrupts a wind-up (it stuns).

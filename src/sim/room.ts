@@ -9,7 +9,7 @@ import { ARENA, useMap, type GameMap } from '../shared/arena';
 import type { Foe } from '../shared/terrain';
 import type { PropKind } from '../shared/props';
 import { Rng } from '../shared/rng';
-import { BLESSING, GUARD, SLEEP, HEAL_RADIUS, HEIGHT, HERO, EXPED_COINS, LODESTONE, MACE, TICK, TRAIT, WEAPONS, type Swing, VARIANTS, SNARER } from '../shared/tuning';
+import { BLESSING, GUARD, SLEEP, HEAL_RADIUS, HEIGHT, HERO, EXPED_COINS, LODESTONE, MACE, TICK, TRAIT, WEAPONS, type Swing, VARIANTS, SNARER, SHORTBOW } from '../shared/tuning';
 import { separate } from './bodies';
 import { lobLodestone, shoot, smite, stepBolt, throwNet } from './bolts';
 import { afflict, stepElements, type World } from './elements';
@@ -605,7 +605,7 @@ export class ArenaRoom {
     if (s.dazes && h.heavy && h.perfect) shieldNear(h, this.heroes, HEAL_RADIUS, w.now, w.ev);
     s = { ...s };
     // Blessed, a DEADEYE perfect release, a TEMPO hit after a dodge through a blow.
-    let mult = (h.blessedUntil > w.now ? BLESSING.dmgMult : 1) * (h.heavy && h.perfect ? perfectMult(h) * (has(h, 'deadeye') ? TRAIT.deadeye : 1) : 1) * brandyDmg(h, w.now) * litMult(h);
+    let mult = (h.blessedUntil > w.now ? BLESSING.dmgMult : 1) * (h.heavy && h.perfect ? perfectMult(h) * (has(h, 'deadeye') ? TRAIT.deadeye : 1) * (h.weapon === 'shortbow' ? SHORTBOW.perfect : 1) : 1) * brandyDmg(h, w.now) * litMult(h);
     if (s.shot && h.tempoUntil > w.now) (mult *= TRAIT.tempo), (h.tempoUntil = -9);
     // The high ground: shots from up on a ledge.
     if (s.shot && (h.z ?? 0) > 0) mult *= HEIGHT.shot;
