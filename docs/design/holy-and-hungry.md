@@ -41,8 +41,7 @@ real price, scaling both ways:
 | 30 to 59 (noticed) | +20% | corrupt; named butchers come for you first; prices up 25%; healers in town turn you away |
 | 60+ (turning) | +35% | the party sees it on you; heals from others do half; something in a later chapter |
 
-Open: shown as a bar or number, or felt only (eyes, voices, prices)? Leaning: a small mark on the
-portrait, no number.
+Shown as a **bar** on the character panel and in the pack (Kyle, 2026-11-08), banded at 15, 30 and 60.
 
 ## 3. Turning hunger in pays
 
@@ -73,9 +72,8 @@ it").
 3. **Never** from ordinary drops or chests. The "first named-butcher kill always drops a relic" rule
    becomes "each named butcher holds its own relic, once".
 
-Open: unique per hero (each hero can find each once; friendly to co-op) or unique per town (only one
-hero in Wickhold holds it until it's given back; a big deal, but harsh)? Leaning: per hero, with the
-first finder in the town named on the Roll.
+**One per hero** (Kyle, 2026-11-08): each hero can find each relic once. The first in the town to find
+one is named on the Roll.
 
 ### Bigger, and recharged by the clean
 
@@ -84,6 +82,12 @@ first finder in the town named on the Roll.
 - Recharge at the church for gold, holy path only. Corrupt: no recharge, ever, until clean. The Tooth
   Ring (kills recharge your relic) stays as the hungry path's one way round it.
 - Elemental relics: a third axis, later (section 6).
+- Relics never touch the Want (Kyle, 2026-11-08).
+- **Relics sour on the corrupt** (Kyle's idea, to try): a relic carried by a corrupt hero slowly turns.
+  Each job it's carried corrupt, it may pick up a bad trait (draft: a use costs some health, it calls a
+  goblin to you, it sometimes misfires), more over time. Coming clean stops the souring; the church can
+  lift a bad trait for gold, clean heroes only. So hunger costs you your relics twice: no recharge, and
+  they rot.
 
 ### Draft homes for the relics we have *(lore: names and places)*
 
@@ -126,7 +130,11 @@ of friends, hungry fire feeds you. Elemental relics stay non-rechargeable. After
 
 ## Questions for Kyle
 
-1. Relics unique per hero or per town?
-2. The Want as a visible bar, a mark, or felt only?
-3. How hard should the town turn on a corrupt hero in co-op (prices and refusals, or only flavour)?
-4. Does carrying a relic, or leaving one on the step, touch the Want? (Already open in the story bible.)
+Answered 2026-11-08: one relic per hero; the Want is a bar on the character panel and pack; relics never
+touch the Want, but they sour on a corrupt hero (above).
+
+Still open:
+1. In co-op, a corrupt hero and a clean friend go to town together. Should Isolde and the town healers
+   really refuse the corrupt one and charge them more (a real cost the friend sees), or should that just
+   be lines and looks?
+2. Souring relics: how many bad traits before it's dark for good, and can the church always fix it?
