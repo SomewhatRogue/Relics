@@ -17,6 +17,7 @@ import { heroPortrait } from './sprites';
 
 const NAMES: Record<HeroClass, string> = { WARRIOR: 'BRANNOCK', RANGER: 'WREN', ROGUE: 'SILK', MAGE: 'ASHE', HEALER: 'IVY' };
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
+import { HOMEW } from './homewords';
 const face = (cls: HeroClass, look = 0) => `<img class="face" alt="" src="${heroPortrait(cls, look).toDataURL()}">`;
 
 export class Title {
@@ -26,6 +27,8 @@ export class Title {
   /** On the class grid, or looking at one class. */
   private detail = false;
   private retiring = -1;
+  /** Which hero's other options (play the wood again, retire) are open on the home screen. */
+  private more = -1;
   private preview: Preview | null = null;
   /** Which of the class's three looks is chosen. */
   private look = 0;
@@ -78,9 +81,15 @@ export class Title {
     const hs = this.g.save.heroes;
     this.el.innerHTML = `<div class="tcard"><h1>RELIC</h1><div class="sub">${CHAPTER_1.name.toUpperCase()}</div>` +
       `<p class="lede">${COPY.homeLede}</p><div class="slots">` +
-      hs.map((h, i) => `<div class="slot">${face(h.cls, h.look)}<div class="who"><b>${esc(h.name)}</b><span>${CLASS_NAME[h.cls]} &middot; LEVEL ${h.level} &middot; ${h.gold} GOLD</span></div>` +
-        `<button data-play="${i}" class="primary">PLAY</button>${h.prologue ? `<button data-wood="${i}" class="ghost" title="Play the wood again">WOOD</button>` : ''}<button data-retire="${i}" class="ghost">${this.retiring === i ? 'SURE?' : 'RETIRE'}</button></div>`).join('') +
-      `</div>${hs.length < HERO_SLOTS ? '<button data-new class="wide">NEW HERO</button>' : '<p class="dim">Three heroes at most. Retire one to make another.</p>'}${this.recoverButton()}</div>`;
+      // Each hero: a big look at them, who they are on one line, PLAY under it, and the rest behind the dots
+      // (Kyle, 2026-11-08: "hard to see your character and no one knows what wood is or retire means").
+      hs.map((h, i) => `<div class="slot"><div class="stop">${face(h.cls, h.look)}<div class="who"><b>${esc(h.name)}</b>` +
+        `<span>${HOMEW.line(CLASS_NAME[h.cls], h.level, h.gold)}</span></div></div>` +
+        `<div class="sgo"><button data-play="${i}" class="primary">PLAY</button><button data-more="${i}" class="ghost more${this.more === i ? ' on' : ''}" aria-label="${HOMEW.more}"><i></i><i></i><i></i></button></div>` +
+        (this.more === i ? `<div class="sopts">${h.prologue ? `<button data-wood="${i}" class="ghost">${HOMEW.wood}</button>` : ''}` +
+          `<button data-retire="${i}" class="ghost${this.retiring === i ? ' danger' : ''}">${this.retiring === i ? HOMEW.sure(h.name) : HOMEW.retire}</button></div>` : '') +
+        '</div>').join('') +
+      `</div>${hs.length < HERO_SLOTS ? '<button data-new class="wide">NEW HERO</button>' : `<p class="dim">${HOMEW.full}</p>`}${this.recoverButton()}</div>`;
   }
 
   private create(): void {
@@ -131,6 +140,7 @@ export class Title {
       if (this.g.create(this.pick, name, this.look) >= 0) this.g.skipWood(), this.hide();
       return;
     }
+    if (d.more !== undefined) return (this.more = this.more === Number(d.more) ? -1 : Number(d.more)), (this.retiring = -1), this.home();
     if (d.retire !== undefined) {
       const i = Number(d.retire);
       if (this.retiring === i) (this.g.retire(i), (this.retiring = -1));

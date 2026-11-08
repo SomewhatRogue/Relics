@@ -8520,3 +8520,7 @@ on a big screen.
 - Kyle: the wand's tap "shouldn't stop any attacks". Its spark no longer interrupts a wind-up; only the wand's
   held spell let go on the flash breaks off a blow. (Small goblins still flinch out of a wind-up on any hit, from
   any weapon.)
+- Kyle: on the home screen "it's hard to see your character and no one knows what wood is or retire means".
+  Each hero's card now shows a bigger portrait, the name, then CLASS · LEVEL · GOLD on one line, a full-width
+  PLAY under it, and a dots button beside PLAY that opens PLAY THE TUTORIAL AGAIN and DELETE THIS HERO (tap
+  twice). Words in client/homewords.ts.
