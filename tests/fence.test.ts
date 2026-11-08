@@ -84,9 +84,13 @@ describe('a hungry piece on you', () => {
     const html = await tobin({ ...p, bag: [gear('fine'), gear('touched')] });
     expect(html).not.toContain(PAWN.panicRule);
     expect(html).toContain(PAWN.greet.slice(0, 20));
-    // The touched piece sits dim in his grid, with the reason under it.
-    expect(html).toContain('tile dim');
-    expect(html).toContain(PAWN.wont);
+    // On the SELL tab, the touched piece sits dim in his grid, with the reason under it.
+    const { pawnTabTo } = await import('../src/client/stores');
+    pawnTabTo('sell');
+    const sell = await tobin({ ...p, bag: [gear('fine'), gear('touched')] });
+    pawnTabTo('buy');
+    expect(sell).toContain('tile dim');
+    expect(sell).toContain(PAWN.wont);
   });
 
   it('given to the church, it is gone: Tobin trades again', async () => {

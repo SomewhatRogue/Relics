@@ -74,6 +74,8 @@ function bank(g: Game, panel: Panel): void {
 /** Which of Tobin's tabs is up: what he has, or your pack to sell from (Kyle, 2026-11-08: "a different tab
  *  than buying, otherwise it takes too much space"). */
 let pawnTab: 'buy' | 'sell' = 'buy';
+/** Turn to one of Tobin's tabs (the tabs themselves do this; the tests too). */
+export const pawnTabTo = (t: 'buy' | 'sell') => void (pawnTab = t);
 
 /**
  * Tobin's stall, in two tabs: FOR SALE, his stock, a bigger pack and what he'll sell you back; and SELL, your
