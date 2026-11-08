@@ -133,8 +133,9 @@ of friends, hungry fire feeds you. Elemental relics stay non-rechargeable. After
 Answered 2026-11-08: one relic per hero; the Want is a bar on the character panel and pack; relics never
 touch the Want, but they sour on a corrupt hero (above).
 
+The town's treatment is real and per hero (Kyle, 2026-11-08: "it's about the individual hero, not who you
+party with"): a corrupt hero is refused by Isolde and the healers and pays more, whoever they came in with;
+their clean friends are served as normal.
+
 Still open:
-1. In co-op, a corrupt hero and a clean friend go to town together. Should Isolde and the town healers
-   really refuse the corrupt one and charge them more (a real cost the friend sees), or should that just
-   be lines and looks?
-2. Souring relics: how many bad traits before it's dark for good, and can the church always fix it?
+1. Souring relics: how many bad traits before it's dark for good, and can the church always fix it?
