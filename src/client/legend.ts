@@ -22,7 +22,7 @@ import type { Panel } from './panels';
 import type { Game } from './game';
 
 /** What a block does to a striped blow (Kyle, 2026-11-06: a block takes most of it, GUARD.striped). */
-const STRIPED_BLOCK = (cls: HeroClass) => `A striped blow still gets ${Math.round((GUARD.striped.through[cls] ?? 1) * 100)}% through a block, and costs more stamina.`;
+const STRIPED_BLOCK = (cls: HeroClass) => `A striped blow still gets ${Math.round((GUARD.striped.through[cls] ?? 1) * 100)}% through a block, and costs more ${cls === 'HEALER' ? 'faith' : 'stamina'}.`;
 
 interface Row { face: Face; url?: string; w?: number; name: string; text: string; key: string }
 
@@ -57,7 +57,7 @@ async function rows(g: Game, touch: boolean): Promise<Row[]> {
   const sg = signFor(me);
   if (sg && g.taught().includes('sign')) out.push({ face: { shape: 'round', size: 22, grade: 'iron', icon: skillCanvas(sg, '') }, name: SIGNS[sg].name, key: SIGN_KEY, text: SIGN_WORDS[sg] });
   const guard = guardOf(kit);
-  if (guard === 'full') out.push({ face: { shape: 'shield', size: 28, grade: 'iron', icon: icon('block') }, name: 'BLOCK', key: 'RIGHT CLICK', text: cls === 'HEALER' ? `Hold to raise your shield of light. It stops blows from any side. Strike soon after it stops a blow: it's a counter and hits harder. ${STRIPED_BLOCK(cls)}` : `Hold to block. Strike soon after you block a blow: it's a counter and hits harder. ${STRIPED_BLOCK(cls)}` });
+  if (guard === 'full') out.push({ face: { shape: 'shield', size: 28, grade: 'iron', icon: icon('block') }, name: 'BLOCK', key: 'RIGHT CLICK', text: cls === 'HEALER' ? `Hold to raise your shield of light. It stops blows from any side, and every blow it stops costs FAITH, the gold around the shield. Faith comes back slowly, and not while your shield is up or you're holding a smite. Strike soon after it stops a blow: it's a counter and hits harder. ${STRIPED_BLOCK(cls)}` : `Hold to block. Strike soon after you block a blow: it's a counter and hits harder. ${STRIPED_BLOCK(cls)}` });
   if (dodgeOf(kit)) {
     const dn = dodgeName(cls);
     out.push({ face: { shape: 'diamond', size: 30, grade: 'iron', icon: icon(({ JUMP: 'jump', DASH: 'dash', BLINK: 'blink' } as Record<string, IconId>)[dn] ?? 'roll') }, name: dn, key: 'SPACE', text: 'Get out of any blow, even a striped one.' + (kit.spellblade ? ` ${SHIELD_LINE}` : '') });

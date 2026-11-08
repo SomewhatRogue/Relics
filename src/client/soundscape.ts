@@ -124,7 +124,7 @@ export class Soundscape {
     // The Mage's: magic spent hums, a fizzle is a dud, a broken blow rings, a slash whooshes in its
     // element; the spellblade's shield rings off a hit, breaks, and hums back on a dodge through a blow; a held spell and GRASP have their own (spellsound.ts).
     if (ev.k === 'magic') return sfx.channeled();
-    if (ev.k === 'fizzle') return sfx.wallhit();
+    if (ev.k === 'fizzle' || ev.k === 'early') return sfx.wallhit();
     if (ev.k === 'interrupt') return sfx.perfect(), sfx.shock();
     if (ev.k === 'manaward') return sfx.warded();
     if (ev.k === 'manabreak') return sfx.wardbreak();

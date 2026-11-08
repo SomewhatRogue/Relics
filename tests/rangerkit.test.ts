@@ -170,7 +170,7 @@ describe('let go before the full draw (Kyle, 2026-11-08)', () => {
     const x = arena('crossbow', [12], true, 14);
     const ev = x.loose(0.35, 0.3);
     expect(shots(ev)).toBe(0);
-    expect(ev.some((e) => e.k === 'fizzle')).toBe(true);
+    expect(ev.some((e) => e.k === 'early')).toBe(true);
     expect(x.h.xbowEmpty).toBeFalsy();
     const s = arena('shortbow', [6]);
     s.loose(0.25, 0.4);

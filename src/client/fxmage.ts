@@ -31,6 +31,9 @@ export function mageFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
       fx.say(x, y - 22, `-${ev.n} MAGIC`, '#c9a8ff', 0.6);
       fx.burst(x, y - 10, 6, VIOLET, 30, true);
       return true;
+    case 'early':
+      fx.burst(x, y - 10, 8, SMOKE, 22, false, -30);
+      return true;
     case 'fizzle':
       fx.say(x, y - 30, 'NOT ENOUGH MAGIC', '#a8a0b8');
       fx.burst(x, y - 10, 10, SMOKE, 25, false, -40);

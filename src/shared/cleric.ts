@@ -12,11 +12,18 @@ export const HOLY_SHIELD = { hp: 20, time: 5 };
  * The Cleric's guard: a holy ward round them, held on the block button (Kyle, 2026-11-05; sim/holyguard.ts).
  * It meets blows from every side and costs stamina for what it stops, as a block does. Standing within
  * `coalReach` tiles of one of your own censer coals while you hold it gives back `coals` stamina a second.
- * A Cleric's stamina comes back slower than other heroes' (Kyle, 2026-11-07: "the cleric's shield is too strong
- * because your stamina recharges too quickly"): nothing for `regenDelay` s after it was last spent (HERO's is
- * 0.6), then at `regen` times the usual rate.
  */
-export const HOLY_GUARD = { coals: 25, coalReach: 1, regenDelay: 1.5, regen: 0.55 };
+export const HOLY_GUARD = { coals: 25, coalReach: 1 };
+
+/**
+ * FAITH (Kyle, 2026-11-08): a Cleric's bar is faith, not breath. The shield of light and the smite run on it:
+ * what the shield stops costs faith as a block costs breath, and the smite drains `smite` a second while you
+ * call it down, so a long charge empties you (out, the call is lost and you're spent until it's back). It
+ * comes back slowly, `regen` a second, and only `delay` s after you last used it, never while the shield is up
+ * or a smite is being called: you get it back by walking, running and quick blows. (Your own coals still give
+ * HOLY_GUARD.coals a second while you guard in them.)
+ */
+export const FAITH = { regen: 12, delay: 2, smite: 22 };
 
 /** The mace. Its quick blows are short (reach 1.2 to 1.35, the sword's is 1.45). Held, the smite: its holy
  *  light mends every friend in the burst `heal` (as every heal, grown by the censer's coals). Let go on

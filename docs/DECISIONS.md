@@ -8530,3 +8530,9 @@ on a big screen.
   to only finish the line).
 - Kyle: Tobin's stall is two tabs, FOR SALE (his stock, a bigger pack, what he'll sell you back) and SELL (your
   pack), so neither crowds the other.
+- Kyle: the Cleric runs on FAITH. Their bar is FAITH on screen (gold, round the shield button; `barWord`), and
+  the shield of light and the held smite spend it: every blow the shield stops costs faith as a block costs
+  breath, and holding a smite drains `FAITH.smite` (22) a second, running dry loses the smite. Faith comes back
+  at 12 a second (others' stamina 34), 2 s after it was last spent, and not at all while the shield is up or a
+  smite is held, so you get it back by walking and quick blows. A hold let go early on a kit that does nothing
+  then now shows a plain puff (`early`), not NOT ENOUGH MAGIC.

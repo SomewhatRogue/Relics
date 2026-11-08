@@ -813,6 +813,8 @@ export type FightEvent =
    *  `n` magic, the shield ran out, a dodge through a blow gave `n` back. */
   | { k: 'magic' | 'manaward'; x: number; y: number; n: number }
   | { k: 'fizzle' | 'interrupt' | 'manabreak'; x: number; y: number }
+  /** A hold let go before its full draw, on a kit that does nothing then (shared/weapons.ts `early`). */
+  | { k: 'early'; x: number; y: number }
   | { k: 'manaup'; x: number; y: number; n: number }
   | { k: 'slash'; x: number; y: number; dx: number; dy: number; el: Augment }
   /** A Mage's held spell going off (sim/holds.ts): `what` it is, from (x, y) along (dx, dy), `r` its size

@@ -332,7 +332,7 @@ function hud(now: number): void {
   $('.st i').style.width = me.stamina + '%';
   // A Mage's bar is MAGIC: the word on its tooltip and a soft violet (shared/barword.ts).
   const bw = barWord(WEAPONS[me.weapon].cls);
-  if ($('.st').title !== bw) ($('.st').title = bw), $('.st').classList.toggle('magic', bw === 'MAGIC');
+  if ($('.st').title !== bw) ($('.st').title = bw), $('.st').classList.toggle('magic', bw === 'MAGIC'), $('.st').classList.toggle('faith', bw === 'FAITH');
   $('.st').classList.toggle('low', me.stamina < 25);
   // Winded: the bar flashes, fast while nothing's coming back, slower as it refills.
   $('.st').classList.toggle('winded', !!me.winded);

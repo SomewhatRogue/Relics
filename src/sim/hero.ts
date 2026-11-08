@@ -4,7 +4,7 @@
  */
 import { isDead } from './damage';
 import { collide, wadeAt } from '../shared/arena';
-import { DODGE, CLASS_DODGES, DECOY, AUGMENTS, CHARGE, GRAB, HORN, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, HERO, INPUT_BUFFER, RELICS, WEAPONS, HOLY_GUARD, type Swing, type Weapon, drilled, STEALTH, dodgeOf, guardOf } from '../shared/tuning';
+import { DODGE, CLASS_DODGES, DECOY, AUGMENTS, CHARGE, GRAB, HORN, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, HERO, INPUT_BUFFER, RELICS, WEAPONS, FAITH, type Swing, type Weapon, drilled, STEALTH, dodgeOf, guardOf } from '../shared/tuning';
 import { slide } from './bodies';
 import { BAG } from '../shared/bags';
 import { applyGear, turnBelt } from './pack';
@@ -202,10 +202,11 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   const most = breathCap(h, now);
   if (h.stamina > most) h.stamina = most;
   const mage = WEAPONS[h.weapon]?.cls === 'MAGE';
-  // A Cleric's breath waits longer and comes back slower (shared/cleric.ts HOLY_GUARD), so the shield of light can't be held up forever.
-  const cleric = WEAPONS[h.weapon]?.cls === 'HEALER';
-  const wait = h.winded ? Math.max(HERO.windedDelay * (1 - knack(h, 'winded')), cleric ? HOLY_GUARD.regenDelay : 0) : mage ? HERO.magicDelay : cleric ? HOLY_GUARD.regenDelay : HERO.regenDelay;
-  if (now - h.staminaAt > wait) h.stamina = Math.min(most, h.stamina + (mage ? HERO.magicRegen : HERO.staminaRegen * (cleric ? HOLY_GUARD.regen : 1)) * (1 + statsOf(h).breath) * needlesBreath(h, enemies) * dt);
+  // A Cleric's bar is FAITH (shared/cleric.ts): it waits longer, comes back slowly, and not at all while the
+  // shield is up or a smite is being called.
+  const cleric = WEAPONS[h.weapon]?.cls === 'HEALER', keeping = cleric && (guardUp(h, inp) || h.act === 'charge');
+  const wait = h.winded ? Math.max(HERO.windedDelay * (1 - knack(h, 'winded')), cleric ? FAITH.delay : 0) : mage ? HERO.magicDelay : cleric ? FAITH.delay : HERO.regenDelay;
+  if (!keeping && now - h.staminaAt > wait) h.stamina = Math.min(most, h.stamina + (mage ? HERO.magicRegen : cleric ? FAITH.regen : HERO.staminaRegen) * (1 + statsOf(h).breath) * needlesBreath(h, enemies) * dt);
   if (h.winded && h.stamina >= most) (h.winded = false), ev.push({ k: 'breath', x: h.x, y: h.y });
   h.actT += dt;
   h.moving = false;
@@ -264,6 +265,11 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     face(h, inp, enemies, false);
     walk(h, inp, w.chargeSpeed, dt, now, ev);
     collide(h, HERO.radius);
+    // Calling a smite down costs faith as you hold it (shared/cleric.ts FAITH); run out and it's lost.
+    if (w.heavy.shot === 'smite' && w.cls === 'HEALER') {
+      Object.assign(h, { stamina: h.stamina - FAITH.smite * dt, staminaAt: now });
+      if (h.stamina <= 0) return void Object.assign(h, { stamina: 0, act: 'idle', actT: 0, perfect: false, power: 0 });
+    }
     const full = chargeFull(w, h) - CHARGE.start;
     if (h.actT >= full && h.actT - dt < full) ev.push({ k: 'charged', x: h.x, y: h.y });
     if (!inp.attack) {
@@ -272,7 +278,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
       // Let go before the full draw: a Mage's spell, the crossbow's bolt and the smite come to nothing, the
       // shortbow flies full anyway, the rest go weaker (shared/weapons.ts `early`). Nothing is spent.
       if (short && w.early === 'fizzle') {
-        ev.push({ k: 'fizzle', x: h.x, y: h.y });
+        ev.push({ k: 'early', x: h.x, y: h.y });
         return void Object.assign(h, { act: 'idle', actT: 0, perfect: false, power: 0 });
       }
       h.power = short && w.early !== 'full' ? held / full : 1;

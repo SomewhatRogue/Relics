@@ -28,7 +28,7 @@ export const KIT: Record<WeaponId, KitRow> = {
   staff: { tap: 'Flame sweep, burns', hold: 'Rolling wall of fire', perfect: 'Wider, burns longer' },
   spellblade: { tap: 'Cuts burn', hold: 'Burning lunge', perfect: 'Longer, costs nothing', also: 'Magic shields, blinks top up' },
   // Cleric (shared/cleric.ts): every perfect shields friends near you.
-  mace: { tap: 'Short blows, 3rd heals', hold: 'Smite, stuns', perfect: 'Harder, shields friends' },
+  mace: { tap: 'Short blows, 3rd heals', hold: 'Smite, stuns', perfect: 'Harder, shields friends', also: 'Holding a smite costs faith' },
   censer: { tap: 'Two cuts, healing swing', hold: 'Whirl, burns', perfect: 'Coals flare, shields friends' },
   flail: { tap: 'Wide shoves, 2nd heals', hold: 'Spin up, sweep', perfect: 'Stuns, shields friends' },
 };

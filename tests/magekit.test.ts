@@ -119,7 +119,7 @@ describe('the staff', () => {
     expect(z.big).toBe(false);
     const f = arena('staff', [[2, 2]], 'storm'), ev = f.loose(0.5, 0.2);
     expect(rings(f.room)).toHaveLength(0);
-    expect(ev.some((x) => x.k === 'fizzle')).toBe(true);
+    expect(ev.some((x) => x.k === 'early')).toBe(true);
   });
 
   it('let go on the white flash: the biggest ring', () => {

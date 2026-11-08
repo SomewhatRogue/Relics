@@ -118,9 +118,11 @@ export class Cluster {
     const mage = kit.cls === 'MAGE', st = me.stamina;
     if (document.body.dataset.mage !== String(mage)) document.body.dataset.mage = String(mage);
     const flick = me.winded && room.time - me.staminaAt < HERO.windedDelay ? Math.floor(now * 11) % 2 === 0 : false;
-    const pips = { lit: flick ? 0 : Math.ceil(st / 10), of: 10, col: me.winded ? '#d84a3a' : mage ? (st < 25 ? '#8f86a8' : '#cdbdf0') : st < 25 ? '#a8a090' : '#ddd5c4' };
-    b.attack.show({ shape: 'round', size: 42, grade: 'iron', icon: atk, iconScale: carrying ? 1 : 2, ...(mage ? {} : { pips }) }, '', '', carrying ? 'Slam' : 'Attack');
-    b.block.show(guard === 'none' ? null : { shape: 'shield', size: 30, grade: 'iron', icon: icon('block') }, '', '', 'Block');
+    // A Cleric's are FAITH, gold, round the shield of light (shared/cleric.ts FAITH).
+    const cleric = kit.cls === 'HEALER';
+    const pips = { lit: flick ? 0 : Math.ceil(st / 10), of: 10, col: me.winded ? '#d84a3a' : mage ? (st < 25 ? '#8f86a8' : '#cdbdf0') : cleric ? (st < 25 ? '#a89060' : '#ffd27a') : st < 25 ? '#a8a090' : '#ddd5c4' };
+    b.attack.show({ shape: 'round', size: 42, grade: 'iron', icon: atk, iconScale: carrying ? 1 : 2, ...(mage || cleric ? {} : { pips }) }, '', '', carrying ? 'Slam' : 'Attack');
+    b.block.show(guard === 'none' ? null : { shape: 'shield', size: 30, grade: 'iron', icon: icon('block'), ...(cleric ? { pips } : {}) }, '', '', 'Block');
     const dn = dodgeName(kit.cls), dodges = !!dodgeOf(kit);
     if (document.body.dataset.dodge !== String(dodges)) document.body.dataset.dodge = String(dodges);
     // A Mage's BLINK wears the magic pips, filling as it comes back. Winded it can't fire, so it goes dull;
