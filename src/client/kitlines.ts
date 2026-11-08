@@ -23,7 +23,7 @@ export const KIT: Record<WeaponId, KitRow> = {
   rapier: { tap: 'Long thrusts', hold: 'Lunge through two', perfect: 'Skewers, bleeds' },
   poisoner: { tap: 'Short sword, hits two', hold: 'Poison dart', perfect: 'Stuns, stronger poison' },
   // Mage (shared/mage.ts): what a tap and a hold are, the element decides (MAGE_KIT below); these are fire's.
-  wand: { tap: 'Firebolt, burns', hold: 'Fireball, burns a crowd', perfect: 'Bigger, interrupts any blow', also: 'Tap interrupts a wind-up' },
+  wand: { tap: 'Firebolt, burns', hold: 'Fireball, burns a crowd', perfect: 'Bigger, interrupts any blow' },
   // The wall of fire burns friends too (sim/firewall.ts): said once on the card: fire's ALSO (MAGE_KIT) and the book card's (BOOK_ALSO).
   staff: { tap: 'Flame sweep, burns', hold: 'Rolling wall of fire', perfect: 'Wider, burns longer' },
   spellblade: { tap: 'Cuts burn', hold: 'Burning lunge', perfect: 'Longer, costs nothing', also: 'Magic shields, blinks top up' },

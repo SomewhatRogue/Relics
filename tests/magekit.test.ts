@@ -41,16 +41,16 @@ describe('the wand', () => {
     expect(a.h.x - 9).toBeGreaterThan(full * WAND.walk * 0.9);
   });
 
-  it('a spark that lands mid wind-up breaks the blow off: a bonus, no PERFECT', () => {
+  it("a tap's spark that lands mid wind-up stops nothing (Kyle, 2026-11-08)", () => {
     const a = arena('wand', [[9, 5]]);
     const ev0: FightEvent[] = [];
     // The goblin starts a blow; the spark is loosed into its wind-up.
     a.e.attack = { kind: 'swing', t: 0, windup: 5, active: 0.1, recover: 0.3, dmg: 10, knock: 2, unblockable: false, dx: 0, dy: 1, ox: 9, oy: 5, range: 1.3, arc: 90, cx: 0, cy: 0, radius: 0, done: false };
-    a.e.act = 'attack';
+    // (A bigger goblin: small ones flinch out of a wind-up on any hit, from anything.)
+    Object.assign(a.e, { act: 'attack', kind: 'butcher', hp: 400, maxHp: 400 });
     ev0.push(...a.tap(0.7));
-    expect(ev0.some((x) => x.k === 'interrupt')).toBe(true);
-    expect(ev0.some((x) => x.k === 'perfect')).toBe(false);
-    expect(a.e.attack).toBeNull();
+    expect(ev0.some((x) => x.k === 'interrupt')).toBe(false);
+    expect(a.e.attack).not.toBeNull();
   });
 
   it('the burst let go on the white flash breaks off whatever it hits, striped blows too, PERFECT', () => {

@@ -8517,3 +8517,6 @@ on a big screen.
   perfect, or a freeze or stun. Only small goblins flinch out of blows now; anything bigger only to a big
   weapon's (greatsword, flail) charged blow let go on the flash, and to stuns and frost as before. A hexer's
   spell is still broken by any blow. The wand's tap still interrupts a wind-up (it stuns).
+- Kyle: the wand's tap "shouldn't stop any attacks". Its spark no longer interrupts a wind-up; only the wand's
+  held spell let go on the flash breaks off a blow. (Small goblins still flinch out of a wind-up on any hit, from
+  any weapon.)

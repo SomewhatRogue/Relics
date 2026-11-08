@@ -51,7 +51,8 @@ export interface Swing {
   quake?: boolean;
   /** A longbow's draw: released on the white flash it is a sure crit and blinds (shared/ranger.ts BLIND). */
   blinds?: boolean;
-  /** A wand's bolt: landing on a goblin mid wind-up, it breaks the blow off (shared/mage.ts WAND). */
+  /** A wand's held spell: let go on the white flash, it breaks off any blow it lands on (shared/mage.ts WAND).
+   *  A tap's spark stops nothing (Kyle, 2026-11-08: "that shouldn't stop any attacks"). */
   interrupts?: boolean;
   /** A staff's slash: a close cut in the Mage's element. */
   slash?: boolean;
@@ -258,7 +259,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     name: 'SPARK WAND',
     cls: 'MAGE',
     // Cast walking (Kyle, 2026-11-04): the left click never stops you.
-    combo: [{ windup: 0.3, active: 0.04, recover: 0.2, dmg: 8, range: 8, arc: 0, lunge: 0, knock: 2, shot: 'spark', speed: 17, interrupts: true }],
+    combo: [{ windup: 0.3, active: 0.04, recover: 0.2, dmg: 8, range: 8, arc: 0, lunge: 0, knock: 2, shot: 'spark', speed: 17 }],
     heavy: { windup: 0.06, active: 0.04, recover: 0.3, dmg: 10, dmgFull: 24, range: 9, arc: 0, lunge: 0, knock: 3, knockFull: 7, shot: 'spark', speed: 19, burst: 0.8, interrupts: true, spell: true },
     draw: 0.6, early: 'fizzle',
     blockSpeed: 0.4, chargeSpeed: 0.55, guardArc: 100, guardCost: 2, speed: 0.86, castWalk: 0.9,

@@ -52,8 +52,8 @@ export function shoot(h: Hero, s: Swing, el: Augment, mult = 1, traits: TraitId[
   if (h.heavy && h.power >= 1 && kit && !kit.noCharge && !kit.reloads) b.charged = true;
   // A poisoner's dart: loosed on the white flash, it retches what it hits (sim/venom.ts).
   if (s.venom) b.poison = h.heavy && h.perfect ? 2 : 1;
-  // A wand's spark breaks off a blow it lands in the wind-up of; its burst let go on the flash, anything (sim/spells.ts).
-  if (s.interrupts) (b.interrupts = true), (b.breaks = h.heavy && h.perfect);
+  // A wand's burst let go on the flash breaks off any blow it lands on (sim/spells.ts); nothing else of it does.
+  if (s.interrupts && h.heavy && h.perfect) (b.interrupts = true), (b.breaks = true);
   // The Ranger's: a longbow's perfect arrow blinds, a crossbow bolt runs through a few (a glinted one, all).
   markShot(h, s, b);
   return b;
