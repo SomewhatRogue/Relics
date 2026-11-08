@@ -88,7 +88,7 @@ export const MORE_KITS: Record<MoreKitId, Weapon> = {
       { windup: 0.24, active: 0.12, recover: 0.45, dmg: 20, range: 1.95, arc: 220, lunge: 0.4, knock: 6.5, heal: 9 },
     ],
     heavy: { windup: 0.1, active: 0.14, recover: 0.5, dmg: 22, dmgFull: 54, range: 2.6, arc: 240, lunge: 0, knock: 8, knockFull: 14, holy: true, dazes: true },
-    draw: 1,
+    draw: 1, early: 'fizzle', // The spin goes only at full (Kyle, 2026-11-08: "charged flail just shouldn't work without a full charge").
     blockSpeed: 0.4, chargeSpeed: 0.55, guardArc: 130, guardCost: 1.3, speed: 0.8, blunt: true, shoves: true, castWalk: 0.5,
     dodge: CLERIC_ROLL,
   },

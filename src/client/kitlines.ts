@@ -81,10 +81,10 @@ export const kitRows = (w: WeaponId, el?: Element | ''): [string, string][] => {
 /** What a hold let go before its full draw does (shared/weapons.ts `early`). */
 const early = (w: WeaponId): string => {
   const e = WEAPONS[w].early;
-  return e === 'full' ? EARLYW.full : e === 'fizzle' ? (w === 'crossbow' ? EARLYW.bolt : w === 'mace' ? EARLYW.smite : EARLYW.spell) : EARLYW.weaker;
+  return e === 'full' ? EARLYW.full : e === 'fizzle' ? (w === 'crossbow' ? EARLYW.bolt : w === 'mace' ? EARLYW.smite : w === 'flail' ? EARLYW.sweep : EARLYW.spell) : EARLYW.weaker;
 };
 /** The LET GO EARLY row's words. */
-export const EARLYW = { weaker: 'Still goes, weaker', full: 'Still a full shot', spell: 'Fizzles, costs no magic', bolt: 'No shot', smite: 'No smite' };
+export const EARLYW = { weaker: 'Still goes, weaker', full: 'Still a full shot', spell: 'Fizzles, costs no magic', bolt: 'No shot', smite: 'No smite', sweep: 'No sweep' };
 
 /** The laptop's hint line: "TAP: ...  HOLD: ...  PERFECT: ..." (a Mage's in the element it's in). */
 export const kitLine = (w: WeaponId, el: Element | '' = 'fire'): string => kitRows(w, el).filter(([l]) => l !== 'ALSO' && l !== 'COST' && l !== 'LET GO EARLY').map(([l, v]) => `${l}: ${v.toUpperCase()}`).join('  ');

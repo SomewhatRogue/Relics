@@ -8536,3 +8536,4 @@ on a big screen.
   at 12 a second (others' stamina 34), 2 s after it was last spent, and not at all while the shield is up or a
   smite is held, so you get it back by walking and quick blows. A hold let go early on a kit that does nothing
   then now shows a plain puff (`early`), not NOT ENOUGH MAGIC.
+- Kyle: the flail's charged spin "shouldn't work without a full charge": let go early, no sweep (`early: 'fizzle'`).
