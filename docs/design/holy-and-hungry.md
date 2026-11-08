@@ -119,6 +119,69 @@ church-only: two or three that can't be found anywhere else *(lore: what)*.
 Both paths can carry an element (fire, frost, storm), each bending it: holy fire heals what it touches
 of friends, hungry fire feeds you. Elemental relics stay non-rechargeable. After sections 1 to 5 land.
 
+## 7. The Keeping Room: the hungry path's church (Kyle, 2026-11-08; lore keeper's proposal)
+
+The inverse of the church, hidden in the Wickhold Sewers. Kept strictly a **shop and a hoard**, never a
+shrine: no altar, no prayers, no rites, no god, no sun imagery (a hidden cult under the town is the
+Blacktongue thieves' guild; we don't go there).
+
+**What it is.** In the siege Wickhold melted its bells and gave its metal. Some didn't: they hid pewter,
+rings and plate in the old cistern off the culvert. It's hidden because it proves the town didn't give
+everything. Gold is kept or given; this is the kept half. (For the bible only: a relic is hunger, so set
+a given thing in front of it and it eats. Nothing else in the room is magic.)
+
+**Who's there.**
+- **Dorcas**: the church's verger before Oswin. She carried the Lantern box in the siege, kept some of
+  it, and was put out. Warm, chatty, calls you "duck", tells you exactly what a thing costs and does and
+  never why. Honest and wrong, the mirror of a church that's "not wrong but not honest".
+- **Nettle** carries holy pieces down to her (unsaid on screen). Isolde won't say Dorcas's name; Odric
+  still counts her among his own and changes the subject.
+
+**Finding it.** Only for a corrupt hero, or one carrying a soured relic. Near a bricked arch in the
+Sewers' cistern node the soured relic goes warm; scratches at hand height catch the eyeshine (clean eyes
+see nothing). At the iron slot Dorcas looks at your eyes; if they shine, the bolt goes back. A clean hero
+just sees brick.
+
+**What it does.**
+- **Feed a relic**: lay holy pieces in the trough with the relic on top; it eats them and fills. This is
+  the corrupt hero's only recharge. It can't lift a sour trait (that stays the church's, clean only).
+  Elemental relics still can't be filled.
+- **Giving holy pieces to Dorcas raises the Want** (it's keeping).
+- Dorcas trades in what the town hid (draft: hungry-side odds and ends, never relics).
+
+**The map** (three-quarter, one small node off the Sewers):
+
+```
+  culvert walkway
+  ==============+
+                |  THE DRY ARCH: walkway's end, iron door with a slot.
+             [ D ]  No light but yours, and the shine on the scratches.
+                |
+   +------------+-------------+
+   | shelves  shelves  shelves|  THE CISTERN: drained, shelved all round with
+   |   .      (cradle)    .   |  the hoard; tallow stubs on every shelf; a
+   |  cot  brazier+kettle  .  |  cradle among it; Dorcas's cot, brazier, kettle.
+   +------------+-------------+
+                |
+           ( trough )           THE TROUGH: a stone basin under a drip. The relic
+                                laid on the holy pieces is the light: gold waking
+                                to sick green as the pieces under it go dull.
+```
+
+**The yellow and gold tiers become holy.** TOUCHED (yellow) becomes **VOWED** (or GIVEN) and TURNING
+(gold) becomes **HALLOWED**. "Celestial" is never a word on screen: their stat lines show gold with a small
+candle-flame mark, each saying what it does (relic power, a relic use saved, heals that carry to a friend,
+shields on friends). No sun, no stars. They can use relics; they stay below HUNGRY in raw power.
+
+This breaks (to change when built): the bible's rare-tiers entry (touched and turning as hungry gear
+caught partway, growing the Want); `TIER_WANT` and `COST_POINTS` in costs.ts; "the vestry never stocks
+touched or turning"; Tobin's fear of yellow and orange (new reason: "that's the church's, not mine to
+buy"); butcher drop tables in gear.ts (a butcher's fist can't hold holy steel); the Want band named
+"turning" at 60+ (rename).
+
+New lore for the bible: the Keeping Room, Dorcas, Nettle's route down, the siege hoard. Optional seed for
+chapter 5 (Kyle's call): a small bell someone kept from the melting, on her shelf.
+
 ## Build order (when we code)
 
 1. Corrupt flag and exclusivity: dim holy on hungry, block recharge and church services when corrupt.
@@ -126,7 +189,9 @@ of friends, hungry fire feeds you. Elemental relics stay non-rechargeable. After
 3. Penance and paid turn-ins (section 3), with the first holy pieces.
 4. Relics: remove random drops, place the eight, the found-a-relic moment and pack slot, uses 2x.
 5. Penance relics and the holy shop.
-6. Elements.
+6. VOWED and HALLOWED tiers replace TOUCHED and TURNING.
+7. The Keeping Room and Dorcas.
+8. Elements.
 
 ## Questions for Kyle
 
