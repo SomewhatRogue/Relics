@@ -186,7 +186,12 @@ export class Soundscape {
       if (ev.kind === 'stab') return goblin.hiss();
       if (ev.kind === 'shot') return goblin.draw();
       if (ev.kind === 'hex') return goblin.chant(Math.round(ev.x * 7 + ev.y * 3));
-      if (ev.kind === 'cleave' || ev.kind === 'slam' || ev.kind === 'charge') return butcher.roar(ev.kind !== 'cleave');
+      // Only a butcher roars (Kyle, 2026-11-08: the shield goblins "roar weirdly"); any other goblin's big
+      // wind-up is its own low hiss.
+      if (ev.kind === 'cleave' || ev.kind === 'slam' || ev.kind === 'charge') {
+        const e = room.enemies.find((x) => Math.abs(x.x - ev.x) < 0.01 && Math.abs(x.y - ev.y) < 0.01);
+        return !e || e.kind === 'butcher' || e.boss ? butcher.roar(ev.kind !== 'cleave') : goblin.hiss();
+      }
       return;
     }
     if (ev.k === 'impact') return ev.kind === 'slam' ? sfx.boom() : ev.kind === 'hex' ? goblin.hexBurst() : undefined;

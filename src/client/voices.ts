@@ -76,7 +76,8 @@ export const goblin = {
   shriek(id: number) {
     if (!ok()) return;
     const p = pitchOf(id), t = ctx!.currentTime;
-    syllable(t, 0.4, 700 * p, 260 * p, 800, 2400, 0.32, 0.7);
+    // Low and short (Kyle, 2026-11-08: deaths were "too high and shrill").
+    syllable(t, 0.3, 420 * p, 150 * p, 600, 1600, 0.3, 0.7);
   },
   /** The hiss before a stab. */
   hiss() {

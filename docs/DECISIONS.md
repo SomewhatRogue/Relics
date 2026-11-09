@@ -8539,3 +8539,4 @@ on a big screen.
 - Kyle: the flail's charged spin "shouldn't work without a full charge": let go early, no sweep (`early: 'fizzle'`).
 - Kyle: the censer's whirl too, "no early release, emulate the flail": let go before the full charge, no whirl.
 - Kyle (2026-11-08): the recorded goblin voices bark. Their chatter, cackle, yelp, hiss and bow warning are the old synth again (lower, shorter), and their swings land without a grunt. Deaths, chants, drums and the screech keep their recordings.
+- Kyle: goblin deaths were too high and shrill: the synth again, pitched lower and shorter. Only butchers and bosses roar on a big wind-up; other goblins (the shield ones) hiss.
