@@ -35,7 +35,7 @@ describe('recorded sound effects', () => {
     const pairs: [object, Record<string, unknown>][] = [[sfx, SFX_ROUTES], [goblin, GOBLIN_ROUTES], [butcher, BUTCHER_ROUTES], [spiderSounds, SPIDER_ROUTES], [sfxTown, TOWN_ROUTES]];
     for (const [target, routes] of pairs) for (const k of Object.keys(routes)) expect(typeof (target as Record<string, unknown>)[k], k).toBe('function');
     const call = (r: unknown, ...a: unknown[]) => (r as (...b: unknown[]) => unknown)(...a);
-    for (const r of [call(SFX_ROUTES.death, 'burst'), call(SFX_ROUTES.death, 'behead'), call(SFX_ROUTES.hit, true), call(GOBLIN_ROUTES.drum, 1, true), call(GOBLIN_ROUTES.chatter, 7)]) {
+    for (const r of [call(SFX_ROUTES.death, 'burst'), call(SFX_ROUTES.death, 'behead'), call(SFX_ROUTES.hit, true), call(GOBLIN_ROUTES.drum, 1, true), call(GOBLIN_ROUTES.shriek, 7)]) {
       const name = Array.isArray(r) ? r[0] : r;
       expect(names).toContain(name as SfxName);
     }

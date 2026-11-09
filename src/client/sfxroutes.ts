@@ -85,13 +85,11 @@ export const SFX_ROUTES: Routes = {
   blink: () => 'blink',
 };
 
+// (Kyle, 2026-11-08: the recorded goblin voices "sound like they're barking"; the old synth was lower,
+// shorter and more understated. So their chatter, cackle, yelp and hiss are the synth again, and their
+// swings land without a grunt. Their bow's warning is the synth's too ("goblin bow warning is bad too"). Deaths, chants, drums and the screech keep their recordings.)
 export const GOBLIN_ROUTES: Routes = {
-  chatter: (id: number) => gob('gob_jabber', id),
-  cackle: (id: number) => gob('gob_cackle', id),
-  yelp: (id: number) => gob('gob_hurt', id),
   shriek: (id: number) => gob('gob_death', id),
-  hiss: () => 'gob_snarl',
-  draw: () => 'bow_draw',
   chant: (id: number) => gob('gob_chant', id),
   hexBurst: () => 'gob_hex_burst',
   // _1 is the low beat, _2 the higher off-beat.

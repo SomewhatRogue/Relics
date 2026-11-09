@@ -27,7 +27,6 @@ const BY_KIND: Partial<Record<FightEvent['k'], SfxName>> = {
 
 export function eventSample(ev: FightEvent): boolean {
   if (ev.k === 'shoot' && ev.kind === 'dart') return playPick('gob_blowpipe');
-  if (ev.k === 'impact' && (ev.kind === 'stab' || ev.kind === 'swing')) return playPick('gob_grunt');
   const name = BY_KIND[ev.k];
   return name ? playPick(name) : false;
 }

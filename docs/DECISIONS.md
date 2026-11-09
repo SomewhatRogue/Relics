@@ -8538,3 +8538,4 @@ on a big screen.
   then now shows a plain puff (`early`), not NOT ENOUGH MAGIC.
 - Kyle: the flail's charged spin "shouldn't work without a full charge": let go early, no sweep (`early: 'fizzle'`).
 - Kyle: the censer's whirl too, "no early release, emulate the flail": let go before the full charge, no whirl.
+- Kyle (2026-11-08): the recorded goblin voices bark. Their chatter, cackle, yelp, hiss and bow warning are the old synth again (lower, shorter), and their swings land without a grunt. Deaths, chants, drums and the screech keep their recordings.
