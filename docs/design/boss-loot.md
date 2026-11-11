@@ -1,6 +1,8 @@
 # Boss loot: a unique pool per boss, one drop a group, rolled for
 
-Spec, 2026-11-11 (Kyle and Claude Opus 5.5). Not built. Waiting on Kyle's answers to "For Kyle" below.
+Spec, 2026-11-11 (Kyle and Claude Opus 5.5). Kyle's answers (2026-11-11): NEED / GREED / PASS with the
+room's 1 to 100 (no gold bid); no bad-luck protection; pools for bosses of the kit, named butchers and BIG
+ONEs; a won piece is a run find, at risk till LEAVE. Building.
 
 Kyle: "I also want each boss to have a loot pool even mini bosses of unique items but its only one loot
 item per entire group. We will want to add a bid and rng system for loot similar to what world of

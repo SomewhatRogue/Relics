@@ -61,6 +61,8 @@ export interface Intent {
   vt?: number;
   /** The Deep: the floor this player has chosen GO DEEPER on (client/game.ts deeper); the leader goes down once all have. */
   deep?: number;
+  /** Boss loot (sim/lootroll.ts): this player's standing choice on each open roll, by the roll's id. */
+  loot?: Record<number, LootPick>;
 }
 
 export const NO_INTENT: Intent = { mx: 0, my: 0, ax: 0, ay: 0, attack: false, block: false, attackSeq: 0, blockSeq: 0, rollSeq: 0, weaponSeq: 0, relicSeq: 0, relicSwapSeq: 0, relicPickSeq: 0, relicPick: 0, augmentSeq: 0, classSeq: 0, grabSeq: 0, takeSeq: 0, take: 0, gearSeq: 0, gearOp: 0, gearArg: 0, potionSeq: 0, beltSeq: 0, openSeq: 0, open: 0, reload: false, reloadSeq: 0 };
@@ -744,6 +746,24 @@ export interface Drop {
   owner?: string;
 }
 
+/** Boss loot (docs/design/boss-loot.md): a player's choice on a roll. */
+export type LootPick = 'need' | 'greed' | 'pass';
+/**
+ * A unique piece up for the group's roll (sim/lootroll.ts), on the room and sent to every screen. Open
+ * until everyone still in has chosen or `until` (room time); then `rolls` (each NEED, or else each GREED,
+ * rolled 1 to 100 on the room's seed) and `winner` (null: everyone passed, the piece is left on the floor).
+ */
+export interface LootRoll {
+  id: number;
+  x: number;
+  y: number;
+  item: import('../shared/loot').Item;
+  until: number;
+  picks: Record<string, LootPick>;
+  rolls?: [string, LootPick, number][];
+  winner?: string | null;
+}
+
 export type FightEvent =
   /** A chalker's stroke on hero `on` (`n` now), the fifth turning its pack on them, the strokes wiped (sim/chalker.ts). */
   | { k: 'chalk'; x: number; y: number; n: number; on: string }
@@ -776,6 +796,8 @@ export type FightEvent =
   | { k: 'cart'; what: 'go' | 'hit' | 'stop'; x: number; y: number; by?: string; on?: string }
   | { k: 'gear'; x: number; y: number; hit: boolean }
   | { k: 'bare'; x: number; y: number }
+  /** Boss loot (sim/lootroll.ts): a unique piece dropped and up for the group's roll (`id`), and the roll settled (`winner`, or none if all passed). */
+  | { k: 'lootroll'; what: 'open' | 'done'; id: number; x: number; y: number; winner?: string }
   | { k: 'cutfree'; x: number; y: number; id: string; by: string }
   | { k: 'stolen'; x: number; y: number; id: string; n: number; potion?: PotionId }
   /** A hero down (`by`: the teammate whose blow did it), or picked up (`by`: who picked them up). */
