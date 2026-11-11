@@ -628,7 +628,9 @@ export class Game {
   private deepJoin(job: Job): void {
     const p = this.profile, seed = deepSeedOf(job);
     if (p.deep && p.deep.seed !== seed) this.dropDeep();
-    if (!p.deep) (p.deep = setOut(p, seed)), store(this.save);
+    // My snapshot, and the run stamped with the world's clock for the boards (shared/deepboard.ts).
+    if (!p.deep) (p.deep = setOut(p, seed)), store(this.save), this.give({ deepStart: seed });
+    if ((this.remote || this.coop?.company) && !p.deep.party) (p.deep.party = true), store(this.save);
     if ((job.floor ?? 0) > p.deep.floor) {
       p.deep.floor = job.floor!;
       this.deepAsk = this.deepThere = false;
@@ -1171,6 +1173,8 @@ export class Game {
     if (key && p.paid?.includes(key)) return void ((this.run = null), unbank(p.id), this.enterTown({ x: 24.1, y: 14.8 }));
     // The Deep (shared/deepkit.ts): up at a checkpoint keeps it all; gone early, as at the last checkpoint; dead, as at the way down.
     const deepEnd: 'out' | 'early' | 'dead' | null = isDeep(run.job) && p.deep ? (won || this.deepUp ? 'out' : how === 'beaten' ? 'dead' : 'early') : null;
+    // (The deepest floor reached goes on the board whatever the end, with the gold banked: shared/deepboard.ts.)
+    const claim = deepEnd && p.deep ? { s: p.deep.seed, f: p.deep.floor, p: !!p.deep.party || withParty } : null;
     const deep = deepEnd && p.deep ? { end: deepEnd, ...endDeep(p.deep, p, deepEnd, run.gold) } : undefined;
     if (isDeep(run.job)) (p.deep = undefined), (this.deepAsk = this.deepThere = this.deepUp = false), (this.deepVote = 0);
     // Driven back (or gone home from a job alone): half the gold. Gone early from a party: what was picked up while with them.
@@ -1223,6 +1227,7 @@ export class Game {
       stats: { jobs: won ? 1 : 0, saved: rescued, kills: run.kills, dens: run.dens, butchers: run.butchers ?? 0, gold, raised: mine(run.raised, ME), falls: mine(run.falls, ME), carried: mine(run.carried, ME), teamkills: mine(run.teamkills, ME), rescueHits: run.rescueHits?.[ME] ?? 0, rescueKills: run.rescueKills?.[ME] ?? 0 }, rescued, dens: run.dens, days: 1,
       story: won && run.job.objective === 'story' ? run.job.id : undefined,
       deed: won && !followed ? { title: run.job.title, place: run.job.place.name, party } : undefined,
+      ...(claim && deep ? { deep: { ...claim, g: deep.gold } } : {}),
     });
     unbank(p.id);
     if (ONLINE && key && !key.startsWith('solo-')) dropOwed(p.id, key);

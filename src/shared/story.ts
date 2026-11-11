@@ -39,6 +39,10 @@ export interface WorldState {
   mended?: { id: string; day: number }[];
   /** Raids on the town (newest first), and what each pulled down (shared/raids.ts). */
   raids?: { day: number; lost: import('./works.js').WorkId[] }[];
+  /** The Deep's boards (shared/deepboard.ts): the deepest each hero has been, alone and with a party, the top ten; and each hero's last run down, stamped with the world's clock. */
+  deepSolo?: import('./deepboard.js').DeepLine[];
+  deepParty?: import('./deepboard.js').DeepLine[];
+  deepRuns?: Record<string, import('./deepboard.js').DeepStamp>;
   /** The archery range's board at the hunters' lodge: each hero's best round, the top ten (shared/rangeboard.ts). */
   range?: import('./rangeboard.js').RangeLine[];
   /** The Drowned Rat's knife board: each hero's best round, the top ten (shared/knifeboard.ts). */

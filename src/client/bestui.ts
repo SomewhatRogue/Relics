@@ -13,12 +13,13 @@ import type { Panel } from './panels';
 import { FISHW, RANGEW, KNIFEW } from './pastimewords';
 import { SHIFTW } from './shiftwords';
 import { BESTW } from './bestwords';
+import { deepBlocks } from './deepbest';
 
 const p = (s: string) => `<p>${s}</p>`;
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 
 /** One game's top names (the first BEST_ROWS), and your best under them if you have one. */
-function block(title: string, board: RangeLine[] | undefined, me: string, best: string, says: (l: RangeLine) => string = (l) => String(l.n)): string {
+export function block(title: string, board: RangeLine[] | undefined, me: string, best: string, says: (l: RangeLine) => string = (l) => String(l.n)): string {
   const rows = (board ?? []).slice(0, BEST_ROWS).map((l, i) =>
     `<li${l.id === me ? ' class="me"' : ''}><span>${i + 1}</span>${esc(l.name)} <small>${CLASS_NAME[l.cls]}</small><em>${says(l)}</em></li>`).join('');
   return `<section class="best"><h4>${title}</h4>${rows ? `<ol class="rangeboard">${rows}</ol>` : p(BESTW.empty)}${best ? `<p class="dim">${best}</p>` : ''}</section>`;
@@ -35,6 +36,7 @@ export function openBest(g: Game, panel: Panel): void {
     block(BESTW.butts, w.range, me, pr.range?.best ? RANGEW.yourBest(pr.range.best) : '') +
     block(BESTW.knives, w.knives, me, pr.knives?.best ? KNIFEW.yourBest(pr.knives.best) : '') +
     block(BESTW.forge, w.shift, me, pr.shift?.best ? SHIFTW.yourBest(pr.shift.best) : '') +
+    deepBlocks(w, me) +
     (g.link?.online ? '' : `<p class="dim">${BESTW.offline}</p>`);
   panel.show(BESTW.title, html);
 }

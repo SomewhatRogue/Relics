@@ -13,6 +13,7 @@ import { knifeClaimScore, type KnifeClaim } from './knifeboard.js';
 import { shiftClaimScore, type ShiftClaim } from './shiftboard.js';
 import { fishClaimCatch, type FishClaim } from './fishboard.js';
 import { placeBid, type StatueBid } from './statue.js';
+import { addDeepLine, deepClaimOk, startDeep, type DeepClaim } from './deepboard.js';
 
 /** Works finished lately, kept for the town's talk. */
 export const MENDED_KEPT = 6;
@@ -50,6 +51,9 @@ export interface Contribution {
   fish?: FishClaim;
   /** A bid for the statue in the square: taken only over the price as it stands now (shared/statue.ts). */
   statue?: StatueBid;
+  /** The Deep (shared/deepboard.ts): a run down begun (its seed, stamped with the world's clock), and a run ended (for the boards). */
+  deepStart?: number;
+  deep?: DeepClaim;
 }
 
 /**
@@ -89,6 +93,15 @@ export function contribute(w: WorldState, c: Contribution, now = Date.now(), rai
     w.fish = addRangeLine(w.fish, { id: c.hero.id, name: c.hero.name, cls: c.hero.cls, n: f.oz, sp: f.sp });
   }
   if (c.statue) placeBid(w, c.hero, c.statue);
+  // The Deep: a run's start stamped with this world's clock; a run's end onto its board only against that stamp.
+  if (c.deepStart !== undefined) w.deepRuns = startDeep(w.deepRuns, c.hero.id, c.deepStart, now);
+  if (c.deep && deepClaimOk(w.deepRuns?.[c.hero.id], c.deep, now)) {
+    const line = { id: c.hero.id, name: c.hero.name, cls: c.hero.cls, n: c.deep.f, gold: c.deep.g };
+    if (c.deep.p) w.deepParty = addDeepLine(w.deepParty, line);
+    else w.deepSolo = addDeepLine(w.deepSolo, line);
+    const { [c.hero.id]: _, ...rest } = w.deepRuns!;
+    w.deepRuns = rest;
+  }
 }
 
 /** The Roll of the Brave: per stat, the top heroes. */

@@ -19,6 +19,7 @@ import { SCORES, type Area } from './scores';
 import { WorldLink } from './worldlink';
 import { throwDice } from './diceanim';
 import { setOutNow } from './setout';
+import { deepBlocks } from './deepbest';
 
 let link: WorldLink | null = null;
 /** The page hands over its line to the world server. */
@@ -89,7 +90,7 @@ export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key:
     const pt = g.parties, party = (pt?.current()?.members.length ?? 0) > 1, mine = !party || !!pt?.leading;
     const go = () => (party ? (pt!.retarget(g.deepJob()), panel.hide(), setOutNow(g, panel)) : (panel.hide(), g.enterDeep()));
     panel.show('THE SEWER GRATE', p('The grate is open. Jobs below the town are on the board in the square: The Wickhold Sewers.') +
-      p(`<b>${DEEP_WORDS.title}</b>`) + p(DEEP_WORDS.scene) + say(DEEP_WORDS.keeper, DEEP_WORDS.speech) + p(DEEP_WORDS.rules) + (mine ? '' : p(DEEP_WORDS.partyLead)),
+      p(`<b>${DEEP_WORDS.title}</b>`) + p(DEEP_WORDS.scene) + say(DEEP_WORDS.keeper, DEEP_WORDS.speech) + p(DEEP_WORDS.rules) + (mine ? '' : p(DEEP_WORDS.partyLead)) + deepBlocks(w, g.profile.id),
       mine ? [{ label: DEEP_WORDS.go, primary: true, act: go }] : []);
     return true;
   }

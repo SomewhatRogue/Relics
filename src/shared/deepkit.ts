@@ -17,6 +17,8 @@ export interface DeepRun {
   seed: number;
   /** The kit at the way down. */
   entry: DeepKit;
+  /** Gone down or gone on with friends at any point (the boards list parties apart: shared/deepboard.ts). */
+  party?: boolean;
   /** The last checkpoint passed: its floor, the kit there, and the run's gold there. */
   mark?: { floor: number; kit: DeepKit; gold: number };
 }

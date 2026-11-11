@@ -18,8 +18,8 @@ the floor's way out asks LEAVE or GO DEEPER; GO DEEPER gives a new map; dying gi
 sword too) and loses finds and gold; LEAVE banks it all; each block of five floors is plainly harder and pays
 better (elites from floor 1, a named butcher on 6 and 9, PRE-WAR common by 6). With a party: the leader takes everyone down, each player chooses at the checkpoint, the party goes on once all
 have. Boss floors every fifth floor, the Haulier and the Doorkeepers in turn (`docs/design/deep-bosses.md`), and boss loot
-(`docs/design/boss-loot.md`): one unique drop a kill, rolled NEED / GREED / PASS. Waiting on Kyle's play. Next: step 5,
-the board. Open: Cobb off
+(`docs/design/boss-loot.md`): one unique drop a kill, rolled NEED / GREED / PASS. The boards, alone and with a party (step 5). Waiting on
+Kyle's play. Next: step 6, curses every five floors and blessings every ten. Open: Cobb off
 the church's cart; every band number.
 
 **A block holds, striped blows half-blocked, an easier wood** (Claude Opus 5.5, 2026-11-06; Kyle: "Warrior block

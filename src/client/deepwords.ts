@@ -34,4 +34,9 @@ export const DEEP_WORDS = {
   lost: (n: number) => `You fell on floor ${n}. What you took down is yours again.`,
   /** The recap's row of what stayed below. */
   keptBelow: 'LEFT BELOW',
+  /** The boards (shared/deepboard.ts): at the grate and on BEST IN WICKHOLD. */
+  boardSolo: 'DEEPEST, ALONE',
+  boardParty: 'DEEPEST, WITH A PARTY',
+  boardLine: (floor: number, gold: number) => `floor ${floor}, ${gold} gold`,
+  yourBest: (floor: number, gold: number) => `Your deepest: floor ${floor}, with ${gold} gold.`,
 };

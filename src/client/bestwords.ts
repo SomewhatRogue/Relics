@@ -4,7 +4,7 @@
  */
 export const BESTW = {
   title: 'BEST IN WICKHOLD',
-  about: "The biggest fish out of the millpond and the best scores at the butts, the Rat's knife board and Halvard's forge are copied up here, by the Lantern. Beat one and your name goes up in its place.",
+  about: "The biggest fish out of the millpond, the best scores at the butts, the Rat's knife board, Halvard's forge and the deepest anyone has been down Cobb's ladder are all copied up here, by the Lantern. Beat one and your name goes up in its place.",
   pond: 'BIGGEST OUT OF THE MILLPOND',
   butts: 'AT THE BUTTS',
   knives: "AT THE RAT'S KNIFE BOARD",
