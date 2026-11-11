@@ -9,6 +9,8 @@
  *   buy, sell, or sell back. A piece in the vault, or given up at the church, is off you.
  * - Nettle, at the back of the Drowned Rat, quietly buys TOUCHED and TURNING, for less than Tobin pays
  *   for anything and with no buying back. Never HUNGRY: that goes to the church and nowhere else.
+ * - Carrying hungry gear (Kyle, 2026-11-11), Tobin won't deal with you, so Nettle buys your ordinary gear too,
+ *   at `HUNGRY_CUT`, less again: him or the forge, and nobody else.
  * Selling to either is trade: it never touches the Want.
  */
 import { RARE } from './gear.js';
@@ -32,14 +34,19 @@ export function tobinWont(p: Carrier, it: Item): '' | 'panic' | 'rare' {
 
 /** Nettle's cut of a piece's worth: less than Tobin's (prices.ts PAWN_CUT, 0.3). */
 export const FENCE_CUT = 0.2;
-/** What Nettle buys: touched and turning gear, nothing else. */
-export const nettleTakes = (it: Item) => it.quality === 'touched' || it.quality === 'turning';
-/** What Nettle pays for it (0: he won't take it). */
-export const fenceValue = (it: Item) => (nettleTakes(it) ? Math.max(1, Math.round(priceOf(it) * FENCE_CUT)) + (it.level ?? 0) * PER_LEVEL : 0);
+/** What Nettle pays a hero carrying hungry gear for the ordinary gear Tobin won't now buy. */
+export const HUNGRY_CUT = 0.12;
+/** The rare two Nettle always buys. */
+const rare = (it: Item) => it.quality === 'touched' || it.quality === 'turning';
+/** What Nettle buys off `p`: touched and turning gear; anything but hungry if `p` carries hungry gear. */
+export const nettleTakes = (it: Item, p?: Carrier) => rare(it) || (!!p && carriesHungry(p) && it.quality !== 'hungry');
+/** What Nettle pays `p` for it (0: he won't take it). */
+export const fenceValue = (it: Item, p?: Carrier) =>
+  nettleTakes(it, p) ? Math.max(1, Math.round(priceOf(it) * (rare(it) ? FENCE_CUT : HUNGRY_CUT))) + (rare(it) ? (it.level ?? 0) * PER_LEVEL : 0) : 0;
 
 /** Sell packed piece `i` to Nettle: gold now, and it's gone (no buying back). Returns what he paid. */
 export function fence(p: Stores, i: number): number {
-  const it = p.bag[i], price = it ? fenceValue(it) : 0;
+  const it = p.bag[i], price = it ? fenceValue(it, p as unknown as Carrier) : 0;
   if (!it || price <= 0) return 0;
   p.bag.splice(i, 1);
   p.gold += price;

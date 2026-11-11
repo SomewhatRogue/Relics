@@ -151,3 +151,20 @@ describe("the lore keeper's fixes (2026-11-05)", () => {
     expect([VENDOR_PLACES.WARRIOR.keeper, VENDOR_PLACES.WARRIOR.who]).toEqual(['QUARTERMASTER PRUE', 'Prue']);
   });
 });
+
+describe('Nettle, to a hero carrying hunger (Kyle, 2026-11-11)', () => {
+  it('buys their ordinary gear too, for less than Tobin would have, and still never hungry', async () => {
+    const { HUNGRY_CUT } = await import('../src/shared/fence');
+    const plain = gear('fine'), red = rollHungry(rng, 'WARRIOR');
+    const clean = hero(plain);
+    expect(nettleTakes(plain, clean)).toBe(false);
+    const fallen = hero(plain, red);
+    expect(nettleTakes(plain, fallen)).toBe(true);
+    expect(nettleTakes(red, fallen)).toBe(false);
+    expect(fenceValue(plain, fallen)).toBe(Math.max(1, Math.round(priceOf(plain) * HUNGRY_CUT)));
+    expect(fenceValue(plain, fallen)).toBeLessThan(sellValue(plain));
+    const gold = fallen.gold;
+    expect(fence(fallen, 0)).toBeGreaterThan(0);
+    expect(fallen.gold).toBeGreaterThan(gold);
+  });
+});

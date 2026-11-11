@@ -24,9 +24,9 @@ export const fenceTabs = (on: Tab) => '<div class="tabs">' +
 
 /** SELL QUIETLY: what he'd pay, and your pack with what he won't take dim. */
 export function fenceBody(g: Game): string {
-  const pr = g.profile, wont = (it: Item) => !nettleTakes(it);
+  const pr = g.profile, wont = (it: Item) => !nettleTakes(it, pr);
   return `<div class="shop"><p class="dim">${FENCE.about}</p><h3 class="gh">PACK <i>${pr.bag.length} / ${bagSize(pr)}</i></h3>` +
-    grid(pr.bag, bagSize(pr), 'bag', null, undefined, (it) => (wont(it) ? PAWN.no : '+' + fenceValue(it) + 'G'), wont) +
+    grid(pr.bag, bagSize(pr), 'bag', null, undefined, (it) => (wont(it) ? PAWN.no : '+' + fenceValue(it, pr) + 'G'), wont) +
     (pr.bag.some(wont) ? `<p class="dim">${FENCE.wont}</p>` : '') + `<p class="dim">${SHOPW.gold(pr.gold)}</p></div>`;
 }
 
@@ -37,7 +37,7 @@ export function wireFence(g: Game, again: () => void, sync: () => void): void {
     e.stopPropagation();
     const i = Number(t.dataset.src!.split(':')[1]), it = pr.bag[i];
     if (!it) return;
-    const price = fenceValue(it), base = { icon: itemIcon(it), name: itemName(it), col: TIERS[it.quality].col, body: card(it, g.hero, true), again };
+    const price = fenceValue(it, g.profile), base = { icon: itemIcon(it), name: itemName(it), col: TIERS[it.quality].col, body: card(it, g.hero, true), again };
     if (!price) return itemPop({ ...base, acts: [], why: it.quality === 'hungry' ? FENCE.hungry : FENCE.wont });
     itemPop({ ...base, acts: [{ label: PAWN.sell(price), primary: true, act: () => {
       if (!fence(pr, i)) return;

@@ -8577,3 +8577,4 @@ on a big screen.
 - Kyle: stun-locked by swarms. After a blow staggers you, small goblins can't stagger you again for
   `STAGGER.guard` (1 s); they still hurt. A butcher's or boss's blow still staggers. (A dodge or block
   breaking out of a stagger was tried and dropped: it split the fight after a host handover.)
+- Kyle: Nettle buys a hungry-carrying hero's ordinary gear too, at `HUNGRY_CUT` (0.12 of its worth, under Tobin's 0.3 and his own 0.2 for the rare two): him or the forge, nobody else. Still never hungry gear.
