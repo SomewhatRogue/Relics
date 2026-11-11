@@ -87,10 +87,10 @@ village in Copperdeep, down into the Open Cut, ending at the Haulier *(lore)*. D
 5. Togetherness: the lone-hero hunters, the near-a-friend edge, loot only for those present.
 6. Later: a wing-based one (Sallow Priory, after the lore keeper's call), then a huge one.
 
+Decided (Kyle, 2026-11-11): boss loot drops **every run** (unique pieces rare, with bad-luck protection,
+so replay is the point); party cap stays **4** for now.
+
 ## Open
 
-1. Boss loot every run, or each boss's pool once a week per hero? (Leaning: every run, with the unique
-   pieces rare and bad-luck protection, so replay is the point.)
-2. Party size for instances: the current 4, or bigger for raids later?
-3. Sallow Priory as the wing model: a fanatic order risks echoing our own church and the Blacktongue
+1. Sallow Priory as the wing model: a fanatic order risks echoing our own church and the Blacktongue
    books *(lore keeper first)*.
