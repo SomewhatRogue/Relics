@@ -2,6 +2,11 @@
 
 ## Current slice
 
+**The Deep, steps 1 and 2** (Claude Opus 5.5, 2026-11-11; spec `docs/design/the-deep.md`). Built; waiting on Kyle's
+play. *Done when*, on his phone and laptop: at the open sewer grate Cobb explains the risk and GO DOWN starts floor 1;
+the floor's way out asks LEAVE or GO DEEPER; GO DEEPER gives a new map; dying gives back the kit taken down (a swapped
+sword too) and loses finds and gold; LEAVE banks it all. Next: step 3, floor scaling. Open: Cobb off the church's cart.
+
 **A block holds, striped blows half-blocked, an easier wood** (Claude Opus 5.5, 2026-11-06; Kyle: "Warrior block
 isn't great against butcher ... tutorial is too hard"). Built; waiting on Kyle's play and the lore keeper and line
 editor on the changed lines. *Done when*, on his phone and laptop: a Warrior holding block in front of a butcher loses

@@ -79,6 +79,8 @@ export interface Job {
   zone?: 'hangman' | 'fen';
   /** A boss's arena as the last room (shared/barnarena.ts): the Doorkeepers in the great barn. */
   arena?: 'doorkeepers';
+  /** A floor of the Deep (shared/deep.ts), from 1: its end is a checkpoint, not home. */
+  floor?: number;
 }
 
 export const BOSSES = ['MAWL', 'SKARN', 'OLD KNUCKLES', 'OLD SPOON', 'GUTCHAIN', 'MOTHER RUST'];

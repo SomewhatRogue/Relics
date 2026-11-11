@@ -12,6 +12,9 @@ import { travel } from '../shared/sweep';
 import type { DreadRule } from '../sim/dread';
 import { townInterior } from '../shared/interiors';
 import { board, STORY_PARTY, type Job } from '../shared/jobs';
+import { deepFloor, isDeep } from '../shared/deep';
+import { endDeep, markHere, setOut } from '../shared/deepkit';
+import { DEEP_WORDS } from './deepwords';
 import { expedition, fenmere, hangmansWood } from '../shared/expedjob';
 import { barnHunt, barnPosted } from '../shared/bossjobs';
 import { WORKS, workDone, workOpen, workProgress, WORK_ORDER, type WorkId } from '../shared/works';
@@ -81,7 +84,7 @@ interface JobSave { run: Run; room: Record<string, unknown>; houses?: SavedHouse
  * gold); or gone early from a party, by LEAVE or cut off from it (the gold picked up while with them).
  */
 export type How = 'won' | 'beaten' | 'left' | 'dropped';
-export interface Result { won: boolean; how: How; half: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number; relic?: RelicItem; /** Every relic won at the job's end (recap's RELICS row). */ relics?: RelicItem[]; treasure: Item[]; sold: Item[]; lost?: number; /** Prisoners led off out of reach (layout 4). */ ledoff?: number; /** The Staithe's folk lost off the jetty (sim/staithe.ts). */ netlost?: number; /** The way taken at a fork and what it paid (shared/waypay.ts). */ way?: string; /** Jobs of the church's light left, if it went on this one. */ lit?: number; /** What happened, for the recap (recaptally.ts). */ recap?: Recap }
+export interface Result { won: boolean; how: How; half: boolean; job: Job; gold: number; xp: number; rescued: number; levels: number; relic?: RelicItem; /** Every relic won at the job's end (recap's RELICS row). */ relics?: RelicItem[]; treasure: Item[]; sold: Item[]; lost?: number; /** Prisoners led off out of reach (layout 4). */ ledoff?: number; /** The Staithe's folk lost off the jetty (sim/staithe.ts). */ netlost?: number; /** The way taken at a fork and what it paid (shared/waypay.ts). */ way?: string; /** Jobs of the church's light left, if it went on this one. */ lit?: number; /** What happened, for the recap (recaptally.ts). */ recap?: Recap; /** A Deep run: how it ended, the floor, the finds left below (shared/deepkit.ts). */ deep?: { end: 'out' | 'early' | 'dead'; floor: number; lost: Item[] } }
 /** A leader back after a reload waits this long (the room held) for a friend to answer before the job's given up. */
 const HOLD = 10;
 /** Something you can use where you stand: a spot, a person, or a door. */
@@ -110,6 +113,9 @@ export class Game {
   result: Result | null = null;
   /** When the job was lost (room time), for the fade out before town. */
   beatenAt: number | null = null;
+  /** The Deep: a floor's end just reached (the checkpoint asks, main.ts), and whether the party stood in it last frame. */
+  deepAsk = false;
+  private deepThere = false;
   /**
    * Inside a building: the room outside (it keeps running: fires burn, dens breed), the door you came
    * in by, and your hero there (in town, kept aside). Online, the party leader runs every room someone is in.
@@ -583,6 +589,36 @@ export class Game {
     return this.world.storyDone.includes(CHAPTER_1.mission.id) ? list : [CHAPTER_1.mission, ...list];
   }
 
+  /** The way down at the sewer grate: the Deep's first floor, the kit taken down kept on the save (shared/deepkit.ts). */
+  enterDeep(): void {
+    if (this.mode !== 'town' || this.run || this.result) return;
+    // A fresh map every time (the room's own Rng decides everything in it).
+    const seed = (Date.now() / 1000 + this.profile.runs * 7919) >>> 0;
+    this.profile.deep = setOut(this.profile, seed);
+    store(this.save);
+    this.startJob(deepFloor(1, seed, DEEP_WORDS.floor(1)));
+  }
+
+  /** GO DEEPER at a checkpoint: the next floor, the same run (its gold, kills, the kit taken down). */
+  deeper(): void {
+    const run = this.run, d = this.profile.deep;
+    if (this.mode !== 'run' || !run || !d || !isDeep(run.job) || this.result) return;
+    this.deepAsk = this.deepThere = false;
+    d.floor++;
+    store(this.save);
+    Object.assign(run, { job: deepFloor(d.floor, d.seed, DEEP_WORDS.floor(d.floor)), index: 0, roads: {}, downs: 0 });
+    run.party = 1 + [...(this.coop?.friends.values() ?? [])].filter((f) => f.profile && !f.gone).length;
+    this.place(runRoom(run), undefined, this.hero);
+    this.rooms.reset(this.room);
+  }
+
+  /** LEAVE at a checkpoint: up the ladder with everything found below. */
+  leaveDeep(): void {
+    if (this.mode !== 'run' || !this.run || !isDeep(this.run.job) || this.result) return;
+    this.deepAsk = this.deepThere = false;
+    this.finish('won');
+  }
+
   startJob(job: Job, party = 1): void {
     this.followers.clear();
     this.mode = 'run';
@@ -691,7 +727,12 @@ export class Game {
       else if (!this.outside && this.room.exitOpen) {
         // The way on takes the whole party, standing in it together; at a fork, the road they stand in.
         const road = this.room.map.roads?.find((r) => this.together(r.area));
-        if (road || this.together(this.room.map.exit)) {
+        // The Deep: a floor's end is a checkpoint, asked once each time the party walks into it.
+        if (isDeep(this.run.job)) {
+          const there = this.together(this.room.map.exit);
+          if (there && !this.deepThere && this.profile.deep) (markHere(this.profile.deep, this.profile, this.run.gold), store(this.save), (this.deepAsk = true));
+          this.deepThere = there;
+        } else if (road || this.together(this.room.map.exit)) {
           if (isFinal(this.run)) this.finish('won');
           else {
             this.run.index++;
@@ -972,15 +1013,23 @@ export class Game {
       const mine = bank && !paid.has(bank.job) && (!bank.party || list === null) ? bank : null;
       if (bank && (!mine || due?.job === bank.job)) unbank(id);
       const pay: { job: string; run: Run; end?: How; party: boolean } | null = due ? { job: due.job, run: due.run, end: due.run.end, party: true } : mine && { job: mine.job, run: mine.end?.run ?? mine.run, end: mine.end ? (mine.end.won ? 'won' : 'beaten') : undefined, party: mine.party };
-      if (!pay) return;
+      if (!pay) return void (p.deep && (this.dropDeep(), store(this.save)));
       this.jobKey = pay.job;
       // Nothing earned: let it go quietly.
-      if (!pay.end && !pay.run.gold && !pay.run.xp) return void ((p.paid = [...paid, pay.job].slice(-12)), store(this.save), unbank(id), ONLINE && dropOwed(id, pay.job));
+      if (!pay.end && !pay.run.gold && !pay.run.xp) return void ((p.paid = [...paid, pay.job].slice(-12)), this.dropDeep(), store(this.save), unbank(id), ONLINE && dropOwed(id, pay.job));
       this.run = pay.run;
       this.finish(pay.end ?? 'dropped', true, pay.party);
     } finally {
       this.settling = false;
     }
+  }
+
+  /** Out of the Deep with no run left to pay (a reload, nothing banked): as at the last checkpoint passed. */
+  private dropDeep(): void {
+    const p = this.profile;
+    if (!p.deep) return;
+    p.gold += endDeep(p.deep, p, 'early', 0).gold;
+    p.deep = undefined;
   }
 
   /**
@@ -1016,8 +1065,12 @@ export class Game {
     this.holdUntil = 0;
     // Paid already (a reload in the middle of paying it): never twice.
     if (key && p.paid?.includes(key)) return void ((this.run = null), unbank(p.id), this.enterTown({ x: 24.1, y: 14.8 }));
+    // The Deep (shared/deepkit.ts): up at a checkpoint keeps it all; gone early, as at the last checkpoint; dead, as at the way down.
+    const deepEnd: 'out' | 'early' | 'dead' | null = isDeep(run.job) && p.deep ? (won ? 'out' : how === 'beaten' ? 'dead' : 'early') : null;
+    const deep = deepEnd && p.deep ? { end: deepEnd, ...endDeep(p.deep, p, deepEnd, run.gold) } : undefined;
+    if (isDeep(run.job)) (p.deep = undefined), (this.deepAsk = this.deepThere = false);
     // Driven back (or gone home from a job alone): half the gold. Gone early from a party: what was picked up while with them.
-    const half = !won && !(withParty && (how === 'left' || how === 'dropped'));
+    const half = !deep && !won && !(withParty && (how === 'left' || how === 'dropped'));
     // Driven back in the Ransom Coat: all of it, not half.
     const ransom = half && p.armor?.hungry === 'ransom';
     // A bigger party: more pay and a better treasure; experience shared out so it's a little more, not a multiple (shared/pace.ts).
@@ -1026,7 +1079,7 @@ export class Game {
     const spared = 1 - Math.min(HOUSEBURN.lostMost, (run.lost ?? 0) * HOUSEBURN.lostCut);
     // The way taken at a fork (layout 4): a share more or less of the pay, more for each one saved down it (shared/waypay.ts).
     const way = wayGot(run.job, run.roads, run.saved), wayPay = won && way ? way.pay : 0;
-    const gold = won ? run.gold + Math.round(run.job.reward * rewardMult(w) * bonus * spared * Math.max(0, 1 + wayPay)) : ransom ? 0 : half ? Math.round(run.gold / 2) : run.gold;
+    const gold = deep ? deep.gold : won ? run.gold + Math.round(run.job.reward * rewardMult(w) * bonus * spared * Math.max(0, 1 + wayPay)) : ransom ? 0 : half ? Math.round(run.gold / 2) : run.gold;
     if (ransom) p.gold = 0;
     // The Want grows with every job finished in hungry gear, and with what it killed.
     const hungry = this.hungryWorn();
@@ -1047,7 +1100,7 @@ export class Game {
     // The sure relics (shared/relicaward.ts): a curated zone's climax (already noted on the run), else a
     // story mission, the expedition's beacon or a deep dive's butcher; each player's own roll. The first
     // is carried at once if nothing is.
-    const relics = won ? wonRelics(run, run.job.seed * 977 + p.runs * 31 + p.xp, p.relics) : [], relic = relics[0];
+    const relics = won && !deep ? wonRelics(run, run.job.seed * 977 + p.runs * 31 + p.xp, p.relics) : [], relic = relics[0];
     for (const r of relics) (p.relics.push(r), (p.relic ||= r.id));
     // Each one NEW in the pack, and its moment once the recap is closed (relicnews.ts).
     this.relicNews.push(...gainRelics(p, relics, true));
@@ -1055,10 +1108,10 @@ export class Game {
     const lit = p.lit ?? 0;
     if (lit > 0) p.lit = lit - 1;
     // The treasure at the end: yours alone. What won't fit in the pack is sold on the spot.
-    const found = won ? treasure(run.job, p.cls, p.id, p.runs, crowd, (run.sides ?? 0) + (way?.treasure ?? 0), run.level ?? 1) : [], kept = found.slice(0, Math.max(0, bagSize(p) - p.bag.length)), sold = found.slice(kept.length);
+    const found = won && !deep ? treasure(run.job, p.cls, p.id, p.runs, crowd, (run.sides ?? 0) + (way?.treasure ?? 0), run.level ?? 1) : [], kept = found.slice(0, Math.max(0, bagSize(p) - p.bag.length)), sold = found.slice(kept.length);
     p.bag.push(...kept);
     p.gold += sold.length * TREASURE_SOLD;
-    this.result = { won, how, half, job: run.job, gold, xp, rescued, levels, relic, relics, treasure: kept, sold, lost: run.lost ?? 0, ledoff: run.ledoff ?? 0, netlost: run.netlost ?? 0, way: way ? wayLine(way) : undefined, lit: lit > 0 ? p.lit : undefined, recap };
+    this.result = { won, how, half, job: run.job, gold, xp, rescued, levels, relic, relics, treasure: kept, sold, lost: run.lost ?? 0, ledoff: run.ledoff ?? 0, netlost: run.netlost ?? 0, way: way ? wayLine(way) : undefined, lit: lit > 0 ? p.lit : undefined, recap, deep: deep && { end: deep.end, floor: deep.floor, lost: deep.lost } };
     this.run = null;
     // Paid: marked so in the same store as the pay (the give below), then the tallies let go.
     if (key) p.paid = [...(p.paid ?? []), key].slice(-12);

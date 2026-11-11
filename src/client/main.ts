@@ -48,6 +48,9 @@ import { Game, ME } from './game';
 import { Panel } from './panels';
 import { openSpot } from './townui';
 import { showResult } from './recap';
+import { showCheckpoint } from './deepui';
+import { DEEP_WORDS } from './deepwords';
+import { isDeep } from '../shared/deep';
 import { RelicPop } from './relicmoment';
 import { Title } from './title';
 import { Recovery } from './recovery';
@@ -294,7 +297,7 @@ $('#kitbtn').addEventListener('click', () => (pack.toggle(false), weaponsAbout(g
 $('#leave').addEventListener('click', () => {
   if (game.mode !== 'run' || panel.open) return;
   const party = !!(game.remote || game.coop?.company);
-  panel.show('BACK TO WICKHOLD?', `<p>${party ? LEAVE_PARTY : LEAVE_SOLO}</p>`, [
+  panel.show('BACK TO WICKHOLD?', `<p>${isDeep(game.run?.job) ? DEEP_WORDS.leaveWarn : party ? LEAVE_PARTY : LEAVE_SOLO}</p>`, [
     { label: 'LEAVE', act: () => (panel.hide(), game.leaveJob()) },
     { label: 'STAY', primary: true, act: () => panel.hide() },
   ]);
@@ -567,6 +570,8 @@ function tick(t: number): void {
   // Back in the open in town: see what the world has been up to (at most every minute; not while idle).
   if (game.mode === 'town' && !game.outside && !townfolk?.dozing) void link.refresh();
   if (game.result && !panel.open) showResult(game, panel);
+  // The Deep: a floor's end reached (deepui.ts).
+  else if (game.deepAsk && !panel.open) showCheckpoint(game, panel);
   // A relic just gained: its moment, once nothing's in the way (the recap first, at a job's end).
   relicPop.frame(game.relicNews, t / 1000, panel.open || title.open || !!game.result);
   // Out of the wood: the road to Wickhold (Orla walked you here; she met you in the wood).

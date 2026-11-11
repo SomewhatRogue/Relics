@@ -13,6 +13,7 @@ import { itemName } from '../shared/tuning';
 import { relicName } from '../shared/relicitems';
 import type { Game } from './game';
 import type { Panel } from './panels';
+import { DEEP_WORDS } from './deepwords';
 import { labelRows } from './card';
 import { RELICW } from './relicwords';
 import { chargePips } from './reliccard';
@@ -54,13 +55,16 @@ export function showResult(g: Game, panel: Panel): void {
     [RECAPW.way, r.won ? r.way ?? '' : ''],
     [RECAPW.found, c?.found.join(', ') ?? ''],
     [RECAPW.treasure, r.treasure.map(itemName).join(', ')],
+    // The Deep: what stayed below (shared/deepkit.ts).
+    [DEEP_WORDS.keptBelow, r.deep?.lost.map(itemName).join(', ') ?? ''],
     // Picked up on the way, then the sure one at the end, each with the uses it holds.
     [RECAPW.relic, [...(c?.relics ?? []), ...(r.relics ?? (r.relic ? [r.relic] : [])).map((x) => RELICW.withUses(relicName(x), x.charge))].join(', ')],
   ], 'recap');
   // Every relic that came home, drawn: its picture, name, uses and NEW (relicshelf.ts's squares, bigger).
   const won = [...g.profile.relics.filter((x) => c?.relicIds?.includes(x.id)), ...(r.relics ?? (r.relic ? [r.relic] : []))];
   const strip = won.length ? `<div class="rwon">${won.map((x) => `<div class="rwon1"><img src="${relicItemIcon(x)}" alt=""><div><i>${RELICW.newRelic}</i><b style="color:${relicCol(x)}">${relicName(x)}</b>${chargePips(x)}</div></div>`).join('')}</div>` : '';
-  const lines = r.won ? [] : [ENDED[r.half ? (r.how === 'dropped' ? 'lostCut' : 'half') : r.how === 'dropped' ? 'cut' : 'left']];
+  const dp = r.deep, deepLine = dp && (dp.end === 'out' ? DEEP_WORDS.out(dp.floor) : dp.end === 'dead' ? DEEP_WORDS.lost(dp.floor) : DEEP_WORDS.outEarly(dp.floor));
+  const lines = deepLine ? [deepLine] : r.won ? [] : [ENDED[r.half ? (r.how === 'dropped' ? 'lostCut' : 'half') : r.how === 'dropped' ? 'cut' : 'left']];
   if (r.levels) lines.push(`<b>Level ${g.profile.level}.</b> ${title(TRAINERS[g.profile.cls].name)} trains you, at ${TRAINERS[g.profile.cls].where}.`);
   for (const i of r.sold) lines.push(`No room for the ${itemName(i)}: sold for 20 gold.`);
   if (r.relic) lines.push((r.job.boss && !r.job.exped && r.job.objective !== 'story' ? RELICW.cutOut(r.job.boss, relicName(r.relic)) : RELICW.broughtHome(relicName(r.relic))) + ' ' + (g.profile.relic === r.relic.id ? RELICW.carryHint : RELICW.shelfHint));
@@ -70,5 +74,5 @@ export function showResult(g: Game, panel: Panel): void {
   if (g.profile.picks) lines.push(RECAPW.knack(g.profile.picks));
   const html = `<div class="recapcard">${p(`<b>${r.job.title}</b>`)}${did}${c ? partyTable(c.party) : ''}<hr>${got}${strip}${lines.map(p).join('')}</div>`;
   // One button, home. Never the knacks screen (Kyle, 2026-11-05).
-  panel.show(r.won ? 'JOB DONE' : r.half ? 'DRIVEN BACK' : 'HOME EARLY', html, [{ label: RECAPW.home, primary: true, act: () => panel.hide() }], true);
+  panel.show(dp ? (dp.end === 'dead' ? DEEP_WORDS.lostTitle : DEEP_WORDS.outTitle) : r.won ? 'JOB DONE' : r.half ? 'DRIVEN BACK' : 'HOME EARLY', html, [{ label: RECAPW.home, primary: true, act: () => panel.hide() }], true);
 }

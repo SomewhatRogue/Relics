@@ -8540,3 +8540,10 @@ on a big screen.
 - Kyle: the censer's whirl too, "no early release, emulate the flail": let go before the full charge, no whirl.
 - Kyle (2026-11-08): the recorded goblin voices bark. Their chatter, cackle, yelp, hiss and bow warning are the old synth again (lower, shorter), and their swings land without a grunt. Deaths, chants, drums and the screech keep their recordings.
 - Kyle: goblin deaths were too high and shrill: the synth again, pitched lower and shorter. Only butchers and bosses roar on a big wind-up; other goblins (the shield ones) hiss.
+
+## 2026-11-11: the Deep, steps 1 and 2: the way down, a floor, the checkpoint, the run snapshot (Kyle; Claude Opus 5.5)
+
+- The way down is on the SEWER GRATE's panel once the sewers works are done: Cobb (lore keeper's pick) says plainly what's at risk, GO DOWN. A floor is one room of the ordinary generator under Wickhold (`shared/deep.ts`, place "The Deep", larder, burn or rescue in turn, never the same twice running), a fresh map from the run's seed each floor. Not yet harder per floor: that's step 3.
+- A floor's way out is a checkpoint (`client/deepui.ts`): walking into it asks LEAVE or GO DEEPER, once each time you walk in. GO DEEPER keeps the run (gold, kills, the three downs reset). LEAVE pays the run's gold whole, no job reward or treasure.
+- The snapshot (`shared/deepkit.ts`) is on the hero's save: the kit at the way down (weapon in hand, every weapon, pack, armor, rings). Die and it comes back whole, a swapped-out sword included; finds and run gold are gone (LEFT BELOW on the recap). Each checkpoint marks the kit and gold there: LEAVE mid-floor, or a reload that can't get back in, counts as leaving at the last checkpoint (none: as at the way down). Relics, potions and gold spent stand.
+- Solo only for now; party choice at the checkpoint and disconnects are step 4. Tests: `tests/deep.test.ts`.

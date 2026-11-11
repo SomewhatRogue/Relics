@@ -127,6 +127,8 @@ export interface Profile {
   fishing?: import('./fishing.js').FishRecord;
   /** The archery range at the hunters' lodge: rounds shot (seeds the next) and the best (shared/range.ts). */
   range?: import('./range.js').RangeRecord;
+  /** Down in the Deep: the kit taken down, and the last checkpoint's (shared/deepkit.ts). Gone once out. */
+  deep?: import('./deepkit.js').DeepRun;
   /** Arm-wrestling at the Drowned Rat: bouts (seeds the next), wins, who you've put down (shared/armwrestle.ts). */
   arm?: import('./armwrestle.js').ArmRecord;
   /** The Rat's knife board: rounds thrown (seeds the next) and the best (shared/knives.ts). */

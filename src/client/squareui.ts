@@ -13,6 +13,7 @@ import { townSays } from '../shared/townsays';
 import type { SpotId } from '../shared/town';
 import type { Game } from './game';
 import { line } from './speech';
+import { DEEP_WORDS } from './deepwords';
 import type { Panel } from './panels';
 import { SCORES, type Area } from './scores';
 import { WorldLink } from './worldlink';
@@ -81,9 +82,11 @@ export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key:
     return true;
   }
   if (id === 'sewer') {
-    panel.show('THE SEWER GRATE', workDone(w, 'sewers')
-      ? p('The grate is open. Jobs below the town are on the board in the square: The Wickhold Sewers.')
-      : p(`Rusted shut. Something scratches below, and the air that comes up smells of wet fur and old pennies. The public works will open it once enough dens are burned out on jobs (${Math.min(w.dens, WORKS.sewers.need)} of ${WORKS.sewers.need}).`));
+    if (!workDone(w, 'sewers')) return panel.show('THE SEWER GRATE', p(`Rusted shut. Something scratches below, and the air that comes up smells of wet fur and old pennies. The public works will open it once enough dens are burned out on jobs (${Math.min(w.dens, WORKS.sewers.need)} of ${WORKS.sewers.need}).`)), true;
+    // Open: the sewer jobs on the board, and the way down to the Deep with Cobb at the top of it (docs/design/the-deep.md).
+    panel.show('THE SEWER GRATE', p('The grate is open. Jobs below the town are on the board in the square: The Wickhold Sewers.') +
+      p(`<b>${DEEP_WORDS.title}</b>`) + p(DEEP_WORDS.scene) + say(DEEP_WORDS.keeper, DEEP_WORDS.speech) + p(DEEP_WORDS.rules),
+      [{ label: DEEP_WORDS.go, primary: true, act: () => (panel.hide(), g.enterDeep()) }]);
     return true;
   }
   if (id === 'locked') {

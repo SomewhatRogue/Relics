@@ -360,3 +360,9 @@ most Want among the heroes is the one the bells don't spare).
 - **Hempen** is among the named butchers, and is always called "it".
 - **The north path** out of the wood comes round to the Wickhold road.
 - On-screen words: **SNARED** (hoisted by the ankle), **CUT FREE** (a friend cuts you down: the same word as for a net), **LOOK UP** (a dropper letting go).
+
+## The Deep and Cobb's ladder (recorded 2026-11-11; lore keeper, Kyle to confirm)
+
+- **The Deep** is a stone pit older than Wickhold. The wall-builders cut their stone out around a hole already going down, bolted a ladder to it, and quit when the rope came up cut. Nobody in town dug it and nobody knows who did. No one has reached a bottom; every floor ends in another ladder. The town says "the Deep" and leaves it there. What the town lost goes down in the end, which is why the gear below is good. The hungry are in it, as they are everywhere dark.
+- It is not the goblins' tunnels (those are narrow, new and run level; the Deep is old, wide and runs down; the sewers meet it from the side). No line says which came first, who dug the tunnels, or that the hungry use the Deep to reach the square. Not the Copperdeep's shard, not the Keeping Room. Tying it to either is Kyle's call, made on purpose later, never hinted now.
+- **Cobb**, the church's gravedigger, sits on a crate at the top of the ladder with a lamp and a slate. He writes each name going down and rubs it out on the way up; the count of the dead stays Odric's. He speaks slowly and flat, no sayings, no jokes, the practical part last. On screen "Cobb" or "the gravedigger", never "the keeper". Open: he's at the ladder only while someone is below, or the church's cart goes without him.

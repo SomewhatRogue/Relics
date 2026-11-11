@@ -1,12 +1,12 @@
 # The Deep: an endless dungeon under Wickhold
 
-Spec, 2026-11-11 (Kyle and Claude Opus 5.5). Not built. Names marked *(lore)* need the lore keeper and
+Spec, 2026-11-11 (Kyle and Claude Opus 5.5). Steps 1 and 2 built 2026-11-11 (`shared/deep.ts`, `shared/deepkit.ts`, `client/deepui.ts`). Names marked *(lore)* need the lore keeper and
 line editor before they go on screen.
 
 ## The shape
 
-- Enter from the Wickhold Sewers. Someone sits at the way down and tells you plainly what you risk
-  *(lore: who; not Dorcas, whose Keeping Room is also in the Sewers but hidden)*.
+- Enter from the Wickhold Sewers, at the sewer grate once the works have opened it. Cobb the gravedigger
+  sits at the way down with a lamp and a slate and tells you plainly what you risk (lore keeper; story bible, "The Deep").
 - Each floor is a fresh random map from the existing generator. Goblins get harder every floor through
   the threat budget (more of them, elites and named butchers deeper); loot gets better every floor.
 - At the end of each floor, a checkpoint: **LEAVE** with what you've found, or **GO DEEPER**.
@@ -65,5 +65,6 @@ Each floor is short (2 to 4 minutes) so a run's length is the player's choice.
 
 ## Open
 
-1. Who sits at the way down, and what is the Deep in the world? *(lore)*
+1. ~~Who sits at the way down, and what is the Deep in the world?~~ Cobb; a pit older than the town (story bible).
+2. Leaving mid-floor alone counts as leaving at the last checkpoint passed (as a disconnect does). Relics and potions are not run finds: a relic found below is kept even on death, a potion drunk is gone.
 3. Any tie to holy and hungry (hungry finds only below a floor, say)?

@@ -82,7 +82,8 @@ export function goal(run: Run, room: ArenaRoom, houses: Captives = { caged: 0, w
   const more = houses.caged ? `${houses.caged} more in the houses` : '';
   const people = [left && cap(left), more && (left ? more : cap(more))].filter(Boolean).join('. ');
   const also = (text: string) => (people ? `${text}. ${people}` : text);
-  const way = (home: boolean) => `${home ? 'Way home' : 'Way on'}: ${wayDir(room.map)}`;
+  // (A Deep floor's way out is the ladder on down to its checkpoint: shared/deep.ts.)
+  const way = (home: boolean) => `${home ? (run.job.floor ? 'Way down' : 'Way home') : 'Way on'}: ${wayDir(room.map)}`;
   if (!isFinal(run)) {
     const fork = !!room.map.roads;
     // With spiders about (nests and all) it's the room to clear, not just the goblins.
