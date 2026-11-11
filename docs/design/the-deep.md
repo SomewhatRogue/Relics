@@ -1,6 +1,6 @@
 # The Deep: an endless dungeon under Wickhold
 
-Spec, 2026-11-11 (Kyle and Claude Opus 5.5). Steps 1 and 2 built 2026-11-11 (`shared/deep.ts`, `shared/deepkit.ts`, `client/deepui.ts`). Names marked *(lore)* need the lore keeper and
+Spec, 2026-11-11 (Kyle and Claude Opus 5.5). Steps 1 to 3 built 2026-11-11 (`shared/deep.ts`, `deepkit.ts`, `deepbands.ts`, `deeploot.ts`, `client/deepui.ts`). Names marked *(lore)* need the lore keeper and
 line editor before they go on screen.
 
 ## The shape

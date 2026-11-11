@@ -1,0 +1,36 @@
+/**
+ * The Deep's floors by band (docs/design/the-deep.md, "Floors and loot"): what each block of five turns
+ * up, and how it keeps rising past fifteen. Read by shared/deep.ts (the floor's job), shared/roombudget.ts
+ * and eliteroll.ts (how many goblins, how many elites), sim/run.ts (level and toughness) and
+ * shared/deeploot.ts (the tier odds). No imports, so anything can read it.
+ *
+ * - `ruin`, `deep`: the floor's place and flag, as any job's (hard places and deep dives: bigger rooms,
+ *   up to two elites a room and three affixes, chests a tier up).
+ * - `room`: the room of a job it's laid out as (budget and elites go by it; a job's first room has none).
+ * - `hunt`: every `hunt`th floor is a hunt for a named butcher (0 never).
+ * - `level`: levels on the party's for the goblins' toughness and the loot's lean (capped, shared/threat.ts).
+ * - `pre`, `rare`: PRE-WAR and the rare three that many times as likely in a chest or off a goblin.
+ */
+export const DEEP_BANDS = [
+  { from: 1, ruin: 2, deep: false, room: 1, hunt: 0, level: 0, pre: 2, rare: 1 },
+  { from: 6, ruin: 3, deep: true, room: 2, hunt: 3, level: 2, pre: 5, rare: 2 },
+  { from: 11, ruin: 3, deep: true, room: 3, hunt: 2, level: 4, pre: 6, rare: 5 },
+  { from: 16, ruin: 3, deep: true, room: 3, hunt: 2, level: 6, pre: 6, rare: 6 },
+];
+export type DeepBand = (typeof DEEP_BANDS)[number];
+
+/**
+ * Past floor `from`, each floor on: goblins' health and damage, the room's budget, and the rare three's
+ * odds, this much more again, with no end. (The on-screen caps still hold: a deeper room is longer and
+ * harder, never a wall of goblins at once.)
+ */
+export const DEEP_PAST = { from: 15, hp: 0.08, harm: 0.04, budget: 0.05, rare: 0.15 };
+
+/** Room `index` of a job as the budget and the elites see it: a Deep floor counts as its band's room. */
+export const roomAt = (job: { floor?: number }, index: number) => (job.floor ? index + bandOf(job.floor).room : index);
+/** Floor `n`'s band (from 1). */
+export const bandOf = (n: number): DeepBand => [...DEEP_BANDS].reverse().find((b) => n >= b.from) ?? DEEP_BANDS[0];
+/** Floors past DEEP_PAST.from (0 before). */
+export const pastOf = (n: number) => Math.max(0, n - DEEP_PAST.from);
+/** Floor `n`'s room budget, and its goblins' health and damage, times this (1 till past fifteen). */
+export const deepGrow = (n: number) => ({ budget: 1 + DEEP_PAST.budget * pastOf(n), hp: 1 + DEEP_PAST.hp * pastOf(n), harm: 1 + DEEP_PAST.harm * pastOf(n) });

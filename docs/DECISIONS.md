@@ -8547,3 +8547,11 @@ on a big screen.
 - A floor's way out is a checkpoint (`client/deepui.ts`): walking into it asks LEAVE or GO DEEPER, once each time you walk in. GO DEEPER keeps the run (gold, kills, the three downs reset). LEAVE pays the run's gold whole, no job reward or treasure.
 - The snapshot (`shared/deepkit.ts`) is on the hero's save: the kit at the way down (weapon in hand, every weapon, pack, armor, rings). Die and it comes back whole, a swapped-out sword included; finds and run gold are gone (LEFT BELOW on the recap). Each checkpoint marks the kit and gold there: LEAVE mid-floor, or a reload that can't get back in, counts as leaving at the last checkpoint (none: as at the way down). Relics, potions and gold spent stand.
 - Solo only for now; party choice at the checkpoint and disconnects are step 4. Tests: `tests/deep.test.ts`.
+
+## 2026-11-11: the Deep, step 3: floors by band (Claude Opus 5.5)
+
+- Every number is in `shared/deepbands.ts`. A floor reads its band (1 to 5, 6 to 10, 11 to 15, 16 on): the place's ruin (2, then 3), the deep-dive flag from floor 6 (bigger rooms, up to two elites a room and three affixes, a chained chest), and the room of a job it's laid out as (2nd, 3rd, 4th: a job's first room has no elites and the smallest budget, so floors no longer read as first rooms).
+- Named butchers: a hunt every third floor in 6 to 10 (6, 9), every other floor from 11 (12, 14, 16...). The spec's plain "butcher every few floors" in 6 to 10 is a named one for now.
+- Levels on the party's: +0, +2, +4, +6 (goblins' toughness and the loot's lean, both capped as ever). Loot leant by band in chests and drops (`shared/deeploot.ts`): PRE-WAR x2, x5, x6, x6; the rare three x1, x2, x5, x6.
+- Past floor 15, a floor on: goblins +8% health, +4% damage, the room's budget +5%, the rare three +15% of their lean, with no end. The on-screen caps still hold.
+- Open: every number once Kyle has gone down a few times; Deep-only finds (later, holy and hungry).

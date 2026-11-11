@@ -6,6 +6,10 @@ import { TICK } from '../src/shared/tuning';
 import type { Item } from '../src/shared/loot';
 import type { Profile } from '../src/shared/progress';
 import { NO_INTENT } from '../src/sim/types';
+import { roomBudget } from '../src/shared/roombudget';
+import { eliteChance } from '../src/shared/eliteroll';
+import { deepOdds } from '../src/shared/deeploot';
+import { DROP_ODDS } from '../src/shared/gear';
 
 // The checkpoint is reached by walking into a finished floor's way out: the floor's goal is taken as done here.
 const done = { on: false };
@@ -155,5 +159,51 @@ describe('the Deep in the game', () => {
     expect(p.gold).toBe(gold0 + 25);
     expect(p.bag).toContainEqual(axe);
     expect(p.rings).not.toContainEqual(ring);
+  });
+});
+
+describe('floors by band (step 3)', () => {
+  const share = (o: [string, number][], ts: string[]) => o.filter(([t]) => ts.includes(t)).reduce((s, [, p]) => s + p, 0);
+  const RARE = ['touched', 'turning', 'hungry'];
+
+  it('each band is a harder place and a deeper room, with named butchers to hunt from floor 6', () => {
+    const f = (n: number) => deepFloor(n, 99, 'x');
+    expect(f(1)).toMatchObject({ place: { ruin: 2 } });
+    expect(f(1).deep).toBeUndefined();
+    expect(f(6)).toMatchObject({ deep: true, place: { ruin: 3 }, objective: 'hunt' });
+    expect(f(6).boss).toBeTruthy();
+    expect([7, 8, 10].map((n) => f(n).objective)).not.toContain('hunt');
+    expect(f(12).objective).toBe('hunt');
+    for (let n = 2; n < 30; n++) expect(f(n).objective === 'hunt' && f(n - 1).objective === 'hunt').toBe(false);
+    const b = [1, 6, 11, 16, 20, 30].map((n) => roomBudget(f(n), 0));
+    for (let i = 1; i < b.length; i++) expect(b[i]).toBeGreaterThanOrEqual(b[i - 1]);
+    expect(b[5]).toBeGreaterThan(b[3]);
+    // An ordinary job's first room has no elites; every Deep floor can.
+    expect(eliteChance({ ...f(1), floor: undefined }, 0)).toBe(0);
+    expect(eliteChance(f(1), 0)).toBeGreaterThan(0);
+  });
+
+  it('a hunt floor has its named butcher; floors past fifteen keep getting tougher', () => {
+    const run = newRun(deepFloor(6, 99, 'x')), room = runRoom(run);
+    expect(room.enemies.some((e) => e.name)).toBe(true);
+    expect(goal(run, room).text).toContain(run.job.boss!);
+    const lv = (n: number) => runRoom(newRun(deepFloor(n, 99, 'x'))).level;
+    expect(lv(1)).toBe(1);
+    expect(lv(11)).toBeGreaterThan(lv(6));
+    // The same goblin a floor on, past fifteen: more health (the room's own map aside).
+    const a = runRoom(newRun({ ...deepFloor(17, 5, 'x'), floor: 16 })), z = runRoom(newRun({ ...deepFloor(17, 5, 'x'), floor: 26 }));
+    const top = (r: typeof a) => Math.max(...r.enemies.map((e) => e.maxHp));
+    expect(top(z)).toBeGreaterThan(top(a));
+    expect(z.floor).toBe(26);
+  });
+
+  it('loot: PRE-WAR then the rare three lean up band by band, and rare keeps rising past fifteen', () => {
+    const o = DROP_ODDS.chest, at = (n: number) => deepOdds(o, n);
+    expect(at(0)).toBe(o);
+    for (const n of [1, 6, 11, 16, 25]) expect(share(at(n), ['plain', 'fine', 'forged', 'tolmouth', ...RARE])).toBeCloseTo(share(o, ['plain', 'fine', 'forged', 'tolmouth', ...RARE]));
+    expect(share(at(1), ['tolmouth'])).toBeGreaterThan(share(o, ['tolmouth']));
+    expect(share(at(6), ['tolmouth'])).toBeGreaterThan(share(at(1), ['tolmouth']));
+    const r = [1, 6, 11, 16, 25, 40].map((n) => share(at(n), RARE));
+    for (let i = 1; i < r.length; i++) expect(r[i]).toBeGreaterThan(r[i - 1]);
   });
 });

@@ -9,6 +9,7 @@ import type { Job } from './jobs.js';
 import { Rng } from './rng.js';
 import { SCREEN, THREAT, THREAT_TIER, threatOf } from './threat.js';
 import { weighOf } from './roombudget.js';
+import { roomAt } from './deepbands.js';
 
 /** Band `band`'s `nth` goblin of role `role` is an elite with `affixes`. */
 export interface EliteRoll { band: number; role: Role; nth: number; affixes: Affix[] }
@@ -17,7 +18,7 @@ export interface EliteRoll { band: number; role: Role; nth: number; affixes: Aff
 const can = (r: Role) => THREAT_TIER[r] === 'meaty' && r !== 'log';
 
 /** The chance a meaty goblin in room `index` of `job` is an elite (0 before ELITE.from). */
-export const eliteChance = (job: Job, index: number) => (ELITE.on && index >= ELITE.from ? ELITE.chance + ELITE.perRuin * job.place.ruin : 0);
+export const eliteChance = (job: Job, index: number) => (ELITE.on && roomAt(job, index) >= ELITE.from ? ELITE.chance + ELITE.perRuin * job.place.ruin : 0);
 
 /**
  * The roller for room `index` of `job`: called with each band's template as the composer picks it, in order

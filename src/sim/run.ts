@@ -19,6 +19,7 @@ import { EXPED, WEAPONS } from '../shared/tuning';
 import { blankScore, foldBoard, type Board, type Score } from './score';
 import type { RelicWon } from '../shared/relicaward';
 import { arenaRoom } from './arenaroom';
+import { bandOf, deepGrow } from '../shared/deepbands';
 
 export interface Run {
   job: Job;
@@ -78,10 +79,18 @@ export function runRoom(run: Run): ArenaRoom {
   const plan = planRoom(run.job, run.index, run.roads[run.index], run.roads), n = run.party ?? 1;
   // Worse places and deep jobs shift every chest roll a tier up.
   const danger = (run.job.place.ruin >= 3 ? 1 : 0) + (run.job.deep ? 1 : 0);
-  const room = new ArenaRoom(run.job.seed + run.index, { map: plan.map, foes: scaleFoes(plan.foes, n, run.job.seed * 17 + run.index * 5 + 2), furniture: plan.props, chests: plan.chests, danger, level: run.level ?? 1 });
+  // A Deep floor: its band's levels on the party's, and its tier odds leant by the floor (shared/deepbands.ts, deeploot.ts).
+  const fl = run.job.floor ?? 0, level = (run.level ?? 1) + (fl ? bandOf(fl).level : 0);
+  const room = new ArenaRoom(run.job.seed + run.index, { map: plan.map, foes: scaleFoes(plan.foes, n, run.job.seed * 17 + run.index * 5 + 2), furniture: plan.props, chests: plan.chests, danger, level });
+  room.floor = fl;
   // A routed room plays the pacing rules (sim/pacing.ts, chase.ts): what's on screen held to the party's caps, and no easy kiting.
   if (run.job.layout && run.job.layout >= 3) room.pace = { index: run.index };
   scaleBosses(room.enemies, n);
+  // Past fifteen floors, every goblin a little tougher and harder hitting again a floor, without end.
+  if (fl) {
+    const g = deepGrow(fl);
+    if (g.hp > 1) for (const e of room.enemies) (e.hp = e.maxHp = Math.round(e.maxHp * g.hp)), (e.harm = +((e.harm ?? 1) * g.harm).toFixed(3));
+  }
   room.board = {};
   room.dread = { by: dreadFor(run.job) };
   // Out in the open, a cage can hold a false prisoner (sim/falsecage.ts); never inside a house.

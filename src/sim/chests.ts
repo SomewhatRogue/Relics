@@ -21,7 +21,7 @@ export const newChest = (x: number, y: number, chained = false, boss?: number): 
 const players = (heroes: Hero[]) => heroes.filter((h) => h.id !== 'squire');
 
 /** Start opening: roll for every player now (so the light is true), best of the opener's sets the colour. */
-export function startChest(c: Chest, h: Hero, heroes: Hero[], enemies: Enemy[], rng: Rng, shift: number, ev: FightEvent[], lv = 1): void {
+export function startChest(c: Chest, h: Hero, heroes: Hero[], enemies: Enemy[], rng: Rng, shift: number, ev: FightEvent[], lv = 1, floor = 0): void {
   if (c.state !== 'shut' || Math.hypot(h.x - c.x, h.y - c.y) > CHEST.reach || h.act === 'down') return;
   if (c.chained && enemies.some((e) => e.name && !isDead(e))) return void ev.push({ k: 'chained', x: c.x, y: c.y });
   if (c.boss !== undefined) rollBossChest(c, players(heroes), lv);
@@ -30,7 +30,7 @@ export function startChest(c: Chest, h: Hero, heroes: Hero[], enemies: Enemy[], 
     const n = rng.next() < 0.4 || c.chained ? 2 : 1, cls = WEAPONS[p.weapon].cls;
     c.rolls[p.id] = Array.from({ length: n }, () => {
       const slot = rng.next() < 0.55 ? 'weapon' : rng.next() < 0.5 ? 'armor' : 'ring';
-      return lift(rollAny(rng, cls, rollTier(rng, 'chest', shift + (c.chained ? 1 : 0), lv), slot), lv);
+      return lift(rollAny(rng, cls, rollTier(rng, 'chest', shift + (c.chained ? 1 : 0), lv, floor), slot), lv);
     });
   }
   c.tier = c.rolls[h.id].reduce<Tier>((best, it) => (TIER_ORDER.indexOf(it.quality) > TIER_ORDER.indexOf(best) ? it.quality : best), 'plain');

@@ -199,6 +199,8 @@ export class ArenaRoom {
   pace: { index: number } | null = null;
   /** The party's average level when the job began (shared/threat.ts LEVEL_SCALE): every goblin tougher by it, loot a little better. */
   level = 1;
+  /** A Deep floor (0 elsewhere): chests and drops lean their tiers by it (shared/deeploot.ts). */
+  floor = 0;
   /** A boss's arena (sim/arenaroom.ts): the room's notes on its bosses (sim/bosskit.ts BossBook), never sent; null, none here. */
   bosses: BossBook | null = null;
 
@@ -395,7 +397,7 @@ export class ArenaRoom {
       const inp = this.intents.get(h.id) ?? NO_INTENT, c = this.chests.find((x) => x.id === inp.open);
       if (inp.openSeq === h.seen.open) continue;
       h.seen.open = inp.openSeq;
-      if (c) startChest(c, h, this.heroes, this.enemies, this.lootRng, this.danger, this.events, this.level);
+      if (c) startChest(c, h, this.heroes, this.enemies, this.lootRng, this.danger, this.events, this.level, this.floor);
     }
     stepChests(this.chests, this.heroes, this.drops, this.pickups, this.lootRng, this.events, TICK);
     for (const h of this.heroes) if (h.safeT) h.safeT = Math.max(0, h.safeT - TICK);
@@ -490,7 +492,7 @@ export class ArenaRoom {
     stepWorldFire(w, this);
     // Out of bounds: the dread, and what comes for anyone who stays out (sim/dread.ts).
     stepDread(this.dread, this.map, this.heroes, this.enemies, TICK, this.events);
-    for (const e of this.enemies) if (alive.has(e.id) && isDead(e) && !e.escaped) dropFrom(e, this.heroes, this.drops, this.lootRng, this.events, this.level);
+    for (const e of this.enemies) if (alive.has(e.id) && isDead(e) && !e.escaped) dropFrom(e, this.heroes, this.drops, this.lootRng, this.events, this.level, this.floor);
     for (const e of this.enemies) if (alive.has(e.id) && isDead(e) && !e.escaped) {
       dropCoal(e, this.coals);
       dropPickups(e, this.pickups, this.lootRng, this.exped ? EXPED_COINS : undefined);

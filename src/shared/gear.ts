@@ -14,6 +14,7 @@ import { CAPS, MODS, MOD_COUNT, PER_MOD, modFits, modPool, modValue, rollMods, t
 import { ARMOR, budget } from './budget.js';
 import { rollCost } from './costs.js';
 import { PLUS, plusCost, plusOf } from './forgeplus.js';
+import { deepOdds } from './deeploot.js';
 
 export * from './mods.js';
 export * from './budget.js';
@@ -102,9 +103,12 @@ export function pickTier(rng: Rng, odds: [Tier, number][]): Tier {
   for (const [tier, p] of odds) if ((r -= p) < 0) return tier;
   return odds[odds.length - 1][0];
 }
-/** `lv`: the party's average level (shared/lootlevel.ts): the odds lean up a little a level. */
-export function rollTier(rng: Rng, from: keyof typeof ODDS, shift = 0, lv = 1): Tier {
-  const t = pickTier(rng, leanOdds(ODDS[from], lv)), i = TIER_ORDER.indexOf(t), top = TIER_ORDER.indexOf(LIFT_TO);
+/**
+ * `lv`: the party's average level (shared/lootlevel.ts): the odds lean up a little a level. `floor`: a Deep
+ * floor (shared/deeploot.ts), its band's PRE-WAR and rare odds on top.
+ */
+export function rollTier(rng: Rng, from: keyof typeof ODDS, shift = 0, lv = 1, floor = 0): Tier {
+  const t = pickTier(rng, deepOdds(leanOdds(ODDS[from], lv), floor)), i = TIER_ORDER.indexOf(t), top = TIER_ORDER.indexOf(LIFT_TO);
   return i >= top ? t : TIER_ORDER[Math.min(top, i + shift)];
 }
 
