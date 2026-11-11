@@ -56,6 +56,8 @@ which path this is, then take it:
 - `npm run check`: TypeScript.
 - `npm run build && npx vite preview --port 4173` then `node scripts/look.cjs`: phone (390x844 at 3x,
   touch) and laptop screenshots into `shots/`, with the fight state and page errors printed.
+- Solo build: `scripts/solo.sh <scratchpad>/relic-play.html`, then publish that file to
+  https://claude.ai/artifact/AStuC1F92Q1JTRLhSPcJte (Kyle plays it there too).
 - Test hooks: `window.render_game_to_text()`, `window.__GAME_STATE__()`, `window.__room`,
   `window.__game`, `window.__openSpot(id, 0)`.
 
