@@ -7,10 +7,16 @@
 import { SLEEP } from '../shared/tuning';
 import type { Enemy, Hero } from './types';
 
-/** Mark who dozes this tick and return the awake ones (in the room's order). */
-export function awake(all: Enemy[], heroes: Hero[]): Enemy[] {
-  const out: Enemy[] = [], w2 = SLEEP.wake * SLEEP.wake, d2 = SLEEP.doze * SLEEP.doze;
+/** Mark who dozes this tick and return the awake ones (in the room's order). `at`: the room's own distances (an instance's area). */
+export function awake(all: Enemy[], heroes: Hero[], at: { wake: number; doze: number } = SLEEP): Enemy[] {
+  const out: Enemy[] = [], w2 = at.wake * at.wake, d2 = at.doze * at.doze;
   for (const e of all) {
+    // A guard driving prisoners never dozes: the line walks only while it's driven (sim/scenes.ts), and a dozing one would read as dead.
+    if (e.task?.k === 'escort') {
+      e.dozing = false;
+      out.push(e);
+      continue;
+    }
     let near = Infinity;
     for (const h of heroes) {
       const dx = h.x - e.x, dy = h.y - e.y, q = dx * dx + dy * dy;

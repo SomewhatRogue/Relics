@@ -9,9 +9,10 @@ import { KIND, SIZES, STORY_PARTY, danger, type Job } from '../shared/jobs';
 import { EXPED_BOARD } from '../shared/expedjob';
 import { WOOD_POST } from '../shared/hangwords';
 import { FEN_POST } from '../shared/fenwords';
+import { CUT_POST } from '../shared/opencutwords';
 
-/** An expedition's board words: the Barrowfields', or Hangman's Wood's (shared/hangwords.ts). */
-const boardWords = (j: Job) => (j.exped === 'hangmans' ? WOOD_POST : j.exped === 'fen' ? { ...FEN_POST, pays: (n: number) => FEN_POST.pays(n, j.boss) } : EXPED_BOARD);
+/** An expedition's or an instance's board words: the Barrowfields', Hangman's Wood's (shared/hangwords.ts), the Open Cut's. */
+const boardWords = (j: Job) => (j.instance ? CUT_POST : j.exped === 'hangmans' ? WOOD_POST : j.exped === 'fen' ? { ...FEN_POST, pays: (n: number) => FEN_POST.pays(n, j.boss) } : EXPED_BOARD);
 import { TIME_WORD, timeOf } from '../shared/timeofday';
 import { treasureWord } from '../shared/treasure';
 import { skyOfJob } from '../shared/weather';
@@ -40,8 +41,8 @@ const skyOf = (j: Job) => (j.exped ? 'clear' : skyOfJob(j));
 const weatherWord = (j: Job) => (skyOf(j) === 'clear' ? '' : SKY_WORD[skyOf(j)]);
 const weatherRow = (j: Job) => (j.exped ? '' : SKY_ROW[skyOf(j)]);
 
-const kindOf = (j: Job) => (j.exped ? 'exped' : j.objective);
-const kindWord = (j: Job) => (j.exped ? boardWords(j).kind : KIND[j.objective]);
+const kindOf = (j: Job) => (j.exped || j.instance ? 'exped' : j.objective);
+const kindWord = (j: Job) => (j.exped || j.instance ? boardWords(j).kind : KIND[j.objective]);
 /** The kind as a coloured chip, and DEEP. */
 const chips = (j: Job) => `<b class="kind k-${kindOf(j)}">${kindWord(j)}</b>` + (j.deep ? `<b class="kind k-deep">${BOARDW.deep}</b>` : '');
 /** The row's tags: the chips, then the length, the hour and the weather. */
@@ -58,17 +59,17 @@ const row = (j: Job, i: number, pay: number) =>
 
 /** The card for one job: the posting in full, its rows, and what you can do. */
 function card(g: Game, j: Job, i: number, pay: number): string {
-  const xp = !!j.exped, alone = g.canTake(j, 1), pt = g.parties, size = SIZES[j.size ?? 'medium'], wx = weatherWord(j);
+  const xp = !!j.exped, inst = !!j.instance, alone = g.canTake(j, 1), pt = g.parties, size = SIZES[j.size ?? 'medium'], wx = weatherWord(j);
   const rows = labelRows([
     // (The expedition's title says where; a boss named in the title isn't said twice.)
     [BOARDW.where, xp ? '' : `${esc(j.place.name)}, ${esc(j.place.region)}. ${RUIN[j.place.ruin]}`],
-    xp ? [BOARDW.map, boardWords(j).rooms] : [BOARDW.rooms, `${j.rooms}, ${size.minutes}`],
+    xp ? [BOARDW.map, boardWords(j).rooms] : [BOARDW.rooms, inst ? boardWords(j).rooms : `${j.rooms}, ${size.minutes}`],
     [BOARDW.time, TIME_WORD[timeOf(j)]],
     [BOARDW.weather, weatherRow(j)],
     [BOARDW.boss, j.boss && !j.title.includes(j.boss) ? esc(j.boss) : ''],
     [BOARDW.danger, pips(danger(j))],
     [BOARDW.needs, alone ? '' : BOARDW.party(STORY_PARTY)],
-    [BOARDW.pays, xp ? boardWords(j).pays(pay) : `${pay} gold and ${treasureWord(j)}`],
+    [BOARDW.pays, xp || inst ? boardWords(j).pays(pay) : `${pay} gold and ${treasureWord(j)}`],
   ], 'jrows');
   const go = `<button class="primary" data-job="${i}"${alone ? '' : ' disabled'}>${pt ? BOARDW.alone : BOARDW.take}</button>`;
   const gather = pt ? `<button class="${alone ? '' : 'primary'}" data-gather="${i}">${BOARDW.gather}</button>` : '';

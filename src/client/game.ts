@@ -16,6 +16,8 @@ import { deepFloor, deepSeedOf, isDeep } from '../shared/deep';
 import { endDeep, markHere, setOut } from '../shared/deepkit';
 import { DEEP_WORDS } from './deepwords';
 import { expedition, fenmere, hangmansWood } from '../shared/expedjob';
+import { openCut } from '../shared/instances';
+import { CheckNotes } from './checknotes';
 import { barnHunt, barnPosted } from '../shared/bossjobs';
 import { WORKS, workDone, workOpen, workProgress, WORK_ORDER, type WorkId } from '../shared/works';
 import { contribute, type Contribution } from '../shared/worldsync';
@@ -140,6 +142,8 @@ export class Game {
   private hostSeen: string | null = null;
   /** A word over my hero when the job moves to another device (main.ts shows it once). */
   hostNote: string | null = null;
+  /** An instance's checkpoint lines (checknotes.ts). */
+  private checks = new CheckNotes();
   /** Parties at the board (online only). */
   parties: Parties | null = null;
   /** Counts up each time the room changes (friends rebuild their copy when it does). */
@@ -589,9 +593,10 @@ export class Game {
     // The day's expedition (THE BARROWFIELDS) at the foot of the board, its own posting.
     // Then Hangman's Wood, the first of the atlas's curated places (docs/plans/atlas.md), posted the same way in Greyhollow.
     // Then Fenmere, the second (shared/fen.ts).
-    const list = [...board(this.world.day, workDone(this.world, 'sewers')), expedition(this.world.day), hangmansWood(this.world.day), fenmere(this.world.day)];
+    // Then the Open Cut, the first instance (shared/instances.ts): Rakehead's rows down to the Haulier.
+    const list = [...board(this.world.day, workDone(this.world, 'sewers')), expedition(this.world.day), hangmansWood(this.world.day), fenmere(this.world.day), openCut(this.world.day)];
     // The Doorkeepers in the great barn, a boss hunt, from late in chapter 1 (shared/bossjobs.ts).
-    if (barnPosted(this.world)) list.splice(list.length - 3, 0, barnHunt(this.world.day));
+    if (barnPosted(this.world)) list.splice(list.length - 4, 0, barnHunt(this.world.day));
     return this.world.storyDone.includes(CHAPTER_1.mission.id) ? list : [CHAPTER_1.mission, ...list];
   }
 
@@ -682,13 +687,15 @@ export class Game {
     else this.finish('won');
   }
 
-  startJob(job: Job, party = 1): void {
+  /** `area`: start at this room of the job (the quick-start's ?area=, to look at an instance's later area). */
+  startJob(job: Job, party = 1, area = 0): void {
     this.followers.clear();
     this.mode = 'run';
     this.outside = null;
     this.rooms.reset(null);
     this.run = newRun(job);
     this.run.party = party;
+    this.run.index = Math.max(0, Math.min(job.rooms - 1, area));
     // The party's average level, fixed for the job: the goblins and the loot go by it (shared/threat.ts LEVEL_SCALE).
     this.run.level = partyLevel([this.profile.level, ...[...(this.coop?.friends.values() ?? [])].filter((f) => f.profile && !f.gone).map((f) => f.profile!.level)]);
     this.run.began = Date.now();
@@ -707,7 +714,11 @@ export class Game {
     if (this.mode === 'run' && this.run && isDeep(this.run.job)) this.deepJoin(this.run.job);
     // (Handed the job on while out of sight, and a frame came before the page said it's back.)
     if (this.handed) return this.backAsGuest(), [];
-    if (this.remote) return this.noteMet(), this.stepRemote();
+    if (this.remote) {
+      this.noteMet();
+      const got = this.stepRemote();
+      return this.checkNote(), got;
+    }
     intent = this.own(intent);
     // Back to lead after a reload: the room waits for a friend to answer (nobody does: the job's gone).
     if (this.holdUntil && this.waiting()) return [];
@@ -801,6 +812,8 @@ export class Game {
           else {
             this.run.index++;
             if (road) this.run.roads[this.run.index] = road.road;
+            // An instance's gate is a checkpoint: the wipes count from here (sim/checkpoint.ts).
+            if (this.run.job.instance) (this.run.downs = 0), (this.run.wipeAt = undefined);
             // The goblins ahead are counted for whoever's still with you.
             this.run.party = 1 + [...(this.coop?.friends.values() ?? [])].filter((f) => f.profile && !f.gone).length;
             this.place(runRoom(this.run), undefined, h);
@@ -809,7 +822,14 @@ export class Game {
         }
       }
     }
+    this.checkNote();
     return ev;
+  }
+
+  /** An instance's checkpoint lines over my hero (checknotes.ts). */
+  private checkNote(): void {
+    const say = this.mode === 'run' ? this.checks.note(this.run, this.room, ME, this.together(this.room.map.exit)) : null;
+    if (say) this.hostNote = say;
   }
 
   /** A house set alight from outside falling in: everyone still in it out in the street (sim/houseburn.ts). */

@@ -81,6 +81,8 @@ export interface Job {
   arena?: 'doorkeepers' | 'haulier';
   /** A floor of the Deep (shared/deep.ts), from 1: its end is a checkpoint, not home. */
   floor?: number;
+  /** An instance (shared/instances.ts): its rooms are its areas, taken in turn, each gate a checkpoint. */
+  instance?: import('./instances.js').InstanceId;
 }
 
 export const BOSSES = ['MAWL', 'SKARN', 'OLD KNUCKLES', 'OLD SPOON', 'GUTCHAIN', 'MOTHER RUST'];

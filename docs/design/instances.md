@@ -1,6 +1,6 @@
 # Instances: dungeons with a story, a route and a chain of bosses
 
-Spec, 2026-11-11 (Kyle and Claude Opus 5.5). Not built. Names marked *(lore)* need the lore keeper and line
+Spec, 2026-11-11 (Kyle and Claude Opus 5.5). Steps 1 and 2 built 2026-11-11 (DECISIONS, "instances"). Names marked *(lore)* need the lore keeper and line
 editor. Build after the Deep (it brings the party loot rolls); in a fresh chat.
 
 ## What Kyle wants

@@ -195,6 +195,8 @@ export class ArenaRoom {
   private squire: boolean;
   /** A big map: goblins far from every hero doze and aren't stepped (sim/sleep.ts). */
   sleepFar = false;
+  /** How near a hero wakes them and how far lets them doze again, if not a big map's (an instance's area: shared/instancetune.ts). */
+  sleepAt?: { wake: number; doze: number };
   /** Every goblin, dozers too, while a big map's tick runs on the awake ones (null between ticks). */
   private whole: Enemy[] | null = null;
   /** An expedition's rules and how it stands (sim/exped.ts): the jobs, the way out, the pressure. */
@@ -349,7 +351,7 @@ export class ArenaRoom {
     if (!this.sleepFar) return this.stepAll();
     // On a big map the tick runs on the awake goblins only; the dozers go back in their places after.
     const all = (this.whole = this.enemies);
-    this.enemies = awake(all, this.heroes);
+    this.enemies = awake(all, this.heroes, this.sleepAt);
     try {
       this.stepAll();
     } finally {

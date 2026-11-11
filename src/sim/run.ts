@@ -19,6 +19,8 @@ import { EXPED, WEAPONS } from '../shared/tuning';
 import { blankScore, foldBoard, type Board, type Score } from './score';
 import type { RelicWon } from '../shared/relicaward';
 import { arenaRoom } from './arenaroom';
+import { instanceRoom } from './instanceroom';
+import { stepCheckpoint } from './checkpoint';
 import { bandOf, deepGrow } from '../shared/deepbands';
 
 export interface Run {
@@ -65,6 +67,8 @@ export interface Run {
   board?: Board;
   /** Relics awarded on the run so far (shared/relicaward.ts awardRelic, e.g. at a zone's climax). */
   relicsWon?: RelicWon[];
+  /** An instance (sim/checkpoint.ts): the room time the party wiped, lying there till they're up at the gate. */
+  wipeAt?: number;
 }
 
 export const MAX_DOWNS = 3;
@@ -76,6 +80,8 @@ export function runRoom(run: Run): ArenaRoom {
   if (run.job.exped) return expedRoom(run.job, run.party ?? 1, run.level ?? 1);
   // A boss's arena as the last room (sim/arenaroom.ts).
   if (run.job.arena && isFinal(run)) return arenaRoom(run);
+  // An instance's area, by hand (sim/instanceroom.ts).
+  if (run.job.instance) return instanceRoom(run);
   const plan = planRoom(run.job, run.index, run.roads[run.index], run.roads), n = run.party ?? 1;
   // Worse places and deep jobs shift every chest roll a tier up.
   const danger = (run.job.place.ruin >= 3 ? 1 : 0) + (run.job.deep ? 1 : 0);
@@ -168,13 +174,15 @@ export function tally(run: Run, room: ArenaRoom, events: FightEvent[], me: strin
     if (ev.k === 'down' && ev.id) bump(run.falls ??= {}, ev.id), ev.id !== 'squire' && line(run, ev.id).downs++;
     if (ev.k === 'pickedup' && ev.by) line(run, ev.by).raised++;
     if (ev.k === 'down' && ev.by) bump(run.teamkills ??= {}, ev.by);
-    if (ev.k === 'down' && players(room.heroes).length < 2) {
+    if (ev.k === 'down' && players(room.heroes).length < 2 && !run.job.instance) {
       // Alone, three downs and it's lost; in a party, it's lost when everyone is out.
       const h = room.heroes.find((x) => x.id === me);
       if (h && Math.abs(h.x - ev.x) < 0.01 && Math.abs(h.y - ev.y) < 0.01) run.downs++;
     }
   }
-  if (run.downs >= MAX_DOWNS || allOut(room.heroes)) run.failed = true;
+  // An instance: a wipe is back to the area's gate, the third since the last gate loses it (sim/checkpoint.ts).
+  if (run.job.instance) stepCheckpoint(run, room, events);
+  else if (run.downs >= MAX_DOWNS || allOut(room.heroes)) run.failed = true;
   board(run, room);
 }
 

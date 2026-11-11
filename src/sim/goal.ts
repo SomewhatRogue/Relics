@@ -84,6 +84,11 @@ export function goal(run: Run, room: ArenaRoom, houses: Captives = { caged: 0, w
   const also = (text: string) => (people ? `${text}. ${people}` : text);
   // (A Deep floor's way out is the ladder on down to its checkpoint: shared/deep.ts.)
   const way = (home: boolean) => `${home ? (run.job.floor ? 'Way down' : 'Way home') : 'Way on'}: ${wayDir(room.map)}`;
+  // An instance's area: its gate opens when its named ones are dead; the cages are there to free, never needed (shared/instances.ts).
+  if (run.job.instance && !isFinal(run)) {
+    const keep = room.enemies.filter((e) => e.name && !isDead(e)).map((e) => e.name);
+    return { text: also(keep.length ? `Kill ${keep.join(' and ')}` : way(false)), done: !keep.length };
+  }
   if (!isFinal(run)) {
     const fork = !!room.map.roads;
     // With spiders about (nests and all) it's the room to clear, not just the goblins.

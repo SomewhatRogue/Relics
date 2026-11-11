@@ -2,6 +2,15 @@
 
 ## Current slice
 
+**Instances, steps 1 and 2: the frame and the Open Cut** (Claude Opus 5.5, 2026-11-11; spec `docs/design/instances.md`).
+Built; waiting on Kyle's play. *Done when*, on his phone and laptop: THE OPEN CUT is on the board after Fenmere; in THE
+ROWS a pack eats at its fire at the foot of the street, roped diggers are driven up it (kill both guards and they're
+free), each cage is kept, and the gate out of the square opens once SLAG is dead and the whole party stands in it; the
+same for CARTER in THE WORKINGS and DAMSMAN past the sluice; then the Haulier. Going down alone, or the whole party
+down, puts everyone back at the area's gate after a beat with the goblins reset, and the third time since the last
+gate loses the run; a friend out while the rest fight on is up at the gate ten seconds later. Next: step 3, each
+mini-boss its own fight, then the Haulier for the Open Cut. DECISIONS 2026-11-11 ("instances").
+
 **The Deep, steps 1 to 4** (Claude Opus 5.5, 2026-11-11; spec `docs/design/the-deep.md`). Built; waiting on Kyle's
 play. *Done when*, on his phone and laptop: at the open sewer grate Cobb explains the risk and GO DOWN starts floor 1;
 the floor's way out asks LEAVE or GO DEEPER; GO DEEPER gives a new map; dying gives back the kit taken down (a swapped

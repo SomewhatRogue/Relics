@@ -33,6 +33,7 @@ export const HERO = {
   respawn: 3,
 };
 
+export * from './instancetune.js';
 export * from './weapons.js';
 export * from './magic.js';
 export * from './skillkit.js';
