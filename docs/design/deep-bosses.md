@@ -1,7 +1,9 @@
 # The Deep's bosses: a guardian every five floors
 
 Spec, 2026-11-11 (Claude Opus 5.5; Kyle: "Butcher isnt the only boss ... other boss types beyond just
-butch"). Not built. Waiting on Kyle's yes. Builds on `docs/design/the-deep.md` and `docs/plans/bosses.md`.
+butch"). Kyle, yes: "fine as long as we have graphics and creative and animations for them". Every fifth
+floor and the Haulier first, as below. Building 2026-11-11. Builds on `docs/design/the-deep.md` and
+`docs/plans/bosses.md`.
 
 ## The shape
 
