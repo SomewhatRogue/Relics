@@ -10,9 +10,9 @@ export const BOSS_CALLS = { staggered: 'STAGGERED', braced: 'BRACED', doorDown: 
 /** The pair's names: the boss plate's title, and each one's under its bar. */
 export const DOOR_NAMES = { plate: 'THE DOORKEEPERS', latch: 'LATCH', hasp: 'HASP' };
 
-/** The Haulier and its ground in the Deep (docs/design/deep-bosses.md): the boss plate's title, and the room's name. Lore keeper and line editor. */
+/** The Haulier and its ground in the Deep (docs/design/deep-bosses.md): the boss plate's title, and the room's name (lore keeper 2026-11-11: not THE OLD WORKING, too near a side room's THE OLD WORKINGS). */
 export const HAUL_NAME = 'THE HAULIER';
-export const SUMP_NAME = 'THE OLD WORKING';
+export const SUMP_NAME = 'THE HAULAGE';
 
 /** The hunt's posting on the board (shared/bossjobs.ts). */
 export const BARN_POST = {
