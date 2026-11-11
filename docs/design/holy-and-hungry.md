@@ -52,58 +52,42 @@ Leaving a hungry piece on the step (or giving it to Isolde):
 - gives a guaranteed holy piece for that slot, rolled for the hero's class, **if the hero is not corrupt
   after the give** (so you can cash one in to come clean, then get paid from the next).
 
-Penance thresholds give a relic (section 4): it's how a hero who touched hunger and walked away earns
-the church's best.
+Penance thresholds pay in the church's best holy pieces (relics now come only from great bosses, section 4).
 
-## 4. Relics: unique, placed, rare
+## 4. Relics: one from each great boss (Kyle, 2026-11-11)
 
-Each relic is **one of a kind and found in one place**. No duplicates, no refinding, no random butcher
-drops. A relic found is a moment: its own banner, a line from whoever's near, and it goes into the pack
-where you can see and equip it (the earlier complaint: "not clear when you get a relic or how to equip
-it").
+Every hero starts with **the Relic Javelin**. Every other relic comes from **one place only: the end boss of
+a big quest** (an instance's final boss, a zone's climax). Beat that boss and, if you don't have its relic
+yet, it's yours, every time, no roll. It's **the only way to get relics**: no caches, no chests, no named
+butchers' drops, no church gifts. So each relic says where you got it, and each big quest is worth doing.
 
-### How they're got
+- **One of each per hero** (2026-11-08). The first in the town to win one is named on the Roll; the relic's
+  card says where it came from ("From the Haulier, the Open Cut").
+- **Five uses** each before it needs recharging (was 3 to 6). Because the set is fixed and each comes from
+  one boss, each can be tuned on its own: big, signature effects, roughly 2x today's.
+- A relic won is a moment: its own banner, a line from whoever's near, and it goes straight into a visible
+  relic slot in the pack (the earlier complaint: "not clear when you get a relic or how to equip it").
+- **Recharge at the church for gold, holy path only.** Corrupt: no recharge, ever, until clean; the Keeping
+  Room's trough is the corrupt hero's only way (section 7). The Tooth Ring (kills recharge) stays too.
+- Relics never touch the Want (2026-11-08), can't be traded (2026-11-11), and **sour on the corrupt**:
+  each job carried corrupt it may pick up a bad trait (a use costs some health, it calls a goblin to you,
+  it sometimes misfires); three at most, a fourth and it goes dark for good; the church lifts traits for
+  clean heroes while it has fewer than three. Isolde and Dorcas both warn of it.
+- Elemental relics: later (section 6).
 
-1. **Placed in the world**: each relic has one home: a hidden cache on one map, a named butcher's first
-   kill, or a world event. Very rare to stumble on; worth hunting for. Rumours (Gannet, the board) hint
-   at where.
-2. **Penance**: the church gives one at penance thresholds, only if you're not corrupt (draft: weight 3,
-   8, 15).
-3. **Never** from ordinary drops or chests. The "first named-butcher kill always drops a relic" rule
-   becomes "each named butcher holds its own relic, once".
+### Draft: which boss gives which *(lore keeper to settle; one per great boss, more as bosses come)*
 
-**One per hero** (Kyle, 2026-11-08): each hero can find each relic once. The first in the town to find
-one is named on the Roll.
-
-### Bigger, and recharged by the clean
-
-- Fewer uses stay (3 to 6), but each use is an ultimate: roughly 2x today's power, and every one gets a
-  signature effect.
-- Recharge at the church for gold, holy path only. Corrupt: no recharge, ever, until clean. The Tooth
-  Ring (kills recharge your relic) stays as the hungry path's one way round it.
-- Elemental relics: a third axis, later (section 6).
-- Relics never touch the Want (Kyle, 2026-11-08).
-- **Relics sour on the corrupt** (Kyle's idea, to try): a relic carried by a corrupt hero slowly turns.
-  Each job it's carried corrupt, it may pick up a bad trait (draft: a use costs some health, it calls a
-  goblin to you, it sometimes misfires), more over time. Coming clean stops the souring; the church can
-  lift a bad trait for gold, clean heroes only. So hunger costs you your relics twice: no recharge, and
-  they rot.
-
-### Draft homes for the relics we have *(lore: names and places)*
-
-| Relic | Home (draft) |
+| Relic | From (draft) |
 | --- | --- |
-| Relic Javelin | A cache under the Wickhold Sewers' old outfall |
-| Grappling Hook | Hesketh Hall, the roof beams (reach it in the hall's second room) |
-| Lodestone | Fennick Ford, the tally wall's foot, found once the Ford is cleared |
-| Gall Bomb | Old Spoon's first kill (the Sewers) |
-| Wind-Up Bow | Tollan's Farm, the larder's back room |
-| Bone Whistle | Sallow Carr, Old Knuckles' first kill |
-| Knuckle | Hangman's Wood, the Hempen Man's first kill |
-| Net | Fenmere, a drowned boat at the Lantern box's furthest reach |
+| Relic Javelin | Every hero starts with it |
+| Grappling Hook | The Haulier, the Open Cut (Rakehead's end) |
+| Knuckle | The Hempen Man, Hangman's Wood |
+| Lodestone | The Doorkeepers, Lowfurrow |
+| Net | Fenmere's end boss |
+| Gall Bomb, Wind-Up Bow, Bone Whistle | Held for the next great bosses (Coldscar's Turnkey, the Old Park, the Corpse Road) |
 
-More to come, one per new place and boss (the Haulier and the Open Cut next). Penance relics are
-church-only: two or three that can't be found anywhere else *(lore: what)*.
+Retired by this: relics placed in caches, penance relics, and "a hero's first named-butcher kill always
+drops a relic". Penance (section 3) pays in holy pieces instead.
 
 ## 5. Holy gear
 
@@ -187,8 +171,9 @@ chapter 5 (Kyle's call): a small bell someone kept from the melting, on her shel
 1. Corrupt flag and exclusivity: dim holy on hungry, block recharge and church services when corrupt.
 2. The Want tiers (section 2 table) wired into the fight and the town.
 3. Penance and paid turn-ins (section 3), with the first holy pieces.
-4. Relics: remove random drops, place the eight, the found-a-relic moment and pack slot, uses 2x.
-5. Penance relics and the holy shop.
+4. Relics: only from great bosses' first kills (each hero once), start with the javelin, five uses, the
+   won-a-relic moment and pack slot, power up.
+5. Penance rewards and the holy shop.
 6. VOWED and HALLOWED tiers replace TOUCHED and TURNING.
 7. The Keeping Room and Dorcas.
 8. Elements.

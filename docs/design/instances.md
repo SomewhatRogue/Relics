@@ -95,6 +95,8 @@ None of them are butchers: named butchers keep the relics and hungry gear (Slag 
   (up to +30); it resets when you win a piece from it.
 - **Drops are minted through the item ledger** (docs/design/trading.md), keyed by run and boss, so a
   reconnect or a host handover can't make a second.
+- **The end boss also gives its relic** to every hero present who doesn't have it yet, no roll (relics come
+  only from great bosses: docs/design/holy-and-hungry.md section 4). The Haulier's draft: the Grappling Hook.
 - **One of each** named piece per hero. The boss board shows each boss's pool and who first won what.
 - Instance pieces are the place's own goods, shown with the place on the chip (RAKEHEAD), not a tier word.
   **No Want, no cost line.** Open: does Tobin buy them, and does Halvard forge and melt them?
