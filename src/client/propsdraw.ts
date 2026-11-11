@@ -4,11 +4,14 @@ import { blit, shadow, spin, type Ctx } from './draw';
 import { SPRITES } from './sprites';
 import { propFlash, propShake } from './propshake';
 import { PX } from './world';
+import { drawCart } from './sumpdraw';
 
 /** (x, y) is the prop's foot on screen; `t` the room's time (for the hit flash). */
 export function drawProp(c: Ctx, p: Prop, x: number, y: number, t: number): void {
   const s = SPRITES[p.kind], flash = propFlash(p, t) ? 0.8 : 0, fast = Math.hypot(p.kvx, p.kvy) > 4, [jx, jy] = propShake(p, t);
   const piece = p.kind === 'plank' || p.kind === 'stave';
+  // The Haulier's ore cart: wheels, dust and sparks on the rail (sumpdraw.ts).
+  if (p.kind === 'cart') return drawCart(c, p, x, y, t);
   shadow(c, x, y, Math.round(p.radius * 14));
   if (fast) return spin(c, s, x, y - (p.air && p.air > 0 ? 10 : 5), p.spin);
   if (piece) return spin(c, s, x, y - 1, (p.id * 1.7) % Math.PI, Math.min(1, p.fadeAt - t));

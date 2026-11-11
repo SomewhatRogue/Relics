@@ -11,7 +11,8 @@ import type { Enemy, FightEvent, Hero } from './types';
 import { hasAffix } from './elite';
 
 /** In plates: an ironhide, or a Plated elite (shared/elites.ts: the ironhide rule). */
-export const armoured = (e: Enemy) => e.variant === 'ironhide' || hasAffix(e, 'plated');
+/** (The Haulier's plate comes off for good in phase 2: boss.bare, sim/haulbook.ts.) */
+export const armoured = (e: Enemy) => !e.boss?.bare && (e.variant === 'ironhide' || hasAffix(e, 'plated'));
 const iron = armoured;
 export const broken = (e: Enemy, now: number) => (e.crackUntil ?? -9) > now;
 

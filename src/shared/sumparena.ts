@@ -23,7 +23,8 @@ export const SUMP_SPOTS = {
   /** The rail: its line across, and the two stops a cart stands at. */
   rail: { y: 6.6, x0: 0.6, x1: 11.4 },
   stops: [{ x: 1.3, y: 6.6 }, { x: 10.7, y: 6.6 }],
-  gear: { x: 9.4, y: 2.2 },
+  // (Low enough to stand clear of the boss plate at the top of a phone's screen.)
+  gear: { x: 9.4, y: 3.3 },
   sump: { x: 0.6, y: 9.2, w: 3.4, h: 2.6 },
   adits: [{ x: 0.7, y: 3.4 }],
   chest: { x: 6, y: 1.4 },
@@ -38,10 +39,11 @@ export function sumpArena(job: Job): RoomPlan {
     { x: 3.2, y: 10.4, r: 0.3, kind: 'support' }, { x: 8.8, y: 10.4, r: 0.3, kind: 'support' },
   ];
   const blocks: Block[] = [{ kind: 'rubble', x: 0.2, y: 0.1, w: 2.4, h: 1 }, { kind: 'rubble', x: 10.6, y: 12.2, w: 1.2, h: 1.2 }];
-  const theme: Theme = { floor: 'rock', back: 'rockface', ambient: [0.12, 0.11, 0.16], moon: 0 };
+  const theme: Theme = { floor: 'rock', back: 'rockface', ambient: [0.15, 0.14, 0.19], moon: 0 };
   const map: GameMap = {
     name: SUMP_NAME, w, h, wallFace: 3, rounds, blocks, theme,
-    torches: [{ x: 3.4, y: 0.2 }, { x: 7.6, y: 0.2 }], braziers: [{ x: 10.8, y: 9.6, r: 0.3 }],
+    // Fire baskets either side of the floor it fights on, so it's lit wherever it stands; one more by the way in.
+    torches: [{ x: 3.4, y: 0.2 }, { x: 7.6, y: 0.2 }], braziers: [{ x: 0.9, y: 5.0, r: 0.3 }, { x: 11.1, y: 5.0, r: 0.3 }, { x: 10.8, y: 9.6, r: 0.3 }],
     water: [s.sump], rail: s.rail, gear: s.gear, adits: s.adits,
     hero: { x: w / 2, y: h - 1.5 }, exit: { x: w / 2 - 1.1, y: h - 0.7, w: 2.2, h: 0.7 },
   };

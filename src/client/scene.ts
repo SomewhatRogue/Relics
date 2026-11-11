@@ -89,6 +89,7 @@ import { skyFlash } from './skystrikedraw';
 import { drawFound } from './foundsdraw';
 import { witchColour } from './hallsdraw';
 import { brazierOn, drawBrazier, drawLamps } from './lampsdraw';
+import { sumpScene } from './sumpdraw';
 import { lampAt } from '../shared/lamps';
 import { drawChalkMarks, drawTally } from './chalkdraw';
 import { noteKneels } from './kneel';
@@ -429,6 +430,8 @@ export class Scene {
     // Hangman's Wood: the cage on its chain, Hew's marks, the mid-point's fire (wooddraw.ts).
     for (const f of woodFigs(room, room.time)) items.push({ y: OY + f.y * PX, draw: () => f.draw(c, OX + f.x * PX - cx, OY + f.y * PX - cy) });
     for (const f of vignetteFigs(map, room.time, me)) items.push({ y: OY + f.y * PX - (f.floor ? 20 : 0), draw: () => f.draw(c, OX + f.x * PX - cx, OY + f.y * PX - cy) });
+    // The Haulier's old working: the rail, the winding gear and shaft, the adit (sumpdraw.ts).
+    if (map.rail || map.gear || map.adits) sumpScene(map, c, cx, cy, items, room.enemies.some((e) => e.boss?.who === 'haulier' && e.boss.phase === 2));
     for (const b of map.braziers) items.push({ y: OY + b.y * PX, draw: () => drawBrazier(c, OX + b.x * PX - cx, OY + b.y * PX + 2 - cy, now, brazierOn(map, b)) });
     // What the goblins left that moves: one hung from a hook, the pot on their fire (grimdraw.ts).
     for (const q of map.grim ?? []) {

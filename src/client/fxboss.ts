@@ -10,6 +10,7 @@ import type { FightEvent } from '../sim/types';
 import type { Fx } from './fx';
 import { sfx } from './sfx';
 import { butcher } from './voices';
+import { haulFx, haulSound } from './fxhaul';
 
 /** True if it was one of these (and has been drawn). */
 export function bossFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
@@ -38,7 +39,7 @@ export function bossFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
     return true;
   }
   if (ev.k === 'growl') return fx.burst(x, y - 30, 5, ['#e8401f', '#a01810'], 40, true), true;
-  return ev.k === 'doorswap';
+  return ev.k === 'doorswap' || haulFx(fx, ev, x, y);
 }
 
 /** Their sounds, from the kit we have. True when it was one of theirs. */
@@ -50,6 +51,6 @@ export function bossSound(ev: FightEvent): boolean {
     case 'roar': return butcher.roar(true), true;
     case 'doorswap': return sfx.thud(), true;
     case 'growl': return butcher.growl(), true;
-    default: return false;
+    default: return haulSound(ev);
   }
 }

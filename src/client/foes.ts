@@ -10,6 +10,7 @@ import { drawRoundSign } from './telegraph2';
 import { drawKit } from './backline';
 import { KITTED, drawFoeKit } from './foekits';
 import { drawIronhide } from './ironhidedraw';
+import { drawHaulier } from './hauldraw';
 import { boardOut } from '../sim/board';
 import { drawLessonMark } from './lessonfoes';
 import { drawLogs, drawLogsDead } from './foedraw';
@@ -153,6 +154,8 @@ export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number, dozing = false
   if (isSpiderKind(e.kind)) return drawSpiderKind(c, e, x, y, c.t ?? c.now);
   // A sneak-thief or a wolf that got away: nothing left here.
   if (e.escaped) return;
+  // The Haulier (the Deep's boss on every fifth floor): its own body and poses (hauldraw.ts).
+  if (e.boss?.who === 'haulier') return drawHaulier(c, e, x, y, c.t ?? c.now);
   if (e.variant === 'wolf') return drawWolf(c, e, x, y);
   if (e.under) return drawMound(c, e, x, y);
   if (e.variant === 'log' && e.act === 'dead') return drawLogsDead(c, e, x, y);

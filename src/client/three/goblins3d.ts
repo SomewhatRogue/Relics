@@ -10,6 +10,7 @@ import type { Enemy } from '../../sim/types';
 import { G, M } from './mats';
 import { blob, collect, middle, part, pivot, stars, type Figure } from './rig';
 import { MEATY_DRAW, meatySort } from '../../shared/meaty';
+import { HAULIER } from '../../shared/haultune';
 import { grownBy } from '../../shared/meaty2';
 
 export interface FoeFig extends Figure {
@@ -79,7 +80,7 @@ export function makeGoblin(e: Enemy): FoeFig {
   meatyKit(e, tor, head, wpn, off, body);
   if (v === 'shield') part(off, 0.62, 0.95, 0.08, M(0x5a4228), 0, 0.18, 0.12), part(off, 0.66, 0.06, 0.1, metal, 0, 0.62, 0.13), part(off, 0.66, 0.06, 0.1, metal, 0, -0.26, 0.13), part(off, 0.14, 0.14, 0.1, metal, 0, 0.18, 0.18);
   const st = stars(root, 1.2);
-  root.scale.setScalar(big ? (e.name ? 1.75 : e.kind === 'butcher' ? 1.6 : 1.3) : v === 'looter' ? 0.68 : v === 'ironhide' ? 0.95 : meatySort(e) ? 0.76 * MEATY_DRAW * grownBy(e.grown ?? 0) : 0.76);
+  root.scale.setScalar(big ? (e.name ? 1.75 : e.kind === 'butcher' ? 1.6 : 1.3) : v === 'looter' ? 0.68 : v === 'ironhide' ? (e.boss?.who === 'haulier' ? 0.95 * HAULIER.size : 0.95) : meatySort(e) ? 0.76 * MEATY_DRAW * grownBy(e.grown ?? 0) : 0.76);
   return { ...collect({ root, mid, body, legs, aR, aL, head, stars: st }), wpn, off, tor, big };
 }
 

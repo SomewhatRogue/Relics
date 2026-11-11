@@ -30,7 +30,8 @@ export const roomProps = () => ROOM_PROPS.map((p) => newProp(p.kind, p.x, p.y));
 export type PropWorld = World;
 
 export function damageProp(p: Prop, n: number, w: PropWorld, dx = 0, dy = 0): void {
-  if (p.broken) return;
+  // (The Haulier's carts are never broken: sim/haulcarts.ts.)
+  if (p.broken || p.kind === 'cart') return;
   p.hp -= n;
   p.hitAt = w.now;
   if (p.hp <= 0) return breakProp(p, w, dx, dy);
@@ -68,6 +69,11 @@ export function stepProps(w: PropWorld, dt: number): Prop[] {
       if (p.home && w.now >= p.respawnAt) Object.assign(p, { broken: false, hp: PROPS[p.kind].hp, x: p.home.x, y: p.home.y, kvx: 0, kvy: 0 });
       continue;
     }
+    // A cart stays where it is but for the rail (sim/haulcarts.ts): never knocked about.
+    if (p.kind === 'cart') {
+      p.kvx = p.kvy = 0;
+      continue;
+    }
     if (p.lifted) continue;
     if (w.now >= p.fadeAt) p.broken = true;
     const speed = Math.hypot(p.kvx, p.kvy);
@@ -103,7 +109,7 @@ export function blastProps(x: number, y: number, r: number, dmg: number, knock: 
 /** A flying prop into a goblin (hits like its weight, big ones break), or a flying goblin into a prop. */
 export function propImpacts(w: PropWorld): void {
   for (const p of w.props) {
-    if (p.broken || p.lifted) continue;
+    if (p.broken || p.lifted || p.kind === 'cart') continue;
     for (const e of w.enemies) {
       const d = Math.hypot(e.x - p.x, e.y - p.y);
       if (isDead(e) || e.act === 'carried' || d > e.radius + p.radius + 0.05) continue;

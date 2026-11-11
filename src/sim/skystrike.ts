@@ -17,6 +17,7 @@ import { spare } from './foundrelics';
 import { burstMult } from './knacks';
 import { stun } from './stuns';
 import { rodHit, rodNear } from './rods';
+import { gearAt, gearStrike } from './haulcarts';
 import type { Enemy, Hero, Zone } from './types';
 
 /** Whether a body at (x, y), `rad` round, is caught: its edge inside the circle. */
@@ -58,8 +59,9 @@ export function callStrike(h: Hero, s: Swing, mult: number, aim: (range: number,
   const [dx, dy] = aimOf(h, w.enemies), big = h.perfect;
   (h.fx = dx), (h.fy = dy);
   const aimed = spotOf(h, w.enemies, dx, dy, Math.min(SKY_STRIKE.range, aim(SKY_STRIKE.range, SKY_STRIKE.fallback)));
-  // An ironhide near where it would fall draws it (sim/rods.ts): it falls on the iron instead.
-  const rod = rodNear(w.enemies, aimed.x, aimed.y), { x, y } = rod ? { x: rod.x, y: rod.y } : aimed;
+  // The Haulier's winding gear near where it would fall takes it first (sim/haulcarts.ts); else an ironhide
+  // near it draws it (sim/rods.ts): it falls on the iron instead.
+  const gear = gearAt(aimed.x, aimed.y), rod = gear ? undefined : rodNear(w.enemies, aimed.x, aimed.y), { x, y } = gear ?? (rod ? { x: rod.x, y: rod.y } : aimed);
   // (WIDE BURST widens it as it does any burst.)
   const r = (big ? SKY_STRIKE.bigR : SKY_STRIKE.r) * burstMult(h), at = w.now + SKY_STRIKE.delay;
   const n = Math.max(1, Math.round(s.dmg * SKY_STRIKE.dmg * mult));
@@ -71,6 +73,9 @@ export function callStrike(h: Hero, s: Swing, mult: number, aim: (range: number,
 function fall(z: Zone, w: World): void {
   z.fell = true;
   w.ev.push({ k: 'skystrike', x: z.x, y: z.y, r: z.r, big: !!z.big });
+  // On the Haulier's gear: it crackles out and cracks the plate of the Haulier under it.
+  const gear = gearAt(z.x, z.y);
+  if (gear) gearStrike(gear, w);
   const by = w.heroes.find((o) => o.id === z.owner), n = z.n ?? 1, cast = newCast();
   const hit = w.enemies.filter((e) => !isDead(e) && e.act !== 'carried' && !e.under && inSkyStrike(z, e, e.radius));
   // Drawn into a rod: the bolt bends into it (its guard broken, wherever it has stepped to).

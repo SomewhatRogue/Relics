@@ -27,7 +27,7 @@ export const HAULIER = {
   radius: 0.85,
   weight: 6,
   /** Drawn this many times an ironhide's size. */
-  size: 1.6,
+  size: 2,
   walk: { pace: 1.7, close: 1.6 },
   phase2: 0.5,
   faster: 1.15,
