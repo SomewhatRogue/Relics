@@ -18,6 +18,7 @@ import type { Panel } from './panels';
 import { SCORES, type Area } from './scores';
 import { WorldLink } from './worldlink';
 import { throwDice } from './diceanim';
+import { setOutNow } from './setout';
 
 let link: WorldLink | null = null;
 /** The page hands over its line to the world server. */
@@ -84,9 +85,12 @@ export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key:
   if (id === 'sewer') {
     if (!workDone(w, 'sewers')) return panel.show('THE SEWER GRATE', p(`Rusted shut. Something scratches below, and the air that comes up smells of wet fur and old pennies. The public works will open it once enough dens are burned out on jobs (${Math.min(w.dens, WORKS.sewers.need)} of ${WORKS.sewers.need}).`)), true;
     // Open: the sewer jobs on the board, and the way down to the Deep with Cobb at the top of it (docs/design/the-deep.md).
+    // In a party of two or more: its leader takes everyone down (the set-out beat, as any job); a member waits on them.
+    const pt = g.parties, party = (pt?.current()?.members.length ?? 0) > 1, mine = !party || !!pt?.leading;
+    const go = () => (party ? (pt!.retarget(g.deepJob()), panel.hide(), setOutNow(g, panel)) : (panel.hide(), g.enterDeep()));
     panel.show('THE SEWER GRATE', p('The grate is open. Jobs below the town are on the board in the square: The Wickhold Sewers.') +
-      p(`<b>${DEEP_WORDS.title}</b>`) + p(DEEP_WORDS.scene) + say(DEEP_WORDS.keeper, DEEP_WORDS.speech) + p(DEEP_WORDS.rules),
-      [{ label: DEEP_WORDS.go, primary: true, act: () => (panel.hide(), g.enterDeep()) }]);
+      p(`<b>${DEEP_WORDS.title}</b>`) + p(DEEP_WORDS.scene) + say(DEEP_WORDS.keeper, DEEP_WORDS.speech) + p(DEEP_WORDS.rules) + (mine ? '' : p(DEEP_WORDS.partyLead)),
+      mine ? [{ label: DEEP_WORDS.go, primary: true, act: go }] : []);
     return true;
   }
   if (id === 'locked') {

@@ -30,5 +30,8 @@ export function deepFloor(n: number, seed: number, title: string): Job {
   };
 }
 
+/** The seed a Deep floor's run set out with (from its id: `deep-<seed>-<floor>`). */
+export const deepSeedOf = (j: Job): number => Number(j.id.split('-')[1]) || 0;
+
 /** A Deep floor (not any other job). */
 export const isDeep = (j: Job | undefined): boolean => !!j?.floor;

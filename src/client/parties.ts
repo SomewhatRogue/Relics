@@ -9,7 +9,7 @@
  * listed asks again every few seconds, so one lost word never strands anyone.
  */
 import type { Job } from '../shared/jobs';
-import { PARTY_GRACE, PARTY_MAX, admit, changes, cleanName, drop, isOffer, post, quiet, standing, type JobTag, type Member, type Offer } from '../shared/lobby';
+import { PARTY_GRACE, PARTY_MAX, admit, changes, cleanName, drop, isOffer, post, quiet, standing, tagOf, type JobTag, type Member, type Offer } from '../shared/lobby';
 import { keepParty, keptParty } from './partykeep';
 import type { Townfolk } from './townfolk';
 import { HOSTPICK, pickHost, sayAgain, type Link } from '../shared/hostpick';
@@ -97,6 +97,14 @@ export class Parties {
     const me = this.me();
     this.mine = post(job, me.id, me.name, Math.floor(Math.random() * 1e6));
     this.job = job;
+    this.changed();
+  }
+
+  /** Leading: the party sets out on this job instead, everyone still in it (the Deep's way down: squareui.ts). */
+  retarget(job: Job): void {
+    if (!this.mine) return;
+    this.job = job;
+    this.mine = { ...this.mine, j: tagOf(job) };
     this.changed();
   }
 

@@ -26,6 +26,7 @@ vi.stubGlobal('document', { addEventListener: () => {}, visibilityState: 'visibl
 const store = new Map<string, string>();
 vi.stubGlobal('localStorage', { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => void store.set(k, v), removeItem: (k: string) => void store.delete(k) });
 const { Game } = await import('../src/client/game');
+const { DEEP_WORDS } = await import('../src/client/deepwords');
 const { newRun, runRoom, goal } = await vi.importActual<typeof import('../src/sim/run')>('../src/sim/run');
 
 const axe: Item = { slot: 'weapon', kit: 'greatsword', quality: 'fine', traits: [] };
@@ -237,5 +238,76 @@ describe('harder goblins, BIG ONEs and elites below (Kyle, 2026-11-11)', () => {
     expect(quickPause({ elite: ['quick'] } as never)).toBe(ELITE.quick.pause);
     expect(quickPause({ elite: ['plated'] } as never)).toBe(1);
     expect(ELITE.quick.pause).toBeLessThan(1);
+  });
+});
+
+describe('the Deep with a party (step 4)', () => {
+  type Friend = { name: string; profile: object | null; intent: typeof NO_INTENT & { deep?: number }; heard: number; fresh: boolean; gone: boolean };
+  /** A leader's game with one friend standing in (the relay itself is the online scripts' job). */
+  function withFriend() {
+    const g = hero();
+    g.enterDeep();
+    const ann: Friend = { name: 'ANN', profile: { ...structuredClone(g.profile), id: 'ann-00001', name: 'ANN' }, intent: { ...NO_INTENT }, heard: 0, fresh: false, gone: false };
+    const friends = new Map([['ann-00001', ann]]);
+    (g as unknown as { coop: object }).coop = { friends, company: true, members: [['me', 'BRAM'], ['ann-00001', 'ANN']], away: () => false, end() {}, close() {}, handOver() {}, frame() {}, onRefused() {} };
+    return { g, ann };
+  }
+
+  it('GO DEEPER is a vote: the leader takes everyone down once every friend still in has chosen it', () => {
+    const { g, ann } = withFriend();
+    toCheckpoint(g);
+    g.deeper();
+    expect(g.run?.job.floor).toBe(1);
+    expect(g.hostNote).toBe(DEEP_WORDS.waiting);
+    done.on = true;
+    g.step(TICK, NO_INTENT);
+    expect(g.run?.job.floor).toBe(1);
+    ann.intent = { ...NO_INTENT, deep: 1 };
+    g.step(TICK, NO_INTENT);
+    done.on = false;
+    expect(g.run?.job.floor).toBe(2);
+    expect(g.deepVote).toBe(0);
+  });
+
+  it('a friend gone home does not hold the party up', () => {
+    const { g, ann } = withFriend();
+    toCheckpoint(g);
+    ann.gone = true;
+    g.deeper();
+    done.on = true;
+    g.step(TICK, NO_INTENT);
+    done.on = false;
+    expect(g.run?.job.floor).toBe(2);
+  });
+
+  it('my vote rides on my input to the leader, and is gone once down', () => {
+    const g = hero();
+    expect(g.own(NO_INTENT).deep).toBeUndefined();
+    g.deepVote = 3;
+    expect(g.own(NO_INTENT).deep).toBe(3);
+  });
+
+  it('LEAVE in a party: up with everything, the job counted done, the rest carry on (handed over)', () => {
+    const { g } = withFriend();
+    const gold0 = g.profile.gold;
+    g.run!.gold = 30;
+    g.profile.bag.push(axe), g.hero.bag.push(axe);
+    toCheckpoint(g);
+    g.leaveDeep();
+    expect(g.result?.deep).toMatchObject({ end: 'out', floor: 1, lost: [] });
+    expect(g.result?.won).toBe(true);
+    expect(g.profile.gold).toBe(gold0 + 30);
+    expect(g.profile.bag).toContainEqual(axe);
+  });
+
+  it("a follower's game takes its own snapshot on arriving, and settles an older run first", () => {
+    const g = hero(), p = g.profile;
+    const job = deepFloor(1, 4242, 'x');
+    (g as unknown as { deepJoin(j: typeof job): void }).deepJoin(job);
+    expect(p.deep?.seed).toBe(4242);
+    p.bag.push(axe);
+    (g as unknown as { deepJoin(j: typeof job): void }).deepJoin(deepFloor(1, 777, 'x'));
+    expect(p.deep?.seed).toBe(777);
+    expect(p.bag).not.toContainEqual(axe);
   });
 });

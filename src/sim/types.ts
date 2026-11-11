@@ -59,6 +59,8 @@ export interface Intent {
   /** A friend's Intent: the leader's room time their screen was showing when they sent it (sim/lagcomp.ts
    *  judges a blow on them by it). The leader's own, and an older guest's, have none. */
   vt?: number;
+  /** The Deep: the floor this player has chosen GO DEEPER on (client/game.ts deeper); the leader goes down once all have. */
+  deep?: number;
 }
 
 export const NO_INTENT: Intent = { mx: 0, my: 0, ax: 0, ay: 0, attack: false, block: false, attackSeq: 0, blockSeq: 0, rollSeq: 0, weaponSeq: 0, relicSeq: 0, relicSwapSeq: 0, relicPickSeq: 0, relicPick: 0, augmentSeq: 0, classSeq: 0, grabSeq: 0, takeSeq: 0, take: 0, gearSeq: 0, gearOp: 0, gearArg: 0, potionSeq: 0, beltSeq: 0, openSeq: 0, open: 0, reload: false, reloadSeq: 0 };

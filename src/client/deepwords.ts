@@ -19,6 +19,10 @@ export const DEEP_WORDS = {
   checkScene: 'Another ladder goes on down, the same grey rungs as the first, and the way up is behind you.',
   haul: (items: number, gold: number) => `Found below so far: ${items ? `${items} ${items === 1 ? 'piece' : 'pieces'} of gear` : 'no gear'} and ${gold} gold.`,
   checkRules: 'LEAVE: go up and keep everything you found. GO DEEPER: the next floor is worse, and if you die there you lose everything found below.',
+  /** Over my hero, GO DEEPER chosen in a party: the rest haven't yet. */
+  waiting: 'Waiting for the rest of the party to choose GO DEEPER.',
+  /** At the grate, in a party I don't lead. */
+  partyLead: 'Only your leader can go down, and the whole party goes with them.',
   leave: 'LEAVE',
   deeper: 'GO DEEPER',
   /** The in-run LEAVE button, in the Deep. */

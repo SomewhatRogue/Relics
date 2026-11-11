@@ -12,7 +12,7 @@ import { travel } from '../shared/sweep';
 import type { DreadRule } from '../sim/dread';
 import { townInterior } from '../shared/interiors';
 import { board, STORY_PARTY, type Job } from '../shared/jobs';
-import { deepFloor, isDeep } from '../shared/deep';
+import { deepFloor, deepSeedOf, isDeep } from '../shared/deep';
 import { endDeep, markHere, setOut } from '../shared/deepkit';
 import { DEEP_WORDS } from './deepwords';
 import { expedition, fenmere, hangmansWood } from '../shared/expedjob';
@@ -113,9 +113,13 @@ export class Game {
   result: Result | null = null;
   /** When the job was lost (room time), for the fade out before town. */
   beatenAt: number | null = null;
-  /** The Deep: a floor's end just reached (the checkpoint asks, main.ts), and whether the party stood in it last frame. */
+  /** The Deep: a floor's end just reached (the checkpoint asks, main.ts), and whether I stood in it last frame. */
   deepAsk = false;
   private deepThere = false;
+  /** The floor I've chosen GO DEEPER on (0 none): sent on my input, the leader goes down once everyone has. */
+  deepVote = 0;
+  /** LEAVE chosen at a checkpoint (in a party, going home through leaveJob): up with everything. */
+  private deepUp = false;
   /**
    * Inside a building: the room outside (it keeps running: fires burn, dens breed), the door you came
    * in by, and your hero there (in town, kept aside). Online, the party leader runs every room someone is in.
@@ -589,21 +593,76 @@ export class Game {
     return this.world.storyDone.includes(CHAPTER_1.mission.id) ? list : [CHAPTER_1.mission, ...list];
   }
 
-  /** The way down at the sewer grate: the Deep's first floor, the kit taken down kept on the save (shared/deepkit.ts). */
-  enterDeep(): void {
-    if (this.mode !== 'town' || this.run || this.result) return;
-    // A fresh map every time (the room's own Rng decides everything in it).
+  /** Floor 1 of a new run down, on a fresh seed (the room's own Rng decides everything in it). */
+  deepJob(): Job {
     const seed = (Date.now() / 1000 + this.profile.runs * 7919) >>> 0;
-    this.profile.deep = setOut(this.profile, seed);
-    store(this.save);
-    this.startJob(deepFloor(1, seed, DEEP_WORDS.floor(1)));
+    return deepFloor(1, seed, DEEP_WORDS.floor(1));
   }
 
-  /** GO DEEPER at a checkpoint: the next floor, the same run (its gold, kills, the kit taken down). */
+  /** The way down at the sewer grate, alone: the Deep's first floor, the kit taken down kept on the save (shared/deepkit.ts). */
+  enterDeep(): void {
+    if (this.mode !== 'town' || this.run || this.result) return;
+    this.startJob(this.deepJob());
+    this.deepJoin(this.run!.job);
+  }
+
+  /**
+   * Down in the Deep on this job (leading, alone or following): my own snapshot at the way down, once,
+   * and my floor kept with the party's. A save still holding an older run is settled first, as dropped.
+   */
+  private deepJoin(job: Job): void {
+    const p = this.profile, seed = deepSeedOf(job);
+    if (p.deep && p.deep.seed !== seed) this.dropDeep();
+    if (!p.deep) (p.deep = setOut(p, seed)), store(this.save);
+    if ((job.floor ?? 0) > p.deep.floor) {
+      p.deep.floor = job.floor!;
+      this.deepAsk = this.deepThere = false;
+      this.deepVote = 0;
+      store(this.save);
+    }
+  }
+
+  /**
+   * My hero walking into an open floor's way out: the checkpoint asks me (each player their own), and the
+   * mark moves here, so leaving or dropping out from now on counts as leaving here.
+   */
+  private deepEdge(): void {
+    const run = this.run, d = this.profile.deep, e = this.room.map.exit, h = this.room.heroes.find((x) => x.id === ME);
+    if (!run || !d || !isDeep(run.job) || run.job.floor !== d.floor) return;
+    const there = !!e && !!h && this.room.exitOpen && !this.outside && h.act !== 'down' && inArea(e, h.x, h.y);
+    if (there && !this.deepThere) (markHere(d, this.profile, run.gold), store(this.save), (this.deepAsk = true));
+    this.deepThere = there;
+  }
+
+  /** GO DEEPER at a checkpoint: my vote. Alone, down at once; in a party, once everyone still in has chosen it. */
   deeper(): void {
+    const run = this.run, fl = run?.job.floor;
+    if (this.mode !== 'run' || !run || !fl || !isDeep(run.job) || this.result) return;
+    this.deepAsk = false;
+    this.deepVote = fl;
+    if (this.remote || this.deepWaiting()) this.hostNote = DEEP_WORDS.waiting;
+    else if (!this.remote) this.descend();
+  }
+
+  /** Leading: a friend still in the job who hasn't chosen GO DEEPER on this floor (one down or gone doesn't hold it up). */
+  private deepWaiting(): boolean {
+    const fl = this.run?.job.floor ?? 0;
+    for (const [id, f] of this.coop?.friends ?? []) {
+      if (!f.profile || f.gone || this.coop?.away(id)) continue;
+      const fh = (this.roomOf(id) ?? this.room).heroes.find((x) => x.id === id);
+      if (fh?.act === 'down') continue;
+      if ((f.intent.deep ?? 0) < fl) return true;
+    }
+    return false;
+  }
+
+  /** The next floor, the same run (its gold, kills, each player's kit taken down). The leader's room only. */
+  private descend(): void {
     const run = this.run, d = this.profile.deep;
-    if (this.mode !== 'run' || !run || !d || !isDeep(run.job) || this.result) return;
+    if (!run || !d) return;
     this.deepAsk = this.deepThere = false;
+    this.deepVote = 0;
+    this.openTest = false;
     d.floor++;
     store(this.save);
     Object.assign(run, { job: deepFloor(d.floor, d.seed, DEEP_WORDS.floor(d.floor)), index: 0, roads: {}, downs: 0 });
@@ -612,11 +671,13 @@ export class Game {
     this.rooms.reset(this.room);
   }
 
-  /** LEAVE at a checkpoint: up the ladder with everything found below. */
+  /** LEAVE at a checkpoint: up the ladder with everything found below. In a party the rest go on without me. */
   leaveDeep(): void {
     if (this.mode !== 'run' || !this.run || !isDeep(this.run.job) || this.result) return;
     this.deepAsk = this.deepThere = false;
-    this.finish('won');
+    this.deepUp = true;
+    if (this.remote || this.coop?.company) this.leaveJob();
+    else this.finish('won');
   }
 
   startJob(job: Job, party = 1): void {
@@ -640,6 +701,8 @@ export class Game {
   step(dt: number, intent: Intent): FightEvent[] {
     // Following a friend's job: their room is drawn here; nothing runs in this browser.
     if (this.mode === 'run' && !this.startKit) this.startKit = kitOf(this.profile);
+    // Down in the Deep, leading or following: my snapshot, and my floor kept with the party's (shared/deepkit.ts).
+    if (this.mode === 'run' && this.run && isDeep(this.run.job)) this.deepJoin(this.run.job);
     // (Handed the job on while out of sight, and a frame came before the page said it's back.)
     if (this.handed) return this.backAsGuest(), [];
     if (this.remote) return this.noteMet(), this.stepRemote();
@@ -718,7 +781,7 @@ export class Game {
     if (this.mode === 'run') (this.friendDoors(), this.outOfTheFire(), this.indoors.cries());
     if (this.mode === 'run' && this.run) {
       const street = this.fightRoom;
-      street.exitOpen = goal(this.run, street, sum(this.houses())).done;
+      street.exitOpen = goal(this.run, street, sum(this.houses())).done || this.openTest;
       // Beaten: a slow fade from where you fell (main.ts), then town.
       if (this.run.failed) {
         this.beatenAt ??= this.room.time;
@@ -727,11 +790,10 @@ export class Game {
       else if (!this.outside && this.room.exitOpen) {
         // The way on takes the whole party, standing in it together; at a fork, the road they stand in.
         const road = this.room.map.roads?.find((r) => this.together(r.area));
-        // The Deep: a floor's end is a checkpoint, asked once each time the party walks into it.
+        // The Deep: a floor's end is each player's checkpoint; the leader takes everyone down once all have chosen.
         if (isDeep(this.run.job)) {
-          const there = this.together(this.room.map.exit);
-          if (there && !this.deepThere && this.profile.deep) (markHere(this.profile.deep, this.profile, this.run.gold), store(this.save), (this.deepAsk = true));
-          this.deepThere = there;
+          this.deepEdge();
+          if (this.deepVote === this.run.job.floor && !this.deepWaiting()) this.descend();
         } else if (road || this.together(this.room.map.exit)) {
           if (isFinal(this.run)) this.finish('won');
           else {
@@ -791,6 +853,12 @@ export class Game {
     const c = this.coop, party = !!c?.company;
     if (party) (c!.handOver(), (this.coop = null));
     this.finish('left', false, party);
+  }
+
+  /** Test hook (scripts/deep-online.cjs): this room's way out opens now, as if its goal were done; till the room changes. */
+  private openTest = false;
+  openForTest(): void {
+    this.openTest = true;
   }
 
   /** Test hook: end the run now (won or lost), as if its last room were done. */
@@ -949,6 +1017,8 @@ export class Game {
     if (g.room?.heroes.some((x) => x.id === ME)) {
       (this.room = g.room), (this.run = g.run ?? this.run);
       if (g.kitSeq !== this.kitSeen) (this.kitSeen = g.kitSeq), this.keepRemoteGear(this.hero);
+      // The Deep, following: my own checkpoint as I walk into the way out (the leader takes us down).
+      if (this.run && isDeep(this.run.job)) (this.deepJoin(this.run.job), this.deepEdge());
     }
     // (Only the leader's word goes in the tally, when a new one comes: not the job as posted, while I wait to get back in.)
     if (g.run && g.run !== this.bankedRun) this.bankIt((this.bankedRun = g.run));
@@ -1054,7 +1124,9 @@ export class Game {
    */
   private finish(how: How, followed = false, withParty = false): void {
     this.beatenAt = null;
-    const run = this.run!, p = this.profile, w = this.world, won = how === 'won', key = this.jobKey;
+    this.openTest = false;
+    // (LEAVE at a Deep checkpoint in a party goes home through leaveJob: a job done all the same.)
+    const run = this.run!, p = this.profile, w = this.world, won = how === 'won' || (isDeep(run.job) && this.deepUp), key = this.jobKey;
     const party = this.coop ? this.coop.members.map(([id, name]) => (id === p.id ? p.name : name)) : [p.name];
     // Leading: everyone's told how it went (each friend's game pays them from the run), each hero named on its board.
     if (!followed) nameBoard(run, ME, p, this.coop?.members);
@@ -1066,9 +1138,9 @@ export class Game {
     // Paid already (a reload in the middle of paying it): never twice.
     if (key && p.paid?.includes(key)) return void ((this.run = null), unbank(p.id), this.enterTown({ x: 24.1, y: 14.8 }));
     // The Deep (shared/deepkit.ts): up at a checkpoint keeps it all; gone early, as at the last checkpoint; dead, as at the way down.
-    const deepEnd: 'out' | 'early' | 'dead' | null = isDeep(run.job) && p.deep ? (won ? 'out' : how === 'beaten' ? 'dead' : 'early') : null;
+    const deepEnd: 'out' | 'early' | 'dead' | null = isDeep(run.job) && p.deep ? (won || this.deepUp ? 'out' : how === 'beaten' ? 'dead' : 'early') : null;
     const deep = deepEnd && p.deep ? { end: deepEnd, ...endDeep(p.deep, p, deepEnd, run.gold) } : undefined;
-    if (isDeep(run.job)) (p.deep = undefined), (this.deepAsk = this.deepThere = false);
+    if (isDeep(run.job)) (p.deep = undefined), (this.deepAsk = this.deepThere = this.deepUp = false), (this.deepVote = 0);
     // Driven back (or gone home from a job alone): half the gold. Gone early from a party: what was picked up while with them.
     const half = !deep && !won && !(withParty && (how === 'left' || how === 'dropped'));
     // Driven back in the Ransom Coat: all of it, not half.
@@ -1569,7 +1641,7 @@ export class Game {
 
   /** My input as it goes to the room: with the levels I've grown counted in. */
   own(i: Intent): Intent {
-    return { ...i, levelSeq: this.levelSeq };
+    return { ...i, levelSeq: this.levelSeq, ...(this.deepVote ? { deep: this.deepVote } : {}) };
   }
 
   /** On a job: a level surely earned (kills and rescues so far) is lit now, in the room, for everyone to see. */

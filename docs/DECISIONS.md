@@ -8578,3 +8578,13 @@ on a big screen.
   `STAGGER.guard` (1 s); they still hurt. A butcher's or boss's blow still staggers. (A dodge or block
   breaking out of a stagger was tried and dropped: it split the fight after a host handover.)
 - Kyle: Nettle buys a hungry-carrying hero's ordinary gear too, at `HUNGRY_CUT` (0.12 of its worth, under Tobin's 0.3 and his own 0.2 for the rare two): him or the forge, nobody else. Still never hungry gear.
+
+
+## 2026-11-11: the Deep, step 4: the party (Claude Opus 5.5)
+
+- At the open grate a party of two or more goes down together: its leader's GO DOWN points the party at floor 1 (`Parties.retarget`, no disband) and sets out with the usual beat; a member who isn't leading sees "Only your leader can go down, and the whole party goes with them." and no button. Alone, as before.
+- Every player's own game takes its own snapshot on arriving (`Game.deepJoin`, on the run's seed: a save still holding an older run is settled first, as dropped) and keeps its floor with the party's.
+- Each player's own checkpoint: asked as their hero walks into the open way out (leader or follower), and their mark moves there. GO DEEPER is a vote riding on their input (`Intent.deep`, the floor chosen); the leader takes everyone down once every friend still in has chosen it (one down, gone or away doesn't hold it up). The voter sees "Waiting for the rest of the party to choose GO DEEPER." LEAVE takes that player up with everything and counts as a job done; a leader leaving hands the job on, as any job.
+- A disconnect counts as leaving at the last checkpoint that player passed (their own mark), as the spec says.
+- `Game.openForTest()`: a test hook opening the room's way out. `scripts/deep-online.cjs`: Kyle and Sam down together, each asked, the wait, floor 2, Sam's LEAVE with the party's gold, Kyle's death: 15 of 15, twice; `party-online.cjs` 30 of 30.
+- Also written: `docs/design/deep-bosses.md`, a boss floor every fifth floor (the Haulier first): waiting on Kyle's yes.
