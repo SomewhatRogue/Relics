@@ -202,5 +202,9 @@ The town's treatment is real and per hero (Kyle, 2026-11-08: "it's about the ind
 party with"): a corrupt hero is refused by Isolde and the healers and pays more, whoever they came in with;
 their clean friends are served as normal.
 
-Still open:
-1. Souring relics: how many bad traits before it's dark for good, and can the church always fix it?
+Souring (Kyle, 2026-11-11): a relic holds **at most three** bad traits. A fourth and it goes dark for
+good. The church lifts traits (clean heroes, for gold) only while it has fewer than three. Isolde says so
+at the church, and Dorcas in the Keeping Room, each in their own way: the player must be told before it
+happens, not after.
+
+Still open: the kept bell on Dorcas's shelf (chapter 5 seed), VOWED or GIVEN for yellow.

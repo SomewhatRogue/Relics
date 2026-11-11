@@ -29,17 +29,14 @@ line editor before they go on screen.
   passed, banking what they had there, unless they rejoin the run.
 - Boards: solo and party listed apart.
 
-## Paths, blessings and curses
+## Paths, blessings and curses (Kyle, 2026-11-11)
 
-- After each block of five floors, the way forks into **three paths**. Each path carries one blessing and
-  one curse for the rest of the run, so every run builds differently. Draft pairs:
-  - more damage, but heals do less
-  - a relic use back each floor, but goblins spot you sooner
-  - better loot, but a named butcher every floor
-  - faster stamina or faith, but less health
-- Blessings and curses last only the run. *(Kyle to confirm: three paths every five floors, each a
-  blessing and a curse paired, is the reading of "choose one of three paths between five floors, you
-  pick up blessings and curses".)*
+- **Every five floors, a curse**: the way forks into three paths and you pick which curse you take.
+  Curses are small and they **stack** for the rest of the run: less damage, slower, a little less
+  health, slower stamina or faith, goblins spot you sooner.
+- **Every ten floors, a blessing** as well: pick one of three, and they stack too (more damage, a relic
+  use back each floor, faster stamina or faith, more health).
+- None of it lasts outside the Deep, good or bad.
 
 ## Floors and loot
 
@@ -64,10 +61,9 @@ Each floor is short (2 to 4 minutes) so a run's length is the player's choice.
 3. Floor scaling (threat and loot tables by band).
 4. Party: per-player checkpoint choice, disconnect counts as leaving at the last checkpoint.
 5. The board.
-6. Paths every five floors, blessings and curses.
+6. A curse every five floors, a blessing every ten, stacking for the run.
 
 ## Open
 
 1. Who sits at the way down, and what is the Deep in the world? *(lore)*
-2. Do curses stack across forks, or does a new fork replace the last?
 3. Any tie to holy and hungry (hungry finds only below a floor, say)?
