@@ -1,3 +1,6 @@
+> **Archive.** Closed on 2026-11-11. New decisions go in each chat's own log under `docs/decisions/`;
+> who is doing what is on `docs/BOARD.md`. Read this, never add to it.
+
 # DECISIONS
 
 Newest first. Each entry says what was decided and why, signed with the model.

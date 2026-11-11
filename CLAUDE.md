@@ -28,7 +28,18 @@ which path this is, then take it:
   scripts unless it's netcode. It reports in ten lines.
 - At most two builders at once, never on overlapping files.
 
-## 2. Checking and landing
+## 2. Working alongside other chats (the board)
+
+Several chats build at once. They talk through files, not each other:
+- **Start of a session, and before every push:** read `docs/BOARD.md`, then what's new in the other chats'
+  logs under `docs/decisions/` since your last pull.
+- **Claim before you edit:** your row on the board lists the files you own. Don't edit another chat's;
+  shared files (tuning.ts, types.ts, game.ts, main.ts) get small separate edits, pulled just before.
+- **Write only your own log** (`docs/decisions/<topic>.md`); keep your board row current; move it to
+  Finished when done. `docs/DECISIONS.md` is a closed archive.
+- **Only the chat named on the board publishes the solo build.**
+
+## 3. Checking and landing
 
 - **Verify in this order, and stop when it's enough:** the touched test files, `npm run check` (tsc),
   the full suite once before pushing, screenshots only for visual changes, online scripts only for
@@ -37,12 +48,11 @@ which path this is, then take it:
 - **Writing checks, batched:** all new player-facing lines from one change go to ONE `lore-keeper` call,
   then ONE `line-editor` call. Short labels that reuse approved words (a button, a stat name) can skip
   them. See `docs/lore/prose-notes.md`.
-- **Record:** a few lines in `docs/DECISIONS.md` per change, signed with the model name. `PLAN.md` for
-  slice status.
+- **Record:** a few lines in your own `docs/decisions/<topic>.md` per change, signed with the model name.
 - Commit as `git -c user.name=SomewhatRogue -c user.email=minerley.kyle@gmail.com`; push `main` deploys
   to relic-lake.vercel.app. Don't stop for approval on each commit.
 
-## 3. Session habits
+## 4. Session habits
 
 - A new chat for each big new topic; a running chat for tweaks and playtest feedback.
 - Connectors not in use (ElevenLabs, Gmail, Google Drive, Vercel) make every step heavier for every
