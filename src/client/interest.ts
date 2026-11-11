@@ -24,7 +24,7 @@ export const INTEREST = { radius: 20, blocks: 26, hear: 30 };
 type State = ReturnType<typeof stateOf>;
 type Ent = Record<string, unknown>;
 /** Events every friend gets, wherever they happened. */
-const EVERYONE = new Set(['exped', 'down', 'pickedup', 'gotup', 'raising', 'rising', 'risebroke', 'risen', 'grudge', 'dread']);
+const EVERYONE = new Set(['exped', 'down', 'pickedup', 'gotup', 'raising', 'rising', 'risebroke', 'risen', 'grudge', 'dread', 'lootroll']);
 
 const near = (e: Ent, x: number, y: number, r2: number) => {
   if (typeof e.x !== 'number' || typeof e.y !== 'number') return true;
@@ -41,7 +41,8 @@ export function stateFor(room: ArenaRoom, id: string, radius = INTEREST.radius):
   if (!h) return all;
   const r2 = radius * radius, b2 = INTEREST.blocks * INTEREST.blocks, out = {} as Record<string, Ent[]>;
   for (const [c, list] of Object.entries(all)) {
-    if (c === 'heroes') out[c] = list;
+    // (The party, and every boss-loot roll wherever it is: everyone in the group is asked: sim/lootroll.ts.)
+    if (c === 'heroes' || c === 'rolls') out[c] = list;
     else if (c === 'blocks') out[c] = list.flatMap((b, i) => (near({ x: (b.x as number) + (b.w as number) / 2, y: (b.y as number) + (b.h as number) / 2 }, h.x, h.y, b2) ? [{ ...b, id: 'b' + i }] : []));
     else out[c] = (list ?? []).filter((e) => near(e, h.x, h.y, r2));
   }

@@ -10,6 +10,8 @@ import { full } from './pack';
 import type { Drop, Enemy, FightEvent, Hero, Intent } from './types';
 
 let nextId = 1;
+/** A fresh drop id (sim/uniquedrop.ts, lootroll.ts make drops too). */
+export const dropId = () => nextId++;
 /** How close a hero must stand to take a drop. */
 export const REACH = 1.4;
 

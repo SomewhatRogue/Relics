@@ -54,6 +54,8 @@ import { stepOak } from './hangfire';
 import { stepBlaze, type BlazeState } from './blaze';
 import { sweepSurvivors } from './survivorhits';
 import { dropFrom, stepDrops, takeLoot } from './loot';
+import { uniqueDrops } from './uniquedrop';
+import { stepRolls } from './lootroll';
 import { hallow, rally, shadowstep, stepZones, ward } from './relics';
 import { castElement, spendPrimed, turnElement } from './channel';
 import { castTap } from './spellbook';
@@ -84,7 +86,7 @@ import { litMult } from './charge';
 import { fireFound, stepSentries } from './foundrelics';
 import { grow } from './grow';
 import { awake, merge } from './sleep';
-import { NO_INTENT, type Ice, type Puddle, type Strike, type Zone, type Bolt, type Drop, type Enemy, type Prop, type FightEvent, type Hero, type Hook, type Intent, type Javelin, type Snare, type Survivor } from './types';
+import { NO_INTENT, type Ice, type Puddle, type Strike, type Zone, type Bolt, type Drop, type Enemy, type Prop, type FightEvent, type Hero, type Hook, type Intent, type LootRoll, type Javelin, type Snare, type Survivor } from './types';
 import { stun } from './stuns';
 import { stepDread, type DreadRule } from './dread';
 import { stepExped, type ExpedState } from './exped';
@@ -140,6 +142,10 @@ export class ArenaRoom {
   chests: Chest[] = [];
   danger = 0;
   props: Prop[] = roomProps();
+  /** Boss loot up for the group's roll (sim/lootroll.ts), sent to every screen; the last roll's number; the Doorkeepers' piece given. */
+  rolls: LootRoll[] = [];
+  rollSeq = 0;
+  keeperDrop = false;
   /** Whoever was freed from a cage (sim/survivors.ts), the dead where they fell. */
   survivors: Survivor[] = [];
   /** Inside a cottage or barn (the freed are home only once out of its door). */
@@ -493,6 +499,7 @@ export class ArenaRoom {
     // Out of bounds: the dread, and what comes for anyone who stays out (sim/dread.ts).
     stepDread(this.dread, this.map, this.heroes, this.enemies, TICK, this.events);
     for (const e of this.enemies) if (alive.has(e.id) && isDead(e) && !e.escaped) dropFrom(e, this.heroes, this.drops, this.lootRng, this.events, this.level, this.floor);
+    if (this.floor > 0) uniqueDrops(this, this.enemies.filter((e) => alive.has(e.id) && isDead(e) && !e.escaped), this.lootRng);
     for (const e of this.enemies) if (alive.has(e.id) && isDead(e) && !e.escaped) {
       dropCoal(e, this.coals);
       dropPickups(e, this.pickups, this.lootRng, this.exped ? EXPED_COINS : undefined);
@@ -504,6 +511,7 @@ export class ArenaRoom {
     stepHungry(this.heroes, this.enemies, this.time, this.events);
     this.pickups = stepPickups(this.pickups, this.heroes, this.events, TICK);
     this.drops = stepDrops(this.drops, TICK);
+    stepRolls(this, this.lootRng);
     this.coals = stepCoals(this.coals, this.heroes, this.events, TICK);
     if (this.map.blaze) stepBlaze(this, TICK);
     // A storm's lightning: the circle a second ahead, then everyone under it hurt (sim/storm.ts).
