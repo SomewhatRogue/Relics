@@ -65,19 +65,35 @@ export function drawPlates(c: Ctx, X: number, Y: number): void {
   for (const [x, y] of [[-29, 10], [-21, 10], [-18, 13], [18, 13], [-2, 20], [8, 18]]) g.fillRect(X + x, Y + y, 1, 1);
 }
 
-/** The chain whirled round it: links on a ring about its waist; `front` the half nearer us. */
-export function drawChain(c: Ctx, X: number, Y: number, w: { r: number; sp: number }, front: boolean): void {
-  const g = c.lit, n = 10;
+/**
+ * The chain whirled round it, on the glow layer so it shows over the floor: a ring of links `share` of the
+ * way out to the drag's radius, a heavy head at its lead and a tail of links behind it, with sparks. Drawn
+ * in world pixels about its feet (not in the body's scaled frame), so the ring is the telegraph's size.
+ */
+export function drawChainRing(c: Ctx, X: number, Y: number, rad: number, w: { r: number; sp: number }): void {
+  const g = c.glow, R = Math.max(6, rad * w.r), n = Math.max(10, Math.round(R * 0.6)), lead = c.now * w.sp;
+  g.save();
   for (let i = 0; i < n; i++) {
-    const a = c.now * w.sp - i * 0.42, sn = Math.sin(a);
-    if ((sn >= 0) !== front) continue;
-    const x = Math.round(X + Math.cos(a) * w.r), y = Math.round(Y - 11 + sn * w.r * 0.38);
-    g.fillStyle = i % 2 ? PAL.ironHi : PAL.iron;
-    g.fillRect(x, y, 2, 2);
-    if (i === 0) {
-      g.fillStyle = PAL.ironLo, g.fillRect(x - 2, y - 2, 5, 5);
-      g.fillStyle = PAL.rust, g.fillRect(x - 1, y - 1, 3, 3);
-      if (w.sp > 12) (c.glow.fillStyle = '#ffd27a'), c.glow.fillRect(x + (Math.cos(a) > 0 ? 3 : -4), y - 2, 1, 1), c.glow.fillRect(x, y + 3, 1, 1);
-    }
+    const a = lead - (i / n) * Math.PI * 2 * 0.85, sn = Math.sin(a), x = Math.round(X + Math.cos(a) * R), y = Math.round(Y - 2 + sn * R * 0.9);
+    const body = sn < 0 && Math.abs(x - X) < 10 && y > Y - 44;
+    g.globalAlpha = (body ? 0.35 : 1) * (1 - (i / n) * 0.55);
+    g.fillStyle = '#2a2420', g.fillRect(x - 2, y - 2, 6, 6);
+    g.fillStyle = i % 2 ? '#f2eee4' : '#9aa8c0', g.fillRect(x - 1, y - 1, 4, 4);
+    g.fillStyle = i % 2 ? '#9aa8c0' : '#f2eee4', g.fillRect(x, y, 2, 2);
+    if (i % 3 === 0) (g.fillStyle = '#ffffff'), g.fillRect(x - 1, y - 1, 2, 2);
   }
+  g.globalAlpha = 1;
+  // The heavy head: a spiked ball, burning at the tip.
+  const hx = Math.round(X + Math.cos(lead) * R), hy = Math.round(Y - 2 + Math.sin(lead) * R * 0.9);
+  g.fillStyle = '#ff7a30', g.fillRect(hx - 3, hy - 3, 7, 7);
+  g.fillStyle = '#ffe9a0', g.fillRect(hx - 2, hy - 2, 5, 5);
+  g.fillStyle = '#ffffff', g.fillRect(hx - 1, hy - 1, 3, 3);
+  g.fillStyle = '#ff9a40';
+  for (const [dx, dy] of [[-5, 0], [5, 0], [0, -5], [0, 5]]) g.fillRect(hx + dx, hy + dy, 1, 1);
+  // Sparks thrown off the head, outwards.
+  if (w.sp > 8) for (let i = 0; i < 7; i++) {
+    const a = lead - i * 0.11, d = R + 2 + ((c.now * 40 + i * 7) % 9), sx = Math.round(X + Math.cos(a) * d + Math.random() * 3), sy = Math.round(Y - 2 + Math.sin(a) * d * 0.9 + Math.random() * 3);
+    g.fillStyle = i % 2 ? '#ffd27a' : '#ffffff', g.fillRect(sx, sy, 1, 1);
+  }
+  g.restore();
 }

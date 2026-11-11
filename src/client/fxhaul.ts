@@ -5,6 +5,8 @@
  */
 import type { FightEvent } from '../sim/types';
 import type { Fx } from './fx';
+import type { Enemy } from '../sim/types';
+import type { Light } from './light';
 import { sfx } from './sfx';
 
 /** When the gear last crackled (wall clock, seconds), and whether lightning fell on it; where a cart last pulled up. */
@@ -56,4 +58,22 @@ export function haulSound(ev: FightEvent): boolean {
   if (ev.k === 'gear') return sfx.shock(), ev.hit && sfx.boom(), true;
   if (ev.k === 'bare') return sfx.wardbreak(), sfx.propbreak(), sfx.slam(), true;
   return false;
+}
+
+/**
+ * The light the Haulier carries (screen x, y of its feet): its smelter's stack smoulders warm, the plate is
+ * lit from the stack, and each tell lights it its own colour (red wind-up, a gold crack, green bare, a hot
+ * chain), so it is never a silhouette between the torches. Cosmetic only.
+ */
+export function haulLights(e: Enemy, x: number, y: number, t: number, now: number): Light[] {
+  const b = e.boss!, a = e.attack, bare = !!b.bare, fl = Math.sin(now * 13 + e.id) * 4;
+  // (A cool, low fill so the plate reads as grey iron, not lit cream: the stack is the warm light.)
+  const out: Light[] = [{ x, y: y - 22, r: 60, i: 0.1, c: [0.7, 0.76, 0.9] }];
+  if (!bare) out.push({ x, y: y - 44, r: 84 + fl, i: 0.34, c: [1, 0.6, 0.26] });
+  if (e.cracked && !bare) out.push({ x, y: y - 24, r: 44, i: 0.25 + 0.2 * Math.sin(now * 9), c: [1, 0.82, 0.3] });
+  if (bare || b.phase === 2) out.push({ x, y: y - 26, r: 90, i: bare ? 0.22 : 0.2, c: [0.5, 1, 0.3] }, { x, y: y - 32, r: 30, i: 0.3, c: [1, 0.25, 0.15] });
+  if (a && a.t < a.windup + a.active && (b.move === 'pick' || b.move === 'overhead')) out.push({ x, y: y - (b.move === 'overhead' ? 54 : 34), r: 64, i: 0.15 + 0.3 * Math.min(1, a.t / a.windup), c: [1, 0.2, 0.12] });
+  if (a && b.move === 'drag') out.push({ x, y: y - 8, r: 120, i: 0.35, c: [1, 0.72, 0.42] });
+  void t;
+  return out;
 }

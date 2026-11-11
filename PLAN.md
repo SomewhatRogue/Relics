@@ -7,7 +7,8 @@ play. *Done when*, on his phone and laptop: at the open sewer grate Cobb explain
 the floor's way out asks LEAVE or GO DEEPER; GO DEEPER gives a new map; dying gives back the kit taken down (a swapped
 sword too) and loses finds and gold; LEAVE banks it all; each block of five floors is plainly harder and pays
 better (elites from floor 1, a named butcher on 6 and 9, PRE-WAR common by 6). With a party: the leader takes everyone down, each player chooses at the checkpoint, the party goes on once all
-have. Next: step 5, the board; boss floors waiting on Kyle's yes (`docs/design/deep-bosses.md`). Open: Cobb off
+have. Every fifth floor the Haulier in THE HAULAGE (`docs/design/deep-bosses.md`): waiting on Kyle's play. Next: step 5,
+the board; the Doorkeepers' Deep arena. Open: Cobb off
 the church's cart; every band number.
 
 **A block holds, striped blows half-blocked, an easier wood** (Claude Opus 5.5, 2026-11-06; Kyle: "Warrior block

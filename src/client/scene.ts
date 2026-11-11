@@ -43,6 +43,7 @@ import { drawStatus } from './status';
 import { nestEmber } from './nestfire';
 import { drawLifted, drawProp } from './propsdraw';
 import type { Fx } from './fx';
+import { haulLights } from './fxhaul';
 import { Lighting, type Light } from './light';
 import { SPRITES } from './sprites';
 import { drawPost, drawRack, drawWatch } from './rackdraw';
@@ -603,6 +604,7 @@ export class Scene {
       if (e.act !== 'dead' && (e.venom ?? 0) > 0 && (e.venomUntil ?? 0) > room.time) lights.push({ x: OX + e.x * PX - cx, y: OY + e.y * PX - cy - 8, r: 22 + 6 * e.venom!, i: 0.45, c: [0.55, 1, 0.3] });
       if (e.act === 'dead') continue;
       const [x, y] = lerp('e:' + e.id, e.x, e.y);
+      if (e.boss?.who === 'haulier') lights.push(...haulLights(e, x - cx, y - cy, room.time, now));
       // A nest burned out up close throws a bigger, warmer light (sim/torch.ts).
       if (e.burnUntil > room.time) lights.push({ x: x - cx, y: y - cy - 10, r: (e.ashAt ? 70 : 44) + Math.sin(now * 17 + e.id) * 4, i: e.ashAt ? 0.95 : 0.75, c: [1, 0.55, 0.25] });
       else if (e.frozenUntil > room.time) lights.push({ x: x - cx, y: y - cy - 8, r: 26, i: 0.4, c: [0.6, 0.85, 1] });

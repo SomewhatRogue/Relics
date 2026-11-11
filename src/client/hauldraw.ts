@@ -7,22 +7,47 @@
  */
 import type { Enemy } from '../sim/types';
 import { line, shadow, stars, type Ctx } from './draw';
-import { drawChain, drawLying, drawPlates, R } from './haullie';
+import { HAULIER } from '../shared/haultune';
+import { drawChainRing, drawLying, drawPlates, R } from './haullie';
 import { haulPose, PAL } from './haulpose';
 import { PX } from './world';
 
 /** Where each bare Haulier shed its plate (world pixels), kept from the first frame we saw it bare. */
 const SHED = new Map<number, [number, number]>();
 const HIT = { ...PAL, skin: '#d4f0a0', skinLo: '#a8c880', skinHi: '#ffffff', iron: '#d8d4cc', ironHi: '#ffffff', ironLo: '#a8a49c', rust: '#c8a888' };
+/** The art is drawn for 1.6 ironhides; HAULIER.size is how big it is now. */
+const FLAT = 1.6;
+/** A throwaway layer for the outline passes, so only the lit body is stamped. */
+let nullGlow: CanvasRenderingContext2D | null = null;
+const quiet = () => (nullGlow ??= document.createElement('canvas').getContext('2d')!);
 
+/** The Haulier: its outline (the body stamped dark a pixel each way), its body, then its chain ring and glows. */
 export function drawHaulier(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
+  const s = HAULIER.size / FLAT, gs = [c.lit, c.glow];
+  for (const g of gs) g.save(), g.translate(x, y), g.scale(s, s), g.translate(-x, -y);
+  try {
+    if (e.act !== 'dead') {
+      const g = c.lit, cc = { ...c, glow: quiet() };
+      g.shadowColor = '#0a0706', g.shadowBlur = 0;
+      for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) (g.shadowOffsetX = dx), (g.shadowOffsetY = dy), body(cc, e, x, y, t, true);
+      g.shadowColor = 'rgba(0,0,0,0)', g.shadowOffsetX = 0, g.shadowOffsetY = 0;
+    }
+    body(c, e, x, y, t, false);
+  } finally {
+    for (const g of gs) g.restore();
+  }
+  const w = haulPose(e, t, c.now).whirl;
+  if (w && e.attack && e.boss?.move === 'drag') drawChainRing(c, Math.round(x), Math.round(y), HAULIER.drag.radius! * PX, w);
+}
+
+function body(c: Ctx, e: Enemy, x: number, y: number, t: number, rim: boolean): void {
   const b = e.boss!, bare = !!b.bare, mad = b.phase === 2, f = e.fx < -0.2 ? -1 : 1, g = c.lit, dead = e.act === 'dead';
   const p = haulPose(e, t, c.now), k = t - e.hitAt < 0.09 && !dead ? HIT : PAL;
   const X = Math.round(x + p.ox), Y = Math.round(y + p.oy);
   if (bare && !SHED.has(e.id)) SHED.set(e.id, [e.x * PX, e.y * PX]);
   const shed = bare ? SHED.get(e.id) : undefined;
-  shadow(c, x, y, p.lie === 'none' ? 12 : 16);
-  if (shed) drawPlates(c, Math.round(x + shed[0] - e.x * PX), Math.round(y + shed[1] - e.y * PX));
+  if (!rim) shadow(c, x, y, p.lie === 'none' ? 12 : 16);
+  if (shed && !rim) drawPlates(c, Math.round(x + shed[0] - e.x * PX), Math.round(y + shed[1] - e.y * PX));
   if (dead) g.globalAlpha = Math.max(0, 1 - e.actT / e.actDur);
   if (p.lie === 'down' || p.lie === 'sit') return drawLying(c, f, X, Y, p, k, bare, dead), void (g.globalAlpha = 1);
   const loose = !bare && mad && (b.roarUntil ?? -9) > t, off = e.cracked && !bare ? 1 : 0;
@@ -30,7 +55,6 @@ export function drawHaulier(c: Ctx, e: Enemy, x: number, y: number, t: number): 
   const r = (dx: number, dy: number, w: number, h: number, col: string) => R(g, f, X, Y, dx, dy, w, h, col);
   const u = (dx: number, dy: number, w: number, h: number, col: string) => R(g, f, X, Y, dx + dl, dy + du, w, h, col);
   const gl = (dx: number, dy: number, col: string, w = 1, h = 1) => ((c.glow.fillStyle = col), c.glow.fillRect(f > 0 ? X + dx + dl : X - dx - dl - w, Y + dy + du, w, h));
-  if (p.whirl) drawChain(c, X, Y, p.whirl, false);
   // The far arm, hanging (or raised with the near one), and its pauldron.
   u(-12, up ? -27 : -19, 3, up ? 9 : 8, k.skin), u(-12, up ? -19 : -13, 3, 3, bare ? k.skinLo : k.iron);
   if (!up) u(-12, -11, 3, 3, k.skin);
@@ -63,9 +87,17 @@ export function drawHaulier(c: Ctx, e: Enemy, x: number, y: number, t: number): 
   } else {
     u(-9, -20, 8, 9, k.iron), u(1, -19, 8, 9, k.iron), u(-8, -20, 7, 1, k.ironHi), u(2, -19, 6, 1, k.ironHi), u(-1, -20, 2, 10, k.skinLo);
     u(-6, -13, 3, 2, k.rust), u(4, -15, 2, 2, k.rust), u(-5, -17, 1, 1, k.rivet), u(6, -16, 1, 1, k.rivet);
-    const flare = t - (e.crackAt ?? -9) < 0.35, col = flare || Math.floor(c.now * 8) % 2 ? '#ffffff' : '#ffd040';
-    for (let i = 0; i < 8; i++) gl(-1 + (i % 2), Math.round(-20 + i * 1.3), col);
+    const flare = t - (e.crackAt ?? -9) < 0.35, pu = 0.5 + 0.5 * Math.sin(c.now * 9), col = flare || pu > 0.5 ? '#fff6c0' : '#ffc020';
+    c.glow.globalAlpha = 0.5 + 0.35 * pu;
+    for (let i = 0; i < 9; i++) gl(-3, Math.round(-21 + i * 1.3), '#ffa010', 7);
+    c.glow.globalAlpha = 1;
+    for (let i = 0; i < 9; i++) gl(-1 + (i % 2), Math.round(-21 + i * 1.3), col, 3);
     if (Math.floor(c.now * 6) % 3 === 0) gl((Math.floor(c.now * 13) % 9) - 4, -22 - (Math.floor(c.now * 9) % 3), '#ffd27a');
+  }
+  if (bare && !dead) {
+    // Bare, it sweats green heat: a wash over the chest and shoulders.
+    const hot = 0.08 + 0.05 * Math.sin(c.now * 6);
+    c.glow.globalAlpha = hot, gl(-10, -21, '#9aff50', 20, 11), gl(-13, -19, '#9aff50', 3, 6), c.glow.globalAlpha = 1;
   }
   // The head: a smelter's cap with its stack, a slit the eyes burn through, a jaw with tusks. Bare: brow, horns.
   const hd = 1 - p.headBack, ht = -27 - (p.headBack > 0 ? 1 : 0);
@@ -78,8 +110,15 @@ export function drawHaulier(c: Ctx, e: Enemy, x: number, y: number, t: number): 
   u(hd + 1, ht + 6, 2, 2, '#d8d0b0'), u(hd - 3, ht + 6, 2, 2, '#d8d0b0');
   if (p.roar) u(hd - 2, ht + 4, 5, 3, '#2a0a0a'), u(hd - 1, ht + 5, 3, 1, '#c01810');
   const ec = p.reel && Math.floor(c.now * 10) % 2 ? '#6f8a30' : mad || bare ? PAL.eyeMad : PAL.eye;
-  gl(hd + 2, ht + 3, ec, 2), gl(hd - 2, ht + 3, ec);
-  if (bare || mad) gl(hd + 2, ht + 4, '#ff3a10'), gl(hd - 2, ht + 4, '#ff3a10');
+  c.glow.globalAlpha = 0.35, gl(hd + 1, ht + 2, ec, 4, 3), gl(hd - 3, ht + 2, ec, 3, 3), c.glow.globalAlpha = 1;
+  gl(hd + 2, ht + 3, ec, 2, 2), gl(hd - 2, ht + 3, ec, 2, 2);
+  if (bare || mad) gl(hd + 2, ht + 4, '#ff3a10', 2), gl(hd - 2, ht + 4, '#ff3a10', 2), gl(hd + 3, ht + 3, '#ff9a60'), gl(hd - 2, ht + 3, '#ff9a60');
+  // The smelter's stack smoulders: a hot mouth and a thread of ember rising.
+  if (!bare && !dead) {
+    const fl = Math.floor(c.now * 11 + e.id) % 3;
+    gl(hd - 1 + off, ht - 4 + off, fl ? '#ff9a30' : '#ffe070', 3), gl(hd + off, ht - 5 + off - fl, '#ff6a20');
+    if (fl === 0) gl(hd + off + ((Math.floor(c.now * 7) % 3) - 1), ht - 8 + off, '#ffc060');
+  }
   if (p.roar) for (let i = 1; i <= 3; i++) gl(hd + 4 + i * 5, ht + 3 - i, 'rgba(255,150,90,' + (0.7 - i * 0.18) + ')', 1, 3 + i * 2);
   // The near arm, up to the hand on the pick; the pauldron over its shoulder.
   const sx = X + f * (8 + dl), sy = Y - 18 + du, hx = X + f * (p.hand[0] + dl), hy = Y + p.hand[1] + du, ang = Math.atan2(hy - sy, hx - sx), len = Math.hypot(hx - sx, hy - sy);
@@ -92,10 +131,24 @@ export function drawHaulier(c: Ctx, e: Enemy, x: number, y: number, t: number): 
   // The pick: a long wooden haft and a double-pointed head.
   const pa = f > 0 ? p.pickA : Math.PI - p.pickA, tx = hx + Math.cos(pa) * 14, ty = hy + Math.sin(pa) * 14;
   line(g, hx, hy, pa, -4, 15, k.leather, 2), line(g, hx, hy, pa, -3, 14, PAL.wood, 1);
-  line(g, tx, ty, pa + Math.PI / 2, -7, 7, k.ironLo, 2), line(g, tx, ty, pa + Math.PI / 2, -6, -1, k.ironHi, 1);
-  g.fillStyle = k.rust, g.fillRect(Math.round(tx) - 1, Math.round(ty) - 1, 2, 2);
+  const steel = k === HIT ? '#ffffff' : '#e4eef8', pn = pa + Math.PI / 2;
+  line(g, tx, ty, pn, -8, 8, k.ironLo, 4), line(g, tx, ty, pn, -8, 8, '#a8b8c8', 2), line(g, tx, ty, pn, -7, 7, steel, 1);
+  line(g, tx, ty, pn, -9, -7, steel, 1), line(g, tx, ty, pn, 7, 9, steel, 1);
+  g.fillStyle = k.rust, g.fillRect(Math.round(tx) - 1, Math.round(ty) - 1, 3, 3);
+  if (!dead) {
+    // Its points catch the light; through a wind-up and the blow the head burns red along its length.
+    const gc = c.glow, gn = p.glint, flick = 0.65 + 0.35 * Math.sin(c.now * 24);
+    if (gn > 0) {
+      gc.globalAlpha = (0.35 + 0.55 * gn) * flick;
+      line(gc, tx, ty, pn, -9, 9, '#ff2a1a', 4), line(gc, tx, ty, pn, -8, 8, '#ff8060', 2);
+      gc.globalAlpha = 1;
+      for (const s of [-9, 9]) (gc.fillStyle = '#ffffff'), gc.fillRect(Math.round(tx + Math.cos(pn) * s) - 1, Math.round(ty + Math.sin(pn) * s) - 1, 2, 2);
+      if (p.arms === 'up') line(gc, hx, hy, pa, 2, 14, '#ff6a40', 1);
+    } else if (Math.floor(c.now * 1.4 + e.id) % 4 === 0) {
+      for (const s of [-8, 8]) (gc.fillStyle = '#ffffff'), gc.fillRect(Math.round(tx + Math.cos(pn) * s), Math.round(ty + Math.sin(pn) * s), 1, 1);
+    }
+  }
   if (p.stuck) for (let i = 0; i < 5; i++) (g.fillStyle = i % 2 ? k.ironLo : '#8a8494'), g.fillRect(Math.round(tx) + (i - 2) * 3, Math.round(ty) + 4 - (i % 2) * 2, 2, 1);
-  if (p.whirl) drawChain(c, X, Y, p.whirl, true);
   if (p.stars) stars(c, X + dl, Y - 33, 4, 8);
   g.globalAlpha = 1;
 }
