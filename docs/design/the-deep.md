@@ -1,0 +1,73 @@
+# The Deep: an endless dungeon under Wickhold
+
+Spec, 2026-11-11 (Kyle and Claude Opus 5.5). Not built. Names marked *(lore)* need the lore keeper and
+line editor before they go on screen.
+
+## The shape
+
+- Enter from the Wickhold Sewers. Someone sits at the way down and tells you plainly what you risk
+  *(lore: who; not Dorcas, whose Keeping Room is also in the Sewers but hidden)*.
+- Each floor is a fresh random map from the existing generator. Goblins get harder every floor through
+  the threat budget (more of them, elites and named butchers deeper); loot gets better every floor.
+- At the end of each floor, a checkpoint: **LEAVE** with what you've found, or **GO DEEPER**.
+- Die and the run's finds are gone. Your deepest floor still goes on the board.
+
+## What's at risk
+
+- **Only what you picked up on the run.** Everything you walked in with is yours, always.
+- The game snapshots each hero's gear and pack at the way down. Anything found below is marked as the
+  run's until you leave. If you die, run finds are lost and everything from the snapshot comes back,
+  **even if you swapped it out mid-run** (equipped a find, dropped your old sword in the pack). Gold
+  found below works the same way.
+- Leaving banks everything: run finds become ordinary gear.
+
+## Party
+
+- Parties welcome; each hero's risk and haul is their own.
+- At a checkpoint each player chooses. Those who leave bank and go up; the rest go on together.
+- **Disconnects are forgiving:** a dropped player counts as having left at the last checkpoint they
+  passed, banking what they had there, unless they rejoin the run.
+- Boards: solo and party listed apart.
+
+## Paths, blessings and curses
+
+- After each block of five floors, the way forks into **three paths**. Each path carries one blessing and
+  one curse for the rest of the run, so every run builds differently. Draft pairs:
+  - more damage, but heals do less
+  - a relic use back each floor, but goblins spot you sooner
+  - better loot, but a named butcher every floor
+  - faster stamina or faith, but less health
+- Blessings and curses last only the run. *(Kyle to confirm: three paths every five floors, each a
+  blessing and a curse paired, is the reading of "choose one of three paths between five floors, you
+  pick up blessings and curses".)*
+
+## Floors and loot
+
+| Floors | Goblins | Loot |
+| --- | --- | --- |
+| 1 to 5 | ordinary packs, the odd elite | town tiers, PRE-WAR now and then |
+| 6 to 10 | elites common, a butcher every few floors | PRE-WAR common, rare tiers start |
+| 11 to 15 | named butchers, mixed affixes | rare tiers common |
+| 16+ | everything, rising without end | the best tables, Deep-only finds *(later: tie to holy and hungry)* |
+
+Each floor is short (2 to 4 minutes) so a run's length is the player's choice.
+
+## The board
+
+- Beside the way down and on BEST IN WICKHOLD: deepest floor reached, then gold banked as tiebreak.
+- Kept per hero, as the other boards, checked on the server the way the butts and the forge are.
+
+## Build order
+
+1. The way down and its keeper; one floor generated, the checkpoint, LEAVE and GO DEEPER.
+2. The run snapshot: gear and pack kept on death, run finds lost, mid-run swaps handled.
+3. Floor scaling (threat and loot tables by band).
+4. Party: per-player checkpoint choice, disconnect counts as leaving at the last checkpoint.
+5. The board.
+6. Paths every five floors, blessings and curses.
+
+## Open
+
+1. Who sits at the way down, and what is the Deep in the world? *(lore)*
+2. Do curses stack across forks, or does a new fork replace the last?
+3. Any tie to holy and hungry (hungry finds only below a floor, say)?
