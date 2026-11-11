@@ -177,9 +177,11 @@ describe('floors by band (step 3)', () => {
     expect(f(1).deep).toBeUndefined();
     expect(f(6)).toMatchObject({ deep: true, place: { ruin: 3 }, objective: 'hunt' });
     expect(f(6).boss).toBeTruthy();
-    expect([7, 8, 10].map((n) => f(n).objective)).not.toContain('hunt');
+    expect([7, 8].map((n) => f(n).objective)).not.toContain('hunt');
     expect(f(12).objective).toBe('hunt');
-    for (let n = 2; n < 30; n++) expect(f(n).objective === 'hunt' && f(n - 1).objective === 'hunt').toBe(false);
+    // (A boss floor, every fifth, is its own: docs/design/deep-bosses.md.)
+    const named = (n: number) => f(n).objective === 'hunt' && !f(n).arena;
+    for (let n = 2; n < 30; n++) expect(named(n) && named(n - 1)).toBe(false);
     const b = [1, 6, 11, 16, 20, 30].map((n) => roomBudget(f(n), roomAt(f(n), 0)));
     for (let i = 1; i < b.length; i++) expect(b[i]).toBeGreaterThanOrEqual(b[i - 1]);
     expect(b[5]).toBeGreaterThan(b[3]);
@@ -218,11 +220,11 @@ describe('harder goblins, BIG ONEs and elites below (Kyle, 2026-11-11)', () => {
   const rooms = (n: number, seeds = 12) => Array.from({ length: seeds }, (_, i) => runRoom(newRun(deepFloor(n, 300 + i, 'x'))));
   const count = (rs: ReturnType<typeof rooms>, p: (e: (typeof rs)[number]['enemies'][number]) => boolean) => rs.reduce((s, r) => s + r.enemies.filter(p).length, 0);
 
-  it('a BIG ONE closes floor 4, then every other floor that is not a hunt, then every one', () => {
+  it('a BIG ONE closes floor 4, then every other floor that is not a hunt, then every one (a boss floor aside)', () => {
     const big = (n: number) => bigRooms(deepFloor(n, 9, 'x')).length > 0;
     expect([1, 2, 3, 4, 5].map(big)).toEqual([false, false, false, true, false]);
-    expect([6, 7, 8, 9, 10].map(big)).toEqual([false, false, true, false, true]);
-    expect([11, 12, 13, 14, 15].map(big)).toEqual([true, false, true, false, true]);
+    expect([6, 7, 8, 9, 10].map(big)).toEqual([false, false, true, false, false]);
+    expect([11, 12, 13, 14, 15].map(big)).toEqual([true, false, true, false, false]);
     expect(count(rooms(4), (e) => !!e.big)).toBeGreaterThan(0);
   });
 

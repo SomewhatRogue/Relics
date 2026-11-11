@@ -269,6 +269,10 @@ export interface GameMap {
   /** `wild`: a camp's fire, burning whatever the hour (shared/lamps.ts); the rest are tended lamps. */
   braziers: (Circle & { wild?: boolean })[];
   torches: { x: number; y: number }[];
+  /** The Haulier's working in the Deep (shared/sumparena.ts): the ore rail across the floor, the winding gear over the shaft, the adits small ones come out of. */
+  rail?: { y: number; x0: number; x1: number };
+  gear?: { x: number; y: number };
+  adits?: { x: number; y: number }[];
   hero: { x: number; y: number };
   /** Walk into this to leave (opens when the room says so). */
   exit: Area | null;

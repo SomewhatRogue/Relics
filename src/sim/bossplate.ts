@@ -17,8 +17,9 @@ export function plateOf(enemies: Enemy[], now: number, near: (e: Enemy) => boole
   const kit = enemies.filter((e) => e.boss && (e.boss.who !== 'hempen' || near(e)));
   if (kit.length) {
     if (kit.every(isDead)) return null;
-    const lone = kit[0].boss!.who === 'hempen', phase = Math.max(...kit.map((e) => e.boss!.phase)), pips = lone || kit.length > 1 ? 2 : 1;
-    const bars = kit.map((e) => ({ name: e.boss!.who === 'hempen' ? '' : DOOR_NAMES[e.boss!.who], hp: Math.max(0, e.hp), max: e.maxHp, poise: e.boss!.poise, poiseMax: e.boss!.poiseMax, dead: isDead(e), staggered: e.boss!.stagUntil > now }));
+    // (A boss alone, Hempen or the Haulier: its own name on the plate, one bar.)
+    const lone = kit.length === 1 && (kit[0].boss!.who === 'hempen' || kit[0].boss!.who === 'haulier'), phase = Math.max(...kit.map((e) => e.boss!.phase)), pips = lone || kit.length > 1 ? 2 : 1;
+    const bars = kit.map((e) => ({ name: lone || e.boss!.who === 'hempen' || e.boss!.who === 'haulier' ? '' : DOOR_NAMES[e.boss!.who], hp: Math.max(0, e.hp), max: e.maxHp, poise: e.boss!.poise, poiseMax: e.boss!.poiseMax, dead: isDead(e), staggered: e.boss!.stagUntil > now }));
     return { name: lone ? kit[0].name ?? '' : DOOR_NAMES.plate, bars, pips, lit: pips - (phase - 1) };
   }
   const e = enemies.find((x) => x.name && !isDead(x) && near(x));

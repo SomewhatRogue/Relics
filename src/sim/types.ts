@@ -685,6 +685,9 @@ export interface Prop extends Body {
   respawnAt: number;
   /** Where it came back to; pieces have none and fade at `fadeAt`. */
   home: { x: number; y: number } | null;
+  /** An ore cart rolling down the rail (sim/haulbook.ts): its speed along it, tiles a second (+ right, - left), and who sent it. */
+  roll?: number;
+  rollBy?: string;
   fadeAt: number;
   /** Spin while flying, for drawing. */
   spin: number;
@@ -768,6 +771,11 @@ export type FightEvent =
    *  an ironhide's guard broken (sim/packrush.ts, sim/ironhide.ts). */
   | { k: 'rush'; x: number; y: number; n: number; id: string }
   | { k: 'cracked'; x: number; y: number }
+  /** The Haulier's working (sim/haulbook.ts, sim/haulcarts.ts; drawn client/hauldraw.ts): a cart set rolling (`by` a hero, or the Haulier's shove),
+   *  hitting a hero or the Haulier (`on`), or stopping at a stop; lightning falling on the winding gear; the Haulier's plate off for good (phase 2). */
+  | { k: 'cart'; what: 'go' | 'hit' | 'stop'; x: number; y: number; by?: string; on?: string }
+  | { k: 'gear'; x: number; y: number; hit: boolean }
+  | { k: 'bare'; x: number; y: number }
   | { k: 'cutfree'; x: number; y: number; id: string; by: string }
   | { k: 'stolen'; x: number; y: number; id: string; n: number; potion?: PotionId }
   /** A hero down (`by`: the teammate whose blow did it), or picked up (`by`: who picked them up). */

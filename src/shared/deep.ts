@@ -6,12 +6,16 @@
  * fifteen it keeps rising.
  */
 import { BOSSES, type Job, type Objective, type Place } from './jobs.js';
+import { HAUL_NAME } from './bosswords.js';
 import { bandOf } from './deepbands.js';
 import { Rng } from './rng.js';
 import { rollTime } from './timeofday.js';
 
 /** Under the town: the 'under' country, the drains' rooms (shared/countries.ts, nodes4.ts). */
 export const DEEP_PLACE: Place = { name: 'The Deep', kind: 'mine', region: 'Wickhold', ruin: 2 };
+
+/** A boss floor every `every`th floor (docs/design/deep-bosses.md). */
+export const DEEP_BOSS = { every: 5 };
 
 /** What a floor asks of you, turn about (a hunt's floor aside); a floor never repeats the last one's. */
 const ASKS: Objective[] = ['larder', 'burn', 'rescue'];
@@ -21,7 +25,13 @@ const ASKS: Objective[] = ['larder', 'burn', 'rescue'];
  * screens build the same map. `title` is the floor's name on the HUD and the recap.
  */
 export function deepFloor(n: number, seed: number, title: string): Job {
-  const s = (seed * 7919 + n * 104729) >>> 0, b = bandOf(n), hunt = !!b.hunt && n % b.hunt === 0;
+  const s = (seed * 7919 + n * 104729) >>> 0, b = bandOf(n);
+  // Every fifth floor, a boss in its own arena (docs/design/deep-bosses.md): the Haulier, for now the only one.
+  if (n % DEEP_BOSS.every === 0) return {
+    id: `deep-${seed}-${n}`, place: { ...DEEP_PLACE, ruin: b.ruin }, objective: 'hunt', twist: 'none', time: rollTime(s, false), rooms: 1, size: 'short', layout: 4,
+    reward: 0, seed: s, title, text: '', floor: n, boss: HAUL_NAME, arena: 'haulier', ...(b.deep ? { deep: true } : {}),
+  };
+  const hunt = !!b.hunt && n % b.hunt === 0;
   // (A hunt's floor among the others: the ones either side of it still never ask the same.)
   const objective: Objective = hunt ? 'hunt' : ASKS[(seed + n) % ASKS.length], boss = hunt ? new Rng(s).pick(BOSSES) : undefined;
   return {

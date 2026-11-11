@@ -4,7 +4,7 @@
  */
 import type { HeroClass } from './weapons.js';
 
-export type PropKind = 'barrel' | 'oil' | 'crate' | 'table' | 'plank' | 'stave' | 'cage' | 'larder' | 'punt' | 'lamp';
+export type PropKind = 'barrel' | 'oil' | 'crate' | 'table' | 'plank' | 'stave' | 'cage' | 'larder' | 'punt' | 'lamp' | 'cart';
 
 export interface PropSpec {
   radius: number;
@@ -28,6 +28,8 @@ export const PROPS: Record<PropKind, PropSpec> = {
   /** The Staithe's: a punt drawn up on the bank (cover; a Warrior can lift it), an oil lamp on its post (broken, its oil spills on the water). */
   punt: { radius: 0.62, weight: 5, hp: 70, pieces: { kind: 'plank', n: 3 } },
   lamp: { radius: 0.2, weight: 0.6, hp: 6, pieces: null },
+  /** The Haulier's working (shared/sumparena.ts): an ore cart on the rail. Never broken or lifted; it rolls (sim/haulbook.ts). */
+  cart: { radius: 0.6, weight: 99, hp: 9999, pieces: null },
 };
 
 /** Classes big enough to lift and throw them (a Barbarian joins when the Warrior forks). */

@@ -13,6 +13,7 @@ import { walk } from './enemies';
 import { isDead } from './damage';
 import { bossBegin, bossTarget, clocked, enraged, rotation, theBook, turnTo, type BossOn } from './bosskit';
 import { stepHempen } from './hempenboss';
+import { stepHaulier } from './haulier';
 import type { Enemy, FightEvent, Hero } from './types';
 
 const D = DOORKEEPERS;
@@ -23,6 +24,8 @@ export function stepKeeper(e: Enemy, heroes: Hero[], now: number, dt: number, ev
   const b = e.boss!, bk = theBook();
   // Hempen, the wood's boss, takes its own turn (sim/hempenboss.ts).
   if (b.who === 'hempen') return stepHempen(e, heroes, now, dt, ev, notice);
+  // The Deep's Haulier takes its own turn too (sim/haulier.ts).
+  if (b.who === 'haulier') return stepHaulier(e, heroes, now, dt, ev, notice);
   // At its post facing the back wall until it sees you, or hears you come within DOORKEEPERS.hear (creeping, only
   // what it sees: an ambush to open with). sim/doorpair.ts wakes its partner and starts the fight.
   if (e.alert === false && !heard(e, heroes) && !notice()) return;

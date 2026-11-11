@@ -20,7 +20,7 @@ import type { AttackKind, Enemy, FightEvent, Hero } from './types';
 /** On a boss goblin (drawn: the plate, its door, the stagger). Room times; -9 for "not". */
 export interface BossOn {
   /** The Doorkeepers' Latch or Hasp, or Hempen (sim/hempenboss.ts). */
-  who: 'latch' | 'hasp' | 'hempen';
+  who: 'latch' | 'hasp' | 'hempen' | 'haulier';
   job: 'wall' | 'move';
   phase: 1 | 2;
   poise: number;
@@ -37,6 +37,9 @@ export interface BossOn {
   straps: number;
   /** Players in the room when it was made (the plan's scaling table). */
   party: number;
+  /** The Haulier (sim/haulier.ts): the move under way (the screen poses on it: client/hauldraw.ts), and its plate gone for good (phase 2). */
+  move?: import('../shared/haultune').HaulMove;
+  bare?: boolean;
   /** Hempen's ropes coming down out of the branches (sim/hempenbook.ts): where, when they land, on whom. Sent as they come and go. */
   ropes?: Rope[];
 }
@@ -66,14 +69,14 @@ export interface BossBook {
   phase: number;
   party: number;
   /** Whose book: the Doorkeepers' (none said) or Hempen's (sim/hempenbook.ts). */
-  of?: 'hempen';
+  of?: 'hempen' | 'haulier';
 }
 
 let book: BossBook | null = null;
 export const useBook = (b: BossBook | null): void => void (book = b);
 export const theBook = () => book;
 
-export function newBook(party: number, swaps: number[], of?: 'hempen'): BossBook {
+export function newBook(party: number, swaps: number[], of?: 'hempen' | 'haulier'): BossBook {
   return { hurt: [], started: -1, swapAt: -1, apartAt: -1, lockBy: -1, lockUntil: -9, lockCool: -9, split: null, swaps, phase: 1, party, ...(of ? { of } : {}) };
 }
 

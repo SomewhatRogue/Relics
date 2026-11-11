@@ -59,8 +59,8 @@ export interface Foe {
   beat?: import('./encounters.js').Beat; big?: boolean; harm?: number;
   /** An elite's affixes (shared/elites.ts). */
   elite?: import('./elites.js').Affix[];
-  /** A boss of the kit (sim/bosskit.ts): which one (the Doorkeepers' Latch or Hasp). */
-  boss?: 'latch' | 'hasp';
+  /** A boss of the kit (sim/bosskit.ts): which one (the Doorkeepers' Latch or Hasp, the Deep's Haulier). */
+  boss?: 'latch' | 'hasp' | 'haulier';
 }
 /** Which way the party went at a fork. */
 export type RoadId = Road['road'];
