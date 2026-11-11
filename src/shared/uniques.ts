@@ -3,7 +3,7 @@
  * has a short pool of its own, found nowhere else, and only in the Deep. A kill there drops one piece of its
  * pool for the whole group, rolled for (NEED / GREED / PASS: sim/lootroll.ts). A piece is PRE-WAR in
  * quality with fixed modifiers and, for a weapon, a fixed trait; `line` is what it is, said on its card.
- * A hero owns at most one of each. Names and lines: lore keeper 2026-11-11 (line editor next).
+ * A hero owns at most one of each. Names and lines: lore keeper and line editor 2026-11-11.
  */
 import type { Item, TraitId } from './loot.js';
 import type { ArmorKind, ModId } from './mods.js';
@@ -23,11 +23,11 @@ export interface Unique {
 }
 
 export const UNIQUES = {
-  haulpick: { name: "THE HAULIER'S PICK", pool: 'haulier', slot: 'weapon', kit: 'greatsword', trait: 'crushing', mods: [{ id: 'damage', v: 0.18 }, { id: 'knock', v: 0.25 }, { id: 'reach', v: 0.12 }], line: 'A quarry pick ground to an edge. It goes through plate.' },
+  haulpick: { name: "THE HAULIER'S PICK", pool: 'haulier', slot: 'weapon', kit: 'greatsword', trait: 'crushing', mods: [{ id: 'damage', v: 0.18 }, { id: 'knock', v: 0.25 }, { id: 'reach', v: 0.12 }], line: 'A quarry pick ground to an edge, and it goes through plate.' },
   smeltplate: { name: "THE HAULIER'S PLATE", pool: 'haulier', slot: 'armor', armor: 'heavy', mods: [{ id: 'tough', v: 0.2 }, { id: 'health', v: 25 }, { id: 'guard', v: 0.15 }], line: 'Riveted iron plate, dented all over and a lot heavier than it looks.' },
   cartlink: { name: 'A DRAG-CHAIN LINK', pool: 'haulier', slot: 'ring', mods: [{ id: 'health', v: 20 }, { id: 'breath', v: 0.18 }, { id: 'foot', v: 0.08 }], line: 'One link off a drag chain, on a thong.' },
   hingepin: { name: 'THE HINGE PIN', pool: 'doorkeepers', slot: 'weapon', kit: 'spear', trait: 'riposte', mods: [{ id: 'reach', v: 0.15 }, { id: 'damage', v: 0.14 }, { id: 'guard', v: 0.2 }], line: 'An iron pin as long as your arm, ground to a point.' },
-  doorbow: { name: 'OLD-OAK BOW', pool: 'doorkeepers', slot: 'weapon', kit: 'longbow', trait: 'deadeye', mods: [{ id: 'damage', v: 0.16 }, { id: 'draw', v: 0.18 }, { id: 'crit', v: 0.1 }], line: 'Cut from a plank of old oak. There is still a nail hole in the stave.' },
+  doorbow: { name: 'OLD-OAK BOW', pool: 'doorkeepers', slot: 'weapon', kit: 'longbow', trait: 'deadeye', mods: [{ id: 'damage', v: 0.16 }, { id: 'draw', v: 0.18 }, { id: 'crit', v: 0.1 }], line: 'Cut from a plank of old oak, with the nail hole still in the stave.' },
   keepersring: { name: 'AN IRON HASP', pool: 'doorkeepers', slot: 'ring', mods: [{ id: 'guard', v: 0.2 }, { id: 'health', v: 20 }, { id: 'tough', v: 0.1 }], line: 'A small iron hasp, bent closed round your finger.' },
   mawlteeth: { name: "MAWL'S TEETH", pool: 'mawl', slot: 'weapon', kit: 'daggers', trait: 'reaper', mods: [{ id: 'backstab', v: 0.4 }, { id: 'crit', v: 0.15 }, { id: 'quick', v: 0.12 }], line: 'Two of its own teeth, filed to points and set in bone.' },
   mawlbelt: { name: "MAWL'S BELT", pool: 'mawl', slot: 'armor', armor: 'light', mods: [{ id: 'dodge', v: 0.2 }, { id: 'foot', v: 0.1 }, { id: 'breath', v: 0.15 }], line: "A belt hung with teeth on cords, and not all of them goblin's." },

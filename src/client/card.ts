@@ -5,6 +5,8 @@
  */
 import { CLASS_DODGES, CLASS_GUARD, guardOf, HUNGRY, type HungryId, LASTS, POTIONS, type PotionId, MODS, MOD_TEXT, PLUS, TIERS, TRAITS, WEAPONS, CHARGE, GUARD, RARE, SPELL, costText, gearStats, itemName, levelOf, plusOf, temperOf, modFits, slotOf, traitText, type HeroClass, type Item, type Mod, type MageKit, type WeaponId } from '../shared/tuning';
 import { CARDW } from './shopwords';
+import { itemCol, isUnique, uniqueLine } from './uniquelook';
+import { LOOTW } from './lootwords';
 import { plusLine, plusPips } from './forgeview';
 import { ANVILW } from './pastimewords';
 import type { Hero } from '../sim/types';
@@ -125,7 +127,8 @@ export function card(it: Item, h?: Hero, brief = false): string {
   if (tp > 0) traits.push(`<div class="tr"><b>${ANVILW.cardRow}:</b> ${ANVILW.cardText(tp)}</div>`);
   // The rare three wear their chip filled in; HUNGRY's darkest of all (ui.css).
   const chip = RARE.includes(it.quality) ? ` rare ${it.quality}` : '';
-  return `<div class="card-head" style="--t:${t.col}"><span class="chip${chip}">${t.name}</span><b>${itemName(it)}</b></div>` +
+  return `<div class="card-head" style="--t:${itemCol(it)}"><span class="chip${chip}">${isUnique(it) ? LOOTW.title : t.name}</span><b>${itemName(it)}</b></div>` +
+    (uniqueLine(it) ? `<div class="uline">${uniqueLine(it)}</div>` : '') +
     (how ? `<div class="how">${how}</div>` : '') + [...plus, ...mods, ...traits].join('') +
     (it.cost ? labelRows([[CARDW.cost, costText(it.cost, cls)]], 'hungry') : '') +
     (it.hungry ? hungryRows(it.hungry as HungryId, cls) : '') + (mods.length + traits.length || it.hungry ? '' : `<div class="tr">Plain. No modifiers.</div>`);

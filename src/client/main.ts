@@ -89,6 +89,7 @@ import { Input } from './input';
 import { HideWatch } from './hidehost';
 import { noteFrame } from './netq';
 import { LootCard } from './lootcard';
+import { RollCard } from './rollcard';
 import { PackView } from './pack';
 import { openTree } from './treeui';
 import { knackCues } from './knackcues';
@@ -184,6 +185,8 @@ const input = new Input(() => views.heroScreen());
 const lobby = new Lobby(game, panel, input.touch, () => pack.toggle(false));
 const $ = (s: string) => document.querySelector(s) as HTMLElement;
 const card = new LootCard((id) => input.take(id));
+// Boss loot: the NEED / GREED / PASS card for a unique piece up for the group's roll (rollcard.ts).
+const rollCard = new RollCard(game.lootPicks, (id) => { const h = game.room.heroes.find((x) => x.id === id); return h?.tag ?? (id === ME ? game.profile.name : id); }, (s) => chat.system(s));
 const lesson = new LessonView(game, input.touch);
 const pack = new PackView((op, arg) => input.gear(op, arg), () => title.open, { open: () => openTree(game, panel), picks: () => game.profile.picks, town: () => game.mode === 'town', fresh: () => game.profile.relicNew ?? [], seen: (id) => game.seeRelic(id) });
 const music = new Music();
@@ -623,6 +626,7 @@ function tick(t: number): void {
   // Out of bounds: the dark closing in, what comes for you, and anyone taken (dreadfx.ts).
   dread.frame(game.room.heroes.find((x) => x.id === ME), game.room.heroes, evs, views, fx, t / 1000, dt);
   hud(t / 1000);
+  rollCard.frame(game.room, game.room.heroes.find((x) => x.id === ME), evs, t / 1000, game.room.time);
   chat.frame();
 }
 

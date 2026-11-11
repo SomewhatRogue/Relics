@@ -6,6 +6,7 @@ import { relicCol } from './relicicons';
 import type { Smoke } from '../sim/flasks';
 import type { Chest } from '../sim/chests';
 import { POTIONS, TIERS, TIER_ORDER } from '../shared/tuning';
+import { isUnique, itemCol } from './uniquelook';
 import { line, type Ctx } from './draw';
 import { EL_COL } from './palette';
 import { drawSpell } from './spelldraw';
@@ -277,7 +278,7 @@ export function drawChest(c: Ctx, ch: Chest, x: number, y: number): void {
 
 /** Gear lying on the floor: a ring of its tier's colour round it, a shaft of light from blue up, and the thing itself. */
 export function drawDrop(c: Ctx, d: Drop, x: number, y: number): void {
-  const fade = Math.min(1, d.life / 5), col = TIERS[d.item.quality].col, step = TIER_ORDER.indexOf(d.item.quality), kind = d.item.slot ?? 'weapon';
+  const fade = Math.min(1, d.life / 5), col = itemCol(d.item), step = isUnique(d.item) ? 6 : TIER_ORDER.indexOf(d.item.quality), kind = d.item.slot ?? 'weapon';
   c.lit.globalAlpha = c.glow.globalAlpha = fade;
   const bob = Math.round(Math.sin(c.now * 3 + d.id) * 1);
   c.glow.fillStyle = col;

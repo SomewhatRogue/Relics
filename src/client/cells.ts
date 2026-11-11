@@ -3,8 +3,9 @@
  * card: a piece next to what you wear in that slot now, with every number the room uses for both and
  * the difference, green better, red worse. Shared by the pack (pack.ts) and the town stores (stores.ts).
  */
-import { CLASS_KITS, TIERS, WEAPONS, itemName, slotOf, type Item } from '../shared/tuning';
+import { CLASS_KITS, WEAPONS, itemName, slotOf, type Item } from '../shared/tuning';
 import type { Hero } from '../sim/types';
+import { itemCol } from './uniquelook';
 import { card, fmt, sheet, shown, wearing, worn, type Row } from './card';
 import { itemIcon } from './itemicons';
 import './cells.css';
@@ -13,7 +14,7 @@ const esc = (s: string) => s.replace(/"/g, '&quot;');
 
 /** One square: a piece's picture in its tier's colour, its level, or an empty place. `src` makes it pickable. */
 export function cell(it: Item | null, src: string | null, opts: { dst?: string; sel?: string | null; label?: string; icon?: string; col?: string; dim?: boolean; tag?: string } = {}): string {
-  const col = opts.col ?? (it ? TIERS[it.quality].col : '#3a3546');
+  const col = opts.col ?? (it ? itemCol(it) : '#3a3546');
   const cls = `tile${it || opts.icon ? '' : ' empty'}${src && src === opts.sel ? ' sel' : ''}${opts.dim ? ' dim' : ''}`;
   const icon = opts.icon ?? (it ? itemIcon(it) : '');
   const name = it ? itemName(it) : opts.label ?? '';

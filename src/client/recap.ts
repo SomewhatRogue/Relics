@@ -7,6 +7,7 @@
  * A knack waiting is never picked here: it's banked, and the PACK says so (knackcues.ts). Each player's
  * own (game.ts finish).
  */
+import { UNIQUE_COL, isUnique } from './uniquelook';
 import { STAITHE_WORDS } from '../shared/staithewords';
 import { TRAINERS } from '../shared/town';
 import { itemName } from '../shared/tuning';
@@ -54,7 +55,7 @@ export function showResult(g: Game, panel: Panel): void {
     ['LOST', [r.lost ? `${r.lost} to the fire` : '', r.ledoff ? RECAPW.ledoff(r.ledoff) : '', r.netlost ? STAITHE_WORDS.lost(r.netlost) : ''].filter(Boolean).join(', ')],
     [RECAPW.way, r.won ? r.way ?? '' : ''],
     [RECAPW.found, c?.found.join(', ') ?? ''],
-    [RECAPW.treasure, r.treasure.map(itemName).join(', ')],
+    [RECAPW.treasure, r.treasure.map((x) => (isUnique(x) ? `<span style="color:${UNIQUE_COL}">${itemName(x)}</span>` : itemName(x))).join(', ')],
     // The Deep: what stayed below (shared/deepkit.ts).
     [DEEP_WORDS.keptBelow, r.deep?.lost.map(itemName).join(', ') ?? ''],
     // Picked up on the way, then the sure one at the end, each with the uses it holds.

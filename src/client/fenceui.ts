@@ -3,7 +3,8 @@
  * SELL QUIETLY, where he quietly buys touched and turning gear out of your pack, cheap and gone for
  * good (shared/fence.ts). Everything else in the pack shows dim with the reason. The words: vendorwords.ts.
  */
-import { TIERS, itemName } from '../shared/tuning';
+import { itemName } from '../shared/tuning';
+import { itemCol } from './uniquelook';
 import { bagSize } from '../shared/bags';
 import { fence, fenceValue, nettleTakes } from '../shared/fence';
 import type { Item } from '../shared/loot';
@@ -37,7 +38,7 @@ export function wireFence(g: Game, again: () => void, sync: () => void): void {
     e.stopPropagation();
     const i = Number(t.dataset.src!.split(':')[1]), it = pr.bag[i];
     if (!it) return;
-    const price = fenceValue(it, g.profile), base = { icon: itemIcon(it), name: itemName(it), col: TIERS[it.quality].col, body: card(it, g.hero, true), again };
+    const price = fenceValue(it, g.profile), base = { icon: itemIcon(it), name: itemName(it), col: itemCol(it), body: card(it, g.hero, true), again };
     if (!price) return itemPop({ ...base, acts: [], why: it.quality === 'hungry' ? FENCE.hungry : FENCE.wont });
     itemPop({ ...base, acts: [{ label: PAWN.sell(price), primary: true, act: () => {
       if (!fence(pr, i)) return;

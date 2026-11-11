@@ -1,0 +1,27 @@
+/* Boss loot: the roll card (rollcard.ts) and a unique piece's line on the item card. */
+.uline { font-style: italic; color: #2fe0c8; margin: 2px 0 4px; font-size: var(--fs-text); }
+#roll { position: fixed; left: 50%; bottom: calc(150px + env(safe-area-inset-bottom)); width: min(340px, calc(100vw - 32px)); transform: translate(-50%, 0); padding: 8px 10px 10px; background: #15171bf2; border: 2px solid #2fe0c8; box-shadow: 0 0 14px #2fe0c855; color: #c8c0b0; z-index: 4; font-size: var(--fs-text); transition: transform 0.25s ease-out, opacity 0.25s; }
+#roll[hidden] { display: block; transform: translate(-50%, 140%); opacity: 0; pointer-events: none; }
+body.touch #roll { bottom: auto; top: calc(152px + env(safe-area-inset-top)); }
+body.touch #roll[hidden] { transform: translate(-50%, -140%); }
+#roll .rhead { display: flex; gap: 8px; align-items: center; }
+#roll .rhead img { width: 36px; height: 36px; image-rendering: pixelated; padding: 3px; border: 2px solid #2fe0c8; background: #0e0f12; flex: none; }
+#roll .rhead b { display: block; color: #2fe0c8; font-weight: 400; }
+#roll .rhead span { color: #a39e94; font-size: var(--fs-s); }
+#roll .rmods { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 0 10px; }
+#roll .rmods div { white-space: nowrap; }
+#roll .rmods .tr { flex-basis: 100%; white-space: normal; color: #ffd27a; }
+#roll .uline { margin: 4px 0 0; }
+#roll .rbar { height: 4px; background: #2a2d34; margin: 6px 0; }
+#roll .rbar i { display: block; height: 100%; background: #2fe0c8; }
+#roll .rbtns { display: flex; gap: 6px; }
+#roll .rbtns button { flex: 1; min-height: 40px; background: #20232a; border: 1px solid #5a606b; color: #e8e4ee; font: inherit; cursor: pointer; }
+#roll .rbtns button.need { border-color: #7fd07a; }
+#roll .rbtns button.greed { border-color: #f2d54a; }
+#roll .rbtns button:disabled { opacity: 0.35; cursor: default; }
+#roll .rbtns button small { display: block; font-size: var(--fs-s); color: #a39e94; }
+#roll .rwait { text-align: center; color: #a39e94; padding: 6px 0 0; }
+#roll .rres { margin-top: 6px; }
+#roll .rres div { display: flex; justify-content: space-between; gap: 8px; }
+#roll .rres div.win { color: #2fe0c8; }
+#roll .rres div.pass { color: #7a7f8a; }

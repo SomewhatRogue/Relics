@@ -4,7 +4,8 @@
  * up unless you click on it"): LOOK on a phone, a tap on the drop, or F on a laptop. On the floor a drop
  * is only its sprite and glint. TAKE (or F again) puts it in your pack; walking off shuts it.
  */
-import { TIERS, WEAPONS } from '../shared/tuning';
+import { itemCol } from './uniquelook';
+import { WEAPONS } from '../shared/tuning';
 import { card, compare } from './card';
 import { REACH } from '../sim/loot';
 import { full } from '../sim/pack';
@@ -69,7 +70,7 @@ export class LootCard {
     this.packed = me.bag.length;
     this.current = d.id;
     const it = d.item, cls = it.kit ? WEAPONS[it.kit].cls : WEAPONS[me.weapon].cls, mine = cls === WEAPONS[me.weapon].cls;
-    this.el.style.setProperty('--el', TIERS[it.quality].col);
+    this.el.style.setProperty('--el', itemCol(it));
     const shut = `<button data-shut>CLOSE</button>`;
     this.el.innerHTML = card(it, me) +
       (mine ? (full(me) ? `<div class="yours">${PACKW.fullJob}</div><div class="lbtns">${shut}</div>` : compare(me, it) + `<div class="yours">${COPY.takes}</div><div class="lbtns"><button class="primary">TAKE${keys ? ' (F)' : ''}</button>${shut}</div>`)

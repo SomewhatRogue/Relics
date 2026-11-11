@@ -172,6 +172,11 @@ export class Chat {
     else this.note(id, name, 'can be heard again.');
   }
 
+  /** A line from the game, in the log (a roll settled: boss loot). */
+  system(text: string): void {
+    this.note('', '', text);
+  }
+
   private note(from: string, name: string, text: string): void {
     this.add({ from, name, ch: 'note', text });
   }

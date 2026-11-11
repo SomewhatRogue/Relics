@@ -118,6 +118,8 @@ export class Game {
   private deepThere = false;
   /** The floor I've chosen GO DEEPER on (0 none): sent on my input, the leader goes down once everyone has. */
   deepVote = 0;
+  /** My standing choice on each open boss-loot roll, by the roll's id (client/rollcard.ts); rides on my input. */
+  lootPicks: Record<number, 'need' | 'greed' | 'pass'> = {};
   /** LEAVE chosen at a checkpoint (in a party, going home through leaveJob): up with everything. */
   private deepUp = false;
   /**
@@ -1641,7 +1643,7 @@ export class Game {
 
   /** My input as it goes to the room: with the levels I've grown counted in. */
   own(i: Intent): Intent {
-    return { ...i, levelSeq: this.levelSeq, ...(this.deepVote ? { deep: this.deepVote } : {}) };
+    return { ...i, levelSeq: this.levelSeq, ...(this.deepVote ? { deep: this.deepVote } : {}), ...(Object.keys(this.lootPicks).length ? { loot: this.lootPicks } : {}) };
   }
 
   /** On a job: a level surely earned (kills and rescues so far) is lit now, in the room, for everyone to see. */

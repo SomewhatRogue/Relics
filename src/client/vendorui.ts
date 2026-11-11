@@ -5,7 +5,8 @@
  * the time left until fresh stock. Tobin's stall (stores.ts) uses the same stock rows. Buying goes into
  * your own save, as every shop.
  */
-import { CLASS_ORDER, TIERS, itemName, priceOf } from '../shared/tuning';
+import { CLASS_ORDER, itemName, priceOf } from '../shared/tuning';
+import { itemCol } from './uniquelook';
 import { bagSize } from '../shared/bags';
 import { buyStock, cantBuy, isBought, stockFor, stockLeft, stockWindow, usable, type VendorId } from '../shared/vendors';
 import type { Game } from './game';
@@ -50,7 +51,7 @@ export function stockGoods(g: Game, v: VendorId, again: () => void): Good[] {
     if (isBought(pr, v, win, i)) return [];
     const why = cantBuy(pr, v, win, i);
     return [{
-      name: itemName(it), price: priceOf(it), icon: itemIcon(it), col: TIERS[it.quality].col, about: card(it, g.hero, true),
+      name: itemName(it), price: priceOf(it), icon: itemIcon(it), col: itemCol(it), about: card(it, g.hero, true),
       cmp: usable(pr, it) ? () => compare(g.hero, it) : undefined,
       why: why === 'class' ? SHOPW.notYours : why === 'pack' ? SHOPW.packFull : why === 'gold' ? SHOPW.poor : why === 'gone' ? SHOPW.soldOut : '',
       buy: () => {

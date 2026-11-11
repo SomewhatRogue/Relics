@@ -10,7 +10,8 @@
  */
 import { carriesHungry, tobinWont } from '../shared/fence';
 import { bagSize, growBag, growVault, nextBag, nextVault, pawn, pawns, redeem, stow, unstow, vaultSize } from '../shared/bags';
-import { STEEL, TIERS, itemName, nextLevel, plusOf, sellValue, type Item } from '../shared/tuning';
+import { itemCol } from './uniquelook';
+import { STEEL, itemName, nextLevel, plusOf, sellValue, type Item } from '../shared/tuning';
 import type { SpotId } from '../shared/town';
 import type { Game } from './game';
 import type { Button, Panel } from './panels';
@@ -49,7 +50,7 @@ function show(panel: Panel, title: string, html: string, tap: (src: string, i: n
 /** A piece's card, with COMPARE when it's yours to wear (a weapon of another class: just the card). */
 function piece(g: Game, it: Item, acts: Act[], again: () => void, note = '', worn = false): void {
   const fits = !it.kit || WEAPONS[it.kit].cls === WEAPONS[g.hero.weapon].cls;
-  itemPop({ icon: itemIcon(it), name: itemName(it), col: TIERS[it.quality].col, body: card(it, g.hero, true) + note, acts, again,
+  itemPop({ icon: itemIcon(it), name: itemName(it), col: itemCol(it), body: card(it, g.hero, true) + note, acts, again,
     cmp: fits && !worn ? () => compare(g.hero, it) : undefined, why: fits ? '' : SHOPW.notYours });
 }
 
@@ -88,13 +89,13 @@ function merchant(g: Game, panel: Panel): void {
   const tap = (s: string, i: number) => {
     const it = s === 'bag' ? pr.bag[i] : undefined, price = it ? sellValue(it) : 0;
     if (!it) return;
-    if (wont(it)) return itemPop({ icon: itemIcon(it), name: itemName(it), col: TIERS[it.quality].col, body: says('Tobin', PAWN.hungry) + card(it, g.hero, true), acts: [], again, why: PAWN.wont });
+    if (wont(it)) return itemPop({ icon: itemIcon(it), name: itemName(it), col: itemCol(it), body: says('Tobin', PAWN.hungry) + card(it, g.hero, true), acts: [], again, why: PAWN.wont });
     piece(g, it, [{ label: PAWN.sell(price), primary: true, act: () => void (pawn(pr, i) && syncPack(g)) }], again);
   };
   const goods: Good[] = [
     ...stockGoods(g, 'pawn', again),
     ...(more ? [{ name: PAWN.bigger, price: more.gold, about: p(SHOPW.pack(more.size)), why: pr.gold < more.gold ? SHOPW.poor : '', buy: () => void (growBag(pr) && syncPack(g)) }] : []),
-    ...held.map((x, k) => ({ name: itemName(x.item), price: x.price, icon: itemIcon(x.item), col: TIERS[x.item.quality].col, label: PAWN.back, about: card(x.item, g.hero, true),
+    ...held.map((x, k) => ({ name: itemName(x.item), price: x.price, icon: itemIcon(x.item), col: itemCol(x.item), label: PAWN.back, about: card(x.item, g.hero, true),
       cmp: () => compare(g.hero, x.item), why: !room ? SHOPW.packFull : pr.gold < x.price ? SHOPW.poor : '', buy: () => void (redeem(pr, k) && syncPack(g)) })),
   ];
   const tabs = '<div class="tabs">' + ([['buy', SHOPW.forSale], ['sell', PAWN.sellTab]] as const)
@@ -113,7 +114,7 @@ function merchant(g: Game, panel: Panel): void {
 
 /** A worn piece at the forge: its plus, NOW and AFTER and the price (forgeview.ts), then its card. */
 function forgePop(g: Game, it: Item, acts: Act[], again: () => void): void {
-  itemPop({ icon: itemIcon(it), name: itemName(it), col: TIERS[it.quality].col, body: forgeBody(it, WEAPONS[g.hero.weapon].cls) + card(it, g.hero, true), acts, again });
+  itemPop({ icon: itemIcon(it), name: itemName(it), col: itemCol(it), body: forgeBody(it, WEAPONS[g.hero.weapon].cls) + card(it, g.hero, true), acts, again });
 }
 
 /** Halvard's forge: UPGRADE what you wear, or MELT DOWN what's in your pack. One choice per piece. Or WORK A SHIFT (shiftui.ts). */
