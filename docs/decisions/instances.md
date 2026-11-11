@@ -2,6 +2,22 @@
 
 The Instances chat's log (docs/BOARD.md). Newest first, signed with the model. Spec: docs/design/instances.md.
 
+## 2026-11-11: THE BRAKESMAN's fight (Kyle: "go"; Claude Opus 5.5)
+
+Step 3, the second named one, from the spec's "it rides the brake at the top of the incline and lets the carts go"
+(`sim/brake.ts`, numbers `BRAKE` in `shared/instancetune.ts`, the lane `client/brakedraw.ts`). A rail across the
+workings' last chamber (`map.rail`, drawn as the Haulier's), its top end at the left by the brake, its bottom by the
+way in. On its brake it stands at its post braced (blows at half, BLOCKED) and swings at whoever comes close. Every 4 s
+(2.6 s under 40%) a cart comes up to the top, its lane striped the rail's length for 1 s, then runs down and knocks
+flat whoever's in it (striped: out of the lane saves you). GRAB held 0.6 s by a cart standing on the rail sends the
+head of its queue back up; into the Brakesman, it's knocked off the brake (30 hurt, stunned 3 s, no carts for 6 s) and
+fights in the open, then walks back to the brake. It never dozes (the rail is longer than an area's wake distance) but
+lets no cart go till someone's within an area's wake distance of the brake. `screened` is now the share that gets
+through (the Drover's quarter, the Brakesman's half). Carts are counted on the rail only (the first chamber's two are
+scenery). The writing pass for both fights: "Stand still by a roped digger to cut them loose, then kill" and "GRAB a
+cart and send it up the rail at the brake, then kill"; CUT LOOSE kept. The spec's carters below who kick carts loose
+are not in yet. Open: every number; the 2.5D view doesn't draw the striped lane.
+
 ## 2026-11-11: THE DROVER's fight (Kyle: "continue"; Claude Opus 5.5)
 
 Step 3, the first named one. The spec's line "free the line and it has nothing to stand behind" as a rule (`sim/drover.ts`,
@@ -13,8 +29,7 @@ alone, you cut first. Its line is held (`led.hold`): at the top of the street th
 roped, instead of walking out of the room with them (`sim/tasks.ts`, `sim/scenes.ts`), so letting it walk is no way
 round the fight and the diggers are never lost. The goal says "Cut the diggers loose (stand by them), then kill THE
 DROVER" while it's screened. Under it the Drover is still the stand-in heavy (380, at three heroes' health).
-Waiting on the writing pass: the goal line and CUT LOOSE go with the next named one's lines in one lore keeper and one
-line editor call. Open: every number (a quarter, 1.6 s, 1.1 tiles).
+Open: every number (a quarter, 1.6 s, 1.1 tiles).
 
 ## 2026-11-11: instances, the frame and the first one, the Open Cut (Kyle; Claude Opus 5.5)
 

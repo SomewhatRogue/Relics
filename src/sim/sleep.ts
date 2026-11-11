@@ -12,7 +12,8 @@ export function awake(all: Enemy[], heroes: Hero[], at: { wake: number; doze: nu
   const out: Enemy[] = [], w2 = at.wake * at.wake, d2 = at.doze * at.doze;
   for (const e of all) {
     // A guard driving prisoners never dozes: the line walks only while it's driven (sim/scenes.ts), and a dozing one would read as dead.
-    if (e.task?.k === 'escort') {
+    // (THE BRAKESMAN neither: its rail runs further than an area's wake distance: sim/brake.ts.)
+    if (e.task?.k === 'escort' || e.brakes) {
       e.dozing = false;
       out.push(e);
       continue;

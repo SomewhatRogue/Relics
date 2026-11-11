@@ -2,6 +2,7 @@
  * One frame: camera, the flat (lit) layer in depth order, the glowing layer, then the lighting pass.
  * The scene is painted at a low resolution and scaled up by a whole number so pixels stay crisp.
  */
+import { drawBrakeLane } from './brakedraw';
 import { sized } from './bodysize';
 import { mistFrame } from './fenmistdraw';
 import { lurkFrame } from './fenlurk';
@@ -435,6 +436,8 @@ export class Scene {
     // The Haulier's old working: the rail, the winding gear and shaft, the adit (sumpdraw.ts).
     if (map.sealed) sealScene(map, c, cx, cy, items);
     if (map.rail || map.gear || map.adits) sumpScene(map, c, cx, cy, items, room.enemies.some((e) => e.boss?.who === 'haulier' && e.boss.phase === 2));
+    // THE BRAKESMAN's cart waiting at the top: its lane striped (brakedraw.ts).
+    if (map.rail) for (const p of room.props) if (p.goAt !== undefined) items.push({ y: -1e6 + 3, draw: () => drawBrakeLane(c, map, p, cx, cy, now) });
     for (const b of map.braziers) items.push({ y: OY + b.y * PX, draw: () => drawBrazier(c, OX + b.x * PX - cx, OY + b.y * PX + 2 - cy, now, brazierOn(map, b)) });
     // What the goblins left that moves: one hung from a hook, the pot on their fire (grimdraw.ts).
     for (const q of map.grim ?? []) {

@@ -31,3 +31,13 @@ export const INSTANCE = {
  * roped, and cutting them loose: stand still this near a roped digger for this long.
  */
 export const DROVER = { screen: 0.25, reach: 1.1, cut: 1.6 };
+
+/**
+ * THE BRAKESMAN (the workings' last chamber, sim/brake.ts): on its brake at the top of the rail it lets a cart go
+ * every `every` s (`fast` below `below` of its health): the lane striped `warn` s, then the cart runs the rail at
+ * `speed`, knocking flat whoever's in its lane (`width`) for `dmg` and `knock`, striped (only out of the lane saves
+ * you). On the brake it's braced: blows land at `braced`. GRAB held `grab` s by a cart standing on the rail sends it
+ * back up; it knocks the Brakesman off the brake (`hit` damage, stunned `down` s, no carts for `off` s). At most
+ * `most` carts on the rail (the oldest at the bottom tipped off for a new one). Back to the brake at `walk` tiles a second.
+ */
+export const BRAKE = { every: 4, fast: 2.6, below: 0.4, warn: 1, speed: 9, dmg: 22, knock: 10, width: 0.9, braced: 0.5, grab: 0.6, hit: 30, down: 3, off: 6, most: 4, walk: 2.4 };

@@ -1,5 +1,5 @@
 /** Damage to an enemy from anything (blades, shots, blasts, burning), and what death resets. */
-import { BROOD, BUTCHER, GUARD, OVERKILL, SCRAPPER, SPIDER, STORM, SWING_DUMMY, TRAIT, WEAK_POP, weakOn, MARK, MEAL, DROVER, type Hurt } from '../shared/tuning';
+import { BROOD, BUTCHER, GUARD, OVERKILL, SCRAPPER, SPIDER, STORM, SWING_DUMMY, TRAIT, WEAK_POP, weakOn, MARK, MEAL, type Hurt } from '../shared/tuning';
 import type { DeathKind, Enemy, FightEvent } from './types';
 import { wet } from './wet';
 import { clanks, plated } from './ironhide';
@@ -96,8 +96,8 @@ export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: Da
   // An ironhide's plates: a heavy hit breaks its guard, anything else barely gets through (sim/ironhide.ts).
   const breaks = !!o.heavy && !o.tick, clank = !o.tick && !breaks && clanks(e, now);
   n = plated(e, n, now, breaks, ev);
-  // THE DROVER behind its roped line (sim/drover.ts): a quarter gets through, and it says so.
-  if (e.screened && n > 0) (n = Math.max(1, Math.round(n * DROVER.screen))), o.tick || ev.push({ k: 'deflect', x: e.x, y: e.y });
+  // THE DROVER behind its roped line, THE BRAKESMAN braced on its brake (sim/drover.ts, brake.ts): a share gets through, and it says so.
+  if (e.screened !== undefined && e.screened < 1 && n > 0) (n = Math.max(1, Math.round(n * e.screened))), o.tick || ev.push({ k: 'deflect', x: e.x, y: e.y });
   // A butcher at a body: a heavy hit takes it off the meal (sim/meal.ts).
   if (e.meal && breaks) (e.meal = null), (e.mealCool = now + MEAL.again), ev.push({ k: 'mealbroken', x: e.x, y: e.y });
   // A Hornblower blowing: a heavy hit cuts it off (sim/hornstate.ts).

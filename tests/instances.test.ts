@@ -7,7 +7,8 @@ import { describe, expect, it } from 'vitest';
 import { openCut, INSTANCES, areaOf } from '../src/shared/instances';
 import { HAUL_NAME } from '../src/shared/bosswords';
 import { CUT_NAMES } from '../src/shared/opencutwords';
-import { DROVER, HERO, INSTANCE, PARTY, TICK } from '../src/shared/tuning';
+import { BRAKE, DROVER, HERO, INSTANCE, PARTY, TICK } from '../src/shared/tuning';
+import { WORKINGS_AT } from '../src/shared/cutworkings';
 import { damage } from '../src/sim/damage';
 import { newRun, runRoom, tally, type Run } from '../src/sim/run';
 import { goal } from '../src/sim/goal';
@@ -188,13 +189,13 @@ describe('THE DROVER', () => {
     const { room, drover, roped } = rows();
     step(room, 0.1);
     expect(roped().length).toBe(3);
-    expect(drover.screened).toBe(true);
+    expect(drover.screened).toBe(DROVER.screen);
     // (Against the same blow on it bare: the heavy's own toughness trims both alike.)
-    drover.screened = false;
+    drover.screened = undefined;
     let hp = drover.hp;
     damage(drover, 80, room.time, []);
     const full = hp - drover.hp, ev: never[] = [];
-    drover.screened = true;
+    drover.screened = DROVER.screen;
     hp = drover.hp;
     damage(drover, 80, room.time, ev);
     expect(hp - drover.hp).toBe(Math.max(1, Math.round(full * DROVER.screen)));
@@ -210,7 +211,7 @@ describe('THE DROVER', () => {
     for (let n = 0; n < Math.round((DROVER.cut + 0.3) / TICK) && roped().length; n++) stand(), room.step(), seen.push(...room.events.map((e) => e.k));
     expect(roped().length).toBe(0);
     expect(seen).toContain('cutloose');
-    expect(drover.screened).toBe(false);
+    expect(drover.screened).toBeUndefined();
     expect(drover.task?.k === 'escort' && drover.task.quit).toBe(true);
     const hp = drover.hp, ev: never[] = [];
     damage(drover, 40, room.time, ev);
@@ -225,6 +226,73 @@ describe('THE DROVER', () => {
     expect(room.survivors.some((v) => v.gone)).toBe(false);
     const drover = room.enemies.find((e) => e.name === CUT_NAMES.drover)!;
     expect(isDead(drover)).toBe(false);
-    expect(drover.screened).toBe(true);
+    expect(drover.screened).toBe(DROVER.screen);
+  });
+});
+
+describe('THE BRAKESMAN', () => {
+  const R = WORKINGS_AT.rail;
+  const workings = () => {
+    const a = area(1);
+    const h = a.hs[0], bk = a.room.enemies.find((e) => e.name === CUT_NAMES.brakesman)!;
+    // Out of its reach and out of the lane, but near enough to wake it; nobody else in the way.
+    a.room.enemies = a.room.enemies.filter((e) => e === bk);
+    Object.assign(h, { x: 14, y: 12.4, hp: 9999, maxHp: 9999 });
+    const carts = () => a.room.props.filter((p) => p.kind === 'cart' && Math.abs(p.y - R.y) < 0.01);
+    return { ...a, h, bk, carts };
+  };
+  const hold = (room: ArenaRoom, h: Hero, at: { x: number; y: number }, s: number, seq: number) => {
+    room.setIntent(h.id, { ...NO_INTENT, grabSeq: seq });
+    for (let n = 0; n < Math.round(s / TICK); n++) Object.assign(h, { x: at.x + 0.9, y: at.y + 0.2, kvx: 0, kvy: 0, safeT: 99 }), room.step();
+  };
+
+  it('works its brake at the top of the rail, braced: a blow lands at half', () => {
+    const { room, bk } = workings();
+    step(room, 0.2);
+    expect(room.map.rail).toEqual(R);
+    expect(Math.hypot(bk.x - bk.home.x, bk.y - bk.home.y)).toBeLessThan(0.05);
+    expect(bk.screened).toBe(BRAKE.braced);
+  });
+
+  it('lets a cart go: its lane striped a moment, then down the rail, knocking flat whoever`s in it', () => {
+    const { room, h, carts } = workings();
+    step(room, BRAKE.warn + 0.1);
+    const c = carts().find((p) => p.goAt !== undefined)!;
+    expect(c.x).toBeCloseTo(R.x0);
+    step(room, BRAKE.warn - 0.1);
+    expect(c.roll ?? 0).toBe(0);
+    Object.assign(h, { x: 10, y: R.y });
+    const seen: { k: string; on?: string }[] = [];
+    for (let n = 0; n < Math.round(3 / TICK); n++) room.step(), seen.push(...(room.events as { k: string; on?: string }[]));
+    expect(seen.some((e) => e.k === 'cart' && e.on === h.id)).toBe(true);
+    // At the bottom, a cart's length short of the one already there.
+    expect(c.roll ?? 0).toBe(0);
+    expect(c.x).toBeGreaterThan(R.x1 - 1.5);
+  });
+
+  it('a cart sent back up knocks it off its brake: stunned, open, no carts; then it walks back to it', () => {
+    const { room, h, bk, carts } = workings();
+    step(room, 0.2);
+    const bottom = carts().find((p) => !p.goAt && !p.roll)!;
+    // (Wait out the first cart's run, out of its lane.)
+    step(room, BRAKE.warn + 3);
+    hold(room, h, bottom, BRAKE.grab + 0.2, 1);
+    // (The head of the queue goes: the first cart had run down against this one.)
+    expect(carts().some((p) => (p.roll ?? 0) < 0)).toBe(true);
+    const hp = bk.hp;
+    room.setIntent(h.id, { ...NO_INTENT, grabSeq: 1 });
+    for (let n = 0; n < Math.round(3 / TICK) && bk.act !== 'stunned'; n++) Object.assign(h, { x: 14, y: 12.4 }), room.step();
+    expect(bk.act).toBe('stunned');
+    expect(bk.hp).toBeLessThan(hp);
+    expect(bk.screened).toBeUndefined();
+    expect(bk.brakes!.off).toBeGreaterThan(room.time + BRAKE.off - 0.5);
+    // No new cart while it's off; back at its post and braced after.
+    const top = Math.max(...carts().map((p) => p.id));
+    step(room, BRAKE.off - 1);
+    expect(Math.max(...carts().map((p) => p.id))).toBe(top);
+    Object.assign(h, { x: 20, y: 13 });
+    step(room, 8);
+    expect(Math.hypot(bk.x - bk.home.x, bk.y - bk.home.y)).toBeLessThan(0.4);
+    expect(bk.screened).toBe(BRAKE.braced);
   });
 });

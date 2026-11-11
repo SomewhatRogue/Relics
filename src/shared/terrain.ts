@@ -63,6 +63,8 @@ export interface Foe {
   boss?: 'latch' | 'hasp' | 'haulier';
   /** THE DROVER: drives the roped line and stands behind it (sim/drover.ts). */
   drives?: boolean;
+  /** THE BRAKESMAN: works the brake at the top of the map's rail (sim/brake.ts). */
+  brakes?: boolean;
 }
 /** Which way the party went at a fork. */
 export type RoadId = Road['road'];

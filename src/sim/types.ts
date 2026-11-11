@@ -523,7 +523,10 @@ export interface Enemy extends Body {
   alert?: boolean;
   /** THE DROVER (sim/drover.ts): it drives the roped line, and while any of it is roped it stands behind them (`screened`). */
   drives?: boolean;
-  screened?: boolean;
+  /** Behind something (sim/drover.ts, brake.ts): the share of a blow that gets through; none, all of it. */
+  screened?: number;
+  /** THE BRAKESMAN (sim/brake.ts): it works the brake at the top of the rail; when it lets the next cart go, and its brake out of use until. */
+  brakes?: { next: number; off: number };
   /** A named goblin (a hunt's quarry, a story boss). */
   name?: string;
   /** A nest: spiders a wave, and when the next one hatches (-1 asleep). A spider: the nest it came from. */
@@ -695,6 +698,8 @@ export interface Prop extends Body {
   /** An ore cart rolling down the rail (sim/haulbook.ts): its speed along it, tiles a second (+ right, - left), and who sent it. */
   roll?: number;
   rollBy?: string;
+  /** THE BRAKESMAN's cart at the top of the rail, its lane striped till it goes at this room time (sim/brake.ts). */
+  goAt?: number;
   fadeAt: number;
   /** Spin while flying, for drawing. */
   spin: number;

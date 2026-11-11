@@ -25,8 +25,13 @@ export const CUT_NAMES = { drover: 'THE DROVER', brakesman: 'THE BRAKESMAN', rak
 
 /** THE DROVER's fight (sim/drover.ts): the goal's line while its diggers are roped, and the rope cut. */
 export const DROVER_WORDS = {
-  goal: 'Cut the diggers loose (stand by them), then kill',
+  goal: 'Stand still by a roped digger to cut them loose, then kill',
   cut: 'CUT LOOSE',
+};
+
+/** THE BRAKESMAN's fight (sim/brake.ts): the goal's line while it's on its brake. */
+export const BRAKE_WORDS = {
+  goal: 'GRAB a cart and send it up the rail at the brake, then kill',
 };
 
 /** The checkpoint: a gate passed, a wipe, and waiting at the gate for the rest. */

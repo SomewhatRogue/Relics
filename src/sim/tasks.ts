@@ -20,7 +20,7 @@ import type { Enemy, FightEvent, Hero } from './types';
 const pulledOff = (e: Enemy, heroes: Hero[], now: number) => now - e.hitAt < 0.3 || players(heroes).some((h) => h.act !== 'down' && Math.hypot(h.x - e.x, h.y - e.y) < SCENE.stay);
 
 /** Toward (x, y) round water and hedges at `speed`; true once there. */
-function goTo(e: Enemy, x: number, y: number, speed: number, dt: number): boolean {
+export function goTo(e: Enemy, x: number, y: number, speed: number, dt: number): boolean {
   const d = Math.hypot(x - e.x, y - e.y);
   if (d < 0.35) return true;
   const g = wayTo(e, x, y), gx = g.x - e.x, gy = g.y - e.y, gl = Math.hypot(gx, gy) || 1;

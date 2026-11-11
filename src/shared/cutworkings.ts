@@ -2,7 +2,8 @@
  * The Open Cut, area 2: THE WORKINGS. In under the hill by the adit: three chambers cut into the rock, one
  * above the next, each way through at the other side from the last so the party crosses every chamber. The
  * first, the hungry asleep by the carts; the second, a kept cage, a shield wall with an archer, three
- * walking a round; the third, THE BRAKESMAN among the carts, the gate up behind it.
+ * walking a round; the third, the rail across it, THE BRAKESMAN at the brake at its top letting the carts go
+ * (sim/brake.ts), the gate up behind it.
  *
  * Fixed by hand; the seed only places the clutter.
  */
@@ -18,7 +19,7 @@ export const WORKINGS = { w: 22, h: 46 };
 /** Each chamber's wall (the way through is at the other end from the last) and where its scenes are. */
 export const WORKINGS_AT = {
   walls: [{ y: 30, gap: 'left' as const }, { y: 14.4, gap: 'right' as const }],
-  sleepers: { x: 15, y: 37.5 }, wall: { x: 14, y: 23 }, cage: { x: 3.2, y: 26.2 }, round: 19.6, brakesman: { x: 11, y: 6.4 }, chest: { x: 19.6, y: 2.6 },
+  sleepers: { x: 15, y: 37.5 }, wall: { x: 14, y: 23 }, cage: { x: 3.2, y: 26.2 }, round: 19.6, brakesman: { x: 1.7, y: 7.9 }, rail: { y: 9.4, x0: 1.2, x1: 20.8 }, chest: { x: 19.6, y: 2.6 },
 };
 
 export function workingsPlan(job: Job): RoomPlan {
@@ -32,8 +33,10 @@ export function workingsPlan(job: Job): RoomPlan {
     round(k, 'support', gx, c.y + 1.7, 0.26);
   }
   // Rails and their carts down the first and last chambers; rubble and props along the walls.
-  for (const y of [34.4, 9.4]) mark(k, 'drag', 1.5, y - 0.15, w - 3, 0.3);
-  prop(k, 'cart', 4.2, 34.4), prop(k, 'cart', 8.6, 34.4), prop(k, 'cart', 5.4, 9.4), prop(k, 'cart', 16.6, 9.4);
+  mark(k, 'drag', 1.5, 34.25, w - 3, 0.3);
+  prop(k, 'cart', 4.2, 34.4), prop(k, 'cart', 8.6, 34.4);
+  // The last chamber's rail (drawn from map.rail): one cart spent at the bottom, by the way in.
+  prop(k, 'cart', A.rail.x1, A.rail.y);
   for (const [x, y] of [[1.2, 44], [20.6, 43], [20.4, 17.2], [1.4, 12.2], [12, 31.9]] as [number, number][]) round(k, 'rock', x, y, 0.5 + k.rng.range(0, 0.3));
   for (const y of [40, 21, 4]) round(k, 'support', 0.7, y, 0.26), round(k, 'support', w - 0.7, y, 0.26);
   // Fire baskets: the only light under the hill.
@@ -53,9 +56,9 @@ export function workingsPlan(job: Job): RoomPlan {
   const beat: Pt[] = [[3, A.round], [w - 3, A.round]];
   for (let i = 0; i < 3; i++) k.foes.push({ kind: 'scrapper', x: 4 + i * 1.1, y: A.round, task: { k: 'patrol', pts: beat, i: 1 }, pack: 4 });
 
-  // 5. The third chamber: THE BRAKESMAN among the carts.
-  keeper(k, 5, A.brakesman, 'heavy', CUT_NAMES.brakesman, 380);
-  pack(k, 5, { x: A.brakesman.x, y: A.brakesman.y + 0.8 }, ['lunger', 'lunger', 'fodder'], 2);
+  // 5. The third chamber: THE BRAKESMAN at its brake, a few of its own over the rail.
+  keeper(k, 5, A.brakesman, 'heavy', CUT_NAMES.brakesman, 380).brakes = true;
+  pack(k, 5, { x: 11, y: 5.4 }, ['lunger', 'lunger', 'fodder'], 2);
   k.chests.push({ ...A.chest });
-  return areaPlan(k, job, { name: CUT_AREAS[1], w, h, kind: 'mine', torches: [5, w - 5] });
+  return areaPlan(k, job, { name: CUT_AREAS[1], w, h, kind: 'mine', torches: [5, w - 5] }, { rail: { ...A.rail } });
 }

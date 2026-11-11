@@ -13,7 +13,7 @@ import { players } from './party';
 
 export function stepDrover(w: World, dt: number): void {
   const roped = (w.survivors ?? []).filter((s) => s.led && !s.gone);
-  for (const e of w.enemies) if (e.drives) e.screened = roped.length > 0 && !isDead(e);
+  for (const e of w.enemies) if (e.drives) e.screened = roped.length > 0 && !isDead(e) ? DROVER.screen : undefined;
   if (!roped.length) return;
   const near = (q: { x: number; y: number }) => roped.reduce((a, s) => (Math.hypot(s.x - q.x, s.y - q.y) < Math.hypot(a.x - q.x, a.y - q.y) ? s : a));
   const h = players(w.heroes).find((q) => q.act === 'idle' && !q.moving && (q.z ?? 0) === 0 && Math.hypot(near(q).x - q.x, near(q).y - q.y) <= DROVER.reach);
@@ -24,6 +24,6 @@ export function stepDrover(w: World, dt: number): void {
   if (at.cutT < DROVER.cut) return;
   for (const s of roped) (delete s.led), (s.cutT = 0), (s.at = w.now), (s.moving = false);
   for (const e of w.enemies) if (e.task?.k === 'escort' && !isDead(e)) (e.task.quit = true), (e.alert = true);
-  for (const e of w.enemies) if (e.drives) e.screened = false;
+  for (const e of w.enemies) if (e.drives) e.screened = undefined;
   w.ev.push({ k: 'cutloose', x: at.x, y: at.y, by: h!.id });
 }
