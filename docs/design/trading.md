@@ -39,8 +39,8 @@ gear a player chooses to put up for trade. Everyday drops stay as they are.
 - **On a job or in an instance:** trade with party members the same way (hand a drop to the friend who
   can use it). Deep finds can't be traded until they're banked.
 - Gold in a trade is ledgered for that trade only (moved with it, the giver's save checked for enough).
-- **What can't be traded** *(Kyle to decide)*: hungry gear (leaning: never; it goes to the church or
-  Nettle), relics (leaning: never; one per hero by design), cosmetics (leaning: yes).
+- **What can't be traded** (Kyle, 2026-11-11): hungry gear, never (it goes to the church or Nettle);
+  relics, never (one of each per hero). Cosmetics trade freely.
 
 ## Costs
 
@@ -54,5 +54,4 @@ A few Redis commands per mint and per trade, and one batched read on load. Nothi
 
 ## Open
 
-1. What can't be traded (above).
-2. Should a trade be logged where the players can see it (a receipt in the pack)?
+1. Should a trade be logged where the players can see it (a receipt in the pack)?
