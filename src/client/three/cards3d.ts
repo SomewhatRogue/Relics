@@ -5,6 +5,7 @@
  * nests, someone caged waving through the bars and calling out, the freed, the map's people (Wickhold's folk, Hew, the dead), and the scenes past the wood's trees. Positions eased between
  * the room's ticks as everywhere else. Only draws.
  */
+import { sized } from '../bodysize';
 import { lurking } from '../../sim/lurk';
 import { lurkFrame } from '../fenlurk';
 import { pulledAt } from '../wave2ground';
@@ -60,7 +61,7 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
   noteKneels(room.heroes, t);
   for (const h of room.heroes) {
     const [x, y] = lerp('h:' + h.id, h.x, h.y);
-    f.put('h' + h.id, x, lift(h.z), y, (c, px, py) => drawHero(c, h, px, py, h.id === meId, t), { xray: true, pool: h.act === 'roll' || h.act === 'down' ? 0.22 : 0.3 });
+    f.put('h' + h.id, x, lift(h.z), y, (c, px, py) => sized(c, px, py, () => drawHero(c, h, px, py, h.id === meId, t)), { xray: true, pool: h.act === 'roll' || h.act === 'down' ? 0.22 : 0.3 });
     if (h.hound) {
       const d = h.hound, [dx, dy] = lerp('d:' + h.id, d.x, d.y);
       hound(f, h, d, dx, dy, x, y, me);
@@ -92,7 +93,7 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
       continue;
     }
     const pz = pulledAt(room, e), [x, y] = pz ?? lerp('e:' + e.id, e.x, e.y), dead = e.act === 'dead', big = e.kind === 'butcher' || e.kind === 'brood';
-    f.put('e' + e.id, x, (e.z ?? 0) >= 2 ? ROOF_UP3 : lift(Math.max(0, e.z ?? 0)), y, (c, px, py) => (drawFoe(c, e, px, py, asleep(map, e), map === ARENA), drawStatus(c, e, px, py, t)), { pool: dead || e.kind === 'nest' || lurking(e) ? 0 : big ? 0.55 : 0.28, bias: dead ? -0.3 : 0 });
+    f.put('e' + e.id, x, (e.z ?? 0) >= 2 ? ROOF_UP3 : lift(Math.max(0, e.z ?? 0)), y, (c, px, py) => (sized(c, px, py, () => drawFoe(c, e, px, py, asleep(map, e), map === ARENA), e.kind !== 'butcher' && !e.boss), drawStatus(c, e, px, py, t)), { pool: dead || e.kind === 'nest' || lurking(e) ? 0 : big ? 0.55 : 0.28, bias: dead ? -0.3 : 0 });
   }
   // A keg about to go, its fuse spitting; a Smouldering one's embers coming up through it (../blastdraw.ts).
   for (const e of room.enemies) {

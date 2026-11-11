@@ -8588,3 +8588,4 @@ on a big screen.
 - A disconnect counts as leaving at the last checkpoint that player passed (their own mark), as the spec says.
 - `Game.openForTest()`: a test hook opening the room's way out. `scripts/deep-online.cjs`: Kyle and Sam down together, each asked, the wait, floor 2, Sam's LEAVE with the party's gold, Kyle's death: 15 of 15, twice; `party-online.cjs` 30 of 30.
 - Also written: `docs/design/deep-bosses.md`, a boss floor every fifth floor (the Haulier first): waiting on Kyle's yes.
+- Kyle: goblins look too small. A test first: SIZE in options draws heroes and goblins 1x, 1.5x or 2x round their feet (client/bodysize.ts), the map, camera and fight unchanged; butchers and bosses stay as they are. If a size sticks, the sprites get redrawn at it on the same pixel grid.

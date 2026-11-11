@@ -2,6 +2,7 @@
  * One frame: camera, the flat (lit) layer in depth order, the glowing layer, then the lighting pass.
  * The scene is painted at a low resolution and scaled up by a whole number so pixels stay crisp.
  */
+import { sized } from './bodysize';
 import { mistFrame } from './fenmistdraw';
 import { lurkFrame } from './fenlurk';
 import { drawBlasts } from './blastdraw';
@@ -290,7 +291,7 @@ export class Scene {
     }
     for (const h of room.heroes) {
       const [x, y] = lerp('h:' + h.id, h.x, h.y), up = (h.z ?? 0) * LIFT;
-      items.push({ y, draw: () => drawHero(c, h, x - cx, y - up - cy, h.id === meId, room.time) });
+      items.push({ y, draw: () => sized(c, x - cx, y - up - cy, () => drawHero(c, h, x - cx, y - up - cy, h.id === meId, room.time)) });
       // A Ranger's hound, wherever it is.
       if (h.hound) {
         const d = h.hound, [dx, dy] = lerp('d:' + h.id, d.x, d.y);
@@ -327,7 +328,7 @@ export class Scene {
       const pz = pulledAt(room, e), roof = (e.z ?? 0) >= 2, [x, y] = pz ? [OX + pz[0] * PX, OY + pz[1] * PX] : lerp('e:' + e.id, e.x, e.y), up = roof ? ROOF_UP : Math.max(0, e.z ?? 0) * LIFT;
       // A big map: only what's on screen is drawn (DECISIONS 2026-11-03).
       if (big && off(x - cx, y - cy)) continue;
-      items.push({ y: roof ? y + 3 * PX : y, draw: () => (drawFoe(c, e, x - cx, y - up - cy, asleep(map, e), map === ARENA), drawStatus(c, e, x - cx, y - up - cy, room.time)) });
+      items.push({ y: roof ? y + 3 * PX : y, draw: () => (sized(c, x - cx, y - up - cy, () => drawFoe(c, e, x - cx, y - up - cy, asleep(map, e), map === ARENA), e.kind !== 'butcher' && !e.boss), drawStatus(c, e, x - cx, y - up - cy, room.time)) });
     }
     for (const p of room.props) {
       if (p.broken) continue;
