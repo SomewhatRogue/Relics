@@ -17,4 +17,11 @@ export const INSTANCE = {
   wipes: 3,
   /** Seconds nothing hurts a hero just got up at the gate. */
   safe: 2,
+  /**
+   * Who it's built for (Kyle, 2026-11-11): three heroes, and never easier below that (two well-geared can just
+   * about do it, one can't). Each hero past three: every goblin this much tougher and harder hitting, never more
+   * of them; the named ones as any named one (PARTY.boss), from three up.
+   */
+  party: 3,
+  more: { hp: 0.3, harm: 0.15 },
 };

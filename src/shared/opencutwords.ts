@@ -17,8 +17,11 @@ export const CUT_POST = {
 /** Each area's name, shown as you come into it, in order. */
 export const CUT_AREAS = ['THE ROWS', 'THE WORKINGS', 'THE WASHING FLOOR', 'THE OPEN CUT'];
 
-/** The named ones keeping each area's gate (the Haulier, the last, is the Deep's: shared/bosswords.ts). */
-export const CUT_NAMES = { rows: 'SLAG', workings: 'CARTER', washing: 'DAMSMAN' };
+/**
+ * The named ones keeping each area's gate (docs/design/instances.md, Kyle 2026-11-11; none a butcher). The
+ * Haulier, the last, is named in shared/bosswords.ts.
+ */
+export const CUT_NAMES = { drover: 'THE DROVER', brakesman: 'THE BRAKESMAN', raker: 'THE RAKER', sluicer: 'THE SLUICER' };
 
 /** The checkpoint: a gate passed, a wipe, and waiting at the gate for the rest. */
 export const CHECK_WORDS = {

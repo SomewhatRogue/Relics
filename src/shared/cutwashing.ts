@@ -2,8 +2,8 @@
  * The Open Cut, area 3: THE WASHING FLOOR. Where the ore was washed: shallow pools you wade through slowly,
  * and across the middle the sluice, deep, crossed only at a ford at either side. Below it, a pack wading
  * the pools and a shield pair holding the west ford with a hexer behind them (go round by the east ford,
- * or through them); above it, archers over the east ford, a kept cage, and DAMSMAN by the upper pool with
- * the gate up behind it.
+ * or through them); above it, archers over the east ford, a kept cage, and
+ * THE SLUICER and THE RAKER by the upper pool, the gate up behind them (kill both).
  *
  * Fixed by hand; the seed only places the clutter.
  */
@@ -20,7 +20,7 @@ export const WASHING_AT = {
   /** The sluice across the middle, and the two fords over it (shallow). */
   sluice: { y: 20.6, h: 2 }, fords: [{ x: 3, w: 3 }, { x: 18, w: 3 }],
   pools: [{ x: 2, y: 30, w: 7.5, h: 4 }, { x: 14, y: 8.6, w: 7, h: 3.4 }],
-  waders: { x: 5.8, y: 32 }, westFord: { x: 4.5, y: 24.6 }, eastFord: { x: 19.5, y: 18 }, cage: { x: 11.4, y: 15.6 }, damsman: { x: 12, y: 5.6 }, chest: { x: 21.6, y: 2.8 },
+  waders: { x: 5.8, y: 32 }, westFord: { x: 4.5, y: 24.6 }, eastFord: { x: 19.5, y: 18 }, cage: { x: 11.4, y: 15.6 }, sluicer: { x: 14.6, y: 6.4 }, raker: { x: 9.4, y: 5.4 }, chest: { x: 21.6, y: 2.8 },
 };
 
 /** The sluice in pieces: deep everywhere but the fords. */
@@ -56,9 +56,9 @@ export function washingPlan(job: Job): RoomPlan {
   // 4. A cage kept on the upper floor.
   prop(k, 'cage', A.cage.x, A.cage.y);
   pack(k, 4, { x: A.cage.x + 1.4, y: A.cage.y - 0.4 }, ['netter', 'fodder'], 0.9);
-  // 5. DAMSMAN by the upper pool.
-  keeper(k, 5, A.damsman, 'ironhide', CUT_NAMES.washing, 400);
-  pack(k, 5, { x: A.damsman.x, y: A.damsman.y + 0.8 }, ['hexer', 'fodder', 'fodder'], 2.2);
+  // 5. THE SLUICER by the upper pool and THE RAKER beside it, a few of their own between.
+  keeper(k, 5, A.sluicer, 'ironhide', CUT_NAMES.sluicer, 300), keeper(k, 5, A.raker, 'heavy', CUT_NAMES.raker, 300);
+  pack(k, 5, { x: 12, y: 7.2 }, ['fodder', 'fodder', 'lunger'], 1.4);
   k.chests.push({ ...A.chest });
   return areaPlan(k, job, { name: CUT_AREAS[2], w, h, kind: 'mine', torches: [6, w - 6] });
 }

@@ -19,7 +19,7 @@ import { EXPED, WEAPONS } from '../shared/tuning';
 import { blankScore, foldBoard, type Board, type Score } from './score';
 import type { RelicWon } from '../shared/relicaward';
 import { arenaRoom } from './arenaroom';
-import { instanceRoom } from './instanceroom';
+import { instanceParty, instanceRoom } from './instanceroom';
 import { stepCheckpoint } from './checkpoint';
 import { bandOf, deepGrow } from '../shared/deepbands';
 
@@ -79,7 +79,7 @@ export function runRoom(run: Run): ArenaRoom {
   // An expedition: one big map, not rooms (sim/expedroom.ts).
   if (run.job.exped) return expedRoom(run.job, run.party ?? 1, run.level ?? 1);
   // A boss's arena as the last room (sim/arenaroom.ts).
-  if (run.job.arena && isFinal(run)) return arenaRoom(run);
+  if (run.job.arena && isFinal(run)) return arenaRoom(run.job.instance ? { ...run, party: instanceParty(run) } : run);
   // An instance's area, by hand (sim/instanceroom.ts).
   if (run.job.instance) return instanceRoom(run);
   const plan = planRoom(run.job, run.index, run.roads[run.index], run.roads), n = run.party ?? 1;

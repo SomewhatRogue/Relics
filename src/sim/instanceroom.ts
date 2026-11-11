@@ -3,27 +3,33 @@
  * Only this area runs and is sent; the ones behind are done with. Its goblins doze till a hero comes near
  * (INSTANCE.wake, an area's distance, not a big map's: sim/sleep.ts), and with that a friend is sent only
  * what's near them (client/interest.ts). The pacing rules hold what's fighting at once to the party's
- * caps (sim/pacing.ts): a pack past them waits its turn. More goblins for more players, as a job's room,
- * and the named ones tougher (PARTY.boss).
+ * caps (sim/pacing.ts): a pack past them waits its turn. Built for three heroes and never easier below that;
+ * each past three, every goblin tougher and harder hitting, never more of them (INSTANCE.party, .more); the
+ * named ones as any named one, from three up (PARTY.boss).
  */
 import { INSTANCE } from '../shared/tuning';
 import { areaOf } from '../shared/instances';
 import { ArenaRoom } from './room';
-import { scaleBosses, scaleFoes } from './party';
+import { scaleBosses } from './party';
 import { dreadFor } from './dreadplace';
 import type { Run } from './run';
 
+/** The party an instance is built for: the heroes in it, three at the least. */
+export const instanceParty = (run: Run) => Math.max(INSTANCE.party, run.party ?? 1);
+
 export function instanceRoom(run: Run): ArenaRoom {
-  const job = run.job, area = areaOf(job, run.index), n = Math.max(1, run.party ?? 1);
+  const job = run.job, area = areaOf(job, run.index), n = instanceParty(run);
   if (!area?.plan) throw new Error(`instance area ${run.index} has no plan`);
   const plan = area.plan(job), seed = job.seed + run.index;
   const room = new ArenaRoom(seed, {
-    map: plan.map, foes: scaleFoes(plan.foes, n, job.seed * 17 + run.index * 5 + 2), furniture: plan.props, chests: plan.chests,
+    map: plan.map, foes: plan.foes, furniture: plan.props, chests: plan.chests,
     danger: job.place.ruin >= 3 ? 1 : 0, level: run.level ?? 1, sleep: true,
   });
   room.sleepAt = { wake: INSTANCE.wake, doze: INSTANCE.doze };
   room.pace = { index: run.index };
   scaleBosses(room.enemies, n);
+  const past = n - INSTANCE.party;
+  if (past > 0) for (const e of room.enemies) if (!e.name) (e.hp = e.maxHp = Math.round(e.maxHp * (1 + INSTANCE.more.hp * past))), (e.harm = +((e.harm ?? 1) * (1 + INSTANCE.more.harm * past)).toFixed(3));
   room.board = {};
   room.dread = { by: dreadFor(job) };
   return room;

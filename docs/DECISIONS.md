@@ -24,18 +24,20 @@ back). Lines over your hero for a gate passed, a wipe and waiting in an open gat
 A guard driving a roped line never dozes (`sim/sleep.ts`): a dozing one read as dead and freed the line for nothing.
 
 **The Open Cut** (posted on the board after Fenmere; `?hero=WARRIOR&cut=1`, `&area=N` to start at area N): from the
-atlas's Rakehead. THE ROWS (16 wide so a phone sees both rows: the pack at its fire, the roped diggers driven up the
-street, a kept cage either side, three on a round, SLAG in the square); THE WORKINGS (three rock chambers, each way
-through at the other end: sleepers by the carts, a cage, a shield wall, a round, CARTER); THE WASHING FLOOR (shallow
-pools, the deep sluice crossed at two fords, a shield pair with a hexer behind on one, archers over the other, a cage,
-DAMSMAN); THE OPEN CUT, the Haulier's working from the Deep. SLAG, CARTER and DAMSMAN are stand-ins for now (a named
-butcher, heavy and ironhide with boss health); step 3 gives each its own fight.
+atlas's Rakehead and Kyle's cast in the spec (2026-11-11, none a butcher). THE ROWS (16 wide so a phone sees both rows: a
+pack at its fire, the roped diggers driven up the street by THE DROVER in front of them, a kept cage either side, three on
+a round, the rest in the square); THE WORKINGS (three rock chambers, each way through at the other end: sleepers by the
+carts, a cage, a shield wall, a round, THE BRAKESMAN); THE WASHING FLOOR (shallow pools, the deep sluice crossed at two
+fords, a shield pair with a hexer behind on one, archers over the other, a cage, THE SLUICER and THE RAKER, both to
+kill); then the Haulier's working from the Deep. The named ones are stand-ins with boss health (a heavy, an ironhide);
+step 3 gives each its own fight. **Built for three** (spec, Kyle 2026-11-11): the hand-laid packs as they are for one
+to three heroes, never more goblins; each hero past three, every goblin 30% tougher and 15% harder hitting
+(`INSTANCE.party`, `.more`); the named ones and the Haulier at three heroes' health at the least.
 
 Lore keeper and line editor on `shared/opencutwords.ts`: everyone taken, not every man; "gate" not "checkpoint"; the run
 "lost", not "over". Open for Kyle: the atlas planned the reckoning house and the hush gully where this has THE WORKINGS
-and THE OPEN CUT; DAMSMAN holds "dam" (allowed by the lore keeper, SLUICEMAN offered); a wipe at the Haulier leaves it
-as it was (its kit isn't reset); group areas tuned by health not count (spec "Solo where it says so") not done: more
-goblins for more players, as jobs. Every number.
+and THE OPEN CUT; a wipe at the Haulier leaves it as it was (its kit isn't reset); no unique drops yet (they roll in the
+Deep only; step 4). Every number.
 
 ## 2026-11-06: WORK A SHIFT at Halvard's forge, for gold and the town's board (Kyle; Claude Opus 5.5)
 

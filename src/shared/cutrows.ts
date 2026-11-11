@@ -4,7 +4,8 @@
  * the street, where some of the hungry eat at their fire; up the street a line of roped diggers is being
  * driven for the top of the village (catch it before it's gone over the hill); a cage at either side of
  * the rows, each kept; three walking a round across the street; and at the top, in the square by the
- * well, SLAG among its own. The gate up out of the square opens when SLAG is dead.
+ * well, the rest of them. THE DROVER drives the line, in front of it (free the line and it has nothing to stand
+ * behind); the gate up out of the square opens when it's dead.
  *
  * Fixed by hand; the seed only places the clutter.
  */
@@ -22,7 +23,7 @@ export const ROWS = { w: 16, h: 44 };
 /** Where each scene is (tests and the spec read these). */
 export const ROWS_AT = {
   fire: { x: 5.4, y: 36.5 }, line: { x: 8, y: 31 }, cageL: { x: 4.9, y: 28.2 }, cageR: { x: 11.1, y: 19.2 },
-  round: 14.6, slag: { x: 8, y: 5.2 }, well: { x: 4.2, y: 6.6 }, chest: { x: 2.2, y: 3.2 },
+  round: 14.6, square: { x: 8, y: 5.6 }, well: { x: 4.2, y: 6.6 }, chest: { x: 2.2, y: 3.2 },
 };
 
 export function rowsPlan(job: Job): RoomPlan {
@@ -48,11 +49,12 @@ export function rowsPlan(job: Job): RoomPlan {
   mark(k, 'blood', A.fire.x - 1.6, A.fire.y + 0.4, 1.4, 0.8);
   pack(k, 1, A.fire, ['fodder', 'fodder', 'lunger'], 1.5, { feeding: true });
 
-  // 2. The roped line, driven up the street for the top of the village, a guard in front and one behind.
+  // 2. The roped line, driven up the street for the top of the village: THE DROVER in front, a guard behind.
   const pts: Pt[] = [[A.line.x, A.line.y], [mid, 20], [mid, 10], [mid + 1.8, 6.5], [mid, 1.4]], n = 3, front = 1.4 + (n - 1) * 0.8;
   for (const [s, off] of [[front + 1, 0.55], [0.4, -0.55]] as [number, number][]) {
-    const p = atArc(pts, s);
-    k.foes.push({ kind: 'scrapper', x: p.x - p.dy * off, y: p.y + p.dx * off, task: { k: 'escort', s, off }, pack: 2 });
+    const p = atArc(pts, s), at = { x: p.x - p.dy * off, y: p.y + p.dx * off };
+    if (s > 1) keeper(k, 2, at, 'heavy', CUT_NAMES.drover, 380).task = { k: 'escort', s, off };
+    else k.foes.push({ kind: 'scrapper', ...at, task: { k: 'escort', s, off }, pack: 2 });
   }
   mark(k, 'drag', mid - 0.6, 10, 1.2, A.line.y - 10);
 
@@ -65,9 +67,8 @@ export function rowsPlan(job: Job): RoomPlan {
   const beat: Pt[] = [[4.6, A.round], [w - 4.6, A.round]];
   for (let i = 0; i < 3; i++) k.foes.push({ kind: 'scrapper', x: 5.4 + i * 1.1, y: A.round, task: { k: 'patrol', pts: beat, i: 1 }, pack: 5 });
 
-  // 6. The square: SLAG and its own, the gate behind it.
-  keeper(k, 6, A.slag, 'butcher', CUT_NAMES.rows, 420);
-  pack(k, 6, { x: A.slag.x, y: A.slag.y + 0.6 }, ['hexer', 'fodder', 'fodder', 'archer'], 2.2);
+  // 6. The square: the rest of them by the well, the gate behind them.
+  pack(k, 6, A.square, ['shield', 'hexer', 'fodder', 'fodder', 'archer'], 2);
   k.chests.push({ ...A.chest });
   return areaPlan(k, job, { name: CUT_AREAS[0], w, h, kind: 'village', torches: [3.4, w - 3.4] }, { led: { pts, n } });
 }

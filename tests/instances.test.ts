@@ -56,11 +56,13 @@ describe('each area', () => {
       for (const f of p.foes) expect(f.x > 0 && f.x < m.w && f.y > 0 && f.y < m.h).toBe(true);
     });
   });
-  it('has its named keeper and runs bottom to top', () => {
-    const names = [CUT_NAMES.rows, CUT_NAMES.workings, CUT_NAMES.washing];
+  it('has its named ones, none a butcher, THE DROVER driving the roped line, and runs bottom to top', () => {
+    const names = [[CUT_NAMES.drover], [CUT_NAMES.brakesman], [CUT_NAMES.sluicer, CUT_NAMES.raker]];
     plans.forEach((plan, i) => {
       const p = plan(job());
-      expect(p.foes.filter((f) => f.name).map((f) => f.name)).toEqual([names[i]]);
+      expect(p.foes.filter((f) => f.name).map((f) => f.name)).toEqual(names[i]);
+      expect(p.foes.filter((f) => f.name).every((f) => f.kind !== 'butcher')).toBe(true);
+      if (i === 0) expect(p.foes.find((f) => f.name)!.task?.k).toBe('escort');
       expect(p.map.hero.y).toBeGreaterThan(p.map.h - 3);
       expect(p.map.exit!.y).toBe(0);
     });
@@ -83,19 +85,19 @@ describe('the frame', () => {
     const { room, hs } = area(0);
     Object.assign(hs[0], { hp: 9999, maxHp: 9999 });
     step(room, 0.2);
-    const keeper = room.enemies.find((e) => e.name === CUT_NAMES.rows)!;
-    expect(keeper.dozing).toBe(true);
+    const far = room.enemies.find((e) => e.pack === 6)!;
+    expect(far.dozing).toBe(true);
     expect(room.enemies.filter((e) => e.task?.k === 'escort').every((e) => !e.dozing)).toBe(true);
-    Object.assign(hs[0], { x: keeper.x, y: keeper.y + 8 });
+    Object.assign(hs[0], { x: far.x, y: far.y + 8 });
     step(room, 0.2);
-    expect(keeper.dozing).toBe(false);
+    expect(far.dozing).toBe(false);
   });
 
   it('opens the gate when the area`s named one is dead, the rest and the cages left as they are', () => {
     const { run, room } = area(0);
     const before = goal(run, room);
     expect(before.done).toBe(false);
-    expect(before.text).toContain(`Kill ${CUT_NAMES.rows}`);
+    expect(before.text).toContain(`Kill ${CUT_NAMES.drover}`);
     const k = room.enemies.find((e) => e.name)!;
     Object.assign(k, { hp: 0, act: 'dead' });
     expect(isDead(k)).toBe(true);
@@ -127,6 +129,18 @@ describe('the frame', () => {
     expect(h.safeT).toBeGreaterThan(0);
     expect([g.x, g.y, g.hp, g.alert]).toEqual([g.home.x, g.home.y, g.maxHp, false]);
     expect(run.wipeAt).toBeUndefined();
+  });
+
+  it('is built for three: the same goblins, as tough, for one or three; a fourth makes them tougher, never more', () => {
+    const one = area(1, ['me']).room, three = area(1, ['a', 'b', 'c']).room, four = area(1, ['a', 'b', 'c', 'd']).room;
+    const hp = (r: ArenaRoom) => r.enemies.map((e) => e.maxHp);
+    expect(hp(one)).toEqual(hp(three));
+    expect(four.enemies.length).toBe(three.enemies.length);
+    four.enemies.forEach((e, i) => expect(e.maxHp).toBeGreaterThan(three.enemies[i].maxHp));
+    expect(four.enemies.filter((e) => !e.name).every((e) => (e.harm ?? 1) > 1)).toBe(true);
+    // The Haulier the same: at three heroes' health for one.
+    const h1 = area(3, ['me']).room.enemies.find((e) => e.boss)!, h3 = area(3, ['a', 'b', 'c']).room.enemies.find((e) => e.boss)!;
+    expect(h1.maxHp).toBe(h3.maxHp);
   });
 
   it('loses the run at the third wipe since the last gate', () => {
