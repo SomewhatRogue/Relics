@@ -28,12 +28,11 @@ The Deep chat, until it finishes (then the general chat).
 | --- | --- | --- | --- | --- |
 | Deep | The Deep (docs/design/the-deep.md) and boss loot rolls | `src/*/deep*.ts`, `src/shared/uniques.ts`, `src/sim/uniquedrop.ts`, `src/client/rollcard.ts`, `scripts/loot-online.cjs` | docs/decisions/deep.md | Steps 1 to 4 and the loot roll in; open: one-of-each not enforced |
 | Instances | Instances (docs/design/instances.md): the frame, then Rakehead's Open Cut | `src/shared/instances.ts`, `instancetune.ts`, `cut*.ts`, `opencutwords.ts`, `src/sim/instanceroom.ts`, `checkpoint.ts`, `src/client/checknotes.ts`, `tests/instances.test.ts` | docs/decisions/instances.md | Steps 1 and 2 in (frame, areas, lead-in); next step 3, the named ones' fights |
+| Trading | Trading and the item ledger (docs/design/trading.md): step 1 the ledger, step 2 boss drops minted through it | `api/ledger*`, `api/_ledger.ts`, `src/shared/ledger.ts`, `src/client/ledger*.ts`, `tests/ledger*.test.ts` | docs/decisions/trading.md | Building steps 1 and 2. Step 2 adds small separate edits to the Deep chat's `sim/uniquedrop.ts` (stamps the ledger id) |
 | General | Playtest fixes, tuning, specs (instances, trading, holy and hungry) | `docs/design/` except the-deep.md | docs/decisions/general.md | Specs written; no code claimed |
 
 ## Waiting (specs ready, no chat yet)
 
-- **Trading and the item ledger** (docs/design/trading.md). Must be built before or with the loot rolls going
-  live: boss drops need minting once on the server.
 - **Holy and hungry** (docs/design/holy-and-hungry.md). Last: it changes loot everything above uses.
 
 ## Collisions to settle
