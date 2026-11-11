@@ -6,6 +6,7 @@
 import { DEEP_BANDS, bandOf } from '../shared/deepbands';
 import { DROPS } from '../shared/tuning';
 import { BUTCHER_POOLS, UNIQUE_DROP, poolOf, uniqueItem, type PoolId } from '../shared/uniques';
+import { dropLedger } from '../shared/ledger';
 import type { Rng } from '../shared/rng';
 import { dropId } from './loot';
 import { isDead } from './damage';
@@ -28,18 +29,20 @@ export function uniqueDrops(room: ArenaRoom, dead: Enemy[], rng: Rng): void {
       const pair = room.enemies.filter((o) => o.boss?.who === 'latch' || o.boss?.who === 'hasp');
       if (room.keeperDrop || !pair.every((o) => isDead(o))) continue;
       room.keeperDrop = true;
-      give(room, 'doorkeepers', e.x, e.y, rng);
+      give(room, 'doorkeepers', e.x, e.y, rng, 'doorkeepers');
       continue;
     }
     const p = poolFor(e, room.floor);
-    if (p && (p.chance >= 1 || rng.next() < p.chance)) give(room, p.pool, e.x, e.y, rng);
+    if (p && (p.chance >= 1 || rng.next() < p.chance)) give(room, p.pool, e.x, e.y, rng, e.id);
   }
 }
 
-function give(room: ArenaRoom, pool: PoolId, x: number, y: number, rng: Rng): void {
+/** `boss`: what dropped it, for its id in the item ledger (shared/ledger.ts): one drop, one id, however often it's sent. */
+function give(room: ArenaRoom, pool: PoolId, x: number, y: number, rng: Rng, boss: string | number): void {
   const ids = poolOf(pool);
   if (!ids.length) return;
-  const item = uniqueItem(rng.pick(ids));
+  const item = uniqueItem(rng.pick(ids)), ledger = dropLedger(room.ledgerRun, boss);
+  if (ledger) item.ledger = ledger;
   if (players(room.heroes).length <= 1) {
     room.drops.push({ id: dropId(), x, y, item, life: DROPS.life });
     room.events.push({ k: 'drop', x, y, q: item.quality });

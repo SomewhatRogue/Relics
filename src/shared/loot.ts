@@ -76,6 +76,8 @@ export interface Item {
   hungry?: string;
   /** A unique piece's id (uniques.ts): its own name, fixed modifiers, its boss's pool. */
   unique?: string;
+  /** Its id in the item ledger, for a piece that can change hands (shared/ledger.ts): the server knows its owner. */
+  ledger?: string;
 }
 
 const ARMOR_NAME = { light: 'LEATHERS', medium: 'MAIL SHIRT', heavy: 'PLATE' };

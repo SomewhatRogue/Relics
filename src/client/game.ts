@@ -56,6 +56,8 @@ import { forgetSession, keepSession, keptJob, type Session } from './session';
 import { PW } from './partywords';
 import { bankEnd, bankJob, banked, soloJob, unbank } from './jobbank';
 import { dropOwed, owedTo } from './owed';
+import { checkLedger } from './ledger';
+import { LedgerMint } from './ledgermint';
 import { dressKit, forgetTaken } from './keepkit';
 import { gainRelics, keepKitNoting, seeRelic, type RelicMoment } from './relicnews';
 import { FULL, ONLINE } from './relay';
@@ -169,6 +171,8 @@ export class Game {
   private grown = 0;
   /** The job's own name (the party's room code, or this device's for a job alone): paid once, by it. */
   jobKey = '';
+  /** Ledgered drops minted to whoever got them, while I run the room (client/ledgermint.ts). */
+  private mint = new LedgerMint();
   /** Leading again after a reload: the room waits till this for a friend to answer (HOLD). */
   private holdUntil = 0;
   private settling = false;
@@ -180,6 +184,8 @@ export class Game {
 
   constructor() {
     this.enterTown();
+    // Every ledgered piece on these heroes, checked once (client/ledger.ts): one traded away shows GONE.
+    void checkLedger(() => this.save);
   }
 
   get hero(): Hero {
@@ -308,6 +314,8 @@ export class Game {
   adopt(s: Save): void {
     this.save = { ...s, current: -1 };
     store(this.save, s.savedAt);
+    // A copy from another device may hold pieces since traded away (client/ledger.ts).
+    void checkLedger(() => this.save);
     this.run = null;
     this.wood = null;
     this.enterTown();
@@ -760,6 +768,8 @@ export class Game {
       fh.lag = f.lag ?? 0;
     }
     // The other rooms run on beside yours (the street while you're in, any house a friend's in; their kills still pay); then yours.
+    // Each run room tagged for the item ledger, and what landed in a kit minted to its hero (client/ledgermint.ts).
+    if (this.mode === 'run' && this.run) this.mint.watch([this.room, ...this.rooms.live()], this.jobKey, this.run.index, performance.now() / 1000);
     const here = this.room, stepped = new Map<ArenaRoom, FightEvent[]>();
     for (const r of this.mode === 'run' ? this.rooms.live() : this.outside ? [this.outside.room] : []) {
       if (r === here) continue;

@@ -147,6 +147,8 @@ export class ArenaRoom {
   rolls: LootRoll[] = [];
   rollSeq = 0;
   keeperDrop = false;
+  /** The run's tag in the item ledger (shared/ledger.ts), set by the host (client/ledgermint.ts): a drop's id is it and its boss. */
+  ledgerRun = '';
   /** Whoever was freed from a cage (sim/survivors.ts), the dead where they fell. */
   survivors: Survivor[] = [];
   /** Inside a cottage or barn (the freed are home only once out of its door). */
