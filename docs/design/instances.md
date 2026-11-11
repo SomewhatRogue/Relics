@@ -55,8 +55,8 @@ and changing at once, not from map size.
 4. **Gates wait for everyone:** the next area opens when the whole party is at the gate.
 5. **Loot needs you there:** a roll on a boss's item only for heroes near it when it died.
 6. **Solo where it says so.** Early areas and side pockets can be soloed; marked group areas and bosses
-   are tuned for a full party (up to `PARTY_MAX`, 4) with more health and harder hits, not more goblins
-   (Kyle, 2026-11-05).
+   are tuned for three heroes and get harder for a fourth (more health and harder hits, not more goblins,
+   Kyle 2026-11-05), never easier below three.
 
 ## Loot
 
@@ -89,6 +89,11 @@ village in Copperdeep, down into the Open Cut, ending at the Haulier *(lore)*. D
 
 Decided (Kyle, 2026-11-11): boss loot drops **every run** (unique pieces rare, with bad-luck protection,
 so replay is the point); party cap stays **4** for now.
+
+**Who it's for (Kyle, 2026-11-11):** tuned for **three**. It gets harder with each hero over that (a
+fourth adds health and harder hits, as the scaling rule above). It does **not** get easier below three: two
+well-geared heroes can *just about* beat it, one can't. So the floor sits at three heroes' worth of
+toughness, and group areas and bosses never scale under it.
 
 ## Open
 
