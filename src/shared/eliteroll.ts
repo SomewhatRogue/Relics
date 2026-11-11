@@ -9,7 +9,7 @@ import type { Job } from './jobs.js';
 import { Rng } from './rng.js';
 import { SCREEN, THREAT, THREAT_TIER, threatOf } from './threat.js';
 import { weighOf } from './roombudget.js';
-import { roomAt } from './deepbands.js';
+import { bandOf } from './deepbands.js';
 
 /** Band `band`'s `nth` goblin of role `role` is an elite with `affixes`. */
 export interface EliteRoll { band: number; role: Role; nth: number; affixes: Affix[] }
@@ -18,7 +18,7 @@ export interface EliteRoll { band: number; role: Role; nth: number; affixes: Aff
 const can = (r: Role) => THREAT_TIER[r] === 'meaty' && r !== 'log';
 
 /** The chance a meaty goblin in room `index` of `job` is an elite (0 before ELITE.from). */
-export const eliteChance = (job: Job, index: number) => (ELITE.on && roomAt(job, index) >= ELITE.from ? ELITE.chance + ELITE.perRuin * job.place.ruin : 0);
+export const eliteChance = (job: Job, index: number) => (ELITE.on && index >= ELITE.from ? ELITE.chance + ELITE.perRuin * job.place.ruin + (job.floor ? bandOf(job.floor).elite : 0) : 0);
 
 /**
  * The roller for room `index` of `job`: called with each band's template as the composer picks it, in order
@@ -29,7 +29,7 @@ export const eliteChance = (job: Job, index: number) => (ELITE.on && roomAt(job,
 export function eliteRoller(job: Job, index: number): (t: Template, band: number, afford: number) => EliteRoll[] {
   const p = eliteChance(job, index);
   if (p <= 0) return () => [];
-  const rng = new Rng(job.seed * 151 + index * 43 + 17), most = job.deep ? ELITE.deep : ELITE.most;
+  const rng = new Rng(job.seed * 151 + index * 43 + 17), most = job.floor ? bandOf(job.floor).elites : job.deep ? ELITE.deep : ELITE.most;
   let made = 0;
   return (t, band, afford) => {
     const roles = [...(t.centre ?? []), ...(t.support ?? [])], seen: Partial<Record<Role, number>> = {}, out: EliteRoll[] = [];
@@ -40,6 +40,8 @@ export function eliteRoller(job: Job, index: number): (t: Template, band: number
       if (!can(role) || (t.big && k === 0) || made >= most || rng.next() >= p) return;
       let n = rng.next() < ELITE.two + ELITE.twoRuin * job.place.ruin ? 2 : 1;
       if (n === 2 && job.deep && rng.next() < ELITE.three) n = 3;
+      // A Deep floor's band: at least its count of affixes (shared/deepbands.ts).
+      if (job.floor) n = Math.max(n, bandOf(job.floor).affixes);
       // (An ironhide is plated already; a Kegman has its keg, a Gorger eats already: shared/elites.ts affixPool.)
       const affixes = rng.shuffle(affixPool(role)).slice(0, n);
       const extra = eliteThreat(threatOf(role), affixes) - threatOf(role);

@@ -17,7 +17,8 @@
  * - Plated: grey plates; the ironhide rule (shared/raiders.ts IRONHIDE): a fifth of anything till a
  *   charged blow, a perfect or storm breaks the plates for IRONHIDE.broken seconds.
  * - Quick: dust at its heels; `quick.pace` its pace, `quick.windup` its wind-ups, but never under the
- *   floors (`quick.red` for a blow you can block, `quick.striped` for one you can't), and never longer.
+ *   floors (`quick.red` for a blow you can block, `quick.striped` for one you can't), and never longer;
+ *   `quick.pause` its rest between blows, so it swings more often too (Kyle, 2026-11-11).
  * - Gorging: blood to the chin; with no hero on it, it eats a small one's body in `gorging.time` to heal
  *   `gorging.heal` of its health (the butcher's meal, sim/meal.ts). Burn the dead and it has nothing.
  * - Oil-soaked: a dark sheen; set alight it stands, flailing, and bursts `oiled` (a striped circle,
@@ -57,7 +58,7 @@ export const ELITE = {
   three: 0.25,
   mult: 1.5,
   perAffix: 1,
-  quick: { pace: 1.25, windup: 0.85, red: 0.9, striped: 1.1 },
+  quick: { pace: 1.25, windup: 0.85, red: 0.9, striped: 1.1, pause: 0.7 },
   gorging: { heal: 0.3, time: 2 },
   oiled: { fuse: 1.0, r: 1.6, dmg: 18, foe: 30, knock: 9, burn: 8 },
   horn: { at: 0.5, near: 7, time: 2.0, call: 3, screen: [5, 8] as [number, number], clear: 3 },

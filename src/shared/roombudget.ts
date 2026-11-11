@@ -9,16 +9,16 @@ import { Rng } from './rng.js';
 import type { Foe } from './terrain.js';
 import { BUDGET, SCREEN, THREAT_TIER, threatOf } from './threat.js';
 import { eliteThreat, type Affix } from './elites.js';
-import { deepGrow, roomAt } from './deepbands.js';
+import { bandOf, deepGrow } from './deepbands.js';
 
 export const difficultyOf = (job: Job): keyof typeof BUDGET.difficulty =>
   job.deep ? 'deep' : job.place.ruin >= 3 ? 'hard' : job.place.ruin >= 2 ? 'normal' : 'easy';
 const party = (n: number) => Math.max(1, Math.min(4, Math.round(n))) - 1;
 
 /** What room `index` of `job` may spend, for a party of `n`. */
-// (A Deep floor: its band's room, and more again past fifteen: shared/deepbands.ts.)
+// (A Deep floor comes laid out as its band's room, `index` already (shared/terrain.ts), and more again past fifteen.)
 export const roomBudget = (job: Job, index: number, n = 1) =>
-  BUDGET.room[Math.min(roomAt(job, index), BUDGET.room.length - 1)] * BUDGET.difficulty[difficultyOf(job)] * BUDGET.party[party(n)] * (job.floor ? deepGrow(job.floor).budget : 1);
+  BUDGET.room[Math.min(index, BUDGET.room.length - 1)] * BUDGET.difficulty[difficultyOf(job)] * BUDGET.party[party(n)] * (job.floor ? deepGrow(job.floor).budget : 1);
 
 /** On screen at once, for a party of `n` in room `index`: threat, meaty ones (heavies too), heavies. */
 export const capsFor = (n: number, index = 0) => ({
@@ -65,6 +65,11 @@ export function beatsFor(n: number, index: number, rng: Rng, big = false): Beat[
  * longer one; never the first room, nor a last room with a named butcher in it. On the job's own stream.
  */
 export function bigRooms(job: Job): number[] {
+  // A Deep floor: one room, laid out as its band's; a BIG ONE every `big`th floor that isn't a hunt (shared/deepbands.ts).
+  if (job.floor) {
+    const b = bandOf(job.floor);
+    return b.big && !job.boss && job.floor % b.big === 0 ? [b.room] : [];
+  }
   const rng = new Rng(job.seed * 389 + 23), named = !!job.boss || !!job.deep || job.objective === 'hunt';
   const can = Array.from({ length: job.rooms }, (_, i) => i).filter((i) => i >= 1 && !(named && i === job.rooms - 1));
   return rng.shuffle(can).slice(0, job.rooms >= 4 ? 2 : 1).sort((a, b) => a - b);

@@ -13,6 +13,8 @@ export const isElite = (e: { elite?: Affix[] }) => !!e.elite?.length;
 
 /** Its pace as a multiple (Quick). */
 export const quickPace = (e: Enemy) => (hasAffix(e, 'quick') ? ELITE.quick.pace : 1);
+/** Its rest between blows as a multiple (Quick: it swings more often; never a boss of the kit's). */
+export const quickPause = (e: Enemy) => (hasAffix(e, 'quick') && !e.boss ? ELITE.quick.pause : 1);
 
 /** A Quick one's wind-up, shortened as it begins (a pack rush keeps the rush's own clock). */
 export function quicken(e: Enemy, a: EnemyAttack): void {

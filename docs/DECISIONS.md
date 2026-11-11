@@ -8555,3 +8555,12 @@ on a big screen.
 - Levels on the party's: +0, +2, +4, +6 (goblins' toughness and the loot's lean, both capped as ever). Loot leant by band in chests and drops (`shared/deeploot.ts`): PRE-WAR x2, x5, x6, x6; the rare three x1, x2, x5, x6.
 - Past floor 15, a floor on: goblins +8% health, +4% damage, the room's budget +5%, the rare three +15% of their lean, with no end. The on-screen caps still hold.
 - Open: every number once Kyle has gone down a few times; Deep-only finds (later, holy and hungry).
+
+## 2026-11-11: the Deep: harder sorts, BIG ONEs and elites below; Quick swings more often (Kyle; Claude Opus 5.5)
+
+- Kyle: "Butcher isnt the only boss. Harder goblins and other boss types beyond just butch is good plus butchers and units with modifiers such as more likely to do an attack and does it faster."
+- A floor is now laid out as its band's room everywhere (`shared/terrain.ts` passes `roomAt` to the composer), so the harder sorts and packs that only come deeper into a job (`t.from`, the specials table, no easy opener) come on deeper floors, not just a bigger budget.
+- BIG ONEs (a brute or ironhide grown huge, with its stomp) close floor 4, then every other non-hunt floor in 6 to 10 (8, 10), then every non-hunt floor from 11. Named butchers stay on the hunt floors.
+- Elites by band (`shared/deepbands.ts`): +0, +10%, +20%, +30% on each meaty goblin's chance; up to 1, 2, 3, 4 a room; at least two affixes from floor 11.
+- Quick, everywhere: `ELITE.quick.pause` 0.7, its rest between blows cut, so it swings more often as well as faster (never a boss of the kit's).
+- Not in: the bosses of the kit (the Doorkeepers, Hempen) are set pieces tied to the barn and the wood. A boss of the Deep's own (say every five floors) is a new boss: spec first.

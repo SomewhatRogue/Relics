@@ -42,7 +42,7 @@ import { stepLurk } from './lurk';
 import { mistReach, mistSight } from '../shared/fenmist';
 import { LEAP } from '../shared/threat';
 import { PLANKER } from '../shared/meaty';
-import { gorges, quicken, quickPace } from './elite';
+import { gorges, quicken, quickPace, quickPause } from './elite';
 import { flyPounce } from './meaty2';
 import { calling, standCall } from './hornblow';
 import { DOORKEEPERS } from '../shared/bosstune';
@@ -268,7 +268,7 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     if (e.variant === 'pouncer') flyPounce(e);
     if (over && e.act === 'attack') {
       // (A Doorkeeper rests less between its blows: sim/doorkeepers.ts keeperPause.)
-      Object.assign(e, { attack: null, act: after(e), actT: 0, cooldown: e.variant === 'hexer' ? HEXER.pause : e.attack?.kind === 'spit' ? BROOD.spitPause : e.boss && e.boss.who !== 'hempen' ? keeperPause(e) : spec ? spec.pauseBetween : SWING_DUMMY.every });
+      Object.assign(e, { attack: null, act: after(e), actT: 0, cooldown: e.variant === 'hexer' ? HEXER.pause : e.attack?.kind === 'spit' ? BROOD.spitPause : e.boss && e.boss.who !== 'hempen' ? keeperPause(e) : spec ? spec.pauseBetween * quickPause(e) : SWING_DUMMY.every });
     }
     return;
   }

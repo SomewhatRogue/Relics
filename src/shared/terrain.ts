@@ -30,6 +30,7 @@ import { composeRoom, crowsOn } from './encounter.js';
 import { clearGrowth, ensure4, finish4, light4, name4, plotter, torches4, wayMore } from './room4.js';
 import { edgePt } from './ports.js';
 import { stageDebuts } from './debut.js';
+import { roomAt } from './deepbands.js';
 
 /** `wave`: a nest's spiders a wave (more in a party; shared/nests.ts). */
 export type FoeVariant = 'looter' | 'lunger' | 'heavy' | 'stoker' | 'shield' | 'hexer' | 'drummer'
@@ -199,7 +200,7 @@ export function planRoom(job: Job, index: number, road?: RoadId, taken?: Record<
   if (spec && !v3) rollBackline(foes, job, index);
   // A new sort staged in its fork way's room first (shared/debut.ts), once the chests are down: the chalker at the CRIES captives' tally.
   if (v4 && spec?.way) stageDebuts(lay, job, spec.way);
-  if (v3) composeRoom({ foes, job, index, W, H, spawn: SPAWN, blocks, spot, free, claim: (x, y, r) => void spots.push({ x, y, r }) });
+  if (v3) composeRoom({ foes, job, index: roomAt(job, index), W, H, spawn: SPAWN, blocks, spot, free, claim: (x, y, r) => void spots.push({ x, y, r }) });
   // Each house's look and fate outside come from the same seed as its inside.
   const spill = settle(job, index, blocks);
   if (side) blocks.push(side);

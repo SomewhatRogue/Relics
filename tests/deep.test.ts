@@ -10,6 +10,10 @@ import { roomBudget } from '../src/shared/roombudget';
 import { eliteChance } from '../src/shared/eliteroll';
 import { deepOdds } from '../src/shared/deeploot';
 import { DROP_ODDS } from '../src/shared/gear';
+import { roomAt } from '../src/shared/deepbands';
+import { bigRooms } from '../src/shared/roombudget';
+import { ELITE } from '../src/shared/elites';
+import { quickPause } from '../src/sim/elite';
 
 // The checkpoint is reached by walking into a finished floor's way out: the floor's goal is taken as done here.
 const done = { on: false };
@@ -175,12 +179,13 @@ describe('floors by band (step 3)', () => {
     expect([7, 8, 10].map((n) => f(n).objective)).not.toContain('hunt');
     expect(f(12).objective).toBe('hunt');
     for (let n = 2; n < 30; n++) expect(f(n).objective === 'hunt' && f(n - 1).objective === 'hunt').toBe(false);
-    const b = [1, 6, 11, 16, 20, 30].map((n) => roomBudget(f(n), 0));
+    const b = [1, 6, 11, 16, 20, 30].map((n) => roomBudget(f(n), roomAt(f(n), 0)));
     for (let i = 1; i < b.length; i++) expect(b[i]).toBeGreaterThanOrEqual(b[i - 1]);
     expect(b[5]).toBeGreaterThan(b[3]);
     // An ordinary job's first room has no elites; every Deep floor can.
     expect(eliteChance({ ...f(1), floor: undefined }, 0)).toBe(0);
-    expect(eliteChance(f(1), 0)).toBeGreaterThan(0);
+    expect(eliteChance(f(1), roomAt(f(1), 0))).toBeGreaterThan(0);
+    expect(eliteChance(f(11), roomAt(f(11), 0))).toBeGreaterThan(eliteChance(f(1), roomAt(f(1), 0)));
   });
 
   it('a hunt floor has its named butcher; floors past fifteen keep getting tougher', () => {
@@ -205,5 +210,32 @@ describe('floors by band (step 3)', () => {
     expect(share(at(6), ['tolmouth'])).toBeGreaterThan(share(at(1), ['tolmouth']));
     const r = [1, 6, 11, 16, 25, 40].map((n) => share(at(n), RARE));
     for (let i = 1; i < r.length; i++) expect(r[i]).toBeGreaterThan(r[i - 1]);
+  });
+});
+
+describe('harder goblins, BIG ONEs and elites below (Kyle, 2026-11-11)', () => {
+  const rooms = (n: number, seeds = 12) => Array.from({ length: seeds }, (_, i) => runRoom(newRun(deepFloor(n, 300 + i, 'x'))));
+  const count = (rs: ReturnType<typeof rooms>, p: (e: (typeof rs)[number]['enemies'][number]) => boolean) => rs.reduce((s, r) => s + r.enemies.filter(p).length, 0);
+
+  it('a BIG ONE closes floor 4, then every other floor that is not a hunt, then every one', () => {
+    const big = (n: number) => bigRooms(deepFloor(n, 9, 'x')).length > 0;
+    expect([1, 2, 3, 4, 5].map(big)).toEqual([false, false, false, true, false]);
+    expect([6, 7, 8, 9, 10].map(big)).toEqual([false, false, true, false, true]);
+    expect([11, 12, 13, 14, 15].map(big)).toEqual([true, false, true, false, true]);
+    expect(count(rooms(4), (e) => !!e.big)).toBeGreaterThan(0);
+  });
+
+  it('deeper floors draw more of the harder sorts and more elites, with two affixes from floor 11', () => {
+    const hard = (n: number) => count(rooms(n), (e) => !!e.role && e.role !== 'fodder' && e.role !== 'wolf' && e.role !== 'blind');
+    expect(hard(12)).toBeGreaterThan(hard(1));
+    const el = rooms(13).flatMap((r) => r.enemies.filter((e) => e.elite?.length));
+    expect(el.length).toBeGreaterThan(0);
+    expect(el.every((e) => e.elite!.length >= 2)).toBe(true);
+  });
+
+  it('a Quick elite rests less between blows', () => {
+    expect(quickPause({ elite: ['quick'] } as never)).toBe(ELITE.quick.pause);
+    expect(quickPause({ elite: ['plated'] } as never)).toBe(1);
+    expect(ELITE.quick.pause).toBeLessThan(1);
   });
 });
