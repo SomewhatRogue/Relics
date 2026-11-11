@@ -203,7 +203,7 @@ describe('the flail', () => {
     bare.tap(0.6), board.tap(0.6);
     // (Both close in on the Cleric first; the bare one is thrown back past where the board stood.)
     expect(board.e.y - bare.e.y).toBeGreaterThan(0.5);
-    expect(lost(board.e)).toBe(Math.round(WEAPONS.flail.combo[0].dmg * VARIANTS.shield.front));
+    expect(lost(board.e)).toBe(0);
     expect(WEAPONS.flail.shoves).toBe(true);
   });
   it('let go on the flash, the spin stuns what it hits (a butcher less) and shields friends near', () => {

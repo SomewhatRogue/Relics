@@ -46,7 +46,7 @@ describe('fire passes on only when a burning goblin dies', () => {
   });
 });
 
-describe('storm ignores shields', () => {
+describe('storm and shields', () => {
   /** A shield-bearer facing the Mage takes a spellblade's cut in `el`. */
   const cut = (el: 'frost' | 'storm') => {
     const a = mageArena('spellblade', [[9, 7.9]], el);
@@ -55,11 +55,11 @@ describe('storm ignores shields', () => {
     return { n: lost(a.e), boarded: ev.some((x) => x.k === 'hit' && !!x.boarded) };
   };
 
-  it("a storm cut isn't stopped by the board from the front; a frost cut is", () => {
+  it('the board stops a storm cut from the front like any other (Kyle, 2026-11-11)', () => {
     const storm = cut('storm'), frost = cut('frost');
     expect(frost.boarded).toBe(true);
-    expect(storm.boarded).toBe(false);
-    expect(storm.n).toBeGreaterThan(frost.n);
+    expect(storm.boarded).toBe(true);
+    expect(storm.n).toBe(0);
   });
 
   it('the lightning strike hits a shield wall from the front as hard as anything', () => {

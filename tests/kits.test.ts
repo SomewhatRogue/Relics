@@ -106,8 +106,8 @@ describe('the flail', () => {
       run(0.5, { attackSeq: 1 });
       return hurt(room.enemies[0]);
     };
-    expect(blow('flail')).toBe(Math.round(WEAPONS.flail.combo[0].dmg * VARIANTS.shield.front));
-    expect(blow('mace')).toBe(Math.round(WEAPONS.mace.combo[0].dmg * VARIANTS.shield.front));
+    expect(blow('flail')).toBe(0);
+    expect(blow('mace')).toBe(0);
   });
 
   it('the second blow heals; held, the spun release is a long sweep (sim/flail.ts; tests/cleric.test.ts)', () => {

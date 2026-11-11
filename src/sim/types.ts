@@ -89,6 +89,8 @@ export interface Body {
 }
 
 export interface Hero extends Body {
+  /** When a blow last staggered this hero (shared/tuning.ts STAGGER: no stun-lock). */
+  staggerAt?: number;
   id: string;
   /** Facing, a unit vector. */
   fx: number;

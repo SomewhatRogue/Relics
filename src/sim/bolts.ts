@@ -34,7 +34,7 @@ import { envenom } from './venom';
 import { markShot, perfectStrike, spent } from './rangershots';
 import { interrupt, windingUp } from './spells';
 import { mayStun, relicStun, stun } from './stuns';
-import { boardMult, meetBoard } from './board';
+import { boardMult, meetBoard, shieldFaces } from './board';
 
 let nextId = 1;
 
@@ -91,6 +91,11 @@ export function blast(w: World, b: Bolt, x: number, y: number): void {
   for (const e of w.enemies) {
     const d = Math.hypot(e.x - x, e.y - y);
     if (isDead(e) || e.act === 'carried' || d > b.burst + e.radius) continue;
+    // Set off in front of a shield-bearer's board, the burst breaks on it (sim/board.ts); on top of it or behind, it lands.
+    if (d > 0.3 && shieldFaces(e, x - e.x, y - e.y, w.now)) {
+      w.ev.push({ k: 'deflect', x: e.x, y: e.y });
+      continue;
+    }
     const wasFrozen = frozen(e, w.now), winding = !!b.interrupts && windingUp(e);
     e.lastBy = b.owner;
     if (damage(e, b.dmg, w.now, w.ev, { heavy: true, flinch: 0.5, mult: true, brutal: b.traits.includes('brutal'), how: 'burst', dx: e.x - x, dy: e.y - y, src: b.kind, el: b.el })) continue;

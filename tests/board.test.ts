@@ -30,8 +30,7 @@ function shot(fx: number, fy: number, o: { weapon?: KitId; charge?: boolean; per
 describe("a shield-bearer's board against shots", () => {
   it('a plain arrow into its front is stopped dead with a BLOCKED; the same arrow in its back lands', () => {
     const front = shot(0, 1), back = shot(0, -1);
-    expect(front.took).toBe(Math.round(20 * VARIANTS.shield.shot));
-    expect(front.took).toBe(0);
+        expect(front.took).toBe(0);
     expect(front.ev.some((x) => x.k === 'deflect')).toBe(true);
     expect(back.took).toBe(20);
     expect(back.ev.some((x) => x.k === 'deflect')).toBe(false);
@@ -44,16 +43,16 @@ describe("a shield-bearer's board against shots", () => {
     expect(shot(Math.sin(a), Math.cos(a)).took).toBe(20);
   });
 
-  it('a full draw or a perfect arrow punches through for less', () => {
-    expect(shot(0, 1, { charge: true }).took).toBe(Math.round(20 * VARIANTS.shield.through));
+  it('a full draw or a perfect arrow is stopped too (Kyle, 2026-11-11)', () => {
+    expect(shot(0, 1, { charge: true }).took).toBe(0);
     const sure = shot(0, 1, { perfect: true });
-    expect(sure.took).toBeGreaterThan(0);
-    expect(sure.ev.some((x) => x.k === 'deflect')).toBe(false);
+    expect(sure.took).toBe(0);
+    expect(sure.ev.some((x) => x.k === 'deflect')).toBe(true);
   });
 
-  it("a plain crossbow bolt is stopped; a glinted one gets through", () => {
+  it("a crossbow bolt is stopped, glinted or not", () => {
     expect(shot(0, 1, { weapon: 'crossbow' }).took).toBe(0);
-    expect(shot(0, 1, { weapon: 'crossbow', perfect: true }).took).toBeGreaterThan(0);
+    expect(shot(0, 1, { weapon: 'crossbow', perfect: true }).took).toBe(0);
   });
 
   it('caught unaware or held fast, the board is down', () => {
@@ -64,10 +63,12 @@ describe("a shield-bearer's board against shots", () => {
     expect(e.hp).toBeLessThan(999);
   });
 
-  it('a burst goes round the board', () => {
+  it('a burst in front breaks on the board; behind it, it lands', () => {
     const { h, e, w } = setup(0, 1);
     const b = shoot(h, { ...WEAPONS.longbow.heavy, dmg: 20, burst: 1.5 }, 'fire');
     blast(w, b, e.x, e.y + 0.5);
+    expect(e.hp).toBe(999);
+    blast(w, b, e.x, e.y - 0.5);
     expect(e.hp).toBeLessThan(999);
   });
 });

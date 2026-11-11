@@ -1,7 +1,7 @@
 /**
- * The shield-bearer as a lighter Planker (sim/board.ts, VARIANTS.shield): a wall from the front, soft behind.
- * Each attack from the front, the side and the back, plain and heavy; the knock-aside and its window; the
- * cone; the slow turn letting a dodge get behind; every class's answer; the same fight twice.
+ * The shield-bearer (sim/board.ts, VARIANTS.shield): the board stops everything from the front, and lowers
+ * for its own blow. Each attack from the front, the side and the back; the lowered window; the cone; the
+ * slow turn letting a dodge get behind; every class's answer; the same fight twice.
  */
 import { describe, expect, it } from 'vitest';
 import { GUARD, HERO, TICK, VARIANTS, WEAPONS, type Swing, type WeaponId } from '../src/shared/tuning';
@@ -48,61 +48,48 @@ function shot(w: World, h: Hero, e: Enemy, o: { weapon?: WeaponId; full?: boolea
 }
 const world = (h: Hero, e: Enemy, now: number, ev: FightEvent[] = []): World => ({ heroes: [h], enemies: [e], javelins: [], props: [], now, ev });
 
-describe('blows from the front, the side and the back', () => {
-  it('plain from the front: a tenth, BLOCKED; from the side all of it; from behind all of it and more', () => {
+describe('the board from the front (Kyle, 2026-11-11: it stops everything)', () => {
+  it('a blow from the front, plain, heavy, charged, perfect or a counter, does nothing: BLOCKED', () => {
     const { room, h, e } = yard();
     const ev: FightEvent[] = [];
-    expect(strike(h, e, room.time, ev)).toBe(Math.round(20 * S.front));
-    expect(ev.some((x) => x.k === 'hit' && x.boarded)).toBe(true);
+    for (const o of [{}, { heavy: true, power: 0.5 }, { heavy: true, power: 1 }, { perfect: true }, { counter: true }, { knock: 8 }]) expect(strike(h, e, room.time, ev, o), JSON.stringify(o)).toBe(0);
+    expect(ev.filter((x) => x.k === 'hit' && x.boarded).length).toBe(6);
+  });
+
+  it('from the side all of it; from behind all of it and more; a Rogue knife in its back is a backstab', () => {
+    const { room, h, e } = yard();
     stand(h, e, 90);
     expect(strike(h, e, room.time, [])).toBe(20);
     stand(h, e, 180);
     expect(strike(h, e, room.time, [])).toBeGreaterThanOrEqual(Math.round(20 * GUARD.rearMult));
+    const r = yard('daggers');
+    stand(r.h, r.e, 180);
+    expect(strike(r.h, r.e, r.room.time, [])).toBe(Math.round(20 * WEAPONS.daggers.backstab!));
   });
 
-  it('heavy from the front (a held blow short of full, a combo finisher): a quarter, and the board stays up', () => {
-    const { room, h, e } = yard();
-    const ev: FightEvent[] = [];
-    expect(strike(h, e, room.time, ev, { heavy: true, power: 0.5 })).toBe(Math.round(20 * S.heavy));
-    expect(strike(h, e, room.time, ev, { knock: 8 })).toBe(Math.round(20 * S.heavy));
-    expect(ev.some((x) => x.k === 'boardout')).toBe(false);
-    stand(h, e, 90);
-    expect(strike(h, e, room.time, [], { heavy: true, power: 0.5 })).toBe(20);
-    stand(h, e, 180);
-    expect(strike(h, e, room.time, [], { heavy: true, power: 0.5 })).toBeGreaterThanOrEqual(20);
-  });
-
-  it('a Rogue knife from the front is next to nothing; in its back, a backstab', () => {
-    const { room, h, e } = yard('daggers');
-    expect(strike(h, e, room.time, [])).toBe(Math.round(20 * (WEAPONS.daggers.front ?? 1) * S.front));
-    stand(h, e, 180);
-    expect(strike(h, e, room.time, [])).toBe(Math.round(20 * WEAPONS.daggers.backstab!));
-  });
-
-  it('shots: plain stopped dead at the front; a full draw or a perfect a quarter; the side and back in full', () => {
+  it('shots from the front are stopped dead, a full draw and a perfect too; the side and back in full', () => {
     const { room, h, e } = yard('longbow');
     const ev: FightEvent[] = [], w = world(h, e, room.time, ev);
     expect(shot(w, h, e)).toBe(0);
     expect(ev.some((x) => x.k === 'deflect')).toBe(true);
     expect(shot(w, h, e, { weapon: 'crossbow' })).toBe(0);
-    expect(shot(w, h, e, { full: true })).toBe(Math.round(20 * S.through));
-    e.boardOutAt = undefined;
-    expect(shot(w, h, e, { perfect: true })).toBeLessThanOrEqual(Math.round(20 * 2 * S.through));
-    e.boardOutAt = undefined;
+    expect(shot(w, h, e, { full: true })).toBe(0);
+    expect(shot(w, h, e, { perfect: true })).toBe(0);
     for (const [fx, fy] of [[1, 0], [0, -1]]) {
       Object.assign(e, { fx, fy });
       expect(shot(w, h, e)).toBe(20);
     }
   });
 
-  it('bursts and lightning go round it; stunned, frozen, netted or unaware, it takes it all', () => {
+  it("a burst set off in front breaks on the board; one on top of it lands; stunned, frozen, netted or unaware, it takes it all", () => {
     const { room, h, e } = yard('wand');
     const w = world(h, e, room.time);
     const b = shoot(h, { ...WEAPONS.wand.heavy, dmg: 20 }, 'fire');
     const before = e.hp;
-    blast(w, b, e.x, e.y + 0.4);
-    // (Its own resistances still count: nothing of the board's.)
-    expect(before - e.hp).toBeGreaterThan(Math.round(20 * S.heavy));
+    blast(w, b, e.x, e.y + 0.8);
+    expect(before - e.hp).toBe(0);
+    blast(w, b, e.x, e.y);
+    expect(before - e.hp).toBeGreaterThan(0);
     Object.assign(h, { weapon: 'sword', x: 15, y: 11.2 });
     for (const down of [{ act: 'stunned', actDur: 9, actT: 0 }, { frozenUntil: 99 }, { snareUntil: 99 }, { alert: false }] as Partial<Enemy>[]) {
       const { room: r2, h: h2, e: e2 } = yard();
@@ -112,48 +99,18 @@ describe('blows from the front, the side and the back', () => {
   });
 });
 
-describe('the knock-aside', () => {
-  it('a full charge, a perfect or a counter into the board knocks it aside: BOARD OUT, a quarter, once', () => {
-    for (const o of [{ heavy: true, power: 1 }, { heavy: true, power: 1, perfect: true }, { counter: true }]) {
-      const { room, h, e } = yard();
-      const ev: FightEvent[] = [];
-      strike(h, e, room.time, ev, o);
-      expect(ev.filter((x) => x.k === 'boardout').length, JSON.stringify(o)).toBe(1);
-      expect(e.boardOutAt).toBe(room.time);
-      // (The knocking blow itself isn't marked BLOCKED: BOARD OUT says it.)
-      expect(ev.some((x) => x.k === 'hit' && x.boarded)).toBe(false);
-      // Knocked again while it's out: nothing new goes out.
-      strike(h, e, room.time + 0.1, ev, o);
-      expect(ev.filter((x) => x.k === 'boardout').length).toBe(1);
-    }
-  });
-
-  it('for its window anything lands in full from the front, a plain shot too; then the board is back up', () => {
+describe('the board lowered for its own blow', () => {
+  it(`down for the last ${S.drop} s of its wind-up and the blow, ${S.after} s after; up otherwise`, () => {
     const { room, h, e } = yard();
-    strike(h, e, room.time, [], { heavy: true, power: 1 });
-    const t0 = room.time;
-    expect(boardOut(e, t0 + S.out - 0.05)).toBe(true);
-    expect(strike(h, e, t0 + 0.4, [])).toBe(20);
-    expect(shot(world(h, e, t0 + 0.6), h, e)).toBe(20);
-    Object.assign(h, { weapon: 'sword', x: 15, y: 11.2, fx: 0, fy: -1 });
-    expect(boardOut(e, t0 + S.out + 0.01)).toBe(false);
-    expect(strike(h, e, t0 + S.out + 0.05, [])).toBe(Math.round(20 * S.front));
-  });
-
-  it('a full draw knocks it aside too, for a friend to hit in full', () => {
-    const { room, h, e } = yard('longbow');
-    const ev: FightEvent[] = [];
-    shot(world(h, e, room.time, ev), h, e, { full: true });
-    expect(ev.some((x) => x.k === 'boardout')).toBe(true);
-    expect(boardOut(e, room.time + 0.5)).toBe(true);
-  });
-
-  it('the board drawn out is one field set once: nothing about it goes out a tick', () => {
-    const { room, h, e } = yard();
-    strike(h, e, room.time, [], { heavy: true, power: 1 });
-    const at = e.boardOutAt;
-    run(room, 1);
-    expect(e.boardOutAt).toBe(at);
+    e.act = 'attack';
+    e.attack = { ...WEAPONS.sword.combo[0], kind: 'stab', t: 0, windup: 1.4, active: 0.1, recover: 0.6, x: 15, y: 11, dx: 0, dy: 1, dmg: 5, range: 1.3, arc: 60, knock: 2, unblockable: false } as unknown as Enemy['attack'];
+    expect(boardOut(e)).toBe(false);
+    expect(strike(h, e, room.time, [])).toBe(0);
+    e.attack!.t = 1.4 - S.drop + 0.05;
+    expect(boardOut(e)).toBe(true);
+    expect(strike(h, e, room.time, [])).toBe(20);
+    e.attack!.t = 1.4 + 0.1 + S.after + 0.05;
+    expect(boardOut(e)).toBe(false);
   });
 });
 
@@ -162,7 +119,7 @@ describe('the cone', () => {
     expect(Math.acos(S.cone) * (180 / Math.PI)).toBeCloseTo(70, 0);
     const { room, h, e } = yard();
     stand(h, e, 64);
-    expect(strike(h, e, room.time, [])).toBe(Math.round(20 * S.front));
+    expect(strike(h, e, room.time, [])).toBe(0);
     stand(h, e, 76);
     expect(strike(h, e, room.time, [])).toBe(20);
     const w = world(h, e, room.time);
@@ -212,16 +169,16 @@ describe('the slow turn', () => {
 });
 
 describe("every class's answer", () => {
-  it('Warrior: block its stab, and the counter knocks the board aside', () => {
+  it('Warrior: block its stab, and the counter lands while its board is still down', () => {
     const { room, h, e } = yard('sword');
     e.cooldown = 0.1;
     room.setIntent('me', { ...NO_INTENT, ay: -1, block: true, blockSeq: 1 });
-    const ev = run(room, 3, () => room.events.some((x) => x.k === 'block'));
-    void ev;
+    run(room, 3, () => room.events.some((x) => x.k === 'block'));
     expect(HERO.hp - h.hp).toBe(0);
+    const hp = e.hp;
     room.setIntent('me', { ...NO_INTENT, ay: -1, attackSeq: 1 });
-    const after = run(room, 0.5);
-    expect(after.some((x) => x.k === 'boardout')).toBe(true);
+    run(room, 0.5);
+    expect(e.hp).toBeLessThan(hp);
   });
 
   it('Warrior: TAUNT GUARD turns it round while a friend goes behind and hits it in full', () => {
@@ -273,7 +230,7 @@ describe("every class's answer", () => {
     expect(strike(h, e, room.time, [])).toBeGreaterThanOrEqual(20);
   });
 
-  it('Mage: a storm cut ignores the board; Healer: a smite stuns it', () => {
+  it('Healer: a smite on top of it stuns it', () => {
     const { room, h, e } = yard('mace');
     const w = world(h, e, room.time);
     const b = shoot(h, { ...WEAPONS.mace.heavy, dmg: 20, burst: 1.3, stun: 1.2 }, '');
@@ -281,7 +238,6 @@ describe("every class's answer", () => {
     blast(w, b, e.x, e.y);
     expect(before - e.hp).toBeGreaterThanOrEqual(20);
     expect(e.act).toBe('stunned');
-    // (The storm cut through the board: tests/storm.test.ts.)
   });
 });
 
@@ -296,7 +252,7 @@ describe('the same fight twice', () => {
         f.room.setIntent('b', { ...NO_INTENT, mx: Math.sin(i / 20), my: 1, attackSeq: Math.floor(i / 7), rollSeq: Math.floor(i / 60) });
         f.room.step();
       }
-      return JSON.stringify(f.room.enemies.map((e) => [e.x, e.y, e.hp, e.fx, e.boardOutAt ?? null, e.act]));
+      return JSON.stringify(f.room.enemies.map((e) => [e.x, e.y, e.hp, e.fx, e.act]));
     };
     expect(play()).toBe(play());
   });

@@ -156,6 +156,12 @@ export const ARRIVE_SAFE = 3;
 
 export const PARTY = { bleed: 20, pickUp: 2.5, reach: 1.4, upHp: 0.4, friendly: 0.5, foes: 0.6, boss: 0.4, grudge: 3, reward: 0.25 };
 export const HURT_STAGGER = 0.25;
+/**
+ * No stun-lock (Kyle, 2026-11-11: "I get stun locked by too many small enemies and can't fight back"): after a
+ * blow staggers you, small goblins' blows can't stagger you again for `guard` seconds (they still hurt), so
+ * you always get a window to dodge, block or hit back. A butcher's still staggers.
+ */
+export const STAGGER = { guard: 1 };
 
 /** Knockback slides decay by this share per second; a slide this fast into a wall slams. */
 export const KNOCK = { friction: 9, wallSpeed: 5, wallDmg: 6, /** A body this fast that hits another hurts both. */ bodySpeed: 6, bodyDmg: 1.5, bodyMax: 25 };
@@ -247,16 +253,15 @@ export const VARIANTS = {
   looter: { hp: 14, speed: 0.55, stab: { windup: 0.85, active: 0.08, recover: 0.7, dmg: 5, knock: 2, range: 1.3, arc: 50, unblockable: false } as EnemyAttackSpec },
   lunger: { hp: 30, reach: 2.8, stab: { windup: 0.8, active: 0.1, recover: 0.8, dmg: 10, knock: 5, range: 3.0, arc: 24, unblockable: true } as EnemyAttackSpec },
   /**
-   * Run goblins with a board, a lighter Planker (sim/board.ts): a wall from the front, soft behind. Within `cone` of
-   * its facing (the cosine: 0.34 is 70 degrees either side) a plain blow does `front` of itself and a plain shot
-   * `shot` (stopped dead); a heavy blow, a counter, a full draw or a perfect does `heavy` (blows) or `through` (shots).
-   * A full charge, a perfect or a counter into the board also knocks it aside: open `out` seconds, in full from
-   * anywhere. From the side or behind, or with it stunned, pinned, frozen, netted or unaware, all of it lands.
-   * Bursts and lightning go round it. It turns `turn` radians a second (a small goblin's 7), so a hero walking or
-   * dodging round it gets behind. Kyle, 2026-11-04: better against shots; 2026-11-06: "block most attacks so you
-   * want to go around".
+   * Run goblins with a board (sim/board.ts), Kyle 2026-11-11: "shield goblins still aren't really shielding". Within
+   * `cone` of its facing (the cosine: 0.34 is 70 degrees either side) the board stops everything: blows, shots,
+   * charged or perfect, fire, frost and lightning, and bursts that go off in front of it. Two ways in: it lowers
+   * the board `drop` seconds before each of its own blows land and `after` seconds past it (hit it then, from the
+   * front: a Warrior's counter just makes it), or get round it: it
+   * walks at `speed` of a goblin's pace and turns `turn` radians a second (a small goblin's 7). From the side or
+   * behind, or with it stunned, pinned, frozen, netted or unaware, everything lands.
    */
-  shield: { hp: 44, front: 0.1, heavy: 0.25, cone: 0.34, shot: 0, through: 0.25, out: 1.2, turn: 1.6 },
+  shield: { hp: 44, cone: 0.34, drop: 1, after: 0.35, speed: 0.75, turn: 1.4 },
   /** The back of the pack (shared/backline.ts): a caster and a drummer. */
   hexer: HEXER,
   drummer: DRUMMER,

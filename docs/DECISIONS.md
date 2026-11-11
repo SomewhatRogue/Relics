@@ -8564,3 +8564,16 @@ on a big screen.
 - Elites by band (`shared/deepbands.ts`): +0, +10%, +20%, +30% on each meaty goblin's chance; up to 1, 2, 3, 4 a room; at least two affixes from floor 11.
 - Quick, everywhere: `ELITE.quick.pause` 0.7, its rest between blows cut, so it swings more often as well as faster (never a boss of the kit's).
 - Not in: the bosses of the kit (the Doorkeepers, Hempen) are set pieces tied to the barn and the wood. A boss of the Deep's own (say every five floors) is a new boss: spec first.
+## 2026-11-11: shields that shield, goblins that commit, no stun-lock (Claude Opus 5.5)
+
+- Kyle: shield goblins "still aren't really shielding". From the front the board now stops everything:
+  blows plain or charged, perfects, counters, every shot and element (storm too), and bursts set off in front
+  of it. It lowers for `VARIANTS.shield.drop` (1 s) before each of its own blows and `after` (0.35 s) past
+  it, so you hit it then from the front (a Warrior's block-and-counter just makes it), or get round it: it
+  walks at 0.75 pace and turns 1.4 rad/s. No more knock-aside or BOARD OUT. Drawn bigger (an iron-bound
+  board, about twice the old) and hangs low at its side while lowered, in both views.
+- Kyle: goblins "wait too long to start and attack". The cause was a bug: a goblin's first swing waited
+  1 + 0.4 s per goblin spawned before it, so the twentieth in a level waited 9 s. Capped at 2 s.
+- Kyle: stun-locked by swarms. After a blow staggers you, small goblins can't stagger you again for
+  `STAGGER.guard` (1 s); they still hurt. A butcher's or boss's blow still staggers. (A dodge or block
+  breaking out of a stagger was tried and dropped: it split the fight after a host handover.)

@@ -145,8 +145,9 @@ describe('the drills count', () => {
     for (let k = 0; g.drill && !g.drill.done && k < 700; k++) (g.hero.safeT = 9), g.step(0.1, NO_INTENT);
     expect(g.drill!.done).toBe(true);
     expect(g.drill!.line).toBe('HELD 60 S');
-    // Waves came out of the gate till PRACTICE.most were up, and what still stood went back in at the end.
-    expect(g.drill!.ids.length).toBe(PRACTICE.most);
+    // Waves came out of the gate till PRACTICE.most were up (more if some fell to each other's blows, now they
+    // swing sooner: 2026-11-11), and what still stood went back in at the end.
+    expect(g.drill!.ids.length).toBeGreaterThanOrEqual(PRACTICE.most);
     expect(practised(g).filter((e) => e.act !== 'dead')).toHaveLength(0);
   });
 

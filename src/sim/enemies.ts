@@ -62,7 +62,7 @@ export function newEnemy(id: number, kind: Enemy['kind'], x: number, y: number):
   const hp = s ? s.hp : kind === 'nest' ? NEST.hp : 999;
   const e: Enemy = {
     id, kind, x, y, kvx: 0, kvy: 0, fx: 0, fy: 1, hp, maxHp: hp, radius: s ? s.radius : 0.4, weight: s ? s.weight : Infinity,
-    act: s ? 'chase' : 'idle', actT: 0, actDur: 0, attack: null, cooldown: 1 + id * 0.4, hitstop: 0, hitAt: -9, moving: false, home: { x, y }, corpse: '',
+    act: s ? 'chase' : 'idle', actT: 0, actDur: 0, attack: null, cooldown: Math.min(1 + id * 0.4, 2), hitstop: 0, hitAt: -9, moving: false, home: { x, y }, corpse: '',
     burnUntil: 0, burnNext: 0, chillUntil: 0, frozenUntil: 0, snareUntil: 0, lastBy: '', death: '', respawns: true, z: 0,
   };
   // A nest: rooted, asleep till a hero comes near (sim/spiders.ts).
@@ -361,7 +361,7 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     // Scrappers sidle a little rather than queueing straight in.
     const side = e.kind === 'scrapper' && !via ? Math.sin(now * 1.3 + e.id * 2) * 0.5 : 0;
     // Walks where it faces: something turning round is slow to come after you.
-    const pace = v === 'looter' ? VARIANTS.looter.speed : v === 'heavy' ? VARIANTS.heavy.speed : 1;
+    const pace = v === 'looter' ? VARIANTS.looter.speed : v === 'heavy' ? VARIANTS.heavy.speed : v === 'shield' ? VARIANTS.shield.speed : 1;
     // A flanker goes wide and ahead to cut them off; a sprint leans, then bursts (sim/chase.ts).
     const wide = paced ? flankTo(e, t, d) : null, wx = wide ? wide.x - e.x : ux - uy * side, wy = wide ? wide.y - e.y : uy + ux * side;
     walk(e, wx, wy, spec.speed * slow * pace * (paced ? sprintPace(e, now) : 1) * Math.max(0.2, facing), dt);

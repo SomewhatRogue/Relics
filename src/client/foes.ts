@@ -343,22 +343,23 @@ function kit(c: Ctx, e: Enemy, x0: number, y0: number): void {
   const f = e.fx >= 0 ? 1 : -1, g = c.lit, held = e.variant === 'lunger' || e.variant === 'heavy';
   const x = x0 + (held ? AT.hx : AT.bx), y = y0 + (held ? AT.hy : AT.by);
   if (e.variant === 'shield' && boardOut(e, c.t ?? c.now)) {
-    // Knocked aside (sim/board.ts): the plank swung wide off its arm, flat out behind it, shaking.
-    const bx = Math.round(x - f * 6 - (f < 0 ? 0 : 7)), by = Math.round(y - 7 + (Math.floor(c.now * 14) % 2));
+    // Lowered for its own blow (sim/board.ts): the big board dropped to hang off its arm, low at its side.
+    const bx = Math.round(x - f * 3 - (f < 0 ? 0 : 6)), by = Math.round(y - 5);
     g.fillStyle = '#5a3f28';
-    g.fillRect(bx, by, 8, 3);
-    g.fillStyle = '#7a5a38';
-    g.fillRect(bx, by, 8, 1);
-    g.fillStyle = '#8a8a90';
-    g.fillRect(bx + 3, by + 1, 1, 1);
+    g.fillRect(bx, by, 6, 6);
+    g.fillStyle = '#9a9aa4';
+    g.fillRect(bx, by, 6, 1), g.fillRect(bx, by + 5, 6, 1);
   } else if (e.variant === 'shield') {
-    // A door-plank shield, held toward whatever it faces.
+    // A big iron-bound board held up toward whatever it faces (Kyle, 2026-11-11: bigger, obviously a shield).
+    const bx = Math.round(x + f * 3 - (f < 0 ? 5 : 0)), by = Math.round(y - 15);
     g.fillStyle = '#5a3f28';
-    g.fillRect(Math.round(x + f * 4 - (f < 0 ? 3 : 0)), Math.round(y - 11), 3, 8);
+    g.fillRect(bx, by, 5, 14);
     g.fillStyle = '#7a5a38';
-    g.fillRect(Math.round(x + f * 4 - (f < 0 ? 3 : 0)), Math.round(y - 11), 3, 1);
-    g.fillStyle = '#8a8a90';
-    g.fillRect(Math.round(x + f * 5 - (f < 0 ? 3 : 0)), Math.round(y - 8), 1, 1);
+    g.fillRect(bx + 1, by + 1, 3, 12);
+    g.fillStyle = '#9a9aa4';
+    g.fillRect(bx, by, 5, 1), g.fillRect(bx, by + 13, 5, 1), g.fillRect(bx, by + 6, 5, 1);
+    g.fillStyle = '#c8c8d0';
+    g.fillRect(bx + 2, by + 6, 1, 1);
   } else if (e.variant === 'lunger') line(g, x + f * 2, y - 8, Math.atan2(e.fy, e.fx), 0, 12, '#6b4a2b', 1), line(g, x + f * 2, y - 8, Math.atan2(e.fy, e.fx), 11, 14, '#cfd6dc', 1);
   else if (e.variant === 'heavy') (g.fillStyle = '#3a2a1a'), g.fillRect(Math.round(x + f * 5), Math.round(y - 14), 2, 10), (g.fillStyle = '#4a3a2a'), g.fillRect(Math.round(x + f * 4), Math.round(y - 16), 4, 3);
   else if (e.variant === 'ironhide') drawIronhide(c, e, x0 + AT.bx, y0 + AT.by, c.t ?? c.now);

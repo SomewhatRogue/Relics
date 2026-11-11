@@ -197,7 +197,8 @@ describe('the fight', () => {
         room.step();
         bit += room.events.filter((e) => e.k === 'bark').length;
       }
-      const heroes = room.heroes.map(({ houndLook: _l, ...rest }) => rest);
+      // (hitIds carries a shot's id from a counter shared across rooms in one process: a label, not the fight.)
+      const heroes = room.heroes.map(({ houndLook: _l, hitIds: _h, ...rest }) => rest);
       return { bit, fight: JSON.stringify([heroes, room.enemies, room.snares, room.time]) };
     };
     const a = play({ breed: 'wolfhound', coat: 0, mark: 'none', name: 'BRAN' }), b = play({ breed: 'collie', coat: 2, mark: 'both', name: 'SLOE' });

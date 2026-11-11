@@ -1,7 +1,7 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, roll, or taken). */
 import { wetMult } from './techmage';
 import { litMult } from './charge';
-import { CENSER, BLESSING, DODGE, WARD, FLINCH, POISE, HORN, OVERKILL, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, VARIANTS, WEAPONS, type Swing, CLASS_DODGES, CRIT, STEALTH, weakOn, SPLAT, BANNER, STORM } from '../shared/tuning';
+import { CENSER, BLESSING, DODGE, WARD, FLINCH, POISE, HORN, OVERKILL, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, STAGGER, VARIANTS, WEAPONS, type Swing, CLASS_DODGES, CRIT, STEALTH, weakOn, SPLAT, BANNER, STORM } from '../shared/tuning';
 import { shove } from './bodies';
 import { knack, statsOf } from './gearstats';
 import { counterWindow, guardArc, rearCos, slipWindow } from './knacks';
@@ -36,7 +36,7 @@ import { guardFrom, rushBlocked, noteRush } from './rushguard';
 import { count, dealt } from './score';
 import { chalkTaken } from './chalker';
 import { plankFaces } from './meaty';
-import { blowMult, knockAside, knocksBoard, shieldFaces } from './board';
+import { shieldFaces } from './board';
 import { addPoise, bracedFor, poiseFromBlow, rebound } from './poise';
 import { doorTake } from './doorwall';
 import { noteHurt } from './bosskit';
@@ -78,17 +78,22 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   const tempo = h.tempoUntil > now ? TRAIT.tempo : 1;
   if (tempo > 1) h.tempoUntil = -9;
   const crit = rollCrit(h), ambush = e.alert === false && !isDummy(e);
-  // A shield-bearer takes a blow from the front on its board: a tenth, a heavy one a quarter (unless it's held
-  // fast, caught unaware, knocked aside, or it's a Mage's storm, which ignores shields and lands harder on the
-  // wet: sim/wet.ts). A full charge, a perfect or a counter knocks the board aside (sim/board.ts).
-  const storm = stormCut(h, s), boarded = !rear && !storm && shieldFaces(e, tx, ty, now), knocks = boarded && knocksBoard(h);
+  // A shield-bearer's board stops a blow from the front dead, whatever it is (sim/board.ts), unless it's lowered
+  // for its own swing, or the goblin is held fast or caught unaware.
+  const storm = stormCut(h, s), boarded = !rear && shieldFaces(e, tx, ty, now);
+  if (boarded) {
+    const stop = HITSTOP.light;
+    (h.hitstop = Math.max(h.hitstop, stop)), (e.hitstop = Math.max(e.hitstop, stop));
+    ev.push({ k: 'hit', x: e.x, y: e.y, n: 0, heavy: false, on: 'enemy', counter: h.counter, crit: false, ambush: false, boarded: true, backstab: false, src: WEAPONS[h.weapon].cls === 'RANGER' ? 'sword' : h.weapon, big: false });
+    return 0;
+  }
   // A Planker's barn door takes everything from the front, heavy or not (sim/meaty.ts): get round it.
   const door = plankFaces(e, tx, ty, now);
   const weak = weakOn(e), soaked = storm && wet(e) ? wetMult(h, STORM.wet) : 1;
   sayWeak(e, weak, now, ev, 'physical');
   // STAMINA ON COUNTER: a counter's first hit fills your stamina. (The spear's shaft halves a blow up close.)
   if (h.counter && has(h, 'bulwark') && h.hitIds.filter((id) => id > 0).length === 1) h.stamina = Math.max(h.stamina, HERO.stamina);
-  const mult = weak * soaked * (h.counter ? counter : heldFast ? held : 1) * shaftMult(h, s, e) * rearMult * blessed * tempo * (crit ? CRIT : 1) * (ambush ? STEALTH.ambush * (1 + knack(h, 'ambush')) : 1) * (boarded ? blowMult(heavy) : 1) * (door ? 0 : 1) * brandyDmg(h, now) * litMult(h) * (h.snagged ? CENSER.snag : 1) * ((e.routUntil ?? -9) > now ? BANNER.rout.hurt : 1);
+  const mult = weak * soaked * (h.counter ? counter : heldFast ? held : 1) * shaftMult(h, s, e) * rearMult * blessed * tempo * (crit ? CRIT : 1) * (ambush ? STEALTH.ambush * (1 + knack(h, 'ambush')) : 1) * (door ? 0 : 1) * brandyDmg(h, now) * litMult(h) * (h.snagged ? CENSER.snag : 1) * ((e.routUntil ?? -9) > now ? BANNER.rout.hurt : 1);
   // An ironhide's plates (sim/ironhide.ts): a charged blow or a perfect breaks its guard; else a fifth gets through.
   const plate = clanks(e, now) && !(h.heavy || h.perfect), raw = plated(e, Math.round(s.dmg * mult), now, h.heavy || h.perfect, ev);
   // Mother Rust's Needles: a backstab kills anything short of a butcher.
@@ -96,7 +101,6 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   // A boss of the kit: what in the blow fills its POISE (door or no door), then its door (sim/poise.ts, doorwall.ts).
   const n = e.boss ? bossBlow(h, e, n0, rear, ambush, now, ev) : n0;
   if (n < 0) return 0;
-  if (knocks) knockAside(e, now, ev);
   e.hp -= n;
   e.hitAt = now;
   dealt(e, h.id, n);
@@ -107,9 +111,9 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   const ring = s.arc >= 360, dl = Math.hypot(e.x - h.x, e.y - h.y) || 1;
   const kx = ring ? (e.x - h.x) / dl : h.fx, ky = ring ? (e.y - h.y) / dl : h.fy;
   // (A shield-bearer's board stops a flail's shove: sim/flail.ts.)
-  if (e.act !== 'pinned' && e.act !== 'carried' && !door && !(boarded && WEAPONS[h.weapon].shoves)) shove(e, kx, ky, s.knock + (h.counter ? 5 : 0), e.weight);
+  if (e.act !== 'pinned' && e.act !== 'carried' && !door) shove(e, kx, ky, s.knock + (h.counter ? 5 : 0), e.weight);
   if (ambush && e.hp > 0) stun(e, h.id, now, STEALTH.reel, ev);
-  ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy, on: 'enemy', counter: h.counter, crit, ambush, boarded: (boarded && !knocks) || door, backstab: rear && (rearMult >= 2 || WEAPONS[h.weapon].cls === 'ROGUE'), src: WEAPONS[h.weapon].cls === 'RANGER' ? 'sword' : h.weapon, big: e.kind === 'butcher', ...(plate ? { plated: true } : {}) });
+  ev.push({ k: 'hit', x: e.x, y: e.y, n, heavy, on: 'enemy', counter: h.counter, crit, ambush, boarded: door, backstab: rear && (rearMult >= 2 || WEAPONS[h.weapon].cls === 'ROGUE'), src: WEAPONS[h.weapon].cls === 'RANGER' ? 'sword' : h.weapon, big: e.kind === 'butcher', ...(plate ? { plated: true } : {}) });
   // A Hornblower blowing: a charged blow, a perfect or a counter that gets through cuts it off (sim/hornstate.ts).
   if (n > 0 && (h.heavy || h.perfect || h.counter)) cutCall(e, now, ev);
   if (isDummy(e)) {
@@ -339,7 +343,9 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   h.hp -= n;
   count(h.id, 'taken', n);
   // Heavy armor: a small goblin's blow doesn't stagger you.
-  if (!(g.steady && e.kind === 'scrapper') && !feet) Object.assign(h, { act: 'hurt', actT: 0, actDur: HURT_STAGGER + a.knock * 0.012 });
+  // No stun-lock: a small goblin can't stagger you again within STAGGER.guard of the last (a butcher can).
+  const guarded = e.kind !== 'butcher' && !e.boss && now - (h.staggerAt ?? -9) < STAGGER.guard;
+  if (!(g.steady && e.kind === 'scrapper') && !feet && !guarded) Object.assign(h, { act: 'hurt', actT: 0, actDur: HURT_STAGGER + a.knock * 0.012, staggerAt: now });
   h.hitstop = Math.max(h.hitstop, HITSTOP.heavy);
   if (feet) ev.push({ k: iron ? 'ironfeet' : 'braced', x: h.x, y: h.y });
   else shove(h, sx / sl, sy / sl, a.knock, HERO.weight);

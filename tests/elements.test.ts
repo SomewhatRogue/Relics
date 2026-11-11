@@ -149,10 +149,9 @@ describe("each element's job", () => {
     return 999 - e.hp;
   };
 
-  it('storm goes round a shield from the front; anything else meets the board', () => {
-    const s = WEAPONS.wand.combo[0];
-    expect(sparkAt('')).toBe(Math.round(s.dmg * VARIANTS.shield.shot));
-    expect(sparkAt('storm')).toBe(Math.round(s.dmg * WEAK.shield.storm!));
+  it('from the front the board stops every element, storm too (Kyle, 2026-11-11)', () => {
+    expect(sparkAt('')).toBe(0);
+    expect(sparkAt('storm')).toBe(0);
   });
 
   it('fire passes, when a burning goblin dies, to goblins standing close (not only touching)', () => {
