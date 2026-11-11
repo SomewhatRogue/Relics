@@ -93,13 +93,15 @@ None of them are butchers: named butchers keep the relics and hungry gear (Slag 
   Twenty seconds to choose; no choice, or disconnected, is PASS. Need beats Greed; ties re-roll.
 - **Bad-luck protection:** lose a roll on a boss and your next Need roll on that boss's pool gets +10
   (up to +30); it resets when you win a piece from it.
+- **Drops are minted through the item ledger** (docs/design/trading.md), keyed by run and boss, so a
+  reconnect or a host handover can't make a second.
 - **One of each** named piece per hero. The boss board shows each boss's pool and who first won what.
 - Instance pieces are the place's own goods, shown with the place on the chip (RAKEHEAD), not a tier word.
   **No Want, no cost line.** Open: does Tobin buy them, and does Halvard forge and melt them?
 
 **Cosmetics: the LOOK slot**
 - A separate slot, worn in town and on jobs, shown on the sprite, the hero card and the boss board. No
-  stats, never touches the Want, any class.
+  stats, no upgrades, never touches the Want, any class: purely fashion (Kyle, 2026-11-11).
 - Things a valley person would own and keep: hoods, felt caps, cloaks, scarves, boots muddy to the knee,
   a stained sleeve, a plain lamp at the belt (a "lamp", never a "lantern": that word is the square's).
   Nothing new: every piece used to be somebody's.
