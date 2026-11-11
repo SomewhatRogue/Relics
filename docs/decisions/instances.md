@@ -2,6 +2,20 @@
 
 The Instances chat's log (docs/BOARD.md). Newest first, signed with the model. Spec: docs/design/instances.md.
 
+## 2026-11-11: THE DROVER's fight (Kyle: "continue"; Claude Opus 5.5)
+
+Step 3, the first named one. The spec's line "free the line and it has nothing to stand behind" as a rule (`sim/drover.ts`,
+numbers `DROVER` in `shared/instancetune.ts`). THE DROVER is the guard in front of the roped diggers (`Foe.drives`).
+While any digger is still roped it's `screened`: a blow lands at a quarter and says BLOCKED (`sim/damage.ts`). Standing
+still by a roped digger for 1.6 s cuts the whole line loose (a ring on the digger fills: `client/captives.ts`; CUT LOOSE):
+the diggers are free, and the Drover and its guard leave the line and come at you. One holds it while another cuts;
+alone, you cut first. Its line is held (`led.hold`): at the top of the street the guards stop over the diggers, still
+roped, instead of walking out of the room with them (`sim/tasks.ts`, `sim/scenes.ts`), so letting it walk is no way
+round the fight and the diggers are never lost. The goal says "Cut the diggers loose (stand by them), then kill THE
+DROVER" while it's screened. Under it the Drover is still the stand-in heavy (380, at three heroes' health).
+Waiting on the writing pass: the goal line and CUT LOOSE go with the next named one's lines in one lore keeper and one
+line editor call. Open: every number (a quarter, 1.6 s, 1.1 tiles).
+
 ## 2026-11-11: instances, the frame and the first one, the Open Cut (Kyle; Claude Opus 5.5)
 
 Kyle: "Build instances from the spec, starting with build-order step 1 (the instance frame), then the first instance."

@@ -18,6 +18,7 @@ import { waiting } from './survivors';
 import { expedGoal } from './expedgoal';
 import { HELD_HINT, pickWay, type WayKind } from '../shared/ways';
 import { STAITHE_WORDS } from '../shared/staithewords';
+import { DROVER_WORDS } from '../shared/opencutwords';
 import { staitheGoal } from './staithegoal';
 
 export interface Captives { caged: number; waiting: number }
@@ -86,8 +87,10 @@ export function goal(run: Run, room: ArenaRoom, houses: Captives = { caged: 0, w
   const way = (home: boolean) => `${home ? (run.job.floor ? 'Way down' : 'Way home') : 'Way on'}: ${wayDir(room.map)}`;
   // An instance's area: its gate opens when its named ones are dead; the cages are there to free, never needed (shared/instances.ts).
   if (run.job.instance && !isFinal(run)) {
-    const keep = room.enemies.filter((e) => e.name && !isDead(e)).map((e) => e.name);
-    return { text: also(keep.length ? `Kill ${keep.join(' and ')}` : way(false)), done: !keep.length };
+    const keep = room.enemies.filter((e) => e.name && !isDead(e)), names = keep.map((e) => e.name).join(' and ');
+    // (THE DROVER behind its roped line: cut them loose first: sim/drover.ts.)
+    const kill = keep.some((e) => e.screened) ? `${DROVER_WORDS.goal} ${names}` : `Kill ${names}`;
+    return { text: also(keep.length ? kill : way(false)), done: !keep.length };
   }
   if (!isFinal(run)) {
     const fork = !!room.map.roads;

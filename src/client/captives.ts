@@ -8,10 +8,10 @@
 import { drawNetOver } from './staithedraw';
 import { drawAsh, drawEaten } from './remainsdraw';
 import { SPRITES } from './sprites';
-import { blit, shadow, type Ctx } from './draw';
+import { blit, ring, shadow, type Ctx } from './draw';
 import { drawText, textWidth } from './pixfont';
 import type { Survivor } from '../sim/types';
-import { SURVIVOR } from '../shared/tuning';
+import { DROVER, SURVIVOR } from '../shared/tuning';
 import { drawFalse } from './falsedraw';
 
 /** What the caged call out (lore keeper and line editor), and what the freed say. */
@@ -48,6 +48,8 @@ export function drawSurvivor(c: Ctx, s: Survivor, sx: number, sy: number, now: n
   if (s.netted) return void (drawNetOver(c, sx, sy, now), (c.lit.globalAlpha = c.glow.globalAlpha = 1));
   if (s.stay) return void (c.lit.globalAlpha = c.glow.globalAlpha = 1);
   // On a rope (layout 4): hands bound in front, the rope round the waist; no thanks yet.
+  // Being cut loose off THE DROVER's rope (sim/drover.ts): the clock as a ring on the glow layer.
+  if (s.led && s.cutT) ring(c, sx, sy, 8, '#ffd27a', s.cutT / DROVER.cut, '#3a3428');
   if (s.led) return void ((c.lit.fillStyle = '#8a7a5a'), c.lit.fillRect(Math.round(sx - 3), Math.round(sy - 5 + step), 7, 1), c.lit.fillRect(Math.round(sx - 1), Math.round(sy - 7 + step), 3, 2), (c.lit.globalAlpha = c.glow.globalAlpha = 1));
   if (t < 1.2) (c.lit.fillStyle = '#c79c78'), c.lit.fillRect(Math.round(sx - 4), Math.round(sy - 11 + up), 1, 3), c.lit.fillRect(Math.round(sx + 3), Math.round(sy - 11 + up), 1, 3);
   // Smouldering: a few sparks rising off them.

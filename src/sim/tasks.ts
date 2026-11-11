@@ -59,6 +59,8 @@ export function stepTask(e: Enemy, heroes: Hero[], now: number, dt: number, ev: 
     t.s += SCENE.led * dt;
     const p = atArc(pts, t.s);
     Object.assign(e, { x: p.x - p.dy * t.off, y: p.y + p.dx * t.off, fx: p.dx, fy: p.dy, moving: true });
+    // (A held line, THE DROVER's: the guard stops at the top and stands over them, never out of the room: sim/drover.ts.)
+    if (p.end && currentMap().led?.hold) return (t.quit = true), (e.moving = false), false;
     if (p.end) {
       Object.assign(e, { act: 'dead', actT: 99, hp: 0, attack: null, escaped: true, respawns: false, death: '' });
       ev.push({ k: 'escaped', x: e.x, y: e.y });

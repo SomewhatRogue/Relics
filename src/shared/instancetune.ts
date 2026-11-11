@@ -25,3 +25,9 @@ export const INSTANCE = {
   party: 3,
   more: { hp: 0.3, harm: 0.15 },
 };
+
+/**
+ * THE DROVER (Rakehead's square, sim/drover.ts): what its roped line takes off a blow while any of it is still
+ * roped, and cutting them loose: stand still this near a roped digger for this long.
+ */
+export const DROVER = { screen: 0.25, reach: 1.1, cut: 1.6 };

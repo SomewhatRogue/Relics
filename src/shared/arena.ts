@@ -306,7 +306,7 @@ export interface GameMap {
   /** Paint only: a stretch of the back wall that came down (tiles), and how far it's mended (0 to 3). */
   breach?: { x: number; w: number; stage: number };
   /** Prisoners led off (layout 4, sim/scenes.ts): roped captives walking these points to the far way out, and how many. */
-  led?: { pts: [number, number][]; n: number };
+  led?: { pts: [number, number][]; n: number; hold?: boolean };
   /** Lamp oil spilled where the room begins (a wrecked cart's: a fire trap), as sim/oil.ts slicks. */
   oil?: { x: number; y: number; r: number }[];
   /** The Staithe (shared/staithe.ts): where its ring, folk and punt are; its jetty, log and smokehouse are blocks. */

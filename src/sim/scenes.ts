@@ -42,7 +42,9 @@ export function stepLed(s: Survivor, w: World, dt: number): boolean {
   if (driving) s.led.s += SCENE.led * dt;
   const p = atArc(pts, s.led.s);
   Object.assign(s, { x: p.x, y: p.y, fx: p.dx < -0.2 ? -1 : p.dx > 0.2 ? 1 : s.fx });
-  if (p.end) {
+  // (THE DROVER's line, `hold`: stood at the top still roped, never taken off: sim/drover.ts.)
+  if (p.end && currentMap().led?.hold) s.moving = false;
+  else if (p.end) {
     Object.assign(s, { taken: true, gone: true, moving: false });
     delete s.led;
     w.ev.push({ k: 'ledoff', x: s.x, y: s.y });

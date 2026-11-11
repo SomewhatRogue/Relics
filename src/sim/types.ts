@@ -521,6 +521,9 @@ export interface Enemy extends Body {
   feeding?: boolean;
   /** False while it hasn't noticed anyone (see ALERT); undefined counts as awake. */
   alert?: boolean;
+  /** THE DROVER (sim/drover.ts): it drives the roped line, and while any of it is roped it stands behind them (`screened`). */
+  drives?: boolean;
+  screened?: boolean;
   /** A named goblin (a hunt's quarry, a story boss). */
   name?: string;
   /** A nest: spiders a wave, and when the next one hatches (-1 asleep). A spider: the nest it came from. */
@@ -662,6 +665,8 @@ export interface Survivor extends Body {
   tearAt?: number;
   /** Led off on a rope (layout 4, sim/scenes.ts): how far along the room's led path; taken off out of the room for good. */
   led?: { s: number };
+  /** Being cut loose off THE DROVER's rope (sim/drover.ts): seconds of it so far. */
+  cutT?: number;
   taken?: boolean;
   /** Their body eaten by a butcher, or burned to ash first (sim/meal.ts, worldfire.ts). */
   eaten?: boolean;
@@ -828,6 +833,8 @@ export type FightEvent =
   | { k: 'death'; x: number; y: number; how: DeathKind; dx: number; dy: number; kind: EnemyKind }
   /** A shot stopped dead on a shield-bearer's board (sim/board.ts): a thunk, sparks, BLOCKED. */
   | { k: 'deflect'; x: number; y: number }
+  /** THE DROVER's roped line cut loose (sim/drover.ts). */
+  | { k: 'cutloose'; x: number; y: number; by: string }
   | { k: 'boardout'; x: number; y: number }
   /** `more`: another blow of a pack rush met by the same guard in the same instant (its words said once). */
   | { k: 'block' | 'guardbreak' | 'winded' | 'breath' | 'bash' | 'dodge' | 'slip' | 'out' | 'roll' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number; more?: boolean; striped?: boolean }

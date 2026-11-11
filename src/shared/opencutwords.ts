@@ -23,6 +23,12 @@ export const CUT_AREAS = ['THE ROWS', 'THE WORKINGS', 'THE WASHING FLOOR', 'THE 
  */
 export const CUT_NAMES = { drover: 'THE DROVER', brakesman: 'THE BRAKESMAN', raker: 'THE RAKER', sluicer: 'THE SLUICER' };
 
+/** THE DROVER's fight (sim/drover.ts): the goal's line while its diggers are roped, and the rope cut. */
+export const DROVER_WORDS = {
+  goal: 'Cut the diggers loose (stand by them), then kill',
+  cut: 'CUT LOOSE',
+};
+
 /** The checkpoint: a gate passed, a wipe, and waiting at the gate for the rest. */
 export const CHECK_WORDS = {
   passed: 'Gate passed, and if you all fall you start here',

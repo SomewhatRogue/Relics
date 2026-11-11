@@ -61,6 +61,8 @@ export interface Foe {
   elite?: import('./elites.js').Affix[];
   /** A boss of the kit (sim/bosskit.ts): which one (the Doorkeepers' Latch or Hasp, the Deep's Haulier). */
   boss?: 'latch' | 'hasp' | 'haulier';
+  /** THE DROVER: drives the roped line and stands behind it (sim/drover.ts). */
+  drives?: boolean;
 }
 /** Which way the party went at a fork. */
 export type RoadId = Road['road'];

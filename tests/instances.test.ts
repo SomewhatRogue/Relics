@@ -7,7 +7,8 @@ import { describe, expect, it } from 'vitest';
 import { openCut, INSTANCES, areaOf } from '../src/shared/instances';
 import { HAUL_NAME } from '../src/shared/bosswords';
 import { CUT_NAMES } from '../src/shared/opencutwords';
-import { HERO, INSTANCE, PARTY, TICK } from '../src/shared/tuning';
+import { DROVER, HERO, INSTANCE, PARTY, TICK } from '../src/shared/tuning';
+import { damage } from '../src/sim/damage';
 import { newRun, runRoom, tally, type Run } from '../src/sim/run';
 import { goal } from '../src/sim/goal';
 import { stepCheckpoint, wiped } from '../src/sim/checkpoint';
@@ -172,5 +173,58 @@ describe('the frame', () => {
     stepCheckpoint(run, room, []);
     expect(run.downs).toBe(1);
     expect(run.failed).toBe(false);
+  });
+});
+
+describe('THE DROVER', () => {
+  const rows = () => {
+    const a = area(0);
+    Object.assign(a.hs[0], { hp: 9999, maxHp: 9999 });
+    const drover = a.room.enemies.find((e) => e.name === CUT_NAMES.drover)!;
+    return { ...a, drover, roped: () => a.room.survivors.filter((v) => v.led && !v.gone) };
+  };
+
+  it('stands behind its roped line: a blow lands at a quarter, and says so', () => {
+    const { room, drover, roped } = rows();
+    step(room, 0.1);
+    expect(roped().length).toBe(3);
+    expect(drover.screened).toBe(true);
+    // (Against the same blow on it bare: the heavy's own toughness trims both alike.)
+    drover.screened = false;
+    let hp = drover.hp;
+    damage(drover, 80, room.time, []);
+    const full = hp - drover.hp, ev: never[] = [];
+    drover.screened = true;
+    hp = drover.hp;
+    damage(drover, 80, room.time, ev);
+    expect(hp - drover.hp).toBe(Math.max(1, Math.round(full * DROVER.screen)));
+    expect((ev as { k: string }[]).some((e) => e.k === 'deflect')).toBe(true);
+  });
+
+  it('standing still by a roped digger cuts the whole line loose; the Drover leaves it and takes blows in full', () => {
+    const { room, hs, drover, roped } = rows();
+    step(room, 0.1);
+    const d = roped()[0], h = hs[0], seen: string[] = [];
+    // Kept by a digger: they don't walk on while it's being cut (the guards are drawn off to fight).
+    const stand = () => Object.assign(h, { x: d.x + 0.6, y: d.y, act: 'idle', moving: false, kvx: 0, kvy: 0, safeT: 99 });
+    for (let n = 0; n < Math.round((DROVER.cut + 0.3) / TICK) && roped().length; n++) stand(), room.step(), seen.push(...room.events.map((e) => e.k));
+    expect(roped().length).toBe(0);
+    expect(seen).toContain('cutloose');
+    expect(drover.screened).toBe(false);
+    expect(drover.task?.k === 'escort' && drover.task.quit).toBe(true);
+    const hp = drover.hp, ev: never[] = [];
+    damage(drover, 40, room.time, ev);
+    expect(hp - drover.hp).toBeGreaterThan(Math.round(40 * DROVER.screen) + 5);
+    expect((ev as { k: string }[]).some((e) => e.k === 'deflect')).toBe(false);
+  });
+
+  it('keeps the line roped at the top if it gets there: never lost, so letting it walk is no way round it', () => {
+    const { room, roped } = rows();
+    step(room, 60);
+    expect(roped().length).toBe(3);
+    expect(room.survivors.some((v) => v.gone)).toBe(false);
+    const drover = room.enemies.find((e) => e.name === CUT_NAMES.drover)!;
+    expect(isDead(drover)).toBe(false);
+    expect(drover.screened).toBe(true);
   });
 });

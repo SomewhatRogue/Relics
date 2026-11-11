@@ -53,7 +53,7 @@ export function rowsPlan(job: Job): RoomPlan {
   const pts: Pt[] = [[A.line.x, A.line.y], [mid, 20], [mid, 10], [mid + 1.8, 6.5], [mid, 1.4]], n = 3, front = 1.4 + (n - 1) * 0.8;
   for (const [s, off] of [[front + 1, 0.55], [0.4, -0.55]] as [number, number][]) {
     const p = atArc(pts, s), at = { x: p.x - p.dy * off, y: p.y + p.dx * off };
-    if (s > 1) keeper(k, 2, at, 'heavy', CUT_NAMES.drover, 380).task = { k: 'escort', s, off };
+    if (s > 1) Object.assign(keeper(k, 2, at, 'heavy', CUT_NAMES.drover, 380), { task: { k: 'escort', s, off }, drives: true });
     else k.foes.push({ kind: 'scrapper', ...at, task: { k: 'escort', s, off }, pack: 2 });
   }
   mark(k, 'drag', mid - 0.6, 10, 1.2, A.line.y - 10);
@@ -70,7 +70,7 @@ export function rowsPlan(job: Job): RoomPlan {
   // 6. The square: the rest of them by the well, the gate behind them.
   pack(k, 6, A.square, ['shield', 'hexer', 'fodder', 'fodder', 'archer'], 2);
   k.chests.push({ ...A.chest });
-  return areaPlan(k, job, { name: CUT_AREAS[0], w, h, kind: 'village', torches: [3.4, w - 3.4] }, { led: { pts, n } });
+  return areaPlan(k, job, { name: CUT_AREAS[0], w, h, kind: 'village', torches: [3.4, w - 3.4] }, { led: { pts, n, hold: true } });
 }
 
 /** (For the tests: every scene's spot is inside the area.) */
