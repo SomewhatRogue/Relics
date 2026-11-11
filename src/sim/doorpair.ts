@@ -14,6 +14,7 @@ import { isDead } from './damage';
 import { bossBegin, bossTarget, clocked, forget, type BossBook } from './bosskit';
 import type { World } from './elements';
 import type { Enemy, Hero } from './types';
+import { currentMap } from '../shared/arena';
 
 const D = DOORKEEPERS;
 const free = (e: Enemy, now: number) => !e.attack && e.act !== 'stunned' && e.act !== 'flinch' && e.boss!.backUntil <= now && e.boss!.openUntil <= now && e.boss!.roarUntil <= now;
@@ -104,11 +105,11 @@ function phaseTwo(bk: BossBook, s: Enemy, w: World, spawn: (x: number, y: number
   adds(bk, spawn);
 }
 
-/** From three players, small ones in at the side doors each phase (BOSS.adds). */
+/** From three players, small ones in at the side doors each phase (BOSS.adds); in the Deep, out of the side tunnels. */
 function adds(bk: BossBook, spawn: (x: number, y: number) => Enemy): void {
   const n = BOSS.adds[Math.min(BOSS.adds.length, bk.party) - 1] ?? 0;
   for (let i = 0; i < n; i++) {
-    const at = BARN_SPOTS.sides[i % 2], e = spawn(at.x, at.y + Math.floor(i / 2) * 0.8);
+    const sides = currentMap().adits ?? BARN_SPOTS.sides, at = sides[i % sides.length], e = spawn(at.x, at.y + Math.floor(i / 2) * 0.8);
     e.alert = true;
   }
 }

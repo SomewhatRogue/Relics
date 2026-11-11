@@ -273,6 +273,8 @@ export interface GameMap {
   rail?: { y: number; x0: number; x1: number };
   gear?: { x: number; y: number };
   adits?: { x: number; y: number }[];
+  /** The Doorkeepers' ground in the Deep (shared/sealarena.ts): the sealed door in the back wall, drawn only (client/sealdraw.ts). */
+  sealed?: { x: number; w: number };
   hero: { x: number; y: number };
   /** Walk into this to leave (opens when the room says so). */
   exit: Area | null;

@@ -1,6 +1,6 @@
 /**
  * A boss's arena as a job's last room (Job.arena): the Doorkeepers in the great barn (shared/barnarena.ts),
- * or the Haulier in its working in the Deep (shared/sumparena.ts). Its bosses take the party's size for
+ * or in the Deep at a sealed door (shared/sealarena.ts); or the Haulier in its haulage in the Deep (shared/sumparena.ts). Its bosses take the party's size for
  * their health (PARTY.boss, as every named one) and POISE bar (POISE_KIT.party), their bodies from their
  * tuning; the room keeps its notes on them (sim/bosskit.ts), with each phase's one seeded swap in the
  * rotation rolled here on the room's seed. The chained chest is the sure chest, on its own seed. No pacing
@@ -9,6 +9,7 @@
 import { DOORKEEPERS, HAULIER } from '../shared/tuning';
 import { barnArena } from '../shared/barnarena';
 import { sumpArena } from '../shared/sumparena';
+import { sealArena } from '../shared/sealarena';
 import { bandOf, deepGrow } from '../shared/deepbands';
 import { Rng } from '../shared/rng';
 import { ArenaRoom } from './room';
@@ -18,7 +19,7 @@ import { dreadFor } from './dreadplace';
 import type { Run } from './run';
 
 export function arenaRoom(run: Run): ArenaRoom {
-  const job = run.job, sump = job.arena === 'haulier', plan = sump ? sumpArena(job) : barnArena(job), n = Math.max(1, run.party ?? 1), seed = job.seed + run.index;
+  const job = run.job, sump = job.arena === 'haulier', plan = sump ? sumpArena(job) : job.floor ? sealArena(job) : barnArena(job), n = Math.max(1, run.party ?? 1), seed = job.seed + run.index;
   const fl = job.floor ?? 0, level = (run.level ?? 1) + (fl ? bandOf(fl).level : 0);
   const chests = plan.chests.map((c) => ({ ...c, boss: (seed * 13 + 7) >>> 0 }));
   const room = new ArenaRoom(seed, { map: plan.map, foes: plan.foes, furniture: plan.props, chests, level });

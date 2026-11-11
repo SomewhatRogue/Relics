@@ -14,7 +14,8 @@ const floor = (n: number) => runRoom(newRun(deepFloor(n, 77, 'x')));
 
 describe('the Haulier', () => {
   it('every fifth floor is its working: the rail, two carts, the gear, the sump, the adit, the chained chest', () => {
-    for (const n of [5, 10, 15, 20]) expect(deepFloor(n, 77, 'x')).toMatchObject({ arena: 'haulier', objective: 'hunt' });
+    // (Boss floors take it in turns with the Doorkeepers: tests/deepdoor.test.ts. On this seed, 5, 15 and 25 are the Haulier's.)
+    for (const n of [5, 15, 25]) expect(deepFloor(n, 77, 'x')).toMatchObject({ arena: 'haulier', objective: 'hunt' });
     for (const n of [4, 6, 9, 11]) expect(deepFloor(n, 77, 'x').arena).toBeUndefined();
     const r = floor(5), m = r.map;
     expect(m.rail && m.gear && m.adits?.length && m.water?.length).toBeTruthy();
@@ -26,7 +27,7 @@ describe('the Haulier', () => {
   });
 
   it('is tougher deeper, and the floor is done when it is dead', () => {
-    const a = floor(5).enemies.find((e) => e.boss)!, b = floor(20).enemies.find((e) => e.boss)!;
+    const a = floor(5).enemies.find((e) => e.boss)!, b = floor(25).enemies.find((e) => e.boss)!;
     expect(b.maxHp).toBeGreaterThan(a.maxHp);
     const run = newRun(deepFloor(5, 77, 'x')), r = runRoom(run), h = r.enemies.find((e) => e.boss)!;
     expect(goal(run, r).done).toBe(false);
