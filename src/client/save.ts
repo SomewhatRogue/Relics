@@ -22,7 +22,7 @@ import { fitShiftRecord } from '../shared/shiftpay';
 const KEY = 'relic.save.v2', OLD = 'relic.save.v1';
 /** `savedAt`: when it was last kept here (it only goes forward), to tell which copy is newer (recovery.ts). */
 /** `trade`: one this browser accepted on the server and hasn't settled yet (client/tradesave.ts). */
-export interface Save { heroes: Profile[]; current: number; world: WorldState; savedAt?: number; trade?: Pending }
+export interface Save { heroes: Profile[]; current: number; world: WorldState; savedAt?: number; trade?: Pending; /** A class being tried (trial.ts): never written. */ trial?: boolean }
 
 /** Fill in fields a saved hero predates. */
 const hero = (old: Partial<Profile>): Profile => {
@@ -104,6 +104,7 @@ export const onStore = (f: () => void) => void (listener = f);
 
 /** Keep it; `at` keeps a copy's own time (one brought from the server), else it moves forward. */
 export function store(s: Save, at?: number): void {
+  if (s.trial) return;
   s.savedAt = at ?? Math.max(Date.now(), (s.savedAt ?? 0) + 1);
   try {
     localStorage.setItem(KEY, JSON.stringify(s));

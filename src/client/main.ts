@@ -1,4 +1,5 @@
 /** Relic: Wickhold, the Training Yard and runs. The rooms run here in the browser (solo is a party of one). */
+import { Trial } from './trial';
 import { forceIdle, pokeIdle } from './idles';
 import { petFrame, petReact, startPet, stopPet } from './petting';
 import { pointAt } from './houndname';
@@ -213,6 +214,10 @@ const cluster = new Cluster();
 /** A phone's buttons go faint over the hero or a telegraph (underbtn.ts). */
 const under = input.touch ? new UnderButtons() : null;
 const title = new Title(game, () => undefined, recovery);
+// Trying a class from its page (trial.ts): DONE comes back to that page.
+const trial = new Trial(game, (c, look) => title.showClass(c, look));
+title.onTry = (c, look) => trial.start(c, look);
+title.onShow = () => trial.end();
 /** Chat (online): world and near in town, the party on a job. */
 const chat = new Chat(game, views, input.touch, () => panel.open || title.open);
 // Swore in chat: lightning out of the sky onto them (chat.ts stuns them).
@@ -657,6 +662,7 @@ function tick(t: number): void {
 }
 
 function frame(t: number): void {
+  trial.frame();
   if (!document.hidden) tick(t);
   requestAnimationFrame(frame);
 }

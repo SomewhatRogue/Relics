@@ -1,0 +1,8 @@
+/* Trying a class (trial.ts): a bar across the top, the spawn buttons and DONE. */
+/* Under the hero card and the corner buttons, one row on a phone. */
+#trialbar { position: fixed; z-index: 6; top: calc(112px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); width: min(560px, calc(100vw - 24px)); box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; padding: 8px; background: #14151ae8; border: 2px solid #07080a; box-shadow: inset 2px 2px 0 #5c616c, inset -2px -2px 0 #0e0f12; }
+#trialbar[hidden] { display: none; }
+#trialbar b { width: 100%; font-weight: normal; text-align: center; color: #c89a4a; font-size: var(--fs-small, 12px); letter-spacing: 0.12em; }
+#trialbar button { flex: 1 1 0; min-width: 0; min-height: 44px; padding: 0 6px; background: #3a3e46; color: #f0e6cc; border: 2px solid #07080a; box-shadow: inset 2px 2px 0 #6a6f7a, inset -2px -2px 0 #1b1d22; font: inherit; font-size: var(--fs-small, 12px); letter-spacing: 0.06em; cursor: pointer; }
+#trialbar button[disabled] { opacity: 0.45; cursor: default; }
+#trialbar button.primary { background: linear-gradient(180deg, #ffe08a, #c8902e); color: #2e1a08; box-shadow: inset 2px 2px 0 #fff3c8, inset -2px -2px 0 #7a4e14; }

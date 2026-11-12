@@ -50,11 +50,23 @@ export class Title {
     }
   }
 
+  /** Trying a class (trial.ts): set by main.ts. `onShow` ends one first. */
+  onTry: ((cls: HeroClass, look: number) => void) | null = null;
+  onShow: (() => void) | null = null;
+
   show(): void {
+    this.onShow?.();
     this.open = true;
     this.el.hidden = false;
     this.retiring = -1;
     this.front();
+  }
+
+  /** Back on a class's page (after trying it). */
+  showClass(cls: HeroClass, look: number): void {
+    Object.assign(this, { open: true, inPanel: false, pick: cls, look, detail: true });
+    this.el.hidden = false;
+    this.create();
   }
 
   /** Your heroes, or the class pick when there are none. */
@@ -113,7 +125,7 @@ export class Title {
       (s.perk ? row(s.perkLabel ?? '', s.perk) : '') + (s.note ? row(s.noteLabel ?? '', s.note) : '') +
       (s.sign ? row(s.signLabel ?? '', s.sign) : '') + row('SKILL', s.skill) + `<p class="cnote">${SKILL_NOTE}</p></div>` +
       `<label class="name">NAME <input maxlength="12" value="${NAMES[c]}" autocomplete="off" spellcheck="false"></label>` +
-      `<button data-begin class="primary wide">BEGIN</button>${this.g.save.heroes.some((h) => h.prologue) ? '<button data-skipwood class="ghost wide">SKIP THE WOOD</button>' : ''}<button data-pick class="ghost wide">BACK</button></div>`;
+      `${this.onTry ? `<button data-try class="wide">TRY THE ${CLASS_NAME[c]}</button>` : ''}<button data-begin class="primary wide">BEGIN</button>${this.g.save.heroes.some((h) => h.prologue) ? '<button data-skipwood class="ghost wide">SKIP THE WOOD</button>' : ''}<button data-pick class="ghost wide">BACK</button></div>`;
     this.preview = new Preview(c, this.look);
     this.el.querySelector('.stage')!.appendChild(this.preview.el);
     this.preview.start();
@@ -152,6 +164,7 @@ export class Title {
     if (d.cls) return (this.pick = d.cls as HeroClass), (this.look = 0), (this.detail = true), this.create();
     if (d.look !== undefined) return (this.look = Number(d.look)), this.keepName(() => this.create());
     if (d.pick !== undefined) return (this.detail = false), this.create();
+    if (d.try !== undefined && this.onTry) return this.hide(), this.onTry(this.pick, this.look);
     if (d.begin !== undefined) {
       const name = (this.el.querySelector('input') as HTMLInputElement).value;
       if (this.g.create(this.pick, name, this.look) >= 0) this.hide();
