@@ -619,6 +619,9 @@ export interface Enemy extends Body {
   harm?: number;
   /** On a Deep floor: its wind-ups and rests between blows as multiples (sim/deepedge.ts). */
   edge?: { windup: number; pause: number };
+  /** A boss or BIG ONE: it can't be frozen again until `thawUntil`, nor stunned until `holdUntil` (sim/bosshold.ts). */
+  thawUntil?: number;
+  holdUntil?: number;
   big?: boolean;
   held?: number;
   chaseOn?: string;

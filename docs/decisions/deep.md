@@ -37,3 +37,10 @@ heal and health or damage figure on screen goes through `shown`: the popups (fx,
 card rows and the health modifier, the forge, drills, the frail cost, potions, perk/ladder/sign/loot lines with
 numbers, the Deep's two health marks, the recap's damage and heal counts. The fight is unchanged. Other chats:
 any new player-facing health or damage number goes through `shown`.
+
+## 2026-11-11: bosses can't be locked down, boss-threat step 2 (Opus 5.5)
+BOSS_HOLD (shared/holdtune.ts) and sim/bosshold.ts: a boss or BIG ONE freezes for at most 1 s, then not again for
+10 s after; a relic's stun on one (and any ordinary stun on a BIG ONE) lasts half, then nobody's lands for 8 s.
+POISE staggers, forced knockdowns (`sure`, e.g. instances' brake.ts) and the last-second dodge stagger untouched.
+A hold shrugged off doesn't spend the hero's stun-cap turn. A pale turning ring at its feet while it can't be
+held (client/status.ts); SHRUG as before. Instances chat: your bosses get this for free through stuns.ts.

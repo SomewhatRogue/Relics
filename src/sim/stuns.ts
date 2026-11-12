@@ -9,6 +9,7 @@
  */
 import { STUN_CAP } from '../shared/tuning';
 import { addPoise, immune } from './poise';
+import { stunFor } from './bosshold';
 import type { Enemy, FightEvent } from './types';
 
 /** Can `by` take this goblin's turn now? If so it's marked as theirs; if not it shrugs it off (and says so,
@@ -33,7 +34,11 @@ function shrug(e: Enemy, now: number, ev?: FightEvent[]): void {
 /** Take its turn: `act` ('stunned' unless said) for `time` s, the blow it had going lost; `still` stops
  *  it sliding too. False if it shrugged it off. */
 export function stun(e: Enemy, by: string | undefined, now: number, time: number, ev?: FightEvent[], act: 'stunned' | 'flinch' | 'pinned' = 'stunned', still = false, sure = false): boolean {
+  // A BIG ONE: a short stun, then none from anyone for a while (sim/bosshold.ts), and a hold shrugged off
+  // doesn't spend the hero's turn. A forced one (a fight's own knockdown) isn't held back.
+  if (!sure && e.big && (e.holdUntil ?? -9) > now) return shrug(e, now, ev), false;
   if (!sure && !mayStun(e, by, now, ev)) return false;
+  if (!sure && e.big) time = stunFor(e, now, time);
   Object.assign(e, { attack: null, act, actT: 0, actDur: time });
   if (still) e.kvx = e.kvy = 0;
   return true;
@@ -43,7 +48,10 @@ export function stun(e: Enemy, by: string | undefined, now: number, time: number
  *  never shrugged off, a striped blow lost with the rest. Marks nobody's turn, so the hero's own stuns
  *  after it aren't held back either. */
 export function relicStun(e: Enemy, now: number, time: number, ev?: FightEvent[], act: 'stunned' | 'flinch' | 'pinned' = 'stunned', still = false): void {
-  // A boss too: in full, and it fills half its POISE bar (a full one staggers it, longer still).
-  stun(e, undefined, now, time, ev, act, still, true);
+  // A boss or BIG ONE: half as long, then none for a while (sim/bosshold.ts). A boss's POISE fills either way
+  // (a full bar staggers it, longer still).
+  const t = stunFor(e, now, time);
+  if (t) stun(e, undefined, now, t, ev, act, still, true);
+  else shrug(e, now, ev);
   if (e.boss) addPoise(e, 'relic', now, ev ?? []);
 }

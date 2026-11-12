@@ -1,10 +1,12 @@
 /** Elements on a goblin: flames while it burns, drifting frost while chilled, a block of ice when frozen;
- *  the Rogue's green poison, retching and bleeding (sim/venom.ts); blinded by a longbow (sim/rangershots.ts). */
+ *  the Rogue's green poison, retching and bleeding (sim/venom.ts); blinded by a longbow (sim/rangershots.ts); a pale
+ *  ring at a boss's feet while it can't be held (sim/bosshold.ts). */
 import { lurking } from '../sim/lurk';
 import type { Enemy } from '../sim/types';
 import type { Ctx } from './draw';
 import { stretchFoe } from './bodysize';
 import { HS } from './heroscale';
+import { unheld } from '../sim/bosshold';
 
 const TALL: Record<Enemy['kind'], number> = { butcher: 24, scrapper: 14, dummy: 18, swingDummy: 18, spider: 6, brood: 14, nest: 12 };
 
@@ -78,6 +80,16 @@ export function drawStatus(c: Ctx, e: Enemy, x: number, y: number, t: number): v
     for (let i = 0; i < 4; i++) {
       const a = c.now * 1.5 + i * 1.57;
       g.fillRect(Math.round(x + Math.cos(a) * (w + 2)), Math.round(y - tall * 0.5 + Math.sin(a * 1.3) * tall * 0.4), 1, 1);
+    }
+  }
+  // A boss or BIG ONE that can't be frozen or stunned just now: a pale ring at its feet, turning slowly (sim/bosshold.ts).
+  if (unheld(e, t)) {
+    g.fillStyle = '#e8e2f4';
+    const r = w + 3, n = 14;
+    for (let i = 0; i < n; i++) {
+      if ((i + Math.floor(c.now * 4)) % 3 === 0) continue;
+      const a = (i / n) * Math.PI * 2;
+      g.fillRect(Math.round(x + Math.cos(a) * r), Math.round(y + Math.sin(a) * r * 0.4), 1, 1);
     }
   }
 }

@@ -74,6 +74,7 @@ export * from './meaty2.js';
 export * from './elites.js';
 export * from './bosstune.js';
 export * from './haultune.js';
+export * from './holdtune.js';
 import { BANNER, NETTER, THIEF, LOGS, ROOF, IRONHIDE } from './raiders.js';
 import { CHALKER } from './chalk.js';
 import { WOLF, KEEPER, OIL, TORCH, SAPPER, CAVE } from './prowlers.js';

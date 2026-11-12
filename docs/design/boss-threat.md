@@ -27,7 +27,9 @@ Fights stay the same length (Kyle approved the spec as suggested): speed comes f
 
 - **Freeze:** a boss can be chilled (slowed) but freezes for at most 1 s, then can't be frozen again for 10 s.
 - **Stuns:** a relic's stun on a boss lasts half as long, then the boss can't be stunned by anyone for 8 s.
-  POISE staggers (the boss's own stagger bar) stay as they are: that's the skill reward.
+  POISE staggers (the boss's own stagger bar) stay as they are: that's the skill reward. So do a fight's own
+  forced knockdowns (the Brakesman's) and a last-second dodge's stagger. A BIG ONE's ordinary stuns follow
+  the same rule, and one it shrugs off doesn't spend the hero's turn.
 - An immune boss shows it: a pale ring at its feet while it can't be held, and SHRUG over it when it shrugs off a hold.
 
 ## 3. Mobility
@@ -54,7 +56,7 @@ First pass per boss (each with its art and animation, Kyle 2026-11-08):
 ## Build order
 
 1. ~~The ×10 scale.~~ In (display scale).
-2. Control resistance.
+2. ~~Control resistance.~~ In (shared/holdtune.ts BOSS_HOLD, sim/bosshold.ts; the ring in client/status.ts).
 3. The Deep's two bosses: mobility and threat, with art.
 4. The instances' bosses, by that chat.
 
