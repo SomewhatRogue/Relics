@@ -104,3 +104,11 @@ From 2026-11-11. Newest at the bottom. Sign each entry with the model name.
 - Shields round a hero at 1.5x (Kyle: they hadn't grown): the spellblade's mana shield (shell, inner shell,
   ground ring, cracks, shards), the Cleric's holy shield (shell, halo, motes), the holy guard's shell, the
   crossbow's reload ring and glint, and the column over a friend being raised. (Claude Opus 5.5)
+- Detail pass (Kyle, 2026-11-11: "since we're more zoomed in we could add more details to EVERYTHING"), in
+  order of what's seen most: heroes, goblins and butchers, then props and buildings. Heroes: brows and mouths
+  on the bare faces, the knight's nasal guard; the Warrior's pauldron rims and rivets, cloth folds, a belt
+  pouch, knee plates, boot cuffs and wider soles; the Ranger's strap buckle, pouch and boot cuffs; the Rogue's
+  strap stud, a knife's hilt at the hip, laced boots; the Mage's hat-band buckle, gold along the hem and a
+  pouch; the Cleric's pouch and soles. Goblins: a ragged jerkin hem, a rope knot at the belt, knobbly knees,
+  claws on hands and toes, a ring in one ear, a wart. Butchers: rag wraps on the legs, toe claws, a nose ring,
+  an old scar on the brow. (Claude Opus 5.5)

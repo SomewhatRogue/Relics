@@ -8,12 +8,12 @@ import { art, skin, type LookDef } from './lookkit';
 
 const HAT = [
   '...........X......', '..........XX......', '.........XXX......', '........XXXX......', '........XXXXX.....', '.......XXXXXX.....',
-  '.......XXXXXXX....', '......XXXXXXX.....', '.....XTTTTTTX.....', '..xXXXXXXXXXXXXx..', '.xXXxxxxxxxxxxXXx.',
+  '.......XXXxXXX....', '......XXXXXXX.....', '.....XTTkkTTX.....', '..xXXXXXXXXXXXXx..', '.xXXxxxxxxxxxxXXx.',
 ];
 const M_BODY = [
-  '.OOOBBBBTTBBBBOOO.', '.OOOBBBBTTBBBBOOO.', '.SSOBBBBTTBBBBOSS.', '...BBBBBTTBBBBB...', '...KKKKKkkKKKKK...',
+  '.OOOBBBBTTBBBBOOO.', '.OOOBBBBTTBBBBOOO.', '.SSOBBBBTTBBBBOSS.', '...BBBBBTTBBBBB...', '...KxxKKkkKKKKK...',
   '...BBBBBTTBBBBB...', '..BBBBBBTTBBBBBB..', '..BBBBBBTTBBBBBB..', '..BBBBBBTTBBBBBB..', '.BBBBBBBTTBBBBBBB.',
-  '.BBBBBBBTTBBBBBBB.', 'bBBBBBBBTTBBBBBBBb', 'bbBBBBBBBBBBBBBBbb', '.....FFF..FFF.....',
+  '.BBBBBBBTTBBBBBBB.', 'bBBBBBBBTTBBBBBBBb', 'bbBkBBBkBBkBBBkBbb', '.....FFF..FFF.....',
 ];
 const M_BACK = [
   '.OOOBBBBBBBBBBOOO.', '.OOOBBBBBBBBBBOOO.', '.SSOBBBBBBBBBBOSS.', '...BBBBBBBBBBBB...', '...KKKKKKKKKKKK...',
@@ -41,8 +41,8 @@ export const MAGE: LookDef[] = [
 
 const C_BODY = [
   '.MMMMWWWWWWWWMMMM.', '.MMMMWWWGGWWWMMMM.', '.MMMWWWGGGGWWWMMM.', '.MMMWWWGWWGWWWMMM.', '.MMMWWWGGGGWWWMMM.',
-  '.SSMWWWWGGWWWWMSS.', '...KKKKKkkKKKKK...', '...MWWWWWWWWWWM...', '...MWWWWWWWWWWM...', '....LWWWWWWWWL....',
-  '....LLLWWWWLLL....', '....LLL....LLL....', '....LLL....LLL....', '...FFFF....FFFF...', '...FFFF....FFFF...',
+  '.SSMWWWWGGWWWWMSS.', '...KKKKKkkKFFKK...', '...MWWWWWWWWWWM...', '...MWWWWWWWWWWM...', '....LWWWWWWWWL....',
+  '....LLLWWWWLLL....', '....LLL....LLL....', '...KKKK....KKKK...', '...FFFF....FFFF...', '..FFFFF....FFFFF..',
 ];
 const C_BACK = C_BODY.map((r) => r.replace(/G/g, 'W').replace(/k/g, 'K'));
 const MAIL = { M: '#8a9098', m: '#646a74', K: '#5a3d22', k: '#d4a537', L: '#4a4e56', F: '#2a2420' };

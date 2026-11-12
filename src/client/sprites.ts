@@ -146,6 +146,9 @@ const gobBody = (k: GobCols): Part[] => [
   ['r', 4, 14, 3, 5, k.L], ['r', 10, 14, 3, 5, k.L], ['r', 3, 19, 4, 1, k.F], ['r', 10, 19, 4, 1, k.F],
   ['r', 3, 9, 11, 5, k.B], ['p', 5, 10, k.b], ['p', 6, 11, k.b], ['p', 11, 10, k.b], ['p', 10, 12, k.b], ['r', 3, 14, 11, 1, k.K], ['p', 8, 14, '#6a5a3a'],
   ['r', 2, 10, 1, 4, k.S], ['r', 14, 10, 1, 4, k.S], ['p', 2, 13, k.s], ['p', 14, 13, k.s],
+  // Detail (the art pass): the jerkin's hem hanging ragged, a rope knot at the belt, knobbly knees, claws on hands and feet.
+  ['p', 4, 15, k.B], ['p', 7, 15, k.B], ['p', 12, 15, k.B], ['p', 9, 14, '#8a7a50'], ['p', 5, 16, k.F], ['p', 11, 16, k.F],
+  ['p', 2, 14, '#c8c0a8'], ['p', 14, 14, '#c8c0a8'], ['p', 3, 19, '#c8c0a8'], ['p', 13, 19, '#c8c0a8'],
 ];
 /** Its head; `pale` ears stand up instead of out. */
 const gobHead = (k: GobCols, pale = false): Part[] => [
@@ -154,6 +157,8 @@ const gobHead = (k: GobCols, pale = false): Part[] => [
     : ([['p', 0, 4, k.S], ['r', 0, 5, 4, 1, k.S], ['r', 2, 6, 2, 1, k.s], ['p', 16, 4, k.S], ['r', 13, 5, 4, 1, k.S], ['r', 13, 6, 2, 1, k.s]] as Part[])),
 ];
 const gobFace = (k: GobCols): Part[] => [
+  // A ring in one ear, a wart by the nose.
+  ['p', 1, 6, '#c0a050'], ['p', 12, 7, k.s],
   ['r', 5, 4, 3, 1, k.s], ['r', 9, 4, 3, 1, k.s], ['p', 6, 5, k.E], ['p', 10, 5, k.E], ['p', 8, 6, k.s],
   ['r', 6, 7, 5, 1, k.T], ['p', 7, 7, k.m], ['p', 9, 7, k.m], ['r', 6, 8, 5, 1, k.m],
 ];

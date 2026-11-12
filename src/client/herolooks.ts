@@ -13,14 +13,14 @@ export type { Cls, LookDef, Life } from './lookkit';
 
 // The Warrior: broad, pauldrons wider than anyone, a tabard, a cape behind (herolife.ts).
 const W_BODY = [
-  'PPPPpBBBTTBBBpPPPP', 'PPPPpBBBTTBBBpPPPP', '.PPppBBBTTBBBppPP.', '.MMMBBBBTTBBBBMMM.', '.MMMBBBBTTBBBBMMM.',
-  '.SSMBBBBTTBBBBMSS.', '...KKKKKkkKKKKK...', '...BBBBBTTBBBBB...', '...bLLLbTTbLLLb...', '....LLL.TT.LLL....',
-  '....LLL....LLL....', '....LLL....LLL....', '....LLL....LLL....', '...FFFF....FFFF...', '...FFFF....FFFF...',
+  'pPPPpBBBTTBBBpPPPp', 'PkPPpBBBTTBBBpPPkP', '.PPppBBBTTBBBppPP.', '.MMMBBBBTTBBBBMMM.', '.MMMBbBBTTBBbBMMM.',
+  '.SSMBbBBTTBBbBMSS.', '...KbbKKkkKKKKK...', '...BBbBBTTBBbBB...', '...bLLLbTTbLLLb...', '....LLL.TT.LLL....',
+  '....LkL....LkL....', '....LLL....LLL....', '...KKKK....KKKK...', '...FFFF....FFFF...', '..FFFFF....FFFFF..',
 ];
 const W_BACK = [
-  'PPPPpBBBBBBBBpPPPP', 'PPPPpBBBBBBBBpPPPP', '.PPppBBBBBBBBppPP.', '.MMMBBBBBBBBBBMMM.', '.MMMBBBBBBBBBBMMM.',
-  '.SSMBBBBBBBBBBMSS.', '...KKKKKKKKKKKK...', '...BBBBBBBBBBBB...', '...bLLLbBBbLLLb...', '....LLL.BB.LLL....',
-  '....LLL....LLL....', '....LLL....LLL....', '....LLL....LLL....', '...FFFF....FFFF...', '...FFFF....FFFF...',
+  'pPPPpBBBBBBBBpPPPp', 'PkPPpBBBBBBBBpPPkP', '.PPppBBBBBBBBppPP.', '.MMMBBBBBBBBBBMMM.', '.MMMBBbBBBBbBBMMM.',
+  '.SSMBBbBBBBbBBMSS.', '...KKKKKKKKKKKK...', '...BBBbBBBBbBBB...', '...bLLLbBBbLLLb...', '....LLL.BB.LLL....',
+  '....LLL....LLL....', '....LLL....LLL....', '...KKKK....KKKK...', '...FFFF....FFFF...', '..FFFFF....FFFFF..',
 ];
 const warrior = (head: string[], back: string[], pal: Record<string, string>, life: LookDef['life']): LookDef => ({
   down: art([...head, ...W_BODY], pal), up: art([...back, ...W_BACK], pal), h: 24, tall: 0, eyes: [5, 7, 10], life,
@@ -29,11 +29,11 @@ const warrior = (head: string[], back: string[], pal: Record<string, string>, li
 // The Ranger: a peaked hood and a cloak, the quiver's fletching over the shoulder, a short sword's hilt at the hip.
 const R_LEGS = [
   '.cCC.LLL..LLL.CCc.', '.cCC.LLL..LLL.CCc.', '.c...LLL..LLL...c.', '.....LLL..LLL.....',
-  '.....LLL..LLL.....', '.....LLL..LLL.....', '....FFFF..FFFF....', '....FFFF..FFFF....',
+  '.....LLL..LLL.....', '....KKKK..KKKK....', '....FFFF..FFFF....', '...FFFFF..FFFFF...',
 ];
 const R_BODY = [
-  '.ccCCCBBBBBBCCCcc.', '.cCCCBBBBBBKBCCCc.', '.cCCCBBBBBKBBCCCc.', '.SCCCBBBBKBBBCCCS.', '.cCCCBBBKBBBBCCCc.',
-  '.cWWKKKKkkKKKKCCc.', '.cCCBBBBBBBBBBCCc.', ...R_LEGS,
+  '.ccCCCBBBBBBCCCcc.', '.cCCCBBBBBBKBCCCc.', '.cCCCBBBBBKBBCCCc.', '.SCCCBBBBkBBBCCCS.', '.cCCCBBBKBBBBCCCc.',
+  '.cWWKKKKkkKKKKCCc.', '.cCCBKKBBBBBBBCCc.', ...R_LEGS,
 ];
 const R_BACK = [
   '.ccCCCCCCCCQCCCcc.', '.cCCCCCCCCQCCCCCc.', '.cCCCCCCCQCCCCCCc.', '.SCCCCCCQCCCCCCCS.', '.cCCCCCQCCCCCCCCc.',
@@ -59,9 +59,9 @@ const G_HEAD = [
   '...CCOOOOOOOOCC...', '...CCSSEGSEGSCC...', '...CCKKKKKKKKCC...', '...CCkKKKKKKkCC...',
 ];
 const G_BODY = [
-  '.CCCCkkKKKKkkCCCC.', '.CCCbBBTBBBBBbCCC.', '.CCcbBBBTBBBBbcCC.', '.CCcbBBBBTBBBbcCC.', '.CSSbBBBBBTBBbSSC.',
-  '.C..TTTtTTTTTT..C.', '.C..bBBBBBBBBb..C.', '.C...LLL..LLL...C.', '.C...LLL..LLL...C.', '.C...LLL..LLL...C.',
-  '.C...LLL..LLL...C.', '.c...Lll..llL...c.', '.....FFF..FFF.....', '....FFFF..FFFF....', '....FFFf..fFFF....',
+  '.CCCCkkKKKKkkCCCC.', '.CCCbBBTBBBBBbCCC.', '.CCcbBBBtBBBBbcCC.', '.CCcbBBBBTBBBbcCC.', '.CSSbBBBBBTBBbSSC.',
+  '.C..TTTtTTTTTT..C.', '.C..bBBBBBBtBb..C.', '.C...LLL..LLL...C.', '.C...LLL..LLL...C.', '.C...LLL..LLL...C.',
+  '.C...LLL..LLL...C.', '.c...Lll..llL...c.', '.....FfF..FfF.....', '....FFfF..FfFF....', '...FFFFf..fFFFF...',
 ];
 const G_BACK = [
   '..................', '.......cCCc.......', '.....ccCCCCcc.....', '....cCCCCCCCCc....', '...cCCCCCCCCCCc...',
@@ -81,17 +81,17 @@ const rogue = (sk: Parameters<typeof skin>[0], pal: Record<string, string>): Loo
 export const LOOK_DEFS: Record<Cls, LookDef[]> = {
   WARRIOR: [
     // The knight: an open-faced helm with a red plume, blue and gold, a red cape.
-    warrior(['.......aAAa.......', '.....aAAAAAAa.....', '....aAAAAAAAAa....', '....aAAAAAAAAa....', '....aASSSSSSAa....', '....aASESSESAa....', '....aASSSSSSAa....', '....aAsSSSSsAa....', '.....aAsSSsAa.....'],
+    warrior(['.......aAAa.......', '.....aAAAAAAa.....', '....aAAAAAAAAa....', '....aAAAAAAAAa....', '....aASSAASSAa....', '....aASESSESAa....', '....aASSSSSSAa....', '....aAsSssSsAa....', '.....aAsSSsAa.....'],
       ['.......aAAa.......', '.....aAAAAAAa.....', '....aAAAAAAAAa....', '....aAAAAAAAAa....', '....aAAAAAAAAa....', '....aAAAAAAAAa....', '....aAAAAAAAAa....', '....aAAAAAAAAa....', '.....aAAAAAAa.....'],
       { ...skin('fair'), A: '#b4bcc6', a: '#6a727c', P: '#a8b0ba', p: '#6a727c', B: '#2f5d9b', b: '#24487a', T: '#d4a537', M: '#8a929c', m: '#666e78', K: '#5a3d22', k: '#d4a537', L: '#3a3f4a', F: '#2a2420' },
       { cape: ['#9a2420', '#5a1414'], plume: '#c0392b' }),
     // The sellsword: bare-headed, cropped black hair and a beard, dented steel over old leather, a brown rag of a cape.
-    warrior(['..................', '......hHHHHh......', '.....hHHHHHHh.....', '.....HHHHHHHH.....', '.....HSSSSSSH.....', '.....SSESSESS.....', '.....SSSSSSSS.....', '.....HHSSSSHH.....', '......HHHHHH......'],
+    warrior(['..................', '......hHHHHh......', '.....hHHHHHHh.....', '.....HHHHHHHH.....', '.....HhhSShhH.....', '.....SSESSESS.....', '.....SSSSsSSS.....', '.....HHSssSHH.....', '......HHHHHH......'],
       ['..................', '......hHHHHh......', '.....hHHHHHHh.....', '.....HHHHHHHH.....', '.....HHHHHHHH.....', '.....HHHHHHHH.....', '.....HHHHHHHH.....', '.....HHHHHHHH.....', '......ssssss......'],
       { ...skin('tan'), H: '#2a201c', h: '#1a1412', P: '#7a7e84', p: '#4a4e54', B: '#5a4030', b: '#3a2a20', T: '#3e2c20', M: '#6a6e74', m: '#4e5258', K: '#2a1e16', k: '#9a9a9a', L: '#4a3a2e', F: '#241c16' },
       { cape: ['#5a4432', '#36281c'], ragged: true }),
     // Blackiron: long pale hair over blackened plate, a scar, dull brass, a cape the colour of old blood.
-    warrior(['.......hHHh.......', '......HHHHHH......', '.....HHHHHHHH.....', '....HHHHHHHHHH....', '....HHSSSSSSHH....', '....HSSESSESSH....', '....HSSSSSSrSH....', '....HHsSSSSsHH....', '....HHHsSSsHHH....'],
+    warrior(['.......hHHh.......', '......HHHHHH......', '.....HHHHHHHH.....', '....HHHHHHHHHH....', '....HHhhSShhHH....', '....HSSESSESSH....', '....HSSSSSSrSH....', '....HHsSssSsHH....', '....HHHsSSsHHH....'],
       ['.......hHHh.......', '......HHHHHH......', '.....HHHHHHHH.....', '....HHHHHHHHHH....', '....HHHHHHHHHH....', '....HHHHHHHHHH....', '....HHHHHHHHHH....', '....HHHHHHHHHH....', '....HHHHHHHHHH....'],
       { ...skin('fair'), S: '#f0d0b0', H: '#d8d0b4', h: '#a8a088', r: '#b8706a', P: '#3e3e48', p: '#26262e', B: '#2a2a32', b: '#1e1e24', T: '#8a6a3a', M: '#3e3e48', m: '#2a2a30', K: '#3a2a1a', k: '#8a6a3a', L: '#2a2a30', F: '#1a1a1e' },
       { cape: ['#5a1818', '#2e0c0c'], hair: '#d8d0b4' }),

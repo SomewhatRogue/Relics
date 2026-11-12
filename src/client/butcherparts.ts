@@ -44,6 +44,9 @@ export function butcherParts(l: ButcherLook, up: boolean): Part[] {
   const rx = lean ? 8 : 11.2, hy = hunch ? 10 : lean ? 5 : 7, legY = lean ? 22 : 25;
   const p: Part[] = [
     ['r', 7, legY, 5, 33 - legY - 2, LEG], ['r', 15, legY, 5, 33 - legY - 2, LEG], ['r', 6, 31, 6, 2, FOOT], ['r', 15, 31, 6, 2, FOOT],
+    // Detail (the art pass): rag wraps round the legs, claws on the toes.
+    ['r', 7, 27, 5, 1, '#4a3a28'], ['r', 15, 27, 5, 1, '#4a3a28'], ['r', 7, 29, 5, 1, '#3e3020'], ['r', 15, 29, 5, 1, '#3e3020'],
+    ['p', 6, 32, BONE], ['p', 11, 32, BONE], ['p', 15, 32, BONE], ['p', 20, 32, BONE],
     ['e', 13.5, 19.5, rx, 9.8, SKIN], ['r', 5, 26, 17, 1, SHADE],
     // A hunch: the back humped up over the head; a lean one's neck long and thin.
     ...(hunch ? ([['e', 13.5, 12, 9, 4.5, SKIN], ['r', 7, 9, 13, 1, SHADE]] as Part[]) : lean ? ([['r', 11, 9, 5, 4, SKIN]] as Part[]) : []),
@@ -63,6 +66,8 @@ export function butcherParts(l: ButcherLook, up: boolean): Part[] {
     p.push(['e', 13.5, hy + 3.5, 5, 2.6, SHADE], ['r', 9, hy - 2, 4, 1, SHADE], ['r', 14, hy - 2, 4, 1, SHADE], ['p', 11, hy - 1, EYE], ['p', 16, hy - 1, EYE], ['r', 13, hy, 2, 2, SHADE]);
     p.push(['r', 11, hy + 3, 6, 1, DARK], ['p', 10, hy + 3, BONE], ['p', 17, hy + 3, BONE], ['p', 10, hy + 2, BONE], ['p', 17, hy + 2, BONE]);
     if (l.soot) p.push(['r', 9, hy - 3, 10, 1, '#2a2622'], ['p', 12, hy + 1, '#2a2622'], ['p', 15, hy, '#2a2622']);
+    // A ring through the nose, an old scar across the brow.
+    if (!l.hempen) p.push(['p', 13, hy + 2, '#b8b0a0'], ['p', 14, hy + 2, '#8a8478'], ['r', 16, hy - 4, 1, 3, '#3a4a1a'], ['p', 17, hy - 2, '#3a4a1a']);
   }
   if (l.hempen) p.push(...hempenParts(l.hempen, up, hy));
   // Its trophy.
