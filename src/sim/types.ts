@@ -61,6 +61,8 @@ export interface Intent {
   vt?: number;
   /** The Deep: the floor this player has chosen GO DEEPER on (client/game.ts deeper); the leader goes down once all have. */
   deep?: number;
+  /** The Deep: this player's curses and blessings for the run (shared/deepmarks.ts), sent standing. */
+  marks?: string[];
   /** Boss loot (sim/lootroll.ts): this player's standing choice on each open roll, by the roll's id. */
   loot?: Record<number, LootPick>;
 }
@@ -302,6 +304,8 @@ export interface Hero extends Body {
   /** Relics this hero owns, each with its charge (one at a time is carried: `relicItem`, its kind in relics[1]). */
   found: RelicItem[];
   relicItem: string;
+  /** The Deep's curses and blessings this hero carries for the run (shared/deepmarks.ts; set from its player's input: sim/deepmarks.ts). */
+  marks?: string[];
   /** Has had the sure relic of their first named butcher (sim/namedrelic.ts; Profile.namedRelic). Set once. */
   namedRelic?: boolean;
   /** Carrying the church's light this job (shared/church.ts LIT). */

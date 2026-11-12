@@ -23,6 +23,26 @@ export const DEEP_WORDS = {
   waiting: 'Waiting for the rest of the party to choose GO DEEPER.',
   /** At the grate, in a party I don't lead. */
   partyLead: 'Only your leader can go down, and the whole party goes with them.',
+  /** The fork every fifth floor and the blessing every tenth (shared/deepmarks.ts). DRAFT: lore keeper and line editor. */
+  forkScene: 'The ladder comes down onto a ledge, and three ways go on from it. Each has something wrong with it.',
+  blessScene: 'Something has been left on the ledge for whoever got this far. You can take one.',
+  marksRule: 'Curses and blessings stack, and last until you leave the Deep.',
+  curses: {
+    dull: { name: 'THE RUSTED WAY', does: 'Your blows land lighter: 6% less damage.' },
+    heavy: { name: 'THE WET WAY', does: 'Mud to the ankle: 6% slower.' },
+    frail: { name: 'THE COLD WAY', does: 'A chill that stays: 10 less health.' },
+    winded: { name: 'THE LOW WAY', does: 'Bent double the whole way: stamina comes back 12% slower.' },
+    dim: { name: 'THE DARK WAY', does: 'Recharge 12% slower.' },
+    seen: { name: 'THE LOUD WAY', does: 'Loose stone underfoot: goblins see you from further off.' },
+  } as Record<string, { name: string; does: string }>,
+  blessings: {
+    keen: { name: 'A WHETSTONE', does: '8% more damage.' },
+    hale: { name: 'A FLASK', does: '15 more health.' },
+    wind: { name: 'CLEAN AIR', does: 'Stamina comes back 15% faster.' },
+    devout: { name: 'A CANDLE END', does: 'Recharge 15% faster.' },
+    relic: { name: 'A TALLOW STUB', does: 'Your relic gets a use back at the start of every floor.' },
+  } as Record<string, { name: string; does: string }>,
+  marksOn: (list: string) => `On you for this run: ${list}.`,
   leave: 'LEAVE',
   deeper: 'GO DEEPER',
   /** The in-run LEAVE button, in the Deep. */

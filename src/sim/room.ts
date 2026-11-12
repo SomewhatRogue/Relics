@@ -108,6 +108,7 @@ import { cutNetted, playOut, shoveLog, stepHungNets, stepStaitheFire } from './s
 import { stepDrift } from './drift';
 import { newBoss, useBook, type BossBook } from './bosskit';
 import { stepBosses } from './bossrooms';
+import { syncMarks } from './deepmarks';
 
 export class ArenaRoom {
   time = 0;
@@ -392,6 +393,7 @@ export class ArenaRoom {
     // Houses alight: their goblins driven out into the street before anyone moves (and their loot falls here).
     stepHouseFires(this, this.fireRng);
     const alive = new Set(this.enemies.filter((e) => !isDead(e)).map((e) => e.id));
+    syncMarks(this.heroes, this.intents);
     for (const h of this.heroes) takeLoot(h, this.intents.get(h.id) ?? NO_INTENT, this.drops, this.events);
     for (const h of this.heroes) grow(h, this.intents.get(h.id) ?? NO_INTENT, this.events);
     for (const h of this.heroes) {

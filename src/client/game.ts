@@ -71,6 +71,8 @@ import type { Parties } from './parties';
 import { again as practiceAgain, clearPractice, letOut, practiceOf, stepPractice, type Pick } from '../sim/practice';
 import { RACK, sortKey } from '../shared/practice';
 import { settleBids } from './statuebuy';
+import { blessesAt, blessingsAt, cursesAt, forksAt, isCurse, type MarkId } from '../shared/deepmarks';
+import { relicBack } from '../sim/deepmarks';
 
 /** A hero's hound as the profile has it (a Ranger's; nobody else has one). */
 const houndOf = (p: Profile): HoundLook | undefined => (p.cls === 'RANGER' ? fitHound(p.hound, p.id) : undefined);
@@ -655,10 +657,32 @@ export class Game {
   deeper(): void {
     const run = this.run, fl = run?.job.floor;
     if (this.mode !== 'run' || !run || !fl || !isDeep(run.job) || this.result) return;
+    // (At a fork the way on is a curse: shared/deepmarks.ts. Going deeper there is taking one: deepMark.)
+    const d = this.profile.deep;
+    if (forksAt(fl) && !d?.forked?.includes(fl)) return;
     this.deepAsk = false;
     this.deepVote = fl;
     if (this.remote || this.deepWaiting()) this.hostNote = DEEP_WORDS.waiting;
     else if (!this.remote) this.descend();
+  }
+
+  /**
+   * At a floor's end in the Deep (shared/deepmarks.ts): a blessing taken (every tenth floor), or one of the three
+   * ways on taken with its curse (every fifth), which is going deeper too. Each only once a floor, and only of
+   * those offered there.
+   */
+  deepMark(id: MarkId): void {
+    const d = this.profile.deep, fl = this.run?.job.floor;
+    if (!d || !fl || fl !== d.floor || !isDeep(this.run!.job)) return;
+    if (isCurse(id)) {
+      if (!forksAt(fl) || d.forked?.includes(fl) || !cursesAt(d.seed, fl).includes(id)) return;
+      Object.assign(d, { marks: [...(d.marks ?? []), id], forked: [...(d.forked ?? []), fl] });
+      store(this.save);
+      return this.deeper();
+    }
+    if (!blessesAt(fl) || d.blessed?.includes(fl) || !blessingsAt(d.seed, fl).includes(id)) return;
+    Object.assign(d, { marks: [...(d.marks ?? []), id], blessed: [...(d.blessed ?? []), fl] });
+    store(this.save);
   }
 
   /** Leading: a friend still in the job who hasn't chosen GO DEEPER on this floor (one down or gone doesn't hold it up). */
@@ -684,8 +708,13 @@ export class Game {
     store(this.save);
     Object.assign(run, { job: deepFloor(d.floor, d.seed, DEEP_WORDS.floor(d.floor)), index: 0, roads: {}, downs: 0 });
     run.party = 1 + [...(this.coop?.friends.values() ?? [])].filter((f) => f.profile && !f.gone).length;
+    // (Each hero's curses and blessings go with it, so the new floor's first tick has them: shared/deepmarks.ts.)
+    const marks = new Map(this.room.heroes.map((h) => [h.id, h.marks]));
     this.place(runRoom(run), undefined, this.hero);
     this.rooms.reset(this.room);
+    for (const h of this.room.heroes) if (marks.get(h.id)?.length) (h.marks = [...marks.get(h.id)!]), refreshHealth(h);
+    // A blessing of a relic use back each floor.
+    relicBack(this.room.heroes);
   }
 
   /** LEAVE at a checkpoint: up the ladder with everything found below. In a party the rest go on without me. */
@@ -1678,7 +1707,7 @@ export class Game {
 
   /** My input as it goes to the room: with the levels I've grown counted in. */
   own(i: Intent): Intent {
-    return { ...i, levelSeq: this.levelSeq, ...(this.deepVote ? { deep: this.deepVote } : {}), ...(Object.keys(this.lootPicks).length ? { loot: this.lootPicks } : {}) };
+    return { ...i, levelSeq: this.levelSeq, ...(this.deepVote ? { deep: this.deepVote } : {}), ...(this.profile.deep?.marks ? { marks: this.profile.deep.marks } : {}), ...(Object.keys(this.lootPicks).length ? { loot: this.lootPicks } : {}) };
   }
 
   /** On a job: a level surely earned (kills and rescues so far) is lit now, in the room, for everyone to see. */

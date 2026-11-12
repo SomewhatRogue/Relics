@@ -84,6 +84,9 @@ const jerks = (ps, dx, dy, by = 0.04) => ps.slice(1).reduce((n, p, i) => n + (((
     await press(kyle, 'GO DEEPER');
     step('Kyle chose it too: the party goes down to floor 2', await until(kyle, () => window.__game.run?.job.floor === 2));
     step('Sam is on floor 2 with him, his snapshot following', await until(sam, () => window.__game.run?.job.floor === 2 && window.__game.profile.deep?.floor === 2 && window.__game.room.heroes.some((h) => h.id === 'me'), null, 10000));
+    // A curse Sam carries reaches Kyle's room on Sam's input (shared/deepmarks.ts): the room puts it on Sam's hero.
+    await sam.page.evaluate(() => { window.__game.profile.deep.marks = ['frail']; });
+    step("Sam's curse is on Sam's hero in Kyle's room", await until(kyle, () => window.__game.room.heroes.some((h) => h.id !== 'me' && (h.marks ?? []).includes('frail')), null, 6000));
     const samGold = await sam.page.evaluate(() => window.__game.profile.gold);
     await wait(800);
     await toEnd(70);

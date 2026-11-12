@@ -49,6 +49,7 @@ import { DOORKEEPERS } from '../shared/bosstune';
 import { clockHolds, trackAim } from './bosskit';
 import { keeperPause, stepKeeper } from './doorkeepers';
 import { bossStun } from './poise';
+import { markSum } from '../shared/deepmarks';
 
 /** The room's oil slicks, for the torch-bearers (the room sets it before its goblins move). */
 /** `pace`: this room plays the pacing rules (sim/pacing.ts, chase.ts): a job's or an expedition's, not the wood or the yard. */
@@ -389,7 +390,8 @@ function notice(e: Enemy, heroes: Hero[], others: Enemy[], now: number, ev: Figh
     // Rain covers your feet and fog hides you: noticed from less far (shared/sky.ts).
     // Fenmere's mist hides you too, the thicker it lies where you stand (shared/fenmist.ts).
     const mist = m.fen ? mistSight(m, h.x, h.y, now) : 1;
-    if (d < sight * noticeFor(theme) * mist * (h.sneaking && h.act !== 'roll' ? sneakSight(h) : 1) + seenFrom(h) * glowIn(theme)) seen = true;
+    // (Cursed in the Deep to be seen sooner: shared/deepmarks.ts.)
+    if (d < sight * noticeFor(theme) * mist * (h.sneaking && h.act !== 'roll' ? sneakSight(h) : 1) * (1 + markSum(h.marks, 'seen')) + seenFrom(h) * glowIn(theme)) seen = true;
   }
   for (const o of noisy(others, now)) if (o !== e && o.alert && (isDead(o) || o.hitAt > now - 0.2) && Math.hypot(o.x - e.x, o.y - e.y) < hearFrom(e, o)) seen = true;
   if (!seen) return false;

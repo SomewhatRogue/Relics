@@ -1,6 +1,7 @@
 /** What a hero's worn gear adds up to (shared/gear.ts), read wherever the fight uses a number. */
 import { cutMax, drilled, gearStats, perkFx, type Fx, type GearStats } from '../shared/tuning';
 import type { Hero } from './types';
+import { markSum } from '../shared/deepmarks';
 
 type Stats = GearStats & { crit: number; fx: Fx };
 const cache = new WeakMap<Hero, { key: unknown[]; s: Stats }>();
@@ -8,12 +9,14 @@ const cache = new WeakMap<Hero, { key: unknown[]; s: Stats }>();
 /** Gear and drills together: power, health, speed and wind from the trainer on top of what's worn. */
 export function statsOf(h: Hero): Stats {
   const w = h.arms?.[h.weapon], rings = h.rings ?? [], c = cache.get(h), d = h.drills;
-  if (c && c.key[0] === w && c.key[1] === h.armor && c.key[2] === rings[0] && c.key[3] === rings[1] && c.key[4] === d && c.key[5] === (h.perks ?? []).join()) return c.s;
+  const mk = (h.marks ?? []).join();
+  if (c && c.key[0] === w && c.key[1] === h.armor && c.key[2] === rings[0] && c.key[3] === rings[1] && c.key[4] === d && c.key[5] === (h.perks ?? []).join() && c.key[6] === mk) return c.s;
   const g = gearStats(w, h.armor, rings);
   const fx = perkFx(h.perks);
   const s = { ...g, fx, damage: g.damage + drilled(d, 'power'), health: g.health + drilled(d, 'health'), speed: g.speed * (1 + drilled(d, 'speed')), breath: g.breath + drilled(d, 'wind'), crit: g.crit + drilled(d, 'crit') };
   withKnacks(s, fx);
-  cache.set(h, { key: [w, h.armor, rings[0], rings[1], d, (h.perks ?? []).join()], s });
+  withMarks(s, h.marks);
+  cache.set(h, { key: [w, h.armor, rings[0], rings[1], d, (h.perks ?? []).join(), mk], s });
   return s;
 }
 
@@ -29,6 +32,16 @@ function withKnacks(s: GearStats & { crit: number }, f: Fx): void {
   for (const k of ['damage', 'quick', 'reach', 'draw', 'knock', 'breath', 'dodge', 'focus', 'mending', 'crit'] as const) s[k] += f[k] ?? 0;
   s.speed *= 1 + (f.foot ?? 0);
   s.taken *= 1 - (f.tough ?? 0);
+}
+
+/** The Deep's curses and blessings on top (shared/deepmarks.ts): stacked for the run, never below nothing. */
+function withMarks(s: GearStats & { crit: number }, marks: string[] | undefined): void {
+  if (!marks?.length) return;
+  s.damage += markSum(marks, 'damage');
+  s.health += markSum(marks, 'health');
+  s.breath += markSum(marks, 'breath');
+  s.focus += markSum(marks, 'focus');
+  s.speed *= Math.max(0.5, 1 + markSum(marks, 'speed'));
 }
 
 /** A hero's knacks, for those that aren't gear numbers (shared/perks.ts names where each is read). */
