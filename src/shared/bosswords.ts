@@ -13,6 +13,9 @@ export const DOOR_NAMES = { plate: 'THE DOORKEEPERS', latch: 'LATCH', hasp: 'HAS
 /** The Haulier and its ground in the Deep (docs/design/deep-bosses.md): the boss plate's title, and the room's name (lore keeper 2026-11-11: not THE OLD WORKING, too near a side room's THE OLD WORKINGS). */
 export const HAUL_NAME = 'THE HAULIER';
 export const SUMP_NAME = 'THE HAULAGE';
+/** THE LISTENER and its cave (docs/design/deep-layer-bosses.md section 1; both proposals for the lore keeper). */
+export const LISTEN_NAME = 'THE LISTENER';
+export const CAVE_NAME = 'THE DRIPPING HALL';
 /** The Doorkeepers' ground in the Deep (shared/sealarena.ts). Lore keeper. */
 export const SEAL_NAME = 'THE SEALED DOOR';
 

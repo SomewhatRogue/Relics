@@ -5,6 +5,7 @@
 import { stepPair } from './doorpair';
 import { stepHempenBook } from './hempenbook';
 import { stepHaulBook } from './haulbook';
+import { stepListenBook } from './listenbook';
 import type { BossBook } from './bosskit';
 import type { World } from './elements';
 import type { Enemy } from './types';
@@ -12,5 +13,6 @@ import type { Enemy } from './types';
 export function stepBosses(bk: BossBook, w: World, spawn: (x: number, y: number) => Enemy): void {
   if (bk.of === 'hempen') stepHempenBook(bk, w, spawn);
   else if (bk.of === 'haulier') stepHaulBook(bk, w, spawn);
+  else if (bk.of === 'listener') stepListenBook(bk, w, spawn);
   else stepPair(bk, w, spawn);
 }

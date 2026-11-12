@@ -20,7 +20,7 @@ import type { AttackKind, Enemy, FightEvent, Hero } from './types';
 /** On a boss goblin (drawn: the plate, its door, the stagger). Room times; -9 for "not". */
 export interface BossOn {
   /** The Doorkeepers' Latch or Hasp, or Hempen (sim/hempenboss.ts). */
-  who: 'latch' | 'hasp' | 'hempen' | 'haulier';
+  who: 'latch' | 'hasp' | 'hempen' | 'haulier' | 'listener';
   job: 'wall' | 'move';
   phase: 1 | 2;
   poise: number;
@@ -40,6 +40,10 @@ export interface BossOn {
   /** The Haulier (sim/haulier.ts): the move under way (the screen poses on it: client/hauldraw.ts), and its plate gone for good (phase 2). */
   move?: import('../shared/haultune').HaulMove;
   bare?: boolean;
+  /** THE LISTENER (sim/listener.ts): the move under way (`move`), gone under the floor (it can't be hit), and the torches knocked out (phase 2). */
+  lmove?: import('../shared/listentune').ListenMove;
+  under?: boolean;
+  dark?: boolean;
   /** The Haulier's crank: where its sparks will fall (sim/sparkshape.ts), cleared once they have. */
   sparks?: { x: number; y: number }[];
   /** Hempen's ropes coming down out of the branches (sim/hempenbook.ts): where, when they land, on whom. Sent as they come and go. */
@@ -71,14 +75,14 @@ export interface BossBook {
   phase: number;
   party: number;
   /** Whose book: the Doorkeepers' (none said) or Hempen's (sim/hempenbook.ts). */
-  of?: 'hempen' | 'haulier';
+  of?: 'hempen' | 'haulier' | 'listener';
 }
 
 let book: BossBook | null = null;
 export const useBook = (b: BossBook | null): void => void (book = b);
 export const theBook = () => book;
 
-export function newBook(party: number, swaps: number[], of?: 'hempen' | 'haulier'): BossBook {
+export function newBook(party: number, swaps: number[], of?: 'hempen' | 'haulier' | 'listener'): BossBook {
   return { hurt: [], started: -1, swapAt: -1, apartAt: -1, lockBy: -1, lockUntil: -9, lockCool: -9, split: null, swaps, phase: 1, party, ...(of ? { of } : {}) };
 }
 

@@ -295,6 +295,9 @@ export interface GameMap {
   rail?: { y: number; x0: number; x1: number };
   gear?: { x: number; y: number };
   adits?: { x: number; y: number }[];
+  /** THE LISTENER's cave (shared/cavearena.ts): holes in the floor (they don't block walking; it drops into one and rises from another), and spots for dripstone columns that lean the way `lean` points (made props in a later slice). */
+  holes?: { x: number; y: number }[];
+  columns?: { x: number; y: number; lean: { x: number; y: number } }[];
   /** The Doorkeepers' ground in the Deep (shared/sealarena.ts): the sealed door in the back wall, drawn only (client/sealdraw.ts). */
   sealed?: { x: number; w: number };
   /** An instance's stretches on one map, in order (sim/stretches.ts; docs/design/open-cut-map.md). */

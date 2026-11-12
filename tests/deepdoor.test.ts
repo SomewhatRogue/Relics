@@ -16,9 +16,11 @@ const doorSeed = [0, 1, 2, 3].find((s) => deepFloor(5, s, 'x').arena === 'doorke
 describe('the Doorkeepers in the Deep', () => {
   it("boss floors take it in turns, the Haulier and the Doorkeepers, on the run's seed", () => {
     for (const seed of [0, 1, 7]) {
+      // (Floor 10 is THE LISTENER's whatever the turn: the old caves, tests/listener.test.ts.)
       const arenas = [5, 10, 15, 20].map((n) => deepFloor(n, seed, 'x').arena);
-      expect(new Set(arenas)).toEqual(new Set(['haulier', 'doorkeepers']));
-      for (let i = 1; i < arenas.length; i++) expect(arenas[i]).not.toBe(arenas[i - 1]);
+      expect(arenas[1]).toBe('listener');
+      expect(new Set(arenas.filter((a) => a !== 'listener'))).toEqual(new Set(['haulier', 'doorkeepers']));
+      expect(arenas[0]).not.toBe(arenas[3]);
     }
   });
 
