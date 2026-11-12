@@ -6,7 +6,7 @@
 import { describe, expect, it } from 'vitest';
 import { openCut, INSTANCES, areaOf, CUT_PLACES, OVER_PLACES, UNDER_PLACES } from '../src/shared/instances';
 import { votes } from '../src/sim/fork';
-import { FORK_WORDS } from '../src/shared/opencutwords';
+import { FORK_WORDS, GATE_WORDS } from '../src/shared/opencutwords';
 import { cutMap } from '../src/shared/cutmap';
 import { HAUL_NAME } from '../src/shared/bosswords';
 import { CUT_NAMES } from '../src/shared/opencutwords';
@@ -493,7 +493,7 @@ describe('the reckoning house', () => {
     m.blocks[st[0].gate!].ruined = true;
     Object.assign(a.run, { stretch: 1 });
     expect(st[1].name).toBe('THE RECKONING HOUSE');
-    expect(goal(a.run, a.room).text).toContain('Kill the goblins keeping the gate');
+    expect(goal(a.run, a.room).text).toContain(GATE_WORDS.guards);
     for (const e of a.room.allEnemies) if (st[1].packs!.includes(e.pack ?? -1)) Object.assign(e, { hp: 0, act: 'dead' });
     expect(goal(a.run, a.room).text).toContain('at the gate together');
   });
