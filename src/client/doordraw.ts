@@ -10,9 +10,9 @@ import { doorShut } from '../sim/doorwall';
 import type { Enemy } from '../sim/types';
 import type { Ctx } from './draw';
 import { drawEnemy } from './foes';
+import { gobPen } from './gobpen';
 
 const WOOD = '#5a3d22', SEAM = '#3a2716', EDGE = '#24180e', IRON = '#4a4652', BARE = '#7a6a58';
-const SIZE = 1.15;
 
 export function drawKeeper(c: Ctx, e: Enemy, x: number, y: number, sleeping: boolean): void {
   const b = e.boss!, t = c.t ?? c.now, dead = e.act === 'dead';
@@ -22,37 +22,34 @@ export function drawKeeper(c: Ctx, e: Enemy, x: number, y: number, sleeping: boo
   const doors = b.phase === 2 ? 2 : 1, mover = b.job === 'move';
   const W = !shut ? 4 : mover ? 9 : 15, H = 20, sx = Math.abs(e.fx) > Math.abs(e.fy);
   const dx = !shut ? side * 11 : sx ? side * 8 : mover ? side * 6 : Math.round(e.fx * 4), dy = up ? -5 : 3;
-  const front = !up && !down;
-  if (down) floorDoor(c, x + side * 10, y + 2, b.straps);
-  if (!front && !down) for (let k = 0; k < doors; k++) door(c, x + dx - k * side * 2, y + dy - k * 2, sx && shut ? 5 : W, H, b.straps);
-  big(c, e, x, y, sleeping);
-  if (b.phase === 2) mad(c, e, x, y, t);
-  if (front) for (let k = doors - 1; k >= 0; k--) door(c, x + dx + k * side * 2, y + dy + k, sx && shut ? 5 : W, H, b.straps);
-}
-
-/** The body a size up, from its feet, on both layers. */
-function big(c: Ctx, e: Enemy, x: number, y: number, sleeping: boolean): void {
-  for (const g of [c.lit, c.glow]) g.save(), g.translate(x, y), g.scale(SIZE, SIZE), g.translate(-x, -y);
+  const front = !up && !down, who = b.who as 'latch' | 'hasp';
+  // The doors in the old pixels through the pen (1.5x, whole pixels: gobpen.ts); the body a size up (foes.ts).
+  const p = gobPen(c, x, y);
+  if (down) floorDoor(p, x + side * 10, y + 2, b.straps);
+  if (!front && !down) for (let k = 0; k < doors; k++) door(p, x + dx - k * side * 2, y + dy - k * 2, sx && shut ? 5 : W, H, b.straps, shut && !sx ? who : undefined);
   drawEnemy(c, e, x, y, sleeping);
-  for (const g of [c.lit, c.glow]) g.restore();
+  if (b.phase === 2) mad(c, e, x, y, t);
+  if (front) for (let k = doors - 1; k >= 0; k--) door(p, x + dx + k * side * 2, y + dy + k, sx && shut ? 5 : W, H, b.straps, shut && !sx ? who : undefined);
 }
 
 /** ENRAGED (its partner dead): eyes burning red, beating, and red heat rising off its shoulders (glow, unlit). */
 function mad(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
-  const g = c.glow, f = e.fx >= -0.2 ? 1 : -1, beat = Math.floor(t * 8) % 2, hy = Math.round(y - 20 * SIZE);
+  // (The body a size up at 1.5x: its eyes 32 rows over the feet, its shoulders 38.)
+  const g = c.glow, f = e.fx >= -0.2 ? 1 : -1, beat = Math.floor(t * 8) % 2, hy = Math.round(y - 32);
   // Over its own eyes, bigger and burning.
   g.fillStyle = beat ? '#ff2a1a' : '#ff6a4a';
-  g.fillRect(Math.round(x + f - 3), hy, 2, 2);
-  g.fillRect(Math.round(x + f + 2), hy, 2, 2);
+  g.fillRect(Math.round(x + f - 4), hy, 3, 2);
+  g.fillRect(Math.round(x + f + 2), hy, 3, 2);
   g.fillStyle = '#c0281a';
-  for (let i = 0; i < 4; i++) {
-    const k = (t * 0.9 + i * 0.25) % 1;
-    g.fillRect(Math.round(x + (i - 1.5) * 6), Math.round(y - 30 * SIZE - k * 10), 1, 2 - Math.floor(k * 2));
+  for (let i = 0; i < 5; i++) {
+    const k = (t * 0.9 + i * 0.2) % 1;
+    g.fillRect(Math.round(x + (i - 2) * 7), Math.round(y - 42 - k * 15), 1, 3 - Math.floor(k * 3));
   }
 }
 
 /** A door stood on its edge, its foot at (cx, fy): planks, two iron straps (bare where cut), a dark edge. */
-function door(c: Ctx, cx: number, fy: number, w: number, h: number, cut: number): void {
+/** `who`: the face of the door each carries square in front, so the pair read apart: the Latch's bar and its ring, the Hasp's hasp and its lock. */
+function door(c: Ctx, cx: number, fy: number, w: number, h: number, cut: number, who?: 'latch' | 'hasp'): void {
   const l = c.lit, x0 = Math.round(cx - w / 2), y0 = Math.round(fy - h);
   l.fillStyle = EDGE;
   l.fillRect(x0 - 1, y0 - 1, w + 2, h + 2);
@@ -64,6 +61,8 @@ function door(c: Ctx, cx: number, fy: number, w: number, h: number, cut: number)
     l.fillStyle = cut > k ? BARE : IRON;
     l.fillRect(x0, Math.round(y0 + h * sy), w, 2);
   }
+  if (who === 'latch') (l.fillStyle = '#7a7684'), l.fillRect(x0 + 2, Math.round(y0 + h * 0.5), w - 5, 1), (l.fillStyle = '#9a96a4'), l.fillRect(x0 + w - 4, Math.round(y0 + h * 0.5) - 1, 2, 3);
+  if (who === 'hasp') (l.fillStyle = '#7a7684'), l.fillRect(Math.round(cx) - 1, Math.round(y0 + h * 0.45), 3, 4), (l.fillStyle = '#a89040'), l.fillRect(Math.round(cx) - 1, Math.round(y0 + h * 0.45) + 4, 3, 3);
   // (Nothing under the door glows through it.)
   c.glow.clearRect(x0 - 1, y0 + 3, w + 2, h - 2);
 }

@@ -29,6 +29,8 @@ export function cast(which: string): Unit[] {
     // Named butchers (a look each from the name), THE STOKER, and the Hempen Man whole and torn.
     for (const n of ['GRISTLE', 'OLD MAW', 'THE TALLOWMAN', 'SKINNER BRANT']) out.push({ label: n.slice(0, 8), tall: 46, foe: { kind: 'butcher', name: n } });
     out.push({ label: 'STOKER', tall: 46, foe: { kind: 'butcher', variant: 'stoker', name: 'THE STOKER' } }, { label: 'HEMPEN', tall: 46, foe: { kind: 'butcher', name: 'HEMPEN', boss: 'hempen' } }, { label: 'HEMPEN 2', tall: 46, foe: { kind: 'butcher', name: 'HEMPEN', boss: 'hempen', hurt: 0.7 } });
+    // The Doorkeepers: the Latch holds its door square (the wall), the Hasp carries its to one side (the mover).
+    out.push({ label: 'LATCH', tall: 50, foe: { kind: 'butcher', name: 'LATCH', boss: 'latch' } }, { label: 'HASP', tall: 50, foe: { kind: 'butcher', name: 'HASP', boss: 'hasp' } });
     for (const v of MOBS) out.push({ label: v.toUpperCase(), tall: 34, foe: { kind: 'scrapper', variant: v } });
   }
   return out;
@@ -76,7 +78,7 @@ export function foeIn(u: Foe, m: Move, id: number, now: number): { e: Enemy; t: 
   const e = newEnemy(id, u.kind, 0, 0);
   if (u.variant) e.variant = u.variant;
   if (u.name) e.name = u.name;
-  if (u.boss) e.boss = { who: u.boss } as Enemy['boss'];
+  if (u.boss) e.boss = { who: u.boss, job: u.boss === 'hasp' ? 'move' : 'wall', phase: 1, poise: 1, poiseMax: 1, stagUntil: -9, roarUntil: -9, rot: 0, rotAt: 0, downUntil: -9, openUntil: -9, straps: 0 } as unknown as Enemy['boss'];
   if (u.hurt) e.hp = Math.round(e.maxHp * (1 - u.hurt));
   Object.assign(e, { act: 'idle', fx: 0.2, fy: 1, moving: false, cooldown: 9 });
   let t = 10;
