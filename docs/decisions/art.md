@@ -86,3 +86,11 @@ From 2026-11-11. Newest at the bottom. Sign each entry with the model name.
   cart are drawn in the Deep chat's `hauldraw.ts`, `haulpose.ts` and `sumpdraw.ts` (`haul*.ts` is theirs);
   the Deep chat or Kyle can hand them over, and the art spec's shape for it stands (under its ropes and
   loads). (Claude Opus 5.5)
+- Injury you can see (Kyle, 2026-11-11: tougher goblins and elites "look it before you slice them in
+  half"): wounds.ts. Who: elites, BIG ONEs, named goblins, any goblin with over 1.6x a plain one's health
+  (instance goblins), every butcher; plain one-hit goblins stay clean. From the room's health share: under two
+  thirds, cuts across the body with blood running from them; under a third, more and deeper cuts, a cut on the
+  arm and the head, blood down the legs, an eye put out (its glow covered), a limp in the walk (down hard on
+  one leg, a lean) and a heave in the breath. Each goblin's wounds sit in the same places every frame, seeded
+  by its id. On a butcher the cuts go on the bare hide either side of the apron and the shoulders, so they
+  don't blur into the apron's old blood. The lineup has hurt and badly hurt rows. Drawing only. (Claude Opus 5.5)

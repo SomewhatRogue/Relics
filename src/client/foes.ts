@@ -34,6 +34,7 @@ const AT = { bx: 0, by: 0, hx: 0, hy: 0 };
 import { OX, OY, PX } from './world';
 import { HS, hline, hs } from './heroscale';
 import { gobPen } from './gobpen';
+import { drawWounds, hurtPose } from './wounds';
 
 /** A butcher's weapon along `a` from the hand, its look (butcherparts.ts); lengths in the old pixels, drawn 1.5x. */
 function cleaver(c: Ctx, x: number, y: number, a: number, arms: Arms = 'cleaver', now = 0): void {
@@ -87,6 +88,7 @@ function butcher(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
   let arm = fa + side * 1.25;
   let trail: [number, number] | null = null;
   if (pz.phase === 'rest' && e.moving) pz.oy = Math.floor(c.now * 5) % 2 ? -1 : 0;
+  hurtPose(pz, e, c.now);
   if (a && a.kind === 'cleave') {
     const half = ((a.arc / 2) * Math.PI) / 180, back = fa - side * (half + 1.5), end = fa + side * half;
     if (a.t < a.windup) arm = arm + (back - arm) * ease(a.t / (a.windup * 0.8));
@@ -111,6 +113,8 @@ function butcher(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
   const [ax, ay] = armOffset(ARM), hx = bx + side * Math.round(hs(7) * look.k) + ax, hy = by - Math.round(hs(13) * look.k) + ay;
   if (up) cleaver(c, hx, hy, arm, arms, c.now);
   drawFigure(c, body, bx, by, pz);
+  const build = butcherLook(e.name, e.variant, hempenOf(e)).build;
+  drawWounds(c, e, body.s.w, false, build === 'hunch' ? 10 : build === 'lean' ? 5 : 7, look.k);
   if (!up) cleaver(c, hx, hy, arm, arms, c.now);
   if (trail) smear(c.glow, hx, hy, trail[0], trail[1], 8 * HS, 15 * HS, e.hitstop > 0 ? '#ffffff' : '#ffb0a0');
   if (e.act === 'stunned') stars(c, bx, by - hs(25), 5, hs(8));
@@ -136,6 +140,7 @@ function scrapper(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
   }
   const pz = scrapperPose(e, t, c.now);
   if (pz.phase === 'rest' && e.moving) pz.oy = Math.floor(c.now * 9) % 2 ? -1 : 0;
+  hurtPose(pz, e, c.now);
   if (e.act === 'stunned') (pz.ox += Math.round(Math.sin(c.now * 5))), (pz.oy += 1);
   const reach = pz.phase === 'windup' ? 1 : pz.phase === 'release' || pz.phase === 'contact' ? 7 : 3;
   shadow(c, x, y, hs(5));
@@ -151,6 +156,8 @@ function scrapper(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
   const knife = () => (e.bow ? bow(p, e, kx, ky, fa) : e.variant === 'hexer' || e.variant === 'drummer' ? drawKit(p, e, ox, oy, ax, ay, t) : e.variant && KITTED.has(e.variant) ? drawFoeKit(p, e, ox, oy, ax, ay, t) : e.variant === 'lunger' ? undefined : line(p.lit, kx + Math.cos(fa) * reach, ky - 6 + Math.sin(fa) * reach, fa, 0, 4, '#cfd6dc'));
   if (up) knife();
   drawFigure(c, body, bx, by, pz);
+  // Its wounds, if it's a tough one and hurt (wounds.ts).
+  drawWounds(c, e, body.s.w, true);
   // The wood's element lesson: wet, aproned or kiln-hot (lessonfoes.ts).
   drawLessonMark(p, e, ox, oy);
   if (!up) knife();
