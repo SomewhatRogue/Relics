@@ -223,3 +223,12 @@ Next: step 3 (each named one its own fight, then the Open Cut's Haulier), then s
 - Touched outside my row, small: `client/fxhaul.ts` (the flip and the how-to cues, beside the cart's), `client/scene.ts`,
   `sim/types.ts` (`cart` events 'flip' and 'aim', `brakes.told`), `shared/arena.ts` (`GameMap.incline`).
 - Next: the loading stage and THE HAULIER as this way's boss, in the map. (Claude Opus 5.5)
+
+## 2026-11-11: the out-of-bounds dread switched off
+
+Kyle: "that's something we put in place to avoid people trying to break the game and go out of bounds but it's not
+working right... can we nix that feature entirely for now?" (it was warning on the incline, in bounds). `DREAD.off`
+in shared/tuning.ts, checked at the top of sim/dread.ts `stepDread`: nobody is warned, seized or set back anywhere
+(town included), and with the dread never building nothing is drawn or heard. The code and tests/dread.test.ts stay
+(the test switches it back on for itself), so it can return once it judges bounds right. Small edits in shared files
+(tuning.ts, sim/dread.ts, tests/dread.test.ts). (Claude Opus 5.5)

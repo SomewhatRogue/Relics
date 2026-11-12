@@ -1,5 +1,5 @@
 /** Out of bounds: the dread's stages and times, stepping back in, the body put back, town's set back, the holes shut. */
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { ARENA, type GameMap } from '../src/shared/arena';
 import { board, PLACES, type Job } from '../src/shared/jobs';
 import { outOfBounds } from '../src/shared/reach';
@@ -27,6 +27,10 @@ function run(room: ArenaRoom, s: number, ev: FightEvent[] = []): FightEvent[] {
 }
 const dreads = (ev: FightEvent[]) => ev.filter((e): e is Extract<FightEvent, { k: 'dread' }> => e.k === 'dread').map((e) => e.n);
 const outThere = (h: Hero) => Object.assign(h, { x: 15, y: 11.5 });
+
+// (Switched off in the game for now, shared/tuning.ts DREAD.off: these test it as it was, ready to come back.)
+beforeAll(() => void (DREAD.off = false));
+afterAll(() => void (DREAD.off = true));
 
 describe('the dread', () => {
   it('warns at once, worsens at 4 s, seizes at 8 s, and crushes and downs the hero 1.1 s later', () => {

@@ -499,7 +499,9 @@ export const PATH = { cell: 0.5, fit: 1, shallow: 1.4, reach: 30 };
  * Back in bounds it drains `lift` times as fast as it came. In town and the yard nothing kills: out for
  * `setback` seconds and you're put back after a dark flicker.
  */
-export const DREAD = { late: 4, take: 8, crush: 1.1, lift: 5, setback: 1.2 };
+/** `off`: switched off for now (Kyle, 2026-11-11: "it's not working right, can we nix that feature entirely for now");
+ * nobody's warned, seized or set back, so nothing's drawn. Set false to bring it back (tests/dread.test.ts does). */
+export const DREAD = { off: true, late: 4, take: 8, crush: 1.1, lift: 5, setback: 1.2 };
 
 /**
  * Weather that changes the fight (Kyle, 2026-11-04: "Let's do some weather and forget about wind

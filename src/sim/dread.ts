@@ -29,7 +29,7 @@ export const safeSpot = (h: Hero) => safe.get(h);
 export const dreadStage = (d: number) => (d <= 0 ? 0 : d < DREAD.late ? 1 : d < DREAD.take ? 2 : 3);
 
 export function stepDread(rule: DreadRule | null, map: GameMap, heroes: Hero[], enemies: Enemy[], dt: number, ev: FightEvent[]): void {
-  if (!rule) return;
+  if (!rule || DREAD.off) return;
   for (const h of players(heroes)) {
     if ((h.takenT ?? -1) >= 0) {
       taken(h, rule.by, map, dt, ev);
