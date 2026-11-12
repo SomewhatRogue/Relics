@@ -60,7 +60,7 @@ in on a line.
   for a while. It goes for whoever's on the windlass, so the party covers them.
 - **Phase 2:** the water rises; it lays logs across the deep channels to reach you (as the hungry do), and
   heroes can hit a log off (it falls in the water, and so does it, if on it).
-- **Loot:** fen-black leather and stitched gear, lost and somehow dry: e.g. waders (no slowing in water or mud),
+- **Loot:** fen-black leather and stitched gear, kept dry by wax and tar: e.g. waders (no slowing in water or mud),
   a line-and-hook sling that pulls a goblin to you, a jerkin leeches can't fasten on.
 
 ## 3. Buried wood: THE HEDGER (floor 20)
