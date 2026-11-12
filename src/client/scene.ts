@@ -47,6 +47,8 @@ import { nestEmber } from './nestfire';
 import { drawLifted, drawProp } from './propsdraw';
 import type { Fx } from './fx';
 import { haulLights } from './fxhaul';
+import { CAVE, caveLook, caveScene, drawCaveMarks, listenLights } from './cavedraw';
+import { columnWatch } from './columndraw';
 import { Lighting, type Light } from './light';
 import { SPRITES } from './sprites';
 import { drawPost, drawRack, drawWatch } from './rackdraw';
@@ -202,6 +204,10 @@ export class Scene {
   /** `others`: other players' heroes in this place (the shared town); drawn only, never in the room. */
   render(room: ArenaRoom, meId: string, fx: Fx, now: number, dt: number, others: Hero[] = []): void {
     const a = room.alpha;
+    // THE LISTENER's cave: where it is, and the torches going out (cavedraw.ts).
+    caveLook(room, now);
+    // Who a dripstone column would hide: heroes and the bosses (columndraw.ts fades a column with one behind it).
+    columnWatch([...room.heroes, ...room.enemies.filter((e) => e.boss)]);
     const lerp = (key: string, x: number, y: number): [number, number] => {
       const p = room.prev.get(key);
       const ix = p ? p[0] + (x - p[0]) * a : x, iy = p ? p[1] + (y - p[1]) * a : y;
@@ -265,6 +271,8 @@ export class Scene {
     drawSparkMarks(c, room, cx, cy);
     // An ENRAGED Doorkeeper's quake: its circles and the crack running at them (quakedraw.ts).
     drawQuakeMarks(c, room, cx, cy);
+    // THE LISTENER's cave: falling columns' lanes, the rise's tremor, the rock in flight, drips (cavedraw.ts).
+    drawCaveMarks(c, room, cx, cy, fx);
     // A held cart's aim, out to where it'll stop (cartaim.ts).
     drawCartAims(c, room, cx, cy);
     // A keg, oil or embers about to go up: its circle, the keg, the embers (blastdraw.ts).
@@ -357,7 +365,7 @@ export class Scene {
         continue;
       }
       const x = OX + p.x * PX - cx, y = OY + p.y * PX - cy;
-      items.push({ y: OY + p.y * PX, draw: () => drawProp(c, p, x, y, room.time) });
+      items.push({ y: p.kind === 'column' && p.fallen ? -1e6 + 3 : OY + p.y * PX, draw: () => drawProp(c, p, x, y, room.time) });
       // Someone caged: a mark over them, and their call when you're close.
       if (p.kind === 'cage' && !p.broken) {
         const near = !!me && Math.hypot(me.x - p.x, me.y - p.y) < 7;
@@ -449,6 +457,7 @@ export class Scene {
     for (const f of vignetteFigs(map, room.time, me)) items.push({ y: OY + f.y * PX - (f.floor ? 20 : 0), draw: () => f.draw(c, OX + f.x * PX - cx, OY + f.y * PX - cy) });
     // The Haulier's old working: the rail, the winding gear and shaft, the adit (sumpdraw.ts).
     if (map.sealed) sealScene(map, c, cx, cy, items);
+    if (map.holes) caveScene(map, c, cx, cy, items);
     if (map.rail || map.gear || map.adits) sumpScene(map, c, cx, cy, items, room.enemies.some((e) => e.boss?.who === 'haulier' && e.boss.phase === 2));
     // THE SLUICER in the water, THE RAKER's lift as a ring at its feet (pairdraw.ts).
     if (room.enemies.some((e) => e.fallen !== undefined)) items.push({ y: -1e6 + 4, draw: () => drawPairLift(c, room.enemies, cx, cy) });
@@ -639,6 +648,7 @@ export class Scene {
       if (e.act === 'dead') continue;
       const [x, y] = lerp('e:' + e.id, e.x, e.y);
       if (e.boss?.who === 'haulier') lights.push(...haulLights(e, x - cx, y - cy, room.time, now));
+      if (e.boss?.who === 'listener') lights.push(...listenLights(e, x - cx, y - cy, now, e.attack ? OX + e.attack.cx * PX - cx : undefined, e.attack ? OY + e.attack.cy * PX - cy : undefined));
       // A nest burned out up close throws a bigger, warmer light (sim/torch.ts).
       if (e.burnUntil > room.time) lights.push({ x: x - cx, y: y - cy - 10, r: (e.ashAt ? 70 : 44) + Math.sin(now * 17 + e.id) * 4, i: e.ashAt ? 0.95 : 0.75, c: [1, 0.55, 0.25] });
       else if (e.frozenUntil > room.time) lights.push({ x: x - cx, y: y - cy - 8, r: 26, i: 0.4, c: [0.6, 0.85, 1] });
@@ -658,6 +668,8 @@ export class Scene {
     // (Fenmere's mist is its banks, below: no dawn bands over the glowing layer there.)
     drawMist(glow, map.fen ? { ...map.theme, mist: 0 } : map.theme, this.vw, this.vh, cx, cy, now);
     fx.drawGlow(glow, lit, cx, cy);
+    // The cave gone dark: every hero keeps a good light round themselves (cavedraw.ts).
+    if (CAVE.dark > 0.02) for (const h of room.heroes) { const [hx, hy] = lerp('h:' + h.id, h.x, h.y); lights.push({ x: hx - cx, y: hy - cy - 10, r: 86, i: 0.75 * CAVE.dark, c: [0.95, 0.85, 0.7] }); }
     lights.push(...fx.lights(cx, cy));
     // Only lights that reach the screen (a town has more than the pass can take at once).
     const seen = lights.filter((l) => l.x + l.r > 0 && l.x - l.r < this.vw && l.y + l.r > 0 && l.y - l.r < this.vh);

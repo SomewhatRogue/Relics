@@ -11,6 +11,7 @@ import { drawKit } from './backline';
 import { KITTED, drawFoeKit } from './foekits';
 import { drawIronhide } from './ironhidedraw';
 import { drawHaulier } from './hauldraw';
+import { drawListener } from './listendraw';
 import { boardOut } from '../sim/board';
 import { drawLessonMark } from './lessonfoes';
 import { drawLogs, drawLogsDead } from './foedraw';
@@ -240,6 +241,8 @@ export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number, dozing = false
   if (e.escaped) return;
   // The Haulier (the Deep's boss on every fifth floor): its own body and poses (hauldraw.ts).
   if (e.boss?.who === 'haulier') return drawHaulier(c, e, x, y, c.t ?? c.now);
+  // THE LISTENER (the Deep's boss on floor 10 of the Copperdeep): its own body and poses (listendraw.ts).
+  if (e.boss?.who === 'listener') return drawListener(c, e, x, y, c.t ?? c.now);
   if (e.variant === 'wolf') return drawWolf(c, e, x, y);
   if (e.under) return drawMound(gobPen(c, x, y), e, x, y);
   if (e.variant === 'log' && e.act === 'dead') return drawLogsDead(gobPen(c, x, y), e, x, y);

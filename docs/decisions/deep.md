@@ -109,3 +109,11 @@ folds to the piece and the buttons (tap the piece for what it does; loot.css, ro
 docs/design/deep-layer-bosses.md (also the project's claude/deep-layer-bosses.md): THE LISTENER, THE LEECHMAN,
 THE HEDGER, THE HOUSEBREAKER, one per layer on its fifth floor, each a trick any class can use. Lore keeper
 cast them; story bible updated. Waiting on Kyle.
+
+## 2026-11-12: THE LISTENER, floor 10 (Opus 5.5; three Sonnet builder slices)
+Built per docs/design/deep-layer-bosses.md: hunting by sound (listennoise.ts: attacks, rolls, running, relics;
+creeping is quiet; a Warrior's taunt the loudest), DROP into the cave's holes and RISE under the loudest (can't be
+hit while under), ROCK, SWEEP after a rise, CHARGE; dripstone columns anyone can knock onto it (a knockdown with
+the cart's 10 s cooldown); BLINDED does nothing (ALREADY BLIND); phase 2 the torches go out and adds climb out of
+the holes. Art reviewed from scripts/listen-look.cjs shots: columns faded when someone stands behind (they hid the
+hero). Words: lore keeper, line editor. deepdoor.test: floor 10 is the Listener now. 3D view: tsc only.

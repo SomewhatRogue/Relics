@@ -21,10 +21,13 @@ import { makeTele, shapeTele } from './teleg3d';
 import { strikeShape } from '../../sim/stormshape';
 import { sparkShapes } from '../../sim/sparkshape';
 import { quakeShapes } from '../../sim/quakeshape';
+import { columnShapes } from '../../sim/columnshape';
+import { LISTENER } from '../../shared/listentune';
+import { caveLook } from '../cavedraw';
 import { cartPath } from '../../sim/cartpath';
 import { blastShape } from '../../sim/blastshape';
 import { shakeProp } from './prophit3d';
-import { makeChest, makeCoal, makeDrop, makePickup, makeProp, poseChest, type ChestFig } from './props3d';
+import { makeChest, makeCoal, makeDrop, makeHole, makePickup, makeProp, poseChest, type ChestFig } from './props3d';
 import { boltLook, makeBolt, makeExit, makeJavelin, makeRing, placeBolt, placeJavelin } from './shots3d';
 import { surfAt } from './hazards3d';
 import { isRound } from '../../sim/types';
@@ -63,6 +66,17 @@ export class Actors {
     return w[2];
   }
 
+  /** One of THE LISTENER's dripstone columns: leaning its way, toppling about its foot along the lean, or broken (as client/columndraw.ts). */
+  private column(p: ArenaRoom['props'][number], t: number): void {
+    const l = p.lean ?? { x: 0, y: 1 }, n = Math.hypot(l.x, l.y) || 1, lx = l.x / n, lz = l.y / n;
+    const o = this.things.get('p' + p.id, p.fallen ? 'colrubble' : 'column', () => ({ root: makeProp(p.fallen ? 'colrubble' : 'column') })).root;
+    o.position.set(p.x, 0, p.y);
+    o.rotation.set(0, 0, 0);
+    if (p.fallen) return void o.rotation.set(0, Math.atan2(lx, lz), 0);
+    const k = p.fallAt === undefined ? 0 : Math.min(1, Math.max(0, 1 - (p.fallAt - t) / LISTENER.column.fall)), th = 0.1 + (Math.PI / 2 - 0.1) * k ** 2.6;
+    o.quaternion.setFromAxisAngle(new THREE.Vector3(lz, 0, -lx), th);
+  }
+
   update(room: ArenaRoom, meId: string, now: number, lerp: Lerp): void {
     const t = room.time, lift = (z?: number) => (z ?? 0) * LEDGE_H;
     for (const p of [this.heroes, this.foes, this.folk, this.hounds, this.teles, this.things, this.chests]) p.begin();
@@ -70,7 +84,7 @@ export class Actors {
     if (BOXFIGS) for (const h of room.heroes) this.hero(h, lerp, now, lift(h.z));
     for (const e of room.enemies) {
       if (BOXFIGS) this.foe(room, e, now, lerp);
-      if (e.attack && e.act === 'attack') {
+      if (e.attack && (e.act === 'attack' || (e.boss?.who === 'listener' && e.boss.lmove === 'rise'))) {
         // A round one on water lies on its surface, with the oil it's about (hazards3d.ts).
         const m = this.teles.get('t' + e.id, '', () => ({ root: makeTele() })).root, a = e.attack;
         m.visible = shapeTele(m, a, now, e.z ? lift(e.z) : isRound(a.kind) ? surfAt(room.map, a.cx, a.cy) : 0);
@@ -86,6 +100,12 @@ export class Actors {
     // The Haulier's sparks coming down (sim/sparkshape.ts, the circles the room judges).
     for (const e of room.enemies) [...sparkShapes(e), ...quakeShapes(e)].forEach((a, i) => {
       const m = this.teles.get('s' + e.id + ':' + i, '', () => ({ root: makeTele() })).root;
+      m.visible = shapeTele(m, a, now, 0);
+    });
+    // THE LISTENER's cave: the torches going out in the dark (cavedraw.ts); each falling column's lane (sim/columnshape.ts).
+    caveLook(room, now);
+    columnShapes(room.props, t).forEach((a, i) => {
+      const m = this.teles.get('col' + i, '', () => ({ root: makeTele() })).root;
       m.visible = shapeTele(m, a, now, 0);
     });
     // A held cart's aim (sim/cartpath.ts, the spot the room stops it): a flat gold strip out to there.
@@ -113,12 +133,14 @@ export class Actors {
     }
     for (const p of room.props) {
       if (p.broken) continue;
+      if (p.kind === 'column') { this.column(p, t); continue; }
       const carrier = p.lifted ? room.heroes.find((h) => h.lifting === p.id) : undefined, o = this.things.get('p' + p.id, p.kind, () => ({ root: makeProp(p.kind) })).root;
       const [x, y] = carrier ? lerp('h:' + carrier.id, carrier.x, carrier.y) : [p.x, p.y];
       o.position.set(x, carrier ? 1.3 : (p.air ?? 0) > 0 ? 0.3 : lift(p.z), y);
       o.rotation.set(0, p.spin, (p.air ?? 0) > 0 ? p.spin * 2 : 0);
       if (!carrier) shakeProp(o, p, t);
     }
+    (room.map.holes ?? []).forEach((h, i) => this.things.get('hole' + i, '', () => ({ root: makeHole() })).root.position.set(h.x, 0, h.y));
     for (const c of room.chests) {
       const f = this.chests.get('c' + c.id, '', makeChest);
       f.root.position.set(c.x, 0, c.y);

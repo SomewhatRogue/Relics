@@ -6,6 +6,7 @@ import { propFlash, propShake } from './propshake';
 import { PX } from './world';
 import { drawCart } from './sumpdraw';
 import { drawTub } from './tubdraw';
+import { drawColumn } from './columndraw';
 import { HS, hs } from './heroscale';
 
 /** (x, y) is the prop's foot on screen; `t` the room's time (for the hit flash). */
@@ -14,6 +15,8 @@ export function drawProp(c: Ctx, p: Prop, x: number, y: number, t: number): void
   const piece = p.kind === 'plank' || p.kind === 'stave';
   // The Haulier's ore cart: wheels, dust and sparks on the rail (sumpdraw.ts).
   if (p.kind === 'cart') return drawCart(c, p, x, y, t);
+  // THE LISTENER's dripstone column: standing, toppling, rubble (columndraw.ts).
+  if (p.kind === 'column') return drawColumn(c, p, x, y, t);
   // An instance puzzle's ore tub (tubdraw.ts).
   if (p.kind === 'tub') return drawTub(c, p, x, y);
   // (Props at hand height are drawn 1.5x in the art pass: sprites.ts `grown`.)

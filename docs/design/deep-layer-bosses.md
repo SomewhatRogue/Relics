@@ -2,7 +2,7 @@
 
 Kyle, 2026-11-12: "lets think of thematic other bosses and attacks or environmental plays and loot." Each of
 the Deep's layers below the drains gets its own boss, fought in a room built from that place. Names and who
-they are: lore keeper, 2026-11-12. Status: **a draft for Kyle's yes.**
+they are: lore keeper, 2026-11-12. Status: Kyle's yes 2026-11-12; **THE LISTENER built** (2026-11-12), the other three to come.
 
 ## Rules for all four
 
@@ -19,7 +19,13 @@ they are: lore keeper, 2026-11-12. Status: **a draft for Kyle's yes.**
 - **Loot:** a pool of three uniques each (shared/uniques.ts), one piece for the whole party, Need, Greed or
   Pass, as now.
 
-## 1. Old caves: THE LISTENER (floor 10)
+## 1. Old caves: THE LISTENER (floor 10) (built)
+
+Built in THE DRIPSTONE CAVE: shared/listentune.ts, cavearena.ts; sim/listener.ts, listenbook.ts, listennoise.ts,
+columns.ts, columnshape.ts; client/listendraw.ts, listenpose.ts, listenlie.ts, cavedraw.ts, columndraw.ts,
+fxlisten.ts; tests/listener.test.ts, listencolumn.test.ts; scripts/listen-look.cjs. A Warrior's taunt is the
+loudest noise there is. Columns fade when someone stands behind them. Loot: THE HUSHED MAUL, DAMP MAIL, A
+DRIPSTONE RING.
 
 A huge goblin gone blind in the caves' dark, its eyes still shining but white and no use to it. It hunts by
 the sound of feet and steel.

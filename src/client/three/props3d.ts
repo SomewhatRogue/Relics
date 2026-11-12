@@ -15,7 +15,10 @@ import { part, pivot } from './rig';
 
 const geos = new Map<string, THREE.BufferGeometry>();
 
-function propGeo(kind: PropKind): THREE.BufferGeometry {
+/** A column's broken remains: `colrubble` (a stump and its shaft in lengths down +z, turned to the lean by the caller). */
+type GeoKind = PropKind | 'colrubble';
+
+function propGeo(kind: GeoKind): THREE.BufferGeometry {
   let g = geos.get(kind);
   if (g) return g;
   const B = new Boxes(), r = new Seed(kind.length * 97);
@@ -62,11 +65,39 @@ function propGeo(kind: PropKind): THREE.BufferGeometry {
     B.b(0, 1.45, 0, 1.25, 0.08, 0.08, 0x4a3420);
     for (let i = 0; i < 4; i++) B.b(-0.38 + i * 0.25, 0.75 + r.next() * 0.2, 0, 0.16, 0.42 + r.next() * 0.2, 0.14, jit(0x7a2420, 0.15, r));
   }
+  if (kind === 'column') {
+    // THE LISTENER's dripstone column (the flat view's: client/columndraw.ts): banded grey stone tapering up, copper stain, a lip at the foot.
+    const bands = [0x8a889c, 0x76748a, 0x6c6a80, 0x5c5a6e];
+    for (let i = 0; i < 7; i++) B.b(0, i * 0.6, 0, 1.05 - i * 0.075 + (i % 2) * 0.05, 0.62, 1.05 - i * 0.075 - (i % 2) * 0.04, jit(bands[i % 4], 0.04, r), i * 0.2);
+    B.b(0, 0, 0, 1.3, 0.12, 1.3, 0x4c4a5e), B.b(-0.34, 1.3, 0.3, 0.1, 0.3, 0.1, 0x4f8f86), B.b(0.25, 2.6, -0.3, 0.1, 0.25, 0.1, 0x4f8f86), B.b(-0.2, 0.5, 0.42, 0.06, 0.6, 0.06, 0xc4d8e8);
+  } else if (kind === 'colrubble') {
+    B.b(0, 0, 0, 1.1, 0.4, 1.1, 0x6c6a80), B.b(0.1, 0.4, 0, 0.7, 0.15, 0.6, 0x4c4a5e);
+    for (let i = 0; i < 5; i++) B.b((i % 2 ? 0.2 : -0.2), 0, 0.9 + i * 0.7, 0.9 - i * 0.12, 0.42 - i * 0.05, 0.62, jit(i % 2 ? 0x76748a : 0x6c6a80, 0.05, r), i * 0.5);
+    for (let i = 0; i < 8; i++) B.b((r.next() - 0.5) * 1.4, 0, 0.6 + r.next() * 3.4, 0.16, 0.1, 0.16, 0x5c5a6e, i);
+  }
   geos.set(kind, (g = B.geometry()));
   return g;
 }
 
-export function makeProp(kind: PropKind): THREE.Mesh {
+/** A hole in the cave floor: a dark mouth with a broken rim of chips. */
+export function makeHole(): THREE.Group {
+  const root = new THREE.Group(), hole = new THREE.Mesh(new THREE.CircleGeometry(0.92, 24), new THREE.MeshBasicMaterial({ color: 0x07060a }));
+  hole.rotation.x = -Math.PI / 2;
+  hole.scale.set(1, 0.9, 1);
+  hole.position.y = 0.03;
+  root.add(hole);
+  const B = new Boxes();
+  for (let i = 0; i < 12; i++) {
+    const a = (i / 12) * Math.PI * 2;
+    B.b(Math.cos(a) * 0.98, 0, Math.sin(a) * 0.9, 0.14 + (i % 3) * 0.05, 0.06 + (i % 2) * 0.05, 0.14, i % 2 ? 0x7c7a8e : 0x4c4a5e, a);
+  }
+  const rim = new THREE.Mesh(B.geometry(), VCOL);
+  rim.receiveShadow = true;
+  root.add(rim);
+  return root;
+}
+
+export function makeProp(kind: GeoKind): THREE.Mesh {
   const m = new THREE.Mesh(propGeo(kind), VCOL);
   m.castShadow = m.receiveShadow = true;
   return m;
