@@ -9,6 +9,7 @@ import { ledgered, prune, LEDGER_MAX } from '../shared/ledger';
 import type { Profile } from '../shared/progress';
 import { store, type Save } from './save';
 import { toast } from './partytoast';
+import { resolveTrade } from './tradesave';
 
 /** The ledger needs the server: none in the solo build. */
 export const LEDGER = !import.meta.env?.VITE_SOLO;
@@ -38,6 +39,8 @@ export function pruneSave(s: Save, gone: Record<string, string[]>): Item[] {
 /** Check this save against the ledger (`get` reads it as it is when the answer comes back) and keep the result. */
 export async function checkLedger(get: () => Save, keep: (s: Save) => void = (s) => store(s), tell: (t: string) => void = (t) => toast(t)): Promise<Item[]> {
   if (!LEDGER) return [];
+  // A trade cut off by a closed page settles first, so what it gave away isn't shown as GONE.
+  await resolveTrade(get, keep);
   // Twins first, here: a replayed drop can leave one id twice in a kit.
   const twins = pruneSave(get(), {});
   const held: Record<string, string[]> = {};

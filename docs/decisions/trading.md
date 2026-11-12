@@ -39,3 +39,38 @@ Building step 1 (the ledger) and step 2 (boss drops minted through it). Step 3, 
   one id), but not the rule yet.
 - "Checked before use" lands with trading (step 3), where use means putting a piece in an offer.
 (Claude Opus 5.5)
+
+## 2026-11-11: step 3, trading in town
+
+- Walk up to another player in Wickhold: TRADE over your head (the phone's context button says TRADE).
+  Their ask also comes as a toast with a TRADE button. Words go over the town's room beside chat and
+  petting (client/trade.ts): ask, yes, offer, ok, no. A word must come from the hero it names.
+- Each side puts in items from the pack and gold; both see both (tap a row for its card and COMPARE).
+  Any change clears both accepts. Only the pack trades: not what you wear or hold, not the vault.
+  Hungry gear never trades; relics are their own list and never show.
+- A piece with no ledger id gets one (`x.<12 letters>`) and is minted to you as you offer it.
+- The server (api/ledger.ts `accept`): the first ACCEPT waits with the terms; the second matching one
+  checks every item is its giver's and swaps the owners in one script, or nothing moves ('bad').
+  Repeats answer the same, so a retry never trades twice. `withdraw` calls an open one off; `ask` reads.
+- Crash safety: before a browser's first ACCEPT, the trade is kept in the save (`Save.trade`,
+  client/tradesave.ts). The next load asks how it ended and settles it, in the same save that lets it go.
+  Then the GONE check runs, so what you traded away isn't shown as GONE.
+- Gold rides in the terms both accept; the server doesn't know a save's gold (the giver's own save is
+  checked). Can't ACCEPT without room in pack and vault for what comes in; overflow goes to the vault.
+- The other player gone from town 4 s calls it off. Both ACCEPTed and no answer in 90 s: called off.
+- Words: lore keeper and line editor, one pass each (src/client/tradewords.ts).
+- Small edits in shared files: game.ts (`townmates`, the TRADE spot in `near()`, `refit()`), main.ts
+  (the manager attached, ticked, TRADE on use), cluster.ts (TRADE on the context button), save.ts
+  (`trade` carried through `fromJson`).
+
+Open, for Kyle (from the lore keeper):
+1. Gold for nothing (a one-sided trade) between heroes: is that "giving" for the Want, or not? As built it
+   touches nothing; the lore keeper suggests recording "trade, like Tobin's".
+2. Touched and turning gear trades as built (only hungry is barred). Record that the Want it grew stays
+   with the hero who wore it?
+3. For the General chat: docs/design/trading.md says hungry gear "goes to the church or Nettle"; the bible
+   says Nettle never buys it. Not player-facing.
+4. The spec's open question (a receipt in the pack) is still open.
+
+Next: trading with party members on a job (Deep finds only once banked).
+(Claude Opus 5.5)

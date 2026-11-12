@@ -4,12 +4,17 @@
  *                                       hero only if it has no owner yet. {owners: [...]}, the owner each has
  *   POST {check: {hero: [id, ...]}}     a save on load: {gone: {hero: [id, ...]}}, what the ledger gives to
  *                                       another hero (an id it has never seen is taken by the hero holding it)
+ *   POST {accept: terms, hero}          a trade's ACCEPT (shared/trade.ts): {state: 'wait' | 'done' | 'bad'}.
+ *                                       The second matching ACCEPT swaps the owners, or nothing moves
+ *   POST {ask: id}                      where a trade stands: {state, terms}, accepting nothing
+ *   POST {withdraw: id, hero}           one of its heroes calls it off: {state} ('none', or how it settled)
  * No accounts, as for the world and the saves: a hero's id is its key. This keeps a piece from being in two
  * places; it can't stop a save edited by hand. A few commands per mint, one read per load.
  */
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { HERO_ID, LEDGER_ID, LEDGER_MAX } from '../src/shared/ledger.js';
 import { checkHeld, memoryLedgerStore, redisLedgerStore, type LedgerStore } from './_ledger.js';
+import { TRADE_ID, cleanTerms } from '../src/shared/trade.js';
 
 let store: Promise<LedgerStore> | null = null;
 function redisUrl(): string | undefined {
@@ -66,11 +71,24 @@ export function cleanCheck(raw: unknown): Record<string, string[]> | null {
 export default async function handler(req: IncomingMessage, res: ServerResponse): Promise<void> {
   try {
     if (req.method !== 'POST') return send(res, 405, { error: 'POST' });
-    let b: { mint?: unknown; check?: unknown } | null;
+    let b: { mint?: unknown; check?: unknown; accept?: unknown; hero?: unknown; ask?: unknown; withdraw?: unknown } | null;
     try {
       b = (await body(req)) as typeof b;
     } catch {
       return send(res, 400, { error: 'not JSON, or too big' });
+    }
+    if (b?.accept !== undefined) {
+      const t = cleanTerms(b.accept), hero = b.hero;
+      if (!t || (hero !== t.a.h && hero !== t.b.h)) return send(res, 400, { error: 'bad trade' });
+      return send(res, 200, { state: await (await getStore()).accept(t, hero) });
+    }
+    if (b?.ask !== undefined) {
+      if (typeof b.ask !== 'string' || !TRADE_ID.test(b.ask)) return send(res, 400, { error: 'bad trade' });
+      return send(res, 200, await (await getStore()).ask(b.ask));
+    }
+    if (b?.withdraw !== undefined) {
+      if (typeof b.withdraw !== 'string' || !TRADE_ID.test(b.withdraw) || typeof b.hero !== 'string' || !HERO_ID.test(b.hero)) return send(res, 400, { error: 'bad trade' });
+      return send(res, 200, { state: await (await getStore()).withdraw(b.withdraw, b.hero) });
     }
     if (b?.mint !== undefined) {
       const pairs = cleanMint(b.mint);

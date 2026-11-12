@@ -25,6 +25,7 @@ import { LOOKS, heroLook } from './sprites';
 import { ONLINE, fullForTest, onFull } from './relay';
 import { sayFull } from './netline';
 import { Townfolk } from './townfolk';
+import { Trades } from './tradeui';
 import { presence } from './townpresence';
 import { parkOf } from './parked';
 import { openFishing } from './fishmode';
@@ -159,6 +160,9 @@ function online(): Townfolk | null {
     // Parties gathered in town: the HUD card, toasts, being pulled into a friend's job (lobby.ts).
     lobby.attach(townfolk, (game.parties = new Parties(townfolk, () => ({ id: game.profile.id, name: game.profile.name }))));
     chat.attach(townfolk);
+    trades.attach(townfolk);
+    const tf = townfolk;
+    game.townmates = () => tf.here(game.room.map.name);
   }
   return townfolk;
 }
@@ -180,6 +184,8 @@ const views = new Views(scene);
 const fx = new Fx();
 const ways = new WayWatch();
 const panel = new Panel();
+/** Trading with another player in town (tradeui.ts). */
+const trades = new Trades(game, panel);
 // The townsfolk's goodbye as their panel closes (townvoice.ts).
 panel.onHide = () => void townVoice.close(voiceClock());
 const input = new Input(() => views.heroScreen());
@@ -261,6 +267,7 @@ const use = () => {
   else if (n.door) game.enter(n.door);
   // A hound to pet (petting.ts): kneel to it. The press that did it isn't "any input" to stop it, and
   // whoever can see it is told once (petword.ts).
+  else if (n.trade) trades.open(n.trade.id, n.trade.name);
   else if (n.pet) {
     if (startPet(game.hero, n.pet, performance.now() / 1000)) touchedIdle(input.read()), chat.pet(n.pet, petReact(ME));
   }
@@ -616,6 +623,8 @@ function tick(t: number): void {
   lobby.frame(inTown, t / 1000, !title.open);
   // (Out of Wickhold, in the yard or the wood, nothing goes to the relay: townpresence.ts.)
   town?.step(h ? presence(game, game.profile.name) : null, t / 1000, dt);
+  // A trade open with another player: the server's answer, or them gone (tradeui.ts).
+  trades.tick(performance.now() / 1000);
   // (Off screen, leading a job in the background: nothing to draw.)
   // (On the wall for the Night Watch: it paints itself over all this, watchmode.ts.)
   if (document.hidden || away()) return;

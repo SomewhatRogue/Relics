@@ -58,6 +58,7 @@ import { bankEnd, bankJob, banked, soloJob, unbank } from './jobbank';
 import { dropOwed, owedTo } from './owed';
 import { checkLedger } from './ledger';
 import { LedgerMint } from './ledgermint';
+import { TRADEW } from './tradewords';
 import { dressKit, forgetTaken } from './keepkit';
 import { gainRelics, keepKitNoting, seeRelic, type RelicMoment } from './relicnews';
 import { FULL, ONLINE } from './relay';
@@ -94,7 +95,7 @@ export interface Result { won: boolean; how: How; half: boolean; job: Job; gold:
 /** A leader back after a reload waits this long (the room held) for a friend to answer before the job's given up. */
 const HOLD = 10;
 /** Something you can use where you stand: a spot, a person, or a door. */
-export interface Near { label: string; talk?: SpotId; arg?: number; key?: string; door?: Block; chest?: number; npc?: Npc; /** A hound to pet (the lodge: petting.ts). */ pet?: Dog }
+export interface Near { label: string; talk?: SpotId; arg?: number; key?: string; door?: Block; chest?: number; npc?: Npc; /** A hound to pet (the lodge: petting.ts). */ pet?: Dog; /** Another player in town to TRADE with (tradeui.ts): their id and name. */ trade?: { id: string; name: string } }
 
 export const ME = 'me';
 /** Wickhold, its halls and the yard: out of bounds, you're only put back (sim/dread.ts). */
@@ -173,6 +174,8 @@ export class Game {
   private grown = 0;
   /** The job's own name (the party's room code, or this device's for a job alone): paid once, by it. */
   jobKey = '';
+  /** The other players standing where I am in town (main.ts sets it, online): TRADE with them (tradeui.ts). */
+  townmates: () => Hero[] = () => [];
   /** Ledgered drops minted to whoever got them, while I run the room (client/ledgermint.ts). */
   private mint = new LedgerMint();
   /** Leading again after a reload: the room waits till this for a friend to answer (HOLD). */
@@ -187,7 +190,7 @@ export class Game {
   constructor() {
     this.enterTown();
     // Every ledgered piece on these heroes, checked once (client/ledger.ts): one traded away shows GONE.
-    void checkLedger(() => this.save);
+    void checkLedger(() => this.save, () => this.refit());
   }
 
   get hero(): Hero {
@@ -317,7 +320,7 @@ export class Game {
     this.save = { ...s, current: -1 };
     store(this.save, s.savedAt);
     // A copy from another device may hold pieces since traded away (client/ledger.ts).
-    void checkLedger(() => this.save);
+    void checkLedger(() => this.save, () => this.refit());
     this.run = null;
     this.wood = null;
     this.enterTown();
@@ -1278,6 +1281,8 @@ export class Game {
     }
     if (this.mode === 'town' && !this.outside) for (const s of townSpots(this.world)) all.push({ x: s.x, y: s.y, label: s.label, talk: s.id, key: s.key });
     if (this.mode === 'yard') all.push({ x: RACK.post.x, y: RACK.post.y, label: 'THE STRAW MEN', talk: 'practice' });
+    // Another player beside you in town: TRADE (tradeui.ts). Their hero's id is 'o:' and their id.
+    if (this.mode === 'town') for (const o of this.townmates()) if (o.id.startsWith('o:')) all.push({ x: o.x, y: o.y, label: TRADEW.spot(o.tag ?? ''), trade: { id: o.id.slice(2), name: o.tag ?? '' } });
     // Maeve's hound by the lodge's fire, and a Ranger's own wherever it's at heel and all's quiet (petting.ts, petwhen.ts).
     const pets = petSpots(this.mode === 'town' ? this.outside?.door.door : null, h, ownPetOk(h, this.room, this.mode));
     for (const s of pets) if (!s.last) all.push({ x: s.x, y: s.y, label: s.label, pet: s.pet, reach: s.reach });
@@ -1518,6 +1523,12 @@ export class Game {
     if (id && !p.relics.some((r) => r.id === id)) return;
     p.relic = id;
     this.relicsChanged();
+  }
+
+  /** The save's kit changed under the hero (a trade, a piece GONE: client/ledger.ts): dress it again and keep it. */
+  refit(): void {
+    this.equip(this.hero, this.hero);
+    store(this.save);
   }
 
   /** The church changed this hero's relics or light (relicchurch.ts): dress the hero again and keep it. */

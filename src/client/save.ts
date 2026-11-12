@@ -3,6 +3,7 @@
  * own class (for life), level, gold and kit; the world (the town, the chapter, the council) is shared
  * by all of them. (The shared world moves to the server, api/world.ts, when the group plays online.)
  */
+import type { Pending } from '../shared/trade';
 import { HERO_SLOTS, fitPerks, newProfile, newStats, type Profile } from '../shared/progress';
 import { newWorld, type WorldState } from '../shared/story';
 import { DORMANT_POTIONS, WEAPONS, fitPlus, upgradeOld } from '../shared/tuning';
@@ -20,7 +21,8 @@ import { fitShiftRecord } from '../shared/shiftpay';
 
 const KEY = 'relic.save.v2', OLD = 'relic.save.v1';
 /** `savedAt`: when it was last kept here (it only goes forward), to tell which copy is newer (recovery.ts). */
-export interface Save { heroes: Profile[]; current: number; world: WorldState; savedAt?: number }
+/** `trade`: one this browser accepted on the server and hasn't settled yet (client/tradesave.ts). */
+export interface Save { heroes: Profile[]; current: number; world: WorldState; savedAt?: number; trade?: Pending }
 
 /** Fill in fields a saved hero predates. */
 const hero = (old: Partial<Profile>): Profile => {
@@ -80,7 +82,7 @@ const hero = (old: Partial<Profile>): Profile => {
 export function fromJson(s: Partial<Save> | null): Save | null {
   if (!s || !Array.isArray(s.heroes) || !s.world) return null;
   const heroes = s.heroes.slice(0, HERO_SLOTS).map(hero);
-  return { heroes, current: Math.min(s.current ?? -1, heroes.length - 1), world: { ...newWorld(), ...s.world }, savedAt: Number(s.savedAt) || 0 };
+  return { heroes, current: Math.min(s.current ?? -1, heroes.length - 1), world: { ...newWorld(), ...s.world }, savedAt: Number(s.savedAt) || 0, ...(s.trade ? { trade: s.trade } : {}) };
 }
 
 export function load(): Save {

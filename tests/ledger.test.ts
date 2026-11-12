@@ -4,6 +4,7 @@ import { checkHeld, memoryLedgerStore } from '../api/_ledger';
 import { cleanCheck, cleanMint } from '../api/ledger';
 import { dropLedger, ledgered, prune, runTag } from '../src/shared/ledger';
 import { Rng } from '../src/shared/rng';
+import { cleanTerms, terms } from '../src/shared/trade';
 import { uniqueItem } from '../src/shared/uniques';
 import type { Item } from '../src/shared/loot';
 import { newEnemy } from '../src/sim/enemies';
@@ -118,5 +119,65 @@ describe('boss drops through the ledger (step 2)', () => {
     r.ledgerRun = '';
     uniqueDrops(r, [fall(r, { name: 'SKARN' })], new Rng(1));
     expect(r.drops[0].item.ledger).toBeUndefined();
+  });
+});
+
+describe('a trade on the server (step 3)', () => {
+  const T = 'tr4de0001';
+  const setup = async () => {
+    const s = memoryLedgerStore();
+    await s.claim([['x:1', A], ['x:2', A], ['y:1', B]]);
+    return s;
+  };
+  const deal = (give: string[] = ['x:1'], back: string[] = ['y:1'], gold = 0) => terms(T, { h: B, give: back, gold }, { h: A, give, gold: 0 });
+
+  it('one ACCEPT waits; the second swaps every owner', async () => {
+    const s = await setup(), t = deal();
+    expect(t.a.h).toBe(A);
+    expect(await s.accept(t, A)).toBe('wait');
+    expect(await s.accept(t, A)).toBe('wait');
+    expect(await s.ask(T)).toMatchObject({ state: 'wait' });
+    expect(await s.accept(t, B)).toBe('done');
+    expect(await s.owners(['x:1', 'y:1', 'x:2'])).toEqual([B, A, A]);
+    // Asked again (a retry, a reload): done, and nothing moves twice.
+    expect(await s.accept(t, A)).toBe('done');
+    expect(await s.owners(['x:1', 'y:1'])).toEqual([B, A]);
+    expect((await s.ask(T)).state).toBe('done');
+  });
+
+  it('a changed offer clears both accepts', async () => {
+    const s = await setup();
+    await s.accept(deal(), A);
+    expect(await s.accept(deal(['x:1', 'x:2']), B)).toBe('wait');
+    expect(await s.owners(['x:1'])).toEqual([A]);
+    expect(await s.accept(deal(['x:1', 'x:2']), A)).toBe('done');
+    expect(await s.owners(['x:1', 'x:2', 'y:1'])).toEqual([B, B, A]);
+  });
+
+  it('an item that is not its giver\'s: nothing moves', async () => {
+    const s = await setup(), t = deal(['x:1', 'y:1'], []);
+    await s.accept(t, A);
+    expect(await s.accept(t, B)).toBe('bad');
+    expect(await s.owners(['x:1', 'y:1'])).toEqual([A, B]);
+    // A settled trade's id with other terms is refused, not reopened.
+    expect(await s.accept(deal(), A)).toBe('bad');
+  });
+
+  it('called off while open: dropped, and the other ACCEPT only waits; called off after it settled: still done', async () => {
+    const s = await setup(), t = deal();
+    await s.accept(t, A);
+    expect(await s.withdraw(T, B)).toBe('none');
+    expect(await s.accept(t, B)).toBe('wait');
+    expect(await s.owners(['x:1'])).toEqual([A]);
+    expect(await s.withdraw(T, 'hnotinit123')).toBe('none');
+    expect(await s.accept(t, A)).toBe('done');
+    expect(await s.withdraw(T, A)).toBe('done');
+  });
+
+  it('gold alone can change hands; nothing at all is no trade', () => {
+    expect(cleanTerms(terms(T, { h: A, give: [], gold: 50 }, { h: B, give: [], gold: 0 }))).not.toBeNull();
+    expect(cleanTerms(terms(T, { h: A, give: [], gold: 0 }, { h: B, give: [], gold: 0 }))).toBeNull();
+    expect(cleanTerms(terms(T, { h: A, give: ['x:1'], gold: 0 }, { h: A, give: [], gold: 0 }))).toBeNull();
+    expect(cleanTerms(terms(T, { h: A, give: ['x:1'], gold: 0 }, { h: B, give: ['x:1'], gold: 0 }))).toBeNull();
   });
 });
