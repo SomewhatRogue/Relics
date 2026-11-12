@@ -48,8 +48,9 @@ Copperdeep to bring them home.
 1. **The winding house.** The headframe and its great drum, half burnt; an elite pack on the gantry above you, coming
    down the stair.
 2. *A lull* along the top of the incline.
-3. **The incline.** THE BRAKESMAN at its brake at the top, carts sent down striped lanes at you as you climb; GRAB the
-   spent ones at the bottom to send them back up (mini-boss).
+3. **The incline.** THE BRAKESMAN at its brake at the top, carts sent down striped lanes at you as you climb. Hold
+   attack and let go as a cart reaches you and it goes back up at the brake (Kyle: "time a power hit at it so it flips
+   back"); GRAB a spent one at the foot does it too, slowly (mini-boss). *Built 2026-11-11, with the winding house.*
 4. **The ropeway and the loading stage** at the lip of the pit: THE HAULIER under its ropes and loads (boss).
 
 **Under the hill (map 2b).**
