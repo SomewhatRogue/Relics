@@ -54,8 +54,12 @@ function person(l: Look): Sprite {
     ['r', 2, 6, 8, 7, l.body], ['r', 2, 6, 8, 1, l.trim], ['r', 1, 7, 2, 4, l.body], ['r', 9, 7, 2, 4, l.body],
     ['p', 1, 11, l.skin], ['p', 10, 11, l.skin],
   ];
-  if (l.apron) parts.push(['r', 3, 8, 6, 5, l.apron]);
-  parts.push(['e', 6, 3.5, 3.4, 3.4, l.skin], ['p', 5, 4, '#141218'], ['p', 7, 4, '#141218'], ...l.hair);
+  // Detail (the art pass): a belt and buckle, cuffs at the sleeves, buttons, boots over the feet.
+  parts.push(['r', 2, 10, 8, 1, '#2a2018'], ['p', 6, 10, '#a89060'], ['r', 1, 10, 2, 1, l.trim], ['r', 9, 10, 2, 1, l.trim], ['r', 3, 14, 2, 1, '#2a2024'], ['r', 7, 14, 2, 1, '#2a2024']);
+  if (l.apron) parts.push(['r', 3, 8, 6, 5, l.apron], ['r', 3, 8, 6, 1, '#3a2a20'], ['p', 4, 11, l.trim]);
+  else parts.push(['p', 6, 7, '#2a2420'], ['p', 6, 9, '#2a2420']);
+  // A face: eyes, a mouth.
+  parts.push(['e', 6, 3.5, 3.4, 3.4, l.skin], ['p', 5, 4, '#141218'], ['p', 7, 4, '#141218'], ['p', 6, 5, '#6a3a2a'], ...l.hair);
   // A tall hat reaches above the head: grow the sprite upward to fit it.
   const lift = Math.max(0, ...parts.map((q) => -(q[2] as number)));
   // Drawn again at 1.5x for the art pass (sprites.ts `grow`), so they stand as tall as the heroes.

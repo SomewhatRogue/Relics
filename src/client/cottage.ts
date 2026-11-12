@@ -53,12 +53,25 @@ export function paintHouse(rect: Rect, b: Block, h: House, w: number, roofH: num
   rect(mx, roofH, mw, tall, wall), rect(mx, roofH, mw, 1, '#14121a');
   if (barn) for (let x = mx + 2; x < mx + mw; x += 4) rect(x, roofH + 1, 1, tall - 1, '#4a3420');
   else if (wall === WALLS[2]) for (let y = roofH + 3; y < roofH + tall; y += 4) for (let x = mx + ((y >> 2) % 2) * 3; x < mx + mw; x += 6) rect(x, y, 5, 1, '#45414c');
-  else for (const x of [mx, mx + mw - 2, mx + Math.round(mw * 0.35)]) rect(x, roofH + 1, 2, tall - 1, '#3e2a1a');
+  else {
+    for (const x of [mx, mx + mw - 2, mx + Math.round(mw * 0.35)]) rect(x, roofH + 1, 2, tall - 1, '#3e2a1a');
+    // Detail (the art pass): half-timbering, a beam across the wall and a brace in the first bay.
+    rect(mx, roofH + Math.round(tall * 0.45), mw, 2, '#3e2a1a');
+    const bay = Math.round(mw * 0.35);
+    for (let i = 2; i < Math.min(bay, Math.round(tall * 0.45)); i++) rect(mx + i, roofH + Math.round(tall * 0.45) - i + 1, 1, 1, '#3e2a1a');
+  }
   // (Windows at 1.5x with the art pass, their sills where the bigger people's heads are.)
   if (!barn) for (const x of windowsOf(h, w)) rect(x - 1, roofH + tall - 24, 8, 8, '#3e2a1a'), rect(x + 1, roofH + tall - 22, 4, 4, '#14100c'), rect(x - 1, roofH + tall - 20, 8, 1, '#3e2a1a'), rect(x + 2, roofH + tall - 22, 1, 4, '#3e2a1a');
   if (b.style === 'stone') for (const x of windowsOf(h, w)) rect(x - 3, roofH + tall - 23, 2, 6, '#4a3424'), rect(x + 7, roofH + tall - 23, 2, 6, '#4a3424'), rect(x - 1, roofH + 1, 8, 1, '#6a6470');
   // Detail (the art pass): a sill under each window, a base course along the wall's foot, a crack or two.
   if (!barn) for (const x of windowsOf(h, w)) rect(x - 2, roofH + tall - 16, 10, 1, '#6a5a44'), rect(x - 1, roofH + tall - 15, 8, 1, '#2a2018');
+  // Shutters open either side of each window; on some cottages a box of flowers under one.
+  if (!barn && b.style !== 'stone') for (const x of windowsOf(h, w)) rect(x - 4, roofH + tall - 24, 3, 8, '#4a5a3a'), rect(x + 7, roofH + tall - 24, 3, 8, '#4a5a3a'), rect(x - 3, roofH + tall - 21, 1, 2, '#3a4a2c'), rect(x + 8, roofH + tall - 21, 1, 2, '#3a4a2c');
+  if (!barn && h.roof % 2 === 0) {
+    const fx = windowsOf(h, w)[0];
+    rect(fx - 2, roofH + tall - 15, 10, 2, '#5a3d22');
+    for (let i = 0; i < 4; i++) rect(fx - 1 + i * 2, roofH + tall - 17, 1, 2, i % 2 ? '#b04a4a' : '#d8c060'), rect(fx + i * 2, roofH + tall - 16, 1, 1, '#3a5a30');
+  }
   rect(mx, roofH + tall - 2, mw, 2, '#2e2a30');
   for (let x = mx + 3; x < mx + mw - 2; x += 7) rect(x, roofH + tall - 2, 1, 2, '#46424c');
   rect(mx + Math.round(mw * 0.15), roofH + 4, 1, 3, '#2a2420'), rect(mx + Math.round(mw * 0.15) + 1, roofH + 7, 1, 2, '#2a2420'), rect(mx + Math.round(mw * 0.82), roofH + 6, 1, 2, '#2a2420');
@@ -74,6 +87,9 @@ export function paintHouse(rect: Rect, b: Block, h: House, w: number, roofH: num
   if (!barn) {
     const cx = chimneyOf(h, w);
     rect(cx, 0, 6, Math.min(8, roofH - 2), '#57525e'), rect(cx, 0, 6, 2, '#2a2733'), rect(cx + 1, 3, 4, 1, '#45414c');
+    // Detail: its bricks, and a clay pot on top.
+    for (let j = 4; j < Math.min(8, roofH - 2); j += 2) for (let i = (j / 2) % 2; i < 6; i += 3) rect(cx + i, j, 1, 1, '#45414c');
+    rect(cx + 2, -1, 2, 2, '#8a5a3a');
   }
   if (h.broken) hole(rect, b, mx, mw, roofH);
 }
@@ -89,8 +105,15 @@ function roof(rect: Rect, h: House, x: number, y: number, w: number, d: number):
     for (let j = y + 2; j < y + d; j += 3) {
       rect(x, j, w, 1, line);
       for (let i = x + ((j / 3) % 2) * 2; i < x + w; i += 5) rect(i, j - 2, 1, 2, line);
+      // Detail (the art pass): each course's lower edge catching the light, here and there a slipped tile.
+      for (let i = x + ((j / 3) % 2) * 2 + 1; i < x + w - 1; i += 5) rect(i, j - 1, 3, 1, 'rgba(255,255,255,0.08)');
+      if ((j + h.roof) % 7 === 0) rect(x + ((j * 7 + h.roof * 5) % Math.max(1, w - 4)), j - 2, 3, 2, line);
     }
+    // Moss in the courses, and a ridge cap along the top.
+    for (let k = 0; k < Math.round(w / 9); k++) rect(x + ((k * 13 + h.roof * 7) % Math.max(1, w - 3)), y + d - 2 - ((k * 5) % Math.max(1, d - 3)), 2, 1, '#3a4a2c');
+    rect(x, y + 1, w, 1, 'rgba(0,0,0,0.25)');
   }
+  if (h.thatch) rect(x, y + d - 1, w, 1, 'rgba(0,0,0,0.3)');
   rect(x, y, w, 1, line);
 }
 

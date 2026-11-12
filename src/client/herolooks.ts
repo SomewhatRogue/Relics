@@ -55,7 +55,7 @@ const ranger = (face: string[], pal: Record<string, string>, life: LookDef['life
 // skirts behind, its sway, its flare on a dash or a SHADOW STEP, and what the kit hangs off the belt are
 // cloaklife.ts (`mantle`).
 const G_HEAD = [
-  '..................', '.......cCCc.......', '.....ccCCCCcc.....', '....cCCCCCCCCc....', '...cCCOOOOOOCCc...',
+  '..................', '.......cCCc.......', '.....ccCCCCcc.....', '....cCcCCCCcCc....', '...cCCOOOOOOCCc...',
   '...CCOOOOOOOOCC...', '...CCSSEGSEGSCC...', '...CCKKKKKKKKCC...', '...CCkKKKKKKkCC...',
 ];
 const G_BODY = [
@@ -81,7 +81,7 @@ const rogue = (sk: Parameters<typeof skin>[0], pal: Record<string, string>): Loo
 export const LOOK_DEFS: Record<Cls, LookDef[]> = {
   WARRIOR: [
     // The knight: an open-faced helm with a red plume, blue and gold, a red cape.
-    warrior(['.......aAAa.......', '.....aAAAAAAa.....', '....aAAAAAAAAa....', '....aAAAAAAAAa....', '....aASSAASSAa....', '....aASESSESAa....', '....aASSSSSSAa....', '....aAsSssSsAa....', '.....aAsSSsAa.....'],
+    warrior(['.......aAAa.......', '.....aAAAAAAa.....', '....aAAAAAAAAa....', '....aAAAAAAAAa....', '....aASSAASSAa....', '....aASESSESAa....', '....kASSSSSSAk....', '....aAsSssSsAa....', '.....aAsSSsAa.....'],
       ['.......aAAa.......', '.....aAAAAAAa.....', '....aAAAAAAAAa....', '....aAAAAAAAAa....', '....aAAAAAAAAa....', '....aAAAAAAAAa....', '....aAAAAAAAAa....', '....aAAAAAAAAa....', '.....aAAAAAAa.....'],
       { ...skin('fair'), A: '#b4bcc6', a: '#6a727c', P: '#a8b0ba', p: '#6a727c', B: '#2f5d9b', b: '#24487a', T: '#d4a537', M: '#8a929c', m: '#666e78', K: '#5a3d22', k: '#d4a537', L: '#3a3f4a', F: '#2a2420' },
       { cape: ['#9a2420', '#5a1414'], plume: '#c0392b' }),
@@ -98,7 +98,7 @@ export const LOOK_DEFS: Record<Cls, LookDef[]> = {
   ],
   RANGER: [
     // Green hood and cloak, an auburn fringe under it, the quiver's grey goose feathers.
-    ranger(['....CCHHHHHHCCQ...', '....CHHSSSSHHCQ...', '....CSSESSESSCQ...', '....CSSSSSSSSCQ...', '....CCsSSSSsCCQ...', '.....CCCSSCCCQ....'],
+    ranger(['....CCHHHHHHCCQ...', '....CHHSSSSHHCQ...', '....CSSESSESSCQ...', '....CSsSSSSsSCQ...', '....CCsSSSSsCCQ...', '.....CCCSSCCCQ....'],
       { ...skin('light'), H: '#8a3e1e', C: '#3f6b3a', c: '#2a4a28', B: '#6b4a2b', K: '#4a3420', k: '#9aa3ad', Q: '#5a3d22', q: '#d8d0bc', W: '#9aa3ad', L: '#3a3a2a', F: '#2a2420' },
       { cloak: ['#3f6b3a', '#2a4a28'] }),
     // A trapper: brown hood with a fur edge, deep brown skin, a black beard.
@@ -106,7 +106,7 @@ export const LOOK_DEFS: Record<Cls, LookDef[]> = {
       { ...skin('deep'), H: '#141012', C: '#6b4a2b', c: '#9a8a70', B: '#8a7a5a', K: '#3a2a1a', k: '#9aa3ad', Q: '#4a3420', q: '#b03a2a', W: '#8a8a90', L: '#3a2e24', F: '#241c16' },
       { cloak: ['#6b4a2b', '#4a3420'] }),
     // A hill warden: grey-blue hood and cloak, pale, a fair fringe, white fletching.
-    ranger(['....CCHHHHHHCCQ...', '....CHHSSSSHHCQ...', '....CSSESSESSCQ...', '....CSSSSSSSSCQ...', '....CCsSSSSsCCQ...', '.....CCCSSCCCQ....'],
+    ranger(['....CCHHHHHHCCQ...', '....CHHSSSSHHCQ...', '....CSSESSESSCQ...', '....CSsSSSSsSCQ...', '....CCsSSSSsCCQ...', '.....CCCSSCCCQ....'],
       { ...skin('fair'), H: '#c8a868', C: '#4a5a6a', c: '#323e4a', B: '#5a5048', K: '#2a2420', k: '#9aa3ad', Q: '#3a3028', q: '#eeeae0', W: '#c0c8d0', L: '#3a3e46', F: '#2a2420' },
       { cloak: ['#4a5a6a', '#323e4a'] }),
   ],

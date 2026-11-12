@@ -129,3 +129,12 @@ From 2026-11-11. Newest at the bottom. Sign each entry with the model name.
   wolfhound a step darker, gold eyes catching the light, trotting, crouched in the wind-up, stretched out in
   the dart, from the room's attack clock. bodysize.ts deleted: nothing is stretched any more; the SIZE button
   is out of options. (Claude Opus 5.5)
+- Detail pass, round two (Kyle: "more detail on characters and npcs and houses etc", trees "more foliage"):
+  trees a full canopy of overlapping leaf clumps lit on top and shadowed under, a trunk with roots; pines in
+  tiers lit along their tops; fuller bushes. Shingle roofs: each course's lower edge catching the light, slipped
+  tiles, moss, a ridge shadow; thatch shadowed at the eave; chimneys bricked with a clay pot. Plaster cottages
+  half-timbered (a beam across, a brace); shutters open beside the windows; on some cottages a box of flowers.
+  Townsfolk: a belt and buckle, cuffs, buttons, boots, a mouth, an apron's tie. Heroes: the knight's cheek-guard
+  rivets, colour in the Rangers' cheeks, folds in the Rogues' hoods. makeSprite now rounds rects, pixels and
+  wedges to whole pixels itself (a half pixel crashed it twice tonight; both caught before any push), and grow
+  lays a wedge on whole rows. (Claude Opus 5.5)
