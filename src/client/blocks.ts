@@ -24,6 +24,7 @@ import { drawPlinth } from './statuedraw';
 import { FEN_KINDS } from './fenpieces';
 import { drawPieceBlock, drawPieceRound, paintBoxes } from './piecedraw';
 import { drawDoorGlow, paintShut } from './shutdraw';
+import { drawPost, isPost } from './postdraw';
 
 export { LOOK };
 
@@ -123,6 +124,8 @@ function door(b: Block, rect: Rect, w: number, wallY: number, l: Look): void {
 export function drawBlock(c: Ctx, b: Block, x: number, y: number, lit: boolean): void {
   // An instance's gate, shut or hauled up (gatedraw.ts).
   if (b.kind === 'gate') return drawGate(c, b, x, y);
+  // The square's job board and Public Works sign (postdraw.ts).
+  if (isPost(b)) return drawPost(c, b, x, y);
   const st = state(b);
   // Fenmere's boards and reeds (fenpieces.ts): their boxes on the lit layer only, so a telegraph on the
   // boards or under the reeds still shows.

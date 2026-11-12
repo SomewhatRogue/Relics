@@ -202,3 +202,8 @@ The plan, one class at a time so Kyle can play each against the old ones:
   painted building and piece of furniture twice its first height (blocklook.ts, was 1.5x), doors 12 by 28 (barns
   24 by 36) in blocks.ts and shutdraw.ts alike, cottage windows four-paned 10 by 10 with sills, shutters and
   flower boxes at the heroes' chests, town windows and the worn ones' boards to match (wear.ts). (Claude Opus 5.5)
+- The square's posting places (Kyle, 2026-11-12: the job board "kind of weird"; the mock "ya I like it"): the JOBS
+  and PUBLIC WORKS stalls drawn as a roofed notice board (pinned notices, a WANTED with a goblin's face, a red
+  seal, a lantern guttering off the eave, a paste pot, JOBS on the fascia) and a builder's sign on scaffold poles
+  (a painted hammer, the plans, planks and a mortar tub, WORKS on the top board). postdraw.ts, on the stalls' own
+  footprints: the room and the spots unchanged. (Claude Opus 5.5)
