@@ -2,6 +2,18 @@
 
 The Instances chat's log (docs/BOARD.md). Newest first, signed with the model. Spec: docs/design/instances.md.
 
+## 2026-11-11: the Open Cut's story and its ways, spec (Kyle; Claude Opus 5.5)
+
+Kyle asked for each instance anchored in a story arc with a few choices of way, several bigger maps each with its own
+mini-boss and boss, and the way leading back to the start. The fork: "majority rules, all have to line up on it";
+THE OVERMAN for now, each instance its own theme. Spec: `docs/design/open-cut-arc.md` (and the Project's
+`claude/open-cut-arc.md`): three acts (Rakehead; over the top OR under the hill; the pit floor), the cage back up to
+the rows. New: the reckoning house, the fork yard and its vote, THE LAMPMAN (the lamp room, fights in the dark),
+the Haulier as the over-the-top way's boss and the Sluicer and Raker as the other's. Lore keeper: on theme, with its
+fixes taken (heads and loads only, "the forge" not Coldscar on screen, no shard hints, the watch lamp kept apart,
+the ending a story that replays). Open for Kyle: which relic the Overman gives (the bible has the Grappling Hook from
+Hempen).
+
 ## 2026-11-11: the Open Cut on one map, step 2 stage A (Kyle: "exactly like that. some periods of lull in between mobs"; Claude Opus 5.5)
 
 `shared/cutmap.ts` joins the places built by hand into one map, bottom to top: the rows, a gate, a lull (a quiet
