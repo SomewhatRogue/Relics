@@ -52,5 +52,20 @@ export const LEECHMAN = {
   chain: ['punish'] as LeechMove[],
   chainPause: 0.05,
   /** Small ones wading in from the reeds: `n` every `every` s (phase 1, phase 2), never more than `most` of them up at once. */
+  /**
+   * The old windlass (slice 2, sim/leechwind.ts): a hero's GRAB within `reach` of it takes hold (GRAB again, or walking more than
+   * 0.8 off, lets go; `hold` s of grace after the press that took it). Held it fills over `turn` s (slipping back at `slip` of
+   * that pace when nobody holds it). Full, the shallows drain `dry` s (mud to walk, THE LEECHMAN down to a `crawl` and without
+   * THE LINE), then the water comes back and the windlass is stuck for `again` s.
+   */
+  windlass: { reach: 1.9, turn: 4, dry: 12, again: 20, hold: 0.25, slip: 0.5, crawl: 0.8 },
+  /** Phase 2, the water rises: every deep channel grows `grow` each side and `ends` at each end. */
+  flood: { grow: 0.6, ends: 0.4 },
+  /**
+   * Phase 2's log (sim/leechlog.ts): laid across a deep channel (`thick` wide, `over` past each bank) when its hero is across
+   * one, within `reach` of the near end; it stands `lay` s while it does, and not again for `relay` s after a log is lost. A
+   * hero's blow knocks it in; THE LEECHMAN on it goes in too, down `down` s, and the fall cannot floor it again for `again` s.
+   */
+  log: { thick: 1.8, over: 1.0, reach: 1.8, lay: 1.0, relay: 6, down: 3.5, again: 8 },
   adds: { n: 2, every: { 1: 24, 2: 12 } as Record<1 | 2, number>, most: 4 },
 };

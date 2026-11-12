@@ -10,6 +10,7 @@ import { inArc } from './combat';
 import { damage, isDead } from './damage';
 import { afflict, type World } from './elements';
 import { hitColumn } from './columns';
+import { hitLog } from './leechlog';
 import { freeSurvivor } from './survivors';
 import { rollFalse } from './falsecage';
 import { blastSurvivors } from './survivorhits';
@@ -35,6 +36,8 @@ export function damageProp(p: Prop, n: number, w: PropWorld, dx = 0, dy = 0): vo
   if (p.broken || p.kind === 'cart' || p.kind === 'tub') return;
   // (A dripstone column is never broken: a blow sets it falling, sim/columns.ts.)
   if (p.kind === 'column') return void (n > 0 && hitColumn(p, w));
+  // (THE LEECHMAN's log is never broken: a blow knocks it into the water, sim/leechlog.ts.)
+  if (p.kind === 'log') return void (n > 0 && hitLog(p, w));
   p.hp -= n;
   p.hitAt = w.now;
   if (p.hp <= 0) return breakProp(p, w, dx, dy);
@@ -73,7 +76,7 @@ export function stepProps(w: PropWorld, dt: number): Prop[] {
       continue;
     }
     // A cart stays where it is but for the rail (sim/haulcarts.ts): never knocked about.
-    if (p.kind === 'cart' || p.kind === 'tub' || p.kind === 'column') {
+    if (p.kind === 'cart' || p.kind === 'tub' || p.kind === 'column' || p.kind === 'log') {
       p.kvx = p.kvy = 0;
       continue;
     }
@@ -112,7 +115,7 @@ export function blastProps(x: number, y: number, r: number, dmg: number, knock: 
 /** A flying prop into a goblin (hits like its weight, big ones break), or a flying goblin into a prop. */
 export function propImpacts(w: PropWorld): void {
   for (const p of w.props) {
-    if (p.broken || p.lifted || p.kind === 'cart' || p.kind === 'tub' || p.kind === 'column') continue;
+    if (p.broken || p.lifted || p.kind === 'cart' || p.kind === 'tub' || p.kind === 'column' || p.kind === 'log') continue;
     for (const e of w.enemies) {
       const d = Math.hypot(e.x - p.x, e.y - p.y);
       if (isDead(e) || e.act === 'carried' || d > e.radius + p.radius + 0.05) continue;

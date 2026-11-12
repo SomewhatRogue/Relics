@@ -16,7 +16,7 @@ import type { Enemy } from './types';
 
 /** The pool a fallen goblin drops from, and the chance. */
 export function poolFor(e: Enemy, floor: number): { pool: PoolId; chance: number } | null {
-  if (e.boss) return e.boss.who === 'haulier' || e.boss.who === 'listener' ? { pool: e.boss.who, chance: UNIQUE_DROP.boss } : null;
+  if (e.boss) return e.boss.who === 'haulier' || e.boss.who === 'listener' || e.boss.who === 'leechman' ? { pool: e.boss.who, chance: UNIQUE_DROP.boss } : null;
   if (e.name && BUTCHER_POOLS[e.name]) return { pool: BUTCHER_POOLS[e.name], chance: UNIQUE_DROP.butcher };
   if (e.big) return { pool: e.role === 'ironhide' || e.variant === 'ironhide' ? 'iron' : 'brute', chance: UNIQUE_DROP.big[DEEP_BANDS.indexOf(bandOf(floor))] };
   return null;

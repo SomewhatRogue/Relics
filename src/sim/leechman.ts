@@ -7,16 +7,19 @@
  * arc, follows at once), the LEECHES (a red circle where they land; caught, they drain until a roll), the WADE-IN
  * blow (it wades up to you first), and the PEAT bank (a striped lane, mud left along it: sim/leechbook.ts).
  * WADE: it is quick in shallow water (the reverse of a hero) and slow on dry ground, mud is nothing to it, and it
- * never goes into deep water (its way round is the path finder's: sim/pathing.ts). Every blow has the kit's pose
+ * never goes into deep water (its way round is the path finder's: sim/pathing.ts, or a log it lays in phase 2: sim/leechlog.ts).
+ * With the shallows drained (sim/leechwind.ts) it crawls and can't use THE LINE; it goes for the hero turning the windlass. Every blow has the kit's pose
  * first (BOSS.tell). Phase 2: LEECHMAN.faster its pace, turn, wind-ups and rests, never under the Doorkeepers'
  * floors. Staggered, it does nothing. `boss.cmove` says which blow is under way.
  */
 import { BOSS, DOORKEEPERS, HERO, LEECHMAN as L, WEAPONS, type EnemyAttackSpec } from '../shared/tuning';
-import { inShallows, wadeAt } from '../shared/arena';
+import { currentMap, inShallows, wadeAt } from '../shared/arena';
 import { begin, walk } from './enemies';
 import { bossTarget, turnTo, theBook, type BossOn } from './bosskit';
 import { leechAim, leechState } from './leechhook';
 import { wayTo } from './pathing';
+import { crossing, logState, mayLay } from './leechlog';
+import { turner } from './leechwind';
 import type { AttackKind, Enemy, FightEvent, Hero } from './types';
 import type { LeechMove } from '../shared/leechtune';
 
@@ -29,7 +32,7 @@ const E = DOORKEEPERS.enrage.floor;
 const up = (h: Hero) => h.act !== 'down' && !h.out && h.id !== 'squire';
 
 /** Its pace where it stands, as it actually moves: quick in the shallows, slow on dry peat (mud is nothing to it). */
-export const leechPace = (x: number, y: number) => (inShallows(x, y) ? L.walk.water : L.walk.dry);
+export const leechPace = (x: number, y: number) => (currentMap().drained ? L.windlass.crawl : inShallows(x, y) ? L.walk.water : L.walk.dry);
 
 /** The rotation for a phase: the plan's, one seeded swap of two different neighbours, one more for a party of four. */
 export function leechRotation(phase: 1 | 2, party: number, swap: number): LeechMove[] {
@@ -78,7 +81,7 @@ export function stepLeechman(e: Enemy, heroes: Hero[], now: number, dt: number, 
   if (!bk) return;
   if (e.alert === false && !notice()) return;
   e.alert = true;
-  const live = heroes.filter(up), t = bossTarget(e, live, now);
+  const live = heroes.filter(up), t = turner(bk, live) ?? bossTarget(e, live, now);
   if (!t) return;
   // Roaring (a phase change): it faces its hero, and nothing lands either way. Staggered or down: it does nothing.
   if (b.roarUntil > now) return void turnTo(e, t.x - e.x, t.y - e.y, 6, dt);
@@ -98,12 +101,17 @@ export function stepLeechman(e: Enemy, heroes: Hero[], now: number, dt: number, 
   const rot = leechRotation(b.phase, b.party, bk.swaps[b.phase - 1] ?? 0), next = rot[b.rot % rot.length], s = SPEC[next];
   // A move it can't get to in time is passed over (a hero keeping off can't stall it for ever).
   if (now - b.rotAt > L.skip) return void advance(b, now, 0);
+  // THE LINE is not used while the shallows are drained.
+  if (next === 'line' && currentMap().drained) return void advance(b, now, 0);
   const near = next === 'wade' || next === 'peat' ? (next === 'wade' ? s.range! - 0.2 : s.range! - 1.5) : next === 'leeches' ? L.leech.range : L.line.range! - 0.5;
   const ok = d <= near && (next !== 'line' || d >= L.lineMin) && facing > (next === 'leeches' ? 0.6 : 0.85);
   if (ok && leechBegin(e, next, t, ev, heroes)) return void advance(b, now, e.attack!.windup + e.attack!.active + e.attack!.recover);
+  // Phase 2: a hero across a deep channel and no log down: it walks to the channel's near end and lays one.
+  const lg = logState(bk), go = b.flood && mayLay(bk, now) ? crossing(e, who) : null;
+  if (go && go.near <= L.log.reach) return void (lg.want = go);
   // Too close for the line: it backs off a step rather than waiting; otherwise it wades in.
   if (next === 'line' && d < L.lineMin) return void walkAway(e, ux, uy, k, dt);
-  if (d > near * 0.9) toward(e, t, facing, k, dt);
+  if (d > near * 0.9 || go) toward(e, go ? go.spot : t, facing, k, dt);
 }
 
 /** On to the next in its rotation (the clock for it starts once this blow is done). */

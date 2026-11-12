@@ -4,7 +4,7 @@
  */
 import type { HeroClass } from './weapons.js';
 
-export type PropKind = 'barrel' | 'oil' | 'crate' | 'table' | 'plank' | 'stave' | 'cage' | 'larder' | 'punt' | 'lamp' | 'cart' | 'tub' | 'column';
+export type PropKind = 'barrel' | 'oil' | 'crate' | 'table' | 'plank' | 'stave' | 'cage' | 'larder' | 'punt' | 'lamp' | 'cart' | 'tub' | 'column' | 'log';
 
 export interface PropSpec {
   radius: number;
@@ -34,6 +34,8 @@ export const PROPS: Record<PropKind, PropSpec> = {
   tub: { radius: 0.56, weight: 99, hp: 9999, pieces: null },
   /** THE LISTENER's dripstone column (shared/cavearena.ts): stands till hit, then falls the way it leans (sim/columns.ts). Never lifted, moved or broken. */
   column: { radius: 0.45, weight: 99, hp: 9999, pieces: null },
+  /** THE LEECHMAN's log, laid across a deep channel (sim/leechlog.ts): a blow knocks it into the water. Never lifted, moved or broken. */
+  log: { radius: 0.9, weight: 99, hp: 9999, pieces: null },
 };
 
 /** Classes big enough to lift and throw them (a Barbarian joins when the Warrior forks). */

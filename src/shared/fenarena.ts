@@ -5,7 +5,8 @@
  *   is quick there (sim/leechman.ts); dry peat banks at the edges (the way in, the back, the sides) where it is slow;
  * - two deep channels (deep true): nobody crosses them, THE LEECHMAN goes round;
  * - reed beds (the fen country's soft reeds, shared/fen.ts): walked through, and small ones wade in from them;
- * - an old windlass on the west bank (`map.windlass`, with a post round it): only placed in this slice.
+ * - an old windlass on the west bank (`map.windlass`, with a post round it): turned by a hero's GRAB (sim/leechwind.ts); the deep channels
+ *   are `span` ones a log can be laid across (sim/leechlog.ts).
  * The chained chest at the back opens at the kill; the way in at the bottom is shut until then.
  * Pure: the same job gives the same pool on every screen.
  */
@@ -46,7 +47,7 @@ export function fenArena(job: Job): RoomPlan {
   const map: GameMap = {
     name: POOL_NAME, w, h, wallFace: 3, rounds, blocks, theme,
     torches: [{ x: 3.4, y: 0.2 }, { x: 8.6, y: 0.2 }], braziers: [{ x: 11.1, y: 6.2, r: 0.3 }, { x: 6, y: 12.6, r: 0.3 }],
-    water: [{ ...s.shallows }, ...s.deep.map((d) => ({ ...d, deep: true }))], windlass: s.windlass,
+    water: [{ ...s.shallows }, ...s.deep.map((d) => ({ ...d, deep: true, span: true, onlyLog: true }))], windlass: s.windlass,
     hero: { x: w / 2, y: h - 1.5 }, exit: { x: w / 2 - 1.1, y: h - 0.7, w: 2.2, h: 0.7 },
   };
   const leechman = { kind: 'scrapper' as const, variant: 'heavy' as const, ...s.leechman, hp: LEECHMAN.hp, name: LEECH_NAME, boss: 'leechman' as const, awake: false };

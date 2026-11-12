@@ -15,6 +15,7 @@ import { PATH } from '../shared/tuning';
 
 export interface Grid { cols: number; rows: number; cost: Uint8Array; sig: string; fields: Map<number, Float32Array>; part?: Int32Array; nearest: Map<string, number> }
 export const C = PATH.cell;
+const overlaps = (a: { x: number; y: number; w: number; h: number }, b: { x: number; y: number; w: number; h: number }) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
 const grids = new WeakMap<GameMap, Map<number, Grid>>();
 
 /** A grid is kept for each size of body in the room (a goblin's radius, to a hundredth: a handful of sizes). */
@@ -42,7 +43,14 @@ function build(m: GameMap, size: number, sig: string): Grid {
   };
   // (A gap with a log laid across it is crossed by the log: sim/staithe.ts.)
   const laid = m.blocks.filter((b) => b.kind === 'gangway' && b.deck && !b.ruined);
-  for (const w of m.water ?? []) if (w.deep && !(w.span && laid.length)) box(w);
+  for (const w of m.water ?? []) {
+    if (!w.deep) continue;
+    if (w.onlyLog) {
+      // (A channel a log is laid across is crossed on the log alone.)
+      box(w);
+      for (const b of laid) if (overlaps(b, w)) for (let j = Math.floor(b.y / C); j <= Math.floor((b.y + b.h) / C); j++) for (let i = Math.floor(b.x / C); i <= Math.floor((b.x + b.w) / C); i++) if (inArea(b, (i + 0.5) * C, (j + 0.5) * C) && i >= 0 && j >= 0 && i < cols && j < rows) cost[j * cols + i] = 1;
+    } else if (!(w.span && laid.length)) box(w);
+  }
   for (const b of m.blocks) if (solid(b)) box(b);
   for (const c of m.rounds) disc(c.x, c.y, c.r);
   for (const b of m.braziers) disc(b.x, b.y, b.r);
@@ -71,7 +79,7 @@ function build(m: GameMap, size: number, sig: string): Grid {
 
 /** The grid for a body of radius r on this map (collide() works on the current map, which this is). */
 export function gridOf(m: GameMap, r: number): Grid {
-  const sig = `${m.blocks.filter((b) => b.ruined || b.deck).length}.${m.blocks.length}.${m.rounds.length}.${m.water?.length ?? 0}.${m.npcs?.length ?? 0}`;
+  const sig = `${m.blocks.filter((b) => b.ruined || b.deck).length}.${m.blocks.length}.${m.rounds.length}.${m.water?.length ?? 0}.${m.water?.reduce((s, w) => s + w.x + w.y + w.w + w.h, 0) ?? 0}.${m.npcs?.length ?? 0}`;
   const size = sizeOf(r);
   let mine = grids.get(m);
   if (!mine) grids.set(m, (mine = new Map()));

@@ -9,7 +9,7 @@ import type { Item, TraitId } from './loot.js';
 import type { ArmorKind, ModId } from './mods.js';
 import type { WeaponId } from './weapons.js';
 
-export type PoolId = 'haulier' | 'doorkeepers' | 'mawl' | 'skarn' | 'knuckles' | 'spoon' | 'gutchain' | 'rust' | 'brute' | 'iron' | 'listener';
+export type PoolId = 'haulier' | 'doorkeepers' | 'mawl' | 'skarn' | 'knuckles' | 'spoon' | 'gutchain' | 'rust' | 'brute' | 'iron' | 'listener' | 'leechman';
 
 export interface Unique {
   name: string;
@@ -49,6 +49,10 @@ export const UNIQUES = {
   hushmaul: { name: 'THE HUSHED MAUL', pool: 'listener', slot: 'weapon', kit: 'mace', trait: 'crushing', mods: [{ id: 'damage', v: 0.17 }, { id: 'knock', v: 0.22 }, { id: 'guard', v: 0.1 }], line: 'A hammer head black with the wet, on a haft wrapped in rag, and it hardly rings when it lands.' },
   dampmail: { name: 'DAMP MAIL', pool: 'listener', slot: 'armor', armor: 'heavy', mods: [{ id: 'tough', v: 0.2 }, { id: 'health', v: 25 }, { id: 'foot', v: 0.06 }], line: 'Steel gone dark with cave water, and quiet when it moves.' },
   dripring: { name: 'A DRIPSTONE RING', pool: 'listener', slot: 'ring', mods: [{ id: 'dodge', v: 0.12 }, { id: 'breath', v: 0.15 }, { id: 'health', v: 15 }], line: 'Cut from a stub of cave dripstone, and still damp.' },
+  // THE LEECHMAN's pool (fen-black leather and stitched gear, lost and somehow dry). PLACEHOLDER names and lines for the lore keeper and line editor.
+  leechstrap: { name: 'THE LEECH-HOOK', pool: 'leechman', slot: 'weapon', kit: 'spear', trait: 'riposte', mods: [{ id: 'reach', v: 0.18 }, { id: 'damage', v: 0.14 }, { id: 'guard', v: 0.12 }], line: 'A long hook on a pole of black bog-oak, and it dries as you hold it.' },
+  fenhide: { name: 'FEN-BLACK HIDE', pool: 'leechman', slot: 'armor', armor: 'medium', mods: [{ id: 'tough', v: 0.18 }, { id: 'health', v: 20 }, { id: 'dodge', v: 0.1 }], line: 'Stitched leather the fen turned black, and somehow dry inside.' },
+  leechring: { name: 'A STITCHED RING', pool: 'leechman', slot: 'ring', mods: [{ id: 'foot', v: 0.08 }, { id: 'breath', v: 0.15 }, { id: 'health', v: 15 }], line: 'A strip of waxed leather sewn into a ring, and it has never been wet.' },
 } satisfies Record<string, Unique>;
 export type UniqueId = keyof typeof UNIQUES;
 

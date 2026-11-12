@@ -842,6 +842,11 @@ export type FightEvent =
   /** THE LEECHMAN (sim/leechhook.ts, sim/leechbook.ts): leeches thrown, latched on a hero (`id`), draining them, shaken off by a roll; and the peat bank's mud laid (a circle `r` wide at x, y, for `time` s). */
   | { k: 'leech'; what: 'throw' | 'latch' | 'drain' | 'shake'; x: number; y: number; id?: string }
   | { k: 'mud'; x: number; y: number; r: number; time: number }
+  /** The windlass (sim/leechwind.ts): taken hold of, turning (`p` the quarter of the way round, 0.25 to 0.75), let go, the shallows drained (`time` s), the water back, or stuck (not yet). */
+  | { k: 'windlass'; what: 'take' | 'turn' | 'let' | 'drained' | 'back' | 'stuck'; x: number; y: number; by?: string; p?: number; time?: number }
+  /** Phase 2 (sim/leechlog.ts): the water rises (`deep` the channels as they now are); a log laid (a box), knocked in (`down`: THE LEECHMAN was on it), THE LEECHMAN shrugging off the fall, or hauling out at (x, y). */
+  | { k: 'flood'; x: number; y: number; deep: { x: number; y: number; w: number; h: number }[] }
+  | { k: 'log'; what: 'lay' | 'fall' | 'shrug' | 'out'; x: number; y: number; w: number; h: number; down?: boolean; by?: string }
   /** A perfect shot that blinds meets THE LISTENER: it is already blind (the line is shared/bosswords.ts LISTEN_BLIND). */
   | { k: 'listenblind'; x: number; y: number }
   | { k: 'bare'; x: number; y: number }

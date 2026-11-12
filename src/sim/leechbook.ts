@@ -5,7 +5,7 @@
  * LEECHMAN.leech.every s (never the last point) until the hero rolls, and fall off a hero who goes down or when it
  * dies; the PEAT bank's mud is laid along its lane as the blow lands (`map.mud`, circles that slow a body: wadeAt)
  * and worn away LEECHMAN.mud.time s on; and below LEECHMAN.phase2 of its health, phase 2: a roar (nothing landing
- * either way), `boss.flood` set (slice 2: rising water, logs), and small ones wading in from the reeds twice as
+ * either way), `boss.flood` set (the water rises, logs: sim/leechlog.ts), and small ones wading in from the reeds twice as
  * often. Small ones come every LEECHMAN.adds.every s, never more than LEECHMAN.adds.most up at once.
  */
 import { BOSS, LEECHMAN as L } from '../shared/tuning';
@@ -16,13 +16,15 @@ import { downIfDead } from './combat';
 import { isDead } from './damage';
 import { forget, type BossBook } from './bosskit';
 import { leechState, type LeechState } from './leechhook';
+import { riseWater, stepLogs } from './leechlog';
+import { endWindlass, stepWindlass } from './leechwind';
 import type { World } from './elements';
 import type { Enemy, FightEvent, Hero } from './types';
 
 export function stepLeechBook(bk: BossBook, w: World, spawn: (x: number, y: number) => Enemy): void {
   const now = w.now, e = w.enemies.find((x) => x.boss?.who === 'leechman'), st = leechState(bk), m = currentMap();
   if (m.mud?.length) m.mud = m.mud.filter((c) => c.until > now);
-  if (!e || isDead(e)) return void st.leeched.clear();
+  if (!e || isDead(e)) return void (st.leeched.clear(), endWindlass(bk));
   const b = e.boss!;
   forget(bk, now);
   if (bk.started < 0 && e.alert) {
@@ -34,6 +36,8 @@ export function stepLeechBook(bk: BossBook, w: World, spawn: (x: number, y: numb
   }
   drain(st, w.heroes, e, now, w.ev);
   peat(e, st, now, w.ev);
+  stepWindlass(bk, e, w);
+  stepLogs(bk, e, w);
   // Its rest between blows is its own: straight on after a haul (the punish), else LEECHMAN.pauseBetween.
   if (e.attack) st.was = true;
   else if (st.was) (st.was = false), (e.cooldown = st.punish && st.punish.until > now ? L.chainPause : L.pauseBetween / (b.phase === 2 ? L.faster : 1));
@@ -44,6 +48,7 @@ export function stepLeechBook(bk: BossBook, w: World, spawn: (x: number, y: numb
     Object.assign(b, { phase: 2, rot: 0, rotAt: now + BOSS.roar, roarUntil: now + BOSS.roar, flood: true, cmove: undefined });
     st.punish = null;
     w.ev.push({ k: 'roar', x: e.x, y: e.y });
+    riseWater(w.ev);
     adds(st, w, spawn, now, 2);
   }
   if (now >= st.nextAdds && b.roarUntil <= now) adds(st, w, spawn, now, b.phase);

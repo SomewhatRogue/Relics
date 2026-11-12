@@ -301,6 +301,8 @@ export interface GameMap {
   /** THE LEECHMAN's fen pool (shared/fenarena.ts): the old windlass at one side (drawn and placed only until slice 2), and the mud its peat bank leaves (sim/leechbook.ts): circles that slow a body to MUD_SLOW until `until`. */
   windlass?: { x: number; y: number };
   mud?: { x: number; y: number; r: number; until: number }[];
+  /** The windlass has drained the shallows (sim/leechwind.ts): the shallow water is mud to walk, not wading; deep water stays deep. */
+  drained?: boolean;
   /** The Doorkeepers' ground in the Deep (shared/sealarena.ts): the sealed door in the back wall, drawn only (client/sealdraw.ts). */
   sealed?: { x: number; w: number };
   /** An instance's stretches on one map, in order (sim/stretches.ts; docs/design/open-cut-map.md). */
@@ -353,7 +355,8 @@ export interface GameMap {
   fen?: import('./fen.js').FenMap;
 }
 /** `span`: a gap a laid log crosses (deep water stops you there unless you're on the log). */
-export interface Water { x: number; y: number; w: number; h: number; deep?: boolean; span?: boolean }
+/** `onlyLog`: of a `span` gap, only what is under a laid log is crossed by goblins on their way (the Staithe's log fills its gap). */
+export interface Water { x: number; y: number; w: number; h: number; deep?: boolean; span?: boolean; onlyLog?: boolean }
 /**
  * The Staithe as laid (shared/staithe.ts): the ring on the bank at the gap, the folk's places on the jetty
  * and the netted's on the bank, the skimmer's post and where it pours, the punt's landings (jetty, far
@@ -377,10 +380,11 @@ export interface Blaze { patches: (Area & { at: number })[]; beams: { x: number;
 /** How fast anyone moves knee-deep in a ford or a bog: a little slower than dry ground (was 0.55, a crawl). */
 export const WADE = 0.7;
 /** How fast you can move where you stand (slowed in shallow water). */
-export const inShallows = (x: number, y: number) => !!(nearby(MAP, x, y)?.water ?? MAP.water)?.some((w) => !w.deep && inArea(w, x, y));
+const inWater = (x: number, y: number) => !!(nearby(MAP, x, y)?.water ?? MAP.water)?.some((w) => !w.deep && inArea(w, x, y));
+export const inShallows = (x: number, y: number) => !MAP.drained && inWater(x, y);
 /** Mud laid on the ground (THE LEECHMAN's peat bank) slows a body to this, whatever else is under it. */
 export const MUD_SLOW = 0.55;
-export const wadeAt = (x: number, y: number) => (inShallows(x, y) ? WADE : 1) * (MAP.mud?.some((c) => Math.hypot(c.x - x, c.y - y) <= c.r) ? MUD_SLOW : 1);
+export const wadeAt = (x: number, y: number) => (inShallows(x, y) ? WADE : MAP.drained && inWater(x, y) ? MUD_SLOW : 1) * (MAP.mud?.some((c) => Math.hypot(c.x - x, c.y - y) <= c.r) ? MUD_SLOW : 1);
 
 export const onLedge = (m: GameMap, x: number, y: number) => !!m.ledges?.some((l) => x > l.x && x < l.x + l.w && y > l.y && y < l.y + l.h);
 export const inRamp = (m: GameMap, x: number, y: number) => !!m.ledges?.some((l) => l.ramps.some((r) => inArea(r, x, y)));
