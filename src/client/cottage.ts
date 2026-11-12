@@ -57,6 +57,11 @@ export function paintHouse(rect: Rect, b: Block, h: House, w: number, roofH: num
   // (Windows at 1.5x with the art pass, their sills where the bigger people's heads are.)
   if (!barn) for (const x of windowsOf(h, w)) rect(x - 1, roofH + tall - 24, 8, 8, '#3e2a1a'), rect(x + 1, roofH + tall - 22, 4, 4, '#14100c'), rect(x - 1, roofH + tall - 20, 8, 1, '#3e2a1a'), rect(x + 2, roofH + tall - 22, 1, 4, '#3e2a1a');
   if (b.style === 'stone') for (const x of windowsOf(h, w)) rect(x - 3, roofH + tall - 23, 2, 6, '#4a3424'), rect(x + 7, roofH + tall - 23, 2, 6, '#4a3424'), rect(x - 1, roofH + 1, 8, 1, '#6a6470');
+  // Detail (the art pass): a sill under each window, a base course along the wall's foot, a crack or two.
+  if (!barn) for (const x of windowsOf(h, w)) rect(x - 2, roofH + tall - 16, 10, 1, '#6a5a44'), rect(x - 1, roofH + tall - 15, 8, 1, '#2a2018');
+  rect(mx, roofH + tall - 2, mw, 2, '#2e2a30');
+  for (let x = mx + 3; x < mx + mw - 2; x += 7) rect(x, roofH + tall - 2, 1, 2, '#46424c');
+  rect(mx + Math.round(mw * 0.15), roofH + 4, 1, 3, '#2a2420'), rect(mx + Math.round(mw * 0.15) + 1, roofH + 7, 1, 2, '#2a2420'), rect(mx + Math.round(mw * 0.82), roofH + 6, 1, 2, '#2a2420');
   if (lw) {
     // The lean-to: lower, rough boards, a plank roof.
     const drop = 7;

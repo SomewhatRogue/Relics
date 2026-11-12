@@ -112,3 +112,10 @@ From 2026-11-11. Newest at the bottom. Sign each entry with the model name.
   pouch; the Cleric's pouch and soles. Goblins: a ragged jerkin hem, a rope knot at the belt, knobbly knees,
   claws on hands and toes, a ring in one ear, a wart. Butchers: rag wraps on the legs, toe claws, a nose ring,
   an old scar on the brow. (Claude Opus 5.5)
+- Detail pass, props and buildings: drawn into each prop's own shapes so they come out at 1.5x with it
+  (barrel stave seams, hoop rivets and lid; table grain, nails and a mug; the well's stone courses, a bucket on
+  its rope, moss; loose straw on hay; stump rings; leaf highlights and bark on trees and pines; cracks and moss
+  on rocks; rust on cages; chips in pillars; rivets and dead coals on braziers; an arrow in the target; nails
+  in the crate's corners). Cottages: a sill under each window, a base course along the wall's foot, cracks in
+  the plaster. Every door: its planks, iron hinge straps, a handle. Next in the pass: the mobs as slice 7
+  redraws them (wolves, spiders, the meaty sorts), and the floors. (Claude Opus 5.5)

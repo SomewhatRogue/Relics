@@ -108,6 +108,13 @@ function door(b: Block, rect: Rect, w: number, wallY: number, l: Look): void {
   const dw = b.kind === 'barn' ? 18 : b.kind === 'den' ? 12 : 9, dh = Math.min(l.tall - 4, b.kind === 'barn' ? 27 : 16);
   rect(Math.round(w / 2 - dw / 2), wallY + l.tall - dh, dw, dh, b.kind === 'den' ? '#0d0b10' : '#2a1e14');
   if (b.kind !== 'den') rect(Math.round(w / 2 - dw / 2), wallY + l.tall - dh, dw, 1, '#5a3d22');
+  // Detail (the art pass): its planks, iron hinge straps and a handle.
+  if (b.kind !== 'den') {
+    const dx = Math.round(w / 2 - dw / 2);
+    for (let x = dx + 3; x < dx + dw - 1; x += 3) rect(x, wallY + l.tall - dh + 1, 1, dh - 1, '#1e150e');
+    for (const y of [wallY + l.tall - dh + 3, wallY + l.tall - 4]) rect(dx, y, Math.min(5, dw - 2), 1, '#6a6674');
+    rect(dx + dw - 3, wallY + l.tall - Math.round(dh / 2), 1, 2, '#b89a4a');
+  }
   // Barred: planks nailed across.
   if (b.locked) for (const k of [0.35, 0.7]) rect(Math.round(w / 2 - dw / 2) - 2, Math.round(wallY + l.tall - dh * k), dw + 4, 2, '#7a5a34');
 }
