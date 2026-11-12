@@ -60,24 +60,24 @@ export function paintHouse(rect: Rect, b: Block, h: House, w: number, roofH: num
     const bay = Math.round(mw * 0.35);
     for (let i = 2; i < Math.min(bay, Math.round(tall * 0.45)); i++) rect(mx + i, roofH + Math.round(tall * 0.45) - i + 1, 1, 1, '#3e2a1a');
   }
-  // (Windows at 1.5x with the art pass, their sills where the bigger people's heads are.)
-  if (!barn) for (const x of windowsOf(h, w)) rect(x - 1, roofH + tall - 24, 8, 8, '#3e2a1a'), rect(x + 1, roofH + tall - 22, 4, 4, '#14100c'), rect(x - 1, roofH + tall - 20, 8, 1, '#3e2a1a'), rect(x + 2, roofH + tall - 22, 1, 4, '#3e2a1a');
-  if (b.style === 'stone') for (const x of windowsOf(h, w)) rect(x - 3, roofH + tall - 23, 2, 6, '#4a3424'), rect(x + 7, roofH + tall - 23, 2, 6, '#4a3424'), rect(x - 1, roofH + 1, 8, 1, '#6a6470');
+  // (Windows sized to the tall heroes, 2026-11-12: four panes, the sill at their chests.)
+  if (!barn) for (const x of windowsOf(h, w)) rect(x - 1, roofH + tall - 34, 10, 10, '#3e2a1a'), rect(x + 1, roofH + tall - 32, 6, 6, '#14100c'), rect(x - 1, roofH + tall - 29, 10, 1, '#3e2a1a'), rect(x + 3, roofH + tall - 32, 1, 6, '#3e2a1a');
+  if (b.style === 'stone') for (const x of windowsOf(h, w)) rect(x - 3, roofH + tall - 33, 2, 8, '#4a3424'), rect(x + 9, roofH + tall - 33, 2, 8, '#4a3424'), rect(x - 1, roofH + 1, 10, 1, '#6a6470');
   // Detail (the art pass): a sill under each window, a base course along the wall's foot, a crack or two.
-  if (!barn) for (const x of windowsOf(h, w)) rect(x - 2, roofH + tall - 16, 10, 1, '#6a5a44'), rect(x - 1, roofH + tall - 15, 8, 1, '#2a2018');
+  if (!barn) for (const x of windowsOf(h, w)) rect(x - 2, roofH + tall - 24, 12, 1, '#6a5a44'), rect(x - 1, roofH + tall - 23, 10, 1, '#2a2018');
   // Shutters open either side of each window; on some cottages a box of flowers under one.
-  if (!barn && b.style !== 'stone') for (const x of windowsOf(h, w)) rect(x - 4, roofH + tall - 24, 3, 8, '#4a5a3a'), rect(x + 7, roofH + tall - 24, 3, 8, '#4a5a3a'), rect(x - 3, roofH + tall - 21, 1, 2, '#3a4a2c'), rect(x + 8, roofH + tall - 21, 1, 2, '#3a4a2c');
+  if (!barn && b.style !== 'stone') for (const x of windowsOf(h, w)) rect(x - 5, roofH + tall - 34, 4, 10, '#4a5a3a'), rect(x + 9, roofH + tall - 34, 4, 10, '#4a5a3a'), rect(x - 4, roofH + tall - 30, 1, 2, '#3a4a2c'), rect(x + 11, roofH + tall - 30, 1, 2, '#3a4a2c');
   if (!barn && h.roof % 2 === 0) {
     const fx = windowsOf(h, w)[0];
-    rect(fx - 2, roofH + tall - 15, 10, 2, '#5a3d22');
-    for (let i = 0; i < 4; i++) rect(fx - 1 + i * 2, roofH + tall - 17, 1, 2, i % 2 ? '#b04a4a' : '#d8c060'), rect(fx + i * 2, roofH + tall - 16, 1, 1, '#3a5a30');
+    rect(fx - 2, roofH + tall - 22, 12, 3, '#5a3d22');
+    for (let i = 0; i < 5; i++) rect(fx - 1 + i * 2, roofH + tall - 25, 1, 2, i % 2 ? '#b04a4a' : '#d8c060'), rect(fx + i * 2, roofH + tall - 23, 1, 1, '#3a5a30');
   }
   rect(mx, roofH + tall - 2, mw, 2, '#2e2a30');
   for (let x = mx + 3; x < mx + mw - 2; x += 7) rect(x, roofH + tall - 2, 1, 2, '#46424c');
   rect(mx + Math.round(mw * 0.15), roofH + 4, 1, 3, '#2a2420'), rect(mx + Math.round(mw * 0.15) + 1, roofH + 7, 1, 2, '#2a2420'), rect(mx + Math.round(mw * 0.82), roofH + 6, 1, 2, '#2a2420');
   if (lw) {
     // The lean-to: lower, rough boards, a plank roof.
-    const drop = 7;
+    const drop = 9;
     rect(lx, drop, lw, roofH, '#4a3a2a');
     for (let y = drop + 2; y < drop + roofH; y += 3) rect(lx, y, lw, 1, '#3a2a1a');
     rect(lx, drop + roofH, lw, tall - drop, '#4a3420');
@@ -131,7 +131,7 @@ function hole(rect: Rect, b: Block, mx: number, mw: number, roofH: number): void
 export function drawLit(c: Ctx, h: House, x: number, top: number, w: number, roofH: number, tall: number, lamps = true): void {
   c.glow.fillStyle = '#ffd27a';
   // The windows show the fire only once it's dark enough to light the lamps (shared/lamps.ts).
-  if (lamps) for (const wx of windowsOf(h, w)) c.glow.fillRect(Math.round(x + wx + 1), Math.round(top + roofH + tall - 22), 4, 4);
+  if (lamps) for (const wx of windowsOf(h, w)) c.glow.fillRect(Math.round(x + wx + 1), Math.round(top + roofH + tall - 32), 6, 6);
   const cx = x + chimneyOf(h, w) + 3;
   for (let j = 0; j < 5; j++) {
     const p = (c.now * 0.18 + j / 5 + x * 0.01) % 1;

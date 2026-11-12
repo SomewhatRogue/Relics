@@ -24,10 +24,11 @@ export function wear(g: CanvasRenderingContext2D, rect: Rect, b: Block, w: numbe
     for (let x = hx + 1; x < hx + hw; x += 3) rect(x, hy, 1, hh, '#5a3d22');
   }
   // The right window boarded, two planks crossed; the left one's shutter hanging off a hinge.
-  const wy = wallY + 5, rx = Math.round(w * 0.72), lx = Math.round(w * 0.22);
-  rect(rx - 2, wy - 1, 7, 5, '#14121a');
-  rect(rx - 3, wy, 9, 1, '#7a5a34'), rect(rx - 3, wy + 2, 9, 1, '#6b4a2b');
-  rect(lx - 3, wy + 1, 2, 5, '#4a3420');
+  // (Sized to the tall heroes, 2026-11-12.)
+  const wy = wallY + 8, rx = Math.round(w * 0.72), lx = Math.round(w * 0.22);
+  rect(rx - 3, wy - 1, 9, 7, '#14121a');
+  rect(rx - 4, wy, 11, 2, '#7a5a34'), rect(rx - 4, wy + 3, 11, 2, '#6b4a2b');
+  rect(lx - 4, wy + 1, 3, 7, '#4a3420');
 }
 
 /** Which of the two windows still show a light (a boarded one doesn't). */

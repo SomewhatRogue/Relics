@@ -17,7 +17,8 @@ const PLANK = ['#b09a72', '#9a845e', '#c4ae84'];
 
 /** The door's box on the house's canvas (as blocks.ts paints a door). */
 export function doorBox(b: Block, w: number, roofH: number, tall: number): { x: number; y: number; w: number; h: number } {
-  const dw = b.kind === 'barn' ? 12 : 6, dh = Math.min(tall - 3, b.kind === 'barn' ? 18 : 11);
+  // (The same door blocks.ts paints: sized to the tall heroes, 2026-11-12.)
+  const dw = b.kind === 'barn' ? 24 : 12, dh = Math.min(tall - 4, b.kind === 'barn' ? 36 : 28);
   return { x: Math.round(w / 2 - dw / 2), y: roofH + tall - dh, w: dw, h: dh };
 }
 
@@ -34,7 +35,7 @@ export function paintShut(rect: Rect, b: Block, h: House, w: number, roofH: numb
     }
     rect(d.x, d.y, d.w, d.h, '#0a0808');
     rect(d.x - 1, d.y - 1, 1, d.h + 1, '#1e1612'), rect(d.x + d.w, d.y + 3, 1, d.h - 3, '#1e1612');
-    if (!barn) for (const x of windowsOf(h, w)) rect(x, roofH + tall - 15, 3, 3, '#050404'), rect(x - 1, roofH + tall - 17, 5, 1, '#1e1612');
+    if (!barn) for (const x of windowsOf(h, w)) rect(x + 1, roofH + tall - 32, 6, 6, '#050404'), rect(x - 1, roofH + tall - 34, 10, 1, '#1e1612');
     return;
   }
   // Boarded: the door's shape, then pale planks nailed across it and across each window.
@@ -42,8 +43,8 @@ export function paintShut(rect: Rect, b: Block, h: House, w: number, roofH: numb
   for (let i = 0, y = d.y + 1; y < d.y + d.h - 1; y += 3, i++) rect(d.x - 2, y, d.w + 4, 2, PLANK[i % 3]);
   rect(d.x + 1, d.y + 1, 1, d.h - 2, '#6a5a3e'), rect(d.x + d.w - 2, d.y + 1, 1, d.h - 2, '#6a5a3e');
   if (!barn) for (const x of windowsOf(h, w)) {
-    rect(x - 2, roofH + tall - 15, 7, 1, PLANK[0]);
-    rect(x - 2, roofH + tall - 13, 7, 1, PLANK[1]);
+    rect(x - 2, roofH + tall - 32, 12, 2, PLANK[0]);
+    rect(x - 2, roofH + tall - 28, 12, 2, PLANK[1]);
   }
 }
 

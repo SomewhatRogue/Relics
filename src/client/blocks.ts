@@ -104,15 +104,15 @@ function furnished(g: CanvasRenderingContext2D, b: Block, rect: Rect, w: number,
 /** A door in the middle of the front wall. */
 function door(b: Block, rect: Rect, w: number, wallY: number, l: Look): void {
   if (!b.door && b.kind !== 'den' && b.kind !== 'granary') return;
-  // (1.5x with the art pass: a door the bigger people walk through.)
-  const dw = b.kind === 'barn' ? 18 : b.kind === 'den' ? 12 : 9, dh = Math.min(l.tall - 4, b.kind === 'barn' ? 27 : 16);
+  // (Sized to the tall heroes, 2026-11-12: a little over their height; shutdraw.ts doorBox the same.)
+  const dw = b.kind === 'barn' ? 24 : b.kind === 'den' ? 14 : 12, dh = Math.min(l.tall - 4, b.kind === 'barn' ? 36 : 28);
   rect(Math.round(w / 2 - dw / 2), wallY + l.tall - dh, dw, dh, b.kind === 'den' ? '#0d0b10' : '#2a1e14');
   if (b.kind !== 'den') rect(Math.round(w / 2 - dw / 2), wallY + l.tall - dh, dw, 1, '#5a3d22');
   // Detail (the art pass): its planks, iron hinge straps and a handle.
   if (b.kind !== 'den') {
     const dx = Math.round(w / 2 - dw / 2);
     for (let x = dx + 3; x < dx + dw - 1; x += 3) rect(x, wallY + l.tall - dh + 1, 1, dh - 1, '#1e150e');
-    for (const y of [wallY + l.tall - dh + 3, wallY + l.tall - 4]) rect(dx, y, Math.min(5, dw - 2), 1, '#6a6674');
+    for (const y of [wallY + l.tall - dh + 4, wallY + l.tall - 6]) rect(dx, y, Math.min(6, dw - 2), 1, '#6a6674');
     rect(dx + dw - 3, wallY + l.tall - Math.round(dh / 2), 1, 2, '#b89a4a');
   }
   // Barred: planks nailed across.
@@ -173,9 +173,10 @@ export function drawBlock(c: Ctx, b: Block, x: number, y: number, lit: boolean):
   if (b.kind === 'forge' && !b.maxHp) (c.glow.fillStyle = Math.floor(c.now * 8) % 2 ? '#ff9a3c' : '#ff6a20'), c.glow.fillRect(Math.round(x + w / 2 - 2), Math.round(y + b.h * PX - 5), 4, 3);
   if (!l.windows || !lit || b.maxHp || b.door === 'tower') return;
   // Lit windows either side of the door: someone lives here.
-  const wy = Math.round(y + b.h * PX - l.tall + 5);
+  // (Sized to the tall heroes, 2026-11-12.)
+  const wy = Math.round(y + b.h * PX - l.tall + 8);
   c.glow.fillStyle = '#ffd27a';
-  for (const wx of windowsLit(b).map((k) => Math.round(w * k))) c.glow.fillRect(Math.round(x + wx), wy, 3, 3);
+  for (const wx of windowsLit(b).map((k) => Math.round(w * k))) c.glow.fillRect(Math.round(x + wx - 1), wy, 5, 5);
 }
 
 /** A lit hearth: the mouth glowing, coals winking along its floor (the flame is the room's torch). */

@@ -193,3 +193,12 @@ The plan, one class at a time so Kyle can play each against the old ones:
   tabards and hair follow without being placed again. Townsfolk: the head's rows drawn smaller and the body's
   longer before the 1.5x redraw (npcs.ts person), so they stand as tall as the heroes; children stay small. The
   pick screen's portraits are 27 by 44 so the Mage's hat fits. The goblins stay as they are. (Claude Opus 5.5)
+- The world to the tall heroes, step one: houses (Kyle, 2026-11-12: "houses now look way too tiny ... like you're a
+  giant"). Research: a pixel-art person is commonly two tiles tall (16 by 32 on 16-pixel tiles); at 31 the heroes
+  are there now, and the world's art was drawn for one-tile heroes and only partly grown. Pulling the camera back
+  alone shrinks everything together; drawing the grid bigger (PX) touches 67 files and leaves fixed-size art
+  small; finer pixels for characters only (mixels) would clash. So: the world's art redrawn to a two-tile person,
+  footprints unchanged (the fight and collisions the same), then the camera a step back. This step: every
+  painted building and piece of furniture twice its first height (blocklook.ts, was 1.5x), doors 12 by 28 (barns
+  24 by 36) in blocks.ts and shutdraw.ts alike, cottage windows four-paned 10 by 10 with sills, shutters and
+  flower boxes at the heroes' chests, town windows and the worn ones' boards to match (wear.ts). (Claude Opus 5.5)

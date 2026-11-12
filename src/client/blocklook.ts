@@ -79,8 +79,10 @@ export const LOOK: Record<Block['kind'], Look> = {
 
 /**
  * The art pass (docs/design/art-pass.md, 1.5x): what's painted from this table stands half again as tall
- * on the same footprint (walls up, furniture at the bigger hands; blocks.ts sizes doors and windows to
+ * on the same footprint, now twice (walls up, furniture at the bigger hands; blocks.ts sizes doors and windows to
  * match). Pieces drawn from their own boxes (pieces.ts) keep theirs: their `tall` only bounds fire and rubble.
  */
 const BOXED = new Set<string>(['headframe', 'log', 'mill', 'stakes', 'jetty', 'gangway', 'smokehouse', 'dryrack', 'hungnet', 'oak', 'haystack', 'boards', 'reeds', 'sideway']);
-for (const [k, l] of Object.entries(LOOK)) if (!BOXED.has(k)) l.tall = Math.round(l.tall * 1.5);
+// (Twice, since the heroic proportions, 2026-11-12: a house's wall a head over the 31-tall heroes, Kyle: "houses now look
+// way too tiny".)
+for (const [k, l] of Object.entries(LOOK)) if (!BOXED.has(k)) l.tall = Math.round(l.tall * 2);
