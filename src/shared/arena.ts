@@ -301,6 +301,8 @@ export interface GameMap {
   stretches?: Stretch[];
   /** THE BRAKESMAN's incline (sim/brake.ts): lanes of rail down it at these x, from `y0` by its brake to `y1` at the foot. */
   incline?: { lanes: number[]; y0: number; y1: number };
+  /** THE LAMPMAN's lamps on their posts (sim/lampman.ts; which are lit is on the Lampman). */
+  lamps?: { x: number; y: number }[];
   /** Instance puzzles: pushing tubs (shared/puzzle.ts, sim/tubs.ts). */
   puzzles?: import('./puzzle.js').TubPuzzle[];
   hero: { x: number; y: number };

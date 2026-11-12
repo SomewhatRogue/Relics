@@ -18,6 +18,7 @@ import { windingPlan, WINDING_GUARDS } from './cutwinding.js';
 import { inclinePlan } from './cutincline.js';
 import { loadingPlan } from './cutloading.js';
 import { sortingPlan } from './cutsorting.js';
+import { lampRoomPlan } from './cutlamproom.js';
 import { washingPlan } from './cutwashing.js';
 import { CUT_NAMES, CUT_POST, FORK_WORDS } from './opencutwords.js';
 import { stressPlan } from './stressmap.js';
@@ -66,6 +67,7 @@ export const OVER_PLACES: CutPlace[] = [
 ];
 export const UNDER_PLACES: CutPlace[] = [
   { plan: sortingPlan, keep: [] },
+  { plan: lampRoomPlan, keep: [CUT_NAMES.lampman] },
   { plan: washingPlan, keep: [CUT_NAMES.sluicer, CUT_NAMES.raker] },
 ];
 

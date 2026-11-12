@@ -34,6 +34,7 @@ import { castElement } from '../sim/channel';
 import { CHANNEL, ELEMENT_NAME, GRAB, PUZZLE } from '../shared/tuning';
 import { PUZZLE_WORDS } from '../shared/opencutwords';
 import { unsolvedAt } from '../sim/tubs';
+import { darkLampBy } from '../sim/lampman';
 import { SIGNS } from '../shared/signs';
 import { signFor, signLeft } from '../sim/signature';
 import { itemIcon, potionIcon } from './itemicons';
@@ -172,7 +173,8 @@ export class Cluster {
     // A Cleric by a friend who is out: RAISE (sim/raise.ts), dim with the seconds left while its cooldown runs.
     // (Kneeling at it, the button stays lit: the raise is going on.)
     const rise = mode === 'run' && !raise && !cut ? (risable(me, room.heroes, room.time) ?? (room.heroes.some((o) => o.out && o.riseBy === me.id) ? 'ready' : null)) : null;
-    const burn = !raise && (!!torchable(me, room.enemies) || (mode === 'run' && !!kindleable(me, room.map)));
+    // (A dark lamp in THE LAMPMAN's room too: BURN lights it, sim/lampman.ts.)
+    const burn = !raise && (!!torchable(me, room.enemies) || (mode === 'run' && (!!kindleable(me, room.map) || (!!room.map.lamps && darkLampBy(me, room.enemies) >= 0))));
     // By an instance puzzle's lever, unsolved: PULL puts the tubs back (sim/tubs.ts).
     const pull = mode === 'run' && !raise && !cut && !burn && !carrying && (room.map.puzzles ?? []).some((p) => unsolvedAt(room.map, room.props, p) && Math.hypot(p.lever.x - me.x, p.lever.y - me.y) <= PUZZLE.lever);
     const lifter = kit.cls === 'WARRIOR', active = can || raise || rise === 'ready' || burn || cut || shove || pull;

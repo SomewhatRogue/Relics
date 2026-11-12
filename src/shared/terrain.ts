@@ -65,6 +65,8 @@ export interface Foe {
   drives?: boolean;
   /** THE BRAKESMAN: works the brake at the top of the map's rail (sim/brake.ts). */
   brakes?: boolean;
+  /** THE LAMPMAN: it keeps the map's lamps (sim/lampman.ts). */
+  lamps?: boolean;
   /** One of the washing floor's pair (sim/pairfall.ts). */
   pair?: 'sluicer' | 'raker';
 }

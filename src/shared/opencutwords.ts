@@ -21,7 +21,16 @@ export const CUT_AREAS = ['THE ROWS', 'THE WORKINGS', 'THE WASHING FLOOR', 'THE 
  * The named ones keeping each area's gate (docs/design/instances.md, Kyle 2026-11-11; none a butcher). The
  * Haulier, the last, is named in shared/bosswords.ts.
  */
-export const CUT_NAMES = { drover: 'THE DROVER', brakesman: 'THE BRAKESMAN', raker: 'THE RAKER', sluicer: 'THE SLUICER' };
+export const CUT_NAMES = { drover: 'THE DROVER', brakesman: 'THE BRAKESMAN', raker: 'THE RAKER', sluicer: 'THE SLUICER', lampman: 'THE LAMPMAN' };
+
+/** THE LAMPMAN's fight (sim/lampman.ts): the goal's line while it's about. */
+export const LAMP_WORDS = {
+  goal: 'BURN a lamp, kill',
+  /** Over a lamp it's put out. */
+  out: 'LAMP OUT',
+  /** Over it, the first lamps it puts out: the goal bar's too short to say near it. */
+  how: 'BURN A LAMP NEAR IT TO STUN IT',
+};
 
 /** THE DROVER's fight (sim/drover.ts): the goal's line while its diggers are roped, and the rope cut. */
 export const DROVER_WORDS = {

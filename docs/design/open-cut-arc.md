@@ -59,7 +59,11 @@ Copperdeep to bring them home.
 1. **The old adit.** Timbered tunnels, a branch to a cave-in (a chest, a pack trapped behind the fall).
 2. **The lamp room** where the miners' lamps hung (not the Wickhold watch lamp at the adit's mouth, the atlas's trace of
    the chapter 2 traitor, which stays apart): THE LAMPMAN keeps the dark, its own doing and nothing deeper. It puts out the lamps one
-   by one and fights in the dark; relight them (BURN at a lamp) and it's OPEN (mini-boss).
+   by one and fights in the dark; relight them (BURN at a lamp) and it's OPEN (mini-boss). *Built 2026-11-12
+   (shared/cutlamproom.ts, sim/lampman.ts): six lamps on posts, all lit at first; every 8 s it snuffs the lit one
+   nearest you (its blows dropped while it does); where no lamp lights it, its blows hurt 40% more; BURN at a dark
+   lamp lights it, and with the Lampman in that light it's stunned and OPEN. Under the hill now runs the sorting
+   floor (the tub puzzle, docs/design/instance-puzzles.md), the lamp room, the washing floor.*
 3. *A lull:* the water rising underfoot.
 4. **The drowned workings and the washing floor:** THE SLUICER and THE RAKER, the Sluicer flooding the floor in waves,
    the Raker dragging it out again; kill both close together (boss).

@@ -5,6 +5,7 @@
 import { drawPairLift } from './pairdraw';
 import { drawBrakeLane, drawIncline } from './brakedraw';
 import { drawPlates, leverItems } from './tubdraw';
+import { lampItems, lampLights } from './lampmandraw';
 import { mistFrame } from './fenmistdraw';
 import { lurkFrame } from './fenlurk';
 import { drawBlasts } from './blastdraw';
@@ -449,6 +450,8 @@ export class Scene {
     if (map.rail || map.gear || map.adits) sumpScene(map, c, cx, cy, items, room.enemies.some((e) => e.boss?.who === 'haulier' && e.boss.phase === 2));
     // THE SLUICER in the water, THE RAKER's lift as a ring at its feet (pairdraw.ts).
     if (room.enemies.some((e) => e.fallen !== undefined)) items.push({ y: -1e6 + 4, draw: () => drawPairLift(c, room.enemies, cx, cy) });
+    // THE LAMPMAN's lamps on their posts (lampmandraw.ts).
+    if (map.lamps) items.push(...lampItems(c, map, room.enemies, cx, cy, now));
     // An instance puzzle: its plates on the floor, its lever (tubdraw.ts).
     if (map.puzzles) {
       items.push({ y: -1e6 + 2, draw: () => drawPlates(c, map, room.props, cx, cy, now) });
@@ -558,6 +561,7 @@ export class Scene {
     strikeLights(room, cx, cy, lights);
     for (const b of beacons) lights.push({ x: OX + b.x * PX - cx, y: OY + b.y * PX - cy - 14, r: 150 + Math.sin(now * 9) * 8, i: 1.3, c: [1, 0.62, 0.3] });
     for (const l of staitheLights(room)) lights.push({ x: OX + l.x * PX - cx, y: OY + l.y * PX - cy - 10, r: l.r * PX + Math.sin(now * 9 + l.x) * 3, i: l.i, c: l.c });
+    for (const l of lampLights(map, room.enemies, now)) lights.push({ x: OX + l.x * PX - cx, y: OY + l.y * PX - cy, r: l.r * PX + Math.sin(now * 9 + l.x) * 3, i: l.i, c: l.c });
     for (const l of [...doorLights(room), ...zoneLights(room, now)]) lights.push({ x: OX + l.x * PX - cx, y: OY + l.y * PX - cy - 10, r: l.r * PX + Math.sin(now * 9 + l.x) * 3, i: l.i, c: l.c });
     for (const m of room.coals) lights.push({ x: OX + m.x * PX - cx, y: OY + m.y * PX - cy - 4, r: 26 + Math.sin(now * 7 + m.id) * 3, i: 0.6 * Math.min(1, m.life / 4), c: [1, 0.6, 0.28] });
     for (const ch of room.chests) if (ch.state !== 'shut') lights.push({ x: OX + ch.x * PX - cx, y: OY + ch.y * PX - cy - 6, r: ch.state === 'opening' ? 16 + 30 * (ch.t / 1.2) : 26, i: ch.state === 'opening' ? 0.4 + 0.5 * (ch.t / 1.2) : 0.35, c: tint(TIERS[ch.tier].col) });

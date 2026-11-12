@@ -80,6 +80,7 @@ import { startKindle, stepKindle } from './kindle';
 import { stepDrover } from './drover';
 import { stepBrake } from './brake';
 import { stepTubs } from './tubs';
+import { stepLampman } from './lampman';
 import { stepPairFall } from './pairfall';
 import { initScenes, stepScenes } from './scenes';
 import { stepHouseFires, type HouseFire, type Indoors } from './houseburn';
@@ -261,6 +262,7 @@ export class ArenaRoom {
         if (f.zoned) e.zoned = true;
         if (f.drives) e.drives = true;
         if (f.brakes) e.brakes = { next: BRAKE.warn, off: 0 };
+        if (f.lamps) e.lamps = { lit: (opts.map?.lamps ?? []).map(() => true), next: 0 };
         if (f.pair) e.pair = f.pair;
         if (f.boss) e.boss = newBoss(f.boss, 1);
         if (f.task) e.task = structuredClone(f.task);
@@ -475,6 +477,7 @@ export class ArenaRoom {
     stepDrover(w, TICK);
     stepBrake(w);
     stepTubs(w, this.map, this.intents, (x, y) => this.spawn('scrapper', x, y));
+    stepLampman(w);
     stepPairFall(w);
     // Hangman's Wood: snares hoisting whoever steps in them, the Gospel Oak burning (sim/snares.ts, hangfire.ts).
     if (this.map.hang) {

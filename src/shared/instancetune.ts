@@ -58,6 +58,14 @@ export const INSTANCE = {
  * `wave.kinds` out of its drift every `wave.every` s (the first after `wave.first`), `wave.most` of them about at once.
  */
 export const PUZZLE = { push: 0.3, touch: 0.32, speed: 4.5, lever: 1.6, near: 4, wave: { first: 5, every: 9, most: 3 } };
+/**
+ * THE LAMPMAN (sim/lampman.ts). A lamp lights `r` tiles round it. Every `every` s (the first `first` s after it's
+ * roused) it goes for the lit lamp nearest the nearest hero, walking at `walk`, and stood within `reach` snuffs it
+ * in `snuff` s, its blows dropped meanwhile; it gives up on one after `give` s. Where no lamp lights it, its blows
+ * do `dark` times the harm. GRAB (BURN) within `burn` of a dark lamp lights it; lit with the Lampman in its light,
+ * it's dazzled: stunned `dazzle` s and OPEN (INSTANCE.open). The first `told` lamps it puts out, how is said over it.
+ */
+export const LAMP = { told: 2, r: 4.2, every: 8, first: 4, walk: 3.4, reach: 1.1, snuff: 0.9, give: 6, dark: 1.4, burn: 1.3, dazzle: 2.2 };
 export const DROVER = { reach: 1.1, cut: 1.6, notice: 5 };
 
 /**

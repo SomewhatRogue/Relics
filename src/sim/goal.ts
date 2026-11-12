@@ -20,7 +20,7 @@ import { waiting } from './survivors';
 import { expedGoal } from './expedgoal';
 import { HELD_HINT, pickWay, type WayKind } from '../shared/ways';
 import { STAITHE_WORDS } from '../shared/staithewords';
-import { BRAKE_WORDS, DROVER_WORDS, FORK_WORDS, GATE_WORDS, PAIR_WORDS, PUZZLE_WORDS } from '../shared/opencutwords';
+import { BRAKE_WORDS, DROVER_WORDS, FORK_WORDS, GATE_WORDS, LAMP_WORDS, PAIR_WORDS, PUZZLE_WORDS } from '../shared/opencutwords';
 import { forkOf } from './fork';
 import { keepers, lastStretch, stretchOf } from './stretches';
 import { staitheGoal } from './staithegoal';
@@ -147,6 +147,6 @@ export function goal(run: Run, room: ArenaRoom, houses: Captives = { caged: 0, w
 function killWords(keep: Enemy[], room: ArenaRoom): string {
   const names = keep.map((e) => e.name).join(' and ');
   const roped = room.survivors.some((v) => v.led && !v.gone), braking = keep.some((e) => e.brakes && e.act !== 'stunned' && room.time >= e.brakes.off);
-  const hint = keep.some((e) => e.drives) && roped ? DROVER_WORDS.goal : braking ? BRAKE_WORDS.goal : '';
+  const hint = keep.some((e) => e.drives) && roped ? DROVER_WORDS.goal : braking ? BRAKE_WORDS.goal : keep.some((e) => e.lamps) ? LAMP_WORDS.goal : '';
   return hint ? `${hint} ${names}` : keep.length > 1 && keep.some((e) => e.pair) ? PAIR_WORDS.goal(names) : `Kill ${names}`;
 }

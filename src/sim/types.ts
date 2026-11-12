@@ -535,6 +535,8 @@ export interface Enemy extends Body {
   /** An instance's goblin (INSTANCE.fierce): quicker wind-ups and rests (sim/elite.ts). */
   fierce?: boolean;
   /** THE BRAKESMAN (sim/brake.ts): it works the brake at the top of the rail; when it lets the next cart go, and its brake out of use until. */
+  /** THE LAMPMAN's lamps (map.lamps): which are lit, when it next goes for one, the one it's going for and how long it's been at it (sim/lampman.ts). */
+  lamps?: { lit: boolean[]; next: number; at?: number; since?: number; snuffT?: number; told?: number };
   brakes?: { next: number; off: number; /** Times it's shown a climber how to send one back (BRAKE.told). */ told?: number };
   /** THE SLUICER and THE RAKER (sim/pairfall.ts): which of the pair; the Sluicer's room time it fell in the water; the Raker's lift so far (s). */
   pair?: 'sluicer' | 'raker';
@@ -829,6 +831,7 @@ export type FightEvent =
    *  hitting a hero or the Haulier (`on`), or stopping at a stop; lightning falling on the winding gear; the Haulier's plate off for good (phase 2). */
   | { k: 'cart'; what: 'go' | 'hit' | 'stop' | 'flip' | 'aim' | 'grab'; x: number; y: number; by?: string; on?: string }
   | { k: 'tub'; what: 'push' | 'plate' | 'reset' | 'solved'; x: number; y: number; by?: string }
+  | { k: 'lamp'; what: 'lit' | 'out' | 'snuff' | 'how'; x: number; y: number; by?: string }
   | { k: 'gear'; x: number; y: number; hit: boolean }
   | { k: 'bare'; x: number; y: number }
   /** The Haulier landing a leap; its sparks coming down on a spot (sim/haulbook.ts). */

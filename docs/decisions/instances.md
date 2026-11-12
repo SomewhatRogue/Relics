@@ -296,3 +296,21 @@ not killing quickly, so kind of anticlimactic".
   on the map while the Haulier's awake. Over the top, the Haulier's stage shares a map with THE BRAKESMAN's incline,
   so its lane carts would have been grabbed and pushed sideways. One guard in sim/haulcarts.ts `isCart`: not a cart on
   `map.incline`'s lanes. (Claude Opus 5.5)
+
+## 2026-11-12: THE LAMP ROOM and THE LAMPMAN (under the hill)
+
+- Kyle: "continue". The arc spec's lamp room: `shared/cutlamproom.ts`, between the sorting floor and the washing floor.
+  Six miners' lamps on posts in a ring (`map.lamps`; `cutmap.ts` carries them), racks on the back wall, the counter
+  by the way in, two at the door, no light but a basket at the way in and the lamps.
+- `sim/lampman.ts`: which lamps are lit is plain data on the Lampman (`lamps.lit`), so friends see the same. Roused,
+  every `LAMP.every` (8 s) it walks to the lit lamp nearest the nearest hero and snuffs it in `LAMP.snuff` (0.9 s), its
+  blows dropped meanwhile (an opening); gives up on one after `LAMP.give`. Out of every lamp's light (`LAMP.r` 4.2) its
+  `harm` is `LAMP.dark` (1.4) times. GRAB by a dark lamp (the button reads BURN, client/cluster.ts) lights it; with
+  the Lampman in that light, stunned `LAMP.dazzle` (2.2 s) and OPEN. The first two lamps it puts out, "BURN A LAMP
+  NEAR IT TO STUN IT" over it (`LAMP.told`).
+- On screen (`client/lampmandraw.ts`): brass lamps hung on the posts, lit with a flame and a pool of light the size
+  of their reach (into the scene's light pass), out as dark glass, guttering while snuffed. Phone screenshot checked.
+- Lines: lore keeper ("BURN is now a third use": the lamp lit from the hero's own torch, never the church's light;
+  no on-screen DAZZLED, OPEN says it), then line editor: goal "BURN a lamp, kill" (+ the name, fits a phone), LAMP
+  OUT, BURN A LAMP NEAR IT TO STUN IT, THE LAMP ROOM.
+- Tests tests/lampman.test.ts; full suite green. Its loot pool waits on the arc's loot step. (Claude Opus 5.5)

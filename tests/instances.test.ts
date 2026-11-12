@@ -97,7 +97,7 @@ describe('the map and its places', () => {
     for (let i = 1; i < laid.length; i++) expect(p.foes.some((f) => f.y > laid[i].y0 + laid[i].h && f.y < laid[i - 1].y0)).toBe(false);
   });
   it('has its named ones, none a butcher, THE DROVER driving the roped line, and runs bottom to top', () => {
-    const names = [[CUT_NAMES.drover], [], [], [CUT_NAMES.brakesman], [HAUL_NAME], [], [CUT_NAMES.sluicer, CUT_NAMES.raker]];
+    const names = [[CUT_NAMES.drover], [], [], [CUT_NAMES.brakesman], [HAUL_NAME], [], [CUT_NAMES.lampman], [CUT_NAMES.sluicer, CUT_NAMES.raker]];
     plans.forEach((plan, i) => {
       const p = plan(job());
       expect(p.foes.filter((f) => f.name).map((f) => f.name)).toEqual(names[i]);
