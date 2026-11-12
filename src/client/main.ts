@@ -258,6 +258,9 @@ const barn = new URLSearchParams(location.search).get('barn');
 if (quick && barn) game.startJob(barnHunt(game.world.day, barn === 'arena'));
 // The big map's load test (?hero=WARRIOR&bigmap=1: bigmode.ts), loaded only when asked.
 if (quick && new URLSearchParams(location.search).get('bigmap') === '1') void import('./bigmode').then((m) => m.startBig(game, new URLSearchParams(location.search)));
+// The art pass's lineup (?lineup, ?lineup=heroes, ?lineup=goblins: lineup.ts), loaded only when asked.
+const lineup = new URLSearchParams(location.search).get('lineup');
+if (lineup !== null) void import('./lineup').then((m) => m.openLineup(lineup));
 // A recovery code here: if another device sent these heroes on since, take that copy (only before play).
 void recovery.start((s) => title.open && (game.adopt(s), title.show(), true));
 /** Talk to whoever you stand by, use the spot, or go in at the door (E or F on a laptop, USE on a phone). */
