@@ -24,6 +24,11 @@ export const INSTANCE = {
    */
   party: 3,
   more: { hp: 0.3, harm: 0.15 },
+  /**
+   * Harder than a job's goblins at any size (Kyle, 2026-11-11, after playing it: "enemies even harder on the
+   * instances"): every goblin's health and hits, the named ones' health.
+   */
+  tough: { hp: 1.5, harm: 1.3, named: 1.25 },
 };
 
 /**

@@ -2,6 +2,23 @@
 
 The Instances chat's log (docs/BOARD.md). Newest first, signed with the model. Spec: docs/design/instances.md.
 
+## 2026-11-11: Kyle's first play of the Open Cut, and two fixes (Claude Opus 5.5)
+
+Kyle: "the Raker was super fun. sluicer was okay but didn't really feel unique and honestly i have NO idea what the one
+throwing carts was meant to do none of the carts came to me and i couldn't throw them back... it felt like it was just
+a small room to a mini boss to a miniboss and then finally a boss. I want the BOSS to be a miniboss and bosses to be
+even more epic and stage based but have a lot better loot pay off. And i want enemies to be even harder on the
+instances."
+
+Why the Brakesman failed: the GRAB button shows only by something liftable (or for a Warrior), and a rail cart isn't
+liftable, so most heroes never had a button by a cart; and the carts ran across the chamber on one rail, so they only
+came at whoever stood in that lane. Fixed now: GRAB shows by a cart standing on a rail (`client/cluster.ts`, which
+also covers the Haulier's carts in the Deep). Harder now: every instance goblin 1.5x health and 1.3x hits, the named
+ones 1.25x health, at any party size (`INSTANCE.tough`), before the three-hero floor and the fourth hero's share.
+Proposed to Kyle, waiting on his yes: the Haulier becomes a mini-boss, a new end boss for the Open Cut in stages with
+the better loot, longer areas between bosses, the Brakesman's chamber as an incline the carts come down at you, the
+Sluicer given its flood.
+
 ## 2026-11-11: THE SLUICER and THE RAKER (Kyle: "continue"; Claude Opus 5.5)
 
 Step 3, the washing floor's pair, from the spec's "one raises the other, so kill both close together" (`sim/pairfall.ts`,

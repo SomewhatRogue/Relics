@@ -10,6 +10,7 @@
  * Warrior's always shows GRAB (dimmed till there's something to take hold of). (The Warrior's roar, TAUNT,
  * sat in the dodge's place till it became TAUNT GUARD, held on the block: 2026-11-06.)
  */
+import { resting } from '../sim/brake';
 import { staitheGrabbable } from '../sim/staithebits';
 import { STAITHE_WORDS } from '../shared/staithewords';
 import { carriedItem } from '../sim/charge';
@@ -29,7 +30,7 @@ import { kindleable } from '../sim/kindle';
 import { liftable } from '../sim/props';
 import { relicLabel } from '../sim/hero';
 import { castElement } from '../sim/channel';
-import { CHANNEL, ELEMENT_NAME } from '../shared/tuning';
+import { CHANNEL, ELEMENT_NAME, GRAB } from '../shared/tuning';
 import { SIGNS } from '../shared/signs';
 import { signFor, signLeft } from '../sim/signature';
 import { itemIcon, potionIcon } from './itemicons';
@@ -159,7 +160,9 @@ export class Cluster {
     b.potion.show({ shape: 'orb', size: 32, grade: next ? 'iron' : 'stone', fill: hp, liquid: me.poison ? '#5a8a2a' : '#a8261c', pulse: low && Math.floor(now * 4) % 2 === 0, icon: next ? img(potionIcon(next)) : null }, me.belt.length > 1 ? String(me.belt.length) : '', '', next ? 'Drink ' + next : 'Health');
     b.potion.el.classList.toggle('low', low);
     // The context slot: help a friend up, set a spider nest or a house's woodpile alight, grab, throw; or what's here to use.
-    const can = carrying || (me.act === 'idle' && (room.enemies.some((e) => grabbable(me, e, room.time)) || room.props.some((p) => liftable(me, p))));
+    // (A cart standing on a rail counts: GRAB sends it rolling, sim/brake.ts and haulcarts.ts.)
+    const cart = !!room.map.rail && room.props.some((p) => resting(p) && Math.hypot(p.x - me.x, p.y - me.y) <= GRAB.reach + 0.6);
+    const can = carrying || (me.act === 'idle' && (room.enemies.some((e) => grabbable(me, e, room.time)) || room.props.some((p) => liftable(me, p)) || cart));
     // (At the Staithe GRAB cuts one of the netted free, or shoves the laid log in: sim/staithebits.ts.)
     const stg = mode === 'run' ? staitheGrabbable(me, room.survivors, room.map) : null, shove = stg === 'shove';
     const raise = me.act === 'idle' && raisable(me, room.heroes), cut = cuttable(me, room.heroes, room.time) || stg === 'cut';

@@ -27,6 +27,13 @@ export function instanceRoom(run: Run): ArenaRoom {
   });
   room.sleepAt = { wake: INSTANCE.wake, doze: INSTANCE.doze };
   room.pace = { index: run.index };
+  // Tougher than a job's goblins, whoever comes (INSTANCE.tough).
+  const T = INSTANCE.tough;
+  for (const e of room.enemies) {
+    const k = e.name ? T.named : T.hp;
+    e.hp = e.maxHp = Math.round(e.maxHp * k);
+    if (!e.name) e.harm = +((e.harm ?? 1) * T.harm).toFixed(3);
+  }
   scaleBosses(room.enemies, n);
   const past = n - INSTANCE.party;
   if (past > 0) for (const e of room.enemies) if (!e.name) (e.hp = e.maxHp = Math.round(e.maxHp * (1 + INSTANCE.more.hp * past))), (e.harm = +((e.harm ?? 1) * (1 + INSTANCE.more.harm * past)).toFixed(3));
