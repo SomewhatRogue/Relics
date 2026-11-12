@@ -8,15 +8,15 @@
  * not turns taken here: they answer the goblin's own blow.
  */
 import { STUN_CAP } from '../shared/tuning';
-import { addPoise, immune } from './poise';
-import { stunFor } from './bosshold';
+import { addPoise } from './poise';
+import { resists, stunFor, unheld } from './bosshold';
 import type { Enemy, FightEvent } from './types';
 
 /** Can `by` take this goblin's turn now? If so it's marked as theirs; if not it shrugs it off (and says so,
  *  now and then). An empty `by` always can, and marks nothing. */
 export function mayStun(e: Enemy, by: string | undefined, now: number, ev?: FightEvent[]): boolean {
-  // A boss of the kit shrugs every ordinary stun off; POISE is its stagger (sim/poise.ts).
-  if (immune(e)) return shrug(e, now, ev), false;
+  // A boss or BIG ONE: any hero's stun lands, then none for a while (sim/bosshold.ts; its POISE stagger is apart).
+  if (unheld(e, now)) return shrug(e, now, ev), false;
   if (!by) return true;
   const last = e.stunnedBy?.[by];
   if (last !== undefined && now - last < STUN_CAP.every) {
@@ -34,11 +34,10 @@ function shrug(e: Enemy, now: number, ev?: FightEvent[]): void {
 /** Take its turn: `act` ('stunned' unless said) for `time` s, the blow it had going lost; `still` stops
  *  it sliding too. False if it shrugged it off. */
 export function stun(e: Enemy, by: string | undefined, now: number, time: number, ev?: FightEvent[], act: 'stunned' | 'flinch' | 'pinned' = 'stunned', still = false, sure = false): boolean {
-  // A BIG ONE: a short stun, then none from anyone for a while (sim/bosshold.ts), and a hold shrugged off
+  // A boss or BIG ONE: the stun, then none from anyone for a while (sim/bosshold.ts), and a hold shrugged off
   // doesn't spend the hero's turn. A forced one (a fight's own knockdown) isn't held back.
-  if (!sure && e.big && (e.holdUntil ?? -9) > now) return shrug(e, now, ev), false;
   if (!sure && !mayStun(e, by, now, ev)) return false;
-  if (!sure && e.big) time = stunFor(e, now, time);
+  if (!sure && resists(e)) time = stunFor(e, now, time);
   Object.assign(e, { attack: null, act, actT: 0, actDur: time });
   if (still) e.kvx = e.kvy = 0;
   return true;

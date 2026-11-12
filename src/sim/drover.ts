@@ -20,6 +20,8 @@ export const ropedNear = (h: Hero, survivors: Survivor[]) =>
 const cutting = new WeakMap<object, { seen: Map<string, number>; by?: string }>();
 
 export function stepDrover(w: World, dt: number): void {
+  // Anyone near and it leaves its line to come for them.
+  for (const e of w.enemies) if (e.drives && e.task?.k === 'escort' && !e.task.quit && !isDead(e) && players(w.heroes).some((h) => h.act !== 'down' && !h.out && Math.hypot(h.x - e.x, h.y - e.y) < DROVER.notice)) (e.task.quit = true), (e.alert = true);
   const roped = (w.survivors ?? []).filter((s) => s.led && !s.gone);
   if (!roped.length) return;
   let st = cutting.get(roped[0]);

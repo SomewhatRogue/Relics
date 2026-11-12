@@ -49,7 +49,9 @@ export const INSTANCE = {
  * THE DROVER (Rakehead's square, sim/drover.ts): CUT FREE (GRAB) this near a roped digger, staying by them this
  * long, cuts the line (it's OPEN after: INSTANCE.open).
  */
-export const DROVER = { reach: 1.1, cut: 1.6 };
+// `notice`: anyone this near and it leaves its line to come for them (Kyle, 2026-11-11: "the first boss didn't actually
+// ever attack"; it walked on unless you were right on it), its guards walking the line on.
+export const DROVER = { reach: 1.1, cut: 1.6, notice: 5 };
 
 /**
  * THE BRAKESMAN (the workings' last chamber, sim/brake.ts): on its brake at the top of the rail it lets a cart go

@@ -232,3 +232,23 @@ in shared/tuning.ts, checked at the top of sim/dread.ts `stepDread`: nobody is w
 (town included), and with the dread never building nothing is drawn or heard. The code and tests/dread.test.ts stay
 (the test switches it back on for itself), so it can return once it judges bounds right. Small edits in shared files
 (tuning.ts, sim/dread.ts, tests/dread.test.ts). (Claude Opus 5.5)
+
+## 2026-11-11: Kyle's play notes: the Drover fights, boss stuns, real numbers
+
+Kyle, after playing: "the first boss didn't actually ever attack, which was kind of anticlimactic"; "some stuns should
+still happen like rogue backstab, shadowstep etc but just not perma stun, e.g. after a stun or freeze they can't be
+again for 20s or so"; "the numbers are TOO inflated now. I meant more that I don't want numbers to be nerfed for
+bosses: normal damage minus shield and armor, but bigger health pools. I feel like I'm doing BIG numbers now but it's
+not killing quickly, so kind of anticlimactic".
+- THE DROVER walked its line and only turned on someone right on top of it or hitting it (reproduced: a hero 2.8 tiles
+  off was ignored 12 s). Now anyone within `DROVER.notice` (5) and it leaves the line to come for them; its guards
+  walk the line on (sim/drover.ts). Test added.
+- **For the Deep chat (boss-threat step 2), changed at Kyle's word:** `BOSS_HOLD` now `{ freeze 1, freezeAgain 20,
+  stunShare 1, stunAgain 20 }`, and a stun or a freeze sets both timers (sim/bosshold.ts). sim/stuns.ts: a kit boss no
+  longer shrugs every ordinary stun (`immune` dropped from `mayStun`): any boss or BIG ONE takes a hero's stun in full,
+  then none for 20 s; a Ranger's blind counts as its stun (sim/rangershots.ts). POISE and forced knockdowns as before.
+  Tests that pinned the old rule updated (bosshold, boss, hempen).
+- **Also yours, at Kyle's word:** `SHOWN` back to 1 (shared/shown.ts, kept as a knob); shown and trainer tests read
+  it through `shown`. docs/design/boss-threat.md still says x10: yours to update.
+- Bosses already took every blow in full minus their armor (plates, a door); nothing changed there. The instance's
+  bigger pools (`INSTANCE.tough`) stay as Kyle asked. (Claude Opus 5.5)

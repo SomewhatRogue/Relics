@@ -8,12 +8,11 @@ import { HERO } from '../src/shared/tuning';
 
 describe('the shown scale', () => {
   it('scales and rounds', () => {
-    expect(SHOWN).toBe(10);
-    expect(shown(12)).toBe(120);
-    expect(shown(6.66)).toBe(67);
+    expect(shown(12)).toBe(Math.round(12 * SHOWN));
+    expect(shown(6.66)).toBe(Math.round(6.66 * SHOWN));
   });
   it('drills, potions and health read in the big numbers; percents stay', () => {
-    expect(drillGain('health', 'WARRIOR', 1)).toBe('+80 health');
+    expect(drillGain('health', 'WARRIOR', 1)).toBe(`+${shown(8)} health`);
     expect(POTIONS.bitter.text).toContain(String(shown(POTION.heal)));
     expect(drillGain('wind', 'WARRIOR', 1)).toContain('8%');
     expect(HERO.hp).toBe(100);

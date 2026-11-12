@@ -56,14 +56,15 @@ describe('POISE', () => {
     expect(doorShut(b.hasp, b.room.time)).toBe(false);
   });
 
-  it('ordinary stuns are shrugged off; a relic\'s lands in full and fills half the bar', () => {
+  it('a hero\'s stun lands, then none for a while; a relic\'s still fills half the bar', () => {
     const b = barn(['sword']);
     wake(b);
     const ev: FightEvent[] = [];
-    expect(stun(b.hasp, 'p0', b.room.time, 1.5, ev)).toBe(false);
-    expect(b.hasp.act).not.toBe('stunned');
-    relicStun(b.hasp, b.room.time, 1.3, ev);
+    // (Kyle, 2026-11-11: a hero's own stun lands on a boss, then none for a while: sim/bosshold.ts.)
+    expect(stun(b.hasp, 'p0', b.room.time, 1.5, ev)).toBe(true);
     expect(b.hasp.act).toBe('stunned');
+    expect(stun(b.hasp, 'p1', b.room.time + 2, 1.5, ev)).toBe(false);
+    relicStun(b.hasp, b.room.time, 1.3, ev);
     expect(b.hasp.boss!.poise).toBe(Math.round(b.hasp.boss!.poiseMax * POISE_KIT.relic));
   });
 });

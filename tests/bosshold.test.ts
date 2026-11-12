@@ -37,16 +37,26 @@ describe('holding a boss', () => {
     expect(stun(e, 'c', 4, 1, ev, 'stunned', false, true)).toBe(true);
     // And after the wait, it can be stunned again.
     Object.assign(e, { act: 'chase' });
-    expect(stun(e, 'b', 1 + BOSS_HOLD.stunAgain + 0.1, 1, ev)).toBe(true);
+    expect(stun(e, 'b', 2 * BOSS_HOLD.stunShare + BOSS_HOLD.stunAgain + 0.1, 1, ev)).toBe(true);
     expect(e.actDur).toBe(BOSS_HOLD.stunShare);
   });
 
   it("a boss's stun timer is its own, and a plain goblin's stuns are untouched", () => {
     const b = boss();
-    expect(stunFor(b, 0, 2)).toBe(1);
+    expect(stunFor(b, 0, 2)).toBe(2 * BOSS_HOLD.stunShare);
     expect(stunFor(b, 5, 2)).toBe(0);
     const g = newEnemy(4, 'scrapper', 1, 1);
     expect(stunFor(g, 0, 2)).toBe(2);
     expect(stunFor(g, 0.1, 2)).toBe(2);
+  });
+
+  it("a hero's own stun (a Rogue's) lands on a boss, then no stun or freeze for a while (Kyle, 2026-11-11)", () => {
+    const b = boss(), ev: FightEvent[] = [];
+    expect(stun(b, 'rogue', 0, 1, ev)).toBe(true);
+    expect(b.act).toBe('stunned');
+    Object.assign(b, { act: 'chase' });
+    expect(stun(b, 'other', 5, 1, ev)).toBe(false);
+    expect(freezeFor(b, 5, 2)).toBe(0);
+    expect(stun(b, 'other', 1 * BOSS_HOLD.stunShare + BOSS_HOLD.stunAgain + 0.1, 1, ev)).toBe(true);
   });
 });

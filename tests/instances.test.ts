@@ -228,6 +228,21 @@ describe('THE DROVER', () => {
     return { ...a, drover, roped: () => a.room.survivors.filter((v) => v.led && !v.gone) };
   };
 
+  it('comes for anyone who gets near, leaving its line to its guards', () => {
+    const { room, hs, drover } = rows(), h = hs[0];
+    room.enemies = room.enemies.filter((e) => e === drover || e.task?.k === 'escort');
+    Object.assign(h, { x: drover.x + DROVER.notice - 0.6, y: drover.y });
+    let hit = false;
+    for (let n = 0; n < Math.round(10 / TICK) && !hit; n++) {
+      Object.assign(h, { hp: 9999 });
+      room.step();
+      hit = (room.events as { k: string; on?: string }[]).some((e) => e.k === 'hit' && e.on === 'hero') && Math.hypot(drover.x - h.x, drover.y - h.y) < 2.5;
+    }
+    expect((drover.task as { quit?: boolean }).quit).toBe(true);
+    expect(hit).toBe(true);
+    expect(room.enemies.some((e) => e !== drover && e.task?.k === 'escort' && !(e.task as { quit?: boolean }).quit)).toBe(true);
+  });
+
   it('takes every blow in full: nothing is ever cut down', () => {
     const { room, drover, roped } = rows();
     step(room, 0.1);

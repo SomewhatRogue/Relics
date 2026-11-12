@@ -5,5 +5,7 @@
  * 7000, and every ratio holds. Use `shown` wherever a hit, a heal, a health figure or a damage figure reaches
  * the screen (popups, cards, drills, perks, recap); stamina, magic, faith, gold and percents stay as they are.
  */
-export const SHOWN = 10;
+// (Back to 1, Kyle, 2026-11-11, after playing it: "the numbers are TOO inflated now. I meant more that I don't want
+// numbers to be nerfed for bosses: normal damage minus shield and armor, but bigger health pools". Kept as a knob.)
+export const SHOWN = 1;
 export const shown = (n: number) => Math.round(n * SHOWN);

@@ -19,7 +19,7 @@ import { isDead } from '../src/sim/damage';
 import { expedRoom } from '../src/sim/expedroom';
 import { hempenBegin as begin0, hempenRotation, ropeReach } from '../src/sim/hempenboss';
 import { hoist } from '../src/sim/snares';
-import { mayStun, relicStun } from '../src/sim/stuns';
+import { stun, mayStun, relicStun } from '../src/sim/stuns';
 import type { ArenaRoom } from '../src/sim/room';
 import { NO_INTENT, type Enemy, type FightEvent, type Hero, type Intent } from '../src/sim/types';
 import { hempenClear } from './bossbot';
@@ -210,9 +210,12 @@ describe('a party: the rope out of the branches on a second hero', () => {
 });
 
 describe('POISE and the stagger', () => {
-  it('ordinary stuns are shrugged off; charged blows fill the bar, and full it is STAGGERED 2.5 s; a relic stun lands and fills half', () => {
+  it('a hero`s stun lands once, then none for a while; charged blows fill the bar, and full it is STAGGERED 2.5 s; a relic stun lands and fills half', () => {
     const g = ground(['sword'], [[0, 1.2]]), h = g.heroes[0], hm = g.hm, ev: FightEvent[] = [];
-    expect(mayStun(hm, h.id, g.room.time, ev)).toBe(false);
+    // (Kyle, 2026-11-11: a hero's own stun lands on a boss, then none for a while: sim/bosshold.ts.)
+    expect(stun(hm, h.id, g.room.time, 1, ev)).toBe(true);
+    expect(mayStun(hm, 'other', g.room.time + 2, ev)).toBe(false);
+    Object.assign(hm, { act: 'chase', actT: 0, holdUntil: 0, thawUntil: 0 });
     Object.assign(hm, { cooldown: 99 });
     const n = Math.ceil(POISE_KIT.bar / POISE_KIT.fill.charged);
     for (let i = 0; i < n; i++) {

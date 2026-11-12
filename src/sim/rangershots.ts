@@ -10,6 +10,7 @@ import { BLIND, XBOW, type Swing } from '../shared/tuning';
 import { isDead } from './damage';
 import type { Bolt, Enemy, FightEvent, Hero } from './types';
 import { mayStun } from './stuns';
+import { stunFor } from './bosshold';
 
 /** Mark a loosed arrow or bolt with what its kit and the release make of it. */
 export function markShot(h: Hero, s: Swing, b: Bolt): void {
@@ -39,7 +40,10 @@ export const blinded = (e: Enemy, now: number) => (e.blindUntil ?? -9) > now;
  *  running from the same hero: sim/stuns.ts). */
 export function blind(e: Enemy, by: string, now: number, ev: FightEvent[]): void {
   if (isDead(e) || e.kind === 'nest' || e.act === 'carried' || !mayStun(e, by, now, ev)) return;
-  e.blindUntil = now + BLIND.time * (e.kind === 'butcher' ? BLIND.big : 1);
+  // (A boss or BIG ONE: a blind counts as its stun, then none for a while: sim/bosshold.ts.)
+  const t = stunFor(e, now, BLIND.time * (e.kind === 'butcher' ? BLIND.big : 1));
+  if (!t) return;
+  e.blindUntil = now + t;
   e.attack = null;
   if (e.act === 'attack') Object.assign(e, { act: 'chase', actT: 0 });
   ev.push({ k: 'blinded', x: e.x, y: e.y });

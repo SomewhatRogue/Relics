@@ -1,5 +1,6 @@
 /** The trainer: every rank waits on a level and costs gold; old heroes keep what they have; the rows say so. */
 import { describe, expect, it } from 'vitest';
+import { shown } from '../src/shared/shown';
 import { DRILLS, DRILL_ORDER, TEACHES, drillLevel, drillPrice, newProfile, type DrillId } from '../src/shared/tuning';
 import { buyDrill, drillState, learnLesson, lessonState } from '../src/shared/training';
 import { trainerRows } from '../src/shared/trainrows';
@@ -89,7 +90,7 @@ describe('trainer', () => {
     expect(at('skill').tag).toBe('150g');
     expect(at('power').state).toBe('locked');
     expect(at('health').state).toBe('buy');
-    expect(at('health').gain).toBe('+80 health');
+    expect(at('health').gain).toBe(`+${shown(8)} health`);
     expect(at('crit').tag).toBe(`${drillPrice('crit', 0)}g`);
     expect(at('power').now).toBe('+10% damage');
     expect(at('power').next).toBe('+15% damage');
