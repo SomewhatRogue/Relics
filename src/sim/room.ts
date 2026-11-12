@@ -224,7 +224,7 @@ export class ArenaRoom {
    * The training room by default. A run room passes its `map`, `foes` and `props` (its goblins stay
    * dead and its furniture doesn't come back). `squire`: a training partner to heal and bless.
    */
-  constructor(seed = 1, opts: { scrappers?: boolean; squire?: boolean; props?: boolean; map?: GameMap; foes?: Foe[]; furniture?: { kind: PropKind; x: number; y: number }[]; chests?: { x: number; y: number; chained?: boolean; boss?: number }[]; danger?: number; sleep?: boolean; level?: number } = {}) {
+  constructor(seed = 1, opts: { scrappers?: boolean; squire?: boolean; props?: boolean; map?: GameMap; foes?: Foe[]; furniture?: { kind: PropKind; x: number; y: number; lean?: { x: number; y: number } }[]; chests?: { x: number; y: number; chained?: boolean; boss?: number }[]; danger?: number; sleep?: boolean; level?: number } = {}) {
     this.sleepFar = !!opts.sleep;
     this.level = opts.level ?? 1;
     this.chests = (opts.chests ?? []).map((c) => newChest(c.x, c.y, c.chained, c.boss));
@@ -276,11 +276,11 @@ export class ArenaRoom {
         }
         this.enemies.push(e);
       });
-      this.props = (opts.furniture ?? []).map((p) => newProp(p.kind, p.x, p.y, false));
+      this.props = (opts.furniture ?? []).map((p) => Object.assign(newProp(p.kind, p.x, p.y, false), p.lean ? { lean: p.lean } : {}));
       return;
     }
     if (opts.map) {
-      this.props = (opts.furniture ?? []).map((p) => newProp(p.kind, p.x, p.y, false));
+      this.props = (opts.furniture ?? []).map((p) => Object.assign(newProp(p.kind, p.x, p.y, false), p.lean ? { lean: p.lean } : {}));
       return;
     }
     const s = ARENA.spawn;

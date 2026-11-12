@@ -206,7 +206,7 @@ export function stepBolt(b: Bolt, w: World, dt: number): boolean {
     b.travelled += d;
     if (Math.hypot(p.x - want.x, p.y - want.y) > 1e-4) return end(b, w, true);
     // Barrels and tables stop shots (and take them).
-    const prop = w.props.find((q) => !q.broken && !q.lifted && Math.hypot(q.x - b.x, q.y - b.y) <= q.radius + 0.1);
+    const prop = w.props.find((q) => !q.broken && !q.lifted && !q.fallen && Math.hypot(q.x - b.x, q.y - b.y) <= q.radius + 0.1);
     if (prop) {
       if (b.kind === 'net') return openNet(w, b), false;
       if (b.burst) return blast(w, b, b.x, b.y), false;

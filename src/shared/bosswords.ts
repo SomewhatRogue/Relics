@@ -16,6 +16,8 @@ export const SUMP_NAME = 'THE HAULAGE';
 /** THE LISTENER and its cave (docs/design/deep-layer-bosses.md section 1; both proposals for the lore keeper). */
 export const LISTEN_NAME = 'THE LISTENER';
 export const CAVE_NAME = 'THE DRIPPING HALL';
+/** PLACEHOLDER for the lore keeper and line editor: shown when a blinding shot meets THE LISTENER (event 'listenblind'). */
+export const LISTEN_BLIND = "It's already blind.";
 /** The Doorkeepers' ground in the Deep (shared/sealarena.ts). Lore keeper. */
 export const SEAL_NAME = 'THE SEALED DOOR';
 

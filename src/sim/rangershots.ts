@@ -39,7 +39,10 @@ export const blinded = (e: Enemy, now: number) => (e.blindUntil ?? -9) > now;
 /** Blinded by hero `by`: it drops whatever blow it had going and can't see a hero for a while (not twice
  *  running from the same hero: sim/stuns.ts). */
 export function blind(e: Enemy, by: string, now: number, ev: FightEvent[]): void {
-  if (isDead(e) || e.kind === 'nest' || e.act === 'carried' || !mayStun(e, by, now, ev)) return;
+  if (isDead(e) || e.kind === 'nest' || e.act === 'carried') return;
+  // THE LISTENER is blind already: nothing happens, and the screen says so (shared/bosswords.ts LISTEN_BLIND).
+  if (e.boss?.who === 'listener') return void ev.push({ k: 'listenblind', x: e.x, y: e.y });
+  if (!mayStun(e, by, now, ev)) return;
   // (A boss or BIG ONE: a blind counts as its stun, then none for a while: sim/bosshold.ts.)
   const t = stunFor(e, now, BLIND.time * (e.kind === 'butcher' ? BLIND.big : 1));
   if (!t) return;

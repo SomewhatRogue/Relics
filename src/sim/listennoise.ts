@@ -5,6 +5,7 @@
  * up, ties to the nearest, and never uses sight. Run once a tick by sim/listenbook.ts.
  */
 import { LISTENER as L, TICK } from '../shared/tuning';
+import { taunts } from './taunt';
 import type { BossBook } from './bosskit';
 import type { Hero } from './types';
 
@@ -12,6 +13,8 @@ export interface ListenState {
   /** Each hero's noise level now, and the last blow and relic counts seen (a press is a sound even if it ends before the tick). */
   noise: Map<string, number>;
   seen: Map<string, [number, number]>;
+  /** Each Warrior's last taunt ring seen (a taunt is a shout: the loudest sound there is). */
+  rings: Map<string, number>;
   /** The book's own clocks: a blow was under way last tick, the next small ones out of the holes, when it rises from under the floor. */
   was: boolean;
   nextAdds: number;
@@ -21,7 +24,7 @@ export interface ListenState {
 const states = new WeakMap<BossBook, ListenState>();
 export function listenState(bk: BossBook): ListenState {
   let s = states.get(bk);
-  if (!s) states.set(bk, (s = { noise: new Map(), seen: new Map(), was: false, nextAdds: Infinity, riseAt: -1 }));
+  if (!s) states.set(bk, (s = { noise: new Map(), seen: new Map(), rings: new Map(), was: false, nextAdds: Infinity, riseAt: -1 }));
   return s;
 }
 
@@ -39,6 +42,10 @@ export function hear(st: ListenState, heroes: Hero[]): void {
       if (h.act === 'attack' || h.act === 'charge' || (was && now[0] !== was[0])) n = Math.max(n, N.attack);
       if (h.act === 'roll') n = Math.max(n, N.roll);
       if (was && now[1] !== was[1]) n = Math.max(n, N.relic);
+      // The Warrior's taunt is a shout: the top of the cap, each time its ring goes up.
+      const ring = h.tauntRingAt;
+      if (ring !== undefined && ring !== st.rings.get(h.id)) n = taunts(h) ? N.max : n;
+      if (ring !== undefined) st.rings.set(h.id, ring);
       // (Creeping, `sneaking`, is quiet; so is standing still.)
       if (h.moving && !h.sneaking && h.act !== 'roll') n = Math.max(n, N.run);
     }

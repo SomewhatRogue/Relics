@@ -5,7 +5,7 @@
  * (sim/listener.ts, sim/listenbook.ts, sim/listennoise.ts) and later the screen; exported through tuning.ts.
  *
  * - `noise`: a hero's noise level, 0 up to `max`. An attack, a roll, a relic raise it to that level (`attack`,
- *   `roll`, `relic`), running at full stick holds it at `run`; it falls `fall` a second. Creeping or standing
+ *   `roll`, `relic`), running at full stick holds it at `run`; it falls `fall` a second. The Warrior's taunt is a shout: the top of the cap. Creeping or standing
  *   still adds nothing. Under `quiet` a hero makes no sound at all. It goes for the loudest hero up (ties: nearest).
  * - `rock`: it breaks a lump off the wall and throws it at the loudest hero: a red circle where it lands.
  * - `drop`: the pose of dropping into a hole (`reach`: how close it walks to one first). Under the floor it
@@ -50,4 +50,11 @@ export const LISTENER = {
   holes: { r: 0.9 },
   noise: { attack: 1, roll: 0.8, run: 0.45, relic: 1.3, fall: 0.5, quiet: 0.05, max: 1.5, wake: 0.3, hear: 11, near: 2.5 },
   adds: { every: 15, n: 2 },
+  /**
+   * The dripstone columns (sim/columns.ts, sim/columnshape.ts): a blow, a shot or a thrown thing on a standing one
+   * sets it falling the way it leans; `fall` s of striped lane (`len` long, `width` across), then it lands: a hero in
+   * it takes `dmg` (striped, `knock`), a goblin `addDmg`, THE LISTENER is down `down` s (not again for `again` s: it
+   * shrugs). A fallen column is rubble, and doesn't come back.
+   */
+  column: { fall: 0.8, len: 4.5, width: 1.4, dmg: 30, knock: 10, addDmg: 60, down: 3, again: 10 },
 };

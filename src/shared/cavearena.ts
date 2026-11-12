@@ -44,5 +44,5 @@ export function caveArena(job: Job): RoomPlan {
     hero: { x: w / 2, y: h - 1.5 }, exit: { x: w / 2 - 1.1, y: h - 0.7, w: 2.2, h: 0.7 },
   };
   const listener = { kind: 'scrapper' as const, variant: 'heavy' as const, ...s.listener, hp: LISTENER.hp, name: LISTEN_NAME, boss: 'listener' as const, awake: false };
-  return { map, foes: [listener], props: [], chests: [{ ...s.chest, chained: true }] };
+  return { map, foes: [listener], props: s.columns.map((c) => ({ kind: 'column' as const, x: c.x, y: c.y, lean: c.lean })), chests: [{ ...s.chest, chained: true }] };
 }

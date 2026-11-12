@@ -72,7 +72,7 @@ export interface Foe {
 }
 /** Which way the party went at a fork. */
 export type RoadId = Road['road'];
-export interface RoomPlan { map: GameMap; foes: Foe[]; props: { kind: PropKind; x: number; y: number }[]; chests: { x: number; y: number; chained?: boolean }[] }
+export interface RoomPlan { map: GameMap; foes: Foe[]; props: { kind: PropKind; x: number; y: number; lean?: { x: number; y: number } }[]; chests: { x: number; y: number; chained?: boolean }[] }
 
 /** A run room: big enough to explore before the way on (layout 3's are their route's size: shared/ports.ts). */
 export const ROOM = { w: 28, h: 24 };

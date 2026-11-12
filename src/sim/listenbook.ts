@@ -14,6 +14,7 @@ import { currentMap } from '../shared/arena';
 import { isDead } from './damage';
 import { forget, type BossBook } from './bosskit';
 import { hear, listenState, loudest, nearestHole, type ListenState } from './listennoise';
+import { stepColumns } from './columns';
 import { listenBegin } from './listener';
 import type { World } from './elements';
 import type { Enemy } from './types';
@@ -30,6 +31,7 @@ export function stepListenBook(bk: BossBook, w: World, spawn: (x: number, y: num
     // (Its first blow when it has heard you, not a goblin's slow start.)
     e.cooldown = Math.min(e.cooldown, 0.6);
   }
+  stepColumns(e, w);
   if (b.under) return void underground(e, st, w);
   // Its rest between blows is its own: straight on after a rise (the sweep), else LISTENER.pauseBetween.
   if (e.attack) st.was = true;

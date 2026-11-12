@@ -9,6 +9,7 @@ import { shove, slide } from './bodies';
 import { inArc } from './combat';
 import { damage, isDead } from './damage';
 import { afflict, type World } from './elements';
+import { hitColumn } from './columns';
 import { freeSurvivor } from './survivors';
 import { rollFalse } from './falsecage';
 import { blastSurvivors } from './survivorhits';
@@ -32,6 +33,8 @@ export type PropWorld = World;
 export function damageProp(p: Prop, n: number, w: PropWorld, dx = 0, dy = 0): void {
   // (The Haulier's carts are never broken: sim/haulcarts.ts.)
   if (p.broken || p.kind === 'cart' || p.kind === 'tub') return;
+  // (A dripstone column is never broken: a blow sets it falling, sim/columns.ts.)
+  if (p.kind === 'column') return void (n > 0 && hitColumn(p, w));
   p.hp -= n;
   p.hitAt = w.now;
   if (p.hp <= 0) return breakProp(p, w, dx, dy);
@@ -70,7 +73,7 @@ export function stepProps(w: PropWorld, dt: number): Prop[] {
       continue;
     }
     // A cart stays where it is but for the rail (sim/haulcarts.ts): never knocked about.
-    if (p.kind === 'cart' || p.kind === 'tub') {
+    if (p.kind === 'cart' || p.kind === 'tub' || p.kind === 'column') {
       p.kvx = p.kvy = 0;
       continue;
     }
@@ -109,7 +112,7 @@ export function blastProps(x: number, y: number, r: number, dmg: number, knock: 
 /** A flying prop into a goblin (hits like its weight, big ones break), or a flying goblin into a prop. */
 export function propImpacts(w: PropWorld): void {
   for (const p of w.props) {
-    if (p.broken || p.lifted || p.kind === 'cart' || p.kind === 'tub') continue;
+    if (p.broken || p.lifted || p.kind === 'cart' || p.kind === 'tub' || p.kind === 'column') continue;
     for (const e of w.enemies) {
       const d = Math.hypot(e.x - p.x, e.y - p.y);
       if (isDead(e) || e.act === 'carried' || d > e.radius + p.radius + 0.05) continue;
@@ -145,7 +148,7 @@ export function propImpacts(w: PropWorld): void {
 
 /** Can this hero lift this prop? Only strong classes, within reach. */
 export const liftable = (h: Hero, p: Prop) =>
-  STRONG.includes(WEAPONS[h.weapon].cls) && p.weight < 10 && !p.broken && !p.lifted && Math.hypot(p.x - h.x, p.y - h.y) <= GRAB.reach + p.radius;
+  STRONG.includes(WEAPONS[h.weapon].cls) && p.weight < 10 && p.kind !== 'column' && !p.broken && !p.lifted && Math.hypot(p.x - h.x, p.y - h.y) <= GRAB.reach + p.radius;
 
 export function tryLift(h: Hero, props: Prop[], ev: FightEvent[]): boolean {
   let best: Prop | null = null, bd = Infinity;
@@ -204,5 +207,5 @@ export function stepLift(h: Hero, inp: Intent, w: PropWorld, dt: number, walk: (
 }
 
 /** For the separation pass: props that are standing in the room. */
-export const solidProps = (props: Prop[]) => props.filter((p) => !p.broken && !p.lifted);
+export const solidProps = (props: Prop[]) => props.filter((p) => !p.broken && !p.lifted && !p.fallen);
 export type { Enemy };

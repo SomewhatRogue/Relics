@@ -722,6 +722,10 @@ export interface Prop extends Body {
   wx?: number;
   wy?: number;
   heldBy?: string;
+  /** A dripstone column (sim/columns.ts): the way it leans (a unit vector), the room time it lands once set falling, and fallen (rubble). */
+  lean?: { x: number; y: number };
+  fallAt?: number;
+  fallen?: boolean;
   /** A puzzle's tub sliding to its next square (sim/tubs.ts). */
   to?: { x: number; y: number };
   /** THE BRAKESMAN's cart at the top of the rail, its lane striped till it goes at this room time (sim/brake.ts). */
@@ -833,6 +837,10 @@ export type FightEvent =
   | { k: 'tub'; what: 'push' | 'plate' | 'reset' | 'solved'; x: number; y: number; by?: string }
   | { k: 'lamp'; what: 'lit' | 'out' | 'snuff' | 'how'; x: number; y: number; by?: string }
   | { k: 'gear'; x: number; y: number; hit: boolean }
+  /** A dripstone column (sim/columns.ts): set falling (dx, dy the way it leans), landed (`down`: THE LISTENER was under it), or THE LISTENER shrugging it off. */
+  | { k: 'column'; what: 'start' | 'land' | 'shrug'; x: number; y: number; dx: number; dy: number; down?: boolean; by?: string }
+  /** A perfect shot that blinds meets THE LISTENER: it is already blind (the line is shared/bosswords.ts LISTEN_BLIND). */
+  | { k: 'listenblind'; x: number; y: number }
   | { k: 'bare'; x: number; y: number }
   /** The Haulier landing a leap; its sparks coming down on a spot (sim/haulbook.ts). */
   | { k: 'haulleap'; x: number; y: number }
