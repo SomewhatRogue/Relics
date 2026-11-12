@@ -93,3 +93,8 @@ haulcarts now clears grabQueuedAt); stun-locking too easy (cart knockdowns now o
 wanted grab, aim, throw. sim/haulcarts.ts rewritten: heldBy, wx/wy, free rolls, goblins hit; sim/cartpath.ts the
 one path; client/cartaim.ts the arrow; "AIM, THEN GRAB TO THROW" on taking hold (short cue, approved words).
 Shove aims at its hero from any cart at rest. haulier.test's cart tests rewritten. 3D view: no aim arrow yet.
+
+## 2026-11-12: the Haulier's gear stays a quiet bonus (Opus 5.5)
+Kyle: lightning at the gear only helps storm heroes; carts are his gimmick. Decision: leave the gear rule as is
+(a reward for storm users who notice), no cue teaching it. Kept in mind for later: a cart thrown into the gear's
+frame drops its bucket on the Haulier below, if the fight grows samey.
