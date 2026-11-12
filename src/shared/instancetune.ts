@@ -28,7 +28,8 @@ export const INSTANCE = {
    * Harder than a job's goblins at any size (Kyle, 2026-11-11, after playing it: "enemies even harder on the
    * instances"): every goblin's health and hits, the named ones' health.
    */
-  tough: { hp: 1.5, harm: 1.3, named: 1.25 },
+  // (Twice that, 2026-11-11, with half as many goblins: "less goblins and each one takes longer for the group".)
+  tough: { hp: 3, harm: 1.3, named: 1.5 },
   /**
    * Fierce (Kyle, 2026-11-11: "too easy to dodge everything without even skill"): every instance goblin winds up in
    * `windup` of the time (never under an elite Quick one's floors, so it's still a tell), rests `pause` as long
@@ -62,7 +63,7 @@ export const BRAKE = { every: 4, fast: 2.6, below: 0.4, warn: 1, speed: 9, dmg: 
 
 /**
  * THE SLUICER and THE RAKER (the washing floor, sim/pairfall.ts): the Sluicer falls in the water instead of dying
- * while the Raker stands; the Raker walks to it at `walk` and lifts it `lift` s (a stun starts that over), and it's
+ * while the Raker stands; the Raker walks to it at `walk` and, `reach` from its body, lifts it `lift` s (a stun starts that over), and it's
  * up at `back` of its health. Kill the Raker while it lies there and it's dead too.
  */
-export const PAIR = { walk: 3, lift: 2.5, back: 0.5, reach: 1.1 };
+export const PAIR = { walk: 3, lift: 2.5, back: 0.5, reach: 0.9 };

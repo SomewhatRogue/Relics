@@ -1,14 +1,14 @@
 /**
- * Instances (docs/design/instances.md): the frame (areas taken in turn, gates that open on their named ones
- * and take the whole party, checkpoints, goblins dozing till a hero is near) and the first one, the Open Cut
- * (shared/instances.ts): Rakehead's rows, the workings, the washing floor, the Haulier's working.
+ * Instances (docs/design/instances.md, open-cut-map.md): the frame (gates that open on their named ones and take
+ * the whole party, checkpoints, goblins dozing till a hero is near) and the first one, the Open Cut
+ * (shared/instances.ts): one map up through Rakehead's rows, the workings and the washing floor, then the Haulier.
  */
 import { describe, expect, it } from 'vitest';
-import { openCut, INSTANCES, areaOf } from '../src/shared/instances';
+import { openCut, INSTANCES, areaOf, CUT_PLACES } from '../src/shared/instances';
+import { cutMap } from '../src/shared/cutmap';
 import { HAUL_NAME } from '../src/shared/bosswords';
 import { CUT_NAMES } from '../src/shared/opencutwords';
 import { BRAKE, DROVER, HERO, INSTANCE, PAIR, PARTY, TICK } from '../src/shared/tuning';
-import { WORKINGS_AT } from '../src/shared/cutworkings';
 import { damage } from '../src/sim/damage';
 import { ropedNear } from '../src/sim/drover';
 import { newRun, runRoom, tally, type Run } from '../src/sim/run';
@@ -20,12 +20,20 @@ import { NO_INTENT, type Hero } from '../src/sim/types';
 import { walkable } from './walk';
 
 const job = (d = 12) => openCut(d);
-function area(i: number, ids = ['me'], d = 12): { run: Run; room: ArenaRoom; hs: Hero[] } {
+/**
+ * Place `i` of the one map (0 the rows, 1 the workings, 2 the washing floor), the party at its foot with the gates
+ * below it open; 3, the Haulier's arena. `at` turns a place's own (x, y) into the map's.
+ */
+function area(i: number, ids = ['me'], d = 12): { run: Run; room: ArenaRoom; hs: Hero[]; at: (x: number, y: number) => { x: number; y: number } } {
   const run = newRun(job(d));
-  Object.assign(run, { index: i, party: ids.length });
-  const room = runRoom(run), hs = ids.map((id) => room.join(id));
+  Object.assign(run, { index: i === 3 ? 1 : 0, party: ids.length, stretch: i === 3 ? 0 : i });
+  const room = runRoom(run), hs = ids.map((id) => room.join(id)), L = cutMap(job(d), CUT_PLACES).laid[Math.min(i, 2)];
   for (const id of ids) room.setIntent(id, NO_INTENT);
-  return { run, room, hs };
+  if (i < 3) {
+    for (const st of room.map.stretches!.slice(0, i)) room.map.blocks[st.gate!].ruined = true;
+    hs.forEach((h, n) => Object.assign(h, { x: L.x0 + L.w / 2 + n * 0.8, y: L.y0 + L.h - 1.6 }));
+  }
+  return { run, room, hs, at: (x, y) => ({ x: x + L.x0, y: y + L.y0 }) };
 }
 const step = (room: ArenaRoom, s: number) => {
   for (let n = 0; n < Math.round(s / TICK); n++) room.step();
@@ -33,31 +41,45 @@ const step = (room: ArenaRoom, s: number) => {
 const fall = (h: Hero, out = false) => Object.assign(h, { hp: 0, act: 'down', actT: out ? PARTY.bleed : 0, actDur: HERO.respawn, ...(out ? { out: true, bleeding: true, selfUp: true } : {}) });
 
 describe('the Open Cut on the board', () => {
-  it('is four areas, the last the Haulier in its working', () => {
+  it('is one map, then the Haulier in its working', () => {
     const j = job();
     expect(j.instance).toBe('opencut');
     expect(j.rooms).toBe(INSTANCES.opencut.areas.length);
-    expect(j.rooms).toBe(4);
+    expect(j.rooms).toBe(2);
     expect(j.arena).toBe('haulier');
     expect(j.boss).toBe(HAUL_NAME);
-    expect(areaOf(j, 3).plan).toBeUndefined();
+    expect(areaOf(j, 1).plan).toBeUndefined();
   });
-  it('is the same job, and the same areas, for the same day', () => {
+  it('is the same job, and the same map, for the same day', () => {
     expect(job(30)).toEqual(job(30));
-    for (const a of INSTANCES.opencut.areas.slice(0, 3)) expect(JSON.stringify(a.plan!(job(30)))).toBe(JSON.stringify(a.plan!(job(30))));
+    const a = INSTANCES.opencut.areas[0];
+    expect(JSON.stringify(a.plan!(job(30)))).toBe(JSON.stringify(a.plan!(job(30))));
   });
 });
 
-describe('each area', () => {
-  const plans = INSTANCES.opencut.areas.slice(0, 3).map((a) => a.plan!);
-  it('can be walked from the way in to its gate, every goblin, cage and chest, by every day', { timeout: 30000 }, () => {
-    for (const d of [1, 12, 77]) plans.forEach((plan, i) => {
-      const p = plan(job(d)), w = walkable(p, [], true), m = p.map;
-      expect(w.reach(m.exit!.x + m.exit!.w / 2, 1.2, 1.2), `${d} area ${i} gate`).toBe(true);
-      for (const f of p.foes) expect(w.reach(f.x, f.y, 1.4), `${d} area ${i} foe at ${f.x},${f.y}`).toBe(true);
-      for (const c of [...p.props.filter((q) => q.kind === 'cage'), ...p.chests]) expect(w.reach(c.x, c.y, 1.6), `${d} area ${i} at ${c.x},${c.y}`).toBe(true);
+describe('the map and its places', () => {
+  const plans = CUT_PLACES.map((p) => p.plan);
+  it('can be walked from the foot to the way out, gates open, every goblin, cage and chest, by every day', { timeout: 60000 }, () => {
+    for (const d of [1, 12, 77]) {
+      const p = INSTANCES.opencut.areas[0].plan!(job(d)), m = p.map;
+      for (const st of m.stretches!) if (st.gate !== undefined) m.blocks[st.gate].ruined = true;
+      const w = walkable(p, [], true);
+      expect(w.reach(m.exit!.x + m.exit!.w / 2, 1.2, 1.2), `${d} the way out`).toBe(true);
+      for (const f of p.foes) expect(w.reach(f.x, f.y, 1.4), `${d} foe at ${f.x},${f.y}`).toBe(true);
+      for (const c of [...p.props.filter((q) => q.kind === 'cage'), ...p.chests]) expect(w.reach(c.x, c.y, 1.6), `${d} at ${c.x},${c.y}`).toBe(true);
       for (const f of p.foes) expect(f.x > 0 && f.x < m.w && f.y > 0 && f.y < m.h).toBe(true);
-    });
+    }
+  });
+  it('is its places in order, a gate shut between each two, the party at the rows` foot', () => {
+    const p = INSTANCES.opencut.areas[0].plan!(job()), m = p.map, st = m.stretches!;
+    expect(st.map((s) => s.keep)).toEqual(CUT_PLACES.map((c) => c.keep));
+    expect(st.slice(0, -1).every((s) => m.blocks[s.gate!].kind === 'gate' && !m.blocks[s.gate!].ruined)).toBe(true);
+    expect(st[st.length - 1].gate).toBeUndefined();
+    expect(m.hero.y).toBeGreaterThan(m.h - 3);
+    expect(m.exit!.y).toBe(0);
+    // Places a lull apart: no goblin between a gate and the next place's foot.
+    const laid = cutMap(job(), CUT_PLACES).laid;
+    for (let i = 1; i < laid.length; i++) expect(p.foes.some((f) => f.y > laid[i].y0 + laid[i].h && f.y < laid[i - 1].y0)).toBe(false);
   });
   it('has its named ones, none a butcher, THE DROVER driving the roped line, and runs bottom to top', () => {
     const names = [[CUT_NAMES.drover], [CUT_NAMES.brakesman], [CUT_NAMES.sluicer, CUT_NAMES.raker]];
@@ -66,20 +88,16 @@ describe('each area', () => {
       expect(p.foes.filter((f) => f.name).map((f) => f.name)).toEqual(names[i]);
       expect(p.foes.filter((f) => f.name).every((f) => f.kind !== 'butcher')).toBe(true);
       if (i === 0) expect(p.foes.find((f) => f.name)!.task?.k).toBe('escort');
-      expect(p.map.hero.y).toBeGreaterThan(p.map.h - 3);
-      expect(p.map.exit!.y).toBe(0);
     });
   });
 });
 
 describe('the frame', () => {
-  it('builds each area dozing beyond an area`s reach, the pacing rules on; the last is the Haulier`s arena', () => {
-    for (let i = 0; i < 3; i++) {
-      const { room } = area(i);
-      expect(room.sleepFar).toBe(true);
-      expect(room.sleepAt).toEqual({ wake: INSTANCE.wake, doze: INSTANCE.doze });
-      expect(room.pace).toEqual({ index: i });
-    }
+  it('builds the map dozing beyond an area`s reach, the pacing rules on; then the Haulier`s arena', () => {
+    const { room: map } = area(0);
+    expect(map.sleepFar).toBe(true);
+    expect(map.sleepAt).toEqual({ wake: INSTANCE.wake, doze: INSTANCE.doze });
+    expect(map.pace).toEqual({ index: 0 });
     const { room } = area(3);
     expect(room.enemies.some((e) => e.boss?.who === 'haulier')).toBe(true);
   });
@@ -96,7 +114,7 @@ describe('the frame', () => {
     expect(far.dozing).toBe(false);
   });
 
-  it('opens the gate when the area`s named one is dead, the rest and the cages left as they are', () => {
+  it('readies the gate when the place`s named one is dead, the rest and the cages left as they are', () => {
     const { run, room } = area(0);
     const before = goal(run, room);
     expect(before.done).toBe(false);
@@ -105,15 +123,15 @@ describe('the frame', () => {
     Object.assign(k, { hp: 0, act: 'dead' });
     expect(isDead(k)).toBe(true);
     const after = goal(run, room);
-    expect(after.done).toBe(true);
-    expect(after.text).toContain('Way on: north');
+    expect(after.done).toBe(false);
+    expect(after.text).toContain('through the gate');
     expect(room.enemies.filter((e) => !isDead(e)).length).toBeGreaterThan(5);
   });
 
   it('alone, going down is a wipe: a beat, then up at the gate whole, the goblins back where they were put', () => {
-    const { run, room, hs } = area(0), h = hs[0], g = room.enemies.find((e) => !e.task && !e.name)!;
+    const { run, room, hs, at } = area(0), h = hs[0], g = room.enemies.find((e) => !e.task && !e.name)!;
     Object.assign(g, { x: g.x + 3, hp: 1, alert: true });
-    Object.assign(h, { x: 11, y: 20 });
+    Object.assign(h, at(8, 20));
     fall(h);
     tally(run, room, [], 'me');
     expect(run.downs).toBe(1);
@@ -243,15 +261,14 @@ describe('THE DROVER', () => {
 });
 
 describe('THE BRAKESMAN', () => {
-  const R = WORKINGS_AT.rail;
   const workings = () => {
-    const a = area(1);
+    const a = area(1), R = a.room.map.rail!;
     const h = a.hs[0], bk = a.room.enemies.find((e) => e.name === CUT_NAMES.brakesman)!;
     // Out of its reach and out of the lane, but near enough to wake it; nobody else in the way.
     a.room.enemies = a.room.enemies.filter((e) => e === bk);
-    Object.assign(h, { x: 14, y: 12.4, hp: 9999, maxHp: 9999 });
+    Object.assign(h, { ...a.at(14, 12.4), hp: 9999, maxHp: 9999 });
     const carts = () => a.room.props.filter((p) => p.kind === 'cart' && Math.abs(p.y - R.y) < 0.01);
-    return { ...a, h, bk, carts };
+    return { ...a, h, bk, carts, R };
   };
   const hold = (room: ArenaRoom, h: Hero, at: { x: number; y: number }, s: number, seq: number) => {
     room.setIntent(h.id, { ...NO_INTENT, grabSeq: seq });
@@ -261,12 +278,12 @@ describe('THE BRAKESMAN', () => {
   it('works its brake at the top of the rail', () => {
     const { room, bk } = workings();
     step(room, 0.2);
-    expect(room.map.rail).toEqual(R);
+    expect(room.map.rail).toBeDefined();
     expect(Math.hypot(bk.x - bk.home.x, bk.y - bk.home.y)).toBeLessThan(0.05);
   });
 
   it('lets a cart go: its lane striped a moment, then down the rail, knocking flat whoever`s in it', () => {
-    const { room, h, carts } = workings();
+    const { room, h, carts, R } = workings();
     step(room, BRAKE.warn + 0.1);
     const c = carts().find((p) => p.goAt !== undefined)!;
     expect(c.x).toBeCloseTo(R.x0);
@@ -282,7 +299,7 @@ describe('THE BRAKESMAN', () => {
   });
 
   it('a cart sent back up knocks it off its brake: stunned and OPEN, no carts; then it walks back to it', () => {
-    const { room, h, bk, carts } = workings();
+    const { room, h, bk, carts, at } = workings();
     step(room, 0.2);
     const bottom = carts().find((p) => !p.goAt && !p.roll)!;
     // (Wait out the first cart's run, out of its lane.)
@@ -292,7 +309,7 @@ describe('THE BRAKESMAN', () => {
     expect(carts().some((p) => (p.roll ?? 0) < 0)).toBe(true);
     const hp = bk.hp;
     room.setIntent(h.id, { ...NO_INTENT, grabSeq: 1 });
-    for (let n = 0; n < Math.round(3 / TICK) && bk.act !== 'stunned'; n++) Object.assign(h, { x: 14, y: 12.4 }), room.step();
+    for (let n = 0; n < Math.round(3 / TICK) && bk.act !== 'stunned'; n++) Object.assign(h, at(14, 12.4)), room.step();
     expect(bk.act).toBe('stunned');
     expect(bk.hp).toBeLessThan(hp);
     expect(bk.takes).toBe(INSTANCE.open.mult);
@@ -312,10 +329,10 @@ describe('THE BRAKESMAN', () => {
 
 describe('THE SLUICER and THE RAKER', () => {
   const floor = () => {
-    const a = area(2), h = a.hs[0];
+    const a = area(2), h = a.hs[0], at = a.at;
     const sl = a.room.enemies.find((e) => e.name === CUT_NAMES.sluicer)!, rk = a.room.enemies.find((e) => e.name === CUT_NAMES.raker)!;
     a.room.enemies = [sl, rk];
-    Object.assign(h, { x: 12, y: 13, hp: 9999, maxHp: 9999, safeT: 999 });
+    Object.assign(h, { ...at(12, 13), hp: 9999, maxHp: 9999, safeT: 999 });
     step(a.room, 0.1);
     const kos = (e: typeof sl) => {
       const ev: never[] = [];
@@ -343,7 +360,7 @@ describe('THE SLUICER and THE RAKER', () => {
     expect(seen).toContain('pairup');
     expect(sl.fallen).toBeUndefined();
     expect(sl.hp).toBe(Math.round(sl.maxHp * PAIR.back));
-    expect(Math.hypot(sl.x - rk.x, sl.y - rk.y)).toBeLessThan(PAIR.reach + 0.6);
+    expect(Math.hypot(sl.x - rk.x, sl.y - rk.y)).toBeLessThan(sl.radius + rk.radius + PAIR.reach + 0.3);
   });
 
   it('a stun on the Raker starts its lift over', () => {

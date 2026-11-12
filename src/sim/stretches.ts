@@ -16,8 +16,9 @@ import type { FightEvent, Hero } from './types';
 /** The stretch the party's in, if the map has them. */
 export const stretchOf = (run: Run, map: GameMap): Stretch | undefined => map.stretches?.[Math.min(run.stretch ?? 0, map.stretches.length - 1)];
 
-/** Its named ones still standing. */
-export const keepers = (s: Stretch, room: ArenaRoom) => room.allEnemies.filter((e) => e.name && s.keep.includes(e.name) && !isDead(e));
+/** Its named ones still standing, or its guard packs' goblins. */
+export const keepers = (s: Stretch, room: ArenaRoom) =>
+  room.allEnemies.filter((e) => !isDead(e) && ((e.name && s.keep.includes(e.name)) || (!!s.packs && e.pack !== undefined && s.packs.includes(e.pack))));
 
 /** Is this the last stretch (no gate: its way out is the map's exit). */
 export const lastStretch = (run: Run, map: GameMap) => !!map.stretches && (run.stretch ?? 0) >= map.stretches.length - 1;

@@ -12,9 +12,10 @@ import { Rng } from './rng.js';
 import { rollTime } from './timeofday.js';
 import { HAUL_NAME } from './bosswords.js';
 import { rowsPlan } from './cutrows.js';
+import { cutMap, type CutPlace } from './cutmap.js';
 import { workingsPlan } from './cutworkings.js';
 import { washingPlan } from './cutwashing.js';
-import { CUT_AREAS, CUT_POST } from './opencutwords.js';
+import { CUT_AREAS, CUT_NAMES, CUT_POST } from './opencutwords.js';
 import { stressPlan } from './stressmap.js';
 
 export type InstanceId = 'opencut' | 'stress';
@@ -32,7 +33,8 @@ Object.assign(INSTANCES, {
   opencut: {
     id: 'opencut',
     place: { name: 'Rakehead', kind: 'mine', region: 'Copperdeep', ruin: 2 },
-    areas: [{ name: CUT_AREAS[0], plan: rowsPlan }, { name: CUT_AREAS[1], plan: workingsPlan }, { name: CUT_AREAS[2], plan: washingPlan }, { name: CUT_AREAS[3] }],
+    // One map down through Rakehead (shared/cutmap.ts), then the Haulier's working (the job's arena).
+    areas: [{ name: 'THE OPEN CUT', plan: openCutMap }, { name: CUT_AREAS[3] }],
   },
 });
 
@@ -40,6 +42,18 @@ INSTANCES.stress = { id: 'stress', place: { name: 'Rakehead', kind: 'mine', regi
 
 /** The stress map's job (docs/design/open-cut-map.md step 0; dev only, `?stress=1`). */
 export const stressJob = (day = 1): Job => ({ ...openCut(day), id: `d${day}-stress`, instance: 'stress', rooms: 1, arena: undefined });
+
+/** The Open Cut's places, from the bottom (docs/design/open-cut-map.md). */
+export const CUT_PLACES: CutPlace[] = [
+  { plan: rowsPlan, keep: [CUT_NAMES.drover] },
+  { plan: workingsPlan, keep: [CUT_NAMES.brakesman] },
+  { plan: washingPlan, keep: [CUT_NAMES.sluicer, CUT_NAMES.raker] },
+];
+
+/** The Open Cut's one map. */
+export function openCutMap(job: Job): RoomPlan {
+  return cutMap(job, CUT_PLACES).plan;
+}
 
 /** Area `i` of an instance job. */
 export const areaOf = (job: Job, i: number): InstanceArea => INSTANCES[job.instance!].areas[i];

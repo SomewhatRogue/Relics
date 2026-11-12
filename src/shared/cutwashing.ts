@@ -47,20 +47,20 @@ export function washingPlan(job: Job): RoomPlan {
   k.braziers.push({ x: 21.8, y: 32, r: 0.3, wild: true }, { x: 2, y: 11.6, r: 0.3, wild: true }, { x: 12, y: 38.6, r: 0.3, wild: true });
 
   // 1. Wading the lower pool.
-  pack(k, 1, A.waders, ['fodder', 'fodder', 'lunger'], 1.5);
+  pack(k, 1, A.waders, ['lunger', 'fodder'], 1.3);
   // 2. The west ford held: two shields in front, the hexer behind them.
   pack(k, 2, A.westFord, ['shield', 'shield'], 0.8);
   pack(k, 2, { x: A.westFord.x, y: A.westFord.y - 2.6 }, ['hexer'], 0);
   // 3. Archers over the east ford.
-  pack(k, 3, A.eastFord, ['archer', 'archer', 'fodder'], 1.2);
+  pack(k, 3, A.eastFord, ['archer', 'archer'], 1);
   // 4. A cage kept on the upper floor.
   prop(k, 'cage', A.cage.x, A.cage.y);
-  pack(k, 4, { x: A.cage.x + 1.4, y: A.cage.y - 0.4 }, ['netter', 'fodder'], 0.9);
+  pack(k, 4, { x: A.cage.x + 1.4, y: A.cage.y - 0.4 }, ['netter'], 0);
   // 5. THE SLUICER by the upper pool and THE RAKER beside it, a few of their own between.
   // (One stands the other up: the Raker the tougher, so killing it first is the long way: sim/pairfall.ts.)
   keeper(k, 5, A.sluicer, 'ironhide', CUT_NAMES.sluicer, 260).pair = 'sluicer';
   keeper(k, 5, A.raker, 'heavy', CUT_NAMES.raker, 380).pair = 'raker';
-  pack(k, 5, { x: 12, y: 7.2 }, ['fodder', 'fodder', 'lunger'], 1.4);
+  pack(k, 5, { x: 12, y: 7.2 }, ['lunger'], 0);
   k.chests.push({ ...A.chest });
   return areaPlan(k, job, { name: CUT_AREAS[2], w, h, kind: 'mine', torches: [6, w - 6] });
 }

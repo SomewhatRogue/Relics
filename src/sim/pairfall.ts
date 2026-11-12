@@ -47,7 +47,8 @@ export function stepPairFall(w: World): void {
   if (was && rk.act !== 'stunned') Object.assign(rk, { x: was.x, y: was.y });
   held.set(rk, { x: rk.x, y: rk.y });
   if (rk.act === 'stunned') return void (rk.lift = 0);
-  const d = Math.hypot(sl.x - rk.x, sl.y - rk.y);
+  // (Body to body: the gap between them, not their middles.)
+  const d = Math.hypot(sl.x - rk.x, sl.y - rk.y) - sl.radius - rk.radius;
   if (d > PAIR.reach) {
     (rk.lift = 0), (rk.attack = null), goTo(rk, sl.x + (rk.x > sl.x ? 0.8 : -0.8), sl.y, PAIR.walk, TICK);
     return void held.set(rk, { x: rk.x, y: rk.y });

@@ -65,6 +65,8 @@ export interface Round extends Circle {
 export interface Stretch {
   name: string;
   keep: string[];
+  /** Packs (by number) to kill before the gate opens, where there's no named one. */
+  packs?: number[];
   gate?: number;
   at?: { x: number; y: number; w: number; h: number };
   check?: { x: number; y: number };

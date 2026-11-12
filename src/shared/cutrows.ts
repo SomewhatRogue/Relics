@@ -47,7 +47,7 @@ export function rowsPlan(job: Job): RoomPlan {
   // 1. At their fire at the foot of the street, eating.
   body(k, A.fire.x - 1, A.fire.y + 0.8, 'villager'), body(k, A.fire.x + 1.1, A.fire.y - 0.6, 'villager');
   mark(k, 'blood', A.fire.x - 1.6, A.fire.y + 0.4, 1.4, 0.8);
-  pack(k, 1, A.fire, ['fodder', 'fodder', 'lunger'], 1.5, { feeding: true });
+  pack(k, 1, A.fire, ['lunger', 'fodder'], 1.3, { feeding: true });
 
   // 2. The roped line, driven up the street for the top of the village: THE DROVER in front, a guard behind.
   const pts: Pt[] = [[A.line.x, A.line.y], [mid, 20], [mid, 10], [mid + 1.8, 6.5], [mid, 1.4]], n = 3, front = 1.4 + (n - 1) * 0.8;
@@ -60,15 +60,15 @@ export function rowsPlan(job: Job): RoomPlan {
 
   // 3 and 4. A cage either side of the rows, each kept.
   prop(k, 'cage', A.cageL.x, A.cageL.y), prop(k, 'cage', A.cageR.x, A.cageR.y);
-  pack(k, 3, { x: A.cageL.x + 1.4, y: A.cageL.y - 1 }, ['hexer', 'fodder', 'fodder'], 1);
-  pack(k, 4, { x: A.cageR.x - 1.4, y: A.cageR.y - 1 }, ['shield', 'archer', 'fodder'], 1);
+  pack(k, 3, { x: A.cageL.x + 1.4, y: A.cageL.y - 1 }, ['hexer', 'fodder'], 1);
+  pack(k, 4, { x: A.cageR.x - 1.4, y: A.cageR.y - 1 }, ['shield', 'archer'], 1);
 
-  // 5. Three walking a round across the street.
+  // 5. Two walking a round across the street.
   const beat: Pt[] = [[4.6, A.round], [w - 4.6, A.round]];
-  for (let i = 0; i < 3; i++) k.foes.push({ kind: 'scrapper', x: 5.4 + i * 1.1, y: A.round, task: { k: 'patrol', pts: beat, i: 1 }, pack: 5 });
+  for (let i = 0; i < 2; i++) k.foes.push({ kind: 'scrapper', x: 5.4 + i * 1.1, y: A.round, task: { k: 'patrol', pts: beat, i: 1 }, pack: 5 });
 
   // 6. The square: the rest of them by the well, the gate behind them.
-  pack(k, 6, A.square, ['shield', 'hexer', 'fodder', 'fodder', 'archer'], 2);
+  pack(k, 6, A.square, ['shield', 'hexer', 'archer'], 1.8);
   k.chests.push({ ...A.chest });
   return areaPlan(k, job, { name: CUT_AREAS[0], w, h, kind: 'village', torches: [3.4, w - 3.4] }, { led: { pts, n, hold: true } });
 }

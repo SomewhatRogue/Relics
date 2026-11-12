@@ -10,7 +10,7 @@ export const CUT_POST = {
   where: 'RAKEHEAD',
   title: 'The Open Cut',
   text: "A digger got out of Rakehead last night and came over the hill on bare feet, and what he says is the hungry took everyone who could swing a pick, roped them, and walked them down to the Open Cut. Some are still in the rows, he thinks. Go up and get them back.",
-  rooms: 'Four areas, about 25 minutes, a boss in each',
+  rooms: 'Down through Rakehead into the pit, about 30 minutes, a boss in each place',
   pays: (n: number) => `${n} gold and what the bosses drop`,
 };
 

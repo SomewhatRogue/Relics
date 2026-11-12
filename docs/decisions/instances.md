@@ -2,6 +2,21 @@
 
 The Instances chat's log (docs/BOARD.md). Newest first, signed with the model. Spec: docs/design/instances.md.
 
+## 2026-11-11: the Open Cut on one map, step 2 stage A (Kyle: "exactly like that. some periods of lull in between mobs"; Claude Opus 5.5)
+
+`shared/cutmap.ts` joins the places built by hand into one map, bottom to top: the rows, a gate, a lull (a quiet
+path of 9 tiles, a fire basket, a body, no goblins), the workings, a gate and a lull, the washing floor, then the map's
+way out to the Haulier's arena (the job is now 2 rooms: the map, the arena). Each place is moved into place with its
+packs renumbered by place; rock either side of a place narrower than the 28-wide map. A stretch can now also be
+kept by guard packs (`Stretch.packs`) where there's no named one. Fewer goblins, each much tougher: 35 on the map
+(was 47 across the areas), every one at 3x a job goblin's health (`INSTANCE.tough.hp`, was 1.5x), the named ones 1.5x
+(was 1.25x). Fixed on the way: the Raker lifts from a gap between their bodies (`PAIR.reach` 0.9), not from their
+middles 1.1 apart, which the two bodies pushing apart could keep it just short of. Board posting: "Down through
+Rakehead into the pit, about 30 minutes, a boss in each place" (to the writing pass with the gate lines). Next, stage
+B: the new places (the reckoning house, the winding house, the terraces) between these. Kyle also asked for story
+arcs with a few choices of way (a dungeon or the main hall and kitchen), several bigger maps each with its own
+mini-boss and boss, the way leading back to the start: to design next, with the lore keeper.
+
 ## 2026-11-11: one map in stretches, step 1 (Kyle: "go for it"; Claude Opus 5.5)
 
 docs/design/open-cut-map.md step 1 (`sim/stretches.ts`). A map lists its stretches (`map.stretches`: the named ones to

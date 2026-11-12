@@ -45,20 +45,20 @@ export function workingsPlan(job: Job): RoomPlan {
     { x: 3, y: 32.4, r: 0.3, wild: true }, { x: 19, y: 16.8, r: 0.3, wild: true }, { x: 18.6, y: 12.2, r: 0.3, wild: true });
 
   // 1. Asleep by the carts in the first chamber.
-  pack(k, 1, A.sleepers, ['fodder', 'fodder', 'sapper'], 1.2);
+  pack(k, 1, A.sleepers, ['sapper', 'fodder'], 1.2);
 
   // 2 and 3. The second chamber: a kept cage, and a shield wall with its archer across the way.
   prop(k, 'cage', A.cage.x, A.cage.y);
   pack(k, 2, { x: A.cage.x + 1.6, y: A.cage.y - 0.6 }, ['netter', 'fodder'], 0.9);
-  pack(k, 3, A.wall, ['shield', 'shield', 'archer', 'fodder'], 1.3);
+  pack(k, 3, A.wall, ['shield', 'shield', 'archer'], 1.3);
 
-  // 4. Three walking a round across the second chamber.
+  // 4. Two walking a round across the second chamber.
   const beat: Pt[] = [[3, A.round], [w - 3, A.round]];
-  for (let i = 0; i < 3; i++) k.foes.push({ kind: 'scrapper', x: 4 + i * 1.1, y: A.round, task: { k: 'patrol', pts: beat, i: 1 }, pack: 4 });
+  for (let i = 0; i < 2; i++) k.foes.push({ kind: 'scrapper', x: 4 + i * 1.1, y: A.round, task: { k: 'patrol', pts: beat, i: 1 }, pack: 4 });
 
   // 5. The third chamber: THE BRAKESMAN at its brake, a few of its own over the rail.
   keeper(k, 5, A.brakesman, 'heavy', CUT_NAMES.brakesman, 380).brakes = true;
-  pack(k, 5, { x: 11, y: 5.4 }, ['lunger', 'lunger', 'fodder'], 2);
+  pack(k, 5, { x: 11, y: 5.4 }, ['lunger'], 0);
   k.chests.push({ ...A.chest });
   return areaPlan(k, job, { name: CUT_AREAS[1], w, h, kind: 'mine', torches: [5, w - 5] }, { rail: { ...A.rail } });
 }
