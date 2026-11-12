@@ -2,6 +2,19 @@
 
 The Instances chat's log (docs/BOARD.md). Newest first, signed with the model. Spec: docs/design/instances.md.
 
+## 2026-11-11: the Open Cut as one map: the spec, and step 0 measured (Kyle: "do it"; Claude Opus 5.5)
+
+Kyle wants one huge WoW-like map with paths and branches, fewer and tougher goblins, each boss in a crafted place
+with a story, intros for the mini-bosses, the Haulier a mini-boss and an end boss in stages with better loot. Spec:
+`docs/design/open-cut-map.md` (also the Project's `claude/open-cut-map.md`).
+Step 0, the stress test (`shared/stressmap.ts`, dev only, `?stress=1`; `STRESS=1 npx vitest run tests/stress.test.ts`):
+a 150x150 map (twice Fenmere), a path winding between rock walls, 150 goblins in packs of three, 2,600 trees and rocks.
+Node: plan 3 ms, room 2 ms, first tick 40 ms (the path grid), then 0.5 ms a tick (p95 0.7, max 12); split three ways,
+0.6 ms (p95 0.9). Browser at phone size with the CPU slowed 4x: load 2.4 s, frames 23 ms on average (p95 33), the
+room's step 1.4 ms (p95 3.1, max 29, path fields as packs wake); Fenmere on the same run: load 1.9 s, frames 34 ms (p95
+50), step 1.7 ms. So one map twice Fenmere's size is cheaper than Fenmere is now: go. The one spike to watch is a path
+field built as a pack wakes (up to about 30 ms once). Next: step 1, stretches and in-map gates on one map.
+
 ## 2026-11-11: harder, no damage cut down, CUT FREE (Kyle's play notes; Claude Opus 5.5)
 
 Kyle: "it just didn't feel hard enough. too easy to dodge everything without even skill and low damage numbers to

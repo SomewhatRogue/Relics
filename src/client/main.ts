@@ -7,7 +7,7 @@ import { SIGNS, SIGN_KEY } from '../shared/signs';
 import { signFor, signLeft } from '../sim/signature';
 import { ExpedUi } from './expedui';
 import { expedition, fenmere, goalWords, hangmansWood } from '../shared/expedjob';
-import { openCut } from '../shared/instances';
+import { openCut, stressJob } from '../shared/instances';
 import { barnHunt } from '../shared/bossjobs';
 import { plateOf } from '../sim/bossplate';
 import { showPlate } from './bossplate';
@@ -247,6 +247,9 @@ if (quick && wday) game.startJob(hangmansWood(wday > 1 ? wday : game.world.day))
 const fday = Number(new URLSearchParams(location.search).get('fen') ?? 0);
 if (quick && fday) game.startJob(fenmere(fday > 1 ? fday : game.world.day));
 // ?hero=WARRIOR&cut=1: straight into today's Open Cut, the first instance (?cut=4: the one posted on day 4; ?area=2 starts at its third area).
+// ?stress=1: the stress map (docs/design/open-cut-map.md step 0), a party of `stress`.
+const stressN = Number(new URLSearchParams(location.search).get('stress') ?? 0);
+if (quick && stressN) game.startJob(stressJob(), stressN);
 const cday = Number(new URLSearchParams(location.search).get('cut') ?? 0);
 if (quick && cday) game.startJob(openCut(cday > 1 ? cday : game.world.day), 1, Number(new URLSearchParams(location.search).get('area') ?? 0));
 // ?hero=WARRIOR&barn=1: straight onto today's Doorkeepers hunt; ?barn=arena: straight into the great barn.
