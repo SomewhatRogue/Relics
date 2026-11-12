@@ -86,3 +86,10 @@ Kyle: Deep only from level 9, with a passphrase level-9 heroes get to pass on. s
 mayGoDown. The grate (client/squareui.ts): under 9, Cobb turns you back with a box for the word (kept on the
 profile as deepSaid while it's the week's); 9 and up, he tells you the word. A party goes with its leader, so
 only the leader is asked. Words and lines: lore keeper (story bible: Cobb's word, the layers), line editor.
+
+## 2026-11-12: carts grabbed, aimed and thrown; no stun-locking the Haulier (Opus 5.5)
+Kyle's playtest: loved it; "nothing to grab" showed when grabbing a cart (the press wasn't marked as used:
+haulcarts now clears grabQueuedAt); stun-locking too easy (cart knockdowns now on e.holdUntil, cart.again 10 s);
+wanted grab, aim, throw. sim/haulcarts.ts rewritten: heldBy, wx/wy, free rolls, goblins hit; sim/cartpath.ts the
+one path; client/cartaim.ts the arrow; "AIM, THEN GRAB TO THROW" on taking hold (short cue, approved words).
+Shove aims at its hero from any cart at rest. haulier.test's cart tests rewritten. 3D view: no aim arrow yet.

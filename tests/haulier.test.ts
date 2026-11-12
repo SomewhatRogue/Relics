@@ -79,50 +79,81 @@ describe('the Haulier', () => {
       expect(h.attack!.kind).toBe(want[move]);
       if (move === 'drag') expect(h.attack).toMatchObject({ radius: HAULIER.drag.radius, unblockable: true });
       if (move === 'overhead') expect(h.attack).toMatchObject({ unblockable: true, radius: HAULIER.overhead.radius });
-      if (move === 'shove') expect(h.attack).toMatchObject({ dy: 0, radius: HAULIER.cart.width / 2, unblockable: true });
+      if (move === 'shove') expect(h.attack).toMatchObject({ radius: HAULIER.cart.width / 2, unblockable: true });
     }
   });
 
-  it('a GRAB at a cart sends it down the rail: it hits a hero in the lane, knocks the Haulier down, cracks it, stops at the far stop', () => {
+  it('GRAB takes hold of a cart, GRAB again throws it the way you aim: it knocks the Haulier down, cracks it, and stops at what is in its way', () => {
     const { r, h, me } = setup();
     const c = carts(r).find((p) => p.x < 6)!, start = c.x;
-    // The Haulier stands in the rail's lane (roaring, so it stays), the hero beside the cart, also in the lane.
+    // The Haulier stands east of the cart (roaring, so it stays), the hero just west of it, aiming east.
     Object.assign(h, { x: 6, y: rail.y });
     h.boss!.roarUntil = 1e9;
-    Object.assign(me, { x: c.x + 1, y: rail.y });
+    Object.assign(me, { x: c.x - 1, y: rail.y });
     run(r, 3);
     expect(c.roll).toBeFalsy();
-    r.setIntent('me', { ...NO_INTENT, grabSeq: 1 });
-    const ev = run(r, 1 / TICK + 5, () => !!c.roll);
+    r.setIntent('me', { ...NO_INTENT, ax: 1, ay: 0, grabSeq: 1 });
+    const ev = run(r, 0.5 / TICK);
+    expect(c.heldBy).toBe('me');
+    expect(c.roll).toBeFalsy();
+    // (The press was for the cart: no "nothing to grab".)
+    expect(ev.find((x) => x.k === 'nograb')).toBeFalsy();
+    expect(ev.find((x) => x.k === 'cart' && x.what === 'grab')).toMatchObject({ by: 'me' });
+    // Held in front of me, the way I face.
+    expect(c.x).toBeGreaterThan(me.x);
+    r.setIntent('me', { ...NO_INTENT, ax: 1, ay: 0, grabSeq: 2 });
+    ev.push(...run(r, 1 / TICK, () => !!c.roll));
     expect(c.roll).toBeGreaterThan(0);
     expect(c.rollBy).toBe('me');
+    expect(c.heldBy).toBeFalsy();
     ev.push(...run(r, 6 / TICK, () => !c.roll));
     expect(ev.find((x) => x.k === 'cart' && x.what === 'go')).toMatchObject({ by: 'me' });
-    expect(ev.find((x) => x.k === 'cart' && x.what === 'hit' && x.on === 'me')).toBeTruthy();
-    expect(me.hp).toBeLessThan(9999);
+    // Never the hero who threw it.
+    expect(ev.find((x) => x.k === 'cart' && x.what === 'hit' && x.on === 'me')).toBeFalsy();
     expect(ev.find((x) => x.k === 'cart' && x.what === 'hit' && x.on === 'haulier')).toBeTruthy();
     expect(h.boss!.downUntil).toBeGreaterThan(0);
     expect(h.cracked).toBe(true);
     expect(ev.find((x) => x.k === 'cart' && x.what === 'stop')).toBeTruthy();
-    // (The other cart stands at that stop: it stops a cart's length short of it.)
-    expect(c.x).toBeGreaterThan(SUMP_SPOTS.stops[1].x - 1.5);
-    expect(c.x).toBeLessThanOrEqual(SUMP_SPOTS.stops[1].x);
     expect(c.x).toBeGreaterThan(start);
     expect(c.roll).toBeFalsy();
   });
 
-  it('a press and walking off sends nothing', () => {
+  it("no stun-locking: a second cart soon after doesn't knock it down again, it shrugs", () => {
+    const { r, h, me } = setup();
+    Object.assign(h, { x: 6, y: rail.y });
+    h.boss!.roarUntil = 1e9;
+    h.holdUntil = r.time + 5;
+    const c = carts(r).find((p) => p.x < 6)!;
+    Object.assign(me, { x: c.x - 1, y: rail.y });
+    run(r, 3);
+    r.setIntent('me', { ...NO_INTENT, ax: 1, ay: 0, grabSeq: 1 });
+    run(r, 0.5 / TICK);
+    r.setIntent('me', { ...NO_INTENT, ax: 1, ay: 0, grabSeq: 2 });
+    const ev = run(r, 4 / TICK);
+    expect(ev.find((x) => x.k === 'cart' && x.what === 'hit' && x.on === 'haulier')).toBeTruthy();
+    expect(ev.find((x) => x.k === 'shrug')).toBeTruthy();
+    expect(h.boss!.downUntil ?? -9).toBeLessThan(r.time);
+  });
+
+  it('a held cart goes where its hero goes, and is let go if they fall or leave', () => {
     const { r, h, me } = setup();
     h.boss!.roarUntil = 1e9;
     const c = carts(r).find((p) => p.x < 6)!;
     Object.assign(me, { x: c.x + 1, y: rail.y });
     run(r, 3);
-    r.setIntent('me', { ...NO_INTENT, grabSeq: 1 });
+    r.setIntent('me', { ...NO_INTENT, ax: -1, ay: 0, grabSeq: 1 });
     run(r, 5);
-    Object.assign(me, { x: c.x + 5, y: 10 });
-    run(r, 1.5 / TICK);
+    expect(c.heldBy).toBe('me');
+    Object.assign(me, { x: me.x + 3, y: rail.y + 2 });
+    run(r, 3);
+    expect(Math.hypot(c.x - me.x, c.y - me.y)).toBeLessThan(1.5);
     expect(c.roll).toBeFalsy();
+    // (Gone from the fight: this setup keeps the hero standing, so out, not down. The same let-go.)
+    me.out = true;
+    run(r, 1);
+    expect(c.heldBy).toBeFalsy();
   });
+
 
   it('its shove sends a cart rolling down the rail, and its own cart never knocks it down', () => {
     const { r, h, me } = setup();

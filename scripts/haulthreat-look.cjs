@@ -54,6 +54,18 @@ const out = process.argv[3] || 'shots';
   await shot('sparks-burning');
   await force('overhead', 2, [-2, 0]);
   if (await at('wrench', 0.3)) await shot('wrench');
+  // Holding a cart, aiming it at the Haulier (the dotted arrow out to where it'll stop).
+  await page.evaluate(() => {
+    const g = window.__game, r = g.room, h = r.enemies.find((e) => e.boss?.who === 'haulier'), me = g.hero;
+    const c = r.props.find((p) => p.kind === 'cart' && !p.roll);
+    Object.assign(h, { x: c.x + 5, y: c.y - 2, attack: null, act: 'chase' });
+    Object.assign(h.boss, { roarUntil: 1e9, phase: 1 });
+    Object.assign(me, { x: c.x - 1, y: c.y + 0.2, hp: me.maxHp });
+    c.heldBy = me.id;
+  });
+  await page.mouse.move(330, 380);
+  await page.waitForTimeout(600);
+  await shot('cart-aim');
   console.log('errors:', errors.length ? errors.slice(0, 5) : 'none');
   await browser.close();
 })();

@@ -16,8 +16,9 @@
 import { BOSS, DOORKEEPERS, HAULIER as H, HERO, WEAPONS, type EnemyAttackSpec } from '../shared/tuning';
 import { begin, walk } from './enemies';
 import { bossTarget, theBook, turnTo, type BossOn } from './bosskit';
-import { haulState, nearestCart, farStop } from './haulcarts';
+import { haulState, nearestCart } from './haulcarts';
 import { sparkSpots } from './sparkshape';
+import { cartPath } from './cartpath';
 import { wayTo } from './pathing';
 import type { AttackKind, Enemy, FightEvent, Hero, Prop } from './types';
 import type { HaulMove } from '../shared/haultune';
@@ -41,7 +42,7 @@ export function haulRotation(phase: 1 | 2, party: number, swap: number): HaulMov
 
 /**
  * Begin one of its blows at `t`: the pose first, its floor after; phase 2 quicker, never under the floors.
- * The shove's lane is the rail from `cart` (at a stop) to the far stop; it faces along it.
+ * The shove's lane runs from `cart` (wherever it stands) at its hero, out to where the cart will stop.
  */
 export function haulBegin(e: Enemy, move: HaulMove, t: Hero, ev: FightEvent[], cart?: Prop, heroes: Hero[] = [t]): boolean {
   const spec = SPEC[move], b = e.boss!, k = b.phase === 2 && move !== 'wrench' ? H.faster : 1;
@@ -54,10 +55,11 @@ export function haulBegin(e: Enemy, move: HaulMove, t: Hero, ev: FightEvent[], c
   if (move === 'crank') (a.aimed = ''), (a.hit = heroes.map((h) => h.id)), (b.sparks = sparkSpots(e, heroes));
   if (move === 'shove') {
     if (!cart) return (e.attack = null), (e.act = 'chase'), false;
-    const dir = Math.sign(farStop(cart) - cart.x) || 1;
-    Object.assign(a, { aimed: '', ox: cart.x, oy: cart.y, dx: dir, dy: 0, cx: cart.x, cy: cart.y, range: Math.abs(farStop(cart) - cart.x), radius: H.cart.width / 2, hit: [] });
-    e.fx = dir;
-    e.fy = 0;
+    // At its hero, from wherever the cart stands, out to where it'll stop (sim/cartpath.ts): the striped lane.
+    const l = Math.hypot(t.x - cart.x, t.y - cart.y) || 1, dx = (t.x - cart.x) / l, dy = (t.y - cart.y) / l, way = cartPath(cart.x, cart.y, dx, dy, cart.radius);
+    Object.assign(a, { aimed: '', ox: cart.x, oy: cart.y, dx, dy, cx: cart.x, cy: cart.y, range: way.len, radius: H.cart.width / 2, hit: [] });
+    e.fx = dx;
+    e.fy = dy;
     haulState(theBook()!).shove = cart.id;
   }
   if (k > 1) {
@@ -86,7 +88,7 @@ export function stepHaulier(e: Enemy, heroes: Hero[], now: number, dt: number, e
   const rot = haulRotation(b.phase, b.party, bk?.swaps[b.phase - 1] ?? 0), next = rot[b.rot % rot.length];
   // A move it can't get to in time is passed over (a hero keeping off can't stall it for ever).
   if (e.cooldown <= 0 && now - b.rotAt > SKIP) return void advance(b, now, 0);
-  // The shove is made at a cart standing at a stop: it goes to the nearest, else passes it over.
+  // The shove is made at a cart at rest: it goes to the nearest, else passes it over.
   const cart = next === 'shove' ? nearestCart(props, e.x, e.y) : undefined;
   if (next === 'shove' && !cart) return void advance(b, now, 0);
   // The leap goes for the hero furthest off; with nobody far enough, it's passed over.

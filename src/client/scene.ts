@@ -82,6 +82,7 @@ import { drawMist, setSun, torchIn } from './daytime';
 import { drawBolts, drawStrikeMarks, strikeLights } from './stormdraw';
 import { drawSparkMarks } from './sparkdraw';
 import { drawQuakeMarks } from './quakedraw';
+import { drawCartAims } from './cartaim';
 import { flashAmb, fogLook } from './skyfx';
 import { flashOf } from '../sim/stormshape';
 import { drawPuddles } from './spiders';
@@ -260,6 +261,8 @@ export class Scene {
     drawSparkMarks(c, room, cx, cy);
     // An ENRAGED Doorkeeper's quake: its circles and the crack running at them (quakedraw.ts).
     drawQuakeMarks(c, room, cx, cy);
+    // A held cart's aim, out to where it'll stop (cartaim.ts).
+    drawCartAims(c, room, cx, cy);
     // A keg, oil or embers about to go up: its circle, the keg, the embers (blastdraw.ts).
     drawBlasts(c, room, cx, cy);
     // A drummer's reach and its beat on the floor, and the goblins it has roused (client/backline.ts).

@@ -62,6 +62,11 @@ export const HAULIER = {
   /** It shoves a cart only from within this of one at a stop (else the next blow). */
   shoveReach: 2.2,
   adds: { every: 15, n: 2 },
-  cart: { grab: 0.6, speed: 9, dmg: 24, knock: 10, down: 2, width: 0.9 },
+  /**
+   * Carts (Kyle, 2026-11-12: "click to grab it then aim it and click again to throw it"): GRAB by a cart at rest
+   * holds it in front of you, GRAB again throws it the way you face at `speed`, at most `most` tiles. It knocks
+   * the Haulier down `down` s, but not again for `again` s after (no stun-locking); a goblin it hits takes `addDmg`.
+   */
+  cart: { grab: 0.6, speed: 9, dmg: 24, knock: 10, down: 2, width: 0.9, most: 14, again: 10, addDmg: 30, hold: 0.25 },
   gear: { reach: 1.4, r: 1.8 },
 };

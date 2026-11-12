@@ -21,6 +21,10 @@ export function haulFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
     if (ev.what === 'go') {
       fx.burst(x, y - 2, 12, ['#8a8494', '#6a647a', '#b8b4ac'], 38, false, 60, true);
       fx.shake = Math.max(fx.shake, 1.5);
+    } else if (ev.what === 'grab') {
+      // Taken hold of: a scrape of grit, and how to throw it.
+      fx.burst(x, y - 2, 8, ['#8a8494', '#6a647a'], 30, false, 60, true);
+      fx.say(x, y - 34, 'AIM, THEN GRAB TO THROW', '#ffd27a', 1.8);
     } else if (ev.what === 'aim') {
       fx.say(x, y - 40, BRAKE_WORDS.how, '#ffd27a', 2.4);
     } else if (ev.what === 'flip') {
@@ -85,7 +89,7 @@ export function haulFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
 
 /** Their sounds, from the kit we have. True when it was one of theirs. */
 export function haulSound(ev: FightEvent): boolean {
-  if (ev.k === 'cart') return ev.what === 'hit' ? (sfx.propbreak(), sfx.slam()) : ev.what === 'flip' ? (sfx.slam(), sfx.rumble()) : ev.what === 'aim' ? undefined : ev.what === 'stop' ? sfx.thud() : sfx.rumble(), true;
+  if (ev.k === 'cart') return ev.what === 'hit' ? (sfx.propbreak(), sfx.slam()) : ev.what === 'flip' ? (sfx.slam(), sfx.rumble()) : ev.what === 'aim' ? undefined : ev.what === 'grab' ? sfx.thud() : ev.what === 'stop' ? sfx.thud() : sfx.rumble(), true;
   if (ev.k === 'gear') return sfx.shock(), ev.hit && sfx.boom(), true;
   if (ev.k === 'bare') return sfx.wardbreak(), sfx.propbreak(), sfx.slam(), true;
   if (ev.k === 'haulleap') return sfx.slam(), sfx.boom(), true;

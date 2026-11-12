@@ -716,6 +716,10 @@ export interface Prop extends Body {
   /** An ore cart rolling down the rail (sim/haulbook.ts): its speed along it, tiles a second (+ right, - left), and who sent it. */
   roll?: number;
   rollBy?: string;
+  /** A thrown or shoved Haulier's cart: its way (a unit vector), off the rail; the hero holding one at rest (sim/haulcarts.ts). */
+  wx?: number;
+  wy?: number;
+  heldBy?: string;
   /** THE BRAKESMAN's cart at the top of the rail, its lane striped till it goes at this room time (sim/brake.ts). */
   goAt?: number;
   fadeAt: number;
@@ -821,7 +825,7 @@ export type FightEvent =
   | { k: 'cracked'; x: number; y: number }
   /** The Haulier's working (sim/haulbook.ts, sim/haulcarts.ts; drawn client/hauldraw.ts): a cart set rolling (`by` a hero, or the Haulier's shove),
    *  hitting a hero or the Haulier (`on`), or stopping at a stop; lightning falling on the winding gear; the Haulier's plate off for good (phase 2). */
-  | { k: 'cart'; what: 'go' | 'hit' | 'stop' | 'flip' | 'aim'; x: number; y: number; by?: string; on?: string }
+  | { k: 'cart'; what: 'go' | 'hit' | 'stop' | 'flip' | 'aim' | 'grab'; x: number; y: number; by?: string; on?: string }
   | { k: 'gear'; x: number; y: number; hit: boolean }
   | { k: 'bare'; x: number; y: number }
   /** The Haulier landing a leap; its sparks coming down on a spot (sim/haulbook.ts). */

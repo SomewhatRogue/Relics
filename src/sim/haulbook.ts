@@ -79,7 +79,7 @@ function shoveGo(st: HaulState, e: Enemy, w: World): void {
   a.radius = 0;
   const own = w.props.find((p) => p.id === st.shove);
   const cart = own && standing(own) ? own : nearestCart(w.props, e.x, e.y, H.shoveReach);
-  if (cart) sendCart(st, cart, 'haulier', w.ev);
+  if (cart) sendCart(st, cart, 'haulier', w.ev, a.dx, a.dy);
 }
 
 /** HAULIER.adds.n small ones out of the adit, and the next batch HAULIER.adds.every s on. */

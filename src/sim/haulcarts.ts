@@ -1,22 +1,24 @@
 /**
  * The Haulier's working (docs/design/deep-bosses.md; numbers shared/haultune.ts): the ore carts on the rail
  * and the winding gear over the shaft. Run once a tick by sim/haulbook.ts.
- * - A cart stands at a stop. A hero's GRAB pressed next to it and kept near for HAULIER.cart.grab s, or the
- *   Haulier's shove (sim/haulier.ts), sets it rolling (`roll`, signed tiles a second along the rail, `rollBy`
- *   who sent it) to the other stop, where it stops. (The Intent carries a grab press, not a held flag, so
- *   "held" is: pressed, and stood by it for the time.)
- * - A rolling cart hits a hero in its lane for cart.dmg and cart.knock, judged as a striped boss blow
- *   (sim/combat.ts hitHero), once each a roll; and the Haulier: knocked down cart.down s, its plate cracked.
- *   The Haulier's own shove never hits the Haulier.
+ * - A cart at rest (on the rail at first, wherever it stopped after): a hero's GRAB beside it takes hold of it,
+ *   held in front of them the way they face; GRAB again throws it that way (Kyle, 2026-11-12). The Haulier's
+ *   shove (sim/haulier.ts) sends one at its hero. A rolling cart (`roll` its speed, signed for the wheels;
+ *   `wx`, `wy` its way; `rollBy` who sent it) goes straight on till something stops it (sim/cartpath.ts).
+ * - It hits a hero in its way for cart.dmg and cart.knock, judged as a striped boss blow (sim/combat.ts
+ *   hitHero), once each a roll, never the one who threw it; a goblin for cart.addDmg; and the Haulier, knocked
+ *   down cart.down s with its plate cracked, but not again for cart.again s after. Its own shove never hits it.
  * - The gear: lightning within gear.reach of it falls on it (sim/skystrike.ts), and cracks the plate of the
  *   Haulier within gear.r of it.
  */
-import { currentMap } from '../shared/arena';
+import { collide, currentMap } from '../shared/arena';
 import { SUMP_SPOTS } from '../shared/sumparena';
 import { GRAB, HAULIER as H, HERO, TICK } from '../shared/tuning';
 import { hitHero } from './combat';
 import { isDead } from './damage';
 import { crack } from './ironhide';
+import { damage } from './damage';
+import { cartPath } from './cartpath';
 import { bossStun } from './poise';
 import type { BossBook } from './bosskit';
 import type { World } from './elements';
@@ -41,97 +43,131 @@ export function haulState(bk: BossBook): HaulState {
   return s;
 }
 
-const stopXs = () => SUMP_SPOTS.stops.map((s) => s.x).sort((a, b) => a - b);
 const isCart = (p: Prop) => p.kind === 'cart' && !p.broken;
-/** A cart standing at a stop (not rolling), or queued up to a cart's length and a half behind one that is. */
-export const standing = (p: Prop) => isCart(p) && !p.roll && stopXs().some((x) => Math.abs(p.x - x) <= 1.6);
-/** Which way it would roll from where it stands: toward the other stop. */
-const laneDir = (p: Prop) => { const [lo, hi] = stopXs(); return p.x < (lo + hi) / 2 ? 1 : -1; };
-/** How far a cart standing here rolls, and the far stop's x. */
-export const farStop = (p: Prop) => { const [lo, hi] = stopXs(); return laneDir(p) > 0 ? hi : lo; };
+/** A cart at rest: not rolling and not held, wherever it stands (on the rail or wherever it was thrown to). */
+export const standing = (p: Prop) => isCart(p) && !p.roll && !p.heldBy;
+/** Where it would go if shoved from where it stands with no aim: along the rail, away from its nearer end. */
+const railWay = (p: Prop): [number, number] => {
+  const xs = SUMP_SPOTS.stops.map((s) => s.x);
+  return [p.x < (Math.min(...xs) + Math.max(...xs)) / 2 ? 1 : -1, 0];
+};
+/** How far a cart standing here would roll along the rail (the Haulier's shove with nobody to aim at). */
+export const farStop = (p: Prop) => p.x + railWay(p)[0] * cartPath(p.x, p.y, railWay(p)[0], 0, p.radius).len;
 
-/** The cart standing at a stop nearest (x, y), within `within` of it. */
+/** The cart at rest nearest (x, y), within `within` of it. */
 export function nearestCart(props: Prop[], x: number, y: number, within = Infinity): Prop | undefined {
   let best: Prop | undefined, bd = within;
   for (const p of props) {
+    if (!standing(p)) continue;
     const d = Math.hypot(p.x - x, p.y - y);
-    if (standing(p) && d <= bd) (bd = d), (best = p);
+    if (d <= bd) (best = p), (bd = d);
   }
   return best;
 }
 
-/** Set a cart rolling toward the other stop. */
-export function sendCart(st: HaulState, p: Prop, by: string, ev: World['ev']): void {
-  p.roll = laneDir(p) * H.cart.speed;
-  p.rollBy = by;
+/** Set a cart rolling along (dx, dy) (along the rail, unaimed). */
+export function sendCart(st: HaulState, p: Prop, by: string, ev: World['ev'], dx?: number, dy?: number): void {
+  const [ux, uy] = dx === undefined || dy === undefined || (!dx && !dy) ? railWay(p) : [dx / Math.hypot(dx, dy), dy / Math.hypot(dx, dy)];
+  Object.assign(p, { wx: ux, wy: uy, roll: (ux >= 0 ? 1 : -1) * H.cart.speed, rollBy: by, heldBy: undefined });
   st.hits.set(p.id, new Set());
   ev.push({ k: 'cart', what: 'go', x: p.x, y: p.y, by });
 }
 
 const up = (h: Hero) => h.act !== 'down' && !h.out && h.id !== 'squire';
 
-/** A rolling cart's blow on a hero in its lane (striped: only a roll or a step out of the lane saves them). */
+/** A rolling cart's blow on a hero in its way (striped: only a roll or a step out of the way saves them). */
 function blow(p: Prop, h: Hero, e: Enemy): EnemyAttack {
   return {
     kind: 'charge', aimed: h.id, t: 0, windup: 0, active: 0.2, recover: 0, dmg: Math.round(H.cart.dmg * (e.harm ?? 1)), knock: H.cart.knock, unblockable: true,
-    dx: Math.sign(p.roll ?? 1), dy: 0, ox: p.x, oy: p.y, range: 0, arc: 0, cx: h.x, cy: h.y, radius: 0.01, done: true,
+    dx: p.wx ?? Math.sign(p.roll ?? 1), dy: p.wy ?? 0, ox: p.x, oy: p.y, range: 0, arc: 0, cx: h.x, cy: h.y, radius: 0.01, done: true,
   };
 }
 
-/** The Haulier flat on its back for cart.down s, its plate cracked. */
-function knockDown(e: Enemy, now: number, ev: World['ev']): void {
+/** The Haulier flat on its back for cart.down s, its plate cracked; but not again for cart.again s (no stun-locking it). */
+function knockDown(e: Enemy, now: number, ev: World['ev']): boolean {
   const b = e.boss!;
+  if ((e.holdUntil ?? -9) > now) return void ev.push({ k: 'shrug', x: e.x, y: e.y }), false;
+  e.holdUntil = now + H.cart.down + H.cart.again;
   crack(e, now, ev);
   bossStun(e, H.cart.down);
   Object.assign(b, { downUntil: now + H.cart.down, rotAt: now + H.cart.down });
+  return true;
 }
 
-/** The carts once a tick: holds begun and finished, rolls run on, what they hit. */
+/** The carts once a tick: grabbed, held and aimed, thrown; rolls run on, what they hit, where they stop. */
 export function stepCarts(st: HaulState, e: Enemy, w: World): void {
-  const now = w.now, rail = currentMap().rail;
-  if (!rail) return;
-  // GRAB pressed beside a cart at a stop (the hero's own press counter moved): begin the hold.
+  const now = w.now;
+  // GRAB pressed (the hero's own press counter moved): beside a cart at rest, take hold of it; holding one, throw it.
   for (const h of w.heroes) {
     const prev = st.seen.get(h.id);
     st.seen.set(h.id, h.seen.grab);
     if (prev === undefined || prev === h.seen.grab || !up(h)) continue;
-    const c = nearestCart(w.props, h.x, h.y, GRAB.reach + 0.6);
-    if (c) st.hold.set(h.id, { cart: c.id, at: now });
-  }
-  for (const [id, hd] of [...st.hold]) {
-    const h = w.heroes.find((x) => x.id === id), p = w.props.find((x) => x.id === hd.cart);
-    if (!h || !p || !up(h) || !standing(p) || Math.hypot(p.x - h.x, p.y - h.y) > GRAB.reach + p.radius + 0.4) {
-      st.hold.delete(id);
+    const held = w.props.find((p) => isCart(p) && p.heldBy === h.id);
+    if (held) {
+      // (Not the press that took hold of it: a moment's grace, cart.hold s.)
+      if (now - (st.hold.get(h.id)?.at ?? -9) < H.cart.hold) continue;
+      st.hold.delete(h.id);
+      sendCart(st, held, h.id, w.ev, h.fx, h.fy);
+      h.grabQueuedAt = -9;
       continue;
     }
-    if (now - hd.at < H.cart.grab - 1e-6) continue;
-    for (const [o, x] of [...st.hold]) if (x.cart === p.id) st.hold.delete(o);
-    sendCart(st, p, h.id, w.ev);
+    const c = nearestCart(w.props, h.x, h.y, GRAB.reach + 0.6);
+    if (!c) continue;
+    c.heldBy = h.id;
+    st.hold.set(h.id, { cart: c.id, at: now });
+    // (The press was for the cart: not "nothing to grab", and no goblin taken with it.)
+    h.grabQueuedAt = -9;
+    w.ev.push({ k: 'cart', what: 'grab', x: c.x, y: c.y, by: h.id });
   }
-  const [lo, hi] = stopXs();
+  // Held: in front of its hero, the way they face; let go if they fall, leave, or are knocked about.
+  for (const p of w.props) {
+    if (!isCart(p) || !p.heldBy) continue;
+    const h = w.heroes.find((x) => x.id === p.heldBy);
+    if (!h || !up(h) || h.act === 'stun' || h.act === 'hurt') {
+      Object.assign(p, { heldBy: undefined });
+      if (h) st.hold.delete(h.id);
+      continue;
+    }
+    const q = { x: h.x + h.fx * (p.radius + HERO.radius + 0.15), y: h.y + h.fy * (p.radius + HERO.radius + 0.15) };
+    collide(q, p.radius);
+    Object.assign(p, { x: q.x, y: q.y, kvx: 0, kvy: 0 });
+  }
   for (const p of w.props) {
     if (!isCart(p) || !p.roll) continue;
     const seen = st.hits.get(p.id) ?? st.hits.set(p.id, new Set()).get(p.id)!;
-    p.y = rail.y;
-    p.x += p.roll * TICK;
-    p.kvx = p.kvy = 0;
+    const ux = p.wx ?? Math.sign(p.roll), uy = p.wy ?? 0, sp = Math.abs(p.roll);
+    // On along its way; something in the way (a wall, a block, the edge) stops it where it is.
+    const q = { x: p.x + ux * sp * TICK, y: p.y + uy * sp * TICK };
+    collide(q, p.radius);
+    const blocked = Math.hypot(q.x - (p.x + ux * sp * TICK), q.y - (p.y + uy * sp * TICK)) > 0.02;
+    Object.assign(p, { x: q.x, y: q.y, kvx: 0, kvy: 0 });
     for (const h of w.heroes) {
-      if (seen.has(h.id) || !up(h) || (h.z ?? 0) !== 0) continue;
-      if (Math.abs(h.y - rail.y) > H.cart.width / 2 + HERO.radius || Math.abs(h.x - p.x) > p.radius + HERO.radius) continue;
+      if (seen.has(h.id) || !up(h) || (h.z ?? 0) !== 0 || h.id === p.rollBy) continue;
+      if (Math.hypot(h.x - p.x, h.y - p.y) > p.radius + HERO.radius) continue;
       seen.add(h.id);
       hitHero(e, blow(p, h, e), h, now, w.ev, w.heroes);
       w.ev.push({ k: 'cart', what: 'hit', x: h.x, y: h.y, by: p.rollBy, on: h.id });
     }
-    if (!seen.has('haulier') && p.rollBy !== 'haulier' && !isDead(e) && e.act !== 'carried' && Math.abs(e.x - p.x) <= p.radius + e.radius && Math.abs(e.y - rail.y) <= H.cart.width / 2 + e.radius) {
+    if (!seen.has('haulier') && p.rollBy !== 'haulier' && !isDead(e) && e.act !== 'carried' && Math.hypot(e.x - p.x, e.y - p.y) <= p.radius + e.radius) {
       seen.add('haulier');
       knockDown(e, now, w.ev);
       w.ev.push({ k: 'cart', what: 'hit', x: e.x, y: e.y, by: p.rollBy, on: 'haulier' });
     }
-    // It stops at the far stop, or a cart's length short of a cart already standing there (they never overlap).
-    const dir = Math.sign(p.roll), gap = 2 * p.radius + 0.02;
-    const block = w.props.find((o) => o !== p && isCart(o) && !o.roll && (o.x - p.x) * dir > 0 && (o.x - p.x) * dir < gap + 0.05);
-    if (block || (dir > 0 && p.x >= hi) || (dir < 0 && p.x <= lo)) {
-      Object.assign(p, { x: block ? block.x - dir * gap : dir > 0 ? hi : lo, roll: 0, rollBy: undefined });
+    // Its goblins too: a heavy blow, flung along its way.
+    for (const g of w.enemies) {
+      const key = 'e' + g.id;
+      if (g === e || g.boss || isDead(g) || seen.has(key) || Math.hypot(g.x - p.x, g.y - p.y) > p.radius + g.radius) continue;
+      seen.add(key);
+      if (p.rollBy) g.lastBy = p.rollBy;
+      Object.assign(g, { kvx: ux * 12, kvy: uy * 12 });
+      damage(g, H.cart.addDmg, now, w.ev, { heavy: true, how: 'burst', dx: ux, dy: uy });
+      w.ev.push({ k: 'cart', what: 'hit', x: g.x, y: g.y, by: p.rollBy, on: key });
+    }
+    // Stopped: by what's in its way, by a cart at rest in front of it (they never overlap), or gone far enough.
+    const ahead = w.props.find((o) => o !== p && standing(o) && Math.hypot(o.x - p.x, o.y - p.y) < 2 * p.radius + 0.02 && (o.x - p.x) * ux + (o.y - p.y) * uy > 0);
+    const run = (st.hits.get(p.id) as Set<string> & { run?: number }), went = (run.run = (run.run ?? 0) + sp * TICK);
+    if (blocked || ahead || went >= H.cart.most) {
+      Object.assign(p, { roll: 0, rollBy: undefined, wx: undefined, wy: undefined });
       st.hits.delete(p.id);
       w.ev.push({ k: 'cart', what: 'stop', x: p.x, y: p.y });
     }

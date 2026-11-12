@@ -48,3 +48,12 @@ underground already, so the Deep gets it first and the Open Cut reuses it later:
 2. The Haulier first, and in the Deep before the Open Cut?
 3. Names: the Haulier† (and every new arena feature) go to the lore keeper and line editor before they
    go on screen.
+
+## Carts, grab and throw (2026-11-12)
+
+Kyle: "it shouldn't say nothing to grab if you do grab it ... too easy to stun-lock him ... click to grab it then
+aim it and click again to throw it." GRAB by a cart at rest takes hold of it (in front of you, the way you face);
+GRAB again throws it that way, off the rail, straight on till a wall, a block or a cart at rest stops it, at most
+14 tiles (sim/cartpath.ts; the same path drawn as a dotted aim arrow, client/cartaim.ts). It hits heroes in its
+way (never its thrower), goblins (30), and knocks the Haulier down 2 s with its plate cracked, but not again for
+10 s after (a shrug). The Haulier's shove sends a cart at rest at its hero, its lane out to where it'll stop.
