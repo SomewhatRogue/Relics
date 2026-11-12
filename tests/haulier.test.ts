@@ -14,8 +14,8 @@ const floor = (n: number) => runRoom(newRun(deepFloor(n, 77, 'x')));
 
 describe('the Haulier', () => {
   it('every fifth floor is its working: the rail, two carts, the gear, the sump, the adit, the chained chest', () => {
-    // (Boss floors take it in turns with the Doorkeepers: tests/deepdoor.test.ts. On this seed, 5, 15 and 25 are the Haulier's.)
-    for (const n of [5, 15, 25]) expect(deepFloor(n, 77, 'x')).toMatchObject({ arena: 'haulier', objective: 'hunt' });
+    // (Boss floors take it in turns with the Doorkeepers: tests/deepdoor.test.ts. On this seed, 5 and 25 are the Haulier's; 15 is THE LEECHMAN's: tests/leechman.test.ts.)
+    for (const n of [5, 25]) expect(deepFloor(n, 77, 'x')).toMatchObject({ arena: 'haulier', objective: 'hunt' });
     for (const n of [4, 6, 9, 11]) expect(deepFloor(n, 77, 'x').arena).toBeUndefined();
     const r = floor(5), m = r.map;
     expect(m.rail && m.gear && m.adits?.length && m.water?.length).toBeTruthy();

@@ -18,7 +18,7 @@ export function plateOf(enemies: Enemy[], now: number, near: (e: Enemy) => boole
   if (kit.length) {
     if (kit.every(isDead)) return null;
     // (A boss alone, Hempen or the Haulier: its own name on the plate, one bar.)
-    const solo = (e: Enemy) => e.boss!.who === 'hempen' || e.boss!.who === 'haulier' || e.boss!.who === 'listener', lone = kit.length === 1 && solo(kit[0]), phase = Math.max(...kit.map((e) => e.boss!.phase)), pips = lone || kit.length > 1 ? 2 : 1;
+    const solo = (e: Enemy) => e.boss!.who === 'hempen' || e.boss!.who === 'haulier' || e.boss!.who === 'listener' || e.boss!.who === 'leechman', lone = kit.length === 1 && solo(kit[0]), phase = Math.max(...kit.map((e) => e.boss!.phase)), pips = lone || kit.length > 1 ? 2 : 1;
     const bars = kit.map((e) => ({ name: lone || solo(e) ? '' : DOOR_NAMES[e.boss!.who as 'latch' | 'hasp'], hp: Math.max(0, e.hp), max: e.maxHp, poise: e.boss!.poise, poiseMax: e.boss!.poiseMax, dead: isDead(e), staggered: e.boss!.stagUntil > now }));
     return { name: lone ? kit[0].name ?? '' : DOOR_NAMES.plate, bars, pips, lit: pips - (phase - 1) };
   }

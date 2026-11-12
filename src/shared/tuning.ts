@@ -75,6 +75,7 @@ export * from './elites.js';
 export * from './bosstune.js';
 export * from './haultune.js';
 export * from './listentune.js';
+export * from './leechtune.js';
 export * from './holdtune.js';
 import { BANNER, NETTER, THIEF, LOGS, ROOF, IRONHIDE } from './raiders.js';
 import { CHALKER } from './chalk.js';

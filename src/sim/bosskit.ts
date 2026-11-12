@@ -15,12 +15,13 @@ import { begin } from './enemies';
 import { isDead } from './damage';
 import { tauntTarget } from './taunt';
 import { hempenAim } from './hempenboss';
+import { leechAim } from './leechhook';
 import type { AttackKind, Enemy, FightEvent, Hero } from './types';
 
 /** On a boss goblin (drawn: the plate, its door, the stagger). Room times; -9 for "not". */
 export interface BossOn {
   /** The Doorkeepers' Latch or Hasp, or Hempen (sim/hempenboss.ts). */
-  who: 'latch' | 'hasp' | 'hempen' | 'haulier' | 'listener';
+  who: 'latch' | 'hasp' | 'hempen' | 'haulier' | 'listener' | 'leechman';
   job: 'wall' | 'move';
   phase: 1 | 2;
   poise: number;
@@ -44,6 +45,9 @@ export interface BossOn {
   lmove?: import('../shared/listentune').ListenMove;
   under?: boolean;
   dark?: boolean;
+  /** THE LEECHMAN (sim/leechman.ts): the move under way (`cmove`), and phase 2's `flood` flag (slice 2: rising water, logs). */
+  cmove?: import('../shared/leechtune').LeechMove;
+  flood?: boolean;
   /** The Haulier's crank: where its sparks will fall (sim/sparkshape.ts), cleared once they have. */
   sparks?: { x: number; y: number }[];
   /** Hempen's ropes coming down out of the branches (sim/hempenbook.ts): where, when they land, on whom. Sent as they come and go. */
@@ -75,14 +79,14 @@ export interface BossBook {
   phase: number;
   party: number;
   /** Whose book: the Doorkeepers' (none said) or Hempen's (sim/hempenbook.ts). */
-  of?: 'hempen' | 'haulier' | 'listener';
+  of?: 'hempen' | 'haulier' | 'listener' | 'leechman';
 }
 
 let book: BossBook | null = null;
 export const useBook = (b: BossBook | null): void => void (book = b);
 export const theBook = () => book;
 
-export function newBook(party: number, swaps: number[], of?: 'hempen' | 'haulier' | 'listener'): BossBook {
+export function newBook(party: number, swaps: number[], of?: 'hempen' | 'haulier' | 'listener' | 'leechman'): BossBook {
   return { hurt: [], started: -1, swapAt: -1, apartAt: -1, lockBy: -1, lockUntil: -9, lockCool: -9, split: null, swaps, phase: 1, party, ...(of ? { of } : {}) };
 }
 
@@ -172,6 +176,7 @@ export function bossTarget(e: Enemy, heroes: Hero[], now: number): Hero | null {
 /** In the wind-up: its blow turns with its hero until BOSS.aimLock of it, then holds (a spin is round itself; a lock is braced, aimed once). */
 export function trackAim(e: Enemy, heroes: Hero[]): void {
   if (e.boss?.who === 'hempen') return hempenAim(e, heroes);
+  if (e.boss?.who === 'leechman') leechAim(e, heroes);
   const a = e.attack;
   if (!a?.boss || a.boss === 'spin' || a.boss === 'lock' || a.t >= a.windup * BOSS.aimLock) return;
   const h = heroes.find((x) => x.id === a.aimed);

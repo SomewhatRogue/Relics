@@ -19,7 +19,9 @@ describe('the Doorkeepers in the Deep', () => {
       // (Floor 10 is THE LISTENER's whatever the turn: the old caves, tests/listener.test.ts.)
       const arenas = [5, 10, 15, 20].map((n) => deepFloor(n, seed, 'x').arena);
       expect(arenas[1]).toBe('listener');
-      expect(new Set(arenas.filter((a) => a !== 'listener'))).toEqual(new Set(['haulier', 'doorkeepers']));
+      // (And floor 15 THE LEECHMAN's, the fen: tests/leechman.test.ts.)
+      expect(arenas[2]).toBe('leechman');
+      expect(new Set(arenas.filter((a) => a !== 'listener' && a !== 'leechman'))).toEqual(new Set(['haulier', 'doorkeepers']));
       expect(arenas[0]).not.toBe(arenas[3]);
     }
   });

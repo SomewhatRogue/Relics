@@ -15,6 +15,7 @@ import { bossBegin, bossTarget, clocked, enraged, rotation, theBook, turnTo, typ
 import { stepHempen } from './hempenboss';
 import { stepHaulier } from './haulier';
 import { stepListener } from './listener';
+import { stepLeechman } from './leechman';
 import type { Enemy, FightEvent, Hero } from './types';
 
 const D = DOORKEEPERS;
@@ -29,6 +30,8 @@ export function stepKeeper(e: Enemy, heroes: Hero[], now: number, dt: number, ev
   if (b.who === 'haulier') return stepHaulier(e, heroes, now, dt, ev, notice);
   // THE LISTENER, the old caves' boss, takes its own (sim/listener.ts).
   if (b.who === 'listener') return stepListener(e, heroes, now, dt, ev);
+  // THE LEECHMAN, the fen's boss, takes its own (sim/leechman.ts).
+  if (b.who === 'leechman') return stepLeechman(e, heroes, now, dt, ev, notice);
   // At its post facing the back wall until it sees you, or hears you come within DOORKEEPERS.hear (creeping, only
   // what it sees: an ambush to open with). sim/doorpair.ts wakes its partner and starts the fight.
   if (e.alert === false && !heard(e, heroes) && !notice()) return;

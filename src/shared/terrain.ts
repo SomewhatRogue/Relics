@@ -60,7 +60,7 @@ export interface Foe {
   /** An elite's affixes (shared/elites.ts). */
   elite?: import('./elites.js').Affix[];
   /** A boss of the kit (sim/bosskit.ts): which one (the Doorkeepers' Latch or Hasp, the Deep's Haulier). */
-  boss?: 'latch' | 'hasp' | 'haulier' | 'listener';
+  boss?: 'latch' | 'hasp' | 'haulier' | 'listener' | 'leechman';
   /** THE DROVER: drives the roped line and stands behind it (sim/drover.ts). */
   drives?: boolean;
   /** THE BRAKESMAN: works the brake at the top of the map's rail (sim/brake.ts). */

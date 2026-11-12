@@ -6,7 +6,7 @@
  * fifteen it keeps rising.
  */
 import { BOSSES, type Job, type Objective, type Place } from './jobs.js';
-import { DOOR_NAMES, HAUL_NAME, LISTEN_NAME } from './bosswords.js';
+import { DOOR_NAMES, HAUL_NAME, LEECH_NAME, LISTEN_NAME } from './bosswords.js';
 import { bandOf } from './deepbands.js';
 import { layerOf } from './deeplayers.js';
 import { Rng } from './rng.js';
@@ -32,10 +32,11 @@ export function deepFloor(n: number, seed: number, title: string): Job {
   // Every fifth floor, a boss in its own arena (docs/design/deep-bosses.md), turn about on the run's seed.
   if (n % DEEP_BOSS.every === 0) {
     // (On a layer of old caves the boss is THE LISTENER, whatever the turn: docs/design/deep-layer-bosses.md.)
-    const arena: 'haulier' | 'doorkeepers' | 'listener' = l.id === 'rock' ? 'listener' : DEEP_BOSS.turn[(n / DEEP_BOSS.every + seed) % DEEP_BOSS.turn.length];
+    // (On the fen layer it is THE LEECHMAN: floors 15, 35, 55 and so on.)
+    const arena: 'haulier' | 'doorkeepers' | 'listener' | 'leechman' = l.id === 'rock' ? 'listener' : l.id === 'fen' ? 'leechman' : DEEP_BOSS.turn[(n / DEEP_BOSS.every + seed) % DEEP_BOSS.turn.length];
     return {
       id: `deep-${seed}-${n}`, place, objective: 'hunt', twist: 'none', time: rollTime(s, false), rooms: 1, size: 'short', layout: 4,
-      reward: 0, seed: s, title, text: '', floor: n, boss: arena === 'listener' ? LISTEN_NAME : arena === 'haulier' ? HAUL_NAME : DOOR_NAMES.plate, arena, ...(b.deep ? { deep: true } : {}),
+      reward: 0, seed: s, title, text: '', floor: n, boss: arena === 'leechman' ? LEECH_NAME : arena === 'listener' ? LISTEN_NAME : arena === 'haulier' ? HAUL_NAME : DOOR_NAMES.plate, arena, ...(b.deep ? { deep: true } : {}),
     };
   }
   // (Never the floor straight after a boss: one boss, then a breather. Kyle, 2026-11-11.)

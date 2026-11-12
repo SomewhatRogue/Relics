@@ -298,6 +298,9 @@ export interface GameMap {
   /** THE LISTENER's cave (shared/cavearena.ts): holes in the floor (they don't block walking; it drops into one and rises from another), and spots for dripstone columns that lean the way `lean` points (made props in a later slice). */
   holes?: { x: number; y: number }[];
   columns?: { x: number; y: number; lean: { x: number; y: number } }[];
+  /** THE LEECHMAN's fen pool (shared/fenarena.ts): the old windlass at one side (drawn and placed only until slice 2), and the mud its peat bank leaves (sim/leechbook.ts): circles that slow a body to MUD_SLOW until `until`. */
+  windlass?: { x: number; y: number };
+  mud?: { x: number; y: number; r: number; until: number }[];
   /** The Doorkeepers' ground in the Deep (shared/sealarena.ts): the sealed door in the back wall, drawn only (client/sealdraw.ts). */
   sealed?: { x: number; w: number };
   /** An instance's stretches on one map, in order (sim/stretches.ts; docs/design/open-cut-map.md). */
@@ -374,7 +377,10 @@ export interface Blaze { patches: (Area & { at: number })[]; beams: { x: number;
 /** How fast anyone moves knee-deep in a ford or a bog: a little slower than dry ground (was 0.55, a crawl). */
 export const WADE = 0.7;
 /** How fast you can move where you stand (slowed in shallow water). */
-export const wadeAt = (x: number, y: number) => ((nearby(MAP, x, y)?.water ?? MAP.water)?.some((w) => !w.deep && inArea(w, x, y)) ? WADE : 1);
+export const inShallows = (x: number, y: number) => !!(nearby(MAP, x, y)?.water ?? MAP.water)?.some((w) => !w.deep && inArea(w, x, y));
+/** Mud laid on the ground (THE LEECHMAN's peat bank) slows a body to this, whatever else is under it. */
+export const MUD_SLOW = 0.55;
+export const wadeAt = (x: number, y: number) => (inShallows(x, y) ? WADE : 1) * (MAP.mud?.some((c) => Math.hypot(c.x - x, c.y - y) <= c.r) ? MUD_SLOW : 1);
 
 export const onLedge = (m: GameMap, x: number, y: number) => !!m.ledges?.some((l) => x > l.x && x < l.x + l.w && y > l.y && y < l.y + l.h);
 export const inRamp = (m: GameMap, x: number, y: number) => !!m.ledges?.some((l) => l.ramps.some((r) => inArea(r, x, y)));

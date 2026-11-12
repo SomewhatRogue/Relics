@@ -78,7 +78,7 @@ export interface Job {
   /** A curated zone (docs/plans/atlas.md): its climax's relic, awarded once at the job's end (shared/relicaward.ts ZONE_RELICS). */
   zone?: 'hangman' | 'fen';
   /** A boss's arena as the last room (shared/barnarena.ts): the Doorkeepers in the great barn. */
-  arena?: 'doorkeepers' | 'haulier' | 'listener';
+  arena?: 'doorkeepers' | 'haulier' | 'listener' | 'leechman';
   /** A floor of the Deep (shared/deep.ts), from 1: its end is a checkpoint, not home. */
   floor?: number;
   /** An instance (shared/instances.ts): its rooms are its areas, taken in turn, each gate a checkpoint. */

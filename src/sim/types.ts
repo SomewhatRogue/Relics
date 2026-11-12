@@ -839,6 +839,9 @@ export type FightEvent =
   | { k: 'gear'; x: number; y: number; hit: boolean }
   /** A dripstone column (sim/columns.ts): set falling (dx, dy the way it leans), landed (`down`: THE LISTENER was under it), or THE LISTENER shrugging it off. */
   | { k: 'column'; what: 'start' | 'land' | 'shrug'; x: number; y: number; dx: number; dy: number; down?: boolean; by?: string }
+  /** THE LEECHMAN (sim/leechhook.ts, sim/leechbook.ts): leeches thrown, latched on a hero (`id`), draining them, shaken off by a roll; and the peat bank's mud laid (a circle `r` wide at x, y, for `time` s). */
+  | { k: 'leech'; what: 'throw' | 'latch' | 'drain' | 'shake'; x: number; y: number; id?: string }
+  | { k: 'mud'; x: number; y: number; r: number; time: number }
   /** A perfect shot that blinds meets THE LISTENER: it is already blind (the line is shared/bosswords.ts LISTEN_BLIND). */
   | { k: 'listenblind'; x: number; y: number }
   | { k: 'bare'; x: number; y: number }

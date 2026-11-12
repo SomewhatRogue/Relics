@@ -18,6 +18,9 @@ export const LISTEN_NAME = 'THE LISTENER';
 export const CAVE_NAME = 'THE DRIPSTONE CAVE';
 /** PLACEHOLDER for the lore keeper and line editor: shown when a blinding shot meets THE LISTENER (event 'listenblind'). */
 export const LISTEN_BLIND = 'ALREADY BLIND';
+/** PLACEHOLDERS for the lore keeper and line editor: THE LEECHMAN (floor 15, the fen layer; docs/design/deep-layer-bosses.md section 2) and its pool. */
+export const LEECH_NAME = 'THE LEECHMAN';
+export const POOL_NAME = 'THE LEECH POOL';
 /** The Doorkeepers' ground in the Deep (shared/sealarena.ts). Lore keeper. */
 export const SEAL_NAME = 'THE SEALED DOOR';
 
