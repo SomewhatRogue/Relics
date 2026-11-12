@@ -53,3 +53,11 @@ WRENCH after the overhead (overhead's stuck time 0.35 s; the wrench keeps its 0.
 Phase 2 chains: 0.1 s after a leap or an overhead. Art: crouch, flight with a lifted body over its shadow, slam;
 chain to the gear, the wheel spun hard, spark streams; dust and spark bursts, sounds. Shots via
 scripts/haulthreat-look.cjs; my first lights washed it out, halved.
+
+## 2026-11-11: the Doorkeepers threaten, boss-threat step 3 part 2 (Opus 5.5)
+VAULT (mover, furthest hero at least 3.5 off, else passed over; sim/bossleap.ts lands it, the Haulier's leap
+moved there too), BASH after each sweep (sweep aside 0, bash 0.7; enraged floor the jab's 0.55), QUAKE when
+ENRAGED (sim/quakeshape.ts, judged in doorpair.ts, its own attack radius 0 so only the three circles show).
+Rotations: phase 1 jab, sweep, bash, jab, vault, jab, charge, jab, sweep, bash, jab, charge; phase 2 sixteen
+long, seven jabs, Door Spin 5 of 9 big ones (doorrage.test's rules). Touches the Great Barn fight too. Bots:
+daggers 91 s, staff 142 s (534 health lost), sword 86 s, all win. doorrage.test's aside check moved to the bash.

@@ -97,7 +97,7 @@ export function rotation(phase: 1 | 2, party: number, swap: number): DoorMove[] 
   return r;
 }
 
-const KIND: Record<DoorMove, AttackKind> = { jab: 'stab', sweep: 'cleave', charge: 'charge', lock: 'charge', spin: 'slam' };
+const KIND: Record<DoorMove, AttackKind> = { jab: 'stab', sweep: 'cleave', charge: 'charge', lock: 'charge', spin: 'slam', vault: 'slam', bash: 'cleave', quake: 'slam' };
 const E = DOORKEEPERS.enrage;
 
 /** ENRAGED: a Doorkeeper whose partner is dead (phase 2). */
@@ -110,7 +110,7 @@ const slowest = Math.min(...Object.values(WEAPONS).map((w) => HERO.speed * (w.sp
 export function doorWindup(move: DoorMove, mad: boolean): number {
   const s: EnemyAttackSpec = DOORKEEPERS[move];
   if (!mad) return s.windup;
-  const floor = move === 'jab' ? E.floor.jab : s.unblockable ? Math.max(E.floor.striped, (s.radius! + HERO.radius) / slowest / 0.6) : E.floor.red;
+  const floor = move === 'jab' || move === 'bash' ? E.floor.jab : s.unblockable ? Math.max(E.floor.striped, (s.radius! + HERO.radius) / slowest / 0.6) : E.floor.red;
   return Math.max(floor, s.windup * E.windup);
 }
 

@@ -11,12 +11,24 @@ import type { Enemy } from '../sim/types';
 import type { Ctx } from './draw';
 import { drawEnemy } from './foes';
 import { gobPen } from './gobpen';
+import { ease, shadow } from './draw';
+import { leapFlight } from '../sim/bossleap';
+import { DOORKEEPERS } from '../shared/tuning';
+import { PX } from './world';
 
 const WOOD = '#5a3d22', SEAM = '#3a2716', EDGE = '#24180e', IRON = '#4a4652', BARE = '#7a6a58';
 
 export function drawKeeper(c: Ctx, e: Enemy, x: number, y: number, sleeping: boolean): void {
   const b = e.boss!, t = c.t ?? c.now, dead = e.act === 'dead';
   if (dead) return drawEnemy(c, e, x, y, sleeping);
+  // Up and over on a VAULT (sim/bossleap.ts): carried toward the circle, door and all, high over its shadow.
+  const k = leapFlight(e, 'vault', DOORKEEPERS.air);
+  if (k >= 0) {
+    const a = e.attack!, m = ease(k), up = Math.round(Math.sin(Math.PI * k) * 30);
+    x += (a.cx - e.x) * PX * m, y += (a.cy - e.y) * PX * m;
+    shadow(c, x, y, Math.max(6, 11 - Math.round(up / 5)));
+    y -= up;
+  }
   const shut = doorShut(e, t), down = b.downUntil > t, up = e.fy < -0.4, side = e.fx >= 0 ? 1 : -1;
   // Where the door is, as a box on screen: square in front (the wall), at its side (the mover), swung out (open).
   const doors = b.phase === 2 ? 2 : 1, mover = b.job === 'move';

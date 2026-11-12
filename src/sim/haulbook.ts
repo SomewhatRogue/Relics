@@ -15,6 +15,7 @@ import { hitHero, downIfDead } from './combat';
 import { OWN_KIT } from './enemies';
 import { slickId } from './oil';
 import { inSparks } from './sparkshape';
+import { leapLand } from './bossleap';
 import type { World } from './elements';
 import type { Enemy } from './types';
 
@@ -45,18 +46,9 @@ export function stepHaulBook(bk: BossBook, w: World, spawn: (x: number, y: numbe
   }
   if (b.phase === 2 && now >= st.nextAdds) adds(st, w, spawn, now);
   shoveGo(st, e, w);
-  leapLand(e, w);
+  leapLand(e, 'leap', w.ev);
   sparksFall(e, w);
   stepCarts(st, e, w);
-}
-
-/** The leap's wind-up about to end: it comes down where the circle is (the blow lands there as usual). */
-function leapLand(e: Enemy, w: World): void {
-  const a = e.attack;
-  if (!a || (a.boss as string | undefined) !== 'leap' || a.t + TICK * 1.5 < a.windup) return;
-  if (Math.hypot(e.x - a.cx, e.y - a.cy) < 0.05) return;
-  Object.assign(e, { x: a.cx, y: a.cy, kvx: 0, kvy: 0 });
-  w.ev.push({ k: 'haulleap', x: e.x, y: e.y });
 }
 
 /** The crank's wind-up about to end: the sparks come down on each spot, and each goes on burning a while. */

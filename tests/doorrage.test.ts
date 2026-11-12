@@ -98,12 +98,14 @@ describe('the door from the front', () => {
     expect(D.aside.sweep).toBeLessThan(D.sweep.recover);
     place(b.hasp, 6, 5, 0, 1);
     b.hasp.boss!.openUntil = -9;
-    blow(b.hasp, 'sweep', b.heroes[0]);
-    const a = b.hasp.attack!, shutAgain = a.windup + a.active + D.aside.sweep;
+    // (The sweep's own opening went to the bash straight after it: boss-threat.md step 3.)
+    expect(D.aside.sweep).toBe(0);
+    blow(b.hasp, 'bash', b.heroes[0]);
+    const a = b.hasp.attack!, shutAgain = a.windup + a.active + D.aside.bash;
     run(b, a.windup + a.active + 0.05, (h) => ((h.hp = h.maxHp), {}));
     expect(doorShut(b.hasp, b.room.time)).toBe(false);
     run(b, shutAgain - (a.windup + a.active + 0.05) + 2 * TICK, (h) => ((h.hp = h.maxHp), {}));
-    expect(b.hasp.attack?.boss).toBe('sweep');
+    expect(b.hasp.attack?.boss).toBe('bash');
     expect(doorShut(b.hasp, b.room.time)).toBe(true);
   });
 });

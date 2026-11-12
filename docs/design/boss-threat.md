@@ -64,7 +64,14 @@ First pass per boss (each with its art and animation, Kyle 2026-11-08):
    wedge) plus a near-instant follow-up after a leap or an overhead. Rotations: phase 1 pick, overhead, pick,
    leap, shove, crank; phase 2 leap, pick, overhead, wrench, crank, drag, shove, pick (shared/haultune.ts,
    sim/haulier.ts, haulbook.ts, sparkshape.ts; client/haulpose.ts, hauldraw.ts, sparkdraw.ts, fxhaul.ts). Not
-   built: backing off after a stagger. The Doorkeepers next.
+   built: backing off after a stagger. **The Doorkeepers in (2026-11-11), the Deep's and the Great Barn's alike:**
+   the mover's VAULT at the hero furthest off (3.5 tiles or more; a striped circle, it flies door and all, its
+   door open 0.8 s after it lands), the BASH straight after every sweep (0.45 s, red; the sweep's opening moved
+   to after the bash), and ENRAGED the QUAKE (both doors driven down; three striped circles 1.7 tiles apart
+   running at its hero, landing 0.22 s apart, a crack drawn out to them). Phase 2 lost its charge to keep Door
+   Spin over half its big blows (Kyle, 2026-11-06). Not built: the pair swapping ends of the arena.
+   (shared/bosstune.ts, sim/doorkeepers.ts, doorpair.ts, bossleap.ts, quakeshape.ts; client/doordraw.ts,
+   quakedraw.ts, fxhaul.ts.)
 4. The instances' bosses, by that chat.
 
 ## Already in (2026-11-11)

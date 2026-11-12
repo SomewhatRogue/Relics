@@ -1,7 +1,8 @@
 /**
  * The Haulier's working as effects and sounds (events from sim/haulbook.ts, sim/haulcarts.ts; the bodies are
  * client/hauldraw.ts and client/sumpdraw.ts): a cart set rolling, crashing, pulling up; lightning on the
- * winding gear; the plate flung off for good; landing a leap; its sparks hitting the floor. Cosmetic only.
+ * winding gear; the plate flung off for good; landing a leap (a Doorkeeper's vault too); its sparks hitting the
+ * floor; a Doorkeeper's quake bursting through. Cosmetic only.
  */
 import type { FightEvent } from '../sim/types';
 import type { Fx } from './fx';
@@ -56,6 +57,13 @@ export function haulFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
     fx.shake = Math.max(fx.shake, 7);
     return true;
   }
+  if (ev.k === 'quake') {
+    // A Doorkeeper's crack bursting through: flagstones thrown up, dust, a ring, a jolt.
+    fx.burst(x, y - 2, 18, ['#8a8494', '#6a647a', '#57525e', '#3a2a20'], 80, false, 220, true);
+    fx.rings.push({ x, y, life: 0.3, max: 0.3, col: '#c8b8a0', size: 24 });
+    fx.shake = Math.max(fx.shake, 4);
+    return true;
+  }
   if (ev.k === 'sparks') {
     // A shower of sparks off the gear hitting the floor: white-hot, then the burning.
     fx.burst(x, y - 4, 22, ['#ffd27a', '#ffffff', '#ff9a3c', '#ff6a20'], 95, true, 140);
@@ -82,6 +90,7 @@ export function haulSound(ev: FightEvent): boolean {
   if (ev.k === 'bare') return sfx.wardbreak(), sfx.propbreak(), sfx.slam(), true;
   if (ev.k === 'haulleap') return sfx.slam(), sfx.boom(), true;
   if (ev.k === 'sparks') return sfx.ignite(), sfx.shock(), true;
+  if (ev.k === 'quake') return sfx.slam(), sfx.thud(), true;
   return false;
 }
 

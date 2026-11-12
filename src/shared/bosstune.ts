@@ -84,7 +84,7 @@ export const DOORKEEPERS = {
    * How long after a blow lands its door stays swung aside (the punish), at most its recover: the big ones
    * only. A jab goes round the door's edge and the door stays shut.
    */
-  aside: { jab: 0, sweep: 0.7, charge: 0.8, lock: 1.0, spin: 2.0 } as Record<DoorMove, number>,
+  aside: { jab: 0, sweep: 0, charge: 0.8, lock: 1.0, spin: 2.0, vault: 0.8, bash: 0.7, quake: 1.2 } as Record<DoorMove, number>,
   /** The gap between one blow and the next (in place of the butcher's own). */
   pause: 0.2,
   swap: 20,
@@ -113,6 +113,23 @@ export const DOORKEEPERS = {
   charge: spec({ windup: 1.3, active: 0.7, recover: 0.8, dmg: 30, knock: 16, range: 8, radius: 0.8, unblockable: true }),
   /** Locked Doors: both together, a shove 3 wide (on the mover, the partner carried with it); both stand open its recover after. */
   lock: spec({ windup: 1.4, active: 0.45, recover: 1.0, dmg: 22, knock: 20, range: 3.5, radius: 1.5, unblockable: true }),
+  /**
+   * Threat (docs/design/boss-threat.md step 3; Kyle, 2026-11-11): the VAULT, the mover up and over to the hero
+   * furthest off (at least `vaultFrom`, else passed over), a striped circle where it lands, its door swung
+   * open after (the punish); the BASH, the door swung back the other way straight after the sweep (a quick
+   * red blow; the sweep's own opening is gone, the bash's after it); and ENRAGED, the QUAKE: both doors
+   * driven into the floor and the crack running at you, `quakeN` striped circles `quakeStep` apart landing
+   * `quakeGap` s after each other.
+   */
+  vault: spec({ windup: 1.0, active: 0.15, recover: 0.9, dmg: 24, knock: 12, radius: 1.5, ahead: 0, unblockable: true }),
+  vaultFrom: 3.5,
+  /** The last `air` s of the vault's wind-up it's in the air (drawn: client/doordraw.ts). */
+  air: 0.4,
+  bash: spec({ windup: 0.45, active: 0.1, recover: 0.8, dmg: 16, knock: 8, range: 2.4, arc: 120, unblockable: false }),
+  quake: spec({ windup: 1.2, active: 0.6, recover: 1.4, dmg: 20, knock: 10, radius: 1.2, ahead: 0, unblockable: true }),
+  quakeN: 3,
+  quakeStep: 1.7,
+  quakeGap: 0.22,
   /** Phase 2's Door Spin: a ring round itself, then dizzy (the recover). */
   spin: spec({ windup: 1.5, active: 0.15, recover: 2.0, dmg: 26, knock: 14, radius: 2.4, unblockable: true }),
   /**
@@ -126,12 +143,12 @@ export const DOORKEEPERS = {
   /** From where it charges (it backs off to get it), and the rotations by phase (one seeded swap each; a party of four one more). */
   chargeFrom: 3,
   rotation: {
-    1: ['jab', 'sweep', 'jab', 'charge', 'jab', 'jab', 'sweep', 'jab', 'charge'],
-    2: ['jab', 'spin', 'jab', 'sweep', 'spin', 'jab', 'charge', 'jab', 'spin'],
+    1: ['jab', 'sweep', 'bash', 'jab', 'vault', 'jab', 'charge', 'jab', 'sweep', 'bash', 'jab', 'charge'],
+    2: ['jab', 'spin', 'jab', 'quake', 'jab', 'spin', 'jab', 'sweep', 'bash', 'jab', 'spin', 'vault', 'jab', 'spin', 'jab', 'spin'],
   } as Record<1 | 2, DoorMove[]>,
   more: 'sweep' as DoorMove,
 };
-export type DoorMove = 'jab' | 'sweep' | 'charge' | 'lock' | 'spin';
+export type DoorMove = 'jab' | 'sweep' | 'charge' | 'lock' | 'spin' | 'vault' | 'bash' | 'quake';
 
 /** The barn hunt on the board (shared/bossjobs.ts): posted once the chapter's well on (this many brought home), or the bell rung. */
 export const BARN_HUNT = { from: 3 };

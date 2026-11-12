@@ -8,6 +8,10 @@
  * mover's blow begins. One down: phase 2, the survivor roars (nothing lands either way), carries both
  * doors and spins.
  */
+import { leapLand } from './bossleap';
+import { inQuake, quakeAt } from './quakeshape';
+import { downIfDead, hitHero } from './combat';
+import { TICK } from '../shared/tuning';
 import { BOSS, DOORKEEPERS } from '../shared/tuning';
 import { BARN_SPOTS } from '../shared/barnarena';
 import { isDead } from './damage';
@@ -25,6 +29,8 @@ export function stepPair(bk: BossBook, w: World, spawn: (x: number, y: number) =
   if (!keepers.length) return;
   forget(bk, now);
   const live = keepers.filter((e) => !isDead(e));
+  // A vault coming down, a quake's crack running (boss-threat.md step 3).
+  for (const e of live) leapLand(e, 'vault', w.ev), quake(e, w);
   if (bk.started < 0) {
     if (!live.some((e) => e.alert !== false)) return;
     bk.started = now;
@@ -111,5 +117,22 @@ function adds(bk: BossBook, spawn: (x: number, y: number) => Enemy): void {
   for (let i = 0; i < n; i++) {
     const sides = currentMap().adits ?? BARN_SPOTS.sides, at = sides[i % sides.length], e = spawn(at.x, at.y + Math.floor(i / 2) * 0.8);
     e.alert = true;
+  }
+}
+
+/** A quake's circles landing in turn, each catching whoever's in it (a striped blow: roll or step out). */
+function quake(e: Enemy, w: World): void {
+  const a = e.attack;
+  if (!a || (a.boss as string | undefined) !== 'quake') return;
+  for (let i = 0; i < D.quakeN; i++) {
+    const q = quakeAt(e, i), tag = 'q' + i;
+    if (a.t + TICK * 1.5 < q.at || a.hit?.includes(tag)) continue;
+    (a.hit ??= []).push(tag);
+    for (const h of w.heroes) {
+      if (h.act === 'down' || h.out || (h.z ?? 0) !== 0 || !inQuake(q, h)) continue;
+      hitHero(e, { ...a, kind: 'slam', aimed: h.id, ox: q.x, oy: q.y, cx: q.x, cy: q.y, radius: D.quake.radius!, hit: [], done: true }, h, w.now, w.ev, w.heroes);
+      downIfDead(h, w.ev);
+    }
+    w.ev.push({ k: 'quake', x: q.x, y: q.y });
   }
 }

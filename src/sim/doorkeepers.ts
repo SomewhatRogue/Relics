@@ -68,7 +68,23 @@ function mover(e: Enemy, b: BossOn, t0: Hero, d0: number, ux0: number, uy0: numb
   const d = t === t0 ? d0 : Math.hypot(t.x - e.x, t.y - e.y) || 1, ux = t === t0 ? ux0 : (t.x - e.x) / d, uy = t === t0 ? uy0 : (t.y - e.y) / d;
   const k = enraged(e) ? D.enrage.pace : 1, facing = turnTo(e, ux, uy, D.turn.move * k, dt), pace = D.walk.move * k;
   if (e.cooldown > 0) return void (d > D.jab.range! * 0.8 && walk(e, ux, uy, pace * Math.max(0.2, facing), dt));
-  const go = (ok: boolean) => ok && bossBegin(e, next, t, ev) && advance(b, now, e.attack!.windup + e.attack!.active + e.attack!.recover);
+  const go = (ok: boolean, at = t) => ok && bossBegin(e, next, at, ev) && advance(b, now, e.attack!.windup + e.attack!.active + e.attack!.recover);
+  // The VAULT: up and over to the hero furthest off; with nobody far enough, passed over (boss-threat.md step 3).
+  if (next === 'vault') {
+    const far = furthest(e, heroes);
+    if (!far) return void advance(b, now, 0);
+    const fu = Math.hypot(far.x - e.x, far.y - e.y) || 1, fface = far === t ? facing : turnTo(e, (far.x - e.x) / fu, (far.y - e.y) / fu, D.turn.move * k, dt);
+    if (go(fface > 0.6, far)) Object.assign(e.attack!, { aimed: '', cx: far.x, cy: far.y });
+    return;
+  }
+  // The BASH: the door swung back straight after the sweep, at whoever's still close; else passed over.
+  if (next === 'bash') return void (go(d <= D.bash.range! + 0.1 && facing > 0.7) || advance(b, now, 0));
+  // The QUAKE: the crack runs the way it faces, from within reach of its last circle (its own blow nothing: no circle of its own).
+  if (next === 'quake') {
+    if (go(facing > 0.85 && d <= D.quakeStep * D.quakeN + 0.5)) (e.attack!.aimed = ''), (e.attack!.hit = heroes.map((h) => h.id)), (e.attack!.radius = 0);
+    else walk(e, ux, uy, pace * Math.max(0.2, facing), dt);
+    return;
+  }
   if (next === 'jab' || next === 'sweep') {
     const reach = next === 'jab' ? D.jab.range! : D.sweep.range!;
     if (go(d <= reach + 0.1 && facing > (next === 'jab' ? 0.85 : 0.8))) return split(e, b, t, now);
@@ -88,6 +104,17 @@ function mover(e: Enemy, b: BossOn, t0: Hero, d0: number, ux0: number, uy0: numb
 export const keeperPause = (e: Enemy) => D.pause * (enraged(e) ? D.enrage.windup : 1);
 
 const heard = (e: Enemy, heroes: Hero[]) => heroes.some((h) => h.act !== 'down' && h.id !== 'squire' && !h.sneaking && Math.hypot(h.x - e.x, h.y - e.y) <= D.hear);
+
+/** The hero standing furthest off, if any is at least DOORKEEPERS.vaultFrom away. */
+function furthest(e: Enemy, heroes: Hero[]): Hero | undefined {
+  let best: Hero | undefined, bd = D.vaultFrom;
+  for (const h of heroes) {
+    if (h.act === 'down' || h.out || h.id === 'squire') continue;
+    const d = Math.hypot(h.x - e.x, h.y - e.y);
+    if (d >= bd) (best = h), (bd = d);
+  }
+  return best;
+}
 
 /** On to the next in its rotation (the clock for it starts once this blow is done). */
 function advance(b: BossOn, now: number, busy: number): true {
