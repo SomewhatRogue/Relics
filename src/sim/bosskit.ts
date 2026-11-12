@@ -40,6 +40,8 @@ export interface BossOn {
   /** The Haulier (sim/haulier.ts): the move under way (the screen poses on it: client/hauldraw.ts), and its plate gone for good (phase 2). */
   move?: import('../shared/haultune').HaulMove;
   bare?: boolean;
+  /** The Haulier's crank: where its sparks will fall (sim/sparkshape.ts), cleared once they have. */
+  sparks?: { x: number; y: number }[];
   /** Hempen's ropes coming down out of the branches (sim/hempenbook.ts): where, when they land, on whom. Sent as they come and go. */
   ropes?: Rope[];
 }

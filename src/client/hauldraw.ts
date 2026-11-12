@@ -6,7 +6,8 @@
  * it shed them. Drawing only.
  */
 import type { Enemy } from '../sim/types';
-import { line, shadow, stars, type Ctx } from './draw';
+import { ease, line, shadow, stars, type Ctx } from './draw';
+import { currentMap } from '../shared/arena';
 import { HAULIER } from '../shared/haultune';
 import { drawChainRing, drawLying, drawPlates, R } from './haullie';
 import { haulPose, PAL } from './haulpose';
@@ -23,30 +24,58 @@ const quiet = () => (nullGlow ??= document.createElement('canvas').getContext('2
 
 /** The Haulier: its outline (the body stamped dark a pixel each way), its body, then its chain ring and glows. */
 export function drawHaulier(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
+  // In the air on a leap: carried toward where it'll land, lifted off its shadow (the room moves it as it lands).
+  const L = leapOff(e);
+  x += L.dx, y += L.dy;
   const s = HAULIER.size / FLAT, gs = [c.lit, c.glow];
   for (const g of gs) g.save(), g.translate(x, y), g.scale(s, s), g.translate(-x, -y);
   try {
     if (e.act !== 'dead') {
       const g = c.lit, cc = { ...c, glow: quiet() };
       g.shadowColor = '#0a0706', g.shadowBlur = 0;
-      for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) (g.shadowOffsetX = dx), (g.shadowOffsetY = dy), body(cc, e, x, y, t, true);
+      for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) (g.shadowOffsetX = dx), (g.shadowOffsetY = dy), body(cc, e, x, y, t, true, L.up / s);
       g.shadowColor = 'rgba(0,0,0,0)', g.shadowOffsetX = 0, g.shadowOffsetY = 0;
     }
-    body(c, e, x, y, t, false);
+    body(c, e, x, y, t, false, L.up / s);
   } finally {
     for (const g of gs) g.restore();
   }
   const w = haulPose(e, t, c.now).whirl;
   if (w && e.attack && e.boss?.move === 'drag') drawChainRing(c, Math.round(x), Math.round(y), HAULIER.drag.radius! * PX, w);
+  if (e.attack && e.boss?.move === 'crank') drawCrankChain(c, e, x, y, s);
 }
 
-function body(c: Ctx, e: Enemy, x: number, y: number, t: number, rim: boolean): void {
+/** The leap's flight now: how far along toward the landing (screen pixels) and how high; nothing when not in the air. */
+function leapOff(e: Enemy): { dx: number; dy: number; up: number } {
+  const a = e.attack;
+  if (!a || e.boss?.move !== 'leap') return { dx: 0, dy: 0, up: 0 };
+  const from = a.windup - HAULIER.air;
+  if (a.t < from || a.t >= a.windup) return { dx: 0, dy: 0, up: 0 };
+  const k = (a.t - from) / HAULIER.air, m = ease(k);
+  return { dx: (a.cx - e.x) * PX * m, dy: (a.cy - e.y) * PX * m, up: Math.sin(Math.PI * k) * 34 };
+}
+
+/** The crank: its chain from its fists up to the winding gear's wheel, link by link, taut and jerking. */
+function drawCrankChain(c: Ctx, e: Enemy, x: number, y: number, s: number): void {
+  const gear = currentMap().gear;
+  if (!gear) return;
+  const p = haulPose(e, e.attack!.t, c.now), f = e.fx < -0.2 ? -1 : 1;
+  const hx = x + f * (p.hand[0] + p.lean) * s, hy = y + (p.hand[1] + p.crouch) * s;
+  const gx = x + (gear.x - e.x) * PX, gy = y + (gear.y - e.y) * PX - 34, d = Math.hypot(gx - hx, gy - hy), n = Math.floor(d / 3), g = c.lit;
+  for (let i = 0; i <= n; i++) {
+    const u = i / Math.max(1, n), jig = Math.sin(c.now * 30 + i) * (1 - u) * 1.2;
+    g.fillStyle = i % 2 ? PAL.ironHi : PAL.iron;
+    g.fillRect(Math.round(hx + (gx - hx) * u + jig), Math.round(hy + (gy - hy) * u), 2, 2);
+  }
+}
+
+function body(c: Ctx, e: Enemy, x: number, y: number, t: number, rim: boolean, lift = 0): void {
   const b = e.boss!, bare = !!b.bare, mad = b.phase === 2, f = e.fx < -0.2 ? -1 : 1, g = c.lit, dead = e.act === 'dead';
   const p = haulPose(e, t, c.now), k = t - e.hitAt < 0.09 && !dead ? HIT : PAL;
-  const X = Math.round(x + p.ox), Y = Math.round(y + p.oy);
+  const X = Math.round(x + p.ox), Y = Math.round(y + p.oy - lift);
   if (bare && !SHED.has(e.id)) SHED.set(e.id, [e.x * PX, e.y * PX]);
   const shed = bare ? SHED.get(e.id) : undefined;
-  if (!rim) shadow(c, x, y, p.lie === 'none' ? 12 : 16);
+  if (!rim) shadow(c, x, y, p.lie === 'none' ? Math.max(7, 12 - Math.round(lift / 4)) : 16);
   if (shed && !rim) drawPlates(c, Math.round(x + shed[0] - e.x * PX), Math.round(y + shed[1] - e.y * PX));
   if (dead) g.globalAlpha = Math.max(0, 1 - e.actT / e.actDur);
   if (p.lie === 'down' || p.lie === 'sit') return drawLying(c, f, X, Y, p, k, bare, dead), void (g.globalAlpha = 1);

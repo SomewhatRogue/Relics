@@ -1,7 +1,7 @@
 /**
  * The Haulier's working as effects and sounds (events from sim/haulbook.ts, sim/haulcarts.ts; the bodies are
  * client/hauldraw.ts and client/sumpdraw.ts): a cart set rolling, crashing, pulling up; lightning on the
- * winding gear; the plate flung off for good. Cosmetic only.
+ * winding gear; the plate flung off for good; landing a leap; its sparks hitting the floor. Cosmetic only.
  */
 import type { FightEvent } from '../sim/types';
 import type { Fx } from './fx';
@@ -47,6 +47,22 @@ export function haulFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
     if (ev.hit) fx.rings.push({ x, y, life: 0.4, max: 0.4, col: '#bfe0ff' }), (fx.shake = Math.max(fx.shake, 3));
     return true;
   }
+  if (ev.k === 'haulleap') {
+    // Down from the leap: the floor thrown up round it, grit and stone, a ring, and the whole screen jolts.
+    fx.burst(x, y - 2, 24, ['#8a8494', '#6a647a', '#b8b4ac', '#57525e'], 90, false, 200, true);
+    fx.burst(x, y - 10, 10, ['#ffd27a', '#ffffff'], 70, true);
+    fx.rings.push({ x, y, life: 0.35, max: 0.35, col: '#d8c8a8', size: 34 });
+    fx.flashes.push({ x, y: y - 6, r: 70, i: 0.9, c: [1, 0.78, 0.5], life: 0.14, max: 0.14 });
+    fx.shake = Math.max(fx.shake, 7);
+    return true;
+  }
+  if (ev.k === 'sparks') {
+    // A shower of sparks off the gear hitting the floor: white-hot, then the burning.
+    fx.burst(x, y - 4, 22, ['#ffd27a', '#ffffff', '#ff9a3c', '#ff6a20'], 95, true, 140);
+    fx.flashes.push({ x, y: y - 4, r: 46, i: 1.1, c: [1, 0.7, 0.3], life: 0.18, max: 0.18 });
+    fx.shake = Math.max(fx.shake, 2.5);
+    return true;
+  }
   if (ev.k === 'bare') {
     // The plate flung off in every direction: iron, rust, rivets, and the heat under it.
     fx.burst(x, y - 14, 26, ['#5e5a58', '#9a968f', '#6a4632', '#b8b4ac'], 120, false, 240, true);
@@ -64,6 +80,8 @@ export function haulSound(ev: FightEvent): boolean {
   if (ev.k === 'cart') return ev.what === 'hit' ? (sfx.propbreak(), sfx.slam()) : ev.what === 'flip' ? (sfx.slam(), sfx.rumble()) : ev.what === 'aim' ? undefined : ev.what === 'stop' ? sfx.thud() : sfx.rumble(), true;
   if (ev.k === 'gear') return sfx.shock(), ev.hit && sfx.boom(), true;
   if (ev.k === 'bare') return sfx.wardbreak(), sfx.propbreak(), sfx.slam(), true;
+  if (ev.k === 'haulleap') return sfx.slam(), sfx.boom(), true;
+  if (ev.k === 'sparks') return sfx.ignite(), sfx.shock(), true;
   return false;
 }
 
@@ -81,6 +99,9 @@ export function haulLights(e: Enemy, x: number, y: number, t: number, now: numbe
   if (bare || b.phase === 2) out.push({ x, y: y - 26, r: 90, i: bare ? 0.22 : 0.2, c: [0.5, 1, 0.3] }, { x, y: y - 32, r: 30, i: 0.3, c: [1, 0.25, 0.15] });
   if (a && a.t < a.windup + a.active && (b.move === 'pick' || b.move === 'overhead')) out.push({ x, y: y - (b.move === 'overhead' ? 54 : 34), r: 64, i: 0.15 + 0.3 * Math.min(1, a.t / a.windup), c: [1, 0.2, 0.12] });
   if (a && b.move === 'drag') out.push({ x, y: y - 8, r: 120, i: 0.35, c: [1, 0.72, 0.42] });
+  // Crouched to leap: red under it; hauling the crank: the sparks' warm flicker on it.
+  if (a && b.move === 'leap' && a.t < a.windup) out.push({ x, y: y - 4, r: 56, i: 0.08 + 0.14 * Math.min(1, a.t / a.windup), c: [1, 0.25, 0.15] });
+  if (a && b.move === 'crank' && a.t < a.windup) out.push({ x, y: y - 48, r: 70, i: 0.1 + 0.05 * Math.sin(now * 23), c: [1, 0.7, 0.3] });
   void t;
   return out;
 }

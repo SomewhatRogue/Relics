@@ -4,7 +4,10 @@
  * you, walks to whoever it faces, and works through its rotation (the plan's, one seeded swap, one more for
  * a party of four): the PICK (a red wedge), the OVERHEAD (a striped circle ahead, the pick stuck after), the
  * SHOVE (it walks to a cart at a stop and puts its shoulder to it: a striped lane the length of the rail
- * shows, then the cart goes) and, in phase 2, the DRAG (a striped ring round itself). Every blow has the
+ * shows, then the cart goes) and, in phase 2, the DRAG (a striped ring round itself). Threat (boss-threat.md
+ * step 3): the LEAP at the hero furthest off (a striped circle where it lands), the CRANK (sparks off the gear
+ * under everyone, sim/sparkshape.ts, then burning floor) and, in phase 2, the WRENCH straight after the
+ * overhead (a quick red wedge: rolling at the last moment from under the pick isn't free). Every blow has the
  * kit's pose first (BOSS.tell), and the pick and the overhead turn with their hero until BOSS.aimLock of the
  * wind-up (sim/bosskit.ts trackAim). Phase 2 (sim/haulbook.ts): HAULIER.faster its pace, walk, turn, wind-ups
  * and rests, never under the Doorkeepers' enraged floors. Staggered or knocked down by a cart, it does nothing.
@@ -14,12 +17,13 @@ import { BOSS, DOORKEEPERS, HAULIER as H, HERO, WEAPONS, type EnemyAttackSpec } 
 import { begin, walk } from './enemies';
 import { bossTarget, theBook, turnTo, type BossOn } from './bosskit';
 import { haulState, nearestCart, farStop } from './haulcarts';
+import { sparkSpots } from './sparkshape';
 import { wayTo } from './pathing';
 import type { AttackKind, Enemy, FightEvent, Hero, Prop } from './types';
 import type { HaulMove } from '../shared/haultune';
 
-const KIND: Record<HaulMove, AttackKind> = { pick: 'cleave', overhead: 'slam', shove: 'charge', drag: 'slam' };
-const SPEC: Record<HaulMove, EnemyAttackSpec> = { pick: H.pick, overhead: H.overhead, shove: H.shove, drag: H.drag };
+const KIND: Record<HaulMove, AttackKind> = { pick: 'cleave', overhead: 'slam', shove: 'charge', drag: 'slam', leap: 'slam', wrench: 'cleave', crank: 'slam' };
+const SPEC: Record<HaulMove, EnemyAttackSpec> = { pick: H.pick, overhead: H.overhead, shove: H.shove, drag: H.drag, leap: H.leap, wrench: H.wrench, crank: H.crank };
 /** Local numbers (shared/haultune.ts has none for them): how fast it turns, and how long it tries one blow before passing it over. */
 const TURN = 4, SKIP = 5;
 /** The slowest kit's pace (a striped floor is walked out of from its middle in 60% of it at this: as bosskit.ts). */
@@ -39,11 +43,15 @@ export function haulRotation(phase: 1 | 2, party: number, swap: number): HaulMov
  * Begin one of its blows at `t`: the pose first, its floor after; phase 2 quicker, never under the floors.
  * The shove's lane is the rail from `cart` (at a stop) to the far stop; it faces along it.
  */
-export function haulBegin(e: Enemy, move: HaulMove, t: Hero, ev: FightEvent[], cart?: Prop): boolean {
-  const spec = SPEC[move], b = e.boss!, k = b.phase === 2 ? H.faster : 1;
+export function haulBegin(e: Enemy, move: HaulMove, t: Hero, ev: FightEvent[], cart?: Prop, heroes: Hero[] = [t]): boolean {
+  const spec = SPEC[move], b = e.boss!, k = b.phase === 2 && move !== 'wrench' ? H.faster : 1;
   begin(e, KIND[move], spec, t, ev);
   const a = e.attack;
   if (!a) return false;
+  // The leap: where it'll land is where its hero stands now (aimed at nobody, so it doesn't turn with them).
+  if (move === 'leap') Object.assign(a, { aimed: '', cx: t.x, cy: t.y });
+  // The crank: no blow of its own; the sparks fall where heroes stand now (sim/haulbook.ts lets them go).
+  if (move === 'crank') (a.aimed = ''), (a.hit = heroes.map((h) => h.id)), (b.sparks = sparkSpots(e, heroes));
   if (move === 'shove') {
     if (!cart) return (e.attack = null), (e.act = 'chase'), false;
     const dir = Math.sign(farStop(cart) - cart.x) || 1;
@@ -57,6 +65,8 @@ export function haulBegin(e: Enemy, move: HaulMove, t: Hero, ev: FightEvent[], c
     a.windup = Math.max(floor, a.windup / k);
     a.recover /= k;
   }
+  // Phase 2: the overhead's stuck time cut short, the wrench straight after it.
+  if (move === 'overhead' && b.phase === 2) a.recover = H.chainRecover;
   Object.assign(a, { boss: move, tell: BOSS.tell, windup: +(a.windup + BOSS.tell).toFixed(3) });
   b.move = move;
   return true;
@@ -78,13 +88,30 @@ export function stepHaulier(e: Enemy, heroes: Hero[], now: number, dt: number, e
   // The shove is made at a cart standing at a stop: it goes to the nearest, else passes it over.
   const cart = next === 'shove' ? nearestCart(props, e.x, e.y) : undefined;
   if (next === 'shove' && !cart) return void advance(b, now, 0);
-  const who = cart ?? t, ux = who.x - e.x, uy = who.y - e.y, d = Math.hypot(ux, uy) || 1;
+  // The leap goes for the hero furthest off; with nobody far enough, it's passed over.
+  const far = next === 'leap' ? furthest(e, heroes) : undefined;
+  if (next === 'leap' && !far) return void advance(b, now, 0);
+  const who = cart ?? far ?? t, ux = who.x - e.x, uy = who.y - e.y, d = Math.hypot(ux, uy) || 1;
   const facing = turnTo(e, ux, uy, TURN * k, dt);
   if (e.cooldown > 0) return void (d > H.pick.range! * 0.8 && toward(e, who, facing, k, dt));
   const s = SPEC[next];
-  const ok = next === 'pick' ? d <= s.range! + 0.1 && facing > 0.8 : next === 'overhead' ? d <= s.ahead! + s.radius! - 0.3 && facing > 0.8 : next === 'drag' ? d <= s.radius! - 0.3 : d <= H.shoveReach;
-  if (ok && haulBegin(e, next, t, ev, cart)) return void advance(b, now, e.attack!.windup + e.attack!.active + e.attack!.recover);
+  const ok = next === 'pick' || next === 'wrench' ? d <= s.range! + 0.1 && facing > 0.8 : next === 'overhead' ? d <= s.ahead! + s.radius! - 0.3 && facing > 0.8 : next === 'drag' ? d <= s.radius! - 0.3 : next === 'leap' ? facing > 0.6 : next === 'crank' ? true : d <= H.shoveReach;
+  // The wrench is a punish: with nobody close for it, it's passed over at once.
+  if (next === 'wrench' && !ok) return void advance(b, now, 0);
+  if (next === 'leap' && !ok) return;
+  if (ok && haulBegin(e, next, far ?? t, ev, cart, heroes)) return void advance(b, now, e.attack!.windup + e.attack!.active + e.attack!.recover);
   if (d > (next === 'shove' ? H.shoveReach - 0.4 : next === 'drag' ? s.radius! - 0.6 : H.walk.close)) toward(e, who, facing, k, dt);
+}
+
+/** The hero standing furthest off, if any is at least HAULIER.leapFrom away. */
+function furthest(e: Enemy, heroes: Hero[]): Hero | undefined {
+  let best: Hero | undefined, bd = H.leapFrom;
+  for (const h of heroes) {
+    if (h.act === 'down' || h.out || h.id === 'squire') continue;
+    const d = Math.hypot(h.x - e.x, h.y - e.y);
+    if (d >= bd) (best = h), (bd = d);
+  }
+  return best;
 }
 
 /** On to the next in its rotation (the clock for it starts once this blow is done). */

@@ -5,6 +5,7 @@
  */
 import type { Enemy } from '../sim/types';
 import { ease } from './draw';
+import { HAULIER } from '../shared/haultune';
 
 export const PAL = {
   skin: '#7fb040', skinLo: '#4f7a2c', skinHi: '#b0e068', iron: '#5f5d6a', ironHi: '#a3a1b2', ironLo: '#2c2a33',
@@ -69,6 +70,26 @@ export function haulPose(e: Enemy, t: number, now: number): HPose {
     if (tt < w) Object.assign(p, { lean: -3 - 2 * ease(k), crouch: 2 + 3 * ease(k), dig: true });
     else if (tt < w + ac) Object.assign(p, { lean: 10, crouch: 4 });
     else Object.assign(p, { lean: 10 * (1 - ease(rr)), crouch: 4 * (1 - ease(rr)) });
+  } else if (move === 'leap') {
+    // Crouched to spring (shaking at the last), up and over (hauldraw.ts carries it to the circle), then down on the pick.
+    const air = w - HAULIER.air;
+    if (tt < air) {
+      const k = ease(tt / air);
+      Object.assign(p, { crouch: Math.round(6 * k), lean: Math.round(4 * k), pickA: lerp(-2.0, -2.8, k), hand: mix(CARRY, [0, -14], k), arms: 'low', glint: 0.6 * k, dig: k > 0.5 });
+      if (air - tt < 0.2) p.ox = Math.round(Math.sin(now * 50));
+    } else if (tt < w) { const k = (tt - air) / HAULIER.air; Object.assign(p, { lean: Math.round(-2 + 6 * k), pickA: lerp(-2.8, -1.4, k), hand: mix([0, -14], [6, -26], k), arms: 'up', glint: 1 }); }
+    else if (tt < w + ac) Object.assign(p, { crouch: 7, lean: 8, pickA: 1.15, hand: [10, -8], glint: 1 });
+    else { const k = ease(rr); Object.assign(p, { crouch: Math.round(7 * (1 - k)), lean: Math.round(8 * (1 - k)), pickA: lerp(1.15, -2.0, k), hand: mix([10, -8], CARRY, k) }); }
+  } else if (move === 'wrench') {
+    // The pick still in the floor, hitching; then ripped out sideways in one hard sweep.
+    if (tt < w) Object.assign(p, { stuck: true, pickA: 1.15 - 0.15 * Math.sin(now * 30), hand: [10, -8], lean: 8, crouch: 5, ox: Math.round(Math.sin(now * 40) * 1.5), glint: tt / w });
+    else if (tt < w + ac) { const k = (tt - w) / ac; Object.assign(p, { pickA: lerp(1.15, -1.2, k), hand: mix([10, -8], [12, -18], k), lean: Math.round(lerp(8, -4, k)), crouch: Math.round(lerp(5, 1, k)), glint: 1 }); }
+    else { const k = ease(rr); Object.assign(p, { pickA: lerp(-1.2, -2.0, k), hand: mix([12, -18], CARRY, k), lean: Math.round(-4 * (1 - k)) }); }
+  } else if (move === 'crank') {
+    // Hauling on the gear's chain hand over hand, leaning back into it, faster as the sparks come.
+    const k = Math.min(1, tt / w), hh = Math.sin(now * (6 + 10 * k));
+    if (tt < w) Object.assign(p, { pickA: -0.9, hand: [4 + Math.round(hh * 2), -24 + Math.round(Math.abs(hh) * 6)], arms: 'up', lean: Math.round(-3 - 2 * k), crouch: 2 + Math.round(Math.abs(hh)), dig: true });
+    else { const k2 = ease(rr); Object.assign(p, { pickA: -0.9, hand: [4, -18], arms: 'up', lean: Math.round(-5 * (1 - k2)), crouch: Math.round(2 * (1 - k2)) }); }
   } else {
     // The chain drag: the pick tucked on the shoulder, the chain whirled round it.
     // (r is the share of the drag's ring the chain has reached, 0..1.)

@@ -57,7 +57,14 @@ First pass per boss (each with its art and animation, Kyle 2026-11-08):
 
 1. ~~The ×10 scale.~~ In (display scale).
 2. ~~Control resistance.~~ In (shared/holdtune.ts BOSS_HOLD, sim/bosshold.ts; the ring in client/status.ts).
-3. The Deep's two bosses: mobility and threat, with art.
+3. The Deep's two bosses: mobility and threat, with art. **The Haulier in (2026-11-11):** the LEAP at the hero
+   furthest off (3.5 tiles or more; a striped circle where it lands, crouch, flight, dust), the CRANK (it hauls
+   the gear's chain; striped circles under each hero, two more either side of one alone or two, sparks streaming
+   off the wheel, then each spot burns 4 s), and in phase 2 the WRENCH straight after the overhead (a quick red
+   wedge) plus a near-instant follow-up after a leap or an overhead. Rotations: phase 1 pick, overhead, pick,
+   leap, shove, crank; phase 2 leap, pick, overhead, wrench, crank, drag, shove, pick (shared/haultune.ts,
+   sim/haulier.ts, haulbook.ts, sparkshape.ts; client/haulpose.ts, hauldraw.ts, sparkdraw.ts, fxhaul.ts). Not
+   built: backing off after a stagger. The Doorkeepers next.
 4. The instances' bosses, by that chat.
 
 ## Already in (2026-11-11)

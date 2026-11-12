@@ -44,3 +44,12 @@ BOSS_HOLD (shared/holdtune.ts) and sim/bosshold.ts: a boss or BIG ONE freezes fo
 POISE staggers, forced knockdowns (`sure`, e.g. instances' brake.ts) and the last-second dodge stagger untouched.
 A hold shrugged off doesn't spend the hero's stun-cap turn. A pale turning ring at its feet while it can't be
 held (client/status.ts); SHRUG as before. Instances chat: your bosses get this for free through stuns.ts.
+
+## 2026-11-11: the Haulier threatens, boss-threat step 3 part 1 (Opus 5.5)
+LEAP (furthest hero, at least 3.5 away, else passed over; lands at the end of the wind-up, sim/haulbook.ts
+leapLand), CRANK (sparkSpots under each hero, plus two either side for one or two heroes; the room judges and
+both views draw sim/sparkshape.ts; each spot becomes a lit slick for 4 s via OWN_KIT.slicks), and phase 2's
+WRENCH after the overhead (overhead's stuck time 0.35 s; the wrench keeps its 0.45 s wind-up, not quickened).
+Phase 2 chains: 0.1 s after a leap or an overhead. Art: crouch, flight with a lifted body over its shadow, slam;
+chain to the gear, the wheel spun hard, spark streams; dust and spark bursts, sounds. Shots via
+scripts/haulthreat-look.cjs; my first lights washed it out, halved.

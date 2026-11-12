@@ -81,6 +81,7 @@ import { SPOT_REACH } from '../shared/town';
 import { dusk } from './streetlife';
 import { drawMist, setSun, torchIn } from './daytime';
 import { drawBolts, drawStrikeMarks, strikeLights } from './stormdraw';
+import { drawSparkMarks } from './sparkdraw';
 import { flashAmb, fogLook } from './skyfx';
 import { flashOf } from '../sim/stormshape';
 import { drawPuddles } from './spiders';
@@ -255,6 +256,8 @@ export class Scene {
     drawBlaze(c, room, cx, cy);
     // A storm's lightning: its circle while it's coming (stormdraw.ts).
     drawStrikeMarks(c, room, cx, cy);
+    // The Haulier's crank: where its sparks will fall, and the sparks coming down (sparkdraw.ts).
+    drawSparkMarks(c, room, cx, cy);
     // A keg, oil or embers about to go up: its circle, the keg, the embers (blastdraw.ts).
     drawBlasts(c, room, cx, cy);
     // A drummer's reach and its beat on the floor, and the goblins it has roused (client/backline.ts).

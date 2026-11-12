@@ -19,6 +19,7 @@ import { makeFolk, makeHound, poseFolk, poseHound } from './folk3d';
 import { Pool, type Held } from './pool3d';
 import { makeTele, shapeTele } from './teleg3d';
 import { strikeShape } from '../../sim/stormshape';
+import { sparkShapes } from '../../sim/sparkshape';
 import { blastShape } from '../../sim/blastshape';
 import { shakeProp } from './prophit3d';
 import { makeChest, makeCoal, makeDrop, makePickup, makeProp, poseChest, type ChestFig } from './props3d';
@@ -80,6 +81,11 @@ export class Actors {
       const m = this.teles.get('k' + s.id, '', () => ({ root: makeTele() })).root;
       m.visible = shapeTele(m, a, now, 0);
     }
+    // The Haulier's sparks coming down (sim/sparkshape.ts, the circles the room judges).
+    for (const e of room.enemies) sparkShapes(e).forEach((a, i) => {
+      const m = this.teles.get('s' + e.id + ':' + i, '', () => ({ root: makeTele() })).root;
+      m.visible = shapeTele(m, a, now, 0);
+    });
     // A keg, oil or embers about to go up (sim/blastshape.ts, the circle the room judges).
     for (const e of room.enemies) {
       const a = blastShape(e, t);

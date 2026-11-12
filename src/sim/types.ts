@@ -822,6 +822,9 @@ export type FightEvent =
   | { k: 'cart'; what: 'go' | 'hit' | 'stop' | 'flip' | 'aim'; x: number; y: number; by?: string; on?: string }
   | { k: 'gear'; x: number; y: number; hit: boolean }
   | { k: 'bare'; x: number; y: number }
+  /** The Haulier landing a leap; its sparks coming down on a spot (sim/haulbook.ts). */
+  | { k: 'haulleap'; x: number; y: number }
+  | { k: 'sparks'; x: number; y: number }
   /** Boss loot (sim/lootroll.ts): a unique piece dropped and up for the group's roll (`id`), and the roll settled (`winner`, or none if all passed). */
   | { k: 'lootroll'; what: 'open' | 'done'; id: number; x: number; y: number; winner?: string }
   | { k: 'cutfree'; x: number; y: number; id: string; by: string }
