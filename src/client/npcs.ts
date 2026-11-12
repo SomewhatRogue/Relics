@@ -63,8 +63,16 @@ function person(l: Look): Sprite {
   parts.push(['e', 6, 3.5, 3.4, 3.4, l.skin], ['p', 5, 4, '#141218'], ['p', 7, 4, '#141218'], ['p', 6, 5, '#6a3a2a'], ...l.hair);
   // A tall hat reaches above the head: grow the sprite upward to fit it.
   const lift = Math.max(0, ...parts.map((q) => -(q[2] as number)));
-  // Drawn again at 1.5x for the art pass (sprites.ts `grow`), so they stand as tall as the heroes.
-  return makeSprite(18, Math.round((16 + lift) * 1.5), grow(parts.map((q) => q.map((v, i) => (i === 2 ? (v as number) + lift : v)) as Part)));
+  // The heroes' proportions (Kyle, 2026-11-12: "all other villagers in town" tall too): the head's rows drawn
+  // smaller and the body's longer before the 1.5x redraw (sprites.ts `grow`), so it's redrawn, not stretched.
+  const neck = lift + 6, Y = (y: number) => (y <= neck ? y * 0.8 : neck * 0.8 + (y - neck) * 1.55);
+  const tall = parts.map((q): Part => {
+    const y = (q[2] as number) + lift;
+    if (q[0] === 'e') return ['e', q[1], Y(y), q[3], (q[4] as number) * 0.8, q[5]] as Part;
+    if (q[0] === 'r') return ['r', q[1], Y(y), q[3], Math.max(0.7, Y(y + (q[4] as number)) - Y(y)), q[5]] as Part;
+    return ['p', q[1], Math.round(Y(y + 0.5) - 0.5), q[3]] as Part;
+  });
+  return makeSprite(18, Math.round(Y(16 + lift) * 1.5), grow(tall));
 }
 
 const SPRITES: Record<string, Sprite> = {};

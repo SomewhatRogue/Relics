@@ -184,3 +184,12 @@ The plan, one class at a time so Kyle can play each against the old ones:
   ONEs still read big beside them and size them if not.
 - Slice one (this push): the knight (Warrior look 1) only.
 (Claude Opus 5.5)
+- Heroic proportions, slice two (Kyle, 2026-11-12: "Tall hero is great. Need all other heroes tall and all other
+  villagers in town... all other skins too"): all 15 looks redrawn tall. Warriors 31 (a 7-row head), Rangers 33
+  (hood point over a 5-row face), Rogues 33 (deep hood, the wrap's tail over the shoulder, a pouch, the cloak
+  flaring), Mages 40 (the hat over a 5-row face, hands at the belt), Healers 31 (coif or cap, the narrow tabard)
+  and the friar 31 (habit to the feet). Each look gives its cut and hand lift. Cloth (herolife.ts) keeps its old
+  rows and maps them onto a tall body (head rows to head, body rows to body), so capes, cloaks, mantles, hems,
+  tabards and hair follow without being placed again. Townsfolk: the head's rows drawn smaller and the body's
+  longer before the 1.5x redraw (npcs.ts person), so they stand as tall as the heroes; children stay small. The
+  pick screen's portraits are 27 by 44 so the Mage's hat fits. The goblins stay as they are. (Claude Opus 5.5)

@@ -118,15 +118,16 @@ export const heroLook = (cls: Cls, i = 0): HeroSprites => LOOK_SPRITES[cls][i] ?
 export const lookDef = (cls: Cls, i = 0): LookDef => LOOKS[cls][i] ?? LOOKS[cls][0];
 
 const portraits = new Map<string, HTMLCanvasElement>();
-/** The look standing on a 27 by 36 card, feet on the bottom (so every class shows at the same scale). */
+/** The look standing on a 27 by 44 card, feet on the bottom (so every class shows at the same scale). */
 export function heroPortrait(cls: Cls, i = 0): HTMLCanvasElement {
   const key = cls + i;
   let c = portraits.get(key);
   if (!c) {
     const s = heroLook(cls, i).down.c;
     c = document.createElement('canvas');
-    (c.width = 27), (c.height = 36);
-    c.getContext('2d')!.drawImage(s, Math.round((27 - s.width) / 2), 36 - s.height);
+    // (44 tall: the Mage's hat at the heroic proportions, 2026-11-12.)
+    (c.width = 27), (c.height = 44);
+    c.getContext('2d')!.drawImage(s, Math.round((27 - s.width) / 2), 44 - s.height);
     portraits.set(key, c);
   }
   return c;

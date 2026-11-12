@@ -56,6 +56,9 @@ export function art(rows: string[], pal: Record<string, string>): Part[] {
 export const SKIN = { fair: ['#ecc4a0', '#c49474'], light: ['#d8a07a', '#b07a58'], tan: ['#b8805a', '#8e603e'], brown: ['#8e5a3a', '#6e4228'], deep: ['#603a26', '#48291a'] } as const;
 export const skin = (k: keyof typeof SKIN) => ({ S: SKIN[k][0], s: SKIN[k][1], E: '#16121a' });
 
+/** A colour a step darker (a shade a palette doesn't give: the legs' or boots' dark side). */
+export const darker = (c: string): string => '#' + [1, 3, 5].map((i) => Math.round(parseInt(c.slice(i, i + 2), 16) * 0.7).toString(16).padStart(2, '0')).join('');
+
 /** A pale glint off a skin tone: the light an eye catches in a hood's shadow (lit, never glowing). */
 export function glint(skinCol: string): string {
   const c = [1, 3, 5].map((i) => Math.round(parseInt(skinCol.slice(i, i + 2), 16) * 0.35 + 236 * 0.65));
