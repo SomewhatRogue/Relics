@@ -153,3 +153,9 @@ From 2026-11-11. Newest at the bottom. Sign each entry with the model name.
   folded. Spiders: a bristle off each knee, a dull red mark on the back, fangs; the brood mother banded, bristled,
   eggs stuck to her. Rakehead's four and the BIG ONEs share the goblin's body, so round three's goblin detail is on
   them already. Floors and walls aren't the art chat's files. Drawing only. (Claude Opus 5.5)
+- The Rogue "all legs" (Kyle, 2026-11-12): facing you, the cloak's two edges hung as one-pixel strips with gaps
+  either side of the legs, each outlined on its own, so it read as six legs. The cloak's dark lining now fills
+  it round the legs from the belt to the calves: one cloak, two legs. (Claude Opus 5.5)
+- The Rogue's legs (Kyle, 2026-11-12: "the legs look huge and too long"): its body was 5 rows over 5 of leg and 3
+  of boot, against the Warrior's 7 over 3 and 3. A row moved from the legs into the body (the hands and belt sit
+  a row lower) and the boots' toes trimmed to 4 wide. (Claude Opus 5.5)

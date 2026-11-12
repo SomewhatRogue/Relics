@@ -50,7 +50,8 @@ const ranger = (face: string[], pal: Record<string, string>, life: LookDef['life
 
 // The Rogue (Kyle, 2026-11-06: "more like an assassin or a ninja"): a deep hood, a wrap over the nose
 // and mouth with the eyes showing between (a pale glint `G` beside each, the light they catch), a slim
-// jerkin crossed by a strap, a belt, and a long cloak (C, c) that hangs past the knees. The legs are
+// jerkin crossed by a strap, a belt, and a long cloak (C, c) that hangs past the knees, its dark lining
+// filling it round the legs (Kyle, 2026-11-12: open, its edges read as more legs). The legs are
 // straight under the hips and the boots turn a little out, planted like everyone else's. The cloak's
 // skirts behind, its sway, its flare on a dash or a SHADOW STEP, and what the kit hangs off the belt are
 // cloaklife.ts (`mantle`).
@@ -58,10 +59,11 @@ const G_HEAD = [
   '..................', '.......cCCc.......', '.....ccCCCCcc.....', '....cCcCCCCcCc....', '...cCCOOOOOOCCc...',
   '...CCOOOOOOOOCC...', '...CCSSEGSEGSCC...', '...CCKKKKKKKKCC...', '...CCkKKKKKKkCC...',
 ];
+// (Kyle, 2026-11-12: "the legs look huge and too long": a row moved from the legs to the body, the toes trimmed.)
 const G_BODY = [
-  '.CCCCkkKKKKkkCCCC.', '.CCCbBBTBBBBBbCCC.', '.CCcbBBBtBBBBbcCC.', '.CCcbBBBBTBBBbcCC.', '.CSSbBBBBBTBBbSSC.',
-  '.C..TTTtTTTTTT..C.', '.C..bBBBBBBtBb..C.', '.C...LLL..LLL...C.', '.C...LLL..LLL...C.', '.C...LLL..LLL...C.',
-  '.C...LLL..LLL...C.', '.c...Lll..llL...c.', '.....FfF..FfF.....', '....FFfF..FfFF....', '...FFFFf..fFFFF...',
+  '.CCCCkkKKKKkkCCCC.', '.CCCbBBTBBBBBbCCC.', '.CCcbBBBtBBBBbcCC.', '.CCcbBBBBTBBBbcCC.', '.CCcbBBBBBTBBbcCC.',
+  '.CSSbBBBBBBTBbSSC.', '.CccTTTtTTTTTTccC.', '.CccbBBBBBBtBbccC.', '.CcccLLL..LLLcccC.', '.CcccLLL..LLLcccC.',
+  '.CcccLLL..LLLcccC.', '.ccccLll..llLcccc.', '.....FfF..FfF.....', '....FFfF..FfFF....', '....FFFf..fFFF....',
 ];
 const G_BACK = [
   '..................', '.......cCCc.......', '.....ccCCCCcc.....', '....cCCCCCCCCc....', '...cCCCCCCCCCCc...',
