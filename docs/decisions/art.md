@@ -66,3 +66,15 @@ From 2026-11-11. Newest at the bottom. Sign each entry with the model name.
   windows 8 by 8 with a cross and set higher, their lamplight to match; stone sills wider. A roof archer
   stands on the new ridge (ROOF_UP 45, 3.45 in 2.5D). Tests that read heights pass (houses, buildings,
   furnish3d, parity3d). (Claude Opus 5.5)
+- Slice 5, butchers: the butcher redrawn 27 by 33 (butcherparts.ts): a great belly, thick arms with big
+  hands, an apron with straps and old blood, a head with ears out, a brow, glowing eyes, tusks. Every named
+  butcher its own look, picked steadily from its name: a build (heavy, hunched with the back humped over the
+  head, or lean with a long neck), a hide and apron (three greens, three aprons), a trophy (skulls at the
+  belt, a string of ears, a hero's dented helm with its plume, a tooth necklace) and a weapon look (cleaver,
+  meat hook, maul). THE STOKER: soot to the eyes, a black apron, an iron poker with a hot end. The Hempen Man:
+  the lean build in sacking, a stitched hood tied at the neck with the eyes burning through rough holes, rope
+  across him, nooses at the belt, a hook, a forward gallows lean; past half his health the sack is torn open
+  over one eye. All looks only: the swing, its arc and its telegraph are the room's; the smear and marks are
+  1.5x. Pose, hand, ring and status sized through heroscale. The lineup shows a few names, the Stoker and
+  the Hempen Man whole and torn. A fractional head row crashed the sprite maker; caught on the lineup before
+  any push. (Claude Opus 5.5)

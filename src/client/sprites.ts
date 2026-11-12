@@ -4,6 +4,7 @@
  */
 import { LOOK_DEFS, type Cls, type LookDef } from './herolooks';
 import { HERO_W } from './heroscale';
+import { PLAIN_BUTCHER, butcherParts, headlessParts } from './butcherparts';
 
 export type Part = ['r', number, number, number, number, string] | ['e', number, number, number, number, string] | ['p', number, number, string] | ['t', number, number, number, number, string];
 
@@ -127,11 +128,6 @@ export function heroPortrait(cls: Cls, i = 0): HTMLCanvasElement {
   return c;
 }
 
-const butcherBase: Part[] = [
-  ['r', 5, 17, 3, 5, '#3a4a1f'], ['r', 10, 17, 3, 5, '#3a4a1f'], ['e', 9, 13, 7.5, 6.5, '#5b6b2a'],
-  ['r', 5, 10, 8, 9, '#8a7a66'], ['p', 7, 13, '#6b1a1a'], ['p', 8, 14, '#6b1a1a'], ['p', 10, 12, '#6b1a1a'], ['p', 9, 16, '#7a1d1d'], ['p', 6, 17, '#6b1a1a'],
-  ['e', 9, 5, 4, 4, '#5b6b2a'], ['p', 4, 3, '#5b6b2a'], ['p', 14, 3, '#5b6b2a'],
-];
 const dummyBase: Part[] = [
   ['r', 5, 9, 2, 8, '#6b4a2b'], ['r', 3, 16, 6, 1, '#4a3420'], ['e', 6, 7, 4, 4.5, '#b89a5a'], ['r', 2, 7, 8, 1, '#8a6a3a'],
   ['p', 4, 6, '#d8c08a'], ['p', 7, 9, '#d8c08a'], ['p', 5, 11, '#8a6a3a'], ['e', 6, 2.2, 2.4, 2.2, '#c8aa6a'], ['r', 0, 5, 12, 1, '#6b4a2b'],
@@ -170,8 +166,9 @@ const char = (parts: Part[]): Part[] => parts.map((p, i) => [...p.slice(0, -1), 
 export const HEROES = Object.fromEntries(Object.keys(LOOKS).map((k) => [k, heroLook(k as Cls)])) as Record<Cls, HeroSprites>;
 
 export const SPRITES = {
-  butcherDown: makeSprite(18, 22, [...butcherBase, ['p', 7, 5, '#ff4a3a'], ['p', 11, 5, '#ff4a3a'], ['p', 7, 8, '#e8e0c8'], ['p', 11, 8, '#e8e0c8'], ['r', 8, 7, 3, 1, '#2a1a14']]),
-  butcherUp: makeSprite(18, 22, [...butcherBase, ['r', 6, 8, 6, 2, '#4a5a22']]),
+  // The plain butcher at 1.5x (butcherparts.ts; a named one's own look is made in foes.ts).
+  butcherDown: makeSprite(27, 33, butcherParts(PLAIN_BUTCHER, false)),
+  butcherUp: makeSprite(27, 33, butcherParts(PLAIN_BUTCHER, true)),
   scrapper: makeSprite(17, 20, [...scrapperBody, ...scrapperHead]),
   /** The blind hunters of the deep workings: bone-pale, long-eared, empty sockets where the eyes should glow. */
   pale: makeSprite(17, 20, [...gobBody(PALE), ...gobHead(PALE, true), ...gobFace(PALE)]),
@@ -179,9 +176,9 @@ export const SPRITES = {
   scrapperUp: makeSprite(17, 20, [...scrapperBody, ...gobHead(GOB), ...gobBack(GOB)]),
   // Bodies left behind: without a head (a red stump), or burned black.
   scrapperHeadless: makeSprite(17, 20, [...scrapperBody, ['r', 6, 8, 5, 1, '#7a1d1d'], ['r', 7, 7, 3, 1, '#9a2a2a']]),
-  butcherHeadless: makeSprite(18, 22, [...butcherBase.slice(0, 9), ['r', 7, 8, 4, 2, '#7a1d1d'], ['p', 8, 7, '#9a2a2a']]),
+  butcherHeadless: makeSprite(27, 33, headlessParts()),
   scrapperBurnt: makeSprite(17, 20, char([...scrapperBody, ...gobHead(GOB)])),
-  butcherBurnt: makeSprite(18, 22, char(butcherBase)),
+  butcherBurnt: makeSprite(27, 33, char(butcherParts(PLAIN_BUTCHER, true))),
   barrel: grown(10, 12, [['r', 1, 1, 8, 11, '#7a5230'], ['r', 0, 3, 10, 6, '#7a5230'], ['r', 0, 3, 10, 1, '#4a4652'], ['r', 0, 8, 10, 1, '#4a4652'], ['r', 2, 0, 6, 2, '#9a7a4a'], ['r', 4, 2, 1, 9, '#5a3d22']]),
   // The Staithe's: a punt drawn up on the bank (pointed ends, a pole laid in it), a lamp on its post.
   punt: grown(22, 9, [['r', 2, 3, 18, 5, '#4a3420'], ['r', 0, 4, 22, 3, '#4a3420'], ['r', 3, 2, 16, 1, '#6a4a2c'], ['r', 3, 4, 16, 2, '#2a1e14'], ['r', 1, 7, 20, 1, '#2e2016'], ['r', 4, 3, 15, 1, '#8a7a5a'], ['p', 9, 5, '#3a2a1a'], ['p', 14, 5, '#3a2a1a']]),

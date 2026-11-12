@@ -12,7 +12,9 @@ import type { FoeVariant } from '../shared/terrain';
 export const MOVES = ['stand', 'walk', 'wind up', 'strike', 'recover', 'hurt', 'flinch', 'stagger', 'die'] as const;
 export type Move = (typeof MOVES)[number];
 
-export type Unit = { label: string; tall: number } & ({ hero: { cls: HeroClass; look: number } } | { foe: { kind: 'scrapper' | 'butcher'; variant?: FoeVariant } });
+/** A foe's `name` (a named butcher's look comes from it), `boss` (who, for the bosses' own looks) and `hurt` (a share of its health gone). */
+export type Foe = { kind: 'scrapper' | 'butcher'; variant?: FoeVariant; name?: string; boss?: string; hurt?: number };
+export type Unit = { label: string; tall: number } & ({ hero: { cls: HeroClass; look: number } } | { foe: Foe });
 
 const CLS: HeroClass[] = ['WARRIOR', 'RANGER', 'ROGUE', 'MAGE', 'HEALER'];
 /** The mobs, most confused first (docs/design/art-pass.md), then the rest. */
@@ -24,6 +26,9 @@ export function cast(which: string): Unit[] {
   if (which !== 'goblins') for (const cls of CLS) for (const look of [0, 1, 2]) out.push({ label: `${cls} ${look + 1}`, tall: 40, hero: { cls, look } });
   if (which !== 'heroes') {
     out.push({ label: 'GOBLIN', tall: 32, foe: { kind: 'scrapper' } }, { label: 'BUTCHER', tall: 44, foe: { kind: 'butcher' } });
+    // Named butchers (a look each from the name), THE STOKER, and the Hempen Man whole and torn.
+    for (const n of ['GRISTLE', 'OLD MAW', 'THE TALLOWMAN', 'SKINNER BRANT']) out.push({ label: n.slice(0, 8), tall: 46, foe: { kind: 'butcher', name: n } });
+    out.push({ label: 'STOKER', tall: 46, foe: { kind: 'butcher', variant: 'stoker', name: 'THE STOKER' } }, { label: 'HEMPEN', tall: 46, foe: { kind: 'butcher', name: 'HEMPEN', boss: 'hempen' } }, { label: 'HEMPEN 2', tall: 46, foe: { kind: 'butcher', name: 'HEMPEN', boss: 'hempen', hurt: 0.7 } });
     for (const v of MOBS) out.push({ label: v.toUpperCase(), tall: 34, foe: { kind: 'scrapper', variant: v } });
   }
   return out;
@@ -67,9 +72,12 @@ function kindOf(e: Enemy): AttackKind {
 }
 
 /** A goblin in the move at wall time `now`; `t` is the room time to draw it at. */
-export function foeIn(u: { kind: 'scrapper' | 'butcher'; variant?: FoeVariant }, m: Move, id: number, now: number): { e: Enemy; t: number } {
+export function foeIn(u: Foe, m: Move, id: number, now: number): { e: Enemy; t: number } {
   const e = newEnemy(id, u.kind, 0, 0);
   if (u.variant) e.variant = u.variant;
+  if (u.name) e.name = u.name;
+  if (u.boss) e.boss = { who: u.boss } as Enemy['boss'];
+  if (u.hurt) e.hp = Math.round(e.maxHp * (1 - u.hurt));
   Object.assign(e, { act: 'idle', fx: 0.2, fy: 1, moving: false, cooldown: 9 });
   let t = 10;
   if (m === 'walk') Object.assign(e, { act: 'chase', fx: 1, fy: 0.1, moving: true });

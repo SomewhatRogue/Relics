@@ -3,7 +3,7 @@
  * cleaver back and chops, or leaps and comes down on the slam; scrappers pull the knife back and stab.
  */
 import type { GameMap } from '../shared/arena';
-import { GUARD, HERO } from '../shared/tuning';
+import { GUARD, HERO, HEMPEN_BOSS } from '../shared/tuning';
 import type { Enemy, EnemyAttack } from '../sim/types';
 import { isRound } from '../sim/types';
 import { drawRoundSign } from './telegraph2';
@@ -22,7 +22,8 @@ import { BUTCHER_CUT, SCRAPPER_CUT, jointed } from './joints';
 import { butcherPose, foeHit, scrapperPose, tumble } from './foepose';
 import { rest, newPose } from './motion';
 import { drawText } from './pixfont';
-import { SPRITES, type Sprite } from './sprites';
+import { SPRITES, makeSprite, type Sprite } from './sprites';
+import { butcherLook, butcherParts, type Arms } from './butcherparts';
 import { drawPounce, drawSpiderKind, drawSpitSign } from './spiders';
 import { SPIDER_SPRITES } from './spidersprites';
 import { isSpiderKind } from '../shared/spiders';
@@ -31,13 +32,45 @@ const ARM: [number, number] = [0, 0];
 /** Where scrapper() last put the body and the weapon hand (pixels from the feet), for its kit. */
 const AT = { bx: 0, by: 0, hx: 0, hy: 0 };
 import { OX, OY, PX } from './world';
-import { HS, hs } from './heroscale';
+import { HS, hline, hs } from './heroscale';
 import { gobPen } from './gobpen';
 
-function cleaver(c: Ctx, x: number, y: number, a: number): void {
-  line(c.lit, x, y, a, 0, 4, '#4a3a2a');
-  line(c.lit, x, y, a, 4, 11, '#9a968c', 3);
-  line(c.lit, x + Math.cos(a + Math.PI / 2) * 1.5, y + Math.sin(a + Math.PI / 2) * 1.5, a, 5, 11, '#e0dcd0');
+/** A butcher's weapon along `a` from the hand, its look (butcherparts.ts); lengths in the old pixels, drawn 1.5x. */
+function cleaver(c: Ctx, x: number, y: number, a: number, arms: Arms = 'cleaver', now = 0): void {
+  const nx = Math.cos(a + Math.PI / 2), ny = Math.sin(a + Math.PI / 2);
+  if (arms === 'hook') {
+    // A meat hook on a short haft: the curve turned back at the end, a point.
+    hline(c.lit, x, y, a, 0, 6, '#4a3a2a', 2);
+    hline(c.lit, x, y, a, 6, 10, '#8a8690', 2);
+    hline(c.lit, x + Math.cos(a) * 15, y + Math.sin(a) * 15, a + Math.PI * 0.75, 0, 4, '#8a8690', 2);
+    return void hline(c.lit, x + Math.cos(a) * 15 + nx * 4, y + Math.sin(a) * 15 + ny * 4, a + Math.PI, 0, 2, '#c8c4bc');
+  }
+  if (arms === 'maul') {
+    // A long haft and an iron-shod block of a head.
+    hline(c.lit, x, y, a, -1, 9, '#5a3d22', 2);
+    hline(c.lit, x + nx * -2, y + ny * -2, a, 8, 12, '#5a5660', 3);
+    return void hline(c.lit, x + nx * 2, y + ny * 2, a, 8, 12, '#6a6470', 3);
+  }
+  if (arms === 'poker') {
+    // The Stoker's iron, its end glowing from the furnace.
+    hline(c.lit, x, y, a, -1, 9, '#3a3436', 2);
+    c.glow.globalAlpha = 0.75 + 0.25 * Math.sin(now * 7);
+    hline(c.glow, x, y, a, 9, 12, '#ff8a3a', 2);
+    return void (c.glow.globalAlpha = 1);
+  }
+  hline(c.lit, x, y, a, 0, 4, '#4a3a2a', 2);
+  hline(c.lit, x, y, a, 4, 11, '#9a968c', 4);
+  hline(c.lit, x + nx * 2, y + ny * 2, a, 5, 11, '#e0dcd0');
+}
+
+/** A named butcher's own sprites, made the first time it's seen (butcherparts.ts). */
+const BUTCHERS = new Map<string, { down: Sprite; up: Sprite }>();
+const hempenOf = (e: Enemy): 1 | 2 | undefined => (e.boss?.who === 'hempen' ? (e.hp < e.maxHp * HEMPEN_BOSS.phase2 ? 2 : 1) : undefined);
+function butcherSprites(e: Enemy): { down: Sprite; up: Sprite } {
+  const l = butcherLook(e.name, e.variant, hempenOf(e)), key = `${l.build}.${l.trophy}.${l.soot}.${l.hempen ?? 0}`;
+  let s = BUTCHERS.get(key);
+  if (!s) BUTCHERS.set(key, (s = { down: makeSprite(27, 33, butcherParts(l, false)), up: makeSprite(27, 33, butcherParts(l, true)) }));
+  return s;
 }
 
 function butcher(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
@@ -60,18 +93,21 @@ function butcher(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
     else arm = fa + side * 0.6;
   } else if (a && a.kind === 'charge') arm = a.t < a.windup ? fa - side * 1.9 : fa + side * 0.3;
   if (e.act === 'stunned') (pz.ox += Math.round(Math.sin(c.now * 4) * 1.5)), (pz.oy += 2), (arm = Math.PI / 2 + side * 0.4);
-  shadow(c, x, y, Math.max(5, 10 - pz.lift / 2));
-  const bx = x + pz.ox, by = y + pz.oy - pz.lift, up = e.fy < -0.55;
+  // At 1.5x (art pass): the pose's moves, the hand and the marks over its head half again as big.
+  shadow(c, x, y, Math.max(hs(5), hs(10) - Math.round(pz.lift * HS / 2)));
+  // The Hempen Man leans forward as if still on the gallows.
+  if (hempenOf(e)) pz.lean += side;
+  const bx = x + Math.round(pz.ox * HS), by = y + Math.round((pz.oy - pz.lift) * HS), up = e.fy < -0.55, look = butcherSprites(e), arms = butcherLook(e.name, e.variant, hempenOf(e)).arms;
   // In parts (figure.ts): the cleaver goes where the arm goes (over his head for the cleave and slam).
-  const body = jointed(up ? SPRITES.butcherUp : SPRITES.butcherDown, BUTCHER_CUT);
-  layout(body, bx, by, e.fx < -0.2, pz);
-  const [ax, ay] = armOffset(ARM), hx = bx + side * 7 + ax, hy = by - 13 + ay;
-  if (up) cleaver(c, hx, hy, arm);
+  const body = jointed(up ? look.up : look.down, BUTCHER_CUT);
+  layout(body, bx, by, e.fx < -0.2, pz, HS);
+  const [ax, ay] = armOffset(ARM), hx = bx + side * hs(7) + ax, hy = by - hs(13) + ay;
+  if (up) cleaver(c, hx, hy, arm, arms, c.now);
   drawFigure(c, body, bx, by, pz);
-  if (!up) cleaver(c, hx, hy, arm);
-  if (trail) smear(c.glow, hx, hy, trail[0], trail[1], 8, 15, e.hitstop > 0 ? '#ffffff' : '#ffb0a0');
-  if (e.act === 'stunned') stars(c, bx, by - 25, 5, 8);
-  if (a && a.unblockable && a.t < a.windup) drawText(c.glow, '!', Math.round(bx - 1), Math.round(by - 33 - (Math.floor(c.now * 6) % 2)), '#ffd040');
+  if (!up) cleaver(c, hx, hy, arm, arms, c.now);
+  if (trail) smear(c.glow, hx, hy, trail[0], trail[1], 8 * HS, 15 * HS, e.hitstop > 0 ? '#ffffff' : '#ffb0a0');
+  if (e.act === 'stunned') stars(c, bx, by - hs(25), 5, hs(8));
+  if (a && a.unblockable && a.t < a.windup) drawText(c.glow, '!', Math.round(bx - 1), Math.round(by - hs(33) - (Math.floor(c.now * 6) % 2)), '#ffd040');
 }
 
 /**
@@ -190,7 +226,7 @@ export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number, dozing = false
   // Hits are stamped in room time (`c.t`), not the wall clock.
   const t = c.t ?? c.now, flash = t - e.hitAt < 0.09 ? 0.9 : 0;
   const hurt = e.hp < e.maxHp && (t - e.hitAt < 3 || e.hp < e.maxHp * 0.5);
-  if ((e.kind === 'butcher' || e.kind === 'scrapper') && hurt) ring(c, x, y, e.kind === 'butcher' ? 11 : hs(6), '#e24b4a', e.hp / e.maxHp);
+  if ((e.kind === 'butcher' || e.kind === 'scrapper') && hurt) ring(c, x, y, hs(e.kind === 'butcher' ? 11 : 6), '#e24b4a', e.hp / e.maxHp);
   // At a body, tearing at it; FED, eyes burning (remainsdraw.ts).
   if (e.kind === 'butcher') return butcher(c, e, x, y, t), drawMealing(c, e, x, y, t), drawFed(c, e, x, y, t);
   if (e.variant === 'log') return drawLogs(c, e, x, y);

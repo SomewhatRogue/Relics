@@ -15,7 +15,7 @@ export function drawStatus(c: Ctx, e: Enemy, x: number, y: number, t: number): v
   // (Nothing over a goblin still lying in Fenmere's reeds: sim/lurk.ts.)
   if (e.act === 'dead' || lurking(e)) return;
   // (A goblin redrawn at 1.5x is half again as tall and wide: bodysize.ts.)
-  const k = e.kind !== 'butcher' && !stretchFoe(e) ? HS : 1, tall = Math.round(TALL[e.kind] * k), w = Math.round(e.radius * 16 * k) + 2, g = c.glow;
+  const k = !stretchFoe(e) ? HS : 1, tall = Math.round(TALL[e.kind] * k), w = Math.round(e.radius * 16 * k) + 2, g = c.glow;
   if (e.frozenUntil > t) {
     const left = Math.round(x - w), top = Math.round(y - tall - 1), fade = Math.min(1, (e.frozenUntil - t) / 0.4);
     g.globalAlpha = 0.32 * fade;
