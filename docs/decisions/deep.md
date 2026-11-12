@@ -18,3 +18,8 @@ docs/DECISIONS.md (the archive). New entries go here, newest at the bottom, sign
 - Curses: THE RUSTED WAY (6% less damage), THE WET WAY (6% slower), THE COLD WAY (10 less health), THE LOW WAY (stamina 12% slower), THE DARK WAY (relics recharge 12% slower), THE LOUD WAY (goblins notice you from further off, 15%). Blessings: A WHETSTONE (+8% damage), A PADDED COAT (+15 health), A WATERSKIN (stamina 15% faster), AN OILED RAG (recharge 15% faster), SOMEONE'S PACK (your relic gets a use back each floor). Words: lore keeper (no flask, no candles, no giver) and line editor.
 - Each player takes their own. Their marks ride on their input (`Intent.marks`); the room puts them on the hero (`sim/deepmarks.ts`), into its numbers (`sim/gearstats.ts`) and how far goblins notice it (`sim/enemies.ts`); they carry to the next floor's heroes at once. `deep-online` checks a follower's curse lands on their hero in the leader's room: 16 of 16.
 - Flag (lore keeper): STAMINA lines read oddly for a Mage, whose bar says MAGIC. Left as the stat's own name for now.
+
+## 2026-11-11: the bar's own word on curses and blessings (Opus 5.5)
+Kyle: each bar keeps its own name, FAITH for a Cleric. The checkpoint's curse and blessing lines now go through
+`barWords` with the hero's class (client/deepui.ts), like cards and the trainer: "Faith comes back 12% slower" for a
+Cleric, "Magic comes back..." for a Mage, "Stamina..." for the rest. No new words, so no lore pass.
