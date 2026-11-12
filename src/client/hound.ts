@@ -77,7 +77,8 @@ export function drawHound(c: Ctx, d: Hound, x: number, y: number, o: HoundDraw =
   if (d.state === 'fled' && d.t > 2) return;
   const m = o.mood ?? {}, look = o.look ?? PLAIN, f = (o.fx ?? d.fx) >= 0 ? 1 : -1, flip = f < 0;
   const p = choose(c, d, o, o.down ?? !!d.down), { s, m: map } = spriteOf(look, p);
-  const X = Math.round(x) + f * (m.lean ?? 0), Y = Math.round(y) - Math.max(0, (m.lift ?? 0) - (p.lift && (m.lift ?? 0) >= 3 ? 3 : 0));
+  // (A mood's lean and lift in the old pixels, half as big again for the 1.5x hound.)
+  const X = Math.round(x) + f * Math.round((m.lean ?? 0) * 1.5), Y = Math.round(y) - Math.round(1.5 * Math.max(0, (m.lift ?? 0) - (p.lift && (m.lift ?? 0) >= 3 ? 3 : 0)));
   shadow(c, x, y, SHAPES[look.breed].shadow);
   blit(c, s, X, Y + 1, flip);
   // Grid to screen (the sprite's middle column is BOX.x; its ground row is just above the feet line).
@@ -92,7 +93,7 @@ export function drawHound(c: Ctx, d: Hound, x: number, y: number, o: HoundDraw =
   // Worrying something: a tooth.
   if (d.state === 'bite' && !d.pin) px(tip - 1, jaw[1] - 1, 1, 1, '#e8e4ee');
   // Shaking off: a few drops flung.
-  if (p.fluff) for (let i = 0; i < 3; i++) px(BOX.x - 4 + i * 3 + p.fluff, top + 1 - ((i + p.fluff) % 2) * 2, 1, 1, '#9fb4c8');
+  if (p.fluff) for (let i = 0; i < 4; i++) px(BOX.x - 6 + i * 4 + p.fluff, top + 2 - ((i + p.fluff) % 2) * 3, 1, 1, '#9fb4c8');
   if (o.name) drawText(c.glow, o.name, Math.round(X - textWidth(o.name) / 2), sy(top) - 6, '#e8d4a0');
 }
 

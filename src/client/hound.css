@@ -1,6 +1,6 @@
 /* Your hound, with Maeve (houndui.ts): a live look at it, rows of choices, its name. */
 #panel .hd-stage { display: flex; justify-content: center; margin: 4px 0 8px; }
-#panel .hd-prev { width: 256px; height: 136px; max-width: 100%; image-rendering: pixelated; background: radial-gradient(ellipse at 50% 80%, #2e2a26 0%, #16171b 72%); border: 1px solid #3a3e46; }
+#panel .hd-prev { width: 256px; height: 160px; max-width: 100%; image-rendering: pixelated; background: radial-gradient(ellipse at 50% 80%, #2e2a26 0%, #16171b 72%); border: 1px solid #3a3e46; }
 #panel .hd-row { margin: 0 0 8px; }
 #panel .hd-l { display: block; margin: 0 0 4px; color: #b8a47c; font-size: var(--fs-text); letter-spacing: 0.15em; }
 #panel .hd-opts { display: flex; flex-wrap: wrap; gap: 5px; }

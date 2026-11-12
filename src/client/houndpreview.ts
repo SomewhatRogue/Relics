@@ -9,7 +9,7 @@ import type { Ctx } from './draw';
 import { drawHound } from './hound';
 import type { PoseName } from './houndposes';
 
-const W = 64, H = 34;
+const W = 64, H = 40;
 /** The loop: [pose, seconds, frames a second]. */
 const LOOP: [PoseName, number, number][] = [['trot', 2.2, 9], ['sit', 1.6, 0], ['sniff', 1.6, 3], ['shake', 1, 9], ['run', 1.6, 13], ['down', 1.8, 0], ['walk', 2, 6]];
 const SPAN = LOOP.reduce((s, [, d]) => s + d, 0);

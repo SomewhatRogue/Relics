@@ -56,34 +56,34 @@ function stand(gr: Grid, s: Shape, look: HoundLook, p: Pose): HeadAt {
 }
 
 function sit(gr: Grid, s: Shape, look: HoundLook, p: Pose): HeadAt {
-  const G = BOX.ground, x0 = BOX.x - 5, cx = BOX.x, top = G - s.leg - s.depth - 1, sh = s.skull[1];
+  const G = BOX.ground, x0 = BOX.x - 8, cx = BOX.x, top = G - s.leg - s.depth - 1, sh = s.skull[1];
   tail(gr, s, x0, G, 'ground', p.wag ?? 0);
-  leg(gr, s, look, false, cx + 2, G - s.leg - 1, 0, 0, 0, true);
-  gr.rect(x0, G - 3, 4, 3, 'B'), gr.rect(x0 + 1, G - 4, 2, 1, 'B');
-  gr.line(x0 + 1, G - 3, cx, top, 'B', 3);
-  gr.rect(cx, top, 3, G - s.leg - top, 'B');
-  gr.line(cx + 2, top + 1, cx + 2, G - s.leg - 1, hasBlaze(look.mark) ? 'W' : look.breed === 'hillhound' || s.ruff ? 'P' : 'L');
-  if (s.rough) gr.set(x0 + 1, G - 5, 'R'), gr.set(cx - 1, top - 1, 'R');
+  leg(gr, s, look, false, cx + 3, G - s.leg - 1, 0, 0, 0, true);
+  gr.rect(x0, G - 5, 6, 5, 'B'), gr.rect(x0 + 1, G - 6, 4, 1, 'B');
+  gr.line(x0 + 2, G - 5, cx, top, 'B', 4);
+  gr.rect(cx, top, 5, G - s.leg - top, 'B');
+  gr.line(cx + 4, top + 1, cx + 4, G - s.leg - 1, hasBlaze(look.mark) ? 'W' : look.breed === 'hillhound' || s.ruff ? 'P' : 'L');
+  if (s.rough) gr.set(x0 + 1, G - 7, 'R'), gr.set(x0 + 4, G - 7, 'R'), gr.set(cx - 1, top - 1, 'R');
   if (p.kind === 'scratch') {
     // A hind foot up at the ear, going: the head tipped into it.
-    const k = p.kick ?? 0, hx = cx + 1, hy = top - s.neck - sh + 2;
-    const at = head(gr, s, look, [cx + 1, top + 1], hx, hy, 'back', false);
-    gr.line(x0 + 2, G - 2, hx - 1 + k, hy + sh - k, 'B', 2);
+    const k = p.kick ?? 0, hx = cx + 2, hy = top - s.neck - sh + 2;
+    const at = head(gr, s, look, [cx + 2, top + 1], hx, hy, 'back', false);
+    gr.line(x0 + 3, G - 3, hx - 1 + k, hy + sh - k, 'B', 3);
     return at;
   }
-  gr.rect(x0 + 3, G, 3, 1, 'B');
-  leg(gr, s, look, false, cx + 1, G - s.leg - 1, 0, 0, 0, false);
-  return head(gr, s, look, [cx + 1, top + 1], cx + 2 + (p.head?.dx ?? 0), top - s.neck - sh + 1 + (p.head?.dy ?? 0), p.ears, p.head?.open);
+  gr.rect(x0 + 4, G, 5, 1, 'B');
+  leg(gr, s, look, false, cx + 2, G - s.leg - 1, 0, 0, 0, false);
+  return head(gr, s, look, [cx + 2, top + 1], cx + 3 + (p.head?.dx ?? 0), top - s.neck - sh + 1 + (p.head?.dy ?? 0), p.ears, p.head?.open);
 }
 
 function down(gr: Grid, s: Shape, look: HoundLook, p: Pose): HeadAt {
-  const G = BOX.ground, len = s.body, hipX = BOX.x - Math.round(len / 2) - 2, shX = hipX + len, top = G - Math.max(2, s.depth - 1) + 1, sh = s.skull[1];
-  const paw = 3 + s.muzzle, socks = look.mark === 'socks' || look.mark === 'both';
+  const G = BOX.ground, len = s.body, hipX = BOX.x - Math.round(len / 2) - 3, shX = hipX + len, top = G - Math.max(3, s.depth - 1) + 1, sh = s.skull[1];
+  const paw = 4 + s.muzzle, socks = look.mark === 'socks' || look.mark === 'both';
   tail(gr, s, hipX - 1, G, 'ground', p.wag ?? 0);
   gr.rect(shX + 1, G - 1, paw, 1, 'D');
-  gr.rect(hipX, top, len + 1, G - top + 1, 'B'), gr.rect(hipX - 1, top + 1, 1, G - top, 'B'), gr.rect(hipX + 1, top - 1, 3, 1, 'B');
-  if (s.rough) for (let x = hipX + 4; x < shX; x += 3) gr.set(x, top - 1, 'R');
-  gr.rect(shX + 1, G, paw, 1, 'B'), gr.set(shX + paw, G, socks ? 'W' : look.breed === 'collie' ? 'P' : 'B');
+  gr.rect(hipX, top, len + 1, G - top + 1, 'B'), gr.rect(hipX - 1, top + 1, 1, G - top, 'B'), gr.rect(hipX + 2, top - 1, 5, 1, 'B');
+  if (s.rough) for (let x = hipX + 5; x < shX; x += 4) gr.set(x, top - 1, 'R');
+  gr.rect(shX + 1, G - 1, paw, 2, 'B'), gr.set(shX + paw, G, socks ? 'W' : look.breed === 'collie' ? 'P' : 'B');
   if (socks) gr.set(shX + paw - 1, G, 'W');
   const hy = p.headUp ? top - s.neck - sh + 2 : G - sh;
   return head(gr, s, look, [shX, top + 1], shX + 1, hy, p.ears, false);
@@ -91,11 +91,11 @@ function down(gr: Grid, s: Shape, look: HoundLook, p: Pose): HeadAt {
 
 /** Over on its back: the back along the floor, the pale belly up, four legs bent in the air and going, the head laid back. */
 function belly(gr: Grid, s: Shape, look: HoundLook, p: Pose): HeadAt {
-  const G = BOX.ground, len = s.body, hipX = BOX.x - Math.round(len / 2) - 1, shX = hipX + len, top = G - Math.max(2, s.depth - 1) + 1, sh = s.skull[1], k = p.kick ?? 0;
+  const G = BOX.ground, len = s.body, hipX = BOX.x - Math.round(len / 2) - 1, shX = hipX + len, top = G - Math.max(3, s.depth - 1) + 1, sh = s.skull[1], k = p.kick ?? 0;
   tail(gr, s, hipX - 1, G, 'ground', p.wag ?? 0);
   const up = (x: number, far: boolean, hi: number, bend: number) => {
-    const ch = far ? 'D' : 'B', y1 = top - 1 - (s.leg - 2) - hi;
-    gr.line(x, top - 1, x, y1, ch, 1);
+    const ch = far ? 'D' : 'B', y1 = top - 1 - (s.leg - 3) - hi;
+    gr.line(x, top - 1, x, y1, ch, 2);
     // Bent at the wrist or hock, the paw flopped over.
     gr.set(x + bend, y1, hasSocks(look.mark) ? 'W' : ch);
   };
@@ -118,8 +118,19 @@ function pattern(gr: Grid, look: HoundLook): void {
   }
 }
 
+/** A pose's pixels (leg shifts, stretch, lift, head moves) half as big again, for the 1.5x hound (the art pass). */
+const k15 = (v: number | undefined) => (v === undefined ? undefined : Math.sign(v) * Math.round(Math.abs(v) * 1.5));
+function big(p: Pose): Pose {
+  const h = p.head;
+  return {
+    ...p, legs: p.legs?.map(([a, b]) => [k15(a)!, k15(b)!]), stretch: k15(p.stretch), tilt: k15(p.tilt), lift: k15(p.lift), crouch: k15(p.crouch), front: k15(p.front),
+    head: h && { ...h, dx: k15(h.dx), dy: k15(h.dy) },
+  };
+}
+
 /** The pixel map for one hound in one pose. */
-export function houndMap(look: HoundLook, p: Pose): HoundMap {
+export function houndMap(look: HoundLook, p0: Pose): HoundMap {
+  const p = big(p0);
   const gr = new Grid(), s = SHAPES[look.breed], pal = palOf(look.breed, look.coat);
   const at = p.kind === 'sit' || p.kind === 'scratch' ? sit(gr, s, look, p) : p.kind === 'down' ? down(gr, s, look, p) : p.kind === 'belly' ? belly(gr, s, look, p) : stand(gr, s, look, p);
   pattern(gr, look);

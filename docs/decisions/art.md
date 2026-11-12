@@ -41,3 +41,10 @@ From 2026-11-11. Newest at the bottom. Sign each entry with the model name.
   meaty sorts' extra size still are until their turn. Open: butchers are still their old size, now barely
   taller than a goblin (slice 5 grows them); props a goblin carries that are sprites (a door, a keg) keep
   their old size until the props slice. (Claude Opus 5.5)
+- The Ranger's hound at 1.5x: every breed measured again half as big again (leg, body, chest, loin, neck,
+  skull, muzzle, snout, tail; legs a pixel thicker, the tail's curl spread over its longer length), in a box
+  39 by 24 (from 26 by 16), so the code draws it natively at the new size with lines still one pixel. Poses'
+  pixel moves (leg shifts, stretch, lift, crouch, head) scaled once where the map is built; the sit, down and
+  belly shapes redrawn to the new measures; a mood's lean and lift scaled. The wolfhound's muzzle is 4, not
+  5, so its nose stays in the box at full stretch (tests/hound.test.ts holds every breed in every pose
+  inside it). Maeve's preview canvas 64 by 40 at an even 4x. (Claude Opus 5.5)
