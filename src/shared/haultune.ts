@@ -26,7 +26,7 @@
  *   it or be out of reach). The overhead's stuck time shrinks to `chainRecover` before it.
  * - `crank`: it hauls on the gear's chain and the wheel throws sparks: a striped circle under each hero
  *   (and `sparks.extra` either side of one alone or two), then each burns `sparks.burn` s (floor taken away).
- * - `chain`: in phase 2, the blow after these comes with only `chainPause` between.
+ * - `chain`: the blow after these comes with only `chainPause` between (both phases since 2026-11-11).
  */
 import type { EnemyAttackSpec } from './tuning.js';
 
@@ -41,19 +41,20 @@ export const HAULIER = {
   walk: { pace: 1.7, close: 1.6 },
   phase2: 0.5,
   faster: 1.15,
-  pauseBetween: 0.7,
+  /** (Kyle, 2026-11-11: "attack more often, faster tells": 0.7 before, wind-ups a seventh shorter.) */
+  pauseBetween: 0.35,
   rotation: { 1: ['pick', 'overhead', 'pick', 'leap', 'shove', 'crank'], 2: ['leap', 'pick', 'overhead', 'wrench', 'crank', 'drag', 'shove', 'pick'] } as Record<1 | 2, HaulMove[]>,
   more: 'drag' as HaulMove,
-  pick: { windup: 1.0, active: 0.12, recover: 0.9, dmg: 22, knock: 8, range: 2.4, arc: 100, unblockable: false } as EnemyAttackSpec,
-  overhead: { windup: 1.4, active: 0.12, recover: 2.2, dmg: 30, knock: 10, radius: 1.8, ahead: 1.6, unblockable: true } as EnemyAttackSpec,
-  shove: { windup: 1.2, active: 0.2, recover: 1.0, dmg: 0, knock: 0, unblockable: true } as EnemyAttackSpec,
-  drag: { windup: 1.5, active: 0.15, recover: 1.5, dmg: 18, knock: 8, radius: 2.6, ahead: 0, unblockable: true } as EnemyAttackSpec,
-  leap: { windup: 1.1, active: 0.15, recover: 0.8, dmg: 26, knock: 12, radius: 1.7, ahead: 0, unblockable: true } as EnemyAttackSpec,
+  pick: { windup: 0.85, active: 0.12, recover: 0.9, dmg: 22, knock: 8, range: 2.4, arc: 100, unblockable: false } as EnemyAttackSpec,
+  overhead: { windup: 1.2, active: 0.12, recover: 2.2, dmg: 30, knock: 10, radius: 1.8, ahead: 1.6, unblockable: true } as EnemyAttackSpec,
+  shove: { windup: 1.0, active: 0.2, recover: 1.0, dmg: 0, knock: 0, unblockable: true } as EnemyAttackSpec,
+  drag: { windup: 1.3, active: 0.15, recover: 1.5, dmg: 18, knock: 8, radius: 2.6, ahead: 0, unblockable: true } as EnemyAttackSpec,
+  leap: { windup: 0.95, active: 0.15, recover: 0.8, dmg: 26, knock: 12, radius: 1.7, ahead: 0, unblockable: true } as EnemyAttackSpec,
   leapFrom: 3.5,
   /** The last `air` s of the leap's wind-up it's in the air (drawn; it lands as the wind-up ends). */
   air: 0.45,
   wrench: { windup: 0.45, active: 0.1, recover: 1.4, dmg: 18, knock: 8, range: 2.6, arc: 150, unblockable: false } as EnemyAttackSpec,
-  crank: { windup: 1.4, active: 0.1, recover: 0.8, dmg: 0, knock: 0, unblockable: true } as EnemyAttackSpec,
+  crank: { windup: 1.2, active: 0.1, recover: 0.8, dmg: 0, knock: 0, unblockable: true } as EnemyAttackSpec,
   sparks: { r: 1.1, dmg: 16, knock: 4, burn: 4, extra: 2, apart: 2.4, most: 4 },
   chain: ['leap', 'overhead'] as HaulMove[],
   chainPause: 0.1,

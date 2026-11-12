@@ -62,7 +62,8 @@ export function haulBegin(e: Enemy, move: HaulMove, t: Hero, ev: FightEvent[], c
   }
   if (k > 1) {
     const floor = spec.unblockable ? Math.max(E.striped, ((spec.radius ?? H.cart.width / 2) + HERO.radius) / SLOWEST / 0.6) : E.red;
-    a.windup = Math.max(floor, a.windup / k);
+    // (Never under the floors, and never slower than phase 1 either.)
+    a.windup = Math.min(a.windup, Math.max(floor, a.windup / k));
     a.recover /= k;
   }
   // Phase 2: the overhead's stuck time cut short, the wrench straight after it.

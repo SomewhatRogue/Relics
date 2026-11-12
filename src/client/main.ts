@@ -51,7 +51,7 @@ import { Game, ME } from './game';
 import { Panel } from './panels';
 import { openSpot } from './townui';
 import { showResult } from './recap';
-import { showCheckpoint } from './deepui';
+import { showCheckpoint, refreshVotes } from './deepui';
 import { DEEP_WORDS } from './deepwords';
 import { isDeep } from '../shared/deep';
 import { RelicPop } from './relicmoment';
@@ -596,6 +596,8 @@ function tick(t: number): void {
   if (game.result && !panel.open) showResult(game, panel);
   // The Deep: a floor's end reached (deepui.ts).
   else if (game.deepAsk && !panel.open) showCheckpoint(game, panel);
+  // The party's choices at a checkpoint, as they come in (deepui.ts).
+  if (panel.open) refreshVotes(game, panel);
   // A relic just gained: its moment, once nothing's in the way (the recap first, at a job's end).
   relicPop.frame(game.relicNews, t / 1000, panel.open || title.open || !!game.result);
   // Out of the wood: the road to Wickhold (Orla walked you here; she met you in the wood).

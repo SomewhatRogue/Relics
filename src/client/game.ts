@@ -73,7 +73,7 @@ import type { Parties } from './parties';
 import { again as practiceAgain, clearPractice, letOut, practiceOf, stepPractice, type Pick } from '../sim/practice';
 import { RACK, sortKey } from '../shared/practice';
 import { settleBids } from './statuebuy';
-import { blessesAt, blessingsAt, cursesAt, forksAt, isCurse, type MarkId } from '../shared/deepmarks';
+import { blessesAt, blessingsAt, cursesAt, forksAt, isCurse, type MarkId, WAYS } from '../shared/deepmarks';
 import { relicBack } from '../sim/deepmarks';
 
 /** A hero's hound as the profile has it (a Ranger's; nobody else has one). */
@@ -680,13 +680,19 @@ export class Game {
     if (!d || !fl || fl !== d.floor || !isDeep(this.run!.job)) return;
     if (isCurse(id)) {
       if (!forksAt(fl) || d.forked?.includes(fl) || !cursesAt(d.seed, fl).includes(id)) return;
-      Object.assign(d, { marks: [...(d.marks ?? []), id], forked: [...(d.forked ?? []), fl] });
+      // (The way's boon comes with its curse: shared/deepmarks.ts WAYS.)
+      Object.assign(d, { marks: [...(d.marks ?? []), id, WAYS[id]], forked: [...(d.forked ?? []), fl] });
       store(this.save);
       return this.deeper();
     }
     if (!blessesAt(fl) || d.blessed?.includes(fl) || !blessingsAt(d.seed, fl).includes(id)) return;
     Object.assign(d, { marks: [...(d.marks ?? []), id], blessed: [...(d.blessed ?? []), fl] });
     store(this.save);
+  }
+
+  /** A hero's player's name as this screen knows it (me, a friend I lead, or the tag the room sends). */
+  heroName(h: Hero): string {
+    return h.id === ME ? this.profile.name : this.coop?.friends.get(h.id)?.name ?? h.tag ?? '';
   }
 
   /** Leading: a friend still in the job who hasn't chosen GO DEEPER on this floor (one down or gone doesn't hold it up). */

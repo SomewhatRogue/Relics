@@ -111,7 +111,7 @@ export function doorWindup(move: DoorMove, mad: boolean): number {
   const s: EnemyAttackSpec = DOORKEEPERS[move];
   if (!mad) return s.windup;
   const floor = move === 'jab' || move === 'bash' ? E.floor.jab : s.unblockable ? Math.max(E.floor.striped, (s.radius! + HERO.radius) / slowest / 0.6) : E.floor.red;
-  return Math.max(floor, s.windup * E.windup);
+  return Math.min(s.windup, Math.max(floor, s.windup * E.windup));
 }
 
 /** Begin one of its moves at `t`: the pose first, its floor after; a spin round itself. ENRAGED, quicker and harder, with a growl. */

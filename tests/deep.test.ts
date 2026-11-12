@@ -171,12 +171,14 @@ describe('floors by band (step 3)', () => {
   const share = (o: [string, number][], ts: string[]) => o.filter(([t]) => ts.includes(t)).reduce((s, [, p]) => s + p, 0);
   const RARE = ['touched', 'turning', 'hungry'];
 
-  it('each band is a harder place and a deeper room, with named butchers to hunt from floor 6', () => {
+  it('each band is a harder place and a deeper room, with named butchers to hunt from floor 9 (never straight after a boss)', () => {
     const f = (n: number) => deepFloor(n, 99, 'x');
     expect(f(1)).toMatchObject({ place: { ruin: 2 } });
     expect(f(1).deep).toBeUndefined();
-    expect(f(6)).toMatchObject({ deep: true, place: { ruin: 3 }, objective: 'hunt' });
-    expect(f(6).boss).toBeTruthy();
+    expect(f(6)).toMatchObject({ deep: true, place: { ruin: 3 } });
+    expect(f(6).objective).not.toBe('hunt');
+    expect(f(9)).toMatchObject({ objective: 'hunt' });
+    expect(f(9).boss).toBeTruthy();
     expect([7, 8].map((n) => f(n).objective)).not.toContain('hunt');
     expect(f(12).objective).toBe('hunt');
     // (A boss floor, every fifth, is its own: docs/design/deep-bosses.md.)
@@ -192,7 +194,7 @@ describe('floors by band (step 3)', () => {
   });
 
   it('a hunt floor has its named butcher; floors past fifteen keep getting tougher', () => {
-    const run = newRun(deepFloor(6, 99, 'x')), room = runRoom(run);
+    const run = newRun(deepFloor(9, 99, 'x')), room = runRoom(run);
     expect(room.enemies.some((e) => e.name)).toBe(true);
     expect(goal(run, room).text).toContain(run.job.boss!);
     const lv = (n: number) => runRoom(newRun(deepFloor(n, 99, 'x'))).level;
@@ -220,11 +222,11 @@ describe('harder goblins, BIG ONEs and elites below (Kyle, 2026-11-11)', () => {
   const rooms = (n: number, seeds = 12) => Array.from({ length: seeds }, (_, i) => runRoom(newRun(deepFloor(n, 300 + i, 'x'))));
   const count = (rs: ReturnType<typeof rooms>, p: (e: (typeof rs)[number]['enemies'][number]) => boolean) => rs.reduce((s, r) => s + r.enemies.filter(p).length, 0);
 
-  it('a BIG ONE closes floor 4, then every other floor that is not a hunt, then every one (a boss floor aside)', () => {
+  it('a BIG ONE closes floor 4, then every other floor that is not a hunt, then every one (a boss floor and the floor after it aside)', () => {
     const big = (n: number) => bigRooms(deepFloor(n, 9, 'x')).length > 0;
     expect([1, 2, 3, 4, 5].map(big)).toEqual([false, false, false, true, false]);
     expect([6, 7, 8, 9, 10].map(big)).toEqual([false, false, true, false, false]);
-    expect([11, 12, 13, 14, 15].map(big)).toEqual([true, false, true, false, false]);
+    expect([11, 12, 13, 14, 15].map(big)).toEqual([false, false, true, false, false]);
     expect(count(rooms(4), (e) => !!e.big)).toBeGreaterThan(0);
   });
 

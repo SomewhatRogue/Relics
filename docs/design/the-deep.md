@@ -68,3 +68,14 @@ Each floor is short (2 to 4 minutes) so a run's length is the player's choice.
 1. ~~Who sits at the way down, and what is the Deep in the world?~~ Cobb; a pit older than the town (story bible).
 2. Leaving mid-floor alone counts as leaving at the last checkpoint passed (as a disconnect does). Relics and potions are not run finds: a relic found below is kept even on death, a potion drunk is gone.
 3. Any tie to holy and hungry (hungry finds only below a floor, say)?
+
+## After the build (2026-11-11)
+
+- **Layers** (shared/deeplayers.ts): every five floors the pit goes down into somewhere else, a place that sank
+  whole long before Wickhold (lore keeper: never "warp" or "magic"). The drains, then old caves, a drowned fen, a
+  buried wood, a buried street, those four round and round. Each is the room builder's own country (under,
+  rock, fen, wood, village): its ground, walls, light and set pieces. Boss floors keep their arenas.
+- **The checkpoint** (client/deepui.ts, deep.css): each choice a card with its good and its cost; what's next
+  (the boss waiting, a new layer starting); in a party who has chosen what, live, and after choosing you wait
+  there. Each way on at a fork is a curse and a boon now (shared/deepmarks.ts WAYS, BOONS).
+- **Cobb** stands by the grate in town once it's open; talking to him is the way down.

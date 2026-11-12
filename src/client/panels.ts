@@ -1,7 +1,8 @@
 /** A panel over the game: a title, some words, and buttons (the job board, the trainer, results). */
 import { finish, forget, skip, typeIn, typing } from './speech';
 import { titleCase } from './tracker';
-export interface Button { label: string; act: () => void; primary?: boolean; disabled?: boolean }
+/** `card`: drawn as a card above the row of buttons instead of in it (html, trusted). */
+export interface Button { label: string; act: () => void; primary?: boolean; disabled?: boolean; card?: string }
 
 export class Panel {
   private el = document.createElement('div');
@@ -32,8 +33,10 @@ export class Panel {
     const all = noClose ? buttons : [...buttons, { label: 'CLOSE', act: () => this.hide() }];
     this.acts = all.map((b) => b.act);
     this.el.innerHTML =
-      `<div class="card"><h2>${titleCase(title)}</h2><div class="body">${html}</div><div class="buttons">` +
-      all.map((b, i) => `<button data-i="${i}" class="${b.primary ? 'primary' : ''}" ${b.disabled ? 'disabled' : ''}>${b.label}</button>`).join('') +
+      `<div class="card"><h2>${titleCase(title)}</h2><div class="body">${html}</div>` +
+      (all.some((b) => b.card) ? `<div class="choices">${all.map((b, i) => (b.card ? `<button data-i="${i}" class="choice${b.primary ? ' primary' : ''}" ${b.disabled ? 'disabled' : ''}>${b.card}</button>` : '')).join('')}</div>` : '') +
+      `<div class="buttons">` +
+      all.map((b, i) => (b.card ? '' : `<button data-i="${i}" class="${b.primary ? 'primary' : ''}" ${b.disabled ? 'disabled' : ''}>${b.label}</button>`)).join('') +
       `</div></div>`;
     this.el.hidden = false;
     this.open = true;

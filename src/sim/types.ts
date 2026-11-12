@@ -306,6 +306,8 @@ export interface Hero extends Body {
   relicItem: string;
   /** The Deep's curses and blessings this hero carries for the run (shared/deepmarks.ts; set from its player's input: sim/deepmarks.ts). */
   marks?: string[];
+  /** The Deep: the floor its player has chosen GO DEEPER on (sim/deepmarks.ts, from their input), shown to the party. */
+  deepVote?: number;
   /** Has had the sure relic of their first named butcher (sim/namedrelic.ts; Profile.namedRelic). Set once. */
   namedRelic?: boolean;
   /** Carrying the church's light this job (shared/church.ts LIT). */

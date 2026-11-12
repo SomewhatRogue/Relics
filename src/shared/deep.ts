@@ -8,6 +8,7 @@
 import { BOSSES, type Job, type Objective, type Place } from './jobs.js';
 import { DOOR_NAMES, HAUL_NAME } from './bosswords.js';
 import { bandOf } from './deepbands.js';
+import { layerOf } from './deeplayers.js';
 import { Rng } from './rng.js';
 import { rollTime } from './timeofday.js';
 
@@ -25,20 +26,23 @@ const ASKS: Objective[] = ['larder', 'burn', 'rescue'];
  * screens build the same map. `title` is the floor's name on the HUD and the recap.
  */
 export function deepFloor(n: number, seed: number, title: string): Job {
-  const s = (seed * 7919 + n * 104729) >>> 0, b = bandOf(n);
+  const s = (seed * 7919 + n * 104729) >>> 0, b = bandOf(n), l = layerOf(n);
+  // Where in the pit this floor is (shared/deeplayers.ts): its own country's look, a fresh one every five floors.
+  const place: Place = { ...DEEP_PLACE, kind: l.kind, region: l.region, ruin: b.ruin };
   // Every fifth floor, a boss in its own arena (docs/design/deep-bosses.md), turn about on the run's seed.
   if (n % DEEP_BOSS.every === 0) {
     const arena = DEEP_BOSS.turn[(n / DEEP_BOSS.every + seed) % DEEP_BOSS.turn.length];
     return {
-      id: `deep-${seed}-${n}`, place: { ...DEEP_PLACE, ruin: b.ruin }, objective: 'hunt', twist: 'none', time: rollTime(s, false), rooms: 1, size: 'short', layout: 4,
+      id: `deep-${seed}-${n}`, place, objective: 'hunt', twist: 'none', time: rollTime(s, false), rooms: 1, size: 'short', layout: 4,
       reward: 0, seed: s, title, text: '', floor: n, boss: arena === 'haulier' ? HAUL_NAME : DOOR_NAMES.plate, arena, ...(b.deep ? { deep: true } : {}),
     };
   }
-  const hunt = !!b.hunt && n % b.hunt === 0;
+  // (Never the floor straight after a boss: one boss, then a breather. Kyle, 2026-11-11.)
+  const hunt = !!b.hunt && n % b.hunt === 0 && (n - 1) % DEEP_BOSS.every !== 0;
   // (A hunt's floor among the others: the ones either side of it still never ask the same.)
   const objective: Objective = hunt ? 'hunt' : ASKS[(seed + n) % ASKS.length], boss = hunt ? new Rng(s).pick(BOSSES) : undefined;
   return {
-    id: `deep-${seed}-${n}`, place: { ...DEEP_PLACE, ruin: b.ruin }, objective, twist: 'none', time: rollTime(s, false), rooms: 1, size: 'short', layout: 4,
+    id: `deep-${seed}-${n}`, place, objective, twist: 'none', time: rollTime(s, false), rooms: 1, size: 'short', layout: 4,
     reward: 0, seed: s, title, text: '', floor: n, ...(b.deep ? { deep: true } : {}), ...(boss ? { boss } : {}),
   };
 }

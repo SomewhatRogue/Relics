@@ -1,6 +1,6 @@
 /** The Deep's curses and blessings (docs/design/the-deep.md step 6; shared/deepmarks.ts). */
 import { describe, expect, it, vi } from 'vitest';
-import { BLESSINGS, CURSES, blessingsAt, blessesAt, cursesAt, forksAt, markSum } from '../src/shared/deepmarks';
+import { BLESSINGS, CURSES, WAYS, blessingsAt, blessesAt, cursesAt, forksAt, markSum } from '../src/shared/deepmarks';
 import { TICK } from '../src/shared/tuning';
 import { NO_INTENT } from '../src/sim/types';
 
@@ -84,10 +84,12 @@ describe('in a run', () => {
     expect(g.run!.job.floor).toBe(5);
     g.deepMark(offered[1]);
     expect(g.run!.job.floor).toBe(6);
-    expect(d.marks).toEqual([offered[1]]);
-    expect(g.own(NO_INTENT).marks).toEqual([offered[1]]);
+    // (The way's boon comes with its curse.)
+    const way = [offered[1], WAYS[offered[1] as keyof typeof WAYS]];
+    expect(d.marks).toEqual(way);
+    expect(g.own(NO_INTENT).marks).toEqual(way);
     g.step(TICK, NO_INTENT);
-    expect(g.hero.marks).toEqual([offered[1]]);
+    expect(g.hero.marks).toEqual(way);
   });
 
   it('at floor 10, a blessing first, once; then a way on; both stack, and none of it outlasts the run', () => {
@@ -101,7 +103,7 @@ describe('in a run', () => {
     expect(g.run!.job.floor).toBe(10);
     g.deepMark(cursesAt(d.seed, 10)[0]);
     expect(g.run!.job.floor).toBe(11);
-    expect(d.marks).toHaveLength(3);
+    expect(d.marks).toHaveLength(5);
     g.leaveJob();
     expect(g.profile.deep).toBeUndefined();
     expect(g.own(NO_INTENT).marks).toBeUndefined();

@@ -74,12 +74,17 @@ const jerks = (ps, dx, dy, by = 0.04) => ps.slice(1).reduce((n, p, i) => n + (((
       for (const h of g.room.heroes) Object.assign(h, { x: x.x + x.w / 2, y: x.y + x.h / 2, act: 'idle', kvx: 0, kvy: 0 });
     }, gold);
     const asked = (p, n) => until(p, (n) => new RegExp(`floor ${n}`, 'i').test(document.querySelector('#panel h2')?.textContent ?? ''), n, 8000);
-    const press = (p, label) => p.page.evaluate((label) => [...document.querySelectorAll('#panel button')].find((b) => b.textContent === label)?.click(), label);
+    const press = (p, label) => p.page.evaluate((label) => [...document.querySelectorAll('#panel button')].find((b) => b.textContent === label || b.querySelector('b')?.textContent === label)?.click(), label);
     await toEnd(40);
     step('floor 1\'s end: Sam is asked on his own screen', await asked(sam, 1));
     step('and Kyle on his', await asked(kyle, 1));
     await press(sam, 'GO DEEPER');
     await wait(1500);
+    // Who's chosen what, on both screens (client/deepui.ts): Kyle sees Sam's GO DEEPER, Sam waits and sees Kyle choosing.
+    step("Kyle's checkpoint shows Sam chose GO DEEPER", await until(kyle, () => /sam\s*go deeper/i.test(document.querySelector('#panel .deep-votes')?.textContent ?? ''), null, 6000));
+    step("Sam's waits, and shows Kyle still choosing", await until(sam, () => /waiting/i.test(document.querySelector('#panel h2')?.textContent ?? '') && /kyle\s*choosing/i.test(document.querySelector('#panel .deep-votes')?.textContent ?? ''), null, 6000));
+    await kyle.page.screenshot({ path: 'shots/deep-checkpoint.png' });
+    await sam.page.screenshot({ path: 'shots/deep-waiting.png' });
     step('Sam chose GO DEEPER: Kyle\'s game waits on Kyle', await kyle.page.evaluate(() => window.__game.run.job.floor === 1));
     await press(kyle, 'GO DEEPER');
     step('Kyle chose it too: the party goes down to floor 2', await until(kyle, () => window.__game.run?.job.floor === 2));

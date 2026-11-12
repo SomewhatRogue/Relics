@@ -108,6 +108,9 @@ function phaseTwo(bk: BossBook, s: Enemy, w: World, spawn: (x: number, y: number
   Object.assign(s, { attack: null, act: 'chase', actT: 0, kvx: 0, kvy: 0 });
   Object.assign(s.boss!, { phase: 2, job: 'move', rot: 0, rotAt: w.now + BOSS.roar, roarUntil: w.now + BOSS.roar, backUntil: -9, openUntil: -9, downUntil: -9, straps: 0 });
   w.ev.push({ k: 'roar', x: s.x, y: s.y });
+  // Its partner's death feeds its rage: some health back (Kyle, 2026-11-11: "the other should heal a little when they berserk").
+  const n = Math.min(s.maxHp - s.hp, Math.round(s.maxHp * D.enrage.heal));
+  if (n > 0) (s.hp += n), w.ev.push({ k: 'heal', x: s.x, y: s.y, n });
   adds(bk, spawn);
 }
 

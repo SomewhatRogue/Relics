@@ -136,6 +136,9 @@ export function townMap(w: WorldState): GameMap {
   // The town's pastimes (shared/pastimes.ts): Old Pennock lends rods at the millpond, Abel keeps the butts.
   npcs.push(n('OLD PENNOCK', MILLPOND.npc[0], MILLPOND.npc[1], 'fish', 'elder'), n('ABEL', BUTTS.npc[0], BUTTS.npc[1], 'range', 'ranger'));
   if (quarter) npcs.push(n('OLD MERREN', 57, 18, 'chat', 'elder', 9));
+  // Cobb the gravedigger at the top of the Deep's ladder, once the grate's open (docs/design/the-deep.md; Kyle,
+  // 2026-11-11: "we say Cobb sits by the sewer grate but he doesn't"). Talking to him is the grate's own panel.
+  if (workDone(w, 'sewers')) npcs.push(n('COBB', 25.1, 35.7, 'sewer', 'digger'));
   // Foreman Judd at the works stall, and his crew sweeping, hauling and shovelling (publicworks.ts).
   npcs.push(...publicWorks(w));
   const m = mending(w), sg = siege(w), worn = !workDone(w, 'shutters');

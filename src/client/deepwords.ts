@@ -3,7 +3,7 @@
  * checkpoint at each floor's end, leaving early, and the recap. Lore keeper and line editor 2026-11-11: Cobb keeps the ladder.
  */
 import { shown } from '../shared/shown';
-import { BLESSINGS, CURSES } from '../shared/deepmarks';
+import { BLESSINGS, BOONS, CURSES } from '../shared/deepmarks';
 export const DEEP_WORDS = {
   /** Who sits at the way down (the lore keeper's call). */
   keeper: 'Cobb',
@@ -41,10 +41,31 @@ export const DEEP_WORDS = {
     keen: { name: 'A WHETSTONE', does: '8% more damage.' },
     hale: { name: 'A PADDED COAT', does: `${shown(BLESSINGS.hale.v)} more health.` },
     wind: { name: 'A WATERSKIN', does: 'Stamina comes back 15% faster.' },
-    devout: { name: 'AN OILED RAG', does: 'Recharge 15% faster.' },
+    devout: { name: 'AN OILED RAG', does: 'Relics recharge 15% faster.' },
     relic: { name: "SOMEONE'S PACK", does: 'Your relic gets a use back at the start of every floor.' },
   } as Record<string, { name: string; does: string }>,
   marksOn: (list: string) => `On you for the rest of the Deep: ${list}.`,
+  /** What each way on gives as well as its curse (shared/deepmarks.ts WAYS, BOONS). */
+  boons: {
+    hush: 'Goblins have to come closer to notice you.',
+    sturdy: `${shown(BOONS.sturdy.v)} more health.`,
+    sharp: '5% more damage.',
+    bright: 'Relics recharge 10% faster.',
+    deep: 'Stamina comes back 10% faster.',
+    quick: 'You move 5% faster.',
+  } as Record<string, string>,
+  /** Each choice's good and its cost, on its card. */
+  leaveCard: { good: 'Keep everything you found below.', bad: 'The run ends here.' },
+  deeperCard: { good: 'Better finds, and a deeper floor for BEST IN WICKHOLD.', bad: 'A harder floor, and if you die there you lose everything found below.' },
+  /** What's below: the next floor, a boss on it, a new layer. */
+  next: (n: number, boss: string | undefined, layer: string | undefined) => `Next: floor ${n}${boss ? `, where ${boss} waits` : ''}.${layer ? ` From here the ladder goes down into ${layer}.` : ''}`,
+  /** The Deep's layers (shared/deeplayers.ts), as the next line names them: places that sank whole long before
+   *  Wickhold, nobody's in particular (lore keeper 2026-11-11; never "warp" or "magic"). Lines: lore keeper and line editor 2026-11-11. */
+  layers: { drains: 'the drains', rock: 'old caves', fen: 'a drowned fen', wood: 'a buried wood', street: 'a buried street' } as Record<string, string>,
+  /** The party's choices, live. */
+  party: 'YOUR PARTY',
+  chose: { deeper: 'GO DEEPER', choosing: 'choosing', down: 'fallen' },
+  waitTitle: (n: number) => `END OF FLOOR ${n}: WAITING`,
   leave: 'LEAVE',
   deeper: 'GO DEEPER',
   /** The in-run LEAVE button, in the Deep. */

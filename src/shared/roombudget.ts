@@ -68,7 +68,8 @@ export function bigRooms(job: Job): number[] {
   // A Deep floor: one room, laid out as its band's; a BIG ONE every `big`th floor that isn't a hunt (shared/deepbands.ts).
   if (job.floor) {
     const b = bandOf(job.floor);
-    return b.big && !job.boss && job.floor % b.big === 0 ? [b.room] : [];
+    // (Never the floor straight after a boss: a breather. Kyle, 2026-11-11.)
+    return b.big && !job.boss && job.floor % b.big === 0 && (job.floor - 1) % 5 !== 0 ? [b.room] : [];
   }
   const rng = new Rng(job.seed * 389 + 23), named = !!job.boss || !!job.deep || job.objective === 'hunt';
   const can = Array.from({ length: job.rooms }, (_, i) => i).filter((i) => i >= 1 && !(named && i === job.rooms - 1));

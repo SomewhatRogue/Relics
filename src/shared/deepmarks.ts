@@ -1,7 +1,7 @@
 /**
  * The Deep's curses and blessings (docs/design/the-deep.md, "Paths, blessings and curses"; build step 6).
  * At the end of every fifth floor the way on forks three ways, each with a curse on it, and going deeper
- * means taking one; at the end of every tenth, a blessing first, one of three. Both stack for the run and
+ * means taking one (and the boon that goes with it: `WAYS`); at the end of every tenth, a blessing first, one of three. Both stack for the run and
  * end with it (shared/deepkit.ts DeepRun.marks). Each player takes their own: a hero's marks ride on their
  * input to the room (sim/deepmarks.ts), which adds them to the hero's numbers (sim/gearstats.ts) and to how
  * far goblins see it (sim/enemies.ts). The three offered come from the run's seed and the floor, so a
@@ -27,6 +27,20 @@ export const BLESSINGS = {
   devout: { stat: 'focus', v: 0.15 },
   relic: { stat: 'relic', v: 1 },
 } satisfies Record<string, { stat: MarkStat; v: number }>;
+/**
+ * Each way on also gives something (Kyle, 2026-11-11: "what potential pros and cons"): the way's curse and its
+ * boon, taken together. `WAYS` pairs each curse with its boon, always the same, so a way is learned.
+ */
+export const BOONS = {
+  hush: { stat: 'seen', v: -0.15 },
+  sturdy: { stat: 'health', v: 8 },
+  sharp: { stat: 'damage', v: 0.05 },
+  bright: { stat: 'focus', v: 0.1 },
+  deep: { stat: 'breath', v: 0.1 },
+  quick: { stat: 'speed', v: 0.05 },
+} satisfies Record<string, { stat: MarkStat; v: number }>;
+export const WAYS: Record<keyof typeof CURSES, keyof typeof BOONS> = { dull: 'hush', heavy: 'sturdy', frail: 'sharp', winded: 'bright', dim: 'deep', seen: 'quick' };
+export type BoonId = keyof typeof BOONS;
 export type CurseId = keyof typeof CURSES;
 export type BlessId = keyof typeof BLESSINGS;
 export type MarkId = CurseId | BlessId;
@@ -34,8 +48,9 @@ export type MarkId = CurseId | BlessId;
 /** A curse at the end of every `curse`th floor, a blessing every `bless`th; `offer` of each to choose from. */
 export const DEEP_MARKS = { curse: 5, bless: 10, offer: 3 };
 
-const MARK: Record<string, { stat: MarkStat; v: number }> = { ...CURSES, ...BLESSINGS };
+const MARK: Record<string, { stat: MarkStat; v: number }> = { ...CURSES, ...BLESSINGS, ...BOONS };
 export const isCurse = (id: string): id is CurseId => id in CURSES;
+export const isBoon = (id: string): id is BoonId => id in BOONS;
 export const isMark = (id: unknown): id is MarkId => typeof id === 'string' && id in MARK;
 
 const three = <T extends string>(ids: T[], seed: number, floor: number, salt: number): T[] => {

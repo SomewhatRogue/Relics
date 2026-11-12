@@ -86,7 +86,8 @@ export const DOORKEEPERS = {
    */
   aside: { jab: 0, sweep: 0, charge: 0.8, lock: 1.0, spin: 2.0, vault: 0.8, bash: 0.7, quake: 1.2 } as Record<DoorMove, number>,
   /** The gap between one blow and the next (in place of the butcher's own). */
-  pause: 0.2,
+  /** (0.2 before Kyle's 2026-11-11 "attack more often".) */
+  pause: 0.08,
   swap: 20,
   lockIn: 2.5,
   lockCool: 7,
@@ -102,17 +103,17 @@ export const DOORKEEPERS = {
   /** The wall stands this far off its hero (in its face, not on top of it). */
   stand: 1.5,
   /** The wall jabs at whoever's in its face, this long apart at most (after the jab's own time). */
-  wallJab: 2.2,
+  wallJab: 1.4,
   /** A rotation entry it can't get to for this long is skipped (so a hero hugging it can't stall it). */
   skip: 3,
   /** A party of two: the wall swings at a second hero this long after the mover's blow begins. */
   split: 0.6,
   /** The Door Jab: a quick red blow round the door's edge, mixed in between the big ones (keeps you on your toes). */
   jab: spec({ windup: 0.6, active: 0.1, recover: 0.35, dmg: 8, knock: 5, range: 2.2, arc: 50, unblockable: false }),
-  sweep: spec({ windup: 1.1, active: 0.12, recover: 1.0, dmg: 24, knock: 9, range: 2.6, arc: 120, unblockable: false }),
-  charge: spec({ windup: 1.3, active: 0.7, recover: 0.8, dmg: 30, knock: 16, range: 8, radius: 0.8, unblockable: true }),
+  sweep: spec({ windup: 0.95, active: 0.12, recover: 1.0, dmg: 24, knock: 9, range: 2.6, arc: 120, unblockable: false }),
+  charge: spec({ windup: 1.2, active: 0.7, recover: 0.8, dmg: 30, knock: 16, range: 8, radius: 0.8, unblockable: true }),
   /** Locked Doors: both together, a shove 3 wide (on the mover, the partner carried with it); both stand open its recover after. */
-  lock: spec({ windup: 1.4, active: 0.45, recover: 1.0, dmg: 22, knock: 20, range: 3.5, radius: 1.5, unblockable: true }),
+  lock: spec({ windup: 1.25, active: 0.45, recover: 1.0, dmg: 22, knock: 20, range: 3.5, radius: 1.5, unblockable: true }),
   /**
    * Threat (docs/design/boss-threat.md step 3; Kyle, 2026-11-11): the VAULT, the mover up and over to the hero
    * furthest off (at least `vaultFrom`, else passed over), a striped circle where it lands, its door swung
@@ -121,12 +122,12 @@ export const DOORKEEPERS = {
    * driven into the floor and the crack running at you, `quakeN` striped circles `quakeStep` apart landing
    * `quakeGap` s after each other.
    */
-  vault: spec({ windup: 1.0, active: 0.15, recover: 0.9, dmg: 24, knock: 12, radius: 1.5, ahead: 0, unblockable: true }),
+  vault: spec({ windup: 0.9, active: 0.15, recover: 0.9, dmg: 24, knock: 12, radius: 1.5, ahead: 0, unblockable: true }),
   vaultFrom: 3.5,
   /** The last `air` s of the vault's wind-up it's in the air (drawn: client/doordraw.ts). */
   air: 0.4,
-  bash: spec({ windup: 0.45, active: 0.1, recover: 0.8, dmg: 16, knock: 8, range: 2.4, arc: 120, unblockable: false }),
-  quake: spec({ windup: 1.2, active: 0.6, recover: 1.4, dmg: 20, knock: 10, radius: 1.2, ahead: 0, unblockable: true }),
+  bash: spec({ windup: 0.45, active: 0.1, recover: 0.8, dmg: 16, knock: 8, range: 3.1, arc: 120, unblockable: false }),
+  quake: spec({ windup: 1.05, active: 0.6, recover: 1.4, dmg: 20, knock: 10, radius: 1.2, ahead: 0, unblockable: true }),
   quakeN: 3,
   quakeStep: 1.7,
   quakeGap: 0.22,
@@ -137,9 +138,10 @@ export const DOORKEEPERS = {
    * turn `pace` times, its wind-ups and the gap between blows `windup` times (never under `floor`: red,
    * striped, and the jab's own; a striped one also never so short a hero at its middle can't walk out in 60%
    * of it at the slowest kit's pace), its blows `dmg` times as hard. Drawn with burning eyes; it growls as
-   * each big blow begins.
+   * each big blow begins. Going berserk it gets `heal` of its health back (Kyle, 2026-11-11).
    */
-  enrage: { pace: 1.25, windup: 0.8, dmg: 1.25, floor: { red: 0.9, striped: 1.1, jab: 0.55 } },
+  /** (Floors 0.9 red, 1.1 striped till Kyle's 2026-11-11 "faster tells".) */
+  enrage: { pace: 1.25, windup: 0.8, dmg: 1.25, floor: { red: 0.75, striped: 0.95, jab: 0.55 }, heal: 0.25 },
   /** From where it charges (it backs off to get it), and the rotations by phase (one seeded swap each; a party of four one more). */
   chargeFrom: 3,
   rotation: {

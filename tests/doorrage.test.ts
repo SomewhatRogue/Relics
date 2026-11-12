@@ -122,9 +122,9 @@ describe('ENRAGED: one dead, the other quicker and harder', () => {
       const s = D[m], w = doorWindup(m, true);
       expect(w).toBeLessThan(s.windup);
       if (m === 'jab') expect(w).toBeGreaterThanOrEqual(0.55);
-      else if (!s.unblockable) expect(w).toBeGreaterThanOrEqual(0.9);
+      else if (!s.unblockable) expect(w).toBeGreaterThanOrEqual(E.floor.red);
       else {
-        expect(w).toBeGreaterThanOrEqual(1.1);
+        expect(w).toBeGreaterThanOrEqual(E.floor.striped);
         expect((s.radius! + HERO.radius) / slowest).toBeLessThanOrEqual(w * 0.6 + 1e-9);
       }
     }

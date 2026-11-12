@@ -11,6 +11,9 @@ import type { Hero, Intent } from './types';
 
 export function syncMarks(heroes: Hero[], intents: Map<string, Intent>): void {
   for (const h of heroes) {
+    // The floor its player chose GO DEEPER on, for every screen to show who's chosen what (client/deepui.ts).
+    const v = intents.get(h.id)?.deep;
+    if (typeof v === 'number' && v !== h.deepVote) h.deepVote = v;
     const m = intents.get(h.id)?.marks;
     if (!Array.isArray(m)) continue;
     const ids = m.filter(isMark);

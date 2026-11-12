@@ -65,3 +65,17 @@ describe("the Doorkeepers' threat", () => {
     expect(me.hp).toBeLessThan(9999);
   });
 });
+
+describe('going berserk', () => {
+  it('when one dies the other roars and gets some health back', () => {
+    const b = barn(['sword'], [[6, 9]]);
+    wake(b);
+    b.hasp.hp = Math.round(b.hasp.maxHp * 0.4);
+    const was = b.hasp.hp;
+    Object.assign(b.latch, { hp: 0, act: 'dead' });
+    const ev = run(b, 0.1);
+    expect(b.hasp.boss!.phase).toBe(2);
+    expect(b.hasp.hp).toBe(was + Math.round(b.hasp.maxHp * D.enrage.heal));
+    expect(ev.some((x) => x.k === 'heal')).toBe(true);
+  });
+});

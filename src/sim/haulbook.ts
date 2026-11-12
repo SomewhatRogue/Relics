@@ -33,8 +33,8 @@ export function stepHaulBook(bk: BossBook, w: World, spawn: (x: number, y: numbe
   }
   // Its rest between blows is its own (the kit's pause is the Doorkeepers').
   if (e.attack) st.was = true;
-  // Phase 2: straight on after a leap or an overhead (the chain: shared/haultune.ts).
-  else if (st.was) (st.was = false), (e.cooldown = b.phase === 2 && b.move && H.chain.includes(b.move) ? H.chainPause : H.pauseBetween / (b.phase === 2 ? H.faster : 1));
+  // Straight on after a leap or an overhead (the chain: shared/haultune.ts).
+  else if (st.was) (st.was = false), (e.cooldown = b.move && H.chain.includes(b.move) ? H.chainPause : H.pauseBetween / (b.phase === 2 ? H.faster : 1));
   // Below the line: phase 2 (not through a stagger, a knock down, nor as a blow lands).
   if (b.phase === 1 && e.hp <= e.maxHp * H.phase2 && b.stagUntil <= now && b.downUntil <= now && !(e.attack && e.attack.t >= e.attack.windup)) {
     bk.phase = 2;

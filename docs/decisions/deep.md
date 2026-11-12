@@ -61,3 +61,16 @@ ENRAGED (sim/quakeshape.ts, judged in doorpair.ts, its own attack radius 0 so on
 Rotations: phase 1 jab, sweep, bash, jab, vault, jab, charge, jab, sweep, bash, jab, charge; phase 2 sixteen
 long, seven jabs, Door Spin 5 of 9 big ones (doorrage.test's rules). Touches the Great Barn fight too. Bots:
 daggers 91 s, staff 142 s (534 health lost), sword 86 s, all win. doorrage.test's aside check moved to the bash.
+
+## 2026-11-11: harder bosses, the layers, the checkpoint's cards and votes, Cobb at the grate (Opus 5.5)
+Kyle: "attack more often, faster tells". Haulier rest 0.35 (0.7), wind-ups about a seventh shorter, the chain
+after a leap or overhead in both phases. Doorkeepers' rest 0.08 (0.2), wall jabs every 1.4 s (2.2), big wind-ups
+shorter; enraged floors 0.75 red, 0.95 striped (0.9, 1.1); a quickened wind-up never longer than its base. The
+bash's reach 3.1 so it catches a hero the sweep just threw. Layers: shared/deeplayers.ts (lore keeper: sunk
+places, nobody's). Checkpoint: Panel buttons can be cards (`card`); Hero.deepVote from Intent.deep in
+sim/deepmarks.ts so every screen lists who chose what; the panel closes itself once the floor changes. Each way
+also gives a boon (WAYS). Cobb: an NPC (`digger`) at the grate whose talk is the grate's panel. deep-online.cjs:
+two more steps (Kyle sees Sam's GO DEEPER; Sam waits, sees Kyle choosing). Words: lore keeper, line editor.
+Also (Kyle, same night): no named-butcher hunt and no BIG ONE on the floor straight after a boss (shared/deep.ts,
+roombudget.ts bigRooms); hunts now first on floor 9. A Doorkeeper going berserk gets DOORKEEPERS.enrage.heal
+(a quarter) of its health back, with a heal number over it (sim/doorpair.ts phaseTwo).
