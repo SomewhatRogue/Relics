@@ -8,7 +8,8 @@ import { HERO, WEAPONS } from '../shared/tuning';
 import type { Hero } from '../sim/types';
 import type { Ctx } from './draw';
 
-const RX = 12, RY = 14, LIFT = 10, DOTS = 48, GOLD = '#ffe9a8';
+// (Round the 1.5x hero: the art pass, heroscale.ts.)
+const RX = 18, RY = 21, LIFT = 15, DOTS = 72, GOLD = '#ffe9a8';
 
 /** Round the Cleric, (x, y) their feet on screen: the ward while they hold their guard. */
 export function drawHolyGuard(c: Ctx, h: Hero, x: number, y: number): void {
@@ -25,9 +26,9 @@ export function drawHolyGuard(c: Ctx, h: Hero, x: number, y: number): void {
   // The circle at their feet.
   g.globalAlpha = 0.3 + 0.3 * k;
   g.fillStyle = GOLD;
-  for (let i = 0; i < 24; i++) {
-    const a = (i / 24) * Math.PI * 2 - turn;
-    g.fillRect(Math.round(x + Math.cos(a) * RX), Math.round(y + Math.sin(a) * 4), 1, 1);
+  for (let i = 0; i < 36; i++) {
+    const a = (i / 36) * Math.PI * 2 - turn;
+    g.fillRect(Math.round(x + Math.cos(a) * RX), Math.round(y + Math.sin(a) * 6), 1, 1);
   }
   g.globalAlpha = 1;
 }

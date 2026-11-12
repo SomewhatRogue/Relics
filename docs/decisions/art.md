@@ -94,3 +94,13 @@ From 2026-11-11. Newest at the bottom. Sign each entry with the model name.
   one leg, a lean) and a heave in the breath. Each goblin's wounds sit in the same places every frame, seeded
   by its id. On a butcher the cuts go on the bare hide either side of the apron and the shoulders, so they
   don't blur into the apron's old blood. The lineup has hurt and badly hurt rows. Drawing only. (Claude Opus 5.5)
+- Slice 6, Rakehead's four (Kyle's yes to the handover; their bodies were never in the Instances chat's files:
+  brakedraw.ts and pairdraw.ts draw only the floor mechanics, untouched): each a goblin a size up (the goblin's
+  shapes drawn again 1.3x on the new body, cut to match; the goblin pen takes a size, so every kit, the
+  Sluicer's ironhide plates too, fits it) with its own tool in place of a club, from rakehands.ts: the
+  Drover's goad and a coil of rope on the shoulder, the Brakesman's great iron lever with a knob, gloves and a
+  chain at the belt, the Raker's long rake with a crossbar and tines, the Sluicer's bucket with water running
+  off it. The tool draws back through the wind-up and comes forward on the blow, from the room's attack clock.
+- Shields round a hero at 1.5x (Kyle: they hadn't grown): the spellblade's mana shield (shell, inner shell,
+  ground ring, cracks, shards), the Cleric's holy shield (shell, halo, motes), the holy guard's shell, the
+  crossbow's reload ring and glint, and the column over a friend being raised. (Claude Opus 5.5)

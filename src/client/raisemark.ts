@@ -8,13 +8,14 @@ import { RAISE } from '../shared/tuning';
 import type { Hero } from '../sim/types';
 import { ring, type Ctx } from './draw';
 
-const GOLD = '#ffe9a8', DEEP = '#e0a040', HIGH = 26;
+// (The column over a 1.5x hero lying down: heroscale.ts.)
+const GOLD = '#ffe9a8', DEEP = '#e0a040', HIGH = 39;
 
 /** Over a friend who is out, (x, y) where they lie on screen; `t` the room's time. */
 export function drawRaise(c: Ctx, h: Hero, x: number, y: number, t: number): void {
   if (!h.out || !h.riseBy || h.riseAt === undefined || h.riseAt < 0) return;
   const share = Math.max(0, Math.min(1, (t - h.riseAt) / RAISE.time)), g = c.glow;
-  ring(c, x, y, 9, GOLD, share, '#3a3428');
+  ring(c, x, y, 13, GOLD, share, '#3a3428');
   // The column: brighter and taller as it goes on, flickering a little.
   const tall = Math.round(HIGH * (0.4 + 0.6 * share));
   for (let k = 0; k < tall; k++) {

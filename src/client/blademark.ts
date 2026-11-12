@@ -35,7 +35,8 @@ export function bladeEdge(c: Ctx, h: Hero, ox: number, oy: number, a: number): v
   g.globalAlpha = 1;
 }
 
-const RX = 11, RY = 13, LIFT = 10, DOTS = 64;
+// (Round the 1.5x hero: the art pass, heroscale.ts.)
+const RX = 17, RY = 20, LIFT = 15, DOTS = 96;
 
 /** Round the hero, (x, y) its feet on screen, `now` the room's time: the ward. */
 export function drawBladeMark(c: Ctx, h: Hero, x: number, y: number, now: number): void {
@@ -55,19 +56,19 @@ export function drawBladeMark(c: Ctx, h: Hero, x: number, y: number, now: number
     g.fillRect(Math.round(x + Math.cos(a) * RX), Math.round(cy + Math.sin(a) * RY), 1, 1);
   }
   // Full and bright: an inner shell and the ward's circle round your feet.
-  const ground = Math.round(28 * k);
+  const ground = Math.round(42 * k);
   for (let i = 0; i < ground; i++) {
-    const a = (i / 28) * Math.PI * 2 - turn;
+    const a = (i / 42) * Math.PI * 2 - turn;
     g.globalAlpha = 0.45 + 0.5 * k;
     g.fillStyle = col;
-    g.fillRect(Math.round(x + Math.cos(a) * 9), Math.round(y + Math.sin(a) * 3), 1, 1);
+    g.fillRect(Math.round(x + Math.cos(a) * 14), Math.round(y + Math.sin(a) * 4.5), 1, 1);
   }
   if (k > 0.66) {
     g.globalAlpha = 0.35 + (k - 0.66) * 1.5;
     g.fillStyle = col;
-    for (let i = 0; i < 36; i++) {
-      const a = (i / 36) * Math.PI * 2 - turn * 1.5;
-      g.fillRect(Math.round(x + Math.cos(a) * (RX - 2)), Math.round(cy + Math.sin(a) * (RY - 2)), 1, 1);
+    for (let i = 0; i < 54; i++) {
+      const a = (i / 54) * Math.PI * 2 - turn * 1.5;
+      g.fillRect(Math.round(x + Math.cos(a) * (RX - 3)), Math.round(cy + Math.sin(a) * (RY - 3)), 1, 1);
     }
   }
   if (crack > 0) cracks(c, h, x, cy, crack);
@@ -83,7 +84,7 @@ function cracks(c: Ctx, h: Hero, x: number, cy: number, k: number): void {
     // From a point on the shell, a crack zigzags along it and a little in, a pixel at a time.
     let a = hash(seed + j * 7) * Math.PI * 2, r = 1;
     const dir = hash(seed + j * 3) > 0.5 ? 1 : -1;
-    for (let s = 0; s < 9; s++) {
+    for (let s = 0; s < 13; s++) {
       a += dir * 0.09;
       r += (hash(seed + j * 7 + s + 1) - 0.55) * 0.16;
       g.fillRect(Math.round(x + Math.cos(a) * RX * r), Math.round(cy + Math.sin(a) * RY * r), 1, 1);
@@ -94,11 +95,11 @@ function cracks(c: Ctx, h: Hero, x: number, cy: number, k: number): void {
 /** The shield ran out: the shell flying apart in shards, fading. */
 function shards(c: Ctx, x: number, cy: number, k: number, col: string): void {
   const g = c.glow, out = 1 + (1 - k) * 0.9;
-  for (let i = 0; i < 14; i++) {
-    const a = (i / 14) * Math.PI * 2 + hash(i) * 0.4;
+  for (let i = 0; i < 20; i++) {
+    const a = (i / 20) * Math.PI * 2 + hash(i) * 0.4;
     g.globalAlpha = k;
     g.fillStyle = i % 3 ? col : '#ffffff';
-    const px = Math.round(x + Math.cos(a) * RX * out), py = Math.round(cy + Math.sin(a) * RY * out + (1 - k) * 4);
-    g.fillRect(px, py, 2, 1);
+    const px = Math.round(x + Math.cos(a) * RX * out), py = Math.round(cy + Math.sin(a) * RY * out + (1 - k) * 6);
+    g.fillRect(px, py, 3, 1);
   }
 }
