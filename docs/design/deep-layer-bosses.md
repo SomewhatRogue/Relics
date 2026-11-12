@@ -35,8 +35,7 @@ the sound of feet and steel.
   same knockdown cooldown). Everyone can do it; timing it is the skill.
 - **Phase 2:** it knocks the torches out. The room goes near-dark (lamp-lit round each hero only); the dark
   costs it nothing.
-- **Open for Kyle:** does a Ranger's BLINDED shot do anything to it? (It's already blind. Suggest: nothing,
-  and its line says so.)
+- **BLINDED:** does nothing to it (Kyle, 2026-11-12: "nope nothing"); it's already blind, and a line says so.
 - **Loot:** cave-damp steel the dark kept, heavy and quiet: e.g. a hammer whose hits make no sound, boots for
   creeping, a helm that keeps goblins' notice off you.
 
