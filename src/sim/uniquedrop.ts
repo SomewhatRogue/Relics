@@ -4,8 +4,8 @@
  * it goes up for a roll (sim/lootroll.ts).
  */
 import { DEEP_BANDS, bandOf } from '../shared/deepbands';
-import { DROPS } from '../shared/tuning';
-import { BUTCHER_POOLS, UNIQUE_DROP, poolOf, uniqueItem, type PoolId } from '../shared/uniques';
+import { DROPS, WEAPONS } from '../shared/tuning';
+import { BUTCHER_POOLS, UNIQUES, UNIQUE_DROP, poolOf, uniqueItem, type PoolId } from '../shared/uniques';
 import { dropLedger } from '../shared/ledger';
 import type { Rng } from '../shared/rng';
 import { dropId } from './loot';
@@ -39,7 +39,11 @@ export function uniqueDrops(room: ArenaRoom, dead: Enemy[], rng: Rng): void {
 
 /** `boss`: what dropped it, for its id in the item ledger (shared/ledger.ts): one drop, one id, however often it's sent. */
 function give(room: ArenaRoom, pool: PoolId, x: number, y: number, rng: Rng, boss: string | number): void {
-  const ids = poolOf(pool);
+  // (A piece some hero here can use, where the pool has one: armor and rings fit anyone. Kyle, 2026-11-12, of an
+  // instance's boss: "the boss loot pool might not be for your hero". Failing that, any, and taken SOULBOUND: sim/loot.ts.)
+  const all = poolOf(pool), here = new Set(players(room.heroes).map((h) => WEAPONS[h.weapon].cls));
+  const fit = all.filter((id) => { const k = (UNIQUES[id] as { kit?: keyof typeof WEAPONS }).kit; return !k || here.has(WEAPONS[k].cls); });
+  const ids = fit.length ? fit : all;
   if (!ids.length) return;
   const item = uniqueItem(rng.pick(ids)), ledger = dropLedger(room.ledgerRun, boss);
   if (ledger) item.ledger = ledger;

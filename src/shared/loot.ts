@@ -78,6 +78,8 @@ export interface Item {
   unique?: string;
   /** Its id in the item ledger, for a piece that can change hands (shared/ledger.ts): the server knows its owner. */
   ledger?: string;
+  /** SOULBOUND: picked up by a hero of another class (sim/loot.ts). It sells, but never changes hands (shared/trade.ts). */
+  bound?: true;
 }
 
 const ARMOR_NAME = { light: 'LEATHERS', medium: 'MAIL SHIRT', heavy: 'PLATE' };

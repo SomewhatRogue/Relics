@@ -75,7 +75,7 @@ describe('loot', () => {
     expect(DROPS.butcher).toBeLessThan(0.5);
   });
 
-  it('taking a drop puts it in the pack (equipped from there); another class cannot take it; a full pack takes nothing', () => {
+  it('taking a drop puts it in the pack (equipped from there); another class`s goes in SOULBOUND; a full pack takes nothing', () => {
     const { room, h } = onTarget(1);
     h.arms.sword = arm(['tempo']);
     const drop = arm(['riposte', 'ember'], 'greatsword');
@@ -88,7 +88,10 @@ describe('loot', () => {
     expect(ev.some((e) => e.k === 'loot')).toBe(true);
     room.setIntent('me', intent({ takeSeq: 2, take: 901 }));
     run(room, 0.1);
-    expect(h.bag.length).toBe(1);
+    // (Another class's: taken SOULBOUND, sim/loot.ts; put aside for the rest.)
+    expect(h.bag.length).toBe(2);
+    expect(h.bag[1].bound).toBe(true);
+    h.bag.pop();
     room.setIntent('me', intent({ takeSeq: 2, take: 901, gearSeq: 1, gearOp: 1, gearArg: 0 }));
     run(room, 0.1);
     expect(h.weapon).toBe('greatsword');

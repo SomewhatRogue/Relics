@@ -32,6 +32,8 @@ export const COPY = {
   takes: 'Goes in your pack.',
   full: 'Pack full.',
   otherClass: 'For a {Class}.',
+  /** Taking another class's piece (sim/loot.ts): SOULBOUND. */
+  bound: 'Yours to sell. SOULBOUND: can\'t be given to another hero.',
 };
 
 /** The Healer's coal (sim/lantern.ts). What it does is on the class card (CENSER, shared/classes.ts). */

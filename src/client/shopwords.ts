@@ -42,6 +42,8 @@ export const SHOPW = {
 
 /** Words on an item's card (card.ts). */
 export const CARDW = {
+  /** A SOULBOUND piece's row (client/card.ts; sim/loot.ts). */
+  bound: 'sells, but can\'t be given to another hero.',
   /** After a modifier the wearer can't use (a BLOCK on a Mage's plate). */
   noUse: 'no use to you',
   cost: 'COST',

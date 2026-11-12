@@ -130,6 +130,8 @@ export function card(it: Item, h?: Hero, brief = false): string {
   const chip = RARE.includes(it.quality) ? ` rare ${it.quality}` : '';
   return `<div class="card-head" style="--t:${itemCol(it)}"><span class="chip${chip}">${isUnique(it) ? LOOTW.title : t.name}</span><b>${itemName(it)}</b></div>` +
     (uniqueLine(it) ? `<div class="uline">${uniqueLine(it)}</div>` : '') +
+    // SOULBOUND: taken by another class (sim/loot.ts); it sells, it never trades.
+    (it.bound ? `<div class="tr"><b>SOULBOUND:</b> ${CARDW.bound}</div>` : '') +
     (how ? `<div class="how">${how}</div>` : '') + [...plus, ...mods, ...traits].join('') +
     (it.cost ? labelRows([[CARDW.cost, costText(it.cost, cls)]], 'hungry') : '') +
     (it.hungry ? hungryRows(it.hungry as HungryId, cls) : '') + (mods.length + traits.length || it.hungry ? '' : `<div class="tr">Plain. No modifiers.</div>`);

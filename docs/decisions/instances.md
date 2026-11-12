@@ -314,3 +314,22 @@ not killing quickly, so kind of anticlimactic".
   no on-screen DAZZLED, OPEN says it), then line editor: goal "BURN a lamp, kill" (+ the name, fits a phone), LAMP
   OUT, BURN A LAMP NEAR IT TO STUN IT, THE LAMP ROOM.
 - Tests tests/lampman.test.ts; full suite green. Its loot pool waits on the arc's loot step. (Claude Opus 5.5)
+
+## 2026-11-12: SOULBOUND, and an instance boss's drop for someone there
+
+- Kyle: "in solo [I keep] getting loot for other heroes. If you're solo it's fine if it's for another hero but you
+  should still be able to pick up and sell. Maybe lock for trading, call it soul bound." Then: "it's specifically in
+  an instance: the boss loot pool might not be for your hero."
+- **Pick up anything:** sim/loot.ts `takeLoot` no longer refuses another class's piece; it goes in the pack with
+  `bound: true` (shared/loot.ts `Item.bound`), never on hungry gear. The loot card offers TAKE with "Yours to sell.
+  SOULBOUND: can't be given to another hero."; the item card a SOULBOUND row (client/card.ts, lootcard.ts, copy.ts,
+  shopwords.ts). It sells as any piece.
+- **For the Trading chat:** `tradeable` in shared/trade.ts is false for a bound piece and `cleanItem` refuses one, so it
+  never goes in an offer or comes in from another browser. (A hacked client could strip the flag; the ledger server
+  doesn't know it. Yours to judge if it matters.)
+- **For the Deep chat:** sim/uniquedrop.ts `give` now picks from the pool's pieces someone in the room can use (armor
+  and rings fit anyone), the whole pool only if none fits. The Haulier's: a solo Ranger gets the plate or the ring,
+  never the pick.
+- Lines: lore keeper (SOULBOUND safe: no tie to the church, the Lantern or the Want; keep it off hungry gear; "traded"
+  also means selling here, so "given to another hero"), then line editor. tests/soulbound.test.ts; tests/loot.test.ts's
+  old "another class cannot take it" now checks it's taken SOULBOUND. (Claude Opus 5.5)

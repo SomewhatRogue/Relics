@@ -74,7 +74,7 @@ export class LootCard {
     const shut = `<button data-shut>CLOSE</button>`;
     this.el.innerHTML = card(it, me) +
       (mine ? (full(me) ? `<div class="yours">${PACKW.fullJob}</div><div class="lbtns">${shut}</div>` : compare(me, it) + `<div class="yours">${COPY.takes}</div><div class="lbtns"><button class="primary">TAKE${keys ? ' (F)' : ''}</button>${shut}</div>`)
-        : `<div class="yours">${COPY.otherClass.replace('{Class}', cls[0] + cls.slice(1).toLowerCase())}</div><div class="lbtns">${shut}</div>`);
+        : `<div class="yours">${COPY.otherClass.replace('{Class}', cls[0] + cls.slice(1).toLowerCase())} ${full(me) ? PACKW.fullJob : COPY.bound}</div><div class="lbtns">${full(me) ? '' : `<button class="primary">TAKE${keys ? ' (F)' : ''}</button>`}${shut}</div>`);
     this.el.hidden = false;
   }
 }

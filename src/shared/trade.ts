@@ -42,8 +42,8 @@ export function cleanTerms(raw: unknown): Terms | null {
   return terms(t.id, t.a, t.b);
 }
 
-/** What can't change hands (Kyle, 2026-11-11): hungry gear, never (it goes to the church or Nettle). */
-export const tradeable = (it: Item): boolean => it.quality !== 'hungry';
+/** What can't change hands (Kyle, 2026-11-11): hungry gear, never (it goes to the church or Nettle); nor a SOULBOUND piece (2026-11-12, sim/loot.ts). */
+export const tradeable = (it: Item): boolean => it.quality !== 'hungry' && !it.bound;
 
 /** An offer as the other player sent it: their items (each ledgered, nothing hungry) and gold. */
 export interface Offer { items: Item[]; gold: number; rev: number }
@@ -59,7 +59,7 @@ export function cleanItem(raw: unknown): Item | null {
   if (slot !== 'weapon' && slot !== 'armor' && slot !== 'ring') return null;
   if (slot === 'weapon' && !(typeof i.kit === 'string' && i.kit in WEAPONS)) return null;
   if (slot === 'armor' && i.armor !== 'light' && i.armor !== 'medium' && i.armor !== 'heavy') return null;
-  if (!TIERS.has(i.quality) || i.hungry !== undefined || typeof i.ledger !== 'string' || !LEDGER_ID.test(i.ledger)) return null;
+  if (!TIERS.has(i.quality) || i.hungry !== undefined || i.bound !== undefined || typeof i.ledger !== 'string' || !LEDGER_ID.test(i.ledger)) return null;
   if (!Array.isArray(i.traits) || i.traits.length > 6 || !i.traits.every((t) => typeof t === 'string' && t in TRAITS)) return null;
   const mods = i.mods ?? [];
   if (!Array.isArray(mods) || mods.length > 8 || !mods.every((m) => m && typeof m.id === 'string' && /^[a-z]{1,12}$/.test(m.id) && fin(m.v, -100, 1000))) return null;
