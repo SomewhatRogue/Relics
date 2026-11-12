@@ -137,7 +137,7 @@ export class View3D {
     // As much floor as the pixel scene shows (its tiles across times down, scene.ts), so a figure stands
     // about as big as there: tilted, the view takes in more rows and fewer columns than the flat one.
     // `__zoom3` (a share of that floor) is for screenshots.
-    const s2 = Math.max(1, Math.round(Math.sqrt((Dw * Dh) / 82000))), floor = ((Dw / s2 / 16) * (Dh / s2 / 16)) * ((globalThis as { __zoom3?: number }).__zoom3 ?? (Dh > Dw ? ZOOM.tall : ZOOM.wide));
+    const s2 = Math.max(1, Math.round(Math.sqrt((Dw * Dh) / 118000))), floor = ((Dw / s2 / 16) * (Dh / s2 / 16)) * ((globalThis as { __zoom3?: number }).__zoom3 ?? (Dh > Dw ? ZOOM.tall : ZOOM.wide));
     this.view.size(W, H, Math.sqrt((W * H) / (Math.sin(PITCH) * floor)));
     this.gl.setSize(W, H, false);
     const css: [string, string] = [(W * S) / this.dpr + 'px', (H * S) / this.dpr + 'px'];

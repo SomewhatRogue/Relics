@@ -174,7 +174,9 @@ export class Scene {
     const W = innerWidth * this.dpr, H = innerHeight * this.dpr;
     // A whole-room view for screenshots and checking a layout (set window.__zoom, then resize).
     const zoom = (globalThis as { __zoom?: number }).__zoom;
-    this.scale = zoom ?? Math.max(1, Math.round(Math.sqrt((W * H) / 82000)));
+    // (A step further back since the heroic proportions, Kyle 2026-11-12: "scale it back down but keep the same
+    // fidelity": the tall heroes about the old ones' size on screen, more of the town round them.)
+    this.scale = zoom ?? Math.max(1, Math.round(Math.sqrt((W * H) / 118000)));
     this.vw = Math.ceil(W / this.scale);
     this.vh = Math.ceil(H / this.scale);
     for (const c of [this.out, this.base, this.glowC]) (c.width = this.vw), (c.height = this.vh);

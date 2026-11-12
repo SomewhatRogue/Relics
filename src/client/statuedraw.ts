@@ -43,14 +43,17 @@ export function stoneFigure(s: StatueHero): HTMLCanvasElement {
   const lx = g.lit, d = lx.getImageData(0, 0, FW, FH), px = d.data;
   let lo = 255, hi = 0;
   const lum = (i: number) => px[i] * 0.3 + px[i + 1] * 0.59 + px[i + 2] * 0.11;
-  for (let i = 0; i < px.length; i += 4) if (px[i + 3] > 40) (lo = Math.min(lo, lum(i))), (hi = Math.max(hi, lum(i)));
+  // (The outline alone takes the darkest stone: a dark brim or hood stretched onto it read as a hole through the
+  // head, Kyle 2026-11-12. Everything else spreads over the five paler bands.)
+  const LINE = 28;
+  for (let i = 0; i < px.length; i += 4) if (px[i + 3] > 40 && lum(i) >= LINE) (lo = Math.min(lo, lum(i))), (hi = Math.max(hi, lum(i)));
   for (let i = 0; i < px.length; i += 4) {
     if (px[i + 3] <= 40) {
       px[i + 3] = 0;
       continue;
     }
     // Stretched over the bands, so a dark hero and a pale one both read as carved stone.
-    const k = Math.min(BANDS.length - 1, Math.floor(((lum(i) - lo) / Math.max(1, hi - lo)) * BANDS.length));
+    const k = lum(i) < LINE ? 0 : 1 + Math.min(BANDS.length - 2, Math.floor(((lum(i) - lo) / Math.max(1, hi - lo)) * (BANDS.length - 1)));
     [px[i], px[i + 1], px[i + 2], px[i + 3]] = [...BANDS[k], 255];
   }
   lx.putImageData(d, 0, 0);

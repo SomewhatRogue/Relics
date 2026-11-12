@@ -16,6 +16,8 @@ import { hallFurn3d } from './hallfurn3d';
 import { PIECE_BLOCKS, blockBoxes } from '../pieces';
 import { putBoxes } from './pieces3d';
 import { fence3d } from './fence3d';
+import { post3d } from './posts3d';
+import { isPost } from '../postkind';
 
 export function flatBlock(b: Block, group: THREE.Group, fires: [number, number, number, number][]): THREE.Group {
   const r = new Seed(Math.round(b.x * 29 + b.y * 13 + 3)), L = LOOK[b.kind], B = new Boxes();
@@ -43,6 +45,9 @@ export function flatBlock(b: Block, group: THREE.Group, fires: [number, number, 
       }
     }
     B.b(cx, 1.38, cz, b.w + 0.06, 0.1, b.h + 0.08, 0x3b3746);
+  } else if (isPost(b)) {
+    // The square's job board and Public Works sign (posts3d.ts).
+    post3d(B, b);
   } else if (b.kind === 'stall') {
     for (const [px, pz] of [[x0 + 0.1, z0 + 0.1], [x1 - 0.1, z0 + 0.1], [x0 + 0.1, z1 - 0.1], [x1 - 0.1, z1 - 0.1]]) B.b(px, 0, pz, 0.09, 1.25, 0.09, 0x4a3420);
     for (let x = x0, i = 0; x < x1 - 0.01; x += 0.4, i++) B.c(x + 0.2, 1.3, cz + 0.1, 0.4, 0.06, b.h + 0.4, i % 2 ? dk(hex(L.ridge)) : dk(roof), 0, 0.18);

@@ -40,11 +40,14 @@ function place(part: Joint, out: number[]): number[] {
   return out;
 }
 
-/** Whether this part is the leg that's up this step (drawn a pixel higher; the body, drawn after, covers its top). */
-const lifted = (part: Joint) => ((part.kind === 'legL' && LAYOUT.step < 0) || (part.kind === 'legR' && LAYOUT.step > 0) ? 1 : 0);
+/** Whether this part is the leg that's up this step (drawn higher, two pixels on a tall leg; the body, drawn after,
+ *  covers its top). A step of 2 is across the screen: the lifted leg swings a pixel forward and the planted one back. */
+const up = (part: Joint) => (part.kind === 'legL' && LAYOUT.step < 0) || (part.kind === 'legR' && LAYOUT.step > 0);
+const lifted = (part: Joint) => (up(part) ? (part.y1 - part.y0 >= 10 ? 2 : 1) : 0);
+const swing = (part: Joint) => (Math.abs(LAYOUT.step) < 2 || (part.kind !== 'legL' && part.kind !== 'legR') ? 0 : (up(part) ? 1 : -1) * (LAYOUT.flip ? -1 : 1));
 
 function put(g: CanvasRenderingContext2D, part: Joint, img: HTMLCanvasElement): void {
-  const [x, y0, dh] = place(part, AT), w = part.x1 - part.x0, h = part.y1 - part.y0, y = y0 - lifted(part);
+  const [x0, y0, dh] = place(part, AT), w = part.x1 - part.x0, h = part.y1 - part.y0, y = y0 - lifted(part), x = x0 + swing(part);
   if (!LAYOUT.flip) return g.drawImage(img, part.x0, part.y0, w, h, x, y, w, dh);
   g.save();
   g.translate(x + w, y);

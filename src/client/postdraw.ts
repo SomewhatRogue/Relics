@@ -56,7 +56,7 @@ const POSTS: Record<string, { s: Sprite; word: string; y: number }> = {
   'PUBLIC WORKS': { s: WORKS, word: 'WORKS', y: 3 },
 };
 
-export const isPost = (b: Block): boolean => b.kind === 'stall' && !!b.label && b.label in POSTS && !b.ruined;
+export { isPost } from './postkind';
 
 /** (x, y) is the footprint's top-left on screen; the post stands on its middle, feet on its front edge. */
 export function drawPost(c: Ctx, b: Block, x: number, y: number): void {

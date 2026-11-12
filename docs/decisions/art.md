@@ -222,3 +222,15 @@ The plan, one class at a time so Kyle can play each against the old ones:
   hips. Their flames and lights moved up to match (lampsdraw.ts, blocks.ts). Things the room moves and breaks
   at their own sizes (barrels, crates, carts, tables, cages) and low clutter (rocks, stumps, bushes) stay as
   they are, so nothing drawn says a different size from what's decided. (Claude Opus 5.5)
+- The world to the tall heroes, step three: the camera and the walk. The camera a step back (scene.ts, and the
+  2.5D view's own floor in three/view3d.ts to match: 118000 for 82000; the phone's 6 to 5, a laptop's 8 to 7):
+  the tall heroes about the old ones' size on screen, more town round them. The walk (Kyle: "isn't timed up"):
+  4.4 squares a second over 12-row legs wanted quicker steps, 11 changes of foot a second for 8; a tall leg lifts
+  two pixels; across the screen the lifted leg swings a pixel forward and the planted one back (figure.ts).
+  (Claude Opus 5.5)
+- The 2.5D view (Kyle plays in it, 2026-11-12: his town still showed the striped PUBLIC WORKS stall): the job board
+  and the works sign built of boxes on the stalls' footprints (three/posts3d.ts, from walls3d.ts), their words on
+  the fascia and top board (tags3d.ts); townsfolk's marks and names at a tall head's height (HEAD 1.65 to 2.15).
+- The statue's "gap in the head" (Kyle's screenshot: a stone Mage): stretched over all six stone shades, the dark
+  underside of the hat's brim took the darkest, the ground's colour, and read as a hole through the head. Only
+  the outline takes the darkest stone now; the rest spreads over the five paler (statuedraw.ts). (Claude Opus 5.5)

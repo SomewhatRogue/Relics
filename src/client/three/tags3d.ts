@@ -3,6 +3,8 @@
  * anyone you can talk to (brighter, and their name under them, when you're close enough to), other
  * players' names over their heads, and a building's name on its front.
  */
+import { isPost } from '../postkind';
+import { POST_WORD_Y } from './posts3d';
 import type { GameMap } from '../../shared/arena';
 import { npcAt } from '../../shared/arena';
 import { SPOT_REACH } from '../../shared/town';
@@ -11,16 +13,18 @@ import { drawText, textWidth } from '../pixfont';
 import type { Proj } from './overlay3d';
 import { BOXFIGS } from './look';
 
-/** Over-the-head heights (tiles) for a grown townsperson, and a child. */
-const HEAD = 1.65, SMALL = 1.05;
+/** Over-the-head heights (tiles) for a grown townsperson (tall since 2026-11-12: 31 pixels, about two tiles), and a child. */
+const HEAD = 2.15, SMALL = 1.05;
 
 export function drawTags(g: CanvasRenderingContext2D, map: GameMap, t: number, me: { x: number; y: number } | null, others: Hero[], P: Proj, now: number): void {
   const bob = Math.floor(now * 3) % 2;
   for (const b of map.blocks) {
     if (!b.label || b.kind === 'wall') continue;
-    const [x, y] = P(b.x + b.w / 2, b.kind === 'stall' ? 1.15 : 1.05, b.y + b.h + 0.02), w = textWidth(b.label);
+    // (The job board's and the works' words on their fascia and top board: posts3d.ts.)
+    const word = isPost(b) ? (b.label === 'PUBLIC WORKS' ? 'WORKS' : b.label) : b.label;
+    const [x, y] = P(b.x + b.w / 2, POST_WORD_Y[b.label] ?? (b.kind === 'stall' ? 1.15 : 1.05), b.y + b.h / 2 + (isPost(b) ? 0.12 : b.h / 2 + 0.02)), w = textWidth(word);
     if (x < -w || y < -8 || x > g.canvas.width + w || y > g.canvas.height + 8) continue;
-    drawText(g, b.label, Math.round(x - w / 2), Math.round(y), b.kind === 'stall' ? '#f0e0b0' : '#d8c48a');
+    drawText(g, word, Math.round(x - w / 2), Math.round(y), b.kind === 'stall' ? '#f0e0b0' : '#d8c48a');
   }
   // A flat figure (cards3d.ts) carries its own mark and name, as in the flat view.
   if (BOXFIGS) for (const n of map.npcs ?? []) {
