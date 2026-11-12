@@ -207,3 +207,12 @@ The plan, one class at a time so Kyle can play each against the old ones:
   seal, a lantern guttering off the eave, a paste pot, JOBS on the fascia) and a builder's sign on scaffold poles
   (a painted hammer, the plans, planks and a mortar tub, WORKS on the top board). postdraw.ts, on the stalls' own
   footprints: the room and the spots unchanged. (Claude Opus 5.5)
+- The long trips to the town hall (Kyle, 2026-11-12: "I'd like instances to be in the town hall maybe so it's
+  cleaner along with expeditions"): a map table by the hall's west wall with CLERK TAMSIN at it (talk: 'map');
+  her list is the expeditions and the Instances, the square's board keeps the rest (hunts, rescues, larders,
+  story jobs, Deep runs) with a line at its foot saying where the long trips went. One list builder for both
+  (boardui.ts `openBoard(g, panel, 'map')`): the cards, GO ALONE and GATHER A PARTY are the same. Lines checked
+  by the lore keeper (no captain in Wickhold; "map table", not "war table"; "expedition" not said in new lines)
+  and the line editor. Open for Kyle: the lore keeper suggests Orla of the watch at the table instead of a new
+  clerk, which grows her part in the bible. Instances chat: the Open Cut is now taken at the map table, not the
+  board; nothing in your files changed. (Claude Opus 5.5)

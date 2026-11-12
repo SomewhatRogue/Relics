@@ -22,4 +22,8 @@ export const BOARDW = {
   back: 'BACK',
   jobs: 'JOBS',
   done: 'DONE LATELY',
+  /** The long trips moved to the town hall (Kyle, 2026-11-12): the map table's title, the board's pointer to it, the clerk there. */
+  mapTitle: 'THE MAP TABLE',
+  toMap: "Pick the Barrowfields, Hangman's Wood, Fenmere or the Open Cut at the map table in the town hall.",
+  clerk: "These go a fair bit further out than the jobs on the board, so pick the one you want and I'll mark it on the map.",
 };

@@ -77,12 +77,16 @@ function card(g: Game, j: Job, i: number, pay: number): string {
     `<p class="jtext">${esc(j.text)}</p>${rows}<div class="jbtns">${go}${gather}<button data-back>${BOARDW.back}</button></div></div></div>`;
 }
 
-export function openBoard(g: Game, panel: Panel): void {
-  const w = g.world, jobs = g.jobs(), pt = g.parties;
-  const showing = () => panel.open && !!document.querySelector('#panel h2')?.textContent?.toUpperCase().startsWith('JOB BOARD');
+/** The long trips (the expeditions and the Instances) are at the town hall's map table, the rest on the square's board (Kyle, 2026-11-12). */
+const far = (j: Job) => !!(j.exped || j.instance);
+
+export function openBoard(g: Game, panel: Panel, at: 'board' | 'map' = 'board'): void {
+  const w = g.world, map = at === 'map', jobs = g.jobs().filter((j) => far(j) === map), pt = g.parties;
+  const title = map ? BOARDW.mapTitle : 'JOB BOARD';
+  const showing = () => panel.open && !!document.querySelector('#panel h2')?.textContent?.toUpperCase().startsWith(title);
   // A fresh visit starts at the list; a redraw (a party changed, a button pressed) keeps the card open.
   if (!showing()) open = '';
-  const again = () => openBoard(g, panel);
+  const again = () => openBoard(g, panel, at);
   if (pt) pt.onChange = () => showing() && again();
   const { html: partyHtml, parties } = partyList(g);
   // Jobs done lately, by whoever did them (the shared world's, online), and the town hit while it's news.
@@ -90,10 +94,12 @@ export function openBoard(g: Game, panel: Panel): void {
   const raidHtml = raid && !deeds.some((d) => d.day > raid.day) ? `<div class="m">${esc(MEND_UI.board(raid.day, lossText(raid)))}</div>` : '';
   const doneHtml = deeds.length || raidHtml ? `<h3>${BOARDW.done}</h3><div class="jdone">` + raidHtml + deeds.map((d) => `<div class="m">Day ${Number(d.day) || 1}: ${esc(d.title)}, by ${d.party.map(esc).join(', ')}.</div>`).join('') + '</div>' : '';
   const pay = (j: Job) => Math.round(j.reward * rewardMult(w));
-  const at = jobs.findIndex((j) => j.id === open);
-  const html = partyHtml + doneHtml + (partyHtml || doneHtml ? `<h3>${BOARDW.jobs}</h3>` : '') +
-    `<div class="jlist">${jobs.map((j, i) => row(j, i, pay(j))).join('')}</div>` + (at >= 0 ? card(g, jobs[at], at, pay(jobs[at])) : '');
-  panel.show(`JOB BOARD, DAY ${w.day}`, html);
+  const sel = jobs.findIndex((j) => j.id === open);
+  // At the map table the clerk's word first; under the board's list, where the long trips went.
+  const lead = map ? `<p class="jlead">${esc(BOARDW.clerk)}</p>` : '', foot = map ? '' : `<p class="jlead">${esc(BOARDW.toMap)}</p>`;
+  const html = lead + partyHtml + doneHtml + (partyHtml || doneHtml ? `<h3>${BOARDW.jobs}</h3>` : '') +
+    `<div class="jlist">${jobs.map((j, i) => row(j, i, pay(j))).join('')}</div>` + foot + (sel >= 0 ? card(g, jobs[sel], sel, pay(jobs[sel])) : '');
+  panel.show(`${title}, DAY ${w.day}`, html);
   const on = (sel: string, f: (b: HTMLElement, e: Event) => void) => document.querySelectorAll<HTMLElement>(`#panel ${sel}`).forEach((b) => b.addEventListener('click', (e) => f(b, e)));
   on('[data-open]', (b) => ((open = jobs[Number(b.dataset.open)].id), again()));
   // BACK, or a tap on the dark round the card: back to the list.

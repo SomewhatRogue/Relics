@@ -67,9 +67,10 @@ export function hall(door: string): GameMap | null {
     { marks: [mk('rushes', 2.6, 3, 6, 3)], hangs: [hang('notices', 4.8, 1.4)], braziers: [{ x: 2, y: 3.2, r: 0.35 }] });
   // The council's two choices on boards either side of the valley map, someone under each to argue it
   // (client/voteboards.ts, councilui.ts); the reeve heard from across his table.
+  // The map table by the west wall, Clerk Tamsin at it: the long trips, off the square's board (Kyle, 2026-11-12).
   if (door === 'townhall') return room('THE TOWN HALL', 12, 8, HOME,
-    [b('desk', 3, 2.4, 6, 1)],
-    [{ ...n('REEVE HOLLIS', 6, 1.7, 'council', 'reeve'), reach: 1.4 }, n('ALDER BRAM', 2.2, 1.3, 'advocate', 'elder', 3), n('GOODWIFE SELL', 9.8, 1.3, 'advocate', 'villager', 4)],
+    [b('desk', 3, 2.4, 6, 1), b('maptable', 0.8, 5, 3.2, 1)],
+    [{ ...n('REEVE HOLLIS', 6, 1.7, 'council', 'reeve'), reach: 1.4 }, { ...n('CLERK TAMSIN', 2.4, 4.6, 'map', 'villager'), reach: 1.6 }, n('ALDER BRAM', 2.2, 1.3, 'advocate', 'elder', 3), n('GOODWIFE SELL', 9.8, 1.3, 'advocate', 'villager', 4)],
     { marks: [mk('rug', 2.4, 1.8, 7.2, 2.6)], hangs: [hang('vote', 0.4, 3.6), hang('map', 4.4, 3.2), hang('vote', 8, 3.6)], torches: [{ x: 4.2, y: -1.6 }, { x: 7.8, y: -1.6 }] });
   return null;
 }

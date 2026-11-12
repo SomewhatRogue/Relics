@@ -50,6 +50,9 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     openPractice(g, panel);
   } else if (id === 'board') {
     openBoard(g, panel);
+  } else if (id === 'map') {
+    // The town hall's map table: the long trips (boardui.ts).
+    openBoard(g, panel, 'map');
   } else if (id === 'council') {
     const goals = chapterGoals(w), d = CHAPTER_1.decision, done = w.flags[d.id];
     const status = p(`<b>${CHAPTER_1.name}</b>`) + p(`People brought home: ${goals.rescued} of ${goals.rescuedGoal}. Story mission, ${CHAPTER_1.mission.title}: ${goals.story ? 'done' : 'not yet'}.`);

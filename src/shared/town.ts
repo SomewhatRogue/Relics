@@ -32,7 +32,9 @@ export type SpotId = 'board' | 'council' | 'church' | 'smith' | 'wright' | 'trai
   /** At the Drowned Rat: the arm-wrestling table and the card sharp's knife board (client/ratui.ts). */
   | 'arm' | 'knives'
   /** The board of bests by the Lantern: the town's best at the pastimes (client/bestui.ts). */
-  | 'best';
+  | 'best'
+  /** The town hall's map table, the clerk at it: the long trips (client/boardui.ts). */
+  | 'map';
 export interface Spot { id: SpotId; x: number; y: number; label: string; key?: string }
 
 export const SPOTS: Spot[] = [
