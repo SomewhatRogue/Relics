@@ -160,6 +160,8 @@ const gobFace = (k: GobCols): Part[] => [
 const gobBack = (k: GobCols): Part[] => [['r', 5, 7, 7, 1, k.s], ['r', 6, 3, 5, 1, k.s]];
 const scrapperBody = gobBody(GOB);
 const scrapperHead = [...gobHead(GOB), ...gobFace(GOB)];
+/** The small goblin's parts, facing you and walking away (foes.ts draws Rakehead's four from them a size up). */
+export const GOB_PARTS = { down: [...scrapperBody, ...scrapperHead], up: [...scrapperBody, ...gobHead(GOB), ...gobBack(GOB)] };
 /** Everything burned to the same black, a few embers left. */
 const char = (parts: Part[]): Part[] => parts.map((p, i) => [...p.slice(0, -1), i % 5 ? '#1a1614' : '#2a2420'] as Part);
 

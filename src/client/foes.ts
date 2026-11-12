@@ -22,7 +22,7 @@ import { BUTCHER_CUT, SCRAPPER_CUT, jointed } from './joints';
 import { butcherPose, foeHit, scrapperPose, tumble } from './foepose';
 import { rest, newPose } from './motion';
 import { drawText } from './pixfont';
-import { SPRITES, grow, makeSprite, type Sprite } from './sprites';
+import { GOB_PARTS, SPRITES, grow, makeSprite, type Sprite } from './sprites';
 import { butcherLook, butcherParts, type Arms } from './butcherparts';
 import { drawPounce, drawSpiderKind, drawSpitSign } from './spiders';
 import { SPIDER_SPRITES } from './spidersprites';
@@ -35,6 +35,7 @@ import { OX, OY, PX } from './world';
 import { HS, hline, hs } from './heroscale';
 import { gobPen } from './gobpen';
 import { drawWounds, hurtPose } from './wounds';
+import { drawRakeTool, rakeOf } from './rakehands';
 
 /** A butcher's weapon along `a` from the hand, its look (butcherparts.ts); lengths in the old pixels, drawn 1.5x. */
 function cleaver(c: Ctx, x: number, y: number, a: number, arms: Arms = 'cleaver', now = 0): void {
@@ -127,6 +128,17 @@ function butcher(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
  * (gobpen.ts), so it lands on whole pixels where the bigger hands are. `bx`, `by` and the arm's offset are
  * handed to the kits in the old pixels; the pen puts them right.
  */
+/** Rakehead's four stand a size up: the goblin's shapes drawn again 1.3 as big, cut to match (rakehands.ts). */
+const RAKE_K = 1.3;
+let rakeBody: { down: Sprite; up: Sprite; cut: typeof SCRAPPER_CUT } | null = null;
+function rakeSprites(): NonNullable<typeof rakeBody> {
+  if (rakeBody) return rakeBody;
+  const r = (v: number) => Math.round(v * RAKE_K), C = SCRAPPER_CUT, mk = (p: typeof GOB_PARTS.down) => makeSprite(r(17), r(20), grow(p, RAKE_K));
+  return (rakeBody = { down: mk(GOB_PARTS.down), up: mk(GOB_PARTS.up), cut: { headTo: r(C.headTo), hip: r(C.hip), back: C.back.map(r) as typeof C.back, arm: C.arm.map(r) as typeof C.arm } });
+}
+/** How much bigger than the old goblin a small one is drawn (1.5x; Rakehead's four 1.3 on top). */
+const gobK = (e: Enemy) => (rakeOf(e) ? HS * RAKE_K : HS);
+
 function scrapper(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
   AT.bx = AT.by = AT.hx = AT.hy = 0;
   // Hit hard: head over heels once, with a hop. Thrown: tumbling end over end through the air.
@@ -143,25 +155,27 @@ function scrapper(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
   hurtPose(pz, e, c.now);
   if (e.act === 'stunned') (pz.ox += Math.round(Math.sin(c.now * 5))), (pz.oy += 1);
   const reach = pz.phase === 'windup' ? 1 : pz.phase === 'release' || pz.phase === 'contact' ? 7 : 3;
-  shadow(c, x, y, hs(5));
-  // The body where it's thrown (1.5x the pose's shift); the kits' feet and hand in the old pixels.
-  const bx = x + Math.round(pz.ox * HS), by = y + Math.round(pz.oy * HS), up = e.fy < -0.55, fa = Math.atan2(e.fy, e.fx);
+  const K = gobK(e), rake = rakeOf(e);
+  shadow(c, x, y, Math.round(5 * K));
+  // The body where it's thrown (the pose's shift at its size); the kits' feet and hand in the old pixels.
+  const bx = x + Math.round(pz.ox * K), by = y + Math.round(pz.oy * K), up = e.fy < -0.55, fa = Math.atan2(e.fy, e.fx);
   // In parts (figure.ts): the knife (or bow) is in the hand, wherever the arm has gone.
-  const pale = e.variant === 'blind', body = jointed(up ? (pale ? SPRITES.paleUp : SPRITES.scrapperUp) : pale ? SPRITES.pale : SPRITES.scrapper, SCRAPPER_CUT);
-  layout(body, bx, by, e.fx < -0.2, pz, HS);
-  const [ax1, ay1] = armOffset(ARM), ax = ax1 / HS, ay = ay1 / HS, ox = x + pz.ox, oy = y + pz.oy, kx = ox + ax, ky = oy + ay;
+  const pale = e.variant === 'blind', rk = rake ? rakeSprites() : null;
+  const body = rk ? jointed(up ? rk.up : rk.down, rk.cut) : jointed(up ? (pale ? SPRITES.paleUp : SPRITES.scrapperUp) : pale ? SPRITES.pale : SPRITES.scrapper, SCRAPPER_CUT);
+  layout(body, bx, by, e.fx < -0.2, pz, K);
+  const [ax1, ay1] = armOffset(ARM), ax = ax1 / K, ay = ay1 / K, ox = x + pz.ox, oy = y + pz.oy, kx = ox + ax, ky = oy + ay;
   Object.assign(AT, { bx: pz.ox, by: pz.oy, hx: pz.ox + ax, hy: pz.oy + ay });
-  const p = gobPen(c, x, y);
-  // A lunger's weapon is its spear (kit()): no knife besides.
-  const knife = () => (e.bow ? bow(p, e, kx, ky, fa) : e.variant === 'hexer' || e.variant === 'drummer' ? drawKit(p, e, ox, oy, ax, ay, t) : e.variant && KITTED.has(e.variant) ? drawFoeKit(p, e, ox, oy, ax, ay, t) : e.variant === 'lunger' ? undefined : line(p.lit, kx + Math.cos(fa) * reach, ky - 6 + Math.sin(fa) * reach, fa, 0, 4, '#cfd6dc'));
+  const p = gobPen(c, x, y, K);
+  // Rakehead's four carry their own (rakehands.ts); a lunger's weapon is its spear (kit()): no knife besides.
+  const knife = () => (rake ? drawRakeTool(p, e, rake, ox, oy, ox + (e.fx < -0.2 ? -3 : 3) + ax, oy - 6 + ay, c.now) : e.bow ? bow(p, e, kx, ky, fa) : e.variant === 'hexer' || e.variant === 'drummer' ? drawKit(p, e, ox, oy, ax, ay, t) : e.variant && KITTED.has(e.variant) ? drawFoeKit(p, e, ox, oy, ax, ay, t) : e.variant === 'lunger' ? undefined : line(p.lit, kx + Math.cos(fa) * reach, ky - 6 + Math.sin(fa) * reach, fa, 0, 4, '#cfd6dc'));
   if (up) knife();
   drawFigure(c, body, bx, by, pz);
   // Its wounds, if it's a tough one and hurt (wounds.ts).
-  drawWounds(c, e, body.s.w, true);
+  drawWounds(c, e, body.s.w, true, 7, rake ? RAKE_K : 1);
   // The wood's element lesson: wet, aproned or kiln-hot (lessonfoes.ts).
   drawLessonMark(p, e, ox, oy);
   if (!up) knife();
-  if (e.act === 'stunned') stars(c, bx, by - hs(15), 3, hs(5));
+  if (e.act === 'stunned') stars(c, bx, by - Math.round(15 * K), 3, Math.round(5 * K));
 }
 
 /** An archer's short bow, the string pulled back through the wind-up, an arrow nocked. */
@@ -260,7 +274,7 @@ export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number, dozing = false
     }
     return;
   }
-  if (e.kind === 'scrapper') return scrapper(c, e, x, y, t), kit(gobPen(c, x, y), e, x, y);
+  if (e.kind === 'scrapper') return scrapper(c, e, x, y, t), kit(gobPen(c, x, y, gobK(e)), e, x, y);
   const a = e.attack;
   shadow(c, x, y, hs(5));
   // A dummy rocks and flattens a little under a blow; it doesn't go anywhere.
@@ -407,6 +421,8 @@ export function drawHeld(c: Ctx, e: Enemy, x: number, y: number, fx: number, fy:
  * out along the lunge and the club goes up with the arm.
  */
 function kit(c: Ctx, e: Enemy, x0: number, y0: number): void {
+  // (Rakehead's four carry their own in place of a club: rakehands.ts. The Sluicer's ironhide plates still go on.)
+  if (rakeOf(e) && e.variant === 'heavy') return;
   const f = e.fx >= 0 ? 1 : -1, g = c.lit, held = e.variant === 'lunger' || e.variant === 'heavy';
   const x = x0 + (held ? AT.hx : AT.bx), y = y0 + (held ? AT.hy : AT.by);
   if (e.variant === 'shield' && boardOut(e, c.t ?? c.now)) {

@@ -10,12 +10,11 @@ import type { Ctx } from './draw';
 import { HS } from './heroscale';
 
 /** What a penned canvas maps round: its own canvas, and the feet. */
-export interface Pen { raw: CanvasRenderingContext2D; ox: number; oy: number }
+export interface Pen { raw: CanvasRenderingContext2D; ox: number; oy: number; k: number }
 
-const size = (w: number) => (Math.abs(w) <= 1 ? w : Math.sign(w) * Math.round(Math.abs(w) * HS));
-
-function penned(raw: CanvasRenderingContext2D, ox: number, oy: number): CanvasRenderingContext2D {
-  const pen: Pen = { raw, ox, oy }, X = (x: number) => ox + Math.round((x - ox) * HS), Y = (y: number) => oy + Math.round((y - oy) * HS);
+function penned(raw: CanvasRenderingContext2D, ox: number, oy: number, k: number): CanvasRenderingContext2D {
+  const pen: Pen = { raw, ox, oy, k }, X = (x: number) => ox + Math.round((x - ox) * k), Y = (y: number) => oy + Math.round((y - oy) * k);
+  const size = (w: number) => (Math.abs(w) <= 1 ? w : Math.sign(w) * Math.round(Math.abs(w) * k));
   return new Proxy(raw, {
     get(t, k) {
       if (k === '__pen') return pen;
@@ -31,9 +30,9 @@ function penned(raw: CanvasRenderingContext2D, ox: number, oy: number): CanvasRe
   });
 }
 
-/** `c` with both layers penned round the feet at (x, y) for this draw. */
-export function gobPen(c: Ctx, x: number, y: number): Ctx {
-  return { lit: penned(c.lit, x, y), glow: penned(c.glow, x, y), now: c.now, t: c.t };
+/** `c` with both layers penned round the feet at (x, y) for this draw; `k` how much bigger (1.5x, or more for a bigger body). */
+export function gobPen(c: Ctx, x: number, y: number, k = HS): Ctx {
+  return { lit: penned(c.lit, x, y, k), glow: penned(c.glow, x, y, k), now: c.now, t: c.t };
 }
 
 /** A penned canvas's pen (draw.ts's line draws through it whole), or null. */

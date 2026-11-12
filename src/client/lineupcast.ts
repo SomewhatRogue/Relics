@@ -31,6 +31,8 @@ export function cast(which: string): Unit[] {
     out.push({ label: 'STOKER', tall: 46, foe: { kind: 'butcher', variant: 'stoker', name: 'THE STOKER' } }, { label: 'HEMPEN', tall: 46, foe: { kind: 'butcher', name: 'HEMPEN', boss: 'hempen' } }, { label: 'HEMPEN 2', tall: 46, foe: { kind: 'butcher', name: 'HEMPEN', boss: 'hempen', hurt: 0.7 } });
     // Injury on the tough ones (wounds.ts): a named goblin and a butcher, hurt and badly hurt.
     for (const [l, k, h] of [['HURT', 'scrapper', 0.5], ['BAD', 'scrapper', 0.8], ['B HURT', 'butcher', 0.5], ['B BAD', 'butcher', 0.8]] as const) out.push({ label: l, tall: k === 'butcher' ? 46 : 34, foe: { kind: k, name: 'SCAB', hurt: h } });
+    // Rakehead's four (rakehands.ts), a size up with their own tools.
+    for (const [l, n, v] of [['DROVER', 'THE DROVER', 'heavy'], ['BRAKESMN', 'THE BRAKESMAN', 'heavy'], ['RAKER', 'THE RAKER', 'heavy'], ['SLUICER', 'THE SLUICER', 'ironhide']] as const) out.push({ label: l, tall: 40, foe: { kind: 'scrapper', variant: v, name: n } });
     // The Doorkeepers: the Latch holds its door square (the wall), the Hasp carries its to one side (the mover).
     out.push({ label: 'LATCH', tall: 50, foe: { kind: 'butcher', name: 'LATCH', boss: 'latch' } }, { label: 'HASP', tall: 50, foe: { kind: 'butcher', name: 'HASP', boss: 'hasp' } });
     for (const v of MOBS) out.push({ label: v.toUpperCase(), tall: 34, foe: { kind: 'scrapper', variant: v } });

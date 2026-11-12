@@ -17,7 +17,11 @@ import type { BodyPose } from './motion';
 /** Where on a body (its sprite's own pixels, before the outline): torso, arm, head and leg boxes, and its eyes. */
 /** `skin`: x ranges of bare hide across the torso (a butcher's apron would hide a cut). */
 interface Body { torso: number[]; arm: number[]; head: number[]; legs: number[][]; eyes: number[][]; skin?: number[][] }
-const SMALL: Body = { torso: [4, 10, 12, 13], arm: [2, 10, 2, 13], head: [5, 2, 12, 8], legs: [[4, 15, 6, 18], [10, 15, 12, 18]], eyes: [[6, 5], [10, 5]] };
+/** A small goblin (17 by 20), or `k` times as big (Rakehead's four). */
+const SMALL = (k: number): Body => {
+  const r = (v: number) => Math.round(v * k);
+  return { torso: [4, 10, 12, 13].map(r), arm: [2, 10, 2, 13].map(r), head: [5, 2, 12, 8].map(r), legs: [[4, 15, 6, 18].map(r), [10, 15, 12, 18].map(r)], eyes: [[6, 5].map(r), [10, 5].map(r)] };
+};
 /** A butcher, its head row (`hy`: heavy 7, hunched 10, lean 5) and size (a Doorkeeper's 1.15). */
 const BIG = (hy: number, k: number): Body => {
   const r = (v: number) => Math.round(v * k);
@@ -54,7 +58,7 @@ const rnd = (id: number, i: number) => (((id * 2654435761 + i * 40503) >>> 0) % 
 export function drawWounds(c: Ctx, e: Enemy, w: number, small: boolean, hy = 7, k = 1): void {
   const st = hurtStage(e);
   if (!st) return;
-  const b = small ? SMALL : BIG(hy, k), L = LAYOUT, half = Math.round(L.lean / 2), g = c.lit;
+  const b = small ? SMALL(k) : BIG(hy, k), L = LAYOUT, half = Math.round(L.lean / 2), g = c.lit;
   // A body pixel to the screen (as figure.ts places the torso; the head leans the whole way, legs not at all).
   const at = (sx: number, sy: number, part: 'torso' | 'head' | 'legs'): [number, number] => {
     const dx = part === 'head' ? L.lean : part === 'legs' ? 0 : half, dy = part === 'legs' ? Math.min(0, L.drop) : L.drop;
