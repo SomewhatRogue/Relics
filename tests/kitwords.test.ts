@@ -74,11 +74,11 @@ describe('only Bitter and Brandy (Kyle, 2026-11-04)', () => {
       dropPickups(e, out, new Rng(i));
       for (const p of out) if (p.potion) got.add(p.potion);
     }
-    expect([...got].sort()).toEqual(['bitter', 'brandy']);
+    expect([...got].sort()).toEqual(['bitter']);
   });
-  it('a saved belt with oil, frost or smoke comes back as Bitter', () => {
+  it('a saved belt with brandy, oil, frost or smoke comes back as Bitter (Kyle, 2026-11-12: only the Bitter)', () => {
     const p = { ...newProfile('WARRIOR', 'OLD'), belt: ['oil', 'brandy', 'smoke'] };
     const s = fromJson({ heroes: [p as never], current: 0, world: newWorld() });
-    expect(s!.heroes[0].belt).toEqual(['bitter', 'brandy', 'bitter']);
+    expect(s!.heroes[0].belt).toEqual(['bitter', 'bitter', 'bitter']);
   });
 });

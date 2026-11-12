@@ -10,8 +10,9 @@ export type PotionId = 'bitter' | 'brandy' | 'oil' | 'frost' | 'smoke';
  * drops or teaches them, and a save's belt turns them into Bitter (client/save.ts). Oil barrels in the
  * world are props, not this, and still burn.
  */
-export const POTION_ORDER: PotionId[] = ['bitter', 'brandy'];
-export const DORMANT_POTIONS: PotionId[] = ['oil', 'frost', 'smoke'];
+export const POTION_ORDER: PotionId[] = ['bitter'];
+/** Kyle, 2026-11-12: "only have healing potions be what drops": the Brandy sleeps too, for now. */
+export const DORMANT_POTIONS: PotionId[] = ['brandy', 'oil', 'frost', 'smoke'];
 
 /**
  * How potions work: Bitter heals `heal` over `healTime` (and cures poison); Brandy, for `brandyTime`,
@@ -44,4 +45,4 @@ export const COINS = {
   life: 30,
   reach: 0.9,
 };
-export const POTION_DROPS = { scrapper: 0.08, archer: 0.1, butcher: 0.35, named: 1, weights: { bitter: 35, brandy: 25, oil: 0, frost: 0, smoke: 0 } as Record<PotionId, number> };
+export const POTION_DROPS = { scrapper: 0.08, archer: 0.1, butcher: 0.35, named: 1, weights: { bitter: 35, brandy: 0, oil: 0, frost: 0, smoke: 0 } as Record<PotionId, number> };

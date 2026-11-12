@@ -33,7 +33,7 @@ const beltFoot = (g: Game) => `${SHOPW.gold(g.profile.gold)} ${SHOPW.belt(g.prof
 function tavern(g: Game, panel: Panel): void {
   const pr = g.profile, again = () => tavern(g, panel);
   const lines = says('Gannet', RUMOURS[(g.world.day * 5 + pr.runs) % RUMOURS.length]) + (pr.want >= 30 ? dim(CHURCH.gannet) : '');
-  show(panel, PLACES.tavern, lines, potions(g, ['brandy']), beltFoot(g), again);
+  show(panel, PLACES.tavern, lines, [], beltFoot(g), again);
 }
 
 /** Sister Agne, her beds, and the Bitter she makes. */

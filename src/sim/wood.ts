@@ -16,6 +16,7 @@ import { startElement, stepElementLesson, wantsElement, type ElementStep } from 
 import { signGoal, startSign, stepSignLesson, wantsSign, type SignStep } from './woodsign';
 import { afterGoal, countNow, needNow, stepAfter, type After } from './woodsteps';
 import { walkHew } from './hewwalk';
+import { stepBitter } from './woodbitter';
 export { CUT, skipCut } from './woodcut';
 import type { ArenaRoom } from './room';
 import type { Enemy, FightEvent, Hero } from './types';
@@ -38,6 +39,8 @@ export interface WoodState {
   hewAlive: boolean;
   /** The relic is out of the Stoker (the game gives it); then walk the road. */
   relic: boolean;
+  /** The Bitter (sim/woodbitter.ts): handed over at your first hit, then two more once you've drunk it. */
+  bitter?: 'drink' | 'done';
   done: boolean;
   /** Seconds into waking up (-1: up and about): you lie still while he comes over. */
   wake: number;
@@ -69,7 +72,7 @@ export interface WoodState {
 }
 /** What the world is held for, and what lets it go on. */
 export type Move = 'move' | Teach;
-export interface Hold { kind: 'card' | 'act' | 'praise' | 'talk' | 'relic'; who: string; text: string; how?: string; move?: Move; need: 'continue' | 'move' | 'attack' | 'roll' | 'block' | 'element' | 'sign' | 'time'; t: number; until: number }
+export interface Hold { kind: 'card' | 'act' | 'praise' | 'talk' | 'relic'; who: string; text: string; how?: string; move?: Move; need: 'continue' | 'move' | 'attack' | 'roll' | 'block' | 'element' | 'sign' | 'time' | 'potion'; t: number; until: number }
 
 /** Waking, in seconds: the fade in, his slow walk over; then his lines wait for a tap; a breath on your feet. */
 export const WAKE = { fade: 2.5, arrive: 5.2, standing: 0.8 };
@@ -194,6 +197,7 @@ export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: nu
   const h = room.heroes.find((x) => x.id === HERO_ID);
   if (!h) return;
   if (ev.some((e) => e.k === 'down' && Math.abs(e.x - h.x) < 0.01 && Math.abs(e.y - h.y) < 0.01)) fallen(w, room);
+  if (stepBitter(w, room, h)) return;
   // Hew walks ahead to wait by the next lesson.
   const n = hew(room), lesson = lessonOf(w);
   if (n && lesson) {

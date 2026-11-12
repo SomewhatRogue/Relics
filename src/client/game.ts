@@ -297,7 +297,7 @@ export class Game {
     if (this.wood.cut >= 0 || this.wood.wake >= 0) return [];
     // A Mage's ELEMENT comes with its element step, after the full charge (sim/woodelement.ts); a Rogue's,
     // Ranger's or Healer's own button with theirs, after the clearing's lesson (sim/woodsign.ts).
-    const el = [...(elementTaught(this.wood) ? ['element'] : []), ...(signTaught(this.wood) ? ['sign'] : [])];
+    const el = [...(elementTaught(this.wood) ? ['element'] : []), ...(signTaught(this.wood) ? ['sign'] : []), ...(this.wood.bitter ? ['potion'] : [])];
     return this.wood.stage >= 5 ? ['attack', 'roll', 'block', 'relic', 'potion', 'grab', ...el] : [...lessonOf(this.wood).moves.filter((m) => m !== 'grab' || this.wood!.stage > 0 || this.wood!.more), ...el];
   }
   /** Your hound as chosen with Maeve (houndui.ts): kept on the hero, and your hero shows it at once
@@ -1385,6 +1385,8 @@ export class Game {
     else if (hold.need === 'roll') done = intent.rollSeq !== h.seen.roll;
     else if (hold.need === 'block') done = intent.blockSeq !== h.seen.block || intent.block;
     else if (hold.need === 'attack') done = intent.attackSeq !== h.seen.attack;
+    // The Bitter's card: the press that drinks it (the frame goes on with it, so it's drunk).
+    else if (hold.need === 'potion') done = intent.potionSeq !== h.seen.potion || this.continued;
     // The element card: a press of ELEMENT goes on and switches as the world restarts (or a tap on the card).
     else if (hold.need === 'element') done = (intent.elementSeq ?? 0) !== (h.seen.element ?? 0) || this.continued;
     // A MARK or MEND card: the press goes on and goes off as the world restarts.

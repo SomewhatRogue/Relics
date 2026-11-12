@@ -184,6 +184,9 @@ export const LINES = {
   block: "Well, there's three of them now, and that's too many to go rolling about between, so you stand your ground and let them knock. And that's *my* kiln they're pissing on, the little sods.",
   hut: "That's ^home^, kettle's older than you are. Hang on, I *didn't* leave that door open.",
   round: "Wait here, stray, I'll go round the back.",
+  /** The first hit you take, Hew there to see it (sim/woodbitter.ts): a card; then two more in passing. */
+  bitter: "Oh, they've only nicked you, it's nothing. Here, get that down you, it's ^Sister Agne's Bitter^ out of Wickhold, which is how they pay me when they pay me at all. You'll feel it working, mind, about when the taste of ditch wears off.",
+  bitterMore: "And take these two while I think of it, only save them for when it's *bad*, mind, not every little scratch.",
   /** Screamed with it holding him (woodcut.ts); then the last, cut off. */
   screams: ["Get off! Get *off* me! Aah! AAAH!"],
   scream: 'No! No, no, n',
@@ -229,6 +232,7 @@ export const LINES = {
   /** The game's own plain line under each lesson, with the control shown beside it. */
   how: {
     move: 'Walk a few steps.',
+    potion: 'Press POTION to drink a Bitter. It heals you and cures poison.',
     attack: 'Tap for quick blows. Hold for a heavy one.',
     roll: "Dodge out of the red before it lands, striped edge or not.",
     step: "Red with a striped edge hurts even through a block. Walk out before it lands.",

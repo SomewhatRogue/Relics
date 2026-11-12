@@ -51,6 +51,7 @@ export function woodRun(cls: HeroClass, skill = 1, most = 240): WoodRun {
         if (hold.need === 'roll') it.rollSeq = ++seq;
         else if (hold.need === 'block') (it.block = true), (it.blockSeq = ++seq);
         else if (hold.need === 'move') (it.mx = 1), g.continueHold();
+        else if (hold.need === 'potion') it.potionSeq = ++seq;
         else g.continueHold();
       } else if (w.cut < 0) {
         // Past a while on a count it can't make itself: made for it (it still fights what's there).

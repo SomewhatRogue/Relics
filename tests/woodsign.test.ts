@@ -157,6 +157,8 @@ describe("the Ranger's MARK step", () => {
 describe("the Healer's MEND step", () => {
   it('an archer shoots Hew; he kneels hurt and calls out, and lives; once they are down, MEND him', () => {
     const g = toSign('HEALER'), w = g.wood!;
+    // (The Bitter's card, at a first hit, is woodbitter.test.ts's.)
+    w.bitter = 'done';
     expect(w.sign).toMatchObject({ id: 'heal', phase: 'aim', taught: false });
     expect(g.taught()).not.toContain('sign');
     // Out of the way of the shot, and the archer looses at Hew.
