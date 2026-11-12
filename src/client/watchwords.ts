@@ -1,5 +1,6 @@
 /**
  * Every player-facing line of the Night Watch, in one place for the lore keeper and the line editor.
+ * (Gone, 2026-11-12: nothing reaches it now. Corporal Brisk gives out the long trips instead: client/boardwords.ts.)
  * (Brisk's lines and the lost line through the lore keeper 2026-11-05; the rest not yet, nor the line editor.)
  */
 export const WATCHW = {

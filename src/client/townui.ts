@@ -28,7 +28,6 @@ import { RELICW } from './relicwords';
 import { openStep } from './churchrelics';
 import { openAdvocate } from './councilui';
 import { openPractice } from './practiceui';
-import { openWatchPost } from './watchpost';
 import { openButts, openPond } from './pastimeui';
 import { openArmTable, openKnifeBoard } from './ratui';
 import { openBest } from './bestui';
@@ -103,9 +102,6 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
         ...hungry.map((it) => ({ label: `LEAVE ${itemName(it)} ON THE STEP`, act: () => (g.giveUp(it), townVoice.rite(voiceClock()), again()) }))]);
   } else if (id === 'yard') {
     panel.show('SQUIRE PELL', say('Squire Pell', "Yard's out back. Straw men, a butcher made of sacking on a chain, and me. Mostly me, getting hit. If you're the sort that heals, I'd take it kindly."), [{ label: 'TO THE YARD', primary: true, act: () => (panel.hide(), g.enterYard()) }]);
-  } else if (id === 'watch') {
-    // Corporal Brisk, at the stair up to the wall: a shift on the Night Watch, after dark (watchpost.ts).
-    openWatchPost(g, panel, CHAT[13].line);
   } else if (id === 'fish') {
     // Old Pennock at the millpond, and Abel at the butts: the town's pastimes (pastimeui.ts).
     openPond(g, panel);

@@ -336,6 +336,10 @@ most Want among the heroes is the one the bells don't spare).
 - Butchers eat their own dead as well as ours, and come up GORGED for a while (Kyle and the lore keeper, 2026-11-05). Eating only heals and gorges one; it never grows a butcher, which only slivers do. Burn the body and the ash gives it nothing, which is Hew's reason for burning the column's dead.
 
 ## The Night Watch (recorded 2026-11-05; Kyle's call, lore keeper)
+
+**Gone (2026-11-12, Kyle):** the Night Watch is no more. Corporal Brisk now gives out the long trips (the
+expeditions and the Instance) at the barracks' map table, alone or for a party; the town hall's map table and its
+clerk are gone too. Nobody says why the shift ended. What follows is the record of how it was.
 - The barracks has a stair out the back up onto the north wall.
 - The watch pays heroes by the head for a night shift with a bow, capped per night. It's wages, never touching the Want.
 - Anyone is handed a bow for the shift.

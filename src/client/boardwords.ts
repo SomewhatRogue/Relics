@@ -22,8 +22,8 @@ export const BOARDW = {
   back: 'BACK',
   jobs: 'JOBS',
   done: 'DONE LATELY',
-  /** The long trips moved to the town hall (Kyle, 2026-11-12): the map table's title, the board's pointer to it, the clerk there. */
+  /** The long trips, at the barracks' map table with Corporal Brisk (Kyle, 2026-11-12): its title, the board's pointer to it, Brisk's word there. */
   mapTitle: 'THE MAP TABLE',
-  toMap: "Pick the Barrowfields, Hangman's Wood, Fenmere or the Open Cut at the map table in the town hall.",
-  clerk: "These go a fair bit further out than the jobs on the board, so pick the one you want and I'll mark it on the map.",
+  toMap: "Corporal Brisk in the barracks sends you to the Barrowfields, Hangman's Wood, Fenmere or the Open Cut.",
+  clerk: "These are a fair way past anything on the board, so mind your boots. Say which one and I'll mark it on the map, just you or the lot of you, I don't mind.",
 };

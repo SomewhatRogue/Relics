@@ -333,3 +333,20 @@ not killing quickly, so kind of anticlimactic".
 - Lines: lore keeper (SOULBOUND safe: no tie to the church, the Lantern or the Want; keep it off hungry gear; "traded"
   also means selling here, so "given to another hero"), then line editor. tests/soulbound.test.ts; tests/loot.test.ts's
   old "another class cannot take it" now checks it's taken SOULBOUND. (Claude Opus 5.5)
+
+## 2026-11-12: the long trips at the barracks with Corporal Brisk; the Night Watch gone
+
+- Kyle: "get the instances and expeditions not from the town hall where it is today, but inside the barracks, which
+  already has things laid out and a board there, and you can talk to the guy who you previously could talk to about
+  defending the wall at night. We're going to nix that entirely; instead you talk to him to start an expedition or
+  quest. Still queue up the same way (parties and solo)."
+- shared/townhalls.ts: CORPORAL BRISK at the barracks' map table is now the `map` talk (the long trips, the same list
+  and party queue the clerk had: client/boardui.ts `openBoard(.., 'map')`); the town hall's map table and CLERK
+  TAMSIN (the Art chat's, 8031a54) are gone. client/voicebank.ts: Brisk's voice on `map`.
+- The Night Watch: every way in removed (Brisk's shift offer in client/townui.ts, the `?watch=1` switch in main.ts).
+  Its code (client/watch*.ts, shared/watchpay.ts, watchtune.ts, sim/watchscore.ts, the hero's `watch` record, the
+  `watch` mode in game.ts) is unreachable; left in place, to clear out in a cleanup of its own (it touches the save).
+- Lines: lore keeper, line editor. Brisk: "These are a fair way past anything on the board, so mind your boots. Say
+  which one and I'll mark it on the map, just you or the lot of you, I don't mind." The board: "Corporal Brisk in the
+  barracks sends you to the Barrowfields, Hangman's Wood, Fenmere or the Open Cut." The bible's Night Watch section
+  marked gone. (Claude Opus 5.5)

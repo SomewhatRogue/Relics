@@ -34,9 +34,11 @@ export function hall(door: string): GameMap | null {
     // Apprentice Lis sells the focus cupboard under the stair, at the desk (client/vendorui.ts).
     [n('MAGISTER VELL', 5.5, 2.5, 'trainer', 'mage', 3), n('APPRENTICE LIS', 7.4, 3.1, 'vendor', 'mage', 3)],
     { rounds: [rd('witchfire', 2.2, 4.6, 0.4), rd('candles', 7.6, 1.3, 0.2)], marks: [mk('chalk', 3, 4.8, 5, 3.2)], hangs: [hang('stars', 6.8, 1.9)], torches: [{ x: 5.5, y: -1.6 }] });
+  // Corporal Brisk at the map table: the long trips, the expeditions and the Instances (Kyle, 2026-11-12: the Night
+  // Watch is gone; you talk to him to start one, alone or with a party). Off the square's board (client/boardui.ts).
   if (door === 'hall') return room('THE BARRACKS', 13, 8, STONE,
     [b('rack', 1, 0.2, 3, 0.5), b('rack', 9, 0.2, 3, 0.5), b('counter', 9.4, 1.7, 1.8, 0.5), b('bunk', 0.4, 3, 1.2, 2.4), b('bunk', 11.4, 3, 1.2, 2.4), b('maptable', 4.6, 3.7, 3.2, 1), b('dummy', 10, 5.4, 0.8, 0.6)],
-    [n('MASTER COLE', 4.5, 2.4, 'trainer', 'trainer', 0), n('SQUIRE PELL', 8.8, 3.2, 'yard', 'squire'), n('CORPORAL BRISK', 6.5, 5.4, 'watch', 'guard', 13), n('QUARTERMASTER NELL', 10.3, 1.15, 'vendor', 'squire', 0)],
+    [n('MASTER COLE', 4.5, 2.4, 'trainer', 'trainer', 0), n('SQUIRE PELL', 8.8, 3.2, 'yard', 'squire'), { ...n('CORPORAL BRISK', 6.5, 5.4, 'map', 'guard', 13), reach: 1.6 }, n('QUARTERMASTER NELL', 10.3, 1.15, 'vendor', 'squire', 0)],
     { marks: [mk('rushes', 1.6, 1, 9.8, 6)], hangs: [hang('shields', 4.2, 1.7), hang('banner', 6.1, 0.8), hang('shields', 7.1, 1.7)] });
   if (door === 'lodge') return room("THE HUNTERS' LODGE", 11, 8, HOME,
     [b('rack', 0.8, 0.2, 4, 0.5), b('skinbench', 6.4, 2.8, 2.6, 0.8), b('sacks', 9.2, 4.6, 1.2, 1)],
@@ -67,10 +69,9 @@ export function hall(door: string): GameMap | null {
     { marks: [mk('rushes', 2.6, 3, 6, 3)], hangs: [hang('notices', 4.8, 1.4)], braziers: [{ x: 2, y: 3.2, r: 0.35 }] });
   // The council's two choices on boards either side of the valley map, someone under each to argue it
   // (client/voteboards.ts, councilui.ts); the reeve heard from across his table.
-  // The map table by the west wall, Clerk Tamsin at it: the long trips, off the square's board (Kyle, 2026-11-12).
   if (door === 'townhall') return room('THE TOWN HALL', 12, 8, HOME,
-    [b('desk', 3, 2.4, 6, 1), b('maptable', 0.8, 5, 3.2, 1)],
-    [{ ...n('REEVE HOLLIS', 6, 1.7, 'council', 'reeve'), reach: 1.4 }, { ...n('CLERK TAMSIN', 2.4, 4.6, 'map', 'villager'), reach: 1.6 }, n('ALDER BRAM', 2.2, 1.3, 'advocate', 'elder', 3), n('GOODWIFE SELL', 9.8, 1.3, 'advocate', 'villager', 4)],
+    [b('desk', 3, 2.4, 6, 1)],
+    [{ ...n('REEVE HOLLIS', 6, 1.7, 'council', 'reeve'), reach: 1.4 }, n('ALDER BRAM', 2.2, 1.3, 'advocate', 'elder', 3), n('GOODWIFE SELL', 9.8, 1.3, 'advocate', 'villager', 4)],
     { marks: [mk('rug', 2.4, 1.8, 7.2, 2.6)], hangs: [hang('vote', 0.4, 3.6), hang('map', 4.4, 3.2), hang('vote', 8, 3.6)], torches: [{ x: 4.2, y: -1.6 }, { x: 7.8, y: -1.6 }] });
   return null;
 }

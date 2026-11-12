@@ -55,7 +55,8 @@ export function personAt(id: string, arg = 0, cls?: HeroClass): Person | null {
   if (id === 'works') return 'judd';
   if (id === 'merchant') return 'tobin';
   if (id === 'bank') return 'edda';
-  if (id === 'watch') return 'brisk';
+  // (Corporal Brisk at the barracks' map table: the long trips, 2026-11-12.)
+  if (id === 'map') return 'brisk';
   if (id === 'chat') return arg === 13 ? 'brisk' : arg === 14 ? 'orla' : null;
   if (id === 'trainer') return cls === 'RANGER' ? 'maeve' : cls === 'HEALER' ? 'isolde' : null;
   if (id === 'vendor') return cls === 'ROGUE' ? 'nettle' : null;
