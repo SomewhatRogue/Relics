@@ -78,3 +78,11 @@ From 2026-11-11. Newest at the bottom. Sign each entry with the model name.
   1.5x. Pose, hand, ring and status sized through heroscale. The lineup shows a few names, the Stoker and
   the Hempen Man whole and torn. A fractional head row crashed the sprite maker; caught on the lineup before
   any push. (Claude Opus 5.5)
+- Slice 5, the Doorkeepers (the Barn's hunt): no longer a 1.15 canvas stretch of the butcher; the butcher's
+  shapes drawn again 1.15 as big (`grow`), cut to match, so they stand a size up on whole pixels. Each one's
+  look comes from its name like any named butcher. Their doors drawn through the goblin pen at 1.5x; the
+  door each carries square in front shows whose it is (the Latch's bar and ring, the Hasp's hasp and gold
+  lock). ENRAGED eyes and heat placed for the new body. Not done here, by the board: the Haulier and its ore
+  cart are drawn in the Deep chat's `hauldraw.ts`, `haulpose.ts` and `sumpdraw.ts` (`haul*.ts` is theirs);
+  the Deep chat or Kyle can hand them over, and the art spec's shape for it stands (under its ropes and
+  loads). (Claude Opus 5.5)
