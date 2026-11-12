@@ -45,10 +45,10 @@ export const UNIQUES = {
   brutering: { name: 'A HEAVY IRON BAND', pool: 'brute', slot: 'ring', mods: [{ id: 'damage', v: 0.1 }, { id: 'knock', v: 0.2 }, { id: 'health', v: 15 }], line: 'Cast for a finger twice the size of yours, then hammered down to fit.' },
   ironscales: { name: 'LACED PLATE', pool: 'iron', slot: 'armor', armor: 'heavy', mods: [{ id: 'tough', v: 0.22 }, { id: 'guard', v: 0.1 }, { id: 'health', v: 15 }], line: 'Iron plates pulled off the biggest ones and laced together.' },
   ironrivet: { name: 'A RIVET', pool: 'iron', slot: 'ring', mods: [{ id: 'tough', v: 0.1 }, { id: 'guard', v: 0.15 }, { id: 'breath', v: 0.1 }], line: 'A rivet off a big iron plate, hammered into a ring.' },
-  // THE LISTENER's pool. PLACEHOLDER names and lines for the lore keeper and line editor (theme: cave-damp steel the dark kept, heavy and quiet).
-  hushmaul: { name: 'THE HUSHED MAUL', pool: 'listener', slot: 'weapon', kit: 'mace', trait: 'crushing', mods: [{ id: 'damage', v: 0.17 }, { id: 'knock', v: 0.22 }, { id: 'guard', v: 0.1 }], line: 'A cave-damp hammer head on a wrapped haft. It rings like wet cloth.' },
+  // THE LISTENER's pool (cave-damp steel the dark kept, heavy and quiet). Lore keeper and line editor 2026-11-12.
+  hushmaul: { name: 'THE HUSHED MAUL', pool: 'listener', slot: 'weapon', kit: 'mace', trait: 'crushing', mods: [{ id: 'damage', v: 0.17 }, { id: 'knock', v: 0.22 }, { id: 'guard', v: 0.1 }], line: 'A hammer head black with the wet, on a haft wrapped in rag, and it hardly rings when it lands.' },
   dampmail: { name: 'DAMP MAIL', pool: 'listener', slot: 'armor', armor: 'heavy', mods: [{ id: 'tough', v: 0.2 }, { id: 'health', v: 25 }, { id: 'foot', v: 0.06 }], line: 'Steel gone dark with cave water, and quiet when it moves.' },
-  dripring: { name: 'A DRIPSTONE RING', pool: 'listener', slot: 'ring', mods: [{ id: 'dodge', v: 0.12 }, { id: 'breath', v: 0.15 }, { id: 'health', v: 15 }], line: 'A ring of grey stone with one cold drop always on it.' },
+  dripring: { name: 'A DRIPSTONE RING', pool: 'listener', slot: 'ring', mods: [{ id: 'dodge', v: 0.12 }, { id: 'breath', v: 0.15 }, { id: 'health', v: 15 }], line: 'Cut from a stub of cave dripstone, and still damp.' },
 } satisfies Record<string, Unique>;
 export type UniqueId = keyof typeof UNIQUES;
 
