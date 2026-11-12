@@ -138,7 +138,7 @@ export function townMap(w: WorldState): GameMap {
   if (quarter) npcs.push(n('OLD MERREN', 57, 18, 'chat', 'elder', 9));
   // Cobb the gravedigger at the top of the Deep's ladder, once the grate's open (docs/design/the-deep.md; Kyle,
   // 2026-11-11: "we say Cobb sits by the sewer grate but he doesn't"). Talking to him is the grate's own panel.
-  if (workDone(w, 'sewers')) npcs.push(n('COBB', 25.1, 35.7, 'sewer', 'digger'));
+  if (workDone(w, 'sewers')) npcs.push({ ...n('COBB', 25.1, 35.7, 'sewer', 'digger'), work: 'ladder' });
   // Foreman Judd at the works stall, and his crew sweeping, hauling and shovelling (publicworks.ts).
   npcs.push(...publicWorks(w));
   const m = mending(w), sg = siege(w), worn = !workDone(w, 'shutters');

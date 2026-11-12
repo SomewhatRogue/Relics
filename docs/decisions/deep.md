@@ -74,3 +74,8 @@ two more steps (Kyle sees Sam's GO DEEPER; Sam waits, sees Kyle choosing). Words
 Also (Kyle, same night): no named-butcher hunt and no BIG ONE on the floor straight after a boss (shared/deep.ts,
 roombudget.ts bigRooms); hunts now first on floor 9. A Doorkeeper going berserk gets DOORKEEPERS.enrage.heal
 (a quarter) of its health back, with a heal number over it (sim/doorpair.ts phaseTwo).
+
+## 2026-11-12: Cobb sits at the ladder (Opus 5.5)
+Kyle: "ya draw it". Npc work `ladder` (shared/arena.ts): client/cobbdraw.ts draws his crate behind him, lifts him
+onto it (COBB_SIT), the slate on his knee and a lit lamp beside him; the lamp lights the flags (scene.ts town
+lights). scripts/cobb-look.cjs for a phone shot (world.dens 99 opens the grate).

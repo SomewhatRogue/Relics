@@ -10,6 +10,7 @@ import { gobPen } from './gobpen';
 import { hs } from './heroscale';
 import { drawWork } from './siegedraw';
 import { CREW, drawCrew } from './crewdraw';
+import { COBB_SIT, drawCobbCrate, drawCobbThings } from './cobbdraw';
 
 type Part = Parameters<typeof makeSprite>[2][number];
 export interface Look { body: string; trim: string; skin: string; hair: Part[]; apron?: string }
@@ -148,13 +149,17 @@ export function drawNpc(c: Ctx, n: Npc, x: number, y: number, near: boolean, fx 
   if (n.pose) return drawDead(c, s, x, y, n);
   // The works' crew face the way they walked in, so what's in their hands faces it too.
   const crew = !!n.work && CREW.has(n.work);
-  blit(c, s, x, y - (n.lift ?? 0) + bob, walking || crew ? fx < 0 : Math.floor(c.now * 0.25 + n.y) % 2 === 0, 0, n.sneak ? 0.78 : n.kneel ? 0.7 : 1);
+  // Cobb sits on his crate at the ladder: the crate behind, him up on it, his slate and lamp in front (cobbdraw.ts).
+  const sits = n.work === 'ladder';
+  if (sits) drawCobbCrate(c, x, y);
+  blit(c, s, x, y - (n.lift ?? 0) - (sits ? COBB_SIT : 0) + bob, walking || crew ? fx < 0 : Math.floor(c.now * 0.25 + n.y) % 2 === 0, 0, n.sneak ? 0.78 : n.kneel ? 0.7 : 1);
   // What they hold is drawn in the old pixels through the pen, onto the 1.5x body (gobpen.ts).
   const p = gobPen(c, x, y);
   // Hew with the archer's arrow in his leg, down on one knee (sim/woodheal.ts).
   if (n.arrow) drawArrowIn(p, x, y);
   // A guard carries a spear upright.
-  if (crew) drawCrew(p, n, x, y + bob, fx, walking);
+  if (sits) drawCobbThings(c, x, y);
+  else if (crew) drawCrew(p, n, x, y + bob, fx, walking);
   else if (n.work) drawWork(p, n, x, y + bob, tx, fx);
   if (n.mute) return;
   if (n.look === 'guard') (p.lit.fillStyle = '#6b4a2b'), p.lit.fillRect(Math.round(x + (fx < 0 && walking ? -6 : 5)), Math.round(y - 22 + bob), 1, 20), (p.lit.fillStyle = '#cfd6dc'), p.lit.fillRect(Math.round(x + (fx < 0 && walking ? -6 : 5)), Math.round(y - 24 + bob), 1, 3);

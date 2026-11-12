@@ -568,6 +568,8 @@ export class Scene {
       if (r.kind === 'witchfire') lights.push({ x: OX + r.x * PX - cx, y: OY + r.y * PX - cy - 10, r: 90 + Math.sin(now * 5) * 4, i: 1.1, c: witchColour(now) });
     }
     for (const r of map.rounds) if (r.kind === 'moths' && !map.theme.day) lights.push({ x: OX + r.x * PX - cx - 36, y: OY + r.y * PX - cy - 34, r: 84, i: 0.4 * dusk(), c: [1, 0.84, 0.58] });
+    // Cobb's lamp by the Deep's ladder (client/cobbdraw.ts).
+    for (const n of map.npcs ?? []) if (n.work === 'ladder') lights.push({ x: OX + n.x * PX - cx + 12, y: OY + n.y * PX - cy - 6, r: 56 + Math.sin(now * 9) * 3, i: 0.85, c: [1, 0.76, 0.42] });
     for (const r of map.rounds) if (r.kind === 'lantern') lights.push({ x: OX + r.x * PX - cx, y: OY + r.y * PX - cy - 28, r: 150 + Math.sin(now * 3) * 4, i: 1.25 * tk, c: [1, 0.78, 0.45] });
     for (const b of map.blocks) {
       const [bx, by] = blockAt(b), mx = bx + (b.w * PX) / 2 - cx;

@@ -204,7 +204,8 @@ export interface Npc {
   fy?: number;
   /** Paint only, what they're busy at: carrying the dead and digging, at the whetstone, at the well;
    *  the public works' crew sweeping, hauling planks, shovelling rubble into a barrow. */
-  work?: 'bury' | 'dig' | 'whet' | 'well' | 'sweep' | 'haul' | 'shovel';
+  /** (`ladder`: Cobb sitting on his crate at the Deep's ladder, with his lamp and slate: client/cobbdraw.ts.) */
+  work?: 'bury' | 'dig' | 'whet' | 'well' | 'sweep' | 'haul' | 'shovel' | 'ladder';
   /** Seconds they stand at each point of their round, working, before walking on (npcstops.ts). */
   stops?: number[];
   /** Walks on Wickhold's wall clock, not the room's, so every screen has them in the same spot. */
