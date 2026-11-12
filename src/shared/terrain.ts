@@ -65,6 +65,8 @@ export interface Foe {
   drives?: boolean;
   /** THE BRAKESMAN: works the brake at the top of the map's rail (sim/brake.ts). */
   brakes?: boolean;
+  /** One of the washing floor's pair (sim/pairfall.ts). */
+  pair?: 'sluicer' | 'raker';
 }
 /** Which way the party went at a fork. */
 export type RoadId = Road['road'];

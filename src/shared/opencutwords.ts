@@ -34,6 +34,13 @@ export const BRAKE_WORDS = {
   goal: 'GRAB a cart and send it up the rail at the brake, then kill',
 };
 
+/** THE SLUICER and THE RAKER (sim/pairfall.ts): the goal's line, and over the Sluicer as it falls and stands. */
+export const PAIR_WORDS = {
+  goal: (names: string) => `Kill ${names} close together. If the Sluicer drops first, the Raker drags it back out`,
+  fell: 'IN THE WATER',
+  up: 'STOOD UP',
+};
+
 /** The checkpoint: a gate passed, a wipe, and waiting at the gate for the rest. */
 export const CHECK_WORDS = {
   passed: 'Gate passed, and if you all fall you start here',

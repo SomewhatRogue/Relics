@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
 import { openCut, INSTANCES, areaOf } from '../src/shared/instances';
 import { HAUL_NAME } from '../src/shared/bosswords';
 import { CUT_NAMES } from '../src/shared/opencutwords';
-import { BRAKE, DROVER, HERO, INSTANCE, PARTY, TICK } from '../src/shared/tuning';
+import { BRAKE, DROVER, HERO, INSTANCE, PAIR, PARTY, TICK } from '../src/shared/tuning';
 import { WORKINGS_AT } from '../src/shared/cutworkings';
 import { damage } from '../src/sim/damage';
 import { newRun, runRoom, tally, type Run } from '../src/sim/run';
@@ -290,9 +290,78 @@ describe('THE BRAKESMAN', () => {
     const top = Math.max(...carts().map((p) => p.id));
     step(room, BRAKE.off - 1);
     expect(Math.max(...carts().map((p) => p.id))).toBe(top);
-    Object.assign(h, { x: 20, y: 13 });
-    step(room, 8);
+    // (A hero standing close by: it walks back all the same.)
+    step(room, 1.2);
+    Object.assign(h, { x: bk.x + 1.2, y: bk.y + 0.6 });
+    for (let n = 0; n < Math.round(8 / TICK); n++) Object.assign(h, { x: bk.home.x + 2.2, y: bk.home.y - 1.4, safeT: 99 }), room.step();
     expect(Math.hypot(bk.x - bk.home.x, bk.y - bk.home.y)).toBeLessThan(0.4);
     expect(bk.screened).toBe(BRAKE.braced);
+  });
+});
+
+describe('THE SLUICER and THE RAKER', () => {
+  const floor = () => {
+    const a = area(2), h = a.hs[0];
+    const sl = a.room.enemies.find((e) => e.name === CUT_NAMES.sluicer)!, rk = a.room.enemies.find((e) => e.name === CUT_NAMES.raker)!;
+    a.room.enemies = [sl, rk];
+    Object.assign(h, { x: 12, y: 13, hp: 9999, maxHp: 9999, safeT: 999 });
+    step(a.room, 0.1);
+    const kos = (e: typeof sl) => {
+      const ev: never[] = [];
+      damage(e, 99999, a.room.time, ev);
+      return ev as { k: string }[];
+    };
+    return { ...a, h, sl, rk, kos };
+  };
+
+  it('the Sluicer falls in the water while the Raker stands: not dead, and nothing lands on it', () => {
+    const { room, sl, kos } = floor();
+    expect(kos(sl).some((e) => e.k === 'pairfell')).toBe(true);
+    expect(isDead(sl)).toBe(false);
+    expect(sl.fallen).toBe(room.time);
+    const hp = sl.hp;
+    damage(sl, 500, room.time, []);
+    expect(sl.hp).toBe(hp);
+  });
+
+  it('the Raker walks to it and stands it up again at half its health', () => {
+    const { room, sl, rk, kos } = floor();
+    kos(sl);
+    const seen: string[] = [];
+    for (let n = 0; n < Math.round(12 / TICK) && sl.fallen !== undefined; n++) room.step(), seen.push(...room.events.map((e) => e.k));
+    expect(seen).toContain('pairup');
+    expect(sl.fallen).toBeUndefined();
+    expect(sl.hp).toBe(Math.round(sl.maxHp * PAIR.back));
+    expect(Math.hypot(sl.x - rk.x, sl.y - rk.y)).toBeLessThan(PAIR.reach + 0.6);
+  });
+
+  it('a stun on the Raker starts its lift over', () => {
+    const { room, sl, rk, kos } = floor();
+    kos(sl);
+    for (let n = 0; n < Math.round(10 / TICK) && (rk.lift ?? 0) < PAIR.lift / 2; n++) room.step();
+    expect(rk.lift).toBeGreaterThan(0);
+    Object.assign(rk, { act: 'stunned', actT: 0, actDur: 1 });
+    room.step();
+    expect(rk.lift).toBe(0);
+    expect(sl.fallen).toBeDefined();
+  });
+
+  it('kill the Raker while it lies there and the Sluicer is dead too; the Raker first, and the Sluicer dies as any', () => {
+    const a = floor();
+    a.kos(a.sl);
+    a.kos(a.rk);
+    expect(isDead(a.rk)).toBe(true);
+    a.room.step();
+    expect(isDead(a.sl)).toBe(true);
+    expect(goal(a.run, a.room).done).toBe(true);
+    const b = floor();
+    b.kos(b.rk);
+    expect(b.kos(b.sl).some((e) => e.k === 'death')).toBe(true);
+    expect(isDead(b.sl)).toBe(true);
+  });
+
+  it('says to kill them close together while both are about', () => {
+    const { run, room } = floor();
+    expect(goal(run, room).text).toContain('close together');
   });
 });

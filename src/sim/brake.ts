@@ -25,6 +25,8 @@ import type { Enemy, EnemyAttack, Hero, Prop } from './types';
 
 type Rail = { y: number; x0: number; x1: number };
 const holds = new WeakMap<object, { seen: Map<string, number>; hold: Map<string, { cart: number; at: number }>; hits: Map<number, Set<string>> }>();
+/** Where it stood last tick walking back to its brake (not saved). */
+const back = new WeakMap<Enemy, { x: number; y: number }>();
 /** A cart on the rail (the chamber's others, off it, are only carts). */
 const isCart = (p: Prop) => p.kind === 'cart' && !p.broken && Math.abs(p.y - (currentMap().rail?.y ?? -99)) < 0.05;
 const up = (h: Hero) => h.act !== 'down' && !h.out && h.id !== 'squire';
@@ -69,7 +71,13 @@ export function stepBrake(w: World): void {
   if (!st) holds.set(map, (st = { seen: new Map(), hold: new Map(), hits: new Map() }));
   // At its post, braced, letting the carts go.
   // Its brake back in use: it walks back to it (its back to you), then works it.
-  if (free(e, now) && !onBrake(e, now)) goTo(e, e.home.x, e.home.y, BRAKE.walk, TICK);
+  // (Its own chase this tick undone while it walks back, or it rocks between you and the brake.)
+  if (free(e, now) && !onBrake(e, now)) {
+    const was = back.get(e);
+    if (was) Object.assign(e, { x: was.x, y: was.y, attack: null });
+    goTo(e, e.home.x, e.home.y, BRAKE.walk, TICK);
+    back.set(e, { x: e.x, y: e.y });
+  } else back.delete(e);
   if (onBrake(e, now)) {
     Object.assign(e, { x: e.home.x, y: e.home.y, kvx: 0, kvy: 0, screened: BRAKE.braced });
     // (Only once someone's come near enough to hear it: an area's wake distance from its brake.)

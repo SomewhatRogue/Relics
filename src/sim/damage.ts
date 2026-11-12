@@ -1,4 +1,5 @@
 /** Damage to an enemy from anything (blades, shots, blasts, burning), and what death resets. */
+import { fallsInstead } from './pairfall';
 import { BROOD, BUTCHER, GUARD, OVERKILL, SCRAPPER, SPIDER, STORM, SWING_DUMMY, TRAIT, WEAK_POP, weakOn, MARK, MEAL, type Hurt } from '../shared/tuning';
 import type { DeathKind, Enemy, FightEvent } from './types';
 import { wet } from './wet';
@@ -74,6 +75,8 @@ export function sayWeak(e: Enemy, m: number, now: number, ev: FightEvent[], el: 
 export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: DamageOpts = {}): boolean {
   e.alert = true;
   if (e.act === 'dead') return false;
+  // (Lying in the water: nothing lands till it's up or done for: sim/pairfall.ts.)
+  if (e.fallen !== undefined) return false;
   // A boss's door stops what comes at its front (a burst, a tick or storm goes round it), and a roar takes nothing (sim/doorwall.ts).
   if (e.boss && n > 0) {
     const round = o.tick || o.how === 'burst' || o.el === 'storm', got = doorTake(e, n, round ? 0 : o.dx ?? 0, round ? 0 : o.dy ?? 0, now);
@@ -111,6 +114,8 @@ export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: Da
     if (e.hp <= 0) e.hp = e.maxHp;
     return false;
   }
+  // THE SLUICER falls in the water while THE RAKER stands, to be stood up again (sim/pairfall.ts).
+  if (e.hp <= 0 && fallsInstead(e, now, ev)) return false;
   if (e.hp <= 0) {
     const how = o.tick ? o.how ?? 'burn' : -e.hp >= OVERKILL ? 'burst' : o.how ?? 'fall';
     return kill(e, ev, how, o.dx ?? 0, o.dy ?? 0), true;

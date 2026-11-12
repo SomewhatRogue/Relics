@@ -57,7 +57,9 @@ export function washingPlan(job: Job): RoomPlan {
   prop(k, 'cage', A.cage.x, A.cage.y);
   pack(k, 4, { x: A.cage.x + 1.4, y: A.cage.y - 0.4 }, ['netter', 'fodder'], 0.9);
   // 5. THE SLUICER by the upper pool and THE RAKER beside it, a few of their own between.
-  keeper(k, 5, A.sluicer, 'ironhide', CUT_NAMES.sluicer, 300), keeper(k, 5, A.raker, 'heavy', CUT_NAMES.raker, 300);
+  // (One stands the other up: the Raker the tougher, so killing it first is the long way: sim/pairfall.ts.)
+  keeper(k, 5, A.sluicer, 'ironhide', CUT_NAMES.sluicer, 260).pair = 'sluicer';
+  keeper(k, 5, A.raker, 'heavy', CUT_NAMES.raker, 380).pair = 'raker';
   pack(k, 5, { x: 12, y: 7.2 }, ['fodder', 'fodder', 'lunger'], 1.4);
   k.chests.push({ ...A.chest });
   return areaPlan(k, job, { name: CUT_AREAS[2], w, h, kind: 'mine', torches: [6, w - 6] });

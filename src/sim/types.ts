@@ -527,6 +527,10 @@ export interface Enemy extends Body {
   screened?: number;
   /** THE BRAKESMAN (sim/brake.ts): it works the brake at the top of the rail; when it lets the next cart go, and its brake out of use until. */
   brakes?: { next: number; off: number };
+  /** THE SLUICER and THE RAKER (sim/pairfall.ts): which of the pair; the Sluicer's room time it fell in the water; the Raker's lift so far (s). */
+  pair?: 'sluicer' | 'raker';
+  fallen?: number;
+  lift?: number;
   /** A named goblin (a hunt's quarry, a story boss). */
   name?: string;
   /** A nest: spiders a wave, and when the next one hatches (-1 asleep). A spider: the nest it came from. */
@@ -840,6 +844,9 @@ export type FightEvent =
   | { k: 'deflect'; x: number; y: number }
   /** THE DROVER's roped line cut loose (sim/drover.ts). */
   | { k: 'cutloose'; x: number; y: number; by: string }
+  /** THE SLUICER in the water, and stood up again by THE RAKER (sim/pairfall.ts). */
+  | { k: 'pairfell'; x: number; y: number }
+  | { k: 'pairup'; x: number; y: number }
   | { k: 'boardout'; x: number; y: number }
   /** `more`: another blow of a pack rush met by the same guard in the same instant (its words said once). */
   | { k: 'block' | 'guardbreak' | 'winded' | 'breath' | 'bash' | 'dodge' | 'slip' | 'out' | 'roll' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number; more?: boolean; striped?: boolean }

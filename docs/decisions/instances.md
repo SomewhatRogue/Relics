@@ -2,6 +2,20 @@
 
 The Instances chat's log (docs/BOARD.md). Newest first, signed with the model. Spec: docs/design/instances.md.
 
+## 2026-11-11: THE SLUICER and THE RAKER (Kyle: "continue"; Claude Opus 5.5)
+
+Step 3, the washing floor's pair, from the spec's "one raises the other, so kill both close together" (`sim/pairfall.ts`,
+numbers `PAIR` in `shared/instancetune.ts`, the lift's ring `client/pairdraw.ts`). A blow that would kill THE SLUICER
+while THE RAKER stands drops it in the water instead (`fallen`, hp 1, nothing lands: a hook in `sim/damage.ts`; IN THE
+WATER). The Raker leaves the fight, walks to it and lifts it 2.5 s (a ring at the Sluicer's feet; a stun on the Raker
+starts it over), and the Sluicer is up at half its health (STOOD UP). Kill the Raker while it lies there and it's
+dead too; kill the Raker first and the Sluicer fights on alone and dies as any. The Raker is the tougher (380 to the
+Sluicer's 260), so killing it first is the long way. Goal: "Kill THE SLUICER and THE RAKER close together. If the
+Sluicer drops first, the Raker drags it back out" (lore keeper and line editor). Found and fixed for both this and the
+Brakesman: a goblin walking somewhere (the Raker to the Sluicer, the Brakesman back to its brake) rocked between there
+and the nearest hero, its own chase pulling it back each tick; now its own movement that tick is undone while it
+walks. The atlas's flooding isn't in. Open: every number.
+
 ## 2026-11-11: THE BRAKESMAN's fight (Kyle: "go"; Claude Opus 5.5)
 
 Step 3, the second named one, from the spec's "it rides the brake at the top of the incline and lets the carts go"

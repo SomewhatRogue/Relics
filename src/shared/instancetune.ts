@@ -41,3 +41,10 @@ export const DROVER = { screen: 0.25, reach: 1.1, cut: 1.6 };
  * `most` carts on the rail (the oldest at the bottom tipped off for a new one). Back to the brake at `walk` tiles a second.
  */
 export const BRAKE = { every: 4, fast: 2.6, below: 0.4, warn: 1, speed: 9, dmg: 22, knock: 10, width: 0.9, braced: 0.5, grab: 0.6, hit: 30, down: 3, off: 6, most: 4, walk: 2.4 };
+
+/**
+ * THE SLUICER and THE RAKER (the washing floor, sim/pairfall.ts): the Sluicer falls in the water instead of dying
+ * while the Raker stands; the Raker walks to it at `walk` and lifts it `lift` s (a stun starts that over), and it's
+ * up at `back` of its health. Kill the Raker while it lies there and it's dead too.
+ */
+export const PAIR = { walk: 3, lift: 2.5, back: 0.5, reach: 1.1 };

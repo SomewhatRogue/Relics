@@ -18,7 +18,7 @@ import { waiting } from './survivors';
 import { expedGoal } from './expedgoal';
 import { HELD_HINT, pickWay, type WayKind } from '../shared/ways';
 import { STAITHE_WORDS } from '../shared/staithewords';
-import { BRAKE_WORDS, DROVER_WORDS } from '../shared/opencutwords';
+import { BRAKE_WORDS, DROVER_WORDS, PAIR_WORDS } from '../shared/opencutwords';
 import { staitheGoal } from './staithegoal';
 
 export interface Captives { caged: number; waiting: number }
@@ -91,7 +91,8 @@ export function goal(run: Run, room: ArenaRoom, houses: Captives = { caged: 0, w
     // (THE DROVER behind its roped line: cut them loose first: sim/drover.ts.)
     // (THE BRAKESMAN braced on its brake: knock it off: sim/brake.ts.)
     const by = keep.find((e) => e.screened !== undefined), hint = by?.drives ? DROVER_WORDS.goal : by?.brakes ? BRAKE_WORDS.goal : '';
-    const kill = hint ? `${hint} ${names}` : `Kill ${names}`;
+    // (The washing floor's pair, both still about: kill them close together: sim/pairfall.ts.)
+    const kill = hint ? `${hint} ${names}` : keep.length > 1 && keep.some((e) => e.pair) ? PAIR_WORDS.goal(names) : `Kill ${names}`;
     return { text: also(keep.length ? kill : way(false)), done: !keep.length };
   }
   if (!isFinal(run)) {
