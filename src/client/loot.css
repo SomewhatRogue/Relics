@@ -25,3 +25,13 @@ body.touch #roll[hidden] { transform: translate(-50%, -140%); }
 #roll .rres div { display: flex; justify-content: space-between; gap: 8px; }
 #roll .rres div.win { color: #2fe0c8; }
 #roll .rres div.pass { color: #7a7f8a; }
+/* A phone (Kyle, 2026-11-12: the card was too big over the fight): a slim strip, the piece and the three
+   buttons; tap the piece for what it does (rollcard.ts toggles .open). */
+body.touch #roll { width: min(300px, calc(100vw - 24px)); padding: 6px 8px 7px; top: calc(158px + env(safe-area-inset-top)); }
+body.touch #roll .rhead img { width: 28px; height: 28px; padding: 2px; }
+body.touch #roll .rhead span::after { content: ' \25BE'; color: #2fe0c8; }
+body.touch #roll.open .rhead span::after { content: ' \25B4'; }
+body.touch #roll:not(.open) .rmods, body.touch #roll:not(.open) .uline { display: none; }
+body.touch #roll .rbar { margin: 4px 0; height: 3px; }
+body.touch #roll .rbtns button { min-height: 34px; }
+body.touch #roll .rbtns button small { display: none; }

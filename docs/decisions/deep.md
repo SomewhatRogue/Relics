@@ -98,3 +98,9 @@ Shove aims at its hero from any cart at rest. haulier.test's cart tests rewritte
 Kyle: lightning at the gear only helps storm heroes; carts are his gimmick. Decision: leave the gear rule as is
 (a reward for storm users who notice), no cue teaching it. Kept in mind for later: a cart thrown into the gear's
 frame drops its bucket on the Haulier below, if the fight grows samey.
+
+## 2026-11-12: quick fixes, phone and 3D (Opus 5.5)
+The boss plate over arenas: already handled (bossplate.ts setTopPush lets the camera bring the room's top down
+by the plate); the Haulier's gear was simply off screen, its arena taller than a phone. The roll card on a phone
+folds to the piece and the buttons (tap the piece for what it does; loot.css, rollcard.ts), below the tracker.
+3D: a held cart's aim as a flat gold strip (three/actors3d.ts, sim/cartpath.ts). loot-online.cjs 12 of 12.

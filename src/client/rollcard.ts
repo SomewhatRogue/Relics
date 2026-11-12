@@ -47,6 +47,8 @@ export class RollCard {
     this.el.hidden = true;
     document.body.appendChild(this.el);
     this.el.addEventListener('pointerdown', (e) => {
+      // On a phone the card is folded to the piece and the buttons: a tap on the piece opens what it does (loot.css).
+      if ((e.target as HTMLElement).closest('.rhead')) return void this.el.classList.toggle('open');
       const b = (e.target as HTMLElement).closest('button[data-pick]') as HTMLButtonElement | null;
       if (!b || b.disabled) return;
       e.preventDefault();
