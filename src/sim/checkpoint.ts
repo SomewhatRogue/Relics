@@ -1,6 +1,6 @@
 /**
  * An instance's checkpoints (docs/design/instances.md): every area's gate is one, the way in where the
- * party stands when the area begins (`map.hero`).
+ * party stands when the area begins (`map.hero`), or on one map the last gate passed (`run.check`: sim/stretches.ts).
  *
  * - A wipe isn't the end. Alone, going down is a wipe; in a party it's everyone down with nobody left to get
  *   up on their own. After a beat (INSTANCE.regroup) the party is up again at the area's gate, whole, and the
@@ -20,8 +20,9 @@ import type { Run } from './run';
 import type { Enemy, FightEvent, Hero } from './types';
 
 /** Where hero `i` of `n` stands at the gate: in a short row across the way in. */
-export function gateSpot(room: ArenaRoom, i: number, n: number): { x: number; y: number } {
-  const g = room.map.hero, x = g.x + (i - (n - 1) / 2) * 0.9;
+export function gateSpot(room: ArenaRoom, i: number, n: number, run?: Run): { x: number; y: number } {
+  // (On one map in stretches, the last gate passed: sim/stretches.ts.)
+  const g = run?.check ?? room.map.hero, x = g.x + (i - (n - 1) / 2) * 0.9;
   return { x: Math.max(0.6, Math.min(room.map.w - 0.6, x)), y: g.y };
 }
 
@@ -58,7 +59,7 @@ export function stepCheckpoint(run: Run, room: ArenaRoom, ev: FightEvent[]): voi
     if (run.wipeAt > room.time) return void (run.wipeAt = undefined);
     if (room.time - run.wipeAt < INSTANCE.regroup) return;
     run.wipeAt = undefined;
-    ps.forEach((h, i) => upAtGate(room, h, gateSpot(room, i, ps.length), ev));
+    ps.forEach((h, i) => upAtGate(room, h, gateSpot(room, i, ps.length, run), ev));
     for (const e of room.allEnemies) if (!isDead(e) && !e.boss) settle(room, e);
     return;
   }
@@ -71,5 +72,5 @@ export function stepCheckpoint(run: Run, room: ArenaRoom, ev: FightEvent[]): voi
     return;
   }
   // Out while your friends fight on: up at the gate after the walk back.
-  ps.filter((h) => h.act === 'down' && h.out && h.actT >= PARTY.bleed + INSTANCE.walkBack).forEach((h) => upAtGate(room, h, gateSpot(room, 0, 1), ev));
+  ps.filter((h) => h.act === 'down' && h.out && h.actT >= PARTY.bleed + INSTANCE.walkBack).forEach((h) => upAtGate(room, h, gateSpot(room, 0, 1, run), ev));
 }

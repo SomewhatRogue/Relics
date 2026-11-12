@@ -12,13 +12,15 @@ import { runInterior } from '../shared/interiors';
 import { isDead } from './damage';
 import { isSpiderKind } from '../shared/spiders';
 import type { ArenaRoom } from './room';
+import type { Enemy } from './types';
 import type { Run } from './run';
 import { densLeft, racksLeft } from './targets';
 import { waiting } from './survivors';
 import { expedGoal } from './expedgoal';
 import { HELD_HINT, pickWay, type WayKind } from '../shared/ways';
 import { STAITHE_WORDS } from '../shared/staithewords';
-import { BRAKE_WORDS, DROVER_WORDS, PAIR_WORDS } from '../shared/opencutwords';
+import { BRAKE_WORDS, DROVER_WORDS, GATE_WORDS, PAIR_WORDS } from '../shared/opencutwords';
+import { keepers, lastStretch, stretchOf } from './stretches';
 import { staitheGoal } from './staithegoal';
 
 export interface Captives { caged: number; waiting: number }
@@ -85,16 +87,17 @@ export function goal(run: Run, room: ArenaRoom, houses: Captives = { caged: 0, w
   const also = (text: string) => (people ? `${text}. ${people}` : text);
   // (A Deep floor's way out is the ladder on down to its checkpoint: shared/deep.ts.)
   const way = (home: boolean) => `${home ? (run.job.floor ? 'Way down' : 'Way home') : 'Way on'}: ${wayDir(room.map)}`;
+  // An instance on one map, in stretches: this stretch's named ones, then its gate (sim/stretches.ts).
+  const st = run.job.instance ? stretchOf(run, room.map) : undefined;
+  if (st) {
+    const keep = keepers(st, room), last = lastStretch(run, room.map);
+    if (keep.length) return { text: also(killWords(keep, room)), done: false };
+    return { text: also(last ? way(false) : GATE_WORDS.on), done: last };
+  }
   // An instance's area: its gate opens when its named ones are dead; the cages are there to free, never needed (shared/instances.ts).
   if (run.job.instance && !isFinal(run)) {
-    const keep = room.enemies.filter((e) => e.name && !isDead(e)), names = keep.map((e) => e.name).join(' and ');
-    // (THE DROVER behind its roped line: cut them loose first: sim/drover.ts.)
-    // (THE BRAKESMAN on its brake: knock it off: sim/brake.ts.)
-    const roped = room.survivors.some((v) => v.led && !v.gone), braking = keep.some((e) => e.brakes && e.act !== 'stunned' && room.time >= e.brakes.off);
-    const hint = keep.some((e) => e.drives) && roped ? DROVER_WORDS.goal : braking ? BRAKE_WORDS.goal : '';
-    // (The washing floor's pair, both still about: kill them close together: sim/pairfall.ts.)
-    const kill = hint ? `${hint} ${names}` : keep.length > 1 && keep.some((e) => e.pair) ? PAIR_WORDS.goal(names) : `Kill ${names}`;
-    return { text: also(keep.length ? kill : way(false)), done: !keep.length };
+    const keep = room.enemies.filter((e) => e.name && !isDead(e));
+    return { text: also(keep.length ? killWords(keep, room) : way(false)), done: !keep.length };
   }
   if (!isFinal(run)) {
     const fork = !!room.map.roads;
@@ -130,4 +133,12 @@ export function goal(run: Run, room: ArenaRoom, houses: Captives = { caged: 0, w
   // The story mission: the boss, every cage out here, and everyone freed brought out.
   if (!bossDead) return { text: also(`Kill ${run.job.boss}`), done: false };
   return { text: freed ? also(`Ring the bell. ${way(true)}`) : people, done: freed };
+}
+
+/** "Kill" the named ones still standing, with the trick each hides (an instance's: sim/drover.ts, brake.ts, pairfall.ts). */
+function killWords(keep: Enemy[], room: ArenaRoom): string {
+  const names = keep.map((e) => e.name).join(' and ');
+  const roped = room.survivors.some((v) => v.led && !v.gone), braking = keep.some((e) => e.brakes && e.act !== 'stunned' && room.time >= e.brakes.off);
+  const hint = keep.some((e) => e.drives) && roped ? DROVER_WORDS.goal : braking ? BRAKE_WORDS.goal : '';
+  return hint ? `${hint} ${names}` : keep.length > 1 && keep.some((e) => e.pair) ? PAIR_WORDS.goal(names) : `Kill ${names}`;
 }

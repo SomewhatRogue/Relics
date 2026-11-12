@@ -38,6 +38,7 @@ export const LOOK: Record<Block['kind'], Look> = {
   partition: { tall: 22, roof: '#3e2a1a', ridge: '#5a3d22', wall: '#6a5e52', windows: false, furniture: true },
   loom: { tall: 18, roof: '#5a3d22', ridge: '#7a5a34', wall: '#3a2a1a', windows: false, furniture: true },
   gallows: { tall: 34, roof: '#5a3d22', ridge: '#5a3d22', wall: '#2e2016', windows: false, furniture: true },
+  gate: { tall: 18, roof: '#2a2420', ridge: '#3a3028', wall: '#4a3a28', windows: false },
   hurdle: { tall: 12, roof: '#3a2818', ridge: '#3a2818', wall: '#5a4a30', windows: false, furniture: true },
   books: { tall: 26, roof: '#3a2818', ridge: '#3a2818', wall: '#2a1d12', windows: false, furniture: true },
   stair: { tall: 30, roof: '#2e2a34', ridge: '#2e2a34', wall: '#2e2a34', windows: false, furniture: true },

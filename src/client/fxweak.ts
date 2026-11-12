@@ -5,7 +5,7 @@
  * on a shield-bearer's board (sim/board.ts); BOARD OUT, splinters and a flash when a heavy blow or shot
  * knocks that board aside. Cosmetic only.
  */
-import { DROVER_WORDS, PAIR_WORDS } from '../shared/opencutwords';
+import { DROVER_WORDS, GATE_WORDS, PAIR_WORDS } from '../shared/opencutwords';
 import type { FightEvent } from '../sim/types';
 import type { Fx } from './fx';
 import { EL_COL } from './palette';
@@ -22,6 +22,10 @@ export function weakFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
     fx.say(x, y - 30, 'BLOCKED', '#c8b090');
     fx.burst(x, y - 10, 9, ['#ffffff', '#ffd27a', '#c8b090'], 65, true);
     fx.burst(x, y - 8, 4, ['#8a6a40', '#6a5030'], 35, false);
+    return true;
+  }
+  if (ev.k === 'gateopen') {
+    fx.say(x, y - 30, GATE_WORDS.open, '#ffd27a');
     return true;
   }
   if (ev.k === 'opened') {

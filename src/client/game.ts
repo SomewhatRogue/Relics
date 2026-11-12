@@ -857,7 +857,7 @@ export class Game {
             this.run.index++;
             if (road) this.run.roads[this.run.index] = road.road;
             // An instance's gate is a checkpoint: the wipes count from here (sim/checkpoint.ts).
-            if (this.run.job.instance) (this.run.downs = 0), (this.run.wipeAt = undefined);
+            if (this.run.job.instance) Object.assign(this.run, { downs: 0, wipeAt: undefined, stretch: 0, check: undefined });
             // The goblins ahead are counted for whoever's still with you.
             this.run.party = 1 + [...(this.coop?.friends.values() ?? [])].filter((f) => f.profile && !f.gone).length;
             this.place(runRoom(this.run), undefined, h);

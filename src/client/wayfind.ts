@@ -25,9 +25,18 @@ function nearest(me: P, list: P[]): P | null {
   return best;
 }
 
+import { keepers, lastStretch, stretchOf } from '../sim/stretches';
+
 export function wayTarget(game: Game): P | null {
   const room = game.room, me = game.hero;
   if (game.mode !== 'run' || !game.run || !me) return null;
+  // One map in stretches: this stretch's nearest named one, then its gate (sim/stretches.ts).
+  const st = stretchOf(game.run, room.map);
+  if (st && !lastStretch(game.run, room.map)) {
+    const keep = keepers(st, room), g = st.at;
+    const p = keep.length ? nearest(me, keep) : g ? { x: g.x + g.w / 2, y: g.y + g.h / 2 } : null;
+    return p && Math.hypot(p.x - me.x, p.y - me.y) > NEAR ? p : null;
+  }
   const t = target(room, me, game.houses());
   return t && Math.hypot(t.x - me.x, t.y - me.y) > NEAR ? t : null;
 }

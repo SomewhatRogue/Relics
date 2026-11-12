@@ -4,6 +4,7 @@
  * block is its footprint with a front wall rising from its bottom edge and a roof over it. Wooden ones
  * on a job char as they're hurt, burn with flames and smoke, and fall in to rubble.
  */
+import { drawGate } from './gatedraw';
 import type { Block, Round } from '../shared/arena';
 import { drawLit, houseOf, paintHouse } from './cottage';
 import { paintFate } from './wreck';
@@ -112,6 +113,8 @@ function door(b: Block, rect: Rect, w: number, wallY: number, l: Look): void {
 
 /** (x, y) is the block's top-left on screen (the footprint's corner). */
 export function drawBlock(c: Ctx, b: Block, x: number, y: number, lit: boolean): void {
+  // An instance's gate, shut or hauled up (gatedraw.ts).
+  if (b.kind === 'gate') return drawGate(c, b, x, y);
   const st = state(b);
   // Fenmere's boards and reeds (fenpieces.ts): their boxes on the lit layer only, so a telegraph on the
   // boards or under the reeds still shows.

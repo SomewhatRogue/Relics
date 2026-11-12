@@ -33,6 +33,8 @@ export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall'
   | 'tower' | 'tavern' | 'monument' | 'rubble' | 'cart' | 'rack'
   // Under siege: the gallows on the square, wicker hurdles barricading the gate.
   | 'gallows' | 'hurdle'
+  // An instance's gate between stretches of one map: shut till the party passes it (sim/stretches.ts).
+  | 'gate'
   // A shack of scrap boards and sailcloth (a shanty, a camp).
   | 'shack'
   // A side way out of a job's room to a dead end (shared/sideway.ts): a gap at the edge, drawn as one.
@@ -55,6 +57,19 @@ export interface Round extends Circle {
   /** Paint only: the plinth's statue (none yet: an empty plinth and a sign). */
   hero?: import('./statue.js').StatueHero;
 }
+/**
+ * A stretch of an instance's one map (docs/design/open-cut-map.md): the named ones `keep` to kill before its gate
+ * (the block `gate` of the map's blocks; none on the last stretch) opens for the whole party standing in `at`; past it
+ * the party's checkpoint is `check`.
+ */
+export interface Stretch {
+  name: string;
+  keep: string[];
+  gate?: number;
+  at?: { x: number; y: number; w: number; h: number };
+  check?: { x: number; y: number };
+}
+
 export interface Block {
   x: number; y: number; w: number; h: number; kind: BlockKind; label?: string;
   /** Walk up into the door (bottom middle) to go in: the interior's id. */
@@ -275,6 +290,8 @@ export interface GameMap {
   adits?: { x: number; y: number }[];
   /** The Doorkeepers' ground in the Deep (shared/sealarena.ts): the sealed door in the back wall, drawn only (client/sealdraw.ts). */
   sealed?: { x: number; w: number };
+  /** An instance's stretches on one map, in order (sim/stretches.ts; docs/design/open-cut-map.md). */
+  stretches?: Stretch[];
   hero: { x: number; y: number };
   /** Walk into this to leave (opens when the room says so). */
   exit: Area | null;

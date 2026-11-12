@@ -857,6 +857,8 @@ export type FightEvent =
   | { k: 'pairfell'; x: number; y: number }
   /** A named one opened up: OPEN (INSTANCE.open). */
   | { k: 'opened'; x: number; y: number }
+  /** An instance's gate between stretches opened for the party (sim/stretches.ts). */
+  | { k: 'gateopen'; x: number; y: number }
   | { k: 'pairup'; x: number; y: number }
   | { k: 'boardout'; x: number; y: number }
   /** `more`: another blow of a pack rush met by the same guard in the same instant (its words said once). */

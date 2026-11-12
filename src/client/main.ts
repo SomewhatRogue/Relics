@@ -8,6 +8,7 @@ import { signFor, signLeft } from '../sim/signature';
 import { ExpedUi } from './expedui';
 import { expedition, fenmere, goalWords, hangmansWood } from '../shared/expedjob';
 import { openCut, stressJob } from '../shared/instances';
+import { stretchOf } from '../sim/stretches';
 import { barnHunt } from '../shared/bossjobs';
 import { plateOf } from '../sim/bossplate';
 import { showPlate } from './bossplate';
@@ -441,7 +442,9 @@ function hud(now: number): void {
     const small = smallLine(x && !me.out && x.phase === 'shut' ? TRACKW.jobsLeft(left, x.goals.length) : g.text, rooms);
     // (On an expedition the named butcher's bar shows only once you're near it.)
     // (A boss of the kit: its plate, sim/bossplate.ts. While it's up the tracker stays tucked to its line under it.)
-    const plate = plateOf(room.enemies, room.time, (e) => !room.exped || Math.hypot(e.x - me.x, e.y - me.y) < 14);
+    // (On an instance's one map, only this stretch's named ones: sim/stretches.ts.)
+    const st = stretchOf(run, room.map);
+    const plate = plateOf(room.enemies, room.time, (e) => (st ? st.keep.includes(e.name ?? '') : !room.exped || Math.hypot(e.x - me.x, e.y - me.y) < 14));
     fold.render(full, small, run.job.place.name + run.index + ':' + (x && !me.out && x.phase === 'shut' ? 'jobs' + left : calm(g.text)), now, objFlash.holding(now), !!plate);
     showPlate($('#boss'), plate);
   } else {

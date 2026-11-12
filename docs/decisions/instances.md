@@ -2,6 +2,19 @@
 
 The Instances chat's log (docs/BOARD.md). Newest first, signed with the model. Spec: docs/design/instances.md.
 
+## 2026-11-11: one map in stretches, step 1 (Kyle: "go for it"; Claude Opus 5.5)
+
+docs/design/open-cut-map.md step 1 (`sim/stretches.ts`). A map lists its stretches (`map.stretches`: the named ones to
+kill, the gate block at its end, where the party gathers, the checkpoint beyond). A new block kind `gate`, solid until
+the room marks it `ruined` (open), which the path grid and every friend's screen already follow; drawn shut as banded
+timber, open as its posts (`client/gatedraw.ts`). The gate opens when the stretch's named ones are dead and every hero
+who's up stands at it (GATE OPEN); the party's then in the next stretch (`run.stretch`), the checkpoint moves to the gate
+(`run.check`, where a wipe gets everyone up: `sim/checkpoint.ts`) and the wipe count starts again. The goal line, the
+way-on arrow, the waiting line and the boss plate follow the current stretch. A new room (the boss arena) clears the
+stretch and checkpoint. The stress map now has a stretch a row, a gate in each wall and a WARDEN (dev label) to kill
+(`?stress=1`). Waiting on the writing pass, with step 2's lines: "Way on: through the gate, all of you together" and
+GATE OPEN. Next: step 2, the Open Cut remade as one map.
+
 ## 2026-11-11: the Open Cut as one map: the spec, and step 0 measured (Kyle: "do it"; Claude Opus 5.5)
 
 Kyle wants one huge WoW-like map with paths and branches, fewer and tougher goblins, each boss in a crafted place

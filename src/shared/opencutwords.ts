@@ -41,6 +41,12 @@ export const PAIR_WORDS = {
   up: 'STOOD UP',
 };
 
+/** An instance on one map: the goal once a stretch's named ones are dead, and the gate opening (sim/stretches.ts). */
+export const GATE_WORDS = {
+  on: 'Way on: through the gate, all of you together',
+  open: 'GATE OPEN',
+};
+
 /** The checkpoint: a gate passed, a wipe, and waiting at the gate for the rest. */
 export const CHECK_WORDS = {
   passed: 'Gate passed, and if you all fall you start here',
