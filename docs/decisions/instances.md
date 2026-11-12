@@ -252,3 +252,23 @@ not killing quickly, so kind of anticlimactic".
   it through `shown`. docs/design/boss-threat.md still says x10: yours to update.
 - Bosses already took every blow in full minus their armor (plates, a door); nothing changed there. The instance's
   bigger pools (`INSTANCE.tough`) stay as Kyle asked. (Claude Opus 5.5)
+
+## 2026-11-12: the loading stage, THE HAULIER as over the top's boss (arc step 3 done)
+
+- Kyle: "Do it" (the loading stage and the Haulier). THE LOADING STAGE (`shared/cutloading.ts`) is over the top's
+  third place: the Haulier's whole working from its own ground (shared/sumparena.ts `SUMP_SPOTS`, moved by
+  `LOADING_AT`): the rail and its two carts, the gear and its legs, the sump, the adit; ropeway pylons, the stage hut
+  and ore bins about it; the chained chest behind. `cutmap.ts` now carries a place's gear and adits.
+- `sim/instanceroom.ts` `kitBosses`: a kit boss in an area gets its body, notes and book as in its arena
+  (sim/arenaroom.ts), the chained chest the sure one; it's left out of the instance's toughness and fierce hooks (tuned
+  as in its ground, three heroes at the least). Its unique drop goes as before (sim/uniquedrop.ts keys on the boss).
+- Act 3 (the Haulier's arena) is gone for now, so over the top doesn't meet it twice: the job is two acts, no
+  `arena`, no `boss`, and each way's boss ends the run (the last stretch of the last area says "Way home", sim/goal.ts)
+  till the pit floor and the Overman (arc step 5).
+- Found on the way: the Brakesman took any cart standing above its incline for one sent back up (the stage's carts
+  would have jammed it): its own lanes' carts only now. And the GRAB button for carts only showed on maps with a rail,
+  so never on the incline alone (client/cluster.ts).
+- It notices you as any goblin does (about 5 tiles in the mine's dark), then fights its full rotation; screenshot
+  checked on a phone. Tests: the stage's pieces, its toughness by party, waking and fighting, the way home at its
+  death. Full suite green.
+- Kyle's puzzle idea written up for his yes: docs/design/instance-puzzles.md. (Claude Opus 5.5)

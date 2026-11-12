@@ -16,6 +16,8 @@ import { ropedNear } from '../src/sim/drover';
 import { currentSwing } from '../src/sim/hero';
 import { newRun, runRoom, tally, type Run } from '../src/sim/run';
 import { goal } from '../src/sim/goal';
+import { SUMP_SPOTS } from '../src/shared/sumparena';
+import { LOADING_AT } from '../src/shared/cutloading';
 import { stepCheckpoint, wiped } from '../src/sim/checkpoint';
 import { isDead } from '../src/sim/damage';
 import type { ArenaRoom } from '../src/sim/room';
@@ -25,17 +27,18 @@ import { walkable } from './walk';
 const job = (d = 12) => openCut(d);
 /**
  * A place of the Open Cut, the party at its foot: 0 the rows (act 1, Rakehead), 1 over the top (the winding house, then
- * `place` 1 the incline), 2 the washing floor (act 2, under the hill); 3, the Haulier's arena. `at` turns a place's own
+ * `place` 1 the incline), 2 the washing floor (act 2, under the hill); 3 over the top's loading stage, the Haulier's. `at` turns a place's own
  * (x, y) into its map's.
  */
 function area(i: number, ids = ['me'], d = 12, place = 0): { run: Run; room: ArenaRoom; hs: Hero[]; at: (x: number, y: number) => { x: number; y: number } } {
   const run = newRun(job(d));
-  Object.assign(run, { index: [0, 1, 1, 2][i], way: i === 2 ? 1 : i === 1 ? 0 : undefined, party: ids.length });
-  const places = [CUT_PLACES, OVER_PLACES, UNDER_PLACES][Math.min(i, 2)];
+  Object.assign(run, { index: [0, 1, 1, 1][i], way: i === 2 ? 1 : i ? 0 : undefined, party: ids.length });
+  const places = [CUT_PLACES, OVER_PLACES, UNDER_PLACES, OVER_PLACES][i];
+  if (i === 3) place = OVER_PLACES.length - 1;
   const fork = i === 0 ? { name: FORK_WORDS.yard, ways: [FORK_WORDS.over, FORK_WORDS.under] as [string, string] } : undefined;
   const room = runRoom(run), hs = ids.map((id) => room.join(id)), L = cutMap(job(d), places, fork).laid[place];
   for (const id of ids) room.setIntent(id, NO_INTENT);
-  if (i < 3) hs.forEach((h, n) => Object.assign(h, { x: L.x0 + L.w / 2 + n * 0.8, y: L.y0 + L.h - 1.6 }));
+  hs.forEach((h, n) => Object.assign(h, { x: L.x0 + L.w / 2 + n * 0.8, y: L.y0 + L.h - 1.6 }));
   return { run, room, hs, at: (x, y) => ({ x: x + L.x0, y: y + L.y0 }) };
 }
 const step = (room: ArenaRoom, s: number) => {
@@ -44,16 +47,15 @@ const step = (room: ArenaRoom, s: number) => {
 const fall = (h: Hero, out = false) => Object.assign(h, { hp: 0, act: 'down', actT: out ? PARTY.bleed : 0, actDur: HERO.respawn, ...(out ? { out: true, bleeding: true, selfUp: true } : {}) });
 
 describe('the Open Cut on the board', () => {
-  it('is three acts: Rakehead, over the top or under the hill, then the Haulier in its working', () => {
+  it('is two acts for now: Rakehead, then over the top (the Haulier at the end) or under the hill', () => {
     const j = job();
     expect(j.instance).toBe('opencut');
     expect(j.rooms).toBe(INSTANCES.opencut.areas.length);
-    expect(j.rooms).toBe(3);
-    expect(j.arena).toBe('haulier');
-    expect(j.boss).toBe(HAUL_NAME);
+    expect(j.rooms).toBe(2);
+    expect(j.arena).toBeUndefined();
     expect(areaOf(j, 1, 0).name).toBe(FORK_WORDS.over);
     expect(areaOf(j, 1, 1).name).toBe(FORK_WORDS.under);
-    expect(areaOf(j, 2).plan).toBeUndefined();
+    expect(OVER_PLACES[OVER_PLACES.length - 1].keep).toEqual([HAUL_NAME]);
   });
   it('is the same job, and the same map, for the same day', () => {
     expect(job(30)).toEqual(job(30));
@@ -92,7 +94,7 @@ describe('the map and its places', () => {
     for (let i = 1; i < laid.length; i++) expect(p.foes.some((f) => f.y > laid[i].y0 + laid[i].h && f.y < laid[i - 1].y0)).toBe(false);
   });
   it('has its named ones, none a butcher, THE DROVER driving the roped line, and runs bottom to top', () => {
-    const names = [[CUT_NAMES.drover], [], [], [CUT_NAMES.brakesman], [CUT_NAMES.sluicer, CUT_NAMES.raker]];
+    const names = [[CUT_NAMES.drover], [], [], [CUT_NAMES.brakesman], [HAUL_NAME], [CUT_NAMES.sluicer, CUT_NAMES.raker]];
     plans.forEach((plan, i) => {
       const p = plan(job());
       expect(p.foes.filter((f) => f.name).map((f) => f.name)).toEqual(names[i]);
@@ -105,7 +107,7 @@ describe('the map and its places', () => {
 });
 
 describe('the frame', () => {
-  it('builds each map dozing beyond an area`s reach, the pacing rules on; then the Haulier`s arena', () => {
+  it('builds each map dozing beyond an area`s reach, the pacing rules on, the Haulier at over the top`s end', () => {
     for (const i of [0, 1, 2]) {
       const { room: map } = area(i);
       expect(map.sleepFar).toBe(true);
@@ -172,9 +174,6 @@ describe('the frame', () => {
     expect(four.enemies.length).toBe(three.enemies.length);
     four.enemies.forEach((e, i) => expect(e.maxHp).toBeGreaterThan(three.enemies[i].maxHp));
     expect(four.enemies.filter((e) => !e.name).every((e) => (e.harm ?? 1) > 1)).toBe(true);
-    // The Haulier the same: at three heroes' health for one.
-    const h1 = area(3, ['me']).room.enemies.find((e) => e.boss)!, h3 = area(3, ['a', 'b', 'c']).room.enemies.find((e) => e.boss)!;
-    expect(h1.maxHp).toBe(h3.maxHp);
   });
 
   it('is fiercer than a job: every goblin winds up quicker, every pack led by an elite', () => {
@@ -386,6 +385,53 @@ describe('THE BRAKESMAN', () => {
     step(room, 1.2);
     for (let n = 0; n < Math.round(8 / TICK); n++) Object.assign(h, { x: bk.home.x + 2.2, y: bk.home.y - 1.4, safeT: 99 }), room.step();
     expect(Math.hypot(bk.x - bk.home.x, bk.y - bk.home.y)).toBeLessThan(0.4);
+  });
+});
+
+describe('THE HAULIER at the loading stage', () => {
+  const stage = (ids = ['me']) => {
+    const a = area(3, ids), e = a.room.enemies.find((x) => x.boss?.who === 'haulier')!;
+    return { ...a, e };
+  };
+
+  it('works its stage as in its own ground: the rail, the gear, the sump, the adit, the carts, its book, the chained chest', () => {
+    const { room, e, at } = stage();
+    const s = SUMP_SPOTS, d = LOADING_AT, m = room.map;
+    expect([m.rail!.x0, m.rail!.x1]).toEqual([at(s.rail.x0 + d.dx, 0).x, at(s.rail.x1 + d.dx, 0).x]);
+    expect(m.rail!.y).toBeCloseTo(at(0, s.rail.y + d.dy).y);
+    expect(m.gear).toEqual(at(s.gear.x + d.dx, s.gear.y + d.dy));
+    expect(m.adits).toEqual(s.adits.map((p) => at(p.x + d.dx, p.y + d.dy)));
+    expect(room.props.filter((p) => p.kind === 'cart' && Math.abs(p.y - m.rail!.y) < 0.01).length).toBe(2);
+    expect(room.bosses?.of).toBe('haulier');
+    expect(e.boss!.poiseMax).toBeGreaterThan(0);
+    expect(e.fierce).toBeFalsy();
+    expect(room.chests.some((c) => c.chained && c.boss !== undefined)).toBe(true);
+  });
+
+  it('is as tough as in its own ground for the party, three at the least', () => {
+    const one = stage(['me']).e, three = stage(['a', 'b', 'c']).e, four = stage(['a', 'b', 'c', 'd']).e;
+    expect(one.maxHp).toBe(three.maxHp);
+    expect(four.maxHp).toBeGreaterThan(three.maxHp);
+  });
+
+  it('wakes and fights the party at its stage; dead, the way home', () => {
+    const { run, room, hs, e } = stage();
+    run.stretch = room.map.stretches!.length - 1;
+    Object.assign(hs[0], { x: e.x, y: e.y + 4, hp: 9999, maxHp: 9999 });
+    let blows = 0;
+    for (let n = 0; n < Math.round(12 / TICK); n++) {
+      Object.assign(hs[0], { hp: 9999 });
+      const was = e.attack;
+      room.step();
+      if (!was && e.attack) blows++;
+    }
+    expect(blows).toBeGreaterThan(0);
+    expect(goal(run, room).done).toBe(false);
+    Object.assign(e, { hp: 0, act: 'dead' });
+    step(room, 0.5);
+    const g = goal(run, room);
+    expect(g.done).toBe(true);
+    expect(g.text).toContain('Way home');
   });
 });
 

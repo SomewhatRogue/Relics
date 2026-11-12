@@ -16,8 +16,9 @@ import { reckonPlan, RECKON_GUARDS } from './cutreckon.js';
 import { cutMap, type CutPlace } from './cutmap.js';
 import { windingPlan, WINDING_GUARDS } from './cutwinding.js';
 import { inclinePlan } from './cutincline.js';
+import { loadingPlan } from './cutloading.js';
 import { washingPlan } from './cutwashing.js';
-import { CUT_AREAS, CUT_NAMES, CUT_POST, FORK_WORDS } from './opencutwords.js';
+import { CUT_NAMES, CUT_POST, FORK_WORDS } from './opencutwords.js';
 import { stressPlan } from './stressmap.js';
 
 export type InstanceId = 'opencut' | 'stress';
@@ -37,12 +38,12 @@ Object.assign(INSTANCES, {
   opencut: {
     id: 'opencut',
     place: { name: 'Rakehead', kind: 'mine', region: 'Copperdeep', ruin: 2 },
-    // One map down through Rakehead (shared/cutmap.ts), then the Haulier's working (the job's arena).
-    // The acts (docs/design/open-cut-arc.md): Rakehead to the fork yard; over the top or under the hill; the Haulier.
+    // The acts (docs/design/open-cut-arc.md), each one map in places (shared/cutmap.ts): Rakehead to the fork yard;
+    // over the top (the Haulier at the end) or under the hill (the Sluicer and the Raker). Each way's boss ends the
+    // run till the pit floor and the Overman are built (the arc's step 5).
     areas: [
       { name: 'RAKEHEAD', plan: openCutMap },
       { name: '', ways: [{ name: FORK_WORDS.over, plan: overTheTop }, { name: FORK_WORDS.under, plan: underTheHill }] },
-      { name: CUT_AREAS[3] },
     ],
   },
 });
@@ -50,7 +51,7 @@ Object.assign(INSTANCES, {
 INSTANCES.stress = { id: 'stress', place: { name: 'Rakehead', kind: 'mine', region: 'Copperdeep', ruin: 2 }, areas: [{ name: 'STRESS', plan: stressPlan }] };
 
 /** The stress map's job (docs/design/open-cut-map.md step 0; dev only, `?stress=1`). */
-export const stressJob = (day = 1): Job => ({ ...openCut(day), id: `d${day}-stress`, instance: 'stress', rooms: 1, arena: undefined });
+export const stressJob = (day = 1): Job => ({ ...openCut(day), id: `d${day}-stress`, instance: 'stress', rooms: 1 });
 
 /** The Open Cut's places, from the bottom (docs/design/open-cut-map.md): Rakehead's, then each way's. */
 export const CUT_PLACES: CutPlace[] = [
@@ -60,6 +61,7 @@ export const CUT_PLACES: CutPlace[] = [
 export const OVER_PLACES: CutPlace[] = [
   { plan: windingPlan, keep: [], packs: [WINDING_GUARDS] },
   { plan: inclinePlan, keep: [CUT_NAMES.brakesman] },
+  { plan: loadingPlan, keep: [HAUL_NAME] },
 ];
 export const UNDER_PLACES: CutPlace[] = [{ plan: washingPlan, keep: [CUT_NAMES.sluicer, CUT_NAMES.raker] }];
 
@@ -82,12 +84,12 @@ export function areaOf(job: Job, i: number, way?: number): InstanceArea {
   return a?.ways ? a.ways[way ?? 0] : a;
 }
 
-/** The day's posting of the Open Cut: Rakehead's rows into the Open Cut, the Haulier at the end. */
+/** The day's posting of the Open Cut: Rakehead's rows into the Open Cut, and over the top or under the hill. */
 export function openCut(day: number): Job {
   const def = INSTANCES.opencut, rng = new Rng(day * 3301 + 53), seed = day * 509 + 181, night = rng.next() < 0.4;
   return {
     id: `d${day}-cut`, place: def.place, objective: 'hunt', twist: night ? 'night' : 'none', time: rollTime(seed, night), rooms: def.areas.length, size: 'long',
-    boss: HAUL_NAME, arena: 'haulier', instance: 'opencut', seed,
+    instance: 'opencut', seed,
     reward: payFor(def.areas.length, 2, night, 'long') + 80, title: CUT_POST.title, text: CUT_POST.text,
   };
 }

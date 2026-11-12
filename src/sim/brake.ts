@@ -69,7 +69,8 @@ function aimLane(w: World, inc: Incline, e: Enemy): [number, Hero | undefined] {
 
 /** A new cart up at the top of the aimed lane (the oldest at the foot tipped off if the incline's full). */
 function bringUp(w: World, inc: Incline, e: Enemy): void {
-  const carts = w.props.filter((p) => isCart(p));
+  // (Its own lanes' carts only: the Haulier's at the loading stage above are none of its.)
+  const carts = w.props.filter((p) => isCart(p) && laneOf(p) !== undefined);
   if (carts.some((p) => p.goAt !== undefined || (p.roll ?? 0) > 0)) return;
   // One sent back up and standing at the top goes next.
   const top = carts.find((p) => resting(p) && p.y <= inc.y0 + 0.3);

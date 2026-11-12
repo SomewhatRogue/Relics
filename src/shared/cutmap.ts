@@ -41,6 +41,8 @@ function shift(p: RoomPlan, dx: number, dy: number, pk: number, into: { map: Gam
   if (m.led) M.led = { ...m.led, pts: m.led.pts.map(([x, y]) => [x + dx, y + dy]) };
   if (m.rail) M.rail = { y: m.rail.y + dy, x0: m.rail.x0 + dx, x1: m.rail.x1 + dx };
   if (m.ledges) (M.ledges ??= []).push(...m.ledges.map((l) => ({ ...mv(l), ramps: l.ramps.map(mv) })));
+  if (m.gear) M.gear = mv(m.gear);
+  if (m.adits) (M.adits ??= []).push(...m.adits.map(mv));
   if (m.incline) M.incline = { lanes: m.incline.lanes.map((x) => x + dx), y0: m.incline.y0 + dy, y1: m.incline.y1 + dy };
   into.plan.foes.push(...p.foes.map((f) => ({ ...mv(f), ...(f.pack ? { pack: f.pack + pk } : {}), ...(f.task?.k === 'patrol' ? { task: { ...f.task, pts: f.task.pts.map(([x, y]) => [x + dx, y + dy] as [number, number]) } } : {}) })));
   into.plan.props.push(...p.props.map(mv));
@@ -60,7 +62,7 @@ export function cutMap(job: Job, places: CutPlace[], fork?: { name: string; ways
   const top = plans[plans.length - 1].map;
   const map: GameMap = {
     ...plans[0].map, name: 'THE OPEN CUT', w: W, h: H, rounds: [], blocks: [], braziers: [], torches: [], water: [], soil: [], marks: [], npcs: [],
-    led: undefined, rail: undefined, incline: undefined, ledges: undefined, stretches: [],
+    led: undefined, rail: undefined, gear: undefined, adits: undefined, incline: undefined, ledges: undefined, stretches: [],
   };
   const plan: RoomPlan = { map, foes: [], props: [], chests: [] }, laid: Laid[] = [], into = { map, plan }, rng = new Rng(job.seed * 2909 + 7);
   let y = H;

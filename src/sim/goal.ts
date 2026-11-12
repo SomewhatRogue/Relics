@@ -96,7 +96,8 @@ export function goal(run: Run, room: ArenaRoom, houses: Captives = { caged: 0, w
     // A fork yard: the party votes by standing on a way (sim/fork.ts).
     const roads = forkOf(room.map);
     if (last && roads) return run.way === undefined ? { text: also(FORK_WORDS.vote), done: false } : { text: also(FORK_WORDS.on(roads[run.way].label)), done: true };
-    return { text: also(last ? way(false) : GATE_WORDS.on), done: last };
+    // (The last stretch of the run's last area: the way home.)
+    return { text: also(last ? way(isFinal(run)) : GATE_WORDS.on), done: last };
   }
   // An instance's area: its gate opens when its named ones are dead; the cages are there to free, never needed (shared/instances.ts).
   if (run.job.instance && !isFinal(run)) {

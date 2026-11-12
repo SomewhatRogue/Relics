@@ -51,7 +51,9 @@ Copperdeep to bring them home.
 3. **The incline.** THE BRAKESMAN at its brake at the top, carts sent down striped lanes at you as you climb. Hold
    attack and let go as a cart reaches you and it goes back up at the brake (Kyle: "time a power hit at it so it flips
    back"); GRAB a spent one at the foot does it too, slowly (mini-boss). *Built 2026-11-11, with the winding house.*
-4. **The ropeway and the loading stage** at the lip of the pit: THE HAULIER under its ropes and loads (boss).
+4. **The ropeway and the loading stage** at the lip of the pit: THE HAULIER under its ropes and loads (boss). *Built
+   2026-11-12: its whole fight laid on the stage (shared/cutloading.ts, sim/instanceroom.ts `kitBosses`). Till act 3
+   is built, each way's boss ends the run (the job is two acts, no arena).*
 
 **Under the hill (map 2b).**
 1. **The old adit.** Timbered tunnels, a branch to a cave-in (a chest, a pack trapped behind the fall).
