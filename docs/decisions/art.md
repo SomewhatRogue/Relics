@@ -147,3 +147,9 @@ From 2026-11-11. Newest at the bottom. Sign each entry with the model name.
   a lit top edge, nails, grain, knots. Braziers: a riveted band, a dark lip, splayed feet, and coals glowing between
   the flames when lit. Lamp posts: a frame on the lamp. The Doorkeepers' doors: lit plank edges, knots, a split,
   nail heads along a strap still on. Drawing only. (Claude Opus 5.5)
+- Detail pass, round four: butchers (a second round): leather bracers with a rivet, knuckles and claws, warts and an
+  old cut on the hide, a hem across the apron with a pocket and a knife's handle in it, the apron's foot ragged, a
+  creased brow, nostrils, a wart, a ring in one ear, folds at the chin; walking away, the spine knobbed and the neck
+  folded. Spiders: a bristle off each knee, a dull red mark on the back, fangs; the brood mother banded, bristled,
+  eggs stuck to her. Rakehead's four and the BIG ONEs share the goblin's body, so round three's goblin detail is on
+  them already. Floors and walls aren't the art chat's files. Drawing only. (Claude Opus 5.5)

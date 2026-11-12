@@ -53,21 +53,29 @@ export function butcherParts(l: ButcherLook, up: boolean): Part[] {
     // Arms hanging thick at its sides, the hands big.
     ['r', lean ? 2 : 1, 15, 4, 9, SKIN], ['r', lean ? 21 : 22, 15, 4, 9, SKIN], ['r', lean ? 2 : 1, 23, 4, 3, SHADE], ['r', lean ? 21 : 22, 23, 4, 3, SHADE],
   ];
+  // Round two: leather bracers with a rivet, knuckles and claws, warts and old cuts on the hide at the belly's sides.
+  for (const ax of lean ? [2, 21] : [1, 22]) p.push(['r', ax, 20, 4, 1, '#4a3a28'], ['p', ax + 1, 20, '#9a96a4'], ['p', ax, 24, SKIN], ['p', ax + 2, 24, SKIN], ['p', ax, 26, BONE], ['p', ax + 3, 26, BONE], ['p', ax + 1, 17, SHADE]);
+  p.push(['p', 6, 17, SHADE], ['p', 20, 21, SHADE], ['r', 19, 16, 2, 1, SHADE], ['p', 7, 23, '#7a1d1d']);
   if (!up) p.push(
     ['r', 8, 15, 11, 13, apron], ['r', 9, 12, 2, 4, strap], ['r', 16, 12, 2, 4, strap],
     ...(l.soot ? ([['p', 10, 18, '#1a1614'], ['r', 13, 20, 3, 1, '#1a1614'], ['p', 16, 24, '#1a1614'], ['p', 12, 26, '#ff8a3a']] as Part[])
       : ([['r', 10, 19, 2, 1, '#6b1a1a'], ['p', 12, 20, '#6b1a1a'], ['r', 15, 18, 1, 2, '#7a1d1d'], ['r', 11, 24, 3, 1, '#6b1a1a'], ['p', 16, 25, '#7a1d1d']] as Part[])),
+    // Round two: a hem across the apron's top, a pocket with a knife's handle in it, the foot of it ragged.
+    ['r', 8, 15, 11, 1, strap], ['r', 14, 21, 4, 3, strap], ['r', 15, 19, 1, 2, '#5a3d22'], ['p', 15, 18, '#9a96a4'], ['p', 9, 27, LEG], ['p', 13, 27, LEG], ['p', 17, 27, LEG],
   );
-  else p.push(['r', 9, 15, 2, 12, strap], ['r', 16, 15, 2, 12, strap], ['r', 9, 21, 9, 2, strap]);
+  // Walking away: the straps crossed on its back, the spine knobbed, folds at the neck.
+  else p.push(['r', 9, 15, 2, 12, strap], ['r', 16, 15, 2, 12, strap], ['r', 9, 21, 9, 2, strap], ['p', 13, 15, SHADE], ['p', 13, 18, SHADE], ['p', 13, 24, SHADE], ['p', 7, 17, SHADE], ['p', 19, 17, SHADE]);
   // The head, the ears out to the sides.
   p.push(['e', 13.5, hy + 0.5, 6, 6, SKIN], ['r', 4, hy - 2, 4, 1, SKIN], ['p', 5, hy - 3, SKIN], ['r', 19, hy - 2, 4, 1, SKIN], ['p', 21, hy - 3, SKIN]);
-  if (up) p.push(['r', 10, hy + 3, 7, 3, SHADE], ['r', 10, hy - 3, 7, 1, SHADE]);
+  if (up) p.push(['r', 10, hy + 3, 7, 3, SHADE], ['r', 10, hy - 3, 7, 1, SHADE], ['r', 11, hy + 6, 5, 1, SHADE], ['p', 12, hy - 1, SHADE], ['p', 15, hy + 1, SHADE]);
   else {
     p.push(['e', 13.5, hy + 3.5, 5, 2.6, SHADE], ['r', 9, hy - 2, 4, 1, SHADE], ['r', 14, hy - 2, 4, 1, SHADE], ['p', 11, hy - 1, EYE], ['p', 16, hy - 1, EYE], ['r', 13, hy, 2, 2, SHADE]);
     p.push(['r', 11, hy + 3, 6, 1, DARK], ['p', 10, hy + 3, BONE], ['p', 17, hy + 3, BONE], ['p', 10, hy + 2, BONE], ['p', 17, hy + 2, BONE]);
     if (l.soot) p.push(['r', 9, hy - 3, 10, 1, '#2a2622'], ['p', 12, hy + 1, '#2a2622'], ['p', 15, hy, '#2a2622']);
     // A ring through the nose, an old scar across the brow.
-    if (!l.hempen) p.push(['p', 13, hy + 2, '#b8b0a0'], ['p', 14, hy + 2, '#8a8478'], ['r', 16, hy - 4, 1, 3, '#3a4a1a'], ['p', 17, hy - 2, '#3a4a1a']);
+    if (!l.hempen) p.push(['p', 13, hy + 2, '#b8b0a0'], ['p', 14, hy + 2, '#8a8478'], ['r', 16, hy - 4, 1, 3, '#3a4a1a'], ['p', 17, hy - 2, '#3a4a1a'],
+      // Round two: a creased brow, two nostrils, a wart, a ring in one ear, the chin's folds.
+      ['r', 11, hy - 4, 4, 1, SHADE], ['p', 13, hy + 1, DARK], ['p', 14, hy + 1, DARK], ['p', 10, hy, SHADE], ['p', 5, hy - 1, '#c0a050'], ['r', 11, hy + 5, 5, 1, SHADE]);
   }
   if (l.hempen) p.push(...hempenParts(l.hempen, up, hy));
   // Its trophy.
