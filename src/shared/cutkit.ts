@@ -10,6 +10,7 @@ import type { Kit, P } from './expedkit.js';
 import type { Job } from './jobs.js';
 import { THEMES, type Foe, type RoomPlan } from './terrain.js';
 import { lightFor, timeOf } from './timeofday.js';
+import { INSTANCE } from './instancetune.js';
 
 export interface AreaShape {
   name: string; w: number; h: number;
@@ -33,13 +34,16 @@ export function areaPlan(k: Kit, job: Job, a: AreaShape, more: Partial<GameMap> 
 }
 
 /**
- * A pack: `roles` stood about `at`, in a loose ring (`r` across), all of pack `id`. `more` goes on each
- * (feeding at the dead, a task, asleep).
+ * A pack: `roles` stood about `at`, in a loose ring (`r` across), all of pack `id`, led by an elite. `more` goes on
+ * each (feeding at the dead, a task, asleep).
  */
 export function pack(k: Kit, id: number, at: P, roles: Role[], r = 1.1, more: Partial<Foe> = {}): Foe[] {
+  const lead = INSTANCE.leaders[Math.floor(k.rng.next() * INSTANCE.leaders.length)];
   return roles.map((role, i) => {
     const a = (i / roles.length) * Math.PI * 2 + id, f: Foe = { kind: 'scrapper', x: at.x + Math.cos(a) * r, y: at.y + Math.sin(a) * r * 0.7, pack: id, ...more };
     k.foes.push(cast(f, role));
+    // The first of every pack of two or more leads it, an elite (INSTANCE.leaders).
+    if (i === 0 && roles.length > 1) f.elite = [lead];
     return f;
   });
 }

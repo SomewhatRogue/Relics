@@ -11,6 +11,7 @@
  * sat in the dodge's place till it became TAUNT GUARD, held on the block: 2026-11-06.)
  */
 import { resting } from '../sim/brake';
+import { ropedNear } from '../sim/drover';
 import { staitheGrabbable } from '../sim/staithebits';
 import { STAITHE_WORDS } from '../shared/staithewords';
 import { carriedItem } from '../sim/charge';
@@ -165,7 +166,7 @@ export class Cluster {
     const can = carrying || (me.act === 'idle' && (room.enemies.some((e) => grabbable(me, e, room.time)) || room.props.some((p) => liftable(me, p)) || cart));
     // (At the Staithe GRAB cuts one of the netted free, or shoves the laid log in: sim/staithebits.ts.)
     const stg = mode === 'run' ? staitheGrabbable(me, room.survivors, room.map) : null, shove = stg === 'shove';
-    const raise = me.act === 'idle' && raisable(me, room.heroes), cut = cuttable(me, room.heroes, room.time) || stg === 'cut';
+    const raise = me.act === 'idle' && raisable(me, room.heroes), cut = cuttable(me, room.heroes, room.time) || stg === 'cut' || (mode === 'run' && ropedNear(me, room.survivors));
     // A Cleric by a friend who is out: RAISE (sim/raise.ts), dim with the seconds left while its cooldown runs.
     // (Kneeling at it, the button stays lit: the raise is going on.)
     const rise = mode === 'run' && !raise && !cut ? (risable(me, room.heroes, room.time) ?? (room.heroes.some((o) => o.out && o.riseBy === me.id) ? 'ready' : null)) : null;

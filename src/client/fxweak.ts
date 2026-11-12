@@ -24,6 +24,10 @@ export function weakFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
     fx.burst(x, y - 8, 4, ['#8a6a40', '#6a5030'], 35, false);
     return true;
   }
+  if (ev.k === 'opened') {
+    fx.say(x, y - 40, 'OPEN', '#ffd27a');
+    return true;
+  }
   if (ev.k === 'pairfell' || ev.k === 'pairup') {
     fx.say(x, y - 34, ev.k === 'pairfell' ? PAIR_WORDS.fell : PAIR_WORDS.up, ev.k === 'pairfell' ? '#8ac8ff' : '#ff8a6a');
     fx.burst(x, y - 4, 10, ['#cfe8ff', '#6aa8d8', '#ffffff'], 60, true);

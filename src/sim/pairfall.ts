@@ -24,7 +24,7 @@ export function fallsInstead(e: Enemy, now: number, ev: FightEvent[]): boolean {
   if (e.pair !== 'sluicer') return false;
   const raker = pairOf(e);
   if (!raker || isDead(raker)) return false;
-  Object.assign(e, { hp: 1, fallen: now, act: 'stunned', actT: 0, actDur: Infinity, attack: null, kvx: 0, kvy: 0, screened: undefined });
+  Object.assign(e, { hp: 1, fallen: now, act: 'stunned', actT: 0, actDur: Infinity, attack: null, kvx: 0, kvy: 0 });
   raker.lift = 0;
   ev.push({ k: 'pairfell', x: e.x, y: e.y });
   return true;

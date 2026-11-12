@@ -29,23 +29,36 @@ export const INSTANCE = {
    * instances"): every goblin's health and hits, the named ones' health.
    */
   tough: { hp: 1.5, harm: 1.3, named: 1.25 },
+  /**
+   * Fierce (Kyle, 2026-11-11: "too easy to dodge everything without even skill"): every instance goblin winds up in
+   * `windup` of the time (never under an elite Quick one's floors, so it's still a tell), rests `pause` as long
+   * between blows, and moves `pace` as fast.
+   */
+  fierce: { windup: 0.8, pause: 0.7, pace: 1.1 },
+  /** Every pack's leader an elite, its affix drawn from these by the seed (shared/cutkit.ts). */
+  leaders: ['quick', 'plated', 'gorging', 'oiled', 'horn', 'ember'] as const,
+  /**
+   * Opened up (no blow is ever cut down: "low damage numbers to bosses felt like a self punishment"): the Drover cut
+   * off its line, the Brakesman knocked off its brake, take `mult` for `time` s.
+   */
+  open: { mult: 1.5, time: 5 },
 };
 
 /**
- * THE DROVER (Rakehead's square, sim/drover.ts): what its roped line takes off a blow while any of it is still
- * roped, and cutting them loose: stand still this near a roped digger for this long.
+ * THE DROVER (Rakehead's square, sim/drover.ts): CUT FREE (GRAB) this near a roped digger, staying by them this
+ * long, cuts the line (it's OPEN after: INSTANCE.open).
  */
-export const DROVER = { screen: 0.25, reach: 1.1, cut: 1.6 };
+export const DROVER = { reach: 1.1, cut: 1.6 };
 
 /**
  * THE BRAKESMAN (the workings' last chamber, sim/brake.ts): on its brake at the top of the rail it lets a cart go
  * every `every` s (`fast` below `below` of its health): the lane striped `warn` s, then the cart runs the rail at
  * `speed`, knocking flat whoever's in its lane (`width`) for `dmg` and `knock`, striped (only out of the lane saves
- * you). On the brake it's braced: blows land at `braced`. GRAB held `grab` s by a cart standing on the rail sends it
- * back up; it knocks the Brakesman off the brake (`hit` damage, stunned `down` s, no carts for `off` s). At most
+ * you). GRAB held `grab` s by a cart standing on the rail sends it
+ * back up; it knocks the Brakesman off the brake (`hit` damage, stunned `down` s and OPEN, no carts for `off` s). At most
  * `most` carts on the rail (the oldest at the bottom tipped off for a new one). Back to the brake at `walk` tiles a second.
  */
-export const BRAKE = { every: 4, fast: 2.6, below: 0.4, warn: 1, speed: 9, dmg: 22, knock: 10, width: 0.9, braced: 0.5, grab: 0.6, hit: 30, down: 3, off: 6, most: 4, walk: 2.4 };
+export const BRAKE = { every: 4, fast: 2.6, below: 0.4, warn: 1, speed: 9, dmg: 22, knock: 10, width: 0.9, grab: 0.6, hit: 30, down: 3, off: 6, most: 4, walk: 2.4 };
 
 /**
  * THE SLUICER and THE RAKER (the washing floor, sim/pairfall.ts): the Sluicer falls in the water instead of dying

@@ -30,6 +30,7 @@ export function instanceRoom(run: Run): ArenaRoom {
   // Tougher than a job's goblins, whoever comes (INSTANCE.tough).
   const T = INSTANCE.tough;
   for (const e of room.enemies) {
+    e.fierce = true;
     const k = e.name ? T.named : T.hp;
     e.hp = e.maxHp = Math.round(e.maxHp * k);
     if (!e.name) e.harm = +((e.harm ?? 1) * T.harm).toFixed(3);

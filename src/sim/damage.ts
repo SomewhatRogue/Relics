@@ -99,8 +99,8 @@ export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: Da
   // An ironhide's plates: a heavy hit breaks its guard, anything else barely gets through (sim/ironhide.ts).
   const breaks = !!o.heavy && !o.tick, clank = !o.tick && !breaks && clanks(e, now);
   n = plated(e, n, now, breaks, ev);
-  // THE DROVER behind its roped line, THE BRAKESMAN braced on its brake (sim/drover.ts, brake.ts): a share gets through, and it says so.
-  if (e.screened !== undefined && e.screened < 1 && n > 0) (n = Math.max(1, Math.round(n * e.screened))), o.tick || ev.push({ k: 'deflect', x: e.x, y: e.y });
+  // Opened up (the Drover off its line, the Brakesman off its brake: INSTANCE.open): blows land harder.
+  if (e.takes !== undefined && (e.openUntil ?? Infinity) > now && n > 0) n = Math.round(n * e.takes);
   // A butcher at a body: a heavy hit takes it off the meal (sim/meal.ts).
   if (e.meal && breaks) (e.meal = null), (e.mealCool = now + MEAL.again), ev.push({ k: 'mealbroken', x: e.x, y: e.y });
   // A Hornblower blowing: a heavy hit cuts it off (sim/hornstate.ts).

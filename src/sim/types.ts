@@ -527,8 +527,11 @@ export interface Enemy extends Body {
   alert?: boolean;
   /** THE DROVER (sim/drover.ts): it drives the roped line, and while any of it is roped it stands behind them (`screened`). */
   drives?: boolean;
-  /** Behind something (sim/drover.ts, brake.ts): the share of a blow that gets through; none, all of it. */
-  screened?: number;
+  /** Opened up (sim/drover.ts, brake.ts; INSTANCE.open): blows land at `takes` till room time `openUntil`. */
+  takes?: number;
+  openUntil?: number;
+  /** An instance's goblin (INSTANCE.fierce): quicker wind-ups and rests (sim/elite.ts). */
+  fierce?: boolean;
   /** THE BRAKESMAN (sim/brake.ts): it works the brake at the top of the rail; when it lets the next cart go, and its brake out of use until. */
   brakes?: { next: number; off: number };
   /** THE SLUICER and THE RAKER (sim/pairfall.ts): which of the pair; the Sluicer's room time it fell in the water; the Raker's lift so far (s). */
@@ -852,6 +855,8 @@ export type FightEvent =
   | { k: 'cutloose'; x: number; y: number; by: string }
   /** THE SLUICER in the water, and stood up again by THE RAKER (sim/pairfall.ts). */
   | { k: 'pairfell'; x: number; y: number }
+  /** A named one opened up: OPEN (INSTANCE.open). */
+  | { k: 'opened'; x: number; y: number }
   | { k: 'pairup'; x: number; y: number }
   | { k: 'boardout'; x: number; y: number }
   /** `more`: another blow of a pack rush met by the same guard in the same instant (its words said once). */

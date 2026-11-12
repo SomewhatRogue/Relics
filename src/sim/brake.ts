@@ -1,14 +1,13 @@
 /**
  * THE BRAKESMAN (docs/design/instances.md, the workings; docs/decisions/instances.md): it works the brake at the
  * top of the rail across the last chamber (map.rail, its top end `x0`, by the brake) and lets the carts go.
- * - On its brake it stands at its post (`home`), braced: blows land at BRAKE.braced. It swings at whoever comes
- *   close, but never leaves the brake.
+ * - On its brake it stands at its post (`home`). It swings at whoever comes close, but never leaves the brake.
  * - Every BRAKE.every s (BRAKE.fast once it's low) a cart comes up to the top: its lane is striped for BRAKE.warn s
  *   (`goAt`), then it runs down the rail and knocks flat whoever's in its lane, once each a run (striped: only out
  *   of the lane saves you). It stops at the bottom, or a cart's length short of one already there.
  * - GRAB held BRAKE.grab s beside a cart standing on the rail sends it back up. If it reaches the Brakesman at the
- *   top, it's knocked off the brake: hurt, stunned BRAKE.down s, and no carts for BRAKE.off s; off the brake it
- *   comes for you and takes blows in full. Then it walks back to the brake (BRAKE.walk).
+ *   top, it's knocked off the brake: hurt, stunned BRAKE.down s and OPEN (INSTANCE.open), and no carts for BRAKE.off s;
+ *   off the brake it comes for you. Then it walks back to the brake (BRAKE.walk).
  * It never dozes (sim/sleep.ts): the rail is longer than an area's wake distance, and the carts are its.
  * Plain data on the goblin and the carts (`brakes`, `goAt`, `roll`), so a friend's screen and a handed-on room
  * have it; who's holding GRAB is kept here only (a hold starts over after a handover).
@@ -79,11 +78,11 @@ export function stepBrake(w: World): void {
     back.set(e, { x: e.x, y: e.y });
   } else back.delete(e);
   if (onBrake(e, now)) {
-    Object.assign(e, { x: e.home.x, y: e.home.y, kvx: 0, kvy: 0, screened: BRAKE.braced });
+    Object.assign(e, { x: e.home.x, y: e.home.y, kvx: 0, kvy: 0 });
     // (Only once someone's come near enough to hear it: an area's wake distance from its brake.)
     const near = w.heroes.some((h) => up(h) && Math.hypot(h.x - e.home.x, h.y - e.home.y) < INSTANCE.wake);
     if (near && now >= e.brakes!.next) bringUp(w, rail, e);
-  } else e.screened = undefined;
+  }
   // GRAB pressed by a cart standing on the rail, and kept by it: it goes back up.
   for (const h of w.heroes) {
     const prev = st.seen.get(h.id);
@@ -128,7 +127,9 @@ export function stepBrake(w: World): void {
     // Sent back up: into the Brakesman at its brake, it's knocked off.
     if (p.roll < 0 && !seen.has('brake') && onBrake(e, now) && Math.abs(e.x - p.x) <= p.radius + e.radius + 0.3 && Math.abs(e.y - rail.y) <= BRAKE.width / 2 + e.radius + 1.2) {
       seen.add('brake');
-      e.screened = undefined;
+      // Knocked off: OPEN while it's down (INSTANCE.open).
+      Object.assign(e, { takes: INSTANCE.open.mult, openUntil: now + INSTANCE.open.time });
+      w.ev.push({ k: 'opened', x: e.x, y: e.y });
       e.lastBy = p.rollBy ?? e.lastBy;
       damage(e, BRAKE.hit, now, w.ev, { heavy: true, dx: -1, dy: 0 });
       stun(e, p.rollBy, now, BRAKE.down, w.ev, 'stunned', true, true);

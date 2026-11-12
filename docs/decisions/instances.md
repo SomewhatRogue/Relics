@@ -2,6 +2,23 @@
 
 The Instances chat's log (docs/BOARD.md). Newest first, signed with the model. Spec: docs/design/instances.md.
 
+## 2026-11-11: harder, no damage cut down, CUT FREE (Kyle's play notes; Claude Opus 5.5)
+
+Kyle: "it just didn't feel hard enough. too easy to dodge everything without even skill and low damage numbers to
+bosses just felt like a self punishment"; and of the Drover: "what did 'stand still by' even mean? ... it's fine if
+there's a trick to do extra damage to a boss but it's really unclear what it is or how you learn it".
+- No blow on a named one is ever cut down any more: the Drover's quarter and the Brakesman's half are gone. The trick
+  pays instead: cut the Drover's line, or knock the Brakesman off its brake, and it's OPEN, taking 1.5x for 5 s
+  (`INSTANCE.open`, `takes`/`openUntil`, an `opened` event that says OPEN).
+- The Drover's cut is a button now: by a roped digger the context button reads CUT FREE (the Staithe's word; GRAB
+  pressed), and a ring fills on the digger while you stay by them (`ropedNear`, `client/cluster.ts`). Goal: "CUT FREE
+  the roped diggers, then kill THE DROVER" (built of the button's own words, so no writing pass).
+- Fiercer: every instance goblin winds up in 0.8 of the time (never under an elite Quick one's floors), rests 0.7 as
+  long between blows and moves 1.1x (`INSTANCE.fierce`, `fierce`, hooks in `sim/elite.ts`); every pack of two or more
+  is led by an elite, its affix by the seed (`INSTANCE.leaders`, `shared/cutkit.ts`). On top of 1.5x health and 1.3x
+  hits from the change before.
+Open: a Warrior pressing CUT FREE by a digger may also hear NOTHING TO GRAB.
+
 ## 2026-11-11: Kyle's first play of the Open Cut, and two fixes (Claude Opus 5.5)
 
 Kyle: "the Raker was super fun. sluicer was okay but didn't really feel unique and honestly i have NO idea what the one

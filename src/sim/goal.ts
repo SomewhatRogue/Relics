@@ -89,8 +89,9 @@ export function goal(run: Run, room: ArenaRoom, houses: Captives = { caged: 0, w
   if (run.job.instance && !isFinal(run)) {
     const keep = room.enemies.filter((e) => e.name && !isDead(e)), names = keep.map((e) => e.name).join(' and ');
     // (THE DROVER behind its roped line: cut them loose first: sim/drover.ts.)
-    // (THE BRAKESMAN braced on its brake: knock it off: sim/brake.ts.)
-    const by = keep.find((e) => e.screened !== undefined), hint = by?.drives ? DROVER_WORDS.goal : by?.brakes ? BRAKE_WORDS.goal : '';
+    // (THE BRAKESMAN on its brake: knock it off: sim/brake.ts.)
+    const roped = room.survivors.some((v) => v.led && !v.gone), braking = keep.some((e) => e.brakes && e.act !== 'stunned' && room.time >= e.brakes.off);
+    const hint = keep.some((e) => e.drives) && roped ? DROVER_WORDS.goal : braking ? BRAKE_WORDS.goal : '';
     // (The washing floor's pair, both still about: kill them close together: sim/pairfall.ts.)
     const kill = hint ? `${hint} ${names}` : keep.length > 1 && keep.some((e) => e.pair) ? PAIR_WORDS.goal(names) : `Kill ${names}`;
     return { text: also(keep.length ? kill : way(false)), done: !keep.length };

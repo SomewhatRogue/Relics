@@ -5,21 +5,23 @@
  *   so the telegraph you see is the one judged);
  * - Gorging: it eats the dead as a butcher does (sim/meal.ts), healing ELITE.gorging.heal.
  */
-import { ELITE, quickWind, type Affix } from '../shared/tuning';
+import { ELITE, INSTANCE, quickWind, type Affix } from '../shared/tuning';
 import type { Enemy, EnemyAttack } from './types';
 
 export const hasAffix = (e: { elite?: Affix[] }, a: Affix) => !!e.elite?.includes(a);
 export const isElite = (e: { elite?: Affix[] }) => !!e.elite?.length;
 
 /** Its pace as a multiple (Quick). */
-export const quickPace = (e: Enemy) => (hasAffix(e, 'quick') ? ELITE.quick.pace : 1);
+export const quickPace = (e: Enemy) => (hasAffix(e, 'quick') ? ELITE.quick.pace : 1) * (e.fierce ? INSTANCE.fierce.pace : 1);
 /** Its rest between blows as a multiple (Quick: it swings more often; never a boss of the kit's). */
-export const quickPause = (e: Enemy) => (hasAffix(e, 'quick') && !e.boss ? ELITE.quick.pause : 1);
+export const quickPause = (e: Enemy) => (hasAffix(e, 'quick') && !e.boss ? ELITE.quick.pause : 1) * (e.fierce && !e.boss ? INSTANCE.fierce.pause : 1);
 
 /** A Quick one's wind-up, shortened as it begins (a pack rush keeps the rush's own clock). */
 export function quicken(e: Enemy, a: EnemyAttack): void {
   // (Never a boss's: its tell pose is added after, sim/bosskit.ts, and a boss is never an elite anyway.)
   if (hasAffix(e, 'quick') && a.rush === undefined && !e.boss) a.windup = +quickWind(a.windup, a.unblockable).toFixed(3);
+  // An instance's goblin (INSTANCE.fierce), under the same floors: still a tell.
+  if (e.fierce && a.rush === undefined && !e.boss) a.windup = +Math.min(a.windup, Math.max(a.windup * INSTANCE.fierce.windup, a.unblockable ? ELITE.quick.striped : ELITE.quick.red)).toFixed(3);
 }
 
 /** A small goblin that eats the dead (Gorging). */
