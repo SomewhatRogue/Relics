@@ -74,3 +74,13 @@ Open, for Kyle (from the lore keeper):
 
 Next: trading with party members on a job (Deep finds only once banked).
 (Claude Opus 5.5)
+
+## 2026-11-11: Nettle buys hungry gear (Kyle: "nettle can buy it")
+
+- Settles open item 3 above the other way: the spec was right, the bible and the code were wrong.
+- `shared/fence.ts`: Nettle buys hungry gear from the pack. It has no price of its own (PRICE.hungry is 0),
+  so he pays as for turning gear at his usual cut, plus its levels. It's off you after, so Tobin deals again.
+- Selling it to him doesn't ease the Want: only giving it up at the church does (bible updated to say so).
+  Kyle's to change if selling should count.
+- Gone: Nettle's refusal line (vendorwords.ts FENCE.hungry). Hungry gear still never trades between heroes.
+(Claude Opus 5.5)

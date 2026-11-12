@@ -175,8 +175,8 @@ most Want among the heroes is the one the bells don't spare).
   gold given at the Lantern and hungry gear given up at the church (which feeds the Lantern). Its tell
   is the eyes. Turning into a named butcher is still Kyle's call.
 - **On screen, "hungry gear"** is the term for butcher-touched gear (red). It can only be given up at the
-  church, never melted, traded or dropped. Since 2026-11-05 (Kyle) it may be left in the vault; that keeps it
-  off you, it doesn't give it up.
+  church, or sold to Nettle (Kyle, 2026-11-11), never melted, traded between heroes or dropped. Since 2026-11-05
+  (Kyle) it may be left in the vault; that keeps it off you, it doesn't give it up.
 - **The prologue** (2026-11-01, Kyle approved by building it): every new hero wakes on the field where the
   Greyhollow column died (undated: every hero plays it, whatever chapter the world is in). Hew, the last
   charcoal burner in Greyhollow, burned the column's dead so the hungry went without; he gave the hero
@@ -328,7 +328,7 @@ most Want among the heroes is the one the bells don't spare).
 - **Who buys the rare three** (Kyle, 2026-11-05: "Tobin can't buy anything Yellow, Orange or Red, he freaks out. You can sell to a shady guy in the tavern though, but it's very hush hush"):
   - Tobin won't buy touched, turning or hungry gear, and never has any on his stall. Why he's so frightened of it stays unsaid; he has a family, and that's all he says.
   - If a hero has any hungry gear on them, worn or in the pack, Tobin won't trade with them at all, buying, selling or selling back, and panics when they come up to his stall. In the vault or given up at the church, it's off them and he trades again.
-  - Nettle is the shady one in the tavern: from his table at the back of the Drowned Rat he quietly buys touched and turning gear, for less than it's worth, and there's no buying it back. He never buys hungry gear: the church is still the only place it can go, because giving it up there is what feeds the Lantern and eases the Want, and a fence would let a hero dodge that. Where Nettle sends what he buys is never said.
+  - Nettle is the shady one in the tavern: from his table at the back of the Drowned Rat he quietly buys touched and turning gear, for less than it's worth, and there's no buying it back. He buys hungry gear too (Kyle, 2026-11-11), but selling it to him only gets it off you: giving it up at the church is still the only thing that feeds the Lantern and eases the Want. Where Nettle sends what he buys is never said.
   - Selling to Nettle is trade, like Tobin: it never touches the Want.
   - The watch drink at the Drowned Rat (Wall Brandy is theirs), which is why Nettle keeps his voice down.
 - Every vendor's stock is the same for everyone at a time; why the goods change is never said.

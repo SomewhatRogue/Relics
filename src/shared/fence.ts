@@ -7,8 +7,10 @@
  * - Tobin won't buy TOUCHED, TURNING or HUNGRY gear, and never stocks them (vendors.ts).
  * - A hero with any HUNGRY piece on them, worn or in the pack, gets nothing from Tobin at all: he won't
  *   buy, sell, or sell back. A piece in the vault, or given up at the church, is off you.
- * - Nettle, at the back of the Drowned Rat, quietly buys TOUCHED and TURNING, for less than Tobin pays
- *   for anything and with no buying back. Never HUNGRY: that goes to the church and nowhere else.
+ * - Nettle, at the back of the Drowned Rat, quietly buys TOUCHED, TURNING and HUNGRY (Kyle, 2026-11-11:
+ *   "nettle can buy it"), for less than Tobin pays for anything and with no buying back. Hungry gear has no
+ *   price of its own; he pays as for turning gear. Selling it to him doesn't ease the Want: only giving it
+ *   up at the church does.
  * - Carrying hungry gear (Kyle, 2026-11-11), Tobin won't deal with you, so Nettle buys your ordinary gear too,
  *   at `HUNGRY_CUT`, less again: him or the forge, and nobody else.
  * Selling to either is trade: it never touches the Want.
@@ -36,13 +38,15 @@ export function tobinWont(p: Carrier, it: Item): '' | 'panic' | 'rare' {
 export const FENCE_CUT = 0.2;
 /** What Nettle pays a hero carrying hungry gear for the ordinary gear Tobin won't now buy. */
 export const HUNGRY_CUT = 0.12;
-/** The rare two Nettle always buys. */
-const rare = (it: Item) => it.quality === 'touched' || it.quality === 'turning';
-/** What Nettle buys off `p`: touched and turning gear; anything but hungry if `p` carries hungry gear. */
-export const nettleTakes = (it: Item, p?: Carrier) => rare(it) || (!!p && carriesHungry(p) && it.quality !== 'hungry');
+/** The rare three Nettle always buys. */
+const rare = (it: Item) => it.quality === 'touched' || it.quality === 'turning' || it.quality === 'hungry';
+/** What Nettle buys off `p`: the rare three; anything at all if `p` carries hungry gear. */
+export const nettleTakes = (it: Item, p?: Carrier) => rare(it) || (!!p && carriesHungry(p));
+/** A piece's worth to Nettle: hungry gear has no price, so it's priced as turning gear. */
+const worth = (it: Item) => priceOf(it.quality === 'hungry' ? { ...it, quality: 'turning' } : it);
 /** What Nettle pays `p` for it (0: he won't take it). */
 export const fenceValue = (it: Item, p?: Carrier) =>
-  nettleTakes(it, p) ? Math.max(1, Math.round(priceOf(it) * (rare(it) ? FENCE_CUT : HUNGRY_CUT))) + (rare(it) ? (it.level ?? 0) * PER_LEVEL : 0) : 0;
+  nettleTakes(it, p) ? Math.max(1, Math.round(worth(it) * (rare(it) ? FENCE_CUT : HUNGRY_CUT))) + (rare(it) ? (it.level ?? 0) * PER_LEVEL : 0) : 0;
 
 /** Sell packed piece `i` to Nettle: gold now, and it's gone (no buying back). Returns what he paid. */
 export function fence(p: Stores, i: number): number {

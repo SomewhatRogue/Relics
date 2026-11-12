@@ -39,7 +39,7 @@ export function wireFence(g: Game, again: () => void, sync: () => void): void {
     const i = Number(t.dataset.src!.split(':')[1]), it = pr.bag[i];
     if (!it) return;
     const price = fenceValue(it, g.profile), base = { icon: itemIcon(it), name: itemName(it), col: itemCol(it), body: card(it, g.hero, true), again };
-    if (!price) return itemPop({ ...base, acts: [], why: it.quality === 'hungry' ? FENCE.hungry : FENCE.wont });
+    if (!price) return itemPop({ ...base, acts: [], why: FENCE.wont });
     itemPop({ ...base, acts: [{ label: PAWN.sell(price), primary: true, act: () => {
       if (!fence(pr, i)) return;
       sync();

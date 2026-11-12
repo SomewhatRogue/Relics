@@ -40,5 +40,4 @@ export const FENCE = {
   about: "Nettle buys touched and turning gear, for less than it's worth. No buying back.",
   sold: "Keep your voice down, there's one of the watch two tables over. It's in the sack with the rest now, and as far as I'm concerned it always was.",
   wont: 'Nettle only buys touched and turning gear.',
-  hungry: "Nettle won't buy hungry gear. Give it up at the church.",
 };

@@ -1,11 +1,12 @@
 /**
  * Who buys the rare three (Kyle, 2026-11-05, shared/fence.ts): Tobin won't touch TOUCHED, TURNING or
  * HUNGRY gear and never stocks it; a hero carrying hungry gear gets nothing from him but his panic; Nettle
- * quietly buys touched and turning gear at a cut, never hungry.
+ * quietly buys touched, turning and (Kyle, 2026-11-11) hungry gear at a cut.
  */
 import { describe, expect, it } from 'vitest';
 import { RARE, TIER_ORDER, priceOf, rollGear, sellValue, type Item } from '../src/shared/tuning';
-import { carriesHungry, fence, fenceValue, nettleTakes, tobinWont } from '../src/shared/fence';
+import { FENCE_CUT, carriesHungry, fence, fenceValue, nettleTakes, tobinWont } from '../src/shared/fence';
+import { PER_LEVEL } from '../src/shared/prices';
 import { pawn, pawns, redeem, stow } from '../src/shared/bags';
 import { STOCK, stockFor } from '../src/shared/vendors';
 import { rollHungry } from '../src/shared/hungry';
@@ -123,8 +124,18 @@ describe('Nettle, under the table', () => {
     }
   });
 
-  it('buys nothing else: not the common tiers (Tobin buys those), and never hungry gear (the church only)', () => {
-    for (const t of TIER_ORDER.filter((x) => x !== 'touched' && x !== 'turning')) {
+  it('buys HUNGRY gear too (Kyle, 2026-11-11), priced as turning, and it\'s off you after', () => {
+    const red = rollHungry(rng, 'WARRIOR'), p = hero(red), v = fenceValue(red);
+    expect(nettleTakes(red)).toBe(true);
+    expect(v).toBeGreaterThan(1);
+    expect(v).toBe(Math.max(1, Math.round(priceOf({ ...red, quality: 'turning' }) * FENCE_CUT)) + (red.level ?? 0) * PER_LEVEL);
+    expect(carriesHungry(p)).toBe(true);
+    expect(fence(p, 0)).toBe(v);
+    expect(carriesHungry(p)).toBe(false);
+  });
+
+  it('buys nothing else: not the common tiers (Tobin buys those)', () => {
+    for (const t of TIER_ORDER.filter((x) => x !== 'touched' && x !== 'turning' && x !== 'hungry')) {
       const it = gear(t), p = hero(it);
       expect(fenceValue(it), t).toBe(0);
       expect(fence(p, 0)).toBe(0);
@@ -153,14 +164,14 @@ describe("the lore keeper's fixes (2026-11-05)", () => {
 });
 
 describe('Nettle, to a hero carrying hunger (Kyle, 2026-11-11)', () => {
-  it('buys their ordinary gear too, for less than Tobin would have, and still never hungry', async () => {
+  it('buys their ordinary gear too, for less than Tobin would have', async () => {
     const { HUNGRY_CUT } = await import('../src/shared/fence');
     const plain = gear('fine'), red = rollHungry(rng, 'WARRIOR');
     const clean = hero(plain);
     expect(nettleTakes(plain, clean)).toBe(false);
     const fallen = hero(plain, red);
     expect(nettleTakes(plain, fallen)).toBe(true);
-    expect(nettleTakes(red, fallen)).toBe(false);
+    expect(nettleTakes(red, fallen)).toBe(true);
     expect(fenceValue(plain, fallen)).toBe(Math.max(1, Math.round(priceOf(plain) * HUNGRY_CUT)));
     expect(fenceValue(plain, fallen)).toBeLessThan(sellValue(plain));
     const gold = fallen.gold;
