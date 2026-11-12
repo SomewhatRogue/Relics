@@ -100,7 +100,7 @@ export const LESSONS: Lesson[] = [
     more: [{ kind: 'scrapper', variant: 'looter', x: 19, y: 27, awake: true }, { kind: 'scrapper', variant: 'looter', x: 18, y: 37, awake: true }] },
   { area: 1, name: 'THE PATH', teach: 'DODGE', moves: ['attack', 'roll'], count: 'dodge', need: 2, hew: [25, 37],
     foes: [{ kind: 'scrapper', variant: 'lunger', x: 31, y: 31, awake: true }, { kind: 'scrapper', variant: 'lunger', x: 36, y: 35, awake: true }, { kind: 'scrapper', bow: true, x: 39, y: 29, awake: true }] },
-  { area: 2, name: "HEW'S CLEARING", teach: 'BLOCK', moves: ['attack', 'roll', 'block'], count: 'block', need: 5, hew: [25, 23],
+  { area: 2, name: "HEW'S CLEARING", teach: 'BLOCK', moves: ['attack', 'roll', 'block'], count: 'block', need: 3, hew: [25, 23],
     foes: [{ kind: 'scrapper', x: 29, y: 15, awake: true }, { kind: 'scrapper', x: 33, y: 14, awake: true }, { kind: 'scrapper', x: 35, y: 18, awake: true }] },
   // The stream: the last-second dodge under a heavy's blow (a Warrior or Healer walks on by: see BY_CLASS).
   { area: 3, name: 'THE STREAM', teach: 'LAST SECOND', card: 'slip', moves: ['attack', 'roll'], count: 'slip', need: 2, hew: [46, 21],
@@ -128,7 +128,7 @@ const BY_CLASS: Record<HeroClass, Lesson[]> = {
   // Only the Warrior lifts: after the first three, the next two are for grabbing and throwing.
   // A Warrior has no dodge button: the path teaches walking out of the striped blow, with no button.
   WARRIOR: [{ ...L[0], count: 'grab', need: 1, moves: ['attack', 'grab'] }, step, heavy(L[2], ['grab']), heavy({ ...onBy, moves: L[2].moves }, ['grab']), heavy(L[4])],
-  HEALER: [L[0], step, { ...heavy(L[2]), need: 4 }, heavy({ ...onBy, moves: L[2].moves }), heavy(L[4])],
+  HEALER: [L[0], step, { ...heavy(L[2]), need: 3 }, heavy({ ...onBy, moves: L[2].moves }), heavy(L[4])],
   ROGUE: [
     { ...L[0], foes: [...L[0].foes, { kind: 'scrapper', variant: 'looter', x: 10, y: 37 }] },
     { ...L[1], foes: [scr(31, 31, 'lunger'), scr(36, 35, 'lunger'), scr(38, 29, 'lunger')] },
