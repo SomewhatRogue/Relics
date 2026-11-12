@@ -20,10 +20,14 @@ const ranged = (h: Hero) => !!WEAPONS[h.weapon].combo[0].shot || WEAPONS[h.weapo
 /** Where the weapon points now (and what it has swept through, for the smear). */
 export function pose(h: Hero, now: number): Pose {
   const fa = Math.atan2(h.fy, h.fx), side = h.fx >= -0.2 ? 1 : -1;
+  // At rest and walking a weapon is carried at a set angle, flipping only with the side faced: it doesn't swivel
+  // round the hero after the aim (Kyle, 2026-11-12: "makes the mace feel not powerful or solid"). Attacks,
+  // charges and blocks still point where they're aimed.
+  const fw = side > 0 ? 0 : Math.PI;
   const rest: Partial<Record<Hero['weapon'], number>> = {
-    sword: fa + side * 1.1, greatsword: -Math.PI / 2 - side * 0.7, spear: -Math.PI / 2 + side * 0.3, daggers: fa + side * 1.4,
-    longbow: fa + side * 1.2, shortbow: fa + side * 1.1, crossbow: fa + side * 0.9, wand: fa + side * 1.1, staff: -Math.PI / 2 + side * 0.25,
-    spellblade: fa + side * 1.1, mace: fa + side * 1.2,
+    sword: fw + side * 1.1, greatsword: -Math.PI / 2 - side * 0.7, spear: -Math.PI / 2 + side * 0.3, daggers: fw + side * 1.4,
+    longbow: fw + side * 1.2, shortbow: fw + side * 1.1, crossbow: fw + side * 0.9, wand: fw + side * 1.1, staff: -Math.PI / 2 + side * 0.25,
+    spellblade: fw + side * 1.1, mace: fw + side * 1.2,
   };
   const charge = Math.min(1, (h.actT + CHARGE.start) / chargeFull(WEAPONS[h.weapon], h));
   const kit = kitPose(h, now, fa, side, charge) ?? tapPose(h, fa, side);

@@ -40,7 +40,8 @@ export function kitPose(h: Hero, now: number, fa: number, side: number, charge: 
     return { a: now * (9 + 9 * charge), ext: 0, reach: 0, pull: charge };
   }
   const rest = { rapier: 1.2, poisoner: 1.2, censer: 1.1, flail: 1.3 } as Record<string, number>;
-  return { a: fa + side * rest[h.weapon], ext: 0, reach: 0, pull: 0 };
+  // Carried at a set angle, not after the aim (held.ts).
+  return { a: (side > 0 ? 0 : Math.PI) + side * rest[h.weapon], ext: 0, reach: 0, pull: 0 };
 }
 
 /** The censer at the off hand, a coal lit from the Last Lantern swinging in it (every Cleric carries one). */

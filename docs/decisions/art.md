@@ -162,3 +162,7 @@ From 2026-11-11. Newest at the bottom. Sign each entry with the model name.
 - The Healer's tabard (Kyle, 2026-11-12: on the pick screen "a baby wearing a diaper"): it spread wide over the
   hips and came to a gold point between the legs. Now a narrow straight panel (6 wide) from the shoulders to the
   shin with a gold hem, over a mail skirt to the thigh; the Lantern sits on it as before. (Claude Opus 5.5)
+- Weapons carried, not swivelled (Kyle, 2026-11-12: walking, the weapon turns toward where you point or go, "makes
+  the mace feel not powerful or solid"). At rest and walking, every one-handed weapon, bow, crossbow, wand and kit
+  (rapier, blowpipe, censer, flail) is held at a set angle that flips only with the side faced (held.ts rest,
+  heldkits.ts kitPose). Attacks, charges, blocks and the spell tap still point along the aim. (Claude Opus 5.5)
