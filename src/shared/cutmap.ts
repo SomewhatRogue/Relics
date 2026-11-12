@@ -47,8 +47,12 @@ function shift(p: RoomPlan, dx: number, dy: number, pk: number, into: { map: Gam
 
 const rock = (x: number, y: number, w: number, h: number): Block => ({ kind: 'rockwall', x, y, w, h });
 
-/** The whole map from its places, bottom first. Returns the plan and where each place was laid. */
-export function cutMap(job: Job, places: CutPlace[]): { plan: RoomPlan; laid: Laid[] } {
+/**
+ * The whole map from its places, bottom first. Returns the plan and where each place was laid. `fork`: the map
+ * ends in a fork yard (a last stretch with no goblins) with these two ways out, left and right (sim/fork.ts).
+ */
+export function cutMap(job: Job, places: CutPlace[], fork?: { name: string; ways: [string, string] }): { plan: RoomPlan; laid: Laid[] } {
+  if (fork) places = [...places, { plan: () => yardPlan(fork.name), keep: [] }];
   const plans = places.map((p) => p.plan(job)), W = CUT.w, L = CUT.lull;
   const H = plans.reduce((a, p) => a + p.map.h, 0) + (plans.length - 1) * L;
   const top = plans[plans.length - 1].map;
@@ -80,6 +84,15 @@ export function cutMap(job: Job, places: CutPlace[]): { plan: RoomPlan; laid: La
     y = y0 - L;
   });
   map.exit = { ...top.exit!, x: top.exit!.x + laid[laid.length - 1].x0, y: 0 };
+  if (fork) {
+    // Two ways out of the yard's back wall, left and right, the party's vote.
+    const Y = laid[laid.length - 1], out = (x: number) => ({ x: Y.x0 + x, y: 0, w: 4, h: 1.4 });
+    map.roads = [
+      { area: out(1), road: 'high', label: fork.ways[0], vote: true },
+      { area: out(Y.w - 5), road: 'low', label: fork.ways[1], vote: true },
+    ];
+    map.exit = map.roads[0].area;
+  }
   return { plan, laid };
 }
 
@@ -95,3 +108,14 @@ function lull(map: GameMap, rng: Rng, y0: number, y1: number, W: number): void {
 
 /** Where (x, y) of place `i` lands on the map. */
 export const onMap = (laid: Laid[], i: number, at: P): P => ({ x: at.x + laid[i].x0, y: at.y + laid[i].y0 });
+
+/** The fork yard: an open yard behind the last place, a fire basket each side, its two ways out in the back wall (narrow, so a phone sees both). */
+function yardPlan(name: string): RoomPlan {
+  const w = 14, h = 12;
+  const map = {
+    name, w, h, wallFace: 3, rounds: [{ kind: 'rock' as const, x: w / 2, y: 4.2, r: 0.7 }], blocks: [], braziers: [{ x: 1.2, y: 4.2, r: 0.3, wild: true }, { x: w - 1.2, y: 4.2, r: 0.3, wild: true }],
+    torches: [], water: [], soil: [{ mat: 'cobble' as const, x: 1, y: 0, w: w - 2, h }], marks: [], npcs: [],
+    hero: { x: w / 2, y: h - 1.6 }, exit: { x: w / 2 - 1.3, y: 0, w: 2.6, h: 0.9 },
+  } as unknown as GameMap;
+  return { map, foes: [], props: [], chests: [] };
+}

@@ -9,6 +9,7 @@ import { CHECK_WORDS } from '../shared/opencutwords';
 import { INSTANCE } from '../shared/tuning';
 import { players } from '../sim/party';
 import { gateReady, lastStretch, stretchOf } from '../sim/stretches';
+import { votes, voting } from '../sim/fork';
 import type { ArenaRoom } from '../sim/room';
 import type { Run } from '../sim/run';
 
@@ -16,6 +17,7 @@ export class CheckNotes {
   private index = -1;
   private downs = 0;
   private there = false;
+  private way = -1;
 
   /** This frame's line, if any. `together`: the whole party already stands in the gate (it's opening). */
   note(run: Run | null, room: ArenaRoom, me: string, together: boolean): string | null {
@@ -39,6 +41,10 @@ export class CheckNotes {
       say = CHECK_WORDS.waiting(up.filter((x) => inArea(e, x.x, x.y)).length, up.length);
     }
     this.there = there;
+    // At a fork, stepping onto a way: who's on it (sim/fork.ts).
+    const way = voting(run, room) && h ? (room.map.roads ?? []).findIndex((r) => inArea(r.area, h.x, h.y)) : -1;
+    if (way >= 0 && way !== this.way) say = `${room.map.roads![way].label}: ${votes(room).on[way]} of ${votes(room).up}`;
+    this.way = way;
     return say;
   }
 }

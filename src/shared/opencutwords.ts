@@ -10,7 +10,7 @@ export const CUT_POST = {
   where: 'RAKEHEAD',
   title: 'The Open Cut',
   text: "A digger got out of Rakehead last night and came over the hill on bare feet, and what he says is the hungry took everyone who could swing a pick, roped them, and walked them down to the Open Cut. Some are still in the rows, he thinks. Go up and get them back.",
-  rooms: 'Down through Rakehead into the pit, about 30 minutes, a boss in each place',
+  rooms: 'Down through Rakehead to the pit, about 30 minutes, someone keeping each gate',
   pays: (n: number) => `${n} gold and what the bosses drop`,
 };
 
@@ -43,8 +43,17 @@ export const PAIR_WORDS = {
 
 /** An instance on one map: the goal once a stretch's named ones are dead, and the gate opening (sim/stretches.ts). */
 export const GATE_WORDS = {
-  on: 'Way on: through the gate, all of you together',
+  on: 'Everyone stand at the gate together',
   open: 'GATE OPEN',
+};
+
+/** The fork yard (sim/fork.ts): its two ways, the goal while the party votes, and once it's chosen. */
+export const FORK_WORDS = {
+  over: 'OVER THE TOP',
+  under: 'UNDER THE HILL',
+  yard: 'THE FORK YARD',
+  vote: 'Everyone stand on one of the two ways. The way with most of you on it wins',
+  on: (way: string) => `Way on: ${way}`,
 };
 
 /** The checkpoint: a gate passed, a wipe, and waiting at the gate for the rest. */

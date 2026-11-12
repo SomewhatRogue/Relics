@@ -859,6 +859,8 @@ export type FightEvent =
   | { k: 'opened'; x: number; y: number }
   /** An instance's gate between stretches opened for the party (sim/stretches.ts). */
   | { k: 'gateopen'; x: number; y: number }
+  /** An instance's fork decided by the party's vote (sim/fork.ts). */
+  | { k: 'wayopen'; x: number; y: number; way: number }
   | { k: 'pairup'; x: number; y: number }
   | { k: 'boardout'; x: number; y: number }
   /** `more`: another blow of a pack rush met by the same guard in the same instant (its words said once). */

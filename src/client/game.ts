@@ -18,6 +18,7 @@ import { DEEP_WORDS } from './deepwords';
 import { expedition, fenmere, hangmansWood } from '../shared/expedjob';
 import { openCut } from '../shared/instances';
 import { CheckNotes } from './checknotes';
+import { forkOf } from '../sim/fork';
 import { barnHunt, barnPosted } from '../shared/bossjobs';
 import { WORKS, workDone, workOpen, workProgress, WORK_ORDER, type WorkId } from '../shared/works';
 import { contribute, type Contribution } from '../shared/worldsync';
@@ -846,17 +847,20 @@ export class Game {
       }
       else if (!this.outside && this.room.exitOpen) {
         // The way on takes the whole party, standing in it together; at a fork, the road they stand in.
-        const road = this.room.map.roads?.find((r) => this.together(r.area));
+        // (An instance's fork: the way the party voted for, sim/fork.ts; it walks out by that one.)
+        const voted = forkOf(this.room.map) ? this.room.map.roads![this.run.way ?? -1] : undefined;
+        const road = forkOf(this.room.map) ? (voted && this.together(voted.area) ? voted : undefined) : this.room.map.roads?.find((r) => this.together(r.area));
         // The Deep: a floor's end is each player's checkpoint; the leader takes everyone down once all have chosen.
         if (isDeep(this.run.job)) {
           this.deepEdge();
           if (this.deepVote === this.run.job.floor && !this.deepWaiting()) this.descend();
-        } else if (road || this.together(this.room.map.exit)) {
+        } else if (road || (!forkOf(this.room.map) && this.together(this.room.map.exit))) {
           if (isFinal(this.run)) this.finish('won');
           else {
             this.run.index++;
             if (road) this.run.roads[this.run.index] = road.road;
             // An instance's gate is a checkpoint: the wipes count from here (sim/checkpoint.ts).
+            // (The way voted for stays: the next map is that way's, sim/instanceroom.ts.)
             if (this.run.job.instance) Object.assign(this.run, { downs: 0, wipeAt: undefined, stretch: 0, check: undefined });
             // The goblins ahead are counted for whoever's still with you.
             this.run.party = 1 + [...(this.coop?.friends.values() ?? [])].filter((f) => f.profile && !f.gone).length;

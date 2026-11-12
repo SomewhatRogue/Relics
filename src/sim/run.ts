@@ -22,6 +22,7 @@ import { arenaRoom } from './arenaroom';
 import { instanceParty, instanceRoom } from './instanceroom';
 import { stepCheckpoint } from './checkpoint';
 import { stepStretches } from './stretches';
+import { stepFork } from './fork';
 import { bandOf } from '../shared/deepbands';
 import { deepEdge } from './deepedge';
 
@@ -74,6 +75,8 @@ export interface Run {
   /** An instance on one map (sim/stretches.ts): the stretch the party's in, from 0, and where the fallen get up. */
   stretch?: number;
   check?: { x: number; y: number };
+  /** An instance's fork (sim/fork.ts): the way the party chose, by its road's place in `map.roads`. */
+  way?: number;
 }
 
 export const MAX_DOWNS = 3;
@@ -183,7 +186,7 @@ export function tally(run: Run, room: ArenaRoom, events: FightEvent[], me: strin
     }
   }
   // An instance: a wipe is back to the area's gate, the third since the last gate loses it (sim/checkpoint.ts).
-  if (run.job.instance) stepStretches(run, room, events), stepCheckpoint(run, room, events);
+  if (run.job.instance) stepStretches(run, room, events), stepFork(run, room, events), stepCheckpoint(run, room, events);
   else if (run.downs >= MAX_DOWNS || allOut(room.heroes)) run.failed = true;
   board(run, room);
 }

@@ -4,7 +4,9 @@
  * (shared/instances.ts): one map up through Rakehead's rows, the workings and the washing floor, then the Haulier.
  */
 import { describe, expect, it } from 'vitest';
-import { openCut, INSTANCES, areaOf, CUT_PLACES } from '../src/shared/instances';
+import { openCut, INSTANCES, areaOf, CUT_PLACES, OVER_PLACES, UNDER_PLACES } from '../src/shared/instances';
+import { votes } from '../src/sim/fork';
+import { FORK_WORDS } from '../src/shared/opencutwords';
 import { cutMap } from '../src/shared/cutmap';
 import { HAUL_NAME } from '../src/shared/bosswords';
 import { CUT_NAMES } from '../src/shared/opencutwords';
@@ -21,18 +23,17 @@ import { walkable } from './walk';
 
 const job = (d = 12) => openCut(d);
 /**
- * Place `i` of the one map (0 the rows, 1 the workings, 2 the washing floor), the party at its foot with the gates
- * below it open; 3, the Haulier's arena. `at` turns a place's own (x, y) into the map's.
+ * A place of the Open Cut, the party at its foot: 0 the rows (act 1, Rakehead), 1 the workings (act 2, over the top),
+ * 2 the washing floor (act 2, under the hill); 3, the Haulier's arena. `at` turns a place's own (x, y) into its map's.
  */
 function area(i: number, ids = ['me'], d = 12): { run: Run; room: ArenaRoom; hs: Hero[]; at: (x: number, y: number) => { x: number; y: number } } {
   const run = newRun(job(d));
-  Object.assign(run, { index: i === 3 ? 1 : 0, party: ids.length, stretch: i === 3 ? 0 : i });
-  const room = runRoom(run), hs = ids.map((id) => room.join(id)), L = cutMap(job(d), CUT_PLACES).laid[Math.min(i, 2)];
+  Object.assign(run, { index: [0, 1, 1, 2][i], way: i === 2 ? 1 : i === 1 ? 0 : undefined, party: ids.length });
+  const places = [CUT_PLACES, OVER_PLACES, UNDER_PLACES][Math.min(i, 2)];
+  const fork = i === 0 ? { name: FORK_WORDS.yard, ways: [FORK_WORDS.over, FORK_WORDS.under] as [string, string] } : undefined;
+  const room = runRoom(run), hs = ids.map((id) => room.join(id)), L = cutMap(job(d), places, fork).laid[0];
   for (const id of ids) room.setIntent(id, NO_INTENT);
-  if (i < 3) {
-    for (const st of room.map.stretches!.slice(0, i)) room.map.blocks[st.gate!].ruined = true;
-    hs.forEach((h, n) => Object.assign(h, { x: L.x0 + L.w / 2 + n * 0.8, y: L.y0 + L.h - 1.6 }));
-  }
+  if (i < 3) hs.forEach((h, n) => Object.assign(h, { x: L.x0 + L.w / 2 + n * 0.8, y: L.y0 + L.h - 1.6 }));
   return { run, room, hs, at: (x, y) => ({ x: x + L.x0, y: y + L.y0 }) };
 }
 const step = (room: ArenaRoom, s: number) => {
@@ -41,14 +42,16 @@ const step = (room: ArenaRoom, s: number) => {
 const fall = (h: Hero, out = false) => Object.assign(h, { hp: 0, act: 'down', actT: out ? PARTY.bleed : 0, actDur: HERO.respawn, ...(out ? { out: true, bleeding: true, selfUp: true } : {}) });
 
 describe('the Open Cut on the board', () => {
-  it('is one map, then the Haulier in its working', () => {
+  it('is three acts: Rakehead, over the top or under the hill, then the Haulier in its working', () => {
     const j = job();
     expect(j.instance).toBe('opencut');
     expect(j.rooms).toBe(INSTANCES.opencut.areas.length);
-    expect(j.rooms).toBe(2);
+    expect(j.rooms).toBe(3);
     expect(j.arena).toBe('haulier');
     expect(j.boss).toBe(HAUL_NAME);
-    expect(areaOf(j, 1).plan).toBeUndefined();
+    expect(areaOf(j, 1, 0).name).toBe(FORK_WORDS.over);
+    expect(areaOf(j, 1, 1).name).toBe(FORK_WORDS.under);
+    expect(areaOf(j, 2).plan).toBeUndefined();
   });
   it('is the same job, and the same map, for the same day', () => {
     expect(job(30)).toEqual(job(30));
@@ -60,8 +63,8 @@ describe('the Open Cut on the board', () => {
 describe('the map and its places', () => {
   const plans = CUT_PLACES.map((p) => p.plan);
   it('can be walked from the foot to the way out, gates open, every goblin, cage and chest, by every day', { timeout: 60000 }, () => {
-    for (const d of [1, 12, 77]) {
-      const p = INSTANCES.opencut.areas[0].plan!(job(d)), m = p.map;
+    for (const d of [1, 12, 77]) for (const plan of [INSTANCES.opencut.areas[0].plan!, ...INSTANCES.opencut.areas[1].ways!.map((w) => w.plan!)]) {
+      const p = plan(job(d)), m = p.map;
       for (const st of m.stretches!) if (st.gate !== undefined) m.blocks[st.gate].ruined = true;
       const w = walkable(p, [], true);
       expect(w.reach(m.exit!.x + m.exit!.w / 2, 1.2, 1.2), `${d} the way out`).toBe(true);
@@ -70,9 +73,11 @@ describe('the map and its places', () => {
       for (const f of p.foes) expect(f.x > 0 && f.x < m.w && f.y > 0 && f.y < m.h).toBe(true);
     }
   });
-  it('is its places in order, a gate shut between each two, the party at the rows` foot', () => {
+  it('is its places in order, a gate shut between each two, the party at the rows` foot, the fork yard last', () => {
     const p = INSTANCES.opencut.areas[0].plan!(job()), m = p.map, st = m.stretches!;
-    expect(st.map((s) => s.keep)).toEqual(CUT_PLACES.map((c) => c.keep));
+    expect(st.map((s) => s.keep)).toEqual([...CUT_PLACES.map((c) => c.keep), []]);
+    expect(st[st.length - 1].name).toBe(FORK_WORDS.yard);
+    expect(m.roads!.map((r) => r.label)).toEqual([FORK_WORDS.over, FORK_WORDS.under]);
     expect(st.slice(0, -1).every((s) => m.blocks[s.gate!].kind === 'gate' && !m.blocks[s.gate!].ruined)).toBe(true);
     expect(st[st.length - 1].gate).toBeUndefined();
     expect(m.hero.y).toBeGreaterThan(m.h - 3);
@@ -93,11 +98,12 @@ describe('the map and its places', () => {
 });
 
 describe('the frame', () => {
-  it('builds the map dozing beyond an area`s reach, the pacing rules on; then the Haulier`s arena', () => {
-    const { room: map } = area(0);
-    expect(map.sleepFar).toBe(true);
-    expect(map.sleepAt).toEqual({ wake: INSTANCE.wake, doze: INSTANCE.doze });
-    expect(map.pace).toEqual({ index: 0 });
+  it('builds each map dozing beyond an area`s reach, the pacing rules on; then the Haulier`s arena', () => {
+    for (const i of [0, 1, 2]) {
+      const { room: map } = area(i);
+      expect(map.sleepFar).toBe(true);
+      expect(map.sleepAt).toEqual({ wake: INSTANCE.wake, doze: INSTANCE.doze });
+    }
     const { room } = area(3);
     expect(room.enemies.some((e) => e.boss?.who === 'haulier')).toBe(true);
   });
@@ -124,7 +130,7 @@ describe('the frame', () => {
     expect(isDead(k)).toBe(true);
     const after = goal(run, room);
     expect(after.done).toBe(false);
-    expect(after.text).toContain('through the gate');
+    expect(after.text).toContain('at the gate together');
     expect(room.enemies.filter((e) => !isDead(e)).length).toBeGreaterThan(5);
   });
 
@@ -391,5 +397,51 @@ describe('THE SLUICER and THE RAKER', () => {
   it('says to kill them close together while both are about', () => {
     const { run, room } = floor();
     expect(goal(run, room).text).toContain('close together');
+  });
+});
+
+describe('the fork yard', () => {
+  const yard = (ids: string[]) => {
+    const a = area(0, ids), m = a.room.map, st = m.stretches!;
+    for (const s of st) if (s.gate !== undefined) m.blocks[s.gate].ruined = true;
+    Object.assign(a.run, { stretch: st.length - 1 });
+    for (const e of a.room.allEnemies) if (e.name) Object.assign(e, { hp: 0, act: 'dead' });
+    const on = (h: Hero, way: number) => {
+      const r = m.roads![way].area;
+      Object.assign(h, { x: r.x + r.w / 2, y: r.y + r.h / 2, safeT: 99 });
+    };
+    const tick = () => (a.room.step(), tally(a.run, a.room, a.room.events, ids[0]));
+    return { ...a, on, tick };
+  };
+
+  it('asks the party to pick a way, and decides nothing till everyone stands on one', () => {
+    const { run, room, hs, on, tick } = yard(['a', 'b', 'c']);
+    expect(goal(run, room).text).toContain(FORK_WORDS.vote);
+    on(hs[0], 0), on(hs[1], 0);
+    tick();
+    expect(run.way).toBeUndefined();
+    expect(votes(room).on).toEqual([2, 0]);
+  });
+
+  it('goes the way most of the party stands on, once all of it is lined up', () => {
+    const { run, room, hs, on, tick } = yard(['a', 'b', 'c']);
+    on(hs[0], 1), on(hs[1], 1), on(hs[2], 0);
+    tick();
+    expect(run.way).toBe(1);
+    expect(goal(run, room)).toEqual({ text: expect.stringContaining(FORK_WORDS.on(FORK_WORDS.under)), done: true });
+    // The next map is that way's.
+    run.index = 1;
+    expect(runRoom(run).map.stretches![0].keep).toEqual(UNDER_PLACES[0].keep);
+  });
+
+  it('a tie decides nothing; alone, your way is the way', () => {
+    const two = yard(['a', 'b']);
+    two.on(two.hs[0], 0), two.on(two.hs[1], 1);
+    two.tick();
+    expect(two.run.way).toBeUndefined();
+    const one = yard(['me']);
+    one.on(one.hs[0], 0);
+    one.tick();
+    expect(one.run.way).toBe(0);
   });
 });

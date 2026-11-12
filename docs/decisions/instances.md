@@ -2,6 +2,22 @@
 
 The Instances chat's log (docs/BOARD.md). Newest first, signed with the model. Spec: docs/design/instances.md.
 
+## 2026-11-11: acts and the fork vote, arc step 1 (Kyle: "build it"; Claude Opus 5.5)
+
+docs/design/open-cut-arc.md step 1. An instance's areas are its acts; an act can be a fork (`InstanceArea.ways`), the
+map loaded for it the way the party chose (`run.way`, `areaOf(job, i, way)`). A map can end in a fork yard
+(`cutMap(..., fork)`: a last stretch with no goblins, 14 wide so a phone sees both ways, two roads in its back wall,
+`Road.vote`, their names drawn from the start). The vote (`sim/fork.ts`, on the leader in tally): once the yard's
+reached, when every hero who's up stands on one way or the other, the way with more of them wins; a tie decides
+nothing; alone, your way is the way. Then the party walks out by the chosen way (`client/game.ts`) and the next map
+is that way's. Each hero stepping onto a way hears its count ("OVER THE TOP: 2 of 3"). The Open Cut for now: act 1
+Rakehead (the rows, then the fork yard), act 2 over the top (the workings, the Brakesman) or under the hill (the washing
+floor, the Sluicer and Raker), act 3 the Haulier; the new places come in the next steps. Writing pass (lore keeper,
+line editor) on the gate and fork lines and the board row: "Everyone stand at the gate together", "Everyone stand on
+one of the two ways. The way with most of you on it wins", "Down through Rakehead to the pit, about 30 minutes, someone
+keeping each gate" (the line editor's "a named foe" not taken: the bible keeps "named" off these). Next: act 1's
+reckoning house.
+
 ## 2026-11-11: the Open Cut's story and its ways, spec (Kyle; Claude Opus 5.5)
 
 Kyle asked for each instance anchored in a story arc with a few choices of way, several bigger maps each with its own

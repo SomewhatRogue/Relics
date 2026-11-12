@@ -19,7 +19,8 @@ import { waiting } from './survivors';
 import { expedGoal } from './expedgoal';
 import { HELD_HINT, pickWay, type WayKind } from '../shared/ways';
 import { STAITHE_WORDS } from '../shared/staithewords';
-import { BRAKE_WORDS, DROVER_WORDS, GATE_WORDS, PAIR_WORDS } from '../shared/opencutwords';
+import { BRAKE_WORDS, DROVER_WORDS, FORK_WORDS, GATE_WORDS, PAIR_WORDS } from '../shared/opencutwords';
+import { forkOf } from './fork';
 import { keepers, lastStretch, stretchOf } from './stretches';
 import { staitheGoal } from './staithegoal';
 
@@ -92,6 +93,9 @@ export function goal(run: Run, room: ArenaRoom, houses: Captives = { caged: 0, w
   if (st) {
     const keep = keepers(st, room), last = lastStretch(run, room.map);
     if (keep.length) return { text: also(killWords(keep, room)), done: false };
+    // A fork yard: the party votes by standing on a way (sim/fork.ts).
+    const roads = forkOf(room.map);
+    if (last && roads) return run.way === undefined ? { text: also(FORK_WORDS.vote), done: false } : { text: also(FORK_WORDS.on(roads[run.way].label)), done: true };
     return { text: also(last ? way(false) : GATE_WORDS.on), done: last };
   }
   // An instance's area: its gate opens when its named ones are dead; the cages are there to free, never needed (shared/instances.ts).

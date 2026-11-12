@@ -18,7 +18,7 @@ import type { Run } from './run';
 export const instanceParty = (run: Run) => Math.max(INSTANCE.party, run.party ?? 1);
 
 export function instanceRoom(run: Run): ArenaRoom {
-  const job = run.job, area = areaOf(job, run.index), n = instanceParty(run);
+  const job = run.job, area = areaOf(job, run.index, run.way), n = instanceParty(run);
   if (!area?.plan) throw new Error(`instance area ${run.index} has no plan`);
   const plan = area.plan(job), seed = job.seed + run.index;
   const room = new ArenaRoom(seed, {

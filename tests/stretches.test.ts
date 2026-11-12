@@ -48,7 +48,7 @@ describe('one map in stretches', () => {
     const s0 = st();
     Object.assign(warden(), { hp: 0, act: 'dead' });
     expect(gateReady(run, room)).toBe(true);
-    expect(goal(run, room).text).toContain('through the gate');
+    expect(goal(run, room).text).toContain('at the gate together');
     run.downs = 2;
     into(hs[0]);
     for (let n = 0; n < 5; n++) tick();

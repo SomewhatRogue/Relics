@@ -181,6 +181,8 @@ export interface Road {
   area: Area; road: 'high' | 'low'; label: string; /** Layout 3: the side of the room it leaves by (else the top). */ side?: 'N' | 'E' | 'S' | 'W';
   /** Layout 4: what you can tell from here about the way (shared/ways.ts): its word is the label, its cue drawn past the gap. */
   way?: import('./ways.js').WayKind;
+  /** An instance's fork (sim/fork.ts): the party votes by standing on it; drawn from the start. */
+  vote?: boolean;
 }
 /** Someone to talk to: `talk` says what they offer (a town spot's panel), `look` how they're drawn. */
 export interface Npc {

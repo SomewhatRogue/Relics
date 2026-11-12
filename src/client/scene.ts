@@ -484,7 +484,7 @@ export class Scene {
     // At a fork, both ways out glow, each with its name.
     for (const r of map.roads ?? []) {
       // Layout 4's ways say what's past them from the start (waycues.ts); the old roads once the way's open.
-      if (!room.exitOpen && !r.way) continue;
+      if (!room.exitOpen && !r.way && !r.vote) continue;
       const e = r.area, ex = OX + e.x * PX - cx, ey = OY + e.y * PX - cy;
       // Under a gap in the back wall; beside one in a side wall, inside the room.
       const [tx, ty] = r.side === 'W' ? [ex + e.w * PX + 26, ey + (e.h * PX) / 2 - 3] : r.side === 'E' ? [ex - 26, ey + (e.h * PX) / 2 - 3] : [ex + (e.w * PX) / 2, ey + e.h * PX + 34];

@@ -15,7 +15,7 @@ import { rowsPlan } from './cutrows.js';
 import { cutMap, type CutPlace } from './cutmap.js';
 import { workingsPlan } from './cutworkings.js';
 import { washingPlan } from './cutwashing.js';
-import { CUT_AREAS, CUT_NAMES, CUT_POST } from './opencutwords.js';
+import { CUT_AREAS, CUT_NAMES, CUT_POST, FORK_WORDS } from './opencutwords.js';
 import { stressPlan } from './stressmap.js';
 
 export type InstanceId = 'opencut' | 'stress';
@@ -24,6 +24,8 @@ export interface InstanceArea {
   name: string;
   /** The area, by hand. None: the job's boss arena (the last area). */
   plan?: (job: Job) => RoomPlan;
+  /** A fork: the ways on, one of which the party chose at the map before (`run.way`: sim/fork.ts). */
+  ways?: InstanceArea[];
 }
 
 export interface Instance { id: InstanceId; place: Place; areas: InstanceArea[] }
@@ -34,7 +36,12 @@ Object.assign(INSTANCES, {
     id: 'opencut',
     place: { name: 'Rakehead', kind: 'mine', region: 'Copperdeep', ruin: 2 },
     // One map down through Rakehead (shared/cutmap.ts), then the Haulier's working (the job's arena).
-    areas: [{ name: 'THE OPEN CUT', plan: openCutMap }, { name: CUT_AREAS[3] }],
+    // The acts (docs/design/open-cut-arc.md): Rakehead to the fork yard; over the top or under the hill; the Haulier.
+    areas: [
+      { name: 'RAKEHEAD', plan: openCutMap },
+      { name: '', ways: [{ name: FORK_WORDS.over, plan: overTheTop }, { name: FORK_WORDS.under, plan: underTheHill }] },
+      { name: CUT_AREAS[3] },
+    ],
   },
 });
 
@@ -43,20 +50,29 @@ INSTANCES.stress = { id: 'stress', place: { name: 'Rakehead', kind: 'mine', regi
 /** The stress map's job (docs/design/open-cut-map.md step 0; dev only, `?stress=1`). */
 export const stressJob = (day = 1): Job => ({ ...openCut(day), id: `d${day}-stress`, instance: 'stress', rooms: 1, arena: undefined });
 
-/** The Open Cut's places, from the bottom (docs/design/open-cut-map.md). */
-export const CUT_PLACES: CutPlace[] = [
-  { plan: rowsPlan, keep: [CUT_NAMES.drover] },
-  { plan: workingsPlan, keep: [CUT_NAMES.brakesman] },
-  { plan: washingPlan, keep: [CUT_NAMES.sluicer, CUT_NAMES.raker] },
-];
+/** The Open Cut's places, from the bottom (docs/design/open-cut-map.md): Rakehead's, then each way's. */
+export const CUT_PLACES: CutPlace[] = [{ plan: rowsPlan, keep: [CUT_NAMES.drover] }];
+export const OVER_PLACES: CutPlace[] = [{ plan: workingsPlan, keep: [CUT_NAMES.brakesman] }];
+export const UNDER_PLACES: CutPlace[] = [{ plan: washingPlan, keep: [CUT_NAMES.sluicer, CUT_NAMES.raker] }];
 
-/** The Open Cut's one map. */
+/** Act 1, Rakehead, up to the fork yard. */
 export function openCutMap(job: Job): RoomPlan {
-  return cutMap(job, CUT_PLACES).plan;
+  return cutMap(job, CUT_PLACES, { name: FORK_WORDS.yard, ways: [FORK_WORDS.over, FORK_WORDS.under] }).plan;
+}
+/** Act 2, over the top. */
+export function overTheTop(job: Job): RoomPlan {
+  return cutMap(job, OVER_PLACES).plan;
+}
+/** Act 2, under the hill. */
+export function underTheHill(job: Job): RoomPlan {
+  return cutMap(job, UNDER_PLACES).plan;
 }
 
 /** Area `i` of an instance job. */
-export const areaOf = (job: Job, i: number): InstanceArea => INSTANCES[job.instance!].areas[i];
+export function areaOf(job: Job, i: number, way?: number): InstanceArea {
+  const a = INSTANCES[job.instance!].areas[i];
+  return a?.ways ? a.ways[way ?? 0] : a;
+}
 
 /** The day's posting of the Open Cut: Rakehead's rows into the Open Cut, the Haulier at the end. */
 export function openCut(day: number): Job {
