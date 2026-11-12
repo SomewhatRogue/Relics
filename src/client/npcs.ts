@@ -5,7 +5,9 @@
 import type { Npc } from '../shared/arena';
 import { blit, shadow, type Ctx } from './draw';
 import { drawText, textWidth } from './pixfont';
-import { makeSprite, type Sprite } from './sprites';
+import { grow, makeSprite, type Sprite } from './sprites';
+import { gobPen } from './gobpen';
+import { hs } from './heroscale';
 import { drawWork } from './siegedraw';
 import { CREW, drawCrew } from './crewdraw';
 
@@ -56,15 +58,16 @@ function person(l: Look): Sprite {
   parts.push(['e', 6, 3.5, 3.4, 3.4, l.skin], ['p', 5, 4, '#141218'], ['p', 7, 4, '#141218'], ...l.hair);
   // A tall hat reaches above the head: grow the sprite upward to fit it.
   const lift = Math.max(0, ...parts.map((q) => -(q[2] as number)));
-  return makeSprite(12, 16 + lift, parts.map((q) => q.map((v, i) => (i === 2 ? (v as number) + lift : v)) as Part));
+  // Drawn again at 1.5x for the art pass (sprites.ts `grow`), so they stand as tall as the heroes.
+  return makeSprite(18, Math.round((16 + lift) * 1.5), grow(parts.map((q) => q.map((v, i) => (i === 2 ? (v as number) + lift : v)) as Part)));
 }
 
 const SPRITES: Record<string, Sprite> = {};
 for (const [k, l] of Object.entries(LOOKS)) SPRITES[k] = person(l);
-SPRITES.child = makeSprite(9, 11, [
+SPRITES.child = makeSprite(14, 17, grow([
   ['r', 2, 8, 2, 3, '#3a3036'], ['r', 5, 8, 2, 3, '#3a3036'], ['r', 1, 4, 7, 5, '#6a7a4a'], ['e', 4.5, 2.5, 2.6, 2.6, SKIN],
   ['p', 3, 3, '#141218'], ['p', 5, 3, '#141218'], ['r', 3, 0, 4, 1, '#8a5a2a'],
-]);
+]));
 
 /** Someone's sprite by their look (the soldier past the trees in the wood is drawn from it: vigshots.ts). */
 export const personSprite = (look: string): Sprite => SPRITES[look] ?? SPRITES.villager;
@@ -100,7 +103,7 @@ function drawSmear(c: Ctx, x: number, y: number, top: number, low: number): void
 
 /** Hew after the bite: still held up without his head, or thrown down on his side. */
 function drawDead(c: Ctx, s: Sprite, x: number, y: number, n: Npc): void {
-  const neck = 7, both = [c.lit, c.glow];
+  const neck = hs(7), both = [c.lit, c.glow];
   for (const g of both) {
     g.save();
     g.translate(Math.round(x), Math.round(y - (n.lift ?? 0)));
@@ -135,20 +138,22 @@ export function drawNpc(c: Ctx, n: Npc, x: number, y: number, near: boolean, fx 
   // The gravedigger stops walking while he digs.
   if ((n.work === 'bury' || n.work === 'dig') && tx < 5) walking = false;
   const bob = n.pose ? 0 : Math.floor(c.now * (walking ? (n.sneak ? 4 : 7) : 1.5) + n.x) % 2 ? -1 : 0;
-  shadow(c, x, y, 5);
+  shadow(c, x, y, hs(5));
   if (n.pose === 'corpse') return drawCorpse(c, s, x, y, n);
   if (n.smear) drawSmear(c, x, y, n.smear, n.lift ?? 0);
   if (n.pose) return drawDead(c, s, x, y, n);
   // The works' crew face the way they walked in, so what's in their hands faces it too.
   const crew = !!n.work && CREW.has(n.work);
   blit(c, s, x, y - (n.lift ?? 0) + bob, walking || crew ? fx < 0 : Math.floor(c.now * 0.25 + n.y) % 2 === 0, 0, n.sneak ? 0.78 : n.kneel ? 0.7 : 1);
+  // What they hold is drawn in the old pixels through the pen, onto the 1.5x body (gobpen.ts).
+  const p = gobPen(c, x, y);
   // Hew with the archer's arrow in his leg, down on one knee (sim/woodheal.ts).
-  if (n.arrow) drawArrowIn(c, x, y);
+  if (n.arrow) drawArrowIn(p, x, y);
   // A guard carries a spear upright.
-  if (crew) drawCrew(c, n, x, y + bob, fx, walking);
-  else if (n.work) drawWork(c, n, x, y + bob, tx, fx);
+  if (crew) drawCrew(p, n, x, y + bob, fx, walking);
+  else if (n.work) drawWork(p, n, x, y + bob, tx, fx);
   if (n.mute) return;
-  if (n.look === 'guard') (c.lit.fillStyle = '#6b4a2b'), c.lit.fillRect(Math.round(x + (fx < 0 && walking ? -6 : 5)), Math.round(y - 22 + bob), 1, 20), (c.lit.fillStyle = '#cfd6dc'), c.lit.fillRect(Math.round(x + (fx < 0 && walking ? -6 : 5)), Math.round(y - 24 + bob), 1, 3);
+  if (n.look === 'guard') (p.lit.fillStyle = '#6b4a2b'), p.lit.fillRect(Math.round(x + (fx < 0 && walking ? -6 : 5)), Math.round(y - 22 + bob), 1, 20), (p.lit.fillStyle = '#cfd6dc'), p.lit.fillRect(Math.round(x + (fx < 0 && walking ? -6 : 5)), Math.round(y - 24 + bob), 1, 3);
   const top = Math.round(y - s.h - 4 + (Math.floor(c.now * 3) % 2));
   c.glow.fillStyle = near ? '#fff1b0' : '#d4a537';
   c.glow.fillRect(Math.round(x), top - 2, 1, 1);

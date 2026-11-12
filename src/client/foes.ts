@@ -212,7 +212,7 @@ export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number, dozing = false
   }
   if (e.kind === 'scrapper') return scrapper(c, e, x, y, t), kit(gobPen(c, x, y), e, x, y);
   const a = e.attack;
-  shadow(c, x, y, 5);
+  shadow(c, x, y, hs(5));
   // A dummy rocks and flattens a little under a blow; it doesn't go anywhere.
   const pz = foeHit(rest(DUMMY), e, t), wob = t - e.hitAt < 0.3 ? Math.round(Math.sin(c.now * 60)) : 0;
   pz.ox = pz.oy = 0;
@@ -220,10 +220,12 @@ export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number, dozing = false
   if (e.kind === 'swingDummy') {
     let ang = Math.atan2(e.fy, e.fx);
     if (a) ang += a.t < a.windup ? -1.4 * ease(a.t / a.windup) : -1.4 + 2.8 * Math.min(1, (a.t - a.windup) / a.active);
-    line(c.lit, x + 5, y - 10, ang, 0, 11, '#6b4a2b', 2);
-    line(c.lit, x + 5, y - 10, ang, 9, 12, '#3a2a1a', 3);
+    // (The dummy is drawn 1.5x: its arm through the goblin pen, gobpen.ts.)
+    const g = gobPen(c, x, y).lit;
+    line(g, x + 5, y - 10, ang, 0, 11, '#6b4a2b', 2);
+    line(g, x + 5, y - 10, ang, 9, 12, '#3a2a1a', 3);
   }
-  if (e.act === 'stunned') stars(c, x, y - 18);
+  if (e.act === 'stunned') stars(c, x, y - hs(18));
 }
 
 /** A boss's rope lane, each side of its line: as far as a hero's middle can be and still be caught (sim/combat.ts inArc). */

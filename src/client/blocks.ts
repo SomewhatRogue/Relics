@@ -245,8 +245,8 @@ export function drawRound(c: Ctx, r: Round, x: number, y: number): void {
     // The Last Lantern: a flame that never goes out.
     const f = Math.floor(c.now * 9) % 3;
     c.glow.fillStyle = '#fff1b0';
-    c.glow.fillRect(Math.round(x - 1), Math.round(y - 30 + Math.round(r.r * 6)), 3, 4);
+    c.glow.fillRect(Math.round(x - 1), Math.round(y - 45 + Math.round(r.r * 6)), 3, 5);
     c.glow.fillStyle = f ? '#ffd27a' : '#ffb44c';
-    c.glow.fillRect(Math.round(x), Math.round(y - 32 + Math.round(r.r * 6)), 1, 2);
+    c.glow.fillRect(Math.round(x), Math.round(y - 48 + Math.round(r.r * 6)), 1, 3);
   }
 }

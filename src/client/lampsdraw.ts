@@ -31,11 +31,12 @@ export const brazierOn = (m: GameMap, b: GameMap['braziers'][number]) => (b.wild
 export function drawBrazier(c: Ctx, x: number, y: number, now: number, on: number): void {
   blit(c, SPRITES.brazier, x, y);
   if (on > 0.5) {
-    flame(c.glow, x - 2, y - 10, now, 2);
-    flame(c.glow, x + 2, y - 10, now + 0.37, 2);
+    // (Over the coals of the brazier, half again as tall in the art pass.)
+    flame(c.glow, x - 2, y - 15, now, 2);
+    flame(c.glow, x + 2, y - 15, now + 0.37, 2);
     return;
   }
-  const r = (dx: number, w: number, col: string) => ((c.lit.fillStyle = col), c.lit.fillRect(Math.round(x + dx), Math.round(y - 8), w, 1));
+  const r = (dx: number, w: number, col: string) => ((c.lit.fillStyle = col), c.lit.fillRect(Math.round(x + dx), Math.round(y - 12), w, 1));
   r(-3, 6, '#5a5660');
   r(-2, 1, '#77727e');
   r(1, 1, '#3a3640');
@@ -56,13 +57,13 @@ export function drawLamps(c: Ctx, m: GameMap, cx: number, cy: number, now: numbe
   }
   for (const b of m.braziers) {
     const on = brazierOn(m, b), x = OX + b.x * PX - cx, y = OY + b.y * PX - cy;
-    if (on > 0) lights.push({ x, y: y - 8, r: 78 + Math.sin(now * 11 + x) * 3, i: 0.95 * tk * on, c: [1, 0.6, 0.3] });
+    if (on > 0) lights.push({ x, y: y - 12, r: 78 + Math.sin(now * 11 + x) * 3, i: 0.95 * tk * on, c: [1, 0.6, 0.3] });
   }
   for (const r of m.rounds) {
     if (r.kind !== 'post') continue;
-    const on = lampAt(m.theme, r.x, r.y), x = OX + r.x * PX - cx, y = OY + r.y * PX - cy - 24;
+    const on = lampAt(m.theme, r.x, r.y), x = OX + r.x * PX - cx, y = OY + r.y * PX - cy - 36;
     if (on <= 0) continue;
-    if (on > 0.5) flame(c.glow, x, y + 2, now, 1);
+    if (on > 0.5) flame(c.glow, x, y + 3, now, 1);
     lights.push({ x, y, r: 64, i: 0.8 * tk * on, c: [1, 0.72, 0.42] });
   }
 }

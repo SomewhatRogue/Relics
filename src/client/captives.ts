@@ -6,6 +6,8 @@
  * Drawing only.
  */
 import { drawNetOver } from './staithedraw';
+import { gobPen } from './gobpen';
+import { hs } from './heroscale';
 import { drawAsh, drawEaten } from './remainsdraw';
 import { SPRITES } from './sprites';
 import { blit, ring, shadow, type Ctx } from './draw';
@@ -40,7 +42,9 @@ export function drawSurvivor(c: Ctx, s: Survivor, sx: number, sy: number, now: n
   // Walking home, fading out toward the way in.
   const fade = home < 0 ? 1 : Math.max(0, 1 - home / SURVIVOR.walkOff);
   c.lit.globalAlpha = c.glow.globalAlpha = Math.max(0.15, fade);
-  shadow(c, sx, sy + 2, 3);
+  shadow(c, sx, sy + 2, hs(3));
+  // (They're drawn 1.5x with the art pass; the rope, raised hands and sparks in the old pixels through the pen.)
+  const p = gobPen(c, sx, sy);
   const up = t < 1.5 && Math.floor(t * 6) % 2 === 0 ? -1 : 0, step = s.moving && Math.floor(now * 7 + s.id) % 2 ? -1 : 0;
   const flash = now - s.hitAt < 0.12 ? 1 : 0;
   blit(c, spr, sx, sy + 2 + up + step, s.fx < 0, flash);
@@ -50,17 +54,17 @@ export function drawSurvivor(c: Ctx, s: Survivor, sx: number, sy: number, now: n
   // On a rope (layout 4): hands bound in front, the rope round the waist; no thanks yet.
   // Being cut loose off THE DROVER's rope (sim/drover.ts): the clock as a ring on the glow layer.
   if (s.led && s.cutT) ring(c, sx, sy, 8, '#ffd27a', s.cutT / DROVER.cut, '#3a3428');
-  if (s.led) return void ((c.lit.fillStyle = '#8a7a5a'), c.lit.fillRect(Math.round(sx - 3), Math.round(sy - 5 + step), 7, 1), c.lit.fillRect(Math.round(sx - 1), Math.round(sy - 7 + step), 3, 2), (c.lit.globalAlpha = c.glow.globalAlpha = 1));
-  if (t < 1.2) (c.lit.fillStyle = '#c79c78'), c.lit.fillRect(Math.round(sx - 4), Math.round(sy - 11 + up), 1, 3), c.lit.fillRect(Math.round(sx + 3), Math.round(sy - 11 + up), 1, 3);
+  if (s.led) return void ((p.lit.fillStyle = '#8a7a5a'), p.lit.fillRect(Math.round(sx - 3), Math.round(sy - 5 + step), 7, 1), p.lit.fillRect(Math.round(sx - 1), Math.round(sy - 7 + step), 3, 2), (c.lit.globalAlpha = c.glow.globalAlpha = 1));
+  if (t < 1.2) (p.lit.fillStyle = '#c79c78'), p.lit.fillRect(Math.round(sx - 4), Math.round(sy - 11 + up), 1, 3), p.lit.fillRect(Math.round(sx + 3), Math.round(sy - 11 + up), 1, 3);
   // Smouldering: a few sparks rising off them.
   if (s.burnUntil > now) {
     c.glow.fillStyle = Math.floor(now * 10) % 2 ? '#ffb040' : '#ff6a20';
-    for (let i = 0; i < 3; i++) c.glow.fillRect(Math.round(sx - 3 + i * 3), Math.round(sy - 6 - ((now * 14 + i * 5) % 8)), 1, 1);
+    for (let i = 0; i < 3; i++) p.glow.fillRect(Math.round(sx - 3 + i * 3), Math.round(sy - 6 - ((now * 14 + i * 5) % 8)), 1, 1);
   }
   c.lit.globalAlpha = c.glow.globalAlpha = 1;
   if (t < 3.5) {
     const line = THANKS[(s.id - 1) % THANKS.length];
-    drawText(c.glow, line, Math.round(sx - textWidth(line) / 2), Math.round(sy - 22), '#c8f0c0');
+    drawText(c.glow, line, Math.round(sx - textWidth(line) / 2), Math.round(sy - hs(22)), '#c8f0c0');
   }
 }
 

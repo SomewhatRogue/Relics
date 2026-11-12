@@ -48,3 +48,14 @@ From 2026-11-11. Newest at the bottom. Sign each entry with the model name.
   belly shapes redrawn to the new measures; a mood's lean and lift scaled. The wolfhound's muzzle is 4, not
   5, so its nose stays in the box at full stretch (tests/hound.test.ts holds every breed in every pose
   inside it). Maeve's preview canvas 64 by 40 at an even 4x. (Claude Opus 5.5)
+- Slice 4, props and townsfolk: `grow` in sprites.ts draws a sprite again from its own shapes at 1.5x
+  (rect edges land on the new grid, ellipses and wedges drawn whole, a lone pixel stays one pixel), so
+  nothing is stretched. Grown 1.5x: barrel, punt, oil, table, plank, stave, cage, larder, trees, pine, dead
+  tree, bush, reeds, rock, hay, well, stump, target, stone, the training dummies (no longer stretched), the
+  freed captives; the crate redrawn by hand (its cross brace as two clean diagonals). Taller on the same
+  footprint: pillar, statue, brazier, lamp, lantern, support, post. Their overlays moved with them (the
+  brazier's flames, ash and light, the lamp post's flame, the Last Lantern's flame, a prop's shadow, tumble
+  and lift over the bigger hero). Wickhold's townsfolk and the child grown the same way; what they hold
+  (spears, tools, Hew's arrow, the crew's loads) and the captives' rope, hands and sparks go through the
+  goblin pen. Left for the Deep chat: the Haulier's ore cart (its wheels are drawn in sumpdraw.ts), still
+  1x. Next: buildings taller on the same footprint. (Claude Opus 5.5)

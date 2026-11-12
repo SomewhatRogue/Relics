@@ -44,7 +44,7 @@ export function sized(c: Ctx, x: number, y: number, draw: () => void, on = true)
 }
 
 /**
- * Whether a foe is still stretched: not a butcher or a boss (big already), and not a small goblin drawn
- * through foes.ts's scrapper() (redrawn at 1.5x). Wolves, logs, the dug-in and the rest wait their turn.
+ * Whether a foe is still stretched: not a butcher or a boss (big already), not a training dummy (redrawn
+ * with the props), and not a small goblin drawn through foes.ts's scrapper() (redrawn at 1.5x). Wolves, logs, the dug-in and the rest wait their turn.
  */
-export const stretchFoe = (e: Enemy) => e.kind !== 'butcher' && !e.boss && !(e.kind === 'scrapper' && e.variant !== 'wolf' && e.variant !== 'log' && !e.under);
+export const stretchFoe = (e: Enemy) => e.kind !== 'butcher' && !e.boss && e.kind !== 'dummy' && e.kind !== 'swingDummy' && !(e.kind === 'scrapper' && e.variant !== 'wolf' && e.variant !== 'log' && !e.under);
