@@ -7,6 +7,7 @@
  * the hero's id, so nothing is sent to keep it going.
  */
 import type { Hero } from '../sim/types';
+import { hs } from './heroscale';
 import type { PastimeId } from '../shared/pastimes';
 import type { BodyPose } from './motion';
 import type { Ctx } from './draw';
@@ -58,14 +59,15 @@ export function parkProps(c: Ctx, at: PropAt, id: PastimeId, t: number): void {
 }
 
 function rod(c: Ctx, at: PropAt, t: number): void {
-  const s = at.side, hx = at.bx + s * 4, hy = at.by - 9;
+  // (Held at the 1.5x hero's hands, heroscale.ts; the float and the butts stay where they are in the world.)
+  const s = at.side, hx = at.bx + s * hs(4), hy = at.by - hs(9);
   // A creel beside them on the bank.
-  dot(c.lit, at.x - s * 7, at.y - 3, 4, 3, '#6a5034'), dot(c.lit, at.x - s * 7, at.y - 4, 4, 1, '#8a6a44');
+  dot(c.lit, at.x - s * hs(7) - (s > 0 ? 2 : 0), at.y - 5, 6, 5, '#6a5034'), dot(c.lit, at.x - s * hs(7) - (s > 0 ? 2 : 0), at.y - 6, 6, 1, '#8a6a44');
   // The rod: out and up over the water, thinning toward the tip, the tip nodding.
-  const nod = Math.round(Math.sin(at.now * 1.7) * 0.6), len = 17;
+  const nod = Math.round(Math.sin(at.now * 1.7) * 0.6), len = hs(17);
   for (let i = 0; i <= len; i++) {
-    const k = i / len, x = hx + s * Math.round(i * 0.72), y = hy - Math.round(i * 0.7 + k * k * 1.5) + (i > 12 ? nod : 0);
-    dot(c.lit, x, y, 1, 1, i < 5 ? '#5a3a20' : '#8a6a3a');
+    const k = i / len, x = hx + s * Math.round(i * 0.72), y = hy - Math.round(i * 0.7 + k * k * 1.5) + (i > hs(12) ? nod : 0);
+    dot(c.lit, x, y, 1, 1, i < hs(5) ? '#5a3a20' : '#8a6a3a');
   }
   const tx = hx + s * Math.round(len * 0.72), ty = hy - Math.round(len * 0.7 + 1.5) + nod;
   // The float out on the water, bobbing; every so often it dips under, and rings spread.
@@ -88,14 +90,14 @@ function bow(c: Ctx, at: PropAt, t: number): void {
   const loosing = t >= SHOOT.draw + SHOOT.hold && t < SHOOT.draw + SHOOT.hold + SHOOT.loose;
   const nocked = !loosing && t < SHOOT.draw + SHOOT.hold || t > CYCLE - SHOOT.nock * 0.4;
   // The bow arm straight out toward the butts (up and to the right), the bow upright across it.
-  const bx = at.bx + 8, by = at.by - 11;
-  for (let i = -6; i <= 6; i++) dot(c.lit, bx + Math.round(2 - (i * i) / 18), by + i, 1, 1, i === 0 ? '#3a2818' : '#8a5a30');
-  const back = Math.round(pull * 6), sx = bx - back;
-  for (let i = -6; i <= 6; i++) {
-    const k = 1 - Math.abs(i) / 6;
+  const bx = at.bx + hs(8), by = at.by - hs(11), H = hs(6);
+  for (let i = -H; i <= H; i++) dot(c.lit, bx + Math.round(3 - (i * i) / 27), by + i, 1, 1, i === 0 ? '#3a2818' : '#8a5a30');
+  const back = Math.round(pull * H), sx = bx - back;
+  for (let i = -H; i <= H; i++) {
+    const k = 1 - Math.abs(i) / H;
     dot(c.lit, Math.round(bx - back * k + (1 - k) * 1), by + i, 1, 1, '#c8c0b0');
   }
-  if (nocked) for (let i = 0; i < 10; i++) dot(c.lit, sx + i, by - Math.round(i * 0.15), 1, 1, i === 9 ? '#b8bcc8' : i < 2 ? '#e8e0d0' : '#d8c48a');
+  if (nocked) for (let i = 0; i < 15; i++) dot(c.lit, sx + i, by - Math.round(i * 0.15), 1, 1, i >= 13 ? '#b8bcc8' : i < 3 ? '#e8e0d0' : '#d8c48a');
   // The draw hand at the string, the bow hand on the grip.
   dot(c.lit, sx - 1, by, 2, 2, skinOf(at.def));
   dot(c.lit, bx, by - 1, 2, 2, skinOf(at.def));

@@ -8,6 +8,7 @@ import type { Pose } from './held';
 import type { LookDef } from './lookkit';
 import type { IdleOut } from './idlepose';
 import type { WeaponId } from '../shared/tuning';
+import { HERO_W } from './heroscale';
 
 /** `x, y`: the feet; `bx, by`: the body (with its shift); `px, py`: the weapon hand; `side`: the way the
  *  hero looks now (1 right); `ey, exl, exr`: the eyes' row and columns; `el`: a Mage's element colour. */
@@ -22,7 +23,7 @@ export function dot(g: CanvasRenderingContext2D, x: number, y: number, w: number
 /** A sprite pixel of the head (col, row in the look's own map) on screen this frame (after `layout`). */
 export function headPx(col: number, row: number): [number, number] {
   const L = LAYOUT;
-  return [(L.flip ? L.left + 12 - col : L.left + 1 + col) + L.lean, L.top + 1 + row + L.drop];
+  return [(L.flip ? L.left + HERO_W - col : L.left + 1 + col) + L.lean, L.top + 1 + row + L.drop];
 }
 
 const cols = new WeakMap<LookDef, Map<number, string>>();
@@ -31,9 +32,9 @@ export function colAt(d: LookDef, col: number, row: number, or = '#5a5048'): str
   let m = cols.get(d);
   if (!m) {
     cols.set(d, (m = new Map()));
-    for (const [, x, y, c] of d.down as unknown as [string, number, number, string][]) m.set(y * 16 + x, c);
+    for (const [, x, y, c] of d.down as unknown as [string, number, number, string][]) m.set(y * 32 + x, c);
   }
-  return m.get(row * 16 + col) ?? or;
+  return m.get(row * 32 + col) ?? or;
 }
 /** The look's skin (the pixel between the eyes). */
 export const skinOf = (d: LookDef) => colAt(d, d.eyes[1] + 1, d.eyes[0], '#d8a07a');

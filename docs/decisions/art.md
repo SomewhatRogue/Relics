@@ -22,3 +22,9 @@ From 2026-11-11. Newest at the bottom. Sign each entry with the model name.
   now 1.5 (a new key, so the old 1x test pick doesn't stick) so goblins not yet redrawn stand at the picked
   size beside them. UI pictures resized to whole multiples of the new card (title faces 54 by 72, the HUD
   face 21 by 18 at one unit a pixel, pack figure 60, roll card face 40). Idle props next. (Claude Opus 5.5)
+- Slice 2, idle props: every idle's things in hand (the thumb on the edge, the yawn, the flex, the stick,
+  the scan, coins and flipped knives, the book, the brim, sparks, the prayer, the polish, the censer's
+  smoke) and the pastimes held at the hands (the rod and creel, the range bow, the arm wrestle, the knife
+  throw, the smith's hammer) placed through `hs`; colour samples and head points read on the new grid.
+  Things out in the world (the float, the butts, the anvil) stay put. Open: the Ranger's hound is still
+  its old size beside the bigger hero; redraw it with the goblins' kit. (Claude Opus 5.5)
