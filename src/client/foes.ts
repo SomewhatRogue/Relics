@@ -31,6 +31,8 @@ const ARM: [number, number] = [0, 0];
 /** Where scrapper() last put the body and the weapon hand (pixels from the feet), for its kit. */
 const AT = { bx: 0, by: 0, hx: 0, hy: 0 };
 import { OX, OY, PX } from './world';
+import { HS, hs } from './heroscale';
+import { gobPen } from './gobpen';
 
 function cleaver(c: Ctx, x: number, y: number, a: number): void {
   line(c.lit, x, y, a, 0, 4, '#4a3a2a');
@@ -72,36 +74,44 @@ function butcher(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
   if (a && a.unblockable && a.t < a.windup) drawText(c.glow, '!', Math.round(bx - 1), Math.round(by - 33 - (Math.floor(c.now * 6) % 2)), '#ffd040');
 }
 
+/**
+ * A small goblin at 1.5x (art pass): the body is its 17 by 20 sprite posed at full size; what it carries
+ * (the knife, the bow, every kit) is drawn by the kit files in the old pixels through a pen round its feet
+ * (gobpen.ts), so it lands on whole pixels where the bigger hands are. `bx`, `by` and the arm's offset are
+ * handed to the kits in the old pixels; the pen puts them right.
+ */
 function scrapper(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
   AT.bx = AT.by = AT.hx = AT.hy = 0;
   // Hit hard: head over heels once, with a hop. Thrown: tumbling end over end through the air.
   const tb = e.act === 'carried' || e.act === 'pinned' ? null : tumble(e, t);
-  if (tb) return shadow(c, x, y, 4), spin(c, SPRITES.scrapper, x, y - 7 - tb.hop, tb.a);
-  if (Math.hypot(e.kvx, e.kvy) > 6 && e.act !== 'carried') return spin(c, SPRITES.scrapper, x, y - 9, c.now * 22);
+  if (tb) return shadow(c, x, y, hs(4)), spin(c, SPRITES.scrapper, x, y - hs(7) - tb.hop, tb.a);
+  if (Math.hypot(e.kvx, e.kvy) > 6 && e.act !== 'carried') return spin(c, SPRITES.scrapper, x, y - hs(9), c.now * 22);
   if (e.act === 'carried' || e.act === 'pinned') {
     const wig = e.act === 'pinned' ? Math.sin(c.now * 14) * 0.25 : c.now * 14;
-    spin(c, SPRITES.scrapper, x, y - 7, Math.atan2(e.fy, e.fx) + wig);
+    spin(c, SPRITES.scrapper, x, y - hs(7), Math.atan2(e.fy, e.fx) + wig);
     return;
   }
   const pz = scrapperPose(e, t, c.now);
   if (pz.phase === 'rest' && e.moving) pz.oy = Math.floor(c.now * 9) % 2 ? -1 : 0;
   if (e.act === 'stunned') (pz.ox += Math.round(Math.sin(c.now * 5))), (pz.oy += 1);
   const reach = pz.phase === 'windup' ? 1 : pz.phase === 'release' || pz.phase === 'contact' ? 7 : 3;
-  shadow(c, x, y, 5);
-  const bx = x + pz.ox, by = y + pz.oy, up = e.fy < -0.55, fa = Math.atan2(e.fy, e.fx);
+  shadow(c, x, y, hs(5));
+  // The body where it's thrown (1.5x the pose's shift); the kits' feet and hand in the old pixels.
+  const bx = x + Math.round(pz.ox * HS), by = y + Math.round(pz.oy * HS), up = e.fy < -0.55, fa = Math.atan2(e.fy, e.fx);
   // In parts (figure.ts): the knife (or bow) is in the hand, wherever the arm has gone.
   const pale = e.variant === 'blind', body = jointed(up ? (pale ? SPRITES.paleUp : SPRITES.scrapperUp) : pale ? SPRITES.pale : SPRITES.scrapper, SCRAPPER_CUT);
-  layout(body, bx, by, e.fx < -0.2, pz);
-  const [ax, ay] = armOffset(ARM), kx = bx + ax, ky = by + ay;
-  Object.assign(AT, { bx: bx - x, by: by - y, hx: bx + ax - x, hy: by + ay - y });
+  layout(body, bx, by, e.fx < -0.2, pz, HS);
+  const [ax1, ay1] = armOffset(ARM), ax = ax1 / HS, ay = ay1 / HS, ox = x + pz.ox, oy = y + pz.oy, kx = ox + ax, ky = oy + ay;
+  Object.assign(AT, { bx: pz.ox, by: pz.oy, hx: pz.ox + ax, hy: pz.oy + ay });
+  const p = gobPen(c, x, y);
   // A lunger's weapon is its spear (kit()): no knife besides.
-  const knife = () => (e.bow ? bow(c, e, kx, ky, fa) : e.variant === 'hexer' || e.variant === 'drummer' ? drawKit(c, e, bx, by, ax, ay, t) : e.variant && KITTED.has(e.variant) ? drawFoeKit(c, e, bx, by, ax, ay, t) : e.variant === 'lunger' ? undefined : line(c.lit, kx + Math.cos(fa) * reach, ky - 6 + Math.sin(fa) * reach, fa, 0, 4, '#cfd6dc'));
+  const knife = () => (e.bow ? bow(p, e, kx, ky, fa) : e.variant === 'hexer' || e.variant === 'drummer' ? drawKit(p, e, ox, oy, ax, ay, t) : e.variant && KITTED.has(e.variant) ? drawFoeKit(p, e, ox, oy, ax, ay, t) : e.variant === 'lunger' ? undefined : line(p.lit, kx + Math.cos(fa) * reach, ky - 6 + Math.sin(fa) * reach, fa, 0, 4, '#cfd6dc'));
   if (up) knife();
   drawFigure(c, body, bx, by, pz);
   // The wood's element lesson: wet, aproned or kiln-hot (lessonfoes.ts).
-  drawLessonMark(c, e, bx, by);
+  drawLessonMark(p, e, ox, oy);
   if (!up) knife();
-  if (e.act === 'stunned') stars(c, bx, by - 15, 3, 5);
+  if (e.act === 'stunned') stars(c, bx, by - hs(15), 3, hs(5));
 }
 
 /** An archer's short bow, the string pulled back through the wind-up, an arrow nocked. */
@@ -141,11 +151,11 @@ export const asleep = (m: GameMap, e: Enemy) => !!e.feeding && e.alert === false
 /** Curled on its side, breathing slow; now and then a breath of steam goes up off it in the cold. */
 function sleeping(c: Ctx, e: Enemy, x: number, y: number, flash: number): void {
   const side = e.id % 2 ? 1 : -1, breathe = Math.floor(c.now * 0.8 + e.id) % 2;
-  shadow(c, x, y, 7);
-  spin(c, SPRITES.scrapper, x, y - 3 - breathe * 0.5, (side * Math.PI) / 2);
-  if (flash) (c.lit.fillStyle = '#ffffff'), c.lit.fillRect(Math.round(x - 5), Math.round(y - 7), 11, 7);
+  shadow(c, x, y, hs(7));
+  spin(c, SPRITES.scrapper, x, y - hs(3) - breathe * 0.5, (side * Math.PI) / 2);
+  if (flash) (c.lit.fillStyle = '#ffffff'), c.lit.fillRect(Math.round(x - 8), Math.round(y - 11), 17, 10);
   const p = (c.now * 0.35 + e.id * 0.31) % 1;
-  if (p < 0.6) (c.lit.globalAlpha = 0.5 * (1 - p / 0.6)), (c.lit.fillStyle = '#8a8494'), c.lit.fillRect(Math.round(x + side * 5 + p * 3), Math.round(y - 8 - p * 8), 2, 1), (c.lit.globalAlpha = 1);
+  if (p < 0.6) (c.lit.globalAlpha = 0.5 * (1 - p / 0.6)), (c.lit.fillStyle = '#8a8494'), c.lit.fillRect(Math.round(x + side * hs(5) + p * 3), Math.round(y - hs(8) - p * 8), 2, 1), (c.lit.globalAlpha = 1);
 }
 
 const DUMMY = newPose();
@@ -180,7 +190,7 @@ export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number, dozing = false
   // Hits are stamped in room time (`c.t`), not the wall clock.
   const t = c.t ?? c.now, flash = t - e.hitAt < 0.09 ? 0.9 : 0;
   const hurt = e.hp < e.maxHp && (t - e.hitAt < 3 || e.hp < e.maxHp * 0.5);
-  if ((e.kind === 'butcher' || e.kind === 'scrapper') && hurt) ring(c, x, y, e.kind === 'butcher' ? 11 : 6, '#e24b4a', e.hp / e.maxHp);
+  if ((e.kind === 'butcher' || e.kind === 'scrapper') && hurt) ring(c, x, y, e.kind === 'butcher' ? 11 : hs(6), '#e24b4a', e.hp / e.maxHp);
   // At a body, tearing at it; FED, eyes burning (remainsdraw.ts).
   if (e.kind === 'butcher') return butcher(c, e, x, y, t), drawMealing(c, e, x, y, t), drawFed(c, e, x, y, t);
   if (e.variant === 'log') return drawLogs(c, e, x, y);
@@ -191,15 +201,16 @@ export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number, dozing = false
     const lean = cyc < 0.45 ? 2 + (Math.floor(c.now * 14) % 2) : cyc < 0.6 ? 0 : 1, shove = cyc < 0.45 ? f : cyc < 0.6 ? -f : 0;
     scrapper(c, e, x + shove, y + lean, t);
     if (cyc >= 0.45 && cyc < 0.75) {
-      const k = (cyc - 0.45) / 0.3;
-      c.lit.fillStyle = '#9a1414';
-      for (let i = 0; i < 3; i++) c.lit.fillRect(Math.round(x + f * (3 + i * 2 * k)), Math.round(y - 7 - 6 * k + i * k * 3 + 8 * k * k), 1, 1);
-      c.lit.fillStyle = '#6a2a1a';
-      c.lit.fillRect(Math.round(x + f * 4), Math.round(y - 8), 2, 1);
+      // (In the old pixels, through the pen: gobpen.ts.)
+      const k = (cyc - 0.45) / 0.3, g = gobPen(c, x, y).lit;
+      g.fillStyle = '#9a1414';
+      for (let i = 0; i < 3; i++) g.fillRect(Math.round(x + f * (3 + i * 2 * k)), Math.round(y - 7 - 6 * k + i * k * 3 + 8 * k * k), 1, 1);
+      g.fillStyle = '#6a2a1a';
+      g.fillRect(Math.round(x + f * 4), Math.round(y - 8), 2, 1);
     }
     return;
   }
-  if (e.kind === 'scrapper') return scrapper(c, e, x, y, t), kit(c, e, x, y);
+  if (e.kind === 'scrapper') return scrapper(c, e, x, y, t), kit(gobPen(c, x, y), e, x, y);
   const a = e.attack;
   shadow(c, x, y, 5);
   // A dummy rocks and flattens a little under a blow; it doesn't go anywhere.
@@ -331,10 +342,11 @@ export function drawTelegraph(c: Ctx, a: EnemyAttack, cx: number, cy: number): v
 export function drawHeld(c: Ctx, e: Enemy, x: number, y: number, fx: number, fy: number, slam: number): void {
   const s = e.kind === 'butcher' ? SPRITES.butcherDown : e.kind === 'spider' ? SPIDER_SPRITES.spiderA : SPRITES.scrapper;
   if (slam > 0) {
-    const up = slam < 0.6 ? 24 + 8 * (slam / 0.6) : 32 * (1 - (slam - 0.6) / 0.4), ahead = slam < 0.6 ? 0 : 12 * ((slam - 0.6) / 0.4);
+    // (Over the 1.5x hero's head, heroscale.ts.)
+    const up = HS * (slam < 0.6 ? 24 + 8 * (slam / 0.6) : 32 * (1 - (slam - 0.6) / 0.4)), ahead = HS * (slam < 0.6 ? 0 : 12 * ((slam - 0.6) / 0.4));
     return spin(c, s, x + fx * ahead, y - up + fy * ahead * 0.5, Math.PI + (slam < 0.6 ? 0 : (slam - 0.6) * 4));
   }
-  spin(c, s, x, y - 27, Math.PI / 2 + Math.sin(c.now * 18) * 0.3);
+  spin(c, s, x, y - hs(27), Math.PI / 2 + Math.sin(c.now * 18) * 0.3);
 }
 
 /**

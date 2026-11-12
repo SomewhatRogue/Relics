@@ -4,7 +4,7 @@
  */
 import { drawPairLift } from './pairdraw';
 import { drawBrakeLane } from './brakedraw';
-import { sized } from './bodysize';
+import { sized, stretchFoe } from './bodysize';
 import { mistFrame } from './fenmistdraw';
 import { lurkFrame } from './fenlurk';
 import { drawBlasts } from './blastdraw';
@@ -334,7 +334,7 @@ export class Scene {
       const pz = pulledAt(room, e), roof = (e.z ?? 0) >= 2, [x, y] = pz ? [OX + pz[0] * PX, OY + pz[1] * PX] : lerp('e:' + e.id, e.x, e.y), up = roof ? ROOF_UP : Math.max(0, e.z ?? 0) * LIFT;
       // A big map: only what's on screen is drawn (DECISIONS 2026-11-03).
       if (big && off(x - cx, y - cy)) continue;
-      items.push({ y: roof ? y + 3 * PX : y, draw: () => (sized(c, x - cx, y - up - cy, () => drawFoe(c, e, x - cx, y - up - cy, asleep(map, e), map === ARENA), e.kind !== 'butcher' && !e.boss), drawStatus(c, e, x - cx, y - up - cy, room.time)) });
+      items.push({ y: roof ? y + 3 * PX : y, draw: () => (sized(c, x - cx, y - up - cy, () => drawFoe(c, e, x - cx, y - up - cy, asleep(map, e), map === ARENA), stretchFoe(e)), drawStatus(c, e, x - cx, y - up - cy, room.time)) });
     }
     for (const p of room.props) {
       if (p.broken) continue;

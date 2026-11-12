@@ -7,6 +7,7 @@
  * (remembered on this device); both go once every goblin is redrawn.
  */
 import type { Ctx } from './draw';
+import type { Enemy } from '../sim/types';
 
 const KEY = 'relic.bodysize2', STEPS = [1, 1.5, 2];
 let size = 1.5;
@@ -41,3 +42,9 @@ export function sized(c: Ctx, x: number, y: number, draw: () => void, on = true)
     c.lit.restore(), c.glow.restore();
   }
 }
+
+/**
+ * Whether a foe is still stretched: not a butcher or a boss (big already), and not a small goblin drawn
+ * through foes.ts's scrapper() (redrawn at 1.5x). Wolves, logs, the dug-in and the rest wait their turn.
+ */
+export const stretchFoe = (e: Enemy) => e.kind !== 'butcher' && !e.boss && !(e.kind === 'scrapper' && e.variant !== 'wolf' && e.variant !== 'log' && !e.under);

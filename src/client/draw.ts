@@ -5,6 +5,8 @@
  */
 import { scaleOf, type BodyPose } from './motion';
 import type { Sprite } from './sprites';
+import { penOf } from './gobpen';
+import { HS } from './heroscale';
 
 export interface Ctx {
   lit: CanvasRenderingContext2D;
@@ -135,6 +137,9 @@ export function ring(c: Ctx, x: number, y: number, rx: number, col: string, shar
 
 /** A straight run of pixels from r0 to r1 along angle a, `w` pixels thick. */
 export function line(g: CanvasRenderingContext2D, x0: number, y0: number, a: number, r0: number, r1: number, col: string, w = 1): void {
+  // On a goblin's pen (gobpen.ts): drawn whole in the 1.5x space, one pixel thin.
+  const pen = penOf(g);
+  if (pen) (x0 = pen.ox + (x0 - pen.ox) * HS), (y0 = pen.oy + (y0 - pen.oy) * HS), (r0 *= HS), (r1 *= HS), (g = pen.raw);
   g.fillStyle = col;
   const nx = -Math.sin(a), ny = Math.cos(a);
   for (let r = r0; r <= r1; r += 0.5) for (let k = 0; k < w; k++) {

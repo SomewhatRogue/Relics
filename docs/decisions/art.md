@@ -28,3 +28,16 @@ From 2026-11-11. Newest at the bottom. Sign each entry with the model name.
   throw, the smith's hammer) placed through `hs`; colour samples and head points read on the new grid.
   Things out in the world (the float, the butts, the anvil) stay put. Open: the Ranger's hound is still
   its old size beside the bigger hero; redraw it with the goblins' kit. (Claude Opus 5.5)
+- Slice 3, goblins (the small body and every kit): the small goblin redrawn 17 by 20 (from 11 by 13): a
+  bigger head, long ears out to the sides, a brow over the glowing eyes, a jagged grin, thin arms, a patched
+  jerkin, bandy legs; the pale blind hunters the same body in bone with upright ears and empty sockets; the
+  headless and burnt bodies redrawn to match. Its pose is laid out 1.5x. Everything it carries goes through
+  `gobpen.ts`: the kit files (foekits*.ts, staithekit, meatydraw*, chalkdraw, ironhidedraw, lessonfoes, the
+  snarer's, the hexer's and drummer's, the elites' marks) still draw in the old pixels round the feet, and the
+  pen puts each rect on the 1.5x grid at whole pixels, one-pixel details kept one pixel; a `line` on the pen
+  (draw.ts) is drawn whole in the new space so it stays thin. No kit file needed editing. Telegraphs and reach
+  are drawn without the pen, unchanged. Status marks (ice, snare, flames) sized to the taller body. Small
+  goblins are no longer stretched (`stretchFoe` in bodysize.ts); wolves, logs, the dug-in, spiders and the
+  meaty sorts' extra size still are until their turn. Open: butchers are still their old size, now barely
+  taller than a goblin (slice 5 grows them); props a goblin carries that are sprites (a door, a keg) keep
+  their old size until the props slice. (Claude Opus 5.5)

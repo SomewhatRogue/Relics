@@ -66,5 +66,6 @@ export function jointed(s: Sprite, cut: Cut): Jointed {
 /** Where each body is cut. A hero is 18 by 24 (`tall` more for a hat or hood), with the legs from row 16,
  *  or only the feet (the bottom row) under a robe; arms on either side of the body. */
 export const heroCut = (tall: number, robe: boolean): Cut => ({ headTo: 9 + tall, hip: (robe ? 23 : 16) + tall, back: [0, 9 + tall, 5, 16 + tall], arm: [13, 9 + tall, 18, 16 + tall] });
-export const SCRAPPER_CUT: Cut = { headTo: 6, hip: 10, back: [0, 6, 3, 10], arm: [8, 6, 11, 10] };
+/** The small goblin at 1.5x (17 by 20): head to row 9, legs from 14, a thin arm each side. */
+export const SCRAPPER_CUT: Cut = { headTo: 9, hip: 14, back: [0, 9, 4, 14], arm: [13, 9, 17, 14] };
 export const BUTCHER_CUT: Cut = { headTo: 10, hip: 17, back: [0, 8, 4, 17], arm: [14, 8, 18, 17] };

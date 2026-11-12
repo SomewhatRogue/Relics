@@ -14,7 +14,12 @@ import { STRAW, drawStrawHeap } from './rackdraw';
 import { toPx } from './world';
 import { drawPerchRope } from './wooddraw';
 import { drawPaceDust, drawPaceOver, paceOffset } from './pacedraw';
-import { drawElite } from './elitedraw';
+import { drawElite as eliteMarks } from './elitedraw';
+import { gobPen } from './gobpen';
+import { stretchFoe } from './bodysize';
+
+/** An elite's affixes, through the goblin pen when its body is the 1.5x one (gobpen.ts). */
+const drawElite = (c: Ctx, e: Enemy, x: number, y: number) => eliteMarks(stretchFoe(e) ? c : gobPen(c, x, y), e, x, y);
 import { MEATY_DRAW, meatySort } from '../shared/meaty';
 import { grownBy } from '../shared/meaty2';
 import { hopOf } from './meatydraw2';

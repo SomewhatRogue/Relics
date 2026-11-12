@@ -118,8 +118,33 @@ const dummyBase: Part[] = [
   ['p', 4, 6, '#d8c08a'], ['p', 7, 9, '#d8c08a'], ['p', 5, 11, '#8a6a3a'], ['e', 6, 2.2, 2.4, 2.2, '#c8aa6a'], ['r', 0, 5, 12, 1, '#6b4a2b'],
 ];
 
-const scrapperBody: Part[] = [['r', 3, 9, 2, 4, '#3a4a1f'], ['r', 6, 9, 2, 4, '#3a4a1f'], ['r', 2, 6, 7, 4, '#4a3a2a'], ['r', 2, 9, 7, 1, '#2a2018']];
-const scrapperHead: Part[] = [['e', 5.5, 4, 3.4, 3, '#5b6b2a'], ['p', 0, 3, '#5b6b2a'], ['p', 1, 3, '#5b6b2a'], ['p', 10, 3, '#5b6b2a'], ['p', 9, 3, '#5b6b2a'], ['p', 4, 4, '#ff4a3a'], ['p', 6, 4, '#ff4a3a'], ['r', 4, 6, 3, 1, '#e8e0c8']];
+/**
+ * The small goblin at 1.5x (art pass, 2026-11-11): 17 by 20, redrawn. Bandy legs, a ragged jerkin and belt,
+ * thin arms at its sides, a big head with long ears out to the sides, a brow over the glowing eyes and a
+ * jagged grin. `GOB` is its colours (skin, its shade, legs, feet, jerkin, its patch, belt, mouth, teeth,
+ * eyes); the pale blind hunters are the same body in bone and ash with empty sockets.
+ */
+type GobCols = { S: string; s: string; L: string; F: string; B: string; b: string; K: string; m: string; T: string; E: string };
+const GOB: GobCols = { S: '#5b6b2a', s: '#4a5a22', L: '#3a4a1f', F: '#2a3418', B: '#4a3a2a', b: '#5a4836', K: '#2a2018', m: '#2a1a14', T: '#e8e0c8', E: '#ff4a3a' };
+const PALE: GobCols = { S: '#c8c2b0', s: '#a8a290', L: '#8a8478', F: '#5a5650', B: '#4a4440', b: '#5a5450', K: '#2a2420', m: '#2a2420', T: '#e8e0c8', E: '#1a1614' };
+const gobBody = (k: GobCols): Part[] => [
+  ['r', 4, 14, 3, 5, k.L], ['r', 10, 14, 3, 5, k.L], ['r', 3, 19, 4, 1, k.F], ['r', 10, 19, 4, 1, k.F],
+  ['r', 3, 9, 11, 5, k.B], ['p', 5, 10, k.b], ['p', 6, 11, k.b], ['p', 11, 10, k.b], ['p', 10, 12, k.b], ['r', 3, 14, 11, 1, k.K], ['p', 8, 14, '#6a5a3a'],
+  ['r', 2, 10, 1, 4, k.S], ['r', 14, 10, 1, 4, k.S], ['p', 2, 13, k.s], ['p', 14, 13, k.s],
+];
+/** Its head; `pale` ears stand up instead of out. */
+const gobHead = (k: GobCols, pale = false): Part[] => [
+  ['e', 8.5, 5.5, 5.1, 4.4, k.S], ['r', 5, 9, 7, 1, k.s],
+  ...(pale ? ([['p', 1, 2, k.S], ['p', 2, 3, k.S], ['r', 2, 4, 2, 2, k.S], ['p', 15, 2, k.S], ['p', 14, 3, k.S], ['r', 13, 4, 2, 2, k.S]] as Part[])
+    : ([['p', 0, 4, k.S], ['r', 0, 5, 4, 1, k.S], ['r', 2, 6, 2, 1, k.s], ['p', 16, 4, k.S], ['r', 13, 5, 4, 1, k.S], ['r', 13, 6, 2, 1, k.s]] as Part[])),
+];
+const gobFace = (k: GobCols): Part[] => [
+  ['r', 5, 4, 3, 1, k.s], ['r', 9, 4, 3, 1, k.s], ['p', 6, 5, k.E], ['p', 10, 5, k.E], ['p', 8, 6, k.s],
+  ['r', 6, 7, 5, 1, k.T], ['p', 7, 7, k.m], ['p', 9, 7, k.m], ['r', 6, 8, 5, 1, k.m],
+];
+const gobBack = (k: GobCols): Part[] => [['r', 5, 7, 7, 1, k.s], ['r', 6, 3, 5, 1, k.s]];
+const scrapperBody = gobBody(GOB);
+const scrapperHead = [...gobHead(GOB), ...gobFace(GOB)];
 /** Everything burned to the same black, a few embers left. */
 const char = (parts: Part[]): Part[] => parts.map((p, i) => [...p.slice(0, -1), i % 5 ? '#1a1614' : '#2a2420'] as Part);
 
@@ -128,15 +153,15 @@ export const HEROES = Object.fromEntries(Object.keys(LOOKS).map((k) => [k, heroL
 export const SPRITES = {
   butcherDown: makeSprite(18, 22, [...butcherBase, ['p', 7, 5, '#ff4a3a'], ['p', 11, 5, '#ff4a3a'], ['p', 7, 8, '#e8e0c8'], ['p', 11, 8, '#e8e0c8'], ['r', 8, 7, 3, 1, '#2a1a14']]),
   butcherUp: makeSprite(18, 22, [...butcherBase, ['r', 6, 8, 6, 2, '#4a5a22']]),
-  scrapper: makeSprite(11, 13, [['r', 3, 9, 2, 4, '#3a4a1f'], ['r', 6, 9, 2, 4, '#3a4a1f'], ['r', 2, 6, 7, 4, '#4a3a2a'], ['r', 2, 9, 7, 1, '#2a2018'], ['e', 5.5, 4, 3.4, 3, '#5b6b2a'], ['p', 0, 3, '#5b6b2a'], ['p', 1, 3, '#5b6b2a'], ['p', 10, 3, '#5b6b2a'], ['p', 9, 3, '#5b6b2a'], ['p', 4, 4, '#ff4a3a'], ['p', 6, 4, '#ff4a3a'], ['r', 4, 6, 3, 1, '#e8e0c8']]),
+  scrapper: makeSprite(17, 20, [...scrapperBody, ...scrapperHead]),
   /** The blind hunters of the deep workings: bone-pale, long-eared, empty sockets where the eyes should glow. */
-  pale: makeSprite(11, 13, [['r', 3, 9, 2, 4, '#8a8478'], ['r', 6, 9, 2, 4, '#8a8478'], ['r', 2, 6, 7, 4, '#4a4440'], ['r', 2, 9, 7, 1, '#2a2420'], ['e', 5.5, 4, 3.4, 3, '#c8c2b0'], ['p', 0, 2, '#c8c2b0'], ['p', 1, 3, '#c8c2b0'], ['p', 10, 2, '#c8c2b0'], ['p', 9, 3, '#c8c2b0'], ['p', 4, 4, '#1a1614'], ['p', 6, 4, '#1a1614'], ['r', 4, 6, 3, 1, '#e8e0c8']]),
-  paleUp: makeSprite(11, 13, [['r', 3, 9, 2, 4, '#8a8478'], ['r', 6, 9, 2, 4, '#8a8478'], ['r', 2, 6, 7, 4, '#4a4440'], ['e', 5.5, 4, 3.4, 3, '#c8c2b0'], ['p', 0, 2, '#c8c2b0'], ['p', 10, 2, '#c8c2b0'], ['r', 3, 5, 5, 1, '#a8a290']]),
-  scrapperUp: makeSprite(11, 13, [['r', 3, 9, 2, 4, '#3a4a1f'], ['r', 6, 9, 2, 4, '#3a4a1f'], ['r', 2, 6, 7, 4, '#4a3a2a'], ['e', 5.5, 4, 3.4, 3, '#5b6b2a'], ['p', 0, 3, '#5b6b2a'], ['p', 10, 3, '#5b6b2a'], ['r', 3, 5, 5, 1, '#4a5a22']]),
+  pale: makeSprite(17, 20, [...gobBody(PALE), ...gobHead(PALE, true), ...gobFace(PALE)]),
+  paleUp: makeSprite(17, 20, [...gobBody(PALE), ...gobHead(PALE, true), ...gobBack(PALE)]),
+  scrapperUp: makeSprite(17, 20, [...scrapperBody, ...gobHead(GOB), ...gobBack(GOB)]),
   // Bodies left behind: without a head (a red stump), or burned black.
-  scrapperHeadless: makeSprite(11, 13, [...scrapperBody, ['r', 4, 5, 3, 1, '#7a1d1d'], ['p', 5, 4, '#9a2a2a']]),
+  scrapperHeadless: makeSprite(17, 20, [...scrapperBody, ['r', 6, 8, 5, 1, '#7a1d1d'], ['r', 7, 7, 3, 1, '#9a2a2a']]),
   butcherHeadless: makeSprite(18, 22, [...butcherBase.slice(0, 9), ['r', 7, 8, 4, 2, '#7a1d1d'], ['p', 8, 7, '#9a2a2a']]),
-  scrapperBurnt: makeSprite(11, 13, char([...scrapperBody, ...scrapperHead.slice(0, 5)])),
+  scrapperBurnt: makeSprite(17, 20, char([...scrapperBody, ...gobHead(GOB)])),
   butcherBurnt: makeSprite(18, 22, char(butcherBase)),
   barrel: makeSprite(10, 12, [['r', 1, 1, 8, 11, '#7a5230'], ['r', 0, 3, 10, 6, '#7a5230'], ['r', 0, 3, 10, 1, '#4a4652'], ['r', 0, 8, 10, 1, '#4a4652'], ['r', 2, 0, 6, 2, '#9a7a4a'], ['r', 4, 2, 1, 9, '#5a3d22']]),
   // The Staithe's: a punt drawn up on the bank (pointed ends, a pole laid in it), a lamp on its post.
