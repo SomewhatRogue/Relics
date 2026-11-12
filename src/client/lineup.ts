@@ -8,7 +8,6 @@ import { drawHero } from './actors';
 import { drawFoe } from './strawman';
 import { BARE, type Ctx } from './draw';
 import { drawText } from './pixfont';
-import { sized, stretchFoe } from './bodysize';
 import { MOVES, cast, foeIn, heroIn, type Unit } from './lineupcast';
 
 const CELL = 32, LEFT = 46, TOP = 18, PX = 16;
@@ -94,8 +93,7 @@ function draw(c: Ctx, sc: Ctx, u: Unit, m: (typeof MOVES)[number], x: number, y:
     } else {
       const { e, t } = foeIn(u.foe, m, id, now);
       c.t = t;
-      // Stretched as the game does until each goblin is redrawn (bodysize.ts).
-      sized(c, x, y, () => drawFoe(c, e, x, y, false, false), stretchFoe(e));
+      drawFoe(c, e, x, y, false, false);
     }
   } catch (err) {
     c.glow.fillStyle = '#ff4a3a';

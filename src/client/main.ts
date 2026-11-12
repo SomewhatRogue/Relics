@@ -104,7 +104,6 @@ import { setMusic, setMuted } from './sfx';
 import { Music } from './music';
 import { heroVoices, primeSpot, townVoice, voiceClock } from './voiceplay';
 import { setVoices, voicesOn } from './voicebus';
-import { bodySize, nextBodySize } from './bodysize';
 import { personAt } from './voicebank';
 import { idleHook } from './idlepose';
 import { carriesHungry } from '../shared/fence';
@@ -727,10 +726,6 @@ $('#music').addEventListener('click', () => musicSwitch(!musicOn));
 const voicesSwitch = (on: boolean) => (setVoices(on), $('#voices').classList.toggle('off', !on));
 voicesSwitch(voicesOn());
 $('#voices').addEventListener('click', () => voicesSwitch(!voicesOn()));
-// How big heroes and goblins are drawn: 1x, 1.5x, 2x, a test for Kyle (bodysize.ts).
-const sizeLabel = (n: number) => ($('#bodysize').textContent = `SIZE ${n}X`);
-sizeLabel(bodySize());
-$('#bodysize').addEventListener('click', () => sizeLabel(nextBodySize()));
 // A Ranger bowled over by the hound laughs on the floor, if they're close enough to hear (herovoice.ts).
 idleHook.fn = (h, id, t, now) => {
   const me = game.hero;

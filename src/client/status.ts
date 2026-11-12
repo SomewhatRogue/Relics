@@ -4,7 +4,6 @@
 import { lurking } from '../sim/lurk';
 import type { Enemy } from '../sim/types';
 import type { Ctx } from './draw';
-import { stretchFoe } from './bodysize';
 import { HS } from './heroscale';
 import { unheld } from '../sim/bosshold';
 
@@ -14,8 +13,8 @@ const TALL: Record<Enemy['kind'], number> = { butcher: 24, scrapper: 14, dummy: 
 export function drawStatus(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
   // (Nothing over a goblin still lying in Fenmere's reeds: sim/lurk.ts.)
   if (e.act === 'dead' || lurking(e)) return;
-  // (A goblin redrawn at 1.5x is half again as tall and wide: bodysize.ts.)
-  const k = !stretchFoe(e) ? HS : 1, tall = Math.round(TALL[e.kind] * k), w = Math.round(e.radius * 16 * k) + 2, g = c.glow;
+  // (Every body is drawn 1.5x in the art pass: half again as tall and wide.)
+  const k = HS, tall = Math.round(TALL[e.kind] * k), w = Math.round(e.radius * 16 * k) + 2, g = c.glow;
   if (e.frozenUntil > t) {
     const left = Math.round(x - w), top = Math.round(y - tall - 1), fade = Math.min(1, (e.frozenUntil - t) / 0.4);
     g.globalAlpha = 0.32 * fade;

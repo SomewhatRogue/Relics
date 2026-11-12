@@ -1,6 +1,5 @@
 /**
- * What isn't a goblin with something in its hand: a wolf (lean, grey, low to the ground, eyes that
- * catch the light), a sapper under the ground (a mound of heaving dirt and the trail behind it), lamp
+ * What isn't a goblin with something in its hand (wolves are wolfdraw.ts): a sapper under the ground (a mound of heaving dirt and the trail behind it), lamp
  * oil on the floor (and burning), and carrion crows on the dead and up in a cloud. Drawing only; the
  * crows and dust that scatter are cosmetic.
  */
@@ -12,43 +11,7 @@ import { TORCH } from '../shared/tuning';
 import { shadow, stars, type Ctx } from './draw';
 import { PX } from './world';
 
-const FUR = '#a4a2a8', FUR2 = '#7a7880', DARK = '#3a3840', EYE = '#ffd040';
 
-/** A wolf at its feet (x, y): trotting legs, a crouch before the dart, stretched out in it, and dead. */
-export function drawWolf(c: Ctx, e: Enemy, x: number, y: number): void {
-  const f = e.fx < -0.2 ? -1 : 1, g = c.lit, a = e.attack, t = c.t ?? c.now;
-  if (e.act === 'dead') {
-    const fade = Math.max(0, 1 - e.actT / Math.max(1, e.actDur));
-    g.globalAlpha = fade;
-    (g.fillStyle = FUR2), g.fillRect(Math.round(x - 6), Math.round(y - 3), 12, 3);
-    (g.fillStyle = '#7a1d1d'), g.fillRect(Math.round(x - 2), Math.round(y - 1), 4, 1);
-    g.globalAlpha = 1;
-    return;
-  }
-  const crouch = a && a.t < a.windup ? 1 : 0, leap = a && a.t >= a.windup && a.t < a.windup + a.active ? 1 : 0;
-  const run = e.moving || leap ? Math.floor(c.now * 12 + e.id) % 2 : 0, flash = t - e.hitAt < 0.09;
-  shadow(c, x, y, 6);
-  const by = Math.round(y - 5 + crouch - leap * 2), bx = Math.round(x);
-  // Legs, the body, the tail, the head and ears.
-  g.fillStyle = DARK;
-  for (const lx of [-4, -2, 2, 4]) g.fillRect(bx + lx * f, by + 3, 1, 2 - crouch + ((lx > 0) === !!run ? 0 : -1 * leap));
-  g.fillStyle = flash ? '#ffffff' : FUR;
-  g.fillRect(bx - 5, by, 10 + leap * 2, 3 - crouch);
-  g.fillStyle = flash ? '#ffffff' : FUR2;
-  g.fillRect(bx - 5, by + 2 - crouch, 10, 1);
-  g.fillRect(bx - f * 6 - (f < 0 ? 2 : 0), by - 1 + run, 3, 1);
-  g.fillStyle = flash ? '#ffffff' : FUR;
-  const hx = bx + f * 5 + (f < 0 ? -3 : 0) + leap * f * 2;
-  g.fillRect(hx, by - 2 + crouch, 4, 3);
-  g.fillRect(hx + (f > 0 ? 3 : -1), by - 1 + crouch, 2, 2);
-  g.fillStyle = FUR2;
-  g.fillRect(hx + (f > 0 ? 0 : 3), by - 3 + crouch, 1, 1);
-  c.glow.fillStyle = EYE;
-  c.glow.fillRect(hx + (f > 0 ? 2 : 1), by - 1 + crouch, 1, 1);
-  if ((e.scatterUntil ?? -9) > t) (c.glow.fillStyle = '#ffffff'), c.glow.fillRect(hx + (f > 0 ? 3 : 0), by - 4, 1, 2);
-  if (e.act === 'stunned') stars(c, x, y - 10, 3, 4);
-  void PX;
-}
 
 /** A sapper under the ground: a mound of dirt heaving where it is, clods kicked up behind it. */
 export function drawMound(c: Ctx, e: Enemy, x: number, y: number): void {

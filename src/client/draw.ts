@@ -44,7 +44,15 @@ export function tinted(s: Sprite, col: string): HTMLCanvasElement {
  * A sprite in a pose: `sx`, `sy` stretch it (feet stay put), `lean` shifts its top third that many
  * pixels sideways (its middle half as many), and `flash` washes it in `tint`. Whole pixels throughout.
  */
+/** On a goblin's pen (gobpen.ts) a sprite keeps its own size: only its feet are put where the pen puts them, on the real canvas. */
+function unpen(c: Ctx, x: number, y: number): [Ctx, number, number] {
+  const p = penOf(c.lit), q = penOf(c.glow);
+  if (!p || !q) return [c, x, y];
+  return [{ ...c, lit: p.raw, glow: q.raw }, p.ox + (x - p.ox) * p.k, p.oy + (y - p.oy) * p.k];
+}
+
 export function blitPose(c: Ctx, s: Sprite, x: number, y: number, flip: boolean, sx: number, sy: number, lean: number, flash: number, tint = '#ffffff'): void {
+  [c, x, y] = unpen(c, x, y);
   const w = Math.max(1, Math.round(s.w * sx)), h = Math.max(1, Math.round(s.h * sy));
   const left = Math.round(x - w / 2), top = Math.round(y - h), bands = lean ? 3 : 1;
   const off = (i: number) => (bands === 1 ? 0 : Math.round((lean * (2 - i)) / 2));
@@ -83,6 +91,7 @@ export function blitPose(c: Ctx, s: Sprite, x: number, y: number, flip: boolean,
 /** A pale afterimage of a body (a lunge's smear frame), on the glow layer; draw it before the body. */
 export function ghost(c: Ctx, s: Sprite, x: number, y: number, flip: boolean, alpha: number, sx = 1, sy = 1): void {
   if (alpha <= 0) return;
+  [c, x, y] = unpen(c, x, y);
   const w = Math.round(s.w * sx), h = Math.round(s.h * sy), left = Math.round(x - w / 2), top = Math.round(y - h);
   c.glow.globalAlpha = alpha;
   if (!flip) c.glow.drawImage(s.white, left, top, w, h);
@@ -100,6 +109,7 @@ export function blitBody(c: Ctx, s: Sprite, x: number, y: number, flip: boolean,
 
 /** A sprite turned by `a` radians about its middle (thrown, pinned, lying down). */
 export function spin(c: Ctx, s: Sprite, x: number, y: number, a: number, alpha = 1): void {
+  [c, x, y] = unpen(c, x, y);
   c.lit.save();
   c.lit.globalAlpha = alpha;
   c.lit.translate(Math.round(x), Math.round(y));

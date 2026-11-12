@@ -13,7 +13,7 @@ export const MOVES = ['stand', 'walk', 'wind up', 'strike', 'recover', 'hurt', '
 export type Move = (typeof MOVES)[number];
 
 /** A foe's `name` (a named butcher's look comes from it), `boss` (who, for the bosses' own looks) and `hurt` (a share of its health gone). */
-export type Foe = { kind: 'scrapper' | 'butcher'; variant?: FoeVariant; name?: string; boss?: string; hurt?: number };
+export type Foe = { kind: 'scrapper' | 'butcher' | 'spider' | 'brood'; variant?: FoeVariant; name?: string; boss?: string; hurt?: number; big?: boolean };
 export type Unit = { label: string; tall: number } & ({ hero: { cls: HeroClass; look: number } } | { foe: Foe });
 
 const CLS: HeroClass[] = ['WARRIOR', 'RANGER', 'ROGUE', 'MAGE', 'HEALER'];
@@ -26,6 +26,8 @@ export function cast(which: string): Unit[] {
   if (which !== 'goblins') for (const cls of CLS) for (const look of [0, 1, 2]) out.push({ label: `${cls} ${look + 1}`, tall: 40, hero: { cls, look } });
   if (which !== 'heroes') {
     out.push({ label: 'GOBLIN', tall: 32, foe: { kind: 'scrapper' } }, { label: 'BUTCHER', tall: 44, foe: { kind: 'butcher' } });
+    // The rest of the mobs (slice 7): spiders, a brood mother, a wolf, a BIG ONE.
+    out.push({ label: 'SPIDER', tall: 22, foe: { kind: 'spider' } }, { label: 'BROOD', tall: 30, foe: { kind: 'brood' } }, { label: 'WOLF', tall: 30, foe: { kind: 'scrapper', variant: 'wolf' } }, { label: 'BIG ONE', tall: 42, foe: { kind: 'scrapper', big: true } });
     // Named butchers (a look each from the name), THE STOKER, and the Hempen Man whole and torn.
     for (const n of ['GRISTLE', 'OLD MAW', 'THE TALLOWMAN', 'SKINNER BRANT']) out.push({ label: n.slice(0, 8), tall: 46, foe: { kind: 'butcher', name: n } });
     out.push({ label: 'STOKER', tall: 46, foe: { kind: 'butcher', variant: 'stoker', name: 'THE STOKER' } }, { label: 'HEMPEN', tall: 46, foe: { kind: 'butcher', name: 'HEMPEN', boss: 'hempen' } }, { label: 'HEMPEN 2', tall: 46, foe: { kind: 'butcher', name: 'HEMPEN', boss: 'hempen', hurt: 0.7 } });
@@ -84,6 +86,7 @@ export function foeIn(u: Foe, m: Move, id: number, now: number): { e: Enemy; t: 
   if (u.name) e.name = u.name;
   if (u.boss) e.boss = { who: u.boss, job: u.boss === 'hasp' ? 'move' : 'wall', phase: 1, poise: 1, poiseMax: 1, stagUntil: -9, roarUntil: -9, rot: 0, rotAt: 0, downUntil: -9, openUntil: -9, straps: 0 } as unknown as Enemy['boss'];
   if (u.hurt) e.hp = Math.round(e.maxHp * (1 - u.hurt));
+  if (u.big) e.big = true;
   Object.assign(e, { act: 'idle', fx: 0.2, fy: 1, moving: false, cooldown: 9 });
   let t = 10;
   if (m === 'walk') Object.assign(e, { act: 'chase', fx: 1, fy: 0.1, moving: true });

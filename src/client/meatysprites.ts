@@ -4,7 +4,7 @@
  * from behind; the Swingle's flail head; the Forker's three tines. The bodies are the small goblin's,
  * drawn bigger (MEATY_DRAW). Drawing only.
  */
-import { makeSprite, type Part } from './sprites';
+import { grow, makeSprite, type Part } from './sprites';
 
 const PLANK = '#6a4a2c', PLANK2 = '#7e5a36', SEAM = '#3e2a18', BRACE = '#54381f', IRON = '#6a6a70', RIVET = '#9aa3ad';
 
@@ -16,13 +16,13 @@ const doorFront: Part[] = [
 ];
 
 export const MEATY_SPRITES = {
-  doorFront: makeSprite(9, 8, doorFront),
+  doorFront: makeSprite(14, 12, grow(doorFront)),
   /** Edge-on, turned to the side: the planks' ends and the strap. */
-  doorSide: makeSprite(3, 9, [['r', 0, 0, 3, 9, PLANK], ['r', 1, 0, 1, 9, PLANK2], ['r', 0, 2, 3, 1, IRON], ['r', 0, 7, 3, 1, IRON]]),
+  doorSide: makeSprite(4, 14, grow([['r', 0, 0, 3, 9, PLANK], ['r', 1, 0, 1, 9, PLANK2], ['r', 0, 2, 3, 1, IRON], ['r', 0, 7, 3, 1, IRON]])),
   /** From behind (it faces away): the brace boards on the back. */
-  doorBack: makeSprite(9, 8, [['r', 0, 0, 9, 8, PLANK], ['r', 0, 0, 9, 1, PLANK2], ['r', 3, 0, 1, 8, SEAM], ['r', 6, 0, 1, 8, SEAM], ['r', 0, 3, 9, 2, BRACE]]),
+  doorBack: makeSprite(14, 12, grow([['r', 0, 0, 9, 8, PLANK], ['r', 0, 0, 9, 1, PLANK2], ['r', 3, 0, 1, 8, SEAM], ['r', 6, 0, 1, 8, SEAM], ['r', 0, 3, 9, 2, BRACE]])),
   /** The swingle: the short heavy bar of a threshing flail, iron-capped. */
-  flailHead: makeSprite(2, 5, [['r', 0, 0, 2, 5, '#5a3d22'], ['r', 0, 0, 2, 1, IRON], ['r', 0, 4, 2, 1, IRON]]),
+  flailHead: makeSprite(3, 8, grow([['r', 0, 0, 2, 5, '#5a3d22'], ['r', 0, 0, 2, 1, IRON], ['r', 0, 4, 2, 1, IRON]])),
   /** The pitchfork's head: three rusty tines on a cross-piece. */
-  tines: makeSprite(5, 4, [['r', 0, 0, 5, 1, '#5a5654'], ['r', 0, 0, 1, 4, '#8a7a6a'], ['r', 2, 0, 1, 4, '#8a7a6a'], ['r', 4, 0, 1, 4, '#8a7a6a'], ['p', 0, 3, '#6a4632']]),
+  tines: makeSprite(8, 6, grow([['r', 0, 0, 5, 1, '#5a5654'], ['r', 0, 0, 1, 4, '#8a7a6a'], ['r', 2, 0, 1, 4, '#8a7a6a'], ['r', 4, 0, 1, 4, '#8a7a6a'], ['p', 0, 3, '#6a4632']])),
 };

@@ -5,7 +5,7 @@
  * nest is a mound of web with egg sacs in it. Cut into parts (joints.ts) so they pose like everything else.
  */
 import type { Cut } from './joints';
-import { makeSprite, type Sprite } from './sprites';
+import { grow, makeSprite, type Sprite } from './sprites';
 
 type Part = Parameters<typeof makeSprite>[2][number];
 const BODY = '#221c26', BACK = '#2c2432', LEG = '#16121a', SHEEN = '#4a3a52', EYE = '#ff8a3a', SMALL = '#ff4a3a';
@@ -52,15 +52,15 @@ const nest: Part[] = [
 const torn: Part[] = [['e', 11, 4, 10, 3, '#1e1a22'], ['e', 11, 3.6, 7, 2, '#3a3640'], ['p', 6, 3, '#6a6050'], ['p', 15, 4, '#6a6050'], ['p', 10, 2, '#4a4652'], ['p', 13, 5, '#2a2018']];
 
 export const SPIDER_SPRITES: Record<string, Sprite> = {
-  spiderA: makeSprite(11, 7, small(0, true)),
-  spiderB: makeSprite(11, 7, small(1, true)),
-  spiderUpA: makeSprite(11, 7, small(0, false)),
-  spiderUpB: makeSprite(11, 7, small(1, false)),
-  broodA: makeSprite(19, 13, mother(0, true)),
-  broodB: makeSprite(19, 13, mother(1, true)),
-  broodUp: makeSprite(19, 13, mother(0, false)),
-  nest: makeSprite(22, 14, nest),
-  nestTorn: makeSprite(22, 7, torn),
+  spiderA: makeSprite(16, 10, grow(small(0, true))),
+  spiderB: makeSprite(16, 10, grow(small(1, true))),
+  spiderUpA: makeSprite(16, 10, grow(small(0, false))),
+  spiderUpB: makeSprite(16, 10, grow(small(1, false))),
+  broodA: makeSprite(28, 20, grow(mother(0, true))),
+  broodB: makeSprite(28, 20, grow(mother(1, true))),
+  broodUp: makeSprite(28, 20, grow(mother(0, false))),
+  nest: makeSprite(33, 21, grow(nest)),
+  nestTorn: makeSprite(33, 10, grow(torn)),
 };
 
 /** Where they're cut: the abdomen is the "head" (it bobs most), the legs below, the front legs left and right. */

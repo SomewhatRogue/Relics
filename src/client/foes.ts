@@ -14,7 +14,8 @@ import { drawHaulier } from './hauldraw';
 import { boardOut } from '../sim/board';
 import { drawLessonMark } from './lessonfoes';
 import { drawLogs, drawLogsDead } from './foedraw';
-import { drawMound, drawWolf } from './beastdraw';
+import { drawMound } from './beastdraw';
+import { drawWolf } from './wolfdraw';
 import { drawAsh, drawEaten, drawFed, drawMealing } from './remainsdraw';
 import { blit, blitBody, ease, line, ring, shadow, smear, spin, stars, type Ctx } from './draw';
 import { armOffset, drawFigure, layout } from './figure';
@@ -33,7 +34,7 @@ const ARM: [number, number] = [0, 0];
 const AT = { bx: 0, by: 0, hx: 0, hy: 0 };
 import { OX, OY, PX } from './world';
 import { HS, hline, hs } from './heroscale';
-import { gobPen } from './gobpen';
+import { BODY, gobPen } from './gobpen';
 import { drawWounds, hurtPose } from './wounds';
 import { drawRakeTool, rakeOf } from './rakehands';
 
@@ -72,7 +73,7 @@ const hempenOf = (e: Enemy): 1 | 2 | undefined => (e.boss?.who === 'hempen' ? (e
 const KEEPER = 1.15;
 const isKeeper = (e: Enemy) => e.boss?.who === 'latch' || e.boss?.who === 'hasp';
 function butcherSprites(e: Enemy): { down: Sprite; up: Sprite; cut: typeof BUTCHER_CUT; k: number } {
-  const l = butcherLook(e.name, e.variant, hempenOf(e)), k = isKeeper(e) ? KEEPER : 1, key = `${l.build}.${l.trophy}.${l.soot}.${l.hempen ?? 0}.${l.tone ?? 0}.${k}`;
+  const l = butcherLook(e.name, e.variant, hempenOf(e)), k = Math.round((isKeeper(e) ? KEEPER : 1) * BODY.k * 20) / 20, key = `${l.build}.${l.trophy}.${l.soot}.${l.hempen ?? 0}.${l.tone ?? 0}.${k}`;
   let s = BUTCHERS.get(key);
   if (!s) {
     const make = (up: boolean) => makeSprite(Math.round(27 * k), Math.round(33 * k), k === 1 ? butcherParts(l, up) : grow(butcherParts(l, up), k));
@@ -128,16 +129,24 @@ function butcher(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
  * (gobpen.ts), so it lands on whole pixels where the bigger hands are. `bx`, `by` and the arm's offset are
  * handed to the kits in the old pixels; the pen puts them right.
  */
-/** Rakehead's four stand a size up: the goblin's shapes drawn again 1.3 as big, cut to match (rakehands.ts). */
+/** Rakehead's four stand a size up (rakehands.ts); a BIG ONE or a meaty sort as big as BODY.k says (gobpen.ts). */
 const RAKE_K = 1.3;
-let rakeBody: { down: Sprite; up: Sprite; cut: typeof SCRAPPER_CUT } | null = null;
-function rakeSprites(): NonNullable<typeof rakeBody> {
-  if (rakeBody) return rakeBody;
-  const r = (v: number) => Math.round(v * RAKE_K), C = SCRAPPER_CUT, mk = (p: typeof GOB_PARTS.down) => makeSprite(r(17), r(20), grow(p, RAKE_K));
-  return (rakeBody = { down: mk(GOB_PARTS.down), up: mk(GOB_PARTS.up), cut: { headTo: r(C.headTo), hip: r(C.hip), back: C.back.map(r) as typeof C.back, arm: C.arm.map(r) as typeof C.arm } });
+/** A small goblin's extra size this draw over its 1.5x body (1 for most). */
+const extraK = (e: Enemy) => (rakeOf(e) ? RAKE_K : 1) * BODY.k;
+type BigGob = { down: Sprite; up: Sprite; cut: typeof SCRAPPER_CUT };
+const BIG_GOBS = new Map<string, BigGob>();
+/** The goblin's shapes drawn again `k` as big, cut to match (made once a size, in steps of 0.05). */
+function bigGob(k: number, pale: boolean): BigGob {
+  k = Math.round(k * 20) / 20;
+  const key = `${k}.${pale}`;
+  let s = BIG_GOBS.get(key);
+  if (s) return s;
+  const r = (v: number) => Math.round(v * k), C = SCRAPPER_CUT, mk = (p: typeof GOB_PARTS.down) => makeSprite(r(17), r(20), grow(p, k));
+  BIG_GOBS.set(key, (s = { down: mk(pale ? GOB_PARTS.paleDown : GOB_PARTS.down), up: mk(pale ? GOB_PARTS.paleUp : GOB_PARTS.up), cut: { headTo: r(C.headTo), hip: r(C.hip), back: C.back.map(r) as typeof C.back, arm: C.arm.map(r) as typeof C.arm } }));
+  return s;
 }
-/** How much bigger than the old goblin a small one is drawn (1.5x; Rakehead's four 1.3 on top). */
-const gobK = (e: Enemy) => (rakeOf(e) ? HS * RAKE_K : HS);
+/** How much bigger than the old goblin a small one is drawn (1.5x, times any extra). */
+export const gobK = (e: Enemy) => HS * extraK(e);
 
 function scrapper(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
   AT.bx = AT.by = AT.hx = AT.hy = 0;
@@ -160,7 +169,7 @@ function scrapper(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
   // The body where it's thrown (the pose's shift at its size); the kits' feet and hand in the old pixels.
   const bx = x + Math.round(pz.ox * K), by = y + Math.round(pz.oy * K), up = e.fy < -0.55, fa = Math.atan2(e.fy, e.fx);
   // In parts (figure.ts): the knife (or bow) is in the hand, wherever the arm has gone.
-  const pale = e.variant === 'blind', rk = rake ? rakeSprites() : null;
+  const pale = e.variant === 'blind', xk = extraK(e), rk = xk !== 1 ? bigGob(xk, pale) : null;
   const body = rk ? jointed(up ? rk.up : rk.down, rk.cut) : jointed(up ? (pale ? SPRITES.paleUp : SPRITES.scrapperUp) : pale ? SPRITES.pale : SPRITES.scrapper, SCRAPPER_CUT);
   layout(body, bx, by, e.fx < -0.2, pz, K);
   const [ax1, ay1] = armOffset(ARM), ax = ax1 / K, ay = ay1 / K, ox = x + pz.ox, oy = y + pz.oy, kx = ox + ax, ky = oy + ay;
@@ -171,7 +180,7 @@ function scrapper(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
   if (up) knife();
   drawFigure(c, body, bx, by, pz);
   // Its wounds, if it's a tough one and hurt (wounds.ts).
-  drawWounds(c, e, body.s.w, true, 7, rake ? RAKE_K : 1);
+  drawWounds(c, e, body.s.w, true, 7, xk);
   // The wood's element lesson: wet, aproned or kiln-hot (lessonfoes.ts).
   drawLessonMark(p, e, ox, oy);
   if (!up) knife();
@@ -225,14 +234,15 @@ function sleeping(c: Ctx, e: Enemy, x: number, y: number, flash: number): void {
 const DUMMY = newPose();
 
 export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number, dozing = false): void {
-  if (isSpiderKind(e.kind)) return drawSpiderKind(c, e, x, y, c.t ?? c.now);
+  // (The rest of the mobs at 1.5x through the goblin pen: their shapes drawn again, their rects on whole pixels.)
+  if (isSpiderKind(e.kind)) return drawSpiderKind(gobPen(c, x, y), e, x, y, c.t ?? c.now);
   // A sneak-thief or a wolf that got away: nothing left here.
   if (e.escaped) return;
   // The Haulier (the Deep's boss on every fifth floor): its own body and poses (hauldraw.ts).
   if (e.boss?.who === 'haulier') return drawHaulier(c, e, x, y, c.t ?? c.now);
   if (e.variant === 'wolf') return drawWolf(c, e, x, y);
-  if (e.under) return drawMound(c, e, x, y);
-  if (e.variant === 'log' && e.act === 'dead') return drawLogsDead(c, e, x, y);
+  if (e.under) return drawMound(gobPen(c, x, y), e, x, y);
+  if (e.variant === 'log' && e.act === 'dead') return drawLogsDead(gobPen(c, x, y), e, x, y);
   if (e.act === 'dead') {
     // Burst or shattered: nothing left but the stains. Otherwise the body, headless or burned.
     if (e.death === 'burst' || e.death === 'shatter') return;
@@ -257,7 +267,7 @@ export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number, dozing = false
   if ((e.kind === 'butcher' || e.kind === 'scrapper') && hurt) ring(c, x, y, hs(e.kind === 'butcher' ? 11 : 6), '#e24b4a', e.hp / e.maxHp);
   // At a body, tearing at it; FED, eyes burning (remainsdraw.ts).
   if (e.kind === 'butcher') return butcher(c, e, x, y, t), drawMealing(c, e, x, y, t), drawFed(c, e, x, y, t);
-  if (e.variant === 'log') return drawLogs(c, e, x, y);
+  if (e.variant === 'log') return drawLogs(gobPen(c, x, y), e, x, y);
   if (e.kind === 'scrapper' && dozing) return sleeping(c, e, x, y, flash);
   if (e.kind === 'scrapper' && e.feeding) {
     // Crouched at the dead: it leans in, worries at it, tears a piece back and chews; red flicks off.

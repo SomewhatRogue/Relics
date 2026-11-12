@@ -8,18 +8,17 @@
 import { lurkAfter, lurkPose } from './fenlurk';
 import type { Enemy, FightEvent } from '../sim/types';
 import type { Ctx } from './draw';
-import { drawEnemy } from './foes';
+import { drawEnemy, gobK } from './foes';
 import type { Fx } from './fx';
 import { STRAW, drawStrawHeap } from './rackdraw';
 import { toPx } from './world';
 import { drawPerchRope } from './wooddraw';
 import { drawPaceDust, drawPaceOver, paceOffset } from './pacedraw';
 import { drawElite as eliteMarks } from './elitedraw';
-import { gobPen } from './gobpen';
-import { stretchFoe } from './bodysize';
+import { BODY, gobPen } from './gobpen';
 
 /** An elite's affixes, through the goblin pen when its body is the 1.5x one (gobpen.ts). */
-const drawElite = (c: Ctx, e: Enemy, x: number, y: number) => eliteMarks(stretchFoe(e) ? c : gobPen(c, x, y), e, x, y);
+const drawElite = (c: Ctx, e: Enemy, x: number, y: number) => eliteMarks(gobPen(c, x, y, e.kind === 'scrapper' ? gobK(e) : undefined), e, x, y);
 import { MEATY_DRAW, meatySort } from '../shared/meaty';
 import { grownBy } from '../shared/meaty2';
 import { hopOf } from './meatydraw2';
@@ -61,7 +60,15 @@ function paced(c: Ctx, e: Enemy, x: number, y: number, sleeping: boolean): void 
   // A Pouncer in the air rides up an arc (its leap's own clock); a Gorger is as big as it has grown (shared/meaty2.ts).
   const o = paceOffset(c, e), bx = x + o.dx, by = y + o.dy - hopOf(e), k = o.k * (meat ? MEATY_DRAW * grownBy(e.grown ?? 0) : 1);
   if (k === 1) drawEnemy(c, e, bx, by, sleeping), drawElite(c, e, bx, by);
-  else {
+  else if (e.kind === 'scrapper' || e.kind === 'butcher') {
+    // Bigger by drawing its shapes again at that size (foes.ts, gobpen.ts BODY), never a stretched canvas.
+    BODY.k = k;
+    try {
+      drawEnemy(c, e, bx, by, sleeping), drawElite(c, e, bx, by);
+    } finally {
+      BODY.k = 1;
+    }
+  } else {
     // Bigger from its feet up, on both layers.
     for (const g of [c.lit, c.glow]) g.save(), g.translate(bx, by), g.scale(k, k), g.translate(-bx, -by);
     drawEnemy(c, e, bx, by, sleeping);

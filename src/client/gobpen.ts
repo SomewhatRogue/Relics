@@ -37,3 +37,9 @@ export function gobPen(c: Ctx, x: number, y: number, k = HS): Ctx {
 
 /** A penned canvas's pen (draw.ts's line draws through it whole), or null. */
 export const penOf = (g: CanvasRenderingContext2D): Pen | null => (g as unknown as { __pen?: Pen }).__pen ?? null;
+
+/**
+ * A body's extra size this draw (a BIG ONE, a meaty sort, a grown gorger: strawman.ts sets it round the
+ * draw). The goblin and the butcher draw their shapes again at it (foes.ts), never a stretched canvas.
+ */
+export const BODY = { k: 1 };

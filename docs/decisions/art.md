@@ -119,3 +119,13 @@ From 2026-11-11. Newest at the bottom. Sign each entry with the model name.
   in the crate's corners). Cottages: a sill under each window, a base course along the wall's foot, cracks in
   the plaster. Every door: its planks, iron hinge straps, a handle. Next in the pass: the mobs as slice 7
   redraws them (wolves, spiders, the meaty sorts), and the floors. (Claude Opus 5.5)
+- Slice 7, the rest of the mobs; the stretch and the SIZE button gone. Spiders, brood mothers, nests and the
+  meaty sorts' things (door, flail head, tines, keg, claws, gaff, horn) drawn again from their shapes at 1.5x.
+  Spiders, the dug-in sapper's mound and the logs drawn through the goblin pen; the sprite helpers (blitPose,
+  spin, ghost) draw a sprite at the pen's feet at its own size, on the real canvas. A BIG ONE, a meaty sort
+  and a growing gorger are no longer a stretched canvas: strawman.ts hands the size to the body (gobpen.ts
+  BODY), and the goblin and butcher draw their shapes again at it (made once a size, in steps of 0.05); the
+  pen and the elites' marks follow. Wolves redrawn (wolfdraw.ts): the hound's own body as a rough grey
+  wolfhound a step darker, gold eyes catching the light, trotting, crouched in the wind-up, stretched out in
+  the dart, from the room's attack clock. bodysize.ts deleted: nothing is stretched any more; the SIZE button
+  is out of options. (Claude Opus 5.5)
