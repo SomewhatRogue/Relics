@@ -12,6 +12,7 @@ import { Rng } from './rng.js';
 import { rollTime } from './timeofday.js';
 import { HAUL_NAME } from './bosswords.js';
 import { rowsPlan } from './cutrows.js';
+import { reckonPlan, RECKON_GUARDS } from './cutreckon.js';
 import { cutMap, type CutPlace } from './cutmap.js';
 import { workingsPlan } from './cutworkings.js';
 import { washingPlan } from './cutwashing.js';
@@ -51,7 +52,10 @@ INSTANCES.stress = { id: 'stress', place: { name: 'Rakehead', kind: 'mine', regi
 export const stressJob = (day = 1): Job => ({ ...openCut(day), id: `d${day}-stress`, instance: 'stress', rooms: 1, arena: undefined });
 
 /** The Open Cut's places, from the bottom (docs/design/open-cut-map.md): Rakehead's, then each way's. */
-export const CUT_PLACES: CutPlace[] = [{ plan: rowsPlan, keep: [CUT_NAMES.drover] }];
+export const CUT_PLACES: CutPlace[] = [
+  { plan: rowsPlan, keep: [CUT_NAMES.drover] },
+  { plan: reckonPlan, keep: [], packs: [RECKON_GUARDS] },
+];
 export const OVER_PLACES: CutPlace[] = [{ plan: workingsPlan, keep: [CUT_NAMES.brakesman] }];
 export const UNDER_PLACES: CutPlace[] = [{ plan: washingPlan, keep: [CUT_NAMES.sluicer, CUT_NAMES.raker] }];
 

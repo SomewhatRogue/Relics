@@ -83,16 +83,18 @@ describe('the map and its places', () => {
     expect(m.hero.y).toBeGreaterThan(m.h - 3);
     expect(m.exit!.y).toBe(0);
     // Places a lull apart: no goblin between a gate and the next place's foot.
-    const laid = cutMap(job(), CUT_PLACES).laid;
+    const laid = cutMap(job(), CUT_PLACES, { name: FORK_WORDS.yard, ways: [FORK_WORDS.over, FORK_WORDS.under] }).laid;
     for (let i = 1; i < laid.length; i++) expect(p.foes.some((f) => f.y > laid[i].y0 + laid[i].h && f.y < laid[i - 1].y0)).toBe(false);
   });
   it('has its named ones, none a butcher, THE DROVER driving the roped line, and runs bottom to top', () => {
-    const names = [[CUT_NAMES.drover], [CUT_NAMES.brakesman], [CUT_NAMES.sluicer, CUT_NAMES.raker]];
+    const names = [[CUT_NAMES.drover], [], [CUT_NAMES.brakesman], [CUT_NAMES.sluicer, CUT_NAMES.raker]];
     plans.forEach((plan, i) => {
       const p = plan(job());
       expect(p.foes.filter((f) => f.name).map((f) => f.name)).toEqual(names[i]);
       expect(p.foes.filter((f) => f.name).every((f) => f.kind !== 'butcher')).toBe(true);
       if (i === 0) expect(p.foes.find((f) => f.name)!.task?.k).toBe('escort');
+      // (The reckoning house has no named one: its gate's kept by a pack, sim/stretches.ts.)
+      if (i === 1) expect(p.foes.some((f) => f.variant === 'chalker')).toBe(true);
     });
   });
 });
@@ -443,5 +445,17 @@ describe('the fork yard', () => {
     one.on(one.hs[0], 0);
     one.tick();
     expect(one.run.way).toBe(0);
+  });
+});
+
+describe('the reckoning house', () => {
+  it('its gate is kept by the pack at the back door: the goal says so, and it opens once they are dead', () => {
+    const a = area(0), m = a.room.map, st = m.stretches!;
+    m.blocks[st[0].gate!].ruined = true;
+    Object.assign(a.run, { stretch: 1 });
+    expect(st[1].name).toBe('THE RECKONING HOUSE');
+    expect(goal(a.run, a.room).text).toContain('Kill the goblins keeping the gate');
+    for (const e of a.room.allEnemies) if (st[1].packs!.includes(e.pack ?? -1)) Object.assign(e, { hp: 0, act: 'dead' });
+    expect(goal(a.run, a.room).text).toContain('at the gate together');
   });
 });

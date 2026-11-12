@@ -92,7 +92,7 @@ export function goal(run: Run, room: ArenaRoom, houses: Captives = { caged: 0, w
   const st = run.job.instance ? stretchOf(run, room.map) : undefined;
   if (st) {
     const keep = keepers(st, room), last = lastStretch(run, room.map);
-    if (keep.length) return { text: also(killWords(keep, room)), done: false };
+    if (keep.length) return { text: also(keep.some((e) => e.name) ? killWords(keep.filter((e) => e.name), room) : GATE_WORDS.guards), done: false };
     // A fork yard: the party votes by standing on a way (sim/fork.ts).
     const roads = forkOf(room.map);
     if (last && roads) return run.way === undefined ? { text: also(FORK_WORDS.vote), done: false } : { text: also(FORK_WORDS.on(roads[run.way].label)), done: true };

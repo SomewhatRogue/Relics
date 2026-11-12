@@ -44,6 +44,8 @@ export const PAIR_WORDS = {
 /** An instance on one map: the goal once a stretch's named ones are dead, and the gate opening (sim/stretches.ts). */
 export const GATE_WORDS = {
   on: 'Everyone stand at the gate together',
+  /** A gate kept by a pack, not a named one. */
+  guards: 'Kill the goblins keeping the gate',
   open: 'GATE OPEN',
 };
 

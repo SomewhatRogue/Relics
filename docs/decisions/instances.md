@@ -2,6 +2,17 @@
 
 The Instances chat's log (docs/BOARD.md). Newest first, signed with the model. Spec: docs/design/instances.md.
 
+## 2026-11-11: act 1's reckoning house, arc step 2 (Kyle: "do it"; Claude Opus 5.5)
+
+`shared/cutreckon.ts`, between the rows and the fork yard (a lull either side). Rakehead's pay office as the goblins'
+counting house: a forecourt with a tipped ore cart and two at the door; stone walls, a front and a back door; shelves
+of books down the west wall (`books`), the pay counter, desks, sacks of pay tins, the floor littered; a chalker at the
+tally board, 45 strokes up (`variant: 'chalker'`, task `tally`); the clerk's room boxed off with a partition, the
+clerk dead at the desk and a chest; and the back door kept by a shield, a shield and an archer (pack 3), whose deaths
+open the gate (`Stretch.packs`; goal "Kill the goblins keeping the gate", a new line for the next writing pass). The
+clerk's book with the Overman's mark (the spec) waits for a way to read things in the world. Next: over the top's
+places (the winding house, the incline).
+
 ## 2026-11-11: acts and the fork vote, arc step 1 (Kyle: "build it"; Claude Opus 5.5)
 
 docs/design/open-cut-arc.md step 1. An instance's areas are its acts; an act can be a fork (`InstanceArea.ways`), the
