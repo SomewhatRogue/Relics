@@ -10,3 +10,5 @@ entry with the model name.
   five uses each (docs/design/holy-and-hungry.md section 4).
 - Trading spec with an item ledger against duplicates; hungry gear and relics can't be traded
   (docs/design/trading.md). Instance spec with Rakehead's bosses and pools (docs/design/instances.md).
+- UI look picked: iron and ember, everywhere (Kyle: parchment "not on theme at all"). Style guide in
+  docs/design/ui-look.md; waiting on the board for a UI chat. Art pass waits on the size pick. (Claude Opus 5.5)

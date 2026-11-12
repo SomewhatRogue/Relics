@@ -33,6 +33,8 @@ The Deep chat, until it finishes (then the general chat).
 
 ## Waiting (specs ready, no chat yet)
 
+- **UI look: iron and ember** (docs/design/ui-look.md). CSS and markup only; starts with the job board.
+- **Art pass** (spec to come): heroes, goblins and bosses redrawn at Kyle's size pick; owns the drawing files.
 - **Holy and hungry** (docs/design/holy-and-hungry.md). Last: it changes loot everything above uses.
 
 ## Collisions to settle
