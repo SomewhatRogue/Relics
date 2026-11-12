@@ -296,6 +296,8 @@ export interface GameMap {
   sealed?: { x: number; w: number };
   /** An instance's stretches on one map, in order (sim/stretches.ts; docs/design/open-cut-map.md). */
   stretches?: Stretch[];
+  /** THE BRAKESMAN's incline (sim/brake.ts): lanes of rail down it at these x, from `y0` by its brake to `y1` at the foot. */
+  incline?: { lanes: number[]; y0: number; y1: number };
   hero: { x: number; y: number };
   /** Walk into this to leave (opens when the room says so). */
   exit: Area | null;

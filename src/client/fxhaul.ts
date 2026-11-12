@@ -8,6 +8,7 @@ import type { Fx } from './fx';
 import type { Enemy } from '../sim/types';
 import type { Light } from './light';
 import { sfx } from './sfx';
+import { BRAKE_WORDS } from '../shared/opencutwords';
 
 /** When the gear last crackled (wall clock, seconds), and whether lightning fell on it; where a cart last pulled up. */
 export const HAUL_FX = { gearAt: -9, gearHit: false, jolt: null as null | { x: number; y: number; at: number } };
@@ -19,6 +20,12 @@ export function haulFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
     if (ev.what === 'go') {
       fx.burst(x, y - 2, 12, ['#8a8494', '#6a647a', '#b8b4ac'], 38, false, 60, true);
       fx.shake = Math.max(fx.shake, 1.5);
+    } else if (ev.what === 'aim') {
+      fx.say(x, y - 40, BRAKE_WORDS.how, '#ffd27a', 2.4);
+    } else if (ev.what === 'flip') {
+      fx.burst(x, y - 6, 18, ['#ffd27a', '#ffffff', '#ff9a40'], 90, true);
+      fx.say(x, y - 30, BRAKE_WORDS.flip, '#ffd27a');
+      fx.shake = Math.max(fx.shake, 4);
     } else if (ev.what === 'hit') {
       fx.burst(x, y - 8, 22, ['#ffd27a', '#ffffff', '#ff9a40'], 95, true);
       fx.burst(x, y - 6, 16, ['#5c5866', '#c8a84a', '#6a4632', '#7a7484'], 85, false, 220, true);
@@ -54,7 +61,7 @@ export function haulFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
 
 /** Their sounds, from the kit we have. True when it was one of theirs. */
 export function haulSound(ev: FightEvent): boolean {
-  if (ev.k === 'cart') return ev.what === 'hit' ? (sfx.propbreak(), sfx.slam()) : ev.what === 'stop' ? sfx.thud() : sfx.rumble(), true;
+  if (ev.k === 'cart') return ev.what === 'hit' ? (sfx.propbreak(), sfx.slam()) : ev.what === 'flip' ? (sfx.slam(), sfx.rumble()) : ev.what === 'aim' ? undefined : ev.what === 'stop' ? sfx.thud() : sfx.rumble(), true;
   if (ev.k === 'gear') return sfx.shock(), ev.hit && sfx.boom(), true;
   if (ev.k === 'bare') return sfx.wardbreak(), sfx.propbreak(), sfx.slam(), true;
   return false;

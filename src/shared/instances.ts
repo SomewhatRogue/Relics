@@ -14,7 +14,8 @@ import { HAUL_NAME } from './bosswords.js';
 import { rowsPlan } from './cutrows.js';
 import { reckonPlan, RECKON_GUARDS } from './cutreckon.js';
 import { cutMap, type CutPlace } from './cutmap.js';
-import { workingsPlan } from './cutworkings.js';
+import { windingPlan, WINDING_GUARDS } from './cutwinding.js';
+import { inclinePlan } from './cutincline.js';
 import { washingPlan } from './cutwashing.js';
 import { CUT_AREAS, CUT_NAMES, CUT_POST, FORK_WORDS } from './opencutwords.js';
 import { stressPlan } from './stressmap.js';
@@ -56,7 +57,10 @@ export const CUT_PLACES: CutPlace[] = [
   { plan: rowsPlan, keep: [CUT_NAMES.drover] },
   { plan: reckonPlan, keep: [], packs: [RECKON_GUARDS] },
 ];
-export const OVER_PLACES: CutPlace[] = [{ plan: workingsPlan, keep: [CUT_NAMES.brakesman] }];
+export const OVER_PLACES: CutPlace[] = [
+  { plan: windingPlan, keep: [], packs: [WINDING_GUARDS] },
+  { plan: inclinePlan, keep: [CUT_NAMES.brakesman] },
+];
 export const UNDER_PLACES: CutPlace[] = [{ plan: washingPlan, keep: [CUT_NAMES.sluicer, CUT_NAMES.raker] }];
 
 /** Act 1, Rakehead, up to the fork yard. */

@@ -533,7 +533,7 @@ export interface Enemy extends Body {
   /** An instance's goblin (INSTANCE.fierce): quicker wind-ups and rests (sim/elite.ts). */
   fierce?: boolean;
   /** THE BRAKESMAN (sim/brake.ts): it works the brake at the top of the rail; when it lets the next cart go, and its brake out of use until. */
-  brakes?: { next: number; off: number };
+  brakes?: { next: number; off: number; /** Times it's shown a climber how to send one back (BRAKE.told). */ told?: number };
   /** THE SLUICER and THE RAKER (sim/pairfall.ts): which of the pair; the Sluicer's room time it fell in the water; the Raker's lift so far (s). */
   pair?: 'sluicer' | 'raker';
   fallen?: number;
@@ -819,7 +819,7 @@ export type FightEvent =
   | { k: 'cracked'; x: number; y: number }
   /** The Haulier's working (sim/haulbook.ts, sim/haulcarts.ts; drawn client/hauldraw.ts): a cart set rolling (`by` a hero, or the Haulier's shove),
    *  hitting a hero or the Haulier (`on`), or stopping at a stop; lightning falling on the winding gear; the Haulier's plate off for good (phase 2). */
-  | { k: 'cart'; what: 'go' | 'hit' | 'stop'; x: number; y: number; by?: string; on?: string }
+  | { k: 'cart'; what: 'go' | 'hit' | 'stop' | 'flip' | 'aim'; x: number; y: number; by?: string; on?: string }
   | { k: 'gear'; x: number; y: number; hit: boolean }
   | { k: 'bare'; x: number; y: number }
   /** Boss loot (sim/lootroll.ts): a unique piece dropped and up for the group's roll (`id`), and the roll settled (`winner`, or none if all passed). */

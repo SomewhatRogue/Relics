@@ -3,7 +3,7 @@
  * The scene is painted at a low resolution and scaled up by a whole number so pixels stay crisp.
  */
 import { drawPairLift } from './pairdraw';
-import { drawBrakeLane } from './brakedraw';
+import { drawBrakeLane, drawIncline } from './brakedraw';
 import { sized, stretchFoe } from './bodysize';
 import { mistFrame } from './fenmistdraw';
 import { lurkFrame } from './fenlurk';
@@ -441,7 +441,10 @@ export class Scene {
     // THE SLUICER in the water, THE RAKER's lift as a ring at its feet (pairdraw.ts).
     if (room.enemies.some((e) => e.fallen !== undefined)) items.push({ y: -1e6 + 4, draw: () => drawPairLift(c, room.enemies, cx, cy) });
     // THE BRAKESMAN's cart waiting at the top: its lane striped (brakedraw.ts).
-    if (map.rail) for (const p of room.props) if (p.goAt !== undefined) items.push({ y: -1e6 + 3, draw: () => drawBrakeLane(c, map, p, cx, cy, now) });
+    if (map.incline) {
+      items.push({ y: -1e6 + 2, draw: () => drawIncline(c, map, cx, cy) });
+      for (const p of room.props) if (p.goAt !== undefined || (p.roll ?? 0) > 0) items.push({ y: -1e6 + 3, draw: () => drawBrakeLane(c, map, p, cx, cy, now) });
+    }
     for (const b of map.braziers) items.push({ y: OY + b.y * PX, draw: () => drawBrazier(c, OX + b.x * PX - cx, OY + b.y * PX + 2 - cy, now, brazierOn(map, b)) });
     // What the goblins left that moves: one hung from a hook, the pot on their fire (grimdraw.ts).
     for (const q of map.grim ?? []) {

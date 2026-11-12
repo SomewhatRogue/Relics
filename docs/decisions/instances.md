@@ -198,3 +198,28 @@ Touched outside this chat's files, small: `docs/design/instances.md` (General's)
 `sim/room.ts` (`sleepAt`), `sim/sleep.ts` (escorts never doze), `sim/goal.ts` (an area's gate), `client/boardui.ts`.
 Next: step 3 (each named one its own fight, then the Open Cut's Haulier), then step 4, where Rakehead's pools go into
 `shared/uniques.ts` and the two Haulier lists merge (the board's collision).
+
+## 2026-11-11: over the top, the winding house and the incline (arc step 3, first two places)
+
+- Over the top is now two places on one map: THE WINDING HOUSE (`cutwinding.ts`: the burnt headframe and drum, a
+  wooden gantry on the east with archers on it and a shield at its stair's foot; that pack keeps the gate,
+  `WINDING_GUARDS`) then THE INCLINE (`cutincline.ts`: three rail lanes up to the brake, rock banks, carters at the
+  foot, a shield and an archer halfway, a spent cart at the foot of the middle lane). `cutworkings.ts` is gone.
+  `cutmap.ts` now carries a place's ledges and `map.incline` when it lays it on the map.
+- THE BRAKESMAN reworked for the incline (`sim/brake.ts`): it lets a cart go down the lane nearest the nearest
+  climber, striped while it waits at the top and while it runs (brakedraw.ts). Kyle (2026-11-11), on the old one:
+  "no idea what it was meant to do, the carts never came to me and I couldn't throw them back"; then "maybe you
+  send a cart back by timing a power hit at it so it flips back". So: **a held attack let go as a cart reaches you
+  sends it back up the lane** (`BRAKE.flip`, at most 2.6 tiles, so a bow can't do it from the foot; late and the
+  cart has you). At the top it knocks the Brakesman off (stunned, OPEN, no carts a while). A cart going up smashes
+  one coming down off the rails. GRAB at a spent cart at the foot still sends it, slowly. The first two carts it
+  lines up on someone, how to is said over them (`BRAKE.told`, BRAKE_WORDS.how), and SENT BACK over a hit cart.
+- Lines: lore keeper then line editor. Goal "Hit a cart back, then kill"; "HOLD ATTACK, LET GO AS IT REACHES YOU"
+  (kept "let go", the game's word; the editor's "as it hits" read like getting hit); "SENT BACK"; the gate pack's
+  "Kill the goblins at the gate". Lore keeper notes for the bible: the Brakesman isn't in story-bible.md yet, and like
+  the Open Cut's Haulier it should be neither a butcher nor from the Deep.
+- Tests: the Brakesman's rewritten for the incline (lane aimed at you, the flip, too late, GRAB, walk back); the walk
+  check counts a goblin on a ledge as reachable when its stair's foot is. Full suite green.
+- Touched outside my row, small: `client/fxhaul.ts` (the flip and the how-to cues, beside the cart's), `client/scene.ts`,
+  `sim/types.ts` (`cart` events 'flip' and 'aim', `brakes.told`), `shared/arena.ts` (`GameMap.incline`).
+- Next: the loading stage and THE HAULIER as this way's boss, in the map. (Claude Opus 5.5)

@@ -13,6 +13,7 @@ import { CUT_NAMES } from '../src/shared/opencutwords';
 import { BRAKE, DROVER, HERO, INSTANCE, PAIR, PARTY, TICK } from '../src/shared/tuning';
 import { damage } from '../src/sim/damage';
 import { ropedNear } from '../src/sim/drover';
+import { currentSwing } from '../src/sim/hero';
 import { newRun, runRoom, tally, type Run } from '../src/sim/run';
 import { goal } from '../src/sim/goal';
 import { stepCheckpoint, wiped } from '../src/sim/checkpoint';
@@ -23,15 +24,16 @@ import { walkable } from './walk';
 
 const job = (d = 12) => openCut(d);
 /**
- * A place of the Open Cut, the party at its foot: 0 the rows (act 1, Rakehead), 1 the workings (act 2, over the top),
- * 2 the washing floor (act 2, under the hill); 3, the Haulier's arena. `at` turns a place's own (x, y) into its map's.
+ * A place of the Open Cut, the party at its foot: 0 the rows (act 1, Rakehead), 1 over the top (the winding house, then
+ * `place` 1 the incline), 2 the washing floor (act 2, under the hill); 3, the Haulier's arena. `at` turns a place's own
+ * (x, y) into its map's.
  */
-function area(i: number, ids = ['me'], d = 12): { run: Run; room: ArenaRoom; hs: Hero[]; at: (x: number, y: number) => { x: number; y: number } } {
+function area(i: number, ids = ['me'], d = 12, place = 0): { run: Run; room: ArenaRoom; hs: Hero[]; at: (x: number, y: number) => { x: number; y: number } } {
   const run = newRun(job(d));
   Object.assign(run, { index: [0, 1, 1, 2][i], way: i === 2 ? 1 : i === 1 ? 0 : undefined, party: ids.length });
   const places = [CUT_PLACES, OVER_PLACES, UNDER_PLACES][Math.min(i, 2)];
   const fork = i === 0 ? { name: FORK_WORDS.yard, ways: [FORK_WORDS.over, FORK_WORDS.under] as [string, string] } : undefined;
-  const room = runRoom(run), hs = ids.map((id) => room.join(id)), L = cutMap(job(d), places, fork).laid[0];
+  const room = runRoom(run), hs = ids.map((id) => room.join(id)), L = cutMap(job(d), places, fork).laid[place];
   for (const id of ids) room.setIntent(id, NO_INTENT);
   if (i < 3) hs.forEach((h, n) => Object.assign(h, { x: L.x0 + L.w / 2 + n * 0.8, y: L.y0 + L.h - 1.6 }));
   return { run, room, hs, at: (x, y) => ({ x: x + L.x0, y: y + L.y0 }) };
@@ -61,14 +63,17 @@ describe('the Open Cut on the board', () => {
 });
 
 describe('the map and its places', () => {
-  const plans = CUT_PLACES.map((p) => p.plan);
+  const plans = [...CUT_PLACES, ...OVER_PLACES, ...UNDER_PLACES].map((p) => p.plan);
   it('can be walked from the foot to the way out, gates open, every goblin, cage and chest, by every day', { timeout: 60000 }, () => {
     for (const d of [1, 12, 77]) for (const plan of [INSTANCES.opencut.areas[0].plan!, ...INSTANCES.opencut.areas[1].ways!.map((w) => w.plan!)]) {
       const p = plan(job(d)), m = p.map;
       for (const st of m.stretches!) if (st.gate !== undefined) m.blocks[st.gate].ruined = true;
       const w = walkable(p, [], true);
       expect(w.reach(m.exit!.x + m.exit!.w / 2, 1.2, 1.2), `${d} the way out`).toBe(true);
-      for (const f of p.foes) expect(w.reach(f.x, f.y, 1.4), `${d} foe at ${f.x},${f.y}`).toBe(true);
+      // (One on a ledge: the foot of its stair, since the walk check doesn't climb.)
+      const up = (x: number, y: number) => m.ledges?.find((l) => x > l.x && x < l.x + l.w && y > l.y && y < l.y + l.h);
+      const foot = (x: number, y: number) => { const l = up(x, y); return l ? l.ramps.some((r) => w.reach(r.x + r.w / 2, r.y + r.h + 0.4, 1.4)) : w.reach(x, y, 1.4); };
+      for (const f of p.foes) expect(foot(f.x, f.y), `${d} foe at ${f.x},${f.y}`).toBe(true);
       for (const c of [...p.props.filter((q) => q.kind === 'cage'), ...p.chests]) expect(w.reach(c.x, c.y, 1.6), `${d} at ${c.x},${c.y}`).toBe(true);
       for (const f of p.foes) expect(f.x > 0 && f.x < m.w && f.y > 0 && f.y < m.h).toBe(true);
     }
@@ -87,7 +92,7 @@ describe('the map and its places', () => {
     for (let i = 1; i < laid.length; i++) expect(p.foes.some((f) => f.y > laid[i].y0 + laid[i].h && f.y < laid[i - 1].y0)).toBe(false);
   });
   it('has its named ones, none a butcher, THE DROVER driving the roped line, and runs bottom to top', () => {
-    const names = [[CUT_NAMES.drover], [], [CUT_NAMES.brakesman], [CUT_NAMES.sluicer, CUT_NAMES.raker]];
+    const names = [[CUT_NAMES.drover], [], [], [CUT_NAMES.brakesman], [CUT_NAMES.sluicer, CUT_NAMES.raker]];
     plans.forEach((plan, i) => {
       const p = plan(job());
       expect(p.foes.filter((f) => f.name).map((f) => f.name)).toEqual(names[i]);
@@ -269,67 +274,101 @@ describe('THE DROVER', () => {
 });
 
 describe('THE BRAKESMAN', () => {
-  const workings = () => {
-    const a = area(1), R = a.room.map.rail!;
+  const incline = () => {
+    const a = area(1, ['me'], 12, 1), I = a.room.map.incline!;
     const h = a.hs[0], bk = a.room.enemies.find((e) => e.name === CUT_NAMES.brakesman)!;
-    // Out of its reach and out of the lane, but near enough to wake it; nobody else in the way.
+    // Nobody else in the way; the hero between two lanes, halfway up (out of every lane).
     a.room.enemies = a.room.enemies.filter((e) => e === bk);
-    Object.assign(h, { ...a.at(14, 12.4), hp: 9999, maxHp: 9999 });
-    const carts = () => a.room.props.filter((p) => p.kind === 'cart' && Math.abs(p.y - R.y) < 0.01);
-    return { ...a, h, bk, carts, R };
+    const safe = () => Object.assign(h, { x: (I.lanes[1] + I.lanes[2]) / 2, y: I.y0 + 20, hp: 9999, maxHp: 9999, kvx: 0, kvy: 0, safeT: 99 });
+    safe();
+    const carts = () => a.room.props.filter((p) => p.kind === 'cart' && I.lanes.some((x) => Math.abs(p.x - x) < 0.05));
+    return { ...a, h, bk, carts, I, safe };
+  };
+  const events = (room: ArenaRoom, s: number, each = () => {}) => {
+    const seen: { k: string; what?: string; on?: string; by?: string }[] = [];
+    for (let n = 0; n < Math.round(s / TICK); n++) each(), room.step(), seen.push(...(room.events as typeof seen));
+    return seen;
   };
   const hold = (room: ArenaRoom, h: Hero, at: { x: number; y: number }, s: number, seq: number) => {
     room.setIntent(h.id, { ...NO_INTENT, grabSeq: seq });
-    for (let n = 0; n < Math.round(s / TICK); n++) Object.assign(h, { x: at.x + 0.9, y: at.y + 0.2, kvx: 0, kvy: 0, safeT: 99 }), room.step();
+    for (let n = 0; n < Math.round(s / TICK); n++) Object.assign(h, { x: at.x + 1.3, y: at.y, kvx: 0, kvy: 0, safeT: 99 }), room.step();
   };
 
-  it('works its brake at the top of the rail', () => {
-    const { room, bk } = workings();
+  it('works its brake at the top of the incline, three lanes below it, a spent cart at the foot', () => {
+    const { room, bk, I, carts } = incline();
     step(room, 0.2);
-    expect(room.map.rail).toBeDefined();
+    expect(I.lanes.length).toBe(3);
+    expect(bk.home.y).toBeLessThan(I.y0);
     expect(Math.hypot(bk.x - bk.home.x, bk.y - bk.home.y)).toBeLessThan(0.05);
+    expect(carts().some((p) => Math.abs(p.y - I.y1) < 0.01)).toBe(true);
   });
 
-  it('lets a cart go: its lane striped a moment, then down the rail, knocking flat whoever`s in it', () => {
-    const { room, h, carts, R } = workings();
-    step(room, BRAKE.warn + 0.1);
+  it('lets a cart go down the lane you`re in: striped a moment, then down, knocking you flat', () => {
+    const { room, h, carts, I } = incline();
+    Object.assign(h, { x: I.lanes[2] });
+    step(room, 1.1);
     const c = carts().find((p) => p.goAt !== undefined)!;
-    expect(c.x).toBeCloseTo(R.x0);
-    step(room, BRAKE.warn - 0.1);
+    expect(c.x).toBeCloseTo(I.lanes[2]);
+    expect(c.y).toBeCloseTo(I.y0);
+    step(room, BRAKE.warn - 0.3);
     expect(c.roll ?? 0).toBe(0);
-    Object.assign(h, { x: 10, y: R.y });
-    const seen: { k: string; on?: string }[] = [];
-    for (let n = 0; n < Math.round(3 / TICK); n++) room.step(), seen.push(...(room.events as { k: string; on?: string }[]));
-    expect(seen.some((e) => e.k === 'cart' && e.on === h.id)).toBe(true);
-    // At the bottom, a cart's length short of the one already there.
+    const seen = events(room, 5, () => Object.assign(h, { x: I.lanes[2], y: I.y0 + 20, kvx: 0, kvy: 0 }));
+    expect(seen.some((e) => e.k === 'cart' && e.what === 'hit' && e.on === h.id)).toBe(true);
+    // On to the foot of its lane.
     expect(c.roll ?? 0).toBe(0);
-    expect(c.x).toBeGreaterThan(R.x1 - 1.5);
+    expect(c.y).toBeCloseTo(I.y1);
   });
 
-  it('a cart sent back up knocks it off its brake: stunned and OPEN, no carts; then it walks back to it', () => {
-    const { room, h, bk, carts, at } = workings();
-    step(room, 0.2);
-    const bottom = carts().find((p) => !p.goAt && !p.roll)!;
-    // (Wait out the first cart's run, out of its lane.)
-    step(room, BRAKE.warn + 3);
-    hold(room, h, bottom, BRAKE.grab + 0.2, 1);
-    // (The head of the queue goes: the first cart had run down against this one.)
-    expect(carts().some((p) => (p.roll ?? 0) < 0)).toBe(true);
-    const hp = bk.hp;
-    room.setIntent(h.id, { ...NO_INTENT, grabSeq: 1 });
-    for (let n = 0; n < Math.round(3 / TICK) && bk.act !== 'stunned'; n++) Object.assign(h, at(14, 12.4)), room.step();
+  it('a power hit on a cart as it comes flips it back up, and up at the top it knocks the Brakesman off: stunned and OPEN', () => {
+    const { room, h, bk, carts, I } = incline();
+    const y = I.y0 + 20, s = (Object.assign(h, { heavy: true }), currentSwing(h)), reach = Math.min(s.range, BRAKE.flip);
+    Object.assign(h, { x: I.lanes[2], y, heavy: false });
+    step(room, 1.1);
+    const c = carts().find((p) => p.goAt !== undefined)!, hp = bk.hp;
+    let swung = false;
+    const seen = events(room, 6, () => {
+      Object.assign(h, { x: I.lanes[2], y, kvx: 0, kvy: 0, safeT: 99 });
+      if (!swung && (c.roll ?? 0) > 0 && y - c.y < reach + c.radius - 0.4) (swung = true), Object.assign(h, { act: 'attack', heavy: true, actT: s.windup, hitIds: [] });
+    });
+    expect(seen.some((e) => e.k === 'cart' && e.what === 'flip' && e.by === h.id)).toBe(true);
+    expect(seen.some((e) => e.k === 'cart' && e.what === 'hit' && e.on === h.id)).toBe(false);
     expect(bk.act).toBe('stunned');
     expect(bk.hp).toBeLessThan(hp);
     expect(bk.takes).toBe(INSTANCE.open.mult);
+  });
+
+  it('a power hit too late: the cart has you first', () => {
+    const { room, h, carts, I } = incline();
+    const y = I.y0 + 20;
+    Object.assign(h, { x: I.lanes[2], y });
+    step(room, 1.1);
+    const c = carts().find((p) => p.goAt !== undefined)!;
+    let swung = false;
+    const seen = events(room, 5, () => {
+      Object.assign(h, { x: I.lanes[2], y, kvx: 0, kvy: 0 });
+      if (!swung && (c.roll ?? 0) > 0 && c.y > y - 0.2) (swung = true), Object.assign(h, { act: 'attack', heavy: true, actT: 0, hitIds: [] });
+    });
+    expect(seen.some((e) => e.k === 'cart' && e.what === 'hit' && e.on === h.id)).toBe(true);
+  });
+
+  it('GRAB at a spent cart at the foot sends it up too; off its brake, no carts, then it walks back', () => {
+    const { room, h, bk, carts, I, safe } = incline();
+    const foot = carts().find((p) => Math.abs(p.y - I.y1) < 0.01)!;
+    // (Wait out the first cart's run, out of its lane.)
+    step(room, BRAKE.warn + 5);
+    hold(room, h, foot, BRAKE.grab + 0.2, 1);
+    expect(carts().some((p) => (p.roll ?? 0) < 0)).toBe(true);
+    const hp = bk.hp;
+    for (let n = 0; n < Math.round(6 / TICK) && bk.act !== 'stunned'; n++) safe(), room.step();
+    expect(bk.act).toBe('stunned');
+    expect(bk.hp).toBeLessThan(hp);
     expect(bk.openUntil).toBeGreaterThan(room.time);
     expect(bk.brakes!.off).toBeGreaterThan(room.time + BRAKE.off - 0.5);
-    // No new cart while it's off; back at its post and braced after.
+    // No new cart while it's off; back at its post after (a hero standing close by: it walks back all the same).
     const top = Math.max(...carts().map((p) => p.id));
     step(room, BRAKE.off - 1);
     expect(Math.max(...carts().map((p) => p.id))).toBe(top);
-    // (A hero standing close by: it walks back all the same.)
     step(room, 1.2);
-    Object.assign(h, { x: bk.x + 1.2, y: bk.y + 0.6 });
     for (let n = 0; n < Math.round(8 / TICK); n++) Object.assign(h, { x: bk.home.x + 2.2, y: bk.home.y - 1.4, safeT: 99 }), room.step();
     expect(Math.hypot(bk.x - bk.home.x, bk.y - bk.home.y)).toBeLessThan(0.4);
   });

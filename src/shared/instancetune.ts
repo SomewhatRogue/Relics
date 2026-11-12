@@ -59,7 +59,10 @@ export const DROVER = { reach: 1.1, cut: 1.6 };
  * back up; it knocks the Brakesman off the brake (`hit` damage, stunned `down` s and OPEN, no carts for `off` s). At most
  * `most` carts on the rail (the oldest at the bottom tipped off for a new one). Back to the brake at `walk` tiles a second.
  */
-export const BRAKE = { every: 4, fast: 2.6, below: 0.4, warn: 1, speed: 9, dmg: 22, knock: 10, width: 0.9, grab: 0.6, hit: 30, down: 3, off: 6, most: 4, walk: 2.4 };
+/** `flip`: a power hit landing on a cart coming down your lane sends it back up, from as far as the blow reaches (at
+ * most `flip` tiles, so a bow's shot can't do it from the foot), the blow's strike or `flipLate` s after it. The first
+ * `told` carts it lines up on a climber, how to is said over them. */
+export const BRAKE = { told: 2, flip: 2.6, flipLate: 0.08, every: 4, fast: 2.6, below: 0.4, warn: 1, speed: 9, dmg: 22, knock: 10, width: 0.9, grab: 0.6, hit: 30, down: 3, off: 6, most: 4, walk: 2.4 };
 
 /**
  * THE SLUICER and THE RAKER (the washing floor, sim/pairfall.ts): the Sluicer falls in the water instead of dying

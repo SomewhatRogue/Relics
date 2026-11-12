@@ -31,7 +31,11 @@ export const DROVER_WORDS = {
 
 /** THE BRAKESMAN's fight (sim/brake.ts): the goal's line while it's on its brake. */
 export const BRAKE_WORDS = {
-  goal: 'GRAB a cart and send it up the rail at the brake, then kill',
+  goal: 'Hit a cart back, then kill',
+  /** Over a climber the first carts are aimed at. */
+  how: 'HOLD ATTACK, LET GO AS IT REACHES YOU',
+  /** Over a cart hit back up the incline. */
+  flip: 'SENT BACK',
 };
 
 /** THE SLUICER and THE RAKER (sim/pairfall.ts): the goal's line, and over the Sluicer as it falls and stands. */
@@ -45,7 +49,7 @@ export const PAIR_WORDS = {
 export const GATE_WORDS = {
   on: 'Everyone stand at the gate together',
   /** A gate kept by a pack, not a named one. */
-  guards: 'Kill the goblins keeping the gate',
+  guards: 'Kill the goblins at the gate',
   open: 'GATE OPEN',
 };
 
