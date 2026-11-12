@@ -210,6 +210,9 @@ export class Game {
 
   /** Play hero `i`: the prologue wood if they haven't been through it, else back in town. */
   choose(i: number): void {
+    // Relic moments belong to the hero who earned them: a new hero never sees another's (Kyle, 2026-11-12:
+    // a brand-new Warrior was told of a LODESTONE in the wood).
+    this.relicNews = [];
     this.save.current = i;
     store(this.save);
     this.run = null;

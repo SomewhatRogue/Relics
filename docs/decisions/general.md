@@ -17,3 +17,4 @@ entry with the model name.
 - Camera stays as it is: 1.5x bodies at today's zoom (12 tiles across on a phone), no tilt (Kyle). (Claude Opus 5.5)
 - The wood's block lesson: 3 blocks, not 5 (Healer 3, not 4) (Kyle: "just blocking 3 is absolutely fine"). A fresh hero gets no relics until the Stoker falls, checked in a fresh browser; Kyle's flood not reproduced yet. (Claude Opus 5.5)
 - The wood's talk (Hew waking you, Orla on the road) and the first-blow calls are strips that stop nothing; a tap skips one; on a phone under the top bar. Only a lesson's own card, and the relic card, stop the world (Kyle: lines that stop you get in the way). (Claude Opus 5.5)
+- Relic moments are cleared when you switch heroes: a brand-new Warrior was shown a LODESTONE in the wood, queued by the hero the game loaded behind the title. Root of the queueing itself not found (not reproduced in a clean browser). (Claude Opus 5.5)
