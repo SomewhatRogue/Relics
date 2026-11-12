@@ -43,6 +43,7 @@ import { mistReach, mistSight } from '../shared/fenmist';
 import { LEAP } from '../shared/threat';
 import { PLANKER } from '../shared/meaty';
 import { gorges, quicken, quickPace, quickPause } from './elite';
+import { edgePause, edgeWind } from './deepedge';
 import { flyPounce } from './meaty2';
 import { calling, standCall } from './hornblow';
 import { DOORKEEPERS } from '../shared/bosstune';
@@ -128,6 +129,8 @@ export function begin(e: Enemy, kind: EnemyAttack['kind'], s: EnemyAttackSpec, t
   if (e.harm) e.attack.dmg = Math.round(e.attack.dmg * e.harm);
   // An elite that's Quick: a shorter wind-up, never under the floors (sim/elite.ts).
   if (e.elite) quicken(e, e.attack);
+  // A Deep floor: quicker to the blow again (sim/deepedge.ts).
+  edgeWind(e, e.attack);
   e.act = 'attack';
   e.actT = 0;
   ev.push({ k: 'windup', x: e.x, y: e.y, kind });
@@ -269,7 +272,7 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     if (e.variant === 'pouncer') flyPounce(e);
     if (over && e.act === 'attack') {
       // (A Doorkeeper rests less between its blows: sim/doorkeepers.ts keeperPause.)
-      Object.assign(e, { attack: null, act: after(e), actT: 0, cooldown: e.variant === 'hexer' ? HEXER.pause : e.attack?.kind === 'spit' ? BROOD.spitPause : e.boss && e.boss.who !== 'hempen' ? keeperPause(e) : spec ? spec.pauseBetween * quickPause(e) : SWING_DUMMY.every });
+      Object.assign(e, { attack: null, act: after(e), actT: 0, cooldown: e.variant === 'hexer' ? HEXER.pause : e.attack?.kind === 'spit' ? BROOD.spitPause : e.boss && e.boss.who !== 'hempen' ? keeperPause(e) : spec ? spec.pauseBetween * quickPause(e) * edgePause(e) : SWING_DUMMY.every });
     }
     return;
   }

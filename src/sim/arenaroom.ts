@@ -10,7 +10,8 @@ import { DOORKEEPERS, HAULIER } from '../shared/tuning';
 import { barnArena } from '../shared/barnarena';
 import { sumpArena } from '../shared/sumparena';
 import { sealArena } from '../shared/sealarena';
-import { bandOf, deepGrow } from '../shared/deepbands';
+import { bandOf } from '../shared/deepbands';
+import { deepEdge } from './deepedge';
 import { Rng } from '../shared/rng';
 import { ArenaRoom } from './room';
 import { scaleBosses } from './party';
@@ -25,14 +26,13 @@ export function arenaRoom(run: Run): ArenaRoom {
   const room = new ArenaRoom(seed, { map: plan.map, foes: plan.foes, furniture: plan.props, chests, level });
   room.floor = fl;
   scaleBosses(room.enemies, n);
-  const grow = fl ? deepGrow(fl) : null;
   for (const e of room.enemies) {
     if (!e.boss) continue;
     const body = e.boss.who === 'haulier' ? { radius: HAULIER.radius, weight: HAULIER.weight, fx: 0, fy: 1 } : { radius: DOORKEEPERS.radius, weight: DOORKEEPERS.weight, fx: 0, fy: -1 };
     Object.assign(e, { boss: newBoss(e.boss.who, n), ...body });
-    // Past fifteen floors, tougher again a floor (shared/deepbands.ts DEEP_PAST).
-    if (grow && grow.hp > 1) (e.hp = e.maxHp = Math.round(e.maxHp * grow.hp)), (e.harm = +((e.harm ?? 1) * grow.harm).toFixed(3));
   }
+  // A Deep floor's edge: bosses quicker to kill, everything harder hitting (sim/deepedge.ts).
+  deepEdge(room.enemies, fl);
   const rng = new Rng(seed * 811 + 5);
   room.bosses = newBook(n, [rng.int(5), rng.int(5)], sump ? 'haulier' : undefined);
   room.board = {};

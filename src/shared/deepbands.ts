@@ -15,21 +15,28 @@
  *   a room, each with at least `affixes` (Quick: faster wind-ups, faster feet, less pause between blows).
  * - `level`: levels on the party's for the goblins' toughness and the loot's lean (capped, shared/threat.ts).
  * - `pre`, `rare`: PRE-WAR and the rare three that many times as likely in a chest or off a goblin.
+ * - `edge` (Kyle, 2026-11-11: "too easy to dodge, and bosses felt like self punishment"): the Deep is hard by
+ *   how its goblins hit, not how long they take to kill. Health (`hp`) and damage (`harm`) times this; every
+ *   wind-up but a boss's times `windup` (never under DEEP_EDGE's floors) and the rest between blows times
+ *   `pause`, so they come quicker and more often. Bosses keep their health and own wind-ups (sim/deepedge.ts).
  */
 export const DEEP_BANDS = [
-  { from: 1, ruin: 2, deep: false, room: 1, hunt: 0, big: 4, elite: 0, elites: 1, affixes: 1, level: 0, pre: 2, rare: 1 },
-  { from: 6, ruin: 3, deep: true, room: 2, hunt: 3, big: 2, elite: 0.1, elites: 2, affixes: 1, level: 2, pre: 5, rare: 2 },
-  { from: 11, ruin: 3, deep: true, room: 3, hunt: 2, big: 1, elite: 0.2, elites: 3, affixes: 2, level: 4, pre: 6, rare: 5 },
-  { from: 16, ruin: 3, deep: true, room: 3, hunt: 2, big: 1, elite: 0.3, elites: 4, affixes: 2, level: 6, pre: 6, rare: 6 },
+  { from: 1, ruin: 2, deep: false, room: 1, hunt: 0, big: 4, elite: 0, elites: 1, affixes: 1, level: 0, pre: 2, rare: 1, edge: { hp: 0.9, harm: 1.25, windup: 0.9, pause: 0.85 } },
+  { from: 6, ruin: 3, deep: true, room: 2, hunt: 3, big: 2, elite: 0.1, elites: 2, affixes: 1, level: 2, pre: 5, rare: 2, edge: { hp: 0.9, harm: 1.4, windup: 0.82, pause: 0.75 } },
+  { from: 11, ruin: 3, deep: true, room: 3, hunt: 2, big: 1, elite: 0.2, elites: 3, affixes: 2, level: 4, pre: 6, rare: 5, edge: { hp: 0.95, harm: 1.55, windup: 0.75, pause: 0.65 } },
+  { from: 16, ruin: 3, deep: true, room: 3, hunt: 2, big: 1, elite: 0.3, elites: 4, affixes: 2, level: 6, pre: 6, rare: 6, edge: { hp: 1, harm: 1.7, windup: 0.7, pause: 0.6 } },
 ];
 export type DeepBand = (typeof DEEP_BANDS)[number];
 
 /**
- * Past floor `from`, each floor on: goblins' health and damage, the room's budget, and the rare three's
+ * Past floor `from`, each floor on: goblins' health and damage (damage rising faster), the room's budget, and the rare three's
  * odds, this much more again, with no end. (The on-screen caps still hold: a deeper room is longer and
  * harder, never a wall of goblins at once.)
  */
-export const DEEP_PAST = { from: 15, hp: 0.08, harm: 0.04, budget: 0.05, rare: 0.15 };
+export const DEEP_PAST = { from: 15, hp: 0.03, harm: 0.05, budget: 0.05, rare: 0.15 };
+
+/** A quickened wind-up never under `red` s (a blow you can block) or `striped` (one you can't). */
+export const DEEP_EDGE = { red: 0.4, striped: 0.8 };
 
 /** Room `index` of a job as it's laid out (shared/terrain.ts): a Deep floor counts as its band's room. */
 export const roomAt = (job: { floor?: number }, index: number) => (job.floor ? index + bandOf(job.floor).room : index);

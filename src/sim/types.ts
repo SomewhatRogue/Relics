@@ -614,6 +614,8 @@ export interface Enemy extends Body {
    *  bigger or stronger party); a BIG ONE; held back at its spot, jeering, since (0: not held); the hero it's
    *  chasing and since when; when its sprint's lean began; its last stomp. Each changes only when that happens, so nothing more goes out a tick. */
   harm?: number;
+  /** On a Deep floor: its wind-ups and rests between blows as multiples (sim/deepedge.ts). */
+  edge?: { windup: number; pause: number };
   big?: boolean;
   held?: number;
   chaseOn?: string;

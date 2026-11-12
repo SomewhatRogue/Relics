@@ -21,7 +21,8 @@ import type { RelicWon } from '../shared/relicaward';
 import { arenaRoom } from './arenaroom';
 import { instanceParty, instanceRoom } from './instanceroom';
 import { stepCheckpoint } from './checkpoint';
-import { bandOf, deepGrow } from '../shared/deepbands';
+import { bandOf } from '../shared/deepbands';
+import { deepEdge } from './deepedge';
 
 export interface Run {
   job: Job;
@@ -92,11 +93,8 @@ export function runRoom(run: Run): ArenaRoom {
   // A routed room plays the pacing rules (sim/pacing.ts, chase.ts): what's on screen held to the party's caps, and no easy kiting.
   if (run.job.layout && run.job.layout >= 3) room.pace = { index: run.index };
   scaleBosses(room.enemies, n);
-  // Past fifteen floors, every goblin a little tougher and harder hitting again a floor, without end.
-  if (fl) {
-    const g = deepGrow(fl);
-    if (g.hp > 1) for (const e of room.enemies) (e.hp = e.maxHp = Math.round(e.maxHp * g.hp)), (e.harm = +((e.harm ?? 1) * g.harm).toFixed(3));
-  }
+  // A Deep floor: its band's edge, and past fifteen harder again a floor, without end (sim/deepedge.ts).
+  deepEdge(room.enemies, fl);
   room.board = {};
   room.dread = { by: dreadFor(run.job) };
   // Out in the open, a cage can hold a false prisoner (sim/falsecage.ts); never inside a house.

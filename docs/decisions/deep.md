@@ -23,3 +23,10 @@ docs/DECISIONS.md (the archive). New entries go here, newest at the bottom, sign
 Kyle: each bar keeps its own name, FAITH for a Cleric. The checkpoint's curse and blessing lines now go through
 `barWords` with the hero's class (client/deepui.ts), like cards and the trainer: "Faith comes back 12% slower" for a
 Cleric, "Magic comes back..." for a Mage, "Stamina..." for the rest. No new words, so no lore pass.
+
+## 2026-11-11: the Deep's edge, hard by how it hits (Opus 5.5)
+Kyle: too easy to dodge everything, and slow boss fights felt like self punishment. Each band now has an `edge`
+(shared/deepbands.ts, sim/deepedge.ts): health 0.9 to 1, damage 1.25 / 1.4 / 1.55 / 1.7, wind-ups 0.9 to 0.7
+(never under 0.4 s red, 0.8 s striped) and rests between blows 0.85 to 0.6. A boss keeps its own wind-ups and its
+health (Kyle, a minute later: big numbers, bigger health; a first cut of boss health was taken back). Past fifteen, each floor +3% health and +5% damage (was +8% / +4%).
+Rough feel: a floor-16 butcher's slam about 84 of 100. Global dodge (i-frames, roll) untouched: not this chat's.
