@@ -5,6 +5,7 @@
  */
 import type { FightEvent } from '../sim/types';
 import type { Fx } from './fx';
+import { shown } from '../shared/shown';
 
 const BLOOD = ['#7a1d1d', '#9a2a2a', '#5a1414'], SICK = ['#9be040', '#6ab82a', '#c8e060'];
 
@@ -20,7 +21,7 @@ export function venomFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
   }
   if (ev.k === 'hit' && ev.tick && ev.src === 'bleed') {
     fx.burst(x, y - 8, 4, BLOOD, 25, false, 180, true);
-    fx.say(x, y - 20, String(ev.n), '#d8402a');
+    fx.say(x, y - 20, String(shown(ev.n)), '#d8402a');
     return true;
   }
   if (ev.k === 'envenom') {

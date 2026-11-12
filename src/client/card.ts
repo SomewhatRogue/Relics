@@ -13,6 +13,7 @@ import type { Hero } from '../sim/types';
 import { kitRows } from './kitlines';
 import { areas } from './guardarea';
 import { barWord, barWords } from '../shared/barword';
+import { shown as bigNum } from '../shared/shown';
 
 /** How a weapon fights, as three short labelled rows (TAP, HOLD, PERFECT, and ALSO where there's a
  *  bonus; kitlines.ts), then its GUARD and DODGE areas (guardarea.ts). */
@@ -50,14 +51,14 @@ interface Worn { weapon: WeaponId; item?: Item; armor: Item | null; rings: Item[
 export function sheet(w: Worn): Row[] {
   const g = gearStats(w.item, w.armor, w.rings), k = WEAPONS[w.weapon], first = k.combo[0], last = k.combo[k.combo.length - 1], q = 1 - g.quick;
   return [
-    { label: 'HIT', v: Math.round(first.dmg * (1 + g.damage)), unit: '' },
-    { label: 'FULL CHARGE', v: Math.round(k.heavy.dmgFull * (1 + g.damage)), unit: '' },
+    { label: 'HIT', v: bigNum(first.dmg * (1 + g.damage)), unit: '' },
+    { label: 'FULL CHARGE', v: bigNum(k.heavy.dmgFull * (1 + g.damage)), unit: '' },
     { label: 'SWING', v: (first.windup + first.active + first.recover * 1) * q, unit: 's', low: true },
     { label: 'TO FULL CHARGE', v: (k.draw ?? CHARGE.full) * (1 - g.draw), unit: 's', low: true },
     { label: 'REACH', v: k.heavy.range * (1 + g.reach), unit: '' },
     // A red blow blocked takes no health; a striped one blocked, the class's share (GUARD.striped).
     { label: 'STRIPED THROUGH BLOCK', v: GUARD.striped.through[k.cls] ?? 1, unit: '%', low: true },
-    { label: 'HEALTH', v: w.baseHp + g.health, unit: '' },
+    { label: 'HEALTH', v: bigNum(w.baseHp + g.health), unit: '' },
     { label: 'DAMAGE TAKEN', v: g.taken, unit: '%', low: true },
     { label: 'WALK', v: k.speed * g.speed, unit: '%' },
     { label: 'DODGE EVERY', v: k.dodge.cooldown * (1 - g.dodge), unit: 's', low: true },
@@ -65,7 +66,7 @@ export function sheet(w: Worn): Row[] {
     { label: 'SKILL RECHARGE', v: 1 - g.focus, unit: '%', low: true },
     { label: 'HEALING GIVEN', v: 1 + g.mending, unit: '%' },
     // The new modifiers' own rows (shared/mods.ts), shown only for kits they act on (`shown`).
-    { label: 'LAST BLOW', v: Math.round(last.dmg * (1 + g.damage) * (1 + g.finisher)), unit: '' },
+    { label: 'LAST BLOW', v: bigNum(last.dmg * (1 + g.damage) * (1 + g.finisher)), unit: '' },
     { label: 'SWING ARC', v: Math.round(first.arc * (1 + g.arc)), unit: '' },
     { label: 'BACKSTAB', v: (k.backstab ?? GUARD.rearMult) * (1 + g.backstab), unit: '%' },
     { label: 'CRIT CHANCE', v: g.crit, unit: '%' },
@@ -101,7 +102,7 @@ export function compare(h: Hero, it: Item): string {
 export const modValue = (m: Mod, grow = 1) => {
   const neg = m.id === 'thrift', v = (neg ? -m.v : m.v) * grow, sign = v > 0 ? '+' : '';
   const r1 = (x: number) => Math.round(x * 10) / 10;
-  return MODS[m.id]?.unit === '%' ? sign + r1(v * 100) + '%' : MODS[m.id]?.unit === 's' ? sign + Math.round(v * 100) / 100 + ' s' : sign + r1(v);
+  return MODS[m.id]?.unit === '%' ? sign + r1(v * 100) + '%' : MODS[m.id]?.unit === 's' ? sign + Math.round(v * 100) / 100 + ' s' : sign + bigNum(v);
 };
 
 /** The card: tier, name, how armor wears, what's on it. How a weapon fights is in the gear's WEAPONS panel. `brief` is kept for callers.

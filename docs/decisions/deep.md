@@ -30,3 +30,10 @@ Kyle: too easy to dodge everything, and slow boss fights felt like self punishme
 (never under 0.4 s red, 0.8 s striped) and rests between blows 0.85 to 0.6. A boss keeps its own wind-ups and its
 health (Kyle, a minute later: big numbers, bigger health; a first cut of boss health was taken back). Past fifteen, each floor +3% health and +5% damage (was +8% / +4%).
 Rough feel: a floor-16 butcher's slam about 84 of 100. Global dodge (i-frames, roll) untouched: not this chat's.
+
+## 2026-11-11: big numbers, boss-threat step 1 (Opus 5.5)
+Kyle approved docs/design/boss-threat.md. Step 1 is a display scale: `shared/shown.ts` (SHOWN 10). Every hit,
+heal and health or damage figure on screen goes through `shown`: the popups (fx, fxvenom, fxmagic, strawman),
+card rows and the health modifier, the forge, drills, the frail cost, potions, perk/ladder/sign/loot lines with
+numbers, the Deep's two health marks, the recap's damage and heal counts. The fight is unchanged. Other chats:
+any new player-facing health or damage number goes through `shown`.

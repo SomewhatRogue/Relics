@@ -17,7 +17,7 @@ export const TRAITS: Record<TraitId, { name: string; text: string }> = {
   deadeye: { name: 'DEADEYE', text: 'PERFECT shots do 60% more damage' },
   crushing: { name: 'CRUSHING', text: 'Goblins knocked into a wall take triple damage' },
   brutal: { name: 'BRUTAL', text: '50% more damage to stunned, pinned, netted or frozen goblins' },
-  reaper: { name: 'REAPER', text: 'A backstab or counter kill heals you 10' },
+  reaper: { name: 'REAPER', text: 'A backstab or counter kill heals you 100' },
   ember: { name: 'FIREFORGED', text: 'Charged hits and full draws set goblins on fire' },
   rime: { name: 'FROSTFORGED', text: 'Charged hits and full draws chill goblins. Two chills freeze' },
   storm: { name: 'STORMFORGED', text: 'Charged hits and full draws shock goblins near the target too' },
@@ -48,7 +48,7 @@ export function traitsFor(kit: WeaponId): TraitId[] {
 }
 
 /** A trait's words for a class: REAPER without a block (so no counters) is a backstab's alone. */
-export const traitText = (t: TraitId, cls?: HeroClass) => barWords(t === 'reaper' && cls && CLASS_GUARD[cls] === 'none' ? 'A backstab kill heals you 10' : TRAITS[t].text, cls);
+export const traitText = (t: TraitId, cls?: HeroClass) => barWords(t === 'reaper' && cls && CLASS_GUARD[cls] === 'none' ? 'A backstab kill heals you 100' : TRAITS[t].text, cls);
 
 /** Gear tiers, white to red (gear.ts): white, green, blue, purple (id 'tolmouth', shown PRE-WAR), then the
  *  three rare and dangerous ones, yellow, orange and red. Ids stay as saved; only names show. */

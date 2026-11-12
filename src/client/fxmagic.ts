@@ -5,6 +5,7 @@ import type { FightEvent } from '../sim/types';
 import type { Fx } from './fx';
 import { EL_COL, EL_LIGHT } from './palette';
 import { toPx } from './world';
+import { shown } from '../shared/shown';
 
 const flash = (fx: Fx, x: number, y: number, r: number, i: number, c: [number, number, number], life = 0.14) =>
   fx.flashes.push({ x, y, r, i, c, life, max: life });
@@ -220,7 +221,7 @@ export function magicFx(fx: Fx, ev: FightEvent, x: number, y: number): void {
       fx.burst(x, y - 4, 6, ['#6a647a', '#57525e'], 30, false);
       break;
     case 'heal':
-      fx.say(x, y - 28, '+' + ev.n, '#7dff8a');
+      fx.say(x, y - 28, '+' + shown(ev.n), '#7dff8a');
       fx.burst(x, y - 8, 8, ['#7dff8a', '#ffffff'], 30, true);
       break;
   }

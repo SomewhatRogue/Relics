@@ -52,7 +52,7 @@ export const SIGNS: Record<SignId, { name: string; cooldown: number }> = {
 /** What each does, in a line (BUTTONS, the class card). Kyle's style; for the lore keeper and line editor. */
 export const SIGN_WORDS: Record<SignId, string> = {
   shadow: "Step out of the dark behind the goblin you face. It's stunned for a second.",
-  mark: "Mark the goblin you aim at for 8 s. Anyone's quick hits on it do +5 damage, heavy hits +40%. Your arrows bend toward it, and your hound goes for it.",
+  mark: "Mark the goblin you aim at for 8 s. Anyone's quick hits on it do +50 damage, heavy hits +40%. Your arrows bend toward it, and your hound goes for it.",
   heal: "Heal whichever friend near you is worst hurt for 25. If nobody near is hurt, or you're in a much worse way than they are, it heals you. Costs 20 stamina. The gold mark shows who it'll reach.",
 };
 

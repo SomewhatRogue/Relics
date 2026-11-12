@@ -14,12 +14,14 @@ butchers and the BIG ONEs.
 
 ## 1. Big numbers (one scale, the whole game)
 
-Every damage number and every health bar times **10**: heroes, goblins, bosses, potions, armor, the lot.
-Fights last as long as they did; a hit reads 80 to 120, a crit 250, a boss bar 7000. One constant
-(`SCALE` in shared/tuning.ts) applied where numbers are defined, so a drawn number and a decided one stay
-one source. Old saves: gear rolls are stored as percents and tiers, so nothing to migrate (to check).
+Every damage and health number on screen times **10**: hits, heals, crits, gear, drills, perks, potions, the
+recap. A hit reads 80 to 120, a crit 250, a boss 7000. **Built 2026-11-11 as a display scale** (`shared/shown.ts`
+`SHOWN`, `shown(n)`): the room still decides in its small numbers and only what's shown is scaled. Scaling the
+305 numbers where they're defined, with every chat adding more, was the riskier way to the same feel. One cost:
+every shown number ends in 0; if that reads fake, the sim can carry finer damage later.
+Any new line that shows health or damage goes through `shown`.
 
-Open: also make boss fights **shorter**, keeping the ×10? (Suggested: no. Speed comes from 3 and 4.)
+Fights stay the same length (Kyle approved the spec as suggested): speed comes from 3 and 4.
 
 ## 2. Control resistance (bosses and BIG ONEs)
 
@@ -51,7 +53,7 @@ First pass per boss (each with its art and animation, Kyle 2026-11-08):
 
 ## Build order
 
-1. The ×10 scale (one change, every test's numbers with it).
+1. ~~The ×10 scale.~~ In (display scale).
 2. Control resistance.
 3. The Deep's two bosses: mobility and threat, with art.
 4. The instances' bosses, by that chat.

@@ -19,6 +19,7 @@ import { MEATY_DRAW, meatySort } from '../shared/meaty';
 import { grownBy } from '../shared/meaty2';
 import { hopOf } from './meatydraw2';
 import { drawKeeper } from './doordraw';
+import { shown } from '../shared/shown';
 
 /** A goblin, or (in the yard: `straw`) a straw man playing one. The plain dummies are themselves either way. */
 export function drawFoe(c: Ctx, e: Enemy, x: number, y: number, sleeping: boolean, straw: boolean): void {
@@ -77,7 +78,7 @@ export function strawFx(fx: Fx, ev: FightEvent): boolean {
     const [x, y] = toPx(ev.x, ev.y);
     fx.burst(x, y - 8, ev.heavy ? 10 : 6, ['#ffffff', '#fff1b0'], ev.heavy ? 60 : 45, true);
     fx.gore.fling(x, y, 8, ev.heavy ? 12 : 7, BITS, ev.heavy ? 60 : 45, 80, 1);
-    if (!ev.tick || Math.random() < 0.3) fx.say(x, y - 22, String(ev.n), ev.heavy ? '#ffe070' : '#ffffff');
+    if (!ev.tick || Math.random() < 0.3) fx.say(x, y - 22, String(shown(ev.n)), ev.heavy ? '#ffe070' : '#ffffff');
     fx.shake = Math.max(fx.shake, ev.heavy ? 2 : 1);
     return true;
   }

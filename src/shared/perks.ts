@@ -36,7 +36,7 @@ const LIST = {
   w_wide: { name: 'WIDE GUARD', text: 'Your block covers 20 degrees more', gain: 'block +20 degrees', fx: { guardArc: 20 } },
   w_block: { name: 'EASY BLOCK', text: 'Blocking costs 25% less stamina', gain: 'block -25% stamina', fx: { block: 0.25 } },
   w_counter: { name: 'HARD COUNTER', text: 'Counters after a block do 25% more damage', gain: 'counter +25%', fx: { counter: 0.25 } },
-  w_health: { name: 'EXTRA HEALTH', text: '+20 health', gain: '+20 health', fx: { health: 20 } },
+  w_health: { name: 'EXTRA HEALTH', text: '+200 health', gain: '+200 health', fx: { health: 20 } },
   w_tough: { name: 'THICK SKIN', text: 'Take 8% less damage', gain: '8% less damage taken', fx: { tough: 0.08 } },
   w_foot: { name: 'QUICK FEET', text: 'Move 6% faster', gain: '+6% speed', fx: { foot: 0.06 } },
   w_charge: { name: 'QUICK CHARGE', text: 'Held blow charges 15% faster', gain: 'charge 15% faster', fx: { draw: 0.15 } },

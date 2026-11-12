@@ -35,6 +35,7 @@ import { Wet } from './wetfx';
 import { iceFx } from './fxice';
 import { worldFx } from './fxworld';
 import { chalkFx } from './chalkfx';
+import { shown } from '../shared/shown';
 
 interface Part { x: number; y: number; vx: number; vy: number; life: number; max: number; col: string; glow: boolean; grav: number; stick: boolean }
 interface Text { x: number; y: number; s: string; col: string; life: number; rise?: number; /** `s` as drawn, broken to fit a phone (saylines.ts). */ lines: string[]; /** Up this long at the start (seconds). */ max: number }
@@ -228,14 +229,14 @@ export class Fx {
           // (A storm stream ticks ten times a second: its sparks, and only some of its numbers.)
           const venom = ev.src === 'poison', spark = ev.src === 'spark';
           this.burst(x, y - 10, spark ? 2 : 3, venom ? ['#9be040', '#6ab82a'] : spark ? ['#fff27a', '#ffffff'] : ['#ffd27a', '#ff9a3c'], 30, true);
-          if (!spark || Math.random() < 0.3) this.say(x, y - 20, String(ev.n), venom ? '#9be040' : spark ? '#fff27a' : '#ff9a3c');
+          if (!spark || Math.random() < 0.3) this.say(x, y - 20, String(shown(ev.n)), venom ? '#9be040' : spark ? '#fff27a' : '#ff9a3c');
           break;
         }
         this.burst(x, y - 8, ev.heavy ? 12 : 7, ['#ffffff', '#fff1b0', '#ffd27a'], ev.heavy ? 70 : 50, true);
         // On a board (a shield-bearer's, the Planker's door): sparks and splinters off the wood, no blood.
         if (ev.boarded) this.burst(x, y - 10, 6, ['#ffffff', '#ffd27a', '#c8b090'], 60, true), this.burst(x, y - 8, 3, ['#8a6a40', '#6a5030'], 35, false);
         else this.burst(x, y - 6, ev.heavy ? 10 : 5, ['#7a1d1d', '#5a1414', '#9a2a2a'], 45, false, 160, true);
-        this.say(x, y - 22, String(ev.n), ev.on === 'hero' ? '#ff6a5a' : ev.marked ? '#ffc23a' : ev.counter ? '#ffa040' : ev.heavy ? '#ffe070' : '#ffffff');
+        this.say(x, y - 22, String(shown(ev.n)), ev.on === 'hero' ? '#ff6a5a' : ev.marked ? '#ffc23a' : ev.counter ? '#ffa040' : ev.heavy ? '#ffe070' : '#ffffff');
         if (ev.marked) {
           // MARK biting (shared/signs.ts): a gold ring and sparks, bigger on a heavy, and a touch more weight.
           this.rings.push({ x, y: y - 8, life: 0.22, max: 0.22, col: '#ffc23a', size: ev.heavy ? 18 : 11 });
@@ -316,7 +317,7 @@ export class Fx {
       case 'survivorhit':
         // Someone you freed, hurt by the party: blood, the number, and a cry (not for every burn).
         this.burst(x, y - 6, ev.tick ? 3 : 8, ['#7a1d1d', '#5a1414', '#9a2a2a'], 45, false, 160, true);
-        this.say(x, y - 18, String(ev.n), '#ff6a5a');
+        this.say(x, y - 18, String(shown(ev.n)), '#ff6a5a');
         if (!ev.tick) (this.say(x, y - 26, CRY, '#f0e0b0'), (this.shake = Math.max(this.shake, 1.5)));
         break;
       case 'survivorhome':

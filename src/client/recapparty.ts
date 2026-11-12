@@ -10,6 +10,7 @@ import type { Count } from '../sim/score';
 import { leads, type CallId } from './recapcalls';
 import { RECAPW } from './recapwords';
 import type { PartyLine } from './recaptally';
+import { shown } from '../shared/shown';
 
 /** The rows shown; the rest open under MORE. */
 // (PARRIES was here until parry went, 2026-11-05: BLOCKS took its place beside DODGES.)
@@ -25,10 +26,12 @@ const cell = (k: Count, v: number) => (k === 'cut' ? (v > 0 ? `<span class="cut"
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 /** Big numbers stay narrow enough for four columns on a phone. */
+/** Counts that are health or damage, shown ×SHOWN like every other (shared/shown.ts). */
+const SCALED = new Set<Count>(['dealt', 'taken', 'healed', 'best']);
 export const num = (v: number) => (v >= 10000 ? `${(v / 1000).toFixed(v >= 100000 ? 0 : 1)}k` : String(Math.round(v)));
 
 function rows(ks: readonly Count[], party: PartyLine[]): string {
-  return ks.map((k) => `<div><b>${RECAPW.stat[k]}</b>${party.map((l) => cell(k, l.s[k] ?? 0) ?? `<span${led(l, party, k) ? ' class="lead"' : ''}>${num(l.s[k] ?? 0)}</span>`).join('')}</div>`).join('');
+  return ks.map((k) => `<div><b>${RECAPW.stat[k]}</b>${party.map((l) => cell(k, l.s[k] ?? 0) ?? `<span${led(l, party, k) ? ' class="lead"' : ''}>${num(SCALED.has(k) ? shown(l.s[k] ?? 0) : l.s[k] ?? 0)}</span>`).join('')}</div>`).join('');
 }
 
 export function partyTable(party: PartyLine[]): string {

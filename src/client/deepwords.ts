@@ -2,6 +2,8 @@
  * The Deep's words (docs/design/the-deep.md): the way down at the sewer grate and who keeps it, the
  * checkpoint at each floor's end, leaving early, and the recap. Lore keeper and line editor 2026-11-11: Cobb keeps the ladder.
  */
+import { shown } from '../shared/shown';
+import { BLESSINGS, CURSES } from '../shared/deepmarks';
 export const DEEP_WORDS = {
   /** Who sits at the way down (the lore keeper's call). */
   keeper: 'Cobb',
@@ -30,14 +32,14 @@ export const DEEP_WORDS = {
   curses: {
     dull: { name: 'THE RUSTED WAY', does: '6% less damage.' },
     heavy: { name: 'THE WET WAY', does: 'You move 6% slower.' },
-    frail: { name: 'THE COLD WAY', does: '10 less health.' },
+    frail: { name: 'THE COLD WAY', does: `${shown(-CURSES.frail.v)} less health.` },
     winded: { name: 'THE LOW WAY', does: 'Stamina comes back 12% slower.' },
     dim: { name: 'THE DARK WAY', does: 'Relics recharge 12% slower.' },
     seen: { name: 'THE LOUD WAY', does: 'Goblins notice you from further off.' },
   } as Record<string, { name: string; does: string }>,
   blessings: {
     keen: { name: 'A WHETSTONE', does: '8% more damage.' },
-    hale: { name: 'A PADDED COAT', does: '15 more health.' },
+    hale: { name: 'A PADDED COAT', does: `${shown(BLESSINGS.hale.v)} more health.` },
     wind: { name: 'A WATERSKIN', does: 'Stamina comes back 15% faster.' },
     devout: { name: 'AN OILED RAG', does: 'Recharge 15% faster.' },
     relic: { name: "SOMEONE'S PACK", does: 'Your relic gets a use back at the start of every floor.' },

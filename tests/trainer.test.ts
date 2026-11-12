@@ -89,7 +89,7 @@ describe('trainer', () => {
     expect(at('skill').tag).toBe('150g');
     expect(at('power').state).toBe('locked');
     expect(at('health').state).toBe('buy');
-    expect(at('health').gain).toBe('+8 health');
+    expect(at('health').gain).toBe('+80 health');
     expect(at('crit').tag).toBe(`${drillPrice('crit', 0)}g`);
     expect(at('power').now).toBe('+10% damage');
     expect(at('power').next).toBe('+15% damage');

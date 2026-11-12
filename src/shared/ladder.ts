@@ -36,7 +36,7 @@ export const RUNG_WORDS: Record<RungId, { name: string; text: string }> = {
   airshot: { name: 'JUMP SHOT', text: 'Tap attack mid-jump to shoot, 60% drawn.' },
   twinsnare: { name: 'TWO SNARES', text: 'Your jump leaves two snares side by side, not one.' },
   landing: { name: 'HARD LANDING', text: 'Landing a jump knocks small goblins next to you flat for 0.8 s.' },
-  blinkburst: { name: 'BLINK BURST', text: 'Blinking leaves a burst of your element where you stood: 10 damage to goblins in it.' },
+  blinkburst: { name: 'BLINK BURST', text: 'Blinking leaves a burst of your element where you stood: 100 damage to goblins in it.' },
   blinkthrough: { name: 'BLINK THROUGH', text: 'Blink at a goblin to come out behind it, facing its back.' },
   halfblink: { name: 'PERFECT BLINK', text: 'A blink within 2 s of a PERFECT hold costs half the magic.' },
   caltrops: { name: 'CALTROPS', text: 'Your dash drops caltrops where you started, once every 5 s. Goblins on them slow down and bleed.' },
@@ -45,7 +45,7 @@ export const RUNG_WORDS: Record<RungId, { name: string; text: string }> = {
   shelter: { name: 'SHELTER', text: 'While you block, friends within 2 tiles take 30% less damage.' },
   // (Kyle, 2026-11-05: "you AND an ally, the ally for free but again stamina drain"; it took COVER's place.)
   allyward: { name: 'SHARED WARD', text: 'Your guard also covers the nearest friend within 3 tiles, and they take no damage. Covering them drains your stamina.' },
-  blockmend: { name: 'HEALING BLOCK', text: 'Each blow you block heals friends within 3 tiles for 5.' },
+  blockmend: { name: 'HEALING BLOCK', text: 'Each blow you block heals friends within 3 tiles for 50.' },
   // The Warrior's guard took the roar's place (Kyle, 2026-11-06).
   tauntguard: { name: 'TAUNT GUARD', text: 'While you hold block, goblins within 4 tiles come for you.' },
   ironstance: { name: 'IRON STANCE', text: 'A blocked blow costs 22 stamina, however hard it hits. The goblin is thrown back, and nothing can hurt you for half a second.' },

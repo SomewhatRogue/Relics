@@ -12,6 +12,7 @@ import { CARDW } from './shopwords';
 import { UPW } from './upgradewords';
 import './upgrades.css';
 import './forge.css';
+import { shown } from '../shared/shown';
 
 /** +3 as three of five pips lit. */
 export const plusPips = (lv: number) =>
@@ -22,7 +23,7 @@ export function plusFmt(r: PlusRow): string {
   const r1 = (x: number) => Math.round(x * 10) / 10;
   if (r.id === 'hit' || r.id === 'charge') return String(r1(r.v));
   if (r.id === 'taken') return Math.round(r.v * 100) + '%';
-  if (r.id === 'health') return '+' + r1(r.v);
+  if (r.id === 'health') return '+' + shown(r.v);
   const sign = r.v > 0 ? '+' : '';
   return r.unit === '%' ? sign + r1(r.v * 100) + '%' : r.unit === 's' ? sign + Math.round(r.v * 100) / 100 + ' s' : sign + r1(r.v);
 }
@@ -30,7 +31,7 @@ export function plusFmt(r: PlusRow): string {
 /** What the piece's plus adds, in words, for its card: "30% more damage, and each modifier on it is 30% stronger". */
 export function plusLine(it: Item): string {
   const lv = plusOf(it), s = slotOf(it), pct = (x: number) => Math.round(lv * x * 100);
-  const main = s === 'weapon' ? FORGE.damage(pct(PLUS.damage)) : s === 'armor' ? FORGE.tough(pct(PLUS.tough)) : FORGE.health(lv * PLUS.health);
+  const main = s === 'weapon' ? FORGE.damage(pct(PLUS.damage)) : s === 'armor' ? FORGE.tough(pct(PLUS.tough)) : FORGE.health(shown(lv * PLUS.health));
   const others = (it.mods ?? []).some((m) => m.id !== (s === 'weapon' ? 'damage' : s === 'armor' ? 'tough' : 'health'));
   return FORGE.adds(main, others ? pct(PLUS.mods) : 0);
 }

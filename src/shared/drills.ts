@@ -6,6 +6,7 @@
  * (PERKS) stay as they were. Every number for the trainer lives here; the rules are in training.ts.
  */
 import type { HeroClass } from './weapons.js';
+import { shown } from './shown.js';
 
 export type DrillId = 'power' | 'health' | 'speed' | 'crit' | 'wind' | 'skill' | 'technique' | 'ladder';
 export const DRILL_ORDER: DrillId[] = ['power', 'health', 'speed', 'crit', 'wind', 'skill', 'technique'];
@@ -50,7 +51,7 @@ export const drilled = (d: Drills | undefined, id: DrillId) => (d?.[id] ?? 0) * 
 export function drillGain(id: DrillId, cls: HeroClass, ranks: number): string {
   void cls;
   const d = DRILLS[id];
-  return d.gain.replace('#', String(d.per < 1 ? Math.round(d.per * ranks * 100) : d.per * ranks));
+  return d.gain.replace('#', String(d.per < 1 ? Math.round(d.per * ranks * 100) : id === 'health' ? shown(d.per * ranks) : d.per * ranks));
 }
 
 /**

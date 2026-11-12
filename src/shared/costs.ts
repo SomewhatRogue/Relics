@@ -9,6 +9,7 @@ import type { Rng } from './rng.js';
 import type { HeroClass } from './weapons.js';
 import type { Item, Tier } from './loot.js';
 import { band } from './mods.js';
+import { shown } from './shown.js';
 
 export type CostId = NonNullable<Item['cost']>['id'];
 /** Each cost: what one unit (1%, or 1 health) is worth in points, and its words for a value (a Mage's bar is magic). */
@@ -16,7 +17,7 @@ export const COSTS: Record<CostId, { unit: '%' | ''; per: number; text: (n: numb
   taken: { unit: '%', per: 1, text: (n) => `You take ${n}% more damage.` },
   winded: { unit: '%', per: 0.5, text: (n, cls) => `${cls === 'MAGE' ? 'Magic' : 'Stamina'} refills ${n}% slower.` },
   slow: { unit: '%', per: 1, text: (n) => `You move ${n}% slower.` },
-  frail: { unit: '', per: 0.6, text: (n) => `${n} less health.` },
+  frail: { unit: '', per: 0.6, text: (n) => `${shown(n)} less health.` },
   dull: { unit: '%', per: 0.8, text: (n) => `Skill and relic recharge ${n}% slower.` },
 };
 export const COST_ORDER = Object.keys(COSTS) as CostId[];

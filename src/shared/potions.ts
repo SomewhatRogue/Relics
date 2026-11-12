@@ -2,6 +2,7 @@
  * Potions: three on a belt, one button drinks (or throws) the one at the front. Names from the lore
  * keeper: Sister Agne makes the Bitter; the watch drinks Wall Brandy on the wall.
  */
+import { shown } from './shown.js';
 export type PotionId = 'bitter' | 'brandy' | 'oil' | 'frost' | 'smoke';
 /**
  * The potions that can be had: bought, dropped or found (Kyle, 2026-11-04: "just have Bitter (healing)
@@ -21,7 +22,7 @@ export const POTION = { belt: 3, cooldown: 0.8, heal: 40, healTime: 2, brandyTim
 
 /** What each does, a few words for the EFFECT row (Kyle, 2026-11-02: short and true to the sim; the numbers are POTION's). */
 export const POTIONS: Record<PotionId, { name: string; short: string; text: string; price: number; thrown: boolean; col: string }> = {
-  bitter: { name: "SISTER'S BITTER", short: 'BITTER', text: `Heals ${POTION.heal}, cures poison`, price: 20, thrown: false, col: '#c0392b' },
+  bitter: { name: "SISTER'S BITTER", short: 'BITTER', text: `Heals ${shown(POTION.heal)}, cures poison`, price: 20, thrown: false, col: '#c0392b' },
   brandy: { name: 'WALL BRANDY', short: 'BRANDY', text: 'Double damage. Half speed, half stamina', price: 15, thrown: false, col: '#d4a537' },
   oil: { name: 'LAMP OIL', short: 'OIL', text: 'Bursts into flames where it lands', price: 20, thrown: true, col: '#ff9a3c' },
   frost: { name: 'FROST FLASK', short: 'FROST', text: 'Chills goblins it splashes. Two splashes freeze', price: 25, thrown: true, col: '#9fd0ff' },
