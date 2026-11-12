@@ -27,11 +27,12 @@ import { caveLook } from '../cavedraw';
 import { cartPath } from '../../sim/cartpath';
 import { blastShape } from '../../sim/blastshape';
 import { shakeProp } from './prophit3d';
-import { makeChest, makeCoal, makeDrop, makeHole, makePickup, makeProp, poseChest, type ChestFig } from './props3d';
+import { makeChest, makeCoal, makeHole, makePickup, makeProp, poseChest, type ChestFig } from './props3d';
+import { makeBottle, makeCoins, makeLoot } from './loot3d';
+import { itemCol } from '../uniquelook';
 import { boltLook, makeBolt, makeExit, makeJavelin, makeRing, placeBolt, placeJavelin } from './shots3d';
 import { surfAt } from './hazards3d';
 import { isRound } from '../../sim/types';
-import { TIERS } from '../../shared/gear';
 import { relicCol } from '../relicicons';
 import type { Figure } from './rig';
 import { BOXFIGS } from './look';
@@ -148,11 +149,12 @@ export class Actors {
     }
     for (const d of room.drops) {
       if (d.owner && d.owner !== meId) continue;
-      const o = this.things.get('d' + d.id, d.item.quality, () => ({ root: makeDrop(TIERS[d.item.quality].col) })).root;
-      o.position.set(d.x, Math.sin(now * 3 + d.id) * 0.05, d.y);
-      o.rotation.y = now * 0.8 + d.id;
+      // Lying on the floor as itself, a glint down its blade now and then (loot3d.ts).
+      const o = this.things.get('d' + d.id, d.item.quality, () => ({ root: makeLoot(d.item, itemCol(d.item), d.id) })).root;
+      o.position.set(d.x, 0, d.y);
+      o.userData.tick?.(now);
     }
-    for (const p of room.pickups) this.things.get('k' + p.id, '', () => ({ root: makePickup(!!p.gold, p.potion, p.relic && relicCol(p.relic)) })).root.position.set(p.x, 0, p.y);
+    for (const p of room.pickups) this.things.get('k' + p.id, '', () => ({ root: p.gold ? makeCoins(p.gold) : p.potion ? makeBottle(p.potion) : makePickup(false, undefined, p.relic && relicCol(p.relic)) })).root.position.set(p.x, 0, p.y);
     for (const c of room.coals) this.things.get('o' + c.id, '', () => ({ root: makeCoal() })).root.position.set(c.x, Math.sin(now * 6 + c.id) * 0.02, c.y);
     for (const b of room.bolts) placeBolt(this.things.get('b' + b.id, boltLook(b), () => ({ root: makeBolt(b) })).root, b, 0);
     for (const j of room.javelins) placeJavelin(this.things.get('j' + j.id, '', () => ({ root: makeJavelin() })).root, j, 0);

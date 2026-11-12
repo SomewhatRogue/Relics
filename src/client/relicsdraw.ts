@@ -10,6 +10,7 @@ import { isUnique, itemCol } from './uniquelook';
 import { line, type Ctx } from './draw';
 import { EL_COL } from './palette';
 import { drawSpell } from './spelldraw';
+import { drawBottle, drawGear, drawGold } from './lootart';
 
 const runes = (c: Ctx, x: number, y: number, a: number, from: number, to: number) => {
   c.glow.globalAlpha = 0.6 + 0.4 * Math.sin(c.now * 6);
@@ -152,25 +153,15 @@ export function drawBolt(c: Ctx, b: Bolt, x: number, y: number): void {
   c.glow.fillRect(Math.round(x), Math.round(ty), 1, 1);
 }
 
-const KIT_COL: Record<string, string> = { sword: '#dfe6ec', greatsword: '#eef2f5', spear: '#8b6a3a', daggers: '#e6ecf0', longbow: '#8b6a3a', shortbow: '#6b4a2b', crossbow: '#5a3d22', wand: '#6b4a2b', staff: '#6b4a2b', spellblade: '#cfd6e8', mace: '#9aa3ad' };
 const FORGED: Record<string, string> = { ember: EL_COL.fire, rime: EL_COL.frost, storm: EL_COL.storm };
 
 /** Gold on the floor (a few coins, glinting) or a potion bottle in its colour. */
 export function drawPickup(c: Ctx, p: Pickup, x: number, y: number): void {
   const fade = Math.min(1, p.life / 4);
   c.lit.globalAlpha = c.glow.globalAlpha = fade;
-  if (p.gold) {
-    const n = Math.min(5, 1 + Math.floor(p.gold / 6));
-    for (let i = 0; i < n; i++) {
-      c.lit.fillStyle = i % 2 ? '#b08a3a' : '#d4a537';
-      c.lit.fillRect(Math.round(x - 4 + ((i * 3) % 8)), Math.round(y - 1 - (i % 3)), 3, 2);
-      c.glow.globalAlpha = 0.35 * fade;
-      c.glow.fillStyle = '#d4a537';
-      c.glow.fillRect(Math.round(x - 4 + ((i * 3) % 8)), Math.round(y - 1 - (i % 3)), 3, 1);
-      c.glow.globalAlpha = fade;
-    }
-    if (Math.floor(c.now * 2 + p.id) % 3 === 0) (c.glow.fillStyle = '#fff1d0'), c.glow.fillRect(Math.round(x), Math.round(y - 3), 1, 1);
-  } else if (p.relic) {
+  // (Coins and bottles drawn as things since the loot pass, lootart.ts.)
+  if (p.gold) drawGold(c, p.gold, x, y, p.id);
+  else if (p.relic) {
     // A relic: a small gold stone stood upright, glowing, with a ring of light under it.
     const col = relicCol(p.relic), bob = Math.round(Math.sin(c.now * 2.5 + p.id) * 1.5);
     c.lit.fillStyle = '#d9a13a';
@@ -179,15 +170,7 @@ export function drawPickup(c: Ctx, p: Pickup, x: number, y: number): void {
     c.glow.fillRect(Math.round(x), Math.round(y - 9 + bob), 1, 6);
     c.glow.globalAlpha = 0.5 * fade;
     for (let a = 0; a < Math.PI * 2; a += 0.5) c.glow.fillRect(Math.round(x + Math.cos(a + c.now) * 5), Math.round(y + Math.sin(a + c.now) * 2), 1, 1);
-  } else if (p.potion) {
-    const col = POTIONS[p.potion].col, bob = Math.round(Math.sin(c.now * 3 + p.id));
-    c.lit.fillStyle = '#5a4a32';
-    c.lit.fillRect(Math.round(x), Math.round(y - 7 + bob), 1, 1);
-    c.lit.fillStyle = col;
-    c.lit.fillRect(Math.round(x - 1), Math.round(y - 6 + bob), 3, 4);
-    c.glow.fillStyle = col;
-    c.glow.fillRect(Math.round(x), Math.round(y - 5 + bob), 1, 1);
-  }
+  } else if (p.potion) drawBottle(c, POTIONS[p.potion].col, x, y, p.id);
   c.lit.globalAlpha = c.glow.globalAlpha = 1;
 }
 
@@ -280,7 +263,6 @@ export function drawChest(c: Ctx, ch: Chest, x: number, y: number): void {
 export function drawDrop(c: Ctx, d: Drop, x: number, y: number): void {
   const fade = Math.min(1, d.life / 5), col = itemCol(d.item), step = isUnique(d.item) ? 6 : TIER_ORDER.indexOf(d.item.quality), kind = d.item.slot ?? 'weapon';
   c.lit.globalAlpha = c.glow.globalAlpha = fade;
-  const bob = Math.round(Math.sin(c.now * 3 + d.id) * 1);
   c.glow.fillStyle = col;
   for (let i = 0; i < 16; i++) {
     const t = (i / 16) * Math.PI * 2;
@@ -291,9 +273,7 @@ export function drawDrop(c: Ctx, d: Drop, x: number, y: number): void {
     c.glow.fillRect(Math.round(x), Math.round(y - 20 - step * 4), 1, 18 + step * 4);
     c.glow.globalAlpha = fade;
   }
-  if (kind === 'weapon') line(c.lit, x - 4, y - 3 + bob, -0.6, 0, 9, KIT_COL[d.item.kit ?? 'sword'] ?? '#dfe6ec', 2);
-  else if (kind === 'armor') (c.lit.fillStyle = d.item.armor === 'heavy' ? '#9aa3ad' : d.item.armor === 'medium' ? '#7a828c' : '#6b4a2b'), c.lit.fillRect(Math.round(x - 3), Math.round(y - 6 + bob), 6, 5);
-  else (c.glow.fillStyle = col), c.glow.fillRect(Math.round(x - 1), Math.round(y - 5 + bob), 3, 1), c.glow.fillRect(Math.round(x - 1), Math.round(y - 3 + bob), 3, 1), c.glow.fillRect(Math.round(x - 2), Math.round(y - 4 + bob), 1, 1), c.glow.fillRect(Math.round(x + 2), Math.round(y - 4 + bob), 1, 1);
-  if (Math.floor(c.now * 2 + d.id) % 3 === 0) (c.glow.fillStyle = '#ffffff'), c.glow.fillRect(Math.round(x + 2), Math.round(y - 7 + bob), 1, 1);
+  // The thing itself, lying on the floor (lootart.ts): the weapon with a glint down its blade, a breastplate, an amulet.
+  drawGear(c, kind, d.item.kit, d.item.armor, col, x, y, d.id, fade);
   c.lit.globalAlpha = c.glow.globalAlpha = 1;
 }

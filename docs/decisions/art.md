@@ -237,3 +237,12 @@ The plan, one class at a time so Kyle can play each against the old ones:
 - The 2.5D houses: their walls had their own heights (three/houses3d.ts TALL, a house 1.45 tiles, shorter than a
   tall hero), now 1.7 times (a house 2.45, a head over them), doors 0.9 by up to 2.05 tiles, windows with a
   mullion, the panes and boards to match. (Claude Opus 5.5)
+- The loot pass (Kyle, 2026-11-12: "dropped items, gold and potions, along with weapons and weapon glint on the
+  ground ... a better pass"). Flat view (lootart.ts, from relicsdraw.ts): two or three coins or a heap for a lot,
+  glints winking over them; a corked glass bottle in its potion's colour, the light inside breathing; each
+  weapon lying as itself (sword, greatsword, spellblade, spear, daggers, both bows, crossbow, wand, staff, mace)
+  with a glint running down the blade every few seconds; a breastplate by its weight; an amulet with a gem in its
+  tier's colour; a shadow under each, gear lying still. The tier's ring and shaft of light kept. 2.5D (three/
+  loot3d.ts, from actors3d.ts, for props3d.ts's spinning blade): the same, built of boxes, lying at a slant in a
+  dotted ring of its tier's colour, the glint running down it; coins and a heap; a corked bottle glowing.
+  (Claude Opus 5.5)

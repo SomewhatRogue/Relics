@@ -126,16 +126,6 @@ export function poseChest(f: ChestFig, c: Chest): void {
   f.chains.visible = c.chained && c.state === 'shut';
 }
 
-/** A weapon on the floor: a blade in its tier's colour, turning slowly. */
-export function makeDrop(col: string): THREE.Group {
-  const root = new THREE.Group(), g = pivot(root, 0, 0.25, 0);
-  part(g, 0.06, 0.5, 0.03, M(0xe4eaf2), 0, 0.1, 0);
-  part(g, 0.2, 0.05, 0.06, G(hex(col), 0.3), 0, -0.16, 0);
-  part(g, 0.05, 0.14, 0.05, M(0x5a3d22), 0, -0.25, 0);
-  g.rotation.z = 0.5;
-  return root;
-}
-
 export function makePickup(gold: boolean, potion?: string, relic?: string): THREE.Group {
   const root = new THREE.Group();
   // A relic: a little gold standing stone, glowing in its element's colour.
