@@ -117,3 +117,12 @@ hit while under), ROCK, SWEEP after a rise, CHARGE; dripstone columns anyone can
 the cart's 10 s cooldown); BLINDED does nothing (ALREADY BLIND); phase 2 the torches go out and adds climb out of
 the holes. Art reviewed from scripts/listen-look.cjs shots: columns faded when someone stands behind (they hid the
 hero). Words: lore keeper, line editor. deepdoor.test: floor 10 is the Listener now. 3D view: tsc only.
+
+## 2026-11-12: THE LEECHMAN, floor 15 (Opus 5.5; three Sonnet builder slices)
+In THE REED BEDS: wades fast in shallows, slow on dry ground, never in deep water; THE LINE hauls a hero in (block
+or roll), the punish after; LEECHES drain till you roll; PEAT BANK's striped lane leaves mud (map.mud; wadeAt honours
+it). The windlass: GRAB and turn 4 s, the shallows drain to mud 12 s (map.drained), it crawls and can't use THE
+LINE; stuck 20 s after. Phase 2: channels widen (Water.onlyLog; the path grid rebuilds), it lays logs; a blow knocks
+a log in, and it with it (a knockdown, holdUntil). Loot: THE BOG-OAK HOOK, FEN-BLACK JERKIN, A STITCHED RING (wax
+and tar, never magic). Art reviewed from scripts/leech-look.cjs. 3D: no drained mud or widened channels yet.
+haulier.test and deepdoor.test: floor 15 is the Leechman now.

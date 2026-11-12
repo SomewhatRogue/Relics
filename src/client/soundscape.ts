@@ -4,6 +4,7 @@
  */
 import { bossSound } from './fxboss';
 import { listenSound } from './fxlisten';
+import { leechSound } from './fxleech';
 import { streamSound } from './streamsound';
 import { chestSound } from './sfx';
 import { mageTapSound } from './magesfx';
@@ -82,7 +83,7 @@ export class Soundscape {
     mageTapSound(ev, room);
     // A recording of its own where the list gives one (sfxevents.ts); else the usual sound below.
     if (eventSample(ev)) return;
-    if (listenSound(ev) || foeSound(ev) || chalkSound(ev) || bossSound(ev)) return;
+    if (listenSound(ev) || leechSound(ev) || foeSound(ev) || chalkSound(ev) || bossSound(ev)) return;
     if (ev.k === 'swing') return swingSound(ev.src, ev.heavy);
     if (ev.k === 'chest') return chestSound(ev.state, ev.tier);
     // The poisoner's: the blowpipe's puff, a skewer's wet stab, a goblin retching (the spiders' own wet sounds).

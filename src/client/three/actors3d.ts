@@ -132,9 +132,16 @@ export class Actors {
       poseFolk(f, s, t, this.stride('s' + s.id, x, y));
       f.root.position.set(x, f.root.position.y + lift(s.z), y);
     }
+    // THE LEECHMAN's old windlass on the west bank: a drum on two timbers, a crank, a chain (as client/windlassdraw.ts).
+    if (room.map.windlass) {
+      const w = room.map.windlass, o = this.things.get('windlass', 'windlass', () => ({ root: makeProp('windlass') })).root;
+      o.position.set(w.x, 0, w.y);
+    }
     for (const p of room.props) {
       if (p.broken) continue;
       if (p.kind === 'column') { this.column(p, t); continue; }
+      // THE LEECHMAN's log is the gangway block's trunk (client/staithebox.ts): nothing more to stand here.
+      if (p.kind === 'log') continue;
       const carrier = p.lifted ? room.heroes.find((h) => h.lifting === p.id) : undefined, o = this.things.get('p' + p.id, p.kind, () => ({ root: makeProp(p.kind) })).root;
       const [x, y] = carrier ? lerp('h:' + carrier.id, carrier.x, carrier.y) : [p.x, p.y];
       o.position.set(x, carrier ? 1.3 : (p.air ?? 0) > 0 ? 0.3 : lift(p.z), y);

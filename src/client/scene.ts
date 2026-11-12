@@ -47,6 +47,9 @@ import { nestEmber } from './nestfire';
 import { drawLifted, drawProp } from './propsdraw';
 import type { Fx } from './fx';
 import { haulLights } from './fxhaul';
+import { drawFenBase, drawFenFloor, fenScene } from './fendraw';
+import { leechFrame } from './fxleech';
+import { drawLeechesOn } from './leechhero';
 import { CAVE, caveLook, caveScene, drawCaveMarks, listenLights } from './cavedraw';
 import { columnWatch } from './columndraw';
 import { Lighting, type Light } from './light';
@@ -206,6 +209,8 @@ export class Scene {
     const a = room.alpha;
     // THE LISTENER's cave: where it is, and the torches going out (cavedraw.ts).
     caveLook(room, now);
+    // THE LEECHMAN's pool: the stamps of what has happened, the windlass, the blows' own moments (fxleech.ts).
+    leechFrame(room, now, fx);
     // Who a dripstone column would hide: heroes and the bosses (columndraw.ts fades a column with one behind it).
     columnWatch([...room.heroes, ...room.enemies.filter((e) => e.boss)]);
     const lerp = (key: string, x: number, y: number): [number, number] => {
@@ -251,9 +256,13 @@ export class Scene {
     lit.fillStyle = '#0d0b10';
     lit.fillRect(0, 0, this.vw, this.vh);
     lit.drawImage(this.bg!, -cx, -cy);
+    // THE LEECHMAN's pool in phase 2: the channels repainted wider (fendraw.ts).
+    drawFenBase(lit, map, cx, cy, now);
     fx.drawDecals(lit, cx, cy);
     // The water moving, blood clouding in it, rings at feet (wetdraw.ts).
     drawWet(lit, fx.wet, map, cx, cy, now);
+    // ...and over it the drained shallows as mud, the peat bank's heaps (fendraw.ts).
+    drawFenFloor(lit, map, cx, cy, now, room.time);
     glow.clearRect(0, 0, this.vw, this.vh);
     // The job's hour: the low sun's shadows; the brood mother's poison on the floor.
     setSun(map.theme);
@@ -318,6 +327,8 @@ export class Scene {
       const [x, y] = lerp('h:' + h.id, h.x, h.y), up = (h.z ?? 0) * LIFT;
       // (Heroes are drawn at 1.5x already, heroscale.ts: never stretched.)
       items.push({ y, draw: () => drawHero(c, h, x - cx, y - up - cy, h.id === meId, room.time) });
+      // Leeches latched on them (THE LEECHMAN's: leechhero.ts).
+      items.push({ y: y + 0.02, draw: () => drawLeechesOn(c, h, x - cx, y - up - cy) });
       // A Ranger's hound, wherever it is.
       if (h.hound) {
         const d = h.hound, [dx, dy] = lerp('d:' + h.id, d.x, d.y);
@@ -418,7 +429,9 @@ export class Scene {
       const [ox, oy] = lerp('h:' + o.id, o.x, o.y);
       items.push({ y: OY + k.y * PX + 1, draw: () => drawHook(c, k, ox - cx, oy - cy, OX + k.x * PX - cx, OY + k.y * PX - cy) });
     }
-    for (const r of map.rounds) if (!big || !off(OX + r.x * PX - cx, OY + r.y * PX - cy)) items.push({ y: OY + r.y * PX, draw: () => drawRound(c, r, OX + r.x * PX - cx, OY + r.y * PX - cy) });
+    // (The windlass's post is drawn with the windlass: fendraw.ts.)
+    fenScene(map, c, cx, cy, room.heroes, items);
+    for (const r of map.rounds) if ((r.kind !== 'post' || !map.windlass) && (!big || !off(OX + r.x * PX - cx, OY + r.y * PX - cy))) items.push({ y: OY + r.y * PX, draw: () => drawRound(c, r, OX + r.x * PX - cx, OY + r.y * PX - cy) });
     for (const b of map.blocks) {
       if (b.kind === 'sideway') continue;
       const [bx, by] = blockAt(b);

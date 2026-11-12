@@ -2,7 +2,7 @@
 
 Kyle, 2026-11-12: "lets think of thematic other bosses and attacks or environmental plays and loot." Each of
 the Deep's layers below the drains gets its own boss, fought in a room built from that place. Names and who
-they are: lore keeper, 2026-11-12. Status: Kyle's yes 2026-11-12; **THE LISTENER built** (2026-11-12), the other three to come.
+they are: lore keeper, 2026-11-12. Status: Kyle's yes 2026-11-12; **THE LISTENER and THE LEECHMAN built** (2026-11-12), the other two to come.
 
 ## Rules for all four
 
@@ -45,7 +45,12 @@ the sound of feet and steel.
 - **Loot:** cave-damp steel the dark kept, heavy and quiet: e.g. a hammer whose hits make no sound, boots for
   creeping, a helm that keeps goblins' notice off you.
 
-## 2. Drowned fen: THE LEECHMAN (floor 15)
+## 2. Drowned fen: THE LEECHMAN (floor 15) (built)
+
+Built in THE REED BEDS: shared/leechtune.ts, fenarena.ts; sim/leechman.ts, leechhook.ts, leechbook.ts, leechwind.ts,
+leechlog.ts; client/leechdraw.ts, leechpose.ts, leechlie.ts, leechline.ts, fendraw.ts, windlassdraw.ts, leechhero.ts,
+leechstate.ts, fxleech.ts; tests/leechman.test.ts, leechwind.test.ts; scripts/leech-look.cjs. Loot: THE BOG-OAK
+HOOK, FEN-BLACK JERKIN, A STITCHED RING.
 
 A goblin that keeps to the shallows and reed beds, hung with leeches it lets fasten on itself. It pulls heroes
 in on a line.

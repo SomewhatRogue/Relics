@@ -7,6 +7,7 @@ import { PX } from './world';
 import { drawCart } from './sumpdraw';
 import { drawTub } from './tubdraw';
 import { drawColumn } from './columndraw';
+import { drawLogWet } from './fendraw';
 import { HS, hs } from './heroscale';
 
 /** (x, y) is the prop's foot on screen; `t` the room's time (for the hit flash). */
@@ -17,8 +18,8 @@ export function drawProp(c: Ctx, p: Prop, x: number, y: number, t: number): void
   if (p.kind === 'cart') return drawCart(c, p, x, y, t);
   // THE LISTENER's dripstone column: standing, toppling, rubble (columndraw.ts).
   if (p.kind === 'column') return drawColumn(c, p, x, y, t);
-  // THE LEECHMAN's log: the deck laid over the water is its drawing (slice 3), the prop only takes the blow.
-  if (p.kind === 'log') return;
+  // THE LEECHMAN's log: the trunk is the deck laid over the water (staithebox.ts); the prop adds the wet at its ends.
+  if (p.kind === 'log') return drawLogWet(c, p, x, y);
   // An instance puzzle's ore tub (tubdraw.ts).
   if (p.kind === 'tub') return drawTub(c, p, x, y);
   // (Props at hand height are drawn 1.5x in the art pass: sprites.ts `grown`.)

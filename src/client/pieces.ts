@@ -25,7 +25,7 @@ const TIMBER = 0x4a3420, DARK = 0x2e2016, STONE = 0x6a6470, IRON = 0x55505e, ROP
 const shuffle = (n: number) => () => ((n = (n * 1103515245 + 12345) & 0x7fffffff), n / 0x7fffffff);
 
 /** A block's boxes, by its kind and footprint (`look`: which way a mill's wheel faces). */
-export function blockBoxes(b: Pick<Block, 'kind' | 'w' | 'h' | 'look' | 'ruined' | 'deck'>): Bx[] {
+export function blockBoxes(b: Pick<Block, 'kind' | 'w' | 'h' | 'look' | 'ruined' | 'deck' | 'hp'>): Bx[] {
   const w = b.w, d = b.h, cx = w / 2, cz = d / 2, out: Bx[] = [], r = shuffle(Math.round(w * 37 + d * 11));
   if (STAITHE_KINDS.has(b.kind)) return staitheBoxes(b, r);
   if (FEN_KINDS.has(b.kind)) return fenBoxes(b, r);

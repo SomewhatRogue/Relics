@@ -10,7 +10,7 @@ import type { Bx } from './pieces';
 export const STAITHE_KINDS = new Set<Block['kind']>(['jetty', 'gangway', 'smokehouse', 'dryrack', 'hungnet']);
 const PLANK = 0x6a5034, PLANK2 = 0x5a4228, PILE = 0x2e2016, CHAR = 0x1e1814, ROPE = 0x8a7a5a, EEL = 0x2a2a22, ROOF = 0x3a3036;
 
-export function staitheBoxes(b: Pick<Block, 'kind' | 'w' | 'h' | 'ruined' | 'deck'>, r: () => number): Bx[] {
+export function staitheBoxes(b: Pick<Block, 'kind' | 'w' | 'h' | 'ruined' | 'deck' | 'hp'>, r: () => number): Bx[] {
   const w = b.w, d = b.h, cx = w / 2, cz = d / 2, out: Bx[] = [], along = w >= d, len = along ? w : d, at = (u: number, v: number): [number, number] => (along ? [u, v] : [v, u]);
   if (b.kind === 'jetty') {
     // Piles down into the water along both long edges; the deck's boards across it, worn and gappy.
@@ -32,6 +32,17 @@ export function staitheBoxes(b: Pick<Block, 'kind' | 'w' | 'h' | 'ruined' | 'dec
   if (b.kind === 'gangway') {
     // Only once it's across: the trunk, planks lashed over it so you can walk it.
     if (!b.deck || b.ruined) return out;
+    // (THE LEECHMAN's, hp 9999 -- sim/leechlog.ts: a wet black trunk, dripping, a pale cut end, moss and a sheen; no planks.)
+    if (b.hp === 9999) {
+      for (let u = 0.1; u < len - 0.05; u += 0.45) {
+        const [x, z] = at(u, along ? cz : cx);
+        out.push([x, -0.25, z, along ? 0.48 : 1.1, 0.5, along ? 1.1 : 0.48, r() < 0.5 ? 0x2a2630 : 0x1e1a24]);
+        out.push([x, 0.25, z, along ? 0.4 : 0.6, 0.04, along ? 0.6 : 0.4, r() < 0.4 ? 0x6a8a8a : 0x3e5a5e]);
+      }
+      const [ex, ez] = at(len - 0.06, along ? cz : cx), [mx, mz] = at(len * 0.3, along ? cz : cx), [rx, rz] = at(len * 0.72, along ? cz : cx);
+      out.push([ex, -0.2, ez, along ? 0.1 : 1.0, 0.44, along ? 1.0 : 0.1, 0x9a8a60], [mx, 0.28, mz, 0.34, 0.1, 0.3, 0x4a6a32, 'lump'], [rx, 0.28, rz, 0.4, 0.1, 0.3, 0x3a5a2a, 'lump']);
+      return out;
+    }
     for (let u = 0.1; u < len - 0.05; u += 0.45) {
       const [x, z] = at(u, along ? cz : cx);
       out.push([x, -0.25, z, along ? 0.48 : 0.6, 0.28, along ? 0.6 : 0.48, r() < 0.5 ? 0x4a3a2a : 0x3e3022]);

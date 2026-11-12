@@ -16,7 +16,7 @@ import { part, pivot } from './rig';
 const geos = new Map<string, THREE.BufferGeometry>();
 
 /** A column's broken remains: `colrubble` (a stump and its shaft in lengths down +z, turned to the lean by the caller). */
-type GeoKind = PropKind | 'colrubble';
+type GeoKind = PropKind | 'colrubble' | 'windlass';
 
 function propGeo(kind: GeoKind): THREE.BufferGeometry {
   let g = geos.get(kind);
@@ -59,13 +59,19 @@ function propGeo(kind: GeoKind): THREE.BufferGeometry {
     B.b(0, 0.8, 0, 0.2, 0.2, 0.2, 0x2a2228);
     B.b(0, 0.84, 0, 0.12, 0.12, 0.21, 0xffd27a);
     B.b(0, 1.0, 0, 0.24, 0.04, 0.24, 0x5a5060);
-  } else {
+  } else if (kind === 'larder') {
     // The larder: a rack, joints of meat hung from it.
     for (const s of [-1, 1]) B.b(s * 0.55, 0, 0, 0.1, 1.5, 0.1, 0x4a3420);
     B.b(0, 1.45, 0, 1.25, 0.08, 0.08, 0x4a3420);
     for (let i = 0; i < 4; i++) B.b(-0.38 + i * 0.25, 0.75 + r.next() * 0.2, 0, 0.16, 0.42 + r.next() * 0.2, 0.14, jit(0x7a2420, 0.15, r));
   }
-  if (kind === 'column') {
+  if (kind === 'windlass') {
+    // THE LEECHMAN's old windlass: two black timbers, a wooden drum with iron bands between them, a crank on one end, a chain running out.
+    for (const s of [-0.75, 0.75]) B.b(s, 0, 0, 0.3, 1.7, 0.3, 0x3a2c1c);
+    B.b(0, 0.7, 0, 1.2, 0.8, 0.8, 0x6a5034), B.b(-0.5, 0.7, 0, 0.08, 0.82, 0.82, 0x4a4a54), B.b(0.5, 0.7, 0, 0.08, 0.82, 0.82, 0x4a4a54);
+    B.b(-0.98, 0.65, 0, 0.1, 0.1, 0.1, 0x2a2a30), B.b(-1.0, 0.2, 0, 0.06, 0.9, 0.06, 0x8a8a94), B.b(-1.04, 0.2, 0, 0.2, 0.16, 0.16, 0x8a6a3a);
+    for (let i = 0; i < 9; i++) B.b(0.7 + i * 0.22, 0.75 - i * 0.07, 0.1, 0.16, 0.08, 0.1, i % 2 ? 0x8a8a94 : 0x3e3e48);
+  } else if (kind === 'column') {
     // THE LISTENER's dripstone column (the flat view's: client/columndraw.ts): banded grey stone tapering up, copper stain, a lip at the foot.
     const bands = [0x8a889c, 0x76748a, 0x6c6a80, 0x5c5a6e];
     for (let i = 0; i < 7; i++) B.b(0, i * 0.6, 0, 1.05 - i * 0.075 + (i % 2) * 0.05, 0.62, 1.05 - i * 0.075 - (i % 2) * 0.04, jit(bands[i % 4], 0.04, r), i * 0.2);
