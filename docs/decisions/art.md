@@ -234,3 +234,6 @@ The plan, one class at a time so Kyle can play each against the old ones:
 - The statue's "gap in the head" (Kyle's screenshot: a stone Mage): stretched over all six stone shades, the dark
   underside of the hat's brim took the darkest, the ground's colour, and read as a hole through the head. Only
   the outline takes the darkest stone now; the rest spreads over the five paler (statuedraw.ts). (Claude Opus 5.5)
+- The 2.5D houses: their walls had their own heights (three/houses3d.ts TALL, a house 1.45 tiles, shorter than a
+  tall hero), now 1.7 times (a house 2.45, a head over them), doors 0.9 by up to 2.05 tiles, windows with a
+  mullion, the panes and boards to match. (Claude Opus 5.5)

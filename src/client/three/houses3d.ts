@@ -21,7 +21,9 @@ import { asLamp, lampMeshes } from './lamps3d';
 import { doorGlow, shutDoor } from './shut3d';
 
 /** Eave height (tiles) by kind. */
-export const TALL: Partial<Record<Block['kind'], number>> = { house: 1.45, barn: 1.9, hall: 1.6, church: 2.4, forge: 1.8, tavern: 1.7, granary: 1.9, tower: 3.6, shack: 0.95, den: 0.7 };
+// (Walls 1.7 times their first height since the heroic proportions, Kyle 2026-11-12: "houses now look way too tiny";
+// the heroes stand near two tiles, a house's wall a head over them, as the flat view's: ../blocklook.ts.)
+export const TALL: Partial<Record<Block['kind'], number>> = { house: 2.45, barn: 3.2, hall: 2.7, church: 4.1, forge: 3.05, tavern: 2.9, granary: 3.2, tower: 6.1, shack: 1.6, den: 1.2 };
 const ROOFED = new Set<Block['kind']>(['house', 'barn', 'hall', 'church', 'forge', 'tavern', 'granary', 'tower', 'shack', 'den']);
 const STONE = new Set<Block['kind']>(['church', 'forge', 'tower', 'hall']);
 
@@ -64,7 +66,7 @@ export function buildBlock(b: Block, kin?: Kindling | null): Built {
   const lean = home && b.kind === 'house' ? asBuilt(b, home).leanTo : 0, lw = lean ? leanW(asBuilt(b, home!), Math.round(b.w * 16)) / 16 : 0;
   const x0 = b.x + (lean < 0 ? lw : 0), x1 = b.x + b.w - (lean > 0 ? lw : 0), z0 = b.y, z1 = b.y + b.h, H = TALL[b.kind] ?? 1.4, t = 0.2;
   const W = new Boxes(), R = new Boxes(), stone = STONE.has(b.kind) || b.style === 'stone';
-  const door = !!b.door && b.fate !== 'blocked' ? doorAt(b).x : null, dw = 0.42, dh = Math.min(1.05, H - 0.25);
+  const door = !!b.door && b.fate !== 'blocked' ? doorAt(b).x : null, dw = 0.45, dh = Math.min(2.05, H - 0.3);
   // A wall from a0 to a1 along x (front or back) or z (sides), courses of stone or planks.
   const wall = (ax: 'x' | 'z', a0: number, a1: number, c: number, y0: number, y1: number) => {
     const ch = stone ? 0.3 : 0.24;
@@ -122,14 +124,16 @@ export function buildBlock(b: Block, kin?: Kindling | null): Built {
     if (bw >= 2.6 && H > 1.2 && b.door !== 'tower') for (const fx of [0.22, 0.78]) {
       const wx = x0 + bw * fx, boarded = (b.worn && fx > 0.5) || b.shut === 'boarded';
       if (door !== null && Math.abs(wx - door) < dw + 0.4) continue;
-      W.b(wx, H * 0.42, z1 + 0.01, 0.46, 0.06, 0.06, beam);
-      W.b(wx, H * 0.42 + 0.36, z1 + 0.01, 0.46, 0.06, 0.06, beam);
-      const pane = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.3, 0.04), lit && !boarded ? G(0xffc070, 0.35) : G(0x0a0808, 1));
+      // (Sized to the tall heroes: the sill at their chests.)
+      W.b(wx, H * 0.42, z1 + 0.01, 0.64, 0.07, 0.06, beam);
+      W.b(wx, H * 0.42 + 0.52, z1 + 0.01, 0.64, 0.07, 0.06, beam);
+      W.b(wx, H * 0.42 + 0.07, z1 + 0.012, 0.05, 0.45, 0.05, beam);
+      const pane = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.45, 0.04), lit && !boarded ? G(0xffc070, 0.35) : G(0x0a0808, 1));
       if (lit && !boarded) asLamp(pane, G(0x0a0808, 1));
-      pane.position.set(wx, H * 0.42 + 0.21, z1 + 0.005);
+      pane.position.set(wx, H * 0.42 + 0.3, z1 + 0.005);
       group.add(pane);
-      if (boarded) for (const [dy, c, rz] of [[0.13, 0x7a5a34, 0.25], [0.27, 0x6b4a2b, -0.2]] as const) W.c(wx, H * 0.42 + dy, z1 + 0.05, 0.56, 0.07, 0.03, c, 0, 0, rz);
-      else if (b.worn) W.c(wx - 0.27, H * 0.42 + 0.12, z1 + 0.08, 0.05, 0.36, 0.2, shade(0x4a3420, k), 0.5, 0, 0.3);
+      if (boarded) for (const [dy, c, rz] of [[0.18, 0x7a5a34, 0.25], [0.38, 0x6b4a2b, -0.2]] as const) W.c(wx, H * 0.42 + dy, z1 + 0.05, 0.78, 0.09, 0.03, c, 0, 0, rz);
+      else if (b.worn) W.c(wx - 0.37, H * 0.42 + 0.17, z1 + 0.08, 0.06, 0.5, 0.26, shade(0x4a3420, k), 0.5, 0, 0.3);
     }
     // Shut for good (../shutdraw.ts): planks over where the door was, or a black hole burnt through.
     if (home && b.shut) shutDoor(W, b, z1, dh, r, group);
