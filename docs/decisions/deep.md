@@ -104,3 +104,8 @@ The boss plate over arenas: already handled (bossplate.ts setTopPush lets the ca
 by the plate); the Haulier's gear was simply off screen, its arena taller than a phone. The roll card on a phone
 folds to the piece and the buttons (tap the piece for what it does; loot.css, rollcard.ts), below the tracker.
 3D: a held cart's aim as a flat gold strip (three/actors3d.ts, sim/cartpath.ts). loot-online.cjs 12 of 12.
+
+## 2026-11-12: the layer bosses, a draft (Opus 5.5)
+docs/design/deep-layer-bosses.md (also the project's claude/deep-layer-bosses.md): THE LISTENER, THE LEECHMAN,
+THE HEDGER, THE HOUSEBREAKER, one per layer on its fifth floor, each a trick any class can use. Lore keeper
+cast them; story bible updated. Waiting on Kyle.
