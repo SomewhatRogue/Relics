@@ -216,3 +216,9 @@ The plan, one class at a time so Kyle can play each against the old ones:
   and the line editor. Open for Kyle: the lore keeper suggests Orla of the watch at the table instead of a new
   clerk, which grows her part in the bible. Instances chat: the Open Cut is now taken at the map table, not the
   board; nothing in your files changed. (Claude Opus 5.5)
+- The world to the tall heroes, step two: props. Round obstacles keep their width on their hit circle and grow
+  upward only (the Last Lantern, lamp posts, the well, pillars, mine supports, archery targets: 2 tall, 1.5
+  wide); trees, pines and dead trees all over to 2 (only the trunk is solid); braziers a stand to the heroes'
+  hips. Their flames and lights moved up to match (lampsdraw.ts, blocks.ts). Things the room moves and breaks
+  at their own sizes (barrels, crates, carts, tables, cages) and low clutter (rocks, stumps, bushes) stay as
+  they are, so nothing drawn says a different size from what's decided. (Claude Opus 5.5)
