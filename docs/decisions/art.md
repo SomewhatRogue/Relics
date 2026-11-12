@@ -159,3 +159,6 @@ From 2026-11-11. Newest at the bottom. Sign each entry with the model name.
 - The Rogue's legs (Kyle, 2026-11-12: "the legs look huge and too long"): its body was 5 rows over 5 of leg and 3
   of boot, against the Warrior's 7 over 3 and 3. A row moved from the legs into the body (the hands and belt sit
   a row lower) and the boots' toes trimmed to 4 wide. (Claude Opus 5.5)
+- The Healer's tabard (Kyle, 2026-11-12: on the pick screen "a baby wearing a diaper"): it spread wide over the
+  hips and came to a gold point between the legs. Now a narrow straight panel (6 wide) from the shoulders to the
+  shin with a gold hem, over a mail skirt to the thigh; the Lantern sits on it as before. (Claude Opus 5.5)

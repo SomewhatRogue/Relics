@@ -40,10 +40,12 @@ export const MAGE: LookDef[] = [
     { ...skin('deep'), X: '#5a7a9a', x: '#3a4a5a', T: '#cfe0ec', H: '#e8eef2', h: '#b8c4cc', O: '#6a8aaa', B: '#5a7a9a', b: '#3a4a5a', K: '#3a4a5a', k: '#cfe0ec', F: '#2a2420' }),
 ];
 
+// The tabard a narrow straight panel over a mail skirt to the thigh (Kyle, 2026-11-12: wide over the hips and
+// pointed between the legs it read as a nappy).
 const C_BODY = [
-  '.MMMMWWWWWWWWMMMM.', '.MMMMWWWGGWWWMMMM.', '.MMMWWWGGGGWWWMMM.', '.MMMwWWGggGWWwMMM.', '.MMMwWWGGGGWWwMMM.',
-  '.SSMwWWWGGWWWwMSS.', '...KKKKKkkKFFKK...', '...MwWWWWWWWWwM...', '...MwWWWWWWWWwM...', '....LwWWWWWWwL....',
-  '....LLLGGGGLLL....', '....LmL....LmL....', '...KKKK....KKKK...', '...FFFF....FFFF...', '..FFFFF....FFFFF..',
+  '.MMMMMWWWWWWMMMMM.', '.MMMMMWWGGWWMMMMM.', '.MMMMMWGGGGWMMMMM.', '.MMMMMwGggGwMMMMM.', '.MMMMMwGGGGwMMMMM.',
+  '.SSMMMwWGGWwMMMSS.', '...KKKKKkkKFFKK...', '...MMMwWWWWwMMM...', '...MmMwWWWWwMmM...', '....LLwWWWWwLL....',
+  '....LLGGGGGGLL....', '....LmL....LmL....', '...KKKK....KKKK...', '...FFFF....FFFF...', '..FFFFF....FFFFF..',
 ];
 const C_BACK = C_BODY.map((r) => r.replace(/[Gg]/g, 'W').replace(/k/g, 'K'));
 const MAIL = { M: '#8a9098', m: '#646a74', K: '#5a3d22', k: '#d4a537', L: '#4a4e56', F: '#2a2420' };
