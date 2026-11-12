@@ -11,3 +11,10 @@ docs/DECISIONS.md (the archive). New entries go here, newest at the bottom, sign
 - A run counts as a party's if anyone was with you at any point (`DeepRun.party`).
 - Seen: `scripts/town-online.cjs` fails its statue steps with or without this change (the plinth buy); not looked into here.
 
+
+## 2026-11-11: the Deep, step 6: curses at the forks, blessings on the ledge (Kyle: "Continue"; Claude Opus 5.5)
+
+- Every fifth floor's end the way on forks three ways, each with a curse; going deeper there is taking one (plain GO DEEPER won't). Every tenth, first a blessing, one of three things on the ledge. Both stack and end with the run (`DeepRun.marks`). The three offered come from the run's seed and the floor (`shared/deepmarks.ts`), the same after a reload.
+- Curses: THE RUSTED WAY (6% less damage), THE WET WAY (6% slower), THE COLD WAY (10 less health), THE LOW WAY (stamina 12% slower), THE DARK WAY (relics recharge 12% slower), THE LOUD WAY (goblins notice you from further off, 15%). Blessings: A WHETSTONE (+8% damage), A PADDED COAT (+15 health), A WATERSKIN (stamina 15% faster), AN OILED RAG (recharge 15% faster), SOMEONE'S PACK (your relic gets a use back each floor). Words: lore keeper (no flask, no candles, no giver) and line editor.
+- Each player takes their own. Their marks ride on their input (`Intent.marks`); the room puts them on the hero (`sim/deepmarks.ts`), into its numbers (`sim/gearstats.ts`) and how far goblins notice it (`sim/enemies.ts`); they carry to the next floor's heroes at once. `deep-online` checks a follower's curse lands on their hero in the leader's room: 16 of 16.
+- Flag (lore keeper): STAMINA lines read oddly for a Mage, whose bar says MAGIC. Left as the stat's own name for now.
