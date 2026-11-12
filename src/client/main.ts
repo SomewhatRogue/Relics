@@ -314,6 +314,7 @@ $('#heroes').addEventListener('click', () => {
   if (game.mode !== 'run' && !panel.open) pack.toggle(false), title.show();
 });
 $('#packbtn').addEventListener('click', () => pack.toggle());
+$('#caption').addEventListener('click', () => game.skipCaption());
 // What each button means (legend.ts), from the gear's box.
 $('#legendbtn').addEventListener('click', () => (pack.toggle(false), void legend(game, panel, input.touch)));
 $('#kitbtn').addEventListener('click', () => (pack.toggle(false), weaponsAbout(game, panel)));

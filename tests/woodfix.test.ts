@@ -147,8 +147,9 @@ describe('Hew keeps out of the trees', () => {
     const m = () => g.room.map, check = (what: string) => expect(sunk(m(), hewOf(g)), what).toBeLessThan(0.05);
     expect(sunk(m(), { x: HEW_START[0], y: HEW_START[1] } as Npc)).toBeLessThanOrEqual(0);
     // The waking: out of the trees, round the field, to your side.
-    for (let i = 0; i < 400 && g.wood!.wake >= 0; i++) {
+    for (let i = 0; i < 1200 && g.wood!.wake >= 0; i++) {
       if (g.wood!.hold) g.continueHold();
+      if (g.wood!.caption) g.skipCaption();
       g.step(0.05, NO_INTENT);
       check(`waking, step ${i}`);
     }

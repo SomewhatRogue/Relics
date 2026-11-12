@@ -1395,6 +1395,12 @@ export class Game {
   }
 
   /** The card's own button (or Enter): go on. */
+  /** A tap on the wood's strip of words: that line's done, on to the next. */
+  skipCaption(): void {
+    const c = this.wood?.caption;
+    if (c && this.mode === 'wood') c.until = Math.min(c.until, this.room.time);
+  }
+
   continueHold(): void {
     this.continued = true;
   }

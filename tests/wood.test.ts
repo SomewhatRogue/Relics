@@ -44,14 +44,19 @@ describe('the prologue wood', () => {
     const x = g.hero.x;
     for (let i = 0; i < 60; i++) g.step(0.1, { ...NO_INTENT, mx: 1 });
     expect(g.hero.x).toBeCloseTo(x);
-    // He talks; each line waits for a tap, and the world with it.
-    for (let i = 0; i < 80 && !g.wood!.hold; i++) g.step(0.1, NO_INTENT);
-    expect(g.wood!.hold?.kind).toBe('talk');
-    const held = g.room.time;
+    // He talks as a strip that stops nothing (Kyle, 2026-11-12); a tap skips a line.
+    for (let i = 0; i < 80 && !g.wood!.caption; i++) g.step(0.1, NO_INTENT);
+    expect(g.wood!.caption?.who).toBe('HEW');
+    expect(g.wood!.hold).toBeNull();
+    const t0 = g.room.time;
     g.step(0.5, NO_INTENT);
-    expect(g.room.time).toBe(held);
-    for (let i = 0; i < 20 && g.wood!.wake >= 0; i++) {
-      if (g.wood!.hold?.kind === 'talk') g.continueHold();
+    expect(g.room.time).toBeGreaterThan(t0);
+    const first = g.wood!.caption!.text;
+    g.skipCaption();
+    g.step(0.1, NO_INTENT);
+    expect(g.wood!.caption!.text).not.toBe(first);
+    for (let i = 0; i < 400 && g.wood!.wake >= 0; i++) {
+      if (g.wood!.caption) g.skipCaption();
       g.step(0.1, NO_INTENT);
     }
     expect(g.hero.act).toBe('idle');
@@ -65,7 +70,7 @@ describe('the prologue wood', () => {
     expect(g.wood!.hold).toBeNull();
   });
 
-  it('a lesson card holds the world until dismissed; the first blows freeze until you answer', () => {
+  it('a lesson card holds the world until dismissed; the first blow is called in passing, never a freeze', () => {
     const g = new Game();
     g.create('WARRIOR', 'stray');
     wake(g);
@@ -79,22 +84,19 @@ describe('the prologue wood', () => {
     g.continueHold();
     g.step(0.05, NO_INTENT);
     expect(g.wood!.hold).toBeNull();
-    // A lunger comes and winds up: the world stops before the stab, until you move (a Warrior has no
+    // A lunger comes and winds up: what to do is said as it comes, and the world goes on (a Warrior has no
     // roll, so it walks out of the stripes).
     const l = g.room.enemies.find((e) => e.variant === 'lunger' && e.alert)!;
     Object.assign(l, { x: g.hero.x + 2, y: g.hero.y, fx: -1, fy: 0, cooldown: 0 });
-    for (let i = 0; i < 80 && !g.wood!.hold; i++) g.step(0.05, NO_INTENT);
-    expect(g.wood!.hold?.need).toBe('move');
-    g.step(0.3, NO_INTENT);
-    expect(g.wood!.hold?.need).toBe('move');
-    g.step(0.15, { ...NO_INTENT, mx: 0, my: 1 });
+    for (let i = 0; i < 80 && g.wood!.caption?.text !== 'NOW: WALK OUT'; i++) g.step(0.05, NO_INTENT);
+    expect(g.wood!.caption?.text).toBe('NOW: WALK OUT');
     expect(g.wood!.hold).toBeNull();
     // Walk on out of the line, and it's counted as a dodge.
     for (let i = 0; i < 30; i++) g.step(0.05, { ...NO_INTENT, mx: 0, my: 1 });
     expect(g.wood!.count).toBeGreaterThanOrEqual(1);
   });
 
-  it('a Rogue on the same path is stopped until it dodges', () => {
+  it('a Rogue on the same path is told to dodge as the blow comes, and can', () => {
     const g = new Game();
     g.create('ROGUE', 'stray');
     wake(g);
@@ -105,10 +107,10 @@ describe('the prologue wood', () => {
     g.step(0.05, NO_INTENT);
     const l = g.room.enemies.find((e) => e.variant === 'lunger' && e.alert)!;
     Object.assign(l, { x: g.hero.x + 2, y: g.hero.y, fx: -1, fy: 0, cooldown: 0 });
-    for (let i = 0; i < 80 && !g.wood!.hold; i++) g.step(0.05, NO_INTENT);
-    expect(g.wood!.hold?.need).toBe('roll');
-    g.step(0.05, { ...NO_INTENT, rollSeq: 1, mx: 0, my: 1 });
+    for (let i = 0; i < 80 && g.wood!.caption?.text !== 'NOW: DODGE OUT'; i++) g.step(0.05, NO_INTENT);
+    expect(g.wood!.caption?.text).toBe('NOW: DODGE OUT');
     expect(g.wood!.hold).toBeNull();
+    g.step(0.05, { ...NO_INTENT, rollSeq: 1, mx: 0, my: 1 });
     expect(g.hero.act).toBe('roll');
   });
 
@@ -239,12 +241,13 @@ describe('the prologue wood', () => {
     // Not yet: the road out waits for her.
     const heard: string[] = [];
     for (let i = 0; i < 400 && heard.length < ORLA.meet.length; i++) {
-      const h = w().hold;
-      if (h) {
-        expect(h.kind).toBe('talk');
-        heard.push(h.who + ': ' + h.text);
+      // Her lines as a strip that stops nothing; a tap skips each.
+      const c = w().caption;
+      expect(w().hold).toBeNull();
+      if (c && c.until > g.room.time && c.who === ORLA.who && heard[heard.length - 1] !== c.who + ': ' + c.text) {
+        heard.push(c.who + ': ' + c.text);
         expect(Math.hypot(orla()!.x - g.hero.x, orla()!.y - g.hero.y)).toBeLessThanOrEqual(ORLA.near + 0.01);
-        g.continueHold();
+        g.skipCaption();
       }
       g.step(0.05, NO_INTENT);
     }

@@ -76,7 +76,7 @@ export const WAKE = { fade: 2.5, arrive: 5.2, standing: 0.8 };
 /** Hew's way in at the waking: out of the trees west of you, round under the cart, slow and low. */
 const SNEAK = { round: [4.2, 36.4] as [number, number], speed: 1.45 };
 /** Tutorial pacing: drilled goblins wind up this much slower; one at a time comes at you. */
-export const DRILL = { windup: WOOD_EASE.windup, wheels: 2, praise: 1, praiseFor: 1.1 };
+export const DRILL = { windup: WOOD_EASE.windup, wheels: 1, praise: 1, praiseFor: 1.1 };
 
 export function newWood(room: ArenaRoom, cls: HeroClass = 'WARRIOR'): WoodState {
   const w: WoodState = { stage: 0, entered: false, count: 0, ids: [], more: false, cut: -1, caption: null, stoker: 0, helped: 0, hewAlive: true, relic: false, done: false, wake: 0, hold: null, drilled: 0, praised: 0, drillAt: -1, from: null, said: 0, upAt: -1, cls };
@@ -102,19 +102,21 @@ function stepWake(w: WoodState, room: ArenaRoom, dt: number): void {
     n.walking = walkHew(n, tx, ty, SNEAK.speed, dt) > 0.05;
   }
   if (t < WAKE.arrive) return;
-  // He talks, one line at a time, each waiting for a tap (the world held); the last as he hauls you up.
+  // He talks, one line at a time; the last as he hauls you up.
   // His checking-over, then what he makes of you, then the boots and up.
   const lines = [LINES.waking[0], LINES.waking[1], ...([] as string[]).concat(LINES.notice[w.cls]), LINES.waking[2], LINES.waking[3]];
   if (w.said < lines.length) {
+    // One line at a time as a strip that doesn't stop anything (Kyle, 2026-11-12); a tap skips it.
+    if (w.caption && w.caption.until > room.time) return;
     if (w.said === lines.length - 1) {
       if (h) Object.assign(h, { act: 'idle', actT: 0, actDur: 0, lying: false, hp: h.maxHp, fx: -1, fy: 0 });
       if (n) Object.assign(n, { sneak: false, walking: false });
       w.upAt = t;
     }
-    w.hold = talk('HEW', lines[w.said++]);
+    say(w, room, 'HEW', lines[w.said++], 3);
     return;
   }
-  if (t >= w.upAt + WAKE.standing) {
+  if (t >= w.upAt + WAKE.standing && !(w.caption && w.caption.until > room.time)) {
     w.wake = -1;
     w.hold = card('HEW', LINES.walk, 'move', 'move', LINES.how.move);
     if (h) w.from = { x: h.x, y: h.y };
@@ -128,7 +130,6 @@ const counts = (kind: Lesson['count'], e: FightEvent): boolean =>
   kind === 'kills' ? e.k === 'death' : kind === 'grab' ? e.k === 'hurl' : kind === 'backstab' ? e.k === 'hit' && e.on === 'enemy' && !!e.backstab : kind === 'heavy' ? e.k === 'hit' && e.on === 'enemy' && e.heavy : e.k === kind;
 
 const card = (who: string, text: string, move: Move, need: Hold['need'], how?: string): Hold => ({ kind: 'card', who, text, how, move, need, t: 0, until: 0 });
-const talk = (who: string, text: string): Hold => ({ kind: 'talk', who, text, need: 'continue', t: 0, until: 0 });
 
 /** Release a hold (the game calls this when its condition is met). */
 export function release(w: WoodState): void {
@@ -145,8 +146,8 @@ function oneAtATime(w: WoodState, room: ArenaRoom, hx: number, hy: number): Enem
   return near;
 }
 
-/** The first blows of a lesson stop just before they land: the moment to answer, and what to press. */
-function drill(w: WoodState, e: Enemy | null, h: Hero): void {
+/** The first blow of a lesson: just before it lands, what to press, said in passing. */
+function drill(w: WoodState, room: ArenaRoom, e: Enemy | null, h: Hero): void {
   const a = e?.attack, kind = countNow(w, lessonOf(w));
   if (!a || a.t >= a.windup || w.drilled >= DRILL.wheels || w.drillAt === e!.id * 1000 + Math.round(a.windup * 100) + Math.round(a.ox * 10)) return;
   // Already answered it (rolling, or moved out of where it'll land): no need to stop the world.
@@ -158,8 +159,8 @@ function drill(w: WoodState, e: Enemy | null, h: Hero): void {
   w.drilled++;
   w.drillAt = e!.id * 1000 + Math.round(a.windup * 100) + Math.round(a.ox * 10);
   const move: Move = kind === 'dodge' ? (walk ? 'step' : 'roll') : kind === 'block' ? 'block' : 'slip';
-  const now = LINES.now[move as 'step' | 'roll' | 'block' | 'slip'];
-  w.hold = { kind: 'act', who: '', text: now, move, need: move === 'step' ? 'move' : move === 'roll' || move === 'slip' ? 'roll' : 'block', t: 0, until: 0 };
+  // Said as it comes, never a freeze (Kyle, 2026-11-12: lines that stop you get in the way).
+  say(w, room, '', LINES.now[move as 'step' | 'roll' | 'block' | 'slip'], 1.2);
 }
 
 function openGate(room: ArenaRoom, i: number): void {
@@ -249,7 +250,7 @@ export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: nu
     w.praised++;
     say(w, room, 'HEW', LINES.praise[w.stage % LINES.praise.length], 1.8);
   }
-  drill(w, oneAtATime(w, room, h.x, h.y), h);
+  drill(w, room, oneAtATime(w, room, h.x, h.y), h);
   if (w.hold) return;
   const left = room.enemies.filter((e) => w.ids.includes(e.id) && !isDead(e));
   // The Stoker: two more come at half its health; the relic comes out of it.

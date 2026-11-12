@@ -11,6 +11,7 @@ import { isDead } from './damage';
 import type { ArenaRoom } from './room';
 import type { Hero } from './types';
 import type { WoodState } from './wood';
+import { say } from './woodkit';
 
 export interface Guard {
   /** Coming up the road, talking, stooping by Hew for the stick, leading you west. */
@@ -61,7 +62,9 @@ export function stepGuard(w: WoodState, room: ArenaRoom, h: Hero, dt: number): v
     g.phase = 'talk';
   }
   if (g.phase === 'talk') {
-    if (g.said < ORLA.meet.length) return void (w.hold = { kind: 'talk', who: ORLA.who, text: ORLA.meet[g.said++], need: 'continue', t: 0, until: 0 });
+    // Her lines as a strip that doesn't stop anything; a tap skips one.
+    if (w.caption && w.caption.until > room.time) return;
+    if (g.said < ORLA.meet.length) return void say(w, room, ORLA.who, ORLA.meet[g.said++], 3);
     g.phase = 'stick';
   }
   if (g.phase === 'stick') {

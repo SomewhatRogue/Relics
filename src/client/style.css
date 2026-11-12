@@ -174,7 +174,10 @@ body.touch #pack .head span { font-size: var(--fs-s); }
 #caption { position: fixed; z-index: 5; left: 50%; transform: translateX(-50%); bottom: calc(150px + env(safe-area-inset-bottom)); width: min(520px, calc(100vw - 32px)); padding: 10px 14px; background: #0d0b10e8; border: 1px solid #5a4a3a; border-radius: 6px; color: #e8e0d0; font-size: var(--fs-text); line-height: 1.45; text-align: center; }
 #caption[hidden] { display: none; }
 #caption b { display: block; color: #ffb35a; font-size: var(--fs-text); letter-spacing: 0.2em; margin-bottom: 3px; }
-body.touch #caption { bottom: auto; top: calc(150px + env(safe-area-inset-top)); }
+/* On a phone a slim strip under the top bar (the stick and buttons own the bottom); a tap skips it (Kyle, 2026-11-12). */
+body.touch #caption { bottom: auto; top: calc(64px + env(safe-area-inset-top)); padding: 6px 12px; line-height: 1.35; }
+body.touch #caption b { display: inline; margin: 0 6px 0 0; }
+#caption { cursor: pointer; }
 #bars i { position: fixed; left: 0; right: 0; height: 0; background: #000; z-index: 4; transition: height 0.5s; }
 #bars i:first-child { top: 0; }
 #bars i:last-child { bottom: 0; }
