@@ -43,7 +43,9 @@ export function haulState(bk: BossBook): HaulState {
   return s;
 }
 
-const isCart = (p: Prop) => p.kind === 'cart' && !p.broken;
+// (Not THE BRAKESMAN's, on its incline's lanes in the same map over the top: sim/brake.ts has those.)
+const onLane = (p: Prop) => !!currentMap().incline?.lanes.some((x) => Math.abs(p.x - x) < 0.05);
+const isCart = (p: Prop) => p.kind === 'cart' && !p.broken && !onLane(p);
 /** A cart at rest: not rolling and not held, wherever it stands (on the rail or wherever it was thrown to). */
 export const standing = (p: Prop) => isCart(p) && !p.roll && !p.heldBy;
 /** Where it would go if shoved from where it stands with no aim: along the rail, away from its nearer end. */

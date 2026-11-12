@@ -292,3 +292,7 @@ not killing quickly, so kind of anticlimactic".
   screenshot showed it too dark to read. The button by the lever reads PULL (client/cluster.ts); cues and sounds in
   client/fxweak.ts. A test link `?cut=1&area=1&way=1` for under the hill (main.ts, game.ts `startJob` way).
 - Lines: lore keeper then line editor (see the spec). Full suite green. (Claude Opus 5.5)
+- **For the Deep chat:** your cart rework (4735cb9, carts grabbed and thrown anywhere) runs `stepCarts` over every cart
+  on the map while the Haulier's awake. Over the top, the Haulier's stage shares a map with THE BRAKESMAN's incline,
+  so its lane carts would have been grabbed and pushed sideways. One guard in sim/haulcarts.ts `isCart`: not a cart on
+  `map.incline`'s lanes. (Claude Opus 5.5)
