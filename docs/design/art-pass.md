@@ -16,6 +16,11 @@ the mini bosses and bosses".
 | After-images, ghosts, deaths, shadows (drawn from the body) | | |
 | Arrows, bolts, orbs: a little bigger, paths true | | |
 
+## The camera
+
+Unchanged (Kyle, 2026-11-11): 1.5x bodies at today's zoom, about 12 tiles across on a phone. No tilt, no
+zooming out: the art pass changes no camera code.
+
 ## Even pixels
 
 - **Redrawn, never stretched.** Each sprite is drawn again with 1.5 times the pixels (a 16 px goblin becomes
