@@ -34,6 +34,9 @@ export function drawBrazier(c: Ctx, x: number, y: number, now: number, on: numbe
     // (Over the coals of the brazier, half again as tall in the art pass.)
     flame(c.glow, x - 2, y - 15, now, 2);
     flame(c.glow, x + 2, y - 15, now + 0.37, 2);
+    // Coals glowing between the flames, one or two flaring in turn.
+    const g = c.glow, f = Math.floor(now * 6);
+    for (let i = 0; i < 5; i++) (g.fillStyle = (f + i * 3) % 7 < 2 ? '#ffb84a' : '#c8501a'), g.fillRect(Math.round(x - 4 + i * 2), Math.round(y - 12), 1, 1);
     return;
   }
   const r = (dx: number, w: number, col: string) => ((c.lit.fillStyle = col), c.lit.fillRect(Math.round(x + dx), Math.round(y - 12), w, 1));

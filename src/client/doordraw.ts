@@ -16,7 +16,7 @@ import { leapFlight } from '../sim/bossleap';
 import { DOORKEEPERS } from '../shared/tuning';
 import { PX } from './world';
 
-const WOOD = '#5a3d22', SEAM = '#3a2716', EDGE = '#24180e', IRON = '#4a4652', BARE = '#7a6a58';
+const WOOD = '#5a3d22', GRAIN = '#6c4c2c', SEAM = '#3a2716', EDGE = '#24180e', IRON = '#4a4652', BARE = '#7a6a58';
 
 export function drawKeeper(c: Ctx, e: Enemy, x: number, y: number, sleeping: boolean): void {
   const b = e.boss!, t = c.t ?? c.now, dead = e.act === 'dead';
@@ -69,9 +69,16 @@ function door(c: Ctx, cx: number, fy: number, w: number, h: number, cut: number,
   l.fillRect(x0, y0, w, h);
   l.fillStyle = SEAM;
   for (let px = x0 + 3; px < x0 + w - 1; px += 4) l.fillRect(px, y0 + 1, 1, h - 2);
+  // Each plank's edge catching the light, a knot or two, a split at the foot.
+  l.fillStyle = GRAIN;
+  for (let px = x0; px < x0 + w - 1; px += 4) l.fillRect(px, y0 + 1, 1, h - 3);
+  l.fillStyle = SEAM;
+  if (w > 5) l.fillRect(x0 + 1, Math.round(y0 + h * 0.45), 1, 1), l.fillRect(x0 + w - 2, Math.round(y0 + h * 0.88), 1, 2);
   for (const [k, sy] of [[0, 0.25], [1, 0.72]] as const) {
     l.fillStyle = cut > k ? BARE : IRON;
     l.fillRect(x0, Math.round(y0 + h * sy), w, 2);
+    // Nail heads along a strap still on (a cut one shows only the bare wood where it was).
+    if (cut <= k) for (let px = x0 + 1; px < x0 + w; px += 3) (l.fillStyle = '#8a8696'), l.fillRect(px, Math.round(y0 + h * sy), 1, 1);
   }
   if (who === 'latch') (l.fillStyle = '#7a7684'), l.fillRect(x0 + 2, Math.round(y0 + h * 0.5), w - 5, 1), (l.fillStyle = '#9a96a4'), l.fillRect(x0 + w - 4, Math.round(y0 + h * 0.5) - 1, 2, 3);
   if (who === 'hasp') (l.fillStyle = '#7a7684'), l.fillRect(Math.round(cx) - 1, Math.round(y0 + h * 0.45), 3, 4), (l.fillStyle = '#a89040'), l.fillRect(Math.round(cx) - 1, Math.round(y0 + h * 0.45) + 4, 3, 3);

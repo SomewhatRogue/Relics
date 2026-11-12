@@ -138,3 +138,12 @@ From 2026-11-11. Newest at the bottom. Sign each entry with the model name.
   rivets, colour in the Rangers' cheeks, folds in the Rogues' hoods. makeSprite now rounds rects, pixels and
   wedges to whole pixels itself (a half pixel crashed it twice tonight; both caught before any push), and grow
   lays a wedge on whole rows. (Claude Opus 5.5)
+- Detail pass, round three (Kyle: "Go" on the Healer and Mage, the goblins, the dungeon pieces). Mages: a fold and a
+  charm on the hat, trimmed cuffs, a pouch and a tassel at the belt, folds down the robe, a gold-stitched hem, bushy
+  brows, a nose, strands in the beard and hair. Healers: the Lantern's heart in pale gold (embroidered, still unlit),
+  the tabard shaded at its sides with a gold tip, knees in the mail, brows and a nose; the friar a wooden cross on a
+  cord and folds in the habit. Goblins: a strap from shoulder to hip with a tooth tied on, rags round the shins,
+  elbows, wiry hairs, a bitten ear, nostrils, hollow cheeks, fangs over the lip (the pale ones stay bald). The crate:
+  a lit top edge, nails, grain, knots. Braziers: a riveted band, a dark lip, splayed feet, and coals glowing between
+  the flames when lit. Lamp posts: a frame on the lamp. The Doorkeepers' doors: lit plank edges, knots, a split,
+  nail heads along a strap still on. Drawing only. (Claude Opus 5.5)
