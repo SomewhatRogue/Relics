@@ -14,6 +14,7 @@ import type { SpotId } from '../shared/town';
 import type { Game } from './game';
 import { line } from './speech';
 import { DEEP_WORDS } from './deepwords';
+import { cleanWord, DEEP_GATE, deepWeek, deepWord, mayGoDown } from '../shared/deepgate';
 import type { Panel } from './panels';
 import { SCORES, type Area } from './scores';
 import { WorldLink } from './worldlink';
@@ -89,9 +90,24 @@ export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key:
     // In a party of two or more: its leader takes everyone down (the set-out beat, as any job); a member waits on them.
     const pt = g.parties, party = (pt?.current()?.members.length ?? 0) > 1, mine = !party || !!pt?.leading;
     const go = () => (party ? (pt!.retarget(g.deepJob()), panel.hide(), setOutNow(g, panel)) : (panel.hide(), g.enterDeep()));
-    panel.show('THE SEWER GRATE', p('The grate is open. Jobs below the town are on the board in the square: The Wickhold Sewers.') +
-      p(`<b>${DEEP_WORDS.title}</b>`) + p(DEEP_WORDS.scene) + say(DEEP_WORDS.keeper, DEEP_WORDS.speech) + p(DEEP_WORDS.rules) + (mine ? '' : p(DEEP_WORDS.partyLead)) + deepBlocks(w, g.profile.id),
-      mine ? [{ label: DEEP_WORDS.go, primary: true, act: go }] : []);
+    // The gate (shared/deepgate.ts): level 9, or Cobb's word for the week. A party goes down with its leader, so it's the leader he asks.
+    const now = Date.now(), pr = g.profile, may = mayGoDown(pr.level, pr.deepSaid, now), D = DEEP_WORDS;
+    const head = p('The grate is open. Jobs below the town are on the board in the square: The Wickhold Sewers.') + p(`<b>${D.title}</b>`) + p(D.scene);
+    if (mine && !may) {
+      const sayIt = () => {
+        const typed = (document.getElementById('deep-word') as HTMLInputElement | null)?.value ?? '';
+        if (cleanWord(typed) !== deepWord(deepWeek(Date.now()))) return panel.show('THE SEWER GRATE', head + say(D.keeper, D.wrongWord) + p(`<small>${D.gateRule(DEEP_GATE.level)}</small>`) + word(), [{ label: D.sayIt, primary: true, act: sayIt }]);
+        pr.deepSaid = cleanWord(typed);
+        g.keep();
+        panel.show('THE SEWER GRATE', head + say(D.keeper, D.rightWord) + p(D.rules) + deepBlocks(w, pr.id), [{ label: D.go, primary: true, act: go }]);
+      };
+      const word = () => p(`<label class="code">${D.wordLabel} <input id="deep-word" type="text" autocomplete="off" autocapitalize="characters" maxlength="16"></label>`);
+      panel.show('THE SEWER GRATE', head + say(D.keeper, D.gate) + p(`<small>${D.gateRule(DEEP_GATE.level)}</small>`) + word() + deepBlocks(w, pr.id), [{ label: D.sayIt, primary: true, act: sayIt }]);
+      return true;
+    }
+    const tell = pr.level >= DEEP_GATE.level && mine ? say(D.keeper, D.tellWord(deepWord(deepWeek(now)))) : '';
+    panel.show('THE SEWER GRATE', head + say(D.keeper, D.speech) + p(D.rules) + tell + (mine ? '' : p(D.partyLead)) + deepBlocks(w, pr.id),
+      mine ? [{ label: D.go, primary: true, act: go }] : []);
     return true;
   }
   if (id === 'locked') {

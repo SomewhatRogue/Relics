@@ -15,6 +15,14 @@ export const DEEP_WORDS = {
   /** The game's own voice: the rule. */
   rules: 'THE DEEP: one floor at a time, each worse than the last. What you bring down is always yours. Gear and gold found below are lost if you die. Leave at the end of any floor and you keep it all.',
   go: 'GO DOWN',
+  /** The gate (shared/deepgate.ts): under level 9, unless you know Cobb's word for the week. Lore keeper and line editor 2026-11-12. */
+  gate: "Not yet, I'd say. I rub every name off this slate that I can, and the ones I can't are mostly folk who went down too green, so see a bit more of the world first. Unless somebody's given you the word.",
+  gateRule: (lv: number) => `THE DEEP opens at level ${lv}. Below that, say Cobb's word for the week. Heroes of level ${lv} and up get it from him.`,
+  tellWord: (w: string) => `If somebody greener wants to come down with you or after you, the word this week is ${w}. Give it to who you like.`,
+  wordLabel: 'THE WORD',
+  sayIt: 'SAY IT',
+  wrongWord: "That's not it, or not this week's, anyway.",
+  rightWord: "That's this week's, right enough. Give me your name for the slate and down you go.",
   /** A floor's job title (the HUD and the recap). */
   floor: (n: number) => `The Deep, floor ${n}`,
   checkTitle: (n: number) => `END OF FLOOR ${n}`,

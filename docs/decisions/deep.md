@@ -79,3 +79,10 @@ roombudget.ts bigRooms); hunts now first on floor 9. A Doorkeeper going berserk 
 Kyle: "ya draw it". Npc work `ladder` (shared/arena.ts): client/cobbdraw.ts draws his crate behind him, lifts him
 onto it (COBB_SIT), the slate on his knee and a lit lamp beside him; the lamp lights the flags (scene.ts town
 lights). scripts/cobb-look.cjs for a phone shot (world.dens 99 opens the grate).
+
+## 2026-11-12: the gate, level 9 or Cobb's word (Opus 5.5)
+Kyle: Deep only from level 9, with a passphrase level-9 heroes get to pass on. shared/deepgate.ts: DEEP_GATE
+.level 9; a word a week from DEEP_WORDS_LIST (by the player's clock, the same for everyone that week);
+mayGoDown. The grate (client/squareui.ts): under 9, Cobb turns you back with a box for the word (kept on the
+profile as deepSaid while it's the week's); 9 and up, he tells you the word. A party goes with its leader, so
+only the leader is asked. Words and lines: lore keeper (story bible: Cobb's word, the layers), line editor.

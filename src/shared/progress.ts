@@ -128,6 +128,8 @@ export interface Profile {
   /** The archery range at the hunters' lodge: rounds shot (seeds the next) and the best (shared/range.ts). */
   range?: import('./range.js').RangeRecord;
   /** Down in the Deep: the kit taken down, and the last checkpoint's (shared/deepkit.ts). Gone once out. */
+  /** The word last given to Cobb at the grate (shared/deepgate.ts): it lets you down while it's the week's. */
+  deepSaid?: string;
   deep?: import('./deepkit.js').DeepRun;
   /** Arm-wrestling at the Drowned Rat: bouts (seeds the next), wins, who you've put down (shared/armwrestle.ts). */
   arm?: import('./armwrestle.js').ArmRecord;
