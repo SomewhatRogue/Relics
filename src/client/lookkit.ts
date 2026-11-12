@@ -1,5 +1,6 @@
 /** What a hero look is made of (herolooks.ts, herolooks2.ts): a pixel map per facing, and what moves. */
 import type { Part } from './sprites';
+import { HERO_W } from './heroscale';
 
 export type Cls = 'WARRIOR' | 'RANGER' | 'ROGUE' | 'MAGE' | 'HEALER';
 
@@ -24,16 +25,16 @@ export interface Life {
 
 /**
  * A look: its pixels facing you and walking away, its height in rows (`tall` of them above the usual
- * 16), whether a robe hides the legs (only the feet move), where the eyes are (row, left x, right x),
+ * 24), whether a robe hides the legs (only the feet move), where the eyes are (row, left x, right x),
  * and what moves.
  */
 export interface LookDef { down: Part[]; up: Part[]; h: number; tall: number; robe?: boolean; eyes: [number, number, number]; life: Life }
 
-/** A pixel map to parts: '.' is empty, `M` (mail) checkers between `M` and `m`. */
+/** A pixel map to parts: '.' is empty, `M` (mail) checkers between `M` and `m`. Rows are HERO_W (18) wide. */
 export function art(rows: string[], pal: Record<string, string>): Part[] {
   const out: Part[] = [];
   rows.forEach((row, y) => {
-    if (row.length !== 12) throw new Error(`lookkit: row ${y} is ${row.length} wide: ${row}`);
+    if (row.length !== HERO_W) throw new Error(`lookkit: row ${y} is ${row.length} wide: ${row}`);
     for (let x = 0; x < row.length; x++) {
       const ch = row[x];
       if (ch === '.') continue;

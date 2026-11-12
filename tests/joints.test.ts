@@ -9,7 +9,7 @@ import { newHero } from '../src/sim/hero';
 
 /** A sprite's canvas size (its pixels plus the outline) and how it's cut. */
 const BODIES: [string, number, number, Cut][] = [
-  ['hero', 14, 18, heroCut(0, false)], ['mage', 14, 23, heroCut(5, true)], ['frost', 14, 20, heroCut(2, true)],
+  ['hero', 20, 26, heroCut(0, false)], ['mage', 20, 34, heroCut(8, true)], ['ranger', 20, 28, heroCut(2, false)],
   ['scrapper', 13, 15, SCRAPPER_CUT], ['butcher', 20, 24, BUTCHER_CUT],
 ];
 

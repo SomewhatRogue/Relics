@@ -3,6 +3,7 @@
  * the top left), a one-pixel dark outline. The Blender-rendered sprites replace these later.
  */
 import { LOOK_DEFS, type Cls, type LookDef } from './herolooks';
+import { HERO_W } from './heroscale';
 
 export type Part = ['r', number, number, number, number, string] | ['e', number, number, number, number, string] | ['p', number, number, string] | ['t', number, number, number, number, string];
 
@@ -86,22 +87,22 @@ export function makeSprite(w: number, h: number, parts: Part[]): Sprite {
 /** The heroes: five classes, three looks each, drawn in herolooks.ts (the first look is the default). */
 export const LOOKS = LOOK_DEFS;
 export type HeroSprites = { down: Sprite; up: Sprite };
-const LOOK_SPRITES = Object.fromEntries(Object.entries(LOOKS).map(([k, ls]) => [k, ls.map((l) => ({ down: makeSprite(12, l.h, l.down), up: makeSprite(12, l.h, l.up) }))])) as Record<Cls, HeroSprites[]>;
+const LOOK_SPRITES = Object.fromEntries(Object.entries(LOOKS).map(([k, ls]) => [k, ls.map((l) => ({ down: makeSprite(HERO_W, l.h, l.down), up: makeSprite(HERO_W, l.h, l.up) }))])) as Record<Cls, HeroSprites[]>;
 /** A class's look `i` (0 to 2; anything else is the first). */
 export const heroLook = (cls: Cls, i = 0): HeroSprites => LOOK_SPRITES[cls][i] ?? LOOK_SPRITES[cls][0];
 /** A look's definition (its height, where the eyes are, what moves). */
 export const lookDef = (cls: Cls, i = 0): LookDef => LOOKS[cls][i] ?? LOOKS[cls][0];
 
 const portraits = new Map<string, HTMLCanvasElement>();
-/** The look standing on an 18 by 24 card, feet on the bottom (so every class shows at the same scale). */
+/** The look standing on a 27 by 36 card, feet on the bottom (so every class shows at the same scale). */
 export function heroPortrait(cls: Cls, i = 0): HTMLCanvasElement {
   const key = cls + i;
   let c = portraits.get(key);
   if (!c) {
     const s = heroLook(cls, i).down.c;
     c = document.createElement('canvas');
-    (c.width = 18), (c.height = 24);
-    c.getContext('2d')!.drawImage(s, Math.round((18 - s.width) / 2), 24 - s.height);
+    (c.width = 27), (c.height = 36);
+    c.getContext('2d')!.drawImage(s, Math.round((27 - s.width) / 2), 36 - s.height);
     portraits.set(key, c);
   }
   return c;
@@ -160,7 +161,8 @@ export const SPRITES = {
   stump: makeSprite(9, 6, [['r', 1, 1, 7, 5, '#4a3420'], ['r', 1, 0, 7, 2, '#8a6a3a'], ['p', 4, 1, '#6b4a2b']]),
   dummy: makeSprite(12, 17, dummyBase),
   swingDummy: makeSprite(12, 17, [...dummyBase, ['r', 2, 9, 8, 1, '#a33a2a'], ['p', 5, 2, '#141218'], ['p', 7, 2, '#141218']]),
-  shield: makeSprite(5, 7, [['r', 0, 0, 5, 7, '#7a5230'], ['r', 0, 0, 5, 1, '#9aa3ad'], ['r', 0, 6, 5, 1, '#9aa3ad'], ['p', 2, 3, '#cfd6dc']]),
+  // The Warrior's shield, at the hero's 1.5x: planks, an iron rim top and bottom, a boss.
+  shield: makeSprite(8, 10, [['r', 0, 0, 8, 10, '#7a5230'], ['r', 2, 1, 1, 8, '#66442a'], ['r', 5, 1, 1, 8, '#66442a'], ['r', 0, 0, 8, 1, '#9aa3ad'], ['r', 0, 9, 8, 1, '#9aa3ad'], ['r', 3, 4, 2, 2, '#cfd6dc'], ['p', 3, 4, '#eef2f5']]),
   pillar: makeSprite(14, 36, [['r', 2, 4, 10, 28, '#4f4a5c'], ['r', 2, 12, 10, 1, '#3b3746'], ['r', 2, 21, 10, 1, '#3b3746'], ['r', 6, 4, 1, 8, '#3b3746'], ['r', 4, 13, 1, 8, '#3b3746'], ['r', 8, 22, 1, 10, '#3b3746'], ['r', 0, 0, 14, 4, '#5d576b'], ['r', 0, 32, 14, 4, '#3b3746']]),
   brazier: makeSprite(10, 9, [['r', 4, 4, 2, 5, '#2a2630'], ['r', 1, 8, 8, 1, '#2a2630'], ['r', 0, 1, 10, 4, '#3a3640'], ['r', 1, 0, 8, 1, '#57525e'], ['r', 2, 1, 6, 1, '#7a2a10']]),
   target: makeSprite(12, 16, [['r', 5, 9, 2, 7, '#4a3420'], ['e', 6, 5.5, 5.5, 5.5, '#d8c48a'], ['e', 6, 5.5, 3.8, 3.8, '#a33a2a'], ['e', 6, 5.5, 2, 2, '#d8c48a'], ['p', 6, 5, '#7a1d1d']]),

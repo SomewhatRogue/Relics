@@ -106,8 +106,9 @@ export class UnitFrame {
   /** The head and shoulders of the hero's own sprite, upscaled by whole pixels into the socket. */
   private paintFace(cls: Parameters<typeof heroLook>[0], look: number): void {
     // From a little above the eyes down (a Mage's hat brim, a Ranger's hood, the face, the shoulders).
-    const s = heroLook(cls, look).down.c, g = this.face.getContext('2d')!, top = Math.max(0, lookDef(cls, look).eyes[0] - 3);
-    const w = 14, h = 12;
+    // (21 by 18: the 1.5x hero, one pixel to each unit of the socket, hud.css.)
+    const s = heroLook(cls, look).down.c, g = this.face.getContext('2d')!, top = Math.max(0, lookDef(cls, look).eyes[0] - 4);
+    const w = 21, h = 18;
     this.face.width = w;
     this.face.height = h;
     g.clearRect(0, 0, w, h);

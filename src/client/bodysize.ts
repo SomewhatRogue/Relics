@@ -1,13 +1,15 @@
 /**
  * Body size, a test (Kyle, 2026-11-11: "goblins seem super small ... make them bigger but keep the map and
- * view the same"): heroes and goblins drawn 1x, 1.5x or 2x round their feet, the map and the camera as they
- * are. Drawing only: the fight (where blows land, the circles on the floor) is unchanged. Butchers and
- * bosses, already big, stay as they are. Remembered on this device; the SIZE button in options cycles it.
+ * view the same"), now the art pass's stopgap (docs/design/art-pass.md, 1.5x picked): goblins not yet
+ * redrawn are stretched 1.5x round their feet, so they stand at the picked size beside the redrawn heroes
+ * (heroscale.ts, never stretched). Drawing only: the fight (where blows land, the circles on the floor) is
+ * unchanged. Butchers and bosses, already big, stay as they are. The SIZE button in options still cycles it
+ * (remembered on this device); both go once every goblin is redrawn.
  */
 import type { Ctx } from './draw';
 
-const KEY = 'relic.bodysize', STEPS = [1, 1.5, 2];
-let size = 1;
+const KEY = 'relic.bodysize2', STEPS = [1, 1.5, 2];
+let size = 1.5;
 try {
   const v = Number(localStorage.getItem(KEY));
   if (STEPS.includes(v)) size = v;

@@ -14,15 +14,16 @@ export const LAYOUT = { left: 0, top: 0, flip: false, drop: 0, lean: 0, ax: 0, a
 /** Of a crouch, how far the body drops (a share of its height), at most this share of the legs; rising, one pixel at most. */
 const DROP = 0.55, FOLD = 0.6;
 
-export function layout(j: Jointed, x: number, y: number, flip: boolean, p: BodyPose): typeof LAYOUT {
+/** `k`: how much bigger the body is drawn than the pose's pixels were set for (a hero's 1.5, heroscale.ts). */
+export function layout(j: Jointed, x: number, y: number, flip: boolean, p: BodyPose, k = 1): typeof LAYOUT {
   const s = j.s, L = LAYOUT, legs = s.h - 1 - j.cut.hip;
   L.flip = flip;
   L.left = Math.round(x - s.w / 2);
   L.top = Math.round(y - s.h);
   L.drop = Math.max(-1, Math.min(Math.round(legs * FOLD), Math.round(p.crouch * s.h * DROP)));
-  L.lean = Math.round(p.lean);
-  L.ax = Math.round(p.reach * p.dx);
-  L.ay = Math.round(p.reach * p.dy * 0.5) - Math.round(p.raise);
+  L.lean = Math.round(p.lean * k);
+  L.ax = Math.round(p.reach * k * p.dx);
+  L.ay = Math.round(p.reach * k * p.dy * 0.5) - Math.round(p.raise * k);
   L.step = p.step;
   return L;
 }

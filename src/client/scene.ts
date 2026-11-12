@@ -296,7 +296,8 @@ export class Scene {
     }
     for (const h of room.heroes) {
       const [x, y] = lerp('h:' + h.id, h.x, h.y), up = (h.z ?? 0) * LIFT;
-      items.push({ y, draw: () => sized(c, x - cx, y - up - cy, () => drawHero(c, h, x - cx, y - up - cy, h.id === meId, room.time)) });
+      // (Heroes are drawn at 1.5x already, heroscale.ts: never stretched.)
+      items.push({ y, draw: () => drawHero(c, h, x - cx, y - up - cy, h.id === meId, room.time) });
       // A Ranger's hound, wherever it is.
       if (h.hound) {
         const d = h.hound, [dx, dy] = lerp('d:' + h.id, d.x, d.y);

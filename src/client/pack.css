@@ -5,7 +5,7 @@ body #pack .doll { flex: none; display: grid; grid-template-columns: 44px 54px 4
 body #pack .s-relic { grid-area: relic; } body #pack .s-skill { grid-area: skill; } body #pack .s-hand { grid-area: hand; } body #pack .s-body { grid-area: body; }
 body #pack .s-ring0 { grid-area: ring0; } body #pack .s-ring1 { grid-area: ring1; } body #pack .s-belt { grid-area: belt; }
 body #pack .fig { grid-area: fig; display: flex; align-items: center; justify-content: center; background: radial-gradient(closest-side, #2e3138, transparent); }
-body #pack .fig img { width: 52px; image-rendering: pixelated; filter: drop-shadow(0 2px 0 #000); }
+body #pack .fig img { width: 60px; image-rendering: pixelated; filter: drop-shadow(0 2px 0 #000); }
 body #pack .s-belt > i { display: block; color: #8d929c; font-size: var(--fs-s); letter-spacing: 0.15em; font-style: normal; margin-bottom: 2px; }
 body #pack .beltrow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
 body #pack .beltrow .tile { aspect-ratio: auto; height: 34px; }

@@ -61,7 +61,7 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
   noteKneels(room.heroes, t);
   for (const h of room.heroes) {
     const [x, y] = lerp('h:' + h.id, h.x, h.y);
-    f.put('h' + h.id, x, lift(h.z), y, (c, px, py) => sized(c, px, py, () => drawHero(c, h, px, py, h.id === meId, t)), { xray: true, pool: h.act === 'roll' || h.act === 'down' ? 0.22 : 0.3 });
+    f.put('h' + h.id, x, lift(h.z), y, (c, px, py) => drawHero(c, h, px, py, h.id === meId, t), { xray: true, pool: h.act === 'roll' || h.act === 'down' ? 0.22 : 0.3 });
     if (h.hound) {
       const d = h.hound, [dx, dy] = lerp('d:' + h.id, d.x, d.y);
       hound(f, h, d, dx, dy, x, y, me);

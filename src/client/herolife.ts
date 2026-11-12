@@ -13,6 +13,7 @@ import type { LookDef } from './lookkit';
 import { OUTLINE } from './sprites';
 import { mix } from './heroeyes';
 import { drawMantle } from './cloaklife';
+import { HERO_W, HS } from './heroscale';
 
 /** A stable number in [0, 1) from a hero's id (their sway's phase, their step's timing). */
 export function idPhase(id: string): number {
@@ -37,11 +38,17 @@ type Att = 0 | 1 | 2 | 3;
 const BUF: number[] = [], COLS: string[] = [], BARE: boolean[] = [];
 let lay: 'back' | 'front' = 'back';
 
-/** A rect in the sprite's own pixels (x across from the facing side's back, y down), on the torso, head or legs. */
+/**
+ * A rect in the old 12-wide body's pixels (x across from the facing side's back, y down), on the torso,
+ * head or legs, put on the 1.5x body (heroscale.ts) at whole pixels: its edges land where the old ones
+ * fall on the new grid, so cloth keeps its shape and nothing is stretched.
+ */
 function rect(want: 'back' | 'front', x: number, y: number, w: number, h: number, col: string, att: Att = 0): void {
   if (want !== lay || w <= 0 || h <= 0) return;
   const L = LAYOUT, dx = att === 2 ? 0 : att === 1 ? L.lean : Math.round(L.lean / 2), dy = att === 2 ? Math.min(0, L.drop) : L.drop;
-  BUF.push((L.flip ? L.left + 13 - x - w : L.left + 1 + x) + dx, L.top + 1 + y + dy, w, h);
+  const x0 = Math.round(x * HS), x1 = Math.round((x + w) * HS), y0 = Math.round(y * HS), y1 = Math.round((y + h) * HS);
+  if (x1 <= x0 || y1 <= y0) return;
+  BUF.push((L.flip ? L.left + HERO_W + 1 - x1 : L.left + 1 + x0) + dx, L.top + 1 + y0 + dy, x1 - x0, y1 - y0);
   COLS.push(col);
   BARE.push(att === 3);
 }
@@ -76,7 +83,8 @@ export function drawLife(c: Ctx, h: Hero, d: LookDef, up: boolean, layer: 'back'
   const now = c.now, ph = idPhase(h.id) * 6.283, k = layer === 'back' ? trail(h, now) : swing.get(h.id)?.k ?? 0;
   const side = Math.abs(h.fx) > 0.35 ? k : 0, rate = 2 + 7 * k;
   const wave = (i: number, amp = 1) => Math.round(Math.sin(now * rate + ph + i * 0.9) * amp);
-  const L = d.life, t = d.tall, bottom = d.h - 2, rag = !!L.ragged || dark > 0.5;
+  // (The look's height, hat and eyes in the old body's rows, which this file's numbers are written in.)
+  const L = d.life, t = d.tall / HS, bottom = d.h / HS - 2, rag = !!L.ragged || dark > 0.5;
   const shade = (col: string) => (dark > 0.5 ? mix(col, '#140a0a', (dark - 0.5) * 1.2) : col);
   // A cape (or the cloak's skirts): behind the body facing you, flying out behind when walking.
   const cloth = L.cape ?? L.cloak;
@@ -105,7 +113,7 @@ export function drawLife(c: Ctx, h: Hero, d: LookDef, up: boolean, layer: 'back'
   }
   // Long hair: past the face on both sides, swinging; down the back walking away.
   if (L.hair) {
-    const y = d.eyes[0] + 1, sw = wave(2, 0.5 + k);
+    const y = d.eyes[0] / HS + 1, sw = wave(2, 0.5 + k);
     if (!up) rect('back', 1 - Math.round(side * 2) + Math.min(0, sw), y, 1 + Math.round(side * 2), 3, L.hair, 1), rect('back', 10, y + Math.max(0, sw), 1, 3 - Math.max(0, sw), L.hair, 1);
     else rect('front', 3 + sw, y + 2, 6, 2, L.hair, 1);
   }
