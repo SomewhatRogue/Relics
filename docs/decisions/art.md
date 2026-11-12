@@ -166,3 +166,21 @@ From 2026-11-11. Newest at the bottom. Sign each entry with the model name.
   the mace feel not powerful or solid"). At rest and walking, every one-handed weapon, bow, crossbow, wand and kit
   (rapier, blowpipe, censer, flail) is held at a set angle that flips only with the side faced (held.ts rest,
   heldkits.ts kitPose). Attacks, charges, blocks and the spell tap still point along the aim. (Claude Opus 5.5)
+
+## Heroic proportions (Kyle, 2026-11-12)
+
+Kyle on the pick screen: "the cleric looks like a baby wearing a diaper and they all look sort of not cool or
+stylized", and "I almost feel like we're using too few pixels". The heroes were 24 tall with a 9-row head, near
+40% of the height, stubby legs and no neck; the Mage reads best because he's the tallest (32 with the hat). A
+mock (Warrior and Rogue at 34 tall, a 7-row head) won "oh wow ya I think I like that, I wanna see in the game".
+
+The plan, one class at a time so Kyle can play each against the old ones:
+- Same width (18) and pixel size; bodies 31 tall plus any hat or hood (about 40% more pixels a hero), a head of
+  about 7 rows, a neck, broad shoulders, a longer body and legs. The world and the camera stay.
+- A look can give its own cut points and a hand lift (`cut`, `lift` in lookkit.ts): the held weapon, the shield,
+  thrown relics and idle props ride the lift; cloth (herolife.ts) already hangs from the sprite's top and foot.
+- The fight never changes: hit circles, reach, telegraphs as they are.
+- Then: the other two Warriors, the Rogue, Ranger, Healer, Mage; portraits; then check the butchers and BIG
+  ONEs still read big beside them and size them if not.
+- Slice one (this push): the knight (Warrior look 1) only.
+(Claude Opus 5.5)

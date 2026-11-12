@@ -43,7 +43,7 @@ function drip(c: Ctx, x: number, y: number, n: number): void {
   c.glow.globalAlpha = 1;
 }
 /** How a class's look is cut into parts: hats and hoods make it taller; a robe hides the legs but for the feet. */
-const cutOf = (d: LookDef) => heroCut(d.tall, !!d.robe);
+const cutOf = (d: LookDef) => d.cut ?? heroCut(d.tall, !!d.robe);
 /** Breathing at rest: the body rises a pixel for part of a slow breath (Kyle, 2026-11-05: more life). */
 const BREATH = { every: 3.4, up: 1.3, crouch: -0.07 };
 /** Walking: a step every 1/8 s, a foot up a pixel and the body bobbing with it. */
@@ -129,28 +129,29 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
   // The body in parts (figure.ts); the weapon is in the weapon hand, wherever that arm has gone.
   const cls = WEAPONS[h.weapon].cls as Cls, def = lookDef(cls, h.look), body = jointed(up ? look.up : look.down, cutOf(def));
   const L = layout(body, bx, by, flip, pz, HS), [ax, ay] = armOffset(ARM), mid = Math.round(L.lean / 2), low = L.drop;
-  const side = flip ? -1 : 1, px = bx + side * hs(3) + ax, py = by - hs(8) + ay, p = pose(hw, c.now);
+  // (A taller body's hands are higher: `lift`, lookkit.ts.)
+  const gy = by - (def.lift ?? 0), side = flip ? -1 : 1, px = bx + side * hs(3) + ax, py = gy - hs(8) + ay, p = pose(hw, c.now);
   if (idl?.a != null) p.a = side > 0 ? idl.a : Math.PI - idl.a;
   if (idl?.ext != null) p.ext = idl.ext;
   if (idl?.hide) p.hide = true;
   // The sword and shield's release: the shield flashes as the blow goes out (the blade too, held.ts).
   const snap = h.weapon === 'sword' && (pz.phase === 'release' || pz.phase === 'contact');
-  const shieldAt: [number, number] = idl?.shield ? [bx + Math.round(idl.shield[0] * HS), by + Math.round(idl.shield[1] * HS)] : h.blocking ? [bx + mid + Math.round(h.fx * hs(6)), by - hs(7) + low + Math.round(h.fy * hs(4))] : [bx + mid - side * hs(4), by - hs(6) + low];
+  const shieldAt: [number, number] = idl?.shield ? [bx + Math.round(idl.shield[0] * HS), by + Math.round(idl.shield[1] * HS)] : h.blocking ? [bx + mid + Math.round(h.fx * hs(6)), gy - hs(7) + low + Math.round(h.fy * hs(4))] : [bx + mid - side * hs(4), gy - hs(6) + low];
   const drawGear = () => {
     if (h.weapon === 'sword') blit(c, SPRITES.shield, shieldAt[0], shieldAt[1] + hs(4), false, snap ? 0.85 : 0);
     drawWeapon(c, hw, px, py, p);
     if (h.act === 'throw' && h.actT < 0.2) {
       const a = Math.atan2(h.fy, h.fx) + Math.PI;
-      if (h.relic === 'javelin') hline(c.lit, bx - side * hs(2), by - hs(10), a, -4, 10, '#d8c48a');
-      else if (h.relic === 'hook') hline(c.lit, bx + side * hs(3), by - hs(9), a + 0.6, 0, 4, '#9aa3ad');
-      else if (h.relic === 'horn') hline(c.lit, bx + side * hs(2), by - hs(13), -Math.PI / 2 + side * 0.9, 0, 6, '#d8c48a', 2);
-      else if (h.relic === 'net') (c.lit.fillStyle = '#8a7a5a'), c.lit.fillRect(Math.round(bx - side * hs(5)), Math.round(by - hs(13)), 4, 4);
-      else if (h.relic === 'lodestone') (c.lit.fillStyle = '#3a3440'), c.lit.fillRect(Math.round(bx - side * hs(5)), Math.round(by - hs(14)), 4, 4);
-      else if (h.relic === 'bomb') (c.lit.fillStyle = '#5a6a30'), c.lit.fillRect(Math.round(bx - side * hs(5)), Math.round(by - hs(14)), 4, 4);
-      else if (h.relic === 'bell') (c.lit.fillStyle = '#e8dcc0'), c.lit.fillRect(Math.round(bx + side * hs(4)), Math.round(by - hs(13)), 3, 4);
-      else if (h.relic === 'knuckle') (c.lit.fillStyle = '#e8dcc0'), c.lit.fillRect(Math.round(bx + side * hs(4)), Math.round(by - hs(11)), 4, 3);
+      if (h.relic === 'javelin') hline(c.lit, bx - side * hs(2), gy - hs(10), a, -4, 10, '#d8c48a');
+      else if (h.relic === 'hook') hline(c.lit, bx + side * hs(3), gy - hs(9), a + 0.6, 0, 4, '#9aa3ad');
+      else if (h.relic === 'horn') hline(c.lit, bx + side * hs(2), gy - hs(13), -Math.PI / 2 + side * 0.9, 0, 6, '#d8c48a', 2);
+      else if (h.relic === 'net') (c.lit.fillStyle = '#8a7a5a'), c.lit.fillRect(Math.round(bx - side * hs(5)), Math.round(gy - hs(13)), 4, 4);
+      else if (h.relic === 'lodestone') (c.lit.fillStyle = '#3a3440'), c.lit.fillRect(Math.round(bx - side * hs(5)), Math.round(gy - hs(14)), 4, 4);
+      else if (h.relic === 'bomb') (c.lit.fillStyle = '#5a6a30'), c.lit.fillRect(Math.round(bx - side * hs(5)), Math.round(gy - hs(14)), 4, 4);
+      else if (h.relic === 'bell') (c.lit.fillStyle = '#e8dcc0'), c.lit.fillRect(Math.round(bx + side * hs(4)), Math.round(gy - hs(13)), 3, 4);
+      else if (h.relic === 'knuckle') (c.lit.fillStyle = '#e8dcc0'), c.lit.fillRect(Math.round(bx + side * hs(4)), Math.round(gy - hs(11)), 4, 3);
       const el = h.augments[h.relic];
-      if (el) (c.glow.fillStyle = EL_COL[el]), c.glow.fillRect(Math.round(bx - side * hs(3)), Math.round(by - hs(12)), 1, 1);
+      if (el) (c.glow.fillStyle = EL_COL[el]), c.glow.fillRect(Math.round(bx - side * hs(3)), Math.round(gy - hs(12)), 1, 1);
     }
   };
   // (Behind the body walking away, or rested back over the shoulder in an idle.)
@@ -180,7 +181,7 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
     c.glow.globalAlpha = 1;
   }
   if (!behind) drawGear();
-  if (idl) idleProps(c, { x, y, bx, by, px, py, side, ey, exl, exr, def, p, el: EL_COL[heldEl(h)], now: c.now, o: idl, w: h.weapon });
+  if (idl) idleProps(c, { x, y, bx, by: gy, px, py, side, ey, exl, exr, def, p, el: EL_COL[heldEl(h)], now: c.now, o: idl, w: h.weapon });
   // A blade's charge gathers at the hand (a caster's draws into the tip instead, held.ts).
   if (h.act === 'charge' && cls !== 'MAGE' && !h.winding) {
     const held = h.actT + CHARGE.start, full = chargeFull(WEAPONS[h.weapon], h), k = Math.min(1, held / full);

@@ -28,7 +28,13 @@ export interface Life {
  * 24), whether a robe hides the legs (only the feet move), where the eyes are (row, left x, right x),
  * and what moves.
  */
-export interface LookDef { down: Part[]; up: Part[]; h: number; tall: number; robe?: boolean; eyes: [number, number, number]; life: Life }
+export interface LookDef {
+  down: Part[]; up: Part[]; h: number; tall: number; robe?: boolean; eyes: [number, number, number]; life: Life;
+  /** A taller body (Kyle, 2026-11-12, the heroic proportions trial): where it's cut, if not heroCut's rows... */
+  cut?: { headTo: number; hip: number; back: [number, number, number, number]; arm: [number, number, number, number] };
+  /** ...and how many pixels higher its hands are than a 24-tall hero's (the weapon, shield and thrown relics). */
+  lift?: number;
+}
 
 /** A pixel map to parts: '.' is empty, `M` (mail) checkers between `M` and `m`. Rows are HERO_W (18) wide. */
 export function art(rows: string[], pal: Record<string, string>): Part[] {

@@ -26,6 +26,23 @@ const warrior = (head: string[], back: string[], pal: Record<string, string>, li
   down: art([...head, ...W_BODY], pal), up: art([...back, ...W_BACK], pal), h: 24, tall: 0, eyes: [5, 7, 10], life,
 });
 
+// The heroic proportions trial (Kyle, 2026-11-12: "I wanna see in the game"): the knight 31 tall, a 7-row
+// helm, a neck, broad pauldrons, a longer body and legs. Its own cut and a hand lift (lookkit.ts).
+const TALL_HEAD = ['......hAAAAa......', '.....hAAAAAAa.....', '.....AAAAAAAa.....', '.....ASEAAESa.....', '.....ASSAASSa.....', '.....aASssSAa.....', '......aSSSSa......'];
+const TALL_HEAD_BACK = ['......hAAAAa......', '.....hAAAAAAa.....', '.....AAAAAAAa.....', '.....AAAAAAAa.....', '.....AAAAAAAa.....', '.....aAAAAAAa.....', '......aAAAAa......'];
+const TALL_BODY = [
+  '.pPPPPpsSSspPPPPp.', 'pPPkPPPBTTBPPPkPPp', 'pPPPPPpBTTBpPPPPPp', '.ppppMMBTTBMMpppp.', '..MMMMBBTTBBMMMM..',
+  '..MmMBBBTTBBBMmM..', '..MmMBbBTTBbBMmM..', '..MmMBbBTTBbBMmM..', '..SSKKKKGGKKKKSS..', '..ssBbBBTTBBbBss..',
+  '....BbBBTTBBbB....', '....BbBBTTBBbB....', '....bLLBTTBLLb....', '....LLLbTTbLLL....', '....LLL.TT.LLL....',
+  '....LlL....LlL....', '....LAl....lAL....', '....LLl....lLL....', '....LLl....lLL....', '...KKKK....KKKK...',
+  '...FFFF....FFFF...', '...FFFF....FFFF...', '..FFFFf....fFFFF..', '..ffff......ffff..',
+];
+const TALL_BACK = TALL_BODY.map((r, i) => (i === 0 ? '.pPPPPpaAAapPPPPp.' : r.replace(/T/g, 'B').replace(/G/g, 'K').replace(/k/g, 'P')));
+const tallKnight = (pal: Record<string, string>, life: LookDef['life']): LookDef => ({
+  down: art([...TALL_HEAD, ...TALL_BODY], pal), up: art([...TALL_HEAD_BACK, ...TALL_BACK], pal), h: 31, tall: 0, eyes: [3, 7, 10], life,
+  cut: { headTo: 7, hip: 19, back: [0, 7, 6, 17], arm: [12, 7, 18, 17] }, lift: 6,
+});
+
 // The Ranger: a peaked hood and a cloak, the quiver's fletching over the shoulder, a short sword's hilt at the hip.
 const R_LEGS = [
   '.cCC.LLL..LLL.CCc.', '.cCC.LLL..LLL.CCc.', '.c...LLL..LLL...c.', '.....LLL..LLL.....',
@@ -82,10 +99,8 @@ const rogue = (sk: Parameters<typeof skin>[0], pal: Record<string, string>): Loo
 
 export const LOOK_DEFS: Record<Cls, LookDef[]> = {
   WARRIOR: [
-    // The knight: an open-faced helm with a red plume, blue and gold, a red cape.
-    warrior(['.......aAAa.......', '.....aAAAAAAa.....', '....aAAAAAAAAa....', '....aAAAAAAAAa....', '....aASSAASSAa....', '....aASESSESAa....', '....kASSSSSSAk....', '....aAsSssSsAa....', '.....aAsSSsAa.....'],
-      ['.......aAAa.......', '.....aAAAAAAa.....', '....aAAAAAAAAa....', '....aAAAAAAAAa....', '....aAAAAAAAAa....', '....aAAAAAAAAa....', '....aAAAAAAAAa....', '....aAAAAAAAAa....', '.....aAAAAAAa.....'],
-      { ...skin('fair'), A: '#b4bcc6', a: '#6a727c', P: '#a8b0ba', p: '#6a727c', B: '#2f5d9b', b: '#24487a', T: '#d4a537', M: '#8a929c', m: '#666e78', K: '#5a3d22', k: '#d4a537', L: '#3a3f4a', F: '#2a2420' },
+    // The knight, at the heroic proportions on trial: an open-faced helm with a red plume, blue and gold, a red cape.
+    tallKnight({ ...skin('fair'), A: '#b4bcc6', a: '#6a727c', h: '#dce2ea', P: '#a8b0ba', p: '#6a727c', B: '#2f5d9b', b: '#24487a', T: '#d4a537', M: '#8a929c', m: '#666e78', K: '#5a3d22', k: '#d4a537', G: '#ecd078', L: '#3a3f4a', l: '#262a32', F: '#2a2420', f: '#16120e' },
       { cape: ['#9a2420', '#5a1414'], plume: '#c0392b' }),
     // The sellsword: bare-headed, cropped black hair and a beard, dented steel over old leather, a brown rag of a cape.
     warrior(['..................', '......hHHHHh......', '.....hHHHHHHh.....', '.....HHHHHHHH.....', '.....HhhSShhH.....', '.....SSESSESS.....', '.....SSSSsSSS.....', '.....HHSssSHH.....', '......HHHHHH......'],
