@@ -51,6 +51,13 @@ export const INSTANCE = {
  */
 // `notice`: anyone this near and it leaves its line to come for them (Kyle, 2026-11-11: "the first boss didn't actually
 // ever attack"; it walked on unless you were right on it), its guards walking the line on.
+/**
+ * Instance puzzles (sim/tubs.ts, docs/design/instance-puzzles.md). A tub goes a square when a hero holds the stick
+ * into it `push` s, touching it (within `touch` of it); it slides at `speed` tiles a second. GRAB within `lever` of
+ * the lever puts the tubs back. Two or more up and near (`near` tiles of the grid), and it's unsolved: one of
+ * `wave.kinds` out of its drift every `wave.every` s (the first after `wave.first`), `wave.most` of them about at once.
+ */
+export const PUZZLE = { push: 0.3, touch: 0.32, speed: 4.5, lever: 1.6, near: 4, wave: { first: 5, every: 9, most: 3 } };
 export const DROVER = { reach: 1.1, cut: 1.6, notice: 5 };
 
 /**

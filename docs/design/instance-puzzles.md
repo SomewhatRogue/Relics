@@ -1,4 +1,4 @@
-# Instance puzzles (spec, draft for Kyle's yes)
+# Instance puzzles (spec)
 
 Draft, 2026-11-12, Instances chat (Claude Opus 5.5). Kyle: "some puzzles in the instance could be good. Simple
 pushing boxes or old runes that open up as a mini game. Nothing super complex but interesting to solve, especially in
@@ -26,8 +26,16 @@ multiplayer having a wave come at you while you solve. Single solo would just be
    *Not in the Open Cut* (the arc spec keeps anything old or carved out of it); for a later instance (a ruined
    keep, the Deep).
 
-## First build (pending Kyle's yes)
+## First build (Kyle: "Yup", 2026-11-12; built the same day)
 
 The puzzle frame and **pushing tubs**, in the Open Cut under the hill: the old adit's **ore sorting floor**, three
 tubs onto the tipping plates to drop the gate, waves out of a side drift when two or more are in. Then points and
 levers over the top, and runes when an instance with old stones comes.
+
+**As built:** THE SORTING FLOOR (shared/cutsorting.ts), the first place under the hill: a 7 by 5 grid of 1.4-tile
+squares, three tubs, three chalked iron plates, boulders for walls; ten pushes at the least, and a wrong first push
+that strands a tub (tests/puzzles.test.ts solves it). Hold the stick into a tub `PUZZLE.push` s and it slides a square.
+The lever by the way in (GRAB, the button reads PULL) puts the tubs back. Two or more near it: one goblin out of the
+side drift every 9 s, three at most. Lines (lore keeper, line editor): "Push 3 tubs onto the plates", PULL, TUBS
+RESET, TUBS IN PLACE. Lore keeper: the tubs, plates and lever are the old miners' fittings; the chalk is plain
+outlines, never strokes in fives (the chalker's tally); the side drift is an ordinary mine passage.

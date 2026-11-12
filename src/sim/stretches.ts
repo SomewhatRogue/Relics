@@ -6,6 +6,7 @@
  * sim/checkpoint.ts) and the wipe count starts again. The stretches behind doze (sim/sleep.ts). Run and block state,
  * plain data, so a friend's screen and a handed-on job have it.
  */
+import { unsolved } from './tubs';
 import { inArea, type GameMap, type Stretch } from '../shared/arena';
 import { isDead } from './damage';
 import { players } from './party';
@@ -26,7 +27,7 @@ export const lastStretch = (run: Run, map: GameMap) => !!map.stretches && (run.s
 /** The gate's open to go through once its named ones are dead; it opens for the whole party at it. */
 export const gateReady = (run: Run, room: ArenaRoom) => {
   const s = stretchOf(run, room.map);
-  return !!s && s.gate !== undefined && !keepers(s, room).length;
+  return !!s && s.gate !== undefined && !keepers(s, room).length && !unsolved(room.map, room.props, s.puzzle);
 };
 
 const up = (h: Hero) => h.act !== 'down' && !h.out;

@@ -41,6 +41,7 @@ function shift(p: RoomPlan, dx: number, dy: number, pk: number, into: { map: Gam
   if (m.led) M.led = { ...m.led, pts: m.led.pts.map(([x, y]) => [x + dx, y + dy]) };
   if (m.rail) M.rail = { y: m.rail.y + dy, x0: m.rail.x0 + dx, x1: m.rail.x1 + dx };
   if (m.ledges) (M.ledges ??= []).push(...m.ledges.map((l) => ({ ...mv(l), ramps: l.ramps.map(mv) })));
+  if (m.puzzles) (M.puzzles ??= []).push(...m.puzzles.map((q) => ({ ...mv(q), lever: mv(q.lever), from: mv(q.from) })));
   if (m.gear) M.gear = mv(m.gear);
   if (m.adits) (M.adits ??= []).push(...m.adits.map(mv));
   if (m.incline) M.incline = { lanes: m.incline.lanes.map((x) => x + dx), y0: m.incline.y0 + dy, y1: m.incline.y1 + dy };
@@ -62,18 +63,21 @@ export function cutMap(job: Job, places: CutPlace[], fork?: { name: string; ways
   const top = plans[plans.length - 1].map;
   const map: GameMap = {
     ...plans[0].map, name: 'THE OPEN CUT', w: W, h: H, rounds: [], blocks: [], braziers: [], torches: [], water: [], soil: [], marks: [], npcs: [],
-    led: undefined, rail: undefined, gear: undefined, adits: undefined, incline: undefined, ledges: undefined, stretches: [],
+    led: undefined, rail: undefined, puzzles: undefined, gear: undefined, adits: undefined, incline: undefined, ledges: undefined, stretches: [],
   };
   const plan: RoomPlan = { map, foes: [], props: [], chests: [] }, laid: Laid[] = [], into = { map, plan }, rng = new Rng(job.seed * 2909 + 7);
   let y = H;
   plans.forEach((p, i) => {
     const m = p.map, x0 = Math.round((W - m.w) / 2), y0 = y - m.h;
+    const puzzles = map.puzzles?.length ?? 0;
     shift(p, x0, y0, i * 100, into);
     laid.push({ x0, y0, w: m.w, h: m.h });
     // Rock either side of a place narrower than the map.
     if (x0 > 0) map.blocks.push(rock(0, y0, x0, m.h), rock(x0 + m.w, y0, W - x0 - m.w, m.h));
     if (i === 0) map.hero = { x: m.hero.x + x0, y: m.hero.y + y0 };
     const st: Stretch = { name: m.name, keep: places[i].keep, ...(places[i].packs ? { packs: places[i].packs!.map((n) => n + i * 100) } : {}) };
+    // A place with a puzzle: its gate waits on it (its first, the map's numbering).
+    if (m.puzzles?.length) st.puzzle = puzzles;
     if (i < plans.length - 1) {
       // The wall across its top, the gate where its way out was; the lull above, to the next place's foot.
       const ex = m.exit!, gx = x0 + ex.x + ex.w / 2 - CUT.gate / 2, wy = y0 - CUT.wall;

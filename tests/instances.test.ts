@@ -27,7 +27,7 @@ import { walkable } from './walk';
 const job = (d = 12) => openCut(d);
 /**
  * A place of the Open Cut, the party at its foot: 0 the rows (act 1, Rakehead), 1 over the top (the winding house, then
- * `place` 1 the incline), 2 the washing floor (act 2, under the hill); 3 over the top's loading stage, the Haulier's. `at` turns a place's own
+ * `place` 1 the incline), 2 the washing floor (act 2, under the hill, after the sorting floor); 3 over the top's loading stage, the Haulier's. `at` turns a place's own
  * (x, y) into its map's.
  */
 function area(i: number, ids = ['me'], d = 12, place = 0): { run: Run; room: ArenaRoom; hs: Hero[]; at: (x: number, y: number) => { x: number; y: number } } {
@@ -35,6 +35,9 @@ function area(i: number, ids = ['me'], d = 12, place = 0): { run: Run; room: Are
   Object.assign(run, { index: [0, 1, 1, 1][i], way: i === 2 ? 1 : i ? 0 : undefined, party: ids.length });
   const places = [CUT_PLACES, OVER_PLACES, UNDER_PLACES, OVER_PLACES][i];
   if (i === 3) place = OVER_PLACES.length - 1;
+  if (i === 2) place = UNDER_PLACES.length - 1;
+  // (The party in that place's stretch.)
+  run.stretch = place;
   const fork = i === 0 ? { name: FORK_WORDS.yard, ways: [FORK_WORDS.over, FORK_WORDS.under] as [string, string] } : undefined;
   const room = runRoom(run), hs = ids.map((id) => room.join(id)), L = cutMap(job(d), places, fork).laid[place];
   for (const id of ids) room.setIntent(id, NO_INTENT);
@@ -94,7 +97,7 @@ describe('the map and its places', () => {
     for (let i = 1; i < laid.length; i++) expect(p.foes.some((f) => f.y > laid[i].y0 + laid[i].h && f.y < laid[i - 1].y0)).toBe(false);
   });
   it('has its named ones, none a butcher, THE DROVER driving the roped line, and runs bottom to top', () => {
-    const names = [[CUT_NAMES.drover], [], [], [CUT_NAMES.brakesman], [HAUL_NAME], [CUT_NAMES.sluicer, CUT_NAMES.raker]];
+    const names = [[CUT_NAMES.drover], [], [], [CUT_NAMES.brakesman], [HAUL_NAME], [], [CUT_NAMES.sluicer, CUT_NAMES.raker]];
     plans.forEach((plan, i) => {
       const p = plan(job());
       expect(p.foes.filter((f) => f.name).map((f) => f.name)).toEqual(names[i]);

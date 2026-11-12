@@ -251,7 +251,10 @@ if (quick && fday) game.startJob(fenmere(fday > 1 ? fday : game.world.day));
 const stressN = Number(new URLSearchParams(location.search).get('stress') ?? 0);
 if (quick && stressN) game.startJob(stressJob(), stressN);
 const cday = Number(new URLSearchParams(location.search).get('cut') ?? 0);
-if (quick && cday) game.startJob(openCut(cday > 1 ? cday : game.world.day), 1, Number(new URLSearchParams(location.search).get('area') ?? 0));
+if (quick && cday) {
+  const q = new URLSearchParams(location.search), way = q.get('way');
+  game.startJob(openCut(cday > 1 ? cday : game.world.day), 1, Number(q.get('area') ?? 0), way === null ? undefined : Number(way));
+}
 // ?hero=WARRIOR&barn=1: straight onto today's Doorkeepers hunt; ?barn=arena: straight into the great barn.
 const barn = new URLSearchParams(location.search).get('barn');
 if (quick && barn) game.startJob(barnHunt(game.world.day, barn === 'arena'));

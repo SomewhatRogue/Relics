@@ -68,3 +68,12 @@ export const CHECK_WORDS = {
   wiped: (left: number) => (left === 1 ? 'Back at the gate. One more and the run is lost' : `Back at the gate. ${left} more and the run is lost`),
   waiting: (here: number, all: number) => `Waiting at the gate for the rest (${here} of ${all})`,
 };
+
+/** Instance puzzles (sim/tubs.ts): the goal while one keeps the gate, and the lever's button. */
+export const PUZZLE_WORDS = {
+  goal: 'Push 3 tubs onto the plates',
+  lever: 'PULL',
+  /** Said over the lever when it's pulled, and over the grid when every plate has a tub. */
+  reset: 'TUBS RESET',
+  solved: 'TUBS IN PLACE',
+};

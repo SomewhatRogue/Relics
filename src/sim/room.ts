@@ -79,6 +79,7 @@ import { startTorch, stepTorch } from './torch';
 import { startKindle, stepKindle } from './kindle';
 import { stepDrover } from './drover';
 import { stepBrake } from './brake';
+import { stepTubs } from './tubs';
 import { stepPairFall } from './pairfall';
 import { initScenes, stepScenes } from './scenes';
 import { stepHouseFires, type HouseFire, type Indoors } from './houseburn';
@@ -473,6 +474,7 @@ export class ArenaRoom {
     stepScenes(this.map, w, TICK);
     stepDrover(w, TICK);
     stepBrake(w);
+    stepTubs(w, this.map, this.intents, (x, y) => this.spawn('scrapper', x, y));
     stepPairFall(w);
     // Hangman's Wood: snares hoisting whoever steps in them, the Gospel Oak burning (sim/snares.ts, hangfire.ts).
     if (this.map.hang) {

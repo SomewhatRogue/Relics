@@ -31,7 +31,9 @@ import { kindleable } from '../sim/kindle';
 import { liftable } from '../sim/props';
 import { relicLabel } from '../sim/hero';
 import { castElement } from '../sim/channel';
-import { CHANNEL, ELEMENT_NAME, GRAB } from '../shared/tuning';
+import { CHANNEL, ELEMENT_NAME, GRAB, PUZZLE } from '../shared/tuning';
+import { PUZZLE_WORDS } from '../shared/opencutwords';
+import { unsolvedAt } from '../sim/tubs';
 import { SIGNS } from '../shared/signs';
 import { signFor, signLeft } from '../sim/signature';
 import { itemIcon, potionIcon } from './itemicons';
@@ -171,12 +173,14 @@ export class Cluster {
     // (Kneeling at it, the button stays lit: the raise is going on.)
     const rise = mode === 'run' && !raise && !cut ? (risable(me, room.heroes, room.time) ?? (room.heroes.some((o) => o.out && o.riseBy === me.id) ? 'ready' : null)) : null;
     const burn = !raise && (!!torchable(me, room.enemies) || (mode === 'run' && !!kindleable(me, room.map)));
-    const lifter = kit.cls === 'WARRIOR', active = can || raise || rise === 'ready' || burn || cut || shove;
+    // By an instance puzzle's lever, unsolved: PULL puts the tubs back (sim/tubs.ts).
+    const pull = mode === 'run' && !raise && !cut && !burn && !carrying && (room.map.puzzles ?? []).some((p) => unsolvedAt(room.map, room.props, p) && Math.hypot(p.lever.x - me.x, p.lever.y - me.y) <= PUZZLE.lever);
+    const lifter = kit.cls === 'WARRIOR', active = can || raise || rise === 'ready' || burn || cut || shove || pull;
     // A drop at your feet with nothing else here: LOOK opens its card.
     const looking = !!look && !busy && !spot?.chest && !spot?.door;
     const use = (!!spot && !busy && (mode !== 'run' || !!spot.chest || !!spot.pet)) || looking;
     const what: IconId = raise || cut || rise ? 'help' : burn ? 'burn' : carrying ? 'throw' : 'grab';
-    const word = cut ? 'CUT FREE' : shove ? STAITHE_WORDS.shove : raise ? 'HELP UP' : rise ? RAISEW.button : burn ? 'BURN' : carrying ? 'THROW' : 'GRAB';
+    const word = cut ? 'CUT FREE' : shove ? STAITHE_WORDS.shove : raise ? 'HELP UP' : rise ? RAISEW.button : burn ? 'BURN' : carrying ? 'THROW' : pull ? PUZZLE_WORDS.lever : 'GRAB';
     // (With no dodge the slot has its own place, so a USE or OPEN can show beside it.)
     const showGrab = (active || lifter || !!rise) && (!dodges || !(use && !active && mode !== 'town'));
     const wait = rise === 'wait' ? riseWait(me, room.time) : 0;

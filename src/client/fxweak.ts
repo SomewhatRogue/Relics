@@ -5,7 +5,8 @@
  * on a shield-bearer's board (sim/board.ts); BOARD OUT, splinters and a flash when a heavy blow or shot
  * knocks that board aside. Cosmetic only.
  */
-import { DROVER_WORDS, FORK_WORDS, GATE_WORDS, PAIR_WORDS } from '../shared/opencutwords';
+import { sfx } from './sfx';
+import { DROVER_WORDS, FORK_WORDS, GATE_WORDS, PAIR_WORDS, PUZZLE_WORDS } from '../shared/opencutwords';
 import type { FightEvent } from '../sim/types';
 import type { Fx } from './fx';
 import { EL_COL } from './palette';
@@ -26,6 +27,14 @@ export function weakFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
   }
   if (ev.k === 'wayopen') {
     fx.say(x, y + 40, FORK_WORDS.on(ev.way === 0 ? FORK_WORDS.over : FORK_WORDS.under), '#ffd27a');
+    return true;
+  }
+  // An instance puzzle (sim/tubs.ts): a tub shoved, landing on a plate, put back by the lever, all of them on.
+  if (ev.k === 'tub') {
+    if (ev.what === 'push') sfx.rumble(), fx.burst(x, y + 2, 5, ['#8a8494', '#5e5048'], 30, false);
+    else if (ev.what === 'plate') sfx.thud(), fx.burst(x, y - 2, 8, ['#ffd27a', '#cfc6ae'], 40, true);
+    else if (ev.what === 'reset') sfx.thud(), fx.say(x, y - 34, PUZZLE_WORDS.reset, '#cfc6ae');
+    else sfx.boom(), fx.say(x, y - 30, PUZZLE_WORDS.solved, '#ffd27a'), fx.burst(x, y, 16, ['#ffd27a', '#ffffff'], 70, true);
     return true;
   }
   if (ev.k === 'gateopen') {

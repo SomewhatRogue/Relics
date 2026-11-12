@@ -737,7 +737,8 @@ export class Game {
   }
 
   /** `area`: start at this room of the job (the quick-start's ?area=, to look at an instance's later area). */
-  startJob(job: Job, party = 1, area = 0): void {
+  /** (`area`, `way`: a test link straight to an instance's area, and which way at a fork: main.ts ?cut=N&area=N&way=N.) */
+  startJob(job: Job, party = 1, area = 0, way?: number): void {
     this.followers.clear();
     this.mode = 'run';
     this.outside = null;
@@ -745,6 +746,7 @@ export class Game {
     this.run = newRun(job);
     this.run.party = party;
     this.run.index = Math.max(0, Math.min(job.rooms - 1, area));
+    if (way !== undefined) this.run.way = way;
     // The party's average level, fixed for the job: the goblins and the loot go by it (shared/threat.ts LEVEL_SCALE).
     this.run.level = partyLevel([this.profile.level, ...[...(this.coop?.friends.values() ?? [])].filter((f) => f.profile && !f.gone).map((f) => f.profile!.level)]);
     this.run.began = Date.now();

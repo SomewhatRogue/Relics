@@ -720,6 +720,8 @@ export interface Prop extends Body {
   wx?: number;
   wy?: number;
   heldBy?: string;
+  /** A puzzle's tub sliding to its next square (sim/tubs.ts). */
+  to?: { x: number; y: number };
   /** THE BRAKESMAN's cart at the top of the rail, its lane striped till it goes at this room time (sim/brake.ts). */
   goAt?: number;
   fadeAt: number;
@@ -826,6 +828,7 @@ export type FightEvent =
   /** The Haulier's working (sim/haulbook.ts, sim/haulcarts.ts; drawn client/hauldraw.ts): a cart set rolling (`by` a hero, or the Haulier's shove),
    *  hitting a hero or the Haulier (`on`), or stopping at a stop; lightning falling on the winding gear; the Haulier's plate off for good (phase 2). */
   | { k: 'cart'; what: 'go' | 'hit' | 'stop' | 'flip' | 'aim' | 'grab'; x: number; y: number; by?: string; on?: string }
+  | { k: 'tub'; what: 'push' | 'plate' | 'reset' | 'solved'; x: number; y: number; by?: string }
   | { k: 'gear'; x: number; y: number; hit: boolean }
   | { k: 'bare'; x: number; y: number }
   /** The Haulier landing a leap; its sparks coming down on a spot (sim/haulbook.ts). */

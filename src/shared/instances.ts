@@ -17,6 +17,7 @@ import { cutMap, type CutPlace } from './cutmap.js';
 import { windingPlan, WINDING_GUARDS } from './cutwinding.js';
 import { inclinePlan } from './cutincline.js';
 import { loadingPlan } from './cutloading.js';
+import { sortingPlan } from './cutsorting.js';
 import { washingPlan } from './cutwashing.js';
 import { CUT_NAMES, CUT_POST, FORK_WORDS } from './opencutwords.js';
 import { stressPlan } from './stressmap.js';
@@ -63,7 +64,10 @@ export const OVER_PLACES: CutPlace[] = [
   { plan: inclinePlan, keep: [CUT_NAMES.brakesman] },
   { plan: loadingPlan, keep: [HAUL_NAME] },
 ];
-export const UNDER_PLACES: CutPlace[] = [{ plan: washingPlan, keep: [CUT_NAMES.sluicer, CUT_NAMES.raker] }];
+export const UNDER_PLACES: CutPlace[] = [
+  { plan: sortingPlan, keep: [] },
+  { plan: washingPlan, keep: [CUT_NAMES.sluicer, CUT_NAMES.raker] },
+];
 
 /** Act 1, Rakehead, up to the fork yard. */
 export function openCutMap(job: Job): RoomPlan {

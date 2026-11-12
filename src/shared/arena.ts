@@ -67,6 +67,8 @@ export interface Stretch {
   keep: string[];
   /** Packs (by number) to kill before the gate opens, where there's no named one. */
   packs?: number[];
+  /** A puzzle (its index in `map.puzzles`) to solve before the gate opens (shared/puzzle.ts). */
+  puzzle?: number;
   gate?: number;
   at?: { x: number; y: number; w: number; h: number };
   check?: { x: number; y: number };
@@ -299,6 +301,8 @@ export interface GameMap {
   stretches?: Stretch[];
   /** THE BRAKESMAN's incline (sim/brake.ts): lanes of rail down it at these x, from `y0` by its brake to `y1` at the foot. */
   incline?: { lanes: number[]; y0: number; y1: number };
+  /** Instance puzzles: pushing tubs (shared/puzzle.ts, sim/tubs.ts). */
+  puzzles?: import('./puzzle.js').TubPuzzle[];
   hero: { x: number; y: number };
   /** Walk into this to leave (opens when the room says so). */
   exit: Area | null;

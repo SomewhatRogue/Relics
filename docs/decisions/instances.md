@@ -272,3 +272,23 @@ not killing quickly, so kind of anticlimactic".
   checked on a phone. Tests: the stage's pieces, its toughness by party, waking and fighting, the way home at its
   death. Full suite green.
 - Kyle's puzzle idea written up for his yes: docs/design/instance-puzzles.md. (Claude Opus 5.5)
+
+## 2026-11-12: instance puzzles, the first: pushing tubs on THE SORTING FLOOR
+
+- Kyle: "some puzzles in the instance could be good. Simple pushing boxes or old runes... especially in multiplayer
+  having a wave come at you while you solve. Single solo would just be the puzzle." Spec docs/design/instance-puzzles.md;
+  Kyle: "Yup" to tubs first.
+- The frame: `shared/puzzle.ts` (a grid, its walls, plates, starts, the lever, the drift; `fromRows` from text;
+  `solved`), `map.puzzles`, a stretch's `puzzle` (its gate waits on it: sim/stretches.ts `gateReady`, and the goal says
+  what to do: sim/goal.ts), `cutmap.ts` carries puzzles. Tubs are a prop kind ('tub') like the Haulier's carts: never
+  broken, knocked, lifted. `sim/tubs.ts`: hold the stick into a tub straight along the grid `PUZZLE.push` (0.3 s),
+  touching it, and it slides a square if it's on the grid, not rock and free; GRAB by the lever puts every tub back;
+  every plate covered, solved, and it stays so. Two or more up near it and unsolved: a goblin out of the drift every
+  `PUZZLE.wave.every` s, three at most, instance-tough. Alone, just the puzzle.
+- THE SORTING FLOOR (`shared/cutsorting.ts`), first under the hill before the washing floor. The layout was picked with
+  a solver (ten pushes at the least, one stranding first push); tests/puzzles.test.ts solves it in TS too.
+- On screen (`client/tubdraw.ts`): tubs, iron plates with chalked squares (faint on the glow layer so they read in the
+  dark, gold once a tub's on), the lever. Fire baskets at the grid's corners and boulders for its rock, after a phone
+  screenshot showed it too dark to read. The button by the lever reads PULL (client/cluster.ts); cues and sounds in
+  client/fxweak.ts. A test link `?cut=1&area=1&way=1` for under the hill (main.ts, game.ts `startJob` way).
+- Lines: lore keeper then line editor (see the spec). Full suite green. (Claude Opus 5.5)

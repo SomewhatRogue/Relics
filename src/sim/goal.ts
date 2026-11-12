@@ -7,6 +7,7 @@
  * a house's inside is its own room). Anyone freed has to be brought out (on a rescue, before the way
  * home opens); the caged in houses are extra ("3 more in the houses"), never needed to go on.
  */
+import { unsolved } from './tubs';
 import { doorAt, type Area, type Block, type GameMap } from '../shared/arena';
 import { runInterior } from '../shared/interiors';
 import { isDead } from './damage';
@@ -19,7 +20,7 @@ import { waiting } from './survivors';
 import { expedGoal } from './expedgoal';
 import { HELD_HINT, pickWay, type WayKind } from '../shared/ways';
 import { STAITHE_WORDS } from '../shared/staithewords';
-import { BRAKE_WORDS, DROVER_WORDS, FORK_WORDS, GATE_WORDS, PAIR_WORDS } from '../shared/opencutwords';
+import { BRAKE_WORDS, DROVER_WORDS, FORK_WORDS, GATE_WORDS, PAIR_WORDS, PUZZLE_WORDS } from '../shared/opencutwords';
 import { forkOf } from './fork';
 import { keepers, lastStretch, stretchOf } from './stretches';
 import { staitheGoal } from './staithegoal';
@@ -93,6 +94,8 @@ export function goal(run: Run, room: ArenaRoom, houses: Captives = { caged: 0, w
   if (st) {
     const keep = keepers(st, room), last = lastStretch(run, room.map);
     if (keep.length) return { text: also(keep.some((e) => e.name) ? killWords(keep.filter((e) => e.name), room) : GATE_WORDS.guards), done: false };
+    // A puzzle keeping it (sim/tubs.ts).
+    if (unsolved(room.map, room.props, st.puzzle)) return { text: also(PUZZLE_WORDS.goal), done: false };
     // A fork yard: the party votes by standing on a way (sim/fork.ts).
     const roads = forkOf(room.map);
     if (last && roads) return run.way === undefined ? { text: also(FORK_WORDS.vote), done: false } : { text: also(FORK_WORDS.on(roads[run.way].label)), done: true };

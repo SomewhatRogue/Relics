@@ -4,6 +4,7 @@
  */
 import { drawPairLift } from './pairdraw';
 import { drawBrakeLane, drawIncline } from './brakedraw';
+import { drawPlates, leverItems } from './tubdraw';
 import { mistFrame } from './fenmistdraw';
 import { lurkFrame } from './fenlurk';
 import { drawBlasts } from './blastdraw';
@@ -448,6 +449,11 @@ export class Scene {
     if (map.rail || map.gear || map.adits) sumpScene(map, c, cx, cy, items, room.enemies.some((e) => e.boss?.who === 'haulier' && e.boss.phase === 2));
     // THE SLUICER in the water, THE RAKER's lift as a ring at its feet (pairdraw.ts).
     if (room.enemies.some((e) => e.fallen !== undefined)) items.push({ y: -1e6 + 4, draw: () => drawPairLift(c, room.enemies, cx, cy) });
+    // An instance puzzle: its plates on the floor, its lever (tubdraw.ts).
+    if (map.puzzles) {
+      items.push({ y: -1e6 + 2, draw: () => drawPlates(c, map, room.props, cx, cy, now) });
+      items.push(...leverItems(c, map, cx, cy));
+    }
     // THE BRAKESMAN's cart waiting at the top: its lane striped (brakedraw.ts).
     if (map.incline) {
       items.push({ y: -1e6 + 2, draw: () => drawIncline(c, map, cx, cy) });
