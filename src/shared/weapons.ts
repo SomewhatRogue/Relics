@@ -72,7 +72,9 @@ export interface Heavy extends Swing {
  * face and keeps you facing; 'dash' is a fast, long, low run. Untouchable between iFrom and iTo.
  */
 export interface Dodge {
-  kind: 'roll' | 'backstep' | 'dash' | 'blink';
+  kind: 'roll' | 'backstep' | 'dash' | 'blink' | 'sprint';
+  /** A sprint's pace, times your walk, for `time` after each press (no dodge-through: sim/hero.ts). */
+  mult?: number;
   distance: number;
   time: number;
   iFrom: number;
@@ -90,6 +92,12 @@ export const RANGER_BLADE: Swing[] = [
 ];
 /** The Ranger's dodge: a jump back, still facing (and it leaves a snare where you stood: SNARE). */
 export const RANGER_JUMP: Dodge = { kind: 'backstep', distance: 2.6, time: 0.26, iFrom: 0.02, iTo: 0.2, stamina: 22, cooldown: 1.0 };
+/**
+ * The shortbow's SPRINT in place of the jump (Kyle's friend, 2026-11-12: "shortbow you can sprint but costs
+ * stamina"): each press runs you at `mult` your walk for `time`, steered on the stick; a press while
+ * running keeps it going, for its stamina again. You can't pass through a blow on it: you outrun them.
+ */
+export const RANGER_SPRINT: Dodge = { kind: 'sprint', distance: 0, time: 1.6, iFrom: 0, iTo: 0, stamina: 24, cooldown: 0.3, mult: 1.55 };
 /** The snare a Ranger leaves when they jump back: a goblin that steps in is held (a butcher slowed). */
 export const SNARE = { cooldown: 7, radius: 0.65, hold: 2.4, life: 20, max: 2 };
 /** The Ranger's hound: how fast it runs, how far from you it'll go after something, how often it joins in
@@ -229,7 +237,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     combo: RANGER_BLADE,
     heavy: { windup: 0.04, active: 0.05, recover: 0.45, dmg: 18, dmgFull: 55, range: 15, arc: 0, lunge: -0.3, knock: 4, knockFull: 15, shot: 'arrow', speed: 34, pierce: true, blinds: true },
     draw: 1.7, // A longer draw to the flash (Kyle, 2026-11-08), but let go early it still flies, weaker.
-    blockSpeed: 0.4, chargeSpeed: 0.3, guardArc: 100, guardCost: 1.6, speed: 0.85,
+    blockSpeed: 0.4, chargeSpeed: 0.3, guardArc: 100, guardCost: 1.6, speed: 0.98,
     dodge: RANGER_JUMP,
   },
   /** Quick draws, light arrows, and you can walk while drawing: the kiting bow. */
@@ -239,8 +247,8 @@ export const WEAPONS: Record<KitId, Weapon> = {
     combo: RANGER_BLADE,
     heavy: { windup: 0.03, active: 0.04, recover: 0.22, dmg: 10, dmgFull: 22, range: 9, arc: 0, lunge: 0, knock: 2, knockFull: 6, shot: 'arrow', speed: 26 },
     draw: 0.4, early: 'full', // Quick to full and to the flash; let go early it's still a full shot.
-    blockSpeed: 0.45, chargeSpeed: 0.7, guardArc: 100, guardCost: 1.7, speed: 0.92,
-    dodge: RANGER_JUMP,
+    blockSpeed: 0.45, chargeSpeed: 0.7, guardArc: 100, guardCost: 1.7, speed: 1.04,
+    dodge: RANGER_SPRINT,
   },
   /** A short sword on a tap. Held with a bolt on it, the crossbow comes up to aim and lets go on release:
    *  a heavy bolt through a line that shoves. Held empty, it winds a reload instead (sim/crossbow.ts). */
@@ -250,7 +258,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     combo: RANGER_BLADE,
     heavy: { windup: 0.06, active: 0.04, recover: 0.35, dmg: 60, dmgFull: 60, range: 13, arc: 0, lunge: -0.2, knock: 12, knockFull: 12, shot: 'bolt', speed: 36, pierce: true },
     draw: 0.6, early: 'fizzle', // The aim has to settle: let go sooner and no bolt goes.
-    blockSpeed: 0.4, chargeSpeed: 0.4, guardArc: 110, guardCost: 1.5, speed: 0.82, reloads: true,
+    blockSpeed: 0.4, chargeSpeed: 0.4, guardArc: 110, guardCost: 1.5, speed: 0.96, reloads: true,
     dodge: RANGER_JUMP,
   },
   /** The Mage at range: a quick bolt of the element cast on the move, or a short 0.6 s cast for the
@@ -262,7 +270,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     combo: [{ windup: 0.3, active: 0.04, recover: 0.2, dmg: 8, range: 8, arc: 0, lunge: 0, knock: 2, shot: 'spark', speed: 17 }],
     heavy: { windup: 0.06, active: 0.04, recover: 0.3, dmg: 10, dmgFull: 24, range: 9, arc: 0, lunge: 0, knock: 3, knockFull: 7, shot: 'spark', speed: 19, burst: 0.8, interrupts: true, spell: true },
     draw: 0.6, early: 'fizzle',
-    blockSpeed: 0.4, chargeSpeed: 0.55, guardArc: 100, guardCost: 2, speed: 0.86, castWalk: 0.9,
+    blockSpeed: 0.4, chargeSpeed: 0.55, guardArc: 100, guardCost: 2, speed: 0.79, castWalk: 0.9,
     dodge: BLINK,
   },
   /** Close and slow: a slash in the Mage's element in front. Held, rooted, the element's spell (it costs
@@ -273,7 +281,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     combo: [{ windup: 0.3, active: 0.1, recover: 0.42, dmg: 15, range: 1.9, arc: 150, lunge: 0.15, knock: 5, slash: true }],
     heavy: { windup: 0.12, active: 0.05, recover: 0.45, dmg: 12, dmgFull: 20, range: 0, arc: 0, lunge: 0, knock: 0, knockFull: 0, spell: true },
     draw: 1, early: 'fizzle',
-    blockSpeed: 0.35, chargeSpeed: 0, guardArc: 100, guardCost: 2, speed: 0.8,
+    blockSpeed: 0.35, chargeSpeed: 0, guardArc: 100, guardCost: 2, speed: 0.78,
     dodge: BLINK,
   },
   /** The combat Mage: a sword in three cuts in the element, and the element's blade spell on a hold (shared/mage.ts). */
@@ -306,7 +314,7 @@ export const CLASS_ORDER: HeroClass[] = ['WARRIOR', 'RANGER', 'ROGUE', 'MAGE', '
  * unblockable blow they step out of on their feet. The light classes dodge and can't hold a guard.
  */
 /** What a class's dodge button says on a phone. */
-export const dodgeName = (cls: HeroClass): string => ({ ROGUE: 'DASH', RANGER: 'JUMP', MAGE: 'BLINK' } as Partial<Record<HeroClass, string>>)[cls] ?? 'ROLL';
+export const dodgeName = (cls: HeroClass, w?: Weapon): string => (w?.dodge.kind === 'sprint' ? 'SPRINT' : ({ ROGUE: 'DASH', RANGER: 'JUMP', MAGE: 'BLINK' } as Partial<Record<HeroClass, string>>)[cls] ?? 'ROLL');
 export const CLASS_DODGES: Record<HeroClass, boolean> = { WARRIOR: false, HEALER: false, ROGUE: true, RANGER: true, MAGE: true };
 /** What the dodge button does for this kit: its own dodge, or nothing (a Warrior or Healer has none). */
 export const dodgeOf = (w: Weapon): Dodge | undefined => (CLASS_DODGES[w.cls] ? w.dodge : undefined);

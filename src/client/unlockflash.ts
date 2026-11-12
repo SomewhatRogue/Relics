@@ -23,7 +23,7 @@ const LATER: BtnId[] = ['attack', 'block', 'roll', 'skill', 'relic', 'potion', '
 const signName = (me: Hero) => { const s = signOf(WEAPONS[me.weapon].cls); return s ? SIGNS[s].name : ''; };
 /** What a button is called, for this hero. */
 function nameOf(id: BtnId, me: Hero): string {
-  if (id === 'roll') return dodgeName(WEAPONS[me.weapon].cls);
+  if (id === 'roll') return dodgeName(WEAPONS[me.weapon].cls, WEAPONS[me.weapon]);
   if (id === 'sign') return signName(me);
   return { attack: 'ATTACK', block: 'BLOCK', skill: 'SKILL', relic: 'RELIC', potion: 'POTION', grab: 'GRAB', use: 'USE', reload: 'RELOAD', element: 'ELEMENT' }[id];
 }

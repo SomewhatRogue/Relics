@@ -30,7 +30,7 @@ export function guardKind(w: WeaponId): GuardKind {
 }
 
 /** The dodge button's name for this kit (ROLL, JUMP, DASH, BLINK), or NONE. */
-export const dodgeOfKit = (w: WeaponId): string => (dodgeOf(WEAPONS[w]) ? dodgeName(WEAPONS[w].cls) : 'NONE');
+export const dodgeOfKit = (w: WeaponId): string => (dodgeOf(WEAPONS[w]) ? dodgeName(WEAPONS[w].cls, WEAPONS[w]) : 'NONE');
 
 const PIPS: Record<GuardRating, number> = { LOW: 1, MED: 2, HIGH: 3 };
 const pips = (n: number, of: number) => `<i class="pips">${'<em class="on"></em>'.repeat(n)}${'<em></em>'.repeat(of - n)}</i>`;

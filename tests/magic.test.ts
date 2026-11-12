@@ -98,8 +98,10 @@ describe('class weapons', () => {
     expect(t.act).toBe('stunned');
   });
 
-  it('only the rogue is quick: every other class walks slower', () => {
-    for (const k of Object.keys(WEAPONS) as (keyof typeof WEAPONS)[]) if (WEAPONS[k].cls !== 'ROGUE') expect(WEAPONS[k].speed).toBeLessThan(1);
+  it('the rogue is quickest; the Ranger just under (2026-11-12); the rest walk slower', () => {
+    const ks = Object.keys(WEAPONS) as (keyof typeof WEAPONS)[], rogue = Math.min(...ks.filter((k) => WEAPONS[k].cls === 'ROGUE').map((k) => WEAPONS[k].speed));
+    for (const k of ks) if (WEAPONS[k].cls !== 'ROGUE') expect(WEAPONS[k].speed).toBeLessThan(rogue);
+    for (const k of ks) if (WEAPONS[k].cls !== 'ROGUE' && WEAPONS[k].cls !== 'RANGER') expect(WEAPONS[k].speed).toBeLessThanOrEqual(0.9);
     expect(WEAPONS.daggers.speed).toBeGreaterThan(1);
     expect(WEAPONS.staff.dodge.cooldown).toBeGreaterThan(WEAPONS.daggers.dodge.cooldown * 4);
   });

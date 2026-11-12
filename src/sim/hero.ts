@@ -447,6 +447,12 @@ export function rollDir(h: Hero, inp: Intent): [number, number] {
 
 function startRoll(h: Hero, inp: Intent, now: number, ev: FightEvent[]): void {
   const dodge = WEAPONS[h.weapon].dodge, kind = dodge.kind;
+  // A SPRINT isn't a dodge: you keep walking (and shooting), faster, for its time (walkspeed.ts).
+  if (kind === 'sprint') {
+    Object.assign(h, { sprintUntil: now + dodge.time, lastRollAt: now, rollQueuedAt: -9 });
+    spend(h, dodge.stamina * DODGE.cost * dodgeBreath(h), now);
+    return void ev.push({ k: 'roll', x: h.x, y: h.y });
+  }
   [h.rollDx, h.rollDy] = rollDir(h, inp);
   if (kind !== 'backstep') (h.fx = h.rollDx), (h.fy = h.rollDy);
   // The press's own moment on a friend's screen (sim/lagcomp.ts).

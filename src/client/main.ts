@@ -468,8 +468,9 @@ function hud(now: number): void {
   const near = game.near(), spot = near?.pet && game.mode === 'run' && card.near >= 0 ? null : near, busy = panel.open || title.open;
   // Whoever you're near: their lines load before you talk to them (voiceplay.ts).
   if (spot?.talk) primeSpot(spot.talk, spot.arg ?? 0, CLASS_ORDER[spot.arg ?? 0]);
-  // (While you're petting the hound, its prompt steps aside so you can see it.)
-  $('#prompt').hidden = !spot || busy || (!!spot.pet && !!petFrame(game.hero, now));
+  // (While you're petting the hound, its prompt steps aside so you can see it. Your own hound, always at
+  // heel, never puts up a prompt: it covered the view (Kyle's friend, 2026-11-12); USE still pets it.)
+  $('#prompt').hidden = !spot || busy || (!!spot.pet && (spot.pet === 'own' || !!petFrame(game.hero, now)));
   if (spot) $('#prompt').textContent = (input.touch ? '' : spot?.chest || (spot?.pet && game.mode === 'run') ? 'F  ' : game.mode === 'run' ? '' : 'E  ') + (spot.door || spot.pet || !spot.talk || NOT_PEOPLE.has(spot.talk) ? spot.label : 'TALK: ' + spot.label);
   // A drop at your feet, its card shut: the key that opens it (a phone has LOOK in the context slot).
   else if (!busy && !input.touch && game.mode === 'run' && card.near >= 0 && card.current < 0) ($('#prompt').hidden = false), ($('#prompt').textContent = 'F  LOOK');

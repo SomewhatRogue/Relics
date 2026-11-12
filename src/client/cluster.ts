@@ -128,7 +128,7 @@ export class Cluster {
     const pips = { lit: flick ? 0 : Math.ceil(st / 10), of: 10, col: me.winded ? '#d84a3a' : mage ? (st < 25 ? '#8f86a8' : '#cdbdf0') : cleric ? (st < 25 ? '#a89060' : '#ffd27a') : st < 25 ? '#a8a090' : '#ddd5c4' };
     b.attack.show({ shape: 'round', size: 42, grade: 'iron', icon: atk, iconScale: carrying ? 1 : 2, ...(mage || cleric ? {} : { pips }) }, '', '', carrying ? 'Slam' : 'Attack');
     b.block.show(guard === 'none' ? null : { shape: 'shield', size: 30, grade: 'iron', icon: icon('block'), ...(cleric ? { pips } : {}) }, '', '', 'Block');
-    const dn = dodgeName(kit.cls), dodges = !!dodgeOf(kit);
+    const dn = dodgeName(kit.cls, kit), dodges = !!dodgeOf(kit);
     if (document.body.dataset.dodge !== String(dodges)) document.body.dataset.dodge = String(dodges);
     // A Mage's BLINK wears the magic pips, filling as it comes back. Winded it can't fire, so it goes dull;
     // with less magic than it costs it still fires but leaves you winded, so the cost shows in red.

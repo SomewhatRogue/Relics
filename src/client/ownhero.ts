@@ -231,6 +231,8 @@ export class OwnHero {
     const breath = (s.stamina as number) - this.acts.filter((o) => o.kind === 'roll' && !o.confirmed && !o.dead).reduce((n, o) => n + o.cost, 0);
     if (breath < 1 || now - this.lastRoll < w.dodge.cooldown * (1 - statsOf(h).dodge)) return;
     if (cur?.kind === 'roll') return;
+    // A SPRINT walks on, faster: the room's word on it (sprintUntil) comes with its next state.
+    if (w.dodge.kind === 'sprint') return void ((this.rollQ = -9), (this.lastRoll = now), (h.sprintUntil = now + w.dodge.time));
     if (cur) {
       const sw = currentSwing(h);
       if (cur.t < sw.windup + sw.active) return;

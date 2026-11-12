@@ -13,6 +13,9 @@ import { quickMult } from './charge';
 import { statsOf } from './gearstats';
 import type { Hero, Intent } from './types';
 
+/** A shortbow's SPRINT, while it runs (shared/weapons.ts RANGER_SPRINT). */
+export const sprintMult = (h: Hero, now: number) => ((h.sprintUntil ?? -1) > now ? WEAPONS[h.weapon].dodge.mult ?? 1 : 1);
+
 /** The guard is up this tick: block held, breath left, not winded, and a kit that holds a block. */
 export const guardUp = (h: Hero, inp: Intent) => inp.block && h.stamina > 0 && !h.winded && guardOf(WEAPONS[h.weapon]) === 'full';
 
@@ -23,7 +26,7 @@ export const guardUp = (h: Hero, inp: Intent) => inp.block && h.stamina > 0 && !
 export function walkSpeed(h: Hero, inp: Intent, now: number, k = 1): number {
   const m = Math.min(1, Math.hypot(inp.mx, inp.my));
   if (m < 0.05) return 0;
-  return HERO.speed * WEAPONS[h.weapon].speed * statsOf(h).speed * k * (m >= STEALTH.slow ? 1 : STEALTH.creep) * wadeAt(h.x, h.y) * brandySpeed(h, now) * quickMult(h, now);
+  return HERO.speed * WEAPONS[h.weapon].speed * statsOf(h).speed * k * (m >= STEALTH.slow ? 1 : STEALTH.creep) * wadeAt(h.x, h.y) * brandySpeed(h, now) * quickMult(h, now) * sprintMult(h, now);
 }
 
 /** The walking pace of what the hero is doing now (`null`: this act doesn't walk on the stick). */
