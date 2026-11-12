@@ -76,3 +76,11 @@ export const LOOK: Record<Block['kind'], Look> = {
   // A side way is a gap, painted with the room's ways out (wayout.ts), never drawn as a block.
   sideway: { tall: 0, roof: '#000', ridge: '#000', wall: '#000', windows: false },
 };
+
+/**
+ * The art pass (docs/design/art-pass.md, 1.5x): what's painted from this table stands half again as tall
+ * on the same footprint (walls up, furniture at the bigger hands; blocks.ts sizes doors and windows to
+ * match). Pieces drawn from their own boxes (pieces.ts) keep theirs: their `tall` only bounds fire and rubble.
+ */
+const BOXED = new Set<string>(['headframe', 'log', 'mill', 'stakes', 'jetty', 'gangway', 'smokehouse', 'dryrack', 'hungnet', 'oak', 'haystack', 'boards', 'reeds', 'sideway']);
+for (const [k, l] of Object.entries(LOOK)) if (!BOXED.has(k)) l.tall = Math.round(l.tall * 1.5);

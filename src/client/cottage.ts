@@ -54,8 +54,9 @@ export function paintHouse(rect: Rect, b: Block, h: House, w: number, roofH: num
   if (barn) for (let x = mx + 2; x < mx + mw; x += 4) rect(x, roofH + 1, 1, tall - 1, '#4a3420');
   else if (wall === WALLS[2]) for (let y = roofH + 3; y < roofH + tall; y += 4) for (let x = mx + ((y >> 2) % 2) * 3; x < mx + mw; x += 6) rect(x, y, 5, 1, '#45414c');
   else for (const x of [mx, mx + mw - 2, mx + Math.round(mw * 0.35)]) rect(x, roofH + 1, 2, tall - 1, '#3e2a1a');
-  if (!barn) for (const x of windowsOf(h, w)) rect(x - 1, roofH + tall - 16, 5, 5, '#3e2a1a'), rect(x, roofH + tall - 15, 3, 3, '#14100c');
-  if (b.style === 'stone') for (const x of windowsOf(h, w)) rect(x - 2, roofH + tall - 15, 1, 3, '#4a3424'), rect(x + 3, roofH + tall - 15, 1, 3, '#4a3424'), rect(x - 1, roofH + 1, 5, 1, '#6a6470');
+  // (Windows at 1.5x with the art pass, their sills where the bigger people's heads are.)
+  if (!barn) for (const x of windowsOf(h, w)) rect(x - 1, roofH + tall - 24, 8, 8, '#3e2a1a'), rect(x + 1, roofH + tall - 22, 4, 4, '#14100c'), rect(x - 1, roofH + tall - 20, 8, 1, '#3e2a1a'), rect(x + 2, roofH + tall - 22, 1, 4, '#3e2a1a');
+  if (b.style === 'stone') for (const x of windowsOf(h, w)) rect(x - 3, roofH + tall - 23, 2, 6, '#4a3424'), rect(x + 7, roofH + tall - 23, 2, 6, '#4a3424'), rect(x - 1, roofH + 1, 8, 1, '#6a6470');
   if (lw) {
     // The lean-to: lower, rough boards, a plank roof.
     const drop = 7;
@@ -102,7 +103,7 @@ function hole(rect: Rect, b: Block, mx: number, mw: number, roofH: number): void
 export function drawLit(c: Ctx, h: House, x: number, top: number, w: number, roofH: number, tall: number, lamps = true): void {
   c.glow.fillStyle = '#ffd27a';
   // The windows show the fire only once it's dark enough to light the lamps (shared/lamps.ts).
-  if (lamps) for (const wx of windowsOf(h, w)) c.glow.fillRect(Math.round(x + wx), Math.round(top + roofH + tall - 15), 3, 3);
+  if (lamps) for (const wx of windowsOf(h, w)) c.glow.fillRect(Math.round(x + wx + 1), Math.round(top + roofH + tall - 22), 4, 4);
   const cx = x + chimneyOf(h, w) + 3;
   for (let j = 0; j < 5; j++) {
     const p = (c.now * 0.18 + j / 5 + x * 0.01) % 1;

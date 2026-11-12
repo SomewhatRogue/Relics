@@ -104,7 +104,8 @@ function furnished(g: CanvasRenderingContext2D, b: Block, rect: Rect, w: number,
 /** A door in the middle of the front wall. */
 function door(b: Block, rect: Rect, w: number, wallY: number, l: Look): void {
   if (!b.door && b.kind !== 'den' && b.kind !== 'granary') return;
-  const dw = b.kind === 'barn' ? 12 : b.kind === 'den' ? 8 : 6, dh = Math.min(l.tall - 3, b.kind === 'barn' ? 18 : 11);
+  // (1.5x with the art pass: a door the bigger people walk through.)
+  const dw = b.kind === 'barn' ? 18 : b.kind === 'den' ? 12 : 9, dh = Math.min(l.tall - 4, b.kind === 'barn' ? 27 : 16);
   rect(Math.round(w / 2 - dw / 2), wallY + l.tall - dh, dw, dh, b.kind === 'den' ? '#0d0b10' : '#2a1e14');
   if (b.kind !== 'den') rect(Math.round(w / 2 - dw / 2), wallY + l.tall - dh, dw, 1, '#5a3d22');
   // Barred: planks nailed across.

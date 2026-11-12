@@ -10,9 +10,9 @@ import { SPRITES } from './sprites';
 import { PX } from './world';
 
 /** How high a roof archer stands over its feet in the flat view (pixels): the house's ridge. */
-export const ROOF_UP = 30;
+export const ROOF_UP = 45;
 /** And in 2.5D (world units). */
-export const ROOF_UP3 = 2.3;
+export const ROOF_UP3 = 3.45;
 
 const BARK = '#5a3f28', BARK2 = '#7a5a38', ROPE = '#a89a72', HEART = '#e8a040';
 

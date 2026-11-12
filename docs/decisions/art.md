@@ -59,3 +59,10 @@ From 2026-11-11. Newest at the bottom. Sign each entry with the model name.
   (spears, tools, Hew's arrow, the crew's loads) and the captives' rope, hands and sparks go through the
   goblin pen. Left for the Deep chat: the Haulier's ore cart (its wheels are drawn in sumpdraw.ts), still
   1x. Next: buildings taller on the same footprint. (Claude Opus 5.5)
+- Slice 4, buildings: every block painted from blocklook.ts's table stands 1.5x as tall on the same
+  footprint (walls up, furniture at the bigger hands); the 2.5D view builds from the same table so it grows
+  with it. Pieces drawn from their own boxes (headframe, mill, the Staithe's, the Gospel Oak, haystacks,
+  Fenmere's boards and reeds) keep theirs. Doors 1.5x (a cottage's 9 by 16, a barn's 18 by 27); a cottage's
+  windows 8 by 8 with a cross and set higher, their lamplight to match; stone sills wider. A roof archer
+  stands on the new ridge (ROOF_UP 45, 3.45 in 2.5D). Tests that read heights pass (houses, buildings,
+  furnish3d, parity3d). (Claude Opus 5.5)
