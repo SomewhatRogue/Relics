@@ -16,7 +16,7 @@ export const QUESTW = {
   tag: 'QUEST',
   /** The goal, plain, with the count where there is one. */
   goal: (q: QuestDef, n: number) => {
-    const g = { q3: "Kill MAWL at Tollan's Farm", q4: 'Burn 3 dens in Greyhollow', q5: 'Bring out 4 people from Fennick Ford', q7: 'Kill the butcher at the bottom of a deep job', q9: 'Kill THE HAULIER in the Deep' }[q.id];
+    const g = { q1: 'Do your first job off the board', q3: "Kill MAWL at Tollan's Farm", q4: 'Burn 3 dens in Greyhollow', q5: 'Bring out 4 people from Fennick Ford', q7: 'Kill the butcher at the bottom of a deep job', q9: 'Kill THE HAULIER in the Deep' }[q.id];
     return q.need > 1 ? `${g} (${n} of ${q.need})` : g;
   },
   /** Folded, one line. */
@@ -32,6 +32,7 @@ export const QUESTW = {
   /** Your board's posting for each (the Haulier's has none: he's in the Deep). */
   post: (q: QuestDef, place: Place): { title: string; text: string } => {
     const t: Record<string, { title: string; text: string }> = {
+      q1: { title: `A first job at ${place.name}`, text: `${place.name}, two rooms and a few of ours to bring out of them. It's the least ruined place in the valley, so it's where we start the new ones.` },
       q3: { title: `Quest: MAWL at ${place.name}`, text: `MAWL has the barn at ${place.name}. Kill him and Tollan can have it back.` },
       q4: { title: `Quest: dens at ${place.name}`, text: "The carr's thick with dens again, so burn three and Corporal Brisk will send you to Hangman's Wood." },
       q5: { title: `Quest: the folk at ${place.name}`, text: "Four of the ford's people are in cages. Bring them out and Corporal Brisk will send you to the Barrowfields and Fenmere." },

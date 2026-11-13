@@ -17,13 +17,18 @@ export interface ErrandLine { rows: string; small: string; key: string }
 function words(p: Profile, id: ErrandId): { pin: string; todo: string; small: string } {
   const h = questHeld(p);
   if (id === 'job' && h) return { pin: QUESTW.held, todo: QUESTW.goal(h.q, h.n), small: QUESTW.small(h.q, h.n) };
+  if (id === 'back') return { pin: ERRANDW.pin.trainer, todo: ERRANDW.todo('trainer', p.cls), small: ERRANDW.small('trainer', p.cls) };
   if (id === 'quest') return { pin: QUESTW.due, todo: ERRANDW.todo('trainer', p.cls), small: `${QUESTW.due}: SEE ${TRAINERS[p.cls].name}` };
   return { pin: ERRANDW.pin[id], todo: ERRANDW.todo(id, p.cls), small: ERRANDW.small(id, p.cls) };
 }
 
 export function errandLine(p: Profile): ErrandLine | null {
   const first = firstErrands(p), open = openErrands(p);
-  const rows: { id: ErrandId; done: boolean }[] = first.length ? first : open.map((id) => ({ id, done: false }));
+  // The first two (ticked as done) while either's open, then whatever else is (the first job handed over at the first meeting among them).
+  const rest = open.filter((id) => !first.some((r) => r.id === id)).map((id) => ({ id, done: false }));
+  // (Due back at the trainer: that row, not the trainer's ticked one as well.)
+  const back = rest.some((r) => r.id === 'back');
+  const rows: { id: ErrandId; done: boolean }[] = [...first.filter((r) => !(back && r.id === 'trainer')), ...rest];
   if (!rows.some((r) => !r.done)) return null;
   const row = (r: { id: ErrandId; done: boolean }) => {
     const w = words(p, r.id);

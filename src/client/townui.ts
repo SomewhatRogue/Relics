@@ -34,7 +34,7 @@ import { openBest } from './bestui';
 import { townVoice, voiceClock } from './voiceplay';
 import { talkedTo } from '../shared/errands';
 import { ERRANDW } from './errandwords';
-import { questHeld } from '../shared/heroquests';
+import { questBack, questHeld } from '../shared/heroquests';
 import { QUESTW } from './questwords';
 import { coinsHtml } from '../shared/coins';
 
@@ -81,20 +81,23 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       return panel.show(t.name, say(name, ELSEWHERE[cls].replace('{who}', title(yours.name)).replace('{where}', yours.where)));
     }
     // Your own trainer: the first errand's done, and they've heard you've a new skill open (shared/errands.ts).
-    const first = !!pr.errands?.told && !pr.errands.trainer, had = questHeld(pr)?.q.id;
+    const first = !!pr.errands?.told && !pr.errands.trainer, had = questHeld(pr)?.q.id, back = !!questBack(pr);
     if (talkedTo(pr, 'trainer', arg)) g.keep();
+    // The first meeting, and the word after your first job, are a talk, not the training screen (Kyle's
+    // playtest, 2026-11-13): there's nothing to buy at level 1, so what they say is the point.
+    const head = `${t.name}, ${CLASS_NAME[cls]} TRAINER`, talk = (s: string, pre = '') => panel.show(head, pre + say(name, s), [{ label: 'TRAINING', act: () => openTrainer(g, panel, head, name, '') }]);
+    // A Cleric's cold censer: Isolde lights it at the Lantern first (on the first meeting, then her word too).
+    const relit = pr.cls === 'HEALER' && pr.cold;
+    if (relit) (pr.cold = false), g.keep(), (g.hero.cold = false);
+    const lit = relit ? p('She takes your censer without asking, carries it to the Lantern, and brings it back lit.') : '';
+    if (first) return talk(ERRANDW.firstVisit[pr.cls], lit);
+    if (relit) return panel.show(head, lit + say(name, TALLY.isolde), [{ label: 'CLOSE', act: again }], true);
+    if (back && pr.level < 3) return talk(ERRANDW.back[pr.cls]);
     // A hero quest handed over just now (shared/heroquests.ts): the trainer's one line for it.
     const handed = !first && !!questHeld(pr) && questHeld(pr)!.q.id !== had;
-    if (pr.cls === 'HEALER' && pr.cold) {
-      pr.cold = false;
-      g.keep();
-      g.hero.cold = false;
-      return panel.show(`${t.name}, ${CLASS_NAME[cls]} TRAINER`, p('She takes your censer without asking, carries it to the Lantern, and brings it back lit.') + say(name, TALLY.isolde), [{ label: 'CLOSE', act: again }], true);
-    }
     // One spoken line at most: grown since you were last here, or (a Cleric) coals for the censer.
-    // (The first time in on the errand: their own line for a new face, errandwords.ts.)
-    const greet = first ? ERRANDW.firstVisit[pr.cls] : handed ? QUESTW.hand[pr.cls] : pr.picks > 0 ? TEACH[pr.cls][0] : pr.cls === 'HEALER' && pr.glow > 0 ? COAL.isolde : '';
-    openTrainer(g, panel, `${t.name}, ${CLASS_NAME[cls]} TRAINER`, name, greet);
+    const greet = handed ? QUESTW.hand[pr.cls] : pr.picks > 0 ? TEACH[pr.cls][0] : pr.cls === 'HEALER' && pr.glow > 0 ? COAL.isolde : '';
+    openTrainer(g, panel, head, name, greet);
   } else if (id === 'hew') {
     panel.show('HEW', say('Hew', g.wood && g.wood.stage >= 2 ? LINES.north : LINES.later));
   } else if (id === 'orla') {

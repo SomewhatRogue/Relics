@@ -132,3 +132,22 @@ From 2026-11-12. Spec: docs/design/town-quests.md. Newest at the bottom. Sign ea
 - Deep skills spec approved by Kyle with the proposals: BARRICADE, FLARE, the samurai cut, THE DOOR, the
   holy warrior; floor 20 (check with the Deep chat); the Rogue's cut first. On the board for its own
   chat. (Claude Opus 5.5)
+- **Kyle's playtest: the trainer was a dead end** (the first-visit line was a small line over a training
+  screen of locked rows, at level 1). Now:
+  - The first meeting is a **talk** (TRAINING to see the screen, or CLOSE): each trainer's own first
+    line sends you to the board in the square (`ERRANDW.firstVisit`, rewritten). A Cleric's cold censer
+    is lit at the Lantern in the same talk.
+  - That hands over a new first hero quest, **q1** (`shared/heroquests.ts`): your own posting, "A first
+    job at Lowfurrow Fields" (short, rescue, always by day, the least ruined place), tagged QUEST, the
+    board marked with its edge point; on the goal line with the first errands (the javelin's too). Any
+    job won counts (no dead end if you take another). Only handed over up to level 2; old heroes have it
+    done.
+  - Done, it sends you **back** to the trainer (`quests.back`, the `back` errand: their mark and the
+    goal line), who names your first skill and says it comes at level 3 (`ERRANDW.back`). At level 3 or
+    over by then, the training screen as usual.
+  - Lines: one lore-keeper call, one line-editor call. **For the story bible:** it still has Shadowstep
+    as Whisper's first skill and Channel as Vell's; the game has Vanish and Round Up (Shadowstep is the
+    Rogue's own button now). The lines follow the game.
+  - Checked end to end with `scripts/firstjob.cjs` (a fresh hero out of the wood, the runner, the
+    meeting, the board, the job won with `endForTest`, back to the trainer), Warrior and Cleric, phone,
+    no page errors. (Claude Opus 5.5)

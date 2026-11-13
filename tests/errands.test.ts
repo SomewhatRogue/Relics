@@ -28,13 +28,14 @@ describe('town errands', () => {
     expect(firstErrands(p)).toEqual([{ id: 'relic', done: false }, { id: 'trainer', done: true }]);
     expect(relicDone(p)).toBe(true);
     expect(relicDone(p)).toBe(false);
-    expect(openErrands(p)).toEqual([]);
+    // (Meeting the trainer handed over the first job: tests/heroquests.test.ts.)
+    expect(openErrands(p)).toEqual(['job']);
     expect(firstErrands(p)).toEqual([]);
   });
 
   it('old saves: a hero from before errands never gets the first two', () => {
     const old = { ...newProfile('MAGE', 'OLD') } as Record<string, unknown>;
-    delete old.errands;
+    delete old.errands, delete old.quests;
     const s = fromJson({ heroes: [old as never], current: 0, world: newWorld() })!;
     const p = s.heroes[0];
     expect(p.errands).toMatchObject({ told: true, relic: true, trainer: true });

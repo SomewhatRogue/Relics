@@ -11,6 +11,8 @@ import { openCut } from '../src/shared/instances';
 const hero = (level: number) => {
   const p = { ...newProfile('WARRIOR', 'Q'), prologue: true };
   told(p), relicDone(p), talkedTo(p, 'trainer', 0);
+  // (The first job, handed over at the first meeting, done and told: its own test below.)
+  p.quests = { at: null, n: 0, done: ['q1'] };
   if (level > 1) gainXp(p, xpFor(level));
   return p;
 };
@@ -19,6 +21,33 @@ const job = (o: Partial<Job>): Job => ({ id: 'j', place: PLACES[0], objective: '
 const facts = (o: Partial<QuestFacts>): QuestFacts => ({ job: job({}), won: true, rescued: 0, dens: 0, ...o });
 
 describe('hero quests', () => {
+  it('the first meeting sends you to the board; your first job, any won job, brings you back to the trainer', () => {
+    const p = { ...newProfile('ROGUE', 'NEW'), prologue: true };
+    told(p);
+    // Before meeting them: the trainer's errand, no quest yet.
+    expect(openErrands(p)).toEqual(['relic', 'trainer']);
+    talkedTo(p, 'trainer', 2);
+    expect(questHeld(p)?.q.id).toBe('q1');
+    expect(openErrands(p)).toEqual(['relic', 'job']);
+    const j = questJob(p, words)!;
+    expect(j).toMatchObject({ quest: 'q1', objective: 'rescue', size: 'short', time: 'day', place: { name: 'Lowfurrow Fields', ruin: 1 } });
+    // A run lost doesn't do; one won does, and sends you back.
+    expect(questCount(p, facts({ won: false }))).toBeNull();
+    expect(questCount(p, facts({ job: job({ objective: 'burn' }) }))?.id).toBe('q1');
+    expect(openErrands(p)).toEqual(['relic', 'back']);
+    // Telling the trainer ends it; nothing more till level 3.
+    talkedTo(p, 'trainer', 2);
+    expect(openErrands(p)).toEqual(['relic']);
+    expect(questDue(p)).toBeNull();
+  });
+
+  it('a hero past level 2 is never handed the first job', () => {
+    const p = { ...newProfile('WARRIOR', 'X'), prologue: true };
+    told(p), relicDone(p);
+    gainXp(p, xpFor(3));
+    expect(questDue(p)?.id).toBe('q3');
+  });
+
   it('nothing till level 3; then your trainer has one, and talking hands it over', () => {
     const p = hero(1);
     expect(questDue(p)).toBeNull();
@@ -71,7 +100,7 @@ describe('hero quests', () => {
     delete old.quests;
     old.xp = xpFor(6), old.level = 6;
     const p = fromJson({ heroes: [old as never], current: 0, world: newWorld() })!.heroes[0];
-    expect(p.quests?.done).toEqual(['q3', 'q4', 'q5']);
+    expect(p.quests?.done).toEqual(['q1', 'q3', 'q4', 'q5']);
     expect(isOpen(p, 'hangman') && isOpen(p, 'exped')).toBe(true);
     expect(isOpen(p, 'deep')).toBe(false);
     expect(questDue(p)).toBeNull();

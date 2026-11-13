@@ -32,12 +32,21 @@ export const ERRANDW = {
   /** The church's free first recharge. */
   free: 'RECHARGE: FREE',
   freeDone: "Isolde takes it round the back and brings it out full, and says there's nothing to pay, this once.",
-  /** Each trainer's line the first time you come in on the errand. */
+  /** Each trainer's first meeting (a talk, not the training screen): they send you to the board in the square
+   *  (Kyle's playtest, 2026-11-13; lore keeper and line editor). */
   firstVisit: {
-    WARRIOR: "So you're the new one. Come in. Let's see what's left of you.",
-    RANGER: 'Found my note, then. Come in and mind the bowls.',
-    ROGUE: "There you are. Sit. Don't touch anything you can't afford.",
-    MAGE: "Ah. Yes. You. Come in, mind the circle, it's chalk and it smudges.",
-    HEALER: "Stand there where I can see you. Hm. You'll do, you great calf. Now listen.",
+    WARRIOR: "So you're the new one. Nothing to teach you till you've some fight in you. Board's in the square, and you can earn your keep there.",
+    RANGER: "Found my note, then. I don't teach anyone I haven't seen work, so there's a board in the square, and mind the dog bowls on your way out.",
+    ROGUE: "There you are. Sit, sit. I don't sell lessons to strangers, so get yourself some work off the board in the square, and then we'll talk.",
+    MAGE: "Ah. Yes. You. Mind the circle, it's chalk. I can't teach you anything yet, not really, so there's the board in the square, and come back after, and I'll have something worked out.",
+    HEALER: "Stand there where I can see you. Hm. You'll do, you great calf. Go and do an honest job off the board in the square, and come back to me after.",
+  } as Record<HeroClass, string>,
+  /** Back after that first job: your first skill, and when (level 3: drills.ts SKILL_STEPS). */
+  back: {
+    WARRIOR: "Good, you came back. At level 3 I'll teach you Shield Charge. Till then, more of the same.",
+    RANGER: "You're still in one piece. Get to level 3 and you'll have the Hunter's Net off me. Till then, the board.",
+    ROGUE: "Back already. Get to level 3 and I'll sell you Vanish, and we'll call it a friend's price. Keep at it.",
+    MAGE: "Good, good. At level 3 I can show you Round Up, I think, I'm almost sure. Keep at the board till then.",
+    HEALER: "Back on your feet, good. Level 3 and you'll have Sanctuary off me. Till then, keep working and keep your back to a wall.",
   } as Record<HeroClass, string>,
 };

@@ -10,10 +10,10 @@ import { SKILL_CHOICES } from './magic.js';
 import type { Profile } from './progress.js';
 import { knowsSkill, skillStep } from './skillteach.js';
 import { CLASS_ORDER, type HeroClass } from './weapons.js';
-import { questDue, questHeld, takeQuest } from './heroquests.js';
+import { questBack, questDue, questHeld, reported, takeQuest } from './heroquests.js';
 
-/** `quest`: your trainer has a hero quest for you; `job`: one in hand, to do (shared/heroquests.ts). */
-export type ErrandId = 'relic' | 'trainer' | 'skill' | 'quest' | 'job';
+/** `quest`: your trainer has a hero quest for you; `job`: one in hand, to do; `back`: one done, to tell them of (shared/heroquests.ts). */
+export type ErrandId = 'relic' | 'trainer' | 'skill' | 'quest' | 'job' | 'back';
 export interface Errands {
   /** The runner has found you and said their line (the first two are yours from then). */
   told: boolean;
@@ -54,8 +54,10 @@ export function openErrands(p: Profile): ErrandId[] {
   if (e.told && !e.relic) out.push('relic');
   if (e.told && !e.trainer) out.push('trainer');
   else if (openSkillLevel(p) > e.seen) out.push('skill');
-  if (questDue(p) && (!e.told || e.trainer)) out.push('quest');
+  // (Not before the runner's been: the first is handed over at the first meeting.)
+  if (questDue(p) && e.told && e.trainer) out.push('quest');
   if (questHeld(p)) out.push('job');
+  if (questBack(p)) out.push('back');
   return out;
 }
 
@@ -96,7 +98,9 @@ export function talkedTo(p: Profile, talk: string, arg?: number): boolean {
   const was = JSON.stringify(e);
   if (e.told) e.trainer = true;
   e.seen = Math.max(e.seen, p.level);
-  // And hands over the quest they have for you (not on top of the first errand).
-  const took = (!e.told || e.trainer) && takeQuest(p);
-  return took || JSON.stringify(e) !== was;
+  // Hears of the one you've done, and hands over the quest they have for you (the first at the first meeting).
+  const back = !!questBack(p);
+  reported(p);
+  const took = e.told && e.trainer && takeQuest(p);
+  return back || took || JSON.stringify(e) !== was;
 }
