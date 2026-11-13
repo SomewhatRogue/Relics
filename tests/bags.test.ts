@@ -1,3 +1,4 @@
+import { plusCost } from '../src/shared/forgeplus';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { BAG, VAULT, bagSize, fitStores, growBag, growVault, melt, pawn, pawns, redeem, stow, unstow, upgraded, vaultSize, type Stores } from '../src/shared/bags';
 import { rollGear, STEEL } from '../src/shared/gear';
@@ -87,7 +88,7 @@ describe("Halvard's anvil", () => {
     const p = hero(1), it = p.bag[0];
     expect(melt(p, 0)).toBe(STEEL[it.quality]);
     expect(p.bag.length).toBe(0);
-    Object.assign(p, { gold: 45, steel: 2 });
+    Object.assign(p, { gold: plusCost(piece())!.gold, steel: plusCost(piece())!.steel });
     const up = upgraded(p, piece())!;
     expect(up.level).toBe(1);
     expect([p.gold, p.steel]).toEqual([0, 0]);

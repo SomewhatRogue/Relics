@@ -20,10 +20,10 @@ describe('trainer', () => {
       expect(Math.max(...DRILLS[id].levels)).toBeLessThanOrEqual(10);
       for (let r = 1; r < DRILLS[id].max; r++) expect(drillPrice(id, r)).toBeGreaterThan(drillPrice(id, r - 1));
     }
-    // Dearer than they were: the first rank of power was 40.
-    expect(drillPrice('power', 0)).toBe(80);
-    expect(TEACHES.skill).toEqual({ level: 3, price: 150 });
-    expect(TEACHES.leave).toEqual({ level: 5, price: 250 });
+    // In jobs of copper (economy.md; tests/prices.test.ts holds the targets).
+    expect(drillPrice('power', 0)).toBe(225);
+    expect(TEACHES.skill).toEqual({ level: 3, price: 450 });
+    expect(TEACHES.leave).toEqual({ level: 5, price: 600 });
   });
 
   it('buying refuses below the level or without the gold, and spends nothing', () => {
@@ -83,12 +83,12 @@ describe('trainer', () => {
     expect(fresh.find((x) => x.id === 'power')!.tag).toBe('LEVEL 2');
     expect(fresh.find((x) => x.id === 'leave')!.tag).toBe('LEVEL 5');
 
-    const mid = hero(5, 300, 'WARRIOR');
+    const mid = hero(5, 1000, 'WARRIOR');
     mid.drills = { power: 2, health: 1 };
     const rows = trainerRows(mid), at = (id: string) => rows.find((x) => x.id === id)!;
     expect(rows.find((x) => x.id === 'leave')).toBeUndefined();
     expect(at('skill').state).toBe('buy');
-    expect(at('skill').tag).toBe(coinsHtml(150));
+    expect(at('skill').tag).toBe(coinsHtml(TEACHES.skill.price));
     expect(at('power').state).toBe('locked');
     expect(at('health').state).toBe('buy');
     expect(at('health').gain).toBe(`+${shown(8)} health`);
@@ -110,8 +110,8 @@ describe('trainer', () => {
 
   it('three skills a class: the first at level 3, the next at 5 and 7, each bought on its own', () => {
     expect(SKILL_STEPS.map((x) => x.level)).toEqual([3, 5, 7]);
-    expect(SKILL_STEPS.map((x) => x.price)).toEqual([150, 250, 400]);
-    const p = hero(5, 1000, 'ROGUE');
+    expect(SKILL_STEPS.map((x) => x.price)).toEqual([450, 750, 900]);
+    const p = hero(5, 3000, 'ROGUE');
     // The second waits on the first.
     // (A Rogue's three: Vanish, Knife Fan, Smoke Bomb; Shadow Step is its own button now.)
     expect(skillState(p, 'knives')).toBe('needs');
@@ -119,7 +119,7 @@ describe('trainer', () => {
     expect(learnSkill(p, 'shadow')).toBe(false);
     expect(learnSkill(p, 'vanish')).toBe(true);
     expect(learnSkill(p, 'knives')).toBe(true);
-    expect(p.gold).toBe(1000 - 150 - 250);
+    expect(p.gold).toBe(3000 - 450 - 750);
     expect(knowsSkill(p, 'knives')).toBe(true);
     // The third waits on level 7.
     expect(skillState(p, 'smoke')).toBe('locked');
@@ -134,10 +134,10 @@ describe('trainer', () => {
     expect(knowsSkill(old, 'horn')).toBe(true);
     expect(knowsSkill(old, 'stamp')).toBe(false);
     old.level = 7;
-    old.gold = 400;
+    old.gold = 10000;
     expect(learnSkill(old, 'stamp')).toBe(true);
     expect(knowsSkill(old, 'horn')).toBe(true);
-    const fresh = hero(3, 150);
+    const fresh = hero(3, TEACHES.skill.price);
     expect(learnSkill(fresh, 'bash')).toBe(true);
     expect(knowsSkill(fresh, 'horn')).toBe(false);
     expect(skillState(fresh, 'horn')).toBe('locked');

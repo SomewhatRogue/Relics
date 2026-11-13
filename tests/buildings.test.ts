@@ -1,3 +1,5 @@
+import { PURSE_RATIO } from '../src/shared/coins';
+import { SHOP } from '../src/shared/progress';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { collide, doorAt, useMap } from '../src/shared/arena';
 import { runInterior, townInterior } from '../src/shared/interiors';
@@ -66,7 +68,7 @@ describe('heroes', () => {
   it("carry an old save's hero across, class from its weapon", () => {
     store.set('relic.save.v1', JSON.stringify({ profile: { gold: 90, xp: 120, level: 2, perks: [], picks: 1, arms: {}, weapon: 'staff', runs: 3 }, world: { ...newWorld(), day: 4 } }));
     const s = load();
-    expect(s.heroes[0]).toMatchObject({ cls: 'MAGE', gold: 90, name: 'HERO' });
+    expect(s.heroes[0]).toMatchObject({ cls: 'MAGE', gold: Math.round(90 * PURSE_RATIO), name: 'HERO' });
     expect(s.world.day).toBe(4);
   });
 
@@ -74,7 +76,7 @@ describe('heroes', () => {
     const g = new Game();
     g.create('WARRIOR', 'b');
     g.skipWood();
-    g.profile.gold = 50;
+    g.profile.gold = SHOP.augment + 10;
     expect(g.fitAugment('bash', 'fire')).toBe(true);
     expect(g.fitAugment('javelin', 'frost')).toBe(false);
     expect(g.hero.augments.bash).toBe('fire');
@@ -92,7 +94,7 @@ describe('the forge', () => {
     const spear = g.buy('fine', 'spear')!, junk = g.buy('fine', 'greatsword')!;
     expect(g.melt(junk)).toBe(true);
     expect(g.profile.steel).toBe(3);
-    Object.assign(g.profile, { gold: 9000, steel: 100 });
+    Object.assign(g.profile, { gold: 30000, steel: 100 });
     for (let i = 0; i < 7; i++) g.levelUp(g.profile.bag[0]);
     expect(g.profile.bag[0].level).toBe(5);
     expect(g.profile.bag[0].kit).toBe('spear');

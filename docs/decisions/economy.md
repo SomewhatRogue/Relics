@@ -63,3 +63,29 @@ The economy chat's log (docs/design/economy.md). Newest at the foot.
   so the Deep's floors drop copper now too. Nothing of yours was edited; say if a number needs to move back.
 - Until slice 3, old prices stand against the new, lower income: everything costs about twice the jobs it
   did. Slice 3 sets prices by time, with the purse conversion in the same push.
+
+## 2026-11-13: slices 3 and 5, prices by time and the purse carried over (Opus 5.5)
+
+- Prices are written in jobs of copper (`jobs(n)`, shared/coins.ts, from JOB_COPPER 150), so each reads as
+  time. A Bitter 25c, other drinks 20 to 30c, a relic charge 30c. Stat ranks: rank 1 at 1.4 to 1.6 jobs,
+  each next one half that again, the fifth 4.2 to 4.8 jobs (`drillPrice`; the old curve made late ranks
+  cheaper in jobs than now). SKILL drill 2 jobs, technique 2.2, a ladder rung 3.5 on the same climb. The
+  first class skill 3 jobs at level 3, the second 5, the third 6; a dodge's leave-behind 4. Gear: plain
+  half a job, fine 1.2, FORGED 3.5, TOLMOUTH 11, TOUCHED 25, TURNING 60. Halvard +1 a job, +2 2.5, +3 5,
+  +4 30, +5 60 (weeks). Tobin's cut 0.3 to 0.2, a level on a piece 20c; Nettle's cut 0.2 to 0.13 (two
+  thirds of Tobin's, as before). Packs 4, 8, 14, 24 jobs; vault 2, 5, 10. A reroll half a job, an element
+  at the relic-wright a job. The wishing coin stays 5c; bets stay even money.
+- `tests/prices.test.ts` holds each row of the spec's table. Pinned old prices in the trainer, forge,
+  church, Tobin and buildings tests moved to the new ones.
+- **The purse carried over (slice 5):** the geometric mean over 64 prices moved x1.46 in copper (income
+  fell to about 0.56, so in jobs things cost about 2.6 times what they did). `PURSE_RATIO` 1.45: a hero
+  saved without `coin` has the purse multiplied once and is marked `coin: 1` (`fitPurse`, client/save.ts;
+  new heroes are made marked). Tested: once only, and never on a new hero. Shipped in the same push as the
+  prices.
+- **Not converted, for Kyle:** the town's shared totals on the server (the works' needs, the Lantern, the
+  statue's price to beat, STATUE_GIVEN) and the Roll's COIN EARNED and COIN GIVEN, which mix old and new
+  units. Works fill about half as fast now. Also not converted: a trade or statue bid pending across the
+  update (rare, small).
+- The job board's list rows still printed `120g` (missed in slice 1; Kyle caught it): coins now. Phone
+  shot of the board checked.
+- Next: slice 4, fewer and bigger stat ranks.

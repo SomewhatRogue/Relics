@@ -10,11 +10,12 @@ import { STEEL, nextLevel } from './gear.js';
 import { sellValue } from './prices.js';
 import { carriesHungry, tobinWont, type Carrier } from './fence.js';
 import type { Item } from './loot.js';
+import { jobs } from './coins.js';
 
 /** Pack sizes in order, and the gold to reach each (index matches). */
-export const BAG = { sizes: [8, 12, 16, 20, 24], gold: [0, 400, 1000, 2000, 3600], start: 8 }; // dear on purpose (Kyle, 2026-11-04): a bigger pack is a long-term goal
+export const BAG = { sizes: [8, 12, 16, 20, 24], gold: [0, jobs(4), jobs(8), jobs(14), jobs(24)], start: 8 }; // dear on purpose (Kyle, 2026-11-04): a bigger pack is a long-term goal
 /** The vault's shelves, the same way. */
-export const VAULT = { sizes: [16, 24, 32, 40], gold: [0, 150, 400, 800], start: 16 };
+export const VAULT = { sizes: [16, 24, 32, 40], gold: [0, jobs(2), jobs(5), jobs(10)], start: 16 };
 /** How many sold pieces Tobin keeps aside for you (the oldest goes first). */
 export const BUYBACK = { keep: 8 };
 

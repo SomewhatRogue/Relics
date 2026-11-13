@@ -18,6 +18,7 @@ import type { WatchRecord } from './watchpay.js';
 import { defaultHound, type HoundLook } from './houndlook.js';
 import { newErrands } from './errands.js';
 import { newQuests } from './heroquests.js';
+import { jobs } from './coins.js';
 
 /** Chapter 1's level cap (it lifts when the council moves the story on). */
 export const LEVEL_CAP = 10;
@@ -50,7 +51,10 @@ export interface Profile {
   /** The hero's name, and the class chosen when they were made (for life). */
   name: string;
   cls: HeroClass;
+  /** The purse, in copper (shared/coins.ts). */
   gold: number;
+  /** The coins' save version: set once the purse is carried over to copper at the new prices (coins.ts fitPurse). */
+  coin?: number;
   /** A bid for the statue in the square, paid and waiting on the world's answer (shared/statue.ts). */
   statueBid?: import('./statue.js').BidNote;
   xp: number;
@@ -156,7 +160,7 @@ export interface Profile {
 }
 
 export const newProfile = (cls: HeroClass = 'WARRIOR', name = 'HERO', id = heroId()): Profile =>
-  ({ id, ...(cls === 'RANGER' ? { hound: defaultHound(id) } : {}), name, cls, gold: 0, xp: 0, level: 1, perks: [], learned: [], picks: 0, arms: {}, weapon: CLASS_KITS[cls][0], bag: [], glow: 0, belt: ['bitter'], armor: { slot: 'armor', armor: CLASS_ARMOR[cls], quality: 'plain', traits: [], mods: [], level: 0 }, rings: [], steel: 0, want: 0, prologue: false, tally: false, cold: false, cutSeen: false, relics: [], relic: '', augments: {}, runs: 0, stats: newStats(), wish: false, dice: 0, signs: true, errands: newErrands(), quests: newQuests() });
+  ({ id, ...(cls === 'RANGER' ? { hound: defaultHound(id) } : {}), name, cls, gold: 0, coin: 1, xp: 0, level: 1, perks: [], learned: [], picks: 0, arms: {}, weapon: CLASS_KITS[cls][0], bag: [], glow: 0, belt: ['bitter'], armor: { slot: 'armor', armor: CLASS_ARMOR[cls], quality: 'plain', traits: [], mods: [], level: 0 }, rings: [], steel: 0, want: 0, prologue: false, tally: false, cold: false, cutSeen: false, relics: [], relic: '', augments: {}, runs: 0, stats: newStats(), wish: false, dice: 0, signs: true, errands: newErrands(), quests: newQuests() });
 
 export function heroId(): string {
   const c = 'abcdefghijkmnpqrstuvwxyz23456789';
@@ -182,4 +186,4 @@ export function gainXp(p: Profile, n: number): number {
 /** Gold and experience for a kill. */
 /** `spider`, `brood`, `nest`: xp for spiders (they carry no gold). */
 export const BOUNTY = { scrapper: { gold: 4, xp: 5 }, butcher: { gold: 30, xp: 30 }, boss: { gold: 80, xp: 80 }, spider: { gold: 0, xp: 2 }, brood: { gold: 0, xp: 30 }, nest: { gold: 0, xp: 10 }, rescue: 15, objective: 40 };
-export const SHOP = { fine: 60, forged: 160, augment: 45, wish: 5 };
+export const SHOP = { fine: jobs(1.2), forged: jobs(3.5), augment: jobs(1), wish: 5 };

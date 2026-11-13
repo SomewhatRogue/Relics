@@ -31,13 +31,13 @@ describe('recharging at the church', () => {
     expect(rechargeCost(r)).toBe((relicMax(r) - 1) * RECHARGE.perCharge);
     expect(recharge(p, r.id)).toBe(true);
     expect(r.charge).toBe(relicMax(r));
-    expect(p.gold).toBe(500 - 3 * 18);
+    expect(p.gold).toBe(500 - 3 * RECHARGE.perCharge);
     expect(recharge(p, r.id)).toBe(false);
   });
 
-  it('a dark plain relic is 72 gold; too poor, nothing happens', () => {
-    const r = relic('hook', 0), p = holder([r], 71);
-    expect(rechargeCost(r)).toBe(72);
+  it('a dark plain relic is four charges; too poor, nothing happens', () => {
+    const r = relic('hook', 0), p = holder([r], 4 * RECHARGE.perCharge - 1);
+    expect(rechargeCost(r)).toBe(4 * RECHARGE.perCharge);
     expect(recharge(p, r.id)).toBe(false);
     expect(r.charge).toBe(0);
   });

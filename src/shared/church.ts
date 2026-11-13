@@ -10,7 +10,8 @@ import { awardRelic } from './relicaward.js';
 import type { RelicId } from './magic.js';
 
 /** Gold for each use put back in a plain relic (a dark javelin: 4 x 18 = 72, what it cost before uses were few). */
-export const RECHARGE = { perCharge: 18 };
+/** Copper a relic charge (economy.md: a part of a job). */
+export const RECHARGE = { perCharge: 30 };
 /** The church's light carried on jobs: blows land `dmg` times as hard, and goblins judge you `lure`
  *  tiles nearer and notice you `notice` further off (they come for you first). At most `max` jobs. */
 export const LIT = { dmg: 1.15, lure: 3, notice: 2, max: 6 };

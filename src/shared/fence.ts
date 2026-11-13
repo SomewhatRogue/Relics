@@ -34,8 +34,8 @@ export function tobinWont(p: Carrier, it: Item): '' | 'panic' | 'rare' {
   return RARE.includes(it.quality) ? 'rare' : '';
 }
 
-/** Nettle's cut of a piece's worth: less than Tobin's (prices.ts PAWN_CUT, 0.3). */
-export const FENCE_CUT = 0.2;
+/** Nettle's cut of a piece's worth: two thirds of Tobin's (prices.ts PAWN_CUT, 0.2 since the economy). */
+export const FENCE_CUT = 0.13;
 /** What Nettle pays a hero carrying hungry gear for the ordinary gear Tobin won't now buy. */
 export const HUNGRY_CUT = 0.12;
 /** The rare three Nettle always buys. */

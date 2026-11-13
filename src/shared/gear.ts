@@ -15,6 +15,7 @@ import { ARMOR, budget } from './budget.js';
 import { rollCost } from './costs.js';
 import { PLUS, plusCost, plusOf } from './forgeplus.js';
 import { deepOdds } from './deeploot.js';
+import { jobs } from './coins.js';
 
 export * from './mods.js';
 export * from './budget.js';
@@ -49,7 +50,7 @@ export const slotOf = (i: Item): Slot => i.slot ?? 'weapon';
 
 /** Steel from melting a piece down, by tier. */
 export const STEEL: Record<Tier, number> = { plain: 1, fine: 3, forged: 8, tolmouth: 20, touched: 30, turning: 45, hungry: 0 };
-export const REROLL = 40;
+export const REROLL = jobs(0.5);
 /** The next plus's price, or null at +5 (and never for hungry gear): forgeplus.ts. */
 export const nextLevel = plusCost;
 

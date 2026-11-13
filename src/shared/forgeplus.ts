@@ -13,10 +13,12 @@
  * fifteen to twenty-five jobs. Steel is as it was.
  */
 import type { Item, Tier } from './loot.js';
+import { jobs } from './coins.js';
 
 export const PLUS_CAP = 5;
 export const PLUS = { mods: 0.1, damage: 0.1, tough: 0.02, health: 3 };
-export const PLUS_GOLD = [0, 60, 150, 350, 800, 1800];
+/** In jobs of copper: +1 a job, +3 five, +4 and +5 weeks of play (economy.md section 3: mostly found or forged). */
+export const PLUS_GOLD = [0, jobs(1), jobs(2.5), jobs(5), jobs(30), jobs(60)];
 export const PLUS_STEEL = [0, 2, 5, 10, 20, 35];
 export const PLUS_TIER: Record<Tier, number> = { plain: 0.5, fine: 0.75, forged: 1, tolmouth: 1.4, touched: 1.8, turning: 2.2, hungry: 0 };
 

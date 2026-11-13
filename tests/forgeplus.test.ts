@@ -23,15 +23,15 @@ const ring = (level = 0): Item => ({ slot: 'ring', quality: 'fine', traits: [], 
 const row = (it: Item, id: string) => plusRows(it).find((r) => r.id === id)!.v;
 
 describe('the price curve', () => {
-  it('a Forged piece costs 60, 150, 350, 800 and 1800 gold a plus, steeper every step', () => {
-    expect([0, 1, 2, 3, 4].map((l) => plusCost(sword('forged', l))!.gold)).toEqual([60, 150, 350, 800, 1800]);
+  it('a Forged piece costs a job, 2.5, 5, 30 and 60 jobs of copper a plus, steeper every step', () => {
+    expect([0, 1, 2, 3, 4].map((l) => plusCost(sword('forged', l))!.gold)).toEqual([150, 375, 750, 4500, 9000]);
     for (let l = 2; l <= PLUS_CAP; l++) expect(PLUS_GOLD[l] / PLUS_GOLD[l - 1]).toBeGreaterThanOrEqual(2);
   });
 
   it('scales by tier, plain cheapest to turning dearest; hungry gear and +5 have no price', () => {
     const tiers = TIER_ORDER.filter((t) => t !== 'hungry'), to5 = (t: Tier) => [0, 1, 2, 3, 4].reduce((n, l) => n + plusCost(sword(t, l))!.gold, 0);
     for (let i = 1; i < tiers.length; i++) expect(to5(tiers[i])).toBeGreaterThan(to5(tiers[i - 1]));
-    expect(to5('forged')).toBe(3160);
+    expect(to5('forged')).toBe(14775);
     expect(plusCost({ ...sword('hungry'), hungry: 'x' })).toBeNull();
     expect(plusCost(sword('forged', 5))).toBeNull();
   });

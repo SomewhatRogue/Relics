@@ -21,3 +21,24 @@ describe('coins', () => {
     expect(coinCol(140)).toBe(COIN_COL.s);
   });
 });
+
+import { fitPurse, PURSE_RATIO } from '../src/shared/coins';
+import { fromJson } from '../src/client/save';
+import { newProfile } from '../src/shared/tuning';
+import { newWorld } from '../src/shared/story';
+
+describe('the purse carried over', () => {
+  const old = () => { const p = newProfile('WARRIOR', 'Old') as unknown as Record<string, unknown>; delete p.coin; p.gold = 1000; return p; };
+  it('a hero saved before the coins: the purse moves by the ratio, once', () => {
+    const s = fromJson({ heroes: [old() as never], current: 0, world: newWorld() })!;
+    expect(s.heroes[0].gold).toBe(Math.round(1000 * PURSE_RATIO));
+    expect(s.heroes[0].coin).toBe(1);
+    const again = fromJson(JSON.parse(JSON.stringify(s)))!;
+    expect(again.heroes[0].gold).toBe(Math.round(1000 * PURSE_RATIO));
+  });
+  it('a new hero is never converted', () => {
+    const p = { ...newProfile('MAGE', 'New'), gold: 300 };
+    fitPurse(p, p);
+    expect(p.gold).toBe(300);
+  });
+});

@@ -57,7 +57,7 @@ const display = (s: string) => titleCase(s).replace(/\b[A-Z][A-Z']+\b/g, (w) => 
 
 /** One row of the list: the job, its tags, how hard, what it pays. */
 const row = (j: Job, i: number, pay: number) =>
-  `<button class="jrow k-${kindOf(j)}${j.deep ? ' deep' : ''}${j.quest ? ' quest' : ''}" data-open="${i}"><span class="jt">${esc(j.title)}</span><span class="jtags">${tags(j)}</span><span class="jr">${pips(danger(j))}<em>${pay}g</em></span></button>`;
+  `<button class="jrow k-${kindOf(j)}${j.deep ? ' deep' : ''}${j.quest ? ' quest' : ''}" data-open="${i}"><span class="jt">${esc(j.title)}</span><span class="jtags">${tags(j)}</span><span class="jr">${pips(danger(j))}<em>${coinsHtml(pay)}</em></span></button>`;
 
 /** The card for one job: the posting in full, its rows, and what you can do. */
 function card(g: Game, j: Job, i: number, pay: number): string {

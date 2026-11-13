@@ -32,3 +32,19 @@ export const coinCol = (copper: number): string => COIN_COL[coinParts(copper)[0]
 /** What a medium job (about 10 minutes) brings in, in copper, as scripts/income.ts measures it: the unit
  *  every price is set against (economy.md section 3; tests/income.test.ts holds it). */
 export const JOB_COPPER = 150;
+/** A price of `n` medium jobs, in copper, to the nearest 5 (economy.md section 3: prices set by time). */
+export const jobs = (n: number): number => Math.round((JOB_COPPER * n) / 5) * 5;
+
+/**
+ * The purse carried over (economy.md section 6): a hero saved before the three coins had a purse in the old
+ * gold, kept as copper one for one through slices 1 and 2; prices moved by about this much (the geometric
+ * mean over 64 prices, scripts/income.ts era, docs/decisions/economy.md), so the purse moves by it once and
+ * buys what it did. `coin` on the hero marks it done, so it never runs twice.
+ */
+export const PURSE_RATIO = 1.45;
+export const COIN_VERSION = 1;
+/** Convert `out`'s purse if the hero as saved (`saved`) predates the coins. */
+export function fitPurse(out: { gold: number; coin?: number }, saved: { coin?: number }): void {
+  if ((saved.coin ?? 0) < COIN_VERSION) out.gold = Math.round(Math.max(0, Number(out.gold) || 0) * PURSE_RATIO);
+  out.coin = COIN_VERSION;
+}

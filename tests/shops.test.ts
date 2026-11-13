@@ -111,8 +111,8 @@ describe("Tobin's stall", () => {
     expect(sellValue(rollHungry(rng, 'RANGER'))).toBe(0);
   });
 
-  it('sells the bigger packs, at the old steep prices', () => {
-    expect(BAG.gold).toEqual([0, 400, 1000, 2000, 3600]);
+  it('sells the bigger packs, steep: 4, 8, 14 and 24 jobs of copper', () => {
+    expect(BAG.gold).toEqual([0, 600, 1200, 2100, 3600]);
     const src = (f: string) => readFileSync(new URL(`../src/client/${f}`, import.meta.url), 'utf8');
     const stores = src('stores.ts'), merchant = stores.slice(stores.indexOf('function merchant'), stores.indexOf('function forge'));
     expect(merchant).toContain('growBag(');
