@@ -1258,7 +1258,7 @@ export class Game {
     const relics = won && !deep ? wonRelics(run, run.job.seed * 977 + p.runs * 31 + p.xp, p.relics) : [], relic = relics[0];
     for (const r of relics) (p.relics.push(r), (p.relic ||= r.id));
     // Each one NEW in the pack, and its moment once the recap is closed (relicnews.ts).
-    this.relicNews.push(...gainRelics(p, relics, true));
+    this.relicNews.push(...this.unannounced(gainRelics(p, relics, true)));
     // The church's light: one job less (any job, won or not).
     const lit = p.lit ?? 0;
     if (lit > 0) p.lit = lit - 1;
@@ -1528,10 +1528,19 @@ export class Game {
   }
 
   /** The room's word on my kit into my save; a relic it brought (a pickup, mine or in the leader's room) gets its moment. */
+  /** Relic moments not yet told this session: one relic is never announced twice (Kyle, 2026-11-12: "a
+   *  million relic notifications"), whatever keeps finding it new. */
+  private announced = new Set<string>();
+  private unannounced(news: RelicMoment[]): RelicMoment[] {
+    const out = news.filter((n) => !this.announced.has(n.item.id));
+    for (const n of out) this.announced.add(n.item.id);
+    return out;
+  }
+
   private keepNoting(h: Hero, copy: boolean): void {
     const k = keepKitNoting(this.profile, h, copy);
     if (!k.changed) return;
-    this.relicNews.push(...k.news);
+    this.relicNews.push(...this.unannounced(k.news));
     store(this.save);
   }
 

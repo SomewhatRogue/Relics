@@ -2,8 +2,7 @@
  * Trying a class before you pick it (Kyle's friend, 2026-11-12: "experiment with them and their first
  * ability ... almost like a sandbox"; Kyle: "only starting skills for now. And a ui where you can spawn
  * goblins or butchers. One butcher max at a time, three gobbos max"). From the class page, TRY puts a
- * hero of that class in the Training Yard with every button, its starting skill and a javelin that never
- * runs dry. Nothing is kept: the hero is a scratch save that's never written (client/save.ts store), and
+ * hero of that class in the Training Yard with every button and its starting skill, in an empty yard. Nothing is kept: the hero is a scratch save that's never written (client/save.ts store), and
  * DONE puts your own heroes back and returns to the class page.
  */
 import './trial.css';
@@ -11,8 +10,6 @@ import { CLASS_NAME } from '../shared/classes';
 import type { HeroClass } from '../shared/weapons';
 import { SKILL_CHOICES } from '../shared/magic';
 import { newProfile } from '../shared/progress';
-import { makeRelic, relicMax } from '../shared/relicitems';
-import { Rng } from '../shared/rng';
 import { isDead } from '../sim/damage';
 import type { Game } from './game';
 import type { Save } from './save';
@@ -47,12 +44,16 @@ export class Trial {
   /** A hero of `cls` in the yard, kept nowhere. */
   start(cls: HeroClass, look: number): void {
     if (this.real) return;
-    const g = this.g, skill = SKILL_CHOICES[cls][0], jav = makeRelic(new Rng(7), 'javelin');
-    const p = { ...newProfile(cls, 'TRIAL'), look, prologue: true, tally: true, skill, learned: ['skill'], belt: ['bitter', 'bitter', 'bitter'], relics: [jav], relic: jav.id };
+    // No relics (Kyle, 2026-11-12): the class, its starting skill and three Bitters.
+    const g = this.g, skill = SKILL_CHOICES[cls][0];
+    const p = { ...newProfile(cls, 'TRIAL'), look, prologue: true, tally: true, skill, learned: ['skill'], belt: ['bitter', 'bitter', 'bitter'], relics: [], relic: '' };
     Object.assign(this, { real: g.save, cls, look });
     this.ids.clear();
     g.save = { heroes: [p as never], current: 0, world: g.save.world, trial: true };
     g.enterYard();
+    // An empty yard (Kyle: no goblins at the start, nobody else's relic news): only what you spawn.
+    g.room.enemies = [];
+    g.relicNews = [];
     this.el.hidden = false;
     this.draw();
   }
@@ -76,8 +77,7 @@ export class Trial {
   frame(): void {
     if (!this.real) return;
     const g = this.g;
-    if (g.mode !== 'yard') g.enterYard();
-    for (const r of g.hero?.found ?? []) r.charge = relicMax(r);
+    if (g.mode !== 'yard') (g.enterYard(), (g.room.enemies = []));
     this.draw();
   }
 
