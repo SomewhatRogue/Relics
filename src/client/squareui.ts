@@ -8,7 +8,7 @@ import { CLASS_NAME } from '../shared/classes';
 import { BLESSING, type HeroClass } from '../shared/tuning';
 import { WORKS, workDone } from '../shared/works';
 import { openWorks } from './worksui';
-import { rollHtml } from './rollui';
+import { rollHtml, wireRoll } from './rollui';
 import { townSays } from '../shared/townsays';
 import type { SpotId } from '../shared/town';
 import type { Game } from './game';
@@ -56,6 +56,7 @@ export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key:
       setTimeout(again, 600);
     } }] : [])]);
     for (const b of document.querySelectorAll<HTMLButtonElement>('#panel .rtabs button')) b.onclick = () => ((rollSide = b.dataset.side as typeof rollSide), again());
+    wireRoll(rollSide, again);
     return true;
   }
   if (id === 'well') {

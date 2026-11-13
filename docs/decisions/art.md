@@ -269,3 +269,9 @@ The plan, one class at a time so Kyle can play each against the old ones:
   behind, and the two outlines read as one cloak cut at the waist; the Ranger's fluttering cloak the same, a notch
   beside its own. Both drawn once now: the cloak's own lower half (from the cut's `skirt` row) sways a pixel with
   the walk, trailing behind across the screen, side to side toward you (figure.ts SWAY). (Claude Opus 5.5)
+- The Roll of the Brave (Kyle, 2026-11-13: with the tall heroes it "takes up too much space. Maybe we do small
+  statues on plinths for it. Also a better organized UI"): one record at a time, picked from a row of buttons
+  under THE BRAVE / THE UNLUCKY; its top three as small stone statues (the hero's look turned to stone, as the
+  town statue's) on stepped plinths, first in the middle and highest; names and counts under them, places four
+  on as a list, your own standing. The unlucky in mossier stone on cracked plinths. One card's height instead of
+  eight cards of faces (rollui.ts; style.css's podium rules replaced). (Claude Opus 5.5)
