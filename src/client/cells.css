@@ -4,17 +4,23 @@ body #pack .cells, #panel .cells { display: grid; grid-template-columns: repeat(
 body #pack .cells.can, #panel .cells.can { box-shadow: inset 0 0 0 2px var(--i-leaf); }
 body #pack .tile, #panel .tile { position: relative; aspect-ratio: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2px; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; cursor: pointer;
   background: radial-gradient(circle, #2a2c33, var(--i-well) 70%); border: 0; box-shadow: 0 0 0 2px var(--i-outline), inset 0 0 0 2px var(--t); }
+/* A piece's tier at a glance, worn or packed, without tapping it (Kyle, 2026-11-13: "I can't see the tier of
+   items on me or in my pack unless I select them"): its frame in the tier's colour and its well tinted with
+   it. (div.tile: over skins.css's plain dark ring on every tile.) */
+body #pack div.tile:not(.empty):not(.drop):not(.rtile), #panel div.tile:not(.empty) {
+  background: radial-gradient(circle, color-mix(in srgb, var(--t) 30%, #1b1d22), color-mix(in srgb, var(--t) 10%, var(--i-well)) 75%);
+  box-shadow: 0 0 0 2px var(--i-outline), inset 0 0 0 2px var(--t), inset 0 0 0 3px #07080a99; }
 body #pack .tile img, #panel .tile img, .tile.ghost img { width: 72%; image-rendering: pixelated; pointer-events: none; }
 body #pack .tile b, #panel .tile b { position: absolute; top: 3px; right: 4px; font: 400 10px/1 var(--i-label); color: var(--i-text); text-shadow: 1px 1px 0 var(--i-outline); }
 body #pack .tile em, #panel .tile em { position: absolute; top: 3px; left: 4px; font: 400 10px/1 var(--i-label); font-style: normal; color: var(--i-leaf); text-shadow: 1px 1px 0 var(--i-outline); }
 body #pack .tile i, #panel .tile i { position: absolute; bottom: 3px; left: 0; right: 0; text-align: center; font: 400 9px/1 var(--i-label); font-style: normal; color: var(--i-cool); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 1px 1px 0 var(--i-outline); }
 body #pack .tile.empty, #panel .tile.empty { background: #121317; box-shadow: inset 1px 1px 0 var(--i-outline), inset -1px -1px 0 #26282e; cursor: default; }
 body #pack .tile.empty i, #panel .tile.empty i { position: static; color: #5a5f69; }
-body #pack .tile.dim, #panel .tile.dim { background: #16181f; box-shadow: 0 0 0 2px var(--i-outline), inset 0 0 0 1px var(--t); }
+body #pack div.tile.dim:not(.empty), #panel div.tile.dim:not(.empty) { background: #16181f; box-shadow: 0 0 0 2px var(--i-outline), inset 0 0 0 1px var(--t); }
 #panel .tile.dim img { opacity: 0.4; }
 #panel .tile.dim em { color: var(--i-quiet); }
 /* (div.tile: over skins.css's bone outline.) */
-body #pack div.tile.sel, #panel div.tile.sel { outline: none; background: radial-gradient(circle, #3a3320, var(--i-well) 75%); box-shadow: 0 0 0 2px var(--i-leaf), inset 0 0 0 2px var(--t); }
+body #pack div.tile.sel:not(.empty):not(.drop):not(.rtile):not(.x), #panel div.tile.sel:not(.empty):not(.x), body #pack div.tile.sel, #panel div.tile.sel { outline: none; background: radial-gradient(circle, #3a3320, var(--i-well) 75%); box-shadow: 0 0 0 2px var(--i-leaf), inset 0 0 0 2px var(--t); }
 body #pack .tile.over, body #pack .cells.over { background: #2e2618; }
 body #pack .tile.dragging { opacity: 0.35; }
 

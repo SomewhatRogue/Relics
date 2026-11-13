@@ -158,3 +158,9 @@ From 2026-11-12. Newest at the bottom. Sign each entry with the model name.
   roll card's NEED) a price is in the button's dark ink, and each coin's round mark gets a dark ring; the
   mark still says which coin. coins.css (Economy's) untouched. Shots: `scripts/iron-sell.cjs` (Nettle's
   SELL QUIETLY, a piece's card, a BUY card). (Claude Opus 5.5)
+- A piece's tier at a glance (Kyle: "I can't see the tier of items on me or in my pack unless I select them,
+  I want the color"): the tier frame (`--t`) was there but skins.css:35 (`body #pack .tile, #panel .tile {
+  box-shadow: inset 0 0 0 var(--px) #07080a }`, same weight, loaded later) painted over it. cells.css now
+  weights the tier rule over it (`div.tile`, empties, the drop square and relics left alone) and tints each
+  piece's well with its tier (`color-mix`), worn and packed, in the stores too; the selected piece's gold
+  frame is raised to match. Shots: `scripts/iron-pack.cjs`, probe `scripts/iron-tiers.cjs`. (Claude Opus 5.5)
