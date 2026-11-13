@@ -42,6 +42,6 @@ export function sealArena(job: Job): RoomPlan {
     adits: d.adits, sealed: { x: d.door.x, w: d.door.w },
     hero: { x: w / 2, y: h - 1.5 }, exit: { x: w / 2 - 1.1, y: h - 0.7, w: 2.2, h: 0.7 },
   };
-  const foe = (who: 'latch' | 'hasp') => ({ kind: 'butcher' as const, ...s[who], hp: DOORKEEPERS.hp, name: DOOR_NAMES[who], boss: who, awake: false });
+  const foe = (who: 'latch' | 'hasp') => ({ kind: 'butcher' as const, ...s[who], hp: Math.round(DOORKEEPERS.hp * DOORKEEPERS.deepHp), name: DOOR_NAMES[who], boss: who, awake: false });
   return { map, foes: [foe('latch'), foe('hasp')], props: [{ kind: 'oil', ...s.oil }], chests: [{ ...s.chest, chained: true }] };
 }

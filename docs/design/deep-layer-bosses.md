@@ -39,6 +39,8 @@ the sound of feet and steel.
 - **The place's trick:** cracked dripstone columns. Hit one (or throw something at it) and it falls the way it
   leans: a striped lane. If it lands on THE LISTENER it's down for a while, plate-cracked like a cart hit (the
   same knockdown cooldown). Everyone can do it; timing it is the skill.
+- **Shield goblins** (Kyle, 2026-11-13: standing still was safe): they climb out of the holes from the start, a few
+  at a time, and walk at you; going round them or fighting them is noise, and so is being hurt.
 - **Phase 2:** it knocks the torches out. The room goes near-dark (lamp-lit round each hero only); the dark
   costs it nothing.
 - **BLINDED:** does nothing to it (Kyle, 2026-11-12: "nope nothing"); it's already blind, and a line says so.

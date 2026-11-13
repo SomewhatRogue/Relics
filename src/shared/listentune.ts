@@ -15,6 +15,10 @@
  * - `charge`: a striped lane at the loudest hero across the room.
  * - Phase 2 at `phase2` of its health: a roar, the torches out (`dark`), `faster` its pace and wind-ups
  *   (floors kept), drops twice as often, and `adds.n` small ones out of the holes every `adds.every` s.
+ * - From the start (Kyle, 2026-11-13: standing still was safe), shield goblins climb out of the holes one at a
+ *   time, `adds.first` s after it wakes and every `adds.early` s, no more than `adds.most[0]` about (`most[1]`
+ *   in phase 2). They walk at you, so you go round them or fight them, and either is heard; a hero hurt is
+ *   heard too (`noise.hurt`).
  */
 import type { EnemyAttackSpec } from './tuning.js';
 
@@ -48,8 +52,8 @@ export const LISTENER = {
   chain: ['rise'] as ListenMove[],
   chainPause: 0.1,
   holes: { r: 0.9 },
-  noise: { attack: 1, roll: 0.8, run: 0.45, relic: 1.3, fall: 0.5, quiet: 0.05, max: 1.5, wake: 0.3, hear: 11, near: 2.5 },
-  adds: { every: 15, n: 2 },
+  noise: { attack: 1, roll: 0.8, run: 0.45, relic: 1.3, hurt: 0.9, fall: 0.5, quiet: 0.05, max: 1.5, wake: 0.3, hear: 11, near: 2.5 },
+  adds: { every: 15, n: 2, first: 5, early: 11, most: [3, 5] as [number, number] },
   /**
    * The dripstone columns (sim/columns.ts, sim/columnshape.ts): a blow, a shot or a thrown thing on a standing one
    * sets it falling the way it leans; `fall` s of striped lane (`len` long, `width` across), then it lands: a hero in

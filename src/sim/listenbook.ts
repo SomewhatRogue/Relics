@@ -9,7 +9,7 @@
  * a roar (nothing landing either way), the torches out (`boss.dark`), and LISTENER.adds.n small ones out of the
  * holes every LISTENER.adds.every s.
  */
-import { BOSS, LISTENER as L, TICK } from '../shared/tuning';
+import { BOSS, LISTENER as L, SCRAPPER, TICK, VARIANTS } from '../shared/tuning';
 import { currentMap } from '../shared/arena';
 import { isDead } from './damage';
 import { forget, type BossBook } from './bosskit';
@@ -27,11 +27,14 @@ export function stepListenBook(bk: BossBook, w: World, spawn: (x: number, y: num
   forget(bk, now);
   if (bk.started < 0 && e.alert) {
     bk.started = now;
+    st.nextAdds = now + L.adds.first;
     b.rotAt = now;
     // (Its first blow when it has heard you, not a goblin's slow start.)
     e.cooldown = Math.min(e.cooldown, 0.6);
   }
   stepColumns(e, w);
+  // (Shield goblins out of the holes, under the floor or not: LISTENER.adds.)
+  if (now >= st.nextAdds && bk.started >= 0) adds(st, w, spawn, now, b.phase === 2);
   if (b.under) return void underground(e, st, w);
   // Its rest between blows is its own: straight on after a rise (the sweep), else LISTENER.pauseBetween.
   if (e.attack) st.was = true;
@@ -42,9 +45,8 @@ export function stepListenBook(bk: BossBook, w: World, spawn: (x: number, y: num
     Object.assign(e, { attack: null, act: 'chase', actT: 0, kvx: 0, kvy: 0 });
     Object.assign(b, { phase: 2, rot: 0, rotAt: now + BOSS.roar, roarUntil: now + BOSS.roar, dark: true, lmove: undefined });
     w.ev.push({ k: 'roar', x: e.x, y: e.y });
-    adds(st, w, spawn, now);
+    adds(st, w, spawn, now, true);
   }
-  if (b.phase === 2 && now >= st.nextAdds) adds(st, w, spawn, now);
   dropPose(e, st, w);
 }
 
@@ -78,13 +80,14 @@ function underground(e: Enemy, st: ListenState, w: World): void {
   w.ev.push({ k: 'surface', x: e.x, y: e.y });
 }
 
-/** LISTENER.adds.n small ones out of the holes, and the next batch LISTENER.adds.every s on. */
-function adds(st: ListenState, w: World, spawn: (x: number, y: number) => Enemy, now: number): void {
-  st.nextAdds = now + L.adds.every;
-  const holes = currentMap().holes ?? [];
+/** Shield goblins out of the holes: one every LISTENER.adds.early s, LISTENER.adds.n every adds.every s in phase 2, never more than adds.most about. */
+function adds(st: ListenState, w: World, spawn: (x: number, y: number) => Enemy, now: number, two: boolean): void {
+  st.nextAdds = now + (two ? L.adds.every : L.adds.early);
+  const holes = currentMap().holes ?? [], about = w.enemies.filter((x) => !x.boss && !isDead(x)).length;
   if (!holes.length) return;
-  for (let i = 0; i < L.adds.n; i++) {
+  for (let i = 0; i < Math.min(two ? L.adds.n : 1, L.adds.most[two ? 1 : 0] - about); i++) {
     const h = holes[(Math.floor(now) + i * 2) % holes.length], s = spawn(h.x, h.y + 0.6);
-    s.alert = true;
+    // (Its health as a shield goblin's, at the room's level: sim/packs.ts levelOn already scaled the small one's.)
+    Object.assign(s, { variant: 'shield', alert: true }), (s.hp = s.maxHp = Math.round(VARIANTS.shield.hp * (s.maxHp / SCRAPPER.hp)));
   }
 }

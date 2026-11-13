@@ -222,4 +222,29 @@ describe('THE LISTENER: its moves', () => {
     const drops = (p: 1 | 2) => L.rotation[p].filter((m) => m === 'drop').length / L.rotation[p].length;
     expect(drops(2)).toBeGreaterThanOrEqual(drops(1) * 1.5);
   });
+
+  it('standing still is not safe: shield goblins climb out of the holes from the start, a few at most', () => {
+    const { r, e, me } = setup('rock');
+    Object.assign(me, { x: e.x + 6, y: e.y + 5 });
+    const adds = () => r.enemies.filter((x) => !x.boss && x.variant === 'shield' && x.hp > 0);
+    run(r, L.adds.first - 1);
+    expect(adds()).toHaveLength(0);
+    run(r, 2);
+    expect(adds()).toHaveLength(1);
+    expect(adds()[0].alert).toBe(true);
+    // (More every LISTENER.adds.early s, never more than adds.most[0] about at once.)
+    let most = 0;
+    for (let k = 0; k < 12; k++) run(r, L.adds.early / 2), (most = Math.max(most, adds().length));
+    expect(most).toBeGreaterThanOrEqual(2);
+    expect(most).toBeLessThanOrEqual(L.adds.most[0]);
+  });
+
+  it('a hero hurt cries out: still, but louder than a quiet one', () => {
+    const st = listenState(newBook(1, [0, 0], 'listener')), a = hero('a', 0, 0, { hp: 100 }), b = hero('b', 1, 0, { hp: 100 });
+    hear(st, [a, b]);
+    a.hp = 90;
+    hear(st, [a, b]);
+    expect(st.noise.get('a')).toBeGreaterThan(0.5);
+    expect(loudest([a, b], st.noise, { x: 1, y: 0 })!.id).toBe('a');
+  });
 });

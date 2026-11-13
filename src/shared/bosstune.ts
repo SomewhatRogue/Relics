@@ -73,6 +73,8 @@ const spec = (s: EnemyAttackSpec) => s;
  */
 export const DOORKEEPERS = {
   hp: 320,
+  /** In the Deep (shared/sealarena.ts) each has this many times `hp` (Kyle, 2026-11-13: "the Doorkeepers need more health"). */
+  deepHp: 1.6,
   radius: 0.72,
   weight: 6,
   /** Its pace (Kyle, 2026-11-06: "they don't chase a ton": both close on you, the mover hardest). */

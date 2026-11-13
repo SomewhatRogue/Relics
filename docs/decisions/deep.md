@@ -162,3 +162,11 @@ hall (encounter.ts). Small edits in jobs.ts, sites.ts, routeports.ts, terrain.ts
 scripts/deepshape-look.cjs (flat or 3d). Open: a great hall on a fen floor can be sparse in cover.
 Also, for the art chat's note: the five Node test files that failed since d1697a6 pass again. paintTracks and mouthsOf
 moved to client/trackbed.ts (no sprites), so world.ts no longer loads sumpdraw's sprites.
+
+## 2026-11-13: playtest, the Doorkeepers tougher and THE LISTENER not safe to stand still against (Opus 5.5)
+Kyle: the Doorkeepers need more health; THE LISTENER isn't scary if you never move. In the Deep each Doorkeeper
+has 1.6 times its health (bosstune.ts `deepHp`, used by sealarena.ts; the Great Barn's pair unchanged). THE LISTENER:
+shield goblins climb out of the holes from the start (one 5 s after it wakes, then every 11 s, at most 3 about; phase 2
+two every 15 s, at most 5), and its phase-2 ones are shield goblins too (listentune.ts `adds`, listenbook.ts). A hero
+hurt cries out (`noise.hurt`, listennoise.ts), so a still hero a shield goblin reaches is heard and it comes up under
+them. Tests in tests/listener.test.ts.

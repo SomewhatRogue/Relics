@@ -15,6 +15,8 @@ export interface ListenState {
   seen: Map<string, [number, number]>;
   /** Each Warrior's last taunt ring seen (a taunt is a shout: the loudest sound there is). */
   rings: Map<string, number>;
+  /** Each hero's health last tick (a hero hurt cries out). */
+  hp: Map<string, number>;
   /** The book's own clocks: a blow was under way last tick, the next small ones out of the holes, when it rises from under the floor. */
   was: boolean;
   nextAdds: number;
@@ -24,7 +26,7 @@ export interface ListenState {
 const states = new WeakMap<BossBook, ListenState>();
 export function listenState(bk: BossBook): ListenState {
   let s = states.get(bk);
-  if (!s) states.set(bk, (s = { noise: new Map(), seen: new Map(), rings: new Map(), was: false, nextAdds: Infinity, riseAt: -1 }));
+  if (!s) states.set(bk, (s = { noise: new Map(), seen: new Map(), rings: new Map(), hp: new Map(), was: false, nextAdds: Infinity, riseAt: -1 }));
   return s;
 }
 
@@ -41,6 +43,8 @@ export function hear(st: ListenState, heroes: Hero[]): void {
       st.seen.set(h.id, now);
       if (h.act === 'attack' || h.act === 'charge' || (was && now[0] !== was[0])) n = Math.max(n, N.attack);
       if (h.act === 'roll') n = Math.max(n, N.roll);
+      // (Hurt, a hero cries out: a still one a shield goblin reaches is heard.)
+      if (h.hp < (st.hp.get(h.id) ?? h.hp)) n = Math.max(n, N.hurt);
       if (was && now[1] !== was[1]) n = Math.max(n, N.relic);
       // The Warrior's taunt is a shout: the top of the cap, each time its ring goes up.
       const ring = h.tauntRingAt;
@@ -49,7 +53,7 @@ export function hear(st: ListenState, heroes: Hero[]): void {
       // (Creeping, `sneaking`, is quiet; so is standing still.)
       if (h.moving && !h.sneaking && h.act !== 'roll') n = Math.max(n, N.run);
     }
-    st.noise.set(h.id, Math.min(N.max, n));
+    st.hp.set(h.id, h.hp), st.noise.set(h.id, Math.min(N.max, n));
   }
 }
 
