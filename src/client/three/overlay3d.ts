@@ -146,7 +146,7 @@ export class Overlay {
     const g = this.g, bob = Math.round(Math.sin(now * 4) * 1.5), pad = 8;
     for (const t of m.marks) {
       const [tx, ty] = t.id !== undefined ? lerp('e:' + t.id, t.x, t.y) : [t.x, t.y];
-      let [x, y] = P(tx, t.kind === 'door' ? 2.6 : t.kind === 'boss' ? 3.4 : 2.0, ty);
+      let [x, y] = P(tx, t.kind === 'door' ? 2.6 : t.kind === 'boss' ? 3.4 : t.kind === 'folk' ? 2.75 : t.kind === 'hall' ? 1.6 : 2.0, ty);
       const off = x < pad || y < pad || x > this.W - pad || y > this.H - pad;
       x = Math.min(this.W - pad, Math.max(pad, x));
       y = Math.min(this.H - pad, Math.max(pad, y));

@@ -13,7 +13,7 @@ import { OX, OY, PX } from './world';
 
 const GOLD = '#ffd860', EDGE = '#3a2408', SHINE = '#fff6c8';
 /** How high over its thing (screen pixels above where it stands) each kind's mark sits. */
-const LIFT: Record<TargetKind, number> = { cage: 26, larder: 28, den: 36, nest: 22, boss: 34, door: 44, out: 18, job: 14 };
+const LIFT: Record<TargetKind, number> = { cage: 26, larder: 28, den: 36, nest: 22, boss: 34, door: 44, out: 18, job: 14, folk: 40, hall: 26 };
 
 /** The diamond, its point down, centred on (x, y). */
 function diamond(g: CanvasRenderingContext2D, x: number, y: number): void {

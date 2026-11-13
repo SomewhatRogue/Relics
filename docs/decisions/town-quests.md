@@ -25,3 +25,12 @@ From 2026-11-12. Spec: docs/design/town-quests.md. Newest at the bottom. Sign ea
   as rows (each DONE as it's done) once the runner has told you, in the street and inside the halls;
   the folded line is the next one to do. Both done: the line is the town's own again (WICKHOLD, DAY n).
   `tests/errands.test.ts`. (Claude Opus 5.5)
+- **Slice 2 in:** the small gold mark over everyone you could talk to is gone (Art's `npcs.ts`, those
+  lines only, and the `?figs=3d` tags in `three/tags3d.ts`); names still show when you're close, and
+  TALK works as before. In town the gold diamond of `questmarks.ts` goes over whoever has an open
+  errand (`client/errandmarks.ts`): inside their hall, the person (`folk`); out in the street, their
+  hall's door (`hall`, set lower than a job's house door so it sits over the doorway). The edge point
+  toward the nearest when none is on screen comes with it, in both views. (Claude Opus 5.5)
+- For the Deep chat, not mine to fix: from d1697a6 (the Haulier's tracks in the 3D view) five suites
+  fail in Node with "document is not defined" from `client/sprites.ts` (raise, rats, recapboard, runux,
+  wading). Checked: they pass at a2c4ad1 and fail at d1697a6, with or without this chat's work. (Claude Opus 5.5)

@@ -19,7 +19,8 @@ import type { Enemy } from './types';
 import { waiting } from './survivors';
 import { expedTargets } from './expedgoal';
 
-export type TargetKind = 'cage' | 'door' | 'out' | 'nest' | 'larder' | 'den' | 'boss' | 'job';
+/** `folk`: someone in town with an errand or a quest for you, `hall` the door of the hall they're in (client/errandmarks.ts). */
+export type TargetKind = 'cage' | 'door' | 'out' | 'nest' | 'larder' | 'den' | 'boss' | 'job' | 'folk' | 'hall';
 /** `id`: a goblin or nest's id (it moves, so it's drawn where it's drawn). */
 export interface Target { kind: TargetKind; x: number; y: number; id?: number }
 /** A house's door and who's caged or freed behind it (sim/goal.ts houseCaptives). */

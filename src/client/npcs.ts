@@ -1,6 +1,6 @@
 /**
  * The people of Wickhold (and those you bring home): placeholder sprites in the same style as the
- * heroes, each trade with its own colours and hat, and a gold mark over anyone you can talk to.
+ * heroes, each trade with its own colours and hat, and their name over them when you're close.
  */
 import type { Npc } from '../shared/arena';
 import { blit, shadow, type Ctx } from './draw';
@@ -85,7 +85,7 @@ SPRITES.child = makeSprite(14, 17, grow([
 /** Someone's sprite by their look (the soldier past the trees in the wood is drawn from it: vigshots.ts). */
 export const personSprite = (look: string): Sprite => SPRITES[look] ?? SPRITES.villager;
 
-/** Someone standing about, breathing; a gold mark overhead says you can talk to them, their name when you're close. */
+/** Someone standing about, breathing; their name when you're close. */
 /** One of the column's dead: on their back or side, in what they bled. */
 function drawCorpse(c: Ctx, s: Sprite, x: number, y: number, n: Npc): void {
   const k = Math.round(n.x * 7 + n.y * 3), side = k % 2 ? 1 : -1, g = c.lit;
@@ -171,10 +171,7 @@ export function drawNpc(c: Ctx, n: Npc, x: number, y: number, near: boolean, fx 
   else if (n.work) drawWork(p, n, x, y + bob, tx, fx);
   if (n.mute) return;
   if (n.look === 'guard') (p.lit.fillStyle = '#6b4a2b'), p.lit.fillRect(Math.round(x + (fx < 0 && walking ? -6 : 5)), Math.round(y - 22 + bob), 1, 20), (p.lit.fillStyle = '#cfd6dc'), p.lit.fillRect(Math.round(x + (fx < 0 && walking ? -6 : 5)), Math.round(y - 24 + bob), 1, 3);
-  const top = Math.round(y - s.h - 4 + (Math.floor(c.now * 3) % 2));
-  c.glow.fillStyle = near ? '#fff1b0' : '#d4a537';
-  c.glow.fillRect(Math.round(x), top - 2, 1, 1);
-  c.glow.fillRect(Math.round(x) - 1, top - 1, 3, 1);
-  c.glow.fillRect(Math.round(x), top, 1, 1);
+  // (No mark over everyone you can talk to: only someone with an errand or a quest for you gets the gold
+  // diamond, client/errandmarks.ts (Kyle, 2026-11-12). Their name still shows when you're close.)
   if (near) drawText(c.glow, n.name, Math.round(x - textWidth(n.name) / 2), Math.round(y + 4), '#f0e0b0');
 }
