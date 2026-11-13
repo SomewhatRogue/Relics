@@ -12,7 +12,7 @@
 import type { Block, GameMap, Npc, Round } from './arena.js';
 import type { PropKind } from './props.js';
 import type { WorldState } from './story.js';
-import { townGround, townSoil } from './ground.js';
+import { TREES, townGround, townSoil } from './ground.js';
 import { mending, WORN } from './mend.js';
 import { siege } from './siege.js';
 import { workDone } from './works.js';
@@ -117,7 +117,7 @@ export function townMap(w: WorldState): GameMap {
     ...[[2.5, 9.4], [4.2, 9.9], [9.8, 9.4], [11.5, 9.9], [13, 9.4]].map(([x, y]) => r('stone', x, y, 0.25)),
     ...[[43, 20], [46, 20.6], [49, 20]].map(([x, y]) => r('target', x, y, 0.35)),
     ...[[19.6, 12.2], [36.3, 12.2], [20, 26.5], [36, 26.5], [12, 27], [44, 27], [8, 20], [50, 25]].map(([x, y]) => r('post', x, y, 0.15)),
-    ...[[60, 5], [1.5, 37], [10, 38], [59.5, 37], [27, 38.5], [41, 8.5], [1.5, 24]].map(([x, y]) => r('tree', x, y, 0.6)),
+    ...[[60, 5], [1.5, 37], [10, 38], [59.5, 37], [27, 38.5], [41, 8.5], [1.5, 24], ...TREES].map(([x, y]) => r('tree', x, y, 0.6)),
     ...[[12.5, 7], [41, 24], [19, 37], [55.5, 9], [60.5, 21]].map(([x, y]) => r('bush', x, y, 0.35)),
     r('grate', 23.5, 36, 0.05), r('statue', 58.5, 19.5, 0.5),
     // The plinth in the square, and whoever paid for the statue on it (shared/statue.ts).

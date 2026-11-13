@@ -331,3 +331,15 @@ The plan, one class at a time so Kyle can play each against the old ones:
   brazier before it are gone. Cobbles in a ring round it; Old Wenna and the arrival point moved off it.
 - The flat view paints the dais's stone a shade darker than the 2.5D boxes: the Lantern's light falls full on
   it and washed it out. statue.test.ts allows the plinth on the dais. (Claude Opus 5.5)
+
+## 2026-11-13: the square paved, shade trees
+
+- Kyle: the square's ground "could look better ... more clean with some shady areas. Also some more nature trees."
+  Lantern Square is now cobbled edge to edge (no more islands of cobble in dirt), with a ring of flagstones round
+  the Lantern's dais (soil `flags`: 16 by 10 stones, courses set over). Till the square's washed, a worn track
+  and a few patches of earth and mud show on it; washing takes them off.
+- Six shade trees (`TREES` in shared/ground.ts, planted by town.ts): the square's two south corners over the
+  benches, by the counting house and the verge west of the well, between the church and the hall, south by the
+  lane. Grass round each, a green verge west of the square, and under each a dappled shade (soil `shade`, a
+  darkening over whatever's there, not a material). The floor painting is shared, so both views have it.
+  mend.test.ts now expects the square paved and washing to take off mud and earth. (Claude Opus 5.5)

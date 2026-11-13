@@ -168,7 +168,9 @@ export type MarkKind = 'blood' | 'drag' | 'debris' | 'scorch' | 'trample' | 'pla
 export type HangKind = 'vote' | 'stars' | 'shields' | 'banner' | 'map' | 'antlers' | 'pelts' | 'bows' | 'window' | 'tools' | 'herbs' | 'notices' | 'sign' | 'shelves' | 'knifeboard';
 export type SoilMat = 'cobble' | 'earth' | 'mud' | 'swept' | 'straw' | 'ash' | 'wet'
   // Out on a job: grass over another floor, a ploughed field in rows, grain standing.
-  | 'grass' | 'furrow' | 'crop';
+  | 'grass' | 'furrow' | 'crop'
+  // Flagstones laid round a monument; `shade` is no material but a tree's dappled shade over whatever is there.
+  | 'flags' | 'shade';
 export interface Soil { mat: SoilMat; x: number; y: number; w: number; h: number; round?: boolean; line?: number }
 /** A floor mark's area (tiles). A `path` runs as a line from (x, y) to (x + w, y + h). */
 export interface Mark { kind: MarkKind; x: number; y: number; w: number; h: number }

@@ -34,7 +34,7 @@ function depth(s: Soil, x: number, y: number): number {
 }
 
 /** Each material: its colours, dark to light, and what turns up in it. */
-const FAMILY: Record<Exclude<Soil['mat'], 'cobble'>, string[]> = {
+const FAMILY: Record<Exclude<Soil['mat'], 'cobble' | 'shade'>, string[]> = {
   earth: ['#38312c', '#3d3630', '#433b34', '#484039'],
   swept: ['#433e38', '#48433d', '#4e4842', '#534d46'],
   mud: ['#251f19', '#2a231c', '#2f271f', '#342b22'],
@@ -44,6 +44,7 @@ const FAMILY: Record<Exclude<Soil['mat'], 'cobble'>, string[]> = {
   grass: ['#233021', '#26331f', '#2b3923', '#2e3d25'],
   furrow: ['#2a221a', '#30271d', '#362c21', '#3c3125'],
   crop: ['#4a3e24', '#544628', '#5e4f2c', '#433822'],
+  flags: ['#4a4652', '#4f4a58', '#534e5c', '#47434f'],
 };
 
 /** A shape's box, grown by as far as the noise can push an edge (tiles). */
@@ -61,13 +62,21 @@ function matAt(soil: Soil[], boxes: number[][], x: number, y: number): Soil['mat
   const wob = (noise(x, y, 1.6, 7) - 0.5) * 1.1 + (noise(x, y, 0.45, 11) - 0.5) * 0.45;
   for (let i = soil.length - 1; i >= 0; i--) {
     const b = boxes[i];
+    if (soil[i].mat === 'shade') continue;
     if (x > b[0] && y > b[1] && x < b[2] && y < b[3] && depth(soil[i], x, y) + wob > 0) return soil[i].mat;
   }
   return 'cobble';
 }
 
 /** A 2x2 block's colour in a material. */
-function colourAt(mat: Exclude<Soil['mat'], 'cobble'>, x: number, y: number, px: number, py: number): string {
+function colourAt(mat: Exclude<Soil['mat'], 'cobble' | 'shade'>, x: number, y: number, px: number, py: number): string {
+  // Flagstones: 16 by 10, every other course set over by half, each stone its own grey, the joints dark.
+  if (mat === 'flags') {
+    const row = Math.floor(py / 10), sx = px + (row % 2 ? 8 : 0), col = Math.floor(sx / 16);
+    if (py % 10 === 0 || sx % 16 === 0) return '#2e2b34';
+    const k = hash(col, row, 13);
+    return hash(px, py, 4) < 0.03 ? '#3a3640' : FAMILY.flags[Math.floor(k * 4)];
+  }
   const fam = FAMILY[mat], k = noise(x, y, 2.2, 3) * 0.8 + hash(px, py, 5) * 0.3, r = hash(px, py, 9);
   const col = fam[Math.min(fam.length - 1, Math.floor(k * fam.length))];
   if (mat === 'earth' || mat === 'swept') return r < 0.025 ? '#57525e' : r < 0.035 ? '#2e2820' : col;
@@ -88,12 +97,26 @@ export function paintSoil(m: GameMap, g: CanvasRenderingContext2D): void {
   const boxes = soil.map(box), W = m.w * PX, H = m.h * PX, img = g.getImageData(OX, OY, W, H), d = img.data;
   for (let by = 0; by < H; by += 4) for (let bx = 0; bx < W; bx += 4) {
     const mat = matAt(soil, boxes, (bx + 2) / PX, (by + 2) / PX);
-    if (mat === 'cobble') continue;
+    if (mat === 'cobble' || mat === 'shade') continue;
     for (let py = by; py < Math.min(H, by + 4); py += 2) for (let px = bx; px < Math.min(W, bx + 4); px += 2) {
       const [r, gg, b] = toRgb(colourAt(mat, px / PX, py / PX, px, py));
       for (let j = 0; j < 2; j++) for (let i = 0; i < 2; i++) {
         const o = ((py + j) * W + px + i) * 4;
         (d[o] = r), (d[o + 1] = gg), (d[o + 2] = b), (d[o + 3] = 255);
+      }
+    }
+  }
+  // Shade: under a tree's crown the ground is darker, dappled where light gets through the leaves.
+  for (const s of soil) {
+    if (s.mat !== 'shade') continue;
+    const [x0, y0, x1, y1] = box(s);
+    for (let py = Math.max(0, Math.floor(y0 * PX / 2) * 2); py < Math.min(H, y1 * PX); py += 2) for (let px = Math.max(0, Math.floor(x0 * PX / 2) * 2); px < Math.min(W, x1 * PX); px += 2) {
+      const x = px / PX, y = py / PX, wob = (noise(x, y, 1.1, 21) - 0.5) * 0.9;
+      if (depth(s, x, y) + wob <= 0) continue;
+      const k = noise(x, y, 0.7, 23) > 0.68 ? 0.84 : 0.66;
+      for (let j = 0; j < 2; j++) for (let i = 0; i < 2; i++) {
+        const o = ((py + j) * W + px + i) * 4;
+        (d[o] = d[o] * k), (d[o + 1] = d[o + 1] * k), (d[o + 2] = d[o + 2] * k * 1.04);
       }
     }
   }

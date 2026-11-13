@@ -160,15 +160,16 @@ describe('the ground and the life in it', () => {
   const kinds = (w: WorldState) => new Set(townMap(w).marks!.map((k) => k.kind));
   const count = (w: WorldState, k: string) => townMap(w).marks!.filter((m) => m.kind === k).length;
 
-  it('the square is not one sheet of cobbles, mended or not, and mending heals the mess', () => {
+  it('the town is not one sheet of cobbles, mended or not, and mending heals the mess', () => {
     const mats = (w: WorldState) => townMap(w).soil!.map((x) => x.mat), soilOf = (w: WorldState, k: string) => mats(w).filter((x) => x === k).length;
     for (const w of [newWorld(), withWorks(...all)]) {
-      for (const k of ['flags', 'ruts', 'puddle', 'weeds', 'gutter', 'holes']) expect(kinds(w).has(k as never), k).toBe(true);
-      for (const k of ['cobble', 'earth', 'mud', 'wet', 'straw', 'ash']) expect(mats(w), k).toContain(k);
+      for (const k of ['ruts', 'puddle', 'weeds', 'gutter', 'holes']) expect(kinds(w).has(k as never), k).toBe(true);
+      for (const k of ['cobble', 'flags', 'earth', 'mud', 'wet', 'straw', 'ash', 'grass', 'shade']) expect(mats(w), k).toContain(k);
     }
     // Earth and mud everywhere first; cobble only in islands and strips over it.
     expect(townMap(newWorld()).soil![0]).toMatchObject({ mat: 'mud', w: 64, h: 42 });
-    expect(soilOf(withWorks('wash'), 'cobble')).toBeGreaterThan(soilOf(newWorld(), 'cobble'));
+    // (The square is paved edge to edge since 2026-11-13, Kyle: "more clean"; washing it takes the wear off.)
+    expect(soilOf(withWorks('wash'), 'mud') + soilOf(withWorks('wash'), 'earth')).toBeLessThan(soilOf(newWorld(), 'mud') + soilOf(newWorld(), 'earth'));
     expect(soilOf(withWorks('wash', 'lanes'), 'swept')).toBeGreaterThan(0);
     expect(soilOf(withWorks('lanes'), 'mud')).toBeLessThan(soilOf(newWorld(), 'mud'));
     expect(count(withWorks('wash', 'lanes'), 'holes')).toBeLessThan(count(newWorld(), 'holes'));
