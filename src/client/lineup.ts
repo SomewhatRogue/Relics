@@ -8,11 +8,12 @@ import { drawHero } from './actors';
 import { drawFoe } from './strawman';
 import { BARE, type Ctx } from './draw';
 import { drawText } from './pixfont';
-import { MOVES, cast, foeIn, heroIn, type Unit } from './lineupcast';
+import { cast, foeIn, heroIn, movesFor, type Move, type Unit } from './lineupcast';
 
 const CELL = 32, LEFT = 46, TOP = 18, PX = 16;
 /** Column heads, short enough to fit a cell (alternate ones sit lower so neighbours never touch). */
-const HEADS = ['STAND', 'WALK', 'WINDUP', 'STRIKE', 'RECOVR', 'HURT', 'FLINCH', 'STAGGR', 'DIE'];
+const HEAD: Record<string, string> = { 'wind up': 'WINDUP', recover: 'RECOVR', stagger: 'STAGGR', 'hold up': 'UP', 'hold down': 'DOWN', release: 'LOOSE' };
+const head = (m: string) => HEAD[m] ?? m.toUpperCase();
 /** Two CSS pixels a scene pixel: the scale a phone sees the game at (about 12 tiles across). */
 const SCALE = 2;
 
@@ -41,7 +42,7 @@ function torches(rows: number[], w: number, now: number): Light[] {
 }
 
 export function openLineup(which: string): void {
-  const units = cast(which), rows: number[] = [];
+  const units = cast(which), rows: number[] = [], MOVES = movesFor(which);
   let y = TOP;
   for (const u of units) rows.push((y += u.tall));
   const W = LEFT + MOVES.length * CELL + 4, H = y + 10;
@@ -66,7 +67,7 @@ export function openLineup(which: string): void {
     c.lit.clearRect(0, 0, W, H);
     c.glow.clearRect(0, 0, W, H);
     floor(c.lit, W, H);
-    HEADS.forEach((m, i) => label(c.glow, m, LEFT + i * CELL + 3, i % 2 ? 9 : 2, '#c8c0a8'));
+    MOVES.forEach((m, i) => label(c.glow, head(m), LEFT + i * CELL + 3, i % 2 ? 9 : 2, '#c8c0a8'));
     BARE.on = true;
     try {
       units.forEach((u, r) => {
@@ -84,7 +85,7 @@ export function openLineup(which: string): void {
 }
 
 /** One unit in one move with its feet at (x, y). A draw that throws shows a red cross, not a blank. */
-function draw(c: Ctx, sc: Ctx, u: Unit, m: (typeof MOVES)[number], x: number, y: number, id: number, now: number): void {
+function draw(c: Ctx, sc: Ctx, u: Unit, m: Move, x: number, y: number, id: number, now: number): void {
   try {
     if ('hero' in u) {
       const { h, t, prime } = heroIn(u.hero, m, 'lineup' + id, now);

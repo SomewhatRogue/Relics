@@ -4,17 +4,23 @@
  * is what the game draws. Cosmetic only: nothing here runs a room.
  */
 import { newHero, currentSwing } from '../sim/hero';
+import { CHARGE } from '../shared/tuning';
 import { newEnemy } from '../sim/enemies';
 import type { Enemy, Hero, AttackKind } from '../sim/types';
 import { CLASS_KITS, type HeroClass } from '../shared/tuning';
+import type { WeaponId } from '../shared/weapons';
 import type { FoeVariant } from '../shared/terrain';
 
 export const MOVES = ['stand', 'walk', 'wind up', 'strike', 'recover', 'hurt', 'flinch', 'stagger', 'die'] as const;
-export type Move = (typeof MOVES)[number];
+/** The bows' own page (`?lineup=bows`): drawing, holding at full and loosing, aimed across, up and down. */
+export const BOW_MOVES = ['stand', 'walk', 'charge', 'hold', 'release', 'hold up', 'hold down', 'tap'] as const;
+export type Move = (typeof MOVES)[number] | (typeof BOW_MOVES)[number];
+/** The moves (and their short column heads) a group shows. */
+export const movesFor = (which: string): readonly Move[] => (which === 'bows' ? BOW_MOVES : MOVES);
 
 /** A foe's `name` (a named butcher's look comes from it), `boss` (who, for the bosses' own looks) and `hurt` (a share of its health gone). */
 export type Foe = { kind: 'scrapper' | 'butcher' | 'spider' | 'brood'; variant?: FoeVariant; name?: string; boss?: string; hurt?: number; big?: boolean };
-export type Unit = { label: string; tall: number } & ({ hero: { cls: HeroClass; look: number } } | { foe: Foe });
+export type Unit = { label: string; tall: number } & ({ hero: { cls: HeroClass; look: number; weapon?: WeaponId } } | { foe: Foe });
 
 const CLS: HeroClass[] = ['WARRIOR', 'RANGER', 'ROGUE', 'MAGE', 'HEALER'];
 /** The mobs, most confused first (docs/design/art-pass.md), then the rest. */
@@ -23,6 +29,10 @@ const MOBS: FoeVariant[] = ['shield', 'netter', 'hexer', 'lunger', 'gaffer', 'sn
 /** Everyone, by the group asked for (`heroes`, `goblins`, or all). */
 export function cast(which: string): Unit[] {
   const out: Unit[] = [];
+  if (which === 'bows') {
+    for (const weapon of ['longbow', 'shortbow', 'crossbow'] as const) for (const look of [0, 1, 2]) out.push({ label: `${weapon.slice(0, 5).toUpperCase()} ${look + 1}`, tall: 46, hero: { cls: 'RANGER', look, weapon } });
+    return out;
+  }
   if (which !== 'goblins') for (const cls of CLS) for (const look of [0, 1, 2]) out.push({ label: `${cls} ${look + 1}`, tall: 40, hero: { cls, look } });
   if (which !== 'heroes') {
     out.push({ label: 'GOBLIN', tall: 32, foe: { kind: 'scrapper' } }, { label: 'BUTCHER', tall: 44, foe: { kind: 'butcher' } });
@@ -46,11 +56,19 @@ export function cast(which: string): Unit[] {
 const loop = (now: number, len: number, off = 0) => ((now + off) % len) / len;
 
 /** A hero in the move at wall time `now`; `t` is the room time to draw it at. */
-export function heroIn(u: { cls: HeroClass; look: number }, m: Move, id: string, now: number): { h: Hero; t: number; prime?: Hero } {
+export function heroIn(u: { cls: HeroClass; look: number; weapon?: WeaponId }, m: Move, id: string, now: number): { h: Hero; t: number; prime?: Hero } {
   const h = newHero(id, 0, 0);
-  Object.assign(h, { weapon: CLASS_KITS[u.cls][0], look: u.look, fx: 0.2, fy: 1, hp: 100, tag: '' });
+  Object.assign(h, { weapon: u.weapon ?? CLASS_KITS[u.cls][0], look: u.look, fx: 0.2, fy: 1, hp: 100, tag: '' });
   const s = currentSwing(h);
   let t = 10;
+  // A held shot: drawing (looping from nothing to full), held at full, aimed across, up or down; loosed.
+  if (m === 'charge') Object.assign(h, { fx: 1, fy: 0.15, act: 'charge', actT: loop(now, 1.4) * 1.2 - CHARGE.start });
+  if (m === 'hold' || m === 'hold up' || m === 'hold down') Object.assign(h, { fx: m === 'hold' ? 1 : 0.15, fy: m === 'hold up' ? -1 : m === 'hold down' ? 1 : 0.15, act: 'charge', actT: 3 });
+  if (m === 'release' || m === 'tap') {
+    Object.assign(h, { fx: 1, fy: 0.15, act: 'attack', combo: 0, heavy: m === 'release', power: 1 });
+    const r = currentSwing(h);
+    h.actT = m === 'release' ? r.windup + loop(now, 0.8) * (r.active + r.recover) : loop(now, 1) * (r.windup + r.active + r.recover);
+  }
   // Stepped a hair every 3 s (never drawn) so a class's idle never starts: this column is the plain stand.
   h.x = (Math.floor(now / 3) % 2) * 0.05;
   if (m === 'walk') Object.assign(h, { fx: 1, fy: 0.1, moving: true });

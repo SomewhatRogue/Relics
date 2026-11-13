@@ -307,3 +307,14 @@ The plan, one class at a time so Kyle can play each against the old ones:
   (body 1.5 tiles), so it still stands well over the square. One card in 2.5D (the second only if a figure
   were ever taller than a card). A dark pixel inside the figure (eyes, a brim, a hood) takes the second-darkest
   stone; only the outline is the darkest, so nothing reads as a hole. (Claude Opus 5.5)
+
+## 2026-11-13: two hands on the bow
+
+- Kyle: the Ranger shot with the hand holding the bow. Now (held.ts) the bow sits out at the end of the bow arm
+  (a leather bracer down the forearm, a gloved fist round the grip), and on a draw the far arm comes across
+  from the shoulder to a second fist on the string, drawn back to an anchor by the face; just loosed, that hand
+  stays back a beat with the string straight. Longbow and shortbow alike. The crossbow is held in both hands, one
+  under the fore-end and the trigger hand at the back of the stock, and comes up to the chest line when aimed.
+  At rest a bow is carried in the one hand. The 2.5D cards draw the same code.
+- The lineup has a bows page, `?lineup=bows`: each bow in three looks through stand, walk, charge, hold, loose,
+  hold aimed up and down, and the tap. Drawing only; the shot is the room's as before. (Claude Opus 5.5)

@@ -65,16 +65,37 @@ export function pose(h: Hero, now: number): Pose {
   return { a: rest[h.weapon] ?? fa, ext: 0, reach: 0, pull: 0 };
 }
 
-/** A bow (`r` is half its length), its belly toward the target; the string pulls back with an arrow on it. */
-function bow(c: Ctx, x: number, y: number, a: number, pull: number, r0 = 6): void {
+/** A gloved fist round a grip or a string: pale leather knuckles ringed dark, so it reads on a body or the floor. */
+function fist(c: Ctx, x: number, y: number): void {
+  const fx = Math.round(x) - 1, fy = Math.round(y) - 1;
+  c.lit.fillStyle = '#241a12';
+  c.lit.fillRect(fx - 1, fy, 4, 2);
+  c.lit.fillRect(fx, fy - 1, 2, 4);
+  c.lit.fillStyle = '#d6aa70';
+  c.lit.fillRect(fx, fy, 2, 1);
+  c.lit.fillStyle = '#9a7040';
+  c.lit.fillRect(fx, fy + 1, 2, 1);
+}
+
+/**
+ * A bow (`r` is half its length), its belly toward the target, held in the bow hand (the weapon arm, out
+ * toward the aim); the other hand draws the string back with an arrow on it (Kyle, 2026-11-13: it shot from
+ * the hand holding the bow). `after`: just loosed, the string straight and the draw hand still back at the
+ * anchor, opened past it.
+ */
+function bow(c: Ctx, x: number, y: number, a: number, pull: number, r0 = 6, after = false, side = 1): void {
+  // The bow arm out straight to the grip, a leather bracer down the forearm.
   const r = r0 * HS, dx = Math.cos(a), dy = Math.sin(a), nx = -dy, ny = dx, gx = x + dx * 3 * HS, gy = y + dy * 3 * HS;
+  rawLine(c.lit, x, y, a, 0, 3 * HS, '#4a3420', 2);
   const at = (k: number): [number, number] => [gx + nx * k - dx * ((k * k) / (r * 2.4)), gy + ny * k - dy * ((k * k) / (r * 2.4))];
   c.lit.fillStyle = r0 > 5 ? '#8b6a3a' : '#6b4a2b';
   for (let k = -r; k <= r; k += 0.5) {
     const [px, py] = at(k);
     c.lit.fillRect(Math.round(px), Math.round(py), 1, 1);
   }
-  const draw = (r0 > 5 ? 5 : 3) * HS, [ax, ay] = at(-r), [bx, by] = at(r), nock: [number, number] = [gx - dx * (2.6 * HS + draw * pull), gy - dy * (2.6 * HS + draw * pull)];
+  // (Drawn back to the anchor by the face, the bow's width short of the far shoulder.)
+  const draw = (r0 > 5 ? 3.4 : 2.6) * HS, back = (k: number): [number, number] => [gx - dx * (2.6 * HS + draw * k), gy - dy * (2.6 * HS + draw * k)];
+  const [ax, ay] = at(-r), [bx, by] = at(r), nock = back(pull);
   for (const [ex, ey] of [[ax, ay], [bx, by]]) {
     const d = Math.hypot(nock[0] - ex, nock[1] - ey);
     rawLine(c.lit, ex, ey, Math.atan2(nock[1] - ey, nock[0] - ex), 0, d, '#d8d0bc');
@@ -84,6 +105,11 @@ function bow(c: Ctx, x: number, y: number, a: number, pull: number, r0 = 6): voi
     line(c.lit, nock[0], nock[1], a, 9, 10, '#dfe6ec');
     if (pull >= 1) (c.glow.fillStyle = '#ffffff'), c.glow.fillRect(Math.round(nock[0] + dx * 10 * HS), Math.round(nock[1] + dy * 10 * HS), 1, 1);
   }
+  // The draw arm: the forearm from the far shoulder to the hand on the string.
+  const hand = pull > 0.05 ? nock : after ? back(1.3) : null, sx = x - side * hs(6), sy = y - hs(3);
+  if (hand) rawLine(c.lit, sx, sy, Math.atan2(hand[1] - sy, hand[0] - sx), 0, Math.hypot(hand[0] - sx, hand[1] - sy), '#4a3420', 2);
+  fist(c, gx, gy);
+  if (hand) fist(c, hand[0], hand[1]);
 }
 
 /**
@@ -139,14 +165,20 @@ export function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): vo
     line(g, ox, oy, p.a, 2, 9, '#dfe6ec');
     line(g, ox, oy, p.a, 0, 2, '#8b6a3a');
     line(g, ox + Math.cos(p.a) * 2 * HS, oy + Math.sin(p.a) * 2 * HS, p.a + Math.PI / 2, -1, 1, '#9aa3ad');
-  } else if (h.weapon === 'longbow') bow(c, ox, oy, p.a, p.pull, 7);
-  else if (h.weapon === 'shortbow') bow(c, ox, oy, p.a, p.pull, 4);
-  else if (h.weapon === 'crossbow') {
-    // Stock along the aim, the prod across it; a bolt sits on it unless it's empty (sim/crossbow.ts).
-    const loaded = !h.xbowEmpty;
-    line(g, ox, oy, p.a, -3, 6, '#5a3d22', 2);
-    line(g, ox + Math.cos(p.a) * 5 * HS, oy + Math.sin(p.a) * 5 * HS, p.a + Math.PI / 2, -4, 4, '#9aa3ad');
-    if (loaded) line(g, ox, oy, p.a, 1, 8, '#cfd6dc');
+  } else if (h.weapon === 'longbow' || h.weapon === 'shortbow') {
+    // Just loosed: the draw hand stays back a beat after the string goes.
+    const s = h.act === 'attack' ? currentSwing(h) : null, after = !!s?.shot && h.actT >= s.windup && h.actT < s.windup + 0.2;
+    bow(c, ox, oy, p.a, p.pull, h.weapon === 'longbow' ? 7 : 4, after, side);
+  } else if (h.weapon === 'crossbow') {
+    // Stock along the aim, the prod across it; a bolt sits on it unless it's empty (sim/crossbow.ts). Held in
+    // both hands: one under the fore-end, the trigger hand at the back of the stock.
+    // Aimed (drawn, held, loosed), it comes up to the shoulder.
+    const loaded = !h.xbowEmpty, ca = Math.cos(p.a), sa = Math.sin(p.a), up = h.act === 'charge' || h.act === 'attack' ? hs(1.5) : 0, cy = oy - up;
+    line(g, ox, cy, p.a, -3, 6, '#5a3d22', 2);
+    line(g, ox + ca * 5 * HS, cy + sa * 5 * HS, p.a + Math.PI / 2, -4, 4, '#9aa3ad');
+    if (loaded) line(g, ox, cy, p.a, 1, 8, '#cfd6dc');
+    fist(c, ox + ca * 3 * HS, cy + sa * 3 * HS + 1);
+    fist(c, ox - ca * 2 * HS, cy - sa * 2 * HS + 1);
   } else if (h.weapon === 'spellblade') {
     // A plain sword whose edge glows with your magic (blademark.ts).
     line(g, ox, oy, p.a, 2, 12, '#cfd6e8');
