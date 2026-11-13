@@ -32,6 +32,8 @@ import { openButts, openPond } from './pastimeui';
 import { openArmTable, openKnifeBoard } from './ratui';
 import { openBest } from './bestui';
 import { townVoice, voiceClock } from './voiceplay';
+import { talkedTo } from '../shared/errands';
+import { ERRANDW } from './errandwords';
 
 
 const p = (s: string) => `<p>${s}</p>`;
@@ -75,6 +77,9 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       const yours = TRAINERS[pr.cls];
       return panel.show(t.name, say(name, ELSEWHERE[cls].replace('{who}', title(yours.name)).replace('{where}', yours.where)));
     }
+    // Your own trainer: the first errand's done, and they've heard you've a new skill open (shared/errands.ts).
+    const first = !!pr.errands?.told && !pr.errands.trainer;
+    if (talkedTo(pr, 'trainer', arg)) g.keep();
     if (pr.cls === 'HEALER' && pr.cold) {
       pr.cold = false;
       g.keep();
@@ -82,7 +87,8 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       return panel.show(`${t.name}, ${CLASS_NAME[cls]} TRAINER`, p('She takes your censer without asking, carries it to the Lantern, and brings it back lit.') + say(name, TALLY.isolde), [{ label: 'CLOSE', act: again }], true);
     }
     // One spoken line at most: grown since you were last here, or (a Cleric) coals for the censer.
-    const greet = pr.picks > 0 ? TEACH[pr.cls][0] : pr.cls === 'HEALER' && pr.glow > 0 ? COAL.isolde : '';
+    // (The first time in on the errand: their own line for a new face, errandwords.ts.)
+    const greet = first ? ERRANDW.firstVisit[pr.cls] : pr.picks > 0 ? TEACH[pr.cls][0] : pr.cls === 'HEALER' && pr.glow > 0 ? COAL.isolde : '';
     openTrainer(g, panel, `${t.name}, ${CLASS_NAME[cls]} TRAINER`, name, greet);
   } else if (id === 'hew') {
     panel.show('HEW', say('Hew', g.wood && g.wood.stage >= 2 ? LINES.north : LINES.later));

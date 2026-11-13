@@ -253,6 +253,8 @@ export class Game {
       Object.assign(p, { prologue: true, tally: true, cold: p.cls === 'HEALER' });
       if (!p.relics.some((r) => r.kind === 'javelin')) p.relics.unshift(makeRelic(new Rng(p.xp * 31 + p.runs + 7), 'javelin'));
       p.relic ||= p.relics.find((r) => r.kind === 'javelin')!.id;
+      // A new hero's javelin reaches town spent, one throw left from the Stoker: the church's errand fills it (Kyle, 2026-11-12; shared/errands.ts).
+      if (p.errands && !p.errands.told) for (const r of p.relics) if (r.kind === 'javelin') r.charge = Math.min(r.charge, 1);
     }
     store(this.save);
   }

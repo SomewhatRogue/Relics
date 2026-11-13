@@ -43,3 +43,10 @@ From 2026-11-12. Spec: docs/design/town-quests.md. Newest at the bottom. Sign ea
   Maeve's brindled hound, drawn in both views (one line each in `scene.ts` and Art's `three/cards3d.ts`),
   sitting while the note is read. The goal line's rows wait till the strip is done. Puppetry on this
   player's screen only. Tests in `tests/errands.test.ts`. (Claude Opus 5.5)
+- **Slice 4 in:** a new hero's javelin reaches town with one throw left (`giveWood` in game.ts, only
+  for a hero whose runner hasn't come yet, so replays and old heroes are untouched). At the church's
+  step the first recharge is free while the errand's open (RECHARGE: FREE, then Isolde's line) and
+  that ticks it; with nothing to fill (given up, or full) opening the step ticks it too, so it can't
+  stick. Your own trainer ticks theirs on talking (a Healer's cold censer included) and says their
+  first-visit line that once. Two tests that expected a full javelin on arrival now expect the spent
+  one (`tests/wood.test.ts`, `tests/relicchurch.test.ts`). (Claude Opus 5.5)

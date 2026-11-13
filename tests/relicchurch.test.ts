@@ -177,9 +177,11 @@ describe('old saves and the room', () => {
     g.skipWood();
     const p = g.profile, h = g.hero, it = h.found.find((r) => r.id === h.relicItem)!;
     expect(it).not.toBe(p.relics[0]);
-    it.charge -= 3;
+    // (A new hero's javelin reaches town with one throw left: town quests, shared/errands.ts.)
+    expect(it.charge).toBe(1);
+    it.charge -= 1;
     expect(keepKit(p, h, true)).toBe(true);
-    expect(p.relics[0].charge).toBe(relicMax(it) - 3);
+    expect(p.relics[0].charge).toBe(0);
     expect(p.relics[0]).not.toBe(it);
     expect(keepKit(p, h, true)).toBe(false);
   });

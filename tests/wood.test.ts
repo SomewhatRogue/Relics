@@ -274,7 +274,8 @@ describe('the prologue wood', () => {
     g.skipWood();
     expect(g.mode).toBe('town');
     expect(g.profile).toMatchObject({ prologue: true, cold: true });
-    expect(g.profile.relics.find((r) => r.id === g.profile.relic)).toMatchObject({ kind: 'javelin', tier: 1, el: '', charge: 4 });
+    // Spent, one throw left: the church's errand fills it (town quests, shared/errands.ts).
+    expect(g.profile.relics.find((r) => r.id === g.profile.relic)).toMatchObject({ kind: 'javelin', tier: 1, el: '', charge: 1 });
     expect(g.hero.cold).toBe(true);
   });
 });

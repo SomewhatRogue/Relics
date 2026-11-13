@@ -13,6 +13,9 @@ import { relicCard } from './reliccard';
 import { RELICW } from './relicwords';
 import { forgeAnim } from './forgeanim';
 import { line } from './speech';
+import { relicDone } from '../shared/errands';
+import { relicMax } from '../shared/relicitems';
+import { ERRANDW } from './errandwords';
 
 const p = (s: string) => `<p>${s}</p>`;
 const say = (who: string, s: string) => p(`<b>${who}:</b> ${line(`"${s}"`, who)}`);
@@ -26,12 +29,16 @@ let sure = '';
 
 export function openStep(g: Game, panel: Panel, back: () => void, said = ''): void {
   const pr = g.profile, again = (s = '') => ((sure = ''), openStep(g, panel, back, s));
+  // A new hero's first recharge is Isolde's to give (the relic's errand, shared/errands.ts); with nothing
+  // to fill (it's been given up, or it's full), the errand's done all the same.
+  const free = !!pr.errands?.told && !pr.errands.relic;
+  if (free && !pr.relics.some((r) => canRecharge(r))) relicDone(pr), g.keep();
   picked = picked.filter((id) => pr.relics.some((r) => r.id === id));
   const lit = pr.lit ?? 0;
   const head = (said.startsWith('~') ? p(said.slice(1)) : said ? say('Father Odric', said) : say('Father Odric', RELICW.churchIntro)) + (lit ? p(`<b>${RELICW.litLeft(lit)}</b>`) : '') + p(`You have ${pr.gold} gold.`) + p(RELICW.stepHow);
   const rows = pr.relics.map((r) => {
     const cost = rechargeCost(r), n = litFor(r);
-    const re = r.el ? '' : b('recharge', r.id, canRecharge(r) ? RELICW.recharge(cost) : RELICW.full, { off: !canRecharge(r) || pr.gold < cost });
+    const re = r.el ? '' : free && canRecharge(r) ? b('free', r.id, ERRANDW.free, { go: true }) : b('recharge', r.id, canRecharge(r) ? RELICW.recharge(cost) : RELICW.full, { off: !canRecharge(r) || pr.gold < cost });
     const get = n ? Math.min(n, LIT.max - lit) : 0;
     const leave = sure === r.id
       ? `</div><p class="rwarn">${RELICW.leaveWarn(get)}</p><div class="rbtns">` + b('leave', r.id, RELICW.leaveSure, { go: true }) + b('keep', r.id, RELICW.keep)
@@ -47,6 +54,13 @@ export function openStep(g: Game, panel: Panel, back: () => void, said = ''): vo
     if (op === 'ask' || op === 'twoask') return (sure = op === 'ask' ? id : 'two'), openStep(g, panel, back, said);
     if (op === 'keep') return again(said);
     if (op === 'recharge') return recharge(pr, id) ? (g.relicsChanged(), again('~' + RELICW.recharged)) : undefined;
+    if (op === 'free') {
+      const r = pr.relics.find((x) => x.id === id);
+      if (!r || !canRecharge(r) || !relicDone(pr)) return;
+      r.charge = relicMax(r);
+      g.relicsChanged();
+      return again('~' + ERRANDW.freeDone);
+    }
     if (op === 'leave') {
       const r = pr.relics.find((x) => x.id === id), was = pr.lit ?? 0;
       if (!r || leaveRelic(pr, id) < 0) return;
