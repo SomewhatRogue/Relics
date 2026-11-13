@@ -281,3 +281,19 @@ The plan, one class at a time so Kyle can play each against the old ones:
   makeSprite as it loads. Making sumpdraw's sprites on first use (or moving paintTracks out of world.ts's imports)
   would clear it. My own process note: I ran the suite before rebasing and piped it through grep, so a red suite
   didn't stop my push; from now I check the suite's exit after the rebase. (Claude Opus 5.5)
+
+## 2026-11-13: the hounds drawn as dogs
+
+- Kyle: "Lets make the hunter dog and dog options better looks not like a dog right now." What made them read
+  wrong: a square skull with a box of muzzle stuck on, a pencil-thin neck straight up, hind legs bending forward
+  at the knee (a goat's), a slab of body with no chest or tuck, a one-pixel tail.
+- Each breed's head is now a small drawing (houndheads.ts): a skull with a stop, the eye at it, a muzzle tapering
+  to the nose, and the ears as the breed wears them at rest, laid back running, pricked up. Wolfhound brows and
+  beard, the lurcher's long flat head, the hill hound's tan muzzle and long drop ears, the collie's tipped ears
+  and white ruff. Open jaws have their own rows.
+- The body: high at the withers, the croup falling to the tail, deep in the brisket, tucked at the loin, the
+  thigh full behind, forechest and rump rounded. The neck a thick wedge from the withers into the skull. Hind legs
+  go back to the hock and down; every foot has a paw; the tail thick at the root. Sitting has a round haunch
+  and a hind foot forward; lying down has the paws out past the nose. Wolfhound and lurcher a row longer in the leg.
+- Same box (HOUND_BOX), same poses and fight; the wolves share the wolfhound's body so they come out better too.
+  scripts/hound-look.cjs's cells now the box's size (39 by 24) so heads aren't cut off the sheet. (Claude Opus 5.5)

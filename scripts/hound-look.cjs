@@ -16,7 +16,7 @@ const COLS = [
   ['stand', 0], ['sit', 0], ['sniff', 0], ['sniff', 1], ['scratch', 0], ['scratch', 1], ['down', 0], ['downUp', 0], ['shake', 0], ['shake', 1], ['shake', 2],
   ['lunge', 0], ['lunge', 1], ['bite', 0], ['bite', 1], ['latch', 0], ['latch', 1], ['bow', 0], ['leap', 0],
 ];
-const W = 32, H = 22, K = 4, LABEL = 200, HEAD = 40;
+const W = 39, H = 24, K = 4, LABEL = 200, HEAD = 40;
 
 (async () => {
   fs.mkdirSync(out, { recursive: true });
