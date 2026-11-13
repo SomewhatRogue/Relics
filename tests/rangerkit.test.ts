@@ -83,7 +83,7 @@ describe('the longbow', () => {
 describe('the shortbow', () => {
   it('a quicker draw (0.4 s, Kyle 2026-11-08), light arrows, walk while drawing', () => {
     const w = WEAPONS.shortbow;
-    expect([w.draw, w.chargeSpeed, w.speed, w.heavy.dmg, w.heavy.dmgFull, w.heavy.range, !!w.heavy.pierce, !!w.heavy.blinds, !!w.reloads]).toEqual([0.4, 0.7, 1.04, 10, 22, 9, false, false, false]);
+    expect([w.draw, w.chargeSpeed, w.speed, w.heavy.dmg, w.heavy.dmgFull, w.heavy.range, !!w.heavy.pierce, !!w.heavy.blinds, !!w.reloads]).toEqual([0.4, 0.7, 1.1, 10, 22, 9, false, false, false]);
   });
 
   it('a perfect arrow strikes clean and does not blind', () => {

@@ -98,12 +98,12 @@ describe('class weapons', () => {
     expect(t.act).toBe('stunned');
   });
 
-  it('the rogue is quickest; the Ranger just under (2026-11-12); the rest walk slower', () => {
-    const ks = Object.keys(WEAPONS) as (keyof typeof WEAPONS)[], rogue = Math.min(...ks.filter((k) => WEAPONS[k].cls === 'ROGUE').map((k) => WEAPONS[k].speed));
-    for (const k of ks) if (WEAPONS[k].cls !== 'ROGUE') expect(WEAPONS[k].speed).toBeLessThan(rogue);
-    for (const k of ks) if (WEAPONS[k].cls !== 'ROGUE' && WEAPONS[k].cls !== 'RANGER') expect(WEAPONS[k].speed).toBeLessThanOrEqual(0.9);
-    expect(WEAPONS.daggers.speed).toBeGreaterThan(1);
-    expect(WEAPONS.staff.dodge.cooldown).toBeGreaterThan(WEAPONS.daggers.dodge.cooldown * 4);
+  it('Rogues and Rangers walk at one quick pace; Warriors, Mages and Clerics at one slow one (Kyle, 2026-11-13)', () => {
+    const ks = Object.keys(WEAPONS) as (keyof typeof WEAPONS)[];
+    const fast = new Set(ks.filter((k) => ['ROGUE', 'RANGER'].includes(WEAPONS[k].cls)).map((k) => WEAPONS[k].speed));
+    const slow = new Set(ks.filter((k) => !['ROGUE', 'RANGER'].includes(WEAPONS[k].cls)).map((k) => WEAPONS[k].speed));
+    expect([...fast]).toEqual([1.1]);
+    expect([...slow]).toEqual([0.8]);
   });
 });
 

@@ -11,6 +11,9 @@ import { RELIC_DROP, relicName, rollRelic, type RelicItem } from '../shared/reli
 
 export interface Pickup { id: number; x: number; y: number; life: number; gold?: number; potion?: PotionId; relic?: RelicItem }
 let nextId = 1;
+/** A new pickup's id: past any still lying in the room, so a host who took over (its own count lower) never
+ *  gives a second one the same id. */
+const pid = (ps: Pickup[]): number => (nextId = Math.max(nextId, ...ps.map((p) => p.id + 1))) && nextId++;
 
 const kindOf = (e: Enemy) => (e.name ? 'named' : e.kind === 'butcher' ? 'butcher' : e.bow ? 'archer' : 'scrapper');
 
@@ -24,20 +27,20 @@ type Coins = Record<'scrapper' | 'archer' | 'butcher' | 'named', { chance: numbe
 export function dropPickups(e: Enemy, pickups: Pickup[], rng: Rng, coins: Coins = COINS): void {
   if ((e.kind !== 'scrapper' && e.kind !== 'butcher') || e.respawns) return;
   const k = kindOf(e), c = (e.variant === 'wolf' && coins.wolf) || coins[k];
-  if (rng.next() < c.chance) pickups.push({ id: nextId++, x: e.x, y: e.y, life: COINS.life, gold: c.min + Math.floor(rng.next() * (c.max - c.min + 1)) });
+  if (rng.next() < c.chance) pickups.push({ id: pid(pickups), x: e.x, y: e.y, life: COINS.life, gold: c.min + Math.floor(rng.next() * (c.max - c.min + 1)) });
   // A BIG ONE's sure handful (shared/threat.ts BIG), on top.
-  if (e.big) pickups.push({ id: nextId++, x: e.x - 0.4, y: e.y - 0.2, life: COINS.life * 2, gold: BIG.gold[0] + Math.floor(rng.next() * (BIG.gold[1] - BIG.gold[0] + 1)) });
+  if (e.big) pickups.push({ id: pid(pickups), x: e.x - 0.4, y: e.y - 0.2, life: COINS.life * 2, gold: BIG.gold[0] + Math.floor(rng.next() * (BIG.gold[1] - BIG.gold[0] + 1)) });
   if (rng.next() < POTION_DROPS[k]) {
     const w = POTION_DROPS.weights, total = POTION_ORDER.reduce((s, p) => s + w[p], 0);
     let r = rng.next() * total, pick: PotionId = 'bitter';
     for (const p of POTION_ORDER) if ((r -= w[p]) < 0) { pick = p; break; }
-    pickups.push({ id: nextId++, x: e.x + 0.4, y: e.y + 0.2, life: COINS.life, potion: pick });
+    pickups.push({ id: pid(pickups), x: e.x + 0.4, y: e.y + 0.2, life: COINS.life, potion: pick });
   }
 }
 
 /** What a sneak-thief took, dropped where it fell (sim/thief.ts): it waits a good while. */
 export function dropLoot(pickups: Pickup[], x: number, y: number, loot: { gold?: number; potion?: PotionId }): void {
-  pickups.push({ id: nextId++, x, y, life: COINS.life * 2, ...(loot.gold ? { gold: loot.gold } : {}), ...(loot.potion ? { potion: loot.potion } : {}) });
+  pickups.push({ id: pid(pickups), x, y, life: COINS.life * 2, ...(loot.gold ? { gold: loot.gold } : {}), ...(loot.potion ? { potion: loot.potion } : {}) });
 }
 
 /** A named butcher, now and then, leaves a relic where it fell (its own seeded stream: RELIC_DROP.named). */
@@ -47,7 +50,7 @@ export function dropRelic(e: Enemy, pickups: Pickup[], rng: Rng): void {
   // (Hempen's relic is Hangman's Wood's own, awarded once at the job's end: shared/relicaward.ts. Never a drop too.)
   if (e.zoned) return;
   if (rng.next() >= RELIC_DROP.named) return;
-  pickups.push({ id: nextId++, x: e.x - 0.3, y: e.y + 0.3, life: RELIC_LIFE, relic: rollRelic(rng) });
+  pickups.push({ id: pid(pickups), x: e.x - 0.3, y: e.y + 0.3, life: RELIC_LIFE, relic: rollRelic(rng) });
 }
 /** A relic on the floor waits a long while (it's worth walking back for). */
 const RELIC_LIFE = 90;

@@ -293,6 +293,10 @@ const swap = (s: string, a: string, b: string) => s.split(`"${a}"`).join('"\u000
  * swaps them, unpackRoom, loadRoom), then stepped on with the same Intents beside the host's own room and
  * beside the same save loaded without the swap. Returns the three, each with the ids as the host had them.
  */
+/** A room's JSON with every object's keys sorted. */
+/** A room's JSON with every object's keys sorted, and pickups' ids (labels from a count each host keeps) left out. */
+const canon = (j: string): string => JSON.stringify(JSON.parse(j), (k, v) => (k === 'pickups' && Array.isArray(v) ? v.map(({ id: _, ...p }) => p) : v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => (a < b ? -1 : 1))) : v));
+
 function handedOn(job: Job, party: number, before: number, after: number): { host: string; friend: string; plain: string; drift: number } {
   const room = runRoom({ ...newRun(job), party });
   const ids = ['me', 'sam-0001', 'amy-0001'].slice(0, party);
@@ -320,7 +324,8 @@ describe('the room across a handover', () => {
   it('a street mid-fight (a pack rushing, barrels about): the same fight, tick for tick, on the friend who took it', () => {
     const job = board(3).find((j) => !j.exped)!;
     const r = handedOn(job, 2, Math.round(6 / TICK), Math.round(20 / TICK));
-    expect(r.friend).toBe(r.host);
+    // The same fight, value for value (the order a field was first set in can differ after a handover).
+    expect(canon(r.friend)).toBe(canon(r.host));
     expect(JSON.parse(r.host).props.length).toBeGreaterThan(0);
   });
   it('an expedition with three: its save is to the centimetre (bigsave.ts), and from it the same fight on any page', () => {

@@ -180,7 +180,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     ],
     // Held: a shield bash that stuns the goblin in front (Kyle's rework): short, little damage, a solid stagger.
     heavy: { windup: 0.06, active: 0.1, recover: 0.32, dmg: 6, dmgFull: 12, range: 1.35, arc: 80, lunge: 0.5, knock: 5, knockFull: 9, hits: 1, shieldBash: true },
-    blockSpeed: 0.45, chargeSpeed: 0.4, guardArc: 170, guardCost: 1, speed: 0.9,
+    blockSpeed: 0.45, chargeSpeed: 0.4, guardArc: 170, guardCost: 1, speed: 0.8,
     dodge: ROLL,
   },
   greatsword: {
@@ -196,7 +196,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     // Held: the overhead (it breaks heavy wind-ups); let go on the white flash and it sends out a shockwave.
     heavy: { windup: 0.1, active: 0.16, recover: 0.6, dmg: 38, dmgFull: 75, range: 2.4, arc: 110, lunge: 0.9, knock: 10, knockFull: 20, quake: true },
     // A plain block like the Warrior's other kits, but a slow one: a narrow arc, dear on stamina, a crawl while held.
-    blockSpeed: 0.35, chargeSpeed: 0.25, guardArc: 110, guardCost: 1.3, speed: 0.78, ponderous: true,
+    blockSpeed: 0.35, chargeSpeed: 0.25, guardArc: 110, guardCost: 1.3, speed: 0.8, ponderous: true,
     dodge: { kind: 'roll', distance: 1.9, time: 0.4, iFrom: 0.06, iTo: 0.28, stamina: 34, cooldown: 1.4 },
   },
   spear: {
@@ -211,7 +211,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     ],
     // Held: a lunge that runs through up to three in a line.
     heavy: { windup: 0.06, active: 0.14, recover: 0.4, dmg: 22, dmgFull: 42, range: 3.0, arc: 34, lunge: 2.4, knock: 9, knockFull: 16, thrust: true, hits: 3 },
-    blockSpeed: 0.4, chargeSpeed: 0.35, guardArc: 120, guardCost: 1.3, speed: 0.86, pins: true, shaft: true,
+    blockSpeed: 0.4, chargeSpeed: 0.35, guardArc: 120, guardCost: 1.3, speed: 0.8, pins: true, shaft: true,
     dodge: { kind: 'backstep', distance: 2, time: 0.26, iFrom: 0.02, iTo: 0.18, stamina: 22, cooldown: 1.0 },
   },
   /** The Rogue's kit: weak from the front, brutal from behind, and the only one quick on its feet. */
@@ -226,7 +226,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     ],
     // Held: a dagger thrown (Kyle), harder the longer it's held; it sticks where it lands.
     heavy: { windup: 0.05, active: 0.04, recover: 0.3, dmg: 14, dmgFull: 30, range: 8, arc: 0, lunge: -0.15, knock: 2, knockFull: 5, shot: 'knife', speed: 24 },
-    blockSpeed: 0.6, chargeSpeed: 0.7, backstab: 2.5, front: 0.6, single: true, guardArc: 100, guardCost: 1.8, speed: 1.12,
+    blockSpeed: 0.6, chargeSpeed: 0.7, backstab: 2.5, front: 0.6, single: true, guardArc: 100, guardCost: 1.8, speed: 1.1,
     dodge: { kind: 'dash', distance: 4.3, time: 0.22, iFrom: 0, iTo: 0.22, stamina: 30, cooldown: 0.35 },
   },
   /** A short sword on a tap; held, the longbow draws for 1.7 s, harder the longer, and pierces a line.
@@ -237,7 +237,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     combo: RANGER_BLADE,
     heavy: { windup: 0.04, active: 0.05, recover: 0.45, dmg: 18, dmgFull: 55, range: 15, arc: 0, lunge: -0.3, knock: 4, knockFull: 15, shot: 'arrow', speed: 34, pierce: true, blinds: true },
     draw: 1.7, // A longer draw to the flash (Kyle, 2026-11-08), but let go early it still flies, weaker.
-    blockSpeed: 0.4, chargeSpeed: 0.3, guardArc: 100, guardCost: 1.6, speed: 0.98,
+    blockSpeed: 0.4, chargeSpeed: 0.3, guardArc: 100, guardCost: 1.6, speed: 1.1,
     dodge: RANGER_JUMP,
   },
   /** Quick draws, light arrows, and you can walk while drawing: the kiting bow. */
@@ -247,7 +247,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     combo: RANGER_BLADE,
     heavy: { windup: 0.03, active: 0.04, recover: 0.22, dmg: 10, dmgFull: 22, range: 9, arc: 0, lunge: 0, knock: 2, knockFull: 6, shot: 'arrow', speed: 26 },
     draw: 0.4, early: 'full', // Quick to full and to the flash; let go early it's still a full shot.
-    blockSpeed: 0.45, chargeSpeed: 0.7, guardArc: 100, guardCost: 1.7, speed: 1.04,
+    blockSpeed: 0.45, chargeSpeed: 0.7, guardArc: 100, guardCost: 1.7, speed: 1.1,
     dodge: RANGER_SPRINT,
   },
   /** A short sword on a tap. Held with a bolt on it, the crossbow comes up to aim and lets go on release:
@@ -258,7 +258,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     combo: RANGER_BLADE,
     heavy: { windup: 0.06, active: 0.04, recover: 0.35, dmg: 60, dmgFull: 60, range: 13, arc: 0, lunge: -0.2, knock: 12, knockFull: 12, shot: 'bolt', speed: 36, pierce: true },
     draw: 0.6, early: 'fizzle', // The aim has to settle: let go sooner and no bolt goes.
-    blockSpeed: 0.4, chargeSpeed: 0.4, guardArc: 110, guardCost: 1.5, speed: 0.96, reloads: true,
+    blockSpeed: 0.4, chargeSpeed: 0.4, guardArc: 110, guardCost: 1.5, speed: 1.1, reloads: true,
     dodge: RANGER_JUMP,
   },
   /** The Mage at range: a quick bolt of the element cast on the move, or a short 0.6 s cast for the
@@ -270,7 +270,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     combo: [{ windup: 0.3, active: 0.04, recover: 0.2, dmg: 8, range: 8, arc: 0, lunge: 0, knock: 2, shot: 'spark', speed: 17 }],
     heavy: { windup: 0.06, active: 0.04, recover: 0.3, dmg: 10, dmgFull: 24, range: 9, arc: 0, lunge: 0, knock: 3, knockFull: 7, shot: 'spark', speed: 19, burst: 0.8, interrupts: true, spell: true },
     draw: 0.6, early: 'fizzle',
-    blockSpeed: 0.4, chargeSpeed: 0.55, guardArc: 100, guardCost: 2, speed: 0.79, castWalk: 0.9,
+    blockSpeed: 0.4, chargeSpeed: 0.55, guardArc: 100, guardCost: 2, speed: 0.8, castWalk: 0.9,
     dodge: BLINK,
   },
   /** Close and slow: a slash in the Mage's element in front. Held, rooted, the element's spell (it costs
@@ -281,7 +281,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     combo: [{ windup: 0.3, active: 0.1, recover: 0.42, dmg: 15, range: 1.9, arc: 150, lunge: 0.15, knock: 5, slash: true }],
     heavy: { windup: 0.12, active: 0.05, recover: 0.45, dmg: 12, dmgFull: 20, range: 0, arc: 0, lunge: 0, knock: 0, knockFull: 0, spell: true },
     draw: 1, early: 'fizzle',
-    blockSpeed: 0.35, chargeSpeed: 0, guardArc: 100, guardCost: 2, speed: 0.78,
+    blockSpeed: 0.35, chargeSpeed: 0, guardArc: 100, guardCost: 2, speed: 0.8,
     dodge: BLINK,
   },
   /** The combat Mage: a sword in three cuts in the element, and the element's blade spell on a hold (shared/mage.ts). */
@@ -299,7 +299,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     ],
     heavy: { windup: 0.15, active: 0.05, recover: 0.55, dmg: 24, dmgFull: 70, range: 6, arc: 0, lunge: 0, knock: 4, knockFull: 10, shot: 'smite', burst: 1.3, stun: 1.2, holy: true },
     draw: 1.2, early: 'fizzle', // The holy smite falls only on a full charge.
-    blockSpeed: 0.45, chargeSpeed: 0.35, guardArc: 150, guardCost: 1.1, speed: 0.84, blunt: true,
+    blockSpeed: 0.45, chargeSpeed: 0.35, guardArc: 150, guardCost: 1.1, speed: 0.8, blunt: true,
     dodge: { kind: 'roll', distance: 2, time: 0.36, iFrom: 0.05, iTo: 0.28, stamina: 28, cooldown: 1.3 },
   },
   // The Rogue's and Cleric's other kits (kits.ts).
