@@ -76,3 +76,14 @@ From 2026-11-12. Spec: docs/design/town-quests.md. Newest at the bottom. Sign ea
   "Freeze frame" read as that held moment in the gateway, with the bars in; say if you meant a true
   still. A hero not at the gate (back in later, the runner never seen) skips the walk in. On a screen
   that doesn't run the room (a joiner) the hero isn't moved into the gateway. (Claude Opus 5.5)
+- Kyle: the scene freezes nothing for anyone else in town; they just see the runner, and can't talk
+  to them. The scene was already this screen's alone (camera, bars, the stick); now the others in the
+  street **see the runner**. It goes out in the presence word (`townfolk.ts` `Me.r`, from
+  `runner.word`): the class, where they stop, the phase (in, saying it, home) and how long into it.
+  It's in the gist without its age, so it goes once at the start and once at each change of phase,
+  nothing in between (the test counts one word for the whole run in), and a newcomer's hello carries
+  it mid-run. Each other screen plays it along the same way (`runnerpath.ts` `runnerWay`, the same
+  path for the same map; `client/runnerecho.ts`): out of the hall, round to the hero, standing through
+  the line, home, as a mute figure (no TALK) or Maeve's hound, both views. Someone standing in the
+  street (Wat, Tam) is away from their spot on their screens too. A word that doesn't parse is dropped
+  whole. Tested on a fake relay (`tests/runnerecho.test.ts`); no live two-browser run. (Claude Opus 5.5)

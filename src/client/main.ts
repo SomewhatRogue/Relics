@@ -140,6 +140,7 @@ import { GoalPulse, goalHtml } from './goalpulse';
 import { errandLine } from './errandline';
 import { errandTargets } from './errandmarks';
 import { runner } from './runner';
+import { echoes } from './runnerecho';
 import { townSpots } from '../shared/town';
 import { GearHint } from './gearhint';
 import './goal.css';
@@ -693,6 +694,8 @@ function tick(t: number): void {
     gate, place: game.remote ? null : (x, y) => Object.assign(game.hero, { x, y }),
   }, t / 1000, dt);
   game.walkOverride = runner.walk();
+  // Others' runners, as they come and go in the street (runnerecho.ts).
+  echoes.frame(game.mode === 'town' && !game.outside ? game.room.map : null, town?.runners(game.room.map.name) ?? [], t / 1000);
   hud(t / 1000);
   rollCard.frame(game.room, game.room.heroes.find((x) => x.id === ME), evs, t / 1000, game.room.time);
   chat.frame();

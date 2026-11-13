@@ -21,6 +21,8 @@
  * you came or went (and what you offer), and the moment someone walks in you tell everyone where you
  * stand. Out of Wickhold altogether (the yard, the wood: townpresence.ts) the socket isn't open.
  */
+import type { RunnerWord } from './runner';
+import type { HeardRunner } from './runnerecho';
 import { newHero } from '../sim/hero';
 import type { Hero } from '../sim/types';
 import { HERO, WEAPONS, type WeaponId } from '../shared/tuning';
@@ -45,9 +47,9 @@ export const AWAY = { hidden: hook('hide', 60), idle: hook('idle', 180), parked:
 export const idleLimit = (parked: boolean, party: boolean) => (party ? Infinity : parked ? AWAY.parked : AWAY.idle);
 
 /** One player about themselves: name, weapon, the place they're in, and x, y, facing, moving. */
-export interface Me { n: string; w: string; l?: number; /** A Ranger's hound: breed, coat, white, name (shared/houndlook.ts). */ d?: PackedHound; at: string; p: [number, number, number, number, number]; pt?: unknown; /** Velocity, tiles a second. */ v?: [number, number]; /** Parked at a pastime (fishing, the butts): said once, then nothing till it's over (shared/pastimes.ts). */ g?: PastimeId }
+export interface Me { n: string; w: string; l?: number; /** A Ranger's hound: breed, coat, white, name (shared/houndlook.ts). */ d?: PackedHound; at: string; p: [number, number, number, number, number]; pt?: unknown; /** Velocity, tiles a second. */ v?: [number, number]; /** Parked at a pastime (fishing, the butts): said once, then nothing till it's over (shared/pastimes.ts). */ g?: PastimeId; /** A new hero's runner out (runner.ts), for the others in the street to see (runnerecho.ts). */ r?: RunnerWord }
 type Said = Me & { k: 'me' | 'hi' };
-interface Folk { hero: Hero; to: [number, number]; v: [number, number]; at: string; heard: number; pt?: unknown }
+interface Folk { hero: Hero; to: [number, number]; v: [number, number]; at: string; heard: number; pt?: unknown; run?: { w: RunnerWord; heard: number } }
 
 const NAME = /[^A-Z0-9 '-]/g;
 const r2 = (v: number) => Math.round(v * 100) / 100;
@@ -137,6 +139,11 @@ export class Townfolk {
     return [...this.folk.values()].filter((f) => f.at === at).map((f) => f.hero);
   }
 
+  /** Others' runners out in this place (runnerecho.ts). */
+  runners(at: string): HeardRunner[] {
+    return [...this.folk].filter(([, f]) => f.at === at && f.run).map(([id, f]) => ({ id, w: f.run!.w, heard: f.run!.heard }));
+  }
+
   /** One player by id: their hero and the place they're in (chat: who's near enough to hear). */
   where(id: string): { hero: Hero; at: string } | null {
     const f = this.folk.get(id);
@@ -194,7 +201,8 @@ export class Townfolk {
   /** All that others see of me but where I am and which way I face (`place`: only what those elsewhere need). */
   private gist(place = false): string {
     const m = this.me;
-    return m ? JSON.stringify([m.n, m.w, m.l, m.d, m.at, place ? 0 : m.p[4], m.pt, m.g ?? 0]) : '';
+    // (A runner's word, but for how long into its phase: told at its start and at each change.)
+    return m ? JSON.stringify([m.n, m.w, m.l, m.d, m.at, place ? 0 : m.p[4], m.pt, m.g ?? 0, place ? 0 : m.r?.slice(0, 4) ?? 0]) : '';
   }
 
   /** Anyone else in the place I'm in (only they see me walk). */
@@ -219,6 +227,9 @@ export class Townfolk {
     const had = JSON.stringify(f.pt ?? null), has = JSON.stringify(d.pt ?? null);
     Object.assign(f, { to: [x, y], v: moving ? heardV(d.v) : [0, 0], at: String(d.at ?? '').slice(0, 40), heard: this.now, pt: d.pt });
     if (had !== has) this.onOffers();
+    // Their runner (a new hero's first minutes in the street), heard whole or not at all.
+    const r = d.r;
+    f.run = Array.isArray(r) && r.length === 5 && r.every((v) => typeof v === 'number' && isFinite(v)) && r[0] >= 0 && r[0] < 5 && r[3] >= 0 && r[3] <= 2 && r[4] >= 0 && r[4] < 120 ? { w: r as RunnerWord, heard: this.now } : undefined;
     // Parked at a pastime, drawn there at it (parked.ts); a word without it, back.
     setPark(f.hero, isPastime(d.g) ? d.g : null);
     Object.assign(f.hero, { weapon, look: typeof d.l === 'number' ? Math.max(0, Math.min(2, Math.floor(d.l))) : 0, fx, fy, moving: !!moving, tag: String(d.n ?? '').toUpperCase().replace(NAME, '').slice(0, 14) || 'STRANGER', houndLook: d.d === undefined ? f.hero.houndLook : unpackHound(d.d, m.from) });

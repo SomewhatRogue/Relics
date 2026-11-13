@@ -25,7 +25,7 @@ import { waiting } from '../../sim/practice';
 import { drawHound } from '../hound';
 import { companion, houndAt, lodgeHoundAt } from '../idlehound';
 import { LODGE_HOUND, MAEVE_HOUND, isLodgeMap } from '../petting';
-import { runnerHound } from '../runner';
+import { runnerHounds } from '../runnerecho';
 import { houndTag } from '../houndname';
 import { seedOf } from '../houndidle';
 import { drawNpc } from '../npcs';
@@ -79,9 +79,8 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
     const d = companion(h, f.now);
     if (d) hound(f, h, d, d.x, d.y, h.x, h.y, me);
   }
-  // Maeve's hound running in with her note for a new Ranger (../runner.ts, the town quests chat).
-  const rh = runnerHound();
-  if (rh) f.put('runhound', rh.x, 0, rh.y, (c, px, py) => drawHound(c, rh.d, px, py, { mood: rh.moving ? { moving: true, gait: 'run' } : { sit: true, wag: true }, look: MAEVE_HOUND }), { pool: 0.28 });
+  // Maeve's hound running in with her note for a new Ranger, this player's or another's (../runnerecho.ts, the town quests chat).
+  runnerHounds().forEach((rh, i) => f.put('runhound' + i, rh.x, 0, rh.y, (c, px, py) => drawHound(c, rh.d, px, py, { mood: rh.moving ? { moving: true, gait: 'run' } : { sit: true, wag: true }, look: MAEVE_HOUND }), { pool: 0.28 }));
   // Maeve's hound by the lodge's fire.
   if (isLodgeMap(map)) {
     const a = lodgeHoundAt(others.length ? [...room.heroes, ...others] : room.heroes, f.now);
