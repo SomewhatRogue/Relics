@@ -21,7 +21,9 @@ const W_BODY = [
   '....LlL....LlL....', '....LAl....lAL....', '....LLl....lLL....', '....LLl....lLL....', '...KKKK....KKKK...',
   '...FFFF....FFFF...', '...FFFF....FFFF...', '..FFFFf....fFFFF..', '..ffff......ffff..',
 ];
-const W_CUT: LookDef['cut'] = { headTo: 7, hip: 19, back: [0, 7, 6, 17], arm: [12, 7, 18, 17] };
+// (The legs cut below the tabard's tip, so it stays whole while they walk: Kyle 2026-11-12, "cloaks look different
+// top and bottom".)
+const W_CUT: LookDef['cut'] = { headTo: 7, hip: 22, back: [0, 7, 6, 17], arm: [12, 7, 18, 17] };
 /** `neck`: the four pixels at the back of the neck walking away (the helm's guard, hair, or skin). */
 const warrior = (head: string[], back: string[], neck: string, pal: Record<string, string>, life: LookDef['life']): LookDef => {
   const p = { A: pal.P, G: '#ecd078', l: darker(pal.L), f: darker(pal.F), ...pal };
@@ -52,7 +54,8 @@ const ranger = (face: string[], pal: Record<string, string>, life: LookDef['life
   const p = { l: darker(pal.L), f: darker(pal.F), ...pal };
   return {
     down: art([...R_HOOD, ...face, ...R_BODY], p), up: art([...R_HOOD_BACK, ...R_BACK], p), h: 33, tall: 2, eyes: [5, 7, 10], life,
-    cut: { headTo: 9, hip: 21, back: [0, 9, 6, 19], arm: [12, 9, 18, 19] }, lift: 6,
+    // (The legs cut below the cloak's hem, so it stays whole as they walk.)
+    cut: { headTo: 9, hip: 25, back: [0, 9, 6, 19], arm: [12, 9, 18, 19] }, lift: 6,
   };
 };
 
@@ -83,7 +86,8 @@ const rogue = (sk: Parameters<typeof skin>[0], pal: Record<string, string>): Loo
   p.G = glint(p.S);
   return {
     down: art([...G_HEAD, ...G_BODY], p), up: art(G_BACK, p), h: 33, tall: 0, eyes: [5, 7, 10], life: { mantle: [p.C, p.c] },
-    cut: { headTo: 9, hip: 19, back: [0, 9, 6, 17], arm: [12, 9, 18, 17] }, lift: 7,
+    // (The legs cut below the cloak's flared hem, so the cloak stays whole and only the boots step under it.)
+    cut: { headTo: 9, hip: 27, back: [0, 9, 6, 17], arm: [12, 9, 18, 17] }, lift: 7,
   };
 };
 

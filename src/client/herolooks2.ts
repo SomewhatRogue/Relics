@@ -52,7 +52,8 @@ const MAIL = { M: '#8a9098', m: '#646a74', K: '#5a3d22', k: '#d4a537', L: '#4a4e
 /** `neck`: the first body row, the coif over the neck or the neck bare. */
 const cleric = (head: string[], back: string[], neck: string, pal: Record<string, string>): LookDef => ({
   down: art([...head, neck, ...C_BODY], pal), up: art([...back, neck.replace(/S/g, 'M'), ...C_BACK], pal), h: 31, tall: 0, eyes: [3, 7, 10],
-  life: { tabard: pal.W }, cut: { headTo: 7, hip: 19, back: [0, 7, 6, 17], arm: [12, 7, 18, 17] }, lift: 6,
+  // (The legs cut below the tabard's gold hem, so it stays whole as they walk.)
+  life: { tabard: pal.W }, cut: { headTo: 7, hip: 22, back: [0, 7, 6, 17], arm: [12, 7, 18, 17] }, lift: 6,
 });
 
 const FRIAR = { ...skin('brown'), H: '#2a2020', C: '#4a3428', B: '#5a4232', b: '#3a2a20', O: '#4a3428', K: '#c8b88a', k: '#a89868', F: '#2a2420', W: '#9a7a4a' };

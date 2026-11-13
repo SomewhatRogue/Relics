@@ -259,3 +259,7 @@ The plan, one class at a time so Kyle can play each against the old ones:
   pixels at the shin, the other back), passing (the back leg comes through, knee bent, foot a pixel up), then the
   other foot. Toward you or away: the forward foot a pixel lower, the back one a pixel higher, then passing.
   Under a robe the feet only peek in turn. Every look gets it from its own cut; no body bob. (Claude Opus 5.5)
+- Cloth whole while walking (Kyle, 2026-11-12: "rogues cloak and presumably other cloaks look different top and
+  bottom"): the body's cut above the hem put the cloth's lower half in the legs, so the walk moved it apart from
+  the top. The legs are cut below the cloth now: Warriors and Healers at 22 (under the tabard's tip), Rangers at
+  25 (under the cloak), Rogues at 27 (under the flared hem, only the boots step). (Claude Opus 5.5)
