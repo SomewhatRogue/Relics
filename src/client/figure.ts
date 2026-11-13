@@ -10,7 +10,7 @@ import type { Joint, Jointed } from './joints';
 import { WHITE, type BodyPose } from './motion';
 
 /** Where everything goes this frame (scene pixels). */
-export const LAYOUT = { left: 0, top: 0, flip: false, drop: 0, lean: 0, ax: 0, ay: 0, step: 0 };
+export const LAYOUT = { left: 0, top: 0, flip: false, drop: 0, lean: 0, ax: 0, ay: 0, step: 0, skirt: 0 };
 /** Of a crouch, how far the body drops (a share of its height), at most this share of the legs; rising, one pixel at most. */
 const DROP = 0.55, FOLD = 0.6;
 
@@ -18,6 +18,7 @@ const DROP = 0.55, FOLD = 0.6;
 export function layout(j: Jointed, x: number, y: number, flip: boolean, p: BodyPose, k = 1): typeof LAYOUT {
   const s = j.s, L = LAYOUT, legs = s.h - 1 - j.cut.hip;
   L.flip = flip;
+  L.skirt = j.cut.skirt ?? 0;
   L.left = Math.round(x - s.w / 2);
   L.top = Math.round(y - s.h);
   L.drop = Math.max(-1, Math.min(Math.round(legs * FOLD), Math.round(p.crouch * s.h * DROP)));
@@ -59,7 +60,8 @@ function legAt(part: Joint, row: number): [number, number] {
   if (!s || (part.kind !== 'legL' && part.kind !== 'legR')) return [0, 0];
   const a = part.kind === 'legL' ? 0 : 3, robe = part.y1 - part.y0 < 6, knee = part.y0 + Math.ceil((part.y1 - part.y0) * 0.45);
   const fwd = LAYOUT.flip ? -1 : 1, dx = robe ? 0 : (row < knee ? s[a] : s[a + 1]) * fwd;
-  return [dx, s[a + 2]];
+  // (Under a robe a foot only lifts up into the hem, never drops out below it: Kyle, "boots out the middle".)
+  return [dx, robe ? Math.min(0, s[a + 2]) : s[a + 2]];
 }
 
 function slice(g: CanvasRenderingContext2D, img: HTMLCanvasElement, part: Joint, sy: number, sh: number, x: number, y: number, dh: number): void {
@@ -72,9 +74,18 @@ function slice(g: CanvasRenderingContext2D, img: HTMLCanvasElement, part: Joint,
   g.restore();
 }
 
+/** A cloak's lower half on the walk (the cut's `skirt`): trailing a pixel behind as a foot lands across the screen,
+ *  swinging side to side toward or away from you (Kyle, 2026-11-12: the Rogue's cloak "doesn't really move right"). */
+const SWAY: Record<number, number> = { 11: -1, 13: -1, 1: 1, 3: -1 };
+
 function put(g: CanvasRenderingContext2D, part: Joint, img: HTMLCanvasElement): void {
-  const [x0, y0, dh] = place(part, AT), h = part.y1 - part.y0;
-  if ((part.kind !== 'legL' && part.kind !== 'legR') || !STRIDE[LAYOUT.step]) return slice(g, img, part, part.y0, h, x0, y0, dh);
+  const [x0, y0, dh] = place(part, AT), h = part.y1 - part.y0, L = LAYOUT;
+  if (part.kind === 'torso' && L.skirt > part.y0 && L.skirt < part.y1 && SWAY[L.step]) {
+    const top = L.skirt - part.y0, sw = SWAY[L.step] * (L.step > 10 ? (L.flip ? -1 : 1) : 1);
+    slice(g, img, part, part.y0, top, x0, y0, top);
+    return slice(g, img, part, L.skirt, h - top, x0 + sw, y0 + top, dh - top);
+  }
+  if ((part.kind !== 'legL' && part.kind !== 'legR') || !STRIDE[L.step]) return slice(g, img, part, part.y0, h, x0, y0, dh);
   // A leg in two: thigh and shin, each at its own offset (the stretch from a crouch goes to the shin).
   const knee = Math.ceil(h * 0.45), [tx, ty] = legAt(part, part.y0), [sx, sy] = legAt(part, part.y1 - 1);
   slice(g, img, part, part.y0, knee, x0 + tx, y0 + ty, knee);

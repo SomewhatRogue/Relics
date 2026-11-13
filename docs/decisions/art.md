@@ -263,3 +263,9 @@ The plan, one class at a time so Kyle can play each against the old ones:
   bottom"): the body's cut above the hem put the cloth's lower half in the legs, so the walk moved it apart from
   the top. The legs are cut below the cloth now: Warriors and Healers at 22 (under the tabard's tip), Rangers at
   25 (under the cloak), Rogues at 27 (under the flared hem, only the boots step). (Claude Opus 5.5)
+- Cloaks and robes on the walk (Kyle, 2026-11-12: "weird boots out the middle of the mage and the rogue's cape is
+  cut at the middle"): under a robe a foot now only lifts into the hem, never drops below it (the drop showed the
+  boots poking out of the middle). The Rogue's cloak was drawn twice, the flare in its sprite and a swaying mantle
+  behind, and the two outlines read as one cloak cut at the waist; the Ranger's fluttering cloak the same, a notch
+  beside its own. Both drawn once now: the cloak's own lower half (from the cut's `skirt` row) sways a pixel with
+  the walk, trailing behind across the screen, side to side toward you (figure.ts SWAY). (Claude Opus 5.5)

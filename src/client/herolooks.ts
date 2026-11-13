@@ -50,19 +50,21 @@ const R_HOOD_BACK = [
   '........CC........', '.......CCCC.......', '......CCCCCC...qq.', '.....CCCCCCCC..qq.', '....CCCCCCCCCCqq..',
   '....CCCCCCCCCCq...', '....CCCCCCCCCC....', '....cCCCCCCCCc....', '.....cCCCCCCc.....',
 ];
-const ranger = (face: string[], pal: Record<string, string>, life: LookDef['life']): LookDef => {
+// (`_life` was the fluttering cloak drawn behind; its outline stuck out as a notch beside the cloak's own, so its own
+// lower half sways with the walk instead: the cut's `skirt`. Kyle, 2026-11-12.)
+const ranger = (face: string[], pal: Record<string, string>, _life: LookDef['life']): LookDef => {
   const p = { l: darker(pal.L), f: darker(pal.F), ...pal };
   return {
-    down: art([...R_HOOD, ...face, ...R_BODY], p), up: art([...R_HOOD_BACK, ...R_BACK], p), h: 33, tall: 2, eyes: [5, 7, 10], life,
+    down: art([...R_HOOD, ...face, ...R_BODY], p), up: art([...R_HOOD_BACK, ...R_BACK], p), h: 33, tall: 2, eyes: [5, 7, 10], life: {},
     // (The legs cut below the cloak's hem, so it stays whole as they walk.)
-    cut: { headTo: 9, hip: 25, back: [0, 9, 6, 19], arm: [12, 9, 18, 19] }, lift: 6,
+    cut: { headTo: 9, hip: 25, back: [0, 9, 6, 19], arm: [12, 9, 18, 19], skirt: 20 }, lift: 6,
   };
 };
 
 // The Rogue (Kyle, 2026-11-06: "more like an assassin or a ninja"): a deep peaked hood, a wrap over the
 // nose and mouth with the eyes between (a pale glint `G` beside each), its tail over the shoulder, a slim
 // jerkin crossed by a strap, a pouch at the belt, and a long cloak that flares toward the hem, its dark
-// lining round the legs. Its skirts, sway and flare are cloaklife.ts (`mantle`).
+// lining round the legs. Its lower half sways with the walk (the cut's `skirt`, figure.ts).
 const G_HEAD = [
   '........CC........', '.......cCCc.......', '......cCHCCc......', '.....cCHCCCCc.....', '.....CCOOOOCC.....',
   '.....COEGSEGC.....', '.....CKKKKKKC.....', '.....cCKKKKCcK....', '......cCkkCcKK....',
@@ -85,9 +87,10 @@ const rogue = (sk: Parameters<typeof skin>[0], pal: Record<string, string>): Loo
   const p: Record<string, string> = { ...skin(sk), H: glint(pal.C), ...pal };
   p.G = glint(p.S);
   return {
-    down: art([...G_HEAD, ...G_BODY], p), up: art(G_BACK, p), h: 33, tall: 0, eyes: [5, 7, 10], life: { mantle: [p.C, p.c] },
-    // (The legs cut below the cloak's flared hem, so the cloak stays whole and only the boots step under it.)
-    cut: { headTo: 9, hip: 27, back: [0, 9, 6, 17], arm: [12, 9, 18, 17] }, lift: 7,
+    // (One cloak: its own lower half sways from the waist with the walk, `skirt`; the separate swaying mantle behind it
+    // is gone, its outline read as the cloak cut in two. The legs cut below the hem; only the boots step under it.)
+    down: art([...G_HEAD, ...G_BODY], p), up: art(G_BACK, p), h: 33, tall: 0, eyes: [5, 7, 10], life: {},
+    cut: { headTo: 9, hip: 27, back: [0, 9, 6, 17], arm: [12, 9, 18, 17], skirt: 19 }, lift: 7,
   };
 };
 

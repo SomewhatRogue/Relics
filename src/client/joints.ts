@@ -8,7 +8,8 @@ import type { Sprite } from './sprites';
 export type JointKind = 'back' | 'legL' | 'legR' | 'torso' | 'head' | 'arm';
 /** Where to cut, in the sprite's own pixels (before its outline): rows above `headTo` are the head,
  *  from `hip` down the legs (split down the middle), and the two arm boxes (x0, y0, x1, y1, half-open). */
-export interface Cut { headTo: number; hip: number; back: [number, number, number, number]; arm: [number, number, number, number] }
+/** `skirt`: where a cloak's lower half starts, swaying with the walk (figure.ts), if the body has one. */
+export interface Cut { headTo: number; hip: number; back: [number, number, number, number]; arm: [number, number, number, number]; skirt?: number }
 
 /** A part: a canvas the size of the whole sprite holding only its pixels (so it is a Sprite too), and its box. */
 export interface Joint extends Sprite { kind: JointKind; x0: number; y0: number; x1: number; y1: number }

@@ -31,7 +31,7 @@ export interface Life {
 export interface LookDef {
   down: Part[]; up: Part[]; h: number; tall: number; robe?: boolean; eyes: [number, number, number]; life: Life;
   /** A taller body (Kyle, 2026-11-12, the heroic proportions trial): where it's cut, if not heroCut's rows... */
-  cut?: { headTo: number; hip: number; back: [number, number, number, number]; arm: [number, number, number, number] };
+  cut?: { headTo: number; hip: number; back: [number, number, number, number]; arm: [number, number, number, number]; skirt?: number };
   /** ...and how many pixels higher its hands are than a 24-tall hero's (the weapon, shield and thrown relics). */
   lift?: number;
 }
