@@ -5,6 +5,7 @@
  * torches and braziers (their flames and light by the hour: lamps3d.ts). Static boxes are merged into one mesh.
  */
 import * as THREE from 'three';
+import { trackMouths3d } from './tracks3d';
 import type { GameMap } from '../../shared/arena';
 import { torchIn } from '../daytime';
 import type { Fx } from '../fx';
@@ -55,6 +56,8 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   floor.position.set(m.w / 2, 0, m.h / 2);
   floor.receiveShadow = true;
   group.add(floor);
+  // The Haulier's tunnel mouths at its tracks' ends (three/tracks3d.ts).
+  if (m.tracks) group.add(trackMouths3d(m));
   const under = new THREE.Mesh(new THREE.PlaneGeometry(m.w + 60, m.h + 60), VCOL);
   under.geometry.setAttribute('color', new THREE.Float32BufferAttribute(new Array(12).fill(0.05), 3));
   under.rotation.x = -Math.PI / 2;

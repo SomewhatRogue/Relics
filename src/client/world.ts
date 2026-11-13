@@ -3,6 +3,7 @@
  * pixel (OX + 16x, OY + 16y). Buildings, trees and rocks are drawn with the actors (so you can walk
  * behind them); see blocks.ts.
  */
+import { paintTracks } from './sumpdraw';
 import type { GameMap, Ledge } from '../shared/arena';
 import { Rng } from '../shared/rng';
 import { paintBreach } from './breach';
@@ -94,6 +95,8 @@ export function paintMap(m: GameMap, flat = true): HTMLCanvasElement {
     rect(x - 1, y, 3, 8, '#3a2a1a');
     rect(x - 2, y + 7, 5, 1, '#3a2a1a');
   }
+  // The Haulier's tracks into the 3D view's ground (the flat view draws them itself each frame: client/sumpdraw.ts).
+  if (!flat && m.tracks) paintTracks(g, m);
   return c;
 }
 

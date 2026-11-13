@@ -145,3 +145,9 @@ cart grab removed (client/cartaim.ts deleted; cluster.ts GRAB cue incline-only).
 skip body separation (they were clamped at the edge). I added each running cart's own light (scene.ts) and a
 spark trail (sumpdraw.ts) after the first shots showed carts hard to see. Open Cut's LOADING STAGE: single rail
 kept, no track carts (instances chat's room).
+
+## 2026-11-12: the Haulier's tracks in 3D (Opus 5.5)
+Kyle: "can we draw the 3d" (2.5D is players' default view). The tracks are painted into paintMap's still floor
+when it's for the 3D ground (client/world.ts, sumpdraw.ts paintTracks); the tunnel mouths are timber-framed dark
+openings at each track's ends (three/tracks3d.ts, added in three/ground.ts). The warning lane already drew in 3D.
+Not done in 3D: each running cart's own light and spark trail (flat view only).

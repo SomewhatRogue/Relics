@@ -65,8 +65,15 @@ export function trackLights(map: GameMap, lit: TrackLit, cx: number, cy: number,
   return trackLamps(t).map((l, k) => ({ x: OX + l.x * PX - cx, y: OY + l.y * PX - cy - 6, r: 40, i: 0.5 + 0.2 * Math.sin(now * 17 + k * 2.3), c: [1, 0.68, 0.28] as [number, number, number] }));
 }
 
+/** The tracks painted into a room's still floor (client/world.ts paintMap), for the 3D view's ground (three/ground.ts). */
+export function paintTracks(g: CanvasRenderingContext2D, map: GameMap): void {
+  const c = { lit: g, glow: g, now: 0 } as unknown as Ctx;
+  for (const t of map.tracks ?? []) drawBed(c, seg(t, 0, 0), false);
+  for (const t of map.tracks ?? []) drawBed(c, seg(t, 0, 0), true);
+}
+
 /** The mouths at a track's two ends, with the side of the room each is on (tile coordinates). */
-function mouthsOf(t: Tr, map: GameMap): [number, number, 'l' | 'r' | 't' | 'b'][] {
+export function mouthsOf(t: Tr, map: GameMap): [number, number, 'l' | 'r' | 't' | 'b'][] {
   return t.x0 === t.x1
     ? [[t.x0, 0, 't'], [t.x1, map.h, 'b']]
     : [[0, t.y0, 'l'], [map.w, t.y0, 'r']];
