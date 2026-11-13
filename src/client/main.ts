@@ -136,6 +136,7 @@ import { GoalPulse, goalHtml } from './goalpulse';
 import { errandLine } from './errandline';
 import { errandTargets } from './errandmarks';
 import { runner } from './runner';
+import { townSpots } from '../shared/town';
 import { GearHint } from './gearhint';
 import './goal.css';
 import { UnlockFlash } from './unlockflash';
@@ -430,7 +431,7 @@ function hud(now: number): void {
   // The wood: the lesson and its control, how far along; Hew's words; the bars in the cutscene.
   document.body.dataset.taught = game.taught().join(' ');
   const wood = game.wood;
-  document.body.classList.toggle('cutscene', !!wood && wood.cut >= 0);
+  document.body.classList.toggle('cutscene', (!!wood && wood.cut >= 0) || runner.scene());
   // Praise shows as a caption while the fight stops for it.
   const praise = wood?.hold?.kind === 'praise' ? { who: wood.hold.who, text: wood.hold.text } : null;
   // (In town, a new hero's runner says their piece on the same strip: runner.ts.)
@@ -633,9 +634,11 @@ function tick(t: number): void {
   fx.update(dt);
   mageTrails(fx, game.room, dt);
   iceTrails(fx, game.room, dt);
-  scene.focus = game.cutFocus();
+  // (A new hero's arrival in town has its own: runner.ts.)
+  scene.focus = game.cutFocus() ?? runner.focus(game.hero ?? null);
   scene.fanfare = game.wood?.hold?.kind === 'relic';
   // In town, only someone with an errand or a quest for you is marked (errandmarks.ts).
+  scene.markEach = game.mode === 'town';
   scene.marks = game.mode === 'run' ? targets(game.run, game.room, game.houses()) : game.mode === 'town' ? errandTargets(game.profile, game.room.map, game.room.time) : [];
   scene.doors = game.mode === 'run' ? game.doorMarks() : [];
   scene.pointTo = game.wood && game.wood.stage === 5 && !game.wood.hold && spoken(game.wood) ? { x: ROAD_OUT.x + 1, y: ROAD_OUT.y + ROAD_OUT.h / 2 } : wayTarget(game);
@@ -674,7 +677,12 @@ function tick(t: number): void {
   // Out of bounds: the dark closing in, what comes for you, and anyone taken (dreadfx.ts).
   dread.frame(game.room.heroes.find((x) => x.id === ME), game.room.heroes, evs, views, fx, t / 1000, dt);
   // A new hero's first minutes in the street: the runner (runner.ts).
-  runner.frame({ street: game.mode === 'town' && !game.outside ? game.room.map : null, hero: game.hero ?? null, profile: game.profile, busy: panel.open || title.open || !!game.greeting || !!game.result, keep: () => game.keep() }, t / 1000, dt);
+  const gate = townSpots(game.world).find((s) => s.id === 'gate') ?? null;
+  runner.frame({
+    street: game.mode === 'town' && !game.outside ? game.room.map : null, hero: game.hero ?? null, profile: game.profile, busy: panel.open || title.open || !!game.greeting || !!game.result, keep: () => game.keep(),
+    gate, place: game.remote ? null : (x, y) => Object.assign(game.hero, { x, y }),
+  }, t / 1000, dt);
+  game.walkOverride = runner.walk();
   hud(t / 1000);
   rollCard.frame(game.room, game.room.heroes.find((x) => x.id === ME), evs, t / 1000, game.room.time);
   chat.frame();

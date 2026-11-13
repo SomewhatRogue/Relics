@@ -117,6 +117,8 @@ export class Game {
   private woodReplay = false;
   /** Something to show a hero once (the road into Wickhold, out of the wood). */
   greeting: string | null = null;
+  /** A town scene's hold on your hero's stick (the arrival: still, or walking in through the gate; client/runner.ts). */
+  walkOverride: { mx: number; my: number } | null = null;
   /** Set when a run ends; the UI shows it and clears it. */
   result: Result | null = null;
   /** When the job was lost (room time), for the fade out before town. */
@@ -786,6 +788,7 @@ export class Game {
     // No fighting in town: no blows, guard, relics or grabs; rolls, dashes and blinks still work.
     // The works' crew walk on Wickhold's wall clock, the same on every screen (townclock.ts).
     if (this.mode === 'town') onClock(this.room.map.npcs, this.room.time);
+    if (this.mode === 'town' && this.walkOverride) intent = { ...intent, ...this.walkOverride, rollSeq: h.seen.roll };
     if (this.mode === 'town') intent = { ...intent, attack: false, block: false, attackSeq: h.seen.attack, blockSeq: h.seen.block, relicSeq: h.seen.relic, grabSeq: h.seen.grab, potionSeq: h.seen.potion, reload: false, reloadSeq: h.seen.reload ?? 0, elementSeq: h.seen.element ?? 0, signSeq: h.seen.sign ?? 0 };
     // The wood: only what Hew has taught you so far; nothing at all during the cutscene.
     if (this.mode === 'wood') {

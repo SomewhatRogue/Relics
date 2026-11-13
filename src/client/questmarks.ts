@@ -2,7 +2,9 @@
  * Quest marks: a small gold diamond bobbing over each thing the room's goal is about (sim/targets.ts:
  * a cage, a larder rack, a den, a nest, the named butcher, a house door with someone inside, the way
  * the freed are brought out), so you can tell in the dark what counts. Gold like the way on, never
- * the red of a telegraph. When none is in sight, a gold point at the screen's edge toward the nearest.
+ * the red of a telegraph. When none is in sight, a gold point at the screen's edge toward the nearest
+ * (or, with `each`, as town's errands have it, a point toward every one out of sight). Under the top
+ * HUD counts as out of sight.
  * Each mark goes the moment its thing is done. Drawing only: the list is the room's.
  */
 import type { Target, TargetKind } from '../sim/targets';
@@ -33,17 +35,22 @@ function diamond(g: CanvasRenderingContext2D, x: number, y: number): void {
  * ticks); `me` is the hero, for the nearest.
  * Returns a little gold light under each mark in sight.
  */
-export function drawQuestMarks(c: Ctx, list: Target[], at: (t: Target) => [number, number], cx: number, cy: number, v: View, me: { x: number; y: number } | null, now: number): Light[] {
+export function drawQuestMarks(c: Ctx, list: Target[], at: (t: Target) => [number, number], cx: number, cy: number, v: View, me: { x: number; y: number } | null, now: number, each = false): Light[] {
   const g = c.glow, lights: Light[] = [];
   let seen = false;
   list.forEach((t, i) => {
     const [px, py] = at(t), sx = px - cx, sy = py - cy, y = sy - LIFT[t.kind] + Math.round(Math.sin(now * 4 + i * 1.3) * 2);
-    if (sx < -4 || sx > v.vw + 4 || y < -4 || y > v.vh + 4) return;
+    if (sx < -4 || sx > v.vw + 4 || y < v.top - 4 || y > v.vh + 4) {
+      // Out of sight (or under the top HUD): with `each`, its own point at the edge.
+      const e = each ? edgeMark(g, sx, y, v, Math.sin(now * 6 + i) * 1.5, GOLD) : null;
+      if (e) diamond(g, e.x, e.y);
+      return;
+    }
     seen = true;
     diamond(g, sx, y);
     lights.push({ x: sx, y: sy - 8, r: 30, i: 0.4, c: [1, 0.85, 0.45] });
   });
-  if (seen || !me || !list.length) return lights;
+  if (each || seen || !me || !list.length) return lights;
   // None in sight: a point at the edge toward the nearest, a small diamond behind it.
   let best = list[0], bd = Infinity;
   for (const t of list) {

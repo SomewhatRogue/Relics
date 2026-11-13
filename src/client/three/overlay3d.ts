@@ -24,7 +24,7 @@ import { WALL_H } from './ground';
 import { cueAt, drawCue, drawWayWord } from '../waycues';
 
 export type Proj = (x: number, y: number, z: number) => [number, number];
-export interface Marks { marks: Target[]; doors: DoorMark[]; pointTo: { x: number; y: number } | null; focus?: { x: number; y: number } | null; fanfare?: boolean }
+export interface Marks { marks: Target[]; doors: DoorMark[]; pointTo: { x: number; y: number } | null; focus?: { x: number; y: number; snap?: boolean } | null; fanfare?: boolean }
 
 export class Overlay {
   readonly canvas = document.createElement('canvas');
@@ -143,13 +143,14 @@ export class Overlay {
 
   /** Gold marks over what the goal is about (a point at the edge for one off screen), names at doors, and the way on. */
   private marks(room: ArenaRoom, meId: string, m: Marks, P: Proj, lerp: Lerp, now: number): void {
-    const g = this.g, bob = Math.round(Math.sin(now * 4) * 1.5), pad = 8;
+    // (On a phone, held below the top HUD as the flat view's points are: wayout.ts.)
+    const g = this.g, bob = Math.round(Math.sin(now * 4) * 1.5), pad = 8, top = this.H > this.W * 1.2 ? Math.round(this.H * 0.2) : pad;
     for (const t of m.marks) {
       const [tx, ty] = t.id !== undefined ? lerp('e:' + t.id, t.x, t.y) : [t.x, t.y];
       let [x, y] = P(tx, t.kind === 'door' ? 2.6 : t.kind === 'boss' ? 3.4 : t.kind === 'folk' ? 2.75 : t.kind === 'hall' ? 1.6 : 2.0, ty);
-      const off = x < pad || y < pad || x > this.W - pad || y > this.H - pad;
+      const off = x < pad || y < top || x > this.W - pad || y > this.H - pad;
       x = Math.min(this.W - pad, Math.max(pad, x));
-      y = Math.min(this.H - pad, Math.max(pad, y));
+      y = Math.min(this.H - pad, Math.max(top, y));
       diamond(g, Math.round(x), Math.round(y) + (off ? 0 : bob), off ? 2 : 3);
     }
     if (!room.indoors) for (const d of m.doors) {

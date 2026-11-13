@@ -126,12 +126,14 @@ export class Scene {
   private painted: GameMap | null = null;
   private cam = { x: 0, y: 0, ready: false };
   /** A cutscene's point of interest (tiles): the camera eases there instead of following the hero. */
-  focus: { x: number; y: number } | null = null;
+  focus: { x: number; y: number; snap?: boolean } | null = null;
   /** The relic held up over your head (the wood's find), and where the arrow by your feet points. */
   fanfare = false;
   pointTo: { x: number; y: number } | null = null;
   /** On a job, what the room's goal is about (sim/targets.ts): a gold mark over each (questmarks.ts). */
   marks: Target[] = [];
+  /** Town's errands: a point at the edge toward every mark out of sight, not just the nearest (questmarks.ts). */
+  markEach = false;
   /** Out in the street on a job: who's gone into which house (doormarks.ts). */
   doors: DoorMark[] = [];
   private heroAt: [number, number] | null = null;
@@ -227,7 +229,8 @@ export class Scene {
       const f = this.focus;
       // (A boss's plate up: the view looks that much higher, so the room's top comes down under it.)
       const tx = f ? OX + f.x * PX - this.vw / 2 : hx + me.fx * 10 - this.vw / 2, ty = f ? OY + f.y * PX - 8 - this.vh / 2 : hy - 8 + me.fy * 8 - this.vh / 2 + (portrait ? this.vh * 0.12 : 0) - topPush() / (this.scale / this.dpr);
-      const k = this.cam.ready ? Math.min(1, dt * (f ? 2.5 : 7)) : 1;
+      // (`snap`: a cut, not a pan.)
+      const k = this.cam.ready && !f?.snap ? Math.min(1, dt * (f ? 2.5 : 7)) : 1;
       this.cam.x += (tx - this.cam.x) * k;
       this.cam.y += (ty - this.cam.y) * k;
       this.cam.ready = true;
@@ -560,7 +563,7 @@ export class Scene {
     const tall = this.vh > this.vw * 1.2, view = { vw: this.vw, vh: this.vh, top: tall ? this.vh * 0.2 : 20, bottom: tall ? this.vh * 0.3 : 20 };
     behindMarks(c, room.survivors ?? [], cx, cy, view, now);
     // What the goal is about: a gold mark over each, or a point at the edge toward the nearest.
-    const markLights = drawQuestMarks(c, this.marks, (t) => (t.id !== undefined ? lerp('e:' + t.id, t.x, t.y) : onScreen(t)), cx, cy, view, me ?? null, now);
+    const markLights = drawQuestMarks(c, this.marks, (t) => (t.id !== undefined ? lerp('e:' + t.id, t.x, t.y) : onScreen(t)), cx, cy, view, me ?? null, now, this.markEach);
     if (!room.indoors) markLights.push(...drawDoorMarks(c, this.doors, cx, cy));
     if (me) {
       // Goblins on your trail off screen: a red point at the edge toward each, and a count.

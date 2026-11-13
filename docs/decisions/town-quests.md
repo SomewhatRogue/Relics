@@ -57,3 +57,22 @@ From 2026-11-12. Spec: docs/design/town-quests.md. Newest at the bottom. Sign ea
   for the rules). The level-up quest was in from slice 1: a level that opens a class skill you don't
   know puts A NEW SKILL on the goal line and the mark on your trainer (or their hall's door) till you
   talk to them. Moves and stats rows are as they were (the spec says skills). (Claude Opus 5.5)
+
+## 2026-11-13 (Claude Opus 5.5)
+
+- Kyle's playtest: no mark for the javelin's errand; and he wants the arrival as a scene.
+- **The missing mark:** the church is in the far top-left, and the flat view only pointed at the edge
+  when no mark at all was on screen (the barracks door was), so nothing pointed to it; and a mark under
+  the top HUD counted as seen. Now in town (`scene.markEach`) every errand out of sight gets its own
+  gold point at the edge, and under the top HUD counts as out of sight (`questmarks.ts`). The 2.5D
+  view already pointed to each; its points are now held below the top HUD on a phone (`overlay3d.ts`).
+- **The arrival scene** (`client/runner.ts`, the way round buildings in `runnerpath.ts`): the first
+  time a new hero stands in the street (after the road panel, for a wood finisher), the cutscene look
+  comes on (letterbox, no HUD: the wood's `body.cutscene`). The frame holds 0.9 s on them in the north
+  gateway, then they walk in a couple of tiles at a walk (their own steps, through `game.walkOverride`;
+  no rolls). Then a hard cut (`focus.snap`, both views) to their trainer's hall: the runner comes out
+  of its door, and the camera follows them running round the buildings to the hero, then frames the two
+  for the line. The line said, it's the player's again and the runner goes back in the way they came.
+  "Freeze frame" read as that held moment in the gateway, with the bars in; say if you meant a true
+  still. A hero not at the gate (back in later, the runner never seen) skips the walk in. On a screen
+  that doesn't run the room (a joiner) the hero isn't moved into the gateway. (Claude Opus 5.5)

@@ -180,7 +180,7 @@ export class View3D {
       const [hx, hy] = lerp('h:' + me.id, me.x, me.y), portrait = this.view.H > this.view.W * 1.2;
       this.heroAt = [hx, hy];
       // A cutscene's point of interest (the Stoker coming): the camera eases there instead.
-      if (f) this.view.follow(map, f.x, f.y, dt * 0.36, fx.shake);
+      if (f) this.view.follow(map, f.x, f.y, f.snap ? 99 : dt * 0.36, fx.shake);
       else {
         // Upright: the hero's feet kept between the top HUD and the touch cluster (phoneband.ts).
         const band = portrait ? feetBand(this.view.H, this.S / this.dpr) : null;

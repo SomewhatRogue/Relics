@@ -68,52 +68,99 @@ describe('town errands', () => {
   });
 });
 
-import { Runner } from '../src/client/runner';
+import { Runner, type RunnerWorld } from '../src/client/runner';
+import { wayThrough } from '../src/client/runnerpath';
 import type { GameMap } from '../src/shared/arena';
 
-describe('the runner', () => {
-  const street = (): GameMap => ({ name: 'WICKHOLD', w: 40, h: 30, wallFace: 3, rounds: [], blocks: [], braziers: [], npcs: [{ name: 'RECRUIT WAT', x: 14, y: 10, talk: 'chat', look: 'soldier' }], hero: { x: 10, y: 10 } } as unknown as GameMap);
-  const play = (r: Runner, w: Parameters<Runner['frame']>[0], secs: number, from = 0) => {
-    for (let t = from; t < from + secs; t += 0.05) r.frame(w, t, 0.05);
+describe('the arrival and the runner', () => {
+  // A street: the barracks (Cole's hall, its door at the bottom) with a wall of a house between it and the gate.
+  const street = (): GameMap => ({
+    name: 'WICKHOLD', w: 40, h: 30, wallFace: 3, rounds: [], braziers: [], hero: { x: 10, y: 10 },
+    blocks: [{ x: 2, y: 12, w: 6, h: 4, kind: 'house', door: 'hall' }, { x: 6, y: 6, w: 10, h: 3, kind: 'house' }],
+    npcs: [{ name: 'RECRUIT WAT', x: 20, y: 20, talk: 'chat', look: 'soldier' }],
+  } as unknown as GameMap);
+  const world = (p: ReturnType<typeof fresh>, map: GameMap, over: Partial<RunnerWorld> = {}): RunnerWorld => {
+    const hero = { x: 10, y: 2.8 };
+    return { street: map, hero, profile: p, busy: false, keep: () => {}, gate: { x: 10, y: 1.2 }, place: (x, y) => Object.assign(hero, { x, y }), ...over };
+  };
+  /** Frames at 20 a second; the hero steps as the scene's stick says. */
+  const play = (r: Runner, w: RunnerWorld, secs: number, from = 0) => {
+    for (let t = from; t < from + secs; t += 0.05) {
+      r.frame(w, t, 0.05);
+      const s = r.walk();
+      if (s && w.hero) w.hero.y += s.my * 3 * 0.05;
+    }
     return from + secs;
   };
 
-  it('comes after a few seconds, says it (the errands are yours), and goes back where they stood', () => {
-    const r = new Runner(), p = fresh('WARRIOR'), map = street(), w = { street: map, hero: { x: 10, y: 10 }, profile: p, busy: false, keep: () => {} };
-    let t = play(r, w, 2.5);
-    expect(map.npcs!.map((n) => n.name)).toEqual(['RECRUIT WAT']);
-    t = play(r, w, 2, t);
-    // Wat left his spot to come: the standing one is gone while the runner is out.
+  it('held on the gate, walks in, cuts to the runner out of their hall, follows them in, then the line', () => {
+    const r = new Runner(), p = fresh('WARRIOR'), map = street(), w = world(p, map);
+    r.frame(w, 0, 0.05);
+    expect(r.scene()).toBe(true);
+    expect(w.hero!.y).toBeCloseTo(1.55);
+    expect(r.walk()).toEqual({ mx: 0, my: 0 });
+    let t = play(r, w, 0.9);
+    expect(r.walk()).toEqual({ mx: 0, my: 0.5 });
+    // Through the gate, then the cut: the runner in the barracks doorway, the camera snapped onto them; Wat's away from his spot.
+    let snapped = false;
+    for (let k = 0; k < 80 && !snapped; k++) {
+      r.frame(w, (t += 0.05), 0.05);
+      const s = r.walk();
+      if (s) w.hero!.y += s.my * 3 * 0.05;
+      snapped = !!r.focus(w.hero)?.snap;
+    }
+    expect(w.hero!.y).toBeGreaterThan(3.5);
+    expect(snapped).toBe(true);
     expect(map.npcs!.map((n) => n.name)).toEqual(['WAT']);
-    t = play(r, w, 1, t);
+    expect(map.npcs![0].y).toBeGreaterThan(15);
+    t = play(r, w, 8, t);
     expect(r.caption(t)?.who).toBe('WAT');
     expect(p.errands!.told).toBe(true);
+    expect(r.scene()).toBe(true);
     r.skip(t);
-    play(r, w, 4, t);
+    r.frame(w, (t += 0.05), 0.05);
+    // The line said: the player's again, and Wat goes home.
+    expect(r.scene()).toBe(false);
+    expect(r.walk()).toBeNull();
+    play(r, w, 10, t);
     expect(map.npcs!.map((n) => n.name)).toEqual(['RECRUIT WAT']);
-    expect(r.caption(99)).toBeNull();
   });
 
-  it('waits while a panel is up, and never comes for a hero who has been told', () => {
+  it('not at the gate (back in later): straight to the runner, no walk in', () => {
+    const r = new Runner(), p = fresh('WARRIOR'), map = street(), w = world(p, map);
+    w.hero!.x = 30, w.hero!.y = 20;
+    play(r, w, 0.8);
+    expect(w.hero).toEqual({ x: 30, y: 20 });
+    expect(map.npcs!.map((n) => n.name)).toEqual(['WAT']);
+  });
+
+  it('waits while a panel is up; never comes for a hero who has been told; a Ranger gets the hound', () => {
     const r = new Runner(), p = fresh('RANGER'), map = street();
-    play(r, { street: map, hero: { x: 10, y: 10 }, profile: p, busy: true, keep: () => {} }, 6);
-    expect(r.hound()).toBeNull();
-    play(r, { street: map, hero: { x: 10, y: 10 }, profile: p, busy: false, keep: () => {} }, 3.2);
-    // A Ranger's is Maeve's hound, not a person in the street.
+    play(r, world(p, map, { busy: true }), 3);
+    expect(r.scene()).toBe(false);
+    const w = world(p, map);
+    play(r, w, 4);
     expect(r.hound()).not.toBeNull();
-    expect(map.npcs!.length).toBe(1);
+    expect(map.npcs!.map((n) => n.name)).toEqual(['RECRUIT WAT']);
     const q = fresh('WARRIOR');
     told(q);
     const r2 = new Runner();
-    play(r2, { street: map, hero: { x: 10, y: 10 }, profile: q, busy: false, keep: () => {} }, 8);
-    expect(map.npcs!.map((n) => n.name)).toEqual(['RECRUIT WAT']);
+    play(r2, world(q, map), 8);
+    expect(r2.scene()).toBe(false);
   });
 
-  it('walking off before the line: they go back, and come again next time', () => {
-    const r = new Runner(), p = fresh('WARRIOR'), map = street(), w = { street: map, hero: { x: 10, y: 10 }, profile: p, busy: false, keep: () => {} };
-    play(r, w, 3.2);
-    r.frame({ ...w, street: null }, 4, 0.05);
+  it('leaving the street before the line: all as it was, and they come again next time', () => {
+    const r = new Runner(), p = fresh('WARRIOR'), map = street(), w = world(p, map);
+    play(r, w, 4);
+    r.frame({ ...w, street: null }, 5, 0.05);
+    expect(r.scene()).toBe(false);
     expect(map.npcs!.map((n) => n.name)).toEqual(['RECRUIT WAT']);
     expect(p.errands!.told).toBe(false);
+  });
+
+  it("the runner's way goes round a building, not through it", () => {
+    const map = street(), way = wayThrough(map, { x: 11, y: 11 }, { x: 11, y: 4 });
+    expect(way.length).toBeGreaterThan(2);
+    for (const q of way) expect(q.y > 6 - 0.3 && q.y < 9 + 0.3 && q.x > 6 - 0.3 && q.x < 16 + 0.3).toBe(false);
   });
 });
