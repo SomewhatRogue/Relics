@@ -126,3 +126,13 @@ LINE; stuck 20 s after. Phase 2: channels widen (Water.onlyLog; the path grid re
 a log in, and it with it (a knockdown, holdUntil). Loot: THE BOG-OAK HOOK, FEN-BLACK JERKIN, A STITCHED RING (wax
 and tar, never magic). Art reviewed from scripts/leech-look.cjs. 3D: no drained mud or widened channels yet.
 haulier.test and deepdoor.test: floor 15 is the Leechman now.
+
+## 2026-11-12: guests on the Deep's boss floors; map changes now reach guests (Opus 5.5)
+Kyle: the instances had a guest showing off the map on their own screen; check the Deep. scripts/deepboss-online.cjs
+(two browsers, a party down to floors 10 and 15): Sam's map is Kyle's size and Sam's hero is on it, where Kyle's
+room has him. Not an issue here. Found instead: a guest that already had the room took only `blaze` from each whole
+send, so map changes after the start never reached it (THE LEECHMAN's drained shallows and widened channels, the
+peat's mud). client/coop.ts apply: a whole send for the same room now takes the leader's map, keeping the guest's
+own blocks (they come piece by piece). Instances chat: a guest that builds its map from the job's seed (the `ms`
+big-room path, shared/expedmap.ts) still takes only `blaze`; if your guest's map is built differently from the
+leader's there, that would put them off it. deep-online 18 of 18, deepboss-online all, full suite green.

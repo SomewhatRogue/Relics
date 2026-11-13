@@ -438,7 +438,12 @@ export class CoopGuest {
       this.key = body.k;
       this.own.reset();
       this.prevT = this.curT = body.t;
-    } else if (body.f && body.map && this.room) this.room.map.blaze = body.map.blaze;
+    } else if (body.f && body.map && this.room) {
+      // The same room whole again: the map's own changes since come with it (a house's blaze; the windlass's drained
+      // shallows, phase 2's widened channels and the peat's mud: sim/leechwind.ts, leechlog.ts; anything else a room
+      // changes in its map). Its blocks come apart, piece by piece, so they stay mine. (Kyle, 2026-11-12: check guests.)
+      Object.assign(this.room.map, { ...body.map, blocks: this.room.map.blocks });
+    }
     else if (body.f && body.ms && this.room) this.room.map.blaze = body.blaze;
     if (body.xs && this.room) this.room.exped = body.xs;
     // (The same room whole again: a house set alight from outside with me in it now burns: houseindoors.ts.)
