@@ -43,7 +43,7 @@ import { OwedBook } from './owed';
 import type { DoorMark } from './jobrooms';
 import { BigSend } from './bigsend';
 import { isBig, loud, mergeBlocks, quiet } from './interest';
-import { expedPlan } from '../shared/expedmap';
+import { guestMap } from '../shared/guestmap';
 import { themeUnder } from '../shared/expedsky';
 import type { ExpedState } from '../sim/exped';
 import { asGuest } from './asguest';
@@ -430,8 +430,9 @@ export class CoopGuest {
     // (Only a whole room to start from: a new leader's changes mean nothing without it.)
     if (!body.f && (!this.room || this.key < 0 || body.k !== this.key)) return;
     if (body.f && (body.k !== this.key || !this.room) && (body.map || (body.ms && body.run))) {
-      // A big room's map is built here from the job's seed, never sent (shared/expedmap.ts); its buildings come near only.
-      const map = body.map ?? expedPlan(body.run!.job).map;
+      // A big room's map is built here from the run, never sent (shared/guestmap.ts: an Instance's area or an
+      // expedition's); its buildings come near only.
+      const map = body.map ?? guestMap(body.run!);
       this.room = new ArenaRoom(1, { map });
       this.base = body.ms ? map.blocks : null;
       this.known = new Map();

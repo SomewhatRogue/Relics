@@ -350,3 +350,15 @@ not killing quickly, so kind of anticlimactic".
   which one and I'll mark it on the map, just you or the lot of you, I don't mind." The board: "Corporal Brisk in the
   barracks sends you to the Barrowfields, Hangman's Wood, Fenmere or the Open Cut." The bible's Night Watch section
   marked gone. (Claude Opus 5.5)
+
+## 2026-11-12: a guest off the map in an Instance (from the Deep chat's lead)
+
+- Kyle had seen a guest standing off the map in an Instance; the Deep chat checked its own boss floors (fine) and found
+  where: a big room (one whose far goblins doze, `isBig` = `room.sleepFar`, as every Instance's is) never sends its
+  map, and the guest built it with `expedPlan(job)`, an expedition's map. For over the top: 96 x 72 against the
+  leader's 28 x 124. `shared/guestmap.ts`: the guest builds an Instance's area (`areaOf`, the fork's way included),
+  else the expedition's; client/coop.ts uses it. tests/guestmap.test.ts: the same map in every area and both ways.
+- The Deep chat's other change (a whole send brings the leader's map) is for rooms that send their map; an Instance's
+  doesn't. Nothing of mine changes the map mid-run: gates are blocks (they come piece by piece), the tubs props, the
+  lamps and the Brakesman's state on goblins; the Haulier's fight changes nothing in it. Full suite green.
+  Not checked in two browsers. (Claude Opus 5.5)
