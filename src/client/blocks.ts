@@ -19,7 +19,10 @@ import { dressOutside, liveOutside } from './exterior';
 import { drawHallRound } from './hallsdraw';
 import { wear, windowsLit } from './wear';
 import { OX, OY, PX } from './world';
-import { blockBoxes, DECKS, PIECE_BLOCKS, PIECE_ROUNDS } from './pieces';
+import { blockBoxes, DECKS, PIECE_BLOCKS, PIECE_ROUNDS, roundBoxes, type Bx } from './pieces';
+import { LANTERN_Y } from './daispieces';
+/** A box colour scaled toward black. */
+const shade = (hex: number, k: number) => (Math.round(((hex >> 16) & 255) * k) << 16) | (Math.round(((hex >> 8) & 255) * k) << 8) | Math.round((hex & 255) * k);
 import { drawPlinth } from './statuedraw';
 import { FEN_KINDS } from './fenpieces';
 import { drawPieceBlock, drawPieceRound, paintBoxes } from './piecedraw';
@@ -248,6 +251,17 @@ export const blockAt = (b: Block): [number, number] => [OX + b.x * PX, OY + b.y 
 export function drawRound(c: Ctx, r: Round, x: number, y: number): void {
   if (r.kind === 'pillar') return blit(c, SPRITES.pillar, x, y + 5);
   if (r.kind === 'plinth') return drawPlinth(c, r, x, y);
+  if (r.kind === 'dais') {
+    // The Last Lantern on its dais (daispieces.ts): a flame that never goes out, over the statue's head.
+    // (A shade darker than the 2.5D boxes: here the Lantern's own light falls full on its stone and washed it out.)
+    paintBoxes(c.lit, roundBoxes(r).map((q) => [q[0], q[1], q[2], q[3], q[4], q[5], shade(q[6], 0.68), q[7]] as Bx), x, y);
+    const f = Math.floor(c.now * 9) % 3, fy = Math.round(y - LANTERN_Y * PX);
+    c.glow.fillStyle = '#fff1b0';
+    c.glow.fillRect(Math.round(x - 2), fy - 3, 4, 5);
+    c.glow.fillStyle = f ? '#ffd27a' : '#ffb44c';
+    c.glow.fillRect(Math.round(x - 1), fy - 6 - (f % 2), 2, 3);
+    return;
+  }
   if (PIECE_ROUNDS.has(r.kind)) return drawPieceRound(c, r, x, y);
   if (r.kind === 'crows' || r.kind === 'moths' || r.kind === 'dog' || r.kind === 'smoke') return void drawLife(c, r, x, y);
   if (r.kind === 'candles' || r.kind === 'witchfire') return void drawHallRound(c, r, x, y);

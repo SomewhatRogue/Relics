@@ -6,6 +6,7 @@
 import type { Round } from '../../shared/arena';
 import { Boxes, Seed, jit } from './boxes';
 import { roundBoxes } from '../pieces';
+import { LANTERN_Y } from '../daispieces';
 import { putBoxes } from './pieces3d';
 import { addNature } from './nature3d';
 
@@ -153,8 +154,11 @@ export function addRound(B: Boxes, o: Round, fires: Spot[], r: Seed): void {
     case 'gibbet':
     case 'waymark':
     case 'plinth':
+    case 'dais':
       // Layout 4's pieces: the boxes the flat view paints (../pieces.ts).
       putBoxes(B, roundBoxes(o), x, z);
+      // The Last Lantern's flame, in its cage on top of the dais's column (daispieces.ts).
+      if (o.kind === 'dais') fires.push([x, LANTERN_Y - 0.2, z, 0.8]);
       break;
     default:
       // Paint only (crows, moths, a dog, smoke): nothing to stand up.

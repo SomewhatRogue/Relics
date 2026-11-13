@@ -19,7 +19,7 @@ const mk = (kind: Mark['kind'], x: number, y: number, w: number, h: number): Mar
 
 /** The buildings' fronts, where a strip of cobble survives (x, front y, width). */
 const FRONTS: [number, number, number][] = [[3, 7.5, 8], [15, 7, 6], [31, 7, 7], [42.5, 7, 4], [1.5, 17, 8], [45, 16.5, 6], [3, 32.5, 7], [13, 34, 8]];
-const BRAZIERS: [number, number][] = [[25, 15], [31, 15], [28, 21.6]];
+const BRAZIERS: [number, number][] = [[25, 15], [31, 15]];
 
 export function townSoil(w: WorldState): Soil[] {
   const washed = workDone(w, 'wash'), cleared = workDone(w, 'lanes'), spine = cleared ? 1.1 : 0.7;
@@ -30,10 +30,10 @@ export function townSoil(w: WorldState): Soil[] {
     S(square, 19.4, 10.6, 17.2, 18), S('earth', 23, -1, 10, 6), S('earth', 35, 9.4, 8, 10), S(lanes, 12, 33, 12, 5), S(lanes, 31, 28, 18, 9), S(lanes, 0, 17.4, 11, 8), S(lanes, 38, 16.4, 15, 3),
     ...(cleared ? [L('swept', 1, 10.5, 52, 10.5, 1.7), L('swept', 1, 27.9, 52, 27.9, 1.9)] : []),
     // The cobbles that survive: the old gate road, a spine down each lane, the building fronts, round
-    // the Lantern and the well, and islands in the square (more of them once it's washed and relaid).
+    // the Lantern's dais and the well, and islands in the square (more of them once it's washed and relaid).
     L('cobble', 28, 0.2, 28, 13.6, 1.1), L('cobble', 1.5, 10.6, 52, 10.6, spine), L('cobble', 2, 28, 52, 28, spine), L('cobble', 34.5, 17.9, 52.5, 17.9, spine - 0.1),
     ...FRONTS.map(([x, y, fw]) => S('cobble', x - 0.4, y - 0.2, fw + 0.8, 1.5, false)),
-    S('cobble', 24, 14.8, 8, 5.6), S('cobble', 20.2, 18.8, 3.6, 3.2),
+    S('cobble', 24.1, 14.7, 7.8, 7.9), S('cobble', 20.2, 18.8, 3.6, 3.2),
     S('cobble', 22.2, 12.3, 3.6, 2.5), S('cobble', 30.2, 12.5, 3.8, 2.3), S('cobble', 22.5, 23.1, 4.6, 2.7), S('cobble', 29.5, 22.9, 4.8, 2.9),
     ...(washed ? [S('cobble', 32.3, 16.4, 2.8, 4.2), S('cobble', 21.2, 15.4, 2.6, 3.2), S('cobble', 25.6, 25.2, 5, 1.8)] : []),
     // Wear over all of it: the track worn corner to corner across the square, mud where carts turn.

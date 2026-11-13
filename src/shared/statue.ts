@@ -21,8 +21,8 @@ export const STATUE = {
   kept: 8,
 };
 
-/** Where the plinth stands in Lantern Square: east of the brazier, clear of the bard, the cart, the bench and Dunn's round. */
-export const PLINTH = { x: 31.8, y: 21.5, r: 0.8 };
+/** Where the plinth stands in Lantern Square: on the Lantern's dais, in front of its column (docs/design/lantern-square.md). */
+export const PLINTH = { x: 28, y: 20, r: 0.8 };
 
 /** Who stands on the plinth: their name, and how they looked (the weapon says the class). */
 export interface StatueHero { id: string; name: string; w: WeaponId; l: number }

@@ -318,3 +318,16 @@ The plan, one class at a time so Kyle can play each against the old ones:
   At rest a bow is carried in the one hand. The 2.5D cards draw the same code.
 - The lineup has a bows page, `?lineup=bows`: each bow in three looks through stand, walk, charge, hold, loose,
   hold aimed up and down, and the tap. Drawing only; the shot is the room's as before. (Claude Opus 5.5)
+
+## 2026-11-13: Lantern Square built round the Lantern (slice 1 of docs/design/lantern-square.md)
+
+- Kyle: the square was too busy and disorganised; "more defined and maybe around a central thing". His calls are
+  in the spec: the Lantern on a dais at the centre, the statue on it, the Roll cut round it; Best in Wickhold to
+  the town hall, the council by deeds, a weekly stipend for the bests (slices 2 and 3, for a systems chat).
+- The Last Lantern now stands on a column on a two-step round dais at (28, 18.6) (`DAIS`, a new round kind
+  `dais`; its boxes in daispieces.ts, one list for both views). Its flame and light are up where the cage is,
+  over the statue's head. The plinth stands on the lower step in front of the column (PLINTH 28, 20); the
+  Roll's gilt plates are on the step's front and its spot is at the dais's foot; the old Roll stone and the
+  brazier before it are gone. Cobbles in a ring round it; Old Wenna and the arrival point moved off it.
+- The flat view paints the dais's stone a shade darker than the 2.5D boxes: the Lantern's light falls full on
+  it and washed it out. statue.test.ts allows the plinth on the dais. (Claude Opus 5.5)

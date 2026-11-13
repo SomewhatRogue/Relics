@@ -4,6 +4,7 @@
  * painted face and real thickness and the gap of the way out, low side walls, ledges, the round things,
  * torches and braziers (their flames and light by the hour: lamps3d.ts). Static boxes are merged into one mesh.
  */
+import { LANTERN_Y } from '../daispieces';
 import * as THREE from 'three';
 import { trackMouths3d } from './tracks3d';
 import type { GameMap } from '../../shared/arena';
@@ -150,6 +151,7 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   for (const o of m.rounds) {
     if (o.kind === 'cookfire') lights.push({ x: o.x, y: 1.6, z: o.y, r: 4.5, i: 0.8 * tk, c: [1, 0.72, 0.42], f: 9 });
     // The Last Lantern never goes out (but its light, like any fire's, fades under the sun: lamps3d.ts).
+    if (o.kind === 'dais') lamps.push({ x: o.x, y: o.y, always: true, fires: [], light: { x: o.x, y: LANTERN_Y, z: o.y, r: 12, i: 1.3, c: [1, 0.78, 0.45], f: 3 } });
     if (o.kind === 'lantern') lamps.push({ x: o.x, y: o.y, always: true, fires: [], light: { x: o.x, y: 2.4, z: o.y, r: 9, i: 1.2, c: [1, 0.78, 0.45], f: 3 } });
     if (o.kind === 'candles') lights.push({ x: o.x, y: 1.2, z: o.y, r: 3.5, i: 0.7, c: [1, 0.78, 0.48], f: 11 });
   }

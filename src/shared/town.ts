@@ -41,13 +41,15 @@ export const SPOTS: Spot[] = [
   { id: 'board', x: 24.1, y: 13.8, label: 'JOB BOARD' },
   { id: 'works', x: 32, y: 13.8, label: 'PUBLIC WORKS' },
   { id: 'best', x: 28, y: 13.8, label: 'BEST IN WICKHOLD' },
-  { id: 'roll', x: 28, y: 25.3, label: 'THE ROLL OF THE BRAVE' },
+  { id: 'roll', x: 28, y: 21.9, label: 'THE ROLL OF THE BRAVE' },
   { id: 'well', x: 22, y: 21.4, label: 'THE WELL' },
   { id: 'market', x: 38.5, y: 14.2, label: 'MARKET ROW' },
   { id: 'gate', x: 28, y: 1.2, label: 'NORTH GATE' },
   { id: 'sewer', x: 23.5, y: 35.4, label: 'SEWER GRATE' },
   { id: 'locked', x: 51.6, y: 18, label: 'RUBBLE', key: 'oldquarter' },
 ];
+/** The Last Lantern's dais in the middle of Lantern Square: its centre and how far its lower step reaches (tiles). */
+export const DAIS = { x: 28, y: 18.6, r: 2.2 };
 /** How close you must stand to use a spot or talk to someone. */
 export const SPOT_REACH = 1.6;
 
@@ -94,7 +96,6 @@ export function townMap(w: WorldState): GameMap {
     { x: 2.4, y: 22.4, w: 6, h: 3.2, kind: 'hall', label: 'COUNTING HOUSE', door: 'bank', worn: true },
     { x: 22.9, y: 12.6, w: 2.4, h: 0.6, kind: 'stall', label: 'JOBS' },
     { x: 30.3, y: 12.6, w: 3.4, h: 0.6, kind: 'stall', label: 'PUBLIC WORKS' },
-    { x: 27, y: 23.5, w: 2, h: 1, kind: 'monument' },
     { x: 23.5, y: 24, w: 2, h: 0.5, kind: 'bench' },
     { x: 31, y: 24, w: 2, h: 0.5, kind: 'bench' },
     { x: 35, y: 21, w: 2.2, h: 1.2, kind: 'cart' },
@@ -110,7 +111,9 @@ export function townMap(w: WorldState): GameMap {
   if (w.flags['north-fields'] === 'farm') blocks.push({ x: 22, y: 3, w: 3.6, h: 3, kind: 'granary', label: 'GRANARY', door: 'granary' });
   const r = (kind: Round['kind'], x: number, y: number, rad: number): Round => ({ kind, x, y, r: rad });
   const rounds: Round[] = [
-    r('lantern', 28, 17.5, 0.5), r('well', 22, 20.4, 0.5),
+    // The Last Lantern on its dais, the square's middle: the statue's plinth on its step, the Roll cut round it
+    // (docs/design/lantern-square.md).
+    r('dais', DAIS.x, DAIS.y, DAIS.r), r('well', 22, 20.4, 0.5),
     ...[[2.5, 9.4], [4.2, 9.9], [9.8, 9.4], [11.5, 9.9], [13, 9.4]].map(([x, y]) => r('stone', x, y, 0.25)),
     ...[[43, 20], [46, 20.6], [49, 20]].map(([x, y]) => r('target', x, y, 0.35)),
     ...[[19.6, 12.2], [36.3, 12.2], [20, 26.5], [36, 26.5], [12, 27], [44, 27], [8, 20], [50, 25]].map(([x, y]) => r('post', x, y, 0.15)),
@@ -124,7 +127,7 @@ export function townMap(w: WorldState): GameMap {
   ];
   const n = (name: string, x: number, y: number, talk: string, look: string, arg?: number, path?: [number, number][], speed?: number): Npc => ({ name, x, y, talk, look, arg, path, speed });
   const npcs: Npc[] = [
-    n('OLD WENNA', 25.5, 19, 'chat', 'elder', 0),
+    n('OLD WENNA', 24.6, 21.4, 'chat', 'elder', 0),
     n('TAM', 22.6, 17.4, 'chat', 'child', 1),
     n('ROWAN THE BARD', 33.5, 19, 'bard', 'bard'),
     n('GATE GUARD', 26.2, 2.4, 'chat', 'guard', 5),
@@ -148,11 +151,11 @@ export function townMap(w: WorldState): GameMap {
   blocks.push(...m.blocks, ...sg.blocks), rounds.push(...m.rounds, ...sg.rounds), npcs.push(...m.npcs, ...sg.npcs);
   return {
     name: 'WICKHOLD', w: W, h: H, wallFace: 3, rounds, blocks, npcs, soil: townSoil(w), marks: [...townGround(w), ...m.marks], breach: m.breach,
-    braziers: [{ x: 25, y: 15, r: 0.35 }, { x: 31, y: 15, r: 0.35 }, { x: 28, y: 21.6, r: 0.35 }, ...sg.braziers],
+    braziers: [{ x: 25, y: 15, r: 0.35 }, { x: 31, y: 15, r: 0.35 }, ...sg.braziers],
     torches: [6, 14, 22, 34, 40, 46, 58].map((x) => ({ x, y: -1.6 })),
     // The millpond under the east wall, where the mill stream comes in (shared/pastimes.ts).
     water: [{ ...MILLPOND.water, deep: true }],
-    hero: { x: 28, y: 20 }, exit: null,
+    hero: { x: 28, y: 23 }, exit: null,
     theme: { floor: 'cobble', back: 'stone', ambient: [0.27, 0.25, 0.33], moon: 0.5 },
   };
 }

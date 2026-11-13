@@ -614,6 +614,8 @@ export class Scene {
     // Cobb's lamp by the Deep's ladder (client/cobbdraw.ts).
     for (const n of map.npcs ?? []) if (n.work === 'ladder') lights.push({ x: OX + n.x * PX - cx + 12, y: OY + n.y * PX - cy - 6, r: 56 + Math.sin(now * 9) * 3, i: 0.85, c: [1, 0.76, 0.42] });
     for (const r of map.rounds) if (r.kind === 'lantern') lights.push({ x: OX + r.x * PX - cx, y: OY + r.y * PX - cy - 28, r: 150 + Math.sin(now * 3) * 4, i: 1.25 * tk, c: [1, 0.78, 0.45] });
+    // The Last Lantern high on its dais's column: the square's light (daispieces.ts).
+    for (const r of map.rounds) if (r.kind === 'dais') lights.push({ x: OX + r.x * PX - cx, y: OY + r.y * PX - cy - 70, r: 180 + Math.sin(now * 3) * 4, i: 0.95 * tk, c: [1, 0.78, 0.45] });
     for (const b of map.blocks) {
       const [bx, by] = blockAt(b), mx = bx + (b.w * PX) / 2 - cx;
       // A building on fire lights the whole street; its ashes smoulder.

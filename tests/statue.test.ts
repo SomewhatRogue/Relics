@@ -130,7 +130,10 @@ describe('in the square', () => {
   it("stands clear of the square's people and things", () => {
     const m = townMap(newWorld()), p = m.rounds.find((r) => r.kind === 'plinth')!;
     for (const n of m.npcs ?? []) for (const [x, y] of [[n.x, n.y], ...(n.path ?? [])]) expect(Math.hypot(x - p.x, y - p.y), n.name).toBeGreaterThan(1.6);
-    for (const r of m.rounds) if (r !== p) expect(Math.hypot(r.x - p.x, r.y - p.y) - r.r).toBeGreaterThan(1.4);
+    // (It stands on the Lantern's dais by design: docs/design/lantern-square.md.)
+    for (const r of m.rounds) if (r !== p && r.kind !== 'dais') expect(Math.hypot(r.x - p.x, r.y - p.y) - r.r).toBeGreaterThan(1.4);
+    const d = m.rounds.find((r) => r.kind === 'dais')!;
+    expect(Math.hypot(p.x - d.x, p.y - d.y)).toBeLessThan(d.r);
     for (const b of m.blocks) expect(p.x + 1.3 < b.x || p.x - 1.3 > b.x + b.w || p.y + 1 < b.y || p.y - 1 > b.y + b.h, b.kind).toBe(true);
   });
 });

@@ -7,7 +7,7 @@ import { nearby } from './mapgrid.js';
 import { stopsAt, type PathAt } from './npcstops.js';
 
 export type Circle = { x: number; y: number; r: number };
-export type RoundKind = 'pillar' | 'tree' | 'pine' | 'rock' | 'hay' | 'well' | 'lantern' | 'support' | 'stump' | 'target' | 'stone' | 'post' | 'grate' | 'statue' | 'bush' | 'reed' | 'deadtree'
+export type RoundKind = 'pillar' | 'tree' | 'pine' | 'rock' | 'hay' | 'well' | 'lantern' | 'dais' | 'support' | 'stump' | 'target' | 'stone' | 'post' | 'grate' | 'statue' | 'bush' | 'reed' | 'deadtree'
   // Lantern Square's plinth, with whoever paid for the statue on it (shared/statue.ts).
   | 'plinth'
   // Paint only, a speck to bump: crows at the blood, moths round a garden lamp.
