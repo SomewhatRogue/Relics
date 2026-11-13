@@ -1,7 +1,7 @@
 # Deep skills: a class skill you can only earn far down in the Deep
 
-Spec, 2026-11-13 (Kyle and Claude Opus 5.5), from the town quests chat. **Not built.** A big new system:
-build it in its own chat, from this.
+Spec, 2026-11-13 (Kyle and Claude Opus 5.5), from the town quests chat. **Approved by Kyle 2026-11-13. Not
+built.** A big new system: build it in its own chat, from this.
 
 ## What Kyle wants
 
@@ -43,18 +43,16 @@ hard." New skills, not today's moved: "would have to be real good."
 | Mage | **THE DOOR**: open two linked doors on the floor for a few seconds; anyone who steps in one comes out the other (goblins too). Ways out, ways round, a friend saved from across the room. | **STILL**: everything in a circle stops for two seconds, goblins and what they threw. |
 | Healer | **Picked (Kyle): a holy warrior, summoned**, who fights at the party's side for a while and kicks ass: big, hits hard, draws goblins off the hurt. What it is in Wickhold's faith (the church, the Lantern; no angels recorded yet) is the lore keeper's to find. Kyle: the Healer's candidates were the weakest; this is the one. | (CALL BACK and VIGIL: not picked.) |
 
-Picked so far: the Rogue's cut, the Healer's holy warrior. My leaning for the other three: BARRICADE,
-FLARE, THE DOOR (each is a verb nothing in the game has yet, and each is about the party).
+**The five (approved):** Warrior BARRICADE, Ranger FLARE, Rogue the samurai cut, Mage THE DOOR, Healer the
+holy warrior.
 
-## Kyle's calls
+## Kyle's calls (approved 2026-11-13)
 
-1. **The other three** (Warrior, Ranger, Mage: from the table, or ideas of his own).
-2. **How deep.** Bosses every 5 floors, blessings every 10 (shared/deep.ts, deepmarks.ts). Proposed:
-   **floor 20** for all five (the fourth boss down; "really hard"), or 15. Ask the Deep chat what floor
-   20 is like now before settling.
-3. **One first:** which to build and play before the rest. Proposed: **the Rogue's cut** (Kyle's
-   clearest picture of what he wants, and a single hero's move, so the quickest to get right). The holy
-   warrior is the bigger build (a fighter of the party's own, run by the room, with its own art).
+1. **The five:** as above.
+2. **How deep: floor 20** for all five. Ask the Deep chat what floor 20 is like now; if it's out of reach
+   for a good party, say so to Kyle before building the gate.
+3. **First: the Rogue's cut**, built and played before the rest. The holy warrior is the biggest build
+   (a fighter of the party's own, run by the room, with its own art), so it goes last or near it.
 
 ## Build order (once it's a yes)
 

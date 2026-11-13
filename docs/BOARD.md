@@ -45,6 +45,8 @@ The Deep chat, until it finishes (then the general chat).
   Haulier). One source: `shared/uniques.ts`. Rakehead's pieces go in there when instances are built, and
   the Haulier's two lists are merged by whoever builds Rakehead.
 
+- **Deep skills** (docs/design/deep-skills.md, approved 2026-11-13): a new extra skill a class, opened at floor 20 of the Deep; the Rogue's samurai cut first. Needs its own chat.
+
 ## Finished
 
 (none yet)

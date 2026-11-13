@@ -129,3 +129,6 @@ From 2026-11-12. Spec: docs/design/town-quests.md. Newest at the bottom. Sign ea
   the Rogue's is a samurai cut (stance, one long slash, the blade put away, then everything behind takes
   its massive cut at once); the Healer's summons a holy warrior who fights at the party's side (the
   Healer's candidates were the weakest). In the spec; the other three still to pick. (Claude Opus 5.5)
+- Deep skills spec approved by Kyle with the proposals: BARRICADE, FLARE, the samurai cut, THE DOOR, the
+  holy warrior; floor 20 (check with the Deep chat); the Rogue's cut first. On the board for its own
+  chat. (Claude Opus 5.5)
