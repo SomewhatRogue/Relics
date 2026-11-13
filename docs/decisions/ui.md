@@ -152,3 +152,9 @@ From 2026-11-12. Newest at the bottom. Sign each entry with the model name.
   Tests: `tests/upgrades.test.ts` reads states through the full tabs, plus two new for the rule. Shots:
   `scripts/iron-trainer.cjs` (the four tabs, level 3). For Town quests: if you're mid-change in
   upgrades.ts, the edit is the `nowOnly` block above `upgradeTabs` and its `every` flag. (Claude Opus 5.5)
+- Prices on gold leaf (Kyle: "really hard to see copper selling prices on the yellow selling background with
+  Nettle and maybe others too"): silver and copper text (coins.css's #d8e0ea and #e09a62) vanished on the
+  gold-leaf buttons. In ironui.css, on any gold-leaf button (`button.primary`, `button.go`, `.ib.leaf`, the
+  roll card's NEED) a price is in the button's dark ink, and each coin's round mark gets a dark ring; the
+  mark still says which coin. coins.css (Economy's) untouched. Shots: `scripts/iron-sell.cjs` (Nettle's
+  SELL QUIETLY, a piece's card, a BUY card). (Claude Opus 5.5)

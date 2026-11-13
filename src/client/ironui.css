@@ -139,3 +139,9 @@ html body .uncovered { opacity: 0.3; transition: opacity 0.15s steps(3); }
 
 /* The MOTION switch in the gear box, with the torchlight's icon. */
 #options #motion::before { background-image: var(--ic-lit); }
+
+/* Prices on gold leaf (Kyle, 2026-11-13: "really hard to see copper selling prices on the yellow"): on any
+   gold-leaf button (BUY, SELL, NEED, the main choice) a price is written in the button's dark ink; the round
+   mark before each part still says which coin it is, with a dark ring so it holds on the gold. */
+:is(button.primary, button.go, .ib.leaf, #roll .rbtns button.need) .cn { color: #2e1a08; text-shadow: none; }
+:is(button.primary, button.go, .ib.leaf, #roll .rbtns button.need) .cn::before { box-shadow: inset -0.1em -0.1em 0 rgba(0, 0, 0, 0.35), 0 0 0 1px #2e1a08; }
