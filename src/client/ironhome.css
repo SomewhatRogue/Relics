@@ -1,0 +1,30 @@
+/* The home screen's hero cards (title.ts), in iron and ember (docs/design/ui-look.md; the parts are
+   ironui.css's). Overrides style.css's #title slot rules, which stay as the fallback. Each hero a forged
+   plate: the hero in a sunk alcove, the name, the line in the small pixel face, PLAY in gold leaf, the dots
+   in iron, the hero's options sunk (DELETE edged red). Under them, NEW HERO iron and the code sunk. */
+#title .lede { font: 500 17px/1.4 var(--i-read); color: var(--i-warm); }
+#title .slots { gap: 14px; }
+#title .slot { gap: 12px; padding: 12px 10px 10px; border: 12px solid transparent; border-image: var(--i-plate) 12 fill / 12px stretch; background: none;
+  box-shadow: 0 0 0 2px var(--i-outline), 0 10px 30px #000000b3; }
+#title .slot .stop { gap: 14px; }
+#title .slot .stop .face { flex: none; padding: 4px; background: radial-gradient(ellipse at 50% 70%, #2a2c33, var(--i-well) 75%);
+  box-shadow: 0 0 0 2px var(--i-outline), inset 1px 1px 0 var(--i-outline), inset -1px -1px 0 #33373e; }
+#title .slot .who { gap: 6px; }
+#title .slot .who b { font: 700 22px/1.1 var(--i-read); color: var(--i-text); text-shadow: 0 2px 0 var(--i-outline); }
+#title .slot .who span { font: 400 11px/1.4 var(--i-label); letter-spacing: 0.03em; color: var(--i-cool); }
+
+/* The buttons: pressed metal, at least 48 px. */
+#title .tcard button { min-height: 48px; padding: 0 12px; border: 0; border-image: none; border-radius: 0;
+  font: 400 14px/1.1 var(--i-label); letter-spacing: 0.03em; text-transform: uppercase;
+  background: #3a3e46; color: var(--i-text); box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #6a6f7a, inset -2px -2px 0 #1b1d22; }
+#title .tcard button:active:not(:disabled) { transform: translateY(1px); box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #1b1d22, inset -2px -2px 0 #6a6f7a; }
+#title .tcard button.primary { background: linear-gradient(180deg, #ffe08a, #c8902e); color: #2e1a08;
+  box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 var(--i-leaf-hi), inset -2px -2px 0 #7a4e14; }
+#title .tcard button.primary:active:not(:disabled) { box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #7a4e14, inset -2px -2px 0 var(--i-leaf-hi); }
+#title .tcard button.ghost { background: #1b1d22; color: var(--i-cool); box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #33373e, inset -2px -2px 0 var(--i-outline); }
+#title .slot .more { width: 56px; background: #3a3e46; color: var(--i-text); box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #6a6f7a, inset -2px -2px 0 #1b1d22; }
+#title .slot .more.on { color: var(--i-leaf); box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #1b1d22, inset -2px -2px 0 #6a6f7a; }
+#title .slot .more i { width: 6px; height: 6px; }
+#title .slot .sgo, #title .slot .sopts { gap: 10px; padding: 2px; }
+#title .slot .sopts .danger { color: #ff8a7a; box-shadow: 0 0 0 2px var(--i-outline), inset 0 0 0 2px var(--i-danger); }
+#title .tcard > button, #title .tcard .wide { margin-inline: 2px; width: calc(100% - 4px); }

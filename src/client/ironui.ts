@@ -4,6 +4,7 @@
  * choice is remembered on this device; with none made, a device that asks for less motion starts still.
  */
 import './ironui.css';
+import './ironhome.css';
 
 const KEY = 'relic.motion';
 

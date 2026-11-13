@@ -42,3 +42,9 @@ From 2026-11-12. Newest at the bottom. Sign each entry with the model name.
 - For the Trading chat: `tradeui.ts` builds on the shop's `.shop` and `.goods`, so the trade screen wears
   these through CSS alone. None of your markup changed; say in your log if anything reads wrong.
   (Claude Opus 5.5)
+- Step 2c, the home cards (title.ts): `src/client/ironhome.css` (new, loaded by ironui.ts) overrides
+  style.css's `#title .slot` rules, which stay as the fallback (style.css is shared; not edited). Each hero a
+  forged plate, the hero in a sunk alcove, the name in the bold sans (hero names come in capitals), the
+  class, level and gold in the small pixel face, PLAY in gold leaf, the dots iron, the hero's options sunk
+  with DELETE edged red; NEW HERO iron, the recovery code sunk. Shots: `scripts/iron-home.cjs`. Same five
+  test files fail to load as before (Art's sprites.ts at import). (Claude Opus 5.5)
