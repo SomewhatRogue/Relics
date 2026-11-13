@@ -90,7 +90,7 @@ export interface BodyPose {
   ghost: number;
   gx: number;
   gy: number;
-  /** A walking step: -1 the left foot is up a pixel, 1 the right, 0 both down (figure.ts). */
+  /** A walking pose: 0 standing, 1 to 4 the walk cycle toward or away from you, 11 to 14 across the screen (figure.ts STRIDE). */
   step: number;
 }
 

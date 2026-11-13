@@ -254,3 +254,8 @@ The plan, one class at a time so Kyle can play each against the old ones:
 - The walk, again (Kyle, 2026-11-12: "walking animations are weird up and down. And mage boots come out from the
   sides as he walks"): the body no longer bobs, a lifted foot rises one pixel, 9 changes of foot a second; no
   swing under a robe (its legs are only the feet row, and swung, the boots stuck out past the hem). (Claude Opus 5.5)
+- The walk cycle (Kyle, 2026-11-12: "lets do it"): four poses from the room's walk clock (figure.ts STRIDE), each
+  leg cut at the knee and posed by thigh and shin. Across the screen: contact (one foot reaching forward, two
+  pixels at the shin, the other back), passing (the back leg comes through, knee bent, foot a pixel up), then the
+  other foot. Toward you or away: the forward foot a pixel lower, the back one a pixel higher, then passing.
+  Under a robe the feet only peek in turn. Every look gets it from its own cut; no body bob. (Claude Opus 5.5)

@@ -40,21 +40,45 @@ function place(part: Joint, out: number[]): number[] {
   return out;
 }
 
-/** Whether this part is the leg that's up this step (drawn a pixel higher; the body, drawn after,
- *  covers its top). A step of 2 is across the screen: the lifted leg swings a pixel forward and the planted one back. */
-const up = (part: Joint) => (part.kind === 'legL' && LAYOUT.step < 0) || (part.kind === 'legR' && LAYOUT.step > 0);
-const lifted = (part: Joint) => (up(part) ? 1 : 0);
-// (Not under a robe, where the legs are only the feet: swung, the boots stuck out past the hem. Kyle, 2026-11-12.)
-const swing = (part: Joint) => (Math.abs(LAYOUT.step) < 2 || (part.kind !== 'legL' && part.kind !== 'legR') || part.y1 - part.y0 < 6 ? 0 : (up(part) ? 1 : -1) * (LAYOUT.flip ? -1 : 1));
+/**
+ * The walk cycle (Kyle, 2026-11-12: "lets do it", a real walk for the tall heroes). `step` 1 to 4 walks toward
+ * or away from you, 11 to 14 across the screen; each leg is cut at the knee and posed by thigh and shin:
+ * contact (one foot forward, the other back, both down), passing (the back leg comes through, knee bent, its
+ * foot a pixel up), then the same with the other foot. Toward you, the forward foot is drawn a pixel lower and
+ * the back one a pixel higher. Under a robe (the legs only the feet) the feet just peek in turn, never out past
+ * the hem. The body, drawn after the legs, covers the tops of the thighs.
+ */
+const STRIDE: Record<number, [number, number, number, number, number, number]> = {
+  // [A thigh dx, A shin dx, A dy, B thigh dx, B shin dx, B dy]; A is the left leg, dx forward along the walk.
+  11: [1, 2, 0, -1, -2, 0], 12: [0, 0, 0, 0, -1, -1], 13: [-1, -2, 0, 1, 2, 0], 14: [0, -1, -1, 0, 0, 0],
+  1: [0, 0, 1, 0, 0, -1], 2: [0, 0, 0, 0, 0, -1], 3: [0, 0, -1, 0, 0, 1], 4: [0, 0, -1, 0, 0, 0],
+};
+/** A leg's offset at a row: [dx on screen, dy]. */
+function legAt(part: Joint, row: number): [number, number] {
+  const s = STRIDE[LAYOUT.step];
+  if (!s || (part.kind !== 'legL' && part.kind !== 'legR')) return [0, 0];
+  const a = part.kind === 'legL' ? 0 : 3, robe = part.y1 - part.y0 < 6, knee = part.y0 + Math.ceil((part.y1 - part.y0) * 0.45);
+  const fwd = LAYOUT.flip ? -1 : 1, dx = robe ? 0 : (row < knee ? s[a] : s[a + 1]) * fwd;
+  return [dx, s[a + 2]];
+}
 
-function put(g: CanvasRenderingContext2D, part: Joint, img: HTMLCanvasElement): void {
-  const [x0, y0, dh] = place(part, AT), w = part.x1 - part.x0, h = part.y1 - part.y0, y = y0 - lifted(part), x = x0 + swing(part);
-  if (!LAYOUT.flip) return g.drawImage(img, part.x0, part.y0, w, h, x, y, w, dh);
+function slice(g: CanvasRenderingContext2D, img: HTMLCanvasElement, part: Joint, sy: number, sh: number, x: number, y: number, dh: number): void {
+  const w = part.x1 - part.x0;
+  if (!LAYOUT.flip) return g.drawImage(img, part.x0, sy, w, sh, x, y, w, dh);
   g.save();
   g.translate(x + w, y);
   g.scale(-1, 1);
-  g.drawImage(img, part.x0, part.y0, w, h, 0, 0, w, dh);
+  g.drawImage(img, part.x0, sy, w, sh, 0, 0, w, dh);
   g.restore();
+}
+
+function put(g: CanvasRenderingContext2D, part: Joint, img: HTMLCanvasElement): void {
+  const [x0, y0, dh] = place(part, AT), h = part.y1 - part.y0;
+  if ((part.kind !== 'legL' && part.kind !== 'legR') || !STRIDE[LAYOUT.step]) return slice(g, img, part, part.y0, h, x0, y0, dh);
+  // A leg in two: thigh and shin, each at its own offset (the stretch from a crouch goes to the shin).
+  const knee = Math.ceil(h * 0.45), [tx, ty] = legAt(part, part.y0), [sx, sy] = legAt(part, part.y1 - 1);
+  slice(g, img, part, part.y0, knee, x0 + tx, y0 + ty, knee);
+  slice(g, img, part, part.y0 + knee, h - knee, x0 + sx, y0 + sy + knee, dh - knee);
 }
 
 /** Draw the figure laid out by `layout`: afterimage, parts, their glow, the pose's flash. */
@@ -72,7 +96,8 @@ export function drawFigure(c: Ctx, j: Jointed, x: number, y: number, p: BodyPose
     const [px, py] = place(part, AT);
     for (const [gx, gy, col] of part.glow) {
       c.glow.fillStyle = col;
-      c.glow.fillRect(px + (L.flip ? part.x1 - 1 - gx : gx - part.x0), py + gy - part.y0 - lifted(part), 1, 1);
+      const [lx, ly] = legAt(part, gy);
+      c.glow.fillRect(px + lx + (L.flip ? part.x1 - 1 - gx : gx - part.x0), py + ly + gy - part.y0, 1, 1);
     }
   }
   if (p.flash > 0) {
