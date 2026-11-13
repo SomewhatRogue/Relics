@@ -1,4 +1,5 @@
 /** Relic: Wickhold, the Training Yard and runs. The rooms run here in the browser (solo is a party of one). */
+import { store } from './save';
 import { normName } from '../shared/names';
 import { claimName } from './names';
 import { Trial } from './trial';
@@ -226,7 +227,8 @@ const under = input.touch ? new UnderButtons() : null;
 const uncover = new Uncover();
 const title = new Title(game, () => undefined, recovery);
 // Heroes made before names were held (2026-11-13) take theirs now, where nobody has it (client/names.ts).
-for (const h of game.save.heroes) void claimName(normName(h.name), h.id);
+// One whose name another hero already holds is asked for a new one on the title (Kyle, 2026-11-13).
+for (const h of game.save.heroes) void claimName(normName(h.name), h.id).then((r) => r === 'taken' && ((h.rename = true), store(game.save)));
 // Trying a class from its page (trial.ts): DONE comes back to that page.
 const trial = new Trial(game, (c, look) => title.showClass(c, look));
 title.onTry = (c, look) => trial.start(c, look);

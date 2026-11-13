@@ -169,6 +169,32 @@ export class Title {
     if (this.g.create(this.pick, name, this.look, id) >= 0) (skip && this.g.skipWood(), this.hide());
   }
 
+  /** A hero whose name another hero holds: a new one before it plays (Kyle, 2026-11-13). */
+  private renameView(i: number): void {
+    const h = this.g.save.heroes[i];
+    this.pick = h.cls;
+    this.el.innerHTML = `<div class="tcard"><h1>RELIC</h1><div class="sub">A NEW NAME</div><div class="stop" style="justify-content: center">${face(h.cls, h.look)}</div>` +
+      `<p class="lede">Another hero already goes by ${esc(h.name)}. Pick a new name for yours.</p>` +
+      `<label class="name">NAME <input maxlength="12" value="${this.free[0] ?? ''}" autocomplete="off" spellcheck="false"></label>` +
+      `<button data-newname class="ghost">NEW NAME</button><p class="nameerr" role="status"></p>` +
+      `<button data-rename="${i}" class="primary wide">KEEP THIS NAME</button><button data-back class="ghost wide">BACK</button></div>`;
+    this.fillNames();
+  }
+  private async rename(i: number): Promise<void> {
+    const h = this.g.save.heroes[i], box = this.el.querySelector('label.name input') as HTMLInputElement | null;
+    if (!h || !box || this.claiming) return;
+    const name = normName(box.value);
+    if (!NAME_OK.test(name)) return this.nameSays('Two to twelve letters.');
+    if (this.g.save.heroes.some((o) => o !== h && normName(o.name) === name)) return this.nameSays('One of your heroes has that name.');
+    this.claiming = true;
+    const got = await claimName(name, h.id);
+    this.claiming = false;
+    if (got === 'taken') return (this.free = this.free.filter((n) => n !== name)), this.nameSays('Someone has that name. Try another.');
+    Object.assign(h, { name, rename: false });
+    this.g.choose(i);
+    this.hide();
+  }
+
   /** Redraw without losing a name the player has typed. */
   private keepName(redraw: () => void): void {
     const typed = (this.el.querySelector('input') as HTMLInputElement | null)?.value;
@@ -183,6 +209,8 @@ export class Title {
     const d = b.dataset;
     if (this.inPanel) return this.panel?.click(d);
     if (d.recover !== undefined && this.panel) return (this.inPanel = true), this.panel.open(), void (this.el.innerHTML = this.panel.html());
+    if (d.play !== undefined && this.g.save.heroes[Number(d.play)]?.rename) return this.renameView(Number(d.play));
+    if (d.rename !== undefined) return void this.rename(Number(d.rename));
     if (d.play !== undefined) return this.g.choose(Number(d.play)), this.hide();
     if (d.wood !== undefined) return this.g.choose(Number(d.wood)), this.g.startWood(true), this.hide();
     if (d.skipwood !== undefined) return void this.begin(true);

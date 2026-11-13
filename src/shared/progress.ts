@@ -118,6 +118,8 @@ export interface Profile {
   wish: boolean;
   /** Dice games played (seeds the next roll). */
   dice: number;
+  /** Its name turned out to be another hero's (api/names.ts): asked for a new one before it plays. */
+  rename?: boolean;
   /** The last few jobs this hero has been paid for (client/jobbank.ts): a job is never paid twice. */
   paid?: string[];
   /** Made, or brought over, since each class's own button (shared/signs.ts, shared/oldskills.ts). */
