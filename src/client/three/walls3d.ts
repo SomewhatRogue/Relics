@@ -18,13 +18,17 @@ import { putBoxes } from './pieces3d';
 import { fence3d } from './fence3d';
 import { post3d } from './posts3d';
 import { isPost } from '../postkind';
+import { gate3d } from './gate3d';
 
 export function flatBlock(b: Block, group: THREE.Group, fires: [number, number, number, number][]): THREE.Group {
   const r = new Seed(Math.round(b.x * 29 + b.y * 13 + 3)), L = LOOK[b.kind], B = new Boxes();
   const x0 = b.x, x1 = b.x + b.w, z0 = b.y, z1 = b.y + b.h, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
   const alight = ((b.burning ?? -1) >= 0 || b.smoulder) && !b.ruined, k = b.ruined || alight ? 0.4 : 1;
   const wall = jit(hex(L.wall), 0, r), roof = hex(L.roof), dk = (c: number) => new THREE.Color(c).multiplyScalar(k).getHex();
-  if (b.ruined && b.kind !== 'jetty') {
+  if (b.kind === 'gate') {
+    // An instance's gate, shut or hauled up (open is `ruined`, so it comes before the ruin).
+    gate3d(B, b);
+  } else if (b.ruined && b.kind !== 'jetty') {
     for (let i = 0; i < Math.max(3, b.w * b.h); i++) B.c(x0 + r.next() * b.w, 0.05, z0 + r.next() * b.h, 0.3, 0.1, 0.12, 0x141012, r.next() * 3);
     for (let i = 0; i < 3; i++) fires.push([x0 + r.next() * b.w, 0.06, z0 + r.next() * b.h, 0.25]);
   } else if (b.kind === 'fence') {

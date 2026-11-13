@@ -343,3 +343,12 @@ The plan, one class at a time so Kyle can play each against the old ones:
   lane. Grass round each, a green verge west of the square, and under each a dappled shade (soil `shade`, a
   darkening over whatever's there, not a material). The floor painting is shared, so both views have it.
   mend.test.ts now expects the square paved and washing to take off mud and earth. (Claude Opus 5.5)
+
+## 2026-11-13: what the 2.5D view was missing
+
+- Kyle asked what's missing in 3D. Checked every round, block, hang, prop, mark and grim kind against the 2.5D
+  code: hangs, marks, grims and soil come through the shared floor and back-wall painting, foes and heroes are
+  the same cards, every round and prop kind has its own build. One gap: an instance's gate between stretches
+  fell to the plain box, and once opened (`ruined`) to a burnt ruin with flames. three/gate3d.ts builds it as
+  gatedraw.ts paints it: posts and a lintel, timbers and iron bands shut, hauled up under the lintel open.
+  (Claude Opus 5.5)
