@@ -125,3 +125,7 @@ From 2026-11-12. Spec: docs/design/town-quests.md. Newest at the bottom. Sign ea
   deepest floor a hero has reached, hidden at the trainer till then; a bar for "real good" (a new verb,
   changes a party's fight, of the Deep, readable on a phone, one built and played first); two candidates
   a class for Kyle to pick; floor 20 proposed. Not built; meant for its own chat. (Claude Opus 5.5)
+- Deep skills, Kyle: a fully new extra skill on its own button (stacks; so a long wait between uses);
+  the Rogue's is a samurai cut (stance, one long slash, the blade put away, then everything behind takes
+  its massive cut at once); the Healer's summons a holy warrior who fights at the party's side (the
+  Healer's candidates were the weakest). In the spec; the other three still to pick. (Claude Opus 5.5)
