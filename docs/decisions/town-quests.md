@@ -50,3 +50,10 @@ From 2026-11-12. Spec: docs/design/town-quests.md. Newest at the bottom. Sign ea
   stick. Your own trainer ticks theirs on talking (a Healer's cold censer included) and says their
   first-visit line that once. Two tests that expected a full javelin on arrival now expect the spent
   one (`tests/wood.test.ts`, `tests/relicchurch.test.ts`). (Claude Opus 5.5)
+- **Slice 5 in:** the trainer's SKILLS track (and the knack tree's, away from the trainer) shows only the
+  skills a hero could learn at their level now, and those they know; the rest aren't shown at all. The
+  track's line still says when the next opens (NEXT AT LEVEL n), and CARRY ONE only shows over two or
+  more. Filtered in `client/upgrades.ts` (the screen), not `shared/trainrows.ts` (the rows stay whole
+  for the rules). The level-up quest was in from slice 1: a level that opens a class skill you don't
+  know puts A NEW SKILL on the goal line and the mark on your trainer (or their hall's door) till you
+  talk to them. Moves and stats rows are as they were (the spec says skills). (Claude Opus 5.5)

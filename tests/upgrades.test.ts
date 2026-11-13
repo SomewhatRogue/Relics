@@ -48,7 +48,8 @@ describe('tiles', () => {
     const skills = upgradeTabs(p, at)[0].tracks[0];
     expect(skills.steps).toHaveLength(1);
     expect(skills.steps[0].fork).toBe('CARRY ONE');
-    expect(skills.steps[0].tiles.map((t) => t.state)).toEqual(['buy', 'locked', 'locked']);
+    // (The third, at level 7, isn't shown at level 5 at all: town quests, Kyle 2026-11-12.)
+    expect(skills.steps[0].tiles.map((t) => t.state)).toEqual(['buy', 'locked']);
     expect(skills.steps[0].tiles[1].lock).toBe('NEEDS SHIELD CHARGE FIRST');
     expect(learnLesson(p, 'skill')).toBe(true);
     const [a, b] = upgradeTabs(p, at)[0].tracks[0].steps[0].tiles;
@@ -58,6 +59,16 @@ describe('tiles', () => {
     const [, c] = upgradeTabs(p, at)[0].tracks[0].steps[0].tiles;
     expect(c).toMatchObject({ state: 'owned', act: 'carry' });
     expect(c.current).toBeFalsy();
+  });
+
+  it("skills a hero can't get at their level aren't shown, not even greyed; the line says when the next opens", () => {
+    const low = upgradeTabs(hero('WARRIOR', 1, 0), at)[0].tracks[0];
+    expect(low.steps).toEqual([]);
+    expect(low.sum).toContain('NEXT AT LEVEL 3');
+    const three = upgradeTabs(hero('ROGUE', 3, 0), at)[0].tracks[0];
+    expect(three.steps[0].tiles).toHaveLength(1);
+    expect(three.steps[0].fork).toBe('');
+    expect(three.sum).toContain('NEXT AT LEVEL 5');
   });
 
   it('knacks: the two on offer are a fork, PICK ONE, taken only out of a fight; later steps say what they need', () => {

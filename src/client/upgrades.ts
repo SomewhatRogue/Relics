@@ -66,11 +66,13 @@ const single = (tiles: UpTile[]): UpStep[] => tiles.map((t) => ({ tiles: [t] }))
 const nextAt = (rs: TrainRow[]) => Math.min(...rs.filter((r) => r.state === 'locked').map((r) => r.level), 99) % 99;
 const sumOf = (rs: TrainRow[], done: (r: TrainRow) => boolean) => `${rs.filter(done).length} OF ${rs.length}` + (nextAt(rs) ? ` &middot; NEXT AT LEVEL ${nextAt(rs)}` : '');
 
-/** The skills: the class's three, CARRY ONE, the one carried marked; and the skill's recharge ranks. */
+/** The skills: those open at this level of the class's three, CARRY ONE, the one carried marked; and the skill's recharge ranks. */
 function skillsTab(p: Profile, rows: TrainRow[]): UpTrack[] {
   const choices = SKILL_CHOICES[p.cls], known = choices.filter((r) => knowsSkill(p, r));
   const carried: RelicId = p.skill && known.includes(p.skill) ? p.skill : known[0] ?? CLASS_SKILL[p.cls];
-  const skills = rows.filter((r) => r.group === 'skills');
+  // Only the skills this hero could learn at their level now, and those they know: the rest aren't shown at
+  // all, not greyed (Kyle, 2026-11-12, town quests). The track's line still says the level the next opens at.
+  const all = rows.filter((r) => r.group === 'skills'), skills = all.filter((r) => !(r.skill && r.state === 'locked'));
   const tiles = skills.map((r) => {
     const t = rowTile(r);
     return r.skill && knowsSkill(p, r.skill) ? { ...t, state: 'owned' as const, badge: UPW.owned, act: r.skill === carried ? '' as const : 'carry' as const } : t;
@@ -78,7 +80,7 @@ function skillsTab(p: Profile, rows: TrainRow[]): UpTrack[] {
   const carryKey = known.length ? skills.find((r) => r.skill === carried)?.key : undefined;
   const drill = rows.find((r) => r.key === 'drill:skill');
   return [
-    { id: 'skills', title: 'SKILLS', sum: sumOf(skills, (r) => !!r.skill && knowsSkill(p, r.skill)), kind: 'track', steps: [{ tiles: markFork(tiles, carryKey, false, UPW.carrying), fork: UPW.carryOne }], note: known.length > 1 ? UPW.carryNote : undefined },
+    { id: 'skills', title: 'SKILLS', sum: sumOf(all, (r) => !!r.skill && knowsSkill(p, r.skill)), kind: 'track', steps: tiles.length ? [{ tiles: markFork(tiles, carryKey, false, UPW.carrying), fork: tiles.length > 1 ? UPW.carryOne : '' }] : [], note: known.length > 1 ? UPW.carryNote : undefined },
     ...(drill ? [{ id: 'skilldrill', title: drill.name, sum: `${drill.rank} OF ${drill.max}`, kind: 'grid' as const, steps: [{ tiles: [rowTile(drill)] }] }] : []),
   ];
 }
