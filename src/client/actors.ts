@@ -1,4 +1,5 @@
 /** Drawing a hero: the class's body, the weapon in hand, the dodge, charge and stun. */
+import { shieldSprite } from './shieldart';
 import { CHARGE, NETTER, WARD, WEAPONS, WANT } from '../shared/tuning';
 import { drawNetOn } from './foedraw';
 import { drawHoistRope } from './wooddraw';
@@ -142,7 +143,7 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
   const snap = h.weapon === 'sword' && (pz.phase === 'release' || pz.phase === 'contact');
   const shieldAt: [number, number] = idl?.shield ? [bx + Math.round(idl.shield[0] * HS), by + Math.round(idl.shield[1] * HS)] : h.blocking ? [bx + mid + Math.round(h.fx * hs(6)), gy - hs(7) + low + Math.round(h.fy * hs(4))] : [bx + mid - side * hs(4), gy - hs(6) + low];
   const drawGear = () => {
-    if (h.weapon === 'sword') blit(c, SPRITES.shield, shieldAt[0], shieldAt[1] + hs(4), false, snap ? 0.85 : 0);
+    if (h.weapon === 'sword') blit(c, h.shieldLook ? shieldSprite(h.shieldLook) : SPRITES.shield, shieldAt[0], shieldAt[1] + hs(4), false, snap ? 0.85 : 0);
     drawWeapon(c, hw, px, py, p);
     if (h.act === 'throw' && h.actT < 0.2) {
       const a = Math.atan2(h.fy, h.fx) + Math.PI;

@@ -274,6 +274,8 @@ export interface Hero extends Body {
   /** A Ranger's hound as its player chose it with Maeve (shared/houndlook.ts): breed, coat, white, name.
    *  Drawing only; the room never reads it, so every hound fights the same. */
   houndLook?: import('../shared/houndlook').HoundLook;
+  /** A Warrior's shield as chosen at the barracks (shared/shieldlook.ts). Drawing only. */
+  shieldLook?: import('../shared/shieldlook').ShieldLook;
   /** In a party: down and waiting to be picked up (`pickT` so far), or out until the job ends. */
   bleeding?: boolean;
   out?: boolean;

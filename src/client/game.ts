@@ -51,6 +51,7 @@ import { NO_INTENT, knows, type FightEvent, type Hero, type Intent, type Learned
 import { players } from '../sim/party';
 import { load, store, type Save } from './save';
 import { fitHound, nameTrouble, type HoundLook } from '../shared/houndlook';
+import { fitShield, type ShieldLook } from '../shared/shieldlook';
 import { treasure } from '../shared/treasure';
 import { makeRelic, relicMax, type RelicItem } from '../shared/relicitems';
 import { wonRelics } from '../shared/relicaward';
@@ -83,6 +84,8 @@ import { relicBack } from '../sim/deepmarks';
 
 /** A hero's hound as the profile has it (a Ranger's; nobody else has one). */
 const houndOf = (p: Profile): HoundLook | undefined => (p.cls === 'RANGER' ? fitHound(p.hound, p.id) : undefined);
+/** A Warrior's shield as the profile has it. */
+const shieldOf = (p: Profile): ShieldLook | undefined => (p.cls === 'WARRIOR' ? fitShield(p.shield) : undefined);
 
 /** Seconds the screen takes to go dark after a lost job, before town. */
 export const FADE_OUT = 2.4;
@@ -311,6 +314,16 @@ export class Game {
     const el = [...(elementTaught(this.wood) ? ['element'] : []), ...(signTaught(this.wood) ? ['sign'] : []), ...(this.wood.bitter ? ['potion'] : [])];
     return this.wood.stage >= 5 ? ['attack', 'roll', 'block', 'relic', 'potion', 'grab', ...el] : [...lessonOf(this.wood).moves.filter((m) => m !== 'grab' || this.wood!.stage > 0 || this.wood!.more), ...el];
   }
+  /** Your shield as chosen with Master Cole (shieldui.ts): kept on the hero and shown at once, friends
+   *  hearing it with your look (townpresence.ts). False if this hero isn't a Warrior. */
+  chooseShield(look: ShieldLook): boolean {
+    const p = this.profile;
+    if (p.cls !== 'WARRIOR') return false;
+    p.shield = fitShield(look);
+    if (this.hero) this.hero.shieldLook = { ...p.shield };
+    store(this.save);
+    return true;
+  }
   /** Your hound as chosen with Maeve (houndui.ts): kept on the hero, and your hero shows it at once
    *  (friends hear it with your look: townpresence.ts, and a party's hero). Its name must pass the chat
    *  filter; false (nothing changed) if it doesn't, or this hero has no hound. */
@@ -381,6 +394,7 @@ export class Game {
     h.deepSkill = deepSkillFor(p);
     h.look = p.look ?? 0;
     h.houndLook = houndOf(p);
+    h.shieldLook = shieldOf(p);
     // Your skill in hand, or (not yet taught it) the relic you carry.
     h.relic = knows(h, 'skill') ? h.relics[0] : (h.relics[1] ?? h.relics[0]);
     for (const r of h.relics) h.augments[r] = p.augments[r] ?? '';

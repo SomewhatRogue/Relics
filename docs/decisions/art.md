@@ -378,3 +378,18 @@ The plan, one class at a time so Kyle can play each against the old ones:
 - Bag icons (itemicons.ts) get a dark outline round whatever's painted, the steel a shade darker, the mace and
   flail heads banded dark and light with a gold collar, so they read as iron, not a white smudge.
 - Drawing only: reach and hit circles unchanged. (Claude Opus 5.5)
+
+## 2026-11-13: a Warrior paints their shield, with Cole
+
+- Kyle: "let warriors customize their shield like hunter dogs can." Built as the hound is: shared/shieldlook.ts
+  (shape heater, round or kite; six colours; a mark: plain, chevron, cross, sash, quarters or the Lantern; gold,
+  silver or iron trim; `fitShield`, packed to four numbers), `Profile.shield` (save.ts fits it, Warriors only),
+  `Hero.shieldLook` (game.ts; `chooseShield`), sent to friends in the town's `me` word as `sh` (townpresence.ts,
+  townfolk.ts unpacks it); a party's hero carries it as a field. shieldart.ts makes each look's sprite once
+  (rim and mark in the trim's metal, the field lit from the left, a round shield's boss); actors.ts holds it up,
+  so the 2.5D cards have it too. shieldui.ts: YOUR SHIELD on Master Cole's trainer panel, the hound panel's
+  rows and look, the shield large as it's picked. tests/shieldlook.test.ts.
+- Lore keeper: goblins carry cleavers, not axes; COLOUR, MARK and SASH for field, device and bend; a heraldic
+  cross is fine (the church's sign is the Lantern, never a cross). New for the bible if Kyle wants it: Warriors
+  can paint the Last Lantern on a shield as a mark, cosmetic only. Then the line editor (Cole leans on *still*). Looks only: every shield
+  blocks the same. (Claude Opus 5.5)

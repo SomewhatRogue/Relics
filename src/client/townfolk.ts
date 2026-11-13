@@ -29,6 +29,7 @@ import { HERO, WEAPONS, type WeaponId } from '../shared/tuning';
 import { RelaySocket, type RelayMsg } from './relay';
 import { Pace, RECKON, heardV, reckoned, type Sent } from './reckon';
 import { unpackHound, type PackedHound } from '../shared/houndlook';
+import { unpackShield, type PackedShield } from '../shared/shieldlook';
 import { isPastime, type PastimeId } from '../shared/pastimes';
 import { parkOf, setPark } from './parked';
 
@@ -47,7 +48,7 @@ export const AWAY = { hidden: hook('hide', 60), idle: hook('idle', 180), parked:
 export const idleLimit = (parked: boolean, party: boolean) => (party ? Infinity : parked ? AWAY.parked : AWAY.idle);
 
 /** One player about themselves: name, weapon, the place they're in, and x, y, facing, moving. */
-export interface Me { n: string; w: string; l?: number; /** A Ranger's hound: breed, coat, white, name (shared/houndlook.ts). */ d?: PackedHound; at: string; p: [number, number, number, number, number]; pt?: unknown; /** Velocity, tiles a second. */ v?: [number, number]; /** Parked at a pastime (fishing, the butts): said once, then nothing till it's over (shared/pastimes.ts). */ g?: PastimeId; /** A new hero's runner out (runner.ts), for the others in the street to see (runnerecho.ts). */ r?: RunnerWord }
+export interface Me { n: string; w: string; l?: number; /** A Ranger's hound: breed, coat, white, name (shared/houndlook.ts). */ d?: PackedHound; /** A Warrior's shield: shape, field, device, trim (shared/shieldlook.ts). */ sh?: PackedShield; at: string; p: [number, number, number, number, number]; pt?: unknown; /** Velocity, tiles a second. */ v?: [number, number]; /** Parked at a pastime (fishing, the butts): said once, then nothing till it's over (shared/pastimes.ts). */ g?: PastimeId; /** A new hero's runner out (runner.ts), for the others in the street to see (runnerecho.ts). */ r?: RunnerWord }
 type Said = Me & { k: 'me' | 'hi' };
 interface Folk { hero: Hero; to: [number, number]; v: [number, number]; at: string; heard: number; pt?: unknown; run?: { w: RunnerWord; heard: number } }
 
@@ -232,7 +233,7 @@ export class Townfolk {
     f.run = Array.isArray(r) && r.length === 5 && r.every((v) => typeof v === 'number' && isFinite(v)) && r[0] >= 0 && r[0] < 5 && r[3] >= 0 && r[3] <= 2 && r[4] >= 0 && r[4] < 120 ? { w: r as RunnerWord, heard: this.now } : undefined;
     // Parked at a pastime, drawn there at it (parked.ts); a word without it, back.
     setPark(f.hero, isPastime(d.g) ? d.g : null);
-    Object.assign(f.hero, { weapon, look: typeof d.l === 'number' ? Math.max(0, Math.min(2, Math.floor(d.l))) : 0, fx, fy, moving: !!moving, tag: String(d.n ?? '').toUpperCase().replace(NAME, '').slice(0, 14) || 'STRANGER', houndLook: d.d === undefined ? f.hero.houndLook : unpackHound(d.d, m.from) });
+    Object.assign(f.hero, { weapon, look: typeof d.l === 'number' ? Math.max(0, Math.min(2, Math.floor(d.l))) : 0, fx, fy, moving: !!moving, tag: String(d.n ?? '').toUpperCase().replace(NAME, '').slice(0, 14) || 'STRANGER', houndLook: d.d === undefined ? f.hero.houndLook : unpackHound(d.d, m.from), shieldLook: d.sh === undefined ? f.hero.shieldLook : unpackShield(d.sh) });
     // Someone new: tell them where you are, just them.
     if (d.k === 'hi') this.tell(m.from, 'me');
   }

@@ -12,6 +12,7 @@
 import type { Game } from './game';
 import type { Me } from './townfolk';
 import { packHound } from '../shared/houndlook';
+import { packShield } from '../shared/shieldlook';
 import { runner } from './runner';
 
 /** Is this a place others can be in with you? */
@@ -24,10 +25,10 @@ export function presence(g: Game, name: string): Me | null {
   const parked = g.mode === 'pastime' && g.pastime ? g.pastime : null;
   const h = sharedPlace(g) || parked ? g.hero : null;
   if (!h) return null;
-  if (parked) return { n: name, w: h.weapon, l: h.look ?? 0, ...(h.houndLook ? { d: packHound(h.houndLook) } : {}), at: g.room.map.name, p: [h.x, h.y, h.fx, h.fy, 0], g: parked };
+  if (parked) return { n: name, w: h.weapon, l: h.look ?? 0, ...(h.houndLook ? { d: packHound(h.houndLook) } : {}), ...(h.shieldLook ? { sh: packShield(h.shieldLook) } : {}), at: g.room.map.name, p: [h.x, h.y, h.fx, h.fy, 0], g: parked };
   // A Ranger's hound goes with the look, packed small (shared/houndlook.ts); it's in what others heard
   // last (townfolk.ts `gist`), so it goes again only when it's changed, never with each step.
   // A new hero's runner, out in the street: the others there see them come and go (runnerecho.ts).
   const r = runner.word(performance.now() / 1000);
-  return { n: name, w: h.weapon, l: h.look ?? 0, ...(h.houndLook ? { d: packHound(h.houndLook) } : {}), at: g.room.map.name, p: [h.x, h.y, h.fx, h.fy, h.moving ? 1 : 0], ...(r ? { r } : {}) };
+  return { n: name, w: h.weapon, l: h.look ?? 0, ...(h.houndLook ? { d: packHound(h.houndLook) } : {}), ...(h.shieldLook ? { sh: packShield(h.shieldLook) } : {}), at: g.room.map.name, p: [h.x, h.y, h.fx, h.fy, h.moving ? 1 : 0], ...(r ? { r } : {}) };
 }

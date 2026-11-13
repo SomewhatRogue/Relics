@@ -119,6 +119,8 @@ export interface Profile {
   look?: number;
   /** A Ranger's hound: breed, coat, white and name, chosen with Maeve at the lodge (shared/houndlook.ts). Cosmetic. */
   hound?: HoundLook;
+  /** A Warrior's shield: shape, field, device and trim, chosen with Master Cole at the barracks (shared/shieldlook.ts). Cosmetic. */
+  shield?: import('./shieldlook.js').ShieldLook;
   /** Elements the relic-wright has fitted to this hero's skill and relics. */
   augments: Partial<Record<RelicId, Augment>>;
   runs: number;

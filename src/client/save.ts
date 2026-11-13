@@ -14,6 +14,7 @@ import { fitRelics } from '../shared/relicitems';
 import { renameKits } from '../shared/oldkits';
 import { fitOldSkills } from '../shared/oldskills';
 import { fitHound } from '../shared/houndlook';
+import { fitShield } from '../shared/shieldlook';
 import { fitNoParry } from '../shared/oldparry';
 import { fitFishRecord } from '../shared/fishing';
 import { fitRangeRecord } from '../shared/range';
@@ -55,6 +56,9 @@ const hero = (old: Partial<Profile>): Profile => {
   // A Ranger's hound (shared/houndlook.ts): heroes from before the choice get the wolfhound and a name.
   if (cls === 'RANGER') out.hound = fitHound(p.hound, out.id);
   else delete out.hound;
+  // A Warrior's shield (shared/shieldlook.ts): heroes from before the choice carry the red heater.
+  if (cls === 'WARRIOR') out.shield = fitShield(p.shield);
+  else delete out.shield;
   // Relics before they had charge: each kind owned becomes a full plain relic (shared/relicitems.ts).
   Object.assign(out, fitRelics(p as never, out.xp * 31 + out.runs + 7));
   // Heroes made before the prologue existed don't have to play it.
