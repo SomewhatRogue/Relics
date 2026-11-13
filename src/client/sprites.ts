@@ -187,6 +187,19 @@ const char = (parts: Part[]): Part[] => parts.map((p, i) => [...p.slice(0, -1), 
 
 export const HEROES = Object.fromEntries(Object.keys(LOOKS).map((k) => [k, heroLook(k as Cls)])) as Record<Cls, HeroSprites>;
 
+/** The heater shield's pixels: each row's span narrowing to the point, the rim round its edge, the chevron in gold. */
+function shieldParts(): Part[] {
+  const span = [[0, 11], [0, 11], [0, 11], [0, 11], [0, 11], [0, 11], [0, 11], [0, 11], [0, 11], [1, 10], [1, 10], [2, 9], [3, 8], [4, 7], [5, 6]];
+  const out: Part[] = [];
+  span.forEach(([a, b], y) => {
+    for (let x = a; x <= b; x++) {
+      const rim = y === 0 || x === a || x === b || y === span.length - 1, chev = Math.abs(Math.abs(x - 5.5) - (9.5 - y)) < 1.1 && y >= 4 && y <= 10;
+      out.push(['p', x, y, rim ? (x <= 5 || y === 0 ? '#cfd6dc' : '#8a929c') : chev ? (x <= 5 ? '#ecc860' : '#c8962e') : x <= 3 ? '#9a2a22' : '#7a1e1a']);
+    }
+  });
+  return out;
+}
+
 export const SPRITES = {
   // The plain butcher at 1.5x (butcherparts.ts; a named one's own look is made in foes.ts).
   butcherDown: makeSprite(27, 33, butcherParts(PLAIN_BUTCHER, false)),
@@ -237,8 +250,9 @@ export const SPRITES = {
   stump: grown(9, 6, [['r', 1, 1, 7, 5, '#4a3420'], ['r', 1, 0, 7, 2, '#8a6a3a'], ['p', 4, 1, '#6b4a2b'], ['r', 3, 1, 3, 1, '#7a5a34'], ['p', 2, 2, '#5a3d22'], ['p', 6, 2, '#5a3d22'], ['p', 4, 1, '#5a3d22']]),
   dummy: grown(12, 17, dummyBase),
   swingDummy: grown(12, 17, [...dummyBase, ['r', 2, 9, 8, 1, '#a33a2a'], ['p', 5, 2, '#141218'], ['p', 7, 2, '#141218']]),
-  // The Warrior's shield, at the hero's 1.5x: planks, an iron rim top and bottom, a boss.
-  shield: makeSprite(8, 10, [['r', 0, 0, 8, 10, '#7a5230'], ['r', 2, 1, 1, 8, '#66442a'], ['r', 5, 1, 1, 8, '#66442a'], ['r', 0, 0, 8, 1, '#9aa3ad'], ['r', 0, 9, 8, 1, '#9aa3ad'], ['r', 3, 4, 2, 2, '#cfd6dc'], ['p', 3, 4, '#eef2f5']]),
+  // The Warrior's shield (Kyle, 2026-11-13: "looks so small"): a heater, steel-rimmed, a red field with a gold
+  // chevron, the left of it catching the light.
+  shield: makeSprite(12, 15, shieldParts()),
   pillar: grown(14, 36, [['r', 2, 4, 10, 28, '#4f4a5c'], ['r', 2, 12, 10, 1, '#3b3746'], ['r', 2, 21, 10, 1, '#3b3746'], ['r', 6, 4, 1, 8, '#3b3746'], ['r', 4, 13, 1, 8, '#3b3746'], ['r', 8, 22, 1, 10, '#3b3746'], ['r', 0, 0, 14, 4, '#5d576b'], ['r', 0, 32, 14, 4, '#3b3746'], ['p', 4, 8, '#3b3746'], ['p', 9, 18, '#3b3746'], ['p', 5, 26, '#3b3746'], ['p', 10, 30, '#6a6478']], 1.5, 2),
   // (Taller since the heroic proportions, 2026-11-12: a stand at their hips; lampsdraw.ts puts its flames.)
   brazier: grown(10, 9, [['r', 4, 4, 2, 5, '#2a2630'], ['r', 1, 8, 8, 1, '#2a2630'], ['r', 0, 1, 10, 4, '#3a3640'], ['r', 1, 0, 8, 1, '#57525e'], ['r', 2, 1, 6, 1, '#7a2a10'], ['p', 2, 2, '#7a7684'], ['p', 7, 2, '#7a7684'], ['p', 4, 1, '#5a2a10'], ['p', 6, 1, '#4a2010'],

@@ -1,12 +1,13 @@
 /**
  * Small pixel pictures for the pack's cells: what kind of thing a piece is at a glance (a blade, a bow,
- * a staff, mail, a ring, a flask), drawn in code on a 12 by 12 grid and kept as images. The cell's
- * border carries its tier's colour; the picture is the same for every tier.
+ * a staff, mail, a ring, a flask), drawn in code on a 12 by 12 grid and kept as images, outlined dark so steel
+ * reads as steel and not a white smudge (Kyle, 2026-11-13). The cell's border carries its tier's colour; the
+ * picture is the same for every tier.
  */
 import { ELEMENT_TRAITS, POTIONS, slotOf, type Item, type PotionId } from '../shared/tuning';
 
 const S = 12;
-const M = '#d8dce6', MD = '#7a8090', W = '#8a5a30', WD = '#5a3a1e', G = '#d9b13a', C = '#9a6a3a';
+const M = '#c4cad4', MD = '#6a7280', W = '#8a5a30', WD = '#5a3a1e', G = '#d9b13a', C = '#9a6a3a';
 export type Paint = (px: (x: number, y: number, c: string) => void, line: (a: number, b: number, c: number, d: number, col: string) => void) => void;
 
 const blade = (len: number, wide: boolean, guard: string): Paint => (px, line) => {
@@ -31,8 +32,8 @@ const ICONS: Record<string, Paint> = {
   wand: (px, line) => { line(2, 10, 8, 4, W); px(9, 3, '#9fe8ff'), px(10, 2, '#fff'), px(11, 1, '#9fe8ff'), px(10, 4, '#9fe8ff'), px(8, 2, '#9fe8ff'); },
   staff: (px, line) => { line(1, 11, 8, 4, W); for (const [x, y] of [[9, 1], [10, 1], [9, 2], [10, 2], [8, 2], [11, 2], [9, 3], [10, 3]]) px(x, y, '#b57aff'); px(9, 1, '#fff'); },
   spellblade: (px, line) => { line(3, 8, 10, 1, W); line(4, 8, 11, 1, '#b57aff'); line(2, 6, 5, 9, M); line(1, 10, 3, 8, WD); px(11, 0, '#fff'); },
-  mace: (px, line) => { line(1, 11, 7, 5, W); for (let y = 1; y < 6; y++) line(6, y, 10, y, y % 2 ? M : MD); px(8, 0, M), px(11, 3, M), px(5, 3, M); },
-  flail: (px, line) => { line(0, 11, 4, 7, W); line(4, 7, 7, 5, MD); for (let y = 2; y < 6; y++) line(7, y, 10, y, M); px(11, 3, M), px(8, 1, M); },
+  mace: (px, line) => { line(1, 11, 6, 6, W); px(2, 10, WD), px(3, 9, WD); px(6, 5, G), px(7, 6, G), px(6, 6, G); for (let y = 1; y < 6; y++) line(7, y - 1 + 1, 10, y, y % 2 ? MD : M); px(8, 0, M), px(11, 3, M), px(6, 2, MD), px(9, 2, '#eef2f5'); },
+  flail: (px, line) => { line(0, 11, 4, 7, W); px(4, 7, G); line(5, 6, 7, 5, MD); for (let y = 2; y < 6; y++) line(7, y, 10, y, y % 2 ? MD : M); px(11, 3, MD), px(8, 1, MD), px(9, 2, '#eef2f5'); },
   censer: (px, line) => { line(2, 0, 6, 4, MD); for (let y = 5; y < 10; y++) line(4, y, 9, y, y === 5 ? G : C); px(6, 7, '#ff9a3c'), px(7, 7, '#ffd27a'), px(5, 10, C), px(8, 10, C); },
   light: (px, line) => tunic(px, line, '#8a5a30', '#5a3a1e'),
   medium: (px, line) => tunic(px, line, '#8a90a0', '#5a6070'),
@@ -53,15 +54,21 @@ export function draw(key: string, paint: Paint): string {
   if (made.has(key)) return made.get(key)!;
   if (typeof document === 'undefined') return '';
   const c = document.createElement('canvas');
-  c.width = c.height = S;
+  // (Two pixels bigger than the grid: a dark outline goes round whatever was painted.)
+  c.width = c.height = S + 2;
   const g = c.getContext('2d');
   if (!g) return '';
-  const px = (x: number, y: number, col: string) => ((g.fillStyle = col), g.fillRect(x, y, 1, 1));
+  const px = (x: number, y: number, col: string) => ((g.fillStyle = col), g.fillRect(x + 1, y + 1, 1, 1));
   const line = (x0: number, y0: number, x1: number, y1: number, col: string) => {
     const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0), 1);
     for (let i = 0; i <= n; i++) px(Math.round(x0 + ((x1 - x0) * i) / n), Math.round(y0 + ((y1 - y0) * i) / n), col);
   };
   paint(px, line);
+  const img = g.getImageData(0, 0, S + 2, S + 2), d = img.data, solid = (x: number, y: number) => x >= 0 && y >= 0 && x < S + 2 && y < S + 2 && d[(y * (S + 2) + x) * 4 + 3] > 0;
+  const ring: [number, number][] = [];
+  for (let y = 0; y < S + 2; y++) for (let x = 0; x < S + 2; x++) if (!solid(x, y) && (solid(x - 1, y) || solid(x + 1, y) || solid(x, y - 1) || solid(x, y + 1))) ring.push([x, y]);
+  g.fillStyle = '#14121a';
+  for (const [x, y] of ring) g.fillRect(x, y, 1, 1);
   const url = c.toDataURL();
   made.set(key, url);
   return url;

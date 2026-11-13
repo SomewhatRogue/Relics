@@ -367,3 +367,14 @@ The plan, one class at a time so Kyle can play each against the old ones:
   its cap, in both views. The flagstones round the dais are paler, their joints softer, so the ring reads against
   the cobbles. In the flat view the dais's lower step is the darkest stone, the upper step paler, the column
   between, so the steps read apart under the Lantern's light. (Claude Opus 5.5)
+
+## 2026-11-13: a bigger shield and blades, steel that reads in the bag
+
+- Kyle: the Warrior's shield "looks so small", ditto swords; the Cleric's mace and weapons looked white in the
+  bag. The shield is a heater now, 12 by 15 (was 8 by 10): steel rim, a red field, a gold chevron, lit from the
+  left (sprites.ts). Swords (held.ts `sword()`): a gold pommel, a bound grip, a broad gold cross, a blade two
+  pixels wide with a bright edge narrowing to its point, a fifth longer; the greatsword the same, wider and
+  longer. The mace: a gripped haft, a gold collar, an iron head with flanges and a spike.
+- Bag icons (itemicons.ts) get a dark outline round whatever's painted, the steel a shade darker, the mace and
+  flail heads banded dark and light with a gold collar, so they read as iron, not a white smudge.
+- Drawing only: reach and hit circles unchanged. (Claude Opus 5.5)

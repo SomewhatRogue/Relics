@@ -145,21 +145,30 @@ function tip(c: Ctx, h: Hero, tx: number, ty: number, el: string): void {
   }
 }
 
+/** A sword along `a` from the hand: pommel, grip, cross, then a blade `len` long (hero units), wider for a greatsword. */
+function sword(g: CanvasRenderingContext2D, ox: number, oy: number, a: number, len: number, guard: number, great = false): void {
+  const ca = Math.cos(a), sa = Math.sin(a), grip = great ? 4 : 2.6;
+  line(g, ox, oy, a, -1.6, -0.8, '#d4a537', 2);
+  line(g, ox, oy, a, -0.8, grip - 0.4, '#4a3420', 2);
+  line(g, ox + ca * (grip - 0.2) * HS, oy + sa * (grip - 0.2) * HS, a + Math.PI / 2, -guard, guard, '#d4a537', 2);
+  line(g, ox, oy, a, grip + 0.6, len - 1.2, '#9aa4ae', great ? 3 : 2);
+  line(g, ox, oy, a, grip + 0.6, len - 1.2, '#eef2f5');
+  line(g, ox, oy, a, len - 1.2, len, '#cfd6dc');
+}
+
 export function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): void {
   const g = c.lit, ox = px + Math.cos(p.a) * p.ext * HS, oy = py + Math.sin(p.a) * p.ext * HS;
   const side = h.fx >= -0.2 ? 1 : -1, el = EL_COL[heldEl(h)];
   if (drawKit(c, h, px, py, ox, oy, p)) {
     // (The Rogue's and Cleric's other kits: heldkits.ts.)
   } else if (h.weapon === 'sword') {
-    line(g, ox, oy, p.a, 2, 12, '#dfe6ec');
-    line(g, ox, oy, p.a, 0, 2, '#d4a537');
+    // An arming sword at the tall heroes' size (Kyle, 2026-11-13: "so small"): a gold pommel, a bound grip,
+    // a broad gold cross, a blade two pixels wide with a bright edge, narrowing to its point.
+    sword(g, ox, oy, p.a, 15, 3);
     // The edge flashes as the blow goes out.
-    if (h.act === 'attack' && h.actT >= currentSwing(h).windup && h.actT < currentSwing(h).windup + 0.08) line(c.glow, ox, oy, p.a, 4, 12, '#ffffff');
+    if (h.act === 'attack' && h.actT >= currentSwing(h).windup && h.actT < currentSwing(h).windup + 0.08) line(c.glow, ox, oy, p.a, 4, 15, '#ffffff');
   } else if (h.weapon === 'greatsword') {
-    line(g, ox, oy, p.a, -2, 2, '#5a3d22');
-    line(g, ox + Math.cos(p.a) * 2.5 * HS, oy + Math.sin(p.a) * 2.5 * HS, p.a + Math.PI / 2, -2, 2, '#d4a537');
-    line(g, ox, oy, p.a, 3, 17, '#b9c1c8', 2);
-    line(g, ox, oy, p.a, 4, 17, '#eef2f5');
+    sword(g, ox, oy, p.a, 21, 4, true);
   } else if (h.weapon === 'spear') {
     line(g, ox, oy, p.a, -7, 13, '#8b6a3a');
     line(g, ox, oy, p.a, 13, 17, '#dfe6ec', 2);
@@ -215,9 +224,15 @@ export function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): vo
       line(c.glow, ox, oy, p.a, 7, 12, p.pull >= 1 ? '#ffffff' : '#ffe9a8', 3);
       c.glow.globalAlpha = 1;
     }
-    line(g, ox, oy, p.a, 0, 8, '#5a3d22');
-    line(g, ox, oy, p.a, 8, 11, '#9aa3ad', 3);
-    line(g, ox + Math.cos(p.a) * 9.5 * HS, oy + Math.sin(p.a) * 9.5 * HS, p.a + Math.PI / 2, -2.5, 2.5, '#cfd6dc');
+    // A flanged mace, heavier (2026-11-13): a gripped haft, a gold collar, an iron head with flanges and a spike.
+    line(g, ox, oy, p.a, -1, 9, '#5a3d22', 2);
+    line(g, ox, oy, p.a, 0, 2, '#3a2a1a', 2);
+    line(g, ox, oy, p.a, 9, 9.6, '#d4a537', 3);
+    line(g, ox, oy, p.a, 9.8, 13.4, '#6a727c', 4);
+    line(g, ox, oy, p.a, 10, 13.2, '#aab2be', 2);
+    const ma = Math.cos(p.a), mb = Math.sin(p.a);
+    for (const r of [10.6, 12.4]) line(g, ox + ma * r * HS, oy + mb * r * HS, p.a + Math.PI / 2, -2.4, 2.4, '#8a929c');
+    line(g, ox, oy, p.a, 13.4, 14.8, '#cfd6dc');
     // The censer in the off hand, a coal lit from the Last Lantern swinging in it.
     censer(c, px, py, side);
   } else {
