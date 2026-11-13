@@ -81,7 +81,8 @@ describe('Fenmere', () => {
       h.weapon = k;
       let i = 1, seq = 0, worst = 0;
       const pts = [...MAIN.slice(0, 10), ...SIDES[3], ...[...SIDES[3]].reverse(), ...MAIN.slice(10, 14), ...SIDES[2], ...MAIN.slice(17)];
-      for (let n = 0; n < 4000 && i < pts.length; n++) {
+      // (A jump goes back, the shortbow's furthest (2026-11-13): more steps for it.)
+      for (let n = 0; n < 6000 && i < pts.length; n++) {
         const to = pts[i], dx = to.x - h.x, dy = to.y - h.y, l = Math.hypot(dx, dy);
         if (l < 0.6) { i++; continue; }
         // A dodge every so often (a Warrior's and a Healer's do nothing).

@@ -182,8 +182,6 @@ export interface Hero extends Body {
   mendLeft: number;
   /** Wall Brandy: breath comes back faster until then. */
   brandyUntil: number;
-  /** A shortbow's SPRINT runs until then (shared/weapons.ts RANGER_SPRINT). */
-  sprintUntil?: number;
   /** In smoke: goblins can't see you (unless close) until then. */
   hiddenUntil: number;
   /** A chalker's strokes on this hero (sim/chalker.ts), when the last went on, and the pack turned on them until then. Drawn over them on every screen. */
