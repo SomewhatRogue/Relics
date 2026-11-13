@@ -2,8 +2,9 @@
  * The words on each hero's card on the home screen (title.ts), Kyle 2026-11-08: the hero plain across the top,
  * PLAY under it, and the rest (the wood again, deleting a hero) said plainly behind the dots.
  */
+import { coinsHtml } from '../shared/coins';
 export const HOMEW = {
-  line: (cls: string, level: number, gold: number) => `${cls} &middot; LEVEL ${level} &middot; ${gold} GOLD`,
+  line: (cls: string, level: number, gold: number) => `${cls} &middot; LEVEL ${level} &middot; ${coinsHtml(gold)}`,
   more: 'More',
   wood: 'PLAY THE TUTORIAL AGAIN',
   retire: 'DELETE THIS HERO',

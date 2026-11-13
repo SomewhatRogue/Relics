@@ -4,6 +4,7 @@
  * maxed), the forks (CARRY ONE for the skills, PICK ONE for the knacks on offer, and a permanent one as
  * the guard upgrades will be), the detail view's numbers and button, and nothing about the rules changed.
  */
+import { coinsHtml } from '../src/shared/coins';
 import { describe, expect, it } from 'vitest';
 import { newProfile, drillPrice } from '../src/shared/tuning';
 import { learnLesson } from '../src/shared/training';
@@ -20,9 +21,9 @@ describe('tiles', () => {
     const p = hero('WARRIOR', 1, 0);
     expect(tile(p, 'drill:power')).toMatchObject({ state: 'locked', lock: 'NEEDS LEVEL 2', badge: 'NEEDS LEVEL 2', act: '' });
     p.level = 2;
-    expect(tile(p, 'drill:power')).toMatchObject({ state: 'poor', badge: `${drillPrice('power', 0)} GOLD, NOT ENOUGH`, act: '' });
+    expect(tile(p, 'drill:power')).toMatchObject({ state: 'poor', badge: `${coinsHtml(drillPrice('power', 0))}, NOT ENOUGH`, act: '' });
     p.gold = 1000;
-    expect(tile(p, 'drill:power')).toMatchObject({ state: 'buy', badge: `${drillPrice('power', 0)} GOLD`, act: 'buy' });
+    expect(tile(p, 'drill:power')).toMatchObject({ state: 'buy', badge: coinsHtml(drillPrice('power', 0)), act: 'buy' });
     expect(tile(p, 'drill:power').pips).toEqual(['off', 'lock', 'lock', 'lock', 'lock']);
     p.drills = { power: 5 };
     expect(tile(p, 'drill:power')).toMatchObject({ state: 'max', badge: 'MAX' });
@@ -113,7 +114,7 @@ describe('a tile opened', () => {
     expect(d.now).toBe('+5% damage');
     expect(d.after).toBe('+10% damage');
     expect(d.ladder).toHaveLength(5);
-    expect(d.button).toEqual({ label: `RANK 2: ${drillPrice('power', 1)} GOLD`, act: 'buy', on: true });
+    expect(d.button).toEqual({ label: `RANK 2: ${coinsHtml(drillPrice('power', 1))}`, act: 'buy', on: true });
     const away = tileDetail(p, 'drill:power', { atTrainer: false, knacksOpen: true }, { who: 'Master Cole', where: 'the barracks' })!;
     expect(away.button?.on).toBe(false);
     expect(away.note).toBe('Master Cole teaches this at the barracks.');

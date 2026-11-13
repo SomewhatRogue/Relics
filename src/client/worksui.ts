@@ -13,6 +13,7 @@ import type { Panel } from './panels';
 import { line } from './speech';
 import { openStatue } from './statueui';
 import { STATUE_WORDS } from './statuewords';
+import { coinsHtml } from '../shared/coins';
 
 const p = (s: string) => `<p>${s}</p>`;
 const say = (who: string, s: string) => p(`<b>${who}:</b> ${line(`"${s}"`, who)}`);
@@ -30,7 +31,7 @@ export function openWorks(g: Game, panel: Panel, fresh = true): void {
   const html = say('Foreman Judd', FOREMAN.lines[(said - 1 + FOREMAN.lines.length) % FOREMAN.lines.length]) +
     (raid && w.day - raid.day <= RAID_FRESH ? p(MEND_UI.board(raid.day, lossText(raid))) : '') +
     (done.length ? p(`<span class="dim">${MEND_UI.done}: ${done.map((k) => WORKS[k].name).join(', ')}.</span>`) : '') +
-    p(`You have ${pr.gold} gold.`);
+    p(`You have ${coinsHtml(pr.gold)}.`);
   panel.show(TITLE, html, [...open.map((k) => ({
     label: `${WORKS[k].name.toUpperCase()} ${Math.min(workProgress(w, k), WORKS[k].need)}/${WORKS[k].need}`,
     act: () => detail(g, panel, k, again),
@@ -42,7 +43,7 @@ function detail(g: Game, panel: Panel, k: WorkId, back: () => void): void {
   const pr = g.profile, wk = WORKS[k], n = workProgress(g.world, k), again = () => (workDone(g.world, k) ? back() : detail(g, panel, k, back));
   const gear = wk.arms ? pr.bag.filter((it) => giveValue(it) > 0) : [];
   const html = p(`<b>${wk.name}</b>`) + p(`${bar(n, wk.need)} ${Math.min(n, wk.need)} of ${wk.need} ${unit(k)}`) + p(wk.text) +
-    (wk.arms ? p(`<span class="dim">${MEND_UI.gear}</span>`) : '') + (wk.by === 'gold' ? p(`You have ${pr.gold} gold.`) : '');
+    (wk.arms ? p(`<span class="dim">${MEND_UI.gear}</span>`) : '') + (wk.by === 'gold' ? p(`You have ${coinsHtml(pr.gold)}.`) : '');
   const gifts = wk.by === 'gold' ? [...new Set([25, 100].map((x) => Math.min(x, left(g, k))))].map((x) => ({ label: `GIVE ${x}`, primary: true, disabled: pr.gold < x, act: () => (g.fund(k, x), again()) })) : [];
   panel.show(TITLE, html, [...gifts, ...(gear.length ? [{ label: 'GIVE GEAR', act: () => gearFor(g, panel, k, again) }] : []), { label: 'BACK', act: back }]);
 }
@@ -51,7 +52,7 @@ function detail(g: Game, panel: Panel, k: WorkId, back: () => void): void {
 function gearFor(g: Game, panel: Panel, k: WorkId, back: () => void): void {
   const can = g.profile.bag.filter((it) => giveValue(it) > 0);
   panel.show('GIVE GEAR', p(`<b>${WORKS[k].name}</b>`) + p(can.length ? MEND_UI.gear : 'Nothing in your pack the works can use.'), [
-    ...can.map((it) => ({ label: `GIVE ${itemName(it)} (WORTH ${giveValue(it)})`, act: () => (g.giveGear(it, k), workDone(g.world, k) ? back() : gearFor(g, panel, k, back)) })),
+    ...can.map((it) => ({ label: `GIVE ${itemName(it)} (WORTH ${coinsHtml(giveValue(it))})`, act: () => (g.giveGear(it, k), workDone(g.world, k) ? back() : gearFor(g, panel, k, back)) })),
     { label: 'BACK', act: back },
   ]);
 }

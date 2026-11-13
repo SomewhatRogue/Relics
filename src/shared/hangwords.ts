@@ -4,6 +4,7 @@
  * Each line here waits on the lore keeper, then the line editor.
  */
 import type { Debut } from './debut.js';
+import { coinsHtml } from './coins.js';
 
 /** The snarer: staged in Hangman's Wood first (never a fork way's room: `staged` names none that stages it), rare in Greyhollow a week on, common a chapter on. */
 export const SNARE_DEBUT: Debut = { staged: 'quiet', home: 'Greyhollow', from: 60, rare: 7, common: 28, weight: 0.5, zone: 'hangmans' };
@@ -19,7 +20,7 @@ export const WOOD_POST = {
   kind: 'EXPEDITION',
   where: "HANGMAN'S WOOD",
   rooms: 'One wood, about 7 minutes',
-  pays: (n: number) => `${n} gold and a relic off Hempen, more for each job done. Half if you don't get out`,
+  pays: (n: number) => `${coinsHtml(n)} and a relic off Hempen, more for each job done. Half if you don't get out`,
 };
 
 /** The pins and what each job says (GOAL_WORDS takes these). */

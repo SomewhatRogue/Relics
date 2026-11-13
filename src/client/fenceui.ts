@@ -3,6 +3,7 @@
  * SELL QUIETLY, where he quietly buys touched and turning gear out of your pack, cheap and gone for
  * good (shared/fence.ts). Everything else in the pack shows dim with the reason. The words: vendorwords.ts.
  */
+import { coinsHtml } from '../shared/coins';
 import { itemName } from '../shared/tuning';
 import { itemCol } from './uniquelook';
 import { bagSize } from '../shared/bags';
@@ -27,7 +28,7 @@ export const fenceTabs = (on: Tab) => '<div class="tabs">' +
 export function fenceBody(g: Game): string {
   const pr = g.profile, wont = (it: Item) => !nettleTakes(it, pr);
   return `<div class="shop"><p class="dim">${FENCE.about}</p><h3 class="gh">PACK <i>${pr.bag.length} / ${bagSize(pr)}</i></h3>` +
-    grid(pr.bag, bagSize(pr), 'bag', null, undefined, (it) => (wont(it) ? PAWN.no : '+' + fenceValue(it, pr) + 'G'), wont) +
+    grid(pr.bag, bagSize(pr), 'bag', null, undefined, (it) => (wont(it) ? PAWN.no : '+' + coinsHtml(fenceValue(it, pr))), wont) +
     (pr.bag.some(wont) ? `<p class="dim">${FENCE.wont}</p>` : '') + `<p class="dim">${SHOPW.gold(pr.gold)}</p></div>`;
 }
 

@@ -22,6 +22,7 @@ import { relicCol, relicItemIcon } from './relicicons';
 import { RECAPW } from './recapwords';
 import { partyTable } from './recapparty';
 import './recap.css';
+import { coinsHtml } from '../shared/coins';
 
 const p = (s: string) => `<p>${s}</p>`;
 const title = (s: string) => s.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
@@ -29,10 +30,10 @@ const clock = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2,
 
 /** A job not won, by how it ended (Game.finish): driven back, gone early from a party, or cut off from it. */
 const ENDED = {
-  half: 'You keep half the gold. Nobody you freed comes home.',
-  left: "You left early. You keep the gold you picked up, not the job's pay.",
-  cut: "Cut off from your party. You keep the gold you picked up, not the job's pay.",
-  lostCut: 'Cut off, and your party was driven back. You keep half the gold. Nobody you freed comes home.',
+  half: 'You keep half the coin. Nobody you freed comes home.',
+  left: "You left early. You keep the coin you picked up, not the job's pay.",
+  cut: "Cut off from your party. You keep the coin you picked up, not the job's pay.",
+  lostCut: 'Cut off, and your party was driven back. You keep half the coin. Nobody you freed comes home.',
 };
 
 export function showResult(g: Game, panel: Panel): void {
@@ -51,7 +52,7 @@ export function showResult(g: Game, panel: Panel): void {
   ], 'recap') : '';
   // What you came home with.
   const got = labelRows([
-    ['GOLD', String(r.gold)], ['XP', String(r.xp)], ['SAVED', r.won ? String(r.rescued) : ''],
+    ['COIN', coinsHtml(r.gold)], ['XP', String(r.xp)], ['SAVED', r.won ? String(r.rescued) : ''],
     ['LOST', [r.lost ? `${r.lost} to the fire` : '', r.ledoff ? RECAPW.ledoff(r.ledoff) : '', r.netlost ? STAITHE_WORDS.lost(r.netlost) : ''].filter(Boolean).join(', ')],
     [RECAPW.way, r.won ? r.way ?? '' : ''],
     [RECAPW.found, c?.found.join(', ') ?? ''],
@@ -67,7 +68,7 @@ export function showResult(g: Game, panel: Panel): void {
   const dp = r.deep, deepLine = dp && (dp.end === 'out' ? DEEP_WORDS.out(dp.floor) : dp.end === 'dead' ? DEEP_WORDS.lost(dp.floor) : DEEP_WORDS.outEarly(dp.floor));
   const lines = deepLine ? [deepLine] : r.won ? [] : [ENDED[r.half ? (r.how === 'dropped' ? 'lostCut' : 'half') : r.how === 'dropped' ? 'cut' : 'left']];
   if (r.levels) lines.push(`<b>Level ${g.profile.level}.</b> ${title(TRAINERS[g.profile.cls].name)} trains you, at ${TRAINERS[g.profile.cls].where}.`);
-  for (const i of r.sold) lines.push(`No room for the ${itemName(i)}: sold for 20 gold.`);
+  for (const i of r.sold) lines.push(`No room for the ${itemName(i)}: sold for ${coinsHtml(20)}.`);
   if (r.relic) lines.push((r.job.boss && !r.job.exped && r.job.objective !== 'story' ? RELICW.cutOut(r.job.boss, relicName(r.relic)) : RELICW.broughtHome(relicName(r.relic))) + ' ' + (g.profile.relic === r.relic.id ? RELICW.carryHint : RELICW.shelfHint));
   if (r.lit !== undefined) lines.push(RELICW.litLeft(r.lit));
   if (r.won && r.job.objective === 'story') lines.push(`<b>Barrowby's bell rings across the valley.</b> The council sits once enough people are home.`);

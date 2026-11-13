@@ -3,6 +3,7 @@
  * place for the lore keeper and then the line editor. None of it has been through either pass yet.
  */
 import { weighs } from '../shared/fishtune';
+import { coinsHtml } from '../shared/coins';
 
 export const FISHW = {
   who: 'OLD PENNOCK',
@@ -92,9 +93,9 @@ export const ARMW = {
     watch: "That's one of ours. He hauls the gate bar every morning, so his arm's about as thick as your leg, and now and then he'll go for it all at once, so be ready, or he'll have your knuckles on the wood before you've put your cup down.",
     gannet: "Gannet comes round the bar for this, and he doesn't do it often. He hasn't lost at this table since the siege, he says, and he'd know, being the one who holds the stakes.",
   } as Record<string, string>,
-  bet: (n: number) => `BET ${n}`,
+  bet: (n: number) => `BET ${coinsHtml(n)}`,
   free: 'FOR NOTHING',
-  gold: (n: number) => `You have ${n} gold.`,
+  gold: (n: number) => `You have ${coinsHtml(n)}.`,
   back: 'BACK',
   /** At the table. */
   hintTouch: 'HOLD TO BEAR DOWN, LET GO TO EASE OFF. KEEP YOUR GRIP IN THE BAND',
@@ -108,8 +109,8 @@ export const ARMW = {
   won: (name: string) => `You put ${name.toLowerCase()} down.`,
   lost: (name: string) => `${name.charAt(0)}${name.slice(1).toLowerCase()} put you down.`,
   gaveUp: 'You let go, and that counts as losing.',
-  paid: (n: number) => `Gannet pays out ${n} gold.`,
-  kept: (n: number) => `Your ${n} gold goes across the table.`,
+  paid: (n: number) => `Gannet pays out ${coinsHtml(n)}.`,
+  kept: (n: number) => `Your ${coinsHtml(n)} goes across the table.`,
   first: "That's the first time you've beaten them.",
   beaten: "You've beaten them before.",
   rows: { held: 'IN THE BAND', time: 'TIME', bouts: 'BOUTS', wins: 'WINS' },
@@ -128,9 +129,9 @@ export const KNIFEW = {
   board: 'BEST AT THE BOARD',
   empty: "Nobody's on the board yet.",
   offline: 'Only your own rounds show until you play online.',
-  bet: (n: number) => `BET ${n}`,
+  bet: (n: number) => `BET ${coinsHtml(n)}`,
   free: 'JUST THROW',
-  gold: (n: number) => `You have ${n} gold.`,
+  gold: (n: number) => `You have ${coinsHtml(n)}.`,
   /** At the chalk. */
   hintTouch: 'TAP TO THROW WHEN THE POINT IS OVER THE MIDDLE',
   hintMouse: 'CLICK OR PRESS SPACE TO THROW WHEN THE POINT IS OVER THE MIDDLE',
@@ -146,7 +147,7 @@ export const KNIFEW = {
   won: (n: number) => `You beat his ${n}, and he pays you with a face on him.`,
   tie: "You matched his score, and a tie goes to him.",
   lost: (n: number) => `His ${n} stands, and he takes your money.`,
-  paid: (n: number) => `He pays out ${n} gold.`,
+  paid: (n: number) => `He pays out ${coinsHtml(n)}.`,
   early: 'You stopped before your nine were thrown, so the bet is his.',
   posted: 'He chalks it up on the board.',
   again: 'ANOTHER ROUND',

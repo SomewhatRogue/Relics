@@ -10,6 +10,7 @@ import { Rng } from './rng.js';
 import { rollTime } from './timeofday.js';
 import { WOOD_GOALS, WOOD_POST } from './hangwords.js';
 import { FEN_GOALS, FEN_POST } from './fenwords.js';
+import { coinsHtml } from './coins.js';
 
 export const EXPED_BOSSES = ['GRISTLE', 'OLD HOOK', 'SPLITNAIL', 'THE DROVER'];
 
@@ -52,7 +53,7 @@ export function fenmere(day: number): Job {
 }
 
 /** The board's label and what the job's rows say. */
-export const EXPED_BOARD = { kind: 'EXPEDITION', where: 'THE BARROWFIELDS', rooms: 'One big map, about 20 minutes', pays: (n: number) => `${n} gold and treasure, more for each job done. Half if you don't get out` };
+export const EXPED_BOARD = { kind: 'EXPEDITION', where: 'THE BARROWFIELDS', rooms: 'One big map, about 20 minutes', pays: (n: number) => `${coinsHtml(n)} and treasure, more for each job done. Half if you don't get out` };
 
 /** Each job: its pin's name, what to do, and the banner once it's done. */
 export const GOAL_WORDS: Record<GoalKind | SideKind, { pin: string; todo: string; done: string }> = {

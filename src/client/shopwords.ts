@@ -3,6 +3,7 @@
  * place is in one plain line (docs/lore/story-bible.md), who keeps it, and the game's own short words
  * for the list of goods and the card that comes up when you tap one.
  */
+import { coinsHtml } from '../shared/coins';
 export interface Place { name: string; line: string; keeper: string }
 
 export const PLACES = {
@@ -19,7 +20,7 @@ export const PLACES = {
 export const SHOPW = {
   forSale: 'FOR SALE',
   buy: 'BUY',
-  gold: (n: number) => `You have ${n} gold.`,
+  gold: (n: number) => `You have ${coinsHtml(n)}.`,
   belt: (n: number, of: number) => `Belt: ${n} of ${of}.`,
   beltFull: 'Belt full.',
   poor: 'Not enough gold.',

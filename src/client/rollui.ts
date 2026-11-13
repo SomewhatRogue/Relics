@@ -10,6 +10,7 @@ import { SHAME, STAT_NAME, STAT_ORDER, type Profile, type Stats } from '../share
 import type { Board } from '../shared/worldsync';
 import type { HeroClass } from '../shared/tuning';
 import { heroLook } from './sprites';
+import { coinsHtml } from '../shared/coins';
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 type Side = 'brave' | 'unlucky';
@@ -70,6 +71,9 @@ function podium(rows: { cls: HeroClass }[], side: Side): string {
 const picked: Record<Side, keyof Stats | null> = { brave: null, unlucky: null };
 
 /** The board's html for one side: the records' buttons and the one picked. */
+/** The purse stats (counted in copper) shown as coins. */
+const num = (k: keyof Stats, n: number) => (k === 'gold' || k === 'given' ? coinsHtml(n) : String(n));
+
 export function rollHtml(board: Board, me: Profile, side: Side): string {
   const keys = STAT_ORDER.filter((k) => (side === 'unlucky') === SHAME.includes(k));
   const k = picked[side] && keys.includes(picked[side]!) ? picked[side]! : keys[0];
@@ -77,10 +81,10 @@ export function rollHtml(board: Board, me: Profile, side: Side): string {
   const rows = board[k] ?? [], mine = rows.findIndex((r) => r.id === me.id);
   const names = [1, 0, 2].map((i) => {
     const r = rows[i];
-    return `<div class="${r && r.id === me.id ? 'me' : ''}">${r ? `<b>${esc(r.name)}</b><em>${r.n}</em>` : '<i>-</i>'}</div>`;
+    return `<div class="${r && r.id === me.id ? 'me' : ''}">${r ? `<b>${esc(r.name)}</b><em>${num(k, r.n)}</em>` : '<i>-</i>'}</div>`;
   }).join('');
-  const rest = rows.slice(3).map((r, i) => `<li${r.id === me.id ? ' class="me"' : ''}><span>${i + 4}</span><b>${esc(r.name)}</b><small>${CLASS_NAME[r.cls]}</small><em>${r.n}</em></li>`).join('');
-  const you = mine < 0 && me.stats[k] > 0 ? `<p class="you">You: <em>${me.stats[k]}</em></p>` : '';
+  const rest = rows.slice(3).map((r, i) => `<li${r.id === me.id ? ' class="me"' : ''}><span>${i + 4}</span><b>${esc(r.name)}</b><small>${CLASS_NAME[r.cls]}</small><em>${num(k, r.n)}</em></li>`).join('');
+  const you = mine < 0 && me.stats[k] > 0 ? `<p class="you">You: <em>${num(k, me.stats[k])}</em></p>` : '';
   const body = rows.length ? `${podium(rows, side)}<div class="rnames">${names}</div>${rest ? `<ol>${rest}</ol>` : ''}` : `${podium([], side)}<p class="dim">Nobody yet.</p>`;
   return `${chips}<div class="rcards"><div class="rcard${side === 'unlucky' ? ' shame' : ''}"><h4>${STAT_NAME[k]}</h4>${body}${you}</div></div>`;
 }

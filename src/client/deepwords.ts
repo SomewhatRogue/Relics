@@ -4,6 +4,7 @@
  */
 import { shown } from '../shared/shown';
 import { BLESSINGS, BOONS, CURSES } from '../shared/deepmarks';
+import { coinsHtml } from '../shared/coins';
 export const DEEP_WORDS = {
   /** Who sits at the way down (the lore keeper's call). */
   keeper: 'Cobb',
@@ -27,7 +28,7 @@ export const DEEP_WORDS = {
   floor: (n: number) => `The Deep, floor ${n}`,
   checkTitle: (n: number) => `END OF FLOOR ${n}`,
   checkScene: 'Another ladder goes on down, the same grey rungs as the first, and the way up is behind you.',
-  haul: (items: number, gold: number) => `Found below so far: ${items ? `${items} ${items === 1 ? 'piece' : 'pieces'} of gear` : 'no gear'} and ${gold} gold.`,
+  haul: (items: number, gold: number) => `Found below so far: ${items ? `${items} ${items === 1 ? 'piece' : 'pieces'} of gear` : 'no gear'} and ${coinsHtml(gold)}.`,
   checkRules: 'LEAVE: go up and keep everything you found. GO DEEPER: the next floor is worse, and if you die there you lose everything found below.',
   /** Over my hero, GO DEEPER chosen in a party: the rest haven't yet. */
   waiting: 'Waiting for the rest of the party to choose GO DEEPER.',
@@ -88,6 +89,6 @@ export const DEEP_WORDS = {
   /** The boards (shared/deepboard.ts): at the grate and on BEST IN WICKHOLD. */
   boardSolo: 'DEEPEST, ALONE',
   boardParty: 'DEEPEST, WITH A PARTY',
-  boardLine: (floor: number, gold: number) => `floor ${floor}, ${gold} gold`,
-  yourBest: (floor: number, gold: number) => `Your deepest: floor ${floor}, with ${gold} gold.`,
+  boardLine: (floor: number, gold: number) => `floor ${floor}, ${coinsHtml(gold)}`,
+  yourBest: (floor: number, gold: number) => `Your deepest: floor ${floor}, with ${coinsHtml(gold)}.`,
 };

@@ -2,6 +2,7 @@
  * Trading's own words (docs/design/trading.md, step 3; for the lore keeper and the line editor). The game's
  * voice: short, plain, second person. TRADE and ACCEPT are Kyle's (the spec), GONE too (ledger.ts).
  */
+import { coinsHtml } from '../shared/coins';
 export const TRADEW = {
   /** Over your head beside another player in town, and the phone's context button. */
   spot: (name: string) => `TRADE: ${name}`,
@@ -12,8 +13,8 @@ export const TRADEW = {
   mine: 'YOU OFFER',
   pack: 'YOUR PACK',
   nothing: 'Nothing yet.',
-  gold: (n: number) => `${n} gold`,
-  have: (n: number) => `You have ${n} gold.`,
+  gold: (n: number) => coinsHtml(n),
+  have: (n: number) => `You have ${coinsHtml(n)}.`,
   offer: 'OFFER',
   back: 'TAKE BACK',
   accept: 'ACCEPT',

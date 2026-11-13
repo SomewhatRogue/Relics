@@ -14,6 +14,7 @@ import type { Profile } from './progress.js';
 import type { HeroClass } from './weapons.js';
 import { barWords } from './barword.js';
 import { drillNeeds, drillState, hasLesson, lessonState, type Lesson, type TrainState } from './training.js';
+import { coinsHtml } from './coins.js';
 
 /** A pip: a rank you have, one your level allows, one still locked behind a level. */
 export type Pip = 'on' | 'off' | 'lock';
@@ -58,7 +59,7 @@ export interface TrainRow {
 }
 
 const tagFor = (s: TrainState, price: number, level: number, needs: string, lesson: boolean) =>
-  s === 'max' ? (lesson ? 'LEARNED' : 'MAX') : s === 'locked' ? `LEVEL ${level}` : s === 'needs' ? `NEEDS ${needs}` : `${price}g`;
+  s === 'max' ? (lesson ? 'LEARNED' : 'MAX') : s === 'locked' ? `LEVEL ${level}` : s === 'needs' ? `NEEDS ${needs}` : coinsHtml(price);
 
 function lessonRow(p: Profile, l: Lesson): TrainRow {
   const t = TEACHES[l], state = lessonState(p, l), have = state === 'max', first = SKILL_CHOICES[p.cls][0];

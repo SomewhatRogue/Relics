@@ -6,6 +6,7 @@ import type { Fx } from './fx';
 import { EL_COL, EL_LIGHT } from './palette';
 import { toPx } from './world';
 import { shown } from '../shared/shown';
+import { coinCol, coins } from '../shared/coins';
 
 const flash = (fx: Fx, x: number, y: number, r: number, i: number, c: [number, number, number], life = 0.14) =>
   fx.flashes.push({ x, y, r, i, c, life, max: life });
@@ -125,7 +126,7 @@ export function magicFx(fx: Fx, ev: FightEvent, x: number, y: number): void {
       fx.say(x, y - 30, 'BEHIND', '#d8a0ff');
       break;
     case 'gold':
-      if (ev.id === 'me') fx.say(x, y - 26, `+${ev.n} GOLD`, '#ffd27a');
+      if (ev.id === 'me') fx.say(x, y - 26, `+${coins(ev.n)}`, coinCol(ev.n));
       break;
     case 'potion':
       fx.say(x, y - 30, POTIONS[ev.kind].short, POTIONS[ev.kind].col);
@@ -141,14 +142,14 @@ export function magicFx(fx: Fx, ev: FightEvent, x: number, y: number): void {
       }
       break;
     case 'spend':
-      if (ev.n >= 5) fx.say(x, y - 30, `-${ev.n} GOLD`, '#ff9a6a');
+      if (ev.n >= 5) fx.say(x, y - 30, `-${coins(ev.n)}`, '#ff9a6a');
       break;
     case 'ransom':
       fx.say(x, y - 40, 'RANSOMED', '#ff4a3a');
       fx.burst(x, y - 10, 16, ['#d4a537', '#ff4a3a'], 60, true);
       break;
     case 'tooth':
-      fx.say(x, y - 34, 'GOLD TAKEN', '#ff4a3a');
+      fx.say(x, y - 34, 'COIN TAKEN', '#ff4a3a');
       break;
     case 'chained':
       fx.say(x, y - 30, 'CHAINED', '#9aa3ad');

@@ -21,6 +21,7 @@ import { WorldLink } from './worldlink';
 import { throwDice } from './diceanim';
 import { setOutNow } from './setout';
 import { deepBlocks } from './deepbest';
+import { coinsHtml } from '../shared/coins';
 
 let link: WorldLink | null = null;
 /** The page hands over its line to the world server. */
@@ -61,8 +62,8 @@ export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key:
   }
   if (id === 'well') {
     panel.show('THE WELL', p('Old as the town, and the water\'s tasted of copper since the siege. People drop a coin in for luck, Father Odric too.') +
-      p(pr.wish ? 'Your coin is in. Your next job starts lucky.' : `A coin (${SHOP.wish} gold) for luck: +${Math.round((BLESSING.dmgMult - 1) * 100)}% damage and ${Math.round((1 - BLESSING.taken) * 100)}% less damage taken for the first 20 s of your next job.`),
-      pr.wish ? [] : [{ label: `DROP A COIN (${SHOP.wish})`, primary: true, disabled: pr.gold < SHOP.wish, act: () => (g.wish(), again()) }]);
+      p(pr.wish ? 'Your coin is in. Your next job starts lucky.' : `A coin (${coinsHtml(SHOP.wish)}) for luck: +${Math.round((BLESSING.dmgMult - 1) * 100)}% damage and ${Math.round((1 - BLESSING.taken) * 100)}% less damage taken for the first 20 s of your next job.`),
+      pr.wish ? [] : [{ label: `DROP A COIN (${coinsHtml(SHOP.wish)})`, primary: true, disabled: pr.gold < SHOP.wish, act: () => (g.wish(), again()) }]);
     return true;
   }
   if (id === 'bard') {
@@ -78,11 +79,11 @@ export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key:
       if (!r) return again();
       throwDice(panel, 'KNUCKLEBONES', r.you, r.moll, (img) => panel.show('KNUCKLEBONES', img +
         say('Moll', r.won ? (r.you[0] + r.you[1] === r.moll[0] + r.moll[1] ? 'Tie goes to the house. Unless the house knows a fellow crook. Take it, take it.' : 'Well. The bones like you. They\'re fickle bones.') : r.you[0] + r.you[1] === r.moll[0] + r.moll[1] ? 'Tie goes to the house, love. Always has.' : 'Pay up, pet. Again?') + p(`You have ${pr.gold} gold.`),
-        [10, 25, 50].map((n) => ({ label: `BET ${n}`, primary: n === bet, disabled: pr.gold < n, act: () => play(n) }))));
+        [10, 25, 50].map((n) => ({ label: `BET ${coinsHtml(n)}`, primary: n === bet, disabled: pr.gold < n, act: () => play(n) }))));
     };
     // Moll plays dice and nothing else (Kyle, 2026-11-02: smoke is Gannet's, over the bar).
     panel.show('DICER MOLL', say('Moll', 'Two bones each, high roll takes the pot, ties go to the house. Yes, I cheat. So would you, if you were any good.') + p(`You have ${pr.gold} gold.`),
-      [10, 25, 50].map((n) => ({ label: `BET ${n}`, disabled: pr.gold < n, act: () => play(n) })));
+      [10, 25, 50].map((n) => ({ label: `BET ${coinsHtml(n)}`, disabled: pr.gold < n, act: () => play(n) })));
     return true;
   }
   if (id === 'sewer') {

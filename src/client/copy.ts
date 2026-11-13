@@ -63,7 +63,7 @@ export const TALLY = {
 
 export const SMITH = {
   bought: "In your pack. He's already oiling the next one.",
-  anvil: 'Melt your spares for steel. Steel and gold buys an upgrade.',
+  anvil: 'Melt your spares for steel. Steel and coin buy an upgrade.',
   hungry: 'Not that one. Not in my fire.',
   sell: 'Leave it on the bench. I buy cheaper than I sell.',
 };

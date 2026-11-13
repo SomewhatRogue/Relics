@@ -1,4 +1,5 @@
 /** The movement ladder (shared/ladder.ts): taught in order at the trainer, none on an old save, and each rung firing in the room (and not without it). */
+import { coinsHtml } from '../src/shared/coins';
 import { describe, expect, it } from 'vitest';
 import { BLINK, DODGE, HERO, SNARE, TEACHES, TICK, drillLevel, drillPrice, newProfile, type WeaponId } from '../src/shared/tuning';
 import { ALLY_WARD, BLINK_BURST, BLOCK_MEND, CALTROPS, IRON_STANCE, LADDER_LEVELS, LADDER_TITLE, LANDING, RUNGS, RUNG_WORDS, SHELTER, STAND_FAST, TAUNT_GUARD, TWIN_SNARE, knowsRung } from '../src/shared/ladder';
@@ -56,7 +57,7 @@ describe('the ladder at the trainer', () => {
     const p = Object.assign(newProfile('WARRIOR'), { level: 10, gold: 5000, drills: { ladder: 1 } });
     const rows = trainerRows(p).filter((r) => r.group === 'ladder');
     expect(rows.map((r) => r.rung)).toEqual(['tauntguard', 'ironstance', 'standfast']);
-    expect(rows.map((r) => r.tag)).toEqual(['LEARNED', `${drillPrice('ladder', 1)}g`, 'LEVEL 15']);
+    expect(rows.map((r) => r.tag)).toEqual(['LEARNED', coinsHtml(drillPrice('ladder', 1)), 'LEVEL 15']);
     expect(rows.map((r) => r.state)).toEqual(['max', 'buy', 'locked']);
     expect(new Set(trainerRows(p).map((r) => r.key)).size).toBe(trainerRows(p).length);
     expect(buyDrill(p, 'ladder')).toBe(true);

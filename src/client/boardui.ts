@@ -29,6 +29,7 @@ import { BOARDW } from './boardwords';
 import type { Game } from './game';
 import type { Panel } from './panels';
 import './board.css';
+import { coinsHtml } from '../shared/coins';
 
 const esc = (v: unknown) => String(v ?? '').replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 const RUIN = ['Held', 'Raided', 'Occupied', 'Razed', 'Blighted'];
@@ -70,7 +71,7 @@ function card(g: Game, j: Job, i: number, pay: number): string {
     [BOARDW.boss, j.boss && !j.title.includes(j.boss) ? esc(j.boss) : ''],
     [BOARDW.danger, pips(danger(j))],
     [BOARDW.needs, alone ? '' : BOARDW.party(STORY_PARTY)],
-    [BOARDW.pays, xp || inst ? boardWords(j).pays(pay) : `${pay} gold and ${treasureWord(j)}`],
+    [BOARDW.pays, xp || inst ? boardWords(j).pays(pay) : `${coinsHtml(pay)} and ${treasureWord(j)}`],
   ], 'jrows');
   const go = `<button class="primary" data-job="${i}"${alone ? '' : ' disabled'}>${pt ? BOARDW.alone : BOARDW.take}</button>`;
   const gather = pt ? `<button class="${alone ? '' : 'primary'}" data-gather="${i}">${BOARDW.gather}</button>` : '';

@@ -5,6 +5,7 @@
  * them up (confirmed the same way), and watch what comes back (forgeanim.ts). The roll is made and
  * kept before the light starts, so nothing on screen can change it.
  */
+import { coinsHtml } from '../shared/coins';
 import { LIT, canRecharge, forge, forgeOdds, leaveRelic, litFor, recharge, rechargeCost } from '../shared/church';
 import { relicName, type RelicItem } from '../shared/relicitems';
 import type { Game } from './game';
@@ -35,7 +36,7 @@ export function openStep(g: Game, panel: Panel, back: () => void, said = ''): vo
   if (free && !pr.relics.some((r) => canRecharge(r))) relicDone(pr), g.keep();
   picked = picked.filter((id) => pr.relics.some((r) => r.id === id));
   const lit = pr.lit ?? 0;
-  const head = (said.startsWith('~') ? p(said.slice(1)) : said ? say('Father Odric', said) : say('Father Odric', RELICW.churchIntro)) + (lit ? p(`<b>${RELICW.litLeft(lit)}</b>`) : '') + p(`You have ${pr.gold} gold.`) + p(RELICW.stepHow);
+  const head = (said.startsWith('~') ? p(said.slice(1)) : said ? say('Father Odric', said) : say('Father Odric', RELICW.churchIntro)) + (lit ? p(`<b>${RELICW.litLeft(lit)}</b>`) : '') + p(`You have ${coinsHtml(pr.gold)}.`) + p(RELICW.stepHow);
   const rows = pr.relics.map((r) => {
     const cost = rechargeCost(r), n = litFor(r);
     const re = r.el ? '' : free && canRecharge(r) ? b('free', r.id, ERRANDW.free, { go: true }) : b('recharge', r.id, canRecharge(r) ? RELICW.recharge(cost) : RELICW.full, { off: !canRecharge(r) || pr.gold < cost });

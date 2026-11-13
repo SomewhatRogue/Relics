@@ -3,6 +3,7 @@
  * the lore keeper and the line editor can take them in one pass. Game voice is short and plain;
  * what people say is in their own voice (docs/lore/voice.md).
  */
+import { coinsHtml } from '../shared/coins';
 export const PACKW = {
   hand: 'HAND', body: 'BODY', ring: 'RING', relic: 'RELIC', skill: 'SKILL', belt: 'BELT',
   bag: 'PACK',
@@ -50,7 +51,7 @@ export const PAWN = {
   no: 'NO',
   sold: 'Pleasure.',
   back: 'BUY BACK',
-  sell: (gold: number) => `SELL (+${gold} GOLD)`,
+  sell: (gold: number) => `SELL (+${coinsHtml(gold)})`,
   rule: "Buy back anything you sold, at the price he paid, until you're home from your next job.",
   bigger: 'A BIGGER PACK',
   biggest: 'Your pack is as big as they come.',
@@ -62,11 +63,11 @@ export const FORGE = {
   /** The anvil's two choices, each its own list (Kyle, 2026-11-05). */
   upHead: 'UPGRADE WHAT YOU WEAR',
   meltHead: 'MELT DOWN FROM YOUR PACK',
-  purse: (gold: number, steel: number) => `You have ${gold} gold and ${steel} steel.`,
+  purse: (gold: number, steel: number) => `You have ${coinsHtml(gold)} and ${steel} steel.`,
   /** The forge's only way up a plus: you strike it yourself (Kyle, 2026-11-06). The price is on the button. */
-  strike: (lv: number, gold: number, steel: number) => `STRIKE IT TO +${lv} (${gold} GOLD, ${steel} STEEL)`,
+  strike: (lv: number, gold: number, steel: number) => `STRIKE IT TO +${lv} (${coinsHtml(gold)}, ${steel} STEEL)`,
   /** Under them: the price, and how a clean strike helps. */
-  price: (lv: number, gold: number, steel: number) => `+${lv} costs ${gold} gold and ${steel} steel.`,
+  price: (lv: number, gold: number, steel: number) => `+${lv} costs ${coinsHtml(gold)} and ${steel} steel.`,
   offer: "You pay Halvard, then strike it yourself. A cold strike still takes the plus, and clean strikes make it count for up to 20% more.",
   top: "It's at +5, and that's as far as it goes.",
   /** What a plus adds, on the card. */

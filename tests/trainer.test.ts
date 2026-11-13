@@ -1,4 +1,5 @@
 /** The trainer: every rank waits on a level and costs gold; old heroes keep what they have; the rows say so. */
+import { coinsHtml } from '../src/shared/coins';
 import { describe, expect, it } from 'vitest';
 import { shown } from '../src/shared/shown';
 import { DRILLS, DRILL_ORDER, TEACHES, drillLevel, drillPrice, newProfile, type DrillId } from '../src/shared/tuning';
@@ -87,11 +88,11 @@ describe('trainer', () => {
     const rows = trainerRows(mid), at = (id: string) => rows.find((x) => x.id === id)!;
     expect(rows.find((x) => x.id === 'leave')).toBeUndefined();
     expect(at('skill').state).toBe('buy');
-    expect(at('skill').tag).toBe('150g');
+    expect(at('skill').tag).toBe(coinsHtml(150));
     expect(at('power').state).toBe('locked');
     expect(at('health').state).toBe('buy');
     expect(at('health').gain).toBe(`+${shown(8)} health`);
-    expect(at('crit').tag).toBe(`${drillPrice('crit', 0)}g`);
+    expect(at('crit').tag).toBe(coinsHtml(drillPrice('crit', 0)));
     expect(at('power').now).toBe('+10% damage');
     expect(at('power').next).toBe('+15% damage');
     // A Warrior's technique is three rows of moves now (shared/techniques.ts): the first at level 4.

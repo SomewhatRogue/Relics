@@ -8,6 +8,7 @@
  * the rare three, and won't trade at all with a hero carrying hungry gear, shared/fence.ts); Halvard's forge (strike what you wear up a plus for gold and steel, forgeview.ts; MELT DOWN what's in your pack).
  * The rules are shared/bags.ts; syncPack keeps the hero in step with the save after each one.
  */
+import { coinsHtml } from '../shared/coins';
 import { carriesHungry, tobinWont } from '../shared/fence';
 import { bagSize, growBag, growVault, nextBag, nextVault, pawn, pawns, redeem, stow, unstow, vaultSize } from '../shared/bags';
 import { itemCol } from './uniquelook';
@@ -102,7 +103,7 @@ function merchant(g: Game, panel: Panel): void {
     .map(([t, name]) => `<button data-ptab="${t}"${t === pawnTab ? ' class="on"' : ''}>${name}</button>`).join('') + '</div>';
   const body = pawnTab === 'buy'
     ? shopHead(PLACES.pawn, says('Tobin', PAWN.greet)) + goodsList(goods, `${SHOPW.gold(pr.gold)} ${freshLine()}` + (more ? '' : ' ' + PAWN.biggest)) + (held.length ? p(`<span class="dim">${PAWN.rule}</span>`) : '')
-    : h3(SHOPW.sell, `${pr.bag.length} / ${bagSize(pr)}`) + grid(pr.bag, bagSize(pr), 'bag', null, undefined, (it) => (wont(it) ? PAWN.no : '+' + sellValue(it) + 'G'), wont) +
+    : h3(SHOPW.sell, `${pr.bag.length} / ${bagSize(pr)}`) + grid(pr.bag, bagSize(pr), 'bag', null, undefined, (it) => (wont(it) ? PAWN.no : '+' + coinsHtml(sellValue(it))), wont) +
       (pr.bag.some(wont) ? p(`<span class="dim">${PAWN.wont}</span>`) : '') + p(`<span class="dim">${SHOPW.gold(pr.gold)}</span>`);
   show(panel, PLACES.pawn.name, tabs + body, tap, again, pawnTab === 'buy' ? goods : []);
   document.querySelectorAll<HTMLElement>('#panel [data-ptab]').forEach((b) => b.addEventListener('click', (e) => {

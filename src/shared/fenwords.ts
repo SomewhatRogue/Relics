@@ -3,6 +3,7 @@
  * come up to each of its scenes. No new places or people: Fenmere, the Peat Cuts and the named butchers are
  * the bible's. Each line here waits on the lore keeper, then the line editor.
  */
+import { coinsHtml } from './coins.js';
 
 export const FEN_NAME = 'Fenmere';
 
@@ -13,7 +14,7 @@ export const FEN_POST = {
   kind: 'EXPEDITION',
   where: 'FENMERE',
   rooms: 'One fen, about 8 minutes',
-  pays: (n: number, boss = '') => `${n} gold and a relic off ${boss || 'the butcher'}, more for each job done. Half if you don't get out`,
+  pays: (n: number, boss = '') => `${coinsHtml(n)} and a relic off ${boss || 'the butcher'}, more for each job done. Half if you don't get out`,
 };
 
 /** The pins and what each job says (GOAL_WORDS takes these on a Fenmere job). */

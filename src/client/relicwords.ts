@@ -5,6 +5,7 @@
  */
 import { SENTRY, type RelicId } from '../shared/tuning';
 import { LIT } from '../shared/church';
+import { coinsHtml } from '../shared/coins';
 
 const jobs = (n: number) => `${n} ${n === 1 ? 'job' : 'jobs'}`;
 /** What the church's light does, plainly (the same line on the step, the LIT badge and after). */
@@ -54,7 +55,7 @@ export const RELICW = {
   churchTitle: 'THE STEP',
   churchIntro: "Fading, is it? Mother Isolde sees to those round the back, and she'll want paying. Not the ones with fire or frost or storm in them, mind, she *won't* have those in the house.",
   none: 'No relics. The big jobs give them: a story job, the beacon on the Barrowfields, the bottom of a DEEP job. Now and then a named butcher has one in it.',
-  recharge: (n: number) => `RECHARGE (${n})`,
+  recharge: (n: number) => `RECHARGE (${coinsHtml(n)})`,
   full: 'FULL',
   /** Above the cards: what giving one up means, before anything is tapped. */
   stepHow: `Give a relic up and it's gone for good. If it has uses left, you carry the church's light for a few jobs: ${LIGHT}.`,

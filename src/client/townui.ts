@@ -36,6 +36,7 @@ import { talkedTo } from '../shared/errands';
 import { ERRANDW } from './errandwords';
 import { questHeld } from '../shared/heroquests';
 import { QUESTW } from './questwords';
+import { coinsHtml } from '../shared/coins';
 
 
 const p = (s: string) => `<p>${s}</p>`;
@@ -106,8 +107,8 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     if (pr.tally) (pr.tally = false), g.keep();
     panel.show('FATHER ODRIC', hew + say('Father Odric', 'Give what you can spare to the Lantern. It keeps the light burning, and it does the giver good, more than you\'d think.') + (pr.cls === 'HEALER' ? say('Father Odric', COAL.odric) : '') +
       (hungry.length ? say('Father Odric', CHURCH.hungry) : '') +
-      p(`Given to the Lantern so far: ${w.lantern} gold.`) + p(`You have ${pr.gold} gold.`),
-      [...[20, 100].map((n) => ({ label: `GIVE ${n}`, disabled: pr.gold < n || pr.armor?.hungry === 'ransom', act: () => (g.donate(n), townVoice.pray(voiceClock()), again()) })),
+      p(`Given to the Lantern so far: ${coinsHtml(w.lantern)}.`) + p(`You have ${coinsHtml(pr.gold)}.`),
+      [...[20, 100].map((n) => ({ label: `GIVE ${coinsHtml(n)}`, disabled: pr.gold < n || pr.armor?.hungry === 'ransom', act: () => (g.donate(n), townVoice.pray(voiceClock()), again()) })),
         { label: RELICW.churchButton, primary: pr.relics.length > 0, act: () => openStep(g, panel, again) },
         ...hungry.map((it) => ({ label: `LEAVE ${itemName(it)} ON THE STEP`, act: () => (g.giveUp(it), townVoice.rite(voiceClock()), again()) }))]);
   } else if (id === 'yard') {

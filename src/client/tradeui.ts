@@ -22,6 +22,7 @@ import { endTrade, holdTrade } from './tradesave';
 import { TRADEW } from './tradewords';
 import type { Townfolk } from './townfolk';
 import { itemCol } from './uniquelook';
+import { coinsHtml } from '../shared/coins';
 
 /** How long someone's ask stands, and how long the other may be out of sight before it's called off, s. */
 const ASK_FOR = 120, LOST_FOR = 4;
@@ -145,7 +146,7 @@ export class Trades {
       }).join('') + `</div>` : `<p class="dim">${TRADEW.nothing}</p>`) + `</div>`;
     const offered = new Set(t.mine.items);
     const pack = p.bag.filter((it) => tradeable(it) && !offered.has(it));
-    const gold = (d: number) => `<button data-gold="${d}" ${!open || t.mine.gold + d < 0 || t.mine.gold + d > Math.min(p.gold, TRADE_GOLD) ? 'disabled' : ''}>${d > 0 ? '+' : ''}${d}</button>`;
+    const gold = (d: number) => `<button data-gold="${d}" ${!open || t.mine.gold + d < 0 || t.mine.gold + d > Math.min(p.gold, TRADE_GOLD) ? 'disabled' : ''}>${d > 0 ? '+' : ''}${coinsHtml(d)}</button>`;
     const html =
       `<div class="trade"><p>${status}</p>${this.why ? `<p class="dim">${this.why}</p>` : ''}` +
       list(t.theirs.items, TRADEW.theirs(name)) + `<p>${TRADEW.gold(t.theirs.gold)}</p>` +

@@ -12,6 +12,7 @@ import type { TabId, UpDetail, UpStep, UpTab, UpTile, UpTrack } from './upgrades
 import { upIcon } from './upicons';
 import { UPW } from './upgradewords';
 import './upgrades.css';
+import { coinsHtml } from '../shared/coins';
 
 const pips = (ps?: Pip[]) => (ps ? `<span class="tr-pips">${ps.map((x) => `<i class="${x}"></i>`).join('')}</span>` : '');
 const lit = (t: UpTile) => t.state === 'owned' || t.state === 'max' || !!t.current;
@@ -57,7 +58,7 @@ export function upDetail(d: UpDetail): string {
     (d.after ? `${d.now ? '<i class="up-arrow"></i>' : ''}<div class="after"><span>${UPW.after}</span><b>${d.after}</b></div>` : '') + '</div>' : '';
   const ladder = d.ladder ? `<h3 class="tr-h">${UPW.ranks}</h3><ol class="tr-ladder">${d.ladder.map((u, i) => {
     const next = !u.have && (i === 0 || d.ladder![i - 1].have);
-    return `<li class="${u.have ? 'have' : next ? 'next' : ''}"><i></i><b>${u.gain}</b><small>LEVEL ${u.level}</small><em>${u.have ? '' : `${u.price}g`}</em></li>`;
+    return `<li class="${u.have ? 'have' : next ? 'next' : ''}"><i></i><b>${u.gain}</b><small>LEVEL ${u.level}</small><em>${u.have ? '' : coinsHtml(u.price)}</em></li>`;
   }).join('')}</ol>` : '';
   return `<div class="up-det s-${t.state}${t.current ? ' cur' : ''}"><div class="up-dh"><img class="up-ic" src="${upIcon(t.icon)}" alt="">` +
     `<div><b>${t.name}</b><span class="up-f">${pips(t.pips)}<em class="up-b">${t.badge}</em></span></div></div>` +

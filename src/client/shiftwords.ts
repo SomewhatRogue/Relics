@@ -3,6 +3,7 @@
  * through the lore keeper or the line editor. Halvard is a man of few words; the rest is plain.
  */
 import type { PieceKind } from '../shared/shifttune';
+import { coinsHtml } from '../shared/coins';
 
 const mins = (secs: number) => Math.max(1, Math.ceil(secs / 60));
 
@@ -14,7 +15,7 @@ export const SHIFTW = {
   /** Halvard, in the rest after a paid shift. */
   resting: (_secs: number) => "Nothing wants doing yet.",
   unpaid: "You can still work a shift for the board. It just won't pay.",
-  pays: (cap: number) => `A good shift pays up to ${cap} gold.`,
+  pays: (cap: number) => `A good shift pays up to ${coinsHtml(cap)}.`,
   yourBest: (n: number) => `Your best shift: ${n}.`,
   board: 'BEST SHIFTS AT THE FORGE',
   empty: "Nobody's on the board yet.",
@@ -37,13 +38,13 @@ export const SHIFTW = {
   cut: 'SHIFT CUT SHORT',
   halvard: { good: 'Good work.', fair: "That'll do.", poor: 'Half of that goes back in the fire.' },
   rows: { score: 'SCORE', made: 'PIECES DONE', spoiled: 'SPOILED', clean: 'CLEAN STRIKES', streak: 'BEST RUN', best: 'YOUR BEST', newBest: 'NEW BEST' },
-  paid: (n: number) => `Halvard pays you ${n} gold.`,
+  paid: (n: number) => `Halvard pays you ${coinsHtml(n)}.`,
   nothing: "That wasn't enough to pay for.",
   forBoard: "This one was for the board, so there's no pay.",
   early: "You stopped before the shift was out, so there's no pay.",
   next: (secs: number) => `The next paid shift is in ${mins(secs)} minute${mins(secs) === 1 ? '' : 's'}.`,
   posted: 'He chalks it on the board.',
-  gold: (n: number) => `You have ${n} gold.`,
+  gold: (n: number) => `You have ${coinsHtml(n)}.`,
   again: 'ANOTHER SHIFT',
   done: 'BACK TO THE FORGE',
 };

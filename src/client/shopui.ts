@@ -9,6 +9,7 @@
 import { line, typeIn } from './speech';
 import { SHOPW, type Place } from './shopwords';
 import './shop.css';
+import { coinsHtml } from '../shared/coins';
 
 /** One thing for sale: its name, price and picture, what it does (html), and buying it. */
 export interface Good {
@@ -43,7 +44,7 @@ export function goodsList(goods: Good[], foot = '', head = SHOPW.forSale): strin
   if (!goods.length) return foot ? `<div class="shop">${p(foot)}</div>` : '';
   return `<div class="shop"><h3 class="gh">${head}</h3><div class="goods">` + goods.map((g, i) =>
     `<button class="good${g.why ? ' off' : ''}" data-good="${i}">${g.icon ? `<img src="${g.icon}" alt="">` : '<span class="noicon"></span>'}` +
-    `<span class="gn"${g.col ? ` style="color:${g.col}"` : ''}>${g.name}</span><em>${g.price}G</em></button>`).join('') +
+    `<span class="gn"${g.col ? ` style="color:${g.col}"` : ''}>${g.name}</span><em>${coinsHtml(g.price)}</em></button>`).join('') +
     `</div>${foot ? `<p class="dim">${foot}</p>` : ''}</div>`;
 }
 
@@ -54,7 +55,7 @@ export function wireGoods(goods: Good[], again: () => void): void {
       e.stopPropagation();
       const g = goods[Number(b.dataset.good)];
       itemPop({ icon: g.icon, name: g.name, col: g.col, body: g.about, cmp: g.cmp, why: g.why, again,
-        acts: [{ label: `${g.label ?? SHOPW.buy} (${g.price} GOLD)`, act: g.buy, primary: true, disabled: !!g.why }] });
+        acts: [{ label: `${g.label ?? SHOPW.buy} (${coinsHtml(g.price)})`, act: g.buy, primary: true, disabled: !!g.why }] });
     }));
 }
 

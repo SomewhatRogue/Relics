@@ -1,0 +1,13 @@
+/* Coins (shared/coins.ts): each part in its own colour, a small round coin mark before it. */
+.coins { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.cn { white-space: nowrap; }
+.cn::before {
+  content: ''; display: inline-block; width: 0.62em; height: 0.62em; margin: 0 0.18em 0.06em 0.05em;
+  border-radius: 50%; vertical-align: middle; box-shadow: inset -0.1em -0.1em 0 rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.5);
+}
+.cn.cg { color: #ffd24a; } .cn.cg::before { background: #e8b21c; }
+.cn.cs { color: #d8e0ea; } .cn.cs::before { background: #b9c4d0; }
+.cn.cc { color: #e09a62; } .cn.cc::before { background: #b8682e; }
+button:disabled .cn { color: inherit; }
+/* The trainer's purse had one coin icon of its own; each part carries its mark now. */
+#panel .up-gold:has(.coins) { padding-left: 0; background: none; }

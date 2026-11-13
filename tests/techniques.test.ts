@@ -1,4 +1,5 @@
 /** The class techniques (shared/techniques.ts): taught in order, kept from old saves, and each one firing in the room. */
+import { coinsHtml } from '../src/shared/coins';
 import { describe, expect, it } from 'vitest';
 import { CHARGE, PARTY, TICK, WEAPONS, drillLevel, drillPrice, newProfile, type WeaponId } from '../src/shared/tuning';
 import { AIM_DRIFT, CUTPURSE, JUDGEMENT, MENDING, QUICK_NOCK, SANCT_STEP, SHOULDER, TECHS, TECH_WORDS, knowsTech } from '../src/shared/techniques';
@@ -61,7 +62,7 @@ describe('techniques at the trainer', () => {
     const p = Object.assign(newProfile('WARRIOR'), { level: 7, gold: 5000, drills: { technique: 1 } });
     const rows = trainerRows(p).filter((r) => r.group === 'craft');
     expect(rows.map((r) => r.tech)).toEqual(['slam', 'shoulder', 'ironfeet']);
-    expect(rows.map((r) => r.tag)).toEqual(['LEARNED', `${drillPrice('technique', 1)}g`, 'LEVEL 10']);
+    expect(rows.map((r) => r.tag)).toEqual(['LEARNED', coinsHtml(drillPrice('technique', 1)), 'LEVEL 10']);
     expect(rows.map((r) => r.state)).toEqual(['max', 'buy', 'locked']);
     expect(rows[1].level).toBe(7);
     expect(buyDrill(p, 'technique')).toBe(true);

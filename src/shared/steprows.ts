@@ -7,9 +7,10 @@ import { LEAVES, drillLevel, drillPrice, type DrillId } from './drills.js';
 import { drillState, type TrainState } from './training.js';
 import type { Profile } from './progress.js';
 import type { TrainGroup, TrainRow } from './trainrows.js';
+import { coinsHtml } from './coins.js';
 
 const tagFor = (s: TrainState, price: number, level: number, needs: string) =>
-  s === 'max' ? 'LEARNED' : s === 'locked' ? `LEVEL ${level}` : s === 'needs' ? `NEEDS ${needs}` : `${price}g`;
+  s === 'max' ? 'LEARNED' : s === 'locked' ? `LEVEL ${level}` : s === 'needs' ? `NEEDS ${needs}` : coinsHtml(price);
 
 /** `ids` in the order they're taught as ranks of drill `id`, named and described by `words`. `mark`
  *  tags each row with what it is (`tech` or `rung`) so the screen knows what to buy. */

@@ -3,6 +3,7 @@
  * posting, each area's name, the named ones and the checkpoint lines. Every line here goes through the
  * lore keeper and the line editor.
  */
+import { coinsHtml } from './coins.js';
 
 /** On the board: the lead-in from Wickhold. */
 export const CUT_POST = {
@@ -11,7 +12,7 @@ export const CUT_POST = {
   title: 'The Open Cut',
   text: "A digger got out of Rakehead last night and came over the hill on bare feet, and what he says is the hungry took everyone who could swing a pick, roped them, and walked them down to the Open Cut. Some are still in the rows, he thinks. Go up and get them back.",
   rooms: 'Down through Rakehead to the pit, about 30 minutes, someone keeping each gate',
-  pays: (n: number) => `${n} gold and what the bosses drop`,
+  pays: (n: number) => `${coinsHtml(n)} and what the bosses drop`,
 };
 
 /** Each area's name, shown as you come into it, in order. */
