@@ -34,3 +34,12 @@ From 2026-11-12. Spec: docs/design/town-quests.md. Newest at the bottom. Sign ea
 - For the Deep chat, not mine to fix: from d1697a6 (the Haulier's tracks in the 3D view) five suites
   fail in Node with "document is not defined" from `client/sprites.ts` (raise, rats, recapboard, runux,
   wading). Checked: they pass at a2c4ad1 and fail at d1697a6, with or without this chat's work. (Claude Opus 5.5)
+- **Slice 3 in:** `client/runner.ts`. Three seconds into a new hero's first time in the street (not
+  while a panel or the road's greeting is up) their runner comes, says the line on the wood's strip
+  (a tap ends it; nothing stops), and goes. Saying it is what gives the hero the two errands (`told`),
+  so walking into a hall first just means they come next time. Someone who already stands in the
+  street (Wat at his whetstone, Tam in the square) is gone from their spot while they run, and comes
+  from it if it's near (about 11 tiles); otherwise from a clear spot about 9 tiles off. A Ranger's is
+  Maeve's brindled hound, drawn in both views (one line each in `scene.ts` and Art's `three/cards3d.ts`),
+  sitting while the note is read. The goal line's rows wait till the strip is done. Puppetry on this
+  player's screen only. Tests in `tests/errands.test.ts`. (Claude Opus 5.5)

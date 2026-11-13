@@ -67,3 +67,53 @@ describe('town errands', () => {
     expect(openErrands(p)).toEqual(['skill']);
   });
 });
+
+import { Runner } from '../src/client/runner';
+import type { GameMap } from '../src/shared/arena';
+
+describe('the runner', () => {
+  const street = (): GameMap => ({ name: 'WICKHOLD', w: 40, h: 30, wallFace: 3, rounds: [], blocks: [], braziers: [], npcs: [{ name: 'RECRUIT WAT', x: 14, y: 10, talk: 'chat', look: 'soldier' }], hero: { x: 10, y: 10 } } as unknown as GameMap);
+  const play = (r: Runner, w: Parameters<Runner['frame']>[0], secs: number, from = 0) => {
+    for (let t = from; t < from + secs; t += 0.05) r.frame(w, t, 0.05);
+    return from + secs;
+  };
+
+  it('comes after a few seconds, says it (the errands are yours), and goes back where they stood', () => {
+    const r = new Runner(), p = fresh('WARRIOR'), map = street(), w = { street: map, hero: { x: 10, y: 10 }, profile: p, busy: false, keep: () => {} };
+    let t = play(r, w, 2.5);
+    expect(map.npcs!.map((n) => n.name)).toEqual(['RECRUIT WAT']);
+    t = play(r, w, 2, t);
+    // Wat left his spot to come: the standing one is gone while the runner is out.
+    expect(map.npcs!.map((n) => n.name)).toEqual(['WAT']);
+    t = play(r, w, 1, t);
+    expect(r.caption(t)?.who).toBe('WAT');
+    expect(p.errands!.told).toBe(true);
+    r.skip(t);
+    play(r, w, 4, t);
+    expect(map.npcs!.map((n) => n.name)).toEqual(['RECRUIT WAT']);
+    expect(r.caption(99)).toBeNull();
+  });
+
+  it('waits while a panel is up, and never comes for a hero who has been told', () => {
+    const r = new Runner(), p = fresh('RANGER'), map = street();
+    play(r, { street: map, hero: { x: 10, y: 10 }, profile: p, busy: true, keep: () => {} }, 6);
+    expect(r.hound()).toBeNull();
+    play(r, { street: map, hero: { x: 10, y: 10 }, profile: p, busy: false, keep: () => {} }, 3.2);
+    // A Ranger's is Maeve's hound, not a person in the street.
+    expect(r.hound()).not.toBeNull();
+    expect(map.npcs!.length).toBe(1);
+    const q = fresh('WARRIOR');
+    told(q);
+    const r2 = new Runner();
+    play(r2, { street: map, hero: { x: 10, y: 10 }, profile: q, busy: false, keep: () => {} }, 8);
+    expect(map.npcs!.map((n) => n.name)).toEqual(['RECRUIT WAT']);
+  });
+
+  it('walking off before the line: they go back, and come again next time', () => {
+    const r = new Runner(), p = fresh('WARRIOR'), map = street(), w = { street: map, hero: { x: 10, y: 10 }, profile: p, busy: false, keep: () => {} };
+    play(r, w, 3.2);
+    r.frame({ ...w, street: null }, 4, 0.05);
+    expect(map.npcs!.map((n) => n.name)).toEqual(['RECRUIT WAT']);
+    expect(p.errands!.told).toBe(false);
+  });
+});

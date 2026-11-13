@@ -133,6 +133,7 @@ import { ObjFlash } from './objflash';
 import { GoalPulse, goalHtml } from './goalpulse';
 import { errandLine } from './errandline';
 import { errandTargets } from './errandmarks';
+import { runner } from './runner';
 import { GearHint } from './gearhint';
 import './goal.css';
 import { UnlockFlash } from './unlockflash';
@@ -321,7 +322,7 @@ $('#heroes').addEventListener('click', () => {
   if (game.mode !== 'run' && !panel.open) pack.toggle(false), title.show();
 });
 $('#packbtn').addEventListener('click', () => pack.toggle());
-$('#caption').addEventListener('click', () => game.skipCaption());
+$('#caption').addEventListener('click', () => (game.skipCaption(), runner.skip(performance.now() / 1000)));
 // A tap anywhere on the scene skips a line of the wood's strip as well (Kyle, 2026-11-12: Orla's lines
 // after the Stoker went too slowly); the stick and buttons sit over it and keep their own taps.
 document.addEventListener('pointerdown', (e) => {
@@ -430,7 +431,8 @@ function hud(now: number): void {
   document.body.classList.toggle('cutscene', !!wood && wood.cut >= 0);
   // Praise shows as a caption while the fight stops for it.
   const praise = wood?.hold?.kind === 'praise' ? { who: wood.hold.who, text: wood.hold.text } : null;
-  const cap = praise ?? (wood?.caption && wood.caption.until > room.time ? wood.caption : null);
+  // (In town, a new hero's runner says their piece on the same strip: runner.ts.)
+  const cap = praise ?? (wood?.caption && wood.caption.until > room.time ? wood.caption : null) ?? (game.mode === 'town' ? runner.caption(now) : null);
   $('#caption').classList.toggle('praise', !!praise);
   // (A lesson card or a freeze-frame says it all; the caption waits.)
   $('#caption').hidden = !cap || (!!wood?.hold && wood.hold.kind !== 'praise');
@@ -470,7 +472,8 @@ function hud(now: number): void {
     goalPulse.clear($('#banner'));
     objFlash.watchWood(-1, now);
     // A new hero's errands, and the trainer's word on a new skill, are the town's goal (errandline.ts).
-    const errands = game.mode === 'town' ? errandLine(pr) : null;
+    // (Not while the runner's still saying it: the strip first, then the rows.)
+    const errands = game.mode === 'town' && !runner.caption(now) ? errandLine(pr) : null;
     const full = game.outside
       ? `<b>${titleCase(room.map.name)}</b> ${errands ? errands.rows : 'Walk out at the bottom'}<span><i class="coin"></i>${pr.gold}</span>`
       : game.mode === 'town'
@@ -668,6 +671,8 @@ function tick(t: number): void {
   }
   // Out of bounds: the dark closing in, what comes for you, and anyone taken (dreadfx.ts).
   dread.frame(game.room.heroes.find((x) => x.id === ME), game.room.heroes, evs, views, fx, t / 1000, dt);
+  // A new hero's first minutes in the street: the runner (runner.ts).
+  runner.frame({ street: game.mode === 'town' && !game.outside ? game.room.map : null, hero: game.hero ?? null, profile: game.profile, busy: panel.open || title.open || !!game.greeting || !!game.result, keep: () => game.keep() }, t / 1000, dt);
   hud(t / 1000);
   rollCard.frame(game.room, game.room.heroes.find((x) => x.id === ME), evs, t / 1000, game.room.time);
   chat.frame();
