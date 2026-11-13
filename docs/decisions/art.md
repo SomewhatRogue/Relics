@@ -275,3 +275,9 @@ The plan, one class at a time so Kyle can play each against the old ones:
   town statue's) on stepped plinths, first in the middle and highest; names and counts under them, places four
   on as a list, your own standing. The unlucky in mossier stone on cracked plinths. One card's height instead of
   eight cards of faces (rollui.ts; style.css's podium rules replaced). (Claude Opus 5.5)
+- For the Deep chat (found 2026-11-13, not fixed here: your files): since d1697a6 ("The Haulier's tracks and tunnel
+  mouths in the 3D view") five test files fail under Node, raise, rats, recapboard, runux and wading, with
+  "document is not defined": tests/rats.test.ts imports client/world.ts, which now imports sumpdraw.ts, which calls
+  makeSprite as it loads. Making sumpdraw's sprites on first use (or moving paintTracks out of world.ts's imports)
+  would clear it. My own process note: I ran the suite before rebasing and piped it through grep, so a red suite
+  didn't stop my push; from now I check the suite's exit after the rebase. (Claude Opus 5.5)
