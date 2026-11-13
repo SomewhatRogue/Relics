@@ -97,3 +97,26 @@ From 2026-11-12. Spec: docs/design/town-quests.md. Newest at the bottom. Sign ea
   quest; old heroes get everything up to their level. He asked whether the Sewers are the Deep: no, the
   Sewers are the town's work (the grate opens for everyone), the Deep is entered from them; default
   written in that the Deep needs both the town's Sewers and your level 7 quest. In the spec. (Claude Opus 5.5)
+- **Hero quests built** (docs/design/hero-quests.md, Kyle's go 2026-11-13), all five slices:
+  - `shared/heroquests.ts`: the ladder (levels 3, 4, 5, 7, 9), the hero's `quests` record (one in hand
+    with its count, those done), counting from a job's facts at its end, the gates, and your posting
+    (seeded from your id and the quest, the same every day). Old heroes: done up to their level.
+  - Your trainer hands it over on talking (an errand, `quest`: their mark and A JOB FOR YOU), with
+    their one line; in hand (`job`) it's on the goal line with its count, and the board (or Cobb, for
+    the Haulier) carries the gold mark. Your own posting tops the board under the story mission,
+    tagged QUEST in the marks' gold.
+  - Counting: every job's end (`questEnd` in game.ts), whoever's job it was, so a joined run counts;
+    THE HAULIER counts when your hero reaches the way out of his Deep floor (it opens with him down).
+    Done, it's said once back in town (a toast: QUEST DONE and what it opened).
+  - Gates: what you haven't opened is off your board and off Brisk's map table (`Game.jobs`); the
+    board's foot names only the long trips you've opened, none if none; Brisk's table with nothing
+    opened says so plainly (`QUESTW.noTrips`, not through the writing pass: a plain line).
+  - **The Deep already had a gate** (shared/deepgate.ts, the Deep chat's: level 9, or Cobb's word for the
+    week). Not taken out: your level 7 quest is a third way past Cobb (`squareui.ts`). Kyle's "needs both"
+    holds for the Sewers (the town's) and the Deep; level 9 and the word still let you down without it.
+  - Lines: one lore-keeper pass, one line-editor pass. The lore keeper caught that the long trips are
+    Corporal Brisk's (the barracks' map table), not the board's, and "deep job" not "deep dive"; the
+    postings and toasts say Brisk sends you. New lore to record: quests are posted by the town and
+    handed over by trainers; a GUTCHAIN kill puts you on Cobb's slate under level 9.
+  - Tests: `tests/heroquests.test.ts`. One errands test now leaves quests out (it's about the skill).
+  (Claude Opus 5.5)

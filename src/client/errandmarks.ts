@@ -9,7 +9,7 @@ import { errandWho, openErrands } from '../shared/errands';
 import type { Profile } from '../shared/progress';
 import type { Target } from '../sim/targets';
 
-export function errandTargets(p: Profile, map: GameMap, t: number): Target[] {
+export function errandTargets(p: Profile, map: GameMap, t: number, spots: { id: string; x: number; y: number }[] = []): Target[] {
   const out: Target[] = [], seen = new Set<string>();
   const add = (x: Target) => {
     const k = x.kind + Math.round(x.x * 4) + ',' + Math.round(x.y * 4);
@@ -23,7 +23,13 @@ export function errandTargets(p: Profile, map: GameMap, t: number): Target[] {
       add({ kind: 'folk', x: at.x, y: at.y });
       continue;
     }
-    const b = map.blocks.find((x) => x.door === who.door && !x.locked);
+    // A spot in the street (the job board, the sewer grate): `spots` are the street's, empty indoors.
+    const s = who.spot ? spots.find((x) => x.id === who.spot) : undefined;
+    if (s) {
+      add({ kind: 'hall', x: s.x, y: s.y });
+      continue;
+    }
+    const b = who.door ? map.blocks.find((x) => x.door === who.door && !x.locked) : undefined;
     if (b) add({ kind: 'hall', ...doorAt(b) });
   }
   return out;

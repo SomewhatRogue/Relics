@@ -92,7 +92,8 @@ export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key:
     const pt = g.parties, party = (pt?.current()?.members.length ?? 0) > 1, mine = !party || !!pt?.leading;
     const go = () => (party ? (pt!.retarget(g.deepJob()), panel.hide(), setOutNow(g, panel)) : (panel.hide(), g.enterDeep()));
     // The gate (shared/deepgate.ts): level 9, or Cobb's word for the week. A party goes down with its leader, so it's the leader he asks.
-    const now = Date.now(), pr = g.profile, may = mayGoDown(pr.level, pr.deepSaid, now), D = DEEP_WORDS;
+    // (Or your level 7 hero quest done: shared/heroquests.ts, the town quests chat. Level 9 and the word still do.)
+    const now = Date.now(), pr = g.profile, may = mayGoDown(pr.level, pr.deepSaid, now) || (!!pr.quests?.done.includes('q7')), D = DEEP_WORDS;
     const head = p('The grate is open. Jobs below the town are on the board in the square: The Wickhold Sewers.') + p(`<b>${D.title}</b>`) + p(D.scene);
     if (mine && !may) {
       const sayIt = () => {

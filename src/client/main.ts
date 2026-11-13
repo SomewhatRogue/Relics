@@ -140,6 +140,8 @@ import { GoalPulse, goalHtml } from './goalpulse';
 import { errandLine } from './errandline';
 import { errandTargets } from './errandmarks';
 import { runner } from './runner';
+import { toast } from './partytoast';
+import { QUESTW } from './questwords';
 import { echoes } from './runnerecho';
 import { townSpots } from '../shared/town';
 import { GearHint } from './gearhint';
@@ -410,6 +412,12 @@ function hud(now: number): void {
   lesson.update();
   $('#packbtn').classList.toggle('on', pack.open);
   knackCues(game, panel.open, $('#packbtn'), (x, y, s) => fx.say(toPx(x, y)[0], toPx(x, y)[1] + 14, s, '#ffd27a', 3.2));
+  // A hero quest done (shared/heroquests.ts): said once, back in town, with what it opened.
+  if (game.questPop && game.mode === 'town' && !game.result && !panel.open) {
+    const q = game.questPop;
+    game.questPop = null;
+    toast(`${QUESTW.done}${q.opens ? ': ' + QUESTW.opened[q.opens] : ''}`, { kind: 'quest' });
+  }
   // At a house's kindling with someone caged inside: a muffled cry, and the words over the pile (kindlecue.ts).
   if (game.mode === 'run') kindleCue(room.map, me, (x, y, s) => fx.say(toPx(x, y)[0], toPx(x, y)[1] - 18, s, '#e8dcc8', 2.6));
   // A house alight with someone still caged inside: shouts from it until the roof comes in.
@@ -649,7 +657,7 @@ function tick(t: number): void {
   scene.fanfare = game.wood?.hold?.kind === 'relic';
   // In town, only someone with an errand or a quest for you is marked (errandmarks.ts).
   scene.markEach = game.mode === 'town';
-  scene.marks = game.mode === 'run' ? targets(game.run, game.room, game.houses()) : game.mode === 'town' ? errandTargets(game.profile, game.room.map, game.room.time) : [];
+  scene.marks = game.mode === 'run' ? targets(game.run, game.room, game.houses()) : game.mode === 'town' ? errandTargets(game.profile, game.room.map, game.room.time, game.outside ? [] : townSpots(game.world)) : [];
   scene.doors = game.mode === 'run' ? game.doorMarks() : [];
   scene.pointTo = game.wood && game.wood.stage === 5 && !game.wood.hold && spoken(game.wood) ? { x: ROAD_OUT.x + 1, y: ROAD_OUT.y + ROAD_OUT.h / 2 } : wayTarget(game);
   // An expedition: MAP, the map screen, and a word over you as things happen (expedui.ts).

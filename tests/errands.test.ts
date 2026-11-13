@@ -54,6 +54,7 @@ describe('town errands', () => {
   it('a level that opens a skill sends you to the trainer; talking to them ends it', () => {
     const p = fresh();
     told(p), relicDone(p), talkedTo(p, 'trainer', 0);
+    p.quests = undefined; // (the skill's word alone: hero quests are tests/heroquests.test.ts)
     expect(openSkillLevel(p)).toBe(0);
     gainXp(p, xpFor(3));
     expect(openSkillLevel(p)).toBe(3);

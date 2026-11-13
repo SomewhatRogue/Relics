@@ -30,6 +30,9 @@
 #panel .k-exped { --kc: var(--i-leaf); }
 #panel .k-deep, #panel .jlist .jrow.deep { --kc: #a37ad6; }
 #panel .jtags .k-deep { color: #14100a; }
+/* Your own quest's posting (town quests chat, shared/heroquests.ts): the quest marks' gold, the row's edge too. */
+#panel .k-quest, #panel .jlist .jrow.quest { --kc: #d4a537; }
+#panel .jtags .k-quest { color: #14100a; }
 
 /* Danger: five sunk studs, lit red for how hard. */
 #panel .jlist .pips, #panel .jcard .pips { display: inline-flex; gap: 3px; vertical-align: middle; }

@@ -17,6 +17,7 @@ import type { PerkId } from './perks.js';
 import type { WatchRecord } from './watchpay.js';
 import { defaultHound, type HoundLook } from './houndlook.js';
 import { newErrands } from './errands.js';
+import { newQuests } from './heroquests.js';
 
 /** Chapter 1's level cap (it lifts when the council moves the story on). */
 export const LEVEL_CAP = 10;
@@ -146,10 +147,12 @@ export interface Profile {
   stake?: import('./stakes.js').Stake;
   /** Town errands: the first two, and the trainer's word on a new skill (shared/errands.ts). Undefined: none due (old heroes). */
   errands?: import('./errands.js').Errands;
+  /** Hero quests: the one in hand and those done (shared/heroquests.ts). Undefined: an old hero, done up to their level. */
+  quests?: import('./heroquests.js').Quests;
 }
 
 export const newProfile = (cls: HeroClass = 'WARRIOR', name = 'HERO', id = heroId()): Profile =>
-  ({ id, ...(cls === 'RANGER' ? { hound: defaultHound(id) } : {}), name, cls, gold: 0, xp: 0, level: 1, perks: [], learned: [], picks: 0, arms: {}, weapon: CLASS_KITS[cls][0], bag: [], glow: 0, belt: ['bitter'], armor: { slot: 'armor', armor: CLASS_ARMOR[cls], quality: 'plain', traits: [], mods: [], level: 0 }, rings: [], steel: 0, want: 0, prologue: false, tally: false, cold: false, cutSeen: false, relics: [], relic: '', augments: {}, runs: 0, stats: newStats(), wish: false, dice: 0, signs: true, errands: newErrands() });
+  ({ id, ...(cls === 'RANGER' ? { hound: defaultHound(id) } : {}), name, cls, gold: 0, xp: 0, level: 1, perks: [], learned: [], picks: 0, arms: {}, weapon: CLASS_KITS[cls][0], bag: [], glow: 0, belt: ['bitter'], armor: { slot: 'armor', armor: CLASS_ARMOR[cls], quality: 'plain', traits: [], mods: [], level: 0 }, rings: [], steel: 0, want: 0, prologue: false, tally: false, cold: false, cutSeen: false, relics: [], relic: '', augments: {}, runs: 0, stats: newStats(), wish: false, dice: 0, signs: true, errands: newErrands(), quests: newQuests() });
 
 export function heroId(): string {
   const c = 'abcdefghijkmnpqrstuvwxyz23456789';

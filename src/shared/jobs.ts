@@ -86,6 +86,8 @@ export interface Job {
   hall?: { w: number; h: number };
   /** An instance (shared/instances.ts): its rooms are its areas, taken in turn, each gate a checkpoint. */
   instance?: import('./instances.js').InstanceId;
+  /** A hero's own posting for their quest in hand (shared/heroquests.ts): on their board only. */
+  quest?: import('./heroquests.js').QuestId;
 }
 
 export const BOSSES = ['MAWL', 'SKARN', 'OLD KNUCKLES', 'OLD SPOON', 'GUTCHAIN', 'MOTHER RUST'];

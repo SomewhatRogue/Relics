@@ -34,6 +34,8 @@ import { openBest } from './bestui';
 import { townVoice, voiceClock } from './voiceplay';
 import { talkedTo } from '../shared/errands';
 import { ERRANDW } from './errandwords';
+import { questHeld } from '../shared/heroquests';
+import { QUESTW } from './questwords';
 
 
 const p = (s: string) => `<p>${s}</p>`;
@@ -78,8 +80,10 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       return panel.show(t.name, say(name, ELSEWHERE[cls].replace('{who}', title(yours.name)).replace('{where}', yours.where)));
     }
     // Your own trainer: the first errand's done, and they've heard you've a new skill open (shared/errands.ts).
-    const first = !!pr.errands?.told && !pr.errands.trainer;
+    const first = !!pr.errands?.told && !pr.errands.trainer, had = questHeld(pr)?.q.id;
     if (talkedTo(pr, 'trainer', arg)) g.keep();
+    // A hero quest handed over just now (shared/heroquests.ts): the trainer's one line for it.
+    const handed = !first && !!questHeld(pr) && questHeld(pr)!.q.id !== had;
     if (pr.cls === 'HEALER' && pr.cold) {
       pr.cold = false;
       g.keep();
@@ -88,7 +92,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     }
     // One spoken line at most: grown since you were last here, or (a Cleric) coals for the censer.
     // (The first time in on the errand: their own line for a new face, errandwords.ts.)
-    const greet = first ? ERRANDW.firstVisit[pr.cls] : pr.picks > 0 ? TEACH[pr.cls][0] : pr.cls === 'HEALER' && pr.glow > 0 ? COAL.isolde : '';
+    const greet = first ? ERRANDW.firstVisit[pr.cls] : handed ? QUESTW.hand[pr.cls] : pr.picks > 0 ? TEACH[pr.cls][0] : pr.cls === 'HEALER' && pr.glow > 0 ? COAL.isolde : '';
     openTrainer(g, panel, `${t.name}, ${CLASS_NAME[cls]} TRAINER`, name, greet);
   } else if (id === 'hew') {
     panel.show('HEW', say('Hew', g.wood && g.wood.stage >= 2 ? LINES.north : LINES.later));

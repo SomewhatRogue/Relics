@@ -5,6 +5,7 @@
  * pops one out as a framed card with the posting in full, its rows, and GO ALONE, GATHER A PARTY and
  * BACK. The parties gathering and the jobs done lately sit over the list as before.
  */
+import { QUESTW } from './questwords';
 import { KIND, SIZES, STORY_PARTY, danger, type Job } from '../shared/jobs';
 import { EXPED_BOARD } from '../shared/expedjob';
 import { WOOD_POST } from '../shared/hangwords';
@@ -43,8 +44,8 @@ const weatherRow = (j: Job) => (j.exped ? '' : SKY_ROW[skyOf(j)]);
 
 const kindOf = (j: Job) => (j.exped || j.instance ? 'exped' : j.objective);
 const kindWord = (j: Job) => (j.exped || j.instance ? boardWords(j).kind : KIND[j.objective]);
-/** The kind as a coloured chip, and DEEP. */
-const chips = (j: Job) => `<b class="kind k-${kindOf(j)}">${kindWord(j)}</b>` + (j.deep ? `<b class="kind k-deep">${BOARDW.deep}</b>` : '');
+/** The kind as a coloured chip, and DEEP; your own quest's posting first, gold (shared/heroquests.ts). */
+const chips = (j: Job) => (j.quest ? `<b class="kind k-quest">${QUESTW.tag}</b>` : '') + `<b class="kind k-${kindOf(j)}">${kindWord(j)}</b>` + (j.deep ? `<b class="kind k-deep">${BOARDW.deep}</b>` : '');
 /** The row's tags: the chips, then the length, the hour and the weather. */
 function tags(j: Job): string {
   const t = timeOf(j), wx = weatherWord(j);
@@ -55,7 +56,7 @@ const display = (s: string) => titleCase(s).replace(/\b[A-Z][A-Z']+\b/g, (w) => 
 
 /** One row of the list: the job, its tags, how hard, what it pays. */
 const row = (j: Job, i: number, pay: number) =>
-  `<button class="jrow k-${kindOf(j)}${j.deep ? ' deep' : ''}" data-open="${i}"><span class="jt">${esc(j.title)}</span><span class="jtags">${tags(j)}</span><span class="jr">${pips(danger(j))}<em>${pay}g</em></span></button>`;
+  `<button class="jrow k-${kindOf(j)}${j.deep ? ' deep' : ''}${j.quest ? ' quest' : ''}" data-open="${i}"><span class="jt">${esc(j.title)}</span><span class="jtags">${tags(j)}</span><span class="jr">${pips(danger(j))}<em>${pay}g</em></span></button>`;
 
 /** The card for one job: the posting in full, its rows, and what you can do. */
 function card(g: Game, j: Job, i: number, pay: number): string {
@@ -96,7 +97,9 @@ export function openBoard(g: Game, panel: Panel, at: 'board' | 'map' = 'board'):
   const pay = (j: Job) => Math.round(j.reward * rewardMult(w));
   const sel = jobs.findIndex((j) => j.id === open);
   // At the map table the clerk's word first; under the board's list, where the long trips went.
-  const lead = map ? `<p class="jlead">${esc(BOARDW.clerk)}</p>` : '', foot = map ? '' : `<p class="jlead">${esc(BOARDW.toMap)}</p>`;
+  // (Only the long trips this hero has opened are named, or none: hero quests, shared/heroquests.ts.)
+  const trips = g.jobs().filter(far), none = map && !jobs.length;
+  const lead = map ? `<p class="jlead">${esc(none ? QUESTW.noTrips : BOARDW.clerk)}</p>` : '', foot = map || !trips.length ? '' : `<p class="jlead">${esc(QUESTW.toMap(trips))}</p>`;
   const html = lead + partyHtml + doneHtml + (partyHtml || doneHtml ? `<h3>${BOARDW.jobs}</h3>` : '') +
     `<div class="jlist">${jobs.map((j, i) => row(j, i, pay(j))).join('')}</div>` + foot + (sel >= 0 ? card(g, jobs[sel], sel, pay(jobs[sel])) : '');
   panel.show(`${title}, DAY ${w.day}`, html);

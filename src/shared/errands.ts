@@ -10,8 +10,10 @@ import { SKILL_CHOICES } from './magic.js';
 import type { Profile } from './progress.js';
 import { knowsSkill, skillStep } from './skillteach.js';
 import { CLASS_ORDER, type HeroClass } from './weapons.js';
+import { questDue, questHeld, takeQuest } from './heroquests.js';
 
-export type ErrandId = 'relic' | 'trainer' | 'skill';
+/** `quest`: your trainer has a hero quest for you; `job`: one in hand, to do (shared/heroquests.ts). */
+export type ErrandId = 'relic' | 'trainer' | 'skill' | 'quest' | 'job';
 export interface Errands {
   /** The runner has found you and said their line (the first two are yours from then). */
   told: boolean;
@@ -52,6 +54,8 @@ export function openErrands(p: Profile): ErrandId[] {
   if (e.told && !e.relic) out.push('relic');
   if (e.told && !e.trainer) out.push('trainer');
   else if (openSkillLevel(p) > e.seen) out.push('skill');
+  if (questDue(p) && (!e.told || e.trainer)) out.push('quest');
+  if (questHeld(p)) out.push('job');
   return out;
 }
 
@@ -78,8 +82,10 @@ export function relicDone(p: Profile): boolean {
 }
 
 /** Who an errand sends you to: a door in town and who's behind it (an npc's `talk` and `arg`). */
-export function errandWho(p: Profile, id: ErrandId): { door: string; talk: string; arg?: number } {
+export function errandWho(p: Profile, id: ErrandId): { door: string; talk: string; arg?: number; spot?: string } {
   if (id === 'relic') return { door: 'church', talk: 'church' };
+  // A quest in hand: the board, where your job for it is; or Cobb's ladder, for what's found in the Deep.
+  if (id === 'job') return questHeld(p)?.q.post ? { door: '', talk: 'board', spot: 'board' } : { door: '', talk: 'sewer', spot: 'sewer' };
   return { door: TRAINER_DOOR[p.cls], talk: 'trainer', arg: CLASS_ORDER.indexOf(p.cls) };
 }
 
@@ -90,5 +96,7 @@ export function talkedTo(p: Profile, talk: string, arg?: number): boolean {
   const was = JSON.stringify(e);
   if (e.told) e.trainer = true;
   e.seen = Math.max(e.seen, p.level);
-  return JSON.stringify(e) !== was;
+  // And hands over the quest they have for you (not on top of the first errand).
+  const took = (!e.told || e.trainer) && takeQuest(p);
+  return took || JSON.stringify(e) !== was;
 }

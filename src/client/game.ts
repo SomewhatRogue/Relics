@@ -4,6 +4,8 @@
  * to go in; taking a job starts a run (room after room until the job is done or you're driven back);
  * the results come home to the hero and the shared world, and the town changes with them.
  */
+import { gateOf, isOpen, questCount, questJob, type QuestDef, type QuestFacts } from '../shared/heroquests';
+import { QUESTW } from './questwords';
 import { normName } from '../shared/names';
 import { releaseName } from './names';
 import { placeOf, spotOf, type PastimeId } from '../shared/pastimes';
@@ -109,6 +111,8 @@ export class Game {
   mode: Mode = 'town';
   /** Grown on the last job: say so over the hero once, back in town (main.ts). */
   levelPop = 0;
+  /** A hero quest just done: said once back in town (main.ts; shared/heroquests.ts). */
+  questPop: QuestDef | null = null;
   /** Relics just gained, each waiting to be shown (relicmoment.ts; main.ts takes them when nothing's in the way). */
   relicNews: RelicMoment[] = [];
   room!: ArenaRoom;
@@ -623,7 +627,11 @@ export class Game {
     const list = [...board(this.world.day, workDone(this.world, 'sewers')), expedition(this.world.day), hangmansWood(this.world.day), fenmere(this.world.day), openCut(this.world.day)];
     // The Doorkeepers in the great barn, a boss hunt, from late in chapter 1 (shared/bossjobs.ts).
     if (barnPosted(this.world)) list.splice(list.length - 4, 0, barnHunt(this.world.day));
-    return this.world.storyDone.includes(CHAPTER_1.mission.id) ? list : [CHAPTER_1.mission, ...list];
+    // Hero quests (shared/heroquests.ts): what this hero hasn't opened yet is off their board, and their own
+    // posting for the quest in hand goes at the top.
+    const p = this.profile, mine = questJob(p, QUESTW.post), open = list.filter((j) => { const g = gateOf(j); return !g || isOpen(p, g); });
+    const all = mine ? [mine, ...open] : open;
+    return this.world.storyDone.includes(CHAPTER_1.mission.id) ? all : [CHAPTER_1.mission, ...all];
   }
 
   /** Floor 1 of a new run down, on a fresh seed (the room's own Rng decides everything in it). */
@@ -666,7 +674,16 @@ export class Game {
     if (!run || !d || !isDeep(run.job) || run.job.floor !== d.floor) return;
     const there = !!e && !!h && this.room.exitOpen && !this.outside && h.act !== 'down' && inArea(e, h.x, h.y);
     if (there && !this.deepThere) (markHere(d, this.profile, run.gold), store(this.save), (this.deepAsk = true));
+    // Out of THE HAULIER's floor (its way out opens with him down): a hero quest's kill (shared/heroquests.ts).
+    if (there && !this.deepThere && run.job.arena === 'haulier') this.questEnd({ job: run.job, won: true, rescued: 0, dens: 0, haulier: true });
     this.deepThere = there;
+  }
+
+  /** A job's end (or the Haulier's floor), as the quest in hand counts it; one done is said back in town (main.ts). */
+  private questEnd(f: QuestFacts): void {
+    const was = JSON.stringify(this.profile.quests), fin = questCount(this.profile, f);
+    if (fin) this.questPop = fin;
+    if (JSON.stringify(this.profile.quests) !== was) store(this.save);
   }
 
   /** GO DEEPER at a checkpoint: my vote. Alone, down at once; in a party, once everyone still in has chosen it. */
@@ -1286,6 +1303,8 @@ export class Game {
       deed: won && !followed ? { title: run.job.title, place: run.job.place.name, party } : undefined,
       ...(claim && deep ? { deep: { ...claim, g: deep.gold } } : {}),
     });
+    // The quest in hand counts this job, whoever's it was (a run joined counts: Kyle, 2026-11-13).
+    this.questEnd({ job: run.job, won, rescued, dens: run.dens ?? 0 });
     unbank(p.id);
     if (ONLINE && key && !key.startsWith('solo-')) dropOwed(p.id, key);
     this.enterTown({ x: 24.1, y: 14.8 });
