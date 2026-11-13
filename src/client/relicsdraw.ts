@@ -7,7 +7,8 @@ import type { Smoke } from '../sim/flasks';
 import type { Chest } from '../sim/chests';
 import { POTIONS, TIERS, TIER_ORDER } from '../shared/tuning';
 import { isUnique, itemCol } from './uniquelook';
-import { line, type Ctx } from './draw';
+import { blit, line, shadow, type Ctx } from './draw';
+import { makeSprite, type Part } from './sprites';
 import { EL_COL } from './palette';
 import { drawSpell } from './spelldraw';
 import { drawBottle, drawGear, drawGold } from './lootart';
@@ -218,44 +219,51 @@ export function drawCoal(c: Ctx, m: Coal, x: number, y: number): void {
   c.glow.globalAlpha = 1;
 }
 
-/** A chest: wood and iron; rattling with light leaking from the seams while it opens; lid up after; chains on a chained one. */
+/** A chest (redrawn in the loot pass, 2026-11-12): a domed lid, iron bands and studs, a brass lock plate, planked
+ *  sides; rattling with light leaking from the seam while it opens; open, the lid's dark inside tipped back and a
+ *  gleam of coin in the mouth; chains across a chained one. 20 by 14, about a tall hero's knee. */
+const IRON = '#4a4652', IRON2 = '#7a7684', STUD = '#c0c0c8', BODY: Part[] = [
+  ['r', 0, 7, 20, 6, '#5e4128'], ['r', 0, 9, 20, 1, '#46301c'], ['r', 0, 11, 20, 1, '#46301c'], ['r', 1, 13, 18, 1, '#3a2614'],
+  ['r', 0, 7, 1, 6, IRON], ['r', 19, 7, 1, 6, IRON], ['p', 0, 8, '#9a96a4'], ['p', 19, 8, '#9a96a4'],
+];
+const SHUT = makeSprite(20, 14, [
+  ['r', 2, 0, 16, 1, '#6b4a2b'], ['r', 1, 1, 18, 1, '#7a5a34'], ['r', 0, 2, 20, 4, '#6b4a2b'], ['r', 1, 2, 18, 1, '#8a6a40'], ['r', 0, 5, 20, 1, '#4a3420'],
+  ['r', 0, 6, 20, 1, '#2a1c10'], ...BODY,
+  ['r', 3, 0, 2, 14, IRON], ['r', 15, 0, 2, 14, IRON], ['r', 3, 1, 1, 12, IRON2], ['r', 15, 1, 1, 12, IRON2],
+  ['p', 4, 3, STUD], ['p', 4, 10, STUD], ['p', 16, 3, STUD], ['p', 16, 10, STUD],
+  ['r', 8, 5, 4, 4, '#c8962e'], ['r', 9, 5, 2, 1, '#e0c060'], ['p', 9, 7, '#1a120a'], ['p', 10, 7, '#1a120a'],
+]);
+const OPEN = makeSprite(20, 14, [
+  ['r', 1, 0, 18, 4, '#3a2614'], ['r', 3, 0, 2, 4, IRON], ['r', 15, 0, 2, 4, IRON], ['r', 0, 4, 20, 1, '#6b4a2b'],
+  ['r', 1, 5, 18, 2, '#1a120a'], ['r', 4, 6, 12, 1, '#a8862e'], ['p', 7, 5, '#e0c060'], ['p', 12, 5, '#e0c060'],
+  ['r', 0, 7, 20, 1, '#7a5a34'], ...BODY.slice(1),
+  ['r', 3, 7, 2, 7, IRON], ['r', 15, 7, 2, 7, IRON], ['p', 4, 10, STUD], ['p', 16, 10, STUD], ['r', 9, 8, 2, 3, '#c8962e'],
+]);
+
 export function drawChest(c: Ctx, ch: Chest, x: number, y: number): void {
   const opening = ch.state === 'opening', open = ch.state === 'open', col = TIERS[ch.tier].col;
-  const jx = opening ? Math.round(Math.sin(c.now * 40) * (ch.t > 0.6 ? 1 : 0.5)) : 0, bx = Math.round(x - 7 + jx), by = Math.round(y - 9);
-  c.lit.fillStyle = 'rgba(8,6,12,0.5)';
-  c.lit.fillRect(bx, by + 9, 14, 2);
-  c.lit.fillStyle = '#5a3d22';
-  c.lit.fillRect(bx, by + 3, 14, 7);
-  c.lit.fillStyle = '#3a2614';
-  c.lit.fillRect(bx, by + 6, 14, 1);
-  c.lit.fillStyle = '#7a828c';
-  c.lit.fillRect(bx + 1, by + 3, 1, 7);
-  c.lit.fillRect(bx + 12, by + 3, 1, 7);
+  const jx = opening ? Math.round(Math.sin(c.now * 40) * (ch.t > 0.6 ? 1 : 0.5)) : 0, left = Math.round(x - 10 + jx), top = Math.round(y - 14);
+  shadow(c, x, y, 11);
+  blit(c, open ? OPEN : SHUT, Math.round(x + jx), Math.round(y + 1));
   if (open) {
-    c.lit.fillStyle = '#6b4a2b';
-    c.lit.fillRect(bx, by - 3, 14, 3);
+    // The tier's light up out of the mouth.
     c.glow.globalAlpha = 0.5;
     c.glow.fillStyle = col;
-    c.glow.fillRect(bx + 2, by + 2, 10, 1);
+    c.glow.fillRect(left + 3, top + 5, 14, 1);
     c.glow.globalAlpha = 1;
-  } else {
-    c.lit.fillStyle = '#6b4a2b';
-    c.lit.fillRect(bx, by, 14, 3);
-    c.lit.fillStyle = '#d4a537';
-    c.lit.fillRect(bx + 6, by + 3, 2, 2);
-  }
+  } else c.glow.fillStyle = col, c.glow.fillRect(left + 10, top + 6, 1, 1);
   if (opening) {
     // Light leaking from the seam, brighter as the lid gives; hungry light pulses dark.
     const k = ch.t / 1.2, pulse = ch.tier === 'hungry' ? 0.5 + 0.5 * Math.sin(c.now * 7) : 1;
     c.glow.globalAlpha = (0.4 + 0.6 * k) * pulse;
     c.glow.fillStyle = col;
-    c.glow.fillRect(bx, by + 3, 14, 1);
-    for (let i = 0; i < 3; i++) c.glow.fillRect(bx + 2 + i * 4 + jx, by + 2 - Math.round(((c.now * 20 + i * 7) % 6) * k), 1, 1);
+    c.glow.fillRect(left, top + 6, 20, 1);
+    for (let i = 0; i < 4; i++) c.glow.fillRect(left + 3 + i * 4, top + 5 - Math.round(((c.now * 20 + i * 7) % 8) * k), 1, 1);
     c.glow.globalAlpha = 1;
   }
   if (ch.chained && ch.state === 'shut') {
     c.lit.fillStyle = '#9aa3ad';
-    for (let i = 0; i < 7; i++) c.lit.fillRect(bx + i * 2, by + 1 + i, 1, 1), c.lit.fillRect(bx + 13 - i * 2, by + 1 + i, 1, 1);
+    for (let i = 0; i < 10; i++) c.lit.fillRect(left + i * 2, top + 1 + i, 1, 1), c.lit.fillRect(left + 19 - i * 2, top + 1 + i, 1, 1);
   }
 }
 

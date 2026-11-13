@@ -115,9 +115,15 @@ export function makeChest(): ChestFig {
   const root = new THREE.Group(), wood = M(0x6b4a2b), band = M(0x4a4652);
   part(root, 0.74, 0.36, 0.46, wood, 0, 0.18, 0);
   for (const x of [-0.26, 0.26]) part(root, 0.06, 0.38, 0.48, band, x, 0.19, 0);
+  // (The loot pass, 2026-11-12: corner irons, a plank seam, a brass lock plate; the lid banded and raised.)
+  for (const x of [-0.37, 0.37]) part(root, 0.03, 0.38, 0.48, band, x, 0.19, 0);
+  part(root, 0.75, 0.02, 0.47, M(0x46301c), 0, 0.18, 0);
+  part(root, 0.14, 0.14, 0.03, M(0xc8962e), 0, 0.27, 0.235);
   const glow = part(root, 0.6, 0.04, 0.36, G(0xffffff, 0.2), 0, 0.35, 0);
   const lid = pivot(root, 0, 0.36, -0.23);
   part(lid, 0.74, 0.16, 0.46, wood, 0, 0.08, 0.23);
+  part(lid, 0.66, 0.06, 0.38, M(0x7a5a34), 0, 0.19, 0.23);
+  for (const x of [-0.26, 0.26]) part(lid, 0.06, 0.2, 0.48, band, x, 0.1, 0.23);
   part(lid, 0.12, 0.1, 0.06, M(0xd4a537), 0, 0.02, 0.47);
   const chains = pivot(root, 0, 0, 0);
   for (const s of [-1, 1]) part(chains, 0.06, 0.06, 0.9, M(0x8a8494), 0, 0.3, 0, 0, s * 0.6);

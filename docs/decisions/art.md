@@ -246,3 +246,8 @@ The plan, one class at a time so Kyle can play each against the old ones:
   loot3d.ts, from actors3d.ts, for props3d.ts's spinning blade): the same, built of boxes, lying at a slant in a
   dotted ring of its tier's colour, the glint running down it; coins and a heap; a corked bottle glowing.
   (Claude Opus 5.5)
+- Chests (the loot pass, continued): flat, 20 by 14 sprites (relicsdraw.ts) for the 14-by-12 boxes: a domed lid,
+  iron bands with studs, corner irons, planked sides, a brass lock plate with a gem of the tier's colour; open,
+  the lid's dark inside tipped back and a gleam of coin in the mouth. The rattle, the seam's light, the sparks
+  and the chains kept, sized to it. 2.5D (three/props3d.ts makeChest): corner irons, a plank seam, a brass lock
+  plate, the lid banded and raised. (Claude Opus 5.5)
