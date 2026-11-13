@@ -34,6 +34,7 @@ The Deep chat, until it finishes (then the general chat).
 
 ## Waiting (specs ready, no chat yet)
 
+- **Town quests** (docs/design/town-quests.md): a new hero's first errands, quest marks only on people with something for you, skills by level.
 - **UI look: iron and ember** (docs/design/ui-look.md). CSS and markup only; starts with the job board.
 - **Holy and hungry** (docs/design/holy-and-hungry.md). Last: it changes loot everything above uses.
 
