@@ -124,3 +124,13 @@ From 2026-11-12. Newest at the bottom. Sign each entry with the model name.
   the taken as plain lines; `.kn-only` joins ironui.css's list. Files: pack.ts, relicshelf.ts, cells.ts,
   itemicons.ts (unowned, now on this row), pack.css, cells.css, tree.css. Full suite green.
   (Claude Opus 5.5)
+- Declutter, the HUD in a fight (phone first): the folded tracker is its line on the scene, no frame (the
+  big box keeps its frame while it's open); with a boss's plate up and no expedition jobs to count, the
+  tracker steps aside (`body.bossfight`, set in main.ts beside showPlate; the plate is the goal, and the
+  cameras come up with it gone); your name over the health hides in a fight on a phone (the hearts stay on
+  its line; `body[data-mode='run']`); the Warrior's dim GRAB hides till there's something to grab (gilt
+  then). Shots: `scripts/iron-fight.cjs` (the barn, a village job, the job's tracker folded).
+- A build bug found on the way: the CSS minifier turns `border-image: none` into an empty `border-image:`,
+  which the browser drops, so the old frame stayed (most of mine hid it anyway with `border: 0`). This chat's
+  sheets now use `border-image-source: none`. Same latent bug for their owners: `skins.css:10`
+  (`#panel .job .jhead`) and `upgrades.css:36`. (Claude Opus 5.5)

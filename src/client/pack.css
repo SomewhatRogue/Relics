@@ -70,7 +70,7 @@ body #pack .s-belt > i { font: 400 11px/1.2 var(--i-label); letter-spacing: 0.03
 body #pack .fig { align-self: stretch; background: radial-gradient(ellipse at 50% 70%, #2a2c33, var(--i-well) 75%); box-shadow: 0 0 0 2px var(--i-outline), inset 1px 1px 0 var(--i-outline), inset -1px -1px 0 #33373e; }
 body #pack .doll { gap: 8px 8px; padding: 2px; }
 
-body #pack button { min-height: 48px; padding: 0 12px; border: 0; border-image: none; border-radius: 0;
+body #pack button { min-height: 48px; padding: 0 12px; border: 0; border-image-source: none; border-radius: 0;
   font: 400 14px/1.1 var(--i-label); letter-spacing: 0.03em; text-transform: uppercase;
   background: #3a3e46; color: var(--i-text); box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #6a6f7a, inset -2px -2px 0 #1b1d22; }
 body #pack button:active:not(:disabled) { transform: translateY(1px); box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #1b1d22, inset -2px -2px 0 #6a6f7a; }
@@ -122,5 +122,5 @@ body #pack .tile.drop i, body #pack .tile.empty.rslot b.rtap { display: block; }
 body #pack .relicrow h3, body #pack .bag h3 { display: none; }
 body #pack .relicrow { margin-top: 12px; }
 body #pack .s-belt { align-self: end; }
-body #pack .detail { border-image: none; }
+body #pack .detail { border-image-source: none; }
 body #pack .detail:empty { display: none; }

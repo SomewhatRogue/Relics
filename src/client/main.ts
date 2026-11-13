@@ -488,8 +488,11 @@ function hud(now: number): void {
     const plate = plateOf(room.enemies, room.time, (e) => (st ? st.keep.includes(e.name ?? '') : !room.exped || Math.hypot(e.x - me.x, e.y - me.y) < 14));
     fold.render(full, small, run.job.place.name + run.index + ':' + (x && !me.out && x.phase === 'shut' ? 'jobs' + left : calm(g.text)), now, objFlash.holding(now), !!plate);
     showPlate($('#boss'), plate);
+    // (A boss's plate up and no expedition's jobs to count: the plate is the goal, the tracker steps aside.)
+    document.body.classList.toggle('bossfight', !!plate && !x);
   } else {
     showPlate($('#boss'), null);
+    document.body.classList.remove('bossfight');
     goalPulse.clear($('#banner'));
     objFlash.watchWood(-1, now);
     // A new hero's errands, and the trainer's word on a new skill, are the town's goal (errandline.ts).

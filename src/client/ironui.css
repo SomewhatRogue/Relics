@@ -55,7 +55,7 @@
    CLOSE). Pressed flips the bevel and drops a pixel. 48 px tall at least. Written as plain lists, not :is(),
    so each screen's own button rules still outweigh them. ---- */
 .ib, #panel:has(.jlist, .shop, .store, .choices, .kn-only) button, #panel > .card > .buttons button {
-  min-height: 48px; padding: 0 12px; border: 0; border-image: none; border-radius: 0; filter: none;
+  min-height: 48px; padding: 0 12px; border: 0; border-image-source: none; border-radius: 0; filter: none;
   font: 400 14px/1.1 var(--i-label); letter-spacing: 0.03em; text-transform: uppercase;
   background: #3a3e46; color: var(--i-text);
   box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #6a6f7a, inset -2px -2px 0 #1b1d22;

@@ -47,8 +47,8 @@ body #pack .tile.dragging { opacity: 0.35; }
    hairline between them, not boxes in a box; WORN NOW and THIS as small brass labels. */
 .pair { gap: 0; }
 /* (body: over skins.css's frame on each side.) */
-body .pair .side { padding: 2px 10px 2px 0; background: none; border: 0; border-image: none; font: 500 15px/1.35 var(--i-read); }
-body .pair .side + .side { padding: 2px 0 2px 10px; border: 0; border-left: 1px solid #3a3e46; border-image: none; }
+body .pair .side { padding: 2px 10px 2px 0; background: none; border: 0; border-image-source: none; font: 500 15px/1.35 var(--i-read); }
+body .pair .side + .side { padding: 2px 0 2px 10px; border: 0; border-left: 1px solid #3a3e46; border-image-source: none; }
 .pair.one .side { padding: 2px 0; }
 .pair .was { font: 400 10px/1.4 var(--i-label); letter-spacing: 0.03em; color: var(--i-brass); margin-bottom: 4px; }
 .pair .card-head b { font: 700 16px/1.2 var(--i-read); }

@@ -14,7 +14,7 @@
 #title .slot .who span { font: 400 11px/1.4 var(--i-label); letter-spacing: 0.03em; color: var(--i-cool); }
 
 /* The buttons: pressed metal, at least 48 px. */
-#title .tcard button { min-height: 48px; padding: 0 12px; border: 0; border-image: none; border-radius: 0;
+#title .tcard button { min-height: 48px; padding: 0 12px; border: 0; border-image-source: none; border-radius: 0;
   font: 400 14px/1.1 var(--i-label); letter-spacing: 0.03em; text-transform: uppercase;
   background: #3a3e46; color: var(--i-text); box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #6a6f7a, inset -2px -2px 0 #1b1d22; }
 #title .tcard button:active:not(:disabled) { transform: translateY(1px); box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #1b1d22, inset -2px -2px 0 #6a6f7a; }

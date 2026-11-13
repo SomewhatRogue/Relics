@@ -198,11 +198,11 @@ body.touch #banner.small { max-width: min(250px, calc(100vw - 16px)); }
 #boss .pb em { margin-top: 3px; font: 400 10px/1 var(--i-label); letter-spacing: 0.03em; color: var(--i-warm); text-shadow: 1px 1px 0 var(--i-outline); }
 #boss .pips i { border-color: #f0a080; }
 #boss .pips i.on { background: #f0a080; }
-#boss .bar, #hud .bar { border: 2px solid; border-color: var(--i-outline) #3a3e46 #3a3e46 var(--i-outline); border-image: none; background: var(--i-outline); box-shadow: 0 0 0 1px var(--i-outline); }
+#boss .bar, #hud .bar { border: 2px solid; border-color: var(--i-outline) #3a3e46 #3a3e46 var(--i-outline); border-image-source: none; background: var(--i-outline); box-shadow: 0 0 0 1px var(--i-outline); }
 #boss .bar { margin-top: 3px; }
 #boss .poise { margin-top: 2px; background: var(--i-outline); }
 #hud .who { font: 400 12px/1.2 var(--i-label); letter-spacing: 0.03em; color: var(--i-text); text-shadow: 1px 1px 0 var(--i-outline); }
-#hud .lv { border: 0; border-image: none; font: 400 11px/18px var(--i-label); color: #2e1a08; background: linear-gradient(180deg, #ffe08a, #c8902e); box-shadow: 0 0 0 2px var(--i-outline); }
+#hud .lv { border: 0; border-image-source: none; font: 400 11px/18px var(--i-label); color: #2e1a08; background: linear-gradient(180deg, #ffe08a, #c8902e); box-shadow: 0 0 0 2px var(--i-outline); }
 /* A phone's stamina, magic or faith (Kyle, 2026-11-13: too small round ATTACK and under the thumb): the bar
    under the health shows on a phone too, full width and named (its title: STAMINA, MAGIC, FAITH), up where no
    thumb goes. The rings round ATTACK and BLINK stay. */
@@ -214,3 +214,16 @@ body.touch #hud .st::before { content: attr(title); position: absolute; z-index:
 body.touch #hud .col { position: relative; }
 body.touch #hud .who { padding-right: 68px; }
 body.touch #hud .ups { position: absolute; top: -6px; right: 0; margin: 0; }
+
+/* ---- Declutter in a fight (Kyle, 2026-11-13: "we just have too much stuff going on"): what a player
+   doesn't need that second steps aside. ---- */
+/* The folded tracker is its line on the scene, no frame (the big box keeps its frame while it's open). */
+#banner.small { background: none; border-color: transparent; border-image-source: none; box-shadow: none;
+  text-shadow: 1px 1px 0 var(--i-outline), -1px 0 0 var(--i-outline), 0 -1px 0 var(--i-outline), 0 1px 0 var(--i-outline); }
+#banner.small .ln { color: var(--i-text); }
+/* A boss's plate up (no expedition jobs to count): the plate is the goal, the tracker steps aside. */
+body.bossfight #banner.small { display: none; }
+/* In a fight on a phone: you know who you are (the name line keeps its place; the hearts stay on it). */
+body.touch[data-mode='run'] #hud .who { color: transparent; text-shadow: none; }
+/* GRAB only when there's something to grab (gilt then); the Warrior's dim hand otherwise steps aside. */
+body.touch #touch .tb.grab.dim { opacity: 0; pointer-events: none; }

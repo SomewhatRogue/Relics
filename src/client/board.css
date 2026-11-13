@@ -6,7 +6,7 @@
 
 /* A row: the job, its tags under it, how hard and what it pays on the right. Pressed, its bevel turns over. */
 #panel .jlist .jrow { display: grid; grid-template-columns: 1fr auto; grid-template-areas: 't r' 'g r'; align-items: center; gap: 4px 10px; width: 100%; min-height: 56px; padding: 8px 10px 8px 14px; text-align: left;
-  border: 0; border-image: none; border-radius: 0; background: #1b1d22; color: var(--i-text); text-transform: none; letter-spacing: 0;
+  border: 0; border-image-source: none; border-radius: 0; background: #1b1d22; color: var(--i-text); text-transform: none; letter-spacing: 0;
   box-shadow: 0 0 0 2px var(--i-outline), inset 4px 0 0 var(--kc, #4b505a), inset 6px 2px 0 #33373e, inset -2px -2px 0 var(--i-outline); }
 #panel .jlist .jrow:active:not(:disabled) { background: #202228; transform: translateY(1px);
   box-shadow: 0 0 0 2px var(--i-outline), inset 4px 0 0 var(--kc, #4b505a), inset 6px 2px 0 var(--i-outline), inset -2px -2px 0 #33373e; }
