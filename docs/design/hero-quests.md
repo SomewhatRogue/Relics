@@ -1,6 +1,6 @@
 # Hero quests: a level's quest on the board that opens the next of the world
 
-Spec, 2026-11-13 (Kyle and Claude Opus 5.5), from the town quests chat. **Not built.** Follows on from
+Spec, 2026-11-13 (Kyle and Claude Opus 5.5), from the town quests chat. **Not built.** Kyle's calls are in. Follows on from
 docs/design/town-quests.md (the errands, the trainer's word on a new skill, quest marks).
 
 ## What Kyle wants
@@ -54,17 +54,17 @@ what a raid is first; not in this draft.
 - So five quests come to about ten new lines, hand-written in one batch, through ONE lore-keeper call and
   ONE line-editor call. No generated quest text, no line from each trainer for each quest.
 
-## Open: Kyle's calls
+## Kyle's calls (2026-11-13)
 
-1. **What's locked: hidden or shown?** Skills a hero can't get aren't shown at all (2026-11-12). The same
-   here would leave Hangman's Wood, the expeditions, the Deep and the Open Cut off your board till their
-   quest's done. Or shown, with a line saying which quest opens them.
-2. **Co-op.** Proposed: you need it open to **start** a run; anyone can **join** a friend's. Does a run
-   joined count toward your own quest (friends can carry you up), or does each walk it themselves?
-3. **Old heroes.** Proposed, as with the errands: everything open up to their level, no quest they've
-   outgrown.
-4. **The Sewers** open today when the town's works are mended (the whole world's). Keep that as it is
-   (the world's gate) and put the hero's gate only on what's in the table?
+1. **What's locked is off your board** till its quest is done, as skills are: not shown, no lock line.
+2. **Co-op:** you need it open to **start** a run; anyone can **join** a friend's, and a run joined
+   **counts toward your own quest**, so friends can carry you up the ladder.
+3. **Old heroes:** everything open up to their level, no quest they've outgrown.
+4. **The Sewers stay the town's gate** (the works, for the whole world: the grate behind the Drowned Rat
+   opens and sewer jobs go on the board). The Deep is entered from the Sewers (Cobb's ladder), so it
+   needs both: the town has opened the Sewers, and you've done your level 7 quest. Until then Cobb's
+   ladder is the sewer jobs only. (Proposed by Claude as the default after Kyle asked whether the Sewers
+   and the Deep were the same; Kyle can change it.)
 
 ## Who it touches
 

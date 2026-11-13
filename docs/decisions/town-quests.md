@@ -93,3 +93,7 @@ From 2026-11-12. Spec: docs/design/town-quests.md. Newest at the bottom. Sign ea
   each over on the level-up visit; your board gets a job of your own, tagged and marked; one line per
   trainer used every time and a sentence or two per posting, about ten lines in all; a first ladder at
   levels 3, 4, 5, 7, 9). Not built; four calls open for Kyle. (Claude Opus 5.5)
+- Hero quests, Kyle's calls: locked content is off your board; a joined run counts toward your own
+  quest; old heroes get everything up to their level. He asked whether the Sewers are the Deep: no, the
+  Sewers are the town's work (the grate opens for everyone), the Deep is entered from them; default
+  written in that the Deep needs both the town's Sewers and your level 7 quest. In the spec. (Claude Opus 5.5)
