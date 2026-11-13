@@ -251,3 +251,6 @@ The plan, one class at a time so Kyle can play each against the old ones:
   the lid's dark inside tipped back and a gleam of coin in the mouth. The rattle, the seam's light, the sparks
   and the chains kept, sized to it. 2.5D (three/props3d.ts makeChest): corner irons, a plank seam, a brass lock
   plate, the lid banded and raised. (Claude Opus 5.5)
+- The walk, again (Kyle, 2026-11-12: "walking animations are weird up and down. And mage boots come out from the
+  sides as he walks"): the body no longer bobs, a lifted foot rises one pixel, 9 changes of foot a second; no
+  swing under a robe (its legs are only the feet row, and swung, the boots stuck out past the hem). (Claude Opus 5.5)

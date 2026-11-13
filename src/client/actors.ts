@@ -46,10 +46,11 @@ function drip(c: Ctx, x: number, y: number, n: number): void {
 const cutOf = (d: LookDef) => d.cut ?? heroCut(d.tall, !!d.robe);
 /** Breathing at rest: the body rises a pixel for part of a slow breath (Kyle, 2026-11-05: more life). */
 const BREATH = { every: 3.4, up: 1.3, crouch: -0.07 };
-/** Walking: a foot up and the body bobbing with it, `CADENCE` changes of foot a second (Kyle, 2026-11-12: the walk
+/** Walking: a foot up, `CADENCE` changes of foot a second; the body no longer bobs (Kyle, 2026-11-12, twice: "walking
+ *  animations are weird up and down"; at 11 a second with a 2-pixel lift it shuddered). Earlier the same day: the walk
  *  "isn't timed up" on the tall bodies: 4.4 squares a second over longer legs wants quicker steps). Across the screen
  *  the step is 2 (figure.ts swings the legs); toward you or away, 1. */
-const STEPS = [-1, 0, 1, 0], CADENCE = 11;
+const STEPS = [-1, 0, 1, 0], CADENCE = 9;
 
 /** `t` is the room's time (blessings and rallies are kept in it). */
 /** A hero, and a netter's net over them while they're held in it (foedraw.ts). */
@@ -88,7 +89,7 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
   const hw = flip !== h.fx < -0.2 ? { ...h, fx: -h.fx } : h;
   let ox = pz.ox, oy = pz.oy, squash = 1;
   const ph = idPhase(h.id);
-  if (pz.phase === 'rest' && h.moving) (pz.step = STEPS[Math.floor(c.now * CADENCE + ph * 4) % 4] * (Math.abs(h.fx) > 0.5 ? 2 : 1)), (oy = pz.step ? -1 : 0);
+  if (pz.phase === 'rest' && h.moving) (pz.step = STEPS[Math.floor(c.now * CADENCE + ph * 4) % 4] * (Math.abs(h.fx) > 0.5 ? 2 : 1));
   else if (!idl && pz.phase === 'rest' && h.act === 'idle' && !h.blocking && ((c.now + ph * BREATH.every) % BREATH.every) < BREATH.up) pz.crouch = BREATH.crouch;
   if (h.act === 'zip') (ox = Math.round(h.fx * 2)), (oy = Math.round(h.fy * 2) - 1);
   const dk = WEAPONS[h.weapon].dodge;
