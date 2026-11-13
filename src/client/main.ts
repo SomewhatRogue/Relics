@@ -609,6 +609,7 @@ function tick(t: number): void {
   // Leading one: the room goes out to the party.
   game.coop?.frame(t / 1000);
   fx.heroes = game.room.heroes;
+  fx.coins.track(game.room.pickups, game.room.heroes);
   for (const ev of evs) {
     // (In the yard they're straw men: a hit throws straw, not blood: strawman.ts.)
     if (!(game.mode === 'yard' && strawFx(fx, ev))) fx.on(ev);

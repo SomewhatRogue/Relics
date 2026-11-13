@@ -352,3 +352,11 @@ The plan, one class at a time so Kyle can play each against the old ones:
   fell to the plain box, and once opened (`ruined`) to a burnt ruin with flames. three/gate3d.ts builds it as
   gatedraw.ts paints it: posts and a lintel, timbers and iron bands shut, hauled up under the lintel open.
   (Claude Opus 5.5)
+
+## 2026-11-13: coins fly to you
+
+- Picking up a pile of gold: its coins (3 to 12, by the pile) hop off the floor and arc into the chest of whoever
+  walked over it, turning as they go, a white glint where each lands (coinfly.ts, on Fx; main.ts tracks the
+  room's piles each frame; overlay3d.ts draws them at their height in 2.5D). A pile counts as picked up when it
+  leaves the room with a hero on it and life in it, so a pile that fades or a room left behind sends nothing.
+  Cosmetic; the room's split of the gold is unchanged. (Claude Opus 5.5)

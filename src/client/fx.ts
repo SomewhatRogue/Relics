@@ -34,6 +34,7 @@ import { stormFx } from './fxstorm';
 import { ladderFx } from './fxladder';
 import { signFx } from './fxsign';
 import { Wet } from './wetfx';
+import { CoinFly } from './coinfly';
 import { iceFx } from './fxice';
 import { worldFx } from './fxworld';
 import { chalkFx } from './chalkfx';
@@ -60,6 +61,8 @@ export class Fx {
   gore = new Gore(this);
   /** The water's own effects: blood clouding in it, rings, things sinking (wetfx.ts). */
   wet = new Wet();
+  /** Coins flying into whoever picked up a pile (coinfly.ts). */
+  coins = new CoinFly();
   /** The room's heroes (set each frame), so an effect can tell whose cast it was. */
   heroes: readonly Hero[] = [];
 
@@ -334,6 +337,7 @@ export class Fx {
   }
 
   update(dt: number): void {
+    this.coins.update(dt, this.heroes);
     for (const p of this.parts) {
       p.life -= dt;
       p.vy += p.grav * dt;
@@ -368,6 +372,7 @@ export class Fx {
   /** Sparks, rings and calls: drawn into the glowing layer. */
   drawGlow(g: CanvasRenderingContext2D, lit: CanvasRenderingContext2D, cx: number, cy: number): void {
     this.gore.draw(lit, g, cx, cy);
+    this.coins.draw(g, cx, cy);
     for (const p of this.parts) {
       const ctx = p.glow ? g : lit;
       ctx.globalAlpha = p.glow ? Math.min(1, (p.life / p.max) * 1.5) : 1;

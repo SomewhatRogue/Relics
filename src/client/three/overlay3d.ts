@@ -58,6 +58,12 @@ export class Overlay {
       g.fillStyle = gb.col;
       g.fillRect(Math.round(x - s / 2), Math.round(y - s / 2), s, s);
     }
+    // Coins flying into whoever picked them up (coinfly.ts), each at its height.
+    fx.coins.each((px, py, z, col, w) => {
+      const [x, y] = at(px, py, z / PX);
+      g.fillStyle = col;
+      g.fillRect(Math.round(x - w / 2), Math.round(y - w / 2), w, w);
+    });
     for (const p of fx.parts) {
       const [x, y] = at(p.x, p.y);
       g.globalAlpha = p.glow ? Math.min(1, (p.life / p.max) * 1.5) : 1;
