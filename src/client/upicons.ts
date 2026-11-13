@@ -4,6 +4,7 @@
  * sword (damage), a boot (speed), a star (crits), breath (stamina or magic back), an hourglass (sooner),
  * plate (taking less), two blades crossed (the counter) and a drop of blood (a bleed).
  */
+import { deepIcon } from './deepbtn';
 import { ICONS } from './icons';
 import { gridUrl, type Grid } from './pixgrid';
 import { skillCanvas } from './skillicons';
@@ -31,6 +32,7 @@ export function upIcon(key: string): string {
   if (kind === 'i' && ICONS[id]) url = gridUrl('i-' + id, ICONS[id]);
   else if (kind === 'u' && UP[id]) url = gridUrl('u-' + id, UP[id]);
   else if (kind === 's') url = skillCanvas(id as never)?.toDataURL() ?? '';
+  else if (kind === 'd') url = deepIcon(id as never)?.toDataURL() ?? '';
   if (!url && UP.star) url = gridUrl('u-star', UP.star);
   urls.set(key, url);
   return url;

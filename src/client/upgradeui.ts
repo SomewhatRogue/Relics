@@ -72,6 +72,7 @@ function act(g: Game, key: string, what: string): void {
   const [kind, id] = key.split(':');
   if (what === 'pick') return g.pickPerk(id as PerkId);
   if (what === 'carry') return g.chooseSkill(id as RelicId);
+  if (kind === 'learn' && id === 'deep') return g.learnDeep();
   if (kind === 'learn') return id === 'skill' || id === 'leave' ? g.learn(id) : g.learnSkill(id as RelicId);
   if (kind === 'tech') return g.buyDrill('technique');
   if (kind === 'rung') return g.buyDrill('ladder');

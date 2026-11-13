@@ -4,6 +4,7 @@
  * (the Come Bye host model) and friends send it Intents.
  */
 import { fireSign } from './signature';
+import { stepCuts } from './samuraicut';
 import { stepSmoke } from './smokebomb';
 import { ARENA, useMap, type GameMap } from '../shared/arena';
 import type { Foe } from '../shared/terrain';
@@ -428,6 +429,8 @@ export class ArenaRoom {
     for (const h of this.heroes) noteGuard(h, this.intents.get(h.id) ?? NO_INTENT);
     // On an oil slick the stick takes hold slowly (sim/oil.ts).
     for (const h of this.heroes) stepHero(h, slipIntent(h, this.intents.get(h.id) ?? NO_INTENT, TICK), this.enemies, this.time, TICK, this.events, acts);
+    // The long cuts whose moment has come land, all at once (sim/samuraicut.ts).
+    stepCuts(this.enemies, this.time, this.events);
     // Blows on friends with lag whose time has come, judged by what their screen showed (sim/lagcomp.ts).
     this.late = stepLate(this.late, this.heroes, this.allEnemies, this.intents, this.time, this.events);
     useLate(this.late);

@@ -1,4 +1,5 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, roll, or taken). */
+import { dashing } from './samuraicut';
 import { wetMult } from './techmage';
 import { litMult } from './charge';
 import { CENSER, BLESSING, DODGE, WARD, FLINCH, POISE, HORN, OVERKILL, TRAIT, GUARD, HERO, HITSTOP, HURT_STAGGER, STAGGER, VARIANTS, WEAPONS, type Swing, CLASS_DODGES, CRIT, STEALTH, weakOn, SPLAT, BANNER, STORM } from '../shared/tuning';
@@ -270,6 +271,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   const g = statsOf(h), taken = (h.blessedUntil > now ? BLESSING.taken : 1) * g.taken * (wears(h, 'apron') ? HUNGRY_FX.apron : 1) * soft * chalkTaken(e, h, now);
   // A spellblade's lightning dash: untouchable while it runs (sim/rush.ts).
   if (h.act === 'bash' && h.rush?.el === 'storm') return void (ev.push({ k: 'dodge', x: h.x, y: h.y }), count(h.id, 'dodges'));
+  // The long cut's crossing: untouchable while it runs (sim/samuraicut.ts).
+  if (dashing(h)) return void ev.push({ k: 'dodge', x: h.x, y: h.y });
   // (Judged late, the dodge was their screen's: a roll the leader's room began after the blow doesn't count.)
   if (!late && h.act === 'roll' && h.actT >= w.dodge.iFrom && h.actT <= slipWindow(h)) return dodgedThrough(e, a, h, now, ev, false);
   // COVER: a Healer blocking beside you takes it on the guard for you (sim/ladderhealer.ts).

@@ -4,6 +4,7 @@
  * to go in; taking a job starts a run (room after room until the job is done or you're driven back);
  * the results come home to the hero and the shared world, and the town changes with them.
  */
+import { deepSkillFor, learnDeepSkill, reachFloor } from '../shared/deepskill';
 import { gateOf, isOpen, questCount, questJob, type QuestDef, type QuestFacts } from '../shared/heroquests';
 import { QUESTW } from './questwords';
 import { normName } from '../shared/names';
@@ -376,6 +377,8 @@ export class Game {
     h.maxHp = cutMax(h.baseHp + statsOf(h).health, h.hpCut);
     h.relics = abilitiesOf(p.cls, carried?.kind, p.skill);
     h.learned = p.learned;
+    // The Deep skill, once taught (shared/deepskill.ts; the room's side, sim/deepskill.ts).
+    h.deepSkill = deepSkillFor(p);
     h.look = p.look ?? 0;
     h.houndLook = houndOf(p);
     // Your skill in hand, or (not yet taught it) the relic you carry.
@@ -663,6 +666,8 @@ export class Game {
       this.deepVote = 0;
       store(this.save);
     }
+    // The deepest floor I've ever reached, with friends or alone: it opens the Deep skill (shared/deepskill.ts).
+    if (reachFloor(p, job.floor ?? 0)) store(this.save);
   }
 
   /**
@@ -811,7 +816,7 @@ export class Game {
     // The works' crew walk on Wickhold's wall clock, the same on every screen (townclock.ts).
     if (this.mode === 'town') onClock(this.room.map.npcs, this.room.time);
     if (this.mode === 'town' && this.walkOverride) intent = { ...intent, ...this.walkOverride, rollSeq: h.seen.roll };
-    if (this.mode === 'town') intent = { ...intent, attack: false, block: false, attackSeq: h.seen.attack, blockSeq: h.seen.block, relicSeq: h.seen.relic, grabSeq: h.seen.grab, potionSeq: h.seen.potion, reload: false, reloadSeq: h.seen.reload ?? 0, elementSeq: h.seen.element ?? 0, signSeq: h.seen.sign ?? 0 };
+    if (this.mode === 'town') intent = { ...intent, attack: false, block: false, attackSeq: h.seen.attack, blockSeq: h.seen.block, relicSeq: h.seen.relic, grabSeq: h.seen.grab, potionSeq: h.seen.potion, reload: false, reloadSeq: h.seen.reload ?? 0, elementSeq: h.seen.element ?? 0, signSeq: h.seen.sign ?? 0, deepSeq: h.seen.deep ?? 0 };
     // The wood: only what Hew has taught you so far; nothing at all during the cutscene.
     if (this.mode === 'wood') {
       const t = this.taught(), cut = (this.wood?.cut ?? -1) >= 0;
@@ -826,6 +831,7 @@ export class Game {
         ...(t.includes('grab') ? {} : { grabSeq: h.seen.grab }),
         ...(t.includes('element') ? {} : { elementSeq: h.seen.element ?? 0 }),
         ...(t.includes('sign') ? {} : { signSeq: h.seen.sign ?? 0 }),
+        deepSeq: h.seen.deep ?? 0,
       };
     }
     this.room.setIntent(ME, intent);
@@ -1745,6 +1751,14 @@ export class Game {
     store(this.save);
   }
 
+  /** Pay your trainer to teach you your class's Deep skill (shared/deepskill.ts); it's on its button at once. */
+  learnDeep(): void {
+    const p = this.profile;
+    if (!learnDeepSkill(p)) return;
+    this.hero.deepSkill = deepSkillFor(p);
+    store(this.save);
+  }
+
   /** Pay your trainer to teach you another of your class's skills (shared/skillteach.ts); you carry it at once. */
   learnSkill(r: RelicId): void {
     const p = this.profile;
@@ -1796,7 +1810,7 @@ export class Game {
 
 /** A friend's hero takes their press counters as already seen (so nothing pressed in town fires). */
 function syncSeen(h: Hero, i: Intent): void {
-  Object.assign(h.seen, { attack: i.attackSeq, block: i.blockSeq, roll: i.rollSeq, weapon: i.weaponSeq, relic: i.relicSeq, relicSwap: i.relicSwapSeq, relicPick: i.relicPickSeq, augment: i.augmentSeq, cls: i.classSeq, take: i.takeSeq, grab: i.grabSeq, gear: i.gearSeq, potion: i.potionSeq, belt: i.beltSeq ?? 0, open: i.openSeq, level: i.levelSeq ?? 0, reload: i.reloadSeq ?? 0, element: i.elementSeq ?? 0, sign: i.signSeq ?? 0 });
+  Object.assign(h.seen, { attack: i.attackSeq, block: i.blockSeq, roll: i.rollSeq, weapon: i.weaponSeq, relic: i.relicSeq, relicSwap: i.relicSwapSeq, relicPick: i.relicPickSeq, augment: i.augmentSeq, cls: i.classSeq, take: i.takeSeq, grab: i.grabSeq, gear: i.gearSeq, potion: i.potionSeq, belt: i.beltSeq ?? 0, open: i.openSeq, level: i.levelSeq ?? 0, reload: i.reloadSeq ?? 0, element: i.elementSeq ?? 0, sign: i.signSeq ?? 0, deep: i.deepSeq ?? 0 });
 }
 
 /** This browser, as one voter (all its heroes share it): made once, kept. */

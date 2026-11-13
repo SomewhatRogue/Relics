@@ -15,6 +15,7 @@ import type { HeroClass } from './weapons.js';
 import { barWords } from './barword.js';
 import { drillNeeds, drillState, hasLesson, lessonState, type Lesson, type TrainState } from './training.js';
 import { coinsHtml } from './coins.js';
+import { deepRows } from './deeprow.js';
 
 /** A pip: a rank you have, one your level allows, one still locked behind a level. */
 export type Pip = 'on' | 'off' | 'lock';
@@ -24,7 +25,7 @@ export interface Rung { rank: number; gain: string; level: number; price: number
  *  the dodge leaves), the movement ladder (its dodge, or what stands in for it), or the base stats. */
 export type TrainGroup = 'skills' | 'craft' | 'ladder' | 'ranks';
 export interface TrainRow {
-  id: DrillId | Lesson | RelicId | TechId | RungId;
+  id: DrillId | Lesson | RelicId | TechId | RungId | 'deep';
   /** A technique row (one of the class's three): bought as the next rank of the technique drill. */
   tech?: TechId;
   /** A rung of the movement ladder (shared/ladder.ts): bought as the next rank of the ladder drill. */
@@ -111,5 +112,6 @@ export function trainerRows(p: Profile): TrainRow[] {
   // The technique: three rows of moves; then the ladder's three rungs.
   const techs = stepRows(p, 'technique', TECHS[p.cls], TECH_WORDS, 'craft', 'tech'), rungs = stepRows(p, 'ladder', RUNGS[p.cls], RUNG_WORDS, 'ladder', 'rung');
   const drills = DRILL_ORDER.flatMap((id) => (id === 'technique' ? [...techs, ...rungs] : [drillRow(p, id)]));
-  return [...skills, ...leave, ...drills].map((r) => magicRow(r, p.cls));
+  // (The Deep skill, once the hero has been deep enough: shared/deeprow.ts.)
+  return [...skills, ...deepRows(p), ...leave, ...drills].map((r) => magicRow(r, p.cls));
 }

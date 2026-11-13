@@ -1,4 +1,5 @@
 /** Relic: Wickhold, the Training Yard and runs. The rooms run here in the browser (solo is a party of one). */
+import { deepTestHero } from './deeptest';
 import { store } from './save';
 import { normName } from '../shared/names';
 import { claimName } from './names';
@@ -256,6 +257,8 @@ const quick = new URLSearchParams(location.search).get('hero') as HeroClass | nu
 if (quick && CLASS_ORDER.includes(quick)) {
   if (game.create(quick, quick) < 0) game.choose(0);
   if (new URLSearchParams(location.search).get('wood') !== '1' && game.mode === 'wood') game.skipWood();
+  // ?deepbest=20 (and &deepskill=1): the Deep skill open, or taught, for a quick look (deeptest.ts).
+  deepTestHero(game);
 }
 else title.show();
 // ?hero=WARRIOR&exped=1: straight onto today's expedition (THE BARROWFIELDS), alone.

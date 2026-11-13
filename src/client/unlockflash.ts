@@ -12,19 +12,21 @@ import { knows, type Hero, type Intent } from '../sim/types';
 import { SIGNS, signOf } from '../shared/signs';
 import { BTN_SEL, KEYCAP, KEYLONG, type BtnId } from './keycaps';
 import { FirstUse } from './firstuse';
+import { DEEP_SKILL_NAME } from '../shared/deepskillwords';
 
 /** Grabs goblins at all (sim/grab.ts): a Warrior, or a Mage with the spellblade. */
 export const grabsGoblins = (me: Hero) => WEAPONS[me.weapon].cls === 'WARRIOR' || me.weapon === 'spellblade';
 /** The buttons for each move the wood teaches. */
 const BTN: Record<string, BtnId[]> = { attack: ['attack'], roll: ['roll'], block: ['block'], relic: ['skill', 'relic'], potion: ['potion'], grab: ['grab'], element: ['element'], sign: ['sign'] };
 /** The buttons that can turn up later (the context slot, RELOAD and USE come and go: never ringed). */
-const LATER: BtnId[] = ['attack', 'block', 'roll', 'skill', 'relic', 'potion', 'element', 'sign'];
+const LATER: BtnId[] = ['attack', 'block', 'roll', 'skill', 'relic', 'potion', 'element', 'sign', 'deep'];
 /** A Rogue's, Ranger's or Healer's own button's name (SHADOW STEP, MARK, MEND). */
 const signName = (me: Hero) => { const s = signOf(WEAPONS[me.weapon].cls); return s ? SIGNS[s].name : ''; };
 /** What a button is called, for this hero. */
 function nameOf(id: BtnId, me: Hero): string {
   if (id === 'roll') return dodgeName(WEAPONS[me.weapon].cls, WEAPONS[me.weapon]);
   if (id === 'sign') return signName(me);
+  if (id === 'deep') return me.deepSkill ? DEEP_SKILL_NAME[me.deepSkill] : '';
   return { attack: 'ATTACK', block: 'BLOCK', skill: 'SKILL', relic: 'RELIC', potion: 'POTION', grab: 'GRAB', use: 'USE', reload: 'RELOAD', element: 'ELEMENT' }[id];
 }
 /** A laptop's line over the hero for a move: the relic lesson names SKILL only once one is known. */

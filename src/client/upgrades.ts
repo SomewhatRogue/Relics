@@ -19,6 +19,8 @@ import type { Profile } from '../shared/progress';
 import { tileIcon } from './upiconkeys';
 import { UPW } from './upgradewords';
 import { KNW } from './treewords';
+import { deepSkillOf } from '../shared/deepskill';
+import { DEEP_TRACK } from '../shared/deepskillwords';
 
 /** owned: learned or taken; max: every rank; buy: can afford now; poor: short of gold; locked: a level
  *  or something first; pick: a knack on offer; next: a knack that can come up on a level up. */
@@ -72,7 +74,9 @@ function skillsTab(p: Profile, rows: TrainRow[]): UpTrack[] {
   const carried: RelicId = p.skill && known.includes(p.skill) ? p.skill : known[0] ?? CLASS_SKILL[p.cls];
   // Only the skills this hero could learn at their level now, and those they know: the rest aren't shown at
   // all, not greyed (Kyle, 2026-11-12, town quests). The track's line still says the level the next opens at.
-  const all = rows.filter((r) => r.group === 'skills'), skills = all.filter((r) => !(r.skill && r.state === 'locked'));
+  const all = rows.filter((r) => r.group === 'skills' && r.id !== 'deep'), skills = all.filter((r) => !(r.skill && r.state === 'locked'));
+  // The Deep skill (shared/deeprow.ts) on its own track below: it's carried as well as the one above, not instead.
+  const deep = rows.filter((r) => r.id === 'deep');
   const tiles = skills.map((r) => {
     const t = rowTile(r);
     return r.skill && knowsSkill(p, r.skill) ? { ...t, state: 'owned' as const, badge: UPW.owned, act: r.skill === carried ? '' as const : 'carry' as const } : t;
@@ -81,6 +85,7 @@ function skillsTab(p: Profile, rows: TrainRow[]): UpTrack[] {
   const drill = rows.find((r) => r.key === 'drill:skill');
   return [
     { id: 'skills', title: 'SKILLS', sum: sumOf(all, (r) => !!r.skill && knowsSkill(p, r.skill)), kind: 'track', steps: tiles.length ? [{ tiles: markFork(tiles, carryKey, false, UPW.carrying), fork: tiles.length > 1 ? UPW.carryOne : '' }] : [], note: known.length > 1 ? UPW.carryNote : undefined },
+    ...(deep.length ? [{ id: 'deepskill', title: DEEP_TRACK, sum: deep[0].state === 'max' ? UPW.owned : '', kind: 'track' as const, steps: single(deep.map((r) => ({ ...rowTile(r), icon: 'd:' + deepSkillOf(p.cls) })))}] : []),
     ...(drill ? [{ id: 'skilldrill', title: drill.name, sum: `${drill.rank} OF ${drill.max}`, kind: 'grid' as const, steps: [{ tiles: [rowTile(drill)] }] }] : []),
   ];
 }

@@ -22,6 +22,7 @@ import { paySpell, refuseSpell } from './spells';
 import { stepElement, tapSwing } from './channel';
 import { graspRefused } from './grasp';
 import { signDue, signPressed } from './signature';
+import { deepDue, deepPressed, startDeep, stepDeep } from './deepskill';
 import { streamFace } from './stream';
 import { knows, type Enemy, type FightEvent, type Hero, type Intent } from './types';
 import { primeShoulder, stride } from './techwarrior';
@@ -159,6 +160,8 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   signPressed(h, inp, now);
   if (h.signing && h.act !== 'throw') h.signing = false;
   if (signDue(h, now, false)) acts.sign(h);
+  // The Deep skill's button (sim/deepskill.ts): counted here, started below once the hero is free.
+  deepPressed(h, inp, now);
   if (inp.grabSeq !== h.seen.grab) (h.seen.grab = inp.grabSeq), (h.grabQueuedAt = now);
   // A GRAB press that found nothing to take hold of, throw, help up or burn: say so, at most once a second.
   if (h.grabQueuedAt > -9 && now - h.grabQueuedAt >= INPUT_BUFFER) {
@@ -221,6 +224,8 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     if (h.actT >= h.actDur) (h.act = 'idle'), (h.actT = 0);
     return;
   }
+  // A Deep skill under way runs as its own act (sim/deepskill.ts).
+  if (h.act === 'cut') return stepDeep(h, inp, enemies, now, dt, ev);
   const w = WEAPONS[h.weapon];
   // A Warrior's or Healer's dodge press does nothing (they have no dodge).
   const dodge = w.dodge;
@@ -345,6 +350,8 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   autoWind(h, Math.hypot(inp.mx, inp.my) >= 0.05, dt, ev);
   // A SHADOW STEP, from a standstill or a walk: turned to the goblin first, then the shadow's own short
   // wind-up and recovery, as when it was a skill (the act 'throw', `signing`).
+  // The Deep skill (sim/deepskill.ts), from a standstill or a walk.
+  if (deepDue(h, now)) return startDeep(h, inp, enemies, ev);
   if (signDue(h, now, true)) {
     face(h, inp, enemies, true, RELICS.shadow.range);
     return void Object.assign(h, { act: 'throw', actT: 0, signing: true, signQueuedAt: -9 });

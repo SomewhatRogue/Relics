@@ -40,6 +40,7 @@ import { signFor, signLeft } from '../sim/signature';
 import { itemIcon, potionIcon } from './itemicons';
 import { relicItemIcon } from './relicicons';
 import { skillCanvas } from './skillicons';
+import { showDeep } from './deepbtn';
 import { icon, type IconId } from './icons';
 import { paintButton, type Face } from './btnart';
 import { stickVars } from './stickart';
@@ -95,7 +96,7 @@ export class Cluster {
   private b = {
     attack: new Btn('attack'), block: new Btn('block'), roll: new Btn('roll'), skill: new Btn('skill'),
     relic: new Btn('relic'), potion: new Btn('potion'), grab: new Btn('grab'), use: new Btn('use'),
-    reload: new Btn('reload'), element: new Btn('element'), sign: new Btn('sign'),
+    reload: new Btn('reload'), element: new Btn('element'), sign: new Btn('sign'), deep: new Btn('deep'),
   };
   private ready: Record<string, boolean> = {};
   private stick = document.querySelector('#touch .stick') as HTMLElement;
@@ -149,6 +150,8 @@ export class Cluster {
     const sg = signFor(me), sl = sg ? signLeft(me, room.time) : 0, given = !!sg && game.taught().includes('sign');
     b.sign.show(sg ? { shape: 'round', size: 22, grade: 'iron', icon: skillCanvas(sg, ''), cd: sl / SIGNS[sg].cooldown, flash: this.flash('sign', sl, room.time) } : null, sl > 0 ? String(Math.ceil(sl)) : '', sg ? SIGNS[sg].name : '', sg ? SIGNS[sg].name : '');
     if (document.body.dataset.sign !== String(given)) document.body.dataset.sign = String(given);
+    // The Deep skill, once taught (deepbtn.ts).
+    showDeep(b.deep, me, room.time, (l) => this.flash('deep', l, room.time));
     const el = me.augments[skill];
     if (knows(me, 'skill')) {
       const l = left(skill);

@@ -11,6 +11,7 @@ import type { Profile } from './progress.js';
 import { knowsSkill, skillStep } from './skillteach.js';
 import { CLASS_ORDER, type HeroClass } from './weapons.js';
 import { questBack, questDue, questHeld, reported, takeQuest } from './heroquests.js';
+import { deepSkillOpen } from './deepskill.js';
 
 /** `quest`: your trainer has a hero quest for you; `job`: one in hand, to do; `back`: one done, to tell them of (shared/heroquests.ts). */
 export type ErrandId = 'relic' | 'trainer' | 'skill' | 'quest' | 'job' | 'back';
@@ -22,6 +23,8 @@ export interface Errands {
   trainer: boolean;
   /** The level the trainer last saw you at (a skill opened above it is news). */
   seen: number;
+  /** The trainer has seen you since the Deep opened your Deep skill (shared/deepskill.ts): no longer news. */
+  deep?: boolean;
 }
 
 export const newErrands = (): Errands => ({ told: false, relic: false, trainer: false, seen: 1 });
@@ -32,7 +35,7 @@ export const doneErrands = (level: number): Errands => ({ told: true, relic: tru
 export function fitErrands(e: unknown, level: number): Errands {
   if (!e || typeof e !== 'object') return doneErrands(level);
   const o = e as Partial<Errands>;
-  return { told: !!o.told, relic: !!o.relic, trainer: !!o.trainer, seen: Math.max(1, Math.floor(Number(o.seen) || 1)) };
+  return { told: !!o.told, relic: !!o.relic, trainer: !!o.trainer, seen: Math.max(1, Math.floor(Number(o.seen) || 1)), ...(o.deep ? { deep: true } : {}) };
 }
 
 /** Where each class's trainer is (the hall's door in town, shared/town.ts). */
@@ -53,7 +56,8 @@ export function openErrands(p: Profile): ErrandId[] {
   const e = p.errands ?? doneErrands(p.level), out: ErrandId[] = [];
   if (e.told && !e.relic) out.push('relic');
   if (e.told && !e.trainer) out.push('trainer');
-  else if (openSkillLevel(p) > e.seen) out.push('skill');
+  // (A new skill by level, or the Deep skill a floor opened and the trainer hasn't told you of: shared/deepskill.ts.)
+  else if (openSkillLevel(p) > e.seen || (deepSkillOpen(p) && !p.deepTaught && !e.deep)) out.push('skill');
   // (Not before the runner's been: the first is handed over at the first meeting.)
   if (questDue(p) && e.told && e.trainer) out.push('quest');
   if (questHeld(p)) out.push('job');
@@ -98,6 +102,7 @@ export function talkedTo(p: Profile, talk: string, arg?: number): boolean {
   const was = JSON.stringify(e);
   if (e.told) e.trainer = true;
   e.seen = Math.max(e.seen, p.level);
+  if (deepSkillOpen(p)) e.deep = true;
   // Hears of the one you've done, and hands over the quest they have for you (the first at the first meeting).
   const back = !!questBack(p);
   reported(p);

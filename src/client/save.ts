@@ -3,6 +3,8 @@
  * own class (for life), level, gold and kit; the world (the town, the chapter, the council) is shared
  * by all of them. (The shared world moves to the server, api/world.ts, when the group plays online.)
  */
+import { fitDeepBest } from '../shared/deepskill';
+import { deepTest } from './deeptest';
 import type { Pending } from '../shared/trade';
 import { HERO_SLOTS, fitPerks, newProfile, newStats, type Profile } from '../shared/progress';
 import { newWorld, type WorldState } from '../shared/story';
@@ -88,13 +90,16 @@ const hero = (old: Partial<Profile>): Profile => {
 export function fromJson(s: Partial<Save> | null): Save | null {
   if (!s || !Array.isArray(s.heroes) || !s.world) return null;
   const heroes = s.heroes.slice(0, HERO_SLOTS).map(hero);
+  // The Deep's deepest floor (shared/deepskill.ts): an older hero's from their saved run or the Deep's boards.
+  for (const h of heroes) if (h.deepBest || h.deep || s.world.deepSolo || s.world.deepParty) h.deepBest = fitDeepBest(h, [s.world.deepSolo, s.world.deepParty]) || undefined;
   return { heroes, current: Math.min(s.current ?? -1, heroes.length - 1), world: { ...newWorld(), ...s.world }, savedAt: Number(s.savedAt) || 0, ...(s.trade ? { trade: s.trade } : {}) };
 }
 
 export function load(): Save {
   try {
     const s = fromJson(JSON.parse(localStorage.getItem(KEY) ?? 'null'));
-    if (s) return s;
+    // (Test hooks: ?deepbest=20, &deepskill=1: client/deeptest.ts.)
+    if (s) return s.heroes.forEach(deepTest), s;
     // The first save kept one hero, unnamed: they come across as HERO, their class from their weapon.
     const v1 = JSON.parse(localStorage.getItem(OLD) ?? 'null');
     if (v1 && v1.profile && v1.world) return { heroes: [hero(v1.profile)], current: -1, world: { ...newWorld(), ...v1.world } };

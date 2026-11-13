@@ -56,6 +56,8 @@ export interface Intent {
   /** The class's own button (shared/signs.ts): a Rogue's SHADOW STEP, a Ranger's MARK, a Healer's MEND (V).
    *  Optional so an older guest's intent still reads. */
   signSeq?: number;
+  /** The Deep skill's button (shared/deepskill.ts; Z): counted, so a tap is never lost. Optional so an older guest's intent still reads. */
+  deepSeq?: number;
   /** A friend's Intent: the leader's room time their screen was showing when they sent it (sim/lagcomp.ts
    *  judges a blow on them by it). The leader's own, and an older guest's, have none. */
   vt?: number;
@@ -76,7 +78,7 @@ export const knows = (h: { learned?: Learned[] }, l: Learned) => !h.learned || h
 /** A Mage's held spells, by kit and element (shared/spellbook.ts). */
 export type SpellWhat = 'fireball' | 'coldblast' | 'strike' | 'firewall' | 'nova' | 'stormring' | 'lunge' | 'shatter' | 'dash';
 
-export type HeroAct = 'idle' | 'charge' | 'attack' | 'throw' | 'zip' | 'bash' | 'roll' | 'hurt' | 'stun' | 'down' | 'carry' | 'slam';
+export type HeroAct = 'idle' | 'charge' | 'attack' | 'throw' | 'zip' | 'bash' | 'roll' | 'hurt' | 'stun' | 'down' | 'carry' | 'slam' | 'cut';
 
 /** Anything that can be pushed: a slide (knockback) decays each tick. */
 export interface Body {
@@ -332,6 +334,12 @@ export interface Hero extends Body {
   /** The class's own button (sim/signature.ts): pressed then, and ready again then. */
   signQueuedAt?: number;
   signReady?: number;
+  /** The Deep skill this hero carries (taught at the trainer: shared/deepskill.ts), its press waiting, and when it's ready again (sim/deepskill.ts). */
+  deepSkill?: import('../shared/deepskill').DeepSkillId;
+  deepQueuedAt?: number;
+  deepReady?: number;
+  /** The long cut under way (sim/samuraicut.ts): its line, from where the hero stood to where the slash ends. */
+  cutLine?: { x0: number; y0: number; x1: number; y1: number };
   /** In a SHADOW STEP's short wind-up and recovery (the act 'throw'). */
   signing?: boolean;
   /** The spellblade's mana shield (sim/manashield.ts): when a hit last took magic, and when one last
@@ -381,7 +389,7 @@ export interface Hero extends Body {
   /** The `vt` the guard went up at, and came down at (undefined: held, or never). */
   guardVt?: number;
   guardOffVt?: number;
-  seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number; augment: number; cls: number; take: number; grab: number; gear: number; potion: number; belt?: number; open: number; level?: number; reload?: number; element?: number; sign?: number };
+  seen: { attack: number; block: number; roll: number; weapon: number; relic: number; relicSwap: number; relicPick: number; augment: number; cls: number; take: number; grab: number; gear: number; potion: number; belt?: number; open: number; level?: number; reload?: number; element?: number; sign?: number; deep?: number };
 }
 
 /** `pounce`: a spider's leap along its line; `bite`: the brood mother's; `spit`: her lobbed glob (a circle). */
@@ -626,6 +634,8 @@ export interface Enemy extends Body {
   /** A boss or BIG ONE: it can't be frozen again until `thawUntil`, nor stunned until `holdUntil` (sim/bosshold.ts). */
   thawUntil?: number;
   holdUntil?: number;
+  /** Cut by a Rogue's long cut (sim/samuraicut.ts): who, when it lands, for how much, along which way. */
+  longCut?: { by: string; at: number; n: number; dx: number; dy: number };
   big?: boolean;
   held?: number;
   chaseOn?: string;
@@ -870,6 +880,10 @@ export type FightEvent =
   | { k: 'hunted'; x: number; y: number; id: string }
   | { k: 'mended'; x: number; y: number; x2: number; y2: number; n: number; self: boolean }
   | { k: 'nosign'; x: number; y: number; id: string; why: 'mark' | 'hurt' | 'breath' }
+  /** The long cut (sim/samuraicut.ts): the stance taken, the slash along its line, each one cut as it lands. */
+  | { k: 'cutstance'; x: number; y: number; id: string }
+  | { k: 'cutslash'; x: number; y: number; x0: number; y0: number; id: string; n: number }
+  | { k: 'cutfall'; x: number; y: number; id: string; dx: number; dy: number }
   /** The wood (sim/woodheal.ts): Hew struck by the archer's arrow; a smoke bomb thrown. */
   | { k: 'hewshot' | 'smokebomb'; x: number; y: number }
   /** Out of bounds (sim/dread.ts): `n` 1 the warning, 2 worse, 3 seized, 4 crushed or pulled down where

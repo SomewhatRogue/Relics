@@ -8,7 +8,7 @@ import type { Intent } from '../sim/types';
 import type { BtnId } from './keycaps';
 
 /** The presses each button counts in this screen's intent (a skill and a relic share relicSeq: relicPick says which). */
-const SEQ = { attack: 'attackSeq', block: 'blockSeq', roll: 'rollSeq', potion: 'potionSeq', grab: 'grabSeq', element: 'elementSeq', sign: 'signSeq', reload: 'reloadSeq' } as const;
+const SEQ = { attack: 'attackSeq', block: 'blockSeq', roll: 'rollSeq', potion: 'potionSeq', grab: 'grabSeq', element: 'elementSeq', sign: 'signSeq', reload: 'reloadSeq', deep: 'deepSeq' } as const;
 
 export class FirstUse {
   private waiting = new Set<BtnId>();

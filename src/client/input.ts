@@ -6,6 +6,7 @@
  * a Ranger's MARK or a Healer's MEND (shared/signs.ts). Phone (upright):
  * a floating stick on the left, Attack, Block and Roll under the right thumb.
  */
+import { DEEP_SKILL } from '../shared/deepskill';
 import { NO_INTENT, type Intent } from '../sim/types';
 import { unlockAudio } from './sfx';
 import { PotionPress } from './potionpress';
@@ -44,6 +45,7 @@ export class Input {
       if (k === 'c') this.reload(true);
       if (k === 'x') this.element();
       if (k === 'v') this.sign();
+      if (k === DEEP_SKILL.key.toLowerCase()) this.deep();
       if (k === 'k') (this.intent.blockSeq++), (this.blockHeld.key = true);
       this.pressed();
     });
@@ -141,6 +143,7 @@ export class Input {
     btn('.reload', () => this.reload(false), () => (this.reloadHeld.touch = false));
     btn('.element', () => this.element());
     btn('.sign', () => this.sign());
+    btn('.deep', () => this.deep());
     btn('.block', () => ((this.intent.blockSeq++), (this.blockHeld.touch = true)), () => (this.blockHeld.touch = false));
   }
 
@@ -168,6 +171,11 @@ export class Input {
   /** The class's own button (V, or its ring by ATTACK: shared/signs.ts): counted, so a tap is never lost. */
   sign(): void {
     this.intent.signSeq = (this.intent.signSeq ?? 0) + 1;
+  }
+
+  /** The Deep skill's button (Z, or its own: shared/deepskill.ts): counted, so a tap is never lost. */
+  deep(): void {
+    this.intent.deepSeq = (this.intent.deepSeq ?? 0) + 1;
   }
 
   /** RELOAD pressed (C, or the crossbow's button): counted, and held till it's let go. */

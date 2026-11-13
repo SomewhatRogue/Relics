@@ -63,6 +63,10 @@ export interface Profile {
   /** The class skills taught after the first (shared/skillteach.ts). Undefined on heroes taught before
    *  there were three: a Warrior of then knows the War Cry too. */
   taught?: RelicId[];
+  /** The Deep's deepest floor this hero has ever reached, alone or with friends (shared/deepskill.ts). */
+  deepBest?: number;
+  /** Taught their class's Deep skill at the trainer (shared/deepskill.ts). */
+  deepTaught?: boolean;
   /** Level ups not yet spent at the trainer. */
   picks: number;
   /** The weapon in hand (`weapon`, plain if `arms` has nothing for it) and the pack. */

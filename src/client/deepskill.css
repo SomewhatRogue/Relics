@@ -1,0 +1,10 @@
+/* The Deep skill's button (deepbtn.ts). On a phone: above the guard and the class's own button, left of the
+   class skill, clear of its neighbours by at least 8px (centre 188 from the right, 212 from the foot; the
+   skill's at 112, 190; the own button's at 160, 140; the context slot's at 112, 262). Its name over it in gold.
+   On a laptop: last in the button bar, after the class's own button. */
+.tb.deep { width: 56px; height: 56px; right: calc(160px + env(safe-area-inset-right)); bottom: calc(184px + env(safe-area-inset-bottom)); }
+.tb.deep i { bottom: auto; top: -12px; padding: 0 2px; background: none; color: var(--gilt); text-shadow: var(--px) var(--px) 0 #07080a; white-space: nowrap; }
+body[data-mode='town'] .tb.deep { display: none; }
+.tb.deep[hidden] { display: none !important; }
+body:not(.touch) .tb.deep { order: 7; }
+body:not(.touch) .tb.deep i { top: auto; bottom: -15px; }
