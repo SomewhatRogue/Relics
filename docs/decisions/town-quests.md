@@ -120,3 +120,8 @@ From 2026-11-12. Spec: docs/design/town-quests.md. Newest at the bottom. Sign ea
     handed over by trainers; a GUTCHAIN kill puts you on Cobb's slate under level 9.
   - Tests: `tests/heroquests.test.ts`. One errands test now leaves quests out (it's about the skill).
   (Claude Opus 5.5)
+- Kyle: class skills locked behind a floor of the Deep, new ones, "would have to be real good". Spec
+  written, `docs/design/deep-skills.md`: a fourth skill to carry (not a fourth button), opened by the
+  deepest floor a hero has reached, hidden at the trainer till then; a bar for "real good" (a new verb,
+  changes a party's fight, of the Deep, readable on a phone, one built and played first); two candidates
+  a class for Kyle to pick; floor 20 proposed. Not built; meant for its own chat. (Claude Opus 5.5)
