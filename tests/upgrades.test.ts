@@ -14,7 +14,8 @@ import { upTrack } from '../src/client/upgradeview';
 
 const hero = (cls: Parameters<typeof newProfile>[0], level: number, gold: number) => Object.assign(newProfile(cls), { level, gold });
 const at = { atTrainer: true, knacksOpen: true };
-const tile = (p: ReturnType<typeof hero>, key: string, o = at): UpTile => allTiles(upgradeTabs(p, o)).find((t) => t.key === key)!;
+// (A tile's state, locked ones too: the trainer shows only what's open now, tested below.)
+const tile = (p: ReturnType<typeof hero>, key: string, o = at): UpTile => allTiles(upgradeTabs(p, o, true)).find((t) => t.key === key)!;
 
 describe('tiles', () => {
   it('a stat rank: locked by level, then can buy, short of gold, and maxed', () => {
@@ -28,7 +29,7 @@ describe('tiles', () => {
     p.drills = { power: 5 };
     expect(tile(p, 'drill:power')).toMatchObject({ state: 'max', badge: 'MAX' });
     // Every tile has a picture key, a name and a line.
-    for (const t of allTiles(upgradeTabs(p, at))) expect(t.icon && t.name && t.line).toBeTruthy();
+    for (const t of allTiles(upgradeTabs(p, at, true))) expect(t.icon && t.name && t.line).toBeTruthy();
   });
 
   it('a technique waits on the one before it; a Ranger\'s first waits on the snare', () => {
@@ -46,7 +47,7 @@ describe('tiles', () => {
 
   it('the skills are a fork, CARRY ONE: the one carried is marked, another known can be carried, the rest wait', () => {
     const p = hero('WARRIOR', 5, 5000);
-    const skills = upgradeTabs(p, at)[0].tracks[0];
+    const skills = upgradeTabs(p, at, true)[0].tracks[0];
     expect(skills.steps).toHaveLength(1);
     expect(skills.steps[0].fork).toBe('CARRY ONE');
     // (The third, at level 7, isn't shown at level 5 at all: town quests, Kyle 2026-11-12.)
@@ -74,7 +75,7 @@ describe('tiles', () => {
 
   it('knacks: the two on offer are a fork, PICK ONE, taken only out of a fight; later steps say what they need', () => {
     const p = Object.assign(hero('MAGE', 3, 0), { picks: 1 });
-    const offer = perkOffer(p), tabs = upgradeTabs(p, at), knacks = tabs.find((t) => t.id === 'knacks')!;
+    const offer = perkOffer(p), tabs = upgradeTabs(p, at, true), knacks = tabs.find((t) => t.id === 'knacks')!;
     expect(knacks.tracks[0].steps[0].fork).toBe(''); // No words over it: the track's title already says take one.
     expect(knacks.tracks[0].steps[0].tiles.map((t) => t.key)).toEqual(offer.map((id) => 'knack:' + id));
     for (const t of knacks.tracks[0].steps[0].tiles) expect(t).toMatchObject({ state: 'pick', act: 'pick' });
@@ -103,6 +104,27 @@ describe('tiles', () => {
     expect(html).toContain('CHOOSE ONE');
     expect(html.match(/data-tile=/g)).toHaveLength(3);
     expect(html).toContain('up-tile s-owned cur');
+  });
+});
+
+describe('only what you can get at the trainer now (Kyle, 2026-11-13)', () => {
+  it('locked ranks, techniques and skill ranks are not shown; a track left empty says when its next opens', () => {
+    const p = hero('WARRIOR', 1, 0), shown = allTiles(upgradeTabs(p, at));
+    expect(shown.some((t) => t.state === 'locked' || t.state === 'next')).toBe(false);
+    expect(shown.find((t) => t.key === 'drill:power')).toBeUndefined();
+    const ranks = upgradeTabs(p, at).find((t) => t.id === 'ranks')!;
+    expect(ranks.tracks[0].steps).toHaveLength(0);
+    expect(ranks.tracks[0].sum).toContain('NEXT AT LEVEL 2');
+    p.level = 2;
+    expect(allTiles(upgradeTabs(p, at)).find((t) => t.key === 'drill:power')).toMatchObject({ state: 'poor' });
+  });
+  it('knacks: the two on offer at the top, and on each chain only those taken; a chain with none taken is not shown', () => {
+    const p = Object.assign(hero('MAGE', 3, 0), { picks: 1, perks: ['m_blink'] });
+    const knacks = upgradeTabs(p, at).find((t) => t.id === 'knacks')!;
+    expect(knacks.tracks[0].steps[0].tiles.every((t) => t.state === 'pick')).toBe(true);
+    const chains = knacks.tracks.slice(1);
+    expect(chains).toHaveLength(1);
+    expect(chains[0].steps.flatMap((s) => s.tiles).map((t) => t.key)).toEqual(['knack:m_blink']);
   });
 });
 

@@ -142,3 +142,13 @@ From 2026-11-12. Newest at the bottom. Sign each entry with the model name.
   screens: the trainer (Town quests: "NO KNACKS TO PICK" as a button, the XP line, two headings over one
   skill), Father Odric and Reeve Hollis; those are worth the same eye, in their own chats. Shots:
   `scripts/iron-look.cjs`. (Claude Opus 5.5)
+- The trainer shows only what you can get there now (Kyle: "moves and knacks etc should also be limited to
+  what you have access to at the trainer", as Town quests did for the skills on 11-12). In `upgrades.ts`
+  (Town quests' file, on Kyle's word; one function and one flag): `nowOnly` drops steps locked by level or by
+  a step first, and knacks that could come up later; short of gold still shows; a knack chain shows only
+  those taken (the two on offer are at the top); a track left empty stays only to say the level its next
+  opens at (MOVES at level 3 is two lines, TECHNIQUE and GUARD with NEXT AT LEVEL; the skill's locked
+  recharge rank goes). `upgradeTabs(p, o, true)` still gives every tile, for a tile's card and the tests.
+  Tests: `tests/upgrades.test.ts` reads states through the full tabs, plus two new for the rule. Shots:
+  `scripts/iron-trainer.cjs` (the four tabs, level 3). For Town quests: if you're mid-change in
+  upgrades.ts, the edit is the `nowOnly` block above `upgradeTabs` and its `every` flag. (Claude Opus 5.5)

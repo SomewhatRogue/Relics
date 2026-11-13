@@ -124,10 +124,24 @@ function knacksTab(p: Profile, open: boolean): UpTrack[] {
 
 const readyIn = (tracks: UpTrack[]) => new Set(tracks.flatMap((t) => t.steps.flatMap((s) => s.tiles)).filter((t) => t.act === 'buy' || t.act === 'pick').map((t) => t.key)).size;
 
-/** Every tab for this hero. */
-export function upgradeTabs(p: Profile, o: UpOpts): UpTab[] {
+/**
+ * Only what this hero has or can take at the trainer now (Kyle, 2026-11-13: "moves and knacks etc should also
+ * be limited to what you have access to at the trainer", as the skills were on 11-12): steps locked by level
+ * or by a step first, and knacks that could come up later, aren't shown. Short of gold still shows (it's
+ * here, it costs). A chain of knacks shows only those taken (the two on offer are at the top). A track left
+ * empty stays only to say the level its next step opens at.
+ */
+export function nowOnly(t: UpTrack): UpTrack | null {
+  const hide = (x: UpTile) => x.state === 'locked' || x.state === 'next' || (t.kind === 'row' && x.state === 'pick');
+  const steps = t.steps.map((s) => ({ ...s, tiles: s.tiles.filter((x) => !hide(x)) })).filter((s) => s.tiles.length);
+  return steps.length || t.id === 'skills' || t.sum.includes('NEXT AT LEVEL') ? { ...t, steps } : null;
+}
+
+/** Every tab for this hero, as the trainer shows it (`every`: with the locked steps too, for the tests and a tile's card). */
+export function upgradeTabs(p: Profile, o: UpOpts, every = false): UpTab[] {
   const rows = trainerRows(p);
-  const tabs: [TabId, UpTrack[]][] = [['skills', skillsTab(p, rows)], ['moves', movesTab(p, rows)], ['ranks', ranksTab(rows)], ['knacks', knacksTab(p, o.knacksOpen)]];
+  const now = (ts: UpTrack[]) => (every ? ts : ts.map(nowOnly).filter((t): t is UpTrack => !!t));
+  const tabs: [TabId, UpTrack[]][] = [['skills', now(skillsTab(p, rows))], ['moves', now(movesTab(p, rows))], ['ranks', now(ranksTab(rows))], ['knacks', now(knacksTab(p, o.knacksOpen))]];
   return tabs.map(([id, tracks]) => ({ id, title: UPW.tabs[id], ready: id === 'knacks' ? (o.knacksOpen ? Math.min(p.picks, readyIn(tracks)) : 0) : o.atTrainer ? readyIn(tracks) : 0, tracks }));
 }
 
@@ -138,7 +152,7 @@ export const allTiles = (tabs: UpTab[]) => tabs.flatMap((t) => t.tracks.flatMap(
 export interface UpDetail { tile: UpTile; text: string; now: string; after: string; ladder?: Rung[]; rows?: [string, string][]; button?: { label: string; act: TileAct; on: boolean }; note: string }
 
 export function tileDetail(p: Profile, key: string, o: UpOpts, where?: { who: string; where: string }): UpDetail | null {
-  const tile = allTiles(upgradeTabs(p, o)).find((t) => t.key === key);
+  const tile = allTiles(upgradeTabs(p, o, true)).find((t) => t.key === key);
   if (!tile) return null;
   if (key.startsWith('knack:')) {
     const id = key.slice(6) as PerkId, steps = CHAINS[chainOf(id)!].steps as PerkId[];
