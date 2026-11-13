@@ -13,7 +13,8 @@ body #pack .tile.empty i, #panel .tile.empty i { position: static; color: #5a5f6
 body #pack .tile.dim, #panel .tile.dim { background: #16181f; box-shadow: 0 0 0 2px var(--i-outline), inset 0 0 0 1px var(--t); }
 #panel .tile.dim img { opacity: 0.4; }
 #panel .tile.dim em { color: var(--i-quiet); }
-body #pack .tile.sel, #panel .tile.sel { background: radial-gradient(circle, #3a3320, var(--i-well) 75%); box-shadow: 0 0 0 2px var(--i-leaf), inset 0 0 0 2px var(--t); }
+/* (div.tile: over skins.css's bone outline.) */
+body #pack div.tile.sel, #panel div.tile.sel { outline: none; background: radial-gradient(circle, #3a3320, var(--i-well) 75%); box-shadow: 0 0 0 2px var(--i-leaf), inset 0 0 0 2px var(--t); }
 body #pack .tile.over, body #pack .cells.over { background: #2e2618; }
 body #pack .tile.dragging { opacity: 0.35; }
 

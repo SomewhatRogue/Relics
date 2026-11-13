@@ -48,3 +48,10 @@ From 2026-11-12. Newest at the bottom. Sign each entry with the model name.
   class, level and gold in the small pixel face, PLAY in gold leaf, the dots iron, the hero's options sunk
   with DELETE edged red; NEW HERO iron, the recovery code sunk. Shots: `scripts/iron-home.cjs`. Same five
   test files fail to load as before (Art's sprites.ts at import). (Claude Opus 5.5)
+- Step 3a, the hero panel and the pack (`pack.css`; no markup changed): the pack a forged panel, the hero in
+  a sunk alcove with an item frame on each part, brass headings with a hairline, KNACKS iron and the cross
+  sunk (both now 48 px), the card under the doll a sunk box, the relics' shelf a sunk well, every relic
+  framed in gold leaf with the glint (and NEW and the empty slot's pulse in steps; all still with MOTION
+  off). The shared panel rule no longer sets `position` on the pack (it is fixed); the pack's cross keeps
+  skins.css's drawn X; the selected tile drops skins.css's bone outline for the gold one. Shots:
+  `scripts/iron-pack.cjs`. (Claude Opus 5.5)

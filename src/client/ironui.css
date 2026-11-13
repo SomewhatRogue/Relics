@@ -21,13 +21,15 @@
 
 /* ---- The panel: outline, plate, rivets, the well, a soft shadow under it. Every panel over the game wears it;
    the parts inside a panel's body (its buttons, its headings) go screen by screen (the list in #panel:has(.jlist, .shop, .store)). ---- */
-.iron, #panel > .card, #panel .jcard, #panel .spcard {
+.iron, #panel > .card, #panel .jcard, #panel .spcard, body #pack {
   border: 12px solid transparent; border-radius: 0;
   border-image: var(--i-plate) 12 fill / 12px stretch; image-rendering: pixelated;
   background: none; padding: 12px 10px 10px;
   box-shadow: 0 0 0 2px var(--i-outline), 0 10px 30px #000000b3;
-  color: var(--i-text); font-family: var(--i-read); position: relative;
+  color: var(--i-text); font-family: var(--i-read);
 }
+/* Above the torchlight. (The pack keeps its own fixed place.) */
+.iron, #panel > .card, #panel .jcard, #panel .spcard { position: relative; }
 #panel:has(.jlist, .shop, .store) > .card .body { font: 500 16px/1.4 var(--i-read); }
 #panel > .card > .body > p { font-size: 16px; line-height: 1.4; }
 

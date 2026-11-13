@@ -48,8 +48,57 @@ body #pack .rtile .rnew { top: 1px; left: 1px; padding: 0 2px; color: #1a1408; b
 body #pack .rtile.new { animation: rnew 1.4s steps(2) infinite; }
 @keyframes rnew { 50% { background: #3a2e14; } }
 /* Nothing carried but a relic owned: the empty slot pulses gold and says TAP. */
-body #pack .tile.empty.rslot.pulse { border-style: solid; border-color: #ffd27a; cursor: pointer; animation: rslot 1.2s ease-in-out infinite; }
+body #pack .tile.empty.rslot.pulse { box-shadow: 0 0 0 2px var(--i-outline), inset 0 0 0 2px var(--i-leaf); cursor: pointer; animation: rslot 1.2s steps(4) infinite; }
 body #pack .rslot .rtap { position: static; color: #ffd27a; font-size: var(--fs-text); letter-spacing: 0.1em; }
 body #pack .rslot.empty i { position: absolute; bottom: 1px; color: #b8a47c; }
-@keyframes rslot { 50% { box-shadow: 0 0 10px #ffd27aaa; background: #2e2618; } }
+@keyframes rslot { 50% { box-shadow: 0 0 0 2px #07080a, inset 0 0 0 2px #e8b85a, 0 0 14px 4px #ffbe5a88; background: #2e2618; } }
 @media (prefers-reduced-motion: reduce) { body #pack .rslot.pulse, body #pack .rtile.new { animation: none; } }
+:root[data-still] body #pack .rslot.pulse, :root[data-still] body #pack .rtile.new, :root[data-still] body #pack .rtile:not(.empty)::after { animation: none; }
+
+/* ---- Iron and ember (docs/design/ui-look.md): the pack a forged panel (ironui.css), the hero in a sunk
+   alcove with a frame on each part, brass headings, the knacks and the cross as pressed metal (48 px), the
+   relics in gold leaf with the glint. ---- */
+body #pack { padding: 12px 10px 10px; font: 500 16px/1.4 var(--i-read); }
+body #pack .head { gap: 10px; padding: 2px; }
+body #pack h2 { flex: none; font: 400 30px/1 var(--i-name); letter-spacing: 0; color: var(--i-leaf); text-shadow: 0 2px 0 var(--i-outline); }
+body #pack .head span { font: 500 14px/1.3 var(--i-read); color: var(--i-quiet); }
+body #pack h3 { display: flex; align-items: center; gap: 8px; margin: 12px 0 8px; font: 400 11px/1.2 var(--i-label); letter-spacing: 0.03em; color: var(--i-brass); text-transform: uppercase; }
+body #pack h3::after { content: ''; flex: 1; height: 2px; background: linear-gradient(90deg, var(--i-brass), #c89a4a00); }
+body #pack h3 i { color: var(--i-quiet); margin-left: 0; }
+body #pack .bag h3 { margin-top: 2px; }
+body #pack .s-belt > i { font: 400 11px/1.2 var(--i-label); letter-spacing: 0.03em; color: var(--i-brass); margin-bottom: 6px; }
+body #pack .fig { align-self: stretch; background: radial-gradient(ellipse at 50% 70%, #2a2c33, var(--i-well) 75%); box-shadow: 0 0 0 2px var(--i-outline), inset 1px 1px 0 var(--i-outline), inset -1px -1px 0 #33373e; }
+body #pack .doll { gap: 8px 8px; padding: 2px; }
+
+body #pack button { min-height: 48px; padding: 0 12px; border: 0; border-image: none; border-radius: 0;
+  font: 400 14px/1.1 var(--i-label); letter-spacing: 0.03em; text-transform: uppercase;
+  background: #3a3e46; color: var(--i-text); box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #6a6f7a, inset -2px -2px 0 #1b1d22; }
+body #pack button:active:not(:disabled) { transform: translateY(1px); box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #1b1d22, inset -2px -2px 0 #6a6f7a; }
+body #pack button.go { background: linear-gradient(180deg, #ffe08a, #c8902e); color: #2e1a08; box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 var(--i-leaf-hi), inset -2px -2px 0 #7a4e14; }
+body #pack button:is(.ghost, .x) { background: #1b1d22; color: var(--i-cool); box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #33373e, inset -2px -2px 0 var(--i-outline); }
+body #pack button:disabled { background: #16171b; color: var(--i-quiet); box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #26282e, inset -2px -2px 0 var(--i-outline); }
+body #pack .kn { height: auto; min-height: 48px; }
+body #pack .kn.pick { color: var(--i-leaf); }
+/* The cross is drawn (skins.css); its letter stays hidden. */
+body #pack .x { width: 48px; height: 48px; padding: 0; font-size: 0; }
+
+body #pack .detail { margin-top: 12px; padding: 10px 12px; background: #1b1d22; box-shadow: inset 1px 1px 0 var(--i-outline), inset -1px -1px 0 #33373e; border: 0; }
+body #pack .detail .btns { gap: 10px; margin-top: 10px; padding: 2px; }
+body #pack .detail button { min-height: 48px; font-size: 13px; }
+body #pack .note { font: 500 15px/1.35 var(--i-read); color: var(--i-warm); }
+body #pack .note.warn { color: var(--i-danger); }
+body #pack .foot summary { line-height: 48px; font-family: var(--i-label); font-size: 12px; letter-spacing: 0.03em; color: var(--i-brass); }
+body #pack .bag .tile.drop { box-shadow: inset 0 0 0 2px #7a3a32; border: 0; background: #2a1414; }
+body #pack .bag .tile.drop i { font: 400 10px/1 var(--i-label); color: var(--i-danger); }
+
+/* The relics: the shelf a sunk well; a relic's frame gold leaf, its glint every 3 s (still with MOTION off). */
+body #pack .rshelf { border: 0; padding: 6px; gap: 6px; background: #101115; box-shadow: inset 1px 1px 0 var(--i-outline), inset -1px -1px 0 #2b2e35; }
+body #pack .rshelf.can { box-shadow: inset 0 0 0 2px var(--i-leaf); }
+body #pack .rrow { gap: 10px; padding: 2px; }
+body #pack .rtile:not(.empty) { background: radial-gradient(circle, #3a2a14, var(--i-well) 70%); box-shadow: 0 0 0 2px var(--i-outline), inset 0 0 0 2px var(--i-leaf); }
+body #pack .rrow > .rtile:not(.empty) { box-shadow: 0 0 0 2px var(--i-outline), inset 0 0 0 2px var(--i-leaf), 0 0 10px #ffbe5a44; }
+body #pack .rtile:not(.empty)::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(110deg, #fff3c800 40%, #fff3c866 50%, #fff3c800 60%) no-repeat; background-size: 300% 100%; animation: i-glint 3s steps(1) infinite; }
+:root[data-still] body #pack .rtile:not(.empty)::after { background: none; }
+body #pack .rtile .rnew { font: 400 9px/1.2 var(--i-label); background: var(--i-leaf); }
+body #pack .rslot .rtap { font: 400 11px/1 var(--i-label); color: var(--i-leaf); }
