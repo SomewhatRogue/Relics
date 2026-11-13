@@ -130,6 +130,7 @@ import { paintFrames } from './frames';
 import { iconVars } from './icons';
 import { Cluster } from './cluster';
 import { UnderButtons } from './underbtn';
+import { Uncover } from './uncover';
 import { UnitFrame } from './unitframe';
 import { expedRows, roomsHtml, smallLine, titleCase, TRACKW } from './tracker';
 import { BannerFold, calm } from './bannerfold';
@@ -221,6 +222,8 @@ if (!input.touch) document.getElementById('touch')!.hidden = false;
 const cluster = new Cluster();
 /** A phone's buttons go faint over the hero or a telegraph (underbtn.ts). */
 const under = input.touch ? new UnderButtons() : null;
+/** The top panels make room and go faint over danger, the same way (uncover.ts). */
+const uncover = new Uncover();
 const title = new Title(game, () => undefined, recovery);
 // Heroes made before names were held (2026-11-13) take theirs now, where nobody has it (client/names.ts).
 for (const h of game.save.heroes) void claimName(normName(h.name), h.id);
@@ -672,6 +675,7 @@ function tick(t: number): void {
   if (document.hidden || away()) return;
   views.render(game.room, ME, fx, t / 1000, dt, inTown ? (townfolk?.here(game.room.map.name) ?? []) : [], game.mode === 'run');
   under?.frame(views, game.room, game.room.heroes.find((x) => x.id === ME), t / 1000);
+  uncover.frame(views, game.room, game.room.heroes.find((x) => x.id === ME), t / 1000);
   // The job moved to another device (a host's page went out of sight): said once, over me.
   if (game.hostNote && game.hero) {
     const [sx, sy] = toPx(game.hero.x, game.hero.y);

@@ -130,5 +130,12 @@
 :root[data-still] .ibar.fuse > i::after, :root[data-still] .itorch::before, :root[data-still] #panel::before { animation: none !important; }
 :root[data-still] .iframe.leaf::after { background: none; }
 
+/* ---- Out of danger's way (uncover.ts): a top panel with an enemy, the hero or a telegraph under it goes
+   faint (still tappable), and a red notch on its lower edge sits over the danger. ---- */
+html body .uncovered { opacity: 0.3; transition: opacity 0.15s steps(3); }
+.unotch { position: fixed; left: -6px; top: 0; z-index: 5; width: 12px; height: 8px; pointer-events: none;
+  background: var(--i-danger); clip-path: polygon(0 0, 100% 0, 50% 100%); filter: drop-shadow(0 1px 0 var(--i-outline)); }
+.unotch[hidden] { display: none; }
+
 /* The MOTION switch in the gear box, with the torchlight's icon. */
 #options #motion::before { background-image: var(--ic-lit); }

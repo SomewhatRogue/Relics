@@ -41,7 +41,7 @@ export class UnderButtons {
 }
 
 /** Points over a telegraph's floor (tiles): a round one's middle and rim, a lane or cone along its reach. */
-function shape(a: NonNullable<ArenaRoom['enemies'][number]['attack']>): [number, number][] {
+export function shape(a: NonNullable<ArenaRoom['enemies'][number]['attack']>): [number, number][] {
   if (isRound(a.kind)) return [[a.cx, a.cy], ...[0, 1, 2, 3, 4, 5, 6, 7].map((i) => [a.cx + Math.cos(i * 0.785) * a.radius, a.cy + Math.sin(i * 0.785) * a.radius] as [number, number])];
   const out: [number, number][] = [];
   const half = ((a.arc || 0) / 2) * (Math.PI / 180), base = Math.atan2(a.dy, a.dx);

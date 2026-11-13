@@ -85,3 +85,19 @@ From 2026-11-12. Newest at the bottom. Sign each entry with the model name.
 - For the Trading chat: the trade window already wore the shop's iron (yesterday's note); now its gold steps
   (-100 to +100) are small iron keys, 48 px tall. (Claude Opus 5.5)
 - All four steps of the guide are in. (Claude Opus 5.5)
+- The top of the screen never hides danger (Kyle: "if UI is ever blocking an enemy or an important thing").
+  New `src/client/uncover.ts`, drawing only, run each frame beside underbtn.ts:
+  - The top line: on an upright phone, the lowest edge of what's docked at the top (unit frame, boss plate,
+    tracker, loot roll card) is measured four times a second and handed to `phoneband.ts` (`setTopLine`,
+    `HUD_LINE` 100 px: the unit frame and folded tracker with nothing extra up). `topPush()` is now the
+    plate's push or the line's overhang, the larger, so both cameras make room under the roll card (and an
+    opened tracker) the way they already did for the plate. Seen: the roll card up, the fight slides down
+    about 100 px and both Doorkeepers clear it.
+  - The fade: the unit frame, plate, tracker, roll card and corner buttons go to 30% (ironui.css
+    `.uncovered`, in steps) while a live enemy's body, my hero or a red telegraph is under them, with a red
+    notch (`.unotch`) on the lower edge over the danger. Still tappable. Shares underbtn.ts's telegraph
+    shapes (`shape` now exported). Test: `tests/uncover.test.ts`. Shots: `scripts/iron-uncover.cjs`.
+  Small edits in shared files: `phoneband.ts` (the line), `underbtn.ts` (the export), `main.ts` (two lines).
+  For the Deep chat: the roll card counts in the top line while it shows; nothing in rollcard.ts changed.
+  Not done: panels opening mid-fight, and the roll card folding to a chip when danger comes near (the
+  Deep's card: theirs to say). (Claude Opus 5.5)

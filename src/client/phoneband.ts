@@ -19,13 +19,23 @@ export const upright = (w: number, h: number) => h > w * 1.2;
  */
 let push = 0;
 export const setTopPush = (px: number): void => void (push = px);
-export const topPush = () => push;
+
+/**
+ * The top HUD's lowest edge with nothing extra up (the unit frame and the folded tracker), CSS px. Anything
+ * docked at the top that reaches lower (the loot roll card, an opened tracker) pushes by the difference: the
+ * lowest edge is measured on a phone each quarter second (uncover.ts, setTopLine).
+ */
+export const HUD_LINE = 100;
+let line = 0;
+export const setTopLine = (px: number): void => void (line = px);
+/** How far under the top HUD the feet band's top and the room's top come down: the plate's or the line's, the larger. */
+export const topPush = () => Math.max(push, line - HUD_LINE);
 
 /**
  * The band for the hero's feet in a view `h` units tall, `css` CSS pixels per unit: [top, bottom], in
  * the view's units. A screen too short for both gets the middle of what's left.
  */
 export function feetBand(h: number, css: number): [number, number] {
-  const top = (HUD_H + push) / css, bottom = h - CLUSTER_H / css;
+  const top = (HUD_H + topPush()) / css, bottom = h - CLUSTER_H / css;
   return top <= bottom ? [top, bottom] : [(top + bottom) / 2, (top + bottom) / 2];
 }
