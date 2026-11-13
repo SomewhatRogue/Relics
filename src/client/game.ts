@@ -26,7 +26,7 @@ import { forkOf } from '../sim/fork';
 import { barnHunt, barnPosted } from '../shared/bossjobs';
 import { WORKS, workDone, workOpen, workProgress, WORK_ORDER, type WorkId } from '../shared/works';
 import { contribute, type Contribution } from '../shared/worldsync';
-import { HERO_SLOTS, SHOP, gainXp, newProfile, perkFx, perkOffer, resetPerks, takePerk, type PerkId, type Profile } from '../shared/progress';
+import { HERO_SLOTS, SHOP, canMake, gainXp, newProfile, perkFx, perkOffer, resetPerks, takePerk, type PerkId, type Profile } from '../shared/progress';
 import { dueLevels, jobXp } from '../shared/pace';
 import { Rng } from '../shared/rng';
 import { CHAPTER_1, rewardMult, settle, type WorldState } from '../shared/story';
@@ -325,7 +325,7 @@ export class Game {
   /** Make a hero (class for life); returns its slot, or -1 when all three are taken. */
   /** `id`: the one its name was claimed under on the server (client/names.ts), when it was. */
   create(cls: HeroClass, name: string, look = 0, id?: string): number {
-    if (this.save.heroes.length >= HERO_SLOTS) return -1;
+    if (this.save.heroes.length >= HERO_SLOTS || !canMake(this.save.heroes, cls)) return -1;
     this.save.heroes.push({ ...newProfile(cls, normName(name) || 'HERO', id), look });
     this.choose(this.save.heroes.length - 1);
     return this.save.current;

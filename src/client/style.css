@@ -104,6 +104,8 @@ body.dicing #banner span { visibility: hidden; }
 #title .ccard { display: flex; align-items: center; gap: 12px; padding: 6px 12px; min-height: 60px; text-align: left; }
 #title .ccard span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 #title .ccard b { color: #ffd27a; font-size: var(--fs-text); letter-spacing: 0.08em; }
+#title .ccard[disabled] { opacity: 0.5; cursor: default; }
+#title .ccard small { margin-left: auto; color: #8d929c; font-size: var(--fs-small, 12px); letter-spacing: 0.08em; }
 #title .ccard i { font-style: normal; color: #b8b2a4; font-size: var(--fs-text); }
 #title .cname { margin: 0; text-align: center; color: #ffd27a; font-size: 22px; letter-spacing: 0.14em; }
 #title .looks { display: flex; justify-content: center; gap: 10px; margin: -2px 0 10px; }

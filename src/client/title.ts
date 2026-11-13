@@ -6,7 +6,7 @@
 import { NAME_OK, normName } from '../shared/names';
 import { heroId } from '../shared/progress';
 import { claimName, freeNames } from './names';
-import { HERO_SLOTS } from '../shared/progress';
+import { HERO_SLOTS, canMake } from '../shared/progress';
 import { CHAPTER_1 } from '../shared/story';
 import { CLASS_KITS, CLASS_ORDER, type HeroClass } from '../shared/tuning';
 import { CLASSES, CLASS_NAME, CLASS_TAG, SKILL_NOTE, STATS } from '../shared/classes';
@@ -104,7 +104,7 @@ export class Title {
         (this.more === i ? `<div class="sopts">${h.prologue ? `<button data-wood="${i}" class="ghost">${HOMEW.wood}</button>` : ''}` +
           `<button data-retire="${i}" class="ghost${this.retiring === i ? ' danger' : ''}">${this.retiring === i ? HOMEW.sure(h.name) : HOMEW.retire}</button></div>` : '') +
         '</div>').join('') +
-      `</div>${hs.length < HERO_SLOTS ? '<button data-new class="wide">NEW HERO</button>' : `<p class="dim">${HOMEW.full}</p>`}${this.recoverButton()}</div>`;
+      `</div>${hs.length < HERO_SLOTS && CLASS_ORDER.some((k) => canMake(hs, k)) ? '<button data-new class="wide">NEW HERO</button>' : `<p class="dim">${HOMEW.full}</p>`}${this.recoverButton()}</div>`;
   }
 
   private create(): void {
@@ -113,7 +113,8 @@ export class Title {
     const back = this.g.save.heroes.length ? '<button data-back class="ghost wide">BACK</button>' : '';
     if (!this.detail) {
       this.el.innerHTML = `<div class="tcard"><h1>RELIC</h1><div class="sub">A NEW CHAPTER</div><p class="lede">Pick a class.</p><div class="cgrid names">` +
-        CLASS_ORDER.map((k) => `<button data-cls="${k}" class="ccard">${face(k)}<b>${CLASS_NAME[k]}</b></button>`).join('') + `</div>${back}${this.recoverButton()}</div>`;
+        // One of each class: one you have already is shown, not picked (Kyle, 2026-11-13).
+        CLASS_ORDER.map((k) => (canMake(this.g.save.heroes, k) ? `<button data-cls="${k}" class="ccard">${face(k)}<b>${CLASS_NAME[k]}</b></button>` : `<button class="ccard" disabled>${face(k)}<b>${CLASS_NAME[k]}</b><small>${HOMEW.have}</small></button>`)).join('') + `</div>${back}${this.recoverButton()}</div>`;
       return;
     }
     // The class card (Kyle, 2026-11-04): name and tagline, how it plays, the ratings, GUARD and DODGE

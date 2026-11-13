@@ -162,7 +162,10 @@ export function heroId(): string {
 }
 
 /** Up to three heroes per player; each keeps its own class, level and kit (the world is shared). */
-export const HERO_SLOTS = 3;
+/** One hero of each class (Kyle, 2026-11-13: "only one of each class"), so five at most. */
+export const HERO_SLOTS = 5;
+/** A new hero of `cls` may be made: none of that class yet. */
+export const canMake = (heroes: readonly { cls: string }[], cls: string): boolean => !heroes.some((h) => h.cls === cls);
 
 /** Add experience; returns how many levels were gained (each is a pick at the trainer). */
 export function gainXp(p: Profile, n: number): number {
