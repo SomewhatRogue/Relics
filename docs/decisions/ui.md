@@ -101,3 +101,12 @@ From 2026-11-12. Newest at the bottom. Sign each entry with the model name.
   For the Deep chat: the roll card counts in the top line while it shows; nothing in rollcard.ts changed.
   Not done: panels opening mid-fight, and the roll card folding to a chip when danger comes near (the
   Deep's card: theirs to say). (Claude Opus 5.5)
+- A phone's stamina, magic and faith (Kyle: "not clear how stamina or magic or holy levels are... too small
+  and you can't see it when covered by your thumb"): the bar under the health was filled every frame on a
+  phone but hidden by `body.touch #hud .st { display: none }`. Now it shows on a phone, full width, 16 px,
+  its name on it (its title: STAMINA, MAGIC or FAITH, from main.ts) in the small pixel face with a dark
+  outline; low, winded, empty and the spell's cost mark work as on a laptop. To keep the unit frame above the
+  tracker (70 px) and the boss plate (76 px), a phone's get-up hearts sit at the right of the name line
+  instead of a row of their own: the frame ends at 68 px with hearts and plate up (measured,
+  `scripts/iron-measure.cjs`). The rings round ATTACK and BLINK stay. (unitframe.ts's header still says a
+  phone's stamina is only the rings; not this chat's file.) (Claude Opus 5.5)

@@ -203,3 +203,14 @@ body.touch #banner.small { max-width: min(250px, calc(100vw - 16px)); }
 #boss .poise { margin-top: 2px; background: var(--i-outline); }
 #hud .who { font: 400 12px/1.2 var(--i-label); letter-spacing: 0.03em; color: var(--i-text); text-shadow: 1px 1px 0 var(--i-outline); }
 #hud .lv { border: 0; border-image: none; font: 400 11px/18px var(--i-label); color: #2e1a08; background: linear-gradient(180deg, #ffe08a, #c8902e); box-shadow: 0 0 0 2px var(--i-outline); }
+/* A phone's stamina, magic or faith (Kyle, 2026-11-13: too small round ATTACK and under the thumb): the bar
+   under the health shows on a phone too, full width and named (its title: STAMINA, MAGIC, FAITH), up where no
+   thumb goes. The rings round ATTACK and BLINK stay. */
+body.touch #hud .st { display: block; width: 100%; height: 16px; }
+body.touch #hud .st::before { content: attr(title); position: absolute; z-index: 1; left: 4px; top: 0; bottom: 0; display: flex; align-items: center; pointer-events: none;
+  font: 400 8px/1 var(--i-label); letter-spacing: 0.04em; color: #fff; text-shadow: 1px 0 0 var(--i-outline), -1px 0 0 var(--i-outline), 0 1px 0 var(--i-outline), 0 -1px 0 var(--i-outline), 1px 1px 0 var(--i-outline); }
+/* (Room for it: on a phone the get-up hearts sit at the right of the name line, not in a row of their own, so
+   the unit frame still ends above the tracker and the plate.) */
+body.touch #hud .col { position: relative; }
+body.touch #hud .who { padding-right: 68px; }
+body.touch #hud .ups { position: absolute; top: -6px; right: 0; margin: 0; }
