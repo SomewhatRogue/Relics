@@ -36,6 +36,7 @@ The Deep chat, until it finishes (then the general chat).
 
 ## Waiting (specs ready, no chat yet)
 
+- **Economy** (docs/design/economy.md): copper, silver and gold at 100 to 1; earning less, mostly from the job's pay; prices set by time; fewer, bigger unlocks. Touches every shop: one chat, after checking prices the Deep, Instances and Trading chats set.
 - **Holy and hungry** (docs/design/holy-and-hungry.md). Last: it changes loot everything above uses.
 
 ## Collisions to settle
