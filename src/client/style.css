@@ -77,6 +77,8 @@ body[data-mode='town'] .tb.attack, body[data-mode='town'] .tb.block, body[data-m
 #title .about span { color: #9aa0aa; font-size: var(--fs-text); }
 #title .name { display: flex; align-items: center; gap: 10px; color: #b8a47c; font-size: var(--fs-text); }
 #title .name input { flex: 1; min-width: 0; height: 40px; padding: 0 10px; font: inherit; font-size: var(--fs); color: #fff1d0; background: #15171b; border: 1px solid #4b505a; text-transform: uppercase; user-select: text; -webkit-user-select: text; }
+#title .nameerr { min-height: 1.3em; margin: 4px 0 0; color: #e8a090; font-size: var(--fs-small, 12px); }
+#title [data-newname] { margin-top: 6px; }
 /* Town works, the Roll of the Brave, dice. */
 #panel .work { border: 1px solid #3a3e46; padding: 7px 9px; margin-bottom: 7px; line-height: 1.5; }
 #panel .work .done { color: #9cc95a; }

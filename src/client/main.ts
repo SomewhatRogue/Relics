@@ -1,4 +1,6 @@
 /** Relic: Wickhold, the Training Yard and runs. The rooms run here in the browser (solo is a party of one). */
+import { normName } from '../shared/names';
+import { claimName } from './names';
 import { Trial } from './trial';
 import { forceIdle, pokeIdle } from './idles';
 import { petFrame, petReact, startPet, stopPet } from './petting';
@@ -220,6 +222,8 @@ const cluster = new Cluster();
 /** A phone's buttons go faint over the hero or a telegraph (underbtn.ts). */
 const under = input.touch ? new UnderButtons() : null;
 const title = new Title(game, () => undefined, recovery);
+// Heroes made before names were held (2026-11-13) take theirs now, where nobody has it (client/names.ts).
+for (const h of game.save.heroes) void claimName(normName(h.name), h.id);
 // Trying a class from its page (trial.ts): DONE comes back to that page.
 const trial = new Trial(game, (c, look) => title.showClass(c, look));
 title.onTry = (c, look) => trial.start(c, look);

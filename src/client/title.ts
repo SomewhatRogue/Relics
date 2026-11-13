@@ -3,6 +3,9 @@
  * one, make a new one, or retire one. Making a hero: the five classes, name and look only; tap one to
  * watch it fight and see its ratings; name them and begin. (Kyle: less is more.) RECOVERY CODE opens recoveryui.ts.
  */
+import { NAME_OK, normName } from '../shared/names';
+import { heroId } from '../shared/progress';
+import { claimName, freeNames } from './names';
 import { HERO_SLOTS } from '../shared/progress';
 import { CHAPTER_1 } from '../shared/story';
 import { CLASS_KITS, CLASS_ORDER, type HeroClass } from '../shared/tuning';
@@ -124,11 +127,46 @@ export class Title {
       `<div class="csheet">${areas(CLASS_KITS[c][0])}<p class="cguard">${s.guard}</p>` +
       (s.perk ? row(s.perkLabel ?? '', s.perk) : '') + (s.note ? row(s.noteLabel ?? '', s.note) : '') +
       (s.sign ? row(s.signLabel ?? '', s.sign) : '') + row('SKILL', s.skill) + `<p class="cnote">${SKILL_NOTE}</p></div>` +
-      `<label class="name">NAME <input maxlength="12" value="${NAMES[c]}" autocomplete="off" spellcheck="false"></label>` +
+      `<label class="name">NAME <input maxlength="12" value="${this.free[0] ?? ''}" autocomplete="off" spellcheck="false"></label>` +
+      `<button data-newname class="ghost">NEW NAME</button><p class="nameerr" role="status"></p>` +
       `${this.onTry ? `<button data-try class="wide">TRY THE ${CLASS_NAME[c]}</button>` : ''}<button data-begin class="primary wide">BEGIN</button>${this.g.save.heroes.some((h) => h.prologue) ? '<button data-skipwood class="ghost wide">SKIP THE WOOD</button>' : ''}<button data-pick class="ghost wide">BACK</button></div>`;
+    this.fillNames();
     this.preview = new Preview(c, this.look);
     this.el.querySelector('.stage')!.appendChild(this.preview.el);
     this.preview.start();
+  }
+
+  /** Names nobody has (client/names.ts): the first is the one suggested. Asked for when they run out. */
+  private free: string[] = [];
+  private asking = false;
+  private claiming = false;
+  private fillNames(): void {
+    if (this.free.length || this.asking) return;
+    this.asking = true;
+    void freeNames(this.g.save.heroes.map((h) => normName(h.name))).then((list) => {
+      this.asking = false;
+      this.free = list.length ? list : [NAMES[this.pick]];
+      const box = this.el.querySelector('label.name input') as HTMLInputElement | null;
+      if (box && !box.value) box.value = this.free[0];
+    });
+  }
+  private nameSays(text: string): void {
+    const p = this.el.querySelector('.nameerr');
+    if (p) p.textContent = text;
+  }
+
+  /** BEGIN (or skip the wood): the name is claimed on the server first, so no two heroes share one. */
+  private async begin(skip: boolean): Promise<void> {
+    if (this.claiming) return;
+    const box = this.el.querySelector('label.name input') as HTMLInputElement, name = normName(box.value || this.free[0] || NAMES[this.pick]);
+    if (!NAME_OK.test(name)) return this.nameSays('Two to twelve letters.');
+    if (this.g.save.heroes.some((h) => normName(h.name) === name)) return this.nameSays('One of your heroes has that name.');
+    this.claiming = true;
+    this.nameSays('');
+    const id = heroId(), got = await claimName(name, id);
+    this.claiming = false;
+    if (got === 'taken') return (this.free = this.free.filter((n) => n !== name)), this.nameSays('Someone has that name. Try another.');
+    if (this.g.create(this.pick, name, this.look, id) >= 0) (skip && this.g.skipWood(), this.hide());
   }
 
   /** Redraw without losing a name the player has typed. */
@@ -147,10 +185,12 @@ export class Title {
     if (d.recover !== undefined && this.panel) return (this.inPanel = true), this.panel.open(), void (this.el.innerHTML = this.panel.html());
     if (d.play !== undefined) return this.g.choose(Number(d.play)), this.hide();
     if (d.wood !== undefined) return this.g.choose(Number(d.wood)), this.g.startWood(true), this.hide();
-    if (d.skipwood !== undefined) {
-      const name = (this.el.querySelector('input') as HTMLInputElement).value;
-      if (this.g.create(this.pick, name, this.look) >= 0) this.g.skipWood(), this.hide();
-      return;
+    if (d.skipwood !== undefined) return void this.begin(true);
+    if (d.newname !== undefined) {
+      this.free.shift();
+      const box = this.el.querySelector('label.name input') as HTMLInputElement;
+      box.value = this.free[0] ?? '';
+      return this.nameSays(''), this.fillNames();
     }
     if (d.more !== undefined) return (this.more = this.more === Number(d.more) ? -1 : Number(d.more)), (this.retiring = -1), this.home();
     if (d.retire !== undefined) {
@@ -165,9 +205,6 @@ export class Title {
     if (d.look !== undefined) return (this.look = Number(d.look)), this.keepName(() => this.create());
     if (d.pick !== undefined) return (this.detail = false), this.create();
     if (d.try !== undefined && this.onTry) return this.hide(), this.onTry(this.pick, this.look);
-    if (d.begin !== undefined) {
-      const name = (this.el.querySelector('input') as HTMLInputElement).value;
-      if (this.g.create(this.pick, name, this.look) >= 0) this.hide();
-    }
+    if (d.begin !== undefined) void this.begin(false);
   }
 }

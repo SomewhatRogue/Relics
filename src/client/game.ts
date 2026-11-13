@@ -4,6 +4,8 @@
  * to go in; taking a job starts a run (room after room until the job is done or you're driven back);
  * the results come home to the hero and the shared world, and the town changes with them.
  */
+import { normName } from '../shared/names';
+import { releaseName } from './names';
 import { placeOf, spotOf, type PastimeId } from '../shared/pastimes';
 import { petSpots, type Dog } from './petting';
 import { ownPetOk } from './petwhen';
@@ -317,9 +319,10 @@ export class Game {
   }
 
   /** Make a hero (class for life); returns its slot, or -1 when all three are taken. */
-  create(cls: HeroClass, name: string, look = 0): number {
+  /** `id`: the one its name was claimed under on the server (client/names.ts), when it was. */
+  create(cls: HeroClass, name: string, look = 0, id?: string): number {
     if (this.save.heroes.length >= HERO_SLOTS) return -1;
-    this.save.heroes.push({ ...newProfile(cls, name.trim().toUpperCase().slice(0, 12) || 'HERO'), look });
+    this.save.heroes.push({ ...newProfile(cls, normName(name) || 'HERO', id), look });
     this.choose(this.save.heroes.length - 1);
     return this.save.current;
   }
@@ -334,6 +337,8 @@ export class Game {
     this.enterTown();
   }
   retire(i: number): void {
+    const gone = this.save.heroes[i];
+    if (gone) releaseName(normName(gone.name), gone.id);
     this.save.heroes.splice(i, 1);
     this.save.current = -1;
     store(this.save);
