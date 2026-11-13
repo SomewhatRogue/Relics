@@ -24,6 +24,7 @@ import { fitShiftRecord } from '../shared/shiftpay';
 import { fitErrands } from '../shared/errands';
 import { fitQuests } from '../shared/heroquests';
 import { fitPurse } from '../shared/coins';
+import { fitRanks } from '../shared/drills';
 
 const KEY = 'relic.save.v2', OLD = 'relic.save.v1';
 /** `savedAt`: when it was last kept here (it only goes forward), to tell which copy is newer (recovery.ts). */
@@ -50,6 +51,8 @@ const hero = (old: Partial<Profile>): Profile => {
   out.steel ??= 0;
   // The purse into copper at the new prices, once (shared/coins.ts, economy.md section 6).
   fitPurse(out, p);
+  // Five small stat ranks to three big ones, the same total, once (shared/drills.ts).
+  fitRanks(out, p);
   // Heroes from before the longer Roll start the new tallies at nothing.
   out.stats = { ...newStats(), ...(p.stats ?? {}) };
   out.want ??= 0;

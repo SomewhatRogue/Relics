@@ -55,6 +55,8 @@ export interface Profile {
   gold: number;
   /** The coins' save version: set once the purse is carried over to copper at the new prices (coins.ts fitPurse). */
   coin?: number;
+  /** The stat ranks' save version (drills.ts fitRanks): set once five small ranks are carried over to three big ones. */
+  ranks?: number;
   /** A bid for the statue in the square, paid and waiting on the world's answer (shared/statue.ts). */
   statueBid?: import('./statue.js').BidNote;
   xp: number;
@@ -162,7 +164,7 @@ export interface Profile {
 }
 
 export const newProfile = (cls: HeroClass = 'WARRIOR', name = 'HERO', id = heroId()): Profile =>
-  ({ id, ...(cls === 'RANGER' ? { hound: defaultHound(id) } : {}), name, cls, gold: 0, coin: 1, xp: 0, level: 1, perks: [], learned: [], picks: 0, arms: {}, weapon: CLASS_KITS[cls][0], bag: [], glow: 0, belt: ['bitter'], armor: { slot: 'armor', armor: CLASS_ARMOR[cls], quality: 'plain', traits: [], mods: [], level: 0 }, rings: [], steel: 0, want: 0, prologue: false, tally: false, cold: false, cutSeen: false, relics: [], relic: '', augments: {}, runs: 0, stats: newStats(), wish: false, dice: 0, signs: true, errands: newErrands(), quests: newQuests() });
+  ({ id, ...(cls === 'RANGER' ? { hound: defaultHound(id) } : {}), name, cls, gold: 0, coin: 1, ranks: 1, xp: 0, level: 1, perks: [], learned: [], picks: 0, arms: {}, weapon: CLASS_KITS[cls][0], bag: [], glow: 0, belt: ['bitter'], armor: { slot: 'armor', armor: CLASS_ARMOR[cls], quality: 'plain', traits: [], mods: [], level: 0 }, rings: [], steel: 0, want: 0, prologue: false, tally: false, cold: false, cutSeen: false, relics: [], relic: '', augments: {}, runs: 0, stats: newStats(), wish: false, dice: 0, signs: true, errands: newErrands(), quests: newQuests() });
 
 export function heroId(): string {
   const c = 'abcdefghijkmnpqrstuvwxyz23456789';

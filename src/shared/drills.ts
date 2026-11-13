@@ -12,23 +12,25 @@ import { jobs } from './coins.js';
 export type DrillId = 'power' | 'health' | 'speed' | 'crit' | 'wind' | 'skill' | 'technique' | 'ladder';
 export const DRILL_ORDER: DrillId[] = ['power', 'health', 'speed', 'crit', 'wind', 'skill', 'technique'];
 
-/** The level each rank needs: the base stats one rank every two levels; the skill and technique later. */
-const STAT_LEVELS = [2, 4, 6, 8, 10];
+/** The level each rank needs: the base stats three big ranks (economy.md section 4), the skill and technique later. */
+const STAT_LEVELS = [2, 5, 8];
+/** The base stats: three ranks each, each felt the moment it's bought. */
+export const STAT_DRILLS: DrillId[] = ['power', 'health', 'speed', 'crit', 'wind'];
 /**
  * Each drill: its name, what a rank gives (`per`; under 1 is a share, shown as a percent), a few words
  * for that (`gain`, `#` is the number), the level each rank needs (its length is the top rank), and
  * the first rank's price.
  */
 export const DRILLS: Record<DrillId, { name: string; text: string; gain: string; per: number; levels: number[]; max: number; price: number }> = {
-  power: { name: 'STRENGTH', text: 'More damage from attacks and spells', gain: '+#% damage', per: 0.05, levels: STAT_LEVELS, max: 5, price: jobs(1.5) },
-  health: { name: 'HEALTH', text: 'More health', gain: '+# health', per: 8, levels: STAT_LEVELS, max: 5, price: jobs(1.5) },
-  speed: { name: 'SPEED', text: 'Move faster', gain: '+#% speed', per: 0.03, levels: STAT_LEVELS, max: 5, price: jobs(1.6) },
-  crit: { name: 'CRITICAL', text: 'A chance for any hit to do 50% more damage', gain: '+#% crit chance', per: 0.04, levels: STAT_LEVELS, max: 5, price: jobs(1.6) },
-  wind: { name: 'STAMINA', text: 'Stamina refills faster', gain: 'stamina refill +#%', per: 0.08, levels: STAT_LEVELS, max: 5, price: jobs(1.4) },
-  skill: { name: 'SKILL', text: 'Skill recharges faster', gain: 'skill recharge #% faster', per: 0.08, levels: [4, 7, 10], max: 3, price: jobs(2) },
-  technique: { name: 'TECHNIQUE', text: '', gain: '', per: 0, levels: [4, 7, 10], max: 3, price: jobs(2.2) },
+  power: { name: 'STRENGTH', text: 'More damage from attacks and spells', gain: '+#% damage', per: 0.08, levels: STAT_LEVELS, max: 3, price: jobs(1.5) },
+  health: { name: 'HEALTH', text: 'More health', gain: '+# health', per: 13, levels: STAT_LEVELS, max: 3, price: jobs(1.5) },
+  speed: { name: 'SPEED', text: 'Move faster', gain: '+#% speed', per: 0.05, levels: STAT_LEVELS, max: 3, price: jobs(1.6) },
+  crit: { name: 'CRITICAL', text: 'A chance for any hit to do 50% more damage', gain: '+#% crit chance', per: 0.07, levels: STAT_LEVELS, max: 3, price: jobs(1.6) },
+  wind: { name: 'STAMINA', text: 'Stamina refills faster', gain: 'stamina refill +#%', per: 0.13, levels: STAT_LEVELS, max: 3, price: jobs(1.4) },
+  skill: { name: 'SKILL', text: 'Skill recharges faster', gain: 'skill recharge #% faster', per: 0.08, levels: [4, 7, 10], max: 3, price: jobs(1.6) },
+  technique: { name: 'TECHNIQUE', text: '', gain: '', per: 0, levels: [4, 7, 10], max: 3, price: jobs(1.6) },
   // The movement ladder (shared/ladder.ts): three rungs a class, one a rank. Not in DRILL_ORDER: its rows are the rungs.
-  ladder: { name: 'LADDER', text: '', gain: '', per: 0, levels: [5, 10, 15], max: 3, price: jobs(3.5) },
+  ladder: { name: 'LADDER', text: '', gain: '', per: 0, levels: [5, 10, 15], max: 3, price: jobs(2.5) },
 };
 /** What a crit does to a blow. */
 export const CRIT = 1.5;
@@ -45,8 +47,22 @@ export const drillLevel = (id: DrillId, rank: number, cls?: HeroClass) => levels
 /** How many ranks a trainer will take you to at this level. */
 export const drillCap = (id: DrillId, level: number, cls?: HeroClass) => levelsOf(id, cls).filter((l) => l <= level).length;
 /** The price of the next rank (`rank` is how many you have): rank 1 at the base price (a job or two of
- * copper, economy.md section 3), each after half that again, so the top rank takes four or five jobs. */
-export const drillPrice = (id: DrillId, rank: number) => Math.round((DRILLS[id].price * (1 + 0.5 * rank)) / 5) * 5;
+ * copper, economy.md section 3), then twice and three times it, so the top rank takes four or five jobs. */
+export const drillPrice = (id: DrillId, rank: number) => Math.round((DRILLS[id].price * (1 + rank)) / 5) * 5;
+
+/** What a stat rank gave before the three big ranks (2026-11-13), for carrying old heroes over. */
+const OLD_PER: Partial<Record<DrillId, number>> = { power: 0.05, health: 8, speed: 0.03, crit: 0.04, wind: 0.08 };
+/** The stat ranks' save version: heroes saved before it had five small ranks a stat. */
+export const RANKS_VERSION = 1;
+/** Old small ranks to the nearest big rank with the same total (economy.md section 4), once. */
+export function fitRanks(out: { drills?: Drills; ranks?: number }, saved: { ranks?: number }): void {
+  if ((saved.ranks ?? 0) < RANKS_VERSION && out.drills) {
+    const d = { ...out.drills };
+    for (const id of STAT_DRILLS) if (d[id]) d[id] = Math.min(DRILLS[id].max, Math.round((d[id]! * OLD_PER[id]!) / DRILLS[id].per));
+    out.drills = d;
+  }
+  out.ranks = RANKS_VERSION;
+}
 /** A drill's total, at its rank. */
 export const drilled = (d: Drills | undefined, id: DrillId) => (d?.[id] ?? 0) * DRILLS[id].per;
 /** A few words for what `ranks` ranks of a drill give (one rank: what the next buys). */

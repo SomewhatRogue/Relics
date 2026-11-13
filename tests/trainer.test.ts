@@ -11,8 +11,8 @@ import { SKILL_STEPS } from '../src/shared/drills';
 const hero = (level: number, gold: number, cls: Parameters<typeof newProfile>[0] = 'WARRIOR') => Object.assign(newProfile(cls), { level, gold });
 
 describe('trainer', () => {
-  it('each rank needs its level: base stats every two levels, the skill and technique later', () => {
-    for (const id of ['power', 'health', 'speed', 'crit', 'wind'] as DrillId[]) expect(DRILLS[id].levels).toEqual([2, 4, 6, 8, 10]);
+  it('each rank needs its level: base stats three big ranks at 2, 5 and 8, the skill and technique later', () => {
+    for (const id of ['power', 'health', 'speed', 'crit', 'wind'] as DrillId[]) expect(DRILLS[id].levels).toEqual([2, 5, 8]);
     expect(drillLevel('skill', 0)).toBeGreaterThan(drillLevel('power', 0));
     expect(drillLevel('technique', 0)).toBeGreaterThan(drillLevel('power', 0));
     for (const id of DRILL_ORDER) {
@@ -34,10 +34,10 @@ describe('trainer', () => {
     expect(buyDrill(p, 'power')).toBe(true);
     expect(p.drills?.power).toBe(1);
     expect(p.gold).toBe(10000 - drillPrice('power', 0));
-    // Rank 2 waits on level 4.
+    // Rank 2 waits on level 5.
     expect(drillState(p, 'power')).toBe('locked');
     expect(buyDrill(p, 'power')).toBe(false);
-    p.level = 4;
+    p.level = 5;
     p.gold = drillPrice('power', 1) - 1;
     expect(drillState(p, 'power')).toBe('poor');
     expect(buyDrill(p, 'power')).toBe(false);
@@ -63,12 +63,12 @@ describe('trainer', () => {
   });
 
   it('old heroes keep ranks above the new caps, and only buy on once their level allows', () => {
-    const p = Object.assign(hero(3, 5000), { drills: { power: 3, skill: 2 }, learned: undefined });
+    const p = Object.assign(hero(3, 5000), { drills: { power: 2, skill: 2 }, learned: undefined });
     expect(drillState(p, 'power')).toBe('locked');
     expect(buyDrill(p, 'power')).toBe(false);
-    expect(p.drills.power).toBe(3);
+    expect(p.drills.power).toBe(2);
     const row = trainerRows(p).find((x) => x.id === 'power')!;
-    expect(row.pips).toEqual(['on', 'on', 'on', 'lock', 'lock']);
+    expect(row.pips).toEqual(['on', 'on', 'lock']);
     expect(row.tag).toBe('LEVEL 8');
     // Lessons from before lessons existed: known.
     expect(trainerRows(p).find((x) => x.id === 'skill')!.tag).toBe('LEARNED');
@@ -91,10 +91,10 @@ describe('trainer', () => {
     expect(at('skill').tag).toBe(coinsHtml(TEACHES.skill.price));
     expect(at('power').state).toBe('locked');
     expect(at('health').state).toBe('buy');
-    expect(at('health').gain).toBe(`+${shown(8)} health`);
+    expect(at('health').gain).toBe(`+${shown(13)} health`);
     expect(at('crit').tag).toBe(coinsHtml(drillPrice('crit', 0)));
-    expect(at('power').now).toBe('+10% damage');
-    expect(at('power').next).toBe('+15% damage');
+    expect(at('power').now).toBe('+16% damage');
+    expect(at('power').next).toBe('+24% damage');
     // A Warrior's technique is three rows of moves now (shared/techniques.ts): the first at level 4.
     expect(rows.filter((x) => x.tech).map((x) => x.name)).toEqual(['WIDE SLAM', 'STRIDING BLOW', 'IRON FEET']);
     expect(rows.find((x) => x.tech === 'slam')!.state).toBe('buy');

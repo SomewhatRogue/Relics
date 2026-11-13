@@ -89,3 +89,21 @@ The economy chat's log (docs/design/economy.md). Newest at the foot.
 - The job board's list rows still printed `120g` (missed in slice 1; Kyle caught it): coins now. Phone
   shot of the board checked.
 - Next: slice 4, fewer and bigger stat ranks.
+
+## 2026-11-13: slice 4, fewer and bigger stat ranks (Opus 5.5)
+
+- The five base stats go from 5 ranks to 3, at levels 2, 5 and 8 (`STAT_DRILLS`, drills.ts). A rank is
+  worth a little under double, the top total about what it was: STRENGTH +8% a rank (24%, was 25%),
+  HEALTH +13 (39, was 40), SPEED +5% (15%), CRITICAL +7% (21%, was 20%), STAMINA refill +13% (39%, was 40%).
+- Prices climb 1x, 2x, 3x from the base (`drillPrice`), so a rank is 1.4 to 1.6 jobs at first and 4.2 to
+  4.8 at the top. SKILL and TECHNIQUE drills on the same climb from 1.6 jobs (top 4.8), a ladder rung from
+  2.5 (top 7.5).
+- Old heroes: their small ranks become the nearest big rank with the same total, once (`fitRanks`, a
+  `ranks` version on the hero, client/save.ts; new heroes are made at it). STRENGTH 5 is 3, 2 is 1, 1 is 1.
+  A hero holding a rank above their level's cap keeps it, as before.
+- The trainer's rows and tiles already show the hero's number now and after a rank, so no new words.
+  Tests: tests/prices.test.ts (three ranks, the totals, the carry-over once); pinned old ranks moved in
+  the trainer, upgrades, drills and shown tests. Not shot on the phone: the pips go from five to three in
+  the same row (Kyle to look).
+- All five slices are in. Open for Kyle: the town's shared totals (works, Lantern, statue) left in the old
+  units; voice.md and story-bible.md still give prices in gold (the lore keeper's note above).

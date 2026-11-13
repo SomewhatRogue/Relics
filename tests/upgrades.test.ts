@@ -25,8 +25,8 @@ describe('tiles', () => {
     expect(tile(p, 'drill:power')).toMatchObject({ state: 'poor', badge: `${coinsHtml(drillPrice('power', 0))}, NOT ENOUGH`, act: '' });
     p.gold = 1000;
     expect(tile(p, 'drill:power')).toMatchObject({ state: 'buy', badge: coinsHtml(drillPrice('power', 0)), act: 'buy' });
-    expect(tile(p, 'drill:power').pips).toEqual(['off', 'lock', 'lock', 'lock', 'lock']);
-    p.drills = { power: 5 };
+    expect(tile(p, 'drill:power').pips).toEqual(['off', 'lock', 'lock']);
+    p.drills = { power: 3 };
     expect(tile(p, 'drill:power')).toMatchObject({ state: 'max', badge: 'MAX' });
     // Every tile has a picture key, a name and a line.
     for (const t of allTiles(upgradeTabs(p, at, true))) expect(t.icon && t.name && t.line).toBeTruthy();
@@ -130,12 +130,12 @@ describe('only what you can get at the trainer now (Kyle, 2026-11-13)', () => {
 
 describe('a tile opened', () => {
   it('says now and after, every rank, and the button; away from the trainer it says where to buy it', () => {
-    const p = hero('WARRIOR', 4, 1000);
+    const p = hero('WARRIOR', 5, 1000);
     p.drills = { power: 1 };
     const d = tileDetail(p, 'drill:power', at)!;
-    expect(d.now).toBe('+5% damage');
-    expect(d.after).toBe('+10% damage');
-    expect(d.ladder).toHaveLength(5);
+    expect(d.now).toBe('+8% damage');
+    expect(d.after).toBe('+16% damage');
+    expect(d.ladder).toHaveLength(3);
     expect(d.button).toEqual({ label: `RANK 2: ${coinsHtml(drillPrice('power', 1))}`, act: 'buy', on: true });
     const away = tileDetail(p, 'drill:power', { atTrainer: false, knacksOpen: true }, { who: 'Master Cole', where: 'the barracks' })!;
     expect(away.button?.on).toBe(false);
