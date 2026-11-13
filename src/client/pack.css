@@ -102,3 +102,25 @@ body #pack .rtile:not(.empty)::after { content: ''; position: absolute; inset: 0
 :root[data-still] body #pack .rtile:not(.empty)::after { background: none; }
 body #pack .rtile .rnew { font: 400 9px/1.2 var(--i-label); background: var(--i-leaf); }
 body #pack .rslot .rtap { font: 400 11px/1 var(--i-label); color: var(--i-leaf); }
+
+/* ---- Declutter (Kyle, 2026-11-13: "we just have too much stuff going on"): pictures, not words. The head on
+   one line: the title, the pack's count beside it, KNACKS (its count in gold leaf while picks wait), the cross.
+   Empty slots show a faint picture of what goes there; a slot's name is on tap. No section rules. ---- */
+body #pack .head { flex-wrap: nowrap; align-items: center; }
+body #pack .head .count { font: 400 12px/1 var(--i-label); font-style: normal; letter-spacing: 0.03em; color: var(--i-quiet); white-space: nowrap; }
+body #pack .head .count.full { color: var(--i-danger); }
+body #pack .head span:empty { display: none; }
+body #pack .head span { flex: 1; min-width: 0; font-size: 13px; }
+body #pack .head span:empty + .kn, body #pack .head .count + .kn { margin-left: auto; }
+body #pack .kn { white-space: nowrap; padding: 0 14px; }
+body #pack button.kn em { display: inline-block; min-width: 20px; margin-left: 6px; padding: 3px 4px 2px; font: inherit; font-style: normal; text-align: center;
+  color: #2e1a08; background: linear-gradient(180deg, #ffe08a, #c8902e); box-shadow: 0 0 0 1px var(--i-outline), inset 1px 1px 0 var(--i-leaf-hi); }
+body #pack .kn.pick { color: var(--i-text); box-shadow: 0 0 0 2px var(--i-outline), inset 0 0 0 2px var(--i-leaf), inset 2px 2px 0 #6a6f7a; }
+body #pack .tile.empty img.ghost { width: 60%; opacity: 0.18; filter: grayscale(1); }
+body #pack .tile i { display: none; }
+body #pack .tile.drop i, body #pack .tile.empty.rslot b.rtap { display: block; }
+body #pack .relicrow h3, body #pack .bag h3 { display: none; }
+body #pack .relicrow { margin-top: 12px; }
+body #pack .s-belt { align-self: end; }
+body #pack .detail { border-image: none; }
+body #pack .detail:empty { display: none; }

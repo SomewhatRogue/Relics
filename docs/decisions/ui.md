@@ -110,3 +110,17 @@ From 2026-11-12. Newest at the bottom. Sign each entry with the model name.
   instead of a row of their own: the frame ends at 68 px with hearts and plate up (measured,
   `scripts/iron-measure.cjs`). The rings round ATTACK and BLINK stay. (unitframe.ts's header still says a
   phone's stamina is only the rings; not this chat's file.) (Claude Opus 5.5)
+- Declutter, the pack first (Kyle: "cleaning up the UI in general is really important. We just have too
+  much stuff going on"). Pictures, not words: no labels in the hero's squares (no more "SWOR..."); an empty
+  body or ring slot shows a faint picture of what goes there (`ghostIcon` in itemicons.ts, `ghost` and
+  `title` options on `cell` in cells.ts), the name in its title and on tap. The head on one line: Pack, the
+  pack's count beside it (red when full), KNACKS with its count on gold leaf while picks wait (was "KNACKS / 1
+  TO PICK" on two lines and a pulse), the cross. No section rules: PACK, BELT and RELICS headings gone; the
+  carried relic's RELIC word gone; the shelf's well only when a relic sits on it. "Tap a piece to compare"
+  shows until the first tap, ever (`relic.packHint` in localStorage), then never; the empty box under it goes
+  too. The compare card is two plain columns with a hairline in the one sunk box, not boxes in a box. STATS
+  stays folded. KNACKS (treeui.ts, the general chat's): tree.css rewritten to what the knacks-only screen
+  uses (the old tree's rules dropped), the two on offer as sunk slots with a brass edge, TAKE in gold leaf,
+  the taken as plain lines; `.kn-only` joins ironui.css's list. Files: pack.ts, relicshelf.ts, cells.ts,
+  itemicons.ts (unowned, now on this row), pack.css, cells.css, tree.css. Full suite green.
+  (Claude Opus 5.5)

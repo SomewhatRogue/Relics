@@ -11,7 +11,6 @@ import type { Hero } from '../sim/types';
 import { chargePips, fillCol } from './reliccard';
 import { relicItemIcon } from './relicicons';
 import { RELICW } from './relicwords';
-import { PACKW } from './storewords';
 
 const esc = (s: string) => s.replace(/"/g, '&quot;');
 
@@ -29,8 +28,9 @@ export function relicRow(h: Pick<Hero, 'found' | 'relicItem' | 'relics'>, sel: s
   const it = carriedRelic(h), others = h.found.map((r, k) => [r, k] as const).filter(([r]) => r !== it);
   if (!h.found.length) return '';
   const slot = it
-    ? square(it, 'relic', sel, fresh.includes(it.id), 'relic', PACKW.relic)
-    : `<div class="tile empty rslot pulse${sel === 'relic' ? ' sel' : ''}" style="--t:#ffd27a" data-src="relic" data-dst="relic"><b class="rtap">${RELICW.tapSlot}</b><i>${PACKW.relic}</i></div>`;
+    ? square(it, 'relic', sel, fresh.includes(it.id), 'relic')
+    : `<div class="tile empty rslot pulse${sel === 'relic' ? ' sel' : ''}" style="--t:#ffd27a" data-src="relic" data-dst="relic"><b class="rtap">${RELICW.tapSlot}</b></div>`;
   const shelf = others.map(([r, k]) => square(r, 'found:' + k, sel, fresh.includes(r.id))).join('');
-  return `<div class="relicrow"><h3>${RELICW.shelf} <i>${h.found.length}</i></h3><div class="rrow">${slot}<div class="rshelf" data-dst="shelf">${shelf}</div></div></div>`;
+  // Pictures only, no heading; the shelf's well only when something is on it (Kyle, 2026-11-13: declutter).
+  return `<div class="relicrow" title="${RELICW.shelf}"><div class="rrow">${slot}${shelf ? `<div class="rshelf" data-dst="shelf">${shelf}</div>` : ''}</div></div>`;
 }

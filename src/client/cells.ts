@@ -13,13 +13,14 @@ import './cells.css';
 const esc = (s: string) => s.replace(/"/g, '&quot;');
 
 /** One square: a piece's picture in its tier's colour, its level, or an empty place. `src` makes it pickable. */
-export function cell(it: Item | null, src: string | null, opts: { dst?: string; sel?: string | null; label?: string; icon?: string; col?: string; dim?: boolean; tag?: string } = {}): string {
+export function cell(it: Item | null, src: string | null, opts: { dst?: string; sel?: string | null; label?: string; icon?: string; col?: string; dim?: boolean; tag?: string; ghost?: string; title?: string } = {}): string {
   const col = opts.col ?? (it ? itemCol(it) : '#3a3546');
   const cls = `tile${it || opts.icon ? '' : ' empty'}${src && src === opts.sel ? ' sel' : ''}${opts.dim ? ' dim' : ''}`;
   const icon = opts.icon ?? (it ? itemIcon(it) : '');
-  const name = it ? itemName(it) : opts.label ?? '';
+  const name = it ? itemName(it) : opts.label ?? opts.title ?? '';
+  // `ghost`: an empty slot's faint picture of what goes there, in place of a word (the pack).
   return `<div class="${cls}" style="--t:${col}" title="${esc(name)}"${src && (it || opts.icon) ? ` data-src="${src}"` : ''}${opts.dst ? ` data-dst="${opts.dst}"` : ''}>` +
-    (icon ? `<img src="${icon}" alt="">` : '') + (it?.level ? `<b>+${it.level}</b>` : '') + (opts.tag ? `<em>${opts.tag}</em>` : '') +
+    (icon ? `<img src="${icon}" alt="">` : opts.ghost ? `<img class="ghost" src="${opts.ghost}" alt="">` : '') + (it?.level ? `<b>+${it.level}</b>` : '') + (opts.tag ? `<em>${opts.tag}</em>` : '') +
     (opts.label ? `<i>${opts.label}</i>` : '') + '</div>';
 }
 

@@ -77,6 +77,8 @@ export function itemIcon(it: Item): string {
   });
 }
 export const relicIcon = () => draw('relic', ICONS.relic);
+/** What an empty slot shows, faint, in place of its name: a tunic for the body, a ring, a relic. */
+export const ghostIcon = (key: 'light' | 'ring' | 'relic') => draw(key, ICONS[key]);
 export const skillIcon = () => draw('skill', ICONS.skill);
 export function potionIcon(id: PotionId): string {
   const col = POTIONS[id]?.col ?? '#c84a3a';
