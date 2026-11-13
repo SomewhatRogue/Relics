@@ -7,14 +7,13 @@
  *
  * - `rotation`: each phase's blows in order (the kit's one seeded swap, one `more` for a party of four).
  * - `pick`: a big red wedge, BRACED or dodge it. `overhead`: a striped circle ahead of it, the pick stuck
- *   after (`recover`, the long punish). `shove`: it puts its shoulder to the nearest cart on the rail and
- *   sends it down the rail at you (a striped lane the rail's width, then the cart). `drag`: phase 2, it
- *   swings its chain round itself (a striped ring).
+ *   after (`recover`, the long punish). `hurl`: it walks to the nearest cart at rest, lifts it overhead and
+ *   hurls it at you (a striped lane the cart's width, then the cart). `drag`: phase 2, it swings its chain
+ *   round itself (a striped ring).
  * - Phase 2 at `phase2` of its health: a roar, the plate off for good, `faster` its pace and wind-ups'
  *   floors kept, and `adds.n` small ones out of the adit every `adds.every` s.
- * - `cart`: a cart on the rail. GRAB held `grab` s at a cart standing at either stop sends it rolling to
- *   the other at `speed`; it hits whatever's in the rail's lane (`width`): a hero for `dmg`, the Haulier
- *   knocked down `down` s (its plate cracked: the payoff). It stops at the far stop.
+ * - `track`, `cart`: carts down the tracks across its floor, with a warning (below); a track cart, or a hurled
+ *   one, knocks the Haulier down `down` s with its plate cracked (the payoff: lure it onto a track).
  * - `gear`: lightning within `gear.reach` of the winding gear over the shaft falls on the gear and
  *   crackles out `gear.r`: the Haulier inside it has its plate cracked (lead it under, then call the storm).
  *
@@ -30,7 +29,7 @@
  */
 import type { EnemyAttackSpec } from './tuning.js';
 
-export type HaulMove = 'pick' | 'overhead' | 'shove' | 'drag' | 'leap' | 'wrench' | 'crank';
+export type HaulMove = 'pick' | 'overhead' | 'hurl' | 'drag' | 'leap' | 'wrench' | 'crank';
 
 export const HAULIER = {
   hp: 700,
@@ -43,11 +42,11 @@ export const HAULIER = {
   faster: 1.15,
   /** (Kyle, 2026-11-11: "attack more often, faster tells": 0.7 before, wind-ups a seventh shorter.) */
   pauseBetween: 0.35,
-  rotation: { 1: ['pick', 'overhead', 'pick', 'leap', 'shove', 'crank'], 2: ['leap', 'pick', 'overhead', 'wrench', 'crank', 'drag', 'shove', 'pick'] } as Record<1 | 2, HaulMove[]>,
+  rotation: { 1: ['pick', 'overhead', 'pick', 'leap', 'hurl', 'crank'], 2: ['leap', 'pick', 'overhead', 'wrench', 'crank', 'drag', 'hurl', 'pick'] } as Record<1 | 2, HaulMove[]>,
   more: 'drag' as HaulMove,
   pick: { windup: 0.85, active: 0.12, recover: 0.9, dmg: 22, knock: 8, range: 2.4, arc: 100, unblockable: false } as EnemyAttackSpec,
   overhead: { windup: 1.2, active: 0.12, recover: 2.2, dmg: 30, knock: 10, radius: 1.8, ahead: 1.6, unblockable: true } as EnemyAttackSpec,
-  shove: { windup: 1.0, active: 0.2, recover: 1.0, dmg: 0, knock: 0, unblockable: true } as EnemyAttackSpec,
+  hurl: { windup: 1.2, active: 0.2, recover: 1.0, dmg: 0, knock: 0, unblockable: true } as EnemyAttackSpec,
   drag: { windup: 1.3, active: 0.15, recover: 1.5, dmg: 18, knock: 8, radius: 2.6, ahead: 0, unblockable: true } as EnemyAttackSpec,
   leap: { windup: 0.95, active: 0.15, recover: 0.8, dmg: 26, knock: 12, radius: 1.7, ahead: 0, unblockable: true } as EnemyAttackSpec,
   leapFrom: 3.5,
@@ -59,14 +58,26 @@ export const HAULIER = {
   chain: ['leap', 'overhead'] as HaulMove[],
   chainPause: 0.1,
   chainRecover: 0.35,
-  /** It shoves a cart only from within this of one at a stop (else the next blow). */
-  shoveReach: 2.2,
+  /** It hurls a cart only from within this of one at rest (else it walks to one first); the cart leaves its hands this far ahead of it. */
+  hurlReach: 2.2,
+  hurlFrom: 1.2,
   adds: { every: 15, n: 2 },
   /**
-   * Carts (Kyle, 2026-11-12: "click to grab it then aim it and click again to throw it"): GRAB by a cart at rest
-   * holds it in front of you, GRAB again throws it the way you face at `speed`, at most `most` tiles. It knocks
-   * the Haulier down `down` s, but not again for `again` s after (no stun-locking); a goblin it hits takes `addDmg`.
+   * Carts (Kyle, 2026-11-12, after the playtest: "tracks everywhere and you get a warning when one is coming, and
+   * if you position the enemy right he gets hit instead. He can also hurl one at you"). A cart at rest (on a
+   * siding, or where a hurled one stopped) is only the Haulier's to hurl. One rolling (a track's or a hurled one)
+   * hits a hero in its way for `dmg`, a goblin for `addDmg`, and the Haulier: down `down` s, plate cracked, but
+   * not again for `again` s after (a shrug). `width` is the lane drawn (and the cart's body); a hurled one goes
+   * `speed` tiles a second, at most `most` tiles.
    */
-  cart: { grab: 0.6, speed: 9, dmg: 24, knock: 10, down: 2, width: 0.9, most: 14, again: 10, addDmg: 30, hold: 0.25 },
+  cart: { speed: 9, dmg: 24, knock: 10, down: 2, width: 1.2, most: 14, again: 10, addDmg: 30 },
+  /**
+   * The tracks (shared/sumparena.ts `map.tracks`): every `every[phase]` s one is picked (sim/trackshape.ts: the
+   * room's seeded Rng, leaning to one within `near` of the Haulier by `lean` times over, and not the last one
+   * twice) and its lamps light for `warn` s (a rumble); a striped lane shows along it for the last `lane` s;
+   * then one cart bursts out of a mouth, rolls the track at `speed` and goes into the far mouth. Never two at once.
+   * `first`: the wait after the fight begins.
+   */
+  track: { every: { 1: 6, 2: 4 } as Record<1 | 2, number>, warn: 1.6, lane: 1.0, speed: 12, first: 2.5, near: 4, lean: 3 },
   gear: { reach: 1.4, r: 1.8 },
 };

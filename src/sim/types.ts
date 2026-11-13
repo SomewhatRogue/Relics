@@ -835,7 +835,7 @@ export type FightEvent =
   | { k: 'cracked'; x: number; y: number }
   /** The Haulier's working (sim/haulbook.ts, sim/haulcarts.ts; drawn client/hauldraw.ts): a cart set rolling (`by` a hero, or the Haulier's shove),
    *  hitting a hero or the Haulier (`on`), or stopping at a stop; lightning falling on the winding gear; the Haulier's plate off for good (phase 2). */
-  | { k: 'cart'; what: 'go' | 'hit' | 'stop' | 'flip' | 'aim' | 'grab'; x: number; y: number; by?: string; on?: string }
+  | { k: 'cart'; what: 'go' | 'hit' | 'stop' | 'flip' | 'aim' | 'warn' | 'gone'; x: number; y: number; by?: string; on?: string }
   | { k: 'tub'; what: 'push' | 'plate' | 'reset' | 'solved'; x: number; y: number; by?: string }
   | { k: 'lamp'; what: 'lit' | 'out' | 'snuff' | 'how'; x: number; y: number; by?: string }
   | { k: 'gear'; x: number; y: number; hit: boolean }

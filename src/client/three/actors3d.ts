@@ -20,11 +20,11 @@ import { Pool, type Held } from './pool3d';
 import { makeTele, shapeTele } from './teleg3d';
 import { strikeShape } from '../../sim/stormshape';
 import { sparkShapes } from '../../sim/sparkshape';
+import { trackShapes } from '../../sim/trackshape';
 import { quakeShapes } from '../../sim/quakeshape';
 import { columnShapes } from '../../sim/columnshape';
 import { LISTENER } from '../../shared/listentune';
 import { caveLook } from '../cavedraw';
-import { cartPath } from '../../sim/cartpath';
 import { blastShape } from '../../sim/blastshape';
 import { shakeProp } from './prophit3d';
 import { makeChest, makeCoal, makeHole, makePickup, makeProp, poseChest, type ChestFig } from './props3d';
@@ -98,8 +98,8 @@ export class Actors {
       const m = this.teles.get('k' + s.id, '', () => ({ root: makeTele() })).root;
       m.visible = shapeTele(m, a, now, 0);
     }
-    // The Haulier's sparks coming down (sim/sparkshape.ts, the circles the room judges).
-    for (const e of room.enemies) [...sparkShapes(e), ...quakeShapes(e)].forEach((a, i) => {
+    // The Haulier's sparks coming down (sim/sparkshape.ts, the circles the room judges) and its next cart's lane (sim/trackshape.ts).
+    for (const e of room.enemies) [...sparkShapes(e), ...quakeShapes(e), ...trackShapes(e, t)].forEach((a, i) => {
       const m = this.teles.get('s' + e.id + ':' + i, '', () => ({ root: makeTele() })).root;
       m.visible = shapeTele(m, a, now, 0);
     });
@@ -109,16 +109,6 @@ export class Actors {
       const m = this.teles.get('col' + i, '', () => ({ root: makeTele() })).root;
       m.visible = shapeTele(m, a, now, 0);
     });
-    // A held cart's aim (sim/cartpath.ts, the spot the room stops it): a flat gold strip out to there.
-    for (const p of room.props) {
-      const h = p.kind === 'cart' && p.heldBy ? room.heroes.find((x) => x.id === p.heldBy) : undefined;
-      if (!h) continue;
-      const end = cartPath(p.x, p.y, h.fx, h.fy, p.radius), len = Math.max(0.1, Math.hypot(end.x - p.x, end.y - p.y));
-      const m = this.teles.get('aim' + p.id, '', () => ({ root: new THREE.Mesh(new THREE.BoxGeometry(1, 0.02, 0.1), new THREE.MeshBasicMaterial({ color: 0xffd27a, transparent: true, opacity: 0.8 })) })).root;
-      m.scale.x = len;
-      m.position.set((p.x + end.x) / 2, 0.04, (p.y + end.y) / 2);
-      m.rotation.y = -Math.atan2(end.y - p.y, end.x - p.x);
-    }
     // A keg, oil or embers about to go up (sim/blastshape.ts, the circle the room judges).
     for (const e of room.enemies) {
       const a = blastShape(e, t);

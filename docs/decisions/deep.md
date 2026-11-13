@@ -136,3 +136,12 @@ peat's mud). client/coop.ts apply: a whole send for the same room now takes the 
 own blocks (they come piece by piece). Instances chat: a guest that builds its map from the job's seed (the `ms`
 big-room path, shared/expedmap.ts) still takes only `blaze`; if your guest's map is built differently from the
 leader's there, that would put them off it. deep-online 18 of 18, deepboss-online all, full suite green.
+
+## 2026-11-12: the Haulier's carts on tracks (Opus 5.5; one Sonnet builder)
+Kyle: THE LISTENER is one of the coolest bosses; the Haulier's carts seemed to vanish and grab-and-throw didn't
+work. Reworked per docs/design/deep-bosses.md "Carts on tracks": tracks with tunnel mouths, warned track carts
+(lamps, then a striped lane: sim/trackshape.ts), the pick leaning to the Haulier's track, HURL from sidings; hero
+cart grab removed (client/cartaim.ts deleted; cluster.ts GRAB cue incline-only). bodies.ts: running and held carts
+skip body separation (they were clamped at the edge). I added each running cart's own light (scene.ts) and a
+spark trail (sumpdraw.ts) after the first shots showed carts hard to see. Open Cut's LOADING STAGE: single rail
+kept, no track carts (instances chat's room).

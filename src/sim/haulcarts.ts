@@ -1,60 +1,61 @@
 /**
- * The Haulier's working (docs/design/deep-bosses.md; numbers shared/haultune.ts): the ore carts on the rail
- * and the winding gear over the shaft. Run once a tick by sim/haulbook.ts.
- * - A cart at rest (on the rail at first, wherever it stopped after): a hero's GRAB beside it takes hold of it,
- *   held in front of them the way they face; GRAB again throws it that way (Kyle, 2026-11-12). The Haulier's
- *   shove (sim/haulier.ts) sends one at its hero. A rolling cart (`roll` its speed, signed for the wheels;
- *   `wx`, `wy` its way; `rollBy` who sent it) goes straight on till something stops it (sim/cartpath.ts).
- * - It hits a hero in its way for cart.dmg and cart.knock, judged as a striped boss blow (sim/combat.ts
- *   hitHero), once each a roll, never the one who threw it; a goblin for cart.addDmg; and the Haulier, knocked
- *   down cart.down s with its plate cracked, but not again for cart.again s after. Its own shove never hits it.
+ * The Haulier's working (docs/design/deep-bosses.md; numbers shared/haultune.ts): the carts on its tracks and
+ * the winding gear over the shaft. Run once a tick by sim/haulbook.ts.
+ * - Tracks (Kyle, 2026-11-12): every `track.every` s one is picked (sim/trackshape.ts), warned (`boss.track`:
+ *   its lamps, then a striped lane for the last `track.lane` s), and a cart bursts out of one mouth, rolls the
+ *   whole track at `track.speed` and goes into the far one (gone). Never two at once.
+ * - A cart at rest (on a siding at first, wherever a hurled one stopped after) is the Haulier's to hurl
+ *   (sim/haulier.ts: it lifts it, `heldBy: 'haulier'`, and sends it at its hero). GRAB does nothing to one.
+ * - A rolling cart (`roll` its speed, `wx`, `wy` its way; `rollBy` 'track' or who hurled it) hits a hero in its
+ *   way for cart.dmg and cart.knock, judged as a striped boss blow (sim/combat.ts hitHero), once each a roll,
+ *   a goblin for cart.addDmg, flung, and the Haulier, knocked down cart.down s with its plate cracked, but not
+ *   again for cart.again s after. Its own hurl never hits it. A hurled one goes straight on till something
+ *   stops it (sim/cartpath.ts); a track's runs through.
  * - The gear: lightning within gear.reach of it falls on it (sim/skystrike.ts), and cracks the plate of the
  *   Haulier within gear.r of it.
  */
 import { collide, currentMap } from '../shared/arena';
-import { SUMP_SPOTS } from '../shared/sumparena';
-import { GRAB, HAULIER as H, HERO, TICK } from '../shared/tuning';
+import { HAULIER as H, HERO, TICK } from '../shared/tuning';
+import { Rng } from '../shared/rng';
 import { hitHero } from './combat';
 import { isDead } from './damage';
 import { crack } from './ironhide';
 import { damage } from './damage';
-import { cartPath } from './cartpath';
 import { bossStun } from './poise';
+import { newProp } from './props';
+import { pickTrack, tracksOf, trackWay } from './trackshape';
 import type { BossBook } from './bosskit';
 import type { World } from './elements';
 import type { Enemy, EnemyAttack, Hero, Prop } from './types';
 
-/** What the book keeps between ticks (not saved with the room: a hold or a stray roll starts over). */
+/** What the book keeps between ticks (not saved with the room: a stray roll starts over). */
 export interface HaulState {
   props: Prop[];
-  seen: Map<string, number>;
-  hold: Map<string, { cart: number; at: number }>;
   hits: Map<number, Set<string>>;
-  /** A blow was under way last tick (so its rest is set when it ends); the next of the adits' small ones; the cart the shove is for. */
+  /** A blow was under way last tick (so its rest is set when it ends); the next of the adits' small ones; the cart the hurl is for. */
   was: boolean;
   nextAdds: number;
-  shove: number;
+  hurl: number;
+  /** The next track's warning begins at this room time (Infinity till the fight does); the last one run (-1 none). */
+  next: number;
+  last: number;
+  /** Its own seeded stream (from the room's seeded swaps), so the fire's is never spent on it. */
+  rng: Rng;
 }
 
 const states = new WeakMap<BossBook, HaulState>();
 export function haulState(bk: BossBook): HaulState {
   let s = states.get(bk);
-  if (!s) states.set(bk, (s = { props: [], seen: new Map(), hold: new Map(), hits: new Map(), was: false, nextAdds: Infinity, shove: 0 }));
+  if (!s) states.set(bk, (s = { props: [], hits: new Map(), was: false, nextAdds: Infinity, hurl: 0, next: Infinity, last: -1, rng: new Rng(((bk.swaps[0] ?? 0) * 977 + (bk.swaps[1] ?? 0) * 31 + 4099) >>> 0) }));
   return s;
 }
 
 // (Not THE BRAKESMAN's, on its incline's lanes in the same map over the top: sim/brake.ts has those.)
 const onLane = (p: Prop) => !!currentMap().incline?.lanes.some((x) => Math.abs(p.x - x) < 0.05);
 const isCart = (p: Prop) => p.kind === 'cart' && !p.broken && !onLane(p);
-/** A cart at rest: not rolling and not held, wherever it stands (on the rail or wherever it was thrown to). */
+/** A cart at rest: not rolling and not held, wherever it stands (on a siding or wherever it was hurled to). */
 export const standing = (p: Prop) => isCart(p) && !p.roll && !p.heldBy;
-/** Where it would go if shoved from where it stands with no aim: along the rail, away from its nearer end. */
-const railWay = (p: Prop): [number, number] => {
-  const xs = SUMP_SPOTS.stops.map((s) => s.x);
-  return [p.x < (Math.min(...xs) + Math.max(...xs)) / 2 ? 1 : -1, 0];
-};
-/** How far a cart standing here would roll along the rail (the Haulier's shove with nobody to aim at). */
-export const farStop = (p: Prop) => p.x + railWay(p)[0] * cartPath(p.x, p.y, railWay(p)[0], 0, p.radius).len;
+const onTrack = (p: Prop) => p.rollBy === 'track';
 
 /** The cart at rest nearest (x, y), within `within` of it. */
 export function nearestCart(props: Prop[], x: number, y: number, within = Infinity): Prop | undefined {
@@ -67,10 +68,10 @@ export function nearestCart(props: Prop[], x: number, y: number, within = Infini
   return best;
 }
 
-/** Set a cart rolling along (dx, dy) (along the rail, unaimed). */
-export function sendCart(st: HaulState, p: Prop, by: string, ev: World['ev'], dx?: number, dy?: number): void {
-  const [ux, uy] = dx === undefined || dy === undefined || (!dx && !dy) ? railWay(p) : [dx / Math.hypot(dx, dy), dy / Math.hypot(dx, dy)];
-  Object.assign(p, { wx: ux, wy: uy, roll: (ux >= 0 ? 1 : -1) * H.cart.speed, rollBy: by, heldBy: undefined });
+/** Set a cart rolling along (dx, dy), at `speed` (a hurled one's by default). */
+export function sendCart(st: HaulState, p: Prop, by: string, ev: World['ev'], dx: number, dy: number, speed: number = H.cart.speed): void {
+  const l = Math.hypot(dx, dy) || 1, ux = dx / l, uy = dy / l;
+  Object.assign(p, { wx: ux, wy: uy, roll: (ux !== 0 ? ux : uy) >= 0 ? speed : -speed, rollBy: by, heldBy: undefined });
   st.hits.set(p.id, new Set());
   ev.push({ k: 'cart', what: 'go', x: p.x, y: p.y, by });
 }
@@ -96,52 +97,56 @@ function knockDown(e: Enemy, now: number, ev: World['ev']): boolean {
   return true;
 }
 
-/** The carts once a tick: grabbed, held and aimed, thrown; rolls run on, what they hit, where they stop. */
+/** The tracks: warn the next one when it is due, then send its cart as the warning runs out. */
+function stepTracks(st: HaulState, e: Enemy, w: World): void {
+  const b = e.boss!, now = w.now, tracks = tracksOf(), W = b.track;
+  if (!tracks.length) return;
+  if (W) {
+    if (now < W.go) return;
+    b.track = undefined;
+    const t = tracks[W.i], m = trackWay(t, W.from), p = newProp('cart', m.ax - m.dx * 0.5, m.ay - m.dy * 0.5, false);
+    // (A number of its own, past every prop's: the room's later ones never meet it.)
+    p.id = 1 + w.props.reduce((n, q) => Math.max(n, q.id), 0);
+    w.props.push(p);
+    sendCart(st, p, 'track', w.ev, m.dx, m.dy, H.track.speed);
+    // (It bursts out of the mouth: the event is there, not where the cart starts.)
+    w.ev[w.ev.length - 1] = { k: 'cart', what: 'go', x: m.ax, y: m.ay, by: 'track' };
+    return;
+  }
+  if (now < st.next || w.props.some((p) => onTrack(p))) return;
+  const i = pickTrack(tracks, e, st.last, st.rng.next()), from = (st.rng.next() < 0.5 ? 1 : 0) as 0 | 1;
+  st.last = i;
+  st.next = now + H.track.every[b.phase];
+  b.track = { i, from, at: now, lane: now + H.track.warn - H.track.lane, go: now + H.track.warn };
+  const m = trackWay(tracks[i], from);
+  w.ev.push({ k: 'cart', what: 'warn', x: m.ax, y: m.ay });
+}
+
+/** Whether a cart is out past the room's edge (into a mouth): gone. */
+const gone = (p: Prop) => {
+  const m = currentMap(), pad = 0.9;
+  return p.x < -pad || p.y < -pad || p.x > m.w + pad || p.y > m.h + pad;
+};
+
+/** The carts once a tick: the one the Haulier holds, the tracks' warnings and carts, rolls run on, what they hit, where they stop. */
 export function stepCarts(st: HaulState, e: Enemy, w: World): void {
   const now = w.now;
-  // GRAB pressed (the hero's own press counter moved): beside a cart at rest, take hold of it; holding one, throw it.
-  for (const h of w.heroes) {
-    const prev = st.seen.get(h.id);
-    st.seen.set(h.id, h.seen.grab);
-    if (prev === undefined || prev === h.seen.grab || !up(h)) continue;
-    const held = w.props.find((p) => isCart(p) && p.heldBy === h.id);
-    if (held) {
-      // (Not the press that took hold of it: a moment's grace, cart.hold s.)
-      if (now - (st.hold.get(h.id)?.at ?? -9) < H.cart.hold) continue;
-      st.hold.delete(h.id);
-      sendCart(st, held, h.id, w.ev, h.fx, h.fy);
-      h.grabQueuedAt = -9;
-      continue;
-    }
-    const c = nearestCart(w.props, h.x, h.y, GRAB.reach + 0.6);
-    if (!c) continue;
-    c.heldBy = h.id;
-    st.hold.set(h.id, { cart: c.id, at: now });
-    // (The press was for the cart: not "nothing to grab", and no goblin taken with it.)
-    h.grabQueuedAt = -9;
-    w.ev.push({ k: 'cart', what: 'grab', x: c.x, y: c.y, by: h.id });
-  }
-  // Held: in front of its hero, the way they face; let go if they fall, leave, or are knocked about.
+  stepTracks(st, e, w);
+  // Held overhead by the Haulier for its hurl; let go (where it stands) if the blow is no more.
   for (const p of w.props) {
-    if (!isCart(p) || !p.heldBy) continue;
-    const h = w.heroes.find((x) => x.id === p.heldBy);
-    if (!h || !up(h) || h.act === 'stun' || h.act === 'hurt') {
-      Object.assign(p, { heldBy: undefined });
-      if (h) st.hold.delete(h.id);
-      continue;
-    }
-    const q = { x: h.x + h.fx * (p.radius + HERO.radius + 0.15), y: h.y + h.fy * (p.radius + HERO.radius + 0.15) };
-    collide(q, p.radius);
-    Object.assign(p, { x: q.x, y: q.y, kvx: 0, kvy: 0 });
+    if (!isCart(p) || p.heldBy !== 'haulier') continue;
+    const a = e.attack;
+    if (!a || (a.boss as string | undefined) !== 'hurl' || e.act === 'carried') Object.assign(p, { heldBy: undefined });
+    else Object.assign(p, { x: e.x, y: e.y + 0.01, kvx: 0, kvy: 0 });
   }
-  for (const p of w.props) {
+  for (const p of [...w.props]) {
     if (!isCart(p) || !p.roll) continue;
-    const seen = st.hits.get(p.id) ?? st.hits.set(p.id, new Set()).get(p.id)!;
+    const seen = st.hits.get(p.id) ?? st.hits.set(p.id, new Set()).get(p.id)!, track = onTrack(p);
     const ux = p.wx ?? Math.sign(p.roll), uy = p.wy ?? 0, sp = Math.abs(p.roll);
-    // On along its way; something in the way (a wall, a block, the edge) stops it where it is.
+    // On along its way. A hurled one is stopped by what is in the way (a wall, a block, the edge); a track's runs through.
     const q = { x: p.x + ux * sp * TICK, y: p.y + uy * sp * TICK };
-    collide(q, p.radius);
-    const blocked = Math.hypot(q.x - (p.x + ux * sp * TICK), q.y - (p.y + uy * sp * TICK)) > 0.02;
+    if (!track) collide(q, p.radius);
+    const blocked = !track && Math.hypot(q.x - (p.x + ux * sp * TICK), q.y - (p.y + uy * sp * TICK)) > 0.02;
     Object.assign(p, { x: q.x, y: q.y, kvx: 0, kvy: 0 });
     for (const h of w.heroes) {
       if (seen.has(h.id) || !up(h) || (h.z ?? 0) !== 0 || h.id === p.rollBy) continue;
@@ -160,12 +165,21 @@ export function stepCarts(st: HaulState, e: Enemy, w: World): void {
       const key = 'e' + g.id;
       if (g === e || g.boss || isDead(g) || seen.has(key) || Math.hypot(g.x - p.x, g.y - p.y) > p.radius + g.radius) continue;
       seen.add(key);
-      if (p.rollBy) g.lastBy = p.rollBy;
+      if (p.rollBy && !track) g.lastBy = p.rollBy;
       Object.assign(g, { kvx: ux * 12, kvy: uy * 12 });
       damage(g, H.cart.addDmg, now, w.ev, { heavy: true, how: 'burst', dx: ux, dy: uy });
       w.ev.push({ k: 'cart', what: 'hit', x: g.x, y: g.y, by: p.rollBy, on: key });
     }
-    // Stopped: by what's in its way, by a cart at rest in front of it (they never overlap), or gone far enough.
+    // Into the far mouth: gone.
+    if (track) {
+      if (gone(p)) {
+        w.props.splice(w.props.indexOf(p), 1);
+        st.hits.delete(p.id);
+        w.ev.push({ k: 'cart', what: 'gone', x: Math.max(0, Math.min(currentMap().w, p.x)), y: Math.max(0, Math.min(currentMap().h, p.y)) });
+      }
+      continue;
+    }
+    // Stopped: by what is in its way, by a cart at rest in front of it (they never overlap), or gone far enough.
     const ahead = w.props.find((o) => o !== p && standing(o) && Math.hypot(o.x - p.x, o.y - p.y) < 2 * p.radius + 0.02 && (o.x - p.x) * ux + (o.y - p.y) * uy > 0);
     const run = (st.hits.get(p.id) as Set<string> & { run?: number }), went = (run.run = (run.run ?? 0) + sp * TICK);
     if (blocked || ahead || went >= H.cart.most) {
@@ -174,6 +188,12 @@ export function stepCarts(st: HaulState, e: Enemy, w: World): void {
       w.ev.push({ k: 'cart', what: 'stop', x: p.x, y: p.y });
     }
   }
+}
+
+/** The Haulier is dead: no cart runs on, no warning stands. */
+export function clearTracks(e: Enemy | undefined, w: World): void {
+  if (e?.boss) e.boss.track = undefined;
+  for (let i = w.props.length - 1; i >= 0; i--) if (onTrack(w.props[i])) w.props.splice(i, 1);
 }
 
 /** The winding gear, if (x, y) is within gear.reach of it. */

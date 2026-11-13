@@ -1,6 +1,6 @@
 /**
  * The Haulier's working as effects and sounds (events from sim/haulbook.ts, sim/haulcarts.ts; the bodies are
- * client/hauldraw.ts and client/sumpdraw.ts): a cart set rolling, crashing, pulling up; lightning on the
+ * client/hauldraw.ts and client/sumpdraw.ts): a cart's warning, bursting out of a mouth, crashing, pulling up, vanishing into the far one; lightning on the
  * winding gear; the plate flung off for good; landing a leap (a Doorkeeper's vault too); its sparks hitting the
  * floor; a Doorkeeper's quake bursting through. Cosmetic only.
  */
@@ -18,13 +18,23 @@ export const secs = () => performance.now() / 1000;
 /** True if it was one of these (and has been drawn). */
 export function haulFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
   if (ev.k === 'cart') {
-    if (ev.what === 'go') {
+    if (ev.what === 'go' && ev.by === 'track') {
+      // A cart bursting out of a mouth: dust and grit thrown ahead of it, sparks off the rails, a jolt.
+      fx.burst(x, y - 4, 26, ['#8a8494', '#6a647a', '#b8b4ac', '#57525e'], 85, false, 140, true);
+      fx.burst(x, y - 3, 12, ['#ffd27a', '#ffffff', '#ff9a40'], 70, true);
+      fx.flashes.push({ x, y: y - 6, r: 54, i: 0.8, c: [1, 0.72, 0.4], life: 0.16, max: 0.16 });
+      fx.shake = Math.max(fx.shake, 3.5);
+    } else if (ev.what === 'warn') {
+      // The mouth stirring: dust shaken loose, a low rumble.
+      fx.burst(x, y - 8, 10, ['#8a8494', '#6a647a'], 22, false, 30, true);
+      fx.shake = Math.max(fx.shake, 1);
+    } else if (ev.what === 'gone') {
+      // Into the far mouth: a puff of dust at it.
+      fx.burst(x, y - 4, 14, ['#8a8494', '#6a647a', '#57525e'], 50, false, 90, true);
+      fx.shake = Math.max(fx.shake, 1.5);
+    } else if (ev.what === 'go') {
       fx.burst(x, y - 2, 12, ['#8a8494', '#6a647a', '#b8b4ac'], 38, false, 60, true);
       fx.shake = Math.max(fx.shake, 1.5);
-    } else if (ev.what === 'grab') {
-      // Taken hold of: a scrape of grit, and how to throw it.
-      fx.burst(x, y - 2, 8, ['#8a8494', '#6a647a'], 30, false, 60, true);
-      fx.say(x, y - 34, 'AIM, THEN GRAB TO THROW', '#ffd27a', 1.8);
     } else if (ev.what === 'aim') {
       fx.say(x, y - 40, BRAKE_WORDS.how, '#ffd27a', 2.4);
     } else if (ev.what === 'flip') {
@@ -89,7 +99,7 @@ export function haulFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
 
 /** Their sounds, from the kit we have. True when it was one of theirs. */
 export function haulSound(ev: FightEvent): boolean {
-  if (ev.k === 'cart') return ev.what === 'hit' ? (sfx.propbreak(), sfx.slam()) : ev.what === 'flip' ? (sfx.slam(), sfx.rumble()) : ev.what === 'aim' ? undefined : ev.what === 'grab' ? sfx.thud() : ev.what === 'stop' ? sfx.thud() : sfx.rumble(), true;
+  if (ev.k === 'cart') return ev.what === 'hit' ? (sfx.propbreak(), sfx.slam()) : ev.what === 'flip' ? (sfx.slam(), sfx.rumble()) : ev.what === 'aim' ? undefined : ev.what === 'stop' || ev.what === 'gone' ? sfx.thud() : sfx.rumble(), true;
   if (ev.k === 'gear') return sfx.shock(), ev.hit && sfx.boom(), true;
   if (ev.k === 'bare') return sfx.wardbreak(), sfx.propbreak(), sfx.slam(), true;
   if (ev.k === 'haulleap') return sfx.slam(), sfx.boom(), true;

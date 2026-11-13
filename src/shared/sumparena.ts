@@ -1,8 +1,9 @@
 /**
  * The Haulier's ground in the Deep (docs/design/deep-bosses.md): an old working cut into the rock, sized to
  * an upright phone (12 by 14, as the barn). What matters on it:
- * - the ore rail across the floor (`map.rail`) with a cart at each stop: GRAB one at its stop to send it
- *   down the rail (sim/haulbook.ts), and the Haulier shoves them at you;
+ * - the tracks across the floor (`map.tracks`: two down, one across, crossing), each ending in a tunnel mouth
+ *   at the room's edge at both ends: carts come down them with a warning (sim/haulcarts.ts, sim/trackshape.ts),
+ *   and the Haulier, on one, is knocked down; a couple of carts rest on sidings for it to hurl at you;
  * - the winding gear over the shaft at the back (`map.gear`): lightning near it falls on it and crackles
  *   out, cracking the Haulier's plate if it's under;
  * - the flooded sump at the front (`map.water`): a jolt through it while it wades cracks the plate too;
@@ -20,7 +21,13 @@ export const SUMP = { w: 12, h: 14 };
 
 export const SUMP_SPOTS = {
   haulier: { x: 6, y: 4.2 },
-  /** The rail: its line across, and the two stops a cart stands at. */
+  /**
+   * The tracks, mouth to mouth at the edges (the room is SUMP.w by SUMP.h): one across, two down.
+   * (`rail` and `stops` are the old single rail: THE LOADING STAGE's carts stand at them, shared/cutloading.ts.)
+   */
+  tracks: [{ x0: 0, y0: 7.6, x1: SUMP.w, y1: 7.6 }, { x0: 4.4, y0: 0, x1: 4.4, y1: SUMP.h }, { x0: 7.8, y0: 0, x1: 7.8, y1: SUMP.h }],
+  /** Carts at rest at the start, beside the tracks: the Haulier's to hurl. */
+  sidings: [{ x: 2.4, y: 5.9 }, { x: 10.0, y: 6.2 }],
   rail: { y: 6.6, x0: 0.6, x1: 11.4 },
   stops: [{ x: 1.3, y: 6.6 }, { x: 10.7, y: 6.6 }],
   // (Low enough to stand clear of the boss plate at the top of a phone's screen.)
@@ -43,10 +50,10 @@ export function sumpArena(job: Job): RoomPlan {
   const map: GameMap = {
     name: SUMP_NAME, w, h, wallFace: 3, rounds, blocks, theme,
     // Fire baskets either side of the floor it fights on, so it's lit wherever it stands; one more by the way in.
-    torches: [{ x: 3.4, y: 0.2 }, { x: 7.6, y: 0.2 }], braziers: [{ x: 0.9, y: 5.0, r: 0.3 }, { x: 11.1, y: 5.0, r: 0.3 }, { x: 10.8, y: 9.6, r: 0.3 }],
-    water: [s.sump], rail: s.rail, gear: s.gear, adits: s.adits,
+    torches: [{ x: 2.8, y: 0.2 }, { x: 9.6, y: 0.2 }], braziers: [{ x: 0.9, y: 5.0, r: 0.3 }, { x: 11.1, y: 5.0, r: 0.3 }, { x: 10.8, y: 9.6, r: 0.3 }],
+    water: [s.sump], tracks: s.tracks, gear: s.gear, adits: s.adits,
     hero: { x: w / 2, y: h - 1.5 }, exit: { x: w / 2 - 1.1, y: h - 0.7, w: 2.2, h: 0.7 },
   };
   const haulier = { kind: 'scrapper' as const, variant: 'ironhide' as const, ...s.haulier, hp: HAULIER.hp, name: HAUL_NAME, boss: 'haulier' as const, awake: false };
-  return { map, foes: [haulier], props: s.stops.map((q) => ({ kind: 'cart' as const, ...q })), chests: [{ ...s.chest, chained: true }] };
+  return { map, foes: [haulier], props: s.sidings.map((q) => ({ kind: 'cart' as const, ...q })), chests: [{ ...s.chest, chained: true }] };
 }

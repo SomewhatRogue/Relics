@@ -23,7 +23,7 @@ export interface HPose {
   glint: number;
   /** Down on its back: 0 upright, else how far along the fall and rise (see haullie.ts). */
   lie: 'none' | 'down' | 'sit' | 'knee';
-  /** The jolt after the cart: seconds into the fall. */
+  /** The jolt after a cart: seconds into the fall. */
   fallT: number;
 }
 
@@ -64,12 +64,12 @@ export function haulPose(e: Enemy, t: number, now: number): HPose {
       // The last beat: it hauls the pick free, hitching.
       if (left < 0.7) { const k = left / 0.7; Object.assign(p, { pickA: 1.15 - 0.2 * Math.sin(now * 28), ox: Math.round(Math.sin(now * 34) * (1 + k)), crouch: 5 + Math.round(Math.sin(now * 28)) }); }
     }
-  } else if (move === 'shove') {
-    const k = Math.min(1, tt / w);
-    Object.assign(p, { pickA: 2.4, hand: [4, -8], arms: 'low' });
-    if (tt < w) Object.assign(p, { lean: -3 - 2 * ease(k), crouch: 2 + 3 * ease(k), dig: true });
-    else if (tt < w + ac) Object.assign(p, { lean: 10, crouch: 4 });
-    else Object.assign(p, { lean: 10 * (1 - ease(rr)), crouch: 4 * (1 - ease(rr)) });
+  } else if (move === 'hurl') {
+    // Hauls the cart up over its head (the cart is drawn there: sumpdraw.ts), holds it, and heaves it forward.
+    const UP: [number, number] = [5, -31];
+    if (tt < w) { const k = ease(Math.min(1, tt / (w * 0.7))); Object.assign(p, { pickA: -1.2, hand: mix([4, -8], UP, k), arms: k > 0.4 ? 'up' : 'low', lean: Math.round(-5 * k), crouch: Math.round(3 - 3 * k), glint: 0 }); if (w - tt < 0.25) p.ox = Math.round(Math.sin(now * 50)); }
+    else if (tt < w + ac) { const k = (tt - w) / ac; Object.assign(p, { pickA: -0.4, hand: mix(UP, [15, -14], k), arms: 'up', lean: Math.round(-5 + 15 * k), crouch: Math.round(4 * k) }); }
+    else { const k = ease(rr); Object.assign(p, { pickA: lerp(-0.4, -2.0, k), hand: mix([15, -14], CARRY, k), lean: Math.round(10 * (1 - k)), crouch: Math.round(4 * (1 - k)) }); }
   } else if (move === 'leap') {
     // Crouched to spring (shaking at the last), up and over (hauldraw.ts carries it to the circle), then down on the pick.
     const air = w - HAULIER.air;

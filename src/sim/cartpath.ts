@@ -1,7 +1,7 @@
 /**
- * Where a thrown or shoved cart will roll (sim/haulcarts.ts): straight on from (x, y) along (dx, dy) until
+ * Where a hurled cart will roll (sim/haulcarts.ts): straight on from (x, y) along (dx, dy) until
  * something stops it (a wall, a block, the edge), or HAULIER.cart.most tiles. One source: the room rolls it
- * and stops it there, and the screen draws the aim arrow out to the same spot (client/cartaim.ts). Pure.
+ * and stops it there, and the screen draws the lane out to the same spot (sim/haulier.ts). Pure.
  */
 import { collide } from '../shared/arena';
 import { HAULIER as H } from '../shared/tuning';

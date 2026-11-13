@@ -1,7 +1,7 @@
 /**
  * The Haulier's working once a tick, before the goblins move (docs/design/deep-bosses.md; numbers
  * shared/haultune.ts, the kit's shared/bosstune.ts): the fight begins when it sees you; the rest it takes
- * between blows (HAULIER.pauseBetween, quicker in phase 2); a shove whose wind-up is out sends its cart
+ * between blows (HAULIER.pauseBetween, quicker in phase 2); a hurl whose wind-up is out sends its cart
  * (sim/haulcarts.ts); the carts and the gear; and below HAULIER.phase2 of its health, phase 2: a roar
  * (nothing landing either way), the plate off for good (`bare`), and HAULIER.adds.n small ones out of the
  * adit every HAULIER.adds.every s.
@@ -10,7 +10,7 @@ import { BOSS, HAULIER as H, TICK } from '../shared/tuning';
 import { currentMap } from '../shared/arena';
 import { isDead } from './damage';
 import { forget, type BossBook } from './bosskit';
-import { haulState, nearestCart, sendCart, standing, stepCarts, type HaulState } from './haulcarts';
+import { clearTracks, haulState, sendCart, stepCarts, type HaulState } from './haulcarts';
 import { hitHero, downIfDead } from './combat';
 import { OWN_KIT } from './enemies';
 import { slickId } from './oil';
@@ -21,13 +21,14 @@ import type { Enemy } from './types';
 
 export function stepHaulBook(bk: BossBook, w: World, spawn: (x: number, y: number) => Enemy): void {
   const now = w.now, e = w.enemies.find((x) => x.boss?.who === 'haulier');
-  if (!e || isDead(e)) return;
+  if (!e || isDead(e)) return clearTracks(e, w);
   const b = e.boss!, st = haulState(bk);
   st.props = w.props;
   forget(bk, now);
   if (bk.started < 0 && e.alert) {
     bk.started = now;
     b.rotAt = now;
+    st.next = now + H.track.first;
     // (Its first blow when it's seen you, not a goblin's slow start.)
     e.cooldown = Math.min(e.cooldown, 0.6);
   }
@@ -45,7 +46,7 @@ export function stepHaulBook(bk: BossBook, w: World, spawn: (x: number, y: numbe
     adds(st, w, spawn, now);
   }
   if (b.phase === 2 && now >= st.nextAdds) adds(st, w, spawn, now);
-  shoveGo(st, e, w);
+  hurlGo(st, e, w);
   leapLand(e, 'leap', w.ev);
   sparksFall(e, w);
   stepCarts(st, e, w);
@@ -69,17 +70,18 @@ function sparksFall(e: Enemy, w: World): void {
   }
 }
 
-/** A shove whose wind-up is about to end: the cart goes (and the blow itself does nothing, no run, no hit). */
-function shoveGo(st: HaulState, e: Enemy, w: World): void {
+/** A hurl whose wind-up is about to end: the cart leaves its hands (and the blow itself does nothing, no run, no hit). */
+function hurlGo(st: HaulState, e: Enemy, w: World): void {
   const a = e.attack;
-  if (!a || (a.boss as string | undefined) !== 'shove') return;
+  if (!a || (a.boss as string | undefined) !== 'hurl') return;
   if (a.kind !== 'charge' || a.hit?.includes('sent') || a.t + TICK * 1.5 < a.windup) return;
   a.hit = ['sent', ...w.heroes.map((h) => h.id)];
   a.range = 0;
   a.radius = 0;
-  const own = w.props.find((p) => p.id === st.shove);
-  const cart = own && standing(own) ? own : nearestCart(w.props, e.x, e.y, H.shoveReach);
-  if (cart) sendCart(st, cart, 'haulier', w.ev, a.dx, a.dy);
+  const cart = w.props.find((p) => p.id === st.hurl && p.heldBy === 'haulier');
+  if (!cart) return;
+  Object.assign(cart, { x: a.ox, y: a.oy });
+  sendCart(st, cart, 'haulier', w.ev, a.dx, a.dy);
 }
 
 /** HAULIER.adds.n small ones out of the adit, and the next batch HAULIER.adds.every s on. */

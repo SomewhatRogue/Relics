@@ -50,6 +50,8 @@ export interface BossOn {
   flood?: boolean;
   /** The Haulier's crank: where its sparks will fall (sim/sparkshape.ts), cleared once they have. */
   sparks?: { x: number; y: number }[];
+  /** The Haulier's track warning, while there is one (sim/trackshape.ts), cleared as its cart goes. */
+  track?: import('./trackshape').TrackWarn;
   /** Hempen's ropes coming down out of the branches (sim/hempenbook.ts): where, when they land, on whom. Sent as they come and go. */
   ropes?: Rope[];
 }

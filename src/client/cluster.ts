@@ -164,8 +164,8 @@ export class Cluster {
     b.potion.show({ shape: 'orb', size: 32, grade: next ? 'iron' : 'stone', fill: hp, liquid: me.poison ? '#5a8a2a' : '#a8261c', pulse: low && Math.floor(now * 4) % 2 === 0, icon: next ? img(potionIcon(next)) : null }, me.belt.length > 1 ? String(me.belt.length) : '', '', next ? 'Drink ' + next : 'Health');
     b.potion.el.classList.toggle('low', low);
     // The context slot: help a friend up, set a spider nest or a house's woodpile alight, grab, throw; or what's here to use.
-    // (A cart standing on a rail counts: GRAB sends it rolling, sim/brake.ts and haulcarts.ts.)
-    const cart = !!(room.map.rail || room.map.incline) && room.props.some((p) => resting(p) && Math.hypot(p.x - me.x, p.y - me.y) <= GRAB.reach + 0.6);
+    // (A cart standing on THE BRAKESMAN's incline counts: GRAB sends it rolling, sim/brake.ts. The Haulier's are not for GRAB.)
+    const cart = !!room.map.incline && room.props.some((p) => resting(p) && Math.hypot(p.x - me.x, p.y - me.y) <= GRAB.reach + 0.6);
     const can = carrying || (me.act === 'idle' && (room.enemies.some((e) => grabbable(me, e, room.time)) || room.props.some((p) => liftable(me, p)) || cart));
     // (At the Staithe GRAB cuts one of the netted free, or shoves the laid log in: sim/staithebits.ts.)
     const stg = mode === 'run' ? staitheGrabbable(me, room.survivors, room.map) : null, shove = stg === 'shove';

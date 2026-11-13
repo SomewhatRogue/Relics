@@ -293,6 +293,8 @@ export interface GameMap {
   torches: { x: number; y: number }[];
   /** The Haulier's working in the Deep (shared/sumparena.ts): the ore rail across the floor, the winding gear over the shaft, the adits small ones come out of. */
   rail?: { y: number; x0: number; x1: number };
+  /** The Haulier's tracks, straight, mouth to mouth at the room's edge (x0, y0) to (x1, y1) (shared/sumparena.ts). */
+  tracks?: { x0: number; y0: number; x1: number; y1: number }[];
   gear?: { x: number; y: number };
   adits?: { x: number; y: number }[];
   /** THE LISTENER's cave (shared/cavearena.ts): holes in the floor (they don't block walking; it drops into one and rises from another), and spots for dripstone columns that lean the way `lean` points (made props in a later slice). */

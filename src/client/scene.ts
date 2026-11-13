@@ -89,7 +89,7 @@ import { drawMist, setSun, torchIn } from './daytime';
 import { drawBolts, drawStrikeMarks, strikeLights } from './stormdraw';
 import { drawSparkMarks } from './sparkdraw';
 import { drawQuakeMarks } from './quakedraw';
-import { drawCartAims } from './cartaim';
+import { drawTrackMarks, trackLit } from './trackdraw';
 import { flashAmb, fogLook } from './skyfx';
 import { flashOf } from '../sim/stormshape';
 import { drawPuddles } from './spiders';
@@ -101,7 +101,7 @@ import { skyFlash } from './skystrikedraw';
 import { drawFound } from './foundsdraw';
 import { witchColour } from './hallsdraw';
 import { brazierOn, drawBrazier, drawLamps } from './lampsdraw';
-import { sumpScene } from './sumpdraw';
+import { sumpScene, trackLights } from './sumpdraw';
 import { sealScene } from './sealdraw';
 import { lampAt } from '../shared/lamps';
 import { drawChalkMarks, drawTally } from './chalkdraw';
@@ -282,8 +282,8 @@ export class Scene {
     drawQuakeMarks(c, room, cx, cy);
     // THE LISTENER's cave: falling columns' lanes, the rise's tremor, the rock in flight, drips (cavedraw.ts).
     drawCaveMarks(c, room, cx, cy, fx);
-    // A held cart's aim, out to where it'll stop (cartaim.ts).
-    drawCartAims(c, room, cx, cy);
+    // The Haulier's next cart: the striped lane along its track for the last second of the warning (trackdraw.ts).
+    drawTrackMarks(c, room, cx, cy);
     // A keg, oil or embers about to go up: its circle, the keg, the embers (blastdraw.ts).
     drawBlasts(c, room, cx, cy);
     // A drummer's reach and its beat on the floor, and the goblins it has roused (client/backline.ts).
@@ -468,10 +468,10 @@ export class Scene {
     // Hangman's Wood: the cage on its chain, Hew's marks, the mid-point's fire (wooddraw.ts).
     for (const f of woodFigs(room, room.time)) items.push({ y: OY + f.y * PX, draw: () => f.draw(c, OX + f.x * PX - cx, OY + f.y * PX - cy) });
     for (const f of vignetteFigs(map, room.time, me)) items.push({ y: OY + f.y * PX - (f.floor ? 20 : 0), draw: () => f.draw(c, OX + f.x * PX - cx, OY + f.y * PX - cy) });
-    // The Haulier's old working: the rail, the winding gear and shaft, the adit (sumpdraw.ts).
+    // The Haulier's old working: the tracks, the winding gear and shaft, the adit (sumpdraw.ts).
     if (map.sealed) sealScene(map, c, cx, cy, items);
     if (map.holes) caveScene(map, c, cx, cy, items);
-    if (map.rail || map.gear || map.adits) sumpScene(map, c, cx, cy, items, room.enemies.some((e) => e.boss?.who === 'haulier' && e.boss.phase === 2));
+    if (map.rail || map.tracks || map.gear || map.adits) sumpScene(map, c, cx, cy, items, room.enemies.some((e) => e.boss?.who === 'haulier' && e.boss.phase === 2), trackLit(room));
     // THE SLUICER in the water, THE RAKER's lift as a ring at its feet (pairdraw.ts).
     if (room.enemies.some((e) => e.fallen !== undefined)) items.push({ y: -1e6 + 4, draw: () => drawPairLift(c, room.enemies, cx, cy) });
     // THE LAMPMAN's lamps on their posts (lampmandraw.ts).
@@ -660,7 +660,9 @@ export class Scene {
       if (e.act !== 'dead' && (e.venom ?? 0) > 0 && (e.venomUntil ?? 0) > room.time) lights.push({ x: OX + e.x * PX - cx, y: OY + e.y * PX - cy - 8, r: 22 + 6 * e.venom!, i: 0.45, c: [0.55, 1, 0.3] });
       if (e.act === 'dead') continue;
       const [x, y] = lerp('e:' + e.id, e.x, e.y);
-      if (e.boss?.who === 'haulier') lights.push(...haulLights(e, x - cx, y - cy, room.time, now));
+      if (e.boss?.who === 'haulier') lights.push(...haulLights(e, x - cx, y - cy, room.time, now), ...trackLights(map, trackLit(room), cx, cy, now));
+      // A cart running a track or hurled: its own warm light and sparks go with it, so it's never missed (Kyle: "the carts vanished").
+      if (e.boss?.who === 'haulier') for (const p of room.props) if (p.kind === 'cart' && !p.broken && Math.abs(p.roll ?? 0) > 1) lights.push({ x: OX + p.x * PX - cx, y: OY + p.y * PX - cy - 8, r: 64, i: 0.75, c: [1, 0.72, 0.38] });
       if (e.boss?.who === 'listener') lights.push(...listenLights(e, x - cx, y - cy, now, e.attack ? OX + e.attack.cx * PX - cx : undefined, e.attack ? OY + e.attack.cy * PX - cy : undefined));
       // A nest burned out up close throws a bigger, warmer light (sim/torch.ts).
       if (e.burnUntil > room.time) lights.push({ x: x - cx, y: y - cy - 10, r: (e.ashAt ? 70 : 44) + Math.sin(now * 17 + e.id) * 4, i: e.ashAt ? 0.95 : 0.75, c: [1, 0.55, 0.25] });

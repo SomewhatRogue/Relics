@@ -47,7 +47,8 @@ export function separate(heroes: Hero[], enemies: Enemy[], props: Prop[] = []): 
     if (e.act === 'dead' || e.act === 'carried' || (e.z ?? 0) >= 2) continue;
     list.push({ b: e, r: e.radius, inv: isFinite(e.weight) && e.act !== 'pinned' ? 1 / e.weight : 0 });
   }
-  for (const p of props) if (!p.broken && !p.lifted) list.push({ b: p, r: p.radius, inv: 1 / p.weight });
+  // (Not a cart running its track, nor one the Haulier holds overhead: sim/haulcarts.ts moves those.)
+  for (const p of props) if (!p.broken && !p.lifted && p.rollBy !== 'track' && p.heldBy !== 'haulier') list.push({ b: p, r: p.radius, inv: 1 / p.weight });
   const pair = (i: number, j: number) => {
     const p = list[i], q = list[j], sum = p.inv + q.inv;
     if (!sum) return;

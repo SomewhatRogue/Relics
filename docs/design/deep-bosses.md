@@ -57,3 +57,16 @@ GRAB again throws it that way, off the rail, straight on till a wall, a block or
 14 tiles (sim/cartpath.ts; the same path drawn as a dotted aim arrow, client/cartaim.ts). It hits heroes in its
 way (never its thrower), goblins (30), and knocks the Haulier down 2 s with its plate cracked, but not again for
 10 s after (a shrug). The Haulier's shove sends a cart at rest at its hero, its lane out to where it'll stop.
+
+## Carts on tracks (2026-11-12, replaces grab and throw)
+
+Kyle's playtest: "it looks like carts entirely vanished ... the targeting and throw back wasn't working at all.
+Instead there's tracks everywhere and you get a warning when one is coming, and if you position the enemy right he
+gets hit; he can also hurl one at you." (The two carts had sat at the ends of one rail, against the walls, off a
+phone's screen.) THE HAULAGE now has three tracks (one across, two down), each ending in a tunnel mouth. Every 6 s
+(4 in phase 2) a track is picked, leaning to one near the Haulier so a party can lure it on: its lamps light amber
+for 1.6 s, a striped lane the last second, then a cart bursts out of a mouth at 12 tiles a second, carrying its own
+warm light and a spark trail, and goes into the far mouth. It hits heroes on the track (roll or step off), goblins,
+and the Haulier (down 2 s, plate cracked, then a shrug for 10 s). HURL: the Haulier lifts a cart off a siding and
+hurls it at its hero down a striped lane. Heroes no longer grab, aim or throw carts. (sim/trackshape.ts the one
+source for the warning and lane; client/trackdraw.ts.) THE LOADING STAGE (instances) keeps its single rail.
