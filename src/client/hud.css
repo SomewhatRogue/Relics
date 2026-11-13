@@ -188,3 +188,18 @@ body.hp-low::after { content: ''; position: fixed; inset: 0; z-index: 1; pointer
 #banner .kitrows.jobs b { display: block; margin: 0; font: 400 var(--fs-text)/1.3 var(--font-body); letter-spacing: 0.04em; color: var(--bone-dim); }
 #banner .kitrows.jobs .ok b, #banner .kitrows.jobs .ok span { color: var(--gilt); }
 body.touch #banner.small { max-width: min(250px, calc(100vw - 16px)); }
+
+/* ---- Iron and ember (docs/design/ui-look.md; tokens in ironui.css): the boss plate a riveted iron plate,
+   a little see-through over the fight; every bar a sunk trough (dark top-left, a faint light bottom-right,
+   an outline round it) with its fill kept; the hero's name and level in the small pixel face. ---- */
+#boss { padding: 5px 14px 7px; background: var(--i-rivets), #14151ae0;
+  box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 var(--i-hi), inset -2px -2px 0 var(--i-lo), 0 6px 18px #0009; }
+#boss b { font: 400 22px/1 var(--i-name); color: #f0a080; text-shadow: 0 2px 0 var(--i-outline); }
+#boss .pb em { margin-top: 3px; font: 400 10px/1 var(--i-label); letter-spacing: 0.03em; color: var(--i-warm); text-shadow: 1px 1px 0 var(--i-outline); }
+#boss .pips i { border-color: #f0a080; }
+#boss .pips i.on { background: #f0a080; }
+#boss .bar, #hud .bar { border: 2px solid; border-color: var(--i-outline) #3a3e46 #3a3e46 var(--i-outline); border-image: none; background: var(--i-outline); box-shadow: 0 0 0 1px var(--i-outline); }
+#boss .bar { margin-top: 3px; }
+#boss .poise { margin-top: 2px; background: var(--i-outline); }
+#hud .who { font: 400 12px/1.2 var(--i-label); letter-spacing: 0.03em; color: var(--i-text); text-shadow: 1px 1px 0 var(--i-outline); }
+#hud .lv { border: 0; border-image: none; font: 400 11px/18px var(--i-label); color: #2e1a08; background: linear-gradient(180deg, #ffe08a, #c8902e); box-shadow: 0 0 0 2px var(--i-outline); }

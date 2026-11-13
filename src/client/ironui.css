@@ -11,6 +11,12 @@
   --i-hungry: #9cc95a; --i-hungry-bg: #26301a; --i-danger: #d8503a;
   --i-leaf-grad: linear-gradient(100deg, #9a6a22 0%, #e8b85a 30%, #fff3c8 48%, #ffe08a 52%, #e8b85a 70%, #9a6a22 100%);
   --i-ember-grad: linear-gradient(90deg, #6a3a12, #e87a2a 80%, #fff0b0);
+  /* Four brass rivets, lit top-left, 4 px in from each corner: background layers for a plate that can't
+     take the frame image (the boss plate). */
+  --i-rivets: linear-gradient(#c89a4a, #c89a4a) left 4px top 4px / 4px 4px no-repeat, linear-gradient(#c89a4a, #c89a4a) right 6px top 4px / 4px 4px no-repeat,
+    linear-gradient(#c89a4a, #c89a4a) left 4px bottom 6px / 4px 4px no-repeat, linear-gradient(#c89a4a, #c89a4a) right 6px bottom 6px / 4px 4px no-repeat,
+    linear-gradient(#6a4a1e, #6a4a1e) left 4px top 4px / 6px 6px no-repeat, linear-gradient(#6a4a1e, #6a4a1e) right 4px top 4px / 6px 6px no-repeat,
+    linear-gradient(#6a4a1e, #6a4a1e) left 4px bottom 4px / 6px 6px no-repeat, linear-gradient(#6a4a1e, #6a4a1e) right 4px bottom 4px / 6px 6px no-repeat;
   --i-label: 'Silkscreen', monospace;
   --i-read: 'Alegreya Sans', 'Trebuchet MS', sans-serif;
   --i-name: 'Grenze Gotisch', Georgia, serif;

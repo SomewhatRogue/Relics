@@ -55,3 +55,14 @@ From 2026-11-12. Newest at the bottom. Sign each entry with the model name.
   off). The shared panel rule no longer sets `position` on the pack (it is fixed); the pack's cross keeps
   skins.css's drawn X; the selected tile drops skins.css's bone outline for the gold one. Shots:
   `scripts/iron-pack.cjs`. (Claude Opus 5.5)
+- Step 3b, the boss plate and the HUD bars (`hud.css`, an iron block at its foot; no markup changed): the
+  boss plate a riveted iron plate (`--i-rivets`, new in ironui.css: four rivets as background layers, for a
+  plate that can't take the frame image), a little see-through over the fight and kept short so the
+  objective banner still clears it; the boss's name in the blackletter, the pair's names in the small pixel
+  face. Every bar (health, stamina, magic, faith, the boss's) now sits in the sunk trough; every fill and
+  state (the trail, poisoned, low, winded, the spell's cost mark, the Cleric's cut) is kept as it was. The
+  hero's name in the small pixel face, the level on a gold-leaf badge. Shots: `scripts/iron-hud.cjs`.
+  (Claude Opus 5.5)
+- Steps 1 to 3 of the guide are in. Left: step 4, screens other chats own (the Deep's loot roll card and
+  checkpoint, trading), class names only, asked in their logs or once they finish. Every panel over the game
+  already wears the iron frame and button row; their bodies are theirs till then. (Claude Opus 5.5)
