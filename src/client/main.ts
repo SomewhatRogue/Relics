@@ -122,6 +122,8 @@ import './skins.css';
 import './exped.css';
 // The pair of faces the words wear (?font=a|b|c to try one), after the sheets it overrides.
 import './fontchoice';
+// The look, iron and ember, over the sheets above, and its MOTION switch (ironui.ts).
+import { ironUi } from './ironui';
 import { paintFrames } from './frames';
 import { iconVars } from './icons';
 import { Cluster } from './cluster';
@@ -776,6 +778,7 @@ try {
 tipsOn(tipsWanted);
 $('#tips').addEventListener('click', () => tipsOn(!document.body.classList.contains('tips')));
 options();
+ironUi();
 if (input.touch) document.body.classList.add('touch');
 
 // Test hooks: read the fight as data, never as pixels.

@@ -1,17 +1,25 @@
-/* The job board (boardui.ts): short rows to read at a glance, and a framed card for the one you tap. */
-#panel .jlist { display: flex; flex-direction: column; gap: 6px; }
-#panel .jrow { display: grid; grid-template-columns: 1fr auto; grid-template-areas: 't r' 'g r'; align-items: center; gap: 3px 10px; width: 100%; min-height: 48px; padding: 6px 8px 7px 10px; text-align: left;
-  border: var(--px) solid var(--stone-500); border-image: none; border-radius: 0; background: var(--stone-750); box-shadow: inset calc(3 * var(--px)) 0 0 var(--kc, var(--stone-500)); color: var(--bone); text-transform: none; letter-spacing: 0; }
-#panel .jrow:active { background: var(--stone-700); transform: none; }
-#panel .jrow .jt { grid-area: t; font: 400 var(--fs-m)/1.15 var(--font-body); color: var(--gilt); letter-spacing: 0.02em; }
-#panel .jrow .jtags { grid-area: g; }
-#panel .jrow .jr { grid-area: r; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
-#panel .jrow em { font: 400 var(--fs-m)/1 var(--font-body); font-style: normal; color: var(--gilt); }
+/* The job board and the map table (boardui.ts), in iron and ember (docs/design/ui-look.md; the panel, its
+   rule and its buttons are ironui.css's): short rows to read at a glance, each a sunk slot with the kind's
+   colour down its left edge, and a forged card for the one you tap. */
+#panel:has(.jlist) > .card { width: min(460px, 100%); }
+#panel .jlist { display: flex; flex-direction: column; gap: 8px; padding: 2px; }
 
-/* The tags: the kind as a coloured chip, then the length, hour and weather in the dim face. */
-#panel .jtags { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font: 400 var(--fs-text)/1.2 var(--font-body); color: var(--bone-dim); letter-spacing: 0.04em; }
-#panel .jtags .kind { padding: 1px 4px; font: 400 var(--fs-text)/1.2 var(--font-body); color: var(--stone-900); background: var(--kc, var(--parch)); letter-spacing: 0.04em; }
+/* A row: the job, its tags under it, how hard and what it pays on the right. Pressed, its bevel turns over. */
+#panel .jlist .jrow { display: grid; grid-template-columns: 1fr auto; grid-template-areas: 't r' 'g r'; align-items: center; gap: 4px 10px; width: 100%; min-height: 56px; padding: 8px 10px 8px 14px; text-align: left;
+  border: 0; border-image: none; border-radius: 0; background: #1b1d22; color: var(--i-text); text-transform: none; letter-spacing: 0;
+  box-shadow: 0 0 0 2px var(--i-outline), inset 4px 0 0 var(--kc, #4b505a), inset 6px 2px 0 #33373e, inset -2px -2px 0 var(--i-outline); }
+#panel .jlist .jrow:active:not(:disabled) { background: #202228; transform: translateY(1px);
+  box-shadow: 0 0 0 2px var(--i-outline), inset 4px 0 0 var(--kc, #4b505a), inset 6px 2px 0 var(--i-outline), inset -2px -2px 0 #33373e; }
+#panel .jlist .jrow .jt { grid-area: t; font: 700 17px/1.15 var(--i-read); color: var(--i-text); letter-spacing: 0; }
+#panel .jlist .jrow .jtags { grid-area: g; }
+#panel .jlist .jrow .jr { grid-area: r; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+#panel .jlist .jrow em { font: 400 14px/1 var(--i-label); font-style: normal; color: var(--i-leaf); letter-spacing: 0.04em; }
+
+/* The tags: the kind as a chip in its colour, then the length, hour and weather as small labels. */
+#panel .jtags { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font: 400 11px/1.2 var(--i-label); color: var(--i-quiet); letter-spacing: 0.03em; text-transform: uppercase; }
+#panel .jtags .kind { padding: 2px 5px 1px; font: 400 11px/1.2 var(--i-label); color: #14100a; background: var(--kc, var(--i-warm)); letter-spacing: 0.03em; box-shadow: 0 0 0 1px var(--i-outline), inset -1px -1px 0 #0000004d; }
 #panel .jtags .t-dawn { color: #a8c0d8; }
+#panel .jtags .t-day { color: var(--i-warm); }
 #panel .jtags .t-dusk { color: #e0a070; }
 #panel .jtags .t-night { color: #9aa0e0; }
 #panel .jtags .wx { color: #b8c8d0; }
@@ -19,28 +27,34 @@
 #panel .k-rescue { --kc: #9cc95a; }
 #panel .k-burn, #panel .k-larder { --kc: #f0b070; }
 #panel .k-story { --kc: #ffd27a; }
-#panel .k-exped { --kc: var(--gold); }
-#panel .k-deep, #panel .jrow.deep { --kc: #a37ad6; }
-#panel .jtags .k-deep { color: var(--stone-900); }
+#panel .k-exped { --kc: var(--i-leaf); }
+#panel .k-deep, #panel .jlist .jrow.deep { --kc: #a37ad6; }
+#panel .jtags .k-deep { color: #14100a; }
 
-/* Danger: five pips, lit for how hard. */
-#panel .jlist .pips, #panel .jcard .pips { display: inline-flex; gap: var(--px); vertical-align: middle; }
-#panel .jlist .pips i, #panel .jcard .pips i { display: block; width: calc(3 * var(--px)); height: calc(3 * var(--px)); background: var(--stone-500); }
-#panel .jlist .pips i.on, #panel .jcard .pips i.on { background: var(--blood-hi); }
+/* Danger: five sunk studs, lit red for how hard. */
+#panel .jlist .pips, #panel .jcard .pips { display: inline-flex; gap: 3px; vertical-align: middle; }
+#panel .jlist .pips i, #panel .jcard .pips i { display: block; width: 7px; height: 7px; background: #2b2e35; box-shadow: inset 1px 1px 0 var(--i-outline); }
+#panel .jlist .pips i.on, #panel .jcard .pips i.on { background: var(--i-danger); box-shadow: inset -1px -1px 0 #7a2014, inset 1px 1px 0 #ff9a80; }
 
-#panel .jdone .m { color: var(--bone-dim); margin-bottom: 3px; }
+/* Jobs done lately: quiet lines. */
+#panel .jdone .m { font: 500 15px/1.35 var(--i-read); color: var(--i-quiet); margin-bottom: 4px; }
 
 /* The card: over the list, centred, the posting in full and three buttons. */
-#panel .jpop { position: fixed; inset: 0; z-index: 7; display: flex; align-items: center; justify-content: center; padding: 16px; background: #07080ad0; }
-#panel .jcard { width: min(400px, 100%); max-height: 88vh; overflow-y: auto; padding: 12px 14px 14px; color: var(--bone); box-shadow: inset 0 calc(3 * var(--px)) 0 var(--kc, var(--stone-500)); }
-#panel .jcard h4 { margin: 8px 0 8px; font: 400 var(--fd-l)/1.05 var(--font-display); color: var(--gilt); text-shadow: 0 var(--px) 0 var(--stone-900); }
-#panel .jcard .jtext { margin: 0 0 10px; font: 400 var(--fs)/1.35 var(--font-body); color: var(--parch); }
-#panel .jcard .kitrows.jrows { gap: 5px 12px; margin: 0 0 12px; }
-#panel .jcard .kitrows.jrows b { font-size: var(--fs-text); color: var(--bone-dim); }
-#panel .jcard .kitrows.jrows span { font: 400 var(--fs-m)/1.3 var(--font-body); color: var(--bone); }
-#panel .jcard .jbtns { display: flex; flex-wrap: wrap; gap: 6px; }
-#panel .jcard .jbtns button { flex: 1 1 40%; min-height: 40px; }
+#panel .jpop { position: fixed; inset: 0; z-index: 7; display: flex; align-items: center; justify-content: center; padding: 16px; background: #07080ad9; }
+#panel .jcard { width: min(400px, 100%); max-height: 88vh; overflow-y: auto; padding: 14px 12px 12px; }
+#panel .jcard h4 { margin: 10px 0 10px; font: 400 32px/1 var(--i-name); color: var(--i-leaf); text-shadow: 0 2px 0 var(--i-outline); }
+#panel .jcard .jtext { margin: 0 0 12px; padding: 10px 12px; font: 500 17px/1.35 var(--i-read); color: var(--i-text); background: #1b1d22; box-shadow: inset 1px 1px 0 var(--i-outline); }
+#panel .jcard .kitrows.jrows { gap: 6px 12px; margin: 0 0 14px; }
+#panel .jcard .kitrows.jrows b { font: 400 11px/1.6 var(--i-label); letter-spacing: 0.03em; color: var(--i-brass); }
+#panel .jcard .kitrows.jrows span { font: 500 16px/1.3 var(--i-read); color: var(--i-text); }
+#panel .jcard .jbtns { display: flex; flex-wrap: wrap; gap: 10px; padding: 2px; }
+#panel .jcard .jbtns button { flex: 1 1 40%; min-height: 52px; }
 #panel .jcard .jbtns button[data-back] { flex: 1 1 100%; }
 @media (min-width: 700px) { #panel .jcard .jbtns button[data-back] { flex: 0 0 auto; } }
-/* The map table's clerk speaking, and the board's pointer to the town hall. */
-#panel .jlead { margin: 6px 0 10px; color: #c8bfa8; line-height: 1.35; }
+
+/* The list's CLOSE, and room round the buttons for their outline. */
+#panel:has(.jlist) > .card .buttons { gap: 10px; margin-top: 14px; padding: 2px; }
+#panel:has(.jlist) > .card .buttons button { min-width: 120px; }
+
+/* The map table's clerk speaking, and the board's pointer to the town hall: the warm second line. */
+#panel .jlead { margin: 8px 0 12px; font: 500 16px/1.35 var(--i-read); color: var(--i-warm); }
