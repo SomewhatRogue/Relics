@@ -57,3 +57,19 @@
 #pack .kn.pick em { font-style: normal; margin-left: 6px; color: var(--gold); }
 @keyframes kn-pick { 50% { background-color: #3a2a0ac0; color: #fff2c0; } }
 @media (prefers-reduced-motion: reduce) { #pack .kn.pick { animation: none; } }
+
+/* The knacks-only screen from the pack (treeui.ts, Kyle 2026-11-13): the two on offer, then the taken. */
+.kn-only { display: flex; flex-direction: column; gap: 10px; }
+.kn-h { margin: 4px 0 0; font: 400 12px/1.2 var(--i-label, monospace); letter-spacing: 0.1em; color: var(--i-brass, #c89a4a); }
+.kn-fork { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: stretch; gap: 8px; }
+.kn-or { align-self: center; font: 400 11px/1 var(--i-label, monospace); color: #8d929c; }
+.kn-card { display: flex; flex-direction: column; gap: 6px; padding: 10px; background: #14151a; border: 2px solid #07080a; box-shadow: inset 1px 1px 0 #3a3e46; min-width: 0; }
+.kn-card b { font: 400 18px/1.1 var(--i-name, serif); color: #f0e6cc; }
+.kn-card span { font-size: 14px; line-height: 1.35; color: #c8c0b0; }
+.kn-card.offer { border-color: #c89a4a; }
+.kn-card.offer b { color: #ffd27a; }
+.kn-card button { margin-top: auto; min-height: 44px; }
+.kn-have { display: flex; flex-direction: column; gap: 6px; }
+.kn-have .kn-card { flex-direction: row; align-items: baseline; gap: 10px; padding: 8px 10px; }
+.kn-have .kn-card b { font-size: 15px; flex: none; }
+.kn-note { margin: 0; color: #a9b4c2; }
