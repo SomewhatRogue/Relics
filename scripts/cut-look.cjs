@@ -22,18 +22,18 @@ const url = process.argv[3] || 'http://localhost:4173/?hero=ROGUE&deepbest=20&de
     await page.evaluate(() => {
       const r = window.__room, h = r.heroes[0];
       Object.assign(h, { x: 9, y: 11, fx: 0, fy: -1 });
-      const proto = r.enemies[0];
+      const proto = r.enemies.find((e) => e.kind === 'scrapper') || r.enemies[0];
       r.enemies = [0, 1, 2, 3].map((i) => ({ ...JSON.parse(JSON.stringify(proto)), id: 900 + i, x: 9 + (i % 2 ? 0.3 : -0.3), y: 9 - i * 1.6, hp: 120, maxHp: 120, cooldown: 99, alert: true, boss: false }));
     });
     await page.waitForTimeout(200);
     await page.locator('.tb.deep').dispatchEvent('touchstart');
     await page.locator('.tb.deep').dispatchEvent('touchend');
-    await page.waitForTimeout(350);
-    await page.screenshot({ path: 'shots/cut-stance.png' });
-    await page.waitForTimeout(350);
-    await page.screenshot({ path: 'shots/cut-sheathe.png' });
-    await page.waitForTimeout(700);
-    await page.screenshot({ path: 'shots/cut-fall.png' });
+    // Each shot when the room's clock says so (the page's own timers drift from it).
+    const t0 = await page.evaluate(() => window.__room.time);
+    const at = async (s, name) => { await page.waitForFunction((t) => window.__room.time >= t, t0 + s, { polling: 16 }); await page.screenshot({ path: `shots/cut-${name}.png` }); };
+    await at(0.3, 'stance');
+    await at(0.95, 'sheathe');
+    await at(1.47, 'fall');
     console.log(await page.evaluate(() => JSON.stringify(window.__room.enemies.map((e) => [e.id, e.hp, e.act]))));
   }
   console.log('errors', JSON.stringify(errors));

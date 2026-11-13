@@ -1,4 +1,5 @@
 /** What a hero holds and how: each weapon's pose through rest, charge and swing, then drawn in hand. */
+import { cutPose } from './cutdraw';
 import { CHARGE, RELEASE, WEAPONS } from '../shared/tuning';
 import { chargeFull, currentSwing } from '../sim/hero';
 import type { Hero } from '../sim/types';
@@ -29,6 +30,8 @@ export function pose(h: Hero, now: number): Pose {
     longbow: fw + side * 1.2, shortbow: fw + side * 1.1, crossbow: fw + side * 0.9, wand: fw + side * 1.1, staff: -Math.PI / 2 + side * 0.25,
     spellblade: fw + side * 1.1, mace: fw + side * 1.2,
   };
+  // The long cut: the blade low behind in the stance, drawn through on the slash, going away at the hip (cutdraw.ts).
+  if (h.act === 'cut') return cutPose(h.actT, fa, side);
   const charge = Math.min(1, (h.actT + CHARGE.start) / chargeFull(WEAPONS[h.weapon], h));
   const kit = kitPose(h, now, fa, side, charge) ?? tapPose(h, fa, side);
   if (kit) return kit;

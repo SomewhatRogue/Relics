@@ -19,7 +19,7 @@ import type { Profile } from '../shared/progress';
 import { tileIcon } from './upiconkeys';
 import { UPW } from './upgradewords';
 import { KNW } from './treewords';
-import { deepSkillOf } from '../shared/deepskill';
+import { DEEP_COOLDOWN, deepSkillOf } from '../shared/deepskill';
 import { DEEP_TRACK } from '../shared/deepskillwords';
 
 /** owned: learned or taken; max: every rank; buy: can afford now; poor: short of gold; locked: a level
@@ -168,7 +168,8 @@ export function tileDetail(p: Profile, key: string, o: UpOpts, where?: { who: st
   }
   const r = trainerRows(p).find((x) => x.key === key)!, multi = r.max > 1;
   const skill = r.skill && r.id !== 'skill' ? r.skill : r.key === 'learn:skill' ? r.skill : undefined;
-  const text = r.text, rows: [string, string][] = skill ? [['COOLDOWN', `${RELICS[skill].cooldown} s`]] : [];
+  const deep = r.id === 'deep' ? deepSkillOf(p.cls) : null;
+  const text = r.text, rows: [string, string][] = skill ? [['COOLDOWN', `${RELICS[skill].cooldown} s`]] : deep ? [['COOLDOWN', `${DEEP_COOLDOWN[deep]} s`]] : [];
   if (tile.act === 'carry' || tile.current) {
     return { tile, text, now: '', after: '', rows, button: tile.act === 'carry' ? { label: `${UPW.carry} ${tile.name}`, act: 'carry', on: true } : undefined, note: '' };
   }

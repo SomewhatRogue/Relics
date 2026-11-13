@@ -4,6 +4,7 @@
  * boom, the poisoner's blowpipe instead of a spider's hiss). True if the recording played; false and
  * the soundscape makes its usual sound. A goblin's own blow (silent until now) only has a recording.
  */
+import { cutSample } from './fxcut';
 import type { FightEvent } from '../sim/types';
 import { playPick } from './sfxroutes';
 import type { SfxName } from './sfxbank';
@@ -27,6 +28,8 @@ const BY_KIND: Partial<Record<FightEvent['k'], SfxName>> = {
 
 export function eventSample(ev: FightEvent): boolean {
   if (ev.k === 'shoot' && ev.kind === 'dart') return playPick('gob_blowpipe');
+  // The long cut's own (fxcut.ts).
+  if (cutSample(ev, playPick)) return true;
   const name = BY_KIND[ev.k];
   return name ? playPick(name) : false;
 }

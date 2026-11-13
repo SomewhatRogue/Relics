@@ -2,6 +2,7 @@
  * One frame: camera, the flat (lit) layer in depth order, the glowing layer, then the lighting pass.
  * The scene is painted at a low resolution and scaled up by a whole number so pixels stay crisp.
  */
+import { drawCuts } from './cutdraw';
 import { drawPairLift } from './pairdraw';
 import { drawBrakeLane, drawIncline } from './brakedraw';
 import { drawPlates, leverItems } from './tubdraw';
@@ -579,6 +580,8 @@ export class Scene {
     drawBolts(c, room, cx, cy);
     // A wand's lightning strike coming down (skystrikedraw.ts).
     drawSpellSky(c.glow, room, cx, cy);
+    // The long cut's line and the ones it has cut (cutdraw.ts).
+    drawCuts(c.glow, room, (x, y, z) => [OX + x * PX - cx, OY + z * PX - cy - y * PX], (k, x, y) => { const [px, py] = lerp(k, x, y); return [(px - OX) / PX, (py - OY) / PX]; }, PX);
     // A Ranger's MARK over its goblin (signdraw.ts).
     drawHuntMarks(c.glow, room, (x, y, z) => [OX + x * PX - cx, OY + z * PX - cy - y * PX], (k, x, y) => { const [px, py] = lerp(k, x, y); return [(px - OX) / PX, (py - OY) / PX]; }, PX);
     // Who a Cleric's MEND would reach (mendmark.ts).

@@ -39,3 +39,21 @@ a stagger in the stance loses it and costs nothing. The slash: everything within
 as the spellblade's storm dash). The sheathe 0.75 s; then every one cut takes 150 times the hero's damage at once
 (stepCuts, from room.ts each tick, so it lands even if the Rogue is hit by then). 40 s cooldown. Bosses shrug most
 of the still off, as any stun. tests/samuraicut.test.ts. Not drawn yet.
+
+## 2026-11-13: the long cut drawn, heard and named; step 2 in for Kyle to play (Opus 5.5)
+- Drawn (client/cutdraw.ts, both views through the same projection: scene.ts and three/view3d.ts, one line
+  each): the stance's line on the floor, 2 px steel, its band's edges dashed (what's inside is cut), a bar across
+  the far end, flickering white as the beat runs out; after the slash, its scar till the cut lands; a thin white
+  line across each one cut, flickering. The blade's pose (held.ts, one line to cutPose): low behind in the stance,
+  swept through, brought to the hip and gone. Phone shots: scripts/cut-look.cjs (button | cut).
+- Moments and sounds (client/fxcut.ts; one line each in fx.ts and sfxevents.ts): the stance a ring and a glint and
+  a low held ring (parry_ring at 0.6); the slash a white streak down the line, a cold flash, a jolt, a long whoosh
+  (throw_whoosh at 0.75); each fall a white line across, blood, a shake, one heavy cut for the lot (hit_cleave at
+  0.85, the rest in the same frame quiet). Recorded samples retuned; no new recordings.
+- Words: lore keeper named it SHEATH CUT (no samurai words: nothing in Wickhold supports them; nobody on screen
+  says who first did it or where it was learned). Line editor made the row plain: "Hold still while a line shows,
+  then slash across the room. Every goblin on the line takes the damage when you sheathe." ("goblin" for its
+  "foe", the game's word.) Track: DEEP SKILLS (the trainer's other tracks are plain). Trainer's tile shows its
+  COOLDOWN (40 s). For the story bible: the cut is the Rogue's own craft, not shard-stuff, and never feeds the Want.
+- Small edits outside my files: held.ts (Art), fx.ts, sfxevents.ts, scene.ts, three/view3d.ts, upgrades.ts.
+- Waiting on Kyle's play before the other four.

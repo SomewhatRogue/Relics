@@ -4,6 +4,7 @@
  * whole number with nearest-pixel sampling; the flat layer of words and marks goes over it at the same
  * size. Only draws; the room decides everything. Built the first time it's wanted (main.ts).
  */
+import { drawCuts } from '../cutdraw';
 import { mistFrame } from '../fenmistdraw';
 import { feetBand, topPush } from '../phoneband';
 import * as THREE from 'three';
@@ -274,6 +275,7 @@ export class View3D {
     drawSkills3(og, room, P, lerp, this.view.ppu, now);
     drawSpellGround3(og, room, P, this.view.ppu, lerp);
     drawHuntMarks(og, room, P, lerp, this.view.ppu);
+    drawCuts(og, room, P, lerp, this.view.ppu);
     drawMendMark(og, room, meId, P, lerp, this.view.ppu);
     drawChalkMarks(og, room, P, lerp, this.view.ppu);
     drawFound3(og, room, P, lerp, this.view.ppu, now);
