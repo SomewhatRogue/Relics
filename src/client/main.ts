@@ -306,6 +306,8 @@ addEventListener('keydown', (e) => {
   const k = e.key.toLowerCase();
   if (game.wood && game.wood.cut >= 0 && (k === 'escape' || k === ' ' || k === 'enter')) return game.skipCut();
   if (game.wood?.hold && k === 'enter') return lesson.go();
+  // Enter skips a line of the wood's strip too (Hew, Orla on the road).
+  if (game.mode === 'wood' && game.wood?.caption && k === 'enter') return game.skipCaption();
   // F at a drop: its card first, then F again takes it.
   if (k === 'f' && card.current >= 0) input.take(card.current);
   else if (k === 'f' && card.near >= 0 && game.mode === 'run' && !panel.open) card.open(card.near);
@@ -318,6 +320,11 @@ $('#heroes').addEventListener('click', () => {
 });
 $('#packbtn').addEventListener('click', () => pack.toggle());
 $('#caption').addEventListener('click', () => game.skipCaption());
+// A tap anywhere on the scene skips a line of the wood's strip as well (Kyle, 2026-11-12: Orla's lines
+// after the Stoker went too slowly); the stick and buttons sit over it and keep their own taps.
+document.addEventListener('pointerdown', (e) => {
+  if ((e.target as HTMLElement | null)?.tagName === 'CANVAS' && game.mode === 'wood' && game.wood?.caption && !game.wood.hold) game.skipCaption();
+});
 // What each button means (legend.ts), from the gear's box.
 $('#legendbtn').addEventListener('click', () => (pack.toggle(false), void legend(game, panel, input.touch)));
 $('#kitbtn').addEventListener('click', () => (pack.toggle(false), weaponsAbout(game, panel)));

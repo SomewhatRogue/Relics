@@ -19,9 +19,9 @@ your level, and you get a new quest to check in with your guild when you can buy
   town's own people first)* comes up to the hero a few seconds after they arrive, says their line, and runs
   off. It doesn't stop the world (a strip, as the wood's talk now is).
 - **The two errands, in either order, both on the goal line and both marked:**
-  1. **Refill your relic** at the church: Isolde recharges the javelin, the first one free. *(Open: the
-     javelin reaches town full today (the lore keeper, 2026-11-05). For this errand to mean anything it
-     must arrive spent, say one throw left from the Stoker fight. Kyle's call.)*
+  1. **Mend your relic** at the church. Decided (Kyle, 2026-11-12): the javelin reaches Wickhold partly
+     broken, with a throw or so left (changes the lore keeper's 2026-11-05 "reaches Wickhold full"), and a
+     Sister at the church mends it, the first time free *(lore: which Sister, Agne or another)*.
   2. **See your trainer** (the class's trainer in the yard or guild): they teach the starting skill, which
      today is bought or picked there.
 - **Done:** each errand ticks off when done; both done, the runner's line is over and the goal line goes
@@ -58,5 +58,5 @@ Trading's or Art's files: check the board.
 
 ## Open
 
-1. The javelin arriving spent (above), or the errand being "have Isolde look at it" with no recharge needed.
+1. ~~The javelin~~: arrives partly broken; a Sister mends it (Kyle, 2026-11-12).
 2. The runner: a guard, an orphan, a churchboy *(lore keeper)*.
