@@ -12,7 +12,7 @@ import type { Game } from './game';
 import { card } from './card';
 import { grid } from './cells';
 import { itemIcon } from './itemicons';
-import { itemPop, says } from './shopui';
+import { itemPop } from './shopui';
 import { SHOPW } from './shopwords';
 import { PAWN } from './storewords';
 import { FENCE } from './vendorwords';
@@ -41,9 +41,8 @@ export function wireFence(g: Game, again: () => void, sync: () => void): void {
     const price = fenceValue(it, g.profile), base = { icon: itemIcon(it), name: itemName(it), col: itemCol(it), body: card(it, g.hero, true), again };
     if (!price) return itemPop({ ...base, acts: [], why: FENCE.wont });
     itemPop({ ...base, acts: [{ label: PAWN.sell(price), primary: true, act: () => {
-      if (!fence(pr, i)) return;
-      sync();
-      return says('Nettle', FENCE.sold);
+      // No line from him each sale (Kyle, 2026-11-12: it got in the way of selling a pack's worth).
+      if (fence(pr, i)) sync();
     } }] });
   }));
 }
