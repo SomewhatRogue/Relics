@@ -29,3 +29,16 @@ From 2026-11-12. Newest at the bottom. Sign each entry with the model name.
 - For the Art chat: on main today five test files fail to load (raise, rats, recapboard, runux, wading):
   `src/client/sprites.ts:114` makes canvases at import, and there is no `document` in Node. Not from this
   chat's changes (same failure with them stashed). (Claude Opus 5.5)
+- Step 2b, the town's shops and stores (`shop.css`, `stores.css`, the tiles in `cells.css`; no markup
+  changed). The panel's shell (plate, rivets, well, the blackletter title, torchlight) and its bottom button
+  row (CLOSE sunk, the main choice in gold leaf, the rest iron) now go on every panel over the game; a
+  panel's body (its own buttons, its headings) goes iron screen by screen, through the list
+  `#panel:has(.jlist, .shop, .store)` in ironui.css. The button variants are plain selector lists, not
+  `:is()`, so each screen's own button rules still outweigh them. Shops: the keeper as a brass label, the
+  goods as sunk slots with the picture in a small frame and the price in gold, the item card a forged panel
+  with a brass hairline over its buttons, tabs sunk with the open one raised. Tiles (stores and the pack)
+  are item frames: a sunk well with the tier's colour round it. Item names come in capitals, which the
+  blackletter can't carry, so the card's name is in the bold sans for now. (Claude Opus 5.5)
+- For the Trading chat: `tradeui.ts` builds on the shop's `.shop` and `.goods`, so the trade screen wears
+  these through CSS alone. None of your markup changed; say in your log if anything reads wrong.
+  (Claude Opus 5.5)

@@ -1,18 +1,19 @@
-/* Gear squares and the side-by-side card, in the pack and in the town's stores (cells.ts). */
-body #pack .cells, #panel .cells { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 4px; min-height: 40px; padding: 4px; border: 1px dashed #33373e; }
-body #pack .cells.can, #panel .cells.can { border-color: #ffd27a; }
-body #pack .tile, #panel .tile { position: relative; aspect-ratio: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2px; background: #202328; border: 2px solid var(--t); overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; cursor: pointer; }
+/* Gear squares as item frames (docs/design/ui-look.md): a sunk well, the frame in the tier's colour (--t),
+   its counts and price in the small pixel face. A unique's frame is its gold (uniquelook.ts). */
+body #pack .cells, #panel .cells { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 6px; min-height: 48px; padding: 6px; background: #101115; box-shadow: inset 1px 1px 0 var(--i-outline), inset -1px -1px 0 #2b2e35; }
+body #pack .cells.can, #panel .cells.can { box-shadow: inset 0 0 0 2px var(--i-leaf); }
+body #pack .tile, #panel .tile { position: relative; aspect-ratio: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2px; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; cursor: pointer;
+  background: radial-gradient(circle, #2a2c33, var(--i-well) 70%); border: 0; box-shadow: 0 0 0 2px var(--i-outline), inset 0 0 0 2px var(--t); }
 body #pack .tile img, #panel .tile img, .tile.ghost img { width: 72%; image-rendering: pixelated; pointer-events: none; }
-body #pack .tile b, #panel .tile b { position: absolute; top: 1px; right: 3px; color: #fff1d0; font-size: var(--fs-s); text-shadow: 0 1px 0 #000; }
-body #pack .tile em, #panel .tile em { position: absolute; top: 1px; left: 3px; font-style: normal; color: #ffd27a; font-size: var(--fs-s); letter-spacing: 0.05em; }
-body #pack .tile i, #panel .tile i { position: absolute; bottom: 1px; left: 0; right: 0; text-align: center; font-style: normal; color: #a39e94; font-size: var(--fs-s); letter-spacing: 0.08em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-body #pack .tile.empty, #panel .tile.empty { border-style: dashed; border-color: #3a3e46; background: #15131b; cursor: default; }
-body #pack .tile.empty i, #panel .tile.empty i { position: static; color: #5a5f69; font-size: var(--fs-s); }
-body #pack .tile.dim, #panel .tile.dim { border-style: dotted; background: #16181f; }
+body #pack .tile b, #panel .tile b { position: absolute; top: 3px; right: 4px; font: 400 10px/1 var(--i-label); color: var(--i-text); text-shadow: 1px 1px 0 var(--i-outline); }
+body #pack .tile em, #panel .tile em { position: absolute; top: 3px; left: 4px; font: 400 10px/1 var(--i-label); font-style: normal; color: var(--i-leaf); text-shadow: 1px 1px 0 var(--i-outline); }
+body #pack .tile i, #panel .tile i { position: absolute; bottom: 3px; left: 0; right: 0; text-align: center; font: 400 9px/1 var(--i-label); font-style: normal; color: var(--i-cool); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 1px 1px 0 var(--i-outline); }
+body #pack .tile.empty, #panel .tile.empty { background: #121317; box-shadow: inset 1px 1px 0 var(--i-outline), inset -1px -1px 0 #26282e; cursor: default; }
+body #pack .tile.empty i, #panel .tile.empty i { position: static; color: #5a5f69; }
+body #pack .tile.dim, #panel .tile.dim { background: #16181f; box-shadow: 0 0 0 2px var(--i-outline), inset 0 0 0 1px var(--t); }
 #panel .tile.dim img { opacity: 0.4; }
-#panel .tile.dim em { color: #8d929c; }
-body #pack .tile.sel, #panel .tile.sel { background: #2a2d33; }
-body #pack .tile.can { }
+#panel .tile.dim em { color: var(--i-quiet); }
+body #pack .tile.sel, #panel .tile.sel { background: radial-gradient(circle, #3a3320, var(--i-well) 75%); box-shadow: 0 0 0 2px var(--i-leaf), inset 0 0 0 2px var(--t); }
 body #pack .tile.over, body #pack .cells.over { background: #2e2618; }
 body #pack .tile.dragging { opacity: 0.35; }
 

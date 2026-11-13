@@ -23,7 +23,7 @@ const base = process.env.URL || 'http://localhost:4173/?hero=WARRIOR';
     await page.evaluate(() => document.querySelector('#panel .body')?.click());
     await page.waitForTimeout(300);
     await page.screenshot({ path: `shots/ui-${tag}-${id}.png` });
-    const card = await page.$('#panel [data-open]');
+    const card = await page.$('#panel [data-open], #panel [data-good]');
     if (card) {
       await card.click();
       await page.waitForTimeout(500);

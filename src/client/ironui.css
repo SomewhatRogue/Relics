@@ -19,47 +19,55 @@
   --i-plate: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' shape-rendering='crispEdges'%3E%3Crect width='28' height='28' fill='%2323252b'/%3E%3Cpath fill='%235c616c' d='M0 0h28v2H0zM0 0h2v28H0z'/%3E%3Cpath fill='%230e0f12' d='M0 26h28v2H0zM26 0h2v28h-2z'/%3E%3Crect x='6' y='6' width='16' height='16' fill='%2314151a'/%3E%3Cpath fill='%2307080a' d='M6 6h16v2H6zM6 6h2v16H6z'/%3E%3Cpath fill='%233a3e46' d='M6 21h16v1H6zM21 6h1v16h-1z'/%3E%3Cpath fill='%236a4a1e' d='M6 6h6v6H6zM16 6h6v6h-6zM6 16h6v6H6zM16 16h6v6h-6z'/%3E%3Cpath fill='%23c89a4a' d='M6 6h4v4H6zM16 6h4v4h-4zM6 16h4v4H6zM16 16h4v4h-4z'/%3E%3C/svg%3E");
 }
 
-/* ---- The panel: outline, plate, rivets, the well, a soft shadow under it. ---- */
-.iron, #panel:has(.jlist) > .card, #panel .jcard {
+/* ---- The panel: outline, plate, rivets, the well, a soft shadow under it. Every panel over the game wears it;
+   the parts inside a panel's body (its buttons, its headings) go screen by screen (the list in #panel:has(.jlist, .shop, .store)). ---- */
+.iron, #panel > .card, #panel .jcard, #panel .spcard {
   border: 12px solid transparent; border-radius: 0;
   border-image: var(--i-plate) 12 fill / 12px stretch; image-rendering: pixelated;
   background: none; padding: 12px 10px 10px;
   box-shadow: 0 0 0 2px var(--i-outline), 0 10px 30px #000000b3;
   color: var(--i-text); font-family: var(--i-read); position: relative;
 }
+#panel:has(.jlist, .shop, .store) > .card .body { font: 500 16px/1.4 var(--i-read); }
+#panel > .card > .body > p { font-size: 16px; line-height: 1.4; }
 
 /* ---- The heading rule: a small brass label between two hairlines that fade out each side. ---- */
-.irule, #panel:has(.jlist) h3 {
-  display: flex; align-items: center; gap: 8px; margin: 12px 0 8px;
+.irule, #panel:has(.jlist, .shop, .store) > .card .body h3 {
+  display: flex; align-items: center; gap: 8px; margin: 14px 0 8px;
   font: 400 11px/1.2 var(--i-label); letter-spacing: 0.03em; color: var(--i-brass); text-transform: uppercase;
 }
-.irule::before, .irule::after, #panel:has(.jlist) h3::before, #panel:has(.jlist) h3::after { content: ''; flex: 1; height: 2px; }
-.irule::before, #panel:has(.jlist) h3::before { background: linear-gradient(90deg, #c89a4a00, var(--i-brass)); }
-.irule::after, #panel:has(.jlist) h3::after { background: linear-gradient(90deg, var(--i-brass), #c89a4a00); }
+.irule::before, .irule::after, #panel:has(.jlist, .shop, .store) > .card .body h3::before, #panel:has(.jlist, .shop, .store) > .card .body h3::after { content: ''; flex: 1; height: 2px; }
+.irule::before, #panel:has(.jlist, .shop, .store) > .card .body h3::before { background: linear-gradient(90deg, #c89a4a00, var(--i-brass)); }
+.irule::after, #panel:has(.jlist, .shop, .store) > .card .body h3::after { background: linear-gradient(90deg, var(--i-brass), #c89a4a00); }
 
 /* Screen titles in the blackletter, warm gold, no glint (glints are for treasure). */
-#panel:has(.jlist) h2 { margin: 0 0 10px; font: 400 30px/1 var(--i-name); color: var(--i-leaf); text-shadow: 0 2px 0 var(--i-outline); }
+#panel > .card > h2 { margin: 0 0 10px; font: 400 30px/1 var(--i-name); color: var(--i-leaf); text-shadow: 0 2px 0 var(--i-outline); }
 
-/* ---- Buttons: pressed metal. Iron by default; gold leaf for the main choice; sunk for the quiet one.
-   Pressed flips the bevel and drops a pixel. 48 px tall at least. ---- */
-.ib, #panel:has(.jlist) button {
+/* ---- Buttons: pressed metal. Iron by default; gold leaf for the main choice; sunk for the quiet one (BACK,
+   CLOSE). Pressed flips the bevel and drops a pixel. 48 px tall at least. Written as plain lists, not :is(),
+   so each screen's own button rules still outweigh them. ---- */
+.ib, #panel:has(.jlist, .shop, .store) button, #panel > .card > .buttons button {
   min-height: 48px; padding: 0 12px; border: 0; border-image: none; border-radius: 0; filter: none;
   font: 400 14px/1.1 var(--i-label); letter-spacing: 0.03em; text-transform: uppercase;
   background: #3a3e46; color: var(--i-text);
   box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #6a6f7a, inset -2px -2px 0 #1b1d22;
   cursor: pointer; transition: none;
 }
-:is(.ib, #panel:has(.jlist) button):active:not(:disabled) { transform: translateY(1px); box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #1b1d22, inset -2px -2px 0 #6a6f7a; }
-:is(.ib.leaf, #panel:has(.jlist) button.primary) {
+#panel > .card > .buttons { gap: 10px; margin-top: 14px; padding: 2px; }
+#panel > .card > .buttons button { min-width: 120px; }
+.ib:active:not(:disabled), #panel:has(.jlist, .shop, .store) button:active:not(:disabled), #panel > .card > .buttons button:active:not(:disabled) {
+  transform: translateY(1px); box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #1b1d22, inset -2px -2px 0 #6a6f7a; }
+.ib.leaf, #panel:has(.jlist, .shop, .store) button.primary, #panel > .card > .buttons button.primary {
   background: linear-gradient(180deg, #ffe08a, #c8902e); color: #2e1a08;
   box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 var(--i-leaf-hi), inset -2px -2px 0 #7a4e14;
 }
-:is(.ib.leaf, #panel:has(.jlist) button.primary):active:not(:disabled) { color: #2e1a08; box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #7a4e14, inset -2px -2px 0 var(--i-leaf-hi); }
-:is(.ib.sunk, #panel:has(.jlist) :is(.buttons button:last-child, button[data-back])) {
+.ib.leaf:active:not(:disabled), #panel:has(.jlist, .shop, .store) button.primary:active:not(:disabled), #panel > .card > .buttons button.primary:active:not(:disabled) {
+  color: #2e1a08; box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #7a4e14, inset -2px -2px 0 var(--i-leaf-hi); }
+.ib.sunk, #panel:has(.jlist, .shop, .store) button[data-back], #panel > .card > .buttons button:last-child:not(.primary) {
   background: #1b1d22; color: var(--i-cool);
   box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #33373e, inset -2px -2px 0 var(--i-outline);
 }
-:is(.ib, #panel:has(.jlist) button):disabled { background: #16171b; color: var(--i-quiet); cursor: default; transform: none;
+.ib:disabled, #panel:has(.jlist, .shop, .store) button:disabled, #panel > .card > .buttons button:disabled { background: #16171b; color: var(--i-quiet); cursor: default; transform: none;
   box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #26282e, inset -2px -2px 0 var(--i-outline); }
 
 /* ---- Bars: a sunk trough with a 1 px edge; the fill by kind. Set the fill's width inline. A fuse sparks
@@ -95,7 +103,7 @@
 
 /* ---- Torchlight behind a panel over the fight or the town: a little flicker, in steps. ---- */
 .itorch { position: relative; }
-.itorch::before, #panel:has(.jlist)::before { content: ''; position: absolute; inset: 0; pointer-events: none;
+.itorch::before, #panel::before { content: ''; position: absolute; inset: 0; pointer-events: none;
   background: radial-gradient(circle at 18% 14%, #ff963c2e, #0000 34%), radial-gradient(circle at 84% 78%, #ffd27a1a, #0000 38%);
   animation: i-flick 1.3s steps(4) infinite; }
 

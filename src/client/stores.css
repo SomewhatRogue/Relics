@@ -1,9 +1,9 @@
-/* The vault, Tobin's stall and the anvil (stores.ts). */
-#panel .store h3.sh { margin: 10px 0 4px; color: #b8a47c; font-size: var(--fs-text); letter-spacing: 0.15em; font-weight: 400; }
-#panel .store h3.sh i { font-style: normal; color: #8d929c; margin-left: 6px; }
-#panel .store .cells { grid-template-columns: repeat(auto-fill, minmax(40px, 50px)); }
-#panel .store .sdetail { margin: 10px 0 8px; padding: 6px; background: #18191d; border: 1px solid #33373e; }
+/* The vault, Tobin's stall and the anvil (stores.ts), in iron and ember (docs/design/ui-look.md; the panel,
+   its rule and its buttons are ironui.css's, the tiles cells.css's). */
+#panel .store h3.sh i { font-style: normal; color: var(--i-quiet); margin-left: 6px; }
+#panel .store .cells { grid-template-columns: repeat(auto-fill, minmax(48px, 56px)); }
+#panel .store .sdetail { margin: 12px 0 10px; padding: 10px; background: #1b1d22; box-shadow: inset 1px 1px 0 var(--i-outline), inset -1px -1px 0 #33373e; font: 500 16px/1.4 var(--i-read); }
 #panel .store .sdetail p { margin: 6px 0 0; }
-#panel .store .btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+#panel .store .btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; padding: 2px; }
 #panel .store .btns button { flex: 1; }
-#panel .store .tile em { color: #ffd27a; font-size: var(--fs-s); }
+#panel .store .tile em { color: var(--i-leaf); }

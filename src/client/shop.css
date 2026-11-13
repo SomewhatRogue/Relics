@@ -1,36 +1,49 @@
-/* Shops and stalls (shopui.ts): the place, the keeper, the goods, and the card over them. */
-#panel .shop .place { color: #b0aa9c; font-style: italic; margin: -2px 0 8px; }
-#panel .shop .keeper { color: #b8a47c; font-size: var(--fs-text); letter-spacing: 0.15em; font-weight: 400; margin: 4px 0 4px; }
-#panel .shop .says { margin: 0 0 6px; }
-#panel .shop h3.gh { margin: 10px 0 4px; color: #b8a47c; font-size: var(--fs-text); letter-spacing: 0.15em; font-weight: 400; }
-#panel .goods { display: flex; flex-direction: column; gap: 4px; }
-#panel .good { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 36px; padding: 2px 10px 2px 6px; text-align: left; background: #22252a; border-color: #3a3e46; }
-#panel .good img, #panel .good .noicon { width: 24px; height: 24px; image-rendering: pixelated; flex: none; }
-#panel .good .gn { flex: 1; color: #f0e6cc; }
-#panel .good em { font-style: normal; color: #ffd27a; }
-#panel .good.off .gn, #panel .good.off em { opacity: 0.55; }
-#panel .spop { position: fixed; inset: 0; z-index: 7; display: flex; align-items: center; justify-content: center; padding: 16px; background: #0e0f1299; }
-/* The card over a shop: head, a block of stats that scrolls, and a bar at the foot that never does. */
-#panel .spcard { display: flex; flex-direction: column; width: min(320px, 100%); max-height: 82vh; background: #23262c; border: 1px solid #ffd27a88; padding: 10px 12px; box-shadow: 0 6px 24px #000a; }
-#panel .spcard .ph { flex: none; display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-#panel .spcard .ph img { width: 32px; height: 32px; image-rendering: pixelated; }
-#panel .spcard .ph b { flex: 1; }
-#panel .spcard .pa { flex: 1 1 auto; min-height: 0; overflow-y: auto; line-height: 1.4; padding-right: 2px; }
-#panel .spcard .pa p { margin: 0 0 6px; }
-#panel .spcard .pa .how { margin: 2px 0 6px; }
-#panel .spcard .pa .tr { color: #c8c0b0; }
+/* Shops and stalls (shopui.ts), in iron and ember (docs/design/ui-look.md; the panel, its rule and its
+   buttons are ironui.css's): the place, the keeper, the goods as sunk slots, and a forged card over them. */
+#panel .shop .place { margin: -2px 0 10px; font: italic 500 16px/1.35 var(--i-read); color: var(--i-quiet); }
+#panel .shop .keeper { margin: 6px 0 4px; font: 400 11px/1.2 var(--i-label); letter-spacing: 0.03em; color: var(--i-brass); text-transform: uppercase; }
+#panel .shop .says { margin: 0 0 8px; font: 500 17px/1.35 var(--i-read); color: var(--i-text); }
+#panel .shop p { font-size: 15px; }
+#panel .shop h3.gh i { font-style: normal; color: var(--i-quiet); }
+
+/* The goods: each a sunk slot, its picture in a small frame, the name, the price in gold. */
+#panel .goods { display: flex; flex-direction: column; gap: 8px; padding: 2px; }
+#panel .goods .good { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 52px; padding: 6px 12px 6px 8px; text-align: left; text-transform: none; letter-spacing: 0;
+  background: #1b1d22; color: var(--i-text); box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #33373e, inset -2px -2px 0 var(--i-outline); }
+#panel .goods .good:active:not(:disabled) { background: #202228; box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 var(--i-outline), inset -2px -2px 0 #33373e; }
+#panel .good img, #panel .good .noicon { flex: none; width: 36px; height: 36px; padding: 4px; box-sizing: border-box; image-rendering: pixelated;
+  background: radial-gradient(circle, #2a2c33, var(--i-well) 70%); box-shadow: 0 0 0 2px var(--i-outline), inset 0 0 0 1px #3a3e46; }
+#panel .good .gn { flex: 1; font: 700 17px/1.2 var(--i-read); color: var(--i-text); }
+#panel .good em { font: 400 14px/1 var(--i-label); font-style: normal; color: var(--i-leaf); letter-spacing: 0.03em; }
+#panel .good.off .gn, #panel .good.off em, #panel .good.off img { opacity: 0.5; }
+
+/* The card over a shop: a forged panel; its head, a block of stats that scrolls, and a bar at the foot that
+   never does, under a brass hairline. */
+#panel .spop { position: fixed; inset: 0; z-index: 7; display: flex; align-items: center; justify-content: center; padding: 16px; background: #07080ad9; }
+#panel .spcard { display: flex; flex-direction: column; width: min(360px, 100%); max-height: 84vh; padding: 12px 10px 10px; }
+#panel .spcard .ph { flex: none; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+#panel .spcard .ph img { width: 48px; height: 48px; padding: 6px; image-rendering: pixelated; background: radial-gradient(circle, #2a2c33, var(--i-well) 70%); box-shadow: 0 0 0 2px var(--i-outline), inset 0 0 0 2px var(--i-brass-dk); }
+/* Item names come in capitals, which no blackletter reads in: the bold sans until they come in title case. */
+#panel .spcard .ph b { flex: 1; font: 700 22px/1.1 var(--i-read); letter-spacing: 0.02em; color: var(--i-leaf); text-shadow: 0 2px 0 var(--i-outline); }
+#panel .spcard .pa { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-right: 2px; font: 500 16px/1.4 var(--i-read); color: var(--i-text); }
+#panel .spcard .pa p { margin: 0 0 8px; }
+#panel .spcard .pa .how { margin: 2px 0 8px; }
+#panel .spcard .pa .tr { color: var(--i-warm); }
 #panel .spcard .pa .tr.nouse { opacity: 0.45; }
-#panel .spcard .pa .tr.nouse i { font-style: normal; color: #8d929c; }
-#panel .spcard .cmpt { display: block; width: 100%; margin: 8px 0 4px; padding: 4px; min-height: 30px; font-size: var(--fs-s); letter-spacing: 0.12em; background: #1b1d22; border-color: #3a3e46; color: #a39e94; }
-#panel .spcard .cmpt.on { color: #ffd27a; border-color: #ffd27a66; }
-#panel .spcard .pb { flex: none; margin-top: 8px; padding-top: 8px; border-top: 1px solid #3a3e46; }
-#panel .spcard .pb .why { margin: 0 0 6px; }
-#panel .spcard .pbb { display: flex; flex-wrap: wrap; gap: 6px; }
+#panel .spcard .pa .tr.nouse i { font-style: normal; color: var(--i-quiet); }
+#panel .spcard .cmpt { display: block; width: 100%; margin: 10px 0 6px; min-height: 48px; font-size: 12px;
+  background: #1b1d22; color: var(--i-cool); box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #33373e, inset -2px -2px 0 var(--i-outline); }
+#panel .spcard .cmpt.on { color: var(--i-leaf); }
+#panel .spcard .pb { flex: none; margin-top: 10px; padding-top: 12px; background: linear-gradient(90deg, #c89a4a00, var(--i-brass), #c89a4a00) top / 100% 2px no-repeat; }
+#panel .spcard .pb .why { margin: 0 0 8px; font: 500 15px/1.35 var(--i-read); }
+#panel .spcard .pbb { display: flex; flex-wrap: wrap; gap: 10px; padding: 2px; }
 #panel .spcard .pbb button { flex: 1 1 40%; }
 #panel .spcard .pbb button.primary { flex-basis: 100%; }
 /* The card's own name is already in the head: only its tier chip shows there. */
 #panel .spcard .pa .card-head b { display: none; }
-/* Tabs over a keeper's goods (Nettle's table: FOR SALE, SELL QUIETLY; fenceui.ts). */
-#panel .tabs { display: flex; gap: 6px; margin: 8px 0 2px; }
-#panel .tabs button { flex: 1; min-height: 34px; padding: 4px; font-size: var(--fs-s); letter-spacing: 0.12em; background: #1b1d22; border-color: #3a3e46; color: #a39e94; }
-#panel .tabs button.on { color: #ffd27a; border-color: #ffd27a88; background: #23262c; }
+
+/* Tabs over a keeper's goods (Nettle's table: FOR SALE, SELL QUIETLY; fenceui.ts): sunk, the open one raised in iron. */
+#panel .tabs { display: flex; gap: 10px; margin: 10px 0 4px; padding: 2px; }
+#panel div.tabs button { flex: 1; min-height: 48px; padding: 4px; font-size: 12px;
+  background: #1b1d22; color: var(--i-cool); box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #33373e, inset -2px -2px 0 var(--i-outline); }
+#panel div.tabs button.on { background: #3a3e46; color: var(--i-leaf); box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #6a6f7a, inset -2px -2px 0 #1b1d22; }
