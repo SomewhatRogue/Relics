@@ -35,4 +35,6 @@ export function ironUi(): void {
   const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   setMotion(motionWanted(stored, reduce), false);
   document.getElementById('motion')?.addEventListener('click', () => setMotion(document.documentElement.hasAttribute('data-still'), true));
+  // A keeper's long word shows three lines; a tap shows the rest, another folds it (shop.css).
+  document.addEventListener('click', (e) => (e.target as Element | null)?.closest?.('#panel .shop .says')?.classList.toggle('all'));
 }

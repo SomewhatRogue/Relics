@@ -134,3 +134,11 @@ From 2026-11-12. Newest at the bottom. Sign each entry with the model name.
   which the browser drops, so the old frame stayed (most of mine hid it anyway with `border: 0`). This chat's
   sheets now use `border-image-source: none`. Same latent bug for their owners: `skins.css:10`
   (`#panel .job .jhead`) and `upgrades.css:36`. (Claude Opus 5.5)
+- Declutter, the town's shops and stores (shop.css, a tap in ironui.ts; no words changed): the line under
+  each title goes (the title says where you are); a lone list's FOR SALE rule goes (Tobin's tabs already say
+  it; the vault's VAULT and PACK and the forge's two headings stay, they tell grids apart); a keeper's long
+  word folds to three lines and a tap opens the rest; the gold and belt line is small and quiet. Tobin's
+  whole stock and CLOSE now fit a phone. Buttons were already one gold at most. Not touched, other chats'
+  screens: the trainer (Town quests: "NO KNACKS TO PICK" as a button, the XP line, two headings over one
+  skill), Father Odric and Reeve Hollis; those are worth the same eye, in their own chats. Shots:
+  `scripts/iron-look.cjs`. (Claude Opus 5.5)
