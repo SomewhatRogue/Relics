@@ -253,8 +253,9 @@ export function drawRound(c: Ctx, r: Round, x: number, y: number): void {
   if (r.kind === 'plinth') return drawPlinth(c, r, x, y);
   if (r.kind === 'dais') {
     // The Last Lantern on its dais (daispieces.ts): a flame that never goes out, over the statue's head.
-    // (A shade darker than the 2.5D boxes: here the Lantern's own light falls full on its stone and washed it out.)
-    paintBoxes(c.lit, roundBoxes(r).map((q) => [q[0], q[1], q[2], q[3], q[4], q[5], shade(q[6], 0.68), q[7]] as Bx), x, y);
+    // (Darker than the 2.5D boxes, the Lantern's own light falls full on its stone here; the upper step and
+    // the column less so than the lower step, so the steps read apart. Gilt and brass as they are.)
+    paintBoxes(c.lit, roundBoxes(r).map((q) => [q[0], q[1], q[2], q[3], q[4], q[5], q[6] === 0xb8963e || q[6] === 0x8a7038 ? q[6] : shade(q[6], q[1] < 0.2 ? 0.6 : q[1] < 0.45 ? 0.85 : 0.62), q[7]] as Bx), x, y);
     const f = Math.floor(c.now * 9) % 3, fy = Math.round(y - LANTERN_Y * PX);
     c.glow.fillStyle = '#fff1b0';
     c.glow.fillRect(Math.round(x - 2), fy - 3, 4, 5);

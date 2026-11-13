@@ -44,7 +44,7 @@ const FAMILY: Record<Exclude<Soil['mat'], 'cobble' | 'shade'>, string[]> = {
   grass: ['#233021', '#26331f', '#2b3923', '#2e3d25'],
   furrow: ['#2a221a', '#30271d', '#362c21', '#3c3125'],
   crop: ['#4a3e24', '#544628', '#5e4f2c', '#433822'],
-  flags: ['#4a4652', '#4f4a58', '#534e5c', '#47434f'],
+  flags: ['#5c5766', '#625d6c', '#68626f', '#57525f'],
 };
 
 /** A shape's box, grown by as far as the noise can push an edge (tiles). */
@@ -73,7 +73,7 @@ function colourAt(mat: Exclude<Soil['mat'], 'cobble' | 'shade'>, x: number, y: n
   // Flagstones: 16 by 10, every other course set over by half, each stone its own grey, the joints dark.
   if (mat === 'flags') {
     const row = Math.floor(py / 10), sx = px + (row % 2 ? 8 : 0), col = Math.floor(sx / 16);
-    if (py % 10 === 0 || sx % 16 === 0) return '#2e2b34';
+    if (py % 10 === 0 || sx % 16 === 0) return '#34313b';
     const k = hash(col, row, 13);
     return hash(px, py, 4) < 0.03 ? '#3a3640' : FAMILY.flags[Math.floor(k * 4)];
   }

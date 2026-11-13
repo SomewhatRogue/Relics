@@ -360,3 +360,10 @@ The plan, one class at a time so Kyle can play each against the old ones:
   room's piles each frame; overlay3d.ts draws them at their height in 2.5D). A pile counts as picked up when it
   leaves the room with a hero on it and life in it, so a pile that fades or a room left behind sends nothing.
   Cosmetic; the room's split of the gold is unchanged. (Claude Opus 5.5)
+
+## 2026-11-13: the plinth carved, the flagstones paler
+
+- The plinth (statuepieces.ts) has a moulding round its foot, a pilaster up each front corner and a cornice under
+  its cap, in both views. The flagstones round the dais are paler, their joints softer, so the ring reads against
+  the cobbles. In the flat view the dais's lower step is the darkest stone, the upper step paler, the column
+  between, so the steps read apart under the Lantern's light. (Claude Opus 5.5)

@@ -15,7 +15,15 @@ const STONE = 0x57525e, DARK = 0x45414c, PALE = 0x6a6470;
 
 export function plinthBoxes(): Bx[] {
   const [sw, sh, sd] = PLINTH_BOX.slab, [bw, bh, bd] = PLINTH_BOX.body, [cw, ch, cd] = PLINTH_BOX.cap;
-  return [[0, 0, 0, sw, sh, sd, DARK], [0, sh, 0, bw, bh, bd, STONE], [0, sh + bh, 0, cw, ch, cd, PALE]];
+  // Carved (Kyle, 2026-11-13): a moulding round its foot, a pilaster up each front corner, a cornice under the cap.
+  const px = bw / 2 - 0.1;
+  return [
+    [0, 0, 0, sw, sh, sd, DARK], [0, sh, 0, bw, bh, bd, STONE],
+    [0, sh, 0, bw + 0.12, 0.12, bd + 0.1, PALE], [0, sh + 0.12, 0, bw + 0.04, 0.05, bd + 0.03, DARK],
+    [-px, sh + 0.17, 0, 0.18, bh - 0.31, bd + 0.05, PALE], [px, sh + 0.17, 0, 0.18, bh - 0.31, bd + 0.05, PALE],
+    [0, sh + bh - 0.14, 0, bw + 0.08, 0.05, bd + 0.05, DARK], [0, sh + bh - 0.09, 0, bw + 0.12, 0.09, bd + 0.1, PALE],
+    [0, sh + bh, 0, cw, ch, cd, PALE],
+  ];
 }
 
 /** A name cut on the plate: one line, or two (at a space nearest the middle, else halved) when it's long. */
