@@ -5,6 +5,7 @@
  */
 import './ironui.css';
 import './ironhome.css';
+import './ironpeers.css';
 
 const KEY = 'relic.motion';
 

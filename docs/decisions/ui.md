@@ -66,3 +66,22 @@ From 2026-11-12. Newest at the bottom. Sign each entry with the model name.
 - Steps 1 to 3 of the guide are in. Left: step 4, screens other chats own (the Deep's loot roll card and
   checkpoint, trading), class names only, asked in their logs or once they finish. Every panel over the game
   already wears the iron frame and button row; their bodies are theirs till then. (Claude Opus 5.5)
+
+## 2026-11-13 (Claude Opus 5.5)
+
+- Step 4, Kyle's go: the screens other chats own, restyled through the class names they already render, from
+  a sheet of this chat's (`src/client/ironpeers.css`, loaded by ironui.ts). None of their files changed and no
+  class names were needed. The rules are weighted (html, body, div) to sit over the owners' sheets; any of
+  them can move into its owner's sheet whenever that chat likes. Shots: `scripts/iron-peers.cjs`.
+  (Claude Opus 5.5)
+- For the Deep chat (`rollcard.ts`, `loot.css`, `deepui.ts`, `deep.css`): the roll card is a riveted iron
+  strip; the piece in a gold-leaf frame that pulses while it asks, its name in gold leaf with the glint, the
+  time left an ember fuse that sparks, NEED in gold leaf, GREED iron, PASS sunk. Still the slim strip on a
+  phone (Kyle, 2026-11-12) with the piece's lines folded, but the buttons are 48 px (were 34): the guide's
+  touch size. A unique's line (`.uline`, here and on the item card) is a gift line in a sunk box, no longer
+  teal italic. The checkpoint: each way on a sunk slot with a brass edge, its name in the small pixel face,
+  the good green and the cost red; the party's choices under the brass rule. If a rule fights something
+  you're building, say so in your log and it moves or goes. (Claude Opus 5.5)
+- For the Trading chat: the trade window already wore the shop's iron (yesterday's note); now its gold steps
+  (-100 to +100) are small iron keys, 48 px tall. (Claude Opus 5.5)
+- All four steps of the guide are in. (Claude Opus 5.5)

@@ -1,0 +1,63 @@
+/* Iron and ember (docs/design/ui-look.md, step 4) on screens other chats own, through the class names they
+   already render; their files are untouched. Weighted (html, body, div) to sit over their own sheets:
+   the Deep's roll card (rollcard.ts, loot.css) and checkpoint (deepui.ts, deep.css), and Trading's window
+   (tradeui.ts, which is built from the shop's parts: shop.css). A rule here can move into its owner's sheet
+   whenever that chat likes. */
+
+/* ---- The roll card: a riveted iron strip over the fight. The piece in a gold-leaf frame that pulses while
+   it asks, its name in gold leaf with the glint, the time left an ember fuse that sparks, NEED in gold
+   leaf, GREED iron, PASS sunk. Still slim on a phone (Kyle, 2026-11-12), but the buttons are 48 px. ---- */
+html body #roll { padding: 8px 12px 10px; border: 0; color: var(--i-text); font: 500 15px/1.35 var(--i-read);
+  background: var(--i-rivets), #14151af0; box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 var(--i-hi), inset -2px -2px 0 var(--i-lo), 0 8px 24px #000a;
+  transition: transform 0.2s steps(4), opacity 0.2s steps(4); }
+html body #roll .rhead { gap: 10px; }
+html body #roll .rhead img { padding: 4px; border: 0; background: radial-gradient(circle, #3a2a14, var(--i-well) 70%); box-shadow: 0 0 0 2px var(--i-outline), inset 0 0 0 2px var(--i-leaf); }
+html body #roll:has(.rbtns) .rhead img { animation: i-throb 1.6s steps(4) infinite; }
+html body #roll .rhead b { font: 400 22px/1.05 var(--i-name); background: var(--i-leaf-grad); background-size: 260% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: i-shine 3s steps(1) infinite; }
+html body #roll .rhead span { font: 500 14px/1.3 var(--i-read); color: var(--i-warm); }
+html body.touch #roll .rhead span::after { color: var(--i-brass); }
+html body #roll .rmods { margin-top: 8px; gap: 2px 12px; font-size: 15px; }
+html body #roll .rmods b { font: 400 12px/1 var(--i-label); color: var(--i-leaf); }
+html body #roll .rmods .tr { color: var(--i-text); }
+html body #roll .rmods .tr b { font: 700 15px/1.3 var(--i-read); color: var(--i-leaf); }
+html body #roll .rbar, html body.touch #roll .rbar { position: relative; height: 8px; margin: 8px 0; background: var(--i-outline); box-shadow: inset 0 0 0 1px #3a3e46; }
+html body #roll .rbar i { position: relative; background: var(--i-ember-grad); }
+html body #roll .rbar i::after { content: ''; position: absolute; right: -2px; top: -6px; width: 3px; height: 3px; background: #ffd27a; animation: i-spark 1.1s steps(6) infinite; }
+html body #roll .rbtns { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 8px; padding: 2px; }
+html body #roll .rbtns button, html body.touch #roll .rbtns button { min-height: 48px; padding: 0 6px; border: 0; border-radius: 0;
+  font: 400 14px/1.1 var(--i-label); letter-spacing: 0.03em; text-transform: uppercase;
+  background: #3a3e46; color: var(--i-text); box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #6a6f7a, inset -2px -2px 0 #1b1d22; }
+html body #roll .rbtns button.need { background: linear-gradient(180deg, #ffe08a, #c8902e); color: #2e1a08; box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 var(--i-leaf-hi), inset -2px -2px 0 #7a4e14; }
+html body #roll .rbtns button.pass { background: #1b1d22; color: var(--i-cool); box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #33373e, inset -2px -2px 0 var(--i-outline); }
+html body #roll .rbtns button:active:not(:disabled) { transform: translateY(1px); }
+html body #roll .rbtns button:disabled { opacity: 1; background: #16171b; color: var(--i-quiet); box-shadow: 0 0 0 2px var(--i-outline), inset 2px 2px 0 #26282e, inset -2px -2px 0 var(--i-outline); }
+html body #roll .rbtns button small { font: 500 12px/1.2 var(--i-read); text-transform: none; color: inherit; opacity: 0.8; }
+html body #roll .rwait { padding: 2px 0 0; font: 400 11px/1.3 var(--i-label); letter-spacing: 0.03em; color: var(--i-cool); text-transform: uppercase; }
+html body #roll .rres { margin-top: 8px; font-size: 15px; }
+html body #roll .rres div { padding: 2px 0; }
+html body #roll .rres b { font: 400 13px/1.2 var(--i-label); }
+html body #roll .rres div.win { color: var(--i-leaf); }
+html body #roll .rres div.pass { color: var(--i-quiet); }
+:root[data-still] body #roll .rhead img, :root[data-still] body #roll .rhead b, :root[data-still] body #roll .rbar i::after { animation: none; }
+
+/* A unique's line (the roll card, the item card): a gift line in a sunk box. */
+html body .uline { margin: 8px 0 4px; padding: 8px 10px; font: 500 16px/1.35 var(--i-read); font-style: normal; color: var(--i-text); background: #1b1d22; box-shadow: inset 1px 1px 0 var(--i-outline); }
+
+/* ---- The Deep's checkpoint: each way on a sunk slot (as the job board's rows), its name in the small pixel
+   face, the good in green and the cost in red; LEAVE the same. The party's choices under a brass rule. ---- */
+#panel div.choices { gap: 10px; padding: 2px; margin: 12px 0 4px; }
+#panel div.choices button.choice { min-height: 56px; padding: 10px 12px 10px 14px; gap: 4px; text-transform: none; letter-spacing: 0;
+  background: #1b1d22; color: var(--i-text); box-shadow: 0 0 0 2px var(--i-outline), inset 4px 0 0 var(--i-brass), inset 6px 2px 0 #33373e, inset -2px -2px 0 var(--i-outline); }
+#panel div.choices button.choice:active:not(:disabled) { transform: translateY(1px); background: #202228;
+  box-shadow: 0 0 0 2px var(--i-outline), inset 4px 0 0 var(--i-brass), inset 6px 2px 0 var(--i-outline), inset -2px -2px 0 #33373e; }
+#panel div.choices button.choice:disabled { background: #16171b; color: var(--i-quiet); }
+#panel div.choices button.choice b { font: 400 14px/1.2 var(--i-label); letter-spacing: 0.03em; text-transform: uppercase; color: var(--i-text); }
+#panel div.choices button.choice span { font: 500 15px/1.3 var(--i-read); }
+#panel div.choices button.choice .good { color: var(--i-hungry); }
+#panel div.choices button.choice .bad { color: #ff8a7a; }
+#panel div.deep-votes h3 { opacity: 1; }
+#panel div.deep-votes div { font: 500 15px/1.35 var(--i-read); padding: 3px 0; }
+#panel div.deep-votes i { font: 400 11px/1.35 var(--i-label); font-style: normal; color: var(--i-cool); opacity: 1; }
+
+/* ---- Trading's window: the gold steps (-100, -10, +10, +100) as small iron keys, still 48 px. ---- */
+#panel div.trade p > button[data-gold] { min-width: 56px; margin: 6px 6px 0 0; padding: 0 8px; font-size: 12px; }
