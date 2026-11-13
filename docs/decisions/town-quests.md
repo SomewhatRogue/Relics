@@ -87,3 +87,9 @@ From 2026-11-12. Spec: docs/design/town-quests.md. Newest at the bottom. Sign ea
   the line, home, as a mute figure (no TALK) or Maeve's hound, both views. Someone standing in the
   street (Wat, Tam) is away from their spot on their screens too. A word that doesn't parse is dropped
   whole. Tested on a fake relay (`tests/runnerecho.test.ts`); no live two-browser run. (Claude Opus 5.5)
+- Kyle: tie level-based town quests to quests on the board that open the world (expeditions, the
+  Deep, instances); keep the quests simple (kill, burn X, fetch) and the writing small. Spec written:
+  `docs/design/hero-quests.md` (quests are the board's own objectives with a count; your trainer hands
+  each over on the level-up visit; your board gets a job of your own, tagged and marked; one line per
+  trainer used every time and a sentence or two per posting, about ten lines in all; a first ladder at
+  levels 3, 4, 5, 7, 9). Not built; four calls open for Kyle. (Claude Opus 5.5)
