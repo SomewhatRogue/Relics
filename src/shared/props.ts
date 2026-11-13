@@ -77,7 +77,10 @@ export const FALSE_CAGE = { chance: 1 / 20, lurch: 0.9, beat: 0.6, goblins: 2, s
  * were caged in, or (caged out in the open) within `homeReach` of where the party came into the room;
  * then they walk off toward it and are gone within `walkOff` seconds.
  */
-export const SURVIVOR = { hp: 24, radius: 0.26, speed: 2.3, gap: 1.3, notice: 9, standUp: 1.4, room: 0.15, knock: 3, bumpEvery: 0.35, homeReach: 2.5, walkOff: 8 };
+/** `run`: freed, they make for the way out on their own, a little slower than a goblin (Kyle, 2026-11-12);
+ *  `prey`: a goblin goes for one this much nearer than any hero (tiles); `cower`: a goblin this near and
+ *  they freeze where they stand, for it to pick them off unless a hero's there. */
+export const SURVIVOR = { run: 2.8, prey: 2, cower: 1.6, hp: 24, radius: 0.26, speed: 2.3, gap: 1.3, notice: 9, standUp: 1.4, room: 0.15, knock: 3, bumpEvery: 0.35, homeReach: 2.5, walkOff: 8 };
 
 /**
  * Stepping out of a house with someone you've freed: a third of the time a few goblins are waiting by

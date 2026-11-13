@@ -499,7 +499,8 @@ export class ArenaRoom {
     stepElements(w);
     stepVenom(this.enemies, this.time, this.events);
     // The freed: home out in the open at the way in; brought out of a house, maybe goblins waiting.
-    const door = stepSurvivors(w, TICK, this.indoors ? null : this.map.hero);
+    // Out in the open they run for where the party came in; in a house, to its door, to come out with the party.
+    const ex = this.map.exit, door = stepSurvivors(w, TICK, this.indoors ? null : this.map.hero, this.indoors && ex ? { x: ex.x + ex.w / 2, y: ex.y + ex.h / 2 } : null);
     if (door) ambush(this.enemies, this.heroes, this.doorRng, door.x, door.y, this.events);
     // A false prisoner tears open: its goblins come out (sim/falsecage.ts).
     stepFalse(this.survivors, this.time, this.events, (x, y) => this.spawn('scrapper', x, y));

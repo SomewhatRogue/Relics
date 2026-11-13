@@ -44,6 +44,8 @@ describe('the freed can be hurt by the party', () => {
 
   it('enough of them kills them, and it counts against the one who struck', () => {
     const { room, h, s } = solo();
+    // (Held where they stand, so every swing finds them: they'd otherwise run for the door.)
+    s.stay = true;
     const run = newRun(job());
     for (let n = 1; n <= 4 && !s.dead; n++) {
       Object.assign(h, { x: s.x - 1, y: s.y, fx: 1, fy: 0 });
@@ -138,19 +140,37 @@ describe('bringing them home', () => {
     expect(goal(run, room).done).toBe(true);
   });
 
-  it("they follow at a gap and keep out of the hero's way", () => {
+  it("out in the open they run for the way in on their own and count, and keep out of the hero's way", () => {
     const { room, h, s } = solo();
-    Object.assign(s, { x: 4, y: 8 });
-    for (let i = 0; i < ticks(4); i++) room.step();
-    const d = Math.hypot(s.x - h.x, s.y - h.y);
-    expect(d).toBeGreaterThan(SURVIVOR.gap - 0.2);
-    expect(d).toBeLessThan(SURVIVOR.gap + 0.3);
+    room.indoors = false;
+    const run = newRun(job()), w = room.map.hero;
+    Object.assign(s, { x: w.x + 6, y: w.y });
+    Object.assign(h, { x: w.x + 12, y: w.y });
+    for (let i = 0; i < ticks(5) && run.rescued === 0; i++) room.step(), tally(run, room, room.events, 'me');
+    expect(run.rescued).toBe(1);
+    // Indoors they run to the house's door and wait there to come out with the party.
+    const b = solo(), ex = b.room.map.exit!;
+    Object.assign(b.s, { x: 4, y: 4 });
+    for (let i = 0; i < ticks(8); i++) b.room.step();
+    expect(Math.hypot(b.s.x - (ex.x + ex.w / 2), b.s.y - (ex.y + ex.h / 2))).toBeLessThan(1.5);
+    expect(b.s.home).toBe(-1);
     // Walked into, they step aside; the hero isn't pushed.
-    Object.assign(s, { x: h.x + 0.1, y: h.y });
+    Object.assign(s, { x: h.x + 0.1, y: h.y, home: -1, gone: false, moving: false });
     const hx = h.x;
     room.step();
     expect(h.x).toBeCloseTo(hx, 5);
     expect(Math.hypot(s.x - h.x, s.y - h.y)).toBeGreaterThan(0.5);
+  });
+  it('goblins go for the freed nearer them than any hero, and their blows land', () => {
+    const { room, h, s } = solo();
+    room.indoors = false;
+    Object.assign(h, { x: 2, y: 2 });
+    // Far from the way in (9, 12), a goblin at their heels.
+    Object.assign(s, { x: 19, y: 3 });
+    const e = room.addFoe('scrapper', 20, 3);
+    e.alert = true;
+    for (let i = 0; i < ticks(6) && !s.dead; i++) room.step();
+    expect(s.hp).toBeLessThan(s.maxHp);
   });
 });
 

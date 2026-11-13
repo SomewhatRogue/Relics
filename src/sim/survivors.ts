@@ -1,13 +1,14 @@
 /**
- * The freed: whoever was in a cage is a body in the room once it breaks. They stand a moment, then
- * follow the nearest player at a slow walk, a little behind and out of everyone's way; with nobody
- * near they wait where they are. Bring them home and they're safe: out of the house they were caged in
- * (walkOut, as the party leaves by the door), or, caged out in the open, back to where the party came
- * into the room. Then they walk off toward the way in and are gone. Till then they're fragile, and the
- * party's blows, shots, blasts and fire hurt them like anything else (survivorhits.ts); a dead one
- * stays where they fell. Goblins leave them be for now.
+ * The freed: whoever was in a cage is a body in the room once it breaks. They stand a moment, then run
+ * for the way out on their own (Kyle, 2026-11-12: escorting them was tedious): where the party came into
+ * the room (there they're safe, walk off and are gone), or a house's door, to come out with the party. Till then they're fragile:
+ * the party's blows, shots, blasts and fire hurt them (survivorhits.ts), and goblins go for one that's
+ * nearer them than any hero, their blows landing on the freed as on anyone (enemies.ts); one right on
+ * them and they freeze, cowering. A dead one stays
+ * where they fell. Out of a house with the party (walkOut) they're home at its door.
  */
 import { collide, currentMap } from '../shared/arena';
+import { wayTo } from './pathing';
 import { burnFor } from '../shared/sky';
 import { BURN, FALSE_CAGE, HERO, SURVIVOR } from '../shared/tuning';
 import { slide } from './bodies';
@@ -15,7 +16,8 @@ import type { World } from './elements';
 import { players } from './party';
 import { survivorHazards } from './survivorhits';
 import { stepLed } from './scenes';
-import type { FightEvent, Hero, Survivor } from './types';
+import type { Enemy, FightEvent, Hero, Survivor } from './types';
+import { isDead } from './damage';
 
 /** Freed and still to be brought home (never a false prisoner: sim/falsecage.ts). What the goal counts. */
 export const waiting = (s: Survivor) => !s.dead && s.home < 0 && s.tearAt === undefined && !s.taken;
@@ -58,15 +60,16 @@ export function igniteSurvivor(s: Survivor, by: string, now: number, ev: FightEv
 }
 
 /**
- * Each tick: what hurts them, their burns, their walk, and coming home. `entrance`: where the party came
- * into this room (out in the open), or null indoors (only the door brings them home). Returns where
+ * Each tick: what hurts them, their burns, their run, and coming home. `entrance`: where the party came
+ * into this room out in the open (home there), or null indoors, where they run to `door` and wait to come
+ * out with the party (walkOut). Returns where
  * anyone just brought out of a house stands (for an ambush), or null.
  */
-export function stepSurvivors(w: World, dt: number, entrance: { x: number; y: number } | null): { x: number; y: number } | null {
+export function stepSurvivors(w: World, dt: number, entrance: { x: number; y: number } | null, door: { x: number; y: number } | null = null): { x: number; y: number } | null {
   const list = w.survivors ?? [];
   if (!list.length) return null;
   survivorHazards(w, dt);
-  let door: { x: number; y: number } | null = null;
+  let out: { x: number; y: number } | null = null;
   for (const s of list) {
     if (s.gone) continue;
     slide(s, SURVIVOR.radius, dt);
@@ -87,14 +90,14 @@ export function stepSurvivors(w: World, dt: number, entrance: { x: number; y: nu
     // The Staithe's: standing on the jetty for the punt, or netted on the bank till someone cuts them free (sim/staithe.ts).
     if (s.stay || s.netted) continue;
     if (s.out || (entrance && Math.hypot(s.x - entrance.x, s.y - entrance.y) <= SURVIVOR.homeReach)) {
-      if (s.out) door ??= { x: s.x, y: s.y };
+      if (s.out) out ??= { x: s.x, y: s.y };
       Object.assign(s, { home: w.now, out: false, burnUntil: 0 });
       w.ev.push({ k: 'survivorhome', x: s.x, y: s.y, id: s.id });
       continue;
     }
-    walk(s, w.heroes, list, w.now, dt);
+    run(s, entrance ?? door, w.heroes, list, w.now, dt, w.enemies);
   }
-  return door;
+  return out;
 }
 
 /** Home: off toward the way in, and gone when there (or after a while, wherever they've got to). */
@@ -106,17 +109,18 @@ function leaving(s: Survivor, to: { x: number; y: number } | null, now: number, 
   if (!s.moving || now - s.home > SURVIVOR.walkOff) (s.gone = true), (s.moving = false);
 }
 
-/** Toward the nearest player (to a gap), then off anyone they'd be standing in. */
-function walk(s: Survivor, heroes: Hero[], all: Survivor[], now: number, dt: number): void {
+/** For the way out, round what's in the way; then off anyone they'd be standing in. */
+function run(s: Survivor, out: { x: number; y: number } | null, heroes: Hero[], all: Survivor[], now: number, dt: number, foes: Enemy[] = []): void {
   s.moving = false;
-  const shaken = now - s.hitAt < 0.35 && s.burnUntil <= now;
-  if (now - s.at >= SURVIVOR.standUp && !shaken && Math.hypot(s.kvx, s.kvy) < 0.5) {
-    const lead = nearest(s, heroes);
-    const ld = lead ? Math.hypot(lead.x - s.x, lead.y - s.y) : 0;
-    if (lead && ld > SURVIVOR.gap) {
-      const k = Math.min(SURVIVOR.speed * dt, ld - SURVIVOR.gap), dx = (lead.x - s.x) / ld;
+  // A goblin right on them: they freeze, cowering (it picks them off unless someone's there).
+  const cowed = foes.some((e) => e.alert && !isDead(e) && e.kind !== 'dummy' && (e.z ?? 0) === (s.z ?? 0) && Math.hypot(e.x - s.x, e.y - s.y) < SURVIVOR.cower);
+  const shaken = cowed || (now - s.hitAt < 0.35 && s.burnUntil <= now);
+  if (out && now - s.at >= SURVIVOR.standUp && !shaken && Math.hypot(s.kvx, s.kvy) < 0.5) {
+    const to = wayTo({ x: s.x, y: s.y, radius: SURVIVOR.radius }, out.x, out.y), d = Math.hypot(to.x - s.x, to.y - s.y);
+    if (d > 0.05) {
+      const k = Math.min(SURVIVOR.run * dt, d), dx = (to.x - s.x) / d;
       s.x += dx * k;
-      s.y += ((lead.y - s.y) / ld) * k;
+      s.y += ((to.y - s.y) / d) * k;
       if (Math.abs(dx) > 0.2) s.fx = dx < 0 ? -1 : 1;
       s.moving = true;
     }

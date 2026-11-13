@@ -5,11 +5,12 @@ import { lure, seenFrom } from './lantern';
 import { visible } from './flasks';
 import { HUNGRY_FX, wears } from './hungry';
 import { collide, currentMap, inArea, wadeAt } from '../shared/arena';
-import { FRIENDLY, DECOY, ALERT, ARCHER, BUTCHER, BROOD, NEST, SPIDER, DRUMMER, HEXER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, BANNER, LOGS, NETTER, type EnemyAttackSpec, type EnemySpec, VARIANTS, STEALTH, CLASS_DODGES, WEAPONS, HORN, HOBBLE, STILL, MEAL, ICE, WOOD_EASE } from '../shared/tuning';
+import { FRIENDLY, DECOY, ALERT, ARCHER, BUTCHER, BROOD, NEST, SPIDER, DRUMMER, HEXER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, BANNER, LOGS, NETTER, type EnemyAttackSpec, type EnemySpec, VARIANTS, STEALTH, CLASS_DODGES, WEAPONS, HORN, HOBBLE, STILL, MEAL, ICE, WOOD_EASE, SURVIVOR } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { hexFriendly, isBackline, stepBackline } from './backline';
 import { shove, slide } from './bodies';
 import { attackCovers, hitHero } from './combat';
+import { hurtSurvivor, waiting } from './survivors';
 import { lateCount } from './latelist';
 import { sneakSight } from './knacks';
 import { damage, frozen, isDead, kill, snared } from './damage';
@@ -100,7 +101,19 @@ function nearest(e: Enemy, heroes: Hero[], now: number): Hero | null {
       if (dd < bd) (bd = dd), (best = { ...h, x: h.decoyX, y: h.decoyY });
     }
   }
+  // The freed making for the way out (sim/survivors.ts): a goblin goes for one nearer it than any hero.
+  for (const s of OWN_KIT.freed) {
+    if (!waiting(s) || s.led || s.stay || s.netted || !best && !heroes.length || (s.z ?? 0) !== (e.z ?? 0)) continue;
+    const d = Math.hypot(s.x - e.x, s.y - e.y) + SURVIVOR.prey;
+    if (d < bd) (bd = d), (best = { ...(best ?? heroes[0]), id: 's:' + s.id, x: s.x, y: s.y, z: s.z ?? 0, act: 'idle' } as Hero);
+  }
   return best;
+}
+
+/** A blow's live moment on the freed in it (sim/survivors.ts): they take it as a hero would, unguarded. */
+function onFreed(e: Enemy, a: EnemyAttack, now: number, ev: FightEvent[]): void {
+  if (e.kind === 'dummy' || e.kind === 'swingDummy') return;
+  for (const s of OWN_KIT.freed) if (waiting(s) && (s.z ?? 0) === (e.z ?? 0) && attackCovers(a, s as never)) hurtSurvivor(s, a.dmg, '', now, ev, s.x - e.x, s.y - e.y);
 }
 
 export function begin(e: Enemy, kind: EnemyAttack['kind'], s: EnemyAttackSpec, target: Hero, ev: FightEvent[]): void {
@@ -153,6 +166,7 @@ function runAttack(e: Enemy, heroes: Hero[], now: number, dt: number, ev: FightE
     const before = heroes.map((h) => h.hp), waiting = lateCount();
     // (A skimmer's pour lands on the water, on nobody: sim/drift.ts.)
     for (const h of heroes) if (a.kind !== 'pour' && (a.kind === 'shot' || (h.z ?? 0) === (e.z ?? 0))) hitHero(e, a, h, now, ev, heroes);
+    if (a.kind !== 'pour') onFreed(e, a, now, ev);
     if (e.attack === null) return true;
     // Their own get in the way: a missed arrow takes the first goblin in its line; a butcher's blow
     // lands on any small goblin under it. (An arrow waiting on a friend's word went to them: sim/latelist.ts.)
