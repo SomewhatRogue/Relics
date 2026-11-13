@@ -1,11 +1,11 @@
 /**
- * The plinth in Lantern Square as boxes (pieces.ts: the same list both views build), and where its plate and
+ * The plinth in Lantern Square as boxes (tall, 2026-11-13: it lifts a hero-sized figure over the square) (pieces.ts: the same list both views build), and where its plate and
  * its statue go, so the flat view and the 2.5D view put the name and the figure in the same place. Paint only.
  */
 import type { Bx } from './pieces';
 
 /** In tiles from the round's foot: a slab, the body with the plate on its front, the cap the statue stands on. */
-export const PLINTH_BOX = { slab: [2.2, 0.16, 1.0], body: [1.9, 0.86, 0.74], cap: [2.06, 0.12, 0.88] } as const;
+export const PLINTH_BOX = { slab: [2.2, 0.16, 1.0], body: [1.9, 1.5, 0.74], cap: [2.06, 0.12, 0.88] } as const;
 /** How high the cap's top stands (tiles): the statue's feet. */
 export const PLINTH_TOP = PLINTH_BOX.slab[1] + PLINTH_BOX.body[1] + PLINTH_BOX.cap[1];
 /** The body's front face: how far forward of the foot (tiles), and its foot and top above the floor (tiles). */

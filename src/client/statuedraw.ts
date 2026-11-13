@@ -17,8 +17,12 @@ import { STATUE_WORDS } from './statuewords';
 import { PX } from './world';
 
 const FW = 40, FH = 48, FOOT = 4;
-/** The statue stands this many times a hero's size (Kyle, 2026-11-06: "Should be much bigger"), each pixel doubled. */
-export const STATUE_SCALE = 2;
+/**
+ * The statue's figure at a hero's own size, on a tall plinth (Kyle, 2026-11-13: doubled, with the tall heroes it
+ * was too big, blocky, and split across two cards in the 2.5D view with a seam through the face). The plinth
+ * gives it the height. Kept as a number so the drawing code still reads it.
+ */
+export const STATUE_SCALE = 1;
 /** How tall the figure stands above its feet on screen, drawn at STATUE_SCALE. */
 export const STATUE_TALL = (FH - FOOT) * STATUE_SCALE;
 /** Stone, darkest to palest: the hero's own shading kept, in the plinth's colours. */
@@ -43,19 +47,27 @@ export function stoneFigure(s: StatueHero): HTMLCanvasElement {
   const lx = g.lit, d = lx.getImageData(0, 0, FW, FH), px = d.data;
   let lo = 255, hi = 0;
   const lum = (i: number) => px[i] * 0.3 + px[i + 1] * 0.59 + px[i + 2] * 0.11;
-  // (The outline alone takes the darkest stone: a dark brim or hood stretched onto it read as a hole through the
-  // head, Kyle 2026-11-12. Everything else spreads over the five paler bands.)
+  // (The outline alone takes the darkest stone: a dark brim, a hood or the eyes stretched onto it read as holes
+  // through the head, Kyle 2026-11-12 and 13. A dark pixel inside the figure takes the next band up; everything
+  // else spreads over the paler bands.)
   const LINE = 28;
+  const edge = (i: number) => {
+    const p = i / 4, x = p % FW, y = Math.floor(p / FW);
+    return [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => {
+      const nx = x + dx, ny = y + dy;
+      return nx < 0 || ny < 0 || nx >= FW || ny >= FH || px[((ny * FW + nx) << 2) + 3] <= 40;
+    });
+  };
   for (let i = 0; i < px.length; i += 4) if (px[i + 3] > 40 && lum(i) >= LINE) (lo = Math.min(lo, lum(i))), (hi = Math.max(hi, lum(i)));
+  const out = new Int8Array(FW * FH).fill(-1);
   for (let i = 0; i < px.length; i += 4) {
-    if (px[i + 3] <= 40) {
-      px[i + 3] = 0;
-      continue;
-    }
+    if (px[i + 3] <= 40) continue;
     // Stretched over the bands, so a dark hero and a pale one both read as carved stone.
-    const k = lum(i) < LINE ? 0 : 1 + Math.min(BANDS.length - 2, Math.floor(((lum(i) - lo) / Math.max(1, hi - lo)) * (BANDS.length - 1)));
-    [px[i], px[i + 1], px[i + 2], px[i + 3]] = [...BANDS[k], 255];
+    out[i >> 2] = lum(i) < LINE ? (edge(i) ? 0 : 1) : 1 + Math.min(BANDS.length - 2, Math.floor(((lum(i) - lo) / Math.max(1, hi - lo)) * (BANDS.length - 1)));
   }
+  // (Banded after every pixel is judged, so a pixel already turned to stone isn't taken for the edge.)
+  for (let i = 0; i < px.length; i += 4) if (out[i >> 2] >= 0) [px[i], px[i + 1], px[i + 2], px[i + 3]] = [...BANDS[out[i >> 2]], 255];
+  for (let i = 0; i < px.length; i += 4) if (out[i >> 2] < 0) px[i + 3] = 0;
   lx.putImageData(d, 0, 0);
   figures.set(key, lit);
   return (c = lit);

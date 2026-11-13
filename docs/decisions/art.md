@@ -297,3 +297,13 @@ The plan, one class at a time so Kyle can play each against the old ones:
   and a hind foot forward; lying down has the paws out past the nose. Wolfhound and lurcher a row longer in the leg.
 - Same box (HOUND_BOX), same poses and fight; the wolves share the wolfhound's body so they come out better too.
   scripts/hound-look.cjs's cells now the box's size (39 by 24) so heads aren't cut off the sheet. (Claude Opus 5.5)
+
+## 2026-11-13: the square's statue redone at a hero's size
+
+- Kyle: the statue "has a hole through its face", maybe too big, weird with several heroes; redo. Doubled, with the
+  tall heroes it was near three heroes high, blocky, and in the 2.5D view it stood on two cards (a card holds 64
+  pixels above its foot) with the seam right through the face.
+- Now the figure is the hero at their own size and fidelity (STATUE_SCALE 1), on a plinth half as tall again
+  (body 1.5 tiles), so it still stands well over the square. One card in 2.5D (the second only if a figure
+  were ever taller than a card). A dark pixel inside the figure (eyes, a brim, a hood) takes the second-darkest
+  stone; only the outline is the darkest, so nothing reads as a hole. (Claude Opus 5.5)
