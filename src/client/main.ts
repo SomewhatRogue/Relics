@@ -131,6 +131,7 @@ import { expedRows, roomsHtml, smallLine, titleCase, TRACKW } from './tracker';
 import { BannerFold, calm } from './bannerfold';
 import { ObjFlash } from './objflash';
 import { GoalPulse, goalHtml } from './goalpulse';
+import { errandLine } from './errandline';
 import { GearHint } from './gearhint';
 import './goal.css';
 import { UnlockFlash } from './unlockflash';
@@ -467,14 +468,16 @@ function hud(now: number): void {
     showPlate($('#boss'), null);
     goalPulse.clear($('#banner'));
     objFlash.watchWood(-1, now);
+    // A new hero's errands, and the trainer's word on a new skill, are the town's goal (errandline.ts).
+    const errands = game.mode === 'town' ? errandLine(pr) : null;
     const full = game.outside
-      ? `<b>${titleCase(room.map.name)}</b> Walk out at the bottom<span><i class="coin"></i>${pr.gold}</span>`
+      ? `<b>${titleCase(room.map.name)}</b> ${errands ? errands.rows : 'Walk out at the bottom'}<span><i class="coin"></i>${pr.gold}</span>`
       : game.mode === 'town'
-      ? `<b>Wickhold</b> DAY ${game.world.day}<span><i class="coin"></i>${pr.gold}${pr.picks ? '<em>(A KNACK TO PICK)</em>' : ''}<em>${game.world.rescued} HOME</em>${link.online ? '<em>WORLD ' + link.group.toUpperCase() + '</em>' : ''}</span>`
+      ? `<b>Wickhold</b> ${errands ? errands.rows : `DAY ${game.world.day}`}<span><i class="coin"></i>${pr.gold}${pr.picks ? '<em>(A KNACK TO PICK)</em>' : ''}<em>${game.world.rescued} HOME</em>${link.online ? '<em>WORLD ' + link.group.toUpperCase() + '</em>' : ''}</span>`
       : `<b>Training Yard</b> ${game.drill?.line ?? 'Walk out at the bottom for town'}`;
     // Folded: the place in one line (town: the day too).
-    const where = game.outside ? room.map.name.toUpperCase() : game.mode === 'town' ? TRACKW.town(game.world.day) : (game.drill?.line ?? 'TRAINING YARD');
-    fold.render(full, smallLine(where), game.mode + where, now);
+    const where = errands ? errands.small : game.outside ? room.map.name.toUpperCase() : game.mode === 'town' ? TRACKW.town(game.world.day) : (game.drill?.line ?? 'TRAINING YARD');
+    fold.render(full, smallLine(where), game.mode + where + (errands?.key ?? ''), now);
   }
   // (A drop of yours at your feet comes before petting the hound: LOOK.)
   const near = game.near(), spot = near?.pet && game.mode === 'run' && card.near >= 0 ? null : near, busy = panel.open || title.open;

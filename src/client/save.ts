@@ -18,6 +18,7 @@ import { fitRangeRecord } from '../shared/range';
 import { fitArmRecord } from '../shared/armwrestle';
 import { fitKnifeRecord } from '../shared/knives';
 import { fitShiftRecord } from '../shared/shiftpay';
+import { fitErrands } from '../shared/errands';
 
 const KEY = 'relic.save.v2', OLD = 'relic.save.v1';
 /** `savedAt`: when it was last kept here (it only goes forward), to tell which copy is newer (recovery.ts). */
@@ -72,6 +73,8 @@ const hero = (old: Partial<Profile>): Profile => {
   if (p.knives) out.knives = fitKnifeRecord(p.knives);
   if (p.shift) out.shift = fitShiftRecord(p.shift);
   if (p.strikes !== undefined) out.strikes = Math.max(0, Math.floor(Number(p.strikes) || 0));
+  // Town errands (shared/errands.ts): a hero from before them has done them all, and is never sent on the first two.
+  out.errands = fitErrands(p.errands, out.level);
   // Knacks onto the tree: one the class can't use comes back as a pick (shared/chains.ts).
   out.perks = [...(out.perks ?? [])];
   fitPerks(out);
