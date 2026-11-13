@@ -38,3 +38,28 @@ The economy chat's log (docs/design/economy.md). Newest at the foot.
   fees, "You have 40 gold."); to update when slice 3 sets the new prices.
 - Phone shots: Tobin's stall and the trainer with a purse of 3g 4s 20c (the trainer's old coin icon
   dropped, each part has its own mark).
+
+## 2026-11-13: slice 2, the income measure and the retune (Opus 5.5)
+
+- `scripts/incomebot.ts` plays a real board job through the client's Game, headless: the hero kept up and
+  its blows made lethal in that process only, walked onto every goblin, coin pile and chest, the job
+  finished through the game's own payout. `npx vite-node scripts/income.ts [days] [levels...]` prints
+  pay, coins, gear's sale value and total per job by level. Ordinary jobs only (no Deep, instance,
+  expedition or quest postings).
+- **Measured before:** a medium job brought in 2s 65c to 2s 77c at every level (pay about 1s 36c, coins
+  about 1s 55c: more from kills than from the job). Income doesn't rise with level; harder places pay more
+  through payFor's ruin term, and that's kept as the only climb. Prices will climb by level instead.
+- **Retuned:** `PAY_SCALE` 0.8 in `payFor`. Goblins: 30% for 1 to 3c (archers 35%, 2 to 4c), a butcher a
+  silver half the time, a named butcher a sure silver; a big one's handful 5 to 10c (threat.ts BIG); a plain
+  chest 4 to 12c half the time (`CHEST_COPPER`, sim/chests.ts). Boss chests left at 80 to 120: bosses pay
+  more. **After:** a medium job about 1s 54c, the pay 62% of everything a job brings in (gear's sale value
+  not counted in that share).
+- `JOB_COPPER = 150` (shared/coins.ts) is the unit prices are set against; `tests/income.test.ts` plays 12
+  jobs and holds a medium job at 1s 20c to 1s 87c and the pay over 58%.
+- Kept two old rules true: an expedition's goblins drop about half a job's copper in under a third of the
+  piles (EXPED_COINS retuned); Halvard's forge shift pays clearly less a minute than a job (cap 25 to 20).
+- **For the Deep, Instances and quest chats:** `payFor` is the economy's, and its 0.8 reaches your
+  postings' base pay (your added constants, +40, +80, are untouched). Kill coins are the shared COINS table,
+  so the Deep's floors drop copper now too. Nothing of yours was edited; say if a number needs to move back.
+- Until slice 3, old prices stand against the new, lower income: everything costs about twice the jobs it
+  did. Slice 3 sets prices by time, with the purse conversion in the same push.

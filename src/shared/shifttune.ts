@@ -46,13 +46,12 @@ export const SHIFT = {
 } as const;
 
 /**
- * Pay for a shift: a gold for every `per` points, at most `cap`, and only one paid shift every
+ * Pay for a shift: a copper for every `per` points, at most `cap`, and only one paid shift every
  * `rest` seconds after the last paid one ends (you can still work one in the rest, for the board).
- * At the most, 25 gold every 75 + 240 s is under 5 gold a minute; a short job at the gentlest place
- * pays 36 for about five minutes before its kill gold (jobs.ts payFor), and 100 or more with it, so the
- * forge stays a side earner, not a farm.
+ * At the most, 20c every 75 + 240 s is under 4c a minute; a short job at the gentlest place pays 29c for
+ * about five minutes before its kill copper (jobs.ts payFor), so the forge stays a side earner, not a farm.
  */
-export const SHIFT_PAY = { per: 50, cap: 25, rest: 240 } as const;
+export const SHIFT_PAY = { per: 50, cap: 20, rest: 240 } as const;
 
 /** The forge's board: the top ten, each hero once. */
 export const SHIFT_BOARD = 10;

@@ -473,13 +473,14 @@ export const EXPED_PACKS = {
  * one time in five, but a bigger one: measured again, 183 kills left 30 piles and 308 coins (1.7 a kill,
  * 10.7 a pile). About half the coins in under a third of the piles, so a pile reads as a find. A butcher's pile
  * is as big, half as often; a named one's as on a job; wolves leave none. Potions drop as ever; the jobs'
- * pay is unchanged.
+ * pay is unchanged. (Economy, 2026-11-13: kept at about half a job's goblin copper in under a third of the
+ * piles after goblins went to copper, shared/potions.ts COINS; a butcher's half a job's, a named one half.)
  */
 export const EXPED_COINS = {
-  scrapper: { chance: 0.2, min: 6, max: 11 },
-  archer: { chance: 0.25, min: 6, max: 12 },
-  butcher: { chance: 0.5, min: 15, max: 30 },
-  named: { chance: 1, min: 60, max: 100 },
+  scrapper: { chance: 0.06, min: 4, max: 6 },
+  archer: { chance: 0.07, min: 4, max: 7 },
+  butcher: { chance: 0.25, min: 100, max: 100 },
+  named: { chance: 1, min: 50, max: 50 },
   wolf: { chance: 0, min: 0, max: 0 },
   life: 30,
   reach: 0.9,

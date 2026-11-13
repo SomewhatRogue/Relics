@@ -94,7 +94,7 @@ export const partyLevel = (levels: number[]) => (levels.length ? Math.round((lev
  * It drops a sure handful of gold (`gold`) and a sure piece (rolled as a butcher's).
  */
 export const BIG = {
-  hp: 2.5, size: 1.3, weight: 1.8, harm: 1.2, gold: [15, 25] as [number, number], stompFrom: 2.2, every: 7,
+  hp: 2.5, size: 1.3, weight: 1.8, harm: 1.2, gold: [5, 10] as [number, number], stompFrom: 2.2, every: 7,
   stomp: { windup: 1.25, active: 0.12, recover: 1.2, dmg: 18, knock: 10, radius: 1.8, ahead: 0, unblockable: true } as EnemyAttackSpec,
 };
 

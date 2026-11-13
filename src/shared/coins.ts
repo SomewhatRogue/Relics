@@ -28,3 +28,7 @@ export const coinsHtml = (copper: number): string =>
 
 /** The colour of the biggest coin in an amount, for a floating number. */
 export const coinCol = (copper: number): string => COIN_COL[coinParts(copper)[0][1]];
+
+/** What a medium job (about 10 minutes) brings in, in copper, as scripts/income.ts measures it: the unit
+ *  every price is set against (economy.md section 3; tests/income.test.ts holds it). */
+export const JOB_COPPER = 150;

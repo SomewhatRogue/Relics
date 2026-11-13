@@ -36,8 +36,10 @@ export const SIZES: Record<Size, { rooms: number; label: string; minutes: string
   medium: { rooms: 3, label: 'MEDIUM', minutes: 'about 10 minutes', pay: 1.15 },
   long: { rooms: 5, label: 'LONG', minutes: 'about 15 minutes', pay: 1.35 },
 };
-/** Gold a job pays: by room, by how bad the place is, more at night, more for a longer one. */
-export const payFor = (rooms: number, ruin: number, night: boolean, size: Size) => Math.round((18 + ruin * 9 + (night ? 6 : 0)) * rooms * SIZES[size].pay);
+/** The pay's scale (docs/design/economy.md slice 2): the job's pay is most of what a job brings in (scripts/income.ts). */
+export const PAY_SCALE = 0.8;
+/** Copper a job pays: by room, by how bad the place is, more at night, more for a longer one. */
+export const payFor = (rooms: number, ruin: number, night: boolean, size: Size) => Math.round((18 + ruin * 9 + (night ? 6 : 0)) * rooms * SIZES[size].pay * PAY_SCALE);
 export type Twist = 'none' | 'night';
 /** A story mission is for a party: at least this many heroes when the world is shared online. */
 export const STORY_PARTY = 3;

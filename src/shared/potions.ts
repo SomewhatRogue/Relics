@@ -34,14 +34,15 @@ export const POTIONS: Record<PotionId, { name: string; short: string; text: stri
 export const LASTS: Partial<Record<PotionId, number>> = { bitter: POTION.healTime, brandy: POTION.brandyTime, smoke: POTION.smokeTime };
 
 /**
- * What goblins leave (sim/pickups.ts): gold `chance` and range by kind (archers a little more; named
- * butchers always, a lot), potions by chance. Gold is split across the party when anyone picks it up.
+ * What goblins leave (sim/pickups.ts), in copper: a goblin now and then a few copper (archers a little
+ * more), a butcher a silver half the time, a named butcher a sure silver (economy.md
+ * slice 2: the job's pay is most of a job's take, scripts/income.ts). Potions by chance. One pot for the party.
  */
 export const COINS = {
-  scrapper: { chance: 0.85, min: 2, max: 6 },
-  archer: { chance: 0.85, min: 3, max: 8 },
-  butcher: { chance: 1, min: 15, max: 30 },
-  named: { chance: 1, min: 60, max: 100 },
+  scrapper: { chance: 0.3, min: 1, max: 3 },
+  archer: { chance: 0.35, min: 2, max: 4 },
+  butcher: { chance: 0.5, min: 100, max: 100 },
+  named: { chance: 1, min: 100, max: 100 },
   life: 30,
   reach: 0.9,
 };

@@ -13,6 +13,8 @@ import type { Pickup } from './pickups';
 /** `boss`: a boss's sure chest, its seed (sim/bosschest.ts), and the relics in it, by hero. */
 export interface Chest { id: number; x: number; y: number; state: 'shut' | 'opening' | 'open'; t: number; by: string; tier: Tier; chained: boolean; rolls: Record<string, Item[]>; boss?: number; relics?: Record<string, import('../shared/relicitems').RelicItem>; sure?: 'hempen' }
 export const CHEST = { open: 1.2, reach: 1.3, leave: 1.8, alert: 6 };
+/** A plain chest's copper, half the time (economy.md slice 2: copper, the job's pay is the most of it). */
+export const CHEST_COPPER = [4, 12] as const;
 import { lift } from './loot';
 import { openBossChest, rollBossChest } from './bosschest';
 let nextId = 1, dropId = 50000;
@@ -59,7 +61,7 @@ export function stepChests(chests: Chest[], heroes: Hero[], drops: Drop[], picku
       openBossChest(c, heroes, pickups, () => dropId++, ev);
       continue;
     }
-    if (rng.next() < 0.5) pickups.push({ id: dropId++, x: c.x + 0.9, y: c.y + 0.4, life: COINS.life, gold: 10 + Math.floor(rng.next() * 21) });
+    if (rng.next() < 0.5) pickups.push({ id: dropId++, x: c.x + 0.9, y: c.y + 0.4, life: COINS.life, gold: CHEST_COPPER[0] + Math.floor(rng.next() * (CHEST_COPPER[1] - CHEST_COPPER[0] + 1)) });
     if (rng.next() < 0.3) pickups.push({ id: dropId++, x: c.x - 0.9, y: c.y + 0.4, life: COINS.life, potion: rng.pick(POTION_ORDER) });
   }
 }
