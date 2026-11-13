@@ -184,7 +184,8 @@ describe('floors by band (step 3)', () => {
     // (A boss floor, every fifth, is its own: docs/design/deep-bosses.md.)
     const named = (n: number) => f(n).objective === 'hunt' && !f(n).arena;
     for (let n = 2; n < 30; n++) expect(named(n) && named(n - 1)).toBe(false);
-    const b = [1, 6, 11, 16, 20, 30].map((n) => roomBudget(f(n), roomAt(f(n), 0)));
+    // (Each floor's own size moves its budget too, shared/deepshapes.ts: the bands compared at a hall's size.)
+    const b = [1, 6, 11, 16, 20, 30].map((n) => roomBudget({ ...f(n), hall: undefined }, roomAt(f(n), 0)));
     for (let i = 1; i < b.length; i++) expect(b[i]).toBeGreaterThanOrEqual(b[i - 1]);
     expect(b[5]).toBeGreaterThan(b[3]);
     // An ordinary job's first room has no elites; every Deep floor can.

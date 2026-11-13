@@ -49,6 +49,13 @@ line editor before they go on screen.
 
 Each floor is short (2 to 4 minutes) so a run's length is the player's choice.
 
+**Each floor its own size and layout** (Kyle, 2026-11-13: "not different enough screen to screen; can be much
+bigger or different sizes"). A floor that isn't a boss's picks a shape from the run's seed (shared/deepshapes.ts):
+tight 22 by 18, hall 28 by 24, long 22 by 40, wide 42 by 22, great 40 by 36; never the same shape two floors
+running, the long, wide and great ones likelier deeper. Its layout has its own seed too (Place `vary`), so two
+floors of one layer don't repeat. A bigger room holds more goblins (its budget and count scale with its area,
+0.75 to 1.8 times a hall's), and a great hall or near it one fight more.
+
 ## The board
 
 - Beside the way down and on BEST IN WICKHOLD: deepest floor reached, then gold banked as tiebreak.

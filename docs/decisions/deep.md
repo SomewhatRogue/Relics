@@ -151,3 +151,14 @@ Kyle: "can we draw the 3d" (2.5D is players' default view). The tracks are paint
 when it's for the 3D ground (client/world.ts, sumpdraw.ts paintTracks); the tunnel mouths are timber-framed dark
 openings at each track's ends (three/tracks3d.ts, added in three/ground.ts). The warning lane already drew in 3D.
 Not done in 3D: each running cart's own light and spark trail (flat view only).
+
+## 2026-11-13: each Deep floor its own size and layout (Opus 5.5)
+Kyle: "in between screens in a biome are on theme but not different enough screen to screen; can be much bigger or
+different sizes." Every non-boss floor was a 28 by 24 heart room laid out from the place's seed, which a layer shares.
+Now shared/deepshapes.ts picks a shape per floor (tight, hall, long, wide, great; never twice running, big ones likelier
+deeper) as Job `hall`, which routeports.ts heartAfter builds to; Place `vary` (the floor) goes into sites.ts placeSeed so
+each floor is laid out afresh. Goblins scale with area: roombudget.ts, terrain.ts's count, and one fight more in a great
+hall (encounter.ts). Small edits in jobs.ts, sites.ts, routeports.ts, terrain.ts, encounter.ts. tests/deepshapes.test.ts;
+scripts/deepshape-look.cjs (flat or 3d). Open: a great hall on a fen floor can be sparse in cover.
+Also, for the art chat's note: the five Node test files that failed since d1697a6 pass again. paintTracks and mouthsOf
+moved to client/trackbed.ts (no sprites), so world.ts no longer loads sumpdraw's sprites.

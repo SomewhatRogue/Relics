@@ -9,6 +9,7 @@ import { BOSSES, type Job, type Objective, type Place } from './jobs.js';
 import { DOOR_NAMES, HAUL_NAME, LEECH_NAME, LISTEN_NAME } from './bosswords.js';
 import { bandOf } from './deepbands.js';
 import { layerOf } from './deeplayers.js';
+import { shapeOf } from './deepshapes.js';
 import { Rng } from './rng.js';
 import { rollTime } from './timeofday.js';
 
@@ -28,7 +29,8 @@ const ASKS: Objective[] = ['larder', 'burn', 'rescue'];
 export function deepFloor(n: number, seed: number, title: string): Job {
   const s = (seed * 7919 + n * 104729) >>> 0, b = bandOf(n), l = layerOf(n);
   // Where in the pit this floor is (shared/deeplayers.ts): its own country's look, a fresh one every five floors.
-  const place: Place = { ...DEEP_PLACE, kind: l.kind, region: l.region, ruin: b.ruin };
+  // (Its own layout seed and its own size, so no two floors running look alike: shared/deepshapes.ts.)
+  const place: Place = { ...DEEP_PLACE, kind: l.kind, region: l.region, ruin: b.ruin, vary: n }, sh = shapeOf(seed, n);
   // Every fifth floor, a boss in its own arena (docs/design/deep-bosses.md), turn about on the run's seed.
   if (n % DEEP_BOSS.every === 0) {
     // (On a layer of old caves the boss is THE LISTENER, whatever the turn: docs/design/deep-layer-bosses.md.)
@@ -45,7 +47,7 @@ export function deepFloor(n: number, seed: number, title: string): Job {
   const objective: Objective = hunt ? 'hunt' : ASKS[(seed + n) % ASKS.length], boss = hunt ? new Rng(s).pick(BOSSES) : undefined;
   return {
     id: `deep-${seed}-${n}`, place, objective, twist: 'none', time: rollTime(s, false), rooms: 1, size: 'short', layout: 4,
-    reward: 0, seed: s, title, text: '', floor: n, ...(b.deep ? { deep: true } : {}), ...(boss ? { boss } : {}),
+    reward: 0, seed: s, title, text: '', floor: n, hall: { w: sh.w, h: sh.h }, ...(b.deep ? { deep: true } : {}), ...(boss ? { boss } : {}),
   };
 }
 

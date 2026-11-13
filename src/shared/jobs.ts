@@ -6,7 +6,8 @@ import { Rng } from './rng.js';
 import { rollTime, type Time } from './timeofday.js';
 
 export type PlaceKind = 'village' | 'farm' | 'field' | 'forest' | 'mine' | 'river' | 'marsh' | 'ruins';
-export interface Place { name: string; kind: PlaceKind; region: string; ruin: number }
+/** `vary`: a Deep floor's own layout seed (shared/sites.ts placeSeed), so floors of one layer differ. */
+export interface Place { name: string; kind: PlaceKind; region: string; ruin: number; vary?: number }
 
 export const PLACES: Place[] = [
   { name: 'Barrowby', kind: 'village', region: 'Barrowfields', ruin: 1 },
@@ -81,6 +82,8 @@ export interface Job {
   arena?: 'doorkeepers' | 'haulier' | 'listener' | 'leechman';
   /** A floor of the Deep (shared/deep.ts), from 1: its end is a checkpoint, not home. */
   floor?: number;
+  /** A Deep floor's room size in tiles (shared/deepshapes.ts); else the usual. */
+  hall?: { w: number; h: number };
   /** An instance (shared/instances.ts): its rooms are its areas, taken in turn, each gate a checkpoint. */
   instance?: import('./instances.js').InstanceId;
 }

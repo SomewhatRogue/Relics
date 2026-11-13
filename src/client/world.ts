@@ -3,7 +3,7 @@
  * pixel (OX + 16x, OY + 16y). Buildings, trees and rocks are drawn with the actors (so you can walk
  * behind them); see blocks.ts.
  */
-import { paintTracks } from './sumpdraw';
+import { paintTracks } from './trackbed';
 import type { GameMap, Ledge } from '../shared/arena';
 import { Rng } from '../shared/rng';
 import { paintBreach } from './breach';

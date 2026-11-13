@@ -5,7 +5,7 @@
  */
 import * as THREE from 'three';
 import type { GameMap } from '../../shared/arena';
-import { mouthsOf } from '../sumpdraw';
+import { mouthsOf } from '../trackbed';
 
 const WOOD = new THREE.MeshLambertMaterial({ color: 0x6a4a2a }), DARK = new THREE.MeshBasicMaterial({ color: 0x050407 });
 

@@ -146,11 +146,13 @@ function build(job: Job, V: Vocab, rng: Rng, plain = false): { high: RoomSpec[];
 
 /** The heart, come into from the last room's way on: by the bottom, or low down a side. */
 function heartAfter(job: Job, last: RoomSpec | undefined, variant: number, piece: Piece, palette: Palette): RoomSpec {
+  // (A Deep floor's own size: shared/deepshapes.ts.)
+  const S = job.hall ?? TALL, M = S.w / 2;
   const o = last?.outs?.[0], side: Side = o ? OPP[o.side] : 'S';
-  const at = !o ? TALL.w / 2 : side === 'S' ? Math.max(4, Math.min(TALL.w - 4, o.at * (TALL.w / (last!.w ?? TALL.w)))) : TALL.h - 3;
+  const at = !o ? M : side === 'S' ? Math.max(4, Math.min(S.w - 4, o.at * (S.w / (last!.w ?? TALL.w)))) : S.h - 3;
   return {
-    index: job.rooms - 1, heart: true, node: siteOf(job.place), layout: `heart-${variant}`, skin: null, inX: side === 'S' ? at : 14, outX: 14, landmark: null, piece, palette,
-    w: TALL.w, h: TALL.h, in: { side, at: Math.round(at * 10) / 10 }, outs: [{ side: 'N', at: 14 }],
+    index: job.rooms - 1, heart: true, node: siteOf(job.place), layout: `heart-${variant}`, skin: null, inX: side === 'S' ? at : M, outX: M, landmark: null, piece, palette,
+    w: S.w, h: S.h, in: { side, at: Math.round(at * 10) / 10 }, outs: [{ side: 'N', at: M }],
   };
 }
 

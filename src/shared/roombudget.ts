@@ -10,6 +10,7 @@ import type { Foe } from './terrain.js';
 import { BUDGET, SCREEN, THREAT_TIER, threatOf } from './threat.js';
 import { eliteThreat, type Affix } from './elites.js';
 import { bandOf, deepGrow } from './deepbands.js';
+import { areaShare } from './deepshapes.js';
 
 export const difficultyOf = (job: Job): keyof typeof BUDGET.difficulty =>
   job.deep ? 'deep' : job.place.ruin >= 3 ? 'hard' : job.place.ruin >= 2 ? 'normal' : 'easy';
@@ -18,7 +19,7 @@ const party = (n: number) => Math.max(1, Math.min(4, Math.round(n))) - 1;
 /** What room `index` of `job` may spend, for a party of `n`. */
 // (A Deep floor comes laid out as its band's room, `index` already (shared/terrain.ts), and more again past fifteen.)
 export const roomBudget = (job: Job, index: number, n = 1) =>
-  BUDGET.room[Math.min(index, BUDGET.room.length - 1)] * BUDGET.difficulty[difficultyOf(job)] * BUDGET.party[party(n)] * (job.floor ? deepGrow(job.floor).budget : 1);
+  BUDGET.room[Math.min(index, BUDGET.room.length - 1)] * BUDGET.difficulty[difficultyOf(job)] * BUDGET.party[party(n)] * (job.floor ? deepGrow(job.floor).budget : 1) * (job.hall ? areaShare(job.hall.w, job.hall.h) : 1);
 
 /** On screen at once, for a party of `n` in room `index`: threat, meaty ones (heavies too), heavies. */
 export const capsFor = (n: number, index = 0) => ({

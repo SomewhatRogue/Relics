@@ -56,7 +56,7 @@ const APPROACH: Record<ApproachNode, (rng: Rng, g: Ground) => Site> = { track, c
 export function placeSeed(p: Place, index: number): number {
   let h = 7;
   for (const ch of p.name) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-  return (h % 100000) * 13 + index * 977 + 5;
+  return (h % 100000) * 13 + index * 977 + 5 + (p.vary ?? 0) * 7919;
 }
 
 /** How a routed room is laid: its spec, spine and river, and the room's own seed (approach rooms). */

@@ -7,6 +7,7 @@
  * each spends its share of the budget, its small ones filling what its specials leave. One or two rooms a
  * job keep a BIG ONE for their closer. On its own seeded stream, after everything else in the room is placed.
  */
+import { areaShare, SHAPE_AREA } from './deepshapes.js';
 import type { Block } from './arena.js';
 import { ENCOUNTER, TEMPLATES, BACK_ROLES, type Beat, type Role, type Template } from './encounters.js';
 import { BIG, BUDGET, SCREEN, THREAT } from './threat.js';
@@ -191,7 +192,9 @@ export function composeRoom(c: Compose): Template[] {
   // The budget: less the ledge's archers and anyone the room already has at something (a scene's, a debut's).
   const busy = c.foes.filter((f) => (f.kind === 'scrapper' || f.kind === 'butcher') && !f.name && !plain(f));
   const budget = roomBudget(job, c.index) - threatIn(busy);
-  const bandsOf = bands(c.foes.filter(plain), c.spawn, ENCOUNTER.fights[at]);
+  // (A big Deep room, a great hall or near it, holds one fight more: shared/deepshapes.ts.)
+  const more = job.hall && areaShare(job.hall.w, job.hall.h) >= SHAPE_AREA.oneMore ? 1 : 0;
+  const bandsOf = bands(c.foes.filter(plain), c.spawn, ENCOUNTER.fights[at] + more);
   // The beats from the way in (on a stream of their own: shared/roombudget.ts).
   // A room keeping a BIG ONE sets its price aside first (and keeps none if it can't afford one).
   const reserve = THREAT.meaty * THREAT.big + THREAT.chaff, big = bigRooms(job).includes(c.index) && budget >= reserve + THREAT.chaff * (bandsOf.length - 1);

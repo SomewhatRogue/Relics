@@ -13,6 +13,7 @@ import type { PropKind } from './props.js';
 import { frameFor } from './roomframe.js';
 import { oldBands } from './roomfoes.js';
 import { heartMarks, layOut } from './sites.js';
+import { areaShare } from './deepshapes.js';
 import { siteClear, type Site, type Spot } from './sitekit.js';
 import { approachTo, offAll } from './spine.js';
 import { rollBackline } from './roster.js';
@@ -174,7 +175,9 @@ export function planRoom(job: Job, index: number, road?: RoadId, taken?: Record<
   // Goblins: a routed room's set piece, or an old room's fires and its heap of the dead. The first room
   // is all small ones; butchers come deeper in.
   const ruin = job.place.ruin, dead: Npc[] = [], braziers: GameMap['braziers'] = [], grim: Grim[] = [], sleepers: { x: number; y: number }[] = [], marks: GameMap['marks'] = [];
-  const n = Math.max(v4 ? 1 : 2, Math.min(v4 ? 13 : 10, 4 + ruin + index + (fight === 'low' ? 2 : fight === 'high' ? -2 : 0) + wayMore(spec)));
+  // (A Deep floor's room, bigger or smaller than a hall, has goblins to match: shared/deepshapes.ts.)
+  const big = job.hall ? areaShare(job.hall.w, job.hall.h) : 1;
+  const n = Math.max(v4 ? 1 : 2, Math.min(Math.round((v4 ? 13 : 10) * Math.max(1, big)), Math.round((4 + ruin + index + (fight === 'low' ? 2 : fight === 'high' ? -2 : 0) + wayMore(spec)) * big)));
   const lay: Lay = { rng, W, H, kind, n, spot, free, claim: (x, y, r) => void spots.push({ x, y, r }), foes, dead, braziers, props, blocks, rounds, marks, grim, sleepers, spine: fr.spine, river: fr.river };
   if (v4 && spec) Object.assign(lay, { out: spec.heart ? undefined : edgePt(spec.outs![0], W, H), chests: [], flocks: [], oil: [], plot: fr.spine && plotter({ rng, W, H, spine: fr.spine, keepOff: [SPAWN, ...ways], blocks, rounds: [rounds, site.rounds], water: fr.water, spots }), clear: (a: { x: number; y: number; w: number; h: number }) => clearGrowth([rounds, site!.rounds], a) });
   if (v4 && spec && !spec.heart) ensure4(spec, blocks, lay.plot);
