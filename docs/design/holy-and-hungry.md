@@ -56,6 +56,8 @@ Penance thresholds pay in the church's best holy pieces (relics now come only fr
 
 ## 4. Relics: one from each great boss (Kyle, 2026-11-11)
 
+**Superseded by docs/design/relics.md (2026-11-15):** relics from church quests and great bosses' first kills, carry one, existing heroes re-earn all but the javelin. Built ahead of the rest of this spec.
+
 Every hero starts with **the Relic Javelin**. Every other relic comes from **one place only: the end boss of
 a big quest** (an instance's final boss, a zone's climax). Beat that boss and, if you don't have its relic
 yet, it's yours, every time, no roll. It's **the only way to get relics**: no caches, no chests, no named
