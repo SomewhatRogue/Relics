@@ -7,8 +7,8 @@
  * Cosmetic only.
  */
 
-/** Which rules apply: the ground (stone only), a wall or furniture, a roof (slate), an enemy (foeHex). */
-export type Grade = 'floor' | 'wall' | 'roof' | 'foe';
+/** Which rules apply: the ground (stone only), a wall or furniture, a roof (slate), an enemy (foeHex), a townsman (folkHex). */
+export type Grade = 'floor' | 'wall' | 'roof' | 'foe' | 'folk';
 
 /** Moss in the joints and on the roofs, darkest first. */
 export const MOSS = ['#2c3820', '#34421f', '#3e4c26', '#4a5a2c'];
@@ -36,6 +36,7 @@ const greyish = (h: number, s: number, l: number) => l > 0.04 && l < 0.82 && (s 
 export function gradeHex(c: number, mode: Grade): number {
   const [h, s, l] = hsl((c >> 16) & 255, (c >> 8) & 255, c & 255);
   if (mode === 'foe') return foeHex(c, h, s, l);
+  if (mode === 'folk') return folkHex(c, h, s, l);
   if (greyish(h, s, l)) {
     // Roofs of grey stone or lead read as slate; everything else as the dungeon's green-grey.
     if (mode === 'roof') return rgb(208, Math.min(0.16, 0.07 + s * 0.5), l * 0.9);
@@ -69,7 +70,20 @@ function foeHex(c: number, h: number, s: number, l: number): number {
   return rgb(h, s * 0.5, l * 0.7);
 }
 
-const memo: Record<Grade, Map<number, number>> = { floor: new Map(), wall: new Map(), roof: new Map(), foe: new Map() };
+/**
+ * The townsfolk (slice 4): the heroes' palette with no gold, so a hero still stands out in a crowd. Skin kept;
+ * gold and brass dulled; blood kept; cloth, hair and leather darker and duller; whites to bone.
+ */
+function folkHex(c: number, h: number, s: number, l: number): number {
+  if (h >= 15 && h <= 35 && s >= 0.2 && s <= 0.5 && l >= 0.33 && l <= 0.7) return c;
+  if (h >= 36 && h <= 60 && s > 0.4 && l > 0.3) return rgb(34, s * 0.4, l * 0.62);
+  if ((h < 14 || h > 335) && s > 0.62) return c;
+  if (l > 0.8) return rgb(h, Math.min(s, 0.25) * 0.7, l * 0.86);
+  if ((h < 14 || h > 335) && s > 0.2) return rgb(12, s * 0.65, l * 0.78);
+  return rgb(h, s * 0.62, l * (l < 0.2 ? 0.9 : 0.78));
+}
+
+const memo: Record<Grade, Map<number, number>> = { floor: new Map(), wall: new Map(), roof: new Map(), foe: new Map(), folk: new Map() };
 /** gradeHex, remembered (for painters that call it every frame). */
 export const graded = (c: number, mode: Grade) => {
   const m = memo[mode];

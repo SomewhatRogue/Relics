@@ -2,6 +2,7 @@
  * The people of Wickhold (and those you bring home): placeholder sprites in the same style as the
  * heroes, each trade with its own colours and hat, and their name over them when you're close.
  */
+import { darkFolk } from './darkfoe';
 import type { Npc } from '../shared/arena';
 import { blit, shadow, type Ctx } from './draw';
 import { drawText, textWidth } from './pixfont';
@@ -139,6 +140,8 @@ function drawArrowIn(c: Ctx, x: number, y: number): void {
 }
 
 export function drawNpc(c: Ctx, n: Npc, x: number, y: number, near: boolean, fx = 0, walking = false, tx = n.x): void {
+  // Dark and gold, slice 4 (darkfoe.ts): the heroes' palette without the gold. Names and marks are on the glow layer.
+  c = darkFolk(c);
   walking ||= !!n.walking;
   // The gravedigger stops walking while he digs.
   if ((n.work === 'bury' || n.work === 'dig') && tx < 5) walking = false;

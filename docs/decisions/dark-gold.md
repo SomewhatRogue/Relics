@@ -43,3 +43,33 @@ The Dark and gold chat's log (docs/design/dark-gold.md, Kyle's pictures in docs/
 - Looked at in `?lineup=goblins` (every foe, every move) and in the Open Cut in 2.5D.
 - One line in Art's strawman.ts (the wrap), noted here.
   (Claude Opus 5.5)
+
+## 2026-11-15: slice 3, heroes
+
+- Kyle: "Go", taken as the yes for slices 3 and 4 (the side-view chat had finished its slices and is waiting on play).
+- Colour by the looks' palettes in Art's herolooks.ts and herolooks2.ts, so the front, the back and the side-view
+  chat's profiles (which read the same palettes) all change together without a line of herosides*.ts touched.
+  Warriors: plate dark steel; the knight's and Blackiron's pauldron rims (`p`) gold, the gold edging; capes the colour
+  of old blood; the sellsword dull, a brass buckle. Rangers: deep teal, dark umber, slate; leathers dark; the hilt and
+  buckle gold, the strap old brass. Rogues: the face lost in the hood (skin and wrap to the hood's dark, hands gloved),
+  two pale glints for eyes (the eye pixels themselves stay `#16121a`: the eye dial draws there, tests/herolooks.test.ts);
+  a gold strap or buckle each. Mages: slate, rust-black and deep teal, gold bands and hems; the brim out to the full
+  width and a feather from the band (HAT rows, `Q` and `q`: wine, black, pale). Healers: the mail dark steel, the
+  tabard's edge (`w`) gold as the filigree, the red cap and tabard wine; the friar's habit darker, the cross gold.
+- Weapons longer (held.ts, heldkits.ts `bladeLength`; drawing only, the room's reach unchanged): the sword 15 to 18,
+  the greatsword 21 to 25, the spear's haft and head 20 to 25 hero units with the tip further out, the staff 18 to 23.
+  The weapons' colours stay the gear-looks chat's (weaponpaint.ts tints whatever held.ts draws).
+- Left for later, because they'd need new profile maps in the side-view chat's files: the Ranger's hat in place of the
+  hood, slimmer bodies, the feather and wider brim from the side (the profile hat is as it was).
+  (Claude Opus 5.5)
+
+## 2026-11-15: slice 4, townsfolk
+
+- The same wrapper as the enemies (darkfoe.ts, now taking a grade): Art's npcs.ts `drawNpc` draws through `darkFolk`,
+  so every look, front and profile, both views, the vignettes and the rack's watch change together. Names are on the
+  glow layer and quest marks are drawn elsewhere (errandmarks.ts), so neither is touched.
+- The 'folk' rules (darkgold.ts `folkHex`): the two skin tones kept; gold and brass dulled (gold is the heroes' mark, so
+  a hero still stands out in a crowd); blood kept; whites to bone; cloth, hair and leather darker and duller; red cloth
+  to rust (the guard's tunic). `node scripts/folk-look.cjs` shows every look.
+- One line in Art's npcs.ts (the wrap; the Town quests chat's gold-mark lines untouched).
+  (Claude Opus 5.5)
