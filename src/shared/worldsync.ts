@@ -3,6 +3,7 @@
  * (api/_world.ts), and so does the browser straight away (so the town changes at once, online or
  * off). Pure and isomorphic: the same rules on both sides.
  */
+import { claimFirst } from './relicroll.js';
 import type { HeroClass } from './weapons.js';
 import type { Stats } from './progress.js';
 import { CHAPTER_1, settle, vote, type WorldState } from './story.js';
@@ -56,6 +57,8 @@ export interface Contribution {
   deep?: DeepClaim;
   /** The hero's longest streak on a job just done (shared/streak.ts), for its board. */
   streak?: number;
+  /** Relics just won (shared/relicroll.ts): the first in the world to win each is named on the Roll. */
+  relics?: import('./magic.js').RelicId[];
 }
 
 /**
@@ -97,6 +100,7 @@ export function contribute(w: WorldState, c: Contribution, now = Date.now(), rai
   if (c.statue) placeBid(w, c.hero, c.statue);
   // The Deep: a run's start stamped with this world's clock; a run's end onto its board only against that stamp.
   if (Number.isInteger(c.streak) && c.streak! > 0 && c.streak! < 10_000) w.streaks = addRangeLine(w.streaks, { id: c.hero.id, name: c.hero.name, cls: c.hero.cls, n: c.streak! });
+  if (c.relics) claimFirst(w, c.hero.name, c.relics);
   if (c.deepStart !== undefined) w.deepRuns = startDeep(w.deepRuns, c.hero.id, c.deepStart, now);
   if (c.deep && deepClaimOk(w.deepRuns?.[c.hero.id], c.deep, now)) {
     const line = { id: c.hero.id, name: c.hero.name, cls: c.hero.cls, n: c.deep.f, gold: c.deep.g };

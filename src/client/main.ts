@@ -224,6 +224,8 @@ const recovery = new Recovery(() => game.save);
 const unit = new UnitFrame();
 const fold = new BannerFold($('#banner'));
 const relicPop = new RelicPop();
+// The fanfare's SEE IT IN THE PACK (relicmoment.ts).
+relicPop.onPack = () => pack.toggle(true);
 const objFlash = new ObjFlash(), unlocks = new UnlockFlash(), purse = new Purse(), goalPulse = new GoalPulse(), gearHint = new GearHint();
 // (A laptop has the same buttons, in a row at the bottom with their keys: they don't take clicks. keybar.css.)
 if (!input.touch) document.getElementById('touch')!.hidden = false;

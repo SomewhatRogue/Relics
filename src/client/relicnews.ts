@@ -11,7 +11,7 @@ import type { Hero } from '../sim/types';
 import { keepKit } from './keepkit';
 
 /** One relic's moment: the item, whether it's already on the RELIC button, the first-relic tip, its sound. */
-export interface RelicMoment { item: RelicItem; carried: boolean; tip: boolean; sound: boolean }
+export interface RelicMoment { item: RelicItem; carried: boolean; tip: boolean; sound: boolean; /** A relic won (item.from): the Roll's first winner of it, and whether that's this hero. */ first?: string; mine?: boolean }
 
 /** At most this many NEW marks kept (older ones just stop being new). */
 const KEEP = 12;

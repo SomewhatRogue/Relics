@@ -94,6 +94,23 @@ export const RELICW = {
   tapSlot: 'TAP',
   emptySlot: 'Nothing carried. Tap a relic to carry it, or drag it onto RELIC.',
   shelfHow: 'Tap a relic to see it, or drag it onto RELIC to carry it.',
+  /** The full-screen moment a relic is won (relicfanfare.ts): draft until the lore pass. */
+  wonKicker: 'A RELIC',
+  wonFrom: { hempen: "From Hempen, in Hangman's Wood", doorkeepers: 'From the Doorkeepers, in the great barn at Lowfurrow', haulier: 'From the Haulier, at the Open Cut' } as Record<string, string>,
+  wonUses: (n: number) => `${n} USES. RECHARGE AT THE CHURCH.`,
+  rollLabel: 'ON THE ROLL',
+  rollFirst: (name: string) => `First in Wickhold to win it: <b>${name}</b>`,
+  rollMine: "You're the first in Wickhold to win it. Your name goes on the Roll.",
+  /** A line from the place it was won (no one stands near a dead boss but you, so the place speaks). */
+  wonSay: {
+    hempen: "It was in Hempen's fist the whole time, the knuckle, grown into the hand like a stone in a tree.",
+    doorkeepers: "It sat in the barn's crossbeam, behind the doors they kept. Nobody knows who put it there.",
+    haulier: 'The hook was on the Haulier\'s chain, worn bright where the rope ran.',
+  } as Record<string, string>,
+  seePack: 'SEE IT IN THE PACK',
+  /** The Roll's relics (relicrollui.ts). */
+  rollTitle: 'RELICS WON, AND WHO WON THEM FIRST',
+  rollNobody: 'Nobody yet',
   /** The one-time card when relics became earned (relicgone.ts): draft until the lore pass. */
   goneTitle: 'YOUR RELICS',
   goneLine: (jav: boolean) => (jav ? 'Every relic you carried is gone but the Relic Javelin.' : 'Every relic you carried is gone.') + ' Relics are won now, each one once: from a great boss the first time it falls, or from Mother Isolde at the church.',

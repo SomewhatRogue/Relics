@@ -20,6 +20,7 @@ import { cleanFishClaim } from '../src/shared/fishboard.js';
 import { WEAPONS, type WeaponId } from '../src/shared/weapons.js';
 import { giveMore } from '../src/shared/statue.js';
 import { cleanDeepClaim, cleanDeepStart } from '../src/shared/deepboard.js';
+import { cleanRelicClaim } from '../src/shared/relicroll.js';
 
 export interface WorldView { world: WorldState; board: Board }
 export interface WorldStore {
@@ -76,6 +77,9 @@ export function clean(raw: unknown): Contribution | null {
   }
   // The longest streak on a job just done (shared/streak.ts), for its board: a whole number, within reason.
   if (Number.isInteger(c.streak) && (c.streak as number) > 0 && (c.streak as number) < 10_000) out.streak = c.streak as number;
+  // Relics just won, for the Roll's first names (shared/relicroll.ts): only relics that are won, each once.
+  const relics = cleanRelicClaim(c.relics);
+  if (relics) out.relics = relics;
   if (CHAPTER_1.decision.choices.some((x) => x.id === c.vote)) out.vote = c.vote as string;
   if (typeof c.voter === 'string' && /^[\w-]{6,40}$/.test(c.voter)) out.voter = c.voter;
   const d = c.deed as Record<string, unknown> | undefined, words = (v: unknown, n: number) => String(v ?? '').replace(/[^A-Za-z0-9 ',.-]/g, '').slice(0, n);

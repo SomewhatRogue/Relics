@@ -9,6 +9,7 @@ import { BLESSING, type HeroClass } from '../shared/tuning';
 import { WORKS, workDone } from '../shared/works';
 import { openWorks } from './worksui';
 import { rollHtml, wireRoll } from './rollui';
+import { relicRollHtml } from './relicrollui';
 import { townSays } from '../shared/townsays';
 import type { SpotId } from '../shared/town';
 import type { Game } from './game';
@@ -49,7 +50,7 @@ export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key:
     const board = link?.online && link.board ? link.board : WorldLink.localBoard(g.save.heroes);
     const where = link?.online ? `World: <b>${link.group.toUpperCase()}</b>.` : 'Your own heroes only, until you play online.';
     const tabs = `<div class="rtabs">${(['brave', 'unlucky'] as const).map((s) => `<button data-side="${s}" class="${s === rollSide ? 'on' : ''}">${s === 'brave' ? 'THE BRAVE' : 'THE UNLUCKY'}</button>`).join('')}</div>`;
-    const html = tabs + p(where) + rollHtml(board, pr, rollSide) +
+    const html = tabs + p(where) + rollHtml(board, pr, rollSide) + (rollSide === 'brave' ? relicRollHtml(w) : '') +
       (link ? `<label class="code">WORLD CODE <input id="wcode" maxlength="24" value="${esc(link.group)}" autocomplete="off" spellcheck="false"></label><p class="dim">Type your own code for a private town. WICKHOLD is the one everyone shares.</p>` : '');
     panel.show('THE ROLL OF THE BRAVE', html, [...(link ? [{ label: 'PLAY IN THIS WORLD', act: () => {
       const v = (document.getElementById('wcode') as HTMLInputElement | null)?.value ?? '';

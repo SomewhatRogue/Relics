@@ -52,3 +52,18 @@ The chat building docs/design/relics.md (Kyle approved 2026-11-15). Newest at th
   - Open for the lore keeper: the net is also the Ranger's class skill (HUNTER'S NET), so Fenmere's relic may
     want to be something else. Fenmere's end boss isn't built yet.
   - tests/relicboss.test.ts (the pair in the barn, Hempen in the wood, the Deep floor, giveHome). (Claude Opus 5.5)
+- **Slice 4 in: the fanfare.** A relic won (one with `from`, slice 3) has the full-screen moment in place of
+  the small pop (`client/relicfanfare.ts`, shown by `relicmoment.ts`, styles in `relicpop.css`), after the
+  "A relic won" artboard: A RELIC, the picture big in a gold frame, the name in gold, where it came from,
+  its uses and RECHARGE AT THE CHURCH, what it does (the card's USE line), the Roll's line, a line about the
+  place, and SEE IT IN THE PACK (opens the pack). It stays until tapped (25 s at most); the fanfare sound
+  always plays. Nobody stands near a dead boss but the party, so the "line from whoever's near" is the
+  place's own line for now: the lore keeper to say who, if anyone.
+  - **The Roll:** `shared/relicroll.ts`. When a won relic reaches the save (game.ts keepNoting), the game
+    gives the world `relics: [kind]`; the world keeps the first name per kind for good
+    (`WorldState.firstRelics`; `contribute` in `worldsync.ts`; `api/_world.ts clean` passes only relics that
+    are won, never the javelin). The moment says whether you're first or who was (by the world as last
+    read). The Roll of the Brave panel lists every won relic and its first winner, or Nobody yet
+    (`client/relicrollui.ts`, one line in `squareui.ts`, the BRAVE side).
+  - It goes straight into the relic slot when nothing is carried (takeRelic, as before).
+  - tests/relicfanfare.test.ts. Lines draft until the lore pass. (Claude Opus 5.5)

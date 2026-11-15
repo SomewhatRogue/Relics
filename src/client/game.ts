@@ -1590,7 +1590,15 @@ export class Game {
   private keepNoting(h: Hero, copy: boolean): void {
     const k = keepKitNoting(this.profile, h, copy);
     if (!k.changed) return;
-    this.relicNews.push(...this.unannounced(k.news));
+    const news = this.unannounced(k.news);
+    // A relic won (a great boss's first kill: docs/design/relics.md): the Roll names the first in the world to win it.
+    const won = news.filter((n) => n.item.from);
+    for (const n of won) {
+      const was = this.world.firstRelics?.[n.item.kind];
+      Object.assign(n, { first: was ?? this.profile.name, mine: !was });
+    }
+    if (won.length) this.give({ relics: won.map((n) => n.item.kind) });
+    this.relicNews.push(...news);
     store(this.save);
   }
 

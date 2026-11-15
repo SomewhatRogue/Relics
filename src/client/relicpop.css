@@ -23,3 +23,27 @@
 #panel .rwon1 div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 #panel .rwon1 i { color: var(--gold); font-size: var(--fs-s); letter-spacing: 0.15em; }
 #panel .rwon1 b { font-size: var(--fs-text); letter-spacing: 0.04em; }
+/* A relic won (relicfanfare.ts): the whole screen, dark, a gold light behind the frame. */
+#relicpop.won { inset: 0; top: 0; left: 0; transform: none; width: auto; max-width: none; border-image: none; box-shadow: none; padding: calc(56px + env(safe-area-inset-top, 0px)) 24px calc(24px + env(safe-area-inset-bottom, 0px)); border: 0; overflow-y: auto;
+  background: radial-gradient(circle at 50% 30%, #ffd27a40, #ffd27a10 30%, #07080af5 58%), #07080af0; }
+#relicpop.won.in { animation: rf-in 0.6s steps(6) both; }
+#relicpop .rf-in { max-width: 360px; min-height: 100%; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+#relicpop .rf-k { color: var(--gold); font-size: var(--fs-s); letter-spacing: 0.2em; font-style: normal; }
+#relicpop .rf-frame { width: 132px; height: 132px; display: flex; align-items: center; justify-content: center; background: #1b1d22; border: 3px solid #ffd27a; box-shadow: 0 0 0 3px #07080a, 0 0 40px 6px #ffd27a66; }
+#relicpop .rf-frame img { width: 96px; height: 96px; image-rendering: pixelated; }
+#relicpop .rf-name { font: 400 calc(var(--fd) * 1.4)/1.1 var(--font-display); color: #fff1d0; text-shadow: 0 0 12px #ffd27a88, 0 var(--px) 0 var(--stone-900); }
+#relicpop .rf-from { color: #b8a47c; }
+#relicpop .rf-uses { display: flex; gap: 6px; transform: scale(1.6); margin: 4px 0; }
+#relicpop .rf-recharge { color: #a9b4c2; font-size: var(--fs-s); letter-spacing: 0.1em; font-style: normal; }
+#relicpop .rf-does { margin: 0; line-height: 1.4; color: #f0e6cc; }
+#relicpop .rf-roll { width: 100%; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px; padding: 10px 14px; background: #1b1d22; border: 1px solid #3a3e46; }
+#relicpop .rf-roll i { color: #8d929c; font-size: var(--fs-s); letter-spacing: 0.15em; font-style: normal; }
+#relicpop .rf-roll b { color: #ffd27a; font-weight: inherit; }
+#relicpop .rf-say { margin: 0; font-style: italic; color: #a9b4c2; line-height: 1.4; }
+#relicpop .rf-go { margin-top: auto; width: 100%; min-height: 52px; background: #ffd27a; color: #2e2618; border: 2px solid #07080a; font: inherit; letter-spacing: 0.08em; cursor: pointer; }
+#relicpop .rf-tap { color: #8d929c; font-size: var(--fs-s); font-style: normal; }
+@keyframes rf-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { #relicpop.won.in { animation: none; } }
+.relicroll { list-style: none; margin: 4px 0 8px; padding: 0; display: grid; gap: 3px; }
+.relicroll li { display: flex; justify-content: space-between; gap: 8px; }
+.relicroll b { color: #ffd27a; font-weight: inherit; }
